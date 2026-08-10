@@ -1,0 +1,64 @@
+<!-- @nav emoji="🚜" titre="Tracteur" sous="Sessions, entretien, GNR" -->
+<section id="tracteur">
+  <div class="sec-h">
+    <div class="sec-ic" aria-hidden="true">🚜</div>
+    <div><h2>Tracteur</h2><div class="sub">Sessions 🚜 · Entretien 🔧</div></div>
+  </div>
+  <p class="lead">Une <b>session</b> = un passage du domaine pour une activité donnée. Elle avance
+  parcelle par parcelle, se date toute seule et alimente au passage le carburant, les heures machine et
+  l'historique du domaine.</p>
+
+  <h3>🚜 Conduire une session</h3>
+  <ol class="steps">
+    <li><b>Ouvrir Tracteur, bouton ＋</b>Sur téléphone, le bouton rond en bas à droite propose
+    <em aria-hidden="true">Session tracteur</em> ou <em aria-hidden="true">Traitement phyto</em>.</li>
+    <li><b>Choisir la machine et l'activité</b>Broyage, labour, rognage, tarière… Les activités sont
+    définies par l'administrateur dans <span class="path">Réglages › Tracteur</span>.</li>
+    <li><b>Cocher les parcelles au fur et à mesure</b>La surface travaillée se cumule en hectares.
+    Certaines activités demandent une valeur à chaque parcelle (le nombre de trous, par exemple).</li>
+    <li><b>Laisser la session ouverte</b>Elle se termine automatiquement à 100&nbsp;%, et ses dates de
+    début et de fin restent modifiables.</li>
+  </ol>
+  <ul class="dot">
+    <li>L'avancement est toujours calculé <b>en surface</b>, jamais en nombre de parcelles : deux petites
+    ne valent pas une grande.</li>
+    <li>La session en cours s'affiche en tête d'écran, en évidence, avec son pourcentage.</li>
+    <li>Chaque session se range dans la <b>saison correspondant à sa date</b>.</li>
+    <li>Un <b>chronomètre par parcelle</b> peut être activé par le domaine pour mesurer le temps réel de
+    passage. Il est facultatif et n'enregistre <b>aucun trajet GPS</b>.</li>
+  </ul>
+
+  <h3>🔧 Entretien</h3>
+  <div class="cards">
+    <div class="card"><h4>⛽ Cuve GNR</h4><ul class="dot">
+      <li>La cuve est celle <b>du domaine</b>, pas d'un tracteur en particulier</li>
+      <li><b>Faire un plein</b> décompte le niveau et crée la fiche d'entretien correspondante</li>
+      <li><b>Corriger le niveau</b> permet de réajuster à la jauge</li>
+      <li><b>Appoint de cuve</b> : litres livrés et prix au litre — réservé à l'administrateur, c'est un
+      prix d'achat. Le coût moyen se met à jour tout seul</li>
+    </ul></div>
+    <div class="card"><h4>🛠️ Révisions</h4><ul class="dot">
+      <li>Compteur d'heures et seuil de révision, machine par machine</li>
+      <li>Pastille de couleur selon les heures restantes : vert, orange, rouge</li>
+      <li>Fiches d'entretien libres, avec pièces et observations</li>
+    </ul></div>
+    <div class="card"><h4>🔩 Réparations</h4><ul class="dot">
+      <li>Signaler un tracteur parti chez le réparateur, avec le motif</li>
+      <li>Retour par <b>✅ Rentré</b> : la période est archivée automatiquement</li>
+      <li>Historique consultable par machine ou toutes machines confondues</li>
+      <li>Une machine au garage est signalée sur l'Accueil et le Pilotage</li>
+    </ul></div>
+  </div>
+  <p><span class="path">⚙️ Outils d'entretien</span> regroupe les actions moins fréquentes : parc,
+  activités, exports.</p>
+
+  <details><summary>Je me suis trompé sur le nombre de trous d'une parcelle</summary>
+    <div class="dbody">Dans la session, <b>décochez puis recochez</b> la parcelle : l'application
+    redemande la valeur. Le total et la tâche Entreplantation se recalculent immédiatement.</div></details>
+  <details><summary>Qui peut créer une session&nbsp;?</summary>
+    <div class="dbody">Les <b>tractoristes</b> et les <b>administrateurs</b>. La suppression d'un
+    tracteur et les exports sont réservés à l'administrateur.</div></details>
+  <details><summary>Le plein n'apparaît pas dans le niveau de la cuve</summary>
+    <div class="dbody">Le décompte se fait <b>à la création</b> du plein. Si vous avez modifié la fiche
+    après coup, utilisez <b>Corriger le niveau</b> pour aligner la cuve sur la jauge réelle.</div></details>
+</section>

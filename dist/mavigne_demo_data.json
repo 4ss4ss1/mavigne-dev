@@ -1,0 +1,338 @@
+{
+  "VERSION": "2.0",
+  "exportDate": "2026-06-06T19:04:20",
+  "domaine": "Domaine des Grandes Vignes",
+  "config": {
+    "domaine_nom": "Domaine des Grandes Vignes",
+    "lat": 47.22,
+    "lon": 4.97,
+    "onboarding_done": true
+  },
+  "membres": [
+    {
+      "nom": "Marie",
+      "email": "marie@demo.mavigneapp.fr",
+      "roles": [
+        "admin",
+        "ouvrier",
+        "tractoriste"
+      ],
+      "couleur": "#3D6B27",
+      "statut": "actif"
+    },
+    {
+      "nom": "Jean",
+      "email": "jean@demo.mavigneapp.fr",
+      "roles": [
+        "ouvrier",
+        "tractoriste"
+      ],
+      "couleur": "#1A4A7A",
+      "statut": "actif"
+    },
+    {
+      "nom": "Sophie",
+      "email": "sophie@demo.mavigneapp.fr",
+      "roles": [
+        "ouvrier"
+      ],
+      "couleur": "#7A4F2E",
+      "statut": "actif"
+    },
+    {
+      "nom": "Paul",
+      "email": "paul@demo.mavigneapp.fr",
+      "roles": [
+        "ouvrier",
+        "tractoriste"
+      ],
+      "couleur": "#5B2D8E",
+      "statut": "actif"
+    }
+  ],
+  "saisons": [
+    {
+      "nom": "Printemps 2026",
+      "periode": "Mars — Juillet 2026",
+      "active": true,
+      "taches": [
+        "Ebourgeonnage",
+        "Relevage",
+        "Accolage",
+        "Pioche",
+        "Palissage"
+      ]
+    },
+    {
+      "nom": "Hiver 2025-2026",
+      "periode": "Nov. 2025 — Fév. 2026",
+      "active": false,
+      "taches": [
+        "Taille",
+        "Tirage",
+        "Brulage"
+      ]
+    }
+  ],
+  "taches": [
+    {
+      "nom": "Taille",
+      "hha": 70,
+      "saison": "Hiver"
+    },
+    {
+      "nom": "Tirage",
+      "hha": 40,
+      "saison": "Hiver"
+    },
+    {
+      "nom": "Brulage",
+      "hha": 40,
+      "saison": "Hiver"
+    },
+    {
+      "nom": "Ebourgeonnage",
+      "hha": 35,
+      "saison": "Printemps"
+    },
+    {
+      "nom": "Relevage",
+      "hha": 50,
+      "saison": "Printemps"
+    },
+    {
+      "nom": "Accolage",
+      "hha": 50,
+      "saison": "Printemps"
+    },
+    {
+      "nom": "Pioche",
+      "hha": 40,
+      "saison": "Printemps"
+    },
+    {
+      "nom": "Palissage",
+      "hha": 50,
+      "saison": "Printemps"
+    }
+  ],
+  "parcelles": [
+    {
+      "nom": "Clos du Moulin",
+      "surface": 0.45,
+      "statut": "Active",
+      "taches": {
+        "Ebourgeonnage": {
+          "p1": "Valide",
+          "p2": null,
+          "ov": null
+        },
+        "Relevage": {
+          "n1": null,
+          "n2": null,
+          "n3": null,
+          "ov": null
+        },
+        "Accolage": null,
+        "Pioche": {
+          "p1": "Valide",
+          "p2": null,
+          "ov": null
+        },
+        "Palissage": null
+      }
+    },
+    {
+      "nom": "Les Charmes",
+      "surface": 1.2,
+      "statut": "Active",
+      "taches": {
+        "Ebourgeonnage": {
+          "p1": "Valide",
+          "p2": "Valide",
+          "ov": null
+        },
+        "Relevage": {
+          "n1": "Valide",
+          "n2": null,
+          "n3": null,
+          "ov": null
+        },
+        "Accolage": "Valide",
+        "Pioche": {
+          "p1": "Valide",
+          "p2": "Valide",
+          "ov": null
+        },
+        "Palissage": null
+      }
+    },
+    {
+      "nom": "Vieilles Vignes",
+      "surface": 0.8,
+      "statut": "Active",
+      "taches": {
+        "Ebourgeonnage": {
+          "p1": "Valide",
+          "p2": null,
+          "ov": null
+        },
+        "Relevage": {
+          "n1": null,
+          "n2": null,
+          "n3": null,
+          "ov": null
+        },
+        "Accolage": null,
+        "Pioche": {
+          "p1": null,
+          "p2": null,
+          "ov": null
+        },
+        "Palissage": null
+      }
+    },
+    {
+      "nom": "Les Perrières",
+      "surface": 1.05,
+      "statut": "Active",
+      "taches": {
+        "Ebourgeonnage": {
+          "p1": "Valide",
+          "p2": "Valide",
+          "ov": "Valide"
+        },
+        "Relevage": {
+          "n1": "Valide",
+          "n2": "Valide",
+          "n3": null,
+          "ov": null
+        },
+        "Accolage": "Valide",
+        "Pioche": {
+          "p1": "Valide",
+          "p2": null,
+          "ov": null
+        },
+        "Palissage": null
+      }
+    },
+    {
+      "nom": "Champ de la Croix",
+      "surface": 0.62,
+      "statut": "Active",
+      "taches": {
+        "Ebourgeonnage": {
+          "p1": "Valide",
+          "p2": "Valide",
+          "ov": null
+        },
+        "Relevage": {
+          "n1": "Valide",
+          "n2": null,
+          "n3": null,
+          "ov": null
+        },
+        "Accolage": null,
+        "Pioche": {
+          "p1": "Valide",
+          "p2": null,
+          "ov": null
+        },
+        "Palissage": null
+      }
+    },
+    {
+      "nom": "En Bertrange",
+      "surface": 0.9,
+      "statut": "Active",
+      "taches": {
+        "Ebourgeonnage": {
+          "p1": null,
+          "p2": null,
+          "ov": null
+        },
+        "Relevage": {
+          "n1": null,
+          "n2": null,
+          "n3": null,
+          "ov": null
+        },
+        "Accolage": null,
+        "Pioche": {
+          "p1": null,
+          "p2": null,
+          "ov": null
+        },
+        "Palissage": null
+      }
+    },
+    {
+      "nom": "La Combotte",
+      "surface": 1.5,
+      "statut": "Active",
+      "taches": {
+        "Ebourgeonnage": {
+          "p1": "Valide",
+          "p2": "Valide",
+          "ov": null
+        },
+        "Relevage": {
+          "n1": "Valide",
+          "n2": "Valide",
+          "n3": "Valide",
+          "ov": null
+        },
+        "Accolage": "Valide",
+        "Pioche": {
+          "p1": "Valide",
+          "p2": "Valide",
+          "ov": null
+        },
+        "Palissage": null
+      }
+    },
+    {
+      "nom": "Aux Murgers",
+      "surface": 0.5,
+      "statut": "Active",
+      "taches": {
+        "Ebourgeonnage": {
+          "p1": "Valide",
+          "p2": null,
+          "ov": null
+        },
+        "Relevage": {
+          "n1": null,
+          "n2": null,
+          "n3": null,
+          "ov": null
+        },
+        "Accolage": null,
+        "Pioche": {
+          "p1": null,
+          "p2": null,
+          "ov": null
+        },
+        "Palissage": null
+      }
+    }
+  ],
+  "journal": [],
+  "sessions": [],
+  "catalogue": [],
+  "traitements": [],
+  "conducteurs": [
+    "Marie",
+    "Jean",
+    "Paul"
+  ],
+  "activites": [
+    "Griffage",
+    "Buttage",
+    "Intercep",
+    "Traitement",
+    "Broyage"
+  ],
+  "historique": []
+}

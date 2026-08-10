@@ -1,0 +1,482 @@
+<!DOCTYPE html>
+<html lang="fr" data-theme="dark">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+  <meta name="color-scheme" content="dark light">
+  <meta name="theme-color" content="#0A0508">
+  <title>Ma Vigne — Guide complet de l'application viticole</title>
+  <meta name="description" content="Documentation complete de Ma Vigne : parcelles, travaux a la tache, registre phytosanitaire E-Phy, materiel et GNR, cave, reserve et bilan matiere, planning RH et annualisation, pilotage. Reponses aux questions frequentes.">
+  <meta name="robots" content="index,follow">
+  <link rel="canonical" href="https://mavigneapp.fr/guide.html">
+  <link rel="icon" href="/icon-192.png">
+  <link rel="stylesheet" href="/fonts/fonts.css">
+  <meta property="og:type" content="article">
+  <meta property="og:site_name" content="Ma Vigne">
+  <meta property="og:locale" content="fr_FR">
+  <meta property="og:url" content="https://mavigneapp.fr/guide.html">
+  <meta property="og:title" content="Ma Vigne — Guide complet de l'application viticole">
+  <meta property="og:description" content="Chaque module expliqué, qui peut faire quoi, et les réponses aux blocages courants.">
+  <meta property="og:image" content="https://mavigneapp.fr/og-mavigne.png">
+  <meta property="og:image:width" content="1200">
+  <meta property="og:image:height" content="630">
+  <meta property="og:image:alt" content="Ma Vigne, application de gestion de domaine viticole">
+  <meta name="twitter:card" content="summary_large_image">
+  <meta name="twitter:title" content="Ma Vigne — Guide complet de l'application viticole">
+  <meta name="twitter:description" content="Chaque module expliqué, qui peut faire quoi, et les réponses aux blocages courants.">
+  <meta name="twitter:image" content="https://mavigneapp.fr/og-mavigne.png">
+  <script type="application/ld+json">
+  {
+    "@context": "https://schema.org",
+    "@type": "TechArticle",
+    "headline": "Guide complet de Ma Vigne",
+    "inLanguage": "fr",
+    "description": "Documentation de reference de l'application viticole Ma Vigne : parcelles, travaux a la tache, registre phytosanitaire, materiel, cave, reserve, planning RH et pilotage.",
+    "author": { "@type": "Organization", "name": "GUERETTECH" },
+    "publisher": {
+      "@type": "Organization",
+      "name": "GUERETTECH",
+      "url": "https://mavigneapp.fr/",
+      "email": "ngdevpro@gmail.com"
+    },
+    "about": { "@type": "SoftwareApplication", "name": "Ma Vigne", "applicationCategory": "BusinessApplication" }
+  }
+  </script>
+  <style>
+*,*::before,*::after{box-sizing:border-box;margin:0;padding:0}
+:root{
+  --bg:#0A0508; --s1:#130B0F; --s2:#1A1015; --s3:#231520; --line:#33232C;
+  --gold:#D8BE38; --gold-d:#9A8818; --cream:#F5EBD8; --cdim:#CBB79E; --muted:#9C8474;
+  --burg:#8E1526; --vert:#5E9B3E; --bleu:#5AA8DC; --terre:#B5764A;
+  --horizon:linear-gradient(90deg,#8A5A38,#C2871E,#3D6B27);
+  --serif:'Cormorant Garamond',Georgia,'Times New Roman',serif;
+  --sans:'Outfit',system-ui,-apple-system,'Segoe UI',Roboto,sans-serif;
+  --rad:14px; --shadow:0 2px 18px rgba(0,0,0,.45);
+  --nav-w:266px; --head-h:58px;
+}
+html[data-theme="light"]{
+  --bg:#F4F1E9; --s1:#FFFDF8; --s2:#FBF7EE; --s3:#F2ECDF; --line:#DCD2BF;
+  --gold:#7A6408; --gold-d:#8A7412; --cream:#231B15; --cdim:#3C3028; --muted:#6A5A4C;
+  --burg:#7A1020; --vert:#2E6B1E; --bleu:#1D5F8A; --terre:#7A4A28;
+  --shadow:0 2px 14px rgba(90,70,40,.13);
+}
+html{scroll-behavior:smooth;-webkit-text-size-adjust:100%}
+body{background:var(--bg);color:var(--cream);font-family:var(--sans);font-size:16px;line-height:1.65;
+  -webkit-font-smoothing:antialiased}
+p,li,td,th,dd,dt,summary,.lead,.dbody,.astuce,.card,.note div{overflow-wrap:break-word;word-break:normal}
+a{color:var(--gold);text-decoration:none}
+a:hover{text-decoration:underline}
+:focus-visible{outline:2px solid var(--gold);outline-offset:2px;border-radius:6px}
+::selection{background:rgba(200,176,32,.28)}
+
+/* ─────────── EN-TETE ─────────── */
+.top{position:sticky;top:0;z-index:60;background:var(--s1);border-bottom:1px solid var(--line)}
+.top::after{content:'';display:block;height:2px;background:var(--horizon);opacity:.85}
+.top-in{max-width:1420px;margin:0 auto;display:flex;align-items:center;gap:12px;
+  padding:9px 16px;min-height:var(--head-h)}
+.brand{display:flex;align-items:baseline;gap:9px;text-decoration:none;flex-shrink:0;min-height:44px;
+  padding-top:6px}
+.brand:hover{text-decoration:none}
+.brand b{font-family:var(--serif);font-size:23px;font-weight:600;color:var(--gold);letter-spacing:.01em}
+.brand span{font-size:10px;color:var(--muted);letter-spacing:.13em;text-transform:uppercase;font-weight:600}
+.grape{font-size:21px;line-height:1}
+.tools{margin-left:auto;display:flex;align-items:center;gap:8px;flex-shrink:0}
+.ico-btn{width:44px;height:44px;display:grid;place-items:center;background:transparent;color:var(--cdim);
+  border:1px solid var(--line);border-radius:11px;font-size:17px;cursor:pointer;font-family:inherit;
+  transition:background .15s,color .15s}
+.ico-btn:hover{background:var(--s3);color:var(--cream)}
+.search-wrap{position:relative;flex:1;max-width:430px;min-width:0}
+.search-wrap input{width:100%;min-height:44px;background:var(--s2);color:var(--cream);
+  border:1px solid var(--line);border-radius:11px;padding:11px 34px 11px 36px;font-size:15px;
+  font-family:inherit}
+.search-wrap input::placeholder{color:var(--muted)}
+.search-wrap input:focus{border-color:var(--gold-d);outline:none}
+.search-ic{position:absolute;left:12px;top:50%;transform:translateY(-50%);color:var(--muted);
+  font-size:14px;pointer-events:none}
+.search-x{position:absolute;right:6px;top:50%;transform:translateY(-50%);background:none;border:none;
+  color:var(--muted);font-size:17px;cursor:pointer;padding:5px 8px;display:none;font-family:inherit}
+.search-x.on{display:block}
+.burger{display:none}
+
+/* ─────────── STRUCTURE ─────────── */
+.layout{max-width:1420px;margin:0 auto;display:flex;align-items:flex-start;gap:0}
+.side{width:var(--nav-w);flex-shrink:0;position:sticky;top:var(--head-h);align-self:flex-start;
+  max-height:calc(100vh - var(--head-h));overflow-y:auto;padding:20px 10px 40px;
+  border-right:1px solid var(--line);scrollbar-width:thin}
+.side::-webkit-scrollbar{width:5px}
+.side::-webkit-scrollbar-thumb{background:var(--line);border-radius:3px}
+.side-t{font-size:10px;color:var(--muted);letter-spacing:.14em;font-weight:700;padding:12px 12px 7px;
+  text-transform:uppercase}
+.side a{display:flex;align-items:center;gap:10px;padding:9px 12px;border-radius:10px;color:var(--cdim);
+  font-size:14px;border-left:3px solid transparent;transition:background .13s,color .13s;line-height:1.35}
+.side a:hover{background:var(--s2);color:var(--cream);text-decoration:none}
+.side a.on{background:var(--s3);color:var(--cream);border-left-color:var(--gold);font-weight:600}
+.side a em{font-style:normal;font-size:16px;width:21px;text-align:center;flex-shrink:0}
+.main{flex:1;min-width:0;padding:26px 30px 90px}
+
+/* ─────────── HERO ─────────── */
+.hero{background:linear-gradient(150deg,var(--s2),var(--s1));border:1px solid var(--line);
+  border-radius:20px;padding:28px 30px;margin-bottom:34px;position:relative;overflow:hidden}
+.hero::before{content:'';position:absolute;inset:0 0 auto 0;height:3px;background:var(--horizon)}
+.hero h1{font-family:var(--serif);font-size:40px;font-weight:600;line-height:1.08;color:var(--gold);
+  letter-spacing:.005em;margin-bottom:10px}
+.hero p{color:var(--cdim);font-size:16px;max-width:70ch}
+.hero-meta{display:flex;flex-wrap:wrap;gap:8px;margin-top:18px}
+.pill{font-size:12px;color:var(--cdim);background:var(--s3);border:1px solid var(--line);
+  border-radius:999px;padding:5px 12px;font-weight:500}
+
+/* ─────────── SECTIONS ─────────── */
+section{scroll-margin-top:calc(var(--head-h) + 14px);margin-bottom:46px}
+.sec-h{display:flex;align-items:center;gap:14px;margin-bottom:8px}
+.sec-ic{width:48px;height:48px;flex-shrink:0;display:grid;place-items:center;font-size:24px;
+  background:var(--s2);border:1px solid var(--line);border-radius:14px}
+.sec-h h2{font-family:var(--serif);font-size:31px;font-weight:600;line-height:1.12;color:var(--cream)}
+.sec-h .sub{font-size:12px;color:var(--muted);letter-spacing:.06em;text-transform:uppercase;
+  font-weight:600;margin-top:2px}
+.lead{color:var(--cdim);font-size:16px;margin:12px 0 20px;max-width:76ch;
+  border-left:3px solid var(--gold-d);padding:2px 0 2px 15px}
+h3{font-family:var(--sans);font-size:16px;font-weight:700;color:var(--cream);margin:26px 0 11px;
+  padding-bottom:8px;border-bottom:1px solid var(--line);display:flex;align-items:center;gap:9px}
+h4{font-size:14px;font-weight:700;color:var(--cream);margin:16px 0 7px}
+p{margin-bottom:12px;color:var(--cdim);max-width:78ch}
+strong,b{color:var(--cream);font-weight:600}
+
+/* listes */
+ul.dot{list-style:none;margin:0 0 14px}
+ul.dot li{position:relative;padding:6px 0 6px 22px;color:var(--cdim);border-bottom:1px solid var(--line);
+  max-width:80ch}
+ul.dot li:last-child{border-bottom:none}
+ul.dot li::before{content:'';position:absolute;left:4px;top:15px;width:6px;height:6px;border-radius:50%;
+  background:var(--gold-d)}
+ol.steps{list-style:none;counter-reset:s;margin:0 0 16px}
+ol.steps li{counter-increment:s;position:relative;padding:9px 0 9px 40px;color:var(--cdim);
+  border-bottom:1px solid var(--line);max-width:80ch}
+ol.steps li:last-child{border-bottom:none}
+ol.steps li::before{content:counter(s);position:absolute;left:0;top:9px;width:26px;height:26px;
+  display:grid;place-items:center;background:var(--s3);border:1px solid var(--line);color:var(--gold);
+  border-radius:9px;font-size:12.5px;font-weight:700}
+ol.steps li b{display:block;color:var(--cream);margin-bottom:2px}
+
+/* cartes */
+.cards{display:grid;grid-template-columns:repeat(auto-fill,minmax(280px,1fr));gap:14px;margin-bottom:18px}
+.card{background:var(--s2);border:1px solid var(--line);border-radius:var(--rad);padding:16px 18px}
+.card h4{margin-top:0;display:flex;align-items:center;gap:8px;font-size:14.5px}
+.card p:last-child,.card ul:last-child{margin-bottom:0}
+.card ul.dot li{border-bottom-color:rgba(255,255,255,.05);font-size:14.5px}
+html[data-theme="light"] .card ul.dot li{border-bottom-color:rgba(0,0,0,.07)}
+
+/* encarts */
+.note{border-radius:12px;padding:13px 16px;margin:16px 0;font-size:14.7px;border:1px solid;
+  display:flex;gap:11px;align-items:flex-start;line-height:1.6}
+.note .ni{font-size:16px;flex-shrink:0;line-height:1.4}
+.note div{color:var(--cdim);max-width:74ch}
+.note b{color:var(--cream)}
+.note.tip{background:rgba(200,176,32,.08);border-color:rgba(200,176,32,.32)}
+.note.warn{background:rgba(200,80,40,.09);border-color:rgba(200,90,50,.36)}
+.note.info{background:rgba(90,168,220,.08);border-color:rgba(90,168,220,.3)}
+.note.legal{background:rgba(140,110,90,.09);border-color:rgba(150,120,95,.3)}
+html[data-theme="light"] .note.tip{background:rgba(200,176,32,.16)}
+html[data-theme="light"] .note.warn{background:rgba(200,80,40,.11)}
+html[data-theme="light"] .note.info{background:rgba(60,140,200,.11)}
+
+/* tableaux */
+.tw{overflow-x:auto;margin:14px 0 18px;border:1px solid var(--line);border-radius:var(--rad)}
+table{width:100%;border-collapse:collapse;font-size:14.5px;min-width:420px}
+th{background:var(--s3);color:var(--cream);text-align:left;padding:10px 13px;font-weight:700;font-size:13px;
+  letter-spacing:.03em;border-bottom:1px solid var(--line);white-space:nowrap}
+td{padding:9px 13px;color:var(--cdim);border-bottom:1px solid var(--line);vertical-align:top}
+tr:last-child td{border-bottom:none}
+td b{color:var(--cream)}
+.ok{color:var(--vert);font-weight:700}
+.no{color:var(--muted)}
+.ro{color:var(--bleu);font-weight:600}
+
+/* chips / badges */
+.tags{display:flex;flex-wrap:wrap;gap:6px;margin:0 0 14px}
+.tag{font-size:11.5px;font-weight:600;letter-spacing:.03em;padding:4px 10px;border-radius:999px;
+  border:1px solid var(--line);background:var(--s3);color:var(--cdim)}
+.tag.gold{color:var(--gold);border-color:rgba(200,176,32,.4);background:rgba(200,176,32,.1)}
+.tag.vert{color:var(--vert);border-color:rgba(94,155,62,.4);background:rgba(94,155,62,.1)}
+.tag.bleu{color:var(--bleu);border-color:rgba(90,168,220,.36);background:rgba(90,168,220,.1)}
+
+/* FAQ */
+details{background:var(--s2);border:1px solid var(--line);border-radius:12px;margin-bottom:9px;
+  overflow:hidden}
+details[open]{border-color:var(--gold-d)}
+summary{padding:13px 16px;cursor:pointer;font-weight:600;color:var(--cream);font-size:15px;
+  list-style:none;display:flex;align-items:center;gap:10px;line-height:1.45}
+summary::-webkit-details-marker{display:none}
+summary::before{content:'+';color:var(--gold);font-size:17px;font-weight:700;width:16px;flex-shrink:0}
+details[open] summary::before{content:'\2212'}
+summary:hover{background:var(--s3)}
+.dbody{padding:0 16px 15px 42px;color:var(--cdim);font-size:15px}
+.dbody p:last-child,.dbody ul:last-child{margin-bottom:0}
+
+/* divers */
+kbd{background:var(--s3);border:1px solid var(--line);border-bottom-width:2px;border-radius:6px;
+  padding:1px 7px;font-family:var(--sans);font-size:13px;color:var(--cream);font-weight:600;
+  white-space:nowrap;display:inline-block}
+.path{font-family:var(--sans);font-weight:600;color:var(--gold);overflow-wrap:break-word}
+.no-res{display:none;text-align:center;padding:56px 20px;color:var(--muted)}
+.no-res.on{display:block}
+.no-res b{display:block;font-family:var(--serif);font-size:24px;color:var(--cdim);margin-bottom:8px}
+mark{background:rgba(200,176,32,.32);color:var(--cream);border-radius:3px;padding:0 2px}
+.foot{border-top:1px solid var(--line);margin-top:52px;padding:26px 0 10px;color:var(--muted);font-size:13px}
+.foot a{color:var(--cdim)}
+.foot-links{display:flex;flex-wrap:wrap;gap:2px 16px;margin-bottom:12px}
+.foot-links a{display:inline-block;padding:9px 0}
+.backtop{position:fixed;right:16px;bottom:16px;width:46px;height:46px;border-radius:50%;
+  background:var(--s3);border:1px solid var(--line);color:var(--gold);font-size:18px;cursor:pointer;
+  display:none;place-items:center;z-index:50;box-shadow:var(--shadow);font-family:inherit}
+.backtop.on{display:grid}
+.skip{position:absolute;left:-9999px;top:0;z-index:200;background:#14110D;color:#F0DFA6;
+  padding:11px 18px;border-radius:0 0 12px 0;font-weight:700;font-size:15px;
+  border-bottom:2px solid #C2871E}
+.skip:focus{left:0;text-decoration:none}
+
+/* ─────────── MOBILE ─────────── */
+@media (max-width:900px){
+  :root{--head-h:54px}
+  .burger{display:grid}
+  .side{position:fixed;top:0;left:0;bottom:0;width:min(84vw,320px);max-height:none;z-index:80;
+    background:var(--s1);border-right:1px solid var(--line);transform:translateX(-102%);
+    transition:transform .22s ease;padding-top:16px;box-shadow:var(--shadow)}
+  .side.open{transform:translateX(0)}
+  .scrim{position:fixed;inset:0;background:rgba(0,0,0,.6);z-index:70;opacity:0;pointer-events:none;
+    transition:opacity .2s}
+  .scrim.on{opacity:1;pointer-events:auto}
+  .main{padding:18px 15px 80px}
+  .hero{padding:22px 18px;border-radius:16px}
+  .hero h1{font-size:29px}
+  .sec-h h2{font-size:24px}
+  .sec-ic{width:42px;height:42px;font-size:21px}
+  .top-in{gap:8px;padding:8px 12px}
+  .brand b{font-size:20px}
+  .brand span{display:none}
+  .cards{grid-template-columns:1fr}
+  body{font-size:15.5px}
+}
+@media (max-width:560px){
+  .search-wrap{order:3;flex-basis:100%;max-width:none;margin-top:2px}
+  .top-in{flex-wrap:wrap}
+}
+@media (prefers-reduced-motion:reduce){
+  html{scroll-behavior:auto}
+  *{transition:none!important;animation:none!important}
+}
+
+/* ─────────── IMPRESSION ─────────── */
+@media print{
+  .top,.side,.scrim,.backtop,.noprint{display:none!important}
+  body{background:#fff;color:#000;font-size:11pt}
+  .main{padding:0}
+  .layout{display:block}
+  section{page-break-inside:avoid;margin-bottom:22px}
+  .hero{border:1px solid #ccc;background:#fff}
+  .hero h1,.sec-h h2{color:#000}
+  p,td,li,.lead,.dbody{color:#222}
+  details{border:1px solid #ccc}
+  details .dbody{display:block!important}
+  summary::before{content:''}
+  a{color:#000;text-decoration:underline}
+  .card,.note,.tw{border:1px solid #ccc;background:#fff}
+  th{background:#eee;color:#000}
+}
+</style>
+</head>
+<body>
+
+<a class="skip" href="#contenu">Aller au contenu</a>
+<header class="top">
+  <div class="top-in">
+    <button class="ico-btn burger" id="burger" aria-label="Ouvrir le sommaire" aria-expanded="false">&#9776;</button>
+    <a class="brand" href="https://mavigneapp.fr/"><span class="grape" aria-hidden="true">&#127815;</span><b>Ma Vigne</b><span>Guide complet</span></a>
+    <div class="search-wrap">
+      <span class="search-ic" aria-hidden="true">&#128269;</span>
+      <input id="q" type="search" placeholder="Rechercher : congés, cuivre, GNR…" aria-label="Rechercher dans la page" autocomplete="off">
+      <button class="search-x" id="q-x" aria-label="Effacer la recherche">&#10005;</button>
+    </div>
+    <div class="tools">
+      <a class="ico-btn" href="https://mavigneapp.fr/demarrage.html" title="Démarrage rapide" aria-label="Démarrage rapide">&#128214;</a>
+      <button class="ico-btn" id="theme-btn" aria-label="Changer l'affichage">&#9790;</button>
+      <button class="ico-btn noprint" id="print-btn" title="Imprimer ou enregistrer en PDF" aria-label="Imprimer">&#128424;</button>
+    </div>
+  </div>
+</header>
+<div class="scrim" id="scrim" aria-hidden="true"></div>
+<div class="layout">
+<nav class="side" id="side" aria-label="Sommaire du guide">
+<div class="side-t">Sommaire</div>
+<!--@nav-->
+<div class="side-t" style="margin-top:14px">Ailleurs</div>
+<a href="https://mavigneapp.fr/demarrage.html"><em aria-hidden="true">🚀</em><span>Démarrage rapide<br><span style="font-size:11.5px;color:var(--muted)">Les gestes essentiels</span></span></a>
+<a href="https://mavigneapp.fr/"><em aria-hidden="true">🍇</em><span>Ouvrir Ma Vigne<br><span style="font-size:11.5px;color:var(--muted)">mavigneapp.fr</span></span></a>
+</nav>
+<main class="main" id="contenu" tabindex="-1">
+
+    <div class="hero">
+      <h1>Guide complet</h1>
+      <p>Tout ce que fait Ma Vigne, module par module&nbsp;: à quoi sert chaque écran, qui peut faire
+      quoi, et la réponse aux questions qu'on se pose le nez dans les rangs. Cette page est conçue pour
+      qu'on y trouve seul ce qu'on cherche — utilisez la <b>recherche</b> en haut, elle filtre tout le
+      guide en direct.</p>
+      <div class="hero-meta">
+        <span class="pill">🔎 Recherche instantanée — touche <kbd>/</kbd></span>
+        <span class="pill">🖨️ Imprimable / PDF</span>
+        <span class="pill">📶 Consultable hors connexion une fois ouverte</span>
+        <span class="pill">🚀 Pressé&nbsp;? <a href="https://mavigneapp.fr/demarrage.html">Démarrage rapide</a></span>
+      </div>
+    </div>
+
+
+<!--@sections-->
+
+
+    <div class="no-res" id="no-res">
+      <b>Aucun résultat</b>
+      Essayez un mot plus court, ou le nom du module&nbsp;: <em aria-hidden="true">parcelle</em>, <em aria-hidden="true">congés</em>,
+      <em aria-hidden="true">cuivre</em>, <em aria-hidden="true">GNR</em>, <em aria-hidden="true">mot de passe</em>…<br><br>
+      Toujours rien&nbsp;? Écrivez à <a href="mailto:ngdevpro@gmail.com">ngdevpro@gmail.com</a>.
+    </div>
+
+
+    <footer class="foot">
+      <div class="foot-links">
+        <a href="https://mavigneapp.fr/">Ouvrir Ma Vigne</a>
+        <a href="https://mavigneapp.fr/guide.html">Guide complet</a>
+        <a href="https://mavigneapp.fr/demarrage.html">Demarrage rapide</a>
+        <a href="https://mavigneapp.fr/cgu.html">CGU</a>
+        <a href="https://mavigneapp.fr/confidentialite.html">Confidentialite</a>
+        <a href="https://mavigneapp.fr/mentions-legales.html">Mentions legales</a>
+      </div>
+      <div style="margin-bottom:10px">Cette documentation décrit l'application telle qu'elle fonctionne aujourd'hui. Les informations réglementaires (catalogue E-Phy, seuils, cadre légal du travail) sont fournies à titre indicatif et ne se substituent pas aux textes officiels ni à l'étiquette des produits.</div>
+      <div>&#127815; Ma Vigne est edite par <b>GUERETTECH</b> &mdash; Nicolas Gueret, SIRET 982 148 116 00022.
+      Une question a laquelle cette page ne repond pas&nbsp;? <a href="mailto:ngdevpro@gmail.com">ngdevpro@gmail.com</a></div>
+    </footer>
+  </main>
+</div>
+<button class="backtop noprint" id="backtop" aria-label="Revenir en haut">&#8593;</button>
+<script>
+(function(){
+  'use strict';
+  var root=document.documentElement;
+
+  /* ── Theme clair / sombre, memorise par appareil ── */
+  var KEY='mavigne_doc_theme';
+  try{ var t=localStorage.getItem(KEY); if(t==='light'||t==='dark') root.setAttribute('data-theme',t); }catch(e){}
+  var tb=document.getElementById('theme-btn');
+  function syncTheme(){
+    var light=root.getAttribute('data-theme')==='light';
+    if(tb){ tb.textContent=light?'\u263C':'\u263E';
+      tb.setAttribute('aria-label',light?'Passer en affichage sombre':'Passer en affichage clair'); }
+  }
+  if(tb) tb.addEventListener('click',function(){
+    var light=root.getAttribute('data-theme')==='light';
+    root.setAttribute('data-theme',light?'dark':'light');
+    try{ localStorage.setItem(KEY,light?'dark':'light'); }catch(e){}
+    syncTheme();
+  });
+  syncTheme();
+
+  /* ── Tiroir de navigation (mobile) ── */
+  var side=document.getElementById('side'),scrim=document.getElementById('scrim'),bg=document.getElementById('burger');
+  function drawer(open){
+    if(!side) return;
+    side.classList.toggle('open',open);
+    if(scrim) scrim.classList.toggle('on',open);
+    if(bg) bg.setAttribute('aria-expanded',open?'true':'false');
+  }
+  if(bg) bg.addEventListener('click',function(){ drawer(!side.classList.contains('open')); });
+  if(scrim) scrim.addEventListener('click',function(){ drawer(false); });
+  document.addEventListener('keydown',function(e){ if(e.key==='Escape') drawer(false); });
+  if(side) side.addEventListener('click',function(e){ if(e.target.closest('a')) drawer(false); });
+
+  /* ── Impression ── */
+  var pb=document.getElementById('print-btn');
+  if(pb) pb.addEventListener('click',function(){
+    var d=document.querySelectorAll('details'); for(var i=0;i<d.length;i++) d[i].open=true;
+    window.print();
+  });
+
+  /* ── Recherche instantanee (+ filtre externe optionnel : role) ── */
+  function norm(s){
+    return (s||'').toLowerCase().normalize('NFD').replace(/[\u0300-\u036f]/g,'');
+  }
+  var input=document.getElementById('q'), clear=document.getElementById('q-x'),
+      empty=document.getElementById('no-res'),
+      secs=[].slice.call(document.querySelectorAll('main section'));
+  var cards=[].slice.call(document.querySelectorAll('[data-card]')).map(function(el){
+    return {el:el, txt:norm(el.textContent||''), sec:el.closest('section')};
+  });
+  var index=secs.map(function(s){ return {el:s, txt:norm(s.textContent||'')}; });
+
+  function run(){
+    var q=input?norm(input.value.trim()):'';
+    if(clear) clear.classList.toggle('on', q.length>0);
+    var words=q.split(/\s+/).filter(Boolean);
+    var roleOk=(typeof window.__docRoleOk==='function')?window.__docRoleOk:null;
+    var hits=0, live={};
+
+    if(cards.length){
+      cards.forEach(function(c){
+        var ok=words.every(function(w){ return c.txt.indexOf(w)>=0; }) && (!roleOk || roleOk(c.el));
+        c.el.style.display=ok?'':'none';
+        if(ok){ hits++; if(c.sec) live[c.sec.id||'_']=1; }
+      });
+    }
+    index.forEach(function(o){
+      var self=words.every(function(w){ return o.txt.indexOf(w)>=0; });
+      var hasCards=cards.some(function(c){ return c.sec===o.el; });
+      var ok=hasCards?!!live[o.el.id||'_']:self;
+      o.el.style.display=ok?'':'none';
+      if(ok && !hasCards) hits++;
+      if(ok && q){ var d=o.el.querySelectorAll('details'); for(var i=0;i<d.length;i++) d[i].open=true; }
+    });
+    if(empty) empty.classList.toggle('on',hits===0);
+    document.body.classList.toggle('searching', !!q);
+  }
+  window.__docRun=run;
+  if(input){
+    var tmr;
+    input.addEventListener('input',function(){ clearTimeout(tmr); tmr=setTimeout(run,110); });
+    input.addEventListener('keydown',function(e){ if(e.key==='Escape'){ input.value=''; run(); input.blur(); } });
+  }
+  if(clear) clear.addEventListener('click',function(){ if(input){ input.value=''; run(); input.focus(); } });
+  document.addEventListener('keydown',function(e){
+    if((e.key==='/'||((e.ctrlKey||e.metaKey)&&e.key==='k')) && input &&
+       document.activeElement!==input && !/^(INPUT|TEXTAREA)$/.test(document.activeElement.tagName)){
+      e.preventDefault(); input.focus(); input.select();
+    }
+  });
+
+  /* ── Sommaire actif au defilement ── */
+  var links={}, navA=[].slice.call(document.querySelectorAll('#side a[href^="#"]'));
+  navA.forEach(function(a){ links[a.getAttribute('href').slice(1)]=a; });
+  if('IntersectionObserver' in window && secs.length){
+    var seen={};
+    var io=new IntersectionObserver(function(ents){
+      ents.forEach(function(en){ seen[en.target.id]=en.isIntersecting?en.intersectionRatio:0; });
+      var best=null,bv=0;
+      for(var k in seen){ if(seen[k]>bv){ bv=seen[k]; best=k; } }
+      if(best){
+        navA.forEach(function(a){ a.classList.remove('on'); });
+        if(links[best]) links[best].classList.add('on');
+      }
+    },{rootMargin:'-72px 0px -62% 0px',threshold:[0,.15,.5,1]});
+    secs.forEach(function(s){ if(s.id) io.observe(s); });
+  }
+
+  /* ── Retour en haut ── */
+  var bt=document.getElementById('backtop');
+  if(bt){
+    bt.addEventListener('click',function(){ window.scrollTo({top:0,behavior:'smooth'}); });
+    var st;
+    window.addEventListener('scroll',function(){
+      clearTimeout(st);
+      st=setTimeout(function(){ bt.classList.toggle('on', window.scrollY>640); },80);
+    },{passive:true});
+  }
+})();
+</script>
+</body>
+</html>

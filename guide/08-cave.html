@@ -1,0 +1,83 @@
+<!-- @nav emoji="🍷" titre="Cave" sous="Le Chai, Le Cuvier, Le millésime" -->
+<section id="cave">
+  <div class="sec-h">
+    <div class="sec-ic" aria-hidden="true">🍷</div>
+    <div><h2>Cave</h2><div class="sub">🛢️ Le Chai · 🍇 Le Cuvier · 🕰️ Le millésime</div></div>
+  </div>
+  <p class="lead">La Cave se divise en deux espaces, comme dans la réalité du bâtiment : <b>Le Cuvier</b>
+  pour la vendange et les fermentations, <b>Le Chai</b> pour l'élevage jusqu'à la mise en bouteille.
+  Une cuve décuvée passe de l'un à l'autre en une action.</p>
+
+  <h3>🍇 Le Cuvier — vendange et fermentations</h3>
+  <div class="cards">
+    <div class="card"><h4>🍇 Récoltes</h4><ul class="dot">
+      <li>Saisie des apports par parcelle : poids, date, destination</li>
+      <li>Le <b>rendement en kg/ha</b> se calcule tout seul et remonte dans la fiche de la parcelle</li>
+      <li>Le millésime est l'<b>année civile de la date</b> de récolte</li>
+      <li>Comparaison d'un millésime à l'autre, parcelle par parcelle</li>
+    </ul></div>
+    <div class="card"><h4>🫗 Cuvier</h4><ul class="dot">
+      <li>État de chaque cuve : volume, contenu, stade</li>
+      <li>Suivi des opérations de vinification</li>
+      <li>Indicateur de santé de l'ensemble du cuvier, en un coup d'œil</li>
+      <li><b>Décuver → Le Chai</b> : la cuve devient une cuvée en élevage, le suivi d'ouillage démarre</li>
+    </ul></div>
+    <div class="card"><h4>🔬 Analyses</h4><ul class="dot">
+      <li>Densités, températures, analyses de laboratoire</li>
+      <li>Courbes de suivi de fermentation</li>
+      <li>Pièce jointe PDF possible sur une analyse</li>
+    </ul></div>
+    <div class="card"><h4>⚙️ Réglages du Cuvier</h4><ul class="dot">
+      <li>Déclaration des cuves et de leurs volumes</li>
+      <li>Paramètres de suivi propres au domaine</li>
+    </ul></div>
+  </div>
+
+  <h3>🛢️ Le Chai — élevage</h3>
+  <ul class="dot">
+    <li><b>Cuvées</b> : liste des vins en élevage, avec leur statut et leur millésime, filtrables.</li>
+    <li><b>Journal</b> : chaque opération datée — soutirage, ouillage, débourbage, filtration, sulfitage…</li>
+    <li><b>Analyses SO₂</b> avec un <b>convertisseur intégré</b> : grammes, pastilles, dilution.
+    Il évite l'erreur de calcul classique entre liquide et pastille.</li>
+    <li><b>Pièces jointes</b> : un bulletin d'analyse en PDF peut être rattaché à une opération.</li>
+    <li><b>Mise en bouteille</b> : clôture le suivi de la cuvée et fige le millésime.</li>
+    <li><b>Alerte d'ouillage</b> réglable de 3 à 30 jours — <span class="path">Cave › Le Chai › Réglages</span>.
+    Le délai peut être <b>resserré millésime par millésime</b> : un vin jeune se surveille de plus près.
+    Sans réglage propre, un millésime suit le délai général du domaine — rien ne change tant que vous n'y touchez pas.</li>
+  </ul>
+  <div class="note tip"><span class="ni" aria-hidden="true">💡</span><div>Les récoltes saisies au Cuvier alimentent
+  l'<b>historique des rendements</b> visible dans la fiche de chaque parcelle, et le coût par hectare
+  calculé dans le Pilotage. Une saisie, plusieurs usages.</div></div>
+
+  <h3>🕰️ Le millésime</h3>
+  <p>Cette troisième section ne demande <b>aucune saisie</b> : tout s'y déduit de ce qui est déjà
+  enregistré au Cuvier et au Chai.</p>
+  <ul class="dot">
+    <li><b>Ce qui vient</b> : l'agenda des quatre prochaines semaines — ouillages dus, cuves à
+    mesurer, fin de fermentation estimée, cuvées à soutirer, températures hautes.</li>
+    <li><b>La ligne de vie</b> : le parcours du vin de la benne à la bouteille, avec les pertes
+    chiffrées entre chaque étape, puis le rendement de chaque parcelle face au maximum de
+    l'appellation.</li>
+  </ul>
+  <div class="note tip"><span class="ni" aria-hidden="true">💡</span><div><b>Deux pentes valent mieux
+  qu'une.</b> La fin de fermentation est projetée sur la moyenne des trois derniers relevés, mais un
+  ralentissement est détecté sur les <b>deux</b> derniers : une moyenne lisse un décrochage récent et
+  annoncerait « tout va bien » sur une cuve arrêtée depuis deux jours. Le même principe sert à la
+  malo, à partir de l'acide malique de vos analyses.</div></div>
+  <div class="note"><span class="ni" aria-hidden="true">🍷</span><div><b>Un millésime est une entité à
+  part.</b> Une opération porte sur une seule année : on n'ouille pas les fûts de 2025 avec le vin de
+  2026. Changer de millésime en tête du formulaire vide donc la sélection de cuvées. Si un seul
+  millésime est en cave, ce choix n'apparaît pas et l'écran est exactement celui d'avant.</div></div>
+  <div class="note"><span class="ni" aria-hidden="true">📋</span><div>Deux documents s'impriment
+  depuis <span class="path">Réglages › App › Documents &amp; impressions</span> : le <b>registre des
+  manipulations</b> (enrichissement, sulfitage, adjonctions, pratiques de cave, millésime par
+  millésime) et le <b>bilan de campagne</b>. Ce sont des <b>états internes</b> : Ma Vigne prépare,
+  l'exploitant déclare.</div></div>
+
+  <details><summary>Les saisonniers voient-ils la Cave&nbsp;?</summary>
+    <div class="dbody">Oui, en <b>lecture seule</b> : un bandeau le rappelle. Ils peuvent consulter les
+    opérations sans risque de fausse manœuvre.</div></details>
+  <details><summary>J'ai décuvé trop tôt, puis-je revenir en arrière&nbsp;?</summary>
+    <div class="dbody">La cuvée existe désormais dans Le Chai avec son historique. Corrigez les volumes
+    et les contenants dans sa fiche plutôt que de tout ressaisir : rien n'est perdu.</div></details>
+</section>

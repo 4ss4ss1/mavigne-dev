@@ -1,0 +1,526 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>Essayer Ma Vigne sur votre domaine</title>
+<meta name="theme-color" content="#14110D">
+<!-- SEO & partage social -->
+<meta name="description" content="Logiciel de gestion viticole conçu par un vigneron : parcelles, phyto, équipe, cave et météo par parcelle. Essayez Ma Vigne sur votre domaine.">
+<link rel="canonical" href="https://mavigneapp.fr/essai.html">
+<meta property="og:type" content="website">
+<meta property="og:site_name" content="Ma Vigne">
+<meta property="og:locale" content="fr_FR">
+<meta property="og:url" content="https://mavigneapp.fr/essai.html">
+<meta property="og:title" content="Ma Vigne — le logiciel de gestion viticole conçu par un vigneron">
+<meta property="og:description" content="Parcelles, phyto, équipe, cave, météo par parcelle : pilotez votre domaine depuis une seule app. Conçue par un vigneron de la Côte de Nuits.">
+<meta property="og:image" content="https://mavigneapp.fr/og-mavigne.png">
+<meta property="og:image:width" content="1200">
+<meta property="og:image:height" content="630">
+<meta property="og:image:alt" content="Ma Vigne — application de gestion viticole">
+<meta name="twitter:card" content="summary_large_image">
+<meta name="twitter:title" content="Ma Vigne — logiciel de gestion viticole conçu par un vigneron">
+<meta name="twitter:description" content="Parcelles, phyto, équipe, cave, météo par parcelle : pilotez votre domaine depuis une seule app.">
+<meta name="twitter:image" content="https://mavigneapp.fr/og-mavigne.png">
+<script type="application/ld+json">
+{
+  "@context": "https://schema.org",
+  "@type": "SoftwareApplication",
+  "name": "Ma Vigne",
+  "applicationCategory": "BusinessApplication",
+  "operatingSystem": "Web (PWA), Android, iOS",
+  "url": "https://mavigneapp.fr/",
+  "inLanguage": "fr",
+  "description": "Application de gestion viticole pour domaines : suivi des parcelles et des travaux à la tâche, traitements phytosanitaires et registre, matériel, cave et élevage, planning et météo par parcelle. Conçue par un vigneron de la Côte de Nuits.",
+  "publisher": {
+    "@type": "Organization",
+    "name": "GUERETTECH",
+    "url": "https://mavigneapp.fr/",
+    "email": "ngdevpro@gmail.com"
+  }
+}
+</script>
+<link rel="stylesheet" href="/fonts/fonts.css">
+<style>
+  :root{
+    --bg:#F2EFE7; --card:#FBFAF6; --ink:#14110D; --ink-soft:#6E6456;
+    --cave:#14110D; --cave-2:#1C1813; --gold:#C9A84C; --gold-2:#C8B020;
+    --terre:#8A5A38; --vert:#3D6B27; --line:rgba(20,17,13,.12);
+    --horizon:linear-gradient(90deg,#8A5A38,#C2871E,#3D6B27);
+    --shadow:0 1px 2px rgba(20,17,13,.05),0 8px 24px rgba(20,17,13,.06);
+  }
+  *{box-sizing:border-box}
+  html{-webkit-text-size-adjust:100%}
+  body{
+    margin:0; background:var(--bg); color:var(--ink);
+    font-family:'Outfit',system-ui,sans-serif; font-weight:400;
+    line-height:1.5; -webkit-font-smoothing:antialiased; overflow-x:hidden;
+  }
+  .wrap{max-width:680px; margin:0 auto; padding:0 18px 64px}
+
+  /* ---- En-tête cave ---- */
+  header{
+    background:var(--cave); color:#F0E2C8; margin:0 0 28px;
+    padding:calc(env(safe-area-inset-top) + 40px) 0 34px; position:relative; overflow:hidden;
+  }
+  header::after{content:""; position:absolute; left:0; right:0; bottom:0; height:3px; background:var(--horizon)}
+  .grape{font-size:30px; line-height:1; opacity:.9}
+  header h1{
+    font-family:'Cormorant Garamond',serif; font-weight:600;
+    font-size:clamp(30px,7vw,44px); line-height:1.04; letter-spacing:.2px;
+    margin:14px 0 0; color:#F6ECD2;
+  }
+  header h1 em{font-style:italic; color:var(--gold)}
+  header p{margin:14px 0 0; max-width:46ch; color:#CBBFA6; font-size:15.5px; font-weight:300}
+  .kicker{font-size:12px; letter-spacing:2.5px; text-transform:uppercase; color:var(--gold); font-weight:500}
+
+  /* ---- Sections ---- */
+  .sec{
+    background:var(--card); border:1px solid var(--line); border-radius:16px;
+    padding:20px; margin:0 0 16px; box-shadow:var(--shadow);
+  }
+  .sec > h2{
+    font-family:'Cormorant Garamond',serif; font-weight:600; font-size:23px;
+    margin:0 0 2px; display:flex; align-items:baseline; gap:10px;
+  }
+  .sec > .hint{margin:0 0 16px; color:var(--ink-soft); font-size:14px}
+  .num{
+    font-family:'Outfit'; font-size:12px; font-weight:600; color:var(--terre);
+    border:1px solid rgba(138,90,56,.35); border-radius:50%;
+    width:22px; height:22px; display:inline-flex; align-items:center; justify-content:center;
+    flex:none; align-self:center;
+  }
+
+  /* ---- Champs ---- */
+  .row{display:flex; flex-wrap:wrap; gap:14px}
+  .field{flex:1 1 220px; min-width:0}
+  label.lbl{display:block; font-size:13px; font-weight:500; color:var(--ink); margin:0 0 6px}
+  label.lbl .opt{color:var(--ink-soft); font-weight:400}
+  input[type=text],input[type=email],input[type=tel],input[type=number],textarea{
+    width:100%; font:inherit; font-size:16px; color:var(--ink);
+    background:#fff; border:1px solid var(--line); border-radius:10px;
+    padding:11px 13px; transition:border-color .15s, box-shadow .15s;
+  }
+  input:focus,textarea:focus{outline:none; border-color:var(--gold); box-shadow:0 0 0 3px rgba(201,168,76,.18)}
+  textarea{resize:vertical; min-height:84px}
+
+  /* ---- Cartes modules ---- */
+  .mods{display:grid; grid-template-columns:1fr 1fr; gap:12px}
+  @media(max-width:480px){.mods{grid-template-columns:1fr}}
+  .mod{position:relative; cursor:pointer}
+  .mod input{position:absolute; opacity:0; pointer-events:none}
+  .mod .box{
+    display:block;
+    border:1px solid var(--line); border-radius:13px; background:#fff;
+    padding:14px 14px 13px; height:100%; transition:border-color .15s, background .15s, transform .08s;
+  }
+  .mod .box:hover{border-color:rgba(201,168,76,.55)}
+  .mod .t{font-weight:600; font-size:15px; display:flex; align-items:center; gap:9px}
+  .mod .t .ic{font-size:17px}
+  .mod .d{display:block; margin:5px 0 0 26px; font-size:13px; color:var(--ink-soft); line-height:1.4}
+  .mod .chk{
+    position:absolute; top:11px; right:11px; width:21px; height:21px; border-radius:50%;
+    border:1.5px solid var(--line); background:#fff; transition:all .15s;
+    display:flex; align-items:center; justify-content:center;
+  }
+  .mod .chk svg{width:12px; height:12px; opacity:0; transform:scale(.6); transition:all .15s}
+  .mod input:checked ~ .box{border-color:var(--gold); background:#FCF7E9}
+  .mod input:checked ~ .box .chk{background:var(--gold); border-color:var(--gold)}
+  .mod input:checked ~ .box .chk svg{opacity:1; transform:scale(1)}
+  .mod input:focus-visible ~ .box{box-shadow:0 0 0 3px rgba(201,168,76,.25)}
+  .mod.full{grid-column:1/-1}
+  .mod.full .box{border-style:dashed}
+
+  /* ---- Conditionnels ---- */
+  .paire{display:grid; grid-template-columns:1fr 130px; gap:10px}
+  @media(max-width:420px){ .paire{grid-template-columns:1fr} }
+  .cond{display:none; margin-top:14px; padding-top:16px; border-top:1px dashed var(--line)}
+  .cond.on{display:block; animation:fade .25s ease}
+  @keyframes fade{from{opacity:0; transform:translateY(-4px)}to{opacity:1; transform:none}}
+  .cond > .ch{font-size:12px; letter-spacing:1.5px; text-transform:uppercase; color:var(--terre); font-weight:600; margin:0 0 12px}
+
+  /* ---- Choix segmentés ---- */
+  .seg{display:flex; flex-wrap:wrap; gap:8px}
+  .seg label{cursor:pointer}
+  .seg input{position:absolute; opacity:0; pointer-events:none}
+  .seg span{
+    display:inline-block; font-size:14px; padding:8px 14px; border-radius:999px;
+    border:1px solid var(--line); background:#fff; transition:all .14s; user-select:none;
+  }
+  .seg label:hover span{border-color:rgba(201,168,76,.6)}
+  .seg input:checked + span{background:var(--cave); color:#F0E2C8; border-color:var(--cave)}
+  .seg input:focus-visible + span{box-shadow:0 0 0 3px rgba(201,168,76,.25)}
+
+  /* ---- Erreur ---- */
+  .err{display:none; color:#7A1020; font-size:13.5px; font-weight:500; margin:4px 0 0}
+  .hp{position:absolute!important; left:-9999px; top:auto; width:1px; height:1px; overflow:hidden}
+  .field.bad input{border-color:#7A1020; box-shadow:0 0 0 3px rgba(122,16,32,.12)}
+  .field.bad .err{display:block}
+
+  /* ---- Pied / actions ---- */
+  .actions{display:flex; flex-wrap:wrap; gap:12px; margin-top:8px}
+  .btn{
+    font:inherit; font-size:16px; font-weight:600; border-radius:12px; cursor:pointer;
+    padding:15px 22px; border:1px solid transparent; transition:transform .08s, filter .15s, background .15s;
+  }
+  .btn:active{transform:translateY(1px)}
+  .btn-go{flex:1 1 240px; background:var(--cave); color:#F6ECD2; position:relative; overflow:hidden}
+  .btn-go::after{content:""; position:absolute; left:0; right:0; bottom:0; height:2px; background:var(--horizon)}
+  .btn-go:hover{filter:brightness(1.18)}
+  .btn-copy{flex:0 1 auto; background:#fff; color:var(--ink); border-color:var(--line)}
+  .btn-copy:hover{border-color:var(--gold)}
+  .reassure{margin:16px 2px 0; font-size:13px; color:var(--ink-soft); display:flex; gap:8px; align-items:flex-start}
+  .reassure .lock{color:var(--vert); flex:none}
+  .ok{display:none; margin:14px 0 0; padding:13px 15px; border-radius:11px; background:#EAF1E4; border:1px solid rgba(61,107,39,.3); color:#2C4D1F; font-size:14px; font-weight:500}
+  .ok.show{display:block}
+
+  footer{text-align:center; margin-top:34px; color:var(--ink-soft); font-size:13px}
+  footer .brand{font-family:'Cormorant Garamond',serif; font-size:18px; color:var(--ink); font-weight:600}
+  footer a{color:var(--terre); text-decoration:none}
+  footer a:hover{text-decoration:underline}
+
+  @media(prefers-reduced-motion:reduce){*{animation:none!important; transition:none!important}}
+</style>
+</head>
+<body>
+<header>
+  <div class="wrap" style="padding-bottom:0">
+    <span class="grape">🍇</span>
+    <div class="kicker" style="margin-top:8px">Essai gratuit · 15 jours</div>
+    <h1>Essayez <em>Ma Vigne</em><br>sur votre domaine</h1>
+    <p>Sur vos propres parcelles, en conditions réelles. Dites-nous ce que vous voulez suivre — on prépare votre espace et on revient vers vous.</p>
+  </div>
+</header>
+
+<div class="wrap">
+
+  <!-- 1. Vous -->
+  <div class="sec">
+    <h2><span class="num">1</span> Vous joindre</h2>
+    <div class="row">
+      <div class="field" id="f-domaine">
+        <label class="lbl" for="domaine">Nom du domaine</label>
+        <input type="text" id="domaine" autocomplete="organization" placeholder="Domaine…">
+        <div class="err">Indiquez le nom de votre domaine.</div>
+      </div>
+      <div class="field" id="f-email">
+        <label class="lbl" for="email">E-mail</label>
+        <input type="email" id="email" autocomplete="email" placeholder="vous@exemple.fr">
+        <div class="err">Un e-mail valide est nécessaire pour vous répondre.</div>
+      </div>
+    </div>
+    <div class="row" style="margin-top:14px">
+      <div class="field">
+        <label class="lbl" for="tel">Téléphone <span class="opt">— facultatif</span></label>
+        <input type="tel" id="tel" autocomplete="tel" placeholder="06 …">
+      </div>
+      <div class="field">
+        <label class="lbl" for="ville">Commune du domaine</label>
+        <div class="paire">
+          <input type="text" id="ville" autocomplete="address-level2" placeholder="Commune">
+          <input type="text" id="cp" inputmode="numeric" maxlength="5" autocomplete="postal-code" placeholder="Code postal">
+        </div>
+      </div>
+      <div class="field">
+        <label class="lbl" for="region">Appellation <span class="opt">— facultatif</span></label>
+        <input type="text" id="region" placeholder="Lalande-de-Pomerol, Gevrey-Chambertin…">
+      </div>
+    </div>
+  </div>
+
+  <!-- 2. Domaine -->
+  <div class="sec">
+    <h2><span class="num">2</span> Votre domaine</h2>
+    <p class="hint">Deux chiffres pour calibrer votre espace.</p>
+    <div class="row">
+      <div class="field">
+        <label class="lbl" for="surface">Surface <span class="opt">— en hectares</span></label>
+        <input type="number" id="surface" min="0" step="0.1" inputmode="decimal" placeholder="ex. 12">
+      </div>
+      <div class="field">
+        <label class="lbl" for="users">Personnes qui utiliseront l'app</label>
+        <input type="number" id="users" min="1" step="1" inputmode="numeric" placeholder="ex. 5">
+      </div>
+    </div>
+  </div>
+
+  <!-- 3. Modules -->
+  <div class="sec">
+    <h2><span class="num">3</span> Ce que vous voulez suivre</h2>
+    <p class="hint">Cochez ce qui vous concerne — un seul, plusieurs, ou tout. Vos choix orientent la suite.</p>
+    <div class="mods" id="mods">
+      <label class="mod"><input type="checkbox" name="mod" value="travaux" data-label="Suivi des travaux à la tâche">
+        <span class="box"><span class="chk"><svg viewBox="0 0 24 24" fill="none"><path d="M5 13l4 4L19 7" stroke="#14110D" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"/></svg></span>
+        <span class="t"><span class="ic">🌿</span> Travaux à la tâche</span><span class="d">Avancement par parcelle, équipes, heures.</span></span></label>
+
+      <label class="mod"><input type="checkbox" name="mod" value="planning" data-label="Planning de l'équipe">
+        <span class="box"><span class="chk"><svg viewBox="0 0 24 24" fill="none"><path d="M5 13l4 4L19 7" stroke="#14110D" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"/></svg></span>
+        <span class="t"><span class="ic">📋</span> Planning de l'équipe</span><span class="d">Horaires, acomptes, heures sup, cadre légal.</span></span></label>
+
+      <label class="mod"><input type="checkbox" name="mod" value="tracteur" data-label="Parc tracteur">
+        <span class="box"><span class="chk"><svg viewBox="0 0 24 24" fill="none"><path d="M5 13l4 4L19 7" stroke="#14110D" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"/></svg></span>
+        <span class="t"><span class="ic">🚜</span> Parc tracteur</span><span class="d">Sessions, entretien, carburant, révisions.</span></span></label>
+
+      <label class="mod"><input type="checkbox" name="mod" value="phyto" data-label="Registre phytosanitaire">
+        <span class="box"><span class="chk"><svg viewBox="0 0 24 24" fill="none"><path d="M5 13l4 4L19 7" stroke="#14110D" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"/></svg></span>
+        <span class="t"><span class="ic">🧪</span> Registre phyto</span><span class="d">Catalogue officiel E-Phy, tenu à jour.</span></span></label>
+
+      <label class="mod"><input type="checkbox" name="mod" value="cave" data-label="Carnet de cave">
+        <span class="box"><span class="chk"><svg viewBox="0 0 24 24" fill="none"><path d="M5 13l4 4L19 7" stroke="#14110D" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"/></svg></span>
+        <span class="t"><span class="ic">🍷</span> Carnet de cave</span><span class="d">Élevage des cuvées, ouillage, opérations.</span></span></label>
+
+      <label class="mod"><input type="checkbox" name="mod" value="pilotage" data-label="Tableau de bord (pilotage)">
+        <span class="box"><span class="chk"><svg viewBox="0 0 24 24" fill="none"><path d="M5 13l4 4L19 7" stroke="#14110D" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"/></svg></span>
+        <span class="t"><span class="ic">📊</span> Tableau de bord</span><span class="d">Vue d'ensemble pour décider votre saison.</span></span></label>
+
+      <label class="mod"><input type="checkbox" name="mod" value="meteo" data-label="Météo par parcelle">
+        <span class="box"><span class="chk"><svg viewBox="0 0 24 24" fill="none"><path d="M5 13l4 4L19 7" stroke="#14110D" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"/></svg></span>
+        <span class="t"><span class="ic">🌦️</span> Météo par parcelle</span><span class="d">Prévisions locales, risque de gel et de pluie.</span></span></label>
+
+      <label class="mod full"><input type="checkbox" name="mod" value="ensemble" data-label="Souhaite voir l'ensemble">
+        <span class="box"><span class="chk"><svg viewBox="0 0 24 24" fill="none"><path d="M5 13l4 4L19 7" stroke="#14110D" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"/></svg></span>
+        <span class="t"><span class="ic">✨</span> Pas encore sûr·e</span><span class="d">Montrez-moi l'ensemble, on verra ensemble ce qui colle.</span></span></label>
+    </div>
+
+    <!-- Conditionnel : parcelles -->
+    <div class="cond" id="cond-parcelles" data-needs="travaux meteo pilotage">
+      <p class="ch">Vos parcelles</p>
+      <label class="lbl">Elles sont réparties sur…</label>
+      <div class="seg" style="margin-bottom:14px">
+        <label><input type="radio" name="commune" value="une seule commune"><span>Une seule commune</span></label>
+        <label><input type="radio" name="commune" value="plusieurs communes"><span>Plusieurs communes</span></label>
+      </div>
+      <label class="lbl">Avez-vous un parcellaire numérique ?</label>
+      <div class="seg" style="margin-bottom:14px">
+        <label><input type="radio" name="parcellaire" value="export PAC / Telepac"><span>Export PAC / Telepac</span></label>
+        <label><input type="radio" name="parcellaire" value="fichier KML / KMZ"><span>Fichier KML</span></label>
+        <label><input type="radio" name="parcellaire" value="non, à créer"><span>Non, à créer</span></label>
+      </div>
+      <div class="field" style="max-width:240px">
+        <label class="lbl" for="nbparc">Nombre de parcelles <span class="opt">— environ</span></label>
+        <input type="number" id="nbparc" min="0" step="1" inputmode="numeric" placeholder="ex. 30">
+      </div>
+    </div>
+
+    <!-- Conditionnel : équipe -->
+    <div class="cond" id="cond-equipe" data-needs="planning">
+      <p class="ch">Votre équipe</p>
+      <div class="row">
+        <div class="field" style="flex:0 1 220px">
+          <label class="lbl" for="perm">Salariés permanents</label>
+          <input type="number" id="perm" min="0" step="1" inputmode="numeric" placeholder="ex. 4">
+        </div>
+        <div class="field" style="flex:0 1 260px">
+          <label class="lbl">Recours à des saisonniers ?</label>
+          <div class="seg">
+            <label><input type="radio" name="saiso" value="oui"><span>Oui</span></label>
+            <label><input type="radio" name="saiso" value="non"><span>Non</span></label>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Conditionnel : matériel -->
+    <div class="cond" id="cond-materiel" data-needs="tracteur">
+      <p class="ch">Votre matériel</p>
+      <div class="field" style="max-width:240px">
+        <label class="lbl" for="engins">Tracteurs / engins <span class="opt">— environ</span></label>
+        <input type="number" id="engins" min="0" step="1" inputmode="numeric" placeholder="ex. 3">
+      </div>
+    </div>
+
+    <!-- Conditionnel : conduite -->
+    <div class="cond" id="cond-conduite" data-needs="phyto">
+      <p class="ch">Conduite du vignoble</p>
+      <div class="seg">
+        <label><input type="radio" name="conduite" value="conventionnel"><span>Conventionnel</span></label>
+        <label><input type="radio" name="conduite" value="biologique"><span>Biologique</span></label>
+        <label><input type="radio" name="conduite" value="en conversion"><span>En conversion</span></label>
+      </div>
+    </div>
+
+    <!-- Conditionnel : cave -->
+    <div class="cond" id="cond-cave" data-needs="cave">
+      <p class="ch">Votre cave</p>
+      <div class="field" style="max-width:240px">
+        <label class="lbl" for="cuvees">Nombre de cuvées <span class="opt">— environ</span></label>
+        <input type="number" id="cuvees" min="0" step="1" inputmode="numeric" placeholder="ex. 8">
+      </div>
+    </div>
+  </div>
+
+  <!-- 4. Message -->
+  <div class="sec">
+    <h2><span class="num">4</span> Un mot pour Nicolas ?</h2>
+    <p class="hint">Une question, une contrainte, votre disponibilité pour un appel… <span class="opt">facultatif</span></p>
+    <textarea id="message" placeholder="Ex. : disponible plutôt en fin de journée, on bascule d'un tableur Excel…"></textarea>
+  </div>
+
+  <div class="hp" aria-hidden="true">
+    <label for="hp-website">Site web (laisser vide)</label>
+    <input type="text" id="hp-website" name="website" tabindex="-1" autocomplete="off">
+  </div>
+
+  <div class="actions">
+    <button class="btn btn-go" id="send" type="button">Envoyer ma demande</button>
+    <button class="btn btn-copy" id="copy" type="button">Copier le récapitulatif</button>
+  </div>
+  <div class="ok" id="okmsg"></div>
+  <p class="reassure"><span class="lock">🔒</span> <span>Aucun paiement à cette étape. Vos informations servent uniquement à préparer votre essai, et restent entre vous et Nicolas.</span></p>
+
+  <footer>
+    <div class="brand">Ma Vigne</div>
+    GUERETTECH · <a href="mailto:ngdevpro@gmail.com">ngdevpro@gmail.com</a> · <a href="https://mavigneapp.fr">mavigneapp.fr</a>
+    <br><a href="https://mavigneapp.fr/mentions-legales.html">Mentions légales</a> · <a href="https://mavigneapp.fr/confidentialite.html">Confidentialité</a> · <a href="https://mavigneapp.fr/cgu.html">CGU</a>
+  </footer>
+</div>
+
+<script>
+  const DEST = 'ngdevpro@gmail.com';
+  const $ = (s)=>document.querySelector(s);
+  const $$ = (s)=>Array.from(document.querySelectorAll(s));
+
+  // --- Conditionnels selon modules cochés ---
+  function checkedMods(){ return $$('input[name="mod"]:checked').map(i=>i.value); }
+  function syncConds(){
+    const on = checkedMods();
+    $$('.cond').forEach(c=>{
+      const needs = (c.dataset.needs||'').split(' ');
+      const show = needs.some(n=>on.includes(n));
+      c.classList.toggle('on', show);
+    });
+  }
+  $$('input[name="mod"]').forEach(i=>i.addEventListener('change', syncConds));
+
+  // --- Validation légère ---
+  function emailOk(v){ return /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(v); }
+  function validate(){
+    let ok = true;
+    const dom = $('#domaine'), em = $('#email');
+    $('#f-domaine').classList.toggle('bad', !dom.value.trim());
+    if(!dom.value.trim()) ok=false;
+    const emBad = !emailOk(em.value.trim());
+    $('#f-email').classList.toggle('bad', emBad);
+    if(emBad) ok=false;
+    if(!ok){ $('#f-domaine').classList.contains('bad') ? dom.focus() : (emBad && em.focus()); }
+    return ok;
+  }
+
+  // --- Construction du récapitulatif ---
+  function radioVal(name){ const r = $('input[name="'+name+'"]:checked'); return r ? r.value : ''; }
+  function line(label, val){ return val ? (label+' : '+val+'\n') : ''; }
+
+  function buildBody(){
+    const mods = $$('input[name="mod"]:checked').map(i=>i.dataset.label);
+    const on = checkedMods();
+    let b = 'Bonjour Nicolas,\n\nJe souhaite essayer Ma Vigne sur mon domaine. Voici les informations :\n\n';
+    b += line('Domaine', $('#domaine').value.trim());
+    b += line('E-mail', $('#email').value.trim());
+    b += line('Téléphone', $('#tel').value.trim());
+    b += line('Commune', [$('#ville').value.trim(), $('#cp').value.trim()].filter(Boolean).join(' '));
+    b += line('Appellation', $('#region').value.trim());
+    b += line('Surface', $('#surface').value ? $('#surface').value+' ha' : '');
+    b += line('Utilisateurs', $('#users').value);
+    b += '\nModules souhaités :\n';
+    b += mods.length ? mods.map(m=>'  - '+m).join('\n')+'\n' : '  (à définir ensemble)\n';
+
+    if(on.some(x=>['travaux','meteo','pilotage'].includes(x))){
+      const det = [radioVal('commune'), radioVal('parcellaire'), $('#nbparc').value ? $('#nbparc').value+' parcelles' : ''].filter(Boolean).join(' · ');
+      if(det) b += '\nParcelles : '+det+'\n';
+    }
+    if(on.includes('planning')){
+      const det = [$('#perm').value ? $('#perm').value+' permanents' : '', radioVal('saiso') ? 'saisonniers : '+radioVal('saiso') : ''].filter(Boolean).join(' · ');
+      if(det) b += 'Équipe : '+det+'\n';
+    }
+    if(on.includes('tracteur') && $('#engins').value) b += 'Matériel : '+$('#engins').value+' engins\n';
+    if(on.includes('phyto') && radioVal('conduite')) b += 'Conduite : '+radioVal('conduite')+'\n';
+    if(on.includes('cave') && $('#cuvees').value) b += 'Cave : '+$('#cuvees').value+' cuvées\n';
+
+    const msg = $('#message').value.trim();
+    if(msg) b += '\nMessage :\n'+msg+'\n';
+    b += '\nMerci !';
+    return b;
+  }
+  function subject(){
+    const d = $('#domaine').value.trim();
+    return 'Demande d\u2019essai Ma Vigne' + (d ? ' \u2014 '+d : '');
+  }
+
+  // --- Envoi vers la Cloud Function (auto-capture) ---
+  // Exposé via un rewrite hosting (firebase.json) : /api/lead → submitLead.
+  // Même origine que mavigneapp.fr → pas de CORS, URL stable.
+  const FN_URL = '/api/lead';
+
+  function payload(){
+    return {
+      domaine:     $('#domaine').value.trim(),
+      email:       $('#email').value.trim(),
+      tel:         $('#tel').value.trim(),
+      region:      $('#region').value.trim(),
+      ville:       $('#ville').value.trim(),
+      cp:          $('#cp').value.trim(),
+      surface:     $('#surface').value.trim(),
+      users:       $('#users').value.trim(),
+      modules:     $$('input[name="mod"]:checked').map(i=>i.dataset.label),
+      commune:     radioVal('commune'),
+      parcellaire: radioVal('parcellaire'),
+      nbparc:      $('#nbparc').value.trim(),
+      perm:        $('#perm').value.trim(),
+      saiso:       radioVal('saiso'),
+      engins:      $('#engins').value.trim(),
+      conduite:    radioVal('conduite'),
+      cuvees:      $('#cuvees').value.trim(),
+      message:     $('#message').value.trim(),
+      hp:          $('#hp-website').value.trim()
+    };
+  }
+
+  function mailtoFallback(){
+    window.location.href = 'mailto:'+DEST+'?subject='+encodeURIComponent(subject())+'&body='+encodeURIComponent(buildBody());
+  }
+
+  function done(m){
+    const b=$('#send'); b.textContent='Demande envoyée \u2713'; b.disabled=true;
+    $('#copy').style.display='none';
+    flash(m);
+  }
+
+  $('#send').addEventListener('click', async ()=>{
+    if(!validate()) return;
+    const b=$('#send'); const old=b.textContent;
+    b.disabled=true; b.textContent='Envoi\u2026';
+    try{
+      const r=await fetch(FN_URL,{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify(payload())});
+      if(!r.ok) throw new Error('http '+r.status);
+      const data=await r.json();
+      if(data.status==='duplicate') done('Nous avons déjà votre demande pour cette adresse \u2014 Nicolas revient vers vous très vite.');
+      else done('Demande envoyée ! Nicolas vous recontacte rapidement pour préparer votre essai.');
+    }catch(e){
+      // Function injoignable → on bascule sur l'e-mail pré-rempli.
+      b.disabled=false; b.textContent=old;
+      flash('Envoi direct indisponible \u2014 votre messagerie va s\u2019ouvrir avec la demande pré-remplie. Sinon, utilisez « Copier le récapitulatif ».');
+      mailtoFallback();
+    }
+  });
+
+  // --- Copier ---
+  $('#copy').addEventListener('click', async ()=>{
+    if(!validate()) return;
+    const txt = 'À : '+DEST+'\nObjet : '+subject()+'\n\n'+buildBody();
+    try{
+      await navigator.clipboard.writeText(txt);
+      flash('Récapitulatif copié. Collez-le dans un e-mail adressé à '+DEST+'.');
+    }catch(e){
+      const ta=document.createElement('textarea'); ta.value=txt; document.body.appendChild(ta);
+      ta.select(); try{document.execCommand('copy')}catch(_){} ta.remove();
+      flash('Récapitulatif copié. Collez-le dans un e-mail adressé à '+DEST+'.');
+    }
+  });
+
+  function flash(m){ const o=$('#okmsg'); o.textContent=m; o.classList.add('show'); o.scrollIntoView({behavior:'smooth', block:'center'}); }
+
+  // efface l'erreur dès qu'on corrige
+  ['#domaine','#email'].forEach(s=>$(s).addEventListener('input', ()=>$(s).closest('.field').classList.remove('bad')));
+</script>
+</body>
+</html>

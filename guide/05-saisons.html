@@ -1,0 +1,92 @@
+<!-- @nav emoji="📅" titre="Saisons &amp; tâches" sous="Cycle, heures/ha, trous" -->
+<section id="saisons">
+  <div class="sec-h">
+    <div class="sec-ic" aria-hidden="true">📅</div>
+    <div><h2>Saisons &amp; tâches</h2><div class="sub">Le cycle, les heures par hectare, l'entreplantation</div></div>
+  </div>
+  <p class="lead">Toute l'activité du domaine s'inscrit dans une saison. C'est elle qui détermine les
+  tâches à faire, la charge de travail à venir et la façon dont l'avancement est mémorisé.</p>
+
+  <h3>📅 Saison active et saison consultée</h3>
+  <ul class="dot">
+    <li>La <b>saison active</b> est celle en cours sur le terrain. Elle est unique et vaut pour tout le
+    domaine : c'est l'administrateur qui la bascule.</li>
+    <li>La <b>saison consultée</b> est propre à chacun : un sélecteur permet de regarder l'avancement
+    d'une saison passée sans rien changer pour les autres.</li>
+    <li>L'avancement est <b>mémorisé saison par saison</b> : revenir en arrière ne perd jamais rien.</li>
+    <li>Les sessions tracteur et les traitements se rangent tout seuls dans la saison correspondant à
+    <b>leur date</b>, jamais dans la saison active du moment de la saisie.</li>
+  </ul>
+  <h3>➕ Créer une saison</h3>
+  <p><span class="path">Réglages › Domaine › Saisons › ＋ Nouvelle saison</span></p>
+  <ol class="steps">
+    <li><b>Type et nom</b>Hiver, Printemps, Été, Automne — le nom reste libre.</li>
+    <li><b>Dates de début et de fin</b>Modifiables à tout moment. Elles peuvent chevaucher l'année civile
+    (une saison d'hiver qui court sur deux années fonctionne).</li>
+    <li><b>Tâches du cycle</b>Cochez celles qui concernent cette saison ; les heures conseillées par
+    hectare sont affichées à côté.</li>
+    <li><b>Activer</b>La saison devient celle de tout le domaine.</li>
+  </ol>
+  <div class="note info"><span class="ni" aria-hidden="true">ℹ️</span><div>Ce sont les <b>dates</b> de la saison qui rendent
+  possibles le calcul de charge, l'ETP requis et les échéances par tâche du Pilotage. Une saison sans
+  dates fonctionne, mais ces indicateurs restent muets.</div></div>
+
+  <h3>⏱️ Les tâches et leurs heures par hectare</h3>
+  <p>Les valeurs livrées par défaut suivent un <b>barème conventionnel régional</b>, choisi à
+  l'installation dans <span class="path">Réglages › Vigne › Barème de la convention</span>. Chaque
+  barème affiche <b>son texte source et sa date</b> ; celui de la Côte de Nuits, en vigne basse, est
+  celui d'origine. Elles sont un point de départ, <b>ajustables tâche par tâche</b> dans
+  <span class="path">Réglages › Vigne › Tâches</span>.</p>
+  <div class="note tip"><span class="ni" aria-hidden="true">💡</span><div><b>La densité fait le
+  gros de l'écart entre régions.</b> Les barèmes sont tous exprimés à 10 000 pieds/hectare ; vos
+  écartements de plantation ramènent ensuite les heures à votre densité réelle, comme le prescrit
+  l'accord lui-même. Sans écartements renseignés, rien ne bouge — le coefficient vaut 1. Ils se
+  saisissent dans <span class="path">Réglages › Vigne › Vos plantations</span> : la distance d'un
+  rang au suivant, puis celle d'un pied au suivant, en mètres. L'application en déduit vos
+  pieds/hectare.</div></div>
+  <div class="note"><span class="ni" aria-hidden="true">✎</span><div>Quand vous modifiez une valeur,
+  l'application affiche <b>les deux chiffres côte à côte</b> — « convention : 70 h/ha · chez vous :
+  100 ». Elle ne corrige jamais la vôtre : c'est une <b>référence datée et sourcée</b>, pas une
+  règle qui s'impose.</div></div>
+  <div class="tw"><table>
+    <tr><th>Tâche</th><th>Saison</th><th>Heures/ha par défaut</th></tr>
+    <tr><td><b>Taille</b></td><td>Hiver</td><td>70</td></tr>
+    <tr><td><b>Tirage</b></td><td>Hiver</td><td>40</td></tr>
+    <tr><td><b>Brûlage</b></td><td>Hiver</td><td>40</td></tr>
+    <tr><td><b>Réparation</b></td><td>Printemps</td><td>30</td></tr>
+    <tr><td><b>Pliage</b></td><td>Printemps</td><td>45</td></tr>
+    <tr><td><b>Plantation</b></td><td>Printemps</td><td>15</td></tr>
+    <tr><td><b>Ébourgeonnage</b></td><td>Printemps</td><td>35 &mdash; <em aria-hidden="true">2 passages</em></td></tr>
+    <tr><td><b>Pioche</b></td><td>Printemps</td><td>40 &mdash; <em aria-hidden="true">2 passages, comptée au temps réel</em></td></tr>
+    <tr><td><b>Relevage</b></td><td>Printemps</td><td>100 &mdash; <em aria-hidden="true">N1&nbsp;50 · N2&nbsp;25 · N3&nbsp;25</em></td></tr>
+    <tr><td><b>Accolage</b></td><td>Printemps</td><td>50</td></tr>
+    <tr><td><b>Palissage</b></td><td>Printemps</td><td>50</td></tr>
+  </table></div>
+  <ul class="dot">
+    <li>Un domaine existant <b>garde ses propres heures</b> : ces valeurs ne s'appliquent qu'aux
+    nouveaux domaines.</li>
+    <li>Le nombre de <b>passages prévus par saison</b> se règle également dans cet écran.</li>
+    <li>Vous pouvez créer vos <b>propres tâches</b> avec leurs heures.</li>
+  </ul>
+
+  <h3>🕳️ Entreplantation — le travail compté en trous</h3>
+  <p>L'entreplantation remplace les pieds manquants. La mesurer à l'hectare n'a aucun sens : ce qui
+  compte est le nombre de trous.</p>
+  <ul class="dot">
+    <li>Le tractoriste saisit le <b>nombre de trous percés</b> parcelle par parcelle, pendant une session
+    à la tarière.</li>
+    <li>Le temps de la tâche devient alors <b>nombre de trous × temps par trou</b>
+    (<b>3&nbsp;minutes</b> par défaut, réglable dans <span class="path">Réglages › Vigne › Tâches</span>).</li>
+    <li>Tant qu'aucun trou n'est saisi, le calcul revient au forfait à la surface.</li>
+    <li>La mise à jour est <b>immédiate</b> : cocher, décocher ou supprimer une session recalcule tout.</li>
+  </ul>
+  <div class="note warn"><span class="ni" aria-hidden="true">⚠️</span><div>Ne confondez pas <b>Entreplantation</b> (remplacer
+  les pieds manquants, tâche du cycle) et <b>Complantation</b> (une parcelle plantée en plusieurs
+  cépages, information de la fiche parcelle). Les deux mots existent dans l'application et ne désignent
+  pas la même chose.</div></div>
+
+  <h3>🏁 Clôturer la campagne</h3>
+  <p><span class="path">Réglages › Domaine › Saisons › Clôturer la campagne</span> — l'opération solde
+  la campagne en cours et prépare la suivante. L'historique reste intégralement consultable, et les
+  comparaisons d'une année sur l'autre s'appuient dessus dans le Pilotage.</p>
+</section>

@@ -1,0 +1,140 @@
+<!-- @nav emoji="📅" titre="Planning RH" sous="Heures, congés, compteur" -->
+<section id="planning">
+  <div class="sec-h">
+    <div class="sec-ic" aria-hidden="true">📅</div>
+    <div><h2>Planning RH</h2><div class="sub">👥 Équipe · 📅 Mon planning</div></div>
+  </div>
+  <p class="lead">Le Planning gère les horaires réels de l'équipe, les congés, le compteur d'heures et
+  les acomptes. C'est un module <b>réservé à l'administrateur</b> ; chaque salarié y voit son propre
+  mois, et rien d'autre.</p>
+
+  <h3>👥 La grille d'équipe</h3>
+  <p>Un seul écran : les salariés en lignes, les jours en colonnes, en vue <b>semaine</b> ou
+  <b>mois</b>. Tout se fait depuis là.</p>
+  <ul class="dot">
+    <li>Toucher une case ouvre l'<b>éditeur du jour</b>, qui glisse depuis le bas. On y navigue d'un
+    jour à l'autre <b>et</b> d'un salarié à l'autre sans jamais refermer.</li>
+    <li>Le <b>mode multi-sélection</b> applique une action à plusieurs cases d'un coup : congés,
+    absences, horaires de chaleur, récupération.</li>
+    <li>Les heures se saisissent <b>à la minute</b>, avec pause déjeuner automatique au-delà d'un seuil.</li>
+    <li>Des <b>modèles de semaine</b> réutilisables évitent de tout ressaisir chaque mois ; un
+    import de pointages au format CSV est possible.</li>
+    <li>Une <b>synthèse du mois</b> et un <b>récapitulatif annuel</b> cliquable se trouvent sous la grille.</li>
+  </ul>
+
+  <h3>⏱️ Heures travaillées et heures prévues</h3>
+  <p>Le module ne se contente pas d'additionner : il compare en permanence le <b>réalisé</b> à la
+  <b>référence</b> — c'est-à-dire aux heures prévues sur les jours réellement sous contrat.</p>
+  <div class="tw"><table>
+    <tr><th>Indicateur</th><th>Signification</th></tr>
+    <tr><td><b>Prévu</b></td><td>Heures du modèle sur les jours sous contrat, hors jours pris en récupération.</td></tr>
+    <tr><td><b>Travaillé</b></td><td>Heures réellement effectuées, saisies dans la grille.</td></tr>
+    <tr><td><b>Écart</b></td><td>Différence entre les deux, en positif ou en négatif, avec sa couleur.</td></tr>
+    <tr><td><b>ETP</b></td><td>Équivalent temps plein du salarié sur le mois.</td></tr>
+  </table></div>
+  <p>Ces chiffres se retrouvent partout : bandeau d'en-tête, synthèse du mois, récapitulatif annuel,
+  vue personnelle du salarié, fiche salarié et relevé d'heures PDF.</p>
+
+  <h3>⚖️ Le cadre légal, affiché en permanence</h3>
+  <p>Les valeurs par défaut suivent la convention nationale <b>Production agricole et CUMA
+  (IDCC 7024)</b>. Elles sont <b>paramétrables</b> pour s'adapter à une autre convention&nbsp;:
+  <span class="path">Planning › Outils du planning › Modèles, cadre légal &amp; pause</span>.</p>
+  <div class="tw"><table>
+    <tr><th>Repère</th><th>Valeur par défaut</th></tr>
+    <tr><td>Durée légale hebdomadaire</td><td>35 h</td></tr>
+    <tr><td>Durée légale mensuelle</td><td>151,67 h</td></tr>
+    <tr><td>Maximum sur une semaine</td><td>48 h</td></tr>
+    <tr><td>Moyenne maximale sur 12 semaines</td><td>44 h</td></tr>
+    <tr><td>Maximum sur une journée</td><td>10 h</td></tr>
+    <tr><td>Durée annuelle de référence</td><td>1&nbsp;607 h</td></tr>
+    <tr><td>Heures de modulation par an</td><td>250 h</td></tr>
+    <tr><td>Durée annuelle maximale</td><td>1&nbsp;940 h</td></tr>
+  </table></div>
+  <p>Les dépassements sont <b>signalés</b> sur la grille et dans la synthèse, au moment où ils
+  apparaissent — pas trois mois plus tard.</p>
+
+  <h3>📈 Le compteur annuel (annualisation)</h3>
+  <p>En haut de la fiche d'un salarié, le compteur d'heures suit l'année civile.</p>
+  <ul class="dot">
+    <li>Le plafond de 1&nbsp;607&nbsp;h est <b>proratisé aux jours réellement sous contrat</b> : un
+    saisonnier de quatre mois n'a évidemment pas le même plafond qu'un permanent.</li>
+    <li>Il est mesuré en <b>travail effectif</b> : congés, arrêts et récupérations n'y entrent pas.
+    Les 1&nbsp;607&nbsp;h sont déjà calculées congés déduits.</li>
+    <li>Les <b>heures de modulation</b> (au-delà de la durée légale hebdomadaire) sont comptées à part,
+    face à leur propre plafond annuel.</li>
+    <li>Une <b>projection</b> indique où le compteur atterrira à ce rythme.</li>
+  </ul>
+
+  <h3>🏖️ Congés payés</h3>
+  <ul class="dot">
+    <li>Deux modes de décompte, au choix du domaine :
+      <b>jours ouvrables</b> (6 par semaine, référence 30 j/an — c'est le défaut légal) ou
+      <b>jours ouvrés</b> (5 par semaine, référence 25 j/an).</li>
+    <li>Dimanches et jours fériés chômés <b>ne comptent jamais</b>, dans les deux modes.</li>
+    <li>En mode ouvrables, poser un <b>vendredi</b> décompte automatiquement le <b>samedi</b> suivant.</li>
+    <li>La <b>période de référence</b> est réglable (elle démarre en juin par défaut).</li>
+    <li><b>Poser des congés sur une période</b> : un écran dédié permet de saisir du…&nbsp;au…&nbsp;pour
+    <b>plusieurs salariés à la fois</b>.</li>
+  </ul>
+
+  <h3>🚫 Motifs d'absence</h3>
+  <p>Le motif n'est pas décoratif : il détermine l'effet sur le compteur annuel et sur la paie.</p>
+  <div class="tw"><table>
+    <tr><th>Motif</th><th>Effet</th></tr>
+    <tr><td>🩹 <b>Arrêt de travail</b></td><td>Suspend le contrat : <b>abaisse le plafond annuel</b>. Journée rémunérée.</td></tr>
+    <tr><td>✈️ <b>Congé sans solde</b></td><td>Suspend le contrat. Non rémunéré.</td></tr>
+    <tr><td>👥 <b>Événement familial</b></td><td>Assimilé à du travail effectif. Rémunéré.</td></tr>
+    <tr><td>🎓 <b>Formation</b></td><td>Assimilée à du travail effectif. Rémunérée.</td></tr>
+    <tr><td>✕ <b>Absence injustifiée</b></td><td>Heures dues, journée non payée.</td></tr>
+    <tr><td>⏰ <b>Retard</b></td><td>Se saisit <b>en heures</b>, heures dues.</td></tr>
+    <tr><td>— <b>Absence non précisée</b></td><td>Sans effet sur le plafond annuel.</td></tr>
+  </table></div>
+
+  <h3>💶 Compteur d'heures &amp; acomptes</h3>
+  <ul class="dot">
+    <li><b>Solde de départ</b> : les heures reportées <em aria-hidden="true">avant</em> l'installation de l'application se
+    saisissent une fois, sinon le compteur repart de zéro à vie.</li>
+    <li><b>Tableau annuel</b> mois par mois, avec le détail cliquable de chaque mois.</li>
+    <li>Les heures supplémentaires sont <b>calculées automatiquement</b> mais restent
+    <b>surchargeables</b> à la main : une valeur corrigée s'affiche d'une autre couleur.</li>
+    <li>Trois politiques possibles selon le domaine : heures <b>payées</b> le mois même, <b>récupérées</b>
+    en repos, ou <b>reportées</b> au solde de fin d'année. Le calcul est identique, seul l'affichage change.</li>
+    <li><b>Acomptes</b> par salarié et par mois, avec montant, date et note ; ils apparaissent dans le
+    relevé PDF.</li>
+    <li><b>Relevé d'heures PDF</b> : référence, travaillé, écart, bloc annuel, congés, acomptes,
+    emplacements de signature.</li>
+  </ul>
+
+  <h3>🌡️ Horaires de chaleur</h3>
+  <p>En période de canicule, un panneau dédié bascule un salarié sur des horaires décalés
+  (06:00–14:00 par défaut, en continu ou avec pause). Les week-ends, congés et jours de récupération
+  sont automatiquement sautés, et le retrait ne touche que les jours marqués canicule.</p>
+
+  <h3>📊 Charge &amp; ETP</h3>
+  <p>Un bandeau compare, pour le mois en cours, la <b>charge de travail</b> qu'exige la saison à la
+  <b>capacité réelle de l'équipe</b>.</p>
+  <ul class="dot">
+    <li>La charge = heures par hectare × surface concernée, répartie sur la durée de la saison au
+    prorata de la capacité de chaque mois.</li>
+    <li>L'<b>ETP requis</b> répond à une seule question : combien de personnes faut-il en moyenne pour
+    finir dans les délais&nbsp;?</li>
+    <li>L'effectif présent est <b>lissé au prorata des jours</b> de contrat de chacun.</li>
+    <li>Pour l'Entreplantation, la charge s'appuie sur les <b>trous</b> dès qu'ils sont renseignés.</li>
+  </ul>
+  <div class="note warn"><span class="ni" aria-hidden="true">⚠️</span><div>Les modèles de semaine livrés par défaut couvrent
+  <b>lundi à vendredi</b>. Si votre équipe travaille régulièrement le samedi, vérifiez la structure de
+  semaine avant de vous fier aux calculs de dépassement hebdomadaire.</div></div>
+
+  <details><summary>Le solde d'heures supplémentaires ne bouge pas</summary>
+    <div class="dbody">Il ne bouge que si le planning contient de <b>vrais dépassements</b> et des jours
+    marqués <b>récupération</b>. Une simple absence ne tire pas le solde. Si vous démarrez, saisissez
+    d'abord le <b>solde de départ</b> : sans lui, le compteur reste à zéro indéfiniment.</div></details>
+  <details><summary>Un salarié peut-il voir les heures des autres&nbsp;?</summary>
+    <div class="dbody">Non. Un non-administrateur ne voit que <b>son</b> onglet personnel : son mois,
+    ses congés restants, son écart. Les taux horaires ne sont, eux, lisibles que par les
+    administrateurs.</div></details>
+  <details><summary>Comment ajouter un salarié au planning&nbsp;?</summary>
+    <div class="dbody">Créez-le d'abord comme membre dans <span class="path">Réglages › Équipe</span> :
+    il apparaît aussitôt dans la grille. Les anciens salariés restent accessibles depuis
+    <span class="path">Planning › Outils du planning › Anciens salariés</span>, avec leurs heures et leurs PDF.</div></details>
+</section>

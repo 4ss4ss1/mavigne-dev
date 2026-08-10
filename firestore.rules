@@ -1,0 +1,325 @@
+rules_version = '2';
+service cloud.firestore {
+  match /databases/{database}/documents {
+
+    // ════ LOT 5 — Isolation inter-tenant par custom claims ════
+    // Claims posés par les Cloud Functions (claims.js) :
+    //   gtAdmin:true  → admin GUERETTECH (tous tenants + _guerettech)
+    //   demo:true     → compte démo (lecture seule domaine-dupont)
+    //   tenant:"slug" → membre du domaine <slug>
+    //   ro:true       → saisonnier / pilotage — lecture seule
+    //   adm:true      → SEC-1 : administrateur DU DOMAINE (écriture des docs sensibles)
+    //
+    // v2.2 (14/06/2026) — ajout du catalogue phyto E-Phy partagé (bas de fichier).
+    // v3.0 (07/2026) — SEC-1 : autorisation d'écriture PAR RÔLE et PAR DOCUMENT.
+    //
+    // ⚠️⚠️ ORDRE DE DÉPLOIEMENT — NE JAMAIS INVERSER ⚠️⚠️
+    //   1. firebase deploy --only functions
+    //   2. gtBackfillClaims (console) → pose `adm` sur les admins existants
+    //   3. firebase deploy --only firestore:rules   ← CE FICHIER, EN DERNIER
+    //   Déployer ces règles avant le backfill = tous les admins perdent l'écriture,
+    //   instantanément et sur tous les domaines.
+    //
+    // ⚠️ Toujours token.get('clé', défaut) : accéder à un claim ABSENT
+    // (ex. token.adm sans claim adm) lève une erreur → refus silencieux.
+    //
+    // ════════════════════════════════════════════════════════════════════
+    // ⚠️ SEC-2 ET SUIVANTS — À LIRE AVANT DE TOUCHER À `membres`
+    //
+    // `membres` est ADMIN-ONLY en écriture → tout flag PAR-UTILISATEUR (ex. forcer un
+    // changement de mot de passe au 1er login) doit être un CLAIM, jamais un champ de
+    // ce doc : sinon l'utilisateur ne peut pas effacer son propre flag et reste bloqué
+    // en boucle (il lui faudrait écrire dans `membres`, ce que ces règles refusent).
+    //
+    // Corollaire : une CF qui gère le PROPRE compte de l'appelant (changer SON mot de
+    // passe) ne doit exiger NI `adm` NI l'absence de `ro`. Un saisonnier doit pouvoir
+    // s'en servir : changer son mot de passe n'est pas une écriture de données.
+    // ════════════════════════════════════════════════════════════════════
+
+    // ========================================================================
+    // SEC-GT/2 — L'IDENTITE NE SUFFIT PLUS : IL FAUT UNE SESSION OUVERTE
+    // ========================================================================
+    // isGtIdent() repond « c'est bien Nicolas » (claim serveur, ou e-mail
+    // verifie). isGtAdmin() y AJOUTE le claim `gts` : l'horodatage de fin de
+    // session, en millisecondes, que seule la Cloud Function gtVerifyOtp sait
+    // poser — apres saisie d'un code a usage unique recu par e-mail.
+    //
+    // Ce que cela change : un mot de passe qui fuit ne donne plus acces aux
+    // donnees des domaines clients. L'attaquant obtient un jeton, et ce jeton
+    // ne franchit aucune de ces regles sans le code, qui part sur une boite
+    // qu'il ne controle pas. Avant ce lot, le mot de passe suffisait a tout
+    // lire directement par le SDK, sans jamais ouvrir l'application : aucun
+    // controle cote interface ne pouvait s'y opposer.
+    //
+    // ⚠️ PORTE DE SECOURS — a lire AVANT de paniquer.
+    // Si le flux de code se casse (mail non delivre, Cloud Function en panne),
+    // l'operateur se retrouve dehors de son propre panneau. Le deverrouillage
+    // se fait depuis la console, sans ligne de commande et sans depot :
+    //   Firebase Console > Firestore Database > Regles > retirer la ligne
+    //   « && request.auth.token.get('gts', 0) > request.time.toMillis() »
+    //   ci-dessous > Publier.   (30 secondes, effet immediat.)
+    // Ne jamais laisser cet etat en place : republier la regle complete apres.
+    //
+    // ⚠️ `gts` est en MILLISECONDES. request.time est un timestamp : toMillis()
+    // donne l'epoch. Ne pas ecrire .seconds(), qui renvoie le champ « secondes »
+    // de l'horloge (0 a 59) et comparerait n'importe quoi.
+    //
+    // ⚠️ Le claim voyage dans le jeton, mis en cache environ une heure : une
+    // session fermee reste donc valide jusqu'au renouvellement du jeton, une
+    // heure au pire. gtEndSession retire le claim pour les jetons suivants.
+    function isGtIdent() {
+      return request.auth != null
+             && (request.auth.token.get('gtAdmin', false) == true
+                 || (request.auth.token.get('email', '') == 'ngdevpro@gmail.com'
+                     && request.auth.token.get('email_verified', false) == true));
+    }
+    function isGtAdmin() {
+      return isGtIdent()
+             && request.auth.token.get('gts', 0) > request.time.toMillis();
+    }
+    function isDemo() {
+      return request.auth != null && request.auth.token.get('demo', false) == true;
+    }
+    function isMyTenant(col) {
+      return request.auth != null
+             && request.auth.token.get('tenant', '') != ''
+             && col == 'mavigne_' + request.auth.token.get('tenant', '');
+    }
+    // Droit d'écrire QUOI QUE CE SOIT dans son domaine. Le compte démo en est exclu
+    // explicitement : s'il recevait un jour un claim `tenant` (membre ajouté au jeu de
+    // démonstration), isMyTenant() suffirait sinon à le rendre inscriptible.
+    function canWrite() {
+      return request.auth != null
+             && request.auth.token.get('ro', false) != true
+             && request.auth.token.get('demo', false) != true;
+    }
+    // SEC-1 — administrateur du domaine. Décidé par le SERVEUR (claims.js/deriveAdm),
+    // jamais par le client. Passe par canWrite() → un compte démo ou ro ne peut pas
+    // être admin, même si un claim `adm` traînait.
+    function isAdmin() {
+      return canWrite() && request.auth.token.get('adm', false) == true;
+    }
+
+    // ── Documents réservés à l'administrateur du domaine ───────────────
+    // membres           : comptes, e-mails, rôles → self-service d'élévation sinon
+    // saisons           : campagne active + échéances → pilote tout l'avancement
+    // planning_*        : RH/paie (CP, absences, heures, heures sup, acomptes).
+    //                     Chapelle & Fils : 4 permanents + saisonniers, DPA Art. 28.
+    // (`config` a son propre régime, voir cfgPrefsOnly ci-dessous.)
+    // paie              : rémunérations nominatives (taux horaire par personne) +
+    //                     prix d'achat du GNR. SEUL document du modèle dont la LECTURE
+    //                     est également restreinte (voir le bloc racine plus bas).
+    function isAdminOnlyDoc(d) {
+      return d in ['membres', 'saisons',
+                   'planning_entries', 'planning_templates',
+                   'planning_acomptes', 'planning_hsup',
+                   'intrants', 'paie'];
+    }
+
+    // ── Validation de forme ───────────────────────────────────────────
+    // 100 % des écritures client passent par fbSave/_saveParcellesMerged, qui écrivent
+    // TOUJOURS exactement { value: … } (firebase.js). Un doc qui porte autre chose au
+    // premier niveau ne vient pas de l'app.
+    function shapeOk() {
+      return request.resource.data.keys().hasOnly(['value']);
+    }
+    // ⚠️ Les règles Firestore ne savent PAS mesurer des octets : size() sur une liste
+    // = nombre d'éléments. La limite dure de 1 Mio par document est appliquée par
+    // Firestore lui-même, pas ici. Ces bornes ne sont qu'un garde-fou de forme, très
+    // au-dessus du réel (Marchand-Grillot = 46 parcelles ≈ 64 ko).
+    function countOk(d) {
+      return !(d in ['parcelles', 'membres', 'saisons'])
+             || (request.resource.data.value is list
+                 && request.resource.data.value.size() <= (d == 'parcelles' ? 3000 : 500));
+    }
+
+    // ── `config` : admin-only SAUF deux champs à écrivains non-admin légitimes ──
+    // Vérifié par relecture de tout le code client (app.js, tracteur.js, planning.js,
+    // reglages.js, pilotage.js) :
+    //   • home_layout → saveHomeLayout() (app.js) : disposition de l'accueil, écrite
+    //     par TOUT compte canWrite() (ouvrier, tractoriste) à chaque personnalisation.
+    //   • gnr         → saveGnr / savePlein / saveGnrCorr (tracteur.js) : cuve GNR
+    //     UNIQUE du domaine, écrite par les TRACTORISTES (rôle non-admin) à chaque plein.
+    // Tout le reste (cp_mode, cadre_legal, tachesPrio, domaine_nom, etp_saison,
+    // plantation_min_trou, cuivre_plafond, pause_dejeuner, _mvCguAccept…) est admin-only.
+    //
+    // Le diff porte sur la map `value` : une écriture non-admin ne passe que si elle ne
+    // touche QUE ces deux clés. Un diff vide (réécriture identique) passe aussi — c'est
+    // un no-op, il ne change rien.
+    //
+    // ⚠️ Dette assumée : home_layout est une préférence PAR UTILISATEUR logée dans un doc
+    // PARTAGÉ (même antipattern que celui décrit plus haut pour `membres`). Le jour où
+    // app.js bouge, la sortir de `config` (localStorage la porte déjà) et retirer
+    // 'home_layout' de la liste ci-dessous.
+    function cfgPrefsOnly() {
+      return resource != null
+             && 'value' in resource.data && resource.data.value is map
+             && 'value' in request.resource.data && request.resource.data.value is map
+             && request.resource.data.value.diff(resource.data.value)
+                  .affectedKeys().hasOnly(['home_layout', 'gnr']);
+    }
+
+    // ══════════════════════════════════════════════════════════════════
+    // TENANTS mavigne_{slug} — UN SEUL bloc racine à joker.
+    //
+    // Structure volontaire : les lectures ET les écritures vivent dans le MÊME
+    // `match /{collection}/{docId}`. Deux blocs racine frères commençant tous deux par
+    // /{collection}/ compileraient peut-être, mais ce n'est pas vérifiable hors CLI :
+    // une seule déclaration de joker par niveau = zéro ambiguïté, zéro surprise au
+    // déploiement du 18. Les règles n'ont pas d'ordre — toute règle `allow` qui matche
+    // accorde l'accès (union) : la ligne GT ci-dessous ne peut donc jamais être annulée
+    // par une règle admin-only plus bas.
+    //
+    // isMyTenant(collection) est exigé dans CHAQUE règle d'écriture → ce bloc ne peut
+    // jamais matcher _guerettech / ephy / leads / mail (leurs blocs dédiés sont plus bas).
+    //
+    // ⚠️ LECTURES — NE PAS TOUCHER (identiques à la v2.2). firebase.js/_pullKeys lit les
+    // 24 collections en parallèle, chaque lecture avec son propre catch en level:'info'.
+    // Un refus de lecture ne casse donc RIEN de visible : la clé n'est pas appliquée,
+    // _mvKeyLoaded[key] reste faux, et la Couche 2 anti-perte refuse ensuite toute
+    // sauvegarde de cette clé. Symptôme : « je ne peux plus enregistrer », sans trace.
+    // Seule l'écriture change en v3.0 : elle passe du niveau collection au niveau document.
+    // ══════════════════════════════════════════════════════════════════
+    match /{collection}/{docId} {
+
+      // ── LECTURES ────────────────────────────────────────────────────
+      // Inchangées SAUF `paie` (nouveau doc, jamais lu avant aujourd'hui) : il porte
+      // des rémunérations NOMINATIVES. Les autres docs sensibles (membres, planning_*)
+      // sont admin-only en ÉCRITURE mais restent lisibles par toute l'équipe — c'est
+      // assumé, l'app en a besoin. Un salaire, non : un doc que personne d'autre que
+      // l'admin ne lit doit être un doc à part, d'où cette collection dédiée.
+      //
+      // ⚠️ Restreindre la lecture d'une clé EXISTANTE serait catastrophique et
+      // silencieux (§8c : refus de lecture → _mvKeyLoaded faux → la Couche 2 refuse
+      // ensuite toute sauvegarde). C'est sans risque ici pour deux raisons :
+      //   • `paie` est une clé NEUVE — aucun code existant n'en dépend ;
+      //   • la Couche 2 ne garde que parcelles / membres / saisons.
+      // Un non-admin reçoit un permission-denied absorbé par le catch level:'info'
+      // de _pullKeys, et n'écrit jamais cette clé (aucun fbPushIfAbsent dessus).
+      allow read: if isGtAdmin() && collection.matches('mavigne_.*');
+      allow read: if isDemo() && collection == 'mavigne_domaine-dupont' && docId != 'paie';
+      allow read: if isMyTenant(collection) && docId != 'paie';
+      allow read: if isMyTenant(collection) && docId == 'paie' && isAdmin();
+
+      // ── ÉCRITURE GT ADMIN (inchangée) ───────────────────────────────
+      allow write: if isGtAdmin() && collection.matches('mavigne_.*');
+
+      // ── ÉCRITURES MEMBRES, DOCUMENT PAR DOCUMENT (SEC-1) ────────────
+      // Profondeur exacte mavigne_{slug}/{doc} : seule forme écrite par le client
+      // (fbDocRef = doc(db, 'mavigne_'+TENANT_ID, key), vérifié sur les 9 setDoc/tx.set
+      // de firebase.js — tous en { value: … }).
+
+      // 1. Documents sensibles → administrateur du domaine uniquement
+      allow write: if isMyTenant(collection)
+                   && isAdminOnlyDoc(docId)
+                   && isAdmin()
+                   && shapeOk() && countOk(docId);
+
+      // 2. config → admin pour tout ; non-admin uniquement home_layout / gnr
+      allow write: if isMyTenant(collection)
+                   && docId == 'config'
+                   && shapeOk()
+                   && (isAdmin() || (canWrite() && cfgPrefsOnly()));
+
+      // 3. Métier courant (journal, sessions, parcelles, traitements, entretiens,
+      //    reparateur, reparateur_hist, cave_elevage, cave_vendange, catalogue,
+      //    travaux, taches, activites, conducteurs, tracteurs_list, historique,
+      //    kml_polygons, error_log…) → règle inchangée : tout membre non-ro.
+      allow write: if isMyTenant(collection)
+                   && !isAdminOnlyDoc(docId) && docId != 'config'
+                   && canWrite()
+                   && shapeOk() && countOk(docId);
+
+      // ── Sous-collections éventuelles (profondeur ≥ 3) ───────────────
+      // Aucune n'existe aujourd'hui sous un tenant. Ce bloc ne fait que PRÉSERVER
+      // à l'identique la portée récursive de l'ancien {document=**} : lecture pour
+      // les membres, tout pour GT. Aucune écriture membre en profondeur (il n'y en a
+      // jamais eu : l'ancienne règle write vivait au niveau collection, et le client
+      // n'écrit qu'à la profondeur 2).
+      match /{sub=**} {
+        allow read, write: if isGtAdmin() && collection.matches('mavigne_.*');
+        allow read: if isDemo() && collection == 'mavigne_domaine-dupont' && docId != 'paie';
+        allow read: if isMyTenant(collection) && docId != 'paie';
+        allow read: if isMyTenant(collection) && docId == 'paie' && isAdmin();
+      }
+    }
+
+    // ── Collection GT admin ───────────────────────────────────────────
+    match /_gt_otp/{document=**} {
+      // SEC-GT/2 — FERMEE A TOUT LE MONDE, y compris a GUERETTECH lui-meme.
+      // Ecrite et lue uniquement par l'Admin SDK (gtRequestOtp / gtVerifyOtp),
+      // qui contourne ces regles. Indispensable, pas decoratif : le porteur du
+      // claim gtAdmin peut tout lire dans _guerettech. Si l'empreinte du code y
+      // vivait, un attaquant ayant le mot de passe la forcerait hors ligne en
+      // une seconde (un million de combinaisons), et le second facteur ne
+      // servirait a rien. Meme raisonnement que `leads` et `_mv_signatures`.
+      allow read, write: if false;
+    }
+
+    match /_guerettech/{document=**} {
+      allow read, write: if isGtAdmin();
+    }
+
+    // ── Registre des slugs — lecture publique (vérif unicité onboarding)
+    // Ne contient que {slugs:[…]} : aucune donnée sensible.
+    match /_guerettech/tenants {
+      allow read: if true;
+      allow write: if isGtAdmin();
+    }
+
+    // ── Codes d'essai 30j — GT admin uniquement ───────────────────────
+    // La validation passe par la Cloud Function checkTrialToken :
+    // le compte démo n'a plus accès à la liste des codes.
+    match /_guerettech/demo_tokens {
+      allow read, write: if isGtAdmin();
+    }
+
+    // ── Log d'accès — écrit côté serveur (checkTrialToken/logTrialAccess)
+    match /_guerettech/access_log {
+      allow read, write: if isGtAdmin();
+    }
+    // ── Preuves d'acceptation CGU + DPA (SEC-DPA) ─────────────────────
+    // Un doc par domaine : _mv_signatures/{slug}. Écrit UNIQUEMENT par la Cloud Function
+    // acceptTerms (Admin SDK → contourne ces règles). write:if false ferme la porte à
+    // TOUT client, y compris l'admin du domaine qui signe : il ne peut ni réécrire ni
+    // effacer sa propre preuve. Lecture réservée au domaine concerné (affichage du reçu)
+    // et à GUERETTECH.
+    // Le bloc joker /{collection}/{docId} n'accorde rien ici : isMyTenant('_mv_signatures')
+    // est faux (≠ 'mavigne_'+tenant) et son read GT est borné à collection.matches('mavigne_.*').
+    match /_mv_signatures/{slug} {
+      allow read:  if isGtAdmin()
+                   || (request.auth != null
+                       && request.auth.token.get('tenant', '') == slug);
+      allow write: if false;
+    }
+
+
+    // ════ v2.2 — Catalogue phyto E-Phy (données nationales partagées) ════
+    // Document(s) ephy/{vigne, …} alimenté(s) par la Cloud Function
+    // syncEphyVigne (admin SDK → contourne ces règles).
+    // Lecture pour tout membre authentifié (tous tenants + démo + saisonniers) :
+    // référentiel public ANSES, aucune donnée tenant. Écriture client interdite.
+    match /ephy/{doc} {
+      allow read:  if request.auth != null;
+      allow write: if false;
+    }
+
+    // ════ Auto-capture des demandes d'essai (formulaire public) ════
+    // Collection écrite UNIQUEMENT par la Cloud Function submitLead
+    // (admin SDK → contourne ces règles). docId = SHA-256 de l'e-mail
+    // normalisé → une seule fiche par adresse (déduplication).
+    // Aucune écriture client : la surface publique passe par la function HTTP.
+    // Lecture réservée à l'admin GT (consultation des demandes).
+    match /leads/{doc} {
+      allow read:  if isGtAdmin();
+      allow write: if false;
+    }
+
+    // File d'attente e-mails de l'extension « Trigger Email »
+    // (firestore-send-email). Lue/écrite par l'extension via son SA admin.
+    // Aucun accès client.
+    match /mail/{doc} {
+      allow read, write: if false;
+    }
+  }
+}

@@ -1,0 +1,72 @@
+<!-- @nav emoji="🛡️" titre="Données &amp; sécurité" sous="Sauvegardes, hors-ligne, RGPD" -->
+<section id="donnees">
+  <div class="sec-h">
+    <div class="sec-ic" aria-hidden="true">🛡️</div>
+    <div><h2>Données &amp; sécurité</h2><div class="sub">Sauvegardes · hors-ligne · confidentialité</div></div>
+  </div>
+  <p class="lead">Une saison de saisies, c'est un an de travail. Plusieurs protections indépendantes
+  se superposent pour qu'aucune fausse manœuvre, aucune coupure réseau et aucun appareil perdu ne puisse
+  emporter votre historique.</p>
+
+  <h3>🛡️ Ce qui protège vos saisies</h3>
+  <ul class="dot">
+    <li><b>Aucun écrasement par du vide.</b> Si un appareil tente d'envoyer une liste vide ou brutalement
+    amputée par-dessus des données existantes, l'envoi est refusé. Une suppression faite à la main passe
+    normalement — c'est la chute massive en une seule fois qui est bloquée.</li>
+    <li><b>Aucune écriture avant lecture.</b> Tant qu'un appareil n'a pas reçu les données du serveur, il
+    n'a pas le droit de les remplacer. C'est ce qui évite le scénario du téléphone allumé en zone
+    blanche qui repart de zéro.</li>
+    <li><b>Fusion intelligente des parcelles.</b> Deux personnes qui valident au même moment sur deux
+    téléphones ne s'effacent pas : les deux validations sont conservées.</li>
+    <li><b>Changer de saison n'est jamais pris pour un effacement</b> : le comptage tient compte de
+    toutes les saisons.</li>
+  </ul>
+
+  <h3>💾 Sauvegardes automatiques</h3>
+  <div class="tw"><table>
+    <tr><th>Sauvegarde</th><th>Fréquence</th><th>Conservation</th></tr>
+    <tr><td>Copie complète de la base</td><td>Chaque nuit</td><td>7 jours</td></tr>
+    <tr><td>Copie lisible, domaine par domaine</td><td>Chaque jour</td><td>30 jours</td></tr>
+    <tr><td>Votre propre export JSON</td><td>Quand vous le décidez</td><td>Chez vous, indéfiniment</td></tr>
+  </table></div>
+  <p>Au pire des cas, une perte est donc bornée à moins de 24&nbsp;heures — et une donnée précise peut
+  être restaurée sans tout réécrire.</p>
+  <div class="note tip"><span class="ni" aria-hidden="true">💡</span><div>Prenez l'habitude d'un <b>export JSON avant chaque
+  opération sensible</b> (import de parcellaire, clôture de campagne, gros nettoyage) :
+  <span class="path">Réglages › App › Exporter</span>. Trente secondes, et vous dormez mieux.</div></div>
+
+  <h3>📶 Hors connexion</h3>
+  <ul class="dot">
+    <li>L'application démarre et fonctionne <b>sans réseau</b> une fois chargée.</li>
+    <li>Les saisies sont mises en file et <b>repartent seules</b> au retour du signal, même après un
+    redémarrage du téléphone.</li>
+    <li>La météo, elle, a besoin du réseau : elle affiche la dernière prévision connue.</li>
+    <li>Installée sur l'écran d'accueil, l'app s'ouvre comme une application classique.</li>
+  </ul>
+
+  <h3>🔐 Confidentialité</h3>
+  <ul class="dot">
+    <li><b>Chaque domaine est hermétiquement isolé.</b> L'isolation est vérifiée sur le serveur, pas
+    seulement dans l'affichage : aucun domaine ne peut lire les données d'un autre, même en cherchant.</li>
+    <li><b>Les droits sont contrôlés côté serveur.</b> Masquer un bouton ne suffirait pas ; une action
+    interdite est refusée à la source.</li>
+    <li><b>Les rémunérations sont doublement protégées</b> : lisibles par les seuls administrateurs, et
+    jamais enregistrées sur l'appareil.</li>
+    <li><b>Mots de passe individuels</b> : personne ne partage un mot de passe commun, et le premier
+    changement est obligatoire.</li>
+    <li>La <b>déconnexion nettoie</b> les données laissées sur l'appareil — indispensable sur un poste
+    partagé.</li>
+    <li>Aucune publicité, aucune revente de données. Détails :
+    <a href="https://mavigneapp.fr/confidentialite.html">politique de confidentialité</a> et
+    <a href="https://mavigneapp.fr/dpa.html">accord de sous-traitance RGPD</a>.</li>
+  </ul>
+  <div class="note legal"><span class="ni" aria-hidden="true">⚖️</span><div>Les données de vos salariés (heures, congés,
+  absences, rémunérations) font de votre domaine le <b>responsable de traitement</b> et de GUERETTECH un
+  <b>sous-traitant</b> au sens du RGPD. L'accord de sous-traitance (article&nbsp;28) encadre cette
+  relation ; son acceptation se fait dans l'application, avec accusé de réception horodaté.</div></div>
+
+  <h3>🔎 Un problème&nbsp;? Il se signale depuis l'app</h3>
+  <p>La pastille <span class="path">? Aide</span>, en haut de chaque écran, ouvre également <span class="path">🐛 Signaler un problème</span> — pré-rempli avec l'écran d'où vous partez. Le chemin complet reste <span class="path">Réglages › App</span>. Le message transmet
+  <b>accompagné du contexte technique</b> : version, module concerné, dernières erreurs rencontrées.
+  C'est infiniment plus efficace qu'un « ça bugue » par SMS, et ça évite deux jours d'aller-retour.</p>
+</section>

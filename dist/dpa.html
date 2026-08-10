@@ -1,0 +1,293 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>Accord de traitement des données (DPA) · Ma Vigne</title>
+<meta name="description" content="Accord de traitement des données personnelles (sous-traitance, article 28 RGPD) entre GUERETTECH et les domaines viticoles utilisateurs de Ma Vigne.">
+<link rel="canonical" href="https://mavigneapp.fr/dpa.html">
+<meta name="robots" content="index,follow">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:wght@600;700&family=Outfit:wght@400;500;600;700&display=swap" rel="stylesheet">
+<style>
+  :root{
+    --texte:#2A2520; --texte-doux:#6B6358; --vert:#3D6B27;
+    --bg-app:#F2EFE7; --bg-card:#FBFAF6; --line:#E7E1D5;
+    --or:#B8911F; --bordeaux:#7A1020;
+  }
+  *{box-sizing:border-box}
+  html{-webkit-text-size-adjust:100%}
+  body{
+    margin:0; background:var(--bg-app); color:var(--texte);
+    font-family:'Outfit',system-ui,-apple-system,sans-serif;
+    font-size:14px; line-height:1.7;
+    padding:0 16px calc(60px + env(safe-area-inset-bottom,0px));
+  }
+  .wrap{max-width:760px; margin:0 auto}
+
+  header{ text-align:center; padding:38px 0 22px; }
+  .brand{ display:inline-flex; align-items:center; gap:10px; margin-bottom:14px; }
+  .brand-mark{
+    width:42px; height:42px; border-radius:50%;
+    background:linear-gradient(150deg,#1C1813,#14110D);
+    border:1.5px solid var(--or); display:flex; align-items:center; justify-content:center;
+    color:var(--or); font-size:20px;
+  }
+  .brand-name{font-family:'Cormorant Garamond',serif; font-size:26px; font-weight:700; color:var(--texte); line-height:1}
+  .brand-name small{display:block; font-family:'Outfit',sans-serif; font-size:10px; font-weight:600; letter-spacing:2px; text-transform:uppercase; color:var(--or); margin-top:3px}
+  h1{
+    font-family:'Cormorant Garamond',serif; font-size:30px; font-weight:700;
+    color:var(--bordeaux); margin:10px 0 4px; line-height:1.1;
+  }
+  .meta{font-size:11px; color:var(--texte-doux); letter-spacing:.4px}
+
+  .doc{
+    background:var(--bg-card); border:1px solid var(--line); border-radius:18px;
+    padding:30px 28px 34px; box-shadow:0 8px 30px rgba(0,0,0,0.05);
+    font-size:13px; color:var(--texte); line-height:1.7;
+  }
+  .intro{
+    background:rgba(61,107,39,0.09); border:1px solid rgba(61,107,39,0.25);
+    border-radius:10px; padding:12px 16px; margin:0 0 20px;
+    font-size:12px; color:var(--texte-doux); line-height:1.6;
+  }
+  .intro strong{color:var(--vert)}
+
+  .cgu-art{
+    font-family:'Cormorant Garamond',serif; font-size:21px; font-weight:700;
+    color:var(--bordeaux); margin:28px 0 8px; padding-bottom:6px;
+    border-bottom:1px solid var(--line);
+  }
+  .cgu-art:first-of-type{margin-top:4px}
+  .cgu-sub{
+    font-weight:600; color:var(--or); font-size:11px; text-transform:uppercase;
+    letter-spacing:.6px; margin:13px 0 3px;
+  }
+  .doc p{margin:0 0 8px}
+  .doc ul{margin:6px 0 10px; padding-left:20px}
+  .doc li{margin:0 0 6px}
+  .cgu-tbl{width:100%; border-collapse:collapse; margin:8px 0 12px; font-size:12px}
+  .cgu-tbl th{background:var(--bg-app); text-align:left; padding:8px 11px; font-weight:600; border:1px solid var(--line)}
+  .cgu-tbl td{padding:8px 11px; border:1px solid var(--line); vertical-align:top}
+  .doc a{color:var(--or); text-decoration:none; font-weight:500}
+  .doc a:hover{text-decoration:underline}
+  .note{
+    background:rgba(0,0,0,0.03); border:1px solid var(--line); border-radius:8px;
+    padding:10px 13px; margin:4px 0 10px; font-size:12px; color:var(--texte-doux); line-height:1.6;
+  }
+
+  footer{
+    text-align:center; font-size:11px; color:var(--texte-doux);
+    padding:24px 0 4px; line-height:1.7;
+  }
+  footer a{color:var(--or); text-decoration:none}
+  .back{
+    display:inline-block; margin-top:14px; font-size:12px; font-weight:600;
+    color:var(--vert); text-decoration:none;
+  }
+
+  @media(max-width:560px){
+    .doc{padding:22px 18px 26px; border-radius:14px}
+    h1{font-size:25px}
+    .cgu-art{font-size:19px}
+  }
+  @media print{
+    body{background:#fff; padding:0}
+    .doc{box-shadow:none; border:none; border-radius:0; padding:0}
+    .back{display:none}
+    .mvd-noprint{display:none!important}
+    a{color:#000}
+  }
+</style>
+</head>
+<body>
+<div class="wrap">
+
+  <header>
+    <div class="brand">
+      <div class="brand-mark">&#x1F347;</div>
+      <div class="brand-name">Ma Vigne<small>GUERETTECH</small></div>
+    </div>
+    <h1>Accord de traitement des données personnelles</h1>
+    <div class="meta">Version 1.0 — Juillet 2026 · Contrat de sous-traitance · Article 28 RGPD · Droit français</div>
+    <div class="meta" id="mvd-badge" style="display:none;margin-top:5px;color:var(--vert);font-weight:700"></div>
+  </header>
+
+  <div class="mvd-noprint" id="mvd-print" style="display:none;text-align:right;margin:0 0 12px">
+    <button onclick="window.print()" style="font-family:'Outfit',sans-serif;font-weight:600;font-size:13px;color:#fff;background:var(--vert);border:0;border-radius:10px;padding:10px 16px;cursor:pointer">&#128424;&#65039; Imprimer / Enregistrer en PDF</button>
+  </div>
+
+  <div class="doc">
+
+    <div id="mvd-draft" style="display:none;margin:0 0 16px;padding:9px 13px;border:1px dashed var(--or);background:rgba(184,145,58,0.10);border-radius:8px;font-size:12px;color:var(--texte-doux)"><strong style="color:var(--or)">Projet &mdash; non sign&eacute;.</strong> Aper&ccedil;u rempli avec les informations saisies dans Ma Vigne. La signature &eacute;lectronique se fait dans l&#39;application.</div>
+
+    <div class="intro">
+      <strong>Contrat de sous-traitance (DPA)</strong> — au sens de l&#39;article 28 du Règlement (UE) 2016/679.
+      Le présent accord encadre les traitements de données à caractère personnel réalisés par GUERETTECH
+      pour le compte du Client dans le cadre de la fourniture du logiciel Ma Vigne. Il complète les Conditions
+      Générales et prévaut sur celles-ci pour tout ce qui concerne la protection des données personnelles.
+    </div>
+
+    <div class="cgu-art">Article 1 — Parties</div>
+    <table class="cgu-tbl">
+      <tr><th>Qualité</th><th>Partie</th></tr>
+      <tr>
+        <td><strong>Responsable de traitement</strong><br>(le « Client »)</td>
+        <td><span id="mvd-ph">Le Client — dénomination, SIRET, adresse du siège et représentant habilité renseignés lors de l&#39;acceptation dans l&#39;application.</span><span id="mvd-fl" style="display:none"><strong id="mvd-rs">—</strong><br>SIRET : <span id="mvd-siret">—</span> · Adresse : <span id="mvd-adr">—</span><br>Représenté(e) par : <span id="mvd-rep">—</span> · Fonction : <span id="mvd-fct">—</span></span></td>
+      </tr>
+      <tr>
+        <td><strong>Sous-traitant</strong><br>(le « Prestataire »)</td>
+        <td>GUERETTECH — Nicolas GUÉRET (entreprise individuelle)<br>SIRET : 982 148 116 00022 · Adresse : 68 rue Henri CHALLAND, 21700 NUITS-SAINT-GEORGES<br>Contact / point de contact données : ngdevpro@gmail.com</td>
+      </tr>
+    </table>
+    <p class="note">L&#39;identité complète du Client (dénomination, SIRET, adresse du siège, représentant habilité) est renseignée et confirmée par l&#39;administrateur du domaine lors de son acceptation dans l&#39;application, à la première ouverture.</p>
+
+    <div class="cgu-art">Article 2 — Objet et cadre</div>
+    <p>Le Prestataire met à disposition du Client, en mode SaaS, l&#39;application Ma Vigne de gestion viticole. Dans ce cadre, il est amené à traiter, pour le compte et sur instruction du Client, des données à caractère personnel dont le Client est responsable de traitement. Le présent DPA définit les conditions dans lesquelles le Prestataire s&#39;engage à effectuer ces opérations, conformément à l&#39;article 28 du RGPD.</p>
+    <p>En cas de contradiction entre le présent DPA et les Conditions Générales sur un point relatif aux données personnelles, le présent DPA prévaut.</p>
+
+    <div class="cgu-art">Article 3 — Description des traitements</div>
+    <div class="cgu-sub">Nature et finalité</div>
+    <p>Hébergement, stockage, structuration, consultation et sauvegarde de données saisies par le Client dans le cadre de la gestion de son exploitation viticole : parcellaire et travaux, sessions de tracteur, traitements phytosanitaires, gestion des membres d&#39;équipe et planning du personnel, suivi de cave. Le traitement est réalisé exclusivement pour rendre le service Ma Vigne.</p>
+    <div class="cgu-sub">Durée</div>
+    <p>Le traitement est réalisé pour toute la durée du contrat SaaS. Les données sont ensuite conservées et supprimées selon l&#39;article 7 ci-dessous et les Conditions Générales.</p>
+    <div class="cgu-sub">Catégories de données à caractère personnel</div>
+    <ul>
+      <li>Données d&#39;identification : nom, prénom, adresse e-mail des utilisateurs (administrateur, ouvriers, tractoristes, saisonniers) ;</li>
+      <li>Données relatives à la vie professionnelle : rôle, affectations, heures travaillées, planning, congés et récupérations, acomptes / avances sur salaire ;</li>
+      <li>Données de connexion et de sécurité : identifiants techniques, journaux d&#39;accès.</li>
+    </ul>
+    <p>Aucune donnée relevant de l&#39;article 9 du RGPD (données « sensibles ») n&#39;est requise par le service. Le Client s&#39;engage à ne pas en saisir.</p>
+    <div class="cgu-sub">Catégories de personnes concernées</div>
+    <p>Salariés permanents et saisonniers du Client, dirigeants et contacts de l&#39;exploitation cliente.</p>
+
+    <div class="cgu-art">Article 4 — Obligations du Prestataire (sous-traitant)</div>
+    <p>Le Prestataire s&#39;engage à :</p>
+    <ul>
+      <li><strong>Instructions documentées</strong> — traiter les données uniquement sur instruction documentée du Client (le contrat, le paramétrage du service et toute instruction écrite ultérieure), y compris pour les transferts ; il informe le Client si une instruction lui paraît contraire au RGPD ou à la loi Informatique et Libertés ;</li>
+      <li><strong>Confidentialité</strong> — veiller à ce que les personnes autorisées à traiter les données s&#39;engagent à la confidentialité ;</li>
+      <li><strong>Sécurité (art. 32)</strong> — mettre en œuvre les mesures techniques et organisationnelles décrites en Annexe 2 ;</li>
+      <li><strong>Sous-traitance ultérieure</strong> — recourir uniquement aux sous-traitants listés en Annexe 3, dans le cadre d&#39;une autorisation générale ; informer le Client de tout changement envisagé et lui permettre de s&#39;y opposer ;</li>
+      <li><strong>Droits des personnes</strong> — aider le Client, par des mesures techniques et organisationnelles appropriées, à répondre aux demandes d&#39;exercice des droits (accès, rectification, effacement, limitation, portabilité, opposition) ; l&#39;export JSON intégré facilite l&#39;accès et la portabilité ;</li>
+      <li><strong>Assistance</strong> — aider le Client à respecter ses obligations au titre des articles 32 à 36 (sécurité, notification de violation, analyse d&#39;impact, consultation préalable), compte tenu de la nature du traitement et des informations à disposition du Prestataire ;</li>
+      <li><strong>Violation de données</strong> — notifier au Client, dans les meilleurs délais après en avoir pris connaissance, toute violation de données à caractère personnel, en précisant la nature de la violation, les catégories et le volume approximatif de données et de personnes concernées, les conséquences probables et les mesures prises ou proposées ;</li>
+      <li><strong>Sort des données</strong> — au terme du contrat, au choix du Client, restituer les données (export JSON) puis les supprimer ; supprimer les copies existantes, sauf obligation légale de conservation ;</li>
+      <li><strong>Documentation et audit</strong> — mettre à la disposition du Client les informations nécessaires pour démontrer le respect de ses obligations, et permettre la réalisation d&#39;audits, dans des conditions raisonnables (préavis, confidentialité, une fois par an au maximum sauf incident) ;</li>
+      <li><strong>Registre</strong> — tenir un registre des catégories d&#39;activités de traitement effectuées pour le compte du Client (art. 30.2) ;</li>
+      <li><strong>Point de contact</strong> — désigner Nicolas GUÉRET (ngdevpro@gmail.com) comme point de contact pour toute question relative aux données.</li>
+    </ul>
+
+    <div class="cgu-art">Article 5 — Obligations du Client (responsable de traitement)</div>
+    <ul>
+      <li>Fournir des instructions licites et documentées, et disposer d&#39;une base légale pour les traitements confiés au Prestataire ;</li>
+      <li>Informer ses personnes concernées (notamment ses salariés et saisonniers) du traitement de leurs données et de leurs droits ;</li>
+      <li>Ne saisir dans le service aucune donnée sensible (art. 9 RGPD) ni donnée non pertinente ;</li>
+      <li>Respecter ses propres obligations (registre art. 30.1, sécurité de ses accès, gestion des habilitations de ses utilisateurs).</li>
+    </ul>
+
+    <div class="cgu-art">Article 6 — Transferts hors Union européenne</div>
+    <p>Aucun transfert de données hors de l&#39;Union européenne n&#39;est réalisé dans le cadre nominal du service : les données sont hébergées dans la région <strong>europe-west1 (Belgique)</strong>. Tout transfert éventuel (par ex. support technique impliquant un accès depuis un pays tiers) serait encadré par les clauses contractuelles types de la Commission européenne et des mesures supplémentaires appropriées.</p>
+
+    <div class="cgu-art">Article 7 — Responsabilité, durée, droit applicable</div>
+    <p>Le présent DPA prend effet à l&#39;acceptation et demeure en vigueur pour toute la durée du contrat SaaS. Chaque partie répond des dommages causés par un manquement à ses obligations au titre du RGPD. Le présent DPA est régi par le droit français ; tout litige relève des juridictions compétentes du ressort du siège du Prestataire, à défaut de résolution amiable.</p>
+
+    <div class="cgu-art">Annexe 1 — Description détaillée du traitement</div>
+    <table class="cgu-tbl">
+      <tr><th>Élément</th><th>Description</th></tr>
+      <tr><td><strong>Finalité(s)</strong></td><td>Fournir le service de gestion viticole Ma Vigne (parcellaire, travaux, tracteur, phytosanitaire, planning du personnel, cave).</td></tr>
+      <tr><td><strong>Nature des opérations</strong></td><td>Collecte (saisie par le Client), stockage, structuration, consultation, modification, sauvegarde, suppression.</td></tr>
+      <tr><td><strong>Catégories de données</strong></td><td>Identification (nom, prénom, e-mail) ; vie professionnelle (rôle, heures, planning, congés, acomptes) ; données de connexion et de sécurité.</td></tr>
+      <tr><td><strong>Personnes concernées</strong></td><td>Salariés permanents et saisonniers du Client ; dirigeants et contacts de l&#39;exploitation.</td></tr>
+      <tr><td><strong>Durée de conservation</strong></td><td>Durée du contrat, puis restitution (export JSON) et suppression conformément aux Conditions Générales (sauf obligation légale).</td></tr>
+    </table>
+
+    <div class="cgu-art">Annexe 2 — Mesures de sécurité (art. 32)</div>
+    <ul>
+      <li><strong>Hébergement dans l&#39;Union européenne</strong> — infrastructure Firebase / Google Cloud, région europe-west1 (Belgique).</li>
+      <li><strong>Chiffrement</strong> — en transit (HTTPS / TLS) et au repos (chiffrement natif de l&#39;infrastructure).</li>
+      <li><strong>Isolation par domaine (multi-tenant)</strong> — chaque exploitation dispose d&#39;un espace de données cloisonné, garanti par des règles d&#39;accès serveur et des jetons d&#39;identité inviolables (custom claims). Un domaine ne peut pas accéder aux données d&#39;un autre.</li>
+      <li><strong>Contrôle d&#39;accès</strong> — authentification individuelle ; gestion des rôles (administrateur, ouvrier, tractoriste, saisonnier, pilotage) avec droits en lecture seule le cas échéant.</li>
+      <li><strong>Protection anti-abus</strong> — App Check / reCAPTCHA v3 sur l&#39;accès et les formulaires.</li>
+      <li><strong>Sauvegardes</strong> — sauvegardes quotidiennes chiffrées, avec durées de rétention et purge automatique ; possibilité de restauration ciblée.</li>
+      <li><strong>Journalisation et alertes</strong> — journalisation des accès sensibles et alertes de sécurité en cas d&#39;anomalie.</li>
+      <li><strong>Garde anti-perte</strong> — mécanismes techniques empêchant l&#39;écrasement de données par un état vide, et procédure de restauration documentée.</li>
+    </ul>
+
+    <div class="cgu-art">Annexe 3 — Sous-traitants ultérieurs autorisés</div>
+    <table class="cgu-tbl">
+      <tr><th>Sous-traitant</th><th>Rôle</th><th>Localisation</th></tr>
+      <tr><td>Google Ireland Limited (Firebase / Google Cloud)</td><td>Hébergement, base de données, authentification, sécurité</td><td>UE — europe-west1</td></tr>
+      <tr><td>Fournisseur d&#39;acheminement e-mail (extension Firebase)</td><td>E-mails transactionnels et de support</td><td>UE — europe-west1 (Belgique)</td></tr>
+    </table>
+    <p>Le Prestataire informe le Client de toute modification de cette liste et lui permet de s&#39;y opposer pour un motif légitime.</p>
+
+    <div class="cgu-art">Signatures</div>
+    <p>Le présent DPA est accepté par voie électronique, dans l&#39;application Ma Vigne, par l&#39;administrateur habilité du domaine Client. L&#39;acceptation est horodatée et journalisée (identifiant du signataire, empreinte du document, date et heure serveur) ; un reçu est adressé par e-mail et conservé comme preuve. Pour GUERETTECH, l&#39;engagement résulte de la publication du présent document.</p>
+
+    <div style="background:rgba(0,0,0,0.03); border-radius:8px; padding:12px 14px; font-size:12px; color:var(--texte-doux); line-height:1.7; margin:18px 0 4px">
+      <strong>GUERETTECH</strong> · Nicolas GUÉRET · SIRET 982 148 116 00022 · 68 rue Henri CHALLAND, 21700 NUITS-SAINT-GEORGES · <a href="mailto:ngdevpro@gmail.com">ngdevpro@gmail.com</a><br>
+      Ma Vigne — service SaaS de gestion viticole · DPA v1.0 — Juillet 2026
+    </div>
+
+    <div id="mvd-sign" style="display:none;margin:16px 0 4px;padding:14px 16px;border:1px solid rgba(61,107,39,0.35);background:rgba(61,107,39,0.06);border-radius:12px">
+      <div style="font-family:'Cormorant Garamond',serif;font-size:18px;font-weight:700;color:var(--vert);margin-bottom:8px">&#10003; Accept&eacute; par voie &eacute;lectronique</div>
+      <table class="cgu-tbl" style="margin:0">
+        <tr><td style="width:42%"><strong>Pour le Client (Responsable de traitement)</strong></td><td><span id="mvd-sg-rs">&mdash;</span> &mdash; repr&eacute;sent&eacute;(e) par <span id="mvd-sg-sig">&mdash;</span></td></tr>
+        <tr><td><strong>Date et heure (serveur)</strong></td><td id="mvd-sg-ts">&mdash;</td></tr>
+        <tr><td><strong>R&eacute;f&eacute;rence</strong></td><td id="mvd-sg-ref">&mdash;</td></tr>
+        <tr><td><strong>Empreinte CGU (SHA-256)</strong></td><td id="mvd-sg-hcgv" style="word-break:break-all;font-size:10.5px">&mdash;</td></tr>
+        <tr><td><strong>Empreinte DPA (SHA-256)</strong></td><td id="mvd-sg-hdpa" style="word-break:break-all;font-size:10.5px">&mdash;</td></tr>
+        <tr><td><strong>Pour le Prestataire (Sous-traitant)</strong></td><td>GUERETTECH &mdash; Nicolas GU&Eacute;RET &middot; engagement par la publication du pr&eacute;sent document</td></tr>
+      </table>
+      <p class="note" style="margin-top:10px">Cet exemplaire reprend l&#39;acceptation enregistr&eacute;e dans Ma Vigne. La preuve horodat&eacute;e (identifiant du signataire, empreintes des documents, date et heure serveur, adresse IP anonymis&eacute;e) est conserv&eacute;e c&ocirc;t&eacute; serveur et vaut preuve pour les deux parties.</p>
+    </div>
+
+  </div>
+
+  <footer>
+    © 2026 Nicolas GUÉRET / GUERETTECH — Tous droits réservés<br>
+    <span style="display:block;margin-top:6px"><a href="https://mavigneapp.fr/mentions-legales.html">Mentions légales</a> · <a href="https://mavigneapp.fr/confidentialite.html">Confidentialité</a> · <a href="https://mavigneapp.fr/cgu.html">CGU</a></span>
+    <a href="https://mavigneapp.fr" class="back">← Retour à Ma Vigne</a>
+  </footer>
+
+</div>
+<script>
+(function(){
+  try{
+    var h=(location.hash||'');
+    var mode=h.indexOf('mvp')>=0?'draft':(h.indexOf('mv')>=0?'signed':'');
+    if(!mode) return;
+    var key=mode==='draft'?'mv_terms_draft':'mv_terms_fill';
+    var raw=null; try{ raw=localStorage.getItem(key); }catch(e){ return; }
+    if(!raw) return;
+    var d; try{ d=JSON.parse(raw); }catch(e){ return; }
+    if(!d||typeof d!=='object') return;
+    var T=function(id,v){ var el=document.getElementById(id); if(el) el.textContent=(v==null?'':String(v)); };
+    var show=function(id,on){ var el=document.getElementById(id); if(el) el.style.display=on?'':'none'; };
+    var fmtSiret=function(s){ s=(s||'').replace(/\D/g,''); if(s.length!==14) return s||'\u2014'; return s.slice(0,3)+' '+s.slice(3,6)+' '+s.slice(6,9)+' '+s.slice(9); };
+    T('mvd-rs', d.rs||'\u2014');
+    T('mvd-siret', fmtSiret(d.siret));
+    var adr=(d.adr||'').trim(); if(d.cpv) adr=adr?(adr+', '+d.cpv):d.cpv;
+    T('mvd-adr', adr||'\u2014');
+    T('mvd-rep', d.sig_nom||'\u2014');
+    T('mvd-fct', d.sig_fct||'\u2014');
+    show('mvd-ph', false); show('mvd-fl', true); show('mvd-print', true);
+    var bd=document.getElementById('mvd-badge'); if(bd&&d.rs){ bd.textContent='Exemplaire du domaine '+d.rs; bd.style.display=''; }
+    if(mode==='signed'){
+      T('mvd-sg-rs', d.rs||'\u2014');
+      T('mvd-sg-sig', (d.sig_nom||'\u2014')+(d.sig_fct?(' \u00b7 '+d.sig_fct):''));
+      var when='\u2014'; try{ if(d.date_iso){ var dt=new Date(d.date_iso); if(!isNaN(dt.getTime())) when=dt.toLocaleDateString('fr-FR',{day:'2-digit',month:'long',year:'numeric'})+' \u00e0 '+dt.toLocaleTimeString('fr-FR',{hour:'2-digit',minute:'2-digit'}); } }catch(e){}
+      T('mvd-sg-ts', when);
+      T('mvd-sg-ref', d.ref||'\u2014');
+      T('mvd-sg-hcgv', d.hashCgv||'\u2014');
+      T('mvd-sg-hdpa', d.hashDpa||'\u2014');
+      show('mvd-sign', true); show('mvd-draft', false);
+    } else {
+      show('mvd-draft', true); show('mvd-sign', false);
+    }
+  }catch(e){}
+})();
+</script>
+</body>
+</html>

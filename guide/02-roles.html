@@ -1,0 +1,56 @@
+<!-- @nav emoji="🔐" titre="Rôles &amp; accès" sous="Qui peut faire quoi" -->
+<section id="roles">
+  <div class="sec-h">
+    <div class="sec-ic" aria-hidden="true">🔐</div>
+    <div><h2>Rôles &amp; accès</h2><div class="sub">Qui voit quoi · qui peut modifier quoi</div></div>
+  </div>
+  <p class="lead">Un membre porte un ou plusieurs rôles, <b>cumulables</b> : on peut être ouvrier
+  <em aria-hidden="true">et</em> tractoriste. Les rôles se règlent dans <span class="path">Réglages › Équipe</span> et
+  s'appliquent immédiatement — la personne concernée voit le changement à sa prochaine ouverture.</p>
+
+  <div class="tw"><table>
+    <tr><th>Rôle</th><th>Ce qu'il fait sur le domaine</th><th>Ce qu'il peut modifier</th></tr>
+    <tr><td><b>Admin</b></td><td>Chef de culture, exploitant. Accès complet.</td>
+      <td>Tout : équipe, saisons, tâches, réglages, paie, registre phyto.</td></tr>
+    <tr><td><b>Ouvrier</b></td><td>Travaille dans les rangs.</td>
+      <td>Avancement des parcelles, journal des travaux, réparations ponctuelles.</td></tr>
+    <tr><td><b>Tractoriste</b></td><td>Conduit et traite.</td>
+      <td>Sessions tracteur, entretiens, carburant, registre phyto. <b>+</b> ce que fait un ouvrier
+      s'il a aussi ce rôle.</td></tr>
+    <tr><td><b>Saisonnier</b></td><td>Renfort ponctuel.</td>
+      <td class="ro">Lecture seule — il consulte, il ne modifie rien.</td></tr>
+    <tr><td><b>Pilotage</b></td><td>Associé, comptable, technicien qui suit sans intervenir.</td>
+      <td class="ro">Lecture seule — accès au tableau de bord Pilotage.</td></tr>
+  </table></div>
+
+  <h3>🔒 Ce qui est réservé à l'administrateur</h3>
+  <ul class="dot">
+    <li>Créer, modifier et archiver les <b>membres</b> de l'équipe, et fixer leurs rôles.</li>
+    <li>Le <b>Planning RH</b> dans son ensemble : heures, congés, acomptes, compteur annuel.</li>
+    <li>Les <b>taux horaires</b> et le <b>prix du GNR</b> — voir l'encart ci-dessous.</li>
+    <li>Créer et activer les <b>saisons</b>, régler les <b>tâches</b> et leurs heures par hectare.</li>
+    <li>La <b>Réserve</b> en écriture, les <b>exports</b>, la suppression d'un tracteur, l'<b>ordre de passage</b>.</li>
+  </ul>
+  <div class="note info"><span class="ni" aria-hidden="true">🔐</span><div><b>Les rémunérations sont à part.</b> Les taux
+  horaires et les prix d'achat du carburant ne vivent pas avec la fiche des membres : ils sont rangés
+  dans un espace séparé, <b>lisible par les seuls administrateurs</b>, et ne sont jamais enregistrés sur
+  le téléphone ou l'ordinateur. Un collègue curieux ne peut pas y accéder, même en cherchant.</div></div>
+
+  <h3>👤 Un membre qui n'a pas d'adresse e-mail</h3>
+  <p>C'est le cas courant des saisonniers. À la création du membre, l'application fabrique une adresse
+  interne à partir du prénom : elle sert uniquement d'identifiant technique, personne n'a besoin de
+  la connaître ni de la consulter. La connexion se fait en touchant son nom dans la liste des profils.</p>
+
+  <details><summary>Je suis ouvrier et je ne vois pas le module Tracteur</summary>
+    <div class="dbody">Deux causes possibles : votre domaine n'a pas la formule qui inclut le Tracteur,
+    ou vous n'avez pas le rôle tractoriste. L'administrateur voit et corrige les deux depuis
+    <span class="path">Réglages › Équipe</span>.</div></details>
+  <details><summary>Un membre est parti, faut-il le supprimer&nbsp;?</summary>
+    <div class="dbody">Non — passez-le en <b>inactif</b>. Son historique de travaux, ses heures et ses
+    congés restent intacts pour les exports et les contrôles, mais il disparaît des listes de saisie et
+    de l'écran de connexion.</div></details>
+  <details><summary>Un membre a changé de rôle mais il voit toujours l'ancien affichage</summary>
+    <div class="dbody">Il doit <b>recharger l'application</b> (fermer puis rouvrir, ou tirer la page vers
+    le bas). Les droits sont vérifiés sur le serveur : tant que la page n'a pas été rechargée, l'ancien
+    affichage subsiste, mais aucune action interdite ne passera.</div></details>
+</section>

@@ -1,0 +1,102 @@
+<!-- @nav emoji="🧭" titre="Premiers pas" sous="Connexion, dock, synchro" -->
+<section id="demarrer">
+  <div class="sec-h">
+    <div class="sec-ic" aria-hidden="true">🧭</div>
+    <div><h2>Premiers pas</h2><div class="sub">Se connecter · circuler · synchroniser</div></div>
+  </div>
+  <p class="lead">Ma Vigne s'ouvre dans un navigateur, sur téléphone comme sur ordinateur, et s'installe
+  comme une application. Une fois chargée, elle fonctionne <b>même sans réseau</b> : c'est le premier
+  réflexe à comprendre quand on travaille au fond d'une combe.</p>
+
+  <h3>📲 Installer l'application (2 minutes, à faire une fois)</h3>
+  <p>Rien à télécharger sur un magasin d'applications. L'installation crée simplement une icône sur
+  l'écran d'accueil et supprime la barre du navigateur.</p>
+  <div class="cards">
+    <div class="card">
+      <h4>🤖 Android — Chrome</h4>
+      <ol class="steps">
+        <li>Ouvrir <span class="path">mavigneapp.fr</span></li>
+        <li>Menu <kbd>⋮</kbd> en haut à droite</li>
+        <li><b>Installer l'application</b> (ou <em aria-hidden="true">Ajouter à l'écran d'accueil</em>)</li>
+      </ol>
+    </div>
+    <div class="card">
+      <h4>🍎 iPhone / iPad — Safari</h4>
+      <ol class="steps">
+        <li>Ouvrir <span class="path">mavigneapp.fr</span> <b>dans Safari</b></li>
+        <li>Bouton <kbd>Partager</kbd> (carré avec flèche)</li>
+        <li><b>Sur l'écran d'accueil</b>, puis <em aria-hidden="true">Ajouter</em></li>
+      </ol>
+    </div>
+    <div class="card">
+      <h4>💻 Ordinateur</h4>
+      <ol class="steps">
+        <li>Ouvrir <span class="path">mavigneapp.fr</span></li>
+        <li>Icône d'installation dans la barre d'adresse</li>
+        <li>L'app s'ouvre alors dans sa propre fenêtre</li>
+      </ol>
+    </div>
+  </div>
+  <div class="note tip"><span class="ni" aria-hidden="true">💡</span><div>Sur iPhone, l'installation <b>n'est possible que
+  depuis Safari</b>. Depuis Chrome iOS, l'option n'apparaît pas : c'est une limite d'Apple, pas de l'app.</div></div>
+
+  <h3>🔑 Première connexion</h3>
+  <ol class="steps">
+    <li><b>Choisir son profil</b>Un écran affiche les personnes du domaine. Touchez votre nom : inutile
+    de taper une adresse e-mail.</li>
+    <li><b>Saisir le mot de passe</b>Il vous est communiqué par l'administrateur du domaine. Il est
+    <b>personnel</b> : deux mots et des chiffres, du type <kbd>cave-rouge-42</kbd>.</li>
+    <li><b>Choisir son propre mot de passe</b>À la toute première connexion, l'app demande de le
+    remplacer. C'est obligatoire, et personne d'autre — pas même l'administrateur — ne verra le nouveau.</li>
+    <li><b>Accepter les conditions</b>Une seule fois, à la première ouverture du domaine. Un accusé de
+    réception est envoyé par e-mail à l'administrateur.</li>
+  </ol>
+  <div class="note warn"><span class="ni" aria-hidden="true">⚠️</span><div>Le mot de passe fourni par l'administrateur ne
+  s'affiche <b>qu'une fois</b>, au moment où il crée le compte. S'il est perdu, il n'est pas récupérable :
+  l'administrateur en génère un nouveau depuis <span class="path">Réglages › Équipe</span>.</div></div>
+
+  <h3>🧭 Circuler dans l'application</h3>
+  <p>Toute la navigation tient dans une <b>barre fixe en bas d'écran</b>. Un module = un bouton.
+  Ce que vous y voyez dépend de votre rôle et de la formule du domaine.</p>
+  <div class="tags">
+    <span class="tag gold">📊 Pilotage</span><span class="tag">🌿 Vigne</span><span class="tag">🚜 Tracteur</span>
+    <span class="tag">🧪 Phyto</span><span class="tag">🍷 Cave</span><span class="tag">📦 Réserve</span>
+    <span class="tag">📅 Planning</span><span class="tag">⚙️ Réglages</span>
+  </div>
+  <ul class="dot">
+    <li>Sur <b>ordinateur</b>, tous les modules autorisés sont affichés côte à côte.</li>
+    <li>Sur <b>téléphone</b>, au-delà de quatre modules, les premiers restent visibles et un bouton
+    <kbd>⋯ Plus</kbd> ouvre le reste dans un panneau.</li>
+    <li>Chacun <b>atterrit là où il travaille</b> : l'administrateur et le rôle Pilotage arrivent sur le
+    tableau de bord, l'équipe arrive sur la Vigne. Un ouvrier à qui une tâche prioritaire a été
+    assignée arrive directement sur ses parcelles, avec le bon filtre déjà posé.</li>
+    <li>Le <b>bouton retour</b> du téléphone referme d'abord la fenêtre ouverte par-dessus, puis revient
+    à la page d'accueil de votre rôle. Il ne ferme jamais l'application par surprise.</li>
+  </ul>
+
+  <h3>🔄 Synchronisation &amp; travail hors réseau</h3>
+  <p>Chaque saisie part vers le serveur et redescend sur les autres appareils du domaine, en quelques
+  secondes. Un indicateur en haut de l'écran donne l'état à tout moment.</p>
+  <div class="tw"><table>
+    <tr><th>Indicateur</th><th>Ce que ça veut dire</th><th>Que faire</th></tr>
+    <tr><td><b>🟢 À jour</b></td><td>Tout est enregistré sur le serveur.</td><td>Rien.</td></tr>
+    <tr><td><b>🔵 Envoi en cours</b></td><td>Une saisie part en ce moment.</td><td>Attendre 2&nbsp;secondes.</td></tr>
+    <tr><td><b>🟠 En attente</b></td><td>Pas de réseau : les saisies sont en file.</td><td>Continuer à travailler,
+    l'envoi repart tout seul dès que le réseau revient.</td></tr>
+  </table></div>
+  <ul class="dot">
+    <li><b>Tirer la page vers le bas</b> force une actualisation immédiate des données et de la météo.</li>
+    <li>Rien n'est jamais perdu hors réseau : la file d'attente est conservée, y compris si vous fermez
+    l'application ou éteignez le téléphone.</li>
+    <li>Après une mise à jour de l'application, un récapitulatif <b>« Nouveautés »</b> s'affiche une fois
+    par appareil, à la connexion suivante.</li>
+  </ul>
+
+  <h3>👀 Confort de lecture</h3>
+  <ul class="dot">
+    <li><b>Thème</b> clair, sombre ou automatique — <span class="path">Réglages › App › Thème</span>.</li>
+    <li><b>Mode plein soleil</b> : contraste renforcé pour lire l'écran dehors, en plein midi —
+    <span class="path">Réglages › App › Plein soleil</span>. Le réglage est mémorisé par appareil.</li>
+    <li>Le <b>zoom</b> du téléphone fonctionne normalement dans toute l'application.</li>
+  </ul>
+</section>

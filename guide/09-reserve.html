@@ -1,0 +1,75 @@
+<!-- @nav emoji="📦" titre="La Réserve" sous="Intrants, parc à fûts, bilan matière" -->
+<section id="reserve">
+  <div class="sec-h">
+    <div class="sec-ic" aria-hidden="true">📦</div>
+    <div><h2>La Réserve</h2><div class="sub">🛒 Fûts · 🧪 Intrants · 📋 Bilan matière</div></div>
+  </div>
+  <p class="lead">La Réserve est la <b>comptabilité matière</b> du domaine : ce qui entre, ce qui sort,
+  ce qui reste. Elle a été conçue pour l'exercice qui fait transpirer tout le monde — le contrôle
+  documentaire d'un organisme certificateur bio.</p>
+
+  <h3>🧪 Intrants</h3>
+  <ul class="dot">
+    <li>Deux familles : les intrants <b>phytosanitaires</b> et les intrants <b>œnologiques</b>.</li>
+    <li>Pour chaque produit : inventaire d'ouverture, achats datés, contenance, fournisseur.</li>
+    <li>Les produits phyto se déclarent depuis <b>E-Phy</b> (AMM et substance enregistrées), avec un
+    repli manuel si nécessaire. L'œnologie reste en texte libre — E-Phy ne couvre ni le SO₂ ni les levures.</li>
+  </ul>
+
+  <h3>📋 Le bilan matière</h3>
+  <p>C'est le cœur du module. Le stock théorique se calcule sans aucune saisie supplémentaire :</p>
+  <div class="note info"><span class="ni" aria-hidden="true">🧮</span><div><b>Stock = inventaire d'ouverture + achats
+  − consommation.</b> Les <b>sorties sont dérivées automatiquement</b> : les opérations de cave pour
+  l'œnologie, le registre phyto (dose × surface traitée) pour les traitements. Rien à ressaisir : ce que
+  vous avez déjà noté ailleurs suffit.</div></div>
+  <ul class="dot">
+    <li>Tableau d'équilibre entrées / sorties, produit par produit.</li>
+    <li><b>Export PDF</b> citant le règlement délégué <b>(UE) 2021/771, article 1</b> — celui qui exige
+    précisément cet équilibre au contrôle.</li>
+    <li>Un écart visible entre stock théorique et stock réel est une information utile, pas une faute :
+    il pointe une saisie oubliée.</li>
+  </ul>
+
+  <h3>🛒 Le parc à fûts</h3>
+  <p>L'onglet s'ouvre sur le <b>parc entier</b> : les fûts vides du magasin <b>et</b> ceux qui sont
+  en vin au chai, additionnés. Ce ne sont pas deux comptabilités à réconcilier — ce sont deux états
+  du même fût.</p>
+  <div class="note tip"><span class="ni" aria-hidden="true">💡</span><div><b>Entonner, embouteiller
+  ou retirer une cuvée ne change pas le nombre de fûts du domaine.</b> Seuls <b>acheter</b> et
+  <b>se séparer</b> le font. C'est la règle qui permet de faire confiance au total.</div></div>
+  <ul class="dot">
+    <li><b>Pyramide des âges</b> : combien de vins chaque fût a déjà faits, et lesquels arrivent en
+    fin de vie. L'âge se compte en <b>années civiles</b> depuis l'achat, pas en campagnes.</li>
+    <li><b>Registre des mouvements</b>, en bas de l'onglet : chaque entrée et chaque sortie avec son
+    motif — achat, entonnage, embouteillage, vente, retour, destruction.</li>
+    <li><b>Se séparer de fûts</b> : sortie définitive avec motif, sur les fûts <b>libres</b>
+    seulement, administrateur uniquement. À ne pas confondre avec la suppression d'une ligne saisie
+    par erreur.</li>
+    <li>Au <b>décuvage</b>, la Cave pioche dans le parc du plus vieux au plus neuf, et signale quand
+    elle entame des barriques neuves.</li>
+  </ul>
+
+  <h3>📦 L'inventaire, lot par lot</h3>
+  <ul class="dot">
+    <li>Les lots sont regroupés <b>par tonnelier</b>, en accordéon, avec un bouton pour tout déplier.</li>
+    <li>Filtre par <b>millésime d'achat</b> d'un geste. Le parc, lui, reste volontairement toutes
+    années confondues : un fût est un contenant, pas un vin.</li>
+    <li>Les références proposées sont celles <b>du tonnelier sélectionné</b>, pas de mélange.</li>
+    <li>Boutons <b>+ / −</b> sur chaque lot pour ajuster les quantités sans rouvrir de formulaire.</li>
+    <li>Saisir un lot déjà présent <b>ajoute à l'existant</b> au lieu de créer un doublon.</li>
+    <li><b>📄 Inventaire PDF</b> : totaux par tonnelier, répartition par millésime, total général.
+    Consultable par toute l'équipe ; l'ajout reste réservé à l'administrateur.</li>
+  </ul>
+
+  <div class="note warn"><span class="ni" aria-hidden="true">⚠️</span><div>L'<b>écriture</b> dans la Réserve est réservée aux
+  administrateurs. C'est un choix assumé : un bilan matière n'a de valeur au contrôle que si une seule
+  main l'alimente.</div></div>
+
+  <details><summary>Mon stock théorique ne correspond pas à ce que je vois sur l'étagère</summary>
+    <div class="dbody">Regardez d'abord les <b>sorties dérivées</b> : un traitement enregistré avec une
+    dose approximative, ou une opération de cave oubliée, décale le calcul. Corrigez à la source
+    (registre phyto ou journal de cave) plutôt que dans la Réserve — l'écart se résorbe tout seul.</div></details>
+  <details><summary>Puis-je m'en servir sans être en bio&nbsp;?</summary>
+    <div class="dbody">Bien sûr. Le bilan matière est conçu pour le contrôle bio, mais le suivi de stock
+    et l'inventaire des fûts servent à n'importe quel domaine.</div></details>
+</section>

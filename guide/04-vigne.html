@@ -1,0 +1,103 @@
+<!-- @nav emoji="🌿" titre="Vigne" sous="Accueil · Parcelles · Journal" -->
+<section id="vigne">
+  <div class="sec-h">
+    <div class="sec-ic" aria-hidden="true">🌿</div>
+    <div><h2>Vigne</h2><div class="sub">Accueil 🏠 · Parcelles 🗺️ · Journal 📓</div></div>
+  </div>
+  <p class="lead">C'est le module du travail quotidien : l'état du domaine, les parcelles à faire et la
+  trace de ce qui a été fait. Trois onglets en haut de l'écran, jamais plus loin qu'un geste.</p>
+
+  <h3>🏠 Accueil — l'état du domaine d'un coup d'œil</h3>
+  <div class="cards">
+    <div class="card"><h4>📊 Avancement</h4><ul class="dot">
+      <li>Pourcentage d'avancement de la saison en cours</li>
+      <li>Nombre de parcelles actives et surface totale</li>
+      <li>Avancement détaillé par tâche, avec accès au détail</li>
+      <li>Plusieurs affichages successifs : touchez les points sous la carte pour changer</li>
+    </ul></div>
+    <div class="card"><h4>⚡ Tâche prioritaire</h4><ul class="dot">
+      <li>Le bandeau indique la tâche du moment décidée par l'administrateur</li>
+      <li>Une équipe peut être rattachée à chaque priorité</li>
+      <li>Un ouvrier concerné arrive directement sur ses parcelles, filtre posé</li>
+      <li>Plusieurs priorités peuvent coexister : chacun voit la sienne</li>
+    </ul></div>
+    <div class="card"><h4>🌦️ Météo du vignoble</h4><ul class="dot">
+      <li>Prévision à 5 jours, calée sur le centre de vos parcelles</li>
+      <li>Résolution fine, adaptée au relief de la Côte</li>
+      <li>Si le domaine s'étend sur plusieurs communes, une météo <b>par secteur</b> s'affiche</li>
+      <li>Une parcelle ouverte utilise d'abord ses propres coordonnées</li>
+    </ul></div>
+    <div class="card"><h4>🚨 Alertes</h4><ul class="dot">
+      <li><b>Gel</b> annoncé dans les prochaines heures</li>
+      <li><b>Délai de rentrée</b> : parcelles encore interdites d'accès après un traitement</li>
+      <li>Matériel en réparation, alertes de cave</li>
+      <li>Travaux mécaniques en cours et derniers travaux réalisés</li>
+    </ul></div>
+  </div>
+  <div class="note tip"><span class="ni" aria-hidden="true">💡</span><div>Le bloc <b>« Ma semaine »</b> résume vos propres
+  heures et renvoie au journal. Les raccourcis en bas d'écran mènent directement aux gestes du jour.</div></div>
+
+  <h3>🗺️ Parcelles — suivre et valider le travail</h3>
+  <h4>Trouver la bonne parcelle</h4>
+  <ul class="dot">
+    <li><b>Filtres d'état</b> : Toutes · ✅ Finies · 🟡 En cours · Arrachées.</li>
+    <li><b>Filtre par tâche</b> : n'afficher que les parcelles concernées par la Taille, le Relevage…</li>
+    <li><b>Recherche</b> par nom de parcelle, avec une croix pour tout effacer.</li>
+    <li>Bascule <b>📋 Liste</b> / <b>🗺️ Carte</b>.</li>
+    <li><b>📍 Ma position</b> : classe les parcelles par distance et signale celle où vous vous trouvez.
+    Le GPS n'est utilisé qu'à ce moment-là, à votre demande — aucun trajet n'est enregistré.</li>
+  </ul>
+  <h4>Valider une tâche</h4>
+  <ul class="dot">
+    <li>Un bouton <b>✓</b> sur la carte de la parcelle suffit : une tâche validée en un geste.</li>
+    <li>Un bandeau <b>Équipe</b> mémorise qui travaille, pour enchaîner les parcelles sans tout resaisir.</li>
+    <li>Un message <b>« Annuler »</b> s'affiche quelques secondes après chaque validation.</li>
+    <li>Les tâches <b>à passages</b> (Ébourgeonnage, Pioche) se valident en deux fois : P1 puis P2.</li>
+    <li>Le <b>Relevage</b> se valide en trois niveaux : N1, N2, N3 — chacun compte dans l'avancement.</li>
+  </ul>
+  <h4>La carte</h4>
+  <ul class="dot">
+    <li>Chaque parcelle est un polygone <b>coloré selon son avancement réel</b>, en dégradé continu du
+    rouge au vert.</li>
+    <li>Toucher un polygone sélectionne la parcelle ; les noms peuvent être masqués (<kbd>🏷 Noms</kbd>).</li>
+    <li>La carte se recentre automatiquement sur le domaine à l'ouverture.</li>
+  </ul>
+  <h4>La fiche d'une parcelle</h4>
+  <ul class="dot">
+    <li>Avancement tâche par tâche, surface, heures estimées et heures restantes.</li>
+    <li><b>🍇 Cépage</b> : cépage principal, et jusqu'à trois cépages pour une parcelle complantée.</li>
+    <li><b>📍 Commune</b> : sert d'étiquette et de repli pour la météo par secteur.</li>
+    <li><b>Historique des rendements</b> par millésime, alimenté par les récoltes saisies en Cave.</li>
+    <li><b>📍 Ouvrir dans GPS</b> pour s'y rendre, <b>🗺️ Ouvrir dans carte</b> pour la situer.</li>
+    <li><b>🔧 Réparation ponctuelle</b> : piquet, amarre ou fil remplacé, avec quantité et date.
+    Accessible à toute l'équipe — c'est du travail de terrain.</li>
+  </ul>
+  <div class="note info"><span class="ni" aria-hidden="true">ℹ️</span><div>Une tâche <b>sans surface concernée</b> s'affiche
+  à 100&nbsp;%. Ce n'est pas un bug : s'il n'y a rien à faire, il n'y a rien à finir.</div></div>
+
+  <h3>📓 Journal — la trace de ce qui a été fait</h3>
+  <ul class="dot">
+    <li>Bouton <b>＋ Ajouter</b> : date, parcelle(s), tâche, intervenants, durée, commentaire.</li>
+    <li>La <b>météo du moment est enregistrée automatiquement</b> avec l'entrée (par secteur si le
+    domaine est réparti sur plusieurs communes).</li>
+    <li>Compteurs en en-tête : total, validés, en cours.</li>
+    <li>Filtres par intervenant, tâche, parcelle et <b>plage de dates</b>, avec un bouton pour tout effacer.</li>
+    <li>Affichage par pages, pour rester fluide même après plusieurs saisons.</li>
+  </ul>
+  <div class="note tip"><span class="ni" aria-hidden="true">💡</span><div><b>Règle d'équipe :</b> quand plusieurs personnes
+  travaillent ensemble, faites <b>une seule entrée</b> avec tous les noms — pas une entrée chacun. Les
+  heures et l'avancement se répartissent correctement. Plusieurs équipes peuvent travailler en parallèle
+  dans la même journée sur des tâches différentes.</div></div>
+
+  <details><summary>J'ai validé la mauvaise parcelle</summary>
+    <div class="dbody">Touchez <b>Annuler</b> dans le message qui s'affiche juste après. Passé ce délai,
+    rouvrez la parcelle et décochez la tâche : l'avancement se recalcule aussitôt.</div></details>
+  <details><summary>Une parcelle a été arrachée</summary>
+    <div class="dbody">Passez son statut à <b>Arrachée</b> dans sa fiche. Elle sort des calculs
+    d'avancement et de charge, reste consultable via le filtre <em aria-hidden="true">Arrachées</em>, et son historique est
+    conservé.</div></details>
+  <details><summary>L'avancement ne bouge pas alors que j'ai validé</summary>
+    <div class="dbody">Vérifiez la <b>saison consultée</b> en haut de l'écran : vous regardez peut-être
+    une autre saison que celle où vous avez validé. Vérifiez ensuite l'indicateur de synchronisation :
+    s'il est orange, la saisie part dès le retour du réseau.</div></details>
+</section>
