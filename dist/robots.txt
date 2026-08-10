@@ -1,9 +1,0 @@
-# Ma Vigne — https://mavigneapp.fr
-# Crawl autorisé sur les pages publiques.
-# L'app (/) est écartée de l'indexation via <meta name="robots" content="noindex"> côté index.html,
-# PAS via Disallow (sinon on bloquerait aussi le crawl des pages publiques servies sous la racine).
-
-User-agent: *
-Allow: /
-
-Sitemap: https://mavigneapp.fr/sitemap.xml
