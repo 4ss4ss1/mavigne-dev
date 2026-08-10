@@ -1,4 +1,17 @@
-// MA VIGNE — Service Worker v6.38
+// MA VIGNE — Service Worker v6.39
+// v6.39 (10/08/2026) — Ordre des trois onglets de la Cave : Le Cuvier, Le Chai,
+//                       Le millesime. Le raisin entre au cuvier avant de partir au
+//                       chai ; les onglets suivaient l'ordre inverse. Trois blocs
+//                       deplaces dans index.html, rien d'autre : la section par
+//                       defaut reste Le Chai (caveSection = 'elevage') et
+//                       _caveSyncSecTabs resynchronise le bouton actif a chaque
+//                       rendu, donc aucun ordre n'est code ailleurs. Suivent les
+//                       trois supports d'accompagnement, meme lot : la fiche
+//                       MV_AIDE de la Cave (sa phrase de synthese enumerait les
+//                       sections dans l'ancien ordre - la liste, elle, se lit deja
+//                       dans le DOM), la section Cave du guide public, et la
+//                       description du module dans le masquage des Reglages, qui
+//                       annoncait encore deux sections sur trois - vAPP 5.89
 // v6.38 (10/08/2026) — Les graphiques dessinaient dans un cadre fixe de 940 a
 //                       1000 unites que l'ecran reduisait ensuite. L'app etant
 //                       bornee a 430 px sur telephone et 760 sur ordinateur,
@@ -762,7 +775,7 @@
 // v2.22 — Fix profils vides : guard vide dans loadData() pour MEMBRES/SAISONS/TACHES
 // v2.17 — Onboarding intégré + tenantId · v2.06 — Firebase Auth · v2.00–v2.05 — divers
 const DEBUG = self.location.hostname === 'localhost' || self.location.hostname === '127.0.0.1';
-const CACHE_NAME   = 'mavigne-v6.38';
+const CACHE_NAME   = 'mavigne-v6.39';
 const TENANT_CACHE = 'mavigne-tenant';   // Cache persistant — préservé à chaque mise à jour SW
 const SYNC_TAG     = 'mavigne-sync';
 
@@ -771,14 +784,14 @@ const SYNC_TAG     = 'mavigne-sync';
 const SHELL_STATIC = ['./icon-192.png', './icon-512.png', './logo-gt.png', './boot.js'];
 // Liste des assets Vite hashés du build courant — injectée dans dist/sw.js par
 // scripts/inject-precache.mjs (npm run build). Vide en dev (placeholder).
-const PRECACHE_ASSETS = ["/assets/main-CbmzgAOV.js","/assets/main-CXonjNKv.css"];
+const PRECACHE_ASSETS = ["/assets/main-CXonjNKv.css","/assets/main-nSCWbHGK.js"];
 const CDN_URLS = [
   'https://unpkg.com/leaflet@1.9.4/dist/leaflet.css',
   'https://unpkg.com/leaflet@1.9.4/dist/leaflet.js',
 ];
 
 self.addEventListener('install', event => {
-  if(DEBUG) console.log('[SW] Ma Vigne v6.38 installé');
+  if(DEBUG) console.log('[SW] Ma Vigne v6.39 installé');
   event.waitUntil(
     caches.open(CACHE_NAME).then(async cache => {
       // ── Cœur applicatif : STRICT (mise à jour ATOMIQUE) ──
@@ -794,7 +807,7 @@ self.addEventListener('install', event => {
 });
 
 self.addEventListener('activate', event => {
-  if(DEBUG) console.log('[SW] Ma Vigne v6.38 activé');
+  if(DEBUG) console.log('[SW] Ma Vigne v6.39 activé');
   event.waitUntil(
     caches.keys().then(keys =>
       Promise.all(

@@ -1429,7 +1429,7 @@ var _EM_MODS=[
   {k:'vigne',    ic:'\uD83C\uDF3F', l:'Vigne',    d:'Accueil, parcelles, avancement, journal'},
   {k:'tracteur', ic:'\uD83D\uDE9C', l:'Tracteur', d:'Sessions, entretien, carburant'},
   {k:'phyto',    ic:'\uD83E\uDDEA', l:'Phyto',    d:'Registre des traitements, catalogue E-Phy'},
-  {k:'cave',     ic:'\uD83C\uDF77', l:'Cave',     d:'Le Chai, Le Cuvier'},
+  {k:'cave',     ic:'\uD83C\uDF77', l:'Cave',     d:'Le Cuvier, Le Chai, Le mill\u00e9sime'},
   {k:'reserve',  ic:'\uD83D\uDCE6', l:'R\u00e9serve',  d:'Intrants, f\u00fbts, bilan mati\u00e8re'},
   {k:'planning', ic:'\uD83D\uDCC5', l:'Planning', d:'Heures, cong\u00e9s, compteur'},
   {k:'pilotage', ic:'\uD83D\uDCCA', l:'Pilotage', d:'Tableau de bord'}

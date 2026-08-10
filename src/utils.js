@@ -23,7 +23,7 @@ export const GT_ADMIN_EMAIL = 'ngdevpro@gmail.com';
 // WHATS_NEW   : tableau vide = modal desactive pour cette version.
 // Format item : { emoji:'📅', titre:'Titre court', desc:'Phrase utilisateur.' }
 // Regle : seulement les changements visibles par les utilisateurs.
-export const APP_VERSION = '5.88';
+export const APP_VERSION = '5.89';
 // ════ Journal des nouveautés (récap cumulatif) ════
 // Une entrée par version, la PLUS RÉCENTE EN HAUT : { v:'5.10', items:[ {emoji,titre,desc}, … ] }
 // À chaque release visible → AJOUTER un bloc en tête (ne pas remplacer). items:[] = release technique (rien à afficher).
@@ -341,6 +341,10 @@ window._mvGraphRepeindre = function(){
 };
 
 export const WHATS_NEW = [
+  { v:'5.89', items:[
+    { emoji:'\u{1F347}', titre:'La Cave suit le chemin du raisin',
+      desc:'Les trois onglets de la Cave changent d\u2019ordre : Le Cuvier passe en premier, Le Chai vient ensuite, Le mill\u00e9sime ferme la marche. C\u2019est le trajet r\u00e9el du raisin, de la benne \u00e0 la bouteille. Rien ne bouge \u00e0 l\u2019int\u00e9rieur des \u00e9crans, aucune saisie n\u2019est d\u00e9plac\u00e9e, et la Cave continue de s\u2019ouvrir sur Le Chai.' }
+  ] },
   { v:'5.88', items:[
     { emoji:'\u{1F4C8}', titre:'Les graphiques ne se lisent plus \u00e0 la loupe',
       desc:'Sur t\u00e9l\u00e9phone, les chiffres et les \u00e9tiquettes des graphiques du Pilotage descendaient jusqu\u2019\u00e0 3 pixels, et ne d\u00e9passaient pas 7 sur un ordinateur : ils \u00e9taient dessin\u00e9s dans un cadre fixe que l\u2019\u00e9cran r\u00e9duisait ensuite. Chaque graphique mesure d\u00e9sormais la place dont il dispose et dessine \u00e0 cette taille, si bien que les textes font partout leur taille r\u00e9elle. Sur un \u00e9cran \u00e9troit, un calendrier de douze mois d\u00e9file au lieu de r\u00e9tr\u00e9cir, et les graphiques se recomposent : moins de graduations, et les noms passent au-dessus des barres plut\u00f4t que dans une colonne qui mangeait le tiers de l\u2019\u00e9cran.' },
@@ -1482,7 +1486,7 @@ var MV_AIDE = {
     points: [
       function () {
         return _mvAideSections('#cave-sec-tabs .mvu-tab', 'sections',
-          "Le Chai suit l’élevage, Le Cuvier suit la vendange, Le millésime raconte le vin.");
+          "Le Cuvier suit la vendange, Le Chai suit l’élevage, Le millésime raconte le vin.");
       },
       ['Un millésime à la fois', "une opération porte sur une seule année. Changer de millésime en haut du formulaire vide la sélection : on ne mélange pas deux vins dans un même geste."],
       ['Le délai d’ouillage', "se règle pour tout le domaine, et se resserre millésime par millésime — un vin jeune se surveille de plus près."],
