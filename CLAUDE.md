@@ -3501,6 +3501,106 @@ radios/cases, section « pièces à joindre » explicite.
 
 ## 28. État courant & backlog
 
+### ★★★ La SOIRÉE du 11 août — deux lots, et un audit qui annule une entrée du backlog
+
+**Versions : APP `5.98` · SW `6.48`.** Ni l'un ni l'autre déployé au moment où ceci s'écrit.
+
+#### A. Le lot d'HYGIÈNE (v5.97 / SW 6.47) — cinq points, un seul vrai bug
+
+| # | Correctif | Fichier |
+|---|---|---|
+| 4 | `_findDebutTache` borné à la période | `app.js` |
+| 8 | `pic` mort purgé de `_rfCtx` | `pilotage.js` |
+| 15 | règle CSS `.cave-tabs` orpheline | `styles.css` |
+| 41 | 44 replis `#8B8175` → `#5F5F5F` | `app.js` · `cave.js` · `reserve.js` |
+| 5 | breakpoint 760 → 767.98 | `styles.css` |
+
+★★★ **LE POINT 4 ÉTAIT UN DEFAUT DE TRAÇABILITÉ, pas un détail de calcul.** `_findDebutTache`
+prenait la date la plus ancienne de **tout** le journal. Une ligne « En cours » restée ouverte
+d'une campagne à l'autre — un oubli de validation, ce qui arrive — faisait moyenner **quatorze
+mois de météo**, et le résultat partait dans `meteo_snapshot`, **au journal**. Aucun signe
+extérieur. **Même famille que l'écart de cadence : un indicateur bâti sur un signal non borné
+ment avec l'autorité d'une mesure.**
+
+**La borne retenue est la PÉRIODE de la validation** (`_saisonForDate`), parce que c'est déjà la
+borne du reste de l'app — `_mvFinChantier` fait exactement ce filtre. Repli sur la **campagne**
+(`_mvCampagneDe`), puis sur le jour même. **Trois niveaux, aucun concept neuf.**
+⚠️ La signature devient `_findDebutTache(parcelle, tache, dateRef)` — **les trois appelants sont
+patchés**. `dateRef` est la date de la VALIDATION, pas celle du jour : rejouer une validation
+ancienne borne sur SA période.
+★ **Le harnais a fait apparaître un cas non anticipé** : une ligne « En cours » **postérieure**
+à la validation comptait aussi. Le `j.date<=ref` la ferme. **17/17, contre-épreuve incluse** —
+le défaut réintroduit donne **377 jours** d'écart.
+
+#### B. Le lot MODULES PAR RÔLE (v5.98 / SW 6.48) — backlog n°40
+
+Un membre créé en lot arrivait avec les **sept modules**. ★★ **Le coût n'est pas le temps de
+l'installateur — c'est la PREMIÈRE IMPRESSION de douze personnes** qui, chez Garraud, ouvriraient
+l'application avec quatre modules hors de leur travail, la plupart sans expérience d'appli métier.
+C'est ce qui justifie le lot, pas les minutes gagnées.
+
+Table `_MV_MODS_ROLE` dans **`utils.js`, source unique**, lue par la création en lot
+(`admin-gt.js`) et par un 5ᵉ preset « Selon le rôle » de la fiche membre (`reglages.js`).
+**L'aperçu avant création dit ce qui sera masqué** — un réglage posé en silence se découvre chez
+le client, et on ne sait plus s'il est voulu.
+
+⚠⚠ **CUMUL DE RÔLES : intersection, jamais union.** Un module n'est masqué que si **tous** les
+rôles le masquent. Avec une union — le réflexe naturel — un **ouvrier-tractoriste perdait son
+Tracteur et son Phyto**. La contre-épreuve du harnais rejoue la version fautive pour le prouver.
+**Dans le doute, on montre.** Un rôle inconnu ne masque rien.
+
+⚠️ **TROIS ÉCARTS ASSUMÉS AVEC LE BACKLOG, qui disait « ouvrier : Cave / Réserve / Planning
+décochées » :**
+1. **`planning` reste visible pour tous.** Depuis la refonte (v6.46) l'ouvrier y tombe directement
+   sur son mois, ses heures et ses congés. Le masquer serait **une régression déguisée en
+   allégement**. Réversible en une ligne si Nico tranche autrement.
+2. **Le chiffre « 12 × 7 arbitrages » était faux** : les presets existaient déjà dans la fiche
+   membre (`_EM_PRESETS`). C'était douze clics, pas 84.
+3. **Il y a un 5ᵉ rôle, `pilotage`**, présent dans la fiche membre mais absent de la création en
+   lot (`_agtLotRoles` n'en détecte que quatre). Écrit explicitement à `[]` — **un arbitrage,
+   pas un oubli.**
+
+★★★ **LE PREFLIGHT A RATTRAPÉ UN DÉFAUT DE MA LIVRAISON** : `_emModPresetRole` appelé en
+`onclick` mais **absent de `window`**. La fiche membre étant injectée dynamiquement, **le bouton
+aurait été mort au clic** — sans erreur, sans trace. C22/C24 gagnent leur place une fois de plus.
+★ **Le lot a été REJOUÉ EN ENTIER depuis le dépôt plutôt que rapiécé** : deux scripts
+déterministes enchaînés, pas un patch sur un patch. **C'est la bonne réaction à un défaut trouvé
+en fin de chaîne**, et elle a coûté deux minutes.
+
+#### C. ★★★ L'AUDIT DES CIBLES TACTILES — le backlog n°39 visait du CODE MORT
+
+**Constat, vérifié avec QUATRE motifs de recherche** (chaîne littérale · construction par morceaux
+· `class=` contenant « toggle » · préfixe progressif) : **`.val-toggle` n'est rendu NULLE PART.**
+`.plan-mo-btn` non plus. Le backlog décrivait pourtant « l'interrupteur qu'un ouvrier bascule par
+équipier, avec des gants ».
+→ **On aurait agrandi une cible tactile qui n'existe pas.** C'est le pendant exact de « livrer
+n'est pas intégrer » : **une entrée de backlog peut décrire un écran qui n'est plus là.**
+
+**Les chiffres, mesurés** : **50 contrôles cliquables sous 44 px**, dont **5 morts**
+(`.val-toggle` 26 · `.mvc-hdr-ico` 34 · `.plan-mo-btn` 34 · `.ph-notif` 36 · `.catsub-b` 42) et
+**45 vivants**. Les plus petits vivants : **`.cexp-type-chk` à 14 px**, puis `.mvt-doc`,
+`.mvt-hab`, `.pil-sw` et `.role-chk` à **20 px**.
+
+⚠️ **POURQUOI CE LOT N'A PAS ÉTÉ FAIT, et ce qu'il faut pour le faire.** La hauteur CSS n'est
+**pas** la zone tactile : une case de 20 px dans un `<label>` de 44 se touche sur 44. Distinguer
+les deux **demande de voir les écrans**, et il n'y a pas de navigateur côté Claude. Deux voies
+existent et elles ne se valent pas :
+- **agrandir vraiment** — change la mise en page (`.pc-start` 34→44 rallonge chaque carte de
+  parcelle non démarrée de 10 px, soit ~450 px de défilement sur 45 parcelles) ;
+- **étendre la seule zone de touche** par `::before{position:absolute;inset:-Npx}` — **zéro pixel
+  de mise en page déplacé**, mais inapplicable aux contrôles mitoyens, dont les zones se
+  chevaucheraient. `.pc-start` et `.pc-validate` partagent une bordure : exclus d'office.
+→ **Arbitrage de Nico requis écran par écran. Le lot ne doit pas partir « à l'estime ».**
+
+⚠⚠ **ET UNE PURGE CSS DE MASSE A ÉTÉ ÉCARTÉE, après l'avoir mesurée.** L'inventaire donne
+**74 classes jamais rendues sur 1 954, ~7,3 ko** — soit **2 % du fichier, ~1,5 ko gzip**.
+**Le gain ne vaut pas le risque** : `.rb-admin` / `.rb-ouvrier` / `.rb-pilotage` figuraient dans la
+liste des « mortes » alors que `'rb-'` apparaît **25 fois** en construction dynamique dans les JS.
+**Un faux positif prouvé dans le lot même qui devait être sûr.** Une règle morte coûte 1,5 ko ;
+un écran qui perd son style chez un client coûte un appel et de la confiance.
+→ **Règle : ne jamais purger du CSS sur la foi d'un `grep` de nom de classe.** Le CSS n'a pas de
+`node --check` : rien ne rougit quand on supprime la mauvaise règle.
+
 ### ★★★ La journée du 11 août (suite) — la refonte du Planning, deux lots
 
 **Point de départ** : *« je trouve que planning est mal conçu, il y en a un peu partout, il faut
@@ -3805,9 +3905,22 @@ appliquée au document lui-même.
     111 lignes inutiles + 5 noms morts. **Unifier `phyto.js` sur la même forme et supprimer sa
     boucle `for..in` (`phyto.js:1165`)**, invisible au preflight. Regraver la baseline **après**
     avoir prouvé la baisse.
-39. ★ **`.val-toggle` 26 → 44 px de haut** — **vérifié `styles.css:283` : toujours 26 px** (pour
-    44 de large). C'est l'interrupteur qu'un ouvrier bascule par équipier, avec des gants.
-    **`.fiche-admin-btn` est à 32 px** (`l.483`) ; vérifier aussi `.pc-start` et `.plan-mo-btn`.
+39. ★★ **LES CIBLES TACTILES — entrée RÉÉCRITE le 11/08 au soir, l'ancienne était FAUSSE.**
+    ⚠⚠⚠ **`.val-toggle` et `.plan-mo-btn` sont du CSS MORT** — aucun rendu, vérifié avec quatre
+    motifs. L'entrée précédente demandait d'agrandir « l'interrupteur qu'un ouvrier bascule avec
+    des gants » : **cet interrupteur n'existe plus dans l'application.**
+    **Mesuré : 50 contrôles cliquables sous 44 px — 5 morts, 45 vivants.** Les plus petits
+    vivants : `.cexp-type-chk` **14 px** ; `.mvt-doc`, `.mvt-hab`, `.pil-sw`, `.role-chk` **20 px** ;
+    `.mv-help-btn` 26 ; `.ob-mbr-del` et `.ob-parcelle-del` 28 ; `.fiche-admin-btn` 32 ;
+    `.pc-start` 34.
+    ⚠️ **NE PAS EXÉCUTER SANS VOIR LES ÉCRANS.** La hauteur CSS n'est pas la zone tactile (une
+    case de 20 px dans un `<label>` de 44 se touche sur 44), et les deux techniques disponibles
+    n'ont pas le même effet : agrandir déplace la mise en page, étendre la zone par `::before`
+    ne la déplace pas mais **ne vaut que pour les contrôles isolés** — `.pc-start` et
+    `.pc-validate` partagent une bordure. **Trier d'abord par CONTEXTE : ce qu'on touche au champ
+    avec des gants d'abord, les écrans de bureau ensuite.**
+    ✅ **Les 5 règles mortes, elles, peuvent partir sans risque** — mais voir le n°43 avant
+    d'étendre à tout le CSS.
 40. ★★ **Valeurs par défaut de modules PAR RÔLE à la création d'un membre** : un ouvrier arrive avec
     Cave / Réserve / Planning décochées, un tractoriste avec Vigne / Tracteur / Phyto. **Vérifié :
     `_canModule` (`app.js:3860`, socle en `admin-gt.js:2664`) = formule ∧ masquage manuel, le rôle
@@ -3821,6 +3934,12 @@ appliquée au document lui-même.
     pas avant.
 
 
+43. ⚠⚠ **PURGE CSS DE MASSE — MESURÉE PUIS ÉCARTÉE le 11/08. Ne pas la rouvrir sans lire ceci.**
+    74 classes sur 1 954 semblent jamais rendues, **~7,3 ko, soit 2 % du fichier (~1,5 ko gzip)**.
+    **Le gain ne vaut pas le risque, et le risque est prouvé** : `.rb-admin` / `.rb-ouvrier` /
+    `.rb-pilotage` figuraient parmi les « mortes » alors que `'rb-'` apparaît **25 fois** en
+    construction dynamique. **Le CSS n'a pas de `node --check`** : supprimer la mauvaise règle ne
+    fait rien rougir, et se découvre chez un client.
 ### ✅ Rayés du backlog
 
 ~~Urssaf~~ · ~~facturer Chapelle~~ · ~~clé `"site"`~~ · ~~UX-1~~ · ~~SEC-3 CSP~~ · ~~e2e 10 pages~~
