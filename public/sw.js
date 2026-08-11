@@ -1,4 +1,20 @@
-// MA VIGNE — Service Worker v6.44
+// MA VIGNE — Service Worker v6.45
+// v6.45 (11/08/2026) — Planning, lot 1 : la selection n'est plus un mode. Toucher
+//                       une case la coche, toujours ; le bouton « Selection
+//                       multiple » disparait. L'en-tete d'un jour coche la colonne,
+//                       un nom coche la ligne, le coin coche la vue. La barre du bas
+//                       annonce QUI et QUAND, et ne montre que les actions qui
+//                       s'appliquent (« Effectif » n'apparait que s'il y a une equipe
+//                       collective cochee ; « Effacer » que s'il y a une saisie).
+//                       Trois feuilles deviennent une : l'editeur du jour absorbe
+//                       « Heures » et « Absence » en selection — ids pmh-/pma-
+//                       supprimes, namespaces devenus inutiles. Une seule regle
+//                       metier dessous : _planApplyHeures / _planApplyAbs /
+//                       _planApplySimple, sans lecture du DOM, donc testables.
+//                       ⚠️ BUG REEL corrige : « Recup » et « Chaleur » en lot
+//                       ECRASAIENT les conges deja poses, sans un mot. Preserves
+//                       desormais, et comptes dans le toast ; le geste sur une case
+//                       unique, lui, ecrase toujours (force).
 // v6.44 (11/08/2026) — L'accompagnement rattrape les deux lots du jour. La fiche
 //                       d'aide du Tracteur ne parlait NI du chrono inversé (v5.92)
 //                       NI du mode du jour (v5.93) : douze points au lieu de six,
@@ -824,7 +840,7 @@
 // v2.22 — Fix profils vides : guard vide dans loadData() pour MEMBRES/SAISONS/TACHES
 // v2.17 — Onboarding intégré + tenantId · v2.06 — Firebase Auth · v2.00–v2.05 — divers
 const DEBUG = self.location.hostname === 'localhost' || self.location.hostname === '127.0.0.1';
-const CACHE_NAME   = 'mavigne-v6.44';
+const CACHE_NAME   = 'mavigne-v6.45';
 const TENANT_CACHE = 'mavigne-tenant';   // Cache persistant — préservé à chaque mise à jour SW
 const SYNC_TAG     = 'mavigne-sync';
 
@@ -840,7 +856,7 @@ const CDN_URLS = [
 ];
 
 self.addEventListener('install', event => {
-  if(DEBUG) console.log('[SW] Ma Vigne v6.44 installé');
+  if(DEBUG) console.log('[SW] Ma Vigne v6.45 installé');
   event.waitUntil(
     caches.open(CACHE_NAME).then(async cache => {
       // ── Cœur applicatif : STRICT (mise à jour ATOMIQUE) ──
@@ -856,7 +872,7 @@ self.addEventListener('install', event => {
 });
 
 self.addEventListener('activate', event => {
-  if(DEBUG) console.log('[SW] Ma Vigne v6.44 activé');
+  if(DEBUG) console.log('[SW] Ma Vigne v6.45 activé');
   event.waitUntil(
     caches.keys().then(keys =>
       Promise.all(

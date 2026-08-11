@@ -143,7 +143,7 @@ function _planYearHasData(y){
   if(PLANNING_TEMPLATES[y]&&Object.keys(PLANNING_TEMPLATES[y]).length)had=true;
   return had;
 }
-function planSetYear(y){ y=parseInt(y,10); if(isNaN(y))return; planYear=y; _pl2Wi=null; _pl2Sel={}; if(typeof _pl2MbarSync==='function')_pl2MbarSync(); renderPlanning(); }
+function planSetYear(y){ y=parseInt(y,10); if(isNaN(y))return; planYear=y; _pl2Wi=null; _pl2Sel={}; renderPlanning(); }
 function planAddYear(){ var list=_planYearList(); var next=(list.length?Math.max.apply(null,list):(new Date()).getFullYear())+1; _planExtraYears.push(next); planSetYear(next); if(window.showToast)showToast('Ann\u00e9e '+next+' ajout\u00e9e','#3D6B27'); }
 function _pl2YearTabs(){
   if(!isAdmin())return '';
@@ -1296,9 +1296,9 @@ function _planAbsEffet(mo){
   if(mo.id==='autre')return {t:'Plafond inchang\u00e9 \u00b7 comportement historique',c:'var(--texte-doux)'};
   return {t:'Plafond inchang\u00e9 \u00b7 heures dues',c:'var(--texte-doux)'};
 }
-function _planAbsMotifsHtml(sel){
+function _planAbsMotifsHtml(sel,sansHeures){
   var h='';
-  PLAN_ABS_MOTIFS.forEach(function(mo){
+  PLAN_ABS_MOTIFS.filter(function(mo){return !(sansHeures&&mo.heures);}).forEach(function(mo){
     var on=(mo.id===sel),ef=_planAbsEffet(mo);
     h+='<button type="button" class="plan-abs-mo" data-mo="'+_escAttr(mo.id)+'" onclick="planSetAbsMotif(\''+_escAttr(mo.id)+'\')" '
       +'style="display:flex;gap:9px;align-items:flex-start;width:100%;padding:10px 11px;margin-bottom:6px;'
@@ -1435,18 +1435,17 @@ function _planRenderBody(){
 
 function planSwitchTab(tab){
   planTab=tab;
-  if(tab!=='equipe'&&_pl2Multi)planToggleMulti(true);
+  if(tab!=='equipe')planSelClear();
   _planRenderHeader();
   _planRenderBody();
 }
-function planPrevMonth(){planMonth--;if(planMonth<0){planMonth=11;planYear--;}_pl2Wi=null;_pl2Sel={};_pl2MbarSync();renderPlanning();}
-function planNextMonth(){planMonth++;if(planMonth>11){planMonth=0;planYear++;}_pl2Wi=null;_pl2Sel={};_pl2MbarSync();renderPlanning();}
+function planPrevMonth(){planMonth--;if(planMonth<0){planMonth=11;planYear--;}_pl2Wi=null;_pl2Sel={};renderPlanning();}
+function planNextMonth(){planMonth++;if(planMonth>11){planMonth=0;planYear++;}_pl2Wi=null;_pl2Sel={};renderPlanning();}
 
 // ── ONGLET ÉQUIPE — grille équipe + synthèse (refonte v5.08) ──
 var _pl2View='wk';        // 'wk' | 'mo'
 var _pl2Wi=null;          // index de la semaine affichée (null = recalculer)
-var _pl2Multi=false;      // mode sélection multiple
-var _pl2Sel={};           // {'Nom|jour':true}
+var _pl2Sel={};           // {'Nom|jour':true} — cochage, jamais un mode
 var _pl2PulseNom=null;    // salarié à surligner (alerte cadre légal)
 
 function _pl2Actifs(){return _planMbrs().filter(function(m){return _planHasContractThisMonth(m,planMonth);});}
@@ -1530,12 +1529,16 @@ function _pl2Board(){
   if(!mbrs.length)return '<div class="plan-empty">Aucun salari\u00e9 sous contrat ce mois.</div>';
   var cols=_pl2DayCols(),mo=_pl2View==='mo';
   var h='<div class="pl2-board"><div class="pl2-bwrap"><div class="pl2-grid'+(mo?' pl2-mo':' pl2-wk')+'" style="--nbc:'+cols.length+'">';
-  h+='<div class="pl2-corner">Salari\u00e9</div>';
+  // Le coin est le croisement de toutes les lignes et de toutes les colonnes :
+  // il coche la vue entiere. C'est la selection « toute l'equipe, cette semaine ».
+  h+='<button class="pl2-corner" onclick="planSelAll()" aria-label="Cocher toute la vue">Salari\u00e9</button>';
   cols.forEach(function(d){
     if(d==null){h+='<div class="pl2-dh pl2-dh-out"><span class="pl2-dh-dow">&nbsp;</span><span class="pl2-dh-num">\u00b7</span></div>';return;}
     var dow=_planDow(planMonth,d),we=(dow===0||dow===6);
     var fer=_planFerie(planMonth,d);
-    h+='<div class="pl2-dh'+(we?' pl2-we':'')+(_pl2IsToday(d)?' pl2-today':'')+'"><span class="pl2-dh-dow">'+(mo?PLAN_JOURS[dow].charAt(0):PLAN_JOURS[dow])+'</span><span class="pl2-dh-num">'+d+'</span>'+(fer?'<span class="pl2-dh-fer" title="'+_escAttr(fer)+'"></span>':'')+'</div>';
+    // L'en-tete du jour coche la COLONNE : toute l'equipe, ce jour-la. C'est le geste
+    // « demain tout le monde commence a 6 h » en deux touches au lieu de huit.
+    h+='<button class="pl2-dh'+(we?' pl2-we':'')+(_pl2IsToday(d)?' pl2-today':'')+(_planColFull(d)?' pl2-hdon':'')+'" data-col="'+d+'" onclick="planColTap('+d+')" aria-label="Cocher le '+d+' pour toute l\u2019\u00e9quipe"><span class="pl2-dh-dow">'+(mo?PLAN_JOURS[dow].charAt(0):PLAN_JOURS[dow])+'</span><span class="pl2-dh-num">'+d+'</span>'+(fer?'<span class="pl2-dh-fer" title="'+_escAttr(fer)+'"></span>':'')+'</button>';
   });
   mbrs.forEach(function(mbr){
     var s=_planSummary(mbr,planMonth),plId=_planPlId(mbr),nomA=_escAttr(mbr.nom);
@@ -1544,7 +1547,9 @@ function _pl2Board(){
       ?('\u{1F465} '+_planEffMax(mbr,planMonth)+' pers. \u00b7 '+_planFmt(_planCollH(mbr,planMonth))+' h')
       :(_planFmt(s.worked)+' / '+_planFmt(s.ref));
     var pulse=_pl2PulseNom===mbr.nom?' pl2-pulse':'';
-    h+='<button class="pl2-name'+pulse+'" data-plrow="'+nomA+'" onclick="openPlanFiche(\''+nomA+'\')">'
+    // Le nom coche la LIGNE : cette personne, sur toute la vue. Sa fiche s'ouvre
+    // depuis sa carte, sous la grille — une cible, un effet.
+    h+='<button class="pl2-name'+pulse+(_planRowFull(mbr.nom)?' pl2-nameon':'')+'" data-plrow="'+nomA+'" onclick="planRowTap(\''+nomA+'\')" aria-label="Cocher toute la vue pour '+nomA+'">'
       +'<span class="pl2-ava" style="background:'+(mbr.couleur||'#3D6B27')+'">'+_escHtml(mbr.nom.charAt(0))+'</span>'
       +'<span class="pl2-name-t"><span class="pl2-name-n">'+_escHtml(mbr.nom)+'</span><span class="pl2-name-s">'+_sub+'</span></span>'
     +'</button>';
@@ -1558,7 +1563,7 @@ function _pl2Board(){
       }
       if(c.hc){h+='<div class="pl2-cell pl2-cell-hc'+(we?' pl2-we':'')+'"><span class="pl2-chip pl2c-hc">\u2013</span></div>';return;}
       var sel=_pl2Sel[mbr.nom+'|'+d]?' pl2-selon':'';
-      h+='<button class="pl2-cell'+(we?' pl2-we':'')+(_pl2IsToday(d)?' pl2-tdcol':'')+sel+'" onclick="planCellTap(\''+nomA+'\','+d+')" aria-label="'+nomA+' '+d+' '+PLAN_MOIS_C[planMonth]+'"><span class="pl2-chip '+c.cls+(c.brk?' pl2c-brk':'')+'">'+c.txt+'</span></button>';
+      h+='<button class="pl2-cell'+(we?' pl2-we':'')+(_pl2IsToday(d)?' pl2-tdcol':'')+sel+'" data-cell="'+nomA+'|'+d+'" onclick="planCellTap(\''+nomA+'\','+d+')" aria-label="'+nomA+' '+d+' '+PLAN_MOIS_C[planMonth]+'"><span class="pl2-chip '+c.cls+(c.brk?' pl2c-brk':'')+'">'+c.txt+'</span></button>';
     });
   });
   h+='<div class="pl2-totl">\u03a3 jour</div>';
@@ -1669,7 +1674,7 @@ function _pl2RenderEquipe(){
   var body=document.getElementById('plan-body');
   if(!body)return;
   body.innerHTML=_pl2YearTabs()+_pl2Toolbar()+_pl2Board()+_pl2Synth()+_pl2Annual();
-  if(_pl2Multi)_pl2MbarSync();
+  _pl2MbarSync();
   if(_pl2PulseNom){
     var row=body.querySelector('.pl2-pulse');
     if(row&&row.scrollIntoView)row.scrollIntoView({block:'center',behavior:'smooth'});
@@ -1681,107 +1686,268 @@ function _pl2RenderEquipe(){
     },2600);
   }
 }
-function planToggleMulti(forceOff){
-  _pl2Multi=(forceOff===true)?false:!_pl2Multi;
-  _pl2Sel={};
-  var btn=document.getElementById('plan-multi-btn');
-  if(btn)btn.classList.toggle('on',_pl2Multi);
-  var bar=document.getElementById('plan-mbar');
-  if(bar)bar.classList.toggle('open',_pl2Multi);
-  _pl2MbarSync();
-  _pl2AbarSync();
-  if(planTab==='equipe'&&isAdmin())_pl2RenderEquipe();
+// ══════════════════════════════════════════════════════════════════════
+// LA SÉLECTION — ce n'est plus un mode, c'est un état
+// ══════════════════════════════════════════════════════════════════════
+// Avant ce lot il fallait ARMER « Sélection multiple » pour que toucher une case
+// la coche ; sans le mode, la même case ouvrait l'éditeur du jour. Deux effets
+// pour un geste identique, et rien à l'écran ne disait lequel s'appliquerait.
+// Désormais toucher une case la coche, toujours. Un jour ou trente, c'est le même
+// geste : la barre du bas dit ce qui est coché et ce qu'on peut en faire.
+// ⚠️ Corollaire à ne pas défaire : plus aucun chemin ne doit dépendre d'un mode
+//    armé au préalable. Un bouton qui ne marche « que si » est le défaut d'origine.
+
+function _planSelKeys(){return Object.keys(_pl2Sel);}
+function _planSelParse(k){var i=k.lastIndexOf('|');return {nom:k.slice(0,i),d:parseInt(k.slice(i+1),10)};}
+function _planSelCount(){return _planSelKeys().length;}
+window._planSelKeys=_planSelKeys;
+
+// Jours cochables de la vue courante pour un salarié : hors contrat exclu, sinon
+// cocher une ligne poserait des heures sur des jours où la personne n'est pas là.
+function _planRowDays(nom){
+  var mbr=(window.MEMBRES||[]).find(function(m){return m.nom===nom;});
+  if(!mbr)return [];
+  return _pl2DayCols().filter(function(d){return d!=null&&_planInContract(mbr,planMonth,d);});
 }
-function _pl2MbarSync(){
-  var n=Object.keys(_pl2Sel).length;
-  var lbl=document.getElementById('plan-mbar-lbl');
-  if(lbl)lbl.textContent=n===0?'Touchez des cases dans la grille':n+(n>1?' jours s\u00e9lectionn\u00e9s':' jour s\u00e9lectionn\u00e9');
+function _planRowFull(nom){
+  var ds=_planRowDays(nom);
+  return ds.length>0&&ds.every(function(d){return !!_pl2Sel[nom+'|'+d];});
 }
+function _planColFull(d){
+  var ms=_pl2Actifs().filter(function(m){return _planInContract(m,planMonth,d);});
+  return ms.length>0&&ms.every(function(m){return !!_pl2Sel[m.nom+'|'+d];});
+}
+
+// ── Les trois gestes de cochage ──
 function planCellTap(nom,d){
   if(!isAdmin())return;
-  if(_pl2Multi){
-    var k=nom+'|'+d;
-    if(_pl2Sel[k])delete _pl2Sel[k];else _pl2Sel[k]=true;
-    _pl2MbarSync();
-    _pl2RenderEquipe();
-    return;
-  }
-  openPlanDayModal(nom,d);
+  var k=nom+'|'+d;
+  if(_pl2Sel[k])delete _pl2Sel[k];else _pl2Sel[k]=true;
+  _pl2SelSync();
 }
-function planMultiApply(kind){
-  var keys=Object.keys(_pl2Sel);
-  if(!keys.length){showToast('Touchez d\u2019abord des cases dans la grille','#E07060');return;}
-  // CP et Absence portent un PARAMÈTRE MÉTIER (règle de décompte pour l'un, motif légal pour
-  // l'autre) : ils passent par une feuille de qualification, comme le fait déjà « Heures ».
-  // Chaleur / Récup / Effacer n'en ont pas et restent en un clic.
-  if(kind==='cp'){openPlanCPSel();return;}
-  if(kind==='abs'){openPlanMultiAbs();return;}
-  if(kind==='eff'){planMultiEffectif();return;}
+function planRowTap(nom){
+  if(!isAdmin())return;
+  var ds=_planRowDays(nom),on=_planRowFull(nom);
+  ds.forEach(function(d){if(on)delete _pl2Sel[nom+'|'+d];else _pl2Sel[nom+'|'+d]=true;});
+  _pl2SelSync();
+}
+function planColTap(d){
+  if(!isAdmin())return;
+  var ms=_pl2Actifs().filter(function(m){return _planInContract(m,planMonth,d);}),on=_planColFull(d);
+  ms.forEach(function(m){if(on)delete _pl2Sel[m.nom+'|'+d];else _pl2Sel[m.nom+'|'+d]=true;});
+  _pl2SelSync();
+}
+function planSelAll(){
+  if(!isAdmin())return;
+  var ms=_pl2Actifs(),cols=_pl2DayCols(),tot=0,on=0;
+  ms.forEach(function(m){cols.forEach(function(d){
+    if(d==null||!_planInContract(m,planMonth,d))return;
+    tot++; if(_pl2Sel[m.nom+'|'+d])on++;
+  });});
+  var vider=(tot>0&&on===tot);
+  ms.forEach(function(m){cols.forEach(function(d){
+    if(d==null||!_planInContract(m,planMonth,d))return;
+    if(vider)delete _pl2Sel[m.nom+'|'+d];else _pl2Sel[m.nom+'|'+d]=true;
+  });});
+  _pl2SelSync();
+}
+function planSelClear(){_pl2Sel={};_pl2SelSync();}
+
+// ★ Sync SANS reconstruire la grille. Un rerender complet à chaque case touchée
+//   coûtait le scroll et un clignotement, sur le geste le plus fréquent du module.
+function _pl2SelSync(){
+  document.querySelectorAll('#plan-body .pl2-cell[data-cell]').forEach(function(el){
+    el.classList.toggle('pl2-selon',!!_pl2Sel[el.getAttribute('data-cell')]);
+  });
+  document.querySelectorAll('#plan-body .pl2-name[data-plrow]').forEach(function(el){
+    el.classList.toggle('pl2-nameon',_planRowFull(el.getAttribute('data-plrow')));
+  });
+  document.querySelectorAll('#plan-body .pl2-dh[data-col]').forEach(function(el){
+    el.classList.toggle('pl2-hdon',_planColFull(parseInt(el.getAttribute('data-col'),10)));
+  });
+  _pl2MbarSync();
+}
+
+// ── Ce que la sélection contient réellement ──
+// La barre annonçait « 3 jours sélectionnés » : vrai, et inutile. Ce qu'on veut
+// relire avant d'appliquer, c'est QUI et QUAND.
+function _planSelResume(){
+  var keys=_planSelKeys();
+  if(!keys.length)return '';
+  var noms={},jours={};
+  keys.forEach(function(k){var p=_planSelParse(k);noms[p.nom]=1;if(!isNaN(p.d))jours[p.d]=1;});
+  var nN=Object.keys(noms).length;
+  var ds=Object.keys(jours).map(function(x){return parseInt(x,10);}).sort(function(a,b){return a-b;});
+  var mois=PLAN_MOIS_C[planMonth].toLowerCase();
+  var perJ=ds.length===0?''
+    :ds.length===1?(ds[0]+' '+mois)
+    :(ds[ds.length-1]-ds[0]===ds.length-1)?(ds[0]+' \u2192 '+ds[ds.length-1]+' '+mois)
+    :(ds.length+' jours');
+  var qui=nN===1?Object.keys(noms)[0]:(nN+' personnes');
+  return qui+' \u00b7 '+perJ+(keys.length>1?(' \u00b7 '+keys.length+' cases'):'');
+}
+
+// ── La barre : elle ne propose que ce qui s'applique vraiment ──
+// « Effectif » affichait un toast d'erreur quand aucune équipe collective n'était
+// cochée : un bouton qui ne sert qu'à dire non. Désormais il n'apparaît pas.
+function _planSelStats(){
+  var st={n:0,coll:0,trav:0,saisis:0};
+  _planSelKeys().forEach(function(k){
+    var p=_planSelParse(k);
+    var mbr=(window.MEMBRES||[]).find(function(m){return m.nom===p.nom;});
+    if(!mbr)return;
+    st.n++;
+    if(window._mvEstCollectif&&window._mvEstCollectif(mbr))st.coll++;
+    if(_planInContract(mbr,planMonth,p.d)&&_planPlanned(_planPlId(mbr),planMonth,p.d)>0)st.trav++;
+    if(_pEntDay(p.nom,planMonth,p.d))st.saisis++;
+  });
+  return st;
+}
+function _pl2MbarSync(){
+  var bar=document.getElementById('plan-mbar');
+  var n=_planSelCount();
+  if(bar)bar.classList.toggle('open',n>0);
+  var lbl=document.getElementById('plan-mbar-lbl');
+  if(lbl)lbl.textContent=n>0?_planSelResume():'';
+  var acts=document.getElementById('plan-mbar-acts');
+  if(!acts)return;
+  if(!n){acts.innerHTML='';return;}
+  var st=_planSelStats();
+  var h='<button class="pl2-mbar-heures" onclick="planSelSheet(\'travail\')"><span>\u{1F550}</span><span>Heures</span></button>'
+    +'<button onclick="openPlanCPSel()"><span>\u2600\uFE0F</span><span>Cong\u00e9</span></button>'
+    +'<button onclick="planSelSheet(\'absent\')"><span>\u2715</span><span>Absence</span></button>';
+  if(st.trav>0)h+='<button onclick="planSelAction(\'rec\')"><span>\u21BA</span><span>R\u00e9cup</span></button>'
+    +'<button onclick="planSelAction(\'heat\')"><span>\u{1F321}\uFE0F</span><span>Chaleur</span></button>';
+  if(st.coll>0)h+='<button onclick="planSelEffectif()"><span>\u{1F465}</span><span>Effectif</span></button>';
+  if(st.saisis>0)h+='<button onclick="planSelAction(\'clr\')"><span>\u232B</span><span>Effacer</span></button>';
+  acts.innerHTML=h;
+}
+// ══════════════════════════════════════════════════════════════════════
+// LES MOTEURS D'ÉCRITURE — une seule règle métier pour un jour et pour trente
+// ══════════════════════════════════════════════════════════════════════
+// Avant ce lot, poser des heures avait DEUX implémentations : savePlanDay pour un
+// jour, planMultiHApply pour une sélection. Elles ne préservaient pas les mêmes
+// choses et ne comptaient pas pareil. Les feuilles ont fusionné ; ces fonctions
+// sont ce qui reste dessous, appelées par les deux chemins.
+// ⚠️ Elles ne lisent AUCUN champ du DOM : tout arrive en paramètre. C'est ce qui
+//    les rend exécutables seules dans un harnais.
+// ★ `force` = le geste porte sur UNE case, désignée à la main : on écrase ce qui
+//   s'y trouve. Sans lui (geste groupé), congés, absences et récupérations de la
+//   sélection sont préservés — on ne détruit pas en lot ce qu'on n'a pas relu.
+
+function _planApplyHeures(keys,o){
+  o=o||{};
+  var deb=o.debut||'08:00',fin=o.fin||'16:00',cont=!!o.continu;
+  var com=(o.comment||'').trim(),force=!!o.force,remp=!!o.remp,heat=!!o.heat;
+  var n=0,skip=0,nCp=0;
+  keys.forEach(function(k){
+    var p=_planSelParse(k);
+    var mbr=(window.MEMBRES||[]).find(function(m){return m.nom===p.nom;});
+    if(!mbr||isNaN(p.d)||!_planInContract(mbr,planMonth,p.d)){skip++;return;}
+    var pl=_planPlanned(_planPlId(mbr),planMonth,p.d);
+    var ex=_pEntDay(p.nom,planMonth,p.d);
+    if(remp){
+      // Un remplacement est un ECHANGE : il ne concerne que les jours sans heures
+      // prevues. Une absence ou une recup n'est jamais ecrasee — un arret de travail
+      // ne doit pas devenir du travail par un geste groupe.
+      if(pl>0){skip++;return;}
+      if(ex&&(ex.absent||ex.type==='recup')){skip++;return;}
+      if(ex&&ex.type==='cp')nCp++;
+      _pEntEnsure(p.nom,planMonth)[p.d]={timing:{debut:deb,fin:fin,continu:cont},comment:com,remplacement:true};
+      n++;return;
+    }
+    if(!force&&ex&&(ex.type==='cp'||ex.type==='recup'||ex.absent)){skip++;return;}
+    var e={timing:{debut:deb,fin:fin,continu:cont},comment:com};
+    if(heat){e.canicule=true;if(!e.comment)e.comment='Chaleur';}
+    _pEntEnsure(p.nom,planMonth)[p.d]=e;
+    n++;
+  });
+  return {n:n,skip:skip,cp:nCp};
+}
+
+function _planApplyAbs(keys,motifId,com,heuresVal){
+  var mo=_planAbsDef(motifId),n=0,skip=0;
+  keys.forEach(function(k){
+    var p=_planSelParse(k);
+    var mbr=(window.MEMBRES||[]).find(function(m){return m.nom===p.nom;});
+    if(!mbr||isNaN(p.d)||!_planInContract(mbr,planMonth,p.d)){skip++;return;}
+    var e={absent:true,motif:mo.id,comment:(com||'').trim()};
+    if(mo.heures){var v=parseFloat(heuresVal);e.motif_h=(isNaN(v)||v<0)?0:v;}
+    _pEntEnsure(p.nom,planMonth)[p.d]=e;
+    n++;
+  });
+  return {n:n,skip:skip};
+}
+
+// Recup / chaleur / effacement : aucun parametre metier a qualifier, donc aucune
+// feuille — ils s'appliquent depuis la barre. `force` sur une case unique, pour
+// la meme raison que ci-dessus.
+function _planApplySimple(keys,kind,force){
   var n=0,skip=0;
   keys.forEach(function(k){
-    var i=k.lastIndexOf('|'),nom=k.slice(0,i),d=parseInt(k.slice(i+1),10);
-    var mbr=(window.MEMBRES||[]).find(function(m){return m.nom===nom;});
-    if(!mbr){skip++;return;}
-    // « Effacer » supprime une SAISIE : il doit rester possible hors contrat, sinon une
+    var p=_planSelParse(k);
+    var mbr=(window.MEMBRES||[]).find(function(m){return m.nom===p.nom;});
+    if(!mbr||isNaN(p.d)){skip++;return;}
+    // « Effacer » retire une SAISIE : il doit rester possible hors contrat, sinon une
     // entree residuelle (salarie parti, contrat raccourci) devient impossible a retirer.
     if(kind==='clr'){
-      var _mb=_pEntYear(nom); if(_mb&&_mb[planMonth]&&_mb[planMonth][d]){delete _mb[planMonth][d];n++;}
-      else skip++;
+      var yb=_pEntYear(p.nom);
+      if(yb&&yb[planMonth]&&yb[planMonth][p.d]){delete yb[planMonth][p.d];n++;}else skip++;
       return;
     }
-    if(!_planInContract(mbr,planMonth,d)){skip++;return;}
-    var pl=_planPlanned(_planPlId(mbr),planMonth,d);
-    // chaleur & récup n'ont de sens que sur un jour travaillé
-    if(pl<=0){skip++;return;}
-    var _eb=_pEntEnsure(nom,planMonth);
-    var e=null;
-    if(kind==='rec')e={type:'recup'};
-    else if(kind==='heat')e={timing:{debut:'06:00',fin:'14:00',continu:true},canicule:true,comment:'Chaleur'};
-    if(e){_eb[d]=e;n++;}
+    if(!_planInContract(mbr,planMonth,p.d)){skip++;return;}
+    // Sur un geste groupe, un jour de repos n'est pas une cible : on ne cree pas
+    // des journees de travail par inadvertance. Sur une case unique, designee a la
+    // main, c'est un choix — poser une recup un samedi doit rester possible.
+    if(!force&&_planPlanned(_planPlId(mbr),planMonth,p.d)<=0){skip++;return;}
+    var ex=_pEntDay(p.nom,planMonth,p.d);
+    // ⚠️ Corrige un defaut reel : poser recup ou chaleur sur une plage ecrasait en
+    //    silence les conges deja poses dessus. Ils sont desormais preserves, et le
+    //    toast le dit. Le geste unitaire (une seule case) ecrase toujours.
+    if(!force&&ex&&(ex.type==='cp'||ex.type==='recup'||ex.absent)){skip++;return;}
+    _pEntEnsure(p.nom,planMonth)[p.d]=(kind==='rec')
+      ?{type:'recup'}
+      :{timing:{debut:'06:00',fin:'14:00',continu:true},canicule:true,comment:'Chaleur'};
+    n++;
   });
+  return {n:n,skip:skip};
+}
+
+function planSelAction(kind){
+  if(!isAdmin())return;
+  var keys=_planSelKeys();
+  if(!keys.length)return;
+  var r=_planApplySimple(keys,kind,keys.length===1);
   window.PLANNING_ENTRIES=PLANNING_ENTRIES;
-  if(n>0&&window.fbSave)window.fbSave('planning_entries',PLANNING_ENTRIES);
-  var lbl={rec:'\u21ba R\u00e9cup pos\u00e9es',heat:'\ud83c\udf21 Horaires chaleur 06:00 \u2192 14:00',clr:'Jours r\u00e9initialis\u00e9s'}[kind]||'Fait';
-  showToast(n>0?('\u2705 '+lbl+' \u00b7 '+n+' j'+(skip>0?' \u00b7 '+skip+' ignor\u00e9'+(skip>1?'s':''):'')):'Aucun jour applicable dans la s\u00e9lection',n>0?'#3D6B27':'#E07060');
-  planToggleMulti(true);
+  if(r.n>0&&window.fbSave)window.fbSave('planning_entries',PLANNING_ENTRIES);
+  var lbl={rec:'\u21ba R\u00e9cup pos\u00e9es',heat:'\ud83c\udf21 Horaires chaleur 06:00 \u2192 14:00',clr:'Saisies effac\u00e9es'}[kind]||'Fait';
+  showToast(r.n>0?('\u2705 '+lbl+' \u00b7 '+r.n+' j'+(r.skip>0?' \u00b7 '+r.skip+' pr\u00e9serv\u00e9'+(r.skip>1?'s':''):'')):'Aucun jour applicable dans la s\u00e9lection',r.n>0?'#3D6B27':'#E07060');
+  planSelClear();
   _pl2Refresh();
 }
-// ── ABSENCE en sélection multiple : le MOTIF est obligatoire ──
-// Avant ce lot, le bouton « Absence » écrivait {absent:true} sans motif → _planAbsMotif()
-// retombait sur 'autre'. Il fallait donc rouvrir chaque jour un par un, et entre-temps un
-// arrêt de travail (suspend:true, qui ABAISSE le plafond annuel) était compté comme une
-// absence sèche : ce n'était pas seulement un clic en trop, c'était un calcul faux.
-// ⚠️ NAMESPACE pma- OBLIGATOIRE. closePlanDayModal() ne retire que la classe .open : le
-//    HTML de l'éditeur de jour RESTE dans le DOM. Réutiliser ici .plan-abs-mo, #plan-abs-h
-//    ou #plan-abs-h-wrap créerait des ids dupliqués et un querySelectorAll croisé entre les
-//    deux feuilles. PLAN_ABS_MOTIFS reste la source unique ; seul le rendu est distinct.
-var _pmaSel='arret';
-// 'retard' se saisit en heures : appliquer le même retard à douze jours n'a pas de sens.
-// Il reste disponible dans l'éditeur de jour, jour par jour.
-// ══ EFFECTIF EN SELECTION MULTIPLE ══
-// Contrairement a Recup / Chaleur / Effacer, l'ecriture FUSIONNE dans l'entree du
-// jour au lieu de la remplacer : on pose l'effectif APRES avoir pose les heures,
-// jamais l'inverse. Un _eb[d]={effectif:n} effacerait les horaires de la vendange.
+
+// ══ EFFECTIF D'UNE ÉQUIPE COLLECTIVE ══
+// L'ecriture FUSIONNE dans l'entree du jour au lieu de la remplacer : on pose
+// l'effectif APRES avoir pose les heures, jamais l'inverse. Un {effectif:n} nu
+// effacerait les horaires de la vendange.
 // Passe par openPrompt (#ovPrompt) : la boite de saisie native du navigateur
-// n'affiche RIEN du tout en PWA iOS — le bouton semblerait mort (lot UX-1).
-function planMultiEffectif(){
-  var keys=Object.keys(_pl2Sel);
-  if(!keys.length){showToast('Touchez d\u2019abord des cases dans la grille','#E07060');return;}
-  var noms={};keys.forEach(function(k){var i=k.lastIndexOf('|');noms[k.slice(0,i)]=1;});
+// n'affiche RIEN en PWA iOS — le bouton semblerait mort (lot UX-1).
+function planSelEffectif(){
+  if(!isAdmin())return;
+  var keys=_planSelKeys();
+  if(!keys.length)return;
+  var noms={};keys.forEach(function(k){noms[_planSelParse(k).nom]=1;});
   var colls=Object.keys(noms).filter(function(n){
     var m=(window.MEMBRES||[]).find(function(x){return x.nom===n;});
     return !!(m&&window._mvEstCollectif&&window._mvEstCollectif(m));
   }).sort();
-  if(!colls.length){
-    showToast('Aucune \u00e9quipe collective dans la s\u00e9lection \u2014 \u00e0 activer dans R\u00e9glages \u203a \u00c9quipe','#B85A1A');
-    return;
-  }
+  if(!colls.length)return;
   if(typeof window.openPrompt!=='function'){showToast('Saisie indisponible','#C0392B');return;}
   var m0=(window.MEMBRES||[]).find(function(x){return x.nom===colls[0];});
   window.openPrompt({
     icone:'\u{1F465}',
     titre:'Combien de personnes\u00a0?',
-    sub:colls.join(', ')+' \u00b7 '+keys.length+' jour'+(keys.length>1?'s':'')+' s\u00e9lectionn\u00e9'+(keys.length>1?'s':''),
+    sub:colls.join(', ')+' \u00b7 '+keys.length+' jour'+(keys.length>1?'s':'')+' coch\u00e9'+(keys.length>1?'s':''),
     valeur:window._mvEffDef(m0),
     unite:'pers.',
     type:'nombre',
@@ -1796,20 +1962,20 @@ function _planEffApply(v){
   if(isNaN(n)||n<1){showToast('Indiquez un nombre de personnes (1 minimum)','#B85A1A');return;}
   n=Math.min(999,n);
   var ok=0,skip=0,noH=0;
-  Object.keys(_pl2Sel).forEach(function(k){
-    var i=k.lastIndexOf('|'),nom=k.slice(0,i),d=parseInt(k.slice(i+1),10);
-    var mbr=(window.MEMBRES||[]).find(function(x){return x.nom===nom;});
+  _planSelKeys().forEach(function(k){
+    var p=_planSelParse(k);
+    var mbr=(window.MEMBRES||[]).find(function(x){return x.nom===p.nom;});
     if(!mbr||!(window._mvEstCollectif&&window._mvEstCollectif(mbr))){skip++;return;}
-    if(isNaN(d)||!_planInContract(mbr,planMonth,d)){skip++;return;}
-    var _eb=_pEntEnsure(nom,planMonth);
-    var e=_eb[d]||{};
+    if(isNaN(p.d)||!_planInContract(mbr,planMonth,p.d)){skip++;return;}
+    var _eb=_pEntEnsure(p.nom,planMonth);
+    var e=_eb[p.d]||{};
     e.effectif=n;
-    _eb[d]=e;
+    _eb[p.d]=e;
     ok++;
     // Un effectif sans heures ne produit AUCUN total : 8 h x 0 personne et
     // 0 h x 30 personnes donnent le meme zero. On le dit plutot que de laisser
     // chercher pourquoi « ca ne compte rien ».
-    if(_planEffective(_planPlId(mbr),planMonth,d,e)<=0.0001)noH++;
+    if(_planEffective(_planPlId(mbr),planMonth,p.d,e)<=0.0001)noH++;
   });
   window.PLANNING_ENTRIES=PLANNING_ENTRIES;
   if(ok>0&&window.fbSave)window.fbSave('planning_entries',PLANNING_ENTRIES);
@@ -1819,262 +1985,27 @@ function _planEffApply(v){
        +(noH>0?(' \u00b7 \u26a0 '+noH+' sans heures pos\u00e9es'):''))
     :'Aucune case d\u2019\u00e9quipe collective dans la s\u00e9lection';
   showToast(msg,ok>0?(noH>0?'#B85A1A':'#3D6B27'):'#E07060');
-  planToggleMulti(true);
-  _pl2Refresh();
-}
-function _pmaMotifs(){return PLAN_ABS_MOTIFS.filter(function(m){return !m.heures;});}
-
-function _pmaInject(){
-  if(document.getElementById('ovPlanMultiAbs'))return;
-  var host=document.getElementById('app-content-wrap')||document.getElementById('app-root')||document.body;
-  var wrap=document.createElement('div');
-  wrap.innerHTML='<div class="overlay" id="ovPlanMultiAbs" onclick="if(event.target===this)closePlanMultiAbs()">'
-    +'<div class="pl2-sheet">'
-      +'<div class="pl2-sh-hdr">'
-        +'<div class="pl2-sh-grab"></div>'
-        +'<button class="pl2-ed-x" onclick="closePlanMultiAbs()" aria-label="Fermer">\u00d7</button>'
-        +'<div class="pl2-ed-d">\u2715 Marquer absent</div>'
-        +'<div class="pl2-ed-s" id="pma-sub">\u2014 jours s\u00e9lectionn\u00e9s</div>'
-      +'</div>'
-      +'<div class="pl2-sh-body" id="pma-body"></div>'
-      +'<div class="pl2-ed-foot">'
-        +'<button class="pl2-ed-btn pl2-ed-ghost" onclick="closePlanMultiAbs()">Annuler</button>'
-        +'<button class="pl2-ed-btn pl2-ed-dark" id="pma-apply" onclick="planMultiAbsApply()">Appliquer</button>'
-      +'</div>'
-    +'</div>'
-  +'</div>';
-  host.appendChild(wrap.firstElementChild);
-}
-
-function openPlanMultiAbs(){
-  if(!isAdmin())return;
-  var n=Object.keys(_pl2Sel).length;
-  if(!n){showToast('Touchez d\u2019abord des cases dans la grille','#E07060');return;}
-  _pmaInject();
-  _pmaSel='arret';
-  var body=document.getElementById('pma-body');
-  if(body){
-    body.innerHTML='<div class="plan-sec-lbl">Motif de l\u2019absence</div>'
-      +'<div id="pma-mo-list">'+_pmaMotifsHtml(_pmaSel)+'</div>'
-      +'<div class="plan-modal-lbl" style="margin-top:8px">Commentaire (optionnel)</div>'
-      +'<input type="text" id="pma-com" maxlength="80" placeholder="Pr\u00e9cision port\u00e9e sur chaque jour" style="width:100%;border:2px solid var(--gris-clair);border-radius:11px;padding:11px;font-size:15px;font-family:inherit;outline:none;background:var(--bg-card);color:var(--texte);box-sizing:border-box">'
-      +'<div class="pl2-note" style="margin-top:8px">Le motif s\u2019applique \u00e0 tous les jours coch\u00e9s. Les jours hors contrat sont ignor\u00e9s. Le retard, qui se saisit en heures, reste dans l\u2019\u00e9diteur de jour.</div>';
-  }
-  var sub=document.getElementById('pma-sub');
-  if(sub)sub.textContent=n+(n>1?' jours s\u00e9lectionn\u00e9s':' jour s\u00e9lectionn\u00e9');
-  var ap=document.getElementById('pma-apply');
-  if(ap)ap.textContent='Marquer '+n+' jour'+(n>1?'s':'');
-  var ov=document.getElementById('ovPlanMultiAbs');
-  if(ov)ov.classList.add('open');
-}
-function closePlanMultiAbs(){var ov=document.getElementById('ovPlanMultiAbs');if(ov)ov.classList.remove('open');}
-
-function _pmaMotifsHtml(sel){
-  var h='';
-  _pmaMotifs().forEach(function(mo){
-    var on=(mo.id===sel), ef=_planAbsEffet(mo);
-    h+='<button type="button" class="pma-mo" data-mo="'+_escAttr(mo.id)+'" onclick="planMultiSetAbsMotif(\''+_escAttr(mo.id)+'\')" '
-      +'style="display:flex;gap:9px;align-items:flex-start;width:100%;padding:10px 11px;margin-bottom:6px;'
-      +'border:1.5px solid '+(on?'var(--terre)':'var(--gris-clair)')+';border-radius:11px;'
-      +'background:'+(on?'var(--terre-pale)':'var(--bg-card)')+';font-family:inherit;cursor:pointer;text-align:left">'
-      +'<span class="pma-r" style="width:15px;height:15px;border-radius:50%;flex-shrink:0;margin-top:2px;'
-      +'border:2px solid '+(on?'var(--terre)':'var(--gris)')+';background:'+(on?'var(--terre)':'transparent')+';box-shadow:inset 0 0 0 2px var(--bg-card)"></span>'
-      +'<span style="flex:1">'
-        +'<span style="display:block;font-size:13px;font-weight:600;color:var(--texte)">'+_escHtml(mo.ico)+' '+_escHtml(mo.nom)+'</span>'
-        +'<span style="display:block;font-size:11px;color:var(--texte-doux);margin-top:1px;line-height:1.3">'+_escHtml(mo.sub)+'</span>'
-        +'<span style="display:block;font-size:11px;font-weight:600;margin-top:3px;line-height:1.3;color:'+ef.c+'">'+ef.t+'</span>'
-      +'</span>'
-    +'</button>';
-  });
-  return h;
-}
-// Portée volontairement limitée à #pma-mo-list : les tuiles de l'éditeur de jour
-// (.plan-abs-mo) restent dans le DOM après fermeture et ne doivent pas être touchées.
-function planMultiSetAbsMotif(id){
-  _pmaSel=id;
-  var list=document.getElementById('pma-mo-list'); if(!list)return;
-  var btns=list.querySelectorAll('.pma-mo');
-  for(var i=0;i<btns.length;i++){
-    var b=btns[i], on=(b.getAttribute('data-mo')===id);
-    b.style.borderColor=on?'var(--terre)':'var(--gris-clair)';
-    b.style.background=on?'var(--terre-pale)':'var(--bg-card)';
-    var r=b.querySelector('.pma-r');
-    if(r){r.style.borderColor=on?'var(--terre)':'var(--gris)';r.style.background=on?'var(--terre)':'transparent';}
-  }
-}
-
-function planMultiAbsApply(){
-  if(!isAdmin())return;
-  var keys=Object.keys(_pl2Sel);
-  if(!keys.length){closePlanMultiAbs();return;}
-  var mo=_planAbsDef(_pmaSel);
-  var com=((document.getElementById('pma-com')||{}).value||'').trim();
-  var n=0, skip=0;
-  keys.forEach(function(k){
-    var i=k.lastIndexOf('|'), nom=k.slice(0,i), d=parseInt(k.slice(i+1),10);
-    var mbr=(window.MEMBRES||[]).find(function(m){return m.nom===nom;});
-    if(!mbr||!_planInContract(mbr,planMonth,d)){skip++;return;}
-    _pEntEnsure(nom,planMonth)[d]={absent:true,motif:mo.id,comment:com};
-    n++;
-  });
-  window.PLANNING_ENTRIES=PLANNING_ENTRIES;
-  if(n>0&&window.fbSave)window.fbSave('planning_entries',PLANNING_ENTRIES);
-  closePlanMultiAbs();
-  planToggleMulti(true);
-  showToast(n>0?('\u2705 '+mo.ico+' '+mo.nom+' \u00b7 '+n+'\u00a0j'+(skip>0?' \u00b7 '+skip+' ignor\u00e9'+(skip>1?'s':''):'')):'Aucun jour applicable dans la s\u00e9lection',n>0?'#3D6B27':'#E07060');
+  planSelClear();
   _pl2Refresh();
 }
 
-// ── HEURES TRAVAILLÉES en sélection multiple (applique un horaire aux jours cochés) ──
-var _pmhCont=false;
-var _pmhRemp=false;   // ★ bascule « jour de remplacement » de la feuille Heures multiple
-
-// ★ Jours de la selection qui sont SANS heures au planning (fermeture, samedi, repos).
-//   Seuls ceux-la peuvent etre des jours de remplacement — meme regle que l'editeur de jour
-//   (isNP = pl===0), pour qu'un seul et meme critere gouverne les deux chemins.
-//   Renvoie aussi le nombre de conges deja poses dessus : c'est ce que la bascule remplacera,
-//   et l'annoncer AVANT d'appliquer evite la surprise d'un conge efface en silence.
-function _pmhNPStats(){
+// ★ Jours de la selection SANS heures au planning (fermeture, samedi, repos).
+//   Seuls ceux-la peuvent etre des jours de remplacement. Renvoie aussi le nombre
+//   de conges deja poses dessus : c'est ce que la bascule remplacera, et l'annoncer
+//   AVANT d'appliquer evite la surprise d'un conge efface en silence.
+function _pmhNPStats(keys){
   var np=0,cp=0;
-  Object.keys(_pl2Sel).forEach(function(k){
-    var i=k.lastIndexOf('|'),nom=k.slice(0,i),d=parseInt(k.slice(i+1),10);
-    var mbr=(window.MEMBRES||[]).find(function(m){return m.nom===nom;});
-    if(!mbr||!_planInContract(mbr,planMonth,d))return;
-    if(_planPlanned(_planPlId(mbr),planMonth,d)>0)return;
+  (keys||_planSelKeys()).forEach(function(k){
+    var p=_planSelParse(k);
+    var mbr=(window.MEMBRES||[]).find(function(m){return m.nom===p.nom;});
+    if(!mbr||isNaN(p.d)||!_planInContract(mbr,planMonth,p.d))return;
+    if(_planPlanned(_planPlId(mbr),planMonth,p.d)>0)return;
     np++;
-    var ex=_pEntDay(nom,planMonth,d);
+    var ex=_pEntDay(p.nom,planMonth,p.d);
     if(ex&&ex.type==='cp')cp++;
   });
   return {np:np,cp:cp};
 }
-function planMultiHeures(){
-  var n=Object.keys(_pl2Sel).length;
-  if(!n){showToast('Touchez d\u2019abord des cases dans la grille','#E07060');return;}
-  _pmhCont=false;
-  _pmhRemp=false;
-  var _np=_pmhNPStats();
-  var deb='07:00',fin='16:30';
-  var body=document.getElementById('pmh-body');
-  if(body){
-    body.innerHTML='<div class="plan-modal-lbl">Horaire de la journ\u00e9e</div>'
-      +'<div class="plan-time-row">'
-        +'<div class="plan-time-field"><div class="plan-time-lbl">Prise de service</div><input type="time" id="pmh-deb" value="'+deb+'" onchange="planMultiHCalc()" style="width:100%;border:2px solid var(--gris-clair);border-radius:11px;padding:11px;font-size:17px;font-family:monospace;outline:none;text-align:center;background:var(--gris-clair);color:var(--texte);box-sizing:border-box;cursor:pointer"></div>'
-        +'<div style="font-size:20px;color:var(--gris);align-self:flex-end;padding-bottom:11px;text-align:center">\u2192</div>'
-        +'<div class="plan-time-field"><div class="plan-time-lbl">Fin de service</div><input type="time" id="pmh-fin" value="'+fin+'" onchange="planMultiHCalc()" style="width:100%;border:2px solid var(--gris-clair);border-radius:11px;padding:11px;font-size:17px;font-family:monospace;outline:none;text-align:center;background:var(--gris-clair);color:var(--texte);box-sizing:border-box;cursor:pointer"></div>'
-      +'</div>'
-      +'<button id="pmh-cont-btn" onclick="planMultiHToggleCont()" class="plan-cont-btn">'
-        +'<span id="pmh-cont-chk" class="plan-cont-chk" style="display:flex;align-items:center;justify-content:center"></span>'
-        +'<span style="text-align:left"><span style="display:block;font-size:13px;font-weight:600;color:var(--texte)">Horaire continu</span><span style="display:block;font-size:11px;color:var(--texte-doux)">Sans coupure d\u00e9jeuner \u00b7 aucune pause d\u00e9duite</span></span>'
-      +'</button>'
-      +'<div id="pmh-calc" class="plan-calc-result"></div>'
-      +(_np.np>0?('<button id="pmh-remp-btn" onclick="planMultiHToggleRemp()" class="plan-cont-btn" style="margin-top:10px">'
-        +'<span id="pmh-remp-chk" class="plan-cont-chk" style="display:flex;align-items:center;justify-content:center"></span>'
-        +'<span style="text-align:left"><span id="pmh-remp-lbl" style="display:block;font-size:13px;font-weight:600;color:var(--texte-doux)">\u21c4 Jours de remplacement</span>'
-        +'<span style="display:block;font-size:11px;color:var(--texte-doux);line-height:1.35">'+_np.np+' jour'+(_np.np>1?'s':'')+' sans heures pr\u00e9vues dans la s\u00e9lection \u00b7 <strong>aucune heure suppl\u00e9mentaire</strong>'
-        +(_np.cp>0?(' \u00b7 remplace '+_np.cp+' cong\u00e9'+(_np.cp>1?'s':'')+' d\u00e9j\u00e0 pos\u00e9'+(_np.cp>1?'s':'')):'')+'</span></span>'
-      +'</button>'):'')
-      +'<div id="pmh-note" style="font-size:12px;color:var(--texte-doux);background:var(--bg-app);border:1px solid var(--gris-clair);border-radius:11px;padding:10px 13px;line-height:1.5;margin-top:10px">'+_pmhNoteTxt()+'</div>';
-  }
-  var sub=document.getElementById('pmh-sub');
-  if(sub)sub.textContent=n+(n>1?' jours s\u00e9lectionn\u00e9s':' jour s\u00e9lectionn\u00e9');
-  var ap=document.getElementById('pmh-apply');
-  if(ap)ap.textContent='Appliquer aux '+n+' jour'+(n>1?'s':'');
-  var ov=document.getElementById('ovPlanMultiH');
-  if(ov)ov.classList.add('open');
-  var _d=document.getElementById('pmh-deb'); if(_d)_d.value=deb;
-  var _f=document.getElementById('pmh-fin'); if(_f)_f.value=fin;
-  planMultiHCalc();
-}
-// ★ La note dit exactement ce que le bouton Appliquer va faire — elle change avec la bascule,
-//   parce que la promesse « les conges sont preserves » devient fausse quand on remplace.
-function _pmhNoteTxt(){
-  if(!_pmhRemp)return 'S\u2019applique \u00e0 tous les jours coch\u00e9s. Les cong\u00e9s, absences et r\u00e9cup\u00e9rations de la s\u00e9lection sont pr\u00e9serv\u00e9s.';
-  var s=_pmhNPStats();
-  return '\u21c4 <b>Mode remplacement</b> \u2014 seuls les <b>'+s.np+' jour'+(s.np>1?'s':'')+' sans heures pr\u00e9vues</b> re\u00e7oivent ces horaires'
-    +(s.cp>0?(', et <b>'+s.cp+' cong\u00e9'+(s.cp>1?'s':'')+'</b> y sera'+(s.cp>1?'nt':'')+' remplac\u00e9'+(s.cp>1?'s':'')+' par du travail'):'')
-    +'. Les jours d\u00e9j\u00e0 travaill\u00e9s au planning, les absences et les r\u00e9cup\u00e9rations ne bougent pas.'
-    +(s.cp>0?'<br>\u26a0\ufe0f Pense \u00e0 poser ces '+s.cp+' jour'+(s.cp>1?'s':'')+' de cong\u00e9 \u00e0 la nouvelle date, sinon ils ne seront pas d\u00e9compt\u00e9s du solde.':'');
-}
-function closePlanMultiH(){var ov=document.getElementById('ovPlanMultiH');if(ov)ov.classList.remove('open');}
-function planMultiHToggleCont(){
-  var btn=document.getElementById('pmh-cont-btn'),chk=document.getElementById('pmh-cont-chk');
-  if(!btn)return;
-  _pmhCont=btn.classList.toggle('active');
-  if(chk){chk.classList.toggle('on',_pmhCont);chk.textContent=_pmhCont?'\u2713':'';}
-  planMultiHCalc();
-}
-function planMultiHToggleRemp(){
-  var btn=document.getElementById('pmh-remp-btn'),chk=document.getElementById('pmh-remp-chk');
-  if(!btn)return;
-  _pmhRemp=btn.classList.toggle('active');
-  if(chk){chk.classList.toggle('on',_pmhRemp);chk.textContent=_pmhRemp?'\u2713':'';}
-  var lbl=document.getElementById('pmh-remp-lbl');
-  if(lbl)lbl.style.color=_pmhRemp?'var(--plan-acc-2,#5e51a0)':'var(--texte-doux)';
-  var note=document.getElementById('pmh-note');
-  if(note)note.innerHTML=_pmhNoteTxt();
-  var ap=document.getElementById('pmh-apply');
-  if(ap){
-    var nn=_pmhRemp?_pmhNPStats().np:Object.keys(_pl2Sel).length;
-    ap.textContent='Appliquer aux '+nn+' jour'+(nn>1?'s':'');
-  }
-}
-function planMultiHCalc(){
-  var res=document.getElementById('pmh-calc');
-  if(!res)return;
-  var deb=(document.getElementById('pmh-deb')||{}).value||'07:00';
-  var fin=(document.getElementById('pmh-fin')||{}).value||'16:30';
-  var h=_planTimingH(deb,fin,_pmhCont);
-  var _pauseMin=window.PLAN_PAUSE_MIN||PLAN_PAUSE_MIN||60;
-  var ds=deb.split(':'),fs=fin.split(':');
-  var span=(parseInt(fs[0])*60+parseInt(fs[1]||0))-(parseInt(ds[0])*60+parseInt(ds[1]||0));
-  var subTxt=_pmhCont?'horaire continu'
-    :(span>360?('\u2212'+_planFmt(_pauseMin/60)+' de coupure'+(window._planCoupureTxt?(function(t){return t?' '+t:'';})(_planCoupureTxt()):''))
-    :'sans coupure (moins de 6\u00a0h)');
-  res.innerHTML='<span style="font-size:11px;color:var(--texte-doux)">'+deb+' \u2192 '+fin+'<br>'+subTxt+'</span>'
-    +'<div style="text-align:right"><span style="font-size:24px;font-weight:700;color:var(--plan-acc-2,#5e51a0)">'+_planFmt(h)+'</span><span style="font-size:13px;font-weight:600;color:var(--texte-doux)">\u00a0h/j</span></div>';
-}
-function planMultiHApply(){
-  var keys=Object.keys(_pl2Sel);
-  if(!keys.length){closePlanMultiH();return;}
-  var deb=(document.getElementById('pmh-deb')||{}).value||'07:00';
-  var fin=(document.getElementById('pmh-fin')||{}).value||'16:30';
-  var h=_planTimingH(deb,fin,_pmhCont);
-  if(h<=0){showToast('Horaire invalide','#E07060');return;}
-  var n=0,skip=0,nCp=0;
-  keys.forEach(function(k){
-    var i=k.lastIndexOf('|'),nom=k.slice(0,i),d=parseInt(k.slice(i+1),10);
-    var mbr=(window.MEMBRES||[]).find(function(m){return m.nom===nom;});
-    if(!mbr||!_planInContract(mbr,planMonth,d)){skip++;return;}
-    var ex=_pEntDay(nom,planMonth,d);
-    var pl=_planPlanned(_planPlId(mbr),planMonth,d);
-    if(_pmhRemp){
-      // ★ Mode remplacement : on ne touche QUE les jours sans heures prevues, et on y
-      //   remplace un conge deja pose (c'est tout l'objet de l'echange). Une absence ou une
-      //   recuperation n'est jamais ecrasee : un arret de travail ne doit pas devenir du
-      //   travail par un clic groupe.
-      if(pl>0){skip++;return;}
-      if(ex&&(ex.absent||ex.type==='recup')){skip++;return;}
-      if(ex&&ex.type==='cp')nCp++;
-      _pEntEnsure(nom,planMonth)[d]={timing:{debut:deb,fin:fin,continu:_pmhCont},comment:'',remplacement:true};
-      n++;
-      return;
-    }
-    if(ex&&(ex.type==='cp'||ex.type==='recup'||ex.absent)){skip++;return;}
-    _pEntEnsure(nom,planMonth)[d]={timing:{debut:deb,fin:fin,continu:_pmhCont},comment:''};
-    n++;
-  });
-  window.PLANNING_ENTRIES=PLANNING_ENTRIES;
-  if(n>0&&window.fbSave)window.fbSave('planning_entries',PLANNING_ENTRIES);
-  closePlanMultiH();
-  var msg=n>0?((_pmhRemp?'\u21c4 ':'\u2705 ')+deb+' \u2192 '+fin+' \u00b7 '+_planFmt(h)+' h \u00b7 '+n+' j'
-    +(nCp>0?' \u00b7 '+nCp+' cong\u00e9'+(nCp>1?'s':'')+' remplac\u00e9'+(nCp>1?'s':''):'')
-    +(skip>0?' \u00b7 '+skip+' pr\u00e9serv\u00e9'+(skip>1?'s':''):''))
-    :(_pmhRemp?'Aucun jour sans heures pr\u00e9vues dans la s\u00e9lection':'Aucun jour applicable dans la s\u00e9lection');
-  showToast(msg,n>0?'#3D6B27':'#E07060');
-  planToggleMulti(true);
-  _pl2Refresh();
-}
-
 function planKpiAlert(){
   var mbrs=_pl2Actifs(),hit=null;
   for(var i=0;i<mbrs.length;i++){if(_planLegalBreaches(mbrs[i],planMonth)>0){hit=mbrs[i];break;}}
@@ -2086,8 +2017,10 @@ function planKpiAlert(){
 }
 function _pl2AbarSync(){
   var bar=document.getElementById('plan-abar');
-  if(bar)bar.style.display=(planTab==='equipe'&&isAdmin()&&!_pl2Multi)?'flex':'none';
-  if((planTab!=='equipe'||!isAdmin())&&_pl2Multi)planToggleMulti(true);
+  // La barre « Outils » s'efface quand une selection est en cours : la barre de
+  // selection prend sa place, au meme endroit de l'ecran.
+  if(bar)bar.style.display=(planTab==='equipe'&&isAdmin()&&_planSelCount()===0)?'flex':'none';
+  if((planTab!=='equipe'||!isAdmin())&&_planSelCount())planSelClear();
 }
 function _pl2Refresh(){
   renderPlanning();
@@ -2848,7 +2781,7 @@ function _planCpApplySel(){
   window.PLANNING_ENTRIES=PLANNING_ENTRIES;
   if(nMbr>0&&window.fbSave)window.fbSave('planning_entries',PLANNING_ENTRIES);
   closePlanCP();
-  planToggleMulti(true);
+  planSelClear();
   showToast(nMbr>0?('\u2705 Cong\u00e9s pos\u00e9s \u00b7 '+nMbr+' salari\u00e9'+(nMbr>1?'s':'')+' \u00b7 '+totJ+'\u00a0j d\u00e9compt\u00e9'+(totJ>1?'s':'')+(prot>0?' \u00b7 '+prot+' pr\u00e9serv\u00e9'+(prot>1?'s':''):'')):'Aucun jour d\u00e9comptable dans la s\u00e9lection',nMbr>0?'#3D6B27':'#E07060');
   _pl2Refresh();
 }
@@ -2874,7 +2807,7 @@ function _planCpRemoveSel(){
   window.PLANNING_ENTRIES=PLANNING_ENTRIES;
   if(nJ>0&&window.fbSave)window.fbSave('planning_entries',PLANNING_ENTRIES);
   closePlanCP();
-  planToggleMulti(true);
+  planSelClear();
   showToast(nJ>0?('Cong\u00e9s retir\u00e9s \u00b7 '+nMbr+' salari\u00e9'+(nMbr>1?'s':'')+' \u00b7 '+nJ+'\u00a0j'):'Aucun cong\u00e9 dans la s\u00e9lection',nJ>0?'#D97706':'#E07060');
   _pl2Refresh();
 }
@@ -3576,59 +3509,150 @@ function planImportCSV(targetId){
 }
 
 // ── Modal édition jour ──
+// ══════════════════════════════════════════════════════════════════════
+// LA FEUILLE DU JOUR — la même pour un jour et pour une sélection
+// ══════════════════════════════════════════════════════════════════════
+// Il y avait trois feuilles pour la même chose : l'éditeur d'un jour, « Heures »
+// en sélection, « Absence » en sélection. Trois rendus, trois calculs d'horaire,
+// trois jeux d'identifiants — et des règles qui divergeaient sans que rien ne le
+// dise. Il n'en reste qu'une : elle s'adapte au nombre de cases cochées.
+// ⚠️ Les identifiants (#plan-t-debut, #plan-cont-btn, #plan-abs-h…) sont désormais
+//    UNIQUES dans le DOM. C'est ce qui rend le namespace pma-/pmh- inutile.
+var _planEdKeys=[];
+
+function _planEdOne(){return _planEdKeys.length===1;}
+
+// Ouverture sur UN jour précis, sans passer par la grille : « Mon planning », la
+// fiche salarié, la visite guidée. La sélection en cours n'est pas touchée.
 function openPlanDayModal(nom,day){
   if(!isAdmin())return;
   var mbr=(window.MEMBRES||[]).find(function(m){return m.nom===nom;});
   if(!mbr)return;
+  _planEdKeys=[nom+'|'+day];
   _planEditDay={nom:nom,day:day,mbr:mbr};
+  _planSheetOpen(null);
+}
+
+// Ouverture depuis les cases cochées.
+function planSelSheet(mode){
+  if(!isAdmin())return;
+  var keys=_planSelKeys();
+  if(!keys.length)return;
+  _planEdKeys=keys.slice();
+  if(keys.length===1){
+    var p=_planSelParse(keys[0]);
+    var m=(window.MEMBRES||[]).find(function(x){return x.nom===p.nom;});
+    _planEditDay=m?{nom:p.nom,day:p.d,mbr:m}:null;
+  } else _planEditDay=null;
+  _planSheetOpen(mode||'travail');
+}
+
+function _planSheetOpen(mode){
+  var one=_planEdOne();
+  var html=one?_planSheetOneHtml(mode):_planSheetManyHtml(mode);
+  var sheet=document.getElementById('ovPlanDaySheet');
+  if(sheet)sheet.innerHTML=html;
+  // iOS Safari : innerHTML n'initialise pas .value sur input[type="time"] → horaires faux
+  var _elD=document.getElementById('plan-t-debut');
+  var _elF=document.getElementById('plan-t-fin');
+  if(_elD)_elD.value=_planEdT0;
+  if(_elF)_elF.value=_planEdT1;
+  var ov=document.getElementById('ovPlanDay');
+  if(ov)ov.classList.add('open');
+  planSetMode(_planModalMode);
+  planCalcResult();
+}
+
+// Horaires proposés à l'ouverture — mémorisés le temps du rendu pour le correctif iOS.
+var _planEdT0='08:00',_planEdT1='16:00';
+
+// ── Blocs communs aux deux rendus ──
+function _planSheetModes(withCp){
+  return '<div class="plan-modal-modes">'
+      +'<button class="plan-modal-mode" id="pmod-travail" onclick="planSetMode(\'travail\')">\u2713\u00a0 Travaill\u00e9</button>'
+      +(withCp?'<button class="plan-modal-mode" id="pmod-cp" onclick="planSetMode(\'cp\')">\u2600\u00a0 Cong\u00e9</button>':'')
+      +'<button class="plan-modal-mode" id="pmod-absent" onclick="planSetMode(\'absent\')">\u2715\u00a0 Absence</button>'
+      +'<button class="plan-modal-mode" id="pmod-recup" onclick="planSetMode(\'recup\')">\u21ba\u00a0 R\u00e9cup</button>'
+    +'</div>';
+}
+function _planSheetTiming(lbl,initCont,heatOn,rempHtml){
+  return '<div id="plan-timing-section">'
+      +'<div class="plan-modal-lbl">'+lbl+'</div>'
+      +'<div class="plan-time-row">'
+        +'<div class="plan-time-field"><div class="plan-time-lbl">Prise de service</div><input type="time" id="plan-t-debut" value="'+_planEdT0+'" onchange="planCalcResult()" style="width:100%;border:2px solid var(--gris-clair);border-radius:11px;padding:11px;font-size:17px;font-family:monospace;outline:none;text-align:center;background:var(--gris-clair);color:var(--texte);box-sizing:border-box;cursor:pointer"></div>'
+        +'<div style="font-size:20px;color:var(--gris);align-self:flex-end;padding-bottom:11px;text-align:center">\u2192</div>'
+        +'<div class="plan-time-field"><div class="plan-time-lbl">Fin de service</div><input type="time" id="plan-t-fin" value="'+_planEdT1+'" onchange="planCalcResult()" style="width:100%;border:2px solid var(--gris-clair);border-radius:11px;padding:11px;font-size:17px;font-family:monospace;outline:none;text-align:center;background:var(--gris-clair);color:var(--texte);box-sizing:border-box;cursor:pointer"></div>'
+      +'</div>'
+      +'<button id="plan-cont-btn" onclick="planToggleContinu()" class="plan-cont-btn'+(initCont?' active':'')+'">'
+        +'<span id="plan-cont-chk" class="plan-cont-chk'+(initCont?' on':'')+'" style="display:flex;align-items:center;justify-content:center">'+(initCont?'\u2713':'')+'</span>'
+        +'<span style="text-align:left"><span style="display:block;font-size:13px;font-weight:600;color:'+(initCont?PLAN_ACC2:'var(--texte-doux)')+'">Horaire continu</span><span style="display:block;font-size:11px;color:var(--texte-doux)">Sans coupure \u00b7 aucune coupure d\u00e9duite</span></span>'
+      +'</button>'
+      +'<button id="plan-heat-btn" onclick="planPresetChaleur()" class="pl2-heat-btn'+(heatOn?' on':'')+'">\ud83c\udf21 Chaleur \u00b7 06:00 \u2192 14:00 continu</button>'
+      +(rempHtml||'')
+      +'<div id="plan-calc-result" class="plan-calc-result"></div>'
+    +'</div>';
+}
+function _planSheetRemp(lblTxt,subTxt){
+  return '<button id="plan-remp-btn" onclick="planToggleRemp()" class="plan-cont-btn'+(_planEdRemp?' active':'')+'" style="margin-top:10px">'
+    +'<span id="plan-remp-chk" class="plan-cont-chk'+(_planEdRemp?' on':'')+'" style="display:flex;align-items:center;justify-content:center">'+(_planEdRemp?'\u2713':'')+'</span>'
+    +'<span style="text-align:left"><span id="plan-remp-lbl" style="display:block;font-size:13px;font-weight:600;color:'+(_planEdRemp?PLAN_ACC2:'var(--texte-doux)')+'">\u21c4 '+lblTxt+'</span>'
+    +'<span style="display:block;font-size:11px;color:var(--texte-doux);line-height:1.35">'+subTxt+'</span></span>'
+  +'</button>';
+}
+function _planSheetComment(val){
+  return '<div id="plan-comment-section">'
+      +'<div class="plan-modal-lbl" style="margin-top:12px">Commentaire <span style="font-size:11px;font-weight:400">(optionnel)</span></div>'
+      +'<input type="text" id="plan-comment" value="'+_escAttr(val||'')+'" placeholder="Ex\u00a0: chaleur, vendanges\u2026" style="width:100%;border:2px solid var(--gris-clair);border-radius:10px;padding:11px;font-size:14px;outline:none;font-family:inherit;box-sizing:border-box">'
+    +'</div>';
+}
+function _planSheetAbsSection(valH,initComment,manyOnly,prevuTxt){
+  return '<div id="plan-absent-section" style="display:none">'
+      +'<div class="plan-modal-lbl">Motif de l\'absence <span style="color:var(--rouge)">*</span></div>'
+      +_planAbsMotifsHtml(_planAbsSel,manyOnly)
+      +'<div id="plan-abs-h-wrap" style="display:'+((!manyOnly&&_planAbsDef(_planAbsSel).heures)?'block':'none')+';margin-top:4px">'
+        +'<div class="plan-modal-lbl">Heures non travaill\u00e9es</div>'
+        +'<div style="display:flex;gap:12px;align-items:center;margin-bottom:4px">'
+          +'<input type="number" id="plan-abs-h" step="0.25" min="0" max="24" value="'+(valH==null?0:Math.round(valH*100)/100)+'" style="width:90px;border:2px solid var(--gris-clair);border-radius:10px;padding:10px;font-size:18px;text-align:center;outline:none;background:var(--bg-card);color:var(--texte);box-sizing:border-box">'
+          +'<span style="font-size:13px;color:var(--texte-doux)">'+(prevuTxt||'h non travaill\u00e9es')+'</span>'
+        +'</div>'
+      +'</div>'
+      +'<div class="plan-modal-lbl" style="margin-top:10px">Pr\u00e9cision (facultatif)</div>'
+      +'<input type="text" id="plan-absent-reason" value="'+_escAttr(initComment||'')+'" placeholder="Ex\u00a0: reprise le 24" style="width:100%;border:2px solid var(--gris-clair);border-radius:10px;padding:11px;font-size:14px;outline:none;font-family:inherit;box-sizing:border-box;background:var(--bg-card)">'
+    +'</div>';
+}
+
+// ── Rendu : UNE case ──
+function _planSheetOneHtml(mode){
+  var nom=_planEditDay.nom,day=_planEditDay.day,mbr=_planEditDay.mbr;
   var plId=_planPlId(mbr);
   var pl=_planPlanned(plId,planMonth,day);
   var isNP=pl===0;
   var ent=_pEntDay(nom,planMonth,day);
   var f=_planFerie(planMonth,day);
   var defT=_planDefTiming(pl,plId,planMonth,day);
-  var initDebut=(ent&&ent.timing&&ent.timing.debut)||defT.d||'08:00';
-  var initFin=(ent&&ent.timing&&ent.timing.fin)||defT.f||'16:00';
+  _planEdT0=(ent&&ent.timing&&ent.timing.debut)||defT.d||'08:00';
+  _planEdT1=(ent&&ent.timing&&ent.timing.fin)||defT.f||'16:00';
   var initCont=!!(ent&&ent.timing&&ent.timing.continu);
   var initComment=(ent&&ent.comment)||'';
   _planEdHeat=!!(ent&&ent.canicule);
   _planEdRemp=!!(ent&&ent.remplacement);
-  _planModalMode=(ent&&ent.absent)?'absent':(ent&&ent.type==='cp')?'cp':(ent&&ent.type==='recup')?'recup':(isNP?'extra':'travail');
+  _planModalMode=mode||((ent&&ent.absent)?'absent':(ent&&ent.type==='cp')?'cp':(ent&&ent.type==='recup')?'recup':(isNP?'extra':'travail'));
   _planAbsSel=((ent&&ent.absent&&ent.motif)?_planAbsDef(ent.motif).id:'autre');
   var dowL=PLAN_JOURS_L[_planDow(planMonth,day)];
-  // plDisplay = heures attendues réelles (codes jour inclus) — cohérent avec le timing affiché
   var plDisplay=_planDayH(plId,planMonth,day,null);
   var tot=_planDays(planMonth);
   var sub=f?('\ud83c\udfd6 '+f+' \u2014 f\u00e9ri\u00e9'+(pl>0?' \u00b7 pr\u00e9vu '+_planFmt(plDisplay)+' h':''))
     :(pl>0?('Pr\u00e9vu\u00a0: '+_planFmt(plDisplay)+' h'+(defT.d?' \u00b7 '+defT.d+' \u2192 '+defT.f:'')+' \u00b7 planning '+plId)
     :'Repos pr\u00e9vu \u2014 heures saisies = jour suppl\u00e9mentaire \u00b7 CP / absence possibles (1 j, 0 h)');
 
-  // Bandeau de bascule salarié (sans fermer l'éditeur)
   var strip='';
   _pl2Actifs().forEach(function(m2){
     strip+='<button class="pl2-ms pl2-ms-dk'+(m2.nom===nom?' on':'')+'" onclick="planEdSwitch(\''+_escAttr(m2.nom)+'\')"><span class="pl2-ava" style="background:'+(m2.couleur||'#3D6B27')+'">'+_escHtml(m2.nom.charAt(0))+'</span>'+_escHtml(m2.nom)+'</button>';
   });
 
-  // Modes TOUJOURS visibles : un jour sans heures prévues (repos, ou congé importé
-  // « non travaillé » depuis un CSV) doit pouvoir recevoir un CP ou une absence
-  // (décompte 1 jour, 0 h — le solde CP compte en jours, pas en heures)
-  var modeHtml='<div class="plan-modal-modes">'
-      +'<button class="plan-modal-mode" id="pmod-travail" onclick="planSetMode(\'travail\')">\u2713\u00a0 Travaill\u00e9</button>'
-      +'<button class="plan-modal-mode" id="pmod-cp" onclick="planSetMode(\'cp\')">\u2600\u00a0 Cong\u00e9</button>'
-      +'<button class="plan-modal-mode" id="pmod-absent" onclick="planSetMode(\'absent\')">\u2715\u00a0 Absence</button>'
-      +'<button class="plan-modal-mode" id="pmod-recup" onclick="planSetMode(\'recup\')">\u21ba\u00a0 R\u00e9cup</button>'
-    +'</div>';
   var initCpH=ent&&ent.type==='cp'?(ent.heures||pl):pl;
-
-  // ── Annuler la saisie du jour ──
-  // Les quatre modes ne savent qu'ECRIRE : « Travaille » ne remet pas le jour au planning,
-  // il fige un horaire. Retirer une absence posee par erreur imposait donc de passer par la
-  // selection multiple > « Effacer », geste indevinable depuis la feuille du jour.
-  // Affiche UNIQUEMENT s'il y a quelque chose a annuler.
   var clrHtml='';
   if(ent){
-    // Le motif exact reste visible juste au-dessus (tuiles radio) : le titre n'a pas a le
-    // repeter — « l'absence · absence injustifiee » se lisait deux fois.
     var _clWhat=ent.absent?'l\u2019absence'
       :(ent.type==='cp')?'le cong\u00e9 pay\u00e9'
       :(ent.type==='recup')?'la r\u00e9cup\u00e9ration'
@@ -3644,7 +3668,9 @@ function openPlanDayModal(nom,day){
     +'</button>';
   }
 
-  var html='<div class="plan-modal-hdr">'
+  var rempHtml=isNP?_planSheetRemp('Jour de remplacement','\u00c9change avec un jour planifi\u00e9 pris ailleurs \u00b7 <strong>aucune heure suppl\u00e9mentaire</strong>'):'';
+
+  return '<div class="plan-modal-hdr">'
     +'<div style="width:36px;height:4px;background:rgba(255,255,255,0.2);border-radius:99px;margin:0 auto 12px"></div>'
     +'<div class="pl2-ed-nav">'
       +'<button class="pl2-ed-arr" onclick="planEdNav(-1)"'+(day<=1?' disabled':'')+' aria-label="Jour pr\u00e9c\u00e9dent">\u2039</button>'
@@ -3658,39 +3684,9 @@ function openPlanDayModal(nom,day){
     +'<div class="pl2-mstrip">'+strip+'</div>'
   +'</div>'
   +'<div id="plan-modal-body" style="overflow-y:auto;flex:1;padding:18px 24px 8px">'
-    +modeHtml
-    +'<div id="plan-timing-section">'
-      +'<div class="plan-modal-lbl">'+(isNP?'Heures travaill\u00e9es':'Horaires de la journ\u00e9e')+'</div>'
-      +'<div class="plan-time-row">'
-        +'<div class="plan-time-field"><div class="plan-time-lbl">Prise de service</div><input type="time" id="plan-t-debut" value="'+initDebut+'" onchange="planCalcResult()" style="width:100%;border:2px solid var(--gris-clair);border-radius:11px;padding:11px;font-size:17px;font-family:monospace;outline:none;text-align:center;background:var(--gris-clair);color:var(--texte);box-sizing:border-box;cursor:pointer"></div>'
-        +'<div style="font-size:20px;color:var(--gris);align-self:flex-end;padding-bottom:11px;text-align:center">\u2192</div>'
-        +'<div class="plan-time-field"><div class="plan-time-lbl">Fin de service</div><input type="time" id="plan-t-fin" value="'+initFin+'" onchange="planCalcResult()" style="width:100%;border:2px solid var(--gris-clair);border-radius:11px;padding:11px;font-size:17px;font-family:monospace;outline:none;text-align:center;background:var(--gris-clair);color:var(--texte);box-sizing:border-box;cursor:pointer"></div>'
-      +'</div>'
-      +'<button id="plan-cont-btn" onclick="planToggleContinu()" class="plan-cont-btn'+(initCont?' active':'')+'">'
-        +'<span id="plan-cont-chk" class="plan-cont-chk'+(initCont?' on':'')+'" style="display:flex;align-items:center;justify-content:center">'+(initCont?'\u2713':'')+'</span>'
-        +'<span style="text-align:left"><span style="display:block;font-size:13px;font-weight:600;color:'+(initCont?PLAN_ACC2:'var(--texte-doux)')+'">Horaire continu</span><span style="display:block;font-size:11px;color:var(--texte-doux)">Sans coupure d\u00e9jeuner \u00b7 aucune pause d\u00e9duite</span></span>'
-      +'</button>'
-      +'<button id="plan-heat-btn" onclick="planPresetChaleur()" class="pl2-heat-btn'+(_planEdHeat?' on':'')+'">\ud83c\udf21 Chaleur \u00b7 06:00 \u2192 14:00 continu</button>'
-      +(isNP?('<button id="plan-remp-btn" onclick="planToggleRemp()" class="plan-cont-btn'+(_planEdRemp?' active':'')+'">'
-        +'<span id="plan-remp-chk" class="plan-cont-chk'+(_planEdRemp?' on':'')+'" style="display:flex;align-items:center;justify-content:center">'+(_planEdRemp?'\u2713':'')+'</span>'
-        +'<span style="text-align:left"><span id="plan-remp-lbl" style="display:block;font-size:13px;font-weight:600;color:'+(_planEdRemp?PLAN_ACC2:'var(--texte-doux)')+'">\u21c4 Jour de remplacement</span>'
-        +'<span style="display:block;font-size:11px;color:var(--texte-doux);line-height:1.35">\u00c9change avec un jour planifi\u00e9 pris ailleurs \u00b7 <strong>aucune heure suppl\u00e9mentaire</strong></span></span>'
-      +'</button>'):'')
-      +'<div id="plan-calc-result" class="plan-calc-result"></div>'
-    +'</div>'
-    +'<div id="plan-absent-section" style="display:none">'
-      +'<div class="plan-modal-lbl">Motif de l\'absence <span style="color:var(--rouge)">*</span></div>'
-      +_planAbsMotifsHtml(_planAbsSel)
-      +'<div id="plan-abs-h-wrap" style="display:'+(_planAbsDef(_planAbsSel).heures?'block':'none')+';margin-top:4px">'
-        +'<div class="plan-modal-lbl">Heures non travaill\u00e9es</div>'
-        +'<div style="display:flex;gap:12px;align-items:center;margin-bottom:4px">'
-          +'<input type="number" id="plan-abs-h" step="0.25" min="0" max="24" value="'+(Math.round(_planAbsH(ent)*100)/100)+'" style="width:90px;border:2px solid var(--gris-clair);border-radius:10px;padding:10px;font-size:18px;text-align:center;outline:none;background:var(--bg-card);color:var(--texte);box-sizing:border-box">'
-          +'<span style="font-size:13px;color:var(--texte-doux)">h sur '+_planFmt(plDisplay)+' h pr\u00e9vues</span>'
-        +'</div>'
-      +'</div>'
-      +'<div class="plan-modal-lbl" style="margin-top:10px">Pr\u00e9cision (facultatif)</div>'
-      +'<input type="text" id="plan-absent-reason" value="'+_escAttr(ent&&ent.absent?initComment:'')+'" placeholder="Ex\u00a0: reprise le 24" style="width:100%;border:2px solid var(--gris-clair);border-radius:10px;padding:11px;font-size:14px;outline:none;font-family:inherit;box-sizing:border-box;background:var(--bg-card)">'
-    +'</div>'
+    +_planSheetModes(true)
+    +_planSheetTiming(isNP?'Heures travaill\u00e9es':'Horaires de la journ\u00e9e',initCont,_planEdHeat,rempHtml)
+    +_planSheetAbsSection(_planAbsH(ent),(ent&&ent.absent)?initComment:'',false,'h sur '+_planFmt(plDisplay)+' h pr\u00e9vues')
     +'<div id="plan-cp-section" style="display:none">'
       +'<div class="plan-modal-lbl">Heures d\u00e9compt\u00e9es</div>'
       +'<div style="display:flex;gap:12px;align-items:center;margin-bottom:12px">'
@@ -3707,10 +3703,7 @@ function openPlanDayModal(nom,day){
         +'\u21ba Jour pris en r\u00e9cup\u00e9ration \u2014 compte comme pr\u00e9sence pay\u00e9e (\u00e9cart neutre) et d\u00e9duit <strong>'+_planFmt(plDisplay)+'</strong> du compteur d\u2019heures sup.'
       +'</div>'
     +'</div>'
-    +'<div id="plan-comment-section">'
-      +'<div class="plan-modal-lbl" style="margin-top:12px">Commentaire <span style="font-size:11px;font-weight:400">(optionnel)</span></div>'
-      +'<input type="text" id="plan-comment" value="'+_escAttr(!(ent&&ent.absent)?initComment:'')+'" placeholder="Ex\u00a0: chaleur, vendanges\u2026" style="width:100%;border:2px solid var(--gris-clair);border-radius:10px;padding:11px;font-size:14px;outline:none;font-family:inherit;box-sizing:border-box">'
-    +'</div>'
+    +_planSheetComment(!(ent&&ent.absent)?initComment:'')
     +clrHtml
   +'</div>'
   +'<div class="pl2-ed-foot">'
@@ -3718,30 +3711,85 @@ function openPlanDayModal(nom,day){
     +'<button class="pl2-ed-btn pl2-ed-dark" onclick="savePlanDay(false)">Enregistrer</button>'
     +'<button class="pl2-ed-btn pl2-ed-acc" onclick="savePlanDay(true)">Enreg. \u2192 suiv. \u203a</button>'
   +'</div>';
-
-  var sheet=document.getElementById('ovPlanDaySheet');
-  if(sheet)sheet.innerHTML=html;
-  // iOS Safari fix : innerHTML n'initialise pas .value sur input[type="time"] → horaires toujours faux
-  var _elD=document.getElementById('plan-t-debut');
-  var _elF=document.getElementById('plan-t-fin');
-  if(_elD)_elD.value=initDebut;
-  if(_elF)_elF.value=initFin;
-  var ov=document.getElementById('ovPlanDay');
-  if(ov)ov.classList.add('open');
-  // Set initial mode
-  planSetMode(_planModalMode);
-  planCalcResult();
 }
 
-// ── Navigation à l'intérieur de l'éditeur (jour ↔ jour, salarié ↔ salarié) ──
+// ── Rendu : PLUSIEURS cases ──
+function _planSheetManyHtml(mode){
+  var keys=_planEdKeys,n=keys.length;
+  var st=_planSelStats(),np=_pmhNPStats(keys);
+  _planEdT0='07:00';_planEdT1='16:30';
+  _planEdHeat=false;_planEdRemp=false;
+  _planModalMode=(mode==='absent'||mode==='recup')?mode:'travail';
+  _planAbsSel='arret';
+  var rempHtml=np.np>0?_planSheetRemp('Jours de remplacement',
+      np.np+' jour'+(np.np>1?'s':'')+' sans heures pr\u00e9vues dans la s\u00e9lection \u00b7 <strong>aucune heure suppl\u00e9mentaire</strong>'
+      +(np.cp>0?(' \u00b7 remplace '+np.cp+' cong\u00e9'+(np.cp>1?'s':'')+' d\u00e9j\u00e0 pos\u00e9'+(np.cp>1?'s':'')):'')):'';
+
+  return '<div class="plan-modal-hdr">'
+    +'<div style="width:36px;height:4px;background:rgba(255,255,255,0.2);border-radius:99px;margin:0 auto 12px"></div>'
+    +'<div class="pl2-ed-nav">'
+      +'<div class="pl2-ed-mid">'
+        +'<div class="pl2-ed-d">'+n+' jours coch\u00e9s</div>'
+        +'<div class="pl2-ed-s">'+_escHtml(_planSelResume())+'</div>'
+      +'</div>'
+      +'<button class="pl2-ed-x" onclick="closePlanDayModal()" aria-label="Fermer">\u00d7</button>'
+    +'</div>'
+  +'</div>'
+  +'<div id="plan-modal-body" style="overflow-y:auto;flex:1;padding:18px 24px 8px">'
+    +_planSheetModes(false)
+    +_planSheetTiming('Horaire appliqu\u00e9 aux '+n+' jours',false,false,rempHtml)
+    +_planSheetAbsSection(null,'',true)
+    +'<div id="plan-recup-section" style="display:none">'
+      +'<div class="plan-modal-lbl">R\u00e9cup\u00e9ration</div>'
+      +'<div style="font-size:12px;color:var(--plan-acc);background:var(--plan-acc-pale);border:1px solid rgba(123,109,184,0.4);padding:10px 12px;border-radius:10px;line-height:1.5">'
+        +'\u21ba Chaque jour coch\u00e9 devient une r\u00e9cup\u00e9ration \u2014 pr\u00e9sence pay\u00e9e, \u00e9cart neutre, heures d\u00e9duites du compteur.'
+      +'</div>'
+    +'</div>'
+    +_planSheetComment('')
+    +'<div id="plan-sheet-note" style="font-size:12px;color:var(--texte-doux);background:var(--bg-app);border:1px solid var(--gris-clair);border-radius:11px;padding:10px 13px;line-height:1.5;margin-top:12px">'+_planSheetNote()+'</div>'
+    +(st.saisis>0?('<button type="button" onclick="planSelAction(\'clr\');closePlanDayModal();" '
+      +'style="display:block;width:100%;margin-top:14px;padding:11px 13px;border:1.5px solid var(--gris-clair);border-radius:12px;background:var(--bg-card);font-family:inherit;cursor:pointer;text-align:left">'
+      +'<span style="display:block;font-size:13.5px;font-weight:700;color:var(--rouge)">\u21a9 Effacer les saisies de ces jours</span>'
+      +'<span style="display:block;font-size:11.5px;color:var(--texte-doux);margin-top:2px;line-height:1.35">'+st.saisis+' jour'+(st.saisis>1?'s':'')+' revient'+(st.saisis>1?'':'')+' au planning pr\u00e9vu.</span>'
+    +'</button>'):'')
+  +'</div>'
+  +'<div class="pl2-ed-foot">'
+    +'<button class="pl2-ed-btn pl2-ed-ghost" onclick="closePlanDayModal()">Fermer</button>'
+    +'<button class="pl2-ed-btn pl2-ed-dark" id="plan-sheet-apply" onclick="savePlanDay(false)">Appliquer aux '+n+' jours</button>'
+  +'</div>';
+}
+
+// ★ La note dit exactement ce que le bouton va faire — elle change avec la bascule,
+//   parce que la promesse « les congés sont préservés » devient fausse en remplacement.
+function _planSheetNote(){
+  if(_planModalMode==='absent')return 'Le motif s\u2019applique \u00e0 tous les jours coch\u00e9s. Un motif qui se compte en heures (retard) se saisit jour par jour.';
+  if(_planModalMode==='recup')return 'Les jours d\u00e9j\u00e0 en cong\u00e9, en absence ou sans heures pr\u00e9vues sont pr\u00e9serv\u00e9s.';
+  if(!_planEdRemp)return 'S\u2019applique \u00e0 tous les jours coch\u00e9s. Les cong\u00e9s, absences et r\u00e9cup\u00e9rations de la s\u00e9lection sont pr\u00e9serv\u00e9s.';
+  var s=_pmhNPStats(_planEdKeys);
+  return '\u21c4 <b>Mode remplacement</b> \u2014 seuls les <b>'+s.np+' jour'+(s.np>1?'s':'')+' sans heures pr\u00e9vues</b> re\u00e7oivent ces horaires'
+    +(s.cp>0?(', et <b>'+s.cp+' cong\u00e9'+(s.cp>1?'s':'')+'</b> y sera'+(s.cp>1?'nt':'')+' remplac\u00e9'+(s.cp>1?'s':'')+' par du travail'):'')
+    +'. Les jours d\u00e9j\u00e0 travaill\u00e9s au planning, les absences et les r\u00e9cup\u00e9rations ne bougent pas.'
+    +(s.cp>0?'<br>\u26a0\ufe0f Pense \u00e0 poser ces '+s.cp+' jour'+(s.cp>1?'s':'')+' de cong\u00e9 \u00e0 la nouvelle date, sinon ils ne seront pas d\u00e9compt\u00e9s du solde.':'');
+}
+function _planSheetNoteSync(){
+  var el=document.getElementById('plan-sheet-note');
+  if(el)el.innerHTML=_planSheetNote();
+  var ap=document.getElementById('plan-sheet-apply');
+  if(ap){
+    var nn=_planEdRemp?_pmhNPStats(_planEdKeys).np:_planEdKeys.length;
+    ap.textContent='Appliquer aux '+nn+' jour'+(nn>1?'s':'');
+  }
+}
+
+// ── Navigation à l'intérieur de la feuille (jour ↔ jour, salarié ↔ salarié) ──
 function planEdNav(dir){
-  if(!_planEditDay)return;
+  if(!_planEdOne()||!_planEditDay)return;
   var d=_planEditDay.day+dir;
   if(d<1||d>_planDays(planMonth))return;
   openPlanDayModal(_planEditDay.nom,d);
 }
 function planEdSwitch(nom){
-  if(!_planEditDay||nom===_planEditDay.nom)return;
+  if(!_planEdOne()||!_planEditDay||nom===_planEditDay.nom)return;
   openPlanDayModal(nom,_planEditDay.day);
 }
 function planPresetChaleur(){
@@ -3764,6 +3812,7 @@ function closePlanDayModal(){
   var ov=document.getElementById('ovPlanDay');
   if(ov)ov.classList.remove('open');
   _planEditDay=null;
+  _planEdKeys=[];
   _planEdHeat=false;
   _planEdRemp=false;
 }
@@ -3792,6 +3841,7 @@ function planSetMode(mode){
   if(cs)cs.style.display=hideWork?'none':'block';
   if(cps)cps.style.display=mode==='cp'?'block':'none';
   if(rs)rs.style.display=mode==='recup'?'block':'none';
+  _planSheetNoteSync();
   planCalcResult();
 }
 
@@ -3805,6 +3855,7 @@ function planToggleRemp(){
   chk.textContent=_planEdRemp?'\u2713':'';
   var lbl=document.getElementById('plan-remp-lbl');
   if(lbl)lbl.style.color=_planEdRemp?PLAN_ACC2:'var(--texte-doux)';
+  _planSheetNoteSync();
   planCalcResult();
 }
 
@@ -3820,75 +3871,95 @@ function planToggleContinu(){
 
 function planCalcResult(){
   var res=document.getElementById('plan-calc-result');
-  if(!res||!_planEditDay)return;
+  if(!res||!_planEdKeys.length)return;
   var debut=(document.getElementById('plan-t-debut')||{}).value||'08:00';
   var fin=(document.getElementById('plan-t-fin')||{}).value||'16:00';
   var cont=document.getElementById('plan-cont-btn')&&document.getElementById('plan-cont-btn').classList.contains('active');
   var h=_planTimingH(debut,fin,cont);
-  var plId=_planPlId(_planEditDay.mbr);
-  // Référence = heures attendues réelles (codes jour inclus) — pas la grille brute
-  var plRef=_planDayH(plId,planMonth,_planEditDay.day,null);
-  var diff=plRef>0?Math.round((h-plRef)*60)/60:null; // précision à la minute (v4.32)
-  var diffStr=diff===null?'':Math.abs(diff)<0.05?'\u00a0\u00b7 = pr\u00e9vu':(diff>0?'\u00a0\u00b7 +':'\u00a0\u00b7 ')+_planFmt(diff)+' vs pr\u00e9vu';
-  var diffColor=!diff||Math.abs(diff)<0.05?'var(--texte-doux)':diff>0?'var(--vert-med)':'var(--orange)';
   var _pauseMin=window.PLAN_PAUSE_MIN||PLAN_PAUSE_MIN||60;
   var _pauseLbl=_planFmt(_pauseMin/60);
-  res.innerHTML='<span style="font-size:11px;color:var(--texte-doux)">'+debut+' \u2192 '+fin+(cont?' \u00b7 continu':'')+(h>6&&!cont?' \u00b7 \u2212'+_pauseLbl+' pause':'')+'</span>'
+  // Sur une selection, il n'y a pas UNE reference a comparer : chaque jour a la
+  // sienne. Afficher un ecart la-dessus serait un nombre faux avec l'autorite d'une
+  // mesure — on affiche les heures posees, et le nombre de jours touches.
+  if(!_planEdOne()||!_planEditDay){
+    var nn=_planEdRemp?_pmhNPStats(_planEdKeys).np:_planEdKeys.length;
+    res.innerHTML='<span style="font-size:11px;color:var(--texte-doux)">'+debut+' \u2192 '+fin+(cont?' \u00b7 continu':'')+(h>6&&!cont?' \u00b7 \u2212'+_pauseLbl+' de coupure':'')+'</span>'
+      +'<div><span style="font-size:22px;font-weight:700;color:var(--texte)">'+_planFmt(h)+'</span>'
+      +'<span style="font-size:12px;font-weight:600;color:var(--texte-doux)">\u00a0h/j \u00b7 '+nn+' jour'+(nn>1?'s':'')+'</span></div>';
+    return;
+  }
+  var plId=_planPlId(_planEditDay.mbr);
+  var plRef=_planDayH(plId,planMonth,_planEditDay.day,null);
+  var diff=plRef>0?Math.round((h-plRef)*60)/60:null;
+  var diffStr=diff===null?'':Math.abs(diff)<0.05?'\u00a0\u00b7 = pr\u00e9vu':(diff>0?'\u00a0\u00b7 +':'\u00a0\u00b7 ')+_planFmt(diff)+' vs pr\u00e9vu';
+  var diffColor=!diff||Math.abs(diff)<0.05?'var(--texte-doux)':diff>0?'var(--vert-med)':'var(--orange)';
+  res.innerHTML='<span style="font-size:11px;color:var(--texte-doux)">'+debut+' \u2192 '+fin+(cont?' \u00b7 continu':'')+(h>6&&!cont?' \u00b7 \u2212'+_pauseLbl+' de coupure':'')+'</span>'
     +'<div><span style="font-size:22px;font-weight:700;color:'+(Math.abs(diff||0)<0.05?'var(--texte)':diff>0?'var(--vert-med)':'var(--orange)')+'">'+_planFmt(h)+'</span>'
     +'<span style="font-size:12px;font-weight:600;color:'+diffColor+'">'+diffStr+'</span></div>'
     +((_planEdRemp&&plRef<=0)?'<div style="font-size:11.5px;font-weight:600;color:var(--bleu);margin-top:3px;line-height:1.35">\u21c4 Remplacement \u2014 compt\u00e9 dans la r\u00e9f\u00e9rence du mois, aucune heure suppl\u00e9mentaire</div>':'');
 }
 
+// ── L'écriture ──
+// Un seul point de sortie pour les deux rendus : ce qui a divergé entre l'éditeur
+// du jour et les feuilles de sélection ne peut plus diverger.
 function savePlanDay(next){
-  if(!_planEditDay)return;
-  var nom=_planEditDay.nom;
-  var day=_planEditDay.day;
-  var e={};
-  if(_planModalMode==='cp'){
-    var cpH=parseFloat((document.getElementById('plan-cp-heures')||{}).value)||_planPlanned(_planPlId(_planEditDay.mbr),planMonth,day);
-    e={type:'cp',heures:cpH};
+  var keys=_planEdKeys.slice();
+  if(!keys.length)return;
+  var one=(keys.length===1);
+  var nom=one&&_planEditDay?_planEditDay.nom:'';
+  var day=one&&_planEditDay?_planEditDay.day:0;
+  var r,msg;
+  if(_planModalMode==='cp'&&one){
+    var cpH=parseFloat((document.getElementById('plan-cp-heures')||{}).value);
+    if(isNaN(cpH))cpH=_planPlanned(_planPlId(_planEditDay.mbr),planMonth,day);
+    _pEntEnsure(nom,planMonth)[day]={type:'cp',heures:cpH};
+    r={n:1,skip:0};
+    msg='\u2705 '+nom+' \u00b7 '+PLAN_JOURS[_planDow(planMonth,day)]+' '+day+' enregistr\u00e9';
   } else if(_planModalMode==='recup'){
-    e={type:'recup'};
+    r=_planApplySimple(keys,'rec',one);
+    msg=r.n>0?('\u21ba R\u00e9cup \u00b7 '+r.n+' j'+(r.skip>0?' \u00b7 '+r.skip+' pr\u00e9serv\u00e9'+(r.skip>1?'s':''):'')):'Aucun jour applicable';
   } else if(_planModalMode==='absent'){
     var reason=((document.getElementById('plan-absent-reason')||{}).value||'').trim();
-    var _mo=_planAbsDef(_planAbsSel);
-    e={absent:true,motif:_mo.id,comment:reason};
-    if(_mo.heures){
-      var _mh=parseFloat((document.getElementById('plan-abs-h')||{}).value);
-      e.motif_h=(isNaN(_mh)||_mh<0)?0:_mh;
-    }
+    var hv=(document.getElementById('plan-abs-h')||{}).value;
+    r=_planApplyAbs(keys,_planAbsSel,reason,hv);
+    var mo=_planAbsDef(_planAbsSel);
+    msg=r.n>0?('\u2705 '+mo.ico+' '+mo.nom+' \u00b7 '+r.n+'\u00a0j'+(r.skip>0?' \u00b7 '+r.skip+' ignor\u00e9'+(r.skip>1?'s':''):'')):'Aucun jour applicable';
   } else {
     var debut=(document.getElementById('plan-t-debut')||{}).value||'08:00';
     var fin=(document.getElementById('plan-t-fin')||{}).value||'16:00';
     var cont=document.getElementById('plan-cont-btn')&&document.getElementById('plan-cont-btn').classList.contains('active');
     var comment=((document.getElementById('plan-comment')||{}).value||'').trim();
-    e={timing:{debut:debut,fin:fin,continu:cont},comment:comment};
-    if(_planEdHeat){e.canicule=true;if(!e.comment)e.comment='Chaleur';}
-    // ★ Remplacement : seulement sur un jour SANS heures prevues (echange de jour).
-    if(_planEdRemp&&_planPlanned(_planPlId(_planEditDay.mbr),planMonth,day)===0)e.remplacement=true;
+    if(_planTimingH(debut,fin,cont)<=0){showToast('Horaire invalide','#E07060');return;}
+    r=_planApplyHeures(keys,{debut:debut,fin:fin,continu:cont,comment:comment,heat:_planEdHeat,remp:_planEdRemp,force:one});
+    msg=r.n>0
+      ?(one?('\u2705 '+nom+' \u00b7 '+PLAN_JOURS[_planDow(planMonth,day)]+' '+day+' enregistr\u00e9')
+        :((_planEdRemp?'\u21c4 ':'\u2705 ')+debut+' \u2192 '+fin+' \u00b7 '+r.n+' j'
+          +(r.cp>0?' \u00b7 '+r.cp+' cong\u00e9'+(r.cp>1?'s':'')+' remplac\u00e9'+(r.cp>1?'s':''):'')
+          +(r.skip>0?' \u00b7 '+r.skip+' pr\u00e9serv\u00e9'+(r.skip>1?'s':''):'')))
+      :(_planEdRemp?'Aucun jour sans heures pr\u00e9vues dans la s\u00e9lection':'Aucun jour applicable');
   }
-  _pEntEnsure(nom,planMonth)[day]=e;
   window.PLANNING_ENTRIES=PLANNING_ENTRIES;
-  if(window.fbSave)window.fbSave('planning_entries',PLANNING_ENTRIES);
-  showToast('\u2705 '+nom+' \u00b7 '+PLAN_JOURS[_planDow(planMonth,day)]+' '+day+' enregistr\u00e9',PLAN_BG);
+  if(r.n>0&&window.fbSave)window.fbSave('planning_entries',PLANNING_ENTRIES);
+  showToast(msg,r.n>0?PLAN_BG:'#E07060');
+  if(!one)planSelClear();
   _pl2Refresh();
-  if(next===true&&day<_planDays(planMonth)){
+  if(one&&next===true&&day<_planDays(planMonth)){
     openPlanDayModal(nom,day+1);
   } else {
     closePlanDayModal();
   }
 }
 
-// ── Annuler la saisie d'une journee (absence, conge, recup, horaires) ──
+// ── Annuler la saisie d'une journee ──
 // Supprime la SEULE entree du jour courant : le jour retombe sur le planning theorique.
 // ⚠️ On ne supprime QUE le niveau jour. Nettoyer aussi les mois/annees/salaries devenus
 //    vides ferait chuter Object.keys(PLANNING_ENTRIES) et pourrait reveiller la garde
 //    anti-perte (chute de plus de moitie en une ecriture) sur un domaine a petit effectif.
-// Pas de confirmation : le geste est immediatement refaisable (les 4 modes sont juste au-dessus),
+// Pas de confirmation : le geste est immediatement refaisable (les modes sont juste au-dessus),
 // et le projet ne confirme pas non plus la suppression d'un acompte.
 function planClearDay(){
   if(!isAdmin()){showToast('R\u00e9serv\u00e9 \u00e0 l\u2019administrateur','#E07060');return;}
-  if(!_planEditDay)return;
+  if(!_planEdOne()||!_planEditDay)return;
   var nom=_planEditDay.nom, day=_planEditDay.day;
   var yb=_pEntYear(nom);
   var e=(yb&&yb[planMonth])?yb[planMonth][day]:null;
@@ -3898,7 +3969,7 @@ function planClearDay(){
   if(window.fbSave)window.fbSave('planning_entries',PLANNING_ENTRIES);
   showToast('\u21a9 '+nom+' \u00b7 '+PLAN_JOURS[_planDow(planMonth,day)]+' '+day+' \u2014 saisie annul\u00e9e',PLAN_BG);
   _pl2Refresh();
-  openPlanDayModal(nom,day); // re-rend la feuille sur l'etat « planning prevu »
+  openPlanDayModal(nom,day);
 }
 
 // ════════════════════════════════════════════════════════════════════
@@ -4726,24 +4797,26 @@ window.planToggleRemp       = planToggleRemp;
 window.planSetDuesDebut     = planSetDuesDebut;
 window.planCalcResult       = planCalcResult;
 
-// ── Refonte v5.08 : grille équipe / fiche salarié / multi-sélection / outils / chaleur ──
+// ── Grille équipe / fiche salarié / sélection / outils / chaleur ──
 window.pl2SetView           = pl2SetView;
 window.pl2Nav               = pl2Nav;
+// ★ La sélection : quatre gestes de cochage, un seul état. planToggleMulti,
+//   planMultiApply, planMultiHeures, planMultiHApply, planMultiAbsApply et leurs
+//   satellites ont disparu avec le mode « Sélection multiple ».
 window.planCellTap          = planCellTap;
-window.planToggleMulti      = planToggleMulti;
-window.planMultiApply       = planMultiApply;
-window.planMultiHeures      = planMultiHeures;
+window.planRowTap           = planRowTap;
+window.planColTap           = planColTap;
+window.planSelAll           = planSelAll;
+window.planSelClear         = planSelClear;
+window.planSelSheet         = planSelSheet;
+window.planSelAction        = planSelAction;
+window.planSelEffectif      = planSelEffectif;
 window._planEffN            = _planEffN;
 window._planCollH           = _planCollH;
 window._planEffMax          = _planEffMax;
-window.closePlanMultiH      = closePlanMultiH;
-window.planMultiHToggleCont = planMultiHToggleCont;
-window.planMultiHToggleRemp = planMultiHToggleRemp;
-window.planMultiHCalc       = planMultiHCalc;
-window.planMultiHApply      = planMultiHApply;
-window.closePlanMultiAbs    = closePlanMultiAbs;
-window.planMultiSetAbsMotif = planMultiSetAbsMotif;
-window.planMultiAbsApply    = planMultiAbsApply;
+window._planApplyHeures     = _planApplyHeures;
+window._planApplyAbs        = _planApplyAbs;
+window._planApplySimple     = _planApplySimple;
 window.planKpiAlert         = planKpiAlert;
 window.openPlanFiche        = openPlanFiche;
 window.closePlanFiche       = closePlanFiche;
@@ -4785,6 +4858,9 @@ window.planCaniculeCalc          = planCaniculeCalc;
 window.planCaniculeApply         = planCaniculeApply;
 window.planCaniculeRemove        = planCaniculeRemove;
 window.openPlanCP           = openPlanCP;
+// ★ Appelee depuis un onclick construit en JS (barre de selection) : sans cette
+//   ligne, le bouton « Conge » serait un clic mort. Signale par le preflight C6.
+window.openPlanCPSel        = openPlanCPSel;
 window.closePlanCP          = closePlanCP;
 window.planCpMb             = planCpMb;
 window.planCpApply          = planCpApply;

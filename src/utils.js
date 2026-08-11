@@ -23,7 +23,7 @@ export const GT_ADMIN_EMAIL = 'ngdevpro@gmail.com';
 // WHATS_NEW   : tableau vide = modal desactive pour cette version.
 // Format item : { emoji:'📅', titre:'Titre court', desc:'Phrase utilisateur.' }
 // Regle : seulement les changements visibles par les utilisateurs.
-export const APP_VERSION = '5.94';
+export const APP_VERSION = '5.95';
 // ════ Journal des nouveautés (récap cumulatif) ════
 // Une entrée par version, la PLUS RÉCENTE EN HAUT : { v:'5.10', items:[ {emoji,titre,desc}, … ] }
 // À chaque release visible → AJOUTER un bloc en tête (ne pas remplacer). items:[] = release technique (rien à afficher).
@@ -341,6 +341,16 @@ window._mvGraphRepeindre = function(){
 };
 
 export const WHATS_NEW = [
+  { v:'5.95', items:[
+    { emoji:'\u{1F449}', titre:'Le planning : plus de \u00ab\u00a0mode\u00a0\u00bb \u00e0 activer',
+      desc:"Avant, toucher une case ouvrait la fiche du jour \u2014 sauf si le bouton \u00ab\u00a0S\u00e9lection multiple\u00a0\u00bb \u00e9tait allum\u00e9, auquel cas la m\u00eame case se cochait. Le bouton a disparu\u00a0: toucher une case la coche, toujours. La barre du bas dit qui est coch\u00e9 et \u00e0 quelles dates, puis propose ce qu\u2019on peut en faire." },
+    { emoji:'\u{1F5D3}', titre:'Toute une journ\u00e9e, toute une personne, en une touche',
+      desc:"Toucher le num\u00e9ro du jour, en haut de la grille, coche toute l\u2019\u00e9quipe ce jour-l\u00e0. Toucher un nom coche sa semaine enti\u00e8re. Toucher \u00ab\u00a0Salari\u00e9\u00a0\u00bb, dans le coin, coche tout ce qui est affich\u00e9. Un deuxi\u00e8me appui d\u00e9coche." },
+    { emoji:'\u{1F4C4}', titre:'Une seule fiche pour un jour comme pour trente',
+      desc:"Les horaires et les absences avaient chacun leur \u00e9cran selon qu\u2019on modifiait un jour ou plusieurs. C\u2019est la m\u00eame fiche d\u00e9sormais\u00a0: elle s\u2019adapte au nombre de cases coch\u00e9es." },
+    { emoji:'\u{1F6E1}', titre:'Un cong\u00e9 ne s\u2019efface plus en silence',
+      desc:"Poser \u00ab\u00a0R\u00e9cup\u00a0\u00bb ou \u00ab\u00a0Chaleur\u00a0\u00bb sur une semaine \u00e9crasait sans le dire les cong\u00e9s d\u00e9j\u00e0 pos\u00e9s dessus. Ils sont maintenant conserv\u00e9s, et le message de confirmation indique combien ont \u00e9t\u00e9 pr\u00e9serv\u00e9s. Sur une seule case, choisie \u00e0 la main, le remplacement reste possible." }
+  ]},
   { v:'5.94', items:[
     { emoji:'\u{2753}', titre:'L\u2019aide du Tracteur ne parlait ni du chrono ni du mode du jour',
       desc:"Deux changements r\u00e9cents \u2014 la coche qui lance la mesure, et la question \u00ab Tu prends le tracteur aujourd\u2019hui ? \u00bb \u2014 n\u2019\u00e9taient expliqu\u00e9s nulle part. La pastille \u00ab ? Aide \u00bb du Tracteur les d\u00e9crit maintenant : les trois compteurs, ce que le chrono mesure et ce qu\u2019il ne mesure pas, la mesure \u00e9cart\u00e9e, et o\u00f9 le domaine active le chrono. Celle de l\u2019Accueil dit \u00e0 quoi sert la question du matin, et rappelle qu\u2019elle ne change aucun droit." },
