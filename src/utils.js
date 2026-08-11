@@ -23,7 +23,7 @@ export const GT_ADMIN_EMAIL = 'ngdevpro@gmail.com';
 // WHATS_NEW   : tableau vide = modal desactive pour cette version.
 // Format item : { emoji:'📅', titre:'Titre court', desc:'Phrase utilisateur.' }
 // Regle : seulement les changements visibles par les utilisateurs.
-export const APP_VERSION = '5.90';
+export const APP_VERSION = '5.91';
 // ════ Journal des nouveautés (récap cumulatif) ════
 // Une entrée par version, la PLUS RÉCENTE EN HAUT : { v:'5.10', items:[ {emoji,titre,desc}, … ] }
 // À chaque release visible → AJOUTER un bloc en tête (ne pas remplacer). items:[] = release technique (rien à afficher).
@@ -341,6 +341,12 @@ window._mvGraphRepeindre = function(){
 };
 
 export const WHATS_NEW = [
+  { v:'5.91', items:[
+    { emoji:'\u{23F1}\u{FE0F}', titre:'La coupure d\u00e9jeuner dit enfin quand elle tombe',
+      desc:'Un ouvrier qui lisait \u00ab une heure de pause \u00bb pouvait croire qu\u2019il en choisissait le moment ; la paie et le chef d\u2019exploitation y lisaient autre chose. Le planning parle maintenant de \u00ab coupure \u00bb, et vous pouvez dire \u00e0 quelle heure elle a lieu : Planning, onglet Mod\u00e8les, sous la dur\u00e9e. Une heure fixe, \u00ab selon le chantier \u00bb, ou rien du tout \u2014 tant que vous ne r\u00e9pondez pas, rien ne change chez vous. Les journ\u00e9es s\u2019affichent alors coup\u00e9es en deux : 09:00 \u2192 12:00 puis 13:00 \u2192 16:00.' },
+    { emoji:'\u{2696}\u{FE0F}', titre:'Trois nombres qui ne se confondent plus',
+      desc:'Pr\u00e9sence, coupure, heures dues : une journ\u00e9e de 09:00 \u00e0 16:00 avec une heure de coupure fait 7 h de pr\u00e9sence et 6 h dues. Chaque dur\u00e9e affich\u00e9e porte d\u00e9sormais son \u00e9tiquette, pour que le chef, l\u2019ouvrier et la paie lisent la m\u00eame ligne sans l\u2019interpr\u00e9ter chacun \u00e0 sa fa\u00e7on.' }
+  ] },
   { v:'5.90', items:[
     { emoji:'\u{1F5D3}\u{FE0F}', titre:'Le planning de l\u2019ann\u00e9e s\u2019imprime',
       desc:'Un nouveau document sort le rythme de l\u2019\u00e9quipe sur douze mois : jours travaill\u00e9s, heures de prise et de fin de service, coupure d\u00e9jeuner, fermetures et jours f\u00e9ri\u00e9s. Il se trouve dans R\u00e9glages, onglet App, \u00ab Documents & impressions \u00bb, et vous propose par d\u00e9faut l\u2019ann\u00e9e \u00e0 venir. Une page par mod\u00e8le de semaine : quand toute l\u2019\u00e9quipe suit le m\u00eame rythme, une seule feuille suffit.' }
@@ -1481,6 +1487,7 @@ var MV_AIDE = {
       ['Toucher un jour', "ouvre l’éditeur, qui enchaîne jour suivant et salarié suivant sans quitter l’écran."],
       ['Sélection multiple', ": congés, absence, récup ou horaires chaleur sur plusieurs jours d’un coup."],
       ['Les heures dues', "se décomptent sur une absence injustifiée ou un retard. Un arrêt de travail est neutre, une formation compte comme du travail."],
+      ['Présence, coupure, heures dues', "trois nombres qui se ressemblent et ne disent pas la même chose. La ‹‹ présence ›› va de l’arrivée au départ. La ‹‹ coupure ›› est le temps non travaillé au milieu — sa durée et son heure sont fixées par le domaine, ce n’est pas un moment que chacun choisit. Les ‹‹ heures dues ›› sont ce qui part en paie et alimente le compteur des 1 607 h. Une journée de 09:00 à 16:00 avec une heure de coupure fait 7 h de présence et 6 h dues."],
       ['Le planning de l’année', "s’imprime depuis le même endroit : le rythme sur douze mois, avec les heures de prise et de fin de service et la coupure déjeuner. Une page par modèle de semaine, pas une par salarié — c’est le document qu’on remet à l’équipe pour l’année à venir."],
       ['Le relevé mensuel', "s’imprime depuis Réglages, onglet App, « Documents & impressions ». C’est un relevé d’heures, pas un bulletin de paie."],
       ['Taux horaires et acomptes', ": administrateurs seulement, et jamais enregistrés sur l’appareil."]

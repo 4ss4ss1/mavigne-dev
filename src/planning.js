@@ -214,9 +214,9 @@ if (_PLAN_IS_MG) {
 // dynamiquement depuis la grille PLAN_DEF / PLANNING_TEMPLATES via _planGetRefH.
 // Cela rend le planning configurable sans modifier le code.
 var PLAN_DEF_T = {
-  3:{d:'08:00',f:'11:00'},   // 3h (sans pause, span=3h)
-  4:{d:'08:00',f:'12:00'},   // 4h (sans pause, span=4h)
-  5:{d:'07:00',f:'12:00'},   // 5h (sans pause, span=5h) ← demi-journée vendredi
+  3:{d:'08:00',f:'11:00'},   // 3h (sans coupure, span=3h)
+  4:{d:'08:00',f:'12:00'},   // 4h (sans coupure, span=4h)
+  5:{d:'07:00',f:'12:00'},   // 5h (sans coupure, span=5h) ← demi-journée vendredi
   6:{d:'07:00',f:'14:00'},   // 7h - 1h pause = 6h
   6.5:{d:'07:00',f:'14:30'}, // 7.5h - 1h = 6.5h
   7:{d:'07:00',f:'15:00'},   // 8h - 1h = 7h
@@ -230,7 +230,9 @@ var PLAN_MOIS=['Janvier','F\u00e9vrier','Mars','Avril','Mai','Juin','Juillet','A
 var PLAN_MOIS_C=['Jan','F\u00e9v','Mar','Avr','Mai','Jun','Jul','Ao\u00fb','Sep','Oct','Nov','D\u00e9c'];
 var PLAN_JOURS=['Di','Lu','Ma','Me','Je','Ve','Sa'];
 var PLAN_JOURS_L=['Dimanche','Lundi','Mardi','Mercredi','Jeudi','Vendredi','Samedi'];
-var PLAN_PAUSE_MIN=60; // Durée pause déjeuner en minutes (configurable par domaine)
+var PLAN_PAUSE_MIN=60; // Duree de la COUPURE dejeuner, en minutes (reglable par domaine).
+// Le mot « pause » est reserve a la pause legale (20 min, un droit du salarie).
+// Ce qui est decide par le domaine et non travaille s'appelle une coupure.
 
 // ── Cadre légal (durées à ne pas dépasser) — paramétrable par convention ──
 // Défauts = convention nationale Production Agricole et CUMA (IDCC 7024) :
@@ -373,7 +375,7 @@ function _planDefTiming(pl,plId,m,d,yr){
   //           heure de fin   = début + pl + pause (si pl>6h).
   // Priorité : 1. Code jour D/M/A  2. Calcul depuis _timings mensuel  3. PLAN_DEF_T (fallback)
   function _computeEnd(debutStr, plH, continu){
-    // Fin = début + heures nettes + pause déjeuner (sauf horaire continu).
+    // Fin = début + heures nettes + coupure dejeuner (sauf horaire continu).
     // La pause suit PLAN_PAUSE_MIN (réglage domaine) et non plus 60 en dur :
     // sinon un domaine à 30 min voyait une fin décalée d'1 h (ex. 08:00+8h → 17:00 au lieu de 16:30).
     var parts=debutStr.split(':');
@@ -2025,7 +2027,9 @@ function planMultiHCalc(){
   var _pauseMin=window.PLAN_PAUSE_MIN||PLAN_PAUSE_MIN||60;
   var ds=deb.split(':'),fs=fin.split(':');
   var span=(parseInt(fs[0])*60+parseInt(fs[1]||0))-(parseInt(ds[0])*60+parseInt(ds[1]||0));
-  var subTxt=_pmhCont?'horaire continu':(span>360?'\u2212'+_planFmt(_pauseMin/60)+' pause d\u00e9jeuner':'sans pause (<6\u00a0h)');
+  var subTxt=_pmhCont?'horaire continu'
+    :(span>360?('\u2212'+_planFmt(_pauseMin/60)+' de coupure'+(window._planCoupureTxt?(function(t){return t?' '+t:'';})(_planCoupureTxt()):''))
+    :'sans coupure (moins de 6\u00a0h)');
   res.innerHTML='<span style="font-size:11px;color:var(--texte-doux)">'+deb+' \u2192 '+fin+'<br>'+subTxt+'</span>'
     +'<div style="text-align:right"><span style="font-size:24px;font-weight:700;color:var(--plan-acc-2,#5e51a0)">'+_planFmt(h)+'</span><span style="font-size:13px;font-weight:600;color:var(--texte-doux)">\u00a0h/j</span></div>';
 }
@@ -2668,7 +2672,7 @@ function _planChaleurRender(){
   +'</div>'
   +'<button onclick="planCaniculeToggleContinu()" id="planCanic-contbtn" class="pl2-chal-cont'+(_planCanic.continu?' active':'')+'">'
     +chk
-    +'<span class="pl2-chal-cont-t"><span id="planCanic-contlbl" style="color:'+(_planCanic.continu?'var(--orange)':'var(--texte-doux)')+'">Journ\u00e9e continue</span><span>Pas de coupure d\u00e9jeuner \u00b7 aucune pause d\u00e9duite</span></span>'
+    +'<span class="pl2-chal-cont-t"><span id="planCanic-contlbl" style="color:'+(_planCanic.continu?'var(--orange)':'var(--texte-doux)')+'">Journ\u00e9e continue</span><span>Pas de coupure d\u00e9jeuner \u00b7 journ\u00e9e d\u2019un seul tenant d\u00e9duite</span></span>'
   +'</button>'
   +'<div class="plan-sec-lbl" style="margin-top:4px">Salari\u00e9s concern\u00e9s</div>'
   +'<div class="pl2-chal-mbrs">';
@@ -3297,7 +3301,7 @@ function planSavePause(min){
   window.CONFIG.pause_dejeuner=min;
   window.CONFIG=window.CONFIG;
   if(window.fbSave)window.fbSave('config',window.CONFIG);
-  showToast('\u2705 Pause d\u00e9jeuner\u00a0: '+_planFmt(min/60),'#3D6B27');
+  showToast('\u2705 Coupure d\u00e9jeuner\u00a0: '+_planFmt(min/60),'#3D6B27');
   _planRenderTemplates();
 }
 
@@ -4462,7 +4466,7 @@ function _paBandeau(g,plId,yr,reg){
     var t=_paHoraire(h,plId,vus[h],yr);
     if(!t) return '';
     return '<span class="pa-kc"><u>'+_paFmt(h)+' h</u><b>'+e(t.d)+'</b><i>\u2192</i><b>'+e(t.f)+'</b>'
-         + '<em>'+(t.coup>0?('coupure '+_paDuree(t.coup)+' h'):(t.continu?'continu':'sans pause'))+'</em></span>';
+         + '<em>'+(t.coup>0?('coupure '+_paDuree(t.coup)+' h'):(t.continu?'continu':'sans coupure'))+'</em></span>';
   }).join('');
   if(!cles) return '';
   return '<div class="pa-hz pa-solo"><div class="pa-hb pa-full">'
