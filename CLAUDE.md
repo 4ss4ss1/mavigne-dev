@@ -2,9 +2,13 @@
 
 > Document de référence du projet **Ma Vigne** (GUERETTECH). Il est le **porteur de vérité** :
 > la mémoire Claude est plafonnée, ce fichier ne l'est pas.
-> Dernière consolidation : **11 août 2026 (soir)** — la **refonte du Planning** en deux lots
-> (**§19a**, section neuve), plus les mises à jour de §12, §19, §25, §27a, §28 et de la règle d'or
-> n°1. ★ **Consolidation faite depuis le fichier réel du dépôt, pas de mémoire** : `CLAUDE.md` est
+> Dernière consolidation : **11 août 2026 (nuit)** — ★★★ **L'AUDIT DU BACKLOG, point par point,
+> sur le dépôt cloné** (commit `636630a`, **APP 5.96 · SW 6.46**). Les 42 entrées techniques ont été
+> re-vérifiées une par une par `grep` sur le code réel : **six rayées**, **cinq chiffres corrigés**,
+> **trois qui avaient empiré pendant qu'elles dormaient au backlog**. Détail dans le §28.
+> Consolidation précédente du même jour (soir) : la **refonte du Planning** en deux lots (**§19a**,
+> section neuve), plus les mises à jour de §12, §19, §25, §27a, §28 et de la règle d'or n°1.
+> ★ **Consolidation faite depuis le fichier réel du dépôt, pas de mémoire** : `CLAUDE.md` est
 > désormais à la racine de `mavigne-dev`, donc lisible par `git clone` en tête de session. **La
 > piste ouverte le 10 août est refermée — l'exception « régénération sans upload » ne concerne plus
 > ce document, qui se patche comme n'importe quel fichier du dépôt.**
@@ -25,11 +29,13 @@
 > « 🖥️ Environnement de Nico › Git ».
 >
 > ⚠️ **Points en suspens au moment de la consolidation** :
-> 1. **Cinq lots livrés et NON DÉPLOYÉS** (§18b) : `admin-gt.js`, `firebase.js`,
->    `functions/leads.js`, `public/mise-en-route.html`.
-> 2. **Une installation à blanc** sur un slug jetable reste à faire — elle valide les cinq lots
->    d'un coup et mesure les temps réels (§18b, §28).
-> 3. La réponse à Château Garraud reste le sujet commercial n°1 (§28).
+> 1. ✅ **TOUT EST DÉPLOYÉ** — les cinq lots d'installation (§18b), les deux lots Tracteur et la
+>    refonte du Planning sont en ligne. **APP 5.96 · SW 6.46.** Ce qui était marqué « NON DÉPLOYÉ »
+>    dans ce document ne l'est plus : les mentions ont été corrigées au §28.
+> 2. ⚠️ **Une installation à blanc** sur un slug jetable reste à faire — **c'est le seul critique
+>    encore ouvert.** Elle valide les cinq lots d'un coup et mesure les temps réels (§18b, §28).
+> 3. **Château Garraud : le devis reste à établir** — c'est le sujet commercial n°1 (§28), et il
+>    force à **borner l'offre de lancement** d'abord.
 > 4. ⚠️ **Des lots restent non documentés ici**, connus par le seul changelog de `sw.js` :
 >    « panneau GUERETTECH : 8 onglets deviennent 6 », « SEC-GT/2 », la **tournée sur l'écran de
 >    l'équipe », l'**exercice comptable**, les **4 défauts de la snapshot localStorage**, le **Chai
@@ -1740,7 +1746,7 @@ le lot n°1.
   maintenant écrire : **un écran qui ment sur son propre travail**.
 - **354 assertions, 9 harnais, 31 défauts réintroduits et 31 rougissements, preflight 0 erreur.**
 
-### Déploiement (⚠️ EN ATTENTE)
+### Déploiement (✅ FAIT le 11/08)
 
 ```
 xcopy functions ..\mavigne-sauvegardes\avant-mer\functions\ /E /I /Y
@@ -1751,6 +1757,10 @@ npm run build && firebase deploy
 ⚠️ Cibler la fonction **par son nom**. Pas de rules, pas de backfill.
 Fichiers : `src/admin-gt.js` · `src/firebase.js` · `functions/leads.js` ·
 `public/mise-en-route.html`. **Aucun bump.**
+✅ **Déployé le 11/08.** ⚠️⚠️ **Mais aucun de ces cinq lots n’a encore servi de bout en
+bout** : l’installation à blanc sur un slug jetable reste à faire, et c’est elle qui transforme
+le « 20 h → ~9 h » en mesure. **Un lot déployé mais jamais exécuté n’est pas un lot validé** —
+c’est la même famille de piège que « livrer n’est pas intégrer », d’un cran plus loin.
 ★ **Depuis le 10/08, ces fichiers vivent dans le dépôt GitHub** (§ Règle d'or n°1) : les
 récupérer par `git clone`/`git pull` plutôt que par upload avant de vérifier s'ils sont partis.
 
@@ -3510,16 +3520,20 @@ lot** — 8 renvois périmés, `MV_AIDE`, `reglages.js`, guide régénéré.
 
 **Détail complet : §19a.** Fichiers : `index.html` · `planning.js` · `styles.css` · `utils.js` ·
 `reglages.js` · `sw.js` · `guide/10-planning.html` + `public/guide.html`. **Bump APP + SW aux deux
-lots. NON DÉPLOYÉ.**
+lots.** ✅ **DÉPLOYÉ** (SW v6.45 et v6.46 lus dans le changelog du dépôt).
 
-⚠️ **`test:smoke` et `test:e2e` n'ont PAS été passés** : Playwright ne peut pas télécharger Chromium
-dans le bac à sable. Preflight, les deux cliquets, `node --check`, build Rollup et le harnais des
-moteurs sont verts. **C'est la première fois qu'un lot part avec les deux paliers navigateur non
-joués — à passer avant tout déploiement.**
+⚠️ **`test:smoke` et `test:e2e` n'avaient PAS été passés au moment de la livraison** : Playwright ne
+peut pas télécharger Chromium dans le bac à sable. Preflight, les deux cliquets, `node --check`,
+build Rollup et le harnais des moteurs étaient verts. **C'est la première fois qu'un lot est parti
+avec les deux paliers navigateur non joués côté Claude — Nico les a passés de son côté avant de
+déployer.**
 
 ### ★★★ La journée du 11 août — audit intégral, puis deux lots Tracteur
 
-**Versions à ce jour : APP `5.93` · SW `6.43`.** (À relire dans les fichiers, jamais depuis ici.)
+**Versions au moment de ces deux lots : APP `5.93` · SW `6.43`.** ⚠️ **Trois versions ont suivi le
+même jour** — v6.44 (l'accompagnement rattrape les deux lots), v6.45 et v6.46 (Planning, lots 1 et
+2). **État réel du dépôt au commit `636630a` : APP `5.96` · SW `6.46`.**
+(À relire dans les fichiers, jamais depuis ici.)
 
 **A. L'AUDIT INTÉGRAL DE L'APP** — preflight vert, 55 376 lignes, 10 analyses statiques.
 Ce qui est **sain, vérifié** : handlers inline (20 types d'événements, 0 non exposé) · un seul
@@ -3551,8 +3565,9 @@ pour AUCUN des deux lots.** Les deux écrans les plus utilisés du module ont ch
 aide décrit les anciens. **C'est la violation exacte de la Règle d'or n°4, écrite le même jour.**
 → **Premier point du backlog, avant tout nouveau lot.**
 
-⚠️ **Ni `npm run build`, ni le smoke, ni l'e2e n'ont été lancés** sur ces deux lots (pas de
-navigateur côté Claude). **Et ils ne sont pas déployés.**
+⚠️ **Ni `npm run build`, ni le smoke, ni l'e2e n'avaient été lancés côté Claude** sur ces deux lots
+(pas de navigateur dans le bac à sable). ✅ **Ils sont déployés** — SW v6.42 et v6.43 sont dans le
+changelog du dépôt, et l'accompagnement les a rattrapés en v6.44.
 
 
 ### ★★★ La journée du 9 août — trois chantiers
@@ -3585,7 +3600,9 @@ navigateur côté Claude). **Et ils ne sont pas déployés.**
 
 **Plus** la procédure `INSTALLER-UN-DOMAINE.md` et son PDF (§18c).
 **20 h → ~9 h sur le papier**, dont 14 h de clavier ramenées à ~4 h.
-⚠️⚠️ **RIEN N'EST DÉPLOYÉ.** Voir la fin du §18b.
+✅ **DÉPLOYÉ.** ⚠️ **Mais le gain reste théorique : l'installation à blanc n'a pas été faite.**
+Les cinq lots sont en ligne, **aucun n'a encore servi de bout en bout**. Le « ~9 h » est un chiffre
+de papier tant qu'un slug jetable n'a pas été monté en entier (§18b, backlog technique n°1).
 ✅ **Rayé** : CF `submitMiseEnRoute`.
 
 ### ★★★ Le 10 août — migration GitHub
@@ -3657,8 +3674,10 @@ corrigé · DEMO-3 · heures sup · **saisonniers dans l'historique** · **équi
 
 ### Backlog — commercial & administratif
 
-1. ★★★ **RÉPONDRE À GARRAUD** — la séquence complète est ci-dessus.
-2. ⚠️ **Borner l'offre de lancement** (durée jamais définie).
+1. ★★★ **LE DEVIS GARRAUD** — la séquence complète est ci-dessus. ⚠️ **Il ne peut pas partir avant
+   le point 2** : le devis chiffre une remise dont la durée n'est pas définie.
+2. ⚠️⚠️ **BORNER L'OFFRE DE LANCEMENT** (durée jamais définie) — **bloquant pour le devis Garraud.**
+   Une remise « −50 % » sans date de fin sur un document contractuel engage sans limite.
 3. **Vérifier les empreintes de `_mv_signatures`** contre les archives du 31/07.
 4. **Vérifier l'indexation dans Search Console.**
 5. **LinkedIn posts #4 et suivants** — **douze angles prêts** (§27).
@@ -3668,94 +3687,139 @@ corrigé · DEMO-3 · heures sup · **saisonniers dans l'historique** · **équi
 
 ### Backlog — technique, par ordre d'effort/effet
 
-0. ✅ **LES FICHES `MV_AIDE` DU TRACTEUR — FAIT.** Le lot d'accompagnement du 11/08 les a refaites
-   (douze points, les trois compteurs, le cadrage « ce n'est pas la journée de travail », les trois
-   chemins de réglage manquants) et a corrigé au passage un **bug réel** : la visite guidée publique
-   annonçait « sur 14 » dans ses 13 étapes. **Vérifié par lecture du changelog `sw.js`, pas cru.**
-0b. ★★★ **`npm run test:smoke` ET `npm run test:e2e`, PUIS déployer.** ⚠️ **Ils n'ont pas été joués
-    sur la refonte du Planning** (Playwright ne peut pas récupérer Chromium dans le bac à sable) :
-    c'est le seul palier manquant de la série. L'e2e tourne en 390×844 et visite `planning` — c'est
-    lui qui dira si les trois onglets se rendent sans erreur console.
-0c. ★★ **Fusionner les deux écrans de congés** — `openPlanCP` (une période) et `openPlanCPSel` (les
-    cases cochées) sont **déjà le même overlay** avec deux rendus. Annoncé au lot 2, non fait : ce
-    serait la 5ᵉ feuille ramenée à 4 (§19a).
-1. ★★★ **DÉPLOYER LES CINQ LOTS D'INSTALLATION** (§18b, fin de section).
-2. ★★★ **INSTALLATION À BLANC de bout en bout sur un slug JETABLE.** Elle valide les cinq lots d'un
-   coup et **mesure les temps réels** (tableau prévu dans `INSTALLER-UN-DOMAINE.md`).
+★★★ **AUDITÉ LIGNE PAR LIGNE LE 11/08 AU SOIR**, sur le dépôt cloné (commit `636630a`,
+APP 5.96 · SW 6.46). **Chaque entrée porte sa preuve mesurée**, fichier et ligne, pas un souvenir.
+**Six points rayés · cinq chiffres corrigés · trois qui avaient EMPIRÉ.**
+
+⚠️⚠️ **La leçon de cet audit : un backlog non audité dérive DANS LES DEUX SENS.** Six entrées
+décrivaient du travail déjà fait — le document faisait travailler dans le vide. Et trois chiffres
+avaient grossi sans que personne le voie : **1 625 → 1 639 sites sous 12 px**, **~2 300 → 2 922
+hex**, **~375 → 407 ko pour `cave.js`**. Un backlog écrit une fois est une photo ; **une entrée
+non re-mesurée depuis une semaine est une hypothèse, pas un constat.** C'est la règle d'or n°1
+appliquée au document lui-même.
+
+1. ★★★ **INSTALLATION À BLANC de bout en bout sur un slug JETABLE — LE SEUL CRITIQUE OUVERT.**
+   Elle valide les cinq lots d'un coup et **mesure les temps réels** (tableau prévu dans
+   `INSTALLER-UN-DOMAINE.md`). Les lots sont déployés ; **le « 20 h → ~9 h » n'a jamais été vérifié.**
    ⚠️ **Un essai consomme un identifiant** : `onboardTenant` refuse un domaine déjà peuplé. Prendre
    un nom jetable, **jamais `chateau-garraud`**.
-3. ★★ **Vérifier si un `rewrite` existe en ligne** (`/api/lead`) : absent du `firebase.json` lu.
-   Si oui, en ajouter un pour `/api/mise-en-route`.
-4. ★ **Corriger `_findDebutTache`** — borne de période, 2 lignes, `app.js` → bump SW (§15).
-5. ★ **Breakpoint 760 → 767.98** — plan validé, 1 ligne CSS, 0 JS, **en attente du go** (§21d).
-6. ★★ **Guide : la section Planning est FAITE** (refaite avec le lot 2, §19a). Restent la section
-   **Données** et le découpage de **`demarrage.html`** sur le même modèle (§27d).
+2. ★★ **Vérifier si un `rewrite` existe en ligne** (`/api/lead`). ⚠️ **Vérifié le 11/08 :
+   `grep rewrite firebase.json` renvoie ZÉRO.** Si un rewrite existe en ligne, il n'est pas dans le
+   dépôt — ce qui est un problème en soi. Si oui, en ajouter un pour `/api/mise-en-route`.
+3. ★★ **Fusionner les deux écrans de congés** — `openPlanCP` et `openPlanCPSel` (**3 occurrences,
+   `planning.js`**) sont **déjà le même overlay** avec deux rendus. Annoncé au lot 2, non fait :
+   ce serait la 5ᵉ feuille ramenée à 4 (§19a).
+4. ★ **Corriger `_findDebutTache`** — `app.js:3116`. **Vérifié : le `reduce` prend toujours le
+   minimum sur tout le journal filtré, sans borne de période.** 2 lignes, bump SW (§15).
+5. ★ **Breakpoint 760 → 767.98** — **vérifié : `styles.css:2084` porte encore `max-width:760px`**
+   face au `min-width:768px`. Le trou est intact. 1 ligne CSS, 0 JS, **en attente du go** (§21d).
+6. ★ **Découper `demarrage.html`** sur le modèle du guide — **938 lignes, monolithique** (§27d).
+   ✅ La section **Données** est faite : `guide/13-donnees.html` existe (7,5 ko).
 7. ★ **Escalier de sources pour la cadence** (§20b) — marche 2 vide aujourd'hui.
-8. **Purger le calcul de pic mort dans `_rfCtx`** — ⚠️ `ctx.pic` introuvable : **vérifier le nom**.
-9. **Pondérer `_ecoRate` par les heures**, pas par tête.
-10. ★ **Détail cosmétique** : le libellé des chips de cuvées affiche `Village 2026· 12`, **sans
-    espace avant le point médian**. 1 caractère.
-11. ★★ **Import KML en MERGE** sur un domaine vivant, avec les **coordonnées écrites dans les
-    parcelles**, et **la densité comme propriété de la parcelle**. ⚠️ Préserver `p.commune`,
-    `p.plantation_trous`, `p.entreplantation`, `p.tachesAll`, `p.rendement_hist`, `p.rdt_max`.
-12. ★★ **Le rattachement des anciens fûts à une référence** — maquetté et validé, **non intégré**.
-13. ★★ **Un 15ᵉ moment de démo sur la cave** — le plus vendeur du parcours.
-14. ★ **Le Cuvier n'enregistre pas d'intervenant** là où le Chai le fait.
-15. **`.cave-tabs`** (classe, 1 règle CSS / 0 usage).
-16. **`_pl2Annual` vs `_planGetRefH`** — 1 ligne, mais **décision de conception d'abord**.
-17. **Terminologie heures sup** : « Solde cumulé » vs « Reste à prendre ».
+8. **Purger le calcul de pic mort dans `_rfCtx`** — ✅ **le nom était bon, le doute est levé** :
+   `pilotage.js:1925` calcule `pic`, la ligne 1976 le renvoie dans l'objet, et **`grep '\.pic'`
+   ne trouve AUCUN consommateur**. Suppression franche.
+9. **Pondérer `_ecoRate` par les heures**, pas par tête (`pilotage.js:4107`).
+10. ★ **Chip de cuvée `Village 2026· 12`, sans espace avant le point médian.** ⚠️ **Non retrouvé au
+    grep le 11/08** — soit corrigé entre-temps, soit le motif de recherche est mauvais.
+    **Varier le motif avant de conclure** (règle vécue avec `mvprint.py` et DOCK).
+11. ★★ **Import KML en MERGE** sur un domaine vivant — `_parseKML` est en `admin-gt.js:2298`,
+    **aucun mode merge**. Avec les **coordonnées écrites dans les parcelles** et **la densité comme
+    propriété de la parcelle**. ⚠️ Préserver `p.commune`, `p.plantation_trous`, `p.entreplantation`,
+    `p.tachesAll`, `p.rendement_hist`, `p.rdt_max`.
+12. ★★ **Le rattachement des anciens fûts à une référence** — maquetté et validé, **non intégré** :
+    0 trace dans `reserve.js`.
+13. ★★ **Un 14ᵉ moment de démo sur la cave** — ⚠️ **le backlog disait « 15ᵉ » : c'est faux.**
+    `grep -c "sur 13"` = **13**. La visite en compte treize, pas quatorze. Le plus vendeur du parcours.
+14. ★ **Le Cuvier n'enregistre pas d'intervenant** là où le Chai le fait — **`cave.js:6290` le dit
+    à l'écran** (« la colonne reste vide pour celles-ci »). Le défaut est assumé, pas corrigé.
+15. **`.cave-tabs`** — ✅ **les deux barres d'onglets mortes sont purgées** (`index.html:1734`
+    porte le commentaire « purgé »). **Reste la règle CSS orpheline `styles.css:1447`.** 1 ligne.
+16. **`_pl2Annual` (`planning.js:1669`) vs `_planGetRefH` (`l.349`)** — 1 ligne, mais **décision de
+    conception d'abord**.
+17. **Terminologie heures sup** : « Solde cumulé » (`planning.js:2319`) vs « Reste à prendre »
+    (`l.4322`) — **les deux libellés coexistent, vérifié**.
 17b. ★ **Le nom d'un salarié, dans la grille, coche sa ligne** et n'ouvre plus sa fiche (§19a).
     Décision assumée — une cible, un effet — mais **à confirmer à l'usage** : c'est le seul point de
     dépaysement de la refonte, et il est réversible en une ligne.
-18. **Batch a11y** · résorption des ~234 `catch{}` vides.
-19. **Rôle `pilotage` (`pil:true`)** — 2 arbitrages préalables. Corriger aussi `getLoginRoster`.
+18. **Batch a11y** · résorption des `catch{}` vides — ⚠️ **chiffre corrigé : 200, pas ~234.**
+    **151 sont dans `app.js` à eux seuls** (puis `pilotage.js` 14, `firebase.js` 12, `utils.js` 10).
+    **La baisse est réelle** (C14 fait son travail) : le cliquet interdit d'en ajouter, il ne purge
+    pas l'existant. **Un lot ciblé `app.js` réglerait les trois quarts du sujet.**
+19. **Rôle `pilotage` (`pil:true`)** — **0 occurrence, vérifié.** 2 arbitrages préalables.
+    Corriger aussi `getLoginRoster` (`functions/claims.js:1360`, renvoie toujours `roles`).
 20. **Injection de données pures dans les guides.**
-21. **Lot B pluie** — précipitation **horaire**, irrécupérable rétroactivement.
-22. **DRY surface** — 32 sommes à la main.
-23. **UI d'activation d'essai client.**
-24. **Fusion de fûts à l'ÉDITION** (La Réserve).
-25. **Ancien catalogue « Mes produits »** — 5 fichiers : arbitrer.
-26. ★ **Vérifier les autres tâches `anytime:true`**.
-27. ★ **Variantes girondines** — guyot double, Médoc Graves et Palus, majorations ; **vérifier
+21. **Lot B pluie** — ⚠️ **à re-qualifier : la collecte horaire EXISTE DÉJÀ.** `app.js:3061` remplit
+    `window.METEO_HOURLY` avec `precipitation` heure par heure et le met en cache
+    (`mavigne_meteohr_cache`). **Ce qui manque n'est pas la donnée, c'est son exploitation.**
+    L'historique reste irrécupérable rétroactivement.
+22. **DRY surface** — ⚠️ **22 sommes à la main, pas 32** (`grep '\.surface||0'`).
+23. **UI d'activation d'essai client** — `fc.trialDays` / `fc.activatedAt` existent
+    (`admin-gt.js:2704`), **aucun écran pour les poser**.
+24. **Fusion de fûts à l'ÉDITION** (La Réserve) — ⚠️ **`reserve.js:324` porte le commentaire qui
+    décrit exactement ce qui manque** : « le formulaire doit fusionner les quantités — comme le fait
+    déjà le +/- ». Le code se documente lui-même comme incomplet.
+25. ✅ ~~**Ancien catalogue « Mes produits »**~~ — **RAYÉ. 0 occurrence dans tout `src/`.**
+    Le backlog annonçait « 5 fichiers à arbitrer » : il n'y a plus rien à arbitrer.
+26. ★ **Vérifier les autres tâches `anytime:true`** — **cinq, vérifiées** : Entreplantation,
+    Arrachage, Désherbage manuel, Effeuillage, Vendange (`app.js:371`, `1020`, `1023-1026`).
+27. ★ **Variantes girondines** — le barème régional **existe** et `app.js:1062` nomme déjà le Médoc,
+    le guyot double et les vignes de plus de 20 ans. **Reste la vérification documentaire :
     qu'aucun avenant postérieur à 2021 n'a révisé ces temps** (§30a).
-28. ★ **Type de contrat « tâcheron »** (§30f) — à prévoir, pas urgent.
-29. **Tokeniser les ~2 300 hex des JS.**
-30. **Mise à jour SW choisie — niveau 1** (§8).
+28. ★ **Type de contrat « tâcheron »** (§30f) — **0 occurrence, vérifié.** À prévoir, pas urgent.
+29. **Tokeniser les hex des JS** — ⚠️ **chiffre corrigé : 2 922, pas ~2 300.** +27 % depuis la
+    dernière mesure. **Il grossit à chaque lot** : le classer bas ne le fait pas rétrécir.
+30. **Mise à jour SW choisie — niveau 1** (§8). Le socle est là : `updatefound` (`app.js:9083`)
+    et `SKIP_WAITING` (`sw.js:1047`).
 31. **Lot 8 différé** (Google Play TWA) — jusqu'à **5+ clients actifs**.
 32. **Une passe Lighthouse sur `staging`.**
 33. ★ **Thème saisonnier** — étude faite, maquette 4 saisons à produire, **décision de Nico** (§21d).
-34. ⚠️ **Surveiller la taille de `cave.js`** (~375 ko).
-35. ★ **Committer ce document dans le dépôt** (`CLAUDE.md` à la racine) pour qu'il soit lisible
-    directement depuis GitHub, comme le code (§29, Règle d'or n°1).
+34. ⚠️ **Surveiller la taille de `cave.js`** — **407 ko, pas ~375.** Pour repère : `app.js` 633 ko,
+    `pilotage.js` 461 ko. **La surveillance sans seuil ne surveille rien** : poser un plafond
+    (500 ko ?) ou retirer l'entrée.
+35. ✅ ~~**Committer ce document dans le dépôt**~~ — **FAIT.** `CLAUDE.md` est à la racine et se lit
+    par `git clone`. C'est ce qui rend cet audit possible sans upload.
 36. ★★★ **L'ÉCHELLE TYPOGRAPHIQUE — le plus gros effet client du backlog** (audit du 11/08).
-    **Lot A : le plancher.** 257 sites sous 10 px remontés à 11 px minimum.
+    ⚠️ **Chiffres corrigés, et ils ont EMPIRÉ : 1 639 sites sous 12 px** (153 en ligne dans
+    `index.html` + 414 dans `styles.css` + **1 072 dans les JS**) et **277 sites sous 10 px**.
+    Le backlog disait 1 625 / 257. **Chaque lot en ajoute.**
+    ★★ **La vraie surprise est la répartition** : les deux tiers sont **dans les JS**, en HTML
+    généré — un lot qui ne toucherait que `styles.css` ne réglerait qu'un quart du problème.
+    **Lot A : le plancher.** Les 277 sites sous 10 px remontés à 11 px minimum.
     ⚠️ **Pas une substitution aveugle** : certains 9 px sont des exposants ou des unités collées à
     un chiffre. **Maquette sur trois écrans d'abord** — accueil ouvrier, session tracteur, registre
     phyto — puis intégration au tableau motif → compte attendu.
-    **Lot B : le réglage « Taille du texte ».** 1 368 sites de 10 à 11,5 px convertis en variables
+    **Lot B : le réglage « Taille du texte ».** Les sites de 10 à 11,5 px convertis en variables
     CSS pilotées par un attribut `data-fs` sur `#app-root`, **jumeau exact de `data-hicontrast`**.
     Trois crans : Normal · Grand · Très grand, dans Réglages › Application, sous « Plein soleil ».
     ⚠️ **Ne PAS passer par un `zoom` CSS global** (qui serait une ligne) : il agrandirait aussi la
     carte Leaflet, les overlays `position:fixed` et la largeur du corps bornée à 430 px — le risque
     porterait sur l'écran le plus utilisé.
-37. ★★ **`mvDate()` et `mvNum()` dans `utils.js`** — une seule date, un seul nombre.
+37. ★★ **`mvDate()` et `mvNum()` dans `utils.js`** — **0 occurrence, vérifié.**
     `mvDate(iso, forme)` : `'jma'` dans les documents et registres (traçabilité), `'court'` dans les
     listes denses, `'long'` dans les titres, **jamais `'court'` là où l'année est ambiguë** (défaut
     actuel de `_vendFrDate`). `mvNum(v, unité)` : décimales imposées par l'unité.
     **Décision de forme AVANT le code.** Supprimer les 2 paires de doublons littéraux.
-38. ★ **Purger le bloc de ré-export de `app.js`** (l. ~9074–9287) : 111 lignes inutiles + 5 noms
-    morts. Réécrire les 89 restantes en `window.X = X;` littéral, **unifier `phyto.js` sur la même
-    forme** et supprimer sa boucle `for..in`. Regraver la baseline **après** avoir prouvé la baisse.
-39. ★ **`.val-toggle` 26 → 44 px de haut** — c'est l'interrupteur qu'un ouvrier bascule par équipier,
-    avec des gants. Vérifier aussi `.pc-start` (34), `.plan-mo-btn` (34), `.fiche-admin-btn` (32).
+38. ★ **Purger le bloc de ré-export de `app.js`** — **314 `window.X` comptés**, du
+    `window._mvKeyLoaded` de la ligne 51 au `window.exportSaisonPDF` de la ligne 10536.
+    111 lignes inutiles + 5 noms morts. **Unifier `phyto.js` sur la même forme et supprimer sa
+    boucle `for..in` (`phyto.js:1165`)**, invisible au preflight. Regraver la baseline **après**
+    avoir prouvé la baisse.
+39. ★ **`.val-toggle` 26 → 44 px de haut** — **vérifié `styles.css:283` : toujours 26 px** (pour
+    44 de large). C'est l'interrupteur qu'un ouvrier bascule par équipier, avec des gants.
+    **`.fiche-admin-btn` est à 32 px** (`l.483`) ; vérifier aussi `.pc-start` et `.plan-mo-btn`.
 40. ★★ **Valeurs par défaut de modules PAR RÔLE à la création d'un membre** : un ouvrier arrive avec
-    Cave / Réserve / Planning décochées, un tractoriste avec Vigne / Tracteur / Phyto. Aujourd'hui
-    `_canModule` = formule ∧ masquage manuel, **le rôle n'entre nulle part**.
+    Cave / Réserve / Planning décochées, un tractoriste avec Vigne / Tracteur / Phyto. **Vérifié :
+    `_canModule` (`app.js:3860`, socle en `admin-gt.js:2664`) = formule ∧ masquage manuel, le rôle
+    n'entre nulle part.**
     ⚠️ **Gain direct sur Garraud : 12 personnes × 7 arbitrages.** À faire **avant** l'installation.
-41. **44 occurrences de `var(--texte-doux,#8B8175)`** — le repli est à **3,66:1**, sous AA. Il ne
-    sert jamais (la variable est toujours définie) mais il est faux. → `#5F5F5F`.
-42. **Six points de rupture responsive** (560, 600, 640, 760, 768, 900, 980, 1200) — les ramener à
-    trois. **Après** le lot typographique, pas avant.
+41. **44 occurrences de `var(--texte-doux,#8B8175)`** — **compté exactement 44, vérifié.** Le repli
+    est à **3,66:1**, sous AA. Il ne sert jamais (la variable est toujours définie) mais il est
+    faux. → `#5F5F5F`.
+42. **Points de rupture responsive** — ⚠️ **neuf, pas huit : 400, 560, 600, 640, 760, 768, 900,
+    980, 1200.** Le 400 manquait à la liste. Les ramener à trois. **Après** le lot typographique,
+    pas avant.
+
 
 ### ✅ Rayés du backlog
 
