@@ -1,4 +1,9 @@
-// MA VIGNE — Service Worker v6.39
+// MA VIGNE — Service Worker v6.40
+// v6.40 (11/08/2026) — Nouveau document « Planning de l'année » : le rythme de
+//                       l'équipe sur douze mois, avec heures de prise et de fin de
+//                       service et coupure déjeuner déduite de l'amplitude. Une page
+//                       par modèle de semaine. Ajouté au hub Documents (reglages.js),
+//                       généré par planning.js via la charte MV_DOC.
 // v6.39 (10/08/2026) — Ordre des trois onglets de la Cave : Le Cuvier, Le Chai,
 //                       Le millesime. Le raisin entre au cuvier avant de partir au
 //                       chai ; les onglets suivaient l'ordre inverse. Trois blocs
@@ -775,7 +780,7 @@
 // v2.22 — Fix profils vides : guard vide dans loadData() pour MEMBRES/SAISONS/TACHES
 // v2.17 — Onboarding intégré + tenantId · v2.06 — Firebase Auth · v2.00–v2.05 — divers
 const DEBUG = self.location.hostname === 'localhost' || self.location.hostname === '127.0.0.1';
-const CACHE_NAME   = 'mavigne-v6.39';
+const CACHE_NAME   = 'mavigne-v6.40';
 const TENANT_CACHE = 'mavigne-tenant';   // Cache persistant — préservé à chaque mise à jour SW
 const SYNC_TAG     = 'mavigne-sync';
 
@@ -791,7 +796,7 @@ const CDN_URLS = [
 ];
 
 self.addEventListener('install', event => {
-  if(DEBUG) console.log('[SW] Ma Vigne v6.39 installé');
+  if(DEBUG) console.log('[SW] Ma Vigne v6.40 installé');
   event.waitUntil(
     caches.open(CACHE_NAME).then(async cache => {
       // ── Cœur applicatif : STRICT (mise à jour ATOMIQUE) ──
@@ -807,7 +812,7 @@ self.addEventListener('install', event => {
 });
 
 self.addEventListener('activate', event => {
-  if(DEBUG) console.log('[SW] Ma Vigne v6.39 activé');
+  if(DEBUG) console.log('[SW] Ma Vigne v6.40 activé');
   event.waitUntil(
     caches.keys().then(keys =>
       Promise.all(

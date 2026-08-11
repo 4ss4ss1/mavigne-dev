@@ -23,7 +23,7 @@ export const GT_ADMIN_EMAIL = 'ngdevpro@gmail.com';
 // WHATS_NEW   : tableau vide = modal desactive pour cette version.
 // Format item : { emoji:'📅', titre:'Titre court', desc:'Phrase utilisateur.' }
 // Regle : seulement les changements visibles par les utilisateurs.
-export const APP_VERSION = '5.89';
+export const APP_VERSION = '5.90';
 // ════ Journal des nouveautés (récap cumulatif) ════
 // Une entrée par version, la PLUS RÉCENTE EN HAUT : { v:'5.10', items:[ {emoji,titre,desc}, … ] }
 // À chaque release visible → AJOUTER un bloc en tête (ne pas remplacer). items:[] = release technique (rien à afficher).
@@ -341,6 +341,10 @@ window._mvGraphRepeindre = function(){
 };
 
 export const WHATS_NEW = [
+  { v:'5.90', items:[
+    { emoji:'\u{1F5D3}\u{FE0F}', titre:'Le planning de l\u2019ann\u00e9e s\u2019imprime',
+      desc:'Un nouveau document sort le rythme de l\u2019\u00e9quipe sur douze mois : jours travaill\u00e9s, heures de prise et de fin de service, coupure d\u00e9jeuner, fermetures et jours f\u00e9ri\u00e9s. Il se trouve dans R\u00e9glages, onglet App, \u00ab Documents & impressions \u00bb, et vous propose par d\u00e9faut l\u2019ann\u00e9e \u00e0 venir. Une page par mod\u00e8le de semaine : quand toute l\u2019\u00e9quipe suit le m\u00eame rythme, une seule feuille suffit.' }
+  ] },
   { v:'5.89', items:[
     { emoji:'\u{1F347}', titre:'La Cave suit le chemin du raisin',
       desc:'Les trois onglets de la Cave changent d\u2019ordre : Le Cuvier passe en premier, Le Chai vient ensuite, Le mill\u00e9sime ferme la marche. C\u2019est le trajet r\u00e9el du raisin, de la benne \u00e0 la bouteille. Rien ne bouge \u00e0 l\u2019int\u00e9rieur des \u00e9crans, aucune saisie n\u2019est d\u00e9plac\u00e9e, et la Cave continue de s\u2019ouvrir sur Le Chai.' }
@@ -1477,6 +1481,7 @@ var MV_AIDE = {
       ['Toucher un jour', "ouvre l’éditeur, qui enchaîne jour suivant et salarié suivant sans quitter l’écran."],
       ['Sélection multiple', ": congés, absence, récup ou horaires chaleur sur plusieurs jours d’un coup."],
       ['Les heures dues', "se décomptent sur une absence injustifiée ou un retard. Un arrêt de travail est neutre, une formation compte comme du travail."],
+      ['Le planning de l’année', "s’imprime depuis le même endroit : le rythme sur douze mois, avec les heures de prise et de fin de service et la coupure déjeuner. Une page par modèle de semaine, pas une par salarié — c’est le document qu’on remet à l’équipe pour l’année à venir."],
       ['Le relevé mensuel', "s’imprime depuis Réglages, onglet App, « Documents & impressions ». C’est un relevé d’heures, pas un bulletin de paie."],
       ['Taux horaires et acomptes', ": administrateurs seulement, et jamais enregistrés sur l’appareil."]
     ]

@@ -4171,6 +4171,358 @@ function planExportPDF(nom){
 
 // (updateHubPlanCard supprimée — hub purgé, plus aucun appelant · refonte v5.08)
 
+
+// ════════════════════════════════════════════════════════════════════
+// PLANNING DE L'ANNÉE — le document que l'équipe emporte
+// ════════════════════════════════════════════════════════════════════
+// Le relevé mensuel dit ce qui a été fait ; celui-ci dit ce qui est prévu.
+// Il se lit à trois hauteurs : l'ouvrier y cherche ses heures de prise et de
+// fin de service, le chef y cherche les semaines creuses, la paie y cherche
+// la coupure déjeuner et une date d'édition.
+//
+// ⚠️ Une page par MODÈLE de semaine, jamais par salarié : quand cinq personnes
+// suivent le même rythme, cinq feuilles identiques n'apprennent rien.
+//
+// ⚠️ Toutes les lectures passent l'année en argument. `_planGetTpl(plId,yr)` et
+// `_planDefTiming(pl,plId,m,d,yr)` retombent sur l'année SÉLECTIONNÉE quand on
+// l'omet : un document tiré pour 2027 depuis un écran calé sur 2026 afficherait
+// les horaires de 2026 sans rien signaler.
+
+function _paFmt(h){
+  if(!h) return '';
+  return (h===Math.round(h)) ? String(h) : String(h).replace('.',',');
+}
+function _paMin(t){ var p=String(t||'').split(':'); return (parseInt(p[0],10)||0)*60+(parseInt(p[1],10)||0); }
+function _paDuree(min){
+  var h=min/60;
+  return (h===Math.round(h)) ? String(h) : (Math.round(h*10)/10).toString().replace('.',',');
+}
+
+// Les membres regroupés par modèle. Un membre dont le contrat ne couvre aucun
+// jour de l'année cible n'a pas à figurer : _planInContract lit _pY() en dur,
+// donc on refait la comparaison ici avec l'année demandée.
+function _paGroupes(yr){
+  var out={}, mbrs=(typeof _planMbrs==='function')?_planMbrs():[];
+  mbrs.forEach(function(mb){
+    var d0=mb.debut_contrat||'', f0=mb.fin_contrat||'';
+    if(d0 && d0>String(yr)+'-12-31') return;
+    if(f0 && f0<String(yr)+'-01-01') return;
+    var id=_planPlId(mb);
+    if(!out[id]) out[id]={id:id,noms:[]};
+    out[id].noms.push(mb.nom||mb.prenom||'—');
+  });
+  return Object.keys(out).map(function(k){ return out[k]; });
+}
+
+// La grille de l'année : heures prévues par jour, fériés remis à zéro.
+function _paGrille(plId,yr){
+  var g={}, F=(typeof _feriesY==='function')?_feriesY(yr):{};
+  for(var m=0;m<12;m++){
+    var n=new Date(yr,m+1,0).getDate();
+    g[m]={};
+    for(var d=1;d<=n;d++){
+      var fe=(F[m]&&F[m][d])?true:false;
+      g[m][d]= fe ? 0 : (parseFloat(_planPlanned(plId,m,d,yr))||0);
+    }
+  }
+  return g;
+}
+
+// Un modèle est RÉGULIER si, dans chaque mois, la durée dominante de chaque jour
+// de semaine couvre au moins 70 % des cas. En dessous, résumer par « lundi–jeudi
+// 7 h » inventerait une régularité absente : on bascule sur une clé de lecture.
+function _paRegulier(g,yr){
+  var ok=0;
+  for(var m=0;m<12;m++){
+    var byd={}, vide=true;
+    for(var d in g[m]){
+      var h=g[m][d]; if(!(h>0)) continue;
+      vide=false;
+      var w=new Date(yr,m,parseInt(d,10)).getDay(); w=(w+6)%7;
+      (byd[w]=byd[w]||[]).push(h);
+    }
+    if(vide){ ok++; continue; }
+    var mini=1;
+    Object.keys(byd).forEach(function(w){
+      var c={}, best=0;
+      byd[w].forEach(function(v){ c[v]=(c[v]||0)+1; if(c[v]>best) best=c[v]; });
+      var r=best/byd[w].length; if(r<mini) mini=r;
+    });
+    if(mini>=0.7) ok++;
+  }
+  return ok>=8;
+}
+
+// Prise de service, fin de service, et coupure DÉDUITE de l'écart entre
+// l'amplitude et les heures dues. Rien n'est écrit en dur : l'heure de début de
+// coupure n'existe pas en base, donc le document ne la prétend pas connue.
+function _paHoraire(h,plId,m,yr){
+  var t=_planDefTiming(h,plId,m,undefined,yr)||{};
+  var d0=t.d||'07:00', f0=t.f||'';
+  if(!f0) return null;
+  var amp=_paMin(f0)-_paMin(d0);
+  return { d:d0, f:f0, amp:amp, coup:Math.max(0,amp-Math.round(h*60)) };
+}
+
+var _PA_JL=['Lundi','Mardi','Mercredi','Jeudi','Vendredi','Samedi','Dimanche'];
+var _PA_JA=['L','M','M','J','V','S','D'];
+var _PA_MO=['Janvier','F\u00e9vrier','Mars','Avril','Mai','Juin','Juillet','Ao\u00fbt','Septembre','Octobre','Novembre','D\u00e9cembre'];
+var _PA_MA=['JANV','F\u00c9VR','MARS','AVRIL','MAI','JUIN','JUIL','AO\u00dbT','SEPT','OCT','NOV','D\u00c9C'];
+
+function _paPlage(ws){
+  ws=ws.slice().sort(function(a,b){return a-b;});
+  if(ws.length===1) return _PA_JL[ws[0]];
+  var suite=true;
+  for(var i=1;i<ws.length;i++) if(ws[i]!==ws[i-1]+1) suite=false;
+  if(suite) return _PA_JL[ws[0]]+'\u2013'+_PA_JL[ws[ws.length-1]].toLowerCase();
+  return ws.map(function(w){return _PA_JL[w].slice(0,2);}).join(' \u00b7 ');
+}
+
+// Signature d'un mois : la durée dominante de chaque jour de semaine. Deux mois
+// de même signature se regroupent, ce qui donne des blocs « mai – août » plutôt
+// que douze colonnes qui répètent la même chose.
+function _paSig(g,m,yr){
+  var byd={};
+  for(var d in g[m]){
+    var h=g[m][d]; if(!(h>0)) continue;
+    var w=new Date(yr,m,parseInt(d,10)).getDay(); w=(w+6)%7;
+    (byd[w]=byd[w]||[]).push(h);
+  }
+  return Object.keys(byd).sort(function(a,b){return a-b;}).map(function(w){
+    var c={}, best=0, val=0;
+    byd[w].forEach(function(v){ c[v]=(c[v]||0)+1; if(c[v]>best){best=c[v];val=v;} });
+    return w+':'+val;
+  }).join('|');
+}
+
+function _paBandeau(g,plId,yr,reg){
+  var e=window._escHtml||function(x){return String(x==null?'':x);};
+  if(reg){
+    var grp=[], prev=null;
+    for(var m=0;m<12;m++){
+      var s=_paSig(g,m,yr);
+      if(prev && prev.s===s){ prev.ms.push(m); }
+      else { prev={s:s,ms:[m]}; grp.push(prev); }
+    }
+    var blocs=grp.map(function(gr){
+      var byh={};
+      gr.s.split('|').forEach(function(p){
+        if(!p) return;
+        var a=p.split(':'), w=parseInt(a[0],10), h=parseFloat(a[1]);
+        (byh[h]=byh[h]||[]).push(w);
+      });
+      var hs=Object.keys(byh).map(Number).sort(function(a,b){return b-a;});
+      var coupe=false;
+      var lignes=hs.map(function(h){
+        var t=_paHoraire(h,plId,gr.ms[0],yr);
+        if(!t) return '';
+        if(t.coup>0) coupe=true;
+        var det = (t.coup>0)
+          ? _paDuree(t.amp)+' h de pr\u00e9sence \u00b7 <b>'+_paDuree(t.coup)+' h de coupure</b>'
+          : 'journ\u00e9e continue, sans coupure';
+        return '<div class="pa-hl"><div class="pa-hlt"><span class="pa-hj">'+e(_paPlage(byh[h]))+'</span>'
+             + '<span class="pa-hn">'+_paFmt(h)+' h</span></div>'
+             + '<div class="pa-hh"><b>'+e(t.d)+'</b><i>\u2192</i><b>'+e(t.f)+'</b></div>'
+             + '<span class="pa-hd2">'+det+'</span></div>';
+      }).join('');
+      if(!lignes) return '';
+      var lbl = (gr.ms.length===1) ? _PA_MO[gr.ms[0]]
+              : _PA_MO[gr.ms[0]]+' \u2013 '+_PA_MO[gr.ms[gr.ms.length-1]].toLowerCase();
+      var pied = coupe
+        ? 'La coupure d\u00e9jeuner n\u2019est pas travaill\u00e9e : les heures indiqu\u00e9es sont les heures dues.'
+        : 'Journ\u00e9es continues : pr\u00e9sence et heures dues sont identiques.';
+      return '<div class="pa-hb"><div class="pa-hm">'+e(lbl)+'</div>'+lignes+'<div class="pa-hp">'+pied+'</div></div>';
+    }).filter(Boolean).join('');
+    return blocs ? '<div class="pa-hz">'+blocs+'</div>' : '';
+  }
+  // Modèle irrégulier : une clé de lecture durée → horaires. L'heure de prise de
+  // service reste stable, c'est la fin qui bouge ; la clé suffit à s'organiser.
+  var vus={};
+  for(var mm=0;mm<12;mm++) for(var dd in g[mm]) if(g[mm][dd]>0) vus[g[mm][dd]]=mm;
+  var durees=Object.keys(vus).map(Number).sort(function(a,b){return a-b;});
+  var cles=durees.map(function(h){
+    var t=_paHoraire(h,plId,vus[h],yr);
+    if(!t) return '';
+    return '<span class="pa-kc"><u>'+_paFmt(h)+' h</u><b>'+e(t.d)+'</b><i>\u2192</i><b>'+e(t.f)+'</b>'
+         + '<em>'+(t.coup>0?('coupure '+_paDuree(t.coup)+' h'):'en continu')+'</em></span>';
+  }).join('');
+  if(!cles) return '';
+  return '<div class="pa-hz pa-solo"><div class="pa-hb pa-full">'
+       + '<div class="pa-hm">Horaires \u2014 dur\u00e9e variable d\u2019un jour \u00e0 l\u2019autre</div>'
+       + '<div class="pa-hkl">La grille donne la dur\u00e9e de chaque journ\u00e9e. Cette cl\u00e9 donne l\u2019heure de prise '
+       + 'et de fin de service correspondante, et la coupure d\u00e9jeuner comprise dedans.</div>'
+       + '<div class="pa-hk">'+cles+'</div></div></div>';
+}
+
+function _paGrilleHtml(g,yr,reg){
+  var F=(typeof _feriesY==='function')?_feriesY(yr):{};
+  var cols='';
+  for(var m=0;m<12;m++){
+    var n=new Date(yr,m+1,0).getDate(), vals=[], k;
+    for(k in g[m]) if(g[m][k]>0) vals.push(g[m][k]);
+    var mn=vals.length?Math.min.apply(null,vals):0, mx=vals.length?Math.max.apply(null,vals):0;
+    var cells='', tot=0, nj=0;
+    for(var d=1;d<=31;d++){
+      if(d>n){ cells+='<div class="pa-c pa-void"></div>'; continue; }
+      var w=new Date(yr,m,d).getDay(); w=(w+6)%7;
+      var h=g[m][d]||0, fe=(F[m]&&F[m][d])?true:false;
+      var cl='pa-c';
+      if(fe) cl+=' pa-fer';
+      else if(w>=5 && !h) cl+=' pa-we';
+      else if(!h) cl+=' pa-clos';
+      else if(reg && h===mn && mn<mx) cl+=' pa-court';
+      if(w===0) cl+=' pa-wk';
+      if(h>0){ tot+=h; nj++; }
+      cells+='<div class="'+cl+'"><span class="pa-d">'+(d<10?'0':'')+d+'</span>'
+           + '<span class="pa-j">'+_PA_JA[w]+'</span>'
+           + '<span class="pa-h">'+(h?_paFmt(h):(fe?'\u2022':''))+'</span></div>';
+    }
+    cols+='<div class="pa-col"><div class="pa-mh">'+_PA_MA[m]+'</div>'+cells
+        + '<div class="pa-mt"><b>'+(_paFmt(Math.round(tot*10)/10)||'0')+'</b><span>'+nj+' j</span></div></div>';
+  }
+  return '<div class="pa-grid">'+cols+'</div>';
+}
+
+// Le CSS du CORPS seulement : la page, les polices, l'en-tête à filet d'or et
+// le pied viennent de la charte MV_DOC. Un onzième document avec sa propre mise
+// en page rouvrirait exactement ce que la charte a refermé.
+var _PA_CSS =
+  '.pa-grp{page-break-after:always;break-after:page}'
++ '.pa-grp:last-child{page-break-after:auto;break-after:auto}'
++ '.pa-who{display:flex;align-items:baseline;gap:8px;padding:6px 9px;background:#FAF3E0;'
+  +'border-left:3px solid #C2A14D;margin-bottom:8px;border-radius:0 4px 4px 0}'
++ '.pa-who b{font-size:8px;text-transform:uppercase;letter-spacing:1px;color:#8A7A62;font-weight:700;white-space:nowrap}'
++ '.pa-who p{font-family:\'Cormorant Garamond\',Georgia,serif;font-size:14px;font-weight:600;color:#2B2118;margin:0}'
++ '.pa-hz{display:flex;border:1px solid #A5701E;background:#FDF7E9;margin-bottom:8px}'
++ '.pa-hb{flex:1;padding:0 0 6px;border-right:1px solid #E0CFA6;min-width:0}'
++ '.pa-hb:last-child{border-right:0}'
++ '.pa-hm{font-size:8px;font-weight:700;text-transform:uppercase;letter-spacing:.6px;color:#fff;'
+  +'background:#8A5D08;padding:3px 6px;margin-bottom:5px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}'
++ '.pa-hl{padding:0 6px;margin-top:5px}'
++ '.pa-hlt{display:flex;align-items:baseline;gap:5px}'
++ '.pa-hj{font-size:7.5px;font-weight:600;color:#8A5D08;text-transform:uppercase;letter-spacing:.4px;'
+  +'white-space:nowrap;overflow:hidden;text-overflow:ellipsis}'
++ '.pa-hn{margin-left:auto;font-family:\'Cormorant Garamond\',Georgia,serif;font-size:11px;font-weight:700;color:#4A3B28}'
++ '.pa-hh{font-family:\'Cormorant Garamond\',Georgia,serif;font-size:14px;color:#1C1008;white-space:nowrap;line-height:1.1}'
++ '.pa-hh b{font-weight:700}'
++ '.pa-hh i{font-style:normal;color:#C8913A;font-weight:700;font-family:\'Outfit\',sans-serif;font-size:8px;margin:0 1px}'
++ '.pa-hd2{display:block;font-size:7px;color:#96794A;line-height:1.3;margin-top:1px}'
++ '.pa-hd2 b{color:#8A5D08;font-weight:700}'
++ '.pa-hp{margin:6px 6px 0;padding-top:4px;border-top:1px solid #E0CFA6;font-size:7px;color:#96794A;line-height:1.3}'
++ '.pa-full{padding:0 0 8px}.pa-hkl{font-size:8px;color:#6B5B44;margin:0 10px 7px}'
++ '.pa-hk{display:flex;flex-wrap:wrap;gap:6px 22px;margin:0 10px}'
++ '.pa-kc{font-family:\'Cormorant Garamond\',Georgia,serif;font-size:13px;color:#1C1008;white-space:nowrap}'
++ '.pa-kc b{font-weight:700}'
++ '.pa-kc u{display:inline-block;text-decoration:none;font-family:\'Outfit\',sans-serif;font-size:8px;font-weight:700;'
+  +'color:#fff;background:#8A5D08;border-radius:3px;padding:1px 5px;margin-right:5px;vertical-align:1px;min-width:26px;text-align:center}'
++ '.pa-kc i{font-style:normal;color:#C8913A;font-weight:700;font-family:\'Outfit\',sans-serif;font-size:8px;margin:0 1px}'
++ '.pa-kc em{font-style:normal;font-family:\'Outfit\',sans-serif;color:#96794A;font-size:7.5px;margin-left:5px}'
++ '.pa-grid{display:flex;border:1px solid #A5701E;border-right:0}'
++ '.pa-col{flex:1;display:flex;flex-direction:column;border-right:1px solid #C3B393;min-width:0}'
++ '.pa-mh{font-size:8px;font-weight:700;letter-spacing:.7px;text-align:center;padding:3px 0;color:#2B1D08;'
+  +'background:#D9A441;border-bottom:1px solid #A5701E}'
++ '.pa-c{display:flex;align-items:center;gap:1px;padding:0 3px;height:11.5px;font-size:7.5px;line-height:1;'
+  +'border-bottom:1px solid #E2DCCF}'
++ '.pa-wk{border-top:1.4px solid #A5701E}'
++ '.pa-d{color:#9C8A6E;width:9px;font-weight:500}'
++ '.pa-j{color:#C9BCA4;width:6px;font-size:6.5px}'
++ '.pa-h{margin-left:auto;font-family:\'Cormorant Garamond\',Georgia,serif;font-size:11px;font-weight:700;color:#1C1008}'
++ '.pa-we{background:#DDD8CF}.pa-we .pa-d,.pa-we .pa-j{color:#8C8378}'
++ '.pa-clos{background:#FBE08A}.pa-clos .pa-d,.pa-clos .pa-j{color:#8A5D08}'
++ '.pa-court{background:#C7E3F5}.pa-court .pa-h{color:#0F5A87}.pa-court .pa-d,.pa-court .pa-j{color:#4C86A8}'
++ '.pa-fer{background:#F0AF9B}.pa-fer .pa-d{color:#8C2E15;font-weight:700}.pa-fer .pa-j{color:#A85A42}'
+  +'.pa-fer .pa-h{color:#8C2E15;font-size:7.5px}'
++ '.pa-void{background:#F2EFE9;border-bottom:0}'
++ '.pa-mt{text-align:center;padding:3px 0;background:#EDE1C6;border-top:1px solid #A5701E;font-size:7px;color:#8A7550}'
++ '.pa-mt b{font-family:\'Cormorant Garamond\',Georgia,serif;font-size:12px;color:#2B2118;display:block;line-height:1}'
++ '.pa-mt span{display:block;margin-top:1px}'
++ '.pa-ft{display:flex;justify-content:space-between;align-items:flex-end;gap:16px;margin-top:7px}'
++ '.pa-lg{display:flex;flex-wrap:wrap;gap:3px 12px;font-size:7.5px;color:#5A4A30}'
++ '.pa-lg i{display:inline-block;width:9px;height:9px;border:1px solid #B9A98C;margin-right:4px;'
+  +'vertical-align:-1px;border-radius:2px}'
++ '.pa-tot{text-align:right;white-space:nowrap}'
++ '.pa-tot .pa-v{font-family:\'Cormorant Garamond\',Georgia,serif;font-size:21px;font-weight:700;color:#2B2118;line-height:1}'
++ '.pa-tot .pa-v em{font-style:normal;font-size:10px;color:#8A7A62;font-family:\'Outfit\',sans-serif}'
++ '.pa-tot .pa-s{font-size:7.5px;color:#8A7A62;margin-top:2px}';
+
+// Le document. Une page par modèle ; le nom du domaine et l'année sont répétés
+// sur chaque page, parce qu'une feuille arrachée du lot doit rester identifiable.
+function _paDoc(yr){
+  var e=window._escHtml||function(x){return String(x==null?'':x);};
+  var grps=_paGroupes(yr);
+  if(!grps.length){ if(window.showToast) window.showToast('Aucun salari\u00e9 sur '+yr,'#B85A1A'); return false; }
+  var F=(typeof _feriesY==='function')?_feriesY(yr):{};
+  var fl=[];
+  for(var m=0;m<12;m++) if(F[m]) for(var d in F[m]) fl.push(d+' '+_PA_MO[m].toLowerCase().slice(0,4)+' '+F[m][d]);
+
+  var corps=grps.map(function(gr){
+    var g=_paGrille(gr.id,yr), reg=_paRegulier(g,yr);
+    var tot=0, nj=0;
+    for(var mm=0;mm<12;mm++) for(var dd in g[mm]) if(g[mm][dd]>0){ tot+=g[mm][dd]; nj++; }
+    tot=Math.round(tot*10)/10;
+    var ec=Math.round((tot-1607)*10)/10;
+    var lg='<span><i style="background:#fff"></i>Journ\u00e9e compl\u00e8te</span>'
+         + (reg?'<span><i style="background:#C7E3F5"></i>Journ\u00e9e courte</span>':'')
+         + '<span><i style="background:#DDD8CF"></i>Week-end</span>'
+         + '<span><i style="background:#FBE08A"></i>Fermeture du domaine</span>'
+         + '<span><i style="background:#F0AF9B"></i>Jour f\u00e9ri\u00e9</span>';
+    return '<div class="pa-grp">'
+      + '<div class="pa-who"><b>Suivent ce planning</b><p>'+e(gr.noms.join(' \u00b7 '))+'</p></div>'
+      + _paBandeau(g,gr.id,yr,reg)
+      + _paGrilleHtml(g,yr,reg)
+      + '<div class="pa-ft"><div class="pa-lg">'+lg+'</div>'
+      + '<div class="pa-tot"><div class="pa-v">'+_paFmt(tot)+' <em>h</em></div>'
+      + '<div class="pa-s">'+nj+' jours travaill\u00e9s \u00b7 '+(ec>=0?'+':'\u2212')+_paFmt(Math.abs(ec))
+      + ' h par rapport aux 1 607 h</div></div></div>'
+      + '</div>';
+  }).join('');
+
+  var lim='<div class="mvdoc-lim"><b>Planning pr\u00e9visionnel.</b> Il donne le rythme de travail : jours '
+    + 'travaill\u00e9s, heures de prise et de fin de service, fermetures du domaine et jours f\u00e9ri\u00e9s. '
+    + 'Les dur\u00e9es sont des heures <b>travaill\u00e9es</b>, coupure d\u00e9duite. Cong\u00e9s pay\u00e9s, absences et '
+    + 'r\u00e9cup\u00e9rations n\u2019y figurent pas : ils se posent au fil de l\u2019ann\u00e9e et apparaissent sur le '
+    + 'relev\u00e9 mensuel d\u2019heures. Ce document n\u2019est ni un contrat de travail ni un bulletin de paie.'
+    + (fl.length?(' \u2014 Jours f\u00e9ri\u00e9s '+yr+' : '+e(fl.join(' \u00b7 '))+'.'):'')
+    + '</div>';
+
+  var neuf = (typeof _planYearHasData==='function' && !_planYearHasData(yr));
+  if(neuf){
+    lim += '<div class="mvdoc-lim"><b>L\u2019ann\u00e9e '+yr+' n\u2019a pas encore de mod\u00e8le enregistr\u00e9.</b> '
+        + 'Le document est construit sur le mod\u00e8le int\u00e9gr\u00e9, dont les jours sont cal\u00e9s sur un autre '
+        + 'calendrier : les jours de semaine ne tombent pas aux m\u00eames dates. Importez le planning de '
+        + 'l\u2019ann\u00e9e au format CSV avant de le diffuser \u00e0 l\u2019\u00e9quipe.</div>';
+  }
+
+  return window._mvDocOpen({
+    titre:'Planning de l\u2019ann\u00e9e '+yr,
+    metas:[String(yr), grps.length+(grps.length>1?' mod\u00e8les de semaine':' mod\u00e8le de semaine'),
+           '\u00c9dit\u00e9 le '+new Date().toLocaleDateString('fr-FR')],
+    orient:'paysage', cat:'planning', css:_PA_CSS, corps:corps+lim
+  });
+}
+
+// Ne jamais poser une question dont la réponse est unique : s'il n'y a qu'une
+// année possible, le document sort directement.
+function planAnnuelPdf(){
+  var ans=(typeof _planYearList==='function')?_planYearList():[];
+  if(!ans.length) ans=[(new Date()).getFullYear()];
+  var def=ans.indexOf(_pY()+1)>=0 ? (_pY()+1) : ans[ans.length-1];
+  if(ans.length===1 || typeof window.openPrompt!=='function'){ _paDoc(ans[0]); return; }
+  window.openPrompt({
+    titre:'Quelle ann\u00e9e ?', unite:'', icone:'\u{1F5D3}\u{FE0F}', type:'nombre',
+    sub:'Ann\u00e9es disponibles : '+ans.join(', ')+'. Le planning de l\u2019ann\u00e9e \u00e0 venir '
+       +'se pr\u00e9pare en important son CSV depuis l\u2019onglet Mod\u00e8les.',
+    valeur:String(def), placeholder:String(def), btnLabel:'\u00c9diter le planning',
+    cb:function(v){
+      var n=parseInt(String(v).replace(/\D/g,''),10);
+      if(!isFinite(n)||n<2000){ if(window.showToast) window.showToast('Ann\u00e9e non reconnue','#B85A1A'); return; }
+      _paDoc(n);
+    }
+  });
+}
+window.planAnnuelPdf = planAnnuelPdf;
+window._paDoc        = _paDoc;
+
 // ════════════════════════════════════════════════════════════════════
 // EXPORTS WINDOW — fonctions appelées depuis HTML (onclick) ou app.js
 // ════════════════════════════════════════════════════════════════════

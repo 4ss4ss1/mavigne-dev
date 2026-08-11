@@ -2522,6 +2522,10 @@ var MV_DOCS = [
   { f:'suivi', act:'saison',    mod:'',         ico:'\u{1F4C4}', bg:'var(--or-pale)',    fm:'pdf', ov:true,
     t:'Rapport de saison', ask:'Choix de la p\u00e9riode',
     s:'Avancement, tracteur, entretiens, incidents, phyto, cuivre et ETP sur une p\u00e9riode.' },
+  { f:'suivi', act:'annuel',    mod:'planning', ico:'\u{1F5D3}\u{FE0F}', bg:'var(--bleu-pale)', fm:'pdf',
+    t:'Planning de l\u2019ann\u00e9e', ask:'Choix de l\u2019ann\u00e9e',
+    s:'Le rythme de l\u2019\u00e9quipe sur douze mois : jours travaill\u00e9s, heures de prise et de fin de service, '
+     +'fermetures et jours f\u00e9ri\u00e9s. Une page par mod\u00e8le de semaine.' },
   { f:'suivi', act:'bilan',     mod:'pilotage', ico:'\u{1F4D6}', bg:'var(--vert-pale)',  fm:'pdf', ov:true,
     t:'Bilan de campagne', ask:'Campagne puis mill\u00e9sime',
     s:'La vigne, la r\u00e9colte, le chai et le parc \u00e0 f\u00fbts sur une ann\u00e9e. La vigne suit la campagne, le vin suit son mill\u00e9sime.' },
@@ -2678,6 +2682,7 @@ window.docsGo=function(i){
     case 'phytoCsv':     fn=window._phytoExportCsv;        break;
     case 'cuivre':       fn=window.openSyntheseCuivre;     break;
     case 'saison':       fn=window.openRapportSaison;      break;
+    case 'annuel':       fn=window.planAnnuelPdf;        break;
     case 'bilan':        fn=window._bcExportChoix;         break;
     case 'manip':        fn=window._rmExportChoix;         break;
     case 'futs':         fn=window._rsvExportFutsPdf;      break;
