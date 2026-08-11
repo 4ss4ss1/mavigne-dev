@@ -3092,14 +3092,29 @@ function _planRenderTemplates(){
   var all=Object.assign({},PLAN_DEF,_pTplStore());
   var ids=Object.keys(all);
   var curPause=window.PLAN_PAUSE_MIN||PLAN_PAUSE_MIN||60;
+  var curCoup=_planCoupureH();
+  var curCoupFixe=!!(curCoup&&curCoup!=='libre');
   var html='<button class="plan-back-btn" onclick="planSwitchTab(\'equipe\')">\u2190 Retour au planning</button>'
-    +'<div class="plan-sec-lbl">R\u00e9glage pause d\u00e9jeuner</div>'
+    +'<div class="plan-sec-lbl">R\u00e9glage coupure d\u00e9jeuner</div>'
     +'<div class="plan-card" style="flex-direction:column;gap:10px">'
-      +'<div style="font-size:13px;color:var(--texte-doux);line-height:1.5">D\u00e9duite automatiquement sur les journ\u00e9es &gt;\u00a06h (hors horaire continu).</div>'
+      +'<div style="font-size:13px;color:var(--texte-doux);line-height:1.5">D\u00e9duite des journ\u00e9es de 6\u00a0h ou plus, hors horaire continu. Elle n\u2019est pas du temps de travail.</div>'
       +'<div style="display:flex;gap:0;border:1px solid var(--gris-clair);border-radius:10px;overflow:hidden">'
         +'<button id="plan-pause-30" onclick="planSavePause(30)" style="flex:1;padding:9px 4px;font-size:13px;font-weight:600;border:none;cursor:pointer;transition:all .15s;background:'+(curPause===30?'#2D6A27':'transparent')+';color:'+(curPause===30?'white':'var(--texte-doux)')+'">30 min</button>'
         +'<button id="plan-pause-60" onclick="planSavePause(60)" style="flex:1;padding:9px 4px;font-size:13px;font-weight:600;border:none;border-left:1px solid var(--gris-clair);border-right:1px solid var(--gris-clair);cursor:pointer;transition:all .15s;background:'+(curPause===60?'#2D6A27':'transparent')+';color:'+(curPause===60?'white':'var(--texte-doux)')+'">1 h</button>'
         +'<button id="plan-pause-120" onclick="planSavePause(120)" style="flex:1;padding:9px 4px;font-size:13px;font-weight:600;border:none;cursor:pointer;transition:all .15s;background:'+(curPause===120?'#2D6A27':'transparent')+';color:'+(curPause===120?'white':'var(--texte-doux)')+'">2 h</button>'
+      +'</div>'
+      // Le QUAND. Sans lui, « 1 h de coupure » laisse croire au salarie qu'il
+      // choisit son moment ; avec lui, la journee se lit sans interpretation.
+      +'<div style="font-size:13px;color:var(--texte-doux);line-height:1.5;margin-top:2px">\u00c0 quelle heure\u00a0?</div>'
+      +'<div style="display:flex;gap:8px;align-items:center;flex-wrap:wrap">'
+        +'<input type="time" id="plan-coup-h" value="'+(curCoupFixe?curCoup:'')+'" onchange="planSaveCoupureH()" style="font-family:inherit;font-size:14px;padding:9px 10px;border:1.5px solid var(--gris-clair);border-radius:10px;background:var(--bg-card);color:var(--texte);outline:none">'
+        +'<button onclick="planSaveCoupure(\'libre\')" style="padding:9px 12px;font-size:13px;font-weight:600;border:1.5px solid '+(curCoup==='libre'?'#2D6A27':'var(--gris-clair)')+';border-radius:10px;cursor:pointer;background:'+(curCoup==='libre'?'#2D6A27':'transparent')+';color:'+(curCoup==='libre'?'white':'var(--texte-doux)')+'">Selon le chantier</button>'
+        +(curCoup?'<button onclick="planSaveCoupure(\'\')" style="padding:9px 10px;font-size:12px;border:none;background:none;color:var(--texte-doux);cursor:pointer;text-decoration:underline">Effacer</button>':'')
+      +'</div>'
+      +'<div style="font-size:12px;color:var(--texte-doux);line-height:1.5">'
+        +(curCoupFixe?('Les journ\u00e9es s\u2019afficheront coup\u00e9es\u00a0: 09:00\u2009\u2192\u2009'+curCoup+' puis reprise jusqu\u2019\u00e0 la fin de service.')
+         :(curCoup==='libre'?'Les documents indiqueront que la coupure est prise selon le chantier.'
+         :'Non renseign\u00e9\u00a0: seule la dur\u00e9e de coupure sera indiqu\u00e9e, sans l\u2019heure.'))
       +'</div>'
     +'</div>';
   // ── Cadre légal (config admin) ──
@@ -3233,6 +3248,46 @@ function planAssignTpl(nom,plId){
   window.MEMBRES=window.MEMBRES;
   if(window.fbSave)window.fbSave('membres',window.MEMBRES);
   showToast('\u2705 '+nom+' \u2192 planning "'+plId+'"','#3D6B27');
+}
+
+// ── La coupure : combien, et quand ────────────────────────────────────────
+// PLAN_PAUSE_MIN dit la DUREE. _planCoupureH dit l'HEURE de debut, ou rien.
+// Trois etats, et le troisieme n'est pas un defaut mais une absence de reponse :
+//   '12:00'  → coupure a heure fixe, le domaine l'a decidee
+//   'libre'  → coupure prise selon le chantier, le domaine l'a decide aussi
+//   ''       → le domaine ne s'est pas prononce : on n'affirme rien
+// ⚠️ Un mois du CSV peut porter sa propre heure (champ `p` du timing) : chez un
+// domaine dont la coupure suit la saison, le mois l'emporte sur le reglage.
+function _planCoupureH(m,plId,yr){
+  if(m!==undefined&&plId!==undefined){
+    var tpl=_planGetTpl(plId,yr)||{};
+    var mt=tpl._timings&&tpl._timings[m];
+    if(mt&&mt.p)return mt.p;
+  }
+  var c=(window.CONFIG&&window.CONFIG.coupure_heure);
+  return c||'';
+}
+// Comment dire la coupure a l'ouvrier, au gerant et a la paie d'un seul trait.
+// « pause » est reserve a la pause legale (un droit du salarie) ; ce qui est
+// decide par le domaine s'appelle une coupure.
+function _planCoupureTxt(m,plId,yr){
+  var h=_planCoupureH(m,plId,yr);
+  if(h==='libre')return 'prise selon le chantier';
+  if(h)return '\u00e0 '+h;
+  return '';
+}
+function planSaveCoupure(v){
+  if(!window.CONFIG)window.CONFIG={};
+  window.CONFIG.coupure_heure=v;
+  window.CONFIG=window.CONFIG;
+  if(window.fbSave)window.fbSave('config',window.CONFIG);
+  showToast(v==='libre'?'\u2705 Coupure prise selon le chantier'
+            :(v?'\u2705 Coupure \u00e0 '+v:'\u2705 Heure de coupure effac\u00e9e'),'#3D6B27');
+  _planRenderTemplates();
+}
+function planSaveCoupureH(){
+  var el=document.getElementById('plan-coup-h');
+  if(el)planSaveCoupure(el.value||'');
 }
 
 function planSavePause(min){
@@ -3414,10 +3469,10 @@ function planExportCSV(templateId){
   var rows=['# Planning Ma Vigne \u2014 template : '+templateId];
   // Lignes timing si définies
   if(tpl._timings){
-    rows.push('# timing'+S+'mois'+S+'prise_de_service'+S+'fin_de_service'+S+'continu(oui/non)');
+    rows.push('# timing'+S+'mois'+S+'prise_de_service'+S+'fin_de_service'+S+'continu(oui/non)'+S+'heure_coupure(facultatif)');
     for(var ti=0;ti<12;ti++){
       var t=tpl._timings[ti];
-      if(t)rows.push('timing'+S+_PLAN_MOIS_CSV[ti]+S+(t.d||t.debut||'08:00')+S+(t.f||t.fin||'16:00')+S+(t.continu?'oui':'non'));
+      if(t)rows.push('timing'+S+_PLAN_MOIS_CSV[ti]+S+(t.d||t.debut||'08:00')+S+(t.f||t.fin||'16:00')+S+(t.continu?'oui':'non')+(t.p?(S+t.p):''));
     }
   }
   // En-tête + heures
@@ -3468,7 +3523,11 @@ function planImportCSV(targetId){
           var mi2=(_PLAN_MOIS_IDX[mKey]!==undefined)?_PLAN_MOIS_IDX[mKey]:parseInt(mKey);
           if(!isNaN(mi2)&&mi2>=0&&mi2<12&&parts[2]&&parts[3]){
             var cont=(parts[4]||'').trim().toLowerCase();
-            timings[mi2]={d:parts[2].trim(),f:parts[3].trim(),continu:cont==='oui'||cont==='1'};
+            // 6e colonne facultative : l'heure de coupure du mois. Absente = le mois
+      // suit le reglage du domaine ; presente = elle l'emporte.
+      var _cp=(parts[5]||'').trim();
+      timings[mi2]={d:parts[2].trim(),f:parts[3].trim(),continu:cont==='oui'||cont==='1'};
+      if(/^\d{1,2}:\d{2}$/.test(_cp))timings[mi2].p=_cp;
           }
           return;
         }
@@ -4275,13 +4334,32 @@ function _paHoraire(h,plId,m,yr){
   var amp=_paMin(f0)-_paMin(d0);
   // `continu` vient du CSV (colonne 5) et de nulle part ailleurs. Le fallback
   // PLAN_DEF_T ne porte pas ce champ : absent ne veut pas dire vrai.
-  return { d:d0, f:f0, amp:amp, coup:Math.max(0,amp-Math.round(h*60)), continu:(t.continu===true) };
+  var ch=(typeof _planCoupureH==='function')?_planCoupureH(m,plId,yr):'';
+  var cq=(typeof _planCoupureTxt==='function')?_planCoupureTxt(m,plId,yr):'';
+  return { d:d0, f:f0, amp:amp, coup:Math.max(0,amp-Math.round(h*60)),
+           continu:(t.continu===true), ch:(ch==='libre'?'':ch), cq:cq };
 }
 // Les trois cas, dans les mots que le modal du planning emploie deja.
 function _paPause(t){
-  if(t.coup>0)  return _paDuree(t.amp)+' h de pr\u00e9sence \u00b7 <b>'+_paDuree(t.coup)+' h de coupure</b>';
+  if(t.coup>0){
+    var q=t.cq?(' '+t.cq):'';
+    return _paDuree(t.amp)+' h de pr\u00e9sence \u00b7 <b>'+_paDuree(t.coup)+' h de coupure</b>'+q;
+  }
   if(t.continu) return 'horaire continu';
-  return 'sans pause (moins de 6\u00a0h)';
+  return 'sans coupure (moins de 6\u00a0h)';
+}
+// La journee coupee en deux, quand le domaine a dit a quelle heure. Sinon on
+// rend les deux bornes seules : mieux vaut une information manquante qu'une
+// information inventee.
+function _paCreneaux(t,e){
+  if(t.coup>0&&/^\d{1,2}:\d{2}$/.test(t.ch||'')){
+    var p0=_paMin(t.ch), p1=p0+t.coup;
+    if(p0>_paMin(t.d)&&p1<_paMin(t.f)){
+      var s2=function(x){return String(Math.floor(x/60)).padStart(2,'0')+':'+String(x%60).padStart(2,'0');};
+      return '<b>'+e(t.d)+'</b><i>\u2192</i><b>'+e(s2(p0))+'</b><em>\u00b7</em><b>'+e(s2(p1))+'</b><i>\u2192</i><b>'+e(t.f)+'</b>';
+    }
+  }
+  return '<b>'+e(t.d)+'</b><i>\u2192</i><b>'+e(t.f)+'</b>';
 }
 
 var _PA_JL=['Lundi','Mardi','Mercredi','Jeudi','Vendredi','Samedi','Dimanche'];
@@ -4362,7 +4440,7 @@ function _paBandeau(g,plId,yr,reg){
         var det = _paPause(t);
         return '<div class="pa-hl"><div class="pa-hlt"><span class="pa-hj">'+e(_paPlage(byh[h]))+'</span>'
              + '<span class="pa-hn">'+_paFmt(h)+' h</span></div>'
-             + '<div class="pa-hh"><b>'+e(t.d)+'</b><i>\u2192</i><b>'+e(t.f)+'</b></div>'
+             + '<div class="pa-hh">'+_paCreneaux(t,e)+'</div>'
              + '<span class="pa-hd2">'+det+'</span></div>';
       }).join('');
       if(!lignes) return '';
@@ -4448,6 +4526,7 @@ var _PA_CSS =
 + '.pa-hh{font-family:\'Cormorant Garamond\',Georgia,serif;font-size:12px;color:#1C1008;white-space:nowrap;line-height:1.05}'
 + '.pa-hh b{font-weight:700}'
 + '.pa-hh i{font-style:normal;color:#C8913A;font-weight:700;font-family:\'Outfit\',sans-serif;font-size:8px;margin:0 1px}'
++ '.pa-hh em{font-style:normal;color:#D9A441;font-size:10px;margin:0 3px}'
 + '.pa-hd2{display:block;font-size:6.2px;color:#96794A;line-height:1.25}'
 + '.pa-hd2 b{color:#8A5D08;font-weight:700}'
 + '.pa-hp{margin:4px 6px 0;padding-top:3px;border-top:1px solid #E0CFA6;font-size:6.2px;color:#96794A;line-height:1.25}'
