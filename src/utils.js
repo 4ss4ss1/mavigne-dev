@@ -23,7 +23,7 @@ export const GT_ADMIN_EMAIL = 'ngdevpro@gmail.com';
 // WHATS_NEW   : tableau vide = modal desactive pour cette version.
 // Format item : { emoji:'📅', titre:'Titre court', desc:'Phrase utilisateur.' }
 // Regle : seulement les changements visibles par les utilisateurs.
-export const APP_VERSION = '5.92';
+export const APP_VERSION = '5.93';
 // ════ Journal des nouveautés (récap cumulatif) ════
 // Une entrée par version, la PLUS RÉCENTE EN HAUT : { v:'5.10', items:[ {emoji,titre,desc}, … ] }
 // À chaque release visible → AJOUTER un bloc en tête (ne pas remplacer). items:[] = release technique (rien à afficher).
@@ -341,6 +341,12 @@ window._mvGraphRepeindre = function(){
 };
 
 export const WHATS_NEW = [
+  { v:'5.93', items:[
+    { emoji:'\uD83D\uDE9C', titre:'\u00ab\u00a0Tu prends le tracteur aujourd\'hui\u00a0?\u00a0\u00bb',
+      desc:"Si tu es \u00e0 la fois ouvrier et tractoriste et qu'une session tracteur est ouverte, l'app pose la question \u00e0 la premi\u00e8re ouverture du jour. Ta r\u00e9ponse tient la journ\u00e9e\u00a0; demain elle se repose." },
+    { emoji:'\uD83D\uDCF1', titre:'Tes \u00e9crans du jour en premier',
+      desc:"En mode tracteur, Tracteur, Phyto et Vigne passent en t\u00eate du menu du bas et l'app s'ouvre directement sur le Tracteur. Rien n'est retir\u00e9\u00a0: le reste glisse sous \u00ab\u00a0Plus\u00a0\u00bb, o\u00f9 se trouve aussi le retour au terrain." }
+  ]},
   { v:'5.92', items:[
     { emoji:'\u23F1', titre:'Le chrono tracteur ne se perd plus',
       desc:"Avant, verrouiller son t\u00e9l\u00e9phone pendant le travail effa\u00e7ait la mesure en cours sans rien dire. Elle est maintenant retrouv\u00e9e \u00e0 la r\u00e9ouverture, m\u00eame plusieurs heures apr\u00e8s." },

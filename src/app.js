@@ -2600,6 +2600,10 @@ function applyRoles(){
   // Mode plein soleil — appliquer la préférence de l'utilisateur (#6)
   _hcApply(_hcLoad());
   if(window._dockBuild)_dockBuild();
+  // La question du jour. Si SESSIONS n'est pas encore charge, _mvModeCheck sort sans
+  // rien marquer : le rattrapage differe repose la question une fois les donnees la.
+  _mvModeCheck();
+  setTimeout(_mvModeCheck, 1500);
 }
 // ════ MÉTÉO ════
 let meteoData=null;
@@ -3664,8 +3668,95 @@ function applyVigneSaison(){
 // ════ LOT 3 — DOCK BAS (navigation globale ; remplace hub + sidebar) ════
 function _canPilotage(){ return (typeof isAdmin==='function'&&isAdmin()) || !!(currentUser&&currentUser.roles&&currentUser.roles.indexOf('pilotage')>=0); }
 window.canSeePilotage=_canPilotage;
+
+// ═══════════════════════════════════════════════════════════════════════════
+// MODE DU JOUR (v5.93) — « Tu prends le tracteur aujourd'hui ? »
+// ---------------------------------------------------------------------------
+// Le tracteur se prend pour la JOURNEE : on attelle le matin, on detelle le soir.
+// Mais le lendemain la meme personne peut repartir au terrain. Le mode est donc
+// journalier — ni permanent (il se tromperait un jour sur deux), ni redemande a
+// chaque ouverture (la question est deja tranchee a 8 h).
+//
+// LA QUESTION PORTE SUR LE FAIT, PAS SUR L'IDENTITE. « Tu prends le tracteur
+// aujourd'hui ? » et non « Ouvrier ou tractoriste ? » : un polyvalent n'a pas a
+// choisir qui il est chaque matin, et « Ouvrier » ne doit pas se lire comme une
+// retrogradation.
+//
+// ⚠️ LE MODE NE TOUCHE A AUCUN DROIT. Il ne fait que RANGER le dock et choisir
+// l'atterrissage. Une personne en mode terrain reste tractoriste au sens des
+// regles Firestore et des gardes isTractoriste(). Ne jamais ecrire
+// `if (_mvMode()==='tracteur')` comme garde de securite : ce n'en est pas une.
+//
+// Rien ne disparait : ce qui sort des 4 cases du dock passe sous « Plus », et la
+// feuille « Plus » porte la sortie du mode. Un module introuvable coute plus cher
+// qu'un module de trop.
+//
+// Propose UNIQUEMENT a qui cumule ouvrier + tractoriste (hors admin, qui a besoin
+// de tout) ET quand une session tracteur est reellement ouverte. Sans session
+// ouverte, rien ne change : c'est le comportement habituel.
+// ═══════════════════════════════════════════════════════════════════════════
+function _mvModeKey(){ return 'mavigne_mode_'+(window.TENANT_ID||'default')+'_'+((currentUser&&currentUser.nom)||'anon'); }
+function _mvModeAuj(){ var d=new Date(); return d.getFullYear()+'-'+String(d.getMonth()+1).padStart(2,'0')+'-'+String(d.getDate()).padStart(2,'0'); }
+function _mvModeDouble(){
+  var r=(currentUser&&currentUser.roles)||[];
+  return r.indexOf('ouvrier')>=0 && r.indexOf('tractoriste')>=0 && r.indexOf('admin')<0;
+}
+// Une session TRACTEUR ouverte : les traitements phyto vivent dans le meme tableau
+// (type:'traitement') et ne declenchent pas la question.
+function _mvModeSessionOuverte(){
+  try{
+    var S=window.SESSIONS||[];
+    for(var i=0;i<S.length;i++){ if(S[i]&&S[i].statut==='En cours'&&S[i].type!=='traitement') return true; }
+    return false;
+  }catch(e){ return false; }
+}
+// La date vit dans la VALEUR, pas dans la cle : la reponse d'hier expire d'elle-meme
+// a minuit, sans rien a purger.
+function _mvModeLu(){
+  try{
+    var r=localStorage.getItem(_mvModeKey()); if(!r) return null;
+    var o=JSON.parse(r);
+    if(!o||o.d!==_mvModeAuj()) return null;
+    return (o.m==='tracteur'||o.m==='terrain')?o.m:null;
+  }catch(e){ return null; }
+}
+function _mvModeEcrire(m){
+  try{ localStorage.setItem(_mvModeKey(), JSON.stringify({d:_mvModeAuj(), m:m})); }
+  catch(e){ if(window.logError)window.logError({level:'info',cat:'mode',msg:'mode du jour non memorise',detail:(e&&e.message)||String(e)}); }
+}
+// Mode effectif. null = comportement habituel (mono-role, admin, ou sans reponse).
+function _mvMode(){ return _mvModeDouble() ? _mvModeLu() : null; }
+window._mvMode=_mvMode;
+
+var _mvModeAsked=false;
+function _mvModeCheck(){
+  if(_mvModeAsked) return;
+  if(!_mvModeDouble()) return;         // un seul role : aucune question a poser
+  if(_mvModeLu()) return;              // deja repondu aujourd'hui
+  if(!_mvModeSessionOuverte()) return; // aucune session ouverte : rien ne change
+  _mvModeAsked=true;
+  // openOv est LA primitive d'app.js (_openOv n'existe que dans tracteur.js).
+  if(document.getElementById('ovMode')) openOv('ovMode');
+}
+window._mvModeCheck=_mvModeCheck;
+function _mvModeChoisir(m){
+  _mvModeEcrire(m);
+  try{ closeOv(null,'ovMode'); }catch(e){ if(window.logError)window.logError({level:'info',cat:'mode',msg:'ovMode non ferme',detail:(e&&e.message)||String(e)}); }
+  try{ if(window._dockBuild)_dockBuild(); }catch(e){ if(window.logError)window.logError({level:'info',cat:'mode',msg:'dock non reconstruit apres choix du mode',detail:(e&&e.message)||String(e)}); }
+  _goLanding();
+}
+window._mvModeChoisir=_mvModeChoisir;
+// Sortie du mode : depuis la feuille « Plus ». On repose la question du jour.
+function _mvModeChanger(){
+  try{ if(window._dockPlusClose)_dockPlusClose(); }catch(e){ if(window.logError)window.logError({level:'info',cat:'mode',msg:'feuille Plus non fermee',detail:(e&&e.message)||String(e)}); }
+  _mvModeAsked=true;
+  openOv('ovMode');
+}
+window._mvModeChanger=_mvModeChanger;
+
 function _landingPage(){
   if(currentUser&&currentUser._isGTAdmin) return 'page-admin-gt';
+  if(_mvMode()==='tracteur'&&_mvCan('tracteur')) return 'page-tracteur';
   if(_canPilotage()&&_mvCan('pilotage')) return 'page-pilotage';
   if(_mvCan('vigne')){
     // Priorite du moment (v5.05) : membre affecte a une priorite -> atterrissage direct sur les parcelles
@@ -3680,6 +3771,7 @@ function _landingPage(){
 }
 function _goLanding(){
   if(currentUser&&currentUser._isGTAdmin){ goTo('admin-gt'); return; }
+  if(_mvMode()==='tracteur'&&_mvCan('tracteur')){ goTo('tracteur'); return; }
   if(_canPilotage()&&_mvCan('pilotage')){ goTo('pilotage'); return; }
   if(_mvCan('vigne')){
     // Priorite du moment (v5.05) : membre affecte -> Vigne > Parcelles, sa tache pre-selectionnee
@@ -3713,6 +3805,15 @@ function _dockDef(){
   // la garantie que le dock n'est jamais vide, quelle que soit la formule ou les
   // cases decochees dans la fiche du membre.
   it.push({p:'reglages',ic:'\u2699\uFE0F',l:'R\u00e9glages'});
+  // Mode tracteur : on RANGE, on ne retire pas. Les 3 modules du jour passent en
+  // tete ; le reste glisse sous « Plus » et reste a un tap.
+  if(_mvMode()==='tracteur'){
+    var _pri={tracteur:0,phyto:1,home:2};
+    it=it.slice().sort(function(x,y){
+      var a=(_pri[x.p]!=null?_pri[x.p]:9), b=(_pri[y.p]!=null?_pri[y.p]:9);
+      return a-b;
+    });
+  }
   return it;
 }
 function _dockBuild(){
@@ -3728,8 +3829,10 @@ function _dockBuild(){
     +(ov.length?'<button class="mv-dk mv-dk-plus" data-plus="1"><span class="mv-dk-ic">\u22EF</span><span class="mv-dk-lb">Plus</span></button>':'');
   Array.prototype.forEach.call(inner.querySelectorAll('.mv-dk'),function(b){ b.onclick=function(){ if(b.getAttribute('data-plus')){ _dockPlus(); } else { _dockGo(b.getAttribute('data-page')); } }; });
   if(sheet){
-    sheet.innerHTML=ov.map(function(x){return '<button class="mv-sg" data-page="'+x.p+'"><span class="mv-sg-ic">'+x.ic+'</span><span class="mv-sg-lb">'+x.l+'</span></button>';}).join('');
-    Array.prototype.forEach.call(sheet.querySelectorAll('.mv-sg'),function(b){ b.onclick=function(){ _dockGo(b.getAttribute('data-page')); }; });
+    sheet.innerHTML=ov.map(function(x){return '<button class="mv-sg" data-page="'+x.p+'"><span class="mv-sg-ic">'+x.ic+'</span><span class="mv-sg-lb">'+x.l+'</span></button>';}).join('')
+      +(_mvMode()?'<button class="mv-sg mv-sg-mode" data-mode="1"><span class="mv-sg-ic">\uD83D\uDD01</span><span class="mv-sg-lb">'
+        +(_mvMode()==='tracteur'?'Mode tracteur':'Mode terrain')+'</span></button>':'');
+    Array.prototype.forEach.call(sheet.querySelectorAll('.mv-sg'),function(b){ b.onclick=function(){ if(b.getAttribute('data-mode')){ _mvModeChanger(); } else { _dockGo(b.getAttribute('data-page')); } }; });
   }
   var act=document.querySelector('.page.active');
   _dockSync(act?act.id.replace('page-',''):'');

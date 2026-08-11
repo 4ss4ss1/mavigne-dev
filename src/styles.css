@@ -4125,3 +4125,25 @@ body,#app-root,.page{min-height:100dvh;}
 .mvds-bg-fin .mvds-fin-t{font-size:52px}
 .mvds-fin-c{display:block;font-size:13px;color:var(--or-clair);line-height:1.6;margin:-12px 0 22px}
 .hmp-n1{color:var(--terre);font-weight:500}
+
+/* ═══ MODE DU JOUR (v5.93) — deux tuiles, aucune sous 12 px ═══ */
+#ovMode .mvmode{max-width:400px;}
+.mvmode-t{font-family:'Cormorant Garamond',serif;font-size:27px;font-weight:700;
+  line-height:1.15;color:var(--texte);}
+.mvmode-s{font-size:13px;color:var(--texte-doux);line-height:1.5;margin-top:8px;}
+.mvmode-b{width:100%;border:1px solid var(--gris);background:var(--bg-card);cursor:pointer;
+  font-family:Outfit,sans-serif;border-radius:14px;padding:18px 16px;margin-bottom:11px;
+  min-height:96px;display:flex;flex-direction:column;align-items:center;gap:3px;
+  text-align:center;transition:transform .1s;}
+.mvmode-b:active{transform:scale(.98);}
+.mvmode-e{font-size:34px;line-height:1.1;}
+.mvmode-l{font-size:17px;font-weight:800;color:var(--texte);}
+.mvmode-x{font-size:12.5px;color:var(--texte-doux);font-weight:500;}
+.mvmode-oui{background:linear-gradient(150deg,#243240,#1a2731);border-color:transparent;
+  box-shadow:0 4px 16px rgba(20,30,40,.24);}
+.mvmode-oui .mvmode-l{color:#E8C86A;} .mvmode-oui .mvmode-x{color:#9fb6c6;}
+.mvmode-non{background:var(--vert-pale);border-color:rgba(61,107,39,.28);}
+.mvmode-non .mvmode-l{color:var(--vert);} .mvmode-non .mvmode-x{color:var(--vert-med);}
+.mvmode-n{font-size:12.5px;color:var(--texte-doux);line-height:1.5;text-align:center;
+  margin-top:4px;}
+.mv-sg.mv-sg-mode{border-top:1px solid var(--gris-clair);margin-top:6px;padding-top:12px;}
