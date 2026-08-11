@@ -2259,6 +2259,12 @@ body.mv-trial-on #app-root{padding-top:calc(env(safe-area-inset-top,0px) + 44px)
 .pl2-note{font-size:12px;color:var(--texte-doux);background:var(--bg-card);border:1px dashed var(--gris);border-radius:11px;padding:10px 12px;line-height:1.5;margin-bottom:8px;}
 
 /* Barres d'action (au-dessus du dock) */
+/* Deux actions qui debordent la vue affichee : une plage de conges, une periode de
+   chaleur. Visibles au-dessus de la grille, la ou etait le menu « Outils ». */
+.pl2-perbar{display:flex;gap:8px;margin:0 0 10px;}
+.pl2-perbar button{flex:1;min-height:40px;border:1.5px solid var(--gris-clair);border-radius:12px;background:var(--bg-card);color:var(--texte-med);font-family:inherit;font-size:12px;font-weight:600;display:flex;align-items:center;justify-content:center;gap:6px;cursor:pointer;padding:6px 8px;line-height:1.25;text-align:center;}
+.pl2-perbar button span{font-size:14px;}
+@media(max-width:400px){.pl2-perbar{flex-direction:column;}}
 .pl2-abar{position:fixed;left:0;right:0;bottom:calc(76px + env(safe-area-inset-bottom,0px));z-index:450;display:flex;gap:9px;padding:0 14px;max-width:720px;margin:0 auto;pointer-events:none;}
 .pl2-ab-btn{flex:1;min-height:48px;border-radius:14px;font-size:13.5px;font-weight:600;display:flex;align-items:center;justify-content:center;gap:7px;box-shadow:var(--shadow-md);cursor:pointer;font-family:inherit;border:none;pointer-events:auto;}
 .pl2-ab-multi{background:var(--bg-card);border:1.5px solid var(--gris);color:var(--texte-med);}

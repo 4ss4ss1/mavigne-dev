@@ -1569,7 +1569,7 @@ function editMembre(nom){
     +'<div id="em-eff-wrap" style="display:'+(m.collectif?'block':'none')+'">'
       +'<div class="fl" style="margin-top:10px">Nombre de personnes par d\u00e9faut</div>'
       +'<input type="number" id="em-effectif" min="1" max="999" step="1" inputmode="numeric" value="'+(m.effectif||1)+'" style="width:100%;padding:10px;border:1.5px solid #e5e7eb;border-radius:10px;font-size:16px;outline:none;box-sizing:border-box;font-family:inherit">'
-      +'<div style="font-size:11px;color:var(--texte-doux,#6b7280);margin:5px 2px 0;line-height:1.5">Se change jour par jour dans le Planning\u00a0: grille \u00c9quipe \u2192 <b>S\u00e9lection multiple</b> \u2192 \u{1F465}\u00a0Effectif. Pensez \u00e0 renseigner les dates de contrat pour que la ligne n\u2019apparaisse que pendant le chantier.</div>'
+      +'<div style="font-size:11px;color:var(--texte-doux,#6b7280);margin:5px 2px 0;line-height:1.5">Se change jour par jour dans le Planning\u00a0: onglet <b>Le mois</b>, cocher les jours, puis \u{1F465}\u00a0Effectif. Pensez \u00e0 renseigner les dates de contrat pour que la ligne n\u2019apparaisse que pendant le chantier.</div>'
     +'</div>'
     // ── SEC-2 : l'admin du domaine dépanne son équipe lui-même ──────────
     // Remplacement du « mot de passe oublié » pour les membres sans vraie boîte mail

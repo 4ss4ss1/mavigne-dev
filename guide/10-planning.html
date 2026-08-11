@@ -2,11 +2,41 @@
 <section id="planning">
   <div class="sec-h">
     <div class="sec-ic" aria-hidden="true">📅</div>
-    <div><h2>Planning RH</h2><div class="sub">👥 Équipe · 📅 Mon planning</div></div>
+    <div><h2>Planning RH</h2><div class="sub">📅 Le mois · 👥 Les gens · ⚙️ Le cadre</div></div>
   </div>
   <p class="lead">Le Planning gère les horaires réels de l'équipe, les congés, le compteur d'heures et
   les acomptes. C'est un module <b>réservé à l'administrateur</b> ; chaque salarié y voit son propre
   mois, et rien d'autre.</p>
+
+  <h3>📐 Trois onglets, un verbe chacun</h3>
+  <ul class="dot">
+    <li><b>Le mois</b> — la grille de toute l'équipe. C'est là qu'on tient le planning au jour le jour.</li>
+    <li><b>Les gens</b> — une ligne par salarié, sa fiche (mois, congés, compteur, acomptes, PDF),
+    le récap annuel et les anciens salariés.</li>
+    <li><b>Le cadre</b> — ce qui se règle une fois par an : modèles de semaine, coupure, convention
+    collective, règle de décompte des congés, sort des heures faites au-delà du planning.</li>
+  </ul>
+  <p>Un salarié qui n'est pas administrateur ne voit <b>aucun onglet</b> : il arrive directement sur
+  son mois.</p>
+
+  <h3>👆 Cocher, puis agir</h3>
+  <p>Dans <b>Le mois</b>, toucher une case la <b>coche</b>. Il n'y a pas de mode à activer avant.</p>
+  <ul class="dot">
+    <li>Le <b>numéro du jour</b>, en haut de la grille, coche toute l'équipe ce jour-là.</li>
+    <li>Un <b>nom</b>, à gauche, coche sa ligne entière sur la vue affichée.</li>
+    <li><b>Salarié</b>, dans le coin, coche tout ce qui est à l'écran.</li>
+    <li>Un deuxième appui décoche.</li>
+  </ul>
+  <p>Dès qu'une case est cochée, la barre du bas s'ouvre : elle dit <b>qui</b> est coché et à
+  <b>quelles dates</b>, et ne propose que ce qui s'applique vraiment. <b>Effectif</b> n'apparaît que
+  s'il y a une équipe collective dans la sélection ; <b>Effacer</b>, que s'il y a une saisie à
+  retirer. Une case ou trente, c'est le même geste et la même fiche.</p>
+  <p>Pour une période plus longue que la vue affichée — trois semaines de congés, deux mois de
+  canicule — deux boutons au-dessus de la grille posent <b>Congés sur une période</b> et
+  <b>Chaleur sur une période</b>, du jour au jour et pour plusieurs salariés.</p>
+  <div class="note warn"><span class="ni" aria-hidden="true">⚠️</span><div><b>Sur un geste groupé, on ne détruit pas ce qu'on n'a pas relu.</b>
+  Les congés, absences et récupérations déjà posés sont <b>préservés</b>, et le message de
+  confirmation dit combien. Sur une case unique, choisie à la main, la saisie est remplacée.</div></div>
 
   <h3>👥 La grille d'équipe</h3>
   <p>Un seul écran : les salariés en lignes, les jours en colonnes, en vue <b>semaine</b> ou
@@ -32,8 +62,8 @@
     <li>Le drapeau se pose sur la fiche du membre, dans <span class="path">Réglages › Équipe</span> :
     <em aria-hidden="true">Équipe collective — une ligne, plusieurs personnes</em>, avec un
     <b>nombre par défaut</b>.</li>
-    <li>Ce nombre se change <b>jour par jour</b> depuis la grille : <b>Sélection multiple</b>, puis
-    <b>👥 Effectif</b>. Un jour à six, le lendemain à quatre.</li>
+    <li>Ce nombre se change <b>jour par jour</b> depuis la grille : cocher les jours, puis
+    <b>👥 Effectif</b> dans la barre du bas. Un jour à six, le lendemain à quatre.</li>
     <li>L'effectif <b>multiplie ce qui est collectif</b> : les heures du chantier, la capacité de
     l'équipe, le coût, la part de l'avancement.</li>
     <li>Il n'entre <b>jamais</b> dans ce qui est individuel : plafond des 1&nbsp;607&nbsp;h, congés
@@ -59,7 +89,7 @@
   <h3>⚖️ Le cadre légal, affiché en permanence</h3>
   <p>Les valeurs par défaut suivent la convention nationale <b>Production agricole et CUMA
   (IDCC 7024)</b>. Elles sont <b>paramétrables</b> pour s'adapter à une autre convention&nbsp;:
-  <span class="path">Planning › Outils du planning › Modèles, cadre légal &amp; coupure</span>.</p>
+  <span class="path">Planning › Le cadre</span>.</p>
   <div class="tw"><table>
     <tr><th>Repère</th><th>Valeur par défaut</th></tr>
     <tr><td>Durée légale hebdomadaire</td><td>35 h</td></tr>
@@ -151,7 +181,7 @@
   Le compteur du <b>Tracteur</b>, lui, dit bien « pause déjeuner » : seul en cabine, le
   conducteur en choisit vraiment le moment. Le mot y est donc exact.</div></div>
   <p>L'heure de la coupure se règle dans
-  <span class="path">Planning › Outils du planning › Modèles, cadre légal &amp; coupure</span>,
+  <span class="path">Planning › Le cadre</span>,
   sous la durée. Trois réponses
   possibles : une heure fixe, « selon le chantier », ou rien. Tant que rien n'est renseigné,
   l'application n'affiche que la durée, sans prétendre savoir quand elle tombe. Un domaine dont la
@@ -205,5 +235,5 @@
   <details><summary>Comment ajouter un salarié au planning&nbsp;?</summary>
     <div class="dbody">Créez-le d'abord comme membre dans <span class="path">Réglages › Équipe</span> :
     il apparaît aussitôt dans la grille. Les anciens salariés restent accessibles depuis
-    <span class="path">Planning › Outils du planning › Anciens salariés</span>, avec leurs heures et leurs PDF.</div></details>
+    <span class="path">Planning › Les gens</span>, en bas de la liste, avec leurs heures et leurs PDF.</div></details>
 </section>

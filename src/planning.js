@@ -1357,30 +1357,56 @@ function _planDayStatus(plId,m,d,e){
 var PLAN_BG='#1C1A2E',PLAN_ACC='var(--plan-acc)',PLAN_ACC2='var(--plan-acc)';
 
 // ── Render principal ──
+// ══════════════════════════════════════════════════════════════════════
+// TROIS ONGLETS, UN VERBE CHACUN
+// ══════════════════════════════════════════════════════════════════════
+// Le module mélangeait trois métiers qui n'ont ni la même fréquence ni le même
+// acteur : TENIR le mois (tous les jours, le chef d'équipe), SUIVRE une personne
+// (à la paie), RÉGLER le cadre (une fois l'an). Ils vivaient dans deux onglets et
+// neuf feuilles, dont un onglet caché derrière « Outils › Modèles ».
+//   mois  → la grille, et rien d'autre
+//   gens  → une ligne par salarié, sa fiche, le récap annuel, les anciens
+//   cadre → modèles de semaine, coupure, convention, congés, heures sup
+// ★ Même patron que Pilotage › Cave (§20g) : la table de migration existe pour que
+//   l'onglet mémorisé d'un client ne le renvoie pas dans le vide.
+var _PLAN_TAB_MIGR={planning:'mois',equipe:'mois',tableau:'mois',saisie:'mois',templates:'cadre'};
+var _PLAN_VALID_TAB={mois:1,gens:1,cadre:1,moi:1};
+
 function renderPlanning(){
   if(!window._dataReady){ var _pb=document.getElementById('plan-body'); if(_pb)_pb.innerHTML=window._mvSk('planning'); return; }
   var pg=document.getElementById('page-planning');
   if(!pg)return;
   _planMigrateYears();
-  // Onglet Équipe réservé admin
-  document.querySelectorAll('.plan-tab-admin').forEach(function(t){
-    t.style.display=isAdmin()?'':'none';
-  });
-  // Migration des anciens noms d'onglets + garde rôle
-  if(planTab==='planning')planTab=isAdmin()?'equipe':'moi';
-  if(planTab==='tableau'||planTab==='saisie')planTab='equipe';
-  if(!isAdmin()&&planTab!=='moi')planTab='moi';
-  if(planTab!=='equipe'&&planTab!=='moi'&&planTab!=='templates')planTab=isAdmin()?'equipe':'moi';
+  // Les trois onglets d'administration ; l'ouvrier n'en voit aucun et tombe
+  // directement sur son mois — un onglet unique n'est pas un choix, c'est un décor.
+  var adm=isAdmin();
+  document.querySelectorAll('.plan-tab-admin').forEach(function(t){t.style.display=adm?'':'none';});
+  var tabsWrap=document.getElementById('plan-tabs');
+  if(tabsWrap)tabsWrap.style.display=adm?'':'none';
+  if(_PLAN_TAB_MIGR[planTab])planTab=_PLAN_TAB_MIGR[planTab];
+  if(!adm)planTab='moi';
+  else if(!_PLAN_VALID_TAB[planTab]||planTab==='moi')planTab='mois';
   _planRenderHeader();
   _planRenderBody();
 }
 
 function _planRenderHeader(){
-  // Bandeau de stats (admin vs non-admin)
   var sb=document.getElementById('plan-stats-band');
   if(!sb)return;
   var mbrs=_planMbrs();
-  if(isAdmin()){
+  // La bande de chiffres suit l'onglet. « Le cadre » n'en porte aucun : ce sont des
+  // réglages, pas une mesure — y afficher une charge du mois serait un décor.
+  if(planTab==='cadre'){sb.innerHTML='';}
+  else if(planTab==='gens'&&isAdmin()){
+    var _act=mbrs.filter(function(m){return _planHasContractThisMonth(m,planMonth);});
+    var _hT=_act.reduce(function(s,m){return s+_planCalcMonth(m,planMonth);},0);
+    var _hR=_act.reduce(function(s,m){return s+((_planSummary(m,planMonth)||{}).ref||0);},0);
+    var _ec=_hT-_hR;
+    sb.innerHTML='<div class="mvu-kpi"><div class="mvu-kpi-v">'+_act.length+'</div><div class="mvu-kpi-l">Suivis ce mois</div></div>'
+      +'<div class="mvu-kpi"><div class="mvu-kpi-v">'+_planFmt(_hT)+'</div><div class="mvu-kpi-l">Heures travaill\u00e9es</div></div>'
+      +'<div class="mvu-kpi"><div class="mvu-kpi-v" style="color:'+(_ec>=0?'var(--vert-med)':'var(--orange)')+'">'+_planFmtE(_ec)+'</div><div class="mvu-kpi-l">\u00c9cart au pr\u00e9vu</div></div>';
+  }
+  else if(isAdmin()){
     // Charge du mois = part des saisons datees couvrant ce mois ; capacite = equipe reelle (hors bureau, contrats actifs)
     var _cm=0,_dated=false;
     (window.SAISONS||[]).forEach(function(_s){
@@ -1392,7 +1418,6 @@ function _planRenderHeader(){
     var _cap=mbrs.filter(function(m){return !m.bureau;}).reduce(function(s,m){return s+((_planSummary(m,planMonth)||{}).ref||0);},0);
     var _cap1=_planGetRefH('standard',planMonth);
     var _etpM=_cap1>0?_cm/_cap1:0;
-    // Alerte cadre légal (semaines > max sur les actifs du mois)
     var _actifs=mbrs.filter(function(m){return _planHasContractThisMonth(m,planMonth);});
     var _brc=_actifs.reduce(function(s,m){return s+_planLegalBreaches(m,planMonth);},0);
     var _alertHtml=_brc>0?'<button class="mvu-kpi pl2-kpi-alert" onclick="planKpiAlert()"><span class="mvu-kpi-v" style="display:block;color:#F0A9A0;font-size:14px">\u26a0 '+_brc+'</span><span class="mvu-kpi-l" style="display:block">sem. &gt; max</span></button>':'';
@@ -1415,27 +1440,26 @@ function _planRenderHeader(){
         +'<div class="mvu-kpi"><div class="mvu-kpi-v" style="color:'+(ms.ecart>=0?'var(--vert-med)':'var(--rouge)')+'">'+_planFmtE(ms.ecart)+'</div><div class="mvu-kpi-l">\u00c9cart</div></div>';
     }
   }
-  // Badge d'en-tete : effectif suivi ce mois-ci
   var _bdg=document.getElementById('plan-header-badge');
   if(_bdg){
     var _na=mbrs.filter(function(m){return _planHasContractThisMonth(m,planMonth);}).length;
     _bdg.textContent=_na+' salari\u00e9'+(_na>1?'s':'');
   }
-  // Onglets
   var tabs=document.querySelectorAll('#plan-tabs .mvu-tab');
   tabs.forEach(function(t){t.classList.toggle('active',t.getAttribute('data-tab')===planTab);});
 }
 
 function _planRenderBody(){
-  if(planTab==='templates'&&isAdmin())_planRenderTemplates();
-  else if(planTab==='equipe'&&isAdmin())_pl2RenderEquipe();
-  else _planRenderMon();
+  if(!isAdmin()){_planRenderMon();_pl2AbarSync();return;}
+  if(planTab==='cadre')_planRenderCadre();
+  else if(planTab==='gens')_planRenderGens();
+  else _pl2RenderEquipe();
   _pl2AbarSync();
 }
 
 function planSwitchTab(tab){
   planTab=tab;
-  if(tab!=='equipe')planSelClear();
+  if(tab!=='mois')planSelClear();
   _planRenderHeader();
   _planRenderBody();
 }
@@ -1594,7 +1618,7 @@ function _pl2Synth(){
   var mbrs=_pl2Actifs();
   var _nC=mbrs.filter(function(m){return window._mvEstCollectif&&window._mvEstCollectif(m);}).length;
   var _nS=mbrs.length-_nC;
-  var h='<div class="plan-sec-lbl" style="margin-top:16px">Synth\u00e8se du mois \u2014 '+_nS+' salari\u00e9'+(_nS>1?'s':'')
+  var h='<div class="plan-sec-lbl">'+_nS+' salari\u00e9'+(_nS>1?'s':'')
     +(_nC>0?(' \u00b7 '+_nC+' \u00e9quipe'+(_nC>1?'s':'')):'')+'</div>';
   mbrs.forEach(function(mbr){
     var s=_planSummary(mbr,planMonth),nomA=_escAttr(mbr.nom);
@@ -1620,15 +1644,6 @@ function _pl2Synth(){
       +'<span class="pl2-chev">\u203a</span>'
     +'</button>';
   });
-  var hors=_planMbrs().filter(function(m){return !_planHasContractThisMonth(m,planMonth);});
-  if(hors.length>0){
-    h+='<div class="pl2-hors">Hors contrat ce mois \u2014 '+hors.map(function(m){
-      var info='';
-      if(m.fin_contrat){var fd=m.fin_contrat.split('-');info=' (fin '+parseInt(fd[2],10)+'/'+parseInt(fd[1],10)+')';}
-      else if(m.debut_contrat){var dd=m.debut_contrat.split('-');info=' (d\u00e8s le '+parseInt(dd[2],10)+'/'+parseInt(dd[1],10)+')';}
-      return _escHtml(m.nom)+info;
-    }).join(' \u00b7 ')+'</div>';
-  }
   return h;
 }
 // Carte de synthese d'une equipe collective : ni ecart, ni ETP, ni barre de
@@ -1670,10 +1685,14 @@ function _pl2Annual(){
   h+='</div></div>';
   return h;
 }
+// ── ONGLET « LE MOIS » — la grille, et rien d'autre ──
+// Les cartes de synthèse et le récap annuel sont partis dans « Les gens » : ils
+// répétaient sous la grille les mêmes noms et les mêmes heures que dans la grille,
+// et les deux ouvraient la même fiche.
 function _pl2RenderEquipe(){
   var body=document.getElementById('plan-body');
   if(!body)return;
-  body.innerHTML=_pl2YearTabs()+_pl2Toolbar()+_pl2Board()+_pl2Synth()+_pl2Annual();
+  body.innerHTML=_pl2YearTabs()+_pl2Toolbar()+_planPeriodeBar()+_pl2Board()+_pl2HorsContrat();
   _pl2MbarSync();
   if(_pl2PulseNom){
     var row=body.querySelector('.pl2-pulse');
@@ -1685,6 +1704,76 @@ function _pl2RenderEquipe(){
       document.querySelectorAll('.pl2-pulse').forEach(function(x){x.classList.remove('pl2-pulse');});
     },2600);
   }
+}
+
+// ★ Ce que la grille ne sait pas cocher : une plage qui déborde la vue affichée
+//   (trois semaines de congés, deux mois de canicule). Deux boutons visibles,
+//   au lieu d'un menu « Outils » qui cachait quatre entrées derrière un engrenage.
+function _planPeriodeBar(){
+  return '<div class="pl2-perbar">'
+    +'<button onclick="openPlanCP()"><span>\u2600\uFE0F</span> Cong\u00e9s sur une p\u00e9riode</button>'
+    +'<button onclick="openPlanChaleur()"><span>\ud83c\udf21\uFE0F</span> Chaleur sur une p\u00e9riode</button>'
+  +'</div>';
+}
+
+// Hors contrat : l'information vivait sous les cartes de synthèse. Elle appartient
+// à la grille — c'est elle qui montre des lignes absentes.
+function _pl2HorsContrat(){
+  var hors=_planMbrs().filter(function(m){return !_planHasContractThisMonth(m,planMonth);});
+  if(!hors.length)return '';
+  return '<div class="pl2-hors">Hors contrat ce mois \u2014 '+hors.map(function(m){
+    var info='';
+    if(m.fin_contrat){var fd=m.fin_contrat.split('-');info=' (fin '+parseInt(fd[2],10)+'/'+parseInt(fd[1],10)+')';}
+    else if(m.debut_contrat){var dd=m.debut_contrat.split('-');info=' (d\u00e8s le '+parseInt(dd[2],10)+'/'+parseInt(dd[1],10)+')';}
+    return _escHtml(m.nom)+info;
+  }).join(' \u00b7 ')+'</div>';
+}
+
+// ── ONGLET « LES GENS » — une ligne par personne, une seule fois ──
+function _planRenderGens(){
+  var body=document.getElementById('plan-body');
+  if(!body)return;
+  body.innerHTML=_pl2YearTabs()+_planGensMois()+_pl2Synth()+_pl2Annual()+_planGensArchives();
+  if(_pl2PulseNom){
+    var row=body.querySelector('.pl2-pulse');
+    if(row&&row.scrollIntoView)row.scrollIntoView({block:'center',behavior:'smooth'});
+    var nomP=_pl2PulseNom;
+    setTimeout(function(){
+      if(_pl2PulseNom!==nomP)return;
+      _pl2PulseNom=null;
+      document.querySelectorAll('.pl2-pulse').forEach(function(x){x.classList.remove('pl2-pulse');});
+    },2600);
+  }
+}
+// Le mois consulté se change ici aussi : les chiffres de chaque carte en dépendent,
+// et renvoyer l'utilisateur dans « Le mois » pour changer de mois serait un aller-retour.
+function _planGensMois(){
+  return '<div class="pl2-toolbar">'
+    +'<button class="pl2-nav-btn" onclick="planPrevMonth()" aria-label="Mois pr\u00e9c\u00e9dent">\u2039</button>'
+    +'<div class="pl2-nav-lbl"><span class="pl2-nav-l1">'+PLAN_MOIS[planMonth]+' '+planYear+'</span><span class="pl2-nav-l2">heures, cong\u00e9s, compteur</span></div>'
+    +'<button class="pl2-nav-btn" onclick="planNextMonth()" aria-label="Mois suivant">\u203a</button>'
+  +'</div>';
+}
+// Les anciens salariés : une section repliée en bas de la liste, plus une feuille
+// séparée qu'il fallait aller chercher dans « Outils ». Ce sont des gens : ils sont
+// dans « Les gens ».
+function _planGensArchives(){
+  var inactifs=(window.MEMBRES||[]).filter(function(m){return m.statut==='Inactif';});
+  if(!inactifs.length)return '';
+  var h='<div class="plan-sec-lbl" style="margin-top:18px">Anciens salari\u00e9s \u2014 '+inactifs.length+'</div>'
+    +'<div class="pl2-note" style="margin-bottom:10px">Sans acc\u00e8s \u00e0 l\u2019application \u2014 heures et PDF restent consultables. Contrat modifiable dans R\u00e9glages \u203a Membres.</div>';
+  inactifs.forEach(function(mbr){
+    var s=_planSummary(mbr,planMonth),nomA=_escAttr(mbr.nom);
+    var tc=mbr.type_contrat||'CDI',cinfo='';
+    if(mbr.fin_contrat){var fd=mbr.fin_contrat.split('-');cinfo=' \u00b7 fin '+parseInt(fd[2],10)+'/'+parseInt(fd[1],10)+'/'+fd[0];}
+    h+='<div class="pl2-arc-row">'
+      +'<span class="pl2-ava" style="background:'+(mbr.couleur||'#888')+';opacity:.6">'+_escHtml(mbr.nom.charAt(0))+'</span>'
+      +'<span class="pl2-arc-mid"><span class="pl2-arc-n">'+_escHtml(mbr.nom)+'</span><span class="pl2-arc-s">'+_planFmt(s.worked)+' / '+_planFmt(s.ref)+' h \u00b7 '+_escHtml(tc)+cinfo+'</span></span>'
+      +'<button class="plan-btn-saisir" onclick="openPlanFiche(\''+nomA+'\')">Heures</button>'
+      +'<button class="plan-btn-pdf" onclick="planExportPDF(\''+nomA+'\')">PDF</button>'
+    +'</div>';
+  });
+  return h;
 }
 // ══════════════════════════════════════════════════════════════════════
 // LA SÉLECTION — ce n'est plus un mode, c'est un état
@@ -2010,17 +2099,16 @@ function planKpiAlert(){
   var mbrs=_pl2Actifs(),hit=null;
   for(var i=0;i<mbrs.length;i++){if(_planLegalBreaches(mbrs[i],planMonth)>0){hit=mbrs[i];break;}}
   if(!hit){showToast('Aucun d\u00e9passement ce mois','#3D6B27');return;}
-  if(planTab!=='equipe'){planTab='equipe';_planRenderHeader();_planRenderBody();}
+  if(planTab!=='mois'){planTab='mois';_planRenderHeader();_planRenderBody();}
   _pl2PulseNom=hit.nom;
   _pl2RenderEquipe();
   showToast('\u26a0 '+hit.nom+' \u00b7 semaine au-dessus du maximum \u2014 d\u00e9tail dans sa fiche','#B85A1A');
 }
+// La barre flottante « Outils » a disparu avec le menu du meme nom. Reste la garde :
+// une selection ne doit pas survivre a un changement d'onglet, sinon la barre du bas
+// propose d'agir sur des cases qui ne sont plus a l'ecran.
 function _pl2AbarSync(){
-  var bar=document.getElementById('plan-abar');
-  // La barre « Outils » s'efface quand une selection est en cours : la barre de
-  // selection prend sa place, au meme endroit de l'ecran.
-  if(bar)bar.style.display=(planTab==='equipe'&&isAdmin()&&_planSelCount()===0)?'flex':'none';
-  if((planTab!=='equipe'||!isAdmin())&&_planSelCount())planSelClear();
+  if((planTab!=='mois'||!isAdmin())&&_planSelCount())planSelClear();
 }
 function _pl2Refresh(){
   renderPlanning();
@@ -2104,7 +2192,7 @@ function _planBuildMonHtml(mbr,canEdit){
     +'</div>';
   }
   daysHtml+='</div>';
-  if(canEdit)daysHtml+='<div class="plan-edit-hint">\u270f\ufe0f Appuyez sur un jour pour le modifier \u2014 toute l\u2019\u00e9quipe se g\u00e8re depuis l\u2019onglet \u00c9quipe.</div>';
+  if(canEdit)daysHtml+='<div class="plan-edit-hint">\u270f\ufe0f Appuyez sur un jour pour le modifier \u2014 toute l\u2019\u00e9quipe se g\u00e8re depuis l\u2019onglet <b>Le mois</b>.</div>';
 
   return sumHtml+daysHtml+_planLegalCard(mbr);
 }
@@ -2526,37 +2614,20 @@ function _planFicheRender(){
         +'<span class="pl2-drow-h" style="color:'+st.c+'">'+(e&&e.absent?'0 h':(e&&e.type==='recup'?'\u21ba':_planFmt(eff)+' h'))+'</span>'
       +'</button>';
     });
-    h+='<div class="pl2-note" style="margin-top:8px">\u270f\ufe0f Toucher un jour l\u2019ouvre dans l\u2019\u00e9diteur \u2014 la grille compl\u00e8te est dans l\u2019onglet \u00c9quipe.</div>';
+    h+='<div class="pl2-note" style="margin-top:8px">\u270f\ufe0f Toucher un jour l\u2019ouvre dans la feuille \u2014 la grille compl\u00e8te est dans l\u2019onglet <b>Le mois</b>.</div>';
     h+=_coll?_planCollNote(mbr):_planLegalCard(mbr);
   }
   if(t==='cp'){
     var cpPris=_planCpPris(mbr.nom),cpSolde=_planCpSolde(mbr),cpIni=mbr.cp_initial_j||0;
-    var _cpMode=((window.CONFIG&&window.CONFIG.cp_mode)==='ouvres')?'ouvres':'ouvrables';
-    var _cpMd=_planCpMoisDebut();
-    var _cpSeg='flex:1;padding:9px 6px;border:1.5px solid;border-radius:10px;font-size:12.5px;font-weight:700;cursor:pointer;text-align:center;font-family:inherit;line-height:1.2';
-    var _cpOn='background:var(--vert-med,#3D6B27);color:#fff;border-color:var(--vert-med,#3D6B27)';
-    var _cpOff='background:transparent;color:var(--texte-doux,#6b7280);border-color:var(--gris,#d1d5db)';
-    var _cpHint=_cpMode==='ouvres'?'Une semaine posée = 5 jours (lun→ven). Référence : 25 j/an. Ce mode ne doit pas léser le salarié vs jours ouvrables.':'Une semaine posée = 6 jours (samedi inclus, même non travaillé). Référence : 30 j/an. Poser un vendredi décompte le samedi suivant.';
-    var _cpModeHtml='<div style="background:var(--bg-card,#fff);border:1px solid var(--gris,#e5e7eb);border-radius:12px;padding:12px;margin-bottom:12px">'
-      +'<div style="font-size:11px;font-weight:700;letter-spacing:.5px;text-transform:uppercase;color:var(--texte-doux,#6b7280);margin-bottom:8px">Décompte des congés · domaine</div>'
-      +'<div style="display:flex;gap:8px">'
-        +'<div id="pl-cpmode-ouvrables" onclick="planSetCpMode(\'ouvrables\')" style="'+_cpSeg+';'+(_cpMode==='ouvrables'?_cpOn:_cpOff)+'">6 jours ouvrables<div style="font-size:10px;font-weight:500;opacity:.85;margin-top:2px">lun→sam</div></div>'
-        +'<div id="pl-cpmode-ouvres" onclick="planSetCpMode(\'ouvres\')" style="'+_cpSeg+';'+(_cpMode==='ouvres'?_cpOn:_cpOff)+'">5 jours ouvrés<div style="font-size:10px;font-weight:500;opacity:.85;margin-top:2px">lun→ven</div></div>'
-      +'</div>'
-      +'<div style="font-size:11px;color:var(--texte-doux,#6b7280);margin-top:8px;line-height:1.35">'+_cpHint+'</div>'
-      +'<div style="font-size:11px;font-weight:700;letter-spacing:.5px;text-transform:uppercase;color:var(--texte-doux,#6b7280);margin:14px 0 8px;padding-top:12px;border-top:1px solid var(--gris-clair)">P\u00e9riode de r\u00e9f\u00e9rence \u00b7 domaine</div>'
-      +'<div style="display:flex;gap:8px">'
-        +'<div id="pl-cpper-juin" onclick="planSetCpPeriode(5)" style="'+_cpSeg+';'+(_cpMd===5?_cpOn:_cpOff)+'">1er juin \u2192 31 mai<span style="display:block;font-size:10px;font-weight:500;opacity:.85;margin-top:2px">usage agricole</span></div>'
-        +'<div id="pl-cpper-jan" onclick="planSetCpPeriode(0)" style="'+_cpSeg+';'+(_cpMd===0?_cpOn:_cpOff)+'">Ann\u00e9e civile<span style="display:block;font-size:10px;font-weight:500;opacity:.85;margin-top:2px">janv. \u2192 d\u00e9c.</span></div>'
-      +'</div>'
-      +'<div style="font-size:11px;color:var(--texte-doux,#6b7280);margin-top:8px;line-height:1.35">Le solde ci-dessous ne compte que les cong\u00e9s pris sur la p\u00e9riode <b>'+_planCpPeriodeLbl()+'</b>. Distinct de l\u2019ann\u00e9e civile qui sert au compteur d\u2019heures.</div>'
-    +'</div>';
-    h=_cpModeHtml+'<div class="pl2-fstat">'
+    // ⚠️ Le mode de decompte et la periode de reference sont des reglages DU DOMAINE :
+    //    ils se reglaient ici, dans la fiche d'UNE personne, ou les changer touchait
+    //    tout le monde sans le dire. Ils vivent desormais dans l'onglet « Le cadre ».
+    h='<div class="pl2-fstat">'
       +'<div class="pl2-fs"><span class="pl2-fs-v">'+cpIni+'</span><span class="pl2-fs-l">Solde initial (j)</span></div>'
       +'<div class="pl2-fs"><span class="pl2-fs-v" style="color:'+(cpPris>0?'var(--orange)':'var(--texte)')+'">'+cpPris+'</span><span class="pl2-fs-l">Pris (j)</span></div>'
       +'<div class="pl2-fs"><span class="pl2-fs-v" style="color:'+(cpSolde>5?'var(--vert-med)':cpSolde>=0?'var(--orange)':'var(--rouge)')+'">'+cpSolde+'</span><span class="pl2-fs-l">Restants (j)</span></div>'
     +'</div>'
-    +'<div class="pl2-note">Pour poser des cong\u00e9s\u00a0: grille \u00c9quipe \u2192 <b>S\u00e9lection multiple</b> \u2192 toucher les jours \u2192 \u2600\ufe0f CP. Ou jour par jour dans l\u2019\u00e9diteur. Le solde initial se r\u00e8gle dans R\u00e9glages \u203a Membres.</div>';
+    +'<div class="pl2-note">D\u00e9compte sur la p\u00e9riode <b>'+_planCpPeriodeLbl()+'</b>. Le solde initial se r\u00e8gle dans R\u00e9glages \u203a Membres, la r\u00e8gle de d\u00e9compte du domaine dans l\u2019onglet <b>Le cadre</b>.</div>';
   }
   if(t==='hsup')h=_planHsupCard(mbr);
   if(t==='ac')h=_planAcomptesCard(mbr,true);
@@ -2564,21 +2635,15 @@ function _planFicheRender(){
 }
 
 
-// ── OUTILS DU PLANNING (sheet) ──
-function openPlanTools(){
-  var n=(window.MEMBRES||[]).filter(function(m){return m.statut==='Inactif';}).length;
-  var c=document.getElementById('pt-arc-count');
-  if(c)c.textContent=n>0?('\u00b7 '+n):'';
-  var ov=document.getElementById('ovPlanTools');
-  if(ov)ov.classList.add('open');
-}
-function closePlanTools(){var ov=document.getElementById('ovPlanTools');if(ov)ov.classList.remove('open');}
-function planToolsTemplates(){closePlanTools();planSwitchTab('templates');}
+// ── Les « Outils du planning » ont disparu ──
+// Quatre entrees derriere un engrenage : deux sont devenues des boutons visibles
+// au-dessus de la grille (conges et chaleur sur une periode), les modeles et le
+// cadre legal ont leur onglet, les anciens salaries sont dans « Les gens ».
 
 // ── HORAIRES CHALEUR — période + multi-salariés (remplace la carte par salarié) ──
 var _pl2ChalSel={};
 function openPlanChaleur(){
-  closePlanTools();
+  if(!isAdmin())return;
   _pl2ChalSel={};
   _pl2Actifs().forEach(function(m){_pl2ChalSel[m.nom]=true;});
   _planChaleurRender();
@@ -2643,7 +2708,6 @@ function _cpIso(d){var m=d.getMonth()+1,j=d.getDate();return d.getFullYear()+'-'
 function _planCpMode(){return((window.CONFIG&&window.CONFIG.cp_mode)==='ouvres')?'ouvres':'ouvrables';}
 function openPlanCP(){
   if(!isAdmin())return;
-  closePlanTools();
   _pl2CpFromSel=false; _pl2CpSelData=null; _planCpHdr(null,null,null);
   _pl2CpSel={};
   _pl2Actifs().forEach(function(m){_pl2CpSel[m.nom]=true;});
@@ -2992,36 +3056,8 @@ function planCpRemove(){
 }
 
 // ── ANCIENS SALARIÉS (overlay) ──
-function openPlanArchives(){
-  closePlanTools();
-  var body=document.getElementById('pa-body');
-  if(body){
-    var inactifs=(window.MEMBRES||[]).filter(function(m){return m.statut==='Inactif';});
-    if(!inactifs.length){
-      body.innerHTML='<div class="pl2-note">Aucun ancien salari\u00e9.</div>';
-    } else {
-      var h='<div class="pl2-note" style="margin-bottom:10px">Sans acc\u00e8s \u00e0 l\u2019application \u2014 heures et PDF restent consultables ici. Contrat modifiable dans R\u00e9glages \u203a Membres.</div>';
-      inactifs.forEach(function(mbr){
-        var s=_planSummary(mbr,planMonth),nomA=_escAttr(mbr.nom);
-        var tc=mbr.type_contrat||'CDI',cinfo='';
-        if(mbr.fin_contrat){var fd=mbr.fin_contrat.split('-');cinfo=' \u00b7 fin '+parseInt(fd[2],10)+'/'+parseInt(fd[1],10)+'/'+fd[0];}
-        h+='<div class="pl2-arc-row">'
-          +'<span class="pl2-ava" style="background:'+(mbr.couleur||'#888')+';opacity:.6">'+_escHtml(mbr.nom.charAt(0))+'</span>'
-          +'<span class="pl2-arc-mid"><span class="pl2-arc-n">'+_escHtml(mbr.nom)+'</span><span class="pl2-arc-s">'+_planFmt(s.worked)+' / '+_planFmt(s.ref)+' h \u00b7 '+_escHtml(tc)+cinfo+'</span></span>'
-          +'<button class="plan-btn-saisir" onclick="closePlanArchives();openPlanFiche(\''+nomA+'\')">Heures</button>'
-          +'<button class="plan-btn-pdf" onclick="planExportPDF(\''+nomA+'\')">PDF</button>'
-        +'</div>';
-      });
-      body.innerHTML=h;
-    }
-  }
-  var ov=document.getElementById('ovPlanArchives');
-  if(ov)ov.classList.add('open');
-}
-function closePlanArchives(){var ov=document.getElementById('ovPlanArchives');if(ov)ov.classList.remove('open');}
-
-// ── TAB TEMPLATES (admin) ──
-function _planRenderTemplates(){
+// ── ONGLET « LE CADRE » (admin) — ce qui se regle une fois par an ──
+function _planRenderCadre(){
   var body=document.getElementById('plan-body');
   if(!body)return;
   if(_planEditing){_planRenderGridEditor();return;}
@@ -3031,8 +3067,7 @@ function _planRenderTemplates(){
   var curPause=window.PLAN_PAUSE_MIN||PLAN_PAUSE_MIN||60;
   var curCoup=_planCoupureH();
   var curCoupFixe=!!(curCoup&&curCoup!=='libre');
-  var html='<button class="plan-back-btn" onclick="planSwitchTab(\'equipe\')">\u2190 Retour au planning</button>'
-    +'<div class="plan-sec-lbl">R\u00e9glage coupure d\u00e9jeuner</div>'
+  var html='<div class="plan-sec-lbl">R\u00e9glage coupure d\u00e9jeuner</div>'
     +'<div class="plan-card" style="flex-direction:column;gap:10px">'
       +'<div style="font-size:13px;color:var(--texte-doux);line-height:1.5">D\u00e9duite des journ\u00e9es de 6\u00a0h ou plus, hors horaire continu. Elle n\u2019est pas du temps de travail.</div>'
       +'<div style="display:flex;gap:0;border:1px solid var(--gris-clair);border-radius:10px;overflow:hidden">'
@@ -3074,6 +3109,30 @@ function _planRenderTemplates(){
       +'</div>'
       +'<button class="plan-btn-saisir" style="width:100%" onclick="planSaveLegal()">Enregistrer le cadre l\u00e9gal</button>'
       +'<div style="font-size:11px;color:var(--texte-doux);line-height:1.5">D\u00e9fauts = convention nationale Production Agricole et CUMA. Modifiez les valeurs pour la convention collective d\'un autre domaine.</div>'
+    +'</div>';
+  // ── Congés du domaine : règle de décompte et période de référence ──
+  // ⚠️ Ces deux réglages vivaient dans la fiche d'UN salarié (onglet Congés), où les
+  //    changer touchait TOUT LE MONDE sans que rien ne le dise. Ce sont des réglages
+  //    du domaine : ils sont ici, avec les autres.
+  var _cpMode=((window.CONFIG&&window.CONFIG.cp_mode)==='ouvres')?'ouvres':'ouvrables';
+  var _cpMd=_planCpMoisDebut();
+  var _cpSeg='flex:1;padding:9px 6px;border:1.5px solid;border-radius:10px;font-size:12.5px;font-weight:700;cursor:pointer;text-align:center;font-family:inherit;line-height:1.2';
+  var _cpOn='background:var(--vert-med,#3D6B27);color:#fff;border-color:var(--vert-med,#3D6B27)';
+  var _cpOff='background:transparent;color:var(--texte-doux,#6b7280);border-color:var(--gris,#d1d5db)';
+  var _cpHint=_cpMode==='ouvres'?'Une semaine pos\u00e9e = 5 jours (lun\u2192ven). R\u00e9f\u00e9rence\u00a0: 25\u00a0j/an. Ce mode ne doit pas l\u00e9ser le salari\u00e9 par rapport aux jours ouvrables.':'Une semaine pos\u00e9e = 6 jours (samedi inclus, m\u00eame non travaill\u00e9). R\u00e9f\u00e9rence\u00a0: 30\u00a0j/an. Poser un vendredi d\u00e9compte le samedi suivant.';
+  html+='<div class="plan-sec-lbl" style="margin-top:8px">Cong\u00e9s pay\u00e9s \u2014 d\u00e9compte du domaine</div>'
+    +'<div class="plan-card" style="flex-direction:column;gap:10px;align-items:stretch">'
+      +'<div style="display:flex;gap:8px">'
+        +'<div id="pl-cpmode-ouvrables" onclick="planSetCpMode(\'ouvrables\')" style="'+_cpSeg+';'+(_cpMode==='ouvrables'?_cpOn:_cpOff)+'">6 jours ouvrables<div style="font-size:10px;font-weight:500;opacity:.85;margin-top:2px">lun\u2192sam</div></div>'
+        +'<div id="pl-cpmode-ouvres" onclick="planSetCpMode(\'ouvres\')" style="'+_cpSeg+';'+(_cpMode==='ouvres'?_cpOn:_cpOff)+'">5 jours ouvr\u00e9s<div style="font-size:10px;font-weight:500;opacity:.85;margin-top:2px">lun\u2192ven</div></div>'
+      +'</div>'
+      +'<div style="font-size:11px;color:var(--texte-doux);line-height:1.5">'+_cpHint+'</div>'
+      +'<div style="font-size:11px;font-weight:700;letter-spacing:.5px;text-transform:uppercase;color:var(--texte-doux);margin-top:6px;padding-top:12px;border-top:1px solid var(--gris-clair)">P\u00e9riode de r\u00e9f\u00e9rence</div>'
+      +'<div style="display:flex;gap:8px">'
+        +'<div id="pl-cpper-juin" onclick="planSetCpPeriode(5)" style="'+_cpSeg+';'+(_cpMd===5?_cpOn:_cpOff)+'">1er juin \u2192 31 mai<span style="display:block;font-size:10px;font-weight:500;opacity:.85;margin-top:2px">usage agricole</span></div>'
+        +'<div id="pl-cpper-jan" onclick="planSetCpPeriode(0)" style="'+_cpSeg+';'+(_cpMd===0?_cpOn:_cpOff)+'">Ann\u00e9e civile<span style="display:block;font-size:10px;font-weight:500;opacity:.85;margin-top:2px">janv. \u2192 d\u00e9c.</span></div>'
+      +'</div>'
+      +'<div style="font-size:11px;color:var(--texte-doux);line-height:1.5">Le solde de chaque salari\u00e9 ne compte que les cong\u00e9s pris sur la p\u00e9riode <b>'+_planCpPeriodeLbl()+'</b>. Distincte de l\u2019ann\u00e9e civile, qui sert au compteur d\u2019heures.</div>'
     +'</div>';
   // ★ Absences qui doivent des heures — a partir d'un mois choisi (jamais retroactif)
   var _dq=_planDuesDebut(),_dqOpt='';
@@ -3220,7 +3279,7 @@ function planSaveCoupure(v){
   if(window.fbSave)window.fbSave('config',window.CONFIG);
   showToast(v==='libre'?'\u2705 Coupure prise selon le chantier'
             :(v?'\u2705 Coupure \u00e0 '+v:'\u2705 Heure de coupure effac\u00e9e'),'#3D6B27');
-  _planRenderTemplates();
+  _planRenderCadre();
 }
 function planSaveCoupureH(){
   var el=document.getElementById('plan-coup-h');
@@ -3235,7 +3294,7 @@ function planSavePause(min){
   window.CONFIG=window.CONFIG;
   if(window.fbSave)window.fbSave('config',window.CONFIG);
   showToast('\u2705 Coupure d\u00e9jeuner\u00a0: '+_planFmt(min/60),'#3D6B27');
-  _planRenderTemplates();
+  _planRenderCadre();
 }
 
 function planLegalPreset(v){
@@ -3266,7 +3325,7 @@ function planSetDuesDebut(v){
   else if(window.fbSave)window.fbSave('config',window.CONFIG);
   showToast(s?('\u2705 Heures dues compt\u00e9es \u00e0 partir de '+PLAN_MOIS[parseInt(s.slice(5,7),10)-1]+' '+s.slice(0,4))
              :'Heures dues\u00a0: inactif','#3D6B27');
-  _planRenderTemplates();
+  _planRenderCadre();
 }
 function planSaveLegal(){
   var gv=function(id,def){var v=parseFloat((document.getElementById(id)||{}).value);return isNaN(v)?def:v;};
@@ -3276,12 +3335,12 @@ function planSaveLegal(){
   window.CONFIG=window.CONFIG;
   if(window.fbSave)window.fbSave('config',window.CONFIG);
   showToast('\u2705 Cadre l\u00e9gal enregistr\u00e9','#3D6B27');
-  _planRenderTemplates();
+  _planRenderCadre();
 }
 // ── Éditeur de grille planning ──
 function planOpenGridEditor(templateId){
   _planEditing={id:templateId,month:planMonth};
-  _planRenderTemplates();
+  _planRenderCadre();
 }
 
 function _planRenderGridEditor(){
@@ -3344,7 +3403,7 @@ function _planRenderGridEditor(){
   body.innerHTML=html;
 }
 
-function planEditorSetMonth(m){if(_planEditing)_planEditing.month=m;_planRenderTemplates();}
+function planEditorSetMonth(m){if(_planEditing)_planEditing.month=m;_planRenderCadre();}
 
 function planUpdateDay(input){
   var d=parseInt(input.getAttribute('data-d'));
@@ -3368,7 +3427,7 @@ function planSaveTpl(id){
   showToast('\u2705 Template "'+id+'" enregistr\u00e9','#3D6B27');
 }
 
-function planCloseGridEditor(){_planEditing=null;_planRenderTemplates();}
+function planCloseGridEditor(){_planEditing=null;_planRenderCadre();}
 
 // ── Import direct par template ──
 function planDirectImportCSV(id){
@@ -3379,11 +3438,11 @@ function planDirectImportCSV(id){
 // ── Suppression template ──
 function planAskDeleteTemplate(id){
   window._planDeleteConfirm=id;
-  _planRenderTemplates();
+  _planRenderCadre();
 }
 function planCancelDeleteTemplate(){
   window._planDeleteConfirm=null;
-  _planRenderTemplates();
+  _planRenderCadre();
 }
 function planDeleteTemplate(id){
   window._planDeleteConfirm=null;
@@ -3395,7 +3454,7 @@ function planDeleteTemplate(id){
   if(window.fbSave)window.fbSave('planning_templates',PLANNING_TEMPLATES);
   if(window.fbSave)window.fbSave('membres',window.MEMBRES);
   showToast('\uD83D\uDDD1 Template "'+id+'" supprim\u00e9','#B85A1A');
-  _planRenderTemplates();
+  _planRenderCadre();
 }
 
 // ── Export CSV ──
@@ -3501,7 +3560,7 @@ function planImportCSV(targetId){
       if(nT>0)msg+=' \u00b7 '+nT+' horaires mois';
       if(nJ>0)msg+=' \u00b7 '+(Object.values(jouTimings).reduce(function(s,m){return s+Object.keys(m).length;},0))+' jours \u00e0 horaire particulier';
       showToast(msg,'#3D6B27');
-      _planRenderTemplates();
+      _planRenderCadre();
     }catch(err){showToast('\u274c Erreur CSV\u00a0: '+err.message,'var(--rouge)');}
   };
   reader.readAsText(file[0]);
@@ -4830,16 +4889,11 @@ window.planAddYear          = planAddYear;
 window._planMigrateYears    = _planMigrateYears;
 window._feriesY             = _feriesY;
 window._planFerie           = _planFerie;
-window.openPlanTools        = openPlanTools;
-window.closePlanTools       = closePlanTools;
-window.planToolsTemplates   = planToolsTemplates;
 window.openPlanChaleur      = openPlanChaleur;
 window.closePlanChaleur     = closePlanChaleur;
 window.planChalMb           = planChalMb;
 window.planChalApply        = planChalApply;
 window.planChalRemove       = planChalRemove;
-window.openPlanArchives     = openPlanArchives;
-window.closePlanArchives    = closePlanArchives;
 window.planEdNav            = planEdNav;
 window.planEdSwitch         = planEdSwitch;
 window.planPresetChaleur    = planPresetChaleur;

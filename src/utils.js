@@ -23,7 +23,7 @@ export const GT_ADMIN_EMAIL = 'ngdevpro@gmail.com';
 // WHATS_NEW   : tableau vide = modal desactive pour cette version.
 // Format item : { emoji:'📅', titre:'Titre court', desc:'Phrase utilisateur.' }
 // Regle : seulement les changements visibles par les utilisateurs.
-export const APP_VERSION = '5.95';
+export const APP_VERSION = '5.96';
 // ════ Journal des nouveautés (récap cumulatif) ════
 // Une entrée par version, la PLUS RÉCENTE EN HAUT : { v:'5.10', items:[ {emoji,titre,desc}, … ] }
 // À chaque release visible → AJOUTER un bloc en tête (ne pas remplacer). items:[] = release technique (rien à afficher).
@@ -341,6 +341,16 @@ window._mvGraphRepeindre = function(){
 };
 
 export const WHATS_NEW = [
+  { v:'5.96', items:[
+    { emoji:'\u{1F5C2}', titre:'Le planning en trois onglets',
+      desc:"Le module m\u00e9langeait trois choses qui ne se font ni au m\u00eame rythme ni par la m\u00eame personne. Elles ont chacune leur onglet\u00a0: <b>Le mois</b>, la grille de l\u2019\u00e9quipe\u00a0; <b>Les gens</b>, une ligne par salari\u00e9 avec sa fiche, le r\u00e9cap annuel et les anciens salari\u00e9s\u00a0; <b>Le cadre</b>, les mod\u00e8les de semaine, la coupure, la convention, les cong\u00e9s et les heures sup. Si vous n\u2019\u00eates pas administrateur, vous n\u2019avez plus d\u2019onglets du tout\u00a0: vous arrivez directement sur votre mois." },
+    { emoji:'\u{1F50D}', titre:'Les salari\u00e9s n\u2019apparaissent plus deux fois',
+      desc:"Sous la grille, une deuxi\u00e8me liste r\u00e9p\u00e9tait les m\u00eames noms et les m\u00eames heures, et les deux ouvraient la m\u00eame fiche. Il n\u2019en reste qu\u2019une, dans \u00ab\u00a0Les gens\u00a0\u00bb." },
+    { emoji:'\u2699\uFE0F', titre:'Le menu \u00ab\u00a0Outils\u00a0\u00bb a disparu',
+      desc:"Ses quatre entr\u00e9es sont sorties de leur tiroir\u00a0: poser des cong\u00e9s et des horaires chaleur sur une p\u00e9riode sont deux boutons visibles au-dessus de la grille, les mod\u00e8les et le cadre l\u00e9gal ont leur onglet, les anciens salari\u00e9s sont avec les gens." },
+    { emoji:'\u26A0\uFE0F', titre:'Un r\u00e9glage du domaine \u00e9tait cach\u00e9 dans la fiche d\u2019une personne',
+      desc:"La r\u00e8gle de d\u00e9compte des cong\u00e9s (6\u00a0jours ouvrables ou 5\u00a0jours ouvr\u00e9s) et la p\u00e9riode de r\u00e9f\u00e9rence se r\u00e9glaient depuis l\u2019onglet Cong\u00e9s de n\u2019importe quel salari\u00e9 \u2014 alors qu\u2019elles s\u2019appliquent \u00e0 toute l\u2019\u00e9quipe. Elles sont maintenant dans \u00ab\u00a0Le cadre\u00a0\u00bb, avec les autres r\u00e9glages du domaine. Rien ne change dans vos soldes." }
+  ]},
   { v:'5.95', items:[
     { emoji:'\u{1F449}', titre:'Le planning : plus de \u00ab\u00a0mode\u00a0\u00bb \u00e0 activer',
       desc:"Avant, toucher une case ouvrait la fiche du jour \u2014 sauf si le bouton \u00ab\u00a0S\u00e9lection multiple\u00a0\u00bb \u00e9tait allum\u00e9, auquel cas la m\u00eame case se cochait. Le bouton a disparu\u00a0: toucher une case la coche, toujours. La barre du bas dit qui est coch\u00e9 et \u00e0 quelles dates, puis propose ce qu\u2019on peut en faire." },
@@ -673,7 +683,7 @@ export const WHATS_NEW = [
     { emoji: '\u{2600}\u{FE0F}', titre: 'Un jour de cong\u00e9 n\u2019est plus une heure travaill\u00e9e', desc: "La journ\u00e9e reste pay\u00e9e exactement comme avant, rien ne change sur la paie. En revanche elle ne compte plus comme du temps de travail dans les compteurs \u2014 c\u2019est la r\u00e8gle. Une semaine avec un jour de cong\u00e9 ne peut donc plus d\u00e9clencher une alerte de d\u00e9passement, et les cong\u00e9s ne remplissent plus le compteur annuel, puisque les 1607 heures sont d\u00e9j\u00e0 calcul\u00e9es cong\u00e9s d\u00e9duits. Vous verrez des totaux plus bas qu\u2019avant sur le cadre l\u00e9gal : ce sont les bons." },
     { emoji: '\u{1FA79}', titre: 'Chaque absence a maintenant son motif', desc: "Une absence se notait par une case et un commentaire libre. Elle se choisit d\u00e9sormais parmi sept motifs, et chacun affiche son effet en clair au moment o\u00f9 vous le s\u00e9lectionnez. Un arr\u00eat de travail abaisse le plafond annuel du salari\u00e9 : ses heures ne sont pas \u00e0 rattraper. Une formation compte comme du travail effectif. Un retard se saisit en heures et non en journ\u00e9e. Vos absences d\u00e9j\u00e0 enregistr\u00e9es gardent leur comportement actuel tant que vous ne leur donnez pas de motif." },
     { emoji: '\u{1F3D6}\u{FE0F}', titre: 'Le solde de cong\u00e9s suit votre p\u00e9riode de r\u00e9f\u00e9rence', desc: "Le compteur de jours pris additionnait tous les cong\u00e9s jamais enregistr\u00e9s, toutes ann\u00e9es confondues : un salari\u00e9 pr\u00e9sent depuis deux ans voyait un solde faux. Il se limite maintenant \u00e0 la p\u00e9riode en cours, du 1er juin au 31 mai. Si la v\u00f4tre suit l\u2019ann\u00e9e civile, cela se r\u00e8gle dans la fiche salari\u00e9, onglet Cong\u00e9s." },
-    { emoji: '\u{2699}\u{FE0F}', titre: 'Les r\u00e8gles de votre domaine', desc: "Ce que deviennent les heures faites au-del\u00e0 du planning du mois \u2014 pay\u00e9es en acompte, r\u00e9cup\u00e9r\u00e9es en repos, ou report\u00e9es \u00e0 la cl\u00f4ture \u2014 se choisit dans Planning \u203a Outils, avec la dur\u00e9e annuelle et le plafond de modulation si votre accord en fixe d\u2019autres." }
+    { emoji: '\u{2699}\u{FE0F}', titre: 'Les r\u00e8gles de votre domaine', desc: "Ce que deviennent les heures faites au-del\u00e0 du planning du mois \u2014 pay\u00e9es en acompte, r\u00e9cup\u00e9r\u00e9es en repos, ou report\u00e9es \u00e0 la cl\u00f4ture \u2014 se choisit dans Planning \u203a Le cadre, avec la dur\u00e9e annuelle et le plafond de modulation si votre accord en fixe d\u2019autres." }
   ] },
   { v: '5.40', items: [
     { emoji: '\u{1F9ED}', titre: 'Une seule façon de naviguer, partout', desc: "Chaque module était construit à sa manière : les onglets tantôt en haut, tantôt en bas, des en-têtes de hauteurs différentes, des piles de boutons qui variaient d'un écran à l'autre. Tout suit désormais la même anatomie : le nom du module et la saison en haut, les onglets juste en dessous — toujours au même endroit, toujours de la même hauteur — puis les chiffres clés, puis le contenu. Vous n'avez plus à réapprendre chaque écran : ce que vous savez faire dans un module se retrouve à l'identique dans les autres. Rien n'a changé dans vos données ni dans vos réglages." },
@@ -1525,11 +1535,12 @@ var MV_AIDE = {
   planning: {
     ico: '\u{1F4C5}', titre: 'Planning', ancre: 'planning',
     points: [
-      ['Onglet Équipe', ": la grille de tout le monde. Onglet Mon planning : la vue du salarié."],
-      ['Toucher un jour', "ouvre l’éditeur, qui enchaîne jour suivant et salarié suivant sans quitter l’écran."],
-      ['Sélection multiple', ": congés, absence, récup ou horaires chaleur sur plusieurs jours d’un coup."],
+      ['Trois onglets', ": Le mois, la grille de toute l’équipe. Les gens, une ligne par salarié et sa fiche. Le cadre, ce qui se règle une fois par an. Un salarié qui n’est pas administrateur n’a pas d’onglets : il arrive sur son mois."],
+      ['Toucher une case', "la coche. Toucher le numéro du jour, en haut, coche toute l’équipe ce jour-là ; toucher un nom coche sa ligne ; toucher « Salarié », dans le coin, coche tout ce qui est affiché. Un deuxième appui décoche."],
+      ['La barre du bas', "dit qui est coché et à quelles dates, puis propose ce qui s’applique vraiment à cette sélection — heures, congé, absence, récup, chaleur, effacer. Une case ou trente, c’est le même geste et la même fiche."],
+      ['Sur une période plus longue', "que la vue affichée, deux boutons au-dessus de la grille posent des congés ou des horaires chaleur du jour au jour, pour plusieurs salariés."],
       ['Les heures dues', "se décomptent sur une absence injustifiée ou un retard. Un arrêt de travail est neutre, une formation compte comme du travail."],
-      ['Présence, coupure, heures dues', "trois nombres qui se ressemblent et ne disent pas la même chose. La ‹‹ présence ›› va de l’arrivée au départ. La ‹‹ coupure ›› est le temps non travaillé au milieu : sa durée et son heure sont fixées par le domaine, dans Outils puis « Modèles, cadre légal & coupure », ce n’est pas un moment que chacun choisit. Les ‹‹ heures dues ›› sont ce qui part en paie et alimente le compteur des 1 607 h. Une journée de 09:00 à 16:00 avec une heure de coupure fait 7 h de présence et 6 h dues."],
+      ['Présence, coupure, heures dues', "trois nombres qui se ressemblent et ne disent pas la même chose. La ‹‹ présence ›› va de l’arrivée au départ. La ‹‹ coupure ›› est le temps non travaillé au milieu : sa durée et son heure sont fixées par le domaine, dans l’onglet Le cadre, ce n’est pas un moment que chacun choisit. Les ‹‹ heures dues ›› sont ce qui part en paie et alimente le compteur des 1 607 h. Une journée de 09:00 à 16:00 avec une heure de coupure fait 7 h de présence et 6 h dues."],
       ['Le planning de l’année', "s’imprime depuis le même endroit : le rythme sur douze mois, avec les heures de prise et de fin de service et la coupure déjeuner. Une page par modèle de semaine, pas une par salarié — c’est le document qu’on remet à l’équipe pour l’année à venir."],
       ['Le relevé mensuel', "s’imprime depuis Réglages, onglet App, « Documents & impressions ». C’est un relevé d’heures, pas un bulletin de paie."],
       ['Taux horaires et acomptes', ": administrateurs seulement, et jamais enregistrés sur l’appareil."]

@@ -1,4 +1,18 @@
-// MA VIGNE — Service Worker v6.45
+// MA VIGNE — Service Worker v6.46
+// v6.46 (11/08/2026) — Planning, lot 2 : trois onglets, un verbe chacun (mois /
+//                       gens / cadre), table _PLAN_TAB_MIGR pour l'onglet memorise.
+//                       L'ouvrier n'a plus d'onglets et tombe sur son mois. Fin du
+//                       doublon grille+syntheses : les cartes, le recap annuel et les
+//                       anciens salaries passent dans « Les gens ». Le menu « Outils »
+//                       et la feuille « Anciens salaries » disparaissent (9 feuilles
+//                       -> 5 depuis le debut de la serie). « Conges sur une periode »
+//                       et « Chaleur sur une periode » deviennent deux boutons
+//                       visibles au-dessus de la grille.
+//                       ⚠️ DEFAUT REEL corrige : le mode de decompte des conges et la
+//                       periode de reference — deux reglages DU DOMAINE — se reglaient
+//                       depuis l'onglet Conges d'UN salarie. Deplaces dans « Le cadre ».
+//                       ★ C15 les a attrapes orphelins entre les deux gestes : la
+//                       preuve que sortir un bloc sans le reposer ne passe pas.
 // v6.45 (11/08/2026) — Planning, lot 1 : la selection n'est plus un mode. Toucher
 //                       une case la coche, toujours ; le bouton « Selection
 //                       multiple » disparait. L'en-tete d'un jour coche la colonne,
@@ -840,7 +854,7 @@
 // v2.22 — Fix profils vides : guard vide dans loadData() pour MEMBRES/SAISONS/TACHES
 // v2.17 — Onboarding intégré + tenantId · v2.06 — Firebase Auth · v2.00–v2.05 — divers
 const DEBUG = self.location.hostname === 'localhost' || self.location.hostname === '127.0.0.1';
-const CACHE_NAME   = 'mavigne-v6.45';
+const CACHE_NAME   = 'mavigne-v6.46';
 const TENANT_CACHE = 'mavigne-tenant';   // Cache persistant — préservé à chaque mise à jour SW
 const SYNC_TAG     = 'mavigne-sync';
 
@@ -856,7 +870,7 @@ const CDN_URLS = [
 ];
 
 self.addEventListener('install', event => {
-  if(DEBUG) console.log('[SW] Ma Vigne v6.45 installé');
+  if(DEBUG) console.log('[SW] Ma Vigne v6.46 installé');
   event.waitUntil(
     caches.open(CACHE_NAME).then(async cache => {
       // ── Cœur applicatif : STRICT (mise à jour ATOMIQUE) ──
@@ -872,7 +886,7 @@ self.addEventListener('install', event => {
 });
 
 self.addEventListener('activate', event => {
-  if(DEBUG) console.log('[SW] Ma Vigne v6.45 activé');
+  if(DEBUG) console.log('[SW] Ma Vigne v6.46 activé');
   event.waitUntil(
     caches.keys().then(keys =>
       Promise.all(
