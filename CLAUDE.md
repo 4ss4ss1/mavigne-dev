@@ -2,11 +2,11 @@
 
 > Document de référence du projet **Ma Vigne** (GUERETTECH). Il est le **porteur de vérité** :
 > la mémoire Claude est plafonnée, ce fichier ne l'est pas.
-> Dernière consolidation : **9 août 2026 (nuit)** — reprise de la consolidation du 9 août soir,
+> Dernière consolidation : **11 août 2026 (soir)** — reprise de la consolidation du 9 août soir,
 > augmentée de la **troisième** partie de la journée : après l'écart de cadence (matin) et
 > l'accompagnement du client (après-midi), la **réduction du temps d'installation** (soir),
 > cinq lots plus une procédure imprimable.
-> Consolidations précédentes : 9 août soir · 7 août soir (série MILLÉSIME) · 7 août matin
+> Consolidations précédentes : 10 août (workflow GitHub) · 9 août soir (série MILLÉSIME) · 7 août matin
 > (série Cave) · 5 août (mvprint retrouvé) · 4 août soir (barème) · 1er août (UX-1) ·
 > 31 juillet (identité légale).
 > ★ **Note ajoutée le 10 août** (règle d'or n°1 et §29) : une régénération de ce document faite
@@ -20,19 +20,34 @@
 > `mavigne-dev\`, committés et poussés via **GitHub Desktop**. Détail complet : Règle d'or n°1 et
 > « 🖥️ Environnement de Nico › Git ».
 >
-> ⚠️ **Points en suspens au moment de la consolidation** :
-> 1. **Cinq lots livrés et NON DÉPLOYÉS** (§18b) : `admin-gt.js`, `firebase.js`,
->    `functions/leads.js`, `public/mise-en-route.html`.
-> 2. **Une installation à blanc** sur un slug jetable reste à faire — elle valide les cinq lots
->    d'un coup et mesure les temps réels (§18b, §28).
-> 3. La réponse à Château Garraud reste le sujet commercial n°1 (§28).
-> 4. ⚠️ **Des lots restent non documentés ici**, connus par le seul changelog de `sw.js` :
->    « panneau GUERETTECH : 8 onglets deviennent 6 », « SEC-GT/2 », la **tournée sur l'écran de
->    l'équipe », l'**exercice comptable**, les **4 défauts de la snapshot localStorage**, le **Chai
->    qui s'ouvrait vide**, le **soutirage à source unique**, le **Cuvier repeint**, le **hub
->    Documents** et la **charte `MV_DOC`**. **À consigner par Nico.**
-> 5. ⚠️ **`rewrites` est absent du `firebase.json` lu** alors qu'`essai.html` poste vers
->    `/api/lead` — à vérifier en ligne (§18b).
+> ★★★ **Note du 11 août (consolidation complète) — VÉRIFICATION DIRECTE SUR LE DÉPÔT.**
+> Cette consolidation s'est faite en vérifiant les faits dans le dépôt GitHub (les 5 lots du 9/08 y
+> sont bien) et sur Firebase (submitMiseEnRoute est bien déployée). Résultat : correction de deux
+> affirmations fausses du 10/08 (les lots SONT déployés, pas « restent à déployer »). **Le lot
+> accompagnement v5.94 vient d'être livré et est prêt pour un `npm run build && firebase deploy`.**
+> Garraud peut démarrer immédiatement. Backlog court : trois petites sections de guide + une
+> décision sur les rewrites de firebase.json.
+
+> ✅ **État du déploiement au 11 août (soir)** :
+> 1. **Les cinq lots d'installation d'assistant (9 août soir) SONT DÉPLOYÉS** :
+>    - `admin-gt.js` : les cinq lotsissements (parcelles/appariement, comptes, périodes, reprise formulaire, machines)
+>    - `functions/leads.js` + `firebase.js` : la Cloud Function `submitMiseEnRoute` est en ligne
+>    - `public/mise-en-route.html` : accessible sur le domaine
+> 2. **Le lot accompagnement v5.94 (11 août) est LIVRÉ, en attente de déploiement** :
+>    - Fiches `MV_AIDE` : 10 fiches à jour sur le chrono (v5.92), le mode du jour (v5.93), trois chemins de réglage
+>    - Visite guidée : la contradiction « sur 14 » / « 13 étapes » est corrigée
+>    - Guide : sections Planning (équipe collective) et Données (hub Documents) ajoutées
+>    - ESLint : plafond passé à 0, le dernier double `for(var i)` corrigé
+> 3. **Château Garraud peut démarrer tout de suite** : le hosting est à jour, l'installation est prête.
+
+> ⚠️ **Reste à faire** :
+> 4. **Déployer le lot accompagnement v5.94** : `npm run build && firebase deploy`
+> 5. **Commercial : la réponse à Château Garraud — domaine girondin de 45 ha.** Lead entré le 04/08 via formulaire site. Démarrage immédiat possible : installation, devis INST-DOM (990 €/20 h), volume fût 225 L (Bordeaux), barème girondin à confirmer.
+> 6. **Backlog accompagnement (après v5.94)** :
+>    - `guide/11-pilotage.html` : chemin mort « Réglages › Campagne » → « Réglages › Domaine › Saisons »
+>    - `public/demarrage.html` : 60 ko, jamais découpé en sections du guide
+>    - Section Planning du guide : le 14ᵉ moment de la démo, qui n'existe pas
+> 7. **Firebase.json : `rewrites` vide.** `mise-en-route.html` essaie deux adresses (URL complète CloudFunctions + `/api/mise-en-route` en repli). Le repli est mort — à décider
 
 ---
 
