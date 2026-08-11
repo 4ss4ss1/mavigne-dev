@@ -1090,11 +1090,32 @@ mark{background:rgba(200,176,32,.32);color:var(--cream);border-radius:3px;paddin
     jour à l'autre <b>et</b> d'un salarié à l'autre sans jamais refermer.</li>
     <li>Le <b>mode multi-sélection</b> applique une action à plusieurs cases d'un coup : congés,
     absences, horaires de chaleur, récupération.</li>
-    <li>Les heures se saisissent <b>à la minute</b>, avec pause déjeuner automatique au-delà d'un seuil.</li>
+    <li>Les heures se saisissent <b>à la minute</b>, avec <b>coupure déjeuner</b> déduite
+    automatiquement au-delà d'un seuil.</li>
     <li>Des <b>modèles de semaine</b> réutilisables évitent de tout ressaisir chaque mois ; un
     import de pointages au format CSV est possible.</li>
     <li>Une <b>synthèse du mois</b> et un <b>récapitulatif annuel</b> cliquable se trouvent sous la grille.</li>
   </ul>
+
+  <h3>👥 Une ligne pour toute une équipe</h3>
+  <p>Une vendange, c'est trente personnes pendant dix jours. Créer trente fiches n'aurait aucun
+  sens : aucune ne se connectera, aucune n'a de compteur d'annualisation à tenir, et la grille
+  deviendrait illisible le seul mois où elle sert vraiment. Un membre peut donc être déclaré comme
+  une <b>équipe collective</b> : <b>une ligne qui porte un effectif</b>.</p>
+  <ul class="dot">
+    <li>Le drapeau se pose sur la fiche du membre, dans <span class="path">Réglages › Équipe</span> :
+    <em aria-hidden="true">Équipe collective — une ligne, plusieurs personnes</em>, avec un
+    <b>nombre par défaut</b>.</li>
+    <li>Ce nombre se change <b>jour par jour</b> depuis la grille : <b>Sélection multiple</b>, puis
+    <b>👥 Effectif</b>. Un jour à six, le lendemain à quatre.</li>
+    <li>L'effectif <b>multiplie ce qui est collectif</b> : les heures du chantier, la capacité de
+    l'équipe, le coût, la part de l'avancement.</li>
+    <li>Il n'entre <b>jamais</b> dans ce qui est individuel : plafond des 1&nbsp;607&nbsp;h, congés
+    payés, heures supplémentaires, maxima légaux hebdomadaires, relevé d'heures, compte de connexion.</li>
+  </ul>
+  <div class="note info"><span class="ni" aria-hidden="true">ℹ️</span><div><b>Ce n'est pas un salarié,
+  c'est une équipe.</b> Renseignez les <b>dates de contrat</b> de la ligne pour qu'elle n'apparaisse
+  que pendant le chantier : sans elles, une équipe de vendange reste affichée toute l'année.</div></div>
 
   <h3>⏱️ Heures travaillées et heures prévues</h3>
   <p>Le module ne se contente pas d'additionner : il compare en permanence le <b>réalisé</b> à la
@@ -1112,7 +1133,7 @@ mark{background:rgba(200,176,32,.32);color:var(--cream);border-radius:3px;paddin
   <h3>⚖️ Le cadre légal, affiché en permanence</h3>
   <p>Les valeurs par défaut suivent la convention nationale <b>Production agricole et CUMA
   (IDCC 7024)</b>. Elles sont <b>paramétrables</b> pour s'adapter à une autre convention&nbsp;:
-  <span class="path">Planning › Outils du planning › Modèles, cadre légal &amp; pause</span>.</p>
+  <span class="path">Planning › Outils du planning › Modèles, cadre légal &amp; coupure</span>.</p>
   <div class="tw"><table>
     <tr><th>Repère</th><th>Valeur par défaut</th></tr>
     <tr><td>Durée légale hebdomadaire</td><td>35 h</td></tr>
@@ -1200,8 +1221,12 @@ mark{background:rgba(200,176,32,.32);color:var(--cream);border-radius:3px;paddin
   volontairement réservé à la <b>pause légale</b> : vingt minutes minimum au-delà de six heures de
   travail effectif, que le salarié prend dans la plage prévue. La <b>coupure déjeuner</b> est autre
   chose : c'est une organisation décidée par le domaine. Dire « une heure de pause » là où il faut
-  lire « une heure de coupure » laisse croire à chacun qu'il en choisit le moment.</div></div>
-  <p>L'heure de la coupure se règle dans <b>Planning › Modèles</b>, sous la durée. Trois réponses
+  lire « une heure de coupure » laisse croire à chacun qu'il en choisit le moment.
+  Le compteur du <b>Tracteur</b>, lui, dit bien « pause déjeuner » : seul en cabine, le
+  conducteur en choisit vraiment le moment. Le mot y est donc exact.</div></div>
+  <p>L'heure de la coupure se règle dans
+  <span class="path">Planning › Outils du planning › Modèles, cadre légal &amp; coupure</span>,
+  sous la durée. Trois réponses
   possibles : une heure fixe, « selon le chantier », ou rien. Tant que rien n'est renseigné,
   l'application n'affiche que la durée, sans prétendre savoir quand elle tombe. Un domaine dont la
   coupure change avec la saison peut la préciser mois par mois dans la sixième colonne du CSV.</p>
@@ -1496,6 +1521,29 @@ mark{background:rgba(200,176,32,.32);color:var(--cream);border-radius:3px;paddin
     toutes les saisons.</li>
   </ul>
 
+  <h3>🖨️ Où sortir un document</h3>
+  <p>Les documents se déclenchaient autrefois depuis quatre points d'entrée répartis sur six écrans :
+  un bouton dans le Cuvier, un autre dans les outils du Tracteur, deux dans La Réserve, une section
+  dans les Réglages. Il fallait savoir où chacun avait été rangé. Ils sont maintenant réunis dans
+  <span class="path">Réglages › App › Documents &amp; impressions</span>, classés
+  <b>par usage et non par module</b>.</p>
+  <div class="tw"><table>
+    <tr><th>Famille</th><th>Ce qu'on y trouve</th></tr>
+    <tr><td>📋 <b>Obligatoire</b></td><td>Ce que vous devez pouvoir sortir en contrôle : registre
+    phyto en PDF et en fichier, synthèse cuivre, relevé mensuel d'heures.</td></tr>
+    <tr><td>📊 <b>Suivi du domaine</b></td><td>Vos états internes : rapport de saison, planning de
+    l'année, bilan de campagne, registre des manipulations, inventaires, carnet d'entretien.</td></tr>
+    <tr><td>💾 <b>Données brutes</b></td><td>Vos données telles quelles, pour votre tableur ou votre
+    comptable : journal des travaux, avancement par parcelle, sauvegarde complète.</td></tr>
+  </table></div>
+  <p>Chaque ligne annonce son <b>format</b> et ce qu'elle va vous demander <em aria-hidden="true">avant</em>
+  de générer. Un document dont le module est masqué pour vous reste visible mais grisé : le cacher
+  laisserait croire qu'il n'existe pas.</p>
+  <div class="note info"><span class="ni" aria-hidden="true">ℹ️</span><div><b>Trois documents restent
+  volontairement dans leur écran</b> : la fiche salarié et l'export CSV du planning dépendent du mois
+  affiché, le CSV des coûts du Pilotage suit la période consultée. Sortis de leur contexte, ils
+  produiraient le document d'un autre mois — en silence.</div></div>
+
   <h3>💾 Sauvegardes automatiques</h3>
   <div class="tw"><table>
     <tr><th>Sauvegarde</th><th>Fréquence</th><th>Conservation</th></tr>
@@ -1507,7 +1555,8 @@ mark{background:rgba(200,176,32,.32);color:var(--cream);border-radius:3px;paddin
   être restaurée sans tout réécrire.</p>
   <div class="note tip"><span class="ni" aria-hidden="true">💡</span><div>Prenez l'habitude d'un <b>export JSON avant chaque
   opération sensible</b> (import de parcellaire, clôture de campagne, gros nettoyage) :
-  <span class="path">Réglages › App › Exporter</span>. Trente secondes, et vous dormez mieux.</div></div>
+  <span class="path">Réglages › App › Documents &amp; impressions › Données brutes</span>, ligne
+  <b>Sauvegarde complète</b>. Trente secondes, et vous dormez mieux.</div></div>
 
   <h3>📶 Hors connexion</h3>
   <ul class="dot">
@@ -1543,6 +1592,14 @@ mark{background:rgba(200,176,32,.32);color:var(--cream);border-radius:3px;paddin
   <p>La pastille <span class="path">? Aide</span>, en haut de chaque écran, ouvre également <span class="path">🐛 Signaler un problème</span> — pré-rempli avec l'écran d'où vous partez. Le chemin complet reste <span class="path">Réglages › App</span>. Le message transmet
   <b>accompagné du contexte technique</b> : version, module concerné, dernières erreurs rencontrées.
   C'est infiniment plus efficace qu'un « ça bugue » par SMS, et ça évite deux jours d'aller-retour.</p>
+  <p>Les incidents sérieux n'attendent d'ailleurs pas votre signalement : ils laissent
+  <b>une trace horodatée dans votre domaine</b> — écran concerné, message technique, version — et
+  c'est cette trace qui est lue quand vous appelez. Vous n'avez <b>pas à reproduire le problème</b>
+  pour qu'il soit compris. Les avertissements sans conséquence, eux, restent sur l'appareil et ne
+  remontent nulle part.</p>
+  <div class="note info"><span class="ni" aria-hidden="true">ℹ️</span><div>Cette trace ne contient
+  <b>aucune donnée de votre exploitation</b> : ni parcelle, ni salarié, ni chiffre. Uniquement de quoi
+  situer la panne dans le code.</div></div>
 </section>
 
 

@@ -16,11 +16,32 @@
     jour à l'autre <b>et</b> d'un salarié à l'autre sans jamais refermer.</li>
     <li>Le <b>mode multi-sélection</b> applique une action à plusieurs cases d'un coup : congés,
     absences, horaires de chaleur, récupération.</li>
-    <li>Les heures se saisissent <b>à la minute</b>, avec pause déjeuner automatique au-delà d'un seuil.</li>
+    <li>Les heures se saisissent <b>à la minute</b>, avec <b>coupure déjeuner</b> déduite
+    automatiquement au-delà d'un seuil.</li>
     <li>Des <b>modèles de semaine</b> réutilisables évitent de tout ressaisir chaque mois ; un
     import de pointages au format CSV est possible.</li>
     <li>Une <b>synthèse du mois</b> et un <b>récapitulatif annuel</b> cliquable se trouvent sous la grille.</li>
   </ul>
+
+  <h3>👥 Une ligne pour toute une équipe</h3>
+  <p>Une vendange, c'est trente personnes pendant dix jours. Créer trente fiches n'aurait aucun
+  sens : aucune ne se connectera, aucune n'a de compteur d'annualisation à tenir, et la grille
+  deviendrait illisible le seul mois où elle sert vraiment. Un membre peut donc être déclaré comme
+  une <b>équipe collective</b> : <b>une ligne qui porte un effectif</b>.</p>
+  <ul class="dot">
+    <li>Le drapeau se pose sur la fiche du membre, dans <span class="path">Réglages › Équipe</span> :
+    <em aria-hidden="true">Équipe collective — une ligne, plusieurs personnes</em>, avec un
+    <b>nombre par défaut</b>.</li>
+    <li>Ce nombre se change <b>jour par jour</b> depuis la grille : <b>Sélection multiple</b>, puis
+    <b>👥 Effectif</b>. Un jour à six, le lendemain à quatre.</li>
+    <li>L'effectif <b>multiplie ce qui est collectif</b> : les heures du chantier, la capacité de
+    l'équipe, le coût, la part de l'avancement.</li>
+    <li>Il n'entre <b>jamais</b> dans ce qui est individuel : plafond des 1&nbsp;607&nbsp;h, congés
+    payés, heures supplémentaires, maxima légaux hebdomadaires, relevé d'heures, compte de connexion.</li>
+  </ul>
+  <div class="note info"><span class="ni" aria-hidden="true">ℹ️</span><div><b>Ce n'est pas un salarié,
+  c'est une équipe.</b> Renseignez les <b>dates de contrat</b> de la ligne pour qu'elle n'apparaisse
+  que pendant le chantier : sans elles, une équipe de vendange reste affichée toute l'année.</div></div>
 
   <h3>⏱️ Heures travaillées et heures prévues</h3>
   <p>Le module ne se contente pas d'additionner : il compare en permanence le <b>réalisé</b> à la
@@ -38,7 +59,7 @@
   <h3>⚖️ Le cadre légal, affiché en permanence</h3>
   <p>Les valeurs par défaut suivent la convention nationale <b>Production agricole et CUMA
   (IDCC 7024)</b>. Elles sont <b>paramétrables</b> pour s'adapter à une autre convention&nbsp;:
-  <span class="path">Planning › Outils du planning › Modèles, cadre légal &amp; pause</span>.</p>
+  <span class="path">Planning › Outils du planning › Modèles, cadre légal &amp; coupure</span>.</p>
   <div class="tw"><table>
     <tr><th>Repère</th><th>Valeur par défaut</th></tr>
     <tr><td>Durée légale hebdomadaire</td><td>35 h</td></tr>
@@ -126,8 +147,12 @@
   volontairement réservé à la <b>pause légale</b> : vingt minutes minimum au-delà de six heures de
   travail effectif, que le salarié prend dans la plage prévue. La <b>coupure déjeuner</b> est autre
   chose : c'est une organisation décidée par le domaine. Dire « une heure de pause » là où il faut
-  lire « une heure de coupure » laisse croire à chacun qu'il en choisit le moment.</div></div>
-  <p>L'heure de la coupure se règle dans <b>Planning › Modèles</b>, sous la durée. Trois réponses
+  lire « une heure de coupure » laisse croire à chacun qu'il en choisit le moment.
+  Le compteur du <b>Tracteur</b>, lui, dit bien « pause déjeuner » : seul en cabine, le
+  conducteur en choisit vraiment le moment. Le mot y est donc exact.</div></div>
+  <p>L'heure de la coupure se règle dans
+  <span class="path">Planning › Outils du planning › Modèles, cadre légal &amp; coupure</span>,
+  sous la durée. Trois réponses
   possibles : une heure fixe, « selon le chantier », ou rien. Tant que rien n'est renseigné,
   l'application n'affiche que la durée, sans prétendre savoir quand elle tombe. Un domaine dont la
   coupure change avec la saison peut la préciser mois par mois dans la sixième colonne du CSV.</p>
