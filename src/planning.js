@@ -4331,8 +4331,8 @@ function _paRegulier(g,yr){
 // Prise de service, fin de service, et coupure DÉDUITE de l'écart entre
 // l'amplitude et les heures dues. Rien n'est écrit en dur : l'heure de début de
 // coupure n'existe pas en base, donc le document ne la prétend pas connue.
-function _paHoraire(h,plId,m,yr){
-  var t=_planDefTiming(h,plId,m,undefined,yr)||{};
+function _paHoraire(h,plId,m,yr,d){
+  var t=_planDefTiming(h,plId,m,d,yr)||{};
   var d0=t.d||'07:00', f0=t.f||'';
   if(!f0) return null;
   var amp=_paMin(f0)-_paMin(d0);
@@ -4344,9 +4344,11 @@ function _paHoraire(h,plId,m,yr){
            continu:(t.continu===true), ch:(ch==='libre'?'':ch), cq:cq };
 }
 // Les trois cas, dans les mots que le modal du planning emploie deja.
-function _paPause(t){
+function _paPause(t,creneauxVisibles){
   if(t.coup>0){
-    var q=t.cq?(' '+t.cq):'';
+    // Si les creneaux affichent deja l'heure, la redire ici allonge la ligne
+    // au point de la faire deborder du bloc.
+    var q=(!creneauxVisibles&&t.cq)?(' '+t.cq):'';
     return _paDuree(t.amp)+' h de pr\u00e9sence \u00b7 <b>'+_paDuree(t.coup)+' h de coupure</b>'+q;
   }
   if(t.continu) return 'horaire continu';
@@ -4366,6 +4368,12 @@ function _paCreneaux(t,e){
   return '<b>'+e(t.d)+'</b><i>\u2192</i><b>'+e(t.f)+'</b>';
 }
 
+// Les codes jour du modele (D/M/A). Une duree ne suffit pas a designer un
+// horaire : deux jours de 6,5 h peuvent valoir 08:00-15:30 et 09:00-16:30.
+function _paCodes(plId,yr){
+  var tpl=_planGetTpl(plId,yr)||{};
+  return tpl._timings_jour||{};
+}
 var _PA_JL=['Lundi','Mardi','Mercredi','Jeudi','Vendredi','Samedi','Dimanche'];
 var _PA_JA=['L','M','M','J','V','S','D'];
 var _PA_MO=['Janvier','F\u00e9vrier','Mars','Avril','Mai','Juin','Juillet','Ao\u00fbt','Septembre','Octobre','Novembre','D\u00e9cembre'];
@@ -4421,6 +4429,7 @@ function _paExceptions(g,yr){
 
 function _paBandeau(g,plId,yr,reg){
   var e=window._escHtml||function(x){return String(x==null?'':x);};
+  var _paCoupe=false;
   if(reg){
     var grp=[], prev=null;
     for(var m=0;m<12;m++){
@@ -4441,43 +4450,65 @@ function _paBandeau(g,plId,yr,reg){
         var t=_paHoraire(h,plId,gr.ms[0],yr);
         if(!t) return '';
         if(t.coup>0) coupe=true;
-        var det = _paPause(t);
+        var cr  = _paCreneaux(t,e);
+        var det = _paPause(t, cr.indexOf('<em>')>=0);
         return '<div class="pa-hl"><div class="pa-hlt"><span class="pa-hj">'+e(_paPlage(byh[h]))+'</span>'
              + '<span class="pa-hn">'+_paFmt(h)+' h</span></div>'
-             + '<div class="pa-hh">'+_paCreneaux(t,e)+'</div>'
+             + '<div class="pa-hh">'+cr+'</div>'
              + '<span class="pa-hd2">'+det+'</span></div>';
       }).join('');
       if(!lignes) return '';
       var lbl = (gr.ms.length===1) ? _PA_MO[gr.ms[0]]
               : _PA_MO[gr.ms[0]]+' \u2013 '+_PA_MO[gr.ms[gr.ms.length-1]].toLowerCase();
-      var pied = coupe
-        ? 'La coupure d\u00e9jeuner n\u2019est pas travaill\u00e9e : les heures indiqu\u00e9es sont les heures dues.'
-        : 'Pr\u00e9sence et heures dues sont identiques : aucune coupure \u00e0 d\u00e9duire.';
-      return '<div class="pa-hb"><div class="pa-hm">'+e(lbl)+'</div>'+lignes+'<div class="pa-hp">'+pied+'</div></div>';
+      if(coupe)_paCoupe=true;
+      return '<div class="pa-hb"><div class="pa-hm">'+e(lbl)+'</div>'+lignes+'</div>';
     }).filter(Boolean).join('');
-    return blocs ? '<div class="pa-hz">'+blocs+'</div>' : '';
+    if(!blocs) return '';
+    var note = _paCoupe
+      ? 'La coupure d\u00e9jeuner n\u2019est pas travaill\u00e9e : les dur\u00e9es indiqu\u00e9es sont les heures dues.'
+      : 'Pr\u00e9sence et heures dues sont identiques : aucune coupure \u00e0 d\u00e9duire.';
+    return '<div class="pa-hz">'+blocs+'</div><div class="pa-hnote">'+note+'</div>';
   }
-  // Modèle irrégulier : une clé de lecture durée → horaires. L'heure de prise de
-  // service reste stable, c'est la fin qui bouge ; la clé suffit à s'organiser.
-  var vus={};
-  for(var mm=0;mm<12;mm++) for(var dd in g[mm]) if(g[mm][dd]>0) vus[g[mm][dd]]=mm;
-  var durees=Object.keys(vus).map(Number).sort(function(a,b){return a-b;});
-  var cles=durees.map(function(h){
-    var t=_paHoraire(h,plId,vus[h],yr);
-    if(!t) return '';
-    return '<span class="pa-kc"><u>'+_paFmt(h)+' h</u><b>'+e(t.d)+'</b><i>\u2192</i><b>'+e(t.f)+'</b>'
-         + '<em>'+(t.coup>0?('coupure '+_paDuree(t.coup)+' h'):(t.continu?'continu':'sans coupure'))+'</em></span>';
+  // Modèle irrégulier : une clé de lecture bâtie sur les horaires REELLEMENT
+  // observés, jour par jour. Un code jour (D/M/A) donne deux horaires differents
+  // pour une meme duree : grouper par duree seule fabrique une correspondance
+  // fausse. On groupe donc par (code, debut, fin).
+  var vus={}, CO=_paCodes(plId,yr);
+  for(var mm=0;mm<12;mm++) for(var dd in g[mm]){
+    var hh=g[mm][dd]; if(!(hh>0)) continue;
+    var di=parseInt(dd,10);
+    var co=(CO[mm]&&CO[mm][di])||'';
+    var t=_paHoraire(hh,plId,mm,yr,di);
+    if(!t) continue;
+    var k=co+'|'+t.d+'|'+t.f;
+    if(!vus[k]) vus[k]={code:co,d:t.d,f:t.f,coup:t.coup,continu:t.continu,h:{},n:0};
+    vus[k].h[hh]=1; vus[k].n++;
+  }
+  var ks=Object.keys(vus).sort(function(a,b){ return vus[b].n-vus[a].n; });
+  if(!ks.length) return '';
+  var cles=ks.map(function(k){
+    var v=vus[k];
+    var ds=Object.keys(v.h).map(Number).sort(function(a,b){return a-b;}).map(_paFmt).join(' / ');
+    return '<span class="pa-kc"><u>'+(v.code?e(v.code):ds+' h')+'</u>'
+         + '<b>'+e(v.d)+'</b><i>\u2192</i><b>'+e(v.f)+'</b>'
+         + '<em>'+(v.code?(ds+' h \u00b7 '):'')
+         + (v.coup>0?('coupure '+_paDuree(v.coup)+' h'):(v.continu?'continu':'sans coupure'))
+         + ' \u00b7 '+v.n+' j</em></span>';
   }).join('');
-  if(!cles) return '';
+  var aCode=ks.some(function(k){ return vus[k].code; });
   return '<div class="pa-hz pa-solo"><div class="pa-hb pa-full">'
        + '<div class="pa-hm">Horaires \u2014 dur\u00e9e variable d\u2019un jour \u00e0 l\u2019autre</div>'
        + '<div class="pa-hkl">La grille donne la dur\u00e9e de chaque journ\u00e9e. Cette cl\u00e9 donne l\u2019heure de prise '
-       + 'et de fin de service correspondante, et la coupure d\u00e9jeuner comprise dedans.</div>'
+       + 'et de fin de service correspondante, et la coupure d\u00e9jeuner comprise dedans.'
+       + (aCode?' Les journ\u00e9es \u00e0 horaire particulier portent leur lettre dans la grille, '
+               +'juste apr\u00e8s les heures.':'')
+       + '</div>'
        + '<div class="pa-hk">'+cles+'</div></div></div>';
 }
 
-function _paGrilleHtml(g,yr,reg){
+function _paGrilleHtml(g,yr,reg,plId){
   var F=(typeof _feriesY==='function')?_feriesY(yr):{};
+  var CO=plId?_paCodes(plId,yr):{};
   var cols='';
   for(var m=0;m<12;m++){
     var n=new Date(yr,m+1,0).getDate(), vals=[], k;
@@ -4499,7 +4530,8 @@ function _paGrilleHtml(g,yr,reg){
       if(h>0){ tot+=h; nj++; }
       cells+='<div class="'+cl+'"><span class="pa-d">'+(d<10?'0':'')+d+'</span>'
            + '<span class="pa-j">'+_PA_JA[w]+'</span>'
-           + '<span class="pa-h">'+(h?_paFmt(h):(fe?'\u2022':''))+'</span></div>';
+           + '<span class="pa-h">'+(h?_paFmt(h):(fe?'\u2022':''))+'</span>'
+           + ((h&&CO[m]&&CO[m][d])?('<span class="pa-cd">'+CO[m][d]+'</span>'):'')+'</div>';
     }
     cols+='<div class="pa-col"><div class="pa-mh">'+_PA_MA[m]+'</div>'+cells
         + '<div class="pa-mt"><b>'+(_paFmt(Math.round(tot*10)/10)||'0')+'</b><span>'+nj+' j</span></div></div>';
@@ -4517,21 +4549,23 @@ var _PA_CSS =
   +'border-left:3px solid #C2A14D;margin-bottom:5px;border-radius:0 4px 4px 0}'
 + '.pa-who b{font-size:8px;text-transform:uppercase;letter-spacing:1px;color:#8A7A62;font-weight:700;white-space:nowrap}'
 + '.pa-who p{font-family:\'Cormorant Garamond\',Georgia,serif;font-size:12px;font-weight:600;color:#2B2118;margin:0}'
-+ '.pa-hz{display:flex;border:1px solid #A5701E;background:#FDF7E9;margin-bottom:5px;page-break-inside:avoid;break-inside:avoid}'
++ '.pa-hz{display:flex;border:1px solid #A5701E;background:#FDF7E9;page-break-inside:avoid;break-inside:avoid}'
++ '.pa-hnote{font-size:6.5px;color:#96794A;line-height:1.3;margin:2px 0 5px;padding-left:2px}'
 + '.pa-hb{flex:1;padding:0 0 6px;border-right:1px solid #E0CFA6;min-width:0}'
 + '.pa-hb:last-child{border-right:0}'
 + '.pa-hm{font-size:7px;font-weight:700;text-transform:uppercase;letter-spacing:.5px;color:#fff;'
   +'background:#8A5D08;padding:2px 6px;margin-bottom:3px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}'
-+ '.pa-hl{padding:0 6px;margin-top:3px}'
++ '.pa-hl{padding:0 5px;margin-top:2px}'
 + '.pa-hlt{display:flex;align-items:baseline;gap:5px}'
 + '.pa-hj{font-size:7.5px;font-weight:600;color:#8A5D08;text-transform:uppercase;letter-spacing:.4px;'
   +'white-space:nowrap;overflow:hidden;text-overflow:ellipsis}'
 + '.pa-hn{margin-left:auto;font-family:\'Cormorant Garamond\',Georgia,serif;font-size:11px;font-weight:700;color:#4A3B28}'
-+ '.pa-hh{font-family:\'Cormorant Garamond\',Georgia,serif;font-size:12px;color:#1C1008;white-space:nowrap;line-height:1.05}'
++ '.pa-hh{font-family:\'Cormorant Garamond\',Georgia,serif;font-size:10.5px;color:#1C1008;line-height:1.15;'
+  +'white-space:nowrap;overflow:hidden;text-overflow:ellipsis}'
 + '.pa-hh b{font-weight:700}'
-+ '.pa-hh i{font-style:normal;color:#C8913A;font-weight:700;font-family:\'Outfit\',sans-serif;font-size:8px;margin:0 1px}'
-+ '.pa-hh em{font-style:normal;color:#D9A441;font-size:10px;margin:0 3px}'
-+ '.pa-hd2{display:block;font-size:6.2px;color:#96794A;line-height:1.25}'
++ '.pa-hh i{font-style:normal;color:#C8913A;font-weight:700;font-family:\'Outfit\',sans-serif;font-size:7px;margin:0 .5px}'
++ '.pa-hh em{font-style:normal;color:#D9A441;font-size:8px;margin:0 2px}'
++ '.pa-hd2{display:block;font-size:5.8px;color:#96794A;line-height:1.2}'
 + '.pa-hd2 b{color:#8A5D08;font-weight:700}'
 + '.pa-hp{margin:4px 6px 0;padding-top:3px;border-top:1px solid #E0CFA6;font-size:6.2px;color:#96794A;line-height:1.25}'
 + '.pa-full{padding:0 0 8px}.pa-hkl{font-size:8px;color:#6B5B44;margin:0 10px 7px}'
@@ -4546,7 +4580,7 @@ var _PA_CSS =
 + '.pa-col{flex:1;display:flex;flex-direction:column;border-right:1px solid #C3B393;min-width:0}'
 + '.pa-mh{font-size:7px;font-weight:700;letter-spacing:.5px;text-align:center;padding:2px 0;color:#2B1D08;'
   +'background:#D9A441;border-bottom:1px solid #A5701E}'
-+ '.pa-c{display:flex;align-items:center;gap:1px;padding:0 2.5px;height:2.8mm;font-size:6.8px;line-height:1;'
++ '.pa-c{display:flex;align-items:center;gap:1px;padding:0 2.5px;height:2.6mm;font-size:6.5px;line-height:1;'
   +'box-sizing:border-box;border-bottom:1px solid #E2DCCF}'
 // Le lisere vin : on travaille ce jour-la alors que le calendrier dit non.
 + '.pa-hors{border-left:2.2px solid #8C2E15;padding-left:1px}'
@@ -4555,6 +4589,7 @@ var _PA_CSS =
 + '.pa-wk{border-top:1.4px solid #A5701E}'
 + '.pa-d{color:#9C8A6E;width:8px;font-weight:500}'
 + '.pa-j{color:#C9BCA4;width:5px;font-size:5.8px}'
++ '.pa-cd{margin-left:1px;font-size:5px;font-weight:700;color:#6D5FA8;vertical-align:top}'
 + '.pa-h{margin-left:auto;font-family:\'Cormorant Garamond\',Georgia,serif;font-size:9.5px;font-weight:700;color:#1C1008}'
 + '.pa-we{background:#DDD8CF}.pa-we .pa-d,.pa-we .pa-j{color:#8C8378}'
 + '.pa-clos{background:#FBE08A}.pa-clos .pa-d,.pa-clos .pa-j{color:#8A5D08}'
@@ -4586,11 +4621,9 @@ function _paDoc(yr){
   var e=window._escHtml||function(x){return String(x==null?'':x);};
   var grps=_paGroupes(yr);
   if(!grps.length){ if(window.showToast) window.showToast('Aucun salari\u00e9 sur '+yr,'#B85A1A'); return false; }
-  var lim='<div class="mvdoc-lim"><b>Planning pr\u00e9visionnel.</b> Jours travaill\u00e9s, heures de prise et '
-    + 'de fin de service, coupure d\u00e9jeuner, fermetures et jours f\u00e9ri\u00e9s. Les dur\u00e9es sont des heures '
-    + '<b>travaill\u00e9es</b>, coupure d\u00e9duite. Cong\u00e9s, absences et r\u00e9cup\u00e9rations n\u2019y figurent pas : ils se '
-    + 'posent au fil de l\u2019ann\u00e9e et apparaissent sur le relev\u00e9 mensuel d\u2019heures. Ni un contrat de '
-    + 'travail, ni un bulletin de paie.</div>';
+  var lim='<div class="mvdoc-lim"><b>Planning pr\u00e9visionnel.</b> Les dur\u00e9es sont des heures '
+    + '<b>travaill\u00e9es</b>, coupure d\u00e9duite. Cong\u00e9s, absences et r\u00e9cup\u00e9rations n\u2019y figurent pas : ils '
+    + 'apparaissent sur le relev\u00e9 mensuel d\u2019heures. Ni un contrat de travail, ni un bulletin de paie.</div>';
 
   var neuf = (typeof _planYearHasData==='function' && !_planYearHasData(yr));
   if(neuf){
@@ -4617,10 +4650,10 @@ function _paDoc(yr){
     return '<div class="pa-grp">'
       + '<div class="pa-who"><b>Suivent ce planning</b><p>'+e(gr.noms.join(' \u00b7 '))+'</p></div>'
       + _paBandeau(g,gr.id,yr,reg)
-      + _paGrilleHtml(g,yr,reg)
+      + _paGrilleHtml(g,yr,reg,gr.id)
       + '<div class="pa-ft"><div class="pa-lg">'+lg+'</div>'
       + '<div class="pa-tot"><div class="pa-v">'+_paFmt(tot)+' <em>h</em></div>'
-      + '<div class="pa-s">'+nj+' jours travaill\u00e9s \u00b7 '+(ec>=0?'+':'\u2212')+_paFmt(Math.abs(ec))
+      + '<div class="pa-s">'+nj+' jours travaill\u00e9s \u00b7 '+(ec===0?'':(ec>0?'+':'\u2212'))+(ec===0?'0':_paFmt(Math.abs(ec)))
       + ' h par rapport aux 1 607 h</div></div></div>'
       + (exc ? ('<div class="pa-exc">'+exc+(exc>1?' journ\u00e9es sortent':' journ\u00e9e sort')
               +' du rythme annonc\u00e9 ci-dessus \u2014 elles figurent dans la grille, '
