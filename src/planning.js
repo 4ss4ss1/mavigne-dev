@@ -4216,13 +4216,16 @@ function _paGroupes(yr){
 
 // La grille de l'année : heures prévues par jour, fériés remis à zéro.
 function _paGrille(plId,yr){
-  var g={}, F=(typeof _feriesY==='function')?_feriesY(yr):{};
+  var g={};
   for(var m=0;m<12;m++){
     var n=new Date(yr,m+1,0).getDate();
     g[m]={};
     for(var d=1;d<=n;d++){
-      var fe=(F[m]&&F[m][d])?true:false;
-      g[m][d]= fe ? 0 : (parseFloat(_planPlanned(plId,m,d,yr))||0);
+      // Le modele fait foi. Un ferie ou un dimanche sur lequel le planning porte
+      // des heures est un jour TRAVAILLE : ecraser sa valeur par 0 remplacerait
+      // une donnee reelle par une regle supposee, et l'equipe decouvrirait le
+      // 14 juillet sur le terrain.
+      g[m][d]=parseFloat(_planPlanned(plId,m,d,yr))||0;
     }
   }
   return g;
@@ -4282,17 +4285,39 @@ function _paPlage(ws){
 // de même signature se regroupent, ce qui donne des blocs « mai – août » plutôt
 // que douze colonnes qui répètent la même chose.
 function _paSig(g,m,yr){
-  var byd={};
+  var byd={}, tot={};
   for(var d in g[m]){
-    var h=g[m][d]; if(!(h>0)) continue;
     var w=new Date(yr,m,parseInt(d,10)).getDay(); w=(w+6)%7;
+    tot[w]=(tot[w]||0)+1;
+    var h=g[m][d]; if(!(h>0)) continue;
     (byd[w]=byd[w]||[]).push(h);
   }
-  return Object.keys(byd).sort(function(a,b){return a-b;}).map(function(w){
+  // Un jour de semaine n'entre dans le bandeau que s'il est travaille au moins
+  // une fois sur deux dans le mois. Sinon c'est une EXCEPTION : l'annoncer comme
+  // un rythme ferait lire « tous les samedis » la ou il n'y en a qu'un.
+  return Object.keys(byd).sort(function(a,b){return a-b;}).filter(function(w){
+    return byd[w].length*2 >= (tot[w]||1);
+  }).map(function(w){
     var c={}, best=0, val=0;
     byd[w].forEach(function(v){ c[v]=(c[v]||0)+1; if(c[v]>best){best=c[v];val=v;} });
     return w+':'+val;
   }).join('|');
+}
+// Les jours travailles que le bandeau ne couvre pas : ils existent, ils sont
+// dans la grille, et le document doit dire ou les chercher plutot que les taire.
+function _paExceptions(g,yr){
+  var n=0, F=(typeof _feriesY==='function')?_feriesY(yr):{};
+  for(var m=0;m<12;m++){
+    var gard={};
+    _paSig(g,m,yr).split('|').forEach(function(p){ if(p) gard[p.split(':')[0]]=1; });
+    for(var d in g[m]){
+      if(!(g[m][d]>0)) continue;
+      var dd=parseInt(d,10);
+      var w=new Date(yr,m,dd).getDay(); w=(w+6)%7;
+      if(!gard[w] || (F[m]&&F[m][dd])) n++;
+    }
+  }
+  return n;
 }
 
 function _paBandeau(g,plId,yr,reg){
@@ -4367,9 +4392,11 @@ function _paGrilleHtml(g,yr,reg){
       var w=new Date(yr,m,d).getDay(); w=(w+6)%7;
       var h=g[m][d]||0, fe=(F[m]&&F[m][d])?true:false;
       var cl='pa-c';
-      if(fe) cl+=' pa-fer';
-      else if(w>=5 && !h) cl+=' pa-we';
-      else if(!h) cl+=' pa-clos';
+      // Le fond dit le CALENDRIER (ferie, week-end, fermeture) ; le lisere dit
+      // qu'on travaille quand meme. Les deux informations ne se remplacent pas.
+      if(fe)          cl+=' pa-fer'+(h?' pa-hors':'');
+      else if(w>=5)   cl+=h ? ' pa-we pa-hors' : ' pa-we';
+      else if(!h)     cl+=' pa-clos';
       else if(reg && h===mn && mn<mx) cl+=' pa-court';
       if(w===0) cl+=' pa-wk';
       if(h>0){ tot+=h; nj++; }
@@ -4417,12 +4444,16 @@ var _PA_CSS =
   +'color:#fff;background:#8A5D08;border-radius:3px;padding:1px 5px;margin-right:5px;vertical-align:1px;min-width:26px;text-align:center}'
 + '.pa-kc i{font-style:normal;color:#C8913A;font-weight:700;font-family:\'Outfit\',sans-serif;font-size:8px;margin:0 1px}'
 + '.pa-kc em{font-style:normal;font-family:\'Outfit\',sans-serif;color:#96794A;font-size:7.5px;margin-left:5px}'
-+ '.pa-grid{display:flex;border:1px solid #A5701E;border-right:0}'
++ '.pa-grid{display:flex;border:1px solid #A5701E;border-right:0;page-break-inside:avoid;break-inside:avoid}'
 + '.pa-col{flex:1;display:flex;flex-direction:column;border-right:1px solid #C3B393;min-width:0}'
 + '.pa-mh{font-size:8px;font-weight:700;letter-spacing:.7px;text-align:center;padding:3px 0;color:#2B1D08;'
   +'background:#D9A441;border-bottom:1px solid #A5701E}'
-+ '.pa-c{display:flex;align-items:center;gap:1px;padding:0 3px;height:11.5px;font-size:7.5px;line-height:1;'
-  +'border-bottom:1px solid #E2DCCF}'
++ '.pa-c{display:flex;align-items:center;gap:1px;padding:0 3px;height:3.5mm;font-size:7.5px;line-height:1;'
+  +'box-sizing:border-box;border-bottom:1px solid #E2DCCF}'
+// Le lisere vin : on travaille ce jour-la alors que le calendrier dit non.
++ '.pa-hors{border-left:2.2px solid #8C2E15;padding-left:1px}'
++ '.pa-hors .pa-h{color:#7A2510;font-weight:700}'
++ '.pa-we.pa-hors{background:#EDE7DC}'
 + '.pa-wk{border-top:1.4px solid #A5701E}'
 + '.pa-d{color:#9C8A6E;width:9px;font-weight:500}'
 + '.pa-j{color:#C9BCA4;width:6px;font-size:6.5px}'
@@ -4431,7 +4462,7 @@ var _PA_CSS =
 + '.pa-clos{background:#FBE08A}.pa-clos .pa-d,.pa-clos .pa-j{color:#8A5D08}'
 + '.pa-court{background:#C7E3F5}.pa-court .pa-h{color:#0F5A87}.pa-court .pa-d,.pa-court .pa-j{color:#4C86A8}'
 + '.pa-fer{background:#F0AF9B}.pa-fer .pa-d{color:#8C2E15;font-weight:700}.pa-fer .pa-j{color:#A85A42}'
-  +'.pa-fer .pa-h{color:#8C2E15;font-size:7.5px}'
+  +'.pa-fer .pa-h{color:#8C2E15}'
 + '.pa-void{background:#F2EFE9;border-bottom:0}'
 + '.pa-mt{text-align:center;padding:3px 0;background:#EDE1C6;border-top:1px solid #A5701E;font-size:7px;color:#8A7550}'
 + '.pa-mt b{font-family:\'Cormorant Garamond\',Georgia,serif;font-size:12px;color:#2B2118;display:block;line-height:1}'
@@ -4443,7 +4474,9 @@ var _PA_CSS =
 + '.pa-tot{text-align:right;white-space:nowrap}'
 + '.pa-tot .pa-v{font-family:\'Cormorant Garamond\',Georgia,serif;font-size:21px;font-weight:700;color:#2B2118;line-height:1}'
 + '.pa-tot .pa-v em{font-style:normal;font-size:10px;color:#8A7A62;font-family:\'Outfit\',sans-serif}'
-+ '.pa-tot .pa-s{font-size:7.5px;color:#8A7A62;margin-top:2px}';
++ '.pa-tot .pa-s{font-size:7.5px;color:#8A7A62;margin-top:2px}'
++ '.pa-exc{margin-top:7px;padding:5px 8px;background:#FBEDE9;border-left:3px solid #8C2E15;'
+  +'font-size:8px;color:#7A2510;line-height:1.5;border-radius:0 4px 4px 0}';
 
 // Le document. Une page par modèle ; le nom du domaine et l'année sont répétés
 // sur chaque page, parce qu'une feuille arrachée du lot doit rester identifiable.
@@ -4454,28 +4487,6 @@ function _paDoc(yr){
   var F=(typeof _feriesY==='function')?_feriesY(yr):{};
   var fl=[];
   for(var m=0;m<12;m++) if(F[m]) for(var d in F[m]) fl.push(d+' '+_PA_MO[m].toLowerCase().slice(0,4)+' '+F[m][d]);
-
-  var corps=grps.map(function(gr){
-    var g=_paGrille(gr.id,yr), reg=_paRegulier(g,yr);
-    var tot=0, nj=0;
-    for(var mm=0;mm<12;mm++) for(var dd in g[mm]) if(g[mm][dd]>0){ tot+=g[mm][dd]; nj++; }
-    tot=Math.round(tot*10)/10;
-    var ec=Math.round((tot-1607)*10)/10;
-    var lg='<span><i style="background:#fff"></i>Journ\u00e9e compl\u00e8te</span>'
-         + (reg?'<span><i style="background:#C7E3F5"></i>Journ\u00e9e courte</span>':'')
-         + '<span><i style="background:#DDD8CF"></i>Week-end</span>'
-         + '<span><i style="background:#FBE08A"></i>Fermeture du domaine</span>'
-         + '<span><i style="background:#F0AF9B"></i>Jour f\u00e9ri\u00e9</span>';
-    return '<div class="pa-grp">'
-      + '<div class="pa-who"><b>Suivent ce planning</b><p>'+e(gr.noms.join(' \u00b7 '))+'</p></div>'
-      + _paBandeau(g,gr.id,yr,reg)
-      + _paGrilleHtml(g,yr,reg)
-      + '<div class="pa-ft"><div class="pa-lg">'+lg+'</div>'
-      + '<div class="pa-tot"><div class="pa-v">'+_paFmt(tot)+' <em>h</em></div>'
-      + '<div class="pa-s">'+nj+' jours travaill\u00e9s \u00b7 '+(ec>=0?'+':'\u2212')+_paFmt(Math.abs(ec))
-      + ' h par rapport aux 1 607 h</div></div></div>'
-      + '</div>';
-  }).join('');
 
   var lim='<div class="mvdoc-lim"><b>Planning pr\u00e9visionnel.</b> Il donne le rythme de travail : jours '
     + 'travaill\u00e9s, heures de prise et de fin de service, fermetures du domaine et jours f\u00e9ri\u00e9s. '
@@ -4493,11 +4504,41 @@ function _paDoc(yr){
         + 'l\u2019ann\u00e9e au format CSV avant de le diffuser \u00e0 l\u2019\u00e9quipe.</div>';
   }
 
+
+  var corps=grps.map(function(gr){
+    var g=_paGrille(gr.id,yr), reg=_paRegulier(g,yr);
+    var tot=0, nj=0;
+    for(var mm=0;mm<12;mm++) for(var dd in g[mm]) if(g[mm][dd]>0){ tot+=g[mm][dd]; nj++; }
+    tot=Math.round(tot*10)/10;
+    var ec=Math.round((tot-1607)*10)/10;
+    var exc=_paExceptions(g,yr);
+    var lg='<span><i style="background:#fff"></i>Journ\u00e9e compl\u00e8te</span>'
+         + (reg?'<span><i style="background:#C7E3F5"></i>Journ\u00e9e courte</span>':'')
+         + '<span><i style="background:#DDD8CF"></i>Week-end</span>'
+         + '<span><i style="background:#FBE08A"></i>Fermeture du domaine</span>'
+         + '<span><i style="background:#F0AF9B"></i>Jour f\u00e9ri\u00e9</span>'
+         + '<span><i style="background:#fff;border-left:3px solid #8C2E15"></i>Travaill\u00e9 un f\u00e9ri\u00e9 ou un week-end</span>';
+    return '<div class="pa-grp">'
+      + '<div class="pa-who"><b>Suivent ce planning</b><p>'+e(gr.noms.join(' \u00b7 '))+'</p></div>'
+      + _paBandeau(g,gr.id,yr,reg)
+      + _paGrilleHtml(g,yr,reg)
+      + '<div class="pa-ft"><div class="pa-lg">'+lg+'</div>'
+      + '<div class="pa-tot"><div class="pa-v">'+_paFmt(tot)+' <em>h</em></div>'
+      + '<div class="pa-s">'+nj+' jours travaill\u00e9s \u00b7 '+(ec>=0?'+':'\u2212')+_paFmt(Math.abs(ec))
+      + ' h par rapport aux 1 607 h</div></div></div>'
+      + (exc ? ('<div class="pa-exc">'+exc+(exc>1?' journ\u00e9es sortent':' journ\u00e9e sort')
+              +' du rythme annonc\u00e9 ci-dessus \u2014 elles figurent dans la grille, '
+              +'rep\u00e9r\u00e9es par un lis\u00e9r\u00e9 rouge quand elles tombent un jour f\u00e9ri\u00e9 '
+              +'ou un week-end.</div>') : '')
+      + lim
+      + '</div>';
+  }).join('');
+
   return window._mvDocOpen({
     titre:'Planning de l\u2019ann\u00e9e '+yr,
     metas:[String(yr), grps.length+(grps.length>1?' mod\u00e8les de semaine':' mod\u00e8le de semaine'),
            '\u00c9dit\u00e9 le '+new Date().toLocaleDateString('fr-FR')],
-    orient:'paysage', cat:'planning', css:_PA_CSS, corps:corps+lim
+    orient:'paysage', cat:'planning', css:_PA_CSS, corps:corps
   });
 }
 
