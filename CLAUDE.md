@@ -2,11 +2,15 @@
 
 > Document de référence du projet **Ma Vigne** (GUERETTECH). Il est le **porteur de vérité** :
 > la mémoire Claude est plafonnée, ce fichier ne l'est pas.
-> Dernière consolidation : **11 août 2026 (soir)** — reprise de la consolidation du 9 août soir,
-> augmentée de la **troisième** partie de la journée : après l'écart de cadence (matin) et
-> l'accompagnement du client (après-midi), la **réduction du temps d'installation** (soir),
-> cinq lots plus une procédure imprimable.
-> Consolidations précédentes : 10 août (workflow GitHub) · 9 août soir (série MILLÉSIME) · 7 août matin
+> Dernière consolidation : **11 août 2026 (soir)** — la **refonte du Planning** en deux lots
+> (**§19a**, section neuve), plus les mises à jour de §12, §19, §25, §27a, §28 et de la règle d'or
+> n°1. ★ **Consolidation faite depuis le fichier réel du dépôt, pas de mémoire** : `CLAUDE.md` est
+> désormais à la racine de `mavigne-dev`, donc lisible par `git clone` en tête de session. **La
+> piste ouverte le 10 août est refermée — l'exception « régénération sans upload » ne concerne plus
+> ce document, qui se patche comme n'importe quel fichier du dépôt.**
+> Consolidations précédentes : **9 août nuit** (assistant d'installation, cinq lots plus une
+> procédure imprimable, après l'écart de cadence le matin et l'accompagnement du client
+> l'après-midi) · 9 août soir · 7 août soir (série MILLÉSIME) · 7 août matin
 > (série Cave) · 5 août (mvprint retrouvé) · 4 août soir (barème) · 1er août (UX-1) ·
 > 31 juillet (identité légale).
 > ★ **Note ajoutée le 10 août** (règle d'or n°1 et §29) : une régénération de ce document faite
@@ -20,34 +24,19 @@
 > `mavigne-dev\`, committés et poussés via **GitHub Desktop**. Détail complet : Règle d'or n°1 et
 > « 🖥️ Environnement de Nico › Git ».
 >
-> ★★★ **Note du 11 août (consolidation complète) — VÉRIFICATION DIRECTE SUR LE DÉPÔT.**
-> Cette consolidation s'est faite en vérifiant les faits dans le dépôt GitHub (les 5 lots du 9/08 y
-> sont bien) et sur Firebase (submitMiseEnRoute est bien déployée). Résultat : correction de deux
-> affirmations fausses du 10/08 (les lots SONT déployés, pas « restent à déployer »). **Le lot
-> accompagnement v5.94 vient d'être livré et est prêt pour un `npm run build && firebase deploy`.**
-> Garraud peut démarrer immédiatement. Backlog court : trois petites sections de guide + une
-> décision sur les rewrites de firebase.json.
-
-> ✅ **État du déploiement au 11 août (soir)** :
-> 1. **Les cinq lots d'installation d'assistant (9 août soir) SONT DÉPLOYÉS** :
->    - `admin-gt.js` : les cinq lotsissements (parcelles/appariement, comptes, périodes, reprise formulaire, machines)
->    - `functions/leads.js` + `firebase.js` : la Cloud Function `submitMiseEnRoute` est en ligne
->    - `public/mise-en-route.html` : accessible sur le domaine
-> 2. **Le lot accompagnement v5.94 (11 août) est LIVRÉ, en attente de déploiement** :
->    - Fiches `MV_AIDE` : 10 fiches à jour sur le chrono (v5.92), le mode du jour (v5.93), trois chemins de réglage
->    - Visite guidée : la contradiction « sur 14 » / « 13 étapes » est corrigée
->    - Guide : sections Planning (équipe collective) et Données (hub Documents) ajoutées
->    - ESLint : plafond passé à 0, le dernier double `for(var i)` corrigé
-> 3. **Château Garraud peut démarrer tout de suite** : le hosting est à jour, l'installation est prête.
-
-> ⚠️ **Reste à faire** :
-> 4. **Déployer le lot accompagnement v5.94** : `npm run build && firebase deploy`
-> 5. **Commercial : la réponse à Château Garraud — domaine girondin de 45 ha.** Lead entré le 04/08 via formulaire site. Démarrage immédiat possible : installation, devis INST-DOM (990 €/20 h), volume fût 225 L (Bordeaux), barème girondin à confirmer.
-> 6. **Backlog accompagnement (après v5.94)** :
->    - `guide/11-pilotage.html` : chemin mort « Réglages › Campagne » → « Réglages › Domaine › Saisons »
->    - `public/demarrage.html` : 60 ko, jamais découpé en sections du guide
->    - Section Planning du guide : le 14ᵉ moment de la démo, qui n'existe pas
-> 7. **Firebase.json : `rewrites` vide.** `mise-en-route.html` essaie deux adresses (URL complète CloudFunctions + `/api/mise-en-route` en repli). Le repli est mort — à décider
+> ⚠️ **Points en suspens au moment de la consolidation** :
+> 1. **Cinq lots livrés et NON DÉPLOYÉS** (§18b) : `admin-gt.js`, `firebase.js`,
+>    `functions/leads.js`, `public/mise-en-route.html`.
+> 2. **Une installation à blanc** sur un slug jetable reste à faire — elle valide les cinq lots
+>    d'un coup et mesure les temps réels (§18b, §28).
+> 3. La réponse à Château Garraud reste le sujet commercial n°1 (§28).
+> 4. ⚠️ **Des lots restent non documentés ici**, connus par le seul changelog de `sw.js` :
+>    « panneau GUERETTECH : 8 onglets deviennent 6 », « SEC-GT/2 », la **tournée sur l'écran de
+>    l'équipe », l'**exercice comptable**, les **4 défauts de la snapshot localStorage**, le **Chai
+>    qui s'ouvrait vide**, le **soutirage à source unique**, le **Cuvier repeint**, le **hub
+>    Documents** et la **charte `MV_DOC`**. **À consigner par Nico.**
+> 5. ⚠️ **`rewrites` est absent du `firebase.json` lu** alors qu'`essai.html` poste vers
+>    `/api/lead` — à vérifier en ligne (§18b).
 
 ---
 
@@ -158,6 +147,14 @@ La mémoire, elle, contenait le chantier : **je ne l'avais pas relue assez atten
    passé depuis la dernière consolidation.
 ★ **Et dans tous les cas, l'annoncer AVANT de livrer** — ce qui n'est pas seulement une politesse :
 c'est ce qui a permis de repérer l'écart au tour suivant.
+
+★★★ **COROLLAIRE APPRIS LE 11/08 — la règle vaut pour MES PROPRES AFFIRMATIONS.**
+Pendant la refonte du Planning, j'ai annoncé comme un fait que la visite guidée casserait
+(`openPlanFiche('Jean')` en dur dans `_mvtSteps`). **C'était faux, et je ne l'avais pas mesuré** :
+les deux étapes visent `.pl2-board`, qui reste dans l'onglet par défaut, et un overlay indépendant
+de l'onglet actif. **Le risque a servi d'argument dans un arbitrage de découpage avant d'être
+vérifié.** Un constat que j'énonce n'est pas plus frais qu'un dossier `/mnt/project` : il se mesure.
+**Dire « à vérifier » coûte un mot ; dire « ça casse » engage une décision.**
 
 **Règle d'or n°2 — aucun numéro de version dans ce document.**
 ★ Ce qui reste autorisé : les **numéros de rappel de pièges** (`v5.12` du commentaire Élevage, §7).
@@ -1281,6 +1278,9 @@ if(pc || items.length<=5){ main=items; ov=[]; } else { main=items.slice(0,4); ov
 - Le toast de `goTo` distingue le blocage **par formule** du blocage **par membre**.
 - **Hub et sidebar : purgés.**
 - ★ **Navigation unifiée** : 9 systèmes d'onglets → **1 seul `.mvu-tabs`**.
+- ★★ **Un onglet unique n'est pas un choix, c'est un décor** (§19a) : quand un rôle n'a accès qu'à
+  un seul onglet, `#plan-tabs` est masqué en entier plutôt que d'afficher une barre à une case.
+  Le Planning le fait pour l'ouvrier.
 - ★ **En-têtes : les 10 modules partagent `.mod-header`.** `_mvMetaSync()` et `_mvInjectHelpBtn()`
   ne ciblent que `.mod-header .mod-meta-row`.
 - ⚠️ **Les onglets doivent rester DANS `.mod-header`**.
@@ -1845,6 +1845,10 @@ Un membre peut être une **équipe** : une ligne de planning pour N personnes, e
 ★ **`_headWeek` expose deux mesures** : `head` (pondéré) et **`headPerm`** (permanents seuls).
 **Arbitrage figé** : cadence, ordre de passage et journée raisonnent sur les **fiches permanentes**.
 
+★★★ **Le module a été refondu en deux lots — voir §19a.** Tout ce qui suit décrit le calcul, qui
+n'a pas bougé ; l'organisation des écrans, elle, a entièrement changé (trois onglets, cinq feuilles
+au lieu de neuf, une sélection qui n'est plus un mode).
+
 **⚠️ Pièges du module :**
 - **`<input type="date">` avec `onchange`** déclenche à **chaque date structurellement valide** en
   cours de frappe → **`onblur` pour les dates**, `onchange` pour les nombres.
@@ -1854,6 +1858,206 @@ Un membre peut être une **équipe** : une ligne de planning pour N personnes, e
   `_planSummary.ref` exclut hors-contrat et récups. **Décision de conception d'abord.**
 - Le modèle « standard » totalise 1589 h/an contre 1607 → avertissement orange.
 - `planning.js` **seul** = **aucun bump**.
+
+---
+
+---
+
+## 19a. ★★★ LA REFONTE DU PLANNING — « il y en a un peu partout »
+
+### Le diagnostic, chiffré avant d'écrire une ligne
+
+Le point de départ n'était pas un bug mais une phrase de Nico : *« il y en a un peu partout, il faut
+parfois cliquer sur un membre parfois non, il est assez compliqué de s'y retrouver. »*
+L'audit a mis des nombres dessus — et c'est ce qui a rendu la refonte discutable au lieu d'être une
+question de goût :
+
+| Constat | Chiffre |
+|---|---|
+| ★★★ **Feuilles pour un seul module** | **9** — jour, fiche, outils, chaleur, CP, heures multiples, archives, absence multiple (injectée en JS), éditeur de grille |
+| ★★★ **Chemins pour poser un congé** | **4** — case → éditeur · sélection → CP · Outils → période · et la fiche, onglet Congés, qui **ne le fait pas** mais *explique le chemin des autres* |
+| ★★ **Chemins pour les horaires chaleur** | **3** — preset dans l'éditeur, sélection multiple, Outils |
+| ★★ **Salariés affichés deux fois** | grille (nom + h/réf) **puis** cartes de synthèse (nom + h/réf + écart + ETP). Les deux ouvraient la même fiche. |
+| ★★★ **Renvois « va ailleurs » écrits en dur** | **8**, dont *« grille Équipe → Sélection multiple → ☀️ CP »* |
+| ★★ **Profondeur des réglages annuels** | **3 niveaux** — Planning › Outils › « Modèles, cadre légal & coupure » |
+
+★★★ **LE SIGNAL LE PLUS FORT : l'app écrivait son propre mode d'emploi.** Huit fois, l'interface
+expliquait par où passer pour faire quelque chose qu'elle ne faisait pas là où on la lisait.
+**Une note qui décrit un chemin est l'aveu que le dessin a raté.** C'est le même défaut que
+l'écran « à venir » du Pilotage (§20g) et que la liste « à finir » de l'assistant (§18b), pris par
+l'autre bout : là, l'écran mentait sur l'avenir ; ici, il disait vrai — et c'était pire, parce qu'un
+mode d'emploi juste n'a aucune raison de disparaître.
+
+### La cause racine
+
+Le module mélangeait **trois métiers qui n'ont ni la même fréquence ni le même acteur** :
+
+| Métier | Fréquence | Qui |
+|---|---|---|
+| **Tenir** le mois | tous les jours | le chef d'équipe |
+| **Suivre** une personne | à la paie | l'administrateur |
+| **Régler** le cadre | une fois l'an | le gérant |
+
+Ils vivaient dans **deux onglets et neuf feuilles**, dont un onglet caché derrière un engrenage.
+★ **Chercher le métier, pas l'écran.** Le désordre n'était pas dans le nombre de boutons : il était
+dans le fait qu'un geste quotidien et un réglage annuel partageaient le même tiroir.
+
+### Lot 1 — la sélection n'est plus un mode, c'est un état
+
+**Le défaut central, et il tenait en une phrase :** toucher une case ouvrait l'éditeur du jour —
+**sauf** si le bouton « Sélection multiple » était armé, auquel cas la même case se cochait.
+**Deux effets pour un geste identique, et rien à l'écran ne disait lequel s'appliquerait.**
+
+- **`planCellTap` coche, toujours.** Le bouton « Sélection multiple » est supprimé, `_pl2Multi`
+  n'existe plus.
+- **Trois cochages de plus** : `planColTap` (l'en-tête du jour → toute l'équipe ce jour-là),
+  `planRowTap` (le nom → sa ligne sur la vue), `planSelAll` (le coin → toute la vue).
+  ⚠️ **Conséquence assumée : le nom n'ouvre plus la fiche.** Une cible, un effet. La fiche s'ouvre
+  depuis « Les gens ». C'est le seul point de dépaysement du lot, et il est réversible.
+- ★★ **`_pl2SelSync()` ne reconstruit PAS la grille.** Un rerender complet à chaque case touchée
+  coûtait le scroll et un clignotement — **sur le geste le plus fréquent du module**. Le sync ne
+  touche que les classes (`.pl2-selon`, `.pl2-nameon`, `.pl2-hdon`) via `data-cell` / `data-plrow` /
+  `data-col`. **Le coût d'un rendu se paie au rythme du geste, pas au rythme du code.**
+- ★★ **La barre ne propose que ce qui s'applique.** `_planSelStats()` compte ce que la sélection
+  contient (équipes collectives, jours travaillés, saisies existantes) et `_pl2MbarSync()` construit
+  les boutons en conséquence. **Avant, « Effectif » était toujours là et ne servait, sans équipe
+  collective cochée, qu'à afficher un message d'erreur : un bouton dont le seul rôle est de dire
+  non.**
+- ★ **`_planSelResume()`** remplace « 3 jours sélectionnés » par « Jean · 9 → 14 juin · 12 cases ».
+  **Ce qu'on relit avant d'appliquer, c'est QUI et QUAND, pas un compte.**
+
+### Lot 1 — une seule feuille, un jour ou trente
+
+`ovPlanMultiH` et `ovPlanMultiAbs` **disparaissent dans `ovPlanDay`**. La feuille se rend en deux
+variantes (`_planSheetOneHtml` / `_planSheetManyHtml`) qui partagent leurs blocs
+(`_planSheetModes`, `_planSheetTiming`, `_planSheetRemp`, `_planSheetComment`,
+`_planSheetAbsSection`).
+
+⚠️⚠️ **Les namespaces `pmh-` et `pma-` sont supprimés — et il faut comprendre pourquoi ils
+existaient.** Le commentaire d'origine était juste : `closePlanDayModal()` ne retire que `.open`, le
+HTML de l'éditeur **reste dans le DOM**, donc réutiliser `#plan-abs-h` dans une seconde feuille
+créait des ids dupliqués. **Le namespace était le bon correctif d'un mauvais dessin.** En fusionnant
+les feuilles, la cause disparaît : les identifiants redeviennent uniques.
+★ **Une convention de nommage qui existe pour départager deux écrans concurrents est un symptôme.
+Supprimer la concurrence vaut mieux que discipliner les noms.**
+
+### Lot 1 — les moteurs, et le bug qu'ils ont révélé
+
+Trois fonctions, **qui ne lisent aucun champ du DOM** — tout arrive en paramètre :
+
+- `_planApplyHeures(keys, {debut, fin, continu, comment, heat, remp, force})`
+- `_planApplyAbs(keys, motifId, comment, heuresVal)`
+- `_planApplySimple(keys, 'rec'|'heat'|'clr', force)`
+
+★★★ **`force` est le seul paramètre qui compte vraiment.** Il vaut `true` quand le geste porte sur
+**une case désignée à la main** : on écrase ce qui s'y trouve. Sans lui — geste groupé — congés,
+absences et récupérations sont **préservés**. **On ne détruit pas en lot ce qu'on n'a pas relu.**
+
+⚠️⚠️ **BUG RÉEL, trouvé en unifiant, pas en auditant.** `planMultiApply('rec')` et
+`planMultiApply('heat')` faisaient `_eb[d]=e` **sans aucun test sur l'entrée existante** : poser
+« Récup » ou « Chaleur » sur une semaine **écrasait les congés déjà posés, en silence**. La feuille
+« Heures », elle, les préservait — et l'annonçait dans sa note. **Les deux chemins ne préservaient
+pas les mêmes choses parce qu'ils étaient écrits deux fois.**
+★★★ **La duplication ne produit pas seulement du code en trop : elle produit des règles métier
+différentes pour un même mot.** « Poser une récup » ne voulait pas dire la même chose selon le
+bouton emprunté. Aucun test ne pouvait le voir — il n'y avait pas de contradiction *dans* un
+chemin, seulement *entre* les deux.
+
+### Lot 2 — trois onglets, un verbe chacun
+
+Même patron que Pilotage › Cave (§20g), **table de migration comprise** :
+
+```js
+var _PLAN_TAB_MIGR={planning:'mois',equipe:'mois',tableau:'mois',saisie:'mois',templates:'cadre'};
+var _PLAN_VALID_TAB={mois:1,gens:1,cadre:1,moi:1};
+```
+
+- **`mois`** — la grille, et rien d'autre. Plus `_planPeriodeBar()` : deux boutons **visibles**
+  (« Congés sur une période », « Chaleur sur une période ») pour ce que la grille ne sait pas
+  cocher, c'est-à-dire une plage qui déborde la vue affichée.
+- **`gens`** — `_pl2Synth()` (une seule fois), le récap annuel, et les anciens salariés en section
+  de bas de page. Le mois consulté se change **ici aussi** (`_planGensMois`) : les chiffres de chaque
+  carte en dépendent, et renvoyer l'utilisateur dans « Le mois » pour ça serait un aller-retour.
+- **`cadre`** — l'ancien onglet caché `templates`, sans son bouton « ← Retour au planning » (un
+  onglet n'a pas de retour).
+
+★ **L'ouvrier n'a plus d'onglets du tout** et tombe sur son mois : `renderPlanning` masque
+`#plan-tabs` entier. **Un onglet unique n'est pas un choix, c'est un décor.**
+⚠️ **L'admin perd « Mon planning », et c'est voulu** : sa ligne est dans la grille comme tout le
+monde, sa fiche est dans « Les gens ». L'onglet faisait doublon avec sa propre ligne.
+
+### ⚠️⚠️⚠️ Le défaut de modèle : un réglage du domaine logé dans une fiche individuelle
+
+**Le mode de décompte des congés** (6 jours ouvrables / 5 jours ouvrés) **et la période de
+référence** se réglaient depuis **l'onglet Congés de n'importe quel salarié**. L'écran disait bien
+« · domaine » en petit sous le titre — mais l'emplacement disait le contraire, et l'emplacement
+gagne toujours. **Changer le réglage depuis la fiche de Marie changeait le décompte de toute
+l'équipe.**
+
+★★★ **Le test à retenir : la PORTÉE d'un réglage doit se lire dans son EMPLACEMENT, pas dans son
+libellé.** Un réglage global posé dans un écran individuel est un piège même quand il est
+correctement étiqueté. Les deux réglages sont dans « Le cadre ».
+
+⚠️ **C15 m'a rattrapé au milieu du geste** : j'avais sorti le bloc de la fiche **avant** de l'avoir
+posé dans « Le cadre ». Le preflight a signalé `planSetCpMode` et `planSetCpPeriode` **sans aucun
+appelant**. Sans lui, deux réglages devenaient **inatteignables en silence**.
+★★ **Un déménagement se fait en deux gestes, et le contrôle de joignabilité est exactement ce qui
+surveille l'intervalle entre les deux.**
+
+### Le décompte des feuilles
+
+| Étape | Feuilles |
+|---|---|
+| Avant | **9** |
+| Après lot 1 | **7** (`ovPlanMultiH`, `ovPlanMultiAbs` fusionnées) |
+| Après lot 2 | **5** (`ovPlanTools`, `ovPlanArchives` supprimées) |
+
+Restent : la feuille du jour, la fiche salarié, les congés, la chaleur, l'éditeur de modèle.
+⚠️ **Non fait, alors qu'annoncé** : la fusion de `openPlanCP` (une période) et `openPlanCPSel` (les
+cases cochées) — **c'est déjà le même overlay avec deux rendus**, la fusion est à portée.
+
+### Le harnais — 12 scénarios, contre-épreuve comprise
+
+Les moteurs ne lisant aucun champ du DOM, ils s'exécutent **hors navigateur**. Le harnais rejoue
+les règles qui avaient divergé : préservation en lot, écrasement en `force`, remplacement limité aux
+jours sans heures prévues, congé remplacé **compté**, absence jamais convertie en travail,
+effacement possible hors contrat.
+
+★★ **La contre-épreuve a été faite pour de bon** : les trois défauts réintroduits un par un — garde
+de préservation retirée, remplacement autorisé sur les jours travaillés, effacement soumis au
+contrat. **Le harnais rougit à chaque fois, sur le bon scénario.** Un harnais qu'on n'a pas vu
+rougir ne mesure rien.
+⚠️ **Le harnais s'est planté avant de mesurer, et il faut savoir le reconnaître** : un
+`new Function('ctx','return ' + wrap)` où `wrap` commençait par un saut de ligne — **ASI**, `return;`
+puis le corps, et douze rouges qui ne parlaient pas du code testé. **Douze rouges identiques
+accusent le harnais, pas le sujet.**
+
+### Ce que la refonte a coûté à l'accompagnement (C22, §27a)
+
+**Huit renvois périmés**, traqués et corrigés **dans le lot, pas après** : trois points de la fiche
+`MV_AIDE` du Planning réécrits, deux chemins faux (`Planning › Outils` → `Planning › Le cadre`), la
+note d'effectif de `reglages.js`, deux hints du module, et la section `guide/10-planning.html` (les
+chemins, plus deux blocs neufs sur les onglets et le geste de cochage).
+
+★ **Écrire la procédure a encore trouvé un défaut** — cette fois dans ma propre prose : j'ai écrit
+`<p class="warn">` alors que la classe du guide est `.note.warn`, avec une structure
+`<span class="ni">` + `<div>`. **L'encart se serait affiché nu.** Rien ne l'aurait signalé : aucun
+palier de test ne lit le guide.
+
+⚠️ **FAUX POINT DUR — à noter parce que je l'ai affirmé avant de le vérifier.** J'avais annoncé que
+la visite guidée casserait (`openPlanFiche('Jean')` en dur dans `_mvtSteps`). **Elle ne casse pas** :
+ses deux étapes visent `.pl2-board` (qui reste dans l'onglet par défaut) et `openPlanFiche` (toujours
+exposée, c'est un overlay indépendant de l'onglet actif).
+★★★ **J'ai énoncé un risque comme un fait sans l'avoir mesuré, et il a servi d'argument dans un
+arbitrage de découpage.** C'est la Règle d'or n°1 appliquée à mes propres affirmations :
+**la fraîcheur d'un constat se mesure, y compris quand le constat est le mien.**
+
+### Les fichiers touchés
+
+`index.html` (racine) · `src/planning.js` · `src/styles.css` · `src/utils.js` · `src/reglages.js` ·
+`public/sw.js` · `guide/10-planning.html` + `public/guide.html` régénéré.
+**Bump APP + SW aux deux lots** (`index.html` touché). Le guide se déploie en `--only hosting`,
+sans bump — c'est une page de `public/`, hors `SHELL_STATIC` (§27d).
 
 ---
 
@@ -2761,6 +2965,27 @@ aucune raison** de réintroduire un `prompt()`.
 
 ---
 
+### ★★ Ce qu'un harnais dit, et ce qu'il ne dit pas (11/08)
+
+★★★ **Écrire les moteurs SANS lecture du DOM est ce qui rend le harnais possible.** Les trois
+fonctions d'écriture du Planning (§19a) reçoivent tout en paramètre ; elles s'extraient du fichier
+livré et s'exécutent dans Node en quelques lignes. **Une fonction qui lit `document.getElementById`
+au milieu de sa règle métier n'est pas testable, et ce n'est pas un détail d'architecture : c'est ce
+qui décide si la règle sera vérifiée ou seulement relue.**
+
+⚠️⚠️ **Douze rouges identiques accusent le harnais, pas le sujet.** Le harnais des moteurs a d'abord
+donné 12 échecs tous formulés « Cannot read properties of undefined » : un
+`new Function('ctx','return ' + wrap)` où `wrap` commençait par un saut de ligne — **ASI**, donc
+`return;` puis le corps mort. **Avant de suspecter le code testé, lire le message : douze pannes
+identiques sur douze scénarios différents ne décrivent pas douze bugs.**
+
+★ **Extraire par `s.index('function X(')` jusqu'au prochain `\n}\n` embarque la ligne suivante si
+c'est un `window.X = X`** — le harnais plantait sur `_planSelKeys is not defined`. L'extraction
+doit être nettoyée, ou bornée sur la fonction seule.
+
+★★ **Réexécuter le harnais sur le fichier FINAL, après le lot suivant.** Les moteurs n'avaient pas
+bougé sous les onglets du lot 2 — mais c'est une chose qui se vérifie, pas qui se suppose.
+
 ### ★★★ La checklist de clôture d'un lot (11/08)
 
 Un lot n'est livrable que quand **les six** sont vraies. Les écrire dans la réponse, pas les penser.
@@ -2768,6 +2993,8 @@ Un lot n'est livrable que quand **les six** sont vraies. Les écrire dans la ré
 1. **Preflight vert** — `node scripts/preflight.mjs`, 0 erreur. Après une **baisse** de compteur
    (C14, C19…), **regraver** : `--baseline`. Après une **hausse**, corriger, jamais regraver.
 2. **Cliquets** — `lint-cliquet.mjs` et `lint-vocabulaire.mjs`. Vérifier qu'ils sont **branchés**.
+   ★ **Constaté le 11/08 en les exécutant** : plafond ESLint **déjà à 0, avec 0 erreur** — le
+   `for(var i…)` dupliqué d'`app.js` a été corrigé. Le point « passer le plafond à 0 » est clos.
 3. **Syntaxe** — `node --check` (CJS) / `--input-type=module --check` (ESM) · accolades CSS
    équilibrées · balance des balises HTML · scan demi-surrogates.
 4. **Versions** — bump APP (`APP_VERSION` + **les 4 affichages réels** d'`index.html`) **ET** SW
@@ -3012,6 +3239,27 @@ au lieu d'être écrite (§18b).
 
 ---
 
+### ★★★ LE TEST DU MODE D'EMPLOI (11/08)
+
+**Un écran qui explique par où passer pour faire quelque chose qu'il ne fait pas là où on le lit
+est un écran raté.** Le Planning en comptait **huit** (§19a), dont celui-ci, dans l'onglet Congés
+d'une fiche salarié :
+
+> *« Pour poser des congés : grille Équipe → **Sélection multiple** → toucher les jours → ☀️ CP. »*
+
+La phrase était **exacte**. C'est précisément ce qui la rendait dangereuse : une note fausse finit
+par sauter aux yeux, une note juste s'installe. Elle a survécu à plusieurs lots.
+
+★★ **La question à se poser en relisant un écran : "est-ce que je décris un chemin ?"** Si oui, deux
+issues seulement — **amener l'action ici**, ou **assumer que l'écran ne la fait pas** et ne rien
+écrire. Le renvoi vers un autre module reste légitime (le solde initial se règle vraiment dans
+Réglages › Équipe) ; le renvoi **à l'intérieur du même module** est un aveu.
+
+⚠️ **Corollaire pour tout lot de refonte : les renvois périmés se traquent PAR GREP.** Chercher les
+noms d'écrans supprimés dans `src/*.js`, `index.html`, `MV_AIDE` et `guide/` — huit occurrences
+trouvées ainsi, dans quatre fichiers dont deux hors du module refondu (`reglages.js`, `utils.js`).
+**Aucun palier de test ne les aurait vues.**
+
 ## 27b. ★★ L'aide contextuelle — `MV_AIDE`
 
 **Dix fiches, une par PAGE.** `_mvAideFiche()` lit l'id de `.page.active` → une fiche sans
@@ -3243,6 +3491,32 @@ radios/cases, section « pièces à joindre » explicite.
 
 ## 28. État courant & backlog
 
+### ★★★ La journée du 11 août (suite) — la refonte du Planning, deux lots
+
+**Point de départ** : *« je trouve que planning est mal conçu, il y en a un peu partout, il faut
+parfois cliquer sur un membre parfois non. »* Diagnostic chiffré, puis maquette validée sur **une
+seule question posée à Nico** — le geste le plus fréquent porte-t-il sur une case ou sur plusieurs ?
+Réponse : « le geste = ta reco », donc **le tap coche**.
+
+**Lot 1 — le geste unique.** Le mode « Sélection multiple » supprimé, trois cochages ajoutés
+(colonne, ligne, vue), barre de sélection contextuelle, **trois feuilles fusionnées en une**, trois
+moteurs d'écriture sans DOM. **Un bug réel** : récup et chaleur en lot écrasaient les congés en
+silence. **Harnais 12/12 + contre-épreuve.**
+
+**Lot 2 — trois onglets** (`mois` / `gens` / `cadre`) avec table de migration, fin du doublon
+grille+synthèses, suppression du menu « Outils » et de la feuille « Anciens salariés », **et un
+défaut de modèle** : deux réglages du domaine logés dans la fiche d'un salarié. **C22 fait dans le
+lot** — 8 renvois périmés, `MV_AIDE`, `reglages.js`, guide régénéré.
+
+**Détail complet : §19a.** Fichiers : `index.html` · `planning.js` · `styles.css` · `utils.js` ·
+`reglages.js` · `sw.js` · `guide/10-planning.html` + `public/guide.html`. **Bump APP + SW aux deux
+lots. NON DÉPLOYÉ.**
+
+⚠️ **`test:smoke` et `test:e2e` n'ont PAS été passés** : Playwright ne peut pas télécharger Chromium
+dans le bac à sable. Preflight, les deux cliquets, `node --check`, build Rollup et le harnais des
+moteurs sont verts. **C'est la première fois qu'un lot part avec les deux paliers navigateur non
+joués — à passer avant tout déploiement.**
+
 ### ★★★ La journée du 11 août — audit intégral, puis deux lots Tracteur
 
 **Versions à ce jour : APP `5.93` · SW `6.43`.** (À relire dans les fichiers, jamais depuis ici.)
@@ -3394,11 +3668,17 @@ corrigé · DEMO-3 · heures sup · **saisonniers dans l'historique** · **équi
 
 ### Backlog — technique, par ordre d'effort/effet
 
-0. ⚠️⚠️⚠️ **LES FICHES `MV_AIDE` DU TRACTEUR** — dette du 11/08, **Règle d'or n°4**. Le chrono
-   inversé (§31) et le mode du jour (§32) ont changé les gestes ; l'aide décrit les anciens.
-   **Avant tout autre lot.** Vérifier au passage la section Tracteur du guide et `_mvtSteps`.
-0b. ★★★ **`npm run build && npm run test:smoke && npm run test:e2e`** sur v5.93/v6.43, **puis
-    déployer**. L'e2e tourne en 390×844 et l'écran de session a changé de structure.
+0. ✅ **LES FICHES `MV_AIDE` DU TRACTEUR — FAIT.** Le lot d'accompagnement du 11/08 les a refaites
+   (douze points, les trois compteurs, le cadrage « ce n'est pas la journée de travail », les trois
+   chemins de réglage manquants) et a corrigé au passage un **bug réel** : la visite guidée publique
+   annonçait « sur 14 » dans ses 13 étapes. **Vérifié par lecture du changelog `sw.js`, pas cru.**
+0b. ★★★ **`npm run test:smoke` ET `npm run test:e2e`, PUIS déployer.** ⚠️ **Ils n'ont pas été joués
+    sur la refonte du Planning** (Playwright ne peut pas récupérer Chromium dans le bac à sable) :
+    c'est le seul palier manquant de la série. L'e2e tourne en 390×844 et visite `planning` — c'est
+    lui qui dira si les trois onglets se rendent sans erreur console.
+0c. ★★ **Fusionner les deux écrans de congés** — `openPlanCP` (une période) et `openPlanCPSel` (les
+    cases cochées) sont **déjà le même overlay** avec deux rendus. Annoncé au lot 2, non fait : ce
+    serait la 5ᵉ feuille ramenée à 4 (§19a).
 1. ★★★ **DÉPLOYER LES CINQ LOTS D'INSTALLATION** (§18b, fin de section).
 2. ★★★ **INSTALLATION À BLANC de bout en bout sur un slug JETABLE.** Elle valide les cinq lots d'un
    coup et **mesure les temps réels** (tableau prévu dans `INSTALLER-UN-DOMAINE.md`).
@@ -3408,8 +3688,8 @@ corrigé · DEMO-3 · heures sup · **saisonniers dans l'historique** · **équi
    Si oui, en ajouter un pour `/api/mise-en-route`.
 4. ★ **Corriger `_findDebutTache`** — borne de période, 2 lignes, `app.js` → bump SW (§15).
 5. ★ **Breakpoint 760 → 767.98** — plan validé, 1 ligne CSS, 0 JS, **en attente du go** (§21d).
-6. ★★ **Guide : mettre à jour les sections Planning et Données**, et **découper `demarrage.html`**
-   sur le même modèle (§27d).
+6. ★★ **Guide : la section Planning est FAITE** (refaite avec le lot 2, §19a). Restent la section
+   **Données** et le découpage de **`demarrage.html`** sur le même modèle (§27d).
 7. ★ **Escalier de sources pour la cadence** (§20b) — marche 2 vide aujourd'hui.
 8. **Purger le calcul de pic mort dans `_rfCtx`** — ⚠️ `ctx.pic` introuvable : **vérifier le nom**.
 9. **Pondérer `_ecoRate` par les heures**, pas par tête.
@@ -3424,6 +3704,9 @@ corrigé · DEMO-3 · heures sup · **saisonniers dans l'historique** · **équi
 15. **`.cave-tabs`** (classe, 1 règle CSS / 0 usage).
 16. **`_pl2Annual` vs `_planGetRefH`** — 1 ligne, mais **décision de conception d'abord**.
 17. **Terminologie heures sup** : « Solde cumulé » vs « Reste à prendre ».
+17b. ★ **Le nom d'un salarié, dans la grille, coche sa ligne** et n'ouvre plus sa fiche (§19a).
+    Décision assumée — une cible, un effet — mais **à confirmer à l'usage** : c'est le seul point de
+    dépaysement de la refonte, et il est réversible en une ligne.
 18. **Batch a11y** · résorption des ~234 `catch{}` vides.
 19. **Rôle `pilotage` (`pil:true`)** — 2 arbitrages préalables. Corriger aussi `getLoginRoster`.
 20. **Injection de données pures dans les guides.**
