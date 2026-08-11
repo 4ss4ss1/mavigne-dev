@@ -371,7 +371,7 @@ function _planDefTiming(pl,plId,m,d,yr){
   // Calcule le timing (debut/fin) d'un jour à partir du planning annualisé.
   // Logique : heure de début = celle du mois (depuis _timings[m]),
   //           heure de fin   = début + pl + pause (si pl>6h).
-  // Priorité : 1. Code Thilio jour  2. Calcul depuis _timings mensuel  3. PLAN_DEF_T (fallback)
+  // Priorité : 1. Code jour D/M/A  2. Calcul depuis _timings mensuel  3. PLAN_DEF_T (fallback)
   function _computeEnd(debutStr, plH, continu){
     // Fin = début + heures nettes + pause déjeuner (sauf horaire continu).
     // La pause suit PLAN_PAUSE_MIN (réglage domaine) et non plus 60 en dur :
@@ -386,7 +386,10 @@ function _planDefTiming(pl,plId,m,d,yr){
   if(plId!==undefined&&m!==undefined){
     var _ct=(PLANNING_TEMPLATES[(yr!=null?yr:_pY())]||{})[plId];
     if(_ct){
-      // 1. Code Thilio D/M/A — timing selon position dans le groupe de jours Thilio
+      // 1. Code jour D/M/A — timing selon la position dans la sequence de jours
+      // ⚠️ Les horaires 09:00 et 16:30 ci-dessous sont ECRITS EN DUR. Ils viennent
+      // du cas d'un salarie precis d'un domaine precis. Tant qu'ils ne sont pas
+      // lus depuis le CSV, ce bloc n'est pas generalisable a un autre client.
       // D (1er jour ou isolé) : début mensuel → 16h30  (ex: 07:00→16:30 = 8h30 en juin)
       // M (milieu, séq. ≥ 3j) : 09:00 → 16h30          (= 6h30 net quel que soit le mois)
       // A (dernier, auto-lendemain) : 09:00 → fin mensuelle (= 6h30 si fin=16:30)
@@ -3161,7 +3164,7 @@ function _planRenderTemplates(){
         +'<div class="plan-tpl-name">'+id
           +(isDefault?' <span class="plan-badge plan-badge-def">D\u00e9faut</span>':'')
           +(hasTimings?' <span class="plan-badge" style="background:var(--vert-pale);color:var(--vert-med);font-size:9px">\ud83d\udd50 Horaires</span>':'')
-          +(hasJour?' <span class="plan-badge" style="background:var(--plan-acc-pale);color:var(--plan-acc);font-size:9px">T Thilio</span>':'')
+          +(hasJour?' <span class="plan-badge" style="background:var(--plan-acc-pale);color:var(--plan-acc);font-size:9px">\ud83d\udcc6 Horaires par jour</span>':'')
         +'</div>'
         +'<div class="plan-tpl-sub">Assign\u00e9\u00a0: '+assignes+'</div>'
       +'</div>'
@@ -3412,7 +3415,7 @@ function planExportCSV(templateId){
     }
   }
   // En-tête + heures
-  rows.push('# jour'+S+'jan'+S+'fev'+S+'... (heures pr\u00e9vues par mois \u00b7 suffixe D/M/A = horaire Thilio)');
+  rows.push('# jour'+S+'jan'+S+'fev'+S+'... (heures pr\u00e9vues par mois \u00b7 suffixe D/M/A = horaire par jour)');
   rows.push(['jour'].concat(_PLAN_MOIS_CSV).join(S));
   for(var d=1;d<=31;d++){
     var cells=[d];
@@ -3494,7 +3497,7 @@ function planImportCSV(targetId){
       if(window.fbSave)window.fbSave('planning_templates',PLANNING_TEMPLATES);
       var msg='\u2705 CSV import\u00e9 \u2192 "'+targetId+'"';
       if(nT>0)msg+=' \u00b7 '+nT+' horaires mois';
-      if(nJ>0)msg+=' \u00b7 '+(Object.values(jouTimings).reduce(function(s,m){return s+Object.keys(m).length;},0))+' jours Thilio';
+      if(nJ>0)msg+=' \u00b7 '+(Object.values(jouTimings).reduce(function(s,m){return s+Object.keys(m).length;},0))+' jours \u00e0 horaire particulier';
       showToast(msg,'#3D6B27');
       _planRenderTemplates();
     }catch(err){showToast('\u274c Erreur CSV\u00a0: '+err.message,'var(--rouge)');}
@@ -3524,7 +3527,7 @@ function openPlanDayModal(nom,day){
   _planModalMode=(ent&&ent.absent)?'absent':(ent&&ent.type==='cp')?'cp':(ent&&ent.type==='recup')?'recup':(isNP?'extra':'travail');
   _planAbsSel=((ent&&ent.absent&&ent.motif)?_planAbsDef(ent.motif).id:'autre');
   var dowL=PLAN_JOURS_L[_planDow(planMonth,day)];
-  // plDisplay = heures attendues réelles (Thilio inclus) — cohérent avec le timing affiché
+  // plDisplay = heures attendues réelles (codes jour inclus) — cohérent avec le timing affiché
   var plDisplay=_planDayH(plId,planMonth,day,null);
   var tot=_planDays(planMonth);
   var sub=f?('\ud83c\udfd6 '+f+' \u2014 f\u00e9ri\u00e9'+(pl>0?' \u00b7 pr\u00e9vu '+_planFmt(plDisplay)+' h':''))
@@ -3754,7 +3757,7 @@ function planCalcResult(){
   var cont=document.getElementById('plan-cont-btn')&&document.getElementById('plan-cont-btn').classList.contains('active');
   var h=_planTimingH(debut,fin,cont);
   var plId=_planPlId(_planEditDay.mbr);
-  // Référence = heures attendues réelles (Thilio inclus) — pas la grille brute
+  // Référence = heures attendues réelles (codes jour inclus) — pas la grille brute
   var plRef=_planDayH(plId,planMonth,_planEditDay.day,null);
   var diff=plRef>0?Math.round((h-plRef)*60)/60:null; // précision à la minute (v4.32)
   var diffStr=diff===null?'':Math.abs(diff)<0.05?'\u00a0\u00b7 = pr\u00e9vu':(diff>0?'\u00a0\u00b7 +':'\u00a0\u00b7 ')+_planFmt(diff)+' vs pr\u00e9vu';
@@ -4264,7 +4267,15 @@ function _paHoraire(h,plId,m,yr){
   var d0=t.d||'07:00', f0=t.f||'';
   if(!f0) return null;
   var amp=_paMin(f0)-_paMin(d0);
-  return { d:d0, f:f0, amp:amp, coup:Math.max(0,amp-Math.round(h*60)) };
+  // `continu` vient du CSV (colonne 5) et de nulle part ailleurs. Le fallback
+  // PLAN_DEF_T ne porte pas ce champ : absent ne veut pas dire vrai.
+  return { d:d0, f:f0, amp:amp, coup:Math.max(0,amp-Math.round(h*60)), continu:(t.continu===true) };
+}
+// Les trois cas, dans les mots que le modal du planning emploie deja.
+function _paPause(t){
+  if(t.coup>0)  return _paDuree(t.amp)+' h de pr\u00e9sence \u00b7 <b>'+_paDuree(t.coup)+' h de coupure</b>';
+  if(t.continu) return 'horaire continu';
+  return 'sans pause (moins de 6\u00a0h)';
 }
 
 var _PA_JL=['Lundi','Mardi','Mercredi','Jeudi','Vendredi','Samedi','Dimanche'];
@@ -4342,9 +4353,7 @@ function _paBandeau(g,plId,yr,reg){
         var t=_paHoraire(h,plId,gr.ms[0],yr);
         if(!t) return '';
         if(t.coup>0) coupe=true;
-        var det = (t.coup>0)
-          ? _paDuree(t.amp)+' h de pr\u00e9sence \u00b7 <b>'+_paDuree(t.coup)+' h de coupure</b>'
-          : 'journ\u00e9e continue, sans coupure';
+        var det = _paPause(t);
         return '<div class="pa-hl"><div class="pa-hlt"><span class="pa-hj">'+e(_paPlage(byh[h]))+'</span>'
              + '<span class="pa-hn">'+_paFmt(h)+' h</span></div>'
              + '<div class="pa-hh"><b>'+e(t.d)+'</b><i>\u2192</i><b>'+e(t.f)+'</b></div>'
@@ -4355,7 +4364,7 @@ function _paBandeau(g,plId,yr,reg){
               : _PA_MO[gr.ms[0]]+' \u2013 '+_PA_MO[gr.ms[gr.ms.length-1]].toLowerCase();
       var pied = coupe
         ? 'La coupure d\u00e9jeuner n\u2019est pas travaill\u00e9e : les heures indiqu\u00e9es sont les heures dues.'
-        : 'Journ\u00e9es continues : pr\u00e9sence et heures dues sont identiques.';
+        : 'Pr\u00e9sence et heures dues sont identiques : aucune coupure \u00e0 d\u00e9duire.';
       return '<div class="pa-hb"><div class="pa-hm">'+e(lbl)+'</div>'+lignes+'<div class="pa-hp">'+pied+'</div></div>';
     }).filter(Boolean).join('');
     return blocs ? '<div class="pa-hz">'+blocs+'</div>' : '';
@@ -4369,7 +4378,7 @@ function _paBandeau(g,plId,yr,reg){
     var t=_paHoraire(h,plId,vus[h],yr);
     if(!t) return '';
     return '<span class="pa-kc"><u>'+_paFmt(h)+' h</u><b>'+e(t.d)+'</b><i>\u2192</i><b>'+e(t.f)+'</b>'
-         + '<em>'+(t.coup>0?('coupure '+_paDuree(t.coup)+' h'):'en continu')+'</em></span>';
+         + '<em>'+(t.coup>0?('coupure '+_paDuree(t.coup)+' h'):(t.continu?'continu':'sans pause'))+'</em></span>';
   }).join('');
   if(!cles) return '';
   return '<div class="pa-hz pa-solo"><div class="pa-hb pa-full">'
