@@ -4416,26 +4416,26 @@ function _paGrilleHtml(g,yr,reg){
 var _PA_CSS =
   '.pa-grp{page-break-after:always;break-after:page}'
 + '.pa-grp:last-child{page-break-after:auto;break-after:auto}'
-+ '.pa-who{display:flex;align-items:baseline;gap:8px;padding:6px 9px;background:#FAF3E0;'
-  +'border-left:3px solid #C2A14D;margin-bottom:8px;border-radius:0 4px 4px 0}'
++ '.pa-who{display:flex;align-items:baseline;gap:8px;padding:3px 9px;background:#FAF3E0;'
+  +'border-left:3px solid #C2A14D;margin-bottom:5px;border-radius:0 4px 4px 0}'
 + '.pa-who b{font-size:8px;text-transform:uppercase;letter-spacing:1px;color:#8A7A62;font-weight:700;white-space:nowrap}'
-+ '.pa-who p{font-family:\'Cormorant Garamond\',Georgia,serif;font-size:14px;font-weight:600;color:#2B2118;margin:0}'
-+ '.pa-hz{display:flex;border:1px solid #A5701E;background:#FDF7E9;margin-bottom:8px}'
++ '.pa-who p{font-family:\'Cormorant Garamond\',Georgia,serif;font-size:12px;font-weight:600;color:#2B2118;margin:0}'
++ '.pa-hz{display:flex;border:1px solid #A5701E;background:#FDF7E9;margin-bottom:5px;page-break-inside:avoid;break-inside:avoid}'
 + '.pa-hb{flex:1;padding:0 0 6px;border-right:1px solid #E0CFA6;min-width:0}'
 + '.pa-hb:last-child{border-right:0}'
-+ '.pa-hm{font-size:8px;font-weight:700;text-transform:uppercase;letter-spacing:.6px;color:#fff;'
-  +'background:#8A5D08;padding:3px 6px;margin-bottom:5px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}'
-+ '.pa-hl{padding:0 6px;margin-top:5px}'
++ '.pa-hm{font-size:7px;font-weight:700;text-transform:uppercase;letter-spacing:.5px;color:#fff;'
+  +'background:#8A5D08;padding:2px 6px;margin-bottom:3px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}'
++ '.pa-hl{padding:0 6px;margin-top:3px}'
 + '.pa-hlt{display:flex;align-items:baseline;gap:5px}'
 + '.pa-hj{font-size:7.5px;font-weight:600;color:#8A5D08;text-transform:uppercase;letter-spacing:.4px;'
   +'white-space:nowrap;overflow:hidden;text-overflow:ellipsis}'
 + '.pa-hn{margin-left:auto;font-family:\'Cormorant Garamond\',Georgia,serif;font-size:11px;font-weight:700;color:#4A3B28}'
-+ '.pa-hh{font-family:\'Cormorant Garamond\',Georgia,serif;font-size:14px;color:#1C1008;white-space:nowrap;line-height:1.1}'
++ '.pa-hh{font-family:\'Cormorant Garamond\',Georgia,serif;font-size:12px;color:#1C1008;white-space:nowrap;line-height:1.05}'
 + '.pa-hh b{font-weight:700}'
 + '.pa-hh i{font-style:normal;color:#C8913A;font-weight:700;font-family:\'Outfit\',sans-serif;font-size:8px;margin:0 1px}'
-+ '.pa-hd2{display:block;font-size:7px;color:#96794A;line-height:1.3;margin-top:1px}'
++ '.pa-hd2{display:block;font-size:6.2px;color:#96794A;line-height:1.25}'
 + '.pa-hd2 b{color:#8A5D08;font-weight:700}'
-+ '.pa-hp{margin:6px 6px 0;padding-top:4px;border-top:1px solid #E0CFA6;font-size:7px;color:#96794A;line-height:1.3}'
++ '.pa-hp{margin:4px 6px 0;padding-top:3px;border-top:1px solid #E0CFA6;font-size:6.2px;color:#96794A;line-height:1.25}'
 + '.pa-full{padding:0 0 8px}.pa-hkl{font-size:8px;color:#6B5B44;margin:0 10px 7px}'
 + '.pa-hk{display:flex;flex-wrap:wrap;gap:6px 22px;margin:0 10px}'
 + '.pa-kc{font-family:\'Cormorant Garamond\',Georgia,serif;font-size:13px;color:#1C1008;white-space:nowrap}'
@@ -4446,37 +4446,41 @@ var _PA_CSS =
 + '.pa-kc em{font-style:normal;font-family:\'Outfit\',sans-serif;color:#96794A;font-size:7.5px;margin-left:5px}'
 + '.pa-grid{display:flex;border:1px solid #A5701E;border-right:0;page-break-inside:avoid;break-inside:avoid}'
 + '.pa-col{flex:1;display:flex;flex-direction:column;border-right:1px solid #C3B393;min-width:0}'
-+ '.pa-mh{font-size:8px;font-weight:700;letter-spacing:.7px;text-align:center;padding:3px 0;color:#2B1D08;'
++ '.pa-mh{font-size:7px;font-weight:700;letter-spacing:.5px;text-align:center;padding:2px 0;color:#2B1D08;'
   +'background:#D9A441;border-bottom:1px solid #A5701E}'
-+ '.pa-c{display:flex;align-items:center;gap:1px;padding:0 3px;height:3.5mm;font-size:7.5px;line-height:1;'
++ '.pa-c{display:flex;align-items:center;gap:1px;padding:0 2.5px;height:2.8mm;font-size:6.8px;line-height:1;'
   +'box-sizing:border-box;border-bottom:1px solid #E2DCCF}'
 // Le lisere vin : on travaille ce jour-la alors que le calendrier dit non.
 + '.pa-hors{border-left:2.2px solid #8C2E15;padding-left:1px}'
 + '.pa-hors .pa-h{color:#7A2510;font-weight:700}'
 + '.pa-we.pa-hors{background:#EDE7DC}'
 + '.pa-wk{border-top:1.4px solid #A5701E}'
-+ '.pa-d{color:#9C8A6E;width:9px;font-weight:500}'
-+ '.pa-j{color:#C9BCA4;width:6px;font-size:6.5px}'
-+ '.pa-h{margin-left:auto;font-family:\'Cormorant Garamond\',Georgia,serif;font-size:11px;font-weight:700;color:#1C1008}'
++ '.pa-d{color:#9C8A6E;width:8px;font-weight:500}'
++ '.pa-j{color:#C9BCA4;width:5px;font-size:5.8px}'
++ '.pa-h{margin-left:auto;font-family:\'Cormorant Garamond\',Georgia,serif;font-size:9.5px;font-weight:700;color:#1C1008}'
 + '.pa-we{background:#DDD8CF}.pa-we .pa-d,.pa-we .pa-j{color:#8C8378}'
 + '.pa-clos{background:#FBE08A}.pa-clos .pa-d,.pa-clos .pa-j{color:#8A5D08}'
 + '.pa-court{background:#C7E3F5}.pa-court .pa-h{color:#0F5A87}.pa-court .pa-d,.pa-court .pa-j{color:#4C86A8}'
 + '.pa-fer{background:#F0AF9B}.pa-fer .pa-d{color:#8C2E15;font-weight:700}.pa-fer .pa-j{color:#A85A42}'
   +'.pa-fer .pa-h{color:#8C2E15}'
 + '.pa-void{background:#F2EFE9;border-bottom:0}'
-+ '.pa-mt{text-align:center;padding:3px 0;background:#EDE1C6;border-top:1px solid #A5701E;font-size:7px;color:#8A7550}'
-+ '.pa-mt b{font-family:\'Cormorant Garamond\',Georgia,serif;font-size:12px;color:#2B2118;display:block;line-height:1}'
++ '.pa-mt{text-align:center;padding:2px 0;background:#EDE1C6;border-top:1px solid #A5701E;font-size:6px;color:#8A7550}'
++ '.pa-mt b{font-family:\'Cormorant Garamond\',Georgia,serif;font-size:10px;color:#2B2118;display:block;line-height:1}'
 + '.pa-mt span{display:block;margin-top:1px}'
-+ '.pa-ft{display:flex;justify-content:space-between;align-items:flex-end;gap:16px;margin-top:7px}'
-+ '.pa-lg{display:flex;flex-wrap:wrap;gap:3px 12px;font-size:7.5px;color:#5A4A30}'
++ '.pa-ft{display:flex;justify-content:space-between;align-items:flex-end;gap:16px;margin-top:4px}'
++ '.pa-lg{display:flex;flex-wrap:wrap;gap:2px 11px;font-size:6.8px;color:#5A4A30}'
 + '.pa-lg i{display:inline-block;width:9px;height:9px;border:1px solid #B9A98C;margin-right:4px;'
   +'vertical-align:-1px;border-radius:2px}'
 + '.pa-tot{text-align:right;white-space:nowrap}'
-+ '.pa-tot .pa-v{font-family:\'Cormorant Garamond\',Georgia,serif;font-size:21px;font-weight:700;color:#2B2118;line-height:1}'
++ '.pa-tot .pa-v{font-family:\'Cormorant Garamond\',Georgia,serif;font-size:18px;font-weight:700;color:#2B2118;line-height:1}'
 + '.pa-tot .pa-v em{font-style:normal;font-size:10px;color:#8A7A62;font-family:\'Outfit\',sans-serif}'
 + '.pa-tot .pa-s{font-size:7.5px;color:#8A7A62;margin-top:2px}'
-+ '.pa-exc{margin-top:7px;padding:5px 8px;background:#FBEDE9;border-left:3px solid #8C2E15;'
-  +'font-size:8px;color:#7A2510;line-height:1.5;border-radius:0 4px 4px 0}';
++ '.pa-exc{margin-top:4px;padding:3px 8px;background:#FBEDE9;border-left:3px solid #8C2E15;'
+  +'font-size:6.8px;color:#7A2510;line-height:1.4;border-radius:0 4px 4px 0}'
+// Un groupe ne doit JAMAIS s'etaler sur deux pages : le budget vertical est
+// calcule pour qu'il tienne, cette regle est la ceinture.
++ '.pa-grp{page-break-inside:avoid;break-inside:avoid}'
++ '.mvdoc-lim{font-size:6.8px!important;line-height:1.4!important;padding:5px 8px!important;margin-top:4px!important}';
 
 // Le document. Une page par modèle ; le nom du domaine et l'année sont répétés
 // sur chaque page, parce qu'une feuille arrachée du lot doit rester identifiable.
@@ -4484,17 +4488,11 @@ function _paDoc(yr){
   var e=window._escHtml||function(x){return String(x==null?'':x);};
   var grps=_paGroupes(yr);
   if(!grps.length){ if(window.showToast) window.showToast('Aucun salari\u00e9 sur '+yr,'#B85A1A'); return false; }
-  var F=(typeof _feriesY==='function')?_feriesY(yr):{};
-  var fl=[];
-  for(var m=0;m<12;m++) if(F[m]) for(var d in F[m]) fl.push(d+' '+_PA_MO[m].toLowerCase().slice(0,4)+' '+F[m][d]);
-
-  var lim='<div class="mvdoc-lim"><b>Planning pr\u00e9visionnel.</b> Il donne le rythme de travail : jours '
-    + 'travaill\u00e9s, heures de prise et de fin de service, fermetures du domaine et jours f\u00e9ri\u00e9s. '
-    + 'Les dur\u00e9es sont des heures <b>travaill\u00e9es</b>, coupure d\u00e9duite. Cong\u00e9s pay\u00e9s, absences et '
-    + 'r\u00e9cup\u00e9rations n\u2019y figurent pas : ils se posent au fil de l\u2019ann\u00e9e et apparaissent sur le '
-    + 'relev\u00e9 mensuel d\u2019heures. Ce document n\u2019est ni un contrat de travail ni un bulletin de paie.'
-    + (fl.length?(' \u2014 Jours f\u00e9ri\u00e9s '+yr+' : '+e(fl.join(' \u00b7 '))+'.'):'')
-    + '</div>';
+  var lim='<div class="mvdoc-lim"><b>Planning pr\u00e9visionnel.</b> Jours travaill\u00e9s, heures de prise et '
+    + 'de fin de service, coupure d\u00e9jeuner, fermetures et jours f\u00e9ri\u00e9s. Les dur\u00e9es sont des heures '
+    + '<b>travaill\u00e9es</b>, coupure d\u00e9duite. Cong\u00e9s, absences et r\u00e9cup\u00e9rations n\u2019y figurent pas : ils se '
+    + 'posent au fil de l\u2019ann\u00e9e et apparaissent sur le relev\u00e9 mensuel d\u2019heures. Ni un contrat de '
+    + 'travail, ni un bulletin de paie.</div>';
 
   var neuf = (typeof _planYearHasData==='function' && !_planYearHasData(yr));
   if(neuf){
