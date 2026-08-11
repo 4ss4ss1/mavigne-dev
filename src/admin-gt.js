@@ -2062,7 +2062,7 @@ function _genDemoCode(){
   var c='ABCDEFGHJKLMNPQRSTUVWXYZ23456789';
   var p1='',p2='';
   for(var i=0;i<2;i++) p1+=c[Math.floor(Math.random()*c.length)];
-  for(var i=0;i<4;i++) p2+=c[Math.floor(Math.random()*c.length)];
+  for(var j=0;j<4;j++) p2+=c[Math.floor(Math.random()*c.length)];
   return 'ESSAI-'+p1+'-'+p2;
 }
 
@@ -4403,7 +4403,7 @@ function _agtBizLignes(an){
 // debordait. Regle : les BARRES sont en HTML/CSS (aucune mise a l'echelle
 // possible), et la seule courbe qui reste en SVG a une hauteur en pixels, des
 // coordonnees en pourcentage et des traits a epaisseur constante.
-var _AGT_MOIS=['J','F','M','A','M','J','J','A','S','O','N','D'];
+var _AGT_MOIS_L=['J','F','M','A','M','J','J','A','S','O','N','D'];
 
 function _agtBizMois(an){
   var m=[], i;
@@ -4454,7 +4454,7 @@ function _agtBizG1(an){
   h+=svg+'</div></div>';
   h+='<div style="display:flex"><div style="width:46px;flex-shrink:0"></div><div style="flex:1;display:flex">';
   for(i=0;i<12;i++)
-    h+='<div style="flex:1;text-align:center;font-size:10px;padding-top:4px;color:rgba(255,255,255,'+(i<=iN?'0.42':'0.18')+')">'+_AGT_MOIS[i]+'</div>';
+    h+='<div style="flex:1;text-align:center;font-size:10px;padding-top:4px;color:rgba(255,255,255,'+(i<=iN?'0.42':'0.18')+')">'+_AGT_MOIS_L[i]+'</div>';
   h+='</div></div>';
   h+='<div style="font-size:11px;color:rgba(255,255,255,0.4);margin-top:6px">Au '+_agtDateFr(new Date())+' \u2014 '
     +'<b style="color:#E8C860">'+_agtEur(cf[iN])+'</b> factur\u00e9s, <b style="color:#86EFAC">'+_agtEur(ce[iN])+'</b> encaiss\u00e9s'
@@ -4494,7 +4494,7 @@ function _agtBizG2(an){
       if(o.geste<0) h+='<div style="height:'+Math.max(2,Math.round(-o.geste/maxN*HN))+'px;background:#C4B5FD;opacity:.85;border-radius:0 0 2px 2px"></div>';
       h+='</div>';
     }
-    h+='<div style="text-align:center;font-size:10px;padding-top:3px;color:rgba(255,255,255,'+(i<=iN?'0.42':'0.18')+')">'+_AGT_MOIS[i]+'</div>';
+    h+='<div style="text-align:center;font-size:10px;padding-top:3px;color:rgba(255,255,255,'+(i<=iN?'0.42':'0.18')+')">'+_AGT_MOIS_L[i]+'</div>';
     h+='</div>';
   });
   h+='</div></div>';

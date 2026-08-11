@@ -1,0 +1,108 @@
+# ============================================================================
+#  MA VIGNE — CI
+#  --------------------------------------------------------------------------
+#  Tourne a CHAQUE push et a chaque pull request. Ce que faisait la discipline
+#  ("penser a lancer npm run check avant de pousser") devient mecanique.
+#
+#  ⚠️ CE WORKFLOW NE DEPLOIE RIEN, JAMAIS.
+#     Deployer reste une decision : bump APP + SW, WHATS_NEW redige, et l'ordre
+#     functions -> backfill -> hosting -> rules. La CI allume le feu vert ou
+#     rouge, elle ne touche pas au levier. Aucun secret n'est necessaire ici.
+#
+#  Deux jobs en parallele pour que le rouge soit lisible d'un coup d'oeil :
+#    · controles : preflight -> lint -> build -> smoke   (~3 min)
+#    · e2e       : les 10 pages, login DOM reel           (~5 min)
+# ============================================================================
+
+name: CI
+
+on:
+  push:
+  pull_request:
+  workflow_dispatch:        # bouton "Run workflow" dans l'onglet Actions
+
+# Un nouveau push sur la meme branche annule le run precedent : pas de file
+# d'attente quand on pousse trois commits d'affilee.
+concurrency:
+  group: ci-${{ github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  # ==========================================================================
+  controles:
+    name: Preflight · ESLint · Build · Smoke
+    runs-on: ubuntu-latest
+    timeout-minutes: 20
+
+    steps:
+      - name: Recuperer le depot
+        uses: actions/checkout@v4
+
+      - name: Node 22 (meme version que les Cloud Functions)
+        uses: actions/setup-node@v4
+        with:
+          node-version: '22'
+          cache: 'npm'
+
+      - name: Installer les dependances
+        run: npm ci
+
+      # C1–C22 : le filet anti-regression. Lecture seule, ~1 s.
+      # (npm run build le relance en prebuild ; ici c'est pour echouer VITE
+      #  et sur une etape NOMMEE, avant les 50 s de build.)
+      - name: Preflight (C1–C22)
+        run: node scripts/preflight.mjs
+
+      # Cliquet : bloque toute erreur NOUVELLE, tolere le plafond documente
+      # dans scripts/lint-cliquet.mjs.
+      - name: ESLint — cliquet anti-regression
+        run: node scripts/lint-cliquet.mjs
+
+      # Vite + inject-precache (postbuild, idempotent).
+      - name: Build
+        run: npm run build
+
+      - name: Chromium pour le smoke
+        run: npx playwright install --with-deps chromium
+
+      # L'app boote-t-elle vraiment ? Le type de bug que node --check ne voit pas.
+      - name: Smoke — l'app demarre sans exception
+        run: npm run test:smoke
+
+      # Utile quand le smoke tombe : on recupere le bundle exact qui a echoue.
+      - name: Garder le build en cas d'echec
+        if: failure()
+        uses: actions/upload-artifact@v4
+        with:
+          name: dist-echec
+          path: dist/
+          retention-days: 5
+
+  # ==========================================================================
+  e2e:
+    name: E2E — 10 pages, login DOM reel
+    runs-on: ubuntu-latest
+    timeout-minutes: 25
+
+    steps:
+      - name: Recuperer le depot
+        uses: actions/checkout@v4
+
+      - name: Node 22
+        uses: actions/setup-node@v4
+        with:
+          node-version: '22'
+          cache: 'npm'
+
+      - name: Installer les dependances
+        run: npm ci
+
+      - name: Chromium pour le e2e
+        run: npx playwright install --with-deps chromium
+
+      # Reseau Firebase coupe, donnees injectees, aucun contact avec la prod.
+      # ⚠️ Ce test charge Leaflet depuis unpkg : une panne d'unpkg peut le faire
+      #    rougir sans qu'aucune ligne de code soit en cause. Dans ce cas,
+      #    "Re-run failed jobs" dans l'onglet Actions.
+      - name: E2E local (donnees injectees)
+        run: npm run test:e2e

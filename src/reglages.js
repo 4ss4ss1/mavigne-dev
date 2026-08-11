@@ -1293,7 +1293,7 @@ function saveEditHha(nom){
     var nivsRef=t.niveaux||[{num:1,hha:50},{num:2,hha:25},{num:3,hha:25}];
     nivsRef.forEach(function(niv){
       var elN=document.getElementById('ehha-niv-'+niv.num);
-      if(elN){var v=parseFloat(elN.value);if(!isNaN(v)&&v>=0)niv.hha=v;}
+      if(elN){var vN=parseFloat(elN.value);if(!isNaN(vN)&&vN>=0)niv.hha=vN;}
     });
     t.niveaux=nivsRef;
     t.hha=nivsRef.reduce(function(s,n){return s+n.hha;},0);
@@ -1301,7 +1301,7 @@ function saveEditHha(nom){
     var _elMT=document.getElementById('ehha-mintrou');if(_elMT){var _mt=parseFloat(_elMT.value);if(!isNaN(_mt)&&_mt>0){window.CONFIG=window.CONFIG||{};CONFIG.plantation_min_trou=_mt;if(window.saveData)window.saveData('config');}}
   } else {
     var elV=document.getElementById('ehha-val');
-    if(elV){var v=parseFloat(elV.value);if(!isNaN(v)&&v>=0)t.hha=v;}
+    if(elV){var vV=parseFloat(elV.value);if(!isNaN(vV)&&vV>=0)t.hha=vV;}
   }
   window.TACHES=window.TACHES;
   delete window.TRAVAUX[nom];window.recalcTravaux(nom);window.TRAVAUX=window.TRAVAUX;
