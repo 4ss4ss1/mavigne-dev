@@ -36,7 +36,7 @@
 
 ---
 
-## ⚖️ Les trois règles d'or
+## ⚖️ Les quatre règles d'or
 
 **Règle d'or n°1 — la vérité est dans les fichiers réels.**
 `/mnt/project` **bouge en cours de session**, peut être **incomplet**, et surtout **peut être en
@@ -195,6 +195,71 @@ ne regarde que le code passe à côté de la moitié de ce que le client voit.**
 ★★★ **Corollaire vécu le 09/08 soir — UNE NOTE DE MISSION AUSSI PEUT MENTIR.** Le fichier de
 mission « réduire le temps d'installation » listait comme « ce qui manque vraiment » deux choses
 déjà faites depuis des semaines. **Le premier geste d'une mission est un inventaire, pas un plan.**
+★★★ **Corollaire vécu le 11/08 — UN CLIQUET ÉCRIT N'EST PAS UN CLIQUET BRANCHÉ.**
+`scripts/lint-vocabulaire.mjs` avait été écrit et poussé le matin même, avec son raisonnement et son
+plafond à zéro. **Aucun appelant ne l'exécutait** — ni `npm run lint`, ni `ci.yml`, ni rien. Le mot
+banni pouvait revenir sans que quoi que ce soit rougisse. **C'est le cas DOCK appliqué à
+l'outillage : livré, jamais intégré.** Réflexe : après avoir écrit un contrôle, `grep` son nom dans
+`package.json` et `.github/` **avant** de le considérer comme actif.
+★★★ **Corollaire vécu le 11/08 — LA BONNE RÉPONSE EST PARFOIS DE RETIRER UNE ÉCRITURE.**
+« Un chrono douteux ne doit pas être comptabilisé » semblait demander un mécanisme : dialogue,
+choix, correction. **Il suffisait de ne pas écrire `dmin`** — les deux consommateurs (`_chronoSummary`
+et `pilotage.js:4318`) retombaient déjà sur le barème, chacun de son côté. **Avant de construire une
+mécanique, vérifier ce que fait déjà le chemin par défaut.**
+★★ **Corollaire vécu le 11/08 — UN HELPER DE MODULE N'EST PAS UNE PRIMITIVE.**
+Du code écrit pour `app.js` appelait `_openOv(...)` : cette fonction **n'existe que dans
+`tracteur.js`**. La primitive d'`app.js` est `openOv`, qui pose la classe `open`, gère le z-index et
+empile l'historique — le repli maison posait `show` et **l'écran ne se serait jamais affiché**.
+⚠️ Le code existant fait la même chose (`app.js:10143`) et **marche par accident** :
+`tracteur.js:2632` expose `window._openOv` et le corps d'`app.js` s'exécute en dernier. **Un appel
+qui marche par ordre de chargement n'est pas un appel correct.**
+★★ **Corollaire vécu le 11/08 — QUAND UN TEST ROUGIT, SOUPÇONNER LE TEST AVANT LE CODE.**
+Trois rouges dans la journée : deux venaient du harnais (`SESSIONS` posé sur `globalThis` au lieu de
+`window` ; un `sed` dont le motif n'existait pas dans le fichier), **un seul était un vrai bug**.
+Mais ce vrai bug n'aurait été trouvé par rien d'autre. **Écrire des assertions fausses n'est pas du
+temps perdu — c'est le prix du seul contrôle qui trouve quelque chose.**
+
+---
+
+**Règle d'or n°4 — un lot n'est pas fini tant que l'aide ne dit pas la vérité.**
+
+> ⚠️⚠️⚠️ **OBLIGATOIRE. AUCUNE EXCEPTION. AUCUN « PLUS TARD ».**
+
+**Toute mise à jour qui change ce que le client voit ou fait doit mettre à jour, DANS LE MÊME LOT,
+les supports d'accompagnement qu'elle rend faux.** Ce n'est pas une étape de finition qu'on repousse
+au lot suivant : c'est une **condition de clôture**, au même titre que le preflight vert.
+
+| Support | Fichier | Quand il devient faux |
+|---|---|---|
+| **Fiche `MV_AIDE`** du module touché | `src/utils.js` | dès qu'un écran, un geste ou un onglet change |
+| **Section du guide public** | `guide/<section>.md` → `npm run build:guide` | dès qu'une fonctionnalité décrite change |
+| **Visite guidée** `_mvtSteps` | `src/app.js` | dès qu'un sélecteur visé bouge |
+| **`WHATS_NEW`** | `src/utils.js` | dès que le changement est **visible** par l'utilisateur |
+| **Écran qui énumère ce qui reste à faire** | selon | dès qu'on lui apprend à faire une des choses listées |
+
+**Le geste concret, avant de livrer :** ouvrir la fiche `MV_AIDE` du module touché et la **relire à
+voix haute contre l'écran neuf**. Si une phrase est devenue fausse, la réécrire *maintenant*. Si
+aucune ne l'est, l'écrire dans la réponse — « fiche relue, rien à changer » — pour que ce soit un
+constat et non un oubli.
+
+⚠️ **Le preflight ne te sauvera pas.** C22 vérifie que les sélecteurs pointent quelque part, **pas
+que les phrases sont vraies**. Une fiche peut être **verte au preflight et entièrement périmée** :
+c'est exactement l'état dans lequel les dix fiches se trouvaient le 09/08, après des mois.
+**Le contrôle automatique protège de la panne, jamais du mensonge.**
+
+⚠️ **Ce qui rend cette règle nécessaire, c'est qu'elle est facile à contourner sans mentir.** Dire
+« les fiches MV_AIDE restent à écrire » en fin de livraison est exact, honnête — et laisse le client
+avec une aide fausse. **Vécu deux fois le 11/08** : le lot du chrono tracteur inversé (v5.92) et le
+lot du mode du jour (v5.93) ont tous deux été livrés en signalant l'aide comme « ce qui reste ». Les
+deux écrans les plus utilisés du module Tracteur ont changé de gestes, et leur fiche décrit encore
+les anciens. **C'est la dette que cette règle existe pour empêcher, écrite le jour même où elle a
+été contractée.**
+
+**Si le temps manque vraiment**, le lot ne se livre pas en deux morceaux : il se **réduit**. Mieux
+vaut un lot plus petit dont l'aide est juste qu'un gros lot dont l'aide ment.
+
+Détail des trois supports et de leur mécanique : **§27a** (la règle longue), **§27b** (`MV_AIDE`),
+**§27d** (le guide découpé).
 
 ---
 
@@ -244,6 +309,22 @@ déjà faites depuis des semaines. **Le premier geste d'une mission est un inven
   `gueret.nicolas@gmail.com` = admin Marchand-Grillot (`adm:true`). Toute procédure GT (backfill,
   `fbAdminRead`, `_fbSetTenantPlan`, assistant d'installation) exige la **fenêtre privée ngdevpro**
   et une session OTP ouverte.
+
+### ★★ La granularité d'une préférence (11/08)
+
+Une objection peut être **juste sur le fond et fausse sur la portée**. « Un mode ouvrier/tractoriste
+se tromperait la moitié du temps » était un bon argument — contre un mode **permanent**. Il ne valait
+plus rien contre un mode **journalier**, parce que la réalité était : homogène dans la journée,
+variable d'un jour à l'autre.
+
+**Avant de rejeter une idée, chercher l'échelle à laquelle elle devient vraie.** Et quand
+l'objection repose sur une hypothèse terrain — la forme d'une journée, la distance entre deux
+parcelles — **c'est Nico qui a la réponse, pas le raisonnement.** Poser la question au lieu de
+déduire : deux fois le 11/08, la réponse a retourné le dessin (parcelles éloignées → 1 tap par
+parcelle impossible ; journées homogènes → le mode collant redevient bon).
+
+---
+
 
 ## 💬 Communication
 
@@ -2665,6 +2746,29 @@ aucune raison** de réintroduire un `prompt()`.
 
 ---
 
+### ★★★ La checklist de clôture d'un lot (11/08)
+
+Un lot n'est livrable que quand **les six** sont vraies. Les écrire dans la réponse, pas les penser.
+
+1. **Preflight vert** — `node scripts/preflight.mjs`, 0 erreur. Après une **baisse** de compteur
+   (C14, C19…), **regraver** : `--baseline`. Après une **hausse**, corriger, jamais regraver.
+2. **Cliquets** — `lint-cliquet.mjs` et `lint-vocabulaire.mjs`. Vérifier qu'ils sont **branchés**.
+3. **Syntaxe** — `node --check` (CJS) / `--input-type=module --check` (ESM) · accolades CSS
+   équilibrées · balance des balises HTML · scan demi-surrogates.
+4. **Versions** — bump APP (`APP_VERSION` + **les 4 affichages réels** d'`index.html`) **ET** SW
+   (en-tête + `CACHE_NAME` + les 2 `console.log` + une ligne de changelog **prépendée**) dès qu'on
+   touche `index.html` / `app.js` / `utils.js` / `styles.css`. Un module JS seul = **aucun bump**.
+5. **`WHATS_NEW`** — prépendé, jamais remplacé, rédigé **du point de vue de l'utilisateur** (le
+   symptôme vécu, pas la cause technique), **vérifié en l'exécutant en Node**.
+6. ⚠️⚠️⚠️ **L'AIDE** — **Règle d'or n°4**. Fiche `MV_AIDE` du module touché relue **contre l'écran
+   neuf**, section du guide, `_mvtSteps`, et tout écran qui énumère ce qui reste à faire. Écrire
+   « fiche relue, rien à changer » si c'est le cas — pour que ce soit un constat, pas un oubli.
+
+**Et ce qu'on ne peut PAS cocher côté Claude** — le dire explicitement à la livraison :
+`npm run build`, `npm run test:smoke`, `npm run test:e2e` (pas de navigateur), et **le déploiement**.
+
+---
+
 ## 26. Tarifs, facturation & conversion
 
 | Formule | Mensuel | Annuel (2 mois offerts) | Contenu | Utilisateurs |
@@ -2828,6 +2932,9 @@ AVANT d'annoncer la liste des fichiers.**
 ## 27a. ★★★ LA RÈGLE DE L'ACCOMPAGNEMENT — À LIRE AVANT DE CLORE TOUT LOT
 
 > ⚠️⚠️⚠️ **CETTE SECTION EST LA PLUS IMPORTANTE DU DOCUMENT POUR LA SUITE DU PROJET.**
+
+> ★★★ **Depuis le 11/08, cette règle est la RÈGLE D'OR N°4** (en tête de document). Cette
+> section en garde le détail et l'histoire ; la règle courte, elle, se lit avant tout lot.
 
 **Trois supports décrivent l'application au client :**
 
@@ -3121,6 +3228,44 @@ radios/cases, section « pièces à joindre » explicite.
 
 ## 28. État courant & backlog
 
+### ★★★ La journée du 11 août — audit intégral, puis deux lots Tracteur
+
+**Versions à ce jour : APP `5.93` · SW `6.43`.** (À relire dans les fichiers, jamais depuis ici.)
+
+**A. L'AUDIT INTÉGRAL DE L'APP** — preflight vert, 55 376 lignes, 10 analyses statiques.
+Ce qui est **sain, vérifié** : handlers inline (20 types d'événements, 0 non exposé) · un seul
+`console.log` non gardé et c'est l'émulateur · **contraste 5,56 → 16,73:1, AA passé partout** ·
+7 « à venir » tous légitimes · `.pc-validate` à **60×60 px** · verrou Planning propre · 0 TODO.
+
+Ce qui ne l'est pas :
+
+| Constat | Chiffre |
+|---|---|
+| ★★★ **Tailles de police sous 12 px** | **1 625** — 1 204 en ligne + 421 CSS, soit **la moitié** de l'app, uniformément répartie. Le dock est à **9,5 px**, les doses phyto à **9 px**. « Plein soleil » ne change **que le contraste**. |
+| ★★ **Trou responsive 761–767 px** | `max-width:760px` vs `min-width:768px` : le corps reste à 430 px pendant que `.pil-hero` garde sa grille 2 colonnes |
+| ★★ **Quatre rendus de date concurrents** | 8 fonctions, dont **2 paires strictement identiques** (`_rmDate`/`_bcDate` dans le même fichier ; `_pOrdDateFr`/`_opDateFr` à l'octet près) |
+| ★★ **Aucun formateur de nombre central** | ~330 `toFixed` + 46 `toLocaleString`, `utils.js` n'en expose aucun |
+| ★ **Bloc de ré-export de 209 lignes** (`app.js`) | **111 lignes strictement inutiles** (le module expose déjà) + **5 noms morts** de l'ancien catalogue « Mes produits » |
+| ★ **Trois conventions d'exposition `window`** | dont la boucle `for..in` de `phyto.js`, **invisible au preflight** — le fichier le reconnaît lui-même en commentaire |
+| **333 `onclick` sur `<div>`** | pour 44 `aria-label` — non focusables clavier |
+
+**B. LE CHRONO TRACTEUR INVERSÉ** — v5.92, §31. `tracteur.js` + `index.html` + `styles.css` +
+`utils.js` + `sw.js`, **bump APP + SW**. Plus le branchement du **cliquet de vocabulaire**
+(`package.json` + `ci.yml`) : il était écrit le matin même et **aucun appelant ne l'exécutait**.
+C14 `tracteur.js` **5 → 4**, baseline regravée.
+
+**C. LE MODE DU JOUR** — v5.93, §32. `app.js` + `index.html` + `styles.css` + `utils.js` + `sw.js`,
+**bump APP + SW**. Deux `catch{}` vides refusés par C14 puis remplis avec `logError`.
+
+⚠️⚠️⚠️ **DETTE CONTRACTÉE LE JOUR MÊME : les fiches `MV_AIDE` du Tracteur n'ont été mises à jour
+pour AUCUN des deux lots.** Les deux écrans les plus utilisés du module ont changé de gestes et leur
+aide décrit les anciens. **C'est la violation exacte de la Règle d'or n°4, écrite le même jour.**
+→ **Premier point du backlog, avant tout nouveau lot.**
+
+⚠️ **Ni `npm run build`, ni le smoke, ni l'e2e n'ont été lancés** sur ces deux lots (pas de
+navigateur côté Claude). **Et ils ne sont pas déployés.**
+
+
 ### ★★★ La journée du 9 août — trois chantiers
 
 **A. LE MATIN — L'ÉCART DE CADENCE D'ÉCONOMIE ÉTAIT FAUX D'UN FACTEUR 5** (§20b)
@@ -3234,6 +3379,11 @@ corrigé · DEMO-3 · heures sup · **saisonniers dans l'historique** · **équi
 
 ### Backlog — technique, par ordre d'effort/effet
 
+0. ⚠️⚠️⚠️ **LES FICHES `MV_AIDE` DU TRACTEUR** — dette du 11/08, **Règle d'or n°4**. Le chrono
+   inversé (§31) et le mode du jour (§32) ont changé les gestes ; l'aide décrit les anciens.
+   **Avant tout autre lot.** Vérifier au passage la section Tracteur du guide et `_mvtSteps`.
+0b. ★★★ **`npm run build && npm run test:smoke && npm run test:e2e`** sur v5.93/v6.43, **puis
+    déployer**. L'e2e tourne en 390×844 et l'écran de session a changé de structure.
 1. ★★★ **DÉPLOYER LES CINQ LOTS D'INSTALLATION** (§18b, fin de section).
 2. ★★★ **INSTALLATION À BLANC de bout en bout sur un slug JETABLE.** Elle valide les cinq lots d'un
    coup et **mesure les temps réels** (tableau prévu dans `INSTALLER-UN-DOMAINE.md`).
@@ -3279,6 +3429,35 @@ corrigé · DEMO-3 · heures sup · **saisonniers dans l'historique** · **équi
 34. ⚠️ **Surveiller la taille de `cave.js`** (~375 ko).
 35. ★ **Committer ce document dans le dépôt** (`CLAUDE.md` à la racine) pour qu'il soit lisible
     directement depuis GitHub, comme le code (§29, Règle d'or n°1).
+36. ★★★ **L'ÉCHELLE TYPOGRAPHIQUE — le plus gros effet client du backlog** (audit du 11/08).
+    **Lot A : le plancher.** 257 sites sous 10 px remontés à 11 px minimum.
+    ⚠️ **Pas une substitution aveugle** : certains 9 px sont des exposants ou des unités collées à
+    un chiffre. **Maquette sur trois écrans d'abord** — accueil ouvrier, session tracteur, registre
+    phyto — puis intégration au tableau motif → compte attendu.
+    **Lot B : le réglage « Taille du texte ».** 1 368 sites de 10 à 11,5 px convertis en variables
+    CSS pilotées par un attribut `data-fs` sur `#app-root`, **jumeau exact de `data-hicontrast`**.
+    Trois crans : Normal · Grand · Très grand, dans Réglages › Application, sous « Plein soleil ».
+    ⚠️ **Ne PAS passer par un `zoom` CSS global** (qui serait une ligne) : il agrandirait aussi la
+    carte Leaflet, les overlays `position:fixed` et la largeur du corps bornée à 430 px — le risque
+    porterait sur l'écran le plus utilisé.
+37. ★★ **`mvDate()` et `mvNum()` dans `utils.js`** — une seule date, un seul nombre.
+    `mvDate(iso, forme)` : `'jma'` dans les documents et registres (traçabilité), `'court'` dans les
+    listes denses, `'long'` dans les titres, **jamais `'court'` là où l'année est ambiguë** (défaut
+    actuel de `_vendFrDate`). `mvNum(v, unité)` : décimales imposées par l'unité.
+    **Décision de forme AVANT le code.** Supprimer les 2 paires de doublons littéraux.
+38. ★ **Purger le bloc de ré-export de `app.js`** (l. ~9074–9287) : 111 lignes inutiles + 5 noms
+    morts. Réécrire les 89 restantes en `window.X = X;` littéral, **unifier `phyto.js` sur la même
+    forme** et supprimer sa boucle `for..in`. Regraver la baseline **après** avoir prouvé la baisse.
+39. ★ **`.val-toggle` 26 → 44 px de haut** — c'est l'interrupteur qu'un ouvrier bascule par équipier,
+    avec des gants. Vérifier aussi `.pc-start` (34), `.plan-mo-btn` (34), `.fiche-admin-btn` (32).
+40. ★★ **Valeurs par défaut de modules PAR RÔLE à la création d'un membre** : un ouvrier arrive avec
+    Cave / Réserve / Planning décochées, un tractoriste avec Vigne / Tracteur / Phyto. Aujourd'hui
+    `_canModule` = formule ∧ masquage manuel, **le rôle n'entre nulle part**.
+    ⚠️ **Gain direct sur Garraud : 12 personnes × 7 arbitrages.** À faire **avant** l'installation.
+41. **44 occurrences de `var(--texte-doux,#8B8175)`** — le repli est à **3,66:1**, sous AA. Il ne
+    sert jamais (la variable est toujours définie) mais il est faux. → `#5F5F5F`.
+42. **Six points de rupture responsive** (560, 600, 640, 760, 768, 900, 980, 1200) — les ramener à
+    trois. **Après** le lot typographique, pas avant.
 
 ### ✅ Rayés du backlog
 
@@ -3659,3 +3838,140 @@ confirmer par l'installation à blanc.**
 
 *Fin des instructions personnalisées — Ma Vigne / GUERETTECH. Document volontairement sans numéro de
 version (Règle d'or n°2).*
+
+
+## 31. ★★★ LE CHRONO TRACTEUR INVERSÉ (11/08 — v5.92)
+
+**Le geste de mesure a été retourné : la coche EST le chrono.**
+
+### Ce qui n'allait pas
+
+L'ancien chrono demandait **Démarrer → cocher → Arrêter** : trois gestes pour la parcelle, sur le
+travail le plus répété de la journée. Sans chrono, cocher coûtait **un** tap. **Le chrono se payait
+donc ×3** — ce qui explique qu'il soit resté en opt-in (`CONFIG.chrono_mode`) et peu utilisé.
+
+★★★ **Mais le vrai défaut était ailleurs, et personne ne l'avait vu :** `_chrono` était une
+**variable JS que rien ne persistait**. `_chronoFinalizeOnClose()` n'était appelé que depuis
+`closeSessionDetail()`. **Un téléphone verrouillé pendant 40 min de rognage — le cas normal dans une
+cabine — perdait la mesure en silence.** Aucune alerte, aucune récupération.
+
+### Le modèle
+
+| Geste | Effet |
+|---|---|
+| **Toucher une parcelle** | la mesure démarre dessus |
+| **« J'AI FINI »** | la mesure se ferme, le temps part en **hors parcelle** |
+| **Toucher une AUTRE parcelle** | clôture la première, démarre la seconde, **sans compter de déplacement** |
+| **Appui long** | ajoute au bloc en cours — temps partagé à la surface |
+| **⏸** | interruption en pleine parcelle : la parcelle **reste ouverte** |
+
+C'est le geste qui déclare la situation, parce que **l'app ne peut pas la deviner** : certaines
+parcelles sont mitoyennes, d'autres à plusieurs kilomètres, et rien dans les données ne dit laquelle.
+
+### Trois seaux, jamais quatre
+
+**MESURE** (dans les parcelles) · **HORS PARCELLE** (trajets, pause légale, ravitaillement, réglage
+— *tout du temps travaillé*) · **PAUSE DÉJEUNER** (non travaillée).
+
+⚠️ **« Pause déjeuner » est JUSTE ici et interdit dans le planning.** Le cliquet
+`scripts/lint-vocabulaire.mjs` bannit le mot de `planning.js`, `reglages.js` et `index.html` parce
+qu'il désigne en droit un **droit du salarié**. Sur le tracteur, **le tractoriste est seul et choisit
+vraiment son moment** — le mot est exact. C'est pourquoi le libellé **vit dans `tracteur.js`**, qui
+n'est pas une cible du cliquet : `index.html` reste à zéro, la protection du planning est intacte.
+
+### ★★★ Ce chrono ne justifie PAS la journée de travail
+
+Au retour il reste le **lavage, les niveaux, le plein de GNR** — ils n'y sont pas. Le chrono sert à
+**budgéter** les travaux de tracteur et à connaître le temps réellement passé dans les vignes.
+**L'écran le dit en toutes lettres, à deux endroits** (sous les compteurs et dans le bilan) : sans
+ça, un tractoriste lit le total comme sa journée.
+
+### Chrono douteux = mesure écartée
+
+Au-delà de **3× le barème**, en dessous de **40 %**, ou au-delà de **12 h** : on **n'écrit pas
+`dmin`**. La parcelle est cochée **au barème**, sans temps constaté.
+
+★★ **Rien n'a eu besoin d'être codé pour ça.** `_chronoSummary` filtre déjà sur `dmin != null` pour
+le « Constaté » et retombe sur `_sessBaremeMin` pour l'« Appliqué » ; `pilotage.js:4318` fait le même
+repli, indépendamment. **La bonne réponse était de RETIRER une écriture, pas d'ajouter un mécanisme.**
+Un premier dessin proposait un dialogue à trois réponses : c'était de la sur-ingénierie.
+
+⚠️ **Mais l'écart est DIT** — toast, ligne ambre dans la liste, compteur au bilan. Un écart
+silencieux serait un indicateur qui ment par omission. **Si un domaine voit ses parcelles écartées
+tous les jours, ce n'est pas le tractoriste qui oublie : c'est le `h_ha` de l'activité qui est faux.**
+Le compteur d'écarts est le seul moyen de s'en apercevoir.
+**Une activité sans `h_ha` n'a pas de barème → aucun écart possible, tout compte.**
+
+### Persistance
+
+`t0` est **ABSOLU**, l'état vit dans `localStorage` (`mavigne_chrono_session`), écrit à chaque geste
+plus sur `pagehide` et `visibilitychange`. Le `sid` de session est dans la charge utile : un état
+laissé sur une autre session est ignoré.
+⚠️ **`closeSessionDetail` n'écrit plus rien** — le bloc en cours est persisté et repris. Écrire à la
+fermeture forcerait une mesure à chaque coup d'œil à l'écran.
+⚠️ **Le `catch` d'un `localStorage` en échec ne doit pas être vide** : c'est exactement la panne que
+ce moteur répare. Il prévient l'utilisateur une fois (`_chrPersistKO`).
+
+### Tri de la liste
+
+**Tournée du chef** (`_mvOrdreFor`) **>** **proximité** au point courant **>** parcelles sans
+polygone, groupées sous un séparateur (elles ne disparaissent jamais).
+⚠️ **La géographie vient des CENTROÏDES KML** (`_mvParcGeo`), **jamais d'une géolocalisation du
+tractoriste** — décision explicite de Nico. Ce sont **les parcelles** qui sont situées, pas l'homme.
+La distance s'affiche (`240 m`, `1,2 km`).
+
+---
+
+## 32. ★★★ LE MODE DU JOUR (11/08 — v5.93)
+
+**« Tu prends le tracteur aujourd'hui ? »** — posé à la première ouverture du jour.
+
+### Pourquoi journalier, et pas permanent
+
+Le tracteur se prend **pour la journée entière** : on attelle le matin, on dételle le soir. Mais le
+lendemain la même personne peut repartir au terrain. **Un mode permanent se tromperait un jour sur
+deux ; une question à chaque ouverture serait redemandée alors qu'elle est tranchée à 8 h.**
+
+★★ **Un premier dessin proposait un mode collant, et l'objection était juste — mais pour la mauvaise
+raison.** L'argument « les journées sont mixtes » a été démenti par Nico, qui est chef d'équipe :
+elles sont homogènes **dans** la journée et variables **d'un jour à l'autre**. **C'était la
+granularité qui clochait, pas le concept.**
+
+### La question porte sur le FAIT, pas sur l'identité
+
+Deux tuiles : **« Oui, je prends le tracteur »** / **« Non, je suis au terrain »**. Pas
+« Ouvrier / Tractoriste » : un polyvalent n'a pas à choisir **qui il est** chaque matin, et
+« Ouvrier » se lirait comme une rétrogradation.
+
+### Qui reçoit la question
+
+`ouvrier` **ET** `tractoriste` **ET** pas `admin` (il a besoin de tout) **ET** au moins une session
+tracteur au statut « En cours ».
+⚠️ **Les traitements phyto vivent dans le même tableau `SESSIONS`** (`type:'traitement'`) et ne
+déclenchent pas la question.
+⚠️ **Pas de filtre sur le conducteur** : celui qui n'a pas encore créé sa session est précisément
+celui qui a besoin de l'écran.
+
+### Mémoire
+
+`mavigne_mode_<tenant>_<personne>`, **la date dans la VALEUR et non dans la clé** — la réponse d'hier
+expire d'elle-même à minuit, rien à purger. Même patron que `_hcKey` (Plein soleil).
+
+### ⚠️⚠️ Le mode ne touche AUCUN droit
+
+Il **range** le dock et choisit l'atterrissage. Une personne en mode terrain **reste tractoriste** au
+sens des rules et des gardes `isTractoriste()`.
+**Ne jamais écrire `if (_mvMode()==='tracteur')` comme garde de sécurité : ce n'en est pas une.**
+Une notion qui a besoin de cette phrase est fragile — d'où le commentaire en tête du bloc.
+
+**Rien ne disparaît** : ce qui sort des 4 cases du dock passe sous « Plus », qui porte aussi la
+**sortie du mode**. Un module introuvable coûte plus cher qu'un module de trop.
+
+### Le trou assumé
+
+Une session passe à « Terminé » à 100 %. **Le lendemain d'un chantier fini, il n'y a plus de session
+ouverte → pas de question ce matin-là.** Le tractoriste passe par le dock, crée sa session, et la
+question repart le jour suivant. **Ça s'auto-corrige en un jour** — le corriger voudrait dire poser
+la question à des gens qui ne prennent pas le tracteur, ce qui est pire.
+
+---
