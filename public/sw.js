@@ -1,4 +1,17 @@
-// MA VIGNE — Service Worker v6.43
+// MA VIGNE — Service Worker v6.44
+// v6.44 (11/08/2026) — L'accompagnement rattrape les deux lots du jour. La fiche
+//                       d'aide du Tracteur ne parlait NI du chrono inversé (v5.92)
+//                       NI du mode du jour (v5.93) : douze points au lieu de six,
+//                       dont les trois compteurs, le cadrage « ce n'est pas la
+//                       journée de travail », la mesure écartée et le chemin
+//                       d'activation (Réglages › Tracteur). La fiche Accueil gagne
+//                       la question du matin et le widget Mise en route. Trois
+//                       chemins de réglage qui manquaient : coupure (Planning ›
+//                       Outils), barème régional, rendement au pressoir.
+//                       ⚠️ BUG RÉEL trouvé en auditant : la visite guidée publique
+//                       annonçait « sur 14 » dans ses 13 étapes — un prospect la
+//                       terminait à « 13 sur 14 ». C22 ne lit pas le texte, il ne
+//                       pouvait pas le voir. Guide : 06-tracteur et 12-reglages.
 // v6.43 (11/08/2026) — Mode du jour. Le tracteur se prend pour la journee entiere,
 //                       mais le lendemain la meme personne repart au terrain : a la
 //                       1re ouverture du jour, si la personne cumule ouvrier ET
@@ -811,7 +824,7 @@
 // v2.22 — Fix profils vides : guard vide dans loadData() pour MEMBRES/SAISONS/TACHES
 // v2.17 — Onboarding intégré + tenantId · v2.06 — Firebase Auth · v2.00–v2.05 — divers
 const DEBUG = self.location.hostname === 'localhost' || self.location.hostname === '127.0.0.1';
-const CACHE_NAME   = 'mavigne-v6.43';
+const CACHE_NAME   = 'mavigne-v6.44';
 const TENANT_CACHE = 'mavigne-tenant';   // Cache persistant — préservé à chaque mise à jour SW
 const SYNC_TAG     = 'mavigne-sync';
 
@@ -827,7 +840,7 @@ const CDN_URLS = [
 ];
 
 self.addEventListener('install', event => {
-  if(DEBUG) console.log('[SW] Ma Vigne v6.43 installé');
+  if(DEBUG) console.log('[SW] Ma Vigne v6.44 installé');
   event.waitUntil(
     caches.open(CACHE_NAME).then(async cache => {
       // ── Cœur applicatif : STRICT (mise à jour ATOMIQUE) ──
@@ -843,7 +856,7 @@ self.addEventListener('install', event => {
 });
 
 self.addEventListener('activate', event => {
-  if(DEBUG) console.log('[SW] Ma Vigne v6.43 activé');
+  if(DEBUG) console.log('[SW] Ma Vigne v6.44 activé');
   event.waitUntil(
     caches.keys().then(keys =>
       Promise.all(

@@ -1942,48 +1942,48 @@ function _demo2Hyp(k){ for(var i=0;i<DEMO2_CREDITS.length;i++){ if(DEMO2_CREDITS
 //    La narration vit en bandeau bas (.mvt-bar) ; le spotlight (masques + ring)
 //    est conserv\u00e9 tel quel. Le 9e moment est l'addition (_mvtAddition).
 var _mvtSteps = [
-  { kick:'8 h \u00b7 moment 1 sur 14', tx:'Lundi. 7 hectares, 4 personnes \u2014 et la m\u00e9t\u00e9o d\u00e9j\u00e0 parcelle par parcelle. Aujourd\u2019hui, c\u2019est sec.',
+  { kick:'8 h \u00b7 moment 1 sur 13', tx:'Lundi. 7 hectares, 4 personnes \u2014 et la m\u00e9t\u00e9o d\u00e9j\u00e0 parcelle par parcelle. Aujourd\u2019hui, c\u2019est sec.',
     sel:['.home-w[data-w="meteo5"]','#home-meteo5'] },
-  { kick:'Le cap du jour \u00b7 2 sur 14', tx:'Avant que l\u2019\u00e9quipe arrive : la t\u00e2che du moment, un mot pour tous.',
+  { kick:'Le cap du jour \u00b7 2 sur 13', tx:'Avant que l\u2019\u00e9quipe arrive : la t\u00e2che du moment, un mot pour tous.',
     mission:'Touchez \u00ab Diffuser la priorit\u00e9 \u00bb',
     nav:function(){ try{ openPriorityEdit(); }catch(e){} }, sel:'#ovPriority .modal', clickSel:'#ovPriority .mbtn.verte' },
-  { kick:'9 h 40 \u00b7 3 sur 14', tx:'L\u2019\u00e9quipe vient de finir une parcelle. Notez-le.',
+  { kick:'9 h 40 \u00b7 3 sur 13', tx:'L\u2019\u00e9quipe vient de finir une parcelle. Notez-le.',
     mission:'Touchez le \u2713',
     nav:function(){ try{ pTacheFilter=window._visiteTache||'Ebourgeonnage'; }catch(e){} if(window.switchVigneOng) window.switchVigneOng('parcelles'); },
     sel:'.pcard-qv .pc-validate', clickSel:'.pcard-qv .pc-validate', actDelay:1700 },
-  { kick:'C\u2019est trac\u00e9 \u00b7 4 sur 14', tx:'Votre validation est au journal : parcelle, \u00e9quipe, m\u00e9t\u00e9o du jour. Rien \u00e0 remplir.',
+  { kick:'C\u2019est trac\u00e9 \u00b7 4 sur 13', tx:'Votre validation est au journal : parcelle, \u00e9quipe, m\u00e9t\u00e9o du jour. Rien \u00e0 remplir.',
     nav:function(){ if(window.switchVigneOng) window.switchVigneOng('journal'); try{ renderJournal(); }catch(e){} },
     sel:'.jcard', credit:{ k:'validation', min:5 } },
-  { kick:'16 h 20 \u00b7 5 sur 14', tx:'Le traitement d\u2019hier est au registre : n\u00b0 AMM, dose, DAR, ZNT remplis depuis le catalogue officiel E-Phy. Demain, la parcelle trait\u00e9e s\u2019affichera ferm\u00e9e.',
+  { kick:'16 h 20 \u00b7 5 sur 13', tx:'Le traitement d\u2019hier est au registre : n\u00b0 AMM, dose, DAR, ZNT remplis depuis le catalogue officiel E-Phy. Demain, la parcelle trait\u00e9e s\u2019affichera ferm\u00e9e.',
     nav:function(){ if(window.goTo) window.goTo('phyto'); },
     sel:'#page-phyto .content', credit:{ k:'phyto', min:20 } },
-  { kick:'16 h 30 \u00b7 6 sur 14', tx:'La R\u00e9serve a suivi toute seule : la bouillie du registre est sortie du stock. Achats, inventaires, f\u00fbts \u2014 et le bilan mati\u00e8re s\u2019\u00e9crit au fil des traitements.',
+  { kick:'16 h 30 \u00b7 6 sur 13', tx:'La R\u00e9serve a suivi toute seule : la bouillie du registre est sortie du stock. Achats, inventaires, f\u00fbts \u2014 et le bilan mati\u00e8re s\u2019\u00e9crit au fil des traitements.',
     hyp:'\u2248 4 h d\u2019inventaires par an \u2014 et le bilan mati\u00e8re r\u00e9glementaire toujours \u00e0 jour.',
     nav:function(){ if(window.goTo) window.goTo('reserve'); setTimeout(function(){ try{ if(window._rsvTabTo) window._rsvTabTo('audit'); }catch(e){ if(window.logError)window.logError({level:'info',cat:'visite',msg:'rsvTabTo'}); } },240); },
     sel:['#mvr-body','#page-reserve'] },
-  { kick:'17 h \u00b7 7 sur 14', tx:'Au Chai, chaque cuv\u00e9e suit ses f\u00fbts, sa part des anges et ses analyses \u2014 SO2 et acidit\u00e9 se comparent d\u2019un relev\u00e9 \u00e0 l\u2019autre, l\u2019ouillage en retard s\u2019est signal\u00e9 tout seul.',
+  { kick:'17 h \u00b7 7 sur 13', tx:'Au Chai, chaque cuv\u00e9e suit ses f\u00fbts, sa part des anges et ses analyses \u2014 SO2 et acidit\u00e9 se comparent d\u2019un relev\u00e9 \u00e0 l\u2019autre, l\u2019ouillage en retard s\u2019est signal\u00e9 tout seul.',
     hyp:'Suivi des cuv\u00e9es : \u2248 6 h de cahier de cave par an.',
     nav:function(){ if(window.goTo) window.goTo('cave'); setTimeout(function(){ try{ if(window.renderCave) renderCave(); }catch(e){ if(window.logError)window.logError({level:'error',cat:'visite',msg:'chai: '+(e&&e.message)}); } },240); },
     sel:['#mvc-elevage','#page-cave'] },
-  { kick:'17 h 15 \u00b7 8 sur 14', tx:'Le Cuvier suit la vendange cuve par cuve : un relev\u00e9 de densit\u00e9 par jour, et la cin\u00e9tique de fermentation se dessine toute seule.',
+  { kick:'17 h 15 \u00b7 8 sur 13', tx:'Le Cuvier suit la vendange cuve par cuve : un relev\u00e9 de densit\u00e9 par jour, et la cin\u00e9tique de fermentation se dessine toute seule.',
     hyp:'Apports, caisses, rendement par parcelle : tout se garde d\u2019un mill\u00e9sime \u00e0 l\u2019autre.',
     nav:function(){ if(window.goTo) window.goTo('cave'); setTimeout(function(){ try{ if(window.selectCaveSection) window.selectCaveSection('vendange'); }catch(e){ if(window.logError)window.logError({level:'error',cat:'visite',msg:'cuvier: '+(e&&e.message)}); } },260); },
     sel:['#mvv-body','#cave-view-vend','#page-cave'] },
-  { kick:'17 h 30 \u00b7 9 sur 14', tx:'Le pointage du soir tient en deux gestes. Et l\u2019\u00e9cart se voit : Jean, une heure de retard \u2014 saisie en heures, elle tire sur son compteur.',
+  { kick:'17 h 30 \u00b7 9 sur 13', tx:'Le pointage du soir tient en deux gestes. Et l\u2019\u00e9cart se voit : Jean, une heure de retard \u2014 saisie en heures, elle tire sur son compteur.',
     hyp:'La feuille d\u2019heures du soir n\u2019existe plus.',
     nav:function(){ if(window.goTo) window.goTo('planning'); },
     sel:['#page-planning .pl2-board','#page-planning'] },
-  { kick:'17 h 40 \u00b7 10 sur 14', tx:'La fiche de Jean, pr\u00eate pour la paie : acompte de 300 \u20ac, heures sup au compteur, retard et r\u00e9cup d\u00e9j\u00e0 compt\u00e9s \u2014 le relev\u00e9 MSA sort en PDF.',
+  { kick:'17 h 40 \u00b7 10 sur 13', tx:'La fiche de Jean, pr\u00eate pour la paie : acompte de 300 \u20ac, heures sup au compteur, retard et r\u00e9cup d\u00e9j\u00e0 compt\u00e9s \u2014 le relev\u00e9 MSA sort en PDF.',
     hyp:'\u2248 18 h de fins de mois par an \u2014 et chaque saisonnier de vendanges suivi sans classeur.',
     nav:function(){ setTimeout(function(){ try{ if(window.openPlanFiche) openPlanFiche('Jean'); }catch(e){ if(window.logError)window.logError({level:'info',cat:'visite',msg:'planFiche'}); } },180); },
     sel:['#ovPlanFiche .modal','#ovPlanFiche'] },
-  { kick:'18 h \u00b7 11 sur 14', tx:'Le soir, la d\u00e9cision du jour est pr\u00eate \u2014 fen\u00eatre de traitement, mat\u00e9riel, cave. Rien \u00e0 chercher.',
+  { kick:'18 h \u00b7 11 sur 13', tx:'Le soir, la d\u00e9cision du jour est pr\u00eate \u2014 fen\u00eatre de traitement, mat\u00e9riel, cave. Rien \u00e0 chercher.',
     nav:function(){ try{ if(window.closePlanFiche) closePlanFiche(); }catch(e2){ if(window.logError)window.logError({level:'info',cat:'visite',msg:'closeFiche'}); } try{ if(window.goTo) window.goTo('pilotage'); window.scrollTo(0,0); }catch(e){} },
     sel:['.pil-dec','.pil-cockpit-card','#page-pilotage .content'] },
-  { kick:'18 h 05 \u00b7 12 sur 14', tx:'Chaque parcelle porte son co\u00fbt r\u00e9el de main-d\u2019\u0153uvre \u2014 en euros, et \u00e0 l\u2019hectare, pond\u00e9r\u00e9 par l\u2019\u00e9quipe qui y est vraiment pass\u00e9e.',
+  { kick:'18 h 05 \u00b7 12 sur 13', tx:'Chaque parcelle porte son co\u00fbt r\u00e9el de main-d\u2019\u0153uvre \u2014 en euros, et \u00e0 l\u2019hectare, pond\u00e9r\u00e9 par l\u2019\u00e9quipe qui y est vraiment pass\u00e9e.',
     nav:function(){ try{ var b=document.querySelector('#pil-tabs [data-tab="eco"]'); if(b) b.click(); else if(window.logError) window.logError({level:'info',cat:'visite',msg:'onglet eco introuvable'}); }catch(e){ if(window.logError)window.logError({level:'info',cat:'visite',msg:'tab eco'}); } },
     sel:['.pil-tbody','.pil-panels','#page-pilotage .content'] },
-  { kick:'18 h 10 \u00b7 13 sur 14', tx:'La question du renfort : combien, et quand ? Demandez au moteur \u2014 il essaie des centaines de placements et ne garde que ce qui boucle.',
+  { kick:'18 h 10 \u00b7 13 sur 13', tx:'La question du renfort : combien, et quand ? Demandez au moteur \u2014 il essaie des centaines de placements et ne garde que ce qui boucle.',
     hyp:'Chaque proposition affiche son co\u00fbt \u2014 le classement se fait parmi ce qui boucle.',
     mission:'Touchez \u00ab Le meilleur placement trouv\u00e9 \u00bb',
     nav:function(){ try{ var b=document.querySelector('#pil-tabs [data-tab="sim"]'); if(b) b.click(); }catch(e){ if(window.logError)window.logError({level:'info',cat:'visite',msg:'tab sim'}); } },
@@ -9595,10 +9595,10 @@ function pQuickValidate(nom,evt){
     var pref=_pvPrefix(task),plan=_pvEffPlan(p,task);
     var cur=(p.taches[task]&&typeof p.taches[task]==='object')?Object.assign({},p.taches[task]):{ov:(p.taches[task]&&p.taches[task].ov!=null)?p.taches[task].ov:null};
     if(type==='niveaux'){
-      var done=[];for(var i=1;i<=plan;i++){if(cur[pref+i]==='Validé')done.push(i);}
+      var done=[],i;for(i=1;i<=plan;i++){if(cur[pref+i]==='Validé')done.push(i);}
       if(done.indexOf(pCurStep)<0)done.push(pCurStep);
       var auto=_computeAutoNiv(done,plan);
-      for(var i=1;i<=plan;i++){
+      for(i=1;i<=plan;i++){
         cur['n'+i]=(done.indexOf(i)>=0)?'Validé':(auto.indexOf(i)>=0?'Auto':(cur['n'+i]==='Commencé'?'Commencé':(cur['n'+i]||'Non démarré')));
       }
       extra.niveaux=done.slice().sort(function(a,b){return a-b;});

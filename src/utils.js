@@ -23,7 +23,7 @@ export const GT_ADMIN_EMAIL = 'ngdevpro@gmail.com';
 // WHATS_NEW   : tableau vide = modal desactive pour cette version.
 // Format item : { emoji:'📅', titre:'Titre court', desc:'Phrase utilisateur.' }
 // Regle : seulement les changements visibles par les utilisateurs.
-export const APP_VERSION = '5.93';
+export const APP_VERSION = '5.94';
 // ════ Journal des nouveautés (récap cumulatif) ════
 // Une entrée par version, la PLUS RÉCENTE EN HAUT : { v:'5.10', items:[ {emoji,titre,desc}, … ] }
 // À chaque release visible → AJOUTER un bloc en tête (ne pas remplacer). items:[] = release technique (rien à afficher).
@@ -341,6 +341,12 @@ window._mvGraphRepeindre = function(){
 };
 
 export const WHATS_NEW = [
+  { v:'5.94', items:[
+    { emoji:'\u{2753}', titre:'L\u2019aide du Tracteur ne parlait ni du chrono ni du mode du jour',
+      desc:"Deux changements r\u00e9cents \u2014 la coche qui lance la mesure, et la question \u00ab Tu prends le tracteur aujourd\u2019hui ? \u00bb \u2014 n\u2019\u00e9taient expliqu\u00e9s nulle part. La pastille \u00ab ? Aide \u00bb du Tracteur les d\u00e9crit maintenant : les trois compteurs, ce que le chrono mesure et ce qu\u2019il ne mesure pas, la mesure \u00e9cart\u00e9e, et o\u00f9 le domaine active le chrono. Celle de l\u2019Accueil dit \u00e0 quoi sert la question du matin, et rappelle qu\u2019elle ne change aucun droit." },
+    { emoji:'\u{1F4CB}', titre:'Trois r\u00e9glages dont l\u2019aide ne disait pas o\u00f9 ils se trouvaient',
+      desc:"L\u2019heure de la coupure d\u00e9jeuner (Planning, Outils), le bar\u00e8me de r\u00e9f\u00e9rence de votre r\u00e9gion et votre rendement au pressoir en kilos par hectolitre (Cave, Le Cuvier, R\u00e9glages) existaient tous les trois, mais rien ne menait \u00e0 eux. Les fiches d\u2019aide du Planning, des R\u00e9glages et de la Cave indiquent d\u00e9sormais le chemin." }
+  ]},
   { v:'5.93', items:[
     { emoji:'\uD83D\uDE9C', titre:'\u00ab\u00a0Tu prends le tracteur aujourd\'hui\u00a0?\u00a0\u00bb',
       desc:"Si tu es \u00e0 la fois ouvrier et tractoriste et qu'une session tracteur est ouverte, l'app pose la question \u00e0 la premi\u00e8re ouverture du jour. Ta r\u00e9ponse tient la journ\u00e9e\u00a0; demain elle se repose." },
@@ -1448,10 +1454,12 @@ var MV_AIDE = {
     ico: '\u{1F33F}', titre: 'Accueil', ancre: 'vigne',
     points: [
       ['La priorité du moment', "reste épinglée en haut : c’est ce que l’équipe attaque aujourd’hui."],
+      ['La mise en route', "n’apparaît que chez l’administrateur d’un domaine neuf : sept étapes qui se cochent en lisant ce qui est déjà enregistré, rien à pointer à la main. Le bloc s’efface tout seul quand tout est fait."],
       ['Ma part du chantier', "montre ce que vous avez fait vous-même sur le travail en cours ; « Ma trace » ouvre le détail de votre campagne. Ce sont des hectares, jamais des heures, et rien n’est comparé entre collègues."],
       ['Appui long puis glisser', "déplace un bloc ; l’œil le masque. Chacun règle son Accueil."],
       ['La pastille de saison', "change la vue. Revenir sur une période passée ne touche pas à la période active."],
       ['Actualiser', "force une resynchronisation quand un chiffre semble figé."],
+      ['« Tu prends le tracteur aujourd’hui ? »', "se pose à la première ouverture du jour, à ceux qui sont à la fois ouvriers et tractoristes et seulement si une session tracteur est ouverte. La réponse tient la journée et se repose le lendemain. Elle range le menu du bas et choisit l’écran d’ouverture : elle ne change aucun de vos droits, et rien ne disparaît — le reste passe sous « Plus », où se trouve aussi le retour au terrain."],
       ['La météo a besoin du réseau.', "Hors ligne, elle affiche la dernière prévision reçue."]
     ]
   },
@@ -1481,6 +1489,12 @@ var MV_AIDE = {
       ['Onglet Sessions', ": le travail fait avec la machine. Onglet Entretien : révisions, réparations, appoints de cuve."],
       ['Le parc', "s’affiche en pastilles sous les chiffres — toucher une machine filtre l’écran."],
       ['Une session en cours', "reste signalée en haut tant qu’elle n’est pas fermée."],
+      ['Toucher la parcelle où vous commencez', "démarre la mesure : il n’y a rien à appuyer avant. « J’ai fini » la ferme. Toucher directement la parcelle suivante enchaîne sans compter de déplacement, et un appui long ajoute une parcelle à celle en cours — leur temps se partage à la surface. Verrouiller son téléphone ne perd plus rien : la mesure est retrouvée à la réouverture, même des heures après."],
+      ['Trois compteurs, pas un', ": le temps passé dans les parcelles, le temps hors parcelle — trajets, ravitaillement, réglage, qui sont du travail eux aussi — et la pause déjeuner, qui n’en est pas. Le bouton pause interrompt sans refermer la parcelle en cours."],
+      ['Ce chrono ne fait pas votre journée de travail', ": il mesure le temps passé dans les parcelles, pour budgéter les travaux. Le lavage, les niveaux et le plein n’y sont pas."],
+      ['Une mesure aberrante est écartée', ": très au-dessus ou très en dessous du barème, la parcelle est cochée au barème sans temps constaté, et l’écran dit lequel. Si cela arrive tous les jours, c’est le barème h/ha de l’activité qui est à revoir, pas celui qui conduit."],
+      ['Les parcelles se rangent par distance', "à celle où vous êtes ; une tournée fixée par le chef passe devant. Les distances viennent des contours de vos parcelles, jamais d’un suivi de votre position."],
+      ['Le chrono s’active par le domaine', ": Réglages, onglet Tracteur, en tête des activités. Sans lui, le barème h/ha prend le relais et rien ne se mesure."],
       ['L’appoint de cuve GNR', "remonte le niveau et recalcule le prix du litre en moyenne pondérée."],
       ['Le carnet d’entretien', "s’imprime machine par machine depuis Réglages, onglet App, « Documents & impressions »."],
       ['Rôle Tractoriste requis', "pour écrire : sans lui, l’écran passe en consultation seule."]
@@ -1505,7 +1519,7 @@ var MV_AIDE = {
       ['Toucher un jour', "ouvre l’éditeur, qui enchaîne jour suivant et salarié suivant sans quitter l’écran."],
       ['Sélection multiple', ": congés, absence, récup ou horaires chaleur sur plusieurs jours d’un coup."],
       ['Les heures dues', "se décomptent sur une absence injustifiée ou un retard. Un arrêt de travail est neutre, une formation compte comme du travail."],
-      ['Présence, coupure, heures dues', "trois nombres qui se ressemblent et ne disent pas la même chose. La ‹‹ présence ›› va de l’arrivée au départ. La ‹‹ coupure ›› est le temps non travaillé au milieu — sa durée et son heure sont fixées par le domaine, ce n’est pas un moment que chacun choisit. Les ‹‹ heures dues ›› sont ce qui part en paie et alimente le compteur des 1 607 h. Une journée de 09:00 à 16:00 avec une heure de coupure fait 7 h de présence et 6 h dues."],
+      ['Présence, coupure, heures dues', "trois nombres qui se ressemblent et ne disent pas la même chose. La ‹‹ présence ›› va de l’arrivée au départ. La ‹‹ coupure ›› est le temps non travaillé au milieu : sa durée et son heure sont fixées par le domaine, dans Outils puis « Modèles, cadre légal & coupure », ce n’est pas un moment que chacun choisit. Les ‹‹ heures dues ›› sont ce qui part en paie et alimente le compteur des 1 607 h. Une journée de 09:00 à 16:00 avec une heure de coupure fait 7 h de présence et 6 h dues."],
       ['Le planning de l’année', "s’imprime depuis le même endroit : le rythme sur douze mois, avec les heures de prise et de fin de service et la coupure déjeuner. Une page par modèle de semaine, pas une par salarié — c’est le document qu’on remet à l’équipe pour l’année à venir."],
       ['Le relevé mensuel', "s’imprime depuis Réglages, onglet App, « Documents & impressions ». C’est un relevé d’heures, pas un bulletin de paie."],
       ['Taux horaires et acomptes', ": administrateurs seulement, et jamais enregistrés sur l’appareil."]
@@ -1522,6 +1536,7 @@ var MV_AIDE = {
       ['Le délai d’ouillage', "se règle pour tout le domaine, et se resserre millésime par millésime — un vin jeune se surveille de plus près."],
       ['La fin de fermentation et la fin de malo', "sont estimées à partir de vos propres relevés : la densité pour l’une, l’acide malique pour l’autre. Sans trois mesures, l’écran dit « démarrage » plutôt qu’une date inventée."],
       ['Le millésime', "annonce ce qui vient dans les quatre prochaines semaines, puis retrace le parcours du vin, de la benne à la bouteille."],
+      ['Votre rendement au pressoir', "se règle au Cuvier, onglet Réglages, en kilos de raisin par hectolitre. Tous les écrans qui transforment des raisins en volume s’en servent — la chaîne de la récolte à la bouteille comme le bilan de campagne."],
       ['Les analyses labo', "s’attachent en PDF à la cuvée. Les supprimer est réservé à l’administrateur."],
       ['Registre des manipulations et bilan de campagne', "s’impriment depuis Réglages, onglet App, « Documents & impressions ». Ce sont des états internes : Ma Vigne prépare, vous déclarez."]
     ]
@@ -1564,6 +1579,7 @@ var MV_AIDE = {
       },
       ['Onglet Vigne', ": vos tâches, leurs heures par hectare, le barème de la convention, vos écartements de plantation et vos périodes de travail."],
       ['Vos écartements', "ramènent les heures conseillées à votre densité réelle. Sans eux, le barème suppose 10 000 pieds à l’hectare — vos heures à vous, elles, ne bougent jamais."],
+      ['Le barème de référence', "se choisit par région dans l’écran du barème, ouvert par « Nouvelle tâche selon le barème de la convention » : la Bourgogne ou la Gironde pour l’instant, chacune avec son texte source et sa date. C’est une référence, pas une règle : en changer ne modifie aucune de vos valeurs."],
       ['Le mot de passe initial', "d’un nouveau membre s’affiche une seule fois — notez-le avant de fermer."],
       ['Passer un membre en inactif', "plutôt que le supprimer conserve son historique."],
       ['Documents & impressions', "dans l’onglet App rassemble tout ce que Ma Vigne sait sortir : ce qui est obligatoire en contrôle, vos états internes, et vos données brutes."],

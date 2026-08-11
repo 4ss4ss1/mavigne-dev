@@ -19,14 +19,15 @@ const __dirname = path.dirname(fileURLToPath(import.meta.url));
 const root = path.join(__dirname, '..');
 
 // ---- LE PLAFOND ------------------------------------------------------------
-// 1 erreur toleree au 10/08/2026 :
-//   src/app.js:9498  'i' is already defined (no-redeclare)
-//   -> deux boucles `for(var i=1;i<=plan;i++)` dans le meme bloc. SANS EFFET
-//      (la 2e reutilise le meme compteur, deja remis a 1). Cosmetique.
-//      Corrige seule, elle imposerait un bump APP + SW pour un renommage :
-//      a plier dans le prochain lot qui touche app.js de toute facon.
-//      ⚠️ EN LA CORRIGEANT, PASSER CE PLAFOND A 0.
-const PLAFOND = 1;
+// ZERO depuis le 11/08/2026 (lot accompagnement v5.94).
+// La seule erreur toleree jusque-la etait :
+//   src/app.js  'i' is already defined (no-redeclare) — deux boucles
+//   `for(var i=1;i<=plan;i++)` dans le meme bloc, SANS EFFET (var, meme borne).
+//   Elle attendait un lot touchant app.js pour ne pas coûter un bump a elle
+//   seule : c'est fait, le compteur est declare une fois en tete du bloc.
+// ⚠️ Le plafond est un CLIQUET : il descend, il ne remonte pas. Une erreur
+//    nouvelle se corrige — on ne releve ce nombre qu'en le JUSTIFIANT ici.
+const PLAFOND = 0;
 
 // ---- execution -------------------------------------------------------------
 const bin = path.join(root, 'node_modules', 'eslint', 'bin', 'eslint.js');
