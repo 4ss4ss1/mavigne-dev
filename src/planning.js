@@ -379,7 +379,13 @@ function _planDefTiming(pl,plId,m,d,yr){
     var parts=debutStr.split(':');
     var startMin=parseInt(parts[0])*60+parseInt(parts[1]||0);
     var P=(window.PLAN_PAUSE_MIN!=null?window.PLAN_PAUSE_MIN:(PLAN_PAUSE_MIN!=null?PLAN_PAUSE_MIN:60));
-    var pauseMin=(!continu&&plH>6)?P:0;
+    // Seuil a 6 h INCLUS, pas au-dela. La loi n'impose la pause qu'au-dela de
+    // 6 h de travail effectif, mais la question posee ici n'est pas legale :
+    // c'est « cette journee enjambe-t-elle midi ». Une journee de 6 h qui prend
+    // a 09:00 finit a 16:00 avec la coupure, pas a 15:00 — c'est le cas reel des
+    // jours a horaire decale, ou l'on debauche avec le reste de l'equipe.
+    // Une journee de 6 h reellement faite d'une traite se marque `continu`.
+    var pauseMin=(!continu&&plH>=6)?P:0;
     var endMin=startMin+Math.round(plH*60)+pauseMin;
     return String(Math.floor(endMin/60)).padStart(2,'0')+':'+String(endMin%60).padStart(2,'0');
   }
