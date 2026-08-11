@@ -1443,8 +1443,6 @@ body.mv-trial-on #app-root{padding-top:calc(env(safe-area-inset-top,0px) + 44px)
 .cave-stat-sep{width:1px;background:rgba(192,132,90,0.12);}
 .cave-stat-val{font-size:18px;font-weight:600;color:#C0845A;}
 .cave-stat-lbl{font-size:10px;color:rgba(240,232,220,0.38);margin-top:1px;}
-/* Onglets */
-.cave-tabs{display:flex;border-bottom:1px solid rgba(192,132,90,0.1);}
 /* Section labels */
 .cave-sec-lbl{font-size:10px;font-weight:700;letter-spacing:.9px;text-transform:uppercase;color:var(--texte-doux);opacity:.6;margin-bottom:9px;margin-top:2px;}
 /* ── Sélecteur de sections Cave ── */
@@ -2081,7 +2079,11 @@ body.mv-trial-on #app-root{padding-top:calc(env(safe-area-inset-top,0px) + 44px)
   .pil-mast-right{width:100%;justify-content:space-between;gap:12px;}
   .pil-charts{grid-template-columns:1fr;}
 }
-@media(max-width:760px){
+/* ⚠️ 767.98 et NON 760 : entre 761 et 767 px, ni cette regle ni le
+   @media(min-width:768px) ne s'appliquaient. Le corps restait a 430 px pendant
+   que .pil-hero gardait sa grille a deux colonnes — sept pixels de largeur ou
+   l'ecran le plus regarde du Pilotage se rendait de travers, sans erreur. */
+@media(max-width:767.98px){
   .pil-hero{grid-template-columns:1fr;gap:16px;text-align:center;}
   .pil-verdict .vk{justify-content:center;}
   .pil-verdict .vsub{margin:0 auto;}

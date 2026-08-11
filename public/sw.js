@@ -1,4 +1,20 @@
-// MA VIGNE — Service Worker v6.46
+// MA VIGNE — Service Worker v6.47
+// v6.47 (11/08/2026) — Lot d'hygiene, cinq points verifies un par un sur le code.
+//                       ⚠️ DEFAUT REEL : la meteo enregistree au journal a la
+//                       validation d'une tache remontait jusqu'a la PREMIERE ligne
+//                       « En cours » du journal, sans aucune borne. Une tache restee
+//                       ouverte d'une campagne a l'autre faisait moyenner quatorze
+//                       mois de meteo, et le chiffre partait dans la tracabilite.
+//                       Desormais borne a la periode de la validation, avec repli
+//                       sur la campagne puis sur le jour meme.
+//                       Entre 761 et 767 px de large, l'ecran d'accueil du Pilotage
+//                       se rendait de travers : aucune des deux regles responsive ne
+//                       s'appliquait. Sept pixels de trou, referme.
+//                       Menage : le calcul du pic hebdomadaire du simulateur de
+//                       renfort, calcule et jamais lu ; une regle CSS d'onglets de
+//                       Cave devenue orpheline ; et 44 couleurs de repli a 3,66:1,
+//                       sous le seuil AA — invisibles (la variable est toujours
+//                       definie) mais fausses.
 // v6.46 (11/08/2026) — Planning, lot 2 : trois onglets, un verbe chacun (mois /
 //                       gens / cadre), table _PLAN_TAB_MIGR pour l'onglet memorise.
 //                       L'ouvrier n'a plus d'onglets et tombe sur son mois. Fin du
@@ -854,7 +870,7 @@
 // v2.22 — Fix profils vides : guard vide dans loadData() pour MEMBRES/SAISONS/TACHES
 // v2.17 — Onboarding intégré + tenantId · v2.06 — Firebase Auth · v2.00–v2.05 — divers
 const DEBUG = self.location.hostname === 'localhost' || self.location.hostname === '127.0.0.1';
-const CACHE_NAME   = 'mavigne-v6.46';
+const CACHE_NAME   = 'mavigne-v6.47';
 const TENANT_CACHE = 'mavigne-tenant';   // Cache persistant — préservé à chaque mise à jour SW
 const SYNC_TAG     = 'mavigne-sync';
 
@@ -870,7 +886,7 @@ const CDN_URLS = [
 ];
 
 self.addEventListener('install', event => {
-  if(DEBUG) console.log('[SW] Ma Vigne v6.46 installé');
+  if(DEBUG) console.log('[SW] Ma Vigne v6.47 installé');
   event.waitUntil(
     caches.open(CACHE_NAME).then(async cache => {
       // ── Cœur applicatif : STRICT (mise à jour ATOMIQUE) ──
@@ -886,7 +902,7 @@ self.addEventListener('install', event => {
 });
 
 self.addEventListener('activate', event => {
-  if(DEBUG) console.log('[SW] Ma Vigne v6.46 activé');
+  if(DEBUG) console.log('[SW] Ma Vigne v6.47 activé');
   event.waitUntil(
     caches.keys().then(keys =>
       Promise.all(

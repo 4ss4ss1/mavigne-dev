@@ -23,7 +23,7 @@ export const GT_ADMIN_EMAIL = 'ngdevpro@gmail.com';
 // WHATS_NEW   : tableau vide = modal desactive pour cette version.
 // Format item : { emoji:'📅', titre:'Titre court', desc:'Phrase utilisateur.' }
 // Regle : seulement les changements visibles par les utilisateurs.
-export const APP_VERSION = '5.96';
+export const APP_VERSION = '5.97';
 // ════ Journal des nouveautés (récap cumulatif) ════
 // Une entrée par version, la PLUS RÉCENTE EN HAUT : { v:'5.10', items:[ {emoji,titre,desc}, … ] }
 // À chaque release visible → AJOUTER un bloc en tête (ne pas remplacer). items:[] = release technique (rien à afficher).
@@ -341,6 +341,10 @@ window._mvGraphRepeindre = function(){
 };
 
 export const WHATS_NEW = [
+  { v:'5.97', items:[
+    { emoji: '\u{1F326}\u{FE0F}', titre: "La m\u00e9t\u00e9o enregistr\u00e9e \u00e0 la validation d\u2019une t\u00e2che", desc: "Quand vous validez une t\u00e2che sur une parcelle, l\u2019application enregistre au journal la m\u00e9t\u00e9o moyenne du chantier. Elle la calculait depuis la toute premi\u00e8re fois o\u00f9 cette t\u00e2che avait \u00e9t\u00e9 mise « en cours » sur cette parcelle \u2014 m\u00eame si c\u2019\u00e9tait la campagne d\u2019avant, sur une ligne rest\u00e9e ouverte par oubli. Une taille valid\u00e9e en mars pouvait ainsi porter la moyenne de quatorze mois. Le calcul s\u2019arr\u00eate maintenant au d\u00e9but de la p\u00e9riode en cours. Les m\u00e9t\u00e9os d\u00e9j\u00e0 enregistr\u00e9es ne changent pas." },
+    { emoji: '\u{1F4F1}', titre: "L\u2019accueil du Pilotage sur \u00e9cran \u00e9troit", desc: "Sur les \u00e9crans d\u2019une largeur tr\u00e8s pr\u00e9cise \u2014 certaines tablettes en portrait, une fen\u00eatre de navigateur r\u00e9duite \u00e0 la main \u2014 le bandeau du haut du Pilotage gardait deux colonnes dans un espace pr\u00e9vu pour une seule. Le texte se tassait. C\u2019est corrig\u00e9." }
+  ]},
   { v:'5.96', items:[
     { emoji:'\u{1F5C2}', titre:'Le planning en trois onglets',
       desc:"Le module m\u00e9langeait trois choses qui ne se font ni au m\u00eame rythme ni par la m\u00eame personne. Elles ont chacune leur onglet\u00a0: <b>Le mois</b>, la grille de l\u2019\u00e9quipe\u00a0; <b>Les gens</b>, une ligne par salari\u00e9 avec sa fiche, le r\u00e9cap annuel et les anciens salari\u00e9s\u00a0; <b>Le cadre</b>, les mod\u00e8les de semaine, la coupure, la convention, les cong\u00e9s et les heures sup. Si vous n\u2019\u00eates pas administrateur, vous n\u2019avez plus d\u2019onglets du tout\u00a0: vous arrivez directement sur votre mois." },

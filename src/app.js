@@ -3112,11 +3112,42 @@ async function fetchMeteo(){
 
 // ════ MÉTÉO MOYENNE SUR PÉRIODE DE TÂCHE ════
 
-// Trouve la date de la première entrée "En cours" pour un triplet parcelle+tâche
-function _findDebutTache(parcelle, tache){
+// Trouve la date de la première entrée "En cours" pour un triplet parcelle+tâche,
+// DANS LA PERIODE DE LA VALIDATION — jamais au-dela.
+// ⚠️⚠️ DEFAUT REEL corrige le 11/08 : la fonction prenait le minimum sur TOUT le
+// journal, sans borne. Une entree « En cours » restee ouverte d'une campagne a
+// l'autre — un oubli de validation, ce qui arrive — faisait calculer la moyenne
+// meteo sur quatorze mois. Le resultat partait dans `meteo_snapshot`, donc DANS
+// LA TRACABILITE, avec l'autorite d'une mesure et aucun signe exterieur.
+// Meme famille que l'ecart de cadence : un indicateur bati sur un signal non
+// borne ment sans le dire.
+// Escalier de bornes, du plus precis au plus sur :
+//   1. la PERIODE de `dateRef` (_saisonForDate) — c'est le vocabulaire de
+//      l'utilisateur, et c'est la borne du reste de l'app (_mvFinChantier fait
+//      exactement ce filtre) ;
+//   2. a defaut de periodes saisies, la CAMPAGNE (_mvCampagneDe, source unique
+//      de utils.js, ouverture au 1er aout) ;
+//   3. a defaut de tout, `dateRef` elle-meme — une moyenne d'un seul jour vaut
+//      mieux qu'une moyenne de quatorze mois.
+// ⚠️ `dateRef` est la date de la VALIDATION, pas la date du jour : rejouer une
+// validation anterieure doit borner sur SA periode, pas sur la periode courante.
+function _findDebutTache(parcelle, tache, dateRef){
+  var ref=dateRef||new Date().toISOString().split('T')[0];
   var enc=JOURNAL.filter(function(j){return j.parcelle===parcelle&&j.tache===tache&&j.statut==='En cours'&&!j.meteo;});
   if(!enc.length)return null;
-  return enc.reduce(function(min,j){return j.date<min?j.date:min;},enc[0].date);
+  var per=(typeof window._saisonForDate==='function')?window._saisonForDate(ref):'';
+  var dans;
+  if(per){
+    dans=function(d){ return window._saisonForDate(d)===per; };
+  }else if(typeof window._mvCampagneDe==='function'){
+    var camp=window._mvCampagneDe(ref);
+    dans=function(d){ return window._mvCampagneDe(d)===camp; };
+  }else{
+    dans=function(d){ return d===ref; };
+  }
+  var ok=enc.filter(function(j){ return j.date<=ref && dans(j.date); });
+  if(!ok.length)return null;
+  return ok.reduce(function(min,j){return j.date<min?j.date:min;},ok[0].date);
 }
 
 // Récupère la météo moyenne sur une plage de dates via Open-Meteo (daily)
@@ -6314,19 +6345,19 @@ function _dpRendInjectCss(){
 .dprh-card{margin-top:14px;background:var(--bg-card,#FBFAF6);border:1px solid rgba(138,90,56,.14);border-radius:14px;padding:13px 14px}
 .dprh-head{font-size:12px;font-weight:700;letter-spacing:.02em;color:var(--terre,#8A5A38);display:flex;align-items:center;gap:7px;margin-bottom:11px}
 .dprh-ico{font-size:15px}
-.dprh-surf{margin-left:auto;font-size:11px;font-weight:500;color:var(--texte-doux,#8B8175)}
+.dprh-surf{margin-left:auto;font-size:11px;font-weight:500;color:var(--texte-doux,#5F5F5F)}
 .dprh-row{display:flex;align-items:center;gap:9px}
 .dprh-yr{font-family:'Cormorant Garamond',Georgia,serif;font-weight:700;font-size:18px;color:var(--texte,#2A241C);width:46px;flex-shrink:0}
 .dprh-bar{flex:1;height:8px;border-radius:5px;background:rgba(138,90,56,.1);overflow:hidden}
 .dprh-fill{height:100%;border-radius:5px;background:linear-gradient(90deg,var(--terre,#8A5A38),var(--or,#C9A84C))}
 .dprh-val{font-family:'Cormorant Garamond',Georgia,serif;font-weight:700;font-size:17px;color:var(--bordeaux,#7A1020);width:98px;text-align:right;flex-shrink:0;line-height:1.05}
-.dprh-u{font-family:inherit;font-size:9px;color:var(--texte-doux,#8B8175);font-weight:400}
+.dprh-u{font-family:inherit;font-size:9px;color:var(--texte-doux,#5F5F5F);font-weight:400}
 .dprh-d{width:58px;text-align:right;flex-shrink:0;font-size:11px;font-weight:700}
 .dprh-d.up{color:var(--vert-med,#3D6B27)}
 .dprh-d.down{color:#B85A1A}
-.dprh-d.flat{color:var(--texte-doux,#8B8175)}
-.dprh-sub2{font-size:10.5px;color:var(--texte-doux,#8B8175);margin:3px 0 12px 55px}
-.dprh-empty{font-size:11.5px;color:var(--texte-doux,#8B8175);font-style:italic}
+.dprh-d.flat{color:var(--texte-doux,#5F5F5F)}
+.dprh-sub2{font-size:10.5px;color:var(--texte-doux,#5F5F5F);margin:3px 0 12px 55px}
+.dprh-empty{font-size:11.5px;color:var(--texte-doux,#5F5F5F);font-style:italic}
 `;
   document.head.appendChild(s);
 }
@@ -6876,7 +6907,7 @@ async function confirmValidation(){
   var jEntry={id:Date.now().toString(16),date,parcelle:_validParcelle,tache:_validTache,qui:currentUser.nom,statut:'Validé',equipe,membresEquipe};
   if(trous)jEntry.plantation_trous=trous;
   // Météo moyenne sur la période de la tâche (du premier "En cours" à aujourd'hui)
-  var _mDeb=_findDebutTache(_validParcelle,_validTache)||date;
+  var _mDeb=_findDebutTache(_validParcelle,_validTache,date)||date;
   var _mSnap=await fetchMeteoMoyenne(_mDeb,date);
   if(_mSnap)jEntry.meteo_snapshot=_mSnap;
   JOURNAL.unshift(jEntry);
@@ -6961,7 +6992,7 @@ async function saveJournalEntry(){
   var jEntry={id:Date.now().toString(16),date,parcelle,tache,qui:currentUser.nom,statut,equipe,membresEquipe};
   // Météo moyenne si validation
   if(statut==='Validé'){
-    var _mDeb=_findDebutTache(parcelle,tache)||date;
+    var _mDeb=_findDebutTache(parcelle,tache,date)||date;
     var _mSnap=await fetchMeteoMoyenne(_mDeb,date);
     if(_mSnap)jEntry.meteo_snapshot=_mSnap;
   }
@@ -9624,7 +9655,7 @@ function pQuickValidate(nom,evt){
   } else {
     _pvToast('✅ '+label+' · '+nom+' · '+who, function(){pQuickUndoEntry(nom,task,prev,jid);});
   }
-  (async function(){try{var _d=_findDebutTache(nom,task)||date;var _m=await fetchMeteoMoyenne(_d,date);if(_m){jEntry.meteo_snapshot=_m;saveData('journal');}}catch(e){}})();
+  (async function(){try{var _d=_findDebutTache(nom,task,date)||date;var _m=await fetchMeteoMoyenne(_d,date);if(_m){jEntry.meteo_snapshot=_m;saveData('journal');}}catch(e){}})();
   var card=evt&&evt.target?evt.target.closest('.pcard'):null;
   if(!pShowDone&&card&&_pvCurDone(p,task)){
     card.classList.add('pv-removing');

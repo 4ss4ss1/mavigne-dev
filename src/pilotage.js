@@ -1956,8 +1956,12 @@ function _rfCtx(d,mode,cdIn){
                capHPerm:(w.capHPerm!=null?w.capHPerm*fr:null), capPayPerm:(w.capPayPerm!=null?w.capPayPerm*fr:null) };
     });
   }
-  var capT=0, pic=0;
-  W.forEach(function(w){ capT+=(w.cap||0); if((w.need||0)>pic) pic=w.need; });
+  // ★ `pic` (le besoin hebdomadaire maximal) etait calcule ici et renvoye dans le
+  //   contexte depuis toujours — AUCUN appelant ne l'a jamais lu. Retire le 11/08
+  //   apres verification (`grep '.pic'` = 0 consommateur). Le pic AFFICHE dans le
+  //   Pilotage est calcule ailleurs, sur l'echelle des semaines.
+  var capT=0;
+  W.forEach(function(w){ capT+=(w.cap||0); });
   if(!(capT>0)) return null;
   // ETP tracteur : MESURE sur la campagne ENTIERE dans les deux modes. Le
   // rapporter aux seules semaines restantes ferait exploser le ratio.
@@ -2008,7 +2012,7 @@ function _rfCtx(d,mode,cdIn){
   var rPic=0; W.forEach(function(w,j){ var bs=(w.need||0)-(dispo[j]||0); if(bs>rPic) rPic=bs; });
   var headMoy=capT>0?W.reduce(function(a,w,j){return a+head[j]*(w.cap||0);},0)/capT:0;
   var headMesMoy=capT>0?W.reduce(function(a,w,j){return a+headMes[j]*(w.cap||0);},0)/capT:0;
-  return { cd:cd, W:W, tw:tw, capT:capT, pic:pic, c:c, rate:rate,
+  return { cd:cd, W:W, tw:tw, capT:capT, c:c, rate:rate,
            head:head, headMes:headMes, dispo:dispo, headMoy:headMoy,
            headMesMoy:headMesMoy, dP:dP, trac:trac,
            mode:(reste?'reste':'plan'), nSkip:nSkip, oDep:oDep, oToday:oT,
