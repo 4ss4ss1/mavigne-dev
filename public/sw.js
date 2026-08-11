@@ -1,4 +1,19 @@
-// MA VIGNE — Service Worker v6.41
+// MA VIGNE — Service Worker v6.42
+// v6.42 (11/08/2026) — Chrono tracteur inversé : la coche EST le chrono. Toucher
+//                       une parcelle démarre la mesure, « J'ai fini » la ferme,
+//                       toucher la suivante enchaîne sans compter de déplacement,
+//                       appui long = bloc partagé à la surface. Trois compteurs
+//                       séparés (dans les parcelles / hors parcelle / pause
+//                       déjeuner) et un cadrage explicite : ce chrono BUDGÈTE les
+//                       travaux, il ne fait pas la journée de travail (lavage,
+//                       niveaux, plein n'y sont pas). État persisté avec t0 ABSOLU
+//                       — un téléphone verrouillé ne perd plus la mesure, c'était
+//                       le vrai défaut. Mesure hors seuils barème (3× / 40 % / 12 h)
+//                       écartée : pas de dmin écrit, la parcelle retombe au barème
+//                       par le chemin déjà existant, et l'écart est DIT. Liste des
+//                       parcelles rangée par distance au point courant (centroïdes
+//                       KML, aucune géolocalisation du tractoriste) ; une tournée
+//                       rangée par le chef reste prioritaire.
 // v6.41 (11/08/2026) — Vocabulaire du planning : « pause déjeuner » devient
 //                       « coupure déjeuner », le mot pause restant réservé à la
 //                       pause légale. Nouveau réglage de l'heure de coupure
@@ -785,7 +800,7 @@
 // v2.22 — Fix profils vides : guard vide dans loadData() pour MEMBRES/SAISONS/TACHES
 // v2.17 — Onboarding intégré + tenantId · v2.06 — Firebase Auth · v2.00–v2.05 — divers
 const DEBUG = self.location.hostname === 'localhost' || self.location.hostname === '127.0.0.1';
-const CACHE_NAME   = 'mavigne-v6.41';
+const CACHE_NAME   = 'mavigne-v6.42';
 const TENANT_CACHE = 'mavigne-tenant';   // Cache persistant — préservé à chaque mise à jour SW
 const SYNC_TAG     = 'mavigne-sync';
 
@@ -801,7 +816,7 @@ const CDN_URLS = [
 ];
 
 self.addEventListener('install', event => {
-  if(DEBUG) console.log('[SW] Ma Vigne v6.41 installé');
+  if(DEBUG) console.log('[SW] Ma Vigne v6.42 installé');
   event.waitUntil(
     caches.open(CACHE_NAME).then(async cache => {
       // ── Cœur applicatif : STRICT (mise à jour ATOMIQUE) ──
@@ -817,7 +832,7 @@ self.addEventListener('install', event => {
 });
 
 self.addEventListener('activate', event => {
-  if(DEBUG) console.log('[SW] Ma Vigne v6.41 activé');
+  if(DEBUG) console.log('[SW] Ma Vigne v6.42 activé');
   event.waitUntil(
     caches.keys().then(keys =>
       Promise.all(

@@ -58,6 +58,12 @@ jobs:
       - name: ESLint — cliquet anti-regression
         run: node scripts/lint-cliquet.mjs
 
+      # Cliquet de vocabulaire : « pause dejeuner » est banni du PLANNING (le mot
+      # designe en droit un droit du salarie). Il etait ecrit depuis le 11/08 mais
+      # AUCUN appelant ne l'executait — ni npm run lint, ni la CI. Branche ici.
+      - name: Vocabulaire — presence / coupure / heures dues
+        run: node scripts/lint-vocabulaire.mjs
+
       # Vite + inject-precache (postbuild, idempotent).
       - name: Build
         run: npm run build

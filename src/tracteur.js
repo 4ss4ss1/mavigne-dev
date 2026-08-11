@@ -1480,17 +1480,53 @@ function _fillNewSessionForm(){
 }
 let sdShowDone=false;
 let sdSkipMode=false;
-/* ============ CHRONO PAR PARCELLE (session tracteur) - opt-in CONFIG.chrono_mode ============
-   Mesure le temps reel par parcelle. Portee = les parcelles cochees pendant que le chrono tourne
-   (partagent le temps, reparti a la surface). La SURFACE reste la metrique d'avancement ; le temps
-   est un attribut ADDITIF de parcellesFaites : {nom, t0, t1, ps, dmin, grp}. Sans chrono, la coche
-   reste au bareme (comportement historique). Desactive pour les activites a champ custom (Tariere)
-   et quand CONFIG.chrono_mode !== 'on'. Aucun trace GPS n'est stocke. */
-var _chrono = {state:'idle', t0:0, segStart:0, accumMs:0, pauseMs:0, pauseStart:0, bracket:[]};
+/* ============ CHRONO PAR PARCELLE — MOTEUR INVERSE (v5.92) ============
+   La coche EST le chrono. Trois gestes, un seul bouton pendant la mesure :
+     • toucher une parcelle          -> la mesure demarre dessus
+     • « J'AI FINI »                 -> la mesure se ferme, le temps part en HORS PARCELLE
+     • toucher une AUTRE parcelle    -> cloture la premiere, demarre la seconde,
+                                        SANS compter de deplacement (parcelles voisines)
+     • appui long                    -> ajoute au bloc en cours (un climat coupe au
+                                        cadastre, travaille d'une traite) : temps
+                                        partage a la surface, comportement historique.
+
+   CE CHRONO NE JUSTIFIE PAS LA JOURNEE DE TRAVAIL. Au retour il reste le lavage,
+   les niveaux et le plein : ils n'y sont pas. Il sert a BUDGETER les travaux de
+   tracteur et a connaitre le temps reellement passe dans les vignes. L'ecran le dit
+   en toutes lettres, sinon un tractoriste lira le total comme sa journee.
+
+   TROIS SEAUX, jamais quatre : MESURE (dans les parcelles) · HORS PARCELLE (trajets,
+   pause legale, ravitaillement, reglage — tout du temps travaille) · PAUSE DEJEUNER
+   (non travaillee). Le mot « pause dejeuner » est JUSTE ici et interdit dans le
+   planning : le tractoriste est seul sur son tracteur, il en choisit le moment.
+   C'est pourquoi le libelle vit dans ce fichier et pas dans index.html, qui reste a
+   zero pour scripts/lint-vocabulaire.mjs.
+
+   CHRONO DOUTEUX = MESURE ECARTEE. Au-dela de 3x le bareme, en dessous de 40 %, ou
+   au-dela de 12 h, on n'ecrit PAS de dmin : la parcelle est cochee au bareme, sans
+   temps constate. Rien a coder pour ca — _chronoSummary et pilotage.js retombent
+   deja sur _sessBaremeMin quand dmin est absent. Mais l'ecart est DIT (toast, ligne
+   ambre, compteur au bilan) : un ecart silencieux serait un indicateur qui ment.
+   Une activite sans h_ha n'a pas de bareme -> aucun ecart possible, tout compte.
+
+   PERSISTANCE. t0 est ABSOLU et l'etat vit dans localStorage, ecrit a chaque geste
+   plus sur pagehide et visibilitychange. Avant, _chrono etait une variable JS que
+   rien ne sauvait : un telephone verrouille pendant 40 min de rognage perdait la
+   mesure en silence. C'etait le vrai defaut, pas l'oubli d'eteindre. */
+var _chrono = _chrNeuf();
 var _chronoTimer = null;
+var _CHR_CLE = 'mavigne_chrono_session';
+var _CHR_HAUT = 3, _CHR_BAS = 0.4, _CHR_BORNE_H = 12;
+
+function _chrNeuf(){
+  return {sid:null, bloc:[], t0:0, mesMs:0, horsMs:0, pauseMs:0,
+          bucket:'hors', bT0:Date.now(), pause:false, pauseOuvert:null, dernier:null,
+          ecarte:0, ecarteMs:0};
+}
 function _chrNom(x){return typeof x==='string'?x:(x&&x.nom)||'';}
 function _chrDur(x){return (x&&typeof x==='object'&&typeof x.dmin==='number')?x.dmin:null;}
 function _chrGrp(x){return (x&&typeof x==='object'&&x.grp)?x.grp:1;}
+function _chrEcart(x){return (x&&typeof x==='object'&&x.ecarte)?x.ecarte:null;}
 function _chronoOn(){return !!(window.CONFIG&&CONFIG.chrono_mode==='on');}
 function _chronoEnabledForSession(s){
   if(!s||!_chronoOn())return false;
@@ -1505,58 +1541,312 @@ function _sessBaremeMin(s,surface){
   return hha*60*(parseFloat(surface)||0);
 }
 function _chrSurf(nom){var p=PARCELLES.find(function(x){return x.nom===nom;});return p?(parseFloat(p.surface)||0):0;}
+function _chrBareme(s,noms){var t=0;(noms||[]).forEach(function(n){t+=_chrSurf(n);});return _sessBaremeMin(s,t);}
 function _chrFmtTimer(ms){
   var s=Math.floor(ms/1000),h=Math.floor(s/3600),m=Math.floor((s%3600)/60),ss=s%60;
   function p(n){return n<10?('0'+n):(''+n);}
   return h>0?(h+':'+p(m)+':'+p(ss)):(p(m)+':'+p(ss));
 }
 function _chrFmtRate(minPerHa){var h=Math.floor(minPerHa/60),m=Math.round(minPerHa%60);if(m===60){h++;m=0;}return h+'h'+(m<10?('0'+m):m)+'/ha';}
-function _chrFmtDur(min){if(min<60)return Math.round(min)+' min';var h=Math.floor(min/60),m=Math.round(min%60);return h+'h'+(m?(m<10?('0'+m):m):'');}
-function _chronoElapsedMs(){return _chrono.accumMs+(_chrono.state==='running'?(Date.now()-_chrono.segStart):0);}
+function _chrFmtDur(min){if(min<1)return '0 min';if(min<60)return Math.round(min)+' min';var h=Math.floor(min/60),m=Math.round(min%60);if(m===60){h++;m=0;}return h+'h'+(m?(m<10?('0'+m):m):'');}
+
+/* ── seaux de temps ── */
+function _chrLive(){return _chrono.bloc.length>0 && !_chrono.pause;}
+function _chrCourant(){return _chrLive()?(Date.now()-_chrono.t0):0;}
+function _chrBucketMs(){return Date.now()-_chrono.bT0;}
+function _chrHors(){return _chrono.horsMs+((_chrono.bucket==='hors'&&!_chrLive())?_chrBucketMs():0);}
+function _chrPause(){return _chrono.pauseMs+(_chrono.bucket==='pause'?_chrBucketMs():0);}
+function _chrMesure(){return _chrono.mesMs+_chrCourant();}
+function _chrGoBucket(b){
+  var d=_chrBucketMs();
+  if(_chrono.bucket==='hors')_chrono.horsMs+=d;
+  else if(_chrono.bucket==='pause')_chrono.pauseMs+=d;
+  _chrono.bucket=b;_chrono.bT0=Date.now();
+}
+
+/* ── persistance : t0 ABSOLU, jamais un compteur ── */
+// Si le stockage refuse (mode prive, quota), le chrono ne survivra PAS a une mise en
+// veille : c'est la panne meme que ce moteur repare. On le dit une fois, on ne l'avale pas.
+var _chrPersistKO=false;
+function _chrSave(){
+  try{
+    if(!_chrono.sid){localStorage.removeItem(_CHR_CLE);return;}
+    localStorage.setItem(_CHR_CLE,JSON.stringify(_chrono));
+  }catch(e){
+    if(!_chrPersistKO){
+      _chrPersistKO=true;
+      showToast('Chrono non sauvegard\u00e9 \u2014 ferme l\'app et la mesure sera perdue','#B85A1A');
+    }
+  }
+}
+function _chrLoad(sid){
+  try{
+    var r=localStorage.getItem(_CHR_CLE);if(!r)return null;
+    var o=JSON.parse(r);
+    if(!o||o.sid!==sid)return null;
+    return o;
+  }catch(e){return null;}
+}
+function _chronoReset(){_chrono=_chrNeuf();_stopChronoTimer();try{localStorage.removeItem(_CHR_CLE);}catch(e){_chrPersistKO=true;}}
 function _stopChronoTimer(){if(_chronoTimer){clearInterval(_chronoTimer);_chronoTimer=null;}}
-function _startChronoTimer(){_stopChronoTimer();_chronoTimer=setInterval(function(){if(_chrono.state==='running')_chronoTick();},250);}
-function _chronoReset(){_chrono.state='idle';_chrono.t0=0;_chrono.accumMs=0;_chrono.pauseMs=0;_chrono.bracket=[];_stopChronoTimer();}
-function _chronoStart(){
-  var now=Date.now();
-  _chrono.state='running';_chrono.t0=now;_chrono.segStart=now;_chrono.accumMs=0;_chrono.pauseMs=0;_chrono.pauseStart=0;_chrono.bracket=[];
-  _startChronoTimer();renderSDParcelles();
-  if(navigator.vibrate)navigator.vibrate(20);
+function _startChronoTimer(){_stopChronoTimer();_chronoTimer=setInterval(_chronoTick,500);}
+
+/* ── mesure douteuse ── */
+function _chrSuspect(s,bloc,ms){
+  var b=_chrBareme(s,bloc);
+  if(!b)return null;                       // activite sans h_ha : aucun seuil
+  if(ms/3600000>=_CHR_BORNE_H)return 'dur';
+  var min=ms/60000;
+  if(min>_CHR_HAUT*b)return 'haut';
+  if(min<_CHR_BAS*b)return 'bas';
+  return null;
 }
-function _chronoPause(){
-  var now=Date.now();
-  if(_chrono.state==='running'){_chrono.accumMs+=now-_chrono.segStart;_chrono.state='paused';_chrono.pauseStart=now;}
-  else if(_chrono.state==='paused'){_chrono.pauseMs+=now-_chrono.pauseStart;_chrono.segStart=now;_chrono.state='running';}
-  _renderChronoBar();
-}
-function _chronoStop(){
-  var s=SESSIONS.find(function(x){return x.id===window.tracSessionId;});if(!s)return;
-  var now=Date.now();
-  if(_chrono.state==='running')_chrono.accumMs+=now-_chrono.segStart;
-  var workedMs=_chrono.accumMs, ids=_chrono.bracket.slice(), ps=Math.round(_chrono.pauseMs/1000), t0=_chrono.t0;
-  if(!ids.length){_chronoReset();renderSDParcelles();showToast('Aucune parcelle dans ce chrono','#C0392B');return;}
-  var totalMin=Math.round(workedMs/60000*10)/10;
-  var surf=ids.reduce(function(a,nom){return a+_chrSurf(nom);},0);
-  var rate=surf>0?(totalMin/surf):0;
+var _CHR_MOTIFS={haut:'chrono rest\u00e9 ouvert', bas:'chrono lanc\u00e9 en retard',
+                 dur:'chrono ouvert plus de '+_CHR_BORNE_H+' h'};
+
+/* ── ecriture d'un bloc dans la session ── */
+function _chrPose(s,nom,entry){
   if(!s.parcellesFaites)s.parcellesFaites=[];
-  ids.forEach(function(nom){
-    var dmin=Math.round(rate*_chrSurf(nom)*10)/10;
-    var entry={nom:nom,t0:t0,t1:now,ps:ps,dmin:dmin,grp:ids.length};
-    var i=s.parcellesFaites.findIndex(function(x){return _chrNom(x)===nom;});
-    if(i>=0)s.parcellesFaites[i]=entry;else s.parcellesFaites.push(entry);
-  });
-  _chronoReset();
-  _saveData('sessions');renderSessionProgress();renderSDParcelles();
-  if(navigator.vibrate)navigator.vibrate(30);
-  showToast(ids.length>1?(ids.length+' parcelles - '+_chrFmtRate(rate)):('Mesure - '+_chrFmtRate(rate)),'#3D6B27');
+  var i=s.parcellesFaites.findIndex(function(x){return _chrNom(x)===nom;});
+  if(i>=0)s.parcellesFaites[i]=entry;else s.parcellesFaites.push(entry);
 }
-function _chronoFinalizeOnClose(){
-  if(_chrono.state==='idle'){_stopChronoTimer();return;}
-  if(_chrono.bracket.length)_chronoStop();else _chronoReset();
+function _chrEcrire(s,bloc,ms){
+  var t1=Date.now(), min=Math.round(ms/60000*10)/10;
+  var surf=bloc.reduce(function(a,n){return a+_chrSurf(n);},0);
+  var rate=surf>0?(min/surf):0;
+  bloc.forEach(function(nom){
+    _chrPose(s,nom,{nom:nom,t0:_chrono.t0,t1:t1,ps:0,
+                    dmin:Math.round(rate*_chrSurf(nom)*10)/10,grp:bloc.length});
+  });
+  _chrono.mesMs+=ms;
+  return rate;
+}
+function _chrEcarter(s,bloc,ms,type){
+  var t1=Date.now();
+  bloc.forEach(function(nom){
+    // PAS de dmin : _chronoSummary et pilotage.js retombent sur le bareme.
+    _chrPose(s,nom,{nom:nom,t0:_chrono.t0,t1:t1,ps:0,grp:bloc.length,ecarte:type});
+  });
+  _chrono.ecarte++;_chrono.ecarteMs+=ms;
+  showToast('Mesure \u00e9cart\u00e9e \u2014 '+_CHR_MOTIFS[type]+'. Cochée au barème.','#B85A1A');
+  if(navigator.vibrate)navigator.vibrate([60,40,60]);
+}
+/* Cloture le bloc en cours. Rend true si la mesure a ete ecartee. */
+function _chrCloturer(s){
+  if(!_chrono.bloc.length)return false;
+  var bloc=_chrono.bloc.slice(), ms=_chrCourant();
+  var sp=_chrSuspect(s,bloc,ms);
+  if(sp)_chrEcarter(s,bloc,ms,sp);
+  else{
+    var rate=_chrEcrire(s,bloc,ms);
+    showToast(bloc.length>1?(bloc.length+' parcelles \u2014 '+_chrFmtRate(rate))
+                           :('Mesur\u00e9 \u2014 '+_chrFmtRate(rate)),'#3D6B27');
+  }
+  _chrono.dernier=bloc[bloc.length-1];
+  _chrono.bloc=[];_chrono.t0=0;
+  return !!sp;
+}
+
+/* ── gestes ── */
+function _chrTapParcelle(nom){
+  var s=SESSIONS.find(function(x){return x.id===window.tracSessionId;});if(!s)return;
+  if(_chrono.pause)return;
+  if(_chrono.bloc.indexOf(nom)>=0)return;          // deja dans le bloc : rien
+  if(_chrono.bloc.length){                          // ENCHAINEMENT : aucun deplacement
+    _chrCloturer(s);
+  } else {
+    _chrGoBucket('none');
+  }
+  _chrono.bloc=[nom];_chrono.t0=Date.now();
+  _startChronoTimer();
+  if(navigator.vibrate)navigator.vibrate(20);
+  _chrSave();_saveData('sessions');renderSessionProgress();renderSDParcelles();
+}
+function _chrAjouterAuBloc(nom){
+  var s=SESSIONS.find(function(x){return x.id===window.tracSessionId;});if(!s)return;
+  if(!_chrono.bloc.length||_chrono.bloc.indexOf(nom)>=0)return;
+  _chrono.bloc.push(nom);
+  if(navigator.vibrate)navigator.vibrate(45);
+  showToast(nom+' ajout\u00e9e au bloc \u2014 temps partag\u00e9 \u00e0 la surface','#8A5A38');
+  _chrSave();renderSDParcelles();
+}
+function _chrFini(){
+  var s=SESSIONS.find(function(x){return x.id===window.tracSessionId;});if(!s)return;
+  if(!_chrono.bloc.length)return;
+  _chrCloturer(s);_chrGoBucket('hors');_stopChronoTimer();
+  if(navigator.vibrate)navigator.vibrate(30);
+  _chrSave();_saveData('sessions');renderSessionProgress();renderSDParcelles();
+}
+/* Interruption en pleine parcelle : la parcelle RESTE ouverte, rien n'est ecrit. */
+function _chrInterrompre(){
+  if(!_chrono.bloc.length)return;
+  _chrono.mesMs+=_chrCourant();
+  _chrono.pauseOuvert=_chrono.bloc.slice();
+  _chrono.bloc=[];_chrono.t0=0;_chrono.pause=true;_chrGoBucket('pause');_stopChronoTimer();
+  showToast('Mesure suspendue \u2014 '+_chrono.pauseOuvert.join(' + ')+' reprendra au retour','#8A5A38');
+  _chrSave();renderSDParcelles();
+}
+function _chrDejeuner(){
+  if(_chrono.bloc.length)return;
+  _chrono.pause=true;_chrGoBucket('pause');_stopChronoTimer();
+  _chrSave();renderSDParcelles();
+}
+function _chrReprendre(){
+  _chrono.pause=false;
+  if(_chrono.pauseOuvert&&_chrono.pauseOuvert.length){
+    _chrGoBucket('none');
+    _chrono.bloc=_chrono.pauseOuvert.slice();_chrono.t0=Date.now();_chrono.pauseOuvert=null;
+    _startChronoTimer();
+  } else _chrGoBucket('hors');
+  _chrSave();renderSDParcelles();
+}
+function _chrFinJournee(){
+  var s=SESSIONS.find(function(x){return x.id===window.tracSessionId;});if(!s)return;
+  if(_chrono.bloc.length)_chrCloturer(s);
+  _chrGoBucket('none');_stopChronoTimer();
+  _saveData('sessions');renderSessionProgress();
+  _chronoReset();
+  closeSessionDetail();
+}
+/* Fermeture de l'ecran : on N'ECRIT PAS le bloc en cours — il est persiste et
+   repris a la reouverture. Ecrire ici forcerait une mesure a chaque coup d'oeil. */
+function _chronoFinalizeOnClose(){_stopChronoTimer();_chrSave();}
+
+/* ── reprise a l'ouverture d'une session ── */
+function _chrRestaurer(sid){
+  var o=_chrLoad(sid);
+  if(!o){_chrono=_chrNeuf();_chrono.sid=sid;_chrono.bT0=Date.now();return;}
+  _chrono=o;
+  if(_chrono.bloc.length){
+    var s=SESSIONS.find(function(x){return x.id===sid;});
+    var ms=_chrCourant(), sp=s?_chrSuspect(s,_chrono.bloc,ms):null;
+    if(sp){_chrEcarter(s,_chrono.bloc.slice(),ms,sp);_chrono.bloc=[];_chrono.t0=0;
+           _chrGoBucket('hors');_saveData('sessions');}
+    else{_startChronoTimer();
+         showToast('Mesure retrouv\u00e9e \u2014 '+_chrono.bloc.join(' + '),'#2C3E50');}
+  }
+  _chrSave();
+}
+
+/* ── ordre d'affichage : tournee du chef > proximite > sans polygone ──
+   La geographie vient des POLYGONES KML via _mvParcGeo, jamais d'une geolocalisation
+   du tractoriste : ce sont les parcelles qui sont situees, pas l'homme. */
+function _chrHav(a,b){
+  if(!a||!b)return null;
+  var R=6371000,r=Math.PI/180;
+  var dLa=(b.lat-a.lat)*r,dLo=(b.lng-a.lng)*r,l1=a.lat*r,l2=b.lat*r;
+  var x=Math.sin(dLa/2)*Math.sin(dLa/2)+Math.cos(l1)*Math.cos(l2)*Math.sin(dLo/2)*Math.sin(dLo/2);
+  return 2*R*Math.asin(Math.sqrt(x));
+}
+function _chrGeo(nom){
+  var p=PARCELLES.find(function(x){return x.nom===nom;});
+  return (p&&window._mvParcGeo)?window._mvParcGeo(p):null;
+}
+function _chrFmtM(m){return m<950?(Math.round(m/10)*10+' m'):((m/1000).toFixed(1).replace('.',',')+' km');}
+/* Rend {liste, src, coupe} — coupe = index a partir duquel les parcelles n'ont pas
+   de polygone (elles ne disparaissent jamais, elles passent en fin de liste). */
+function _chrTrier(s,arr){
+  var ord=(window._mvOrdreFor)?window._mvOrdreFor(s.activite):null;
+  if(ord&&ord.ordre&&ord.ordre.length){
+    var r={};ord.ordre.forEach(function(n,i){r[n]=i;});
+    return {src:'tourn\u00e9e du chef',coupe:null,
+      liste:arr.slice().sort(function(a,b){
+        var ra=(r[a.nom]==null?9999:r[a.nom]),rb=(r[b.nom]==null?9999:r[b.nom]);
+        return (ra-rb)||a.nom.localeCompare(b.nom,'fr');})};
+  }
+  var refNom=_chrono.bloc.length?_chrono.bloc[_chrono.bloc.length-1]:_chrono.dernier;
+  var ref=refNom?_chrGeo(refNom):null;
+  if(!ref)return {src:'ordre alphab\u00e9tique',coupe:null,
+    liste:arr.slice().sort(function(a,b){return a.nom.localeCompare(b.nom,'fr');})};
+  var avec=[],sans=[];
+  arr.forEach(function(p){
+    var g=_chrGeo(p.nom);
+    if(g){p._chrD=(p.nom===refNom)?-1:_chrHav(ref,g);avec.push(p);}
+    else{p._chrD=null;sans.push(p);}
+  });
+  avec.sort(function(a,b){return a._chrD-b._chrD;});
+  sans.sort(function(a,b){return a.nom.localeCompare(b.nom,'fr');});
+  return {src:'les plus proches de '+refNom,coupe:avec.length,liste:avec.concat(sans)};
+}
+
+/* ── rendu de la barre : trois etats, un seul gros bouton ── */
+function _renderChronoBar(){
+  var host=document.getElementById('sd-chrono');if(!host)return;
+  var s=SESSIONS.find(function(x){return x.id===window.tracSessionId;});
+  if(!s||!_chronoEnabledForSession(s)){host.innerHTML='';return;}
+  var h='';
+  if(_chrono.pause){
+    h='<div class="chr-pz"><div class="chr-pz-e">\uD83C\uDF7D</div>'
+      +'<div class="chr-pz-t">Pause d\u00e9jeuner</div>'
+      +'<div class="chr-pz-c" id="chr-pzc">'+_chrFmtTimer(_chrPause())+'</div>'
+      +(_chrono.pauseOuvert&&_chrono.pauseOuvert.length
+        ?'<div class="chr-pz-x">'+_escHtml(_chrono.pauseOuvert.join(' + '))+' reprendra au retour</div>':'')
+      +'<button class="chr-pz-b" onclick="_chrReprendre()">\u25B6&nbsp; REPRENDRE</button></div>';
+  } else if(_chrono.bloc.length){
+    var bar=_chrBareme(s,_chrono.bloc), ms=_chrCourant();
+    var al=bar>0&&(ms/60000)>_CHR_HAUT*bar;
+    var sf=_chrono.bloc.reduce(function(a,n){return a+_chrSurf(n);},0);
+    h='<div class="chr-run'+(al?' chr-al':'')+'"><div class="chr-run-hd">'
+      +'<div><div class="chr-run-st"><span class="chr-dot"></span>'
+      +(al?'Chrono encore ouvert\u00a0?':'Mesure en cours')+'</div>'
+      +'<div class="chr-run-p">'+_escHtml(_chrono.bloc.join(' + '))+'</div>'
+      +'<div class="chr-run-x">'+sf.toFixed(2)+' ha'
+      +(_chrono.bloc.length>1?' \u00b7 bloc de '+_chrono.bloc.length:'')+'</div></div>'
+      +'<button class="chr-mini" onclick="_chrInterrompre()">\u23F8</button></div>'
+      +'<div class="chr-run-t" id="chr-time">'+_chrFmtTimer(ms)+'</div>'
+      +'<div class="chr-run-b" id="chr-bar">'
+      +(bar>0?(al?'largement au-del\u00e0 du bar\u00e8me ('+_chrFmtDur(bar)+')':'bar\u00e8me '+_chrFmtDur(bar)):'pas de bar\u00e8me pour cette activit\u00e9')
+      +'</div>'
+      +'<button class="chr-fini" onclick="_chrFini()">\u2713&nbsp; J\'AI FINI</button></div>';
+  } else {
+    h='<div class="chr-idle"><b>Touchez la parcelle o\u00f9 vous commencez.</b><br>'
+      +'La mesure d\u00e9marre toute seule \u2014 rien d\'autre \u00e0 appuyer.</div>';
+  }
+  // Trois seaux + le cadrage : ce chrono ne fait pas la journee de travail.
+  h+='<div class="chr-strip">'
+    +'<div class="chr-st chr-st-m"><div class="chr-st-k">\u23F1 Mesur\u00e9<br>dans les parcelles</div>'
+      +'<div class="chr-st-v" id="chr-c-m">'+_chrFmtDur(_chrMesure()/60000)+'</div></div>'
+    +'<div class="chr-st chr-st-h"><div class="chr-st-k">\uD83D\uDEE3 Hors<br>parcelle</div>'
+      +'<div class="chr-st-v" id="chr-c-h">'+_chrFmtDur(_chrHors()/60000)+'</div></div>'
+    +'<div class="chr-st chr-st-p"><div class="chr-st-k">\uD83C\uDF7D Pause<br>d\u00e9jeuner</div>'
+      +'<div class="chr-st-v" id="chr-c-p">'+_chrFmtDur(_chrPause()/60000)+'</div></div>'
+    +'</div>'
+    +'<div class="chr-cadre">\u23F1 Ce chrono mesure <b>le temps pass\u00e9 dans les parcelles</b>, '
+    +'pour budg\u00e9ter les travaux. <b>Ce n\'est pas la journ\u00e9e de travail</b>\u00a0: le lavage, '
+    +'les niveaux et le plein n\'y sont pas.'
+    +(_chrono.ecarte?'<br><span class="chr-cadre-w">'+_chrono.ecarte+' mesure'+(_chrono.ecarte>1?'s':'')
+      +' \u00e9cart\u00e9e'+(_chrono.ecarte>1?'s':'')+' \u2014 '+_chrFmtDur(_chrono.ecarteMs/60000)
+      +' de chrono non exploitable'+(_chrono.ecarte>1?'s':'')+'.</span>':'')
+    +'</div>';
+  host.innerHTML=h;
 }
 function _chronoTick(){
-  var tEl=document.getElementById('chr-time');if(tEl)tEl.textContent=_chrFmtTimer(_chronoElapsedMs());
-  var pv=document.getElementById('chr-prev');
-  if(pv){var surf=_chrono.bracket.reduce(function(a,nom){return a+_chrSurf(nom);},0);pv.textContent=surf>0?_chrFmtRate((_chronoElapsedMs()/60000)/surf):'--';}
+  var e=document.getElementById('chr-time');if(e)e.textContent=_chrFmtTimer(_chrCourant());
+  e=document.getElementById('chr-pzc');if(e)e.textContent=_chrFmtTimer(_chrPause());
+  e=document.getElementById('chr-c-m');if(e)e.textContent=_chrFmtDur(_chrMesure()/60000);
+  e=document.getElementById('chr-c-h');if(e)e.textContent=_chrFmtDur(_chrHors()/60000);
+  e=document.getElementById('chr-c-p');if(e)e.textContent=_chrFmtDur(_chrPause()/60000);
+  // le passage en alerte redessine une seule fois
+  var s=SESSIONS.find(function(x){return x.id===window.tracSessionId;});
+  if(s&&_chrono.bloc.length){
+    var bar=_chrBareme(s,_chrono.bloc);
+    var al=bar>0&&(_chrCourant()/60000)>_CHR_HAUT*bar;
+    var box=document.querySelector('#sd-chrono .chr-run');
+    if(box&&al&&box.className.indexOf('chr-al')<0)_renderChronoBar();
+  }
+}
+/* Etiquette portee par la ligne de parcelle. */
+function _chrTag(s,p,fait,entry){
+  if(!fait)return '';
+  if(_chrono.bloc.indexOf(p.nom)>=0)return '<div class="sdp-tag pend">\u23F1 en cours\u2026</div>';
+  var ec=_chrEcart(entry);
+  if(ec)return '<div class="sdp-tag ecart">\u26A0 bar\u00e8me<small>'+_escHtml(_CHR_MOTIFS[ec]||'mesure \u00e9cart\u00e9e')+'</small></div>';
+  var d=_chrDur(entry);
+  if(d!=null){
+    var sf=parseFloat(p.surface)||0,rate=sf>0?(d/sf):0,grp=_chrGrp(entry);
+    return '<div class="sdp-tag mes">\u23F1 '+_chrFmtRate(rate)+'<small>'+(grp>1?('groupe de '+grp):_chrFmtDur(d))+'</small></div>';
+  }
+  return '';
 }
 function _chronoSummary(s){
   var pf=s.parcellesFaites||[];
@@ -1566,45 +1856,14 @@ function _chronoSummary(s){
   var appMin=pf.reduce(function(a,x){var d=_chrDur(x);if(d!=null)return a+d;return a+_sessBaremeMin(s,_chrSurf(_chrNom(x)));},0);
   return {n:mes.length,rate:surf>0?(min/surf):null,appMin:appMin};
 }
-function _chrTag(s,p,fait,entry){
-  if(!fait)return '';
-  if(_chrono.bracket.indexOf(p.nom)>=0&&(_chrono.state==='running'||_chrono.state==='paused'))
-    return '<div class="sdp-tag pend">⏱ en cours…</div>';
-  var d=_chrDur(entry);
-  if(d!=null){
-    var sf=parseFloat(p.surface)||0,rate=sf>0?(d/sf):0,grp=_chrGrp(entry);
-    return '<div class="sdp-tag mes">⏱ '+_chrFmtRate(rate)+'<small>'+(grp>1?('groupe de '+grp):_chrFmtDur(d))+'</small></div>';
-  }
-  var act=ACTIVITES.find(function(a){return a.nom===s.activite;});
-  var hha=act?(parseFloat(act.h_ha)||0):0;
-  if(hha<=0)return '';
-  return '<div class="sdp-tag bar">📄 '+_chrFmtRate(hha*60)+'</div>';
-}
-function _renderChronoBar(){
-  var host=document.getElementById('sd-chrono');if(!host)return;
+/* Bas de l'ecran : deux gestes d'une fois par jour, visibles seulement a l'arret. */
+function _renderChronoJour(){
+  var host=document.getElementById('sd-jour');if(!host)return;
   var s=SESSIONS.find(function(x){return x.id===window.tracSessionId;});
-  if(!s||!_chronoEnabledForSession(s)){host.innerHTML='';return;}
-  var st=_chrono.state, sum=_chronoSummary(s);
-  var sumHtml='<div class="chr-sum">'
-    +'<div class="chr-sum-c"><span class="chr-sum-k">⏱ Constate</span><span class="chr-sum-v">'+(sum.rate!=null?_chrFmtRate(sum.rate):'--')+'</span><span class="chr-sum-x">'+(sum.n?(sum.n+' mesure'+(sum.n>1?'s':'')):'aucune mesure')+'</span></div>'
-    +'<div class="chr-sum-c"><span class="chr-sum-k">📊 Applique</span><span class="chr-sum-v">'+(sum.appMin>0?_chrFmtDur(sum.appMin):'--')+'</span><span class="chr-sum-x">reel ou mesure - bareme sinon</span></div>'
-    +'</div>';
-  if(st==='idle'){
-    host.innerHTML='<div class="chr-box idle"><button class="chr-start" onclick="_chronoStart()">▶ Demarrer le chrono</button>'
-      +'<div class="chr-hint">Optionnel - coche les parcelles pendant que le chrono tourne, elles partagent ce temps. Sans chrono : bareme.</div></div>'+sumHtml;
-    return;
-  }
-  var paused=st==='paused';
-  var pills=_chrono.bracket.length
-    ?('<b>'+_chrono.bracket.length+' parcelle'+(_chrono.bracket.length>1?'s':'')+'</b> - '+_chrono.bracket.map(function(n){return '<span class="chr-pill">'+_escHtml(n)+'</span>';}).join(''))
-    :'Coche les parcelles a inclure dans cette mesure…';
-  host.innerHTML='<div class="chr-box '+(paused?'pause':'run')+'"><div class="chr-top">'
-    +'<div><div class="chr-state"><span class="chr-dot'+(paused?' pz':'')+'"></span>'+(paused?'En pause':'Mesure en cours')+'</div><div class="chr-time" id="chr-time">'+_chrFmtTimer(_chronoElapsedMs())+'</div></div>'
-    +'<div class="chr-prev-wrap">estime /ha<b id="chr-prev">--</b></div></div>'
-    +'<div class="chr-brk">'+pills+'</div>'
-    +'<div class="chr-act"><button class="chr-b '+(paused?'chr-resume':'chr-pause')+'" onclick="_chronoPause()">'+(paused?'▶ Reprendre':'⏸ Pause')+'</button>'
-    +'<button class="chr-b chr-stop" onclick="_chronoStop()">⏹ Arreter &amp; attribuer</button></div></div>'+sumHtml;
-  _chronoTick();
+  if(!s||!_chronoEnabledForSession(s)||_chrono.bloc.length||_chrono.pause){host.innerHTML='';return;}
+  host.innerHTML='<div class="chr-acts">'
+    +'<button class="chr-act" onclick="_chrDejeuner()">\uD83C\uDF7D Pause d\u00e9jeuner</button>'
+    +'<button class="chr-act chr-act-fin" onclick="_chrFinJournee()">\uD83C\uDF19 Fin de journ\u00e9e</button></div>';
 }
 
 function openSessionDetail(id){
@@ -1619,7 +1878,7 @@ function openSessionDetail(id){
   renderSDTracEncart();
   closeSdTracPicker();
   updateSDSkipBtn();
-  _chronoReset();
+  _chrRestaurer(id);
   renderSDParcelles();
   renderSessionProgress();
   // Zone suppression admin
@@ -1649,7 +1908,9 @@ function renderSDParcelles(){
   if(sdSkipMode){
     toShow=actives.filter(p=>!doneNoms.includes(p.nom)).slice().sort((a,b)=>a.nom.localeCompare(b.nom,'fr'));
   } else {
-    toShow=(sdShowDone?actives:actives.filter(p=>(!doneNoms.includes(p.nom)||_chrono.bracket.indexOf(p.nom)>=0)&&!skip.includes(p.nom))).slice().sort((a,b)=>a.nom.localeCompare(b.nom,'fr'));
+    toShow=(sdShowDone?actives:actives.filter(p=>(!doneNoms.includes(p.nom)||_chrono.bloc.indexOf(p.nom)>=0)&&!skip.includes(p.nom))).slice();
+    var _t=chronoUi?_chrTrier(s,toShow):{liste:toShow.slice().sort((a,b)=>a.nom.localeCompare(b.nom,'fr')),src:null,coupe:null};
+    toShow=_t.liste; window._sdTri=_t;
   }
   const btn=document.getElementById('sd-show-done-btn');
   if(btn)btn.textContent=sdShowDone?'Masquer faites':'Voir toutes';
@@ -1657,7 +1918,8 @@ function renderSDParcelles(){
   // Activité courante pour savoir si il y a un champ custom
   var act=ACTIVITES.find(function(a){return a.nom===s.activite;});
   var hasChamp=!!(act&&act.champCustom&&act.champCustom.label);
-  document.getElementById('sd-parcelles').innerHTML=toShow.map(p=>{
+  var _tri=window._sdTri||{coupe:null,src:null};
+  document.getElementById('sd-parcelles').innerHTML=toShow.map((p,idxRow)=>{
     const fait=doneNoms.includes(p.nom);
     const skipped=skip.includes(p.nom);
     const entryFaite=done.find(function(x){return _pfNom(x)===p.nom;});
@@ -1673,10 +1935,14 @@ function renderSDParcelles(){
       const dataHtml=fait&&dataFaite&&Object.keys(dataFaite).length
         ?'<div style="font-size:10px;color:var(--acier-med);margin-top:2px">'+Object.entries(dataFaite).map(function(kv){return _escHtml(kv[0])+' : '+_escHtml(kv[1]);}).join(' · ')+'</div>'
         :'';
-      return '<div class="sdp-row '+(fait?'sdp-done':'')+'" data-action="coche" data-nom="'+p.nom.replace(/"/g,'&quot;')+'" style="cursor:pointer">'
-        +'<div class="sdp-check '+(fait?'on':'')+'">'+( fait?'✓':'')+'</div>'
+      const enCours=_chrono.bloc.indexOf(p.nom)>=0;
+      const ecart=_chrEcart(entryFaite);
+      const sep=(_tri.coupe!=null&&idxRow===_tri.coupe)?'<div class="sdp-sep">Sans polygone \u2014 position inconnue</div>':'';
+      const dist=(!fait&&typeof p._chrD==='number'&&p._chrD>0)?'<div class="sdp-dist">'+_chrFmtM(p._chrD)+'</div>':'';
+      return sep+'<div class="sdp-row '+(enCours?'sdp-live':(fait?(ecart?'sdp-done sdp-bar':'sdp-done'):''))+'" data-action="coche" data-nom="'+p.nom.replace(/"/g,'&quot;')+'" style="cursor:pointer">'
+        +'<div class="sdp-check '+(enCours?'live':(fait?'on':''))+'">'+(enCours?'\u23F1':(fait?'\u2713':''))+'</div>'
         +'<div style="flex:1;min-width:0"><div class="sdp-nom">'+_escHtml(p.nom)+'</div>'+dataHtml+'</div>'
-        +'<div class="sdp-surf">'+p.surface+' ha</div>'
+        +'<div class="sdp-surf">'+p.surface+' ha'+dist+'</div>'
         +(chronoUi?_chrTag(s,p,fait,entryFaite):'')
       +'</div>';
     }
@@ -1684,12 +1950,25 @@ function renderSDParcelles(){
   // Event listeners directs (Vite-safe — pas de onclick dans innerHTML)
   var _sdEl=document.getElementById('sd-parcelles');
   _sdEl.querySelectorAll('[data-action="coche"]').forEach(function(el){
-    el.addEventListener('click',function(){toggleSessionParcelle(el.dataset.nom,el);});
+    // Appui long = ajouter au bloc en cours. Geste rare pour un cas rare : deux
+    // parcelles cadastrales travaillees d'une traite, temps partage a la surface.
+    var _lp=null,_tire=false;
+    function _dn(){_tire=false;_lp=setTimeout(function(){_tire=true;_chrAjouterAuBloc(el.dataset.nom);},480);}
+    function _up(){clearTimeout(_lp);if(!_tire)toggleSessionParcelle(el.dataset.nom,el);}
+    function _cx(){clearTimeout(_lp);}
+    el.addEventListener('touchstart',_dn,{passive:true});
+    el.addEventListener('touchend',function(e){e.preventDefault();_up();});
+    el.addEventListener('touchmove',_cx,{passive:true});
+    el.addEventListener('mousedown',_dn);
+    el.addEventListener('mouseup',_up);
+    el.addEventListener('mouseleave',_cx);
   });
   _sdEl.querySelectorAll('[data-action="skip"]').forEach(function(el){
     el.addEventListener('click',function(e){e.stopPropagation();toggleSessionSkip(el.dataset.nom);});
   });
-  _renderChronoBar();
+  _renderChronoBar();_renderChronoJour();
+  var _lb=document.getElementById('sd-parc-lbl');
+  if(_lb)_lb.textContent=_tri.src?('Parcelles \u2014 '+_tri.src):'Parcelles restantes';
 }
 function toggleSDShowDone(){sdShowDone=!sdShowDone;renderSDParcelles();}
 function toggleSessionParcelle(nom,row){
@@ -1715,18 +1994,11 @@ function toggleSessionParcelle(nom,row){
     }
     return;
   }
-  // -- CHRONO : coche/decoche = ajout/retrait au bracket de la mesure en cours --
-  if(_chronoEnabledForSession(s)&&(_chrono.state==='running'||_chrono.state==='paused')){
-    var _bi=_chrono.bracket.indexOf(nom);
-    if(estDecoche){
-      s.parcellesFaites.splice(idx,1);
-      if(_bi>=0)_chrono.bracket.splice(_bi,1);
-    } else {
-      s.parcellesFaites.push(nom);
-      if(_bi<0)_chrono.bracket.push(nom);
-    }
-    if(window._recalcPlantationTrous && _recalcPlantationTrous()){ try{ _saveData('parcelles'); }catch(e){} }
-    _saveData('sessions');renderSessionProgress();renderSDParcelles();
+  // -- CHRONO INVERSE : toucher une parcelle DEMARRE la mesure dessus. Toucher une
+  //    AUTRE parcelle cloture la premiere et demarre la seconde sans compter de
+  //    deplacement. La decoche reste une decoche : on ne mesure pas un retrait.
+  if(_chronoEnabledForSession(s)&&!sdSkipMode&&!estDecoche){
+    _chrTapParcelle(nom);
     return;
   }
   if(estDecoche){
@@ -2475,9 +2747,19 @@ function _tractHoursSeason(s){
   return Math.round(total*10)/10;
 }
 window._tractHoursSeason=_tractHoursSeason;
-window._chronoStart=_chronoStart;
-window._chronoPause=_chronoPause;
-window._chronoStop=_chronoStop;
+// L'app peut etre evincee de la memoire a tout instant (ecran verrouille dans une
+// cabine). L'etat du chrono part sur disque a chaque sortie, jamais a la fermeture
+// de l'ecran seulement.
+window.addEventListener('pagehide', function(){ _chrSave(); });
+document.addEventListener('visibilitychange', function(){ if(document.hidden) _chrSave(); });
+
+window._chrTapParcelle=_chrTapParcelle;
+window._chrAjouterAuBloc=_chrAjouterAuBloc;
+window._chrFini=_chrFini;
+window._chrInterrompre=_chrInterrompre;
+window._chrDejeuner=_chrDejeuner;
+window._chrReprendre=_chrReprendre;
+window._chrFinJournee=_chrFinJournee;
 window.saveConducteur = saveConducteur;
 window.openAddConducteur = openAddConducteur;
 window.editCond = editCond;

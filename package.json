@@ -8,6 +8,7 @@
     "dev": "vite",
     "check": "node scripts/preflight.mjs",
     "lint": "node scripts/lint-cliquet.mjs",
+    "lint:vocabulaire": "node scripts/lint-vocabulaire.mjs",
     "prebuild": "node scripts/preflight.mjs",
     "build": "vite build && node scripts/inject-precache.mjs",
     "preview": "vite preview",

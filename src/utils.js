@@ -23,7 +23,7 @@ export const GT_ADMIN_EMAIL = 'ngdevpro@gmail.com';
 // WHATS_NEW   : tableau vide = modal desactive pour cette version.
 // Format item : { emoji:'📅', titre:'Titre court', desc:'Phrase utilisateur.' }
 // Regle : seulement les changements visibles par les utilisateurs.
-export const APP_VERSION = '5.91';
+export const APP_VERSION = '5.92';
 // ════ Journal des nouveautés (récap cumulatif) ════
 // Une entrée par version, la PLUS RÉCENTE EN HAUT : { v:'5.10', items:[ {emoji,titre,desc}, … ] }
 // À chaque release visible → AJOUTER un bloc en tête (ne pas remplacer). items:[] = release technique (rien à afficher).
@@ -341,6 +341,18 @@ window._mvGraphRepeindre = function(){
 };
 
 export const WHATS_NEW = [
+  { v:'5.92', items:[
+    { emoji:'\u23F1', titre:'Le chrono tracteur ne se perd plus',
+      desc:"Avant, verrouiller son t\u00e9l\u00e9phone pendant le travail effa\u00e7ait la mesure en cours sans rien dire. Elle est maintenant retrouv\u00e9e \u00e0 la r\u00e9ouverture, m\u00eame plusieurs heures apr\u00e8s." },
+    { emoji:'\uD83D\uDC46', titre:'Toucher une parcelle lance la mesure',
+      desc:"Plus de bouton D\u00e9marrer. On touche la parcelle o\u00f9 l'on commence, on touche \u00ab\u00a0J'ai fini\u00a0\u00bb en partant. Toucher directement la parcelle suivante ench\u00e2ine sans compter de d\u00e9placement." },
+    { emoji:'\uD83D\uDEE3', titre:'Trajets et pause d\u00e9jeuner s\u00e9par\u00e9s du travail',
+      desc:"Trois compteurs au lieu d'un\u00a0: le temps dans les parcelles, le temps hors parcelle, la pause d\u00e9jeuner. La cadence ne m\u00e9lange plus la route et le travail." },
+    { emoji:'\u26A0', titre:'Un chrono oubli\u00e9 n\'est plus comptabilis\u00e9',
+      desc:"Une mesure tr\u00e8s longue ou tr\u00e8s courte par rapport au bar\u00e8me est \u00e9cart\u00e9e\u00a0: la parcelle reste coch\u00e9e au bar\u00e8me, et l'\u00e9cran dit pourquoi." },
+    { emoji:'\uD83D\uDCCD', titre:'Les parcelles les plus proches en premier',
+      desc:"La liste se range par distance \u00e0 la parcelle en cours au lieu de l'ordre alphab\u00e9tique. Une tourn\u00e9e rang\u00e9e par le chef reste prioritaire." }
+  ]},
   { v:'5.91', items:[
     { emoji:'\u{23F1}\u{FE0F}', titre:'La coupure d\u00e9jeuner dit enfin quand elle tombe',
       desc:'Un ouvrier qui lisait \u00ab une heure de pause \u00bb pouvait croire qu\u2019il en choisissait le moment ; la paie et le chef d\u2019exploitation y lisaient autre chose. Le planning parle maintenant de \u00ab coupure \u00bb, et vous pouvez dire \u00e0 quelle heure elle a lieu : Planning, onglet Mod\u00e8les, sous la dur\u00e9e. Une heure fixe, \u00ab selon le chantier \u00bb, ou rien du tout \u2014 tant que vous ne r\u00e9pondez pas, rien ne change chez vous. Les journ\u00e9es s\u2019affichent alors coup\u00e9es en deux : 09:00 \u2192 12:00 puis 13:00 \u2192 16:00.' },
