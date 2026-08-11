@@ -1,4 +1,19 @@
-// MA VIGNE — Service Worker v6.47
+// MA VIGNE — Service Worker v6.48
+// v6.48 (11/08/2026) — Les comptes crees en lot arrivent avec les modules de leur
+//                       role. Un ouvrier ne voit plus la Cave, la Reserve, le
+//                       Tracteur ni le Phyto dans sa barre ; un tractoriste garde
+//                       Tracteur et Phyto. Avant, les sept modules etaient la pour
+//                       tout le monde et il fallait rouvrir chaque fiche pour les
+//                       decocher. Sur un domaine de douze permanents, c'etait douze
+//                       fiches — ou douze personnes qui decouvraient l'application
+//                       avec quatre modules hors de leur travail.
+//                       ⚠️ Le Planning reste visible pour TOUS : c'est la que chacun
+//                       lit son mois, ses heures et ses conges.
+//                       ⚠️ Cumul de roles : un module n'est masque que si TOUS les
+//                       roles le masquent. Un ouvrier-tractoriste garde le Tracteur.
+//                       L'apercu de creation dit maintenant ce qui sera masque, et
+//                       la fiche membre gagne un bouton « Selon le role » qui pose
+//                       la meme combinaison — meme table, un seul endroit.
 // v6.47 (11/08/2026) — Lot d'hygiene, cinq points verifies un par un sur le code.
 //                       ⚠️ DEFAUT REEL : la meteo enregistree au journal a la
 //                       validation d'une tache remontait jusqu'a la PREMIERE ligne
@@ -870,7 +885,7 @@
 // v2.22 — Fix profils vides : guard vide dans loadData() pour MEMBRES/SAISONS/TACHES
 // v2.17 — Onboarding intégré + tenantId · v2.06 — Firebase Auth · v2.00–v2.05 — divers
 const DEBUG = self.location.hostname === 'localhost' || self.location.hostname === '127.0.0.1';
-const CACHE_NAME   = 'mavigne-v6.47';
+const CACHE_NAME   = 'mavigne-v6.48';
 const TENANT_CACHE = 'mavigne-tenant';   // Cache persistant — préservé à chaque mise à jour SW
 const SYNC_TAG     = 'mavigne-sync';
 
@@ -886,7 +901,7 @@ const CDN_URLS = [
 ];
 
 self.addEventListener('install', event => {
-  if(DEBUG) console.log('[SW] Ma Vigne v6.47 installé');
+  if(DEBUG) console.log('[SW] Ma Vigne v6.48 installé');
   event.waitUntil(
     caches.open(CACHE_NAME).then(async cache => {
       // ── Cœur applicatif : STRICT (mise à jour ATOMIQUE) ──
@@ -902,7 +917,7 @@ self.addEventListener('install', event => {
 });
 
 self.addEventListener('activate', event => {
-  if(DEBUG) console.log('[SW] Ma Vigne v6.47 activé');
+  if(DEBUG) console.log('[SW] Ma Vigne v6.48 activé');
   event.waitUntil(
     caches.keys().then(keys =>
       Promise.all(

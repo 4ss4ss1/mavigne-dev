@@ -1471,6 +1471,7 @@ function _emModsHtml(m){
       +'<button type="button" class="emod-preset" onclick="_emModPreset(\'vigne\')">\uD83C\uDF3F Vigne</button>'
       +'<button type="button" class="emod-preset" onclick="_emModPreset(\'tracteur\')">\uD83D\uDE9C Tracteur</button>'
       +'<button type="button" class="emod-preset" onclick="_emModPreset(\'cave\')">\uD83C\uDF77 Cave</button>'
+      +'<button type="button" class="emod-preset" onclick="_emModPresetRole()">\uD83C\uDFAF Selon le r\u00f4le</button>'
     +'</div>'
     +'<div id="em-mods-list">'
       +list.map(function(x){
@@ -1488,6 +1489,37 @@ function _emModToggle(el){
   el.textContent=on?'\u2713':'';
   el.setAttribute('aria-checked',on?'true':'false');
 }
+// ★ 5e preset : la combinaison que la CREATION EN LOT pose deja d'elle-meme
+// (table _MV_MODS_ROLE dans utils.js, source unique). Deux usages : remettre une
+// fiche bricolee dans l'etat standard, et voir ce qu'un role donne avant de
+// creer les comptes.
+// ⚠️ Les roles lus sont ceux COCHES A L'ECRAN, pas ceux enregistres : on vient
+// peut-etre de passer quelqu'un tractoriste, et le bouton doit repondre a ce
+// qu'on voit, pas a ce qui est en base.
+function _emModPresetRole(){
+  // ⚠️ Les cases a cocher sont la SEULE source : l'etat des roles ne vit nulle
+  // part ailleurs (toggleEmRole ne touche que la classe du DOM).
+  // ⚠️ Array.prototype.forEach.call et non NodeList.forEach : c'est la forme
+  // employee partout dans ce fichier, et elle ne depend pas du moteur.
+  var roles=[];
+  try{
+    Array.prototype.forEach.call(document.querySelectorAll('[id^="erc-"].role-chk.on'),function(el){
+      var r=String(el.id||'').slice(4); if(r) roles.push(r);
+    });
+  }catch(e){ roles=[]; }
+  var md=(typeof window._mvModsDefaut==='function')?window._mvModsDefaut(roles):{};
+  var off=Object.keys(md||{});
+  if(!roles.length){ if(window.showToast) showToast('Cochez d\u2019abord un r\u00f4le','#B85A1A'); return; }
+  var box=document.getElementById('em-mods-list'); if(!box) return;
+  Array.prototype.forEach.call(box.querySelectorAll('.emod-chk'),function(el){
+    var on=(off.indexOf(el.getAttribute('data-mod'))<0);
+    el.classList.toggle('on',on);
+    el.textContent=on?'\u2713':'';
+    el.setAttribute('aria-checked',on?'true':'false');
+  });
+  if(window.showToast) showToast(off.length?('\u2713 '+off.length+' module'+(off.length>1?'s':'')+' masqu\u00e9'+(off.length>1?'s':'')):'\u2713 Tous les modules visibles','#3D6B27');
+}
+
 function _emModPreset(key){
   var off=_EM_PRESETS[key]||[];
   var box=document.getElementById('em-mods-list'); if(!box) return;
@@ -3820,6 +3852,7 @@ window._emPickType           = _emPickType;
 window.saveEditMembre        = saveEditMembre;
 window._emModToggle          = _emModToggle;
 window._emModPreset          = _emModPreset;
+window._emModPresetRole      = _emModPresetRole;
 window.deleteMembre          = deleteMembre;
 window.openChangePwd         = openChangePwd;
 // ── SEC-2 ──

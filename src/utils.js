@@ -23,7 +23,7 @@ export const GT_ADMIN_EMAIL = 'ngdevpro@gmail.com';
 // WHATS_NEW   : tableau vide = modal desactive pour cette version.
 // Format item : { emoji:'📅', titre:'Titre court', desc:'Phrase utilisateur.' }
 // Regle : seulement les changements visibles par les utilisateurs.
-export const APP_VERSION = '5.97';
+export const APP_VERSION = '5.98';
 // ════ Journal des nouveautés (récap cumulatif) ════
 // Une entrée par version, la PLUS RÉCENTE EN HAUT : { v:'5.10', items:[ {emoji,titre,desc}, … ] }
 // À chaque release visible → AJOUTER un bloc en tête (ne pas remplacer). items:[] = release technique (rien à afficher).
@@ -341,6 +341,9 @@ window._mvGraphRepeindre = function(){
 };
 
 export const WHATS_NEW = [
+  { v:'5.98', items:[
+    { emoji: '\u{1F3AF}', titre: "Chaque personne voit les modules de son m\u00e9tier", desc: "Quand on cr\u00e9e plusieurs comptes d\u2019un coup, chacun arrivait avec les sept modules dans sa barre du bas \u2014 y compris la Cave et la R\u00e9serve pour quelqu\u2019un qui ne quitte pas les vignes. Il fallait rouvrir chaque fiche pour d\u00e9cocher. Maintenant le r\u00f4le suffit\u202f: un ouvrier arrive avec la Vigne et le Planning, un tractoriste garde en plus le Tracteur et le Phyto. Le Planning reste visible pour tout le monde, c\u2019est l\u00e0 que chacun lit ses heures et ses cong\u00e9s. Rien n\u2019est fig\u00e9\u202f: la fiche de chaque personne, dans R\u00e9glages, permet de recocher ce qu\u2019on veut, et un nouveau bouton \u00ab Selon le r\u00f4le \u00bb repose la combinaison standard d\u2019un geste. Les personnes d\u00e9j\u00e0 en place ne changent pas." }
+  ]},
   { v:'5.97', items:[
     { emoji: '\u{1F326}\u{FE0F}', titre: "La m\u00e9t\u00e9o enregistr\u00e9e \u00e0 la validation d\u2019une t\u00e2che", desc: "Quand vous validez une t\u00e2che sur une parcelle, l\u2019application enregistre au journal la m\u00e9t\u00e9o moyenne du chantier. Elle la calculait depuis la toute premi\u00e8re fois o\u00f9 cette t\u00e2che avait \u00e9t\u00e9 mise « en cours » sur cette parcelle \u2014 m\u00eame si c\u2019\u00e9tait la campagne d\u2019avant, sur une ligne rest\u00e9e ouverte par oubli. Une taille valid\u00e9e en mars pouvait ainsi porter la moyenne de quatorze mois. Le calcul s\u2019arr\u00eate maintenant au d\u00e9but de la p\u00e9riode en cours. Les m\u00e9t\u00e9os d\u00e9j\u00e0 enregistr\u00e9es ne changent pas." },
     { emoji: '\u{1F4F1}', titre: "L\u2019accueil du Pilotage sur \u00e9cran \u00e9troit", desc: "Sur les \u00e9crans d\u2019une largeur tr\u00e8s pr\u00e9cise \u2014 certaines tablettes en portrait, une fen\u00eatre de navigateur r\u00e9duite \u00e0 la main \u2014 le bandeau du haut du Pilotage gardait deux colonnes dans un espace pr\u00e9vu pour une seule. Le texte se tassait. C\u2019est corrig\u00e9." }
@@ -2250,6 +2253,73 @@ window._mvProj            = _mvProj;
 // est deja sur la campagne de l'annee civile, au 6 juillet on est encore sur la
 // precedente. SOURCE UNIQUE : pilotage.js (frise des archives) et cave.js (Le
 // millesime) l'appellent tous les deux. Deux definitions = incoherence garantie.
+// ════ MODULES PAR DEFAUT SELON LE ROLE ════
+// Un membre cree en lot arrivait avec les SEPT modules dans sa barre du bas.
+// Chez un domaine de douze permanents, ca fait douze fiches a rouvrir une par
+// une pour cocher un profil — et si on oublie, douze personnes decouvrent
+// l'application avec quatre modules qui ne les concernent pas. Le cout n'est pas
+// le temps de l'installateur : c'est la PREMIERE IMPRESSION de douze gens dont
+// la plupart n'ont jamais ouvert d'application metier.
+//
+// ⚠️ SOURCE UNIQUE. Deux appelants : la creation en lot (admin-gt.js) et le
+// preset « Selon le role » de la fiche membre (reglages.js). Deux tables = deux
+// verites, et l'ecart ne se verrait que chez un client.
+//
+// ⚠️ Ce sont des EXCLUSIONS, jamais des autorisations : le champ ne peut que
+// retirer ce que la formule du domaine accorde deja (cf. _canModule). Et c'est
+// de l'allegement d'interface, PAS du cloisonnement — ce qui est protege l'est
+// cote rules (SEC-1).
+//
+// ★★ CE QUI N'EST JAMAIS MASQUE, et pourquoi :
+//   · `vigne`    — c'est l'application. Un membre sans la vigne n'a plus d'accueil.
+//   · `reglages` — socle inalienable (mot de passe, theme, deconnexion).
+//   · `planning` — ⚠️ ECART ASSUME AVEC LE BACKLOG, qui demandait de le masquer
+//     aux ouvriers. C'est l'ecran ou l'ouvrier lit SON mois, ses heures et ses
+//     conges — depuis la refonte (v6.46) il y tombe directement, sans onglets.
+//     Le masquer serait une regression fonctionnelle deguisee en allegement.
+var _MV_MODS_ROLE = {
+  admin:       [],                                                  // il a besoin de tout
+  ouvrier:     ['tracteur', 'phyto', 'cave', 'reserve', 'pilotage'],
+  saisonnier:  ['tracteur', 'phyto', 'cave', 'reserve', 'pilotage'],
+  tractoriste: ['cave', 'reserve', 'pilotage'],
+  // ⚠️ 5e role, present dans la fiche membre (reglages.js) mais PAS dans la
+  // creation en lot (_agtLotRoles n'en detecte que quatre). Il ne masque rien :
+  // c'est un role d'observation transverse, on ne sait pas ce que la personne
+  // fait par ailleurs. Ecrit explicitement plutot que laisse en « inconnu »,
+  // pour que ce soit un arbitrage et pas un oubli.
+  pilotage:    []
+};
+var _MV_MODS_JAMAIS = { vigne: 1, reglages: 1, planning: 1 };
+
+// Rend { cave:false, … } — uniquement les exclusions, comme le champ `mods`.
+// Objet VIDE = rien a masquer, l'appelant ne pose alors aucun champ.
+//
+// ⚠⚠ CUMUL DE ROLES : un module n'est masque que s'il l'est par TOUS les roles
+// de la personne. Un polyvalent ouvrier+tractoriste garde le Tracteur — l'union
+// des exclusions le lui aurait retire, ce qui est exactement l'inverse du besoin.
+// L'intersection est la seule regle sure : dans le doute, on montre.
+//
+// ⚠️ Un role INCONNU rend l'ensemble vide, donc rien n'est masque a personne
+// qui le porte. Zero regression sur l'existant, et un nouveau role invente plus
+// tard ne masquera rien tant qu'il n'est pas ecrit ici.
+function _mvModsDefaut(roles) {
+  var r = Array.isArray(roles) ? roles : [];
+  if (!r.length) return {};
+  if (r.indexOf('admin') >= 0) return {};
+  var inter = null;
+  for (var i = 0; i < r.length; i++) {
+    var liste = _MV_MODS_ROLE[r[i]];
+    if (!liste) return {};                       // role inconnu -> on ne masque rien
+    if (inter === null) { inter = liste.slice(); continue; }
+    inter = inter.filter(function (k) { return liste.indexOf(k) >= 0; });
+  }
+  var out = {};
+  (inter || []).forEach(function (k) { if (!_MV_MODS_JAMAIS[k]) out[k] = false; });
+  return out;
+}
+window._MV_MODS_ROLE = _MV_MODS_ROLE;
+window._mvModsDefaut = _mvModsDefaut;
+
 function _mvCampagneDe(iso){
   var p=String(iso||'').split('-');
   var an=parseInt(p[0],10), mo=parseInt(p[1],10);

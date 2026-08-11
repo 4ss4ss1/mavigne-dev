@@ -1695,6 +1695,7 @@ function _agtLotRender() {
         + '</div>'
         + '<div style="font-size:11.5px;color:rgba(255,255,255,0.35);margin-top:2px">' + E(x.email)
         + (x.fictive && !x.bloque ? ' \u00b7 identifiant, pas une bo\u00eete' : '') + '</div>'
+        + (x.bloque ? '' : _agtLotModsLigne(x.roles))
         + (x.bloque ? '<div style="font-size:11.5px;color:#E0A46A;margin-top:3px">\u2298 ' + E(x.bloque) + '</div>' : '')
         + '</div>';
     });
@@ -1729,6 +1730,22 @@ function agtLotPreview() {
   _agtLotRender();
 }
 
+// Ce que la creation va masquer, DIT dans l'apercu. Un reglage pose sans le dire
+// se decouvre chez le client, et on ne sait plus si c'est voulu ou si c'est un bug.
+// Les libelles sont ceux de la fiche membre — l'installateur et le client doivent
+// lire les memes mots.
+var _AGT_MOD_LBL = { tracteur: 'Tracteur', phyto: 'Phyto', cave: 'Cave',
+                     reserve: 'R\u00e9serve', planning: 'Planning', pilotage: 'Pilotage' };
+function _agtLotModsLigne(roles) {
+  var md = null;
+  try { md = window._mvModsDefaut ? window._mvModsDefaut(roles) : null; } catch (e) { md = null; }
+  var ks = md ? Object.keys(md) : [];
+  if (!ks.length) return '<div style="font-size:11px;color:rgba(255,255,255,0.28);margin-top:3px">Tous les modules visibles</div>';
+  var noms = ks.map(function (k) { return _AGT_MOD_LBL[k] || k; }).join(', ');
+  return '<div style="font-size:11px;color:rgba(255,255,255,0.32);margin-top:3px">'
+    + '\uD83D\uDC41\uFE0F Masqu\u00e9s\u00a0: ' + noms + ' \u00b7 <span style="opacity:.7">modifiable dans R\u00e9glages</span></div>';
+}
+
 // Creation. Une par une — createMemberAccount cree UN compte. Ce qui echoue est
 // dit, ce qui a reussi est garde : on ecrit le document `membres` MEME en cas
 // d'echec partiel, sinon un compte existerait sans fiche, invisible et inutilisable.
@@ -1747,8 +1764,19 @@ async function agtLotGo() {
     try {
       var cred = await window.createAuthAccount(x.email, '', { roles: x.roles, tenant: slug });
       if (!cred) throw new Error('aucune r\u00e9ponse');
-      mbr.push({ nom: x.nom, email: x.email, roles: x.roles,
-                 couleur: _AGT_MBR_COLORS[mbr.length % _AGT_MBR_COLORS.length], statut: 'actif' });
+      var _fiche = { nom: x.nom, email: x.email, roles: x.roles,
+                 couleur: _AGT_MBR_COLORS[mbr.length % _AGT_MBR_COLORS.length], statut: 'actif' };
+      // Modules masques d'apres le role — table dans utils.js, source unique
+      // partagee avec le preset de la fiche membre. Objet vide -> AUCUN champ :
+      // « absent » reste le defaut lisible cote _canModule, et un domaine sans
+      // roles reconnus cree exactement les memes fiches qu'avant ce lot.
+      try {
+        var _md = window._mvModsDefaut ? window._mvModsDefaut(x.roles) : null;
+        if (_md && Object.keys(_md).length) _fiche.mods = _md;
+      } catch (e) {
+        if (window.logError) window.logError({ level: 'info', cat: 'agt-lot', msg: 'mods par defaut non poses' });
+      }
+      mbr.push(_fiche);
       creds.push({ nom: x.nom, mail: x.email, pwd: (cred.password || '') });
     } catch (e) {
       var msg = (e && (e.message || e.code)) || 'erreur';
