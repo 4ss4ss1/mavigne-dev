@@ -16,6 +16,42 @@ function _pilNum(n){ return Math.round(Number(n)||0).toLocaleString('fr-FR'); }
 function _pilTnom(n){ return (typeof window.tNom==='function') ? window.tNom(n) : n; }
 // pctColor — dégradé terre → ambre → vert vigne (cohérent avec la carte parcelles)
 function _pilPctColor(p){ return p>=85?'#5B9B3A':p>=65?'#7FA83A':p>=45?'#D9A441':p>=25?'#C8853A':'#9A5A38'; }
+// ════════════════════════════════════════════════════════════════════════════
+// LA PALETTE SEMANTIQUE — un nom, un sens, une couleur.
+// Chaque graphe du module tire ses couleurs d'ICI, jamais d'un hex ecrit sur
+// place. Le motif corrige : `c.col.alerte` servait A LA FOIS au renfort a
+// trouver (des barres) et au trait d'aujourd'hui (un reperage) dans la MEME
+// image — deux choses sans rapport sous une seule couleur, donc une image qui
+// se lit de travers. « aujourdhui » a desormais son encre a lui.
+// ⚠️ A DEPLACER dans utils.js au prochain lot qui bumpe (une palette ne
+//    devrait pas vivre dans un module). Elle est ici pour rester sans bump.
+// ════════════════════════════════════════════════════════════════════════════
+var _PIL_SEM = {
+  fait:       '#3D6B27',   // fait, absorbe par l'equipe, couvert
+  reste:      '#C2A14D',   // reste a faire — n'alarme pas
+  faute:      '#A0291E',   // manque, depassement, sous-effectif
+  socle:      '#4A9FC8',   // reference : socle permanent, moyenne
+  hors:       '#DED7C9',   // hors portee
+  sel:        '#8A5A38',   // la selection en cours
+  aujourdhui: '#14110D'    // le trait du jour — un REPERE, pas une alerte
+};
+// ── Une polyligne qui se COUPE sur un trou ─────────────────────────────────
+// pts = [{x0,x1,y,gap}] deja projetes. `gap:true` = pas de mesure ici.
+// Sans cette rupture, deux periodes separees par trois semaines vides sont
+// reliees par un segment droit : le trait AFFIRME un effectif sur une fenetre
+// ou personne n'a rien compte. Un trou n'est pas un zero, et ce n'est pas
+// davantage une interpolation.
+function _pilPolyBreak(pts){
+  var d='', ouvert=false, i;
+  for(i=0;i<pts.length;i++){
+    var q=pts[i];
+    if(q.gap){ ouvert=false; continue; }
+    d += (ouvert?' L':(d?' M':'M')) + q.x0.toFixed(1) + ' ' + q.y.toFixed(1)
+       + ' L' + q.x1.toFixed(1) + ' ' + q.y.toFixed(1);
+    ouvert=true;
+  }
+  return d;
+}
 var _PIL_PIE_COLORS = ['#7A1020','#C8853A','#5B2D8E','#5B9B3A','#C9A84C','#1A5276','#2E5220','#9A5A38','#B23A52','#3D6B27','#8A5A2E','#1A4A7A'];
 
 // ── État de personnalisation (localStorage par utilisateur) ──────────
@@ -760,11 +796,19 @@ function _pilDemandSvg(cd,w){
   var g='';
   for(var v=0;v<=yTop;v++){ g+='<line x1="'+padL+'" y1="'+Y(v).toFixed(1)+'" x2="'+(W-padR)+'" y2="'+Y(v).toFixed(1)+'" stroke="'+c.col.grille+'" stroke-width="1"/><text x="'+(padL-8)+'" y="'+(Y(v)+4).toFixed(1)+'" text-anchor="end" font-size="'+c.txt.mini+'" fill="'+c.col.texte+'" font-family="Outfit">'+v+'</text>'; }
   months.forEach(function(mo){ var x0=X(Math.max(s,_moO0(mo))); g+='<line x1="'+x0.toFixed(1)+'" y1="'+padT+'" x2="'+x0.toFixed(1)+'" y2="'+(padT+plotH)+'" stroke="'+c.col.grille+'" stroke-width="1"/>'; var xc=(X(Math.max(s,_moO0(mo)))+X(Math.min(e,_moO1(mo))+1))/2; g+='<text x="'+xc.toFixed(1)+'" y="'+(H-22)+'" text-anchor="middle" font-size="'+c.txt.mini+'" font-weight="600" fill="'+c.col.texte+'" font-family="Outfit">'+MN[mo.m]+'</text>'; });
-  wk.forEach(function(w){ if(w.cap<=0)return; var bx=X(w.o0)+2, bw=X(w.o1+1)-X(w.o0)-4; var over=w.need>((w.head||0)+0.001); g+='<rect x="'+bx.toFixed(1)+'" y="'+Y(w.need).toFixed(1)+'" width="'+Math.max(1,bw).toFixed(1)+'" height="'+(padT+plotH-Y(w.need)).toFixed(1)+'" rx="2" fill="'+(over?c.col.alerte:c.col.fait)+'" opacity="'+(over?0.95:0.8)+'"/>'; });
-  var path=''; wk.forEach(function(w,k){ var x0=X(w.o0), x1=X(w.o1+1), yy=Y(w.head||0); path+=(k===0?'M '+x0.toFixed(1)+' '+yy.toFixed(1):' L '+x0.toFixed(1)+' '+yy.toFixed(1))+' L '+x1.toFixed(1)+' '+yy.toFixed(1); });
+  wk.forEach(function(w){ if(w.cap<=0)return; var bx=X(w.o0)+2, bw=X(w.o1+1)-X(w.o0)-4; var over=w.need>((w.head||0)+0.001); g+='<rect x="'+bx.toFixed(1)+'" y="'+Y(w.need).toFixed(1)+'" width="'+Math.max(1,bw).toFixed(1)+'" height="'+(padT+plotH-Y(w.need)).toFixed(1)+'" rx="2" fill="'+(over?_PIL_SEM.faute:_PIL_SEM.fait)+'" opacity="'+(over?0.95:0.8)+'"/>'; });
+  // ★ Meme regle que la frise annuelle : une semaine SANS capacite (hors
+  //   modele de semaine) n'a pas d'effectif mesure. La ligne s'y coupe. Avant,
+  //   elle y tombait a `head||0` — un zero dessine est une mesure, et celle-ci
+  //   n'existait pas.
+  var _pts=[]; wk.forEach(function(w){
+    if(!(w.cap>0)){ _pts.push({gap:true}); return; }
+    _pts.push({x0:X(w.o0),x1:X(w.o1+1),y:Y(w.head||0)});
+  });
+  var path=_pilPolyBreak(_pts);
   g+='<path d="'+path+'" fill="none" stroke="var(--texte)" stroke-width="2.5" stroke-linejoin="round"/>';
   var pk=0,pkw=null; wk.forEach(function(w){ if(w.cap>0&&w.need>pk){pk=w.need;pkw=w;} });
-  if(pkw && pkw.need>((pkw.head||0)+0.001)){ var px=(X(pkw.o0)+X(pkw.o1+1))/2; g+='<text x="'+px.toFixed(1)+'" y="'+(Y(pk)-7).toFixed(1)+'" text-anchor="middle" font-size="'+c.txt.mini+'" font-weight="700" fill="'+c.col.alerte+'" font-family="Outfit">pic '+(Math.round(pk*10)/10).toString().replace('.',',')+'</text>'; }
+  if(pkw && pkw.need>((pkw.head||0)+0.001)){ var px=(X(pkw.o0)+X(pkw.o1+1))/2; g+='<text x="'+px.toFixed(1)+'" y="'+(Y(pk)-7).toFixed(1)+'" text-anchor="middle" font-size="'+c.txt.mini+'" font-weight="700" fill="'+_PIL_SEM.faute+'" font-family="Outfit">pic '+(Math.round(pk*10)/10).toString().replace('.',',')+'</text>'; }
   var _tj=E.o(E.todayIso);
   if(_tj>=E.s && _tj<=E.e){ var _tx=X(_tj); g+='<line x1="'+_tx.toFixed(1)+'" y1="'+padT+'" x2="'+_tx.toFixed(1)+'" y2="'+(padT+plotH).toFixed(1)+'" stroke="'+c.col.texte+'" stroke-width="1.5" stroke-dasharray="4 3"/>'; }
   return window._mvGraphSvg(window._mvGraphCadre(W,H), 'Personnes n\u00e9cessaires par semaine, face \u00e0 l\u2019effectif pr\u00e9sent.', g);
@@ -988,25 +1032,34 @@ function _pilFriseAnneeSvg(ann,w){
     if(!(x.cap>0)||x.need<=0.01) return;
     var bx=Math.max(padL,X(x.o0))+1, bx2=Math.min(W-padR,X(x.o1+1)), bw=Math.max(1.5,bx2-bx-1);
     var base=Math.min(x.need,x.head), ov=Math.max(0,x.need-x.head);
-    g+='<rect x="'+bx.toFixed(1)+'" y="'+Y(base).toFixed(1)+'" width="'+bw.toFixed(1)+'" height="'+(padT+chH-Y(base)).toFixed(1)+'" rx="2" fill="'+c.col.fait+'" opacity="0.85"/>';
-    if(ov>0.02) g+='<rect x="'+bx.toFixed(1)+'" y="'+Y(x.need).toFixed(1)+'" width="'+bw.toFixed(1)+'" height="'+(Y(base)-Y(x.need)).toFixed(1)+'" rx="2" fill="'+c.col.alerte+'" opacity="0.92"/>';
+    g+='<rect x="'+bx.toFixed(1)+'" y="'+Y(base).toFixed(1)+'" width="'+bw.toFixed(1)+'" height="'+(padT+chH-Y(base)).toFixed(1)+'" rx="2" fill="'+_PIL_SEM.fait+'" opacity="0.85"/>';
+    if(ov>0.02) g+='<rect x="'+bx.toFixed(1)+'" y="'+Y(x.need).toFixed(1)+'" width="'+bw.toFixed(1)+'" height="'+(Y(base)-Y(x.need)).toFixed(1)+'" rx="2" fill="'+_PIL_SEM.faute+'" opacity="0.92"/>';
   });
   // Deux lignes : effectif PRESENT (plein) et SOCLE PERMANENT (pointille, equipes
   // collectives exclues — c'est headPerm, deja calcule par planning.js). Le socle
   // rend l'hiver lisible meme quand l'axe est cale sur le pic : on lit « au-dessus
   // de cette ligne, c'est du renfort a trouver », et non un chiffre absolu perdu.
-  var pp='', qq='', k=0;
+  // ★ LA LIGNE SE COUPE SUR UN TROU. Elle enchainait en 'L' quelle que soit la
+  //   distance : entre deux periodes separees d'un mois, un segment droit
+  //   traversait une fenetre ou RIEN n'avait ete mesure. Le trait affirmait un
+  //   effectif la ou l'application n'en connait aucun. On insere un point
+  //   `gap` des que la semaine suivante ne colle pas a la precedente.
+  var ptsH=[], ptsP=[], prevFin=null;
   vis.forEach(function(x){
+    if(prevFin!==null && x.o0>prevFin+1){ ptsH.push({gap:true}); ptsP.push({gap:true}); }
     var x0=Math.max(padL,X(x.o0)), x1=Math.min(W-padR,X(x.o1+1));
-    pp+=(k?' L':'M')+x0.toFixed(1)+' '+Y(x.head).toFixed(1)+' L'+x1.toFixed(1)+' '+Y(x.head).toFixed(1);
-    qq+=(k?' L':'M')+x0.toFixed(1)+' '+Y(x.headPerm).toFixed(1)+' L'+x1.toFixed(1)+' '+Y(x.headPerm).toFixed(1);
-    k++;
+    ptsH.push({x0:x0,x1:x1,y:Y(x.head)});
+    ptsP.push({x0:x0,x1:x1,y:Y(x.headPerm)});
+    prevFin=x.o1;
   });
-  if(qq) g+='<path d="'+qq+'" fill="none" stroke="#4A9FC8" stroke-width="1.8" stroke-dasharray="5 4"/>';
+  var qq=_pilPolyBreak(ptsP), pp=_pilPolyBreak(ptsH);
+  if(qq) g+='<path d="'+qq+'" fill="none" stroke="'+_PIL_SEM.socle+'" stroke-width="1.8" stroke-dasharray="5 4"/>';
   if(pp) g+='<path d="'+pp+'" fill="none" stroke="var(--texte)" stroke-width="2.4" stroke-linejoin="round"/>';
   var tIso=(typeof window._mvAujIso==='function')?window._mvAujIso():new Date().toISOString().split('T')[0];
   var tj=_pilAnnOrd(tIso);
-  if(tj>=s&&tj<=e) g+='<line x1="'+X(tj).toFixed(1)+'" y1="'+padT+'" x2="'+X(tj).toFixed(1)+'" y2="'+(padT+chH).toFixed(1)+'" stroke="'+c.col.alerte+'" stroke-width="1.5" stroke-dasharray="4 3"/>';
+  // Le trait du jour est un REPERE, pas une alerte : il ne prend plus la
+  // couleur des barres de renfort, avec qui il partageait `col.alerte`.
+  if(tj>=s&&tj<=e) g+='<line x1="'+X(tj).toFixed(1)+'" y1="'+padT+'" x2="'+X(tj).toFixed(1)+'" y2="'+(padT+chH).toFixed(1)+'" stroke="'+_PIL_SEM.aujourdhui+'" stroke-width="1.5" stroke-dasharray="4 3" opacity="0.55"/>';
   if(!selP){
     ann.pers.forEach(function(p){
       var x0=Math.max(padL,X(_pilAnnOrd(p.debut))), x1=Math.min(W-padR,X(_pilAnnOrd(p.fin)+1)), bw=x1-x0;
@@ -6809,6 +6862,8 @@ function renderPilotage(){
 // module liste les onglets en les LISANT ici, au lieu de les decrire dans une
 // phrase qui vieillit. Elle a annonce « Six onglets » pendant que le module en
 // comptait sept, avec deux noms qui n'existaient plus.
+window._PIL_SEM       = _PIL_SEM;
+window._pilPolyBreak  = _pilPolyBreak;
 window._PIL_TABS      = _PIL_TABS;
 window._PIL_TOOLS     = _PIL_TOOLS;
 window.renderPilotage = renderPilotage;
