@@ -715,6 +715,31 @@ function _setActChampType(pfx,type){
 
 // Période consultée (objet). La liste des tâches y est portée : toute création / suppression de
 // tâche doit la mettre à jour, sinon l'ajout est un geste sans effet visible.
+// ── Contrats precedents d'une fiche : lecture seule + suppression ────────────
+// Sans cet affichage, m.contrats[] serait une boite noire : on ne saurait ni ce
+// qui a ete archive, ni corriger un archivage errone. Une donnee invisible est
+// une donnee qu'on ne peut pas croire.
+// Les lignes portent leurs dates en attributs : la sauvegarde relit le DOM, donc
+// supprimer une ligne suffit a supprimer le contrat.
+function _emContratsHtml(m){
+  var L=(m&&Array.isArray(m.contrats))?m.contrats:[];
+  if(!L.length) return '';
+  var fr=function(d){ if(!d) return '\u2014'; var p=String(d).split('-'); return p.length===3?(p[2]+'/'+p[1]+'/'+p[0]):d; };
+  return '<div class="fl" style="margin-top:10px">Contrats pr\u00e9c\u00e9dents <span style="font-size:11px;color:var(--texte-doux,#6b7280);font-weight:400">archiv\u00e9s automatiquement</span></div>'
+    +'<div id="em-contrats-list" style="margin-bottom:8px">'
+    +L.map(function(c,i){
+        return '<div data-ctr="'+i+'" data-deb="'+_escAttr(c.debut||'')+'" data-fin="'+_escAttr(c.fin||'')+'" data-typ="'+_escAttr(c.type||'')+'"'
+          +' style="display:flex;align-items:center;gap:8px;padding:8px 10px;border:1.5px solid #e5e7eb;border-radius:10px;margin-bottom:6px;background:var(--terre-pale,#faf8f4)">'
+          +'<span style="flex:1;font-size:13px">'+fr(c.debut)+' \u2192 '+fr(c.fin)
+          +(c.type?(' <span style="font-size:11px;color:var(--texte-doux,#6b7280)">'+_escHtml(c.type)+'</span>'):'')+'</span>'
+          +'<button type="button" onclick="this.closest(\'[data-ctr]\').remove()" title="Retirer ce contrat"'
+          +' style="border:none;background:transparent;color:#A0291E;font-size:16px;cursor:pointer;padding:2px 6px;line-height:1">\u00d7</button>'
+          +'</div>';
+      }).join('')
+    +'</div>'
+    +'<div style="font-size:11px;color:var(--texte-doux,#6b7280);margin:-2px 0 8px;line-height:1.5">Ces p\u00e9riodes servent \u00e0 savoir qui \u00e9tait pr\u00e9sent sur les campagnes pass\u00e9es. Le compteur des 1607\u00a0h, les cong\u00e9s et la paie portent sur le contrat en cours uniquement.</div>';
+}
+
 // Frise de campagne : les périodes en couleur sur l'axe du temps, le trait du jour, les trous en
 // hachuré et les chevauchements cerclés de rouge. C'est le seul endroit où « on raisonne par date »
 // devient visible d'un coup d'œil.
@@ -956,6 +981,10 @@ function _cmpFenetre(){
   ds.sort(); fs.sort();
   return {a:ds[0], b:fs[fs.length-1]};
 }
+// Expose : Pilotage y lit la fenetre de la campagne pour sa frise annuelle. Une
+// SEULE definition de « ou commence et ou finit l'annee » — Reglages et Pilotage
+// doivent cadrer sur la meme, sinon deux ecrans dessinent deux annees.
+window._cmpFenetre=_cmpFenetre;
 var _MV_MOISA=['janv.','févr.','mars','avr.','mai','juin','juil.','août','sept.','oct.','nov.','déc.'];
 
 var _nsTachesSel=new Set(), _nsTachesTouched=false;
@@ -1564,6 +1593,7 @@ function editMembre(nom){
     +'<input type="date" id="em-debut-contrat" value="'+(m.debut_contrat||'')+'" style="width:100%;padding:10px;border:1.5px solid #e5e7eb;border-radius:10px;font-size:14px;outline:none;box-sizing:border-box;margin-bottom:8px;font-family:inherit">'
     +'<div class="fl">Fin de contrat <span id="em-fin-hint" style="font-size:11px;color:'+(isPerm?'#16a34a':'#d97706')+'">'+(isPerm?'Pas de date de fin requise pour ce type de contrat.':'Une date de fin est recommand\u00e9e pour ce type de contrat.')+'</span></div>'
     +'<input type="date" id="em-fin-contrat" value="'+(m.fin_contrat||'')+'"'+(isPerm?' disabled':'')+' style="width:100%;padding:10px;border:1.5px solid #e5e7eb;border-radius:10px;font-size:14px;outline:none;box-sizing:border-box;margin-bottom:8px;font-family:inherit">'
+    +_emContratsHtml(m)
     +'<div id="em-renouv-section" style="display:'+(isRenouv?'block':'none')+'">'
     +'<div class="fl" style="margin-top:6px">🔄 Renouvellement <span style="font-size:11px;color:var(--texte-doux,#6b7280);font-weight:400">(optionnel)</span></div>'
     +'<div style="background:var(--tag-amber-bg,#fffbeb);border:1.5px solid #fcd34d;border-radius:10px;padding:10px 12px;margin:6px 0 4px">'
@@ -1696,9 +1726,38 @@ function saveEditMembre(){
         showToast('\u26a0\ufe0f R\u00f4les enregistr\u00e9s, mais droits non appliqu\u00e9s : '+((e&&e.message)||''),'#B85A1A');
       });
   }
+  // ⚠️⚠️ ARCHIVAGE AVANT ECRASEMENT — C'EST ICI QUE LE PASSE SE PERDAIT.
+  // Saisir la date de debut d'un nouveau contrat ecrasait l'ancien sans un mot :
+  // le salarie disparaissait RETROACTIVEMENT de toutes les campagnes precedentes
+  // (effectif, heures, cout). Aucun code de lecture ne pouvait rattraper cela
+  // apres coup — la donnee n'existait plus nulle part.
+  // On n'archive QUE dans le cas NON AMBIGU : l'ancien contrat est clos (il porte
+  // une date de fin) ET le nouveau debut est STRICTEMENT posterieur a cette fin.
+  // Corriger une faute de frappe dans la date de debut ne remplit jamais cette
+  // condition : on ne fabrique donc pas de faux contrat passe.
+  var _ndeb=document.getElementById('em-debut-contrat')?.value||'';
+  var _nfin=document.getElementById('em-fin-contrat')?.value||'';
+  if(m.debut_contrat && m.fin_contrat && _ndeb && _ndeb>m.fin_contrat && _ndeb!==m.debut_contrat){
+    if(!Array.isArray(m.contrats)) m.contrats=[];
+    var _dej=m.contrats.some(function(c){ return c && c.debut===m.debut_contrat && c.fin===m.fin_contrat; });
+    if(!_dej){
+      m.contrats.push({debut:m.debut_contrat, fin:m.fin_contrat, type:m.type_contrat||''});
+      showToast('\u{1F4C7} Contrat pr\u00e9c\u00e9dent archiv\u00e9 \u2014 '+m.debut_contrat+' \u2192 '+m.fin_contrat,'#3D6B27');
+    }
+  }
+  // Relecture de la liste affichee : une ligne supprimee a l'ecran disparait ici.
+  // Lire le DOM plutot que de tenir un etat global suit ce que fait deja le reste
+  // de la fiche, et evite qu'un membre en cours d'edition survive a une fermeture.
+  var _lst=document.getElementById('em-contrats-list');
+  if(_lst){
+    var _rows=[].slice.call(_lst.querySelectorAll('[data-ctr]')).map(function(r){
+      return {debut:r.getAttribute('data-deb')||'', fin:r.getAttribute('data-fin')||'', type:r.getAttribute('data-typ')||''};
+    }).filter(function(c){ return c.debut||c.fin; });
+    if(_rows.length) m.contrats=_rows; else delete m.contrats;
+  }
   m.type_contrat=document.getElementById('em-type-contrat')?.value||'CDI';
-  m.debut_contrat=document.getElementById('em-debut-contrat')?.value||'';
-  m.fin_contrat=document.getElementById('em-fin-contrat')?.value||'';
+  m.debut_contrat=_ndeb;
+  m.fin_contrat=_nfin;
   m.renouvellement_date=document.getElementById('em-renouv-date')?.value||'';
   m.renouvellement_fin=document.getElementById('em-renouv-fin')?.value||'';
   m.cp_initial_j=parseFloat(document.getElementById('em-cp-initial-j')?.value||'0')||0;

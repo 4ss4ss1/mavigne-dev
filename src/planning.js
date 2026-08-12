@@ -806,10 +806,21 @@ function _chargeSaisonData(s){
       ? window._mvEnContratSurPeriode(m,s.debut,s.fin)
       : (m && m.statut!=='Inactif' && !m.bureau);
   });
+  // Poids d'une fiche : une equipe COLLECTIVE pese son EFFECTIF, pas 1.
+  // _headWeek et _capWeekReal l'appliquaient deja ; capEquipe et capPresent non.
+  // Consequence mesuree le 11/08 sur un domaine reel : une equipe de 40 vendangeurs
+  // comptait pour UNE personne, capEquipe sortait a ~600 h au lieu de ~3300, et la
+  // barre « Ou va le temps » affichait une part de 392 % — une repartition qui
+  // depasse 100 % — pendant qu'« Autres » tombait a 0 h par saturation du Math.max.
+  // Une seule definition du poids, ici comme dans _headWeek.
+  function _mbPoids(mb){
+    return (window._mvEstCollectif && window._mvEstCollectif(mb) && typeof window._mvEffDef==='function')
+      ? window._mvEffDef(mb) : 1;
+  }
   var capEquipe=0;
   months.forEach(function(x){
     var full=capMonth(x.yr,x.m,true); var ratio=full>0?x.capRef/full:1;
-    _planCtxYear=x.yr; mbrs.forEach(function(mb){ capEquipe+=(((_planSummary(mb,x.m)||{}).ref)||0)*ratio; }); _planCtxYear=null;
+    _planCtxYear=x.yr; mbrs.forEach(function(mb){ capEquipe+=(((_planSummary(mb,x.m)||{}).ref)||0)*ratio*_mbPoids(mb); }); _planCtxYear=null;
   });
   var etpDispo=capRefTotal>0?capEquipe/capRefTotal:0;
   // Repartition par ORDRE des taches (vue par pics) + capacite reellement presente / mois.
@@ -863,7 +874,7 @@ function _chargeSaisonData(s){
   });
   months.forEach(function(x){
     var full=capMonth(x.yr,x.m,true); var ratio=full>0?x.capRef/full:1;
-    var cp=0; _planCtxYear=x.yr; mbrs.forEach(function(mb){ cp+=(_planPresentRef(mb,x.m)||0)*ratio; }); _planCtxYear=null;
+    var cp=0; _planCtxYear=x.yr; mbrs.forEach(function(mb){ cp+=(_planPresentRef(mb,x.m)||0)*ratio*_mbPoids(mb); }); _planCtxYear=null;
     x.capPresent=cp;
     x.etpReq=x.capRef>0?x.chargeOrd/x.capRef:0;
     x.etpPres=x.capRef>0?x.capPresent/x.capRef:0;
@@ -874,7 +885,21 @@ function _chargeSaisonData(s){
   function _capDaysOrd(o0,o1){ var sum=0,a=Math.max(o0,spanS),b=Math.min(o1,spanE); for(var o=a;o<=b;o++){ var dt=new Date(Date.parse('2026-01-01T00:00:00')+o*86400000); var mo=_planGetTpl('standard',dt.getFullYear())[dt.getMonth()]||{}; var hv=mo[String(dt.getDate())]; if(hv!=null)sum+=parseFloat(hv)||0; } return sum; }
   // Effectif present LISSE : tetes non-bureau sous contrat, prorata de jours dans la semaine.
   // ANNEE REELLE via _ford (contrairement a _planInContract qui fige l'annee sur l'horloge -> KO saison a cheval sur l'an civil).
-  function _inContractDay(mb,ds){ if(!mb.debut_contrat&&!mb.fin_contrat)return true; if(mb.debut_contrat&&ds<mb.debut_contrat)return false; if(mb.fin_contrat&&ds>mb.fin_contrat)return false; return true; }
+  // Question 2 — « etait-il la CE JOUR-LA ? » : TOUS les contrats de la fiche,
+  // le contrat en cours ET les precedents (utils.js, _mvContrats). C'est cette
+  // lecture-la qui effacait le passe : un salarie reembauche n'existait plus sur
+  // les campagnes ou il avait pourtant travaille.
+  // ⚠️ NE PAS CONFONDRE avec _planInContract (question 3, ~35 appels) : plafond
+  // des 1607 h, conges, grille du planning. Celui-la ne voit QUE le contrat en
+  // cours et NE DOIT PAS etre elargi — deux contrats separes par une coupure ont
+  // deux compteurs distincts, les fondre en un seul fausserait la paie.
+  function _inContractDay(mb,ds){
+    var P=(typeof window._mvContrats==='function')?window._mvContrats(mb):null;
+    if(!P){ if(!mb.debut_contrat&&!mb.fin_contrat)return true; if(mb.debut_contrat&&ds<mb.debut_contrat)return false; if(mb.fin_contrat&&ds>mb.fin_contrat)return false; return true; }
+    if(!P.length) return true;
+    for(var i=0;i<P.length;i++){ if(P[i].debut&&ds<P[i].debut)continue; if(P[i].fin&&ds>P[i].fin)continue; return true; }
+    return false;
+  }
   // Effectif LISSE de la semaine. DEUX mesures, volontairement distinctes :
   //   head     = personnes REELLEMENT presentes. Une equipe collective y pese son
   //              effectif, sinon la vendange afficherait 2 presents face au pic de
@@ -946,9 +971,27 @@ function _chargeSaisonData(s){
                 capH:wreal?wreal.work:null, capPay:wreal?wreal.pay:null,
                 capHPerm:wreal?wreal.workPerm:null, capPayPerm:wreal?wreal.payPerm:null});
   }
-  var peakReq=0, peakMonth=null, anyShort=false;
-  months.forEach(function(x){ if(x.etpReq>peakReq){peakReq=x.etpReq;peakMonth=x.m;} if(x.etpReq>x.etpPres+0.05)anyShort=true; });
-  return {saison:s.nom,debut:s.debut,fin:s.fin,charge:charge,tasks:taskDet,months:months,capRefTotal:capRefTotal,etpCible:etpCible,capEquipe:capEquipe,etpDispo:etpDispo,nMbr:mbrs.length,taskWindows:taskWindows,weeks:weeks,capPresentTotal:capPresentTotal,etpPresent:etpPresent,peakReq:peakReq,peakMonth:peakMonth,anyShort:anyShort};
+  // ══ LE PIC SE LIT A LA SEMAINE, PLUS AU MOIS ══════════════════════════════
+  // x.etpReq = x.chargeOrd / x.capRef divisait les heures TOMBANT dans le mois par
+  // la capacite du mois ENTIER. Mesure du 11/08 : une vendange de 4 jours dans
+  // septembre sortait a 6,1 ETP quand la MEME intensite en aout — tronque par le
+  // debut de saison, donc a denominateur court — sortait a 27. Deux denominateurs
+  // sous un seul mot. La semaine compare w.need = wh/wcap SUR LA MEME semaine :
+  // c'est la seule maille ou le rapport a un sens, et elle ne depend pas de la
+  // longueur de la periode (une campagne de cinq semaines et une de cinq mois s'y
+  // lisent pareil).
+  // L'effectif du pic suit la meme regle. L'ancienne moyenne mensuelle de head
+  // noyait une semaine a 42 dans trois semaines a 2 et annoncait « 12 presents » —
+  // un chiffre qui n'existe AUCUN jour de l'annee. On retient l'effectif de la
+  // semaine du pic, le seul comparable au besoin de cette semaine-la.
+  // ⚠️ w.cap<=0 : semaine hors template (feries, fermeture) — need n'y veut rien dire.
+  var peakReq=0, peakWeek=null, peakMonth=null, peakPres=0, anyShort=false;
+  weeks.forEach(function(w){
+    if(!(w.cap>0)) return;
+    if(w.need>peakReq){ peakReq=w.need; peakWeek=w; peakMonth=w.m; peakPres=w.head||0; }
+    if(w.need>(w.head||0)+0.05) anyShort=true;
+  });
+  return {saison:s.nom,debut:s.debut,fin:s.fin,charge:charge,tasks:taskDet,months:months,capRefTotal:capRefTotal,etpCible:etpCible,capEquipe:capEquipe,etpDispo:etpDispo,nMbr:mbrs.length,taskWindows:taskWindows,weeks:weeks,capPresentTotal:capPresentTotal,etpPresent:etpPresent,peakReq:peakReq,peakMonth:peakMonth,peakWeek:peakWeek,peakPres:peakPres,anyShort:anyShort};
 }
 window._chargeSaisonData=_chargeSaisonData;
 

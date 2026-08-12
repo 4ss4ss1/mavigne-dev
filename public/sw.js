@@ -1,4 +1,13 @@
-// MA VIGNE — Service Worker v6.48
+// MA VIGNE — Service Worker v6.49
+// v6.49 (12/08/2026) — Contrats : m.contrats[] garde les contrats PRECEDENTS d'une
+//   fiche, archives automatiquement quand un nouveau debut est posterieur a la fin
+//   du precedent. _mvContrats (utils.js) = definition unique, fusionne les contrats
+//   CONTIGUS (fin+1j = debut) et separe ceux coupes par un jour. _mvEnContratLe,
+//   _mvEnContratSurPeriode et _inContractDay voient tous les contrats ; _planInContract
+//   NON (plafond 1607 h, conges, grille : un contrat = un compteur).
+//   Pilotage : pic et effectif rebases sur la SEMAINE (le mois divisait 4 jours de
+//   vendange par 22 jours de capacite), frise annuelle zoomable, detail mois retire,
+//   equipe collective ponderee dans capEquipe/capPresent (barre a 392 % corrigee).
 // v6.48 (11/08/2026) — Les comptes crees en lot arrivent avec les modules de leur
 //                       role. Un ouvrier ne voit plus la Cave, la Reserve, le
 //                       Tracteur ni le Phyto dans sa barre ; un tractoriste garde
@@ -885,7 +894,7 @@
 // v2.22 — Fix profils vides : guard vide dans loadData() pour MEMBRES/SAISONS/TACHES
 // v2.17 — Onboarding intégré + tenantId · v2.06 — Firebase Auth · v2.00–v2.05 — divers
 const DEBUG = self.location.hostname === 'localhost' || self.location.hostname === '127.0.0.1';
-const CACHE_NAME   = 'mavigne-v6.48';
+const CACHE_NAME   = 'mavigne-v6.49';
 const TENANT_CACHE = 'mavigne-tenant';   // Cache persistant — préservé à chaque mise à jour SW
 const SYNC_TAG     = 'mavigne-sync';
 
@@ -901,7 +910,7 @@ const CDN_URLS = [
 ];
 
 self.addEventListener('install', event => {
-  if(DEBUG) console.log('[SW] Ma Vigne v6.48 installé');
+  if(DEBUG) console.log('[SW] Ma Vigne v6.49 installé');
   event.waitUntil(
     caches.open(CACHE_NAME).then(async cache => {
       // ── Cœur applicatif : STRICT (mise à jour ATOMIQUE) ──
@@ -917,7 +926,7 @@ self.addEventListener('install', event => {
 });
 
 self.addEventListener('activate', event => {
-  if(DEBUG) console.log('[SW] Ma Vigne v6.48 activé');
+  if(DEBUG) console.log('[SW] Ma Vigne v6.49 activé');
   event.waitUntil(
     caches.keys().then(keys =>
       Promise.all(

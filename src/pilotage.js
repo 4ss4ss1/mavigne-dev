@@ -43,7 +43,7 @@ var _PIL_DEFAULT = {
   pie:   'reste',
   bar:   'saison',
   collapsed:{echeances:0,carte:0,etp:0,equipe:0,tracteur:0,cave:0,presences:0,gnr:0,capacite:0,traitement:0,simulateur:0,phyto:0,cout:0,couteff:0,cuivre:0,ift:0,dre:0},
-  sub:   {trac_revision:1,trac_controle:1,trac_repar:1,trac_intercep:1,cave_fml:1,cave_sout:1,cave_ouillage:1,pres_cp:1,pres_recup:1,pres_mal:1,etp_frise:1,etp_courbe:1,etp_ecart:1,etp_mois:1}
+  sub:   {trac_revision:1,trac_controle:1,trac_repar:1,trac_intercep:1,cave_fml:1,cave_sout:1,cave_ouillage:1,pres_cp:1,pres_recup:1,pres_mal:1,etp_frise:1,etp_courbe:1,etp_ecart:1,etp_annee:1}
 };
 function _pilCloneDefault(){ return JSON.parse(JSON.stringify(_PIL_DEFAULT)); }
 function _pilNormalize(st){
@@ -789,6 +789,186 @@ function _pilEcartHtml(cd, real){
   }).join('');
   return '<div style="font-size:12.5px">'+rows+'</div>';
 }
+// ══════════════════════════════════════════════════════════════════════════════
+// FRISE ANNUELLE — l'union des periodes, PAS une entite de plus
+// ══════════════════════════════════════════════════════════════════════════════
+// Une periode joue DEUX roles incompatibles : elle CONTIENT les taches (s.taches,
+// donc la charge) et elle sert de DENOMINATEUR a tout ce qui se lit en ETP.
+// Le premier role tolere une periode de cinq semaines, le second non : la charge
+// ne depend pas de la duree de la periode, capRefTotal si — donc plus la periode
+// est courte, plus l'ETP explose. Mesure du 11/08 : une vendange de cinq semaines
+// annonçait 10,5 ETP la ou la semaine du pic en demandait 42. D'ou l'annee comme
+// maille de LECTURE.
+//
+// ⚠️ AUCUN OBJET NOUVEAU N'EST CREE. On appelle _chargeSaisonData PERIODE PAR
+// PERIODE, chacune AVEC SON PROPRE SPAN, puis on recolle les semaines sur un axe
+// commun. C'est ce qui permet de lire l'annee SANS toucher aux fenetres de taches :
+// une fenetre par defaut est une FRACTION du span (planning.js, _mvTaskWin) —
+// etirer un span a douze mois etalerait la taille sur un tiers d'annee. Periode
+// par periode, chaque tache reste chez elle. Zero migration, zero prerequis de
+// saisie, et _VISU_SAISON (qui filtre le journal, le phyto, la cave) ne bouge pas.
+//
+// Le recollage est legitime parce que w.need = wh/wcap se calcule sur la MEME
+// semaine des deux cotes : deux periodes produisent des valeurs comparables.
+var _PIL_ETPSEL=null;              // nom de la campagne zoomee ; null = annee entiere
+var _PIL_ANN=null, _PIL_ANNK='';   // memo : N appels a _chargeSaisonData par rendu
+function _pilAnnOrd(y){ return Math.round((Date.parse(y+'T00:00:00')-Date.parse('2026-01-01T00:00:00'))/86400000); }
+function _pilAnnuelData(){
+  if(typeof window._chargeSaisonData!=='function') return null;
+  var brut=(typeof window._cmpVisibles==='function')?window._cmpVisibles():(window.SAISONS||[]);
+  var pers=(brut||[]).filter(function(p){ return p&&p.debut&&p.fin&&p.fin>=p.debut; })
+    .sort(function(a,b){ return String(a.debut).localeCompare(String(b.debut)); });
+  if(!pers.length) return null;
+  var key=pers.map(function(p){return p.nom+'|'+p.debut+'|'+p.fin;}).join(';')
+    +'#'+((window.MEMBRES||[]).length)+'#'+((window.PARCELLES||[]).length)
+    +'#'+((window.TACHES||[]).length);
+  if(_PIL_ANN && _PIL_ANNK===key) return _PIL_ANN;
+  var out={pers:[],weeks:[],trous:[],ovl:[],s:0,e:0}, prevFin=null;
+  pers.forEach(function(p,i){
+    var cd=null; try{ cd=window._chargeSaisonData(p); }catch(err){ cd=null; }
+    out.pers.push({nom:p.nom,debut:p.debut,fin:p.fin,idx:i,cd:cd,
+      col:(typeof window._cmpCouleur==='function')?window._cmpCouleur(p):'#3D6B27'});
+    if(prevFin && p.debut<=prevFin) out.ovl.push(p.nom);
+    if(!prevFin || p.fin>prevFin) prevFin=p.fin;
+    if(!cd) return;
+    (cd.weeks||[]).forEach(function(w){
+      out.weeks.push({o0:w.o0,o1:w.o1,m:w.m,cap:w.cap||0,need:w.need||0,
+        head:w.head||0,headPerm:w.headPerm||0,per:i});
+    });
+  });
+  out.weeks.sort(function(a,b){ return a.o0-b.o0; });
+  // Fenetre = celle de Reglages quand elle existe. UNE SEULE definition de « ou
+  // commence et ou finit l'annee » : deux definitions dessineraient deux annees.
+  var F=(typeof window._cmpFenetre==='function')?window._cmpFenetre():null;
+  out.s=F?_pilAnnOrd(F.a):_pilAnnOrd(pers[0].debut);
+  out.e=F?_pilAnnOrd(F.b):_pilAnnOrd(pers[pers.length-1].fin);
+  // Trous : intervalles que plus AUCUNE periode ne couvre. Un trou n'est pas une
+  // absence de travail, c'est une absence de periode — une saisie datee la ne se
+  // rattache a rien. Il se dessine hachure, JAMAIS a zero : un zero est une mesure.
+  var cur=out.s;
+  pers.forEach(function(p){
+    var d0=Math.max(_pilAnnOrd(p.debut),out.s), f0=Math.min(_pilAnnOrd(p.fin),out.e);
+    if(f0<d0) return;
+    if(d0>cur) out.trous.push([cur,d0-1]);
+    if(f0+1>cur) cur=f0+1;
+  });
+  if(cur<=out.e) out.trous.push([cur,out.e]);
+  _PIL_ANN=out; _PIL_ANNK=key;
+  return out;
+}
+function _pilAnnPer(nom){
+  var a=_PIL_ANN; if(!a||nom==null) return null;
+  for(var i=0;i<a.pers.length;i++){ if(a.pers[i].nom===nom) return a.pers[i]; }
+  return null;   // periode renommee ou supprimee -> on retombe sur l'annee entiere
+}
+function _pilAnnTaches(p){
+  var tw=(p&&p.cd&&p.cd.taskWindows)||[];
+  return tw.slice().sort(function(a,b){ return String(a.start).localeCompare(String(b.start)); }).slice(0,12);
+}
+function _pilFriseAnneeSvg(ann,w){
+  if(!ann||!ann.weeks.length) return window._mvGraphVide(
+    'Aucune p\u00e9riode dat\u00e9e sur la campagne',
+    'Renseignez les dates de d\u00e9but et de fin de vos p\u00e9riodes (R\u00e9glages \u203a Saisons).');
+  var selP=_pilAnnPer(_PIL_ETPSEL), s, e;
+  if(selP){ var d0=_pilAnnOrd(selP.debut), d1=_pilAnnOrd(selP.fin);
+    var mg=Math.max(2,Math.round((d1-d0)*0.04)); s=d0-mg; e=d1+mg; }
+  else { s=ann.s; e=ann.e; }
+  var L2=Math.max(1,e-s+1), W=(w>0)?Math.round(Math.max(620,w)):1000;
+  var padL=(W<760)?38:52, padR=16, plotW=W-padL-padR;
+  function X(o){ return padL+(o-s)/L2*plotW; }
+  var tks=selP?_pilAnnTaches(selP):[];
+  var bandH=selP?(tks.length*13+2):22;
+  var padT=bandH+16, chH=(W<760)?170:206, scH=28, H=padT+chH+scH;
+  var c=window._mvGraphCadre(W,H);
+  var vis=ann.weeks.filter(function(x){
+    return x.o1>=s && x.o0<=e && (selP?(x.per===selP.idx):true);
+  });
+  // ★ L'ECHELLE VERTICALE SUIT LE ZOOM — c'est tout l'interet du clic. Sur l'annee
+  // l'axe monte au pic de vendange (~42) et l'hiver (~3) rampe en bas, illisible.
+  // Zoome sur l'hiver l'axe redescend a 5 et le detail apparait.
+  var yMax=1;
+  vis.forEach(function(x){ if(x.need>yMax)yMax=x.need; if(x.head>yMax)yMax=x.head; });
+  var step=yMax>60?20:(yMax>30?10:(yMax>12?5:(yMax>5?2:1)));
+  var yTop=Math.ceil(yMax/step)*step; if(!(yTop>0))yTop=step;
+  function Y(v){ return padT+chH-(v/yTop)*chH; }
+  var MN=['JANV','F\u00c9VR','MARS','AVR','MAI','JUIN','JUIL','AO\u00dbT','SEPT','OCT','NOV','D\u00c9C'];
+  var g='<defs><pattern id="pil-ann-h" width="6" height="6" patternTransform="rotate(45)" patternUnits="userSpaceOnUse">'
+    +'<line x1="0" y1="0" x2="0" y2="6" stroke="'+c.col.texte+'" stroke-width="1.4" opacity="0.28"/></pattern></defs>';
+  if(!selP) ann.trous.forEach(function(t){
+    var x0=X(Math.max(t[0],s)), x1=X(Math.min(t[1]+1,e+1));
+    if(x1>x0) g+='<rect x="'+x0.toFixed(1)+'" y="'+padT+'" width="'+(x1-x0).toFixed(1)+'" height="'+chH+'" fill="url(#pil-ann-h)"/>';
+  });
+  for(var v=0;v<=yTop;v+=step){
+    g+='<line x1="'+padL+'" y1="'+Y(v).toFixed(1)+'" x2="'+(W-padR)+'" y2="'+Y(v).toFixed(1)+'" stroke="'+c.col.grille+'" stroke-width="1"/>'
+      +'<text x="'+(padL-7)+'" y="'+(Y(v)+4).toFixed(1)+'" text-anchor="end" font-size="'+c.txt.mini+'" fill="'+c.col.texte+'" font-family="Outfit">'+v+'</text>';
+  }
+  // ★ BARRES EMPILEES : vert = ce que l'equipe absorbe, rouge = le renfort a
+  // trouver. L'ancienne barre etait coloriee EN ENTIER (vert OU rouge) : elle
+  // disait « ca deborde » sans dire de combien. Ici la hauteur de rouge EST le
+  // nombre de personnes a recruter, lisible sans calcul.
+  vis.forEach(function(x){
+    if(!(x.cap>0)||x.need<=0.01) return;
+    var bx=Math.max(padL,X(x.o0))+1, bx2=Math.min(W-padR,X(x.o1+1)), bw=Math.max(1.5,bx2-bx-1);
+    var base=Math.min(x.need,x.head), ov=Math.max(0,x.need-x.head);
+    g+='<rect x="'+bx.toFixed(1)+'" y="'+Y(base).toFixed(1)+'" width="'+bw.toFixed(1)+'" height="'+(padT+chH-Y(base)).toFixed(1)+'" rx="2" fill="'+c.col.fait+'" opacity="0.85"/>';
+    if(ov>0.02) g+='<rect x="'+bx.toFixed(1)+'" y="'+Y(x.need).toFixed(1)+'" width="'+bw.toFixed(1)+'" height="'+(Y(base)-Y(x.need)).toFixed(1)+'" rx="2" fill="'+c.col.alerte+'" opacity="0.92"/>';
+  });
+  // Deux lignes : effectif PRESENT (plein) et SOCLE PERMANENT (pointille, equipes
+  // collectives exclues — c'est headPerm, deja calcule par planning.js). Le socle
+  // rend l'hiver lisible meme quand l'axe est cale sur le pic : on lit « au-dessus
+  // de cette ligne, c'est du renfort a trouver », et non un chiffre absolu perdu.
+  var pp='', qq='', k=0;
+  vis.forEach(function(x){
+    var x0=Math.max(padL,X(x.o0)), x1=Math.min(W-padR,X(x.o1+1));
+    pp+=(k?' L':'M')+x0.toFixed(1)+' '+Y(x.head).toFixed(1)+' L'+x1.toFixed(1)+' '+Y(x.head).toFixed(1);
+    qq+=(k?' L':'M')+x0.toFixed(1)+' '+Y(x.headPerm).toFixed(1)+' L'+x1.toFixed(1)+' '+Y(x.headPerm).toFixed(1);
+    k++;
+  });
+  if(qq) g+='<path d="'+qq+'" fill="none" stroke="#4A9FC8" stroke-width="1.8" stroke-dasharray="5 4"/>';
+  if(pp) g+='<path d="'+pp+'" fill="none" stroke="var(--texte)" stroke-width="2.4" stroke-linejoin="round"/>';
+  var tIso=(typeof window._mvAujIso==='function')?window._mvAujIso():new Date().toISOString().split('T')[0];
+  var tj=_pilAnnOrd(tIso);
+  if(tj>=s&&tj<=e) g+='<line x1="'+X(tj).toFixed(1)+'" y1="'+padT+'" x2="'+X(tj).toFixed(1)+'" y2="'+(padT+chH).toFixed(1)+'" stroke="'+c.col.alerte+'" stroke-width="1.5" stroke-dasharray="4 3"/>';
+  if(!selP){
+    ann.pers.forEach(function(p){
+      var x0=Math.max(padL,X(_pilAnnOrd(p.debut))), x1=Math.min(W-padR,X(_pilAnnOrd(p.fin)+1)), bw=x1-x0;
+      if(!(bw>0)) return;
+      g+='<g data-etpc="'+_pilEsc(p.nom)+'" style="cursor:pointer">'
+        +'<rect x="'+x0.toFixed(1)+'" y="'+(padT-bandH-8)+'" width="'+bw.toFixed(1)+'" height="'+bandH+'" rx="4" fill="'+p.col+'"/>';
+      if(bw>78) g+='<text x="'+(x0+bw/2).toFixed(1)+'" y="'+(padT-bandH+7)+'" text-anchor="middle" font-size="'+c.txt.axe+'" font-weight="600" fill="#fff" font-family="Outfit" pointer-events="none">'+_pilEsc(p.nom)+'</text>';
+      g+='</g>';
+    });
+  } else {
+    // Zoome : les bandes du haut deviennent les TACHES de la campagne. C'est la
+    // reponse a « laquelle fait le pic ? », impossible a lire sur l'annee entiere.
+    var r=0;
+    tks.forEach(function(t){
+      var x0=Math.max(padL,X(_pilAnnOrd(t.start))), x1=Math.min(W-padR,X(_pilAnnOrd(t.end)+1));
+      var yy=padT-bandH-8+r*13;
+      g+='<rect x="'+x0.toFixed(1)+'" y="'+yy+'" width="'+Math.max(3,x1-x0).toFixed(1)+'" height="11" rx="3" fill="'+_taskColor(t.nom)+'"/>'
+        +'<text x="'+(x0+5).toFixed(1)+'" y="'+(yy+8.5)+'" font-size="'+c.txt.mini+'" font-weight="600" fill="#fff" font-family="Outfit">'+_pilEsc(t.nom)+'</text>';
+      r++;
+    });
+  }
+  var dt=new Date(Date.parse('2026-01-01T00:00:00')+s*86400000);
+  var cy=dt.getUTCFullYear(), cm=dt.getUTCMonth();
+  for(var q=0;q<30;q++){
+    var mo0=_pilAnnOrd(cy+'-'+String(cm+1).padStart(2,'0')+'-01');
+    if(mo0>e) break;
+    var ny=(cm===11)?cy+1:cy, nm=(cm+1)%12;
+    var mo1=_pilAnnOrd(ny+'-'+String(nm+1).padStart(2,'0')+'-01');
+    if(mo1>=s){
+      if(mo0>=s) g+='<line x1="'+X(mo0).toFixed(1)+'" y1="'+padT+'" x2="'+X(mo0).toFixed(1)+'" y2="'+(padT+chH+4).toFixed(1)+'" stroke="'+c.col.grille+'" stroke-width="1"/>';
+      var cx=(X(Math.max(mo0,s))+X(Math.min(mo1,e+1)))/2;
+      if(cx>padL+14&&cx<W-padR-14) g+='<text x="'+cx.toFixed(1)+'" y="'+(padT+chH+19)+'" text-anchor="middle" font-size="'+c.txt.mini+'" font-weight="600" fill="'+c.col.texte+'" font-family="Outfit">'+MN[cm]+'</text>';
+    }
+    cy=ny; cm=nm;
+  }
+  return window._mvGraphSvg(window._mvGraphCadre(W,H),
+    (selP?('Personnes n\u00e9cessaires par semaine sur '+selP.nom):'Personnes n\u00e9cessaires par semaine sur la campagne')
+    +', face \u00e0 l\u2019effectif pr\u00e9sent.', g);
+}
+
 function _pilPanelEtp(d){
   var cd=(window._chargeSaisonData&&window.getSaisonActive)?window._chargeSaisonData(window._pilSaison()):null;
   if(!cd||!cd.months.length){
@@ -796,40 +976,37 @@ function _pilPanelEtp(d){
       '<div class="pil-empty">Renseignez les dates de d\u00e9but et de fin de la saison active (R\u00e9glages \u203a Saisons) pour calculer la charge et l\'ETP n\u00e9cessaire.</div>');
   }
   function _e(v){ return (Math.round((v||0)*10)/10).toString().replace('.',','); }
-  var MN=['janvier','f\u00e9vrier','mars','avril','mai','juin','juillet','ao\u00fbt','septembre','octobre','novembre','d\u00e9cembre'];
-  function _cap(x){ return x.charAt(0).toUpperCase()+x.slice(1); }
   var s=_PIL_STATE.sub||{};
   var real=_pilTaskReal(cd,d);
-  var peakReq=(cd.peakReq!=null)?cd.peakReq:cd.etpCible;
-  // Effectif present = tetes LISSEES (cd.weeks[].head) — membres non-bureau sous contrat, prorata jours.
-  var _presMo={},_presCnt={}; (cd.weeks||[]).forEach(function(w){ _presMo[w.m]=(_presMo[w.m]||0)+(w.head||0); _presCnt[w.m]=(_presCnt[w.m]||0)+1; });
-  function _presMonth(m){ return (_presCnt[m]?_presMo[m]/_presCnt[m]:0); }
-  var _headArr=(cd.weeks||[]).map(function(w){return w.head||0;});
-  var etpPresent=_headArr.length?_headArr.reduce(function(a,b){return a+b;},0)/_headArr.length:0;
-  var peak4=peakReq||0, presAtPeak=_presMonth(cd.peakMonth);
-  var anyShort=false; (cd.months||[]).forEach(function(x){ var _rq=(x.etpReq!=null)?x.etpReq:x.etp; if(_rq>_presMonth(x.m)+0.05)anyShort=true; });
-  var rows=cd.months.map(function(x){
-    var req=(x.etpReq!=null)?x.etpReq:x.etp, pres=_presMonth(x.m);
-    var ch=(x.chargeOrd!=null)?x.chargeOrd:x.charge;
-    var short=req>pres+0.05, tense=!short&&req>pres*0.85;
-    var col=short?'var(--rouge)':(tense?'var(--orange)':'var(--vert)');
-    var barCol=short?'#9B2D1F':(tense?'#C2871E':'#5C8A3E');
-    var pct=peak4>0?Math.round(req/peak4*100):0;
-    var nm=MN[x.m];
-    return '<div class="pil-li">'
-      + '<span class="pil-av" style="background:#C9A84C26;color:#8A5A38;font-size:10px;font-weight:700">'+nm.slice(0,3)+'</span>'
-      + '<div class="pil-li-main">'
-      +   '<div class="pil-li-t">'+_cap(nm)+(short?' <span style="font-size:10px;color:var(--rouge);font-weight:700">\u26A0 pic</span>':'')+'</div>'
-      +   '<div class="pil-li-s"><span style="display:inline-block;height:5px;width:'+Math.max(pct,3)+'px;min-width:'+Math.max(pct,3)+'%;max-width:130px;background:'+barCol+';border-radius:3px;vertical-align:middle;margin-right:7px"></span>'+_pilNum(ch)+' h \u00b7 '+_e(pres)+' pr\u00e9sents</div>'
-      + '</div>'
-      + '<div class="pil-li-r"><b style="font-size:16px;color:'+col+'">'+_e(req)+'</b><span style="font-size:10px;color:var(--texte-doux)"> ETP requis</span></div>'
-      + '</div>';
-  }).join('');
+  var ann=_pilAnnuelData();
+  // ══ LE PIC ET L'EFFECTIF SE LISENT A LA SEMAINE ═══════════════════════════
+  // cd.peakReq est desormais le maximum HEBDOMADAIRE et cd.peakPres l'effectif de
+  // CETTE semaine-la (planning.js). Avant, deux moyennes mensuelles de grandeurs
+  // qui varient d'un facteur 20 dans le mois se comparaient : « 27 ETP requis »
+  // (des heures de 5 jours divisees par 5 jours de capacite) contre « 11,2
+  // presents » (une semaine a 42 noyee dans trois semaines a 2 — un chiffre qui
+  // n'existe AUCUN jour de l'annee). L'ecran annonçait « manque 15,8 ETP » pendant
+  // que la courbe hebdo, juste, montrait la vendange couverte. Le meme ecran
+  // disait deux choses contraires ; il n'en dit plus qu'une.
+  var peak4=cd.peakReq||0, presAtPeak=(cd.peakPres!=null)?cd.peakPres:0;
+  var anyShort=!!cd.anyShort, pkw=cd.peakWeek||null;
+  var MOA=['janv.','f\u00e9vr.','mars','avr.','mai','juin','juil.','ao\u00fbt','sept.','oct.','nov.','d\u00e9c.'];
+  function _semLab(wk){
+    if(!wk) return '';
+    var dd=new Date(Date.parse('2026-01-01T00:00:00')+wk.o0*86400000);
+    return 'semaine du '+dd.getUTCDate()+' '+MOA[dd.getUTCMonth()];
+  }
   var synth, sBg, sCol;
-  if(anyShort){ var miss=Math.max(0,peak4-presAtPeak); synth='Pic en '+(cd.peakMonth!=null?MN[cd.peakMonth]:'\u2014')+' : '+_e(peak4)+' ETP requis pour '+_e(presAtPeak)+' pr\u00e9sents \u2192 manque ~'+_e(miss)+' ETP'; sBg='#F3D9D4'; sCol='var(--rouge)'; }
-  else { synth='L\'effectif pr\u00e9sent couvre les pics ('+_e(etpPresent)+' pr\u00e9sents en moyenne)'; sBg='#DCEBD0'; sCol='var(--vert-med)'; }
+  if(anyShort){
+    var miss=Math.max(0,peak4-presAtPeak);
+    synth='Pic \u00e0 '+_e(peak4)+' personnes'+(pkw?(' \u00b7 '+_semLab(pkw)):'')+' pour '+_e(presAtPeak)+' pr\u00e9sentes \u2192 il en manque ~'+_e(miss);
+    sBg='#F3D9D4'; sCol='var(--rouge)';
+  } else {
+    synth='Aucune semaine en sous-effectif. Pic \u00e0 '+_e(peak4)+' personnes'+(pkw?(' \u00b7 '+_semLab(pkw)):'')+'.';
+    sBg='#DCEBD0'; sCol='var(--vert-med)';
+  }
   function chip(k,lab){ var on=s[k]!==0; return '<button data-etp="'+k+'" style="border:1px solid '+(on?'#C9A84C':'var(--gris)')+';background:'+(on?'#C9A84C22':'#fff')+';color:'+(on?'#8A5A38':'var(--texte-doux)')+';border-radius:20px;padding:4px 11px;font-size:11.5px;font-weight:600;cursor:pointer;margin:0 6px 6px 0">'+(on?'\u2713 ':'')+lab+'</button>'; }
-  var chips='<div style="margin:-2px 0 8px">'+chip('etp_frise','Frise')+chip('etp_courbe','Courbe / sem.')+chip('etp_ecart','\u00c9cart pr\u00e9vu/r\u00e9el')+chip('etp_mois','D\u00e9tail mois')+'</div>';
+  var chips='<div style="margin:-2px 0 8px">'+chip('etp_annee','Ann\u00e9e')+chip('etp_frise','Frise')+chip('etp_courbe','Courbe / sem.')+chip('etp_ecart','\u00c9cart pr\u00e9vu/r\u00e9el')+'</div>';
   var friseLeg='<div style="display:flex;gap:14px;flex-wrap:wrap;font-size:11.5px;color:var(--texte-doux);margin:8px 0 2px">'
     +'<span style="display:inline-flex;align-items:center;gap:6px"><i style="width:14px;height:10px;border-radius:3px;background:var(--terre);display:inline-block"></i> pr\u00e9vu</span>'
     +'<span style="display:inline-flex;align-items:center;gap:6px"><i style="width:14px;height:10px;border-radius:3px;border:1px solid #14110D;background:repeating-linear-gradient(45deg,#14110D,#14110D 2px,transparent 2px,transparent 5px);display:inline-block"></i> r\u00e9el (journal)</span>'
@@ -839,39 +1016,80 @@ function _pilPanelEtp(d){
     +'<span style="display:inline-flex;align-items:center;gap:6px"><i style="width:14px;height:10px;border-radius:3px;background:#5C8A3E;display:inline-block"></i> dans l\'effectif</span>'
     +'<span style="display:inline-flex;align-items:center;gap:6px"><i style="width:14px;height:10px;border-radius:3px;background:#9B2D1F;display:inline-block"></i> pic \u2014 sous-effectif</span>'
     +'<span style="display:inline-flex;align-items:center;gap:6px"><i style="width:16px;height:0;border-top:2px solid #14110D;display:inline-block"></i> effectif pr\u00e9sent</span></div>';
+  var annLeg='<div style="display:flex;gap:14px;flex-wrap:wrap;font-size:11.5px;color:var(--texte-doux);margin:8px 0 2px">'
+    +'<span style="display:inline-flex;align-items:center;gap:6px"><i style="width:14px;height:10px;border-radius:3px;background:var(--vert-med);display:inline-block"></i> couvert par l\u2019\u00e9quipe</span>'
+    +'<span style="display:inline-flex;align-items:center;gap:6px"><i style="width:14px;height:10px;border-radius:3px;background:var(--rouge);display:inline-block"></i> renfort \u00e0 trouver</span>'
+    +'<span style="display:inline-flex;align-items:center;gap:6px"><i style="width:16px;height:0;border-top:2px solid var(--texte);display:inline-block"></i> effectif pr\u00e9sent</span>'
+    +'<span style="display:inline-flex;align-items:center;gap:6px"><i style="width:16px;height:0;border-top:2px dashed #4A9FC8;display:inline-block"></i> socle permanent</span></div>';
   var secTtl='font-weight:600;font-size:12.5px;color:var(--cave);margin:14px 0 2px';
+  // ── Frise annuelle : clic sur une campagne = ZOOM (axe X et axe Y) ───────────
+  var annBlock='';
+  if(s.etp_annee!==0 && ann){
+    var _selP=_pilAnnPer(_PIL_ETPSEL);
+    annBlock='<div style="display:flex;align-items:baseline;justify-content:space-between;flex-wrap:wrap;gap:8px;margin:2px 0 2px">'
+      +'<div style="'+secTtl+';margin:0">'+(_selP?_pilEsc(_selP.nom):'Toute la campagne')+' \u2014 personnes n\u00e9cessaires / semaine</div>'
+      +(_selP?('<button data-etpc="'+_pilEsc(_selP.nom)+'" style="border:1px solid var(--gris);background:#fff;color:var(--texte-doux);border-radius:20px;padding:4px 11px;font-size:11.5px;font-weight:600;cursor:pointer">\u2190 toute la campagne</button>'):'')
+      +'</div>'
+      +'<div style="font-size:10px;color:var(--texte-doux);margin:0 0 6px">'
+      +(_selP?'L\u2019\u00e9chelle verticale suit le zoom \u2014 les bandes du haut sont les t\u00e2ches de la campagne.'
+             :'Cliquez une campagne pour zoomer dessus. Les zones hachur\u00e9es ne sont couvertes par aucune p\u00e9riode.')
+      +'</div>'
+      +'<div style="width:100%;overflow-x:auto" id="pil-g-ann"></div>'+annLeg;
+    if(ann.ovl.length) annBlock+='<div style="margin:6px 0 0;padding:8px 11px;border-radius:9px;background:#F3D9D4;color:var(--rouge);font-size:12px;font-weight:600">'
+      +'\u26A0 Chevauchement de p\u00e9riodes sur '+_pilEsc(ann.ovl.join(', '))+' \u2014 les heures y sont compt\u00e9es deux fois sur la frise.</div>';
+    window._mvGraphSuivre('#pil-g-ann', function(lg){ return _pilFriseAnneeSvg(ann,lg); });
+  }
   // ── Bloc répartition « Où va le temps » (présence → vigne / tracteur / autres) ──
   var _tH=(window._tractHoursSeason)?Math.round(window._tractHoursSeason(window._pilSaison())||0):0;
-  var _prez=Math.round(cd.capEquipe||0), _vig=Math.round(cd.charge||0);
-  if(_vig+_tH>_prez)_tH=Math.max(0,_prez-_vig);
-  var _aut=Math.max(0,_prez-_vig-_tH), _cr=cd.capRefTotal||0;
-  var _etpF=function(h){return _cr>0?(h/_cr).toFixed(1).replace('.',','):'—';};
-  var _wV=_prez>0?(_vig/_prez*100):0,_wT=_prez>0?(_tH/_prez*100):0,_wA=Math.max(0,100-_wV-_wT);
-  var _pV=_prez>0?Math.round(_vig/_prez*100):0,_pT=_prez>0?Math.round(_tH/_prez*100):0,_pA=Math.max(0,100-_pV-_pT);
-  var _segR=function(w,g){return (w>0.5)?('<div style="width:'+w+'%;background:'+g+';display:flex;align-items:center;justify-content:center;font-size:10.5px;font-weight:700;color:#fff">'+Math.round(w)+'\u00a0%</div>'):'';};
+  var _prez=Math.round(cd.capEquipe||0), _vig=Math.round(cd.charge||0), _cr=cd.capRefTotal||0;
+  var _etpF=function(h){return _cr>0?(h/_cr).toFixed(1).replace('.',','):'\u2014';};
+  // ══ UNE PART NE PEUT PAS DEPASSER 100 % ═══════════════════════════════════
+  // _pV=_vig/_prez*100 sortait a 392 % dans une barre qui se PRESENTE comme une
+  // repartition, pendant qu'« Autres » tombait a 0 h par le Math.max(0,...) : la
+  // barre mentait deux fois — une part impossible, et un reste invente a zero
+  // alors qu'il y a bien de la cave et des trajets. Desormais la surcharge se DIT.
+  // (La cause premiere du 392 % — l'equipe collective comptee pour 1 — est reglee
+  //  dans planning.js, capEquipe/*_mbPoids* ; ce garde-fou reste utile en soi.)
+  var _tot=_vig+_tH, _surch=(_prez>0 && _tot>_prez+0.5), _ratio=(_prez>0)?(_tot/_prez):0;
+  var _aut=_surch?0:Math.max(0,_prez-_vig-_tH);
+  var _base=_surch?_tot:(_prez||1);
+  var _wV=_vig/_base*100, _wT=_tH/_base*100, _wA=_surch?0:Math.max(0,100-_wV-_wT);
+  var _pV=Math.round(_wV), _pT=Math.round(_wT), _pA=_surch?0:Math.max(0,100-_pV-_pT);
+  var _segR=function(wd,gr){return (wd>0.5)?('<div style="width:'+wd+'%;background:'+gr+';display:flex;align-items:center;justify-content:center;font-size:10.5px;font-weight:700;color:#fff">'+Math.round(wd)+'\u00a0%</div>'):'';};
   var _rowR=function(col,nm,sub,val,pct,etp){return '<div style="display:flex;align-items:center;gap:9px;font-size:12.5px;padding:5px 0;border-top:1px solid var(--gris)"><span style="width:10px;height:10px;border-radius:3px;background:'+col+';flex-shrink:0"></span><span style="flex:1">'+nm+' <span style="font-size:11px;color:var(--texte-doux)">'+sub+'</span></span><span style="font-weight:700">'+_pilNum(val)+' h</span><span style="font-size:11px;color:var(--texte-doux);margin-left:6px">'+pct+'\u00a0% \u00b7 '+etp+' ETP</span></div>';};
-  var _footR='Il faut <b style="color:#3D6B27">'+_etpF(_vig)+' ETP</b> pour la vigne'+((_tH>0)?(' et <b style="color:#4A9FC8">'+_etpF(_tH)+' ETP</b> au tracteur'):'')+'. Le reste ('+_etpF(_aut)+' ETP) part sur cave, trajets, entretien\u2026'+((_tH>0)?'':' Renseigne un bar\u00e8me h/ha par activit\u00e9 (R\u00e9glages) pour d\u00e9tacher le tracteur d\u2019\u00ab Autres \u00bb.');
+  var _footR='Il faut <b style="color:#3D6B27">'+_etpF(_vig)+' ETP</b> pour la vigne'
+    +((_tH>0)?(' et <b style="color:#4A9FC8">'+_etpF(_tH)+' ETP</b> au tracteur'):'')
+    +' <b>en moyenne sur la p\u00e9riode</b>. ';
+  if(_surch){
+    _footR+='La pr\u00e9sence de l\u2019\u00e9quipe ('+_pilNum(_prez)+' h) ne couvre pas cette charge : <b style="color:var(--rouge)">surcharge \u00d7'
+      +(Math.round(_ratio*10)/10).toString().replace('.',',')+'</b>. Rien ne reste pour la cave, les trajets ou l\u2019entretien.';
+  } else {
+    _footR+='Le reste ('+_etpF(_aut)+' ETP) part sur cave, trajets, entretien\u2026'
+      +((_tH>0)?'':' Renseigne un bar\u00e8me h/ha par activit\u00e9 (R\u00e9glages) pour d\u00e9tacher le tracteur d\u2019\u00ab Autres \u00bb.');
+  }
+  // ★ Une moyenne n'est pas un pic : le dire ICI, a cote du chiffre moyen, est le
+  //   seul endroit ou quelqu'un risque de le confondre avec un besoin reel.
+  _footR+=' <b>Une moyenne n\u2019est pas un pic</b> \u2014 la frise ci-dessus donne la semaine la plus charg\u00e9e.';
   var repartBlock='<div style="border:1px solid var(--gris);border-radius:11px;padding:12px 14px;margin-bottom:12px;background:#fff">'
     +'<div style="font-size:11px;font-weight:700;text-transform:uppercase;letter-spacing:.6px;color:var(--texte-doux)">O\u00f9 va le temps de l\u2019\u00e9quipe</div>'
     +'<div style="display:flex;align-items:baseline;gap:7px;margin:8px 0 3px"><span style="font-family:\'Cormorant Garamond\',serif;font-size:26px;font-weight:700;color:var(--cave)">'+_pilNum(_prez)+' h</span><span style="font-size:12px;color:var(--texte-doux)">pr\u00e9sence \u00b7 '+_etpF(_prez)+' ETP \u00e9quipe</span></div>'
     +'<div style="display:flex;height:24px;border-radius:7px;overflow:hidden;border:1px solid var(--gris);margin:9px 0">'+_segR(_wV,'linear-gradient(180deg,#5C8A3A,#3D6B27)')+_segR(_wT,'linear-gradient(180deg,#6FB6D6,#4A9FC8)')+_segR(_wA,'linear-gradient(180deg,#B98A5E,#8A5A38)')+'</div>'
     +_rowR('#3D6B27','Travaux vigne','(bar\u00e8me)',_vig,_pV,_etpF(_vig))
     +((_tH>0)?_rowR('#4A9FC8','Tracteur','(estim\u00e9 h/ha)',_tH,_pT,_etpF(_tH)):'')
-    +_rowR('#8A5A38','Autres',((_tH>0)?'(cave, trajet, entretien\u2026)':'(tracteur, cave, trajet\u2026)'),_aut,_pA,_etpF(_aut))
+    +(_surch?'':_rowR('#8A5A38','Autres',((_tH>0)?'(cave, trajet, entretien\u2026)':'(tracteur, cave, trajet\u2026)'),_aut,_pA,_etpF(_aut)))
     +'<div style="font-size:11px;color:var(--texte-doux);margin-top:10px;background:rgba(74,159,200,.08);border-radius:8px;padding:8px 11px">'+_footR+'</div>'
   +'</div>';
-  var body=repartBlock+chips;
-  if(s.etp_frise!==0){ body+='<div style="font-size:10px;color:var(--texte-doux);margin:0 0 6px">Frise pr\u00e9vu / r\u00e9el \u2014 fen\u00eatres modifiables dans l\'onglet <b>Param\u00e9trage</b></div>'
+  var body=chips+annBlock+repartBlock;
+  if(s.etp_frise!==0){ body+='<div style="font-size:10px;color:var(--texte-doux);margin:14px 0 6px">Frise pr\u00e9vu / r\u00e9el \u2014 fen\u00eatres modifiables dans l\'onglet <b>Param\u00e9trage</b></div>'
     +'<div style="width:100%;overflow-x:auto" id="pil-g-frise"></div>'+friseLeg;
     window._mvGraphSuivre('#pil-g-frise', function(lg){ return _pilFriseSvg(cd,real,lg); }); }
-  if(s.etp_courbe!==0){ body+='<div style="'+secTtl+'">Personnes n\u00e9cessaires / semaine</div><div style="width:100%;overflow-x:auto" id="pil-g-dem"></div>'+curveLeg;
+  if(s.etp_courbe!==0){ body+='<div style="'+secTtl+'">'+_pilEsc(cd.saison)+' \u2014 personnes n\u00e9cessaires / semaine</div><div style="width:100%;overflow-x:auto" id="pil-g-dem"></div>'+curveLeg;
     window._mvGraphSuivre('#pil-g-dem', function(lg){ return _pilDemandSvg(cd,lg); }); }
   if(s.etp_ecart!==0){ body+='<div style="'+secTtl+'">\u00c9cart pr\u00e9vu / r\u00e9el</div>'+_pilEcartHtml(cd,real); }
-  if(s.etp_mois!==0){ body+='<div class="pil-ip-list" style="margin-top:12px">'+rows+'</div>'; }
   body+='<div style="margin-top:10px;padding:9px 11px;border-radius:9px;background:'+sBg+';color:'+sCol+';font-size:12.5px;font-weight:600">'+synth+'</div>';
-  var cov=peak4>0?Math.min(etpPresent/peak4*100,100):100;
-  return _pilTile('etp','\u2696\uFE0F','#C9A84C','Charge & ETP \u00b7 '+cd.saison, _pilStat(_e(peak4),' ETP au pic'),
-    _pilNum(cd.charge)+' h \u00b7 '+cd.months.length+' mois \u00b7 '+_e(etpPresent)+' pr\u00e9sents', cov, body);
+  var cov=peak4>0?Math.min(presAtPeak/peak4*100,100):100;
+  return _pilTile('etp','\u2696\uFE0F','#C9A84C','Charge & ETP \u00b7 '+cd.saison, _pilStat(_e(peak4),' au pic'),
+    _pilNum(cd.charge)+' h \u00b7 '+_e(presAtPeak)+' pr\u00e9sents au pic'+(pkw?(' \u00b7 '+_semLab(pkw)):''), cov, body);
 }
 function _pilFmtD(iso){ var pp=String(iso||'').split('-'); if(pp.length!==3)return String(iso||''); var mo=['janv.','févr.','mars','avr.','mai','juin','juil.','août','sept.','oct.','nov.','déc.']; var mi=parseInt(pp[1],10)-1; return parseInt(pp[2],10)+' '+(mo[mi]||''); }
 function _pilEchWin(e){ if(!e)return ''; var a=e.d1?_pilFmtD(e.d1):'', b=e.d2?_pilFmtD(e.d2):''; if(a&&b)return a+' → '+b; if(a)return 'dès '+a; if(b)return 'jusqu’au '+b; return ''; }
@@ -6395,6 +6613,10 @@ function _pilBindContent(content){
     var _sb=e.target.closest('[data-sim]'); if(_sb){ e.stopPropagation(); _pilSimAction(_sb.getAttribute('data-sim'), _sb.getAttribute('data-ti')); return; }
     var _ob=e.target.closest('[data-op]'); if(_ob){ e.stopPropagation(); _pilOpAction(_ob); return; }
     var nb=e.target.closest('.pil-names-btn'); if(nb){ e.stopPropagation(); _pilNamesOn=!_pilNamesOn; _pilApplyNames(); nb.textContent=_pilNamesOn?'\uD83C\uDFF7 Noms \u2713':'\uD83C\uDFF7 Noms'; return; }
+    // Clic sur une campagne de la frise annuelle : zoom / retour. Re-cliquer la
+    // meme campagne (ou le bouton de retour, qui porte son nom) revient a l'annee.
+    var _ea=e.target.closest('[data-etpc]');
+    if(_ea){ e.stopPropagation(); var _en=_ea.getAttribute('data-etpc'); _PIL_ETPSEL=(_PIL_ETPSEL===_en)?null:_en; _pilFillContent(_pilData()); return; }
     var _ec=e.target.closest('[data-etp]'); if(_ec){ e.stopPropagation(); var _ek=_ec.getAttribute('data-etp'); if(!_PIL_STATE.sub)_PIL_STATE.sub={}; _PIL_STATE.sub[_ek]=(_PIL_STATE.sub[_ek]===0)?1:0; _pilSaveState(_PIL_STATE); _pilFillContent(_pilData()); return; }
     // Économie : sous-vues, tri du tableau, export, raccourci Paramétrage.
     var _pe=e.target.closest('[data-pec]');

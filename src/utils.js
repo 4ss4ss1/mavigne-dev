@@ -23,7 +23,7 @@ export const GT_ADMIN_EMAIL = 'ngdevpro@gmail.com';
 // WHATS_NEW   : tableau vide = modal desactive pour cette version.
 // Format item : { emoji:'📅', titre:'Titre court', desc:'Phrase utilisateur.' }
 // Regle : seulement les changements visibles par les utilisateurs.
-export const APP_VERSION = '5.98';
+export const APP_VERSION = '5.99';
 // ════ Journal des nouveautés (récap cumulatif) ════
 // Une entrée par version, la PLUS RÉCENTE EN HAUT : { v:'5.10', items:[ {emoji,titre,desc}, … ] }
 // À chaque release visible → AJOUTER un bloc en tête (ne pas remplacer). items:[] = release technique (rien à afficher).
@@ -341,6 +341,12 @@ window._mvGraphRepeindre = function(){
 };
 
 export const WHATS_NEW = [
+  { v:'5.99', items:[
+    { emoji: '\u{1F4C7}', titre: "Un salari\u00e9 r\u00e9embauch\u00e9 ne perd plus son pass\u00e9", desc: "Quand quelqu\u2019un finit un contrat puis en resigne un autre plus tard, il fallait \u00e9craser ses dates par les nouvelles \u2014 et l\u2019application oubliait alors compl\u00e8tement qu\u2019il avait travaill\u00e9 avant. Il dispara\u00eessait des campagnes pass\u00e9es\u202f: plus dans l\u2019effectif, plus dans les heures, plus dans le co\u00fbt. Un domaine a vu dix personnes au pic s\u2019afficher comme quatre. D\u00e9sormais l\u2019ancien contrat est archiv\u00e9 tout seul d\u00e8s que vous saisissez une date de d\u00e9but post\u00e9rieure \u00e0 la fin du pr\u00e9c\u00e9dent, et la fiche affiche la liste des contrats pr\u00e9c\u00e9dents, que vous pouvez corriger ou supprimer. Deux contrats qui se suivent sans un jour de coupure sont trait\u00e9s comme un seul\u202f; d\u00e8s qu\u2019il y a une coupure, ce sont deux contrats, chacun avec son propre compteur d\u2019heures annuelles. Rien ne change pour la paie ni pour les cong\u00e9s, qui continuent de porter sur le contrat en cours." },
+    { emoji: '\u{1F4C5}', titre: "Le Pilotage compte les personnes \u00e0 la semaine", desc: "L\u2019\u00e9cran Charge & ETP raisonnait au mois. Une vendange de quatre jours en septembre \u00e9tait divis\u00e9e par un mois entier de travail et ressortait \u00e0 six personnes, quand la m\u00eame vendange \u00e0 cheval sur la fin ao\u00fbt en affichait vingt-sept. Et l\u2019effectif en face \u00e9tait une moyenne du mois\u202f: une semaine \u00e0 quarante personnes noy\u00e9e dans trois semaines \u00e0 deux donnait douze, un chiffre qui n\u2019existait aucun jour de l\u2019ann\u00e9e. L\u2019\u00e9cran annon\u00e7ait donc un manque de seize personnes pendant que la courbe, juste, montrait la vendange couverte. Tout se lit maintenant \u00e0 la semaine, la seule maille o\u00f9 le rapport a un sens." },
+    { emoji: '\u{1F5D3}\u{FE0F}', titre: "Une frise de toute l\u2019ann\u00e9e, et le clic qui zoome", desc: "Le Pilotage s\u2019ouvre d\u00e9sormais sur une frise de la campagne enti\u00e8re\u202f: vos p\u00e9riodes en couleur, et sous chacune le nombre de personnes n\u00e9cessaires semaine par semaine. Le vert est ce que votre \u00e9quipe absorbe, le rouge ce qu\u2019il reste \u00e0 recruter \u2014 vous lisez le renfort en hauteur de rouge, sans calcul. Cliquez une p\u00e9riode\u202f: l\u2019axe se recale dessus, l\u2019\u00e9chelle verticale suit, et les t\u00e2ches qui la composent apparaissent en bandes. C\u2019est ce qui permet de voir la taille alors que la vendange \u00e9crase tout. Les zones hachur\u00e9es ne sont couvertes par aucune p\u00e9riode." },
+    { emoji: '\u{1F465}', titre: "Une \u00e9quipe de vendangeurs compte pour son effectif", desc: "Une fiche d\u2019\u00e9quipe collective r\u00e9gl\u00e9e \u00e0 quarante personnes ne comptait que pour une seule dans le calcul de la pr\u00e9sence de l\u2019\u00e9quipe. Le bandeau \u00ab\u202fO\u00f9 va le temps\u202f\u00bb affichait alors une part de 392\u202f%\u202f\u2014 une r\u00e9partition qui d\u00e9passe cent \u2014 et annon\u00e7ait z\u00e9ro heure de cave et de trajets, ce qui \u00e9tait faux. C\u2019est corrig\u00e9\u202f; et si votre charge d\u00e9passe vraiment votre pr\u00e9sence, la surcharge est d\u00e9sormais \u00e9crite en clair au lieu d\u2019\u00eatre absorb\u00e9e." }
+  ]},
   { v:'5.98', items:[
     { emoji: '\u{1F3AF}', titre: "Chaque personne voit les modules de son m\u00e9tier", desc: "Quand on cr\u00e9e plusieurs comptes d\u2019un coup, chacun arrivait avec les sept modules dans sa barre du bas \u2014 y compris la Cave et la R\u00e9serve pour quelqu\u2019un qui ne quitte pas les vignes. Il fallait rouvrir chaque fiche pour d\u00e9cocher. Maintenant le r\u00f4le suffit\u202f: un ouvrier arrive avec la Vigne et le Planning, un tractoriste garde en plus le Tracteur et le Phyto. Le Planning reste visible pour tout le monde, c\u2019est l\u00e0 que chacun lit ses heures et ses cong\u00e9s. Rien n\u2019est fig\u00e9\u202f: la fiche de chaque personne, dans R\u00e9glages, permet de recocher ce qu\u2019on veut, et un nouveau bouton \u00ab Selon le r\u00f4le \u00bb repose la combinaison standard d\u2019un geste. Les personnes d\u00e9j\u00e0 en place ne changent pas." }
   ]},
@@ -1824,11 +1830,15 @@ function _saisonTaches(nom){
 //   Corollaire assume : un CDD dont les dates ne sont pas saisies compte toujours.
 window._mvEnContratLe = function(m, ds){
   if(!m) return false;
-  if(!m.debut_contrat && !m.fin_contrat) return true;
+  var P = (typeof window._mvContrats === 'function') ? window._mvContrats(m) : [];
+  if(!P.length) return true;   // aucune date : on ne peut rien affirmer -> present
   if(!ds) return true;
-  if(m.debut_contrat && ds < m.debut_contrat) return false;
-  if(m.fin_contrat   && ds > m.fin_contrat)   return false;
-  return true;
+  for(var i = 0; i < P.length; i++){
+    if(P[i].debut && ds < P[i].debut) continue;
+    if(P[i].fin   && ds > P[i].fin)   continue;
+    return true;
+  }
+  return false;
 };
 
 // Contrat arrive a echeance a la date consideree. Distinct de « pas encore
@@ -2043,14 +2053,81 @@ window._mvOrdreRangs = function(tache, noms){
   return out;
 };
 
+// ════ LES PERIODES DE CONTRAT D'UNE FICHE — definition UNIQUE ════════════════
+// Un salarie peut avoir eu PLUSIEURS contrats : un CDD de printemps, puis un CDI
+// signe quatre semaines plus tard. Le couple debut_contrat/fin_contrat ne tient
+// qu'UN contrat : saisir le second ECRASAIT le premier, en silence et sans
+// confirmation. Mesure du 11/08/2026 sur un domaine reel : un salarie present de
+// mars a juillet puis reembauche en aout n'existait plus DU TOUT sur la campagne
+// de printemps — ni dans l'effectif, ni dans la capacite, ni dans le cout.
+// La perte avait lieu A LA SAISIE, pas a la lecture : aucun code ne pouvait la
+// rattraper apres coup.
+//
+// REGLE DE TERRAIN (Nico, 12/08/2026) : deux contrats qui SE TOUCHENT — fin + 1
+// jour = debut du suivant — n'en font qu'un ; « sans jour de pause entre les
+// deux, ca se serait suivi ». UN SEUL jour de coupure = deux contrats distincts,
+// chacun avec son propre compteur de 1607 h. Il n'y a de du ni d'un cote ni de
+// l'autre : chaque contrat suit le rythme du planning a l'embauche.
+//
+// ⚠️ CE QUI LIT CETTE FONCTION, ET CE QUI NE LA LIT PAS. Trois questions
+// distinctes, qu'un seul couple de dates confondait :
+//   1. « est-il la AUJOURD'HUI ? »            -> _mvEnContratLe
+//   2. « a-t-il travaille pendant CETTE PERIODE ? » -> _mvEnContratSurPeriode
+//      et _inContractDay (planning.js) : ces deux-la voient TOUS les contrats,
+//      c'est le sens meme de la question, et c'est ce qui effacait le passe.
+//   3. « combien d'heures lui doit-on sur CE contrat ? » -> _planInContract
+//      (planning.js) : plafond des 1607 h, conges, grille. Celui-la ne voit QUE
+//      le contrat en cours et NE DOIT PAS changer. Elargir le prorata melangerait
+//      deux contrats en un seul compteur.
+// Le couple debut_contrat/fin_contrat garde donc exactement son sens : le contrat
+// EN COURS, celui que lit la paie. m.contrats[] ne porte que les PRECEDENTS.
+window._mvContrats = function(m){
+  if(!m) return [];
+  var out = [];
+  (m.contrats || []).forEach(function(c){
+    if(c && (c.debut || c.fin)) out.push({ debut: c.debut || '', fin: c.fin || '' });
+  });
+  if(m.debut_contrat || m.fin_contrat) out.push({ debut: m.debut_contrat || '', fin: m.fin_contrat || '' });
+  if(!out.length) return [];
+  // Un debut vide = ouvert a gauche (trie en premier) ; une fin vide = ouverte a
+  // droite (absorbe tout ce qui suit).
+  out.sort(function(a, b){ return String(a.debut || '0000-00-00').localeCompare(String(b.debut || '0000-00-00')); });
+  var res = [{ debut: out[0].debut, fin: out[0].fin }];
+  for(var i = 1; i < out.length; i++){
+    var p = res[res.length - 1], c = out[i], fus;
+    if(!p.fin)        fus = true;                                  // p ouvert a droite
+    else if(!c.debut) fus = true;                                  // c ouvert a gauche
+    else              fus = (c.debut <= window._mvJourApres(p.fin)); // chevauchement OU contiguite
+    if(fus){
+      if(!p.fin || !c.fin) p.fin = '';
+      else if(c.fin > p.fin) p.fin = c.fin;
+    } else res.push({ debut: c.debut, fin: c.fin });
+  }
+  return res;
+};
+
+// Le lendemain d'une date ISO. Sert la regle de contiguite ci-dessus : passer par
+// Date evite le piege du 31 -> 01 et des fins de mois (un simple +1 sur la chaine
+// donnerait '2026-07-32').
+window._mvJourApres = function(iso){
+  if(!iso) return '';
+  var t = Date.parse(iso + 'T00:00:00');
+  if(isNaN(t)) return iso;
+  return new Date(t + 86400000).toISOString().split('T')[0];
+};
+
 window._mvEnContratSurPeriode = function(m, d0, d1){
   if(!m || m.bureau) return false;
-  if(m.debut_contrat || m.fin_contrat){
-    if(m.debut_contrat && d1 && m.debut_contrat > d1) return false;
-    if(m.fin_contrat   && d0 && m.fin_contrat   < d0) return false;
+  var P = window._mvContrats(m);
+  // Sans AUCUNE date on ne peut pas savoir quand la personne est partie : le
+  // statut tranche (comptes de service, anciens salaries jamais dates).
+  if(!P.length) return m.statut !== 'Inactif';
+  for(var i = 0; i < P.length; i++){
+    if(P[i].debut && d1 && P[i].debut > d1) continue;
+    if(P[i].fin   && d0 && P[i].fin   < d0) continue;
     return true;
   }
-  return m.statut !== 'Inactif';
+  return false;
 };
 
 
