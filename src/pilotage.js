@@ -854,7 +854,38 @@ function _pilEcartHtml(cd, real){
 //
 // Le recollage est legitime parce que w.need = wh/wcap se calcule sur la MEME
 // semaine des deux cotes : deux periodes produisent des valeurs comparables.
-var _PIL_ETPSEL=null;              // nom de la campagne zoomee ; null = annee entiere
+// ════════════════════════════════════════════════════════════════════════════
+// LA PORTEE — un seul etat, lu par tout le module.
+// Le module portait CINQ selecteurs qui s'ignoraient : _PIL_ETPSEL (frise),
+// _PEC_SUB (economie), _PEX_AN (exercice), _PCAV_MIL (millesime) et la periode
+// active. Cliquer une campagne ne bougeait qu'UN panneau ; les chiffres au-
+// dessus restaient sur une autre fenetre, sans le dire. D'ou deux reponses
+// justes a la meme question sur le meme ecran.
+// `camp` remplace _PIL_ETPSEL, qui n'en est plus qu'un alias de lecture.
+// ⚠️ Toute nouvelle vue lit _PIL_SCOPE. On n'ajoute pas un sixieme selecteur.
+// ════════════════════════════════════════════════════════════════════════════
+var _PIL_SCOPE = { camp:null };    // nom de la campagne zoomee ; null = l'annee
+
+// Meme patron de cle que _pilTabKey : un module, une facon de nommer.
+function _pilScopeKey(){ return 'mavigne_pil_scope_'+_pilTenant(); }
+function _pilScopeLoad(){
+  try{ var v=localStorage.getItem(_pilScopeKey()); if(v!=null) _PIL_SCOPE.camp=(v==='')?null:v; }catch(e){}
+}
+function _pilScopeSet(camp){
+  _PIL_SCOPE.camp = camp || null;
+  try{ localStorage.setItem(_pilScopeKey(), _PIL_SCOPE.camp||''); }catch(e){}
+}
+// La campagne portee EXISTE-T-ELLE encore ? Une periode supprimee ou renommee
+// laisserait une portee fantome : l'ecran filtrerait sur un nom que plus
+// personne ne porte, et n'afficherait rien sans dire pourquoi.
+function _pilScopeVerif(ann){
+  if(!_PIL_SCOPE.camp || !ann || !ann.pers) return;
+  for(var i=0;i<ann.pers.length;i++) if(ann.pers[i].nom===_PIL_SCOPE.camp) return;
+  _pilScopeSet(null);
+}
+Object.defineProperty(window,'_PIL_ETPSEL',{ get:function(){ return _PIL_SCOPE.camp; },
+  set:function(v){ _pilScopeSet(v); }, configurable:true });
+var _PIL_ETPSEL=null;              // conserve pour la lecture interne ; voir _PIL_SCOPE
 var _PIL_ANN=null, _PIL_ANNK='';   // memo : N appels a _chargeSaisonData par rendu
 function _pilAnnOrd(y){ return Math.round((Date.parse(y+'T00:00:00')-Date.parse('2026-01-01T00:00:00'))/86400000); }
 function _pilAnnuelData(){
@@ -991,7 +1022,7 @@ function _pilFriseAnneeSvg(ann,w){
   if(!ann||!ann.weeks.length) return window._mvGraphVide(
     'Aucune p\u00e9riode dat\u00e9e sur la campagne',
     'Renseignez les dates de d\u00e9but et de fin de vos p\u00e9riodes (R\u00e9glages \u203a Saisons).');
-  var selP=_pilAnnPer(_PIL_ETPSEL), s, e;
+  var selP=_pilAnnPer(_PIL_SCOPE.camp), s, e;
   if(selP){ var d0=_pilAnnOrd(selP.debut), d1=_pilAnnOrd(selP.fin);
     var mg=Math.max(2,Math.round((d1-d0)*0.04)); s=d0-mg; e=d1+mg; }
   else { s=ann.s; e=ann.e; }
@@ -1156,7 +1187,7 @@ function _pilPanelEtp(d){
   // ── Frise annuelle : clic sur une campagne = ZOOM (axe X et axe Y) ───────────
   var annBlock='';
   if(s.etp_annee!==0 && ann){
-    var _selP=_pilAnnPer(_PIL_ETPSEL);
+    var _selP=_pilAnnPer(_PIL_SCOPE.camp);
     annBlock='<div style="display:flex;align-items:baseline;justify-content:space-between;flex-wrap:wrap;gap:8px;margin:2px 0 2px">'
       +'<div style="'+secTtl+';margin:0">'+(_selP?_pilEsc(_selP.nom):'Toute la campagne')+' \u2014 personnes n\u00e9cessaires / semaine</div>'
       +(_selP?('<button data-etpc="'+_pilEsc(_selP.nom)+'" style="border:1px solid var(--gris);background:#fff;color:var(--texte-doux);border-radius:20px;padding:4px 11px;font-size:11.5px;font-weight:600;cursor:pointer">\u2190 toute la campagne</button>'):'')
@@ -6485,14 +6516,183 @@ function _pilSkeleton(d,tab){
   // L'onglet Économie n'a pas de roue crantée : ses trois sous-vues remplacent la
   // liste de cases à cocher, et l'on ne masque pas un poste de dépense à la carte.
   var perso=(tab==='auj'||tab==='avc'||tab==='equ'||tab==='sim'||tab==='cfm')?'<button class="pil-gear2" id="pil-gear"><span>\u2699</span> Choisir les indicateurs</button>':'';
+  _pilCssV2(); _pilScopeLoad();
+  // La barre de portee se pose ENTRE le masthead et les onglets : elle dit ou
+  // l'on regarde avant de dire ce que l'on regarde. Les photos ouvrent le
+  // contenu, quel que soit l'onglet — on voit l'ensemble avant le detail.
   return _pilHdrHtml(d)
+    +'<div class="pil-portee"><div class="pil-portee-in">'
+    +'<div class="pil-crumb" id="pil-crumb">'+_pilCrumbHtml()+'</div>'
+    +'</div></div>'
     +'<div class="pil-tabsbar">'+_pilTabsHtml(tab)+'</div>'
     +'<div class="pil-wrap">'
+    +'<div id="pil-photos-host">'+_pilPhotosHtml()+'</div>'
     +'<div class="pil-tabhead"><h2 class="pil-h2">'+_pilEsc(_pilTabLabel(tab))+'</h2>'+perso+'</div>'
     +'<div class="pil-perso" id="pil-perso"></div>'
     +'<div class="pil-content" id="pil-content"></div>'
     +'</div>';
 }
+
+
+// ════════════════════════════════════════════════════════════════════════════
+// LA BARRE DE PORTEE ET LES QUATRE PHOTOS
+// Le module s'ouvrait sur sept onglets a plat — sept SUJETS, aucun niveau de
+// zoom. On ne voyait donc jamais l'annee : on tombait dans un sujet.
+// Ici : une ligne qui dit OU l'on regarde (le fil d'Ariane), et quatre photos
+// qui repondent aux quatre questions d'un domaine — travaux, effectif, budget,
+// conformite — a la maille de la portee. Cliquer une photo descend au detail.
+// ⚠️ Les quatre photos lisent _PIL_SCOPE. Aucune ne garde d'etat a elle.
+// ════════════════════════════════════════════════════════════════════════════
+function _pilCssV2(){
+  if(document.getElementById('pil-css-v2')) return;
+  var css=''
+  +'.pil-portee{position:sticky;top:0;z-index:34;background:var(--bg-card);border-bottom:1px solid var(--gris);}'
+  +'.pil-portee-in{max-width:1180px;margin:0 auto;padding:9px 16px;display:flex;align-items:center;gap:9px;flex-wrap:wrap}'
+  +'.pil-crumb{display:flex;align-items:center;gap:5px;flex-wrap:wrap;flex:1;min-width:0}'
+  +'.pil-cr{display:inline-flex;align-items:center;gap:6px;border:1px solid var(--gris);background:var(--bg-app);border-radius:9px;padding:5px 10px;font-size:12.5px;font-weight:600;color:var(--texte);white-space:nowrap;min-height:34px;font-family:inherit;cursor:pointer}'
+  +'.pil-cr.root{background:var(--cave);border-color:var(--cave);color:var(--or-clair)}'
+  +'.pil-cr.sel{background:var(--terre-pale);border-color:var(--terre);color:var(--terre)}'
+  +'.pil-cr .x{border:0;background:none;color:inherit;opacity:.55;font-size:16px;line-height:1;padding:0 0 0 3px;font-family:inherit;cursor:pointer;min-width:20px}'
+  +'.pil-cr .x:hover{opacity:1}'
+  +'.pil-cr-sep{color:var(--gris);font-size:13px}'
+  +'.pil-cr-note{font-size:11.5px;color:var(--texte-doux);white-space:nowrap}'
+  +'.pil-photos{display:grid;grid-template-columns:repeat(4,1fr);gap:11px;margin:0 0 18px}'
+  +'.pil-photo{background:var(--bg-card);border:1px solid var(--gris-clair);border-radius:14px;padding:13px 14px 12px;box-shadow:var(--shadow-sm);text-align:left;width:100%;font-family:inherit;cursor:pointer;transition:border-color .12s;min-height:112px;display:block}'
+  +'.pil-photo:hover{border-color:var(--or)}'
+  +'.pil-photo .k{font-size:9.5px;letter-spacing:1.5px;text-transform:uppercase;color:var(--texte-doux);font-weight:700;display:flex;align-items:center;gap:6px}'
+  +'.pil-photo .v{font-family:\'Cormorant Garamond\',serif;font-size:32px;font-weight:700;line-height:1.05;margin:5px 0 0;color:var(--cave);font-variant-numeric:tabular-nums}'
+  +'.pil-photo .u{font-family:Outfit,sans-serif;font-size:13.5px;font-weight:600;color:var(--texte-doux)}'
+  +'.pil-photo .s{font-size:11.5px;color:var(--texte-doux);margin-top:2px;line-height:1.35}'
+  +'.pil-photo .go{font-size:10.5px;color:var(--terre);font-weight:700;margin-top:7px}'
+  +'.pil-flag{display:inline-flex;align-items:center;justify-content:center;width:15px;height:15px;border-radius:50%;font-size:10px;font-weight:800;color:#fff;flex-shrink:0}'
+  +'@media(max-width:880px){.pil-photos{grid-template-columns:1fr 1fr}}'
+  +'@media(max-width:430px){.pil-photo .v{font-size:27px}.pil-portee-in{padding:8px 11px}}';
+  var el=document.createElement('style'); el.id='pil-css-v2'; el.textContent=css;
+  document.head.appendChild(el);
+}
+
+// ── Le fil d'Ariane ─────────────────────────────────────────────────────────
+// Une portee active se lit sur la MEME ligne que le reste, jamais repliee dans
+// un panneau : un filtre qu'on oublie qu'il tourne est pire que pas de filtre.
+function _pilCrumbHtml(){
+  // _mvExercice() rend {an,debut,fin} — il n'existe pas de fonction de libelle,
+  // on le compose ici plutot que d'appeler un helper imaginaire.
+  var ex='Exercice', X=null;
+  try{ X=(typeof window._mvExercice==='function')?window._mvExercice():null; }catch(e){ X=null; }
+  if(X && X.debut && X.fin){
+    var a0=String(X.debut).slice(0,4), a1=String(X.fin).slice(0,4);
+    ex='Exercice '+(a0===a1?a0:(a0+'-'+a1.slice(2)));
+  }
+  var h='<button class="pil-cr root" id="pil-cr-root" title="Revenir \u00e0 l\u2019ann\u00e9e enti\u00e8re">\u2302 '+_pilEsc(ex)+'</button>';
+  if(_PIL_SCOPE.camp){
+    h+='<span class="pil-cr-sep">\u203A</span><span class="pil-cr sel">\uD83C\uDF47 '+_pilEsc(_PIL_SCOPE.camp)
+      +'<button class="x" id="pil-cr-x" title="Revenir \u00e0 l\u2019ann\u00e9e">\u00d7</button></span>';
+  } else {
+    h+='<span class="pil-cr-note">l\u2019ann\u00e9e enti\u00e8re \u2014 cliquez une campagne dans la frise pour zoomer</span>';
+  }
+  return h;
+}
+
+// ── Les quatre photos ───────────────────────────────────────────────────────
+// Chacune repond a UNE question et emmene a l'ecran qui la detaille. Un chiffre
+// dont les entrees sont incompletes porte un drapeau : il ne se tait pas et il
+// ne ment pas non plus, il dit qu'il est partiel.
+function _pilPhotosData(){
+  var ann=null; try{ ann=_pilAnnuelData(); }catch(e){ ann=null; }
+  if(ann) _pilScopeVerif(ann);
+  var camp=_PIL_SCOPE.camp, selP=ann?_pilAnnPer(camp):null;
+  var wk=(ann&&ann.weeks)?ann.weeks.filter(function(x){ return selP?(x.per===selP.idx):true; }):[];
+
+  // TRAVAUX — heures de bareme de la portee.
+  var hTot=0, hFait=0;
+  try{
+    if(selP&&selP.cd){ hTot=Math.round(selP.cd.totalTotal||0); hFait=Math.max(0,hTot-Math.round(selP.cd.totalReste||0)); }
+    else if(ann){ ann.pers.forEach(function(p){ if(p.cd){ hTot+=Math.round(p.cd.totalTotal||0); hFait+=Math.max(0,Math.round(p.cd.totalTotal||0)-Math.round(p.cd.totalReste||0)); } }); }
+  }catch(e){}
+  var pct=hTot>0?Math.round(hFait/hTot*100):0;
+
+  // EFFECTIF — le PIC, jamais la moyenne : une moyenne annuelle n'existe aucun
+  // jour de l'annee, et c'est le pic qui decide d'un recrutement.
+  var pic=0, picW=null, som=0, n=0;
+  wk.forEach(function(x){ if(!(x.cap>0)) return; som+=x.need; n++; if(x.need>pic){ pic=x.need; picW=x; } });
+  var moy=n>0?(som/n):0;
+  var head=picW?(picW.head||0):0, manque=Math.max(0,pic-head);
+
+  // BUDGET — la source est celle de l'ecran Economie, pas un second calcul.
+  var eur=0, sansTaux=0, ecoOk=false;
+  // ⚠️ _pecData() rend le total sous la cle `tot`, pas `T` — verifie dans le
+  //    fichier, pas deduit du nom de la variable interne.
+  try{ var _P=_pecData(); if(_P&&_P.tot){ eur=(_P.tot.moB||0)+(_P.tot.tracF||0)+(_P.tot.phyF||0); sansTaux=_P.tot.nSansTaux||0; ecoOk=true; } }catch(e){ ecoOk=false; }
+
+  // CONFORMITE — le cuivre roule sur sept ans : c'est un chiffre d'ANNEE.
+  var cu=null; try{ cu=_cfmCuivre(); }catch(e){ cu=null; }
+
+  return { ann:ann, selP:selP, hTot:hTot, hFait:hFait, pct:pct, pic:pic, picW:picW,
+           moy:moy, head:head, manque:manque, eur:eur, sansTaux:sansTaux, ecoOk:ecoOk, cu:cu, trous:(ann&&ann.trous)?ann.trous.length:0, ovl:(ann&&ann.ovl)?ann.ovl.length:0 };
+}
+
+
+// ── Le rendu des quatre photos ──────────────────────────────────────────────
+function _pilPhotoHtml(k,ico,val,unite,sous,cible,drapeau){
+  return '<button class="pil-photo" data-pgo="'+cible+'">'
+    +'<div class="k">'+ico+' '+k+(drapeau||'')+'</div>'
+    +'<div class="v">'+val+'<span class="u">'+unite+'</span></div>'
+    +'<div class="s">'+sous+'</div>'
+    +'<div class="go">voir le d\u00e9tail \u203A</div></button>';
+}
+function _pilFlag(g,titre){
+  var c=(g==='r')?'var(--rouge)':(g==='o'?'var(--orange)':'#4A9FC8');
+  return '<span class="pil-flag" style="background:'+c+'" title="'+_pilEsc(titre)+'">!</span>';
+}
+function _pilPhotosHtml(){
+  var D;
+  try{ D=_pilPhotosData(); }catch(e){ return ''; }
+  var camp=_PIL_SCOPE.camp, cadre=camp?('sur '+_pilEsc(camp)):'sur l\u2019exercice';
+
+  // TRAVAUX
+  var fT='';
+  if(D.trous>0) fT=_pilFlag('r',D.trous+' trou(s) dans le calendrier \u2014 ce travail n\u2019est compt\u00e9 nulle part');
+  else if(D.ovl>0) fT=_pilFlag('o','Des p\u00e9riodes se chevauchent \u2014 des heures comptent deux fois');
+  var pTrav=_pilPhotoHtml('Travaux','\uD83C\uDF3F',_pilNb(D.hTot),' h',
+    D.hTot>0?(D.pct+' % fait '+cadre):('aucune t\u00e2che dat\u00e9e '+cadre),'avc',fT);
+
+  // EFFECTIF — le pic, et le manque en clair s'il y en a un.
+  var sE = D.pic>0
+    ? ('au pic'+(D.picW?(' \u00b7 '+_pilNb(D.head)+' pr\u00e9sents cette semaine-l\u00e0'):''))
+    : 'aucune semaine mesur\u00e9e '+cadre;
+  var fE = (D.manque>0.05) ? _pilFlag('o','Il manque '+_pilUn(D.manque)+' personne(s) au pic') : '';
+  var pEff=_pilPhotoHtml('Effectif','\uD83D\uDC65',D.pic>0?_pilUn(D.pic):'\u2014',D.pic>0?' pers.':'', sE,'equ',fE);
+
+  // BUDGET
+  var fB=D.sansTaux>0?_pilFlag('o',D.sansTaux+' fiche(s) sans taux horaire \u2014 le co\u00fbt est sous-\u00e9valu\u00e9'):'';
+  var pBud = D.ecoOk
+    ? _pilPhotoHtml('Budget','\uD83D\uDCB6',_pilNb(Math.round(D.eur/1000)),' k\u20ac','main-d\u2019\u0153uvre, carburant et phyto','eco',fB)
+    : _pilPhotoHtml('Budget','\uD83D\uDCB6','\u2014','','le calcul du co\u00fbt n\u2019a pas abouti','eco',_pilFlag('r','Ouvrez \u00c9conomie pour voir ce qui bloque'));
+
+  // CONFORMITE — le cuivre roule sur 7 ans : c'est un chiffre d'ANNEE, il ne
+  // se recadre pas sur une campagne, et l'ecran le dit au lieu de faire semblant.
+  var pCfm;
+  if(D.cu && D.cu.avail && D.cu.rows.length){
+    var mx=D.cu.rows[0];
+    var fC=D.cu.over>0?_pilFlag('r',D.cu.over+' parcelle(s) au-dessus du plafond')
+          :(D.cu.warn>0?_pilFlag('o',D.cu.warn+' parcelle(s) proche(s) du plafond'):'');
+    pCfm=_pilPhotoHtml('Conformit\u00e9','\uD83D\uDEE1\uFE0F',_pilUn(mx.cu),' kg Cu',
+      'la plus charg\u00e9e \u00b7 plafond '+D.cu.plaf+' kg/ha sur 7 ans','cfm',fC);
+  } else {
+    pCfm=_pilPhotoHtml('Conformit\u00e9','\uD83D\uDEE1\uFE0F','0',' kg Cu','aucun apport de cuivre enregistr\u00e9','cfm','');
+  }
+  return '<div class="pil-photos">'+pTrav+pEff+pBud+pCfm+'</div>';
+}
+function _pilNb(v){ v=Math.round(Number(v)||0); return String(v).replace(/\B(?=(\d{3})+(?!\d))/g,'\u00a0'); }
+function _pilUn(v){ return (Math.round((Number(v)||0)*10)/10).toString().replace('.',','); }
+
+// Repeint la barre de portee sans reconstruire la page. Appelee au clic sur une
+// campagne : la portee change, le fil et les photos suivent — c'est tout l'objet.
+function _pilPortee(){
+  var c=document.getElementById('pil-crumb'); if(c) c.innerHTML=_pilCrumbHtml();
+  var p=document.getElementById('pil-photos-host'); if(p) p.innerHTML=_pilPhotosHtml();
+}
+window._pilPortee = _pilPortee;
 
 // ── Paramétrage : carte « objectif » + fenêtres de tâches ──
 function _pilObjCard(cd,admin){
@@ -6756,8 +6956,30 @@ function _pilBindContent(content){
       _PIL_ANN=null; _PIL_ANNK='';
       if(typeof window._pexSetMois==='function') window._pexSetMois(_em);
       return; }
+    // Une photo emmene a l'ecran qui detaille sa question : on voit l'ensemble,
+    // puis on descend. C'est le zoom demande, avec les onglets pour destinations.
+    var _pg=e.target.closest('[data-pgo]');
+    // ⚠️ Il n'existe PAS de _pilSetTab : le module ecrit _PIL_TAB, memorise, et
+    //    re-rend. On suit le meme chemin que le clic sur un onglet (l.7035)
+    //    plutot que d'inventer une seconde facon de changer d'onglet.
+    if(_pg){ e.stopPropagation(); var _pt=_pg.getAttribute('data-pgo');
+      // Une cible que le module ne connait pas ne doit pas ecrire une cle morte
+      // dans localStorage : _pilLoadTab retomberait sur 'auj' au rechargement
+      // sans que personne comprenne pourquoi.
+      if(_pt && _PIL_VALID_TAB[_pt] && _pt!==_PIL_TAB){ _PIL_TAB=_pt; _pilSaveTab(_pt); renderPilotage();
+        if(window.scrollTo) window.scrollTo(0,0); }
+      return; }
+    // Le fil d'Ariane : la croix et la racine ramenent a l'annee entiere.
+    var _cx=e.target.closest('#pil-cr-x, #pil-cr-root');
+    if(_cx){ e.stopPropagation();
+      if(_PIL_SCOPE.camp){ _pilScopeSet(null); _pilPortee(); _pilFillContent(_pilData()); }
+      return; }
     var _ea=e.target.closest('[data-etpc]');
-    if(_ea){ e.stopPropagation(); var _en=_ea.getAttribute('data-etpc'); _PIL_ETPSEL=(_PIL_ETPSEL===_en)?null:_en; _pilFillContent(_pilData()); return; }
+    if(_ea){ e.stopPropagation(); var _en=_ea.getAttribute('data-etpc');
+      // ★ Le clic ne change plus un panneau : il change LA PORTEE. Le fil
+      //   d'Ariane et les quatre photos suivent, parce qu'ils lisent la meme
+      //   chose. C'est ce qui manquait : une selection sans effet ailleurs.
+      _pilScopeSet(_PIL_SCOPE.camp===_en?null:_en); _pilPortee(); _pilFillContent(_pilData()); return; }
     var _ec=e.target.closest('[data-etp]'); if(_ec){ e.stopPropagation(); var _ek=_ec.getAttribute('data-etp'); if(!_PIL_STATE.sub)_PIL_STATE.sub={}; _PIL_STATE.sub[_ek]=(_PIL_STATE.sub[_ek]===0)?1:0; _pilSaveState(_PIL_STATE); _pilFillContent(_pilData()); return; }
     // Économie : sous-vues, tri du tableau, export, raccourci Paramétrage.
     var _pe=e.target.closest('[data-pec]');
