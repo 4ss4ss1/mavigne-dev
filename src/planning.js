@@ -838,15 +838,35 @@ function _chargeSaisonData(s){
   var taskWindows=taskDet.map(function(t){
     var key=_mvTaskNorm(t.nom), ws, we, custom=false;
     // 1) echeances de la saison (dates saisies dans « Modifier la periode ») en PRIORITE
-    var e=_ech[t.nom];
+    // ★★★ UNE FENETRE QUI NE RENCONTRE PAS LA PERIODE N'EST PAS UNE FENETRE.
+    //   AVANT : les deux bornes etaient rabotees sur [spanS,spanE] SANS verifier
+    //   qu'il restait quelque chose. Une echeance entierement hors periode donnait
+    //   ws=we=spanE, puis `if(we<=ws) we=ws+1` : UN SEUL JOUR. Toutes les heures du
+    //   travail tombaient sur ce jour-la, et `need = heures/capacite` explosait sur
+    //   la derniere semaine de la periode.
+    //   ⚠⚠ Le cas n'est pas theorique : CONFIG.task_windows est un override GLOBAL
+    //   a dates ABSOLUES, applique a CHAQUE periode. Un relevage cale sur mai 2027
+    //   s'ecrase donc sur le dernier jour de l'hiver 2026-2027, ou ces dates
+    //   n'existent pas. Mesure du 12/08 : pic annonce a 46,3 personnes sur un
+    //   domaine qui en emploie 2, porte par UNE barre d'un jour, invisible a
+    //   l'ecran (1 px) mais assez haute pour ecraser l'axe des 52 semaines.
+    //   Desormais : pas de recouvrement = on ignore la consigne et on retombe sur
+    //   la fenetre par defaut, en le DISANT (horsPeriode).
+    var e=_ech[t.nom], hors=false;
     if(e&&(e.d1||e.d2)){
       var es=_ord(e.d1||s.debut), ee=_ord(e.d2||s.fin);
-      if(!isNaN(es)&&!isNaN(ee)&&ee>=es){ ws=Math.max(spanS,Math.min(spanE,es)); we=Math.max(spanS,Math.min(spanE,ee)); custom=true; }
+      if(!isNaN(es)&&!isNaN(ee)&&ee>=es){
+        if(ee>=spanS&&es<=spanE){ ws=Math.max(spanS,Math.min(spanE,es)); we=Math.max(spanS,Math.min(spanE,ee)); custom=true; }
+        else hors=true;
+      }
     }
     // 2) sinon CONFIG.task_windows (override global)
     if(!custom){ var ov=_cfgW[key];
       if(ov&&ov.start&&ov.end){ var os=_ord(ov.start), oe=_ord(ov.end);
-        if(!isNaN(os)&&!isNaN(oe)&&oe>=os){ ws=Math.max(spanS,Math.min(spanE,os)); we=Math.max(spanS,Math.min(spanE,oe)); custom=true; } }
+        if(!isNaN(os)&&!isNaN(oe)&&oe>=os){
+          if(oe>=spanS&&os<=spanE){ ws=Math.max(spanS,Math.min(spanE,os)); we=Math.max(spanS,Math.min(spanE,oe)); custom=true; }
+          else hors=true;
+        } }
     }
     // 3) sinon fenetre par defaut (fractions)
     if(!custom){ var fr=_mvTaskWin(t.nom); ws=spanS+fr[0]*spanLen; we=spanS+fr[1]*spanLen; }
@@ -854,7 +874,7 @@ function _chargeSaisonData(s){
     // capacite 1 ETP cumulee sur la fenetre [ws,we) — denominateur de l'etalement prorata-capacite
     var winCap=0; for(var _d=Math.round(ws);_d<Math.round(we);_d++) winCap+=_cap1(_d);
     var s0=(ws-spanS)/spanLen, s1=(we-spanS)/spanLen;
-    return {nom:t.nom,h:t.h,s0:s0,s1:s1,ws:ws,we:we,winCap:winCap,start:_ford(ws),end:_ford(we),custom:custom};
+    return {nom:t.nom,h:t.h,s0:s0,s1:s1,ws:ws,we:we,winCap:winCap,start:_ford(ws),end:_ford(we),custom:custom,horsPeriode:hors};
   });
   // Heures de t etalees au PRORATA DE LA CAPACITE sur [a,b) : une semaine de feries (capacite ~0)
   // recoit proportionnellement moins de travail -> plus de pic « fantome ». Repli uniforme si winCap==0.
@@ -967,9 +987,27 @@ function _chargeSaisonData(s){
     var wcap=_capDaysOrd(wo0,wo1);
     var wm=new Date(Date.parse('2026-01-01T00:00:00')+(wo0+3)*86400000).getMonth();
     var wreal=_capWeekReal(wo0,wo1);
-    weeks.push({o0:wo0,o1:wo1,m:wm,hours:wh,cap:wcap,need:wcap>0?wh/wcap:0,head:_headWeek(wo0,wo1),headPerm:_headWeek(wo0,wo1,true),
+    weeks.push({o0:wo0,o1:wo1,nd:(wo1-wo0+1),m:wm,hours:wh,cap:wcap,need:wcap>0?wh/wcap:0,head:_headWeek(wo0,wo1),headPerm:_headWeek(wo0,wo1,true),
                 capH:wreal?wreal.work:null, capPay:wreal?wreal.pay:null,
                 capHPerm:wreal?wreal.workPerm:null, capPayPerm:wreal?wreal.payPerm:null});
+  }
+  // ★★ PAS DE MOIGNON DE SEMAINE EN FIN DE PERIODE.
+  //   Le decoupage part de spanS par pas de 7 : la DERNIERE case vaut 1 a 6 jours
+  //   des que la periode ne fait pas un nombre entier de semaines. Cette case est
+  //   une SEMAINE pour tout le module — elle porte un `need`, elle peut porter le
+  //   pic de l'annee, elle se dessine sur la frise... large d'un pixel. Un chiffre
+  //   qu'on ne peut pas voir ne se verifie pas. On la fond dans la precedente :
+  //   une periode se termine par une case de 8 a 13 jours, jamais par un moignon.
+  //   need reste une INTENSITE (heures / capacite) : la fusion ne la deforme pas.
+  if(weeks.length>1 && weeks[weeks.length-1].nd<7){
+    var _q=weeks.pop(), _p=weeks[weeks.length-1];
+    _p.o1=_q.o1; _p.nd=_p.o1-_p.o0+1;
+    _p.hours+=_q.hours; _p.cap+=_q.cap;
+    _p.need=_p.cap>0?_p.hours/_p.cap:0;
+    _p.head=_headWeek(_p.o0,_p.o1); _p.headPerm=_headWeek(_p.o0,_p.o1,true);
+    var _wr=_capWeekReal(_p.o0,_p.o1);
+    _p.capH=_wr?_wr.work:null; _p.capPay=_wr?_wr.pay:null;
+    _p.capHPerm=_wr?_wr.workPerm:null; _p.capPayPerm=_wr?_wr.payPerm:null;
   }
   // ══ LE PIC SE LIT A LA SEMAINE, PLUS AU MOIS ══════════════════════════════
   // x.etpReq = x.chargeOrd / x.capRef divisait les heures TOMBANT dans le mois par

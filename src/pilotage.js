@@ -945,6 +945,21 @@ Object.defineProperty(window,'_PIL_ETPSEL',{ get:function(){ return _PIL_SCOPE.c
 var _PIL_ETPSEL=null;              // conserve pour la lecture interne ; voir _PIL_SCOPE
 var _PIL_ANN=null, _PIL_ANNK='';   // memo : N appels a _chargeSaisonData par rendu
 function _pilAnnOrd(y){ return Math.round((Date.parse(y+'T00:00:00')-Date.parse('2026-01-01T00:00:00'))/86400000); }
+// ★★★ L'INVERSE DE _pilAnnOrd — UNE SEULE FOIS, SUR L'EPOQUE UTC.
+//   Trois sites reconstruisaient une date depuis un ordinal en melangeant DEUX
+//   conventions dans la meme expression : une epoque LOCALE
+//   (Date.parse('2026-01-01T00:00:00')) relue avec des accesseurs UTC
+//   (getUTCDate / toISOString). A l'est de Greenwich, minuit local vaut 23:00 UTC
+//   la VEILLE : toutes les dates du Pilotage sortaient UN JOUR TROP TOT.
+//   Mesure du 12/08 sur l'ecran de Nico : une campagne 1 avr. -> 31 juil. 2027
+//   s'affichait « 31 mars -> 30 juil. », le pic « semaine du 31 mars » pour la
+//   semaine du 1er avril, et la fenetre d'accolage 18 juin -> 18 juil. devenait
+//   « 16 juin -> 20 juil. ». Aucun calcul n'etait faux : TOUTES les etiquettes
+//   l'etaient. Un chiffre juste sous une date fausse ne se verifie pas.
+//   Meme base et memes accesseurs que _ford (planning.js) : UTC des deux cotes.
+function _pilOrdD(o){ return new Date(Date.UTC(2026,0,1)+o*86400000); }
+function _pilOrdIso(o){ var d=_pilOrdD(o), m=d.getUTCMonth()+1, j=d.getUTCDate();
+  return d.getUTCFullYear()+'-'+(m<10?'0':'')+m+'-'+(j<10?'0':'')+j; }
 function _pilAnnuelData(){
   if(typeof window._chargeSaisonData!=='function') return null;
   var brut=(typeof window._cmpVisibles==='function')?window._cmpVisibles():(window.SAISONS||[]);
@@ -1133,7 +1148,7 @@ function _pilCadreLbl(PP){
 function _pilSemLabO(o0){
   if(o0==null) return '';
   var MOA=['janv.','f\u00e9vr.','mars','avr.','mai','juin','juil.','ao\u00fbt','sept.','oct.','nov.','d\u00e9c.'];
-  var dd=new Date(Date.parse('2026-01-01T00:00:00')+o0*86400000);
+  var dd=_pilOrdD(o0);
   return 'semaine du '+dd.getUTCDate()+' '+MOA[dd.getUTCMonth()];
 }
 // ── LES DEUX CADRES ─────────────────────────────────────────────────────────
@@ -1413,7 +1428,7 @@ function _pilFriseAnneeSvg(ann,w){
       r++;
     });
   }
-  var dt=new Date(Date.parse('2026-01-01T00:00:00')+s*86400000);
+  var dt=_pilOrdD(s);
   var cy=dt.getUTCFullYear(), cm=dt.getUTCMonth();
   for(var q=0;q<30;q++){
     var mo0=_pilAnnOrd(cy+'-'+String(cm+1).padStart(2,'0')+'-01');
@@ -2476,7 +2491,7 @@ function _pilPanelOrdrePassage(d){
 // plus cher. Lecture seule, rien n'est enregistré.
 // ════════════════════════════════════════════════════════════════════
 // Ordinal -> ISO. Meme base que planning.js/_pilFriseSvg : 2026-01-01.
-function _rfIso(o){ return new Date(Date.parse('2026-01-01T00:00:00')+o*86400000).toISOString().split('T')[0]; }
+function _rfIso(o){ return _pilOrdIso(o); }
 // Sélection courante : nombre de renforts + fenêtre d'emploi (index de semaine).
 // ⚠ Remplace l'ancien profil libre édité au clic dans les colonnes : la zone
 // cliquable couvrait tout le graphique, on ne savait plus ce qu'on avait posé.
@@ -3008,17 +3023,32 @@ function _rfBest(ctx){
 function _rfStrategies(ctx){
   var n=ctx.W.length, out=[], bes=_rfBesoinC(ctx);
   out.push({nom:'Aucun renfort', sel:{R:0,a:0,b:0}});
+  // ★★★ LE GARDE-FOU : `tout` EST CALCULE D'ABORD, ET IL PLAFONNE LES AUTRES.
+  //   x.R n'est PAS « ce que cette tache demande » : c'est « combien de monde il
+  //   faut poser SUR LA SEULE FENETRE DE CETTE TACHE pour qu'elle tienne, alors
+  //   qu'on n'a rien fait avant ». Tout le retard accumule vient s'y ecraser, le
+  //   surcout de retard le multiplie, et le nombre s'envole.
+  //   Mesure du 12/08, sur le meme ecran, au meme instant :
+  //     · le tableau « Est-ce que ca tient dans les fenetres ? » : accolage,
+  //       il faudrait 3,2 personnes, il y en a deja 1,2 ;
+  //     · le bouton juste au-dessus : « Accolage — 26 pers. » ;
+  //     · et le bouton d'a cote : « 7 sur toute la periode », qui fait tenir
+  //       TOUTE la campagne, accolage compris.
+  //   Trois nombres, un seul ecran. Une proposition CIBLEE qui coute plus cher
+  //   que la solution GLOBALE n'est pas une proposition : c'est un piege.
+  //   On ne l'affiche plus. Ce qui reste est vrai et comparable.
+  var tout=_rfMinR(ctx,0,n-1,_RF_RMAX_DUR,null);
+  var plafond=(tout!=null&&tout>0)?tout:_RF_RMAX_DUR;
   // Les deux travaux qui commandent, chacun avec le nombre exact que SA fenetre
   // reclame. Au-dela de deux, la rangee de boutons devient illisible.
   var k=0;
   bes.forEach(function(x){
-    if(k>=2 || !(x.R>0)) return;
+    if(k>=2 || !(x.R>0) || x.R>plafond) return;
     k++;
     out.push({nom:_pilEsc(x.nom)+' \u2014 '+x.R+' pers.', sel:{R:x.R,a:x.a,b:x.b},
       detail:x.R+' personne'+(x.R>1?'s':'')+' du '+_pilFmtD(x.d0)+' au '+_pilFmtD(x.d1)
-             +' \u00b7 '+x.sem+' semaine'+(x.sem>1?'s':'')});
+             +' \u00b7 '+x.sem+' semaine'+(x.sem>1?'s':'')+' \u2014 pos\u00e9s sur cette seule fen\u00eatre'});
   });
-  var tout=_rfMinR(ctx,0,n-1,_RF_RMAX_DUR,null);
   if(tout!=null && tout>0) out.push({nom:tout+' sur toute la p\u00e9riode', sel:{R:tout,a:0,b:n-1},
     detail:'le plus petit nombre qui tient sans jamais s\u2019arr\u00eater'});
   var b=_rfBest(ctx);
@@ -3050,18 +3080,35 @@ function _rfProfilSvg(ctx,res,sel,opt,w){
   // frise. colW ne sert plus qu'a doser la densite des etiquettes.
   function CX0(k){ return X(W[Math.max(0,Math.min(n-1,k))].o0); }
   function CX1(k){ return X(W[Math.max(0,Math.min(n-1,k))].o1+1); }
+  // ★★★ LE ROUGE N'EST PLUS PLAFONNE A 4, ET IL EST EMPILE SUR LE MEME SOCLE
+  //   QUE LE RESTE DE LA COLONNE. Deux fautes, dans la meme image :
+  //   ① `Math.min(att,4)` : une semaine a qui il manque 40 personnes se dessinait
+  //      exactement comme une semaine a qui il en manque 4. Mesure du 12/08 :
+  //      SEPT colonnes consecutives a 6,0 pile — un PLATEAU PARFAIT, qui n'est pas
+  //      dans les donnees. C'etait 2 (effectif) + 4 (plafond). Un graphe qui rend
+  //      un manque de 40 identique a un manque de 4 empeche exactement la decision
+  //      qu'on vient le chercher.
+  //   ② Le rouge partait de `head+R` (des TETES) alors que le bas de la colonne
+  //      est empile en EQUIVALENTS-PERSONNES (b0 + dispo, soit capH/cap). Deux
+  //      unites dans une seule barre : le bloc rouge flottait au-dessus du vert.
+  //   Desormais : une seule unite du bas jusqu'au sommet, et le rouge dit sa
+  //   hauteur reelle. L'axe monte avec lui — c'est le but.
   var colW=pw/n, top=2, i;
+  var b0=ctx.trac.etp;
   for(i=0;i<n;i++){
-    var q=PS[i]||{}, dt=(ctx.head[i]||0)+((sel&&sel.R&&i>=sel.a&&i<=sel.b)?sel.R:0);
+    var q=PS[i]||{}, R0=(sel&&sel.R&&i>=sel.a&&i<=sel.b)?sel.R:0;
+    var dt=b0+(ctx.dispo[i]||0)+R0;
     var att=(q.cap>0)?q.reste/q.cap:0;
-    if(dt+Math.min(att,4)>top) top=dt+Math.min(att,4);
+    if(dt+att>top) top=dt+att;
     if((W[i].need||0)>top) top=W[i].need;
   }
   top=Math.ceil(top)+1;
   function Y(v){ return padT+ph-(v/top)*ph; }
   var g='<defs><pattern id="rfoisif" patternUnits="userSpaceOnUse" width="6" height="6" patternTransform="rotate(45)">'
    +'<rect width="6" height="6" fill="var(--bg-card)"/><line x1="0" y1="0" x2="0" y2="6" stroke="var(--gris)" stroke-width="2"/></pattern></defs>';
-  for(var v=0;v<=top;v+=(top>14?2:1)){
+  // Pas de graduation adaptatif : sans lui, un axe qui monte a 45 ecrit 23 nombres.
+  var _pas=(top>60?10:(top>26?5:(top>14?2:1)));
+  for(var v=0;v<=top;v+=_pas){
     g+='<line x1="'+padL+'" y1="'+Y(v).toFixed(1)+'" x2="'+(Wd-padR)+'" y2="'+Y(v).toFixed(1)+'" stroke="'+c.col.grille+'"/>'
       +'<text x="'+(padL-8)+'" y="'+(Y(v)+4).toFixed(1)+'" text-anchor="end" font-size="'+c.txt.mini+'" fill="'+c.col.texte+'">'+v+'</text>';
   }
@@ -3087,27 +3134,38 @@ function _rfProfilSvg(ctx,res,sel,opt,w){
     var bx0=CX0(sel.a), bx1=CX1(sel.b);
     g+='<rect x="'+bx0.toFixed(1)+'" y="'+padT+'" width="'+(bx1-bx0).toFixed(1)+'" height="'+ph+'" fill="'+c.col.prevu+'" opacity="0.12"/>';
   }
-  var b0=ctx.trac.etp;
   for(i=0;i<n;i++){
     var q2=PS[i]||{cap:W[i].cap,used:0,reste:0,capNorm:0};
     var R=(sel&&sel.R&&i>=sel.a&&i<=sel.b)?sel.R:0;
-    var dispoV=(ctx.dispo[i]||0)+R, tT=(ctx.head[i]||0)+R;
+    // tT = SOMMET REEL de la pile (tracteur + capacite disponible + renfort pose).
+    // C'est de la que part le travail en attente, sinon le rouge flotte.
+    var dispoV=(ctx.dispo[i]||0)+R, tT=b0+dispoV;
     var occ=(q2.capNorm>0)?Math.min(dispoV,(q2.used/q2.capNorm)*dispoV):0;
     var att2=(q2.cap>0)?q2.reste/q2.cap:0;
     var cx0=CX0(i), cx1=CX1(i), bx=cx0+2.5, bw=Math.max(1,cx1-cx0-5);
     if(b0>0.01) g+='<rect x="'+bx.toFixed(1)+'" y="'+Y(b0).toFixed(1)+'" width="'+bw.toFixed(1)+'" height="'+(Y(0)-Y(b0)).toFixed(1)+'" rx="2" fill="var(--acier)" opacity="0.72"/>';
     if(occ>0.01) g+='<rect x="'+bx.toFixed(1)+'" y="'+Y(b0+occ).toFixed(1)+'" width="'+bw.toFixed(1)+'" height="'+(Y(b0)-Y(b0+occ)).toFixed(1)+'" rx="2" fill="'+c.col.fait+'" opacity="0.85"/>';
     if(dispoV-occ>0.04) g+='<rect x="'+bx.toFixed(1)+'" y="'+Y(b0+dispoV).toFixed(1)+'" width="'+bw.toFixed(1)+'" height="'+(Y(b0+occ)-Y(b0+dispoV)).toFixed(1)+'" rx="2" fill="url(#rfoisif)" stroke="var(--gris)" stroke-width="1"/>';
-    if(att2>0.04) g+='<rect x="'+bx.toFixed(1)+'" y="'+Y(tT+Math.min(att2,4)).toFixed(1)+'" width="'+bw.toFixed(1)+'" height="'+(Y(tT)-Y(tT+Math.min(att2,4))).toFixed(1)+'" rx="2" fill="'+c.col.alerte+'" opacity="0.55"/>';
+    if(att2>0.04) g+='<rect x="'+bx.toFixed(1)+'" y="'+Y(tT+att2).toFixed(1)+'" width="'+bw.toFixed(1)+'" height="'+(Y(tT)-Y(tT+att2)).toFixed(1)+'" rx="2" fill="'+c.col.alerte+'" opacity="0.55"/>';
   }
   // ligne de l'effectif permanent : EN ESCALIER (elle varie avec les contrats)
-  var path='';
+  // ★★ LA LIGNE EST DANS LA MEME UNITE QUE LES BARRES. Elle tracait `head`, un
+  //   comptage de TETES lisse, au-dessus de colonnes empilees en capacite reelle
+  //   (heures travaillables / capacite d'un ETP). Tant que tout le monde est a
+  //   temps plein les deux coincident et personne ne le voit ; un mi-temps, un
+  //   solde de CP ou une equipe collective les separent — et le lecteur conclut
+  //   que le graphe se contredit. On trace ce que la ligne PROMET : la capacite
+  //   dont on dispose reellement cette semaine-la, renfort pose compris.
+  var path='', _yEnd=0;
   for(i=0;i<n;i++){
-    var x0=CX0(i), x1=CX1(i), yy=Y(ctx.head[i]||0);
+    var _R=(sel&&sel.R&&i>=sel.a&&i<=sel.b)?sel.R:0;
+    var _v=b0+(ctx.dispo[i]||0)+_R;
+    var x0=CX0(i), x1=CX1(i), yy=Y(_v);
+    if(i===n-1) _yEnd=yy;
     path+=(i===0?'M ':' L ')+x0.toFixed(1)+' '+yy.toFixed(1)+' L '+x1.toFixed(1)+' '+yy.toFixed(1);
   }
   g+='<path d="'+path+'" fill="none" stroke="var(--texte)" stroke-width="2.5" stroke-linejoin="round"/>'
-    +'<text x="'+(Wd-padR-4)+'" y="'+(Y(ctx.head[n-1]||0)-6).toFixed(1)+'" text-anchor="end" font-size="'+c.txt.mini+'" font-weight="700" fill="var(--texte)">'+_pilEsc(ctx.baseCourt||'pr\u00e9sents')+'</text>';
+    +'<text x="'+(Wd-padR-4)+'" y="'+(_yEnd-6).toFixed(1)+'" text-anchor="end" font-size="'+c.txt.mini+'" font-weight="700" fill="var(--texte)">'+_pilEsc(ctx.baseCourt||'pr\u00e9sents')+'</text>';
   if(opt.note)
     g+='<text x="'+(padL+pw/2).toFixed(1)+'" y="'+(padT+14)+'" text-anchor="middle" font-size="'+c.txt.axe+'" font-weight="700" fill="'+c.col.texte+'">'+_pilEsc(opt.note)+'</text>';
   else if(!sel || !sel.R)
@@ -3983,19 +4041,33 @@ function _pilPanelCapacite(d){
   var PP=_pilPicPortee(), cd=_pilCdVue();
   var present=d.presentChamp!=null?d.presentChamp:0;
   if(!PP.ok && !cd){ return _pilTile('capacite','\u2696\uFE0F','#C9A84C','Capacité vs charge', _pilStat(present,' à la vigne'), null, null, '<div class="pil-empty">Renseigne les dates de la saison (Réglages \u203A Saisons) pour estimer l\'ETP requis.</div>'); }
-  var req=PP.pic||0, manque=Math.max(0,req-present), pPres=req>0?Math.min(present/req*100,100):100;
+  // ★★★ ON NE SOUSTRAIT PLUS DEUX GRANDEURS QUI N'ONT NI LA MEME DATE NI LA
+  //   MEME UNITE. AVANT : `manque = PP.pic - d.presentChamp`.
+  //     · PP.pic  = le besoin de la SEMAINE DU PIC, quelque part dans l'exercice,
+  //                 en equivalents-personnes, equipes collectives PONDEREES.
+  //     · present = un COMPTAGE DE TETES d'AUJOURD'HUI, hors bureau, hors
+  //                 absents, ou une equipe de 40 vendangeurs pese 1.
+  //   Deux dates, deux unites, une soustraction — affichee en gros, en orange,
+  //   avec le mot ETP colle aux deux. Mesure du 12/08 : « 46,3 ETP au pic » moins
+  //   « 2 ETP presents » = « manque 44,3 ETP » sur un domaine de 4 personnes.
+  //   Le manque se lit desormais SUR LA SEMAINE DU PIC, contre l'effectif prevu
+  //   CETTE SEMAINE-LA (PP.manque, deja calcule par _pilPicPortee, source unique).
+  //   La presence du jour reste affichee — sous son propre nom, sans unite ETP.
+  var req=PP.pic||0, prevu=PP.head||0, manque=PP.manque||0;
+  var pCouv=req>0?Math.min(prevu/req*100,100):100;
   var cadre=_pilCadreLbl(PP), sem=PP.picW?_pilSemLabO(PP.picW.o0):'';
-  var body='<div style="display:flex;justify-content:space-between;font-size:12.5px;margin-bottom:3px"><span>Effectif présent à la vigne</span><b>'+present+' ETP</b></div>'
-    +'<div class="pil-gbar"><i style="width:'+pPres.toFixed(0)+'%;background:var(--vert-med)"></i></div>'
-    +'<div style="display:flex;justify-content:space-between;font-size:12.5px;margin:11px 0 3px"><span>ETP requis au pic sur '+_pilEsc(cadre)+(sem?(' \u00b7 '+_pilEsc(sem)):'')+'</span><b style="color:var(--orange)">'+_pilEtpFmt(req)+' ETP</b></div>'
+  var body='<div style="display:flex;justify-content:space-between;font-size:12.5px;margin-bottom:3px"><span>Prévu au planning '+(sem?_pilEsc(sem):'la semaine du pic')+'</span><b>'+_pilEtpFmt(prevu)+' pers.</b></div>'
+    +'<div class="pil-gbar"><i style="width:'+pCouv.toFixed(0)+'%;background:var(--vert-med)"></i></div>'
+    +'<div style="display:flex;justify-content:space-between;font-size:12.5px;margin:11px 0 3px"><span>Nécessaire cette semaine-là · pic sur '+_pilEsc(cadre)+'</span><b style="color:var(--orange)">'+_pilEtpFmt(req)+' pers.</b></div>'
     +'<div class="pil-gbar"><i style="width:100%;background:var(--orange)"></i></div>'
-    // ★ L'effectif de la SEMAINE DU PIC est le seul comparable au besoin de
-    //   cette semaine-la. Le present du jour, lui, repond a une autre question :
-    //   les deux sont affiches, chacun sous son nom.
-    +(PP.picW?('<div class="pil-li-s" style="margin-top:8px">Cette semaine-là, <b>'+_pilEtpFmt(PP.head)+'</b> personne'+(PP.head>1.05?'s':'')+' sont prévues au planning.</div>'):'')
-    +'<div class="pil-li-s" style="margin-top:10px">'+(manque>0.1?('Manque \u2248 <b style="color:var(--orange)">'+_pilEtpFmt(manque)+' ETP</b> au pic de charge. Options : renfort saisonnier, décaler une tâche, ou repousser l\'objectif (voir Simulateur).'):'Effectif suffisant pour le pic de charge sur '+_pilEsc(cadre)+'.')+'</div>';
-  var sub='présent : '+present+(cd?(' · cible moyenne '+_pilEsc(cd.saison)+' : '+_pilEtpFmt(cd.etpCible||0)+' ETP'):'');
-  return _pilTile('capacite','\u2696\uFE0F','#C9A84C','Capacité vs charge · '+cadre, _pilStat(_pilEtpFmt(req),' ETP au pic'), sub, null, body);
+    +'<div class="pil-li-s" style="margin-top:10px">'+(manque>0.1?('Il manque \u2248 <b style="color:var(--orange)">'+_pilEtpFmt(manque)+' personne'+(manque>1.05?'s':'')+'</b> cette semaine-là. Options : renfort saisonnier, décaler une tâche, ou repousser l\'objectif (voir Simulateur).'):'Effectif suffisant pour le pic de charge sur '+_pilEsc(cadre)+'.')+'</div>'
+    // ★ AUJOURD'HUI EST UNE AUTRE QUESTION, ET ELLE A SON PROPRE ENCART. Le pic
+    //   peut tomber dans onze mois : comparer la presence du jour a ce besoin-la
+    //   n'apprend rien, et le faire en silence donne un chiffre faux.
+    +'<div class="pil-li-s" style="margin-top:9px;color:var(--texte-doux)">Aujourd\u2019hui : <b>'+present+'</b> personne'+(present>1?'s':'')+' au champ (hors bureau et hors absents). Un comptage de têtes, pas un ETP.</div>'
+    +(cd?('<div class="pil-li-s" style="margin-top:4px;color:var(--texte-doux)">Moyenne sur '+_pilEsc(cd.saison)+' : <b>'+_pilEtpFmt(cd.etpCible||0)+'</b> pers. — c\u2019est une <b>autre fenêtre</b> que le pic ci-dessus.</div>'):'');
+  var sub='pic sur '+cadre+(sem?(' \u00b7 '+sem):'');
+  return _pilTile('capacite','\u2696\uFE0F','#C9A84C','Capacité vs charge · '+cadre, _pilStat(_pilEtpFmt(req),' pers. au pic'), sub, null, body);
 }
 function _pilTabPrs(d){
   var H='<div class="pil-panels">';
@@ -7845,7 +7917,15 @@ function _pilParamBody(d){
   var rows=cd.taskWindows.map(function(t){
     var dis=admin?'':' disabled';
     var key=_friseNorm(t.nom);
-    var tag=t.custom?'<span style="font-size:10px;color:var(--orange);font-weight:700">\u2022 perso</span>':'<span style="font-size:10px;color:var(--texte-doux)">auto</span>';
+    // ★ TROISIEME ETAT, ET IL COMPTE : une consigne de fenetre a bien ete
+    //   enregistree pour cette tache, mais ses dates ne rencontrent PAS cette
+    //   periode (echeance d'une autre campagne, ou override global a dates
+    //   absolues applique a toutes les periodes). Le calcul retombe sur la
+    //   fenetre par defaut — et il le DIT, au lieu de laisser croire que la
+    //   consigne s'applique.
+    var tag=t.horsPeriode
+      ? '<span style="font-size:10px;color:#9B2D1F;font-weight:700" title="Une fen\u00eatre est enregistr\u00e9e pour cette t\u00e2che, mais ses dates sont hors de cette p\u00e9riode. La fen\u00eatre par d\u00e9faut est appliqu\u00e9e.">\u26a0 hors p\u00e9riode</span>'
+      : (t.custom?'<span style="font-size:10px;color:var(--orange);font-weight:700">\u2022 perso</span>':'<span style="font-size:10px;color:var(--texte-doux)">auto</span>');
     var inCss='border:1px solid var(--gris);border-radius:7px;padding:3px 5px;font-family:Outfit;font-size:12.5px;background:#fff';
     var nCss='width:58px;text-align:center;border:1px solid var(--gris);border-radius:7px;padding:3px 0;font-family:Outfit;font-size:13px;background:#fff';
     return '<tr>'
