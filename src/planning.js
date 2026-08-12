@@ -949,6 +949,30 @@ function _chargeSaisonData(s){
     });
     return sum;
   }
+  // ★★★ COMBIEN DE CORPS DANS LES RANGS, AU PLUS FORT DE LA SEMAINE.
+  //   head est un effectif LISSE : chaque fiche y pese ses jours sous contrat
+  //   divises par les jours de la semaine. C'est juste pour une COURBE, et faux
+  //   pour une TOURNEE. Mesure du 12/08 : 40 vendangeurs engages du 26 aout au
+  //   4 septembre tombent a 28,6 sur la semaine du 24 aout — parce que leur
+  //   contrat ne commence pas un lundi. Personne ne travaille a 28,6 : ce jour-la
+  //   il y a 40 personnes dans les rangs, ou il n'y en a aucune.
+  //   headMax repond a « combien de personnes au plus fort de la semaine ». Il
+  //   sert a dimensionner un ordre de passage et une repartition de taches ;
+  //   head reste la courbe. Meme boucle, meme poids _mvEffDef, meme
+  //   _inContractDay : une seule definition de « etre la ce jour-la ».
+  function _headDayMax(o0,o1){
+    var mx=0;
+    for(var o=o0;o<=o1;o++){
+      var ds=_ford(o), s=0;
+      mbrs.forEach(function(mb){
+        if(!_inContractDay(mb,ds)) return;
+        s+=(window._mvEstCollectif&&window._mvEstCollectif(mb)&&typeof window._mvEffDef==='function')
+             ? window._mvEffDef(mb) : 1;
+      });
+      if(s>mx) mx=s;
+    }
+    return mx;
+  }
   // ══ CAPACITE HEBDOMADAIRE REELLE ══════════════════════════════════════════
   // _capDaysOrd ne connait qu'UN modele, « standard », applique a tout le monde.
   // Ici on descend au salarie et au jour :
@@ -1007,7 +1031,7 @@ function _chargeSaisonData(s){
     var wcap=_capDaysOrd(wo0,wo1);
     var wm=new Date(Date.parse('2026-01-01T00:00:00')+(wo0+3)*86400000).getMonth();
     var wreal=_capWeekReal(wo0,wo1);
-    weeks.push({o0:wo0,o1:wo1,nd:(wo1-wo0+1),m:wm,hours:wh,cap:wcap,need:wcap>0?wh/wcap:0,head:_headWeek(wo0,wo1),headPerm:_headWeek(wo0,wo1,true),
+    weeks.push({o0:wo0,o1:wo1,nd:(wo1-wo0+1),m:wm,hours:wh,cap:wcap,need:wcap>0?wh/wcap:0,head:_headWeek(wo0,wo1),headPerm:_headWeek(wo0,wo1,true),headMax:_headDayMax(wo0,wo1),
                 capH:wreal?wreal.work:null, capPay:wreal?wreal.pay:null,
                 capHPerm:wreal?wreal.workPerm:null, capPayPerm:wreal?wreal.payPerm:null});
   }
@@ -1025,6 +1049,7 @@ function _chargeSaisonData(s){
     _p.hours+=_q.hours; _p.cap+=_q.cap;
     _p.need=_p.cap>0?_p.hours/_p.cap:0;
     _p.head=_headWeek(_p.o0,_p.o1); _p.headPerm=_headWeek(_p.o0,_p.o1,true);
+    _p.headMax=_headDayMax(_p.o0,_p.o1);
     var _wr=_capWeekReal(_p.o0,_p.o1);
     _p.capH=_wr?_wr.work:null; _p.capPay=_wr?_wr.pay:null;
     _p.capHPerm=_wr?_wr.workPerm:null; _p.capPayPerm=_wr?_wr.payPerm:null;

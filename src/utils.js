@@ -23,7 +23,7 @@ export const GT_ADMIN_EMAIL = 'ngdevpro@gmail.com';
 // WHATS_NEW   : tableau vide = modal desactive pour cette version.
 // Format item : { emoji:'📅', titre:'Titre court', desc:'Phrase utilisateur.' }
 // Regle : seulement les changements visibles par les utilisateurs.
-export const APP_VERSION = '6.04';
+export const APP_VERSION = '6.05';
 // ════ Journal des nouveautés (récap cumulatif) ════
 // Une entrée par version, la PLUS RÉCENTE EN HAUT : { v:'5.10', items:[ {emoji,titre,desc}, … ] }
 // À chaque release visible → AJOUTER un bloc en tête (ne pas remplacer). items:[] = release technique (rien à afficher).
@@ -354,6 +354,22 @@ window._mvGraphRepeindre = function(){
 };
 
 export const WHATS_NEW = [
+  { v:'6.05', items:[
+    { emoji: '\u{1F465}', titre: "L\u2019ordre de passage comptait UNE personne pour un chantier \u00e0 quarante",
+      desc: "Simuler lisait l\u2019effectif <b>d\u2019aujourd\u2019hui</b>. Un contrat de groupe qui d\u00e9marre dans quinze jours n\u2019existait donc pas, et un cong\u00e9 du jour retirait quelqu\u2019un d\u2019un chantier qui commence en septembre. La tourn\u00e9e envoy\u00e9e aux ouvriers \u00e9tait d\u00e9coup\u00e9e pour une personne. L\u2019effectif se lit maintenant sur la <b>fen\u00eatre du travail</b>\u202f: le jour de la vendange, personne n\u2019est en cong\u00e9 et tous les contrats courent. L\u2019\u00e9cran affiche sur quelles dates il a compt\u00e9, et l\u2019\u00e9cart avec la pr\u00e9sence du jour." },
+    { emoji: '\u{1F4C5}', titre: "Les dates du Pilotage \u00e9taient d\u00e9cal\u00e9es d\u2019un jour",
+      desc: "Une campagne du 1\u1d49\u02b3 avril au 31 juillet s\u2019affichait \u00ab\u202fdu 31 mars au 30 juillet\u202f\u00bb, le pic tombait \u00ab\u202fsemaine du 31 mars\u202f\u00bb pour la semaine du 1\u1d49\u02b3 avril, et les fen\u00eatres de travaux reculaient pareil. Les calculs \u00e9taient bons\u202f: <b>toutes les dates \u00e9crites</b> \u00e9taient fausses. Corrig\u00e9 partout, en une seule fois." },
+    { emoji: '\u{2696}\u{FE0F}', titre: "Un pic \u00e0 46 personnes sur un domaine qui en emploie deux",
+      desc: "Quand une fen\u00eatre de travail enregistr\u00e9e ne tombait pas dans la p\u00e9riode consult\u00e9e, <b>toutes ses heures s\u2019\u00e9crasaient sur un seul jour</b> \u2014 d\u2019o\u00f9 un pic \u00e9norme, port\u00e9 par une barre large d\u2019un pixel, qui \u00e9crasait l\u2019\u00e9chelle des 52 semaines. La fen\u00eatre par d\u00e9faut s\u2019applique d\u00e9sormais \u00e0 la place, et le tableau des fen\u00eatres (Outils \u203a Param\u00e9trage) marque la ligne <b>\u26a0 hors p\u00e9riode</b> au lieu de se taire." },
+    { emoji: '\u{1F4CF}', titre: "\u00ab\u202fIl manque 44 ETP\u202f\u00bb\u202f: deux chiffres qui n\u2019allaient pas ensemble",
+      desc: "Le besoin de la semaine la plus charg\u00e9e \u00e9tait compar\u00e9 \u00e0 la <b>pr\u00e9sence d\u2019aujourd\u2019hui</b>. Deux dates, deux fa\u00e7ons de compter. Le manque se lit maintenant sur la semaine du pic, contre ce qui est pr\u00e9vu au planning <b>cette semaine-l\u00e0</b>\u202f; la pr\u00e9sence du jour est affich\u00e9e \u00e0 part, sous son propre nom." },
+    { emoji: '\u{1F4CA}', titre: "Le graphe du renfort plafonnait le manque \u00e0 quatre",
+      desc: "Une semaine \u00e0 qui il manquait quarante personnes se dessinait comme une semaine \u00e0 qui il en manquait quatre \u2014 d\u2019o\u00f9 ces plateaux parfaitement plats qui n\u2019existaient pas dans les donn\u00e9es. Le plafond est retir\u00e9, l\u2019axe monte avec le manque. Et les propositions qui co\u00fbtent plus cher que de tenir toute la campagne ne vous sont plus pr\u00e9sent\u00e9es." },
+    { emoji: '\u{1F4C6}', titre: "\u00ab\u202fFin le 25 avril\u202f\u00bb s\u2019arr\u00eatait le 24",
+      desc: "La derni\u00e8re journ\u00e9e de chaque fen\u00eatre de travail ne recevait aucune heure, y compris le dernier jour de la p\u00e9riode elle-m\u00eame. Elle travaille maintenant\u202f: les dates affich\u00e9es n\u2019ont pas boug\u00e9, c\u2019est le calcul qui a gagn\u00e9 le jour. Au passage, les heures se r\u00e9partissent d\u00e9sormais partout au prorata des jours <b>travaillables</b>\u202f: une semaine de ponts en re\u00e7oit moins, les semaines pleines r\u00e9cup\u00e8rent le reste." },
+    { emoji: '\u{1F53A}', titre: "Deux p\u00e9riodes qui se recouvrent, deux barres au m\u00eame endroit",
+      desc: "Rien n\u2019est compt\u00e9 deux fois \u2014 les heures suivent les t\u00e2ches, et une t\u00e2che n\u2019appartient qu\u2019\u00e0 une seule p\u00e9riode. Mais sur les jours partag\u00e9s, la frise dessinait deux barres l\u2019une sur l\u2019autre sans le dire. Ces jours sont maintenant <b>hachur\u00e9s en violet</b>, avec une trame diff\u00e9rente de celle des trous de calendrier." },
+  ] },
   { v:'6.04', items:[
     { emoji: '\u{23F1}\u{FE0F}', titre: "\u00ab\u202fO\u00f9 va le temps de l\u2019\u00e9quipe\u202f\u00bb est pass\u00e9 dans \u00ab\u202fLa campagne\u202f\u00bb",
       desc: "La r\u00e9partition du temps, la frise pr\u00e9vu/r\u00e9el, la courbe par semaine et l\u2019\u00e9cart parlent tous d\u2019<b>une campagne</b>. Ils \u00e9taient rang\u00e9s dans \u00ab\u202fL\u2019ann\u00e9e\u202f\u00bb, sous un bandeau qui expliquait qu\u2019ils d\u00e9taillaient en fait une campagne. Un bandeau qui explique pourquoi un bloc est au mauvais endroit ne le d\u00e9place pas\u202f: ils sont maintenant dans \u00ab\u202fLa campagne\u202f\u00bb, et le bandeau a disparu avec eux. \u00ab\u202fL\u2019ann\u00e9e\u202f\u00bb garde ce qui la regarde\u202f: les 52 semaines de l\u2019exercice et le pic." },
@@ -1668,8 +1684,13 @@ var MV_AIDE = {
       ['Le bouton « à compléter »', "liste ce qui manque pour que vos chiffres soient justes, et vous emmène à l’endroit exact où le renseigner. Un rond rouge sur un chiffre veut dire qu’il ne se calcule pas ; un rond orange, qu’il sort mais faux."],
       ['Les onglets vont du large au fin', ": l’année, puis la campagne, puis l’équipe et les tâches, puis la simulation. Après le trait, ce sont des écrans de détail — on y arrive aussi en touchant un des quatre chiffres."],
       ['La campagne', "montre l’avancement, mais aussi — sous « Où va le temps de l’équipe » — comment la présence se partage entre vigne, tracteur et le reste, avec la frise prévu/réel, la courbe par semaine et l’écart. Ces blocs parlent d’une campagne ; le pic de la semaine la plus chargée, lui, se lit dans « L’année »."],
-      ['Deux périodes qui se chevauchent', "ne comptent rien deux fois : les heures suivent les tâches, et une tâche n’appartient qu’à une seule période. Sur les jours communs, ce sont les bandes du calendrier qui se superposent, pas la charge."],
+      ['Deux périodes qui se chevauchent', "ne comptent rien deux fois : les heures suivent les tâches, et une tâche n’appartient qu’à une seule période. Sur les jours communs, la frise hachure le fond en violet — il y a deux barres au même endroit, on lit la plus haute."],
+      ['Une fenêtre de tâche s’arrête le jour écrit', " : fin au 25 avril, le 25 travaille. Et les heures se répartissent au prorata des jours <b>travaillables</b> : une semaine de ponts en reçoit moins, les semaines pleines récupèrent le reste."],
+      ['Le marqueur « hors période »', "dans Outils › Paramétrage veut dire qu’une fenêtre enregistrée ne tombe pas dans cette période. La fenêtre par défaut s’applique à la place, et l’écran le dit au lieu d’écraser tout le travail sur un seul jour."],
       ['Simuler', "répond à deux questions : dans quel ordre passer sur les parcelles, et combien de renfort prendre — à quelle date, et pour quel coût. La simulation part de l’effectif <b>déjà sous contrat</b>, vendangeurs compris : le renfort que vous posez s’ajoute à cette ligne. Le sélecteur « On part de » permet de repasser aux permanents seuls pour préparer la campagne suivante."],
+      ['Simuler compte sur la fenêtre du TRAVAIL', ", pas sur le calendrier d’aujourd’hui. Quarante vendangeurs engagés du 26 août au 4 septembre comptent dès maintenant pour l’ordre de passage et la répartition de la vendange — même si vous êtes seul dans les rangs ce matin. Le jour du travail, personne n’est en congé et tous les contrats courent."],
+      ['Un contrat de groupe compte pour son effectif', " : une fiche « équipe de vendange » à 40 vaut 40 personnes, pas une ligne. Inutile de créer quarante fiches. L’écran dit toujours sur quelles dates il a compté, et affiche l’écart avec la présence du jour."],
+      ['Le manque d’effectif se lit sur la semaine du pic', ", contre ce qui est prévu au planning <b>cette semaine-là</b> — pas contre la présence d’aujourd’hui. Un pic qui tombe dans onze mois ne se compare pas à qui est là ce matin."],
       ['Économie', "compare un budget de barème à ce qui est engagé. Quand l’écart est grand, c’est le barème qu’on corrige dans Réglages, jamais le taux horaire."],
       ['Conformité', "suit le cuivre sur sept ans, le nombre de passages et les délais de rentrée en cours."],
       ['Cave', "dit ce qui presse aujourd’hui, où en est le millésime, et ce que coûte le parc à fûts."],

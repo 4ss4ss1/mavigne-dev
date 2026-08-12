@@ -1,4 +1,36 @@
-// MA VIGNE — Service Worker v6.54
+// MA VIGNE — Service Worker v6.55
+// v6.55 (12/08/2026) — Pilotage : COHERENCE. Huit lots, mesures sur le code.
+//   ① TOUTES les dates du module reculaient d'un jour : epoque LOCALE relue
+//     avec des accesseurs UTC. 1 avr -> 31 juil s'affichait 31 mars -> 30 juil.
+//     Un inverse unique, _pilOrdD / _pilOrdIso, meme base que _ford.
+//   ② LE PIC A 46,3. Fenetre de tache dont les dates ne rencontrent pas la
+//     periode : rabotee sans test de recouvrement -> ws=we -> UN JOUR, toutes
+//     les heures dessus. CONFIG.task_windows est un override GLOBAL a dates
+//     ABSOLUES applique a CHAQUE periode. Repli sur la fenetre par defaut +
+//     drapeau horsPeriode. Et le moignon de semaine de fin est fondu.
+//   ③ CAPACITE VS CHARGE : PP.pic moins presentChamp (tetes d'AUJOURD'HUI).
+//     Deux dates, deux unites. Le manque vient de PP.manque.
+//   ④ GRAPHE RENFORT : Math.min(att,4) -> plateau a 6,0 absent des donnees.
+//     Plafond retire, rouge empile au sommet reel, ligne en equivalents-personnes.
+//   ⑤ STRATEGIES : une proposition ciblee plus chere que la solution globale
+//     est retiree (« Accolage 26 pers. » a cote de « 7 sur toute la periode »).
+//   ⑥ FIN INCLUSE + REGLE A. we = dernier jour + 1, affichage en we-1 : les
+//     dates montrees ne bougent pas. capCum sort de _chargeSaisonData, le
+//     simulateur le LIT : une seule regle d'etalement.
+//   ⑦★★★ L'EFFECTIF SE LIT SUR LA FENETRE DU TRAVAIL, PAS SUR AUJOURD'HUI.
+//     Le lot 6.54 ponderait les equipes collectives et ne changeait RIEN a
+//     l'ecran : d.membres vient de _pilMembresActifs, qui filtre sur
+//     _mvEnContratLe(m, AUJOURD'HUI). 40 vendangeurs sous CONTRAT DE GROUPE du
+//     26 aout au 4 septembre n'existent pas le 12 aout — la fiche n'atteignait
+//     meme pas la ponderation. « EFFECTIF 1 » sur un ordre de passage ENVOYE
+//     aux ouvriers. _pilEffFenetre / _pilFenTaches / _pilEffTaches lisent la
+//     fenetre des taches cochees. _pilEffSemaine supprimee (C15).
+//   ⑧ headMax : head est LISSE sur la semaine — 40 vendangeurs demarrant un
+//     mercredi y valent 28,6. Personne ne travaille a 28,6. _headDayMax donne
+//     le nombre de corps au plus fort de la semaine ; head reste la courbe.
+//   ➕ Zone partagee par deux periodes hachuree (trame opposee aux trous).
+//     Guide 11-pilotage, MV_AIDE.pilotage et WHATS_NEW repris dans CE lot.
+//   ⚠ Contre-epreuve : 40 defauts reinjectes un par un, 40 attrapes.
 // v6.54 (12/08/2026) — Pilotage : LES CINQ RETOURS.
 //   ① Le temps de l'equipe change de NIVEAU. Repartition, frise prevu/reel,
 //     courbe par semaine et ecart parlent d'UNE campagne ; ils etaient dans
@@ -1017,7 +1049,7 @@
 // v2.22 — Fix profils vides : guard vide dans loadData() pour MEMBRES/SAISONS/TACHES
 // v2.17 — Onboarding intégré + tenantId · v2.06 — Firebase Auth · v2.00–v2.05 — divers
 const DEBUG = self.location.hostname === 'localhost' || self.location.hostname === '127.0.0.1';
-const CACHE_NAME   = 'mavigne-v6.54';
+const CACHE_NAME   = 'mavigne-v6.55';
 const TENANT_CACHE = 'mavigne-tenant';   // Cache persistant — préservé à chaque mise à jour SW
 const SYNC_TAG     = 'mavigne-sync';
 
@@ -1033,7 +1065,7 @@ const CDN_URLS = [
 ];
 
 self.addEventListener('install', event => {
-  if(DEBUG) console.log('[SW] Ma Vigne v6.54 installé');
+  if(DEBUG) console.log('[SW] Ma Vigne v6.55 installé');
   event.waitUntil(
     caches.open(CACHE_NAME).then(async cache => {
       // ── Cœur applicatif : STRICT (mise à jour ATOMIQUE) ──
@@ -1049,7 +1081,7 @@ self.addEventListener('install', event => {
 });
 
 self.addEventListener('activate', event => {
-  if(DEBUG) console.log('[SW] Ma Vigne v6.54 activé');
+  if(DEBUG) console.log('[SW] Ma Vigne v6.55 activé');
   event.waitUntil(
     caches.keys().then(keys =>
       Promise.all(

@@ -1005,7 +1005,8 @@ function _pilAnnuelData(){
       //   puis JETEE ici. C'est pourtant la seule mesure qui sache qu'une
       //   embauche commence le 26 aout — la projection de fin la lit desormais.
       out.weeks.push({o0:w.o0,o1:w.o1,m:w.m,cap:w.cap||0,need:w.need||0,
-        head:w.head||0,headPerm:w.headPerm||0,capH:(w.capH!=null?w.capH:null),per:i});
+        head:w.head||0,headPerm:w.headPerm||0,headMax:(w.headMax!=null?w.headMax:(w.head||0)),
+        capH:(w.capH!=null?w.capH:null),per:i});
     });
   });
   out.weeks.sort(function(a,b){ return a.o0-b.o0; });
@@ -1167,19 +1168,68 @@ function _pilPicPortee(){
 //   un second chiffre, et c'est exactement la faute que ce module repare.
 //   null quand aujourd'hui ne tombe dans aucune periode : un trou n'est pas un
 //   zero, et un zero est une mesure.
-function _pilEffSemaine(){
+// \u2605\u2605\u2605 SUR QUELLE FENETRE ? CELLE DU TRAVAIL.
+//   \u26a0\u26a0 CORRECTION DE FOND (12/08/2026, retour de Nico, capture a l'appui).
+//   Le lot precedent ponderait bien les equipes collectives \u2014 et ne changeait
+//   RIEN a l'ecran, parce qu'il lisait AUJOURD'HUI. Or `d.membres` vient de
+//   _pilMembresActifs, qui filtre sur _mvEnContratLe(m, AUJOURD'HUI) : une
+//   equipe de 40 vendangeurs sous CONTRAT DE GROUPE du 26 aout au 4 septembre
+//   n'existe pas le 12 aout. La fiche n'arrivait meme pas jusqu'a la ponderation.
+//   Resultat a l'ecran : \u00ab EFFECTIF 1 \u00bb sur un ordre de passage de vendange que
+//   Nico envoie ensuite aux ouvriers, et une repartition qui partage 154 j-homme
+//   entre une seule paire de bras.
+//   \u2605 LA VRAIE QUESTION N'EST PAS \u00ab qui est la ce matin \u00bb MAIS \u00ab qui sera la
+//   QUAND LE TRAVAIL SE FERA \u00bb. Le jour de la vendange, personne n'est en conge
+//   et tous les contrats courent. Un ordre de passage calcule sur l'effectif du
+//   12 aout est faux le 26.
+//   Source : w.head des semaines couvertes \u2014 la MEME que la frise annuelle et le
+//   simulateur de renfort. _chargeSaisonData retient les fiches dont un contrat
+//   RECOUPE la periode (_mvEnContratSurPeriode), puis _headWeek compte jour par
+//   jour avec le poids _mvEffDef. Aucun calcul neuf : un second calcul donnerait
+//   un second chiffre.
+//   \u26a0 On retient le MAXIMUM des semaines couvertes, pas la moyenne : une
+//   vendange de 40 personnes sur deux semaines noyee dans un mois de calme
+//   rendrait 12, un chiffre qui n'existe aucun jour de l'annee (\u00a733).
+function _pilEffFenetre(iso0,iso1){
   var ann=null; try{ ann=_pilAnnuelData(); }catch(e){ ann=null; }
   if(!ann||!ann.weeks||!ann.weeks.length) return null;
-  var tIso=(typeof window._mvAujIso==='function')?window._mvAujIso():null;
-  if(!tIso) return null;
-  var o=_pilAnnOrd(tIso); if(isNaN(o)) return null;
+  var a=_pilAnnOrd(iso0), b=_pilAnnOrd(iso1||iso0);
+  if(isNaN(a)||isNaN(b)) return null;
+  if(b<a){ var t=a; a=b; b=t; }
   var best=null;
   ann.weeks.forEach(function(w){
-    if(w.o0>o||w.o1<o) return;
-    if(best===null||(w.head||0)>best) best=(w.head||0);
+    if(w.o1<a||w.o0>b) return;
+    // ⚠ headMax, pas head. head est lisse sur la semaine : un contrat de groupe
+    //   qui demarre un mercredi y vaut 5/7 de son effectif. Personne ne travaille
+    //   a 28,6 — ce jour-la il y a 40 personnes dans les rangs, ou aucune.
+    var h=(w.headMax!=null?w.headMax:(w.head||0));
+    if(best===null||h>best) best=h;
   });
   return best;
 }
+// Fenetre COMMUNE d'une liste de taches, lue dans cd.taskWindows (les memes
+// dates que le tableau Outils \u203a Param\u00e9trage). null si aucune tache reconnue :
+// une fenetre inventee vaudrait moins que pas de fenetre.
+function _pilFenTaches(noms){
+  var cd=_pilCdVue(); if(!cd||!cd.taskWindows||!cd.taskWindows.length) return null;
+  var set={}; (noms||[]).forEach(function(n){ set[_friseNorm(n)]=1; });
+  var d0=null,d1=null;
+  cd.taskWindows.forEach(function(t){
+    if(!set[_friseNorm(t.nom)]) return;
+    if(!d0||t.start<d0) d0=t.start;
+    if(!d1||t.end>d1)   d1=t.end;
+  });
+  return (d0&&d1)?{d0:d0,d1:d1}:null;
+}
+// Effectif sous contrat PENDANT ces taches. Rend aussi la fenetre, pour que
+// l'ecran puisse dire SUR QUOI il a compte — un nombre sans ses dates est une
+// opinion.
+function _pilEffTaches(noms){
+  var f=_pilFenTaches(noms); if(!f) return null;
+  var e=_pilEffFenetre(f.d0,f.d1);
+  return (e==null)?null:{eff:e,d0:f.d0,d1:f.d1};
+}
+function _pilFenLbl(f){ return f?(_pilFmtD(f.d0)+' \u2192 '+_pilFmtD(f.d1)):''; }
 // Le libelle du cadre, ecrit SOUS le chiffre. Un pic sans cadre est une opinion.
 function _pilCadreLbl(PP){
   if(!PP.annee) return PP.nom||'la campagne';
@@ -1865,13 +1915,27 @@ function _pilSimInitData(d){
   var nV=(d.membres||[]).reduce(function(a,m){
     return a + ((m&&!m.bureau)?((typeof window._mvEffDef==='function')?window._mvEffDef(m):1):0);
   },0);
-  var perH=(cadH>0&&nV>0)?(cadH/nV):0;
-  var present=(typeof d.presentChamp==='number')?d.presentChamp:nV;
-  var eSem=_pilEffSemaine();
+  // \u26a0 nMes est le DIVISEUR de la cadence mesuree : c'est l'equipe qui a PRODUIT
+  //   ces heures, pas celle qui viendra. Le remplacer par l'effectif futur
+  //   diviserait la cadence par 41 et rendrait chaque personne 41 fois plus lente.
+  var nMes=Math.max(1,nV);
+  var perH=(cadH>0)?(cadH/nMes):0;
+  var presentJour=(typeof d.presentChamp==='number')?d.presentChamp:nV;
+  // \u2605 LE POINT DE DEPART EST L'EFFECTIF SOUS CONTRAT PENDANT CES TRAVAUX.
+  //   Les taches restantes se feront dans les semaines qui viennent ; c'est la
+  //   qu'il faut compter, pas ce matin.
+  var et=_pilEffTaches(tasks.map(function(t){ return t.nom; }));
+  var base=(et&&et.eff>0.5)?Math.round(et.eff):presentJour;
+  if(!(base>0)) base=Math.max(1,presentJour);
   var tasks=(d.active||[]).filter(function(t){ return (t.h_reste||0)>0; }).sort(function(a,b){ return (b.h_reste||0)-(a.h_reste||0); }).map(function(t){ return {nom:t.nom,hreste:Math.round(t.h_reste||0),pct:t.pct||0}; });
-  _PIL_SIM_DATA={ tasks:tasks, cadH:cadH, nV:nV, present:present, perH:perH, indispo:(d.nIndispoChamp||0), indispoNoms:_pilIndispoNoms(d), eSem:eSem };
-  if(!_PIL_SIM || _PIL_SIM.alloc.length!==tasks.length || _PIL_SIM._present!==present){
-    _PIL_SIM={ alloc:_pilSimEven(tasks.length,present).slice(), pool:present, _present:present };
+  // nV nomme desormais l'equipe DE REFERENCE du panneau (celle qui fera le
+  // travail), pas le nombre de fiches presentes ce matin : c'est elle qui borne
+  // le curseur et qui sert de repere « equipe au complet ».
+  _PIL_SIM_DATA={ tasks:tasks, cadH:cadH, nV:base, nMes:nMes, present:base,
+                  presentJour:presentJour, perH:perH, indispo:(d.nIndispoChamp||0),
+                  indispoNoms:_pilIndispoNoms(d), fen:(et?{d0:et.d0,d1:et.d1}:null) };
+  if(!_PIL_SIM || _PIL_SIM.alloc.length!==tasks.length || _PIL_SIM._present!==base){
+    _PIL_SIM={ alloc:_pilSimEven(tasks.length,base).slice(), pool:base, _present:base };
   }
 }
 function _pilSimReset(){ if(_PIL_SIM_DATA){ _PIL_SIM={ alloc:_pilSimEven(_PIL_SIM_DATA.tasks.length,_PIL_SIM_DATA.present).slice(), pool:_PIL_SIM_DATA.present, _present:_PIL_SIM_DATA.present }; } }
@@ -1912,18 +1976,25 @@ function _pilSimBody(){
   var fin=(sDate?'~ '+sDate:'à l\'arrêt')+(sDelta!=null&&sDelta!==0?' <span style="font-size:11px;font-weight:700;color:'+(sDelta<0?'var(--vert-med)':'var(--rouge)')+'">('+(sDelta<0?(-sDelta+' j plus tôt'):('+'+sDelta+' j'))+')</span>':'');
   h+=stat('FIN DE SAISON', fin, 'var(--or)');
   h+='</div>';
-  h+='<div style="font-size:10px;color:var(--texte-doux);margin:-6px 0 12px">fin de saison \u00b7 r\u00e9f. \u00e9quipe au complet ('+D.nV+')'
+  h+='<div style="font-size:10px;color:var(--texte-doux);margin:-6px 0 12px">fin de saison \u00b7 r\u00e9f. '+(D.fen?'\u00e9quipe sous contrat':'\u00e9quipe au complet')+' ('+_pilEtpFmt(D.nV)+')'
     + (nArret>0?(' \u00b7 <b style="color:var(--rouge)">'+nArret+' t\u00e2che'+(nArret>1?'s':'')+' sans personne : la saison ne se termine pas</b>'):'')
     + (free>0?(' \u00b7 <b style="color:var(--orange)">'+free+' personne'+(free>1?'s':'')+' non affect\u00e9e'+(free>1?'s':'')+'</b>'):'')+'</div>';
-  var presLine=D.present+' présent'+(D.present>1?'s':'')+' aujourd\'hui';
-  if(D.indispo>0){ presLine+=' <span style="color:var(--rouge)">· −'+D.indispo+' indispo'+((D.indispoNoms&&D.indispoNoms.length)?' ('+_pilEsc(D.indispoNoms.join(', '))+')':'')+'</span>'; }
-  // \u2605 CE QUI EST DEJA SIGNE. Affiche seulement quand il DIFFERE de la presence
-  //   du jour : repeter le meme nombre sous deux noms fait croire a deux mesures.
-  if(D.eSem!=null && Math.abs(D.eSem-D.present)>0.05){
-    presLine+=' <span style="color:var(--texte-doux)">\u00b7 '+_pilEtpFmt(D.eSem)+' sous contrat cette semaine</span>';
+  // \u2605 LE NOMBRE, PUIS SUR QUOI IL A ETE COMPTE. Un effectif sans ses dates ne
+  //   se verifie pas — et c'est exactement ce qui a fait passer « 1 » pour une
+  //   mesure alors que quarante personnes etaient sous contrat pour la vendange.
+  var presLine;
+  if(D.fen){
+    presLine=_pilEtpFmt(D.present)+' sous contrat \u00b7 '+_pilEsc(_pilFenLbl(D.fen))
+      +' <span style="color:var(--texte-doux)">la fen\u00eatre de ces travaux</span>';
+    if(Math.abs((D.presentJour||0)-D.present)>0.5)
+      presLine+='<br><span style="color:var(--texte-doux)">aujourd\u2019hui : '+_pilEtpFmt(D.presentJour||0)
+        +' au champ \u2014 les cong\u00e9s et les contrats \u00e0 venir expliquent l\u2019\u00e9cart</span>';
+  } else {
+    presLine=_pilEtpFmt(D.present)+' pr\u00e9sent'+(D.present>1.05?'s':'')+' aujourd\'hui';
   }
+  if(D.indispo>0){ presLine+=' <span style="color:var(--rouge)">\u00b7 \u2212'+D.indispo+' indispo'+((D.indispoNoms&&D.indispoNoms.length)?' ('+_pilEsc(D.indispoNoms.join(', '))+')':'')+'</span>'; }
   var renfortDelta=pool-D.present;
-  var rdLab=renfortDelta>0?('+'+renfortDelta+' renfort'):(renfortDelta<0?(renfortDelta+' en moins'):'équipe du jour');
+  var rdLab=renfortDelta>0?('+'+renfortDelta+' renfort'):(renfortDelta<0?(renfortDelta+' en moins'):(D.fen?'\u00e9quipe sous contrat':'\u00e9quipe du jour'));
   var rdCol=renfortDelta>0?'var(--vert-med)':(renfortDelta<0?'var(--rouge)':'var(--texte-doux)');
   h+='<div style="border:1px solid var(--gris-clair);border-radius:11px;padding:11px 13px;margin-bottom:10px;background:rgba(201,168,76,.05)">'
     + '<div style="display:flex;align-items:center;justify-content:space-between;gap:10px">'
@@ -1943,10 +2014,10 @@ function _pilSimBody(){
       + '<div class="pil-li-r">'+_pilSimStepper('task',i,S.alloc[i],S.alloc[i]>0,free>0)+'</div></div>';
   });
   h+='</div>';
-  h+='<div style="font-size:11px;color:var(--texte-doux);line-height:1.5;margin-top:8px">L\'effectif part de l\'équipe <b>présente aujourd\'hui</b> (CP, maladie, absences et récup déduits) — une équipe collective y compte pour son <b>effectif inscrit au contrat</b>, pas pour une fiche. Monte pour un <b>renfort</b>, descends pour un <b>départ</b> · <b>répartir</b> change quelle tâche finit en premier.</div>';
+  h+='<div style="font-size:11px;color:var(--texte-doux);line-height:1.5;margin-top:8px">L\'effectif part de ce qui est <b>sous contrat pendant ces travaux</b>, pas de qui est l\u00e0 ce matin : un contrat de groupe qui d\u00e9marre dans quinze jours compte, et un cong\u00e9 d\'aujourd\'hui ne retire personne du chantier. Une \u00e9quipe collective y p\u00e8se son <b>effectif inscrit au contrat</b>, pas une fiche. Monte pour un <b>renfort</b>, descends pour un <b>d\u00e9part</b> \u00b7 <b>r\u00e9partir</b> change quelle t\u00e2che finit en premier.</div>';
   var even0=_pilSimEven(D.tasks.length,D.present);
   var touched=(pool!==D.present)||D.tasks.some(function(t,i){return S.alloc[i]!==even0[i];});
-  h+='<div style="margin-top:10px;display:flex;align-items:center;gap:10px"><button data-sim="reset" style="border:1px solid var(--gris-clair);background:transparent;color:var(--texte);cursor:pointer;border-radius:8px;padding:7px 14px;font-size:12px;font-weight:700'+(touched?'':';opacity:.55')+'">↺ Revenir à l\'équipe du jour</button><span style="font-size:11px;color:var(--texte-doux)">simulation — rien n\'est enregistré</span></div>';
+  h+='<div style="margin-top:10px;display:flex;align-items:center;gap:10px"><button data-sim="reset" style="border:1px solid var(--gris-clair);background:transparent;color:var(--texte);cursor:pointer;border-radius:8px;padding:7px 14px;font-size:12px;font-weight:700'+(touched?'':';opacity:.55')+'">↺ Revenir à l\'équipe '+(D.fen?'sous contrat':'du jour')+'</button><span style="font-size:11px;color:var(--texte-doux)">simulation — rien n\'est enregistré</span></div>';
   return h;
 }
 function _pilSimRefresh(){ var el=document.getElementById('pil-sim-body'); if(el) el.innerHTML=_pilSimBody(); }
@@ -1982,8 +2053,8 @@ var _PIL_OP=null, _PIL_OP_DATA=null;
 //   a l'aveugle.
 function _opEffNote(OP){
   if(!OP.effAuto) return 'r\u00e9gl\u00e9';
-  var e=_PIL_OP_DATA&&_PIL_OP_DATA.eSem;
-  if(e!=null && e>OP.eff+0.5) return 'pr\u00e9sents (auto) \u00b7 '+_pilEtpFmt(e)+' sous contrat';
+  var D=_PIL_OP_DATA;
+  if(D&&D.fen&&D.effFen!=null&&D.effFen>0.5) return 'sous contrat \u00b7 '+_pilFenLbl(D.fen);
   return 'pr\u00e9sents (auto)';
 }
 function _opCanEdit(){ return !!(typeof window.isAdmin==='function' && window.isAdmin()); }
@@ -2535,7 +2606,9 @@ function _pilOpAction(el){
   else if(!_opCanEdit()){ return; }
   else if(op==='task'){ var nm=el.getAttribute('data-nom'), i=_PIL_OP.tasks.indexOf(nm);
     if(i>=0){ if(_PIL_OP.tasks.length>1) _PIL_OP.tasks.splice(i,1); } else _PIL_OP.tasks.push(nm);
-    _PIL_OP.order=null; _PIL_OP._pick=null; }
+    _PIL_OP.order=null; _PIL_OP._pick=null;
+    // Changer de travail change la fenetre, donc l'effectif engage dessus.
+    _opEffAppliquer(); }
   else if(op==='sort'){ var mode=el.getAttribute('data-mode'), act=_opActTodo();
     _PIL_OP._pick=null;
     if(mode==='nn') _PIL_OP.order=_opNNNames(act);
@@ -2576,7 +2649,7 @@ function _opInit(d){
   var arr=(typeof window.getTachesSaison==='function')?window.getTachesSaison():(window.TACHES||[]);
   var tasks=arr.map(function(def){ var tot=_opParcActive().filter(function(p){return _opApplic(p,def);}).reduce(function(a,p){return a+_opParcReste(p,def);},0); return { def:def, nom:def.nom, tot:tot }; });
   var deflt=null; tasks.forEach(function(x){ if(!deflt||x.tot>deflt.tot) deflt=x; });
-  _PIL_OP_DATA={ present:present, eSem:_pilEffSemaine(), tasks:tasks, defaultTask:deflt?deflt.nom:((tasks[0]&&tasks[0].nom)||'') };
+  _PIL_OP_DATA={ present:present, tasks:tasks, defaultTask:deflt?deflt.nom:((tasks[0]&&tasks[0].nom)||'') };
   if(!_PIL_OP){ _PIL_OP={ tasks:[_PIL_OP_DATA.defaultTask].filter(Boolean), eff:Math.max(1,present), effAuto:true, jour:7, pause:45, trajet:5, _startNom:null, order:null, _pick:null }; }
   else { if(_PIL_OP.effAuto) _PIL_OP.eff=Math.max(1,present);
     // Un rendu COMPLET de l'onglet (changement d'onglet, rafra\u00eechissement de
@@ -2586,6 +2659,24 @@ function _opInit(d){
     var valid={}; tasks.forEach(function(x){valid[x.nom]=1;});
     _PIL_OP.tasks=(_PIL_OP.tasks||[]).filter(function(n){return valid[n];});
     if(!_PIL_OP.tasks.length) _PIL_OP.tasks=[_PIL_OP_DATA.defaultTask].filter(Boolean); }
+  _opEffAppliquer();
+}
+// \u2605\u2605\u2605 L'EFFECTIF DE LA TOURNEE EST CELUI DE LA FENETRE DU TRAVAIL.
+//   \u26a0 Cet ecran-la n'est pas qu'un indicateur : l'ordre de passage est
+//   ENREGISTRE et ENVOYE aux ouvriers. Une tournee decoupee pour UNE personne
+//   quand quarante seront dans les rangs ne se voit pas a l'ecran — elle se voit
+//   en bout de rang, le jour de la vendange.
+//   La fenetre suit LES TACHES COCHEES : cocher \u00ab Vendange \u00bb doit recompter sur
+//   le 26 aout, pas sur aujourd'hui. Appele a l'init ET a chaque changement de
+//   coche, tant que l'utilisateur n'a pas regle le compteur a la main (effAuto).
+function _opEffAppliquer(){
+  if(!_PIL_OP||!_PIL_OP_DATA) return;
+  var et=_pilEffTaches(_PIL_OP.tasks||[]);
+  _PIL_OP_DATA.fen=et?{d0:et.d0,d1:et.d1}:null;
+  _PIL_OP_DATA.effFen=et?et.eff:null;
+  if(!_PIL_OP.effAuto) return;
+  var v=(et&&et.eff>0.5)?Math.round(et.eff):_PIL_OP_DATA.present;
+  _PIL_OP.eff=Math.max(1,Math.round(v||1));
 }
 function _pilPanelOrdrePassage(d){
   _opInit(d);
