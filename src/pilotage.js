@@ -1921,13 +1921,18 @@ function _pilSimInitData(d){
   var nMes=Math.max(1,nV);
   var perH=(cadH>0)?(cadH/nMes):0;
   var presentJour=(typeof d.presentChamp==='number')?d.presentChamp:nV;
+  var tasks=(d.active||[]).filter(function(t){ return (t.h_reste||0)>0; }).sort(function(a,b){ return (b.h_reste||0)-(a.h_reste||0); }).map(function(t){ return {nom:t.nom,hreste:Math.round(t.h_reste||0),pct:t.pct||0}; });
   // \u2605 LE POINT DE DEPART EST L'EFFECTIF SOUS CONTRAT PENDANT CES TRAVAUX.
   //   Les taches restantes se feront dans les semaines qui viennent ; c'est la
   //   qu'il faut compter, pas ce matin.
+  // \u26a0\u26a0 CE BLOC DOIT RESTER APRES `var tasks`. Place avant, `tasks` vaut
+  //   undefined par hissage et `tasks.map` leve — l'onglet Decider rendait un
+  //   ecran BLANC avec \u00ab Cannot read properties of undefined (reading 'map') \u00bb.
+  //   Ni node --check ni le preflight ne voient ça : c'est une faute d'ORDRE, pas
+  //   de syntaxe. Seul un appel reel la revele (harnais fonctionnel, scenario 5).
   var et=_pilEffTaches(tasks.map(function(t){ return t.nom; }));
   var base=(et&&et.eff>0.5)?Math.round(et.eff):presentJour;
   if(!(base>0)) base=Math.max(1,presentJour);
-  var tasks=(d.active||[]).filter(function(t){ return (t.h_reste||0)>0; }).sort(function(a,b){ return (b.h_reste||0)-(a.h_reste||0); }).map(function(t){ return {nom:t.nom,hreste:Math.round(t.h_reste||0),pct:t.pct||0}; });
   // nV nomme desormais l'equipe DE REFERENCE du panneau (celle qui fera le
   // travail), pas le nombre de fiches presentes ce matin : c'est elle qui borne
   // le curseur et qui sert de repere « equipe au complet ».
