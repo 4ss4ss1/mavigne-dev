@@ -1,4 +1,39 @@
-// MA VIGNE — Service Worker v6.53
+// MA VIGNE — Service Worker v6.54
+// v6.54 (12/08/2026) — Pilotage : LES CINQ RETOURS.
+//   ① Le temps de l'equipe change de NIVEAU. Repartition, frise prevu/reel,
+//     courbe par semaine et ecart parlent d'UNE campagne ; ils etaient dans
+//     « L'annee » sous un bandeau qui s'en excusait. UN BANDEAU QUI EXPLIQUE
+//     POURQUOI UN BLOC EST AU MAUVAIS ENDROIT NE LE DEPLACE PAS. Nouveau
+//     _pilPanelTemps (cle avc_temps, tuile 'temps'), _pilPanelEtp reduit a la
+//     frise annuelle + le pic. Chip « Annee » retiree : une case qui vide son
+//     propre panneau n'est pas un reglage.
+//   ② Le chevauchement de periodes n'est plus un defaut. Le constat disait
+//     « les jours communs sont comptes deux fois » : FAUX. _chargeSaisonData
+//     calcule la charge sur les TACHES de la periode (s.taches), jamais sur ses
+//     jours. Constat retire de _pilDiag, banniere rouge remplacee par une note
+//     grise. NE PAS LE REINTRODUIRE sans avoir mesure un double comptage reel.
+//   ③ Le bareme se lit sur le BON CHAMP. Le constat « N taches sans bareme »
+//     testait t.h_ha, un champ qui n'existe sur AUCUNE tache (h_ha ne vit que
+//     sur TRAVAUX[] et sur les activites tracteur) : il se declenchait donc sur
+//     100 % des taches de la periode consultee. Nouveau _pilTacheHha, qui lit
+//     t.hha et comprend niveaux / passages / tariere. Meme famille que
+//     CONFIG.ecartRang (§34d) : un champ suppose, jamais verifie.
+//   ④ Le simulateur part des CONTRATS SIGNES. Le socle lisait toujours
+//     headPerm (collectifs exclus) : 34 vendangeurs deja sous contrat etaient
+//     invisibles et l'ecran reclamait 34 renforts pour une equipe embauchee,
+//     pendant que la frise annuelle (head) montrait la vendange couverte.
+//     Ce qui separe le socle du renfort n'est pas « permanent / saisonnier »
+//     mais « DEJA ENGAGE / ENCORE A DECIDER ». _RF_SEL.base ('eng' par defaut,
+//     'perm' au selecteur), head/capH/capPay au lieu des variantes *Perm.
+//     ctx.baseLbl/baseCourt = SOURCE UNIQUE du mot, lue par les 4 ecrans.
+//   ⑤ Plus deux fois le meme graphique. « deux graphes » se decidait sur
+//     nSkip>0 : des que la campagne avait commence, l'ecran dessinait deux fois
+//     le meme profil, seuls le voile gris et l'axe changeaient. Nouveau
+//     _rfMemeImage (travail fait / semaines ecartees chargees / fenetres
+//     deplacees), _rfPair rend deux fois le plan et pose `meme`.
+//   Accompagnement du meme lot : MV_AIDE.pilotage (2 lignes neuves + Simuler
+//   reecrit), guide/11-pilotage.html (3 blocs) + regeneration, 5 items
+//   WHATS_NEW. Contre-epreuve : 63 assertions, 14 defauts rejoues, tous rouges.
 // v6.53 (12/08/2026) — Pilotage : LE SIXIEME SELECTEUR, PURGE.
 //   La v6.00 avait fondu cinq selecteurs dans _PIL_SCOPE. Il en restait un,
 //   invisible parce qu'il ne ressemble pas a un selecteur : _pilSaison(), la
@@ -982,7 +1017,7 @@
 // v2.22 — Fix profils vides : guard vide dans loadData() pour MEMBRES/SAISONS/TACHES
 // v2.17 — Onboarding intégré + tenantId · v2.06 — Firebase Auth · v2.00–v2.05 — divers
 const DEBUG = self.location.hostname === 'localhost' || self.location.hostname === '127.0.0.1';
-const CACHE_NAME   = 'mavigne-v6.53';
+const CACHE_NAME   = 'mavigne-v6.54';
 const TENANT_CACHE = 'mavigne-tenant';   // Cache persistant — préservé à chaque mise à jour SW
 const SYNC_TAG     = 'mavigne-sync';
 
@@ -998,7 +1033,7 @@ const CDN_URLS = [
 ];
 
 self.addEventListener('install', event => {
-  if(DEBUG) console.log('[SW] Ma Vigne v6.53 installé');
+  if(DEBUG) console.log('[SW] Ma Vigne v6.54 installé');
   event.waitUntil(
     caches.open(CACHE_NAME).then(async cache => {
       // ── Cœur applicatif : STRICT (mise à jour ATOMIQUE) ──
@@ -1014,7 +1049,7 @@ self.addEventListener('install', event => {
 });
 
 self.addEventListener('activate', event => {
-  if(DEBUG) console.log('[SW] Ma Vigne v6.53 activé');
+  if(DEBUG) console.log('[SW] Ma Vigne v6.54 activé');
   event.waitUntil(
     caches.keys().then(keys =>
       Promise.all(

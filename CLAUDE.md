@@ -5015,3 +5015,124 @@ fonction. **Vérifier que le défaut a bien été injecté avant de conclure que
    par un filtre y sont **grisées, pas retirées** : un domaine qui perd 20 parcelles sans le dire
    est illisible. ⚠️ Les couleurs disent l'**avancement**, jamais un état sanitaire.
 4. ★ Purger les palettes désormais mortes et les `pil-empty` restants.
+
+## 35. ★★★ LES CINQ RETOURS DU 12/08 (soir — APP v6.04 · SW v6.54)
+
+Cinq remarques de Nico après une séance d'usage réel sur le Pilotage refondu (§34). **Quatre sur
+cinq étaient des bugs**, dont deux constats de diagnostic qui **accusaient les données du domaine
+d'une faute que le code commettait lui-même**.
+
+### 35a. Ce qu'il a dit, ce qu'il y avait dessous
+
+| Le retour, mot pour mot | La cause, mesurée sur le code |
+|---|---|
+| *« où va le temps de l'équipe et le graphe du dessous n'ont rien à faire dans l'année mais ils doivent être dans la campagne »* | `_pilPanelEtp` empilait **quatre blocs de campagne** dans le niveau ①, et s'en excusait par un bandeau |
+| *« le chevauchement… nous avons convenu que c'est normal… on compte les tâches et non les périodes »* | Le constat annonçait « les jours communs sont **comptés deux fois** ». **Faux** |
+| *« dans simuler ça ne prend pas en compte les effectifs inscrits au contrat »* | `_rfCtx` lisait **toujours** `headPerm` — collectifs exclus |
+| *« les 2 graph sont exactement les mêmes donc incompréhensibles »* | `deux` se décidait sur `nSkip>0`, pas sur le contenu |
+| *« la tâche inscrite sans barème, a bien un barème d'inscrit »* | Le test portait sur `t.h_ha`, **un champ qui n'existe sur aucune tâche** |
+
+### 35b. ★★★ UN BANDEAU QUI EXPLIQUE POURQUOI UN BLOC EST AU MAUVAIS ENDROIT NE LE DÉPLACE PAS
+
+Le lot 3 de §34 avait fait monter « Charge & ETP » vers le niveau ① — juste pour la frise des
+52 semaines, **faux pour les quatre blocs qui la suivaient** (répartition du temps, frise
+prévu/réel, courbe par semaine, écart). Le §34 lui-même l'avait senti et avait ajouté `noteCadre` :
+*« les blocs ci-dessous détaillent la campagne X »*.
+
+★★ **Une note qui documente une mauvaise place est un aveu, pas une correction.** Elle a survécu
+un jour. Scission : `_pilPanelEtp` (niveau ① : frise annuelle + pic) / **`_pilPanelTemps`**
+(niveau ② : les quatre blocs, clé `avc_temps`, tuile `temps`). Le bandeau a disparu **avec** eux —
+le titre nomme la campagne, il n'y a plus rien à excuser.
+
+★ **Chip « Année » retirée** : elle vidait le panneau qui la contenait. *Une case à cocher qui vide
+son propre panneau n'est pas un réglage, c'est une trappe.* Clé `etp_annee` purgée des défauts —
+pas de réglage mort.
+
+### 35c. ★★★ DEUX CONSTATS QUI ACCUSAIENT LE DOMAINE D'UNE FAUTE DU CODE
+
+**Le chevauchement.** Vérifié en deux lectures : `_chargeSaisonData` (planning.js) calcule la charge
+d'une période sur les tâches de **sa** liste (`s.taches`), **jamais sur ses jours**. Deux périodes
+qui partagent des dates ne partagent **aucune heure**. Le constat orange — « le chiffre sort, mais
+faux » — poussait donc à **redécouper des périodes justes pour faire taire une alerte fausse**.
+Retiré de `_pilDiag`, bannière rouge → note grise sous la frise. ⚠️ **Ne pas le réintroduire sans
+avoir d'abord mesuré un double comptage réel.**
+
+**Le barème.** `sansBar` filtrait sur `parseFloat(t.h_ha)`. **`h_ha` n'existe sur aucune tâche** :
+il ne vit que sur `TRAVAUX[]` (table calculée) et sur les activités tracteur (`a.h_ha`). Le champ
+d'une tâche est **`t.hha`**. Le test rendait donc `undefined` **pour tout le monde** — 100 % des
+tâches de la période consultée étaient déclarées « sans barème ». Sur une période à une seule tâche,
+ça sort « 1 tâche sans barème » : **plausible, et faux**. Nouveau `_pilTacheHha`, qui lit `t.hha`
+et comprend niveaux (somme), passages (`passagesHha[]`) et tarière (pas de h/ha à réclamer).
+
+> ★★★ **C'EST LA TROISIÈME FOIS EN DEUX JOURS.** `CONFIG.ecartRang` (§34d), puis trois signatures
+> supposées (§34d lot 2), maintenant `t.h_ha`. **Un champ jamais grepé contre le code qui l'écrit
+> est une supposition, pas une lecture.** Et les deux constats faux partageaient le même symptôme :
+> ils étaient **plausibles**, donc personne ne les a vérifiés.
+
+### 35d. ★★★ « DÉJÀ ENGAGÉ » N'EST PAS « PERMANENT »
+
+`_rfCtx` lisait toujours `headPerm` — l'effectif permanent, **équipes collectives exclues**.
+L'intention de planning.js était explicite et raisonnable : *« on ne raisonne pas un recrutement sur
+des vendangeurs »*. **Elle devient fausse dès que l'embauche est FAITE.** 34 vendangeurs déjà sous
+contrat du 17 août au 3 septembre n'existaient pas pour le simulateur, qui réclamait « 34 personnes
+de renfort à poser » pour une équipe déjà recrutée — **pendant que la frise annuelle, qui lit `head`,
+montrait la vendange couverte.** Le même module disait deux choses : la faute exacte de §33 et §34.
+
+★★★ **Ce qui sépare le socle du renfort n'est pas « permanent / saisonnier », c'est « DÉJÀ ENGAGÉ /
+ENCORE À DÉCIDER ». Un contrat signé ne se décide plus. Il se subit — et il se compte.**
+
+`_RF_SEL.base` : `'eng'` par défaut (`head`/`capH`/`capPay`), `'perm'` au sélecteur « On part de »
+— l'autre question, celle qui sert à **préparer la campagne suivante**. ⚠️ Le champ se traite
+**AVANT** le `parseInt` de `window._rfSel` : `'eng'` n'est pas un nombre, le garde `isFinite`
+l'avalait en silence. ★ `ctx.baseLbl`/`baseCourt` = **source unique du mot**, lue par les quatre
+écrans (graphe, tableau, sélecteur, corps) — six libellés à la main auraient divergé à la première
+retouche.
+
+### 35e. ★★ DEUX IMAGES IDENTIQUES SOUS DEUX TITRES DIFFÉRENTS
+
+`deux = ctx.nSkip>0 || …` : dès que la campagne avait commencé, l'écran dessinait **deux fois le
+même profil** — mêmes colonnes, même ligne d'effectif ; seuls le voile gris et la légende de l'axe
+changeaient. **Le lecteur cherche une différence qui n'existe pas.**
+
+`_rfMemeImage(P,R)` compare ce que l'œil verra : ① du travail a-t-il été fait, ② les semaines
+écartées portaient-elles du travail, ③ une fenêtre a-t-elle bougé. Le tri se fait **dans `_rfPair`**
+— un seul juge : quand l'image est la même, la paire rend **deux fois le plan** (son sélecteur
+couvre toute la campagne) et pose `meme`, que `_rfBody` lit pour **dire pourquoi** il n'y a qu'un
+graphe. ⚠️ **Honnêteté sur ce que mesurent ces tests** : ① et ② sont des **sorties anticipées** que
+③ attraperait déjà sur les données d'aujourd'hui — elles sont donc éprouvées sur le **contrat** de
+la fonction, faute de quoi les retirer ne rougirait nulle part.
+
+### 35f. La contre-épreuve, et les cinq assertions fausses qu'elle a trouvées
+
+**63 assertions vertes**, **14 défauts rejoués, tous rouges** (`mv-harnais-retours.mjs`). La
+première passe en a rendu **5 problématiques — 5 assertions fausses, 0 bug** :
+
+| Symptôme | Lequel des deux avait tort |
+|---|---|
+| « un seul appel à `_pilPanelTemps` » rouge | **l'assertion** : la **définition** ressemble à un appel (§34g, 3ᵉ fois) |
+| renommer `pil-g-frise` restait vert | **l'assertion** : `includes()` sur un **préfixe** — `pil-g-friseX` contient `pil-g-frise` |
+| réinjecter le constat de chevauchement restait vert | **l'assertion** : motif trop étroit. Remplacé par `!/chevauch/i` |
+| injection du barème impossible | **la contre-épreuve** : la chaîne réelle porte `t && ` devant |
+| retirer les gardes ① et ② de `_rfMemeImage` restait vert | **les cas de test** : ils étaient déjà attrapés par la garde ③ |
+
+★★ **Deux leçons.** Une assertion **verte** peut être une panne de lecture — c'est le cas 2, et
+c'est le plus dangereux. Et **une contre-épreuve qui n'injecte rien ne prouve rien** : le harnais
+vérifie que le défaut est bien entré avant de conclure quoi que ce soit (§34h, déjà vécu).
+
+### 35g. Accompagnement — dans le même lot
+
+`MV_AIDE.pilotage` : 2 lignes neuves (« La campagne », « Deux périodes qui se chevauchent »),
+« Simuler » réécrit. `guide/11-pilotage.html` : 3 blocs, régénéré. **5 items WHATS_NEW** en tête,
+écrits du point de vue de l'utilisateur (le symptôme vécu, pas la cause technique).
+
+⚠️ **`utils.js` touché → BUMP** : APP 6.03 → **6.04** (4 emplacements d'`index.html`), SW 6.53 →
+**6.54** (en-tête + `CACHE_NAME` + 2 `console.log` + changelog prepend).
+
+### 35h. Reste à faire
+
+1. Les points 1 à 4 de §34i restent ouverts (filtres cépage/commune, `_PIL_SEM` → `utils.js`,
+   carte colorée par avancement, purge des palettes mortes).
+2. ★ **Vérifier sur les données réelles** que `_rfMemeImage` ne masque pas un cas utile : la
+   pertinence se juge à l'usage, pas au harnais.
+3. ★ Le sélecteur « On part de » n'est **pas mémorisé** entre deux ouvertures — volontaire pour
+   l'instant (le défaut doit rester « ce qu'on sait »), à revoir si Nico le repose souvent.

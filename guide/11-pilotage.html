@@ -39,6 +39,10 @@
     écrase tout.</li>
     <li>Les zones <b>hachurées</b> ne sont couvertes par aucune période. Ce n'est pas un zéro : c'est
     une absence de mesure, et la courbe d'effectif s'y interrompt au lieu de la traverser.</li>
+    <li><b>Deux périodes peuvent se chevaucher</b> sans que rien ne soit compté deux fois. Les heures
+    suivent les <b>tâches</b>, et chaque tâche n'appartient qu'à une seule période : sur les jours
+    communs, ce sont les bandes du calendrier qui se superposent, jamais la charge. L'écran le dit
+    en gris sous la frise, et n'en fait pas une alerte.</li>
     <li><b>Deux façons de compter votre année.</b> Un domaine en a deux, et elles ne répondent pas à
     la même question. L'<b>exercice comptable</b> va d'un bilan à l'autre : c'est lui qui répond à
     « ce que m'a coûté l'année fiscale ». Il est fixé par votre comptable — ce n'est pas un réglage
@@ -68,6 +72,13 @@
   <ul class="dot">
     <li><b>Jauge de saison</b> et <b>avancement par tâche</b>, avec comparatif de l'année précédente.</li>
     <li><b>Donut de charge</b> : quelle tâche pèse le plus dans ce qui reste.</li>
+    <li><b>Où va le temps de l'équipe</b> : la présence de la campagne partagée entre les travaux de
+    vigne au barème, le tracteur et le reste (cave, trajets, entretien). Sous la barre, trois blocs
+    dépliables : la <b>frise prévu / réel</b> tâche par tâche, la <b>courbe des personnes nécessaires
+    par semaine</b>, et l'<b>écart</b> entre ce qui était prévu et ce que dit le journal. Ces quatre
+    blocs parlent d'<b>une campagne</b> : ils étaient rangés dans « L'année », ils sont ici.
+    Une moyenne n'est pas un pic : pour la semaine la plus chargée, c'est la frise des 52 semaines,
+    dans « L'année », qui répond.</li>
     <li><b>Échéances par tâche</b> : date de fin projetée pour chacune, en jours ouvrés.</li>
     <li><b>Carte du domaine</b> colorée par avancement, libellés masquables.</li>
   </ul>
@@ -83,6 +94,12 @@
     semaine, l'application rejoue la campagne et affiche ce qui boucle et ce que ça coûte. Le travail
     non absorbé ne disparaît pas, il <b>glisse</b> sur les semaines suivantes, en coûtant un peu plus
     à chaque fois.</li>
+    <li><b>La simulation part de ce que vous savez déjà.</b> La ligne noire, c'est l'effectif
+    <b>déjà sous contrat</b> semaine par semaine — vendangeurs et saisonniers déjà embauchés
+    compris. Le renfort que vous posez s'<b>ajoute</b> à cette ligne, il ne la remplace pas : une
+    équipe déjà recrutée ne vous est plus réclamée. Le sélecteur « On part de » permet de repasser
+    aux <b>permanents seuls</b>, qui répond à l'autre question : de quoi aurais-je besoin si je
+    n'avais encore embauché personne ? C'est la vue utile pour préparer la campagne suivante.</li>
   </ul>
   <div class="note tip"><span class="ni" aria-hidden="true">💡</span><div><b>La date compte autant que
   le nombre.</b> Certains travaux ont une fenêtre qu'on ne rattrape pas : la vendange se fait quand

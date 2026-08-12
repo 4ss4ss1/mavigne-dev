@@ -23,7 +23,7 @@ export const GT_ADMIN_EMAIL = 'ngdevpro@gmail.com';
 // WHATS_NEW   : tableau vide = modal desactive pour cette version.
 // Format item : { emoji:'📅', titre:'Titre court', desc:'Phrase utilisateur.' }
 // Regle : seulement les changements visibles par les utilisateurs.
-export const APP_VERSION = '6.03';
+export const APP_VERSION = '6.04';
 // ════ Journal des nouveautés (récap cumulatif) ════
 // Une entrée par version, la PLUS RÉCENTE EN HAUT : { v:'5.10', items:[ {emoji,titre,desc}, … ] }
 // À chaque release visible → AJOUTER un bloc en tête (ne pas remplacer). items:[] = release technique (rien à afficher).
@@ -354,6 +354,18 @@ window._mvGraphRepeindre = function(){
 };
 
 export const WHATS_NEW = [
+  { v:'6.04', items:[
+    { emoji: '\u{23F1}\u{FE0F}', titre: "\u00ab\u202fO\u00f9 va le temps de l\u2019\u00e9quipe\u202f\u00bb est pass\u00e9 dans \u00ab\u202fLa campagne\u202f\u00bb",
+      desc: "La r\u00e9partition du temps, la frise pr\u00e9vu/r\u00e9el, la courbe par semaine et l\u2019\u00e9cart parlent tous d\u2019<b>une campagne</b>. Ils \u00e9taient rang\u00e9s dans \u00ab\u202fL\u2019ann\u00e9e\u202f\u00bb, sous un bandeau qui expliquait qu\u2019ils d\u00e9taillaient en fait une campagne. Un bandeau qui explique pourquoi un bloc est au mauvais endroit ne le d\u00e9place pas\u202f: ils sont maintenant dans \u00ab\u202fLa campagne\u202f\u00bb, et le bandeau a disparu avec eux. \u00ab\u202fL\u2019ann\u00e9e\u202f\u00bb garde ce qui la regarde\u202f: les 52 semaines de l\u2019exercice et le pic." },
+    { emoji: '\u{1F465}', titre: "Le simulateur de renfort voit enfin vos embauches d\u00e9j\u00e0 sign\u00e9es",
+      desc: "Il ne comptait que les <b>permanents</b>\u202f: 34 vendangeurs d\u00e9j\u00e0 sous contrat du 17 ao\u00fbt au 3 septembre n\u2019existaient pas pour lui, et il vous r\u00e9clamait \u00ab\u202f34 personnes de renfort \u00e0 poser\u202f\u00bb pour une \u00e9quipe d\u00e9j\u00e0 recrut\u00e9e \u2014 pendant que la frise de l\u2019ann\u00e9e, elle, montrait la vendange couverte. Le m\u00eame module disait deux choses. Il part maintenant de l\u2019effectif <b>d\u00e9j\u00e0 sous contrat</b>, et le renfort que vous posez s\u2019<b>ajoute</b> \u00e0 cette ligne. Le s\u00e9lecteur \u00ab\u202fOn part de\u202f\u00bb permet de revenir aux permanents seuls\u202f: c\u2019est l\u2019autre question, celle qui sert \u00e0 pr\u00e9parer la campagne suivante." },
+    { emoji: '\u{1F4CF}', titre: "Deux p\u00e9riodes qui se chevauchent ne sont plus une alerte",
+      desc: "L\u2019\u00e9cran annon\u00e7ait en orange que les jours communs \u00e0 deux p\u00e9riodes \u00e9taient \u00ab\u202fcompt\u00e9s deux fois\u202f\u00bb et que vos heures \u00e9taient gonfl\u00e9es d\u2019autant. C\u2019\u00e9tait <b>faux</b>\u202f: les heures suivent les <b>t\u00e2ches</b>, et chaque t\u00e2che n\u2019appartient qu\u2019\u00e0 une seule p\u00e9riode. Sur les jours communs, ce sont les bandes du calendrier qui se superposent, jamais la charge. Le fait reste \u00e9crit, en gris, sous la frise \u2014 et il n\u2019y a rien \u00e0 corriger." },
+    { emoji: '\u{1F4CF}', titre: "\u00ab\u202fT\u00e2che sans bar\u00e8me h/ha\u202f\u00bb ne se d\u00e9clenche plus \u00e0 tort",
+      desc: "Le contr\u00f4le cherchait les heures par hectare dans un champ qui n\u2019existe sur aucune t\u00e2che. Il ne trouvait donc jamais rien, et signalait <b>toutes</b> les t\u00e2ches de la p\u00e9riode consult\u00e9e comme d\u00e9pourvues de bar\u00e8me \u2014 y compris celles que vous aviez remplies. Sur une p\u00e9riode \u00e0 une seule t\u00e2che, \u00e7a donnait \u00ab\u202f1 t\u00e2che sans bar\u00e8me\u202f\u00bb\u202f: plausible, et faux. Il lit maintenant le bon champ, et comprend aussi les t\u00e2ches \u00e0 niveaux, \u00e0 passages, et celles pilot\u00e9es \u00e0 la tari\u00e8re, qui n\u2019ont pas d\u2019heures par hectare \u00e0 avoir." },
+    { emoji: '\u{1F4C8}', titre: "Le simulateur ne dessine plus deux fois le m\u00eame graphique",
+      desc: "\u00ab\u202fCe qu\u2019il reste \u00e0 faire\u202f\u00bb et \u00ab\u202fle plan de d\u00e9part\u202f\u00bb apparaissaient tous les deux d\u00e8s que la campagne avait commenc\u00e9 \u2014 m\u00eames colonnes, m\u00eame ligne d\u2019effectif, seule la l\u00e9gende changeait. Deux images identiques sous deux titres diff\u00e9rents ne se comparent pas. L\u2019\u00e9cran v\u00e9rifie maintenant qu\u2019elles racontent vraiment deux choses\u202f; sinon il n\u2019en montre qu\u2019une, et dit pourquoi." }
+  ]},
   { v:'6.03', items:[
     { emoji: '\u{1F50D}', titre: "Cliquer une campagne recadre enfin TOUT l\u2019\u00e9cran",
       desc: "Choisir une campagne dans la frise bougeait la frise, les quatre chiffres du haut\u2026 et laissait trois blocs sur une autre p\u00e9riode\u202f: le chiffre <b>Effectif</b> d\u2019Aujourd\u2019hui, la tuile <b>Charge & ETP</b> et <b>Capacit\u00e9 vs charge</b>. Ils lisaient la p\u00e9riode que vous consultez, pas celle que vous regardez. Sur l\u2019ann\u00e9e enti\u00e8re, la photo r\u00e9pondait donc pour l\u2019ann\u00e9e et la tuile juste en dessous pour une seule campagne\u202f: deux nombres, un seul mot, \u00e0 quinze centim\u00e8tres l\u2019un de l\u2019autre. Tout suit maintenant la m\u00eame barre du haut \u2014 la r\u00e9partition du temps, la frise pr\u00e9vu/r\u00e9el, la courbe par semaine et l\u2019\u00e9cart compris." },
@@ -1655,7 +1667,9 @@ var MV_AIDE = {
       ['Les quatre chiffres du haut', "répondent aux quatre questions d’un domaine : les travaux, l’effectif, le budget, la conformité. Ils changent avec ce que vous regardez, et chacun mène à l’écran qui le détaille."],
       ['Le bouton « à compléter »', "liste ce qui manque pour que vos chiffres soient justes, et vous emmène à l’endroit exact où le renseigner. Un rond rouge sur un chiffre veut dire qu’il ne se calcule pas ; un rond orange, qu’il sort mais faux."],
       ['Les onglets vont du large au fin', ": l’année, puis la campagne, puis l’équipe et les tâches, puis la simulation. Après le trait, ce sont des écrans de détail — on y arrive aussi en touchant un des quatre chiffres."],
-      ['Simuler', "répond à deux questions : dans quel ordre passer sur les parcelles, et combien de renfort prendre — à quelle date, et pour quel coût."],
+      ['La campagne', "montre l’avancement, mais aussi — sous « Où va le temps de l’équipe » — comment la présence se partage entre vigne, tracteur et le reste, avec la frise prévu/réel, la courbe par semaine et l’écart. Ces blocs parlent d’une campagne ; le pic de la semaine la plus chargée, lui, se lit dans « L’année »."],
+      ['Deux périodes qui se chevauchent', "ne comptent rien deux fois : les heures suivent les tâches, et une tâche n’appartient qu’à une seule période. Sur les jours communs, ce sont les bandes du calendrier qui se superposent, pas la charge."],
+      ['Simuler', "répond à deux questions : dans quel ordre passer sur les parcelles, et combien de renfort prendre — à quelle date, et pour quel coût. La simulation part de l’effectif <b>déjà sous contrat</b>, vendangeurs compris : le renfort que vous posez s’ajoute à cette ligne. Le sélecteur « On part de » permet de repasser aux permanents seuls pour préparer la campagne suivante."],
       ['Économie', "compare un budget de barème à ce qui est engagé. Quand l’écart est grand, c’est le barème qu’on corrige dans Réglages, jamais le taux horaire."],
       ['Conformité', "suit le cuivre sur sept ans, le nombre de passages et les délais de rentrée en cours."],
       ['Cave', "dit ce qui presse aujourd’hui, où en est le millésime, et ce que coûte le parc à fûts."],
