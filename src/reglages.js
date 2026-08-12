@@ -1631,7 +1631,15 @@ function editMembre(nom){
     +((window.isAdmin&&window.isAdmin())?(
        '<div class="fl" style="margin-top:14px">💶 Taux horaire chargé <span style="font-size:11px;color:var(--texte-doux,#6b7280);font-weight:400">(coût employeur, € par heure)</span></div>'
       +'<input type="number" id="em-taux-h" min="0" step="0.5" inputmode="decimal" value="'+(_paieTaux(nom)!=null?_paieTaux(nom):'')+'" placeholder="'+(_paieTauxContrat(tc)!=null?String(_paieTauxContrat(tc)):'ex. 21')+'" style="width:100%;padding:10px;border:1.5px solid #e5e7eb;border-radius:10px;font-size:14px;outline:none;box-sizing:border-box;font-family:inherit">'
-      +'<div style="font-size:11px;color:var(--texte-doux,#6b7280);margin:5px 2px 0;line-height:1.5">Sert au coût par hectare (Pilotage › Économie). Modifiable à tout moment — en cas d’augmentation, remplacez simplement la valeur. Visible des seuls administrateurs.'+(_paieHistTxt(nom)?(' '+_escHtml(_paieHistTxt(nom))):'')+'</div>'):'')
+      +'<div style="font-size:11px;color:var(--texte-doux,#6b7280);margin:5px 2px 0;line-height:1.5">Sert au co\u00fbt du travail (Pilotage \u203a \u00c9conomie). Visible des seuls administrateurs.</div>'
+      // ★★★ LA DATE D'EFFET. Pre-remplie a AUJOURD'HUI : le geste par defaut est
+      // l'augmentation, qui ouvre une periode et laisse le passe intact. Vider le
+      // champ est un geste EXPLICITE, et c'est le seul qui reecrive une ligne
+      // existante. Le defaut protege ; la destruction se demande.
+      +'<div class="fl" style="margin-top:10px;margin-bottom:4px">\u00c0 partir du</div>'
+      +'<input type="date" id="em-taux-d" value="'+_escAttr(_paieAuj())+'" style="width:100%;padding:10px;border:1.5px solid #e5e7eb;border-radius:10px;font-size:14px;outline:none;box-sizing:border-box;font-family:inherit">'
+      +'<div style="font-size:11px;color:var(--texte-doux,#6b7280);margin:5px 2px 0;line-height:1.5">Une <b>augmentation</b> garde le taux pr\u00e9c\u00e9dent pour les heures d\u00e9j\u00e0 travaill\u00e9es. Pour <b>corriger une erreur de saisie</b> sans cr\u00e9er d\u2019augmentation, videz cette date\u00a0: la derni\u00e8re ligne sera r\u00e9\u00e9crite. Pour retirer un taux, retirez ses lignes ci-dessous.</div>'
+      +_paieSerieHtml(nom)):'')
     +'<div class="fl" style="margin-top:14px">🏢 Rattachement</div>'
     +'<div style="display:flex;align-items:center;justify-content:space-between;gap:12px;background:#f8fafc;border:1.5px solid #e5e7eb;border-radius:10px;padding:11px 12px">'
     +'<div style="font-size:13px;color:var(--texte,#374151);font-weight:600">Bureau<div style="font-size:11px;color:var(--texte-doux,#6b7280);font-weight:400;margin-top:1px;max-width:300px">Non compté dans la capacité de travail des vignes (calcul de charge).</div></div>'
@@ -1808,8 +1816,28 @@ function saveEditMembre(){
   if(Object.keys(_modsNew).length) m.mods=_modsNew; else delete m.mods;
   // Taux horaire → collection `paie` (doc séparé, admin-only en lecture ET écriture).
   // Volontairement HORS de `m` : le doc membres est lisible par toute l'équipe.
+  // Relecture de la serie affichee : une ligne supprimee a l'ecran disparait ici.
+  // Meme mecanique que la liste des contrats precedents — lire le DOM plutot que
+  // de tenir un etat global. La liste n'existe QUE chez l'administrateur : chez un
+  // non-admin `_tsEl` est null, `rows` reste null, et la serie en base est intacte.
   var _thEl=document.getElementById('em-taux-h');
-  if(_thEl && window._mvPaieSetTaux) window._mvPaieSetTaux(nom, _thEl.value);
+  if(_thEl && window._mvPaieApply){
+    var _tdEl=document.getElementById('em-taux-d');
+    var _tsEl=document.getElementById('em-taux-serie');
+    var _tRows=null;
+    if(_tsEl) _tRows=[].slice.call(_tsEl.querySelectorAll('[data-txr]')).map(function(r){
+      return { d:r.getAttribute('data-txd')||'', v:r.getAttribute('data-txv')||'' };
+    });
+    var _tRes=window._mvPaieApply(nom, _thEl.value, (_tdEl?_tdEl.value:''), _tRows);
+    // On DIT ce qu'on vient de faire : les deux gestes ne se ressemblent pas, et
+    // celui qui corrige doit savoir qu'il vient de reecrire une ligne, pas d'en creer.
+    try{
+      if(_tRes && _tRes.geste==='augmentation')
+        showToast('\u{1F4B6} Augmentation enregistr\u00e9e \u2014 le taux pr\u00e9c\u00e9dent reste sur les heures d\u00e9j\u00e0 travaill\u00e9es','#3D6B27');
+      else if(_tRes && _tRes.geste==='correction')
+        showToast('\u270E Taux corrig\u00e9 sur place \u2014 aucune augmentation cr\u00e9\u00e9e','#8A5A38');
+    }catch(e){ if(window.logError)window.logError({level:'info',cat:'paie',msg:'toast taux horaire',detail:(e&&e.message)||String(e)}); }
+  }
   window.saveData('membres','\ud83d\udc64 Membre mis \u00e0 jour');
   // Si l'admin vient de se restreindre lui-meme, appliquer sans attendre l'aller-
   // retour Firestore : reconstruit le dock et quitte la page si elle est masquee.
@@ -3971,10 +3999,15 @@ function _paie(){
   if(!P||typeof P!=='object'||Array.isArray(P)){ P={}; window.PAIE=P; }
   if(!P.taux||typeof P.taux!=='object') P.taux={};
   if(!P.taux_hist||typeof P.taux_hist!=='object') P.taux_hist={};
+  if(!P.taux_serie||typeof P.taux_serie!=='object') P.taux_serie={};
   if(!Array.isArray(P.gnr_appoints)) P.gnr_appoints=[];
   return P;
 }
-function _paieSave(){ var P=_paie(); window.PAIE=P; if(window.fbSave) window.fbSave('paie',P); }
+function _paieSave(){
+  var P=_paie(); window.PAIE=P;
+  _pSerCache={ref:null,map:{}};          // le cache de series est derive de P : il meurt avec l'ecriture
+  if(window.fbSave) window.fbSave('paie',P);
+}
 function _paieNum(v){ var n=parseFloat(String(v==null?'':v).replace(',','.')); return (isFinite(n)&&n>=0)?n:0; }
 function _paieTaux(nom){ var v=Number(_paie().taux[nom]); return (isFinite(v)&&v>0)?v:null; }
 // Repli legacy : barème par type de contrat (CONFIG.eco.taux_horaire), conservé en
@@ -3989,22 +4022,160 @@ function _paieTauxEff(m){
   var v=_paieTaux(m.nom); if(v!=null) return v;
   return _paieTauxContrat(m.type_contrat);
 }
-window._mvPaie        = _paie;
-window._mvPaieTaux    = _paieTaux;
+
+// ═══════════ LE TAUX EST UNE SERIE DATEE, PAS UN NOMBRE ═══════════════════════
+// ⚠️⚠️⚠️ UN TAUX CHANGE AUJOURD'HUI NE DOIT RIEN CHANGER A CE QU'A COUTE HIER.
+// Avant ce lot, `taux[nom]` etait un scalaire lu SANS DATE par les trois calculs de
+// cout (cout par parcelle, sessions tracteur, exercice comptable) : augmenter
+// quelqu'un revalorisait retroactivement TOUT l'historique, jusqu'a un exercice
+// deja clos. `taux_hist` existait — mais il n'etait lu par AUCUN calcul, seulement
+// affiche en une phrase sous le champ. ★ La trace donnait l'illusion que le
+// probleme etait traite pendant que les totaux bougeaient en silence.
+//
+//   taux_serie[nom] = [{d:'YYYY-MM-DD', v:12.10}, ...]  croissante — SOURCE DE VERITE
+//   taux[nom]       = MIROIR du taux EN VIGUEUR AUJOURD'HUI. Conserve parce que la
+//                     fiche, le compteur de la carte Economie et le garde anti-perte
+//                     le lisent. Reecrit a chaque enregistrement, jamais saisi seul.
+//
+// ⚠️ MIGRATION : AUCUNE ECRITURE. Serie absente -> elle est DERIVEE a la lecture
+// depuis `taux` + `taux_hist`, selon la regle dictee par Nico : « les salaires
+// indiques sont ok jusqu'a leur date de modification inscrite » — donc `de` vaut
+// JUSQU'A `d`, et `a` vaut A PARTIR DE `d`. Un domaine qui n'ouvre jamais la fiche
+// continue de calculer exactement comme avant : la derivation d'un domaine sans
+// aucun historique rend [{depuis toujours, taux courant}], soit le comportement
+// actuel a l'identique. La serie n'est materialisee qu'au premier enregistrement.
+var _PAIE_ANCRE='0000-01-01';        // « depuis toujours » — borne basse d'une serie derivee
+var _pSerCache={ref:null,map:{}};    // invalide par _paieSave et par tout remplacement de window.PAIE
+function _paieAuj(){
+  if(typeof window._mvAujIso==='function'){
+    var v=window._mvAujIso();
+    if(_paieIsoOk(v)) return v;      // on VERIFIE la valeur au lieu de la supposer
+  }
+  var n=new Date(), p=function(x){ return (x<10?'0':'')+x; };
+  return n.getFullYear()+'-'+p(n.getMonth()+1)+'-'+p(n.getDate());
+}
+function _paieIsoOk(d){ return /^\d{4}-\d{2}-\d{2}$/.test(String(d||'')); }
+// Normalise : valeurs > 0 seulement, dates valides, tri croissant, une seule ligne
+// par date (la derniere gagne), 60 lignes au maximum.
+function _paieSerNorm(A){
+  var seen={}, out=[];
+  (Array.isArray(A)?A:[]).forEach(function(e){
+    if(!e) return;
+    var d=String(e.d||'').slice(0,10), v=_paieNum(e.v);
+    if(!(v>0)) return;
+    if(!d) d=_PAIE_ANCRE;
+    if(!_paieIsoOk(d)) return;
+    seen[d]={d:d,v:v};
+  });
+  Object.keys(seen).sort().forEach(function(k){ out.push(seen[k]); });
+  return (out.length>60)?out.slice(-60):out;
+}
+// Resolution : derniere ligne dont la date est <= d. Sortie NULL si la serie est vide.
+function _paieResolve(S,d){
+  if(!S||!S.length) return null;
+  var v=null;
+  for(var i=0;i<S.length;i++){ if(S[i].d<=d) v=S[i].v; else break; }
+  // Date anterieure a la premiere ligne : n'arrive que sur une serie SAISIE dont la
+  // premiere ligne porte une date (une serie derivee est ancree « depuis toujours »).
+  // On retombe sur la plus ancienne valeur connue plutot que sur zero : afficher une
+  // masse salariale nulle sur un mois travaille serait un mensonge plus grave que
+  // d'etendre vers l'arriere le plus ancien taux connu.
+  if(v==null) v=S[0].v;
+  return (v>0)?v:null;
+}
+function _paieSerieRaw(nom,P){
+  var S=_paieSerNorm(P.taux_serie[nom]);
+  if(S.length) return S;
+  var cur=_paieNum(P.taux[nom]);
+  var H=Array.isArray(P.taux_hist[nom])?P.taux_hist[nom]:[], D=[];
+  for(var i=0;i<H.length;i++){
+    var h=H[i]; if(!h) continue;
+    if(!D.length && h.de!=null && _paieNum(h.de)>0) D.push({d:_PAIE_ANCRE, v:_paieNum(h.de)});
+    var a=_paieNum(h.a), d=String(h.d||'').slice(0,10);
+    if(a>0 && _paieIsoOk(d)) D.push({d:d, v:a});
+  }
+  D=_paieSerNorm(D);
+  if(!D.length) return (cur>0)?[{d:_PAIE_ANCRE, v:cur}]:[];
+  // Divergence entre le miroir et la fin de l'historique : `taux` a ete ecrit sans
+  // passer par l'historisation (import, console, ancienne version). On ne REECRIT PAS
+  // le passe pour le faire coller — on ajoute ce qu'on sait, a la seule date qu'on
+  // puisse honnetement lui donner : aujourd'hui.
+  if(cur>0 && Math.abs(D[D.length-1].v-cur)>0.001) D.push({d:_paieAuj(), v:cur});
+  return _paieSerNorm(D);
+}
+function _paieSerie(nom){
+  var P=_paie();
+  if(_pSerCache.ref!==P) _pSerCache={ref:P,map:{}};
+  if(!_pSerCache.map[nom]) _pSerCache.map[nom]=_paieSerieRaw(nom,P);
+  return _pSerCache.map[nom];
+}
+// ★★★ LA fonction : taux d'une personne A UNE DATE. Sans date -> taux courant, ce
+// qui reproduit exactement l'ancien comportement pour tout appelant non converti.
+function _paieTauxAt(nom,iso){
+  var d=String(iso||'').slice(0,10);
+  if(!d) return _paieTaux(nom);
+  return _paieResolve(_paieSerie(nom),d);
+}
+// Taux effectif A UNE DATE : individuel d'abord, bareme de contrat en repli.
+function _paieTauxEffAt(m,iso){
+  if(!m) return null;
+  var v=_paieTauxAt(m.nom,iso); if(v!=null) return v;
+  return _paieTauxContrat(m.type_contrat);
+}
+window._mvPaie         = _paie;
+window._mvPaieTaux     = _paieTaux;
+window._mvPaieSerie    = _paieSerie;
+window._mvPaieTauxAt   = _paieTauxAt;
+window._mvPaieTauxEffAt= _paieTauxEffAt;
+// ⚠️ SANS DATE : renvoie le taux d'AUJOURD'HUI. Ne JAMAIS s'en servir pour valoriser
+// des heures passees — c'est precisement le bug corrige par ce lot. Pour toute heure
+// qui porte une date, c'est `_mvPaieTauxEffAt(membre, date)` qu'il faut appeler.
 window._mvPaieTauxEff = _paieTauxEff;
-// Enregistre un taux + historise le changement. Appelé depuis saveEditMembre.
-window._mvPaieSetTaux = function(nom, val){
-  if(!nom) return;
-  if(typeof isAdmin==='function' && !isAdmin()) return;   // défense en profondeur (rules = verrou réel)
-  var P=_paie(), av=(P.taux[nom]!=null?Number(P.taux[nom]):null), n=_paieNum(val);
-  var ap=(n>0)?n:null;
-  if((av||null)===(ap||null)) return;                     // no-op : pas d'écriture inutile
-  if(ap==null) delete P.taux[nom]; else P.taux[nom]=ap;
-  if(!Array.isArray(P.taux_hist[nom])) P.taux_hist[nom]=[];
-  P.taux_hist[nom].push({ d:new Date().toISOString().slice(0,10), de:av, a:ap });
-  if(P.taux_hist[nom].length>40) P.taux_hist[nom]=P.taux_hist[nom].slice(-40);
+// ★★★ Enregistre le taux depuis la fiche membre. TROIS gestes distincts, et un seul
+// d'entre eux fabrique une periode :
+//   · valeur changee + date d'effet -> AUGMENTATION : une ligne de plus, a cette date
+//   · valeur changee, date VIDEE    -> CORRECTION  : la derniere ligne est reecrite
+//                                      SUR PLACE. Aucune periode fabriquee.
+//   · lignes retirees a l'ecran     -> la serie relue du DOM les a deja perdues
+// ⚠️⚠️ C'est mot pour mot la lecon du lot « historique des contrats » (§33) : corriger
+// une faute de frappe ne doit JAMAIS fabriquer un passe qui n'a pas eu lieu. Le champ
+// de date est donc PRE-REMPLI a aujourd'hui — le geste par defaut est le geste sur, il
+// faut vider le champ a la main pour ecraser une ligne existante.
+// ⚠️ Le champ de valeur vide ne supprime plus rien : pour retirer un taux, on retire
+// ses lignes. Un champ de saisie ne doit pas pouvoir detruire un historique.
+// `rows` = lignes relues du DOM (null = on repart de la serie en base).
+window._mvPaieApply = function(nom, val, dEffet, rows){
+  if(!nom) return null;
+  if(typeof isAdmin==='function' && !isAdmin()) return null;  // défense en profondeur (rules = verrou réel)
+  var P=_paie();
+  var S=(rows!=null)?_paieSerNorm(rows):_paieSerie(nom).slice();
+  var n=_paieNum(val);
+  var d=String(dEffet||'').slice(0,10); if(!_paieIsoOk(d)) d='';
+  var avant=S.length?S[S.length-1].v:null, geste=null;
+  if(n>0){
+    if(!S.length){ S=[{d:(d||_PAIE_ANCRE), v:n}]; geste='depart'; }
+    else if(Math.abs(avant-n)>0.001){
+      if(d){ S=S.concat([{d:d, v:n}]); geste='augmentation'; }
+      else { S[S.length-1]={d:S[S.length-1].d, v:n}; geste='correction'; }
+    }
+  }
+  S=_paieSerNorm(S);
+  if(S.length){
+    P.taux_serie[nom]=S;
+    // Le miroir est le taux EN VIGUEUR AUJOURD'HUI, pas la derniere ligne : une
+    // augmentation datee du mois prochain ne doit pas se presenter comme le taux
+    // actuel dans la fiche ni dans le compteur de la carte Economie.
+    var mir=_paieResolve(S,_paieAuj());
+    if(mir>0) P.taux[nom]=mir; else delete P.taux[nom];
+  } else {
+    delete P.taux_serie[nom]; delete P.taux[nom];
+  }
   _paieSave();
+  return { geste:geste, de:avant, a:n, d:d, n:S.length };
 };
+// Signature historique conservee (aucune date = correction sur place). Appelants
+// hors fiche membre : voir _mvPaieApply, qui est le point d'entree complet.
+window._mvPaieSetTaux = function(nom, val){ return window._mvPaieApply(nom, val, '', null); };
 // Prix du litre de GNR = moyenne PONDÉRÉE des appoints de cuve (PMP). Repli sur
 // l'ancien champ Réglages CONFIG.eco.prix_gnr_litre tant qu'aucun appoint n'est saisi.
 window._mvPaieGnrPMP = function(){
@@ -4014,15 +4185,36 @@ window._mvPaieGnrPMP = function(){
   var e=(window.CONFIG&&window.CONFIG.eco)||{}, v=Number(e.prix_gnr_litre);
   return (isFinite(v)&&v>0)?v:0;
 };
-// Résumé lisible du dernier changement de taux (affiché sous le champ, admin only).
-function _paieHistTxt(nom){
-  var h=_paie().taux_hist[nom];
-  if(!Array.isArray(h)||!h.length) return '';
-  var last=h[h.length-1];
-  if(!last||last.de==null) return '';
-  var d=last.d||'';
-  try{ if(typeof _fmtDate==='function' && d) d=_fmtDate(d); }catch(e){}
-  return 'Dernier changement : ' + String(last.de).replace('.',',') + ' → ' + String(last.a==null?0:last.a).replace('.',',') + ' €/h' + (d?(' le '+d):'') + '.';
+// ★ La serie, affichee dans la fiche (admin only). Meme idiome que la liste des
+// contrats precedents : chaque ligne porte ses valeurs en attributs, le « × » la
+// retire du DOM, et saveEditMembre relit la liste. Une donnee invisible est une
+// donnee qu'on ne peut pas croire — et celle-ci chiffre des euros.
+function _paieSerieHtml(nom){
+  var S=_paieSerie(nom);
+  if(!S.length) return '';
+  var auj=_paieAuj();
+  var fr=function(d){
+    if(!d||d===_PAIE_ANCRE) return 'depuis toujours';
+    var p=String(d).split('-');
+    return (p.length===3)?('depuis le '+p[2]+'/'+p[1]+'/'+p[0]):d;
+  };
+  var eur=function(v){ return String(Math.round(v*100)/100).replace('.',','); };
+  var rows=S.slice().reverse().map(function(e,i){
+    var futur=(e.d>auj);
+    return '<div data-txr="'+i+'" data-txd="'+_escAttr(e.d)+'" data-txv="'+_escAttr(String(e.v))+'"'
+      +' style="display:flex;align-items:center;gap:8px;padding:8px 10px;border:1.5px solid #e5e7eb;border-radius:10px;margin-bottom:6px;background:var(--terre-pale,#faf8f4)">'
+      +'<span style="flex:1;font-size:13px"><b>'+eur(e.v)+'\u00a0\u20AC/h</b> '
+      +'<span style="font-size:11.5px;color:var(--texte-doux,#6b7280)">'+fr(e.d)+(futur?'\u00a0\u00b7 \u00e0 venir':'')+'</span></span>'
+      +'<button type="button" onclick="this.closest(\'[data-txr]\').remove()" title="Retirer cette ligne"'
+      +' style="border:none;background:transparent;color:#A0291E;font-size:16px;cursor:pointer;padding:2px 6px;line-height:1">\u00d7</button>'
+      +'</div>';
+  }).join('');
+  return '<div class="fl" style="margin-top:10px">Ce que ce taux a valu, et depuis quand</div>'
+    +'<div id="em-taux-serie" style="margin-bottom:8px">'+rows+'</div>'
+    +'<div style="font-size:11px;color:var(--texte-doux,#6b7280);margin:-2px 0 8px;line-height:1.5">'
+    +'Chaque ligne vaut jusqu\u2019\u00e0 la suivante. Le co\u00fbt d\u2019un exercice, d\u2019une parcelle ou d\u2019une session '
+    +'de tracteur relit cette liste \u00e0 la date de chaque heure travaill\u00e9e\u00a0: augmenter quelqu\u2019un aujourd\u2019hui '
+    +'ne change plus ce qu\u2019a co\u00fbt\u00e9 hier.</div>';
 }
 
 // ═══════════════ Économie & conformité (taux, GNR, IFT réf.) ═══════════════

@@ -790,12 +790,22 @@ function _mvIntrantsCount(v) {
   });
   return n;
 }
-// Taux nominatifs saisis + appoints de cuve GNR. `taux_hist` est un derive
-// (historique de promotion) : il ne compte pas.
+// Taux nominatifs + appoints de cuve GNR.
+// ⚠️⚠️ `taux_serie` COMPTE, et c'est un changement de statut : ce n'est pas une trace,
+// c'est la SOURCE de tout cout de main-d'oeuvre date. Une ecriture qui la viderait
+// ferait retomber tous les calculs sur le taux du jour — exactement le bug que le lot
+// des salaires dates a corrige. `taux_hist`, lui, reste un derive et ne compte pas :
+// il n'est plus lu que pour deriver la serie d'un domaine jamais migre.
 function _mvPaieCount(v) {
   if (!v || typeof v !== 'object') return 0;
   var n = 0;
   if (v.taux && typeof v.taux === 'object') n += Object.keys(v.taux).length;
+  if (v.taux_serie && typeof v.taux_serie === 'object') {
+    Object.keys(v.taux_serie).forEach(function (k) {
+      var S = v.taux_serie[k];
+      n += Array.isArray(S) ? S.length : 0;
+    });
+  }
   if (Array.isArray(v.gnr_appoints)) n += v.gnr_appoints.length;
   return n;
 }

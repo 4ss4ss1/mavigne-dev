@@ -5428,9 +5428,18 @@ function _ecoRate(){
     ? (window.MEMBRES||[]).filter(function(m){ return window._mvEnContratSurPeriode(m,_d0R,_d1R); })
     : [];
   if(!membres.length) membres=_tousActifs;
+  // ★★★ TAUX A LA DATE. Le cout MO d'une parcelle est un budget de SAISON : le taux
+  // qui compte est celui qui valait AU DEBUT DE LA PERIODE CONSULTEE, pas celui
+  // d'aujourd'hui. Sans ca, une augmentation signee en aout rechiffrait le budget de
+  // la taille de fevrier — et le budget d'une campagne archivee bougeait tout seul.
+  // ⚠️ REPLI : periode non datee -> `_mvPaieTauxAt` sans date rend le taux courant,
+  // soit exactement l'ancien comportement. Aucune regression possible sur ce chemin.
+  var _atR=(typeof window._mvPaieTauxAt==='function')
+    ? function(nm){ return Number(window._mvPaieTauxAt(nm,_d0R))||0; }
+    : function(nm){ return Number(indiv[nm])||0; };
   var sum=0,n=0;
   membres.forEach(function(m){
-    var r=Number(indiv[m.nom])||0;
+    var r=_atR(m.nom);
     if(!(r>0)) r=Number(taux[m.type_contrat||'CDI'])||0;
     if(r>0){ sum+=r; n++; }
   });
@@ -5519,7 +5528,9 @@ function _ecoEquipeByParc(){
         var pw=(typeof window._mvPoidsNom==='function')?window._mvPoidsNom(n):1;
         var w=pw/nb;
         jh+=w;
-        var m=byNom[n], r=(m&&window._mvPaieTauxEff)?Number(window._mvPaieTauxEff(m)):0;
+        // ★ TAUX A LA DATE DU TRAVAIL : `dt` est la date du journal. Une augmentation
+        // de juillet ne doit pas rechiffrer la taille de fevrier.
+        var m=byNom[n], r=(m&&window._mvPaieTauxEffAt)?Number(window._mvPaieTauxEffAt(m,dt)):0;
         if(r>0){ sum+=r*w; wt+=w; }
       });
     });
@@ -5597,9 +5608,11 @@ function _ecoTracHByParc(win){
   var out={h:{},cost:{},qui:{},nAnon:0,nSess:0,byDate:{},gnrByDate:{},hByDate:{}};
   var _rate0=_ecoRate(), _cfgT=_ecoCfg();
   var _mBy={}; (window.MEMBRES||[]).forEach(function(m){ if(m&&m.nom) _mBy[m.nom]=m; });
-  function _tauxCond(nom){
+  // ★ TAUX A LA DATE DE LA SESSION. Une session de mars se valorise au taux de mars,
+  // meme si le conducteur a ete augmente depuis.
+  function _tauxCond(nom, iso){
     var m=nom?_mBy[nom]:null;
-    var r=(m&&window._mvPaieTauxEff)?Number(window._mvPaieTauxEff(m)):0;
+    var r=(m&&window._mvPaieTauxEffAt)?Number(window._mvPaieTauxEffAt(m,iso)):0;
     return (isFinite(r)&&r>0)?r:0;
   }
   var s=(typeof window._pilSaison==='function')?window._pilSaison():null;
@@ -5615,7 +5628,7 @@ function _ecoTracHByParc(win){
     if(!se||!_in(se)) return;
     var act=acts.find(function(a){return a&&a.nom===se.activite;});
     var hha=act?(parseFloat(act.h_ha)||0):0;
-    var _tc=_tauxCond(se.conducteur), _tu=(_tc>0?_tc:_rate0);
+    var _tc=_tauxCond(se.conducteur, se.date), _tu=(_tc>0?_tc:_rate0);
     out.nSess++; if(!(_tc>0)) out.nAnon++;
     (se.parcellesFaites||[]).forEach(function(x){
       var nom=(typeof x==='string')?x:((x&&x.nom)||''); if(!nom) return;
@@ -6773,6 +6786,33 @@ function _pexMoisWin(ex){
 // fiche est un cout employeur (cf. la definition posee dans _ecoCfg).
 function _pexSalLab(){ return 'Salaires charg\u00e9s'; }
 
+// ── Decoupage d'un mois aux dates de changement de taux ─────────────────────
+// Rend les sous-fenetres [d0,d1] sur lesquelles le taux d'une personne est CONSTANT.
+// Serie absente ou sans changement dans le mois -> UNE seule fenetre, identique au
+// mois : le chemin nominal ne coute rien et ne change aucun total.
+function _pexJourAvant(iso){
+  var p=String(iso||'').split('-');
+  if(p.length!==3) return iso;
+  var d=new Date(Number(p[0]),Number(p[1])-1,Number(p[2]));
+  d.setDate(d.getDate()-1);
+  return _pexIso(d.getFullYear(),d.getMonth(),d.getDate());
+}
+function _pexSegsTaux(nom, d0, d1){
+  var S=(typeof window._mvPaieSerie==='function')?(window._mvPaieSerie(nom)||[]):[];
+  var cuts=[d0];
+  S.forEach(function(e){
+    if(e && e.d>d0 && e.d<=d1 && cuts.indexOf(e.d)<0) cuts.push(e.d);
+  });
+  if(cuts.length===1) return [{d0:d0,d1:d1}];
+  cuts.sort();
+  var out=[];
+  for(var i=0;i<cuts.length;i++){
+    var a=cuts[i], b=(i+1<cuts.length)?_pexJourAvant(cuts[i+1]):d1;
+    if(b>=a) out.push({d0:a,d1:b});
+  }
+  return out;
+}
+
 // ── Moteur ──────────────────────────────────────────────────────────
 // `noCmp` coupe la comparaison a l'exercice precedent : c'est le garde-fou contre
 // la recursion infinie, l'appel N-1 se faisant avec noCmp=true.
@@ -6802,21 +6842,40 @@ function _pexData(ex, noCmp){
   var gens=[], salT=0, hPaid=0, hWork=0, nSansTaux=0, hSansTaux=0;
   mbrs.forEach(function(mb){
     if(!canPaid) return;
-    var tx=(typeof window._mvPaieTauxEff==='function')?(Number(window._mvPaieTauxEff(mb))||0):0;
-    var hp=0;
+    // ★★★ TAUX A LA DATE, SEGMENT PAR SEGMENT. Un mois est DECOUPE aux dates de
+    // changement de taux : une augmentation au 15 mars ne revalorise pas les quinze
+    // premiers jours. C'est tout l'objet du lot — un exercice DEJA CLOS ne doit plus
+    // bouger parce qu'on augmente quelqu'un aujourd'hui. Resoudre au mois entier
+    // aurait suffi a 95 %, et menti sur les 5 % restants avec l'autorite d'un total.
+    var hp=0, eur=0, hNoTx=0, txs=[];
     mois.forEach(function(mo){
-      var h=Number(window._planPaidRange(mb,_pexD(mo.d0),_pexD(mo.d1)))||0;
-      if(h>0){ hp+=h; byM[mo.k].sal+=h*tx; }
+      _pexSegsTaux(mb.nom, mo.d0, mo.d1).forEach(function(sg){
+        var h=Number(window._planPaidRange(mb,_pexD(sg.d0),_pexD(sg.d1)))||0;
+        if(!(h>0)) return;
+        var tx=(typeof window._mvPaieTauxEffAt==='function')?(Number(window._mvPaieTauxEffAt(mb,sg.d0))||0):0;
+        hp+=h;
+        if(tx>0){
+          eur+=h*tx; byM[mo.k].sal+=h*tx;
+          var L=txs[txs.length-1];
+          if(L && Math.abs(L.v-tx)<0.001) L.h+=h; else txs.push({v:tx,h:h});
+        } else hNoTx+=h;
+      });
     });
     var hw=canWork?(Number(window._planWorkPersRange(mb,_pexD(ex.d0),_pexD(ex.d1)))||0):0;
     if(hp<=0 && hw<=0) return;
+    // Taux moyen PONDERE par les heures de chaque segment — le seul nombre unique
+    // qui ait un sens quand le taux a bouge en cours d'exercice.
+    var txMoy=((hp-hNoTx)>0)?(eur/(hp-hNoTx)):0;
     // On compte les personnes SANS taux, et on retient leurs heures : c'est l'ampleur
     // du trou, pas son nombre de lignes, qui interesse celui qui lit un exercice.
-    if(!(tx>0)){ nSansTaux++; hSansTaux+=hp; }
-    gens.push({ nom:mb.nom, tx:tx, hp:hp, hw:hw, eur:hp*tx,
+    // ⚠️ On ne compte plus que les heures REELLEMENT non valorisees : quelqu'un dont
+    // le taux ne commence qu'en cours d'exercice n'a plus tout son exercice compte
+    // comme un trou.
+    if(hNoTx>0.05){ nSansTaux++; hSansTaux+=hNoTx; }
+    gens.push({ nom:mb.nom, tx:txMoy, txs:txs, hNoTx:hNoTx, hp:hp, hw:hw, eur:eur,
                 coll:!!(window._mvEstCollectif&&window._mvEstCollectif(mb)),
                 bureau:!!mb.bureau });
-    salT+=hp*tx; hPaid+=hp; hWork+=hw;
+    salT+=eur; hPaid+=hp; hWork+=hw;
   });
   gens.sort(function(a,b){ return b.eur-a.eur || (a.nom<b.nom?-1:1); });
 
@@ -7046,19 +7105,30 @@ function _pexTableSal(E){
     return '<div class="pec-card"><div class="pec-cb"><div class="pec-empty">Aucune heure pos\u00e9e au planning sur cet exercice.</div></div></div>';
   var rows=E.gens.map(function(g){
     var cp=Math.max(0,g.hp-g.hw);
+    // ★ Le taux n'est plus forcement UN nombre : quand il a change dans l'exercice,
+    // la colonne dit la SUITE des taux. Afficher la seule moyenne ponderee aurait
+    // rendu une valeur que personne n'a jamais signee sur un contrat.
+    var txCell;
+    if(g.txs && g.txs.length>1)
+      txCell=g.txs.map(function(t){ return _ecoEur2(t.v); }).join(' puis ')+' \u20AC';
+    else if(g.tx>0) txCell=_ecoEur2(g.tx)+' \u20AC';
+    else txCell='<span style="color:'+_PEC_COL.ret+'">\u2014</span>';
+    if(g.hNoTx>0.05 && g.txs && g.txs.length)
+      txCell+='<div style="font-size:10.5px;color:'+_PEC_COL.ret+'">'+_ecoH1(g.hNoTx)+' h sans taux</div>';
     return '<tr><td class="n">'+_pilEsc(g.nom)
       +(g.coll?' <span class="pec-pill" style="background:var(--or-pale);color:var(--or-tx,#7A5E12)">\u00e9quipe</span>':'')
       +(g.bureau?' <span class="pec-pill" style="background:var(--gris-clair);color:var(--texte-doux)">bureau</span>':'')+'</td>'
       +'<td class="r">'+_ecoH1(g.hp)+' h</td>'
       +'<td class="r">'+_ecoH1(g.hw)+' h</td>'
       +'<td class="r">'+(cp>0.05?(_ecoH1(cp)+' h'):'\u2014')+'</td>'
-      +'<td class="r">'+(g.tx>0?(_ecoEur2(g.tx)+' \u20AC'):'<span style="color:'+_PEC_COL.ret+'">\u2014</span>')+'</td>'
+      +'<td class="r">'+txCell+'</td>'
       +'<td class="r">'+_pilEsc(_ecoEur(g.eur))+'</td></tr>';
   }).join('');
   var cpT=Math.max(0,E.hPaid-E.hWork);
   return '<div class="pec-card"><div class="pec-ch"><div class="pec-ct">Les salaires, personne par personne</div>'
     +'<div class="pec-cs">Heures <b>pay\u00e9es</b> (un cong\u00e9 pay\u00e9 en fait partie) et heures <b>au champ</b>\u00a0: l\u2019\u00e9cart entre les deux, ce sont les cong\u00e9s et les absences r\u00e9mun\u00e9r\u00e9es. Une ligne d\u2019\u00e9quipe compte son effectif r\u00e9el, jour par jour.'
     +' Le taux affich\u00e9 est le <b>taux horaire charg\u00e9</b> de la fiche \u2014 le co\u00fbt employeur\u00a0: heures pay\u00e9es \u00d7 taux = co\u00fbt.'
+    +' Chaque heure est valoris\u00e9e au taux qui valait <b>ce jour-l\u00e0</b>\u00a0: quand un taux a chang\u00e9 dans l\u2019exercice, la colonne montre les deux, et le mois du changement est coup\u00e9 \u00e0 la bonne date.'
     +'</div></div>'
     +'<div class="pec-cb"><div class="pec-scroll"><table class="pec-tbl" style="min-width:560px">'
     +'<thead><tr><th>Personne</th><th class="r">Pay\u00e9es</th><th class="r">Au champ</th><th class="r">CP &amp; abs.</th><th class="r">Taux charg\u00e9</th><th class="r">Co\u00fbt</th></tr></thead>'

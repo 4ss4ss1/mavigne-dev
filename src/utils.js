@@ -23,7 +23,7 @@ export const GT_ADMIN_EMAIL = 'ngdevpro@gmail.com';
 // WHATS_NEW   : tableau vide = modal desactive pour cette version.
 // Format item : { emoji:'📅', titre:'Titre court', desc:'Phrase utilisateur.' }
 // Regle : seulement les changements visibles par les utilisateurs.
-export const APP_VERSION = '6.05';
+export const APP_VERSION = '6.06';
 // ════ Journal des nouveautés (récap cumulatif) ════
 // Une entrée par version, la PLUS RÉCENTE EN HAUT : { v:'5.10', items:[ {emoji,titre,desc}, … ] }
 // À chaque release visible → AJOUTER un bloc en tête (ne pas remplacer). items:[] = release technique (rien à afficher).
@@ -354,6 +354,16 @@ window._mvGraphRepeindre = function(){
 };
 
 export const WHATS_NEW = [
+  { v:'6.06', items:[
+    { emoji: '\u{1F4B6}', titre: "Augmenter quelqu\u2019un rechiffrait tout son pass\u00e9",
+      desc: "Le taux horaire d\u2019un salari\u00e9 \u00e9tait <b>un seul nombre, sans date</b>. Le jour o\u00f9 vous le changiez, l\u2019application recalculait avec le nouveau taux <b>toutes les heures d\u00e9j\u00e0 travaill\u00e9es</b>\u202f: le co\u00fbt de la taille de f\u00e9vrier, celui d\u2019une campagne archiv\u00e9e, et jusqu\u2019au total d\u2019un <b>exercice comptable d\u00e9j\u00e0 clos</b>. Une ligne \u00ab\u202fdernier changement\u202f\u00bb s\u2019affichait bien sous le champ, mais elle n\u2019entrait dans aucun calcul\u202f: elle donnait l\u2019impression que c\u2019\u00e9tait g\u00e9r\u00e9. \u00c0 partir de maintenant, chaque heure est valoris\u00e9e au taux qui valait <b>ce jour-l\u00e0</b>." },
+    { emoji: '\u{1F4C5}', titre: "Une augmentation porte une date, et ne remonte pas le temps",
+      desc: "Dans la fiche d\u2019un salari\u00e9 (R\u00e9glages \u203a \u00c9quipe), sous le taux, un champ <b>\u00ab \u00c0 partir du \u00bb</b> pr\u00e9-rempli \u00e0 aujourd\u2019hui. Vous changez la valeur, vous enregistrez\u202f: le taux pr\u00e9c\u00e9dent reste attach\u00e9 aux heures d\u00e9j\u00e0 faites. La fiche affiche d\u00e9sormais <b>la liste compl\u00e8te</b> de ce que ce taux a valu et depuis quand. Si vous avez simplement <b>tap\u00e9 un chiffre de travers</b>, videz la date\u202f: la derni\u00e8re ligne est corrig\u00e9e sur place, sans inventer d\u2019augmentation qui n\u2019a pas eu lieu." },
+    { emoji: '\u{1F4CA}', titre: "L\u2019exercice coupe le mois \u00e0 la bonne date",
+      desc: "Une augmentation au 15 mars ne revalorise plus les quinze premiers jours du mois\u202f: les heures sont d\u00e9coup\u00e9es \u00e0 la date exacte du changement. Dans <b>Pilotage \u203a \u00c9conomie \u203a Exercice</b>, la colonne du taux montre alors les deux valeurs, \u00ab\u202f12,10 puis 13,50\u202f\u00bb, au lieu d\u2019un seul chiffre que personne n\u2019a jamais sign\u00e9." },
+    { emoji: '\u{1F512}', titre: "Un champ de saisie ne peut plus effacer un historique",
+      desc: "Vider le champ du taux ne supprime plus rien. Pour retirer une valeur, on retire sa ligne dans la liste \u2014 elle est visible, donc v\u00e9rifiable. Ces montants restent lisibles des <b>seuls administrateurs</b>, comme avant." },
+  ] },
   { v:'6.05', items:[
     { emoji: '\u{1F465}', titre: "L\u2019ordre de passage comptait UNE personne pour un chantier \u00e0 quarante",
       desc: "Simuler lisait l\u2019effectif <b>d\u2019aujourd\u2019hui</b>. Un contrat de groupe qui d\u00e9marre dans quinze jours n\u2019existait donc pas, et un cong\u00e9 du jour retirait quelqu\u2019un d\u2019un chantier qui commence en septembre. La tourn\u00e9e envoy\u00e9e aux ouvriers \u00e9tait d\u00e9coup\u00e9e pour une personne. L\u2019effectif se lit maintenant sur la <b>fen\u00eatre du travail</b>\u202f: le jour de la vendange, personne n\u2019est en cong\u00e9 et tous les contrats courent. L\u2019\u00e9cran affiche sur quelles dates il a compt\u00e9, et l\u2019\u00e9cart avec la pr\u00e9sence du jour." },
@@ -1708,6 +1718,7 @@ var MV_AIDE = {
       ['Onglet Vigne', ": vos tâches, leurs heures par hectare, le barème de la convention, vos écartements de plantation et vos périodes de travail."],
       ['Vos écartements', "ramènent les heures conseillées à votre densité réelle. Sans eux, le barème suppose 10 000 pieds à l’hectare — vos heures à vous, elles, ne bougent jamais."],
       ['Le barème de référence', "se choisit par région dans l’écran du barème, ouvert par « Nouvelle tâche selon le barème de la convention » : la Bourgogne ou la Gironde pour l’instant, chacune avec son texte source et sa date. C’est une référence, pas une règle : en changer ne modifie aucune de vos valeurs."],
+      ['Le taux horaire d’un salarié', "porte une date. Une augmentation s’enregistre « à partir du » jour choisi : les heures déjà travaillées gardent l’ancien taux, et le coût d’un exercice clos ne bouge plus. La fiche liste tout ce que ce taux a valu ; pour corriger une simple faute de frappe sans créer d’augmentation, videz la date. Ces montants sont visibles des seuls administrateurs."],
       ['Le mot de passe initial', "d’un nouveau membre s’affiche une seule fois — notez-le avant de fermer."],
       ['Passer un membre en inactif', "plutôt que le supprimer conserve son historique."],
       ['Documents & impressions', "dans l’onglet App rassemble tout ce que Ma Vigne sait sortir : ce qui est obligatoire en contrôle, vos états internes, et vos données brutes."],

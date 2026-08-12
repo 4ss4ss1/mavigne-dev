@@ -1,4 +1,37 @@
-// MA VIGNE — Service Worker v6.55
+// MA VIGNE — Service Worker v6.56
+// v6.56 (12/08/2026) — LE SALAIRE EST UNE SERIE DATEE.
+//   Le taux horaire d'un salarie etait UN SCALAIRE lu SANS DATE par les trois
+//   calculs de cout : cout par parcelle (_ecoJhByParc), sessions tracteur
+//   (_tauxCond) et exercice comptable (_pexData). Augmenter quelqu'un
+//   revalorisait donc retroactivement TOUT l'historique, y compris un exercice
+//   DEJA CLOS. `taux_hist` existait mais n'etait lu par AUCUN calcul — une
+//   phrase sous le champ, rien de plus.
+//   ★★★ UNE TRACE AFFICHEE N'EST PAS UNE TRACE LUE. Elle donnait l'illusion que
+//   le probleme etait traite pendant que les totaux bougeaient en silence. Meme
+//   famille que l'IDCC affiche mais non ecrit (§30i) et que les commentaires pris
+//   pour des preuves (§34g).
+//   MODELE : `paie.taux_serie[nom] = [{d,v}]` croissante = SOURCE DE VERITE ;
+//   `taux[nom]` devient le MIROIR du taux en vigueur AUJOURD'HUI (relu par la
+//   fiche, le compteur de la carte Economie et le garde anti-perte).
+//   MIGRATION A ZERO ECRITURE : serie absente -> DERIVEE a la lecture depuis
+//   `taux` + `taux_hist`, regle de Nico « les salaires indiques sont ok jusqu'a
+//   leur date de modification inscrite » (de vaut JUSQU'A d, a vaut A PARTIR DE d).
+//   Un domaine sans historique derive [{depuis toujours, taux courant}] : ancien
+//   comportement a l'identique.
+//   TROIS GESTES, UN SEUL FABRIQUE UNE PERIODE — champ de date PRE-REMPLI a
+//   aujourd'hui (augmentation), date VIDEE (correction sur place, aucune periode
+//   fabriquee), lignes retirees a l'ecran (relecture DOM, meme idiome que les
+//   contrats precedents). ⚠️ LE CHAMP VIDE NE SUPPRIME PLUS RIEN : un champ de
+//   saisie ne doit pas pouvoir detruire un historique (lecon §33 lot 2).
+//   L'EXERCICE COUPE LE MOIS a la date exacte du changement (_pexSegsTaux) : une
+//   augmentation au 15 mars ne revalorise pas les 15 premiers jours. La colonne
+//   affiche « 12,10 puis 13,50 » plutot qu'une moyenne que personne n'a signee.
+//   Les heures sans taux ne comptent plus l'exercice entier d'une personne mais
+//   les seules heures reellement non valorisees.
+//   `_mvPaieCount` compte desormais `taux_serie` : ce n'est plus un derive, c'est
+//   la source de tout cout de main-d'oeuvre date.
+//   Harnais mv-harnais-salaires.mjs : 51 assertions, contre-epreuve sur 4 defauts.
+//
 // v6.55 (12/08/2026) — Pilotage : COHERENCE. Huit lots, mesures sur le code.
 //   ① TOUTES les dates du module reculaient d'un jour : epoque LOCALE relue
 //     avec des accesseurs UTC. 1 avr -> 31 juil s'affichait 31 mars -> 30 juil.
@@ -1049,7 +1082,7 @@
 // v2.22 — Fix profils vides : guard vide dans loadData() pour MEMBRES/SAISONS/TACHES
 // v2.17 — Onboarding intégré + tenantId · v2.06 — Firebase Auth · v2.00–v2.05 — divers
 const DEBUG = self.location.hostname === 'localhost' || self.location.hostname === '127.0.0.1';
-const CACHE_NAME   = 'mavigne-v6.55';
+const CACHE_NAME   = 'mavigne-v6.56';
 const TENANT_CACHE = 'mavigne-tenant';   // Cache persistant — préservé à chaque mise à jour SW
 const SYNC_TAG     = 'mavigne-sync';
 
@@ -1065,7 +1098,7 @@ const CDN_URLS = [
 ];
 
 self.addEventListener('install', event => {
-  if(DEBUG) console.log('[SW] Ma Vigne v6.55 installé');
+  if(DEBUG) console.log('[SW] Ma Vigne v6.56 installé');
   event.waitUntil(
     caches.open(CACHE_NAME).then(async cache => {
       // ── Cœur applicatif : STRICT (mise à jour ATOMIQUE) ──
@@ -1081,7 +1114,7 @@ self.addEventListener('install', event => {
 });
 
 self.addEventListener('activate', event => {
-  if(DEBUG) console.log('[SW] Ma Vigne v6.55 activé');
+  if(DEBUG) console.log('[SW] Ma Vigne v6.56 activé');
   event.waitUntil(
     caches.keys().then(keys =>
       Promise.all(
