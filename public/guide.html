@@ -1316,7 +1316,7 @@ mark{background:rgba(200,176,32,.32);color:var(--cream);border-radius:3px;paddin
 <section id="pilotage">
   <div class="sec-h">
     <div class="sec-ic" aria-hidden="true">📊</div>
-    <div><h2>Pilotage</h2><div class="sub">Aujourd'hui · Avancement · Décider · Équipe · Cave · Économie · Conformité</div></div>
+    <div><h2>Pilotage</h2><div class="sub">Aujourd'hui · L'année · La campagne · L'équipe &amp; les tâches · Simuler · Cave · Économie · Conformité</div></div>
   </div>
   <p class="lead">Le Pilotage est un tableau de bord <b>en lecture seule</b>, pensé pour décider :
   où en est-on, tiendra-t-on les délais, peut-on traiter demain, combien coûte cet hectare. Il ne
@@ -1324,6 +1324,39 @@ mark{background:rgba(200,176,32,.32);color:var(--cream);border-radius:3px;paddin
   <div class="note tip"><span class="ni" aria-hidden="true">💡</span><div>Il est conçu pour le <b>grand écran</b>. Sur
   ordinateur, tout est lisible d'un coup ; sur téléphone il fonctionne, mais l'expérience est celle
   d'un cockpit vu par le hublot.</div></div>
+
+  <h3>🧭 Comment il se lit</h3>
+  <p>Les onglets vont du <b>large au fin</b> : l'année, puis la campagne, puis l'équipe et les tâches,
+  puis la simulation. Ils portent leur numéro. Après le trait, la Cave, l'Économie et la Conformité
+  sont des <b>écrans de détail</b> — pas des niveaux de zoom.</p>
+  <ul class="dot">
+    <li><b>La barre du haut dit où vous regardez</b> : l'exercice entier, ou une campagne. Cliquez une
+    campagne dans la frise de l'année et tout l'écran suit — les quatre chiffres du haut comme les
+    tableaux. La croix revient à l'année.</li>
+    <li><b>Quatre chiffres en tête de toutes les pages</b> : les travaux, l'effectif, le budget, la
+    conformité, à la maille de ce que vous regardez. Toucher l'un d'eux ouvre l'écran qui le détaille.
+    L'effectif affiche le <b>pic</b>, pas la moyenne : une moyenne annuelle n'existe aucun jour de
+    l'année, et c'est le pic qui décide d'un recrutement.</li>
+    <li><b>Le bouton « à compléter »</b> liste ce qui empêche vos chiffres d'être justes — périodes sans
+    dates, trous dans le calendrier, salariés sans taux horaire, tâches sans heures par hectare… Chaque
+    ligne dit <b>ce que ça fausse</b>, et le bouton vous emmène à l'endroit exact, qui clignote une
+    seconde. Un rond rouge sur un chiffre : il ne se calcule pas. Un rond orange : il sort, mais faux.</li>
+  </ul>
+
+  <h3>🗓️ L'année</h3>
+  <ul class="dot">
+    <li><b>Les 52 semaines de l'exercice</b> : vos périodes en couleur, et sous chacune le nombre de
+    personnes nécessaires semaine par semaine. Le vert est ce que l'équipe absorbe, le rouge ce qu'il
+    reste à recruter — le renfort se lit en hauteur de rouge, sans calcul.</li>
+    <li><b>Cliquez une période</b> : l'axe se recale dessus, l'échelle verticale suit, et les tâches qui
+    la composent apparaissent en bandes. C'est ce qui permet de voir la taille alors que la vendange
+    écrase tout.</li>
+    <li>Les zones <b>hachurées</b> ne sont couvertes par aucune période. Ce n'est pas un zéro : c'est
+    une absence de mesure, et la courbe d'effectif s'y interrompt au lieu de la traverser.</li>
+    <li><b>Le cadre de l'année</b> : où commence votre exercice comptable, et ce que ça change. Une
+    vendange placée en début d'année ouvre l'exercice au lieu de le clore — vous lisez alors deux
+    moitiés de cycles. L'écran le dit, et propose le réglage en un clic.</li>
+  </ul>
 
   <h3>🧭 Aujourd'hui</h3>
   <ul class="dot">
@@ -1337,16 +1370,15 @@ mark{background:rgba(200,176,32,.32);color:var(--cream);border-radius:3px;paddin
     <li><b>Tâche prioritaire</b> en cours et <b>alertes</b> matériel &amp; cave.</li>
   </ul>
 
-  <h3>🍇 Avancement</h3>
+  <h3>🍇 La campagne</h3>
   <ul class="dot">
     <li><b>Jauge de saison</b> et <b>avancement par tâche</b>, avec comparatif de l'année précédente.</li>
     <li><b>Donut de charge</b> : quelle tâche pèse le plus dans ce qui reste.</li>
     <li><b>Échéances par tâche</b> : date de fin projetée pour chacune, en jours ouvrés.</li>
     <li><b>Carte du domaine</b> colorée par avancement, libellés masquables.</li>
-    <li><b>Charge &amp; ETP</b> de la saison.</li>
   </ul>
 
-  <h3>🎛️ Décider</h3>
+  <h3>🎛️ Simuler</h3>
   <p>C'est l'onglet qui répond à <b>« qu'est-ce que je fais&nbsp;? »</b>, et il pose deux questions
   bien distinctes.</p>
   <ul class="dot">

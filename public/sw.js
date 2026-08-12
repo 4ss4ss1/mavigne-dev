@@ -1,4 +1,23 @@
-// MA VIGNE — Service Worker v6.49
+// MA VIGNE — Service Worker v6.50
+// v6.50 (12/08/2026) — Pilotage : la barre d'onglets devient un AXE DE ZOOM
+//   (Aujourd'hui · 1 L'annee · 2 La campagne · 3 L'equipe & les taches ·
+//   4 Simuler | Cave · Economie · Conformite). Les CLES sont inchangees
+//   (avc/equ/sim memorisees chez les clients, citees par app.js, verifiees
+//   par C22) : seuls les libelles et l'ordre bougent. Nouvel onglet `an` ;
+//   _pilPanelEtp y demenage depuis `avc` (un seul appel dans le fichier).
+//   _PIL_SHOW_MIGR reporte avc_etp -> an_frise sur les deux sources d'etat.
+//   PORTEE UNIQUE _PIL_SCOPE : _PIL_ETPSEL n'est plus qu'un alias en lecture
+//   (Object.defineProperty). Fin des cinq selecteurs qui s'ignoraient.
+//   Quatre photos (travaux/effectif/budget/conformite) en tete de tous les
+//   onglets ; l'effectif lit le PIC, jamais la moyenne ; source absente = tiret.
+//   MOTEUR DE DIAGNOSTIC _pilDiag() : 9 constats calcules, 3 gravites, et
+//   _pilGo() qui ouvre la page + switchReglTab + scrollIntoView + clignotement
+//   (7 ancres set-sec-* verifiees dans index.html). Les drapeaux des photos
+//   tirent du MOTEUR, pas de tests ecrits sur place.
+//   _pilPolyBreak : la ligne d'effectif se COUPE sur un trou au lieu de le
+//   traverser en droite ligne (elle affirmait un effectif non mesure).
+//   Palette semantique _PIL_SEM : col.alerte portait DEUX sens dans la meme
+//   image (renfort a trouver + trait du jour) ; le trait du jour a son encre.
 // v6.49 (12/08/2026) — Contrats : m.contrats[] garde les contrats PRECEDENTS d'une
 //   fiche, archives automatiquement quand un nouveau debut est posterieur a la fin
 //   du precedent. _mvContrats (utils.js) = definition unique, fusionne les contrats
@@ -894,7 +913,7 @@
 // v2.22 — Fix profils vides : guard vide dans loadData() pour MEMBRES/SAISONS/TACHES
 // v2.17 — Onboarding intégré + tenantId · v2.06 — Firebase Auth · v2.00–v2.05 — divers
 const DEBUG = self.location.hostname === 'localhost' || self.location.hostname === '127.0.0.1';
-const CACHE_NAME   = 'mavigne-v6.49';
+const CACHE_NAME   = 'mavigne-v6.50';
 const TENANT_CACHE = 'mavigne-tenant';   // Cache persistant — préservé à chaque mise à jour SW
 const SYNC_TAG     = 'mavigne-sync';
 
@@ -910,7 +929,7 @@ const CDN_URLS = [
 ];
 
 self.addEventListener('install', event => {
-  if(DEBUG) console.log('[SW] Ma Vigne v6.49 installé');
+  if(DEBUG) console.log('[SW] Ma Vigne v6.50 installé');
   event.waitUntil(
     caches.open(CACHE_NAME).then(async cache => {
       // ── Cœur applicatif : STRICT (mise à jour ATOMIQUE) ──
@@ -926,7 +945,7 @@ self.addEventListener('install', event => {
 });
 
 self.addEventListener('activate', event => {
-  if(DEBUG) console.log('[SW] Ma Vigne v6.49 activé');
+  if(DEBUG) console.log('[SW] Ma Vigne v6.50 activé');
   event.waitUntil(
     caches.keys().then(keys =>
       Promise.all(
