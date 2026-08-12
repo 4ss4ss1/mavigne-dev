@@ -821,7 +821,10 @@ function _pilAnnuelData(){
   if(!pers.length) return null;
   var key=pers.map(function(p){return p.nom+'|'+p.debut+'|'+p.fin;}).join(';')
     +'#'+((window.MEMBRES||[]).length)+'#'+((window.PARCELLES||[]).length)
-    +'#'+((window.TACHES||[]).length);
+    +'#'+((window.TACHES||[]).length)
+    // ⚠️ le mois d'exercice entre dans la cle : sans lui, changer l'ouverture
+    // laisserait la frise sur l'ancien cadre jusqu'au prochain rechargement.
+    +'#'+((typeof window._mvExerciceMois==='function')?window._mvExerciceMois():'-');
   if(_PIL_ANN && _PIL_ANNK===key) return _PIL_ANN;
   var out={pers:[],weeks:[],trous:[],ovl:[],s:0,e:0}, prevFin=null;
   pers.forEach(function(p,i){
@@ -837,11 +840,52 @@ function _pilAnnuelData(){
     });
   });
   out.weeks.sort(function(a,b){ return a.o0-b.o0; });
-  // Fenetre = celle de Reglages quand elle existe. UNE SEULE definition de « ou
-  // commence et ou finit l'annee » : deux definitions dessineraient deux annees.
-  var F=(typeof window._cmpFenetre==='function')?window._cmpFenetre():null;
-  out.s=F?_pilAnnOrd(F.a):_pilAnnOrd(pers[0].debut);
-  out.e=F?_pilAnnOrd(F.b):_pilAnnOrd(pers[pers.length-1].fin);
+  // ══ L'ANNEE = L'EXERCICE COMPTABLE ════════════════════════════════════════
+  // Un cadre FIXE, regle par l'admin, et le meme que celui de l'ecran Economie :
+  // la charge et le cout d'une annee doivent se lire sur la meme fenetre, sinon
+  // on compare des heures d'une annee a des euros d'une autre.
+  // Repli sur les bornes des periodes si l'exercice n'est pas lisible.
+  out.ex=(typeof window._cmpAnneeExercice==='function')?window._cmpAnneeExercice():null;
+  if(out.ex){ out.s=_pilAnnOrd(out.ex.d0); out.e=_pilAnnOrd(out.ex.d1); }
+  else {
+    var F=(typeof window._cmpFenetre==='function')?window._cmpFenetre():null;
+    out.s=F?_pilAnnOrd(F.a):_pilAnnOrd(pers[0].debut);
+    out.e=F?_pilAnnOrd(F.b):_pilAnnOrd(pers[pers.length-1].fin);
+  }
+  // Periodes qui sortent du cadre : on ne les etire pas dans la frise (le cadre
+  // cesserait d'etre un cadre), on les COMPTE pour le dire a l'ecran. Une periode
+  // hors exercice, c'est du travail dont le cout tombe dans une autre annee
+  // comptable — ca se decide, ca ne se decouvre pas.
+  out.hors=[];
+  pers.forEach(function(p){
+    if(p.fin<(out.ex?out.ex.d0:'') || p.debut>(out.ex?out.ex.d1:'\uFFFF')) out.hors.push(p.nom);
+  });
+  // ══ ANNEE VIGNE : la vendange doit CLORE l'annee, pas l'ouvrir ════════════
+  // « De apres vendange N jusqu'a fin vendange N+1 » (Nico, 12/08/2026). Le cycle
+  // de la vigne commence a la taille, apres la recolte. Si l'exercice ouvre AVANT
+  // la vendange, celle-ci tombe au debut de l'annee : on ne lit plus un cycle, on
+  // lit deux moities de cycles. Et si une borne TRAVERSE la vendange, la recolte
+  // est coupee en deux exercices — la moitie des heures et du cout d'un cote, la
+  // moitie de l'autre, sans que rien ne le signale.
+  out.vend=null; out.align=null;
+  var vd=null, vf=null;
+  out.pers.forEach(function(p){
+    ((p.cd&&p.cd.taskWindows)||[]).forEach(function(t){
+      if(_friseNorm(t.nom).indexOf('vendang')<0) return;
+      if(!vd||t.start<vd) vd=t.start;
+      if(!vf||t.end>vf)   vf=t.end;
+    });
+  });
+  if(vd&&vf&&out.ex){
+    out.vend={debut:vd,fin:vf};
+    var coupe=(vd<out.ex.d0&&vf>=out.ex.d0)||(vd<=out.ex.d1&&vf>out.ex.d1);
+    var o0=_pilAnnOrd(vd), L=Math.max(1,out.e-out.s+1);
+    var pos=(o0-out.s)/L;                         // 0 = ouvre l'annee, 1 = la clot
+    // Mois ideal d'ouverture = celui qui SUIT la fin de la vendange.
+    var fv=new Date(Date.parse(vf+'T00:00:00'));
+    var moisIdeal=(fv.getUTCMonth()+1)%12;
+    out.align={coupe:coupe, pos:pos, ok:(!coupe&&pos>=0.72), moisIdeal:moisIdeal};
+  }
   // Trous : intervalles que plus AUCUNE periode ne couvre. Un trou n'est pas une
   // absence de travail, c'est une absence de periode — une saisie datee la ne se
   // rattache a rien. Il se dessine hachure, JAMAIS a zero : un zero est une mesure.
@@ -864,6 +908,40 @@ function _pilAnnPer(nom){
 function _pilAnnTaches(p){
   var tw=(p&&p.cd&&p.cd.taskWindows)||[];
   return tw.slice().sort(function(a,b){ return String(a.start).localeCompare(String(b.start)); }).slice(0,12);
+}
+// ── Le mot sur l'alignement annee / vendange ────────────────────────────────
+// Un cadre annuel mal pose ne fait pas d'erreur visible : il donne des chiffres
+// PLAUSIBLES sur un cycle coupe en deux. C'est la pire des pannes — celle qui ne
+// se voit pas. On la dit, avec le geste qui la corrige.
+function _pilAnneeVigneHtml(ann){
+  if(!ann||!ann.ex) return '';
+  var A=ann.align, out='';
+  var MLB=(window.MV_EX_MOIS_LBL)||['janvier','f\u00e9vrier','mars','avril','mai','juin','juillet','ao\u00fbt','septembre','octobre','novembre','d\u00e9cembre'];
+  var admin=!!(typeof window.isAdmin==='function' && window.isAdmin());
+  var fr=function(d){ if(!d)return'\u2014'; var p=String(d).split('-'); return p.length===3?(parseInt(p[2],10)+' '+MLB[parseInt(p[1],10)-1]):d; };
+  var box=function(bg,col,html){
+    return '<div style="margin:0 0 8px;padding:9px 12px;border-radius:9px;background:'+bg+';color:'+col+';font-size:12px;line-height:1.55">'+html+'</div>';
+  };
+  if(A){
+    var bouton=(admin&&A.moisIdeal!=null)
+      ? (' <button data-exm="'+A.moisIdeal+'" style="border:1px solid currentColor;background:transparent;color:inherit;border-radius:16px;padding:2px 10px;font-size:11.5px;font-weight:700;cursor:pointer;margin-left:4px">Ouvrir au 1\u1D49\u02B3 '+MLB[A.moisIdeal]+'</button>')
+      : '';
+    if(A.coupe){
+      out+=box('#F3D9D4','var(--rouge)','\u26A0 <b>La vendange est coup\u00e9e par la borne de l\u2019exercice.</b> Elle court du '
+        +fr(ann.vend.debut)+' au '+fr(ann.vend.fin)+', \u00e0 cheval sur deux ann\u00e9es comptables : une partie des heures et du co\u00fbt tombe d\u2019un c\u00f4t\u00e9, le reste de l\u2019autre. Aucune lecture annuelle n\u2019est fiable tant que c\u2019est le cas.'+bouton);
+    } else if(!A.ok){
+      out+=box('#FBF0DC','#8A5A38','\u2139\ufe0f <b>La vendange ouvre l\u2019ann\u00e9e au lieu de la clore.</b> Votre exercice d\u00e9marre le 1\u1D49\u02B3 '
+        +MLB[ann.ex.mois]+' et la vendange tombe le '+fr(ann.vend.debut)+'. Une ann\u00e9e vigne va d\u2019<i>apr\u00e8s</i> la vendange \u00e0 la <i>fin</i> de la suivante : la taille et le tirage de ce cycle-l\u00e0 se lisent alors dans la m\u00eame ann\u00e9e que la r\u00e9colte qu\u2019ils pr\u00e9parent.'+bouton);
+    } else {
+      out+=box('#DCEBD0','var(--vert-med)','\u2713 <b>Ann\u00e9e vigne align\u00e9e.</b> Le cycle va d\u2019apr\u00e8s la vendange pr\u00e9c\u00e9dente \u00e0 la fin de celle du '
+        +fr(ann.vend.fin)+'.');
+    }
+  }
+  if(ann.hors&&ann.hors.length){
+    out+=box('#FBF0DC','#8A5A38','\u2139\ufe0f <b>'+ann.hors.length+' p\u00e9riode'+(ann.hors.length>1?'s':'')+' hors de cet exercice</b> \u2014 '
+      +_pilEsc(ann.hors.join(', '))+'. Leur travail et leur co\u00fbt tombent dans une autre ann\u00e9e comptable.');
+  }
+  return out;
 }
 function _pilFriseAnneeSvg(ann,w){
   if(!ann||!ann.weeks.length) return window._mvGraphVide(
@@ -1032,8 +1110,10 @@ function _pilPanelEtp(d){
       +'</div>'
       +'<div style="font-size:10px;color:var(--texte-doux);margin:0 0 6px">'
       +(_selP?'L\u2019\u00e9chelle verticale suit le zoom \u2014 les bandes du haut sont les t\u00e2ches de la campagne.'
-             :'Cliquez une campagne pour zoomer dessus. Les zones hachur\u00e9es ne sont couvertes par aucune p\u00e9riode.')
+             :((ann.ex?('Ann\u00e9e = exercice comptable \u00b7 '+_pilEsc(ann.ex.lbl)+'. '):'')
+               +'Cliquez une campagne pour zoomer dessus. Les zones hachur\u00e9es ne sont couvertes par aucune p\u00e9riode.'))
       +'</div>'
+      +(_selP?'':_pilAnneeVigneHtml(ann))
       +'<div style="width:100%;overflow-x:auto" id="pil-g-ann"></div>'+annLeg;
     if(ann.ovl.length) annBlock+='<div style="margin:6px 0 0;padding:8px 11px;border-radius:9px;background:#F3D9D4;color:var(--rouge);font-size:12px;font-weight:600">'
       +'\u26A0 Chevauchement de p\u00e9riodes sur '+_pilEsc(ann.ovl.join(', '))+' \u2014 les heures y sont compt\u00e9es deux fois sur la frise.</div>';
@@ -6615,6 +6695,14 @@ function _pilBindContent(content){
     var nb=e.target.closest('.pil-names-btn'); if(nb){ e.stopPropagation(); _pilNamesOn=!_pilNamesOn; _pilApplyNames(); nb.textContent=_pilNamesOn?'\uD83C\uDFF7 Noms \u2713':'\uD83C\uDFF7 Noms'; return; }
     // Clic sur une campagne de la frise annuelle : zoom / retour. Re-cliquer la
     // meme campagne (ou le bouton de retour, qui porte son nom) revient a l'annee.
+    // Reglage de l'ouverture d'exercice depuis la frise annuelle. _pexSetMois
+    // verifie lui-meme le droit admin et RELIT la valeur apres ecriture : si
+    // reglages.js n'est pas a jour, il le dit au lieu de faire semblant.
+    var _ex=e.target.closest('[data-exm]');
+    if(_ex){ e.stopPropagation(); var _em=parseInt(_ex.getAttribute('data-exm'),10);
+      _PIL_ANN=null; _PIL_ANNK='';
+      if(typeof window._pexSetMois==='function') window._pexSetMois(_em);
+      return; }
     var _ea=e.target.closest('[data-etpc]');
     if(_ea){ e.stopPropagation(); var _en=_ea.getAttribute('data-etpc'); _PIL_ETPSEL=(_PIL_ETPSEL===_en)?null:_en; _pilFillContent(_pilData()); return; }
     var _ec=e.target.closest('[data-etp]'); if(_ec){ e.stopPropagation(); var _ek=_ec.getAttribute('data-etp'); if(!_PIL_STATE.sub)_PIL_STATE.sub={}; _PIL_STATE.sub[_ek]=(_PIL_STATE.sub[_ek]===0)?1:0; _pilSaveState(_PIL_STATE); _pilFillContent(_pilData()); return; }

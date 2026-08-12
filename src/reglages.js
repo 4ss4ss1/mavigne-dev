@@ -981,6 +981,25 @@ function _cmpFenetre(){
   ds.sort(); fs.sort();
   return {a:ds[0], b:fs[fs.length-1]};
 }
+// ★ LES BORNES DE L'ANNEE — celles de l'EXERCICE, pas une fenetre deduite.
+// _cmpFenetre ci-dessus garde son role : encadrer les periodes TELLES QUE SAISIES,
+// pour la frise d'edition de Reglages ; elle doit continuer de tout montrer, y
+// compris ce qui deborde. Mais « l'annee » au sens du Pilotage est autre chose :
+// un CADRE fixe, pas un resultat qui bouge a chaque periode ajoutee ou renommee.
+// _mvExercice (utils.js) est deja la source unique de « ou commence l'annee », et
+// l'admin la regle dans Pilotage > Economie > Exercice. On la CONSOMME. En
+// fabriquer une seconde ici donnerait deux ecrans qui racontent deux annees — le
+// motif exact qui a coute 941 heures fantomes sur le filtre de taches.
+// L'ancre est la periode ACTIVE : on regarde l'exercice de ce qu'on consulte, pas
+// celui d'aujourd'hui — sinon consulter Hiver 2025 en aout 2026 afficherait
+// l'exercice 2026-2027, qui ne le contient pas.
+function _cmpAnneeExercice(){
+  if(typeof window._mvExercice!=='function') return null;
+  var act=(window.SAISONS||[]).filter(function(s){ return s&&s.active&&s.debut; })[0];
+  var ex=window._mvExercice(act?act.debut:undefined);
+  return ex||null;
+}
+window._cmpAnneeExercice=_cmpAnneeExercice;
 // Expose : Pilotage y lit la fenetre de la campagne pour sa frise annuelle. Une
 // SEULE definition de « ou commence et ou finit l'annee » — Reglages et Pilotage
 // doivent cadrer sur la meme, sinon deux ecrans dessinent deux annees.
