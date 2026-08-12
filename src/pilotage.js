@@ -329,23 +329,40 @@ function _pilData(){
       else if(e.type==='recup') etat='recup';
       else if(e.absent){ motif=e.comment||''; etat=/malad/i.test(motif)?'maladie':'absent'; }
     }
-    return { nom:m.nom, etat:etat, motif:motif, bureau:!!m.bureau };
+    // \u2605\u2605\u2605 LE POIDS DE LA FICHE VOYAGE AVEC ELLE.
+    //   Une equipe COLLECTIVE (m.collectif, m.effectif = 26) est UNE fiche et
+    //   VINGT-SIX personnes. _headWeek et capEquipe le savent depuis le 11/08
+    //   (\u00a733), le simulateur de renfort depuis le 12/08 (\u00a735) — pas ces
+    //   presences-la. Sans ce poids, l'onglet D\u00e9cider propose de repartir
+    //   \u00ab 2 personnes \u00bb entre les taches un jour ou 28 sont sous contrat.
+    return { nom:m.nom, etat:etat, motif:motif, bureau:!!m.bureau,
+             eff:((typeof window._mvEffDef==='function')?window._mvEffDef(m):1),
+             coll:!!(typeof window._mvEstCollectif==='function'&&window._mvEstCollectif(m)) };
   });
   var nPresent = presences.filter(function(p){ return p.etat==='present'; }).length;
   var nCp = presences.filter(function(p){ return p.etat==='cp'; }).length;
   var nAbs = presences.filter(function(p){ return p.etat==='maladie'||p.etat==='absent'; }).length;
   var nRecup = presences.filter(function(p){ return p.etat==='recup'; }).length;
-  // Effectif réellement présent au champ aujourd'hui (hors bureau, hors indisponibles)
+  // Effectif au champ aujourd'hui. DEUX nombres, volontairement distincts :
+  //   presentFiches = combien de FICHES sont la (\u00ab 3 pr\u00e9sents sur 4 \u00bb) ;
+  //   presentChamp  = combien de PERSONNES, equipes collectives a leur effectif.
+  // Les deux sont deja bornes aux gens SOUS CONTRAT ce jour-la : `membres` vient
+  // de _pilMembresActifs, qui filtre sur _mvEnContratLe. Confondre les deux, c'est
+  // soit annoncer \u00ab 28 pr\u00e9sents sur 4 \u00bb, soit repartir une equipe de 26 comme
+  // une seule paire de bras.
   var nVchamp = presences.filter(function(p){ return !p.bureau; }).length;
   var nIndispoChamp = presences.filter(function(p){ return !p.bureau && p.etat!=='present'; }).length;
-  var presentChamp = Math.max(0, nVchamp - nIndispoChamp);
+  var presentFiches = Math.max(0, nVchamp - nIndispoChamp);
+  var presentChamp = presences.reduce(function(a,p){
+    return a + ((!p.bureau && p.etat==='present') ? (p.eff||1) : 0);
+  },0);
 
   var domaine = window.DOMAINE_NOM || 'Domaine';
 
   return { data:data, active:active, done:done, totalReste:totalReste, totalTotal:totalTotal, hDone:hDone, gaugePct:gaugePct,
            saison:saison, surfTot:surfTot, nActives:nActives, membres:membres, refDate:_refDs, nFinis:nFinis, prio:prio,
            sessions:sessions, lastSess:lastSess, sessAdv:sessAdv, cuvees:cuvees, traits:traits, meteo:meteo, domaine:domaine,
-           tracs:tracs, nRepar:nRepar, gnr:gnr, ouAlerte:ouAlerte, presences:presences, nPresent:nPresent, nCp:nCp, nAbs:nAbs, nRecup:nRecup, nVchamp:nVchamp, presentChamp:presentChamp, nIndispoChamp:nIndispoChamp };
+           tracs:tracs, nRepar:nRepar, gnr:gnr, ouAlerte:ouAlerte, presences:presences, nPresent:nPresent, nCp:nCp, nAbs:nAbs, nRecup:nRecup, nVchamp:nVchamp, presentChamp:presentChamp, presentFiches:presentFiches, nIndispoChamp:nIndispoChamp };
 }
 
 
@@ -1139,6 +1156,30 @@ function _pilPicPortee(){
            moy:(n>0?som/n:0), court:court, nSem:n, annee:!selP,
            nom:(selP?selP.nom:null), ann:ann, selP:selP };
 }
+// \u2605\u2605\u2605 CE QUI EST DEJA SIGNE, POUR LA SEMAINE EN COURS.
+//   Les simulateurs du jour repondent \u00ab avec qui est la CE MATIN \u00bb. C'est utile
+//   et incomplet : un CDD signe qui demarre lundi, une equipe d'accolage engagee
+//   pour trois semaines, ne se voient nulle part tant qu'ils ne sont pas devant
+//   la porte. On affiche donc, a cote de la presence du jour, l'effectif SOUS
+//   CONTRAT de la semaine — celui que la frise annuelle et le simulateur de
+//   renfort lisent deja (w.head, contrats lus par _mvContrats, collectifs
+//   ponderes par _mvEffDef). \u26a0 AUCUN NOUVEAU CALCUL : un second calcul donnerait
+//   un second chiffre, et c'est exactement la faute que ce module repare.
+//   null quand aujourd'hui ne tombe dans aucune periode : un trou n'est pas un
+//   zero, et un zero est une mesure.
+function _pilEffSemaine(){
+  var ann=null; try{ ann=_pilAnnuelData(); }catch(e){ ann=null; }
+  if(!ann||!ann.weeks||!ann.weeks.length) return null;
+  var tIso=(typeof window._mvAujIso==='function')?window._mvAujIso():null;
+  if(!tIso) return null;
+  var o=_pilAnnOrd(tIso); if(isNaN(o)) return null;
+  var best=null;
+  ann.weeks.forEach(function(w){
+    if(w.o0>o||w.o1<o) return;
+    if(best===null||(w.head||0)>best) best=(w.head||0);
+  });
+  return best;
+}
 // Le libelle du cadre, ecrit SOUS le chiffre. Un pic sans cadre est une opinion.
 function _pilCadreLbl(PP){
   if(!PP.annee) return PP.nom||'la campagne';
@@ -1817,11 +1858,18 @@ function _pilSimClamp(){
 }
 function _pilSimEven(nT, ppl){ var a=[]; for(var i=0;i<nT;i++)a.push(0); if(nT>0){ for(var k=0;k<ppl;k++)a[k%nT]++; } return a; }
 function _pilSimInitData(d){
-  var c=_pilEchCadence(d), cadH=c.cadH, nV=(d.membres||[]).filter(function(m){ return m && !m.bureau; }).length;
+  // \u26a0 nV divise la cadence pour donner les heures PAR PERSONNE. Compte en
+  //   fiches, il fait d'une equipe de 26 une seule paire de bras : perH sortait
+  //   26 fois trop haut et TOUTES les durees du panneau avec lui.
+  var c=_pilEchCadence(d), cadH=c.cadH;
+  var nV=(d.membres||[]).reduce(function(a,m){
+    return a + ((m&&!m.bureau)?((typeof window._mvEffDef==='function')?window._mvEffDef(m):1):0);
+  },0);
   var perH=(cadH>0&&nV>0)?(cadH/nV):0;
   var present=(typeof d.presentChamp==='number')?d.presentChamp:nV;
+  var eSem=_pilEffSemaine();
   var tasks=(d.active||[]).filter(function(t){ return (t.h_reste||0)>0; }).sort(function(a,b){ return (b.h_reste||0)-(a.h_reste||0); }).map(function(t){ return {nom:t.nom,hreste:Math.round(t.h_reste||0),pct:t.pct||0}; });
-  _PIL_SIM_DATA={ tasks:tasks, cadH:cadH, nV:nV, present:present, perH:perH, indispo:(d.nIndispoChamp||0), indispoNoms:_pilIndispoNoms(d) };
+  _PIL_SIM_DATA={ tasks:tasks, cadH:cadH, nV:nV, present:present, perH:perH, indispo:(d.nIndispoChamp||0), indispoNoms:_pilIndispoNoms(d), eSem:eSem };
   if(!_PIL_SIM || _PIL_SIM.alloc.length!==tasks.length || _PIL_SIM._present!==present){
     _PIL_SIM={ alloc:_pilSimEven(tasks.length,present).slice(), pool:present, _present:present };
   }
@@ -1869,6 +1917,11 @@ function _pilSimBody(){
     + (free>0?(' \u00b7 <b style="color:var(--orange)">'+free+' personne'+(free>1?'s':'')+' non affect\u00e9e'+(free>1?'s':'')+'</b>'):'')+'</div>';
   var presLine=D.present+' présent'+(D.present>1?'s':'')+' aujourd\'hui';
   if(D.indispo>0){ presLine+=' <span style="color:var(--rouge)">· −'+D.indispo+' indispo'+((D.indispoNoms&&D.indispoNoms.length)?' ('+_pilEsc(D.indispoNoms.join(', '))+')':'')+'</span>'; }
+  // \u2605 CE QUI EST DEJA SIGNE. Affiche seulement quand il DIFFERE de la presence
+  //   du jour : repeter le meme nombre sous deux noms fait croire a deux mesures.
+  if(D.eSem!=null && Math.abs(D.eSem-D.present)>0.05){
+    presLine+=' <span style="color:var(--texte-doux)">\u00b7 '+_pilEtpFmt(D.eSem)+' sous contrat cette semaine</span>';
+  }
   var renfortDelta=pool-D.present;
   var rdLab=renfortDelta>0?('+'+renfortDelta+' renfort'):(renfortDelta<0?(renfortDelta+' en moins'):'équipe du jour');
   var rdCol=renfortDelta>0?'var(--vert-med)':(renfortDelta<0?'var(--rouge)':'var(--texte-doux)');
@@ -1890,7 +1943,7 @@ function _pilSimBody(){
       + '<div class="pil-li-r">'+_pilSimStepper('task',i,S.alloc[i],S.alloc[i]>0,free>0)+'</div></div>';
   });
   h+='</div>';
-  h+='<div style="font-size:11px;color:var(--texte-doux);line-height:1.5;margin-top:8px">L\'effectif part de l\'équipe <b>présente aujourd\'hui</b> (CP, maladie, absences et récup déduits). Monte pour un <b>renfort</b>, descends pour un <b>départ</b> · <b>répartir</b> change quelle tâche finit en premier.</div>';
+  h+='<div style="font-size:11px;color:var(--texte-doux);line-height:1.5;margin-top:8px">L\'effectif part de l\'équipe <b>présente aujourd\'hui</b> (CP, maladie, absences et récup déduits) — une équipe collective y compte pour son <b>effectif inscrit au contrat</b>, pas pour une fiche. Monte pour un <b>renfort</b>, descends pour un <b>départ</b> · <b>répartir</b> change quelle tâche finit en premier.</div>';
   var even0=_pilSimEven(D.tasks.length,D.present);
   var touched=(pool!==D.present)||D.tasks.some(function(t,i){return S.alloc[i]!==even0[i];});
   h+='<div style="margin-top:10px;display:flex;align-items:center;gap:10px"><button data-sim="reset" style="border:1px solid var(--gris-clair);background:transparent;color:var(--texte);cursor:pointer;border-radius:8px;padding:7px 14px;font-size:12px;font-weight:700'+(touched?'':';opacity:.55')+'">↺ Revenir à l\'équipe du jour</button><span style="font-size:11px;color:var(--texte-doux)">simulation — rien n\'est enregistré</span></div>';
@@ -1923,6 +1976,16 @@ function _pilPanelSimulateur(d){
 // ════════════════════════════════════════════════════════════════════
 var _PIL_OP=null, _PIL_OP_DATA=null;
 
+// \u2605 D'OU VIENT LE NOMBRE, ECRIT SOUS LE NOMBRE. \u00ab pr\u00e9sents (auto) \u00bb ne disait
+//   pas si les contrats etaient lus ; quand la semaine engage plus de monde que
+//   ce matin, on l'annonce plutot que de laisser l'utilisateur monter le compteur
+//   a l'aveugle.
+function _opEffNote(OP){
+  if(!OP.effAuto) return 'r\u00e9gl\u00e9';
+  var e=_PIL_OP_DATA&&_PIL_OP_DATA.eSem;
+  if(e!=null && e>OP.eff+0.5) return 'pr\u00e9sents (auto) \u00b7 '+_pilEtpFmt(e)+' sous contrat';
+  return 'pr\u00e9sents (auto)';
+}
 function _opCanEdit(){ return !!(typeof window.isAdmin==='function' && window.isAdmin()); }
 function _opTaskDef(nom){ var arr=(typeof window.getTachesSaison==='function')?window.getTachesSaison():(window.TACHES||[]); return arr.find(function(t){ return t && t.nom===nom; }) || null; }
 function _opDefs(){ return (_PIL_OP&&_PIL_OP.tasks||[]).map(_opTaskDef).filter(Boolean); }
@@ -2356,7 +2419,7 @@ function _opBody(){
 
   // ── Réglages sim ──
   h+='<div style="display:grid;grid-template-columns:repeat(4,1fr);gap:7px;margin-bottom:11px">'
-    +_opStepper('eff','Effectif',-1,1,OP.eff,(OP.effAuto?'pr\u00e9sents (auto)':'r\u00e9gl\u00e9'),OP.eff>1,true)
+    +_opStepper('eff','Effectif',-1,1,OP.eff,_opEffNote(OP),OP.eff>1,true)
     +_opStepper('jour','Journ\u00e9e',-0.5,0.5,OP.jour,'h/jour',OP.jour>1,OP.jour<12)
     +_opStepper('pause','Pause',-15,15,OP.pause,'min',OP.pause>0,OP.pause<180)
     +_opStepper('trajet','Trajet',-5,5,OP.trajet,'min/saut',OP.trajet>0,OP.trajet<60)+'</div>';
@@ -2502,11 +2565,18 @@ function _pilOpAction(el){
 }
 
 function _opInit(d){
-  var present=(typeof d.presentChamp==='number')?d.presentChamp:((d.membres||[]).filter(function(m){return m&&!m.bureau;}).length||1);
+  // Meme regle que partout : une equipe collective pese son effectif. Le repli
+  // (aucun presentChamp) applique le meme poids, sinon il contredit le chemin
+  // normal des qu'il sert.
+  var present=(typeof d.presentChamp==='number')?d.presentChamp:Math.max(1,
+    (d.membres||[]).reduce(function(a,m){
+      return a + ((m&&!m.bureau)?((typeof window._mvEffDef==='function')?window._mvEffDef(m):1):0);
+    },0));
+  present=Math.round(present);
   var arr=(typeof window.getTachesSaison==='function')?window.getTachesSaison():(window.TACHES||[]);
   var tasks=arr.map(function(def){ var tot=_opParcActive().filter(function(p){return _opApplic(p,def);}).reduce(function(a,p){return a+_opParcReste(p,def);},0); return { def:def, nom:def.nom, tot:tot }; });
   var deflt=null; tasks.forEach(function(x){ if(!deflt||x.tot>deflt.tot) deflt=x; });
-  _PIL_OP_DATA={ present:present, tasks:tasks, defaultTask:deflt?deflt.nom:((tasks[0]&&tasks[0].nom)||'') };
+  _PIL_OP_DATA={ present:present, eSem:_pilEffSemaine(), tasks:tasks, defaultTask:deflt?deflt.nom:((tasks[0]&&tasks[0].nom)||'') };
   if(!_PIL_OP){ _PIL_OP={ tasks:[_PIL_OP_DATA.defaultTask].filter(Boolean), eff:Math.max(1,present), effAuto:true, jour:7, pause:45, trajet:5, _startNom:null, order:null, _pick:null }; }
   else { if(_PIL_OP.effAuto) _PIL_OP.eff=Math.max(1,present);
     // Un rendu COMPLET de l'onglet (changement d'onglet, rafra\u00eechissement de
@@ -3949,10 +4019,12 @@ function _pilCkEtp(d){
   var present=d.presentChamp!=null?d.presentChamp:0;
   var req=PP.ok?PP.pic:null;
   var low=(req!=null && present<req-0.05);
-  var reqTxt=(req!=null)?(' / '+_pilEtpFmt(req)+' ETP'):'';
+  // present et req sont maintenant la MEME grandeur : des personnes, equipes
+  // collectives ponderees des deux cotes. Le mot « ETP » melangeait deux unites.
+  var reqTxt=(req!=null)?(' / '+_pilEtpFmt(req)+' pers.'):'';
   var sous = (req==null) ? 'à la vigne aujourd\'hui'
     : ((low?'sous-effectif':'capacité suffisante')+' au pic \u00b7 '+_pilCadreLbl(PP));
-  return '<div class="pil-ck"><div class="kl">Effectif</div><div class="kv">'+present+'<span class="u">'+reqTxt+'</span></div>'
+  return '<div class="pil-ck"><div class="kl">Effectif</div><div class="kv">'+_pilEtpFmt(present)+'<span class="u">'+reqTxt+'</span></div>'
     +'<div class="ks"'+(low?' style="color:var(--orange);font-weight:600"':'')+'>'+_pilEsc(sous)+'</div></div>';
 }
 function _pilCkJours(){
@@ -3971,10 +4043,17 @@ function _pilCkPres(d){
     var col=p.etat==='cp'?'var(--orange)':p.etat==='recup'?'#7B6DB8':'var(--rouge)';
     return '<span class="pil-chip2" style="background:'+bg+';color:'+col+'">'+_pilEsc(lab)+'</span>';
   }).join('');
-  var tot=(d.presences||[]).filter(function(p){return !p.bureau;}).length, pc=d.presentChamp||0;
+  // \u26a0 CETTE TUILE COMPTE DES FICHES, et elle doit continuer : \u00ab 3 pr\u00e9sents
+  //   sur 4 \u00bb nomme les quatre lignes de l'equipe. Y mettre l'effectif pondere
+  //   donnerait \u00ab 28 pr\u00e9sents sur 4 \u00bb. Le nombre de PERSONNES est ajoute en
+  //   dessous, sous son propre nom, quand une equipe collective les separe.
+  var tot=(d.presences||[]).filter(function(p){return !p.bureau;}).length;
+  var pc=(d.presentFiches!=null?d.presentFiches:(d.presentChamp||0));
+  var pers=(d.presentChamp!=null?d.presentChamp:pc);
   return '<div class="pil-tile2"><div class="pil-t2h"><span class="ic">'+_pilIco('users')+'</span><span class="t">À la vigne aujourd\'hui</span></div>'
     +'<div class="pil-t2b"><div class="pil-big green">'+pc+' présent'+(pc>1?'s':'')+'</div>'
-    +'<div class="pil-t2s">sur '+tot+(ind.length?' · '+ind.length+' indisponible'+(ind.length>1?'s':''):' · équipe au complet')+'</div>'
+    +'<div class="pil-t2s">sur '+tot+(ind.length?' · '+ind.length+' indisponible'+(ind.length>1?'s':''):' · équipe au complet')
+      +(pers>pc+0.5?(' · <b>'+_pilEtpFmt(pers)+' personnes</b> au total (équipe collective)'):'')+'</div>'
     +(chips?'<div style="margin-top:7px">'+chips+'</div>':'')+'</div></div>';
 }
 function _pilCkTraiter(){
@@ -4139,7 +4218,7 @@ function _pilPanelCapacite(d){
     // ★ AUJOURD'HUI EST UNE AUTRE QUESTION, ET ELLE A SON PROPRE ENCART. Le pic
     //   peut tomber dans onze mois : comparer la presence du jour a ce besoin-la
     //   n'apprend rien, et le faire en silence donne un chiffre faux.
-    +'<div class="pil-li-s" style="margin-top:9px;color:var(--texte-doux)">Aujourd\u2019hui : <b>'+present+'</b> personne'+(present>1?'s':'')+' au champ (hors bureau et hors absents). Un comptage de têtes, pas un ETP.</div>'
+    +'<div class="pil-li-s" style="margin-top:9px;color:var(--texte-doux)">Aujourd\u2019hui : <b>'+_pilEtpFmt(present)+'</b> personne'+(present>1.05?'s':'')+' au champ (hors bureau, hors absents, une équipe collective comptée à son effectif). C\u2019est <b>une autre date</b> que le pic ci-dessus.</div>'
     +(cd?('<div class="pil-li-s" style="margin-top:4px;color:var(--texte-doux)">Moyenne sur '+_pilEsc(cd.saison)+' : <b>'+_pilEtpFmt(cd.etpCible||0)+'</b> pers. — c\u2019est une <b>autre fenêtre</b> que le pic ci-dessus.</div>'):'');
   var sub='pic sur '+cadre+(sem?(' \u00b7 '+sem):'');
   return _pilTile('capacite','\u2696\uFE0F','#C9A84C','Capacité vs charge · '+cadre, _pilStat(_pilEtpFmt(req),' pers. au pic'), sub, null, body);
