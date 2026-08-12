@@ -869,11 +869,13 @@ var _PIL_SCOPE = { camp:null };    // nom de la campagne zoomee ; null = l'annee
 // Meme patron de cle que _pilTabKey : un module, une facon de nommer.
 function _pilScopeKey(){ return 'mavigne_pil_scope_'+_pilTenant(); }
 function _pilScopeLoad(){
-  try{ var v=localStorage.getItem(_pilScopeKey()); if(v!=null) _PIL_SCOPE.camp=(v==='')?null:v; }catch(e){}
+  try{ var v=localStorage.getItem(_pilScopeKey()); if(v!=null) _PIL_SCOPE.camp=(v==='')?null:v; }
+  catch(e){ if(window.logError) window.logError({level:'info',cat:'pilotage',msg:'scope: lecture impossible'}); }
 }
 function _pilScopeSet(camp){
   _PIL_SCOPE.camp = camp || null;
-  try{ localStorage.setItem(_pilScopeKey(), _PIL_SCOPE.camp||''); }catch(e){}
+  try{ localStorage.setItem(_pilScopeKey(), _PIL_SCOPE.camp||''); }
+  catch(e){ if(window.logError) window.logError({level:'info',cat:'pilotage',msg:'scope: ecriture impossible'}); }
 }
 // La campagne portee EXISTE-T-ELLE encore ? Une periode supprimee ou renommee
 // laisserait une portee fantome : l'ecran filtrerait sur un nom que plus
@@ -6559,11 +6561,11 @@ function _pilCssV2(){
   +'.pil-photos{display:grid;grid-template-columns:repeat(4,1fr);gap:11px;margin:0 0 18px}'
   +'.pil-photo{background:var(--bg-card);border:1px solid var(--gris-clair);border-radius:14px;padding:13px 14px 12px;box-shadow:var(--shadow-sm);text-align:left;width:100%;font-family:inherit;cursor:pointer;transition:border-color .12s;min-height:112px;display:block}'
   +'.pil-photo:hover{border-color:var(--or)}'
-  +'.pil-photo .k{font-size:9.5px;letter-spacing:1.5px;text-transform:uppercase;color:var(--texte-doux);font-weight:700;display:flex;align-items:center;gap:6px}'
-  +'.pil-photo .v{font-family:\'Cormorant Garamond\',serif;font-size:32px;font-weight:700;line-height:1.05;margin:5px 0 0;color:var(--cave);font-variant-numeric:tabular-nums}'
-  +'.pil-photo .u{font-family:Outfit,sans-serif;font-size:13.5px;font-weight:600;color:var(--texte-doux)}'
-  +'.pil-photo .s{font-size:11.5px;color:var(--texte-doux);margin-top:2px;line-height:1.35}'
-  +'.pil-photo .go{font-size:10.5px;color:var(--terre);font-weight:700;margin-top:7px}'
+  +'.pil-photo .k{display:flex;align-items:center;gap:6px;font-size:9.5px;letter-spacing:1.5px;text-transform:uppercase;color:var(--texte-doux);font-weight:700}'
+  +'.pil-photo .v{display:block;font-family:\'Cormorant Garamond\',serif;font-size:32px;font-weight:700;line-height:1.05;margin:5px 0 0;color:var(--cave);font-variant-numeric:tabular-nums}'
+  +'.pil-photo .u{display:inline;font-family:Outfit,sans-serif;font-size:13.5px;font-weight:600;color:var(--texte-doux)}'
+  +'.pil-photo .s{display:block;font-size:11.5px;color:var(--texte-doux);margin-top:2px;line-height:1.35}'
+  +'.pil-photo .go{display:block;font-size:10.5px;color:var(--terre);font-weight:700;margin-top:7px}'
   +'.pil-flag{display:inline-flex;align-items:center;justify-content:center;width:15px;height:15px;border-radius:50%;font-size:10px;font-weight:800;color:#fff;flex-shrink:0}'
   +'@media(max-width:880px){.pil-photos{grid-template-columns:1fr 1fr}}'
   +'@media(max-width:430px){.pil-photo .v{font-size:27px}.pil-portee-in{padding:8px 11px}}';
@@ -6608,7 +6610,8 @@ function _pilPhotosData(){
   try{
     if(selP&&selP.cd){ hTot=Math.round(selP.cd.totalTotal||0); hFait=Math.max(0,hTot-Math.round(selP.cd.totalReste||0)); }
     else if(ann){ ann.pers.forEach(function(p){ if(p.cd){ hTot+=Math.round(p.cd.totalTotal||0); hFait+=Math.max(0,Math.round(p.cd.totalTotal||0)-Math.round(p.cd.totalReste||0)); } }); }
-  }catch(e){}
+  }
+  catch(e){ if(window.logError) window.logError({level:'info',cat:'pilotage',msg:'photos: charge illisible'}); }
   var pct=hTot>0?Math.round(hFait/hTot*100):0;
 
   // EFFECTIF — le PIC, jamais la moyenne : une moyenne annuelle n'existe aucun
@@ -6634,11 +6637,15 @@ function _pilPhotosData(){
 
 // ── Le rendu des quatre photos ──────────────────────────────────────────────
 function _pilPhotoHtml(k,ico,val,unite,sous,cible,drapeau){
+  // \u26A0\uFE0F Des <span display:block>, pas des <div> : le contenu d'un <button>
+  //    est du « phrasing content » en HTML5. Le clic marcherait quand meme,
+  //    mais §24 l'interdit \u2014 et un balisage invalide se paie plus tard, pas
+  //    tout de suite.
   return '<button class="pil-photo" data-pgo="'+cible+'">'
-    +'<div class="k">'+ico+' '+k+(drapeau||'')+'</div>'
-    +'<div class="v">'+val+'<span class="u">'+unite+'</span></div>'
-    +'<div class="s">'+sous+'</div>'
-    +'<div class="go">voir le d\u00e9tail \u203A</div></button>';
+    +'<span class="k">'+ico+' '+k+(drapeau||'')+'</span>'
+    +'<span class="v">'+val+'<span class="u">'+unite+'</span></span>'
+    +'<span class="s">'+sous+'</span>'
+    +'<span class="go">voir le d\u00e9tail \u203A</span></button>';
 }
 function _pilFlag(g,titre){
   var c=(g==='r')?'var(--rouge)':(g==='o'?'var(--orange)':'#4A9FC8');
