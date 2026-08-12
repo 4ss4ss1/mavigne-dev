@@ -1,4 +1,41 @@
-// MA VIGNE — Service Worker v6.56
+// MA VIGNE — Service Worker v6.57
+// v6.57 (12/08/2026) — AUDIT DU PILOTAGE : CE QUE L'ECRAN PROMETTAIT SANS LE TENIR.
+//   Onze defauts trouves en relisant le module apres la refonte du 12/08 (§34).
+//   ★★★ TROIS ETAIENT DES PROMESSES NON TENUES PAR L'ECRAN LUI-MEME :
+//   1. LA BARRE DE PORTEE DISPARAISSAIT AU SCROLL. .pil-portee (sticky top:0
+//      z-index:34) et .pil-tabsbar (sticky top:0 z-index:60) etaient collees au
+//      MEME point : les onglets recouvraient le fil d'Ariane des le premier
+//      defilement. La piece maitresse de la refonte s'oubliait donc exactement
+//      comme avant. La hauteur du fil est MESUREE (--pil-portee-h) et devient le
+//      `top` des onglets. ⚠️ Deux barres collantes au meme top se recouvrent —
+//      la seconde n'a pas d'erreur a signaler, elle passe simplement dessus.
+//   2. « TOUT L'ECRAN SUIT » N'ETAIT VRAI QUE DE LA MOITIE DE L'ECRAN. Economie
+//      cadre sur la periode CONSULTEE, la Cave sur le MILLESIME, la Conformite sur
+//      SEPT ANS. Avec « Vendanges » epingle en haut, ces trois-la repondaient sur
+//      une autre fenetre SANS LE DIRE. On ne leur ajoute pas un sixieme selecteur :
+//      on NOMME leur cadre (_pilCadreAvert), comme le faisait deja le Parametrage.
+//   3. LA BARRE ET LES TITRES DISAIENT DEUX MODULES. _PIL_TABS renomme, _PIL_LABELS
+//      pas : « La campagne » titrait « Avancement », « Simuler » titrait « Decider »
+//      — le libelle que le lot 5 declarait mort. Et `an` n'avait AUCUNE entree : le
+//      titre du niveau ① sortait VIDE. ★ L'onglet ③ promettait « les taches » et
+//      n'en montrait aucune (Personnel + Materiel) -> « L'equipe & le materiel ».
+//      Les descendre ici les aurait DUPLIQUEES : elles vivent au niveau ②.
+//   ★★ ET UN BUG DE MEMOIRE A EFFET RETARD : `an_cadres`/`an_frise` manquaient aux
+//   defauts, donc _pilNormalize les PURGEAIT a chaque chargement, pendant que
+//   `avc_etp` — reste des defauts alors que l'indicateur avait demenage —
+//   ressuscitait a 1 et etait recopie par la migration. Une case decochee se
+//   recochait toute seule. Correction en deux gestes : les cles ajoutees, et
+//   L'ORDRE INVERSE — on MIGRE AVANT DE NORMALISER, sinon la normalisation jette
+//   la valeur que la migration devait lire.
+//   AUTRES : 7 impasses `pil-empty` branchees sur _pilGo (_pilEmptyGo) et le mot
+//   « Saisons » — nom de code interne jamais affiche — remplace par « Campagne »,
+//   son vrai titre a l'ecran · le bouton « Voir les deux cadres » ouvrait Reglages
+//   (cible interne `an_cadres` + _pilFlash extrait) · photo Conformite : tiret au
+//   lieu de « 0 kg Cu » quand _cfmCuivre echoue (source absente ⇒ tiret, jamais
+//   zero) · clic sur une photo deja ouverte ne tombe plus dans le vide · onglet ③
+//   tout decoche ne sort plus un ecran BLANC · branche morte `d.exm` retiree ·
+//   registre unifie au VOUS (15 « tu/ton/tes » restants du module).
+//   Preflight 0/0, ESLint 0/0, catch muets 16 -> 16 (deux introduits, refermes).
 // v6.56 (12/08/2026) — LE SALAIRE EST UNE SERIE DATEE.
 //   Le taux horaire d'un salarie etait UN SCALAIRE lu SANS DATE par les trois
 //   calculs de cout : cout par parcelle (_ecoJhByParc), sessions tracteur
@@ -1082,7 +1119,7 @@
 // v2.22 — Fix profils vides : guard vide dans loadData() pour MEMBRES/SAISONS/TACHES
 // v2.17 — Onboarding intégré + tenantId · v2.06 — Firebase Auth · v2.00–v2.05 — divers
 const DEBUG = self.location.hostname === 'localhost' || self.location.hostname === '127.0.0.1';
-const CACHE_NAME   = 'mavigne-v6.56';
+const CACHE_NAME   = 'mavigne-v6.57';
 const TENANT_CACHE = 'mavigne-tenant';   // Cache persistant — préservé à chaque mise à jour SW
 const SYNC_TAG     = 'mavigne-sync';
 
@@ -1098,7 +1135,7 @@ const CDN_URLS = [
 ];
 
 self.addEventListener('install', event => {
-  if(DEBUG) console.log('[SW] Ma Vigne v6.56 installé');
+  if(DEBUG) console.log('[SW] Ma Vigne v6.57 installé');
   event.waitUntil(
     caches.open(CACHE_NAME).then(async cache => {
       // ── Cœur applicatif : STRICT (mise à jour ATOMIQUE) ──
@@ -1114,7 +1151,7 @@ self.addEventListener('install', event => {
 });
 
 self.addEventListener('activate', event => {
-  if(DEBUG) console.log('[SW] Ma Vigne v6.56 activé');
+  if(DEBUG) console.log('[SW] Ma Vigne v6.57 activé');
   event.waitUntil(
     caches.keys().then(keys =>
       Promise.all(

@@ -66,7 +66,16 @@ var _PIL_DEFAULT = {
     // Aujourd'hui (cockpit)
     auj_marge:1, auj_charge:1, auj_cadence:1, auj_budget:1, auj_etp:1, auj_jours:1, auj_pres:1, auj_traiter:1, auj_prio:1, auj_alertes:1,
     // Avancement
-    avc_gauge:1, avc_bar:1, avc_pie:1, avc_temps:1, avc_echeances:1, avc_carte:1, avc_etp:1,
+    // L'annee (niveau ①)
+    // ⚠️⚠️ CES DEUX CLES MANQUAIENT AUX DEFAUTS. _pilNormalize ne garde que les
+    //   cles listees ici : `an_frise` et `an_cadres` etaient PURGEES a chaque
+    //   chargement, tandis qu'`avc_etp` — reste des defauts alors que l'indicateur
+    //   avait demenage — ressuscitait a 1, valeur que _pilMigrShow recopiait
+    //   aussitot dans `an_frise`. Une case decochee se recochait donc TOUTE SEULE a
+    //   la session suivante, et la migration du lot 3 rejouait indefiniment.
+    an_cadres:1, an_frise:1,
+    // Avancement (`avc_etp` RETIRE : deplace vers `an_frise`, cf. _PIL_SHOW_MIGR)
+    avc_gauge:1, avc_bar:1, avc_pie:1, avc_temps:1, avc_echeances:1, avc_carte:1,
     // Personnel
     prs_equipe:1, prs_presences:1, prs_capacite:1,
     // Matériel
@@ -106,8 +115,12 @@ function _pilMigrShow(st){
 // masquer tous les indicateurs d'une moitie laisserait son titre orphelin.
 function _pilAnyShow(ids){ for(var i=0;i<ids.length;i++){ if(_pilShow(ids[i])) return true; } return false; }
 function _pilLoadState(){
-  try{ var raw=localStorage.getItem(_pilUserKey()); if(raw){ var n=_pilNormalize(JSON.parse(raw)); if(n) return _pilMigrShow(n); } }catch(e){}
-  try{ var rawD=localStorage.getItem(_pilDomKey()); if(rawD){ var nd=_pilNormalize(JSON.parse(rawD)); if(nd) return _pilMigrShow(nd); } }catch(e){}
+  // ⚠️⚠️ L'ORDRE COMPTE : ON MIGRE AVANT DE NORMALISER.
+  //   _pilNormalize ne conserve que les cles connues des defauts. Place en premier,
+  //   il jetait `avc_etp` AVANT que _pilMigrShow ait pu en lire la valeur : le
+  //   choix du client etait perdu au lieu d'etre reporte sur le nouveau nom.
+  try{ var raw=localStorage.getItem(_pilUserKey()); if(raw){ var n=_pilNormalize(_pilMigrShow(JSON.parse(raw))); if(n) return n; } }catch(e){}
+  try{ var rawD=localStorage.getItem(_pilDomKey()); if(rawD){ var nd=_pilNormalize(_pilMigrShow(JSON.parse(rawD))); if(nd) return nd; } }catch(e){}
   return _pilCloneDefault();
 }
 function _pilSaveState(st){ try{ localStorage.setItem(_pilUserKey(), JSON.stringify(st)); }catch(e){} }
@@ -139,7 +152,13 @@ var _PIL_TABS = [
   ['auj','\uD83E\uDDED','Aujourd\'hui'],
   ['an', '\uD83D\uDDD3\uFE0F','L\'année'],
   ['avc','\uD83C\uDF47','La campagne'],
-  ['equ','\uD83D\uDC65','L\'équipe & les tâches'],
+  // ★★ « L'equipe & les taches » ne montrait AUCUNE tache : son contenu est
+  //   Personnel + Materiel. Les taches vivent au niveau ② (avancement par tache,
+  //   echeances) et dans Economie › Postes. Les descendre ici les DUPLIQUERAIT —
+  //   la faute que la refonte venait de corriger sur « Charge & ETP ». On corrige
+  //   donc le mot, pas la place : l'axe se lit « l'annee › la campagne et ses
+  //   taches › les gens et les machines › simuler ».
+  ['equ','\uD83D\uDC65','L\'équipe & le matériel'],
   ['sim','\uD83C\uDF9B\uFE0F','Simuler'],
   ['cav','\uD83C\uDF77','Cave'],
   ['eco','\uD83D\uDCB6','Économie'],
@@ -150,7 +169,13 @@ var _PIL_TABS = [
 var _PIL_ZOOM_FIN = 'sim';
 // Outils : accessibles par le bouton dedie, pas dans la barre.
 var _PIL_TOOLS = [['arc','\uD83D\uDDC3\uFE0F','Archives'],['param','\u2699\uFE0F','Paramétrage']];
-var _PIL_LABELS = {auj:'Aujourd\'hui',avc:'Avancement',equ:'Équipe & matériel',cav:'Cave',eco:'Économie — budget, rythme de dépense et prix de revient',cfm:'Conformité — cuivre, passages phyto et délai de rentrée',arc:'Archives des campagnes',sim:'Décider — effectif, renfort et ordre de passage',param:'Paramétrage'};
+// ★★ LA BARRE ET LE TITRE DISENT ENFIN LA MEME CHOSE. La refonte avait renomme
+// _PIL_TABS sans toucher a _PIL_LABELS : on cliquait « La campagne » et on
+// atterrissait sous « Avancement », « Simuler » sous « Decider » — le libelle que
+// le lot 5 declarait mort. Et `an` n'avait AUCUNE entree : le titre du niveau ①
+// sortait VIDE, la roue crantee flottant seule dans l'en-tete.
+// ⚠️ Les cles ne bougent pas ; seuls les mots changent.
+var _PIL_LABELS = {auj:'Aujourd\'hui',an:'L\'année — les douze mois, d\'un cadre à l\'autre',avc:'La campagne — avancement, temps et échéances',equ:'L\'équipe & le matériel',cav:'Cave',eco:'Économie — budget, rythme de dépense et prix de revient',cfm:'Conformité — cuivre, passages phyto et délai de rentrée',arc:'Archives des campagnes',sim:'Simuler — effectif, renfort et ordre de passage',param:'Paramétrage'};
 var _PIL_VALID_TAB = {auj:1,an:1,avc:1,equ:1,cav:1,eco:1,cfm:1,arc:1,sim:1,param:1};
 // Migration des onglets memorises avant le regroupement.
 // Migration des cles memorisees : `ecf` (l'onglet composite) part sur l'economie.
@@ -541,6 +566,19 @@ function _pilApplyNames(){
   _pilMapLabels.forEach(function(o){ if(!o||!o.mk||!o.tt) return; try{ if(_pilNamesOn){ o.mk.bindTooltip(o.tt); } else { o.mk.unbindTooltip(); } }catch(e){} });
 }
 function _pilStat(n,u,warn){ return '<span class="pil-th-stat"><b>'+n+'</b>'+(u||'')+(warn?' <b class="warn">'+warn+'</b>':'')+'</span>'; }
+// ── UNE IMPASSE QUI NE DIT PAS OU ALLER N'AIDE PERSONNE ─────────────────────
+// Les impasses `pil-empty` ecrivaient « Réglages › Saisons » en TEXTE MORT : il
+// fallait deviner l'ecran, le trouver, et se souvenir de ce qu'on venait y faire.
+// Le moteur de diagnostic a deja une porte — _pilGo, avec defilement et
+// clignotement. Ces messages passent par LA MEME, pas par une seconde.
+// ⚠️ Le libelle nomme la section telle qu'elle s'appelle A L'ECRAN : la carte
+//    s'intitule « Campagne » dans Réglages › Domaine, jamais « Saisons » — un nom
+//    de code interne que l'utilisateur n'a jamais vu affiche nulle part.
+function _pilEmptyGo(txt,cible,lib){
+  return '<div class="pil-empty">'+txt
+    +'<div style="margin-top:9px"><button class="pil-diag-go ghost" data-diag="'+_pilEsc(cible)
+    +'">'+_pilEsc(lib)+' \u203A</button></div></div>';
+}
 function _pilTile(id,ico,dot,title,statHtml,subHtml,gradPct,bodyHtml){
   // Garde defensive : _PIL_STATE n'est pose que par renderPilotage. _pilShow() se
   // protegeait deja du cas null, _pilTile non — un appel hors sequence de rendu
@@ -1391,7 +1429,7 @@ function _pilDeuxCadresHtml(ann){
       +_pilNb(h)+' h</td></tr>';
   });
 
-  return '<div style="background:var(--bg-app);border:1px solid var(--gris-clair);border-radius:16px;padding:14px 16px;margin:0 0 16px">'
+  return '<div id="pil-an-cadres" style="background:var(--bg-app);border:1px solid var(--gris-clair);border-radius:16px;padding:14px 16px;margin:0 0 16px">'
     +'<div style="font-family:\'Cormorant Garamond\',serif;font-size:20px;font-weight:700;color:var(--cave)">Deux fa\u00e7ons de compter votre ann\u00e9e</div>'
     +'<div style="font-size:12.5px;color:var(--texte-doux);margin:3px 0 12px;line-height:1.5">'
     +'Un domaine en a <b>deux</b>, et elles ne r\u00e9pondent pas \u00e0 la m\u00eame question. '
@@ -1597,7 +1635,7 @@ function _pilPanelEtp(d){
   var PP=_pilPicPortee();
   if(!cd||!cd.months.length){
     return _pilTile('etp','\u2696\uFE0F','#C9A84C','Charge & ETP \u00b7 saison', _pilStat('\u2014',''), 'datez la saison pour estimer la charge', null,
-      '<div class="pil-empty">Renseignez les dates de d\u00e9but et de fin de la saison active (R\u00e9glages \u203a Saisons) pour calculer la charge et l\'ETP n\u00e9cessaire.</div>');
+      _pilEmptyGo('Renseignez les dates de d\u00e9but et de fin de la campagne active pour calculer la charge et l\'ETP n\u00e9cessaire.','saisons','R\u00e9glages \u203a Campagne'));
   }
   function _e(v){ return (Math.round((v||0)*10)/10).toString().replace('.',','); }
   var ann=_pilAnnuelData();
@@ -1669,7 +1707,7 @@ function _pilPanelEtp(d){
     //   generiques qui la laissaient a 60 % de la page.
     window._mvGraphSuivre('#pil-g-ann', function(lg){ return _pilFriseAnneeSvg(ann,lg); }, {max:1800});
   }
-  var body=annBlock || '<div class="pil-empty">Renseignez au moins une p\u00e9riode dat\u00e9e (R\u00e9glages \u203a Campagne) pour dessiner les 52 semaines de l\u2019exercice.</div>';
+  var body=annBlock || _pilEmptyGo('Renseignez au moins une p\u00e9riode dat\u00e9e pour dessiner les 52 semaines de l\u2019exercice.','saisons','R\u00e9glages \u203a Campagne');
   body+='<div style="margin-top:10px;padding:9px 11px;border-radius:9px;background:'+sBg+';color:'+sCol+';font-size:12.5px;font-weight:600">'+synth+'</div>';
   var cov=peak4>0?Math.min(presAtPeak/peak4*100,100):100;
   var _sub=_e(presAtPeak)+' pr\u00e9sents au pic'+(pkw?(' \u00b7 '+_semLab(pkw)):'');
@@ -1686,7 +1724,7 @@ function _pilPanelTemps(d){
   var cd=_pilCdVue();
   if(!cd||!cd.months.length){
     return _pilTile('temps','\u23F1\uFE0F','#4A9FC8','Le temps de l\u2019\u00e9quipe', _pilStat('\u2014',''), 'datez la campagne pour r\u00e9partir le temps', null,
-      '<div class="pil-empty">Renseignez les dates de d\u00e9but et de fin de la campagne (R\u00e9glages \u203a Campagne) : la r\u00e9partition du temps, la frise et la courbe en d\u00e9coulent.</div>');
+      _pilEmptyGo('Renseignez les dates de d\u00e9but et de fin de la campagne : la r\u00e9partition du temps, la frise et la courbe en d\u00e9coulent.','saisons','R\u00e9glages \u203a Campagne'));
   }
   var s=_PIL_STATE.sub||{};
   // ⚠ d.data porte les pourcentages de la periode CONSULTEE (calcHeures). Sur une
@@ -1732,7 +1770,7 @@ function _pilPanelTemps(d){
       +(Math.round(_ratio*10)/10).toString().replace('.',',')+'</b>. Rien ne reste pour la cave, les trajets ou l\u2019entretien.';
   } else {
     _footR+='Le reste ('+_etpF(_aut)+' ETP) part sur cave, trajets, entretien\u2026'
-      +((_tH>0)?'':' Renseigne un bar\u00e8me h/ha par activit\u00e9 (R\u00e9glages) pour d\u00e9tacher le tracteur d\u2019\u00ab Autres \u00bb.');
+      +((_tH>0)?'':' Renseignez un bar\u00e8me h/ha par activit\u00e9 (R\u00e9glages \u203a Tracteur) pour d\u00e9tacher le tracteur d\u2019\u00ab Autres \u00bb.');
   }
   // ★ Une moyenne n'est pas un pic : le dire ICI, a cote du chiffre moyen, est le
   //   seul endroit ou quelqu'un risque de le confondre avec un besoin reel.
@@ -1888,7 +1926,7 @@ function _pilPanelTraitement(d){
         + '</div>';
     }).join('');
     body='<div style="display:flex;flex-direction:column;gap:6px;padding-top:4px">'+rows+'</div>'
-      + '<div style="font-size:11px;color:var(--texte-doux);margin-top:11px;line-height:1.5">Au-delà de 25° : phytotoxicité (soufre, cuivre, foliaires) et efficacité en baisse · vent &gt; 19 km/h interdit. Vérifie tes délais DAR / DRE / ZNT.</div>';
+      + '<div style="font-size:11px;color:var(--texte-doux);margin-top:11px;line-height:1.5">Au-delà de 25° : phytotoxicité (soufre, cuivre, foliaires) et efficacité en baisse · vent &gt; 19 km/h interdit. Vérifiez vos délais DAR / DRE / ZNT.</div>';
   }
   return _pilTile('traitement','💧','#5A9FD4','Fenêtre de traitement', statHtml, sub, null, body);
 }
@@ -3657,8 +3695,8 @@ function _rfSelHtml(ctx){
 
 function _rfBody(d){
   var P=_rfPair(d), ctxP=P.plan, ctx=P.dec;
-  if(!ctxP) return '<div class="pil-empty">Renseignez les dates de d\u00e9but et de fin de la p\u00e9riode (R\u00e9glages \u203a Campagne) : les fen\u00eatres de t\u00e2ches et la charge en d\u00e9coulent.</div>';
-  if(ctxP.noRate) return '<div class="pil-empty">Renseignez un <b>taux horaire</b> dans la fiche de chaque salari\u00e9 (R\u00e9glages \u203a \u00c9quipe) pour chiffrer les sc\u00e9narios.</div>';
+  if(!ctxP) return _pilEmptyGo('Renseignez les dates de d\u00e9but et de fin de la p\u00e9riode : les fen\u00eatres de t\u00e2ches et la charge en d\u00e9coulent.','saisons','R\u00e9glages \u203a Campagne');
+  if(ctxP.noRate) return _pilEmptyGo('Renseignez un <b>taux horaire</b> dans la fiche de chaque salari\u00e9 pour chiffrer les sc\u00e9narios.','equipe','R\u00e9glages \u203a \u00c9quipe');
   // Deux graphes seulement s'ils racontent deux choses differentes. Le tri est
   // fait par _rfMemeImage, DANS _rfPair : quand les deux dessinent la meme
   // image, la paire rend deux fois le plan et pose le drapeau `meme`. Ici il
@@ -3722,7 +3760,7 @@ function _rfBody(d){
     +'L\u2019\u00e9cart entre la ligne noire et le vert compte aussi les <b>cong\u00e9s, absences et fermetures d\u00e9j\u00e0 saisis au Planning</b> : ces heures sont pay\u00e9es, mais personne n\u2019est dans les rangs. '
     +'<span class="rf-k" style="background:#14110D"></span>La ligne noire, l\u2019effectif <b>'+_pilEsc(ctx.baseLbl||'')+'</b> \u2014 elle monte et descend avec les contrats saisis, '
     +'<b>vendangeurs et saisonniers d\u00e9j\u00e0 embauch\u00e9s compris</b> : c\u2019est la m\u00eame que la frise des 52 semaines, dans <b>L\u2019ann\u00e9e</b>.<br>'
-    +'<b>Choisis ton renfort dans les listes ci-dessous</b>, ou pars d\u2019une proposition. Le renfort s\u2019<b>ajoute</b> \u00e0 cette ligne \u2014 il ne la remplace pas.</div>'
+    +'<b>Choisissez votre renfort dans les listes ci-dessous</b>, ou partez d\u2019une proposition. Le renfort s\u2019<b>ajoute</b> \u00e0 cette ligne \u2014 il ne la remplace pas.</div>'
     +_rfSelHtml(ctx)
     +'<div class="rf-strats">'+boutons+'</div>'
     +'<div style="width:100%;overflow-x:auto" id="rf-g-prof"></div>';
@@ -3784,7 +3822,7 @@ function _rfBody(d){
   H+='<div class="rf-step" style="margin-top:18px"><div class="rf-n">4</div><div class="rf-t">Ce que ce choix co\u00fbte</div></div>'
     +'<div class="rf-how"><b>Comment lire.</b> Le co\u00fbt ne se lit qu\u2019une fois l\u2019\u00e9ch\u00e9ance tranch\u00e9e : les strat\u00e9gies qui tiennent les fen\u00eatres sont en haut du tableau, celles qui d\u00e9bordent en dessous du trait rouge. '
     +'Ces derni\u00e8res sont souvent les moins ch\u00e8res sur le papier \u2014 elles ne r\u00e9pondent simplement pas \u00e0 la m\u00eame question. '
-    +'La barre ne montre que ce que tu d\u00e9cides : le socle des permanents est le m\u00eame partout, il ne peut pas les d\u00e9partager.</div>'
+    +'La barre ne montre que ce que vous d\u00e9cidez : le socle des permanents est le m\u00eame partout, il ne peut pas les d\u00e9partager.</div>'
     +'<div style="width:100%;overflow-x:auto" id="rf-g-cout"></div>'
     +tab.html;
   window._mvGraphSuivre('#rf-g-cout', function(lg){ return _rfCoutSvg(ctx,res,tab.meilleur,lg); });
@@ -3807,7 +3845,7 @@ function _rfBody(d){
   H+='<div class="rf-lim"><b>Ce que le mod\u00e8le suppose.</b> Le travail finit par se faire, m\u00eame apr\u00e8s la campagne : une strat\u00e9gie qui d\u00e9borde mord sur la suivante, et ce report n\u2019est pas chiffr\u00e9. '
     +'<b>Sauf les travaux sans rattrapage</b> \u2014 la vendange \u2014 o\u00f9 ce qui n\u2019est pas fait dans la fen\u00eatre est perdu : les heures perdues sont compt\u00e9es, la valeur de la r\u00e9colte non rentr\u00e9e ne l\u2019est pas, volontairement. '
     +'Les heures induites par le retard, elles, le sont. '
-    +'Les fen\u00eatres viennent des dates que tu as saisies ; ce qui est d\u00e9j\u00e0 fait vient de l\u2019avancement r\u00e9el des parcelles. Le hachur\u00e9 ne compte que le travail de vigne : le tracteur est d\u00e9duit, la cave et l\u2019entretien ne le sont pas encore. '
+    +'Les fen\u00eatres viennent des dates que vous avez saisies ; ce qui est d\u00e9j\u00e0 fait vient de l\u2019avancement r\u00e9el des parcelles. Le hachur\u00e9 ne compte que le travail de vigne : le tracteur est d\u00e9duit, la cave et l\u2019entretien ne le sont pas encore. '
     +'Ces r\u00e9glages se modifient dans <b>Pilotage \u203a Outils \u203a Param\u00e9trage</b>. Rien n\u2019est enregistr\u00e9 ici.</div>';
   return H;
 }
@@ -4212,7 +4250,7 @@ function _pilTabAuj(d){
     cockpit+='<div class="pil-hero">'
       +'<div class="pil-ring"><svg width="168" height="168" viewBox="0 0 168 168"><circle cx="84" cy="84" r="74" fill="none" stroke="var(--gris-clair)" stroke-width="7"/><circle cx="84" cy="84" r="74" fill="none" stroke="'+_pilPctColor(ringPc)+'" stroke-width="7" stroke-linecap="round" stroke-dasharray="'+dash.toFixed(1)+' '+C.toFixed(1)+'" transform="rotate(-90 84 84)"/></svg>'
       +'<div class="pil-ring-mid"><div class="pc">'+ringPc+'%</div><div class="lb">saison faite</div></div></div>'
-      +'<div class="pil-verdict"><div class="vk">Marge sur ton objectif</div>'
+      +'<div class="pil-verdict"><div class="vk">Marge sur votre objectif</div>'
       +'<span class="pil-badge '+badgeCls+'">'+badgeTxt+'</span>'
       +'<div class="vbig" style="color:'+vCol+'">'+vBig+'</div>'
       +'<div class="vsub">'+_pilMargeSous(m)+'</div>'
@@ -4240,7 +4278,7 @@ function _pilTabAuj(d){
   if(_pilShow('auj_prio')) dec+=_pilCkPrio(d);
   if(dec) H+='<div class="pil-sec-h">La décision du jour</div><div class="pil-dec">'+dec+'</div>';
   if(_pilShow('auj_alertes')) H+='<div class="pil-sec-h">Alertes matériel &amp; cave</div>'+_pilCkAlertes(d);
-  return H || '<div class="pil-empty">Aucun indicateur affiché — active-les via « Choisir les indicateurs ».</div>';
+  return H || '<div class="pil-empty">Aucun indicateur affiché — activez-les via « Choisir les indicateurs ».</div>';
 }
 
 // ── Onglet AVANCEMENT ──
@@ -4290,7 +4328,7 @@ function _pilTabAvc(d){
 function _pilPanelCapacite(d){
   var PP=_pilPicPortee(), cd=_pilCdVue();
   var present=d.presentChamp!=null?d.presentChamp:0;
-  if(!PP.ok && !cd){ return _pilTile('capacite','\u2696\uFE0F','#C9A84C','Capacité vs charge', _pilStat(present,' à la vigne'), null, null, '<div class="pil-empty">Renseigne les dates de la saison (Réglages \u203A Saisons) pour estimer l\'ETP requis.</div>'); }
+  if(!PP.ok && !cd){ return _pilTile('capacite','\u2696\uFE0F','#C9A84C','Capacité vs charge', _pilStat(present,' à la vigne'), null, null, _pilEmptyGo('Renseignez les dates de la campagne pour estimer l\'ETP requis.','saisons','Réglages \u203A Campagne')); }
   // ★★★ ON NE SOUSTRAIT PLUS DEUX GRANDEURS QUI N'ONT NI LA MEME DATE NI LA
   //   MEME UNITE. AVANT : `manque = PP.pic - d.presentChamp`.
   //     · PP.pic  = le besoin de la SEMAINE DU PIC, quelque part dans l'exercice,
@@ -5364,7 +5402,7 @@ function _pilTabCav(d){
     window.logError&&window.logError({level:'error',cat:'pilotage',msg:'onglet cave',err:e});
     body='<div class="pcav-vide">Cet écran n’a pas pu se construire.<br>L’incident a été enregistré.</div>';
   }
-  return nav+body;
+  return nav+_pilCadreAvert(_pilAvertCav())+body;
 }
 
 // ════════════════════════════════════
@@ -7000,7 +7038,7 @@ function _pexMoisChoix(){
 function _pexGraph(E,w){
   var M=E.mois;
   if(!M.length) return window._mvGraphVide('Aucun mois dans cet exercice',
-    'Choisis un autre exercice dans la barre au-dessus.');
+    'Choisissez un autre exercice dans la barre au-dessus.');
   var maxV=0; M.forEach(function(mo){ var b=E.byM[mo.k]; var t=b.sal+b.gnr+b.ach; if(t>maxV) maxV=t; });
   if(!(maxV>0)) return window._mvGraphVide('Aucune d\u00e9pense dat\u00e9e sur cet exercice',
     'Les d\u00e9penses se posent \u00e0 la date de leur travail, de leur plein ou de leur achat.');
@@ -7194,7 +7232,7 @@ function _pilTabEco(d){
   else if(_PEC_SUB==='par') body=_pecViewParcelles(E);
   else if(_PEC_SUB==='exe') body=_pexView();
   else body=_pecViewSynthese(E,TL);
-  return '<div class="pec-wrap">'+_pecSubNav(E)+body+'</div>';
+  return '<div class="pec-wrap">'+_pilCadreAvert(_pilAvertEco())+_pecSubNav(E)+body+'</div>';
 }
 
 // ── Conformité : délai de rentrée (heures) — même logique que utils.dreEffectif ──
@@ -7296,7 +7334,7 @@ function _pilTabCfm(d){
           +'<div class="pil-li-r" style="color:var('+col+')">'+(Math.round(r.cu*10)/10).toLocaleString('fr-FR')+'<span style="font-size:10px;font-weight:500;color:var(--texte-doux)"> kg/ha</span></div></div>';
       }).join('');
       var body='<div class="pil-ip-list">'+crows+'</div>'
-        +'<div class="pil-li-s" style="margin-top:10px;line-height:1.5">Cumul de <b>cuivre m\u00e9tal</b> sur 7 ans face au plafond UE de <b>28 kg/ha</b> (bio). Indicatif \u2014 ajuste selon ton organisme certificateur.</div>';
+        +'<div class="pil-li-s" style="margin-top:10px;line-height:1.5">Cumul de <b>cuivre m\u00e9tal</b> sur 7 ans face au plafond UE de <b>28 kg/ha</b> (bio). Indicatif \u2014 ajustez selon votre organisme certificateur.</div>';
       var sw=cu.over?('\u26A0 '+cu.over):(cu.warn?('\u2191 '+cu.warn):null);
       H+=_pilTile('cuivre','\uD83D\uDD35','#5B8DBF','Cuivre \u00b7 bio (7 ans)', _pilStat(cu.rows.length,' parcelle'+(cu.rows.length>1?'s':''), sw), null, null, body);
     }
@@ -7345,7 +7383,7 @@ function _pilTabCfm(d){
     }
   }
   H+='</div>';
-  return any ? H : '<div class="pil-empty">Aucun indicateur affich\u00e9 \u2014 active-les via \u00ab Choisir les indicateurs \u00bb.</div>';
+  return any ? (_pilCadreAvert(_pilAvertCfm())+H) : '<div class="pil-empty">Aucun indicateur affich\u00e9 \u2014 activez-les via \u00ab Choisir les indicateurs \u00bb.</div>';
 }
 
 
@@ -7362,7 +7400,7 @@ function _pilPersoHtml(tab){
   var defs=_PIL_PERSO_DEFS[tab]; if(!defs) return '';
   return '<h3>Afficher dans cet onglet — réglage propre à chaque onglet, mémorisé pour vous</h3><div class="pil-opts">'
     +defs.map(function(o){ return '<label><input type="checkbox" class="pil-sw" data-show="'+o[0]+'"'+(_pilShow(o[0])?' checked':'')+'> '+_pilEsc(o[1])+'</label>'; }).join('')
-    +'</div><div class="pil-perso-note">Décoche pour retirer une tuile. \uD83D\uDD12 Lecture seule — n\'affecte que ton affichage.</div>';
+    +'</div><div class="pil-perso-note">Décochez pour retirer une tuile. \uD83D\uDD12 Lecture seule — n\'affecte que votre affichage.</div>';
 }
 function _pilPersoChange(e){
   var id=e.target.getAttribute&&e.target.getAttribute('data-show'); if(!id) return;
@@ -7479,10 +7517,10 @@ function _pilTabsHtml(tab){
     if(!apres && t[0]!=='auj') n='<span class="pil-lvn">'+(++niv)+'</span>';
     if(t[0]===_PIL_ZOOM_FIN){ apres=true; poseSep=true; }
     return sep+'<button class="mvu-tab'+(t[0]===tab?' active':'')+'" data-tab="'+t[0]+'">'
-      +n+'<span class="mvu-tab-em">'+t[1]+'</span>'+t[2]+'</button>';
+      +n+'<span class="mvu-tab-em">'+t[1]+'</span>'+_pilEsc(t[2])+'</button>';
   }).join('');
   // Outil actif : epingle en fin de barre pour que l'utilisateur voie ou il se trouve.
-  if(cur) h+='<button class="mvu-tab active" data-tab="'+cur[0]+'"><span class="mvu-tab-em">'+cur[1]+'</span>'+cur[2]+'</button>';
+  if(cur) h+='<button class="mvu-tab active" data-tab="'+cur[0]+'"><span class="mvu-tab-em">'+cur[1]+'</span>'+_pilEsc(cur[2])+'</button>';
   h+='<button class="mvu-tab pil-outils-btn" id="pil-outils-btn" aria-label="Outils du pilotage" title="Outils"><span class="mvu-tab-em">\u2699\uFE0F</span>Outils</button></div>';
   h+='<div class="pil-outils-menu" id="pil-outils-menu">'+_PIL_TOOLS.map(function(t){
     return '<button data-tool="'+t[0]+'"><span class="pom-ic">'+t[1]+'</span><span class="pom-t">'+t[2]+'</span><span class="pom-c">\u203A</span></button>';
@@ -7521,7 +7559,7 @@ function _pilSkeleton(d,tab){
   // l'on regarde avant de dire ce que l'on regarde. Les photos ouvrent le
   // contenu, quel que soit l'onglet — on voit l'ensemble avant le detail.
   return _pilHdrHtml(d)
-    +'<div class="pil-portee"><div class="pil-portee-in">'
+    +'<div class="pil-portee" id="pil-portee"><div class="pil-portee-in">'
     +'<div class="pil-crumb" id="pil-crumb">'+_pilCrumbHtml()+'</div>'
     +'<span id="pil-diagbtn-host">'+_pilDiagBtnHtml()+'</span>'
     +'</div></div>'
@@ -7549,6 +7587,17 @@ function _pilCssV2(){
   if(document.getElementById('pil-css-v2')) return;
   var css=''
   +'.pil-portee{position:sticky;top:0;z-index:34;background:var(--bg-card);border-bottom:1px solid var(--gris);}'
+  // ⚠️⚠️ DEUX BARRES COLLANTES AU MEME `top` SE RECOUVRENT.
+  //   .pil-tabsbar est sticky top:0 z-index:60 (styles.css) et .pil-portee sticky
+  //   top:0 z-index:34 : des le premier scroll, la barre d'onglets passait
+  //   PAR-DESSUS le fil d'Ariane et le bouton « a completer ». La portee active
+  //   redevenait invisible en cours de lecture — le defaut meme que la refonte
+  //   corrigeait : un filtre qu'on oublie qu'il tourne est pire que pas de filtre.
+  //   La hauteur du fil se MESURE (deux lignes sur telephone, une puce de plus
+  //   quand une campagne est epinglee) et devient le `top` des onglets.
+  //   ★ `body .pil-tabsbar` : une classe de plus que styles.css, donc il gagne
+  //   SANS !important, meme si l'ordre des feuilles change un jour.
+  +'body .pil-tabsbar{top:var(--pil-portee-h,0px);}'
   +'.pil-portee-in{max-width:1180px;margin:0 auto;padding:9px 16px;display:flex;align-items:center;gap:9px;flex-wrap:wrap}'
   +'.pil-crumb{display:flex;align-items:center;gap:5px;flex-wrap:wrap;flex:1;min-width:0}'
   +'.pil-cr{display:inline-flex;align-items:center;gap:6px;border:1px solid var(--gris);background:var(--bg-app);border-radius:9px;padding:5px 10px;font-size:12.5px;font-weight:600;color:var(--texte);white-space:nowrap;min-height:34px;font-family:inherit;cursor:pointer}'
@@ -7606,6 +7655,49 @@ function _pilCssV2(){
 // ── Le fil d'Ariane ─────────────────────────────────────────────────────────
 // Une portee active se lit sur la MEME ligne que le reste, jamais repliee dans
 // un panneau : un filtre qu'on oublie qu'il tourne est pire que pas de filtre.
+// ── LE CADRE D'UN ECRAN, DIT QUAND IL DIFFERE DE LA PORTEE ──────────────────
+// ★★★ « TOUT L'ECRAN SUIT » N'ETAIT VRAI QUE DE LA MOITIE DE L'ECRAN.
+//   Le fil d'Ariane et les quatre photos suivent la portee. L'Economie, elle,
+//   cadre sur la PERIODE CONSULTEE ; la Cave suit le MILLESIME ; la Conformite
+//   roule sur SEPT ANS glissants. Avec « Vendanges » epingle en haut, ces trois
+//   ecrans repondaient donc sur une AUTRE fenetre — sans le dire. C'est la faute
+//   exacte qu'on reprochait au module avant sa refonte : une selection qui
+//   n'agit pas partout, et un chiffre dont le cadre n'est pas ecrit sous lui.
+//   ⚠️⚠️ ON N'AJOUTE PAS UN SIXIEME SELECTEUR — la refonte en a fondu cinq en un.
+//   On NOMME le cadre. Meme geste que l'avertissement du Parametrage, qui posait
+//   deja le principe : ce qui ne suit pas le zoom doit l'annoncer de lui-meme.
+function _pilCadreAvert(txt){
+  if(!txt) return '';
+  return '<div style="margin:0 0 12px;padding:9px 12px;border-radius:9px;background:var(--bg-card);'
+    +'border:1px solid var(--gris-clair);border-left:3px solid var(--or);color:var(--texte-doux);'
+    +'font-size:12px;line-height:1.5">\u2139\uFE0F '+txt+'</div>';
+}
+// L'Economie chiffre la periode CONSULTEE : _ecoAllDefs lit getTachesSaison(),
+// et les sessions sont filtrees PAR NOM DE SAISON. Elle ne sait cadrer ni sur
+// l'exercice ni sur une autre campagne — sauf sa sous-vue « Exercice », faite
+// pour ca, et qui a donc l'avertissement inverse.
+function _pilAvertEco(){
+  var nom=_pilSaisonNom(), camp=_PIL_SCOPE.camp;
+  if(_PEC_SUB==='exe'){
+    return camp ? ('Cette sous-vue cadre sur l\u2019<b>exercice comptable</b>, d\u2019un bilan \u00e0 l\u2019autre \u2014 pas sur <b>'
+      +_pilEsc(camp)+'</b>, la campagne \u00e9pingl\u00e9e en haut.') : '';
+  }
+  if(!nom || (camp && camp===nom)) return '';
+  if(camp) return 'Vous regardez <b>'+_pilEsc(camp)+'</b> en haut, mais cet \u00e9cran chiffre <b>'+_pilEsc(nom)
+    +'</b>, la p\u00e9riode consult\u00e9e. Le co\u00fbt d\u2019un bilan entier se lit dans la sous-vue <b>Exercice</b>.';
+  return 'Cet \u00e9cran chiffre <b>'+_pilEsc(nom)+'</b>, la p\u00e9riode consult\u00e9e \u2014 pas l\u2019exercice comptable'
+    +' affich\u00e9 en haut. Le co\u00fbt d\u2019un bilan entier se lit dans la sous-vue <b>Exercice</b>.';
+}
+function _pilAvertCav(){
+  var camp=_PIL_SCOPE.camp;
+  return camp ? ('La Cave suit le <b>mill\u00e9sime</b>, pas la campagne : cet \u00e9cran ne se recadre pas sur <b>'
+    +_pilEsc(camp)+'</b>.') : '';
+}
+function _pilAvertCfm(){
+  var camp=_PIL_SCOPE.camp;
+  return camp ? ('La conformit\u00e9 se lit sur l\u2019ann\u00e9e, et le cuivre sur <b>sept ans glissants</b>\u00a0: '
+    +'cet \u00e9cran ne se recadre pas sur <b>'+_pilEsc(camp)+'</b>.') : '';
+}
 function _pilCrumbHtml(){
   // _mvExercice() rend {an,debut,fin} — il n'existe pas de fonction de libelle,
   // on le compose ici plutot que d'appeler un helper imaginaire.
@@ -7807,7 +7899,14 @@ function _pilPhotosHtml(){
     pCfm=_pilPhotoHtml('Conformit\u00e9','\uD83D\uDEE1\uFE0F',_pilUn(mx.cu),' kg Cu',
       'la plus charg\u00e9e \u00b7 plafond '+D.cu.plaf+' kg/ha sur 7 ans','cfm',fC,'conf');
   } else {
-    pCfm=_pilPhotoHtml('Conformit\u00e9','\uD83D\uDEE1\uFE0F','0',' kg Cu','aucun apport de cuivre enregistr\u00e9','cfm','','conf');
+    // ⚠️ SOURCE ABSENTE \u21d2 TIRET, JAMAIS ZERO. Un _cfmCuivre() qui echoue, ou qui
+    //   ne sait pas repondre, sortait « 0 kg Cu · aucun apport enregistre » : un
+    //   calcul qui n'a pas abouti, presente comme une mesure d'absence. Le zero ne
+    //   s'ecrit que si la synthese a bien tourne et n'a rien trouve.
+    pCfm=(!D.cu || !D.cu.avail)
+      ? _pilPhotoHtml('Conformit\u00e9','\uD83D\uDEE1\uFE0F','\u2014','','la synth\u00e8se cuivre n\u2019a pas abouti','cfm',
+          _pilFlag('r','Ouvrez Conformit\u00e9 pour voir ce qui bloque'),'conf')
+      : _pilPhotoHtml('Conformit\u00e9','\uD83D\uDEE1\uFE0F','0',' kg Cu','aucun apport de cuivre enregistr\u00e9','cfm','','conf');
   }
   return '<div class="pil-photos">'+pTrav+pEff+pBud+pCfm+'</div>';
 }
@@ -7823,6 +7922,15 @@ function _pilPortee(){
   // Le compte des manques se repeint AUSSI : un bouton fige sur l'ancien
   // nombre apres une correction, c'est un ecran qui se contredit.
   var b=document.getElementById('pil-diagbtn-host'); if(b) b.innerHTML=_pilDiagBtnHtml();
+  _pilStickyH();
+}
+// La hauteur du fil d'Ariane est une DONNEE DE MISE EN PAGE, pas une constante.
+// Mesuree a chaque rendu et a chaque redimensionnement ; les onglets s'y calent.
+function _pilStickyH(){
+  var p=document.getElementById('pil-portee'); if(!p) return;
+  var h=Math.round(p.getBoundingClientRect().height)||0;
+  try{ document.documentElement.style.setProperty('--pil-portee-h', h+'px'); }
+  catch(e){ if(window.logError) window.logError({level:'info',cat:'pilotage',msg:'sticky: hauteur du fil'}); }
 }
 window._pilPortee = _pilPortee;
 
@@ -7846,6 +7954,10 @@ window._pilPortee = _pilPortee;
 // ⚠️ `touche` relie le constat aux photos. Un chiffre dont les entrees sont
 //    incompletes porte un drapeau — il ne se tait pas, et il ne ment pas.
 // ════════════════════════════════════════════════════════════════════════════
+// ★★ UNE CIBLE INTERNE AU MODULE. Le constat « vendange a cheval » portait
+//   `cible:'saisons'` : son bouton « Voir les deux cadres » ouvrait Reglages ›
+//   Campagne et faisait clignoter la liste des periodes. Le libelle promettait un
+//   ecran, le doigt en obtenait un autre. Le panneau vit ICI, au niveau ①.
 var _PIL_DIAG_CIBLES = {
   saisons:   ['reglages','domaine','set-sec-saisons'],
   taches:    ['reglages','vigne',  'set-sec-taches'],
@@ -7856,22 +7968,36 @@ var _PIL_DIAG_CIBLES = {
   parcelles: ['parcelles',null,null]
 };
 
+// Defile jusqu'au bloc et le fait clignoter une seconde. Sans le clignotement, on
+// arrive sur un ecran dense sans savoir ce qu'on venait y faire. Extrait de _pilGo :
+// la cible interne « les deux cadres » en a besoin aussi.
+function _pilFlash(el){
+  if(!el) return;
+  try{
+    el.scrollIntoView({behavior:'smooth',block:'center'});
+    el.style.transition='box-shadow .25s';
+    el.style.boxShadow='0 0 0 3px var(--or)';
+    setTimeout(function(){ el.style.boxShadow=''; }, 1400);
+  }catch(e){ if(window.logError) window.logError({level:'info',cat:'pilotage',msg:'flash'}); }
+}
 // Ouvre la page, bascule sur le bon onglet, fait defiler jusqu'au bloc, et le
 // fait clignoter une seconde. Sans le clignotement, on arrive sur un ecran
 // dense sans savoir ce qu'on venait y faire.
 window._pilGo = function(cible){
   try{
+    // Cible INTERNE : on ne quitte pas le module, on change de niveau.
+    if(cible==='an_cadres'){
+      if(_PIL_TAB!=='an'){ _PIL_TAB='an'; _pilSaveTab('an'); renderPilotage(); }
+      setTimeout(function(){ _pilFlash(document.getElementById('pil-an-cadres')); }, 240);
+      return;
+    }
     var C=_PIL_DIAG_CIBLES[cible]; if(!C) return;
     if(window.goTo) window.goTo(C[0]);
     setTimeout(function(){
       try{
         if(C[1] && window.switchReglTab) window.switchReglTab(C[1]);
         if(!C[2]) return;
-        var el=document.getElementById(C[2]); if(!el) return;
-        el.scrollIntoView({behavior:'smooth',block:'center'});
-        el.style.transition='box-shadow .25s';
-        el.style.boxShadow='0 0 0 3px var(--or)';
-        setTimeout(function(){ el.style.boxShadow=''; }, 1400);
+        _pilFlash(document.getElementById(C[2]));
       }catch(e2){ if(window.logError) window.logError({level:'info',cat:'pilotage',msg:'diag: ancre '+cible}); }
     }, 240);
   }catch(e){ if(window.logError) window.logError({level:'info',cat:'pilotage',msg:'diag: navigation '+cible}); }
@@ -7962,7 +8088,7 @@ function _pilDiag(){
   //    Gravite 'b' : le chiffre est juste, on aide seulement a le lire.
   if(ann && ann.align && ann.align.coupe && ann.vend && ann.ex){
     var J=_pilAnnSplitVend(ann);
-    out.push({ g:'b', cible:'saisons', touche:['budget'],
+    out.push({ g:'b', cible:'an_cadres', touche:['budget'],
       k:'Votre vendange est \u00e0 cheval sur deux exercices',
       f:'Sur ses <b>'+J.total+' jours</b>, <b>'+J.dedans+'</b> tombent dans cet exercice et <b>'+J.dehors+'</b> dans le suivant. '
        +'Le co\u00fbt de la r\u00e9colte se lit donc sur <b>deux bilans</b>. Ce n\u2019est pas une erreur\u00a0: '
@@ -8079,11 +8205,11 @@ function _pilDiagSheetHtml(quoi){
 
   h+=L.map(function(d){
     var G=_PIL_DIAG_GN[d.g]||_PIL_DIAG_GN.b;
-    // Le bandeau d'alignement propose deja le reglage en un clic (data-exm) :
-    // on reutilise SON chemin plutot que d'en ouvrir un second.
-    var act=(d.exm!=null)
-      ? ('<button class="pil-diag-go" data-exm="'+d.exm+'">'+_pilEsc(d.ou)+'</button>')
-      : ('<button class="pil-diag-go ghost" data-diag="'+_pilEsc(d.cible)+'">'+_pilEsc(d.ou)+' \u203A</button>');
+    // ⚠️ LA BRANCHE `d.exm` A ETE RETIREE. Plus aucun constat ne pose ce champ
+    //   depuis que le lot 6 a cesse de prescrire un deplacement de cloture : le
+    //   bouton « Décaler l'ouverture » ne pouvait plus s'afficher. Un chemin mort
+    //   dans un moteur se remet a mentir des qu'on le relit.
+    var act='<button class="pil-diag-go ghost" data-diag="'+_pilEsc(d.cible)+'">'+_pilEsc(d.ou)+' \u203A</button>';
     return '<div class="pil-dl '+d.g+'"><div class="pil-dl-t">'+G[0]+' '+_pilEsc(d.k)+'</div>'
       +'<div class="pil-dl-g">'+G[1]+'</div>'
       +'<div class="pil-dl-f">'+d.f+'</div>'+act+'</div>';
@@ -8109,7 +8235,7 @@ function _pilObjCard(cd,admin){
   var nom=cd?cd.saison:_pilSaisonNom();
   return '<div style="'+cardCss+'">'
     +'<div style="'+ttlCss+';margin-bottom:4px">\uD83C\uDFAF Objectif de fin des travaux</div>'
-    +'<div style="font-size:12.5px;color:var(--texte-doux);margin-bottom:12px">Date à laquelle tu veux que toutes les tâches de la saison soient terminées. La marge du tableau de bord compare la projection (cadence réelle) à cette date — indépendante de la fin de saison.</div>'
+    +'<div style="font-size:12.5px;color:var(--texte-doux);margin-bottom:12px">Date à laquelle vous voulez que toutes les tâches de la saison soient terminées. La marge du tableau de bord compare la projection (cadence réelle) à cette date — indépendante de la fin de saison.</div>'
     +'<div style="display:flex;align-items:center;gap:10px;flex-wrap:wrap"><span style="font-size:13px;font-weight:700">Saison '+_pilEsc(nom||'—')+' — terminer pour le</span>'
     +'<input type="date" id="pil-obj-param" value="'+(objIso||'')+'"'+(admin?'':' disabled')+' style="'+inCss+'">'
     +(admin?'':'<span style="font-size:11px;color:var(--texte-doux)">\uD83D\uDD12 admin</span>')+'</div></div>';
@@ -8212,7 +8338,7 @@ function _pilParamBody(d){
   if(!cd||!cd.taskWindows||!cd.taskWindows.length){
     return '<div id="pil-param-host">'+_pilObjCard(cd,admin)
       +'<div style="'+cardCss+'"><div style="'+ttlCss+';margin-bottom:8px">Paramétrage · fenêtres des tâches</div>'
-      +'<div class="pil-empty">Renseigne les dates de la saison active (Réglages \u203A Saisons) pour paramétrer les fenêtres de tâches.</div></div>'
+      +_pilEmptyGo('Renseignez les dates de la campagne active pour paramétrer les fenêtres de tâches.','saisons','Réglages \u203A Campagne')+'</div>'
       +_pilSimEcoCard(admin)+'</div>';
   }
   function _o(y){ return Math.round((Date.parse(y+'T00:00:00')-Date.parse('2026-01-01T00:00:00'))/86400000); }
@@ -8232,7 +8358,7 @@ function _pilParamBody(d){
     ? ('<div style="margin:0 0 10px;padding:9px 12px;border-radius:9px;background:#FBF0DC;color:#8A5A38;font-size:12px;line-height:1.5">'
        +'\u26A0 Vous regardez <b>'+_pilEsc(_PIL_SCOPE.camp)+'</b> dans le reste du Pilotage, mais ce param\u00e9trage porte sur '
        +'<b>'+_pilEsc(cd.saison)+'</b>, la p\u00e9riode consult\u00e9e. Pour param\u00e9trer '+_pilEsc(_PIL_SCOPE.camp)+', '
-       +'changez de p\u00e9riode consult\u00e9e (R\u00e9glages \u203a Saisons).</div>')
+       +'changez de p\u00e9riode consult\u00e9e (R\u00e9glages \u203a Campagne).</div>')
     : '';
   var rows=cd.taskWindows.map(function(t){
     var dis=admin?'':' disabled';
@@ -8347,9 +8473,14 @@ function _pilFillContent(d){
   if(tab==='auj') host.innerHTML=_pilTabAuj(d);
   else if(tab==='an') host.innerHTML=_pilTabAn(d);
   else if(tab==='avc') host.innerHTML=_pilTabAvc(d);
-  else if(tab==='equ') host.innerHTML=
-      (_pilAnyShow(['prs_equipe','prs_presences','prs_capacite'])?'<div class="pil-sec-h">Personnel</div>'+_pilTabPrs(d):'')
-    + (_pilAnyShow(['mat_tracteur','mat_gnr','mat_phyto','mat_traitement'])?'<div class="pil-sec-h">Matériel</div>'+_pilTabMat(d):'');
+  else if(tab==='equ'){
+    var _hEqu=
+        (_pilAnyShow(['prs_equipe','prs_presences','prs_capacite'])?'<div class="pil-sec-h">Personnel</div>'+_pilTabPrs(d):'')
+      + (_pilAnyShow(['mat_tracteur','mat_gnr','mat_phyto','mat_traitement'])?'<div class="pil-sec-h">Matériel</div>'+_pilTabMat(d):'');
+    // Les six autres onglets ont leur repli ; celui-ci sortait un ECRAN BLANC,
+    // sans meme la phrase qui dit comment rallumer les tuiles.
+    host.innerHTML=_hEqu || '<div class="pil-empty">Aucun indicateur affiché — activez-les via « Choisir les indicateurs ».</div>';
+  }
   else if(tab==='cav') host.innerHTML=_pilTabCav(d);
   else if(tab==='sim') host.innerHTML=_pilTabSim(d);
   else if(tab==='eco') host.innerHTML=_pilTabEco(d);
@@ -8414,6 +8545,11 @@ function _pilBindContent(content){
       // sans que personne comprenne pourquoi.
       if(_pt && _PIL_VALID_TAB[_pt] && _pt!==_PIL_TAB){ _PIL_TAB=_pt; _pilSaveTab(_pt); renderPilotage();
         if(window.scrollTo) window.scrollTo(0,0); }
+      // Deja sur l'ecran vise : le clic tombait dans le vide. « voir le detail »
+      // doit toujours faire quelque chose — ici, descendre au detail annonce.
+      else if(_pt===_PIL_TAB){ var _pc=document.getElementById('pil-content');
+        if(_pc){ try{ _pc.scrollIntoView({behavior:'smooth',block:'start'}); }
+          catch(e4){ if(window.logError) window.logError({level:'info',cat:'pilotage',msg:'photo: defilement'}); } } }
       return; }
     // Le fil d'Ariane : la croix et la racine ramenent a l'annee entiere.
     var _cx=e.target.closest('#pil-cr-x, #pil-cr-root');

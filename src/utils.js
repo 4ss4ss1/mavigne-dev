@@ -23,7 +23,7 @@ export const GT_ADMIN_EMAIL = 'ngdevpro@gmail.com';
 // WHATS_NEW   : tableau vide = modal desactive pour cette version.
 // Format item : { emoji:'📅', titre:'Titre court', desc:'Phrase utilisateur.' }
 // Regle : seulement les changements visibles par les utilisateurs.
-export const APP_VERSION = '6.06';
+export const APP_VERSION = '6.07';
 // ════ Journal des nouveautés (récap cumulatif) ════
 // Une entrée par version, la PLUS RÉCENTE EN HAUT : { v:'5.10', items:[ {emoji,titre,desc}, … ] }
 // À chaque release visible → AJOUTER un bloc en tête (ne pas remplacer). items:[] = release technique (rien à afficher).
@@ -354,6 +354,20 @@ window._mvGraphRepeindre = function(){
 };
 
 export const WHATS_NEW = [
+  { v:'6.07', items:[
+    { emoji: '\u{1F4CC}', titre: "La barre du haut dispara\u00eessait d\u00e8s qu\u2019on faisait d\u00e9filer",
+      desc: "La ligne qui dit <b>ce que vous regardez</b> \u2014 l\u2019exercice, ou une campagne \u00e9pingl\u00e9e \u2014 passait sous la barre des onglets au premier d\u00e9filement. Vous pouviez donc lire un tableau filtr\u00e9 sur les vendanges en croyant regarder l\u2019ann\u00e9e enti\u00e8re. Les deux barres se rangent d\u00e9sormais l\u2019une sous l\u2019autre, et le fil reste visible du haut en bas de la page." },
+    { emoji: '\u{1F5C2}', titre: "Trois \u00e9crans r\u00e9pondaient sur une autre p\u00e9riode que celle affich\u00e9e",
+      desc: "\u00c9conomie chiffre la <b>p\u00e9riode consult\u00e9e</b>, la Cave suit le <b>mill\u00e9sime</b>, la Conformit\u00e9 roule sur <b>sept ans</b>\u202f: aucun des trois ne se recadre sur la campagne \u00e9pingl\u00e9e en haut, et ils ne le disaient pas. Chacun l\u2019annonce maintenant en une ligne, au-dessus de ses chiffres. Rien n\u2019a chang\u00e9 dans les calculs \u2014 seulement dans ce qu\u2019ils avouent." },
+    { emoji: '\u{1F3F7}', titre: "Le titre de « L\u2019ann\u00e9e » \u00e9tait vide, et deux onglets portaient deux noms",
+      desc: "On cliquait « La campagne » et on atterrissait sous « Avancement »\u202f; « Simuler » s\u2019intitulait « D\u00e9cider ». Et le niveau <b>L\u2019ann\u00e9e</b> s\u2019ouvrait carr\u00e9ment <b>sans titre</b>. Les libell\u00e9s sont align\u00e9s. L\u2019onglet « L\u2019\u00e9quipe &amp; les t\u00e2ches » devient <b>« L\u2019\u00e9quipe &amp; le mat\u00e9riel »</b>\u202f: il ne montrait aucune t\u00e2che, elles vivent dans « La campagne »." },
+    { emoji: '\u{2611}', titre: "Vos cases coch\u00e9es dans « L\u2019ann\u00e9e » ne tenaient pas la nuit",
+      desc: "Les deux indicateurs du niveau <b>L\u2019ann\u00e9e</b> \u2014 les deux fa\u00e7ons de compter, et les 52 semaines \u2014 n\u2019\u00e9taient pas connus du r\u00e9glage\u202f: d\u00e9coch\u00e9s, ils se recochaient tout seuls \u00e0 la session suivante. Votre choix est d\u00e9sormais m\u00e9moris\u00e9 comme celui des autres onglets." },
+    { emoji: '\u{1F517}', titre: "« Renseignez Réglages › Saisons » sans le moindre lien",
+      desc: "Sept \u00e9crans vides vous renvoyaient \u00e0 un r\u00e9glage <b>en texte mort</b>, avec un nom de section qui n\u2019existe nulle part\u202f: la carte s\u2019appelle <b>Campagne</b>. Chacun porte maintenant un bouton qui ouvre le bon \u00e9cran, fait d\u00e9filer jusqu\u2019au bon bloc et le fait clignoter \u2014 comme le fait d\u00e9j\u00e0 la liste « \u00e0 compl\u00e9ter ». Le bouton « Voir les deux cadres », lui, ouvrait Réglages au lieu du panneau qu\u2019il annon\u00e7ait." },
+    { emoji: '\u{1F6E1}', titre: "La conformit\u00e9 affichait 0 kg de cuivre quand le calcul \u00e9chouait",
+      desc: "Un z\u00e9ro est une mesure\u202f: \u00e9crire « 0 kg Cu \u00b7 aucun apport enregistr\u00e9 » l\u00e0 o\u00f9 la synth\u00e8se n\u2019avait pas abouti revenait \u00e0 certifier une absence qu\u2019on n\u2019avait pas v\u00e9rifi\u00e9e. C\u2019est un tiret d\u00e9sormais, avec la pastille qui dit o\u00f9 aller voir." },
+  ] },
   { v:'6.06', items:[
     { emoji: '\u{1F4B6}', titre: "Augmenter quelqu\u2019un rechiffrait tout son pass\u00e9",
       desc: "Le taux horaire d\u2019un salari\u00e9 \u00e9tait <b>un seul nombre, sans date</b>. Le jour o\u00f9 vous le changiez, l\u2019application recalculait avec le nouveau taux <b>toutes les heures d\u00e9j\u00e0 travaill\u00e9es</b>\u202f: le co\u00fbt de la taille de f\u00e9vrier, celui d\u2019une campagne archiv\u00e9e, et jusqu\u2019au total d\u2019un <b>exercice comptable d\u00e9j\u00e0 clos</b>. Une ligne \u00ab\u202fdernier changement\u202f\u00bb s\u2019affichait bien sous le champ, mais elle n\u2019entrait dans aucun calcul\u202f: elle donnait l\u2019impression que c\u2019\u00e9tait g\u00e9r\u00e9. \u00c0 partir de maintenant, chaque heure est valoris\u00e9e au taux qui valait <b>ce jour-l\u00e0</b>." },
@@ -1689,10 +1703,10 @@ var MV_AIDE = {
     points: [
       ['Rien ne se saisit ici', ": tout est en lecture seule. Les chiffres viennent du journal, du planning et des sessions tracteur."],
       _mvAideOngletsPil,
-      ['La barre du haut dit où vous regardez', ": l’exercice entier, ou une campagne. Cliquez une campagne dans la frise de l’année et tout l’écran suit — les quatre chiffres du haut comme les tableaux. La croix revient à l’année."],
+      ['La barre du haut dit où vous regardez', ": l’exercice entier, ou une campagne. Cliquez une campagne dans la frise de l’année et les quatre chiffres du haut, la frise et les tableaux de la campagne suivent. La croix revient à l’année. <b>Trois écrans ont leur propre cadre</b> et ne se recadrent pas : Économie chiffre la période consultée, la Cave suit le millésime, la Conformité roule sur sept ans — chacun l’écrit au-dessus de ses chiffres."],
       ['Les quatre chiffres du haut', "répondent aux quatre questions d’un domaine : les travaux, l’effectif, le budget, la conformité. Ils changent avec ce que vous regardez, et chacun mène à l’écran qui le détaille."],
       ['Le bouton « à compléter »', "liste ce qui manque pour que vos chiffres soient justes, et vous emmène à l’endroit exact où le renseigner. Un rond rouge sur un chiffre veut dire qu’il ne se calcule pas ; un rond orange, qu’il sort mais faux."],
-      ['Les onglets vont du large au fin', ": l’année, puis la campagne, puis l’équipe et les tâches, puis la simulation. Après le trait, ce sont des écrans de détail — on y arrive aussi en touchant un des quatre chiffres."],
+      ['Les onglets vont du large au fin', ": l’année, puis la campagne, puis l’équipe et le matériel, puis la simulation. Après le trait, ce sont des écrans de détail — on y arrive aussi en touchant un des quatre chiffres."],
       ['La campagne', "montre l’avancement, mais aussi — sous « Où va le temps de l’équipe » — comment la présence se partage entre vigne, tracteur et le reste, avec la frise prévu/réel, la courbe par semaine et l’écart. Ces blocs parlent d’une campagne ; le pic de la semaine la plus chargée, lui, se lit dans « L’année »."],
       ['Deux périodes qui se chevauchent', "ne comptent rien deux fois : les heures suivent les tâches, et une tâche n’appartient qu’à une seule période. Sur les jours communs, la frise hachure le fond en violet — il y a deux barres au même endroit, on lit la plus haute."],
       ['Une fenêtre de tâche s’arrête le jour écrit', " : fin au 25 avril, le 25 travaille. Et les heures se répartissent au prorata des jours <b>travaillables</b> : une semaine de ponts en reçoit moins, les semaines pleines récupèrent le reste."],
@@ -1701,7 +1715,7 @@ var MV_AIDE = {
       ['Simuler compte sur la fenêtre du TRAVAIL', ", pas sur le calendrier d’aujourd’hui. Quarante vendangeurs engagés du 26 août au 4 septembre comptent dès maintenant pour l’ordre de passage et la répartition de la vendange — même si vous êtes seul dans les rangs ce matin. Le jour du travail, personne n’est en congé et tous les contrats courent."],
       ['Un contrat de groupe compte pour son effectif', " : une fiche « équipe de vendange » à 40 vaut 40 personnes, pas une ligne. Inutile de créer quarante fiches. L’écran dit toujours sur quelles dates il a compté, et affiche l’écart avec la présence du jour."],
       ['Le manque d’effectif se lit sur la semaine du pic', ", contre ce qui est prévu au planning <b>cette semaine-là</b> — pas contre la présence d’aujourd’hui. Un pic qui tombe dans onze mois ne se compare pas à qui est là ce matin."],
-      ['Économie', "compare un budget de barème à ce qui est engagé. Quand l’écart est grand, c’est le barème qu’on corrige dans Réglages, jamais le taux horaire."],
+      ['Économie', "compare un budget de barème à ce qui est engagé, sur la <b>période consultée</b> — le coût d’un bilan entier se lit dans sa sous-vue <b>Exercice</b>. Quand l’écart est grand, c’est le barème qu’on corrige dans Réglages, jamais le taux horaire."],
       ['Conformité', "suit le cuivre sur sept ans, le nombre de passages et les délais de rentrée en cours."],
       ['Cave', "dit ce qui presse aujourd’hui, où en est le millésime, et ce que coûte le parc à fûts."],
       ['Archives', "empile les campagnes sur un même axe, du 1er août au 31 juillet : le décalage d’une année sur l’autre se lit d’un coup d’œil."],
