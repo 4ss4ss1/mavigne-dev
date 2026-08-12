@@ -1034,7 +1034,9 @@ function _pilAnnuelData(){
     var o0=_pilAnnOrd(vd), L=Math.max(1,out.e-out.s+1);
     var pos=(o0-out.s)/L;                         // 0 = ouvre l'annee, 1 = la clot
     // Mois ideal d'ouverture = celui qui SUIT la fin de la vendange.
-    var fv=new Date(Date.parse(vf+'T00:00:00'));
+    // \u26a0 Meme piege que les etiquettes de semaine : minuit LOCAL relu en UTC.
+    //   Une vendange finissant un 1er octobre proposait \u00ab septembre \u00bb.
+    var fv=new Date(vf+'T00:00:00Z');
     var moisIdeal=(fv.getUTCMonth()+1)%12;
     out.align={coupe:coupe, pos:pos, ok:(!coupe&&pos>=0.72), moisIdeal:moisIdeal};
   }
@@ -1331,6 +1333,34 @@ function _pilDeuxCadresHtml(ann){
     +'</div>';
 }
 
+// \u2605\u2605\u2605 LES JOURS COUVERTS PAR PLUS D'UNE PERIODE.
+//   \u26a0 CE N'EST PAS UN DEFAUT DE COMPTAGE, et on ne le represente pas comme tel.
+//   Les heures suivent les TACHES, une tache n'appartient qu'a UNE periode : rien
+//   n'est compte deux fois (\u00a735c, verifie sur _chargeSaisonData \u2014 ne pas
+//   reintroduire l'alerte). C'est un defaut de DESSIN : sur un jour partage, la
+//   frise peint DEUX barres au meme endroit, l'une par-dessus l'autre. Le chiffre
+//   affiche reste juste (c'est un maximum, pas une somme) mais le lecteur voit une
+//   barre la ou il y en a deux, et rien ne lui dit de quelle periode est celle du
+//   dessus. On hachure le fond : la zone se lit, les barres restent lisibles.
+//   Balayage : +1 a chaque debut, -1 au lendemain de chaque fin. Partage = 2 et
+//   plus. Deux periodes bout a bout (fin le X, debut le X+1) ne partagent RIEN.
+function _pilAnnPartage(ann){
+  if(!ann||!ann.pers||ann.pers.length<2) return [];
+  var ev=[];
+  ann.pers.forEach(function(p){
+    var a=_pilAnnOrd(p.debut), b=_pilAnnOrd(p.fin);
+    if(isNaN(a)||isNaN(b)||b<a) return;
+    ev.push([a,1]); ev.push([b+1,-1]);
+  });
+  ev.sort(function(x,y){ return (x[0]-y[0])||(x[1]-y[1]); });
+  var n=0, deb=null, out=[];
+  ev.forEach(function(x){
+    var av=n; n+=x[1];
+    if(av<2 && n>=2) deb=x[0];
+    else if(av>=2 && n<2 && deb!=null){ if(x[0]>deb) out.push([deb,x[0]-1]); deb=null; }
+  });
+  return out;
+}
 function _pilFriseAnneeSvg(ann,w){
   if(!ann||!ann.weeks.length) return window._mvGraphVide(
     'Aucune p\u00e9riode dat\u00e9e sur la campagne',
@@ -1361,12 +1391,25 @@ function _pilFriseAnneeSvg(ann,w){
   var yTop=Math.ceil(yMax/step)*step; if(!(yTop>0))yTop=step;
   function Y(v){ return padT+chH-(v/yTop)*chH; }
   var MN=['JANV','F\u00c9VR','MARS','AVR','MAI','JUIN','JUIL','AO\u00dbT','SEPT','OCT','NOV','D\u00c9C'];
+  // Deux motifs, deux SENS, deux inclinaisons opposees : un trou (aucune periode)
+  // ne doit pas ressembler a un partage (deux periodes). Meme trame = meme
+  // message pour l'oeil, quel que soit le texte de la legende.
   var g='<defs><pattern id="pil-ann-h" width="6" height="6" patternTransform="rotate(45)" patternUnits="userSpaceOnUse">'
-    +'<line x1="0" y1="0" x2="0" y2="6" stroke="'+c.col.texte+'" stroke-width="1.4" opacity="0.28"/></pattern></defs>';
-  if(!selP) ann.trous.forEach(function(t){
-    var x0=X(Math.max(t[0],s)), x1=X(Math.min(t[1]+1,e+1));
-    if(x1>x0) g+='<rect x="'+x0.toFixed(1)+'" y="'+padT+'" width="'+(x1-x0).toFixed(1)+'" height="'+chH+'" fill="url(#pil-ann-h)"/>';
-  });
+    +'<line x1="0" y1="0" x2="0" y2="6" stroke="'+c.col.texte+'" stroke-width="1.4" opacity="0.28"/></pattern>'
+    +'<pattern id="pil-ann-p" width="7" height="7" patternTransform="rotate(-45)" patternUnits="userSpaceOnUse">'
+    +'<line x1="0" y1="0" x2="0" y2="7" stroke="#7A5CA8" stroke-width="2" opacity="0.20"/></pattern></defs>';
+  var _part=[];
+  if(!selP){
+    ann.trous.forEach(function(t){
+      var x0=X(Math.max(t[0],s)), x1=X(Math.min(t[1]+1,e+1));
+      if(x1>x0) g+='<rect x="'+x0.toFixed(1)+'" y="'+padT+'" width="'+(x1-x0).toFixed(1)+'" height="'+chH+'" fill="url(#pil-ann-h)"/>';
+    });
+    _part=_pilAnnPartage(ann);
+    _part.forEach(function(t){
+      var x0=X(Math.max(t[0],s)), x1=X(Math.min(t[1]+1,e+1));
+      if(x1>x0) g+='<rect x="'+x0.toFixed(1)+'" y="'+padT+'" width="'+(x1-x0).toFixed(1)+'" height="'+chH+'" fill="url(#pil-ann-p)"/>';
+    });
+  }
   for(var v=0;v<=yTop;v+=step){
     g+='<line x1="'+padL+'" y1="'+Y(v).toFixed(1)+'" x2="'+(W-padR)+'" y2="'+Y(v).toFixed(1)+'" stroke="'+c.col.grille+'" stroke-width="1"/>'
       +'<text x="'+(padL-7)+'" y="'+(Y(v)+4).toFixed(1)+'" text-anchor="end" font-size="'+c.txt.mini+'" fill="'+c.col.texte+'" font-family="Outfit">'+v+'</text>';
@@ -1444,7 +1487,8 @@ function _pilFriseAnneeSvg(ann,w){
   }
   return window._mvGraphSvg(window._mvGraphCadre(W,H),
     (selP?('Personnes n\u00e9cessaires par semaine sur '+selP.nom):'Personnes n\u00e9cessaires par semaine sur la campagne')
-    +', face \u00e0 l\u2019effectif pr\u00e9sent.', g);
+    +', face \u00e0 l\u2019effectif pr\u00e9sent.'
+    +(_part.length?(' '+_part.length+' zone'+(_part.length>1?'s':'')+' o\u00f9 deux p\u00e9riodes se recouvrent, hachur\u00e9e'+(_part.length>1?'s':'')+' : deux barres y sont dessin\u00e9es au m\u00eame endroit.'):''), g);
 }
 
 // ── NIVEAU ① — L'ANNEE : la frise des 52 semaines et le pic ─────────────────
@@ -1473,6 +1517,9 @@ function _pilPanelEtp(d){
   // contre « 11,2 presents » — un chiffre qui n'existe AUCUN jour de l'annee.
   var peak4=PP.pic||0, presAtPeak=PP.head||0;
   var anyShort=!!PP.court, pkw=PP.picW||null;
+  // Nombre de zones ou deux periodes se recouvrent. Meme source que la frise
+  // (_pilAnnPartage) : la legende ne peut pas annoncer autre chose que le dessin.
+  var _partN=(ann&&!_pilAnnPer(_PIL_SCOPE.camp))?_pilAnnPartage(ann).length:0;
   var cadre=_pilCadreLbl(PP);
   function _semLab(wk){ return wk?_pilSemLabO(wk.o0):''; }
   var synth, sBg, sCol;
@@ -1488,7 +1535,12 @@ function _pilPanelEtp(d){
     +'<span style="display:inline-flex;align-items:center;gap:6px"><i style="width:14px;height:10px;border-radius:3px;background:var(--vert-med);display:inline-block"></i> couvert par l\u2019\u00e9quipe</span>'
     +'<span style="display:inline-flex;align-items:center;gap:6px"><i style="width:14px;height:10px;border-radius:3px;background:var(--rouge);display:inline-block"></i> renfort \u00e0 trouver</span>'
     +'<span style="display:inline-flex;align-items:center;gap:6px"><i style="width:16px;height:0;border-top:2px solid var(--texte);display:inline-block"></i> effectif pr\u00e9sent</span>'
-    +'<span style="display:inline-flex;align-items:center;gap:6px"><i style="width:16px;height:0;border-top:2px dashed #4A9FC8;display:inline-block"></i> socle permanent</span></div>';
+    +'<span style="display:inline-flex;align-items:center;gap:6px"><i style="width:16px;height:0;border-top:2px dashed #4A9FC8;display:inline-block"></i> socle permanent</span>'
+    // \u2605 La hachure violette n'apparait dans la legende QUE s'il y a une zone
+    //   partagee. Une legende qui nomme une trame absente du dessin fait chercher
+    //   ce qui n'existe pas \u2014 et fait douter du reste.
+    +(_partN?('<span style="display:inline-flex;align-items:center;gap:6px"><i style="width:14px;height:10px;border-radius:3px;background:repeating-linear-gradient(45deg,rgba(122,92,168,.30) 0 2px,transparent 2px 5px);display:inline-block"></i> deux p\u00e9riodes se recouvrent \u2014 deux barres au m\u00eame endroit</span>'):'')
+    +'</div>';
   var secTtl='font-weight:600;font-size:12.5px;color:var(--cave);margin:14px 0 2px';
   // ── Frise annuelle : clic sur une campagne = ZOOM (axe X et axe Y) ───────────
   // ★ Plus de chip « Annee » : la frise EST la tuile. Une case a cocher qui vide
@@ -2605,7 +2657,10 @@ function _rfBesoin(ctx){
   var W=ctx.W, rMax=_RF_RMAX_DUR, out=[];
   (ctx.tw||[]).forEach(function(t){
     if(!(t.h>0.01)) return;
-    var a=_rfWOf(W,t.ws), b=_rfWOf(W,t.we);
+    // t.we est la borne EXCLUSIVE : le dernier jour travaille est we-1. Viser
+    // wOf(t.we) designait la semaine du LENDEMAIN de l'echeance — une semaine de
+    // rab quand la fenetre se terminait un dimanche.
+    var a=_rfWOf(W,t.ws), b=_rfWOf(W,t.we-1);
     if(b<a) b=a;
     var cap1=0, dispoH=0, i;
     for(i=a;i<=b;i++){ cap1+=(W[i].cap||0); dispoH+=((ctx.dispo[i]||0)*(W[i].cap||0)); }
@@ -2657,11 +2712,31 @@ function _rfCd(){
   var sa=(typeof window._pilSaison==='function')?window._pilSaison():null;
   return (window._chargeSaisonData&&window.getSaisonActive)?window._chargeSaisonData(sa):null;
 }
-// Part des heures d'une tache tombant dans [a,b) — etalement uniforme sur sa
-// fenetre. Sert a redonner une ECHELLE juste aux colonnes du graphe du reste.
-function _rfHIn(t,a,b){
+// \u2605\u2605\u2605 UNE SEULE REGLE D'ETALEMENT DANS TOUT LE MODULE \u2014 LA REGLE A.
+//   Les heures d'une tache se repartissent au prorata des jours TRAVAILLABLES de
+//   sa fenetre, jamais des jours du calendrier. Une semaine amputee par le 1er mai
+//   et l'Ascension n'a que trois jours pour absorber du travail : elle en recoit
+//   trois cinquiemes, pas sept septiemes.
+//   AVANT : _taskHoursIn (planning.js) appliquait la regle A, _rfHIn appliquait
+//   un etalement a plat. Les deux lectures du simulateur \u2014 \u00ab le plan \u00bb et \u00ab ce
+//   qu'il reste \u00bb \u2014 se dessinaient donc sous DEUX regles, cote a cote, et
+//   _rfMemeImage les comparait l'une a l'autre.
+//   La capacite ne se recalcule pas ici : elle est LUE dans cd.capCum, le cumul
+//   jour par jour rendu par _chargeSaisonData. Un second calcul donnerait un
+//   second chiffre.
+//   \u26a0 Repli integral sur l'ancien etalement si capCum est absent (planning.js
+//   anterieur a ce lot) : jamais d'ecran vide pour une cle manquante.
+function _rfCapIn(cd,a,b){
+  var C=cd&&cd.capCum; if(!C||cd.spanS==null) return null;
+  var i=Math.round(a)-cd.spanS, j=Math.round(b)-cd.spanS, L=C.length-1;
+  if(i<0)i=0; if(i>L)i=L; if(j<0)j=0; if(j>L)j=L;
+  return (j>i)?(C[j]-C[i]):0;
+}
+function _rfHIn(cd,t,a,b){
   var A=Math.max(t.ws,a), B=Math.min(t.we,b);
   if(B<=A) return 0;
+  var den=_rfCapIn(cd,t.ws,t.we);
+  if(den!=null&&den>0){ var num=_rfCapIn(cd,A,B); return t.h*(num||0)/den; }
   return t.h*(B-A)/Math.max(1,t.we-t.ws);
 }
 function _rfCtx(d,mode,cdIn){
@@ -2696,7 +2771,7 @@ function _rfCtx(d,mode,cdIn){
       var fr=(k===0)?(ndr/nd):1, cp=(w.cap||0)*fr;
       // need RECALCULE sur le reste : garder celui du plan ferait mentir la
       // hauteur des colonnes du graphe.
-      var wh=0; tw.forEach(function(t){ wh+=_rfHIn(t,o0,w.o1+1); });
+      var wh=0; tw.forEach(function(t){ wh+=_rfHIn(cd,t,o0,w.o1+1); });
       return { o0:o0, o1:w.o1, m:w.m, hours:wh, cap:cp, need:(cp>0?wh/cp:0),
                head:w.head, headPerm:w.headPerm,
                capH:(w.capH!=null?w.capH*fr:null), capPay:(w.capPay!=null?w.capPay*fr:null),
@@ -2872,7 +2947,7 @@ function _rfSim(ctx,prof){
   // demarre aujourd'hui, pas forcement un lundi).
   function wOf(o){ return _rfWOf(W,o); }
   var st=ctx.tw.map(function(t){
-    return { nom:t.nom, rest:t.h, h0:t.h, ouv:wOf(t.ws), lim:wOf(t.we),
+    return { nom:t.nom, rest:t.h, h0:t.h, ouv:wOf(t.ws), lim:wOf(t.we-1),
              fin:null, dep:0, cpt:!!t.cpt, perdu:0 };
   });
   var hSup=0, induit=0, capRenf=0, pointe=0, inemploye=0, sem=0, fin0=null, parSem=[];

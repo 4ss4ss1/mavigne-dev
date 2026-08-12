@@ -856,7 +856,7 @@ function _chargeSaisonData(s){
     if(e&&(e.d1||e.d2)){
       var es=_ord(e.d1||s.debut), ee=_ord(e.d2||s.fin);
       if(!isNaN(es)&&!isNaN(ee)&&ee>=es){
-        if(ee>=spanS&&es<=spanE){ ws=Math.max(spanS,Math.min(spanE,es)); we=Math.max(spanS,Math.min(spanE,ee)); custom=true; }
+        if(ee>=spanS&&es<=spanE){ ws=Math.max(spanS,Math.min(spanE,es)); we=Math.max(spanS,Math.min(spanE,ee))+1; custom=true; }
         else hors=true;
       }
     }
@@ -864,17 +864,25 @@ function _chargeSaisonData(s){
     if(!custom){ var ov=_cfgW[key];
       if(ov&&ov.start&&ov.end){ var os=_ord(ov.start), oe=_ord(ov.end);
         if(!isNaN(os)&&!isNaN(oe)&&oe>=os){
-          if(oe>=spanS&&os<=spanE){ ws=Math.max(spanS,Math.min(spanE,os)); we=Math.max(spanS,Math.min(spanE,oe)); custom=true; }
+          if(oe>=spanS&&os<=spanE){ ws=Math.max(spanS,Math.min(spanE,os)); we=Math.max(spanS,Math.min(spanE,oe))+1; custom=true; }
           else hors=true;
         } }
     }
     // 3) sinon fenetre par defaut (fractions)
-    if(!custom){ var fr=_mvTaskWin(t.nom); ws=spanS+fr[0]*spanLen; we=spanS+fr[1]*spanLen; }
+    // \u2605\u2605\u2605 LA FENETRE S'ARRETE LE JOUR ECRIT, PAS LA VEILLE.
+    //   `we` est la borne EXCLUSIVE de l'etalement : _taskHoursIn et le calcul de
+    //   winCap balaient [ws, we[. Elle valait exactement la date de fin saisie, si
+    //   bien que le DERNIER JOUR de chaque fenetre ne recevait aucune heure.
+    //   \u00ab fin le 25 avril \u00bb faisait travailler jusqu'au 24. Un jour perdu sur
+    //   CHAQUE tache, y compris le dernier jour de la periode elle-meme.
+    //   Desormais we = (dernier jour voulu) + 1. L'affichage lit `we-1` : les dates
+    //   montrees ne bougent pas d'un pixel, c'est le calcul qui gagne le jour.
+    if(!custom){ var fr=_mvTaskWin(t.nom); ws=spanS+fr[0]*spanLen; we=spanS+fr[1]*spanLen+1; }
     if(we<=ws)we=ws+1;
     // capacite 1 ETP cumulee sur la fenetre [ws,we) — denominateur de l'etalement prorata-capacite
     var winCap=0; for(var _d=Math.round(ws);_d<Math.round(we);_d++) winCap+=_cap1(_d);
     var s0=(ws-spanS)/spanLen, s1=(we-spanS)/spanLen;
-    return {nom:t.nom,h:t.h,s0:s0,s1:s1,ws:ws,we:we,winCap:winCap,start:_ford(ws),end:_ford(we),custom:custom,horsPeriode:hors};
+    return {nom:t.nom,h:t.h,s0:s0,s1:s1,ws:ws,we:we,winCap:winCap,start:_ford(ws),end:_ford(we-1),custom:custom,horsPeriode:hors};
   });
   // Heures de t etalees au PRORATA DE LA CAPACITE sur [a,b) : une semaine de feries (capacite ~0)
   // recoit proportionnellement moins de travail -> plus de pic « fantome ». Repli uniforme si winCap==0.
@@ -980,6 +988,18 @@ function _chargeSaisonData(s){
     });
     return out;
   }
+  // \u2605\u2605\u2605 LA CAPACITE CUMULEE, JOUR PAR JOUR, SORT D'ICI.
+  //   Le simulateur de renfort recalculait les heures de chaque semaine avec SA
+  //   propre regle : un etalement a plat sur les jours du CALENDRIER. Ici,
+  //   _taskHoursIn etale au prorata des jours TRAVAILLABLES. Deux regles pour la
+  //   meme courbe : la semaine du 1er mai recevait sa charge pleine alors qu'elle
+  //   n'a que trois jours pour la faire — le graphe la montrait calme, les rangs
+  //   disaient l'inverse. Et le test qui decide d'afficher un graphe ou deux
+  //   comparait ces deux regles entre elles.
+  //   capCum[k] = capacite 1 ETP cumulee de spanS jusqu'a spanS+k EXCLU. Le
+  //   simulateur lit ce tableau ; il n'y a plus qu'UNE definition de l'etalement.
+  var capCum=[0];
+  for(var _cc=spanS;_cc<=spanE;_cc++) capCum.push(capCum[capCum.length-1]+_cap1(_cc));
   var weeks=[];
   for(var wo=spanS; wo<=spanE; wo+=7){
     var wo0=wo, wo1=Math.min(spanE,wo+6), wh=0;
@@ -1029,7 +1049,7 @@ function _chargeSaisonData(s){
     if(w.need>peakReq){ peakReq=w.need; peakWeek=w; peakMonth=w.m; peakPres=w.head||0; }
     if(w.need>(w.head||0)+0.05) anyShort=true;
   });
-  return {saison:s.nom,debut:s.debut,fin:s.fin,charge:charge,tasks:taskDet,months:months,capRefTotal:capRefTotal,etpCible:etpCible,capEquipe:capEquipe,etpDispo:etpDispo,nMbr:mbrs.length,taskWindows:taskWindows,weeks:weeks,capPresentTotal:capPresentTotal,etpPresent:etpPresent,peakReq:peakReq,peakMonth:peakMonth,peakWeek:peakWeek,peakPres:peakPres,anyShort:anyShort};
+  return {saison:s.nom,debut:s.debut,fin:s.fin,spanS:spanS,spanE:spanE,capCum:capCum,charge:charge,tasks:taskDet,months:months,capRefTotal:capRefTotal,etpCible:etpCible,capEquipe:capEquipe,etpDispo:etpDispo,nMbr:mbrs.length,taskWindows:taskWindows,weeks:weeks,capPresentTotal:capPresentTotal,etpPresent:etpPresent,peakReq:peakReq,peakMonth:peakMonth,peakWeek:peakWeek,peakPres:peakPres,anyShort:anyShort};
 }
 window._chargeSaisonData=_chargeSaisonData;
 
