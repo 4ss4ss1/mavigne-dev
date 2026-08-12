@@ -2,7 +2,27 @@
 
 > Document de référence du projet **Ma Vigne** (GUERETTECH). Il est le **porteur de vérité** :
 > la mémoire Claude est plafonnée, ce fichier ne l'est pas.
-> Dernière consolidation : **12 août 2026 (soir)** — ★★★ **LE CHANTIER PILOTAGE** (**§34**, section
+> Dernière consolidation : **12 août 2026 (nuit)** — ★★★ **« AMÉLIORE FOIS 100 »** (**§36**, section
+> neuve). Parti d'un *« Trop d'incohérence dans pilotage, vérifie absolument tout »* et de sept
+> captures. **Huit familles de défauts, toutes prouvées sur le code** : toutes les dates du module
+> reculaient d'un jour (époque **locale** relue avec des accesseurs **UTC**) · un pic annoncé à
+> **46,3 personnes** pour un domaine de quatre, porté par une fenêtre de tâche écrasée sur **un seul
+> jour** et un **moignon de semaine** large d'un pixel · « manque 44,3 ETP » = deux dates et deux
+> unités dans une soustraction · un travail en attente **plafonné à 4** à l'affichage, d'où un
+> plateau qui n'existe pas dans les données · une fenêtre qui s'arrêtait **la veille** du jour écrit ·
+> deux règles d'étalement pour une même courbe.
+> ★★★ **La leçon de la séance est ailleurs** : un correctif **juste** (pondérer les équipes
+> collectives) n'avait **rien changé à l'écran**, parce qu'il lisait **aujourd'hui** — un contrat de
+> **groupe** de 40 vendangeurs démarrant dans quinze jours n'existait pas. *La vraie question n'était
+> pas « combien vaut une fiche » mais « quel jour on compte ».* L'effectif se lit désormais sur **la
+> fenêtre du travail**. ★★ Et une **faute d'ordre** (bloc posé avant `var tasks`) a rendu un **écran
+> blanc** que ni `node --check` ni le preflight ni 86 assertions ne voyaient : *tester une fonction
+> sans jamais passer par le chemin réel, c'est tester autre chose.* **APP 6.05 · SW 6.55.**
+> **41 défauts réinjectés, 41 attrapés · 6 assertions fausses, dont deux VERTES sur du vide.**
+> Consolidation précédente du même jour : ★★★ **LES CINQ RETOURS** (**§35**) — quatre sur cinq
+> étaient des bugs, dont deux constats de diagnostic qui **accusaient les données du domaine d'une
+> faute que le code commettait lui-même**. **APP 6.04 · SW 6.54.**
+> Consolidation précédente du même jour : ★★★ **LE CHANTIER PILOTAGE** (**§34**, section
 > neuve). Parti d'un *« on améliore fois 100 pilotage, pour le moment ça ne convient pas »* et
 > d'une capture d'écran. Diagnostic chiffré sur le code réel : **12 moteurs de graphe**,
 > **4 palettes** concurrentes, **5 sélecteurs** qui s'ignoraient, **29 impasses** sans lien, et
@@ -5136,3 +5156,264 @@ vérifie que le défaut est bien entré avant de conclure quoi que ce soit (§34
    pertinence se juge à l'usage, pas au harnais.
 3. ★ Le sélecteur « On part de » n'est **pas mémorisé** entre deux ouvertures — volontaire pour
    l'instant (le défaut doit rester « ce qu'on sait »), à revoir si Nico le repose souvent.
+
+## 36. ★★★ « AMÉLIORE FOIS 100 » — HUIT LOTS SUR LE PILOTAGE (12/08 nuit — APP v6.05 · SW v6.55)
+
+**Point de départ**, mot pour mot : *« Trop d'incohérence dans pilotage. Il faut l'améliorer fois
+100. Vérifie absolument tout. »* Plus **sept captures** d'écran mobile.
+
+Puis, au fil de la séance, quatre retours qui ont chacun **rouvert** ce qui venait d'être fermé :
+*« Non ça doit s'arrêter le 25 »* · *« explique moi je ne comprends pas »* · *« quelles barres : on a
+dit on regarde les tâches »* · *« ça doit prendre aussi les contrats déjà signés »* · *« tout est
+bloqué dans pilotage »*.
+
+★★ **Le retour le plus utile de la séance n'est pas le premier, c'est le quatrième.** Les trois
+premiers ont produit des correctifs justes. Le quatrième a montré qu'un correctif juste **peut ne
+rien changer à l'écran** — voir 36f. C'est celui-là qu'il faut relire.
+
+### 36a. Le diagnostic, mesuré sur le code — jamais sur l'impression
+
+Reconstitution faite **depuis les captures**, puis vérifiée ligne à ligne avant de toucher au code.
+Huit familles, toutes prouvées :
+
+| ce que Nico voyait | ce qu'il y avait dessous |
+|---|---|
+| « campagne · 31 mars → 30 juil. » pour une campagne 1 avr → 31 juil | époque **locale** relue avec des accesseurs **UTC** — **toutes** les dates du module reculaient d'un jour |
+| « 46,3 ETP au pic » sur un domaine de 4 personnes | une fenêtre de tâche écrasée sur **un seul jour** + un **moignon de semaine** d'un jour qui portait le pic |
+| « Manque ≈ 44,3 ETP » | `PP.pic` (semaine du pic, pondéré) **moins** `presentChamp` (têtes **d'aujourd'hui**, non pondérées) |
+| sept colonnes à **6,0 pile** | `Math.min(att,4)` : le travail en attente **plafonné à 4** à l'affichage |
+| « Accolage — 26 pers. » à côté de « 7 sur toute la période » | `x.R` est un **rattrapage**, pas un besoin — et il n'était pas comparé à la solution globale |
+| « fin le 25 avril » | `we` **exclusif** valait la date saisie : le 25 ne travaillait pas |
+| deux graphes du simulateur incomparables | `_rfHIn` étalait à plat sur les jours du **calendrier**, `_taskHoursIn` au prorata des jours **travaillables** |
+| « EFFECTIF 1 » avec 40 vendangeurs sous contrat | l'effectif était lu **AUJOURD'HUI**, pas sur la fenêtre du travail |
+
+### 36b. ★★★ UNE ÉPOQUE LOCALE RELUE AVEC DES ACCESSEURS UTC
+
+Trois sites reconstruisaient une date depuis un ordinal en mélangeant **deux conventions dans la
+même expression** : `new Date(Date.parse('2026-01-01T00:00:00') + o*86400000)` — époque **locale** —
+relu par `getUTCDate()` / `toISOString()`. À l'est de Greenwich, minuit local vaut **23:00 UTC la
+veille** : toutes les dates sortaient un jour trop tôt.
+
+⚠️ **Les deux voies prises séparément étaient justes.** `_ford` (planning.js) fait UTC → UTC.
+`_cap1` fait local → local. C'est le **croisement** qui ment. Et il ment **partout à la fois**, donc
+de façon cohérente — rien ne clignote.
+
+★★ **Aucun calcul n'était faux ; toutes les étiquettes l'étaient.** *Un chiffre juste sous une date
+fausse ne se vérifie pas.* C'est ce qui rendait tout le module « incohérent » à la lecture.
+
+**Correctif** : un inverse unique, `_pilOrdD` / `_pilOrdIso`, même base et mêmes accesseurs que
+`_ford`. ★ Preuve **numérique** dans le harnais : aller-retour exact sur 800 jours, **et** on rejoue
+l'ancienne version pour vérifier qu'elle reculait bien d'un jour — *une contre-épreuve qui ne
+reproduit pas le défaut ne prouve rien.*
+
+### 36c. ★★★ LE PIC À 46,3 — DEUX MÉCANISMES, UN SEUL SYMPTÔME
+
+**(a) La fenêtre écrasée.** Dans `taskWindows`, les deux bornes étaient rabotées sur `[spanS,spanE]`
+**sans vérifier qu'il restait quelque chose**. Une échéance entièrement hors période donnait
+`ws=we`, puis `if(we<=ws) we=ws+1` → **un seul jour**, portant **toutes** les heures de la tâche.
+
+⚠️⚠️ **Le cas n'est pas théorique : `CONFIG.task_windows` est un override GLOBAL à dates ABSOLUES,
+appliqué à CHAQUE période.** Un relevage calé sur mai 2027 s'écrase donc sur le dernier jour de
+l'hiver 2026-2027, où ces dates n'existent pas. **Une même consigne, deux périodes, un désastre dans
+l'une.**
+
+**(b) Le moignon de semaine.** `for(wo=spanS; wo<=spanE; wo+=7)` laisse une dernière case de 1 à
+6 jours dès qu'une période ne fait pas un nombre entier de semaines. Cette case est une **semaine**
+pour tout le module : elle porte un `need`, elle peut porter le **pic de l'année**, et elle se
+dessine **large d'un pixel**.
+
+★★ **Un chiffre qu'on ne peut pas voir ne se vérifie pas.** Sur la capture, le pic de l'exercice
+était une barre fine isolée au milieu de barres larges — invisible tant qu'on ne la cherche pas.
+
+**Correctif** : test de recouvrement avant tout rabotage, repli sur la fenêtre par défaut, drapeau
+`horsPeriode` **lu** par le tableau des fenêtres (3ᵉ état, `⚠ hors période`) ; et le moignon fondu
+dans la semaine précédente, à la source, pour **tous** les lecteurs.
+
+★ **Preuve chiffrée, en faisant tourner le vrai `_chargeSaisonData`** (harnais fonctionnel, vm) :
+fenêtre relevage **1 j → 47,6 j**, dernière case **1 j → 8 j**, **pic 147 → 6,2 personnes**. Même
+domaine, même donnée.
+
+### 36d. Les quatre autres corrections d'affichage
+
+**La tuile « Capacité vs charge ».** `manque = PP.pic − d.presentChamp` : **deux dates, deux unités,
+une soustraction**, affichée en gros et en orange. Le manque vient désormais de `PP.manque` (même
+semaine, même pondération) ; la présence du jour a son propre encart, sous son propre nom. Et la
+seconde barre de progression, **toujours à `width:100%`**, a disparu — *une barre qui ne varie jamais
+est un décor, pas une mesure.*
+
+**Le plafond du graphe.** `Math.min(att,4)` faisait ressembler un manque de quarante à un manque de
+quatre. ★★ **Un plateau parfaitement plat qui n'est pas dans les données est le symptôme d'un
+plafond.** Sept colonnes à 6,0 = 2 (effectif) + 4 (plafond). Retiré ; l'axe monte avec le manque, pas
+de graduation adaptatif. Au passage, le bloc rouge partait de `head` (**têtes**) au-dessus d'une pile
+empilée en **équivalents-personnes** : deux unités dans une seule barre, le rouge flottait. Et la
+ligne noire traçait `head` sur un graphe en capacité — invisible tant que tout le monde est à temps
+plein, faux dès le premier mi-temps.
+
+**Les propositions.** `x.R` répond à « combien poser **sur la seule fenêtre de cette tâche** alors
+qu'on n'a rien fait avant » : tout le retard s'y écrase, le surcoût de retard le multiplie, le nombre
+s'envole. ★★ **Une proposition ciblée plus chère que la solution globale n'est pas une proposition,
+c'est un piège.** `tout` est calculé d'abord et plafonne les autres.
+
+**La zone partagée.** Rien n'est compté deux fois (§35c, non rouvert) — mais sur les jours communs la
+frise dessinait **deux barres au même endroit**, l'une derrière l'autre, sans le dire. Hachurée en
+violet, **trame inclinée dans l'autre sens** que celle des trous : ⚠️ même trame = même message pour
+l'œil, quel que soit le texte de la légende. Légende conditionnelle — *une légende qui nomme une
+trame absente du dessin fait chercher ce qui n'existe pas.*
+
+### 36e. ★★ LA FIN EST INCLUSE, ET IL N'Y A QU'UNE RÈGLE D'ÉTALEMENT
+
+**Sur retour de Nico** (*« Non ça doit s'arrêter le 25 »*) : `we` est la borne **exclusive** de
+l'étalement et valait **exactement la date de fin saisie**. « Fin le 25 avril » travaillait jusqu'au
+**24** — un jour perdu sur **chaque** tâche, y compris le dernier jour de la période elle-même.
+
+★ **Correctif à coût nul pour l'utilisateur** : `we = (dernier jour voulu) + 1`, affichage en `we-1`.
+**Les dates montrées ne bougent pas d'un pixel** ; c'est le calcul qui gagne le jour. Mesuré :
+capacité de la fenêtre **111 h → 119 h**, dernière semaine **38 h → 71 h**, affichage identique.
+Conséquence rattrapée dans le même lot : `lim`/`b` visaient `wOf(t.we)`, la semaine du **lendemain**
+de l'échéance.
+
+**Deux règles pour une même courbe.** `_taskHoursIn` étale au prorata des jours **travaillables**,
+`_rfHIn` étalait **à plat sur les jours du calendrier**. Les deux lectures du simulateur — « le
+plan » et « ce qu'il reste » — se dessinaient donc sous deux règles, côte à côte, et `_rfMemeImage`
+les comparait l'une à l'autre. ★ `capCum` (cumul jour par jour) **sort** de `_chargeSaisonData` et le
+simulateur le **lit** : *un second calcul donnerait un second chiffre.* Mesuré sur l'ébourgeonnage :
+semaine du 1ᵉʳ mai **39 h** contre 50 h pour une semaine pleine ; l'ancienne règle servait **45 h aux
+deux**.
+
+### 36f. ★★★ LA LEÇON DE LA SÉANCE — UN CORRECTIF JUSTE QUI NE CHANGE RIEN À L'ÉCRAN
+
+Retour de Nico, capture à l'appui : *« On est censé avoir quarante personnes qui ont un contrat
+signé, je l'ai mis sur le contrat groupe. Donc là, tu mets toujours une personne. »*
+
+**Le lot précédent (6.54) avait pondéré les équipes collectives.** `presentChamp` devenait une somme
+pondérée par `_mvEffDef`, les trois panneaux de Décider partaient du même nombre, harnais vert,
+contre-épreuve verte. **Et l'écran n'avait pas bougé d'un chiffre.**
+
+⚠️⚠️⚠️ **Parce que `d.membres` vient de `_pilMembresActifs`, qui filtre sur
+`_mvEnContratLe(m, AUJOURD'HUI).`** Un contrat de **groupe** du 26 août au 4 septembre n'existe pas
+le 12 août : **la fiche n'atteignait même pas la pondération.** J'avais corrigé le poids d'une fiche
+qui n'était pas là.
+
+★★★ **LA VRAIE QUESTION N'ÉTAIT PAS « COMBIEN VAUT UNE FICHE » MAIS « QUEL JOUR ON COMPTE ».**
+Mot pour mot, Nico : *« au moment des tâches, personne ne sera en congé et tous les contrats seront
+en cours. »* Un ordre de passage calculé sur l'effectif du 12 août est faux le 26 — et cet écran-là
+n'est pas un indicateur : **il est enregistré et envoyé aux ouvriers.**
+
+**Correctif** : `_pilEffFenetre(d0,d1)` / `_pilFenTaches(noms)` / `_pilEffTaches(noms)`. L'effectif
+se lit sur **la fenêtre des tâches cochées**, jamais sur le calendrier du jour. Cocher un autre
+travail recompte ; un réglage manuel n'est jamais écrasé ; l'écran **dit toujours sur quelles dates
+il a compté** — *un effectif sans ses dates est une opinion.*
+
+★ **`_pilEffSemaine` est devenue morte et a été supprimée. Ce n'est pas moi qui l'ai vu : c'est C15
+du preflight.** La preuve que le filet vaut mieux que l'attention.
+
+**Et un second piège, dessous.** `w.head` est un effectif **LISSÉ** : chaque fiche y pèse ses jours
+sous contrat divisés par les jours de la semaine. 40 vendangeurs démarrant un **mercredi** y valent
+**28,6**. ★★ **Personne ne travaille à 28,6 : ce jour-là il y a 40 personnes dans les rangs, ou
+aucune.** `_headDayMax` (planning.js, à côté de `_headWeek`, même `_inContractDay`, même `_mvEffDef`)
+donne le nombre de **corps au plus fort de la semaine**. `head` reste la **courbe** ; `headMax`
+dimensionne une **tournée**.
+
+★ Preuve : le même jour, le même écran répond **1** pour aujourd'hui et **41** pour la vendange.
+
+### 36g. ★★★ UNE FAUTE D'ORDRE N'EST PAS UNE FAUTE DE SYNTAXE
+
+Retour de Nico : *« tout est bloqué dans pilotage »*, capture d'un onglet Décider **vide** et d'un
+bandeau *« Promesse rejetée : Cannot read properties of undefined (reading 'map') »*.
+
+Le bloc qui lit la fenêtre du travail avait été posé **avant** `var tasks` dans `_pilSimInitData`.
+Par hissage, `tasks` vaut `undefined` : `tasks.map` lève.
+
+⚠️⚠️ **`node --check` passe. Le preflight passe. Les 86 assertions passent.** Un contrôle de
+**syntaxe** ne voit pas une faute d'**ordre**.
+
+★★★ **ET LA VRAIE CAUSE EST DANS MON HARNAIS, PAS DANS LE CODE.** Le scénario appelait
+`_pilEffFenetre` et `_pilEffTaches` **directement** : les deux répondaient juste, vert. **Je n'ai
+jamais appelé le panneau.**
+
+> **RÈGLE : tester une fonction sans jamais passer par le chemin réel, c'est tester autre chose.**
+> Le harnais construit désormais la chaîne complète — `_pilData` → `_pilSimInitData` → `_pilSimBody`
+> → `_opInit` → `_opEffAppliquer` — et **échoue si l'un d'eux lève**. Contre-épreuve : défaut
+> réinjecté, le harnais rougit avec **le message exact vu à l'écran**.
+
+★ Une chasse générique aux « usages avant déclaration » a rendu **49 candidats, presque tous faux
+positifs** (paramètres de fonctions internes, attributs SVG, chaînes CSS). *Un contrôle statique
+approximatif sur du JS coûte plus qu'il ne rapporte* — c'est l'appel réel qui tranche.
+
+### 36h. Les assertions qui ont eu tort — six, pour zéro bug
+
+Fidèle à §34g, et il faut le réécrire à chaque fois :
+
+1. **`G.4 « aucun catch vide »`** — plafond à zéro, alors que les fichiers en comptaient **déjà 14 et
+   2**, inchangés. ★ Et surtout : **le preflight fait déjà ce contrôle, correctement, en cliquet.**
+   Assertion **retirée**, pas corrigée — *deux sources pour une question, c'est la faute qu'on répare.*
+2. **`4.4`** écrite **en négatif** (`!/yy=Y\(ctx\.head\[i\]\|\|0\)/`). Défaut réinjecté avec une autre
+   orthographe : **resté vert**. ★★ *Une assertion négative ne teste pas un sens, elle teste une
+   chaîne.* Réécrite en positif, la négative gardée en second.
+3. **`14.2` / `14.3`** cherchaient `presentChamp=` **sans les espaces** autour du `=`. Rouge sur du
+   code juste.
+4. **`17.3`** visait `_pilCkEffectif` — la fonction s'appelle **`_pilCkEtp`**. `corps()` rendait une
+   chaîne vide et le test « ne contient pas ETP » passait au **vert sur du vide**. ★★★ **Attrapée par
+   la garde « tous les sites sont bien LUS », écrite exactement pour ça après §34g.** Sans elle,
+   l'assertion aurait rassuré indéfiniment.
+5. **`15.x`** mesuraient `_pilEffSemaine` — **la mauvaise question** (voir 36f). Vertes, et le
+   correctif ne changeait rien à l'écran.
+
+> **Bilan de la séance : 6 assertions fausses, 0 bug de code de leur fait. Aucune contournée.**
+> **Et son symétrique, deux fois vécu ici : une assertion VERTE peut être une panne de lecture.**
+
+### 36i. Le banc d'essai — deux pièges de vm à connaître
+
+- **`Object.defineProperty(window,'_PIL_ETPSEL')` échoue dans une vm** : en module ES un `var` est
+  local au module ; dans une vm le hissage en fait une propriété globale **non configurable**. Le
+  script s'arrête là. ★ Les **déclarations de fonction**, elles, sont hissées : tout ce qu'on appelle
+  existe. Les `var` d'état sont remis à `null` à la main.
+- **`planning.js` et `pilotage.js` déclarent tous deux `const DEBUG`** : chargés dans **la même** vm,
+  le second refuse de compiler (« Identifier 'DEBUG' has already been declared ») et **rien** n'est
+  défini. ⚠️ **Échec silencieux si on avale l'exception.** Deux contextes, et on branche
+  `_chargeSaisonData` de l'un dans l'autre — exactement ce que fait `window`.
+- ⚠️ Le harnais **affiche** l'erreur de chargement au lieu de la manger : une vm qui n'a rien chargé
+  et un code sans défaut se ressemblent trop.
+
+### 36j. Ce qui a été livré
+
+| fichier | ce qu'il porte |
+|---|---|
+| `src/pilotage.js` | dates, pic, tuile capacité, graphe renfort, stratégies, règle A, zone partagée, effectif sur la fenêtre |
+| `src/planning.js` | recouvrement des fenêtres + `horsPeriode`, `nd` + fusion du moignon, fin incluse, `capCum`, `_headDayMax` |
+| `src/utils.js` | `MV_AIDE.pilotage` (6 points), `APP_VERSION` 6.05, `WHATS_NEW` 6.05 (7 items) |
+| `index.html` | 4 emplacements de version |
+| `public/sw.js` | 6.55 — en-tête + `CACHE_NAME` + 2 `console.log` + changelog prepend |
+| `guide/11-pilotage.html` + `public/guide.html` | 7 blocs, dont « Sur quel effectif Simuler compte » |
+| `mv-harnais-coherence.mjs` | **87 assertions** de sens |
+| `mv-harnais-fonctionnel.mjs` | **5 scénarios** qui font tourner le vrai code en vm |
+
+⚠️ **`utils.js` touché → BUMP** : APP 6.04 → **6.05**, SW 6.54 → **6.55**. Le piège du remplacement
+global refermé par l'assertion d'usage : après le lot, **`v6.54` subsiste exactement une fois**, sur
+sa propre ligne de changelog.
+
+★ **Le `WHATS_NEW` 6.05 annonce aussi les lots partis muets** (`pilotage.js` + `planning.js` seuls ne
+bumpent pas) — règle de §27, appliquée.
+
+### 36k. Contre-épreuve
+
+**41 défauts réinjectés un par un, 41 attrapés.** Référence verte après restauration, fichiers
+identiques **à l'octet près** (assertion de fin de script). Chaque injection vérifie d'abord **que le
+défaut est bien entré** avant de conclure quoi que ce soit — §34h, déjà vécu.
+
+⚠️ **Le 41ᵉ est le plus instructif** : c'est l'écran blanc de 36g, et il n'a été ajouté **qu'après**
+que Nico l'a vu en production. *Une contre-épreuve ne couvre que ce qu'on a pensé à casser.*
+
+### 36l. Reste à faire
+
+1. Les points 1 à 4 de **§34i** restent ouverts (filtres cépage/commune, `_PIL_SEM` → `utils.js`,
+   carte colorée par avancement, purge des palettes mortes). ⚠️ **Le point 2 disait « au prochain lot
+   qui bumpe » — ce lot bumpe, et je ne l'ai pas fait.** Ne pas le laisser glisser une fois de plus.
+2. Les points 2 et 3 de **§35h** restent ouverts.
+3. ★ **`s0` / `s1` sur `taskWindows` ne sont lus nulle part** (vérifié par grep sur tout `src/`).
+   À purger au prochain passage sur `_chargeSaisonData`.
+4. ★ **Vérifier sur les données réelles du domaine** quelle tâche portait le pic à 46,3 : ouvrir
+   Pilotage › Outils › Paramétrage sur **Hiver 2026-2027** et lire la ligne marquée `⚠ hors période`.
+   Le mécanisme est prouvé ; **la ligne fautive, elle, n'a pas encore été nommée.**
+5. ★ `capCum` ajoute ~120 entiers par période dans `cd`. Négligeable, mais à surveiller sur un domaine
+   à beaucoup de périodes.
