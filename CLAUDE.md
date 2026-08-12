@@ -2,7 +2,14 @@
 
 > Document de référence du projet **Ma Vigne** (GUERETTECH). Il est le **porteur de vérité** :
 > la mémoire Claude est plafonnée, ce fichier ne l'est pas.
-> Dernière consolidation : **11 août 2026 (nuit)** — ★★★ **L'AUDIT DU BACKLOG, point par point,
+> Dernière consolidation : **12 août 2026** — ★★★ **LES ETP, L'ANNÉE ET LES CONTRATS** (**§33**,
+> section neuve). Parti d'une capture d'écran et d'un « beaucoup de faute ! », l'audit a trouvé
+> **quatre bugs d'une même famille** — un indicateur divisé par un dénominateur qui n'est pas le
+> sien — dont un qui faisait **dire deux choses contraires au même écran**. Trois lots livrés :
+> le pic rebasé sur la semaine + la frise annuelle zoomable, l'**historique des contrats** (une
+> perte de données qui était **en cours**), et l'**année calée sur l'exercice comptable** avec
+> diagnostic d'alignement de la vendange. **APP 5.99 · SW 6.49.** Mises à jour de §19, §20b, §28.
+> Consolidation précédente : **11 août 2026 (nuit)** — ★★★ **L'AUDIT DU BACKLOG, point par point,
 > sur le dépôt cloné** (commit `636630a`, **APP 5.96 · SW 6.46**). Les 42 entrées techniques ont été
 > re-vérifiées une par une par `grep` sur le code réel : **six rayées**, **cinq chiffres corrigés**,
 > **trois qui avaient empiré pendant qu'elles dormaient au backlog**. Détail dans le §28.
@@ -30,18 +37,23 @@
 >
 > ⚠️ **Points en suspens au moment de la consolidation** :
 > 1. ✅ **TOUT EST DÉPLOYÉ** — les cinq lots d'installation (§18b), les deux lots Tracteur et la
->    refonte du Planning sont en ligne. **APP 5.96 · SW 6.46.** Ce qui était marqué « NON DÉPLOYÉ »
+>    refonte du Planning sont en ligne. Ce qui était marqué « NON DÉPLOYÉ »
 >    dans ce document ne l'est plus : les mentions ont été corrigées au §28.
+>    ⚠️ **APP 5.99 · SW 6.49 sont LIVRÉS mais PAS ENCORE DÉPLOYÉS** (§33) — trois lots du 12/08.
+>    ⚠️⚠️ **Les numéros de ce paragraphe ont été périmés deux fois de suite.** Ne jamais les lire
+>    comme un fait : `APP_VERSION` dans `utils.js` et l'en-tête de `sw.js` sont les seules sources.
 > 2. ⚠️ **Une installation à blanc** sur un slug jetable reste à faire — **c'est le seul critique
 >    encore ouvert.** Elle valide les cinq lots d'un coup et mesure les temps réels (§18b, §28).
 > 3. **Château Garraud : le devis reste à établir** — c'est le sujet commercial n°1 (§28), et il
 >    force à **borner l'offre de lancement** d'abord.
-> 4. ⚠️ **Des lots restent non documentés ici**, connus par le seul changelog de `sw.js` :
+> 4. ✅ **Le plafond ESLint est à 0 avec 0 erreur** — re-vérifié le 12/08 sur les six fichiers du
+>    jour. L'entrée « passer le plafond à 0 » est close depuis le 11/08 ; ne pas la rouvrir.
+> 5. ⚠️ **Des lots restent non documentés ici**, connus par le seul changelog de `sw.js` :
 >    « panneau GUERETTECH : 8 onglets deviennent 6 », « SEC-GT/2 », la **tournée sur l'écran de
 >    l'équipe », l'**exercice comptable**, les **4 défauts de la snapshot localStorage**, le **Chai
 >    qui s'ouvrait vide**, le **soutirage à source unique**, le **Cuvier repeint**, le **hub
 >    Documents** et la **charte `MV_DOC`**. **À consigner par Nico.**
-> 5. ⚠️ **`rewrites` est absent du `firebase.json` lu** alors qu'`essai.html` poste vers
+> 6. ⚠️ **`rewrites` est absent du `firebase.json` lu** alors qu'`essai.html` poste vers
 >    `/api/lead` — à vérifier en ligne (§18b).
 
 ---
@@ -285,7 +297,10 @@ Détail des trois supports et de leur mécanique : **§27a** (la règle longue),
 
 - ★★★ **Git, depuis le 10 août — via GitHub Desktop.** Dépôt `4ss4ss1/mavigne-dev` (**public** —
   nécessaire au clone anonyme de Claude), cloné dans
-  `C:\Users\p4n0m\Desktop\Applications\mavigne-dev\` (dossier **distinct** de l'ancien `mavigne\`,
+  `C:\Users\p4n0m\Desktop\Applications\mavigne-dev\` — ⚠️ **CHEMIN À CONFIRMER PAR NICO** : une
+  note de mémoire indique `C:\Users\p4n0m\Documents\GitHub\mavigne-dev` (le défaut de GitHub
+  Desktop). **Les deux sont invérifiables depuis le bac à sable** ; le premier qui relit tranche et
+  supprime l'autre. (dossier **distinct** de l'ancien `mavigne\`,
   qui peut être supprimé une fois vérifié que tout a bien été copié dedans). Nico édite dans
   `mavigne-dev\`, GitHub Desktop détecte les changements, **Commit + Push** (deux clics, pas de
   ligne de commande). ⚠️ Ça ne change **rien** à `npm run build` / `firebase deploy`, qui restent
@@ -1846,6 +1861,23 @@ Les courbes filtraient sur `statut !== 'Inactif'`. Marquer un contrat terminé e
 de **tout l'historique** : le pic d'effectif tombait de **10 à 4**.
 **Correctif** : `window._mvEnContratSurPeriode(m, d0, d1)`, appliquée aux **3 sites**.
 ⚠️ Les écrans « **qui est là aujourd'hui** » sont **volontairement inchangés**.
+
+★★★ **SUITE DU 12/08 — le même piège, un cran plus loin (§33).** Le correctif ci-dessus réglait
+la question 2 (« a-t-il travaillé pendant cette période ? ») **tant qu'un salarié n'a qu'un seul
+contrat**. Dès qu'il en signe un second, saisir la nouvelle date de début **écrasait la
+précédente** : le passé disparaissait quand même, et cette fois **à la saisie**, hors de portée de
+tout code de lecture. `m.contrats[]` + `window._mvContrats(m)` corrigent le modèle.
+**Trois questions, trois lecteurs, à ne plus jamais confondre :**
+
+| question | qui répond | voit |
+|---|---|---|
+| est-il là **aujourd'hui** ? | `_mvEnContratLe` | tous les contrats |
+| a-t-il travaillé **sur cette période** ? | `_mvEnContratSurPeriode`, `_inContractDay` | tous les contrats |
+| combien lui doit-on **sur CE contrat** ? | `_planInContract` (**35 appels**) | **le contrat en cours seul** |
+
+⚠️⚠️ **`_planInContract` NE DOIT PAS être élargi.** Il pilote le plafond des 1607 h, les congés et
+toute la grille. Règle de Nico : *un contrat = un compteur ; deux contrats séparés par une coupure
+= deux compteurs.* Les fondre fausserait la paie.
 
 ### ★★ Équipe collective (COLLECTIF-1)
 
@@ -3501,106 +3533,6 @@ radios/cases, section « pièces à joindre » explicite.
 
 ## 28. État courant & backlog
 
-### ★★★ La SOIRÉE du 11 août — deux lots, et un audit qui annule une entrée du backlog
-
-**Versions : APP `5.98` · SW `6.48`.** Ni l'un ni l'autre déployé au moment où ceci s'écrit.
-
-#### A. Le lot d'HYGIÈNE (v5.97 / SW 6.47) — cinq points, un seul vrai bug
-
-| # | Correctif | Fichier |
-|---|---|---|
-| 4 | `_findDebutTache` borné à la période | `app.js` |
-| 8 | `pic` mort purgé de `_rfCtx` | `pilotage.js` |
-| 15 | règle CSS `.cave-tabs` orpheline | `styles.css` |
-| 41 | 44 replis `#8B8175` → `#5F5F5F` | `app.js` · `cave.js` · `reserve.js` |
-| 5 | breakpoint 760 → 767.98 | `styles.css` |
-
-★★★ **LE POINT 4 ÉTAIT UN DEFAUT DE TRAÇABILITÉ, pas un détail de calcul.** `_findDebutTache`
-prenait la date la plus ancienne de **tout** le journal. Une ligne « En cours » restée ouverte
-d'une campagne à l'autre — un oubli de validation, ce qui arrive — faisait moyenner **quatorze
-mois de météo**, et le résultat partait dans `meteo_snapshot`, **au journal**. Aucun signe
-extérieur. **Même famille que l'écart de cadence : un indicateur bâti sur un signal non borné
-ment avec l'autorité d'une mesure.**
-
-**La borne retenue est la PÉRIODE de la validation** (`_saisonForDate`), parce que c'est déjà la
-borne du reste de l'app — `_mvFinChantier` fait exactement ce filtre. Repli sur la **campagne**
-(`_mvCampagneDe`), puis sur le jour même. **Trois niveaux, aucun concept neuf.**
-⚠️ La signature devient `_findDebutTache(parcelle, tache, dateRef)` — **les trois appelants sont
-patchés**. `dateRef` est la date de la VALIDATION, pas celle du jour : rejouer une validation
-ancienne borne sur SA période.
-★ **Le harnais a fait apparaître un cas non anticipé** : une ligne « En cours » **postérieure**
-à la validation comptait aussi. Le `j.date<=ref` la ferme. **17/17, contre-épreuve incluse** —
-le défaut réintroduit donne **377 jours** d'écart.
-
-#### B. Le lot MODULES PAR RÔLE (v5.98 / SW 6.48) — backlog n°40
-
-Un membre créé en lot arrivait avec les **sept modules**. ★★ **Le coût n'est pas le temps de
-l'installateur — c'est la PREMIÈRE IMPRESSION de douze personnes** qui, chez Garraud, ouvriraient
-l'application avec quatre modules hors de leur travail, la plupart sans expérience d'appli métier.
-C'est ce qui justifie le lot, pas les minutes gagnées.
-
-Table `_MV_MODS_ROLE` dans **`utils.js`, source unique**, lue par la création en lot
-(`admin-gt.js`) et par un 5ᵉ preset « Selon le rôle » de la fiche membre (`reglages.js`).
-**L'aperçu avant création dit ce qui sera masqué** — un réglage posé en silence se découvre chez
-le client, et on ne sait plus s'il est voulu.
-
-⚠⚠ **CUMUL DE RÔLES : intersection, jamais union.** Un module n'est masqué que si **tous** les
-rôles le masquent. Avec une union — le réflexe naturel — un **ouvrier-tractoriste perdait son
-Tracteur et son Phyto**. La contre-épreuve du harnais rejoue la version fautive pour le prouver.
-**Dans le doute, on montre.** Un rôle inconnu ne masque rien.
-
-⚠️ **TROIS ÉCARTS ASSUMÉS AVEC LE BACKLOG, qui disait « ouvrier : Cave / Réserve / Planning
-décochées » :**
-1. **`planning` reste visible pour tous.** Depuis la refonte (v6.46) l'ouvrier y tombe directement
-   sur son mois, ses heures et ses congés. Le masquer serait **une régression déguisée en
-   allégement**. Réversible en une ligne si Nico tranche autrement.
-2. **Le chiffre « 12 × 7 arbitrages » était faux** : les presets existaient déjà dans la fiche
-   membre (`_EM_PRESETS`). C'était douze clics, pas 84.
-3. **Il y a un 5ᵉ rôle, `pilotage`**, présent dans la fiche membre mais absent de la création en
-   lot (`_agtLotRoles` n'en détecte que quatre). Écrit explicitement à `[]` — **un arbitrage,
-   pas un oubli.**
-
-★★★ **LE PREFLIGHT A RATTRAPÉ UN DÉFAUT DE MA LIVRAISON** : `_emModPresetRole` appelé en
-`onclick` mais **absent de `window`**. La fiche membre étant injectée dynamiquement, **le bouton
-aurait été mort au clic** — sans erreur, sans trace. C22/C24 gagnent leur place une fois de plus.
-★ **Le lot a été REJOUÉ EN ENTIER depuis le dépôt plutôt que rapiécé** : deux scripts
-déterministes enchaînés, pas un patch sur un patch. **C'est la bonne réaction à un défaut trouvé
-en fin de chaîne**, et elle a coûté deux minutes.
-
-#### C. ★★★ L'AUDIT DES CIBLES TACTILES — le backlog n°39 visait du CODE MORT
-
-**Constat, vérifié avec QUATRE motifs de recherche** (chaîne littérale · construction par morceaux
-· `class=` contenant « toggle » · préfixe progressif) : **`.val-toggle` n'est rendu NULLE PART.**
-`.plan-mo-btn` non plus. Le backlog décrivait pourtant « l'interrupteur qu'un ouvrier bascule par
-équipier, avec des gants ».
-→ **On aurait agrandi une cible tactile qui n'existe pas.** C'est le pendant exact de « livrer
-n'est pas intégrer » : **une entrée de backlog peut décrire un écran qui n'est plus là.**
-
-**Les chiffres, mesurés** : **50 contrôles cliquables sous 44 px**, dont **5 morts**
-(`.val-toggle` 26 · `.mvc-hdr-ico` 34 · `.plan-mo-btn` 34 · `.ph-notif` 36 · `.catsub-b` 42) et
-**45 vivants**. Les plus petits vivants : **`.cexp-type-chk` à 14 px**, puis `.mvt-doc`,
-`.mvt-hab`, `.pil-sw` et `.role-chk` à **20 px**.
-
-⚠️ **POURQUOI CE LOT N'A PAS ÉTÉ FAIT, et ce qu'il faut pour le faire.** La hauteur CSS n'est
-**pas** la zone tactile : une case de 20 px dans un `<label>` de 44 se touche sur 44. Distinguer
-les deux **demande de voir les écrans**, et il n'y a pas de navigateur côté Claude. Deux voies
-existent et elles ne se valent pas :
-- **agrandir vraiment** — change la mise en page (`.pc-start` 34→44 rallonge chaque carte de
-  parcelle non démarrée de 10 px, soit ~450 px de défilement sur 45 parcelles) ;
-- **étendre la seule zone de touche** par `::before{position:absolute;inset:-Npx}` — **zéro pixel
-  de mise en page déplacé**, mais inapplicable aux contrôles mitoyens, dont les zones se
-  chevaucheraient. `.pc-start` et `.pc-validate` partagent une bordure : exclus d'office.
-→ **Arbitrage de Nico requis écran par écran. Le lot ne doit pas partir « à l'estime ».**
-
-⚠⚠ **ET UNE PURGE CSS DE MASSE A ÉTÉ ÉCARTÉE, après l'avoir mesurée.** L'inventaire donne
-**74 classes jamais rendues sur 1 954, ~7,3 ko** — soit **2 % du fichier, ~1,5 ko gzip**.
-**Le gain ne vaut pas le risque** : `.rb-admin` / `.rb-ouvrier` / `.rb-pilotage` figuraient dans la
-liste des « mortes » alors que `'rb-'` apparaît **25 fois** en construction dynamique dans les JS.
-**Un faux positif prouvé dans le lot même qui devait être sûr.** Une règle morte coûte 1,5 ko ;
-un écran qui perd son style chez un client coûte un appel et de la confiance.
-→ **Règle : ne jamais purger du CSS sur la foi d'un `grep` de nom de classe.** Le CSS n'a pas de
-`node --check` : rien ne rougit quand on supprime la mauvaise règle.
-
 ### ★★★ La journée du 11 août (suite) — la refonte du Planning, deux lots
 
 **Point de départ** : *« je trouve que planning est mal conçu, il y en a un peu partout, il faut
@@ -3798,6 +3730,30 @@ hex**, **~375 → 407 ko pour `cave.js`**. Un backlog écrit une fois est une ph
 non re-mesurée depuis une semaine est une hypothèse, pas un constat.** C'est la règle d'or n°1
 appliquée au document lui-même.
 
+★ **AJOUT DU 12/08 — les entrées 0a à 0d sortent du chantier ETP/année/contrats (§33).** Elles
+sont neuves, donc **non auditées** : les traiter comme des hypothèses jusqu'à re-mesure.
+
+0a. ★★★ **DÉPLOYER les trois lots du 12/08** — APP 5.99 · SW 6.49, livrés, contrôles verts,
+   **jamais mis en ligne**. `npm run build && firebase deploy`. Tant que ce n'est pas fait, les
+   clients lisent encore « manque 15,8 ETP » sur une vendange couverte.
+0b. ★★★ **RESSAISIR les contrats écrasés** — le CDD de Victor (`2026-03-02 → 2026-07-24`) est
+   **perdu**, pas caché ; aucune migration ne le retrouve. Geste : mettre les anciennes dates dans
+   la fiche, enregistrer, puis remettre `2026-08-17` en début → l'archivage se déclenche seul.
+   ⚠️ **Même geste pour Shana, Alicia et Vic** dès leur resignature (annoncée au 17/08).
+0c. ★★ **Régler l'ouverture d'exercice au 1ᵉʳ octobre** — aujourd'hui au 1ᵉʳ août, la vendange
+   tombe à **7 %** de l'année et l'ouvre au lieu de la clore. Un clic depuis le bandeau de la frise
+   annuelle. ⚠️ **Vérifier l'effet sur l'écran Économie › Exercice** : il change de fenêtre lui
+   aussi, c'est le but, mais les comparaisons d'exercices antérieurs se décalent d'un cran.
+0d. ★★ **Le pont coût annuel ↔ campagnes** — le gros morceau ouvert par Nico le 12/08, détaillé en
+   fin de §33. Coût annuel **par date**, part d'une campagne **par tâche**, et le **reste**
+   (vinification, entretien, temps mort) qui n'est lisible **qu'avec un taux de saisie**.
+   ⚠️ Le journal ne stocke **pas d'heures** : le croisement passe par les heures payées du jour.
+0e. ★ **Deux compteurs de 1607 h** quand un salarié a deux contrats dans l'année civile. L'écran
+   Planning n'en affiche qu'un. **Affichage, pas calcul** (§19, §33).
+0f. ★ **Resserrer la fin de la période *Vendanges*** — elle court au 30/09 alors que le travail
+   s'arrête le 06/09. Le pic n'est plus faussé, mais la moyenne « sur la période » reste diluée
+   sur trois semaines vides.
+
 1. ★★★ **INSTALLATION À BLANC de bout en bout sur un slug JETABLE — LE SEUL CRITIQUE OUVERT.**
    Elle valide les cinq lots d'un coup et **mesure les temps réels** (tableau prévu dans
    `INSTALLER-UN-DOMAINE.md`). Les lots sont déployés ; **le « 20 h → ~9 h » n'a jamais été vérifié.**
@@ -3905,22 +3861,9 @@ appliquée au document lui-même.
     111 lignes inutiles + 5 noms morts. **Unifier `phyto.js` sur la même forme et supprimer sa
     boucle `for..in` (`phyto.js:1165`)**, invisible au preflight. Regraver la baseline **après**
     avoir prouvé la baisse.
-39. ★★ **LES CIBLES TACTILES — entrée RÉÉCRITE le 11/08 au soir, l'ancienne était FAUSSE.**
-    ⚠⚠⚠ **`.val-toggle` et `.plan-mo-btn` sont du CSS MORT** — aucun rendu, vérifié avec quatre
-    motifs. L'entrée précédente demandait d'agrandir « l'interrupteur qu'un ouvrier bascule avec
-    des gants » : **cet interrupteur n'existe plus dans l'application.**
-    **Mesuré : 50 contrôles cliquables sous 44 px — 5 morts, 45 vivants.** Les plus petits
-    vivants : `.cexp-type-chk` **14 px** ; `.mvt-doc`, `.mvt-hab`, `.pil-sw`, `.role-chk` **20 px** ;
-    `.mv-help-btn` 26 ; `.ob-mbr-del` et `.ob-parcelle-del` 28 ; `.fiche-admin-btn` 32 ;
-    `.pc-start` 34.
-    ⚠️ **NE PAS EXÉCUTER SANS VOIR LES ÉCRANS.** La hauteur CSS n'est pas la zone tactile (une
-    case de 20 px dans un `<label>` de 44 se touche sur 44), et les deux techniques disponibles
-    n'ont pas le même effet : agrandir déplace la mise en page, étendre la zone par `::before`
-    ne la déplace pas mais **ne vaut que pour les contrôles isolés** — `.pc-start` et
-    `.pc-validate` partagent une bordure. **Trier d'abord par CONTEXTE : ce qu'on touche au champ
-    avec des gants d'abord, les écrans de bureau ensuite.**
-    ✅ **Les 5 règles mortes, elles, peuvent partir sans risque** — mais voir le n°43 avant
-    d'étendre à tout le CSS.
+39. ★ **`.val-toggle` 26 → 44 px de haut** — **vérifié `styles.css:283` : toujours 26 px** (pour
+    44 de large). C'est l'interrupteur qu'un ouvrier bascule par équipier, avec des gants.
+    **`.fiche-admin-btn` est à 32 px** (`l.483`) ; vérifier aussi `.pc-start` et `.plan-mo-btn`.
 40. ★★ **Valeurs par défaut de modules PAR RÔLE à la création d'un membre** : un ouvrier arrive avec
     Cave / Réserve / Planning décochées, un tractoriste avec Vigne / Tracteur / Phyto. **Vérifié :
     `_canModule` (`app.js:3860`, socle en `admin-gt.js:2664`) = formule ∧ masquage manuel, le rôle
@@ -3934,12 +3877,6 @@ appliquée au document lui-même.
     pas avant.
 
 
-43. ⚠⚠ **PURGE CSS DE MASSE — MESURÉE PUIS ÉCARTÉE le 11/08. Ne pas la rouvrir sans lire ceci.**
-    74 classes sur 1 954 semblent jamais rendues, **~7,3 ko, soit 2 % du fichier (~1,5 ko gzip)**.
-    **Le gain ne vaut pas le risque, et le risque est prouvé** : `.rb-admin` / `.rb-ouvrier` /
-    `.rb-pilotage` figuraient parmi les « mortes » alors que `'rb-'` apparaît **25 fois** en
-    construction dynamique. **Le CSS n'a pas de `node --check`** : supprimer la mauvaise règle ne
-    fait rien rougir, et se découvre chez un client.
 ### ✅ Rayés du backlog
 
 ~~Urssaf~~ · ~~facturer Chapelle~~ · ~~clé `"site"`~~ · ~~UX-1~~ · ~~SEC-3 CSP~~ · ~~e2e 10 pages~~
@@ -4455,4 +4392,298 @@ ouverte → pas de question ce matin-là.** Le tractoriste passe par le dock, cr
 question repart le jour suivant. **Ça s'auto-corrige en un jour** — le corriger voudrait dire poser
 la question à des gens qui ne prennent pas le tracteur, ce qui est pire.
 
+
 ---
+
+## 33. ★★★ LES ETP, L'ANNÉE ET LES CONTRATS (12/08 — APP v5.99 · SW v6.49)
+
+### Le point de départ
+
+Une capture d'écran de **Pilotage › Charge & ETP** et six mots : *« beaucoup de faute ! calcul
+d'etp, etp present… »*. Trois chiffres que Nico ne comprenait pas, et il avait raison sur les
+trois :
+
+- **2353 h → 10,5 ETP**
+- **Août : 27 ETP requis pour 11,2 présents**
+- **Septembre : 6,1 ETP**
+
+Plus une barre de répartition affichant **392 %**.
+
+### Le diagnostic — quatre bugs, une seule famille
+
+Reconstitution faite **depuis les chiffres affichés**, avant de toucher au code :
+
+| grandeur | valeur déduite |
+|---|---|
+| charge vigne | 2353 h |
+| `capRefTotal` (1 ETP sur la période) | ≈ 224 h |
+| `capEquipe` (l'équipe sur la période) | ≈ 600 h |
+| `capRef` septembre (mois **entier**) | ≈ 176 h |
+| `capRef` août (jours **en saison** seulement) | ≈ 47,5 h |
+
+**Les quatre défauts sont la même erreur sous quatre formes : un numérateur divisé par un
+dénominateur qui n'est pas le sien.**
+
+**1. `etpReq = chargeOrd / capRef`** — numérateur : les heures qui **tombent dans le mois**.
+Dénominateur : la capacité du **mois entier**. Une vendange de quatre jours dans septembre était
+divisée par vingt-deux jours → **6,1**. La même intensité en août, tronqué par le début de saison,
+donc à dénominateur court → **27**. *Deux dénominateurs sous un seul mot.*
+
+**2. `presAtPeak` = moyenne mensuelle de `head`.** Sur une campagne où l'équipe vaut **42** une
+semaine et **2** les autres, la moyenne donne **12** — un chiffre qui **n'existe aucun jour de
+l'année**. (Détail réel : août = (1 + 2 + 30,6)/3 = 11,2 ; septembre = (42 + 2 + 2 + 2)/4 = 12.)
+
+**3. `capEquipe` et `capPresent` sans le poids de l'effectif collectif.** `_headWeek` et
+`_capWeekReal` appliquaient `*w`, ces deux-là non : **une équipe de 40 vendangeurs comptait pour
+une personne.** D'où `capEquipe` ≈ 600 h au lieu de ≈ 2 900.
+
+**4. La barre de répartition saturée.** `_pV = _vig/_prez*100` → **392 %** dans un segment qui se
+présente comme une **part**, pendant qu'« Autres » tombait à **0 h** par le `Math.max(0,…)`. Elle
+mentait deux fois : une part impossible, et un reste inventé à zéro alors qu'il y a bien de la
+cave et des trajets.
+
+### ⚠️⚠️⚠️ LE MÊME ÉCRAN DISAIT DEUX CHOSES CONTRAIRES
+
+C'est le fait le plus important de la journée. Sur **la même capture** :
+
+- la **courbe hebdomadaire** (`need = wh/wcap`, juste depuis toujours) montrait les deux semaines
+  de vendange **couvertes** — barres à ~23 et ~38, ligne d'effectif à ~35 et ~42 ;
+- la **ligne de synthèse**, deux centimètres plus bas, annonçait **« manque ~15,8 ETP »**.
+
+**Personne ne l'avait vu.** Un écran qui se contredit ne lève aucune alarme : il donne deux
+chiffres plausibles, et le lecteur en croit un au hasard. C'est la panne la plus coûteuse du
+projet à ce jour, et elle a vécu des mois.
+
+★★★ **La règle qui en sort : quand deux éléments d'un même écran répondent à la même question, il
+faut les faire lire la MÊME source, ou en supprimer un.** Ici, `peakReq` a été rebasé sur
+`weeks[]` — la maille de la courbe — et le détail mensuel a été **supprimé** plutôt que réparé.
+
+### La preuve par le harnais — reproduire avant de corriger
+
+`mv-harnais-etp.mjs` (hors dépôt) rejoue `_chargeSaisonData` **sur les données réelles du
+domaine** : 16 fiches, équipe collective « Vendangeurs » à 40, période *Vendanges* 10/08 → 30/09.
+Il retrouve **2352 h** et un **pic mensuel de 27,0** — les chiffres exacts de la capture. **Le
+modèle est donc fidèle**, et tout ce qu'il mesure ensuite vaut pour le vrai domaine.
+
+| | avant | après |
+|---|---|---|
+| pic | 27,0 (mensuel) | **36,6 (hebdo)** |
+| effectif au pic | 11,2 (moyenne) | **42,0 (la semaine du pic)** |
+| `capEquipe` | ~600 h | **2 887 h** |
+| barre de répartition | 392 % | **81 %** |
+| alerte | « manque 15,8 ETP » | **couvert** |
+
+★ **Contre-épreuve systématique** : chaque défaut réintroduit un par un fait rougir le harnais.
+
+---
+
+### Lot 1 — le pic à la semaine, et la frise annuelle
+
+`planning.js` + `pilotage.js` + `reglages.js`, **aucun bump** (modules JS seuls).
+
+- `peakReq` / `peakWeek` / `peakMonth` / `peakPres` **rebasés sur `weeks[]`**, avec un garde
+  `w.cap > 0` (semaine hors template : `need` n'y veut rien dire).
+- `anyShort` compare `need` et `head` **de la même semaine**.
+- **Détail mois supprimé** (chip `etp_mois` → `etp_annee`). Non réparable : un mois est trop long
+  quand le travail dure quatre jours.
+- `*_mbPoids()*` posé sur `capEquipe` et `capPresent`.
+- Barre de répartition **plafonnée à 100 %** ; la surcharge est **écrite en clair** (`×3,9`) au
+  lieu d'être absorbée.
+- Le chiffre moyen porte désormais sa propre mise en garde : *« une moyenne n'est pas un pic »*.
+
+#### ★★★ La frise annuelle — l'union des périodes, PAS une entité de plus
+
+**Le piège évité, et il était réel.** Une fenêtre de tâche par défaut est une **FRACTION du span**
+de sa période (`_mvTaskWin`, `planning.js:841`). Étirer un span à douze mois étalerait la taille
+sur un tiers d'année. **La solution : appeler `_chargeSaisonData` PÉRIODE PAR PÉRIODE, chacune avec
+son propre span, puis recoller les `weeks[]` sur un axe commun.** Chaque tâche reste chez elle.
+Zéro migration, zéro prérequis de saisie, `_VISU_SAISON` intact.
+
+Le recollage est légitime parce que `need = wh/wcap` se calcule **sur la même semaine des deux
+côtés** : deux périodes produisent des valeurs directement comparables.
+
+- **Barres empilées** : vert = ce que l'équipe absorbe, rouge = le renfort à trouver. *La hauteur
+  de rouge EST le nombre à recruter*, lisible sans calcul. L'ancienne barre était coloriée en
+  entier — elle disait « ça déborde » sans dire de combien.
+- **Ligne pointillée du socle permanent** (`headPerm`, déjà calculé). Sans elle, à 42 au pic,
+  l'hiver à 3 rampe en bas, illisible. Avec elle on lit *« au-dessus, c'est du renfort »*.
+- **Zones hachurées** = aucune période ne couvre. Un trou n'est pas une absence de travail, c'est
+  une absence de période — il ne se dessine **jamais à zéro**, un zéro est une mesure.
+- **Clic = ZOOM**, pas surbrillance : l'axe X **et l'axe Y** se recalent, et les **tâches de la
+  campagne** remplacent le bandeau. C'est ce qui répond à *« laquelle fait le pic ? »*.
+- Chevauchement de périodes signalé (heures comptées deux fois).
+
+---
+
+### Lot 2 — l'historique des contrats
+
+`utils.js` + `planning.js` + `reglages.js` + `index.html` + `sw.js`. **BUMP APP 5.98 → 5.99 et
+SW 6.48 → 6.49** (`utils.js` touché).
+
+#### ⚠️⚠️⚠️ La perte était EN COURS, pas passée
+
+Trois salariés devaient resigner **cinq jours plus tard**. Chaque resignature aurait effacé leur
+printemps. C'est ce qui a fait passer ce lot devant l'année, plus urgent en apparence.
+
+**Et la perte avait lieu À LA SAISIE.** Nico avait tapé la date du CDI de Victor par-dessus celle
+de son CDD ; l'app n'avait rien dit. **Aucun code de lecture ne pouvait rattraper ça** — la donnée
+n'existait plus nulle part. Le CDD de Victor **est perdu**, pas caché : il faut le ressaisir.
+
+★ **La leçon, qui dépasse ce lot : quand une donnée disparaît, chercher d'abord si elle a été
+écrasée à l'écriture avant d'aller réparer la lecture.**
+
+#### La règle, dictée par Nico
+
+> *« Il y a eu un délai entre la fin du 1er et le début du second. Les contrats auraient été signés
+> sans jour de pause entre les 2, ça se serait suivi. Pour les CDD, apprentis et CDI, ils suivent
+> le rythme imposé par le planning au moment de l'embauche, il n'y a pas de dû d'un côté ou de
+> l'autre. »*
+
+→ **Contrats CONTIGUS (fin + 1 jour = début suivant) = un seul.** **UN jour de coupure = deux
+contrats, chacun son compteur de 1607 h.** `_mvJourApres` passe par `Date` : un `+1` sur la chaîne
+donnerait `2026-07-32`.
+
+#### Le modèle, et pourquoi pas un tableau à la place du couple
+
+`debut_contrat`/`fin_contrat` **gardent exactement leur sens** : le contrat **en cours**, celui que
+lit la paie. `m.contrats[]` ne porte que les **précédents**. Bilan : **3 fonctions changent** au
+lieu de 40 sites, migration nulle (tableau absent = vide), et les 37 autres lecteurs continuent de
+lire ce qu'ils doivent lire.
+
+#### Le garde-fou, volontairement étroit
+
+Archivage automatique **seulement si** l'ancien contrat est **clos** (il a une date de fin) **et**
+que le nouveau début est **strictement postérieur** à cette fin. Corriger une faute de frappe ne
+remplit jamais cette condition → **pas de faux contrat passé fabriqué**. Toast à l'archivage, et
+la fiche affiche la liste avec un `×` par ligne : *une donnée invisible est une donnée qu'on ne
+peut pas croire*.
+
+**Harnais** `mv-harnais-contrats.mjs` : 20 assertions, dont le piège du **31/07 → 01/08**, et une
+assertion **structurelle** vérifiant que `_planInContract` ne lit **pas** `_mvContrats`.
+
+---
+
+### Lot 3 — l'année EST l'exercice comptable
+
+`pilotage.js` + `reglages.js`, **aucun bump** — et c'est le point de conception : **`_mvExercice`
+est déjà la source unique de « où commence l'année »**. On la consomme, on n'en fabrique pas une
+seconde. Toucher `utils.js` aurait été le réflexe, et il aurait été faux.
+
+**La demande de Nico tenait en deux phrases apparemment contradictoires** : *« on fait coïncider
+l'année avec le début d'exercice écrit par l'admin »* et *« il faut trouver un moyen d'avoir le
+visuel d'une année vigne, de après vendange N jusqu'à fin vendange N+1 »*.
+
+★★★ **La résolution : ce ne sont pas deux années, c'est une année bien posée.** On n'obtient pas le
+visuel d'une année vigne en codant une seconde année — **on l'obtient en ouvrant l'exercice au bon
+mois.** Le lot ne code donc pas une année vigne : **il mesure si l'exercice en est une, et le dit.**
+
+- `_cmpAnneeExercice()` (reglages.js) — ancrée sur la **période active**, pas sur aujourd'hui :
+  consulter Hiver 2025 en août 2026 doit montrer l'exercice qui le **contient**.
+- `_cmpFenetre` **n'a pas changé** : elle encadre les périodes telles que saisies pour la frise
+  d'édition de Réglages, et doit continuer de tout montrer, débordements compris. Deux écrans,
+  deux questions, deux fonctions.
+- Le mois d'exercice entre dans la **clé de mémoïsation** — sans lui, changer le réglage laisserait
+  la frise sur l'ancien cadre.
+
+#### Le diagnostic d'alignement — trois états
+
+| état | condition | ce que ça veut dire |
+|---|---|---|
+| 🔴 **coupée** | une borne traverse la fenêtre de vendange | la récolte est **à cheval sur deux exercices** : moitié des heures et du coût d'un côté, moitié de l'autre |
+| 🟠 **mal alignée** | vendange dans le premier tiers (`pos < 0,72`) | elle **ouvre** l'année au lieu de la clore : on lit deux moitiés de cycles |
+| 🟢 **alignée** | ni coupée, `pos ≥ 0,72` | d'après la vendange précédente à la fin de la suivante |
+
+**État réel du domaine :** exercice au **1ᵉʳ août**, vendange à **7 %** de l'année → 🟠. Au
+**1ᵉʳ octobre** : cadre 01/10 → 30/09, vendange à **90 %** → 🟢. Le bandeau propose le réglage en
+**un clic** (`_pexSetMois`, qui vérifie le droit admin et **relit après écriture**).
+
+Un quatrième bandeau compte les **périodes hors exercice** : leur travail et leur coût tombent
+dans une autre année comptable — *ça se décide, ça ne se découvre pas*.
+
+★ **Pourquoi ce diagnostic existe** : un cadre annuel mal posé **ne produit aucune erreur
+visible**. Il donne des chiffres plausibles sur un cycle coupé en deux. **C'est la pire des pannes,
+celle qui ne se voit pas** — exactement celle qu'on venait de passer trois heures à débusquer.
+
+#### ⚠️ Limites assumées, imprimées par le harnais à chaque exécution
+
+- L'exercice ouvre au **1ᵉʳ d'un mois**. Une vendange tardive à cheval sur une fin de mois — le
+  millésime 2021 est allé en octobre — **reste coupée quel que soit le réglage**.
+- Le diagnostic lit les **fenêtres de tâches**, pas le journal. Une vendange réellement plus
+  tardive que prévue ne déclenchera rien tant que les dates prévisionnelles ne bougent pas.
+
+---
+
+### ★★ Ce que la journée a appris
+
+★★★ **Un écran qui se contredit ne lève aucune alarme.** Deux chiffres plausibles, et le lecteur
+en croit un au hasard. Quand deux éléments d'un même écran répondent à la même question : même
+source, ou on en supprime un.
+
+★★★ **Une moyenne sur une fenêtre où la grandeur varie d'un facteur 20 n'est pas un résumé, c'est
+une invention.** « 12 présents » n'existait aucun jour de l'année. Toute moyenne affichée doit
+porter la fenêtre sur laquelle elle est prise, et céder la vedette au pic.
+
+★★ **Quand une donnée disparaît, chercher d'abord l'écrasement à l'écriture.** On a failli passer
+le lot à réparer des lecteurs alors que la perte se produisait à la saisie.
+
+★★ **Un indicateur qui n'a pas de dénominateur naturel n'a pas de sens.** `charge / capRefTotal`
+sur une période de cinq semaines ne veut rien dire ; **sur une année**, `charge / 1607` devient le
+nombre de permanents à embaucher. Ce n'est pas la formule qui change, c'est la fenêtre.
+
+★★ **La bonne réponse à « ajoute une année » était « n'ajoute rien ».** L'exercice existait déjà,
+les deux moteurs de coût aussi. Le réflexe de créer une entité de plus aurait doublé une source de
+vérité — le motif exact qui a coûté 941 heures fantômes.
+
+★ **Deux assertions fausses pour zéro bug**, encore : le harnais année cherchait la disparition
+**globale** de `_mvExerciceMois`, qui apparaît ailleurs dans le fichier. **Le test était faux, pas
+le code.** Corrigé, pas contourné — et le commentaire dit pourquoi.
+
+★ **Un diagnostic reconstitué depuis un écran vaut une mesure, s'il retombe sur les chiffres
+affichés.** Le harnais retrouvant `2352 h` et `27,0` a validé le modèle entier avant la première
+ligne de correctif.
+
+### Fichiers, versions, état
+
+| fichier | lot | bump ? |
+|---|---|---|
+| `src/planning.js` | 1 + 2 | — |
+| `src/pilotage.js` | 1 + 3 | — |
+| `src/reglages.js` | 1 + 2 + 3 | — |
+| `src/utils.js` | 2 | **APP 5.98 → 5.99** |
+| `index.html` | 2 | 4 affichages |
+| `public/sw.js` | 2 | **6.48 → 6.49** |
+
+**Contrôles passés sur les trois lots** : preflight C1→C22 `0/0` · cliquet ESLint `0`, plafond `0`
+· cliquet vocabulaire `0` · `node --check` sur les cinq JS · balance accolades/parenthèses
+identique à la base · `catch{}` inchangés (C14) · diff ciblé, aucune ligne hors zone ·
+**WHATS_NEW vérifié EN L'EXÉCUTANT EN NODE** (4 items, émojis et apostrophes typographiques
+corrects).
+
+⚠️ **NON DÉPLOYÉ au moment de l'écriture.** `npm run build && firebase deploy`.
+
+⚠️ **Trois harnais hors dépôt à sauvegarder dans `mavigne-sauvegardes\`** : `mv-harnais-etp.mjs`,
+`mv-harnais-contrats.mjs`, `mv-harnais-annee.mjs`.
+
+### ★ Ce que ce chantier a ouvert et n'a pas fermé
+
+**1. Le coût annuel de main-d'œuvre et sa répartition par campagne.** Position de Nico, à retenir
+telle quelle : *« après vendange on est en vinification, personne ne travaille encore dans les
+vignes mais les permanents continuent d'être payés et ont donc un coût de main d'œuvre »* et
+*« deux campagnes peuvent se chevaucher »*. **Les deux moteurs existent déjà** : le budget de
+campagne (barème h/ha, attribué aux tâches) et l'exercice (`_planPaidRange` × taux, **toutes** les
+heures payées, datées). `pilotage.js:5624` écrit déjà pourquoi on ne peut pas déduire l'un de
+l'autre. **Ce qui manque est le pont** : coût annuel **par date** (la vérité), part d'une campagne
+**par tâche** (le chevauchement disparaît, une tâche n'appartient qu'à une campagne), et le
+**reste** = vinification, entretien, trajets, temps mort.
+⚠️ **Le journal ne stocke PAS d'heures** — seulement date + tâche + qui (`_pilTaskReal:656`). Le
+croisement passe par les heures payées du jour, réparties sur les tâches où la personne apparaît.
+⚠️⚠️ **Ce reste mélangera deux choses** : le vrai travail hors vigne et le travail vigne **non
+saisi**. Il n'est lisible qu'accompagné d'un **taux de saisie**. Sans lui : un indicateur bâti sur
+un signal partiel, qui ment avec l'autorité d'une mesure.
+
+**2. Deux contrats dans la même année civile → deux compteurs de 1607 h.** L'écran Planning n'en
+affiche qu'un, celui du contrat en cours. **Affichage, pas calcul.**
+
+**3. La position de la période *Vendanges*** court jusqu'au 30 septembre alors que le travail
+s'arrête le 6. Ça ne fausse plus le pic, mais dilue la moyenne sur trois semaines vides.
+
