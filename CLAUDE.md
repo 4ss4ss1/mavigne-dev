@@ -2,26 +2,15 @@
 
 > Document de référence du projet **Ma Vigne** (GUERETTECH). Il est le **porteur de vérité** :
 > la mémoire Claude est plafonnée, ce fichier ne l'est pas.
-> Dernière consolidation : **12 août 2026 (nuit)** — ★★★ **« AMÉLIORE FOIS 100 »** (**§36**, section
-> neuve). Parti d'un *« Trop d'incohérence dans pilotage, vérifie absolument tout »* et de sept
-> captures. **Huit familles de défauts, toutes prouvées sur le code** : toutes les dates du module
-> reculaient d'un jour (époque **locale** relue avec des accesseurs **UTC**) · un pic annoncé à
-> **46,3 personnes** pour un domaine de quatre, porté par une fenêtre de tâche écrasée sur **un seul
-> jour** et un **moignon de semaine** large d'un pixel · « manque 44,3 ETP » = deux dates et deux
-> unités dans une soustraction · un travail en attente **plafonné à 4** à l'affichage, d'où un
-> plateau qui n'existe pas dans les données · une fenêtre qui s'arrêtait **la veille** du jour écrit ·
-> deux règles d'étalement pour une même courbe.
-> ★★★ **La leçon de la séance est ailleurs** : un correctif **juste** (pondérer les équipes
-> collectives) n'avait **rien changé à l'écran**, parce qu'il lisait **aujourd'hui** — un contrat de
-> **groupe** de 40 vendangeurs démarrant dans quinze jours n'existait pas. *La vraie question n'était
-> pas « combien vaut une fiche » mais « quel jour on compte ».* L'effectif se lit désormais sur **la
-> fenêtre du travail**. ★★ Et une **faute d'ordre** (bloc posé avant `var tasks`) a rendu un **écran
-> blanc** que ni `node --check` ni le preflight ni 86 assertions ne voyaient : *tester une fonction
-> sans jamais passer par le chemin réel, c'est tester autre chose.* **APP 6.05 · SW 6.55.**
-> **41 défauts réinjectés, 41 attrapés · 6 assertions fausses, dont deux VERTES sur du vide.**
-> Consolidation précédente du même jour : ★★★ **LES CINQ RETOURS** (**§35**) — quatre sur cinq
-> étaient des bugs, dont deux constats de diagnostic qui **accusaient les données du domaine d'une
-> faute que le code commettait lui-même**. **APP 6.04 · SW 6.54.**
+> Dernière consolidation : **12 août 2026 (nuit)** — ★★★ **LE SALAIRE EST UNE SÉRIE DATÉE**
+> (**§36**, section neuve). Parti d'une phrase de Nico : *« il ne faut pas qu'un salaire changé
+> aujourd'hui change la mémoire d'un salaire qu'il a eu hier »*. Le diagnostic mesuré sur le code a
+> trouvé mieux qu'un manque : **un piège déjà armé**. `taux_hist` existait, était écrit à chaque
+> changement, **et n'était lu par AUCUN calcul** — une phrase sous le champ, rien de plus. Les trois
+> moteurs de coût lisaient un scalaire **sans date** : augmenter quelqu'un revalorisait tout
+> l'historique, jusqu'à un **exercice comptable déjà clos**. Modèle livré : `taux_serie[nom]`,
+> **migration à zéro écriture**, **trois gestes** dont un seul fabrique une période.
+> **APP 6.06 · SW 6.56.** Mises à jour de §10-11, §28, §30i.
 > Consolidation précédente du même jour : ★★★ **LE CHANTIER PILOTAGE** (**§34**, section
 > neuve). Parti d'un *« on améliore fois 100 pilotage, pour le moment ça ne convient pas »* et
 > d'une capture d'écran. Diagnostic chiffré sur le code réel : **12 moteurs de graphe**,
@@ -1248,6 +1237,17 @@ propres gardes avant d'écrire (§18b).
 
 ⚠️ **`intrants` et `paie` sont des conteneurs à clés fixes** → `Object.keys()` y renvoie une
 **constante** → deux compteurs de **contenu** : **`_mvIntrantsCount`** et **`_mvPaieCount`**.
+★★★ **`_mvPaieCount` compte désormais `taux_serie`** (12/08, §36) : ce n'est plus un dérivé, c'est
+**la source de tout coût de main-d'œuvre daté**. `taux_hist`, lui, reste un dérivé et ne compte pas.
+
+★★★ **Le document `paie` — modèle à jour (§36)** :
+```
+taux[nom]        MIROIR du taux EN VIGUEUR AUJOURD'HUI — pas la dernière ligne
+taux_serie[nom]  [{d:'YYYY-MM-DD', v:12.10}] croissante — SOURCE DE VÉRITÉ
+taux_hist[nom]   [{d,de,a}] — trace historique, lue UNIQUEMENT pour dériver une
+                 série absente. Aucun calcul ne s'en sert.
+gnr_appoints[]   {id,d,l,pu,f,par} — appoints de cuve (Tracteur)
+```
 ★ ⚠️ **`fut_mouv` grossit indéfiniment** : c'est un journal, jamais purgé. Le rendu n'en montre que
 **40 lignes** puis un compteur.
 
@@ -3860,12 +3860,18 @@ appliquée au document lui-même.
 ★ **AJOUT DU 12/08 — les entrées 0a à 0d sortent du chantier ETP/année/contrats (§33).** Elles
 sont neuves, donc **non auditées** : les traiter comme des hypothèses jusqu'à re-mesure.
 
-0a. ★★★ **DÉPLOYER — APP 6.01 · SW 6.51.** Le paquet contient **neuf lots** : les trois du matin
-   (ETP/contrats, §33) **et les six du chantier Pilotage** (§34). Livrés, preflight **0/0**,
-   **143 assertions** vertes, **jamais mis en ligne**. `npm run build && firebase deploy` —
+0a. ★★★ **DÉPLOYER — APP 6.06 · SW 6.56.** ⚠️ **Le paquet a GROSSI trois fois depuis le 12/08 au
+   matin** : les trois lots ETP/contrats (§33), les six du chantier Pilotage (§34), les cinq retours
+   du soir (§35), **et le lot des salaires datés (§36)**. Livrés, preflight **0/0**, harnais verts,
+   **jamais mis en ligne**. `npm run build && firebase deploy` —
    ⚠️ **un seul `&&`** : `inject-precache` tourne déjà en postbuild, un second passage sort en 1
    et annule le déploiement. Tant que ce n'est pas fait, les clients lisent encore
-   « manque 15,8 ETP » sur une vendange couverte.
+   « manque 15,8 ETP » sur une vendange couverte, et **une augmentation de salaire continue de
+   rechiffrer les exercices clos**.
+   ⚠️⚠️ **`scripts/preflight-baseline.json` fait partie de la livraison du 12/08 nuit** : la
+   baseline a été **regravée** sur une diminution réelle (un `catch{}` vide parti avec
+   `_paieHistTxt`). Sans elle, le prochain preflight avertit sans raison — et un avertissement
+   qu'on apprend à ignorer est un cliquet mort.
 0b. ✅ **Le CDD de Victor est RESSAISI** (confirmé par Nico le 12/08 au soir).
    ⚠️ **Le même geste reste à faire pour Shana, Alicia et Vic** dès leur resignature (annoncée au
    17/08) : mettre les anciennes dates dans la fiche, enregistrer, puis remettre la nouvelle date de
@@ -3894,6 +3900,17 @@ sont neuves, donc **non auditées** : les traiter comme des hypothèses jusqu'à
 0f. ★ **Resserrer la fin de la période *Vendanges*** — elle court au 30/09 alors que le travail
    s'arrête le 06/09. Le pic n'est plus faussé, mais la moyenne « sur la période » reste diluée
    sur trois semaines vides.
+0g. ★★★ **`taux_serie` est clé par NOM** — ouvert par §36, **volontairement non fermé**. Renommer un
+   salarié dans sa fiche **détache son historique de salaire**. C'est la faiblesse de tout le modèle
+   (`MEMBRES`, `PLANNING_ENTRIES`, `taux`, `_mvPoidsNom` — tous clés par nom), mais **ici elle
+   chiffre des euros dans un exercice comptable**. ⚠️ **Ne pas bricoler un rattrapage local dans
+   `paie`** : ça donnerait un identifiant stable à un seul endroit et une fausse impression de
+   sécurité partout ailleurs. Le vrai lot est *un identifiant de fiche membre*, et il touche bien
+   plus que la paie. **Chantier à part entière, à chiffrer avant d'être promis.**
+0h. ★★ **`scripts/lint-cliquet.mjs` PLANTE** en `MODULE_NOT_FOUND` (constaté le 12/08 au soir en
+   l'exécutant, pas en le supposant). **Préexistant**, mais ⚠️ *un linter qui ne démarre pas ne
+   protège rien* — et il fait partie des paliers de test (§6b), donc son silence se lit comme un
+   succès. Le réparer ou le retirer des paliers : les deux valent mieux que le laisser mort.
 
 1. ★★★ **INSTALLATION À BLANC de bout en bout sur un slug JETABLE — LE SEUL CRITIQUE OUVERT.**
    Elle valide les cinq lots d'un coup et **mesure les temps réels** (tableau prévu dans
@@ -4342,6 +4359,12 @@ sais pas », il disait « vous allez deux fois plus vite que prévu ».
 ★★★ **Corollaire du 09/08 au soir, pour tout ÉCRAN** : *ne jamais annoncer un réglage qu'on ne pose
 pas.* L'IDCC affiché mais non écrit, et la liste « à finir » qui suit ce qui a été fait, viennent
 tous deux de là.
+★★★ **Corollaire du 12/08 nuit, pour toute TRACE** : *une trace affichée n'est pas une trace lue.*
+`taux_hist` était écrit à chaque changement de salaire et rendu en une phrase sous le champ — et
+**aucun calcul ne le lisait**. Il ne rassurait pas à côté du problème : **il le masquait**, en
+donnant l'apparence d'un historique tenu pendant que les totaux se réécrivaient en silence.
+⚠️ **Devant tout champ « historique », « journal » ou « trace », la question n'est pas *existe-t-il ?*
+mais *qui le LIT, et pour calculer quoi ?*** Un `grep` du nom de la clé répond en dix secondes.
 
 ### 30j. Ce qu'il ne faut PAS faire
 
@@ -5157,263 +5180,207 @@ vérifie que le défaut est bien entré avant de conclure quoi que ce soit (§34
 3. ★ Le sélecteur « On part de » n'est **pas mémorisé** entre deux ouvertures — volontaire pour
    l'instant (le défaut doit rester « ce qu'on sait »), à revoir si Nico le repose souvent.
 
-## 36. ★★★ « AMÉLIORE FOIS 100 » — HUIT LOTS SUR LE PILOTAGE (12/08 nuit — APP v6.05 · SW v6.55)
+---
 
-**Point de départ**, mot pour mot : *« Trop d'incohérence dans pilotage. Il faut l'améliorer fois
-100. Vérifie absolument tout. »* Plus **sept captures** d'écran mobile.
+## 36. ★★★ LE SALAIRE EST UNE SÉRIE DATÉE (12/08 nuit — APP 6.06 · SW 6.56)
 
-Puis, au fil de la séance, quatre retours qui ont chacun **rouvert** ce qui venait d'être fermé :
-*« Non ça doit s'arrêter le 25 »* · *« explique moi je ne comprends pas »* · *« quelles barres : on a
-dit on regarde les tâches »* · *« ça doit prendre aussi les contrats déjà signés »* · *« tout est
-bloqué dans pilotage »*.
+> *« Il faut vraiment mettre en place un système dans réglages pour les salaires puisque les
+> salariés sont voués à avoir des évolutions de salaire et il ne faut pas qu'un salaire changé
+> aujourd'hui change la mémoire d'un salaire qu'il a eu hier, surtout par rapport aux calculs de
+> coûts d'exercice. »* — Nico, 12/08
 
-★★ **Le retour le plus utile de la séance n'est pas le premier, c'est le quatrième.** Les trois
-premiers ont produit des correctifs justes. Le quatrième a montré qu'un correctif juste **peut ne
-rien changer à l'écran** — voir 36f. C'est celui-là qu'il faut relire.
+### 36a. Le diagnostic — ce n'était pas un manque, c'était un piège déjà armé
 
-### 36a. Le diagnostic, mesuré sur le code — jamais sur l'impression
+Mesuré sur le code cloné, pas sur l'impression :
 
-Reconstitution faite **depuis les captures**, puis vérifiée ligne à ligne avant de toucher au code.
-Huit familles, toutes prouvées :
+`PAIE.taux_hist[nom] = [{d, de, a}]` **existait**. Il était **écrit à chaque changement** par
+`_mvPaieSetTaux`. Et :
 
-| ce que Nico voyait | ce qu'il y avait dessous |
+- il était lu par **une seule fonction**, `_paieHistTxt`, qui en rendait **une phrase** sous le
+  champ de la fiche ;
+- **aucun calcul ne le lisait** ;
+- son `d` était la date du **clic** (`new Date()`), pas la date d'**effet** ;
+- `_mvPaieCount` le déclarait *« un dérivé : il ne compte pas »* → **le garde anti-perte l'ignorait**.
+  Une écriture qui l'aurait vidé ne déclenchait rien.
+
+Pendant ce temps, les **trois** moteurs de coût appelaient tous `_mvPaieTauxEff(m)` — un scalaire,
+**sans date** :
+
+| Lieu | Ce qui était revalorisé rétroactivement |
 |---|---|
-| « campagne · 31 mars → 30 juil. » pour une campagne 1 avr → 31 juil | époque **locale** relue avec des accesseurs **UTC** — **toutes** les dates du module reculaient d'un jour |
-| « 46,3 ETP au pic » sur un domaine de 4 personnes | une fenêtre de tâche écrasée sur **un seul jour** + un **moignon de semaine** d'un jour qui portait le pic |
-| « Manque ≈ 44,3 ETP » | `PP.pic` (semaine du pic, pondéré) **moins** `presentChamp` (têtes **d'aujourd'hui**, non pondérées) |
-| sept colonnes à **6,0 pile** | `Math.min(att,4)` : le travail en attente **plafonné à 4** à l'affichage |
-| « Accolage — 26 pers. » à côté de « 7 sur toute la période » | `x.R` est un **rattrapage**, pas un besoin — et il n'était pas comparé à la solution globale |
-| « fin le 25 avril » | `we` **exclusif** valait la date saisie : le 25 ne travaillait pas |
-| deux graphes du simulateur incomparables | `_rfHIn` étalait à plat sur les jours du **calendrier**, `_taskHoursIn` au prorata des jours **travaillables** |
-| « EFFECTIF 1 » avec 40 vendangeurs sous contrat | l'effectif était lu **AUJOURD'HUI**, pas sur la fenêtre du travail |
+| `_pexData` (exercice comptable) | `heures payées × taux` mois par mois → **un exercice CLOS changeait de total** |
+| `_ecoJhByParc` (coût par parcelle) | la journée-personne de mars payée au taux d'août |
+| `_ecoTracHByParc._tauxCond` | idem, **alors que `se.date` était déjà dans le scope** |
+| `_ecoRate` (moyenne, budget de saison) | le budget d'une campagne archivée bougeait tout seul |
 
-### 36b. ★★★ UNE ÉPOQUE LOCALE RELUE AVEC DES ACCESSEURS UTC
+★★★ **La fiche affichait « Dernier changement : 12,10 → 13,50 €/h le 12/08 » pendant que le total de
+l'exercice bougeait en silence.** Voir le corollaire posé en §30i : *une trace affichée n'est pas une
+trace lue.* Même famille que l'IDCC affiché mais non écrit (§18b) et que les commentaires pris pour
+des preuves (§34g).
 
-Trois sites reconstruisaient une date depuis un ordinal en mélangeant **deux conventions dans la
-même expression** : `new Date(Date.parse('2026-01-01T00:00:00') + o*86400000)` — époque **locale** —
-relu par `getUTCDate()` / `toISOString()`. À l'est de Greenwich, minuit local vaut **23:00 UTC la
-veille** : toutes les dates sortaient un jour trop tôt.
+### 36b. Les quatre points tranchés par Nico AVANT toute ligne de code
 
-⚠️ **Les deux voies prises séparément étaient justes.** `_ford` (planning.js) fait UTC → UTC.
-`_cap1` fait local → local. C'est le **croisement** qui ment. Et il ment **partout à la fois**, donc
-de façon cohérente — rien ne clignote.
+1. **Deux gestes distincts** sur la fiche (augmentation / correction) — **ok**.
+2. **`taux_hist` est importé** : *« on part du principe où les salaires indiqués sont ok jusqu'à leur
+   date de modification inscrite »* → **`de` vaut JUSQU'À `d`, `a` vaut À PARTIR DE `d`**.
+3. **`_ecoRate` se résout au début de la période consultée** — **confirmé**.
+4. **L'exercice affiche la suite des taux** — **oui**.
 
-★★ **Aucun calcul n'était faux ; toutes les étiquettes l'étaient.** *Un chiffre juste sous une date
-fausse ne se vérifie pas.* C'est ce qui rendait tout le module « incohérent » à la lecture.
+### 36c. Le modèle — calqué sur l'historique des contrats (§33 lot 2)
 
-**Correctif** : un inverse unique, `_pilOrdD` / `_pilOrdIso`, même base et mêmes accesseurs que
-`_ford`. ★ Preuve **numérique** dans le harnais : aller-retour exact sur 800 jours, **et** on rejoue
-l'ancienne version pour vérifier qu'elle reculait bien d'un jour — *une contre-épreuve qui ne
-reproduit pas le défaut ne prouve rien.*
+```
+taux_serie[nom] = [{d:'YYYY-MM-DD', v:12.10}, …]   croissante — SOURCE DE VÉRITÉ
+taux[nom]       = MIROIR du taux EN VIGUEUR AUJOURD'HUI
+```
 
-### 36c. ★★★ LE PIC À 46,3 — DEUX MÉCANISMES, UN SEUL SYMPTÔME
+⚠️⚠️ **Le miroir n'est PAS la dernière ligne, c'est `_paieResolve(S, aujourd'hui)`.** Une
+augmentation datée du mois prochain ne doit pas se présenter comme le taux actuel dans la fiche ni
+dans le compteur de la carte Économie. C'est testé (harnais §5).
 
-**(a) La fenêtre écrasée.** Dans `taskWindows`, les deux bornes étaient rabotées sur `[spanS,spanE]`
-**sans vérifier qu'il restait quelque chose**. Une échéance entièrement hors période donnait
-`ws=we`, puis `if(we<=ws) we=ws+1` → **un seul jour**, portant **toutes** les heures de la tâche.
+Le miroir est conservé **parce que trois lecteurs indépendants s'en servent** : le champ de la fiche,
+le compteur « n / N renseignés » de la carte Économie, et `_mvPaieCount`. Le supprimer aurait
+transformé un lot de modèle en refonte de trois écrans.
 
-⚠️⚠️ **Le cas n'est pas théorique : `CONFIG.task_windows` est un override GLOBAL à dates ABSOLUES,
-appliqué à CHAQUE période.** Un relevage calé sur mai 2027 s'écrase donc sur le dernier jour de
-l'hiver 2026-2027, où ces dates n'existent pas. **Une même consigne, deux périodes, un désastre dans
-l'une.**
+**★★★ MIGRATION À ZÉRO ÉCRITURE.** Série absente → elle est **dérivée à la lecture** depuis `taux` +
+`taux_hist`. Conséquences, toutes voulues :
 
-**(b) Le moignon de semaine.** `for(wo=spanS; wo<=spanE; wo+=7)` laisse une dernière case de 1 à
-6 jours dès qu'une période ne fait pas un nombre entier de semaines. Cette case est une **semaine**
-pour tout le module : elle porte un `need`, elle peut porter le **pic de l'année**, et elle se
-dessine **large d'un pixel**.
+- un domaine **sans aucun historique** dérive `[{depuis toujours, taux courant}]` → **comportement
+  actuel à l'identique**, ligne pour ligne ;
+- **rien n'est écrit tant que personne n'ouvre la fiche** — pas de migration à lancer, pas d'ordre
+  functions → backfill → hosting à respecter, pas de fenêtre pendant laquelle la base est à moitié
+  convertie ;
+- la série n'est **matérialisée qu'au premier enregistrement**.
 
-★★ **Un chiffre qu'on ne peut pas voir ne se vérifie pas.** Sur la capture, le pic de l'exercice
-était une barre fine isolée au milieu de barres larges — invisible tant qu'on ne la cherche pas.
+★ **La borne basse est `'0000-01-01'`** — « depuis toujours ». Elle rend l'extrapolation vers
+l'arrière **explicite dans la donnée** au lieu d'être une règle cachée dans le lecteur.
 
-**Correctif** : test de recouvrement avant tout rabotage, repli sur la fenêtre par défaut, drapeau
-`horsPeriode` **lu** par le tableau des fenêtres (3ᵉ état, `⚠ hors période`) ; et le moignon fondu
-dans la semaine précédente, à la source, pour **tous** les lecteurs.
+**Cache** : `_pSerCache` mémoïse par nom, clé sur la **référence de l'objet `window.PAIE`**.
+`applyFbData` remplace l'objet au pull (`window[key.toUpperCase()] = value`) → invalidation gratuite.
+`_paieSave` le vide explicitement, parce qu'il **mute en place** et ne changerait pas la référence.
 
-★ **Preuve chiffrée, en faisant tourner le vrai `_chargeSaisonData`** (harnais fonctionnel, vm) :
-fenêtre relevage **1 j → 47,6 j**, dernière case **1 j → 8 j**, **pic 147 → 6,2 personnes**. Même
-domaine, même donnée.
+**Divergence miroir / fin d'historique** (import, console, ancienne version) : on **n'écrit pas le
+passé pour le faire coller**. On ajoute ce qu'on sait, à la seule date qu'on puisse honnêtement lui
+donner — **aujourd'hui**.
 
-### 36d. Les quatre autres corrections d'affichage
+### 36d. ★★★ TROIS GESTES, UN SEUL FABRIQUE UNE PÉRIODE
 
-**La tuile « Capacité vs charge ».** `manque = PP.pic − d.presentChamp` : **deux dates, deux unités,
-une soustraction**, affichée en gros et en orange. Le manque vient désormais de `PP.manque` (même
-semaine, même pondération) ; la présence du jour a son propre encart, sous son propre nom. Et la
-seconde barre de progression, **toujours à `width:100%`**, a disparu — *une barre qui ne varie jamais
-est un décor, pas une mesure.*
-
-**Le plafond du graphe.** `Math.min(att,4)` faisait ressembler un manque de quarante à un manque de
-quatre. ★★ **Un plateau parfaitement plat qui n'est pas dans les données est le symptôme d'un
-plafond.** Sept colonnes à 6,0 = 2 (effectif) + 4 (plafond). Retiré ; l'axe monte avec le manque, pas
-de graduation adaptatif. Au passage, le bloc rouge partait de `head` (**têtes**) au-dessus d'une pile
-empilée en **équivalents-personnes** : deux unités dans une seule barre, le rouge flottait. Et la
-ligne noire traçait `head` sur un graphe en capacité — invisible tant que tout le monde est à temps
-plein, faux dès le premier mi-temps.
-
-**Les propositions.** `x.R` répond à « combien poser **sur la seule fenêtre de cette tâche** alors
-qu'on n'a rien fait avant » : tout le retard s'y écrase, le surcoût de retard le multiplie, le nombre
-s'envole. ★★ **Une proposition ciblée plus chère que la solution globale n'est pas une proposition,
-c'est un piège.** `tout` est calculé d'abord et plafonne les autres.
-
-**La zone partagée.** Rien n'est compté deux fois (§35c, non rouvert) — mais sur les jours communs la
-frise dessinait **deux barres au même endroit**, l'une derrière l'autre, sans le dire. Hachurée en
-violet, **trame inclinée dans l'autre sens** que celle des trous : ⚠️ même trame = même message pour
-l'œil, quel que soit le texte de la légende. Légende conditionnelle — *une légende qui nomme une
-trame absente du dessin fait chercher ce qui n'existe pas.*
-
-### 36e. ★★ LA FIN EST INCLUSE, ET IL N'Y A QU'UNE RÈGLE D'ÉTALEMENT
-
-**Sur retour de Nico** (*« Non ça doit s'arrêter le 25 »*) : `we` est la borne **exclusive** de
-l'étalement et valait **exactement la date de fin saisie**. « Fin le 25 avril » travaillait jusqu'au
-**24** — un jour perdu sur **chaque** tâche, y compris le dernier jour de la période elle-même.
-
-★ **Correctif à coût nul pour l'utilisateur** : `we = (dernier jour voulu) + 1`, affichage en `we-1`.
-**Les dates montrées ne bougent pas d'un pixel** ; c'est le calcul qui gagne le jour. Mesuré :
-capacité de la fenêtre **111 h → 119 h**, dernière semaine **38 h → 71 h**, affichage identique.
-Conséquence rattrapée dans le même lot : `lim`/`b` visaient `wOf(t.we)`, la semaine du **lendemain**
-de l'échéance.
-
-**Deux règles pour une même courbe.** `_taskHoursIn` étale au prorata des jours **travaillables**,
-`_rfHIn` étalait **à plat sur les jours du calendrier**. Les deux lectures du simulateur — « le
-plan » et « ce qu'il reste » — se dessinaient donc sous deux règles, côte à côte, et `_rfMemeImage`
-les comparait l'une à l'autre. ★ `capCum` (cumul jour par jour) **sort** de `_chargeSaisonData` et le
-simulateur le **lit** : *un second calcul donnerait un second chiffre.* Mesuré sur l'ébourgeonnage :
-semaine du 1ᵉʳ mai **39 h** contre 50 h pour une semaine pleine ; l'ancienne règle servait **45 h aux
-deux**.
-
-### 36f. ★★★ LA LEÇON DE LA SÉANCE — UN CORRECTIF JUSTE QUI NE CHANGE RIEN À L'ÉCRAN
-
-Retour de Nico, capture à l'appui : *« On est censé avoir quarante personnes qui ont un contrat
-signé, je l'ai mis sur le contrat groupe. Donc là, tu mets toujours une personne. »*
-
-**Le lot précédent (6.54) avait pondéré les équipes collectives.** `presentChamp` devenait une somme
-pondérée par `_mvEffDef`, les trois panneaux de Décider partaient du même nombre, harnais vert,
-contre-épreuve verte. **Et l'écran n'avait pas bougé d'un chiffre.**
-
-⚠️⚠️⚠️ **Parce que `d.membres` vient de `_pilMembresActifs`, qui filtre sur
-`_mvEnContratLe(m, AUJOURD'HUI).`** Un contrat de **groupe** du 26 août au 4 septembre n'existe pas
-le 12 août : **la fiche n'atteignait même pas la pondération.** J'avais corrigé le poids d'une fiche
-qui n'était pas là.
-
-★★★ **LA VRAIE QUESTION N'ÉTAIT PAS « COMBIEN VAUT UNE FICHE » MAIS « QUEL JOUR ON COMPTE ».**
-Mot pour mot, Nico : *« au moment des tâches, personne ne sera en congé et tous les contrats seront
-en cours. »* Un ordre de passage calculé sur l'effectif du 12 août est faux le 26 — et cet écran-là
-n'est pas un indicateur : **il est enregistré et envoyé aux ouvriers.**
-
-**Correctif** : `_pilEffFenetre(d0,d1)` / `_pilFenTaches(noms)` / `_pilEffTaches(noms)`. L'effectif
-se lit sur **la fenêtre des tâches cochées**, jamais sur le calendrier du jour. Cocher un autre
-travail recompte ; un réglage manuel n'est jamais écrasé ; l'écran **dit toujours sur quelles dates
-il a compté** — *un effectif sans ses dates est une opinion.*
-
-★ **`_pilEffSemaine` est devenue morte et a été supprimée. Ce n'est pas moi qui l'ai vu : c'est C15
-du preflight.** La preuve que le filet vaut mieux que l'attention.
-
-**Et un second piège, dessous.** `w.head` est un effectif **LISSÉ** : chaque fiche y pèse ses jours
-sous contrat divisés par les jours de la semaine. 40 vendangeurs démarrant un **mercredi** y valent
-**28,6**. ★★ **Personne ne travaille à 28,6 : ce jour-là il y a 40 personnes dans les rangs, ou
-aucune.** `_headDayMax` (planning.js, à côté de `_headWeek`, même `_inContractDay`, même `_mvEffDef`)
-donne le nombre de **corps au plus fort de la semaine**. `head` reste la **courbe** ; `headMax`
-dimensionne une **tournée**.
-
-★ Preuve : le même jour, le même écran répond **1** pour aujourd'hui et **41** pour la vendange.
-
-### 36g. ★★★ UNE FAUTE D'ORDRE N'EST PAS UNE FAUTE DE SYNTAXE
-
-Retour de Nico : *« tout est bloqué dans pilotage »*, capture d'un onglet Décider **vide** et d'un
-bandeau *« Promesse rejetée : Cannot read properties of undefined (reading 'map') »*.
-
-Le bloc qui lit la fenêtre du travail avait été posé **avant** `var tasks` dans `_pilSimInitData`.
-Par hissage, `tasks` vaut `undefined` : `tasks.map` lève.
-
-⚠️⚠️ **`node --check` passe. Le preflight passe. Les 86 assertions passent.** Un contrôle de
-**syntaxe** ne voit pas une faute d'**ordre**.
-
-★★★ **ET LA VRAIE CAUSE EST DANS MON HARNAIS, PAS DANS LE CODE.** Le scénario appelait
-`_pilEffFenetre` et `_pilEffTaches` **directement** : les deux répondaient juste, vert. **Je n'ai
-jamais appelé le panneau.**
-
-> **RÈGLE : tester une fonction sans jamais passer par le chemin réel, c'est tester autre chose.**
-> Le harnais construit désormais la chaîne complète — `_pilData` → `_pilSimInitData` → `_pilSimBody`
-> → `_opInit` → `_opEffAppliquer` — et **échoue si l'un d'eux lève**. Contre-épreuve : défaut
-> réinjecté, le harnais rougit avec **le message exact vu à l'écran**.
-
-★ Une chasse générique aux « usages avant déclaration » a rendu **49 candidats, presque tous faux
-positifs** (paramètres de fonctions internes, attributs SVG, chaînes CSS). *Un contrôle statique
-approximatif sur du JS coûte plus qu'il ne rapporte* — c'est l'appel réel qui tranche.
-
-### 36h. Les assertions qui ont eu tort — six, pour zéro bug
-
-Fidèle à §34g, et il faut le réécrire à chaque fois :
-
-1. **`G.4 « aucun catch vide »`** — plafond à zéro, alors que les fichiers en comptaient **déjà 14 et
-   2**, inchangés. ★ Et surtout : **le preflight fait déjà ce contrôle, correctement, en cliquet.**
-   Assertion **retirée**, pas corrigée — *deux sources pour une question, c'est la faute qu'on répare.*
-2. **`4.4`** écrite **en négatif** (`!/yy=Y\(ctx\.head\[i\]\|\|0\)/`). Défaut réinjecté avec une autre
-   orthographe : **resté vert**. ★★ *Une assertion négative ne teste pas un sens, elle teste une
-   chaîne.* Réécrite en positif, la négative gardée en second.
-3. **`14.2` / `14.3`** cherchaient `presentChamp=` **sans les espaces** autour du `=`. Rouge sur du
-   code juste.
-4. **`17.3`** visait `_pilCkEffectif` — la fonction s'appelle **`_pilCkEtp`**. `corps()` rendait une
-   chaîne vide et le test « ne contient pas ETP » passait au **vert sur du vide**. ★★★ **Attrapée par
-   la garde « tous les sites sont bien LUS », écrite exactement pour ça après §34g.** Sans elle,
-   l'assertion aurait rassuré indéfiniment.
-5. **`15.x`** mesuraient `_pilEffSemaine` — **la mauvaise question** (voir 36f). Vertes, et le
-   correctif ne changeait rien à l'écran.
-
-> **Bilan de la séance : 6 assertions fausses, 0 bug de code de leur fait. Aucune contournée.**
-> **Et son symétrique, deux fois vécu ici : une assertion VERTE peut être une panne de lecture.**
-
-### 36i. Le banc d'essai — deux pièges de vm à connaître
-
-- **`Object.defineProperty(window,'_PIL_ETPSEL')` échoue dans une vm** : en module ES un `var` est
-  local au module ; dans une vm le hissage en fait une propriété globale **non configurable**. Le
-  script s'arrête là. ★ Les **déclarations de fonction**, elles, sont hissées : tout ce qu'on appelle
-  existe. Les `var` d'état sont remis à `null` à la main.
-- **`planning.js` et `pilotage.js` déclarent tous deux `const DEBUG`** : chargés dans **la même** vm,
-  le second refuse de compiler (« Identifier 'DEBUG' has already been declared ») et **rien** n'est
-  défini. ⚠️ **Échec silencieux si on avale l'exception.** Deux contextes, et on branche
-  `_chargeSaisonData` de l'un dans l'autre — exactement ce que fait `window`.
-- ⚠️ Le harnais **affiche** l'erreur de chargement au lieu de la manger : une vm qui n'a rien chargé
-  et un code sans défaut se ressemblent trop.
-
-### 36j. Ce qui a été livré
-
-| fichier | ce qu'il porte |
+| Geste | Effet |
 |---|---|
-| `src/pilotage.js` | dates, pic, tuile capacité, graphe renfort, stratégies, règle A, zone partagée, effectif sur la fenêtre |
-| `src/planning.js` | recouvrement des fenêtres + `horsPeriode`, `nd` + fusion du moignon, fin incluse, `capCum`, `_headDayMax` |
-| `src/utils.js` | `MV_AIDE.pilotage` (6 points), `APP_VERSION` 6.05, `WHATS_NEW` 6.05 (7 items) |
-| `index.html` | 4 emplacements de version |
-| `public/sw.js` | 6.55 — en-tête + `CACHE_NAME` + 2 `console.log` + changelog prepend |
-| `guide/11-pilotage.html` + `public/guide.html` | 7 blocs, dont « Sur quel effectif Simuler compte » |
-| `mv-harnais-coherence.mjs` | **87 assertions** de sens |
-| `mv-harnais-fonctionnel.mjs` | **5 scénarios** qui font tourner le vrai code en vm |
+| valeur changée **+ date d'effet** | **AUGMENTATION** — une ligne de plus |
+| valeur changée, **date VIDÉE** | **CORRECTION** — la dernière ligne réécrite sur place |
+| **lignes retirées à l'écran** | relecture DOM, elles ont disparu |
 
-⚠️ **`utils.js` touché → BUMP** : APP 6.04 → **6.05**, SW 6.54 → **6.55**. Le piège du remplacement
-global refermé par l'assertion d'usage : après le lot, **`v6.54` subsiste exactement une fois**, sur
-sa propre ligne de changelog.
+★★★ **Le champ de date est PRÉ-REMPLI à aujourd'hui.** Le geste par défaut est le geste sûr ; il faut
+**vider le champ à la main** pour écraser une ligne existante. **Le défaut protège, la destruction se
+demande.** Sans ce pré-remplissage, l'oubli de la date aurait reproduit exactement le bug qu'on
+corrigeait — et silencieusement.
 
-★ **Le `WHATS_NEW` 6.05 annonce aussi les lots partis muets** (`pilotage.js` + `planning.js` seuls ne
-bumpent pas) — règle de §27, appliquée.
+⚠️⚠️ **LE CHAMP VIDE NE SUPPRIME PLUS RIEN.** Pour retirer un taux, on retire ses **lignes**, qui
+sont visibles. *Un champ de saisie ne doit pas pouvoir détruire un historique* — c'est mot pour mot
+la leçon de §33 lot 2, où la resignature d'un contrat effaçait le précédent.
 
-### 36k. Contre-épreuve
+**Idiome de la liste** : identique aux contrats précédents — chaque ligne porte ses valeurs en
+attributs `data-*`, le `×` la retire du **DOM**, et `saveEditMembre` **relit la liste**. Pas d'état
+global, pas d'écriture immédiate, et un membre en cours d'édition ne survit pas à une fermeture.
+★ Chez un non-admin la liste n'existe pas → `rows` reste `null` → **la série en base est intacte**.
 
-**41 défauts réinjectés un par un, 41 attrapés.** Référence verte après restauration, fichiers
-identiques **à l'octet près** (assertion de fin de script). Chaque injection vérifie d'abord **que le
-défaut est bien entré** avant de conclure quoi que ce soit — §34h, déjà vécu.
+Les deux gestes se **disent** : toast « Augmentation enregistrée — le taux précédent reste sur les
+heures déjà travaillées » ou « Taux corrigé sur place — aucune augmentation créée ».
 
-⚠️ **Le 41ᵉ est le plus instructif** : c'est l'écran blanc de 36g, et il n'a été ajouté **qu'après**
-que Nico l'a vu en production. *Une contre-épreuve ne couvre que ce qu'on a pensé à casser.*
+### 36e. Les quatre lecteurs, et la date que chacun avait déjà sous la main
 
-### 36l. Reste à faire
+Le point remarquable du lot : **aucun des quatre n'a eu besoin qu'on lui fabrique une date.**
 
-1. Les points 1 à 4 de **§34i** restent ouverts (filtres cépage/commune, `_PIL_SEM` → `utils.js`,
-   carte colorée par avancement, purge des palettes mortes). ⚠️ **Le point 2 disait « au prochain lot
-   qui bumpe » — ce lot bumpe, et je ne l'ai pas fait.** Ne pas le laisser glisser une fois de plus.
-2. Les points 2 et 3 de **§35h** restent ouverts.
-3. ★ **`s0` / `s1` sur `taskWindows` ne sont lus nulle part** (vérifié par grep sur tout `src/`).
-   À purger au prochain passage sur `_chargeSaisonData`.
-4. ★ **Vérifier sur les données réelles du domaine** quelle tâche portait le pic à 46,3 : ouvrir
-   Pilotage › Outils › Paramétrage sur **Hiver 2026-2027** et lire la ligne marquée `⚠ hors période`.
-   Le mécanisme est prouvé ; **la ligne fautive, elle, n'a pas encore été nommée.**
-5. ★ `capCum` ajoute ~120 entiers par période dans `cd`. Négligeable, mais à surveiller sur un domaine
-   à beaucoup de périodes.
+- `_ecoJhByParc` → `dt`, la date du journal, était la variable de boucle ;
+- `_ecoTracHByParc._tauxCond` → `se.date`, à trois lignes de l'appel ;
+- `_ecoRate` → `_d0R`, le début de la période consultée, déjà calculé ;
+- `_pexData` → `mo.d0`, le début du mois.
+
+⚠️ **`_ecoRate` reste une moyenne** — le coût MO d'une parcelle est un **budget de saison**, on ne
+sait pas qui fera quelle parcelle (§20b). Ce qui change, c'est la **date à laquelle** on la résout.
+
+**★★★ L'exercice COUPE LE MOIS.** `_pexSegsTaux(nom, d0, d1)` rend les sous-fenêtres sur lesquelles
+le taux est **constant** ; `_planPaidRange` est appelé sur chacune. Une augmentation au 15 mars ne
+revalorise pas les quinze premiers jours.
+⚠️ **Résoudre au mois entier aurait suffi à 95 %, et menti sur les 5 % restants avec l'autorité d'un
+total.** Chemin nominal préservé : aucun changement dans le mois → **une seule fenêtre, identique au
+mois**, zéro coût.
+
+La colonne « Taux chargé » affiche alors **« 12,10 puis 13,50 »**. ★ Afficher la seule moyenne
+pondérée aurait rendu **une valeur que personne n'a jamais signée sur un contrat**.
+
+★★ **Effet de bord vertueux** : `nSansTaux` / `hSansTaux` ne comptent plus l'exercice entier d'une
+personne dès qu'elle n'a pas de taux, mais **les seules heures réellement non valorisées**. Quelqu'un
+dont le taux ne commence qu'en cours d'exercice n'est plus signalé comme un trou complet.
+
+### 36f. Le harnais — 51 assertions, contre-épreuve comprise
+
+`scripts/mv-harnais-salaires.mjs`. Fonctions **extraites du fichier réel, triées par leur position**
+(`str.index` avant découpe), exécutées dans un `vm` à `window` stubbé.
+
+Le test qui compte est le **8** : il **reproduit le bug d'origine** avant de vérifier la correction —
+masse figée à 2 400 € sur février-mars, augmentation d'août appliquée, **la masse ne bouge pas**.
+Puis une augmentation rétroactive au 16 mars, et la majoration tombe **exactement** sur 16 jours.
+
+**Contre-épreuve — quatre défauts réintroduits, quatre détectés** : taux ignorant la date, correction
+fabriquant une période, segment qui ne s'arrête pas la veille, champ vide destructeur.
+
+★★★ **UNE ASSERTION EST TOMBÉE ROUGE, ET C'ÉTAIT ELLE QUI AVAIT TORT.** Elle attendait que le miroir
+passe à 13,60 après une augmentation datée du **17/08**, saisie le **12/08**. Or la date n'est pas
+arrivée : le miroir **doit** rester à 12,10. La règle de §25 a joué — *quand une assertion échoue,
+demander d'abord laquelle des deux est fausse* — et le test a été corrigé, pas le code.
+⚠️ **Corollaire de rédaction** : un harnais qui mélange des dates passées et futures **par accident**
+teste le calendrier au lieu du modèle. Les cas « futur » ont été isolés dans leur propre bloc.
+
+⚠️ **Piège Python revécu** : le patch du harnais a échoué en silence parce qu'il mélangeait des
+caractères Unicode **littéraux** (`⚠`, `—`, tapés directement) et des **séquences `\u2019`** dans une
+chaîne Python normale, qui les convertissait. `r"""…"""` obligatoire, et les littéraux se tapent
+littéralement. **Deuxième fois que ce piège coûte un aller-retour.**
+
+### 36g. Ce que le preflight a attrapé
+
+**C14** : `catch {} vide : 3 contre 2 en référence`. J'en avais introduit deux (un `try/catch` de
+confort dans `_paieAuj`, un autour des toasts) et **retiré un sans le voir** — celui de
+`_paieHistTxt`, parti avec la fonction.
+
+Corrigés autrement plutôt que garnis : `_paieAuj` **n'a plus de `try/catch` du tout** (un test de
+type suffit, et la valeur rendue est **vérifiée** au lieu d'être supposée) ; le toast **trace**.
+Résultat **1 contre 2** → **diminution réelle → baseline REGRAVÉE** (`--baseline`), sinon le prochain
+lot hérite d'un avertissement permanent, et *un avertissement qu'on apprend à ignorer est un cliquet
+mort*.
+
+### 36h. Accompagnement — dans le même lot (C22, §27a)
+
+**4 items WHATS_NEW** en tête, écrits du **symptôme vécu** : « Augmenter quelqu'un rechiffrait tout
+son passé », pas « la résolution du taux est devenue datée ». Fiche `MV_AIDE.reglages` : une ligne
+neuve. `guide/12-reglages.html` régénéré.
+
+★★★ **Le guide PROMETTAIT DÉJÀ ce qui n'existait pas** : *« Taux horaire de chaque salarié, avec
+historique des évolutions »*. La phrase était **vraie à l'écran et fausse dans les chiffres** —
+l'historique existait bel et bien, il n'entrait simplement dans aucun calcul. C'est le même défaut
+que le code, écrit en français : **un document d'accompagnement peut mentir en disant la vérité.**
+
+### 36i. Fichiers, versions, état
+
+`src/reglages.js` (modèle + UI + écriture) · `src/pilotage.js` (4 lecteurs + affichage) ·
+`src/firebase.js` (garde) · `src/utils.js` (`APP_VERSION` + WHATS_NEW + `MV_AIDE`) ·
+`index.html` (4 emplacements) · `public/sw.js` · `guide/12-reglages.html` + `public/guide.html`
+régénéré · `scripts/preflight-baseline.json` regravée · `scripts/mv-harnais-salaires.mjs`.
+
+**`utils.js` touché → BUMP : APP 6.05 → 6.06, SW 6.55 → 6.56.** Preflight **0/0**, harnais **51/0**.
+⚠️ **Non déployé** — voir backlog 0a, dont c'est le quatrième lot en attente.
+
+### 36j. Ce que ce chantier a ouvert et n'a pas fermé
+
+1. **`taux_serie` est clé par NOM** (backlog 0g). Renommer un salarié détache son historique de
+   salaire. Faiblesse partagée par tout le modèle, mais **ici elle chiffre des euros dans un exercice
+   comptable**. ⚠️ **Ne pas la rattraper localement dans `paie`** : ça donnerait un identifiant stable
+   à un seul endroit et une fausse sécurité partout ailleurs.
+2. **Les augmentations passées non enregistrées n'existent nulle part.** À la première ouverture, tout
+   le monde démarre sur `[{depuis toujours, taux actuel}]` : la **première augmentation saisie sera la
+   première vraie coupure**. Comme le CDD de Victor, ce qui n'a jamais été écrit n'est pas caché — il
+   est perdu, et se ressaisit à la main (ancien taux + sa date, puis l'actuel ; l'ordre n'importe pas,
+   la série se trie).
+3. **Le taux reste un coût employeur unique par personne.** Pas de distinction brut/chargé, pas de
+   majoration d'heures supplémentaires dans le coût. La définition unique de §20b tient, et
+   `coef_charges` **reste banni**.
