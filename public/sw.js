@@ -1,4 +1,31 @@
-// MA VIGNE — Service Worker v6.52
+// MA VIGNE — Service Worker v6.53
+// v6.53 (12/08/2026) — Pilotage : LE SIXIEME SELECTEUR, PURGE.
+//   La v6.00 avait fondu cinq selecteurs dans _PIL_SCOPE. Il en restait un,
+//   invisible parce qu'il ne ressemble pas a un selecteur : _pilSaison(), la
+//   periode CONSULTEE. _pilCkEtp, _pilPanelEtp et _pilPanelCapacite la lisaient
+//   pendant que photos et frise lisaient la portee -> le zoom ne les bougeait
+//   pas, et sur l'annee la photo repondait pour l'ANNEE quand la tuile juste
+//   dessous repondait pour UNE campagne. Deux nombres, un seul mot.
+//   NOUVEAU, definitions uniques : _pilPeriodeVue (periode designee par la
+//   portee, repli sur la consultee), _pilCdVue (+ memo par rendu, oubli aux
+//   memes 3 points que _pilExoOublier), _pilVueEstConsultee, _pilPicPortee
+//   (LE pic, lu par la photo, le KPI, la tuile ETP et Capacite vs charge),
+//   _pilCadreLbl, _pilSemLabO. _pilPhotosData ne recalcule plus le pic.
+//   Le cadre est ECRIT sous chaque chiffre (sur l'exercice / sur <campagne>).
+//   _tractHoursSeason cale sur _pilPeriodeVue : les deux parts de la
+//   repartition parlaient de deux fenetres differentes.
+//   _pilTaskReal(cd,d,memeSaison) : sans le drapeau, l'avancement de la periode
+//   consultee declarait 'termine'/'en cours' sur une AUTRE campagne. Repli sur
+//   ce que le journal sait (campagne close = tache close). Appel a 2 arguments
+//   strictement inchange.
+//   PARAMETRAGE : il ECRIT (s.echeances de la periode consultee) -> il ne suit
+//   PAS le zoom, et il l'ANNONCE quand la portee designe une autre campagne.
+//   Une ecriture silencieuse au mauvais endroit ne se voit qu'a la campagne
+//   suivante.
+//   ⚠ Ce lot REMPLACE les fichiers du lot 6.02 / SW 6.52 livre le meme jour et
+//   non deploye. Bump par regle du doute : 6.52 peut etre en ligne, et on ne
+//   reutilise jamais un numero (sauter n'a aucune consequence, reutiliser fige
+//   l'index.html des clients deja passes).
 // v6.52 (12/08/2026) — Pilotage : SEPT DEFAUTS SIGNALES PAR NICO, MEME SEANCE.
 //   1+2. Delegation de clic posee sur #pil-content alors que les 4 photos, le
 //        fil d'Ariane et le bouton « a completer » sont ses FRERES depuis 6.50 :
@@ -955,7 +982,7 @@
 // v2.22 — Fix profils vides : guard vide dans loadData() pour MEMBRES/SAISONS/TACHES
 // v2.17 — Onboarding intégré + tenantId · v2.06 — Firebase Auth · v2.00–v2.05 — divers
 const DEBUG = self.location.hostname === 'localhost' || self.location.hostname === '127.0.0.1';
-const CACHE_NAME   = 'mavigne-v6.52';
+const CACHE_NAME   = 'mavigne-v6.53';
 const TENANT_CACHE = 'mavigne-tenant';   // Cache persistant — préservé à chaque mise à jour SW
 const SYNC_TAG     = 'mavigne-sync';
 
@@ -971,7 +998,7 @@ const CDN_URLS = [
 ];
 
 self.addEventListener('install', event => {
-  if(DEBUG) console.log('[SW] Ma Vigne v6.52 installé');
+  if(DEBUG) console.log('[SW] Ma Vigne v6.53 installé');
   event.waitUntil(
     caches.open(CACHE_NAME).then(async cache => {
       // ── Cœur applicatif : STRICT (mise à jour ATOMIQUE) ──
@@ -987,7 +1014,7 @@ self.addEventListener('install', event => {
 });
 
 self.addEventListener('activate', event => {
-  if(DEBUG) console.log('[SW] Ma Vigne v6.52 activé');
+  if(DEBUG) console.log('[SW] Ma Vigne v6.53 activé');
   event.waitUntil(
     caches.keys().then(keys =>
       Promise.all(

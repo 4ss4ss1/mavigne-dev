@@ -724,10 +724,19 @@ function _pilWorkdayDate(n){
   return J[dt.getDay()]+' '+dt.getDate()+' '+M[dt.getMonth()];
 }
 function _friseNorm(s){ return String(s==null?'':s).normalize('NFD').replace(/[\u0300-\u036f]/g,'').toLowerCase().trim(); }
-function _pilTaskReal(cd,d){
+// ⚠️ `memeSaison` : d.data (calcHeures) ne connait que la periode CONSULTEE. Sur
+//    une campagne zoomee qui n'est pas elle, un pourcentage emprunte declarerait
+//    « termine » une tache d'apres l'avancement d'une AUTRE campagne. Sans lui, on
+//    tranche sur ce que le journal sait vraiment : une campagne dont la fin est
+//    passee est close, une campagne en cours ne l'est pas.
+//    Appel sans 3e argument = comportement strictement inchange.
+function _pilTaskReal(cd,d,memeSaison){
   var J=(window.JOURNAL||[]); var out={};
   var dlo=cd.debut, dhi=cd.fin;
-  var pct={}; ((d&&d.data)||[]).forEach(function(t){ pct[_friseNorm(t.nom)]=(t.pct||0); });
+  var _ok=(memeSaison===undefined)?true:!!memeSaison;
+  var _auj=(typeof window._mvAujIso==='function')?window._mvAujIso():'';
+  var _close=(!!_auj && dhi<_auj);
+  var pct={}; if(_ok) ((d&&d.data)||[]).forEach(function(t){ pct[_friseNorm(t.nom)]=(t.pct||0); });
   (cd.taskWindows||[]).forEach(function(t){
     var k=_friseNorm(t.nom), mn=null, mx=null;
     for(var i=0;i<J.length;i++){ var j=J[i];
@@ -737,7 +746,7 @@ function _pilTaskReal(cd,d){
       if(mn==null||dt<mn)mn=dt; if(mx==null||dt>mx)mx=dt;
     }
     if(mn==null){ out[k]={state:'none'}; }
-    else { var done=(pct[k]||0)>=99.5; out[k]={start:mn,end:done?mx:null,state:done?'done':'live'}; }
+    else { var done=_ok?((pct[k]||0)>=99.5):_close; out[k]={start:mn,end:done?mx:null,state:done?'done':'live'}; }
   });
   return out;
 }
@@ -1037,6 +1046,96 @@ function _pilAnnTaches(p){
   var tw=(p&&p.cd&&p.cd.taskWindows)||[];
   return tw.slice().sort(function(a,b){ return String(a.start).localeCompare(String(b.start)); }).slice(0,12);
 }
+
+// ══ LA PORTEE COMMANDE AUSSI LA CHARGE ET L'EFFECTIF ═══════════════════
+// ⚠️⚠️ LE SIXIEME SELECTEUR, NON RECENSE (trouve le 12/08).
+//   La v6.00 avait fondu cinq selecteurs dans _PIL_SCOPE en ecrivant « toute
+//   nouvelle vue lit _PIL_SCOPE ». Il en restait un, invisible parce qu'il ne
+//   ressemble pas a un selecteur : _pilSaison(), la periode CONSULTEE.
+//   Les quatre photos et la frise lisaient _PIL_SCOPE ; le KPI Effectif, la
+//   tuile Charge & ETP et Capacite vs charge lisaient _pilSaison(). Deux
+//   consequences, toutes deux vues a l'ecran le meme jour :
+//     · cliquer une campagne dans la frise ne bougeait PAS ces trois-la ;
+//     · sur l'annee entiere, la photo annonçait le pic de l'ANNEE et la tuile
+//       juste en dessous celui d'UNE campagne. Deux nombres, un seul mot.
+//
+// _pilPeriodeVue() rend la periode que la portee designe. Sur l'annee, elle
+// retombe sur la periode consultee : un panneau qui a besoin d'un `cd` complet
+// (frise des taches, courbe hebdo, ecart prevu/reel, repartition du temps) ne
+// peut pas travailler sur « l'annee », qui n'est pas une periode. Il NOMME
+// alors ce qu'il montre, au lieu de le laisser croire.
+function _pilPeriodeVue(){
+  var c=_PIL_SCOPE.camp;
+  if(c){
+    var l=(window.SAISONS||[]);
+    for(var i=0;i<l.length;i++) if(l[i]&&l[i].nom===c) return l[i];
+  }
+  return (typeof _pilSaison==='function')?_pilSaison():null;
+}
+// Memo par rendu. _chargeSaisonData est le calcul le plus cher du module
+// (capacite reelle jour par jour x effectif x contrats) et CINQ lecteurs
+// l'appellent. On l'oublie a chaque repeinte, comme le cout d'exercice : un
+// chiffre fige apres une saisie de planning serait le defaut qu'on corrige.
+var _PIL_CDV=null, _PIL_CDVK='';
+function _pilCdVueOublier(){ _PIL_CDV=null; _PIL_CDVK=''; }
+function _pilCdVue(){
+  if(typeof window._chargeSaisonData!=='function') return null;
+  var p=_pilPeriodeVue(); if(!p||!p.debut||!p.fin) return null;
+  var k=(p.nom||'')+'|'+p.debut+'|'+p.fin;
+  if(_PIL_CDV!==null && _PIL_CDVK===k) return _PIL_CDV||null;
+  var cd=null; try{ cd=window._chargeSaisonData(p); }catch(e){ cd=null; }
+  _PIL_CDV=cd||false; _PIL_CDVK=k;
+  return cd;
+}
+// La periode vue est-elle celle que le reste de l'application consulte ?
+// calcHeures(), CONFIG.objectifs_fin et d.data ne connaissent QUE celle-la :
+// les leur appliquer sur une autre campagne serait un chiffre sans assiette.
+function _pilVueEstConsultee(){
+  var p=_pilPeriodeVue(), n=_pilSaisonNom();
+  return !!(p && n && p.nom===n);
+}
+
+// ══ LE PIC DE LA PORTEE — UNE SEULE DEFINITION ══════════════════════
+// Lue par la photo Effectif, le KPI Effectif d'Aujourd'hui, la tuile Charge &
+// ETP et Capacite vs charge. Sur une campagne : ses semaines. Sur l'annee : les
+// semaines de l'EXERCICE, bornees — jamais celles d'une campagne que l'ecran
+// declare lui-meme hors exercice.
+// ⚠️ w.cap<=0 : semaine hors modele (feries, fermeture) — `need` n'y veut rien
+//    dire, elle ne peut pas porter un pic.
+function _pilPicPortee(){
+  var ann=null; try{ ann=_pilAnnuelData(); }catch(e){ ann=null; }
+  if(ann) _pilScopeVerif(ann);
+  var selP=ann?_pilAnnPer(_PIL_SCOPE.camp):null;
+  var wk=(ann&&ann.weeks)?ann.weeks.filter(function(x){
+    if(selP) return x.per===selP.idx;
+    return x.o1>=ann.s && x.o0<=ann.e;
+  }):[];
+  var pic=0, picW=null, som=0, n=0, court=false;
+  wk.forEach(function(x){
+    if(!(x.cap>0)) return;
+    som+=x.need; n++;
+    if(x.need>pic){ pic=x.need; picW=x; }
+    if(x.need>(x.head||0)+0.05) court=true;
+  });
+  var head=picW?(picW.head||0):0;
+  return { ok:(pic>0), pic:pic, picW:picW, head:head, manque:Math.max(0,pic-head),
+           moy:(n>0?som/n:0), court:court, nSem:n, annee:!selP,
+           nom:(selP?selP.nom:null), ann:ann, selP:selP };
+}
+// Le libelle du cadre, ecrit SOUS le chiffre. Un pic sans cadre est une opinion.
+function _pilCadreLbl(PP){
+  if(!PP.annee) return PP.nom||'la campagne';
+  return 'l\u2019exercice';
+}
+// La semaine d'un pic, en clair. Meme convention de date que la frise (UTC sur
+// l'axe ordinal), pas l'horloge locale : un decalage d'un jour sur une etiquette
+// de semaine se voit et fait douter de tout le reste.
+function _pilSemLabO(o0){
+  if(o0==null) return '';
+  var MOA=['janv.','f\u00e9vr.','mars','avr.','mai','juin','juil.','ao\u00fbt','sept.','oct.','nov.','d\u00e9c.'];
+  var dd=new Date(Date.parse('2026-01-01T00:00:00')+o0*86400000);
+  return 'semaine du '+dd.getUTCDate()+' '+MOA[dd.getUTCMonth()];
+}
 // ── LES DEUX CADRES ─────────────────────────────────────────────────────────
 // ⚠️ CORRECTION DE FOND (12/08/2026, sur retour de Nico). Cet ecran disait
 //    « exercice mal aligne, corrigez-le » et allait jusqu'a « aucune lecture
@@ -1334,14 +1433,22 @@ function _pilFriseAnneeSvg(ann,w){
 }
 
 function _pilPanelEtp(d){
-  var cd=(window._chargeSaisonData&&window.getSaisonActive)?window._chargeSaisonData(window._pilSaison()):null;
+  // ★ LA TUILE SUIT LA PORTEE. _pilCdVue rend la periode zoomee quand il y en a
+  //   une, sinon la periode consultee : cliquer une campagne dans la frise
+  //   recadre desormais la repartition, la frise prevu/reel, la courbe hebdo et
+  //   l'ecart — ce que la v6.00 avait promis et n'avait livre que pour la frise.
+  var cd=_pilCdVue();
+  var PP=_pilPicPortee();
   if(!cd||!cd.months.length){
     return _pilTile('etp','\u2696\uFE0F','#C9A84C','Charge & ETP \u00b7 saison', _pilStat('\u2014',''), 'datez la saison pour estimer la charge', null,
       '<div class="pil-empty">Renseignez les dates de d\u00e9but et de fin de la saison active (R\u00e9glages \u203a Saisons) pour calculer la charge et l\'ETP n\u00e9cessaire.</div>');
   }
   function _e(v){ return (Math.round((v||0)*10)/10).toString().replace('.',','); }
   var s=_PIL_STATE.sub||{};
-  var real=_pilTaskReal(cd,d);
+  // ⚠️ d.data porte les pourcentages de la periode CONSULTEE (calcHeures). Sur une
+  //   campagne zoomee qui n'est pas elle, les appliquer declarerait « termine » ou
+  //   « en cours » d'apres l'avancement d'une AUTRE campagne. On passe le drapeau.
+  var real=_pilTaskReal(cd,d,_pilVueEstConsultee());
   var ann=_pilAnnuelData();
   // ══ LE PIC ET L'EFFECTIF SE LISENT A LA SEMAINE ═══════════════════════════
   // cd.peakReq est desormais le maximum HEBDOMADAIRE et cd.peakPres l'effectif de
@@ -1352,23 +1459,29 @@ function _pilPanelEtp(d){
   // n'existe AUCUN jour de l'annee). L'ecran annonçait « manque 15,8 ETP » pendant
   // que la courbe hebdo, juste, montrait la vendange couverte. Le meme ecran
   // disait deux choses contraires ; il n'en dit plus qu'une.
-  var peak4=cd.peakReq||0, presAtPeak=(cd.peakPres!=null)?cd.peakPres:0;
-  var anyShort=!!cd.anyShort, pkw=cd.peakWeek||null;
-  var MOA=['janv.','f\u00e9vr.','mars','avr.','mai','juin','juil.','ao\u00fbt','sept.','oct.','nov.','d\u00e9c.'];
-  function _semLab(wk){
-    if(!wk) return '';
-    var dd=new Date(Date.parse('2026-01-01T00:00:00')+wk.o0*86400000);
-    return 'semaine du '+dd.getUTCDate()+' '+MOA[dd.getUTCMonth()];
-  }
+  var peak4=PP.pic||0, presAtPeak=PP.head||0;
+  var anyShort=!!PP.court, pkw=PP.picW||null;
+  var cadre=_pilCadreLbl(PP);
+  function _semLab(wk){ return wk?_pilSemLabO(wk.o0):''; }
   var synth, sBg, sCol;
   if(anyShort){
     var miss=Math.max(0,peak4-presAtPeak);
-    synth='Pic \u00e0 '+_e(peak4)+' personnes'+(pkw?(' \u00b7 '+_semLab(pkw)):'')+' pour '+_e(presAtPeak)+' pr\u00e9sentes \u2192 il en manque ~'+_e(miss);
+    synth='Sur '+cadre+' \u2014 pic \u00e0 '+_e(peak4)+' personnes'+(pkw?(' \u00b7 '+_semLab(pkw)):'')+' pour '+_e(presAtPeak)+' pr\u00e9sentes \u2192 il en manque ~'+_e(miss);
     sBg='#F3D9D4'; sCol='var(--rouge)';
   } else {
-    synth='Aucune semaine en sous-effectif. Pic \u00e0 '+_e(peak4)+' personnes'+(pkw?(' \u00b7 '+_semLab(pkw)):'')+'.';
+    synth='Sur '+cadre+' \u2014 aucune semaine en sous-effectif. Pic \u00e0 '+_e(peak4)+' personnes'+(pkw?(' \u00b7 '+_semLab(pkw)):'')+'.';
     sBg='#DCEBD0'; sCol='var(--vert-med)';
   }
+  // Quand la portee est l'ANNEE, les blocs de detail ne peuvent pas la suivre :
+  // une frise de taches, une courbe hebdo ou un ecart prevu/reel n'existent qu'a
+  // la maille d'une campagne. Ils montrent donc la periode consultee — et le
+  // DISENT, plutot que de laisser croire qu'ils repondent pour l'annee.
+  var noteCadre = PP.annee
+    ? ('<div style="margin:2px 0 10px;padding:8px 11px;border-radius:9px;background:rgba(74,159,200,.08);font-size:11.5px;color:var(--texte-doux);line-height:1.5">'
+       +'Le chiffre en t\u00eate porte sur <b>l\u2019exercice entier</b>. Les blocs ci-dessous \u2014 r\u00e9partition du temps, frise pr\u00e9vu/r\u00e9el, courbe par semaine, \u00e9cart \u2014 '
+       +'d\u00e9taillent la campagne <b>'+_pilEsc(cd.saison)+'</b>\u00a0: une frise de t\u00e2ches n\u2019existe qu\u2019\u00e0 la maille d\u2019une campagne. '
+       +'Cliquez une campagne dans la frise pour tout recadrer dessus.</div>')
+    : '';
   function chip(k,lab){ var on=s[k]!==0; return '<button data-etp="'+k+'" style="border:1px solid '+(on?'#C9A84C':'var(--gris)')+';background:'+(on?'#C9A84C22':'#fff')+';color:'+(on?'#8A5A38':'var(--texte-doux)')+';border-radius:20px;padding:4px 11px;font-size:11.5px;font-weight:600;cursor:pointer;margin:0 6px 6px 0">'+(on?'\u2713 ':'')+lab+'</button>'; }
   var chips='<div style="margin:-2px 0 8px">'+chip('etp_annee','Ann\u00e9e')+chip('etp_frise','Frise')+chip('etp_courbe','Courbe / sem.')+chip('etp_ecart','\u00c9cart pr\u00e9vu/r\u00e9el')+'</div>';
   var friseLeg='<div style="display:flex;gap:14px;flex-wrap:wrap;font-size:11.5px;color:var(--texte-doux);margin:8px 0 2px">'
@@ -1410,7 +1523,10 @@ function _pilPanelEtp(d){
     window._mvGraphSuivre('#pil-g-ann', function(lg){ return _pilFriseAnneeSvg(ann,lg); }, {max:1800});
   }
   // ── Bloc répartition « Où va le temps » (présence → vigne / tracteur / autres) ──
-  var _tH=(window._tractHoursSeason)?Math.round(window._tractHoursSeason(window._pilSaison())||0):0;
+  // ★ Meme periode que `cd` : additionner les heures de tracteur d'une campagne
+  //   a la charge d'une autre donnerait une repartition dont les deux parts ne
+  //   parlent pas de la meme fenetre.
+  var _tH=(window._tractHoursSeason)?Math.round(window._tractHoursSeason(_pilPeriodeVue())||0):0;
   var _prez=Math.round(cd.capEquipe||0), _vig=Math.round(cd.charge||0), _cr=cd.capRefTotal||0;
   var _etpF=function(h){return _cr>0?(h/_cr).toFixed(1).replace('.',','):'\u2014';};
   // ══ UNE PART NE PEUT PAS DEPASSER 100 % ═══════════════════════════════════
@@ -1449,7 +1565,7 @@ function _pilPanelEtp(d){
     +(_surch?'':_rowR('#8A5A38','Autres',((_tH>0)?'(cave, trajet, entretien\u2026)':'(tracteur, cave, trajet\u2026)'),_aut,_pA,_etpF(_aut)))
     +'<div style="font-size:11px;color:var(--texte-doux);margin-top:10px;background:rgba(74,159,200,.08);border-radius:8px;padding:8px 11px">'+_footR+'</div>'
   +'</div>';
-  var body=chips+annBlock+repartBlock;
+  var body=chips+noteCadre+annBlock+repartBlock;
   if(s.etp_frise!==0){ body+='<div style="font-size:10px;color:var(--texte-doux);margin:14px 0 6px">Frise pr\u00e9vu / r\u00e9el \u2014 fen\u00eatres modifiables dans l\'onglet <b>Param\u00e9trage</b></div>'
     +'<div style="width:100%;overflow-x:auto" id="pil-g-frise"></div>'+friseLeg;
     window._mvGraphSuivre('#pil-g-frise', function(lg){ return _pilFriseSvg(cd,real,lg); }, {max:1800}); }
@@ -1458,8 +1574,10 @@ function _pilPanelEtp(d){
   if(s.etp_ecart!==0){ body+='<div style="'+secTtl+'">\u00c9cart pr\u00e9vu / r\u00e9el</div>'+_pilEcartHtml(cd,real); }
   body+='<div style="margin-top:10px;padding:9px 11px;border-radius:9px;background:'+sBg+';color:'+sCol+';font-size:12.5px;font-weight:600">'+synth+'</div>';
   var cov=peak4>0?Math.min(presAtPeak/peak4*100,100):100;
-  return _pilTile('etp','\u2696\uFE0F','#C9A84C','Charge & ETP \u00b7 '+cd.saison, _pilStat(_e(peak4),' au pic'),
-    _pilNum(cd.charge)+' h \u00b7 '+_e(presAtPeak)+' pr\u00e9sents au pic'+(pkw?(' \u00b7 '+_semLab(pkw)):''), cov, body);
+  var _sub = PP.annee
+    ? (_e(presAtPeak)+' pr\u00e9sents au pic'+(pkw?(' \u00b7 '+_semLab(pkw)):'')+' \u00b7 d\u00e9tail sur '+cd.saison)
+    : (_pilNum(cd.charge)+' h de bar\u00e8me \u00b7 '+_e(presAtPeak)+' pr\u00e9sents au pic'+(pkw?(' \u00b7 '+_semLab(pkw)):''));
+  return _pilTile('etp','\u2696\uFE0F','#C9A84C','Charge & ETP \u00b7 '+cadre, _pilStat(_e(peak4),' au pic'), _sub, cov, body);
 }
 function _pilFmtD(iso){ var pp=String(iso||'').split('-'); if(pp.length!==3)return String(iso||''); var mo=['janv.','févr.','mars','avr.','mai','juin','juil.','août','sept.','oct.','nov.','déc.']; var mi=parseInt(pp[1],10)-1; return parseInt(pp[2],10)+' '+(mo[mi]||''); }
 function _pilEchWin(e){ if(!e)return ''; var a=e.d1?_pilFmtD(e.d1):'', b=e.d2?_pilFmtD(e.d2):''; if(a&&b)return a+' → '+b; if(a)return 'dès '+a; if(b)return 'jusqu’au '+b; return ''; }
@@ -3574,13 +3692,19 @@ function _pilCkBudget(){
         : ('cadence <b style="color:'+col+'">'+(ec>0?'+':'')+Math.round(ec)+' %</b> vs bar\u00e8me \u00b7 fin \u2248 '+_pecEurK(E.projFin)))+'</div></div>';
 }
 function _pilCkEtp(d){
-  var cd=(window._chargeSaisonData&&window.getSaisonActive)?window._chargeSaisonData(window._pilSaison()):null;
+  // ★ Le KPI suit la PORTEE, comme la photo Effectif juste au-dessus de lui.
+  //   Il lisait _pilSaison() : sur l'annee entiere il repondait pour une seule
+  //   campagne (36,6) sous une photo qui repondait pour l'annee. Meme mot, deux
+  //   nombres, a quinze centimetres l'un de l'autre.
+  var PP=_pilPicPortee();
   var present=d.presentChamp!=null?d.presentChamp:0;
-  var req=(cd&&cd.peakReq!=null&&cd.peakReq>0)?cd.peakReq:null;
+  var req=PP.ok?PP.pic:null;
   var low=(req!=null && present<req-0.05);
   var reqTxt=(req!=null)?(' / '+_pilEtpFmt(req)+' ETP'):'';
+  var sous = (req==null) ? 'à la vigne aujourd\'hui'
+    : ((low?'sous-effectif':'capacité suffisante')+' au pic \u00b7 '+_pilCadreLbl(PP));
   return '<div class="pil-ck"><div class="kl">Effectif</div><div class="kv">'+present+'<span class="u">'+reqTxt+'</span></div>'
-    +'<div class="ks"'+(low?' style="color:var(--orange);font-weight:600"':'')+'>'+(req==null?'à la vigne aujourd\'hui':(low?'sous-effectif au pic':'capacité suffisante au pic'))+'</div></div>';
+    +'<div class="ks"'+(low?' style="color:var(--orange);font-weight:600"':'')+'>'+_pilEsc(sous)+'</div></div>';
 }
 function _pilCkJours(){
   var days=_pilTreatDays();
@@ -3736,17 +3860,22 @@ function _pilTabAvc(d){
 
 // ── Onglet PERSONNEL ──
 function _pilPanelCapacite(d){
-  var cd=(window._chargeSaisonData&&window.getSaisonActive)?window._chargeSaisonData(window._pilSaison()):null;
+  var PP=_pilPicPortee(), cd=_pilCdVue();
   var present=d.presentChamp!=null?d.presentChamp:0;
-  if(!cd){ return _pilTile('capacite','\u2696\uFE0F','#C9A84C','Capacité vs charge', _pilStat(present,' à la vigne'), null, null, '<div class="pil-empty">Renseigne les dates de la saison (Réglages \u203A Saisons) pour estimer l\'ETP requis.</div>'); }
-  var MN=['janv.','févr.','mars','avr.','mai','juin','juil.','août','sept.','oct.','nov.','déc.'];
-  var req=cd.peakReq||0, manque=Math.max(0,req-present), pPres=req>0?Math.min(present/req*100,100):100;
+  if(!PP.ok && !cd){ return _pilTile('capacite','\u2696\uFE0F','#C9A84C','Capacité vs charge', _pilStat(present,' à la vigne'), null, null, '<div class="pil-empty">Renseigne les dates de la saison (Réglages \u203A Saisons) pour estimer l\'ETP requis.</div>'); }
+  var req=PP.pic||0, manque=Math.max(0,req-present), pPres=req>0?Math.min(present/req*100,100):100;
+  var cadre=_pilCadreLbl(PP), sem=PP.picW?_pilSemLabO(PP.picW.o0):'';
   var body='<div style="display:flex;justify-content:space-between;font-size:12.5px;margin-bottom:3px"><span>Effectif présent à la vigne</span><b>'+present+' ETP</b></div>'
     +'<div class="pil-gbar"><i style="width:'+pPres.toFixed(0)+'%;background:var(--vert-med)"></i></div>'
-    +'<div style="display:flex;justify-content:space-between;font-size:12.5px;margin:11px 0 3px"><span>ETP requis au pic'+(cd.peakMonth!=null?' ('+MN[cd.peakMonth]+')':'')+'</span><b style="color:var(--orange)">'+_pilEtpFmt(req)+' ETP</b></div>'
+    +'<div style="display:flex;justify-content:space-between;font-size:12.5px;margin:11px 0 3px"><span>ETP requis au pic sur '+_pilEsc(cadre)+(sem?(' \u00b7 '+_pilEsc(sem)):'')+'</span><b style="color:var(--orange)">'+_pilEtpFmt(req)+' ETP</b></div>'
     +'<div class="pil-gbar"><i style="width:100%;background:var(--orange)"></i></div>'
-    +'<div class="pil-li-s" style="margin-top:10px">'+(manque>0.1?('Manque \u2248 <b style="color:var(--orange)">'+_pilEtpFmt(manque)+' ETP</b> au pic de charge. Options : renfort saisonnier, décaler une tâche, ou repousser l\'objectif (voir Simulateur).'):'Effectif suffisant pour le pic de charge de la saison.')+'</div>';
-  return _pilTile('capacite','\u2696\uFE0F','#C9A84C','Capacité vs charge', _pilStat(_pilEtpFmt(req),' ETP au pic'), 'présent : '+present+' · cible saison : '+_pilEtpFmt(cd.etpCible||0)+' ETP', null, body);
+    // ★ L'effectif de la SEMAINE DU PIC est le seul comparable au besoin de
+    //   cette semaine-la. Le present du jour, lui, repond a une autre question :
+    //   les deux sont affiches, chacun sous son nom.
+    +(PP.picW?('<div class="pil-li-s" style="margin-top:8px">Cette semaine-là, <b>'+_pilEtpFmt(PP.head)+'</b> personne'+(PP.head>1.05?'s':'')+' sont prévues au planning.</div>'):'')
+    +'<div class="pil-li-s" style="margin-top:10px">'+(manque>0.1?('Manque \u2248 <b style="color:var(--orange)">'+_pilEtpFmt(manque)+' ETP</b> au pic de charge. Options : renfort saisonnier, décaler une tâche, ou repousser l\'objectif (voir Simulateur).'):'Effectif suffisant pour le pic de charge sur '+_pilEsc(cadre)+'.')+'</div>';
+  var sub='présent : '+present+(cd?(' · cible moyenne '+_pilEsc(cd.saison)+' : '+_pilEtpFmt(cd.etpCible||0)+' ETP'):'');
+  return _pilTile('capacite','\u2696\uFE0F','#C9A84C','Capacité vs charge · '+cadre, _pilStat(_pilEtpFmt(req),' ETP au pic'), sub, null, body);
 }
 function _pilTabPrs(d){
   var H='<div class="pil-panels">';
@@ -7015,19 +7144,11 @@ function _pilPhotosData(){
   var ann=null; try{ ann=_pilAnnuelData(); }catch(e){ ann=null; }
   if(ann) _pilScopeVerif(ann);
   var camp=_PIL_SCOPE.camp, selP=ann?_pilAnnPer(camp):null;
-  // ⚠️ « SUR L'EXERCICE » DOIT VOULOIR DIRE SUR L'EXERCICE.
-  //   ann.weeks contient les semaines de TOUTES les periodes, y compris celles
-  //   qui tombent entierement hors de l'exercice comptable — ann.hors les
-  //   nomme, et l'ecran les affiche deux blocs plus bas comme « hors exercice ».
-  //   Sans ce bornage, la photo Effectif annonçait un pic de 60,8 personnes
-  //   « sur l'exercice » : un pic de PRINTEMPS 2026, hors exercice (d'ou les
-  //   5 presents), pendant que Charge & ETP, cadre sur la periode consultee,
-  //   en affichait 36,6. Deux reponses justes a la meme question, sur le meme
-  //   ecran, et aucune ne disait sur quoi elle portait.
-  var wk=(ann&&ann.weeks)?ann.weeks.filter(function(x){
-    if(selP) return x.per===selP.idx;
-    return x.o1>=ann.s && x.o0<=ann.e;
-  }):[];
+  // ⚠️ « SUR L'EXERCICE » DOIT VOULOIR DIRE SUR L'EXERCICE. Une periode qui tombe
+  //   entierement hors de l'exercice comptable (ann.hors la nomme, et le tableau
+  //   « Deux façons de compter » l'affiche en clair) n'entre pas dans un total
+  //   annonce « sur l'exercice ». Le bornage des SEMAINES vit dans _pilPicPortee,
+  //   definition unique du pic ; celui des HEURES vit ici.
   function _dansEx(p){ return !(ann&&ann.ex) || !(p.fin<ann.ex.d0 || p.debut>ann.ex.d1); }
 
   // TRAVAUX — heures de bareme de la portee.
@@ -7065,10 +7186,11 @@ function _pilPhotosData(){
 
   // EFFECTIF — le PIC, jamais la moyenne : une moyenne annuelle n'existe aucun
   // jour de l'annee, et c'est le pic qui decide d'un recrutement.
-  var pic=0, picW=null, som=0, n=0;
-  wk.forEach(function(x){ if(!(x.cap>0)) return; som+=x.need; n++; if(x.need>pic){ pic=x.need; picW=x; } });
-  var moy=n>0?(som/n):0;
-  var head=picW?(picW.head||0):0, manque=Math.max(0,pic-head);
+  // ★ UNE SEULE DEFINITION : _pilPicPortee, la meme que lit le KPI d'Aujourd'hui
+  //   et la tuile Charge & ETP. La photo la recalculait pour elle seule — c'est
+  //   exactement comme ça que deux ecrans finissent par se contredire.
+  var _PP=_pilPicPortee();
+  var pic=_PP.pic, picW=_PP.picW, moy=_PP.moy, head=_PP.head, manque=_PP.manque;
 
   // BUDGET — DEUX SOURCES, PARCE QU'IL Y A DEUX QUESTIONS.
   //   · portee = l'exercice  -> _pexData : ce que coute le bilan (salaires
@@ -7183,7 +7305,7 @@ function _pilUn(v){ return (Math.round((Number(v)||0)*10)/10).toString().replace
 // Repeint la barre de portee sans reconstruire la page. Appelee au clic sur une
 // campagne : la portee change, le fil et les photos suivent — c'est tout l'objet.
 function _pilPortee(){
-  _pilExoOublier();
+  _pilExoOublier(); _pilCdVueOublier();
   var c=document.getElementById('pil-crumb'); if(c) c.innerHTML=_pilCrumbHtml();
   var p=document.getElementById('pil-photos-host'); if(p) p.innerHTML=_pilPhotosHtml();
   // Le compte des manques se repeint AUSSI : un bouton fige sur l'ancien
@@ -7544,6 +7666,20 @@ function _pilParamBody(d){
   var note = admin
     ? 'Définis la fenêtre de chaque tâche (début, fin, durée). Elles pilotent la frise et la charge par mois. « auto » = calé sur l\'enchaînement par défaut.'
     : '\uD83D\uDD12 Lecture seule — seul un administrateur peut modifier ces fenêtres.';
+  // ⚠️⚠️ LE PARAMETRAGE ECRIT, IL NE REGARDE PAS.
+  //   Depuis que la portee recadre les tuiles de lecture, on peut arriver ici en
+  //   ayant zoome sur une AUTRE campagne que celle qu'on consulte. Or les
+  //   echeances se rangent dans s.echeances de la periode CONSULTEE : suivre le
+  //   zoom ferait ecrire dans la mauvaise fiche. Le module ne suit donc pas le
+  //   zoom ici — et il le DIT, parce qu'une ecriture silencieuse au mauvais
+  //   endroit est le pire des defauts : elle ne se voit qu'a la campagne suivante.
+  var _zoomAilleurs = !!(_PIL_SCOPE.camp && cd && cd.saison && _PIL_SCOPE.camp!==cd.saison);
+  var _avert = _zoomAilleurs
+    ? ('<div style="margin:0 0 10px;padding:9px 12px;border-radius:9px;background:#FBF0DC;color:#8A5A38;font-size:12px;line-height:1.5">'
+       +'\u26A0 Vous regardez <b>'+_pilEsc(_PIL_SCOPE.camp)+'</b> dans le reste du Pilotage, mais ce param\u00e9trage porte sur '
+       +'<b>'+_pilEsc(cd.saison)+'</b>, la p\u00e9riode consult\u00e9e. Pour param\u00e9trer '+_pilEsc(_PIL_SCOPE.camp)+', '
+       +'changez de p\u00e9riode consult\u00e9e (R\u00e9glages \u203a Saisons).</div>')
+    : '';
   var rows=cd.taskWindows.map(function(t){
     var dis=admin?'':' disabled';
     var key=_friseNorm(t.nom);
@@ -7565,6 +7701,7 @@ function _pilParamBody(d){
   var resetAll=admin?'<button id="pil-pw-resetall" style="border:1px solid var(--gris);background:#fff;border-radius:9px;padding:7px 12px;font-size:12px;color:var(--texte-doux);cursor:pointer">Tout remettre en auto</button>':'';
   return '<div id="pil-param-host">'+_pilObjCard(cd,admin)
     +'<div style="'+cardCss+'">'
+    +_avert
     +'<div style="'+ttlCss+';margin-bottom:4px">Paramétrage · fenêtres des tâches</div>'
     +'<div style="font-size:12.5px;color:var(--texte-doux);margin-bottom:10px">'+note+'</div>'
     +'<div style="height:3px;border-radius:3px;background:linear-gradient(90deg,#9B2D1F,#C2871E,#C8B020,#5C8A3E,#3D6B27);margin:0 0 14px"></div>'
@@ -7642,7 +7779,7 @@ function _pilFillContent(d){
   // Budget et le panneau « Deux façons de compter »). On l'oublie a chaque
   // repeinte : un chiffre fige apres une saisie de planning serait un ecran qui
   // se contredit lui-meme, exactement ce qu'on vient de corriger.
-  _pilExoOublier();
+  _pilExoOublier(); _pilCdVueOublier();
   var tab=_PIL_TAB;
   if(tab==='param'){ host.innerHTML=_pilParamBody(d); _pilBindParam(d); return; }
   if(tab==='auj') host.innerHTML=_pilTabAuj(d);
@@ -7828,7 +7965,7 @@ function _pilBind(){
 function renderPilotage(){
   var page=document.getElementById('page-pilotage'); if(!page) return;
   _PIL_STATE=_pilLoadState(); _PIL_TAB=_pilLoadTab(); _PIL_CAVSUB=_pilLoadCav(); _pecLoadSt();
-  _pilExoOublier();
+  _pilExoOublier(); _pilCdVueOublier();
   _pecCss();
   var d=_pilData();
   page.innerHTML=_pilSkeleton(d,_PIL_TAB);

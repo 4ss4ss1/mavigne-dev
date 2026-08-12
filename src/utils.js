@@ -23,7 +23,7 @@ export const GT_ADMIN_EMAIL = 'ngdevpro@gmail.com';
 // WHATS_NEW   : tableau vide = modal desactive pour cette version.
 // Format item : { emoji:'📅', titre:'Titre court', desc:'Phrase utilisateur.' }
 // Regle : seulement les changements visibles par les utilisateurs.
-export const APP_VERSION = '6.02';
+export const APP_VERSION = '6.03';
 // ════ Journal des nouveautés (récap cumulatif) ════
 // Une entrée par version, la PLUS RÉCENTE EN HAUT : { v:'5.10', items:[ {emoji,titre,desc}, … ] }
 // À chaque release visible → AJOUTER un bloc en tête (ne pas remplacer). items:[] = release technique (rien à afficher).
@@ -354,6 +354,16 @@ window._mvGraphRepeindre = function(){
 };
 
 export const WHATS_NEW = [
+  { v:'6.03', items:[
+    { emoji: '\u{1F50D}', titre: "Cliquer une campagne recadre enfin TOUT l\u2019\u00e9cran",
+      desc: "Choisir une campagne dans la frise bougeait la frise, les quatre chiffres du haut\u2026 et laissait trois blocs sur une autre p\u00e9riode\u202f: le chiffre <b>Effectif</b> d\u2019Aujourd\u2019hui, la tuile <b>Charge & ETP</b> et <b>Capacit\u00e9 vs charge</b>. Ils lisaient la p\u00e9riode que vous consultez, pas celle que vous regardez. Sur l\u2019ann\u00e9e enti\u00e8re, la photo r\u00e9pondait donc pour l\u2019ann\u00e9e et la tuile juste en dessous pour une seule campagne\u202f: deux nombres, un seul mot, \u00e0 quinze centim\u00e8tres l\u2019un de l\u2019autre. Tout suit maintenant la m\u00eame barre du haut \u2014 la r\u00e9partition du temps, la frise pr\u00e9vu/r\u00e9el, la courbe par semaine et l\u2019\u00e9cart compris." },
+    { emoji: '\u{1F3F7}\u{FE0F}', titre: "Chaque chiffre dit d\u00e9sormais sur quoi il porte",
+      desc: "\u00ab\u202f36,6 au pic\u202f\u00bb ne veut rien dire sans savoir si c\u2019est le pic de l\u2019ann\u00e9e ou celui d\u2019une campagne. Le cadre est maintenant \u00e9crit sous le chiffre, partout\u202f: \u00ab\u202fsur l\u2019exercice\u202f\u00bb, \u00ab\u202fsur Vendanges\u202f\u00bb, avec la semaine du pic. Un pic sans cadre n\u2019est pas une mesure, c\u2019est une opinion." },
+    { emoji: '\u{1F4D0}', titre: "Les blocs qui ne peuvent pas suivre le zoom le disent",
+      desc: "Une frise de t\u00e2ches, une courbe par semaine ou un \u00e9cart pr\u00e9vu/r\u00e9el n\u2019existent qu\u2019\u00e0 la maille d\u2019une campagne\u202f: sur l\u2019ann\u00e9e enti\u00e8re, ils ne peuvent montrer qu\u2019une campagne. Ils l\u2019\u00e9crivent maintenant en clair au lieu de laisser croire qu\u2019ils r\u00e9pondent pour l\u2019ann\u00e9e. Et le <b>Param\u00e9trage</b>, qui \u00e9crit dans vos donn\u00e9es, pr\u00e9vient si vous regardez une campagne alors qu\u2019il porte sur une autre \u2014 une \u00e9criture au mauvais endroit ne se voit qu\u2019\u00e0 la campagne suivante." },
+    { emoji: '\u{2705}', titre: "Une t\u00e2che n\u2019est plus d\u00e9clar\u00e9e termin\u00e9e d\u2019apr\u00e8s une autre campagne",
+      desc: "La frise pr\u00e9vu/r\u00e9el jugeait \u00ab\u202ftermin\u00e9\u202f\u00bb ou \u00ab\u202fen cours\u202f\u00bb avec l\u2019avancement de la p\u00e9riode consult\u00e9e, quelle que soit la campagne affich\u00e9e. En zoomant sur une campagne pass\u00e9e, vous pouviez voir \u00ab\u202fen cours\u202f\u00bb sur des travaux finis depuis des mois. Elle s\u2019appuie maintenant sur ce que le journal sait vraiment." }
+  ]},
   { v:'6.02', items:[
     { emoji: '\u{1F446}', titre: "\u00ab\u202fvoir le d\u00e9tail\u202f\u00bb et \u00ab\u202f\u00e0 compl\u00e9ter\u202f\u00bb r\u00e9pondent enfin",
       desc: "Les quatre chiffres en haut du Pilotage, le bouton \u00ab\u202fN choses \u00e0 compl\u00e9ter\u202f\u00bb et la croix qui revient \u00e0 l\u2019ann\u00e9e enti\u00e8re ne r\u00e9agissaient pas au clic. Pas d\u2019erreur, pas de message\u202f: rien. Ces boutons avaient \u00e9t\u00e9 sortis de la zone qui \u00e9coute les clics lors de la refonte pr\u00e9c\u00e9dente, et personne ne le voyait tant qu\u2019on ne cliquait pas. C\u2019est r\u00e9par\u00e9\u202f: chaque chiffre ouvre l\u2019\u00e9cran qui le d\u00e9taille, chaque pastille rouge ou orange ouvre la liste de ce qui le fausse." },
