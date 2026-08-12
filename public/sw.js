@@ -1,4 +1,33 @@
-// MA VIGNE — Service Worker v6.51
+// MA VIGNE — Service Worker v6.52
+// v6.52 (12/08/2026) — Pilotage : SEPT DEFAUTS SIGNALES PAR NICO, MEME SEANCE.
+//   1+2. Delegation de clic posee sur #pil-content alors que les 4 photos, le
+//        fil d'Ariane et le bouton « a completer » sont ses FRERES depuis 6.50 :
+//        data-pgo, .pil-flag, #pil-diagbtn, #pil-cr-root/x etaient morts, sans
+//        erreur ni trace. Delegation deplacee sur #page-pilotage, une seule fois
+//        (garde _pilDeleg : la page survit aux rendus, les ecouteurs s'empileraient).
+//   3.   Photo Effectif : ann.weeks n'etait pas borne a [ann.s,ann.e] -> pic de
+//        60,8 pris dans une campagne que l'ecran declare lui-meme hors exercice,
+//        contre 36,6 au panneau Charge & ETP. Bornage + _dansEx sur le total.
+//   4.   cd.totalTotal/totalReste N'EXISTENT PAS sur _chargeSaisonData (elles
+//        viennent de calcHeures, app.js) -> Travaux et les 4 lignes de « Deux
+//        facons de compter » sortaient a 0 h. Lecture de `charge`. Le pourcentage
+//        fait ne s'affiche plus que sur la periode consultee (seule assiette).
+//   4bis. La cellule « Exercice comptable » lisait _pecData (cadre CAMPAGNE) :
+//        45 kEUR de vendange sous l'etiquette d'une annee. Passe a _pexData
+//        (salaires charges + GNR + achats, fenetre de dates), memoise par rendu.
+//   5.   MV_GRAPH_MAX=760 plafonnait TOUS les graphes : _mvGraphW(el,max) et
+//        _mvGraphSuivre(sel,build,opts) en AJOUT PUR ; frise annuelle, frise
+//        prevu/reel et courbe hebdo a 1800 ; hauteur suivant la largeur.
+//   6.   _pilMargeCalc projetait charge/cadence des 4 dernieres semaines : 15 h/j
+//        mesures en aout avec une personne, appliques jusqu'en janvier, en
+//        ignorant 36 vendangeurs sous contrat. Nouveau _pilCapaProj : consomme la
+//        charge sur weeks[].capH (capacite REELLEMENT planifiee, contrats et dates
+//        de debut compris), facteur presence->bareme pris de l'ecart de cadence
+//        deja mesure par _pecData, borne [0,5;3]. Repli ANNONCE sur la cadence.
+//        _pilAnnuelData transporte capH, qu'elle jetait.
+//   7.   _pilDemandSvg graduait de 1 en 1 : 38 etiquettes dans 238 px sur une
+//        vendange a 36,6. Pas adaptatif, meme echelle que la frise annuelle.
+//   BUMP APP 6.01 -> 6.02 : utils.js touche (_mvGraphW / _mvGraphSuivre).
 // v6.51 (12/08/2026) — Pilotage / cadre annuel : CORRECTION DE FOND. L'ecran
 //   declarait l'exercice « mal aligne » et poussait a le deplacer, jusqu'a
 //   « aucune lecture annuelle n'est fiable ». Mauvais conseil : un exercice
@@ -926,7 +955,7 @@
 // v2.22 — Fix profils vides : guard vide dans loadData() pour MEMBRES/SAISONS/TACHES
 // v2.17 — Onboarding intégré + tenantId · v2.06 — Firebase Auth · v2.00–v2.05 — divers
 const DEBUG = self.location.hostname === 'localhost' || self.location.hostname === '127.0.0.1';
-const CACHE_NAME   = 'mavigne-v6.51';
+const CACHE_NAME   = 'mavigne-v6.52';
 const TENANT_CACHE = 'mavigne-tenant';   // Cache persistant — préservé à chaque mise à jour SW
 const SYNC_TAG     = 'mavigne-sync';
 
@@ -942,7 +971,7 @@ const CDN_URLS = [
 ];
 
 self.addEventListener('install', event => {
-  if(DEBUG) console.log('[SW] Ma Vigne v6.51 installé');
+  if(DEBUG) console.log('[SW] Ma Vigne v6.52 installé');
   event.waitUntil(
     caches.open(CACHE_NAME).then(async cache => {
       // ── Cœur applicatif : STRICT (mise à jour ATOMIQUE) ──
@@ -958,7 +987,7 @@ self.addEventListener('install', event => {
 });
 
 self.addEventListener('activate', event => {
-  if(DEBUG) console.log('[SW] Ma Vigne v6.51 activé');
+  if(DEBUG) console.log('[SW] Ma Vigne v6.52 activé');
   event.waitUntil(
     caches.keys().then(keys =>
       Promise.all(

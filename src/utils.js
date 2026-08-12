@@ -23,7 +23,7 @@ export const GT_ADMIN_EMAIL = 'ngdevpro@gmail.com';
 // WHATS_NEW   : tableau vide = modal desactive pour cette version.
 // Format item : { emoji:'📅', titre:'Titre court', desc:'Phrase utilisateur.' }
 // Regle : seulement les changements visibles par les utilisateurs.
-export const APP_VERSION = '6.01';
+export const APP_VERSION = '6.02';
 // ════ Journal des nouveautés (récap cumulatif) ════
 // Une entrée par version, la PLUS RÉCENTE EN HAUT : { v:'5.10', items:[ {emoji,titre,desc}, … ] }
 // À chaque release visible → AJOUTER un bloc en tête (ne pas remplacer). items:[] = release technique (rien à afficher).
@@ -215,10 +215,19 @@ window.MV_GRAPH_TRAIT = { mesure: 2, prevu: 1.5, seuil: 1.5, grille: 1 };
 
 // La largeur VRAIE du conteneur, bornee. Jamais une constante : c'est la mesure
 // qui evite l'etirement.
-window._mvGraphW = function(el){
+// ★ PLAFOND PAR GRAPHE (`max`, optionnel — AJOUT PUR, appel sans argument
+//   strictement inchange). MV_GRAPH_MAX = 760 est le bon plafond pour un graphe
+//   pose dans une colonne : au-dela, les points s'etirent sans rien montrer de
+//   plus. Mais une FRISE DE DOUZE MOIS n'est pas dans une colonne — elle occupe
+//   toute la carte, et dans un .pil-wrap de 1280 px elle s'arretait a 760, soit
+//   60 % de la page, avec cinquante-deux semaines ecrasees dans la moitie de la
+//   place disponible. Un plafond global n'a pas a decider pour tous les graphes.
+window._mvGraphW = function(el, max){
   var w = (el && el.clientWidth > 0) ? el.clientWidth : 0;
-  if(!(w > 0)) return MV_GRAPH_DEF;
-  return Math.round(Math.max(MV_GRAPH_MIN, Math.min(MV_GRAPH_MAX, w)));
+  var hi = (max > 0) ? max : MV_GRAPH_MAX;
+  if(hi < MV_GRAPH_MIN) hi = MV_GRAPH_MIN;
+  if(!(w > 0)) return Math.min(MV_GRAPH_DEF, hi);
+  return Math.round(Math.max(MV_GRAPH_MIN, Math.min(hi, w)));
 };
 
 // Le cadre : gouttieres, surface de trace, nombre de graduations, echelles.
@@ -284,7 +293,7 @@ var _MV_GRAPHS = [], _mvGraphHooked = false, _mvGraphTimer = null;
 function _mvGraphDessine(e){
   var box = document.querySelector(e.sel);
   if(!box) return;                       // l'ecran n'est pas affiche : cas normal
-  var w = window._mvGraphW(box);
+  var w = window._mvGraphW(box, e.max);
   // Repeindre aussi quand le conteneur a ete reconstruit (nouvel element) ou
   // qu'il est vide : sinon un ecran rebati garde une case blanche.
   if(w === e.w && box === e.el && box.firstChild) return;
@@ -308,12 +317,16 @@ function _mvGraphDessine(e){
 
 // Enregistre un graphe et le dessine tout de suite. Le selecteur doit etre
 // stable : c'est lui qui identifie l'entree, et le dernier `build` fait foi.
-window._mvGraphSuivre = function(sel, build){
+// `opts.max` : plafond de largeur propre a CE graphe (voir _mvGraphW). Il se
+// pose AVANT le premier dessin, sinon le graphe naitrait a 760 puis ne se
+// redessinerait qu'au prochain redimensionnement.
+window._mvGraphSuivre = function(sel, build, opts){
   if(!sel || typeof build !== 'function') return;
   var e = null, i;
   for(i = 0; i < _MV_GRAPHS.length; i++){ if(_MV_GRAPHS[i].sel === sel){ e = _MV_GRAPHS[i]; break; } }
-  if(!e){ e = { sel: sel, w: 0, el: null, dit: false }; _MV_GRAPHS.push(e); }
+  if(!e){ e = { sel: sel, w: 0, el: null, dit: false, max: 0 }; _MV_GRAPHS.push(e); }
   e.build = build;
+  e.max = (opts && opts.max > 0) ? opts.max : 0;
   _mvGraphDessine(e);
   if(!_mvGraphHooked){
     _mvGraphHooked = true;
@@ -341,6 +354,20 @@ window._mvGraphRepeindre = function(){
 };
 
 export const WHATS_NEW = [
+  { v:'6.02', items:[
+    { emoji: '\u{1F446}', titre: "\u00ab\u202fvoir le d\u00e9tail\u202f\u00bb et \u00ab\u202f\u00e0 compl\u00e9ter\u202f\u00bb r\u00e9pondent enfin",
+      desc: "Les quatre chiffres en haut du Pilotage, le bouton \u00ab\u202fN choses \u00e0 compl\u00e9ter\u202f\u00bb et la croix qui revient \u00e0 l\u2019ann\u00e9e enti\u00e8re ne r\u00e9agissaient pas au clic. Pas d\u2019erreur, pas de message\u202f: rien. Ces boutons avaient \u00e9t\u00e9 sortis de la zone qui \u00e9coute les clics lors de la refonte pr\u00e9c\u00e9dente, et personne ne le voyait tant qu\u2019on ne cliquait pas. C\u2019est r\u00e9par\u00e9\u202f: chaque chiffre ouvre l\u2019\u00e9cran qui le d\u00e9taille, chaque pastille rouge ou orange ouvre la liste de ce qui le fausse." },
+    { emoji: '\u{1F4CF}', titre: "Vos heures de bar\u00e8me ne s\u2019affichent plus \u00e0 z\u00e9ro",
+      desc: "La photo \u00ab\u202fTravaux\u202f\u00bb annon\u00e7ait \u00ab\u202f0 h, aucune t\u00e2che dat\u00e9e\u202f\u00bb et le tableau \u00ab\u202fDeux fa\u00e7ons de compter votre ann\u00e9e\u202f\u00bb sortait toutes ses campagnes \u00e0 0 h \u2014 sur des domaines qui affichaient des milliers d\u2019heures restantes deux centim\u00e8tres plus haut. L\u2019application cherchait le total au mauvais endroit et trouvait \u00ab\u202frien\u202f\u00bb, ce qu\u2019elle affichait comme un z\u00e9ro. Les heures sont l\u00e0. Et le pourcentage \u00ab\u202f% fait\u202f\u00bb ne s\u2019affiche plus que sur la p\u00e9riode que vous consultez, la seule o\u00f9 il a un sens." },
+    { emoji: '\u{1F4B6}', titre: "Un exercice comptable qui affiche vraiment l\u2019exercice",
+      desc: "La case \u00ab\u202fExercice comptable\u202f\u00bb affichait le co\u00fbt de la <b>campagne en cours</b> sous les dates de l\u2019ann\u00e9e enti\u00e8re\u202f: 45\u202fk\u20ac pour douze mois, alors que c\u2019\u00e9tait le co\u00fbt de dix jours de vendange. Le chiffre \u00e9tait juste, son \u00e9tiquette \u00e9tait fausse \u2014 et c\u2019est pire, parce qu\u2019on ne v\u00e9rifie pas une \u00e9tiquette. La case lit maintenant le m\u00eame moteur que \u00c9conomie \u203a Exercice\u202f: salaires charg\u00e9s, carburant GNR et achats d\u2019intrants, entre vos deux bilans." },
+    { emoji: '\u{1F465}', titre: "L\u2019effectif au pic ne va plus chercher hors de votre exercice",
+      desc: "Le chiffre \u00ab\u202fEffectif\u202f\u00bb annon\u00e7ait un pic de 60,8 personnes \u00ab\u202fsur l\u2019exercice\u202f\u00bb pendant que l\u2019\u00e9cran Charge & ETP, juste en dessous, en affichait 36,6. Les deux \u00e9taient justes\u202f: le premier allait chercher son pic dans une campagne que l\u2019application affiche elle-m\u00eame comme \u00ab\u202fhors exercice\u202f\u00bb. Deux r\u00e9ponses \u00e0 la m\u00eame question sur le m\u00eame \u00e9cran, et aucune ne disait sur quoi elle portait. Le pic reste d\u00e9sormais dans le cadre annonc\u00e9." },
+    { emoji: '\u{1F4C5}', titre: "La date de fin compte enfin vos saisonniers",
+      desc: "\u00ab\u202f85\u202fj de retard, fin le 27\u202fjanvier\u202f\u00bb sur une vendange de dix jours\u202f: la projection divisait le travail restant par la cadence des <b>quatre derni\u00e8res semaines</b>, mesur\u00e9e en ao\u00fbt avec une personne, et l\u2019appliquait telle quelle jusqu\u2019en janvier. Les trente-six vendangeurs d\u00e9j\u00e0 sous contrat n\u2019entraient nulle part. Elle consomme maintenant la charge sur l\u2019\u00e9quipe <b>r\u00e9ellement planifi\u00e9e</b>, semaine par semaine, dates de d\u00e9but de contrat comprises \u2014 et quand cette \u00e9quipe ne suffit pas, elle vous dit combien d\u2019heures manquent au lieu d\u2019inventer une date. La phrase sous le chiffre dit toujours sur quoi la date est b\u00e2tie." },
+    { emoji: '\u{1F4CA}', titre: "La frise de l\u2019ann\u00e9e prend toute la largeur, et son axe redevient lisible",
+      desc: "La frise des douze mois s\u2019arr\u00eatait \u00e0 760\u202fpixels quelle que soit la taille de votre \u00e9cran\u202f: sur un ordinateur, cinquante-deux semaines \u00e9cras\u00e9es dans 60\u202f% de la page. Elle occupe maintenant toute la carte, et grandit en hauteur avec elle. Et la courbe \u00ab\u202fpersonnes n\u00e9cessaires par semaine\u202f\u00bb tra\u00e7ait une graduation par personne\u202f: sur une vendange \u00e0 37\u202fpersonnes, trente-huit \u00e9tiquettes empil\u00e9es sur 24\u202fcentim\u00e8tres carr\u00e9s, soit un p\u00e2t\u00e9 noir \u00e0 la place de l\u2019axe. Elle gradue d\u00e9sormais de 5 en 5 ou de 10 en 10, comme la frise." }
+  ]},
   { v:'6.01', items:[
     { emoji: '\u{1F4D8}', titre: "Votre exercice comptable et votre ann\u00e9e vigne, c\u00f4te \u00e0 c\u00f4te",
       desc: "L\u2019\u00e9cran vous disait que votre exercice \u00e9tait \u00ab\u202fmal align\u00e9\u202f\u00bb et vous proposait de le d\u00e9placer. C\u2019\u00e9tait un mauvais conseil\u202f: un exercice comptable est fix\u00e9 par votre comptable, parfois par votre statut, et on ne le d\u00e9cale pas pour qu\u2019un graphique tombe mieux. Le vrai manque \u00e9tait ailleurs\u202f: l\u2019application n\u2019avait <b>qu\u2019un seul cadre</b> pour deux questions diff\u00e9rentes. Le niveau \u00ab\u202fL\u2019ann\u00e9e\u202f\u00bb s\u2019ouvre maintenant sur les deux, nomm\u00e9s\u202f: l\u2019<b>exercice comptable</b>, d\u2019un bilan \u00e0 l\u2019autre, qui r\u00e9pond \u00e0 \u00ab\u202fce que m\u2019a co\u00fbt\u00e9 l\u2019ann\u00e9e fiscale\u202f\u00bb\u202f; et l\u2019<b>ann\u00e9e vigne</b>, d\u2019apr\u00e8s une vendange jusqu\u2019\u00e0 la fin de la suivante, qui r\u00e9pond \u00e0 \u00ab\u202fce que m\u2019a co\u00fbt\u00e9 un cycle\u202f\u00bb. Les deux totaux ne sont pas les m\u00eames, et l\u2019\u00e9cran explique enfin pourquoi\u202f: une campagne \u00e0 cheval sur la cl\u00f4ture est partag\u00e9e entre deux bilans, une campagne enti\u00e8rement hors de l\u2019exercice n\u2019y appara\u00eet pas du tout." },
