@@ -1,4 +1,17 @@
-// MA VIGNE — Service Worker v6.50
+// MA VIGNE — Service Worker v6.51
+// v6.51 (12/08/2026) — Pilotage / cadre annuel : CORRECTION DE FOND. L'ecran
+//   declarait l'exercice « mal aligne » et poussait a le deplacer, jusqu'a
+//   « aucune lecture annuelle n'est fiable ». Mauvais conseil : un exercice
+//   comptable est une DONNEE (comptable, statut), pas un reglage d'affichage.
+//   La panne reelle etait UN SEUL cadre pour DEUX questions. Nouveau panneau
+//   _pilDeuxCadresHtml au niveau `an` : exercice comptable (cout, via _pecData,
+//   non recalcule) vs annee vigne (heures de bareme), campagnes marquees « a
+//   cheval » / « hors exercice », et l'explication de l'ecart.
+//   Le constat de diagnostic passe de 'o' a 'b' et ne se declenche PLUS que sur
+//   align.coupe (une vendange qui « ouvre » l'annee n'est pas un defaut).
+//   _pilAnnSplitVend chiffre le partage en JOURS exacts, pas en euros prorates.
+//   Fil d'Ariane et photo Budget nomment le cadre : « exercice comptable ».
+//   BUMP par regle du doute : 6.50 peut etre deja en ligne, on ne reutilise pas.
 // v6.50 (12/08/2026) — Pilotage : la barre d'onglets devient un AXE DE ZOOM
 //   (Aujourd'hui · 1 L'annee · 2 La campagne · 3 L'equipe & les taches ·
 //   4 Simuler | Cave · Economie · Conformite). Les CLES sont inchangees
@@ -913,7 +926,7 @@
 // v2.22 — Fix profils vides : guard vide dans loadData() pour MEMBRES/SAISONS/TACHES
 // v2.17 — Onboarding intégré + tenantId · v2.06 — Firebase Auth · v2.00–v2.05 — divers
 const DEBUG = self.location.hostname === 'localhost' || self.location.hostname === '127.0.0.1';
-const CACHE_NAME   = 'mavigne-v6.50';
+const CACHE_NAME   = 'mavigne-v6.51';
 const TENANT_CACHE = 'mavigne-tenant';   // Cache persistant — préservé à chaque mise à jour SW
 const SYNC_TAG     = 'mavigne-sync';
 
@@ -929,7 +942,7 @@ const CDN_URLS = [
 ];
 
 self.addEventListener('install', event => {
-  if(DEBUG) console.log('[SW] Ma Vigne v6.50 installé');
+  if(DEBUG) console.log('[SW] Ma Vigne v6.51 installé');
   event.waitUntil(
     caches.open(CACHE_NAME).then(async cache => {
       // ── Cœur applicatif : STRICT (mise à jour ATOMIQUE) ──
@@ -945,7 +958,7 @@ self.addEventListener('install', event => {
 });
 
 self.addEventListener('activate', event => {
-  if(DEBUG) console.log('[SW] Ma Vigne v6.50 activé');
+  if(DEBUG) console.log('[SW] Ma Vigne v6.51 activé');
   event.waitUntil(
     caches.keys().then(keys =>
       Promise.all(

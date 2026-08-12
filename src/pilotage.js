@@ -1021,10 +1021,25 @@ function _pilAnnTaches(p){
   var tw=(p&&p.cd&&p.cd.taskWindows)||[];
   return tw.slice().sort(function(a,b){ return String(a.start).localeCompare(String(b.start)); }).slice(0,12);
 }
-// ── Le mot sur l'alignement annee / vendange ────────────────────────────────
-// Un cadre annuel mal pose ne fait pas d'erreur visible : il donne des chiffres
-// PLAUSIBLES sur un cycle coupe en deux. C'est la pire des pannes — celle qui ne
-// se voit pas. On la dit, avec le geste qui la corrige.
+// ── LES DEUX CADRES ─────────────────────────────────────────────────────────
+// ⚠️ CORRECTION DE FOND (12/08/2026, sur retour de Nico). Cet ecran disait
+//    « exercice mal aligne, corrigez-le » et allait jusqu'a « aucune lecture
+//    annuelle n'est fiable tant que c'est le cas ». C'etait un MAUVAIS CONSEIL :
+//    un exercice comptable est fixe par le comptable, parfois par le statut. On
+//    ne le deplace pas pour qu'un graphique tombe mieux.
+//
+//    La vraie panne etait ailleurs : UN SEUL cadre pour DEUX questions.
+//      · L'EXERCICE COMPTABLE (bilan a bilan) repond a « ce que m'a coute
+//        l'annee fiscale ». C'est une donnee, pas un reglage.
+//      · L'ANNEE VIGNE (apres vendange N -> fin vendange N+1) repond a « ce que
+//        m'a coute un cycle de production ». C'est un cycle biologique.
+//    Les deux sont justes. Ils ne donnent pas le meme nombre, et c'est NORMAL.
+//    L'ecran doit donc les NOMMER et dire ce que chacun repond — pas en
+//    declarer un cassé.
+//
+//    Ce qui reste utile a signaler : quand une borne d'exercice TRAVERSE la
+//    vendange, la recolte est repartie sur deux bilans. Ca ne se corrige pas,
+//    ca se SAIT — et on le chiffre en jours, exactement, sans fausse precision.
 function _pilAnneeVigneHtml(ann){
   if(!ann||!ann.ex) return '';
   var A=ann.align, out='';
@@ -1034,20 +1049,21 @@ function _pilAnneeVigneHtml(ann){
   var box=function(bg,col,html){
     return '<div style="margin:0 0 8px;padding:9px 12px;border-radius:9px;background:'+bg+';color:'+col+';font-size:12px;line-height:1.55">'+html+'</div>';
   };
-  if(A){
+  // On ne signale QUE la coupure, parce qu'elle seule repartit une recolte sur
+  // deux bilans. Une vendange qui « ouvre » l'annee n'est pas un defaut : c'est
+  // le calendrier de votre comptable, et il n'y a rien a corriger.
+  if(A && A.coupe && ann.vend){
+    var J=_pilAnnSplitVend(ann);
     var bouton=(admin&&A.moisIdeal!=null)
-      ? (' <button data-exm="'+A.moisIdeal+'" style="border:1px solid currentColor;background:transparent;color:inherit;border-radius:16px;padding:2px 10px;font-size:11.5px;font-weight:700;cursor:pointer;margin-left:4px">Ouvrir au 1\u1D49\u02B3 '+MLB[A.moisIdeal]+'</button>')
+      ? (' <button data-exm="'+A.moisIdeal+'" style="border:1px solid currentColor;background:transparent;color:inherit;border-radius:16px;padding:3px 11px;font-size:11.5px;font-weight:700;cursor:pointer;margin-left:4px">D\u00e9caler au 1\u1D49\u02B3 '+MLB[A.moisIdeal]+'</button>')
       : '';
-    if(A.coupe){
-      out+=box('#F3D9D4','var(--rouge)','\u26A0 <b>La vendange est coup\u00e9e par la borne de l\u2019exercice.</b> Elle court du '
-        +fr(ann.vend.debut)+' au '+fr(ann.vend.fin)+', \u00e0 cheval sur deux ann\u00e9es comptables : une partie des heures et du co\u00fbt tombe d\u2019un c\u00f4t\u00e9, le reste de l\u2019autre. Aucune lecture annuelle n\u2019est fiable tant que c\u2019est le cas.'+bouton);
-    } else if(!A.ok){
-      out+=box('#FBF0DC','#8A5A38','\u2139\ufe0f <b>La vendange ouvre l\u2019ann\u00e9e au lieu de la clore.</b> Votre exercice d\u00e9marre le 1\u1D49\u02B3 '
-        +MLB[ann.ex.mois]+' et la vendange tombe le '+fr(ann.vend.debut)+'. Une ann\u00e9e vigne va d\u2019<i>apr\u00e8s</i> la vendange \u00e0 la <i>fin</i> de la suivante : la taille et le tirage de ce cycle-l\u00e0 se lisent alors dans la m\u00eame ann\u00e9e que la r\u00e9colte qu\u2019ils pr\u00e9parent.'+bouton);
-    } else {
-      out+=box('#DCEBD0','var(--vert-med)','\u2713 <b>Ann\u00e9e vigne align\u00e9e.</b> Le cycle va d\u2019apr\u00e8s la vendange pr\u00e9c\u00e9dente \u00e0 la fin de celle du '
-        +fr(ann.vend.fin)+'.');
-    }
+    out+=box('#FBF0DC','#8A5A38','\u2139\ufe0f <b>Votre vendange est \u00e0 cheval sur deux exercices.</b> Elle court du '
+      +fr(ann.vend.debut)+' au '+fr(ann.vend.fin)+' : sur ses <b>'+J.total+' jours</b>, '
+      +'<b>'+J.dedans+'</b> tombent dans cet exercice et <b>'+J.dehors+'</b> dans le suivant. '
+      +'Le co\u00fbt de la r\u00e9colte se lit donc sur <b>deux bilans</b>, dans \u00e0 peu pr\u00e8s cette proportion. '
+      +'Ce n\u2019est pas une erreur \u2014 c\u2019est votre calendrier comptable. Il n\u2019y a rien \u00e0 corriger\u00a0; '
+      +'il faut seulement le savoir en lisant le bilan.'
+      +(bouton?('<br><span style="font-size:11px;opacity:.85">Si votre comptable accepte de changer la date de cl\u00f4ture, la r\u00e9colte tiendrait dans un seul exercice\u00a0:</span>'+bouton):''));
   }
   if(ann.hors&&ann.hors.length){
     out+=box('#FBF0DC','#8A5A38','\u2139\ufe0f <b>'+ann.hors.length+' p\u00e9riode'+(ann.hors.length>1?'s':'')+' hors de cet exercice</b> \u2014 '
@@ -1055,6 +1071,86 @@ function _pilAnneeVigneHtml(ann){
   }
   return out;
 }
+
+// Combien de jours de vendange tombent de chaque cote de la borne. En JOURS,
+// pas en euros : les jours se comptent exactement, le cout se prorate — et une
+// fausse precision sur un chiffre comptable est pire qu'un ordre de grandeur
+// annonce comme tel.
+function _pilAnnSplitVend(ann){
+  var v=ann.vend, ex=ann.ex;
+  var a=_pilAnnOrd(v.debut), b=_pilAnnOrd(v.fin);
+  var d0=_pilAnnOrd(ex.d0), d1=_pilAnnOrd(ex.d1);
+  var tot=Math.max(1,b-a+1);
+  var dedans=Math.max(0, Math.min(b,d1)-Math.max(a,d0)+1);
+  return { total:tot, dedans:dedans, dehors:Math.max(0,tot-dedans) };
+}
+
+// ── « DEUX FACONS DE COMPTER » ──────────────────────────────────────────────
+// Le panneau qui manquait. Un domaine a DEUX annees, et elles ne repondent pas
+// a la meme question :
+//   · l'EXERCICE COMPTABLE, bilan a bilan, fixe par le comptable ;
+//   · l'ANNEE VIGNE, apres une vendange jusqu'a la fin de la suivante.
+// Sans ce panneau, l'utilisateur voit deux totaux differents pour « l'annee »
+// et croit a une erreur. Ce n'en est pas une : ce sont deux questions.
+function _pilDeuxCadresHtml(ann){
+  if(!ann||!ann.ex) return '';
+  var MLB=(window.MV_EX_MOIS_LBL)||['janvier','f\u00e9vrier','mars','avril','mai','juin','juillet','ao\u00fbt','septembre','octobre','novembre','d\u00e9cembre'];
+  var fr=function(d){ if(!d)return'\u2014'; var q=String(d).split('-'); return q.length===3?(parseInt(q[2],10)+' '+MLB[parseInt(q[1],10)-1]+' '+q[0]):d; };
+
+  // Le cout de l'exercice vient de l'ecran Economie, qui cadre DEJA sur
+  // l'exercice comptable. Un second calcul donnerait un second chiffre.
+  var eur=null, taux=0;
+  try{ var P=_pecData(); if(P&&P.tot){ eur=(P.tot.moB||0)+(P.tot.tracF||0)+(P.tot.phyF||0); taux=P.rate||0; } }catch(e){ eur=null; }
+
+  var cell=function(titre,sous,val,unite,det){
+    return '<div style="flex:1;min-width:210px;background:var(--bg-card);border:1px solid var(--gris-clair);border-radius:13px;padding:12px 14px">'
+      +'<div style="font-size:9.5px;letter-spacing:1.4px;text-transform:uppercase;color:var(--texte-doux);font-weight:700">'+titre+'</div>'
+      +'<div style="font-size:11.5px;color:var(--texte-doux);margin:3px 0 7px;line-height:1.4">'+sous+'</div>'
+      +'<div style="font-family:\'Cormorant Garamond\',serif;font-size:27px;font-weight:700;color:var(--cave);line-height:1.05">'+val
+      +'<span style="font-family:Outfit,sans-serif;font-size:13px;font-weight:600;color:var(--texte-doux)">'+unite+'</span></div>'
+      +'<div style="font-size:11.5px;color:var(--texte-doux);margin-top:3px;line-height:1.4">'+det+'</div></div>';
+  };
+
+  // Les campagnes de l'exercice, en heures de bareme : exactes, elles.
+  var lignes='', hTot=0;
+  ann.pers.forEach(function(pe){
+    if(!pe.cd) return;
+    var h=Math.round(pe.cd.totalTotal||0); hTot+=h;
+    var dedans = !(pe.fin<ann.ex.d0 || pe.debut>ann.ex.d1);
+    var chev = dedans && (pe.debut<ann.ex.d0 || pe.fin>ann.ex.d1);
+    lignes+='<tr><td style="padding:6px 8px;border-bottom:1px solid var(--gris-clair)"><b>'+_pilEsc(pe.nom)+'</b>'
+      +(chev?' <span style="font-size:10px;font-weight:700;color:var(--orange);background:var(--orange-pale);border-radius:20px;padding:1px 7px">\u00e0 cheval</span>':'')
+      +(!dedans?' <span style="font-size:10px;font-weight:700;color:var(--texte-doux);background:var(--gris-clair);border-radius:20px;padding:1px 7px">hors exercice</span>':'')
+      +'</td><td style="padding:6px 8px;border-bottom:1px solid var(--gris-clair);text-align:right;font-variant-numeric:tabular-nums;font-weight:600">'
+      +_pilNb(h)+' h</td></tr>';
+  });
+
+  return '<div style="background:var(--bg-app);border:1px solid var(--gris-clair);border-radius:16px;padding:14px 16px;margin:0 0 16px">'
+    +'<div style="font-family:\'Cormorant Garamond\',serif;font-size:20px;font-weight:700;color:var(--cave)">Deux fa\u00e7ons de compter votre ann\u00e9e</div>'
+    +'<div style="font-size:12.5px;color:var(--texte-doux);margin:3px 0 12px;line-height:1.5">'
+    +'Un domaine en a <b>deux</b>, et elles ne r\u00e9pondent pas \u00e0 la m\u00eame question. '
+    +'Elles ne donnent pas le m\u00eame total\u00a0: c\u2019est normal, ce n\u2019est pas une erreur.</div>'
+    +'<div style="display:flex;gap:11px;flex-wrap:wrap">'
+    +cell('\uD83D\uDCD8 Exercice comptable',
+          'Ce que voit votre comptable, d\u2019un bilan \u00e0 l\u2019autre. Fix\u00e9 par lui\u00a0: ce n\u2019est pas un r\u00e9glage d\u2019affichage.',
+          (eur!=null?_pilNb(Math.round(eur/1000)):'\u2014'), (eur!=null?' k\u20ac':''),
+          'du '+fr(ann.ex.d0)+' au '+fr(ann.ex.d1))
+    +cell('\uD83C\uDF47 Ann\u00e9e vigne',
+          'Un cycle de production\u00a0: d\u2019apr\u00e8s une vendange jusqu\u2019\u00e0 la fin de la suivante. C\u2019est le cadre qui dit si une campagne a co\u00fbt\u00e9 cher.',
+          _pilNb(hTot), ' h de bar\u00e8me',
+          (ann.vend?('vendange du '+fr(ann.vend.debut)+' au '+fr(ann.vend.fin)):'aucune vendange dat\u00e9e'))
+    +'</div>'
+    +'<div style="font-size:12px;color:var(--texte-doux);margin:11px 0 7px;line-height:1.5">'
+    +'<b style="color:var(--texte)">Pourquoi les deux totaux diff\u00e8rent.</b> Une campagne \u00e0 cheval sur la cl\u00f4ture est '
+    +'partag\u00e9e entre deux bilans, et une campagne enti\u00e8rement hors de l\u2019exercice n\u2019y appara\u00eet pas du tout \u2014 '
+    +'alors qu\u2019elle appartient bien \u00e0 un cycle de vigne. Le d\u00e9tail\u00a0:</div>'
+    +'<table style="width:100%;border-collapse:collapse;font-size:12.5px">'+lignes+'</table>'
+    +(taux>0?('<div style="font-size:11px;color:var(--texte-doux);margin-top:8px;font-style:italic">'
+      +'Les heures ci-dessus sont du bar\u00e8me, exactes. Le co\u00fbt de l\u2019exercice vient de l\u2019\u00e9cran \u00c9conomie, '
+      +'qui cadre d\u00e9j\u00e0 sur l\u2019exercice comptable\u00a0\u2014 il n\u2019est pas recalcul\u00e9 ici, pour qu\u2019il n\u2019y ait qu\u2019un seul chiffre.</div>'):'')
+    +'</div>';
+}
+
 function _pilFriseAnneeSvg(ann,w){
   if(!ann||!ann.weeks.length) return window._mvGraphVide(
     'Aucune p\u00e9riode dat\u00e9e sur la campagne',
@@ -3412,6 +3508,12 @@ function _pilTabAn(d){
   // (_pilAnneeVigneHtml). On ne le rappelle pas ici : deux cadres de l'annee
   // sur un meme ecran, c'est la faute qu'on corrige.
   var H='';
+  // Le cadre se lit AVANT les chiffres : sans lui, deux totaux differents pour
+  // « l'annee » passent pour une erreur.
+  if(_pilShow('an_cadres')){
+    var _a=null; try{ _a=_pilAnnuelData(); }catch(e){ _a=null; }
+    if(_a) H+=_pilDeuxCadresHtml(_a);
+  }
   if(_pilShow('an_frise')) H+='<div class="pil-panels">'+_pilPanelEtp(d)+'</div>';
   return H || '<div class="pil-empty">Aucun indicateur affiché.</div>';
 }
@@ -6412,7 +6514,7 @@ function _pilTabCfm(d){
 // ── Personnalisation PAR ONGLET (visibilité des tuiles) ──
 var _PIL_PERSO_DEFS={
   auj:[['auj_marge','Marge sur objectif'],['auj_charge','Charge restante'],['auj_cadence','Cadence équipe'],['auj_budget','Budget consommé & dérive'],['auj_etp','ETP présents / requis'],['auj_jours','Jours favorables'],['auj_pres','À la vigne aujourd\'hui'],['auj_traiter','Traiter ?'],['auj_prio','Tâche prioritaire'],['auj_alertes','Alertes matériel & cave']],
-  an: [['an_frise','Les 52 semaines de l\'exercice']],
+  an: [['an_cadres','Deux fa\u00e7ons de compter l\'ann\u00e9e'],['an_frise','Les 52 semaines de l\'exercice']],
   avc:[['avc_gauge','Jauge de saison'],['avc_bar','Avancement par tâche'],['avc_pie','Charge (donut)'],['avc_echeances','Échéances par tâche'],['avc_carte','Carte du domaine']],
   equ:[['prs_equipe','Équipe'],['prs_presences','Présences du jour'],['prs_capacite','Capacité vs charge'],['mat_tracteur','Parc tracteur'],['mat_gnr','Cuve GNR'],['mat_phyto','Registre phyto'],['mat_traitement','Fenêtre de traitement']],
   sim:[['sim_ordre','Ordre de passage'],['sim_etsi','Répartition « et si ? »'],['sim_cout','Renfort : combien et quand']],
@@ -6673,7 +6775,9 @@ function _pilCrumbHtml(){
   try{ X=(typeof window._mvExercice==='function')?window._mvExercice():null; }catch(e){ X=null; }
   if(X && X.debut && X.fin){
     var a0=String(X.debut).slice(0,4), a1=String(X.fin).slice(0,4);
-    ex='Exercice '+(a0===a1?a0:(a0+'-'+a1.slice(2)));
+    // « Exercice comptable », pas « Exercice » : c'est le cadre du bilan, et
+    // le distinguer de l'annee vigne commence par le nommer.
+    ex='Exercice comptable '+(a0===a1?a0:(a0+'-'+a1.slice(2)));
   }
   var h='<button class="pil-cr root" id="pil-cr-root" title="Revenir \u00e0 l\u2019ann\u00e9e enti\u00e8re">\u2302 '+_pilEsc(ex)+'</button>';
   if(_PIL_SCOPE.camp){
@@ -6772,7 +6876,8 @@ function _pilPhotosHtml(){
   // BUDGET
   var fB=drap('budget');
   var pBud = D.ecoOk
-    ? _pilPhotoHtml('Budget','\uD83D\uDCB6',_pilNb(Math.round(D.eur/1000)),' k\u20ac','main-d\u2019\u0153uvre, carburant et phyto','eco',fB,'budget')
+    ? _pilPhotoHtml('Budget','\uD83D\uDCB6',_pilNb(Math.round(D.eur/1000)),' k\u20ac',
+        (camp?('sur '+_pilEsc(camp)):'sur l\u2019<b>exercice comptable</b>')+' \u00b7 main-d\u2019\u0153uvre, carburant et phyto','eco',fB,'budget')
     : _pilPhotoHtml('Budget','\uD83D\uDCB6','\u2014','','le calcul du co\u00fbt n\u2019a pas abouti','eco',_pilFlag('r','Ouvrez \u00c9conomie pour voir ce qui bloque'),'budget');
 
   // CONFORMITE — le cuivre roule sur 7 ans : c'est un chiffre d'ANNEE, il ne
@@ -6887,17 +6992,22 @@ function _pilDiag(){
     ou:'R\u00e9glages \u203a Campagne' });
 
   // ── Le cadre de l'annee ──────────────────────────────────────────────────
-  // Le calcul existe deja (ann.align) : on ne le refait pas, on le remonte.
-  if(ann && ann.align && !ann.align.ok){
-    var MLB=(window.MV_EX_MOIS_LBL)||['janvier','f\u00e9vrier','mars','avril','mai','juin','juillet','ao\u00fbt','septembre','octobre','novembre','d\u00e9cembre'];
-    var pc=Math.round((ann.align.pos||0)*100);
-    out.push({ g:'o', cible:'saisons', touche:['travaux','effectif','budget'],
-      k:'Exercice mal align\u00e9 sur la vendange',
-      f:ann.align.coupe
-        ? 'La vendange est <b>coup\u00e9e en deux</b> par l\u2019ouverture de l\u2019exercice : une moiti\u00e9 sur chaque ann\u00e9e comptable. Aucun des deux totaux ne d\u00e9crit un cycle.'
-        : ('La vendange tombe \u00e0 <b>'+pc+' %</b> de l\u2019ann\u00e9e : elle <b>ouvre</b> l\u2019exercice au lieu de le clore. Vous lisez deux moiti\u00e9s de cycles au lieu d\u2019une ann\u00e9e vigne.'),
-      ou:(ann.align.moisIdeal!=null?('Ouvrir l\u2019exercice au 1\u1D49\u02B3 '+MLB[ann.align.moisIdeal]):'R\u00e9gler l\u2019ouverture de l\u2019exercice'),
-      exm:(ann.align.moisIdeal!=null?ann.align.moisIdeal:null) });
+  // ⚠️ CE CONSTAT A CHANGE DE NATURE (12/08/2026). Il disait « exercice mal
+  //    aligne » en orange, c'est-a-dire « votre chiffre est faux, corrigez ».
+  //    Faux conseil : un exercice comptable est fixe par le comptable. Une
+  //    vendange qui ouvre l'annee n'est PAS un defaut, c'est un calendrier —
+  //    et ce constat-la disparait completement.
+  //    Reste le seul fait utile : quand la borne TRAVERSE la vendange, la
+  //    recolte est repartie sur deux bilans. Ca ne se corrige pas, ca se sait.
+  //    Gravite 'b' : le chiffre est juste, on aide seulement a le lire.
+  if(ann && ann.align && ann.align.coupe && ann.vend && ann.ex){
+    var J=_pilAnnSplitVend(ann);
+    out.push({ g:'b', cible:'saisons', touche:['budget'],
+      k:'Votre vendange est \u00e0 cheval sur deux exercices',
+      f:'Sur ses <b>'+J.total+' jours</b>, <b>'+J.dedans+'</b> tombent dans cet exercice et <b>'+J.dehors+'</b> dans le suivant. '
+       +'Le co\u00fbt de la r\u00e9colte se lit donc sur <b>deux bilans</b>. Ce n\u2019est pas une erreur\u00a0: '
+       +'c\u2019est votre calendrier comptable, et il n\u2019y a rien \u00e0 corriger \u2014 seulement \u00e0 le savoir.',
+      ou:'Voir les deux cadres' });
   }
 
   // ── Le cout ──────────────────────────────────────────────────────────────

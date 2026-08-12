@@ -23,7 +23,7 @@ export const GT_ADMIN_EMAIL = 'ngdevpro@gmail.com';
 // WHATS_NEW   : tableau vide = modal desactive pour cette version.
 // Format item : { emoji:'📅', titre:'Titre court', desc:'Phrase utilisateur.' }
 // Regle : seulement les changements visibles par les utilisateurs.
-export const APP_VERSION = '6.00';
+export const APP_VERSION = '6.01';
 // ════ Journal des nouveautés (récap cumulatif) ════
 // Une entrée par version, la PLUS RÉCENTE EN HAUT : { v:'5.10', items:[ {emoji,titre,desc}, … ] }
 // À chaque release visible → AJOUTER un bloc en tête (ne pas remplacer). items:[] = release technique (rien à afficher).
@@ -341,6 +341,12 @@ window._mvGraphRepeindre = function(){
 };
 
 export const WHATS_NEW = [
+  { v:'6.01', items:[
+    { emoji: '\u{1F4D8}', titre: "Votre exercice comptable et votre ann\u00e9e vigne, c\u00f4te \u00e0 c\u00f4te",
+      desc: "L\u2019\u00e9cran vous disait que votre exercice \u00e9tait \u00ab\u202fmal align\u00e9\u202f\u00bb et vous proposait de le d\u00e9placer. C\u2019\u00e9tait un mauvais conseil\u202f: un exercice comptable est fix\u00e9 par votre comptable, parfois par votre statut, et on ne le d\u00e9cale pas pour qu\u2019un graphique tombe mieux. Le vrai manque \u00e9tait ailleurs\u202f: l\u2019application n\u2019avait <b>qu\u2019un seul cadre</b> pour deux questions diff\u00e9rentes. Le niveau \u00ab\u202fL\u2019ann\u00e9e\u202f\u00bb s\u2019ouvre maintenant sur les deux, nomm\u00e9s\u202f: l\u2019<b>exercice comptable</b>, d\u2019un bilan \u00e0 l\u2019autre, qui r\u00e9pond \u00e0 \u00ab\u202fce que m\u2019a co\u00fbt\u00e9 l\u2019ann\u00e9e fiscale\u202f\u00bb\u202f; et l\u2019<b>ann\u00e9e vigne</b>, d\u2019apr\u00e8s une vendange jusqu\u2019\u00e0 la fin de la suivante, qui r\u00e9pond \u00e0 \u00ab\u202fce que m\u2019a co\u00fbt\u00e9 un cycle\u202f\u00bb. Les deux totaux ne sont pas les m\u00eames, et l\u2019\u00e9cran explique enfin pourquoi\u202f: une campagne \u00e0 cheval sur la cl\u00f4ture est partag\u00e9e entre deux bilans, une campagne enti\u00e8rement hors de l\u2019exercice n\u2019y appara\u00eet pas du tout." },
+    { emoji: '\u{1F5D3}\u{FE0F}', titre: "Une vendange \u00e0 cheval sur deux bilans, dite en jours",
+      desc: "Quand la cl\u00f4ture de votre exercice traverse la vendange, la r\u00e9colte se lit sur deux bilans. L\u2019application vous dit d\u00e9sormais combien de jours tombent de chaque c\u00f4t\u00e9 \u2014 en jours, compt\u00e9s exactement, plut\u00f4t qu\u2019en euros approxim\u00e9s. Et elle ne pr\u00e9sente plus \u00e7a comme une erreur \u00e0 corriger\u202f: c\u2019est votre calendrier comptable, il n\u2019y a rien \u00e0 changer, il faut seulement le savoir en lisant le bilan. Si votre comptable accepte de d\u00e9placer la cl\u00f4ture, le bouton reste l\u00e0 \u2014 mais c\u2019est propos\u00e9, plus prescrit. Au passage, l\u2019alerte orange qui s\u2019affichait quand la vendange \u00ab\u202fouvrait\u202f\u00bb l\u2019ann\u00e9e a disparu\u202f: il n\u2019y avait rien \u00e0 corriger." }
+  ]},
   { v:'6.00', items:[
     { emoji: '\u{1F9ED}', titre: "Le Pilotage s\u2019ouvre sur l\u2019ann\u00e9e, puis vous zoomez",
       desc: "Les onglets \u00e9taient sept sujets pos\u00e9s c\u00f4te \u00e0 c\u00f4te\u202f: on ne voyait jamais son ann\u00e9e, on tombait dans un sujet. Ils vont maintenant du large au fin \u2014 <b>l\u2019ann\u00e9e</b>, puis <b>la campagne</b>, puis <b>l\u2019\u00e9quipe et les t\u00e2ches</b>, puis <b>la simulation</b> \u2014 avec leur num\u00e9ro devant. Un trait marque o\u00f9 le zoom s\u2019arr\u00eate\u202f: apr\u00e8s lui, la Cave, l\u2019\u00c9conomie et la Conformit\u00e9 sont des \u00e9crans de d\u00e9tail. La frise des douze mois, qui \u00e9tait rang\u00e9e dans une tuile pliable au milieu d\u2019un \u00e9cran parlant d\u2019une campagne, ouvre d\u00e9sormais le niveau \u00ab\u202fL\u2019ann\u00e9e\u202f\u00bb. Si vous aviez d\u00e9coch\u00e9 \u00ab\u202fCharge &amp; ETP\u202f\u00bb, votre choix vous suit\u202f: rien \u00e0 recocher." },
