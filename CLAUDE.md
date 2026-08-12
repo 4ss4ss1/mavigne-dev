@@ -2,13 +2,24 @@
 
 > Document de référence du projet **Ma Vigne** (GUERETTECH). Il est le **porteur de vérité** :
 > la mémoire Claude est plafonnée, ce fichier ne l'est pas.
-> Dernière consolidation : **12 août 2026** — ★★★ **LES ETP, L'ANNÉE ET LES CONTRATS** (**§33**,
+> Dernière consolidation : **12 août 2026 (soir)** — ★★★ **LE CHANTIER PILOTAGE** (**§34**, section
+> neuve). Parti d'un *« on améliore fois 100 pilotage, pour le moment ça ne convient pas »* et
+> d'une capture d'écran. Diagnostic chiffré sur le code réel : **12 moteurs de graphe**,
+> **4 palettes** concurrentes, **5 sélecteurs** qui s'ignoraient, **29 impasses** sans lien, et
+> **3 endroits** répondant à « combien d'ETP ? ». Cause racine : **les onglets étaient un axe de
+> SUJETS alors qu'il fallait un axe de ZOOM.** Maquette cliquable validée, puis **six lots**.
+> Le sixième est une **correction de fond sur retour de Nico** : l'écran déclarait l'exercice
+> comptable « mal aligné » et poussait à le déplacer — il confondait **une donnée** avec **un
+> réglage**. **APP 6.01 · SW 6.51.** Mises à jour de §19, §20b, §25, §27a, §28.
+> Consolidation précédente du même jour : ★★★ **LES ETP, L'ANNÉE ET LES CONTRATS** (**§33**,
 > section neuve). Parti d'une capture d'écran et d'un « beaucoup de faute ! », l'audit a trouvé
 > **quatre bugs d'une même famille** — un indicateur divisé par un dénominateur qui n'est pas le
 > sien — dont un qui faisait **dire deux choses contraires au même écran**. Trois lots livrés :
 > le pic rebasé sur la semaine + la frise annuelle zoomable, l'**historique des contrats** (une
 > perte de données qui était **en cours**), et l'**année calée sur l'exercice comptable** avec
 > diagnostic d'alignement de la vendange. **APP 5.99 · SW 6.49.** Mises à jour de §19, §20b, §28.
+> ⚠️ **Le diagnostic d'alignement de §33 a été REPRIS le soir même** — sa formulation était
+> prescriptive et fausse dans son principe. Voir §34, lot 6.
 > Consolidation précédente : **11 août 2026 (nuit)** — ★★★ **L'AUDIT DU BACKLOG, point par point,
 > sur le dépôt cloné** (commit `636630a`, **APP 5.96 · SW 6.46**). Les 42 entrées techniques ont été
 > re-vérifiées une par une par `grep` sur le code réel : **six rayées**, **cinq chiffres corrigés**,
@@ -39,7 +50,9 @@
 > 1. ✅ **TOUT EST DÉPLOYÉ** — les cinq lots d'installation (§18b), les deux lots Tracteur et la
 >    refonte du Planning sont en ligne. Ce qui était marqué « NON DÉPLOYÉ »
 >    dans ce document ne l'est plus : les mentions ont été corrigées au §28.
->    ⚠️ **APP 5.99 · SW 6.49 sont LIVRÉS mais PAS ENCORE DÉPLOYÉS** (§33) — trois lots du 12/08.
+>    ⚠️ **APP 6.01 · SW 6.51 sont LIVRÉS mais PAS ENCORE DÉPLOYÉS** — les trois lots ETP/contrats
+>    du matin (§33) **et** les six lots du chantier Pilotage (§34) sont dans le même paquet.
+>    ✅ Le CDD perdu de Victor a été **réintroduit par Nico** le 12/08 (2026-03-02 → 2026-07-24).
 >    ⚠️⚠️ **Les numéros de ce paragraphe ont été périmés deux fois de suite.** Ne jamais les lire
 >    comme un fait : `APP_VERSION` dans `utils.js` et l'en-tête de `sw.js` sont les seules sources.
 > 2. ⚠️ **Une installation à blanc** sur un slug jetable reste à faire — **c'est le seul critique
@@ -457,7 +470,7 @@ seul tour**.
 | **Cave** | **TROIS sections** : **Le Chai** (élevage, fûts, part des anges, filtre et seuil par millésime) · **Le Cuvier** (vendange) · **Le millésime** (ce qui vient + la ligne de vie) |
 | **La Réserve** | Intrants, achats, inventaires, **parc à fûts avec mouvements**, **bilan matière** |
 | **Planning** | Grille équipe, éditeur slide-up, CP, heures sup, **annualisation 1607 h**, PDF MSA, **équipe collective**, **capacité réelle jour par jour** |
-| **Pilotage** | **7 onglets** : Aujourd'hui, Avancement, **Décider**, Équipe, **Cave**, **Économie**, **Conformité** (+ Outils : Archives, Paramétrage) |
+| **Pilotage** | **8 entrées, un axe de ZOOM** : Aujourd'hui · ① L'année · ② La campagne · ③ L'équipe & les tâches · ④ Simuler ┃ Cave · Économie · Conformité (+ Outils : Archives, Paramétrage). Portée unique `_PIL_SCOPE`, 4 photos en tête, moteur de diagnostic. **§34** |
 | **Réglages** | Domaine (dont **SIRET & bio**), équipe, campagne, tâches, **barème de la convention**, app, ★ **Documents & impressions**, zone dangereuse |
 
 ★ **Deux pages transversales** (overlays, pas des modules du dock) : **Ma trace** (`ovMaTrace`) et
@@ -2143,14 +2156,71 @@ indissociables dont un **filet de tolérance** en tête de `switchCaveOng`.
 
 ## 20b. Pilotage
 
-- ★★ **7 onglets** (`_PIL_TABS`) : **Aujourd'hui · Avancement · Décider · Équipe · Cave ·
+> ⚠️ **REFONDU LE 12/08 (soir) — voir §34 pour le récit complet et les six lots.** Ce qui suit
+> décrit l'état d'arrivée. La barre n'est plus une liste de sujets : c'est un **axe de zoom**.
+
+- ★★★ **8 entrées** (`_PIL_TABS`), **du large au fin** :
+  **Aujourd'hui · ① L'année · ② La campagne · ③ L'équipe & les tâches · ④ Simuler ┃ Cave ·
   Économie · Conformité** (+ ⚙️ Outils `_PIL_TOOLS` : Archives, Paramétrage).
-  ⚠️ **Conformité** (clé `cfm`) était sorti du **document**, pas du code. `_PIL_TAB_MIGR` migre les
-  onglets mémorisés (`prs`→`equ`, `mat`→`equ`, `ecf`→`eco`) ; `_PIL_VALID_TAB` accepte 9 clés.
-  ★★ **`_PIL_TAB_MIGR` est la LISTE DES CLÉS MORTES** — c'est ce qui permet à C22 de détecter
-  qu'un autre fichier en demande encore une (§6c).
+  ★ **`_PIL_ZOOM_FIN = 'sim'`** marque où le zoom s'arrête : un filet est posé après, et les trois
+  suivants sont des **écrans de détail**, pas des niveaux. « Aujourd'hui » n'est pas numéroté —
+  ce n'est pas un niveau de zoom, c'est le présent.
+  ⚠️⚠️ **LES CLÉS N'ONT PAS BOUGÉ** (`avc`, `equ`, `sim`…) : elles sont mémorisées chez les clients,
+  citées par `app.js` (les moments de démo cliquent `[data-tab="eco"]` et `[data-tab="equ"]`,
+  `app.js:2226`) et vérifiées par C22. **On renomme les libellés, jamais les clés.** Seul `an` est
+  neuf. `_PIL_VALID_TAB` accepte donc **10 clés**.
+  ★★ **`_PIL_TAB_MIGR` reste la LISTE DES CLÉS MORTES** (`prs`→`equ`, `mat`→`equ`, `ecf`→`eco`) —
+  c'est ce qui permet à C22 de détecter qu'un autre fichier en demande encore une (§6c).
+  Aucune clé n'y a été ajoutée par la refonte : rien n'a été retiré.
   ★ **`_PIL_TABS` et `_PIL_TOOLS` sont exposés sur `window`** depuis le 09/08, pour que l'aide
-  contextuelle liste les onglets en les **lisant** (§27b).
+  contextuelle liste les onglets en les **lisant** (§27b) — donc `_mvAideOngletsPil` a suivi la
+  refonte **toute seule**. Seules les lignes écrites en dur de `MV_AIDE.pilotage` ont dû être
+  reprises (« Décider » n'existait plus).
+
+- ★★★ **`_PIL_SCOPE` — LA PORTÉE UNIQUE.** Le module portait **cinq sélecteurs qui s'ignoraient** :
+  `_PIL_ETPSEL` (frise), `_PEC_SUB` (économie), `_PEX_AN` (exercice), `_PCAV_MIL` (millésime) et la
+  période active. Cliquer une campagne ne bougeait **qu'un panneau** ; les chiffres au-dessus
+  restaient sur une autre fenêtre **sans le dire**. `_PIL_SCOPE.camp` remplace `_PIL_ETPSEL`, qui
+  n'est plus qu'un **alias en lecture** (`Object.defineProperty`) pour ne rien casser d'externe.
+  ⚠️ **Toute nouvelle vue lit `_PIL_SCOPE`. On n'ajoute pas un sixième sélecteur.**
+  ★ `_pilScopeVerif(ann)` nettoie une **portée fantôme** : une période supprimée ou renommée
+  laisserait l'écran filtrant sur un nom que plus personne ne porte.
+
+- ★★ **Les quatre photos** (`_pilPhotosHtml`) en tête de **tous** les onglets : Travaux · Effectif ·
+  Budget · Conformité, à la maille de la portée, chacune menant à l'écran qui la détaille.
+  ⚠️ **L'effectif affiche le PIC, jamais la moyenne** — une moyenne annuelle n'existe aucun jour de
+  l'année, et c'est le pic qui décide d'un recrutement.
+  ⚠️ **Source absente ⇒ tiret, jamais zéro.** Un tableau de bord qui écrit 0 là où il n'a pas su
+  calculer ment.
+
+- ★★★ **`_pilDiag()` — LE MOTEUR DE DIAGNOSTIC.** Il remplace les **29 impasses** (`pil-empty`) qui
+  écrivaient « Réglages › Saisons » **sans aucun lien**, et qu'on ne découvrait qu'en ouvrant
+  l'onglet qui les contenait. Neuf constats calculés, **aucun écrit en dur**. Trois gravités :
+  `'r'` **bloquant** (le chiffre ne se calcule pas) · `'o'` **faussant** (il sort, mais faux —
+  le plus dangereux) · `'b'` **améliorable**.
+  ⚠️ **Chaque constat dit CE QUE ÇA FAUSSE**, pas seulement ce qui manque : sinon le lecteur juge
+  de l'urgence sans les éléments.
+  ★ `_pilGo(cible)` ouvre la page + `switchReglTab` + `scrollIntoView` + **clignotement** d'une
+  seconde. Les 7 ancres `#set-sec-*` sont vérifiées dans `index.html`.
+  ★★ **Les drapeaux des photos tirent du MOTEUR**, pas de tests écrits sur place : un chiffre ne
+  peut pas porter un drapeau que la liste ne contient pas.
+  ★ `_pilDiagCouverture` **pèse la gravité, pas le nombre** — dix remarques améliorables ne valent
+  pas un trou dans le calendrier. Plancher à 35 %.
+
+- ★★★ **LES DEUX CADRES DE L'ANNÉE** (`_pilDeuxCadresHtml`, niveau ①). Un domaine a **deux années**
+  et elles ne répondent pas à la même question :
+  **l'EXERCICE COMPTABLE** (bilan à bilan) → *« ce que m'a coûté l'année fiscale »* ;
+  **l'ANNÉE VIGNE** (après vendange N → fin vendange N+1) → *« ce que m'a coûté un cycle »*.
+  Les deux totaux diffèrent, **et c'est normal** : une campagne à cheval sur la clôture est
+  partagée entre deux bilans, une campagne entièrement hors de l'exercice n'y apparaît pas du tout.
+  ⚠️⚠️ **UN EXERCICE COMPTABLE EST UNE DONNÉE, PAS UN RÉGLAGE.** Voir §34, lot 6.
+
+- ★★ **Un seul moteur de graphe.** `_mvGraphCadre` / `_mvGraphSvg` (utils.js) existait déjà et
+  9 des 11 générateurs SVG s'en servaient — le problème n'était pas qu'il manquait, c'est que
+  la moitié du reste peignait à côté. ★ **`_PIL_SEM`** pose désormais **7 sens sémantiques**
+  (fait · reste · faute · socle · hors · sel · aujourdhui).
+  ⚠️ **À DÉPLACER dans `utils.js`** au prochain lot qui bumpe : une palette ne devrait pas vivre
+  dans un module. Elle est dans `pilotage.js` pour avoir pu être livrée **sans bump**.
 - ★ **Conformité** — cuivre (7 ans vs 28 kg/ha), passages phyto vs référence régionale réglable
   (défaut 12), délai de rentrée avec heure de libération.
 - ⚠️ **Compatibilité `app.js`** : la visite guidée référence `.pil-tile[data-pid="traitement"]`,
@@ -2878,6 +2948,30 @@ aucune raison** de réintroduire un `prompt()`.
 > **Incident fondateur (`tracSessionId`)** : patcher une copie périmée de `/mnt/project` a réintroduit
 > un bug corrigé. **Toujours repartir du DERNIER fichier livré** — désormais, du dépôt GitHub.
 
+> ★★★ **AJOUT DU 12/08 (soir) — TROIS RÈGLES DE TEST, PAYÉES CHER (§34e, §34g).**
+>
+> **1. LANCER LE PREFLIGHT. Toujours.** `node scripts/preflight.mjs` **avant** chaque livraison.
+> Un lot a été livré sans, et la CI a rendu 3 `catch` muets et un `<div>` dans un `<button>`.
+> ⚠️ **Un cliquet maison qui ne compte pas la même chose que le filet ne protège de rien** —
+> celui-ci comptait `catch{` quand le code écrit `catch(e){}`.
+>
+> **2. NE PAS DUPLIQUER LE PREFLIGHT DANS UN HARNAIS.** Tentative faite, résultat : un faux positif,
+> parce qu'une expression régulière lisait du JS **sans voir les bornes de chaîne**.
+> **Le preflight vérifie la mécanique ; les harnais vérifient le SENS.** Un contrôle, une source.
+>
+> **3. LES COMMENTAIRES NE SONT PAS UNE PREUVE.** ★★★ **Trois fois** dans la même séance, une
+> assertion est passée au **vert** parce que le commentaire documentant la correction citait le
+> texte corrigé. **Un harnais qui lit ce qu'on raconte au sujet du code ne teste pas le code.**
+> Correctif à la racine : la fonction d'extraction retire les commentaires
+> (`.replace(/^\s*\/\/.*$/gm,'')`) **pour toutes les assertions**.
+>
+> ★★ **Quand une assertion rouge tombe : lequel des deux a tort, l'assertion ou le code ?**
+> Bilan de la séance : **6 assertions fausses pour 0 bug**, toutes corrigées, aucune contournée.
+> ★★★ **Et son symétrique, plus dangereux : une assertion VERTE peut être une panne de lecture.**
+> Un découpage d'arguments qui comptait les virgules **dans une chaîne** sautait un site en silence
+> et passait au vert **en ne mesurant que 5 sites sur 6**. D'où l'assertion de garde :
+> **compter les sites lus**, pas seulement vérifier qu'un motif existe.
+
 1. ★★★ **DEPUIS LE 10 AOÛT : LIRE DEPUIS LE DÉPÔT CLONÉ**, pas depuis une mémoire de session
    précédente. `git clone` (session neuve) ou `git pull` (Nico vient de pousser) AVANT tout
    inventaire. ★ **Faire l'inventaire AVANT de proposer un patch** : sur un changement transverse,
@@ -3216,6 +3310,19 @@ AVANT d'annoncer la liste des fichiers.**
 ## 27a. ★★★ LA RÈGLE DE L'ACCOMPAGNEMENT — À LIRE AVANT DE CLORE TOUT LOT
 
 > ⚠️⚠️⚠️ **CETTE SECTION EST LA PLUS IMPORTANTE DU DOCUMENT POUR LA SUITE DU PROJET.**
+
+> ★★★ **AJOUT DU 12/08 — CE QUI SUIT LE CODE TOUT SEUL, ET CE QUI NE LE SUIT PAS.**
+> La refonte du Pilotage (§34) a renommé et réordonné les huit onglets. Mesure faite :
+> · ✅ **`_mvAideOngletsPil` a suivi SEUL** — il lit `window._PIL_TABS` **à l'exécution**.
+>   ★★ **C'est le bon patron : une aide qui LIT le code ne peut pas mentir.** À généraliser.
+> · ✅ **C22 n'exige rien de plus** : `MV_AIDE` est indexée par **PAGE** (`#page-pilotage`), pas par
+>   onglet. Ajouter un onglet n'oblige donc pas à toucher `utils.js`.
+> · ❌ **Les lignes écrites EN DUR ont menti** : `MV_AIDE.pilotage` décrivait encore « Décider ».
+> · ❌ **Le guide public a menti** : `11-pilotage.html` annonçait les sept anciens onglets en
+>   sous-titre. Il n'y a **pas de contrôle mécanique** dessus — §24 et C22 ne jugent aucun texte.
+>
+> ⚠️ **CONCLUSION** : à chaque renommage d'écran, faire un `grep` du **libellé retiré** dans
+> `src/utils.js` (MV_AIDE) **et** dans `guide/`. C'est le seul filet, et il est manuel.
 
 > ★★★ **Depuis le 11/08, cette règle est la RÈGLE D'OR N°4** (en tête de document). Cette
 > section en garde le détail et l'histoire ; la règle courte, elle, se lit avant tout lot.
@@ -3733,17 +3840,31 @@ appliquée au document lui-même.
 ★ **AJOUT DU 12/08 — les entrées 0a à 0d sortent du chantier ETP/année/contrats (§33).** Elles
 sont neuves, donc **non auditées** : les traiter comme des hypothèses jusqu'à re-mesure.
 
-0a. ★★★ **DÉPLOYER les trois lots du 12/08** — APP 5.99 · SW 6.49, livrés, contrôles verts,
-   **jamais mis en ligne**. `npm run build && firebase deploy`. Tant que ce n'est pas fait, les
-   clients lisent encore « manque 15,8 ETP » sur une vendange couverte.
-0b. ★★★ **RESSAISIR les contrats écrasés** — le CDD de Victor (`2026-03-02 → 2026-07-24`) est
-   **perdu**, pas caché ; aucune migration ne le retrouve. Geste : mettre les anciennes dates dans
-   la fiche, enregistrer, puis remettre `2026-08-17` en début → l'archivage se déclenche seul.
-   ⚠️ **Même geste pour Shana, Alicia et Vic** dès leur resignature (annoncée au 17/08).
-0c. ★★ **Régler l'ouverture d'exercice au 1ᵉʳ octobre** — aujourd'hui au 1ᵉʳ août, la vendange
-   tombe à **7 %** de l'année et l'ouvre au lieu de la clore. Un clic depuis le bandeau de la frise
-   annuelle. ⚠️ **Vérifier l'effet sur l'écran Économie › Exercice** : il change de fenêtre lui
-   aussi, c'est le but, mais les comparaisons d'exercices antérieurs se décalent d'un cran.
+0a. ★★★ **DÉPLOYER — APP 6.01 · SW 6.51.** Le paquet contient **neuf lots** : les trois du matin
+   (ETP/contrats, §33) **et les six du chantier Pilotage** (§34). Livrés, preflight **0/0**,
+   **143 assertions** vertes, **jamais mis en ligne**. `npm run build && firebase deploy` —
+   ⚠️ **un seul `&&`** : `inject-precache` tourne déjà en postbuild, un second passage sort en 1
+   et annule le déploiement. Tant que ce n'est pas fait, les clients lisent encore
+   « manque 15,8 ETP » sur une vendange couverte.
+0b. ✅ **Le CDD de Victor est RESSAISI** (confirmé par Nico le 12/08 au soir).
+   ⚠️ **Le même geste reste à faire pour Shana, Alicia et Vic** dès leur resignature (annoncée au
+   17/08) : mettre les anciennes dates dans la fiche, enregistrer, puis remettre la nouvelle date de
+   début → l'archivage se déclenche seul.
+0c. ❌ **ENTRÉE ANNULÉE — c'était un mauvais conseil.** Elle demandait de régler l'ouverture
+   d'exercice au 1ᵉʳ octobre « pour que la vendange clôture l'année ». ⚠️⚠️ **Un exercice comptable
+   est fixé par le comptable, parfois par le statut : ce n'est pas un réglage d'affichage.**
+   La vraie correction est livrée au **lot 6 du §34** : l'écran montre désormais les **deux cadres**
+   (exercice comptable / année vigne), dit **pourquoi leurs totaux diffèrent**, et se contente de
+   chiffrer — **en jours exacts** — le partage de la vendange quand la clôture la traverse.
+   Le décalage reste **proposé**, jamais prescrit. **Ne pas rouvrir cette entrée.**
+0c-bis. ★★ **Les filtres cépage / commune du Pilotage** — démontrés dans la maquette v3, **non
+   livrés volontairement** (§34i). Ils exigent que le calcul de charge descende à la parcelle.
+   ⚠️ **Un filtre qui change la liste sans changer les chiffres est un décor.** Les données existent
+   déjà : `p.cepages[]` et `p.commune`. Aucune saisie neuve à demander au client.
+0c-ter. ★ **Déplacer `_PIL_SEM` dans `utils.js`** au prochain lot qui bumpe — une palette
+   sémantique ne devrait pas vivre dans un module. Elle est dans `pilotage.js` pour avoir pu être
+   livrée sans bump (§20b).
+
 0d. ★★ **Le pont coût annuel ↔ campagnes** — le gros morceau ouvert par Nico le 12/08, détaillé en
    fin de §33. Coût annuel **par date**, part d'une campagne **par tâche**, et le **reste**
    (vinification, entretien, temps mort) qui n'est lisible **qu'avec un taux de saisie**.
@@ -4687,3 +4808,210 @@ affiche qu'un, celui du contrat en cours. **Affichage, pas calcul.**
 **3. La position de la période *Vendanges*** court jusqu'au 30 septembre alors que le travail
 s'arrête le 6. Ça ne fausse plus le pic, mais dilue la moyenne sur trois semaines vides.
 
+---
+
+## 34. ★★★ LE CHANTIER PILOTAGE — SIX LOTS (12/08 soir — APP v6.01 · SW v6.51)
+
+**Point de départ**, mot pour mot : *« on améliore fois 100 pilotage. pour le moment ça ne convient
+pas. réfléchi à la meilleure disposition, il faut que tous les graphismes soient cohérents. qu'il y
+ait une réelle interaction entre la sélection de l'utilisateur et ce qui est affiché par les chiffres
+et les graphiques. il faut un outil pro, rangé, qui fait une photo de l'année (budget, effectif,
+travaux), puis une photo de la campagne, puis une photo du personnel, des tâches. des simulations.
+on zoom de plus en plus sur le détail après avoir vu une vue d'ensemble. »* Plus une capture d'écran
+de l'onglet Avancement.
+
+### 34a. Le diagnostic, mesuré sur le code — pas sur l'impression
+
+| ce que Nico voyait | ce qu'il y avait dessous |
+|---|---|
+| « les graphismes ne sont pas cohérents » | **12 moteurs de graphe** indépendants (10 SVG + 2 HTML), **4 palettes** concurrentes (`_PIL_PIE_COLORS`, `_PEC_COL`, `_PIL_TASK_COL`, `_PCAV_PHASES`), chacun ses marges et ses axes |
+| « pas d'interaction avec la sélection » | **5 sélecteurs isolés**. Cliquer une campagne ne bougeait **qu'un** panneau |
+| « ce n'est pas rangé » | 7 onglets = 7 **sujets** à plat. Aucun n'est un niveau de zoom. « Charge & ETP », un tableau de bord de 12 mois, était enfermé dans **une tuile pliable** |
+| « ça ne signale pas ce qui manque » | **29 impasses** (`pil-empty`) : du texte disant « Réglages › Saisons » **sans aucun lien**, découvrables seulement en ouvrant l'onglet qui les contient |
+| — | **3 endroits** répondaient à « combien d'ETP ? » — la faute exacte que §33 venait de documenter |
+
+★★★ **LA CAUSE RACINE, ET ELLE VAUT AU-DELÀ DU PILOTAGE :** *les onglets étaient un **axe de
+sujets** alors que Nico demandait un **axe de zoom**.* Tant que les deux sont confondus, chaque écran
+repart de zéro. Ce n'était pas un problème de mise en page.
+
+### 34b. La maquette d'abord — trois versions, validées avant toute ligne de code
+
+Maquette **HTML cliquable** (palette et polices réelles de l'app, données réelles du domaine :
+2 353 h, pic 36,6, 42 présents, 2 979 h de présence). Trois itérations, chacune corrigeant une faute
+trouvée **dans la maquette elle-même** :
+
+- **v1 → v2** : la ligne d'effectif plongeait à zéro sur un trou ; les sparklines à 4 points
+  suggéraient une continuité qui n'existe pas (4 campagnes ne sont pas une courbe → barres).
+- **v2 → v3** : trois textes **en dur** (« Rognage », « 3 fiches sans taux », « 40 vendangeurs »)
+  s'affichaient sur des campagnes où ils étaient **faux** — la faute même qu'on corrigeait.
+- **v3, après ajout des filtres** : le tableau des tâches affichait 764 h pendant que la photo
+  disait 572 h. **Le même écran disait deux choses.** Corrigé, puis **vérifié par un test qui
+  compare la photo à la somme du tableau : écart 0 h.**
+
+★★ **Leçon de méthode** : corriger un dessin coûte dix minutes, corriger 6 800 lignes coûte la
+journée. La maquette a payé trois fois.
+
+### 34c. Ce qui a été refusé, et pourquoi
+
+Nico a ensuite fourni une spécification générique de « module de pilotage pro » (issue d'un autre
+assistant). Tri fait **par grep sur le code**, pas sur l'impression : **11 points déjà présents**
+(mode sombre, plein soleil, météo AROME, comparaison N-1, le Mur, flotte, DRE, ZNT, export CSV,
+notifications, mémoïsation), **5 déjà couverts par la maquette**, et **4 refusés** :
+
+- **Widgets déplaçables/redimensionnables** → c'est « Choisir les indicateurs » en pire.
+  ★★ **Un tableau de bord qui doit être configuré pour devenir lisible a une disposition fausse.**
+  Et en bout de rang, personne ne redimensionne un widget.
+- **Glisser-déposer pour assigner** → retiré volontairement de l'ordre de passage (cassé, et il
+  obligeait à tenir le doigt en faisant défiler 45 lignes). **Ne pas le réintroduire.**
+- **Filtre par appellation/climat** → le champ **n'existe pas**. Le créer = de la saisie en plus à
+  chaque installation. `p.commune` et les secteurs couvrent le besoin.
+- **Alertes SMS/e-mail à seuils réglables** → un moteur de règles est un module entier, et chaque
+  alerte de trop tue les autres.
+
+⚠️ **L'état sanitaire (risque mildiou/oïdium) reste HORS PÉRIMÈTRE.** « Mildiou » n'existe que comme
+**cible** dans le catalogue E-Phy ; il n'y a **aucun modèle de risque**. En faire un vrai suppose les
+stades phénologiques par parcelle (saisie neuve), la météo horaire avec humectation, et un modèle
+épidémio validé. **Un modèle faux serait pire que rien.** Proposition en attente : afficher la
+**pression météo** sans prétendre au risque maladie.
+
+### 34d. Les six lots
+
+Tous en **`pilotage.js` seul**, donc **sans bump**, sauf les lots 5 et 6.
+
+**Lot 1 — le socle graphique.** `_PIL_SEM` (7 sens) + `_pilPolyBreak`. **Deux bugs réels** :
+(a) la ligne d'effectif **traversait les trous** en ligne droite — elle affirmait un effectif là où
+rien n'avait été mesuré ; (b) `col.alerte` portait **deux sens dans la même image** (renfort à
+trouver **et** trait du jour). Harnais : 17 assertions.
+
+**Lot 2 — la portée unique et les quatre photos.** `_PIL_SCOPE`, fil d'Ariane, photos, drapeaux.
+⚠️ **Trois signatures supposées et fausses**, trouvées en allant lire : `_pecData()` rend le total
+sous `tot` (pas `T`) · `_mvExerciceLabel` n'existe pas · `_pilSetTab` non plus. Harnais : 29.
+
+**Lot 3 — l'axe de zoom.** Réordonnancement, numéros, filet, nouvel onglet `an`, `_pilPanelEtp`
+déménagé (**un seul appel dans tout le fichier**, vérifié). ★ `_PIL_SHOW_MIGR` reporte `avc_etp` →
+`an_frise` **sur les deux sources d'état** : sans ça, un client ayant décoché « Charge & ETP »
+serait arrivé sur un niveau vide avec la case pour le rallumer dans un autre onglet. Harnais : 38.
+
+**Lot 4 — le moteur de diagnostic.** `_pilDiag()` + `_pilGo()`. ⚠️ **Une supposition fausse
+rattrapée** : le test portait sur `CONFIG.ecartRang`, un champ inexistant — les écartements vivent
+dans `CONFIG.vigne.{ec_rang, ec_pied}`. **Le constat ne se serait jamais déclenché.**
+★★ **Un test qui ne peut pas rougir est pire qu'aucun test : il rassure.** Harnais : 39.
+
+**Lot 5 — l'accompagnement et le bump** (APP 6.00 · SW 6.50). `MV_AIDE.pilotage` reprise, guide
+`11-pilotage.html` + régénération, **5 items WHATS_NEW**, les 4 emplacements d'`index.html`, les
+5 du SW. ★ **`_mvAideOngletsPil` lit `_PIL_TABS` à l'exécution** : la liste s'était mise à jour
+toute seule, seules les lignes en dur mentaient.
+
+**Lot 6 — LA CORRECTION DE FOND** (APP 6.01 · SW 6.51). Voir 34f.
+
+### 34e. ★★★ LE PREFLIGHT A ATTRAPÉ CE QUE JE N'AVAIS PAS VU
+
+Le lot 2 a été livré **sans avoir lancé `scripts/preflight.mjs`**. La CI a rendu :
+**3 `catch(e){}` muets** (19 contre 16 en référence) et **un `<div>` dans un `<button>`** (§24).
+
+⚠️⚠️ **La cause : mon contrôle maison comptait `catch{` alors que le code écrit `catch(e){}`.
+Je mesurais autre chose que ce que mesure le filet.** Un cliquet qui ne compte pas la même chose
+que le filet ne protège de rien.
+
+★★ **Et la suite compte plus que la faute.** J'ai voulu redoubler ces deux contrôles dans mon
+harnais. La version `catch` passait ; celle du `<div>` a signalé un **faux positif** — mon
+expression régulière lisait du JS **sans voir les bornes de chaîne**. J'ai **retiré la section
+entière** : le preflight fait ce contrôle correctement, en écrire une seconde version approximative
+aurait créé **deux sources pour une question**.
+
+> **RÈGLE, écrite dans les harnais eux-mêmes :**
+> `node scripts/preflight.mjs && node mv-harnais-<lot>.mjs src/pilotage.js`
+> Le preflight vérifie la **mécanique**. Les harnais vérifient le **sens** — ce que le preflight ne
+> peut pas voir. **On ne duplique pas l'un dans l'autre.**
+
+### 34f. ★★★ LOT 6 — UN EXERCICE COMPTABLE EST UNE DONNÉE, PAS UN RÉGLAGE
+
+**Le retour de Nico**, textuel : *« je ne comprends toujours pas pourquoi je réglerais l'ouverture
+de l'exercice au 1er octobre. je cherche à savoir ce que me coûte une année fiscale de bilan à
+bilan. c'est à toi d'organiser les vues pour que l'utilisateur comprenne bien ce qu'il voit et qu'il
+y a une différence entre le coût de la campagne et le coût de l'année fiscale. »*
+
+**Il avait raison.** L'écran issu de §33 déclarait l'exercice « **mal aligné** » en orange —
+c'est-à-dire *« votre chiffre est faux, corrigez »* — et allait jusqu'à « **aucune lecture annuelle
+n'est fiable tant que c'est le cas** ». Il proposait un bouton pour déplacer la clôture.
+
+⚠️⚠️⚠️ **C'était un mauvais conseil.** Un exercice comptable est fixé par le comptable, parfois par
+le statut. **On ne le déplace pas pour qu'un graphique tombe mieux.** L'écran confondait **une
+DONNÉE** (le calendrier du bilan) avec **un RÉGLAGE d'affichage**.
+
+**La vraie panne était ailleurs : UN SEUL CADRE POUR DEUX QUESTIONS.**
+
+| | répond à | fixé par |
+|---|---|---|
+| **Exercice comptable** | « ce que m'a coûté l'**année fiscale** » | le comptable — c'est une donnée |
+| **Année vigne** | « ce que m'a coûté un **cycle de production** » | la biologie : après vendange N → fin vendange N+1 |
+| **Campagne** | « ce que coûte **ce chantier** » | les périodes du domaine |
+
+**Les trois sont justes. Ils ne donnent pas le même nombre, et c'est NORMAL.** Le rôle de l'écran
+est de les **nommer** et de dire ce que chacun répond — **pas d'en déclarer un cassé.**
+
+**Ce qui a été livré :**
+- ★ `_pilDeuxCadresHtml` ouvre le niveau ① : les deux cadres côte à côte, le détail campagne par
+  campagne avec les étiquettes « **à cheval** » et « **hors exercice** », et l'explication écrite de
+  **pourquoi les deux totaux diffèrent**.
+- ★ Le coût de l'exercice **vient de `_pecData()`**, qui cadre déjà sur l'exercice comptable.
+  ⚠️ **Aucun second calcul** : un second calcul donnerait un second chiffre.
+- ★★ **L'alerte orange a disparu.** Une vendange qui « ouvre » l'année n'est **pas un défaut**.
+  Il ne reste que le fait utile : quand la borne **traverse** la vendange, `_pilAnnSplitVend` dit
+  combien de jours tombent de chaque côté — **en jours comptés exactement, pas en euros proratés**.
+  ⚠️ **Une fausse précision sur un chiffre comptable est pire qu'un ordre de grandeur annoncé comme
+  tel.** Gravité ramenée de `'o'` à `'b'` : le chiffre est juste, on aide seulement à le lire.
+- ★ Le bouton de décalage subsiste, mais **proposé** (« si votre comptable accepte »), plus prescrit.
+- ★ Fil d'Ariane et photo Budget **nomment le cadre** : « exercice comptable ».
+
+### 34g. ★★★ LES COMMENTAIRES NE SONT PAS UNE PREUVE
+
+**Trois fois dans la même séance**, une assertion de harnais est passée au **vert** parce que le
+**commentaire qui documentait la correction citait le texte corrigé**. Exemples vécus :
+`!/n'est fiable tant que/.test(SRC)` — vrai dans le code, faux dans le commentaire d'explication ;
+`/Exercice comptable/.test(corps('_pilCrumbHtml'))` — satisfait par le commentaire « *« Exercice
+comptable », pas « Exercice »* ».
+
+★★★ **Un harnais qui lit ce qu'on raconte au sujet du code ne teste pas le code.**
+**Correctif à la racine** : `corps()` retire les commentaires (`.replace(/^\s*\/\/.*$/gm,'')`)
+**pour toutes les assertions**, une bonne fois.
+
+★★ **Autres assertions fausses de la séance, toutes du même genre** — un motif trop naïf sur du JS :
+`[^)]*?` qui s'arrête au premier `)` alors que les arguments contiennent des appels · un découpage
+d'arguments qui compte les virgules **dans une chaîne** (`'main-d'œuvre, carburant'`) et **saute un
+site en silence**, faisant passer l'assertion au vert **en ne mesurant que 5 sites sur 6** ·
+`_pilPanelEtp(d)` compté 2 fois parce que la **définition** ressemble à un appel (fait **deux fois**).
+
+> **Quand une assertion rouge tombe, la première question est : lequel des deux a tort,
+> l'assertion ou le code ?** Sur cette séance : **6 assertions fausses pour 0 bug**. Toutes
+> corrigées, aucune contournée, chacune commentée avec la raison.
+>
+> **Et son symétrique, plus dangereux :** une assertion **verte** peut être une panne de lecture.
+> ★ D'où l'assertion de garde : **compter les sites lus** (« les six appels sont lus, aucun sauté en
+> silence »). Un constat d'absence doit être confirmé en variant la méthode (§ règles d'or).
+
+### 34h. Ce que couvre la contre-épreuve
+
+**143 assertions** vertes réparties en 4 harnais (`mv-harnais-frise` 17 · `mv-harnais-portee` 29 ·
+`mv-harnais-niveaux` 38 · `mv-harnais-diag` 59). **Chaque lot a subi sa contre-épreuve** :
+défauts réintroduits **un par un**, harnais qui doit rougir, référence qui doit rester verte —
+**3 + 5 + 6 + 7 + 6 = 27 défauts rejoués**.
+
+⚠️ **Deux contre-épreuves étaient elles-mêmes fausses** et ont été refaites : l'une neutralisait une
+branche `else if` qui gardait la couverture ; l'autre coupait trop large et emportait la fin de la
+fonction. **Vérifier que le défaut a bien été injecté avant de conclure que le harnais est aveugle.**
+
+### 34i. Reste à faire sur le Pilotage
+
+1. ★★ **Les filtres cépage / commune** — la maquette v3 les démontre et ils changent **réellement**
+   les chiffres (Chardonnay : 6 930 h → 1 549 h). ⚠️ **Non livrés volontairement** : ils exigent que
+   le calcul de charge descende à la parcelle. **Un filtre qui change la liste sans changer les
+   chiffres est un décor** — exactement la faute reprochée au module.
+   ★ Les données existent : `p.cepages[]` (jusqu'à 3, complantation gérée) et `p.commune{nom,lat,lng}`.
+   ⚠️ Une parcelle complantée compte dans **chacun** de ses cépages : la somme des surfaces dépasse
+   celle du domaine. **C'est voulu — une parcelle ne se coupe pas en deux.**
+2. ★ **Déplacer `_PIL_SEM` dans `utils.js`** au prochain lot qui bumpe.
+3. ★ **La carte du domaine colorée par avancement** (maquette v3, niveau ②) — les parcelles exclues
+   par un filtre y sont **grisées, pas retirées** : un domaine qui perd 20 parcelles sans le dire
+   est illisible. ⚠️ Les couleurs disent l'**avancement**, jamais un état sanitaire.
+4. ★ Purger les palettes désormais mortes et les `pil-empty` restants.
