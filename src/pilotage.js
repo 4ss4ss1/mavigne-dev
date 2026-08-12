@@ -6583,7 +6583,9 @@ function _pilSkeleton(d,tab){
   return _pilHdrHtml(d)
     +'<div class="pil-portee"><div class="pil-portee-in">'
     +'<div class="pil-crumb" id="pil-crumb">'+_pilCrumbHtml()+'</div>'
+    +'<span id="pil-diagbtn-host">'+_pilDiagBtnHtml()+'</span>'
     +'</div></div>'
+    +'<div class="pil-diagwrap" id="pil-diagwrap"><div class="pil-diagsheet" id="pil-diagsheet"></div></div>'
     +'<div class="pil-tabsbar">'+_pilTabsHtml(tab)+'</div>'
     +'<div class="pil-wrap">'
     +'<div id="pil-photos-host">'+_pilPhotosHtml()+'</div>'
@@ -6630,6 +6632,30 @@ function _pilCssV2(){
   // Le filet dit ou s'arrete le zoom. Sans lui, « Cave » se lit comme un
   // cinquieme niveau, et la barre redevient une liste de sujets.
   +'.pil-tabsep{display:inline-block;width:1px;align-self:stretch;min-height:22px;margin:0 9px;background:var(--gris);flex-shrink:0}'
+  +'.pil-diagbtn{border:1px solid var(--orange);background:var(--orange-pale);color:var(--orange);border-radius:9px;padding:6px 11px;font-size:12px;font-weight:700;white-space:nowrap;min-height:34px;font-family:inherit;cursor:pointer}'
+  +'.pil-diagbtn.grave{border-color:var(--rouge);background:var(--rouge-pale);color:var(--rouge)}'
+  +'.pil-diagbtn.clean{border-color:var(--vert-med);background:var(--vert-pale);color:var(--vert-med)}'
+  +'.pil-diagwrap{position:fixed;inset:0;background:rgba(20,17,13,.45);z-index:90;display:none;align-items:flex-end;justify-content:center}'
+  +'.pil-diagwrap.show{display:flex}'
+  +'.pil-diagsheet{background:var(--bg-app);width:100%;max-width:640px;max-height:86vh;overflow:auto;border-radius:18px 18px 0 0;padding:17px 17px 34px}'
+  +'.pil-diag-h{display:flex;align-items:flex-start;justify-content:space-between;gap:12px;margin-bottom:4px}'
+  +'.pil-diag-t{font-family:\'Cormorant Garamond\',serif;font-size:23px;font-weight:700;color:var(--cave);line-height:1.15}'
+  +'.pil-diag-s{font-size:12px;color:var(--texte-doux);margin-top:2px}'
+  +'.pil-diag-x{border:1px solid var(--gris);background:var(--bg-card);border-radius:8px;width:32px;height:32px;font-size:17px;color:var(--texte-doux);flex-shrink:0;font-family:inherit;cursor:pointer}'
+  +'.pil-diag-ok{background:var(--bg-card);border:1px solid var(--gris-clair);border-radius:13px;padding:16px;text-align:center;color:var(--vert-med);font-weight:600;margin-top:11px}'
+  +'.pil-cov{display:flex;align-items:center;gap:12px;background:var(--bg-card);border:1px solid var(--gris-clair);border-radius:13px;padding:11px 13px;margin:11px 0 13px}'
+  +'.pil-cov-v{font-family:\'Cormorant Garamond\',serif;font-size:31px;font-weight:700;line-height:1;color:var(--orange);white-space:nowrap;flex-shrink:0}'
+  +'.pil-cov-t{font-size:12.5px;line-height:1.45}'
+  +'.pil-cov-t span{color:var(--texte-doux)}'
+  +'.pil-dl{background:var(--bg-card);border:1px solid var(--gris-clair);border-left-width:4px;border-radius:11px;padding:11px 13px;margin-bottom:9px}'
+  +'.pil-dl.r{border-left-color:var(--rouge)}.pil-dl.o{border-left-color:var(--orange)}.pil-dl.b{border-left-color:#4A9FC8}'
+  +'.pil-dl-t{font-weight:700;font-size:13.5px;display:flex;align-items:center;gap:7px;margin-bottom:2px}'
+  +'.pil-dl-g{font-size:10px;letter-spacing:1px;text-transform:uppercase;color:var(--texte-doux);font-weight:700;margin-bottom:5px}'
+  +'.pil-dl-f{font-size:12.5px;color:var(--texte-doux);line-height:1.5}'
+  +'.pil-dl-f b{color:var(--texte)}'
+  +'.pil-diag-go{margin-top:9px;border:1px solid var(--cave);background:var(--cave);color:var(--or-clair);border-radius:8px;padding:7px 13px;font-size:12px;font-weight:700;font-family:inherit;cursor:pointer;min-height:34px}'
+  +'.pil-diag-go.ghost{background:var(--bg-card);color:var(--cave)}'
+  +'.pil-flag{cursor:pointer}'
   +'@media(max-width:880px){.pil-photos{grid-template-columns:1fr 1fr}}'
   +'@media(max-width:520px){.pil-tabsep{margin:0 5px}.pil-lvn{margin-right:4px}}'
   +'@media(max-width:430px){.pil-photo .v{font-size:27px}.pil-portee-in{padding:8px 11px}}';
@@ -6700,12 +6726,12 @@ function _pilPhotosData(){
 
 
 // ── Le rendu des quatre photos ──────────────────────────────────────────────
-function _pilPhotoHtml(k,ico,val,unite,sous,cible,drapeau){
+function _pilPhotoHtml(k,ico,val,unite,sous,cible,drapeau,quest){
   // \u26A0\uFE0F Des <span display:block>, pas des <div> : le contenu d'un <button>
   //    est du « phrasing content » en HTML5. Le clic marcherait quand meme,
   //    mais §24 l'interdit \u2014 et un balisage invalide se paie plus tard, pas
   //    tout de suite.
-  return '<button class="pil-photo" data-pgo="'+cible+'">'
+  return '<button class="pil-photo" data-pgo="'+cible+'" data-pq="'+quest+'">'
     +'<span class="k">'+ico+' '+k+(drapeau||'')+'</span>'
     +'<span class="v">'+val+'<span class="u">'+unite+'</span></span>'
     +'<span class="s">'+sous+'</span>'
@@ -6720,27 +6746,34 @@ function _pilPhotosHtml(){
   try{ D=_pilPhotosData(); }catch(e){ return ''; }
   var camp=_PIL_SCOPE.camp, cadre=camp?('sur '+_pilEsc(camp)):'sur l\u2019exercice';
 
+  // ★ Les drapeaux viennent du MOTEUR, pas d'un test ecrit sur place : un
+  //   chiffre ne peut pas porter un drapeau que la liste ne contient pas.
+  var DG=_pilDiag();
+  function drap(quoi){
+    var l=DG.filter(function(d){ return d.touche && d.touche.indexOf(quoi)>=0; });
+    if(!l.length) return '';
+    var g=l.some(function(d){return d.g==='r';})?'r':(l.some(function(d){return d.g==='o';})?'o':'b');
+    return _pilFlag(g, l.length+' chose'+(l.length>1?'s':'')+' \u00e0 compl\u00e9ter \u2014 touchez pour voir');
+  }
   // TRAVAUX
-  var fT='';
-  if(D.trous>0) fT=_pilFlag('r',D.trous+' trou(s) dans le calendrier \u2014 ce travail n\u2019est compt\u00e9 nulle part');
-  else if(D.ovl>0) fT=_pilFlag('o','Des p\u00e9riodes se chevauchent \u2014 des heures comptent deux fois');
+  var fT=drap('travaux');
   // La photo descend d'UN cran, pas au fond : sans portee elle mene a l'annee,
   // avec une campagne selectionnee elle mene a cette campagne. C'est le zoom.
   var pTrav=_pilPhotoHtml('Travaux','\uD83C\uDF3F',_pilNb(D.hTot),' h',
-    D.hTot>0?(D.pct+' % fait '+cadre):('aucune t\u00e2che dat\u00e9e '+cadre), camp?'avc':'an', fT);
+    D.hTot>0?(D.pct+' % fait '+cadre):('aucune t\u00e2che dat\u00e9e '+cadre), camp?'avc':'an', fT, 'travaux');
 
   // EFFECTIF — le pic, et le manque en clair s'il y en a un.
   var sE = D.pic>0
     ? ('au pic'+(D.picW?(' \u00b7 '+_pilNb(D.head)+' pr\u00e9sents cette semaine-l\u00e0'):''))
     : 'aucune semaine mesur\u00e9e '+cadre;
-  var fE = (D.manque>0.05) ? _pilFlag('o','Il manque '+_pilUn(D.manque)+' personne(s) au pic') : '';
-  var pEff=_pilPhotoHtml('Effectif','\uD83D\uDC65',D.pic>0?_pilUn(D.pic):'\u2014',D.pic>0?' pers.':'', sE,'equ',fE);
+  var fE = drap('effectif') || ((D.manque>0.05) ? _pilFlag('o','Il manque '+_pilUn(D.manque)+' personne(s) au pic') : '');
+  var pEff=_pilPhotoHtml('Effectif','\uD83D\uDC65',D.pic>0?_pilUn(D.pic):'\u2014',D.pic>0?' pers.':'', sE,'equ',fE,'effectif');
 
   // BUDGET
-  var fB=D.sansTaux>0?_pilFlag('o',D.sansTaux+' fiche(s) sans taux horaire \u2014 le co\u00fbt est sous-\u00e9valu\u00e9'):'';
+  var fB=drap('budget');
   var pBud = D.ecoOk
-    ? _pilPhotoHtml('Budget','\uD83D\uDCB6',_pilNb(Math.round(D.eur/1000)),' k\u20ac','main-d\u2019\u0153uvre, carburant et phyto','eco',fB)
-    : _pilPhotoHtml('Budget','\uD83D\uDCB6','\u2014','','le calcul du co\u00fbt n\u2019a pas abouti','eco',_pilFlag('r','Ouvrez \u00c9conomie pour voir ce qui bloque'));
+    ? _pilPhotoHtml('Budget','\uD83D\uDCB6',_pilNb(Math.round(D.eur/1000)),' k\u20ac','main-d\u2019\u0153uvre, carburant et phyto','eco',fB,'budget')
+    : _pilPhotoHtml('Budget','\uD83D\uDCB6','\u2014','','le calcul du co\u00fbt n\u2019a pas abouti','eco',_pilFlag('r','Ouvrez \u00c9conomie pour voir ce qui bloque'),'budget');
 
   // CONFORMITE — le cuivre roule sur 7 ans : c'est un chiffre d'ANNEE, il ne
   // se recadre pas sur une campagne, et l'ecran le dit au lieu de faire semblant.
@@ -6750,9 +6783,9 @@ function _pilPhotosHtml(){
     var fC=D.cu.over>0?_pilFlag('r',D.cu.over+' parcelle(s) au-dessus du plafond')
           :(D.cu.warn>0?_pilFlag('o',D.cu.warn+' parcelle(s) proche(s) du plafond'):'');
     pCfm=_pilPhotoHtml('Conformit\u00e9','\uD83D\uDEE1\uFE0F',_pilUn(mx.cu),' kg Cu',
-      'la plus charg\u00e9e \u00b7 plafond '+D.cu.plaf+' kg/ha sur 7 ans','cfm',fC);
+      'la plus charg\u00e9e \u00b7 plafond '+D.cu.plaf+' kg/ha sur 7 ans','cfm',fC,'conf');
   } else {
-    pCfm=_pilPhotoHtml('Conformit\u00e9','\uD83D\uDEE1\uFE0F','0',' kg Cu','aucun apport de cuivre enregistr\u00e9','cfm','');
+    pCfm=_pilPhotoHtml('Conformit\u00e9','\uD83D\uDEE1\uFE0F','0',' kg Cu','aucun apport de cuivre enregistr\u00e9','cfm','','conf');
   }
   return '<div class="pil-photos">'+pTrav+pEff+pBud+pCfm+'</div>';
 }
@@ -6764,8 +6797,238 @@ function _pilUn(v){ return (Math.round((Number(v)||0)*10)/10).toString().replace
 function _pilPortee(){
   var c=document.getElementById('pil-crumb'); if(c) c.innerHTML=_pilCrumbHtml();
   var p=document.getElementById('pil-photos-host'); if(p) p.innerHTML=_pilPhotosHtml();
+  // Le compte des manques se repeint AUSSI : un bouton fige sur l'ancien
+  // nombre apres une correction, c'est un ecran qui se contredit.
+  var b=document.getElementById('pil-diagbtn-host'); if(b) b.innerHTML=_pilDiagBtnHtml();
 }
 window._pilPortee = _pilPortee;
+
+
+// ════════════════════════════════════════════════════════════════════════════
+// LE MOTEUR DE DIAGNOSTIC
+// Le module comptait vingt-neuf impasses : du texte qui disait « Reglages ›
+// Saisons » sans AUCUN lien, et qu'on ne decouvrait qu'en ouvrant l'onglet qui
+// le contenait. Ici, une seule liste, trois gravites, et un bouton qui emmene
+// a l'endroit exact.
+//
+//   'r' BLOQUANT   le chiffre ne se calcule pas. Il affiche un tiret.
+//   'o' FAUSSANT   le chiffre SORT, mais faux ou partiel. Le plus dangereux :
+//                  un indicateur bati sur un signal partiel ment avec
+//                  l'autorite d'une mesure.
+//   'b' AMELIORABLE le chiffre est juste, il serait plus fin.
+//
+// ⚠️ Chaque constat porte : ce qui manque, CE QUE CA FAUSSE, et ou aller.
+//    Un diagnostic qui dit seulement « il manque X » laisse le lecteur juger
+//    de l'urgence sans les elements.
+// ⚠️ `touche` relie le constat aux photos. Un chiffre dont les entrees sont
+//    incompletes porte un drapeau — il ne se tait pas, et il ne ment pas.
+// ════════════════════════════════════════════════════════════════════════════
+var _PIL_DIAG_CIBLES = {
+  saisons:   ['reglages','domaine','set-sec-saisons'],
+  taches:    ['reglages','vigne',  'set-sec-taches'],
+  dens:      ['reglages','vigne',  'set-sec-dens'],
+  secteurs:  ['reglages','vigne',  'set-sec-secteurs'],
+  equipe:    ['reglages','equipe', 'set-sec-equipe'],
+  tracteurs: ['reglages','tracteur','set-sec-tracteurs'],
+  parcelles: ['parcelles',null,null]
+};
+
+// Ouvre la page, bascule sur le bon onglet, fait defiler jusqu'au bloc, et le
+// fait clignoter une seconde. Sans le clignotement, on arrive sur un ecran
+// dense sans savoir ce qu'on venait y faire.
+window._pilGo = function(cible){
+  try{
+    var C=_PIL_DIAG_CIBLES[cible]; if(!C) return;
+    if(window.goTo) window.goTo(C[0]);
+    setTimeout(function(){
+      try{
+        if(C[1] && window.switchReglTab) window.switchReglTab(C[1]);
+        if(!C[2]) return;
+        var el=document.getElementById(C[2]); if(!el) return;
+        el.scrollIntoView({behavior:'smooth',block:'center'});
+        el.style.transition='box-shadow .25s';
+        el.style.boxShadow='0 0 0 3px var(--or)';
+        setTimeout(function(){ el.style.boxShadow=''; }, 1400);
+      }catch(e2){ if(window.logError) window.logError({level:'info',cat:'pilotage',msg:'diag: ancre '+cible}); }
+    }, 240);
+  }catch(e){ if(window.logError) window.logError({level:'info',cat:'pilotage',msg:'diag: navigation '+cible}); }
+};
+
+function _pilDiagJours(t){ return Math.max(1,(t[1]-t[0])+1); }
+
+// La liste des constats. Chacun est calcule sur les donnees reelles ; aucun
+// n'est ecrit en dur, et aucun n'apparait quand il n'a pas lieu d'etre.
+function _pilDiag(){
+  var out=[], i;
+  var ann=null; try{ ann=_pilAnnuelData(); }catch(e){ ann=null; }
+
+  // ── Les periodes ─────────────────────────────────────────────────────────
+  var sais=(window.SAISONS||[]);
+  var sansDates=sais.filter(function(p){ return p && (!p.debut||!p.fin); });
+  if(sansDates.length) out.push({ g:'r', cible:'saisons', touche:['travaux','effectif','budget'],
+    k:sansDates.length+' p\u00e9riode'+(sansDates.length>1?'s':'')+' sans dates',
+    f:'<b>'+_pilEsc(sansDates.map(function(p){return p.nom;}).join(', '))+'</b> n\u2019a pas de date de d\u00e9but ou de fin. '
+     +'Sans fen\u00eatre, la charge ne se calcule pas : ces travaux ne p\u00e8sent <b>rien</b>.',
+    ou:'R\u00e9glages \u203a Campagne' });
+
+  if(ann && ann.trous && ann.trous.length){
+    var j=0; ann.trous.forEach(function(t){ j+=_pilDiagJours(t); });
+    out.push({ g:'r', cible:'saisons', touche:['travaux','budget'],
+      k:'Trou de '+j+' jour'+(j>1?'s':'')+' dans le calendrier',
+      f:ann.trous.length+' fen\u00eatre'+(ann.trous.length>1?'s':'')+' de l\u2019exercice n\u2019'+(ann.trous.length>1?'ont':'a')+' aucune p\u00e9riode. '
+       +'Le travail de ces jours n\u2019est compt\u00e9 <b>nulle part</b> : ni dans la charge, ni dans le budget, ni dans l\u2019avancement.',
+      ou:'R\u00e9glages \u203a Campagne' });
+  }
+
+  if(ann && ann.ovl && ann.ovl.length) out.push({ g:'o', cible:'saisons', touche:['travaux','effectif','budget'],
+    k:ann.ovl.length+' p\u00e9riode'+(ann.ovl.length>1?'s se chevauchent':' se chevauche'),
+    f:'<b>'+_pilEsc(ann.ovl.join(', '))+'</b> commence avant la fin de la pr\u00e9c\u00e9dente. '
+     +'Les jours communs sont compt\u00e9s <b>deux fois</b> : les heures et le co\u00fbt sont gonfl\u00e9s d\u2019autant.',
+    ou:'R\u00e9glages \u203a Campagne' });
+
+  // ── Le cadre de l'annee ──────────────────────────────────────────────────
+  // Le calcul existe deja (ann.align) : on ne le refait pas, on le remonte.
+  if(ann && ann.align && !ann.align.ok){
+    var MLB=(window.MV_EX_MOIS_LBL)||['janvier','f\u00e9vrier','mars','avril','mai','juin','juillet','ao\u00fbt','septembre','octobre','novembre','d\u00e9cembre'];
+    var pc=Math.round((ann.align.pos||0)*100);
+    out.push({ g:'o', cible:'saisons', touche:['travaux','effectif','budget'],
+      k:'Exercice mal align\u00e9 sur la vendange',
+      f:ann.align.coupe
+        ? 'La vendange est <b>coup\u00e9e en deux</b> par l\u2019ouverture de l\u2019exercice : une moiti\u00e9 sur chaque ann\u00e9e comptable. Aucun des deux totaux ne d\u00e9crit un cycle.'
+        : ('La vendange tombe \u00e0 <b>'+pc+' %</b> de l\u2019ann\u00e9e : elle <b>ouvre</b> l\u2019exercice au lieu de le clore. Vous lisez deux moiti\u00e9s de cycles au lieu d\u2019une ann\u00e9e vigne.'),
+      ou:(ann.align.moisIdeal!=null?('Ouvrir l\u2019exercice au 1\u1D49\u02B3 '+MLB[ann.align.moisIdeal]):'R\u00e9gler l\u2019ouverture de l\u2019exercice'),
+      exm:(ann.align.moisIdeal!=null?ann.align.moisIdeal:null) });
+  }
+
+  // ── Le cout ──────────────────────────────────────────────────────────────
+  var P=null; try{ P=_pecData(); }catch(e){ P=null; }
+  if(P && P.tot && P.tot.nSansTaux>0) out.push({ g:'o', cible:'equipe', touche:['budget'],
+    k:P.tot.nSansTaux+' fiche'+(P.tot.nSansTaux>1?'s':'')+' sans taux horaire',
+    f:'Leurs heures comptent dans l\u2019effectif mais <b>pas dans le co\u00fbt</b>. La masse salariale affich\u00e9e est un plancher, pas une mesure.',
+    ou:'R\u00e9glages \u203a \u00c9quipe' });
+
+  // ── Les baremes ──────────────────────────────────────────────────────────
+  var tks=(typeof window.getTachesSaison==='function')?window.getTachesSaison():(window.TACHES||[]);
+  var sansBar=(tks||[]).filter(function(t){ return t && !(parseFloat(t.h_ha)>0); });
+  if(sansBar.length) out.push({ g:'o', cible:'taches', touche:['travaux','effectif'],
+    k:sansBar.length+' t\u00e2che'+(sansBar.length>1?'s':'')+' sans bar\u00e8me h/ha',
+    f:'<b>'+_pilEsc(sansBar.slice(0,4).map(function(t){return t.nom;}).join(', '))
+     +(sansBar.length>4?(' et '+(sansBar.length-4)+' autre'+(sansBar.length-4>1?'s':'')):'')
+     +'</b> n\u2019'+(sansBar.length>1?'ont':'a')+' pas d\u2019heures par hectare. '
+     +(sansBar.length>1?'Elles ne p\u00e8sent':'Elle ne p\u00e8se')+' <b>rien</b> dans la charge : le total affich\u00e9 est un plancher.',
+    ou:'R\u00e9glages \u203a Vigne \u203a T\u00e2ches' });
+
+  // ── Les parcelles ────────────────────────────────────────────────────────
+  var parc=(window.PARCELLES||[]).filter(function(x){ return x && x.statut!=='Arrachee'; });
+  var sansSurf=parc.filter(function(x){ return !(parseFloat(x.surface)>0); });
+  if(sansSurf.length) out.push({ g:'r', cible:'parcelles', touche:['travaux','budget'],
+    k:sansSurf.length+' parcelle'+(sansSurf.length>1?'s':'')+' sans surface',
+    f:'Toute la charge se calcule en heures par hectare. Une parcelle sans surface p\u00e8se <b>z\u00e9ro heure</b>, quel que soit le travail qu\u2019elle demande.',
+    ou:'Ouvrir les parcelles' });
+
+  // ── Les ecartements ──────────────────────────────────────────────────────
+  // ⚠️ Les ecartements ne sont PAS a la racine de CONFIG : ils vivent dans
+  //    CONFIG.vigne.{ec_rang, ec_pied}, ecrits par _tcvSetDens et lus par
+  //    _mvVigne(). Ma premiere version testait cfg.ecartRang — un champ qui
+  //    n'existe nulle part, donc un constat qui ne se serait JAMAIS declenche.
+  //    Un test qui ne peut pas rougir est pire qu'aucun test : il rassure.
+  var vg=null; try{ vg=(typeof window._mvVigne==='function')?window._mvVigne():null; }
+  catch(e){ vg=null; }
+  if(!vg || !(parseFloat(vg.ec_rang)>0) || !(parseFloat(vg.ec_pied)>0))
+    out.push({ g:'b', cible:'dens', touche:[],
+      k:'\u00c9cartements de plantation absents',
+      f:'Sans eux, le bar\u00e8me conseill\u00e9 suppose <b>10 000 pieds/ha</b>. \u00c0 6 000 pieds, il propose environ un tiers d\u2019heures de trop.',
+      ou:'R\u00e9glages \u203a Vigne' });
+
+  // ── La conformite ────────────────────────────────────────────────────────
+  // Sans ce constat, la photo Conformite pourrait porter un drapeau qui ouvre
+  // une feuille vide : la question `conf` n'existerait dans aucun `touche`.
+  var cu=null; try{ cu=_cfmCuivre(); }catch(e){ cu=null; }
+  if(cu && cu.avail && cu.over>0) out.push({ g:'r', cible:'parcelles', touche:['conf'],
+    k:cu.over+' parcelle'+(cu.over>1?'s':'')+' au-dessus du plafond de cuivre',
+    f:'Le plafond bio est de <b>'+cu.plaf+' kg/ha lisses sur 7 ans</b>. '
+     +(cu.over>1?'Ces parcelles le dépassent':'Cette parcelle le dépasse')+' : '
+     +'c’est un écart <b>opposable en contrôle</b>, pas un simple indicateur.',
+    ou:'Voir les parcelles' });
+  else if(cu && cu.avail && cu.warn>0) out.push({ g:'o', cible:'parcelles', touche:['conf'],
+    k:cu.warn+' parcelle'+(cu.warn>1?'s':'')+' proche'+(cu.warn>1?'s':'')+' du plafond de cuivre',
+    f:(cu.warn>1?'Elles ont':'Elle a')+' dépassé <b>87,5 %</b> des '+cu.plaf+' kg/ha autorisés sur 7 ans. '
+     +'Il reste de la marge, mais elle se compte maintenant en un ou deux passages.',
+    ou:'Voir les parcelles' });
+
+  // Rangees par ce que ca coute a la justesse : bloquant, puis faussant.
+  var R={r:0,o:1,b:2};
+  out.sort(function(a,b){ return R[a.g]-R[b.g]; });
+  return out;
+}
+
+// Le taux de couverture : un seul chiffre honnete plutot que douze avertis-
+// sements. Il pese chaque constat par sa gravite, pas par son nombre — dix
+// remarques ameliorables ne valent pas un trou dans le calendrier.
+function _pilDiagCouverture(L){
+  var pen=0, POIDS={r:9,o:5,b:2};
+  L.forEach(function(d){ pen+=POIDS[d.g]||0; });
+  return Math.max(35, 100-pen);
+}
+
+
+// ── La feuille de diagnostic ────────────────────────────────────────────────
+var _PIL_DIAG_GN = { r:['\uD83D\uDD34','Le chiffre ne se calcule pas'],
+                     o:['\uD83D\uDFE0','Le chiffre sort, mais faux'],
+                     b:['\uD83D\uDD35','Le chiffre est juste, il serait plus fin'] };
+
+function _pilDiagBtnHtml(){
+  var L=_pilDiag(), n=L.length;
+  if(!n) return '<button class="pil-diagbtn clean" id="pil-diagbtn">\u2713 rien \u00e0 compl\u00e9ter</button>';
+  return '<button class="pil-diagbtn'+(L[0].g==='r'?' grave':'')+'" id="pil-diagbtn">\u26A0 '
+    +n+' chose'+(n>1?'s':'')+' \u00e0 compl\u00e9ter</button>';
+}
+
+// `quoi` restreint aux constats qui touchent UN chiffre : ouvrir la liste
+// depuis la photo Budget ne doit pas noyer le lecteur sous les manques qui
+// n'entrent pas dans ce calcul-la.
+function _pilDiagSheetHtml(quoi){
+  var L=_pilDiag();
+  if(quoi) L=L.filter(function(d){ return d.touche && d.touche.indexOf(quoi)>=0; });
+  var LB={travaux:'les travaux',effectif:'l\u2019effectif',budget:'le budget',conf:'la conformit\u00e9'};
+  var h='<div class="pil-diag-h"><div><div class="pil-diag-t">'
+    +(quoi?('Ce qui affecte '+(LB[quoi]||'ce chiffre')):'Ce qu\u2019il manque')+'</div>'
+    +'<div class="pil-diag-s">'+(quoi
+      ? 'Les autres manques n\u2019entrent pas dans ce calcul.'
+      : 'Rang\u00e9 par ce que \u00e7a co\u00fbte \u00e0 la justesse de vos chiffres.')+'</div></div>'
+    +'<button class="pil-diag-x" id="pil-diag-x" aria-label="Fermer">\u00d7</button></div>';
+
+  if(!quoi){
+    var cv=_pilDiagCouverture(_pilDiag());
+    h+='<div class="pil-cov"><div class="pil-cov-v">'+cv+' %</div><div class="pil-cov-t">'
+      +'<b>Vos chiffres reposent sur '+cv+' % des donn\u00e9es attendues.</b><br>'
+      +'<span>Ce qui manque n\u2019est pas un z\u00e9ro, c\u2019est un trou. Un indicateur b\u00e2ti sur un signal '
+      +'partiel ment avec l\u2019autorit\u00e9 d\u2019une mesure.</span></div></div>';
+  }
+  if(!L.length) return h+'<div class="pil-diag-ok">\u2713 Rien ne manque'+(quoi?' pour ce chiffre.':'.')+'</div>';
+
+  h+=L.map(function(d){
+    var G=_PIL_DIAG_GN[d.g]||_PIL_DIAG_GN.b;
+    // Le bandeau d'alignement propose deja le reglage en un clic (data-exm) :
+    // on reutilise SON chemin plutot que d'en ouvrir un second.
+    var act=(d.exm!=null)
+      ? ('<button class="pil-diag-go" data-exm="'+d.exm+'">'+_pilEsc(d.ou)+'</button>')
+      : ('<button class="pil-diag-go ghost" data-diag="'+_pilEsc(d.cible)+'">'+_pilEsc(d.ou)+' \u203A</button>');
+    return '<div class="pil-dl '+d.g+'"><div class="pil-dl-t">'+G[0]+' '+_pilEsc(d.k)+'</div>'
+      +'<div class="pil-dl-g">'+G[1]+'</div>'
+      +'<div class="pil-dl-f">'+d.f+'</div>'+act+'</div>';
+  }).join('');
+  return h;
+}
+
+function _pilDiagOpen(quoi){
+  var w=document.getElementById('pil-diagwrap'); if(!w) return;
+  var b=document.getElementById('pil-diagsheet'); if(b) b.innerHTML=_pilDiagSheetHtml(quoi||null);
+  w.classList.add('show');
+}
+function _pilDiagClose(){
+  var w=document.getElementById('pil-diagwrap'); if(w) w.classList.remove('show');
+}
 
 // ── Paramétrage : carte « objectif » + fenêtres de tâches ──
 function _pilObjCard(cd,admin){
@@ -7036,6 +7299,17 @@ function _pilBindContent(content){
     // ⚠️ Il n'existe PAS de _pilSetTab : le module ecrit _PIL_TAB, memorise, et
     //    re-rend. On suit le meme chemin que le clic sur un onglet (l.7035)
     //    plutot que d'inventer une seconde facon de changer d'onglet.
+    // Une photo drapeautee ouvre d'abord CE QUI LA FAUSSE : descendre au
+    // detail d'un chiffre faux, c'est lire un faux chiffre en plus grand.
+    var _pf=e.target.closest('.pil-flag');
+    if(_pf){ e.stopPropagation();
+      var _ph=_pf.closest('[data-pq]');
+      _pilDiagOpen(_ph?_ph.getAttribute('data-pq'):null); return; }
+    var _dg=e.target.closest('[data-diag]');
+    if(_dg){ e.stopPropagation(); _pilDiagClose(); window._pilGo(_dg.getAttribute('data-diag')); return; }
+    if(e.target.closest('#pil-diagbtn')){ e.stopPropagation(); _pilDiagOpen(null); return; }
+    if(e.target.closest('#pil-diag-x')){ e.stopPropagation(); _pilDiagClose(); return; }
+    if(e.target.id==='pil-diagwrap'){ e.stopPropagation(); _pilDiagClose(); return; }
     if(_pg){ e.stopPropagation(); var _pt=_pg.getAttribute('data-pgo');
       // Une cible que le module ne connait pas ne doit pas ecrire une cle morte
       // dans localStorage : _pilLoadTab retomberait sur 'auj' au rechargement
