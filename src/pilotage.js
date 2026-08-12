@@ -89,12 +89,25 @@ function _pilNormalize(st){
   return { show:mergeObj(st.show,def.show), pie:st.pie||def.pie, bar:st.bar||def.bar, collapsed:mergeObj(st.collapsed,def.collapsed), sub:mergeObj(st.sub,def.sub) };
 }
 function _pilShow(id){ var s=(_PIL_STATE&&_PIL_STATE.show)||{}; return s[id]!==0; }
+// Cles d'indicateurs deplacees d'un onglet a l'autre : le choix memorise suit.
+// Sans ca, « Charge & ETP » decoche dans Avancement laisserait le niveau
+// « L'annee » vide chez ce client, et la case pour le rallumer serait ailleurs.
+var _PIL_SHOW_MIGR = { avc_etp:'an_frise' };
+function _pilMigrShow(st){
+  if(!st||!st.show) return st;
+  for(var k in _PIL_SHOW_MIGR){
+    if(!Object.prototype.hasOwnProperty.call(_PIL_SHOW_MIGR,k)) continue;
+    if(st.show[k]!=null && st.show[_PIL_SHOW_MIGR[k]]==null) st.show[_PIL_SHOW_MIGR[k]]=st.show[k];
+    delete st.show[k];
+  }
+  return st;
+}
 // Les deux onglets composites portent un intertitre par moitie. Sans ce test,
 // masquer tous les indicateurs d'une moitie laisserait son titre orphelin.
 function _pilAnyShow(ids){ for(var i=0;i<ids.length;i++){ if(_pilShow(ids[i])) return true; } return false; }
 function _pilLoadState(){
-  try{ var raw=localStorage.getItem(_pilUserKey()); if(raw){ var n=_pilNormalize(JSON.parse(raw)); if(n) return n; } }catch(e){}
-  try{ var rawD=localStorage.getItem(_pilDomKey()); if(rawD){ var nd=_pilNormalize(JSON.parse(rawD)); if(nd) return nd; } }catch(e){}
+  try{ var raw=localStorage.getItem(_pilUserKey()); if(raw){ var n=_pilNormalize(JSON.parse(raw)); if(n) return _pilMigrShow(n); } }catch(e){}
+  try{ var rawD=localStorage.getItem(_pilDomKey()); if(rawD){ var nd=_pilNormalize(JSON.parse(rawD)); if(nd) return _pilMigrShow(nd); } }catch(e){}
   return _pilCloneDefault();
 }
 function _pilSaveState(st){ try{ localStorage.setItem(_pilUserKey(), JSON.stringify(st)); }catch(e){} }
@@ -112,11 +125,33 @@ var _PIL_CAVSUB = 'urg';
 // L'ECONOMIE et la CONFORMITE partageaient un seul onglet. Deux metiers, deux
 // questions, deux rythmes : l'une se consulte le lundi matin, l'autre avant un
 // controle. Les melanger obligeait a masquer la moitie de l'ecran pour lire l'autre.
-var _PIL_TABS = [['auj','\uD83E\uDDED','Aujourd\'hui'],['avc','\uD83C\uDF47','Avancement'],['sim','\uD83C\uDF9B\uFE0F','Décider'],['equ','\uD83D\uDC65','Équipe'],['cav','\uD83C\uDF77','Cave'],['eco','\uD83D\uDCB6','Économie'],['cfm','\uD83D\uDEE1\uFE0F','Conformité']];
+// ════════════════════════════════════════════════════════════════════════════
+// LA BARRE EST UN AXE DE ZOOM, PLUS UNE LISTE DE SUJETS.
+// Sept onglets a plat, c'etaient sept SUJETS : on ne voyait donc jamais
+// l'annee, on tombait dans un sujet. L'ordre va desormais du large au fin —
+// l'annee, la campagne, les gens et les taches, la simulation — et les trois
+// derniers sont des ECRANS DE DETAIL, ou l'on arrive en cliquant une photo.
+// ⚠️ Les cles ne changent PAS (`avc`, `equ`, `sim`…) : elles sont memorisees
+//    chez les clients, citees par app.js et verifiees par C22. On renomme et
+//    on reordonne ; on ne renumerote rien en base.
+// ════════════════════════════════════════════════════════════════════════════
+var _PIL_TABS = [
+  ['auj','\uD83E\uDDED','Aujourd\'hui'],
+  ['an', '\uD83D\uDDD3\uFE0F','L\'année'],
+  ['avc','\uD83C\uDF47','La campagne'],
+  ['equ','\uD83D\uDC65','L\'équipe & les tâches'],
+  ['sim','\uD83C\uDF9B\uFE0F','Simuler'],
+  ['cav','\uD83C\uDF77','Cave'],
+  ['eco','\uD83D\uDCB6','Économie'],
+  ['cfm','\uD83D\uDEE1\uFE0F','Conformité']
+];
+// Ou s'arrete le zoom et ou commencent les ecrans de detail. La barre pose un
+// filet entre les deux : sans lui, « Cave » se lit comme un cinquieme niveau.
+var _PIL_ZOOM_FIN = 'sim';
 // Outils : accessibles par le bouton dedie, pas dans la barre.
 var _PIL_TOOLS = [['arc','\uD83D\uDDC3\uFE0F','Archives'],['param','\u2699\uFE0F','Paramétrage']];
 var _PIL_LABELS = {auj:'Aujourd\'hui',avc:'Avancement',equ:'Équipe & matériel',cav:'Cave',eco:'Économie — budget, rythme de dépense et prix de revient',cfm:'Conformité — cuivre, passages phyto et délai de rentrée',arc:'Archives des campagnes',sim:'Décider — effectif, renfort et ordre de passage',param:'Paramétrage'};
-var _PIL_VALID_TAB = {auj:1,avc:1,equ:1,cav:1,eco:1,cfm:1,arc:1,sim:1,param:1};
+var _PIL_VALID_TAB = {auj:1,an:1,avc:1,equ:1,cav:1,eco:1,cfm:1,arc:1,sim:1,param:1};
 // Migration des onglets memorises avant le regroupement.
 // Migration des cles memorisees : `ecf` (l'onglet composite) part sur l'economie.
 // `eco` et `cfm` etaient des cles historiques deja vues : elles redeviennent valides.
@@ -3368,6 +3403,19 @@ function _pilTabAuj(d){
 }
 
 // ── Onglet AVANCEMENT ──
+// ── Niveau 1 : L'ANNEE ──────────────────────────────────────────────────────
+// La vue d'ensemble. On y voit les douze mois d'un coup, les campagnes qui les
+// decoupent, et le cadre comptable qui dit ou l'annee commence. On zoome
+// depuis ici : cliquer une campagne pose la portee, et tout le module suit.
+function _pilTabAn(d){
+  // Le bandeau d'alignement annee/vendange est deja DANS _pilPanelEtp
+  // (_pilAnneeVigneHtml). On ne le rappelle pas ici : deux cadres de l'annee
+  // sur un meme ecran, c'est la faute qu'on corrige.
+  var H='';
+  if(_pilShow('an_frise')) H+='<div class="pil-panels">'+_pilPanelEtp(d)+'</div>';
+  return H || '<div class="pil-empty">Aucun indicateur affiché.</div>';
+}
+
 function _pilTabAvc(d){
   var H='';
   if(_pilShow('avc_gauge')) H+='<div class="pil-gauge" id="pil-gauge"></div>';
@@ -3378,12 +3426,10 @@ function _pilTabAvc(d){
   var panels='';
   if(_pilShow('avc_echeances')) panels+=_pilPanelEcheances(d);
   if(_pilShow('avc_carte')) panels+=_pilPanelCarte(d);
-  // « Charge & ETP » reste ICI. Deplace vers Decider au lot 3, il y faisait
-  // DOUBLON : _pilPanelRenfort trace deja la meme frise _pilFriseSvg, et son
-  // profil hebdo dit la meme chose que _pilDemandSvg. Chacun sa question :
-  // Avancement montre le REEL (suis-je en sous-effectif cette annee ?),
-  // Decider montre le PROSPECTIF (et si j'etais N ?).
-  if(_pilShow('avc_etp')) panels+=_pilPanelEtp(d);
+  // « Charge & ETP » a QUITTE cet onglet : il porte une frise de douze mois,
+  // il n'a rien a faire dans un ecran qui parle d'une campagne. Il ouvre
+  // maintenant le niveau « L'annee ». Il n'est pas duplique : il n'existe
+  // qu'a un seul endroit, et c'est celui qui repond a sa question.
 
   if(panels) H+='<div class="pil-panels">'+panels+'</div>';
   return H || '<div class="pil-empty">Aucun indicateur affiché.</div>';
@@ -6366,7 +6412,8 @@ function _pilTabCfm(d){
 // ── Personnalisation PAR ONGLET (visibilité des tuiles) ──
 var _PIL_PERSO_DEFS={
   auj:[['auj_marge','Marge sur objectif'],['auj_charge','Charge restante'],['auj_cadence','Cadence équipe'],['auj_budget','Budget consommé & dérive'],['auj_etp','ETP présents / requis'],['auj_jours','Jours favorables'],['auj_pres','À la vigne aujourd\'hui'],['auj_traiter','Traiter ?'],['auj_prio','Tâche prioritaire'],['auj_alertes','Alertes matériel & cave']],
-  avc:[['avc_gauge','Jauge de saison'],['avc_bar','Avancement par tâche'],['avc_pie','Charge (donut)'],['avc_echeances','Échéances par tâche'],['avc_carte','Carte du domaine'],['avc_etp','Charge & ETP']],
+  an: [['an_frise','Les 52 semaines de l\'exercice']],
+  avc:[['avc_gauge','Jauge de saison'],['avc_bar','Avancement par tâche'],['avc_pie','Charge (donut)'],['avc_echeances','Échéances par tâche'],['avc_carte','Carte du domaine']],
   equ:[['prs_equipe','Équipe'],['prs_presences','Présences du jour'],['prs_capacite','Capacité vs charge'],['mat_tracteur','Parc tracteur'],['mat_gnr','Cuve GNR'],['mat_phyto','Registre phyto'],['mat_traitement','Fenêtre de traitement']],
   sim:[['sim_ordre','Ordre de passage'],['sim_etsi','Répartition « et si ? »'],['sim_cout','Renfort : combien et quand']],
   cfm:[['cfm_cuivre','Cuivre (bio · 7 ans)'],['cfm_ift','Passages phyto / IFT'],['cfm_dre','Délai de rentrée (DRE)']]
@@ -6480,8 +6527,19 @@ window._arcOpenCmp = function(){
 
 function _pilTabsHtml(tab){
   var cur=_PIL_TOOLS.find(function(t){return t[0]===tab;});
+  // Le numero de niveau se lit AVANT le nom : c'est lui qui dit que la barre
+  // se parcourt de gauche a droite, du large au fin. « Aujourd'hui » n'en
+  // porte pas : ce n'est pas un niveau de zoom, c'est le present. Et les
+  // ecrans de detail non plus — les numeroter ferait croire a huit niveaux.
+  var niv=0, apres=false, poseSep=false;
   var h='<div class="mvu-tabs mvu-pil" id="pil-tabs">'+_PIL_TABS.map(function(t){
-    return '<button class="mvu-tab'+(t[0]===tab?' active':'')+'" data-tab="'+t[0]+'"><span class="mvu-tab-em">'+t[1]+'</span>'+t[2]+'</button>';
+    var sep=poseSep?'<span class="pil-tabsep" aria-hidden="true"></span>':'';
+    poseSep=false;
+    var n='';
+    if(!apres && t[0]!=='auj') n='<span class="pil-lvn">'+(++niv)+'</span>';
+    if(t[0]===_PIL_ZOOM_FIN){ apres=true; poseSep=true; }
+    return sep+'<button class="mvu-tab'+(t[0]===tab?' active':'')+'" data-tab="'+t[0]+'">'
+      +n+'<span class="mvu-tab-em">'+t[1]+'</span>'+t[2]+'</button>';
   }).join('');
   // Outil actif : epingle en fin de barre pour que l'utilisateur voie ou il se trouve.
   if(cur) h+='<button class="mvu-tab active" data-tab="'+cur[0]+'"><span class="mvu-tab-em">'+cur[1]+'</span>'+cur[2]+'</button>';
@@ -6517,7 +6575,7 @@ function _pilHdrHtml(d){
 function _pilSkeleton(d,tab){
   // L'onglet Économie n'a pas de roue crantée : ses trois sous-vues remplacent la
   // liste de cases à cocher, et l'on ne masque pas un poste de dépense à la carte.
-  var perso=(tab==='auj'||tab==='avc'||tab==='equ'||tab==='sim'||tab==='cfm')?'<button class="pil-gear2" id="pil-gear"><span>\u2699</span> Choisir les indicateurs</button>':'';
+  var perso=(tab==='auj'||tab==='an'||tab==='avc'||tab==='equ'||tab==='sim'||tab==='cfm')?'<button class="pil-gear2" id="pil-gear"><span>\u2699</span> Choisir les indicateurs</button>':'';
   _pilCssV2(); _pilScopeLoad();
   // La barre de portee se pose ENTRE le masthead et les onglets : elle dit ou
   // l'on regarde avant de dire ce que l'on regarde. Les photos ouvrent le
@@ -6567,7 +6625,13 @@ function _pilCssV2(){
   +'.pil-photo .s{display:block;font-size:11.5px;color:var(--texte-doux);margin-top:2px;line-height:1.35}'
   +'.pil-photo .go{display:block;font-size:10.5px;color:var(--terre);font-weight:700;margin-top:7px}'
   +'.pil-flag{display:inline-flex;align-items:center;justify-content:center;width:15px;height:15px;border-radius:50%;font-size:10px;font-weight:800;color:#fff;flex-shrink:0}'
+  +'.pil-lvn{display:inline-flex;align-items:center;justify-content:center;width:17px;height:17px;border-radius:50%;background:var(--gris-clair);color:var(--texte-doux);font-size:10px;font-weight:800;margin-right:6px;flex-shrink:0;font-family:Outfit,sans-serif}'
+  +'.mvu-tab.active .pil-lvn{background:var(--cave);color:var(--or-clair)}'
+  // Le filet dit ou s'arrete le zoom. Sans lui, « Cave » se lit comme un
+  // cinquieme niveau, et la barre redevient une liste de sujets.
+  +'.pil-tabsep{display:inline-block;width:1px;align-self:stretch;min-height:22px;margin:0 9px;background:var(--gris);flex-shrink:0}'
   +'@media(max-width:880px){.pil-photos{grid-template-columns:1fr 1fr}}'
+  +'@media(max-width:520px){.pil-tabsep{margin:0 5px}.pil-lvn{margin-right:4px}}'
   +'@media(max-width:430px){.pil-photo .v{font-size:27px}.pil-portee-in{padding:8px 11px}}';
   var el=document.createElement('style'); el.id='pil-css-v2'; el.textContent=css;
   document.head.appendChild(el);
@@ -6660,8 +6724,10 @@ function _pilPhotosHtml(){
   var fT='';
   if(D.trous>0) fT=_pilFlag('r',D.trous+' trou(s) dans le calendrier \u2014 ce travail n\u2019est compt\u00e9 nulle part');
   else if(D.ovl>0) fT=_pilFlag('o','Des p\u00e9riodes se chevauchent \u2014 des heures comptent deux fois');
+  // La photo descend d'UN cran, pas au fond : sans portee elle mene a l'annee,
+  // avec une campagne selectionnee elle mene a cette campagne. C'est le zoom.
   var pTrav=_pilPhotoHtml('Travaux','\uD83C\uDF3F',_pilNb(D.hTot),' h',
-    D.hTot>0?(D.pct+' % fait '+cadre):('aucune t\u00e2che dat\u00e9e '+cadre),'avc',fT);
+    D.hTot>0?(D.pct+' % fait '+cadre):('aucune t\u00e2che dat\u00e9e '+cadre), camp?'avc':'an', fT);
 
   // EFFECTIF — le pic, et le manque en clair s'il y en a un.
   var sE = D.pic>0
@@ -6918,6 +6984,7 @@ function _pilFillContent(d){
   var tab=_PIL_TAB;
   if(tab==='param'){ host.innerHTML=_pilParamBody(d); _pilBindParam(d); return; }
   if(tab==='auj') host.innerHTML=_pilTabAuj(d);
+  else if(tab==='an') host.innerHTML=_pilTabAn(d);
   else if(tab==='avc') host.innerHTML=_pilTabAvc(d);
   else if(tab==='equ') host.innerHTML=
       (_pilAnyShow(['prs_equipe','prs_presences','prs_capacite'])?'<div class="pil-sec-h">Personnel</div>'+_pilTabPrs(d):'')
