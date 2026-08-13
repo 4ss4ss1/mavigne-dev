@@ -23,7 +23,7 @@ export const GT_ADMIN_EMAIL = 'ngdevpro@gmail.com';
 // WHATS_NEW   : tableau vide = modal desactive pour cette version.
 // Format item : { emoji:'📅', titre:'Titre court', desc:'Phrase utilisateur.' }
 // Regle : seulement les changements visibles par les utilisateurs.
-export const APP_VERSION = '6.07';
+export const APP_VERSION = '6.08';
 // ════ Journal des nouveautés (récap cumulatif) ════
 // Une entrée par version, la PLUS RÉCENTE EN HAUT : { v:'5.10', items:[ {emoji,titre,desc}, … ] }
 // À chaque release visible → AJOUTER un bloc en tête (ne pas remplacer). items:[] = release technique (rien à afficher).
@@ -354,6 +354,16 @@ window._mvGraphRepeindre = function(){
 };
 
 export const WHATS_NEW = [
+  { v:'6.08', items:[
+    { emoji: '\u{1F347}', titre: "Avant vendange : o\u00f9 en est le domaine quand on n\u2019a mesur\u00e9 que cinq parcelles",
+      desc: "Le Cuvier tra\u00e7ait la courbe d\u2019une parcelle, mais pas la r\u00e9ponse qu\u2019on cherche en montant au cuvier\u202f: la moyenne du <b>domaine</b>, celle des <b>rouges</b>, celle des <b>blancs</b>, et le classement de <b>toutes</b> les parcelles de la plus avanc\u00e9e \u00e0 la plus en retard. La moyenne est <b>pond\u00e9r\u00e9e par la surface</b> \u2014 sinon une demi-ouvr\u00e9e p\u00e8serait autant qu\u2019un hectare. Et le nombre de parcelles mesur\u00e9es est \u00e9crit \u00e0 c\u00f4t\u00e9 du chiffre\u202f: si vous n\u2019avez sorti le r\u00e9fractom\u00e8tre que sur les parcelles en avance, ce n\u2019est pas la moyenne du domaine, c\u2019est la moyenne des parcelles en avance." },
+    { emoji: '\u{1F5D3}', titre: "Une mesure de la semaine derni\u00e8re ne dit plus o\u00f9 en est la parcelle",
+      desc: "Seules les mesures des <b>7 derniers jours</b> comptent par d\u00e9faut (14 jours ou toute la vendange au choix). Une parcelle rest\u00e9e \u00e0 huit jours sort de la moyenne mais reste <b>affich\u00e9e</b>, avec la date de sa derni\u00e8re mesure et ce qu\u2019elle vaudrait \u00e0 sa cadence connue \u2014 annonc\u00e9 comme une projection, jamais compt\u00e9 comme une mesure. Les parcelles <b>d\u00e9j\u00e0 rentr\u00e9es</b> ne tirent plus la moyenne de ce qui reste \u00e0 ramasser." },
+    { emoji: '\u{1F52C}', titre: "Changer le coefficient sucre/degr\u00e9 rechiffrait vos analyses pass\u00e9es",
+      desc: "Le coefficient des R\u00e9glages du Cuvier \u00e9tait relu \u00e0 chaque affichage\u202f: le modifier aujourd\u2019hui d\u00e9calait <b>r\u00e9troactivement</b> toutes les mesures saisies dans l\u2019autre unit\u00e9, sans que rien ne le signale. Il est d\u00e9sormais <b>enregistr\u00e9 avec chaque analyse</b>. Au passage, l\u2019unit\u00e9 affich\u00e9e en gros suit celle que vous saisissez\u202f: si vous lisez votre degr\u00e9 au r\u00e9fractom\u00e8tre, vous ne verrez plus un chiffre en grammes que personne n\u2019a mesur\u00e9." },
+    { emoji: '\u{1F344}', titre: "Votre c\u00e9page n\u2019\u00e9tait pas dans la liste",
+      desc: "La fiche parcelle ne proposait que <b>huit c\u00e9pages bourguignons</b> et « Autre ». Un domaine du Bordelais, du Rh\u00f4ne ou de la Loire ne pouvait donc enregistrer ni Merlot, ni Syrah, ni Chenin \u2014 et « Autre » ne permet pas de savoir si la parcelle est en rouge ou en blanc. Le menu compte maintenant <b>47 c\u00e9pages regroup\u00e9s par r\u00e9gion</b>. Vos saisies existantes ne bougent pas." },
+  ] },
   { v:'6.07', items:[
     { emoji: '\u{1F4CC}', titre: "La barre du haut dispara\u00eessait d\u00e8s qu\u2019on faisait d\u00e9filer",
       desc: "La ligne qui dit <b>ce que vous regardez</b> \u2014 l\u2019exercice, ou une campagne \u00e9pingl\u00e9e \u2014 passait sous la barre des onglets au premier d\u00e9filement. Vous pouviez donc lire un tableau filtr\u00e9 sur les vendanges en croyant regarder l\u2019ann\u00e9e enti\u00e8re. Les deux barres se rangent d\u00e9sormais l\u2019une sous l\u2019autre, et le fil reste visible du haut en bas de la page." },

@@ -4863,17 +4863,20 @@ var _MAT_CAMP_J  = 150;    // au-dela, c'est la vendange precedente
 
 var _MV_CEP_COUL = {
   'pinot noir':'r','gamay':'r','cesar':'r','pinot meunier':'r','merlot':'r','syrah':'r',
-  'cabernet sauvignon':'r','cabernet franc':'r','grenache':'r','malbec':'r','cot':'r',
-  'mourvedre':'r','carignan':'r','cinsault':'r','tannat':'r','petit verdot':'r',
-  'poulsard':'r','trousseau':'r','nebbiolo':'r','sangiovese':'r','tempranillo':'r',
+  'cabernet sauvignon':'r','cabernet franc':'r','grenache':'r','grenache noir':'r',
+  'malbec':'r','cot':'r','mourvedre':'r','carignan':'r','cinsault':'r','tannat':'r',
+  'petit verdot':'r','carmenere':'r','negrette':'r','grolleau':'r',"pineau d'aunis":'r',
+  'mondeuse':'r','poulsard':'r','trousseau':'r','nebbiolo':'r','sangiovese':'r','tempranillo':'r',
   'chardonnay':'b','aligote':'b','pinot blanc':'b','pinot gris':'b','melon de bourgogne':'b',
-  'sauvignon':'b','sauvignon blanc':'b','semillon':'b','muscadelle':'b','viognier':'b',
-  'chenin':'b','riesling':'b','savagnin':'b','gewurztraminer':'b','marsanne':'b',
-  'roussanne':'b','ugni blanc':'b','colombard':'b','muscat':'b','sylvaner':'b'
+  'sacy':'b','sauvignon':'b','sauvignon blanc':'b','sauvignon gris':'b','semillon':'b',
+  'muscadelle':'b','viognier':'b','grenache blanc':'b','clairette':'b','bourboulenc':'b',
+  'vermentino':'b','folle blanche':'b','chenin':'b','riesling':'b','savagnin':'b',
+  'gewurztraminer':'b','marsanne':'b','roussanne':'b','ugni blanc':'b','colombard':'b',
+  'muscat':'b','sylvaner':'b'
 };
 
 function _matNorm(s){
-  var t = String(s || '').trim().toLowerCase();
+  var t = String(s || '').trim().toLowerCase().replace(/\u2019/g, "'");
   return t.normalize ? t.normalize('NFD').replace(/[\u0300-\u036f]/g, '') : t;
 }
 // Couleur d'une parcelle. Le cepage tranche ; un choix manuel prime.

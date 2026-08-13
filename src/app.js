@@ -6281,7 +6281,27 @@ function renderParcelles(){
 }
 
 // ── Cépage ──
-var CEPAGES=['Pinot Noir','Chardonnay','Aligoté','Gamay','Pinot Gris','Pinot Blanc','Melon de Bourgogne','Autre'];
+// Cepages proposes a la saisie. La liste etait bourguignonne : un domaine
+// bordelais ne pouvait choisir que « Autre », et « Autre » n'a pas de couleur —
+// ses parcelles arrivaient toutes « a classer » dans la synthese de maturite.
+// Regroupes pour rester lisibles dans un menu deroulant sur telephone.
+// ⚠️ Tout libelle ajoute ici doit exister dans _MV_CEP_COUL (cave.js), sinon la
+// parcelle retombe « a classer » : c'est le libelle qui sert de cle.
+var CEPAGES_GR=[
+  ['Bourgogne & Beaujolais',['Pinot Noir','Chardonnay','Aligoté','Gamay','Pinot Gris','Pinot Blanc','Melon de Bourgogne','César','Sacy']],
+  ['Bordeaux & Sud-Ouest',['Merlot','Cabernet Sauvignon','Cabernet Franc','Malbec','Petit Verdot','Carménère','Tannat','Négrette','Sémillon','Sauvignon Blanc','Sauvignon Gris','Muscadelle','Colombard','Ugni Blanc']],
+  ['Rhône & Méditerranée',['Syrah','Grenache Noir','Mourvèdre','Cinsault','Carignan','Grenache Blanc','Viognier','Marsanne','Roussanne','Clairette','Bourboulenc','Vermentino']],
+  ['Loire, Alsace & Jura',['Chenin','Grolleau','Pineau d\u2019Aunis','Mondeuse','Poulsard','Trousseau','Riesling','Gewurztraminer','Sylvaner','Muscat','Savagnin','Folle Blanche']]
+];
+// Liste a plat : conserve CEPAGES.indexOf() pour la valeur hors liste preservee.
+var CEPAGES=CEPAGES_GR.reduce(function(a,g){return a.concat(g[1]);},[]).concat(['Autre']);
+function _cepOptions(cur){
+  return CEPAGES_GR.map(function(g){
+    return '<optgroup label="'+g[0]+'">'+g[1].map(function(c){
+      return '<option value="'+c+'"'+(c===cur?' selected':'')+'>'+c+'</option>';
+    }).join('')+'</optgroup>';
+  }).join('')+'<option value="Autre"'+(cur==='Autre'?' selected':'')+'>Autre</option>';
+}
 var _dpCurrentNom='';
 
 function openDPCepage(nom){
@@ -6304,7 +6324,7 @@ function openDPCepage(nom){
     if(!sel)return;
     var cur=curArr[i]||'';
     var placeholder=i===0?'':'— Aucun';
-    var opts=(i>0?'<option value="">'+placeholder+'</option>':'')+CEPAGES.map(function(c){return '<option value="'+c+'"'+(c===cur?' selected':'')+'>'+c+'</option>';}).join('');
+    var opts=(i>0?'<option value="">'+placeholder+'</option>':'')+_cepOptions(cur);
     sel.innerHTML=opts;
     if(cur&&CEPAGES.indexOf(cur)<0&&cur!=='Autre'){sel.innerHTML+='<option value="'+cur+'" selected>'+cur+'</option>';}
     sel.value=cur||'';

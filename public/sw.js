@@ -1,4 +1,62 @@
-// MA VIGNE — Service Worker v6.57
+// MA VIGNE — Service Worker v6.58
+// v6.58 (13/08/2026) — MATURITE : « OU EN EST-ON » QUAND ON N'A PAS TOUT MESURE.
+//   Le Cuvier savait tracer la courbe d'une parcelle, pas repondre a la question
+//   qu'on se pose en montant au cuvier avant vendange : ou en est le domaine, les
+//   rouges, les blancs, alors qu'on n'a sorti le refractometre que sur cinq
+//   parcelles sur quinze. Nouvelle carte en tete de Cuvier > Analyses.
+//   ★ CE QUI EST MESURE NE MENT PAS, CE QUI EST DEDUIT LE DIT :
+//   1. LA MOYENNE EST PONDEREE PAR LA SURFACE. Une moyenne simple ferait peser
+//      0,26 ha autant que 1,54 ha ; la benne, elle, ne compte pas les parcelles.
+//      La moyenne sans ponderation reste affichee en petit, juste dessous.
+//   2. FENETRE DE FRAICHEUR, 7 JOURS PAR DEFAUT (14 j, ou toute la vendange). Une
+//      mesure de huit jours moyennee avec celle du matin ne dit plus ou on en est :
+//      sur le jeu de recette, 204 g/L a 7 jours contre 197 a 14. Meme domaine, meme
+//      jour. Les parcelles ecartees restent AFFICHEES avec la date de leur derniere
+//      mesure, et leur projection a la cadence connue — annoncee comme projection,
+//      jamais comptee dans la moyenne.
+//   3. LA COUVERTURE EST ECRITE A COTE DU CHIFFRE (n parcelles sur N, % de surface).
+//      Si on ne mesure que les parcelles en avance, la « moyenne du domaine » est la
+//      moyenne des parcelles en avance. La carte le dit en toutes lettres.
+//   4. LES PARCELLES DEJA RENTREES SORTENT DU CALCUL, les arrachees aussi.
+//   ★ CLASSEMENT DE TOUTES LES PARCELLES sur une piste commune : pastille sur un
+//     axe, pas de barre — l'axe ne part pas de zero et une barre tronquee exagere
+//     les ecarts. Mesurees fraiches en tete, puis les hors-fenetre (pastille
+//     creuse), les jamais analysees (repliees a 3 lignes + total en ha), les
+//     rentrees barrees. Taper « Rouges » ou « Blancs » filtre tout l'ensemble.
+//   ★ COULEUR DEDUITE DU CEPAGE (table de 40). Deux cepages de couleurs
+//     differentes complantes, ou « Autre » : la parcelle n'est PAS classee d'office,
+//     elle passe en bas de carte avec deux boutons Rouge/Blanc, choix memorise.
+//     Elle compte dans le domaine, pas dans les deux colonnes.
+//   ★★★ LE COEFFICIENT SUCRE/DEGRE EST DESORMAIS FIGE DANS CHAQUE ANALYSE. Il etait
+//     lu a la volee dans les reglages : changer le reglage aujourd'hui redressait
+//     retroactivement toutes les mesures saisies dans l'autre unite. Le passe se
+//     reecrivait tout seul, sans que rien ne le signale. Meme famille que le taux
+//     horaire scalaire de v6.56. Les analyses d'avant portent le reglage courant en
+//     repli : zero ecriture, zero migration.
+//   ★ L'UNITE AFFICHEE SUIT LA SAISIE. Un domaine qui lit son degre au
+//     refractometre ne doit pas trouver un chiffre en g/L en gros : personne ne l'a
+//     mesure. Graduations posees sur des valeurs rondes DANS L'UNITE AFFICHEE.
+//     Les valeurs converties depuis l'autre unite sont soulignees en pointille,
+//     avec le sens de la conversion en pied de carte.
+//   ⚠️ DEUX DEFAUTS TROUVES PAR LE HARNAIS, PAS PAR LA RELECTURE :
+//     · une parcelle rentree JAMAIS analysee porte suc=null et entrait dans les
+//       bornes de l'echelle. Math.min(null,...) vaut 0 : l'axe serait parti de
+//       -10 g/L, toutes les pastilles ecrasees a droite.
+//     · une recolte de l'ANNEE DERNIERE sortait la parcelle du calcul cette annee.
+//       Analyses et recoltes sont bornees a 150 jours — au-dela c'est la vendange
+//       precedente. C'est pourquoi le 3e bouton dit « Cette vendange », pas « Toutes ».
+//   ★ LA LISTE DES CEPAGES PASSE DE 8 A 47, groupee par region (optgroup). Elle
+//     etait bourguignonne : un domaine bordelais ne pouvait choisir que « Autre »,
+//     et « Autre » n'a pas de couleur — TOUTES ses parcelles seraient arrivees « a
+//     classer » dans la synthese ci-dessus. Ce n'est pas la table de couleurs qui
+//     echouait, c'est que le mot « Merlot » ne pouvait pas etre ECRIT depuis
+//     l'interface : les trois champs sont des <select>, sans saisie libre.
+//     CEPAGES reste a plat (derive des groupes) pour que indexOf() continue de
+//     preserver une valeur hors liste venue d'un import. Un test croise verifie que
+//     chaque libelle propose a bien une couleur — le libelle EST la cle.
+//     _matNorm ramene aussi l'apostrophe typographique, sinon « Pineau d'Aunis »
+//     ne trouvait jamais la sienne.
+//   Guide > Cave et Guide > Vigne mis a jour dans le meme lot (C22).
 // v6.57 (12/08/2026) — AUDIT DU PILOTAGE : CE QUE L'ECRAN PROMETTAIT SANS LE TENIR.
 //   Onze defauts trouves en relisant le module apres la refonte du 12/08 (§34).
 //   ★★★ TROIS ETAIENT DES PROMESSES NON TENUES PAR L'ECRAN LUI-MEME :
@@ -1119,7 +1177,7 @@
 // v2.22 — Fix profils vides : guard vide dans loadData() pour MEMBRES/SAISONS/TACHES
 // v2.17 — Onboarding intégré + tenantId · v2.06 — Firebase Auth · v2.00–v2.05 — divers
 const DEBUG = self.location.hostname === 'localhost' || self.location.hostname === '127.0.0.1';
-const CACHE_NAME   = 'mavigne-v6.57';
+const CACHE_NAME   = 'mavigne-v6.58';
 const TENANT_CACHE = 'mavigne-tenant';   // Cache persistant — préservé à chaque mise à jour SW
 const SYNC_TAG     = 'mavigne-sync';
 
@@ -1135,7 +1193,7 @@ const CDN_URLS = [
 ];
 
 self.addEventListener('install', event => {
-  if(DEBUG) console.log('[SW] Ma Vigne v6.57 installé');
+  if(DEBUG) console.log('[SW] Ma Vigne v6.58 installé');
   event.waitUntil(
     caches.open(CACHE_NAME).then(async cache => {
       // ── Cœur applicatif : STRICT (mise à jour ATOMIQUE) ──
@@ -1151,7 +1209,7 @@ self.addEventListener('install', event => {
 });
 
 self.addEventListener('activate', event => {
-  if(DEBUG) console.log('[SW] Ma Vigne v6.57 activé');
+  if(DEBUG) console.log('[SW] Ma Vigne v6.58 activé');
   event.waitUntil(
     caches.keys().then(keys =>
       Promise.all(
