@@ -355,15 +355,13 @@ window._mvGraphRepeindre = function(){
 
 export const WHATS_NEW = [
   { v:'6.08', items:[
-    { emoji: '\u{1F347}', titre: "Avant vendange : o\u00f9 en est le domaine quand on n\u2019a mesur\u00e9 que cinq parcelles",
-      desc: "Le Cuvier tra\u00e7ait la courbe d\u2019une parcelle, mais pas la r\u00e9ponse qu\u2019on cherche en montant au cuvier\u202f: la moyenne du <b>domaine</b>, celle des <b>rouges</b>, celle des <b>blancs</b>, et le classement de <b>toutes</b> les parcelles de la plus avanc\u00e9e \u00e0 la plus en retard. La moyenne est <b>pond\u00e9r\u00e9e par la surface</b> \u2014 sinon une demi-ouvr\u00e9e p\u00e8serait autant qu\u2019un hectare. Et le nombre de parcelles mesur\u00e9es est \u00e9crit \u00e0 c\u00f4t\u00e9 du chiffre\u202f: si vous n\u2019avez sorti le r\u00e9fractom\u00e8tre que sur les parcelles en avance, ce n\u2019est pas la moyenne du domaine, c\u2019est la moyenne des parcelles en avance." },
-    { emoji: '\u{1F5D3}', titre: "Une mesure de la semaine derni\u00e8re ne dit plus o\u00f9 en est la parcelle",
-      desc: "Seules les mesures des <b>7 derniers jours</b> comptent par d\u00e9faut (14 jours ou toute la vendange au choix). Une parcelle rest\u00e9e \u00e0 huit jours sort de la moyenne mais reste <b>affich\u00e9e</b>, avec la date de sa derni\u00e8re mesure et ce qu\u2019elle vaudrait \u00e0 sa cadence connue \u2014 annonc\u00e9 comme une projection, jamais compt\u00e9 comme une mesure. Les parcelles <b>d\u00e9j\u00e0 rentr\u00e9es</b> ne tirent plus la moyenne de ce qui reste \u00e0 ramasser." },
-    { emoji: '\u{1F52C}', titre: "Changer le coefficient sucre/degr\u00e9 rechiffrait vos analyses pass\u00e9es",
-      desc: "Le coefficient des R\u00e9glages du Cuvier \u00e9tait relu \u00e0 chaque affichage\u202f: le modifier aujourd\u2019hui d\u00e9calait <b>r\u00e9troactivement</b> toutes les mesures saisies dans l\u2019autre unit\u00e9, sans que rien ne le signale. Il est d\u00e9sormais <b>enregistr\u00e9 avec chaque analyse</b>. Au passage, l\u2019unit\u00e9 affich\u00e9e en gros suit celle que vous saisissez\u202f: si vous lisez votre degr\u00e9 au r\u00e9fractom\u00e8tre, vous ne verrez plus un chiffre en grammes que personne n\u2019a mesur\u00e9." },
-    { emoji: '\u{1F344}', titre: "Votre c\u00e9page n\u2019\u00e9tait pas dans la liste",
-      desc: "La fiche parcelle ne proposait que <b>huit c\u00e9pages bourguignons</b> et « Autre ». Un domaine du Bordelais, du Rh\u00f4ne ou de la Loire ne pouvait donc enregistrer ni Merlot, ni Syrah, ni Chenin \u2014 et « Autre » ne permet pas de savoir si la parcelle est en rouge ou en blanc. Le menu compte maintenant <b>47 c\u00e9pages regroup\u00e9s par r\u00e9gion</b>. Vos saisies existantes ne bougent pas." },
-  ] },
+    { emoji: '\u{1F4B6}', titre: "Un salari\u00e9 r\u00e9embauch\u00e9 retrouve ses heures et son co\u00fbt",
+      desc: "Depuis la version pr\u00e9c\u00e9dente, l\u2019application gardait bien les contrats pass\u00e9s d\u2019un salari\u00e9\u00a0\u2014 mais seulement pour dire qu\u2019il \u00e9tait <b>l\u00e0</b>. Ses heures et son salaire, eux, restaient \u00e0 z\u00e9ro sur toute la p\u00e9riode de l\u2019ancien contrat. Un CDD de mars \u00e0 juillet, archiv\u00e9 puis suivi d\u2019un nouveau contrat en ao\u00fbt, pesait <b>0\u00a0h et 0\u00a0\u20ac</b> dans l\u2019exercice au lieu de 735\u00a0h. Il n\u2019apparaissait m\u00eame pas comme une ligne vide\u00a0: il disparaissait de la liste, et le total \u00e9tait donc faux sans que rien ne le signale. La masse salariale, la capacit\u00e9 de l\u2019\u00e9quipe, la cadence et la pr\u00e9sence r\u00e9elle comptent d\u00e9sormais <b>tous</b> les contrats de la fiche. Attendez-vous \u00e0 voir ces chiffres monter\u00a0: ils \u00e9taient sous-\u00e9valu\u00e9s." },
+    { emoji: '\u{1F551}', titre: "Un saisonnier n\u2019a plus de compteur annuel qui n\u2019a pas lieu d\u2019\u00eatre",
+      desc: "Les TESA, saisonniers et extras sont pay\u00e9s <b>\u00e0 l\u2019heure</b>\u00a0: l\u2019annualisation ne les concerne pas. L\u2019application leur affichait pourtant un plafond de 1607\u00a0h proratis\u00e9, des heures de modulation et un \u00ab\u00a0reste \u00e0 faire\u00a0\u00bb\u00a0\u2014 des nombres qu\u2019ils ne toucheront jamais, et qu\u2019on ne v\u00e9rifie pas parce qu\u2019ils ont l\u2019air d\u2019une mesure. Leur fiche montre maintenant ce qui les concerne vraiment\u00a0: heures faites et jours travaill\u00e9s. Les CDI, CDD, apprentis et g\u00e9rants ne changent pas." },
+    { emoji: '\u{1F4C4}', titre: "Le relev\u00e9 PDF d\u2019un mois pass\u00e9 ne sort plus blanc",
+      desc: "Quand un contrat \u00e9tait archiv\u00e9, le relev\u00e9 des mois de ce contrat sortait <b>vide</b>\u00a0\u2014 pas une erreur, une page sans lignes. Le relev\u00e9 de mars d\u2019un salari\u00e9 r\u00e9embauch\u00e9 en ao\u00fbt \u00e9tait donc introuvable, alors qu\u2019il en a besoin pour la MSA. Chaque mois sort d\u00e9sormais le relev\u00e9 du contrat qui le couvre, et l\u2019en-t\u00eate indique lequel." }
+  ]},
   { v:'6.07', items:[
     { emoji: '\u{1F4CC}', titre: "La barre du haut dispara\u00eessait d\u00e8s qu\u2019on faisait d\u00e9filer",
       desc: "La ligne qui dit <b>ce que vous regardez</b> \u2014 l\u2019exercice, ou une campagne \u00e9pingl\u00e9e \u2014 passait sous la barre des onglets au premier d\u00e9filement. Vous pouviez donc lire un tableau filtr\u00e9 sur les vendanges en croyant regarder l\u2019ann\u00e9e enti\u00e8re. Les deux barres se rangent d\u00e9sormais l\u2019une sous l\u2019autre, et le fil reste visible du haut en bas de la page." },
@@ -2201,15 +2199,44 @@ window._mvOrdreRangs = function(tache, noms){
 // ⚠️ CE QUI LIT CETTE FONCTION, ET CE QUI NE LA LIT PAS. Trois questions
 // distinctes, qu'un seul couple de dates confondait :
 //   1. « est-il la AUJOURD'HUI ? »            -> _mvEnContratLe
-//   2. « a-t-il travaille pendant CETTE PERIODE ? » -> _mvEnContratSurPeriode
-//      et _inContractDay (planning.js) : ces deux-la voient TOUS les contrats,
-//      c'est le sens meme de la question, et c'est ce qui effacait le passe.
+//   2. « a-t-il travaille pendant CETTE PERIODE ? » -> _mvEnContratSurPeriode,
+//      _inContractDay et _planJourCouvert (planning.js) : ces trois-la voient
+//      TOUS les contrats, c'est le sens meme de la question, et c'est ce qui
+//      effacait le passe. _planJourCouvert est le portail des MESURES DE
+//      FENETRE : masse salariale de l'exercice, capacite, cadence, presence.
+//      Il se pose via _planWide(), jamais en dur.
 //   3. « combien d'heures lui doit-on sur CE contrat ? » -> _planInContract
 //      (planning.js) : plafond des 1607 h, conges, grille. Celui-la ne voit QUE
 //      le contrat en cours et NE DOIT PAS changer. Elargir le prorata melangerait
-//      deux contrats en un seul compteur.
+//      deux contrats en un seul compteur. Un contrat qui se termine SOLDE son
+//      compteur (paye, donc a zero) ; le suivant repart de sa date de debut,
+//      sans du ni indu.
 // Le couple debut_contrat/fin_contrat garde donc exactement son sens : le contrat
 // EN COURS, celui que lit la paie. m.contrats[] ne porte que les PRECEDENTS.
+// ══════════════════════════════════════════════════════════════════════
+// QUI EST SOUMIS A L'ANNUALISATION — une seule definition, ici
+// ══════════════════════════════════════════════════════════════════════
+// TESA, saisonniers et extras sont payes A L'HEURE : pas de plafond annuel,
+// pas de modulation, pas de compteur qui se solde au 31 decembre. Leur
+// afficher un plafond de 1607 h proratise, c'est afficher un nombre qu'ils
+// ne toucheront jamais — et un nombre faux se defend tout seul dans une
+// discussion de bulletin, parce qu'il a l'autorite d'une mesure.
+// ⚠️ PAS de derogation par fiche : une option que personne ne regle
+// correctement est pire que pas d'option.
+// ⚠️ La liste enumere ce qu'on RETIRE, pas ce qu'on garde. Une liste d'inclusion
+// ferait sortir de l'annualisation tout type absent de la liste — un libelle
+// futur, une donnee importee, une faute de frappe — et ferait donc DISPARAITRE
+// un compteur en silence. Ici, tout ce qui n'est pas nomme reste annualise :
+// un domaine existant garde exactement le compteur qu'il avait.
+window.MV_HORS_ANNU = ['TESA', 'Saisonnier', 'Extra'];
+window._mvAnnualise = function(m){
+  if(!m) return true;
+  // Une ligne d'equipe collective n'a deja ni compteur, ni conges, ni releve
+  // individuel : ces compteurs sont propres a UN salarie.
+  if(window._mvEstCollectif && window._mvEstCollectif(m)) return false;
+  return window.MV_HORS_ANNU.indexOf(m.type_contrat || 'CDI') < 0;
+};
+
 window._mvContrats = function(m){
   if(!m) return [];
   var out = [];

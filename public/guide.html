@@ -601,10 +601,7 @@ mark{background:rgba(200,176,32,.32);color:var(--cream);border-radius:3px;paddin
   <h4>La fiche d'une parcelle</h4>
   <ul class="dot">
     <li>Avancement tâche par tâche, surface, heures estimées et heures restantes.</li>
-    <li><b>🍇 Cépage</b> : cépage principal, et jusqu'à trois cépages pour une parcelle complantée.
-      Le menu couvre la Bourgogne, le Bordelais et le Sud-Ouest, le Rhône et le Midi, la Loire,
-      l'Alsace et le Jura — regroupés par région. Le cépage sert aussi à ranger la parcelle en
-      <b>rouge</b> ou en <b>blanc</b> dans la synthèse de maturité du Cuvier.</li>
+    <li><b>🍇 Cépage</b> : cépage principal, et jusqu'à trois cépages pour une parcelle complantée.</li>
     <li><b>📍 Commune</b> : sert d'étiquette et de repli pour la météo par secteur.</li>
     <li><b>Historique des rendements</b> par millésime, alimenté par les récoltes saisies en Cave.</li>
     <li><b>📍 Ouvrir dans GPS</b> pour s'y rendre, <b>🗺️ Ouvrir dans carte</b> pour la situer.</li>
@@ -943,41 +940,12 @@ mark{background:rgba(200,176,32,.32);color:var(--cream);border-radius:3px;paddin
       <li>Densités, températures, analyses de laboratoire</li>
       <li>Courbes de suivi de fermentation</li>
       <li>Pièce jointe PDF possible sur une analyse</li>
-      <li><b>Maturité avant vendange</b> : sucre ou degré au réfractomètre, parcelle par parcelle</li>
     </ul></div>
     <div class="card"><h4>⚙️ Réglages du Cuvier</h4><ul class="dot">
       <li>Déclaration des cuves et de leurs volumes</li>
       <li>Paramètres de suivi propres au domaine</li>
     </ul></div>
   </div>
-
-  <h4 style="margin-top:22px">🍇 Maturité : « où en est-on » quand on n'a pas tout mesuré</h4>
-  <p>Au-dessus des courbes, l'onglet <b>Analyses</b> affiche une synthèse à date : la moyenne du
-  <b>domaine</b>, celle des <b>rouges</b> et celle des <b>blancs</b>, puis le classement de toutes les
-  parcelles, de la plus avancée à la plus en retard. Tapez sur « Rouges » ou « Blancs » pour ne garder
-  que celles-là ; retapez pour revenir au domaine.</p>
-  <ul class="dot">
-    <li><b>La fenêtre.</b> Par défaut, seules les mesures des <b>7 derniers jours</b> comptent — une
-      mesure de la semaine dernière ne dit plus où en est la parcelle aujourd'hui. Deux autres boutons
-      élargissent à 14 jours ou à toute la vendange. Les parcelles écartées restent affichées, sous la
-      barre, avec la date de leur dernière mesure.</li>
-    <li><b>La moyenne est pondérée par la surface</b>, sinon un demi-ouvrée pèserait autant qu'un
-      hectare. La moyenne sans pondération est rappelée en petit, juste dessous.</li>
-    <li><b>Ce n'est pas la moyenne du domaine</b> : c'est la moyenne de ce qui a été mesuré. Le nombre
-      de parcelles et le pourcentage de surface couverte sont écrits à côté de chaque chiffre.</li>
-    <li><b>Les parcelles déjà rentrées sortent du calcul</b> : elles ne tirent plus la moyenne de ce
-      qui reste à ramasser.</li>
-    <li><b>La couleur des pastilles</b> vient du cépage. Quand le cépage ne permet pas de trancher
-      (« Autre », ou deux couleurs complantées), la parcelle est signalée en bas de la carte avec deux
-      boutons <b>Rouge</b> / <b>Blanc</b> : votre choix est mémorisé. En attendant, elle compte dans le
-      domaine mais pas dans les deux colonnes.</li>
-    <li><b>Sucre ou degré ?</b> Les deux, au choix, à la saisie. L'unité affichée en gros suit celle
-      que vous employez le plus. Les valeurs converties depuis l'autre unité sont <b>soulignées en
-      pointillé</b> : ce sont des conversions, pas des mesures.</li>
-  </ul>
-  <div class="note tip"><span class="ni" aria-hidden="true">💡</span><div>Le coefficient de conversion
-  (Réglages du Cuvier, <b>sucre par degré</b>) est <b>enregistré avec chaque analyse</b>. Le modifier
-  plus tard ne change donc pas les mesures déjà saisies — seulement les suivantes.</div></div>
 
   <h3>🛢️ Le Chai — élevage</h3>
   <ul class="dot">
@@ -1212,14 +1180,21 @@ mark{background:rgba(200,176,32,.32);color:var(--cream);border-radius:3px;paddin
 
   <h3>📈 Le compteur annuel (annualisation)</h3>
   <p>En haut de la fiche d'un salarié, le compteur d'heures suit l'année civile.</p>
+  <p><b>Il ne concerne pas tout le monde.</b> Les <b>TESA</b>, <b>saisonniers</b> et <b>extras</b>
+  sont payés à l'heure : pas de plafond annuel, pas de modulation, pas de solde à la clôture.
+  Leur fiche affiche à la place leurs <b>heures faites</b> et leurs <b>jours travaillés</b>, qui
+  sont ce dont ils ont besoin pour la MSA. Les gérants, CDI, CDD et apprentis sont annualisés.</p>
   <ul class="dot">
     <li>Le plafond de 1&nbsp;607&nbsp;h est <b>proratisé aux jours réellement sous contrat</b> : un
-    saisonnier de quatre mois n'a évidemment pas le même plafond qu'un permanent.</li>
+    CDD de quatre mois n'a évidemment pas le même plafond qu'un permanent à l'année.</li>
     <li>Il est mesuré en <b>travail effectif</b> : congés, arrêts et récupérations n'y entrent pas.
     Les 1&nbsp;607&nbsp;h sont déjà calculées congés déduits.</li>
     <li>Les <b>heures de modulation</b> (au-delà de la durée légale hebdomadaire) sont comptées à part,
     face à leur propre plafond annuel.</li>
     <li>Une <b>projection</b> indique où le compteur atterrira à ce rythme.</li>
+    <li>Un contrat qui se termine <b>solde</b> son compteur : il est payé, donc remis à zéro. Si la
+    personne resigne plus tard, le nouveau contrat repart de sa date de début — rien n'est dû
+    d'un côté ni de l'autre. Deux contrats qui se suivent sans un jour de coupure ne font qu'un.</li>
   </ul>
 
   <h3>🏖️ Congés payés</h3>
