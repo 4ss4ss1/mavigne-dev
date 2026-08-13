@@ -2972,14 +2972,25 @@ function _rfCtx(d,mode,cdIn){
     W=WA.slice(i0).map(function(w,k){
       var o0=(k===0)?Math.max(w.o0,oT):w.o0;
       var nd=Math.max(1,w.o1-w.o0+1), ndr=Math.max(0,w.o1-o0+1);
-      var fr=(k===0)?(ndr/nd):1, cp=(w.cap||0)*fr;
+      var fr=(k===0)?(ndr/nd):1;
+      // \u2605 LA SEMAINE EN COURS SE COUPE AU JOUR (12/08/2026). Le prorata
+      //   `fr` supposait les heures etalees a plat sur les sept jours : un
+      //   mercredi, il gardait 5/7 d'une semaine dont le week-end vaut 0 et dont
+      //   une equipe collective peut porter la totalite sur deux jours. Meme
+      //   defaut, meme correction que _pilCapaProj — et meme source : capCum via
+      //   _rfCapIn pour la capacite 1 ETP, capRCum via _mvCapReelIn pour les
+      //   heures reelles. `fr` ne sert plus que de repli quand la donnee manque.
+      var cpX=_rfCapIn(cd,o0,w.o1+1), cp=(cpX!=null)?cpX:(w.cap||0)*fr;
+      var CR=(typeof window._mvCapReelIn==='function')?window._mvCapReelIn(cd,o0,w.o1+1):null;
       // need RECALCULE sur le reste : garder celui du plan ferait mentir la
       // hauteur des colonnes du graphe.
       var wh=0; tw.forEach(function(t){ wh+=_rfHIn(cd,t,o0,w.o1+1); });
       return { o0:o0, o1:w.o1, m:w.m, hours:wh, cap:cp, need:(cp>0?wh/cp:0),
                head:w.head, headPerm:w.headPerm,
-               capH:(w.capH!=null?w.capH*fr:null), capPay:(w.capPay!=null?w.capPay*fr:null),
-               capHPerm:(w.capHPerm!=null?w.capHPerm*fr:null), capPayPerm:(w.capPayPerm!=null?w.capPayPerm*fr:null) };
+               capH:CR?CR.work:(w.capH!=null?w.capH*fr:null),
+               capPay:CR?CR.pay:(w.capPay!=null?w.capPay*fr:null),
+               capHPerm:CR?CR.workPerm:(w.capHPerm!=null?w.capHPerm*fr:null),
+               capPayPerm:CR?CR.payPerm:(w.capPayPerm!=null?w.capPayPerm*fr:null) };
     });
   }
   // ★ `pic` (le besoin hebdomadaire maximal) etait calcule ici et renvoye dans le
@@ -4023,33 +4034,69 @@ function _pilCapaProj(charge, startIso){
                   .sort(function(a,b){ return a.o0-b.o0; });
   if(!ws.length) return null;
 
-  var cum=0, couvert=o0-1, nSem=0, hTotal=0;
+  // \u2605\u2605\u2605 UNE SEMAINE ENTAMEE SE LIT AU JOUR, PAS AU PRORATA (12/08/2026).
+  //   AVANT : h = capH x (jours retenus / jours de la semaine). Les heures d'une
+  //   semaine ne sont pas etalees a plat sur ses sept jours — un week-end vaut 0,
+  //   et une equipe de vendange sous contrat du 26 aout au 4 septembre a TOUTES
+  //   ses heures dans les jours qu'on garde. Rogner la semaine du 24 au 30 aout
+  //   de 2/7 retirait 2/7 des heures de 40 vendangeurs absents les 24 et 25.
+  //   Mesure : meme equipe, meme charge, meme depart, fin annoncee entre le
+  //   7 septembre et le 1er octobre — voire « capacite insuffisante » — selon la
+  //   seule date d'ouverture de la periode, qui decide de l'alignement des
+  //   semaines. La reponse juste, lue jour par jour, ne bougeait pas : 4 sept.
+  //   La faute ne se voyait pas : apres la vendange il ne reste qu'une personne,
+  //   donc chaque heure perdue coute un JOUR de retard affiche.
+  //   MAINTENANT : _mvCapReelIn(cd, a, b) (planning.js), le cumul jour par jour
+  //   des heures reellement travaillables, lu sur la periode a laquelle la
+  //   semaine appartient (w.per -> ann.pers[].cd). Meme source pour la plage et
+  //   pour la descente au jour : la date de fin est le jour ou le cumul atteint
+  //   le besoin, pas une fraction de semaine arrondie.
+  //   \u26a0 REPLI ANNONCE (approx) si la donnee manque — cd d'un planning.js
+  //   anterieur a ce lot. On ne remplace jamais une mesure absente par une
+  //   estimation muette.
+  function _capIn(w,a,b){
+    var cdP=(ann.pers&&ann.pers[w.per])?ann.pers[w.per].cd:null;
+    var R=(typeof window._mvCapReelIn==='function')?window._mvCapReelIn(cdP,a,b):null;
+    return (R&&R.work!=null)?R.work:null;
+  }
+  var cum=0, couvert=o0-1, nSem=0, approx=false;
   for(var i=0;i<ws.length;i++){
     var w=ws[i];
     var a=Math.max(w.o0, couvert+1);
     if(a>w.o1) continue;                       // semaine deja couverte : doublon
     var nd=w.o1-w.o0+1;
-    // Semaine entamee (le depart tombe dedans) ou tronquee par un
-    // chevauchement : on prend la part de jours qui reste, au prorata.
-    var h=(w.capH||0)*((w.o1-a+1)/Math.max(1,nd));
+    var exact=_capIn(w,a,w.o1+1);
+    var h=(exact!=null)?exact:(w.capH||0)*((w.o1-a+1)/Math.max(1,nd));
+    if(exact==null) approx=true;
     couvert=w.o1;
     if(!(h>0)) continue;
-    nSem++; hTotal+=h;
+    nSem++;
     if(cum+h>=besoin){
-      // Descente au JOUR : une semaine de 300 h ferait « finir dimanche » un
-      // travail termine le mardi. On repartit la semaine sur ses jours au
-      // prorata, ce qui suffit a la maille d'une date affichee.
-      var frac=(besoin-cum)/h, jour=a+Math.max(0,Math.ceil(frac*(w.o1-a+1))-1);
-      if(jour>w.o1) jour=w.o1;
+      var jour=w.o1;
+      if(exact!=null){
+        // Descente au JOUR, sur la MEME source : le premier jour ou le cumul
+        // atteint le besoin. Une semaine de 300 h ne fait plus « finir dimanche »
+        // un travail termine le mardi.
+        var c2=cum;
+        for(var o=a;o<=w.o1;o++){
+          var dh=_capIn(w,o,o+1); if(dh==null||!(dh>0)) continue;
+          if(c2+dh>=besoin){ jour=o; break; }
+          c2+=dh;
+        }
+      } else {
+        var frac=(besoin-cum)/h; jour=a+Math.max(0,Math.ceil(frac*(w.o1-a+1))-1);
+        if(jour>w.o1) jour=w.o1;
+      }
       return { ok:true, fin:_pilOrdDate(jour), finOrd:jour, k:k, kOk:kOk,
-               besoin:besoin, hDispo:cum+h, sem:nSem };
+               besoin:besoin, hDispo:cum+h, sem:nSem, approx:approx };
     }
     cum+=h;
   }
   // La capacite planifiee ne suffit pas jusqu'au bout du cadre connu. C'est une
   // REPONSE, pas une panne : elle chiffre le manque en heures.
   return { ok:false, fin:null, k:k, kOk:kOk, besoin:besoin, hDispo:cum,
-           manque:Math.max(0,besoin-cum), sem:nSem, finCadre:_pilOrdDate(couvert) };
+           manque:Math.max(0,besoin-cum), sem:nSem, approx:approx,
+           finCadre:_pilOrdDate(couvert) };
 }
 function _pilOrdDate(o){ return new Date(Date.parse('2026-01-01T00:00:00')+o*86400000); }
 
@@ -4149,16 +4196,29 @@ function _pilCkEtp(d){
   //   Il lisait _pilSaison() : sur l'annee entiere il repondait pour une seule
   //   campagne (36,6) sous une photo qui repondait pour l'annee. Meme mot, deux
   //   nombres, a quinze centimetres l'un de l'autre.
+  // ★★★ DEUX DATES SOUS UNE SEULE BARRE DE FRACTION (12/08/2026).
+  //   La tuile ecrivait « 1 / 38,6 pers. — sous-effectif au pic ». Le 1 etait
+  //   la presence d'AUJOURD'HUI, le 38,6 le besoin de la SEMAINE DU PIC. Un
+  //   12 aout, avec 40 vendangeurs sous contrat de groupe a partir du 26, la
+  //   tuile criait au sous-effectif pendant que la photo juste au-dessus
+  //   annoncait « 42 presents cette semaine-la ». Deux verdicts opposes a
+  //   quinze centimetres l'un de l'autre, et aucune contradiction dans les
+  //   donnees : c'est le RAPPROCHEMENT qui etait faux.
+  //   Le module savait deja repondre : PP.head (effectif de la semaine du pic)
+  //   et PP.manque, que « Capacite vs charge » lit deja depuis le 12/08. La
+  //   tuile compare desormais PP.head a PP.pic — meme semaine, meme unite —
+  //   et la presence du jour reste ou elle a un sens : la tuile
+  //   « A la vigne aujourd'hui », juste en dessous.
   var PP=_pilPicPortee();
-  var present=d.presentChamp!=null?d.presentChamp:0;
   var req=PP.ok?PP.pic:null;
-  var low=(req!=null && present<req-0.05);
-  // present et req sont maintenant la MEME grandeur : des personnes, equipes
-  // collectives ponderees des deux cotes. Le mot « ETP » melangeait deux unites.
+  var low=(req!=null && (PP.manque||0)>0.05);
+  // val et req sont la MEME grandeur A LA MEME DATE : des personnes de la semaine
+  // du pic, equipes collectives ponderees des deux cotes.
+  var val=(req!=null)?(PP.head||0):(d.presentChamp!=null?d.presentChamp:0);
   var reqTxt=(req!=null)?(' / '+_pilEtpFmt(req)+' pers.'):'';
   var sous = (req==null) ? 'à la vigne aujourd\'hui'
-    : ((low?'sous-effectif':'capacité suffisante')+' au pic \u00b7 '+_pilCadreLbl(PP));
-  return '<div class="pil-ck"><div class="kl">Effectif</div><div class="kv">'+_pilEtpFmt(present)+'<span class="u">'+reqTxt+'</span></div>'
+    : ((low?('manque '+_pilEtpFmt(PP.manque)+' pers.'):'couvert')+' au pic \u00b7 '+_pilCadreLbl(PP));
+  return '<div class="pil-ck"><div class="kl">Effectif au pic</div><div class="kv">'+_pilEtpFmt(val)+'<span class="u">'+reqTxt+'</span></div>'
     +'<div class="ks"'+(low?' style="color:var(--orange);font-weight:600"':'')+'>'+_pilEsc(sous)+'</div></div>';
 }
 function _pilCkJours(){

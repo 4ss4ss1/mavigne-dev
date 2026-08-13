@@ -991,26 +991,56 @@ function _chargeSaisonData(s){
     var b=PLANNING_ENTRIES[nom]; var y=b&&b[yr]; var mo=y&&y[m];
     return (mo&&mo[d])||null;
   }
-  function _capWeekReal(o0,o1){
+  // ══ LA CAPACITE REELLE SE LIT AU JOUR, JAMAIS AU PRORATA DE LA SEMAINE ══
+  // \u26a0\u26a0 DEFAUT MESURE LE 12/08/2026, CAPTURE DE NICO A L'APPUI.
+  //   La projection de fin (_pilCapaProj) et le simulateur (_rfCtx) decoupaient une
+  //   semaine ENTAMEE en multipliant capH par (jours retenus / jours de la semaine).
+  //   Or les heures d'une semaine ne sont PAS reparties a plat sur ses sept jours :
+  //   le week-end vaut 0, aout est ferme jusqu'au 24, et surtout une equipe de
+  //   vendange sous contrat du 26 aout au 4 septembre concentre TOUTES ses heures
+  //   sur les jours qu'on garde. Retirer 2/7 de la semaine du 24 au 30 aout, c'est
+  //   retirer 2/7 des heures de 40 vendangeurs qui n'etaient pas la les 24 et 25.
+  //   MESURE. Meme equipe, meme charge (2 352 h), meme depart (26 aout). La SEULE
+  //   chose qui change est la date d'ouverture de la periode, donc l'endroit ou
+  //   tombe la grille des semaines. Fin projetee : 7 sept. (periode ouverte le 26),
+  //   10 sept. (le 25), 23 sept. (le 24), 1er oct. (le 20) et meme « capacite
+  //   insuffisante » (le 21). Lue jour par jour, la reponse vaut 4 SEPTEMBRE dans
+  //   les cinq cas — le dernier jour du contrat de groupe.
+  //   Une date de fin qui depend de l'alignement du calendrier n'est pas une
+  //   projection, c'est un artefact. Et l'erreur ne se voit pas : apres la vendange
+  //   il ne reste qu'une personne, donc chaque heure perdue coute un jour entier.
+  // \u2605 UNE SEULE DEFINITION. _capDayReal(o) rend les quatre mesures d'UN jour,
+  //   capRCum en fait un cumul (meme convention que capCum : plage [a,b) exclusive
+  //   a droite), _capReelIn lit une plage, _capWeekReal n'est plus qu'un appel.
+  //   Personne ne recalcule, donc personne ne peut donner un second chiffre.
+  function _capDayReal(o){
     var out={work:0,pay:0,workPerm:0,payPerm:0};
-    if(typeof _planWorkH!=='function'||typeof _planDayH!=='function') return null;
+    var ds=_ford(o);
+    var yr=parseInt(ds.slice(0,4),10), mi=parseInt(ds.slice(5,7),10)-1, dj=parseInt(ds.slice(8,10),10);
     mbrs.forEach(function(mb){
+      if(!_inContractDay(mb,ds))return;
       var coll=!!(window._mvEstCollectif&&window._mvEstCollectif(mb));
       // Meme convention que _headWeek : l'effectif PAR DEFAUT de la fiche, pas la
       // saisie du jour. Une lecture hebdomadaire lissee n'y gagnerait rien.
       var w=(coll&&typeof window._mvEffDef==='function')?window._mvEffDef(mb):1;
-      var plId=_planPlId(mb);
-      for(var o=o0;o<=o1;o++){
-        var ds=_ford(o);
-        if(!_inContractDay(mb,ds))continue;
-        var yr=parseInt(ds.slice(0,4),10), mi=parseInt(ds.slice(5,7),10)-1, dj=parseInt(ds.slice(8,10),10);
-        var e=_entDayY(mb.nom,yr,mi,dj);
-        var hw=_planWorkH(plId,mi,dj,e,yr)*w, hp=_planDayH(plId,mi,dj,e,yr)*w;
-        out.work+=hw; out.pay+=hp;
-        if(!coll){ out.workPerm+=hw; out.payPerm+=hp; }
-      }
+      var plId=_planPlId(mb), e=_entDayY(mb.nom,yr,mi,dj);
+      var hw=_planWorkH(plId,mi,dj,e,yr)*w, hp=_planDayH(plId,mi,dj,e,yr)*w;
+      out.work+=hw; out.pay+=hp;
+      if(!coll){ out.workPerm+=hw; out.payPerm+=hp; }
     });
     return out;
+  }
+  function _capReelIn(a,b){
+    if(!capRCum) return null;
+    var i=Math.round(a)-spanS, j=Math.round(b)-spanS, L=capRCum.length-1;
+    if(i<0)i=0; if(i>L)i=L; if(j<0)j=0; if(j>L)j=L;
+    if(j<=i) return {work:0,pay:0,workPerm:0,payPerm:0};
+    var A=capRCum[i], B=capRCum[j];
+    return {work:B.w-A.w,pay:B.p-A.p,workPerm:B.wp-A.wp,payPerm:B.pp-A.pp};
+  }
+  function _capWeekReal(o0,o1){
+    if(typeof _planWorkH!=='function'||typeof _planDayH!=='function') return null;
+    return _capReelIn(o0,o1+1);
   }
   // \u2605\u2605\u2605 LA CAPACITE CUMULEE, JOUR PAR JOUR, SORT D'ICI.
   //   Le simulateur de renfort recalculait les heures de chaque semaine avec SA
@@ -1024,6 +1054,18 @@ function _chargeSaisonData(s){
   //   simulateur lit ce tableau ; il n'y a plus qu'UNE definition de l'etalement.
   var capCum=[0];
   for(var _cc=spanS;_cc<=spanE;_cc++) capCum.push(capCum[capCum.length-1]+_cap1(_cc));
+  // \u2605 LE MEME CUMUL, SUR LES HEURES REELLES DE L'EQUIPE (quatre mesures).
+  //   capCum repond « combien de temps offre UNE personne ce jour-la » (le
+  //   template). capRCum repond « combien d'heures l'equipe SIGNEE offre ce
+  //   jour-la » : modele de chacun, entrees du planning, contrats, effectif
+  //   collectif. C'est cette seconde mesure que lisent la projection de fin et le
+  //   simulateur ; elle n'existait qu'agregee a la semaine, ce qui interdisait
+  //   toute lecture d'une semaine entamee autrement qu'au prorata du calendrier.
+  var capRCum=[{w:0,p:0,wp:0,pp:0}];
+  for(var _cr=spanS;_cr<=spanE;_cr++){
+    var _dd=_capDayReal(_cr), _lv=capRCum[capRCum.length-1];
+    capRCum.push({w:_lv.w+_dd.work,p:_lv.p+_dd.pay,wp:_lv.wp+_dd.workPerm,pp:_lv.pp+_dd.payPerm});
+  }
   var weeks=[];
   for(var wo=spanS; wo<=spanE; wo+=7){
     var wo0=wo, wo1=Math.min(spanE,wo+6), wh=0;
@@ -1074,9 +1116,21 @@ function _chargeSaisonData(s){
     if(w.need>peakReq){ peakReq=w.need; peakWeek=w; peakMonth=w.m; peakPres=w.head||0; }
     if(w.need>(w.head||0)+0.05) anyShort=true;
   });
-  return {saison:s.nom,debut:s.debut,fin:s.fin,spanS:spanS,spanE:spanE,capCum:capCum,charge:charge,tasks:taskDet,months:months,capRefTotal:capRefTotal,etpCible:etpCible,capEquipe:capEquipe,etpDispo:etpDispo,nMbr:mbrs.length,taskWindows:taskWindows,weeks:weeks,capPresentTotal:capPresentTotal,etpPresent:etpPresent,peakReq:peakReq,peakMonth:peakMonth,peakWeek:peakWeek,peakPres:peakPres,anyShort:anyShort};
+  return {saison:s.nom,debut:s.debut,fin:s.fin,spanS:spanS,spanE:spanE,capCum:capCum,capRCum:capRCum,charge:charge,tasks:taskDet,months:months,capRefTotal:capRefTotal,etpCible:etpCible,capEquipe:capEquipe,etpDispo:etpDispo,nMbr:mbrs.length,taskWindows:taskWindows,weeks:weeks,capPresentTotal:capPresentTotal,etpPresent:etpPresent,peakReq:peakReq,peakMonth:peakMonth,peakWeek:peakWeek,peakPres:peakPres,anyShort:anyShort};
 }
 window._chargeSaisonData=_chargeSaisonData;
+// \u2605\u2605 LA MEME LECTURE, DEPUIS LES AUTRES MODULES.
+//   [a,b) en ordinaux (base 2026-01-01), exactement la convention de capCum et de
+//   _rfCapIn (pilotage.js). Rend les quatre mesures d'une plage de jours.
+//   null = la donnee n'est pas la (cd d'un planning.js anterieur a ce lot) : a
+//   l'appelant de retomber sur son ancien calcul, et de le dire.
+window._mvCapReelIn=function(cd,a,b){
+  if(!cd||!cd.capRCum||cd.spanS==null) return null;
+  var C=cd.capRCum, i=Math.round(a)-cd.spanS, j=Math.round(b)-cd.spanS, L=C.length-1;
+  if(i<0)i=0; if(i>L)i=L; if(j<0)j=0; if(j>L)j=L;
+  if(j<=i) return {work:0,pay:0,workPerm:0,payPerm:0};
+  return {work:C[j].w-C[i].w,pay:C[j].p-C[i].p,workPerm:C[j].wp-C[i].wp,payPerm:C[j].pp-C[i].pp};
+};
 
 // ── Heures TRAVAILLÉES / PRÉVUES sur une SAISON, agrégées depuis le Planning (pour le Rapport de saison). ──
 // Ne renvoie une valeur QUE si la saison tient ENTIÈREMENT dans UNE MÊME année civile (multi-années) :
