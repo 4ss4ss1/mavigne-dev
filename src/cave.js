@@ -4209,7 +4209,16 @@ var _caveBtlConfirm  = null;      // id cuvée en attente de confirmation d'embo
 
 function _mvBtl(hl){ return Math.round((hl||0)*100/0.75); }               // bouteilles 75 cl
 function _mvF1(n){ return (Math.round((n||0)*10)/10).toString().replace('.',','); }
-function _vendAnaAlc(a){ var spd=(_vendCfg().sucre_par_degre)||16.83; return a.mode==='alc'?(a.val||0):((a.val||0)/spd); }
+// Le coefficient sucre/degre est FIGE dans l'analyse au moment de la saisie.
+// Sans cela, changer le reglage aujourd'hui redresserait retroactivement toutes
+// les mesures saisies dans l'autre unite : le passe se reecrirait tout seul.
+// Les analyses d'avant portent le reglage courant en repli — zero ecriture.
+function _anaSpd(a, def){
+  var f = parseFloat(a && a.spd);
+  if(f > 0) return f;
+  return def || (_vendCfg().sucre_par_degre) || 16.83;
+}
+function _vendAnaAlc(a){ var spd=_anaSpd(a); return a.mode==='alc'?(a.val||0):((a.val||0)/spd); }
 
 function _caveV2InjectCss(){
   if(document.getElementById('mv-cave-v2-css')) return;
@@ -4229,6 +4238,85 @@ function _caveV2InjectCss(){
   +'.mvc-cuv-sout{display:flex;align-items:center;gap:7px;flex-wrap:wrap;margin-top:5px}'
   +'.mvc-tag-sout{background:rgba(93,124,168,.12);color:#4A6E9C;border:1px solid rgba(93,124,168,.25)}'
   +'.mvc-sout-note{font-size:10px;color:var(--texte-doux)}'
+  /* — Synthese de maturite a date (Cuvier > Analyses) — */
+  +'.mvsy{background:var(--bg-card,#FBFAF6);border:1px solid var(--gris-clair,#ECE6DA);border-radius:14px;padding:15px;margin:2px 0 14px;box-shadow:0 1px 4px rgba(20,17,13,.06)}'
+  +'.mvsy-hd{display:flex;align-items:baseline;justify-content:space-between;gap:8px;margin-bottom:11px}'
+  +'.mvsy-ttl{font-size:10px;letter-spacing:1.5px;text-transform:uppercase;color:var(--texte-doux,#5F5F5F);font-weight:600}'
+  +'.mvsy-dt{font-size:11px;color:var(--texte-doux,#5F5F5F);font-variant-numeric:tabular-nums}'
+  +'.mvsy-fen{display:flex;border:1px solid var(--gris-clair,#ECE6DA);border-radius:9px;overflow:hidden;margin-bottom:12px}'
+  +'.mvsy-fen button{flex:1;background:var(--bg-card,#FBFAF6);border:0;padding:9px 4px;font-family:inherit;font-size:12px;color:var(--texte-doux,#5F5F5F);cursor:pointer;border-left:1px solid var(--gris-clair,#ECE6DA);min-height:38px}'
+  +'.mvsy-fen button:first-child{border-left:0}'
+  +'.mvsy-fen button.on{background:var(--terre,#8A5A38);color:#fff;font-weight:600}'
+  +'.mvsy-tiles{display:flex;gap:8px}'
+  +'.mvsy-t{flex:1;min-width:0;position:relative;overflow:hidden;display:block;text-align:left;font-family:inherit;color:inherit;cursor:pointer;background:var(--blanc,#FBFAF6);border:1px solid var(--gris-clair,#ECE6DA);border-radius:12px;padding:10px 9px 9px}'
+  +'.mvsy-t::before{content:"";position:absolute;left:0;top:0;bottom:0;width:3px;background:var(--gris,#DED7C9)}'
+  +'.mvsy-t.dom::before{background:var(--terre,#8A5A38)}'
+  +'.mvsy-t.rge::before{background:var(--rouge,#A0291E)}'
+  +'.mvsy-t.bl::before{background:var(--or,#C2A14D)}'
+  +'.mvsy-t.sel{border-color:var(--terre,#8A5A38);box-shadow:0 0 0 2px var(--terre-pale,#F3EADF)}'
+  +'.mvsy-t .lb{display:block;font-size:9.5px;letter-spacing:.09em;text-transform:uppercase;color:var(--texte-doux,#5F5F5F);font-weight:600}'
+  +'.mvsy-t .gl{display:block;font-size:23px;font-weight:700;color:var(--texte,#2A241C);line-height:1.1;margin-top:3px;font-variant-numeric:tabular-nums}'
+  +'.mvsy-t .gl em{font-style:normal;font-size:11px;font-weight:500;color:var(--texte-doux,#5F5F5F);margin-left:2px}'
+  +'.mvsy-t .al{display:block;font-size:13px;font-weight:600;color:var(--bordeaux,#7A1020);font-variant-numeric:tabular-nums}'
+  +'.mvsy-t .cv{display:block;font-size:10px;color:var(--texte-doux,#5F5F5F);margin-top:5px;line-height:1.35}'
+  +'.mvsy-t.vide .gl{color:var(--texte-doux,#5F5F5F);font-size:17px;font-weight:600}'
+  +'.mvsy-simple{font-size:10.5px;color:var(--texte-doux,#5F5F5F);margin-top:8px;text-align:center;font-variant-numeric:tabular-nums}'
+  +'.mvcl{margin-top:14px;padding-top:12px;border-top:1px solid var(--gris-clair,#ECE6DA)}'
+  +'.mvcl-hd{display:flex;align-items:baseline;justify-content:space-between;margin-bottom:9px}'
+  +'.mvcl-ttl{font-size:10px;letter-spacing:1.4px;text-transform:uppercase;color:var(--texte-doux,#5F5F5F);font-weight:600}'
+  +'.mvcl-n{font-size:10.5px;color:var(--texte-doux,#5F5F5F)}'
+  +'.mvcl-vide{font-size:12px;color:var(--texte-doux,#5F5F5F);padding:6px 0}'
+  +'.mvcl-grad{display:grid;grid-template-columns:96px 1fr 52px;align-items:center;height:14px;margin-bottom:2px}'
+  +'.mvcl-grad .g{position:relative;height:100%}'
+  +'.mvcl-grad .g span{position:absolute;top:0;transform:translateX(-50%);font-size:9.5px;color:var(--texte-doux,#5F5F5F);font-variant-numeric:tabular-nums;white-space:nowrap}'
+  +'.mvcl-zone{position:relative}'
+  +'.mvcl-ov{position:absolute;left:96px;right:52px;top:0;bottom:0;pointer-events:none}'
+  +'.mvcl-ov i{position:absolute;top:0;bottom:0;width:0;border-left:1.5px dashed var(--terre,#8A5A38);opacity:.55}'
+  +'.mvcl-ov i.obj{border-left-style:solid;border-color:var(--vert-med,#3D6B27);opacity:.75}'
+  +'.mvcl-ov b{position:absolute;top:-1px;transform:translateX(-50%);font-size:9px;font-weight:700;padding:1px 4px;border-radius:5px;white-space:nowrap;letter-spacing:.04em}'
+  +'.mvcl-ov b.moy{background:var(--terre,#8A5A38);color:#fff}'
+  +'.mvcl-ov b.obj{background:var(--vert-med,#3D6B27);color:#fff}'
+  +'.mvcl-r{display:grid;grid-template-columns:96px 1fr 52px;align-items:center;height:26px}'
+  +'.mvcl-r .n{font-size:11.5px;font-weight:600;color:var(--texte,#2A241C);overflow:hidden;text-overflow:ellipsis;white-space:nowrap;padding-right:7px}'
+  +'.mvcl-r .pi{position:relative;height:100%}'
+  +'.mvcl-r .pi::before{content:"";position:absolute;left:0;right:0;top:50%;height:1.5px;margin-top:-.75px;background:var(--gris-clair,#ECE6DA);border-radius:2px}'
+  +'.mvcl-r .dot{position:absolute;top:50%;width:11px;height:11px;margin-top:-5.5px;margin-left:-5.5px;border-radius:50%;background:var(--gris,#DED7C9);box-shadow:0 0 0 2px var(--bg-card,#FBFAF6)}'
+  +'.mvcl-r .dot.r{background:var(--rouge,#A0291E)}'
+  +'.mvcl-r .dot.b{background:var(--or,#C2A14D)}'
+  +'.mvcl-r .dot.q{background:var(--texte-doux,#5F5F5F)}'
+  +'.mvcl-r .dot.old{background:var(--bg-card,#FBFAF6);border:2px solid var(--gris,#DED7C9)}'
+  +'.mvcl-r .dot.old.r{border-color:var(--rouge,#A0291E)}'
+  +'.mvcl-r .dot.old.b{border-color:var(--or,#C2A14D)}'
+  +'.mvcl-r .v{text-align:right;font-size:12px;font-weight:700;color:var(--texte,#2A241C);font-variant-numeric:tabular-nums;line-height:1.05}'
+  +'.mvcl-r .v s{text-decoration:none;display:block;font-size:9.5px;font-weight:500;color:var(--texte-doux,#5F5F5F)}'
+  +'.mvcl-r .v.conv b{border-bottom:1px dotted var(--texte-doux,#5F5F5F)}'
+  +'.mvcl-r.pale .n{font-weight:500;color:var(--texte-doux,#5F5F5F)}'
+  +'.mvcl-r.pale .v{font-weight:600;color:var(--texte-doux,#5F5F5F)}'
+  +'.mvcl-r.out .n{text-decoration:line-through;text-decoration-thickness:1px}'
+  +'.mvcl-sep{font-size:9.5px;letter-spacing:.09em;text-transform:uppercase;color:var(--texte-doux,#5F5F5F);padding:9px 0 3px;border-top:1px solid var(--gris-clair,#ECE6DA);margin-top:5px}'
+  +'.mvcl-plus{display:block;font-size:11px;color:var(--terre,#8A5A38);background:none;border:0;font-family:inherit;padding:8px 0 2px;cursor:pointer;text-align:left;text-decoration:underline}'
+  +'.mvcl-lg{display:flex;flex-wrap:wrap;gap:10px;margin-top:10px;font-size:10.5px;color:var(--texte-doux,#5F5F5F)}'
+  +'.mvcl-lg span{display:inline-flex;align-items:center;gap:5px}'
+  +'.mvcl-lg i{width:10px;height:10px;border-radius:50%;background:var(--gris,#DED7C9);flex:none}'
+  +'.mvcl-lg i.pl{background:var(--terre,#8A5A38)}'
+  +'.mvcl-lg i.cr{background:transparent;border:2px solid var(--gris,#DED7C9)}'
+  +'.mvcl-lg i.tr{width:0;height:11px;border-radius:0;border-left:1.5px dashed var(--terre,#8A5A38);background:none}'
+  +'.mvcl-lg i.cv{width:auto;height:auto;border-radius:0;background:none;font-style:normal;border-bottom:1px dotted var(--texte-doux,#5F5F5F);line-height:1}'
+  +'.mvcl-pied{font-size:10.5px;color:var(--texte-doux,#5F5F5F);margin-top:8px;line-height:1.45}'
+  +'.mvsy-ec{font-size:12px;color:var(--texte-med,#4A4A3A);margin-top:11px;padding-top:10px;border-top:1px solid var(--gris-clair,#ECE6DA);line-height:1.5}'
+  +'.mvsy-ec b{color:var(--terre,#8A5A38);font-weight:700}'
+  +'.mvsy-warn{font-size:11.5px;line-height:1.5;color:var(--texte-med,#4A4A3A);background:var(--orange-pale,#FBF0E6);border-radius:9px;padding:9px 10px;margin-top:10px}'
+  +'.mvsy-warn b{color:var(--orange,#B85A1A)}'
+  +'.mvsy-info{font-size:11.5px;line-height:1.5;color:var(--texte-doux,#5F5F5F);margin-top:9px}'
+  +'.mvsy-info b{color:var(--texte-med,#4A4A3A);font-weight:600}'
+  +'.mvsy-cls{margin-top:11px;padding-top:10px;border-top:1px solid var(--gris-clair,#ECE6DA)}'
+  +'.mvsy-cls .t{font-size:11.5px;color:var(--texte-med,#4A4A3A);margin-bottom:7px;line-height:1.45}'
+  +'.mvsy-clr{display:flex;align-items:center;gap:7px;padding:5px 0}'
+  +'.mvsy-clr .n{font-size:12.5px;font-weight:600;color:var(--texte,#2A241C);flex:1;min-width:0;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}'
+  +'.mvsy-clr button{font-family:inherit;font-size:11.5px;font-weight:600;padding:6px 12px;border-radius:8px;border:1px solid var(--gris,#DED7C9);background:var(--bg-card,#FBFAF6);color:var(--texte-doux,#5F5F5F);cursor:pointer;min-height:38px}'
+  +'.mvsy-clr button.r.on{background:var(--rouge,#A0291E);border-color:var(--rouge,#A0291E);color:#fff}'
+  +'.mvsy-clr button.b.on{background:var(--or,#C2A14D);border-color:var(--or,#C2A14D);color:#241B08}'
+  +'@media(max-width:360px){.mvcl-grad,.mvcl-r{grid-template-columns:78px 1fr 46px}.mvcl-ov{left:78px;right:46px}}'
   /* — Analyses maturité — */
   +'.mva-form{background:linear-gradient(180deg,#fff,var(--terre-pale,#F3EADF));border:1px solid rgba(201,168,76,.35);border-radius:14px;padding:14px;margin:2px 0 14px}'
   +'.mva-frow{display:flex;gap:8px;flex-wrap:wrap;align-items:flex-end}'
@@ -4608,7 +4696,7 @@ var MV_MAT_COL = ['var(--rouge)','var(--or)','var(--vert-med)','var(--terre)','v
 var MV_MAT_MAX = 6;   // au-dela, on garde les plus avancees et on le dit
 
 // Sucre en g/L, quelle que soit l'unite de saisie.
-function _matSuc(a, spd){ return a.mode === 'alc' ? (a.val || 0) * spd : (a.val || 0); }
+function _matSuc(a, spd){ var s = _anaSpd(a, spd); return a.mode === 'alc' ? (a.val || 0) * s : (a.val || 0); }
 
 // Le classement : derniere valeur, et vitesse sur les deux derniers releves.
 // La vitesse est le vrai signal — deux parcelles au meme sucre ne se recoltent
@@ -4754,6 +4842,322 @@ function _vendAnaSpark(arr,w){
   return window._mvGraphSvg(c,'Maturit\u00e9 : '+arr.length+' analyses, degr\u00e9 potentiel jusqu\u2019\u00e0 '+_mvF1(last)+' pour cent volume.',g);
 }
 
+// ══════════════════════════════════════════════════════════════════
+// ── SYNTHESE DE MATURITE A DATE (Cuvier › Analyses)
+//    Repond a « ou en est-on » quand on n'a mesure qu'une partie du
+//    domaine : trois moyennes (domaine / rouges / blancs) et le
+//    classement de TOUTES les parcelles. Aucune saisie nouvelle —
+//    analyses, surfaces, cepages et recoltes existent deja.
+//
+//    ⚠️ Le calcul vit toujours en SUCRE. La conversion est lineaire :
+//    moyenner en g/L puis reconvertir redonne exactement le degre.
+//    C'est l'AFFICHAGE qui suit l'unite de saisie du domaine. Un
+//    domaine qui lit son degre au refractometre ne doit pas trouver un
+//    chiffre en g/L en gros : personne ne l'a mesure.
+// ══════════════════════════════════════════════════════════════════
+var _matFen      = 7;      // fenetre de fraicheur, en jours
+var _matFiltre   = 'dom';  // 'dom' | 'rge' | 'bl'
+var _matVoirTout = false;  // deplier les parcelles jamais analysees
+var _matUn       = 's';    // unite d'affichage : 's' g/L | 'a' %vol
+var _MAT_CAMP_J  = 150;    // au-dela, c'est la vendange precedente
+
+var _MV_CEP_COUL = {
+  'pinot noir':'r','gamay':'r','cesar':'r','pinot meunier':'r','merlot':'r','syrah':'r',
+  'cabernet sauvignon':'r','cabernet franc':'r','grenache':'r','malbec':'r','cot':'r',
+  'mourvedre':'r','carignan':'r','cinsault':'r','tannat':'r','petit verdot':'r',
+  'poulsard':'r','trousseau':'r','nebbiolo':'r','sangiovese':'r','tempranillo':'r',
+  'chardonnay':'b','aligote':'b','pinot blanc':'b','pinot gris':'b','melon de bourgogne':'b',
+  'sauvignon':'b','sauvignon blanc':'b','semillon':'b','muscadelle':'b','viognier':'b',
+  'chenin':'b','riesling':'b','savagnin':'b','gewurztraminer':'b','marsanne':'b',
+  'roussanne':'b','ugni blanc':'b','colombard':'b','muscat':'b','sylvaner':'b'
+};
+
+function _matNorm(s){
+  var t = String(s || '').trim().toLowerCase();
+  return t.normalize ? t.normalize('NFD').replace(/[\u0300-\u036f]/g, '') : t;
+}
+// Couleur d'une parcelle. Le cepage tranche ; un choix manuel prime.
+// Deux cepages de couleurs differentes : on ne choisit PAS a la place du
+// vigneron — la parcelle reste a classer.
+function _parcCoul(nom){
+  var ov = (_vendCfg().coul_parc || {})[nom];
+  if(ov === 'r' || ov === 'b') return ov;
+  var p = _vendParcByName(nom); if(!p) return '?';
+  var arr = p.cepages || (p.cepage ? [p.cepage] : []);
+  var vu = null;
+  for(var i = 0; i < arr.length; i++){
+    var c = _MV_CEP_COUL[_matNorm(arr[i])];
+    if(!c) continue;                    // cepage inconnu : il ne tranche rien
+    if(vu && vu !== c) return '?';      // complantation de deux couleurs
+    vu = c;
+  }
+  return vu || '?';
+}
+function _vendSetCoul(nom, c){
+  if(!canWrite()){ showToast('Accès lecture seule 🔒', '#B85A1A'); return; }
+  if(!CAVE_VENDANGE.config) CAVE_VENDANGE.config = {};
+  if(!CAVE_VENDANGE.config.coul_parc) CAVE_VENDANGE.config.coul_parc = {};
+  if(CAVE_VENDANGE.config.coul_parc[nom] === c) delete CAVE_VENDANGE.config.coul_parc[nom];
+  else CAVE_VENDANGE.config.coul_parc[nom] = c;
+  window.CAVE_VENDANGE = CAVE_VENDANGE;
+  if(window.fbSave) window.fbSave('cave_vendange', CAVE_VENDANGE);
+  renderVendAna();
+}
+
+function _matJours(d, tj){ return Math.round((tj - Date.parse(d)) / 86400000); }
+
+// Le calcul. Rien n'est invente : une parcelle sans mesure n'a pas de valeur,
+// une mesure trop vieille sort de la moyenne mais reste affichee.
+function _matSynth(fen){
+  var o = { frais:[], vieilles:[], jamais:[], rentrees:[], nonClass:[], tiles:{} };
+  var tj = Date.parse(new Date().toISOString().slice(0, 10));
+
+  var byP = {};
+  (CAVE_VENDANGE.analyses || []).forEach(function(a){
+    if(!a || !a.parcelle || !a.date) return;
+    if(_matJours(a.date, tj) > _MAT_CAMP_J) return;   // vendange precedente
+    (byP[a.parcelle] = byP[a.parcelle] || []).push(a);
+  });
+  // Une recolte de l'an dernier ne sort pas la parcelle de cette campagne.
+  var rec = {};
+  (CAVE_VENDANGE.recoltes || []).forEach(function(r){
+    if(!r || !r.parcelle || !r.date) return;
+    if(_matJours(r.date, tj) > _MAT_CAMP_J) return;
+    if(!rec[r.parcelle] || r.date > rec[r.parcelle]) rec[r.parcelle] = r.date;
+  });
+
+  var actives = (window.PARCELLES || []).filter(function(p){
+    return p && p.nom && p.statut !== 'Arrachee';
+  });
+
+  actives.forEach(function(p){
+    var nom = String(p.nom).trim();
+    var e = { nom:nom, ha:parseFloat(p.surface) || 0, coul:_parcCoul(nom),
+              suc:null, date:null, age:null, vit:null, mode:null, rentree:rec[nom] || null };
+    if(e.coul === '?') o.nonClass.push(e);
+    var arr = (byP[nom] || []).slice().sort(function(a, b){ return (a.date || '') < (b.date || '') ? -1 : 1; });
+    if(arr.length){
+      var der = arr[arr.length - 1];
+      e.suc = _matSuc(der); e.date = der.date; e.age = _matJours(der.date, tj);
+      e.mode = der.mode === 'alc' ? 'a' : 's';
+      if(arr.length >= 2){
+        var av = arr[arr.length - 2], dj = (Date.parse(der.date) - Date.parse(av.date)) / 86400000;
+        if(dj > 0) e.vit = (e.suc - _matSuc(av)) / dj;
+      }
+    }
+    if(e.rentree)        o.rentrees.push(e);
+    else if(e.suc == null) o.jamais.push(e);
+    else if(e.age > fen)   o.vieilles.push(e);
+    else                   o.frais.push(e);
+  });
+
+  o.frais.sort(function(a, b){ return b.suc - a.suc; });
+  o.vieilles.sort(function(a, b){ return b.suc - a.suc; });
+  o.jamais.sort(function(a, b){ return a.nom.localeCompare(b.nom, 'fr'); });
+  o.nonClass = o.nonClass.filter(function(e){ return !e.rentree; });
+
+  // Pondere par la SURFACE : une moyenne simple ferait peser 0,26 ha autant
+  // que 1,54 ha. Le denominateur, lui, est tout ce qui reste a rentrer.
+  function bloc(f){
+    var m = o.frais.filter(f);
+    var tous = actives.filter(function(p){
+      var nom = String(p.nom).trim();
+      return !rec[nom] && f({ coul:_parcCoul(nom) });
+    });
+    var haTot = tous.reduce(function(s, p){ return s + (parseFloat(p.surface) || 0); }, 0);
+    if(!m.length) return { n:0, nTot:tous.length, haTot:haTot };
+    var haM = m.reduce(function(s, x){ return s + x.ha; }, 0);
+    if(!(haM > 0)) haM = m.length;   // surfaces non renseignees : moyenne simple
+    return { n:m.length, nTot:tous.length, ha:haM, haTot:haTot,
+      pond:   m.reduce(function(s, x){ return s + x.suc * (x.ha || 1); }, 0) / (haM || 1),
+      simple: m.reduce(function(s, x){ return s + x.suc; }, 0) / m.length,
+      pct:    haTot > 0 ? Math.round(haM / haTot * 100) : 0 };
+  }
+  o.tiles.dom = bloc(function(){ return true; });
+  o.tiles.rge = bloc(function(x){ return x.coul === 'r'; });
+  o.tiles.bl  = bloc(function(x){ return x.coul === 'b'; });
+  return o;
+}
+
+
+// ─────────── Rendu de la synthese ───────────
+function _matUnite(){ return _matUn === 'a' ? '%vol' : 'g/L'; }
+function _matGros(suc, spd){ return _matUn === 'a' ? _mvF1(suc / spd) : String(Math.round(suc)); }
+function _matPetit(suc, spd){
+  return _matUn === 'a' ? Math.round(suc) + ' g/L' : '~' + _mvF1(suc / spd) + ' %vol';
+}
+function _matTuile(cls, lab, b, spd){
+  var sel = _matFiltre === cls ? ' sel' : '';
+  if(!b.n) return '<button type="button" class="mvsy-t vide ' + cls + sel + '" onclick="_matSetFiltre(\'' + cls + '\')">'
+    + '<span class="lb">' + lab + '</span><span class="gl">—</span>'
+    + '<span class="cv">aucune mesure<br>dans la fenêtre</span></button>';
+  return '<button type="button" class="mvsy-t ' + cls + sel + '" onclick="_matSetFiltre(\'' + cls + '\')">'
+    + '<span class="lb">' + lab + '</span>'
+    + '<span class="gl">' + _matGros(b.pond, spd) + '<em>' + _matUnite() + '</em></span>'
+    + '<span class="al">' + _matPetit(b.pond, spd) + '</span>'
+    + '<span class="cv">' + b.n + ' parc. sur ' + b.nTot + '<br>' + _mvF1(b.ha) + ' ha · ' + b.pct + ' %</span></button>';
+}
+
+function _matSynthHtml(){
+  var r = _matSynth(_matFen);
+  var spd = (_vendCfg().sucre_par_degre) || 16.83;
+  // L'unite d'affichage suit la majorite des saisies retenues.
+  var tot = 0, alc = 0;
+  r.frais.concat(r.vieilles).forEach(function(e){ if(e.mode){ tot++; if(e.mode === 'a') alc++; } });
+  _matUn = (tot && alc > tot / 2) ? 'a' : 's';
+
+  var h = '<div class="mvsy">'
+    + '<div class="mvsy-hd"><div class="mvsy-ttl">Où en est la maturité</div>'
+    + '<div class="mvsy-dt">au ' + new Date().toISOString().slice(8, 10) + '/' + new Date().toISOString().slice(5, 7) + '</div></div>'
+    + '<div class="mvsy-fen">'
+    + [[7, '7 derniers jours'], [14, '14 jours'], [_MAT_CAMP_J, 'Cette vendange']].map(function(f){
+        return '<button type="button" class="' + (_matFen === f[0] ? 'on' : '') + '" onclick="_matSetFen(' + f[0] + ')">' + f[1] + '</button>';
+      }).join('')
+    + '</div>'
+    + '<div class="mvsy-tiles">' + _matTuile('dom', 'Domaine', r.tiles.dom, spd)
+    + _matTuile('rge', 'Rouges', r.tiles.rge, spd) + _matTuile('bl', 'Blancs', r.tiles.bl, spd) + '</div>';
+
+  var b = r.tiles[_matFiltre] || r.tiles.dom;
+  if(b.n) h += '<div class="mvsy-simple">moyenne pondérée par la surface · sans pondération : '
+    + _matGros(b.simple, spd) + ' ' + _matUnite() + '</div>';
+
+  // ── Classement : TOUTES les parcelles, une piste commune ──
+  function garde(e){ return _matFiltre === 'dom' || e.coul === (_matFiltre === 'rge' ? 'r' : 'b'); }
+  var frais = r.frais.filter(garde), vieilles = r.vieilles.filter(garde),
+      jamais = r.jamais.filter(garde), rent = r.rentrees.filter(garde);
+  // Une parcelle rentree (ou listee) sans analyse porte suc = null : la laisser
+  // entrer ici ferait Math.min(null, ...) = 0 et l'echelle partirait a zero.
+  var vals = frais.concat(vieilles, rent)
+    .filter(function(e){ return e.suc != null; }).map(function(e){ return e.suc; });
+  var obj = parseFloat(_vendCfg().mat_objectif) || 0;
+  if(obj > 0) vals.push(obj);
+
+  h += '<div class="mvcl"><div class="mvcl-hd"><div class="mvcl-ttl">Classement à date'
+    + (_matFiltre === 'rge' ? ' · rouges' : _matFiltre === 'bl' ? ' · blancs' : '') + '</div>'
+    + '<div class="mvcl-n">' + (frais.length + vieilles.length + jamais.length + rent.length) + ' parcelles</div></div>';
+
+  if(!vals.length){
+    h += '<div class="mvcl-vide">Aucune mesure à classer dans cette fenêtre.</div></div></div>';
+    return h;
+  }
+
+  var vMin = Math.floor((Math.min.apply(null, vals) - 8) / 10) * 10;
+  var vMax = Math.ceil((Math.max.apply(null, vals) + 8) / 10) * 10;
+  if(vMax - vMin < 30) vMax = vMin + 30;
+  function pos(v){ return ((v - vMin) / (vMax - vMin) * 100).toFixed(1); }
+
+  // Graduations posees sur des valeurs RONDES DANS L'UNITE AFFICHEE : des g/L
+  // reconvertis donneraient 10,1 · 11,3 · 12,5.
+  var gr = '';
+  if(_matUn === 'a'){
+    var aMin = Math.ceil(vMin / spd * 2) / 2, aMax = vMax / spd, pasA = (aMax - aMin) > 3 ? 1 : 0.5;
+    for(var a = aMin; a <= aMax + 0.01; a += pasA) gr += '<span style="left:' + pos(a * spd) + '%">' + _mvF1(a) + '</span>';
+  } else {
+    var pasS = Math.max(10, Math.round((vMax - vMin) / 4 / 10) * 10);
+    for(var v = vMin; v <= vMax; v += pasS) gr += '<span style="left:' + pos(v) + '%">' + v + '</span>';
+  }
+  h += '<div class="mvcl-grad"><div></div><div class="g">' + gr + '</div><div></div></div>';
+
+  var ov = '';
+  if(b.n) ov += '<i style="left:' + pos(b.pond) + '%"></i><b class="moy" style="left:' + pos(b.pond) + '%">moy.</b>';
+  if(obj > 0) ov += '<i class="obj" style="left:' + pos(obj) + '%"></i><b class="obj" style="left:' + pos(obj) + '%">objectif</b>';
+
+  var nConv = 0;
+  function ligne(e, cls, dot, sous){
+    var conv = e.suc != null && e.mode && e.mode !== _matUn;
+    if(conv) nConv++;
+    return '<div class="mvcl-r' + (cls ? ' ' + cls : '') + '">'
+      + '<span class="n">' + _escHtml(e.nom) + '</span>'
+      + '<span class="pi">' + (e.suc != null ? '<i class="dot ' + dot + '" style="left:' + pos(e.suc) + '%"></i>' : '') + '</span>'
+      + '<span class="v' + (conv ? ' conv' : '') + '">' + (e.suc != null ? '<b>' + _matGros(e.suc, spd) + '</b>' : '—')
+      + '<s>' + sous + '</s></span></div>';
+  }
+  var rows = '';
+  frais.forEach(function(e){ rows += ligne(e, '', e.coul === '?' ? 'q' : e.coul, _matPetit(e.suc, spd)); });
+  if(vieilles.length){
+    rows += '<div class="mvcl-sep">Mesure de plus de ' + _matFen + ' jours — hors moyenne</div>';
+    vieilles.forEach(function(e){ rows += ligne(e, 'pale', 'old ' + (e.coul === '?' ? 'q' : e.coul), 'le ' + e.date.slice(8) + '/' + e.date.slice(5, 7)); });
+  }
+  if(jamais.length){
+    // Ce qui est MESURE reste toujours visible. Ce qui n'a rien se COMPTE :
+    // sur quarante parcelles, la liste des muettes noierait le classement.
+    rows += '<div class="mvcl-sep">Jamais analysées — ' + jamais.length + ' parcelles · '
+      + _mvF1(jamais.reduce(function(x, e){ return x + e.ha; }, 0)) + ' ha</div>';
+    (_matVoirTout ? jamais : jamais.slice(0, 3)).forEach(function(e){ rows += ligne(e, 'pale', '', _mvF1(e.ha) + ' ha'); });
+    if(jamais.length > 3) rows += '<button type="button" class="mvcl-plus" onclick="_matVoirPlus()">'
+      + (_matVoirTout ? 'replier' : 'voir les ' + (jamais.length - 3) + ' autres') + '</button>';
+  }
+  if(rent.length){
+    rows += '<div class="mvcl-sep">Déjà rentrées</div>';
+    rent.forEach(function(e){ rows += ligne(e, 'pale out', 'old ' + (e.coul === '?' ? 'q' : e.coul), 'le ' + e.rentree.slice(8) + '/' + e.rentree.slice(5, 7)); });
+  }
+  h += '<div class="mvcl-zone"><div class="mvcl-ov">' + ov + '</div>' + rows + '</div>'
+    + '<div class="mvcl-lg"><span><i class="pl"></i>mesure dans la fenêtre</span>'
+    + '<span><i class="cr"></i>mesure plus ancienne, hors moyenne</span>'
+    + '<span><i class="tr"></i>moyenne</span>'
+    + (nConv ? '<span><i class="cv">' + (_matUn === 'a' ? '12,7' : '214') + '</i>valeur convertie, pas mesurée</span>' : '')
+    + '</div>';
+  if(nConv) h += '<div class="mvcl-pied">' + (_matUn === 'a'
+      ? 'Les ' + nConv + ' valeurs soulignées ont été saisies en sucre et converties : sucre ÷ ' + _mvF1(spd) + '.'
+      : 'Les ' + nConv + ' valeurs soulignées ont été lues en degré au réfractomètre et converties : degré × ' + _mvF1(spd) + '.') + '</div>';
+  h += '</div>';
+
+  // ── L'ecart, ce que la benne mettrait ensemble ──
+  if(frais.length > 1){
+    var hi = frais[0], lo = frais[frais.length - 1], d = hi.suc - lo.suc;
+    h += '<div class="mvsy-ec"><b>' + _escHtml(hi.nom) + '</b> en tête, <b>' + _escHtml(lo.nom) + '</b> en queue : <b>'
+      + (_matUn === 'a' ? _mvF1(d / spd) + ' %vol d’écart</b>, ' + Math.round(d) + ' g/L'
+                        : Math.round(d) + ' g/L d’écart</b>, ' + _mvF1(d / spd) + ' %vol')
+      + '. C’est ce que la même benne mettrait ensemble.</div>';
+  }
+
+  if(vieilles.length){
+    h += '<div class="mvsy-warn"><b>' + vieilles.length + ' parcelle' + (vieilles.length > 1 ? 's écartées' : ' écartée')
+      + '</b> du calcul : rien depuis plus de ' + _matFen + ' jours. ';
+    vieilles.forEach(function(e){
+      h += _escHtml(e.nom) + ' en est restée au ' + e.date.slice(8) + '/' + e.date.slice(5, 7)
+        + ' (' + e.age + ' j, ' + _matGros(e.suc, spd) + ' ' + _matUnite() + ')';
+      // La projection est une projection : elle se dit, elle ne se compte pas.
+      h += (e.vit != null && e.vit > 0)
+        ? ' — à ' + (_matUn === 'a' ? _mvF1(e.vit / spd) + ' %vol' : _mvF1(e.vit) + ' g/L') + ' par jour elle serait vers '
+          + _matGros(e.suc + e.vit * e.age, spd) + ', mais personne ne l’a mesurée. '
+        : '. ';
+    });
+    h += '</div>';
+  }
+
+  h += '<div class="mvsy-info"><b>Ce chiffre n’est pas la moyenne du domaine</b> : c’est la moyenne des parcelles '
+    + 'qui ont une mesure fraîche, pondérée par leur surface. ' + r.jamais.length + ' parcelle'
+    + (r.jamais.length > 1 ? 's n’ont' : ' n’a') + ' aucune analyse cette vendange.'
+    + (r.rentrees.length ? ' ' + r.rentrees.length + ' parcelle' + (r.rentrees.length > 1 ? 's déjà rentrées ne comptent' : ' déjà rentrée ne compte') + ' plus.' : '')
+    + '</div>';
+
+  if(r.nonClass.length && canWrite()){
+    h += '<div class="mvsy-cls"><div class="t"><b>' + r.nonClass.length + ' parcelle'
+      + (r.nonClass.length > 1 ? 's' : '') + ' sans couleur.</b> Le cépage ne permet pas de trancher. '
+      + (r.nonClass.length > 1 ? 'Elles comptent' : 'Elle compte') + ' dans le domaine, pas dans les deux colonnes.</div>';
+    var cp = _vendCfg().coul_parc || {};
+    r.nonClass.forEach(function(e){
+      h += '<div class="mvsy-clr"><span class="n">' + _escHtml(e.nom) + ' · ' + _mvF1(e.ha) + ' ha</span>'
+        + '<button type="button" class="r' + (cp[e.nom] === 'r' ? ' on' : '') + '" onclick="_vendSetCoul(' + _mvQ(e.nom) + ',\'r\')">Rouge</button>'
+        + '<button type="button" class="b' + (cp[e.nom] === 'b' ? ' on' : '') + '" onclick="_vendSetCoul(' + _mvQ(e.nom) + ',\'b\')">Blanc</button></div>';
+    });
+    h += '</div>';
+  }
+  return h + '</div>';
+}
+
+// Nom de parcelle passe a un onclick : il vient de la saisie du domaine.
+function _mvQ(s){
+  var t = String(s).replace(/\\/g, '\\\\').replace(/'/g, "\\'");   // 1. litteral JS
+  t = t.replace(/&/g, '&amp;').replace(/"/g, '&quot;')             // 2. attribut HTML
+       .replace(/</g, '&lt;').replace(/>/g, '&gt;');
+  return "'" + t + "'";
+}
+function _matSetFen(f){ _matFen = f; renderVendAna(); }
+function _matSetFiltre(k){ _matFiltre = (_matFiltre === k ? 'dom' : k); renderVendAna(); }
+function _matVoirPlus(){ _matVoirTout = !_matVoirTout; renderVendAna(); }
+
 function renderVendAna(){
   _caveV2InjectCss();
   var el=document.getElementById('mvv-body'); if(!el) return;
@@ -4787,7 +5191,10 @@ function renderVendAna(){
     html+='<div class="mvb-empty">Aucune analyse enregistrée.<br>Ajoutez une première mesure de maturité ci-dessus.</div>';
   } else {
     window._mvGraphOublier('#mvg-mat-');
-    // Le graphe qui COMPARE, en tete. Les fiches par parcelle restent dessous :
+    // La synthese « ou en est-on » AVANT tout : c'est la question qu'on se pose
+    // en montant au cuvier. Le graphe d'evolution et les fiches restent dessous.
+    html+=_matSynthHtml();
+    // Le graphe qui COMPARE. Les fiches par parcelle restent dessous :
     // elles portent le detail des mesures et leur suppression.
     html+='<div class="mvmat-card"><div class="mvmat-ttl">Maturit\u00e9 par parcelle \u00b7 r\u00e9fractom\u00e8tre</div>'
       +'<div id="mvg-mat-all"></div></div>';
@@ -4802,7 +5209,7 @@ function renderVendAna(){
     parcs.forEach(function(p,pi){
       var arr=byP[p].slice().sort(function(a,b){return (a.date||'')<(b.date||'')?-1:1;});
       var last=arr[arr.length-1];
-      var lastSuc=last.mode==='alc'?(last.val*spd):last.val;
+      var lastSuc=_matSuc(last,spd);
       html+='<div class="mva-card"><div class="mva-cname">'+_escHtml(p)+'</div>'
         +'<div class="mva-meta">'+arr.length+' analyse'+(arr.length>1?'s':'')+' · dernière le '+(last.date?last.date.slice(8)+'/'+last.date.slice(5,7):'')+'</div>'
         +'<div class="mva-line"><span>🍬 '+Math.round(lastSuc)+' g/L</span><span class="pot">🍷 ~'+_mvF1(_vendAnaAlc(last))+'% vol potentiel</span></div>'
@@ -4810,7 +5217,7 @@ function renderVendAna(){
       (function(a2,ix){ window._mvGraphSuivre('#mvg-mat-'+ix, function(lg){ return _vendAnaSpark(a2,lg); }); })(arr,pi);
       html+='<div class="mva-rows">';
       arr.slice().reverse().forEach(function(a){
-        var suc=a.mode==='alc'?(a.val*spd):a.val;
+        var suc=_matSuc(a,spd);
         html+='<div class="mva-row"><span>'+(a.date?a.date.slice(8)+'/'+a.date.slice(5,7)+'/'+a.date.slice(0,4):'')+' · '+Math.round(suc)+' g/L · ~'+_mvF1(_vendAnaAlc(a))+'% vol</span>'
           +(canEdit?'<button class="mva-x" onclick="_vendAnaDel(\''+a.id+'\')" aria-label="Supprimer">×</button>':'')+'</div>';
       });
@@ -4848,7 +5255,8 @@ function _vendAnaAdd(){
   if(!p){ showToast('Choisissez une parcelle','#E07060'); return; }
   if(!(v>0)){ showToast('Saisissez une mesure','#E07060'); return; }
   if(!CAVE_VENDANGE.analyses) CAVE_VENDANGE.analyses=[];
-  CAVE_VENDANGE.analyses.push({id:'vana_'+Date.now(),parcelle:p,date:d||new Date().toISOString().slice(0,10),mode:_vendAnaUnitMode,val:v});
+  CAVE_VENDANGE.analyses.push({id:'vana_'+Date.now(),parcelle:p,date:d||new Date().toISOString().slice(0,10),
+    mode:_vendAnaUnitMode,val:v,spd:(_vendCfg().sucre_par_degre)||16.83});
   window.CAVE_VENDANGE=CAVE_VENDANGE;
   if(window.fbSave) window.fbSave('cave_vendange',CAVE_VENDANGE);
   showToast('🔬 Analyse enregistrée','#C0845A');
@@ -5053,6 +5461,10 @@ window.renderVendAna        = renderVendAna;
 window._vendAnaUnit         = _vendAnaUnit;
 window._vendAnaLive         = _vendAnaLive;
 window._vendAnaAdd          = _vendAnaAdd;
+window._matSetFen           = _matSetFen;
+window._matSetFiltre        = _matSetFiltre;
+window._matVoirPlus         = _matVoirPlus;
+window._vendSetCoul         = _vendSetCoul;
 window._vendAnaDel          = _vendAnaDel;
 window._caveSetMill         = _caveSetMill;
 window._caveEnsureBtlTab    = _caveEnsureBtlTab;
