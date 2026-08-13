@@ -442,6 +442,51 @@ function _planInContract(mbr,m,d){
   if(mbr.fin_contrat&&ds>mbr.fin_contrat)return false;
   return true;
 }
+// ══════════════════════════════════════════════════════════════════════
+// LES DEUX PORTAILS — ne jamais confondre le compteur et la mesure
+// ══════════════════════════════════════════════════════════════════════
+// _planInContract (au-dessus) repond a la question 3 : « combien d'heures
+// lui doit-on SUR CE CONTRAT ? ». Il ne voit QUE le contrat en cours, et
+// c'est juste : un contrat qui se termine SOLDE son compteur (paye, donc a
+// zero) ; le contrat suivant, s'il demarre apres une coupure, se recale sur
+// l'annualisation depuis sa date de debut, sans du ni indu. Ses ~35 points
+// d'appel — plafond des 1607 h, conges, grille, maxima hebdo — NE DOIVENT
+// PAS etre elargis.
+//
+// _planJourCouvert repond a la question 2 : « a-t-il travaille CE JOUR-LA,
+// sous n'importe lequel de ses contrats ? ». C'est la mesure d'une fenetre
+// de dates : masse salariale de l'exercice, capacite, cadence, presence.
+// Mesure le 13/08 sur une fiche reelle : un CDD mars->juillet archive puis
+// un nouveau contrat en aout donnait 0 h payee sur mars->juillet contre
+// 735 h pour la meme fiche non archivee. Meme homme, meme planning ; la
+// seule difference etait l'archivage.
+function _planJourCouvert(mbr,m,d){
+  var P=(typeof window._mvContrats==='function')?window._mvContrats(mbr):null;
+  // Pas de tableau, ou fiche sans aucune date : comportement d'origine.
+  if(!P||!P.length)return _planInContract(mbr,m,d);
+  var year=_pY();
+  var ds=year+'-'+String(m+1).padStart(2,'0')+'-'+String(d).padStart(2,'0');
+  for(var i=0;i<P.length;i++){
+    if(P[i].debut&&ds<P[i].debut)continue;
+    if(P[i].fin&&ds>P[i].fin)continue;
+    return true;
+  }
+  return false;
+}
+// Drapeau de contexte, meme patron que _planCtxYear. Pose UNIQUEMENT par les
+// quatre entrees de mesure ci-dessous ; partout ailleurs il vaut false et le
+// code se comporte a l'octet pres comme avant ce lot.
+var _planWideCtx=false;
+function _planInContractRead(mbr,m,d){
+  return _planWideCtx?_planJourCouvert(mbr,m,d):_planInContract(mbr,m,d);
+}
+// try/finally : une exception dans fn() ne doit JAMAIS laisser le drapeau
+// pose — le reste de l'ecran lirait alors les contrats passes en silence.
+// Restaure la valeur PRECEDENTE et non false, pour supporter l'imbrication.
+function _planWide(fn){
+  var _sv=_planWideCtx; _planWideCtx=true;
+  try{ return fn(); } finally { _planWideCtx=_sv; }
+}
 function _planHasContractThisMonth(mbr,planMonth){
   // Retourne true si le membre a au moins un jour de contrat dans le mois planMonth
   if(!mbr.debut_contrat&&!mbr.fin_contrat)return true;
@@ -578,7 +623,12 @@ function _planWorkRange(mbr,from,to){
 //      une ligne « 8 vendangeurs » pesait UNE personne dans la masse salariale.
 //      _planCtxYear etant pose sur l'annee du jour courant, _pEntDay lit la bonne annee
 //      — une fenetre a cheval sur deux annees civiles reste juste.
+// ENTREE DE MESURE 1/4 — fenetre de dates. Appelee seulement par
+// _planPaidRange / _planWorkPersRange, donc seulement par le Pilotage.
 function _planRangeH(mbr,from,to,mode){
+  return _planWide(function(){ return _planRangeH_(mbr,from,to,mode); });
+}
+function _planRangeH_(mbr,from,to,mode){
   var plId=_planPlId(mbr),_sv=_planCtxYear,tot=0,guard=0;
   var cur=new Date(from.getFullYear(),from.getMonth(),from.getDate());
   var end=new Date(to.getFullYear(),to.getMonth(),to.getDate());
@@ -586,7 +636,7 @@ function _planRangeH(mbr,from,to,mode){
     guard++;
     var yr=cur.getFullYear(),mi=cur.getMonth(),d=cur.getDate();
     _planCtxYear=yr;
-    if(_planInContract(mbr,mi,d)){
+    if(_planInContractRead(mbr,mi,d)){
       var yb=(PLANNING_ENTRIES[mbr.nom]||{})[yr]||{}, e=(yb[mi]||{})[d];
       var h=(mode==='work')?_planWorkH(plId,mi,d,e,yr):_planDayH(plId,mi,d,e,yr);
       if(h>0) tot+=h*_planEffN(mbr,mi,d);
@@ -608,7 +658,7 @@ function _planCalcMonth(mbr,m){
   var ent=_pEntMonth(mbr.nom,m);
   var w=0;
   for(var d=1;d<=_planDays(m);d++){
-    if(!_planInContract(mbr,m,d))continue;
+    if(!_planInContractRead(mbr,m,d))continue;
     w+=_planDayH(plId,m,d,ent[d]);
   }
   return w;
@@ -626,7 +676,7 @@ function _planAbsLostH(mbr,m,duesOnly){
   for(var d=1;d<=_planDays(m);d++){
     var e=ent[d];
     if(!e||!e.absent)continue;
-    if(!_planInContract(mbr,m,d))continue;
+    if(!_planInContractRead(mbr,m,d))continue;
     var mo=_planAbsMotif(e);
     if(duesOnly&&mo.id!=='injustifie'&&!mo.heures)continue;
     h+=Math.max(0,_planPlanned(plId,m,d)-_planDayH(plId,m,d,e));
@@ -650,7 +700,7 @@ function _planRempH(mbr,m){
   for(var d=1;d<=_planDays(m);d++){
     var e=ent[d];
     if(!e||!e.remplacement)continue;
-    if(!_planInContract(mbr,m,d))continue;
+    if(!_planInContractRead(mbr,m,d))continue;
     if(_planPlanned(plId,m,d)>0)continue;
     h+=_planDayH(plId,m,d,e);
   }
@@ -666,7 +716,7 @@ function _planSummary(mbr,m){
   var ref=Object.keys(mo).reduce(function(s,k){
     if(!/^\d+$/.test(k))return s;
     var dd=parseInt(k,10);
-    if(!_planInContract(mbr,m,dd))return s;
+    if(!_planInContractRead(mbr,m,dd))return s;
     if(ent[dd]&&ent[dd].type==='recup')return s;
     return s+(parseFloat(mo[k])||0);
   },0);
@@ -684,7 +734,7 @@ function _planPresentRef(mbr,m){
   return Object.keys(mo).reduce(function(s,k){
     if(!/^\d+$/.test(k))return s;
     var dd=parseInt(k,10);
-    if(!_planInContract(mbr,m,dd))return s;
+    if(!_planInContractRead(mbr,m,dd))return s;
     var e=ent[dd];
     if(e&&(e.absent||e.type==='cp'||e.type==='recup'))return s;
     return s+(parseFloat(mo[k])||0);
@@ -820,7 +870,10 @@ function _chargeSaisonData(s){
   var capEquipe=0;
   months.forEach(function(x){
     var full=capMonth(x.yr,x.m,true); var ratio=full>0?x.capRef/full:1;
-    _planCtxYear=x.yr; mbrs.forEach(function(mb){ capEquipe+=(((_planSummary(mb,x.m)||{}).ref)||0)*ratio*_mbPoids(mb); }); _planCtxYear=null;
+    // ENTREE DE MESURE 2/4 — capacite de la saison. mbrs vient de
+    // _mvEnContratSurPeriode (tous contrats) : sans le mode large, une fiche
+    // reembauchee etait DANS la liste et pesait 0 h de capacite.
+    _planCtxYear=x.yr; _planWide(function(){ mbrs.forEach(function(mb){ capEquipe+=(((_planSummary(mb,x.m)||{}).ref)||0)*ratio*_mbPoids(mb); }); }); _planCtxYear=null;
   });
   var etpDispo=capRefTotal>0?capEquipe/capRefTotal:0;
   // Repartition par ORDRE des taches (vue par pics) + capacite reellement presente / mois.
@@ -902,7 +955,8 @@ function _chargeSaisonData(s){
   });
   months.forEach(function(x){
     var full=capMonth(x.yr,x.m,true); var ratio=full>0?x.capRef/full:1;
-    var cp=0; _planCtxYear=x.yr; mbrs.forEach(function(mb){ cp+=(_planPresentRef(mb,x.m)||0)*ratio*_mbPoids(mb); }); _planCtxYear=null;
+    // ENTREE DE MESURE 3/4 — capacite reellement presente.
+    var cp=0; _planCtxYear=x.yr; _planWide(function(){ mbrs.forEach(function(mb){ cp+=(_planPresentRef(mb,x.m)||0)*ratio*_mbPoids(mb); }); }); _planCtxYear=null;
     x.capPresent=cp;
     x.etpReq=x.capRef>0?x.chargeOrd/x.capRef:0;
     x.etpPres=x.capRef>0?x.capPresent/x.capRef:0;
@@ -919,8 +973,11 @@ function _chargeSaisonData(s){
   // les campagnes ou il avait pourtant travaille.
   // ⚠️ NE PAS CONFONDRE avec _planInContract (question 3, ~35 appels) : plafond
   // des 1607 h, conges, grille du planning. Celui-la ne voit QUE le contrat en
-  // cours et NE DOIT PAS etre elargi — deux contrats separes par une coupure ont
-  // deux compteurs distincts, les fondre en un seul fausserait la paie.
+  // cours et NE DOIT PAS etre elargi — un contrat qui se termine SOLDE son
+  // compteur (paye, donc a zero) et le suivant repart de sa date de debut, sans
+  // du ni indu. Les fondre en un seul fausserait la paie.
+  // Pour la MESURE d'une fenetre de dates (masse salariale, capacite, cadence,
+  // presence), le portail est _planJourCouvert, pose par _planWide.
   function _inContractDay(mb,ds){
     var P=(typeof window._mvContrats==='function')?window._mvContrats(mb):null;
     if(!P){ if(!mb.debut_contrat&&!mb.fin_contrat)return true; if(mb.debut_contrat&&ds<mb.debut_contrat)return false; if(mb.fin_contrat&&ds>mb.fin_contrat)return false; return true; }
@@ -1183,7 +1240,11 @@ window._planSeasonHours=_planSeasonHours;
 // ── Cadence équipe sur une fenêtre [from,to] (Date), hors salariés « bureau » ──
 // Pilotage : jours ouvrés réels + Σ heures planning de l'équipe → cadence (h/jour ouvré).
 // NB : le calcul suit l'année RÉELLE de chaque jour de la fenêtre (accesseurs année-aware).
+// ENTREE DE MESURE 4/4 — cadence reelle de l'equipe sur une fenetre.
 function _planTeamCadence(from, to){
+  return _planWide(function(){ return _planTeamCadence_(from, to); });
+}
+function _planTeamCadence_(from, to){
   _planMigrateYears();
   var mbrs = _planMbrs().filter(function(m){ return !m.bureau; });
   var totalH = 0, jours = {}, guard = 0;
@@ -1195,7 +1256,7 @@ function _planTeamCadence(from, to){
     _planCtxYear = cur.getFullYear();
     for(var i=0;i<mbrs.length;i++){
       var mbr = mbrs[i];
-      if(!_planInContract(mbr, m, d)) continue;
+      if(!_planInContractRead(mbr, m, d)) continue;
       var ent = _pEntDay(mbr.nom,m,d);
       dayTeam += _planDayH(_planPlId(mbr), m, d, ent);
     }
