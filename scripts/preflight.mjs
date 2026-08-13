@@ -319,6 +319,8 @@ function checkVersions() {
 // ============================================================================
 //  C6 — onclick → window.* (cf. §24 : fonction non exposée = clic mort).
 //        Heuristique → AVERTISSEMENT.
+//        ⚠️ Ne lit que le PREMIER identifiant, et seulement suivi d'une
+//        parenthèse. Le corps entier du gestionnaire, c'est C23.
 // ============================================================================
 const JS_KW = new Set(['if', 'for', 'while', 'switch', 'return', 'function', 'var', 'let',
   'const', 'new', 'typeof', 'void', 'delete', 'do', 'else', 'try', 'catch', 'throw', 'await',
@@ -420,9 +422,9 @@ function checkPageDisplay() {
 }
 
 // ============================================================================
-//  BASELINE — cliquet anti-régression (C11, C14, C15, C16, C18, C19)
+//  BASELINE — cliquet anti-régression (C11, C14, C15, C16, C18, C19, C23)
 // ----------------------------------------------------------------------------
-//  Ces six règles décrivent une dette qui EXISTE DÉJÀ : les passer en erreur
+//  Ces sept règles décrivent une dette qui EXISTE DÉJÀ : les passer en erreur
 //  sèche casserait le build dès le premier jour. Le cliquet règle ça : la
 //  référence est figée dans scripts/preflight-baseline.json, on INTERDIT tout
 //  ajout et on TOLÈRE l'existant. La référence ne peut que descendre — quand
@@ -932,6 +934,88 @@ function checkAideEtVisite() {
 // ============================================================================
 //  Exécution + rapport
 // ============================================================================
+// ============================================================================
+//  C23 — TOUT CE QU'UN ATTRIBUT HTML NOMME DOIT ETRE JOIGNABLE DEPUIS window
+//        C6 ne regarde que le PREMIER identifiant du gestionnaire, et seulement
+//        s'il est suivi d'une parenthese — il ecarte meme explicitement tout ce
+//        qui contient un point. C23 lit le CORPS ENTIER.
+//
+//        Vecu le 13/08, fiche membre refondue : les neuf fonctions _emhX etaient
+//        exposees, l'ETAT ne l'etait pas.
+//            var _EMH = {...};                     // portee du MODULE
+//            oninput="_EMH.d=this.value;_emhEff()" // portee GLOBALE
+//        Un `var` de haut niveau d'un module ES n'est PAS sur window. Au premier
+//        caractere tape : « _EMH is not defined ». C6 n'a rien vu — `_EMH.d`
+//        contient un point, et n'est pas suivi d'une parenthese.
+//        ⚠️ Exporter les FONCTIONS ne suffit pas : il faut exporter tout ce
+//        qu'un attribut nomme, variables d'etat comprises.
+//
+//        Le controle ne juge rien d'autre qu'un fait mecanique : cet identifiant
+//        est-il assigne a window quelque part, oui ou non.
+// ============================================================================
+const C23_GLOB = new Set(['window', 'document', 'console', 'Math', 'JSON', 'Object', 'Array',
+  'String', 'Number', 'Boolean', 'Date', 'RegExp', 'Promise', 'Map', 'Set', 'Error',
+  'parseInt', 'parseFloat', 'isNaN', 'isFinite', 'encodeURIComponent', 'decodeURIComponent',
+  'setTimeout', 'clearTimeout', 'setInterval', 'clearInterval', 'requestAnimationFrame',
+  'localStorage', 'sessionStorage', 'navigator', 'location', 'history', 'alert', 'confirm', 'prompt']);
+
+function checkHandlerScope() {
+  const allJs = listDir('src', '.js');
+  // Ce qui est joignable : l'union de ce que TOUS les fichiers assignent a
+  // window. Un gestionnaire de reglages.js peut nommer une fonction exposee par
+  // app.js — ne regarder qu'un fichier fabriquerait de faux positifs.
+  const exposed = new Set();
+  for (const rel of allJs) {
+    const raw = read(rel); if (!raw) continue;
+    const c = blankJsComments(raw);
+    let m;
+    const r1 = /window\.([a-zA-Z_$][\w$]*)\s*=(?!=)/g;
+    while ((m = r1.exec(c))) exposed.add(m[1]);
+    const r2 = /window\[\s*['"]([a-zA-Z_$][\w$]*)['"]\s*\]\s*=(?!=)/g;
+    while ((m = r2.exec(c))) exposed.add(m[1]);
+    const r3 = /Object\.assign\(\s*window\s*,\s*\{([\s\S]*?)\}\s*\)/g;
+    while ((m = r3.exec(c))) for (const km of m[1].matchAll(/([a-zA-Z_$][\w$]*)\s*[:,}]/g)) exposed.add(km[1]);
+    // Une fonction declaree dans index.html vit deja dans la portee globale.
+  }
+  const rawHtml = read('index.html');
+  if (rawHtml) {
+    const h = blankHtmlComments(rawHtml);
+    for (const m of h.matchAll(/<script(?![^>]*\btype\s*=\s*["']module)[^>]*>([\s\S]*?)<\/script>/gi))
+      for (const fm of m[1].matchAll(/function\s+([a-zA-Z_$][\w$]*)\s*\(/g)) exposed.add(fm[1]);
+  }
+
+  const targets = [['index.html', rawHtml ? blankHtmlComments(rawHtml) : null]];
+  for (const rel of allJs) { const raw = read(rel); targets.push([rel, raw ? blankJsComments(raw) : null]); }
+  // Le corps du gestionnaire s'arrete au premier guillemet non echappe : c'est
+  // aussi la ou une concatenation JS coupe la chaine, donc on ne lit jamais que
+  // du code litteral, jamais un morceau reconstruit.
+  const HANDLER = /on(?:click|change|input|submit|blur|focus|keydown|keyup|mousedown|touchstart)\s*=\s*\\?["'`]([^"'`\\]*(?:\\.[^"'`\\]*)*)/g;
+  // Identifiant EN POSITION D'USAGE : suivi d'un appel ou d'un acces propriete.
+  // Le caractere qui precede exclut les proprietes (a.b) et l'interieur des
+  // chaines ('texte'), qui ne sont pas des references a resoudre.
+  const IDENT = /(^|[^.\w$'"`])([a-zA-Z_$][\w$]*)\s*(?=\(|\.|\s*=(?!=))/g;
+  for (const [rel, c] of targets) {
+    if (!c) continue;
+    const orphans = new Set();
+    let m;
+    while ((m = HANDLER.exec(c))) {
+      const body = m[1];
+      // Variables declarees DANS le gestionnaire : elles s'y resolvent seules.
+      const local = new Set([...body.matchAll(/\b(?:var|let|const)\s+([a-zA-Z_$][\w$]*)/g)].map(x => x[1]));
+      let im;
+      const rx = new RegExp(IDENT.source, 'g');
+      while ((im = rx.exec(body))) {
+        const id = im[2];
+        if (JS_KW.has(id) || C23_GLOB.has(id) || local.has(id) || exposed.has(id)) continue;
+        orphans.add(id);
+      }
+    }
+    ratchetList('C23_handler_scope', rel, [...orphans],
+      'Identifiant nomme dans un gestionnaire inline mais absent de window (ReferenceError au clic ou a la frappe)',
+      'L\'exposer : window.X = X. Exporter les fonctions ne suffit pas — l\'etat aussi doit traverser.');
+  }
+}
+
 checkSyntax();
 checkSurrogates();
 checkDivBalance();
@@ -955,15 +1039,16 @@ checkUnescaped();        // C19
 checkGuardBehaviour();   // C20
 checkPaiePrivacy();      // C21
 checkAideEtVisite();     // C22
+checkHandlerScope();     // C23
 
 // ---- baseline : regravure explicite, ou signalement si absente ---------------
 if (rebase) {
-  const out = { _note: 'Reference du cliquet anti-regression du preflight (C11/C14/C15/C16/C18/C19). Regraver : node scripts/preflight.mjs --baseline. Elle ne doit que DESCENDRE.', generated: new Date().toISOString().slice(0, 10), ...nextBaseline };
+  const out = { _note: 'Reference du cliquet anti-regression du preflight (C11/C14/C15/C16/C18/C19/C23). Regraver : node scripts/preflight.mjs --baseline. Elle ne doit que DESCENDRE.', generated: new Date().toISOString().slice(0, 10), ...nextBaseline };
   fs.writeFileSync(path.join(root, BASELINE_REL), JSON.stringify(out, null, 2) + '\n', 'utf8');
   console.log('');
   console.log('  ' + green('✓ Référence regravée : ' + BASELINE_REL));
 } else if (baselineMissing) {
-  add('WARN', BASELINE_REL, null, 'Référence du cliquet absente → C11/C14/C15/C16/C18/C19 ne bloquent rien pour l\'instant. La créer une fois : node scripts/preflight.mjs --baseline');
+  add('WARN', BASELINE_REL, null, 'Référence du cliquet absente → C11/C14/C15/C16/C18/C19/C23 ne bloquent rien pour l\'instant. La créer une fois : node scripts/preflight.mjs --baseline');
 }
 
 console.log('');

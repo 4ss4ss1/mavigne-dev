@@ -922,7 +922,13 @@ const DEV_EMAILS=[GT_ADMIN_EMAIL,'gueret.nicolas@gmail.com'];
 const GT_BASE_URL='https://mavigneapp.fr'; // URL production — liens d'invitation Admin GT
 
 let currentUser=null;
-let pFilter='toutes',pTacheFilter='toutes',pSearch='',pShowDone=false,jQui='tous',jTache='toutes',jSearch='',jParcelle='toutes',jDateDeb='',jDateFin='',phTab='reg',phFilter='tous';
+// /!\ pShowDone vit sur window et NON dans la portee du module : le bundle est
+// une IIFE, un `let` de haut niveau y est enferme dans la fermeture. La puce
+// « A faire / Toutes » l'ecrit depuis un onclick, qui s'evalue dans la portee
+// GLOBALE — elle levait donc « pShowDone is not defined » a chaque clic, en
+// silence pour qui ne regarde pas la console. Trouve par C23 (13/08).
+window.pShowDone=false;
+let pFilter='toutes',pTacheFilter='toutes',pSearch='',jQui='tous',jTache='toutes',jSearch='',jParcelle='toutes',jDateDeb='',jDateFin='',phTab='reg',phFilter='tous';
 var _pProxPos=null,_pProxHere=null,_pProxLoading=false; // tri des parcelles par proximite GPS (lecture seule)
 let _jPage=0; // pagination journal (200 entrées/page)
 // fCond/fAct/selEmoji — état déplacé sur window dans tracteur.js (fix v3.87)
@@ -6173,7 +6179,7 @@ function renderParcelles(){
       }).join('');
       tfRow.innerHTML='<div class="p-focus-bar"><span class="p-focus-lbl">'+_tgt+' Priorit\u00e9 du moment</span>'+_chipsP+'<button class="p-focus-all" onclick="_prioShowAll()">Voir toutes les t\u00e2ches</button></div>';
     } else {
-    var showDoneBtn=pTacheFilter!=='toutes'?`<div class="ptfchip${pShowDone?' active ac':''}" onclick="pShowDone=!pShowDone;renderParcelles()" style="margin-left:auto;flex-shrink:0;border-style:dashed">${pShowDone?'👁 Toutes':'🔲 À faire'}</div>`:'';
+    var showDoneBtn=pTacheFilter!=='toutes'?`<div class="ptfchip${window.pShowDone?' active ac':''}" onclick="window.pShowDone=!window.pShowDone;renderParcelles()" style="margin-left:auto;flex-shrink:0;border-style:dashed">${window.pShowDone?'👁 Toutes':'🔲 À faire'}</div>`:'';
     var backPrio=(_prioTaskOK&&!isAdmin()&&_prioOverride)?'<div class="ptfchip pfc-back" onclick="_prioBackToPriority()">\u2190 Priorit\u00e9</div>':'';
     tfRow.innerHTML=backPrio+`<div class="ptfchip${pTacheFilter==='toutes'?' active':''}" data-t="toutes" onclick="setPTacheFilter('toutes',this)">Toutes tâches</div>`
       +tachesSaisonFSorted.map(t=>`<div class="ptfchip${pTacheFilter===t.nom?' active':''}" data-t="${t.nom}" onclick="setPTacheFilter('${_escAttr(t.nom)}',this)">${TEMOJI[t.nom]||'🌿'} ${t.nom}</div>`).join('')
@@ -6192,7 +6198,7 @@ function renderParcelles(){
     if(pTacheFilter!=='toutes'){
       if(p.statut==='Arrachee')return false; // jamais dans le filtre tâche
       if((p.tachesExclues||[]).includes(pTacheFilter))return false; // tâche désactivée sur cette parcelle
-      if(!pShowDone&&_pvCurDone(p,pTacheFilter))return false; // étape/tâche courante déjà faite (QV)
+      if(!window.pShowDone&&_pvCurDone(p,pTacheFilter))return false; // étape/tâche courante déjà faite (QV)
     }
     return true;
   });
@@ -6281,27 +6287,7 @@ function renderParcelles(){
 }
 
 // ── Cépage ──
-// Cepages proposes a la saisie. La liste etait bourguignonne : un domaine
-// bordelais ne pouvait choisir que « Autre », et « Autre » n'a pas de couleur —
-// ses parcelles arrivaient toutes « a classer » dans la synthese de maturite.
-// Regroupes pour rester lisibles dans un menu deroulant sur telephone.
-// ⚠️ Tout libelle ajoute ici doit exister dans _MV_CEP_COUL (cave.js), sinon la
-// parcelle retombe « a classer » : c'est le libelle qui sert de cle.
-var CEPAGES_GR=[
-  ['Bourgogne & Beaujolais',['Pinot Noir','Chardonnay','Aligoté','Gamay','Pinot Gris','Pinot Blanc','Melon de Bourgogne','César','Sacy']],
-  ['Bordeaux & Sud-Ouest',['Merlot','Cabernet Sauvignon','Cabernet Franc','Malbec','Petit Verdot','Carménère','Tannat','Négrette','Sémillon','Sauvignon Blanc','Sauvignon Gris','Muscadelle','Colombard','Ugni Blanc']],
-  ['Rhône & Méditerranée',['Syrah','Grenache Noir','Mourvèdre','Cinsault','Carignan','Grenache Blanc','Viognier','Marsanne','Roussanne','Clairette','Bourboulenc','Vermentino']],
-  ['Loire, Alsace & Jura',['Chenin','Grolleau','Pineau d\u2019Aunis','Mondeuse','Poulsard','Trousseau','Riesling','Gewurztraminer','Sylvaner','Muscat','Savagnin','Folle Blanche']]
-];
-// Liste a plat : conserve CEPAGES.indexOf() pour la valeur hors liste preservee.
-var CEPAGES=CEPAGES_GR.reduce(function(a,g){return a.concat(g[1]);},[]).concat(['Autre']);
-function _cepOptions(cur){
-  return CEPAGES_GR.map(function(g){
-    return '<optgroup label="'+g[0]+'">'+g[1].map(function(c){
-      return '<option value="'+c+'"'+(c===cur?' selected':'')+'>'+c+'</option>';
-    }).join('')+'</optgroup>';
-  }).join('')+'<option value="Autre"'+(cur==='Autre'?' selected':'')+'>Autre</option>';
-}
+var CEPAGES=['Pinot Noir','Chardonnay','Aligoté','Gamay','Pinot Gris','Pinot Blanc','Melon de Bourgogne','Autre'];
 var _dpCurrentNom='';
 
 function openDPCepage(nom){
@@ -6324,7 +6310,7 @@ function openDPCepage(nom){
     if(!sel)return;
     var cur=curArr[i]||'';
     var placeholder=i===0?'':'— Aucun';
-    var opts=(i>0?'<option value="">'+placeholder+'</option>':'')+_cepOptions(cur);
+    var opts=(i>0?'<option value="">'+placeholder+'</option>':'')+CEPAGES.map(function(c){return '<option value="'+c+'"'+(c===cur?' selected':'')+'>'+c+'</option>';}).join('');
     sel.innerHTML=opts;
     if(cur&&CEPAGES.indexOf(cur)<0&&cur!=='Autre'){sel.innerHTML+='<option value="'+cur+'" selected>'+cur+'</option>';}
     sel.value=cur||'';
@@ -8106,7 +8092,7 @@ function renderJournal(){
     +TACHES.map(t=>`<div class="tfchip" data-t="${t.nom}" onclick="setJTache('${t.nom}',this)">${TEMOJI[t.nom]||''} ${t.nom}</div>`).join('');
   renderJournalList();
 }
-function setPTacheFilter(v,el){pShowDone=false;pCurStep=_pvSmartStep(v);
+function setPTacheFilter(v,el){window.pShowDone=false;pCurStep=_pvSmartStep(v);
   pTacheFilter=v;
   document.querySelectorAll('.ptfchip').forEach(x=>x.classList.remove('active'));
   if(el)el.classList.add('active');
@@ -9677,7 +9663,7 @@ function pQuickValidate(nom,evt){
   }
   (async function(){try{var _d=_findDebutTache(nom,task,date)||date;var _m=await fetchMeteoMoyenne(_d,date);if(_m){jEntry.meteo_snapshot=_m;saveData('journal');}}catch(e){}})();
   var card=evt&&evt.target?evt.target.closest('.pcard'):null;
-  if(!pShowDone&&card&&_pvCurDone(p,task)){
+  if(!window.pShowDone&&card&&_pvCurDone(p,task)){
     card.classList.add('pv-removing');
     setTimeout(function(){renderParcelles();computePStats();},330);
   } else {

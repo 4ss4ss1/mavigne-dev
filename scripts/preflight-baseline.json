@@ -1,6 +1,6 @@
 {
-  "_note": "Reference du cliquet anti-regression du preflight (C11/C14/C15/C16/C18/C19). Regraver : node scripts/preflight.mjs --baseline. Elle ne doit que DESCENDRE.",
-  "generated": "2026-08-12",
+  "_note": "Reference du cliquet anti-regression du preflight (C11/C14/C15/C16/C18/C19/C23). Regraver : node scripts/preflight.mjs --baseline. Elle ne doit que DESCENDRE.",
+  "generated": "2026-08-13",
   "C11_dead_ids": {
     "src/admin-gt.js": [],
     "src/app.js": [],
@@ -77,5 +77,20 @@
     "src/reserve.js": 0,
     "src/tracteur.js": 2,
     "src/utils.js": 1
+  },
+  "C23_handler_scope": {
+    "index.html": [],
+    "src/admin-gt.js": [],
+    "src/app.js": [],
+    "src/cave.js": [],
+    "src/firebase.js": [],
+    "src/onboarding.js": [],
+    "src/phyto.js": [],
+    "src/pilotage.js": [],
+    "src/planning.js": [],
+    "src/reglages.js": [],
+    "src/reserve.js": [],
+    "src/tracteur.js": [],
+    "src/utils.js": []
   }
 }

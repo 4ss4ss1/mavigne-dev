@@ -1,39 +1,143 @@
-// MA VIGNE — Service Worker v6.58
-// v6.58 (13/08/2026) — LES DEUX DOCUMENTS QUE LE CUVIER NE SAVAIT PAS IMPRIMER.
-//   Le hub Documents sortait douze PDF. Deux saisies du Cuvier n'en faisaient
-//   partie d'AUCUN : les analyses de maturite (CAVE_VENDANGE.analyses) et les
-//   mesures de fermentation (cuves_vinif[].mesures_fa). Verifie par grep : ni
-//   le bilan de campagne, ni le rapport de saison ne les touchent.
-//   ★ CE N'EST PAS UN OUBLI DU REGISTRE DES MANIPULATIONS. Son en-tete l'ecrit
-//   noir sur blanc : « densite, analyses n'en font pas partie : l'inclure
-//   noierait le document sous des dizaines de lignes sans interet pour un
-//   controle ». Un controle regarde l'enrichissement et le sulfitage ; le
-//   vigneron a besoin de ses courbes. Deux publics -> deux documents, pas une
-//   section de plus dans un registre qui a raison de les refuser.
-//   1. CONTROLE DE MATURITE (paysage) — une matrice : une ligne par parcelle,
-//      une colonne par jour de releve, dans l'ordre de maturite. Les trois
-//      moyennes ponderees par la surface (domaine / rouges / blancs), la
-//      vitesse en g/L par jour, les parcelles jamais mesurees et celles deja
-//      rentrees. Au-dela de huit jours de releve, les huit derniers sont
-//      affiches et le document DIT combien manquent.
-//   2. CAHIER DE CUVERIE (portrait) — une page par cuve : identite (parcelles,
-//      surface, eraflage, levures, SO2 a l'encuvage, MPF, duree de cuvaison),
-//      les releves dates avec la densite corrigee a 20 °C, le sucre restant
-//      estime et l'avancement, les operations via _rmDetail, et la cuvee ou le
-//      vin est parti au decuvage.
-//   ★★ AUCUN CALCUL NEUF. _matSynth, _matClasse, _matSuc/_anaSpd, _vendD20,
-//   _vendSucre, _vendFaPct et _rmDetail sont les moteurs DE L'ECRAN. Deux
-//   definitions du meme chiffre finissent toujours par diverger.
-//   ⚠️ _matSynth prend un second parametre `refIso` — le document rejoue la
-//   synthese a une date passee. Il fallait alors borner AUSSI PAR LE HAUT :
-//   _matJours rend un ecart NEGATIF pour une mesure posterieure a la
-//   reference, donc le filtre des 150 jours la laissait passer et la vendange
-//   suivante se serait invitee dans le document de l'annee precedente. La
-//   borne ne s'arme que si refIso est fourni : l'ecran est inchange.
-//   ⚠️ Les documents ne touchent AUCUN etat d'ecran — en particulier pas
-//   `_matUn`, l'unite d'affichage du Cuvier, qu'ils recalculent localement.
-//   Fichiers : cave.js (moteur + 2 documents), reglages.js (2 entrees au hub),
-//   utils.js (MV_AIDE.cave + WHATS_NEW), index.html (4 affichages).
+// MA VIGNE — Service Worker v6.61
+// v6.61 (13/08/2026) — C23 : CE QU'UN ATTRIBUT HTML NOMME DOIT VIVRE SUR window.
+//   ★★★ CORRECTIF 6.60. Les neuf fonctions _emhX de la fiche membre etaient
+//   exposees, l'ETAT ne l'etait pas : `var _EMH` est une variable de MODULE,
+//   `oninput="_EMH.d=this.value"` s'evalue dans la portee GLOBALE. Au premier
+//   caractere tape : « _EMH is not defined ». 27 references reecrites en
+//   window._EMH. C'est C15 applique a une VARIABLE et non a une fonction.
+//   ★★ NOUVEAU CONTROLE C23 (scripts/preflight.mjs), avec cliquet. C6 existait
+//   deja mais ne lit que le PREMIER identifiant du gestionnaire, seulement s'il
+//   est suivi d'une parenthese, et ecarte explicitement tout ce qui contient un
+//   point — `_EMH.d=` cochait les trois cases. C23 lit le CORPS ENTIER :
+//   appels, acces propriete, affectations. Exposition croisee entre fichiers
+//   (un handler de reglages.js peut nommer une fonction d'app.js), variables
+//   declarees dans le gestionnaire ignorees, mots-cles et globaux natifs exclus.
+//   ★ TROUVE DES LE PREMIER PASSAGE, un defaut ancien et sans rapport :
+//   `let pShowDone` (app.js) est enferme dans la fermeture de l'IIFE produite
+//   par Rollup. La puce « A faire / Toutes » des parcelles, visible des qu'on
+//   filtre par tache, levait une ReferenceError a CHAQUE clic — en silence.
+//   Le bouton ne faisait rien depuis toujours. Corrige : window.pShowDone.
+//   ⚠️ Un `let` de haut niveau n'est joignable ni via window, ni via la portee
+//   globale : le bundle est une IIFE, il n'y a pas de portee globale a atteindre.
+//
+// v6.60 (13/08/2026) — LA FICHE MEMBRE REFONDUE (lot C2 — la saisie).
+//   Sept champs disparates deviennent UN BANDEAU + UN HISTORIQUE : type, debut,
+//   fin, liste des contrats precedents, renouvellement_date, renouvellement_fin,
+//   taux + serie de taux. On lisait des cases, jamais une suite.
+//   ★★★ LA COUPURE EST DESSINEE. Le rail de la frise est PLEIN pendant un
+//   contrat et POINTILLE dans le vide ; le trou porte son propre encart hachure
+//   (« coupure de 23 jours — le compteur du precedent est solde »). C'est ce
+//   trou qui decide si le compteur repart de zero, et il n'etait affiche NULLE
+//   PART : c'est la cause commune des defauts des lots A, B et C1.
+//   ★★ CHAQUE GESTE ANNONCE SON EFFET AVANT VALIDATION, meme patron que
+//   _planAbsEffet (motifs d'absence du Planning). L'encart est CALCULE en
+//   simulant l'ajout sur _mvPeriodes, jamais ecrit en dur : un texte fige
+//   finirait par mentir le jour ou la regle change.
+//   ★ UN EVENEMENT S'ECRIT DES QU'IL EST VALIDE, pas a l'enregistrement de la
+//   fiche : un fait se consigne quand on le consigne, et fermer la fiche ne
+//   perd plus un contrat saisi. Le « × » de chaque ligne fait marche arriere.
+//   ★ LE RAPPEL NE PEUT PLUS SE TAIRE. reglages.js:432 testait
+//   `if(!m.renouvellement_date && fin...)` : remplir le champ FACULTATIF
+//   « date de renouvellement » ETEIGNAIT l'alerte de fin de contrat — annoncer
+//   un renouvellement pour janvier faisait taire l'application sur un CDD qui
+//   se terminait en aout. Source unique desormais : la fin du contrat, toujours
+//   renseignee sur un CDD. Deux boutons dessus (renouveler / acter l'arret).
+//   renouvellement_date et renouvellement_fin sont SUPPRIMES du modele ; le
+//   second n'etait lu nulle part depuis toujours.
+//   ★ LA GRILLE HORAIRE EST PORTEE PAR LE CONTRAT, pas par un evenement a part.
+//   Mesure : _planPlId est affecte HORS BOUCLE dans 26 fonctions, et les
+//   modeles sont deja dates a l'ANNEE (PLANNING_TEMPLATES[annee]) — dater
+//   l'affectation au JOUR aurait melange deux granularites sur le meme calcul.
+//   m.planning_id devient un miroir de plus. Changer de grille = signer.
+//   Supprimes : _emContratsHtml, _emPickType, _paieSerieHtml et le chemin
+//   d'ecriture du contrat livre en 6.59 (le modele, lui, est inchange).
+//
+// v6.59 (13/08/2026) — LE JOURNAL DU SALARIE (lot C1 — modele seul, ecran inchange).
+//   ★★★ QUATRE MEMOIRES PARALLELES. La vie contractuelle d'un salarie vivait a
+//   quatre endroits qui ne se parlaient pas : le couple debut/fin (contrat en
+//   cours), m.contrats[] (les precedents, invisibles des moteurs avant 6.58),
+//   renouvellement_date/_fin (une alerte — et renouvellement_fin n'etait LU
+//   NULLE PART, ecrit ligne 1789 et jamais relu), PAIE.taux_serie (le salaire).
+//   Deux sur quatre etaient datees ET lues.
+//   m.hist[] devient la SOURCE. Trois evenements, tous producteurs :
+//     embauche {d,type,fin?} · renouvellement {d,fin} · fin {d}
+//   ⚠️ LE MODELE RESTE EN DEUX MORCEAUX. `membres` est lisible par toute
+//   l'equipe, `paie` est admin-only (firestore.rules:201-202) : les contrats
+//   vont dans membres, les salaires restent dans paie, fusion A LA LECTURE.
+//   ★ MIGRATION A ZERO ECRITURE. Journal absent -> derive a la lecture depuis
+//   contrats[] + le couple. Rien n'est ecrit tant qu'une fiche n'est pas
+//   enregistree. Un domaine qui n'ouvre aucune fiche calcule comme avant.
+//   ★★ LES ANCIENS CHAMPS DEVIENNENT DES MIROIRS, reecrits par _mvHistMirror()
+//   a l'enregistrement : les ~40 points de lecture (paie, 1607 h, conges, MSA,
+//   Pilotage) n'ont pas bouge d'une ligne. Patron de taux[nom] retrograde en
+//   miroir de taux_serie[nom] (§36).
+//   ⚠️ PROPRIETE CENTRALE, verifiee sur 10 formes de fiche : DERIVER PUIS
+//   REMIROITER EST L'IDENTITE. Sans elle, le premier enregistrement d'une fiche
+//   reecrirait ses dates en silence. Le harnais l'a fait echouer deux fois :
+//   (1) un contrat archive SANS type se voyait inventer un 'CDI' — un
+//   saisonnier serait devenu permanent ; (2) meme chose sur le contrat en cours
+//   d'une fiche ancienne. Un type inconnu reste desormais inconnu.
+//   ★ PROLONGER UN CONTRAT LAISSE UNE TRACE. Repousser fin_contrat sur un
+//   contrat ouvert ecrasait l'ancienne date sans un mot ; c'est maintenant un
+//   evenement `renouvellement`, et le contrat reste UN SEUL contrat (un seul
+//   compteur). Deux gestes distincts comme pour le salaire : prolonger ouvre
+//   une ligne, corriger reecrit la ligne existante.
+//   ★ GARDE ANTI-PERTE. `membres` est un TABLEAU : _mvDocSize renvoyait le
+//   NOMBRE DE FICHES. Vider le journal des huit salaries d'un domaine passait
+//   sans un bruit (8 -> 8) alors qu'il porte les dates qui pilotent la masse
+//   salariale et le compteur des 1607 h. _mvMembresCount compte fiches ET
+//   evenements. Une fiche non migree vaut 1, comme avant.
+//   NON FAIT, VOLONTAIREMENT : la refonte de la SAISIE (liste chronologique +
+//   bouton « + ») attend une maquette — lot C2. Ni renouvellement_fin ranime,
+//   ni grille horaire datee (_planPlId a 48 points d'appel) : un evenement qui
+//   ne pilote rien serait exactement le defaut qu'on vient de retirer.
+//
+// v6.58 (13/08/2026) — LE CONTRAT ARCHIVE NE PESAIT PLUS RIEN (lots A + B).
+//   ★★★ LE TROU. §33 avait ajoute m.contrats[] pour ne plus perdre le passe
+//   d'un salarie reembauche. La fiche le retrouvait, l'effectif le comptait —
+//   mais le MOTEUR D'HEURES, lui, ne voyait toujours que le contrat en cours.
+//   Mesure du 13/08 sur une fiche reelle (CDD 02/03->24/07 archive, nouveau
+//   contrat au 17/08) : 0 h payee sur mars->juillet contre 735 h pour la meme
+//   fiche non archivee. Meme homme, meme planning ; seule difference l'archivage.
+//   Pire : _pexData fait `if(hp<=0 && hw<=0) return;` — la personne DISPARAIT
+//   de la liste au lieu d'y figurer a zero. Le total etait donc sous-evalue
+//   sans le moindre signal. Touchait la masse salariale de l'exercice, la
+//   capacite ETP, la cadence d'equipe et la presence reelle.
+//   ⚠️ LE CORRECTIF N'ELARGIT PAS _planInContract. Un contrat qui se termine
+//   SOLDE son compteur (paye, donc a zero) ; le suivant repart de sa date de
+//   debut, sans du ni indu. Ses ~31 appels — plafond 1607 h, conges, grille,
+//   maxima hebdo — sont inchanges. On ajoute un SECOND portail,
+//   _planJourCouvert, pose par _planWide() sur quatre entrees de mesure
+//   seulement : _planRangeH, _planTeamCadence, capEquipe, capPresent.
+//   Drapeau de contexte (meme patron que _planCtxYear) plutot qu'un parametre :
+//   _planSummary appelle _planCalcMonth, _planRempH et _planAbsNeutH, qui
+//   gataient toutes sur le contrat — threader `wide` = 7 signatures et un oubli
+//   qui passe en silence. try/finally : une exception ne peut pas laisser le
+//   drapeau pose.
+//   ★★ ANNUALISATION PAR TYPE DE CONTRAT. type_contrat etait lu 8 fois dans
+//   tout le code et AUCUNE n'etait un calcul : deux libelles, un repli de taux,
+//   des alertes. _planAnnuPlafond proratisait donc 1607 h pour TOUT LE MONDE —
+//   un vendangeur en TESA avait un compteur d'annualisation, de la modulation
+//   et des heures sup. Ils sont payes A L'HEURE. window.MV_HORS_ANNU
+//   (utils.js, definition unique) = TESA/Saisonnier/Extra. ⚠️ La liste enumere
+//   ce qu'on RETIRE : une liste d'inclusion ferait disparaitre en silence le
+//   compteur de tout type non nomme (libelle futur, import, faute de frappe).
+//   Tout ce qui n'y figure pas reste annualise, donc aucun domaine existant ne
+//   perd son compteur. ★ Ce qui remplace le compteur
+//   compte autant que l'exemption : la carte devient un COMPTAGE (heures
+//   faites, jours travailles) — une carte vide serait une regression deguisee.
+//   ★ RELEVE PDF PAR CONTRAT. rowFor() gatait sur _planInContract : apres
+//   archivage, le releve des mois du contrat archive sortait BLANC — pas une
+//   erreur, une page sans lignes, introuvable pour la MSA. Troisieme contexte
+//   _planCtrCtx (oppose au premier : borner a UN contrat au lieu de les voir
+//   tous), pose par _planSurContrat(). planExportPDF se borne au contrat qui
+//   couvre le mois affiche ; mois a cheval sur deux contrats ou fiche a contrat
+//   unique -> comportement d'origine. Le releve n'est JAMAIS blanc.
+//   ⚠️ _planInContractCtr : lecteur des fonctions qui suivent UN contrat mais
+//   JAMAIS le mode large (_planAnnuPlafond, _planWorkMonth, _planDaysWorked).
+//   NON TRAITE, a decider : heures sup, solde de depart et solde annuel restent
+//   affiches pour les non-annualises (mecanisme hebdomadaire distinct).
+//
 // v6.57 (12/08/2026) — AUDIT DU PILOTAGE : CE QUE L'ECRAN PROMETTAIT SANS LE TENIR.
 //   Onze defauts trouves en relisant le module apres la refonte du 12/08 (§34).
 //   ★★★ TROIS ETAIENT DES PROMESSES NON TENUES PAR L'ECRAN LUI-MEME :
@@ -1154,7 +1258,7 @@
 // v2.22 — Fix profils vides : guard vide dans loadData() pour MEMBRES/SAISONS/TACHES
 // v2.17 — Onboarding intégré + tenantId · v2.06 — Firebase Auth · v2.00–v2.05 — divers
 const DEBUG = self.location.hostname === 'localhost' || self.location.hostname === '127.0.0.1';
-const CACHE_NAME   = 'mavigne-v6.58';
+const CACHE_NAME   = 'mavigne-v6.61';
 const TENANT_CACHE = 'mavigne-tenant';   // Cache persistant — préservé à chaque mise à jour SW
 const SYNC_TAG     = 'mavigne-sync';
 
@@ -1170,7 +1274,7 @@ const CDN_URLS = [
 ];
 
 self.addEventListener('install', event => {
-  if(DEBUG) console.log('[SW] Ma Vigne v6.58 installé');
+  if(DEBUG) console.log('[SW] Ma Vigne v6.61 installé');
   event.waitUntil(
     caches.open(CACHE_NAME).then(async cache => {
       // ── Cœur applicatif : STRICT (mise à jour ATOMIQUE) ──
@@ -1186,7 +1290,7 @@ self.addEventListener('install', event => {
 });
 
 self.addEventListener('activate', event => {
-  if(DEBUG) console.log('[SW] Ma Vigne v6.58 activé');
+  if(DEBUG) console.log('[SW] Ma Vigne v6.61 activé');
   event.waitUntil(
     caches.keys().then(keys =>
       Promise.all(
