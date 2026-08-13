@@ -355,27 +355,31 @@ window._mvGraphRepeindre = function(){
 
 export const WHATS_NEW = [
   { v:'6.11', items:[
-    { emoji: '\u{1F69C}', titre: "Votre carnet d\u2019entretien portait le nom de l\u2019\u00e9diteur",
-      desc: "Il s\u2019intitulait « Ma Vigne \u2014 Entretien tracteurs » et se signait « \u00a9 GUERETTECH », l\u00e0 o\u00f9 tous vos autres documents portent <b>le nom de votre domaine</b>. C\u2019est votre carnet, pas le n\u00f4tre. Il reprend d\u00e9sormais l\u2019en-t\u00eate commun \u2014 domaine, titre, machines concern\u00e9es, date d\u2019\u00e9dition \u2014 et les m\u00eames polices que le reste. Les marges n\u2019ont pas boug\u00e9 : rien ne se d\u00e9cale dans les tableaux." },
-  ] },
+    { emoji: '\u{1F532}', titre: "Le filtre \u00ab\u00a0\u00c0 faire\u00a0\u00bb des parcelles r\u00e9pond enfin",
+      desc: "Quand vous filtriez les parcelles par t\u00e2che, la puce <b>\u00ab\u00a0\u{1F532}\u00a0\u00c0 faire\u00a0/\u00a0\u{1F441}\u00a0Toutes\u00a0\u00bb</b> qui appara\u00eet \u00e0 droite ne faisait <b>rien du tout</b>\u00a0: le clic \u00e9chouait en silence, sans message, et la liste restait telle quelle. Elle bascule d\u00e9sormais correctement entre les parcelles qui restent \u00e0 faire et toutes les parcelles." }
+  ]},
   { v:'6.10', items:[
-    { emoji: '\u{1F464}', titre: "Le relev\u00e9 d\u2019un salari\u00e9 se cachait dans le Planning",
-      desc: "C\u2019est le document qu\u2019on vous demande en premier en cas de contr\u00f4le \u2014 le mois jour par jour, les heures suppl\u00e9mentaires, le compteur, l\u2019annualisation, avec les deux lignes de signature \u2014 et il fallait ouvrir le Planning, trouver la fiche de la personne, puis le bouton PDF. Il figure maintenant dans <b>R\u00e9glages \u203a App \u203a Documents</b>, avec le choix du salari\u00e9 et du mois. Le hub tient enfin sa promesse : tout ce que Ma Vigne sait sortir est au m\u00eame endroit." },
-    { emoji: '\u{1F4C4}', titre: "Il affichait « CDD » sans dire sur quelles dates",
-      desc: "Le compteur d\u2019annualisation est <b>proratis\u00e9 aux jours sous contrat</b> : un saisonnier de quatre mois n\u2019a pas un plafond de 1 607 h. Le relev\u00e9 montrait pourtant le plafond sans montrer ce qui le d\u00e9termine. Il porte d\u00e9sormais <b>la liste dat\u00e9e des contrats</b>, avec leur dur\u00e9e, et signale les <b>coupures</b> : deux p\u00e9riodes s\u00e9par\u00e9es d\u2019un seul jour ouvrent deux compteurs distincts, rien ne se reporte de l\u2019une \u00e0 l\u2019autre. Les <b>cong\u00e9s pay\u00e9s</b> y figurent aussi \u2014 solde initial, pris, reste, sur la p\u00e9riode de r\u00e9f\u00e9rence du domaine." },
-  ] },
+    { emoji: '\u{1F4C7}', titre: "La fiche d\u2019un salari\u00e9 raconte enfin son histoire",
+      desc: "Le contrat, les contrats pr\u00e9c\u00e9dents, le renouvellement et le taux horaire \u00e9taient quatre blocs s\u00e9par\u00e9s qui ne se parlaient pas\u00a0: on lisait des cases, jamais une suite. La fiche s\u2019ouvre maintenant sur <b>le contrat en cours</b> \u2014 type, dates, grille, taux, et s\u2019il est annualis\u00e9 ou pay\u00e9 \u00e0 l\u2019heure \u2014 puis sur <b>un historique dat\u00e9</b> o\u00f9 chaque changement a sa ligne. Le bouton <b>\u00ab\u00a0Ajouter un \u00e9v\u00e9nement\u00a0\u00bb</b> ne demande plus une valeur mais <b>ce qui s\u2019est pass\u00e9</b>\u00a0: une embauche, un renouvellement, une fin de contrat, une augmentation. Chacun annonce son effet <b>avant</b> que vous validiez." },
+    { emoji: '\u2702\uFE0F', titre: "La coupure entre deux contrats se voit",
+      desc: "C\u2019est elle qui d\u00e9cide si le compteur d\u2019heures repart de z\u00e9ro, et elle n\u2019\u00e9tait affich\u00e9e nulle part. L\u2019historique la dessine d\u00e9sormais en clair\u00a0: <i>coupure de 23 jours, le compteur du pr\u00e9c\u00e9dent est sold\u00e9</i>. Prolonger un contrat et en signer un nouveau ne se ressemblent plus \u2014 le premier garde un seul compteur, le second en ouvre un." },
+    { emoji: '\u{1F514}', titre: "Le rappel de fin de contrat ne peut plus se taire",
+      desc: "L\u2019alerte \u00e0 trente jours lisait un champ facultatif, \u00ab\u00a0date de renouvellement\u00a0\u00bb. Le remplir <b>\u00e9teignait</b> l\u2019alerte de fin de contrat\u00a0: indiquer un renouvellement pr\u00e9vu en janvier faisait taire l\u2019application sur un CDD qui se terminait en ao\u00fbt. Le rappel lit maintenant la <b>fin du contrat</b>, toujours renseign\u00e9e, et propose directement de renouveler ou d\u2019acter l\u2019arr\u00eat. Les deux champs de renouvellement disparaissent." },
+    { emoji: '\u{1F5D3}\uFE0F', titre: "La grille horaire suit le contrat",
+      desc: "Changer quelqu\u2019un de grille recalculait ses heures pr\u00e9vues depuis janvier, donc ses heures suppl\u00e9mentaires, sans rien annoncer. La grille est d\u00e9sormais un attribut du contrat\u00a0: elle se choisit \u00e0 l\u2019embauche, s\u2019affiche dans le bandeau, et un changement ne s\u2019applique qu\u2019\u00e0 partir du contrat qui le porte." }
+  ]},
   { v:'6.09', items:[
-    { emoji: '\u{1F5FA}', titre: "Le vignoble ne sortait qu\u2019en tableur",
-      desc: "Pour avoir la liste de vos parcelles sur papier, il fallait passer par le fichier Excel \u2014 une colonne par t\u00e2che, et rien d\u2019autre. L\u2019<b>\u00e9tat du vignoble</b> s\u2019imprime maintenant depuis R\u00e9glages \u203a App \u203a Documents\u00a0: <b>une ligne par parcelle</b> avec la surface, le c\u00e9page, la commune, l\u2019avancement de la campagne, le dernier travail enregistr\u00e9 et le dernier rendement, puis la r\u00e9partition par c\u00e9page et les parcelles arrach\u00e9es." },
-    { emoji: '\u{1F50E}', titre: "Et surtout, il dit ce qui manque",
-      desc: "Une parcelle sans c\u00e9page ne se range dans aucune couleur, une parcelle sans position n\u2019a <b>ni m\u00e9t\u00e9o de secteur ni tri par proximit\u00e9</b>, une parcelle sans contour n\u2019appara\u00eet pas sur la carte \u2014 et rien ne vous le disait dans une liste de quarante lignes. Le document les compte et les nomme, en fin de page. C\u2019est la feuille \u00e0 cocher d\u2019une installation, et la relecture de d\u00e9but de campagne." },
-  ] },
+    { emoji: '\u{1F4D2}', titre: "Prolonger un contrat ne fait plus dispara\u00eetre l\u2019ancienne date",
+      desc: "Quand vous repoussiez la date de fin d\u2019un contrat en cours, l\u2019ancienne \u00e9tait <b>\u00e9cras\u00e9e sans un mot</b>\u00a0: plus moyen de savoir jusqu\u2019o\u00f9 courait le contrat avant l\u2019avenant. C\u2019est d\u00e9sormais un <b>renouvellement</b>, qui garde la trace des deux dates. Le contrat reste <b>un seul contrat</b>, avec un seul compteur d\u2019heures\u00a0\u2014 prolonger n\u2019est pas r\u00e9embaucher. Corriger une faute de frappe dans une date, en revanche, r\u00e9\u00e9crit simplement la ligne\u00a0: les deux gestes sont distincts, comme pour les taux horaires. <b>L\u2019\u00e9cran ne change pas</b>, c\u2019est le m\u00eame formulaire." }
+  ]},
   { v:'6.08', items:[
-    { emoji: '\u{1F347}', titre: "Vos rel\u00e8vements de maturit\u00e9 ne sortaient pas de l\u2019\u00e9cran",
-      desc: "Vous saisissez le sucre ou le degr\u00e9 parcelle par parcelle pendant les trois semaines qui pr\u00e9c\u00e8dent la vendange, et il fallait ressortir le t\u00e9l\u00e9phone pour les relire \u2014 dans les rangs, au tri, ou devant le \u0153nologue. Le <b>contr\u00f4le de maturit\u00e9</b> s\u2019imprime maintenant depuis R\u00e9glages \u203a App \u203a Documents\u00a0: un tableau d\u2019une page, une ligne par parcelle, une colonne par jour de rel\u00e8vement, class\u00e9 <b>dans l\u2019ordre de maturit\u00e9</b> avec la vitesse de progression et les trois moyennes du domaine." },
-    { emoji: '\u{1FAA3}', titre: "La fermentation se suivait, mais ne s\u2019imprimait nulle part",
-      desc: "Densit\u00e9s, temp\u00e9ratures, remontages, pigeages, chaptalisations\u00a0: tout \u00e9tait enregistr\u00e9, et rien ne pouvait sortir sur papier. Le registre des manipulations, lui, \u00e9carte ces lignes expr\u00e8s \u2014 il r\u00e9pond \u00e0 un contr\u00f4le, pas au vigneron. Le <b>cahier de cuverie</b> comble le trou\u00a0: une page par cuve, avec la densit\u00e9 corrig\u00e9e \u00e0 20\u00a0\u00b0C, le sucre restant estim\u00e9, l\u2019avancement, les op\u00e9rations dat\u00e9es et la cuv\u00e9e o\u00f9 le vin est parti au d\u00e9cuvage." },
-  ] },
+    { emoji: '\u{1F4B6}', titre: "Un salari\u00e9 r\u00e9embauch\u00e9 retrouve ses heures et son co\u00fbt",
+      desc: "Depuis la version pr\u00e9c\u00e9dente, l\u2019application gardait bien les contrats pass\u00e9s d\u2019un salari\u00e9\u00a0\u2014 mais seulement pour dire qu\u2019il \u00e9tait <b>l\u00e0</b>. Ses heures et son salaire, eux, restaient \u00e0 z\u00e9ro sur toute la p\u00e9riode de l\u2019ancien contrat. Un CDD de mars \u00e0 juillet, archiv\u00e9 puis suivi d\u2019un nouveau contrat en ao\u00fbt, pesait <b>0\u00a0h et 0\u00a0\u20ac</b> dans l\u2019exercice au lieu de 735\u00a0h. Il n\u2019apparaissait m\u00eame pas comme une ligne vide\u00a0: il disparaissait de la liste, et le total \u00e9tait donc faux sans que rien ne le signale. La masse salariale, la capacit\u00e9 de l\u2019\u00e9quipe, la cadence et la pr\u00e9sence r\u00e9elle comptent d\u00e9sormais <b>tous</b> les contrats de la fiche. Attendez-vous \u00e0 voir ces chiffres monter\u00a0: ils \u00e9taient sous-\u00e9valu\u00e9s." },
+    { emoji: '\u{1F551}', titre: "Un saisonnier n\u2019a plus de compteur annuel qui n\u2019a pas lieu d\u2019\u00eatre",
+      desc: "Les TESA, saisonniers et extras sont pay\u00e9s <b>\u00e0 l\u2019heure</b>\u00a0: l\u2019annualisation ne les concerne pas. L\u2019application leur affichait pourtant un plafond de 1607\u00a0h proratis\u00e9, des heures de modulation et un \u00ab\u00a0reste \u00e0 faire\u00a0\u00bb\u00a0\u2014 des nombres qu\u2019ils ne toucheront jamais, et qu\u2019on ne v\u00e9rifie pas parce qu\u2019ils ont l\u2019air d\u2019une mesure. Leur fiche montre maintenant ce qui les concerne vraiment\u00a0: heures faites et jours travaill\u00e9s. Les CDI, CDD, apprentis et g\u00e9rants ne changent pas." },
+    { emoji: '\u{1F4C4}', titre: "Le relev\u00e9 PDF d\u2019un mois pass\u00e9 ne sort plus blanc",
+      desc: "Quand un contrat \u00e9tait archiv\u00e9, le relev\u00e9 des mois de ce contrat sortait <b>vide</b>\u00a0\u2014 pas une erreur, une page sans lignes. Le relev\u00e9 de mars d\u2019un salari\u00e9 r\u00e9embauch\u00e9 en ao\u00fbt \u00e9tait donc introuvable, alors qu\u2019il en a besoin pour la MSA. Chaque mois sort d\u00e9sormais le relev\u00e9 du contrat qui le couvre, et l\u2019en-t\u00eate indique lequel." }
+  ]},
   { v:'6.07', items:[
     { emoji: '\u{1F4CC}', titre: "La barre du haut dispara\u00eessait d\u00e8s qu\u2019on faisait d\u00e9filer",
       desc: "La ligne qui dit <b>ce que vous regardez</b> \u2014 l\u2019exercice, ou une campagne \u00e9pingl\u00e9e \u2014 passait sous la barre des onglets au premier d\u00e9filement. Vous pouviez donc lire un tableau filtr\u00e9 sur les vendanges en croyant regarder l\u2019ann\u00e9e enti\u00e8re. Les deux barres se rangent d\u00e9sormais l\u2019une sous l\u2019autre, et le fil reste visible du haut en bas de la page." },
@@ -1632,8 +1636,7 @@ var MV_AIDE = {
       ['Le bouton vert', "sur une carte valide la tâche en cours sans ouvrir la parcelle."],
       ['Onglet Carte', ": les contours viennent de votre export PAC ou d’un fichier KML."],
       ['La recherche', "accepte le nom du climat comme le lieu-dit."],
-      ['Une parcelle arrachée', "sort des totaux mais reste dans l’historique."],
-      ['L’état du vignoble', "s’imprime depuis Réglages, onglet App, « Documents & impressions » : toutes vos parcelles sur une page, avec la surface, le cépage, la commune, l’avancement, le dernier travail, le dernier rendement — et la liste de ce qui reste à renseigner."]
+      ['Une parcelle arrachée', "sort des totaux mais reste dans l’historique."]
     ]
   },
   journal: {
@@ -1686,7 +1689,6 @@ var MV_AIDE = {
       ['Présence, coupure, heures dues', "trois nombres qui se ressemblent et ne disent pas la même chose. La ‹‹ présence ›› va de l’arrivée au départ. La ‹‹ coupure ›› est le temps non travaillé au milieu : sa durée et son heure sont fixées par le domaine, dans l’onglet Le cadre, ce n’est pas un moment que chacun choisit. Les ‹‹ heures dues ›› sont ce qui part en paie et alimente le compteur des 1 607 h. Une journée de 09:00 à 16:00 avec une heure de coupure fait 7 h de présence et 6 h dues."],
       ['Le planning de l’année', "s’imprime depuis le même endroit : le rythme sur douze mois, avec les heures de prise et de fin de service et la coupure déjeuner. Une page par modèle de semaine, pas une par salarié — c’est le document qu’on remet à l’équipe pour l’année à venir."],
       ['Le relevé mensuel', "s’imprime depuis Réglages, onglet App, « Documents & impressions ». C’est un relevé d’heures, pas un bulletin de paie."],
-      ['Le relevé d’un seul salarié', "s’imprime au même endroit, en choisissant la personne et le mois : son mois jour par jour, ses contrats et leurs dates, ses congés payés, son compteur d’heures et son annualisation, avec deux lignes de signature. Le bouton PDF de sa fiche, au Planning, sort exactement le même document."],
       ['Taux horaires et acomptes', ": administrateurs seulement, et jamais enregistrés sur l’appareil."]
     ]
   },
@@ -1703,7 +1705,7 @@ var MV_AIDE = {
       ['Le millésime', "annonce ce qui vient dans les quatre prochaines semaines, puis retrace le parcours du vin, de la benne à la bouteille."],
       ['Votre rendement au pressoir', "se règle au Cuvier, onglet Réglages, en kilos de raisin par hectolitre. Tous les écrans qui transforment des raisins en volume s’en servent — la chaîne de la récolte à la bouteille comme le bilan de campagne."],
       ['Les analyses labo', "s’attachent en PDF à la cuvée. Les supprimer est réservé à l’administrateur."],
-      ['Quatre documents sortent de la Cave', "depuis Réglages, onglet App, « Documents & impressions » : le contrôle de maturité avant vendange, le cahier de cuverie pendant la fermentation, le registre des manipulations et le bilan de campagne. Ce sont des états internes : Ma Vigne prépare, vous déclarez."]
+      ['Registre des manipulations et bilan de campagne', "s’impriment depuis Réglages, onglet App, « Documents & impressions ». Ce sont des états internes : Ma Vigne prépare, vous déclarez."]
     ]
   },
   reserve: {
@@ -2215,22 +2217,206 @@ window._mvOrdreRangs = function(tache, noms){
 // ⚠️ CE QUI LIT CETTE FONCTION, ET CE QUI NE LA LIT PAS. Trois questions
 // distinctes, qu'un seul couple de dates confondait :
 //   1. « est-il la AUJOURD'HUI ? »            -> _mvEnContratLe
-//   2. « a-t-il travaille pendant CETTE PERIODE ? » -> _mvEnContratSurPeriode
-//      et _inContractDay (planning.js) : ces deux-la voient TOUS les contrats,
-//      c'est le sens meme de la question, et c'est ce qui effacait le passe.
+//   2. « a-t-il travaille pendant CETTE PERIODE ? » -> _mvEnContratSurPeriode,
+//      _inContractDay et _planJourCouvert (planning.js) : ces trois-la voient
+//      TOUS les contrats, c'est le sens meme de la question, et c'est ce qui
+//      effacait le passe. _planJourCouvert est le portail des MESURES DE
+//      FENETRE : masse salariale de l'exercice, capacite, cadence, presence.
+//      Il se pose via _planWide(), jamais en dur.
 //   3. « combien d'heures lui doit-on sur CE contrat ? » -> _planInContract
 //      (planning.js) : plafond des 1607 h, conges, grille. Celui-la ne voit QUE
 //      le contrat en cours et NE DOIT PAS changer. Elargir le prorata melangerait
-//      deux contrats en un seul compteur.
+//      deux contrats en un seul compteur. Un contrat qui se termine SOLDE son
+//      compteur (paye, donc a zero) ; le suivant repart de sa date de debut,
+//      sans du ni indu.
 // Le couple debut_contrat/fin_contrat garde donc exactement son sens : le contrat
 // EN COURS, celui que lit la paie. m.contrats[] ne porte que les PRECEDENTS.
+// ══════════════════════════════════════════════════════════════════════
+// QUI EST SOUMIS A L'ANNUALISATION — une seule definition, ici
+// ══════════════════════════════════════════════════════════════════════
+// TESA, saisonniers et extras sont payes A L'HEURE : pas de plafond annuel,
+// pas de modulation, pas de compteur qui se solde au 31 decembre. Leur
+// afficher un plafond de 1607 h proratise, c'est afficher un nombre qu'ils
+// ne toucheront jamais — et un nombre faux se defend tout seul dans une
+// discussion de bulletin, parce qu'il a l'autorite d'une mesure.
+// ⚠️ PAS de derogation par fiche : une option que personne ne regle
+// correctement est pire que pas d'option.
+// ⚠️ La liste enumere ce qu'on RETIRE, pas ce qu'on garde. Une liste d'inclusion
+// ferait sortir de l'annualisation tout type absent de la liste — un libelle
+// futur, une donnee importee, une faute de frappe — et ferait donc DISPARAITRE
+// un compteur en silence. Ici, tout ce qui n'est pas nomme reste annualise :
+// un domaine existant garde exactement le compteur qu'il avait.
+window.MV_HORS_ANNU = ['TESA', 'Saisonnier', 'Extra'];
+window._mvAnnualise = function(m){
+  if(!m) return true;
+  // Une ligne d'equipe collective n'a deja ni compteur, ni conges, ni releve
+  // individuel : ces compteurs sont propres a UN salarie.
+  if(window._mvEstCollectif && window._mvEstCollectif(m)) return false;
+  return window.MV_HORS_ANNU.indexOf(m.type_contrat || 'CDI') < 0;
+};
+
+// ══════════════════════════════════════════════════════════════════════
+// LE JOURNAL DU SALARIE — une seule verite datee
+// ══════════════════════════════════════════════════════════════════════
+// AVANT ce lot, la vie contractuelle d'un salarie vivait a quatre endroits
+// qui ne se parlaient pas : le couple debut/fin (contrat en cours),
+// m.contrats[] (les precedents), le couple renouvellement_* (une alerte, et
+// renouvellement_fin n'etait LU nulle part), et PAIE.taux_serie (le salaire).
+// Deux d'entre eux seulement etaient dates ET lus.
+//
+// Desormais m.hist[] est la SOURCE. Trois evenements :
+//   embauche       {d, type, fin?}  ouvre un contrat ; fin = fin PREVUE
+//   renouvellement {d, fin}         repousse la fin SANS couper -> meme contrat
+//   fin            {d}              clot au jour d (fin reelle, prime sur la prevue)
+// Le salaire reste dans PAIE.taux_serie : `membres` est lisible par toute
+// l'equipe, `paie` est admin-only (firestore.rules). Le modele DOIT rester en
+// deux morceaux ; on les fusionne a la lecture, jamais dans le document.
+//
+// ★ MIGRATION A ZERO ECRITURE. Journal absent -> il est DERIVE a la lecture
+// depuis contrats[] + le couple courant. Rien n'est ecrit tant que la fiche
+// n'est pas enregistree. Un domaine qui n'ouvre jamais une fiche calcule
+// exactement comme avant, a l'octet pres.
+//
+// ★★ LES ANCIENS CHAMPS DEVIENNENT DES MIROIRS. _mvHistMirror() les reecrit
+// depuis le journal a chaque enregistrement, si bien que les ~40 points de
+// lecture existants (paie, compteur 1607 h, conges, MSA, Pilotage) n'ont pas
+// bouge d'une ligne. Meme patron que taux[nom] retrograde en miroir de
+// taux_serie[nom] (§36).
+window.MV_HIST_TYPES = ['embauche', 'renouvellement', 'fin'];
+
+// Journal NORMALISE et trie. Derive si absent. Ne modifie jamais m.
+window._mvHist = function(m){
+  if(!m) return [];
+  var H = [];
+  if(Array.isArray(m.hist) && m.hist.length){
+    m.hist.forEach(function(e){
+      if(!e || !e.d) return;
+      if(window.MV_HIST_TYPES.indexOf(e.t) < 0) return;
+      var o = { d: String(e.d), t: e.t };
+      if(e.type)   o.type   = String(e.type);
+      if(e.fin)    o.fin    = String(e.fin);
+      if(e.grille) o.grille = String(e.grille);
+      H.push(o);
+    });
+  } else {
+    // DERIVATION depuis l'ancien modele. Une periode = une embauche portant sa
+    // fin PREVUE : c'est exactement l'information que l'ancien modele contenait,
+    // ni plus ni moins. Aucun evenement `fin` n'est invente — on ne sait pas si
+    // la fin etait prevue ou subie, et l'affirmer serait ajouter un fait.
+    (m.contrats || []).forEach(function(c){
+      if(!c || !(c.debut || c.fin)) return;
+      var o = { d: c.debut || '', t: 'embauche' };
+      if(c.type)   o.type   = String(c.type);
+      if(c.fin)    o.fin    = String(c.fin);
+      if(c.grille) o.grille = String(c.grille);
+      H.push(o);
+    });
+    if(m.debut_contrat || m.fin_contrat){
+      var k = { d: m.debut_contrat || '', t: 'embauche' };
+      if(m.type_contrat) k.type = String(m.type_contrat);
+      if(m.fin_contrat)  k.fin  = String(m.fin_contrat);
+      // La grille du contrat EN COURS vient de m.planning_id, le champ que lit
+      // deja _planPlId. Elle n'est pas inventee : absente, elle reste absente.
+      if(m.planning_id)  k.grille = String(m.planning_id);
+      H.push(k);
+    }
+  }
+  // Tri par date. ⚠️ Tri STABLE (garanti depuis ES2019) : deux evenements du
+  // meme jour gardent l'ordre de saisie, sans quoi une fin et une embauche
+  // posees le meme jour pourraient s'inverser d'un rendu a l'autre.
+  H.sort(function(a, b){ return String(a.d || '0000-00-00').localeCompare(String(b.d || '0000-00-00')); });
+  return H;
+};
+
+// Periodes CONTRACTUELLES, dans l'ordre, NON fusionnees : chacune garde son
+// type. C'est ce que lit _mvSalarieAt ; _mvContrats, lui, fusionne.
+window._mvPeriodes = function(m){
+  var H = window._mvHist(m), P = [], cur = null;
+  for(var i = 0; i < H.length; i++){
+    var e = H[i];
+    if(e.t === 'embauche'){
+      // ⚠️ type '' et non 'CDI' : une fiche ancienne peut porter un contrat
+      // archive SANS type. Ecrire 'CDI' par defaut inventerait un fait — et
+      // le premier enregistrement transformerait un saisonnier en permanent.
+      // L'inconnu reste inconnu ; les lecteurs appliquent leur propre defaut.
+      cur = { debut: e.d || '', fin: e.fin || '', type: e.type || '', grille: e.grille || '' };
+      P.push(cur);
+    } else if(e.t === 'renouvellement'){
+      // Repousse la fin du contrat OUVERT. Sans contrat ouvert l'evenement est
+      // ignore plutot que d'en inventer un : un renouvellement ne cree pas un
+      // emploi, il en prolonge un.
+      if(cur) cur.fin = e.fin || '';
+    } else if(e.t === 'fin'){
+      // La fin REELLE prime sur la fin prevue, dans les deux sens : une rupture
+      // anticipee raccourcit, une fin constatee plus tard allonge.
+      if(cur){ cur.fin = e.d || ''; cur = null; }
+    }
+  }
+  return P;
+};
+
+// « Qu'etait-il ce jour-la ? » — le contrat couvrant iso, ou null.
+// Le taux vient de PAIE (_mvPaieTauxEffAt), collection separee : il n'est pas
+// joint ici, sinon la fonction ne serait utilisable que par un administrateur.
+window._mvSalarieAt = function(m, iso){
+  if(!m || !iso) return null;
+  var P = window._mvPeriodes(m);
+  for(var i = 0; i < P.length; i++){
+    var p = P[i];
+    if(p.debut && iso < p.debut) continue;
+    if(p.fin && iso > p.fin) continue;
+    return { debut: p.debut, fin: p.fin, type: p.type, grille: p.grille };
+  }
+  return null;
+};
+
+// Reecrit les MIROIRS depuis le journal. Appele a l'enregistrement, jamais a la
+// lecture. La derniere periode est le contrat EN COURS (celui que lisent la paie
+// et le compteur des 1607 h) ; les precedentes vont dans contrats[].
+// ⚠️ Doit etre l'IDENTITE sur une fiche jamais migree : deriver puis remiroiter
+// ne doit rien changer, sinon le premier enregistrement d'une fiche reecrirait
+// ses dates en silence. C'est la propriete que le harnais verifie en premier.
+window._mvHistMirror = function(m){
+  if(!m) return m;
+  var P = window._mvPeriodes(m);
+  if(!P.length){
+    m.debut_contrat = ''; m.fin_contrat = '';
+    delete m.contrats;
+    return m;
+  }
+  var last = P[P.length - 1], prev = P.slice(0, -1);
+  m.debut_contrat = last.debut || '';
+  m.fin_contrat   = last.fin || '';
+  // Un type inconnu ne s'ecrit pas : on laisse le champ tel quel plutot que d'y
+  // poser 'CDI'. Ecrire un defaut ici, c'est fabriquer une donnee contractuelle.
+  if(last.type) m.type_contrat = last.type;
+  // ★ LA GRILLE EST PORTEE PAR LE CONTRAT. Mesure du 13/08 : _planPlId est
+  // affecte HORS BOUCLE dans 26 fonctions, et les modeles eux-memes sont deja
+  // dates a l'annee (PLANNING_TEMPLATES[annee]). Dater l'affectation au JOUR
+  // aurait donc melange deux granularites sur le meme calcul — la signature
+  // exacte des defauts qu'on vient de corriger. La grille change avec le
+  // contrat, ce qui est aussi la realite : passer a temps partiel est un
+  // avenant. m.planning_id reste le champ lu, il devient un miroir.
+  if(last.grille) m.planning_id = last.grille;
+  if(prev.length){
+    m.contrats = prev.map(function(p){
+      var o = { debut: p.debut || '', fin: p.fin || '' };
+      if(p.type)   o.type   = p.type;
+      if(p.grille) o.grille = p.grille;
+      return o;
+    });
+  } else delete m.contrats;
+  return m;
+};
+
 window._mvContrats = function(m){
   if(!m) return [];
-  var out = [];
-  (m.contrats || []).forEach(function(c){
-    if(c && (c.debut || c.fin)) out.push({ debut: c.debut || '', fin: c.fin || '' });
+  // Meme sortie qu'avant ce lot — la fusion (contiguite/chevauchement) est
+  // inchangee. Seule la PROVENANCE des periodes change : le journal au lieu du
+  // couple + contrats[]. Sur une fiche non migree les deux donnent la meme liste.
+  var out = window._mvPeriodes(m).map(function(p){
+    return { debut: p.debut || '', fin: p.fin || '' };
   });
-  if(m.debut_contrat || m.fin_contrat) out.push({ debut: m.debut_contrat || '', fin: m.fin_contrat || '' });
   if(!out.length) return [];
   // Un debut vide = ouvert a gauche (trie en premier) ; une fin vide = ouverte a
   // droite (absorbe tout ce qui suit).

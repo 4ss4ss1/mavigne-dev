@@ -1,144 +1,143 @@
 // MA VIGNE — Service Worker v6.61
-// v6.61 (13/08/2026) — LA CHARTE DES DOCUMENTS : L'AUDIT, PUIS UNE SEULE
-//   CONVERSION. Le lot annonce voulait « passer les 8 retardataires a
-//   _mvDocOpen ». La MESURE, faite avant d'ecrire, dit autre chose.
-//   ★ IL N'Y A PAS HUIT DOCUMENTS EN DESORDRE. IL Y EN A DEUX CHARTES.
-//     · MV_DOC (utils.js) : 7 documents — recoltes, elevage, planning annuel,
-//       intrants, et les trois livres aujourd'hui (maturite, cuverie, vignoble).
-//     · UNE SECONDE CHARTE, NON ECRITE, appliquee a 3 documents RECENTS de la
-//       Cave et de la Reserve — registre des manipulations, bilan de campagne,
-//       inventaire des futs. Meme encre #14110D, meme filet degrade
-//       #8A5A38 -> #C2871E -> #3D6B27, meme Cormorant, meme marge 14mm 12mm.
-//       Ce n'est pas de la negligence : c'est un en-tete PLUS RICHE que celui
-//       de la charte (degrade, radius, titre 30-34px), ecrit APRES elle.
-//       Les aplatir ferait PERDRE en qualite. Question posee a Nico : faut-il
-//       remonter ce hero dans MV_DOC comme variante, plutot que l'inverse ?
-//     · 4 vrais retardataires : carnet d'entretien, releve mensuel, registre
-//       phyto (paysage 9mm), rapport de saison (margin:0), releve individuel
-//       (10mm).
-//   ★ UNE SEULE CONVERSION DANS CE LOT : LE CARNET D'ENTRETIEN. C'est le seul
-//   dont la conversion est SANS RISQUE DE MISE EN PAGE : ses marges etaient
-//   deja 14mm 12mm, donc la largeur utile ne change pas d'un millimetre.
-//   ⚠️ Les trois autres ne sont PAS convertis, et pas par manque de temps :
-//   passer le registre phyto de 9mm a 12mm de marge retire 6mm a un tableau de
-//   dix colonnes deja serre, et le rapport de saison est en margin:0 (pleine
-//   page). Ces deux-la demandent un RENDU pour etre valides, pas une relecture
-//   de source. Les convertir a l'aveugle serait exactement la faute que ce
-//   projet documente : croire au lieu de verifier.
-//   ★ CE QUE LE CARNET AVOUAIT : il titrait « Ma Vigne — Entretien tracteurs »
-//   et signait « © 2026 Nicolas GUERET / GUERETTECH ». La charte dit le
-//   contraire, noir sur blanc : « Les documents portent le nom du DOMAINE,
-//   jamais celui de GUERETTECH. Ce sont les documents du vigneron. » Corrige.
-//   ★ FILET NEUF : scripts/mv-chartes-doc.mjs recense les generateurs de
-//   documents, dit lequel suit quelle charte, et ECHOUE si le nombre de
-//   documents hors MV_DOC AUGMENTE. La dette est desormais bornee, mesuree,
-//   et un document neuf ne peut plus naitre hors charte en silence.
-//   Fichiers : app.js (conversion), utils.js (WHATS_NEW), index.html.
-// v6.60 (13/08/2026) — LE RELEVE INDIVIDUEL : IL EXISTAIT, IL SE CACHAIT.
-//   ⚠️⚠️ CE LOT N'A PAS CREE DE DOCUMENT, ET C'EST LE POINT PRINCIPAL.
-//   La suite annoncee etait « fiche salarie : contrats, heures face aux 1607 h,
-//   conges ». En lisant planExportPDF() avant d'ecrire, on trouve que 80 % y
-//   etait deja : le mois jour par jour, les heures sup a payer, le COMPTEUR
-//   D'ANNUALISATION (_planAnnu : plafond proratise, travail effectif, reste,
-//   modulation, suspensions) et le detail mois par mois. Ecrire une « fiche
-//   annuelle » de plus aurait fabrique une deuxieme definition des memes
-//   chiffres — la faute que ce projet paie le plus cher.
-//   Ce lot fait donc DEUX choses :
-//   1. IL REND LE DOCUMENT ATTEIGNABLE. Le hub annonce « tout ce que Ma Vigne
-//      sait sortir » ; le releve individuel n'y etait pas. Il fallait ouvrir le
-//      Planning, la fiche d'un salarie, puis le bouton PDF. Entree neuve en
-//      famille « Obligatoire », juste apres le releve mensuel, avec un panneau
-//      de preparation a deux champs (salarie, mois).
-//   2. IL COMPLETE CE QUI MANQUAIT :
-//      · LES CONTRATS. Le document ecrivait `type_contrat` — une etiquette —
-//        sans dire SUR QUELLES DATES. Or le plafond annuel est proratise aux
-//        jours sous contrat : on lisait un plafond sans voir ce qui le fixe.
-//        Liste datee via _mvContrats (la fusion des contrats CONTIGUS), duree
-//        de chaque periode, contrat en cours marque, et la COUPURE NOMMEE :
-//        deux periodes separees d'un jour = deux compteurs distincts.
-//      · LES CONGES PAYES : solde initial, pris, reste, periode de reference et
-//        mode de decompte du domaine. Ils vivaient a l'ecran, pas sur le papier.
-//   ★★ AUCUN CALCUL NEUF : _mvContrats, _planCpPris, _planCpSolde,
-//   _planCpPeriodeLbl. Un membre COLLECTIF n'a pas de bloc conges (il n'a pas
-//   de compteur individuel — regle utils.js).
-//   ⚠️ planExportPDF lit la variable de module `planMonth`. Le point d'entree
-//   du hub la deplace le temps de produire le document PUIS LA REMET : sans
-//   cela, editer un releve depuis les Documents changerait le mois affiche au
-//   Planning sans que personne ne l'ait demande. Restauration en `finally`.
-//   ⚠️ Le panneau du hub est construit EN JS (injection idempotente dans
-//   #docs-pane), pas ecrit dans index.html : trois champs ne valent pas de
-//   faire grossir un index.html de 268 ko, et le panneau reste a cote du code
-//   qui le lit. _docsPane connait desormais trois panneaux.
-//   Fichiers : planning.js (2 blocs + point d'entree), reglages.js (entree hub
-//   + panneau), utils.js (WHATS_NEW), index.html (4 affichages).
-// v6.59 (13/08/2026) — L'ETAT DU VIGNOBLE : LE SOCLE N'AVAIT AUCUN DOCUMENT.
-//   Le vignoble ne sortait qu'en CSV (« Avancement par parcelle », une colonne
-//   par tache) : lisible par un tableur, muet sur la surface, le cepage, la
-//   commune, le rendement — et sur CE QUI MANQUE.
-//   Document paysage, entree « Etat du vignoble » au hub (famille Suivi, en
-//   tete, avant le rapport de saison) :
-//     · 5 tuiles : parcelles, surface, communes, cepages, avancement
-//     · une ligne par parcelle active : commune, ha, cepages (complantation
-//       signalee), avancement + barre, taches faites/concernees, taches « hors
-//       sujet », dernier travail, dernier rendement, reperes manquants
-//     · repartition par cepage, parcelles arrachees a part
-//     · ★ LA SECTION « CE QU'IL RESTE A RENSEIGNER » : cepage absent, aucune
-//       position, aucun contour. C'est la feuille a cocher d'une installation —
-//       40 parcelles chez un prospect, personne ne relit 40 lignes a l'ecran.
-//   ★★ AUCUN CALCUL NEUF. getPCls (avancement, exclusions comprises),
-//   getTachesSaison, _mvParcGeo (position : coordonnees, sinon centroide du
-//   polygone), _mvKmlCtrs (contours), _dpRendHistRows (rendement par
-//   millesime). Ce dernier n'etait pas expose : UNE ligne d'export dans app.js
-//   plutot qu'une copie du calcul dans reglages.js.
-//   ⚠️ LE DOCUMENT NE PARLE PAS D'HEURES, VOLONTAIREMENT. Les heures restantes
-//   d'une parcelle se calculent dans openDP avec les trous de plantation,
-//   l'entreplantation et les exclusions ; les recopier ici en ferait une
-//   seconde definition, donc une divergence a terme. Elles restent au Pilotage
-//   et au rapport de saison.
-//   ⚠️ Le journal porte AUSSI les releves meteo : sans le filtre `!j.meteo`,
-//   la « derniere intervention » d'une parcelle aurait pu etre une note de
-//   pluie. Meme filtre que l'export JSON.
-//   ⚠️ Une parcelle complantee compte sa surface ENTIERE pour chacun de ses
-//   cepages : la colonne depasse alors la surface du domaine, et le document
-//   l'ecrit. Rien ne permet de partager une surface rang par rang.
-//   ⚠️ L'avancement du domaine est PONDERE PAR LA SURFACE, et le dit.
-//   Fichiers : reglages.js (document + entree hub), app.js (1 export),
-//   utils.js (MV_AIDE.parcelles + WHATS_NEW), index.html (4 affichages).
-// v6.58 (13/08/2026) — LES DEUX DOCUMENTS QUE LE CUVIER NE SAVAIT PAS IMPRIMER.
-//   Le hub Documents sortait douze PDF. Deux saisies du Cuvier n'en faisaient
-//   partie d'AUCUN : les analyses de maturite (CAVE_VENDANGE.analyses) et les
-//   mesures de fermentation (cuves_vinif[].mesures_fa). Verifie par grep : ni
-//   le bilan de campagne, ni le rapport de saison ne les touchent.
-//   ★ CE N'EST PAS UN OUBLI DU REGISTRE DES MANIPULATIONS. Son en-tete l'ecrit
-//   noir sur blanc : « densite, analyses n'en font pas partie : l'inclure
-//   noierait le document sous des dizaines de lignes sans interet pour un
-//   controle ». Un controle regarde l'enrichissement et le sulfitage ; le
-//   vigneron a besoin de ses courbes. Deux publics -> deux documents, pas une
-//   section de plus dans un registre qui a raison de les refuser.
-//   1. CONTROLE DE MATURITE (paysage) — une matrice : une ligne par parcelle,
-//      une colonne par jour de releve, dans l'ordre de maturite. Les trois
-//      moyennes ponderees par la surface (domaine / rouges / blancs), la
-//      vitesse en g/L par jour, les parcelles jamais mesurees et celles deja
-//      rentrees. Au-dela de huit jours de releve, les huit derniers sont
-//      affiches et le document DIT combien manquent.
-//   2. CAHIER DE CUVERIE (portrait) — une page par cuve : identite (parcelles,
-//      surface, eraflage, levures, SO2 a l'encuvage, MPF, duree de cuvaison),
-//      les releves dates avec la densite corrigee a 20 °C, le sucre restant
-//      estime et l'avancement, les operations via _rmDetail, et la cuvee ou le
-//      vin est parti au decuvage.
-//   ★★ AUCUN CALCUL NEUF. _matSynth, _matClasse, _matSuc/_anaSpd, _vendD20,
-//   _vendSucre, _vendFaPct et _rmDetail sont les moteurs DE L'ECRAN. Deux
-//   definitions du meme chiffre finissent toujours par diverger.
-//   ⚠️ _matSynth prend un second parametre `refIso` — le document rejoue la
-//   synthese a une date passee. Il fallait alors borner AUSSI PAR LE HAUT :
-//   _matJours rend un ecart NEGATIF pour une mesure posterieure a la
-//   reference, donc le filtre des 150 jours la laissait passer et la vendange
-//   suivante se serait invitee dans le document de l'annee precedente. La
-//   borne ne s'arme que si refIso est fourni : l'ecran est inchange.
-//   ⚠️ Les documents ne touchent AUCUN etat d'ecran — en particulier pas
-//   `_matUn`, l'unite d'affichage du Cuvier, qu'ils recalculent localement.
-//   Fichiers : cave.js (moteur + 2 documents), reglages.js (2 entrees au hub),
-//   utils.js (MV_AIDE.cave + WHATS_NEW), index.html (4 affichages).
+// v6.61 (13/08/2026) — C23 : CE QU'UN ATTRIBUT HTML NOMME DOIT VIVRE SUR window.
+//   ★★★ CORRECTIF 6.60. Les neuf fonctions _emhX de la fiche membre etaient
+//   exposees, l'ETAT ne l'etait pas : `var _EMH` est une variable de MODULE,
+//   `oninput="_EMH.d=this.value"` s'evalue dans la portee GLOBALE. Au premier
+//   caractere tape : « _EMH is not defined ». 27 references reecrites en
+//   window._EMH. C'est C15 applique a une VARIABLE et non a une fonction.
+//   ★★ NOUVEAU CONTROLE C23 (scripts/preflight.mjs), avec cliquet. C6 existait
+//   deja mais ne lit que le PREMIER identifiant du gestionnaire, seulement s'il
+//   est suivi d'une parenthese, et ecarte explicitement tout ce qui contient un
+//   point — `_EMH.d=` cochait les trois cases. C23 lit le CORPS ENTIER :
+//   appels, acces propriete, affectations. Exposition croisee entre fichiers
+//   (un handler de reglages.js peut nommer une fonction d'app.js), variables
+//   declarees dans le gestionnaire ignorees, mots-cles et globaux natifs exclus.
+//   ★ TROUVE DES LE PREMIER PASSAGE, un defaut ancien et sans rapport :
+//   `let pShowDone` (app.js) est enferme dans la fermeture de l'IIFE produite
+//   par Rollup. La puce « A faire / Toutes » des parcelles, visible des qu'on
+//   filtre par tache, levait une ReferenceError a CHAQUE clic — en silence.
+//   Le bouton ne faisait rien depuis toujours. Corrige : window.pShowDone.
+//   ⚠️ Un `let` de haut niveau n'est joignable ni via window, ni via la portee
+//   globale : le bundle est une IIFE, il n'y a pas de portee globale a atteindre.
+//
+// v6.60 (13/08/2026) — LA FICHE MEMBRE REFONDUE (lot C2 — la saisie).
+//   Sept champs disparates deviennent UN BANDEAU + UN HISTORIQUE : type, debut,
+//   fin, liste des contrats precedents, renouvellement_date, renouvellement_fin,
+//   taux + serie de taux. On lisait des cases, jamais une suite.
+//   ★★★ LA COUPURE EST DESSINEE. Le rail de la frise est PLEIN pendant un
+//   contrat et POINTILLE dans le vide ; le trou porte son propre encart hachure
+//   (« coupure de 23 jours — le compteur du precedent est solde »). C'est ce
+//   trou qui decide si le compteur repart de zero, et il n'etait affiche NULLE
+//   PART : c'est la cause commune des defauts des lots A, B et C1.
+//   ★★ CHAQUE GESTE ANNONCE SON EFFET AVANT VALIDATION, meme patron que
+//   _planAbsEffet (motifs d'absence du Planning). L'encart est CALCULE en
+//   simulant l'ajout sur _mvPeriodes, jamais ecrit en dur : un texte fige
+//   finirait par mentir le jour ou la regle change.
+//   ★ UN EVENEMENT S'ECRIT DES QU'IL EST VALIDE, pas a l'enregistrement de la
+//   fiche : un fait se consigne quand on le consigne, et fermer la fiche ne
+//   perd plus un contrat saisi. Le « × » de chaque ligne fait marche arriere.
+//   ★ LE RAPPEL NE PEUT PLUS SE TAIRE. reglages.js:432 testait
+//   `if(!m.renouvellement_date && fin...)` : remplir le champ FACULTATIF
+//   « date de renouvellement » ETEIGNAIT l'alerte de fin de contrat — annoncer
+//   un renouvellement pour janvier faisait taire l'application sur un CDD qui
+//   se terminait en aout. Source unique desormais : la fin du contrat, toujours
+//   renseignee sur un CDD. Deux boutons dessus (renouveler / acter l'arret).
+//   renouvellement_date et renouvellement_fin sont SUPPRIMES du modele ; le
+//   second n'etait lu nulle part depuis toujours.
+//   ★ LA GRILLE HORAIRE EST PORTEE PAR LE CONTRAT, pas par un evenement a part.
+//   Mesure : _planPlId est affecte HORS BOUCLE dans 26 fonctions, et les
+//   modeles sont deja dates a l'ANNEE (PLANNING_TEMPLATES[annee]) — dater
+//   l'affectation au JOUR aurait melange deux granularites sur le meme calcul.
+//   m.planning_id devient un miroir de plus. Changer de grille = signer.
+//   Supprimes : _emContratsHtml, _emPickType, _paieSerieHtml et le chemin
+//   d'ecriture du contrat livre en 6.59 (le modele, lui, est inchange).
+//
+// v6.59 (13/08/2026) — LE JOURNAL DU SALARIE (lot C1 — modele seul, ecran inchange).
+//   ★★★ QUATRE MEMOIRES PARALLELES. La vie contractuelle d'un salarie vivait a
+//   quatre endroits qui ne se parlaient pas : le couple debut/fin (contrat en
+//   cours), m.contrats[] (les precedents, invisibles des moteurs avant 6.58),
+//   renouvellement_date/_fin (une alerte — et renouvellement_fin n'etait LU
+//   NULLE PART, ecrit ligne 1789 et jamais relu), PAIE.taux_serie (le salaire).
+//   Deux sur quatre etaient datees ET lues.
+//   m.hist[] devient la SOURCE. Trois evenements, tous producteurs :
+//     embauche {d,type,fin?} · renouvellement {d,fin} · fin {d}
+//   ⚠️ LE MODELE RESTE EN DEUX MORCEAUX. `membres` est lisible par toute
+//   l'equipe, `paie` est admin-only (firestore.rules:201-202) : les contrats
+//   vont dans membres, les salaires restent dans paie, fusion A LA LECTURE.
+//   ★ MIGRATION A ZERO ECRITURE. Journal absent -> derive a la lecture depuis
+//   contrats[] + le couple. Rien n'est ecrit tant qu'une fiche n'est pas
+//   enregistree. Un domaine qui n'ouvre aucune fiche calcule comme avant.
+//   ★★ LES ANCIENS CHAMPS DEVIENNENT DES MIROIRS, reecrits par _mvHistMirror()
+//   a l'enregistrement : les ~40 points de lecture (paie, 1607 h, conges, MSA,
+//   Pilotage) n'ont pas bouge d'une ligne. Patron de taux[nom] retrograde en
+//   miroir de taux_serie[nom] (§36).
+//   ⚠️ PROPRIETE CENTRALE, verifiee sur 10 formes de fiche : DERIVER PUIS
+//   REMIROITER EST L'IDENTITE. Sans elle, le premier enregistrement d'une fiche
+//   reecrirait ses dates en silence. Le harnais l'a fait echouer deux fois :
+//   (1) un contrat archive SANS type se voyait inventer un 'CDI' — un
+//   saisonnier serait devenu permanent ; (2) meme chose sur le contrat en cours
+//   d'une fiche ancienne. Un type inconnu reste desormais inconnu.
+//   ★ PROLONGER UN CONTRAT LAISSE UNE TRACE. Repousser fin_contrat sur un
+//   contrat ouvert ecrasait l'ancienne date sans un mot ; c'est maintenant un
+//   evenement `renouvellement`, et le contrat reste UN SEUL contrat (un seul
+//   compteur). Deux gestes distincts comme pour le salaire : prolonger ouvre
+//   une ligne, corriger reecrit la ligne existante.
+//   ★ GARDE ANTI-PERTE. `membres` est un TABLEAU : _mvDocSize renvoyait le
+//   NOMBRE DE FICHES. Vider le journal des huit salaries d'un domaine passait
+//   sans un bruit (8 -> 8) alors qu'il porte les dates qui pilotent la masse
+//   salariale et le compteur des 1607 h. _mvMembresCount compte fiches ET
+//   evenements. Une fiche non migree vaut 1, comme avant.
+//   NON FAIT, VOLONTAIREMENT : la refonte de la SAISIE (liste chronologique +
+//   bouton « + ») attend une maquette — lot C2. Ni renouvellement_fin ranime,
+//   ni grille horaire datee (_planPlId a 48 points d'appel) : un evenement qui
+//   ne pilote rien serait exactement le defaut qu'on vient de retirer.
+//
+// v6.58 (13/08/2026) — LE CONTRAT ARCHIVE NE PESAIT PLUS RIEN (lots A + B).
+//   ★★★ LE TROU. §33 avait ajoute m.contrats[] pour ne plus perdre le passe
+//   d'un salarie reembauche. La fiche le retrouvait, l'effectif le comptait —
+//   mais le MOTEUR D'HEURES, lui, ne voyait toujours que le contrat en cours.
+//   Mesure du 13/08 sur une fiche reelle (CDD 02/03->24/07 archive, nouveau
+//   contrat au 17/08) : 0 h payee sur mars->juillet contre 735 h pour la meme
+//   fiche non archivee. Meme homme, meme planning ; seule difference l'archivage.
+//   Pire : _pexData fait `if(hp<=0 && hw<=0) return;` — la personne DISPARAIT
+//   de la liste au lieu d'y figurer a zero. Le total etait donc sous-evalue
+//   sans le moindre signal. Touchait la masse salariale de l'exercice, la
+//   capacite ETP, la cadence d'equipe et la presence reelle.
+//   ⚠️ LE CORRECTIF N'ELARGIT PAS _planInContract. Un contrat qui se termine
+//   SOLDE son compteur (paye, donc a zero) ; le suivant repart de sa date de
+//   debut, sans du ni indu. Ses ~31 appels — plafond 1607 h, conges, grille,
+//   maxima hebdo — sont inchanges. On ajoute un SECOND portail,
+//   _planJourCouvert, pose par _planWide() sur quatre entrees de mesure
+//   seulement : _planRangeH, _planTeamCadence, capEquipe, capPresent.
+//   Drapeau de contexte (meme patron que _planCtxYear) plutot qu'un parametre :
+//   _planSummary appelle _planCalcMonth, _planRempH et _planAbsNeutH, qui
+//   gataient toutes sur le contrat — threader `wide` = 7 signatures et un oubli
+//   qui passe en silence. try/finally : une exception ne peut pas laisser le
+//   drapeau pose.
+//   ★★ ANNUALISATION PAR TYPE DE CONTRAT. type_contrat etait lu 8 fois dans
+//   tout le code et AUCUNE n'etait un calcul : deux libelles, un repli de taux,
+//   des alertes. _planAnnuPlafond proratisait donc 1607 h pour TOUT LE MONDE —
+//   un vendangeur en TESA avait un compteur d'annualisation, de la modulation
+//   et des heures sup. Ils sont payes A L'HEURE. window.MV_HORS_ANNU
+//   (utils.js, definition unique) = TESA/Saisonnier/Extra. ⚠️ La liste enumere
+//   ce qu'on RETIRE : une liste d'inclusion ferait disparaitre en silence le
+//   compteur de tout type non nomme (libelle futur, import, faute de frappe).
+//   Tout ce qui n'y figure pas reste annualise, donc aucun domaine existant ne
+//   perd son compteur. ★ Ce qui remplace le compteur
+//   compte autant que l'exemption : la carte devient un COMPTAGE (heures
+//   faites, jours travailles) — une carte vide serait une regression deguisee.
+//   ★ RELEVE PDF PAR CONTRAT. rowFor() gatait sur _planInContract : apres
+//   archivage, le releve des mois du contrat archive sortait BLANC — pas une
+//   erreur, une page sans lignes, introuvable pour la MSA. Troisieme contexte
+//   _planCtrCtx (oppose au premier : borner a UN contrat au lieu de les voir
+//   tous), pose par _planSurContrat(). planExportPDF se borne au contrat qui
+//   couvre le mois affiche ; mois a cheval sur deux contrats ou fiche a contrat
+//   unique -> comportement d'origine. Le releve n'est JAMAIS blanc.
+//   ⚠️ _planInContractCtr : lecteur des fonctions qui suivent UN contrat mais
+//   JAMAIS le mode large (_planAnnuPlafond, _planWorkMonth, _planDaysWorked).
+//   NON TRAITE, a decider : heures sup, solde de depart et solde annuel restent
+//   affiches pour les non-annualises (mecanisme hebdomadaire distinct).
+//
 // v6.57 (12/08/2026) — AUDIT DU PILOTAGE : CE QUE L'ECRAN PROMETTAIT SANS LE TENIR.
 //   Onze defauts trouves en relisant le module apres la refonte du 12/08 (§34).
 //   ★★★ TROIS ETAIENT DES PROMESSES NON TENUES PAR L'ECRAN LUI-MEME :

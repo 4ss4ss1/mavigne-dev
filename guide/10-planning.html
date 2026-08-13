@@ -106,14 +106,21 @@
 
   <h3>📈 Le compteur annuel (annualisation)</h3>
   <p>En haut de la fiche d'un salarié, le compteur d'heures suit l'année civile.</p>
+  <p><b>Il ne concerne pas tout le monde.</b> Les <b>TESA</b>, <b>saisonniers</b> et <b>extras</b>
+  sont payés à l'heure : pas de plafond annuel, pas de modulation, pas de solde à la clôture.
+  Leur fiche affiche à la place leurs <b>heures faites</b> et leurs <b>jours travaillés</b>, qui
+  sont ce dont ils ont besoin pour la MSA. Les gérants, CDI, CDD et apprentis sont annualisés.</p>
   <ul class="dot">
     <li>Le plafond de 1&nbsp;607&nbsp;h est <b>proratisé aux jours réellement sous contrat</b> : un
-    saisonnier de quatre mois n'a évidemment pas le même plafond qu'un permanent.</li>
+    CDD de quatre mois n'a évidemment pas le même plafond qu'un permanent à l'année.</li>
     <li>Il est mesuré en <b>travail effectif</b> : congés, arrêts et récupérations n'y entrent pas.
     Les 1&nbsp;607&nbsp;h sont déjà calculées congés déduits.</li>
     <li>Les <b>heures de modulation</b> (au-delà de la durée légale hebdomadaire) sont comptées à part,
     face à leur propre plafond annuel.</li>
     <li>Une <b>projection</b> indique où le compteur atterrira à ce rythme.</li>
+    <li>Un contrat qui se termine <b>solde</b> son compteur : il est payé, donc remis à zéro. Si la
+    personne resigne plus tard, le nouveau contrat repart de sa date de début — rien n'est dû
+    d'un côté ni de l'autre. Deux contrats qui se suivent sans un jour de coupure ne font qu'un.</li>
   </ul>
 
   <h3>🏖️ Congés payés</h3>
@@ -152,8 +159,8 @@
     en repos, ou <b>reportées</b> au solde de fin d'année. Le calcul est identique, seul l'affichage change.</li>
     <li><b>Acomptes</b> par salarié et par mois, avec montant, date et note ; ils apparaissent dans le
     relevé PDF.</li>
-    <li><b>Relevé d'heures PDF</b> — voir ci-dessous : il s'édite aussi bien depuis la fiche que
-    depuis les Documents.</li>
+    <li><b>Relevé d'heures PDF</b> : référence, travaillé, écart, bloc annuel, congés, acomptes,
+    emplacements de signature.</li>
   </ul>
 
   <h3>🌡️ Horaires de chaleur</h3>
@@ -186,30 +193,6 @@
   possibles : une heure fixe, « selon le chantier », ou rien. Tant que rien n'est renseigné,
   l'application n'affiche que la durée, sans prétendre savoir quand elle tombe. Un domaine dont la
   coupure change avec la saison peut la préciser mois par mois dans la sixième colonne du CSV.</p>
-
-  <h3>👤 Le relevé d'un seul salarié</h3>
-  <p>C'est le document qu'on vous demande en premier lors d'un contrôle. Il s'édite depuis
-  <span class="path">Réglages › App › Documents &amp; impressions</span> en choisissant
-  <b>la personne et le mois</b>, ou depuis le bouton <b>PDF</b> de sa fiche — c'est le même
-  document dans les deux cas.</p>
-  <ul class="dot">
-    <li><b>Le mois jour par jour</b> : statut de chaque journée et heures effectives, sur les seuls
-    jours sous contrat.</li>
-    <li><b>Les contrats et leurs dates</b>, avec la durée de chaque période. Deux contrats qui se
-    touchent — fin puis reprise le lendemain — n'en font qu'un ; <b>une seule journée de
-    coupure en fait deux</b>, et le document le dit, parce que chaque contrat ouvre alors son propre
-    compteur d'heures : rien ne se reporte de l'un à l'autre.</li>
-    <li><b>Les congés payés</b> : solde initial, pris, reste, sur la période de référence du
-    domaine et selon son mode de décompte. Une <b>équipe collective</b> n'en a pas : elle n'a pas
-    de compteur individuel.</li>
-    <li><b>Le compteur d'heures et l'annualisation</b> : plafond proratisé aux jours sous contrat,
-    travail effectif, reste à faire, modulation, suspensions — puis le détail mois par mois.</li>
-    <li><b>Deux lignes de signature</b>, salarié et employeur.</li>
-  </ul>
-  <div class="note info"><span class="ni" aria-hidden="true">ℹ️</span><div>L'année du compteur
-  est celle que vous consultez au Planning ; le mois se choisit dans le panneau. Éditer un relevé
-  depuis les Documents <b>ne déplace pas</b> le mois affiché au Planning. Ce relevé est un
-  décompte d'heures, <b>pas un bulletin de paie</b> : aucun montant n'y figure.</div></div>
 
   <h3>🗓️ Le planning de l'année</h3>
   <p>Depuis Réglages, onglet App, « Documents &amp; impressions », le document
