@@ -2652,10 +2652,6 @@
 
 <div class="overlay" id="ovEditMembre" onclick="closeOv(event,'ovEditMembre')"><div class="modal" onclick="event.stopPropagation()"><div class="modal-handle"></div><div class="modal-hd"><div class="modal-title" id="em-title">✏️ Modifier membre</div></div><input type="hidden" id="em-nom"><div class="modal-body"><div class="fl">Rôles</div><div class="roles-check" id="em-roles"></div><div class="fl">Statut</div><div class="ppicker"><div class="pchk sel vert" data-val="Actif" onclick="pickVal(this,'em-statut','vert')">✅ Actif</div><div class="pchk" data-val="Inactif" onclick="pickVal(this,'em-statut','vert')">⏸ Inactif</div></div><input type="hidden" id="em-statut" value="Actif"><button class="mbtn verte" onclick="saveEditMembre()">Enregistrer</button><button class="mbtn-del" onclick="deleteMembre()">Supprimer</button></div></div></div>
 
-<!-- ══════ ÉVÉNEMENT D'HISTORIQUE (fiche membre) ══════ -->
-<!-- Se superpose à ovEditMembre : openOv() empile les z-index tout seul. -->
-<div class="overlay" id="ovEmEvt" onclick="closeOv(event,'ovEmEvt')"><div class="modal" onclick="event.stopPropagation()"><div class="modal-handle"></div><div id="emevt-body"></div></div></div>
-
 <!-- ══════ TOAST CONFIRMATION ══════ -->
 <div id="mv-toast"><div id="mv-toast-dot"></div><span id="mv-toast-msg"></span></div>
 <div id="pv-toast"><span id="pv-toast-msg"></span><button id="pv-toast-undo">Annuler</button></div>

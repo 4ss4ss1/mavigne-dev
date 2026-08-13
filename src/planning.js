@@ -442,76 +442,6 @@ function _planInContract(mbr,m,d){
   if(mbr.fin_contrat&&ds>mbr.fin_contrat)return false;
   return true;
 }
-// ══════════════════════════════════════════════════════════════════════
-// LES DEUX PORTAILS — ne jamais confondre le compteur et la mesure
-// ══════════════════════════════════════════════════════════════════════
-// _planInContract (au-dessus) repond a la question 3 : « combien d'heures
-// lui doit-on SUR CE CONTRAT ? ». Il ne voit QUE le contrat en cours, et
-// c'est juste : un contrat qui se termine SOLDE son compteur (paye, donc a
-// zero) ; le contrat suivant, s'il demarre apres une coupure, se recale sur
-// l'annualisation depuis sa date de debut, sans du ni indu. Ses ~35 points
-// d'appel — plafond des 1607 h, conges, grille, maxima hebdo — NE DOIVENT
-// PAS etre elargis.
-//
-// _planJourCouvert repond a la question 2 : « a-t-il travaille CE JOUR-LA,
-// sous n'importe lequel de ses contrats ? ». C'est la mesure d'une fenetre
-// de dates : masse salariale de l'exercice, capacite, cadence, presence.
-// Mesure le 13/08 sur une fiche reelle : un CDD mars->juillet archive puis
-// un nouveau contrat en aout donnait 0 h payee sur mars->juillet contre
-// 735 h pour la meme fiche non archivee. Meme homme, meme planning ; la
-// seule difference etait l'archivage.
-function _planJourCouvert(mbr,m,d){
-  var P=(typeof window._mvContrats==='function')?window._mvContrats(mbr):null;
-  // Pas de tableau, ou fiche sans aucune date : comportement d'origine.
-  if(!P||!P.length)return _planInContract(mbr,m,d);
-  var year=_pY();
-  var ds=year+'-'+String(m+1).padStart(2,'0')+'-'+String(d).padStart(2,'0');
-  for(var i=0;i<P.length;i++){
-    if(P[i].debut&&ds<P[i].debut)continue;
-    if(P[i].fin&&ds>P[i].fin)continue;
-    return true;
-  }
-  return false;
-}
-// Drapeau de contexte, meme patron que _planCtxYear. Pose UNIQUEMENT par les
-// quatre entrees de mesure ci-dessous ; partout ailleurs il vaut false et le
-// code se comporte a l'octet pres comme avant ce lot.
-var _planWideCtx=false;
-// Deuxieme contexte, oppose au premier : borner a UN contrat precis au lieu de
-// les voir tous. Sert au releve PDF, qui est un document PAR CONTRAT — un mois
-// couvert par un contrat archive sortait blanc, faute de pouvoir s'y borner.
-// Le contrat gagne toujours sur le mode large : on demande un document precis.
-var _planCtrCtx=null;
-function _planDansCtr(m,d){
-  var ds=_pY()+'-'+String(m+1).padStart(2,'0')+'-'+String(d).padStart(2,'0');
-  if(_planCtrCtx.debut&&ds<_planCtrCtx.debut)return false;
-  if(_planCtrCtx.fin&&ds>_planCtrCtx.fin)return false;
-  return true;
-}
-function _planInContractRead(mbr,m,d){
-  if(_planCtrCtx)return _planDansCtr(m,d);
-  return _planWideCtx?_planJourCouvert(mbr,m,d):_planInContract(mbr,m,d);
-}
-// Lecteur des fonctions qui doivent suivre UN contrat mais JAMAIS le mode large :
-// le plafond annuel, le travail du mois, les jours travailles. Elargir leur
-// portee melangerait deux compteurs — c'est exactement ce que la question 3
-// interdit.
-function _planInContractCtr(mbr,m,d){
-  if(_planCtrCtx)return _planDansCtr(m,d);
-  return _planInContract(mbr,m,d);
-}
-// try/finally : une exception dans fn() ne doit JAMAIS laisser le drapeau
-// pose — le reste de l'ecran lirait alors les contrats passes en silence.
-// Restaure la valeur PRECEDENTE et non false, pour supporter l'imbrication.
-function _planWide(fn){
-  var _sv=_planWideCtx; _planWideCtx=true;
-  try{ return fn(); } finally { _planWideCtx=_sv; }
-}
-// Meme patron. c = {debut,fin} ou null (null = ne borne rien).
-function _planSurContrat(c,fn){
-  var _sv=_planCtrCtx; _planCtrCtx=c||null;
-  try{ return fn(); } finally { _planCtrCtx=_sv; }
-}
 function _planHasContractThisMonth(mbr,planMonth){
   // Retourne true si le membre a au moins un jour de contrat dans le mois planMonth
   if(!mbr.debut_contrat&&!mbr.fin_contrat)return true;
@@ -612,7 +542,7 @@ function _planWorkH(plId,m,d,e,yr){
 function _planWorkMonth(mbr,m){
   var plId=_planPlId(mbr),ent=_pEntMonth(mbr.nom,m),w=0;
   for(var d=1;d<=_planDays(m);d++){
-    if(!_planInContractCtr(mbr,m,d))continue;
+    if(!_planInContract(mbr,m,d))continue;
     w+=_planWorkH(plId,m,d,ent[d]);
   }
   return w;
@@ -648,12 +578,7 @@ function _planWorkRange(mbr,from,to){
 //      une ligne « 8 vendangeurs » pesait UNE personne dans la masse salariale.
 //      _planCtxYear etant pose sur l'annee du jour courant, _pEntDay lit la bonne annee
 //      — une fenetre a cheval sur deux annees civiles reste juste.
-// ENTREE DE MESURE 1/4 — fenetre de dates. Appelee seulement par
-// _planPaidRange / _planWorkPersRange, donc seulement par le Pilotage.
 function _planRangeH(mbr,from,to,mode){
-  return _planWide(function(){ return _planRangeH_(mbr,from,to,mode); });
-}
-function _planRangeH_(mbr,from,to,mode){
   var plId=_planPlId(mbr),_sv=_planCtxYear,tot=0,guard=0;
   var cur=new Date(from.getFullYear(),from.getMonth(),from.getDate());
   var end=new Date(to.getFullYear(),to.getMonth(),to.getDate());
@@ -661,7 +586,7 @@ function _planRangeH_(mbr,from,to,mode){
     guard++;
     var yr=cur.getFullYear(),mi=cur.getMonth(),d=cur.getDate();
     _planCtxYear=yr;
-    if(_planInContractRead(mbr,mi,d)){
+    if(_planInContract(mbr,mi,d)){
       var yb=(PLANNING_ENTRIES[mbr.nom]||{})[yr]||{}, e=(yb[mi]||{})[d];
       var h=(mode==='work')?_planWorkH(plId,mi,d,e,yr):_planDayH(plId,mi,d,e,yr);
       if(h>0) tot+=h*_planEffN(mbr,mi,d);
@@ -683,7 +608,7 @@ function _planCalcMonth(mbr,m){
   var ent=_pEntMonth(mbr.nom,m);
   var w=0;
   for(var d=1;d<=_planDays(m);d++){
-    if(!_planInContractRead(mbr,m,d))continue;
+    if(!_planInContract(mbr,m,d))continue;
     w+=_planDayH(plId,m,d,ent[d]);
   }
   return w;
@@ -701,7 +626,7 @@ function _planAbsLostH(mbr,m,duesOnly){
   for(var d=1;d<=_planDays(m);d++){
     var e=ent[d];
     if(!e||!e.absent)continue;
-    if(!_planInContractRead(mbr,m,d))continue;
+    if(!_planInContract(mbr,m,d))continue;
     var mo=_planAbsMotif(e);
     if(duesOnly&&mo.id!=='injustifie'&&!mo.heures)continue;
     h+=Math.max(0,_planPlanned(plId,m,d)-_planDayH(plId,m,d,e));
@@ -725,7 +650,7 @@ function _planRempH(mbr,m){
   for(var d=1;d<=_planDays(m);d++){
     var e=ent[d];
     if(!e||!e.remplacement)continue;
-    if(!_planInContractRead(mbr,m,d))continue;
+    if(!_planInContract(mbr,m,d))continue;
     if(_planPlanned(plId,m,d)>0)continue;
     h+=_planDayH(plId,m,d,e);
   }
@@ -741,7 +666,7 @@ function _planSummary(mbr,m){
   var ref=Object.keys(mo).reduce(function(s,k){
     if(!/^\d+$/.test(k))return s;
     var dd=parseInt(k,10);
-    if(!_planInContractRead(mbr,m,dd))return s;
+    if(!_planInContract(mbr,m,dd))return s;
     if(ent[dd]&&ent[dd].type==='recup')return s;
     return s+(parseFloat(mo[k])||0);
   },0);
@@ -759,7 +684,7 @@ function _planPresentRef(mbr,m){
   return Object.keys(mo).reduce(function(s,k){
     if(!/^\d+$/.test(k))return s;
     var dd=parseInt(k,10);
-    if(!_planInContractRead(mbr,m,dd))return s;
+    if(!_planInContract(mbr,m,dd))return s;
     var e=ent[dd];
     if(e&&(e.absent||e.type==='cp'||e.type==='recup'))return s;
     return s+(parseFloat(mo[k])||0);
@@ -776,7 +701,7 @@ var _PLAN_ST_OFFDAY={cp:1,recup:1,absent:1};
 function _planDaysWorked(mbr,m){
   var plId=_planPlId(mbr),ent=_pEntMonth(mbr.nom,m),n=0;
   for(var d=1;d<=_planDays(m);d++){
-    if(!_planInContractCtr(mbr,m,d))continue;
+    if(!_planInContract(mbr,m,d))continue;
     var e=ent[d],st=_planDayStatus(plId,m,d,e);
     if(_PLAN_ST_OFFDAY[st.t])continue;
     if(_planEffective(plId,m,d,e)>0.0001)n++;
@@ -895,10 +820,7 @@ function _chargeSaisonData(s){
   var capEquipe=0;
   months.forEach(function(x){
     var full=capMonth(x.yr,x.m,true); var ratio=full>0?x.capRef/full:1;
-    // ENTREE DE MESURE 2/4 — capacite de la saison. mbrs vient de
-    // _mvEnContratSurPeriode (tous contrats) : sans le mode large, une fiche
-    // reembauchee etait DANS la liste et pesait 0 h de capacite.
-    _planCtxYear=x.yr; _planWide(function(){ mbrs.forEach(function(mb){ capEquipe+=(((_planSummary(mb,x.m)||{}).ref)||0)*ratio*_mbPoids(mb); }); }); _planCtxYear=null;
+    _planCtxYear=x.yr; mbrs.forEach(function(mb){ capEquipe+=(((_planSummary(mb,x.m)||{}).ref)||0)*ratio*_mbPoids(mb); }); _planCtxYear=null;
   });
   var etpDispo=capRefTotal>0?capEquipe/capRefTotal:0;
   // Repartition par ORDRE des taches (vue par pics) + capacite reellement presente / mois.
@@ -980,8 +902,7 @@ function _chargeSaisonData(s){
   });
   months.forEach(function(x){
     var full=capMonth(x.yr,x.m,true); var ratio=full>0?x.capRef/full:1;
-    // ENTREE DE MESURE 3/4 — capacite reellement presente.
-    var cp=0; _planCtxYear=x.yr; _planWide(function(){ mbrs.forEach(function(mb){ cp+=(_planPresentRef(mb,x.m)||0)*ratio*_mbPoids(mb); }); }); _planCtxYear=null;
+    var cp=0; _planCtxYear=x.yr; mbrs.forEach(function(mb){ cp+=(_planPresentRef(mb,x.m)||0)*ratio*_mbPoids(mb); }); _planCtxYear=null;
     x.capPresent=cp;
     x.etpReq=x.capRef>0?x.chargeOrd/x.capRef:0;
     x.etpPres=x.capRef>0?x.capPresent/x.capRef:0;
@@ -998,11 +919,8 @@ function _chargeSaisonData(s){
   // les campagnes ou il avait pourtant travaille.
   // ⚠️ NE PAS CONFONDRE avec _planInContract (question 3, ~35 appels) : plafond
   // des 1607 h, conges, grille du planning. Celui-la ne voit QUE le contrat en
-  // cours et NE DOIT PAS etre elargi — un contrat qui se termine SOLDE son
-  // compteur (paye, donc a zero) et le suivant repart de sa date de debut, sans
-  // du ni indu. Les fondre en un seul fausserait la paie.
-  // Pour la MESURE d'une fenetre de dates (masse salariale, capacite, cadence,
-  // presence), le portail est _planJourCouvert, pose par _planWide.
+  // cours et NE DOIT PAS etre elargi — deux contrats separes par une coupure ont
+  // deux compteurs distincts, les fondre en un seul fausserait la paie.
   function _inContractDay(mb,ds){
     var P=(typeof window._mvContrats==='function')?window._mvContrats(mb):null;
     if(!P){ if(!mb.debut_contrat&&!mb.fin_contrat)return true; if(mb.debut_contrat&&ds<mb.debut_contrat)return false; if(mb.fin_contrat&&ds>mb.fin_contrat)return false; return true; }
@@ -1265,11 +1183,7 @@ window._planSeasonHours=_planSeasonHours;
 // ── Cadence équipe sur une fenêtre [from,to] (Date), hors salariés « bureau » ──
 // Pilotage : jours ouvrés réels + Σ heures planning de l'équipe → cadence (h/jour ouvré).
 // NB : le calcul suit l'année RÉELLE de chaque jour de la fenêtre (accesseurs année-aware).
-// ENTREE DE MESURE 4/4 — cadence reelle de l'equipe sur une fenetre.
 function _planTeamCadence(from, to){
-  return _planWide(function(){ return _planTeamCadence_(from, to); });
-}
-function _planTeamCadence_(from, to){
   _planMigrateYears();
   var mbrs = _planMbrs().filter(function(m){ return !m.bureau; });
   var totalH = 0, jours = {}, guard = 0;
@@ -1281,7 +1195,7 @@ function _planTeamCadence_(from, to){
     _planCtxYear = cur.getFullYear();
     for(var i=0;i<mbrs.length;i++){
       var mbr = mbrs[i];
-      if(!_planInContractRead(mbr, m, d)) continue;
+      if(!_planInContract(mbr, m, d)) continue;
       var ent = _pEntDay(mbr.nom,m,d);
       dayTeam += _planDayH(_planPlId(mbr), m, d, ent);
     }
@@ -1503,7 +1417,7 @@ function _planAnnuPlafond(mbr){
       var pl=_planPlanned(plId,m,d);
       if(pl<=0)continue;
       all+=pl;
-      if(_planInContractCtr(mbr,m,d))ctr+=pl;
+      if(_planInContract(mbr,m,d))ctr+=pl;
     }
   }
   var plaf=(all>0)?(L.plafAnnuel*ctr/all):L.plafAnnuel;
@@ -1536,23 +1450,18 @@ function _planModulH(mbr,uptoMonth){
   return tot;
 }
 // Synthese d'annualisation d'un salarie au mois uptoMonth inclus.
-// ⚠️ annualise=false -> plafond, modulation, reste et cadence n'ont AUCUN sens :
-// la personne est payee a l'heure. Ils sont mis a zero et la carte bascule sur
-// un simple comptage. Voir _mvAnnualise (utils.js), definition unique.
 function _planAnnu(mbr,uptoMonth){
   var L=_planLegal(),um=(uptoMonth==null?11:uptoMonth);
-  var annu=(typeof window._mvAnnualise==='function')?window._mvAnnualise(mbr):true;
-  var plaf=annu?_planAnnuPlafond(mbr):0,cum=0,proj=0;
+  var plaf=_planAnnuPlafond(mbr),cum=0,proj=0;
   for(var m=0;m<12;m++){
     if(m<=um){var w=_planWorkMonth(mbr,m);cum+=w;proj+=w;}
     else proj+=_planSummary(mbr,m).ref;
   }
   var moisRest=Math.max(0,11-um);
   return {
-    annualise:annu,
     plafond:plaf, cumul:cum, reste:plaf-cum,
     projection:proj, ecartProj:proj-plaf,
-    modul:annu?_planModulH(mbr,um):0, modulMax:L.modulMax,
+    modul:_planModulH(mbr,um), modulMax:L.modulMax,
     susp:_planSuspH(mbr), maxAnnuel:L.maxAnnuel,
     moisRest:moisRest, cadence:moisRest>0?Math.max(0,plaf-cum)/moisRest:0
   };
@@ -2485,34 +2394,9 @@ function _planModelTotal(plId){
 }
 window._planModelTotal=_planModelTotal;
 
-// ── Carte COMPTAGE — pour qui n'est PAS annualise (TESA, saisonnier, extra) ──
-// Ce qui remplace le compteur compte autant que l'exemption : une personne payee
-// a l'heure a toujours besoin de ses heures faites et de ses jours travailles
-// pour la MSA. Une carte vide serait une regression deguisee en correctif.
-function _planCompteCard(mbr,uptoMonth,a){
-  var um=(uptoMonth==null?11:uptoMonth),jours=0;
-  for(var m=0;m<=um;m++)jours+=_planDaysWorked(mbr,m);
-  var tc=mbr.type_contrat||'CDI';
-  var h='<div class="plan-card" style="background:var(--bg-card);border:1.5px solid var(--gris-clair);margin-bottom:14px;flex-direction:column;align-items:stretch">';
-  h+='<div style="display:flex;align-items:center;gap:6px;margin-bottom:11px">'
-    +'<span style="font-size:10px;font-weight:700;text-transform:uppercase;letter-spacing:1px;color:var(--terre)">\u23f1 Heures faites \u00b7 '+planYear+'</span>'
-    +'<span style="margin-left:auto;font-size:10px;font-weight:700;color:var(--texte-doux);background:var(--bg-app);border:1px solid var(--gris-clair);padding:2px 8px;border-radius:20px">'+_escHtml(tc)+'</span>'
-  +'</div>';
-  h+='<div style="display:flex;gap:7px">'
-    +'<div style="flex:1;text-align:center;padding:11px 4px;background:var(--bg-app);border-radius:10px"><div style="font-size:24px;font-weight:800;line-height:1;font-variant-numeric:tabular-nums">'+_planFmt(a.cumul)+'</div><div style="font-size:9px;text-transform:uppercase;letter-spacing:.4px;color:var(--texte-doux);margin-top:4px">Travail effectif</div></div>'
-    +'<div style="flex:1;text-align:center;padding:11px 4px;background:var(--bg-app);border-radius:10px"><div style="font-size:24px;font-weight:800;line-height:1;font-variant-numeric:tabular-nums">'+jours+'</div><div style="font-size:9px;text-transform:uppercase;letter-spacing:.4px;color:var(--texte-doux);margin-top:4px">Jours travaill\u00e9s</div></div>'
-  +'</div>';
-  h+='<div style="font-size:11px;color:var(--texte-doux);margin-top:11px;line-height:1.4">'
-    +'<b>Pas d\u2019annualisation</b> pour ce type de contrat\u00a0: les heures sont pay\u00e9es \u00e0 l\u2019heure. '
-    +'Ni plafond de '+_planFmt(_planLegal().plafAnnuel)+'\u00a0h, ni modulation, ni solde \u00e0 la cl\u00f4ture. '
-    +'Mesur\u00e9 en travail effectif\u00a0: cong\u00e9s, arr\u00eats et r\u00e9cup n\u2019y entrent pas.'
-  +'</div>';
-  return h+'</div>';
-}
 // ── Carte COMPTEUR D'HEURES (annualisation) — en tete de l'onglet ──
 function _planAnnuCard(mbr,uptoMonth){
   var a=_planAnnu(mbr,uptoMonth),L=_planLegal();
-  if(!a.annualise)return _planCompteCard(mbr,uptoMonth,a);
   var ech=Math.max(a.maxAnnuel,Math.ceil(a.plafond*1.15/100)*100,1);
   var over=(a.cumul>a.plafond+0.0001);
   var fin=(uptoMonth>=11);
@@ -4510,35 +4394,9 @@ function planDeleteAcompte(nom,moisKey,idx){
 }
 
 
-// Contrat qui couvre le mois affiche. Retourne null si la fiche n'a qu'un seul
-// contrat (comportement d'origine, aucun changement) OU si le mois est a cheval
-// sur deux contrats (on montre alors le mois entier plutot que d'en amputer une
-// moitie). Dans les deux cas le releve n'est JAMAIS blanc.
-function _planCtrDuMois(mbr,m){
-  var P=(typeof window._mvContrats==='function')?window._mvContrats(mbr):null;
-  if(!P||P.length<2)return null;
-  var mm=String(m+1).padStart(2,'0');
-  var d0=_pY()+'-'+mm+'-01', d1=_pY()+'-'+mm+'-'+String(_planDays(m)).padStart(2,'0');
-  var hit=P.filter(function(c){
-    if(c.fin&&c.fin<d0)return false;
-    if(c.debut&&c.debut>d1)return false;
-    return true;
-  });
-  return hit.length===1?hit[0]:null;
-}
-function _planFmtJour(iso){
-  if(!iso)return '';
-  var p=String(iso).split('-');
-  return p.length===3?(p[2]+'/'+p[1]+'/'+p[0]):iso;
-}
 function planExportPDF(nom){
   var mbr=(window.MEMBRES||[]).find(function(m){return m.nom===nom;});
   if(!mbr){showToast('Membre introuvable','#E07060');return;}
-  var _ctr=_planCtrDuMois(mbr,planMonth);
-  return _planSurContrat(_ctr,function(){ return _planExportPDF_(nom,mbr,_ctr); });
-}
-function _planExportPDF_(nom,mbr,_ctr){
-  var _ctrTxt=_ctr?('Contrat du '+_planFmtJour(_ctr.debut||'')+(_ctr.fin?(' au '+_planFmtJour(_ctr.fin)):' \u2014 en cours')):'';
   var plId=_planPlId(mbr);
   var ent=_pEntMonth(nom,planMonth);
   var s=_planSummary(mbr,planMonth);
@@ -4555,7 +4413,7 @@ function _planExportPDF_(nom,mbr,_ctr){
   var LBG={work:'#fff',supp:'#f0fdf4',continu:'#f5f3fc',reduit:'#fffbeb',cp:'#fffbeb',absent:'#fef2f2',recup:'#f5f3fc',ferie:'#fffbeb',wknd:'#fafaf9',off:'#fafaf9',extra:'#eff6ff',canicule:'#fff7ed'};
   var LFG={work:'#1c1917',supp:'#16a34a',continu:'#7B6DB8',reduit:'#d97706',cp:'#d97706',absent:'#dc2626',recup:'#7B6DB8',ferie:'#d97706',wknd:'#a8a29e',off:'#a8a29e',extra:'#1A4A7A',canicule:'#d97706'};
   function rowFor(d){
-    if(!_planInContractCtr(mbr,planMonth,d))return '';
+    if(!_planInContract(mbr,planMonth,d))return '';
     var pl=_planPlanned(plId,planMonth,d);
     var e=ent[d];
     var dow=_planDow(planMonth,d);
@@ -4632,20 +4490,14 @@ function _planExportPDF_(nom,mbr,_ctr){
   var _an=_planAnnu(mbr,planMonth);
   var _anOver=(_an.cumul>_an.plafond+0.0001);
   var _anMod=(_an.modul>_an.modulMax+0.0001);
-  var annuCptHtml=_an.annualise
-  ? ('<div class="soldean"><div class="t">\u23f1 Compteur d\u2019heures \u2014 ann\u00e9e '+planYear+' (au '+PLAN_MOIS_C[planMonth]+')</div>'
+  var annuCptHtml='<div class="soldean"><div class="t">\u23f1 Compteur d\u2019heures \u2014 ann\u00e9e '+planYear+' (au '+PLAN_MOIS_C[planMonth]+')</div>'
     +'<span class="it">Plafond annuel <b>'+_planFmt(_an.plafond)+'</b></span>'
     +'<span class="it">Travail effectif <b>'+_planFmt(_an.cumul)+'</b></span>'
     +'<span class="it">'+(_an.reste<0?'Au-dessus':'Reste \u00e0 faire')+' <b style="color:'+(_anOver?'#d97706':'#16a34a')+'">'+_planFmt(Math.abs(_an.reste))+'</b></span>'
     +'<span class="it">Modulation <b style="color:'+(_anMod?'#dc2626':'#7B6DB8')+'">'+_planFmt(_an.modul)+' / '+_planFmt(_an.modulMax)+'</b></span>'
     +(_an.susp>0.0001?'<span class="it">Dont suspension <b style="color:#dc2626">\u2212'+_planFmt(_an.susp)+'</b></span>':'')
     +'<div style="font-size:9.5px;color:#78716c;margin-top:5px;line-height:1.4">Travail effectif\u00a0: hors cong\u00e9s pay\u00e9s, arr\u00eats et r\u00e9cup\u00e9rations. Le solde se r\u00e8gle \u00e0 la cl\u00f4ture du 31 d\u00e9cembre.</div>'
-  +'</div>')
-  : ('<div class="soldean"><div class="t">\u23f1 Heures faites \u2014 ann\u00e9e '+planYear+' (au '+PLAN_MOIS_C[planMonth]+')</div>'
-    +'<span class="it">Travail effectif <b>'+_planFmt(_an.cumul)+'</b></span>'
-    +'<span class="it">Type de contrat <b>'+_escHtml(tc)+'</b></span>'
-    +'<div style="font-size:9.5px;color:#78716c;margin-top:5px;line-height:1.4">Pay\u00e9 \u00e0 l\u2019heure\u00a0: pas d\u2019annualisation, donc ni plafond annuel, ni modulation, ni solde \u00e0 la cl\u00f4ture. Travail effectif\u00a0: hors cong\u00e9s pay\u00e9s, arr\u00eats et r\u00e9cup\u00e9rations.</div>'
-  +'</div>');
+  +'</div>';
   var annuHtml='<div class="annu"><div class="t">\ud83d\udcc5 D\u00e9tail mois par mois \u2014 ann\u00e9e '+planYear+'</div>'
     +'<table><thead><tr><th>Mois</th><th class="r2" style="width:52px">Sup.</th><th class="r2" style="width:52px">R\u00e9cup</th>'+(_anAnyDue?'<th class="r2" style="width:56px">Heures dues</th>':'')+'<th class="r2" style="width:62px">Pay\u00e9</th><th class="r2 hi" style="width:72px">Reste \u00e0 prendre</th></tr></thead>'
     +'<tbody>'+_anRows+'</tbody>'
@@ -4671,13 +4523,11 @@ function _planExportPDF_(nom,mbr,_ctr){
     +'.apay{display:flex;align-items:center;justify-content:space-between;border:2px solid #b45309;background:#fffbeb;border-radius:8px;padding:8px 13px;margin-bottom:9px}.apay .t{font-size:9.5px;font-weight:700;text-transform:uppercase;letter-spacing:.5px;color:#b45309}.apay .s{font-size:10px;color:#78716c;margin-top:2px}.apay .v{font-size:26px;font-weight:800;color:#b45309;line-height:1}.apay.off{border:1.5px solid #e7e5e4;background:#fafaf9}.apay.off .t{color:#78716c}.apay.off .v{color:#a8a29e}'
     +'.soldean{border:1.5px solid #d8c3a3;background:#faf6ef;border-radius:8px;padding:7px 12px;margin-bottom:9px;display:flex;flex-wrap:wrap;gap:4px 16px;align-items:center}.soldean .t{font-size:9px;font-weight:700;text-transform:uppercase;letter-spacing:.5px;color:#8A5A38;width:100%;margin-bottom:1px}.soldean .it{font-size:11px;color:#57534e}.soldean .it b{font-size:12px}.soldean .net{margin-left:auto;font-size:14px;font-weight:800}'
     +'.days{display:flex;gap:14px}.col{flex:1}table{width:100%;border-collapse:collapse}thead tr{background:#1C1A2E;color:#fff}th{padding:4px 6px;text-align:left;font-size:8px;text-transform:uppercase;letter-spacing:.4px;font-weight:700}th.c,td.c{text-align:center}th.r2,td.r2{text-align:right}td{padding:2px 6px;border-bottom:1px solid #f0ece8;font-size:9.5px;line-height:1.2}'
-    +'.annu th.hi,.annu td.hi{background:#f7f3ec}.annu thead th.hi{background:#2c2942}.annu{margin-top:10px;page-break-inside:avoid}.annu .t{font-size:9px;font-weight:700;text-transform:uppercase;letter-spacing:.5px;color:#8A5A38;margin-bottom:5px}.annu tfoot td{border-top:1.5px solid #d4d0cc;border-bottom:none;font-weight:800;background:#fafaf9}.annu .note{font-size:8.5px;color:#a8a29e;margin-top:5px;line-height:1.45}.annu .note b{color:#78716c}'
+    +'.annu th.hi,.annu td.hi{background:#f7f3ec}.annu thead th.hi{background:#2c2942}.ctr{border:1.5px solid #d8c3a3;background:#faf6ef;border-radius:8px;padding:7px 12px;margin-bottom:9px;page-break-inside:avoid}.ctr .t{font-size:9px;font-weight:700;text-transform:uppercase;letter-spacing:.5px;color:#8A5A38;margin-bottom:4px}.crow{display:flex;justify-content:space-between;gap:12px;font-size:10px;color:#44403c;padding:2px 0;border-bottom:1px solid #efe7da}.crow:last-of-type{border-bottom:none}.crow .cv{white-space:nowrap;color:#78716c}.cnow{font-size:8px;text-transform:uppercase;letter-spacing:.4px;color:#16a34a;background:#f0fdf4;border-radius:8px;padding:1px 5px;margin-left:4px}.annu{margin-top:10px;page-break-inside:avoid}.annu .t{font-size:9px;font-weight:700;text-transform:uppercase;letter-spacing:.5px;color:#8A5A38;margin-bottom:5px}.annu tfoot td{border-top:1.5px solid #d4d0cc;border-bottom:none;font-weight:800;background:#fafaf9}.annu .note{font-size:8.5px;color:#a8a29e;margin-top:5px;line-height:1.45}.annu .note b{color:#78716c}'
     +'.acomptes{margin-top:8px;font-size:10px;color:#92400e;background:#fffbeb;border:1px solid #fcd34d;border-radius:8px;padding:7px 12px}.acomptes b{color:#b45309}'
     +'.foot{margin-top:16px;display:flex;gap:40px}.sig{flex:1;border-top:1px solid #d4d0cc;padding-top:6px;font-size:10px;color:#a8a29e;text-align:center}.credit{margin-top:14px;font-size:8px;color:#cbc7c2;text-align:center}'
     +'@media print{@page{size:A4;margin:10mm}}</style></head><body><div class="sheet">'
-    +'<div class="hdr"><div><h1>\uD83C\uDF47 Feuille d\'heures</h1><div class="sub"><span class="badge">'+tc+'</span>'+nom+' \u00b7 Planning '+plId+'</div>'
-      +(_ctrTxt?('<div class="sub" style="margin-top:2px;font-weight:600;color:#8A5A38">'+_escHtml(_ctrTxt)+'</div>'):'')
-    +'</div>'
+    +'<div class="hdr"><div><h1>\uD83C\uDF47 Feuille d\'heures</h1><div class="sub"><span class="badge">'+tc+'</span>'+nom+' \u00b7 Planning '+plId+'</div></div>'
     +'<div><div class="mo">'+PLAN_MOIS[planMonth]+' '+planYear+'</div><div class="etp">ETP '+_planFmtEtp(s.etp)+'</div></div></div>'
     +apHtml
     +'<div class="summ">'
@@ -4688,6 +4538,8 @@ function _planExportPDF_(nom,mbr,_ctr){
       +'<div class="box"><div class="v" style="color:var(--phyto-med,#7B6DB8)">'+_planFmt(recupH)+'</div><div class="l">R\u00e9cup prise</div></div>'
       +'<div class="box"><div class="v" style="color:var(--phyto-med,#7B6DB8)">'+_planFmt(bank.solde)+'</div><div class="l">Compteur</div></div>'
     +'</div>'
+    +_plRvContratsHtml(mbr)
+    +_plRvCpHtml(mbr)
     +annuCptHtml
     +'<div class="days"><div class="col"><table><thead><tr><th class="c" style="width:34px">Jr</th><th>Statut</th><th class="r2" style="width:42px">Eff.</th></tr></thead><tbody>'+c1+'</tbody></table></div>'
     +'<div class="col"><table><thead><tr><th class="c" style="width:34px">Jr</th><th>Statut</th><th class="r2" style="width:42px">Eff.</th></tr></thead><tbody>'+c2+'</tbody></table></div></div>'
@@ -5295,3 +5147,149 @@ window.PLAN_MOIS_C              = PLAN_MOIS_C;
 window.PLAN_JOURS               = PLAN_JOURS;
 window.PLAN_FERIES              = PLAN_FERIES;
 
+/* ══════════════════════════════════════════════════════════════════════════
+   LE RELEVÉ INDIVIDUEL — CE QU'IL LUI MANQUAIT, ET COMMENT ON Y ACCÈDE
+   ══════════════════════════════════════════════════════════════════════════
+   ⚠️⚠️ CE DOCUMENT EXISTAIT DEJA. Il ne fallait surtout pas en ecrire un
+   second : planExportPDF() sort deja le mois jour par jour, les heures
+   supplementaires a payer, le COMPTEUR D'ANNUALISATION (_planAnnu : plafond
+   proratise, travail effectif, reste, modulation, suspensions) et le detail
+   mois par mois de l'annee. Une « fiche salarie annuelle » de plus aurait
+   refait 80 % de ce document — et deux definitions du meme chiffre finissent
+   toujours par diverger.
+
+   Ce lot fait donc deux choses, et deux seulement :
+
+   1. IL LE REND ATTEIGNABLE. Le hub Documents annonce « tout ce que Ma Vigne
+      sait sortir » ; le releve individuel n'y figurait pas. Il fallait passer
+      par Planning › la fiche d'un salarie › PDF. C'est le document le plus
+      demande d'un controle, et il etait le seul a se cacher.
+
+   2. IL COMPLETE CE QUI MANQUAIT VRAIMENT :
+      · LES CONTRATS. Le document affichait `type_contrat` — une etiquette —
+        sans jamais dire SUR QUELLES DATES il porte. Or le compteur
+        d'annualisation, lui, est proratise aux jours sous contrat : le lecteur
+        voyait un plafond sans voir ce qui le determine. Et surtout, deux
+        contrats separes par un seul jour de coupure ont DEUX compteurs
+        distincts (_planInContract ne voit que le contrat en cours) : cette
+        coupure devait se voir sur le papier.
+      · LES CONGES PAYES. Solde initial, pris, reste, sur la periode de
+        reference du domaine. Ils etaient dans la fiche a l'ecran, pas dans le
+        document.
+
+   ⚠️ AUCUN CALCUL NEUF : _mvContrats (utils.js, la fusion des contrats
+   contigus), _planCpPris / _planCpSolde / _planCpPeriodeLbl (planning.js).
+   ══════════════════════════════════════════════════════════════════════════ */
+
+/* Deux dates ISO -> « du 2 mars 2026 au 24 juillet 2026 », et la duree. */
+function _plRvDateLg(iso){
+  if(!iso) return '';
+  var p = String(iso).slice(0, 10).split('-');
+  if(p.length !== 3) return String(iso);
+  return parseInt(p[2], 10) + ' ' + PLAN_MOIS[parseInt(p[1], 10) - 1].toLowerCase() + ' ' + p[0];
+}
+/* ⚠️ _planFmt formate des HEURES : _planFmt(12) rend « 12h ». Les conges se
+   comptent en JOURS, et « 12h j » est exactement le genre de sottise qu'un
+   document imprime porte pendant des mois. Formateur separe, donc. */
+function _plRvJ(n){
+  var v = Math.round((parseFloat(n) || 0) * 10) / 10;
+  return String(v).replace('.', ',') + ' j';
+}
+function _plRvJours(a, b){
+  if(!a || !b) return null;
+  var n = Math.round((Date.parse(b) - Date.parse(a)) / 86400000) + 1;
+  return isFinite(n) && n > 0 ? n : null;
+}
+
+/* Le bloc CONTRATS du releve. Une ligne par periode, la coupure NOMMEE.
+   ⚠️ On lit _mvContrats : c'est lui qui fusionne deux contrats contigus
+   (fin + 1 jour = debut du suivant) et qui garde separes ceux qui ne le sont
+   pas. Refaire la fusion ici donnerait un document en desaccord avec
+   l'effectif du Pilotage. */
+function _plRvContratsHtml(mbr){
+  var P = (typeof window._mvContrats === 'function') ? (window._mvContrats(mbr) || []) : [];
+  var tc = mbr.type_contrat || 'CDI';
+  if(!P.length){
+    return '<div class="ctr"><div class="t">\u{1F4C4} Contrat</div>'
+      + '<div class="crow"><span class="cl">' + _escHtml(tc) + '</span>'
+      + '<span class="cv">aucune date enregistr\u00e9e</span></div>'
+      + '<div class="note">Sans date de d\u00e9but ni de fin, l\u2019application consid\u00e8re le salari\u00e9 '
+      + 'pr\u00e9sent toute l\u2019ann\u00e9e : le plafond annuel n\u2019est alors pas proratis\u00e9.</div></div>';
+  }
+  var enCours = (mbr.debut_contrat || mbr.fin_contrat)
+    ? { debut: mbr.debut_contrat || '', fin: mbr.fin_contrat || '' } : null;
+  var rows = '', coupure = false;
+  P.forEach(function(c, i){
+    if(i > 0){
+      var prev = P[i - 1];
+      if(prev.fin && c.debut) coupure = true;
+    }
+    var estCourant = !!(enCours
+      && (!enCours.debut || (c.debut && c.debut <= enCours.debut))
+      && (!enCours.fin   || (!c.fin || c.fin >= enCours.fin)));
+    var nj = _plRvJours(c.debut, c.fin);
+    rows += '<div class="crow">'
+      + '<span class="cl">' + (c.debut ? ('Du ' + _plRvDateLg(c.debut)) : 'Depuis toujours')
+      + (c.fin ? (' au ' + _plRvDateLg(c.fin)) : ' \u2014 sans terme')
+      + (estCourant ? ' <b class="cnow">en cours</b>' : '') + '</span>'
+      + '<span class="cv">' + (nj ? (nj + ' jour' + (nj > 1 ? 's' : '')) : '\u2014') + '</span>'
+      + '</div>';
+  });
+  return '<div class="ctr"><div class="t">\u{1F4C4} Contrats \u2014 ' + _escHtml(tc) + '</div>'
+    + rows
+    + '<div class="note">Le plafond annuel du compteur est <b>proratis\u00e9 aux jours sous contrat</b>, '
+    + 'suspensions d\u00e9duites.'
+    + (coupure
+        ? ' <b>Deux p\u00e9riodes s\u00e9par\u00e9es par une coupure comptent s\u00e9par\u00e9ment</b> : chaque contrat '
+          + 'ouvre son propre compteur, rien ne se reporte de l\u2019un \u00e0 l\u2019autre. Deux contrats qui '
+          + 'se touchent, eux, n\u2019en font qu\u2019un.'
+        : ' Deux contrats qui se touchent \u2014 fin puis reprise le lendemain \u2014 n\u2019en font qu\u2019un.')
+    + '</div></div>';
+}
+
+/* Le bloc CONGES PAYES. Le mode de decompte et la periode de reference sont
+   des reglages DU DOMAINE, pas du salarie : le document les nomme. */
+function _plRvCpHtml(mbr){
+  if(typeof window._mvEstCollectif === 'function' && window._mvEstCollectif(mbr)) return '';
+  var ini = mbr.cp_initial_j || 0;
+  var pris = _planCpPris(mbr.nom), solde = _planCpSolde(mbr);
+  var mode = ((window.CONFIG && window.CONFIG.cp_mode) === 'ouvres') ? 'ouvr\u00e9s' : 'ouvrables';
+  return '<div class="ctr"><div class="t">\u{1F334} Cong\u00e9s pay\u00e9s \u2014 ' + _planCpPeriodeLbl() + '</div>'
+    + '<div class="crow"><span class="cl">Solde initial</span><span class="cv">' + _plRvJ(ini) + '</span></div>'
+    + '<div class="crow"><span class="cl">Pris sur la p\u00e9riode</span><span class="cv">' + _plRvJ(pris) + '</span></div>'
+    + '<div class="crow"><span class="cl"><b>Reste</b></span>'
+      + '<span class="cv"><b style="color:' + (solde < 0 ? '#dc2626' : '#16a34a') + '">'
+      + _plRvJ(solde) + '</b></span></div>'
+    + '<div class="note">D\u00e9compte en jours <b>' + mode + '</b>, r\u00e9glage du domaine. '
+    + 'Le solde initial se saisit dans la fiche du salari\u00e9.</div></div>';
+}
+
+window._plRvContratsHtml = _plRvContratsHtml;
+window._plRvCpHtml       = _plRvCpHtml;
+
+/* Point d'entree du hub : le mois n'est pas celui de l'ecran Planning.
+   ⚠️ planExportPDF lit la variable de module `planMonth`. On la deplace le
+   temps de produire le document, PUIS ON LA REMET : sans cette restauration,
+   editer un releve depuis les Documents changerait le mois affiche au Planning
+   sans que personne ne l'ait demande. planExportPDF est synchrone — la
+   restauration a donc bien lieu apres la construction du document. */
+window._planReleveIndiv = function(nom, mois){
+  var mbr = (window.MEMBRES || []).find(function(m){ return m.nom === nom; });
+  if(!mbr){ showToast('Salari\u00e9 introuvable', '#E07060'); return false; }
+  var m = parseInt(mois, 10);
+  var avant = planMonth;
+  if(isFinite(m) && m >= 0 && m <= 11) planMonth = m;
+  try{ planExportPDF(nom); }
+  finally{ planMonth = avant; }
+  return true;
+};
+
+/* La liste des salaries offerte au choix, et le mois par defaut : ceux que
+   l'ecran Planning montre deja. */
+window._planReleveMbrs = function(){
+  return _planMbrs().map(function(m){
+    return { nom: m.nom, coll: (typeof window._mvEstCollectif === 'function') && window._mvEstCollectif(m) };
+  });
+};
+window._planReleveMois = function(){ return planMonth; };
+window._planReleveAn   = function(){ return planYear; };

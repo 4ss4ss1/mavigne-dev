@@ -425,15 +425,12 @@ function renderReglages(){
       var _in30=new Date(_toDay);_in30.setDate(_in30.getDate()+30);
       var _dsP=function(d){if(!d)return null;var p=d.split('-');return new Date(parseInt(p[0]),parseInt(p[1])-1,parseInt(p[2]));}
       var _RENOUV=['CDD','TESA','Saisonnier','Extra'];
-      // ★ UNE SEULE SOURCE : la fin du contrat. Avant, remplir le champ facultatif
-      // `renouvellement_date` ETEIGNAIT cette alerte (`if(!m.renouvellement_date
-      // && fin...)`) : annoncer un renouvellement pour janvier faisait taire
-      // l'application sur un CDD qui se terminait en aout. La fin de contrat est
-      // toujours renseignee sur un CDD, l'alerte ne peut donc plus se taire.
       var _alertes=window.MEMBRES.filter(function(m){
         var tc=m.type_contrat||'CDI';if(_RENOUV.indexOf(tc)<0)return false;
-        var fd=_dsP(m.fin_contrat);
-        return !!(fd&&fd>=_toDay&&fd<=_in30);
+        var rd=_dsP(m.renouvellement_date),fd=_dsP(m.fin_contrat);
+        if(rd&&rd>=_toDay&&rd<=_in30)return true;
+        if(!m.renouvellement_date&&fd&&fd>=_toDay&&fd<=_in30)return true;
+        return false;
       });
       var _ab=document.getElementById('contrats-alertes');
       if(!_ab){_ab=document.createElement('div');_ab.id='contrats-alertes';ml.parentNode.insertBefore(_ab,ml);}
@@ -441,9 +438,10 @@ function renderReglages(){
         _ab.innerHTML='<div style="background:var(--tag-amber-bg,#fef3c7);border:1.5px solid #f59e0b;border-radius:12px;padding:12px 14px;margin-bottom:12px">'
           +'<div style="font-size:13px;font-weight:600;color:var(--tag-amber-tx,#92400e);margin-bottom:8px">⚠️ Contrats \u00e0 renouveler ('+_alertes.length+')</div>'
           +_alertes.map(function(m){
-            var dateRef=_dsP(m.fin_contrat);
+            var rd=_dsP(m.renouvellement_date),fd=_dsP(m.fin_contrat);
+            var dateRef=rd||fd;
             var j=Math.round((dateRef-_toDay)/86400000);
-            var label='Fin de contrat';
+            var label=m.renouvellement_date?'Renouvellement':'Fin de contrat';
             var dateStr=dateRef?dateRef.toLocaleDateString('fr-FR',{day:'numeric',month:'short'}):''
             var urgent=j<=7;
             return'<div style="display:flex;align-items:center;justify-content:space-between;padding:6px 0;border-top:1px solid #fcd34d;cursor:pointer" onclick="editMembre(\''+_escAttr(m.nom)+'\')">'  
@@ -455,8 +453,8 @@ function renderReglages(){
       } else {_ab.innerHTML='';}
       ml.innerHTML=window.MEMBRES.map(function(m){
         var tc=m.type_contrat||'CDI';
-        var fd=_dsP(m.fin_contrat);
-        var hasAlert=_RENOUV.indexOf(tc)>=0&&!!(fd&&fd>=_toDay&&fd<=_in30);
+        var rd=_dsP(m.renouvellement_date),fd=_dsP(m.fin_contrat);
+        var hasAlert=_RENOUV.indexOf(tc)>=0&&((rd&&rd>=_toDay&&rd<=_in30)||(!m.renouvellement_date&&fd&&fd>=_toDay&&fd<=_in30));
         var badge=hasAlert?'<span style="font-size:10px;background:#f59e0b;color:#fff;border-radius:8px;padding:1px 6px;margin-left:6px;vertical-align:middle">🔄</span>':'';
         var bBureau=m.bureau?'<span style="font-size:10px;background:#475569;color:#fff;border-radius:8px;padding:1px 6px;margin-left:6px;vertical-align:middle">🏢</span>':'';
         // Fiche encore « Active » alors que le contrat est échu. C'est ce cas précis qui
@@ -717,146 +715,29 @@ function _setActChampType(pfx,type){
 
 // Période consultée (objet). La liste des tâches y est portée : toute création / suppression de
 // tâche doit la mettre à jour, sinon l'ajout est un geste sans effet visible.
-// ═════════════════════════════════════════════════════════════════════
-// L'HISTORIQUE DU SALARIE — quatre blocs deviennent une suite datee (§39)
-// ═════════════════════════════════════════════════════════════════════
-// Avant : type + debut + fin + liste des contrats precedents + renouvellement
-// + taux + serie de taux. Sept champs qui ne se parlaient pas ; on lisait des
-// cases, jamais une suite. Et deux d'entre eux ne servaient a rien :
-// renouvellement_fin n'etait LU nulle part, et remplir renouvellement_date
-// ETEIGNAIT l'alerte de fin de contrat.
-//
-// ★ UN EVENEMENT EST ECRIT DES QU'IL EST VALIDE, pas a l'enregistrement de la
-// fiche. Un fait se consigne quand on le consigne ; et le « × » de chaque
-// ligne permet de revenir en arriere. C'est aussi ce qui evite qu'un contrat
-// saisi soit perdu parce qu'on a ferme la fiche sans enregistrer.
-var _EMH_GRILLES_DEF=['standard'];
-function _emhFmt(iso){ if(!iso) return '\u2014'; var p=String(iso).split('-'); return p.length===3?(p[2]+'/'+p[1]+'/'+p[0]):iso; }
-function _emhJours(a,b){ var x=Date.parse(a+'T00:00:00'), y=Date.parse(b+'T00:00:00');
-  return (isFinite(x)&&isFinite(y))?Math.round((y-x)/86400000):0; }
-function _emhGrilles(){
-  var out=[], T=(window.PLANNING_TEMPLATES&&window.PLANNING_TEMPLATES[new Date().getFullYear()])||null;
-  if(T) Object.keys(T).forEach(function(k){ if(out.indexOf(k)<0) out.push(k); });
-  if(window.PLAN_DEF) Object.keys(window.PLAN_DEF).forEach(function(k){ if(out.indexOf(k)<0) out.push(k); });
-  return out.length?out:_EMH_GRILLES_DEF;
-}
-// Ecrit le journal, reconstruit les miroirs, enregistre. Un seul chemin.
-function _emhCommit(m,H,msg){
-  m.hist=window._mvHist({hist:H});
-  window._mvHistMirror(m);
-  window.saveData('membres',msg||'\u{1F4C7} Historique mis \u00e0 jour');
-}
-var _EMH_LBL={ embauche:{i:'\u{1F4C4}',n:'Embauche'}, renouvellement:{i:'\u{1F504}',n:'Renouvellement'},
-               fin:{i:'\u23F9',n:'Fin de contrat'}, taux:{i:'\u{1F4B6}',n:'Changement de taux'} };
-
-// Le bloc complet : rappel + contrat en cours + historique + bouton.
-function _emhRender(nom){
-  var box=document.getElementById('em-hist-wrap'); if(!box) return;
-  var m=(window.MEMBRES||[]).find(function(x){return x.nom===nom;}); if(!m) return;
-  var adm=!!(window.isAdmin&&window.isAdmin());
-  var P=(window._mvPeriodes?window._mvPeriodes(m):[]);
-  var last=P.length?P[P.length-1]:null;
-  var auj=_paieAuj();
-  box.innerHTML=_emhRapHtml(m,last,auj)+'<div class="fl">Contrat en cours</div>'+_emhNowHtml(m,last,adm,auj)
-    +_emhHistHtml(m,P,adm)
-    +'<button type="button" class="emh-add" onclick="_emhPick(\''+_escAttr(nom)+'\')">\uFF0B Ajouter un \u00e9v\u00e9nement</button>';
-}
-// ── LE RAPPEL. Sa seule source est la FIN DU CONTRAT, toujours renseignee sur
-// un CDD — contrairement a l'ancien champ facultatif, qui pouvait l'eteindre.
-function _emhRapHtml(m,last,auj){
-  if(!last||!last.fin) return '';
-  var j=_emhJours(auj,last.fin);
-  if(j<0||j>30) return '';
-  var urg=(j<=7), nomA=_escAttr(m.nom);
-  return '<div class="emh-rap'+(urg?' urg':'')+'">'
-    +'<div class="emh-rap-t">\u26A0\uFE0F Contrat \u00e0 renouveler</div>'
-    +'<div class="emh-rap-s">Le '+_escHtml(last.type||'contrat')+' se termine le <b>'+_emhFmt(last.fin)+'</b>\u00a0\u2014 '
-    +(j===0?'aujourd\u2019hui':j===1?'demain':'dans '+j+' jours')+'.</div>'
-    +'<button type="button" class="emh-rap-b" onclick="_emhForm(\''+nomA+'\',\'renouvellement\')">\u{1F504} Renouveler</button>'
-    +'<button type="button" class="emh-rap-b alt" onclick="_emhForm(\''+nomA+'\',\'fin\')">\u23F9 Il s\u2019arr\u00eate</button>'
-    +'</div>';
-}
-function _emhNowHtml(m,last,adm,auj){
-  if(!last) return '<div class="emh-now"><div class="emh-vide">Aucun contrat en cours.<br>'
-    +'Ajoutez une <b>embauche</b> pour en ouvrir un.</div></div>';
-  // ⚠️ Le badge doit lire LE TYPE AFFICHE JUSTE A COTE, pas le miroir
-  // m.type_contrat. Les deux coincident aujourd'hui parce que le miroir est
-  // derive de last — mais deux definitions du meme fait sur la meme ligne
-  // finissent toujours par diverger, et l'ecran dirait alors « CDD » avec le
-  // badge d'un annualise. Repli sur le miroir si la periode n'a pas de type
-  // (fiche ancienne). Le drapeau collectif, lui, appartient bien a la fiche.
-  var annu=(typeof window._mvAnnualise==='function')
-    ? window._mvAnnualise({type_contrat:(last.type||m.type_contrat||''), collectif:m.collectif})
-    : true;
-  var tx=(typeof window._mvPaieTauxEffAt==='function')?window._mvPaieTauxEffAt(m,auj):null;
-  return '<div class="emh-now">'
-   +'<div class="emh-top"><span class="emh-type">'+_escHtml(last.type||'\u2014')+'</span>'
-     +'<span class="emh-pill '+(annu?'ok':'hr')+'">'
-     +(annu?'Annualis\u00e9 \u00b7 plafond proratis\u00e9':'Pay\u00e9 \u00e0 l\u2019heure \u00b7 pas d\u2019annualisation')+'</span></div>'
-   +'<div class="emh-dates">depuis le <b>'+_emhFmt(last.debut)+'</b>\u00a0\u00b7 '
-     +(last.fin?('jusqu\u2019au <b>'+_emhFmt(last.fin)+'</b>'):'<b>sans terme</b>')+'</div>'
-   +'<div class="emh-row"><span>Grille horaire</span><b style="font-size:13px">'+_escHtml(last.grille||'standard')+'</b></div>'
-   +(adm?('<div class="emh-row"><span>Taux horaire charg\u00e9</span><b>'
-     +((tx!=null&&tx>0)?(String(Math.round(tx*100)/100).replace('.',',')+'\u00a0\u20AC'):'\u2014')+'</b></div>'):'')
-   +'</div>';
-}
-// ── LA FRISE. Le rail est PLEIN pendant un contrat, POINTILLE dans le vide.
-// La coupure decide si le compteur repart de zero : elle est ecrite en clair.
-function _emhHistHtml(m,P,adm){
-  var HC=(window._mvHist?window._mvHist(m):[]).slice();
-  var HT=[];
-  if(adm && typeof _paieSerie==='function'){
-    _paieSerie(m.nom).forEach(function(e){
-      if(e && e.d && e.d!==_PAIE_ANCRE) HT.push({d:e.d,t:'taux',v:e.v});
-    });
-  }
-  var L=HC.concat(HT).sort(function(a,b){return String(a.d).localeCompare(String(b.d));}).reverse();
-  var head='<div class="fl">Historique <span style="font-weight:600;letter-spacing:0;text-transform:none;color:var(--texte-doux)">\u00b7 '
-    +L.length+' \u00e9v\u00e9nement'+(L.length>1?'s':'')+'</span></div>';
-  if(!L.length) return head+'<div class="emh-gap"><div class="emh-gap-t">Rien d\u2019enregistr\u00e9</div>'
-    +'<div class="emh-gap-s">Le premier \u00e9v\u00e9nement est une embauche.</div></div>';
-  function inP(iso){ for(var i=0;i<P.length;i++){ if(iso>=P[i].debut&&(!P[i].fin||iso<=P[i].fin)) return i; } return -1; }
-  var nomA=_escAttr(m.nom), h=head+'<div class="emh-rail">', prev=null;
-  L.forEach(function(e,k){
-    var pi=inP(e.d);
-    if(prev!==null&&pi>=0&&prev>=0&&pi<prev){
-      var n=_emhJours(P[pi].fin,P[prev].debut)-1;
-      h+='<div class="emh-gap"><div class="emh-gap-t">\u2702\uFE0F Coupure de '+n+' jour'+(n>1?'s':'')
-        +'\u00a0\u2014 du '+_emhFmt(P[pi].fin)+' au '+_emhFmt(P[prev].debut)+'</div>'
-        +'<div class="emh-gap-s">Le compteur du contrat pr\u00e9c\u00e9dent est <b>sold\u00e9</b>\u00a0: pay\u00e9, donc \u00e0 z\u00e9ro. '
-        +'Le nouveau repart de sa date de d\u00e9but, sans d\u00fb ni indu.</div></div>';
-    }
-    var cls='emh-ev'+(e.t==='taux'?' pay':'')+(e.t==='fin'?' stop':'')+(pi<0?' out':'')
-      +(k===0?' first':'')+(k===L.length-1?' last':'');
-    var sub='';
-    if(e.t==='embauche')            sub=(e.type?_escHtml(e.type):'type non renseign\u00e9')+'\u00a0\u00b7 '
-                                       +(e.fin?('fin pr\u00e9vue le '+_emhFmt(e.fin)):'sans terme')
-                                       +'\u00a0\u00b7 grille '+_escHtml(e.grille||'standard');
-    else if(e.t==='renouvellement') sub='fin repouss\u00e9e au '+_emhFmt(e.fin)+'\u00a0\u2014 toujours le m\u00eame contrat';
-    else if(e.t==='fin')            sub='fin r\u00e9elle\u00a0\u00b7 le compteur est sold\u00e9';
-    else                            sub=String(Math.round(e.v*100)/100).replace('.',',')+'\u00a0\u20AC/h\u00a0\u00b7 visible des seuls administrateurs';
-    h+='<div class="'+cls+'"><span class="emh-dot"></span>'
-      +'<span class="emh-d">'+String(e.d).slice(8,10)+'/'+String(e.d).slice(5,7)+'<br>'
-        +'<span style="font-weight:500;opacity:.7">'+String(e.d).slice(0,4)+'</span></span>'
-      +'<span class="emh-m"><span class="emh-t">'+_EMH_LBL[e.t].i+' '+_EMH_LBL[e.t].n+'</span>'
-        +'<span class="emh-s">'+sub+'</span></span>'
-      +'<button type="button" class="emh-x" aria-label="Retirer cet \u00e9v\u00e9nement" '
-        +'onclick="_emhDel(\''+nomA+'\',\''+_escAttr(e.t)+'\',\''+_escAttr(e.d)+'\')">\u00d7</button></div>';
-    prev=pi;
-  });
-  return h+'</div>';
-}
-function _emhDel(nom,t,d){
-  var m=(window.MEMBRES||[]).find(function(x){return x.nom===nom;}); if(!m) return;
-  if(t==='taux'){
-    var S=_paieSerie(nom).filter(function(e){ return e.d!==d; });
-    window._mvPaieApply(nom,'','',S.map(function(e){return {d:e.d,v:String(e.v)};}));
-    showToast('\u{1F4B6} Ligne de taux retir\u00e9e','#8A5A38');
-  } else {
-    var H=window._mvHist(m).filter(function(e){ return !(e.t===t&&e.d===d); });
-    _emhCommit(m,H,'\u{1F4C7} \u00c9v\u00e9nement retir\u00e9');
-  }
-  _emhRender(nom); renderReglages();
+// ── Contrats precedents d'une fiche : lecture seule + suppression ────────────
+// Sans cet affichage, m.contrats[] serait une boite noire : on ne saurait ni ce
+// qui a ete archive, ni corriger un archivage errone. Une donnee invisible est
+// une donnee qu'on ne peut pas croire.
+// Les lignes portent leurs dates en attributs : la sauvegarde relit le DOM, donc
+// supprimer une ligne suffit a supprimer le contrat.
+function _emContratsHtml(m){
+  var L=(m&&Array.isArray(m.contrats))?m.contrats:[];
+  if(!L.length) return '';
+  var fr=function(d){ if(!d) return '\u2014'; var p=String(d).split('-'); return p.length===3?(p[2]+'/'+p[1]+'/'+p[0]):d; };
+  return '<div class="fl" style="margin-top:10px">Contrats pr\u00e9c\u00e9dents <span style="font-size:11px;color:var(--texte-doux,#6b7280);font-weight:400">archiv\u00e9s automatiquement</span></div>'
+    +'<div id="em-contrats-list" style="margin-bottom:8px">'
+    +L.map(function(c,i){
+        return '<div data-ctr="'+i+'" data-deb="'+_escAttr(c.debut||'')+'" data-fin="'+_escAttr(c.fin||'')+'" data-typ="'+_escAttr(c.type||'')+'"'
+          +' style="display:flex;align-items:center;gap:8px;padding:8px 10px;border:1.5px solid #e5e7eb;border-radius:10px;margin-bottom:6px;background:var(--terre-pale,#faf8f4)">'
+          +'<span style="flex:1;font-size:13px">'+fr(c.debut)+' \u2192 '+fr(c.fin)
+          +(c.type?(' <span style="font-size:11px;color:var(--texte-doux,#6b7280)">'+_escHtml(c.type)+'</span>'):'')+'</span>'
+          +'<button type="button" onclick="this.closest(\'[data-ctr]\').remove()" title="Retirer ce contrat"'
+          +' style="border:none;background:transparent;color:#A0291E;font-size:16px;cursor:pointer;padding:2px 6px;line-height:1">\u00d7</button>'
+          +'</div>';
+      }).join('')
+    +'</div>'
+    +'<div style="font-size:11px;color:var(--texte-doux,#6b7280);margin:-2px 0 8px;line-height:1.5">Ces p\u00e9riodes servent \u00e0 savoir qui \u00e9tait pr\u00e9sent sur les campagnes pass\u00e9es. Le compteur des 1607\u00a0h, les cong\u00e9s et la paie portent sur le contrat en cours uniquement.</div>';
 }
 
 // Frise de campagne : les périodes en couleur sur l'axe du temps, le trait du jour, les trous en
@@ -1715,14 +1596,50 @@ function editMembre(nom){
     var saveBtn=document.querySelector('#ovEditMembre .mbtn.verte');
     if(saveBtn)saveBtn.parentNode.insertBefore(cs,saveBtn);
   }
+  var tc=m.type_contrat||'CDI';
+  var types=['G\u00e9rant','CDI','CDD','TESA','Apprenti','Saisonnier','Extra'];
+  var PERM_TYPES=['G\u00e9rant','CDI'];
+  var RENOUV_TYPES=['CDD','TESA','Saisonnier','Extra'];
+  var isPerm=PERM_TYPES.indexOf(tc)>=0;
+  var isRenouv=RENOUV_TYPES.indexOf(tc)>=0;
   cs.innerHTML=_emModsHtml(m)
-    +'<div id="em-hist-wrap"></div>'
+    +'<div class="fl" style="margin-top:12px">Type de contrat</div>'
+    +'<div class="ppicker">'
+    +types.map(function(t){return'<div class="pchk'+(tc===t?' sel vert':'')+'" data-val="'+t+'" onclick="window.pickVal(this,\'em-type-contrat\',\'vert\');_emPickType(\''+t+'\')">'+t+'</div>';}).join('')
+    +'</div>'
+    +'<input type="hidden" id="em-type-contrat" value="'+tc+'">'
+    +'<div class="fl" style="margin-top:10px">D\u00e9but de contrat</div>'
+    +'<input type="date" id="em-debut-contrat" value="'+(m.debut_contrat||'')+'" style="width:100%;padding:10px;border:1.5px solid #e5e7eb;border-radius:10px;font-size:14px;outline:none;box-sizing:border-box;margin-bottom:8px;font-family:inherit">'
+    +'<div class="fl">Fin de contrat <span id="em-fin-hint" style="font-size:11px;color:'+(isPerm?'#16a34a':'#d97706')+'">'+(isPerm?'Pas de date de fin requise pour ce type de contrat.':'Une date de fin est recommand\u00e9e pour ce type de contrat.')+'</span></div>'
+    +'<input type="date" id="em-fin-contrat" value="'+(m.fin_contrat||'')+'"'+(isPerm?' disabled':'')+' style="width:100%;padding:10px;border:1.5px solid #e5e7eb;border-radius:10px;font-size:14px;outline:none;box-sizing:border-box;margin-bottom:8px;font-family:inherit">'
+    +_emContratsHtml(m)
+    +'<div id="em-renouv-section" style="display:'+(isRenouv?'block':'none')+'">'
+    +'<div class="fl" style="margin-top:6px">🔄 Renouvellement <span style="font-size:11px;color:var(--texte-doux,#6b7280);font-weight:400">(optionnel)</span></div>'
+    +'<div style="background:var(--tag-amber-bg,#fffbeb);border:1.5px solid #fcd34d;border-radius:10px;padding:10px 12px;margin:6px 0 4px">'
+    +'<div style="font-size:12px;color:var(--tag-amber-tx,#92400e);margin-bottom:10px">Si ce contrat est renouvel\u00e9, renseignez les dates ci-dessous. Une alerte admin s\'affichera automatiquement.</div>'
+    +'<div class="fl" style="margin-bottom:4px">Date de renouvellement</div>'
+    +'<input type="date" id="em-renouv-date" value="'+(m.renouvellement_date||'')+'" style="width:100%;padding:10px;border:1.5px solid #e5e7eb;border-radius:10px;font-size:14px;outline:none;box-sizing:border-box;margin-bottom:8px;font-family:inherit">'
+    +'<div class="fl" style="margin-bottom:4px">Nouvelle date de fin de contrat</div>'
+    +'<input type="date" id="em-renouv-fin" value="'+(m.renouvellement_fin||'')+'" style="width:100%;padding:10px;border:1.5px solid #e5e7eb;border-radius:10px;font-size:14px;outline:none;box-sizing:border-box;font-family:inherit">'
+    +'</div>'
+    +'</div>'
     +'<div class="fl" style="margin-top:14px">☀️ Solde CP initial <span style="font-size:11px;color:var(--texte-doux,#6b7280);font-weight:400">('+(((window.CONFIG&&window.CONFIG.cp_mode)==='ouvres')?'jours ouvrés':'jours ouvrables')+', au début de la période de référence)</span></div>'
     +'<input type="number" id="em-cp-initial-j" min="0" max="100" step="0.5" value="'+(m.cp_initial_j||0)+'" style="width:100%;padding:10px;border:1.5px solid #e5e7eb;border-radius:10px;font-size:14px;outline:none;box-sizing:border-box;margin-bottom:8px;font-family:inherit">'
-    // Le taux horaire a quitté ce bloc : il est devenu un ÉVÉNEMENT de
-    // l'historique ci-dessus (§39). Il vit toujours dans la collection `paie`,
-    // PAS dans le doc `membres` (lisible par toute l'équipe) — l'historique ne
-    // fusionne les deux qu'à l'affichage, et seulement pour un administrateur.
+    // Taux horaire chargé — vit dans la collection `paie`, PAS dans le doc `membres`
+    // (lisible par toute l'équipe). Affiché aux seuls administrateurs ; le verrou réel
+    // est côté rules, ce test n'est que de la défense en profondeur.
+    +((window.isAdmin&&window.isAdmin())?(
+       '<div class="fl" style="margin-top:14px">💶 Taux horaire chargé <span style="font-size:11px;color:var(--texte-doux,#6b7280);font-weight:400">(coût employeur, € par heure)</span></div>'
+      +'<input type="number" id="em-taux-h" min="0" step="0.5" inputmode="decimal" value="'+(_paieTaux(nom)!=null?_paieTaux(nom):'')+'" placeholder="'+(_paieTauxContrat(tc)!=null?String(_paieTauxContrat(tc)):'ex. 21')+'" style="width:100%;padding:10px;border:1.5px solid #e5e7eb;border-radius:10px;font-size:14px;outline:none;box-sizing:border-box;font-family:inherit">'
+      +'<div style="font-size:11px;color:var(--texte-doux,#6b7280);margin:5px 2px 0;line-height:1.5">Sert au co\u00fbt du travail (Pilotage \u203a \u00c9conomie). Visible des seuls administrateurs.</div>'
+      // ★★★ LA DATE D'EFFET. Pre-remplie a AUJOURD'HUI : le geste par defaut est
+      // l'augmentation, qui ouvre une periode et laisse le passe intact. Vider le
+      // champ est un geste EXPLICITE, et c'est le seul qui reecrive une ligne
+      // existante. Le defaut protege ; la destruction se demande.
+      +'<div class="fl" style="margin-top:10px;margin-bottom:4px">\u00c0 partir du</div>'
+      +'<input type="date" id="em-taux-d" value="'+_escAttr(_paieAuj())+'" style="width:100%;padding:10px;border:1.5px solid #e5e7eb;border-radius:10px;font-size:14px;outline:none;box-sizing:border-box;font-family:inherit">'
+      +'<div style="font-size:11px;color:var(--texte-doux,#6b7280);margin:5px 2px 0;line-height:1.5">Une <b>augmentation</b> garde le taux pr\u00e9c\u00e9dent pour les heures d\u00e9j\u00e0 travaill\u00e9es. Pour <b>corriger une erreur de saisie</b> sans cr\u00e9er d\u2019augmentation, videz cette date\u00a0: la derni\u00e8re ligne sera r\u00e9\u00e9crite. Pour retirer un taux, retirez ses lignes ci-dessous.</div>'
+      +_paieSerieHtml(nom)):'')
     +'<div class="fl" style="margin-top:14px">🏢 Rattachement</div>'
     +'<div style="display:flex;align-items:center;justify-content:space-between;gap:12px;background:#f8fafc;border:1.5px solid #e5e7eb;border-radius:10px;padding:11px 12px">'
     +'<div style="font-size:13px;color:var(--texte,#374151);font-weight:600">Bureau<div style="font-size:11px;color:var(--texte-doux,#6b7280);font-weight:400;margin-top:1px;max-width:300px">Non compté dans la capacité de travail des vignes (calcul de charge).</div></div>'
@@ -1754,7 +1671,6 @@ function editMembre(nom){
       +'<button type="button" class="mbtn" id="em-reset-pwd" onclick="_mvResetMemberPwd(\''+_escAttr(m.nom)+'\')" style="width:100%;margin:0;background:var(--terre-pale,#F3EADF);color:var(--terre,#8A5A38);border:1.5px solid var(--terre,#8A5A38)">🔑 Réinitialiser le mot de passe</button>'
       +'</div>'):'');
   window.openOv('ovEditMembre');
-  _emhRender(nom);
 }
 
 // ── SEC-2 : réinitialisation d'un membre par l'admin du domaine ───────
@@ -1796,166 +1712,17 @@ function toggleEmCollectif(el){
   var w=document.getElementById('em-eff-wrap');
   if(w)w.style.display=on?'block':'none';
 }
-// ══ LE « + » : d'abord QUOI, jamais « quelle valeur » ══════════════════
-// Chaque option annonce son effet AVANT d'etre choisie — meme patron que les
-// motifs d'absence du Planning (_planAbsEffet). Prolonger et reembaucher ne se
-// ressemblent plus : l'un garde un compteur, l'autre en ouvre un.
-// ⚠⚠ L'ETAT DOIT VIVRE SUR window, PAS DANS LA PORTEE DU MODULE.
-// Un gestionnaire inline (onclick=, oninput=) s'execute dans la portee GLOBALE.
-// Un `var` de haut niveau d'un module ES n'y est PAS : `window._EMH.d=this.value`
-// levait « window._EMH is not defined » au premier caractere tape. C'est C15 applique
-// a une VARIABLE et non a une fonction — exporter les fonctions ne suffit pas,
-// il faut exporter tout ce qu'un attribut HTML nomme.
-window._EMH={nom:'',t:'',d:'',type:'',fin:'',grille:'',v:0};
-function _emhSheet(html){
-  var b=document.getElementById('emevt-body'); if(!b) return;
-  b.innerHTML=html;
-  var ov=document.getElementById('ovEmEvt');
-  if(ov&&!ov.classList.contains('open')) window.openOv('ovEmEvt');
+function _emPickType(t){
+  var PERM=['G\u00e9rant','CDI'];
+  var RENOUV=['CDD','TESA','Saisonnier','Extra'];
+  var isPerm=PERM.indexOf(t)>=0;var isRenouv=RENOUV.indexOf(t)>=0;
+  var hint=document.getElementById('em-fin-hint');
+  var finInput=document.getElementById('em-fin-contrat');
+  var renouvSection=document.getElementById('em-renouv-section');
+  if(hint){hint.style.color=isPerm?'#16a34a':'#d97706';hint.textContent=isPerm?'Pas de date de fin requise pour ce type de contrat.':'Une date de fin est recommand\u00e9e pour ce type de contrat.';}
+  if(finInput){finInput.disabled=isPerm;if(isPerm)finInput.value='';}
+  if(renouvSection)renouvSection.style.display=isRenouv?'block':'none';
 }
-function _emhClose(){ window.closeOv(null,'ovEmEvt'); }
-function _emhPick(nom){
-  var m=(window.MEMBRES||[]).find(function(x){return x.nom===nom;}); if(!m) return;
-  var P=window._mvPeriodes(m), last=P.length?P[P.length-1]:null, auj=_paieAuj();
-  var ouvert=!!last&&(!last.fin||last.fin>=auj);
-  var nomA=_escAttr(nom);
-  var O=[
-    ['embauche','\u{1F4C4}','Embauche', ouvert
-      ?'Cl\u00f4t le contrat en cours et en ouvre un nouveau, avec son propre compteur.'
-      :'Ouvre un contrat. Son compteur d\u2019heures d\u00e9marre \u00e0 sa date de d\u00e9but.','var(--terre)',true],
-    ['renouvellement','\u{1F504}','Renouvellement', ouvert
-      ?'Repousse la fin sans couper\u00a0: <b>un seul contrat, un seul compteur</b>.'
-      :'Indisponible \u2014 aucun contrat ouvert \u00e0 prolonger.','var(--vert-med)',ouvert],
-    ['fin','\u23F9','Fin de contrat', ouvert
-      ?'Cl\u00f4t au jour choisi. Le compteur est sold\u00e9, donc pay\u00e9.'
-      :'Indisponible \u2014 aucun contrat ouvert \u00e0 clore.','var(--rouge)',ouvert]
-  ];
-  if(window.isAdmin&&window.isAdmin()) O.push(['taux','\u{1F4B6}','Changement de taux',
-    'Les heures d\u00e9j\u00e0 travaill\u00e9es gardent l\u2019ancien taux.','var(--vert-med)',true]);
-  var h='<div class="modal-hd"><div class="modal-title">Qu\u2019est-ce qui s\u2019est pass\u00e9\u00a0?</div></div>'
-   +'<div class="modal-body"><div style="font-size:11.5px;color:var(--texte-doux);line-height:1.45;margin-bottom:13px">'
-   +'Chaque \u00e9v\u00e9nement est dat\u00e9. L\u2019historique garde les deux versions, avant et apr\u00e8s.</div>';
-  O.forEach(function(x){
-    h+='<button type="button" class="emh-opt"'+(x[5]?(' onclick="_emhForm(\''+nomA+'\',\''+x[0]+'\')"'):' disabled')+'>'
-      +'<span class="emh-opt-i">'+x[1]+'</span><span style="flex:1">'
-      +'<span class="emh-opt-n">'+x[2]+'</span>'
-      +'<span class="emh-opt-e" style="color:'+(x[5]?x[4]:'var(--texte-doux)')+'">'+x[3]+'</span></span></button>';
-  });
-  h+='<button type="button" class="mbtn" onclick="_emhClose()" style="width:100%;margin-top:8px">Annuler</button></div>';
-  _emhSheet(h);
-}
-// ── puis QUAND, avec l'effet calcule EN DIRECT sur les vraies regles ─────
-function _emhForm(nom,t){
-  var m=(window.MEMBRES||[]).find(function(x){return x.nom===nom;}); if(!m) return;
-  var P=window._mvPeriodes(m), last=P.length?P[P.length-1]:null, auj=_paieAuj();
-  window._EMH={nom:nom,t:t,d:auj,type:(last&&last.type)||'CDI',fin:'',
-        grille:(last&&last.grille)||'standard',
-        v:((typeof window._mvPaieTauxEffAt==='function')?(window._mvPaieTauxEffAt(m,auj)||0):0)};
-  if(t==='embauche'){ window._EMH.d=''; window._EMH.type='CDD'; }
-  var h='<div class="modal-hd"><div class="modal-title">'+_EMH_LBL[t].i+' '+_EMH_LBL[t].n+'</div></div><div class="modal-body">';
-  if(t==='embauche'){
-    h+='<div class="emh-s" style="margin-bottom:6px">Un nouveau contrat. Le pr\u00e9c\u00e9dent, s\u2019il existe, sera archiv\u00e9\u00a0\u2014 il reste lisible et imprimable.</div>'
-     +'<div class="fl">Date de d\u00e9but</div><input type="date" class="emh-in" id="emh-d" oninput="window._EMH.d=this.value;_emhEff()">'
-     +'<div class="fl" style="margin-top:10px">Type de contrat</div><div class="ppicker" id="emh-ty"></div>'
-     +'<div class="fl" style="margin-top:10px">Grille horaire</div><div class="ppicker" id="emh-gr"></div>'
-     +'<div class="fl" style="margin-top:10px">Fin pr\u00e9vue <span style="font-weight:400;text-transform:none;letter-spacing:0;color:var(--texte-doux)">\u2014 vide si sans terme</span></div>'
-     +'<input type="date" class="emh-in" id="emh-f" oninput="window._EMH.fin=this.value;_emhEff()">';
-  } else if(t==='renouvellement'){
-    h+='<div class="emh-s" style="margin-bottom:6px">Le contrat continue. Seule sa date de fin bouge.</div>'
-     +'<div class="fl">Date de signature</div><input type="date" class="emh-in" id="emh-d" value="'+_escAttr(auj)+'" oninput="window._EMH.d=this.value;_emhEff()">'
-     +'<div class="fl" style="margin-top:10px">Nouvelle date de fin</div><input type="date" class="emh-in" id="emh-f" oninput="window._EMH.fin=this.value;_emhEff()">';
-  } else if(t==='fin'){
-    h+='<div class="emh-s" style="margin-bottom:6px">La fin r\u00e9elle. Elle prime sur la fin pr\u00e9vue, dans les deux sens.</div>'
-     +'<div class="fl">Dernier jour travaill\u00e9</div><input type="date" class="emh-in" id="emh-d" value="'+_escAttr(auj)+'" oninput="window._EMH.d=this.value;_emhEff()">';
-  } else {
-    h+='<div class="emh-s" style="margin-bottom:6px">Une augmentation ouvre une p\u00e9riode et laisse le pass\u00e9 intact.</div>'
-     +'<div class="fl">Taux horaire charg\u00e9 (\u20AC/h)</div>'
-     +'<input type="number" step="0.10" min="0" inputmode="decimal" class="emh-in" id="emh-v" value="'+_escAttr(String(window._EMH.v||''))+'" oninput="window._EMH.v=parseFloat(this.value)||0;_emhEff()">'
-     +'<div class="fl" style="margin-top:10px">\u00c0 partir du</div><input type="date" class="emh-in" id="emh-d" value="'+_escAttr(auj)+'" oninput="window._EMH.d=this.value;_emhEff()">';
-  }
-  h+='<div class="emh-eff" id="emh-eff"></div>'
-   +'<div style="display:flex;gap:8px;margin-top:15px">'
-   +'<button type="button" class="mbtn" onclick="_emhPick(\''+_escAttr(nom)+'\')" style="flex:1;margin:0">Retour</button>'
-   +'<button type="button" class="mbtn verte" onclick="_emhOk()" style="flex:1;margin:0">Enregistrer</button></div></div>';
-  _emhSheet(h);
-  if(t==='embauche'){ _emhTyPick(); _emhGrPick(); }
-  _emhEff();
-}
-function _emhTyPick(){
-  var el=document.getElementById('emh-ty'); if(!el) return;
-  el.innerHTML=['G\u00e9rant','CDI','CDD','TESA','Apprenti','Saisonnier','Extra'].map(function(t){
-    return '<div class="pchk'+(window._EMH.type===t?' sel vert':'')+'" onclick="window._EMH.type=\''+t+'\';_emhTyPick();_emhEff()">'+t+'</div>';
-  }).join('');
-}
-function _emhGrPick(){
-  var el=document.getElementById('emh-gr'); if(!el) return;
-  el.innerHTML=_emhGrilles().map(function(g){
-    return '<div class="pchk'+(window._EMH.grille===g?' sel vert':'')+'" onclick="window._EMH.grille=\''+_escAttr(g)+'\';_emhGrPick();_emhEff()">'+_escHtml(g)+'</div>';
-  }).join('');
-}
-function _emhEvt(){
-  var E=window._EMH;
-  if(E.t==='taux')           return (E.d&&E.v>0)?{d:E.d,t:'taux',v:E.v}:null;
-  if(E.t==='embauche')       return E.d?{d:E.d,t:'embauche',type:E.type,fin:E.fin||'',grille:E.grille||'standard'}:null;
-  if(E.t==='renouvellement') return (E.d&&E.fin)?{d:E.d,t:'renouvellement',fin:E.fin}:null;
-  if(E.t==='fin')            return E.d?{d:E.d,t:'fin'}:null;
-  return null;
-}
-// L'effet est calcule en SIMULANT l'ajout sur _mvPeriodes, jamais decrit en dur :
-// un texte fige finirait par mentir le jour ou la regle change.
-function _emhEff(){
-  var box=document.getElementById('emh-eff'); if(!box) return;
-  var e=_emhEvt();
-  if(!e){ box.className='emh-eff'; box.textContent='Renseignez les dates pour voir ce que \u00e7a va changer.'; return; }
-  if(window._EMH.t==='taux'){
-    box.className='emh-eff good';
-    box.innerHTML='\u00c0 partir du <b>'+_emhFmt(window._EMH.d)+'</b>, le co\u00fbt du travail passe \u00e0 <b>'
-      +String(Math.round(window._EMH.v*100)/100).replace('.',',')+'\u00a0\u20AC/h</b>. Les heures d\u2019avant gardent leur taux.';
-    return;
-  }
-  var m=(window.MEMBRES||[]).find(function(x){return x.nom===window._EMH.nom;});
-  var H=window._mvHist(m);
-  var avant=window._mvPeriodes({hist:H}), apres=window._mvPeriodes({hist:H.concat([e])});
-  var la=apres.length?apres[apres.length-1]:null;
-  if(apres.length>avant.length){
-    var lav=avant.length?avant[avant.length-1]:null;
-    var chg=lav&&la&&(lav.grille||'standard')!==(la.grille||'standard');
-    box.className='emh-eff warn';
-    box.innerHTML='\u26A0\uFE0F <b>Nouveau contrat.</b> Vous en aurez '+apres.length+'. Le compteur du pr\u00e9c\u00e9dent est '
-      +'<b>sold\u00e9</b> \u00e0 sa date de fin\u00a0; celui-ci d\u00e9marre le <b>'+_emhFmt(la.debut)+'</b>, sans d\u00fb ni indu. '
-      +'Le pr\u00e9c\u00e9dent reste lisible, et son relev\u00e9 reste imprimable.'
-      +(chg?('<br><br>La grille passe de <b>'+_escHtml(lav.grille||'standard')+'</b> \u00e0 <b>'+_escHtml(la.grille||'standard')
-        +'</b>. Elle ne s\u2019applique qu\u2019\u00e0 partir du '+_emhFmt(la.debut)+'\u00a0\u2014 les mois d\u00e9j\u00e0 \u00e9coul\u00e9s gardent l\u2019ancienne.'):'');
-  } else if(window._EMH.t==='renouvellement'){
-    box.className='emh-eff good';
-    box.innerHTML='<b>Toujours un seul contrat</b>, donc un seul compteur. Il court d\u00e9sormais jusqu\u2019au <b>'
-      +_emhFmt(window._EMH.fin)+'</b>. L\u2019ancienne date de fin reste dans l\u2019historique.';
-  } else if(window._EMH.t==='fin'){
-    box.className='emh-eff';
-    box.innerHTML='Le contrat s\u2019arr\u00eate le <b>'+_emhFmt(window._EMH.d)+'</b>. Son compteur est sold\u00e9. '
-      +'La fiche reste consultable, avec ses heures et son relev\u00e9.';
-  } else {
-    box.className='emh-eff';
-    box.innerHTML='Aucune coupure\u00a0: cette date tombe dans le contrat en cours, elle le <b>corrige</b> '
-      +'plut\u00f4t que d\u2019en cr\u00e9er un nouveau.';
-  }
-}
-function _emhOk(){
-  var e=_emhEvt();
-  if(!e){ showToast('Il manque une date','#B85A1A'); return; }
-  var nom=window._EMH.nom, m=(window.MEMBRES||[]).find(function(x){return x.nom===nom;});
-  if(!m) return;
-  if(e.t==='taux'){
-    var r=window._mvPaieApply(nom,String(e.v),e.d,null);
-    showToast((r&&r.geste==='correction')
-      ?'\u270E Taux corrig\u00e9 sur place \u2014 aucune augmentation cr\u00e9\u00e9e'
-      :'\u{1F4B6} Augmentation enregistr\u00e9e \u2014 le taux pr\u00e9c\u00e9dent reste sur les heures d\u00e9j\u00e0 travaill\u00e9es','#3D6B27');
-  } else {
-    _emhCommit(m,window._mvHist(m).concat([e]),_EMH_LBL[e.t].n+' enregistr\u00e9'+(e.t==='fin'?'e':''));
-  }
-  _emhClose(); _emhRender(nom); renderReglages();
-}
-
 function saveEditMembre(){
   const nom=document.getElementById('em-nom').value;
   const m=window.MEMBRES.find(x=>x.nom===nom);
@@ -1986,13 +1753,40 @@ function saveEditMembre(){
         showToast('\u26a0\ufe0f R\u00f4les enregistr\u00e9s, mais droits non appliqu\u00e9s : '+((e&&e.message)||''),'#B85A1A');
       });
   }
-  // Le contrat, la grille et le taux ne s'ecrivent plus ICI : chaque evenement
-  // est enregistre au moment ou il est valide (_emhOk). Un fait se consigne
-  // quand on le consigne, et fermer la fiche sans enregistrer ne perd plus un
-  // contrat saisi. renouvellement_date / renouvellement_fin ont disparu : le
-  // second n'etait lu nulle part, et le premier ETEIGNAIT l'alerte de fin de
-  // contrat (l'ancien test `if(!m.renouvellement_date && fin...)`).
-  delete m.renouvellement_date; delete m.renouvellement_fin;
+  // ⚠️⚠️ ARCHIVAGE AVANT ECRASEMENT — C'EST ICI QUE LE PASSE SE PERDAIT.
+  // Saisir la date de debut d'un nouveau contrat ecrasait l'ancien sans un mot :
+  // le salarie disparaissait RETROACTIVEMENT de toutes les campagnes precedentes
+  // (effectif, heures, cout). Aucun code de lecture ne pouvait rattraper cela
+  // apres coup — la donnee n'existait plus nulle part.
+  // On n'archive QUE dans le cas NON AMBIGU : l'ancien contrat est clos (il porte
+  // une date de fin) ET le nouveau debut est STRICTEMENT posterieur a cette fin.
+  // Corriger une faute de frappe dans la date de debut ne remplit jamais cette
+  // condition : on ne fabrique donc pas de faux contrat passe.
+  var _ndeb=document.getElementById('em-debut-contrat')?.value||'';
+  var _nfin=document.getElementById('em-fin-contrat')?.value||'';
+  if(m.debut_contrat && m.fin_contrat && _ndeb && _ndeb>m.fin_contrat && _ndeb!==m.debut_contrat){
+    if(!Array.isArray(m.contrats)) m.contrats=[];
+    var _dej=m.contrats.some(function(c){ return c && c.debut===m.debut_contrat && c.fin===m.fin_contrat; });
+    if(!_dej){
+      m.contrats.push({debut:m.debut_contrat, fin:m.fin_contrat, type:m.type_contrat||''});
+      showToast('\u{1F4C7} Contrat pr\u00e9c\u00e9dent archiv\u00e9 \u2014 '+m.debut_contrat+' \u2192 '+m.fin_contrat,'#3D6B27');
+    }
+  }
+  // Relecture de la liste affichee : une ligne supprimee a l'ecran disparait ici.
+  // Lire le DOM plutot que de tenir un etat global suit ce que fait deja le reste
+  // de la fiche, et evite qu'un membre en cours d'edition survive a une fermeture.
+  var _lst=document.getElementById('em-contrats-list');
+  if(_lst){
+    var _rows=[].slice.call(_lst.querySelectorAll('[data-ctr]')).map(function(r){
+      return {debut:r.getAttribute('data-deb')||'', fin:r.getAttribute('data-fin')||'', type:r.getAttribute('data-typ')||''};
+    }).filter(function(c){ return c.debut||c.fin; });
+    if(_rows.length) m.contrats=_rows; else delete m.contrats;
+  }
+  m.type_contrat=document.getElementById('em-type-contrat')?.value||'CDI';
+  m.debut_contrat=_ndeb;
+  m.fin_contrat=_nfin;
+  m.renouvellement_date=document.getElementById('em-renouv-date')?.value||'';
+  m.renouvellement_fin=document.getElementById('em-renouv-fin')?.value||'';
   m.cp_initial_j=parseFloat(document.getElementById('em-cp-initial-j')?.value||'0')||0;
   m.bureau=document.getElementById('em-bureau')?.classList.contains('on')||false;
   m.collectif=document.getElementById('em-collectif')?.classList.contains('on')||false;
@@ -2026,6 +1820,24 @@ function saveEditMembre(){
   // Meme mecanique que la liste des contrats precedents — lire le DOM plutot que
   // de tenir un etat global. La liste n'existe QUE chez l'administrateur : chez un
   // non-admin `_tsEl` est null, `rows` reste null, et la serie en base est intacte.
+  var _thEl=document.getElementById('em-taux-h');
+  if(_thEl && window._mvPaieApply){
+    var _tdEl=document.getElementById('em-taux-d');
+    var _tsEl=document.getElementById('em-taux-serie');
+    var _tRows=null;
+    if(_tsEl) _tRows=[].slice.call(_tsEl.querySelectorAll('[data-txr]')).map(function(r){
+      return { d:r.getAttribute('data-txd')||'', v:r.getAttribute('data-txv')||'' };
+    });
+    var _tRes=window._mvPaieApply(nom, _thEl.value, (_tdEl?_tdEl.value:''), _tRows);
+    // On DIT ce qu'on vient de faire : les deux gestes ne se ressemblent pas, et
+    // celui qui corrige doit savoir qu'il vient de reecrire une ligne, pas d'en creer.
+    try{
+      if(_tRes && _tRes.geste==='augmentation')
+        showToast('\u{1F4B6} Augmentation enregistr\u00e9e \u2014 le taux pr\u00e9c\u00e9dent reste sur les heures d\u00e9j\u00e0 travaill\u00e9es','#3D6B27');
+      else if(_tRes && _tRes.geste==='correction')
+        showToast('\u270E Taux corrig\u00e9 sur place \u2014 aucune augmentation cr\u00e9\u00e9e','#8A5A38');
+    }catch(e){ if(window.logError)window.logError({level:'info',cat:'paie',msg:'toast taux horaire',detail:(e&&e.message)||String(e)}); }
+  }
   window.saveData('membres','\ud83d\udc64 Membre mis \u00e0 jour');
   // Si l'admin vient de se restreindre lui-meme, appliquer sans attendre l'aller-
   // retour Firestore : reconstruit le dock et quitte la page si elle est masquee.
@@ -2843,8 +2655,14 @@ var MV_DOCS = [
   { f:'oblig', act:'mois',      mod:'planning', ico:'\u23F1\u{FE0F}', bg:'var(--bleu-pale)', fm:'pdf',
     t:'Relev\u00e9 mensuel d\u2019heures', ask:'Choix du mois',
     s:'Heures travaill\u00e9es, jours travaill\u00e9s et absences du mois \u2014 le format attendu par la MSA.' },
+  { f:'oblig', act:'releve',    mod:'planning', ico:'\u{1F464}', bg:'var(--phyto-pale)', fm:'pdf',
+    t:'Relev\u00e9 individuel d\u2019un salari\u00e9', ask:'Salari\u00e9 puis mois',
+    s:'Le mois jour par jour d\u2019une seule personne, ses contrats, ses cong\u00e9s, son compteur d\u2019heures et son annualisation. \u00c0 signer des deux c\u00f4t\u00e9s.' },
 
   // --- Suivi du domaine : des etats internes, jamais des declarations ---
+  { f:'suivi', act:'vignoble',  mod:'',         ico:'\u{1F5FA}\u{FE0F}', bg:'var(--vert-pale)', fm:'pdf',
+    t:'\u00c9tat du vignoble', ask:'',
+    s:'Toutes vos parcelles sur une page : surface, c\u00e9page, commune, avancement, dernier travail, dernier rendement \u2014 et ce qui reste \u00e0 renseigner.' },
   { f:'suivi', act:'saison',    mod:'',         ico:'\u{1F4C4}', bg:'var(--or-pale)',    fm:'pdf', ov:true,
     t:'Rapport de saison', ask:'Choix de la p\u00e9riode',
     s:'Avancement, tracteur, entretiens, incidents, phyto, cuivre et ETP sur une p\u00e9riode.' },
@@ -2864,9 +2682,15 @@ var MV_DOCS = [
   { f:'suivi', act:'intrants',  mod:'reserve',  ico:'\u{1F4E6}', bg:'var(--acier-pale)', fm:'pdf',
     t:'Inventaire des intrants', ask:'',
     s:'Stocks, achats et consommations du magasin.' },
+  { f:'suivi', act:'matur',     mod:'cave',     ico:'\u{1F347}', bg:'var(--vert-pale)',  fm:'pdf', ov:true,
+    t:'Contr\u00f4le de maturit\u00e9', ask:'Choix de l\u2019ann\u00e9e',
+    s:'Vos rel\u00e8vements avant vendange, parcelle par parcelle et jour par jour, dans l\u2019ordre de maturit\u00e9.' },
   { f:'suivi', act:'recoltes',  mod:'cave',     ico:'\u{1F347}', bg:'var(--rouge-pale)', fm:'pdf',
     t:'R\u00e9coltes de la vendange', ask:'',
     s:'Caisses, kilos et hectolitres par parcelle et par cuve.' },
+  { f:'suivi', act:'cuverie',   mod:'cave',     ico:'\u{1FAA3}', bg:'var(--terre-pale)', fm:'pdf', ov:true,
+    t:'Cahier de cuverie', ask:'Choix de l\u2019ann\u00e9e',
+    s:'Une page par cuve : densit\u00e9s, temp\u00e9ratures, remontages, pigeages et op\u00e9rations de la fermentation.' },
   { f:'suivi', act:'elevage',   mod:'cave',     ico:'\u{1F377}', bg:'var(--rouge-pale)', fm:'pdf', ov:true,
     t:'Suivi d\u2019\u00e9levage', ask:'',
     s:'Les op\u00e9rations du chai, cuv\u00e9e par cuv\u00e9e, avec les analyses.' },
@@ -2968,7 +2792,7 @@ window.docsFam=function(k){ _docsFam=k; _docsRender(); };
 function _docsPane(id){
   var home=document.getElementById('docs-home'), pane=document.getElementById('docs-pane');
   if(!home||!pane) return;
-  ['docs-pane-mois','docs-pane-etp'].forEach(function(p){
+  ['docs-pane-mois','docs-pane-etp','docs-pane-releve'].forEach(function(p){
     var el=document.getElementById(p); if(el) el.style.display=(p===id)?'':'none';
   });
   home.style.display='none'; pane.style.display='';
@@ -2991,6 +2815,7 @@ window.docsGo=function(i){
     if(pm&&pm.value&&typeof window.planFillPDFFromMonth==='function') window.planFillPDFFromMonth(pm.value);
     return;
   }
+  if(d.act==='releve'){ _docsReleveOpen(); return; }
   if(d.act==='etp'){ _docsPane('docs-pane-etp'); return; }
   if(d.act==='restore'){
     var inp=document.getElementById('import-json-input');
@@ -3007,13 +2832,16 @@ window.docsGo=function(i){
     case 'phytoPdf':     fn=window.exportPDFPhyto;         break;
     case 'phytoCsv':     fn=window._phytoExportCsv;        break;
     case 'cuivre':       fn=window.openSyntheseCuivre;     break;
+    case 'vignoble':     fn=window._vgnExportVignoble;     break;
     case 'saison':       fn=window.openRapportSaison;      break;
     case 'annuel':       fn=window.planAnnuelPdf;        break;
     case 'bilan':        fn=window._bcExportChoix;         break;
     case 'manip':        fn=window._rmExportChoix;         break;
     case 'futs':         fn=window._rsvExportFutsPdf;      break;
     case 'intrants':     fn=window._rsvExportPdf;          break;
+    case 'matur':        fn=window._matExportChoix;        break;
     case 'recoltes':     fn=window.exportVendRecoltesPdf;  break;
+    case 'cuverie':      fn=window._cuvExportChoix;        break;
     case 'elevage':      fn=window.openOvCaveExport;       break;
     case 'entretien':    fn=window.ouvrirExportEntretien;  break;
     case 'csvJournal':   fn=window.exportCSVJournal;       break;
@@ -4142,18 +3970,10 @@ window.editMembre            = editMembre;
 window.toggleEmRole          = toggleEmRole;
 window.toggleEmBureau        = toggleEmBureau;
 window.toggleEmCollectif     = toggleEmCollectif;
+window._emPickType           = _emPickType;
 window.saveEditMembre        = saveEditMembre;
 window._emModToggle          = _emModToggle;
 window._emModPreset          = _emModPreset;
-window._emhRender            = _emhRender;
-window._emhPick              = _emhPick;
-window._emhForm              = _emhForm;
-window._emhOk                = _emhOk;
-window._emhDel               = _emhDel;
-window._emhEff               = _emhEff;
-window._emhClose             = _emhClose;
-window._emhTyPick            = _emhTyPick;
-window._emhGrPick            = _emhGrPick;
 window._emModPresetRole      = _emModPresetRole;
 window.deleteMembre          = deleteMembre;
 window.openChangePwd         = openChangePwd;
@@ -4381,6 +4201,38 @@ window._mvPaieGnrPMP = function(){
   var e=(window.CONFIG&&window.CONFIG.eco)||{}, v=Number(e.prix_gnr_litre);
   return (isFinite(v)&&v>0)?v:0;
 };
+// ★ La serie, affichee dans la fiche (admin only). Meme idiome que la liste des
+// contrats precedents : chaque ligne porte ses valeurs en attributs, le « × » la
+// retire du DOM, et saveEditMembre relit la liste. Une donnee invisible est une
+// donnee qu'on ne peut pas croire — et celle-ci chiffre des euros.
+function _paieSerieHtml(nom){
+  var S=_paieSerie(nom);
+  if(!S.length) return '';
+  var auj=_paieAuj();
+  var fr=function(d){
+    if(!d||d===_PAIE_ANCRE) return 'depuis toujours';
+    var p=String(d).split('-');
+    return (p.length===3)?('depuis le '+p[2]+'/'+p[1]+'/'+p[0]):d;
+  };
+  var eur=function(v){ return String(Math.round(v*100)/100).replace('.',','); };
+  var rows=S.slice().reverse().map(function(e,i){
+    var futur=(e.d>auj);
+    return '<div data-txr="'+i+'" data-txd="'+_escAttr(e.d)+'" data-txv="'+_escAttr(String(e.v))+'"'
+      +' style="display:flex;align-items:center;gap:8px;padding:8px 10px;border:1.5px solid #e5e7eb;border-radius:10px;margin-bottom:6px;background:var(--terre-pale,#faf8f4)">'
+      +'<span style="flex:1;font-size:13px"><b>'+eur(e.v)+'\u00a0\u20AC/h</b> '
+      +'<span style="font-size:11.5px;color:var(--texte-doux,#6b7280)">'+fr(e.d)+(futur?'\u00a0\u00b7 \u00e0 venir':'')+'</span></span>'
+      +'<button type="button" onclick="this.closest(\'[data-txr]\').remove()" title="Retirer cette ligne"'
+      +' style="border:none;background:transparent;color:#A0291E;font-size:16px;cursor:pointer;padding:2px 6px;line-height:1">\u00d7</button>'
+      +'</div>';
+  }).join('');
+  return '<div class="fl" style="margin-top:10px">Ce que ce taux a valu, et depuis quand</div>'
+    +'<div id="em-taux-serie" style="margin-bottom:8px">'+rows+'</div>'
+    +'<div style="font-size:11px;color:var(--texte-doux,#6b7280);margin:-2px 0 8px;line-height:1.5">'
+    +'Chaque ligne vaut jusqu\u2019\u00e0 la suivante. Le co\u00fbt d\u2019un exercice, d\u2019une parcelle ou d\u2019une session '
+    +'de tracteur relit cette liste \u00e0 la date de chaque heure travaill\u00e9e\u00a0: augmenter quelqu\u2019un aujourd\u2019hui '
+    +'ne change plus ce qu\u2019a co\u00fbt\u00e9 hier.</div>';
+}
+
 // ═══════════════ Économie & conformité (taux, GNR, IFT réf.) ═══════════════
 // Carte de saisie (admin, onglet Domaine). Alimente le tableau de bord Pilotage
 // (coût/ha, IFT, DRE) en lecture seule. Écrit CONFIG.eco / CONFIG.conformite en
@@ -4923,3 +4775,400 @@ function _tcvRender(){
 
 window.openEditSaison        = openEditSaison;
 window.saveEditSaison        = saveEditSaison;
+
+/* ══════════════════════════════════════════════════════════════════════════
+   MA VIGNE — L'ÉTAT DU VIGNOBLE
+   ══════════════════════════════════════════════════════════════════════════
+   Le vignoble ne sortait qu'en CSV : une ligne par parcelle, une colonne par
+   tache. Utile a un tableur, illisible sur une table de cuisine, et muet sur
+   tout ce qui n'est pas une tache — la surface, le cepage, la commune, le
+   rendement, et surtout CE QUI MANQUE.
+
+   Ce document est l'etat civil du domaine. Il sert deux moments precis :
+     · l'installation d'un nouveau client, ou l'on verifie parcelle par
+       parcelle ce qui a ete repris et ce qui reste a renseigner ;
+     · le debut de campagne, ou l'on veut la liste complete sous les yeux.
+
+   ⚠️ AUCUN CALCUL NEUF. Les moteurs sont ceux des ecrans :
+     getPCls          l'avancement d'une parcelle (taches exclues comprises)
+     getTachesSaison  les taches de la saison CONSULTEE
+     _mvParcGeo       ou est une parcelle : ses coordonnees, sinon le centroide
+     _mvKmlCtrs       les contours cartographies, par nom
+     _dpRendHistRows  l'historique de rendement d'une parcelle, par millesime
+   Le document LIT ces moteurs. Il ne les refait pas.
+
+   ⚠️ CE DOCUMENT NE PARLE PAS D'HEURES. Le calcul des heures restantes d'une
+   parcelle vit dans le detail parcelle (openDP) et tient compte des trous de
+   plantation, de l'entreplantation et des exclusions ; le recopier ici en
+   ferait une seconde definition, donc une divergence a terme. Les heures se
+   lisent au Pilotage et dans le rapport de saison, qui ont leur moteur.
+
+   ⚠️ Le bloc CSS ci-dessous est le JUMEAU de MV_CUVDOC_CSS (cave.js) : memes
+   classes, memes valeurs, pour que les documents se ressemblent. Les deux sont
+   a remonter dans utils.js — la ou vit deja la charte MV_DOC — au prochain lot
+   qui bumpe. Ecrit ici pour ne pas retoucher un fichier deja livre.
+   ══════════════════════════════════════════════════════════════════════════ */
+
+var MV_VGNDOC_CSS = ''
+  + '.cd-kpis{display:flex;gap:16px;flex-wrap:wrap;background:#FAF6EC;border:1px solid #E8DCC0;'
+    + 'border-radius:7px;padding:9px 13px;margin-bottom:13px}'
+  + '.cd-k{min-width:96px}'
+  + '.cd-k b{display:block;font-size:8px;text-transform:uppercase;letter-spacing:.6px;color:#8B6020;margin-bottom:2px}'
+  + '.cd-k span{font-family:\'Cormorant Garamond\',Georgia,serif;font-size:20px;font-weight:700;color:#2D1B09;line-height:1.05}'
+  + '.cd-k span small{font-family:\'Outfit\',sans-serif;font-size:9px;font-weight:600;color:#7A6A4A}'
+  + '.cd-k i{display:block;font-style:normal;font-size:8px;color:#7A7263;margin-top:2px;line-height:1.4}'
+  + 'h2{font-size:11px;color:#2D1B09;margin:15px 0 6px;text-transform:uppercase;letter-spacing:.9px}'
+  + 'table{width:100%;border-collapse:collapse;font-size:9.5px;margin-bottom:4px}'
+  + 'th{text-align:left;padding:5px 6px;background:#2D1B09;color:#F3E7CE;font-size:8px;'
+    + 'text-transform:uppercase;letter-spacing:.4px;font-weight:700}'
+  + 'td{border-bottom:1px solid #EDE7DA;padding:4px 6px;vertical-align:top}'
+  + 'td.n,th.n{text-align:right;white-space:nowrap}'
+  + 'tr:nth-child(even) td{background:#FBFAF6}'
+  + 'tr.tot td{background:#F4EEE2;font-weight:700;border-top:1.5px solid #C8A060;border-bottom:none}'
+  + '.cd-note{font-size:8.5px;color:#7A7263;margin:2px 0 11px;line-height:1.5}'
+  + '.cd-vide{font-size:9.5px;color:#7A7263;margin:0 0 11px}'
+  // propre a ce document : les reperes manquants, et la barre d'avancement
+  + '.vg-m{display:inline-block;font-size:7.5px;font-weight:700;letter-spacing:.3px;text-transform:uppercase;'
+    + 'padding:1px 5px;border-radius:8px;background:#F6E4D2;color:#A2521A;margin-right:3px}'
+  + '.vg-ok{color:#6E8A52;font-weight:700}'
+  + '.vg-bar{display:block;height:4px;background:#EDE7DA;border-radius:3px;overflow:hidden;margin-top:2px}'
+  + '.vg-bar i{display:block;height:100%;background:#8A5A38}'
+  + '.vg-ar td{color:#8A8272;font-style:italic}';
+
+/* ── Lecture : une passe sur le domaine, aucune ecriture ──────────────────
+   Tout ce qui est calcule ici est une AGREGATION de moteurs existants, jamais
+   une seconde version d'un moteur. */
+function _vgnEsc(s){
+  return (typeof window._escHtml === 'function') ? window._escHtml(String(s == null ? '' : s))
+                                                 : String(s == null ? '' : s);
+}
+function _vgnNum(n, d){
+  var f = Math.pow(10, d == null ? 2 : d);
+  return String(Math.round((n || 0) * f) / f).replace('.', ',');
+}
+function _vgnDateFr(iso){
+  if(!iso) return '';
+  var p = String(iso).slice(0, 10).split('-');
+  return p.length === 3 ? (p[2] + '/' + p[1] + '/' + p[0].slice(2)) : String(iso);
+}
+function _vgnCommune(p){
+  if(!p) return '';
+  if(p.commune && typeof p.commune === 'object') return String(p.commune.nom || '');
+  return String(p.commune || '');
+}
+function _vgnCepages(p){
+  if(!p) return [];
+  if(Array.isArray(p.cepages) && p.cepages.length) return p.cepages.filter(Boolean);
+  return p.cepage ? [p.cepage] : [];
+}
+
+/* Le dernier travail enregistre sur une parcelle.
+   ⚠️ Le journal porte AUSSI les releves meteo (j.meteo) : sans ce filtre, la
+   « derniere intervention » d'une parcelle serait une note de pluie. C'est le
+   meme filtre que l'export JSON. */
+function _vgnDernierTravail(){
+  var out = {};
+  (window.JOURNAL || []).forEach(function(j){
+    if(!j || j.meteo || !j.parcelle || !j.date) return;
+    var k = String(j.parcelle);
+    if(!out[k] || String(j.date) > String(out[k].date)) out[k] = j;
+  });
+  return out;
+}
+
+function _vgnLignes(){
+  var parcs   = window.PARCELLES || [];
+  var taches  = (typeof window.getTachesSaison === 'function') ? (window.getTachesSaison() || []) : [];
+  var ctrs    = (typeof window._mvKmlCtrs === 'function') ? (window._mvKmlCtrs() || {}) : {};
+  var dernier = _vgnDernierTravail();
+  var out = [];
+  parcs.forEach(function(p){
+    if(!p || !p.nom) return;
+    var cl = (typeof window.getPCls === 'function') ? window.getPCls(p) : { pct:0, nbDone:0, nbTotal:0 };
+    var rh = (typeof window._dpRendHistRows === 'function') ? (window._dpRendHistRows(p) || []) : [];
+    var geo = (typeof window._mvParcGeo === 'function') ? window._mvParcGeo(p) : null;
+    var j = dernier[String(p.nom)] || null;
+    out.push({
+      nom: String(p.nom),
+      arrachee: p.statut === 'Arrachee',
+      statut: String(p.statut || ''),
+      ha: parseFloat(p.surface) || 0,
+      commune: _vgnCommune(p),
+      cepages: _vgnCepages(p),
+      complantee: !!p.entreplantation,
+      pct: cl.pct || 0, nbDone: cl.nbDone || 0, nbTotal: cl.nbTotal || 0,
+      exclues: (p.tachesExclues || []).filter(function(t){
+        return taches.some(function(x){ return x.nom === t; });
+      }),
+      trous: parseInt(p.plantation_trous, 10) || 0,
+      dernier: j ? { date:j.date, tache:String(j.tache || j.activite || '') } : null,
+      rend: rh.length ? rh[0] : null,
+      geo: !!geo,
+      contour: !!ctrs[String(p.nom).toLowerCase()]
+    });
+  });
+  // Tri de tournee : par commune, puis par nom. ⚠️ Une commune VIDE trierait en
+  // premier ; les parcelles sans commune passent donc en fin de liste, pas en
+  // tete du document.
+  out.sort(function(a, b){
+    var ca = a.commune.toLowerCase(), cb = b.commune.toLowerCase();
+    if(!ca !== !cb) return ca ? -1 : 1;
+    if(ca !== cb) return ca < cb ? -1 : 1;
+    return a.nom.localeCompare(b.nom, 'fr');
+  });
+  return out;
+}
+
+/* Repartition par cepage. ⚠️ Une parcelle complantee compte sa surface pour
+   CHAQUE cepage present : la somme de cette colonne depasse alors la surface
+   du domaine. Le document l'ecrit, plutot que de partager une surface qu'on
+   n'a jamais mesuree rang par rang. */
+function _vgnParCepage(lignes){
+  var m = {};
+  lignes.forEach(function(l){
+    if(l.arrachee) return;
+    var cs = l.cepages.length ? l.cepages : ['\u2014 non renseign\u00e9'];
+    cs.forEach(function(c){
+      if(!m[c]) m[c] = { cepage:c, n:0, ha:0 };
+      m[c].n++; m[c].ha += l.ha;
+    });
+  });
+  return Object.keys(m).map(function(k){ return m[k]; })
+    .sort(function(a, b){ return b.ha - a.ha; });
+}
+
+function _vgnDoc(){
+  var lignes = _vgnLignes();
+  if(!lignes.length){ showToast('Aucune parcelle enregistr\u00e9e', '#B85A1A'); return; }
+  var act = lignes.filter(function(l){ return !l.arrachee; });
+  var arr = lignes.filter(function(l){ return l.arrachee; });
+  if(!act.length){ showToast('Aucune parcelle active', '#B85A1A'); return; }
+
+  var haAct = act.reduce(function(s, l){ return s + l.ha; }, 0);
+  // La surface affichee est celle que l'application affiche partout ailleurs.
+  var haRef = parseFloat(window.SURF_TOTALE);
+  if(!isFinite(haRef) || haRef <= 0) haRef = haAct;
+
+  // Avancement du domaine : PONDERE PAR LA SURFACE. Une moyenne simple ferait
+  // peser une demi-ouvree autant qu'un hectare et demi.
+  var pondere = haAct > 0
+    ? Math.round(act.reduce(function(s, l){ return s + l.pct * l.ha; }, 0) / haAct)
+    : 0;
+  var finies = act.filter(function(l){ return l.pct === 100; }).length;
+
+  var comms  = {}; act.forEach(function(l){ if(l.commune) comms[l.commune] = (comms[l.commune] || 0) + l.ha; });
+  var nComm  = Object.keys(comms).length;
+  var parCep = _vgnParCepage(lignes);
+  var nCep   = parCep.filter(function(c){ return c.cepage.indexOf('non renseign') === -1; }).length;
+  var cepTop = parCep.length ? parCep[0] : null;
+  var saison = (typeof window._visuSaison === 'function') ? (window._visuSaison() || '') : '';
+
+  var sansCep = act.filter(function(l){ return !l.cepages.length; });
+  var sansGeo = act.filter(function(l){ return !l.geo; });
+  var sansCtr = act.filter(function(l){ return !l.contour; });
+
+  function tuile(lab, gros, unite, sous){
+    return '<div class="cd-k"><b>' + lab + '</b><span>' + gros
+      + (unite ? ' <small>' + unite + '</small>' : '') + '</span>'
+      + (sous ? '<i>' + sous + '</i>' : '') + '</div>';
+  }
+
+  var corps = '<div class="cd-kpis">'
+    + tuile('Parcelles', act.length, '', arr.length ? (arr.length + ' arrach\u00e9e' + (arr.length > 1 ? 's' : '') + ' en plus') : 'aucune arrach\u00e9e')
+    + tuile('Surface', _vgnNum(haRef), 'ha', 'soit ' + _vgnNum(haAct / act.length) + ' ha en moyenne')
+    + tuile('Communes', nComm || '\u2014', '', nComm ? Object.keys(comms).sort().join(', ') : 'aucune commune renseign\u00e9e')
+    + tuile('C\u00e9pages', nCep || '\u2014', '', cepTop ? (_vgnEsc(cepTop.cepage) + ' en t\u00eate, ' + _vgnNum(cepTop.ha) + ' ha') : 'aucun c\u00e9page renseign\u00e9')
+    + tuile('Avancement', pondere, '%', 'pond\u00e9r\u00e9 par la surface \u00b7 ' + finies + ' parcelle'
+        + (finies > 1 ? 's' : '') + ' termin\u00e9e' + (finies > 1 ? 's' : '') + ' sur ' + act.length)
+    + '</div>';
+
+  function reperes(l){
+    var m = '';
+    if(!l.cepages.length) m += '<span class="vg-m">c\u00e9page</span>';
+    if(!l.geo)            m += '<span class="vg-m">GPS</span>';
+    if(!l.contour)        m += '<span class="vg-m">contour</span>';
+    return m || '<span class="vg-ok">\u2713</span>';
+  }
+  function rendCell(l){
+    if(!l.rend) return '\u2014';
+    if(l.rend.kg_ha != null) return l.rend.millesime + ' \u00b7 ' + l.rend.kg_ha.toLocaleString('fr-FR') + ' kg/ha';
+    return l.rend.millesime + ' \u00b7 ' + Math.round(l.rend.kg || 0).toLocaleString('fr-FR') + ' kg';
+  }
+
+  corps += '<h2>Les parcelles en production \u2014 ' + act.length + ' sur ' + _vgnNum(haRef) + ' ha</h2>'
+    + '<table><thead><tr><th>Parcelle</th><th>Commune</th><th class="n">ha</th><th>C\u00e9page(s)</th>'
+    + '<th class="n">Avanc.</th><th class="n">T\u00e2ches</th><th>Dernier travail</th>'
+    + '<th>Dernier rendement</th><th>\u00c0 renseigner</th></tr></thead><tbody>'
+    + act.map(function(l){
+        var cep = l.cepages.length
+          ? _vgnEsc(l.cepages.join(' \u00b7 ')) + (l.complantee ? ' <i style="color:#8A8272">complant\u00e9e</i>' : '')
+          : '<span style="color:#A89E8C">\u2014</span>';
+        return '<tr><td>' + _vgnEsc(l.nom) + (l.trous > 0 ? ' <i style="color:#8A8272">' + l.trous + ' trous</i>' : '') + '</td>'
+          + '<td>' + (l.commune ? _vgnEsc(l.commune) : '<span style="color:#A89E8C">\u2014</span>') + '</td>'
+          + '<td class="n">' + _vgnNum(l.ha) + '</td>'
+          + '<td>' + cep + '</td>'
+          + '<td class="n">' + l.pct + ' %<span class="vg-bar"><i style="width:' + l.pct + '%"></i></span></td>'
+          + '<td class="n">' + l.nbDone + '/' + l.nbTotal
+            + (l.exclues.length ? '<i style="display:block;color:#8A8272;font-style:normal">'
+                + l.exclues.length + ' hors sujet</i>' : '') + '</td>'
+          + '<td>' + (l.dernier ? (_vgnEsc(l.dernier.tache) + ' \u00b7 ' + _vgnDateFr(l.dernier.date))
+                                : '<span style="color:#A89E8C">aucun</span>') + '</td>'
+          + '<td>' + rendCell(l) + '</td>'
+          + '<td>' + reperes(l) + '</td></tr>';
+      }).join('')
+    + '<tr class="tot"><td colspan="2">Total \u2014 ' + act.length + ' parcelles</td>'
+    + '<td class="n">' + _vgnNum(haAct) + '</td><td></td>'
+    + '<td class="n">' + pondere + ' %</td><td colspan="4"></td></tr>'
+    + '</tbody></table>'
+    + '<div class="cd-note">L\u2019avancement d\u2019une parcelle est le nombre de t\u00e2ches valid\u00e9es sur le '
+    + 'nombre de t\u00e2ches qui la concernent : les t\u00e2ches marqu\u00e9es <b>hors sujet</b> sur cette parcelle '
+    + 'ne comptent ni au num\u00e9rateur ni au d\u00e9nominateur. Le total, lui, est <b>pond\u00e9r\u00e9 par la '
+    + 'surface</b>. Le dernier travail vient du journal, hors rel\u00e9v\u00e9s m\u00e9t\u00e9o.</div>';
+
+  corps += '<h2>Par c\u00e9page</h2>'
+    + '<table><thead><tr><th>C\u00e9page</th><th class="n">Parcelles</th><th class="n">ha</th>'
+    + '<th class="n">Part du domaine</th></tr></thead><tbody>'
+    + parCep.map(function(c){
+        return '<tr><td>' + _vgnEsc(c.cepage) + '</td><td class="n">' + c.n + '</td>'
+          + '<td class="n">' + _vgnNum(c.ha) + '</td>'
+          + '<td class="n">' + (haAct > 0 ? Math.round(c.ha / haAct * 100) : 0) + ' %</td></tr>';
+      }).join('')
+    + '</tbody></table>'
+    + '<div class="cd-note">Une parcelle <b>complant\u00e9e</b> compte sa surface enti\u00e8re pour chacun de '
+    + 'ses c\u00e9pages : la somme de cette colonne peut donc d\u00e9passer la surface du domaine. Rien ne '
+    + 'permet de partager une surface rang par rang, et un partage invent\u00e9 serait pire qu\u2019un '
+    + 'double compte annonc\u00e9.</div>';
+
+  if(sansCep.length || sansGeo.length || sansCtr.length){
+    corps += '<h2>Ce qu\u2019il reste \u00e0 renseigner</h2><div class="cd-vide">';
+    if(sansCep.length) corps += '<b>C\u00e9page absent</b> (' + sansCep.length + ') : '
+      + sansCep.map(function(l){ return _vgnEsc(l.nom); }).join(', ') + '.<br>';
+    if(sansGeo.length) corps += '<b>Aucune position</b> (' + sansGeo.length + ') : '
+      + sansGeo.map(function(l){ return _vgnEsc(l.nom); }).join(', ')
+      + ' \u2014 sans position, pas de m\u00e9t\u00e9o de secteur ni de tri par proximit\u00e9.<br>';
+    if(sansCtr.length) corps += '<b>Aucun contour sur la carte</b> (' + sansCtr.length + ') : '
+      + sansCtr.map(function(l){ return _vgnEsc(l.nom); }).join(', ') + '.';
+    corps += '</div>';
+  }
+
+  if(arr.length){
+    corps += '<h2>Parcelles arrach\u00e9es \u2014 ' + arr.length + '</h2>'
+      + '<table><thead><tr><th>Parcelle</th><th>Commune</th><th class="n">ha</th>'
+      + '<th>C\u00e9page(s)</th><th>Dernier rendement connu</th></tr></thead><tbody>'
+      + arr.map(function(l){
+          return '<tr class="vg-ar"><td>' + _vgnEsc(l.nom) + '</td>'
+            + '<td>' + _vgnEsc(l.commune) + '</td><td class="n">' + _vgnNum(l.ha) + '</td>'
+            + '<td>' + _vgnEsc(l.cepages.join(' \u00b7 ')) + '</td>'
+            + '<td>' + rendCell(l) + '</td></tr>';
+        }).join('')
+      + '</tbody></table>'
+      + '<div class="cd-note">Elles sortent de la surface du domaine et de tous les avancements, '
+      + 'mais leur historique reste : c\u2019est pourquoi elles figurent ici.</div>';
+  }
+
+  corps += '<div class="mvdoc-lim"><b>Ce document pr\u00e9sente ce que vous avez enregistr\u00e9.</b> '
+    + 'C\u2019est un \u00e9tat interne : il ne tient lieu ni de d\u00e9claration de surface, ni de casier '
+    + 'viticole. L\u2019avancement porte sur la p\u00e9riode consult\u00e9e'
+    + (saison ? ' \u2014 <b>' + _vgnEsc(saison) + '</b>' : '')
+    + ' : changez de p\u00e9riode dans la Vigne et le document suivra. '
+    + '<b>Aucune heure ne figure ici</b> : les heures restantes se lisent au Pilotage et dans le '
+    + 'rapport de saison, qui les calculent \u00e0 partir du bar\u00e8me. Les rendements viennent de vos '
+    + 'saisies de vendange, ramen\u00e9es \u00e0 la surface de la parcelle.</div>';
+
+  if(typeof window._mvDocOpen !== 'function'){
+    showToast('Mise \u00e0 jour incompl\u00e8te \u2014 rechargez l\u2019application', '#B85A1A'); return;
+  }
+  window._mvDocOpen({
+    titre: '\u00c9tat du vignoble',
+    orient: 'paysage', cat: 'parcelles', css: MV_VGNDOC_CSS, corps: corps,
+    metas: [act.length + ' parcelle' + (act.length > 1 ? 's' : '') + ' \u00b7 ' + _vgnNum(haRef) + ' ha',
+            saison, '\u00c9dit\u00e9 le ' + new Date().toLocaleDateString('fr-FR')]
+  });
+  showToast('\u{1F5FA} \u00c9tat du vignoble \u00b7 ' + act.length + ' parcelles', '#3D6B27');
+}
+
+window._vgnExportVignoble = function(){ _vgnDoc(); };
+window._vgnLignes         = _vgnLignes;
+window._vgnParCepage      = _vgnParCepage;
+window._vgnDoc            = _vgnDoc;
+
+/* ══════════════════════════════════════════════════════════════════════════
+   HUB DOCUMENTS — le panneau du relevé individuel
+   ══════════════════════════════════════════════════════════════════════════
+   Le relevé individuel demande DEUX choses avant de sortir : qui, et quel
+   mois. Une saisie libre (openPrompt) ne convient pas pour un nom — on ne tape
+   pas « Victor » sans risque de faute de frappe. Il lui faut donc un panneau,
+   comme en ont deja le releve mensuel et le reglage des heures de saison.
+
+   ⚠️ Le panneau est CONSTRUIT EN JS, pas ecrit dans index.html : injection
+   idempotente dans #docs-pane. C'est le patron deja employe par le Cuvier pour
+   ses feuilles — il evite de faire grossir un index.html de 268 ko pour trois
+   champs, et il garde le panneau a cote du code qui le lit.
+
+   ⚠️ Le mois et l'annee proposes sont CEUX DU PLANNING, pas la date du jour :
+   on edite un releve en regardant l'ecran qu'on vient de quitter. Le document,
+   lui, ne deplace jamais le mois du Planning (cf. _planReleveIndiv).
+   ══════════════════════════════════════════════════════════════════════════ */
+
+var MV_DOCS_MOIS = ['Janvier','F\u00e9vrier','Mars','Avril','Mai','Juin',
+                    'Juillet','Ao\u00fbt','Septembre','Octobre','Novembre','D\u00e9cembre'];
+
+function _docsReleveOpen(){
+  var pane = document.getElementById('docs-pane');
+  if(!pane){ if(window.showToast) window.showToast('\u00c9cran indisponible', '#B85A1A'); return; }
+  var mbrs = (typeof window._planReleveMbrs === 'function') ? (window._planReleveMbrs() || []) : [];
+  if(!mbrs.length){
+    if(window.showToast) window.showToast('Aucun salari\u00e9 actif', '#B85A1A');
+    return;
+  }
+  var host = document.getElementById('docs-pane-releve');
+  if(!host){
+    host = document.createElement('div');
+    host.id = 'docs-pane-releve';
+    host.style.display = 'none';
+    pane.appendChild(host);
+  }
+  var mSel = (typeof window._planReleveMois === 'function') ? window._planReleveMois() : 0;
+  var an   = (typeof window._planReleveAn   === 'function') ? window._planReleveAn()   : new Date().getFullYear();
+  host.innerHTML = '<div style="background:var(--phyto-pale);border-radius:14px;padding:14px 16px">'
+    + '<div style="font-size:13px;font-weight:700;color:var(--phyto-med,#7B6DB8);margin-bottom:12px">'
+      + '\u{1F464} Relev\u00e9 individuel d\u2019un salari\u00e9</div>'
+    + '<div class="fl" style="margin-top:0">Salari\u00e9</div>'
+    + '<select class="fi" id="docs-rlv-nom" style="width:100%;margin-bottom:10px">'
+      + mbrs.map(function(m){
+          return '<option value="' + _docsEsc(m.nom) + '">' + _docsEsc(m.nom)
+            + (m.coll ? ' \u2014 \u00e9quipe' : '') + '</option>';
+        }).join('')
+    + '</select>'
+    + '<div class="fl" style="margin-top:0">Mois \u00b7 ' + an + '</div>'
+    + '<select class="fi" id="docs-rlv-mois" style="width:100%;margin-bottom:12px">'
+      + MV_DOCS_MOIS.map(function(nm, i){
+          return '<option value="' + i + '"' + (i === mSel ? ' selected' : '') + '>' + nm + '</option>';
+        }).join('')
+    + '</select>'
+    + '<div style="font-size:10px;color:var(--texte-doux);background:var(--fond-module);border-radius:8px;'
+      + 'padding:6px 10px;margin-bottom:10px;line-height:1.45">'
+      + 'Le mois jour par jour, les contrats et leurs dates, les cong\u00e9s pay\u00e9s, le compteur d\u2019heures '
+      + 'et l\u2019annualisation de l\u2019ann\u00e9e ' + an + '. Deux lignes de signature en bas de page. '
+      + 'L\u2019ann\u00e9e est celle consult\u00e9e au Planning.</div>'
+    + '<button onclick="_docsReleveGo()" style="background:var(--phyto-med,#7B6DB8);color:white;border:none;'
+      + 'border-radius:10px;padding:11px 18px;font-size:13px;font-weight:600;font-family:\'Outfit\',sans-serif;'
+      + 'width:100%;cursor:pointer">\u{1F5A8}\u{FE0F} \u00c9diter le relev\u00e9</button>'
+    + '</div>';
+  _docsPane('docs-pane-releve');
+}
+
+window._docsReleveGo = function(){
+  var n = document.getElementById('docs-rlv-nom');
+  var m = document.getElementById('docs-rlv-mois');
+  if(!n || !m){ if(window.showToast) window.showToast('\u00c9cran indisponible', '#B85A1A'); return; }
+  if(typeof window._planReleveIndiv !== 'function'){
+    if(window.showToast) window.showToast('Mise \u00e0 jour incompl\u00e8te \u2014 rechargez l\u2019application', '#B85A1A');
+    return;
+  }
+  // ⚠️ On relit les DEUX champs dans le DOM au moment du clic — jamais une
+  // valeur memorisee a l'ouverture du panneau (§30i).
+  window._planReleveIndiv(n.value, parseInt(m.value, 10));
+};
+
+window._docsReleveOpen = _docsReleveOpen;
