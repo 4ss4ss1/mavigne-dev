@@ -36,12 +36,31 @@
     <li><b>Ajouter un membre</b> : nom, adresse e-mail (facultative pour un saisonnier), rôles cumulables.</li>
     <li>Le <b>mot de passe initial</b> s'affiche une seule fois : notez-le avant de fermer.</li>
     <li>Modifier l'adresse e-mail d'un membre, réinitialiser son mot de passe, changer ses rôles.</li>
-    <li><b>Taux horaire</b> de chaque salarié, sous forme d’<b>historique daté</b> — administrateurs seulement.
-      Une augmentation s’enregistre « à partir du » jour choisi : les heures déjà travaillées restent valorisées
-      à l’ancien taux, et le coût d’un exercice comptable déjà clos ne bouge plus. Pour corriger une erreur de
-      saisie sans créer d’augmentation, videz la date : la dernière ligne est réécrite sur place.</li>
     <li>Passer un membre en <b>inactif</b> plutôt que le supprimer, pour conserver l'historique.</li>
   </ul>
+
+  <h4>La fiche d'un salarié : un contrat en cours, et un historique</h4>
+  <p>La fiche s'ouvre sur le <b>contrat en cours</b> — type, dates, grille horaire, taux, et s'il est
+  annualisé ou payé à l'heure. En dessous, <b>l'historique</b> : une ligne par changement, la plus
+  récente en haut.</p>
+  <p>Le bouton <b>« Ajouter un événement »</b> ne demande pas une valeur mais <b>ce qui s'est passé</b>.
+  Chaque choix annonce son effet avant que vous validiez :</p>
+  <ul class="dot">
+    <li><b>Embauche</b> — ouvre un contrat. S'il en existait un, il est archivé : il reste lisible, et
+    son relevé PDF reste imprimable.</li>
+    <li><b>Renouvellement</b> — repousse la date de fin <b>sans couper</b>. Un seul contrat, donc un
+    seul compteur d'heures. L'ancienne date reste dans l'historique.</li>
+    <li><b>Fin de contrat</b> — clôt au jour choisi. Le compteur est soldé, donc payé.</li>
+    <li><b>Changement de taux</b> — administrateurs seulement. Une augmentation vaut « à partir du »
+    jour choisi : les heures déjà travaillées gardent l'ancien taux, et le coût d'un exercice déjà clos
+    ne bouge plus. Saisir le même jour qu'une ligne existante la corrige au lieu d'en créer une.</li>
+  </ul>
+  <p>Entre deux contrats, l'historique dessine la <b>coupure</b> : c'est elle qui décide si le compteur
+  repart de zéro. Un contrat qui se termine solde son compteur — il est payé, donc remis à zéro — et le
+  suivant repart de sa date de début, sans dû ni indu. Deux contrats qui se suivent sans un jour
+  d'écart n'en font qu'un.</p>
+  <p>Quand un contrat arrive à terme, un <b>rappel</b> apparaît en tête de la fiche et dans la liste des
+  membres, trente jours avant, avec de quoi renouveler ou acter l'arrêt en un geste.</p>
 
   <h3>🚜 Tracteur</h3>
   <ul class="dot">

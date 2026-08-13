@@ -1,4 +1,76 @@
-// MA VIGNE — Service Worker v6.58
+// MA VIGNE — Service Worker v6.60
+// v6.60 (13/08/2026) — LA FICHE MEMBRE REFONDUE (lot C2 — la saisie).
+//   Sept champs disparates deviennent UN BANDEAU + UN HISTORIQUE : type, debut,
+//   fin, liste des contrats precedents, renouvellement_date, renouvellement_fin,
+//   taux + serie de taux. On lisait des cases, jamais une suite.
+//   ★★★ LA COUPURE EST DESSINEE. Le rail de la frise est PLEIN pendant un
+//   contrat et POINTILLE dans le vide ; le trou porte son propre encart hachure
+//   (« coupure de 23 jours — le compteur du precedent est solde »). C'est ce
+//   trou qui decide si le compteur repart de zero, et il n'etait affiche NULLE
+//   PART : c'est la cause commune des defauts des lots A, B et C1.
+//   ★★ CHAQUE GESTE ANNONCE SON EFFET AVANT VALIDATION, meme patron que
+//   _planAbsEffet (motifs d'absence du Planning). L'encart est CALCULE en
+//   simulant l'ajout sur _mvPeriodes, jamais ecrit en dur : un texte fige
+//   finirait par mentir le jour ou la regle change.
+//   ★ UN EVENEMENT S'ECRIT DES QU'IL EST VALIDE, pas a l'enregistrement de la
+//   fiche : un fait se consigne quand on le consigne, et fermer la fiche ne
+//   perd plus un contrat saisi. Le « × » de chaque ligne fait marche arriere.
+//   ★ LE RAPPEL NE PEUT PLUS SE TAIRE. reglages.js:432 testait
+//   `if(!m.renouvellement_date && fin...)` : remplir le champ FACULTATIF
+//   « date de renouvellement » ETEIGNAIT l'alerte de fin de contrat — annoncer
+//   un renouvellement pour janvier faisait taire l'application sur un CDD qui
+//   se terminait en aout. Source unique desormais : la fin du contrat, toujours
+//   renseignee sur un CDD. Deux boutons dessus (renouveler / acter l'arret).
+//   renouvellement_date et renouvellement_fin sont SUPPRIMES du modele ; le
+//   second n'etait lu nulle part depuis toujours.
+//   ★ LA GRILLE HORAIRE EST PORTEE PAR LE CONTRAT, pas par un evenement a part.
+//   Mesure : _planPlId est affecte HORS BOUCLE dans 26 fonctions, et les
+//   modeles sont deja dates a l'ANNEE (PLANNING_TEMPLATES[annee]) — dater
+//   l'affectation au JOUR aurait melange deux granularites sur le meme calcul.
+//   m.planning_id devient un miroir de plus. Changer de grille = signer.
+//   Supprimes : _emContratsHtml, _emPickType, _paieSerieHtml et le chemin
+//   d'ecriture du contrat livre en 6.59 (le modele, lui, est inchange).
+//
+// v6.59 (13/08/2026) — LE JOURNAL DU SALARIE (lot C1 — modele seul, ecran inchange).
+//   ★★★ QUATRE MEMOIRES PARALLELES. La vie contractuelle d'un salarie vivait a
+//   quatre endroits qui ne se parlaient pas : le couple debut/fin (contrat en
+//   cours), m.contrats[] (les precedents, invisibles des moteurs avant 6.58),
+//   renouvellement_date/_fin (une alerte — et renouvellement_fin n'etait LU
+//   NULLE PART, ecrit ligne 1789 et jamais relu), PAIE.taux_serie (le salaire).
+//   Deux sur quatre etaient datees ET lues.
+//   m.hist[] devient la SOURCE. Trois evenements, tous producteurs :
+//     embauche {d,type,fin?} · renouvellement {d,fin} · fin {d}
+//   ⚠️ LE MODELE RESTE EN DEUX MORCEAUX. `membres` est lisible par toute
+//   l'equipe, `paie` est admin-only (firestore.rules:201-202) : les contrats
+//   vont dans membres, les salaires restent dans paie, fusion A LA LECTURE.
+//   ★ MIGRATION A ZERO ECRITURE. Journal absent -> derive a la lecture depuis
+//   contrats[] + le couple. Rien n'est ecrit tant qu'une fiche n'est pas
+//   enregistree. Un domaine qui n'ouvre aucune fiche calcule comme avant.
+//   ★★ LES ANCIENS CHAMPS DEVIENNENT DES MIROIRS, reecrits par _mvHistMirror()
+//   a l'enregistrement : les ~40 points de lecture (paie, 1607 h, conges, MSA,
+//   Pilotage) n'ont pas bouge d'une ligne. Patron de taux[nom] retrograde en
+//   miroir de taux_serie[nom] (§36).
+//   ⚠️ PROPRIETE CENTRALE, verifiee sur 10 formes de fiche : DERIVER PUIS
+//   REMIROITER EST L'IDENTITE. Sans elle, le premier enregistrement d'une fiche
+//   reecrirait ses dates en silence. Le harnais l'a fait echouer deux fois :
+//   (1) un contrat archive SANS type se voyait inventer un 'CDI' — un
+//   saisonnier serait devenu permanent ; (2) meme chose sur le contrat en cours
+//   d'une fiche ancienne. Un type inconnu reste desormais inconnu.
+//   ★ PROLONGER UN CONTRAT LAISSE UNE TRACE. Repousser fin_contrat sur un
+//   contrat ouvert ecrasait l'ancienne date sans un mot ; c'est maintenant un
+//   evenement `renouvellement`, et le contrat reste UN SEUL contrat (un seul
+//   compteur). Deux gestes distincts comme pour le salaire : prolonger ouvre
+//   une ligne, corriger reecrit la ligne existante.
+//   ★ GARDE ANTI-PERTE. `membres` est un TABLEAU : _mvDocSize renvoyait le
+//   NOMBRE DE FICHES. Vider le journal des huit salaries d'un domaine passait
+//   sans un bruit (8 -> 8) alors qu'il porte les dates qui pilotent la masse
+//   salariale et le compteur des 1607 h. _mvMembresCount compte fiches ET
+//   evenements. Une fiche non migree vaut 1, comme avant.
+//   NON FAIT, VOLONTAIREMENT : la refonte de la SAISIE (liste chronologique +
+//   bouton « + ») attend une maquette — lot C2. Ni renouvellement_fin ranime,
+//   ni grille horaire datee (_planPlId a 48 points d'appel) : un evenement qui
+//   ne pilote rien serait exactement le defaut qu'on vient de retirer.
+//
 // v6.58 (13/08/2026) — LE CONTRAT ARCHIVE NE PESAIT PLUS RIEN (lots A + B).
 //   ★★★ LE TROU. §33 avait ajoute m.contrats[] pour ne plus perdre le passe
 //   d'un salarie reembauche. La fiche le retrouvait, l'effectif le comptait —
@@ -1165,7 +1237,7 @@
 // v2.22 — Fix profils vides : guard vide dans loadData() pour MEMBRES/SAISONS/TACHES
 // v2.17 — Onboarding intégré + tenantId · v2.06 — Firebase Auth · v2.00–v2.05 — divers
 const DEBUG = self.location.hostname === 'localhost' || self.location.hostname === '127.0.0.1';
-const CACHE_NAME   = 'mavigne-v6.58';
+const CACHE_NAME   = 'mavigne-v6.60';
 const TENANT_CACHE = 'mavigne-tenant';   // Cache persistant — préservé à chaque mise à jour SW
 const SYNC_TAG     = 'mavigne-sync';
 
@@ -1181,7 +1253,7 @@ const CDN_URLS = [
 ];
 
 self.addEventListener('install', event => {
-  if(DEBUG) console.log('[SW] Ma Vigne v6.58 installé');
+  if(DEBUG) console.log('[SW] Ma Vigne v6.60 installé');
   event.waitUntil(
     caches.open(CACHE_NAME).then(async cache => {
       // ── Cœur applicatif : STRICT (mise à jour ATOMIQUE) ──
@@ -1197,7 +1269,7 @@ self.addEventListener('install', event => {
 });
 
 self.addEventListener('activate', event => {
-  if(DEBUG) console.log('[SW] Ma Vigne v6.58 activé');
+  if(DEBUG) console.log('[SW] Ma Vigne v6.60 activé');
   event.waitUntil(
     caches.keys().then(keys =>
       Promise.all(
