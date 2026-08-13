@@ -4863,20 +4863,17 @@ var _MAT_CAMP_J  = 150;    // au-dela, c'est la vendange precedente
 
 var _MV_CEP_COUL = {
   'pinot noir':'r','gamay':'r','cesar':'r','pinot meunier':'r','merlot':'r','syrah':'r',
-  'cabernet sauvignon':'r','cabernet franc':'r','grenache':'r','grenache noir':'r',
-  'malbec':'r','cot':'r','mourvedre':'r','carignan':'r','cinsault':'r','tannat':'r',
-  'petit verdot':'r','carmenere':'r','negrette':'r','grolleau':'r',"pineau d'aunis":'r',
-  'mondeuse':'r','poulsard':'r','trousseau':'r','nebbiolo':'r','sangiovese':'r','tempranillo':'r',
+  'cabernet sauvignon':'r','cabernet franc':'r','grenache':'r','malbec':'r','cot':'r',
+  'mourvedre':'r','carignan':'r','cinsault':'r','tannat':'r','petit verdot':'r',
+  'poulsard':'r','trousseau':'r','nebbiolo':'r','sangiovese':'r','tempranillo':'r',
   'chardonnay':'b','aligote':'b','pinot blanc':'b','pinot gris':'b','melon de bourgogne':'b',
-  'sacy':'b','sauvignon':'b','sauvignon blanc':'b','sauvignon gris':'b','semillon':'b',
-  'muscadelle':'b','viognier':'b','grenache blanc':'b','clairette':'b','bourboulenc':'b',
-  'vermentino':'b','folle blanche':'b','chenin':'b','riesling':'b','savagnin':'b',
-  'gewurztraminer':'b','marsanne':'b','roussanne':'b','ugni blanc':'b','colombard':'b',
-  'muscat':'b','sylvaner':'b'
+  'sauvignon':'b','sauvignon blanc':'b','semillon':'b','muscadelle':'b','viognier':'b',
+  'chenin':'b','riesling':'b','savagnin':'b','gewurztraminer':'b','marsanne':'b',
+  'roussanne':'b','ugni blanc':'b','colombard':'b','muscat':'b','sylvaner':'b'
 };
 
 function _matNorm(s){
-  var t = String(s || '').trim().toLowerCase().replace(/\u2019/g, "'");
+  var t = String(s || '').trim().toLowerCase();
   return t.normalize ? t.normalize('NFD').replace(/[\u0300-\u036f]/g, '') : t;
 }
 // Couleur d'une parcelle. Le cepage tranche ; un choix manuel prime.
@@ -4911,14 +4908,24 @@ function _matJours(d, tj){ return Math.round((tj - Date.parse(d)) / 86400000); }
 
 // Le calcul. Rien n'est invente : une parcelle sans mesure n'a pas de valeur,
 // une mesure trop vieille sort de la moyenne mais reste affichee.
-function _matSynth(fen){
+//
+// ★ `refIso` n'existe QUE pour le document imprime : il rejoue la synthese a
+// une date passee. Sans lui, rien ne change — l'ecran appelle _matSynth(_matFen)
+// et lit aujourd'hui, exactement comme avant ce lot. Avec lui, il faut aussi
+// borner PAR LE HAUT : _matJours rend un ecart NEGATIF pour une mesure
+// posterieure a la reference, donc le filtre des 150 jours la laisse passer.
+// Un releve de la vendange suivante se serait invite dans le document de
+// l'annee precedente — un seul moteur, mais deux bornes.
+function _matSynth(fen, refIso){
   var o = { frais:[], vieilles:[], jamais:[], rentrees:[], nonClass:[], tiles:{} };
-  var tj = Date.parse(new Date().toISOString().slice(0, 10));
+  var ref = refIso || new Date().toISOString().slice(0, 10);
+  var tj = Date.parse(ref);
 
   var byP = {};
   (CAVE_VENDANGE.analyses || []).forEach(function(a){
     if(!a || !a.parcelle || !a.date) return;
     if(_matJours(a.date, tj) > _MAT_CAMP_J) return;   // vendange precedente
+    if(refIso && a.date > ref) return;                // vendange suivante
     (byP[a.parcelle] = byP[a.parcelle] || []).push(a);
   });
   // Une recolte de l'an dernier ne sort pas la parcelle de cette campagne.
@@ -4926,6 +4933,7 @@ function _matSynth(fen){
   (CAVE_VENDANGE.recoltes || []).forEach(function(r){
     if(!r || !r.parcelle || !r.date) return;
     if(_matJours(r.date, tj) > _MAT_CAMP_J) return;
+    if(refIso && r.date > ref) return;
     if(!rec[r.parcelle] || r.date > rec[r.parcelle]) rec[r.parcelle] = r.date;
   });
 
@@ -7440,3 +7448,412 @@ window._bcExport       = _bcExport;
 window._bcCampagnes    = _bcCampagnes;
 window._bcData         = _bcData;
 window._bcDoc          = _bcDoc;
+
+/* ══════════════════════════════════════════════════════════════════════════
+   MA VIGNE — LES DEUX DOCUMENTS DU CUVIER
+   ══════════════════════════════════════════════════════════════════════════
+   Le Cuvier saisissait deux choses que rien ne savait imprimer :
+     · le CONTROLE DE MATURITE  (CAVE_VENDANGE.analyses)        — avant la vendange
+     · les MESURES DE FERMENTATION (cuves_vinif[].mesures_fa)   — pendant
+
+   Ce n'est pas un oubli du registre des manipulations : il les ecarte
+   VOLONTAIREMENT (voir son en-tete — « densite, analyses n'en font pas partie :
+   l'inclure noierait le document sous des dizaines de lignes »). Un controle
+   regarde l'enrichissement et le sulfitage ; le vigneron, lui, a besoin de ses
+   courbes. Deux publics, deux documents.
+
+   ⚠️ AUCUN CALCUL NEUF ICI. Tout vient des moteurs deja a l'ecran :
+     _matSynth   moyennes ponderees par surface, fraicheur, parcelles rentrees
+     _matClasse  derniere valeur + vitesse, dans l'ordre de maturite
+     _matSuc / _anaSpd     conversion sucre <-> degre, coefficient FIGE a la saisie
+     _vendD20 / _vendSucre / _vendFaPct   densite corrigee, sucre restant, avancement
+     _rmDetail   le detail lisible d'une operation de cuve
+   Deux definitions du meme chiffre finissent toujours par diverger : le
+   document LIT l'ecran, il ne le refait pas.
+
+   ⚠️ Ces documents ne touchent AUCUN etat d'ecran. En particulier ils ne
+   changent pas `_matUn` (l'unite d'affichage du Cuvier) : ils calculent la
+   leur, localement, et la laissent la.
+   ══════════════════════════════════════════════════════════════════════════ */
+
+var MV_CUVDOC_CSS = ''
+  + '.cd-kpis{display:flex;gap:16px;flex-wrap:wrap;background:#FAF6EC;border:1px solid #E8DCC0;'
+    + 'border-radius:7px;padding:9px 13px;margin-bottom:13px}'
+  + '.cd-k{min-width:96px}'
+  + '.cd-k b{display:block;font-size:8px;text-transform:uppercase;letter-spacing:.6px;color:#8B6020;margin-bottom:2px}'
+  + '.cd-k span{font-family:\'Cormorant Garamond\',Georgia,serif;font-size:20px;font-weight:700;color:#2D1B09;line-height:1.05}'
+  + '.cd-k span small{font-family:\'Outfit\',sans-serif;font-size:9px;font-weight:600;color:#7A6A4A}'
+  + '.cd-k i{display:block;font-style:normal;font-size:8px;color:#7A7263;margin-top:2px;line-height:1.4}'
+  + 'h2{font-size:11px;color:#2D1B09;margin:15px 0 6px;text-transform:uppercase;letter-spacing:.9px}'
+  + 'h3{font-size:12.5px;color:#2D1B09;margin:0 0 3px;font-family:\'Cormorant Garamond\',Georgia,serif;font-weight:700}'
+  + 'table{width:100%;border-collapse:collapse;font-size:9.5px;margin-bottom:4px}'
+  + 'th{text-align:left;padding:5px 6px;background:#2D1B09;color:#F3E7CE;font-size:8px;'
+    + 'text-transform:uppercase;letter-spacing:.4px;font-weight:700}'
+  + 'td{border-bottom:1px solid #EDE7DA;padding:4px 6px;vertical-align:top}'
+  + 'td.n,th.n{text-align:right;white-space:nowrap}'
+  + 'tr:nth-child(even) td{background:#FBFAF6}'
+  + 'tr.tot td{background:#F4EEE2;font-weight:700;border-top:1.5px solid #C8A060;border-bottom:none}'
+  + '.cd-conv{font-style:italic;color:#7A6A4A}'
+  + '.cd-note{font-size:8.5px;color:#7A7263;margin:2px 0 11px;line-height:1.5}'
+  + '.cd-vide{font-size:9.5px;color:#7A7263;margin:0 0 11px}'
+  + '.cd-cuve{margin-bottom:16px;padding-bottom:4px;border-top:1.5px solid #C8A060;padding-top:9px}'
+  + '.cd-idr{display:flex;flex-wrap:wrap;gap:5px 14px;margin:0 0 7px}'
+  + '.cd-idr em{font-style:normal;font-size:9px;color:#7A7263}'
+  + '.cd-idr em b{font-weight:700;color:#2D1B09}'
+  + '.cd-tag{display:inline-block;font-size:8px;font-weight:700;letter-spacing:.4px;text-transform:uppercase;'
+    + 'padding:1.5px 6px;border-radius:9px;background:#F0E6D2;color:#7B4A1A;margin-left:6px}';
+
+/* ── Le controle de maturite ───────────────────────────────────────────────
+   Une matrice : une ligne par parcelle, une colonne par jour de releve. C'est
+   la forme que le papier sait faire mieux que l'ecran — la courbe compare deux
+   parcelles, le tableau les compare toutes. */
+
+/* Les annees ou l'on a mesure quelque chose, la plus recente d'abord. */
+function _matAnnees(){
+  var s = {};
+  (CAVE_VENDANGE.analyses || []).forEach(function(a){
+    if(a && a.date && String(a.date).length >= 4) s[String(a.date).slice(0, 4)] = 1;
+  });
+  return Object.keys(s).sort().reverse();
+}
+
+/* La date a laquelle le document se place. L'annee en cours se lit AUJOURD'HUI,
+   comme l'ecran. Une annee passee se lit a son DERNIER releve : sinon la
+   fenetre de fraicheur de sept jours ne contiendrait plus rien et les trois
+   moyennes sortiraient vides d'un document pourtant plein de mesures. */
+function _matRefIso(an){
+  var today = new Date().toISOString().slice(0, 10);
+  if(String(an) === today.slice(0, 4)) return today;
+  var last = '';
+  (CAVE_VENDANGE.analyses || []).forEach(function(a){
+    if(a && a.date && String(a.date).slice(0, 4) === String(an) && a.date > last) last = a.date;
+  });
+  return last || (an + '-12-31');
+}
+
+/* Formatage seul — le calcul vit en sucre, l'affichage suit l'unite de saisie
+   majoritaire. Un domaine qui lit son degre au refractometre ne doit pas
+   trouver un chiffre en g/L en gros : personne ne l'a mesure. */
+function _matDocVal(suc, spd, un){ return un === 'a' ? _mvF1(suc / spd) : String(Math.round(suc)); }
+function _matDocAlt(suc, spd, un){ return un === 'a' ? (Math.round(suc) + ' g/L') : ('~' + _mvF1(suc / spd) + ' %vol'); }
+function _matDocUn(un){ return un === 'a' ? '%vol' : 'g/L'; }
+
+function _matDoc(an){
+  var spd = (_vendCfg().sucre_par_degre) || 16.83;
+  var ref = _matRefIso(an);
+  var tj  = Date.parse(ref);
+  var S;
+  try{ S = _matSynth(_matFen, ref); }
+  catch(err){
+    if(window.logError) window.logError({ level:'error', cat:'cave', msg:'controle de maturite' });
+    showToast('Document impossible à produire', '#C0392B'); return;
+  }
+
+  /* Le meme filtre que la synthese, au caractere pres : ce qui est dans le
+     tableau est ce qui est dans les moyennes. */
+  var byP = {}, jours = {}, nAlc = 0, nTot = 0;
+  (CAVE_VENDANGE.analyses || []).forEach(function(a){
+    if(!a || !a.parcelle || !a.date) return;
+    if(a.date > ref) return;
+    if(_matJours(a.date, tj) > _MAT_CAMP_J) return;
+    (byP[a.parcelle] = byP[a.parcelle] || []).push(a);
+    jours[a.date] = 1; nTot++; if(a.mode === 'alc') nAlc++;
+  });
+  if(!nTot){ showToast('Aucun relevé de maturité sur ' + an, '#B85A1A'); return; }
+
+  var un    = (nAlc > nTot / 2) ? 'a' : 's';
+  var toutes = Object.keys(jours).sort();
+  var cols   = toutes.length > 8 ? toutes.slice(-8) : toutes;
+  var caches = toutes.length - cols.length;
+  var rangs  = _matClasse(byP, spd);
+
+  /* Rentrees : la synthese sait deja lesquelles, et depuis quand. */
+  var rentree = {};
+  (S.rentrees || []).forEach(function(e){ rentree[e.nom] = e.rentree; });
+
+  function tuile(lab, b){
+    if(!b || !b.n) return '<div class="cd-k"><b>' + lab + '</b><span>—</span>'
+      + '<i>aucune mesure dans la fenêtre</i></div>';
+    return '<div class="cd-k"><b>' + lab + '</b>'
+      + '<span>' + _matDocVal(b.pond, spd, un) + ' <small>' + _matDocUn(un) + '</small></span>'
+      + '<i>' + _matDocAlt(b.pond, spd, un) + '<br>' + b.n + ' parcelle' + (b.n > 1 ? 's' : '')
+      + ' sur ' + b.nTot + ' · ' + _mvF1(b.ha || 0) + ' ha (' + b.pct + ' %)</i></div>';
+  }
+
+  var nConv = 0;
+  function cell(arr, d){
+    var v = null;
+    for(var i = 0; i < arr.length; i++) if(arr[i].date === d) v = arr[i];
+    if(!v) return '<td class="n">·</td>';
+    var suc  = _matSuc(v, spd);
+    var conv = (un === 'a') !== (v.mode === 'alc');
+    if(conv) nConv++;
+    return '<td class="n' + (conv ? ' cd-conv' : '') + '">' + _matDocVal(suc, spd, un) + '</td>';
+  }
+
+  var lignes = rangs.map(function(r){
+    var ha  = _vendParcSurf(r.nom);
+    var c   = _parcCoul(r.nom);
+    var age = _matJours(r.date, tj);
+    var etat = rentree[r.nom]
+      ? ('Rentrée le ' + _vendFrDate(rentree[r.nom]))
+      : (age <= _matFen ? 'À jour' : ('Relevé il y a ' + age + ' j'));
+    var vit = (r.vit == null) ? '—'
+      : ((r.vit >= 0 ? '+' : '−') + _mvF1(Math.abs(un === 'a' ? r.vit / spd : r.vit)));
+    return '<tr><td>' + _escHtml(r.nom) + '</td>'
+      + '<td>' + (c === 'r' ? 'Rouge' : c === 'b' ? 'Blanc' : '—') + '</td>'
+      + '<td class="n">' + _mvF1(ha) + '</td>'
+      + cols.map(function(d){ return cell(r.arr, d); }).join('')
+      + '<td class="n">' + _matDocVal(r.suc, spd, un) + '</td>'
+      + '<td class="n">' + vit + '</td>'
+      + '<td>' + etat + '</td></tr>';
+  }).join('');
+
+  var tete = '<tr><th>Parcelle</th><th>Couleur</th><th class="n">ha</th>'
+    + cols.map(function(d){ return '<th class="n">' + _vendFrDate(d) + '</th>'; }).join('')
+    + '<th class="n">Dernier</th><th class="n">Vitesse</th><th>État</th></tr>';
+
+  var corps = '<div class="cd-kpis">'
+    + tuile('Domaine', S.tiles.dom) + tuile('Rouges', S.tiles.rge) + tuile('Blancs', S.tiles.bl)
+    + '</div>'
+    + '<h2>Ordre de maturité — ' + rangs.length + ' parcelle' + (rangs.length > 1 ? 's' : '')
+    + ' suivie' + (rangs.length > 1 ? 's' : '') + '</h2>'
+    + '<table><thead>' + tete + '</thead><tbody>' + lignes + '</tbody></table>'
+    + '<div class="cd-note">Valeurs en ' + _matDocUn(un) + '. La vitesse est calculée sur les deux '
+    + 'derniers relevés de la parcelle, en ' + _matDocUn(un) + ' par jour. Un point signifie : pas de '
+    + 'relevé ce jour-là.'
+    + (nConv ? ' Les ' + nConv + ' valeur' + (nConv > 1 ? 's' : '') + ' en italique '
+        + (nConv > 1 ? 'ont' : 'a') + ' été saisie' + (nConv > 1 ? 's' : '')
+        + ' dans l’autre unité puis convertie' + (nConv > 1 ? 's' : '') + '.' : '')
+    + (caches ? ' Les ' + caches + ' premier' + (caches > 1 ? 's' : '') + ' jour'
+        + (caches > 1 ? 's' : '') + ' de relevé ne tiennent pas dans le tableau : seuls les huit '
+        + 'derniers sont affichés.' : '')
+    + '</div>';
+
+  if(S.jamais && S.jamais.length){
+    corps += '<h2>Sans aucun relevé — ' + S.jamais.length + ' parcelle'
+      + (S.jamais.length > 1 ? 's' : '') + '</h2>'
+      + '<div class="cd-vide">' + S.jamais.map(function(e){
+          return _escHtml(e.nom) + ' <span style="color:#9A9080">(' + _mvF1(e.ha) + ' ha)</span>';
+        }).join(' · ') + '</div>';
+  }
+  if(S.nonClass && S.nonClass.length){
+    corps += '<div class="cd-note"><b>' + S.nonClass.length + ' parcelle'
+      + (S.nonClass.length > 1 ? 's ne sont pas classées' : ' n’est pas classée')
+      + ' en rouge ou blanc</b> — cépage non renseigné, ou deux couleurs complantées : '
+      + S.nonClass.map(function(e){ return _escHtml(e.nom); }).join(', ')
+      + '. Elles comptent dans la moyenne du domaine, jamais dans celle d’une couleur.</div>';
+  }
+
+  corps += '<div class="mvdoc-lim"><b>Ce document présente vos propres mesures.</b> '
+    + 'C’est un état interne : il ne tient lieu d’aucune déclaration. '
+    + 'Les trois moyennes sont <b>pondérées par la surface</b> et ne retiennent que les relevés '
+    + 'des ' + _matFen + ' derniers jours au ' + _vendFrDate(ref) + ' — une parcelle mesurée avant '
+    + 'reste dans le tableau, pas dans la moyenne. Le pourcentage dit quelle part de la surface '
+    + 'encore sur pied est couverte par ces relevés. La conversion sucre ↔ degré utilise le '
+    + 'coefficient <b>figé au moment de chaque saisie</b> (réglage actuel : ' + _mvF1(spd)
+    + ' g/L par degré) : changer ce réglage ne réécrit pas le passé.</div>';
+
+  if(typeof window._mvDocOpen !== 'function'){
+    showToast('Mise à jour incomplète — rechargez l’application', '#B85A1A'); return;
+  }
+  var d1 = toutes[0], d2 = toutes[toutes.length - 1];
+  window._mvDocOpen({
+    titre: 'Contrôle de maturité ' + an,
+    orient: 'paysage', cat: 'cave', css: MV_CUVDOC_CSS, corps: corps,
+    metas: [nTot + ' relevé' + (nTot > 1 ? 's' : '') + ' sur ' + rangs.length + ' parcelle'
+              + (rangs.length > 1 ? 's' : ''),
+            'du ' + _vendFrDate(d1) + ' au ' + _vendFrDate(d2),
+            'Édité le ' + new Date().toLocaleDateString('fr-FR')]
+  });
+  showToast('\u{1F347} Contrôle de maturité ' + an, '#3D6B27');
+}
+
+/* Ne jamais poser une question dont la reponse est unique. */
+window._matExportChoix = function(){
+  var ans = _matAnnees();
+  if(!ans.length){ showToast('Aucun relevé de maturité enregistré', '#B85A1A'); return; }
+  if(ans.length === 1 || typeof window.openPrompt !== 'function'){ _matDoc(ans[0]); return; }
+  window.openPrompt({
+    titre:'Quelle année ?', unite:'', icone:'\u{1F347}', type:'nombre',
+    sub:'Le contrôle de maturité se lit vendange par vendange. Disponibles : ' + ans.join(', ') + '.',
+    valeur:String(ans[0]), placeholder:String(ans[0]), btnLabel:'Éditer le relevé',
+    cb:function(v){
+      var n = String(parseInt(String(v).replace(/\D/g, ''), 10));
+      if(ans.indexOf(n) < 0){ showToast('Aucun relevé sur ' + n, '#B85A1A'); return; }
+      _matDoc(n);
+    }
+  });
+};
+
+/* ── Le cahier de cuverie ──────────────────────────────────────────────────
+   Une page par cuve : ce qui y est entre, la cinetique jour par jour, les
+   operations, et ou le vin est parti. C'est le cahier qu'on tenait au mur du
+   cuvier, et qu'on recopiait le soir. */
+
+/* L'annee d'une cuve. La date d'entree fait foi ; a defaut on prend le premier
+   releve, puis le decuvage — une cuve sans aucune date ne se rattache a rien
+   et ne doit pas atterrir dans l'annee courante par defaut. */
+function _cuvAn(c){
+  if(!c) return '';
+  if(c.date_entree) return String(c.date_entree).slice(0, 4);
+  var m = (c.mesures_fa || [])[0];
+  if(m && m.date) return String(m.date).slice(0, 4);
+  if(c.decuvage && c.decuvage.date) return String(c.decuvage.date).slice(0, 4);
+  return '';
+}
+function _cuvAnnees(){
+  var s = {};
+  (CAVE_VENDANGE.cuves_vinif || []).forEach(function(c){ var a = _cuvAn(c); if(a) s[a] = 1; });
+  return Object.keys(s).sort().reverse();
+}
+function _cuvErLbl(k){
+  return k === 'total' ? 'Éraflage total' : k === 'partiel' ? 'Éraflage partiel' : 'Vendange entière';
+}
+function _cuvJours(a, b){
+  if(!a || !b) return null;
+  var d = Math.round((Date.parse(b) - Date.parse(a)) / 86400000);
+  return isFinite(d) ? d : null;
+}
+
+function _cuvDoc(an){
+  var cuves = (CAVE_VENDANGE.cuves_vinif || []).filter(function(c){ return _cuvAn(c) === String(an); })
+    .sort(function(a, b){ return String(a.date_entree || '') < String(b.date_entree || '') ? -1 : 1; });
+  if(!cuves.length){ showToast('Aucune cuve sur ' + an, '#B85A1A'); return; }
+
+  var totVol = 0, totMes = 0, totSuc = 0, totRem = 0, totPig = 0;
+  var sections = cuves.map(function(c){
+    var mes = (c.mesures_fa || []).slice().sort(function(a, b){ return String(a.date) < String(b.date) ? -1 : 1; });
+    var ops = (c.operations || []).slice().sort(function(a, b){ return String(a.date) < String(b.date) ? -1 : 1; });
+    totVol += (c.volume_hl || 0);
+    totMes += mes.length;
+    ops.forEach(function(o){ if(o.type === 'chaptalisation' && o.kg_sucre) totSuc += o.kg_sucre; });
+
+    var rem = 0, pig = 0;
+    var rows = mes.map(function(m){
+      rem += (m.remontages || 0); pig += (m.pigeages || 0);
+      var d20 = _vendMesD20(m);
+      return '<tr><td>' + _vendFrDate(m.date) + '</td>'
+        + '<td class="n">' + (m.densite != null ? Math.round(m.densite) : '—') + '</td>'
+        + '<td class="n">' + (d20 != null ? Math.round(d20) : '—') + '</td>'
+        + '<td class="n">' + (m.temp_c != null ? _mvF1(m.temp_c) : '—') + '</td>'
+        + '<td class="n">' + (d20 != null ? Math.round(_vendSucre(d20)) : '—') + '</td>'
+        + '<td class="n">' + (d20 != null ? _vendFaPct(d20) + ' %' : '—') + '</td>'
+        + '<td class="n">' + (m.remontages || 0) + '</td>'
+        + '<td class="n">' + (m.pigeages || 0) + '</td>'
+        + '<td>' + _escHtml(m.note || '') + '</td></tr>';
+    }).join('');
+    totRem += rem; totPig += pig;
+
+    var fin  = (c.decuvage && c.decuvage.date) || (mes.length ? mes[mes.length - 1].date : null);
+    var nj   = _cuvJours(c.date_entree, fin);
+    var dDeb = mes.length ? _vendMesD20(mes[0]) : null;
+    var dFin = mes.length ? _vendMesD20(mes[mes.length - 1]) : null;
+
+    var tbl = mes.length
+      ? ('<table><thead><tr><th>Date</th><th class="n">Densité</th><th class="n">à 20 °C</th>'
+          + '<th class="n">T °C</th><th class="n">Sucre g/L</th><th class="n">Avanc.</th>'
+          + '<th class="n">Rem.</th><th class="n">Pig.</th><th>Note</th></tr></thead><tbody>'
+          + rows
+          + '<tr class="tot"><td>' + mes.length + ' relevé' + (mes.length > 1 ? 's' : '') + '</td>'
+          + '<td class="n">' + (dDeb != null ? Math.round(dDeb) : '—') + '</td>'
+          + '<td class="n">' + (dFin != null ? Math.round(dFin) : '—') + '</td>'
+          + '<td colspan="3"></td>'
+          + '<td class="n">' + rem + '</td><td class="n">' + pig + '</td><td></td></tr>'
+          + '</tbody></table>')
+      : '<div class="cd-vide">Aucun relevé de fermentation sur cette cuve.</div>';
+
+    var tops = ops.length
+      ? ('<table><thead><tr><th>Date</th><th>Opération</th><th>Détail</th><th>Note</th></tr></thead><tbody>'
+          + ops.map(function(o){
+              return '<tr><td>' + _vendFrDate(o.date) + '</td>'
+                + '<td>' + _escHtml(_vendOpLbl(o.type)) + '</td>'
+                + '<td>' + _escHtml(_rmDetail(o) || '—') + '</td>'
+                + '<td>' + _escHtml(o.note || '') + '</td></tr>';
+            }).join('')
+          + '</tbody></table>')
+      : '';
+
+    var parc = (c.parcelles || []);
+    var haP  = parc.reduce(function(s, n){ return s + _vendParcSurf(n); }, 0);
+    var id = [];
+    if(c.date_entree) id.push('<em>Entrée le <b>' + _vendFrDate(c.date_entree) + '</b></em>');
+    if(c.volume_hl)   id.push('<em>Volume <b>' + _mvF1(c.volume_hl) + ' hL</b></em>');
+    if(parc.length)   id.push('<em>' + parc.length + ' parcelle' + (parc.length > 1 ? 's' : '')
+                        + ' <b>' + _escHtml(parc.join(', ')) + '</b>'
+                        + (haP > 0 ? ' (' + _mvF1(haP) + ' ha)' : '') + '</em>');
+    if(c.nb_caisses)  id.push('<em>Apport <b>' + c.nb_caisses + ' caisses</b></em>');
+    id.push('<em><b>' + _cuvErLbl(c.erasflage) + '</b></em>');
+    id.push('<em>Levures <b>' + (c.levures === 'selectionnees' ? 'sélectionnées' : 'indigènes') + '</b></em>');
+    if(c.so2_g_hl)    id.push('<em>SO₂ à l’encuvage <b>' + _mvF1(c.so2_g_hl) + ' g/hL</b></em>');
+    if(c.mpf && c.mpf.active) id.push('<em>Macération préfermentaire <b>' + _mvF1(c.mpf.temp_c || 0)
+                        + ' °C · ' + (c.mpf.duree_j || 0) + ' j</b></em>');
+    if(nj != null)    id.push('<em>Cuvaison <b>' + nj + ' jour' + (nj > 1 ? 's' : '') + '</b></em>');
+
+    var pied = '';
+    if(c.decuvage && c.decuvage.date){
+      var cu = (CAVE_ELEVAGE.cuvees || []).filter(function(x){ return x.id === c.decuvage.cuvee_id; })[0];
+      pied = '<div class="cd-note"><b>Décuvée le ' + _vendFrDate(c.decuvage.date) + '</b>'
+        + (cu ? ' → passée au Chai sous le nom « ' + _escHtml(cu.nom) + ' » (millésime '
+            + _escHtml(String(cu.millesime || an)) + ')' : '') + '.</div>';
+    }
+
+    return '<div class="cd-cuve mvdoc-avoid"><h3>' + _escHtml(c.nom || 'Cuve')
+      + '<span class="cd-tag">' + _escHtml(_vendStatLbl(c.statut)) + '</span></h3>'
+      + '<div class="cd-idr">' + id.join('') + '</div>'
+      + tbl + (tops ? ('<h2 style="margin-top:9px">Opérations</h2>' + tops) : '') + pied + '</div>';
+  }).join('');
+
+  var enCours = cuves.filter(function(c){ return c.statut !== 'termine'; }).length;
+  var corps = '<div class="cd-kpis">'
+    + '<div class="cd-k"><b>Cuves</b><span>' + cuves.length + '</span><i>' + enCours
+      + ' encore en cuve</i></div>'
+    + '<div class="cd-k"><b>Volume</b><span>' + _mvF1(totVol) + ' <small>hL</small></span>'
+      + '<i>à l’encuvage, saignées déduites</i></div>'
+    + '<div class="cd-k"><b>Relevés</b><span>' + totMes + '</span><i>' + totRem + ' remontages · '
+      + totPig + ' pigeages</i></div>'
+    + '<div class="cd-k"><b>Sucre ajouté</b><span>' + _mvF1(totSuc) + ' <small>kg</small></span>'
+      + '<i>toutes cuves confondues</i></div>'
+    + '</div>'
+    + sections
+    + '<div class="mvdoc-lim"><b>Ce document présente vos propres relevés.</b> '
+    + 'C’est un état interne : il ne tient lieu d’aucune déclaration, et il ne remplace pas le '
+    + 'registre des manipulations, qui reste le document du contrôle. '
+    + 'La <b>densité à 20 °C</b> est votre densité corrigée par la température saisie — sans '
+    + 'température, la valeur brute est reprise telle quelle. Le <b>sucre restant</b> et '
+    + 'l’<b>avancement</b> sont estimés à partir de cette densité : ce sont des ordres de '
+    + 'grandeur, jamais une analyse de laboratoire.</div>';
+
+  if(typeof window._mvDocOpen !== 'function'){
+    showToast('Mise à jour incomplète — rechargez l’application', '#B85A1A'); return;
+  }
+  window._mvDocOpen({
+    titre: 'Cahier de cuverie ' + an,
+    orient: 'portrait', cat: 'cave', css: MV_CUVDOC_CSS, corps: corps,
+    metas: [cuves.length + ' cuve' + (cuves.length > 1 ? 's' : ''),
+            totMes + ' relevé' + (totMes > 1 ? 's' : '') + ' de fermentation',
+            'Édité le ' + new Date().toLocaleDateString('fr-FR')]
+  });
+  showToast('\u{1FAA3} Cahier de cuverie ' + an, '#3D6B27');
+}
+
+window._cuvExportChoix = function(){
+  var ans = _cuvAnnees();
+  if(!ans.length){ showToast('Aucune cuve de vinification enregistrée', '#B85A1A'); return; }
+  if(ans.length === 1 || typeof window.openPrompt !== 'function'){ _cuvDoc(ans[0]); return; }
+  window.openPrompt({
+    titre:'Quelle vendange ?', unite:'', icone:'\u{1FAA3}', type:'nombre',
+    sub:'Une cuve appartient à l’année où elle est entrée. Disponibles : ' + ans.join(', ') + '.',
+    valeur:String(ans[0]), placeholder:String(ans[0]), btnLabel:'Éditer le cahier',
+    cb:function(v){
+      var n = String(parseInt(String(v).replace(/\D/g, ''), 10));
+      if(ans.indexOf(n) < 0){ showToast('Aucune cuve sur ' + n, '#B85A1A'); return; }
+      _cuvDoc(n);
+    }
+  });
+};
+
+window._matDoc     = _matDoc;
+window._matAnnees  = _matAnnees;
+window._cuvDoc     = _cuvDoc;
+window._cuvAnnees  = _cuvAnnees;
