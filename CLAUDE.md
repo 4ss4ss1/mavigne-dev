@@ -1497,6 +1497,36 @@ commune — l'étiquette reste juste, seul le repère de secteur manque.
   06/08** — changement repéré au changelog, **non documenté ici**.
 - ⚠️ **Vérifier `trial_until` avant toute promesse commerciale.**
 
+### ★★★ L’ESSAI EST BORNÉ (14/08 — §40)
+
+**15 jours, reconductibles UNE FOIS, puis lecture seule.** Trois nombres, deux fichiers :
+
+| | `functions/claims.js` | `src/admin-gt.js` |
+|---|---|---|
+| durée | `TRIAL_DAYS = 15` | `_FC_TRIAL_DAYS = 15` |
+| borne | `TRIAL_MAX_RENEW = 1` | `_FC_TRIAL_MAX = 1` |
+| alerte | `TRIAL_WARN_D = 3` | seuil `d<=3` dans `_mvTrialBanner()` (`app.js`) |
+
+⚠️ **Ces nombres sont DUPLIQUÉS et c'est assumé** : l’un affiche, l’autre fait respecter. Si l'un
+bouge sans l'autre, **l'écran promet ce que le serveur refuse**. `harnais-reconduction.mjs` et
+`harnais-bandeau-essai.mjs` comparent les fichiers entre eux et rougissent.
+
+**Qui fait foi, et qui n'est qu'une copie.** Ce qui gèle le client, c'est le claim `trial_until`,
+posé sur chaque membre. `_guerettech/tenants.clients[slug].trialExp` en est la **copie** — celle que
+`trialWatch` lit, parce qu'elle ne peut pas parcourir les jetons de tous les membres de tous les
+domaines chaque nuit. Les deux s'écrivent dans le même geste (`_fcSaveAbo`, `agtInsTrialGo`,
+`gtRenewTrial`). **Si un jour l'un part sans l'autre, la veille se trompera de date en silence.**
+
+**⚠️ LA LECTURE SEULE EST CÔTÉ NAVIGATEUR.** `_mvCheckExpired()` pose `window._MV_LOCKED`,
+`saveData()` refuse en tête (`app.js:703`). **Aucune règle de `firestore.rules` ne lit
+`trial_until`** — la base accepte toujours les écritures d'un domaine expiré. (Le mot « trial » y
+apparaît deux fois, dans des commentaires sur `checkTrialToken` : mécanisme sans rapport.) C'est un
+frein commercial, pas une serrure. Écrit ici pour que personne ne le découvre autrement.
+
+**Nouvelles clés du registre** : `trialRenewals` (0|1) · `trialRenewedAt` · `trialPrevu` (essai
+accordé mais pas encore démarré, cf. §40) · `trialExp`. Marqueurs anti-doublon des mails :
+`_guerettech/trial_mails` `{value:{slug:{j3,exp,relance}}}`.
+
 ## 14c. ★ L'écran d'accueil public
 
 **Le problème.** `_fbLoad` routait tout visiteur sans tenant vers `showOnboarding()` → un prospect
@@ -3716,6 +3746,33 @@ radios/cases, section « pièces à joindre » explicite.
 ---
 
 ## 28. État courant & backlog
+
+### ⚠️ À FAIRE AVANT DE DÉPLOYER LE CHANTIER §40
+
+1. **Ordre non négociable** :
+   `firebase deploy --only functions:gtRenewTrial,functions:trialWatch` **puis**
+   `npm run build && firebase deploy`. Pas de rules, pas de backfill.
+2. **`test:smoke` et `test:e2e` côté Nico** — jamais joués côté Claude (CDN Playwright injoignable).
+3. ✅ **`trialExp` de Marchand-Grillot et Chapelle vérifié** (14/08, Nico) — la première nuit,
+   `trialWatch` traite ce qu'elle trouve ; un `trialExp` résiduel chez un converti aurait déclenché
+   une relance chez lui.
+
+### ✅ L'OFFRE DE LANCEMENT EST BORNÉE (14/08)
+
+**Réglé.** 15 jours, reconductibles une fois, puis lecture seule — cf. §14b et §40. C'était le point
+bloquant du devis Garraud depuis trois sessions. **Reste à trancher : ce qui se passe après J30.**
+L'hypothèse en vigueur — la lecture seule dure — n'a jamais été confirmée explicitement.
+
+### NOUVEAU AU BACKLOG (issu de §40)
+
+- ⚠️ **`trialExp` / `trial_until` peuvent diverger.** Trois chemins les écrivent ensemble
+  (`_fcSaveAbo`, `agtInsTrialGo`, `gtRenewTrial`). Un quatrième qui l'oublierait ferait mentir la
+  veille **en silence**. Piste : une assertion de cohérence dans `trialWatch`, qui alerte au lieu de
+  se taire.
+- **Durcir la lecture seule côté serveur** — `firestore.rules` ignore `trial`. Décision commerciale
+  avant technique : est-ce un frein ou une serrure ?
+- **Mesure d'audience** sur `essai.html` et la démo guidée.
+- **Les trois nombres dupliqués** (§14b) — vivre avec, ou générer l'un depuis l'autre.
 
 ### ★★★ La journée du 11 août (suite) — la refonte du Planning, deux lots
 
@@ -5999,3 +6056,154 @@ incompatibles** avec un seul drapeau :
 Le lot ETP bureau n'est donc pas « retirer un filtre » mais **séparer les deux questions** — et le
 nom du champ, *« non compté dans la capacité de travail des vignes »*, dit déjà laquelle des deux
 il était censé servir.
+
+
+---
+
+## 40. ★★★ LE PARCOURS PROSPECT, DE BOUT EN BOUT (14/08 — APP 6.13 inchangé · SW 6.65 → 6.66)
+
+**Point de départ** : *« refais le chemin du prospect depuis demander un essai »*, puis *« comble
+tous les trous, il faut que tout soit parfait pour le prospect »*. Audit d'abord, six lots ensuite.
+**14 moments cartographiés** — 7 le prospect seul, 3 Nico seul, 4 ensemble.
+
+### ⚠️⚠️ LE TROU QUI VIDAIT LA CHAÎNE — `/api/lead` N'EXISTAIT PAS
+
+`firebase.json` n'avait **aucun bloc `rewrites`**. `essai.html` postait sur `/api/lead` → 404 →
+`catch` → `mailtoFallback()`. Conséquences en cascade, toutes silencieuses :
+
+- **aucun document `leads` écrit** → le dossier de l'assistant d'installation restait vide, et la
+  chaîne « 20 h → 9 h » perdait son carburant ;
+- **l'accusé de réception au prospect ne partait jamais** — non parce qu'il manquait, mais parce que
+  c'est `submitLead` qui l'envoie, et `submitLead` n'était jamais appelée. **`ackText`/`ackHtml`
+  existaient depuis toujours dans `leads.js`.**
+
+**Château Garraud est passé par le repli mailto** — ce qui explique sa fiche sans affichage.
+
+**Correctif** : `essai.html` essaie **l'URL absolue d'abord**, `/api/lead` en repli — même ordre, et
+pour la même raison, que `mise-en-route.html`. Les deux `rewrites` sont posés en plus, mais la page
+n'en dépend plus.
+
+★ **La leçon** : *une page qui a un repli ne signale pas sa panne.* Le formulaire « marchait » depuis
+des semaines. Chaque envoi partait en mailto, et personne ne pouvait le voir depuis l'app.
+
+★★ **La leçon de méthode** : j'ai d'abord annoncé « l'accusé de réception manque, à écrire ». Faux —
+il était là, 60 lignes plus bas dans le fichier que je venais de lire. **Lire jusqu'au bout avant de
+conclure qu'une chose manque.** Idem plus tard pour la lecture seule et le chrono, annoncés comme
+« à construire » alors qu'ils existaient (`_mvCheckExpired`, `_mvTrialBanner`). **Deux fois la même
+faute dans la même session : reconstituer de mémoire au lieu de lire.**
+
+### LES SIX LOTS
+
+| Lot | Fichiers | Ce qu'il ferme |
+|---|---|---|
+| **A** hosting | `firebase.json` · `essai.html` · `mise-en-route.html` | `/api/lead` · repli presse-papier · RGPD au point de collecte · effectifs de Garraud retirés |
+| **B** functions | `leads.js` | accusé de mise en route au client, **une seule fois** |
+| **C** panneau GT | `admin-gt.js` | essai à la remise · fiche honnête · pièces jointes suivies |
+| **D** functions | `claims.js` | `gtRenewTrial` + `trialWatch` — l'essai borné |
+| **E** câblage | `firebase.js` · `admin-gt.js` | le bouton qui rend `gtRenewTrial` exécutable |
+| **F** client | `app.js` · `index.html` · `sw.js` | le bandeau dit ce qui vient après |
+
+### CE QUE CHAQUE LOT A APPRIS
+
+**A — `mise-en-route.html` parlait de Garraud à tout le monde.** « vos 12 permanents », « vos
+6 engins », « vos 4 cuvées », en dur dans la page publique. Le deuxième prospect aurait lu les
+effectifs du premier. ★ **Une page publique écrite pour un client nommé devient un incident dès le
+deuxième.**
+
+**A — le mailto n'est pas un repli.** `window.location='mailto:'` ne fait **rien** sur un appareil
+sans client mail configuré. Le récapitulatif part désormais au **presse-papier d'abord**, la
+messagerie ensuite.
+
+**B — l'accusé de mise en route est le seul dont la réponse est incomplète.** Les fichiers ne partent
+pas avec le formulaire. L'accusé porte donc trois choses et pas une de plus : *c'est arrivé* · *voici
+ce que vous m'avez envoyé* · *voici ce qu'il reste à joindre*. ⚠️ **Envoyé une seule fois par
+adresse** (`dejaMer` sorti de la transaction) — sinon le formulaire devient un moyen d'écrire à
+l'adresse de son choix.
+
+**C — un bandeau qui explique une contrainte ne la lève pas** (§35b, à nouveau). L'assistant
+affichait *« installez le jour où vous envoyez les identifiants »*. Remplacé par un choix — « l'essai
+démarre : à la remise / tout de suite », **défaut à la remise** — et un bouton sur l'écran des
+identifiants. Un DPA à faire signer ne mange plus des jours d'essai.
+
+**C — l'état intermédiaire créé doit être lisible ailleurs.** Un domaine installé « à la remise » n'a
+ni `trial_until` ni `trialDays` : sans branche dédiée, la fiche client l'annonçait **« Abonnement
+actif »** — d'un client qui n'a rien signé. D'où `trialPrevu`. ★ **Créer un état, c'est s'engager à
+le rendre lisible partout où l'ancien l'était.**
+
+**C — les pièces jointes étaient hors radar.** Le chemin se dédouble après la mise en route : les
+**réponses** arrivent par la fonction, les **fichiers** par la boîte mail. Rien ne disait où en était
+le second. Deux pastilles sur la carte lead, et une bascule manuelle dans `leads_status` — **le seul
+fait de cette fiche qui se coche à la main, et c'est assumé.**
+
+**D — `esc()` n'existe pas dans `claims.js`.** `_trialMailNico` l'appelait. Ça passait `node --check`,
+ça passait le **chargement du module**, et ça n'aurait échoué **qu'à l'exécution** — mail avalé par
+le `catch`, alerte jamais reçue, personne pour s'en apercevoir. Attrapé par le harnais, pas par les
+outils statiques. ★★ **Une fonction utilitaire qui vit dans un fichier voisin ne s'importe pas
+toute seule. Le seul filet qui l'attrape est un harnais qui EXÉCUTE.**
+
+**D — le garde-fou est serveur.** `gtRenewTrial` refuse la seconde reconduction avec
+`failed-precondition`. Le bouton grisé n'est que l'affichage. `gtSetTenantPlan` reste ouvert à côté :
+c'est le passe-partout de Nico, assumé, et pas le chemin normal.
+
+**D — la reconduction repart de MAINTENANT**, pas de l'ancienne échéance. Un essai reconduit trois
+jours après son terme donne quinze jours pleins : sinon la lenteur administrative se paie sur le
+temps du client, ce que ce lot existe pour éviter.
+
+**E — trois zones à repeindre, pas une de moins.** Après reconduction : l'encart d'état, le champ de
+jours, et le bloc de reconduction qui doit se griser. ★ **En oublier une laisse l'écran affirmer
+l'ancien état juste à côté du nouveau.**
+
+**F — un décompte sans suite annoncée se lit comme une menace.** Le bandeau affichait « J-4 » et rien
+d'autre. Le client ignorait qu'à l'échéance tout reste consultable, et croyait devoir relancer
+lui-même. Sous-ligne les trois derniers jours. **Le seuil 3 est le miroir de `TRIAL_WARN_D` : on ne
+promet l'alerte que les jours où la veille l'envoie.**
+
+**F — quatre porteurs de version, pas deux.** J'avais bumpé l'en-tête et `CACHE_NAME`, pas les deux
+`console.log`. **Le preflight l'a attrapé** (§7). Le cliquet a fait exactement son travail.
+
+### LA VEILLE — `trialWatch`, tous les jours à 8h05 Paris
+
+| Moment | Destinataire | Condition |
+|---|---|---|
+| J-3 avant échéance | Nico | `!m.j3` |
+| échéance (bascule lecture seule) | Nico | `!m.exp` |
+| J+15 après expiration | **le client** + copie Nico | `trialRenewals === 0 && !m.relance` |
+| reconduction | Nico (« appelle-le ») | événement, hors veille |
+
+★ *« Absence de contact entre J15 et J30 »* est traduit en **`trialRenewals === 0`** : le système ne
+sait pas si un coup de fil a eu lieu, mais **la reconduction est la trace du contact**.
+
+⚠️ **8h05 et pas 3h du matin** : une alerte J-3 qui arrive la nuit se noie.
+⚠️ **Marqueurs écrits APRÈS mise en file.** Une veille quotidienne qui renvoie le même mail chaque
+nuit est pire que pas de veille : on cesse de les lire.
+⚠️ **Un domaine qui échoue ne doit pas emporter les suivants** — `try` par slug.
+
+### APRÈS J30 — hypothèse prise, jamais confirmée
+
+**La lecture seule dure.** Ni fermeture, ni bascule payante. C'est déjà le comportement du code et
+c'est le choix non destructeur — mais Nico n'a jamais tranché explicitement. ⚠️ **À confirmer.**
+
+### LES HARNAIS — 108 assertions, hors dépôt
+
+`harnais-parcours-prospect.mjs` (58) · `harnais-essai-borne.cjs` (15) · `harnais-reconduction.mjs`
+(20) · `harnais-bandeau-essai.mjs` (15). Ils lisent les **fichiers réels** et extraient les fonctions
+pour les exécuter : ils rougiront si un lot repart en arrière.
+
+★★ **Deux faux verts attrapés en les écrivant, et c'est la vraie leçon de la session :**
+
+1. **`admin.firestore` n'est pas inscriptible.** `admin.firestore = mock` **échoue en silence** ; le
+   harnais tapait la vraie base, la lecture échouait, `trialWatch` sortait en début de fonction — et
+   *« aucun mail envoyé »* verdissait. Corrigé par `Object.defineProperty`, **et par une garde qui
+   rougit si le registre n'a pas été lu.**
+2. **Un harnais qui explose doit compter ROUGE**, pas s'arrêter. `_fcTrialStatusHtml` appelait
+   `_fcTrialFmt`, non extrait : le `throw` tuait le processus au milieu des assertions.
+
+★★★ **Un harnais qui verdit sur une panne de montage est pire qu'aucun harnais.** Toujours lui faire
+prouver que son décor a été monté.
+
+### CE QUI N'A PAS ÉTÉ FAIT
+
+- **`test:smoke` et `test:e2e` jamais joués** — le CDN Playwright est injoignable du bac à sable.
+  Trois écrans client ont changé : bandeau, écran de fin d'essai, panneau GT.
+- **La lecture seule reste côté navigateur** (cf. §14b). Aucune règle Firestore ne connaît `trial`.
+- **Aucune mesure d'audience** : un prospect qui fait la démo et repart reste invisible.
