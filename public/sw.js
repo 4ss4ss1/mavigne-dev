@@ -1,4 +1,42 @@
-// MA VIGNE — Service Worker v6.64
+// MA VIGNE — Service Worker v6.65
+// v6.65 (14/08/2026) — LA VISITE S'ARRETAIT AU 18e MOMENT. TROIS DEFAUTS.
+//   Symptomes rapportes : voile noir sans rien de surligne sur les moments 16
+//   a 18, puis BLOCAGE au 18 — le bouton a toucher n'existait pas, et un moment
+//   d'action n'offre pas de « Continuer ».
+//   ★ 1. « #page-pilotage .content » N'EXISTE PAS. _pilSkeleton() emet
+//     <div class="pil-content" id="pil-content"> : il n'y a aucun .content dans
+//     cette page. Ce selecteur etait le REPLI FINAL des trois moments — quand le
+//     premier echouait, il ne restait rien, _mvtEl passait a null et
+//     _mvtReposition masquait l'ecran ENTIER. D'ou le voile noir.
+//     ⚠️ Ce selecteur mort vient de la visite D'ORIGINE (moments 11-13) : il
+//     n'avait jamais servi tant que le premier selecteur repondait. Remplace par
+//     #pil-content, le seul ID que le squelette pose sans condition.
+//   ★ 2. L'ONGLET DU PILOTAGE EST MEMORISE. renderPilotage() fait
+//     _PIL_TAB=_pilLoadTab() a CHAQUE rendu, et tout clic d'onglet ecrit dans
+//     localStorage. Le moment « Conformite » ajoute en 6.64 laissait donc 'cfm'
+//     derriere lui, et le moment « decision du jour » rouvrait Pilotage sur
+//     Conformite — ou ni .pil-dec ni .pil-cockpit-card n'existent. C'est le lot
+//     precedent qui a arme le defaut 1.
+//   ★ 3. UN MOMENT D'ACTION SANS CIBLE FIGEAIT LA VISITE. _mvtPlace affiche la
+//     consigne A LA PLACE du bouton « Continuer » : si clickSel ne repond pas, il
+//     ne reste que « Passer ». Or .rf-strat.best n'existe que si le simulateur
+//     trouve un placement qui BOUCLE — n'en trouver aucun est un cas NORMAL.
+//     La cible est desormais verifiee AVANT de choisir l'affichage, et _mvtQuery
+//     replie en dernier recours sur .page.active : plus de blocage, plus d'ecran
+//     noir muet, et une trace logError qui nomme le selecteur manquant.
+//   pilotage.js : _pilSetTab(t,opts) devient LE seul chemin pour changer
+//   d'onglet — le clic sur #pil-tabs le traverse aussi. Le module portait la
+//   note « il n'existe PAS de _pilSetTab [...] plutot que d'inventer une seconde
+//   facon de changer d'onglet » : on factorise celle qui existe au lieu de la
+//   doubler, et la note est corrigee (un commentaire faux trompe le relecteur
+//   suivant). La visite ne simule plus de clic : le garde-fou
+//   « if(t===_PIL_TAB) return » et le scrollTo({behavior:'smooth'}) du handler
+//   sont faits pour un doigt, pas pour un appelant qui veut poser un ecran.
+//   ★ LA DEMO NE LAISSE PLUS RIEN DERRIERE ELLE : l'onglet du visiteur est
+//   memorise au premier passage et lui est rendu a l'addition — et aussi quand
+//   il passe la visite. Une demo qui laisse le Pilotage sur « Simuler un
+//   renfort » a modifie les reglages de quelqu'un qui n'a rien demande.
+//   app.js + pilotage.js -> APP_VERSION inchange (6.13), WHATS_NEW intact.
 // v6.64 (14/08/2026) — LA VISITE GUIDEE RATTRAPE SIX MOIS D'APP.
 //   La demo publique (?demo=visite) montrait 13 moments et 12 chapitres. Elle
 //   ne connaissait AUCUN des lots d'aout : ni Le Millesime, ni la mise en
@@ -1387,7 +1425,7 @@
 // v2.22 — Fix profils vides : guard vide dans loadData() pour MEMBRES/SAISONS/TACHES
 // v2.17 — Onboarding intégré + tenantId · v2.06 — Firebase Auth · v2.00–v2.05 — divers
 const DEBUG = self.location.hostname === 'localhost' || self.location.hostname === '127.0.0.1';
-const CACHE_NAME   = 'mavigne-v6.64';
+const CACHE_NAME   = 'mavigne-v6.65';
 const TENANT_CACHE = 'mavigne-tenant';   // Cache persistant — préservé à chaque mise à jour SW
 const SYNC_TAG     = 'mavigne-sync';
 
@@ -1403,7 +1441,7 @@ const CDN_URLS = [
 ];
 
 self.addEventListener('install', event => {
-  if(DEBUG) console.log('[SW] Ma Vigne v6.64 installé');
+  if(DEBUG) console.log('[SW] Ma Vigne v6.65 installé');
   event.waitUntil(
     caches.open(CACHE_NAME).then(async cache => {
       // ── Cœur applicatif : STRICT (mise à jour ATOMIQUE) ──
@@ -1419,7 +1457,7 @@ self.addEventListener('install', event => {
 });
 
 self.addEventListener('activate', event => {
-  if(DEBUG) console.log('[SW] Ma Vigne v6.64 activé');
+  if(DEBUG) console.log('[SW] Ma Vigne v6.65 activé');
   event.waitUntil(
     caches.keys().then(keys =>
       Promise.all(

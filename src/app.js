@@ -2033,6 +2033,26 @@ function _demo2Hyp(k){ for(var i=0;i<DEMO2_CREDITS.length;i++){ if(DEMO2_CREDITS
 // ── Les 9 moments : une phrase de d\u00e9cor, un geste, une cons\u00e9quence visible.
 //    La narration vit en bandeau bas (.mvt-bar) ; le spotlight (masques + ring)
 //    est conserv\u00e9 tel quel. Le 9e moment est l'addition (_mvtAddition).
+// Aller sur un onglet du Pilotage SANS simuler de clic. _pilSetTab valide la
+// cle, pose l'onglet et rend — sans le defilement fluide du handler de clic.
+// Le premier appel MEMORISE l'onglet du visiteur : la visite le lui rend a la
+// fin. Une demo qui laisse le Pilotage sur « Simuler un renfort » a modifie les
+// reglages de quelqu'un qui n'a rien demande.
+var _mvtPilTabAvant=null;
+function _mvtPilTab(tab){
+  try{
+    if(_mvtPilTabAvant===null && typeof window._pilGetTab==='function') _mvtPilTabAvant=window._pilGetTab();
+    if(window.goTo) window.goTo('pilotage');
+    if(typeof window._pilSetTab==='function'){ window._pilSetTab(tab); }
+    else if(window.logError){ window.logError({level:'info',cat:'visite',msg:'_pilSetTab absent : onglet '+tab+' non force'}); }
+  }catch(e){ if(window.logError)window.logError({level:'info',cat:'visite',msg:'pilTab '+tab}); }
+}
+function _mvtPilTabRendre(){
+  if(_mvtPilTabAvant===null) return;
+  try{ if(typeof window._pilSetTab==='function') window._pilSetTab(_mvtPilTabAvant, true); }
+  catch(e){ if(window.logError)window.logError({level:'info',cat:'visite',msg:'pilTab restauration'}); }
+  _mvtPilTabAvant=null;
+}
 var _mvtSteps = [
   // ── Le matin : ce que dit le ciel, et ce qu'on decide d'en faire ──
   { kick:'8 h', tx:'Lundi. 7 hectares, 4 personnes \u2014 et la m\u00e9t\u00e9o d\u00e9j\u00e0 parcelle par parcelle. Aujourd\u2019hui, c\u2019est sec.',
@@ -2070,8 +2090,8 @@ var _mvtSteps = [
     sel:'#page-phyto .content', credit:{ k:'phyto', min:20 } },
   { kick:'16 h 25', tx:'Le m\u00eame registre, vu du contr\u00f4le : cuivre m\u00e9tal cumul\u00e9 sur sept ans face au plafond bio, passages par parcelle, d\u00e9lai de rentr\u00e9e en cours. Rien \u00e0 recalculer la veille.',
     hyp:'Le cumul se met \u00e0 jour \u00e0 chaque traitement saisi \u2014 personne ne tient ce tableau \u00e0 la main.',
-    nav:function(){ if(window.goTo) window.goTo('pilotage'); setTimeout(function(){ try{ var b=document.querySelector('#pil-tabs [data-tab="cfm"]'); if(b) b.click(); else if(window.logError) window.logError({level:'info',cat:'visite',msg:'onglet cfm introuvable'}); }catch(e){ if(window.logError)window.logError({level:'info',cat:'visite',msg:'tab cfm'}); } },260); },
-    sel:['.pil-tile[data-pid="cuivre"]','.pil-panels','#page-pilotage .content'] },
+    nav:function(){ _mvtPilTab('cfm'); },
+    sel:['.pil-tile[data-pid="cuivre"]','.pil-panels','#pil-content'] },
   { kick:'16 h 30', tx:'La R\u00e9serve a suivi toute seule : la bouillie du registre est sortie du stock. Achats, inventaires, f\u00fbts \u2014 et le bilan mati\u00e8re s\u2019\u00e9crit au fil des traitements.',
     hyp:'\u2248 4 h d\u2019inventaires par an \u2014 et le bilan mati\u00e8re r\u00e9glementaire toujours \u00e0 jour.',
     nav:function(){ if(window.goTo) window.goTo('reserve'); setTimeout(function(){ try{ if(window._rsvTabTo) window._rsvTabTo('audit'); }catch(e){ if(window.logError)window.logError({level:'info',cat:'visite',msg:'rsvTabTo'}); } },240); },
@@ -2102,16 +2122,16 @@ var _mvtSteps = [
 
   // ── Le soir : decider ──
   { kick:'18 h', tx:'Le soir, la d\u00e9cision du jour est pr\u00eate \u2014 fen\u00eatre de traitement, mat\u00e9riel, cave. Rien \u00e0 chercher.',
-    nav:function(){ try{ if(window.closePlanFiche) closePlanFiche(); }catch(e2){ if(window.logError)window.logError({level:'info',cat:'visite',msg:'closeFiche'}); } try{ if(window.goTo) window.goTo('pilotage'); window.scrollTo(0,0); }catch(e){ if(window.logError)window.logError({level:'info',cat:'visite',msg:'goTo pilotage'}); } },
-    sel:['.pil-dec','.pil-cockpit-card','#page-pilotage .content'] },
+    nav:function(){ try{ if(window.closePlanFiche) closePlanFiche(); }catch(e2){ if(window.logError)window.logError({level:'info',cat:'visite',msg:'closeFiche'}); } _mvtPilTab('auj'); },
+    sel:['.pil-dec','.pil-cockpit-card','#pil-content'] },
   { kick:'18 h 05', tx:'Chaque parcelle porte son co\u00fbt r\u00e9el de main-d\u2019\u0153uvre \u2014 en euros, et \u00e0 l\u2019hectare, pond\u00e9r\u00e9 par l\u2019\u00e9quipe qui y est vraiment pass\u00e9e.',
-    nav:function(){ try{ var b=document.querySelector('#pil-tabs [data-tab="eco"]'); if(b) b.click(); else if(window.logError) window.logError({level:'info',cat:'visite',msg:'onglet eco introuvable'}); }catch(e){ if(window.logError)window.logError({level:'info',cat:'visite',msg:'tab eco'}); } },
-    sel:['.pil-tbody','.pil-panels','#page-pilotage .content'] },
+    nav:function(){ _mvtPilTab('eco'); },
+    sel:['.pil-tbody','.pil-panels','#pil-content'] },
   { kick:'18 h 10', tx:'La question du renfort : combien, et quand ? Demandez au moteur \u2014 il essaie des centaines de placements et ne garde que ce qui boucle.',
     hyp:'Chaque proposition affiche son co\u00fbt \u2014 le classement se fait parmi ce qui boucle.',
     mission:'Touchez \u00ab Le meilleur placement trouv\u00e9 \u00bb',
-    nav:function(){ try{ var b=document.querySelector('#pil-tabs [data-tab="sim"]'); if(b) b.click(); }catch(e){ if(window.logError)window.logError({level:'info',cat:'visite',msg:'tab sim'}); } },
-    sel:['.rf-strats','.pil-panels','#page-pilotage .content'], clickSel:'.rf-strat.best', actDelay:900 },
+    nav:function(){ _mvtPilTab('sim'); },
+    sel:['.rf-strats','.pil-panels','#pil-content'], clickSel:'.rf-strat.best', actDelay:900 },
 
   // ── Et le jour du controle ──
   { kick:'18 h 20', tx:'Reste le classeur. Registre phyto, synth\u00e8se cuivre, relev\u00e9s d\u2019heures MSA, inventaires, sauvegarde : vingt-deux documents, chacun \u00e0 un clic. Le registre phyto \u00e9lectronique devient obligatoire au 1\u1d49\u02b3 janvier 2027 \u2014 le v\u00f4tre sera pr\u00eat.',
@@ -2142,10 +2162,19 @@ function _mvtStart(){
 }
 window.mvTourStart=_mvtStart;
 function _mvtQuery(sel){
-  if(!sel) return null;
-  if(typeof sel==='string') return document.querySelector(sel);
+  if(!sel) return _mvtPageActive();
+  if(typeof sel==='string'){ return document.querySelector(sel) || _mvtPageActive(); }
   for(var i=0;i<sel.length;i++){ var e=document.querySelector(sel[i]); if(e) return e; }
-  return null;
+  // ★ REPLI ULTIME. Sans lui, un selecteur qui ne repond pas rend _mvtEl null,
+  //   et _mvtReposition masque l'ecran ENTIER : voile noir, plus rien de
+  //   surligne, le visiteur croit l'appli plantee. Montrer l'ecran en cours est
+  //   toujours mieux que ne rien montrer — et la trace dit lequel a manque.
+  if(window.logError) window.logError({level:'info',cat:'visite',msg:'aucun selecteur trouve : '+sel.join(' | ')});
+  return _mvtPageActive();
+}
+function _mvtPageActive(){
+  var p=document.querySelector('.page.active');
+  return (p && p.getBoundingClientRect().width>0) ? p : null;
 }
 function _mvtNext(){
   _mvtClearOne();
@@ -2176,6 +2205,17 @@ function _mvtPlace(s){
   // Un point par moment, plus un pour l'addition. La boucle SUIT la liste :
   // c'est la seule facon d'etre sur qu'un moment ajoute soit compte.
   var dots=''; for(var i=0;i<=_tot;i++){ dots += '<i class="'+(i===_mvtCur?'on':'')+'"></i>'; }
+  // ★ Un moment d'action dont la cible manque FIGEAIT la visite : la consigne
+  //   remplace le bouton « Continuer », donc il ne restait rien a toucher que
+  //   « Passer ». On verifie la cible AVANT de choisir quoi afficher — la
+  //   visite doit toujours pouvoir avancer, meme quand un ecran ne rend pas ce
+  //   qu'on attendait (le simulateur ne propose aucun placement s'il n'en
+  //   trouve aucun qui boucle : c'est un cas normal, pas une anomalie).
+  var _clk = isAct ? document.querySelector(s.clickSel || '') : null;
+  if(isAct && !_clk){
+    isAct=false;
+    if(window.logError) window.logError({level:'info',cat:'visite',msg:'cible d\'action absente, repli sur Continuer : '+(s.clickSel||'')});
+  }
   var mid;
   if(isAct){
     mid='<span class="mvt-miss"><span class="mvt-hand">\u{1F446}</span><span>'+s.mission+'</span></span>';
@@ -2194,7 +2234,7 @@ function _mvtPlace(s){
   var c=document.getElementById('mvt-c'); if(c) c.style.display = isAct ? 'none' : 'block';
   var ring=document.getElementById('mvt-ring'); if(ring) ring.classList.toggle('act', isAct);
   if(isAct){
-    var _clk = s.clickSel ? document.querySelector(s.clickSel) : _mvtEl;
+    if(!s.clickSel) _clk=_mvtEl;
     if(_clk){ var fn=function(){ setTimeout(_mvtNext, s.actDelay||320); }; _clk.addEventListener('click', fn); _mvtOne={el:_clk, fn:fn}; }
   }
   if(s.credit && !_mvtDone[s.credit.k]){
@@ -2204,6 +2244,7 @@ function _mvtPlace(s){
 }
 function _mvtSkip(){
   _mvtClearOne();
+  _mvtPilTabRendre();
   var t=document.getElementById('mvt'); if(t){ t.style.display='none'; }
   _mvtMenu();
 }
@@ -2300,6 +2341,7 @@ function _mvtAddition(){
 function _mvtEnd(){
   _mvtClearOne();
   var t=document.getElementById('mvt'); if(t){ t.style.display='none'; }
+  _mvtPilTabRendre();
   // Le 19e moment laisse le hub Documents ouvert : l'addition se dessinerait
   // dessous, et le bouton d'essai ne serait jamais vu.
   if(document.getElementById('ovDocs') && typeof window.closeOv==='function'){
@@ -2405,16 +2447,7 @@ function _mvtChapterClose(silent){
 // cles ecrites dans la navigation : elles sont memorisees chez les clients et
 // verifiees par C22 (_PIL_VALID_TAB). Une cle morte se corrige ici, une fois.
 var _MVT_PILTAB={pilotage:'auj', annee:'an', campagne:'avc', etp:'equ', eco:'eco', conformite:'cfm', sim:'sim'};
-function _mvtGoPilTab(tb){
-  if(window.goTo) window.goTo('pilotage');
-  setTimeout(function(){
-    try{
-      var b=document.querySelector('#pil-tabs [data-tab="'+tb+'"]');
-      if(b) b.click();
-      else if(window.logError) window.logError({level:'info',cat:'demo',msg:'onglet '+tb+' introuvable'});
-    }catch(e){ if(window.logError)window.logError({level:'info',cat:'demo',msg:'pil tab '+tb}); }
-  },260);
-}
+function _mvtGoPilTab(tb){ _mvtPilTab(tb); }
 function _mvtGoCave(sec,after){
   if(window.goTo) window.goTo('cave');
   setTimeout(function(){

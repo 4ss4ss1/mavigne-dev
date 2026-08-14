@@ -184,6 +184,21 @@ var _PIL_TAB_MIGR = {prs:'equ',mat:'equ',ecf:'eco'};
 function _pilTabKey(){ return 'mavigne_pil_tab_'+_pilTenant(); }
 function _pilLoadTab(){ try{ var t=localStorage.getItem(_pilTabKey()); if(_PIL_TAB_MIGR[t]) t=_PIL_TAB_MIGR[t]; if(_PIL_VALID_TAB[t]) return t; }catch(e){} return 'auj'; }
 function _pilSaveTab(t){ try{ localStorage.setItem(_pilTabKey(), t); }catch(e){} }
+// ── LE seul chemin pour changer d'onglet. Le clic sur #pil-tabs le traverse,
+//   et un appelant exterieur aussi. Options :
+//     silencieux : ne remonte pas la page (rendre au visiteur l'onglet qu'il
+//                  avait avant une demo ne doit pas lui faire sauter l'ecran).
+//   Rend false quand rien n'a change — cle inconnue, ou onglet deja actif.
+function _pilSetTab(t, opts){
+  if(!t || !_PIL_VALID_TAB[t]){
+    if(window.logError) window.logError({level:'info',cat:'pilotage',msg:'_pilSetTab : cle inconnue '+t});
+    return false;
+  }
+  if(t===_PIL_TAB) return false;
+  _PIL_TAB=t; _pilSaveTab(t); renderPilotage();
+  if(!(opts&&opts.silencieux)){ try{ window.scrollTo({top:0,behavior:'smooth'}); }catch(e){} }
+  return true;
+}
 function _pilCavKey(){ return 'mavigne_pil_cav_'+_pilTenant(); }
 // Cles refondues (urg/mil/parc). Les anciennes (elv/vin/ven) sont MIGREES
 // plutot que rejetees : sans table, l'utilisateur retombait sans explication
@@ -8623,9 +8638,8 @@ function _pilBindContent(content){
     // Une photo emmene a l'ecran qui detaille sa question : on voit l'ensemble,
     // puis on descend. C'est le zoom demande, avec les onglets pour destinations.
     var _pg=e.target.closest('[data-pgo]');
-    // ⚠️ Il n'existe PAS de _pilSetTab : le module ecrit _PIL_TAB, memorise, et
-    //    re-rend. On suit le meme chemin que le clic sur un onglet (l.7035)
-    //    plutot que d'inventer une seconde facon de changer d'onglet.
+    // Changer d'onglet passe par _pilSetTab() — le clic sur #pil-tabs aussi.
+    //    Une seule facon de le faire, donc un seul endroit ou la corriger.
     // Une photo drapeautee ouvre d'abord CE QUI LA FAUSSE : descendre au
     // detail d'un chiffre faux, c'est lire un faux chiffre en plus grand.
     var _pf=e.target.closest('.pil-flag');
@@ -8716,16 +8730,12 @@ function _pilBind(){
     if(e.target.closest('#pil-outils-btn')){ if(omenu) omenu.classList.toggle('show'); return; }
     var b=e.target.closest('[data-tab]'); if(!b) return;
     _pilOutilsClose();
-    var t=b.getAttribute('data-tab'); if(!t||t===_PIL_TAB) return;
-    _PIL_TAB=t; _pilSaveTab(t); renderPilotage();
-    try{ window.scrollTo({top:0,behavior:'smooth'}); }catch(e2){}
+    var t=b.getAttribute('data-tab'); if(!_pilSetTab(t)) return;
   });
   if(omenu) omenu.addEventListener('click', function(e){
     var b=e.target.closest('[data-tool]'); if(!b) return;
     _pilOutilsClose();
-    var t=b.getAttribute('data-tool'); if(!t||t===_PIL_TAB) return;
-    _PIL_TAB=t; _pilSaveTab(t); renderPilotage();
-    try{ window.scrollTo({top:0,behavior:'smooth'}); }catch(e2){}
+    var t=b.getAttribute('data-tool'); if(!_pilSetTab(t)) return;
   });
   document.addEventListener('click', function(e){
     if(!omenu||!omenu.classList.contains('show')) return;
@@ -8785,6 +8795,8 @@ window._pilPolyBreak  = _pilPolyBreak;
 window._PIL_TABS      = _PIL_TABS;
 window._PIL_TOOLS     = _PIL_TOOLS;
 window.renderPilotage = renderPilotage;
+window._pilGetTab     = function(){ return _pilLoadTab(); };
+window._pilSetTab     = function(t, silencieux){ return _pilSetTab(t, {silencieux:!!silencieux}); };
 window.openPilotage   = function(){ if(window.goTo) window.goTo('pilotage'); else renderPilotage(); };
 
 export { renderPilotage };
