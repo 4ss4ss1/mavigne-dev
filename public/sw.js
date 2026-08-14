@@ -1,4 +1,33 @@
-// MA VIGNE — Service Worker v6.63
+// MA VIGNE — Service Worker v6.64
+// v6.64 (14/08/2026) — LA VISITE GUIDEE RATTRAPE SIX MOIS D'APP.
+//   La demo publique (?demo=visite) montrait 13 moments et 12 chapitres. Elle
+//   ne connaissait AUCUN des lots d'aout : ni Le Millesime, ni la mise en
+//   bouteille, ni le controle de maturite, ni le hub Documents, ni cinq des
+//   dix onglets du Pilotage. Le Tracteur n'apparaissait dans aucun recit.
+//   Parcours : 13 -> 19 moments (meteo par secteur, carte du domaine,
+//   entretien & GNR, conformite cuivre/DRE, Le Millesime, les 22 documents).
+//   Chapitres : 12 -> 26, ranges en 6 familles (vigne, cave, equipe, materiel,
+//   piloter, papiers) — une liste a plat de 26 entrees ne se lit pas.
+//   ★ TROIS ECRANS SE SERAIENT OUVERTS VIDES, sans une erreur :
+//     · la synthese cuivre — _cuIsCu() exige type==='Cuivre' ET cuMetal>0, et
+//       le seed posait le bon type sans jamais poser cuMetal ;
+//     · le controle de maturite — CAVE_VENDANGE.analyses etait [] ;
+//     · l'archive bouteilles — aucune cuvee en statut 'embouteille'.
+//   Corriges en executant les VRAIES fonctions (_cuParcRollSum, _matSynth) sur
+//   les donnees du seed, pas en relisant le code. Meme lecon que le Cuvier vide
+//   de juillet et le simulateur vide d'aout.
+//   ★ LE COMPTEUR N'EST PLUS ECRIT A LA MAIN. Chaque kick portait son propre
+//   « n sur 13 » et les points de progression bouclaient sur i<14 : ajouter un
+//   moment laissait la barre muette, et c'est ce codage en dur qui avait fait
+//   ecrire « 15e moment » au backlog pour une visite qui en comptait 13. La
+//   numerotation derive desormais de _mvtSteps.length.
+//   ★ Le seed est derive de window.PARCELLES, jamais de noms ecrits en dur :
+//   _matSynth croise sur le nom REEL de la parcelle, et des analyses orphelines
+//   ne se seraient vues nulle part.
+//   Le hub Documents est referme avant l'addition (sinon l'ecran de fin, celui
+//   qui porte le bouton d'essai, se dessinait dessous).
+//   app.js seul -> APP_VERSION inchange (6.13), WHATS_NEW intact : rien de tout
+//   ceci n'est visible d'un client, c'est la demo des prospects.
 // v6.63 (14/08/2026) — DEUX CHIFFRES QUI NE SUIVAIENT PLUS LEUR SOURCE.
 //   1) LA COURBE D'EFFECTIF GELEE. Le memo _PIL_ANN (pilotage.js) etait cle
 //   sur des LONGUEURS : MEMBRES.length, PARCELLES.length, TACHES.length. Or
@@ -1358,7 +1387,7 @@
 // v2.22 — Fix profils vides : guard vide dans loadData() pour MEMBRES/SAISONS/TACHES
 // v2.17 — Onboarding intégré + tenantId · v2.06 — Firebase Auth · v2.00–v2.05 — divers
 const DEBUG = self.location.hostname === 'localhost' || self.location.hostname === '127.0.0.1';
-const CACHE_NAME   = 'mavigne-v6.63';
+const CACHE_NAME   = 'mavigne-v6.64';
 const TENANT_CACHE = 'mavigne-tenant';   // Cache persistant — préservé à chaque mise à jour SW
 const SYNC_TAG     = 'mavigne-sync';
 
@@ -1374,7 +1403,7 @@ const CDN_URLS = [
 ];
 
 self.addEventListener('install', event => {
-  if(DEBUG) console.log('[SW] Ma Vigne v6.63 installé');
+  if(DEBUG) console.log('[SW] Ma Vigne v6.64 installé');
   event.waitUntil(
     caches.open(CACHE_NAME).then(async cache => {
       // ── Cœur applicatif : STRICT (mise à jour ATOMIQUE) ──
@@ -1390,7 +1419,7 @@ self.addEventListener('install', event => {
 });
 
 self.addEventListener('activate', event => {
-  if(DEBUG) console.log('[SW] Ma Vigne v6.63 activé');
+  if(DEBUG) console.log('[SW] Ma Vigne v6.64 activé');
   event.waitUntil(
     caches.keys().then(keys =>
       Promise.all(

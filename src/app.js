@@ -1785,6 +1785,85 @@ function _visiteScenario(){
     var _ac={}; _ac['Jean']={}; _ac['Jean'][_mk]=[{date:'2026-'+_p2(_m+1)+'-15',montant:300,note:'Acompte'}]; _ap('planning_acomptes',_ac);
   }catch(e){}
 
+  // 10quinquies) CEPAGES, CUIVRE, MATURITE, BOUTEILLES
+  //   Les ecrans ouverts par la refonte de la visite (conformite, controle de
+  //   maturite, mise en bouteille) lisent des donnees qu'AUCUN seed ne posait :
+  //   ils se seraient ouverts VIDES, sans erreur — exactement le motif du
+  //   Cuvier de juillet et du simulateur d'aout.
+  //   ⚠️ TOUT est derive de window.PARCELLES. Ecrire des noms de parcelles en
+  //   dur fabriquerait des analyses orphelines : _matSynth croise sur le nom
+  //   REEL de la parcelle, pas sur celui qu'on aurait imagine.
+  try{
+    var _pA=(window.PARCELLES||[]).filter(function(p){ return p && p.nom && p.statut!=='Arrachee'; });
+    var _pN=_pA.map(function(p){ return p.nom; });
+
+    // a) Cepage — sans lui _parcCoul() rend '?' et les tuiles Rouges / Blancs
+    //    de la synthese de maturite restent vides. On ne SURCHARGE jamais un
+    //    cepage deja saisi : la demo complete la base du bac a sable, elle ne
+    //    la reecrit pas.
+    _pA.forEach(function(p,i){
+      var _c=p.cepages||(p.cepage?[p.cepage]:[]);
+      if(!_c.length) p.cepage=(i%5===4)?'Chardonnay':'Pinot Noir';
+    });
+
+    // b) CUIVRE METAL sur sept ans — _cuIsCu() exige type==='Cuivre' ET
+    //    cuMetal>0 : le traitement de bouillie ci-dessus portait le bon type
+    //    mais AUCUN cuMetal, donc la synthese cuivre du Pilotage ne trouvait
+    //    zero ligne et l'onglet Conformite s'ouvrait sur un vide.
+    //    Deux apports par an sur six campagnes passees, le second sur les deux
+    //    premieres parcelles seulement : le cumul se lit en gradient, DEUX
+    //    parcelles passent en « Vigilance », aucune en depassement. Un domaine
+    //    ou les trois quarts des parcelles seraient en alerte ne serait pas une
+    //    demonstration, ce serait un contre-argument.
+    //    Les annees anterieures ne polluent pas le compteur de passages :
+    //    _cfmPassages() filtre sur la saison consultee.
+    var _cuY=now.getFullYear(), _cuT=[];
+    for(var _k=6;_k>=1;_k--){
+      var _yy=_cuY-_k;
+      _cuT.push({produit:'Bouillie bordelaise RSR',type:'Cuivre',amm:'2020047',dar:21,drae:6,znt:5,
+        dose:'2 kg/ha',cuMetal:2.2,operateur:'Marie',date:_yy+'-06-12',parcelles:_pN.slice(),note:'Pression mildiou'});
+      if(_pN.length>2) _cuT.push({produit:'Bouillie bordelaise RSR',type:'Cuivre',amm:'2020047',dar:21,drae:6,znt:5,
+        dose:'1,8 kg/ha',cuMetal:2.0,operateur:'Jean',date:_yy+'-07-04',parcelles:_pN.slice(0,2),note:'Reprise apres orage'});
+    }
+    (window.TRAITEMENTS||[]).forEach(function(t){
+      if(t && t.type==='Cuivre' && t.cuMetal==null) t.cuMetal=0.3;
+    });
+    if(_cuT.length) _ap('traitements',(window.TRAITEMENTS||[]).concat(_cuT));
+
+    // c) CONTROLE DE MATURITE — CAVE_VENDANGE.analyses etait un tableau VIDE.
+    //    Trois releves par parcelle, a J-12 / J-6 / J-1 : deux mesures au moins
+    //    sont necessaires pour que _matSynth calcule une VITESSE, et la vitesse
+    //    est le vrai signal (deux parcelles au meme sucre ne se recoltent pas
+    //    le meme jour si l'une monte deux fois plus vite).
+    //    Les parcelles deja rentrees sont ecartees : elles sortiraient du
+    //    classement pour rejoindre « rentrees », et la demo n'aurait rien a
+    //    comparer.
+    var _dej={}; (_cvSeed.recoltes||[]).forEach(function(r){ if(r&&r.parcelle) _dej[r.parcelle]=1; });
+    var _matP=_pN.filter(function(n){ return !_dej[n]; }).slice(0,5);
+    var _ana=[];
+    _matP.forEach(function(nom,i){
+      var _dep=176+i*4, _pas=13+(i%3)*4;   // depart et vitesse differents par parcelle
+      [12,6,1].forEach(function(j,k){
+        _ana.push({id:'vana_d'+i+'_'+k,parcelle:nom,date:_vD(j),mode:'sucre',
+                   val:_dep+_pas*k,spd:16.83});
+      });
+    });
+    //    ⚠️ Object.assign() d'applyFbData est une copie de SURFACE : reposer
+    //    _cvSeed.analyses remplace la reference dans le seed, pas celle deja
+    //    posee sur window. On ecrit donc aux DEUX endroits — la ceinture 12bis
+    //    ne fait que confirmer.
+    if(_ana.length){ _cvSeed.analyses=_ana; if(window.CAVE_VENDANGE) window.CAVE_VENDANGE.analyses=_ana; }
+
+    // d) UNE CUVEE EN BOUTEILLE — l'onglet « Mise en bouteille » du Chai
+    //    n'affichait que « Aucune cuvee embouteillee » : l'archive par
+    //    millesime, qui est la memoire du domaine, ne se voyait nulle part.
+    if(window.CAVE_ELEVAGE && window.CAVE_ELEVAGE.cuvees && window.CAVE_ELEVAGE.cuvees.length){
+      window.CAVE_ELEVAGE.cuvees.push({id:'cuv0',nom:'Gevrey-Chambertin VV',millesime:now.getFullYear()-3,
+        tonneaux:[{annee:now.getFullYear()-3,nb:5}],statut:'embouteille',fml_terminee:true,sous_tire:true,
+        last_ouillage:null,last_analyse:null,nb_bouteilles:1480,date_bouteille:_daysAgo(240)});
+    }
+  }catch(e){ if(window.logError)window.logError({level:'info',cat:'demo',msg:'seed cuivre/maturite/bouteille'}); }
+
   // 12bis) CEINTURE vendange : quel que soit l'ordre des pulls, on ré-affirme
   //         les tableaux du Cuvier en DIRECT (même motif que PAIE) juste avant
   //         le gel — un doc Firestore vide arrivé entre le seed et le gel
@@ -1819,9 +1898,12 @@ function _mvtWelcome(){
     +_mvtCap('\uD83C\uDF47','Parcelles, avancement & délais')
     +_mvtCap('\uD83D\uDC65','Équipe, planning & heures')
     +_mvtCap('\uD83D\uDE9C','Tracteur, carburant & entretien')
+    +_mvtCap('\uD83C\uDF77','Chai, Cuvier & mise en bouteille')
+    +_mvtCap('\uD83D\uDEE1\uFE0F','Conformit\u00e9 : cuivre, DRE, contr\u00f4le')
+    +_mvtCap('\uD83D\uDDA8\uFE0F','22 documents pr\u00eats \u00e0 imprimer')
     +_mvtCap('\uD83D\uDCCA','Pilotage : décider d\'un coup d\'œil')
     +'</div>'
-    +'<div class="mvtwc-foot"><div class="mvtwc-note">Suivez une journée type au domaine — deux minutes, montre en main.</div>'
+    +'<div class="mvtwc-foot"><div class="mvtwc-note">Suivez une journée type au domaine — trois minutes, montre en main. Puis '+_MVT_CHAPS.length+' écrans à explorer librement.</div>'
     +'<button class="mvtwc-go" id="mvtwc-go">Commencer la visite&nbsp;&nbsp;\u25B6</button>'
     +'<button class="mvtwc-skip" id="mvtwc-skip">Explorer par moi-même</button></div>'
     +'</div>';
@@ -1912,6 +1994,10 @@ var _mvtCss = `
 .mvt-menu-h{font-family:'Cormorant Garamond',serif;font-size:25px;font-weight:600;line-height:1.1;color:#2A2521;text-align:center;margin-top:4px}
 .mvt-menu-sub{font-size:12.5px;color:#6a5f52;line-height:1.5;text-align:center;margin:8px 6px 4px}
 .mvt-ch-grid{display:flex;flex-direction:column;gap:8px;margin:14px 0 6px}
+.mvt-fam{display:flex;align-items:center;gap:8px;margin:14px 2px 2px;font-size:10.5px;font-weight:700;letter-spacing:1.1px;text-transform:uppercase;color:#8A5A38}
+.mvt-fam:first-child{margin-top:2px}
+.mvt-fam-ic{font-size:13px;letter-spacing:0}
+.mvt-fam-n{margin-left:auto;font-size:10px;font-weight:600;letter-spacing:0;color:#A99781;background:#F3EADF;border:1px solid #E8E0D2;border-radius:99px;padding:1px 7px}
 .mvt-ch{display:flex;align-items:center;gap:12px;text-align:left;width:100%;background:#fff;border:1px solid #E8E0D2;border-radius:14px;padding:12px 13px;cursor:pointer;font-family:inherit;transition:transform .08s ease,box-shadow .15s ease}
 .mvt-ch:hover{box-shadow:0 6px 18px rgba(20,17,13,.12);transform:translateY(-1px)}
 .mvt-ch-ic{font-size:22px;flex-shrink:0;width:30px;text-align:center}
@@ -1936,7 +2022,7 @@ var DEMO2_CREDITS = [
   { k:'validation', min:5,  freq:400, lab:'Journal & validations',                   hyp:'Estimation prudente : 5 min de papier par t\u00e2che valid\u00e9e \u2014 250 valid\u00e9es chez moi de janvier \u00e0 juillet.' },
   { k:'finmois',    min:90, freq:12,  lab:'Fins de mois \u2014 heures, CP, PDF MSA', hyp:'' },
   { k:'saisonniers',min:40, freq:12,  lab:'Saisonniers & vendanges \u2014 dossiers, heures, relev\u00e9s', hyp:'' },
-  { k:'cuvees',     min:15, freq:24,  lab:'Chai & Cuvier \u2014 suivi des cuv\u00e9es', hyp:'' },
+  { k:'cuvees',     min:15, freq:24,  lab:'Chai & Cuvier \u2014 suivi des cuv\u00e9es', hyp:'Estimation : 15 min de cahier de cave par op\u00e9ration \u2014 ouillage, soutirage, analyse.' },
   { k:'reserve',    min:20, freq:12,  lab:'La R\u00e9serve \u2014 stock & bilan mati\u00e8re', hyp:'' },
   { k:'info',       min:10, freq:220, lab:'Retrouver l\u2019info, \u00e9viter le d\u00e9placement pour rien', hyp:'' }
 ];
@@ -1948,52 +2034,90 @@ function _demo2Hyp(k){ for(var i=0;i<DEMO2_CREDITS.length;i++){ if(DEMO2_CREDITS
 //    La narration vit en bandeau bas (.mvt-bar) ; le spotlight (masques + ring)
 //    est conserv\u00e9 tel quel. Le 9e moment est l'addition (_mvtAddition).
 var _mvtSteps = [
-  { kick:'8 h \u00b7 moment 1 sur 13', tx:'Lundi. 7 hectares, 4 personnes \u2014 et la m\u00e9t\u00e9o d\u00e9j\u00e0 parcelle par parcelle. Aujourd\u2019hui, c\u2019est sec.',
+  // ── Le matin : ce que dit le ciel, et ce qu'on decide d'en faire ──
+  { kick:'8 h', tx:'Lundi. 7 hectares, 4 personnes \u2014 et la m\u00e9t\u00e9o d\u00e9j\u00e0 parcelle par parcelle. Aujourd\u2019hui, c\u2019est sec.',
     sel:['.home-w[data-w="meteo5"]','#home-meteo5'] },
-  { kick:'Le cap du jour \u00b7 2 sur 13', tx:'Avant que l\u2019\u00e9quipe arrive : la t\u00e2che du moment, un mot pour tous.',
+  { kick:'8 h 05', tx:'Vos vignes sont sur trois communes. Trois pr\u00e9visions distinctes, pas une moyenne : il pleut \u00e0 Fixin, pas \u00e0 Gevrey. C\u2019est ce qui d\u00e9cide o\u00f9 part l\u2019\u00e9quipe.',
+    hyp:'Chaque secteur suit ses propres coordonn\u00e9es \u2014 rien \u00e0 param\u00e9trer, les parcelles portent leur commune.',
+    nav:function(){ if(window.goTo) window.goTo('home'); setTimeout(function(){ var el=document.getElementById('home-meteo-communes'); if(el){ try{ el.scrollIntoView({block:'center'}); }catch(e){ if(window.logError)window.logError({level:'info',cat:'visite',msg:'scroll secteurs'}); } } },260); },
+    sel:['#home-meteo-communes','.home-w[data-w="meteo5"]'] },
+  { kick:'Le cap du jour', tx:'Avant que l\u2019\u00e9quipe arrive : la t\u00e2che du moment, un mot pour tous.',
     mission:'Touchez \u00ab Diffuser la priorit\u00e9 \u00bb',
-    nav:function(){ try{ openPriorityEdit(); }catch(e){} }, sel:'#ovPriority .modal', clickSel:'#ovPriority .mbtn.verte' },
-  { kick:'9 h 40 \u00b7 3 sur 13', tx:'L\u2019\u00e9quipe vient de finir une parcelle. Notez-le.',
+    nav:function(){ try{ openPriorityEdit(); }catch(e){ if(window.logError)window.logError({level:'info',cat:'visite',msg:'openPriorityEdit'}); } }, sel:'#ovPriority .modal', clickSel:'#ovPriority .mbtn.verte' },
+
+  // ── Le geste du terrain, et sa trace ──
+  { kick:'9 h 40', tx:'L\u2019\u00e9quipe vient de finir une parcelle. Notez-le.',
     mission:'Touchez le \u2713',
-    nav:function(){ try{ pTacheFilter=window._visiteTache||'Ebourgeonnage'; }catch(e){} if(window.switchVigneOng) window.switchVigneOng('parcelles'); },
+    nav:function(){ try{ pTacheFilter=window._visiteTache||'Ebourgeonnage'; }catch(e){ if(window.logError)window.logError({level:'info',cat:'visite',msg:'pTacheFilter'}); } if(window.switchVigneOng) window.switchVigneOng('parcelles'); },
     sel:'.pcard-qv .pc-validate', clickSel:'.pcard-qv .pc-validate', actDelay:1700 },
-  { kick:'C\u2019est trac\u00e9 \u00b7 4 sur 13', tx:'Votre validation est au journal : parcelle, \u00e9quipe, m\u00e9t\u00e9o du jour. Rien \u00e0 remplir.',
-    nav:function(){ if(window.switchVigneOng) window.switchVigneOng('journal'); try{ renderJournal(); }catch(e){} },
+  { kick:'C\u2019est trac\u00e9', tx:'Votre validation est au journal : parcelle, \u00e9quipe, m\u00e9t\u00e9o du jour. Rien \u00e0 remplir.',
+    nav:function(){ if(window.switchVigneOng) window.switchVigneOng('journal'); try{ renderJournal(); }catch(e){ if(window.logError)window.logError({level:'info',cat:'visite',msg:'renderJournal'}); } },
     sel:'.jcard', credit:{ k:'validation', min:5 } },
-  { kick:'16 h 20 \u00b7 5 sur 13', tx:'Le traitement d\u2019hier est au registre : n\u00b0 AMM, dose, DAR, ZNT remplis depuis le catalogue officiel E-Phy. Demain, la parcelle trait\u00e9e s\u2019affichera ferm\u00e9e.',
+  { kick:'10 h 15', tx:'Les m\u00eames parcelles vues d\u2019en haut. La couleur, c\u2019est l\u2019avancement : ce qui reste se voit sans ouvrir une liste.',
+    hyp:'Parcelles g\u00e9olocalis\u00e9es \u2014 surfaces, c\u00e9pages et contours viennent de votre relev\u00e9.',
+    nav:function(){ if(window.goTo) window.goTo('parcelles'); setTimeout(function(){ try{ if(window.switchPTab) window.switchPTab('carte'); }catch(e){ if(window.logError)window.logError({level:'info',cat:'visite',msg:'switchPTab carte'}); } },240); },
+    sel:['#pwrapcarte','#page-parcelles'] },
+
+  // ── Midi : la machine ──
+  { kick:'12 h 30', tx:'Le plein. La cuve GNR est \u00e0 255 L sur 1 000 \u2014 sous votre seuil \u2014 et le New Holland affiche 482 h : r\u00e9vision \u00e0 500. Le mat\u00e9riel pr\u00e9vient avant de tomber en panne.',
+    hyp:'Pleins, vidanges, filtres, anomalies : le carnet d\u2019entretien s\u2019\u00e9crit \u00e0 chaque passage.',
+    nav:function(){ if(window.goTo) window.goTo('tracteur'); setTimeout(function(){ try{ if(window.switchTracOnglet) window.switchTracOnglet('entretiens'); }catch(e){ if(window.logError)window.logError({level:'info',cat:'visite',msg:'switchTracOnglet'}); } },240); },
+    sel:['#trac-panel-entretiens','#page-tracteur'] },
+
+  // ── L'apres-midi : le traitement, sa preuve, ses consequences ──
+  { kick:'16 h 20', tx:'Le traitement d\u2019hier est au registre : n\u00b0 AMM, dose, DAR, ZNT remplis depuis le catalogue officiel E-Phy. Demain, la parcelle trait\u00e9e s\u2019affichera ferm\u00e9e.',
     nav:function(){ if(window.goTo) window.goTo('phyto'); },
     sel:'#page-phyto .content', credit:{ k:'phyto', min:20 } },
-  { kick:'16 h 30 \u00b7 6 sur 13', tx:'La R\u00e9serve a suivi toute seule : la bouillie du registre est sortie du stock. Achats, inventaires, f\u00fbts \u2014 et le bilan mati\u00e8re s\u2019\u00e9crit au fil des traitements.',
+  { kick:'16 h 25', tx:'Le m\u00eame registre, vu du contr\u00f4le : cuivre m\u00e9tal cumul\u00e9 sur sept ans face au plafond bio, passages par parcelle, d\u00e9lai de rentr\u00e9e en cours. Rien \u00e0 recalculer la veille.',
+    hyp:'Le cumul se met \u00e0 jour \u00e0 chaque traitement saisi \u2014 personne ne tient ce tableau \u00e0 la main.',
+    nav:function(){ if(window.goTo) window.goTo('pilotage'); setTimeout(function(){ try{ var b=document.querySelector('#pil-tabs [data-tab="cfm"]'); if(b) b.click(); else if(window.logError) window.logError({level:'info',cat:'visite',msg:'onglet cfm introuvable'}); }catch(e){ if(window.logError)window.logError({level:'info',cat:'visite',msg:'tab cfm'}); } },260); },
+    sel:['.pil-tile[data-pid="cuivre"]','.pil-panels','#page-pilotage .content'] },
+  { kick:'16 h 30', tx:'La R\u00e9serve a suivi toute seule : la bouillie du registre est sortie du stock. Achats, inventaires, f\u00fbts \u2014 et le bilan mati\u00e8re s\u2019\u00e9crit au fil des traitements.',
     hyp:'\u2248 4 h d\u2019inventaires par an \u2014 et le bilan mati\u00e8re r\u00e9glementaire toujours \u00e0 jour.',
     nav:function(){ if(window.goTo) window.goTo('reserve'); setTimeout(function(){ try{ if(window._rsvTabTo) window._rsvTabTo('audit'); }catch(e){ if(window.logError)window.logError({level:'info',cat:'visite',msg:'rsvTabTo'}); } },240); },
     sel:['#mvr-body','#page-reserve'] },
-  { kick:'17 h \u00b7 7 sur 13', tx:'Au Chai, chaque cuv\u00e9e suit ses f\u00fbts, sa part des anges et ses analyses \u2014 SO2 et acidit\u00e9 se comparent d\u2019un relev\u00e9 \u00e0 l\u2019autre, l\u2019ouillage en retard s\u2019est signal\u00e9 tout seul.',
-    hyp:'Suivi des cuv\u00e9es : \u2248 6 h de cahier de cave par an.',
-    nav:function(){ if(window.goTo) window.goTo('cave'); setTimeout(function(){ try{ if(window.renderCave) renderCave(); }catch(e){ if(window.logError)window.logError({level:'error',cat:'visite',msg:'chai: '+(e&&e.message)}); } },240); },
-    sel:['#mvc-elevage','#page-cave'] },
-  { kick:'17 h 15 \u00b7 8 sur 13', tx:'Le Cuvier suit la vendange cuve par cuve : un relev\u00e9 de densit\u00e9 par jour, et la cin\u00e9tique de fermentation se dessine toute seule.',
+
+  // ── Le soir : la cave ──
+  { kick:'17 h', tx:'Au Chai, chaque cuv\u00e9e suit ses f\u00fbts, sa part des anges et ses analyses \u2014 SO2 et acidit\u00e9 se comparent d\u2019un relev\u00e9 \u00e0 l\u2019autre, l\u2019ouillage en retard s\u2019est signal\u00e9 tout seul.',
+    nav:function(){ if(window.goTo) window.goTo('cave'); setTimeout(function(){ try{ if(window.selectCaveSection) window.selectCaveSection('elevage'); }catch(e){ if(window.logError)window.logError({level:'error',cat:'visite',msg:'chai: '+(e&&e.message)}); } },240); },
+    sel:['#mvc-elevage','#page-cave'], credit:{ k:'cuvees', min:15 } },
+  { kick:'17 h 10', tx:'Le Cuvier suit la vendange cuve par cuve : un relev\u00e9 de densit\u00e9 par jour, et la cin\u00e9tique de fermentation se dessine toute seule.',
     hyp:'Apports, caisses, rendement par parcelle : tout se garde d\u2019un mill\u00e9sime \u00e0 l\u2019autre.',
     nav:function(){ if(window.goTo) window.goTo('cave'); setTimeout(function(){ try{ if(window.selectCaveSection) window.selectCaveSection('vendange'); }catch(e){ if(window.logError)window.logError({level:'error',cat:'visite',msg:'cuvier: '+(e&&e.message)}); } },260); },
     sel:['#mvv-body','#cave-view-vend','#page-cave'] },
-  { kick:'17 h 30 \u00b7 9 sur 13', tx:'Le pointage du soir tient en deux gestes. Et l\u2019\u00e9cart se voit : Jean, une heure de retard \u2014 saisie en heures, elle tire sur son compteur.',
+  { kick:'17 h 20', tx:'Et la question du lendemain : qu\u2019est-ce qui m\u2019attend ? Ouillages dus, cuves \u00e0 mesurer, f\u00fbts \u00e0 pr\u00e9parer \u2014 la semaine se range toute seule, du raisin \u00e0 la bouteille.',
+    hyp:'Le mill\u00e9sime est un fil : la parcelle, la cuve, le f\u00fbt et la bouteille sont le m\u00eame vin.',
+    nav:function(){ if(window.goTo) window.goTo('cave'); setTimeout(function(){ try{ if(window.selectCaveSection) window.selectCaveSection('millesime'); }catch(e){ if(window.logError)window.logError({level:'error',cat:'visite',msg:'millesime: '+(e&&e.message)}); } },260); },
+    sel:['#ml-body','#cave-view-mil','#page-cave'] },
+
+  // ── Le soir : les gens ──
+  { kick:'17 h 30', tx:'Le pointage du soir tient en deux gestes. Et l\u2019\u00e9cart se voit : Jean, une heure de retard \u2014 saisie en heures, elle tire sur son compteur.',
     hyp:'La feuille d\u2019heures du soir n\u2019existe plus.',
     nav:function(){ if(window.goTo) window.goTo('planning'); },
     sel:['#page-planning .pl2-board','#page-planning'] },
-  { kick:'17 h 40 \u00b7 10 sur 13', tx:'La fiche de Jean, pr\u00eate pour la paie : acompte de 300 \u20ac, heures sup au compteur, retard et r\u00e9cup d\u00e9j\u00e0 compt\u00e9s \u2014 le relev\u00e9 MSA sort en PDF.',
+  { kick:'17 h 40', tx:'La fiche de Jean, pr\u00eate pour la paie : acompte de 300 \u20ac, heures sup au compteur, retard et r\u00e9cup d\u00e9j\u00e0 compt\u00e9s \u2014 le relev\u00e9 MSA sort en PDF.',
     hyp:'\u2248 18 h de fins de mois par an \u2014 et chaque saisonnier de vendanges suivi sans classeur.',
     nav:function(){ setTimeout(function(){ try{ if(window.openPlanFiche) openPlanFiche('Jean'); }catch(e){ if(window.logError)window.logError({level:'info',cat:'visite',msg:'planFiche'}); } },180); },
     sel:['#ovPlanFiche .modal','#ovPlanFiche'] },
-  { kick:'18 h \u00b7 11 sur 13', tx:'Le soir, la d\u00e9cision du jour est pr\u00eate \u2014 fen\u00eatre de traitement, mat\u00e9riel, cave. Rien \u00e0 chercher.',
-    nav:function(){ try{ if(window.closePlanFiche) closePlanFiche(); }catch(e2){ if(window.logError)window.logError({level:'info',cat:'visite',msg:'closeFiche'}); } try{ if(window.goTo) window.goTo('pilotage'); window.scrollTo(0,0); }catch(e){} },
+
+  // ── Le soir : decider ──
+  { kick:'18 h', tx:'Le soir, la d\u00e9cision du jour est pr\u00eate \u2014 fen\u00eatre de traitement, mat\u00e9riel, cave. Rien \u00e0 chercher.',
+    nav:function(){ try{ if(window.closePlanFiche) closePlanFiche(); }catch(e2){ if(window.logError)window.logError({level:'info',cat:'visite',msg:'closeFiche'}); } try{ if(window.goTo) window.goTo('pilotage'); window.scrollTo(0,0); }catch(e){ if(window.logError)window.logError({level:'info',cat:'visite',msg:'goTo pilotage'}); } },
     sel:['.pil-dec','.pil-cockpit-card','#page-pilotage .content'] },
-  { kick:'18 h 05 \u00b7 12 sur 13', tx:'Chaque parcelle porte son co\u00fbt r\u00e9el de main-d\u2019\u0153uvre \u2014 en euros, et \u00e0 l\u2019hectare, pond\u00e9r\u00e9 par l\u2019\u00e9quipe qui y est vraiment pass\u00e9e.',
+  { kick:'18 h 05', tx:'Chaque parcelle porte son co\u00fbt r\u00e9el de main-d\u2019\u0153uvre \u2014 en euros, et \u00e0 l\u2019hectare, pond\u00e9r\u00e9 par l\u2019\u00e9quipe qui y est vraiment pass\u00e9e.',
     nav:function(){ try{ var b=document.querySelector('#pil-tabs [data-tab="eco"]'); if(b) b.click(); else if(window.logError) window.logError({level:'info',cat:'visite',msg:'onglet eco introuvable'}); }catch(e){ if(window.logError)window.logError({level:'info',cat:'visite',msg:'tab eco'}); } },
     sel:['.pil-tbody','.pil-panels','#page-pilotage .content'] },
-  { kick:'18 h 10 \u00b7 13 sur 13', tx:'La question du renfort : combien, et quand ? Demandez au moteur \u2014 il essaie des centaines de placements et ne garde que ce qui boucle.',
+  { kick:'18 h 10', tx:'La question du renfort : combien, et quand ? Demandez au moteur \u2014 il essaie des centaines de placements et ne garde que ce qui boucle.',
     hyp:'Chaque proposition affiche son co\u00fbt \u2014 le classement se fait parmi ce qui boucle.',
     mission:'Touchez \u00ab Le meilleur placement trouv\u00e9 \u00bb',
     nav:function(){ try{ var b=document.querySelector('#pil-tabs [data-tab="sim"]'); if(b) b.click(); }catch(e){ if(window.logError)window.logError({level:'info',cat:'visite',msg:'tab sim'}); } },
-    sel:['.rf-strats','.pil-panels','#page-pilotage .content'], clickSel:'.rf-strat.best', actDelay:900 }
+    sel:['.rf-strats','.pil-panels','#page-pilotage .content'], clickSel:'.rf-strat.best', actDelay:900 },
+
+  // ── Et le jour du controle ──
+  { kick:'18 h 20', tx:'Reste le classeur. Registre phyto, synth\u00e8se cuivre, relev\u00e9s d\u2019heures MSA, inventaires, sauvegarde : vingt-deux documents, chacun \u00e0 un clic. Le registre phyto \u00e9lectronique devient obligatoire au 1\u1d49\u02b3 janvier 2027 \u2014 le v\u00f4tre sera pr\u00eat.',
+    hyp:'Ma Vigne pr\u00e9pare, vous d\u00e9clarez : ce sont vos \u00e9tats internes, mis au format attendu.',
+    nav:function(){ if(window.goTo) window.goTo('reglages'); setTimeout(function(){ try{ if(window.openDocs) window.openDocs(); }catch(e){ if(window.logError)window.logError({level:'info',cat:'visite',msg:'openDocs'}); } },300); },
+    sel:['#docs-list','#ovDocs .modal','#ovDocs'] }
 ];
 var _mvtCur=-1, _mvtEl=null, _mvtEls=null, _mvtOne=null, _mvtBuilt=false, _mvtEarn=0, _mvtDone={};
 function _mvtBuild(){
@@ -2048,7 +2172,10 @@ function _mvtNext(){
 function _mvtPlace(s){
   var isAct = !!(s.tap || s.clickSel);
   var bar=document.getElementById('mvt-bar'); if(!bar) return;
-  var dots=''; for(var i=0;i<14;i++){ dots += '<i class="'+(i===_mvtCur?'on':'')+'"></i>'; }
+  var _tot=_mvtSteps.length;
+  // Un point par moment, plus un pour l'addition. La boucle SUIT la liste :
+  // c'est la seule facon d'etre sur qu'un moment ajoute soit compte.
+  var dots=''; for(var i=0;i<=_tot;i++){ dots += '<i class="'+(i===_mvtCur?'on':'')+'"></i>'; }
   var mid;
   if(isAct){
     mid='<span class="mvt-miss"><span class="mvt-hand">\u{1F446}</span><span>'+s.mission+'</span></span>';
@@ -2056,7 +2183,7 @@ function _mvtPlace(s){
     mid='<button class="mvt-bnext on" id="mvt-next" type="button"><span>Continuer \u203a</span></button>';
   }
   var hyp=(s.credit && !_mvtDone[s.credit.k]) ? _demo2Hyp(s.credit.k) : (s.hyp||'');
-  bar.innerHTML='<div class="mvt-bar-in"><div class="mvt-bk">'+s.kick+'</div>'
+  bar.innerHTML='<div class="mvt-bar-in"><div class="mvt-bk">'+s.kick+' \u00b7 '+(_mvtCur+1)+' sur '+_tot+'</div>'
     +'<div class="mvt-btx">'+s.tx+'</div>'
     +(hyp?'<div class="mvt-bh">'+hyp+'</div>':'')
     +'<div class="mvt-brow">'+mid
@@ -2163,7 +2290,7 @@ function _mvtAddition(){
     +'<div class="mvt-add-eur">En face, ce que \u00e7a co\u00fbte : abonnement Domaine <b>79 \u20ac/mois</b> (948 \u20ac/an \u2014 790 \u20ac en formule annuelle) et l\u2019installation, une fois : <b>990 \u20ac</b>.</div>'
     +'<div class="mvt-add-inst">Premi\u00e8re ann\u00e9e, tout compris : \u2248 '+eur.toLocaleString('fr-FR')+' \u2212 '+abo+' \u2212 990 = <b>+\u2248 '+r1.toLocaleString('fr-FR')+' \u20ac</b> \u2014 l\u2019app est pay\u00e9e, et vous \u00eates d\u00e9j\u00e0 gagnant (+\u2248 '+r1a.toLocaleString('fr-FR')+' \u20ac en annuel). Ensuite : <b>\u2248 '+rn.toLocaleString('fr-FR')+' \u20ac de gagn\u00e9 chaque ann\u00e9e</b>.</div>'
     +'<a class="mvt-add-cta" href="/essai.html" target="_blank" rel="noopener">Essayer 15 jours sur mes parcelles</a>'
-    +'<button class="mvt-add-ghost" id="mvt-add-ch" type="button"><span>Voir les 12 chapitres \u203a</span></button>'
+    +'<button class="mvt-add-ghost" id="mvt-add-ch" type="button"><span>Voir les '+_MVT_CHAPS.length+' \u00e9crans \u203a</span></button>'
     +'<div class="mvt-add-sign">\u2014 Nicolas, chef d\u2019\u00e9quipe viticole en C\u00f4te de Nuits.<br>Compt\u00e9 sur mes propres journ\u00e9es.</div>'
     +'</div>';
   document.body.appendChild(m);
@@ -2173,36 +2300,84 @@ function _mvtAddition(){
 function _mvtEnd(){
   _mvtClearOne();
   var t=document.getElementById('mvt'); if(t){ t.style.display='none'; }
+  // Le 19e moment laisse le hub Documents ouvert : l'addition se dessinerait
+  // dessous, et le bouton d'essai ne serait jamais vu.
+  if(document.getElementById('ovDocs') && typeof window.closeOv==='function'){
+    try{ window.closeOv(null,'ovDocs'); }catch(e){ if(window.logError)window.logError({level:'info',cat:'visite',msg:'closeOv ovDocs'}); }
+  }
   _mvtAddition();
 }
 // ── Menu de chapitres (exploration libre, écrans réels) ──
+var _MVT_FAM=[
+  {k:'vigne',  ic:'\uD83C\uDF3F', t:'La vigne'},
+  {k:'cave',   ic:'\uD83C\uDF77', t:'La cave'},
+  {k:'equipe', ic:'\uD83D\uDC65', t:'L\u2019\u00e9quipe'},
+  {k:'outils', ic:'\uD83D\uDE9C', t:'Mat\u00e9riel & intrants'},
+  {k:'pil',    ic:'\uD83D\uDCCA', t:'Piloter'},
+  {k:'pap',    ic:'\uD83D\uDDA8\uFE0F', t:'Les papiers'}
+];
+// ⚠️ La famille du materiel s'appelle 'outils', PAS 'mat' : « mat » est une
+//    cle MORTE d'onglet du Pilotage (_PIL_TAB_MIGR), et C22 interdit de la
+//    citer ailleurs — c'est ce qui empeche un querySelector de viser le vide.
+// ⚠️ Chaque `id` doit avoir sa branche dans _mvtChapter() : un chapitre sans
+//    branche ouvre la barre du bas sur l'ecran precedent, sans erreur.
+//    Le harnais de livraison compare les deux listes.
 var _MVT_CHAPS=[
-  {id:'pilotage', ic:'\uD83D\uDCCA', t:'Pilotage \u2014 la vue chef', x:'Avancement, charge restante, fen\u00eatres de traitement et mat\u00e9riel : tout le domaine en un \u00e9cran.'},
-  {id:'carte',    ic:'\uD83D\uDDFA\uFE0F', t:'Carte du domaine', x:'Vos parcelles g\u00e9olocalis\u00e9es, color\u00e9es selon l\u2019avancement de la t\u00e2che en cours.'},
-  {id:'secteurs', ic:'\uD83C\uDF26\uFE0F', t:'M\u00e9t\u00e9o par secteur', x:'Vos vignes sur 3 communes : une pr\u00e9vision distincte par secteur, pas une moyenne.'},
-  {id:'planning', ic:'\uD83D\uDC65', t:'Planning & heures', x:'Pr\u00e9sence, compteur annuel des 1607 h, heures suppl\u00e9mentaires, cong\u00e9s et acomptes \u2014 la paie d\u00e9j\u00e0 pr\u00e9par\u00e9e.'},
-  {id:'tracteur', ic:'\uD83D\uDE9C', t:'Tracteur & carburant', x:'Cuve GNR, prochaine r\u00e9vision, anomalies : le suivi du mat\u00e9riel se tient seul.'},
-  {id:'phyto',    ic:'\uD83C\uDF3F', t:'Registre phytosanitaire', x:'Catalogue officiel E-Phy, d\u00e9lai de rentr\u00e9e calcul\u00e9 tout seul, registre pr\u00eat pour un contr\u00f4le.'},
-  {id:'cave',     ic:'\uD83C\uDF77', t:'Le Chai \u2014 \u00e9levage', x:'Cuv\u00e9es en f\u00fbt, rappels d\u2019ouillage, analyses labo, puis la mise en bouteille.'},
-  {id:'eco',      ic:'\uD83D\uDCB6', t:'Ce que co\u00fbte une parcelle', x:'Le co\u00fbt en euros et \u00e0 l\u2019hectare, pond\u00e9r\u00e9 par l\u2019\u00e9quipe r\u00e9ellement pass\u00e9e. La bascule pilote aussi le tri.'},
-  {id:'etp',      ic:'\uD83D\uDCC8', t:'Combien de bras', x:'Effectif pr\u00e9sent semaine par semaine, charge \u00e0 absorber, et le co\u00fbt total selon la taille d\u2019\u00e9quipe.'},
-  {id:'cuvier',   ic:'\uD83C\uDF47', t:'Le Cuvier \u2014 la vendange', x:'Du raisin \u00e0 la cuve : caisses, \u00e9tat du raisin, \u00e9raflage, rendement contr\u00f4l\u00e9 au remplissage.'},
-  {id:'reserve',  ic:'\uD83D\uDCE6', t:'La R\u00e9serve', x:'Stocks, achats et inventaires : le bilan mati\u00e8re se tient tout seul, produit par produit.'},
-  {id:'ouvrier',  ic:'\uD83D\uDC77', t:'Ce que voit l\u2019ouvrier', x:'Bascule sur l\u2019interface simplifi\u00e9e d\u2019un ouvrier : sa journ\u00e9e, sans le reste.'}
+  {f:'vigne', id:'carte',    ic:'\uD83D\uDDFA\uFE0F', t:'Carte du domaine', x:'Vos parcelles g\u00e9olocalis\u00e9es, color\u00e9es selon l\u2019avancement de la t\u00e2che en cours.'},
+  {f:'vigne', id:'secteurs', ic:'\uD83C\uDF26\uFE0F', t:'M\u00e9t\u00e9o par secteur', x:'Vos vignes sur 3 communes : une pr\u00e9vision distincte par secteur, pas une moyenne.'},
+  {f:'vigne', id:'parcelles',ic:'\u2705', t:'Parcelles & avancement', x:'La liste filtr\u00e9e par t\u00e2che, l\u2019avancement par passage et la validation en un tap.'},
+  {f:'vigne', id:'journal',  ic:'\uD83D\uDCD3', t:'Le journal des travaux', x:'Qui a fait quoi, o\u00f9, quand \u2014 en \u00e9quipe ou seul. La m\u00e9moire du domaine.'},
+
+  {f:'cave',  id:'cave',     ic:'\uD83D\uDEE2\uFE0F', t:'Le Chai \u2014 \u00e9levage', x:'Cuv\u00e9es en f\u00fbt, rappels d\u2019ouillage, analyses labo, part des anges.'},
+  {f:'cave',  id:'cuvier',   ic:'\uD83C\uDF47', t:'Le Cuvier \u2014 la vendange', x:'Du raisin \u00e0 la cuve : caisses, \u00e9tat du raisin, \u00e9raflage, densit\u00e9s jour par jour.'},
+  {f:'cave',  id:'maturite', ic:'\uD83D\uDD2C', t:'Contr\u00f4le de maturit\u00e9', x:'Vos relev\u00e9s au r\u00e9fractom\u00e8tre : qui monte, qui stagne, dans quel ordre r\u00e9colter.'},
+  {f:'cave',  id:'millesime',ic:'\uD83D\uDD70\uFE0F', t:'Le mill\u00e9sime \u2014 ce qui vient', x:'La semaine \u00e0 venir en cave, et le fil complet d\u2019un mill\u00e9sime, de la parcelle \u00e0 la bouteille.'},
+  {f:'cave',  id:'bouteille',ic:'\uD83C\uDF7E', t:'La mise en bouteille', x:'Le compte de bouteilles, les pertes \u00e9tape par \u00e9tape, et l\u2019archive par mill\u00e9sime.'},
+
+  {f:'equipe',id:'planning', ic:'\uD83D\uDCC5', t:'Planning & heures', x:'Pr\u00e9sence, compteur annuel des 1607 h, heures suppl\u00e9mentaires, cong\u00e9s et acomptes.'},
+  {f:'equipe',id:'fiche',    ic:'\uD83D\uDC64', t:'La fiche d\u2019un salari\u00e9', x:'Contrats, cong\u00e9s pris, annualisation, acomptes \u2014 et le relev\u00e9 MSA en PDF.'},
+  {f:'equipe',id:'ouvrier',  ic:'\uD83D\uDC77', t:'Ce que voit l\u2019ouvrier', x:'Bascule sur l\u2019interface simplifi\u00e9e d\u2019un ouvrier : sa journ\u00e9e, sans le reste.'},
+
+  {f:'outils',id:'tracteur', ic:'\uD83D\uDE9C', t:'Tracteur & sessions', x:'Le chantier en cours, les parcelles faites, le conducteur et la machine.'},
+  {f:'outils',id:'entretien',ic:'\uD83D\uDD27', t:'Entretien, GNR & r\u00e9visions', x:'Cuve GNR, prochaine r\u00e9vision, anomalies : le suivi du mat\u00e9riel se tient seul.'},
+  {f:'outils',id:'phyto',    ic:'\uD83C\uDF3F', t:'Registre phytosanitaire', x:'Catalogue officiel E-Phy, d\u00e9lai de rentr\u00e9e calcul\u00e9 tout seul, registre pr\u00eat pour un contr\u00f4le.'},
+  {f:'outils',id:'reserve',  ic:'\uD83D\uDCE6', t:'La R\u00e9serve', x:'Stocks, achats, inventaires et parc \u00e0 f\u00fbts : le bilan mati\u00e8re se tient tout seul.'},
+
+  {f:'pil',   id:'pilotage', ic:'\uD83E\uDDED', t:'Aujourd\u2019hui \u2014 la vue chef', x:'Marge sur votre objectif, charge restante, cadence, et la d\u00e9cision du jour.'},
+  {f:'pil',   id:'annee',    ic:'\uD83D\uDDD3\uFE0F', t:'L\u2019ann\u00e9e \u2014 les douze mois', x:'La frise annuelle, l\u2019exercice comptable et l\u2019ann\u00e9e vigne : deux cadres, deux r\u00e9ponses.'},
+  {f:'pil',   id:'campagne', ic:'\uD83C\uDF47', t:'La campagne', x:'Avancement par t\u00e2che, temps pass\u00e9, \u00e9ch\u00e9ances et comparatif avec l\u2019an dernier.'},
+  {f:'pil',   id:'eco',      ic:'\uD83D\uDCB6', t:'Ce que co\u00fbte une parcelle', x:'Le co\u00fbt en euros et \u00e0 l\u2019hectare, pond\u00e9r\u00e9 par l\u2019\u00e9quipe r\u00e9ellement pass\u00e9e.'},
+  {f:'pil',   id:'etp',      ic:'\uD83D\uDCC8', t:'Combien de bras', x:'Effectif pr\u00e9sent semaine par semaine, charge \u00e0 absorber, mat\u00e9riel et pic de saison.'},
+  {f:'pil',   id:'conformite',ic:'\uD83D\uDEE1\uFE0F', t:'Conformit\u00e9', x:'Cuivre m\u00e9tal sur 7 ans, passages phyto par parcelle, d\u00e9lais de rentr\u00e9e en cours.'},
+  {f:'pil',   id:'sim',      ic:'\uD83C\uDF9B\uFE0F', t:'Simuler un renfort', x:'Combien de bras, quand, et pour quel co\u00fbt \u2014 le moteur ne garde que ce qui boucle.'},
+
+  {f:'pap',   id:'documents',ic:'\uD83D\uDDA8\uFE0F', t:'Documents & impressions', x:'Vingt-deux documents pr\u00eats : registres, relev\u00e9s MSA, inventaires, sauvegarde.'},
+  {f:'pap',   id:'archives', ic:'\uD83D\uDDC3\uFE0F', t:'Les campagnes archiv\u00e9es', x:'Toutes vos saisons sur le m\u00eame axe : d\u2019une ann\u00e9e \u00e0 l\u2019autre, le d\u00e9calage se lit.'},
+  {f:'pap',   id:'reglages', ic:'\u2699\uFE0F', t:'Tout est param\u00e9trable', x:'T\u00e2ches, heures/ha, \u00e9quipe, communes, mat\u00e9riel, produits, formules de calcul.'}
 ];
 function _mvtMenu(){
   _mvtChapterClose(true);
   var old=document.getElementById('mvt-menu'); if(old) old.remove();
-  var grid=_MVT_CHAPS.map(function(c){
-    return '<button class="mvt-ch" data-cid="'+c.id+'"><span class="mvt-ch-ic">'+c.ic+'</span><span class="mvt-ch-tx"><b>'+c.t+'</b><i>'+c.x+'</i></span><span class="mvt-ch-go">\u203A</span></button>';
-  }).join('');
+  // Rendu par familles. Une entree dont la famille est inconnue n'est PAS
+  // perdue : elle rejoint la derniere famille plutot que de dispara\u00eetre en
+  // silence — c'est le defaut qu'on ne verrait jamais a la relecture.
+  var vus={}, grid='';
+  _MVT_FAM.forEach(function(f){
+    var lst=_MVT_CHAPS.filter(function(c){ return c.f===f.k; });
+    if(!lst.length) return;
+    lst.forEach(function(c){ vus[c.id]=1; });
+    grid+='<div class="mvt-fam"><span class="mvt-fam-ic">'+f.ic+'</span><span>'+f.t+'</span><span class="mvt-fam-n">'+lst.length+'</span></div>';
+    grid+=lst.map(_mvtChBtn).join('');
+  });
+  var orph=_MVT_CHAPS.filter(function(c){ return !vus[c.id]; });
+  if(orph.length){ grid+='<div class="mvt-fam"><span class="mvt-fam-ic">\u2026</span><span>Et aussi</span><span class="mvt-fam-n">'+orph.length+'</span></div>'+orph.map(_mvtChBtn).join(''); }
   var m=document.createElement('div'); m.id='mvt-menu'; m.className='mvt-menu';
   m.innerHTML='<div class="mvt-menu-card">'
     +'<div class="mvt-menu-eye">La visite continue</div>'
     +'<div class="mvt-menu-h">Vous avez suivi une journ\u00e9e.<br>Voici tout le reste.</div>'
-    +'<div class="mvt-menu-sub">Choisissez ce que vous voulez explorer \u2014 chaque \u00e9cran est r\u00e9el, rien n\u2019est enregistr\u00e9.</div>'
+    +'<div class="mvt-menu-sub">'+_MVT_CHAPS.length+' \u00e9crans, group\u00e9s par m\u00e9tier. Chacun est r\u00e9el \u2014 rien n\u2019est enregistr\u00e9.</div>'
     +'<div class="mvt-ch-grid">'+grid+'</div>'
-    +'<div class="mvt-menu-note">\u2699\uFE0F Et tout est param\u00e9trable : t\u00e2ches, heures/ha, \u00e9quipe, communes, mat\u00e9riel, produits\u2026</div>'
+    +'<div class="mvt-menu-note">\u2699\uFE0F Et tout se r\u00e8gle : t\u00e2ches, heures/ha, \u00e9quipe, communes, mat\u00e9riel, produits, bar\u00e8me\u2026</div>'
     +'<a class="mvt-eb p" href="/essai.html" target="_blank" rel="noopener">Demander un acc\u00e8s d\u2019essai</a>'
     +'<button class="mvt-eb" id="mvt-menu-free">Explorer l\u2019appli librement</button>'
     +'</div>';
@@ -2210,34 +2385,77 @@ function _mvtMenu(){
   Array.prototype.forEach.call(m.querySelectorAll('.mvt-ch'),function(b){ b.addEventListener('click',function(){ _mvtChapter(b.getAttribute('data-cid')); }); });
   var fr=document.getElementById('mvt-menu-free'); if(fr) fr.addEventListener('click',function(){ m.remove(); });
 }
+function _mvtChBtn(c){
+  return '<button class="mvt-ch" data-cid="'+c.id+'"><span class="mvt-ch-ic">'+c.ic+'</span><span class="mvt-ch-tx"><b>'+c.t+'</b><i>'+c.x+'</i></span><span class="mvt-ch-go">\u203A</span></button>';
+}
 function _mvtChapterClose(silent){
   var b=document.getElementById('mvt-chbar'); if(b) b.remove();
+  // Les chapitres qui ouvrent un OVERLAY doivent le refermer en sortant :
+  // sinon le menu se dessine dessous et le visiteur croit l'app bloquee.
+  ['ovDocs','ovPlanFiche'].forEach(function(id){
+    var ov=document.getElementById(id);
+    if(ov && typeof window.closeOv==='function'){ try{ window.closeOv(null,id); }catch(e){ if(window.logError)window.logError({level:'info',cat:'visite',msg:'closeOv '+id}); } }
+  });
   if(window._mvtOuvrierActive){
-    try{ if(window.currentUser){ window.currentUser.roles=['admin','ouvrier','tractoriste']; } if(typeof currentUser!=='undefined'){ currentUser.roles=['admin','ouvrier','tractoriste']; } if(typeof applyRoles==='function')applyRoles(); }catch(e){}
+    try{ if(window.currentUser){ window.currentUser.roles=['admin','ouvrier','tractoriste']; } if(typeof currentUser!=='undefined'){ currentUser.roles=['admin','ouvrier','tractoriste']; } if(typeof applyRoles==='function')applyRoles(); }catch(e){ if(window.logError)window.logError({level:'info',cat:'visite',msg:'roles rendus'}); }
     window._mvtOuvrierActive=false;
   }
+}
+// Les onglets du Pilotage vises par les chapitres. Table SEPAREE plutot que
+// cles ecrites dans la navigation : elles sont memorisees chez les clients et
+// verifiees par C22 (_PIL_VALID_TAB). Une cle morte se corrige ici, une fois.
+var _MVT_PILTAB={pilotage:'auj', annee:'an', campagne:'avc', etp:'equ', eco:'eco', conformite:'cfm', sim:'sim'};
+function _mvtGoPilTab(tb){
+  if(window.goTo) window.goTo('pilotage');
+  setTimeout(function(){
+    try{
+      var b=document.querySelector('#pil-tabs [data-tab="'+tb+'"]');
+      if(b) b.click();
+      else if(window.logError) window.logError({level:'info',cat:'demo',msg:'onglet '+tb+' introuvable'});
+    }catch(e){ if(window.logError)window.logError({level:'info',cat:'demo',msg:'pil tab '+tb}); }
+  },260);
+}
+function _mvtGoCave(sec,after){
+  if(window.goTo) window.goTo('cave');
+  setTimeout(function(){
+    try{
+      if(window.selectCaveSection) window.selectCaveSection(sec);
+      if(after) after();
+    }catch(e){ if(window.logError)window.logError({level:'info',cat:'demo',msg:'cave '+sec}); }
+  },260);
 }
 function _mvtChapter(id){
   var c=null; for(var i=0;i<_MVT_CHAPS.length;i++){ if(_MVT_CHAPS[i].id===id){ c=_MVT_CHAPS[i]; break; } }
   if(!c) return;
+  _mvtChapterClose(true);
   var menu=document.getElementById('mvt-menu'); if(menu) menu.remove();
   try{
-    if(id==='pilotage'){ goTo('pilotage'); }
-    else if(id==='carte'){ goTo('parcelles'); setTimeout(function(){ try{ if(window.switchPTab) window.switchPTab('carte'); }catch(e){} },240); }
-    else if(id==='secteurs'){ goTo('home'); setTimeout(function(){ var el=document.getElementById('home-meteo-communes'); if(el){ try{ el.scrollIntoView({behavior:'smooth',block:'center'}); }catch(e){} } },340); }
+    if(_MVT_PILTAB[id]){ _mvtGoPilTab(_MVT_PILTAB[id]); }
+    else if(id==='carte'){ goTo('parcelles'); setTimeout(function(){ try{ if(window.switchPTab) window.switchPTab('carte'); }catch(e){ if(window.logError)window.logError({level:'info',cat:'demo',msg:'switchPTab carte'}); } },240); }
+    else if(id==='parcelles'){ goTo('parcelles'); setTimeout(function(){ try{ if(window.switchPTab) window.switchPTab('liste'); }catch(e){ if(window.logError)window.logError({level:'info',cat:'demo',msg:'switchPTab liste'}); } },240); }
+    else if(id==='journal'){ if(window.switchVigneOng) window.switchVigneOng('journal'); setTimeout(function(){ try{ if(window.renderJournal) window.renderJournal(); }catch(e){ if(window.logError)window.logError({level:'info',cat:'demo',msg:'renderJournal'}); } },200); }
+    else if(id==='secteurs'){ goTo('home'); setTimeout(function(){ var el=document.getElementById('home-meteo-communes'); if(el){ try{ el.scrollIntoView({behavior:'smooth',block:'center'}); }catch(e){ if(window.logError)window.logError({level:'info',cat:'demo',msg:'scroll secteurs'}); } } },340); }
+    else if(id==='cave'){ _mvtGoCave('elevage',function(){ if(window.switchCaveOng) window.switchCaveOng('cuv'); }); }
+    else if(id==='bouteille'){ _mvtGoCave('elevage',function(){ if(window.switchCaveOng) window.switchCaveOng('bouteille'); }); }
+    else if(id==='cuvier'){ _mvtGoCave('vendange',function(){ if(window.switchVendOng) window.switchVendOng('rec'); }); }
+    else if(id==='maturite'){ _mvtGoCave('vendange',function(){ if(window.switchVendOng) window.switchVendOng('ana'); }); }
+    else if(id==='millesime'){ _mvtGoCave('millesime',null); }
     else if(id==='planning'){ goTo('planning'); }
-    else if(id==='tracteur'){ goTo('tracteur'); setTimeout(function(){ try{ if(window.switchTracOnglet) window.switchTracOnglet('entretiens'); }catch(e){} },220); }
-    else if(id==='cave'){ goTo('cave'); }
+    else if(id==='fiche'){ goTo('planning'); setTimeout(function(){ try{ if(window.openPlanFiche) window.openPlanFiche('Jean'); }catch(e){ if(window.logError)window.logError({level:'info',cat:'demo',msg:'planFiche'}); } },300); }
+    else if(id==='tracteur'){ goTo('tracteur'); setTimeout(function(){ try{ if(window.switchTracOnglet) window.switchTracOnglet('sessions'); }catch(e){ if(window.logError)window.logError({level:'info',cat:'demo',msg:'trac sessions'}); } },220); }
+    else if(id==='entretien'){ goTo('tracteur'); setTimeout(function(){ try{ if(window.switchTracOnglet) window.switchTracOnglet('entretiens'); }catch(e){ if(window.logError)window.logError({level:'info',cat:'demo',msg:'trac entretiens'}); } },220); }
     else if(id==='phyto'){ goTo('phyto'); }
-    else if(id==='eco'||id==='etp'){ goTo('pilotage'); (function(tb){ setTimeout(function(){ try{ var b=document.querySelector('#pil-tabs [data-tab="'+tb+'"]'); if(b) b.click(); else if(window.logError) window.logError({level:'info',cat:'demo',msg:'onglet '+tb+' introuvable'}); }catch(e){ if(window.logError)window.logError({level:'info',cat:'demo',msg:'pil tab'}); } },260); })(id==='eco'?'eco':'equ'); }
-    else if(id==='cuvier'){ goTo('cave'); setTimeout(function(){ try{ if(window.selectCaveSection) window.selectCaveSection('vendange'); if(window.switchVendOng) window.switchVendOng('rec'); }catch(e){ if(window.logError)window.logError({level:'info',cat:'demo',msg:'cuvier'}); } },260); }
     else if(id==='reserve'){ goTo('reserve'); setTimeout(function(){ try{ if(window._rsvTabTo) window._rsvTabTo('audit'); }catch(e){ if(window.logError)window.logError({level:'info',cat:'demo',msg:'rsvTabTo'}); } },240); }
+    else if(id==='documents'){ goTo('reglages'); setTimeout(function(){ try{ if(window.openDocs) window.openDocs(); }catch(e){ if(window.logError)window.logError({level:'info',cat:'demo',msg:'openDocs'}); } },300); }
+    else if(id==='archives'){ if(window._pilOpenArchives) window._pilOpenArchives(); else _mvtGoPilTab('arc'); }
+    else if(id==='reglages'){ goTo('reglages'); setTimeout(function(){ try{ if(window.switchReglTab) window.switchReglTab('vigne'); }catch(e){ if(window.logError)window.logError({level:'info',cat:'demo',msg:'switchReglTab'}); } },280); }
     else if(id==='ouvrier'){
       window._mvtOuvrierActive=true;
-      try{ if(window.currentUser){ window.currentUser.roles=['ouvrier']; } if(typeof currentUser!=='undefined'){ currentUser.roles=['ouvrier']; } if(typeof applyRoles==='function')applyRoles(); }catch(e){}
+      try{ if(window.currentUser){ window.currentUser.roles=['ouvrier']; } if(typeof currentUser!=='undefined'){ currentUser.roles=['ouvrier']; } if(typeof applyRoles==='function')applyRoles(); }catch(e){ if(window.logError)window.logError({level:'info',cat:'demo',msg:'roles ouvrier'}); }
       goTo('home');
     }
-  }catch(e){}
+    else if(window.logError){ window.logError({level:'info',cat:'demo',msg:'chapitre sans branche : '+id}); }
+  }catch(e){ if(window.logError)window.logError({level:'info',cat:'demo',msg:'chapitre '+id+' : '+(e&&e.message)}); }
   var oldb=document.getElementById('mvt-chbar'); if(oldb) oldb.remove();
   var bar=document.createElement('div'); bar.id='mvt-chbar'; bar.className='mvt-chbar';
   var backLbl=(id==='ouvrier')?'\u2039 Revenir (chef)':'\u2039 Les chapitres';
