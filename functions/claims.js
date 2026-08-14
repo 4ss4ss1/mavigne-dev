@@ -770,6 +770,292 @@ exports.gtSetTenantPlan = onCall({ region: REGION, enforceAppCheck: true, timeou
   } catch (e) { throw new HttpsError('internal', e.message); }
 });
 
+
+// ══════════════════════════════════════════════════════════════════
+// ESSAI BORNÉ — 15 jours, reconductibles UNE FOIS, puis lecture seule
+// ══════════════════════════════════════════════════════════════════
+// LE PROBLEME QU'ON REGLE : un essai sans borne n'oblige a rien. Personne ne
+// rappelle, personne ne decide, et le domaine reste ouvert indefiniment.
+//
+// LA FORME : 15 jours d'ecriture. A J-3, un mail previent Nicolas — c'est LUI qui
+// doit reprendre la main, pas le client qui doit y penser. A l'echeance, le client
+// passe en LECTURE SEULE : il garde tout, il voit tout, il n'ecrit plus. Nicolas peut
+// reconduire UNE fois, ce qui redonne 15 jours et declenche un mail « appelle-le ».
+// Quinze jours apres une expiration jamais reconduite, un mail de relance part CHEZ
+// LE CLIENT : le contact n'a pas eu lieu, on le provoque.
+//
+// ⚠️ CE QUI FAIT FOI, ET CE QUI N'EN EST QU'UNE COPIE
+//    Ce qui GELE le client, c'est le claim `trial_until`, pose sur chaque membre.
+//    Le registre `_guerettech/tenants.clients[slug].trialExp` en est la COPIE — celle
+//    que cette veille lit, parce qu'elle ne peut pas parcourir les jetons de tous les
+//    membres de tous les domaines chaque nuit. Les deux s'ecrivent dans le meme geste
+//    (ici, _fcSaveAbo, agtInsTrialGo). Si un jour l'un part sans l'autre, la veille
+//    se trompera de date en silence : c'est le seul point fragile de ce lot.
+//
+// ⚠️ LA LECTURE SEULE EST COTE NAVIGATEUR. `window._MV_LOCKED` bloque saveData ;
+//    firestore.rules ne connait pas `trial_until`. C'est un frein commercial, pas
+//    une serrure. Assume, et ecrit ici pour que personne ne le decouvre autrement.
+const TRIAL_DAYS      = 15;                      // duree d'un essai, et d'une reconduction
+const TRIAL_MAX_RENEW = 1;                       // « renouvelable une fois » — la borne
+const TRIAL_WARN_D    = 3;                       // alerte a Nicolas, J-3 avant l'echeance
+const TRIAL_RELANCE_D = 15;                      // relance au client, J+15 apres expiration seche
+const TRIAL_MAILS_DOC = '_guerettech/trial_mails';
+
+// ⚠️ esc() vit dans leads.js, PAS ici. L'appeler depuis claims.js passe node --check,
+//    passe le chargement du module, et n'echoue qu'A L'EXECUTION — mail avale, alerte
+//    jamais recue, et personne pour s'en apercevoir. Un helper local, donc.
+function _trialEsc(v) {
+  return String(v == null ? '' : v)
+    .replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;')
+    .replace(/"/g, '&quot;').replace(/'/g, '&#39;');
+}
+
+// Anti-doublon : une veille QUOTIDIENNE qui renvoie le meme mail chaque nuit est pire
+// que pas de veille du tout — on cesse de les lire. Un marqueur par slug et par
+// moment, pose APRES la mise en file.
+async function _trialMarks(db) {
+  try {
+    const s = await db.doc(TRIAL_MAILS_DOC).get();
+    const v = s.exists ? (s.data() || {}).value : null;
+    return (v && typeof v === 'object') ? v : {};
+  } catch (e) { return {}; }
+}
+
+// L'adresse du client : le premier membre qui porte le role admin, a defaut le premier
+// membre tout court. Meme source que setTenantPlanTrial — un seul endroit ou se tromper.
+async function _trialAdminMail(db, slug) {
+  try {
+    const s = await db.doc('mavigne_' + slug + '/membres').get();
+    const d = s.exists ? s.data() : null;
+    const v = d ? (d.value !== undefined ? d.value : d) : null;
+    const membres = Array.isArray(v) ? v : [];
+    const adm = membres.filter((m) => m && m.email && Array.isArray(m.roles) && m.roles.indexOf('admin') >= 0);
+    const pick = adm.length ? adm[0] : membres.filter((m) => m && m.email)[0];
+    return pick ? { email: String(pick.email), nom: String(pick.nom || '') } : null;
+  } catch (e) { return null; }
+}
+
+function _trialJours(ms) { return Math.ceil((ms - Date.now()) / DAY_MS); }
+
+// ── Les quatre messages ──────────────────────────────────────────
+// Les trois premiers vont a Nicolas : courts, un fait et une action. Le quatrieme part
+// chez le client : c'est le seul qui a besoin d'etre ecrit, pas note.
+function _trialMailNico(sujet, lignes, slug) {
+  const txt = lignes.join('\n') + '\n\nPanneau GUERETTECH → Clients → ' + slug + ' → Abonnement.';
+  return {
+    subject: sujet,
+    text:    txt,
+    html:    '<div style="font-family:system-ui,Arial,sans-serif;max-width:520px;color:#14110D;font-size:15px;line-height:1.6">'
+             + lignes.map((l) => '<p style="margin:0 0 8px">' + _trialEsc(l) + '</p>').join('')
+             + '<p style="font-size:13px;color:#6E6456;margin-top:16px">Panneau GUERETTECH \u2192 Clients \u2192 '
+             + _trialEsc(slug) + ' \u2192 Abonnement.</p></div>',
+  };
+}
+
+function _trialMailRelance(domaine) {
+  const t = 'Bonjour,\n\n'
+    + 'Votre essai de Ma Vigne s\u2019est termine il y a deux semaines. Votre domaine est toujours '
+    + 'la, avec vos parcelles, votre equipe et tout ce que vous y avez saisi : rien n\u2019a ete '
+    + 'efface. Vous pouvez toujours tout consulter, simplement plus rien modifier.\n\n'
+    + 'Si le moment etait mal choisi, dites-le moi : je peux vous rouvrir l\u2019ecriture le temps '
+    + 'qu\u2019il faut. Et si l\u2019outil ne vous a pas convaincu, dites-le moi aussi — savoir ce qui '
+    + 'a manque m\u2019est utile.\n\n'
+    + 'Repondez simplement a ce message, ou appelez-moi.\n\n'
+    + 'Nicolas Gueret\nMa Vigne \u2014 GUERETTECH\n06 99 42 48 59\nmavigneapp.fr';
+  return {
+    subject: 'Votre domaine sur Ma Vigne \u2014 ' + domaine,
+    text:    t,
+    html:    '<div style="font-family:system-ui,Arial,sans-serif;max-width:520px;color:#14110D;font-size:15px;line-height:1.6">'
+             + '<p>Bonjour,</p>'
+             + '<p>Votre essai de Ma Vigne s\u2019est termin\u00e9 il y a deux semaines. Votre domaine est '
+             + 'toujours l\u00e0, avec vos parcelles, votre \u00e9quipe et tout ce que vous y avez saisi : '
+             + '<strong>rien n\u2019a \u00e9t\u00e9 effac\u00e9</strong>. Vous pouvez toujours tout consulter, simplement '
+             + 'plus rien modifier.</p>'
+             + '<p>Si le moment \u00e9tait mal choisi, dites-le moi : je peux vous rouvrir l\u2019\u00e9criture le '
+             + 'temps qu\u2019il faut. Et si l\u2019outil ne vous a pas convaincu, dites-le moi aussi \u2014 savoir '
+             + 'ce qui a manqu\u00e9 m\u2019est utile.</p>'
+             + '<p>R\u00e9pondez simplement \u00e0 ce message, ou appelez-moi.</p>'
+             + '<p style="margin-top:22px"><strong>Nicolas Gu\u00e9ret</strong><br>'
+             + '<span style="color:#6E6456">Ma Vigne \u2014 GUERETTECH</span><br>'
+             + '<span style="color:#6E6456">06 99 42 48 59 \u00b7 mavigneapp.fr</span></p></div>',
+  };
+}
+
+// ── gtRenewTrial — la reconduction, UNE fois, et le mail qui suit ─
+// LE GARDE-FOU EST ICI, PAS DANS L'ECRAN. Un bouton grise se contourne ; une regle
+// commerciale qui ne vit que dans le rendu n'est pas une regle. gtSetTenantPlan reste
+// ouvert a cote : c'est le passe-partout de Nicolas, assume, et pas le chemin normal.
+exports.gtRenewTrial = onCall({ region: REGION, enforceAppCheck: true, timeoutSeconds: 120 }, async (request) => {
+  assertGtAdmin(request);
+  const tenant = String((request.data && request.data.tenant) || '');
+  if (!/^[a-z0-9][a-z0-9-]*$/.test(tenant)) throw new HttpsError('invalid-argument', 'tenant invalide.');
+
+  const db = admin.firestore();
+  const regRef = db.doc('_guerettech/tenants');
+  const reg = await regRef.get();
+  const data = reg.exists ? (reg.data() || {}) : {};
+  const clients = (data.clients && typeof data.clients === 'object') ? data.clients : {};
+  const cli = clients[tenant];
+  if (!cli) throw new HttpsError('not-found', 'Domaine inconnu au registre.');
+
+  const faites = (typeof cli.trialRenewals === 'number') ? cli.trialRenewals : 0;
+  if (faites >= TRIAL_MAX_RENEW) {
+    throw new HttpsError('failed-precondition',
+      'Essai déjà reconduit une fois. Au-delà, c\u2019est une conversion — ou l\u2019onglet Abonnement, en connaissance de cause.',
+      { reason: 'max_renewals', renewals: faites });
+  }
+
+  // ⚠️ Le compte repart de MAINTENANT, pas de l'ancienne echeance. Un essai reconduit
+  //    trois jours apres son terme donne bien quinze jours pleins : sinon la lenteur
+  //    administrative se paie sur le temps du client, ce que ce lot existe pour eviter.
+  const until = Date.now() + TRIAL_DAYS * DAY_MS;
+  const plan = (PLANS.indexOf(cli.plan) >= 0) ? cli.plan : 'domaine';
+  const rep = await setTenantPlanTrial(db, tenant, plan, until);
+
+  const next = Object.assign({}, clients);
+  next[tenant] = Object.assign({}, cli, {
+    trialDays:     TRIAL_DAYS,
+    trialExp:      until,
+    trialRenewals: faites + 1,
+    trialRenewedAt: new Date().toISOString(),
+  });
+  delete next[tenant].trialPrevu;
+  await regRef.set(Object.assign({}, data, { clients: next }), { merge: true });
+
+  // Le marqueur repart de zero : la nouvelle echeance doit pouvoir re-alerter.
+  try {
+    const marks = await _trialMarks(db);
+    delete marks[tenant];
+    await db.doc(TRIAL_MAILS_DOC).set({ value: marks }, { merge: false });
+  } catch (e) { logger.warn('[trial] marqueurs non remis à zéro', e); }
+
+  // ★ Le mail demande : « si reconduction, un mail chez moi pour que j'appelle ».
+  try {
+    const jusqu = new Date(until).toLocaleDateString('fr-FR', { day: '2-digit', month: 'long', year: 'numeric' });
+    await db.collection(MAIL_COLLECTION).add({
+      to: [GT_EMAIL],
+      message: _trialMailNico('\u{1F4DE} Essai reconduit \u2014 ' + tenant + ' : appeler le client', [
+        'L\u2019essai de ' + tenant + ' est reconduit pour ' + TRIAL_DAYS + ' jours, jusqu\u2019au ' + jusqu + '.',
+        'C\u2019est la reconduction unique : à cette échéance, il n\u2019y en aura pas d\u2019autre par ce chemin.',
+        'Appelez le client — c\u2019est le rendez-vous que cette reconduction sert à provoquer.',
+        rep && rep.count ? (rep.done.length + ' membre(s) sur ' + rep.count + ' ont reçu le nouveau jeton.') : '',
+      ].filter(Boolean), tenant),
+    });
+  } catch (e) { logger.warn('[trial] mail de reconduction non mis en file', e); }
+
+  logger.info('[trial] ' + tenant + ' reconduit jusqu\u2019au ' + new Date(until).toISOString());
+  return { ok: true, tenant: tenant, trialUntil: until, renewals: faites + 1, report: rep };
+});
+
+// ── trialWatch — la veille quotidienne ───────────────────────────
+// Trois moments, un mail chacun, jamais deux fois. Tourne a 8h05 Paris : Nicolas lit
+// ses mails le matin, et une alerte J-3 qui arrive a 3h du matin se noie.
+exports.trialWatch = onSchedule(
+  {
+    schedule:       '5 8 * * *',
+    timeZone:       'Europe/Paris',
+    region:         REGION,
+    memory:         '256MiB',
+    timeoutSeconds: 120,
+  },
+  async () => {
+    const db = admin.firestore();
+    let data;
+    try {
+      const reg = await db.doc('_guerettech/tenants').get();
+      data = reg.exists ? (reg.data() || {}) : {};
+    } catch (e) { logger.error('[trialWatch] registre illisible', e); return; }
+
+    const clients = (data.clients && typeof data.clients === 'object') ? data.clients : {};
+    const marks = await _trialMarks(db);
+    const now = Date.now();
+    let poses = 0;
+
+    for (const slug of Object.keys(clients)) {
+      const cli = clients[slug] || {};
+      const exp = (typeof cli.trialExp === 'number') ? cli.trialExp : 0;
+      if (!exp) continue;                                   // pas d'essai en cours : converti, ou jamais arme
+      if (cli.status && cli.status !== 'active') continue;  // pas encore installe
+      const m = marks[slug] || {};
+      const j = _trialJours(exp);
+
+      try {
+        // ① J-3 — Nicolas reprend la main pendant que le client ecrit encore.
+        if (j <= TRIAL_WARN_D && j > 0 && !m.j3) {
+          const reste = (typeof cli.trialRenewals === 'number' ? cli.trialRenewals : 0) < TRIAL_MAX_RENEW;
+          await db.collection(MAIL_COLLECTION).add({
+            to: [GT_EMAIL],
+            message: _trialMailNico('\u23F3 Essai \u2014 ' + slug + ' : J-' + j, [
+              'L\u2019essai de ' + slug + ' se termine dans ' + j + ' jour' + (j > 1 ? 's' : '') + '.',
+              'Passée cette date, le client bascule en lecture seule : il garde et consulte tout, il n\u2019écrit plus.',
+              reste
+                ? 'Vous pouvez encore le reconduire une fois (' + TRIAL_DAYS + ' jours de plus), ou convertir.'
+                : 'La reconduction unique a déjà été utilisée : la suite, c\u2019est une conversion.',
+            ], slug),
+          });
+          m.j3 = now; poses++;
+        }
+
+        // ② L'echeance — le client vient de passer en lecture seule.
+        if (j <= 0 && !m.exp) {
+          const reste = (typeof cli.trialRenewals === 'number' ? cli.trialRenewals : 0) < TRIAL_MAX_RENEW;
+          await db.collection(MAIL_COLLECTION).add({
+            to: [GT_EMAIL],
+            message: _trialMailNico('\u26D4 Essai termin\u00e9 \u2014 ' + slug, [
+              'L\u2019essai de ' + slug + ' est arrivé à échéance : le domaine est en lecture seule.',
+              'Rien n\u2019est perdu — toutes ses données sont là, il les consulte normalement.',
+              reste
+                ? 'Reconduction possible, une seule fois, depuis l\u2019onglet Abonnement.'
+                : 'Reconduction déjà utilisée. Sans conversion, une relance partira chez le client dans '
+                  + TRIAL_RELANCE_D + ' jours.',
+            ], slug),
+          });
+          m.exp = now; poses++;
+        }
+
+        // ③ J+15 sec — le contact n'a pas eu lieu, on le provoque CHEZ LE CLIENT.
+        //    Condition exacte demandee : « en cas d'absence de contact entre J15 et J30 ».
+        //    Le systeme ne sait pas si un coup de fil a eu lieu ; ce qu'il sait, c'est si
+        //    la reconduction a ete faite. C'est ca, la trace du contact.
+        const secheresse = (now - exp) / DAY_MS;
+        const jamaisReconduit = ((typeof cli.trialRenewals === 'number') ? cli.trialRenewals : 0) === 0;
+        if (secheresse >= TRIAL_RELANCE_D && jamaisReconduit && !m.relance) {
+          const who = await _trialAdminMail(db, slug);
+          if (who) {
+            await db.collection(MAIL_COLLECTION).add({
+              to:      [who.email],
+              replyTo: GT_EMAIL,
+              message: _trialMailRelance(cli.nom || slug),
+            });
+            await db.collection(MAIL_COLLECTION).add({
+              to: [GT_EMAIL],
+              message: _trialMailNico('\u{1F4EC} Relance envoy\u00e9e \u2014 ' + slug, [
+                'Quinze jours de lecture seule sans reconduction : une relance vient de partir chez '
+                  + (who.nom || who.email) + ' (' + who.email + ').',
+                'Elle dit que ses données sont intactes et propose de rouvrir l\u2019écriture.',
+                'S\u2019il répond, c\u2019est le moment de conclure.',
+              ], slug),
+            });
+            m.relance = now; poses += 2;
+          } else {
+            logger.warn('[trialWatch] ' + slug + ' : aucune adresse admin, relance impossible');
+          }
+        }
+      } catch (e) {
+        // ⚠️ Un domaine qui echoue ne doit pas emporter les suivants.
+        logger.error('[trialWatch] ' + slug + ' : ' + ((e && e.message) || String(e)));
+      }
+      marks[slug] = m;
+    }
+
+    if (poses) {
+      try { await db.doc(TRIAL_MAILS_DOC).set({ value: marks }, { merge: false }); }
+      catch (e) { logger.error('[trialWatch] marqueurs non écrits — RISQUE DE DOUBLON DEMAIN', e); }
+    }
+    logger.info('[trialWatch] ' + Object.keys(clients).length + ' domaine(s) examiné(s), ' + poses + ' mail(s) en file');
+  }
+);
+
 // ── 8. activateTrial — le client active l'essai 15j sur SON domaine via un code ──
 // Authentifié (admin du tenant créé à l'onboarding). data: { code }
 // Le code vit dans _guerettech/demo_tokens et peut porter { plan, days, tenant? }.
