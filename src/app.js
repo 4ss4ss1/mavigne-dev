@@ -8867,14 +8867,62 @@ function lancerExportEntretienPDF(){
     return '<section class="tracteur-section"><div class="tracteur-title"><div><div class="tracteur-nom">'+_escHtml(t.nom)+(t.traitementOnly?' <span class="badge-trait">Traitement</span>':'')+'</div><div class="tracteur-modele">🔩 '+_escHtml(t.modele||'—')+' · '+_escHtml(t.type)+'</div></div><div class="tracteur-annee">'+annee+'</div></div>'+resumeHTML+'<h3 class="section-sub">📋 Fiches d\'entretien</h3>'+fichesHTML+'<h3 class="section-sub" style="margin-top:20px">🔧 Passages réparateur</h3>'+repsHTML+'</section>';
   }).join('<div class="page-break"></div>');
   var aujourd_hui=fmtD(new Date().toISOString().slice(0,10));
-  var html='<!DOCTYPE html><html lang="fr"><head><meta charset="UTF-8"><title>Ma Vigne — Entretien '+annee+'</title><link rel="stylesheet" href="/fonts/fonts.css"><style>@page{size:A4 portrait;margin:14mm 12mm}*{box-sizing:border-box;margin:0;padding:0;}body{font-family:Outfit,system-ui,-apple-system,sans-serif;font-size:11px;color:#1A1A1A;}.doc-title{font-family:"Cormorant Garamond",Georgia,serif}.doc-header{border-bottom:2px solid #3D6B27;padding-bottom:12px;margin-bottom:20px;display:flex;justify-content:space-between;align-items:flex-end;}.doc-title{font-size:20px;font-weight:bold;color:#3D6B27;}.doc-meta{text-align:right;font-size:10px;color:#888;}.tracteur-section{margin-bottom:30px;}.tracteur-title{display:flex;justify-content:space-between;align-items:flex-start;background:#2A3547;color:white;padding:12px 16px;border-radius:8px;margin-bottom:12px;}.tracteur-nom{font-size:16px;font-weight:bold;}.tracteur-modele{font-size:10px;color:rgba(255,255,255,0.6);margin-top:3px;}.tracteur-annee{font-size:22px;font-weight:bold;color:rgba(255,255,255,0.35);}.badge-trait{font-size:9px;background:#E07B2A;color:white;border-radius:4px;padding:1px 6px;vertical-align:middle;font-weight:normal;margin-left:6px;}.resume-bar{display:flex;border:1px solid #E0DDD5;border-radius:8px;overflow:hidden;margin-bottom:16px;}.resume-item{flex:1;text-align:center;padding:10px 6px;border-right:1px solid #E0DDD5;}.resume-item:last-child{border-right:none;}.resume-val{display:block;font-size:18px;font-weight:bold;color:#2A3547;}.val-warn{color:#C0392B;}.resume-lbl{display:block;font-size:9px;color:#888;margin-top:2px;text-transform:uppercase;letter-spacing:0.04em;}.section-sub{font-size:12px;font-weight:bold;color:#2A3547;margin-bottom:8px;padding-bottom:4px;border-bottom:1px solid #E8E4D9;}.fiche-bloc{border:1px solid #E0DDD5;border-radius:6px;margin-bottom:8px;overflow:hidden;break-inside:avoid;}.fiche-bloc.has-anomalie{border-color:#F5B8B4;}.fiche-header{display:flex;justify-content:space-between;align-items:center;padding:8px 12px;background:#F9F8F5;border-bottom:1px solid #E0DDD5;}.fiche-date{font-weight:bold;font-size:11px;}.fiche-meta{font-size:10px;color:#666;margin-top:2px;}.fiche-score{font-size:18px;font-weight:bold;}.score-ok{color:#3D6B27;}.score-warn{color:#E07B2A;}.check-grid{display:grid;grid-template-columns:1fr 1fr 1fr;gap:4px;padding:8px 12px;}.check-item{font-size:10px;display:flex;justify-content:space-between;align-items:center;padding:3px 6px;border-radius:4px;}.check-item.ok{background:#EAF4E2;color:#2D5A1B;}.check-item.ko{background:#FEF0EF;color:#922B21;}.check-item span{font-weight:bold;}.anomalie{padding:6px 12px 8px;background:#FEF0EF;font-size:10px;color:#922B21;border-top:1px solid #F5B8B4;}.rep-bloc{border:1px solid #E0DDD5;border-radius:6px;margin-bottom:8px;padding:10px 14px;break-inside:avoid;}.rep-bloc.rep-en-cours{border-color:#F5CBA7;background:#FEF9F5;}.rep-bloc.rep-depasse{border-color:#F5B8B4;background:#FEF0EF;}.rep-header{display:flex;justify-content:space-between;align-items:center;gap:10px;}.rep-motif{font-weight:bold;font-size:11px;margin-bottom:4px;}.rep-dates{font-size:10px;color:#555;}.rep-badge{font-size:10px;font-weight:bold;padding:4px 10px;border-radius:12px;white-space:nowrap;}.badge-ok{background:#EAF4E2;color:#2D5A1B;}.badge-cours{background:#FEF3E2;color:#935116;}.empty{font-size:10px;color:#999;font-style:italic;padding:8px 0;}.page-break{page-break-after:always;}.doc-footer{border-top:1px solid #E0DDD5;padding-top:8px;margin-top:20px;font-size:9px;color:#AAA;display:flex;justify-content:space-between;}@media print{.page-break{page-break-after:always;border:none;margin:0;}}</style></head><body><div class="doc-header"><div><div class="doc-title">🍇 Ma Vigne — Entretien tracteurs</div><div style="font-size:11px;color:var(--texte-doux,#666);margin-top:2px">Historique '+annee+' · '+tracteursSelectionnes.map(function(t){return t.nom;}).join(', ')+'</div></div><div class="doc-meta">Généré le '+aujourd_hui+'<br>Ma Vigne ' + (window.APP_VERSION ? 'v' + window.APP_VERSION : '') + ' \u00b7 GUERETTECH</div></div>'+sectionsHTML+'<div class="doc-footer"><span>Ma Vigne — Document confidentiel · Usage interne</span><span>© 2026 Nicolas GUERET / GUERETTECH</span></div></body></html>';
-  var win=window.open('','_blank');
-  if(!win){showToast('Autorisez les popups pour l\'impression','#C0392B');return;}
-  win.document.write(html);
-  win.document.close();
-  win.onload=function(){win.focus();win.print();};
-  document.getElementById('ovExportEntretien').classList.remove('open');
-  showToast('PDF ouvert ✓','#3D6B27');
+  // ★ CHARTE MV_DOC. Ce document titrait « Ma Vigne — Entretien tracteurs » et
+  // signait « © GUERETTECH » : il portait le nom de l'editeur, pas celui du
+  // vigneron. Le format de page, les polices, l'en-tete et le pied viennent
+  // desormais de la primitive commune ; ne reste ici que le CSS PROPRE au
+  // carnet. Les marges etaient deja celles de la charte (14mm 12mm) : la
+  // largeur utile ne bouge pas, aucune colonne ne se decale.
+  var _entCss = ''
+    + '.tracteur-section{margin-bottom:30px;}'
+    + '.tracteur-title{display:flex;justify-content:space-between;align-items:flex-start;background:#2A3547;color:white;padding:12px 16px;border-radius:8px;margin-bottom:12px;}'
+    + '.tracteur-nom{font-size:16px;font-weight:bold;}'
+    + '.tracteur-modele{font-size:10px;color:rgba(255,255,255,0.6);margin-top:3px;}'
+    + '.tracteur-annee{font-size:22px;font-weight:bold;color:rgba(255,255,255,0.35);}'
+    + '.badge-trait{font-size:9px;background:#E07B2A;color:white;border-radius:4px;padding:1px 6px;vertical-align:middle;font-weight:normal;margin-left:6px;}'
+    + '.resume-bar{display:flex;border:1px solid #E0DDD5;border-radius:8px;overflow:hidden;margin-bottom:16px;}'
+    + '.resume-item{flex:1;text-align:center;padding:10px 6px;border-right:1px solid #E0DDD5;}'
+    + '.resume-item:last-child{border-right:none;}'
+    + '.resume-val{display:block;font-size:18px;font-weight:bold;color:#2A3547;}'
+    + '.val-warn{color:#C0392B;}'
+    + '.resume-lbl{display:block;font-size:9px;color:#888;margin-top:2px;text-transform:uppercase;letter-spacing:0.04em;}'
+    + '.section-sub{font-size:12px;font-weight:bold;color:#2A3547;margin-bottom:8px;padding-bottom:4px;border-bottom:1px solid #E8E4D9;}'
+    + '.fiche-bloc{border:1px solid #E0DDD5;border-radius:6px;margin-bottom:8px;overflow:hidden;break-inside:avoid;}'
+    + '.fiche-bloc.has-anomalie{border-color:#F5B8B4;}'
+    + '.fiche-header{display:flex;justify-content:space-between;align-items:center;padding:8px 12px;background:#F9F8F5;border-bottom:1px solid #E0DDD5;}'
+    + '.fiche-date{font-weight:bold;font-size:11px;}'
+    + '.fiche-meta{font-size:10px;color:#666;margin-top:2px;}'
+    + '.fiche-score{font-size:18px;font-weight:bold;}'
+    + '.score-ok{color:#3D6B27;}'
+    + '.score-warn{color:#E07B2A;}'
+    + '.check-grid{display:grid;grid-template-columns:1fr 1fr 1fr;gap:4px;padding:8px 12px;}'
+    + '.check-item{font-size:10px;display:flex;justify-content:space-between;align-items:center;padding:3px 6px;border-radius:4px;}'
+    + '.check-item.ok{background:#EAF4E2;color:#2D5A1B;}'
+    + '.check-item.ko{background:#FEF0EF;color:#922B21;}'
+    + '.check-item span{font-weight:bold;}'
+    + '.anomalie{padding:6px 12px 8px;background:#FEF0EF;font-size:10px;color:#922B21;border-top:1px solid #F5B8B4;}'
+    + '.rep-bloc{border:1px solid #E0DDD5;border-radius:6px;margin-bottom:8px;padding:10px 14px;break-inside:avoid;}'
+    + '.rep-bloc.rep-en-cours{border-color:#F5CBA7;background:#FEF9F5;}'
+    + '.rep-bloc.rep-depasse{border-color:#F5B8B4;background:#FEF0EF;}'
+    + '.rep-header{display:flex;justify-content:space-between;align-items:center;gap:10px;}'
+    + '.rep-motif{font-weight:bold;font-size:11px;margin-bottom:4px;}'
+    + '.rep-dates{font-size:10px;color:#555;}'
+    + '.rep-badge{font-size:10px;font-weight:bold;padding:4px 10px;border-radius:12px;white-space:nowrap;}'
+    + '.badge-ok{background:#EAF4E2;color:#2D5A1B;}'
+    + '.badge-cours{background:#FEF3E2;color:#935116;}'
+    + '.empty{font-size:10px;color:#999;font-style:italic;padding:8px 0;}'
+    + '.page-break{page-break-after:always;}'
+    + '@media print{.page-break{page-break-after:always;border:none;margin:0;}}';
+  if(typeof window._mvDocOpen!=='function'){ showToast('Mise \u00e0 jour incompl\u00e8te \u2014 rechargez l\u2019application','#B85A1A'); return; }
+  var _entOk = window._mvDocOpen({
+    titre:'Carnet d\u2019entretien '+annee,
+    orient:'portrait', cat:'tracteur', css:_entCss, corps:sectionsHTML,
+    metas:[tracteursSelectionnes.length+' machine'+(tracteursSelectionnes.length>1?'s':''),
+           tracteursSelectionnes.map(function(t){return t.nom;}).join(', '),
+           '\u00c9dit\u00e9 le '+aujourd_hui]
+  });
+  var _entOv=document.getElementById('ovExportEntretien'); if(_entOv) _entOv.classList.remove('open');
+  if(_entOk) showToast('Carnet d\u2019entretien ouvert \u2713','#3D6B27');
 }
 
 // ════ SWIPE TO CLOSE — bottom sheets / modals ════
@@ -9441,6 +9489,7 @@ async function refreshApp(){
   window._jeBuildTaches   = _jeBuildTaches;
   window.getHomeCardData  = getHomeCardData;
   window.getPCls          = getPCls;
+  window._dpRendHistRows  = _dpRendHistRows;   // etat du vignoble (reglages.js) — un seul moteur de rendement
   window.recalcTravaux    = recalcTravaux;
   window.openConfirmDel   = openConfirmDel;
   window.couleurTracType  = couleurTracType;

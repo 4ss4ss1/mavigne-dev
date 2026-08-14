@@ -1,4 +1,84 @@
-// MA VIGNE — Service Worker v6.61
+// MA VIGNE — Service Worker v6.62
+// v6.62 (13/08/2026) — LES DOCUMENTS : QUATRE LOTS, ET UN ECRASEMENT REPARE.
+//   ⚠️⚠️⚠️ D'ABORD L'INCIDENT, PARCE QU'IL EXPLIQUE CE NUMERO.
+//   Ces quatre lots ont ete ecrits sur un clone du depot date de 07:33. Six
+//   commits ont ete pousses entre-temps (le chantier CONTRATS, v6.58 a v6.61).
+//   Livres en FICHIERS COMPLETS, ils ont ecrase ce chantier au commit
+//   « mesure » : 331 lignes perdues dans reglages.js, 216 dans utils.js, 171
+//   dans planning.js, 19 dans app.js — dont la correction de `pShowDone`.
+//   ★ C'EST C23, ECRIT LE JOUR MEME, QUI A SONNE : le controle a retrouve
+//   l'onclick que sa propre correction venait de retirer. La CI a echoue avant
+//   le build. Sans lui, l'ecrasement partait en production.
+//   Repare par `git revert` du commit fautif (etat restaure au caractere pres,
+//   verifie par diff), puis les quatre lots REJOUES sur la base a jour : les
+//   15 points d'ancrage ont ete retrouves, une seule fois chacun.
+//   ⚠️ LES NUMEROS 6.58, 6.60 ET 6.61 ONT SERVI DEUX CONTENUS DIFFERENTS, et
+//   les deux ont ete deployes. On repart a 6.62, jamais servi. Regle rappelee :
+//   sauter un numero ne coute rien, en reutiliser un coute un client fige.
+//   ★ LEÇON A GRAVER : un fichier COMPLET livre depuis une base vieille de
+//   quelques heures est une bombe a retardement. La fraicheur se re-mesure
+//   AVANT CHAQUE LIVRAISON, pas une fois par session.
+//
+//   ── CE QUE CONTIENT LE LOT ──────────────────────────────────────────────
+//   1. LE CUVIER ETAIT MUET (acces). cave.js portait deja _matDoc et _cuvDoc
+//      depuis la v6.58 — sans AUCUNE entree au hub. Deux documents en
+//      production, atteignables par personne : C15 grandeur nature, cause par
+//      une livraison en morceaux. Entrees ajoutees, plus les deux cas docsGo.
+//   2. ETAT DU VIGNOBLE (reglages.js, paysage). Une ligne par parcelle :
+//      commune, ha, cepages, avancement, taches hors sujet, dernier travail,
+//      dernier rendement a l'hectare, puis repartition par cepage et arrachees.
+//      ★ Sa derniere colonne dit CE QUI MANQUE : cepage absent, aucune
+//      position, aucun contour. Feuille a cocher d'une installation.
+//      Moteurs lus, jamais refaits : getPCls, getTachesSaison, _mvParcGeo,
+//      _mvKmlCtrs, _dpRendHistRows (une ligne d'export dans app.js plutot
+//      qu'une copie du calcul). AUCUNE HEURE : leur calcul vit dans openDP
+//      avec les trous de plantation et les exclusions — le recopier en ferait
+//      une seconde definition.
+//      ⚠️ Le journal porte AUSSI les releves meteo : sans le filtre !j.meteo,
+//      la « derniere intervention » aurait pu etre une note de pluie.
+//   3. RELEVE INDIVIDUEL (planning.js). Le document existait ; il se cachait
+//      dans la fiche du salarie. Entree au hub avec panneau (salarie + mois),
+//      plus deux blocs neufs :
+//      · LES CONTRATS, lus sur window._mvPeriodes (v6.59) — periodes NON
+//        fusionnees, chacune avec SON type — et les COUPURES nommees en jours,
+//        avec le meme vocabulaire que la frise de la fiche membre (v6.60).
+//        _mvContrats fusionne les contigus : bon pour « etait-il la ? »,
+//        faux pour lister des contrats.
+//      · LES CONGES PAYES : solde initial, pris, reste, periode et mode de
+//        decompte. Rien pour une equipe collective, qui n'a pas de compteur.
+//      ⚠️ Le pied du bloc suit window._mvAnnualise (v6.61) : ecrire « plafond
+//      proratise » sur le releve d'un TESA serait faux depuis ce lot-la.
+//      ⚠️ planExportPDF lit la variable de module planMonth. Le point d'entree
+//      la deplace puis LA REMET (finally) : editer un releve depuis les
+//      Documents ne doit pas changer le mois affiche au Planning.
+//      ⚠️ _planFmt formate des HEURES : _planFmt(12) rend « 12h ». Les conges
+//      se comptent en JOURS — le harnais a trouve « 12h j » avant le papier.
+//   4. CARNET D'ENTRETIEN A LA CHARTE (app.js). Il titrait « Ma Vigne —
+//      Entretien tracteurs » et signait « © GUERETTECH » : le nom de
+//      l'editeur sur le document du vigneron, ce que MV_DOC interdit noir sur
+//      blanc. Marges deja 14mm 12mm : la largeur utile ne bouge pas.
+//      ★ L'AUDIT DES CHARTES, mesure avant d'ecrire : il n'y a pas huit
+//      documents en desordre, il y a DEUX chartes. MV_DOC (8 documents) et une
+//      seconde, non ecrite mais coherente, sur trois documents RECENTS de la
+//      Cave et de la Reserve (encre #14110D, filet #8A5A38->#C2871E->#3D6B27,
+//      Cormorant) — plus riche que MV_DOC, ecrite apres elle. Les aplatir
+//      ferait PERDRE. Question ouverte : remonter ce hero dans la charte ?
+//      Restent 4 vrais retardataires (releve mensuel, registre phyto en 9mm,
+//      rapport de saison en margin:0, releve individuel en 10mm) : leur
+//      conversion CHANGE LA LARGEUR UTILE et demande un rendu, pas une
+//      relecture de source.
+//   ── LES FILETS AJOUTES ───────────────────────────────────────────────────
+//   · scripts/mv-chartes-doc.mjs : recense les 15 generateurs, dit qui suit
+//     quelle charte, ECHOUE si le nombre de documents hors MV_DOC augmente.
+//     Sa propre contre-epreuve a trouve une faille dans le detecteur : il
+//     comptait la MENTION de _mvDocOpen, or le garde `typeof window._mvDocOpen`
+//     cite le nom sans appeler. Il cherche l'APPEL desormais.
+//   · scripts/mv-whatsnew-check.mjs : execute le journal au lieu de le relire
+//     (tete = APP_VERSION, ordre, doublons, backslash rendu, demi-surrogates
+//     apparies, _whatsNewSince joue).
+//   · 3 harnais neufs (vignoble, releve, entretien) sur le patron de cuvdoc :
+//     module reel ou fonctions EXTRAITES du source, et contre-epreuves.
+//   Fichiers : app.js, planning.js, reglages.js, utils.js, index.html, guide.
 // v6.61 (13/08/2026) — C23 : CE QU'UN ATTRIBUT HTML NOMME DOIT VIVRE SUR window.
 //   ★★★ CORRECTIF 6.60. Les neuf fonctions _emhX de la fiche membre etaient
 //   exposees, l'ETAT ne l'etait pas : `var _EMH` est une variable de MODULE,
@@ -1258,7 +1338,7 @@
 // v2.22 — Fix profils vides : guard vide dans loadData() pour MEMBRES/SAISONS/TACHES
 // v2.17 — Onboarding intégré + tenantId · v2.06 — Firebase Auth · v2.00–v2.05 — divers
 const DEBUG = self.location.hostname === 'localhost' || self.location.hostname === '127.0.0.1';
-const CACHE_NAME   = 'mavigne-v6.61';
+const CACHE_NAME   = 'mavigne-v6.62';
 const TENANT_CACHE = 'mavigne-tenant';   // Cache persistant — préservé à chaque mise à jour SW
 const SYNC_TAG     = 'mavigne-sync';
 
@@ -1274,7 +1354,7 @@ const CDN_URLS = [
 ];
 
 self.addEventListener('install', event => {
-  if(DEBUG) console.log('[SW] Ma Vigne v6.61 installé');
+  if(DEBUG) console.log('[SW] Ma Vigne v6.62 installé');
   event.waitUntil(
     caches.open(CACHE_NAME).then(async cache => {
       // ── Cœur applicatif : STRICT (mise à jour ATOMIQUE) ──
@@ -1290,7 +1370,7 @@ self.addEventListener('install', event => {
 });
 
 self.addEventListener('activate', event => {
-  if(DEBUG) console.log('[SW] Ma Vigne v6.61 activé');
+  if(DEBUG) console.log('[SW] Ma Vigne v6.62 activé');
   event.waitUntil(
     caches.keys().then(keys =>
       Promise.all(

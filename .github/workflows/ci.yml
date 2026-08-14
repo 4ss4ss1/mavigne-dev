@@ -36,10 +36,10 @@ jobs:
 
     steps:
       - name: Recuperer le depot
-        uses: actions/checkout@v4
+        uses: actions/checkout@v5
 
       - name: Node 22 (meme version que les Cloud Functions)
-        uses: actions/setup-node@v4
+        uses: actions/setup-node@v5
         with:
           node-version: '22'
           cache: 'npm'
@@ -64,6 +64,27 @@ jobs:
       - name: Vocabulaire — presence / coupure / heures dues
         run: node scripts/lint-vocabulaire.mjs
 
+      # Le guide public est ASSEMBLE depuis guide/*.html par un script hors build.
+      # Vecu le 13/08 : les sources avaient ete enrichies sans regenerer, et la
+      # page deployee est restee en retard sans que rien ne le signale.
+      - name: Guide — la page deployee est en phase avec ses sources
+        run: node scripts/build-guide.mjs --check
+
+      # Le journal des nouveautes s'EXECUTE au lieu de se relire, et les
+      # documents ne doivent pas s'echapper de la charte MV_DOC (cliquet).
+      - name: Journal des nouveautes + chartes de document
+        run: |
+          node scripts/mv-whatsnew-check.mjs
+          node scripts/mv-chartes-doc.mjs
+
+      # Harnais des documents : modules reels charges dans Node, aucun reseau.
+      - name: Harnais — les six documents
+        run: |
+          node scripts/mv-harnais-cuvdoc.mjs
+          node scripts/mv-harnais-vignoble.mjs
+          node scripts/mv-harnais-releve.mjs
+          node scripts/mv-harnais-entretien.mjs
+
       # Vite + inject-precache (postbuild, idempotent).
       - name: Build
         run: npm run build
@@ -78,7 +99,7 @@ jobs:
       # Utile quand le smoke tombe : on recupere le bundle exact qui a echoue.
       - name: Garder le build en cas d'echec
         if: failure()
-        uses: actions/upload-artifact@v4
+        uses: actions/upload-artifact@v5
         with:
           name: dist-echec
           path: dist/
@@ -92,10 +113,10 @@ jobs:
 
     steps:
       - name: Recuperer le depot
-        uses: actions/checkout@v4
+        uses: actions/checkout@v5
 
       - name: Node 22
-        uses: actions/setup-node@v4
+        uses: actions/setup-node@v5
         with:
           node-version: '22'
           cache: 'npm'

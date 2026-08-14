@@ -23,7 +23,7 @@ export const GT_ADMIN_EMAIL = 'ngdevpro@gmail.com';
 // WHATS_NEW   : tableau vide = modal desactive pour cette version.
 // Format item : { emoji:'📅', titre:'Titre court', desc:'Phrase utilisateur.' }
 // Regle : seulement les changements visibles par les utilisateurs.
-export const APP_VERSION = '6.11';
+export const APP_VERSION = '6.12';
 // ════ Journal des nouveautés (récap cumulatif) ════
 // Une entrée par version, la PLUS RÉCENTE EN HAUT : { v:'5.10', items:[ {emoji,titre,desc}, … ] }
 // À chaque release visible → AJOUTER un bloc en tête (ne pas remplacer). items:[] = release technique (rien à afficher).
@@ -354,6 +354,16 @@ window._mvGraphRepeindre = function(){
 };
 
 export const WHATS_NEW = [
+  { v:'6.12', items:[
+    { emoji: '\u{1F347}', titre: "Deux documents du Cuvier existaient sans que personne puisse les ouvrir",
+      desc: "Le <b>contr\u00f4le de maturit\u00e9</b> et le <b>cahier de cuverie</b> \u00e9taient dans l\u2019application depuis quelques jours, mais aucun bouton n\u2019y menait. Ils sont d\u00e9sormais dans <b>R\u00e9glages \u203a App \u203a Documents</b>. Le premier reprend vos rel\u00e8vements d\u2019avant vendange en un tableau \u2014 une ligne par parcelle, une colonne par jour, <b>dans l\u2019ordre de maturit\u00e9</b>, avec la vitesse de progression. Le second donne <b>une page par cuve</b> : densit\u00e9 corrig\u00e9e \u00e0 20\u00a0\u00b0C, sucre restant estim\u00e9, remontages, pigeages, op\u00e9rations et cuv\u00e9e de sortie." },
+    { emoji: '\u{1F5FA}', titre: "Le vignoble ne sortait qu\u2019en tableur",
+      desc: "L\u2019<b>\u00e9tat du vignoble</b> tient sur une page\u00a0: une ligne par parcelle avec la surface, le c\u00e9page, la commune, l\u2019avancement, le dernier travail et le dernier rendement, puis la r\u00e9partition par c\u00e9page. Sa derni\u00e8re colonne dit <b>ce qui manque</b> \u2014 c\u00e9page absent, aucune position, aucun contour \u2014 et la fin du document les compte et les nomme. C\u2019est la feuille \u00e0 cocher d\u2019une installation." },
+    { emoji: '\u{1F464}', titre: "Le relev\u00e9 d\u2019un salari\u00e9 se cachait dans le Planning",
+      desc: "C\u2019est le document qu\u2019on vous demande en premier en cas de contr\u00f4le, et il fallait ouvrir le Planning, trouver la fiche de la personne, puis le bouton PDF. Il figure maintenant dans <b>R\u00e9glages \u203a App \u203a Documents</b>, avec le choix du salari\u00e9 et du mois. Il porte en plus <b>la liste dat\u00e9e des contrats</b> \u2014 chacun avec son type, et les <b>coupures</b> signal\u00e9es, puisque c\u2019est la coupure qui d\u00e9cide si le compteur repart de z\u00e9ro \u2014 et <b>les cong\u00e9s pay\u00e9s</b> de la p\u00e9riode." },
+    { emoji: '\u{1F69C}', titre: "Votre carnet d\u2019entretien portait le nom de l\u2019\u00e9diteur",
+      desc: "Il s\u2019intitulait « Ma Vigne \u2014 Entretien tracteurs » et se signait « \u00a9 GUERETTECH », l\u00e0 o\u00f9 tous vos autres documents portent <b>le nom de votre domaine</b>. C\u2019est votre carnet, pas le n\u00f4tre. Il reprend l\u2019en-t\u00eate commun \u2014 domaine, titre, machines concern\u00e9es, date \u2014 et les m\u00eames polices que le reste. Les marges n\u2019ont pas boug\u00e9\u00a0: rien ne se d\u00e9cale dans les tableaux." },
+  ] },
   { v:'6.11', items:[
     { emoji: '\u{1F532}', titre: "Le filtre \u00ab\u00a0\u00c0 faire\u00a0\u00bb des parcelles r\u00e9pond enfin",
       desc: "Quand vous filtriez les parcelles par t\u00e2che, la puce <b>\u00ab\u00a0\u{1F532}\u00a0\u00c0 faire\u00a0/\u00a0\u{1F441}\u00a0Toutes\u00a0\u00bb</b> qui appara\u00eet \u00e0 droite ne faisait <b>rien du tout</b>\u00a0: le clic \u00e9chouait en silence, sans message, et la liste restait telle quelle. Elle bascule d\u00e9sormais correctement entre les parcelles qui restent \u00e0 faire et toutes les parcelles." }
@@ -1636,7 +1646,8 @@ var MV_AIDE = {
       ['Le bouton vert', "sur une carte valide la tâche en cours sans ouvrir la parcelle."],
       ['Onglet Carte', ": les contours viennent de votre export PAC ou d’un fichier KML."],
       ['La recherche', "accepte le nom du climat comme le lieu-dit."],
-      ['Une parcelle arrachée', "sort des totaux mais reste dans l’historique."]
+      ['Une parcelle arrachée', "sort des totaux mais reste dans l’historique."],
+      ['L’état du vignoble', "s’imprime depuis Réglages, onglet App, « Documents & impressions » : toutes vos parcelles sur une page, avec la surface, le cépage, la commune, l’avancement, le dernier travail, le dernier rendement — et la liste de ce qui reste à renseigner."]
     ]
   },
   journal: {
@@ -1689,6 +1700,7 @@ var MV_AIDE = {
       ['Présence, coupure, heures dues', "trois nombres qui se ressemblent et ne disent pas la même chose. La ‹‹ présence ›› va de l’arrivée au départ. La ‹‹ coupure ›› est le temps non travaillé au milieu : sa durée et son heure sont fixées par le domaine, dans l’onglet Le cadre, ce n’est pas un moment que chacun choisit. Les ‹‹ heures dues ›› sont ce qui part en paie et alimente le compteur des 1 607 h. Une journée de 09:00 à 16:00 avec une heure de coupure fait 7 h de présence et 6 h dues."],
       ['Le planning de l’année', "s’imprime depuis le même endroit : le rythme sur douze mois, avec les heures de prise et de fin de service et la coupure déjeuner. Une page par modèle de semaine, pas une par salarié — c’est le document qu’on remet à l’équipe pour l’année à venir."],
       ['Le relevé mensuel', "s’imprime depuis Réglages, onglet App, « Documents & impressions ». C’est un relevé d’heures, pas un bulletin de paie."],
+      ['Le relevé d’un seul salarié', "s’imprime au même endroit, en choisissant la personne et le mois : son mois jour par jour, ses contrats avec leurs coupures, ses congés payés, son compteur d’heures et son annualisation, avec deux lignes de signature. Le bouton PDF de sa fiche sort exactement le même document."],
       ['Taux horaires et acomptes', ": administrateurs seulement, et jamais enregistrés sur l’appareil."]
     ]
   },
@@ -1705,7 +1717,7 @@ var MV_AIDE = {
       ['Le millésime', "annonce ce qui vient dans les quatre prochaines semaines, puis retrace le parcours du vin, de la benne à la bouteille."],
       ['Votre rendement au pressoir', "se règle au Cuvier, onglet Réglages, en kilos de raisin par hectolitre. Tous les écrans qui transforment des raisins en volume s’en servent — la chaîne de la récolte à la bouteille comme le bilan de campagne."],
       ['Les analyses labo', "s’attachent en PDF à la cuvée. Les supprimer est réservé à l’administrateur."],
-      ['Registre des manipulations et bilan de campagne', "s’impriment depuis Réglages, onglet App, « Documents & impressions ». Ce sont des états internes : Ma Vigne prépare, vous déclarez."]
+      ['Quatre documents sortent de la Cave', "depuis Réglages, onglet App, « Documents & impressions » : le contrôle de maturité avant vendange, le cahier de cuverie pendant la fermentation, le registre des manipulations et le bilan de campagne. Ce sont des états internes : Ma Vigne prépare, vous déclarez."]
     ]
   },
   reserve: {

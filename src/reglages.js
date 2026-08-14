@@ -2843,8 +2843,14 @@ var MV_DOCS = [
   { f:'oblig', act:'mois',      mod:'planning', ico:'\u23F1\u{FE0F}', bg:'var(--bleu-pale)', fm:'pdf',
     t:'Relev\u00e9 mensuel d\u2019heures', ask:'Choix du mois',
     s:'Heures travaill\u00e9es, jours travaill\u00e9s et absences du mois \u2014 le format attendu par la MSA.' },
+  { f:'oblig', act:'releve',    mod:'planning', ico:'\u{1F464}', bg:'var(--phyto-pale)', fm:'pdf',
+    t:'Relev\u00e9 individuel d\u2019un salari\u00e9', ask:'Salari\u00e9 puis mois',
+    s:'Le mois jour par jour d\u2019une seule personne, ses contrats, ses cong\u00e9s, son compteur d\u2019heures et son annualisation. \u00c0 signer des deux c\u00f4t\u00e9s.' },
 
   // --- Suivi du domaine : des etats internes, jamais des declarations ---
+  { f:'suivi', act:'vignoble',  mod:'',         ico:'\u{1F5FA}\u{FE0F}', bg:'var(--vert-pale)', fm:'pdf',
+    t:'\u00c9tat du vignoble', ask:'',
+    s:'Toutes vos parcelles sur une page : surface, c\u00e9page, commune, avancement, dernier travail, dernier rendement \u2014 et ce qui reste \u00e0 renseigner.' },
   { f:'suivi', act:'saison',    mod:'',         ico:'\u{1F4C4}', bg:'var(--or-pale)',    fm:'pdf', ov:true,
     t:'Rapport de saison', ask:'Choix de la p\u00e9riode',
     s:'Avancement, tracteur, entretiens, incidents, phyto, cuivre et ETP sur une p\u00e9riode.' },
@@ -2864,9 +2870,15 @@ var MV_DOCS = [
   { f:'suivi', act:'intrants',  mod:'reserve',  ico:'\u{1F4E6}', bg:'var(--acier-pale)', fm:'pdf',
     t:'Inventaire des intrants', ask:'',
     s:'Stocks, achats et consommations du magasin.' },
+  { f:'suivi', act:'matur',     mod:'cave',     ico:'\u{1F347}', bg:'var(--vert-pale)',  fm:'pdf', ov:true,
+    t:'Contr\u00f4le de maturit\u00e9', ask:'Choix de l\u2019ann\u00e9e',
+    s:'Vos rel\u00e8vements avant vendange, parcelle par parcelle et jour par jour, dans l\u2019ordre de maturit\u00e9.' },
   { f:'suivi', act:'recoltes',  mod:'cave',     ico:'\u{1F347}', bg:'var(--rouge-pale)', fm:'pdf',
     t:'R\u00e9coltes de la vendange', ask:'',
     s:'Caisses, kilos et hectolitres par parcelle et par cuve.' },
+  { f:'suivi', act:'cuverie',   mod:'cave',     ico:'\u{1FAA3}', bg:'var(--terre-pale)', fm:'pdf', ov:true,
+    t:'Cahier de cuverie', ask:'Choix de l\u2019ann\u00e9e',
+    s:'Une page par cuve : densit\u00e9s, temp\u00e9ratures, remontages, pigeages et op\u00e9rations de la fermentation.' },
   { f:'suivi', act:'elevage',   mod:'cave',     ico:'\u{1F377}', bg:'var(--rouge-pale)', fm:'pdf', ov:true,
     t:'Suivi d\u2019\u00e9levage', ask:'',
     s:'Les op\u00e9rations du chai, cuv\u00e9e par cuv\u00e9e, avec les analyses.' },
@@ -2968,7 +2980,7 @@ window.docsFam=function(k){ _docsFam=k; _docsRender(); };
 function _docsPane(id){
   var home=document.getElementById('docs-home'), pane=document.getElementById('docs-pane');
   if(!home||!pane) return;
-  ['docs-pane-mois','docs-pane-etp'].forEach(function(p){
+  ['docs-pane-mois','docs-pane-etp','docs-pane-releve'].forEach(function(p){
     var el=document.getElementById(p); if(el) el.style.display=(p===id)?'':'none';
   });
   home.style.display='none'; pane.style.display='';
@@ -2991,6 +3003,7 @@ window.docsGo=function(i){
     if(pm&&pm.value&&typeof window.planFillPDFFromMonth==='function') window.planFillPDFFromMonth(pm.value);
     return;
   }
+  if(d.act==='releve'){ _docsReleveOpen(); return; }
   if(d.act==='etp'){ _docsPane('docs-pane-etp'); return; }
   if(d.act==='restore'){
     var inp=document.getElementById('import-json-input');
@@ -3007,13 +3020,16 @@ window.docsGo=function(i){
     case 'phytoPdf':     fn=window.exportPDFPhyto;         break;
     case 'phytoCsv':     fn=window._phytoExportCsv;        break;
     case 'cuivre':       fn=window.openSyntheseCuivre;     break;
+    case 'vignoble':     fn=window._vgnExportVignoble;     break;
     case 'saison':       fn=window.openRapportSaison;      break;
     case 'annuel':       fn=window.planAnnuelPdf;        break;
     case 'bilan':        fn=window._bcExportChoix;         break;
     case 'manip':        fn=window._rmExportChoix;         break;
     case 'futs':         fn=window._rsvExportFutsPdf;      break;
     case 'intrants':     fn=window._rsvExportPdf;          break;
+    case 'matur':        fn=window._matExportChoix;        break;
     case 'recoltes':     fn=window.exportVendRecoltesPdf;  break;
+    case 'cuverie':      fn=window._cuvExportChoix;        break;
     case 'elevage':      fn=window.openOvCaveExport;       break;
     case 'entretien':    fn=window.ouvrirExportEntretien;  break;
     case 'csvJournal':   fn=window.exportCSVJournal;       break;
@@ -4923,3 +4939,400 @@ function _tcvRender(){
 
 window.openEditSaison        = openEditSaison;
 window.saveEditSaison        = saveEditSaison;
+
+/* ══════════════════════════════════════════════════════════════════════════
+   MA VIGNE — L'ÉTAT DU VIGNOBLE
+   ══════════════════════════════════════════════════════════════════════════
+   Le vignoble ne sortait qu'en CSV : une ligne par parcelle, une colonne par
+   tache. Utile a un tableur, illisible sur une table de cuisine, et muet sur
+   tout ce qui n'est pas une tache — la surface, le cepage, la commune, le
+   rendement, et surtout CE QUI MANQUE.
+
+   Ce document est l'etat civil du domaine. Il sert deux moments precis :
+     · l'installation d'un nouveau client, ou l'on verifie parcelle par
+       parcelle ce qui a ete repris et ce qui reste a renseigner ;
+     · le debut de campagne, ou l'on veut la liste complete sous les yeux.
+
+   ⚠️ AUCUN CALCUL NEUF. Les moteurs sont ceux des ecrans :
+     getPCls          l'avancement d'une parcelle (taches exclues comprises)
+     getTachesSaison  les taches de la saison CONSULTEE
+     _mvParcGeo       ou est une parcelle : ses coordonnees, sinon le centroide
+     _mvKmlCtrs       les contours cartographies, par nom
+     _dpRendHistRows  l'historique de rendement d'une parcelle, par millesime
+   Le document LIT ces moteurs. Il ne les refait pas.
+
+   ⚠️ CE DOCUMENT NE PARLE PAS D'HEURES. Le calcul des heures restantes d'une
+   parcelle vit dans le detail parcelle (openDP) et tient compte des trous de
+   plantation, de l'entreplantation et des exclusions ; le recopier ici en
+   ferait une seconde definition, donc une divergence a terme. Les heures se
+   lisent au Pilotage et dans le rapport de saison, qui ont leur moteur.
+
+   ⚠️ Le bloc CSS ci-dessous est le JUMEAU de MV_CUVDOC_CSS (cave.js) : memes
+   classes, memes valeurs, pour que les documents se ressemblent. Les deux sont
+   a remonter dans utils.js — la ou vit deja la charte MV_DOC — au prochain lot
+   qui bumpe. Ecrit ici pour ne pas retoucher un fichier deja livre.
+   ══════════════════════════════════════════════════════════════════════════ */
+
+var MV_VGNDOC_CSS = ''
+  + '.cd-kpis{display:flex;gap:16px;flex-wrap:wrap;background:#FAF6EC;border:1px solid #E8DCC0;'
+    + 'border-radius:7px;padding:9px 13px;margin-bottom:13px}'
+  + '.cd-k{min-width:96px}'
+  + '.cd-k b{display:block;font-size:8px;text-transform:uppercase;letter-spacing:.6px;color:#8B6020;margin-bottom:2px}'
+  + '.cd-k span{font-family:\'Cormorant Garamond\',Georgia,serif;font-size:20px;font-weight:700;color:#2D1B09;line-height:1.05}'
+  + '.cd-k span small{font-family:\'Outfit\',sans-serif;font-size:9px;font-weight:600;color:#7A6A4A}'
+  + '.cd-k i{display:block;font-style:normal;font-size:8px;color:#7A7263;margin-top:2px;line-height:1.4}'
+  + 'h2{font-size:11px;color:#2D1B09;margin:15px 0 6px;text-transform:uppercase;letter-spacing:.9px}'
+  + 'table{width:100%;border-collapse:collapse;font-size:9.5px;margin-bottom:4px}'
+  + 'th{text-align:left;padding:5px 6px;background:#2D1B09;color:#F3E7CE;font-size:8px;'
+    + 'text-transform:uppercase;letter-spacing:.4px;font-weight:700}'
+  + 'td{border-bottom:1px solid #EDE7DA;padding:4px 6px;vertical-align:top}'
+  + 'td.n,th.n{text-align:right;white-space:nowrap}'
+  + 'tr:nth-child(even) td{background:#FBFAF6}'
+  + 'tr.tot td{background:#F4EEE2;font-weight:700;border-top:1.5px solid #C8A060;border-bottom:none}'
+  + '.cd-note{font-size:8.5px;color:#7A7263;margin:2px 0 11px;line-height:1.5}'
+  + '.cd-vide{font-size:9.5px;color:#7A7263;margin:0 0 11px}'
+  // propre a ce document : les reperes manquants, et la barre d'avancement
+  + '.vg-m{display:inline-block;font-size:7.5px;font-weight:700;letter-spacing:.3px;text-transform:uppercase;'
+    + 'padding:1px 5px;border-radius:8px;background:#F6E4D2;color:#A2521A;margin-right:3px}'
+  + '.vg-ok{color:#6E8A52;font-weight:700}'
+  + '.vg-bar{display:block;height:4px;background:#EDE7DA;border-radius:3px;overflow:hidden;margin-top:2px}'
+  + '.vg-bar i{display:block;height:100%;background:#8A5A38}'
+  + '.vg-ar td{color:#8A8272;font-style:italic}';
+
+/* ── Lecture : une passe sur le domaine, aucune ecriture ──────────────────
+   Tout ce qui est calcule ici est une AGREGATION de moteurs existants, jamais
+   une seconde version d'un moteur. */
+function _vgnEsc(s){
+  return (typeof window._escHtml === 'function') ? window._escHtml(String(s == null ? '' : s))
+                                                 : String(s == null ? '' : s);
+}
+function _vgnNum(n, d){
+  var f = Math.pow(10, d == null ? 2 : d);
+  return String(Math.round((n || 0) * f) / f).replace('.', ',');
+}
+function _vgnDateFr(iso){
+  if(!iso) return '';
+  var p = String(iso).slice(0, 10).split('-');
+  return p.length === 3 ? (p[2] + '/' + p[1] + '/' + p[0].slice(2)) : String(iso);
+}
+function _vgnCommune(p){
+  if(!p) return '';
+  if(p.commune && typeof p.commune === 'object') return String(p.commune.nom || '');
+  return String(p.commune || '');
+}
+function _vgnCepages(p){
+  if(!p) return [];
+  if(Array.isArray(p.cepages) && p.cepages.length) return p.cepages.filter(Boolean);
+  return p.cepage ? [p.cepage] : [];
+}
+
+/* Le dernier travail enregistre sur une parcelle.
+   ⚠️ Le journal porte AUSSI les releves meteo (j.meteo) : sans ce filtre, la
+   « derniere intervention » d'une parcelle serait une note de pluie. C'est le
+   meme filtre que l'export JSON. */
+function _vgnDernierTravail(){
+  var out = {};
+  (window.JOURNAL || []).forEach(function(j){
+    if(!j || j.meteo || !j.parcelle || !j.date) return;
+    var k = String(j.parcelle);
+    if(!out[k] || String(j.date) > String(out[k].date)) out[k] = j;
+  });
+  return out;
+}
+
+function _vgnLignes(){
+  var parcs   = window.PARCELLES || [];
+  var taches  = (typeof window.getTachesSaison === 'function') ? (window.getTachesSaison() || []) : [];
+  var ctrs    = (typeof window._mvKmlCtrs === 'function') ? (window._mvKmlCtrs() || {}) : {};
+  var dernier = _vgnDernierTravail();
+  var out = [];
+  parcs.forEach(function(p){
+    if(!p || !p.nom) return;
+    var cl = (typeof window.getPCls === 'function') ? window.getPCls(p) : { pct:0, nbDone:0, nbTotal:0 };
+    var rh = (typeof window._dpRendHistRows === 'function') ? (window._dpRendHistRows(p) || []) : [];
+    var geo = (typeof window._mvParcGeo === 'function') ? window._mvParcGeo(p) : null;
+    var j = dernier[String(p.nom)] || null;
+    out.push({
+      nom: String(p.nom),
+      arrachee: p.statut === 'Arrachee',
+      statut: String(p.statut || ''),
+      ha: parseFloat(p.surface) || 0,
+      commune: _vgnCommune(p),
+      cepages: _vgnCepages(p),
+      complantee: !!p.entreplantation,
+      pct: cl.pct || 0, nbDone: cl.nbDone || 0, nbTotal: cl.nbTotal || 0,
+      exclues: (p.tachesExclues || []).filter(function(t){
+        return taches.some(function(x){ return x.nom === t; });
+      }),
+      trous: parseInt(p.plantation_trous, 10) || 0,
+      dernier: j ? { date:j.date, tache:String(j.tache || j.activite || '') } : null,
+      rend: rh.length ? rh[0] : null,
+      geo: !!geo,
+      contour: !!ctrs[String(p.nom).toLowerCase()]
+    });
+  });
+  // Tri de tournee : par commune, puis par nom. ⚠️ Une commune VIDE trierait en
+  // premier ; les parcelles sans commune passent donc en fin de liste, pas en
+  // tete du document.
+  out.sort(function(a, b){
+    var ca = a.commune.toLowerCase(), cb = b.commune.toLowerCase();
+    if(!ca !== !cb) return ca ? -1 : 1;
+    if(ca !== cb) return ca < cb ? -1 : 1;
+    return a.nom.localeCompare(b.nom, 'fr');
+  });
+  return out;
+}
+
+/* Repartition par cepage. ⚠️ Une parcelle complantee compte sa surface pour
+   CHAQUE cepage present : la somme de cette colonne depasse alors la surface
+   du domaine. Le document l'ecrit, plutot que de partager une surface qu'on
+   n'a jamais mesuree rang par rang. */
+function _vgnParCepage(lignes){
+  var m = {};
+  lignes.forEach(function(l){
+    if(l.arrachee) return;
+    var cs = l.cepages.length ? l.cepages : ['\u2014 non renseign\u00e9'];
+    cs.forEach(function(c){
+      if(!m[c]) m[c] = { cepage:c, n:0, ha:0 };
+      m[c].n++; m[c].ha += l.ha;
+    });
+  });
+  return Object.keys(m).map(function(k){ return m[k]; })
+    .sort(function(a, b){ return b.ha - a.ha; });
+}
+
+function _vgnDoc(){
+  var lignes = _vgnLignes();
+  if(!lignes.length){ showToast('Aucune parcelle enregistr\u00e9e', '#B85A1A'); return; }
+  var act = lignes.filter(function(l){ return !l.arrachee; });
+  var arr = lignes.filter(function(l){ return l.arrachee; });
+  if(!act.length){ showToast('Aucune parcelle active', '#B85A1A'); return; }
+
+  var haAct = act.reduce(function(s, l){ return s + l.ha; }, 0);
+  // La surface affichee est celle que l'application affiche partout ailleurs.
+  var haRef = parseFloat(window.SURF_TOTALE);
+  if(!isFinite(haRef) || haRef <= 0) haRef = haAct;
+
+  // Avancement du domaine : PONDERE PAR LA SURFACE. Une moyenne simple ferait
+  // peser une demi-ouvree autant qu'un hectare et demi.
+  var pondere = haAct > 0
+    ? Math.round(act.reduce(function(s, l){ return s + l.pct * l.ha; }, 0) / haAct)
+    : 0;
+  var finies = act.filter(function(l){ return l.pct === 100; }).length;
+
+  var comms  = {}; act.forEach(function(l){ if(l.commune) comms[l.commune] = (comms[l.commune] || 0) + l.ha; });
+  var nComm  = Object.keys(comms).length;
+  var parCep = _vgnParCepage(lignes);
+  var nCep   = parCep.filter(function(c){ return c.cepage.indexOf('non renseign') === -1; }).length;
+  var cepTop = parCep.length ? parCep[0] : null;
+  var saison = (typeof window._visuSaison === 'function') ? (window._visuSaison() || '') : '';
+
+  var sansCep = act.filter(function(l){ return !l.cepages.length; });
+  var sansGeo = act.filter(function(l){ return !l.geo; });
+  var sansCtr = act.filter(function(l){ return !l.contour; });
+
+  function tuile(lab, gros, unite, sous){
+    return '<div class="cd-k"><b>' + lab + '</b><span>' + gros
+      + (unite ? ' <small>' + unite + '</small>' : '') + '</span>'
+      + (sous ? '<i>' + sous + '</i>' : '') + '</div>';
+  }
+
+  var corps = '<div class="cd-kpis">'
+    + tuile('Parcelles', act.length, '', arr.length ? (arr.length + ' arrach\u00e9e' + (arr.length > 1 ? 's' : '') + ' en plus') : 'aucune arrach\u00e9e')
+    + tuile('Surface', _vgnNum(haRef), 'ha', 'soit ' + _vgnNum(haAct / act.length) + ' ha en moyenne')
+    + tuile('Communes', nComm || '\u2014', '', nComm ? Object.keys(comms).sort().join(', ') : 'aucune commune renseign\u00e9e')
+    + tuile('C\u00e9pages', nCep || '\u2014', '', cepTop ? (_vgnEsc(cepTop.cepage) + ' en t\u00eate, ' + _vgnNum(cepTop.ha) + ' ha') : 'aucun c\u00e9page renseign\u00e9')
+    + tuile('Avancement', pondere, '%', 'pond\u00e9r\u00e9 par la surface \u00b7 ' + finies + ' parcelle'
+        + (finies > 1 ? 's' : '') + ' termin\u00e9e' + (finies > 1 ? 's' : '') + ' sur ' + act.length)
+    + '</div>';
+
+  function reperes(l){
+    var m = '';
+    if(!l.cepages.length) m += '<span class="vg-m">c\u00e9page</span>';
+    if(!l.geo)            m += '<span class="vg-m">GPS</span>';
+    if(!l.contour)        m += '<span class="vg-m">contour</span>';
+    return m || '<span class="vg-ok">\u2713</span>';
+  }
+  function rendCell(l){
+    if(!l.rend) return '\u2014';
+    if(l.rend.kg_ha != null) return l.rend.millesime + ' \u00b7 ' + l.rend.kg_ha.toLocaleString('fr-FR') + ' kg/ha';
+    return l.rend.millesime + ' \u00b7 ' + Math.round(l.rend.kg || 0).toLocaleString('fr-FR') + ' kg';
+  }
+
+  corps += '<h2>Les parcelles en production \u2014 ' + act.length + ' sur ' + _vgnNum(haRef) + ' ha</h2>'
+    + '<table><thead><tr><th>Parcelle</th><th>Commune</th><th class="n">ha</th><th>C\u00e9page(s)</th>'
+    + '<th class="n">Avanc.</th><th class="n">T\u00e2ches</th><th>Dernier travail</th>'
+    + '<th>Dernier rendement</th><th>\u00c0 renseigner</th></tr></thead><tbody>'
+    + act.map(function(l){
+        var cep = l.cepages.length
+          ? _vgnEsc(l.cepages.join(' \u00b7 ')) + (l.complantee ? ' <i style="color:#8A8272">complant\u00e9e</i>' : '')
+          : '<span style="color:#A89E8C">\u2014</span>';
+        return '<tr><td>' + _vgnEsc(l.nom) + (l.trous > 0 ? ' <i style="color:#8A8272">' + l.trous + ' trous</i>' : '') + '</td>'
+          + '<td>' + (l.commune ? _vgnEsc(l.commune) : '<span style="color:#A89E8C">\u2014</span>') + '</td>'
+          + '<td class="n">' + _vgnNum(l.ha) + '</td>'
+          + '<td>' + cep + '</td>'
+          + '<td class="n">' + l.pct + ' %<span class="vg-bar"><i style="width:' + l.pct + '%"></i></span></td>'
+          + '<td class="n">' + l.nbDone + '/' + l.nbTotal
+            + (l.exclues.length ? '<i style="display:block;color:#8A8272;font-style:normal">'
+                + l.exclues.length + ' hors sujet</i>' : '') + '</td>'
+          + '<td>' + (l.dernier ? (_vgnEsc(l.dernier.tache) + ' \u00b7 ' + _vgnDateFr(l.dernier.date))
+                                : '<span style="color:#A89E8C">aucun</span>') + '</td>'
+          + '<td>' + rendCell(l) + '</td>'
+          + '<td>' + reperes(l) + '</td></tr>';
+      }).join('')
+    + '<tr class="tot"><td colspan="2">Total \u2014 ' + act.length + ' parcelles</td>'
+    + '<td class="n">' + _vgnNum(haAct) + '</td><td></td>'
+    + '<td class="n">' + pondere + ' %</td><td colspan="4"></td></tr>'
+    + '</tbody></table>'
+    + '<div class="cd-note">L\u2019avancement d\u2019une parcelle est le nombre de t\u00e2ches valid\u00e9es sur le '
+    + 'nombre de t\u00e2ches qui la concernent : les t\u00e2ches marqu\u00e9es <b>hors sujet</b> sur cette parcelle '
+    + 'ne comptent ni au num\u00e9rateur ni au d\u00e9nominateur. Le total, lui, est <b>pond\u00e9r\u00e9 par la '
+    + 'surface</b>. Le dernier travail vient du journal, hors rel\u00e9v\u00e9s m\u00e9t\u00e9o.</div>';
+
+  corps += '<h2>Par c\u00e9page</h2>'
+    + '<table><thead><tr><th>C\u00e9page</th><th class="n">Parcelles</th><th class="n">ha</th>'
+    + '<th class="n">Part du domaine</th></tr></thead><tbody>'
+    + parCep.map(function(c){
+        return '<tr><td>' + _vgnEsc(c.cepage) + '</td><td class="n">' + c.n + '</td>'
+          + '<td class="n">' + _vgnNum(c.ha) + '</td>'
+          + '<td class="n">' + (haAct > 0 ? Math.round(c.ha / haAct * 100) : 0) + ' %</td></tr>';
+      }).join('')
+    + '</tbody></table>'
+    + '<div class="cd-note">Une parcelle <b>complant\u00e9e</b> compte sa surface enti\u00e8re pour chacun de '
+    + 'ses c\u00e9pages : la somme de cette colonne peut donc d\u00e9passer la surface du domaine. Rien ne '
+    + 'permet de partager une surface rang par rang, et un partage invent\u00e9 serait pire qu\u2019un '
+    + 'double compte annonc\u00e9.</div>';
+
+  if(sansCep.length || sansGeo.length || sansCtr.length){
+    corps += '<h2>Ce qu\u2019il reste \u00e0 renseigner</h2><div class="cd-vide">';
+    if(sansCep.length) corps += '<b>C\u00e9page absent</b> (' + sansCep.length + ') : '
+      + sansCep.map(function(l){ return _vgnEsc(l.nom); }).join(', ') + '.<br>';
+    if(sansGeo.length) corps += '<b>Aucune position</b> (' + sansGeo.length + ') : '
+      + sansGeo.map(function(l){ return _vgnEsc(l.nom); }).join(', ')
+      + ' \u2014 sans position, pas de m\u00e9t\u00e9o de secteur ni de tri par proximit\u00e9.<br>';
+    if(sansCtr.length) corps += '<b>Aucun contour sur la carte</b> (' + sansCtr.length + ') : '
+      + sansCtr.map(function(l){ return _vgnEsc(l.nom); }).join(', ') + '.';
+    corps += '</div>';
+  }
+
+  if(arr.length){
+    corps += '<h2>Parcelles arrach\u00e9es \u2014 ' + arr.length + '</h2>'
+      + '<table><thead><tr><th>Parcelle</th><th>Commune</th><th class="n">ha</th>'
+      + '<th>C\u00e9page(s)</th><th>Dernier rendement connu</th></tr></thead><tbody>'
+      + arr.map(function(l){
+          return '<tr class="vg-ar"><td>' + _vgnEsc(l.nom) + '</td>'
+            + '<td>' + _vgnEsc(l.commune) + '</td><td class="n">' + _vgnNum(l.ha) + '</td>'
+            + '<td>' + _vgnEsc(l.cepages.join(' \u00b7 ')) + '</td>'
+            + '<td>' + rendCell(l) + '</td></tr>';
+        }).join('')
+      + '</tbody></table>'
+      + '<div class="cd-note">Elles sortent de la surface du domaine et de tous les avancements, '
+      + 'mais leur historique reste : c\u2019est pourquoi elles figurent ici.</div>';
+  }
+
+  corps += '<div class="mvdoc-lim"><b>Ce document pr\u00e9sente ce que vous avez enregistr\u00e9.</b> '
+    + 'C\u2019est un \u00e9tat interne : il ne tient lieu ni de d\u00e9claration de surface, ni de casier '
+    + 'viticole. L\u2019avancement porte sur la p\u00e9riode consult\u00e9e'
+    + (saison ? ' \u2014 <b>' + _vgnEsc(saison) + '</b>' : '')
+    + ' : changez de p\u00e9riode dans la Vigne et le document suivra. '
+    + '<b>Aucune heure ne figure ici</b> : les heures restantes se lisent au Pilotage et dans le '
+    + 'rapport de saison, qui les calculent \u00e0 partir du bar\u00e8me. Les rendements viennent de vos '
+    + 'saisies de vendange, ramen\u00e9es \u00e0 la surface de la parcelle.</div>';
+
+  if(typeof window._mvDocOpen !== 'function'){
+    showToast('Mise \u00e0 jour incompl\u00e8te \u2014 rechargez l\u2019application', '#B85A1A'); return;
+  }
+  window._mvDocOpen({
+    titre: '\u00c9tat du vignoble',
+    orient: 'paysage', cat: 'parcelles', css: MV_VGNDOC_CSS, corps: corps,
+    metas: [act.length + ' parcelle' + (act.length > 1 ? 's' : '') + ' \u00b7 ' + _vgnNum(haRef) + ' ha',
+            saison, '\u00c9dit\u00e9 le ' + new Date().toLocaleDateString('fr-FR')]
+  });
+  showToast('\u{1F5FA} \u00c9tat du vignoble \u00b7 ' + act.length + ' parcelles', '#3D6B27');
+}
+
+window._vgnExportVignoble = function(){ _vgnDoc(); };
+window._vgnLignes         = _vgnLignes;
+window._vgnParCepage      = _vgnParCepage;
+window._vgnDoc            = _vgnDoc;
+
+/* ══════════════════════════════════════════════════════════════════════════
+   HUB DOCUMENTS — le panneau du relevé individuel
+   ══════════════════════════════════════════════════════════════════════════
+   Le relevé individuel demande DEUX choses avant de sortir : qui, et quel
+   mois. Une saisie libre (openPrompt) ne convient pas pour un nom — on ne tape
+   pas « Victor » sans risque de faute de frappe. Il lui faut donc un panneau,
+   comme en ont deja le releve mensuel et le reglage des heures de saison.
+
+   ⚠️ Le panneau est CONSTRUIT EN JS, pas ecrit dans index.html : injection
+   idempotente dans #docs-pane. C'est le patron deja employe par le Cuvier pour
+   ses feuilles — il evite de faire grossir un index.html de 268 ko pour trois
+   champs, et il garde le panneau a cote du code qui le lit.
+
+   ⚠️ Le mois et l'annee proposes sont CEUX DU PLANNING, pas la date du jour :
+   on edite un releve en regardant l'ecran qu'on vient de quitter. Le document,
+   lui, ne deplace jamais le mois du Planning (cf. _planReleveIndiv).
+   ══════════════════════════════════════════════════════════════════════════ */
+
+var MV_DOCS_MOIS = ['Janvier','F\u00e9vrier','Mars','Avril','Mai','Juin',
+                    'Juillet','Ao\u00fbt','Septembre','Octobre','Novembre','D\u00e9cembre'];
+
+function _docsReleveOpen(){
+  var pane = document.getElementById('docs-pane');
+  if(!pane){ if(window.showToast) window.showToast('\u00c9cran indisponible', '#B85A1A'); return; }
+  var mbrs = (typeof window._planReleveMbrs === 'function') ? (window._planReleveMbrs() || []) : [];
+  if(!mbrs.length){
+    if(window.showToast) window.showToast('Aucun salari\u00e9 actif', '#B85A1A');
+    return;
+  }
+  var host = document.getElementById('docs-pane-releve');
+  if(!host){
+    host = document.createElement('div');
+    host.id = 'docs-pane-releve';
+    host.style.display = 'none';
+    pane.appendChild(host);
+  }
+  var mSel = (typeof window._planReleveMois === 'function') ? window._planReleveMois() : 0;
+  var an   = (typeof window._planReleveAn   === 'function') ? window._planReleveAn()   : new Date().getFullYear();
+  host.innerHTML = '<div style="background:var(--phyto-pale);border-radius:14px;padding:14px 16px">'
+    + '<div style="font-size:13px;font-weight:700;color:var(--phyto-med,#7B6DB8);margin-bottom:12px">'
+      + '\u{1F464} Relev\u00e9 individuel d\u2019un salari\u00e9</div>'
+    + '<div class="fl" style="margin-top:0">Salari\u00e9</div>'
+    + '<select class="fi" id="docs-rlv-nom" style="width:100%;margin-bottom:10px">'
+      + mbrs.map(function(m){
+          return '<option value="' + _docsEsc(m.nom) + '">' + _docsEsc(m.nom)
+            + (m.coll ? ' \u2014 \u00e9quipe' : '') + '</option>';
+        }).join('')
+    + '</select>'
+    + '<div class="fl" style="margin-top:0">Mois \u00b7 ' + an + '</div>'
+    + '<select class="fi" id="docs-rlv-mois" style="width:100%;margin-bottom:12px">'
+      + MV_DOCS_MOIS.map(function(nm, i){
+          return '<option value="' + i + '"' + (i === mSel ? ' selected' : '') + '>' + nm + '</option>';
+        }).join('')
+    + '</select>'
+    + '<div style="font-size:10px;color:var(--texte-doux);background:var(--fond-module);border-radius:8px;'
+      + 'padding:6px 10px;margin-bottom:10px;line-height:1.45">'
+      + 'Le mois jour par jour, les contrats et leurs dates, les cong\u00e9s pay\u00e9s, le compteur d\u2019heures '
+      + 'et l\u2019annualisation de l\u2019ann\u00e9e ' + an + '. Deux lignes de signature en bas de page. '
+      + 'L\u2019ann\u00e9e est celle consult\u00e9e au Planning.</div>'
+    + '<button onclick="_docsReleveGo()" style="background:var(--phyto-med,#7B6DB8);color:white;border:none;'
+      + 'border-radius:10px;padding:11px 18px;font-size:13px;font-weight:600;font-family:\'Outfit\',sans-serif;'
+      + 'width:100%;cursor:pointer">\u{1F5A8}\u{FE0F} \u00c9diter le relev\u00e9</button>'
+    + '</div>';
+  _docsPane('docs-pane-releve');
+}
+
+window._docsReleveGo = function(){
+  var n = document.getElementById('docs-rlv-nom');
+  var m = document.getElementById('docs-rlv-mois');
+  if(!n || !m){ if(window.showToast) window.showToast('\u00c9cran indisponible', '#B85A1A'); return; }
+  if(typeof window._planReleveIndiv !== 'function'){
+    if(window.showToast) window.showToast('Mise \u00e0 jour incompl\u00e8te \u2014 rechargez l\u2019application', '#B85A1A');
+    return;
+  }
+  // ⚠️ On relit les DEUX champs dans le DOM au moment du clic — jamais une
+  // valeur memorisee a l'ouverture du panneau (§30i).
+  window._planReleveIndiv(n.value, parseInt(m.value, 10));
+};
+
+window._docsReleveOpen = _docsReleveOpen;
