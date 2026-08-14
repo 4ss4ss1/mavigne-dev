@@ -1628,32 +1628,6 @@ mark{background:rgba(200,176,32,.32);color:var(--cream);border-radius:3px;paddin
   <b>réservées aux administrateurs</b>. Un profil Pilotage sans droits d'administration verra ces
   montants à zéro : ce n'est pas une panne, c'est la protection des salaires.</div></div>
 
-  <details><summary>D'où vient l'écart de cadence&nbsp;?</summary>
-    <div class="dbody">Il compare deux grandeurs&nbsp;: les <b>heures réellement travaillées au
-    planning</b> sur la période (moins les heures de sessions tracteur, déjà comptées ailleurs) et
-    les <b>heures de barème du travail fait</b>. Un écart positif veut dire que le travail prend
-    plus de temps que le barème ne le prévoit.<br>
-    L'écran cherche sa source dans cet ordre, et <b>dit toujours laquelle il a trouvée</b>&nbsp;:
-    <ol>
-      <li><b>La période en cours</b>, dès qu'elle a passé <b>40&nbsp;% de barème réalisé</b>. En
-      dessous, le travail déjà fait ne ressemble pas assez à celui de toute la période&nbsp;: la
-      taille et le relevage n'ont pas la même cadence, et janvier ne prédit pas juin.</li>
-      <li><b>La même période de la campagne précédente</b>, si elle est archivée. La ligne est alors
-      précédée d'un <b>↩</b> et nomme la campagne d'origine. C'est une <b>hypothèse de
-      projection</b>, pas une mesure du moment&nbsp;— elle est remplacée par la vraie dès le seuil
-      atteint.</li>
-      <li><b>Rien</b>, et l'écran l'écrit plutôt que d'afficher un chiffre inventé.</li>
-    </ol>
-    <b>Le biais est assumé et écrit à l'écran</b>&nbsp;: une entrée de planning dit que la personne
-    était là, jamais ce qu'elle a fait. La cave, l'atelier et le bureau restent donc dans la
-    présence, qui est plutôt surévaluée&nbsp;— l'indicateur penche vers «&nbsp;barème un peu
-    serré&nbsp;».</div></details>
-
-  <div class="note"><b>La cadence ne s'applique qu'au reste à engager.</b> Appliquée au budget
-  entier, elle réécrirait le passé&nbsp;: à 100&nbsp;% d'avancement, la fin projetée retombe
-  exactement sur ce qui est déjà engagé. Une projection ne peut pas contredire une dépense
-  déjà faite, sur la même carte.</div>
-
   <h3>🗃️ Archives des campagnes</h3>
   <p>Toutes les campagnes sur un <b>même axe, du 1<sup>er</sup> août au 31 juillet</b> : de récolte à récolte, l'hiver n'est pas coupé en deux par le 31 décembre. Empilées, elles répondent à la question qui compte l'année suivante : <b>est-ce qu'on s'y est pris plus tôt ?</b></p>
   <p>Les heures affichées viennent des instantanés pris à la clôture de chaque campagne — une période jamais clôturée apparaît sur la frise sans compter d'heures. C'est aussi ici que se compare l'avancement de deux saisons.</p>
