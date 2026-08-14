@@ -2,7 +2,18 @@
 
 > Document de référence du projet **Ma Vigne** (GUERETTECH). Il est le **porteur de vérité** :
 > la mémoire Claude est plafonnée, ce fichier ne l'est pas.
-> Dernière consolidation : **12 août 2026 (nuit)** — ★★★ **LE SALAIRE EST UNE SÉRIE DATÉE**
+> Dernière consolidation : **14 août 2026** — ★★★ **LES DOCUMENTS, ET UN ÉCRASEMENT** (**§38**,
+> section neuve, avec **§37** qui rattrape le chantier CONTRATS resté non consigné). Quatre lots
+> livrés sur les documents imprimés : les deux du Cuvier rendus **atteignables** (ils existaient dans
+> le code déployé sans qu'aucun bouton n'y mène), l'**état du vignoble**, le **relevé individuel**
+> porté au hub avec ses contrats et ses congés, le **carnet d'entretien** ramené à la charte.
+> ⚠️⚠️⚠️ **Mais la leçon du jour n'est pas là.** Ces quatre lots ont été écrits sur un clone daté
+> de **07:33** et livrés en **fichiers complets** jusqu'à 20:31, pendant que Nico poussait **six
+> commits**. L'intégration a **écrasé son chantier** : 331 lignes dans `reglages.js`, 216 dans
+> `utils.js`, 171 dans `planning.js`. C'est **son propre contrôle C23, écrit le jour même**, qui a
+> sonné l'alarme en CI. Réparé par `git revert`, puis les quatre lots **rejoués** sur la base à jour.
+> **APP 6.12 · SW 6.62.** Mises à jour de la règle d'or n°1, §25, §27d, §28.
+> Consolidation précédente : **12 août 2026 (nuit)** — ★★★ **LE SALAIRE EST UNE SÉRIE DATÉE**
 > (**§36**, section neuve). Parti d'une phrase de Nico : *« il ne faut pas qu'un salaire changé
 > aujourd'hui change la mémoire d'un salaire qu'il a eu hier »*. Le diagnostic mesuré sur le code a
 > trouvé mieux qu'un manque : **un piège déjà armé**. `taux_hist` existait, était écrit à chaque
@@ -70,7 +81,12 @@
 >    force à **borner l'offre de lancement** d'abord.
 > 4. ✅ **Le plafond ESLint est à 0 avec 0 erreur** — re-vérifié le 12/08 sur les six fichiers du
 >    jour. L'entrée « passer le plafond à 0 » est close depuis le 11/08 ; ne pas la rouvrir.
-> 5. ⚠️ **Des lots restent non documentés ici**, connus par le seul changelog de `sw.js` :
+> 5. ✅ **Le chantier CONTRATS (v6.58 → v6.61) et les DOCUMENTS (v6.62) sont désormais consignés**,
+>    §37 et §38. Le §37 est une **synthèse établie depuis les changelogs de `sw.js`**, pas depuis une
+>    session de travail : le détail fait foi dans `sw.js`, à compléter par Nico si un point manque.
+>    ⚠️ **C'est l'absence de ce §37 qui a rendu l'écrasement possible** — un chantier non consigné est
+>    un chantier qu'une session suivante ne sait pas qu'elle doit préserver.
+> 5b. ⚠️ **Des lots plus anciens restent non documentés ici**, connus par le seul changelog de `sw.js` :
 >    « panneau GUERETTECH : 8 onglets deviennent 6 », « SEC-GT/2 », la **tournée sur l'écran de
 >    l'équipe », l'**exercice comptable**, les **4 défauts de la snapshot localStorage**, le **Chai
 >    qui s'ouvrait vide**, le **soutirage à source unique**, le **Cuvier repeint**, le **hub
@@ -107,6 +123,30 @@ n'existe pas, cloner avant toute autre chose.** Si le dossier existe déjà dans
 mais que Nico vient de dire avoir poussé un changement, `git pull` avant de faire confiance au
 contenu — **c'est le même principe de fraîcheur que pour `/mnt/project`, sur une mécanique
 différente.**
+★★★ **VÉCU LE 13 AOÛT — LA FRAÎCHEUR SE RE-MESURE AVANT *CHAQUE LIVRAISON*, PAS UNE FOIS PAR
+SESSION.** Clone à **07:33**, quatre lots livrés en **fichiers complets** jusqu'à **20:31**. Entre
+les deux, **six commits** poussés par Nico (le chantier CONTRATS, §37). L'intégration a écrasé ce
+chantier : **331 lignes** perdues dans `reglages.js`, **216** dans `utils.js`, **171** dans
+`planning.js`, **19** dans `app.js` — dont un correctif écrit le matin même.
+**Rien dans la session ne le signalait** : le clone était bon *au moment où il a été fait*, les
+patchs s'appliquaient sans erreur, tous les contrôles passaient — **sur une base morte**.
+- **Un fichier COMPLET livré depuis une base vieille de quelques heures est une bombe à retardement.**
+  Un patch qui ne trouve pas son ancre échoue bruyamment ; un fichier complet, lui, écrase en silence.
+- **Le réflexe** : `git pull` (ou re-clone) **juste avant** de construire le paquet, puis vérifier que
+  `git log -1` porte bien le commit sur lequel on a travaillé. Si ce n'est pas le cas : **rejouer les
+  patchs sur la base neuve**, ne jamais livrer les fichiers construits sur l'ancienne.
+- **Ne pas se fier au silence de Nico.** Il n'a pas à annoncer chaque push : c'est son dépôt, il y
+  travaille. C'est à Claude de re-mesurer.
+- **Réparation, si c'est déjà arrivé** : ne PAS fusionner à la main. `git revert` du commit fautif
+  (opération exacte, testée avant d'être conseillée : le résultat était identique au caractère près),
+  puis rejouer les patchs sur la base restaurée. Les ancres retrouvées **une seule fois chacune**
+  prouvent que les deux travaux ne se marchent pas dessus ; celles qui manquent désignent exactement
+  les endroits à arbitrer.
+- ⚠️ **Corollaire sur les numéros de version** : travailler sur une base périmée fait **réutiliser des
+  numéros déjà servis**. Le 13/08, `6.58`, `6.60` et `6.61` ont porté **deux contenus différents**,
+  tous deux déployés. Un client passé sur l'un ne prendra **jamais** l'autre. Sauter un numéro ne
+  coûte rien ; en réutiliser un fige un client pour toujours.
+
 ⚠️ **Le dépôt est PUBLIC** — condition nécessaire au clone anonyme. S'il redevient privé, le clone
 échoue avec `fatal: could not read Username for 'https://github.com'` : le dire à Nico plutôt que
 de deviner une autre cause. Après un clone/pull, `git log -1` pour dater ce qu'on lit et le
@@ -5384,3 +5424,303 @@ régénéré · `scripts/preflight-baseline.json` regravée · `scripts/mv-harna
 3. **Le taux reste un coût employeur unique par personne.** Pas de distinction brut/chargé, pas de
    majoration d'heures supplémentaires dans le coût. La définition unique de §20b tient, et
    `coef_charges` **reste banni**.
+---
+
+## 37. ★★★ LE CHANTIER CONTRATS (13/08 — APP 6.08 → 6.11 · SW 6.58 → 6.61)
+
+> ⚠️ **Section rédigée depuis les changelogs de `sw.js`, pas depuis la session de travail.** Le
+> détail fait foi dans `public/sw.js` (blocs v6.58 à v6.61). Elle existe parce qu'un chantier non
+> consigné ici est un chantier qu'une session suivante **écrase sans le savoir** — c'est exactement
+> ce qui s'est produit le soir même (§38).
+
+### 37a. Le trou — quatre mémoires parallèles
+
+La vie contractuelle d'un salarié vivait à **quatre endroits qui ne se parlaient pas** :
+
+| Où | Quoi | Daté ? | Lu ? |
+|---|---|---|---|
+| `debut_contrat` / `fin_contrat` | le contrat en cours | oui | oui |
+| `m.contrats[]` | les contrats précédents | oui | **non, avant 6.58** |
+| `renouvellement_date` / `_fin` | une alerte | oui | **`_fin` n'était lu NULLE PART** |
+| `PAIE.taux_serie` | le salaire | oui | oui (§36) |
+
+**Deux sur quatre étaient datées ET lues.** Conséquences mesurées : un contrat archivé ne pesait rien
+dans les compteurs, prolonger un contrat **écrasait l'ancienne date sans un mot**, et remplir le champ
+facultatif « date de renouvellement » **éteignait l'alerte de fin de contrat** — annoncer un
+renouvellement pour janvier faisait taire l'application sur un CDD qui se terminait en août.
+
+### 37b. `m.hist[]` devient la source (v6.59)
+
+Trois événements, tous producteurs : `embauche {d,type,fin?}` · `renouvellement {d,fin}` · `fin {d}`.
+
+- **Migration à zéro écriture** : journal absent → dérivé **à la lecture** depuis `contrats[]` + le
+  couple. Un domaine qui n'ouvre aucune fiche calcule exactement comme avant.
+- **Les anciens champs deviennent des miroirs**, réécrits par `_mvHistMirror()` à l'enregistrement :
+  les ~40 points de lecture (paie, 1607 h, congés, MSA, Pilotage) n'ont pas bougé d'une ligne.
+  ★ Même patron que `taux[nom]` rétrogradé en miroir de `taux_serie[nom]` (§36).
+- ⚠️ **Le modèle reste en DEUX morceaux** : `membres` est lisible par toute l'équipe, `paie` est
+  admin-only (`firestore.rules:201-202`). Les contrats vont dans `membres`, les salaires restent dans
+  `paie`, **fusion à la lecture**.
+- ⚠️⚠️ **Propriété centrale, vérifiée sur 10 formes de fiche : DÉRIVER PUIS REMIROITER EST
+  L'IDENTITÉ.** Sans elle, le premier enregistrement d'une fiche réécrirait ses dates en silence. Le
+  harnais l'a fait échouer **deux fois** : un contrat archivé **sans type** se voyait inventer un
+  `'CDI'` — *un saisonnier serait devenu permanent*. Un type inconnu reste désormais inconnu.
+- ★ **Garde anti-perte** : `membres` est un TABLEAU, donc `_mvDocSize` rendait le **nombre de fiches**.
+  Vider le journal des huit salariés passait sans un bruit (8 → 8). `_mvMembresCount` compte fiches
+  **et** événements.
+
+### 37c. Les fonctions à connaître (utils.js)
+
+| Fonction | Ce qu'elle rend | Piège |
+|---|---|---|
+| `_mvHist(m)` | le journal normalisé et trié | tri **stable** : deux événements du même jour gardent l'ordre de saisie |
+| `_mvPeriodes(m)` | périodes **NON fusionnées**, chacune **avec son type** | c'est ce qu'il faut pour **lister** des contrats |
+| `_mvContrats(m)` | périodes **FUSIONNÉES** (contigus = un seul) | bon pour « était-il là ce jour-là », **faux pour lister** |
+| `_mvSalarieAt(m, iso)` | « qu'était-il ce jour-là ? » | ne joint **pas** le taux (collection `paie`, admin-only) |
+| `_mvAnnualise(m)` | annualisé ou non | **définition unique** — voir 37e |
+
+★★★ **La différence `_mvPeriodes` / `_mvContrats` est un piège actif.** Choisir la mauvaise donne un
+document qui a l'air juste : soit deux contrats de types différents fondus en un, soit un contrat
+prolongé compté deux fois.
+
+### 37d. La coupure est DESSINÉE (v6.60)
+
+Sept champs disparates deviennent **un bandeau + un historique**. Le rail de la frise est **plein**
+pendant un contrat et **pointillé** dans le vide ; le trou porte son propre encart hachuré
+(« *coupure de 23 jours — le compteur du précédent est soldé* »).
+
+★★★ **C'est ce trou qui décide si le compteur repart de zéro, et il n'était affiché NULLE PART** :
+cause commune des défauts des lots A, B et C1.
+
+- **Chaque geste annonce son effet AVANT validation**, même patron que `_planAbsEffet`. L'encart est
+  **calculé** en simulant l'ajout sur `_mvPeriodes`, jamais écrit en dur : *un texte figé finirait par
+  mentir le jour où la règle change*.
+- **Un événement s'écrit dès qu'il est validé**, pas à l'enregistrement de la fiche : fermer la fiche
+  ne perd plus un contrat saisi.
+- **La grille horaire est portée par le contrat**, pas par un événement à part — mesure : `_planPlId`
+  est affecté **hors boucle** dans 26 fonctions, et les modèles sont déjà datés à l'**année**. Dater
+  l'affectation au **jour** aurait mélangé deux granularités sur le même calcul.
+- **Supprimés du modèle** : `renouvellement_date`, `renouvellement_fin`.
+
+### 37e. La question ouverte de §36j est TRANCHÉE
+
+`window.MV_HORS_ANNU = ['TESA', 'Saisonnier', 'Extra']` et `window._mvAnnualise(m)`.
+
+⚠️ **La liste énumère ce qu'on RETIRE, pas ce qu'on garde.** Une liste d'inclusion ferait sortir de
+l'annualisation tout type absent — un libellé futur, une donnée importée, une faute de frappe — et
+ferait donc **disparaître un compteur en silence**. Tout ce qui n'est pas nommé reste annualisé.
+
+`annualise:false` → plafond, modulation, reste et cadence **n'ont aucun sens** : mis à zéro, et la
+carte bascule sur un simple comptage (`_planCompteCard`). Une **équipe collective** n'est jamais
+annualisée. ⚠️ **Tout écran ou document qui parle de plafond doit lire `_mvAnnualise` d'abord.**
+
+### 37f. C23 — ce qu'un attribut HTML nomme doit vivre sur `window` (v6.61)
+
+**Correctif 6.60** : les neuf fonctions `_emhX` de la fiche membre étaient exposées, **l'ÉTAT ne
+l'était pas**. `var _EMH` est une variable de **module** ; `oninput="_EMH.d=this.value"` s'évalue dans
+la portée **globale**. Au premier caractère tapé : *« _EMH is not defined »*. 27 références réécrites
+en `window._EMH`. **C'est C15 appliqué à une VARIABLE et non à une fonction.**
+
+**Nouveau contrôle C23** (`scripts/preflight.mjs`), avec cliquet. C6 existait déjà mais ne lit que le
+**premier** identifiant du gestionnaire, seulement s'il est suivi d'une parenthèse, et écarte tout ce
+qui contient un point — `_EMH.d=` cochait les trois cases. **C23 lit le CORPS ENTIER** : appels, accès
+propriété, affectations ; exposition **croisée entre fichiers** ; variables déclarées dans le
+gestionnaire ignorées ; mots-clés et globaux natifs exclus.
+
+★ **Trouvé dès le premier passage, un défaut ancien et sans rapport** : `let pShowDone` (app.js). La
+puce « À faire / Toutes » des parcelles levait une **ReferenceError à chaque clic**, en silence.
+**Le bouton ne faisait rien depuis toujours.**
+
+⚠️⚠️ **Un `let` de haut niveau n'est joignable ni via `window`, ni via la portée globale : le bundle
+est une IIFE, il n'y a pas de portée globale à atteindre.**
+
+---
+
+## 38. ★★★ LES DOCUMENTS, ET L'ÉCRASEMENT (13-14/08 — APP 6.12 · SW 6.62)
+
+### 38a. ⚠️⚠️⚠️ D'abord l'incident, parce qu'il prime sur le reste
+
+Point de départ anodin : *« ça serait bien un pdf des mesures effectuées aux vendanges, analyse avant
+vendange et tous les autres modules »*. Quatre lots ont suivi. **Tous ont été écrits sur un clone de
+07:33 et livrés en fichiers complets jusqu'à 20:31**, pendant que Nico poussait six commits (§37).
+
+**Ce qui a été écrasé, mesuré** (lignes présentes chez Nico, absentes après intégration) :
+`reglages.js` **331** · `utils.js` **216** · `planning.js` **171** · `sw.js` **139** (son changelog) ·
+`app.js` **19** · `index.html` et le guide **19**.
+
+★★★ **C'EST SON PROPRE C23, ÉCRIT LE JOUR MÊME, QUI A SONNÉ.** Le contrôle a retrouvé l'`onclick`
+`pShowDone` que **sa propre correction venait de retirer** ; la CI a échoué **avant le build**. Sans
+lui, l'écrasement partait en production.
+
+**Réparation** : `git revert` du commit d'intégration — testé avant d'être conseillé, l'état restauré
+était **identique au caractère près** — puis les quatre lots **rejoués** sur la base à jour. Les **15
+points d'ancrage retrouvés, une seule fois chacun** : preuve mécanique que les deux travaux ne se
+marchent pas dessus. Trois adaptations ont été nécessaires, elles sont en 38d.
+
+**Les leçons sont consignées en Règle d'or n°1** (re-mesurer la fraîcheur avant *chaque* livraison,
+réutilisation des numéros de version, procédure de réparation).
+
+⚠️ **Deux régressions retrouvées en rejouant, attrapées par mes propres harnais** : une correction
+faite directement dans le fichier patché **et non dans le bloc source** est revenue à l'état
+défectueux (tri des parcelles sans commune). **Corriger le livrable sans corriger la source du patch,
+c'est corriger une fois.**
+
+### 38b. Ce qu'a trouvé la mesure, avant d'écrire une ligne
+
+**Le hub Documents sortait déjà douze PDF.** Deux saisies du Cuvier n'en faisaient partie d'**aucun** :
+les analyses de maturité (`CAVE_VENDANGE.analyses`) et les mesures de fermentation
+(`cuves_vinif[].mesures_fa`). Vérifié par grep : ni le bilan de campagne, ni le rapport de saison ne
+les touchent.
+
+★ **Ce n'est pas un oubli du registre des manipulations.** Son en-tête l'écrit : *« densité, analyses
+n'en font pas partie : l'inclure noierait le document »*. Un contrôle regarde l'enrichissement et le
+sulfitage ; le vigneron a besoin de ses courbes. **Deux publics → deux documents**, pas une section de
+plus dans un registre qui a raison de les refuser.
+
+### 38c. Les quatre lots
+
+**1. Le Cuvier (cave.js).** `_matDoc` — **contrôle de maturité**, paysage : une ligne par parcelle,
+une colonne par jour de relèvement, **dans l'ordre de maturité**, vitesse en g/L par jour, trois
+moyennes **pondérées par la surface**, parcelles jamais mesurées et déjà rentrées. Au-delà de huit
+jours, les huit derniers s'affichent et le document **dit combien manquent**. `_cuvDoc` — **cahier de
+cuverie**, portrait : une page par cuve, densité corrigée à 20 °C, sucre restant estimé, avancement,
+remontages, pigeages, opérations via `_rmDetail`, cuvée de sortie au décuvage.
+
+⚠️ **`_matSynth` prend un second paramètre `refIso`** pour rejouer une campagne passée. Il a fallu
+borner **AUSSI PAR LE HAUT** : `_matJours` rend un écart **négatif** pour une mesure postérieure à la
+référence, donc le filtre des 150 jours la laissait passer — la vendange suivante se serait invitée
+dans le document de l'année précédente. **La borne ne s'arme que si `refIso` est fourni** : l'écran
+est strictement inchangé.
+
+★★★ **ET SURTOUT : CE LOT A ÉTÉ INTÉGRÉ À MOITIÉ.** `cave.js` est parti en production le 13/08 à
+15:18 (v6.58) **sans le `reglages.js` du même lot** : deux documents complets, fonctionnels, et
+**atteignables par personne**. **C15 grandeur nature, causé par une livraison en morceaux.** Un lot
+qui touche deux fichiers s'intègre en une fois ou pas du tout.
+
+**2. L'état du vignoble (reglages.js).** Le vignoble ne sortait qu'en CSV. Une ligne par parcelle :
+commune, ha, cépages (complantation signalée), avancement + barre, tâches faites/concernées, tâches
+« hors sujet », dernier travail, dernier rendement à l'hectare ; puis répartition par cépage et
+arrachées à part.
+★ **Sa dernière colonne dit CE QUI MANQUE** : cépage absent, aucune position, aucun contour — comptés
+et nommés en fin de page. **C'est la feuille à cocher d'une installation** (40 parcelles chez un
+prospect, personne ne relit 40 lignes à l'écran).
+- Moteurs **lus**, jamais refaits : `getPCls`, `getTachesSaison`, `_mvParcGeo`, `_mvKmlCtrs`,
+  `_dpRendHistRows` (**une ligne d'export** dans `app.js` plutôt qu'une copie du calcul).
+- ⚠️ **AUCUNE HEURE, volontairement.** Leur calcul vit dans `openDP` avec les trous de plantation,
+  l'entreplantation et les exclusions : le recopier en ferait une **seconde définition**.
+- ⚠️ **Le journal porte AUSSI les relevés météo** : sans le filtre `!j.meteo`, la « dernière
+  intervention » d'une parcelle aurait pu être une note de pluie. Même filtre que l'export JSON.
+- ⚠️ **Une parcelle complantée compte sa surface ENTIÈRE pour chacun de ses cépages** : la colonne
+  dépasse alors la surface du domaine, et **le document l'écrit**. Rien ne permet de partager une
+  surface rang par rang, et *un partage inventé serait pire qu'un double compte annoncé*.
+- L'avancement du domaine est **pondéré par la surface**, et le dit.
+
+**3. Le relevé individuel (planning.js).** ⚠️⚠️ **CE DOCUMENT EXISTAIT DÉJÀ** — lu avant d'écrire :
+`planExportPDF` sortait le mois jour par jour, les heures sup, **le compteur d'annualisation** et le
+détail mois par mois. Écrire une « fiche salarié » de plus aurait fabriqué **une seconde définition
+des mêmes chiffres**. Le lot fait donc deux choses :
+- **il rend le document atteignable** — entrée au hub (famille *Obligatoire*) avec un panneau
+  salarié + mois, **construit en JS** (injection idempotente dans `#docs-pane`) plutôt qu'écrit dans
+  un `index.html` de 268 ko ;
+- **il ajoute la vie contractuelle et les congés**. L'en-tête ne nomme que le contrat **du mois**
+  (`_ctrTxt`, v6.60) ; le compteur porte sur l'**année**. Entre les deux, rien ne disait combien de
+  contrats l'année comptait ni où tombaient les **coupures**.
+- ⚠️ Source : **`_mvPeriodes`** (37c), pas `_mvContrats`. Chaque contrat avec **son type**, et les
+  coupures **comptées en jours**, avec le vocabulaire de la frise (37d).
+- ⚠️ Le pied suit **`_mvAnnualise`** (37e) : écrire « plafond proratisé » sur le relevé d'un TESA
+  serait faux depuis la v6.61.
+- ⚠️ **`planExportPDF` lit la variable de module `planMonth`.** Le point d'entrée la déplace puis
+  **la remet** (`finally`) : éditer un relevé depuis les Documents ne doit pas changer le mois affiché
+  au Planning.
+- ⚠️ **`_planFmt` formate des HEURES** : `_planFmt(12)` rend « 12h ». Les congés se comptent en
+  **jours** — le document imprimait **« 12h j »**, trouvé par le harnais, pas à l'œil. Formateur de
+  jours séparé, plus un garde-fou permanent qui échoue sur tout `h j<`.
+- **Aucun montant** : c'est un décompte d'heures, pas un bulletin de paie. La donnée `paie` n'est pas
+  touchée (C21).
+
+**4. Le carnet d'entretien à la charte (app.js).** Il titrait *« Ma Vigne — Entretien tracteurs »* et
+signait *« © 2026 Nicolas GUERET / GUERETTECH »*, là où la charte écrit noir sur blanc que **les
+documents portent le nom du DOMAINE, jamais celui de GUERETTECH**. Corrigé. Ses marges étaient **déjà**
+14mm 12mm : la largeur utile ne bouge pas, aucune colonne ne se décale.
+
+### 38d. Les trois adaptations imposées par le chantier CONTRATS
+
+En rejouant les lots sur la base à jour, trois choses ont dû changer — et **c'est la partie utile de
+l'incident** :
+1. le bloc contrats est passé de `_mvContrats` à **`_mvPeriodes`** (chaque contrat garde son type) ;
+2. le pied du bloc suit **`_mvAnnualise`** au lieu d'affirmer un plafond ;
+3. « en cours » désigne **la période qui couvre aujourd'hui**, et non « sans date de fin » — sinon
+   seuls les CDI étaient marqués.
+
+★ **Un patch qui s'applique n'est pas un patch qui a raison.** Les 15 ancres tenaient ; c'est la
+**lecture du travail de l'autre** qui a corrigé le sens.
+
+### 38e. ★★ L'audit des chartes — il n'y a pas huit documents en désordre, il y en a deux chartes
+
+Mesuré avant d'écrire, sur les 15 générateurs :
+
+| Famille | Combien | Ce qu'ils partagent |
+|---|---|---|
+| **`MV_DOC`** (`_mvDocOpen`) | **8** | la primitive commune de `utils.js` |
+| **Charte « Cave », non écrite** | **3** | registre des manipulations, bilan de campagne, inventaire des fûts : encre `#14110D`, filet `#8A5A38 → #C2871E → #3D6B27`, Cormorant, marge 14/12 |
+| **Vrais retardataires** | **4** | relevé mensuel · registre phyto (paysage **9mm**) · rapport de saison (**margin:0**) · relevé individuel (**10mm**) |
+
+★★★ **La charte « Cave » n'est pas de la négligence : c'est un en-tête PLUS RICHE que celui de
+`MV_DOC` (dégradé, radius, titre 30-34px), écrit APRÈS elle, et cohérent entre ses trois documents.
+Les aplatir ferait PERDRE en qualité.**
+
+⚠️ **Les quatre retardataires n'ont pas été convertis, et pas par manque de temps** : passer le
+registre phyto de 9 à 12 mm **retire 6 mm à un tableau de dix colonnes** déjà serré, et le rapport de
+saison est en pleine page. **Ces conversions se valident sur un RENDU, pas sur une relecture de
+source.** Les convertir à l'aveugle serait la faute que ce document passe son temps à décrire.
+
+### 38f. Les filets ajoutés
+
+- **`scripts/mv-chartes-doc.mjs`** — recense les 15 générateurs, dit qui suit quelle charte, affiche
+  la marge que chacun s'invente, et **échoue si le nombre de documents hors `MV_DOC` augmente**
+  (plafond **7**, à ne faire que **descendre**).
+  ★ **Sa propre contre-épreuve a trouvé une faille dans le détecteur** : il comptait la **mention** de
+  `_mvDocOpen`, or le garde `typeof window._mvDocOpen` cite le nom **sans appeler**. Un document qui
+  perdrait son appel en gardant son garde passait pour conforme. Il cherche l'**appel** désormais.
+- **`scripts/mv-whatsnew-check.mjs`** — **exécute** le journal au lieu de le relire : tête =
+  `APP_VERSION`, ordre décroissant, doublons, backslash rendu littéralement, demi-surrogates
+  **appariés** (un emoji hors BMP est une paire légitime), `_whatsNewSince` **joué**.
+- **Trois harnais** (`vignoble`, `releve`, `entretien`) sur le patron de `cuvdoc`, chacun avec ses
+  contre-épreuves : 11 + 11 + 8 défauts réinjectés, **tous rouges**.
+  ⚠️ **`app.js` ne se charge pas dans Node** (il importe le SDK Firebase et `styles.css`) : les
+  moteurs y sont **extraits du source réel** par découpe (méthode C20). `planning.js`, `reglages.js`
+  et `cave.js`, eux, se chargent entiers derrière un DOM minimal.
+- **`.github/workflows/ci.yml`** — actions `v4 → v5` (fin des avertissements Node 20) et trois étapes
+  neuves avant le build : **le guide en phase avec ses sources**, le journal + le cliquet des chartes,
+  les quatre harnais.
+
+★ **Trou fermé au passage** : `public/guide.html` était **en retard sur ses propres sources**
+(`guide/*.html` enrichis sans régénérer). `build-guide.mjs --check` n'était **pas dans la CI** — il
+y est maintenant.
+
+### 38g. Fichiers, versions, état
+
+`src/reglages.js` (2 blocs + 4 entrées au hub) · `src/planning.js` (2 blocs + point d'entrée) ·
+`src/app.js` (1 export + conversion du carnet) · `src/utils.js` (`APP_VERSION` + WHATS_NEW +
+`MV_AIDE` cave/parcelles/planning) · `index.html` (4 emplacements) · `public/sw.js` ·
+`guide/04-vigne.html` + `guide/10-planning.html` + `public/guide.html` régénéré ·
+`.github/workflows/ci.yml` · 5 scripts neufs. **`cave.js` était déjà intégré (v6.58).**
+
+**APP 6.11 → 6.12, SW 6.61 → 6.62.** Preflight **0/0**, ESLint **0** (plafond 0), vocabulaire vert,
+guide en phase, journal vert, cliquet des chartes **8 / 7 / plafond 7**, quatre harnais verts,
+**41 contre-épreuves toutes rouges**, build Rollup complet avec vérification du câblage **dans le
+bundle minifié**. ⚠️ **Smoke et e2e non joués** : le téléchargement de Chromium est bloqué par la
+politique réseau du bac à sable — ils ne tournent qu'en CI.
+
+### 38h. Ce que ce chantier ouvre et ne ferme pas
+
+1. **La charte « Cave » ou `MV_DOC` ?** Décision de design qui appartient à Nico : remonter le hero
+   riche dans `utils.js` comme variante (`hero:'riche'`) et y rallier les autres — le plafond du
+   cliquet tomberait de **7 à 4** sans rien perdre visuellement — ou aplatir trois documents récents
+   vers un en-tête plus pauvre.
+2. **Les quatre retardataires attendent un rendu.** Registre phyto (largeur), rapport de saison
+   (`margin:0`), relevé mensuel (31 ko), relevé individuel (10mm).
+3. **`openSyntheseCuivre` est taggé `fm:'pdf'` au hub alors qu'il ouvre un ÉCRAN**, pas un document.
+   À vérifier : l'écran a-t-il un bouton d'impression ?
+4. **Le guide et les documents ne se contrôlent pas mutuellement.** Un document peut promettre une
+   colonne que le guide ignore, et l'inverse. Aucun filet là-dessus.
