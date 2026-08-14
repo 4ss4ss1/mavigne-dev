@@ -4071,7 +4071,20 @@ function _pilCapaProj(charge, startIso){
   var k=1, kOk=false;
   try{
     var E=_pecData();
-    if(E&&E.cad&&E.cad.ok){
+    // \u2605\u2605\u2605 SEULE LA MARCHE 1 PILOTE UNE DATE (14/08/2026, soir).
+    //   La marche 2 - meme periode, campagne precedente - a ete branchee ici le
+    //   matin meme. Resultat mesure en vendange, a 0 % d'avancement : k=2,93, la
+    //   charge restante presque triplee, « -202 j de retard » sur un domaine qui
+    //   affichait 1 j d'avance la veille.
+    //   \u26a0 LE RAPPORT PRESENCE/BAREME N'EST PAS TRANSPOSABLE. Son numerateur
+    //   porte TOUT le domaine (cave, atelier, entretien, bureau), son denominateur
+    //   le seul travail de vigne. Pendant la vendange la cave tourne a plein : le
+    //   rapport mesure la cave, pas la cadence des rangs. La marche 1 tolerait ce
+    //   biais parce que le seuil de 40 % d'avancement garantit que la vigne domine
+    //   la presence ; la marche 2 n'a AUCUN garant equivalent.
+    //   \u26a0 LA BORNE [0,5 ; 3] N'A PAS PROTEGE : 2,93 passe a 0,07 pres. Une borne
+    //   calibree sur un biais faible ne rattrape pas un biais d'une autre nature.
+    if(E&&E.cad&&E.cad.ok&&E.cad.applic){
       k=1+((E.cad.ecart||0)/100);
       // Bornes de bon sens : un facteur hors de [0,5 ; 3] ne mesure plus une
       // cadence, il mesure un trou de saisie. On le refuse plutot que de le
@@ -4236,7 +4249,12 @@ function _pilCkBudget(){
   var E=_pecData();
   if(!E.configured) return '<div class="pil-ck"><div class="kl">Budget consomm\u00e9</div><div class="kv">\u2014</div>'
     +'<div class="ks">taux horaire \u00e0 renseigner (R\u00e9glages \u203A \u00c9quipe)</div></div>';
-  var ec=E.cad.ok?E.cad.ecart:null;
+  // \u2605 CINQUIEME POINT D'AFFICHAGE, OUBLIE LE MATIN. Les quatre points repris
+  //   pour annoncer la source etaient TOUS dans l'onglet Economie ; celui-ci et le
+  //   verdict sont sur l'ACCUEIL - les deux premiers chiffres que Nico voit. Un
+  //   ecart d'histoire affiche « cadence +193 % vs bareme » au present, c'est
+  //   exactement la faute de \u00a734 commise sur l'ecran le plus lu.
+  var ec=(E.cad.ok&&E.cad.applic)?E.cad.ecart:null;
   var col = (ec===null)?'var(--texte)' : (ec>15?'var(--rouge)' : (ec>5?'var(--orange)' : 'var(--vert-med)'));
   return '<div class="pil-ck"><div class="kl">Budget consomm\u00e9</div>'
     +'<div class="kv" style="color:'+col+'">'+Math.round(E.cons)+'<span class="u"> %</span></div>'
@@ -6304,7 +6322,13 @@ function _pecData(){
   // 0 € restant, l'ecran projetait une fin a 37,4 k€ — une projection ne peut pas
   // contredire ce qui est deja depense, sur la meme carte. A 0 % d'avancement le
   // resultat est identique a l'ancien ; a 100 % elle retombe exactement sur l'engage.
-  var projFin = cadOk ? (engage + resteE*(1+ecart)) : budget;
+  // \u26a0 MEME REGLE QUE LA DATE (14/08/2026, soir) : un budget projete est une
+  //   PREVISION. La marche 2 ne prevoit rien, elle RAPPELLE. Sous le seuil, la
+  //   projection retombe sur le budget de bareme - exactement le comportement
+  //   d'avant le branchement de la marche 2. L'ecart histo reste LU a l'ecran,
+  //   il n'est plus MULTIPLIE par une charge.
+  var cadAppl = (cadSrc==='planning');
+  var projFin = cadAppl ? (engage + resteE*(1+ecart)) : budget;
 
   var postes = [
     { k:'mo',   lab:'Main-d\u2019\u0153uvre vigne', col:_PEC_COL.mo,   fait:T.moF,   budget:T.moB, proj:false, det:_ecoH1(T.fH)+' h faites sur '+_ecoH1(T.bH)+' h de bar\u00e8me' },
@@ -6327,7 +6351,7 @@ function _pecData(){
     rate:rate, cfg:cfg, phy:phy, rcfg:rcfg, minTrou:_ecoMinTrou(),
     tracAnon:tracH.nAnon, tracSess:tracH.nSess,
     avc:avcPct, cons:consPct, projOn:projOn,
-    cad:{ hReel:hReelC, hBar:hBarC, ok:cadOk, ecart:ecart*100, hJour:hJour,
+    cad:{ hReel:hReelC, hBar:hBarC, ok:cadOk, applic:cadAppl, ecart:ecart*100, hJour:hJour,
           src:(cadSrc || (cadP?'planning':null)), hTrac:(cadHist?cadHist.hTrac:T.tracH), seuil:_PEC_CAD_AVC*100,
           d0:(cadHist?cadHist.d0:(cadP?cadP.d0:'')), d1:(cadHist?cadHist.d1:(cadP?cadP.d1:'')),
           nMbr:(cadHist?cadHist.nMbr:(cadP?cadP.n:0)),
@@ -6465,7 +6489,7 @@ function _pecBurnSvg(E,TL,w){
   var tMax=Math.max(TL.tEnd, TL.tToday||0, TL.projMs||0, TL.tLast||0);
   if(tMax<=TL.t0) tMax=TL.t0+86400000*30;
   tMax=TL.t0+(tMax-TL.t0)*1.02;
-  var pFin=(E && E.cad && E.cad.ok && Math.abs(E.cad.ecart)>5) ? E.projFin : 0;
+  var pFin=(E && E.cad && E.cad.ok && E.cad.applic && Math.abs(E.cad.ecart)>5) ? E.projFin : 0;
   var yTop=_pecNiceMax(Math.max(TL.budget, TL.cum, TL.projEndV||0, pFin)*1.05);
   function X(t){ return pL+(Math.max(TL.t0,Math.min(tMax,t))-TL.t0)/(tMax-TL.t0)*iw; }
   function Y(v){ return pT+ih-(Math.max(0,Math.min(yTop,v))/yTop)*ih; }
@@ -6716,8 +6740,12 @@ function _pecAlertes(E,TL){
   if(chers.length) push('warn','\uD83D\uDCC8','<b>'+chers.length+' parcelle'+(chers.length>1?'s':'')+'</b> d\u00e9passe'+(chers.length>1?'nt':'')+' de plus de 30 % le co\u00fbt moyen \u00e0 l\u2019hectare : '
     +_pilEsc(chers.slice(0,3).map(function(r){ return r.nom+' ('+_ecoEur(r.coutHa)+'/ha)'; }).join(', '))+(chers.length>3?'\u2026':'')+'. \u00c0 regarder : plants, passages en plus, ou tri des t\u00e2ches.');
   if(E.cad.ok && E.cad.ecart>15){
-    if(E.cad.src==='histo')
-      push('warn','\u21a9\ufe0e','L\u2019an dernier, sur la p\u00e9riode homologue (<b>'+_pilEsc(E.cad.histoNom||'campagne pr\u00e9c\u00e9dente')+'</b>), l\u2019\u00e9quipe avait pass\u00e9 <b>'+_pilEsc(_pecPct(E.cad.ecart))+' de temps en plus</b> que le bar\u00e8me h/ha. Cette p\u00e9riode-ci n\u2019est pas encore assez avanc\u00e9e pour se mesurer elle-m\u00eame ('+Math.round(E.avc)+' % sur '+Math.round(E.cad.seuil)+' % requis) : la projection reprend donc ce rythme comme <b>hypoth\u00e8se</b>. Si le bar\u00e8me n\u2019a pas boug\u00e9 depuis, il y a de bonnes chances qu\u2019elle se v\u00e9rifie \u2014 mais rien ne le garantit encore.');
+    // \u2605 GARDE EXPLICITE, PAS STRUCTURELLE. La branche basse cite E.projFin :
+    //   elle n'a de sens que si la projection applique vraiment l'ecart. Le if/else
+    //   le garantissait deja par construction - et c'est exactement le genre de
+    //   garantie qu'un refactor efface sans bruit. On l'ecrit.
+    if(E.cad.src==='histo' || !E.cad.applic)
+      push('warn','\u21a9\ufe0e','L\u2019an dernier, sur la p\u00e9riode homologue (<b>'+_pilEsc(E.cad.histoNom||'campagne pr\u00e9c\u00e9dente')+'</b>), l\u2019\u00e9quipe avait pass\u00e9 <b>'+_pilEsc(_pecPct(E.cad.ecart))+' de temps en plus</b> que le bar\u00e8me h/ha. Cette p\u00e9riode-ci n\u2019est pas encore assez avanc\u00e9e pour se mesurer elle-m\u00eame ('+Math.round(E.avc)+' % sur '+Math.round(E.cad.seuil)+' % requis) : c\u2019est un <b>rep\u00e8re</b>, pas une pr\u00e9vision : ni la date de fin ni le budget projet\u00e9 ne l\u2019appliquent. La pr\u00e9sence au planning compte aussi la cave, l\u2019atelier et le bureau, alors que le bar\u00e8me ne compte que la vigne \u2014 sur une p\u00e9riode o\u00f9 la cave tourne, l\u2019\u00e9cart parle surtout d\u2019elle.');
     else
       push('bad','\u23F3','Sur le travail d\u00e9j\u00e0 fait, l\u2019\u00e9quipe a pass\u00e9 <b>'+_pilEsc(_pecPct(E.cad.ecart))+' de temps en plus</b> que le bar\u00e8me h/ha. Si cela tient jusqu\u2019au bout, la p\u00e9riode co\u00fbtera <b>'+_pilEsc(_pecEurK(E.projFin))+'</b> au lieu de '+_pilEsc(_pecEurK(E.budget))+'. Deux causes possibles, et elles se distinguent dans <b>Postes &amp; travaux</b> : un bar\u00e8me trop serr\u00e9 (<b>R\u00e9glages \u203A T\u00e2ches</b>), ou un travail pr\u00e9cis qui d\u00e9rape.');
   }
@@ -6770,7 +6798,7 @@ function _pecViewSynthese(E,TL){
     +'<div class="pec-leg"><span class="pec-lg"><em style="background:var(--terre)"></em>Engag\u00e9 cumul\u00e9</span>'
     +'<span class="pec-lg"><i style="border-top:2px dashed var(--terre);opacity:.6"></i>Projection au rythme constat\u00e9</span>'
     +'<span class="pec-lg"><i style="border-top:2px dashed var(--or)"></i>Budget</span>'
-    +(E.cad.ok&&Math.abs(E.cad.ecart)>5?'<span class="pec-lg"><em style="background:'+(E.projFin>E.budget?'var(--rouge)':'var(--vert-med)')+'"></em>Fin projet\u00e9e \u00e0 la cadence mesur\u00e9e</span>':'')
+    +(E.cad.ok&&E.cad.applic&&Math.abs(E.cad.ecart)>5?'<span class="pec-lg"><em style="background:'+(E.projFin>E.budget?'var(--rouge)':'var(--vert-med)')+'"></em>Fin projet\u00e9e \u00e0 la cadence mesur\u00e9e</span>':'')
     +(TL&&TL.objMs?'<span class="pec-lg"><i style="border-top:2px dashed var(--or)"></i>Objectif de fin des travaux</span>':'')+'</div>'
     +'<div class="pec-note">Chaque euro est pos\u00e9 \u00e0 <b>sa</b> date : la main-d\u2019\u0153uvre sur les validations du journal, le tracteur et le GNR sur la date de session, le phyto sur la date de traitement. Une personne pr\u00e9sente sur plusieurs parcelles le m\u00eame jour est r\u00e9partie \u00e0 parts \u00e9gales \u2014 le journal dit qui et quand, jamais combien d\u2019heures.<br>'
       +'L\u2019<b>\u00e9cart de cadence</b> vient de l\u00e0 : les heures <b>r\u00e9ellement travaill\u00e9es au planning</b> sur la p\u00e9riode, moins les heures de sessions tracteur, compar\u00e9es aux heures de bar\u00e8me du travail fait. '
