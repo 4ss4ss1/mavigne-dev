@@ -2,7 +2,23 @@
 
 > Document de référence du projet **Ma Vigne** (GUERETTECH). Il est le **porteur de vérité** :
 > la mémoire Claude est plafonnée, ce fichier ne l'est pas.
-> Dernière consolidation : **14 août 2026 (soir)** — **§39 clôturé, APP 6.13 · SW 6.63.** Nico a
+> Dernière consolidation : **14 août 2026 (nuit)** — ★★★ **L'ESCALIER DE CADENCE, ET LE FICHIER
+> QUI NE TROUVE PAS SA PLACE** (**§41**, section neuve). **APP 6.14 · SW 6.67.** Parti d'un seul mot,
+> *« suite »*, sur le backlog technique. **Quatre entrées rayees** (3, 7, 9, 0e) — et **cinq autres
+> trouvées déjà mortes** à l'audit préalable (2, 5, 8, 15, 41). C'est le **troisième** audit du même
+> genre à trouver des fantômes : un backlog non ré-audité fait travailler dans le vide.
+> ★★ **La marche 2 de l'escalier de cadence est enfin câblée** : sous le seuil d'avancement, l'écran
+> reprend la **même période de la campagne précédente**. `hBar` vient du snapshot, `hReel` se
+> **recalcule** — et **quatre** points d'affichage annoncent la source, parce qu'un chiffre d'histoire
+> présenté comme une mesure du moment est exactement la faute de §34.
+> ⚠⚠⚠ **Mais la leçon du jour n'est pas dans le code, qui était juste du premier coup.** Elle est
+> dans la livraison : j'ai livré `public/guide.html` — **un fichier qu'un script fabrique** — à côté
+> de sa source, sous un nom renommé qui n'existe pas dans le dépôt. **Deux allers-retours de CI**,
+> le décalage changeant de sens sans disparaître. **On livre l'entrée, on nomme la commande.**
+> ★★★ **RÈGLE D'OR N°5 CRÉÉE — ÉCRIRE À NICO EN LANGAGE SIMPLE**, demandée explicitement par lui à
+> la fin de cette session. Le vocabulaire se simplifie ; le raisonnement, jamais.
+> Mises à jour : règle d'or n°1 et n°4, §27d, §28.
+> Consolidation précédente du même jour : **§39 clôturé, APP 6.13 · SW 6.63.** Nico a
 > **supprimé la fiche `Pilotage`**, ce qui lève le seul blocage de §39g : la ligne
 > `if(!P.length) return true;` est posée. ★ **Sa raison est une orientation produit à retenir** :
 > *« je veux compter aussi les ETP bureaux pour pouvoir budgéter au plus près de la réalité »* —
@@ -113,7 +129,7 @@
 
 ---
 
-## ⚖️ Les quatre règles d'or
+## ⚖️ Les cinq règles d'or
 
 **Règle d'or n°1 — la vérité est dans les fichiers réels.**
 `/mnt/project` **bouge en cours de session**, peut être **incomplet**, et surtout **peut être en
@@ -207,6 +223,13 @@ d'exploration** tant qu'aucun patch n'en sort. **Mais toute conclusion tirée de
   ★ **Corollaire inverse, demandé par Nico le 09/08 au soir** : ne pas **re-présenter** à chaque
   livraison les fichiers inchangés. Les laisser dans les sorties, ne présenter que le livrable
   courant.
+  ★★★ **Corollaire du 14/08 — NE JAMAIS LIVRER UN FICHIER QU'UN SCRIPT FABRIQUE.**
+  `public/guide.html` est produit par `scripts/build-guide.mjs`. Livré à côté de sa source, il a
+  coûté **deux allers-retours de CI** — une fois la source manquait, une fois c'est le généré qui
+  était revenu en arrière. **On livre l'entrée, on nomme la commande.** Détail : §27d.
+  ⚠️ **Et le dossier de sortie est PLAT** : impossible d'y créer `guide/11-pilotage.html`. Tout
+  fichier dont le nom de livraison diffère de son nom dans le dépôt doit voir ce renommage
+  **annoncé en tête de réponse**, en clair. Sinon il n'est pas intégré, et rien ne le signale.
 
 ★ **Le réflexe md5, systématique — pour ce qui n'est PAS dans le dépôt.** Quand un upload est censé
 contenir un patch livré plus tôt, comparer son empreinte à celle du fichier de sortie **avant** de
@@ -341,7 +364,7 @@ au lot suivant : c'est une **condition de clôture**, au même titre que le pref
 | Support | Fichier | Quand il devient faux |
 |---|---|---|
 | **Fiche `MV_AIDE`** du module touché | `src/utils.js` | dès qu'un écran, un geste ou un onglet change |
-| **Section du guide public** | `guide/<section>.md` → `npm run build:guide` | dès qu'une fonctionnalité décrite change |
+| **Section du guide public** | `guide/NN-<section>.html` → `node scripts/build-guide.mjs` | dès qu'une fonctionnalité décrite change |
 | **Visite guidée** `_mvtSteps` | `src/app.js` | dès qu'un sélecteur visé bouge |
 | **`WHATS_NEW`** | `src/utils.js` | dès que le changement est **visible** par l'utilisateur |
 | **Écran qui énumère ce qui reste à faire** | selon | dès qu'on lui apprend à faire une des choses listées |
@@ -369,6 +392,39 @@ vaut un lot plus petit dont l'aide est juste qu'un gros lot dont l'aide ment.
 
 Détail des trois supports et de leur mécanique : **§27a** (la règle longue), **§27b** (`MV_AIDE`),
 **§27d** (le guide découpé).
+
+**Règle d'or n°5 — ÉCRIRE À NICO EN LANGAGE SIMPLE.**
+
+> ★★★ **Demandé explicitement par Nico le 14/08.** Vaut pour TOUTE réponse, pas seulement
+> pour les tutoriels.
+
+**Nico est vigneron et chef d'équipe avant d'être développeur.** Il connaît son application par
+cœur — il l'a conçue — mais il n'a pas à connaître le vocabulaire d'un outillage qu'il ne fait
+que subir. Une explication qu'il doit relire deux fois est une explication ratée, même si chaque
+mot est exact.
+
+**Les gestes concrets :**
+
+| À la place de | Écrire |
+|---|---|
+| « le fichier généré diffère de ses sources » | « la page en ligne ne correspond plus au texte que tu as écrit » |
+| « bump le SW » | « change le numéro de version dans `sw.js` — sinon les clients gardent l'ancienne version » |
+| « l'ancre du patch n'a pas matché » | « je n'ai pas retrouvé le bout de code à modifier » |
+| « mémoïsation », « idempotent », « CRLF » | dire ce que ça FAIT, pas comment ça s'appelle |
+
+- **Un terme technique par explication, maximum**, et toujours suivi de ce qu'il veut dire.
+- **Toujours dire l'effet AVANT la cause.** « Le guide en ligne montre l'ancien texte » d'abord ;
+  « parce que la source n'a pas été recopiée » ensuite.
+- **Un tutoriel = une action par étape**, avec le chemin complet du dossier et le texte exact à
+  taper. Jamais « place le fichier au bon endroit » : écrire le chemin en entier.
+- **Dire ce qu'il doit VOIR quand ça marche.** Une étape sans signe de réussite laisse Nico
+  incapable de savoir s'il peut passer à la suivante.
+- ⚠️ **Ça ne veut pas dire simplifier le RAISONNEMENT.** Les diagnostics restent complets et les
+  désaccords restent francs. C'est le VOCABULAIRE qui se simplifie, jamais le contenu — le prendre
+  pour un débutant serait aussi raté que le noyer sous le jargon.
+
+★ **Le test** : est-ce que Nico pourrait exécuter cette réponse sur son téléphone, entre deux
+rangs, sans rien rechercher ? Si non, la réécrire.
 
 ---
 
@@ -3618,6 +3674,38 @@ firebase deploy --only hosting
 **AUCUN BUMP.** `guide.html` est une page de `public/` **hors précache**, et `scripts/` n'est jamais
 déployé.
 
+### ⚠️⚠️⚠️ LE PIÈGE DU 14/08 — LIVRER LE FICHIER GÉNÉRÉ À CÔTÉ DE SA SOURCE
+
+**Deux allers-retours de CI perdus, sur un lot dont le code était juste.**
+
+J'ai livré **les deux** : la source `guide/11-pilotage.html` **et** le résultat
+`public/guide.html`. `/mnt/user-data/outputs` étant **plat**, je ne peux pas y créer de
+sous-dossier `guide/` — j'ai donc renommé la source en **`guide-11-pilotage.html`**. Ce nom
+n'existe nulle part dans le dépôt.
+
+**Ce qui s'est passé, dans l'ordre :**
+
+| tour | `guide/11-pilotage.html` | `public/guide.html` | `--check` |
+|---|---|---|---|
+| 1 | ancien (nom inconnu → pas intégré) | **neuf** | ❌ le généré est plus riche que sa source |
+| 2 | **neuf** | ancien (restauré) | ❌ la source est plus riche que le généré |
+
+**Le décalage a changé de sens sans jamais disparaître.** Livrer les deux moitiés d'une paire
+dérivée, c'est garantir qu'une seule des deux arrive.
+
+★★★ **LA RÈGLE QUI EN SORT : NE JAMAIS LIVRER `public/guide.html`.**
+C'est un fichier **dérivé** — il se fabrique, il ne se transporte pas. Claude livre **uniquement**
+les sources `guide/NN-*.html` touchées, et Nico lance `node scripts\build-guide.mjs` chez lui.
+Une source ne peut pas être confondue avec sa sortie s'il n'y a qu'elle dans le lot.
+
+⚠️ **Corollaire général, au-delà du guide** : dès qu'un fichier est **produit par un script du
+dépôt**, il ne se livre pas. On livre l'entrée, on nomme la commande. Vaut aussi pour `dist/`.
+
+⚠️ **Et si un renommage est inévitable** (dossier de sortie plat), l'annoncer **en tête de
+livraison, en une phrase visible** — pas dans une cellule de tableau. « Le fichier arrive sous le
+nom X, renomme-le en Y et place-le dans Z ». Un nom qui n'existe pas dans le dépôt ne trouve
+jamais sa place tout seul.
+
 ### ⚠️ LE PIÈGE — modifier une source sans régénérer
 
 **C'est l'ancien guide qui part en ligne, en silence.** D'où le garde-fou :
@@ -4041,8 +4129,11 @@ sont neuves, donc **non auditées** : les traiter comme des hypothèses jusqu'à
    fin de §33. Coût annuel **par date**, part d'une campagne **par tâche**, et le **reste**
    (vinification, entretien, temps mort) qui n'est lisible **qu'avec un taux de saisie**.
    ⚠️ Le journal ne stocke **pas d'heures** : le croisement passe par les heures payées du jour.
-0e. ★ **Deux compteurs de 1607 h** quand un salarié a deux contrats dans l'année civile. L'écran
-   Planning n'en affiche qu'un. **Affichage, pas calcul** (§19, §33).
+0e. ~~**Deux compteurs de 1607 h**~~ — ✅ **FAIT le 14/08** (APP 6.14 · SW 6.67).
+   `_planAnnuCard` pose une carte compacte par **contrat soldé dans l'année civile**, au-dessus du
+   compteur courant : dates, heures faites, plafond proratisé. Borné par `_planSurContrat(ctr,…)`,
+   qui contraint `_planInContractCtr` aux dates du contrat passé. **Affichage seul, aucun calcul
+   touché** (§19, §33).
 0f. ★ **Resserrer la fin de la période *Vendanges*** — elle court au 30/09 alors que le travail
    s'arrête le 06/09. Le pic n'est plus faussé, mais la moyenne « sur la période » reste diluée
    sur trois semaines vides.
@@ -4066,20 +4157,28 @@ sont neuves, donc **non auditées** : les traiter comme des hypothèses jusqu'à
 2. ★★ **Vérifier si un `rewrite` existe en ligne** (`/api/lead`). ⚠️ **Vérifié le 11/08 :
    `grep rewrite firebase.json` renvoie ZÉRO.** Si un rewrite existe en ligne, il n'est pas dans le
    dépôt — ce qui est un problème en soi. Si oui, en ajouter un pour `/api/mise-en-route`.
-3. ★★ **Fusionner les deux écrans de congés** — `openPlanCP` et `openPlanCPSel` (**3 occurrences,
-   `planning.js`**) sont **déjà le même overlay** avec deux rendus. Annoncé au lot 2, non fait :
-   ce serait la 5ᵉ feuille ramenée à 4 (§19a).
+3. ~~**Fusionner les deux écrans de congés**~~ — ✅ **FAIT le 14/08** (APP 6.14 · SW 6.67).
+   `openPlanCP(fromSel)` est le point d'entrée unique ; `openPlanCPSel` est supprimée, son
+   exposition `window` retirée, le bouton de la barre de sélection appelle `openPlanCP(true)`.
+   La 5ᵉ feuille est ramenée à 4 (§19a).
 4. ★ **Corriger `_findDebutTache`** — `app.js:3116`. **Vérifié : le `reduce` prend toujours le
    minimum sur tout le journal filtré, sans borne de période.** 2 lignes, bump SW (§15).
 5. ★ **Breakpoint 760 → 767.98** — **vérifié : `styles.css:2084` porte encore `max-width:760px`**
    face au `min-width:768px`. Le trou est intact. 1 ligne CSS, 0 JS, **en attente du go** (§21d).
 6. ★ **Découper `demarrage.html`** sur le modèle du guide — **938 lignes, monolithique** (§27d).
    ✅ La section **Données** est faite : `guide/13-donnees.html` existe (7,5 ko).
-7. ★ **Escalier de sources pour la cadence** (§20b) — marche 2 vide aujourd'hui.
+7. ~~**Escalier de sources pour la cadence**~~ — ✅ **FAIT le 14/08** (APP 6.14 · SW 6.67), §41.
+   `_pecCadHisto()` remplit la marche 2 : sous le seuil d'avancement, l'écran reprend la **même
+   période de la campagne précédente**. `hBar` vient du snapshot (`stats.hFaites`), `hReel` se
+   **recalcule** sur `PLANNING_ENTRIES` — clé par année, jamais purgé. **Quatre points d'affichage
+   annoncent la source.** Harnais : 28 assertions, 5 contre-épreuves.
 8. **Purger le calcul de pic mort dans `_rfCtx`** — ✅ **le nom était bon, le doute est levé** :
    `pilotage.js:1925` calcule `pic`, la ligne 1976 le renvoie dans l'objet, et **`grep '\.pic'`
    ne trouve AUCUN consommateur**. Suppression franche.
-9. **Pondérer `_ecoRate` par les heures**, pas par tête (`pilotage.js:4107`).
+9. ~~**Pondérer `_ecoRate` par les heures**~~ — ✅ **FAIT le 14/08** (APP 6.14 · SW 6.67).
+   Moyenne pondérée par les heures annuelles du gabarit (`window._planGetRefH` sur 12 mois).
+   ★ **Repli sur `h=1` si le planning n'est pas chargé** — résultat identique à l'ancien, donc
+   aucune régression possible sur un domaine sans données de planning.
 10. ★ **Chip de cuvée `Village 2026· 12`, sans espace avant le point médian.** ⚠️ **Non retrouvé au
     grep le 11/08** — soit corrigé entre-temps, soit le motif de recherche est mauvais.
     **Varier le motif avant de conclure** (règle vécue avec `mvprint.py` et DOCK).
@@ -6207,3 +6306,123 @@ prouver que son décor a été monté.
   Trois écrans client ont changé : bandeau, écran de fin d'essai, panneau GT.
 - **La lecture seule reste côté navigateur** (cf. §14b). Aucune règle Firestore ne connaît `trial`.
 - **Aucune mesure d'audience** : un prospect qui fait la démo et repart reste invisible.
+
+---
+
+## 41. ★★★ L'ESCALIER DE CADENCE, ET LE FICHIER QUI NE TROUVE PAS SA PLACE (14/08 soir — APP 6.13 → 6.14 · SW 6.66 → 6.67)
+
+**Point de départ** : deux mots, `« suite »`, sur le backlog technique. Quatre entrées traitées.
+**La leçon du jour n'est pas dans le code** — il était juste du premier coup. Elle est dans la
+livraison, qui a coûté **deux allers-retours de CI** pour un fichier de guide.
+
+### 41a. L'audit d'abord — cinq entrées déjà mortes
+
+Avant d'écrire une ligne, `grep` sur les neuf entrées annoncées. **Cinq étaient déjà faites** :
+
+| # | annoncé au backlog | mesuré sur le code |
+|---|---|---|
+| 2 | rewrite `/api/mise-en-route` absent | ✅ **présent** dans `firebase.json` |
+| 5 | breakpoint 760 px encore là | ✅ **767.98 déjà posé** |
+| 8 | pic mort dans `_rfCtx` | ✅ **retiré le 11/08**, commentaire en place |
+| 15 | `.cave-tabs` orpheline `styles.css:1447` | ✅ **introuvable** au grep |
+| 41 | 44 × `var(--texte-doux,#8B8175)` | ✅ **zéro occurrence de ce motif** |
+
+★ **Un backlog non ré-audité fait travailler sur des fantômes.** C'est le troisième audit du même
+genre (11/08, 14/08 matin, ici) et il trouve **toujours** des entrées mortes. Les 15 `#8B8175`
+restants dans `cave.js` sont des **usages directs**, pas des replis de variable : sujet différent,
+entrée à réécrire plutôt qu'à rayer.
+
+### 41b. L'escalier de cadence — la marche 2 (entrée 7)
+
+Le design était déjà écrit en §20b : *période en cours ≥ seuil → même période l'an dernier via
+`HISTORIQUE` + `_pilCmpSnapshot` → sinon rien*. **La marche 2 n'avait jamais été câblée.**
+
+**Ce qui rendait la marche 2 possible sans rien inventer :**
+
+| grandeur | d'où elle vient | pourquoi |
+|---|---|---|
+| `hBar` | **le snapshot**, `stats.hFaites` | `TRAVAUX` est remis à zéro à la clôture — **seule grandeur non recalculable** |
+| `hReel` | **recalculé** sur `PLANNING_ENTRIES` | clé **par année**, jamais purgé ; `_planWorkPersRange` est année-aware |
+| `hTrac` | `_ecoTracHByParc({d0,d1})` | la fonction **acceptait déjà une fenêtre de dates**, et `SESSIONS` n'est pas purgé |
+| les dates | **`SAISONS`**, pas le snapshot | une période supprimée de `SAISONS` n'est plus datable — on ne devine pas une fenêtre |
+
+★★ **Le seuil de 40 % ne s'applique PAS à la marche 2.** C'est la **représentativité** qui le
+justifiait — janvier ne prédit pas juin. Une période **close** est représentative d'elle-même par
+construction. Appliquer le seuil à un passé terminé aurait été un copier-coller de garde sans
+comprendre ce qu'elle garde.
+
+★★★ **QUATRE POINTS D'AFFICHAGE, PAS UN.** Un chiffre de l'an dernier présenté comme une mesure du
+moment, **c'est exactement la faute de §34** — deux choses sous un mot, sur le même écran. Il a
+donc fallu reprendre : le **verdict** (titre réécrit, préambule qui nomme la campagne), la **note
+du graphe**, le **KPI** « Écart de cadence », et l'**alerte > 15 %** — qui passe de `bad` à `warn`
+et change de ton : on ne crie pas au dérapage sur un chiffre d'histoire.
+
+⚠️ **Le verdict devait être réécrit, pas préfixé.** Ses quatre branches sont au présent
+(« l'équipe **a passé** », « la cadence **colle** ») et décriraient une période qui n'est pas celle
+affichée. Ajouter un bandeau devant une phrase fausse ne la rend pas vraie.
+
+**Le harnais** : 28 assertions, dont une **garde de montage** qui rougit si `_pecCadHisto` n'est
+plus trouvée dans le fichier — sans elle, un renommage ferait verdir un harnais vide (§40).
+**Cinq contre-épreuves**, chacune rouge sur le bon scénario : garde `hFaites>0` retirée · tracteur
+non soustrait · marche 2 inconditionnelle · affichage muet sur la source · fonction renommée.
+
+### 41c. Les trois autres entrées
+
+**Entrée 9 — `_ecoRate` pondéré.** Un temps plein à 12 €/h pesait autant qu'un mi-temps à 14 €/h.
+Pondération par les heures annuelles du gabarit. ★ **Repli sur `h=1` si `window._planGetRefH` est
+absent** : le résultat redevient alors *exactement* l'ancienne moyenne par tête. Une pondération
+dont le cas dégradé est l'ancien comportement ne peut pas régresser.
+
+**Entrée 0e — les compteurs soldés.** Une carte par contrat terminé dans l'année civile, bornée par
+`_planSurContrat(ctr, …)`. Le calcul était déjà juste — `_planInContractCtr` refusait déjà le mode
+large, précisément pour ne pas mélanger deux compteurs. **C'est l'affichage qui était incomplet.**
+
+**Entrée 3 — fusion des congés.** `openPlanCP(fromSel)`. `_pl2CpFromSel` pilotait déjà le
+branchement interne : la fusion **rend explicite** ce qui était implicite, elle ne change rien.
+
+**Entrée 0f — écartée : ce n'est pas du code.** La fin des *Vendanges* au 30/09 est une **donnée
+Firestore**, à corriger dans Réglages › Saisons. ★ Une entrée de backlog technique qui n'a pas de
+ligne de code à modifier doit être **déplacée**, pas traitée.
+
+### 41d. ⚠️⚠️⚠️ LE FICHIER QUI NE TROUVE PAS SA PLACE — deux CI perdus
+
+**Le code était juste. C'est la livraison qui a échoué, deux fois, en changeant de sens.**
+
+J'ai livré **la source `guide/11-pilotage.html` ET le résultat `public/guide.html`**. Le dossier de
+sortie étant **plat**, la source est partie sous le nom **`guide-11-pilotage.html`** — un nom qui
+n'existe nulle part dans le dépôt.
+
+| tour | source | généré | `--check` |
+|---|---|---|---|
+| 1 | ancienne (nom inconnu → non intégrée) | **neuf** | ❌ le généré est plus riche que sa source |
+| 2 | **neuve** | ancien (revenu en arrière) | ❌ la source est plus riche que le généré |
+
+★★★ **NE JAMAIS LIVRER UN FICHIER QU'UN SCRIPT FABRIQUE.** On livre l'entrée, on nomme la commande.
+Détail et corollaires : §27d et règle d'or n°1.
+
+★★ **Et le renommage s'annonce EN TÊTE DE RÉPONSE, en clair.** Il était dans une cellule de tableau
+de placement. Personne ne lit une cellule comme une instruction.
+
+### 41e. ★★★ LA RÈGLE D'OR N°5 — écrire en langage simple
+
+**Demandée explicitement par Nico à la fin de cette session**, après le tutoriel de réparation du
+guide. Elle est en tête de document, avec ses gestes concrets et son test.
+
+⚠️ **Ce qui l'a rendue nécessaire est visible dans cette section même** : « le fichier généré
+diffère de ses sources » est un diagnostic exact et **inutilisable**. Ce qu'il fallait écrire :
+*« la page du guide en ligne ne correspond plus au texte que tu as écrit »*.
+
+**Le vocabulaire se simplifie. Le raisonnement, jamais.** Les diagnostics restent complets, les
+désaccords restent francs. Prendre Nico pour un débutant serait aussi raté que le noyer sous le
+jargon — il a écrit cette application.
+
+### 41f. Ce qui reste ouvert sur ce lot
+
+- **`test:smoke` et `test:e2e` jamais joués** — le CDN Playwright est injoignable du bac à sable
+  (`Failed to download Chrome for Testing`). **Trois écrans changent** : la carte du compteur
+  d'heures, la carte « Rythme de dépense », les alertes de l'Économie.
+- **La marche 2 n'a jamais tourné sur des données réelles.** Le harnais monte son propre décor.
+  Chez MG, `HISTORIQUE` contient « Hiver 2025–2026 » — la première vraie preuve viendra de là.
+- ⚠️ **`stats.hFaites` est arrondi à l'entier** par `_calcHistoStats`. Sans effet à cette échelle
+  (des centaines d'heures), mais c'est une **perte de précision irréversible** au moment de
+  l'archivage : à consigner si un jour un écart de cadence semble décalé de quelques dixièmes.
