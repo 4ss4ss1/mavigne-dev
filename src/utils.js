@@ -23,7 +23,7 @@ export const GT_ADMIN_EMAIL = 'ngdevpro@gmail.com';
 // WHATS_NEW   : tableau vide = modal desactive pour cette version.
 // Format item : { emoji:'📅', titre:'Titre court', desc:'Phrase utilisateur.' }
 // Regle : seulement les changements visibles par les utilisateurs.
-export const APP_VERSION = '6.12';
+export const APP_VERSION = '6.13';
 // ════ Journal des nouveautés (récap cumulatif) ════
 // Une entrée par version, la PLUS RÉCENTE EN HAUT : { v:'5.10', items:[ {emoji,titre,desc}, … ] }
 // À chaque release visible → AJOUTER un bloc en tête (ne pas remplacer). items:[] = release technique (rien à afficher).
@@ -354,6 +354,12 @@ window._mvGraphRepeindre = function(){
 };
 
 export const WHATS_NEW = [
+  { v:'6.13', items:[
+    { emoji: '\u{1F4C8}', titre: "La courbe d\u2019effectif ne bougeait pas quand vous modifiiez un contrat",
+      desc: "Vous saisissiez une date de contrat dans R\u00e9glages, vous reveniez sur <b>Pilotage</b>, et la courbe \u00ab\u202fpersonnes n\u00e9cessaires par semaine\u202f\u00bb affichait toujours l\u2019ancien effectif. Idem apr\u00e8s avoir coch\u00e9 \u00ab\u202fBureau\u202f\u00bb, chang\u00e9 l\u2019effectif d\u2019une \u00e9quipe collective, corrig\u00e9 une surface ou des heures par hectare. L\u2019\u00e9cran ne se remettait \u00e0 jour qu\u2019en <b>rechargeant l\u2019application</b>, et rien ne le signalait\u202f: la courbe \u00e9tait parfaitement lisible, simplement p\u00e9rim\u00e9e. Elle suit maintenant vos saisies imm\u00e9diatement." },
+    { emoji: '\u{1F464}', titre: "Une personne mise en \u00ab\u202finactif\u202f\u00bb disparaissait de vos campagnes pass\u00e9es",
+      desc: "Passer quelqu\u2019un en <b>inactif</b> sert \u00e0 ne plus avoir \u00e0 le s\u00e9lectionner tous les jours\u202f; \u00e7a ne devrait rien changer \u00e0 ce qu\u2019il a fait. Pourtant, si sa fiche ne portait <b>aucune date de contrat</b>, il sortait de <b>toutes</b> les p\u00e9riodes \u2014 y compris des <b>campagnes archiv\u00e9es</b>, dont l\u2019effectif et les co\u00fbts se rejouaient alors avec une personne de moins. Une fiche sans dates est un <b>CDI depuis le d\u00e9but</b>\u202f: elle compte partout, quel que soit son statut." },
+  ] },
   { v:'6.12', items:[
     { emoji: '\u{1F347}', titre: "Deux documents du Cuvier existaient sans que personne puisse les ouvrir",
       desc: "Le <b>contr\u00f4le de maturit\u00e9</b> et le <b>cahier de cuverie</b> \u00e9taient dans l\u2019application depuis quelques jours, mais aucun bouton n\u2019y menait. Ils sont d\u00e9sormais dans <b>R\u00e9glages \u203a App \u203a Documents</b>. Le premier reprend vos rel\u00e8vements d\u2019avant vendange en un tableau \u2014 une ligne par parcelle, une colonne par jour, <b>dans l\u2019ordre de maturit\u00e9</b>, avec la vitesse de progression. Le second donne <b>une page par cuve</b> : densit\u00e9 corrig\u00e9e \u00e0 20\u00a0\u00b0C, sucre restant estim\u00e9, remontages, pigeages, op\u00e9rations et cuv\u00e9e de sortie." },
@@ -2460,9 +2466,21 @@ window._mvJourApres = function(iso){
 window._mvEnContratSurPeriode = function(m, d0, d1){
   if(!m || m.bureau) return false;
   var P = window._mvContrats(m);
-  // Sans AUCUNE date on ne peut pas savoir quand la personne est partie : le
-  // statut tranche (comptes de service, anciens salaries jamais dates).
-  if(!P.length) return m.statut !== 'Inactif';
+  // ★★★ SANS AUCUNE DATE = CDI DEPUIS TOUJOURS, PRESENT SUR TOUTE PERIODE.
+  //   Convention posee par Nico le 09/07/2026 et jamais revisee : « effectif present
+  //   = membres non-bureau dont le contrat est actif a la date ; CDI sans date =
+  //   present en permanence ». Le STATUT n'y figure pas, et c'est deliberé.
+  //   ⚠⚠ CE QUE FAISAIT LA LIGNE D'AVANT (`return m.statut !== 'Inactif'`) :
+  //   une fiche sans aucune date passee en Inactif sortait de TOUTES les periodes,
+  //   PASSEES COMPRISES. Une campagne archivee se rejouait donc avec un salarie de
+  //   moins, des mois apres sa cloture — un chiffre d'histoire qui bouge parce qu'on
+  //   a range une liste. Or « Inactif » est un CONFORT DE SAISIE (ne plus avoir a le
+  //   selectionner a l'ouverture), pas un fait d'historique : le contrat est termine,
+  //   on ne sait juste pas quand. Sans date, la seule reponse honnete est « present ».
+  //   ★ Corollaire assume : un compte de service sans dates compterait comme un CDI.
+  //   La reponse n'est pas dans le statut, elle est dans le drapeau `bureau` juste
+  //   au-dessus — ou dans la suppression de la fiche.
+  if(!P.length) return true;
   for(var i = 0; i < P.length; i++){
     if(P[i].debut && d1 && P[i].debut > d1) continue;
     if(P[i].fin   && d0 && P[i].fin   < d0) continue;

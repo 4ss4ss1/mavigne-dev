@@ -2,7 +2,14 @@
 
 > Document de référence du projet **Ma Vigne** (GUERETTECH). Il est le **porteur de vérité** :
 > la mémoire Claude est plafonnée, ce fichier ne l'est pas.
-> Dernière consolidation : **14 août 2026 (après-midi)** — ★★★ **LE CACHE QUI GÈLE UNE COURBE**
+> Dernière consolidation : **14 août 2026 (soir)** — **§39 clôturé, APP 6.13 · SW 6.63.** Nico a
+> **supprimé la fiche `Pilotage`**, ce qui lève le seul blocage de §39g : la ligne
+> `if(!P.length) return true;` est posée. ★ **Sa raison est une orientation produit à retenir** :
+> *« je veux compter aussi les ETP bureaux pour pouvoir budgéter au plus près de la réalité »* —
+> **prochaine mise à jour**, entrée **0a-ter**. ⚠️ **Et l'audit de ce lot a trouvé mieux** : la
+> **masse salariale exclut déjà les bureaux alors que son propre commentaire dit l'inverse**
+> (§39i). Un commentaire qui décrit l'intention pendant que la ligne fait le contraire.
+> Consolidation précédente du même jour : ★★★ **LE CACHE QUI GÈLE UNE COURBE**
 > (**§39**, section neuve). Parti de six mots sur une capture de la frise annuelle : *« pourquoi
 > que 3 permanents ? c'est faux par rapport à ce qui est inscrit dans réglage »*. La capture,
 > calibrée au pixel, donne **3,005 constant sur 1 309 colonnes** — aucune marche. Les mêmes
@@ -3932,6 +3939,28 @@ sont neuves, donc **non auditées** : les traiter comme des hypothèses jusqu'à
    salariale** (pilotage.js l.6933) et dans le **coût MO par parcelle** (l.5525). **Aucun marqueur
    « compte de service » n'existe dans le modèle.** → Cocher **Bureau** sur `Pilotage`, ou supprimer
    la fiche. Ensuite la ligne part : `utils.js`, donc **bump APP + SW**. Détail en **§39g**.
+0a-ter. ★★★ **COMPTER LES ETP BUREAU — orientation produit, 14/08.** Nico :
+   *« je veux compter aussi les ETP bureaux pour pouvoir budgéter au plus près de la réalité (on
+   fera ça sur une prochaine mise à jour) »*. ⚠️ **Ce n'est pas un simple retrait du filtre** :
+   `m.bureau` est lu à des endroits qui ne posent pas la même question.
+   · **La capacité vignes** (`_headWeek`, courbe d'effectif, simulateur de renfort) doit **rester**
+     hors bureau — c'est le sens même du champ, *« non compté dans la capacité de travail des
+     vignes »*, et un administratif dans la courbe de taille ferait croire un pic couvert.
+   · **Le budget** (masse salariale, coût employeur, ETP payés) doit **les inclure** — un salaire
+     est un salaire. **Voir 0a-quater : c'est déjà censé être le cas, et ça ne l'est pas.**
+   → Le travail réel est de **séparer les deux questions** : « qui travaille la vigne ? » et
+   « qui coûte ? ». Aujourd'hui `_mvEnContratSurPeriode` répond aux deux avec le même filtre.
+0a-quater. ★★★ **DÉFAUT MESURÉ LE 14/08 — la masse salariale perd tous les bureaux.**
+   `_pexData` (pilotage.js l.6971) filtre avec `_mvEnContratSurPeriode`, dont **la toute première
+   ligne** est `if(!m || m.bureau) return false;`. Or le commentaire posé trois lignes au-dessus
+   dit : *« Le "bureau" N'EST PAS exclu : c'est un salaire, et on chiffre une masse salariale. »*
+   ⚠️⚠️ **Le commentaire décrit l'intention, la ligne fait le contraire.** Sur le tenant de
+   référence, Etienne et Chloé sont bureau : leurs salaires **ne figurent pas** dans le total de
+   l'exercice. Correctif = un 4ᵉ argument `avecBureau` sur `_mvEnContratSurPeriode`, passé `true`
+   **au seul appelant l.6971** — les trois autres (coût MO par parcelle l.5564, cadence l.6064,
+   effectif présent planning.js l.881) posent bien la question « qui travaille la vigne ».
+   **NON LIVRÉ** : ça change un chiffre d'argent, et Nico a explicitement mis le sujet bureau à la
+   *prochaine mise à jour*. À faire au même lot que 0a-ter. Détail en **§39i**.
 0b. ✅ **Le CDD de Victor est RESSAISI** (confirmé par Nico le 12/08 au soir).
    ⚠️ **Le même geste reste à faire pour Shana, Alicia et Vic** dès leur resignature (annoncée au
    17/08) : mettre les anciennes dates dans la fiche, enregistrer, puis remettre la nouvelle date de
@@ -5880,9 +5909,10 @@ sans dates. La ligne en ferait un **CDI permanent** qui compte +1 sur chaque cou
 **Aucun marqueur « compte de service » n'existe dans le modèle** — ni champ, ni convention de nom,
 ni rôle. Aucune heuristique honnête ne distingue cette fiche d'un vrai CDI sans dates.
 
-→ **Décision de Nico** : cocher **Bureau** sur `Pilotage` — c'est littéralement le sens du champ,
-*« non compté dans la capacité de travail des vignes »* — ou supprimer la fiche. Ensuite la ligne
-part : `utils.js`, donc **bump APP + SW**. Entrée de backlog **0a-bis**.
+→ **TRANCHÉ LE 14/08 — Nico a supprimé la fiche `Pilotage`.** La ligne est posée. ★ Et sa raison
+compte plus que le geste : *« je veux compter aussi les ETP bureaux pour pouvoir budgéter au plus
+près de la réalité »* — un compte de service aurait pollué ce comptage à venir. La suppression
+n'était pas un contournement, c'était une préparation. Suite en **§39i** et backlog **0a-ter**.
 
 ⚠️ **Le reste des memos n'a pas été audité.** `_PIL_CDV` et `_PIL_ANN` sont les deux seuls déclarés
 sur le motif `var _X=null, _XK=''` ; les deux ont été regardés. **Tout autre cache posé ailleurs sur
@@ -5896,3 +5926,76 @@ affirmer *« la seule chose qui peut modifier ce calcul est le nombre de fiches 
 que personne n'a vérifiée et que le code contredisait déjà. **Une clé se dérive de la liste des
 lectures de la fonction mémoïsée, pas de ce qui semble suffisant.** Quand la liste est trop longue
 pour être tenue à la main, c'est le signe qu'il faut oublier par repeinte plutôt que mémoïser.
+
+### 39i. Suite du 14/08 au soir — la ligne posée, et ce que l'audit a trouvé en chemin
+
+**APP 6.12 → 6.13 · SW 6.62 → 6.63.** `utils.js` (la ligne + `APP_VERSION` + `WHATS_NEW`) ·
+`index.html` (4 emplacements) · `public/sw.js` (en-tête + `CACHE_NAME` + 2 `console.log` +
+changelog préfixé) · `pilotage.js` (la clé de §39e).
+
+**1. La ligne.** `if(!P.length) return true;`. Harnais **8 cas** joué sur les deux versions de la
+fonction, extraites du dépôt :
+
+| cas | patché | base |
+|---|---|---|
+| CDI sans dates, Actif | présent | présent |
+| **CDI sans dates, INACTIF** | **présent** | **absent** |
+| bureau sans dates (Actif ou Inactif) | absent | absent |
+| CDD hors période | absent | absent |
+| CDD dans la période, Inactif | présent | présent |
+| contrat ouvert à droite | présent | présent |
+| fin sans début, avant la période | absent | absent |
+
+★ **La contre-épreuve est l'assertion sur la liste des divergences** : le harnais échoue si le
+nombre de cas où base ≠ patché n'est pas **exactement 1**, et si ce cas n'est pas *« CDI sans
+dates, Inactif »*. Un correctif d'une ligne qui changerait un deuxième comportement sortirait rouge.
+
+Contrôles : preflight **0/0**, `mv-whatsnew-check` vert, cliquets vocabulaire et interpolation
+verts, chartes 8/7, `node --check` ESM, `utils.js` et `sw.js` **ASCII pur** (convention du fichier),
+build Rollup complet — et le câblage **vérifié dans le bundle minifié** : `if(!i.length)return!0;`
+pour la ligne, et la clé longue avec `JSON.stringify(window.SAISON_PASSAGES||{})` pour le cache.
+
+⚠️ **Un piège rencontré en écrivant `WHATS_NEW`** : les emoji sont écrits `'\u{1F4C8}'` dans un
+fichier **ASCII pur**. Un backslash de trop dans le script de patch produit `'\\u{1F4C8}'`, que JS
+rend **littéralement** — la vignette affiche le code source. Invisible à la relecture, visible à
+l'exécution. **C'est exactement pourquoi `WHATS_NEW` se vérifie en l'EXÉCUTANT**, jamais en
+relisant la source.
+
+**2. Ce que l'audit a trouvé en chemin — la masse salariale perd tous les bureaux.**
+
+`_pexData` (pilotage.js l.6971) construit le total des salaires chargés de l'exercice. Son
+commentaire, trois lignes plus haut :
+
+> *« Qui ? Toute personne SOUS CONTRAT sur la fenêtre […] Le "bureau" N'EST PAS exclu : c'est un
+> salaire, et on chiffre une masse salariale. »*
+
+Et le filtre juste en dessous appelle `_mvEnContratSurPeriode`, dont **la toute première ligne**
+est `if(!m || m.bureau) return false;`.
+
+⚠️⚠️⚠️ **Le commentaire décrit l'intention, la ligne fait le contraire — et personne ne peut le
+voir**, parce qu'un total de masse salariale trop bas reste un nombre plausible. Sur le tenant de
+référence, deux fiches sont bureau : leurs salaires sont **absents du total de l'exercice**.
+
+★ **La famille du défaut est celle de §39d, déplacée d'un cran** : là c'était une clé qui affirmait
+sans vérifier ; ici c'est un commentaire. **Un commentaire est une assertion non testée.** Il vieillit
+comme un cache : la fonction appelée change de contrat, le commentaire reste. Le seul filet contre
+ça est un harnais qui joue l'assertion du commentaire — il n'en existe aucun sur `_pexData`.
+
+**Correctif préparé, non livré** : 4ᵉ argument `avecBureau` sur `_mvEnContratSurPeriode`, passé
+`true` **au seul appelant l.6971**. Les trois autres appelants posent bien la question « qui
+travaille la vigne » et doivent rester filtrés — coût main-d'œuvre par parcelle (l.5564), cadence
+(l.6064), effectif présent (planning.js l.881). **Reporté au lot ETP bureau (backlog 0a-ter)** : ça
+change un chiffre d'argent, et Nico a explicitement placé le sujet à la mise à jour suivante.
+
+**3. La règle produit qui se dégage.** `bureau` répond aujourd'hui à **deux questions
+incompatibles** avec un seul drapeau :
+
+| question | qui la pose | bureau doit être… |
+|---|---|---|
+| **qui travaille la vigne ?** | courbe d'effectif, simulateur de renfort, cadence, coût MO/parcelle | **exclu** |
+| **qui coûte ?** | masse salariale, budget, ETP payés | **inclus** |
+
+★★ **Un drapeau qui répond à deux questions finira par mentir à l'une des deux.** C'est déjà fait.
+Le lot ETP bureau n'est donc pas « retirer un filtre » mais **séparer les deux questions** — et le
+nom du champ, *« non compté dans la capacité de travail des vignes »*, dit déjà laquelle des deux
+il était censé servir.

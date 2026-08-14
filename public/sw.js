@@ -1,4 +1,24 @@
-// MA VIGNE — Service Worker v6.62
+// MA VIGNE — Service Worker v6.63
+// v6.63 (14/08/2026) — DEUX CHIFFRES QUI NE SUIVAIENT PLUS LEUR SOURCE.
+//   1) LA COURBE D'EFFECTIF GELEE. Le memo _PIL_ANN (pilotage.js) etait cle
+//   sur des LONGUEURS : MEMBRES.length, PARCELLES.length, TACHES.length. Or
+//   aucune longueur ne bouge quand on saisit une date de contrat, qu'on coche
+//   Bureau, qu'on change l'effectif d'une equipe collective ou une surface.
+//   La frise reservait donc l'ancien calcul JUSQU'AU PROCHAIN F5, sans rien
+//   signaler. Mesure : capture calibree au pixel = 3,005 constant sur 1 309
+//   colonnes ; les memes fonctions rejouees sur les memes donnees rendent
+//   4 → 3,857 → 3. Le calcul etait juste, l'affichage etait perime.
+//   ★ UN CACHE DONT LA CLE NE DERIVE PAS DE SES ENTREES N'EST PAS UN CACHE,
+//   C'EST UN GEL — et il ment sans erreur, sans trou, sans valeur aberrante.
+//   La cle derive desormais de tout ce que lit _chargeSaisonData.
+//   2) FICHE SANS DATES + INACTIF = SORTIE DE TOUTES LES PERIODES, PASSEES
+//   COMPRISES. _mvEnContratSurPeriode faisait `return m.statut !== 'Inactif'`
+//   quand la fiche ne portait aucune date. Une campagne ARCHIVEE se rejouait
+//   donc avec un salarie de moins, des mois apres sa cloture. Or « Inactif »
+//   est un confort de saisie, pas un fait d'historique. Convention du 09/07
+//   retablie : sans date = CDI depuis toujours, present partout.
+//   ⚠️ Corollaire : un compte de service sans dates compterait comme un CDI.
+//   La reponse est le drapeau `bureau`, pas le statut.
 // v6.62 (13/08/2026) — LES DOCUMENTS : QUATRE LOTS, ET UN ECRASEMENT REPARE.
 //   ⚠️⚠️⚠️ D'ABORD L'INCIDENT, PARCE QU'IL EXPLIQUE CE NUMERO.
 //   Ces quatre lots ont ete ecrits sur un clone du depot date de 07:33. Six
@@ -1338,7 +1358,7 @@
 // v2.22 — Fix profils vides : guard vide dans loadData() pour MEMBRES/SAISONS/TACHES
 // v2.17 — Onboarding intégré + tenantId · v2.06 — Firebase Auth · v2.00–v2.05 — divers
 const DEBUG = self.location.hostname === 'localhost' || self.location.hostname === '127.0.0.1';
-const CACHE_NAME   = 'mavigne-v6.62';
+const CACHE_NAME   = 'mavigne-v6.63';
 const TENANT_CACHE = 'mavigne-tenant';   // Cache persistant — préservé à chaque mise à jour SW
 const SYNC_TAG     = 'mavigne-sync';
 
@@ -1354,7 +1374,7 @@ const CDN_URLS = [
 ];
 
 self.addEventListener('install', event => {
-  if(DEBUG) console.log('[SW] Ma Vigne v6.62 installé');
+  if(DEBUG) console.log('[SW] Ma Vigne v6.63 installé');
   event.waitUntil(
     caches.open(CACHE_NAME).then(async cache => {
       // ── Cœur applicatif : STRICT (mise à jour ATOMIQUE) ──
@@ -1370,7 +1390,7 @@ self.addEventListener('install', event => {
 });
 
 self.addEventListener('activate', event => {
-  if(DEBUG) console.log('[SW] Ma Vigne v6.62 activé');
+  if(DEBUG) console.log('[SW] Ma Vigne v6.63 activé');
   event.waitUntil(
     caches.keys().then(keys =>
       Promise.all(
