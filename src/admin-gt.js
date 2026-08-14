@@ -2727,6 +2727,59 @@ window._fcModPlanChange=function(){ var plan=_fcModPlan(); if(_FC.featOv) Object
 window._fcModToggle=function(id){ var plan=_fcModPlan(); var nv=!_fcModEff(id); if(!_FC.featOv)_FC.featOv={}; if(nv===_FC_PLANDEF[plan][id]) delete _FC.featOv[id]; else _FC.featOv[id]=nv; _fcModsRender(); };
 window._fcModReset=function(id){ if(_FC.featOv) delete _FC.featOv[id]; _fcModsRender(); };
 
+// ⚠️ MIROIR de functions/claims.js (TRIAL_DAYS, TRIAL_MAX_RENEW). Ces deux nombres
+//    existent en DEUX endroits : ici pour l'afficher, la-bas pour le faire respecter.
+//    Si l'un bouge sans l'autre, l'ecran promet ce que le serveur refuse.
+var _FC_TRIAL_DAYS = 15;
+var _FC_TRIAL_MAX  = 1;
+
+// La reconduction unique. Le bouton NE PORTE PAS la regle, il la MONTRE : Nicolas doit
+// savoir ou il en est AVANT de cliquer, pas en recevant un refus.
+function _fcRenewHtml(){
+  var faites=(typeof _FC.trialRenewals==='number')?_FC.trialRenewals:0;
+  var dispo=(faites<_FC_TRIAL_MAX);
+  var sous=dispo
+    ? 'Redonne '+_FC_TRIAL_DAYS+' jours pleins \u00e0 compter d\u2019aujourd\u2019hui \u2014 pas depuis l\u2019ancienne \u00e9ch\u00e9ance \u2014 et vous envoie un rappel d\u2019appeler le client.'
+    : 'D\u00e9j\u00e0 reconduit une fois. Au-del\u00e0, c\u2019est une conversion \u2014 ou le champ ci-dessus, en connaissance de cause.';
+  return '<div id="agt-fc-renew" style="background:rgba(201,168,76,0.06);border:1px solid rgba(201,168,76,0.22);border-radius:11px;padding:12px 13px;margin:0 0 13px">'
+    +'<div style="display:flex;align-items:center;gap:8px;margin-bottom:6px">'
+    +'<span style="font-size:12.5px;font-weight:600;color:#E8D89A">Reconduction de l\u2019essai</span>'
+    +'<span style="font-size:10px;font-weight:600;color:'+(dispo?'#86EFAC':'rgba(255,255,255,0.35)')+';background:rgba(255,255,255,0.05);border-radius:20px;padding:2px 8px">'+faites+' / '+_FC_TRIAL_MAX+'</span></div>'
+    +'<div style="font-size:11px;color:rgba(255,255,255,0.4);line-height:1.5;margin-bottom:9px">'+sous+'</div>'
+    +'<button id="agt-fc-renew-btn"'+(dispo?'':' disabled')+' onclick="_fcRenewTrial()" style="width:100%;font-family:Outfit,sans-serif;font-size:12.5px;font-weight:700;border-radius:9px;padding:10px;border:0;cursor:'+(dispo?'pointer':'not-allowed')+';background:'+(dispo?'#C9A84C':'rgba(255,255,255,0.06)')+';color:'+(dispo?'#0C1A0A':'rgba(255,255,255,0.3)')+'">'
+    +(dispo?('Reconduire '+_FC_TRIAL_DAYS+' jours'):'Reconduction utilis\u00e9e')+'</button></div>';
+}
+
+window._fcRenewTrial=async function(){
+  var btn=document.getElementById('agt-fc-renew-btn'), lib=btn?btn.textContent:'';
+  if(btn){ btn.disabled=true; btn.textContent='Un instant\u2026'; }
+  try{
+    if(!window._fbRenewTrial) throw new Error('fonction non d\u00e9ploy\u00e9e');
+    var r=await window._fbRenewTrial(_FC_SLUG);
+    _FC.trialRenewals=(r&&typeof r.renewals==='number')?r.renewals:((_FC.trialRenewals||0)+1);
+    _FC.trialExp=(r&&typeof r.trialUntil==='number')?r.trialUntil:0;
+    _FC.trialDays=_FC_TRIAL_DAYS;
+    _FC.trialPrevu=0;
+    // ⚠️ TROIS zones, et pas une de moins : l'encart d'etat, le champ de jours, et le
+    //    bloc lui-meme qui doit se griser. En oublier une laisse l'ecran affirmer
+    //    l'ancien etat juste a cote du nouveau.
+    var z1=document.getElementById('agt-fc-trial-status'); if(z1) z1.outerHTML=_fcTrialStatusHtml(_FC);
+    var z2=document.getElementById('agt-fc-trial');        if(z2) z2.value=_fcTrialLeft(_FC);
+    var z3=document.getElementById('agt-fc-renew');        if(z3) z3.outerHTML=_fcRenewHtml();
+    _fcSyncSum();
+    if(typeof agtLogAccess==='function') agtLogAccess(_FC_SLUG,'Essai reconduit '+_FC_TRIAL_DAYS+' j','\u23F3');
+    showToast('\u2705 Essai reconduit '+_FC_TRIAL_DAYS+' j \u00b7 un rappel d\u2019appel part vers vous','#3D6B27');
+  }catch(e){
+    var code=String((e&&(e.code||''))||''), msg=String((e&&e.message)||'');
+    showToast(/failed-precondition/.test(code)||/reconduit/i.test(msg)
+      ? 'D\u00e9j\u00e0 reconduit une fois \u2014 le serveur refuse la seconde.'
+      : 'Échec : '+(msg||code||'inconnue'), '#E07060');
+    // On REPEINT le bloc depuis l'etat, sans supposer que rien n'a bouge cote serveur.
+    var z4=document.getElementById('agt-fc-renew');
+    if(z4) z4.outerHTML=_fcRenewHtml(); else if(btn){ btn.disabled=false; btn.textContent=lib; }
+  }
+};
+
 function _fcTrialExpMs(fc){
   if(fc.trialExp>0) return fc.trialExp;
   if(fc.trialDays>0 && fc.activatedAt){ var t=Date.parse(fc.activatedAt); if(!isNaN(t)) return t+fc.trialDays*86400000; }
@@ -2746,7 +2799,11 @@ function _fcTrialStatusHtml(fc){
     if(exp<=now) return box('rgba(224,112,96,0.08)','rgba(224,112,96,0.28)','rgba(224,112,96,0.15)','⛔','#F0B4A8','rgba(240,180,168,0.7)','Essai expiré le '+_fcTrialFmt(exp),'client en lecture seule — régler un nouvel essai ou convertir');
     var left=Math.max(0,Math.ceil((exp-now)/86400000));
     var lbl=left>0?('Essai en cours · <span style="color:#E8C860">J-'+left+'</span>'):('Essai en cours · <span style="color:#E8C860">expire aujourd&#39;hui</span>');
-    return box('rgba(201,168,76,0.08)','rgba(201,168,76,0.28)','rgba(201,168,76,0.15)','⏳','#E8D89A','rgba(232,200,96,0.65)',lbl,'expire le '+_fcTrialFmt(exp)+' · calculé en direct');
+    // ★ « J-4 » ne dit pas ce qui se passe apres. La suite depend d'un seul fait : la
+    //   reconduction unique est-elle encore disponible.
+    var _rn=(typeof fc.trialRenewals==='number')?fc.trialRenewals:0;
+    var _suite=(_rn<1)?' · reconduction encore possible':' · reconduction déjà utilisée';
+    return box('rgba(201,168,76,0.08)','rgba(201,168,76,0.28)','rgba(201,168,76,0.15)','⏳','#E8D89A','rgba(232,200,96,0.65)',lbl,'expire le '+_fcTrialFmt(exp)+_suite);
   }
   if(fc.trialDays>0){
     if(fc.cliStatus==='pending') return box('rgba(139,92,246,0.08)','rgba(196,181,253,0.22)','rgba(139,92,246,0.15)','⌛','#C4B5FD','rgba(196,181,253,0.6)','Essai de '+fc.trialDays+' j','démarre à la 1ère connexion du client');
@@ -2790,6 +2847,7 @@ function _fcSecAbo(){
     +'<div style="margin-bottom:13px"><div style="font-size:11px;color:rgba(255,255,255,0.35);margin-bottom:6px">Formule (= socle modules)</div><select id="agt-fc-plan" onchange="_fcModPlanChange()" style="'+_FC_SEL_STYLE+'">'+opt('essentiel','Essentiel — Vigne · Journal · Météo')+opt('vigneron','Vigneron — + Tracteur · Phyto')+opt('domaine','Domaine — + Planning · Pilotage · Cave · Réserve')+'</select></div>'
     +'<div style="margin-bottom:13px"><div style="font-size:11px;color:rgba(255,255,255,0.35);margin-bottom:6px">Régler l&#39;essai — jours dès aujourd&#39;hui</div><input id="agt-fc-trial" type="number" min="0" max="90" value="'+tdInput+'" style="'+_FC_INP_STYLE+'"><div style="font-size:10px;color:rgba(255,255,255,0.3);margin-top:5px;line-height:1.4">Enregistrer repositionne l&#39;expiration à aujourd&#39;hui + N jours. <b style="color:rgba(255,255,255,0.45)">0</b> = convertir en payant.</div></div>'
     +'</div>'
+    +_fcRenewHtml()
     +'<div style="font-size:11px;color:rgba(255,255,255,0.35);margin:8px 0 9px">🎛️ Modules visibles par ce client</div>'
     +'<div id="agt-fc-mods">'+_fcModsHtml()+'</div>';
 }
@@ -3002,6 +3060,7 @@ async function _fcLoad(slug){
     plan:(['essentiel','vigneron','domaine'].indexOf(cli.plan)>=0)?cli.plan:'domaine',
     trialDays:(typeof cli.trialDays==='number')?cli.trialDays:0,
     trialPrevu:(typeof cli.trialPrevu==='number')?cli.trialPrevu:0,
+    trialRenewals:(typeof cli.trialRenewals==='number')?cli.trialRenewals:0,
     trialExp:(typeof cli.trialExp==='number')?cli.trialExp:0,
     cliStatus:(typeof cli.status==='string')?cli.status:'',
     activatedAt:(typeof cli.activated_at==='string')?cli.activated_at:''

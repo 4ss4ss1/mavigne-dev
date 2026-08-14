@@ -1648,6 +1648,13 @@ window._fbActivateTrial = async function (code) {
 window._fbSetTenantPlan = function (tenant, plan, trialDays) {
   return window.fbCallFn('gtSetTenantPlan', { tenant: tenant, plan: plan, trialDays: trialDays });
 };
+// Reconduction UNIQUE de l'essai : 15 jours de plus, a compter de MAINTENANT.
+// ⚠️ La borne n'est pas ici. gtRenewTrial refuse la seconde reconduction avec
+//    failed-precondition — un bouton grise se contourne, une regle serveur non.
+// Timeout large : la fonction repose le claim trial_until sur chaque membre, un par un.
+window._fbRenewTrial = function (tenant) {
+  return window.fbCallFn('gtRenewTrial', { tenant: tenant }, { timeout: 120000 });
+};
 window._fbUpdateMemberEmail = function (oldEmail, newEmail, tenant) {
   return window.fbCallFn('updateMemberEmail', { oldEmail: oldEmail, newEmail: newEmail, tenant: tenant || undefined });
 };
