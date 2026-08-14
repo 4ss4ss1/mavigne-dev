@@ -2512,7 +2512,48 @@ function _planCompteCard(mbr,uptoMonth,a){
 // ── Carte COMPTEUR D'HEURES (annualisation) — en tete de l'onglet ──
 function _planAnnuCard(mbr,uptoMonth){
   var a=_planAnnu(mbr,uptoMonth),L=_planLegal();
-  if(!a.annualise)return _planCompteCard(mbr,uptoMonth,a);
+  // ★ Contrats soldés dans la même année civile (backlog 0e — affichage seul).
+  // Un salarie ré-embauché dans l'annee a N compteurs : l'ecran n'en montrait qu'un
+  // (celui du contrat en cours). Chaque contrat terminé gagne ici une carte compacte.
+  // _planSurContrat() borne _planInContractCtr aux dates du contrat passé :
+  // plafond et cumul sont recalculés sur CETTE periode seulement.
+  var yr=planYear.toString();
+  function _pShort(iso){
+    if(!iso)return '?';
+    var pp=iso.split('-'),d=parseInt(pp[2],10),m=parseInt(pp[1],10)-1;
+    return d+'\u00a0'+(PLAN_MOIS_C[m]||'');
+  }
+  var prevH='';
+  if(a.annualise && typeof window._mvPeriodes==='function'){
+    var allCtrs=window._mvPeriodes(mbr)||[];
+    var actifDebut=mbr.debut_contrat||'';
+    allCtrs.forEach(function(ctr){
+      if(!ctr.fin)return;                                    // ouvert a droite = contrat actif
+      if(actifDebut && ctr.debut===actifDebut)return;        // c'est le contrat courant
+      if(ctr.fin<(yr+'-01-01'))return;                       // terminé avant l'annee
+      if(ctr.debut>(yr+'-12-31'))return;                     // commencé après l'annee
+      var pa=_planSurContrat(ctr,function(){ return _planAnnu(mbr,11); });
+      if(!(pa.plafond>0))return;
+      var over2=(pa.reste<0), pct=Math.min(100,pa.cumul/pa.plafond*100);
+      var col2=over2?'var(--orange)':'var(--texte-doux)';
+      prevH+='<div class="plan-card" style="background:var(--bg-card);border:1.5px solid var(--gris-clair);margin-bottom:10px;flex-direction:column;align-items:stretch">'
+        +'<div style="display:flex;align-items:center;gap:6px;margin-bottom:8px">'
+        +'<span style="font-size:10px;font-weight:700;text-transform:uppercase;letter-spacing:1px;color:var(--texte-doux)">'
+        +'\u23f1 Compteur sold\u00e9 \u00b7 '+_pShort(ctr.debut)+' \u2192 '+_pShort(ctr.fin)+'</span>'
+        +'<span style="margin-left:auto;font-size:10px;font-weight:700;color:'+(over2?'var(--orange)':'var(--vert-med)')+'">'+(over2?'surplus\u00a0\u26a0\ufe0f':'sold\u00e9\u00a0\u2713')+'</span>'
+        +'</div>'
+        +'<div style="display:flex;align-items:center;gap:9px">'
+        +'<div><span style="font-size:22px;font-weight:800;font-variant-numeric:tabular-nums">'+_planFmt(pa.cumul)+'</span>'
+        +'<span style="font-size:11px;color:var(--texte-doux);margin-left:3px">h sur '+_planFmt(pa.plafond)+'\u00a0h</span></div>'
+        +'<div style="flex:1;height:7px;background:var(--gris-clair);border-radius:4px;position:relative;overflow:hidden">'
+        +'<div style="position:absolute;left:0;top:0;bottom:0;border-radius:4px;width:'+pct+'%;background:'+col2+'"></div>'
+        +'</div>'
+        +'<div style="font-size:11px;font-weight:700;color:'+(over2?'var(--orange)':'var(--vert-med)')+'">'+_planFmt(Math.abs(pa.reste))+'\u00a0h '+(over2?'au-dessus':'cr\u00e9dit')+'</div>'
+        +'</div>'
+        +'</div>';
+    });
+  }
+  if(!a.annualise)return prevH+_planCompteCard(mbr,uptoMonth,a);
   var ech=Math.max(a.maxAnnuel,Math.ceil(a.plafond*1.15/100)*100,1);
   var over=(a.cumul>a.plafond+0.0001);
   var fin=(uptoMonth>=11);
@@ -2560,7 +2601,7 @@ function _planAnnuCard(mbr,uptoMonth){
       :'Compt\u00e9es semaine par semaine\u00a0: une semaine creuse ne rattrape pas une semaine charg\u00e9e.')
   +'</div>';
   h+='</div></div>';
-  return h;
+  return prevH+h;
 }
 
 function _planHsupTable(mbr){

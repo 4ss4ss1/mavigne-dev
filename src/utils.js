@@ -23,7 +23,7 @@ export const GT_ADMIN_EMAIL = 'ngdevpro@gmail.com';
 // WHATS_NEW   : tableau vide = modal desactive pour cette version.
 // Format item : { emoji:'📅', titre:'Titre court', desc:'Phrase utilisateur.' }
 // Regle : seulement les changements visibles par les utilisateurs.
-export const APP_VERSION = '6.13';
+export const APP_VERSION = '6.14';
 // ════ Journal des nouveautés (récap cumulatif) ════
 // Une entrée par version, la PLUS RÉCENTE EN HAUT : { v:'5.10', items:[ {emoji,titre,desc}, … ] }
 // À chaque release visible → AJOUTER un bloc en tête (ne pas remplacer). items:[] = release technique (rien à afficher).
@@ -354,6 +354,14 @@ window._mvGraphRepeindre = function(){
 };
 
 export const WHATS_NEW = [
+  { v:'6.14', items:[
+    { emoji: '\u{21A9}', titre: "L\u2019\u00e9cart de cadence se taisait alors que l\u2019an dernier \u00e9tait lisible",
+      desc: "En d\u00e9but de p\u00e9riode, l\u2019indicateur \u00ab\u202f\u00e9cart de cadence\u202f\u00bb affichait un tiret\u202f: il attend <b>40\u202f% du bar\u00e8me r\u00e9alis\u00e9</b> avant de se prononcer, parce qu\u2019un travail de janvier ne pr\u00e9dit pas celui de juin. Mais quand la <b>m\u00eame p\u00e9riode de la campagne pr\u00e9c\u00e9dente</b> \u00e9tait archiv\u00e9e, elle \u00e9tait ignor\u00e9e alors qu\u2019elle disait quelque chose. L\u2019\u00e9cran la reprend d\u00e9sormais comme <b>hypoth\u00e8se de projection</b> \u2014 et le dit\u202f: la ligne porte un <b>\u21a9</b> et nomme la campagne d\u2019o\u00f9 vient le chiffre. Elle sera remplac\u00e9e par la vraie mesure d\u00e8s le seuil atteint. Si aucune campagne comparable n\u2019est archiv\u00e9e, l\u2019\u00e9cran continue de le dire plut\u00f4t que d\u2019inventer." },
+    { emoji: '\u{23F1}', titre: "Un salari\u00e9 r\u00e9embauch\u00e9 n\u2019avait qu\u2019un compteur d\u2019heures affich\u00e9",
+      desc: "Quand quelqu\u2019un finit un contrat puis en resigne un autre dans la <b>m\u00eame ann\u00e9e civile</b>, il a <b>deux compteurs des 1607\u202fh</b>, chacun proratis\u00e9 \u00e0 la dur\u00e9e de son contrat. L\u2019\u00e9cran n\u2019en montrait qu\u2019un\u202f: celui du contrat en cours. Les contrats <b>sold\u00e9s dans l\u2019ann\u00e9e</b> ont maintenant leur propre carte, au-dessus, avec leurs dates, leurs heures faites et leur plafond. Le calcul, lui, \u00e9tait d\u00e9j\u00e0 juste \u2014 c\u2019est l\u2019affichage qui \u00e9tait incomplet." },
+    { emoji: '\u{1F4B6}', titre: "Le taux horaire moyen comptait un mi-temps comme un temps plein",
+      desc: "Quand une parcelle n\u2019a pas d\u2019\u00e9quipe nomm\u00e9e au journal, son co\u00fbt est valoris\u00e9 au <b>taux moyen du domaine</b>. Ce moyen \u00e9tait une simple moyenne par t\u00eate\u202f: quelqu\u2019un pr\u00e9sent quatre mois pesait autant qu\u2019un permanent. Il est d\u00e9sormais <b>pond\u00e9r\u00e9 par les heures annuelles</b> de chaque grille horaire. Sur un domaine qui m\u00e9lange permanents et saisonniers, attendez-vous \u00e0 un chiffre l\u00e9g\u00e8rement diff\u00e9rent \u2014 plus proche de ce que vous payez r\u00e9ellement." },
+  ] },
   { v:'6.13', items:[
     { emoji: '\u{1F4C8}', titre: "La courbe d\u2019effectif ne bougeait pas quand vous modifiiez un contrat",
       desc: "Vous saisissiez une date de contrat dans R\u00e9glages, vous reveniez sur <b>Pilotage</b>, et la courbe \u00ab\u202fpersonnes n\u00e9cessaires par semaine\u202f\u00bb affichait toujours l\u2019ancien effectif. Idem apr\u00e8s avoir coch\u00e9 \u00ab\u202fBureau\u202f\u00bb, chang\u00e9 l\u2019effectif d\u2019une \u00e9quipe collective, corrig\u00e9 une surface ou des heures par hectare. L\u2019\u00e9cran ne se remettait \u00e0 jour qu\u2019en <b>rechargeant l\u2019application</b>, et rien ne le signalait\u202f: la courbe \u00e9tait parfaitement lisible, simplement p\u00e9rim\u00e9e. Elle suit maintenant vos saisies imm\u00e9diatement." },
@@ -1760,6 +1768,7 @@ var MV_AIDE = {
       ['Un contrat de groupe compte pour son effectif', " : une fiche « équipe de vendange » à 40 vaut 40 personnes, pas une ligne. Inutile de créer quarante fiches. L’écran dit toujours sur quelles dates il a compté, et affiche l’écart avec la présence du jour."],
       ['Le manque d’effectif se lit sur la semaine du pic', ", contre ce qui est prévu au planning <b>cette semaine-là</b> — pas contre la présence d’aujourd’hui. Un pic qui tombe dans onze mois ne se compare pas à qui est là ce matin."],
       ['Économie', "compare un budget de barème à ce qui est engagé, sur la <b>période consultée</b> — le coût d’un bilan entier se lit dans sa sous-vue <b>Exercice</b>. Quand l’écart est grand, c’est le barème qu’on corrige dans Réglages, jamais le taux horaire."],
+      ['L’écart de cadence cherche sa source dans un ordre', ", et dit toujours laquelle il a trouvée. D’abord <b>la période en cours</b>, dès 40 % de barème réalisé. Sinon <b>la même période de la campagne précédente</b>, si elle est archivée — la ligne porte alors un <b>↩</b> et nomme la campagne : c’est une hypothèse de projection, pas une mesure du moment. Sinon rien, et l’écran l’écrit plutôt que d’afficher un chiffre inventé."],
       ['Conformité', "suit le cuivre sur sept ans, le nombre de passages et les délais de rentrée en cours."],
       ['Cave', "dit ce qui presse aujourd’hui, où en est le millésime, et ce que coûte le parc à fûts."],
       ['Archives', "empile les campagnes sur un même axe, du 1er août au 31 juillet : le décalage d’une année sur l’autre se lit d’un coup d’œil."],

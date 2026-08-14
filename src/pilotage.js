@@ -6103,6 +6103,59 @@ function _pecCadPresence(){
   return { h:h, n:n, d0:d0, d1:d1 };
 }
 
+// ★★★ MARCHE 2 DE L'ESCALIER — la meme periode, la campagne d'avant (backlog 7, §20b).
+// Rend {hReel,hBar,ecart,nom,d0,d1,nMbr} ou null. Chaque garde renvoie null plutot que
+// d'inventer : une marche vide se lit deja correctement a l'ecran (marche 3).
+//
+// ⚠️ hBar vient du SNAPSHOT (`stats.hFaites`, ecrit par _calcHistoStats a l'archivage) :
+//   c'est la seule grandeur de la periode passee qu'on ne peut pas recalculer, TRAVAUX
+//   ayant ete remis a zero au changement de campagne.
+// ⚠️ hReel se RECALCULE, lui, sur le planning : PLANNING_ENTRIES est cle par annee et
+//   n'est jamais purge. _planWorkPersRange est annee-aware (_planCtxYear), une fenetre
+//   d'aout a juillet traverse donc deux annees civiles sans se tromper.
+// ⚠️ Les membres sont filtres sur LEUR contrat de l'epoque, pas sur l'effectif du jour :
+//   sinon un saisonnier parti l'an dernier disparaitrait de sa propre periode.
+function _pecCadHisto(hBarCourant){
+  if(typeof _pilCmpSnapshot!=='function') return null;
+  var snap=null;
+  try{ snap=_pilCmpSnapshot(); }catch(e){ return null; }
+  if(!snap || !snap.stats) return null;
+  var hBar=Number(snap.stats.hFaites)||0;
+  if(!(hBar>0)) return null;
+  // Les dates viennent de SAISONS, pas du snapshot : une periode supprimee de SAISONS
+  // n'est plus datable, et on ne devine pas une fenetre.
+  var per=(typeof _pilCmpPeriode==='function')?_pilCmpPeriode(snap.saisonNom):null;
+  if(!per || !per.debut || !per.fin) return null;
+  var d0=String(per.debut).slice(0,10), d1=String(per.fin).slice(0,10);
+  if(d1<d0) return null;
+  if(typeof window._planWorkPersRange!=='function') return null;
+  var okPer=(typeof window._mvEnContratSurPeriode==='function');
+  var mbrs=(window.MEMBRES||[]).filter(function(m){
+    if(!m||!m.nom) return false;
+    return okPer ? window._mvEnContratSurPeriode(m,d0,d1) : (m.statut!=='Inactif');
+  });
+  if(!mbrs.length) return null;
+  var D0=_pexD(d0), D1=_pexD(d1), pres=0, n=0;
+  mbrs.forEach(function(m){
+    var v=0;
+    try{ v=Number(window._planWorkPersRange(m,D0,D1))||0; }
+    catch(e){ if(window.logError) window.logError({level:'info',cat:'eco',msg:'cadence histo '+(m.nom||'')}); }
+    if(v>0){ pres+=v; n++; }
+  });
+  if(!(pres>0)) return null;
+  // Tracteur de CETTE fenetre : _ecoTracHByParc accepte deja une fenetre de dates, et
+  // SESSIONS n'est pas purge au changement de campagne. Somme des heures, tous parcs.
+  var hTrac=0;
+  try{
+    var tw=_ecoTracHByParc({d0:d0,d1:d1});
+    Object.keys(tw.h||{}).forEach(function(k){ hTrac+=(tw.h[k]||0); });
+  }catch(e){ hTrac=0; }
+  var hReel=Math.max(0, pres-hTrac);
+  if(!(hReel>0)) return null;
+  return { hReel:hReel, hBar:hBar, ecart:((hReel-hBar)/hBar),
+           nom:String(snap.saisonNom||''), d0:d0, d1:d1, nMbr:n, hTrac:hTrac };
+}
+
 function _pecData(){
   var cfg=_ecoCfg(), rate=_ecoRate();
   var tracH=_ecoTracHByParc(), phy=_ecoPhytoByParc();
@@ -6222,6 +6275,30 @@ function _pecData(){
   var hReelC=cadP ? Math.max(0, cadP.h - T.tracH) : 0;
   var cadOk = (hBarC>0 && hReelC>0 && avc>=_PEC_CAD_AVC);
   var ecart = cadOk ? ((hReelC-hBarC)/hBarC) : 0;
+  // ★★★ ESCALIER DE SOURCES — MARCHE 2 (backlog 7, §20b).
+  // Marche 1 : la periode EN COURS des qu'elle a passe le seuil d'avancement (ci-dessus).
+  // Marche 2 : sous le seuil, la MEME PERIODE DE LA CAMPAGNE PRECEDENTE, si elle est
+  //   archivee. Meme arithmetique, meme discipline de perimetre : numerateur global
+  //   (presence planning de la fenetre, moins le tracteur de la fenetre) sur denominateur
+  //   global (heures de bareme faites, lues dans le snapshot).
+  // Marche 3 : rien — et l'ecran le dit deja.
+  // ⚠️ Le seuil ne s'applique PAS a la marche 2 : une campagne archivee est terminee,
+  //   son avancement est ce qu'il est. C'est la representativite qui justifiait le seuil,
+  //   et une periode close est representative d'elle-meme par construction.
+  // ⚠️ La source DOIT etre annoncee a l'ecran : un chiffre de l'an dernier presente comme
+  //   une mesure du moment serait exactement la faute de §34 — deux choses sous un mot.
+  var cadSrc = cadOk ? 'planning' : null;
+  var cadHist = null;
+  if(!cadOk){
+    cadHist = _pecCadHisto(hBarC);
+    if(cadHist){
+      cadOk   = true;
+      cadSrc  = 'histo';
+      hReelC  = cadHist.hReel;
+      hBarC   = cadHist.hBar;
+      ecart   = cadHist.ecart;
+    }
+  }
   // ⚠ La cadence ne s'applique qu'au RESTE A ENGAGER. Appliquee au budget entier
   // elle reecrivait le passe : a 100 % d'avancement, avec 79 358 € deja engages et
   // 0 € restant, l'ecran projetait une fin a 37,4 k€ — une projection ne peut pas
@@ -6251,8 +6328,10 @@ function _pecData(){
     tracAnon:tracH.nAnon, tracSess:tracH.nSess,
     avc:avcPct, cons:consPct, projOn:projOn,
     cad:{ hReel:hReelC, hBar:hBarC, ok:cadOk, ecart:ecart*100, hJour:hJour,
-          src:(cadP?'planning':null), hTrac:T.tracH, seuil:_PEC_CAD_AVC*100,
-          d0:(cadP?cadP.d0:''), d1:(cadP?cadP.d1:''), nMbr:(cadP?cadP.n:0) },
+          src:(cadSrc || (cadP?'planning':null)), hTrac:(cadHist?cadHist.hTrac:T.tracH), seuil:_PEC_CAD_AVC*100,
+          d0:(cadHist?cadHist.d0:(cadP?cadP.d0:'')), d1:(cadHist?cadHist.d1:(cadP?cadP.d1:'')),
+          nMbr:(cadHist?cadHist.nMbr:(cadP?cadP.n:0)),
+          histoNom:(cadHist?cadHist.nom:'') },
     projFin:projFin,
     budget:budget, engage:engage, resteE:resteE,
     coutHaB:(T.surf>0?budget/T.surf:0), coutHaE:(T.surf>0?engage/T.surf:0),
@@ -6603,6 +6682,18 @@ function _pecVerdict(E,TL){
   if(TL && TL.ok && TL.pace>0 && TL.projMs && TL.objMs && TL.projMs>TL.objMs){
     d+=' \u23F1 Au rythme de d\u00e9pense actuel, le budget serait \u00e9puis\u00e9 le <b>'+_pilEsc(_pecDfrMs(TL.projMs))+'</b>, apr\u00e8s l\u2019objectif de fin des travaux.';
   }
+  // ★ MARCHE 2 : la cadence ne vient PAS de la periode en cours. Le dire avant tout le
+  //   reste, et remplacer le titre : les quatre branches ci-dessus sont ecrites au present
+  //   (« l'equipe a passe », « la cadence colle ») et decriraient une periode qui n'est pas
+  //   celle affichee. Un chiffre d'histoire presente comme une mesure du moment est
+  //   exactement la faute de §34.
+  if(ec!=null && E.cad.src==='histo'){
+    t=t.replace(/^La cadence colle au bar\u00e8me$/,'La cadence de l\u2019an dernier collait au bar\u00e8me');
+    t='\u21a9\ufe0e '+t+' \u2014 mesur\u00e9 sur la campagne pr\u00e9c\u00e9dente';
+    d='<b>Cette p\u00e9riode n\u2019est pas encore assez avanc\u00e9e</b> ('+Math.round(E.avc)+' %, il en faut '+Math.round(E.cad.seuil)+' %) : '
+      +'la cadence affich\u00e9e est celle de <b>'+_pilEsc(E.cad.histoNom||'la campagne pr\u00e9c\u00e9dente')+'</b>, sa p\u00e9riode homologue. '
+      +'Elle sert d\u2019hypoth\u00e8se de projection, pas de mesure du moment \u2014 elle sera remplac\u00e9e par la mesure r\u00e9elle d\u00e8s le seuil atteint. '+d;
+  }
   return '<div class="pec-card"><div class="pec-verdict"><div class="em">'+em+'</div><div><div class="t">'+t+'</div><div class="d">'+d+'</div></div></div></div>';
 }
 
@@ -6624,10 +6715,15 @@ function _pecAlertes(E,TL){
                         .sort(function(a,b){ return b.coutHa-a.coutHa; });
   if(chers.length) push('warn','\uD83D\uDCC8','<b>'+chers.length+' parcelle'+(chers.length>1?'s':'')+'</b> d\u00e9passe'+(chers.length>1?'nt':'')+' de plus de 30 % le co\u00fbt moyen \u00e0 l\u2019hectare : '
     +_pilEsc(chers.slice(0,3).map(function(r){ return r.nom+' ('+_ecoEur(r.coutHa)+'/ha)'; }).join(', '))+(chers.length>3?'\u2026':'')+'. \u00c0 regarder : plants, passages en plus, ou tri des t\u00e2ches.');
-  if(E.cad.ok && E.cad.ecart>15) push('bad','\u23F3','Sur le travail d\u00e9j\u00e0 fait, l\u2019\u00e9quipe a pass\u00e9 <b>'+_pilEsc(_pecPct(E.cad.ecart))+' de temps en plus</b> que le bar\u00e8me h/ha. Si cela tient jusqu\u2019au bout, la p\u00e9riode co\u00fbtera <b>'+_pilEsc(_pecEurK(E.projFin))+'</b> au lieu de '+_pilEsc(_pecEurK(E.budget))+'. Deux causes possibles, et elles se distinguent dans <b>Postes &amp; travaux</b> : un bar\u00e8me trop serr\u00e9 (<b>R\u00e9glages \u203A T\u00e2ches</b>), ou un travail pr\u00e9cis qui d\u00e9rape.');
+  if(E.cad.ok && E.cad.ecart>15){
+    if(E.cad.src==='histo')
+      push('warn','\u21a9\ufe0e','L\u2019an dernier, sur la p\u00e9riode homologue (<b>'+_pilEsc(E.cad.histoNom||'campagne pr\u00e9c\u00e9dente')+'</b>), l\u2019\u00e9quipe avait pass\u00e9 <b>'+_pilEsc(_pecPct(E.cad.ecart))+' de temps en plus</b> que le bar\u00e8me h/ha. Cette p\u00e9riode-ci n\u2019est pas encore assez avanc\u00e9e pour se mesurer elle-m\u00eame ('+Math.round(E.avc)+' % sur '+Math.round(E.cad.seuil)+' % requis) : la projection reprend donc ce rythme comme <b>hypoth\u00e8se</b>. Si le bar\u00e8me n\u2019a pas boug\u00e9 depuis, il y a de bonnes chances qu\u2019elle se v\u00e9rifie \u2014 mais rien ne le garantit encore.');
+    else
+      push('bad','\u23F3','Sur le travail d\u00e9j\u00e0 fait, l\u2019\u00e9quipe a pass\u00e9 <b>'+_pilEsc(_pecPct(E.cad.ecart))+' de temps en plus</b> que le bar\u00e8me h/ha. Si cela tient jusqu\u2019au bout, la p\u00e9riode co\u00fbtera <b>'+_pilEsc(_pecEurK(E.projFin))+'</b> au lieu de '+_pilEsc(_pecEurK(E.budget))+'. Deux causes possibles, et elles se distinguent dans <b>Postes &amp; travaux</b> : un bar\u00e8me trop serr\u00e9 (<b>R\u00e9glages \u203A T\u00e2ches</b>), ou un travail pr\u00e9cis qui d\u00e9rape.');
+  }
   else if(!E.cad.ok && E.avc>10) push('info','\uD83D\uDCD3',(E.cad.src
       ? ('L\u2019\u00e9cart de cadence n\u2019est pas encore affich\u00e9 : il demande <b>'+Math.round(E.cad.seuil)+' %</b> du bar\u00e8me r\u00e9alis\u00e9, la p\u00e9riode en est \u00e0 <b>'+Math.round(E.avc)+' %</b>. Rien \u00e0 faire, il appara\u00eetra seul.')
-      : 'L\u2019\u00e9cart de cadence est indisponible : aucune heure de planning sur cette p\u00e9riode. C\u2019est le planning qui mesure le temps pass\u00e9, plus les validations du journal.'));
+      : 'L\u2019\u00e9cart de cadence est indisponible : aucune heure de planning sur cette p\u00e9riode, et aucune campagne comparable archiv\u00e9e. C\u2019est le planning qui mesure le temps pass\u00e9, plus les validations du journal.'));
   if(E.tot.retE>0) push('warn','\u23F1','<b>'+_pilEsc(_ecoEur(E.tot.retE))+'</b> de surco\u00fbt de retard mod\u00e9lis\u00e9 sur '+E.tot.nRet+' parcelle'+(E.tot.nRet>1?'s':'')+' ('+E.rcfg.pct+' %/semaine hors fen\u00eatre, plafond '+E.rcfg.capPct+' %). <b>Mod\u00e9lis\u00e9, jamais pay\u00e9</b> : il n\u2019entre dans aucun total.');
   if(!A.length) push('ok','\u2705','Toutes les donn\u00e9es de chiffrage sont en place : taux horaires, prix du GNR, doses et prix des produits. Les chiffres de cet onglet sont complets.');
   return A.join('');
@@ -6650,7 +6746,9 @@ function _pecViewSynthese(E,TL){
       +'<div class="v" style="color:'+dCol+'">'+(ec===null?'\u2014':((ec>0?'+':'')+_pecPct(ec)))+'</div>'
       +'<div class="s">'+(ec===null
           ? (E.cad.src?('mesurable d\u00e8s '+Math.round(E.cad.seuil)+' % du bar\u00e8me r\u00e9alis\u00e9 \u00b7 '+Math.round(E.avc)+' % \u00e0 ce jour'):'aucune heure de planning sur la p\u00e9riode')
-          : ('temps pass\u00e9 contre bar\u00e8me \u00b7 fin projet\u00e9e \u00e0 <b>'+_pilEsc(_pecEurK(E.projFin))+'</b>'))+'</div></div>'
+          : (E.cad.src==='histo'
+              ? ('\u21a9\ufe0e campagne pr\u00e9c\u00e9dente \u00b7 fin projet\u00e9e \u00e0 <b>'+_pilEsc(_pecEurK(E.projFin))+'</b>')
+              : ('temps pass\u00e9 contre bar\u00e8me \u00b7 fin projet\u00e9e \u00e0 <b>'+_pilEsc(_pecEurK(E.projFin))+'</b>')))+'</div></div>'
     +'</div>'
     +'<div class="pec-cb" style="padding-top:16px">'
     +'<div class="pec-bar"><i style="width:'+pE.toFixed(1)+'%;background:'+_PEC_COL.mo+'"></i></div>'
@@ -6677,8 +6775,11 @@ function _pecViewSynthese(E,TL){
     +'<div class="pec-note">Chaque euro est pos\u00e9 \u00e0 <b>sa</b> date : la main-d\u2019\u0153uvre sur les validations du journal, le tracteur et le GNR sur la date de session, le phyto sur la date de traitement. Une personne pr\u00e9sente sur plusieurs parcelles le m\u00eame jour est r\u00e9partie \u00e0 parts \u00e9gales \u2014 le journal dit qui et quand, jamais combien d\u2019heures.<br>'
       +'L\u2019<b>\u00e9cart de cadence</b> vient de l\u00e0 : les heures <b>r\u00e9ellement travaill\u00e9es au planning</b> sur la p\u00e9riode, moins les heures de sessions tracteur, compar\u00e9es aux heures de bar\u00e8me du travail fait. '
       +(E.cad.ok
-         ? ('<b>'+_ecoH1(E.cad.hReel)+' h</b> de pr\u00e9sence contre <b>'+_ecoH1(E.cad.hBar)+' h</b> pr\u00e9vues'+(E.cad.hTrac>0?(', apr\u00e8s d\u00e9duction de '+_ecoH1(E.cad.hTrac)+' h de tracteur'):'')+'. \u26a0 Le planning dit que la personne \u00e9tait l\u00e0, jamais ce qu\u2019elle a fait : la cave, l\u2019atelier et le bureau restent dans ce total. La pr\u00e9sence est donc plut\u00f4t sur\u00e9valu\u00e9e.')
-         : ('Neutralis\u00e9 sous '+Math.round(E.cad.seuil)+' % du bar\u00e8me r\u00e9alis\u00e9 \u2014 '+Math.round(E.avc)+' % \u00e0 ce jour.'))+'</div>'
+         ? ((E.cad.src==='histo'
+              ? ('\u21a9\ufe0e <b>Mesur\u00e9 sur la campagne pr\u00e9c\u00e9dente</b> ('+_pilEsc(E.cad.histoNom||'p\u00e9riode homologue')+') : cette p\u00e9riode-ci n\u2019a pas encore atteint les '+Math.round(E.cad.seuil)+' % de bar\u00e8me r\u00e9alis\u00e9 qu\u2019il faut pour se mesurer elle-m\u00eame. ')
+              : '')
+            +'<b>'+_ecoH1(E.cad.hReel)+' h</b> de pr\u00e9sence contre <b>'+_ecoH1(E.cad.hBar)+' h</b> pr\u00e9vues'+(E.cad.hTrac>0?(', apr\u00e8s d\u00e9duction de '+_ecoH1(E.cad.hTrac)+' h de tracteur'):'')+'. \u26a0 Le planning dit que la personne \u00e9tait l\u00e0, jamais ce qu\u2019elle a fait : la cave, l\u2019atelier et le bureau restent dans ce total. La pr\u00e9sence est donc plut\u00f4t sur\u00e9valu\u00e9e.')
+         : ('Neutralis\u00e9 sous '+Math.round(E.cad.seuil)+' % du bar\u00e8me r\u00e9alis\u00e9 \u2014 '+Math.round(E.avc)+' % \u00e0 ce jour, et aucune campagne comparable archiv\u00e9e.'))+'</div>'
     +'</div></div>';
 
   // Prix de revient

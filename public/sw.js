@@ -1,4 +1,24 @@
-// MA VIGNE — Service Worker v6.66
+// MA VIGNE — Service Worker v6.67
+// v6.67 (14/08/2026) — L’ECART DE CADENCE AVAIT UNE SEULE SOURCE, OU AUCUNE.
+//   Sous 40 % de bareme realise l’indicateur se taisait, y compris quand la MEME
+//   periode de la campagne precedente etait archivee et parfaitement lisible. Un
+//   escalier de sources est cable : periode en cours -> meme periode l’an dernier
+//   -> rien. La marche 2 recalcule la presence sur PLANNING_ENTRIES (cle par annee,
+//   jamais purge) et lit le bareme dans le snapshot (stats.hFaites) — TRAVAUX ayant
+//   ete remis a zero a la cloture, c’est la seule grandeur non recalculable.
+//   ★ QUATRE points d’affichage annoncent la source (verdict, note du graphe, KPI,
+//     alerte) avec un ↩ et le nom de la campagne. Un chiffre d’histoire presente
+//     comme une mesure du moment, c’est la faute de §34 — deux choses sous un mot.
+//   ★ Le seuil ne s’applique PAS a la marche 2 : c’est la representativite qui le
+//     justifiait, et une periode close est representative d’elle-meme.
+//   · planning.js : les compteurs des 1607 h des contrats SOLDES dans l’annee civile
+//     s’affichent enfin (backlog 0e). Un salarie reembauche en avait N, l’ecran n’en
+//     montrait qu’un. Affichage seul — aucun calcul ne bouge.
+//   · planning.js : openPlanCPSel fusionnee dans openPlanCP(fromSel) (backlog 3).
+//   · pilotage.js : _ecoRate pondere par les heures annuelles du gabarit (backlog 9).
+//     Un temps plein a 12 €/h pesait autant qu’un mi-temps a 14. Repli h=1 si le
+//     planning n’est pas charge — resultat identique a l’ancien, zero regression.
+//   BUMP : utils.js est modifie (MV_AIDE + APP_VERSION). APP 6.13 -> 6.14.
 // v6.66 (14/08/2026) — UN COMPTE A REBOURS QUI NE DISAIT PAS CE QU'IL Y AVAIT APRES.
 //   Le bandeau d'essai affichait « J-4 » et rien d'autre. Un decompte sans suite
 //   annoncee se lit comme une menace de perte de donnees : c'est faux — a l'echeance
@@ -1441,7 +1461,7 @@
 // v2.22 — Fix profils vides : guard vide dans loadData() pour MEMBRES/SAISONS/TACHES
 // v2.17 — Onboarding intégré + tenantId · v2.06 — Firebase Auth · v2.00–v2.05 — divers
 const DEBUG = self.location.hostname === 'localhost' || self.location.hostname === '127.0.0.1';
-const CACHE_NAME   = 'mavigne-v6.66';
+const CACHE_NAME   = 'mavigne-v6.67';
 const TENANT_CACHE = 'mavigne-tenant';   // Cache persistant — préservé à chaque mise à jour SW
 const SYNC_TAG     = 'mavigne-sync';
 
@@ -1457,7 +1477,7 @@ const CDN_URLS = [
 ];
 
 self.addEventListener('install', event => {
-  if(DEBUG) console.log('[SW] Ma Vigne v6.66 installé');
+  if(DEBUG) console.log('[SW] Ma Vigne v6.67 installé');
   event.waitUntil(
     caches.open(CACHE_NAME).then(async cache => {
       // ── Cœur applicatif : STRICT (mise à jour ATOMIQUE) ──
@@ -1473,7 +1493,7 @@ self.addEventListener('install', event => {
 });
 
 self.addEventListener('activate', event => {
-  if(DEBUG) console.log('[SW] Ma Vigne v6.66 activé');
+  if(DEBUG) console.log('[SW] Ma Vigne v6.67 activé');
   event.waitUntil(
     caches.keys().then(keys =>
       Promise.all(
