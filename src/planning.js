@@ -2174,7 +2174,7 @@ function _pl2MbarSync(){
   if(!n){acts.innerHTML='';return;}
   var st=_planSelStats();
   var h='<button class="pl2-mbar-heures" onclick="planSelSheet(\'travail\')"><span>\u{1F550}</span><span>Heures</span></button>'
-    +'<button onclick="openPlanCPSel()"><span>\u2600\uFE0F</span><span>Cong\u00e9</span></button>'
+    +'<button onclick="openPlanCP(true)"><span>\u2600\uFE0F</span><span>Cong\u00e9</span></button>'
     +'<button onclick="planSelSheet(\'absent\')"><span>\u2715</span><span>Absence</span></button>';
   if(st.trav>0)h+='<button onclick="planSelAction(\'rec\')"><span>\u21BA</span><span>R\u00e9cup</span></button>'
     +'<button onclick="planSelAction(\'heat\')"><span>\u{1F321}\uFE0F</span><span>Chaleur</span></button>';
@@ -3002,22 +3002,33 @@ var _pl2CpSel={};
 var _pl2CpDates={du:'',au:''};
 function _cpIso(d){var m=d.getMonth()+1,j=d.getDate();return d.getFullYear()+'-'+(m<10?'0'+m:m)+'-'+(j<10?'0'+j:j);}
 function _planCpMode(){return((window.CONFIG&&window.CONFIG.cp_mode)==='ouvres')?'ouvres':'ouvrables';}
-function openPlanCP(){
+// openPlanCP(fromSel) — unique point d'entree pour les deux modes de conges.
+// Sans argument : mode PERIODE — plage de dates, tous les actifs preselectes.
+// fromSel=true : mode SELECTION — cases cochees dans la grille (ex-openPlanCPSel).
+// Les deux partagent l'overlay ovPlanCP depuis le lot §19a ; _pl2CpFromSel pilotait
+// deja le branchement interne — on le rend simplement explicite ici plutot que d'avoir
+// deux fonctions d'entree pour le meme overlay.
+function openPlanCP(fromSel){
   if(!isAdmin())return;
-  _pl2CpFromSel=false; _pl2CpSelData=null; _planCpHdr(null,null,null);
-  _pl2CpSel={};
-  _pl2Actifs().forEach(function(m){_pl2CpSel[m.nom]=true;});
-  var t=new Date();
-  if(t.getFullYear()===planYear){
-    var dow=t.getDay(), off=(dow===0?-6:1-dow);
-    var mon=new Date(t); mon.setDate(t.getDate()+off);
-    var fri=new Date(mon); fri.setDate(mon.getDate()+4);
-    _pl2CpDates.du=_cpIso(mon); _pl2CpDates.au=_cpIso(fri);
+  if(fromSel && !Object.keys(_pl2Sel).length){showToast('Touchez d\u2019abord des cases dans la grille','#E07060');return;}
+  _pl2CpFromSel=!!fromSel; _pl2CpSelData=null; _planCpHdr(null,null,null);
+  if(!fromSel){
+    _pl2CpSel={};
+    _pl2Actifs().forEach(function(m){_pl2CpSel[m.nom]=true;});
+    var t=new Date();
+    if(t.getFullYear()===planYear){
+      var dow=t.getDay(), off=(dow===0?-6:1-dow);
+      var mon=new Date(t); mon.setDate(t.getDate()+off);
+      var fri=new Date(mon); fri.setDate(mon.getDate()+4);
+      _pl2CpDates.du=_cpIso(mon); _pl2CpDates.au=_cpIso(fri);
+    } else {
+      _pl2CpDates.du=planYear+'-'+String(planMonth+1).padStart(2,'0')+'-01';
+      _pl2CpDates.au=_pl2CpDates.du;
+    }
+    _planCPRender();
   } else {
-    _pl2CpDates.du=planYear+'-'+String(planMonth+1).padStart(2,'0')+'-01';
-    _pl2CpDates.au=_pl2CpDates.du;
+    _planCPRenderSel();
   }
-  _planCPRender();
   var ov=document.getElementById('ovPlanCP');
   if(ov)ov.classList.add('open');
 }
@@ -3043,15 +3054,6 @@ function _planCpHdr(titre,sous,btn){
   if(d)d.innerHTML=(titre===null)?_pl2CpHdrSave.d:titre;
   if(s)s.innerHTML=(sous===null)?_pl2CpHdrSave.s:sous;
   if(b)b.innerHTML=(btn===null)?_pl2CpHdrSave.b:btn;
-}
-
-function openPlanCPSel(){
-  if(!isAdmin())return;
-  if(!Object.keys(_pl2Sel).length){showToast('Touchez d\u2019abord des cases dans la grille','#E07060');return;}
-  _pl2CpFromSel=true;
-  _planCPRenderSel();
-  var ov=document.getElementById('ovPlanCP');
-  if(ov)ov.classList.add('open');
 }
 
 // Regroupe les cases cochées par salarié et classe chaque jour.
@@ -5246,7 +5248,7 @@ window.planCaniculeRemove        = planCaniculeRemove;
 window.openPlanCP           = openPlanCP;
 // ★ Appelee depuis un onclick construit en JS (barre de selection) : sans cette
 //   ligne, le bouton « Conge » serait un clic mort. Signale par le preflight C6.
-window.openPlanCPSel        = openPlanCPSel;
+// window.openPlanCPSel supprime — fusionne dans openPlanCP(true) (backlog 3)
 window.closePlanCP          = closePlanCP;
 window.planCpMb             = planCpMb;
 window.planCpApply          = planCpApply;

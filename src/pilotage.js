@@ -5588,13 +5588,26 @@ function _ecoRate(){
   var _atR=(typeof window._mvPaieTauxAt==='function')
     ? function(nm){ return Number(window._mvPaieTauxAt(nm,_d0R))||0; }
     : function(nm){ return Number(indiv[nm])||0; };
-  var sum=0,n=0;
+  // ★ Pondéré par les heures annuelles du gabarit (backlog 9).
+  // Un temps plein a 12 €/h pese plus qu'un mi-temps a 14 €/h dans le budget global :
+  // la moyenne par tete surestime le taux quand le domaine melange durees inegales.
+  // Repli sur h=1 (= par tete, meme resultat qu'avant) si window._planGetRefH absent
+  // ou gabarit vide — aucune regression sur un domaine sans donnees de planning.
+  var sum=0, wsum=0;
   membres.forEach(function(m){
     var r=_atR(m.nom);
     if(!(r>0)) r=Number(taux[m.type_contrat||'CDI'])||0;
-    if(r>0){ sum+=r; n++; }
+    if(r>0){
+      var plId=(typeof window._planPlId==='function')?window._planPlId(m):'standard';
+      var h=0;
+      if(typeof window._planGetRefH==='function'){
+        for(var mi=0;mi<12;mi++) h+=(window._planGetRefH(plId,mi)||0);
+      }
+      if(!(h>0)) h=1;
+      sum+=r*h; wsum+=h;
+    }
   });
-  if(n>0) return sum/n;
+  if(wsum>0) return sum/wsum;
   var vals=_ECO_CONTRATS.map(function(k){ return Number(taux[k])||0; }).filter(function(v){ return v>0; });
   return vals.length ? vals.reduce(function(a,b){return a+b;},0)/vals.length : 0;
 }
