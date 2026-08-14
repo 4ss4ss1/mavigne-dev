@@ -1021,9 +1021,47 @@ function _pilAnnuelData(){
   var pers=(brut||[]).filter(function(p){ return p&&p.debut&&p.fin&&p.fin>=p.debut; })
     .sort(function(a,b){ return String(a.debut).localeCompare(String(b.debut)); });
   if(!pers.length) return null;
-  var key=pers.map(function(p){return p.nom+'|'+p.debut+'|'+p.fin;}).join(';')
-    +'#'+((window.MEMBRES||[]).length)+'#'+((window.PARCELLES||[]).length)
-    +'#'+((window.TACHES||[]).length)
+  // ★★★ LA CLE DOIT DERIVER DE CE QUI ENTRE DANS LE CALCUL, PAS DE SON COMPTAGE.
+  //   Elle ne portait que des LONGUEURS : MEMBRES.length, PARCELLES.length,
+  //   TACHES.length. Modifier une date de contrat, cocher Bureau, changer
+  //   l'effectif d'une equipe collective, corriger une surface ou des heures/ha
+  //   ne fait varier AUCUNE longueur : la frise servait l'ancien calcul jusqu'au
+  //   prochain F5, sans rien signaler. Un cache dont la cle ne derive pas de ses
+  //   entrees n'est pas un cache, c'est un GEL.
+  //   ⚠⚠ MESURE DU 13/08/2026, domaine reel, periode Hiver 01/10/2026 -> 31/03/2027.
+  //   Quatre fiches sous contrat en octobre, la quatrieme sortant le 17/11. La ligne
+  //   « effectif present » devait valoir 4, puis 3,857 la semaine du 12 nov., puis 3.
+  //   Elle etait PLATE A 3 sur les six mois. Les memes fonctions (_headWeek,
+  //   _inContractDay, _mvEnContratSurPeriode), rejouees sur les memes donnees,
+  //   rendent bien 4 / 3,857 / 3 : le calcul etait juste, le memo servait un
+  //   resultat perime. C'est le pire genre de faute — aucune erreur, aucun trou,
+  //   une courbe parfaitement lisible qui dit le contraire de la base.
+  //   ★ Tout ce que lit _chargeSaisonData entre desormais dans la cle : contrats
+  //   et drapeaux de chaque fiche, surface et statut de chaque parcelle, heures/ha
+  //   et fenetres de chaque tache, passages, overrides CONFIG, liste de taches de
+  //   chaque periode. Le cout est de quelques centaines de concatenations par
+  //   rendu — trois ordres de grandeur sous le calcul qu'il evite.
+  function _annSigM(m){
+    if(!m) return '';
+    var Q=(typeof window._mvContrats==='function')?window._mvContrats(m):[];
+    return (m.nom||'')+(m.bureau?'|B':'')+(m.collectif?('|C'+(m.effectif||1)):'')+'|'+(m.statut||'')
+      +'|'+Q.map(function(q){return (q.debut||'')+'>'+(q.fin||'');}).join(',');
+  }
+  function _annSigP(p){
+    if(!p) return '';
+    return (p.statut||'')+':'+(p.surface||0)+':'+((p.tachesExclues||[]).length);
+  }
+  function _annSigT(t){
+    if(!t) return '';
+    return (t.nom||'')+':'+(t.hha||0)+':'+(t.type||'')+(t.trous?'T':'')+(t.anytime?'A':'')
+      +':'+((t.saisons||[]).join('.')||(t.saison||''));
+  }
+  var _cfgTW=(window.CONFIG&&window.CONFIG.task_windows)||{};
+  var key=pers.map(function(p){return p.nom+'|'+p.debut+'|'+p.fin+'|'+((p.taches||[]).join('.'));}).join(';')
+    +'#'+(window.MEMBRES||[]).map(_annSigM).join(';')
+    +'#'+(window.PARCELLES||[]).map(_annSigP).join(';')
+    +'#'+(window.TACHES||[]).map(_annSigT).join(';')
+    +'#'+JSON.stringify(window.SAISON_PASSAGES||{})+'#'+JSON.stringify(_cfgTW)
     // ⚠️ le mois d'exercice entre dans la cle : sans lui, changer l'ouverture
     // laisserait la frise sur l'ancien cadre jusqu'au prochain rechargement.
     +'#'+((typeof window._mvExerciceMois==='function')?window._mvExerciceMois():'-');

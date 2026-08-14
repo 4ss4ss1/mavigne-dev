@@ -2,7 +2,17 @@
 
 > Document de référence du projet **Ma Vigne** (GUERETTECH). Il est le **porteur de vérité** :
 > la mémoire Claude est plafonnée, ce fichier ne l'est pas.
-> Dernière consolidation : **14 août 2026** — ★★★ **LES DOCUMENTS, ET UN ÉCRASEMENT** (**§38**,
+> Dernière consolidation : **14 août 2026 (après-midi)** — ★★★ **LE CACHE QUI GÈLE UNE COURBE**
+> (**§39**, section neuve). Parti de six mots sur une capture de la frise annuelle : *« pourquoi
+> que 3 permanents ? c'est faux par rapport à ce qui est inscrit dans réglage »*. La capture,
+> calibrée au pixel, donne **3,005 constant sur 1 309 colonnes** — aucune marche. Les mêmes
+> fonctions rejouées sur les mêmes données rendent **4 → 3,857 → 3**. ⚠️⚠️ **Le calcul était juste
+> depuis le début** : la clé du memo `_PIL_ANN` était faite de **longueurs** (`MEMBRES.length`,
+> `PARCELLES.length`, `TACHES.length`), et aucune longueur ne bouge quand on saisit une date de
+> contrat. **Un cache dont la clé ne dérive pas de ses entrées n'est pas un cache, c'est un gel.**
+> `pilotage.js` seul, **aucun bump**. Reste ouvert : une ligne d'`utils.js` bloquée non par un doute
+> technique mais par **une donnée** — le compte de service `Pilotage`.
+> Consolidation précédente du même jour : ★★★ **LES DOCUMENTS, ET UN ÉCRASEMENT** (**§38**,
 > section neuve, avec **§37** qui rattrape le chantier CONTRATS resté non consigné). Quatre lots
 > livrés sur les documents imprimés : les deux du Cuvier rendus **atteignables** (ils existaient dans
 > le code déployé sans qu'aucun bouton n'y mène), l'**état du vignoble**, le **relevé individuel**
@@ -3912,6 +3922,16 @@ sont neuves, donc **non auditées** : les traiter comme des hypothèses jusqu'à
    baseline a été **regravée** sur une diminution réelle (un `catch{}` vide parti avec
    `_paieHistTxt`). Sans elle, le prochain preflight avertit sans raison — et un avertissement
    qu'on apprend à ignorer est un cliquet mort.
+0a-bis. ★★ **UNE LIGNE D'`utils.js` EN ATTENTE D'UNE DÉCISION DE DONNÉE — pas de code.**
+   `_mvEnContratSurPeriode` (utils.js l.2449) fait `if(!P.length) return m.statut !== 'Inactif';`.
+   La convention posée par Nico le **09/07** est *« CDI sans date = présent en permanence »* — le
+   statut n'y figure pas. Aujourd'hui une fiche **sans aucune date** passée en Inactif sort de
+   **toutes** les périodes, **passées comprises**. Correction = `return true;`.
+   ⚠️ **Ce qui bloque** : la fiche **`Pilotage`** du tenant de référence est Inactive et **sans
+   dates**. La ligne en ferait un CDI permanent — +1 sur chaque courbe, entrée dans la **masse
+   salariale** (pilotage.js l.6933) et dans le **coût MO par parcelle** (l.5525). **Aucun marqueur
+   « compte de service » n'existe dans le modèle.** → Cocher **Bureau** sur `Pilotage`, ou supprimer
+   la fiche. Ensuite la ligne part : `utils.js`, donc **bump APP + SW**. Détail en **§39g**.
 0b. ✅ **Le CDD de Victor est RESSAISI** (confirmé par Nico le 12/08 au soir).
    ⚠️ **Le même geste reste à faire pour Shana, Alicia et Vic** dès leur resignature (annoncée au
    17/08) : mettre les anciennes dates dans la fiche, enregistrer, puis remettre la nouvelle date de
@@ -5724,3 +5744,155 @@ politique réseau du bac à sable — ils ne tournent qu'en CI.
    À vérifier : l'écran a-t-il un bouton d'impression ?
 4. **Le guide et les documents ne se contrôlent pas mutuellement.** Un document peut promettre une
    colonne que le guide ignore, et l'inverse. Aucun filet là-dessus.
+
+---
+
+## 39. ★★★ LE CACHE QUI GÈLE UNE COURBE (14/08 — `pilotage.js` seul, aucun bump)
+
+> **Point de départ** : une capture de la frise annuelle zoomée sur *Hiver 2026-2027* et six mots —
+> *« pourquoi que 3 permanents ? c'est faux par rapport à ce qui est inscrit dans réglage »*.
+
+### 39a. La première réponse était à côté, et c'est instructif
+
+Premier réflexe : expliquer les filtres. Réglages liste `MEMBRES` en entier — inactifs, bureau,
+équipes collectives, comptes de service — pendant que la ligne noire ne compte que les fiches
+**sous contrat ce jour-là, hors bureau**. Tout cela est exact. Et ça n'expliquait rien : Nico avait
+raison, le chiffre était faux.
+
+⚠️⚠️ **La faute est dans l'ordre des opérations.** Expliquer pourquoi un écran a *le droit*
+d'afficher un chiffre différent de celui qu'on attend, c'est fabriquer une excuse avant d'avoir
+mesuré. L'explication était plausible, cohérente, sourcée dans le code — et fausse comme réponse à
+la question posée. **Une explication plausible n'est pas un diagnostic.** Elle a coûté un tour.
+
+### 39b. La capture d'écran est une mesure, à condition de la traiter comme telle
+
+Calibration : gradins 0 / 2 / 4 / 6 aux ordonnées **524,5 / 417 / 309,5 / 202** ; séparateurs de
+mois aux abscisses **236** (1ᵉʳ oct.), 459,5, 675,5, 899, 1122,5, 1324,5, 1547,5 → **7,205 px par
+jour**, constant à 0,3 % près sur six mois. Le trait noir occupe **y = 362-364 sur toute la
+largeur**, x = 237 → 1546 : **3,005 constant, aucune marche**. Les seules interruptions (x = 458-461,
+674-677, …) sont les séparateurs de mois, **dessinés après la polyligne**.
+
+Les bornes de l'axe se déduisent du code : `mg = max(2, round((d1-d0)*0.04))` n'admet qu'une
+solution auto-cohérente — **mg = 7**, donc **période du 01/10/2026 au 31/03/2027**. Recoupement
+indépendant par les bandes de tâches : Réparation 1ᵉʳ oct. → 1ᵉʳ déc., Taille 30 nov. → 1ᵉʳ mars,
+Tirage 7 déc. → 16 mars. Les trois concordent.
+
+★ **Lire « la ligne a l'air plate » n'est pas un constat.** Extraire 3,005 sur 1 309 colonnes en est
+un — et c'est ce qui a permis d'affirmer *avant* de creuser que le défaut n'était pas un arrondi de
+semaine partielle.
+
+### 39c. Ce que le calcul rendait vraiment
+
+Table relevée en console sur le domaine réel, colonne `contrats` = sortie de `_mvContrats` :
+**16 fiches** — 8 inactives (dont un **compte de service `Pilotage`**, sans dates), 2 bureau
+(Etienne, Chloé), 1 collective (`Vendangeurs`, effectif 40), 5 actives.
+
+Les **vraies fonctions extraites du dépôt** — `_mvEnContratSurPeriode` (utils.js), `_inContractDay`,
+`_headWeek`, `_headDayMax` (planning.js) — rejouées sur ces données, période 01/10 → 31/03 :
+
+| semaines | `head` | qui |
+|---|---|---|
+| 01/10 → 11/11 | **4,000** | Nico (sans dates), Victor, Shana, Alicia |
+| 12/11 → 18/11 | **3,857** | Shana sort le 17 → 6/7 de semaine |
+| 19/11 → 31/03 | **3,000** | — |
+
+`mbrs` retenus : **Nico, Victor, Shana, Alicia**. `Vic` est exclu à raison (contrat clos le 06/09,
+avant le début de période). **Le calcul était juste.** L'écran affichait 3 plat.
+
+### 39d. La cause : une clé faite de longueurs
+
+`_pilAnnuelData` (pilotage.js l.1001) mémoïse son résultat dans `_PIL_ANN`. Sa clé portait les
+périodes, puis `MEMBRES.length`, `PARCELLES.length`, `TACHES.length` et le mois d'exercice.
+
+⚠️⚠️⚠️ **Aucune de ces longueurs ne bouge quand on saisit une date de contrat.** Ni quand on coche
+Bureau, ni quand on change l'effectif d'une équipe collective, ni quand on corrige une surface ou
+des heures/ha. La frise reservait le calcul d'avant **jusqu'au prochain F5**, sans rien signaler.
+`_PIL_ANN` n'était vidé **qu'au changement de mois d'exercice** (l.8582).
+
+★★★ **UN CACHE DONT LA CLÉ NE DÉRIVE PAS DE SES ENTRÉES N'EST PAS UN CACHE, C'EST UN GEL.** Et il
+ment de la pire façon : aucune exception, aucun trou, aucune valeur aberrante — une courbe
+parfaitement lisible qui dit le contraire de la base. Même famille que « l'indicateur bâti sur un
+signal partiel ment avec l'autorité d'une mesure » (§33), déplacée d'un cran : ici le signal est
+complet, c'est **la fraîcheur** qui est partielle.
+
+★ **L'asymétrie était visible dans le fichier lui-même.** `pilotage.js` porte **deux** memos sur la
+même donnée : `_PIL_CDV` (l.1190) est **oublié à chaque repeinte** — `_pilCdVueOublier()` est appelé
+en trois points, dont `renderPilotage()` — avec ce commentaire : *« un chiffre figé après une saisie
+de planning serait un écran qui se contredit lui-même »*. `_PIL_ANN` ne l'est nulle part. La règle
+était écrite à dix lignes du défaut.
+
+⚠️ **Et l'oubli par repeinte n'était pas la bonne correction ici** : `_pilAnnuelData` appelle
+`_chargeSaisonData` **une fois par période**, c'est précisément pourquoi il est mémoïsé. Le vider à
+chaque rendu paierait N calculs de charge par repeinte. **La clé était le bon levier ; elle était
+simplement fausse.**
+
+### 39e. Le correctif
+
+La clé dérive maintenant de **tout ce que lit `_chargeSaisonData`**, via trois signatures locales :
+
+| signature | ce qu'elle porte |
+|---|---|
+| `_annSigM(m)` | nom · `bureau` · `collectif` + effectif · `statut` · **toutes les périodes rendues par `_mvContrats`** |
+| `_annSigP(p)` | `statut` · `surface` · nombre d'exclusions de tâches |
+| `_annSigT(t)` | nom · `hha` · `type` · `trous` · `anytime` · saisons |
+
+Plus `SAISON_PASSAGES`, `CONFIG.task_windows`, la **liste de tâches** de chaque période (`p.taches`,
+absente de l'ancienne clé alors qu'elle décide quelles tâches entrent dans la charge), et le mois
+d'exercice déjà présent. Coût : quelques centaines de concaténations par rendu — **trois ordres de
+grandeur sous le calcul qu'elles évitent.**
+
+### 39f. Contre-épreuves
+
+| scénario | clé base | clé patchée |
+|---|---|---|
+| Shana reçoit son contrat 17/08 → 17/11 | **identique** → frise gelée | **change** → recalcul |
+| Bureau coché sur une fiche | — | **change** |
+| aucune modification | — | **stable** (le memo sert toujours) |
+
+La contre-épreuve sur la base est **rouge**, comme elle doit l'être — un harnais qui ne peut pas
+rougir ne prouve rien. Le troisième scénario est le garde-fou inverse : une clé trop volatile aurait
+supprimé le memo au lieu de le réparer.
+
+Contrôles : preflight **0 / 0** (APP 6.12 · SW 6.62), `node --check` ESM, cliquet `catch{}`
+**83 → 83**, delta d'accolades **0**, cliquet d'interpolation vert, vocabulaire vert, chartes de
+document **8 / 7 / plafond 7**, guide en phase, diff ciblé **3 lignes retirées / 41 ajoutées, aucune
+hors zone**.
+
+**Aucun bump** — `pilotage.js` seul (§20b). ⚠️ **Livré, non intégré** au moment d'écrire.
+
+### 39g. Ce que ce lot n'a pas fermé — et pourquoi
+
+★★ **`_mvEnContratSurPeriode` contredit la convention du 09/07.** utils.js l.2449 :
+`if(!P.length) return m.statut !== 'Inactif';`. La définition posée par Nico ce jour-là, retrouvée
+mot pour mot dans l'historique, est *« effectif présent = membres non-bureau dont le contrat est
+actif à la date ; **CDI sans date = présent en permanence** »*. **Le statut n'y figure pas.** Une
+fiche **sans aucune date** passée en Inactif sort donc aujourd'hui de **toutes** les périodes,
+**passées comprises** — ce qui réécrit rétroactivement des campagnes archivées.
+
+Nico l'a redit le 14/08 : *« inactif […] ça veut juste dire que le contrat est terminé et que la
+personne est inactive. Ça évite d'avoir à la sélectionner lorsque j'allume l'appli. »* C'est un
+**confort de saisie**, pas un fait d'historique.
+
+Correction = **une ligne**, `return true;`. **Elle n'a pas été posée**, et le blocage n'est pas
+technique — c'est **une donnée** : la fiche **`Pilotage`** du tenant de référence est Inactive et
+sans dates. La ligne en ferait un **CDI permanent** qui compte +1 sur chaque courbe, entre dans la
+**masse salariale** (pilotage.js l.6933) et dans le **coût main-d'œuvre par parcelle** (l.5525).
+**Aucun marqueur « compte de service » n'existe dans le modèle** — ni champ, ni convention de nom,
+ni rôle. Aucune heuristique honnête ne distingue cette fiche d'un vrai CDI sans dates.
+
+→ **Décision de Nico** : cocher **Bureau** sur `Pilotage` — c'est littéralement le sens du champ,
+*« non compté dans la capacité de travail des vignes »* — ou supprimer la fiche. Ensuite la ligne
+part : `utils.js`, donc **bump APP + SW**. Entrée de backlog **0a-bis**.
+
+⚠️ **Le reste des memos n'a pas été audité.** `_PIL_CDV` et `_PIL_ANN` sont les deux seuls déclarés
+sur le motif `var _X=null, _XK=''` ; les deux ont été regardés. **Tout autre cache posé ailleurs sur
+une clé qui compte au lieu de décrire porte le même défaut** — à chercher au prochain passage sur
+un module qui mémoïse.
+
+### 39h. La règle à retenir
+
+**Une clé de cache est une hypothèse sur ce qui peut changer.** Écrire `MEMBRES.length`, c'est
+affirmer *« la seule chose qui peut modifier ce calcul est le nombre de fiches »* — une affirmation
+que personne n'a vérifiée et que le code contredisait déjà. **Une clé se dérive de la liste des
+lectures de la fonction mémoïsée, pas de ce qui semble suffisant.** Quand la liste est trop longue
+pour être tenue à la main, c'est le signe qu'il faut oublier par repeinte plutôt que mémoïser.
