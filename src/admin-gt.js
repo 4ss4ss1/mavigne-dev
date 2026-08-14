@@ -2752,6 +2752,10 @@ function _fcTrialStatusHtml(fc){
     if(fc.cliStatus==='pending') return box('rgba(139,92,246,0.08)','rgba(196,181,253,0.22)','rgba(139,92,246,0.15)','⌛','#C4B5FD','rgba(196,181,253,0.6)','Essai de '+fc.trialDays+' j','démarre à la 1ère connexion du client');
     return box('rgba(139,92,246,0.08)','rgba(196,181,253,0.22)','rgba(139,92,246,0.15)','⌛','#C4B5FD','rgba(196,181,253,0.6)','Essai de '+fc.trialDays+' j accordés','date d&#39;expiration inconnue — ré-enregistrer pour suivre le décompte');
   }
+  // ⚠️ Un domaine installe « essai a la remise » n'a ni trial_until ni trialDays : sans
+  //    cette branche, la fiche annoncerait un ABONNEMENT ACTIF d'un client qui n'a rien
+  //    signe. Un ecran qui se trompe d'etat vaut moins qu'un ecran muet.
+  if(fc.trialPrevu>0) return box('rgba(201,168,76,0.08)','rgba(201,168,76,0.28)','rgba(201,168,76,0.15)','⌛','#E8D89A','rgba(232,200,96,0.65)','Essai de '+fc.trialPrevu+' j prévu','non démarré — acc&#232;s complet en attendant ; il part &#224; la remise, ou en enregistrant la fiche ci-dessous');
   return box('rgba(61,109,39,0.08)','rgba(134,239,172,0.22)','rgba(61,109,39,0.18)','✅','#B7E8C4','rgba(183,232,196,0.6)','Abonnement actif','pas d&#39;essai en cours');
 }
 
@@ -2822,6 +2826,7 @@ function _fcSyncSum(){
   if(_tLeft>0) h+=chip('rgba(201,168,76,0.12)','rgba(201,168,76,0.3)','#C9A84C','Essai · J-'+_tLeft);
   else if(_tExp>0 && _tExp<=_tNow) h+=chip('rgba(224,112,96,0.12)','rgba(224,112,96,0.3)','#E88F82','Essai expiré');
   else if(_FC.trialDays>0) h+=chip('rgba(139,92,246,0.10)','rgba(139,92,246,0.28)','#C4B5FD','Essai '+_FC.trialDays+'j · à venir');
+  else if(_FC.trialPrevu>0) h+=chip('rgba(201,168,76,0.12)','rgba(201,168,76,0.3)','#C9A84C','Essai '+_FC.trialPrevu+'j · non démarré');
   h+=chip('rgba(255,255,255,0.04)','rgba(255,255,255,0.08)','rgba(255,255,255,0.6)',_fcActiveCount('parcelles')+' parcelles');
   h+=chip('rgba(255,255,255,0.04)','rgba(255,255,255,0.08)','rgba(255,255,255,0.6)',(_FC.membres||[]).length+' membres');
   try{ var _pd=_FC_PLANDEF&&_FC_PLANDEF[plan]; var _nf=_FC.featOv?Object.keys(_FC.featOv).filter(function(k){return _pd&&_FC.featOv[k]!==_pd[k];}).length:0; if(_nf>0) h+=chip('rgba(139,92,246,0.10)','rgba(139,92,246,0.28)','#C4B5FD',_nf+' module'+(_nf>1?'s':'')+' forcé'+(_nf>1?'s':'')); }catch(_e){}
@@ -2996,6 +3001,7 @@ async function _fcLoad(slug){
     saisons:_fcArr(sai),
     plan:(['essentiel','vigneron','domaine'].indexOf(cli.plan)>=0)?cli.plan:'domaine',
     trialDays:(typeof cli.trialDays==='number')?cli.trialDays:0,
+    trialPrevu:(typeof cli.trialPrevu==='number')?cli.trialPrevu:0,
     trialExp:(typeof cli.trialExp==='number')?cli.trialExp:0,
     cliStatus:(typeof cli.status==='string')?cli.status:'',
     activatedAt:(typeof cli.activated_at==='string')?cli.activated_at:''
@@ -3473,7 +3479,7 @@ function _agtInsSnap() {
   if (!document.getElementById('agtins-nom')) return;
   var f = {};
   ['agtins-nom', 'agtins-slug', 'agtins-ville', 'agtins-cp', 'agtins-mail',
-   'agtins-admnom', 'agtins-trial', 'agtins-plan', 'agtins-noms'].forEach(function (id) {
+   'agtins-admnom', 'agtins-trial', 'agtins-plan', 'agtins-tstart', 'agtins-noms'].forEach(function (id) {
     var e = document.getElementById(id); if (e) f[id] = e.value;
   });
   var s = document.getElementById('agtins-slug');
@@ -3780,8 +3786,13 @@ function _agtInsRender() {
   h += '<option value="essentiel">Essentiel</option></select></div></div>';
   h += '<div class="agi-f"><label for="agtins-trial">Essai (jours)</label><div>';
   h += '<input type="number" id="agtins-trial" min="0" max="90"></div></div>';
-  h += '<div class="agi-w">Le compte \u00e0 rebours de l\u2019essai part \u00e0 la cr\u00e9ation du domaine, pas \u00e0 la ';
-  h += 'premi\u00e8re connexion du client. <b>Installez le jour o\u00f9 vous envoyez les identifiants.</b></div>';
+  h += '<div class="agi-f"><label for="agtins-tstart">Il d\u00e9marre</label><div><select id="agtins-tstart">';
+  h += '<option value="remise">\u00e0 la remise des identifiants</option>';
+  h += '<option value="now">tout de suite</option></select></div></div>';
+  h += '<div class="agi-w">Le compte \u00e0 rebours part de l\u2019instant o\u00f9 il est pos\u00e9 \u2014 jamais de la ';
+  h += 'premi\u00e8re connexion du client. <b>\u00ab \u00c0 la remise \u00bb ouvre le domaine SANS essai</b> et pose ';
+  h += 'un bouton sur l\u2019\u00e9cran des identifiants : un DPA \u00e0 faire signer, une semaine d\u2019attente, ';
+  h += 'ne mangent plus des jours d\u2019essai que le client n\u2019a pas utilis\u00e9s.</div>';
 
   // ── Administrateur ──
   h += '<div class="agi-ch">L\u2019administrateur</div>';
@@ -4005,6 +4016,10 @@ function _agtInsFill(L) {
   set('agtins-noms', '');
   var pl = document.getElementById('agtins-plan');
   if (pl) pl.value = (F && F['agtins-plan']) ? F['agtins-plan'] : 'domaine';
+  // ⚠️ Un select ne se remplit pas par set() : il faut lui reposer sa valeur, sinon
+  //    chaque rendu le renvoie a sa premiere option — le meme piege que le plan.
+  var ts = document.getElementById('agtins-tstart');
+  if (ts) ts.value = (F && F['agtins-tstart']) ? F['agtins-tstart'] : 'remise';
   var sl = document.getElementById('agtins-slug');
   if (sl && F && F._slugTouched) sl.dataset.touched = '1';
   _agtIns.per.forEach(function (p, i) {
@@ -4050,6 +4065,12 @@ async function agtInsGo() {
   var admnom = g('agtins-admnom') || 'Administrateur';
   var plan = g('agtins-plan') || 'domaine';
   var trial = Math.max(0, Math.min(90, parseInt(g('agtins-trial'), 10) || 0));
+  // ★ « remise » : le domaine s'ouvre SANS essai. onboardTenant lit trialDays au
+  //   registre pour poser trial_until ; on lui donne 0, et la duree voulue part dans
+  //   trialPrevu. Le compte a rebours s'arme d'un bouton, sur l'ecran des identifiants,
+  //   au moment ou on les dicte au telephone.
+  var tstart = (g('agtins-tstart') === 'now') ? 'now' : 'remise';
+  var trialNow = (tstart === 'now') ? trial : 0;
 
   if (!nom) { showToast('Nom du domaine requis', '#B85A1A'); var e1 = document.getElementById('agtins-nom'); if (e1) e1.focus(); return; }
   if (!slug || slug.length < 2) { showToast('Identifiant invalide', '#B85A1A'); return; }
@@ -4087,7 +4108,10 @@ async function agtInsGo() {
     var clients = (gtData && gtData.clients && typeof gtData.clients === 'object') ? Object.assign({}, gtData.clients) : {};
     if (clients[slug] && clients[slug].status === 'active') throw new Error('Ce domaine est d\u00e9j\u00e0 install\u00e9');
     if (slugs.indexOf(slug) < 0) slugs.push(slug);
-    clients[slug] = { plan: plan, trialDays: trial, status: 'pending', created_at: new Date().toISOString() };
+    clients[slug] = { plan: plan, trialDays: trialNow, status: 'pending', created_at: new Date().toISOString() };
+    // ⚠️ trialPrevu n'est LU PAR PERSONNE cote serveur : c'est une note pour la fiche
+    //    client, qui dirait sinon « abonnement actif » d'un domaine en attente de remise.
+    if (trial > 0 && !trialNow) clients[slug].trialPrevu = trial;
     if (window.fbAdminWriteGT) await window.fbAdminWriteGT('tenants', Object.assign({}, gtData || {}, { slugs: slugs, clients: clients }));
 
     // 2. Les communes, une seule fois chacune (meteo par secteur des l'ouverture).
@@ -4143,9 +4167,10 @@ async function agtInsGo() {
     }
 
     _agtIns.creds = {
-      nom: nom, slug: slug, mail: mail,
+      nom: nom, slug: slug, mail: mail, plan: plan,
       pwd: (res && res.password) || '',
-      trial: trial, parc: _agtIns.parc.length, ha: _agtInsSurfTot()
+      trial: trial, trialArme: !!trialNow,
+      parc: _agtIns.parc.length, ha: _agtInsSurfTot()
     };
     _agtIns.parc = [];
     _agtInsRender();
@@ -4160,8 +4185,14 @@ async function agtInsGo() {
 function _agtInsCreds() {
   var c = _agtIns.creds;
   var E = window._escHtml || function (x) { return String(x == null ? '' : x); };
+  // ⚠️ « essai de 15 jours » ne disait pas s'il COURT. Deux domaines identiques a
+  //    l'ecran, l'un dont le compte a rebours tourne et l'autre non : le sous-titre
+  //    doit trancher, pas decrire.
+  var _ess = !c.trial ? '' : (c.trialArme
+    ? ' \u00b7 essai de ' + c.trial + ' jours, en cours'
+    : ' \u00b7 essai de ' + c.trial + ' jours, non d\u00e9marr\u00e9');
   var h = '<div class="agi-hd"><div><h3>' + E(c.nom) + ' est ouvert</h3>';
-  h += '<p>' + c.parc + ' parcelles \u00b7 ' + c.ha.toFixed(2) + ' ha' + (c.trial ? ' \u00b7 essai de ' + c.trial + ' jours' : '') + '</p></div>';
+  h += '<p>' + c.parc + ' parcelles \u00b7 ' + c.ha.toFixed(2) + ' ha' + _ess + '</p></div>';
   h += '<button class="agi-x" onclick="agtInsClose()">\u2715</button></div>';
   h += '<div class="agi-cr"><div class="k">Adresse</div><div class="v">mavigneapp.fr/?tenant=' + E(c.slug) + '</div></div>';
   h += '<div class="agi-cr"><div class="k">Identifiant</div><div class="v">' + E(c.mail) + '</div></div>';
@@ -4169,6 +4200,14 @@ function _agtInsCreds() {
   h += '<div class="agi-w">Ce mot de passe ne sera plus jamais affich\u00e9. Il est fait pour \u00eatre dit au ';
   h += 't\u00e9l\u00e9phone : le client le tape une fois, l\u2019application lui demande aussit\u00f4t de choisir le sien. ';
   h += '<b>Si vous le perdez, le bouton \u00ab Nouveau mot de passe \u00bb de la fiche client en refait un.</b></div>';
+  if (c.trial && !c.trialArme) {
+    h += '<div class="agi-w" style="border-color:rgba(201,168,76,0.45)">';
+    h += '<b>L\u2019essai de ' + c.trial + ' jours n\u2019est pas d\u00e9marr\u00e9.</b> Le domaine est ouvert, le ';
+    h += 'compte \u00e0 rebours non : le client a un acc\u00e8s complet jusqu\u2019\u00e0 ce que vous appuyiez. ';
+    h += 'Appuyez au moment o\u00f9 vous dictez les identifiants, pas avant.';
+    h += '<div style="margin-top:10px"><button class="agi-b or" id="agtins-tgo" onclick="agtInsTrialGo()">';
+    h += 'D\u00e9marrer l\u2019essai de ' + c.trial + ' jours</button></div></div>';
+  }
   h += '<div style="display:flex;gap:8px;margin-top:16px">';
   h += '<button class="agi-b or" style="flex:1" onclick="agtInsCopy()">Copier les identifiants</button>';
   h += '<button class="agi-b" onclick="agtInsClose()">Fermer</button></div>';
@@ -4194,6 +4233,41 @@ function agtInsCopy() {
     navigator.clipboard.writeText(txt).then(function () { showToast('Identifiants copi\u00e9s \u2713', '#3D6B27'); })
       .catch(function () { showToast(txt, '#1A4A7A'); });
   } else { showToast(txt, '#1A4A7A'); }
+}
+
+// Arme le compte a rebours, au moment ou les identifiants sont dictes. MEME CHAINE
+// que _fcSaveAbo, et dans le meme ordre : les claims d'abord (c'est eux qui font foi
+// pour le bandeau et le gel en lecture seule), le registre ensuite (c'est lui que la
+// fiche client relit pour afficher J-X). trialPrevu disparait : il a servi.
+// ⚠️ Si la fenetre a ete fermee avant l'appui, l'essai se pose par la fiche client :
+//    onglet Abonnement, meme duree, bouton Enregistrer. C'est le meme geste.
+async function agtInsTrialGo() {
+  var c = _agtIns.creds;
+  if (!c || !c.trial || c.trialArme) return;
+  var btn = document.getElementById('agtins-tgo');
+  if (btn) { btn.disabled = true; btn.textContent = 'Un instant\u2026'; }
+  try {
+    if (!window._fbSetTenantPlan) throw new Error('_fbSetTenantPlan indisponible');
+    var r = await window._fbSetTenantPlan(c.slug, c.plan || 'domaine', c.trial);
+    var exp = (r && typeof r.trialUntil === 'number') ? r.trialUntil : (Date.now() + c.trial * 86400000);
+    if (window.fbAdminReadGT && window.fbAdminWriteGT) {
+      var gt = (await window.fbAdminReadGT('tenants')) || {};
+      var clients = (gt.clients && typeof gt.clients === 'object') ? Object.assign({}, gt.clients) : {};
+      // Object.assign sur l'existant : plan, status et created_at ne se perdent pas.
+      var cur = Object.assign({}, clients[c.slug] || {}, { trialDays: c.trial, trialExp: exp });
+      delete cur.trialPrevu;
+      clients[c.slug] = cur;
+      await window.fbAdminWriteGT('tenants', Object.assign({}, gt, { clients: clients }));
+    }
+    c.trialArme = true;
+    if (typeof agtLogAccess === 'function') agtLogAccess(c.slug, 'Essai de ' + c.trial + ' j d\u00e9marr\u00e9', '\u23F3');
+    showToast('\u2705 Essai de ' + c.trial + ' jours d\u00e9marr\u00e9', '#3D6B27');
+    _agtInsRender();
+    if (window.renderAdminGT) renderAdminGT();
+  } catch (e) {
+    showToast('\u00c9chec : ' + ((e && (e.message || e.code)) || 'erreur'), '#C0392B');
+    if (btn) { btn.disabled = false; btn.textContent = 'D\u00e9marrer l\u2019essai de ' + c.trial + ' jours'; }
+  }
 }
 
 // Nouveau mot de passe pour un membre d'un domaine — la sortie de secours quand la
@@ -5324,6 +5398,17 @@ function _agtBuildLeads(){
     h+='<div style="font-size:11.5px;color:rgba(255,255,255,0.45);margin-top:8px;word-break:break-word">'
       +'\u2709 '+_escHtml(l.email||'')+(l.tel?' \u00b7 \u260E '+_escHtml(l.tel):'')+'</div>';
 
+    // ★ Le chemin se dedouble apres la mise en route : les REPONSES arrivent par la
+    //   fonction, les FICHIERS arrivent par mail. Rien ne disait ou en etait le second,
+    //   et un dossier pouvait dormir faute d'un KML sans que l'ecran le montre.
+    if(l.mer){
+      var _pj=!!(_agtLeadSt[l._id]&&_agtLeadSt[l._id].pj);
+      h+='<div style="margin-top:7px;display:flex;gap:6px;flex-wrap:wrap">';
+      h+='<span style="font-size:10.5px;font-weight:600;color:#C4B5FD;background:rgba(139,92,246,0.12);border:1px solid rgba(139,92,246,0.3);border-radius:20px;padding:2px 9px">R\u00e9ponses de mise en route</span>';
+      h+='<span style="font-size:10.5px;font-weight:600;color:'+(_pj?'#86EFAC':'#E8C860')+';background:rgba(255,255,255,0.05);border:1px solid '+(_pj?'rgba(134,239,172,0.35)':'rgba(232,200,96,0.35)')+';border-radius:20px;padding:2px 9px">'+(_pj?'Pi\u00e8ces re\u00e7ues':'Pi\u00e8ces attendues')+'</span>';
+      h+='</div>';
+    }
+
     if(ouvert){
       var lignes=[
         ['Utilisateurs', l.users], ['Parcelles', l.nbparc], ['Commune(s)', l.commune],
@@ -5354,6 +5439,10 @@ function _agtBuildLeads(){
       h+='<button onclick="agtLeadMail(\'' + id + '\')" style="background:#C9A84C;border:none;border-radius:8px;padding:7px 13px;color:#0C1A0A;font-size:11.5px;font-weight:700;cursor:pointer;font-family:Outfit,sans-serif">R\u00e9pondre</button>';
       h+='<button onclick="agtLeadCopy(\'' + id + '\')" style="background:rgba(255,255,255,0.06);border:1px solid rgba(255,255,255,0.12);border-radius:8px;padding:7px 13px;color:rgba(255,255,255,0.55);font-size:11.5px;cursor:pointer;font-family:Outfit,sans-serif">Copier l\u2019e-mail</button>';
       h+='<button onclick="agtLeadNote(\'' + id + '\')" style="background:rgba(255,255,255,0.06);border:1px solid rgba(255,255,255,0.12);border-radius:8px;padding:7px 13px;color:rgba(255,255,255,0.55);font-size:11.5px;cursor:pointer;font-family:Outfit,sans-serif">Note</button>';
+      if(l.mer){
+        var _pjb=!!(_agtLeadSt[l._id]&&_agtLeadSt[l._id].pj);
+        h+='<button onclick="agtLeadPj(\'' + id + '\')" style="background:rgba(255,255,255,0.06);border:1px solid '+(_pjb?'rgba(134,239,172,0.4)':'rgba(232,200,96,0.4)')+';border-radius:8px;padding:7px 13px;color:'+(_pjb?'#86EFAC':'#E8C860')+';font-size:11.5px;cursor:pointer;font-family:Outfit,sans-serif">'+(_pjb?'\u2713 Pi\u00e8ces re\u00e7ues':'Pi\u00e8ces re\u00e7ues ?')+'</button>';
+      }
       h+='</div>';
     }
 
@@ -5406,6 +5495,18 @@ function agtLeadMail(id){
   catch(e){ if(window.logError) window.logError({level:'info',cat:'ui',msg:'mailto lead',detail:(e&&e.message)||String(e)}); }
 }
 
+// Le seul fait de cette fiche qui se coche A LA MAIN, et c'est assume : aucune
+// fonction ne peut le savoir, puisque les fichiers arrivent par la boite mail.
+// Ecrit dans leads_status, jamais dans `leads` — qui est write:false cote client.
+async function agtLeadPj(id){
+  var e=_agtLeadSt[id]||{};
+  _agtLeadSt[id]=Object.assign({}, e, { pj:!e.pj, ts:new Date().toISOString() });
+  if(await _agtSaveLeadSt()){
+    showToast(_agtLeadSt[id].pj?'\u2705 Pi\u00e8ces re\u00e7ues':'Pi\u00e8ces en attente', _agtLeadSt[id].pj?'#3D6B27':'#B85A1A');
+    agtRenderBody();
+  }
+}
+
 function agtLeadCopy(id){
   var l=_agtLeadById(id); if(!l) return;
   var v=l.email||'';
@@ -5440,6 +5541,7 @@ window.agtLeadSet        = agtLeadSet;
 window.agtLeadNote       = agtLeadNote;
 window.agtLeadMail       = agtLeadMail;
 window.agtLeadCopy       = agtLeadCopy;
+window.agtLeadPj         = agtLeadPj;
 window.agtShowConfig     = agtShowConfig;
 window.agtSaveConfig     = agtSaveConfig;
 window.agtShowJournal    = agtShowJournal;
@@ -5502,6 +5604,7 @@ window.agtInsPick             = agtInsPick;
 window.agtInsKml              = agtInsKml;
 window.agtInsGo               = agtInsGo;
 window.agtInsCopy             = agtInsCopy;
+window.agtInsTrialGo          = agtInsTrialGo;
 window.agtInsParcDel          = agtInsParcDel;
 window.agtInsParcSurf         = agtInsParcSurf;
 window.agtInsSlugSync         = agtInsSlugSync;

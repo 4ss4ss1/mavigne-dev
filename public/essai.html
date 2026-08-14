@@ -171,6 +171,7 @@
   .btn-copy:hover{border-color:var(--gold)}
   .reassure{margin:16px 2px 0; font-size:13px; color:var(--ink-soft); display:flex; gap:8px; align-items:flex-start}
   .reassure .lock{color:var(--vert); flex:none}
+  .reassure a{color:var(--or); text-decoration:underline; text-underline-offset:2px}
   .ok{display:none; margin:14px 0 0; padding:13px 15px; border-radius:11px; background:#EAF1E4; border:1px solid rgba(61,107,39,.3); color:#2C4D1F; font-size:14px; font-weight:500}
   .ok.show{display:block}
 
@@ -366,7 +367,7 @@
     <button class="btn btn-copy" id="copy" type="button">Copier le récapitulatif</button>
   </div>
   <div class="ok" id="okmsg"></div>
-  <p class="reassure"><span class="lock">🔒</span> <span>Aucun paiement à cette étape. Vos informations servent uniquement à préparer votre essai, et restent entre vous et Nicolas.</span></p>
+  <p class="reassure"><span class="lock">🔒</span> <span>Aucun paiement à cette étape. Vos informations servent uniquement à préparer votre essai, et restent entre vous et Nicolas. Elles sont conservées par GUERETTECH le temps d’étudier votre demande&nbsp;; vous pouvez en demander l’accès ou la suppression à tout moment à <a href="mailto:ngdevpro@gmail.com">ngdevpro@gmail.com</a> · <a href="https://mavigneapp.fr/confidentialite.html">Confidentialité</a>.</span></p>
 
   <footer>
     <div class="brand">Ma Vigne</div>
@@ -447,9 +448,16 @@
   }
 
   // --- Envoi vers la Cloud Function (auto-capture) ---
-  // Exposé via un rewrite hosting (firebase.json) : /api/lead → submitLead.
-  // Même origine que mavigneapp.fr → pas de CORS, URL stable.
-  const FN_URL = '/api/lead';
+  // ⚠️ DEUX adresses, essayées dans cet ordre. L'URL complète de la fonction ne dépend
+  //    d'AUCUNE réécriture d'hébergement ; /api/lead n'existe que si le rewrite est
+  //    présent dans firebase.json. Il a MANQUÉ : le formulaire basculait alors en
+  //    silence sur le mailto — donc aucune fiche en base, et aucun accusé de réception
+  //    au prospect, puisque c'est submitLead qui l'envoie. Même ordre, et pour la même
+  //    raison, que public/mise-en-route.html.
+  const FN_URLS = [
+    'https://europe-west1-mavigne-a0fd5.cloudfunctions.net/submitLead',
+    '/api/lead'
+  ];
 
   function payload(){
     return {
@@ -489,18 +497,31 @@
     if(!validate()) return;
     const b=$('#send'); const old=b.textContent;
     b.disabled=true; b.textContent='Envoi\u2026';
-    try{
-      const r=await fetch(FN_URL,{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify(payload())});
-      if(!r.ok) throw new Error('http '+r.status);
-      const data=await r.json();
-      if(data.status==='duplicate') done('Nous avons déjà votre demande pour cette adresse \u2014 Nicolas revient vers vous très vite.');
-      else done('Demande envoyée ! Nicolas vous recontacte rapidement pour préparer votre essai.');
-    }catch(e){
-      // Function injoignable → on bascule sur l'e-mail pré-rempli.
-      b.disabled=false; b.textContent=old;
-      flash('Envoi direct indisponible \u2014 votre messagerie va s\u2019ouvrir avec la demande pré-remplie. Sinon, utilisez « Copier le récapitulatif ».');
-      mailtoFallback();
+
+    let data=null;
+    for(let i=0;i<FN_URLS.length && !data;i++){
+      try{
+        const r=await fetch(FN_URLS[i],{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify(payload())});
+        if(r.ok) data=await r.json();
+      }catch(e){ /* adresse suivante */ }
     }
+
+    if(data){
+      const em=$('#email').value.trim();
+      // ★ Dire que l'accusé part : sans ça, la personne ne sait pas qu'elle doit
+      //   surveiller sa boîte, et un accusé tombé en indésirables ne sert à rien.
+      if(data.status==='duplicate') done('Votre demande est déjà enregistrée pour '+em+' \u2014 inutile de la renvoyer. Nicolas vous répond personnellement sous 24 heures.');
+      else done('Demande envoyée. Un accusé de réception part à l\u2019instant vers '+em+' \u2014 s\u2019il n\u2019arrive pas, regardez dans les indésirables. Nicolas vous répond personnellement sous 24 heures.');
+      return;
+    }
+
+    // Les deux adresses ont échoué. Rien ne se perd, et on ne compte pas sur le
+    // seul mailto : le récapitulatif part d'abord au presse-papier, parce qu'un
+    // appareil sans client mail configuré ne fait RIEN de window.location='mailto:'.
+    b.disabled=false; b.textContent=old;
+    try{ await navigator.clipboard.writeText('À : '+DEST+'\nObjet : '+subject()+'\n\n'+buildBody()); }catch(e){}
+    flash('L\u2019envoi direct n\u2019a pas abouti \u2014 rien n\u2019est perdu. Votre demande est copiée dans le presse-papier, et votre messagerie va s\u2019ouvrir déjà remplie. Sinon, écrivez simplement à '+DEST+'.');
+    mailtoFallback();
   });
 
   // --- Copier ---

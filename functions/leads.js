@@ -156,6 +156,62 @@ function ackHtml(l) {
 </div>`;
 }
 
+// ── Accusé de réception MISE EN ROUTE, envoyé au client ──────────
+// Le formulaire d'essai avait son accusé ; celui-ci n'en avait pas. Or c'est le plus
+// long des deux — dix-sept questions — et le seul dont la réponse est INCOMPLÈTE sans
+// un second geste : les fichiers ne partent pas avec le formulaire. Un client qui
+// envoie ses réponses et ne reçoit rien n'a donc ni preuve d'envoi, ni rappel de ce
+// qui manque encore. D'où trois choses, et pas une de plus : c'est arrivé · voici ce
+// que vous m'avez envoyé · voici ce qu'il reste à joindre.
+//
+// ⚠️ La liste des pièces est écrite ICI en toutes lettres, sans effectif ni chiffre :
+//    elle part chez n'importe quel domaine, pas chez un seul.
+const MER_PIECES = [
+  'votre fichier parcellaire (KML, KMZ, ou un export PAC / Telepac)',
+  'la liste de vos salariés permanents — nom et rôle',
+  'vos tracteurs et engins — type, marque, modèle',
+  'vos cuvées, vos cuves et vos fûts',
+  'vos temps par hectare, si vous en suivez déjà',
+];
+
+function merAckText(domaine, recap) {
+  let t = 'Bonjour,\n\n'
+    + 'J\u2019ai bien reçu vos réponses de mise en route pour ' + domaine + '.\n\n'
+    + 'Il me reste à recevoir vos fichiers : ils ne partent pas avec le formulaire. '
+    + 'Répondez simplement à ce message en y joignant ce que vous avez sous la main :\n\n';
+  MER_PIECES.forEach((p) => { t += '  - ' + p + '\n'; });
+  t += '\nNe les retapez pas : le format dans lequel ils existent chez vous me convient.\n\n'
+    + 'Dès que j\u2019ai tout, j\u2019installe votre domaine et je vous envoie vos identifiants. '
+    + 'Le jour où vous ouvrez l\u2019application, elle contient déjà vos parcelles, votre équipe '
+    + 'et votre matériel.\n\n'
+    + '— Vos réponses, telles que je les ai reçues —\n\n'
+    + (recap || '(récapitulatif vide)')
+    + '\n\nÀ très vite,\n\n'
+    + 'Nicolas Guéret\nMa Vigne — GUERETTECH\n06 99 42 48 59\nmavigneapp.fr';
+  return t;
+}
+
+function merAckHtml(domaine, recap) {
+  const items = MER_PIECES.map((p) => `<li style="margin-bottom:6px">${esc(p)}</li>`).join('');
+  return `<div style="font-family:system-ui,Arial,sans-serif;max-width:560px;color:#14110D;font-size:15px;line-height:1.6">
+  <p>Bonjour,</p>
+  <p>J\u2019ai bien reçu vos réponses de mise en route pour <strong>${esc(domaine)}</strong>.</p>
+  <p>Il me reste à recevoir <strong>vos fichiers</strong> : ils ne partent pas avec le formulaire.
+     Répondez simplement à ce message en y joignant ce que vous avez sous la main.</p>
+  <ul style="font-size:14px;margin:0 0 14px;padding-left:20px">${items}</ul>
+  <p style="font-size:14px;color:#6E6456">Ne les retapez pas : le format dans lequel ils existent
+     chez vous me convient.</p>
+  <p>Dès que j\u2019ai tout, j\u2019installe votre domaine et je vous envoie vos identifiants. Le jour où
+     vous ouvrez l\u2019application, elle contient déjà vos parcelles, votre équipe et votre matériel.</p>
+  <p style="font-size:13px;color:#6E6456;margin:22px 0 6px">Vos réponses, telles que je les ai reçues</p>
+  <pre style="font-size:12.5px;white-space:pre-wrap;margin:0;padding:12px 14px;background:#F7F4EC;border-radius:8px;font-family:inherit;color:#4A4238">${esc(recap)}</pre>
+  <p style="margin-top:22px">À très vite,<br>
+     <strong>Nicolas Guéret</strong><br>
+     <span style="color:#6E6456">Ma Vigne — GUERETTECH</span><br>
+     <span style="color:#6E6456">06 99 42 48 59 · mavigneapp.fr</span></p>
+</div>`;
+}
+
 // ══════════════════════════════════════════════════════════════════
 // MISE EN ROUTE — les reponses d'installation, en base
 // ══════════════════════════════════════════════════════════════════
@@ -218,15 +274,20 @@ exports.submitMiseEnRoute = onRequest(
     const db   = admin.firestore();
     const ref  = db.collection(LEADS).doc(hash);
 
-    let connu = false;
+    // ⚠️ La transaction rend DEUX faits, pas un : le dossier existait-il, et une mise
+    //    en route y avait-elle DEJA ete deposee. Le second borne l'accuse de reception
+    //    a un seul envoi par adresse — sans quoi ce formulaire deviendrait un moyen
+    //    d'envoyer autant de messages qu'on veut a l'adresse de son choix.
+    let connu = false, dejaMer = false;
     try {
-      connu = await db.runTransaction(async (tx) => {
+      const _out = await db.runTransaction(async (tx) => {
         const snap = await tx.get(ref);
+        const prev = snap.exists ? (snap.data() || {}) : {};
         const base = {
           mer:      Object.assign({}, mer, { at: admin.firestore.FieldValue.serverTimestamp() }),
           merCount: admin.firestore.FieldValue.increment(1),
         };
-        if (snap.exists) { tx.set(ref, base, { merge: true }); return true; }
+        if (snap.exists) { tx.set(ref, base, { merge: true }); return { connu: true, dejaMer: !!prev.mer }; }
         // Personne d'inconnu : la mise en route peut arriver sans demande d'essai
         // prealable (lien envoye de la main a la main). On ouvre le dossier.
         tx.set(ref, Object.assign({
@@ -236,8 +297,9 @@ exports.submitMiseEnRoute = onRequest(
           attempts:  0,
           createdAt: admin.firestore.FieldValue.serverTimestamp(),
         }, base));
-        return false;
+        return { connu: false, dejaMer: false };
       });
+      connu = _out.connu; dejaMer = _out.dejaMer;
     } catch (err) {
       logger.error('[MER] Échec écriture Firestore', err);
       res.status(500).json({ error: 'server_error' });
@@ -269,7 +331,30 @@ exports.submitMiseEnRoute = onRequest(
       logger.warn('[MER] Réponses enregistrées mais e-mail non mis en file', err);
     }
 
-    logger.info(`[MER] Mise en route — ${domaine} <${email}>` + (connu ? ' (dossier connu)' : ' (nouveau)'));
+    // ── Accusé de réception AU CLIENT ────────────────────────────
+    // Une seule fois par adresse : on n'arrive ici avec dejaMer=false que sur la
+    // PREMIERE mise en route de ce dossier. Un renvoi met les réponses à jour en
+    // base — c'est le comportement voulu — mais ne renvoie aucun message.
+    // ⚠️ Un échec d'envoi ne doit jamais faire échouer la demande : les réponses
+    //    sont en base, et c'est ce qui compte.
+    if (!dejaMer) {
+      try {
+        await db.collection(MAIL_COLLECTION).add({
+          to:      [email],
+          replyTo: DEST,
+          message: {
+            subject: 'Vos réponses de mise en route — ' + domaine,
+            text:    merAckText(domaine, mer.recap),
+            html:    merAckHtml(domaine, mer.recap),
+          },
+        });
+      } catch (err) {
+        logger.warn('[MER] Accusé de réception non mis en file', err);
+      }
+    }
+
+    logger.info(`[MER] Mise en route — ${domaine} <${email}>` + (connu ? ' (dossier connu)' : ' (nouveau)')
+                + (dejaMer ? ' · accusé déjà envoyé' : ' · accusé envoyé'));
     res.status(200).json({ status: 'saved' });
   }
 );
