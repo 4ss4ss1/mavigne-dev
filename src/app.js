@@ -4187,9 +4187,20 @@ function _mvTrialBanner(){
   var col = (lvl==='urgent') ? {bg:'#7A1020',fg:'#FBE9E9'} : ((lvl==='warn') ? {bg:'#B5621A',fg:'#FFF1E0'} : {bg:'#B8911F',fg:'#FFF8E6'});
   var label = (d<=1) ? 'Dernier jour d\'essai' : ('Essai · '+d+' jours restants');
   bar.style.background=col.bg;
+  // ★ Deux choses que ce bandeau taisait, et qui decident du comportement du client :
+  //   ce qui se passe A L'ECHEANCE (rien ne disparait, seule la saisie s'arrete), et
+  //   qu'il n'a PERSONNE A RELANCER. Un compte a rebours sans suite annoncee se lit
+  //   comme une menace de perte de donnees — c'est faux, et ca fait fuir.
+  // ⚠️ Le seuil 3 est le MIROIR de TRIAL_WARN_D dans functions/claims.js : le bandeau
+  //    ne promet l'alerte que les jours ou la veille l'envoie reellement.
+  var sous = (d<=3)
+    ? 'Tout reste consultable \u00e0 l\u2019\u00e9ch\u00e9ance \u00b7 Nicolas est pr\u00e9venu automatiquement'
+    : '';
   bar.innerHTML='<div class="mvtb-in" style="color:'+col.fg+'">'
     +'<span class="mvtb-ic" aria-hidden="true">\u23F3</span>'
-    +'<span class="mvtb-txt"><b>'+label+'</b></span>'
+    +'<span class="mvtb-txt"><b>'+label+'</b>'
+      +(sous?('<span style="display:block;font-size:11px;font-weight:500;opacity:.85;line-height:1.3;margin-top:1px">'+sous+'</span>'):'')
+    +'</span>'
     +'<button class="mvtb-btn" style="color:'+col.bg+'" onclick="window._mvContactGo()">Continuer</button>'
     +'</div>';
   bar.classList.add('show'); document.body.classList.add('mv-trial-on');

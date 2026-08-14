@@ -1,4 +1,20 @@
-// MA VIGNE — Service Worker v6.65
+// MA VIGNE — Service Worker v6.66
+// v6.66 (14/08/2026) — UN COMPTE A REBOURS QUI NE DISAIT PAS CE QU'IL Y AVAIT APRES.
+//   Le bandeau d'essai affichait « J-4 » et rien d'autre. Un decompte sans suite
+//   annoncee se lit comme une menace de perte de donnees : c'est faux — a l'echeance
+//   le domaine passe en LECTURE SEULE, tout reste consultable, seule la saisie
+//   s'arrete. Le client l'ignorait, et devait deviner qu'il fallait relancer.
+//   · Bandeau (app.js) : sous-ligne les 3 derniers jours — ce qui reste, et le fait
+//     que Nicolas est prevenu tout seul. Le seuil 3 est le miroir de TRIAL_WARN_D
+//     dans functions/claims.js : on ne promet l'alerte que les jours ou elle part.
+//   · Ecran de fin (index.html) : dit la lecture seule, et que la reconduction de
+//     quinze jours existe. Le titre ne dit plus « de 15 jours » — apres reconduction
+//     l'essai en a dure trente.
+//   BUMP : index.html est modifie. Regle du doute — le sauter figerait l'ancien
+//   index.html dans le cache des clients installes, definitivement.
+//   app.js + index.html -> APP_VERSION inchange (6.13) : rien ici ne merite une
+//   entree « Nouveautes » chez les clients payants, qui ne voient jamais ce bandeau.
+//
 // v6.65 (14/08/2026) — LA VISITE S'ARRETAIT AU 18e MOMENT. TROIS DEFAUTS.
 //   Symptomes rapportes : voile noir sans rien de surligne sur les moments 16
 //   a 18, puis BLOCAGE au 18 — le bouton a toucher n'existait pas, et un moment
@@ -1425,7 +1441,7 @@
 // v2.22 — Fix profils vides : guard vide dans loadData() pour MEMBRES/SAISONS/TACHES
 // v2.17 — Onboarding intégré + tenantId · v2.06 — Firebase Auth · v2.00–v2.05 — divers
 const DEBUG = self.location.hostname === 'localhost' || self.location.hostname === '127.0.0.1';
-const CACHE_NAME   = 'mavigne-v6.65';
+const CACHE_NAME   = 'mavigne-v6.66';
 const TENANT_CACHE = 'mavigne-tenant';   // Cache persistant — préservé à chaque mise à jour SW
 const SYNC_TAG     = 'mavigne-sync';
 
@@ -1441,7 +1457,7 @@ const CDN_URLS = [
 ];
 
 self.addEventListener('install', event => {
-  if(DEBUG) console.log('[SW] Ma Vigne v6.65 installé');
+  if(DEBUG) console.log('[SW] Ma Vigne v6.66 installé');
   event.waitUntil(
     caches.open(CACHE_NAME).then(async cache => {
       // ── Cœur applicatif : STRICT (mise à jour ATOMIQUE) ──
@@ -1457,7 +1473,7 @@ self.addEventListener('install', event => {
 });
 
 self.addEventListener('activate', event => {
-  if(DEBUG) console.log('[SW] Ma Vigne v6.65 activé');
+  if(DEBUG) console.log('[SW] Ma Vigne v6.66 activé');
   event.waitUntil(
     caches.keys().then(keys =>
       Promise.all(
