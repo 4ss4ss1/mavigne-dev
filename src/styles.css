@@ -11,6 +11,28 @@
 
 :root{
   color-scheme:light dark;
+  /* ═══ L'ECHELLE DE TEXTE DU PILOTAGE — ONZE PAS NOMMES ═══
+     Le module portait 28 valeurs de font-size ecrites a la main, de 8,5 a 40 px,
+     choisies une par une au fil des ecrans. Vingt-huit tailles, ce n'est pas une
+     hierarchie : c'est son absence. L'oeil n'a aucun point d'accroche, alors il
+     lit tout pour trouver un chiffre.
+     Onze pas, chacun nomme par son ROLE. Toute nouvelle taille passe par ici, ou
+     elle n'existe pas — le harnais mv-harnais-echelle.mjs le verifie en CI.
+     ⚠️ Elle etait declaree dans _pilCssV2() pour avoir pu etre livree sans bump.
+        Elle remonte ici au premier lot qui bumpe, avec _PIL_SEM. Les appels
+        gardent leur repli : var(--pt-txt,12.5px) reste juste si ce fichier est
+        en retard chez un client. */
+  --pt-hero:40px;   /* le verdict, une seule fois par ecran      */
+  --pt-xxl:31px;    /* LE chiffre d'une carte                    */
+  --pt-xl:27px;     /* chiffre secondaire                        */
+  --pt-lg:23px;     /* titre serif d'un panneau                  */
+  --pt-md:20px;     /* titre serif d'une section                 */
+  --pt-sm:17px;     /* bouton, pas d'un compteur                 */
+  --pt-base:14px;   /* valeur forte dans une liste               */
+  --pt-txt:12.5px;  /* le corps : listes, lignes de detail       */
+  --pt-micro:11px;  /* la ligne de cadre, legendes, mentions     */
+  --pt-lbl:10.5px;  /* etiquette : capitales, interlettrage      */
+  --pt-nano:9.5px;  /* sur-etiquette, en-tete de tableau         */
   --vert:#1E3A12;--vert-med:#3D6B27;--vert-clair:#6BA34A;--vert-pale:#EAF3E2;
   --or:#C2A14D;--or-clair:#D8BC72;--or-pale:#FAF3E0;
   --terre:#8A5A38;--terre-pale:#F3EADF;
@@ -3824,6 +3846,36 @@ a[href^="mailto:"]{color:var(--or-tx);}
 }
 .mva-fbtn:active{ background:var(--gris); }
 .mva-fbtn.mva-bug{ background:var(--orange-pale); border-color:rgba(184,90,26,0.35); color:var(--texte-med); }
+
+/* — La pastille « i » et sa feuille (#ovInfo) —
+   Petite soeur de .mv-help-btn : meme famille, autre question. « ? Aide » dit
+   CE QU'ON PEUT FAIRE sur un ecran ; « i » dit D'OU VIENT CE CHIFFRE, et se
+   pose a cote du chiffre, jamais en tete de page.
+   ⚠️ La cible tactile fait 44 px par le ::after, sans que le rond grandisse :
+      la pastille vit dans un en-tete de tuile dont la hauteur est acquise. */
+.mv-i{
+  position:relative; flex:none; display:inline-flex; align-items:center; justify-content:center;
+  width:20px; height:20px; padding:0; border-radius:50%; cursor:pointer;
+  background:transparent; border:1.4px solid var(--gris); color:var(--texte-doux);
+  font-family:'Cormorant Garamond',Georgia,serif; font-size:13px; font-style:italic;
+  font-weight:700; line-height:1; -webkit-tap-highlight-color:transparent;
+  vertical-align:middle;
+}
+.mv-i span{ transform:translateY(-0.5px); }
+.mv-i::after{ content:''; position:absolute; inset:-12px; }
+.mv-i:hover,.mv-i:focus-visible{ border-color:var(--terre); background:var(--or-pale); color:var(--terre); }
+.mv-i:active{ background:var(--gris-clair); }
+.mvi-ic{
+  width:34px; height:34px; border-radius:11px; display:flex; align-items:center; justify-content:center;
+  background:var(--or-pale); color:var(--terre); font-family:'Cormorant Garamond',Georgia,serif;
+  font-size:19px; font-style:italic; font-weight:700; line-height:1;
+}
+.mvi-bd{ padding:14px 20px 2px; }
+.mvi-bd p{
+  margin:0 0 11px; font-size:13.5px; line-height:1.62; color:var(--texte-med);
+}
+.mvi-bd p:last-child{ margin-bottom:2px; }
+.mvi-bd b{ color:var(--texte); font-weight:600; }
 
 
 /* ═══════════════════════════════════════════════════════════════════════

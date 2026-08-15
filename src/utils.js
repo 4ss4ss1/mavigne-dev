@@ -23,7 +23,7 @@ export const GT_ADMIN_EMAIL = 'ngdevpro@gmail.com';
 // WHATS_NEW   : tableau vide = modal desactive pour cette version.
 // Format item : { emoji:'📅', titre:'Titre court', desc:'Phrase utilisateur.' }
 // Regle : seulement les changements visibles par les utilisateurs.
-export const APP_VERSION = '6.14';
+export const APP_VERSION = '6.15';
 // ════ Journal des nouveautés (récap cumulatif) ════
 // Une entrée par version, la PLUS RÉCENTE EN HAUT : { v:'5.10', items:[ {emoji,titre,desc}, … ] }
 // À chaque release visible → AJOUTER un bloc en tête (ne pas remplacer). items:[] = release technique (rien à afficher).
@@ -354,6 +354,10 @@ window._mvGraphRepeindre = function(){
 };
 
 export const WHATS_NEW = [
+  { v:'6.15', items:[
+    { emoji: '\u{2139}', titre: "Les explications de calcul passent derri\u00e8re un petit \u00ab\u202fi\u202f\u00bb",
+      desc: "Le Pilotage affichait en permanence <b>neuf pages</b> de texte expliquant comment chaque chiffre est calcul\u00e9. C\u2019est utile la premi\u00e8re fois, encombrant les cent suivantes\u202f: on relisait la m\u00e9thode pour atteindre le nombre. Ces explications se rangent d\u00e9sormais derri\u00e8re un <b>petit rond \u00ab\u202fi\u202f\u00bb</b>, \u00e0 c\u00f4t\u00e9 du chiffre concern\u00e9\u202f: touchez-le et la fiche s\u2019ouvre. <b>Rien n\u2019est perdu</b>, et ce qui <b>cadre</b> un chiffre \u2014 sa date, sa source, son p\u00e9rim\u00e8tre \u2014 reste \u00e0 l\u2019\u00e9cran, en une ligne. Trois endroits l\u2019inaugurent\u202f: la capacit\u00e9 au pic, l\u2019\u00e9cart de cadence, et les deux fa\u00e7ons de compter l\u2019ann\u00e9e. Les autres suivront." },
+  ] },
   { v:'6.14', items:[
     { emoji: '\u{21A9}', titre: "L\u2019\u00e9cart de cadence se taisait alors que l\u2019an dernier \u00e9tait lisible",
       desc: "En d\u00e9but de p\u00e9riode, l\u2019indicateur \u00ab\u202f\u00e9cart de cadence\u202f\u00bb affichait un tiret\u202f: il attend <b>40\u202f% du bar\u00e8me r\u00e9alis\u00e9</b> avant de se prononcer, parce qu\u2019un travail de janvier ne pr\u00e9dit pas celui de juin. Mais quand la <b>m\u00eame p\u00e9riode de la campagne pr\u00e9c\u00e9dente</b> \u00e9tait archiv\u00e9e, elle \u00e9tait ignor\u00e9e alors qu\u2019elle disait quelque chose. L\u2019\u00e9cran la reprend d\u00e9sormais comme <b>hypoth\u00e8se de projection</b> \u2014 et le dit\u202f: la ligne porte un <b>\u21a9</b> et nomme la campagne d\u2019o\u00f9 vient le chiffre. Elle sera remplac\u00e9e par la vraie mesure d\u00e8s le seuil atteint. Si aucune campagne comparable n\u2019est archiv\u00e9e, l\u2019\u00e9cran continue de le dire plut\u00f4t que d\u2019inventer." },
@@ -1754,6 +1758,7 @@ var MV_AIDE = {
     ico: '\u{1F4CA}', titre: 'Pilotage', ancre: 'pilotage',
     points: [
       ['Rien ne se saisit ici', ": tout est en lecture seule. Les chiffres viennent du journal, du planning et des sessions tracteur."],
+      ['Le petit rond « i » dit d’où vient un chiffre', ": touchez-le, une fiche s’ouvre et explique comment ce chiffre est calculé, sur quelle fenêtre, et ce qu’il ne dit pas. Ce qui <b>cadre</b> un chiffre — sa date, sa source, son périmètre — reste toujours affiché à côté de lui, en une ligne. C’est la méthode qui se range, jamais le cadre."],
       _mvAideOngletsPil,
       ['La barre du haut dit où vous regardez', ": l’exercice entier, ou une campagne. Cliquez une campagne dans la frise de l’année et les quatre chiffres du haut, la frise et les tableaux de la campagne suivent. La croix revient à l’année. <b>Trois écrans ont leur propre cadre</b> et ne se recadrent pas : Économie chiffre la période consultée, la Cave suit le millésime, la Conformité roule sur sept ans — chacun l’écrit au-dessus de ses chiffres."],
       ['Les quatre chiffres du haut', "répondent aux quatre questions d’un domaine : les travaux, l’effectif, le budget, la conformité. Ils changent avec ce que vous regardez, et chacun mène à l’écran qui le détaille."],
@@ -1875,6 +1880,132 @@ if (typeof document !== 'undefined') {
   else _mvInjectHelpBtn();
 }
 
+// ═══════════════════════════════════════════════════════════════════════════
+// _PIL_SEM — LA PALETTE SEMANTIQUE DES GRAPHES : un nom, un sens, une couleur.
+// ═══════════════════════════════════════════════════════════════════════════
+// Elle est nee dans pilotage.js (§34, lot 1) et y est restee pour pouvoir etre
+// livree sans changer de numero de version. Une palette n'est pas la propriete
+// d'un module : elle remonte ici, ou tout le monde la lit de la meme source.
+// Le motif qu'elle corrige : `col.alerte` servait A LA FOIS au renfort a trouver
+// (des barres) et au trait d'aujourd'hui (un reperage) dans la MEME image —
+// deux choses sans rapport sous une seule encre, donc une image qui se lit de
+// travers. « aujourdhui » a desormais la sienne.
+export const _PIL_SEM = {
+  fait:       '#3D6B27',   // fait, absorbe par l'equipe, couvert
+  reste:      '#C2A14D',   // reste a faire — n'alarme pas
+  faute:      '#A0291E',   // manque, depassement, sous-effectif
+  socle:      '#4A9FC8',   // reference : socle permanent, moyenne
+  hors:       '#DED7C9',   // hors portee
+  sel:        '#8A5A38',   // la selection en cours
+  aujourdhui: '#14110D'    // le trait du jour — un REPERE, pas une alerte
+};
+
+// ═══════════════════════════════════════════════════════════════════════════
+// MV_INFO — « D'OU VIENT CE CHIFFRE »
+// ═══════════════════════════════════════════════════════════════════════════
+// LE CONSTAT. Le Pilotage affichait ~25 000 caracteres de prose en permanence :
+// 217 phrases, neuf pages A4, reparties dans 60 fonctions de rendu. Et AUCUN
+// moyen d'en replier une seule — pas un <details>, pas une infobulle, rien,
+// dans tout le projet. Le chiffre etait noye dans sa propre notice.
+//
+// LA REGLE, en trois familles. Toute phrase affichee tombe dans une seule :
+//   ① CE QUI CADRE LE CHIFFRE (sa date, sa source, son perimetre) — RESTE a
+//     l'ecran, en UNE ligne, toujours a la meme place. C'est ce qui empeche de
+//     lire un chiffre pour un autre. On ne le replie jamais.
+//   ② CE QUI EXPLIQUE LE CALCUL (methode, conventions, biais assumes) — vient
+//     ICI. Ca se lit une fois, pas a chaque ouverture de l'ecran.
+//   ③ CE QUI DIT QUOI FAIRE — devient un BOUTON, pas une phrase a executer de
+//     memoire. « Il se saisit dans Reglages › Equipe » est un chemin a retenir ;
+//     un bouton est un clic.
+//
+// ⚠️ CE N'EST PAS « CACHER LE TEXTE ». La moitie de ces phrases est la seule
+//   trace ecrite d'une convention du domaine. Les supprimer serait la faute
+//   inverse, et plus grave : un chiffre sans son cadre ment (§34, §41).
+//
+// ⚠️ LES CLES SONT NOMMEES PAR MODULE (`pil.`, plus tard `cave.`, `plan.`) :
+//   deux modules peuvent avoir chacun leur « cadence » sans se marcher dessus.
+//
+// ★ Elle vit a cote de MV_AIDE, et pour la meme raison : la regle
+//   d'accompagnement (regle d'or n°4) couvre ce qui vit dans ce fichier. Une
+//   fiche posee ailleurs vieillirait sans que personne ne la relise.
+export const MV_INFO = {
+
+  'pil.capacite': { t: 'Capacité au pic', p: [
+    'Le pic est la <b>semaine la plus chargée</b> de la fenêtre affichée, jamais une moyenne. Une moyenne annuelle n\u2019existe aucun jour de l\u2019année ; c\u2019est le pic qui décide d\u2019un recrutement.',
+    'Le <b>nécessaire</b> vient du barème h/ha du domaine, appliqué aux surfaces qui restent à faire. Le <b>prévu</b> vient du planning de cette semaine-là, contrat par contrat : une personne compte si elle est sous contrat ce jour-là, pas si sa fiche est marquée active.',
+    'Les personnes comptées <b>aujourd\u2019hui</b> sont celles qui sont <b>au champ</b> : hors bureau, hors absents. Une <b>équipe collective</b> compte pour son effectif réel — une fiche « équipe de vendange » à 40 vaut 40 personnes, pas une ligne.',
+    '<b>Deux autres chiffres de cet écran ne se comparent pas à celui-ci.</b> Les personnes présentes aujourd\u2019hui : c\u2019est une autre date, et le pic peut tomber dans onze mois. La moyenne sur la campagne : c\u2019est une autre fenêtre. Les soustraire donne un chiffre faux — c\u2019est le défaut corrigé en août 2026, où « 46,3 personnes au pic » moins « 2 présentes » affichait « il en manque 44,3 » sur un domaine de quatre.'
+  ] },
+
+  'pil.cadence': { t: 'L\u2019écart de cadence', p: [
+    'Il compare le <b>temps réellement passé</b> — les heures du planning — au <b>barème h/ha</b> du travail déjà fait. Un écart positif veut dire que l\u2019équipe a mis plus de temps que le barème ne le prévoit.',
+    'Il cherche sa source dans un ordre, et <b>dit toujours laquelle il a trouvée</b>. D\u2019abord la période en cours, dès <b>40 % du barème réalisé</b> — en dessous, le travail fait ne ressemble pas assez à celui qui reste. Sinon la <b>même période de la campagne précédente</b>, si elle est archivée : la ligne porte alors un <b>\u21a9</b> et nomme la campagne. Sinon rien, et l\u2019écran l\u2019écrit plutôt que d\u2019inventer un chiffre.',
+    'La cadence ne s\u2019applique qu\u2019au <b>reste à engager</b>, jamais à ce qui est déjà dépensé : à 100 % d\u2019avancement, la projection retombe exactement sur l\u2019engagé. Sans cette règle, l\u2019écran annonçait une fin à 37 k\u20ac alors que 79 k\u20ac étaient déjà payés — sur la même carte.',
+    '<b>Un biais assumé.</b> Une entrée de planning porte des heures, jamais une activité : la cave, l\u2019atelier et le bureau restent donc dans la présence, alors que le barème ne compte que la vigne. La présence est <b>surévaluée</b>, et l\u2019indicateur penche vers « barème un peu serré ». Sur une période où la cave tourne, l\u2019écart parle surtout d\u2019elle.',
+    'Quand l\u2019écart est grand, c\u2019est le <b>barème</b> qu\u2019on corrige dans Réglages \u203a Tâches, <b>jamais le taux horaire</b>.'
+  ] },
+
+  'pil.cadres': { t: 'Pourquoi les deux totaux diffèrent', p: [
+    'Une campagne <b>à cheval</b> sur la clôture est partagée entre deux bilans. Une campagne <b>entièrement hors</b> de l\u2019exercice n\u2019y apparaît pas du tout, alors qu\u2019elle appartient bien à un cycle de vigne. À l\u2019inverse, un hiver qui <b>ouvre</b> le cycle suivant tombe dans cet exercice sans appartenir à cette année vigne.',
+    'Seules les lignes marquées <b>année vigne</b> entrent dans le total de droite.',
+    'Les heures du tableau sont du <b>barème</b> : ce que le travail devrait prendre, pas ce qu\u2019il a pris.',
+    'Le coût de l\u2019exercice vient d\u2019<b>Économie \u203a Exercice</b>, qui cadre déjà d\u2019un bilan à l\u2019autre. Il n\u2019est <b>pas recalculé ici</b> : un second calcul donnerait un second chiffre.',
+    'Fermage, amortissements, assurances et frais généraux n\u2019y sont pas : <b>ce n\u2019est pas un compte de résultat</b>.'
+  ] }
+
+};
+
+
+// La pastille. Posee A COTE du chiffre qu'elle explique, jamais en tete d'ecran :
+// une notice generale ne repond a aucune question precise.
+// ⚠️ `type="button"` : sans lui, un bouton dans un formulaire le soumet.
+export function _mvInfoBtn(cle) {
+  return '<button type="button" class="mv-i" data-mvi="' + _escAttr(cle)
+       + '" aria-label="D\u2019ou vient ce chiffre"><span aria-hidden="true">i</span></button>';
+}
+
+export function _mvInfoOpen(cle) {
+  var el = document.getElementById('info-inner');
+  if (!el) return;
+  var f = MV_INFO[cle];
+  if (!f) {
+    // Une pastille morte est plus deroutante qu'une explication absente : on
+    // ouvre quand meme, en le disant. Le harnais interdit ce cas en CI — s'il
+    // arrive quand meme, il doit se voir, pas se taire.
+    if (window.logError) window.logError({ level: 'info', cat: 'info', msg: 'MV_INFO : cle inconnue ' + cle });
+    f = { t: 'Explication manquante', p: ['Cette explication n\u2019a pas encore ete ecrite (' + _escHtml(String(cle)) + ').'] };
+  }
+  var h = '<div class="modal-hd mva-hd">'
+        + '<span class="mva-hd-ic mvi-ic" aria-hidden="true">i</span>'
+        + '<div><div class="modal-title">' + _escHtml(f.t) + '</div>'
+        + '<div class="modal-sub">D\u2019o\u00f9 vient ce chiffre</div></div></div>'
+        + '<div class="mvi-bd">';
+  // Le texte des fiches est ECRIT ICI, jamais saisi : il porte ses propres <b>.
+  // Aucune donnee utilisateur ne traverse cette fonction (C19).
+  for (var i = 0; i < f.p.length; i++) h += '<p>' + f.p[i] + '</p>';
+  h += '</div><div class="mva-foot">'
+     + '<button type="button" class="mva-fbtn" id="mvi-ok">Compris</button></div>';
+  el.innerHTML = h;
+  var b = document.getElementById('mvi-ok');
+  if (b) b.onclick = function () { if (window.closeOv) window.closeOv(null, 'ovInfo'); };
+  if (window.openOv) window.openOv('ovInfo');
+}
+
+// UN SEUL ECOUTEUR, pose une fois sur le document. Chaque module qui pose une
+// pastille n'a rien a brancher.
+// ⚠️⚠️ `stopPropagation` est INDISPENSABLE : la pastille vit dans l'en-tete
+//   d'une tuile, et cet en-tete replie la tuile au clic. Sans lui, ouvrir la
+//   fiche fermerait l'ecran qu'on cherche a comprendre.
+if (typeof document !== 'undefined') {
+  document.addEventListener('click', function (e) {
+    var b = e.target && e.target.closest ? e.target.closest('[data-mvi]') : null;
+    if (!b) return;
+    e.preventDefault();
+    e.stopPropagation();
+    _mvInfoOpen(b.getAttribute('data-mvi'));
+  }, true);
+}
+
 // ════ EXPOSITION GLOBALE ════
 // Nécessaire pour :
 //  • firebase.js qui appelle window.showSyncBadge (async, avant que app.js soit prêt)
@@ -1882,6 +2013,10 @@ if (typeof document !== 'undefined') {
 //  • logError() appelé depuis window.addEventListener('error', ...)
 //  • Modules futurs qui n'importent pas encore depuis utils.js
 window.GT_ADMIN_EMAIL     = GT_ADMIN_EMAIL;
+window.MV_INFO            = MV_INFO;
+window._mvInfoOpen        = _mvInfoOpen;
+window._mvInfoBtn         = _mvInfoBtn;
+window._PIL_SEM           = _PIL_SEM;
 window.showSyncBadge      = showSyncBadge;
 window.showToast          = showToast;
 window.setThemeMode       = setThemeMode;

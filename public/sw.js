@@ -1,4 +1,29 @@
-// MA VIGNE — Service Worker v6.67
+// MA VIGNE — Service Worker v6.68
+// v6.68 (15/08/2026) — LA PASTILLE « i », ET DEUX CHOSES QUI REMONTENT D’UN CRAN.
+//   Le Pilotage affichait ~25 000 caracteres de prose en permanence : 217 phrases,
+//   neuf pages A4, et AUCUN moyen d’en replier une seule — pas un <details>, pas
+//   une infobulle, rien, dans tout le projet. Le chiffre etait noye dans sa notice.
+//   ★ MV_INFO + _mvInfoOpen (utils.js) + #ovInfo (index.html) : une primitive,
+//     une feuille, un seul ecouteur delegue. Elle vit a cote de MV_AIDE pour que
+//     la regle d’accompagnement la couvre — une fiche posee ailleurs vieillit.
+//   ★ LA REGLE DES TROIS FAMILLES, ecrite dans utils.js : ce qui CADRE le chiffre
+//     reste a l’ecran en une ligne · ce qui EXPLIQUE le calcul passe derriere le
+//     « i » · ce qui DIT QUOI FAIRE devient un bouton. Ce n’est PAS « cacher le
+//     texte » : la moitie de ces phrases est la seule trace ecrite d’une
+//     convention du domaine, et un chiffre sans son cadre ment (§34, §41).
+//   · Trois emplacements pilotes, texte reellement deplace : la capacite au pic
+//     (les deux « c’est une autre date / une autre fenetre »), l’ecart de cadence
+//     (le biais cave/atelier/bureau), les deux facons de compter l’annee.
+//   · ⚠️ stopPropagation sur l’ecouteur : la pastille vit dans un en-tete de tuile
+//     qui replie la tuile au clic. Sans lui, ouvrir la fiche fermait l’ecran.
+//   · Deux dettes de §34i soldees, parce que ce lot bumpe : _PIL_SEM (la palette
+//     semantique) et l’echelle de texte --pt-* remontent de pilotage.js vers
+//     utils.js et styles.css. Une palette et une echelle ne sont pas la propriete
+//     d’un module. ★ Les appels gardent leur repli — var(--pt-txt,12.5px) reste
+//     juste si styles.css est en retard chez un client.
+//   · pilotage.js n’avait AUCUN import : il lisait tout depuis window. _PIL_SEM
+//     y arrive par un vrai import. Un appel qui marche par ordre de chargement
+//     n’est pas un appel correct.
 // v6.67 (14/08/2026) — L’ECART DE CADENCE AVAIT UNE SEULE SOURCE, OU AUCUNE.
 //   Sous 40 % de bareme realise l’indicateur se taisait, y compris quand la MEME
 //   periode de la campagne precedente etait archivee et parfaitement lisible. Un
@@ -1461,7 +1486,7 @@
 // v2.22 — Fix profils vides : guard vide dans loadData() pour MEMBRES/SAISONS/TACHES
 // v2.17 — Onboarding intégré + tenantId · v2.06 — Firebase Auth · v2.00–v2.05 — divers
 const DEBUG = self.location.hostname === 'localhost' || self.location.hostname === '127.0.0.1';
-const CACHE_NAME   = 'mavigne-v6.67';
+const CACHE_NAME   = 'mavigne-v6.68';
 const TENANT_CACHE = 'mavigne-tenant';   // Cache persistant — préservé à chaque mise à jour SW
 const SYNC_TAG     = 'mavigne-sync';
 
@@ -1477,7 +1502,7 @@ const CDN_URLS = [
 ];
 
 self.addEventListener('install', event => {
-  if(DEBUG) console.log('[SW] Ma Vigne v6.67 installé');
+  if(DEBUG) console.log('[SW] Ma Vigne v6.68 installé');
   event.waitUntil(
     caches.open(CACHE_NAME).then(async cache => {
       // ── Cœur applicatif : STRICT (mise à jour ATOMIQUE) ──
@@ -1493,7 +1518,7 @@ self.addEventListener('install', event => {
 });
 
 self.addEventListener('activate', event => {
-  if(DEBUG) console.log('[SW] Ma Vigne v6.67 activé');
+  if(DEBUG) console.log('[SW] Ma Vigne v6.68 activé');
   event.waitUntil(
     caches.keys().then(keys =>
       Promise.all(

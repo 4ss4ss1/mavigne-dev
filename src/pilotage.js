@@ -7,6 +7,13 @@
 // © 2026 Nicolas GUERET / GUERETTECH
 // ════════════════════════════════════
 
+// ⚠️ CE MODULE N'AVAIT AUCUN IMPORT : il lisait tout depuis `window`. Ca marche
+//   parce que l'ordre de chargement met utils.js en premier — et « un appel qui
+//   marche par ordre de chargement n'est pas un appel correct ». La palette
+//   semantique arrive par un VRAI import, resolu au build : elle ne peut plus
+//   etre absente au moment ou un graphe la lit.
+import { _PIL_SEM, _mvInfoBtn } from './utils.js';
+
 const DEBUG = location.hostname === 'localhost' || location.hostname === '127.0.0.1';
 if (DEBUG) console.log('[Ma Vigne] pilotage.js chargé');
 
@@ -17,24 +24,11 @@ function _pilTnom(n){ return (typeof window.tNom==='function') ? window.tNom(n) 
 // pctColor — dégradé terre → ambre → vert vigne (cohérent avec la carte parcelles)
 function _pilPctColor(p){ return p>=85?'#5B9B3A':p>=65?'#7FA83A':p>=45?'#D9A441':p>=25?'#C8853A':'#9A5A38'; }
 // ════════════════════════════════════════════════════════════════════════════
-// LA PALETTE SEMANTIQUE — un nom, un sens, une couleur.
-// Chaque graphe du module tire ses couleurs d'ICI, jamais d'un hex ecrit sur
-// place. Le motif corrige : `c.col.alerte` servait A LA FOIS au renfort a
-// trouver (des barres) et au trait d'aujourd'hui (un reperage) dans la MEME
-// image — deux choses sans rapport sous une seule couleur, donc une image qui
-// se lit de travers. « aujourdhui » a desormais son encre a lui.
-// ⚠️ A DEPLACER dans utils.js au prochain lot qui bumpe (une palette ne
-//    devrait pas vivre dans un module). Elle est ici pour rester sans bump.
+// LA PALETTE SEMANTIQUE vit desormais dans utils.js (dette §34i soldee) : une
+// palette n'est pas la propriete d'un module. Chaque graphe tire ses couleurs
+// de _PIL_SEM, jamais d'un hex ecrit sur place. Elle est IMPORTEE en tete de
+// fichier, plus lue sur window : le build garantit sa presence.
 // ════════════════════════════════════════════════════════════════════════════
-var _PIL_SEM = {
-  fait:       '#3D6B27',   // fait, absorbe par l'equipe, couvert
-  reste:      '#C2A14D',   // reste a faire — n'alarme pas
-  faute:      '#A0291E',   // manque, depassement, sous-effectif
-  socle:      '#4A9FC8',   // reference : socle permanent, moyenne
-  hors:       '#DED7C9',   // hors portee
-  sel:        '#8A5A38',   // la selection en cours
-  aujourdhui: '#14110D'    // le trait du jour — un REPERE, pas une alerte
-};
 // ── Une polyligne qui se COUPE sur un trou ─────────────────────────────────
 // pts = [{x0,x1,y,gap}] deja projetes. `gap:true` = pas de mesure ici.
 // Sans cette rupture, deux periodes separees par trois semaines vides sont
@@ -1500,18 +1494,19 @@ function _pilDeuxCadresHtml(ann){
                +'<br>'+nCycle+' campagne'+(nCycle>1?'s':'')+' dans ce cycle')
             : 'aucune vendange dat\u00e9e \u2014 le cycle ne peut pas \u00eatre born\u00e9'))
     +'</div>'
-    +'<div style="font-size:var(--pt-txt,12.5px);color:var(--texte-doux);margin:11px 0 7px;line-height:1.5">'
-    +'<b style="color:var(--texte)">Pourquoi les deux totaux diff\u00e8rent.</b> Une campagne \u00e0 cheval sur la cl\u00f4ture est '
-    +'partag\u00e9e entre deux bilans, et une campagne enti\u00e8rement hors de l\u2019exercice n\u2019y appara\u00eet pas du tout \u2014 '
-    +'alors qu\u2019elle appartient bien \u00e0 un cycle de vigne. \u00c0 l\u2019inverse, un hiver qui OUVRE le cycle suivant '
-    +'tombe dans cet exercice sans appartenir \u00e0 cette ann\u00e9e vigne\u00a0: seules les lignes marqu\u00e9es '
-    +'<b style="color:var(--vert-med)">ann\u00e9e vigne</b> entrent dans le total de droite. Le d\u00e9tail\u00a0:</div>'
+    // ★ 530 CARACTERES D'EXPLICATION -> UNE LIGNE + LA PASTILLE.
+    //   Le lecteur a besoin de savoir QUE les deux totaux different et que ce
+    //   n'est pas une erreur ; POURQUOI se lit une fois.
+    +'<div style="font-size:var(--pt-txt,12.5px);color:var(--texte-doux);margin:11px 0 7px;line-height:1.5;display:flex;align-items:center;gap:8px;flex-wrap:wrap">'
+    +'<span><b style="color:var(--texte)">Le d\u00e9tail, campagne par campagne.</b> Seules les lignes marqu\u00e9es '
+    +'<b style="color:var(--vert-med)">ann\u00e9e vigne</b> entrent dans le total de droite.</span>'
+    +_mvInfoBtn('pil.cadres')+'</div>'
     +'<table style="width:100%;border-collapse:collapse;font-size:var(--pt-txt,12.5px)">'+lignes+'</table>'
+    // ★ 440 CARACTERES EN ITALIQUE -> LE CADRE SEUL. « Heures de bareme » change
+    //   la lecture du tableau : ca reste. Le reste (d'ou vient le cout, ce qui
+    //   n'y est pas) explique le calcul : MV_INFO['pil.cadres'].
     +'<div style="font-size:var(--pt-micro,11px);color:var(--texte-doux);margin-top:8px;font-style:italic">'
-      +'Les heures ci-dessus sont du bar\u00e8me, exactes\u00a0: ce que le travail DEVRAIT prendre, pas ce qu\u2019il a pris. '
-      +'Le co\u00fbt de l\u2019exercice vient de \u00c9conomie \u203a Exercice, qui cadre d\u00e9j\u00e0 entre deux bilans\u00a0\u2014 '
-      +'il n\u2019est pas recalcul\u00e9 ici, pour qu\u2019il n\u2019y ait qu\u2019un seul chiffre. '
-      +'Fermage, amortissements, assurances et frais g\u00e9n\u00e9raux n\u2019y sont pas\u00a0: ce n\u2019est pas un compte de r\u00e9sultat.</div>'
+      +'Heures de <b>bar\u00e8me</b>\u00a0: ce que le travail devrait prendre, pas ce qu\u2019il a pris.</div>'
     +'</div>';
 }
 
@@ -4483,8 +4478,16 @@ function _pilPanelCapacite(d){
     // ★ AUJOURD'HUI EST UNE AUTRE QUESTION, ET ELLE A SON PROPRE ENCART. Le pic
     //   peut tomber dans onze mois : comparer la presence du jour a ce besoin-la
     //   n'apprend rien, et le faire en silence donne un chiffre faux.
-    +'<div class="pil-li-s" style="margin-top:9px;color:var(--texte-doux)">Aujourd\u2019hui : <b>'+_pilEtpFmt(present)+'</b> personne'+(present>1.05?'s':'')+' au champ (hors bureau, hors absents, une équipe collective comptée à son effectif). C\u2019est <b>une autre date</b> que le pic ci-dessus.</div>'
-    +(cd?('<div class="pil-li-s" style="margin-top:4px;color:var(--texte-doux)">Moyenne sur '+_pilEsc(cd.saison)+' : <b>'+_pilEtpFmt(cd.etpCible||0)+'</b> pers. — c\u2019est une <b>autre fenêtre</b> que le pic ci-dessus.</div>'):'');
+    // ★ TROIS PHRASES DEVIENNENT DEUX LIGNES DE CADRE + UNE FICHE.
+    //   Ce qui CADRE reste : « autre date », « autre fenetre » — sans elles on
+    //   soustrait deux grandeurs qui n'ont ni la meme date ni la meme unite,
+    //   la faute exacte de §33. Ce qui EXPLIQUE (hors bureau, hors absents,
+    //   equipe collective a son effectif, le pic peut tomber dans onze mois)
+    //   part dans MV_INFO['pil.capacite'] : ca se lit une fois, pas cent.
+    +'<div class="pil-li-s" style="margin-top:9px;color:var(--texte-doux)">Aujourd\u2019hui : <b>'+_pilEtpFmt(present)+'</b> personne'+(present>1.05?'s':'')+' au champ \u2014 <b>autre date</b> que le pic.</div>'
+    +(cd?('<div class="pil-li-s" style="margin-top:4px;color:var(--texte-doux)">Moyenne sur '+_pilEsc(cd.saison)+' : <b>'+_pilEtpFmt(cd.etpCible||0)+'</b> pers. \u2014 <b>autre fen\u00eatre</b> que le pic.</div>'):'');
+  body+='<div style="margin-top:11px">'+_mvInfoBtn('pil.capacite')
+      +'<span style="font-size:var(--pt-micro,11px);color:var(--texte-doux);margin-left:7px;vertical-align:middle">D\u2019o\u00f9 vient ce chiffre</span></div>';
   var sub='pic sur '+cadre+(sem?(' \u00b7 '+sem):'');
   return _pilTile('capacite','\u2696\uFE0F','#C9A84C','Capacité vs charge · '+cadre, _pilStat(_pilEtpFmt(req),' pers. au pic'), sub, null, body);
 }
@@ -6745,7 +6748,13 @@ function _pecAlertes(E,TL){
     //   le garantissait deja par construction - et c'est exactement le genre de
     //   garantie qu'un refactor efface sans bruit. On l'ecrit.
     if(E.cad.src==='histo' || !E.cad.applic)
-      push('warn','\u21a9\ufe0e','L\u2019an dernier, sur la p\u00e9riode homologue (<b>'+_pilEsc(E.cad.histoNom||'campagne pr\u00e9c\u00e9dente')+'</b>), l\u2019\u00e9quipe avait pass\u00e9 <b>'+_pilEsc(_pecPct(E.cad.ecart))+' de temps en plus</b> que le bar\u00e8me h/ha. Cette p\u00e9riode-ci n\u2019est pas encore assez avanc\u00e9e pour se mesurer elle-m\u00eame ('+Math.round(E.avc)+' % sur '+Math.round(E.cad.seuil)+' % requis) : c\u2019est un <b>rep\u00e8re</b>, pas une pr\u00e9vision : ni la date de fin ni le budget projet\u00e9 ne l\u2019appliquent. La pr\u00e9sence au planning compte aussi la cave, l\u2019atelier et le bureau, alors que le bar\u00e8me ne compte que la vigne \u2014 sur une p\u00e9riode o\u00f9 la cave tourne, l\u2019\u00e9cart parle surtout d\u2019elle.');
+      // ★ LA PHRASE LA PLUS LONGUE DU MODULE, ramenee a son cadre.
+      //   Ce qui reste dit D'OU vient le chiffre (l'an dernier, quelle campagne)
+      //   et CE QU'IL VAUT (un repere, pas une prevision) — sans ca, un chiffre
+      //   d'histoire passe pour une mesure du moment, la faute de §41.
+      //   Le seuil, le biais cave/atelier/bureau et ce que la projection en fait
+      //   sont dans MV_INFO['pil.cadence'].
+      push('warn','\u21a9\ufe0e','L\u2019an dernier, sur la p\u00e9riode homologue (<b>'+_pilEsc(E.cad.histoNom||'campagne pr\u00e9c\u00e9dente')+'</b>), l\u2019\u00e9quipe avait pass\u00e9 <b>'+_pilEsc(_pecPct(E.cad.ecart))+' de temps en plus</b> que le bar\u00e8me h/ha. C\u2019est un <b>rep\u00e8re</b>, pas une pr\u00e9vision. '+_mvInfoBtn('pil.cadence'));
     else
       push('bad','\u23F3','Sur le travail d\u00e9j\u00e0 fait, l\u2019\u00e9quipe a pass\u00e9 <b>'+_pilEsc(_pecPct(E.cad.ecart))+' de temps en plus</b> que le bar\u00e8me h/ha. Si cela tient jusqu\u2019au bout, la p\u00e9riode co\u00fbtera <b>'+_pilEsc(_pecEurK(E.projFin))+'</b> au lieu de '+_pilEsc(_pecEurK(E.budget))+'. Deux causes possibles, et elles se distinguent dans <b>Postes &amp; travaux</b> : un bar\u00e8me trop serr\u00e9 (<b>R\u00e9glages \u203A T\u00e2ches</b>), ou un travail pr\u00e9cis qui d\u00e9rape.');
   }
@@ -7841,30 +7850,12 @@ function _pilSkeleton(d,tab){
 function _pilCssV2(){
   if(document.getElementById('pil-css-v2')) return;
   // ═══ L'ECHELLE DE TEXTE — ONZE PAS NOMMES ═══
-  //   Le module portait 28 valeurs de font-size ecrites a la main, de 8,5 a 40 px,
-  //   choisies une par une au fil des ecrans. Vingt-huit tailles, ce n'est pas une
-  //   hierarchie : c'est l'absence de hierarchie. L'oeil n'a aucun point d'accroche,
-  //   alors il lit tout pour trouver un chiffre.
-  //   Onze pas, chacun nomme par son ROLE. Aucun pas ne s'invente ailleurs : toute
-  //   nouvelle taille passe par ici, ou elle n'existe pas.
-  //   ⚠ Pose sur :root, pas sur #page-pilotage — les bulles Leaflet et les
-  //     couches d'overlay sortent du conteneur de la page.
-  //   ★ A DEPLACER dans styles.css au prochain lot qui bumpe, avec _PIL_SEM (§34i).
-  //     Elle vit ici pour avoir pu etre livree sans changer de numero de version.
+  //   Declaree dans styles.css (:root) depuis ce lot : une echelle n'est pas la
+  //   propriete d'un module. Les 259 appels du fichier gardent leur REPLI —
+  //   var(--pt-txt,12.5px) — pour que le module reste juste meme si styles.css
+  //   est en retard chez un client. Une variable inconnue rend la declaration
+  //   invalide et fait retomber TOUT le texte a la taille heritee, en silence.
   var css=''
-  +':root{'
-  +'  --pt-hero:40px;'
-  +'  --pt-xxl:31px;'
-  +'  --pt-xl:27px;'
-  +'  --pt-lg:23px;'
-  +'  --pt-md:20px;'
-  +'  --pt-sm:17px;'
-  +'  --pt-base:14px;'
-  +'  --pt-txt:12.5px;'
-  +'  --pt-micro:11px;'
-  +'  --pt-lbl:10.5px;'
-  +'  --pt-nano:9.5px;'
-  +'}'
   +'.pil-portee{position:sticky;top:0;z-index:34;background:var(--bg-card);border-bottom:1px solid var(--gris);}'
   // ⚠️⚠️ DEUX BARRES COLLANTES AU MEME `top` SE RECOUVRENT.
   //   .pil-tabsbar est sticky top:0 z-index:60 (styles.css) et .pil-portee sticky
@@ -8956,7 +8947,8 @@ function renderPilotage(){
 // module liste les onglets en les LISANT ici, au lieu de les decrire dans une
 // phrase qui vieillit. Elle a annonce « Six onglets » pendant que le module en
 // comptait sept, avec deux noms qui n'existaient plus.
-window._PIL_SEM       = _PIL_SEM;
+// _PIL_SEM n'est plus expose ici : utils.js le fait, une seule fois, a la
+// source. Deux expositions du meme objet, c'est deux verites en puissance.
 window._pilPolyBreak  = _pilPolyBreak;
 window._PIL_TABS      = _PIL_TABS;
 window._PIL_TOOLS     = _PIL_TOOLS;
