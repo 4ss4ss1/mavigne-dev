@@ -24,8 +24,8 @@ const CP = [
     s => s.replace("  { k:'controle',", "  { k:'info', min:10, freq:220, lab:'Retrouver l\\u2019info', hyp:'' },\n  { k:'controle',")],
   ['⑥ une fonction du moteur est appelée sans être écrite',
     s => s.replace('function _mvtCredits(s){', 'function _mvtCreditsX(s){')],
-  ['⑦ la clôture redevient une soustraction en euros',
-    s => s.replace('heure rendue', 'de gagn\\u00e9 la premi\\u00e8re ann\\u00e9e')],
+  ['⑦ un prix se reglisse dans la clôture',
+    s => s.replace("+'<a class=\"mvt-add-cta\"", "+'<div class=\"mvt-add-eur\">Abonnement 79 \\u20AC/mois</div>'\n    +'<a class=\"mvt-add-cta\"")],
 ];
 
 console.log('── contre-épreuve mv-harnais-demo ──');

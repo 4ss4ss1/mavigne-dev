@@ -355,14 +355,14 @@ window._mvGraphRepeindre = function(){
 
 export const WHATS_NEW = [
   { v:'6.25', items:[
-    { emoji: '\u{1F347}', titre: "La visite guid\u00e9e du site montre enfin ce que voit un ouvrier",
-      desc: "La d\u00e9mo publique (le lien \u00ab\u202fVoir la d\u00e9mo\u202f\u00bb) faisait visiter le domaine depuis votre fauteuil, et jamais depuis le t\u00e9l\u00e9phone de vos salari\u00e9s. Elle bascule d\u00e9sormais une minute sur <b>l\u2019\u00e9cran d\u2019un ouvrier</b> : sa t\u00e2che, ses parcelles, un \u2713, rien d\u2019autre. C\u2019est ce que vos visiteurs demandent en premier. <b>Rien ne change dans l\u2019application</b> \u2014 c\u2019est la vitrine qui change." },
+    { emoji: '\u{1F477}', titre: "La visite guid\u00e9e montre l\u2019\u00e9cran d\u2019un ouvrier \u2014 et qu\u2019un oubli se rattrape",
+      desc: "La d\u00e9mo publique (le lien \u00ab\u202fVoir la d\u00e9mo\u202f\u00bb) faisait visiter le domaine depuis votre fauteuil, jamais depuis le t\u00e9l\u00e9phone de vos salari\u00e9s. Elle bascule d\u00e9sormais sur <b>la liste des parcelles telle qu\u2019un ouvrier l\u2019ouvre</b> : la t\u00e2che du jour, ses parcelles, un \u2713 \u00e0 cocher, rien d\u2019autre. Et le moment suivant montre que <b>vous pouvez cocher \u00e0 sa place</b> si personne ne l\u2019a fait \u2014 c\u2019est la premi\u00e8re question que pose tout le monde. <b>Rien ne change dans l\u2019application</b> : c\u2019est la vitrine qui change." },
     { emoji: '\u{1F6E1}', titre: "La d\u00e9mo montre une parcelle ferm\u00e9e par un d\u00e9lai de rentr\u00e9e",
       desc: "Elle promettait \u00ab\u202fdemain, la parcelle trait\u00e9e s\u2019affichera ferm\u00e9e\u202f\u00bb sans jamais le montrer. Deux parcelles apparaissent maintenant <b>barr\u00e9es en rouge dans la liste</b>, en accord avec ce que le Pilotage affichait d\u00e9j\u00e0 de son c\u00f4t\u00e9. La liste et le Pilotage se contredisaient." },
     { emoji: '\u{1F4C5}', titre: "Le bouton \u00ab\u202fPasser\u202f\u00bb de la visite quittait tout",
       desc: "Il annon\u00e7ait un saut d\u2019\u00e9cran et faisait une sortie : le visiteur perdait tous les moments suivants. Il y a d\u00e9sormais <b>\u00ab\u202fPasser ce moment\u202f\u00bb</b> et <b>\u00ab\u202fQuitter\u202f\u00bb</b>, et quitter m\u00e8ne au r\u00e9capitulatif final." },
     { emoji: '\u23F1', titre: "Le r\u00e9capitulatif de fin ne compte plus que ce qu\u2019il a montr\u00e9",
-      desc: "La plus grosse ligne du calcul de temps gagn\u00e9 n\u2019\u00e9tait <b>d\u00e9montr\u00e9e par aucun \u00e9cran</b> de la visite. Elle est sortie du total et annonc\u00e9e \u00e0 part. Trois lignes la remplacent \u2014 pointage du soir, carnet tracteur, papiers du contr\u00f4le \u2014 et chacune correspond \u00e0 un \u00e9cran que le visiteur vient de voir." }
+      desc: "La plus grosse ligne du calcul de temps gagn\u00e9 n\u2019\u00e9tait <b>d\u00e9montr\u00e9e par aucun \u00e9cran</b> de la visite. Elle est sortie du total et annonc\u00e9e \u00e0 part. Trois lignes la remplacent \u2014 pointage du soir, carnet tracteur, papiers du contr\u00f4le \u2014 et chacune correspond \u00e0 un \u00e9cran que le visiteur vient de voir. Et <b>le r\u00e9capitulatif ne cite plus aucun tarif</b> : il ne compte qu\u2019en heures et en journ\u00e9es de bureau. Le prix se dit de vive voix." }
   ] },
   { v:'6.24', items:[
     { emoji: '\u{1F4CA}', titre: "Les chiffres du haut du Pilotage ne vous suivent plus partout",

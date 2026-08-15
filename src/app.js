@@ -2146,14 +2146,27 @@ var _mvtSteps = [
   //   n'est pas le prix, c'est « mes gars ne s'en serviront pas ». La visite
   //   entiere se jouait depuis le fauteuil du chef. Le geste est
   //   contre-intuitif — MONTRER MOINS — donc il se retient.
-  { kick:'8 h 10', tx:'Sur le t\u00e9l\u00e9phone de Jean, il n\u2019y a pas de tableau de bord. Sa t\u00e2che, ses parcelles, un \u2713. On lui a tout enlev\u00e9 \u2014 c\u2019est la seule fa\u00e7on qu\u2019il s\u2019en serve.',
-    hyp:'Bascule r\u00e9elle sur le r\u00f4le ouvrier. Aucun r\u00e9glage \u00e0 faire, aucun chiffre qui ne le regarde pas.',
-    nav:function(){ _mvtRoleOuvrier(true); if(window.goTo) window.goTo('home'); },
-    sel:['#page-home .content','#page-home'], wait:520 },
+  // ⚠️ L'ouvrier n'atterrit PAS sur l'accueil : son ecran, c'est la liste de ses
+  //   parcelles filtree sur la tache du jour, avec le \u2713 a portee de pouce. On
+  //   pose donc `pTacheFilter` ICI — c'est ce filtre qui fait apparaitre le
+  //   bouton (_pvActions sort vide si la tache vaut « toutes »).
+  { kick:'8 h 10', tx:'Sur le t\u00e9l\u00e9phone de Jean, il n\u2019y a pas de tableau de bord. La t\u00e2che du jour, ses parcelles, un \u2713 \u00e0 cocher. On lui a tout enlev\u00e9 \u2014 c\u2019est la seule fa\u00e7on qu\u2019il s\u2019en serve.',
+    hyp:'Bascule r\u00e9elle sur le r\u00f4le ouvrier : c\u2019est l\u2019\u00e9cran que vos salari\u00e9s ouvrent le matin, tel quel.',
+    nav:function(){
+      _mvtRoleOuvrier(true);
+      try{ pTacheFilter=window._visiteTache||'Ebourgeonnage'; }catch(e){ if(window.logError)window.logError({level:'info',cat:'visite',msg:'pTacheFilter ouvrier'}); }
+      if(window.switchVigneOng) window.switchVigneOng('parcelles');
+      setTimeout(function(){ try{ if(window.switchPTab) window.switchPTab('liste'); }catch(e){ if(window.logError)window.logError({level:'info',cat:'visite',msg:'switchPTab liste ouvrier'}); } },240);
+    },
+    sel:['#pwrapliste','#page-parcelles'], wait:620 },
 
-  { kick:'9 h 40', tx:'Vous reprenez la main. L\u2019\u00e9quipe vient de finir une parcelle \u2014 notez-le.',
+  // ★ LE MEME BOUTON, DES DEUX COTES. C'est ce qui leve la peur : « et s'il
+  //   oublie ? ». L'ouvrier coche depuis le rang, et vous cochez pour lui si
+  //   personne ne l'a fait — meme geste, meme trace (canWrite() est vrai pour
+  //   l'ouvrier comme pour l'admin).
+  { kick:'9 h 40', tx:'Vous reprenez la main. Jean a coch\u00e9 les siennes depuis le rang. Celle-ci, personne ne l\u2019a fait \u2014 cochez-la pour lui : un oubli ne fait rien perdre.',
     mission:'Touchez le \u2713',
-    nav:function(){ _mvtRoleOuvrier(false); try{ pTacheFilter=window._visiteTache||'Ebourgeonnage'; }catch(e){ if(window.logError)window.logError({level:'info',cat:'visite',msg:'pTacheFilter'}); } if(window.switchVigneOng) window.switchVigneOng('parcelles'); },
+    nav:function(){ _mvtRoleOuvrier(false); if(window.switchVigneOng) window.switchVigneOng('parcelles'); },
     sel:'.pcard-qv .pc-validate', clickSel:'.pcard-qv .pc-validate', actDelay:1700, wait:560 },
 
   { kick:'C\u2019est trac\u00e9', tx:'Votre validation est au journal : parcelle, \u00e9quipe, m\u00e9t\u00e9o du jour. Rien \u00e0 remplir.',
@@ -2168,7 +2181,12 @@ var _mvtSteps = [
   // ★ LE TRACTEUR NE SE RESUME PAS A UNE JAUGE. Le chrono inverse (§31) est ce
   //   qui distingue l'outil d'un carnet : le temps se pose sur les parcelles
   //   REELLEMENT faites, pas au prorata de la surface.
-  { kick:'11 h 30', tx:'Le chrono a tourn\u00e9 pendant le passage : machine, conducteur, et les parcelles r\u00e9ellement faites. Le temps se r\u00e9partit sur celles-l\u00e0 \u2014 jamais au prorata de la surface.',
+  // ⚠️ NE PAS PARLER DU CHRONO ICI : il ne s'affiche que si `CONFIG.chrono_mode`
+  //   vaut 'on' ET qu'une mesure est ouverte (_chronoEnabledForSession). Le
+  //   scenario n'en ouvre pas — le texte annoncait donc un ecran qu'on ne
+  //   voyait pas. La liste des sessions porte deja l'argument de precision :
+  //   les parcelles FAITES sont cochees une par une.
+  { kick:'11 h 30', tx:'Le broyage est en cours : la machine, le conducteur, et les parcelles d\u00e9j\u00e0 faites, coch\u00e9es une par une. Le temps du chantier se posera sur celles-l\u00e0 \u2014 jamais au prorata de la surface.',
     hyp:'Et le mat\u00e9riel pr\u00e9vient avant de tomber : cuve GNR \u00e0 255 L sur 1 000, New Holland \u00e0 482 h \u2014 r\u00e9vision \u00e0 500.',
     nav:function(){ if(window.goTo) window.goTo('tracteur'); setTimeout(function(){ try{ if(window.switchTracOnglet) window.switchTracOnglet('sessions'); }catch(e){ if(window.logError)window.logError({level:'info',cat:'visite',msg:'switchTracOnglet sessions'}); } },240); },
     sel:['#trac-panel-sessions','#page-tracteur'], credits:[{ k:'tracteur', min:10 }] },
@@ -2195,7 +2213,12 @@ var _mvtSteps = [
     sel:['#ml-body','#cave-view-mil','#page-cave'] },
 
   // ══ ACTE III — CE QUE CA REND ══
-  { kick:'17 h 30', tx:'Le pointage du soir tient en deux gestes. Et l\u2019\u00e9cart se voit : Jean, une heure de retard \u2014 saisie en heures, elle tire sur son compteur.',
+  // ⚠️⚠️ NE PAS ANNONCER « une heure de retard » ICI. _pl2Cell rend TOUTE entree
+  //   `absent:true` par une croix rouge « Absence » : un retard d'une heure et
+  //   une journee entiere s'affichent PAREIL sur le tableau. Le detail en
+  //   heures se lit dans la fiche du salarie, moment suivant. (Le defaut de
+  //   lisibilite du tableau est au backlog — ce n'est pas un defaut de demo.)
+  { kick:'17 h 30', tx:'Le pointage du soir tient en deux gestes. Cong\u00e9s, r\u00e9cup\u00e9rations, absences : le mois entier se lit d\u2019un coup d\u2019\u0153il, et le compteur annuel suit tout seul.',
     hyp:'La feuille d\u2019heures du soir n\u2019existe plus.',
     nav:function(){ if(window.goTo) window.goTo('planning'); },
     sel:['#page-planning .pl2-board','#page-planning'], credits:[{ k:'pointage', min:10 }] },
@@ -2205,9 +2228,15 @@ var _mvtSteps = [
     nav:function(){ setTimeout(function(){ try{ if(window.openPlanFiche) openPlanFiche('Jean'); }catch(e){ if(window.logError)window.logError({level:'info',cat:'visite',msg:'planFiche'}); } },180); },
     sel:['#ovPlanFiche .modal','#ovPlanFiche'], credits:[{ k:'finmois', min:20 },{ k:'saisonniers', min:0 }] },
 
-  { kick:'18 h', tx:'La marge sur votre objectif, la charge qui reste, la cadence tenue \u2014 et la d\u00e9cision du jour, d\u00e9j\u00e0 \u00e9crite. Rien \u00e0 chercher.',
+  // ⚠️ LA CIBLE SUIVAIT LE MAUVAIS BLOC. Le texte parle de marge, de charge et
+  //   de cadence : tout cela vit dans `.pil-cockpit-card` (.pil-verdict +
+  //   .pil-cks). `.pil-dec` est le bloc D'EN DESSOUS — et il contient la carte
+  //   « Traiter ? » deja eclairee au moment 2 : deux fois la meme image sous
+  //   deux titres differents (§35e).
+  { kick:'18 h', tx:'Le soir, le verdict : votre marge sur l\u2019objectif, la charge qui reste, la cadence r\u00e9ellement tenue. Un chiffre, et ce qui le cadre.',
+    hyp:'Juste en dessous, la d\u00e9cision du jour : qui est l\u00e0, traiter ou pas, la t\u00e2che prioritaire.',
     nav:function(){ try{ if(window.closePlanFiche) closePlanFiche(); }catch(e2){ if(window.logError)window.logError({level:'info',cat:'visite',msg:'closeFiche'}); } _mvtPilTab('auj'); },
-    sel:['.pil-dec','.pil-cockpit-card','#pil-content'], wait:620 },
+    sel:['.pil-cockpit-card','#pil-content'], wait:620 },
 
   // ★★★ LE PREVISIONNEL. Une DATE et un NOMBRE D'HEURES QUI MANQUENT frappent
   //   dix fois plus fort qu'un pourcentage d'avancement : c'est le seul ecran
@@ -2441,27 +2470,24 @@ function _mvtReposition(){
   if(ring){ ring.style.left=(r.left-pad)+'px'; ring.style.top=(r.top-pad)+'px'; ring.style.width=(r.width+2*pad)+'px'; ring.style.height=(r.height+2*pad)+'px'; }
 }
 // ── L'addition : plein \u00e9cran sobre, calcul\u00e9 depuis DEMO2_CREDITS. ──
-// ★★★ L'ADDITION — CE QUI A CHANGE, ET POURQUOI.
-//   AVANT : le total etait converti en euros, puis on soustrayait l'abonnement
-//   et l'installation. La derniere chose que le prospect lisait, apres quatre
-//   minutes de demonstration, etait « +260 EUR la premiere annee ». Deux
-//   defauts dans une seule ligne : ca pose l'idee que l'app est A PEINE
-//   rentable, et ca invite a auditer la soustraction au lieu de sentir le
-//   soulagement. Une marge plus mince que le scepticisme du lecteur est un
-//   couteau qu'on lui tend.
-//   MAINTENANT : le gain reste en HEURES (§26 : le ROI s'exprime en temps), le
-//   cout se dit en heures de main-d'oeuvre, et la cloture donne un SEUIL
-//   HORAIRE que le lecteur valide avec SON propre taux. Quel que soit le
-//   chiffre qu'il a en tete, il fait le calcul dans le bon sens.
-function _mvtEur2(x){ return (Math.round(x*100)/100).toFixed(2).replace('.',','); }
+// ★★★ L'ADDITION — ELLE NE COMPTE QU'EN HEURES.
+//   Elle est passee par deux etats faux avant celui-ci.
+//   ① Elle convertissait le gain en euros, puis soustrayait abonnement et
+//     installation : la derniere chose lue apres quatre minutes de
+//     demonstration etait « +260 EUR la premiere annee ». Une marge plus mince
+//     que le scepticisme du lecteur est un couteau qu'on lui tend, et une
+//     soustraction s'audite au lieu de se ressentir.
+//   ② Elle donnait un cout « par heure rendue ». Plus solide, mais toujours un
+//     prix — et un prix pose sur un ecran ne se discute pas, il se compare.
+//   MAINTENANT : AUCUN MONTANT. Le gain est en heures, en journees, ligne par
+//   ligne, chacune adossee a un ecran qu'on vient de voir. Le prix appartient
+//   a la conversation qui suit, pas a la demonstration.
+//   ⚠️ Le harnais interdit tout montant dans ce bloc — voir mv-harnais-demo.
 function _mvtAddition(){
   var old=document.getElementById('mvt-add'); if(old) old.remove();
   var totalH=_demo2TotalH();
   var horsH=_demo2HorsH();
   var jours=Math.round(totalH/8);
-  var TAUX=20, ABO=79*12, ABOAN=790, INST=990;
-  var hAbo=Math.round(ABO/TAUX), hInst=Math.round(INST/TAUX);
-  var eurH=_mvtEur2(ABO/totalH), eurH1=_mvtEur2((ABO+INST)/totalH);
   var rows='';
   DEMO2_CREDITS.forEach(function(c){ rows+='<div class="mvt-add-row"><span>'+c.lab+'</span><i>\u2248 '+_demo2H(c)+' h</i></div>'; });
   var today=(_mvtEarn>0)?('<div class="mvt-add-td">Avec vous, aujourd\u2019hui : <b>'+_mvtEarn+' min de moins qu\u2019au papier</b>.</div>'):'';
@@ -2470,17 +2496,16 @@ function _mvtAddition(){
     +'<div class="mvt-add-eye">La journ\u00e9e est finie</div>'
     +today
     +'<div class="mvt-add-big">\u2248 '+Math.round(totalH)+' h</div>'
-    +'<div class="mvt-add-sub">par campagne \u2014 12 mois, d\u2019une r\u00e9colte \u00e0 l\u2019autre. <b>'+jours+' journ\u00e9es de bureau.</b></div>'
+    +'<div class="mvt-add-sub">par campagne \u2014 12 mois, d\u2019une r\u00e9colte \u00e0 l\u2019autre. <b>'+jours+' journ\u00e9es de bureau rendues \u00e0 la vigne.</b></div>'
     +'<div class="mvt-add-rows">'+rows+'</div>'
-    +'<div class="mvt-add-hyp">Hypoth\u00e8ses sur ces douze mois : 16 traitements \u00b7 \u2248 400 t\u00e2ches valid\u00e9es (compt\u00e9 chez moi : 250 de janvier \u00e0 juillet) \u00b7 220 pointages du soir \u00b7 12 fins de mois \u00b7 24 op\u00e9rations de cave \u00b7 60 passages tracteur. Des estimations franches, arrondies sans exc\u00e8s. Chaque ligne correspond \u00e0 un \u00e9cran que vous venez de voir. Le v\u00f4tre donnera ses propres chiffres.</div>'
+    +'<div class="mvt-add-hyp">Hypoth\u00e8ses sur ces douze mois : 16 traitements \u00b7 \u2248 400 t\u00e2ches valid\u00e9es (compt\u00e9 chez moi : 250 de janvier \u00e0 juillet) \u00b7 220 pointages du soir \u00b7 12 fins de mois \u00b7 24 op\u00e9rations de cave \u00b7 60 passages tracteur. Des estimations franches, arrondies sans exc\u00e8s. <b>Chaque ligne correspond \u00e0 un \u00e9cran que vous venez de voir.</b> Le v\u00f4tre donnera ses propres chiffres.</div>'
     +'<div class="mvt-add-plus"><div class="ph">Et ce qu\u2019on ne sait pas compter au chronom\u00e8tre</div>'
-    +'<div class="mvt-add-pr"><span class="pi">\u{1F50E}</span><span>'+DEMO2_HORS.lab+' : \u2248 '+DEMO2_HORS.min+' min par jour ouvr\u00e9. Si vous les comptez, ajoutez <b>'+horsH+' h</b>. <b>Hors total</b> \u2014 je pr\u00e9f\u00e8re le dire que le facturer.</span></div></div>'
+    +'<div class="mvt-add-pr"><span class="pi">\u{1F50E}</span><span>'+DEMO2_HORS.lab+' : \u2248 '+DEMO2_HORS.min+' min par jour ouvr\u00e9. Si vous les comptez, ajoutez <b>'+horsH+' h</b>. <b>Hors total</b> \u2014 je pr\u00e9f\u00e8re le dire que le compter.</span></div></div>'
     +'<div class="mvt-add-plus"><div class="ph">Et ce qui ne se compte pas en heures</div>'
     +'<div class="mvt-add-pr"><span class="pi">\u{1F9FE}</span><span><b>La tra\u00e7abilit\u00e9, sans y penser.</b> Du traitement au stock : registre phyto, d\u00e9lais de rentr\u00e9e, bilan mati\u00e8re \u2014 pr\u00eats le jour du contr\u00f4le.</span></div>'
     +'<div class="mvt-add-pr"><span class="pi">\u{1F4C5}</span><span><b>La m\u00e9moire du domaine.</b> Rendements par parcelle, co\u00fbts, avancement : chaque mill\u00e9sime se garde et se compare au suivant.</span></div>'
     +'<div class="mvt-add-pr"><span class="pi">\u{1F9ED}</span><span><b>Et d\u00e9cider.</b> La date qui ne rentre pas, le renfort qui boucle : \u00e7a, \u00e7a ne se compte pas en minutes.</span></div></div>'
-    +'<div class="mvt-add-eur">L\u2019abonnement Domaine : <b>79 \u20ac/mois</b> ('+ABO+' \u20ac/an, '+ABOAN+' \u20ac en formule annuelle). \u00c0 '+TAUX+' \u20ac de l\u2019heure charg\u00e9e, il vous co\u00fbte <b>'+hAbo+' h de main-d\u2019\u0153uvre par an</b>. Il vous en rend <b>'+Math.round(totalH)+'</b>.<br>L\u2019installation, une fois : <b>'+INST+' \u20ac</b> \u2014 '+hInst+' h, la premi\u00e8re ann\u00e9e seulement.</div>'
-    +'<div class="mvt-add-inst">Autrement dit : Ma Vigne vous co\u00fbte <b>'+eurH+' \u20ac l\u2019heure rendue</b>. <b>'+eurH1+' \u20ac</b> la premi\u00e8re ann\u00e9e, installation comprise.<br><b>Votre heure charg\u00e9e vaut 20 \u00e0 25 \u20ac.</b></div>'
+    +'<div class="mvt-add-inst">Quinze jours sur <b>vos</b> parcelles, vos surfaces, votre bar\u00e8me. Vous compterez vous-m\u00eame.</div>'
     +'<a class="mvt-add-cta" href="/essai.html" target="_blank" rel="noopener">Essayer 15 jours sur mes parcelles</a>'
     +'<button class="mvt-add-ghost" id="mvt-add-ch" type="button"><span>Voir les '+_MVT_CHAPS.length+' \u00e9crans \u203a</span></button>'
     +'<div class="mvt-add-sign">\u2014 Nicolas, chef d\u2019\u00e9quipe viticole en C\u00f4te de Nuits.<br>Compt\u00e9 sur mes propres journ\u00e9es.</div>'

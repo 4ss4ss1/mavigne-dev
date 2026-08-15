@@ -1,4 +1,35 @@
-// MA VIGNE — Service Worker v6.78
+// MA VIGNE — Service Worker v6.79
+// v6.79 (15/08/2026) — CINQ VIGNETTES RECALEES A L'OEIL, ET PLUS AUCUN MONTANT.
+//   ⚠️ 144 assertions vertes n'avaient PAS vu ces cinq-la. Un harnais verifie
+//     ce qu'on facture et ce qu'on vise ; il ne voit pas un projecteur mal pose
+//     ni une phrase qui decrit un autre ecran. Sur une demo, l'assertion la
+//     moins chere reste un oeil.
+//   ★★★ 4/19 — L'OUVRIER ATTERRIT SUR SA LISTE DE PARCELLES, pas sur l'accueil.
+//     `pTacheFilter` se pose DANS ce moment : sans filtre, _pvActions sort vide
+//     et il n'y a aucune coche a montrer.
+//   ★★★ 5/19 — LE MEME BOUTON DES DEUX COTES. Le moment disait « notez-le » : on
+//     ne voyait ni que l'ouvrier coche lui-meme, ni qu'un oubli se rattrape.
+//     canWrite() est vrai pour l'ouvrier comme pour l'admin — c'est ce qui
+//     repond a « et s'il oublie ? », la vraie objection.
+//   ★★ 8/19 — LE TEXTE PARLAIT D'UN CHRONO QU'ON NE VOIT PAS.
+//     _chronoEnabledForSession exige CONFIG.chrono_mode==='on' ET une mesure
+//     ouverte ; le scenario n'en ouvre aucune. La liste des sessions porte deja
+//     l'argument : les parcelles FAITES, cochees une par une.
+//   ★★★ 13/19 — « Jean, une heure de retard » NE SE VOIT PAS : il est marque
+//     absent. DEFAUT PRODUIT, pas defaut de demo : _pl2Cell rend TOUTE entree
+//     `absent:true` par la meme croix rouge, avant meme de lire `motif` et
+//     `motif_h`. Un retard d'une heure et une journee entiere s'affichent
+//     pareil. Narration recalee ; le correctif du tableau est au backlog.
+//   ★★ 15/19 — LA SURBRILLANCE SUIVAIT LE MAUVAIS BLOC. Le texte parle de
+//     marge, de charge et de cadence : tout cela vit dans `.pil-cockpit-card`.
+//     La cible etait `.pil-dec`, le bloc D'EN DESSOUS — qui contient la carte
+//     « Traiter ? » deja eclairee au moment 2 (§35e, encore).
+//   ★★★ ZERO MONTANT DANS L'ADDITION. Elle donnait un cout « par heure rendue »
+//     apres avoir donne une soustraction en euros. Les deux sont partis : ni
+//     symbole EUR, ni abonnement, ni installation, ni taux horaire. Le gain se
+//     dit en heures et en journees de bureau, ligne par ligne, chacune adossee
+//     a un ecran. Le prix appartient a la conversation, pas a la demonstration
+//     — et le harnais l'interdit desormais (4 motifs + contre-epreuve).
 // v6.78 (15/08/2026) — LA VISITE GUIDEE, REVUE DE BOUT EN BOUT.
 //   ★★★ TROIS MOMENTS QUI MANQUAIENT. « Ce que voit Jean » (bascule reelle sur
 //     le role ouvrier) : l'objection numero un d'un patron n'est pas le prix,
@@ -1751,7 +1782,7 @@
 // v2.22 — Fix profils vides : guard vide dans loadData() pour MEMBRES/SAISONS/TACHES
 // v2.17 — Onboarding intégré + tenantId · v2.06 — Firebase Auth · v2.00–v2.05 — divers
 const DEBUG = self.location.hostname === 'localhost' || self.location.hostname === '127.0.0.1';
-const CACHE_NAME   = 'mavigne-v6.78';
+const CACHE_NAME   = 'mavigne-v6.79';
 const TENANT_CACHE = 'mavigne-tenant';   // Cache persistant — préservé à chaque mise à jour SW
 const SYNC_TAG     = 'mavigne-sync';
 
@@ -1767,7 +1798,7 @@ const CDN_URLS = [
 ];
 
 self.addEventListener('install', event => {
-  if(DEBUG) console.log('[SW] Ma Vigne v6.78 installé');
+  if(DEBUG) console.log('[SW] Ma Vigne v6.79 installé');
   event.waitUntil(
     caches.open(CACHE_NAME).then(async cache => {
       // ── Cœur applicatif : STRICT (mise à jour ATOMIQUE) ──
@@ -1783,7 +1814,7 @@ self.addEventListener('install', event => {
 });
 
 self.addEventListener('activate', event => {
-  if(DEBUG) console.log('[SW] Ma Vigne v6.78 activé');
+  if(DEBUG) console.log('[SW] Ma Vigne v6.79 activé');
   event.waitUntil(
     caches.keys().then(keys =>
       Promise.all(

@@ -116,11 +116,19 @@ export function jouer(src = SRC, tout = null, muet = false) {
   for (const f of [...appeles].sort())
     t(`« ${f} » est définie`, new RegExp('function\\s+' + f + '\\s*\\(').test(corpsSrc));
 
-  // 7 — La clôture ne soustrait plus, et reste en heures.
+  // 7 — LA CLÔTURE NE COMPTE QU'EN HEURES. Aucun montant, nulle part : ni
+  //   symbole €, ni prix d'abonnement, ni prix d'installation, ni taux horaire.
+  //   Le prix appartient à la conversation, pas à la démonstration.
   const add = corps(bloc(src, 'function _mvtAddition(){', '\n}'));
-  t('la clôture ne pose plus de soustraction en euros', !/\u2212|premi\\u00e8re ann\\u00e9e, tout compris/.test(add));
-  t('la clôture dit un coût par heure rendue', /heure rendue/.test(add));
+  for (const [nom, motif] of [
+    ['aucun symbole €', /\u20AC|\\u20AC/],
+    ['aucun prix d\'abonnement', /\b(79|948|790)\b/],
+    ['aucun prix d\'installation', /\b990\b/],
+    ['aucune soustraction', /\u2212/],
+  ]) t('clôture : ' + nom, !motif.test(add));
   t('le total est affiché en heures', /Math\.round\(totalH\)/.test(add));
+  t('les journées de bureau sont dites', /journ\\u00e9es de bureau/.test(add));
+  t('la ligne hors total est affichée', /horsH/.test(add));
 
   return { ok, ko, totalH, horsH: H.min * H.freq / 60, moments: M.length };
 }

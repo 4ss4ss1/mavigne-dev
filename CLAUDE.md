@@ -3465,6 +3465,8 @@ la plaquette et clique la démo voit du simple au double** : ça n'attaque pas l
 la crédibilité du vendeur.
 ★ **Depuis le 15/08 (§43), la source unique est `DEMO2_CREDITS`** : **≈ 127 h démontrées**, plus
 **37 h hors total** (« retrouver l'info »), soit **164 h** pour qui compte la ligne molle.
+★★★ **Et la démo ne dit AUCUN montant** : ni abonnement, ni installation, ni conversion en euros.
+Le tarif se dit de vive voix, une fois le besoin établi.
 ⚠️ **`mvprint.py` (215 h) et l'argumentaire oral ne sont PAS encore alignés** — voir backlog.
 
 **Essai** : **15 jours**, claim `trial_until` + `plan` ; bandeau J-X ; à l'expiration **lecture
@@ -3955,16 +3957,45 @@ pour une fin de mois) ; le compteur compte **ce que cette journée-là fait gagn
 total sur les 19 moments). `min:0` marque une ligne **démontrée sans rien créditer** — sinon
 « aujourd'hui » cesse d'être crédible.
 
-### ★★★ L'addition — la clôture ne se saborde plus
+### ★★★ L'addition — ELLE NE COMPTE QU'EN HEURES. AUCUN MONTANT.
 
-**Avant** : `2 200 € − 948 − 990 = **+260 €** la première année`. Après quatre minutes de
-démonstration, la dernière chose lue était un gain de 260 €. **Une marge plus mince que le
-scepticisme du lecteur est un couteau qu'on lui tend** — et une soustraction s'audite au lieu de
-se ressentir.
-**Maintenant** : le gain reste en **heures** (§26), le coût se dit **en heures de main-d'œuvre**
-(47 h d'abonnement, 50 h d'installation à 20 €/h), et la clôture donne un **seuil horaire** que le
-lecteur valide avec **son** taux : *« 7,45 € l'heure rendue, 15,22 € la première année. Votre heure
-vaut 20 à 25. »* Quel que soit le chiffre qu'il a en tête, il fait le calcul dans le bon sens.
+Elle est passée par **deux états faux** avant celui-ci :
+① `2 200 € − 948 − 990 = **+260 €** la première année` — après quatre minutes de démonstration, la
+dernière chose lue était un gain de 260 €. **Une marge plus mince que le scepticisme du lecteur
+est un couteau qu'on lui tend**, et une soustraction s'audite au lieu de se ressentir.
+② un coût « **par heure rendue** » (7,45 €). Plus solide — mais **toujours un prix**, et un prix
+posé sur un écran ne se discute pas, il se compare.
+
+★★★ **DÉCISION DE NICO (15/08) : ZÉRO MONTANT DANS LA DÉMO.** Ni symbole €, ni abonnement, ni
+installation, ni taux horaire. Le gain se dit en **heures** et en **journées de bureau**, ligne par
+ligne, chacune adossée à un écran qu'on vient de voir. **Le prix appartient à la conversation qui
+suit, pas à la démonstration.** Clôture : *« Quinze jours sur vos parcelles, vos surfaces, votre
+barème. Vous compterez vous-même. »*
+⚠️ **Le harnais interdit mécaniquement tout montant dans `_mvtAddition`** — quatre motifs (€,
+79/948/790, 990, le signe −), et la contre-épreuve y rouvre un prix pour vérifier que ça rougit.
+
+### ★★★ CINQ VIGNETTES CORRIGÉES PAR L'ŒIL DE NICO
+
+**144 assertions vertes, et cinq moments faux quand même.** Un harnais vérifie ce qu'on facture et
+ce qu'on vise ; **il ne voit pas un projecteur mal posé ni une phrase qui décrit un autre écran.**
+
+- **4/19** — l'ouvrier atterrissait sur l'accueil. Son écran, c'est **la liste de ses parcelles**
+  filtrée sur la tâche du jour. `pTacheFilter` se pose **dans ce moment-là** : sans filtre,
+  `_pvActions` sort vide et il n'y a aucune coche à montrer.
+- **5/19** — la peur n'était pas levée. On ne voyait ni que **l'ouvrier coche lui-même**, ni
+  **qu'un oubli se rattrape**. `canWrite()` est vrai pour l'ouvrier comme pour l'admin : **le même
+  bouton des deux côtés**. C'est ce qui répond à « et s'il oublie ? », la vraie objection.
+- **8/19** — le texte parlait d'un **chrono qu'on ne voit pas** : `_chronoEnabledForSession` exige
+  `CONFIG.chrono_mode==='on'` **et** une mesure ouverte, et le scénario n'en ouvre aucune. La liste
+  des sessions porte déjà l'argument — les parcelles faites, cochées une par une.
+- **13/19** — ⚠️⚠️ **DÉFAUT PRODUIT, PAS DÉFAUT DE DÉMO** : `_pl2Cell` rend **toute** entrée
+  `absent:true` par une croix rouge « Absence », **avant même de lire** `motif` / `motif_h`.
+  **Un retard d'une heure et une journée entière s'affichent à l'identique.** Backlog.
+- **15/19** — la cible était `.pil-dec`, le bloc **sous** le cockpit, qui contient la carte
+  « Traiter ? » **déjà éclairée au moment 2** : deux fois la même image (§35e, encore).
+
+★ **La leçon** : sur une démo, **l'assertion la moins chère est un œil**. Le harnais empêche la
+régression ; il ne remplace pas le fait de regarder les 19 écrans une fois.
 
 ### Les défauts de moteur corrigés
 
@@ -4064,6 +4095,20 @@ radios/cases, section « pièces à joindre » explicite.
 
 ## 28. État courant & backlog
 
+### ✅ LA FUSION DE `pilotage.js` EST FAITE (commit `2e002ae`)
+
+**Le commit `banc` avait remplacé `src/pilotage.js` par un fichier d'une autre lignée** — 1 690
+lignes changées, 1 164 suppressions : `_mvInfoBtn` 28→0, `MV_INFO` 4→0, `_PIL_ST_V` 4→0,
+`_pecFiabCard` 4→0, `_pilTile` passé de 9 à 8 arguments. **Signature d'un fichier restauré depuis
+une sauvegarde, pas d'une décision** : `utils.js` gardait ses 11 fiches `MV_INFO` sans pastille où
+les poser, et la CI lançait toujours trois harnais devenus rouges.
+⚠️ **Les deux lignées ne se recouvraient pas** — `7a509b4` portait l'ergonomie sans
+`_PIL_CMP_RECOUV`, `c638402` la cadence sans l'ergonomie : **aucun n'était un sur-ensemble de
+l'autre**, il a fallu fusionner à la main. **Fait par Nico.** Vérifié : 9 660 lignes, les six
+marqueurs présents, `banc` + `garde-projection` + les trois harnais Pilotage tous verts.
+★ **La leçon** : quand un fichier maigrit de 600 lignes entre deux clones, **c'est le nombre de
+lignes qu'il faut regarder en premier** — pas le diff, qui noie le signal dans le bruit.
+
 ### ⚠️ À FAIRE AVANT DE DÉPLOYER LE CHANTIER §43 (la visite guidée)
 
 1. ⚠️⚠️⚠️ **ALIGNER LES TROIS CHIFFRES DU ROI.** La démo dit **127 h (+37 hors total)**.
@@ -4111,6 +4156,21 @@ radios/cases, section « pièces à joindre » explicite.
 - **Mesurer si les fiches « i » sont ouvertes.** Tout ce chantier parie qu'un vigneron touche la
   pastille quand il en a besoin. **Ce pari n'est pas vérifié.** Si personne ne l'ouvre jamais, c'est
   que le texte manque là où il était, pas qu'il était de trop.
+
+### NOUVEAU AU BACKLOG (issu de §43)
+
+- ⚠️⚠️ **UN RETARD D'UNE HEURE ET UNE ABSENCE D'UNE JOURNÉE S'AFFICHENT PAREIL.** `_pl2Cell` :
+  `if(e&&e.absent) return {txt:'✕', cls:'pl2c-abs'}` — la croix rouge tombe **avant** toute lecture
+  de `motif` et de `motif_h`. Or le motif `retard` porte `heures:true` : **la donnée est là,
+  l'affichage l'écrase.** Trouvé à l'œil sur la démo, **mais c'est le produit** : chez MG et
+  Chapelle, un retard saisi ressemble à une journée perdue sur le tableau. Piste : un glyphe
+  distinct (⏰ + les heures) quand `motif_h > 0`, et la légende qui suit.
+- **Le chrono tracteur n'est jamais visible en démo** (`CONFIG.chrono_mode` à 'off', aucune mesure
+  ouverte). Soit on le sème pour en faire un moment — c'est l'argument de précision le plus fort
+  du module — soit on l'assume hors parcours. Aujourd'hui : hors parcours.
+- **Deux harnais périmés rougissent la CI** : `harnais-bandeau-essai` (épinglé sur `APP_VERSION
+  6.13`) et `harnais-cadence-escalier` (règle d'alerte antérieure). Un rouge permanent masque le
+  prochain vrai rouge.
 
 ### ⚠️ À FAIRE AVANT DE DÉPLOYER LE CHANTIER §40
 
