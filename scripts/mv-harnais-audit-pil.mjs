@@ -27,13 +27,28 @@ T('A1 mesuree a chaque repeinte du fil',   /_pilStickyH\(\)/.test(corps('_pilPor
 // ── A2/A4/B6 : la barre et les titres ──
 T('A2 le niveau ① a un titre',             /an:'L\\'ann\u00e9e/.test(NC));
 T('A4 « Avancement » ne titre plus',       !/avc:'Avancement'/.test(NC));
-T('A4 « Decider » ne titre plus',          !/sim:'D\u00e9cider/.test(NC));
+// ★★★ CLIQUET INVERSE LE 15/08 — ET C'EST UN REVIREMENT ASSUME.
+//   §34 lot 5 avait declare « Decider » mort : la barre etait alors une liste de
+//   SUJETS, et un verbe d'action y detonnait. La barre est un axe de ZOOM depuis,
+//   et l'onglet `sim` contient la SEULE carte du module qui ecrive une donnee
+//   partagee (l'ordre de passage → CONFIG.ordre_passage_t → ecran de l'equipe).
+//   Un onglet nomme « Simuler » promettait qu'il ne s'y passe rien : c'etait faux.
+//   ⚠️ L'assertion ne DISPARAIT pas, elle CHANGE DE SENS. Un cliquet qu'on retire
+//     ne protege plus rien ; celui-ci garde desormais le nom neuf.
+T('A4 « Decider » titre a nouveau (revirement §34 lot 5)', /sim:'Décider — /.test(NC));
+T('A4 « Simuler » ne titre plus',          !/sim:'Simuler/.test(NC) && !/'Simuler'\]/.test(NC));
+T('A4 la cle `sim` n\'a PAS bouge',           /\['sim','/.test(NC) && /\bsim:1/.test(NC));
 T('B6 l\'onglet ③ ne promet plus de taches', !/L\\'\u00e9quipe & les t\u00e2ches/.test(NC));
 T('B6 la cle `equ` n\'a PAS bouge',        /\['equ','\\uD83D\\uDC65'/.test(NC));
 T('A4 libelle d\'onglet echappe',          /_pilEsc\(t\[2\]\)/.test(NC));
 
 // ── A3 : la memoire du niveau ① ──
-T('A3 les deux cles sont aux defauts',     /an_cadres:1, an_frise:1/.test(NC));
+// ⚠️ L'ASSERTION EXIGEAIT L'ADJACENCE, PAS LA PRESENCE. Elle rougissait des
+//   qu'une cle du meme onglet s'intercalait — ici `an_budget`. Son INTENTION
+//   etait « les deux cles sont aux defauts » : on la teste, une par une.
+T('A3 an_cadres est aux defauts',          /\ban_cadres:1/.test(NC));
+T('A3 an_frise est aux defauts',           /\ban_frise:1/.test(NC));
+T('A3 an_budget est aux defauts',          /\ban_budget:1/.test(NC));
 T('A3 avc_etp a quitte les defauts',       !/avc_etp:1/.test(NC));
 T('A3 on migre AVANT de normaliser',       /_pilNormalize\(_pilMigrShow\(JSON\.parse\(raw\)\)\)/.test(corps('_pilLoadState')));
 T('A3 la migration ne passe plus apres',   !/return _pilMigrShow\(n\)/.test(corps('_pilLoadState')));
@@ -63,8 +78,19 @@ T('A9 plus de « active-les »',             !/active-les via/.test(NC));
 T('A9 plus de « Decoche »',                !/D\u00e9coche pour retirer/.test(NC));
 
 // ── A10 : tiret, jamais zero ──
-T('A10 la photo distingue panne et zero',  /!D\.cu \|\| !D\.cu\.avail/.test(corps('_pilPhotosHtml')));
-T('A10 la panne porte un drapeau rouge',   /_pilFlag\('r','Ouvrez Conformit/.test(NC));
+// ★ LA PHOTO CONFORMITE A QUITTE LA BANDE (le cuivre roule sur sept ans, il
+//   ignore la portee — il n'avait pas sa place dans une ligne qui se recadre).
+//   ⚠️ LA GARANTIE, ELLE, NE DISPARAIT PAS : « un calcul qui n'a pas abouti
+//     s'ecrit TIRET, jamais zero — un zero est une mesure ». Elle se verifie
+//     desormais la ou le cuivre vit : l'onglet Conformite.
+T('A10 Conformite distingue la panne du zero',
+  /if\(!cu\.avail\)\{/.test(corps('_pilTabCfm')) && /if\(!cu\.rows\.length\)\{/.test(corps('_pilTabCfm')));
+T('A10 la panne rend un tiret, pas un zero',
+  /!cu\.avail[\s\S]{0,220}_pilStat\('\\u2014'/.test(corps('_pilTabCfm')));
+T('A10 le zero mesure, lui, s\'ecrit zero',
+  /!cu\.rows\.length[\s\S]{0,200}_pilStat\('0'/.test(corps('_pilTabCfm')));
+T('A10 la bande ne compte plus que trois photos',
+  /\+pTrav\+pEff\+pBud\+'<\/div>'/.test(corps('_pilPhotosHtml')) && !/pCfm/.test(NC));
 
 // ── A11/A12/A13 ──
 T('A11 le clic sur photo ouverte agit',    /_pt===_PIL_TAB/.test(NC) && /pil-content/.test(NC));
@@ -84,7 +110,21 @@ T('B5 aucun sixieme selecteur',            !/_PIL_ECOSEL|_PIL_CFMSEL|_PIL_CAVSEL
 T('compat visite : data-tab eco/sim',      /data-tab="'\+t\[0\]\+'"/.test(NC));
 T('compat visite : .pil-dec',              /pil-dec/.test(NC));
 T('compat visite : .pil-cockpit-card',     /pil-cockpit-card/.test(NC));
-T('compat : data-pid traitement',          /_pilTile\('traitement'/.test(NC));
+// ⚠️ `_pilTile('traitement')` N'EXISTE PLUS : la fenetre de traitement etait
+//   affichee a DEUX endroits pour une seule source (_pilTreatDays). Elle a
+//   fusionne dans « Traiter ? », sur Aujourd'hui — c'est une decision du jour.
+//   VERIFIE AVANT DE RETIRER CE POINT : la visite guidee d'app.js vise
+//   `.pil-tile[data-pid="cuivre"]`, PAS « traitement ». Aucun spotlight ne
+//   pointe dans le vide. (C22 n'aurait pas pu le dire : il verifie le TOKEN
+//   `pil-tile`, pas le selecteur d'attribut complet.)
+T('compat : la visite guidee vise une tuile qui existe',
+  /_pilTile\('cuivre'/.test(NC));
+T('la fenetre de traitement n\'a plus qu\'un seul rendu',
+  !/_pilPanelTraitement/.test(NC) && !/mat_traitement/.test(NC));
+T('… et sa fiche reste posee sur la carte survivante',
+  /_mvInfoBtn\('pil\.traitement'\)/.test(corps('_pilCkTraiter')));
+T('… qui porte bien les cinq jours',
+  /_pilTreatRows\(days\)/.test(corps('_pilCkTraiter')));
 
 console.log(ko ? ('\n  '+ko+' ROUGE(S) sur '+n) : ('\n  '+n+' assertions vertes'));
 process.exit(ko?1:0);

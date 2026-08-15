@@ -127,15 +127,41 @@ for (const [nom, ph] of partis) {
    Une carte sans ligne de cadre est une carte dont on ne sait pas sur quoi le
    chiffre a ete calcule. Une fiche sans pastille est une fiche inatteignable.
    On exige les trois pour chacune des six. */
-const CARTES = ['equipe','presences','tracteur','gnr','phyto','traitement','capacite'];
+// ⚠️ « traitement » A QUITTE CETTE LISTE le 15/08. La fenetre de traitement
+//   etait rendue a DEUX endroits pour une seule source (_pilTreatDays) : elle a
+//   fusionne dans « Traiter ? » (Aujourd'hui), qui n'est pas une _pilTile mais
+//   une .pil-tile2. Sa garantie est reprise plus bas, sous sa forme neuve.
+// ⚠️ « phyto » reste dans la liste : la carte existe toujours, a l'identique.
+//   Elle a seulement change d'ONGLET (materiel → Conformite). Ce controle-ci
+//   verifie sa forme, pas sa place.
+const CARTES = ['equipe','presences','tracteur','gnr','phyto','capacite'];
 for (const c of CARTES) {
   const app = [...PIL.matchAll(new RegExp("_pilTile\\('" + c + "'[\\s\\S]{0,900}?\\);", 'g'))];
   t(`la carte « ${c} » est rendue`, app.length >= 1);
-  t(`« ${c} » porte sa fiche`, app.every(m => m[0].includes("'pil." + c + "'")),
-    app.length ? 'appel sans cle' : '');
+  // ⚠⚠ FAUX-VERT FERME : `[].every(...)` rend TRUE. Sans le `app.length >= 1`,
+  //   une carte supprimee sortait « pas rendue ✗ » mais « porte sa fiche ✓ » et
+  //   « porte une ligne de cadre ✓ » — deux verts sur zero appel. Vecu le 15/08.
+  t(`« ${c} » porte sa fiche`,
+    app.length >= 1 && app.every(m => m[0].includes("'pil." + c + "'")),
+    app.length ? 'appel sans cle' : 'aucun appel');
   t(`« ${c} » porte une ligne de cadre (jamais null)`,
-    app.every(m => !/,\s*null,\s*null,/.test(m[0].replace(/\n\s*/g,' '))));
+    app.length >= 1 && app.every(m => !/,\s*null,\s*null,/.test(m[0].replace(/\n\s*/g,' '))));
 }
+
+/* « Traiter ? » : la carte qui a absorbe la fenetre de traitement. Ce n'est pas
+   une _pilTile — elle vit dans la grille .pil-dec du cockpit — donc on verifie
+   les trois memes choses sous sa forme propre. */
+const CK = (() => { const i = PIL.indexOf('function _pilCkTraiter('); let d = 0, s = PIL.indexOf('{', i);
+  for (let k = s; k < PIL.length; k++) { if (PIL[k] === '{') d++; else if (PIL[k] === '}') { d--; if (!d) return PIL.slice(s, k + 1); } }
+  return ''; })();
+t('« Traiter ? » existe', CK.length > 0);
+t('« Traiter ? » porte la fiche pil.traitement', CK.includes("_mvInfoBtn('pil.traitement')"));
+t('« Traiter ? » porte les cinq jours', CK.includes('_pilTreatRows(days)'));
+t('… derriere un depliant, pas etires dans la grille', CK.includes('<details class="pil-t5"'));
+t('le verdict du jour reste en grand, jamais replie', /pil-big[\s\S]{0,80}\+big\+/.test(CK));
+t('le dessin des cinq jours est PARTAGE, pas recopie',
+  (PIL.match(/_pilTreatRows\(/g) || []).length === 2);
+t('plus aucun second rendu de la fenetre de traitement', !PIL.includes('_pilPanelTraitement'));
 
 /* ══ 5 ter. LES DOUBLONS TROUVES EN DEPLACANT LE TEXTE ══
    Le meme nombre affiche deux fois sur une carte, c'est le lecteur qui doute. */
