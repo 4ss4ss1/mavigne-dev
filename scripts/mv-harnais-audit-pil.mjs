@@ -47,7 +47,13 @@ T('A7 le clignotement a UN seul site',     (NC.match(/el\.style\.boxShadow='0 0 
 // ── A8 : les impasses ──
 T('A8 le helper existe',                   /function _pilEmptyGo\(txt,cible,lib\)/.test(NC));
 T('A8 il passe par la porte du diagnostic', /data-diag=/.test(corps('_pilEmptyGo')));
-T('A8 les 7 impasses l\'utilisent',        (NC.match(/_pilEmptyGo\(/g)||[]).length===8); // 7 sites + la definition
+// ⚠️ C'ETAIT UN CLIQUET A L'ENVERS. La condition « exactement 8 » rougissait des
+//   qu'on AJOUTAIT un bouton — c'est-a-dire chaque fois qu'on faisait ce que ce
+//   controle existe pour encourager. Ce qu'on veut interdire, c'est le RETOUR au
+//   texte mort : le compte ne doit jamais DESCENDRE sous les 8 d'origine.
+//   (Passe a 11 le 15/08 : contrats echus de l'Equipe, cuve GNR absente, niveau bas.)
+const _nGo = (NC.match(/_pilEmptyGo\(/g)||[]).length;
+T('A8 aucune impasse ne redevient muette (' + (_nGo-1) + ' boutons)', _nGo >= 8);
 T('A8 plus aucune impasse muette',         !/pil-empty">[^']*R\u00e9glages/.test(NC) && !/pil-empty">[^']*R\\u00e9glages/.test(NC));
 T('A8 « Saisons » n\'est plus affiche',    !/\u203a Saisons|\u203A Saisons/.test(NC));
 

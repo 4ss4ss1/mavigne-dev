@@ -23,7 +23,7 @@ export const GT_ADMIN_EMAIL = 'ngdevpro@gmail.com';
 // WHATS_NEW   : tableau vide = modal desactive pour cette version.
 // Format item : { emoji:'📅', titre:'Titre court', desc:'Phrase utilisateur.' }
 // Regle : seulement les changements visibles par les utilisateurs.
-export const APP_VERSION = '6.16';
+export const APP_VERSION = '6.17';
 // ════ Journal des nouveautés (récap cumulatif) ════
 // Une entrée par version, la PLUS RÉCENTE EN HAUT : { v:'5.10', items:[ {emoji,titre,desc}, … ] }
 // À chaque release visible → AJOUTER un bloc en tête (ne pas remplacer). items:[] = release technique (rien à afficher).
@@ -354,6 +354,12 @@ window._mvGraphRepeindre = function(){
 };
 
 export const WHATS_NEW = [
+  { v:'6.17', items:[
+    { emoji: '\u{1F465}', titre: "\u00ab\u202fL\u2019\u00e9quipe & le mat\u00e9riel\u202f\u00bb\u202f: six cartes remises \u00e0 plat",
+      desc: "Chaque carte de cet onglet affiche maintenant, <b>sans qu\u2019on la d\u00e9plie</b>, son chiffre et la ligne qui dit sur quoi il a \u00e9t\u00e9 calcul\u00e9. Le parc tracteur remonte la <b>r\u00e9vision la plus proche</b> \u2014 il fallait ouvrir la carte pour la voir. La cuve GNR affiche les <b>litres</b> plut\u00f4t que le pourcentage, parce que c\u2019est ce qu\u2019on lit pour d\u00e9cider d\u2019un plein. Le d\u00e9tail du calcul de chaque chiffre est derri\u00e8re son petit \u00ab\u202fi\u202f\u00bb." },
+    { emoji: '\u{1F517}', titre: "Les phrases qui vous envoyaient ailleurs sont devenues des boutons",
+      desc: "\u00ab\u202fCuve GNR \u00e0 renseigner (Tracteur \u203a Entretien)\u202f\u00bb, \u00ab\u202ffiches \u00e0 passer en Inactif\u202f\u00bb\u202f: il fallait lire, retenir le chemin, sortir de l\u2019\u00e9cran et retrouver le bon onglet. Ce sont d\u00e9sormais des <b>boutons</b> qui ouvrent l\u2019\u00e9cran directement, au bon endroit, avec un clignotement pour vous dire o\u00f9 regarder." },
+  ] },
   { v:'6.16', items:[
     { emoji: '\u{1F5C2}', titre: "Le Pilotage arrive rang\u00e9 : le chiffre d\u2019abord, le d\u00e9tail au besoin",
       desc: "Les blocs du Pilotage s\u2019ouvraient <b>tous en m\u00eame temps</b> d\u00e8s l\u2019arriv\u00e9e. Comme un bloc ouvert prend toute la largeur, sept indicateurs faisaient sept \u00e9crans \u00e0 faire d\u00e9filer, et l\u2019on cherchait un chiffre au milieu de ses explications. D\u00e9sormais chaque bloc est une <b>carte compacte</b>, et elles se rangent <b>c\u00f4te \u00e0 c\u00f4te</b>\u202f: sur un onglet, vous voyez tous les chiffres d\u2019un coup d\u2019\u0153il. <b>Rien n\u2019est cach\u00e9</b>\u202f: le chiffre et la ligne qui dit sur quoi il a \u00e9t\u00e9 calcul\u00e9 \u2014 sa date, sa source, son p\u00e9rim\u00e8tre \u2014 restent affich\u00e9s carte ferm\u00e9e. Touchez une carte pour voir son d\u00e9tail\u202f; elle s\u2019ouvre en grand, et la pr\u00e9c\u00e9dente se referme." },
@@ -1766,6 +1772,7 @@ var MV_AIDE = {
       ['Rien ne se saisit ici', ": tout est en lecture seule. Les chiffres viennent du journal, du planning et des sessions tracteur."],
       ['Les cartes arrivent repliées', ": chaque bloc montre son <b>chiffre</b> et la ligne qui dit sur quoi il a été calculé, même fermé — rien n’est caché. Touchez-en une pour voir son détail : elle s’ouvre en grand, et la précédente se referme, pour que les autres restent rangées côte à côte."],
       ['Le petit rond « i » dit d’où vient un chiffre', ": touchez-le, une fiche s’ouvre et explique comment ce chiffre est calculé, sur quelle fenêtre, et ce qu’il ne dit pas. Ce qui <b>cadre</b> un chiffre — sa date, sa source, son périmètre — reste toujours affiché à côté de lui, en une ligne. C’est la méthode qui se range, jamais le cadre."],
+      ['Quand il manque quelque chose, un bouton vous y emmène', ": plus de chemin à retenir. « Cuve GNR à renseigner », « fiches à passer en Inactif » — le bouton ouvre l’écran concerné, sur le bon onglet, et fait clignoter l’endroit exact une seconde."],
       _mvAideOngletsPil,
       ['La barre du haut dit où vous regardez', ": l’exercice entier, ou une campagne. Cliquez une campagne dans la frise de l’année et les quatre chiffres du haut, la frise et les tableaux de la campagne suivent. La croix revient à l’année. <b>Trois écrans ont leur propre cadre</b> et ne se recadrent pas : Économie chiffre la période consultée, la Cave suit le millésime, la Conformité roule sur sept ans — chacun l’écrit au-dessus de ses chiffres."],
       ['Les quatre chiffres du haut', "répondent aux quatre questions d’un domaine : les travaux, l’effectif, le budget, la conformité. Ils changent avec ce que vous regardez, et chacun mène à l’écran qui le détaille."],
@@ -1950,6 +1957,46 @@ export const MV_INFO = {
     'La cadence ne s\u2019applique qu\u2019au <b>reste à engager</b>, jamais à ce qui est déjà dépensé : à 100 % d\u2019avancement, la projection retombe exactement sur l\u2019engagé. Sans cette règle, l\u2019écran annonçait une fin à 37 k\u20ac alors que 79 k\u20ac étaient déjà payés — sur la même carte.',
     '<b>Un biais assumé.</b> Une entrée de planning porte des heures, jamais une activité : la cave, l\u2019atelier et le bureau restent donc dans la présence, alors que le barème ne compte que la vigne. La présence est <b>surévaluée</b>, et l\u2019indicateur penche vers « barème un peu serré ». Sur une période où la cave tourne, l\u2019écart parle surtout d\u2019elle.',
     'Quand l\u2019écart est grand, c\u2019est le <b>barème</b> qu\u2019on corrige dans Réglages \u203a Tâches, <b>jamais le taux horaire</b>.'
+  ] },
+
+  'pil.equipe': { t: 'Équipe', p: [
+    'Le compte est un nombre de <b>personnes</b>, pas de fiches. Une <b>équipe collective</b> est une seule fiche mais compte pour son effectif réel — sinon l\u2019écran afficherait « 2 actifs » en pleine vendange.',
+    'Une personne compte si elle est <b>sous contrat à la date affichée</b>, pas si sa fiche est marquée active. Un saisonnier dont le CDD s\u2019est terminé sort du compte le lendemain, même si personne n\u2019a touché à sa fiche. Passer quelqu\u2019un en « inactif » sert à ne plus avoir à le sélectionner tous les jours ; ça ne retire rien de ce qu\u2019il a fait.',
+    'Une fiche <b>sans aucune date de contrat</b> est traitée comme un CDI depuis le début : elle compte sur toutes les périodes, y compris les campagnes archivées.',
+    'Le <b>bureau</b> est compté ici, mais <b>pas</b> dans la capacité à la vigne : il ne travaille pas les rangs. C\u2019est pour ça que les deux chiffres diffèrent.'
+  ] },
+
+  'pil.presences': { t: 'Présences du jour', p: [
+    'Le compte est celui des personnes <b>au champ aujourd\u2019hui</b> : hors bureau, hors absents. Une équipe collective compte pour son effectif réel.',
+    'La source est le <b>planning</b>, jamais le journal. Le journal dit qui a travaillé sur quoi ; il ne dit pas combien d\u2019heures ni qui était là.',
+    '<b>Ce chiffre ne se compare ni au pic ni à la moyenne</b> affichés ailleurs sur cet écran : ce sont d\u2019autres fenêtres. Le pic peut tomber dans onze mois.'
+  ] },
+
+  'pil.tracteur': { t: 'Parc tracteur', p: [
+    'Le compte inclut les machines de traitement, signalées « pulvé ».',
+    'Les heures avant révision se décomptent des <b>sessions saisies</b>. Une session non saisie ne fait pas avancer le compteur : l\u2019échéance affichée est donc au plus tôt, jamais au plus tard.',
+    'Une machine <b>en réparation</b> reste dans le parc et dans le compte — elle existe toujours, elle n\u2019est simplement pas disponible. Le nombre en orange à côté du total dit combien.'
+  ] },
+
+  'pil.gnr': { t: 'Cuve GNR', p: [
+    'Le niveau est <b>calculé, pas mesuré</b> : appoints saisis moins la consommation des sessions. Il n\u2019y a pas de jauge connectée à la cuve. Un plein oublié ou une session non saisie le fait dériver.',
+    'Le <b>seuil bas</b> est celui que vous avez réglé dans Tracteur \u203a Entretien, pas une valeur du logiciel.',
+    'Le prix au litre utilisé dans les budgets est la <b>moyenne pondérée des appoints</b> saisis. Sans aucun appoint, le carburant reste à <b>zéro</b> dans tous les coûts — pas « à peu près », à zéro.'
+  ] },
+
+  'pil.phyto': { t: 'Registre phyto', p: [
+    'Un <b>passage</b> compte pour une intervention, quel que soit le nombre de produits mélangés dans la cuve.',
+    'Les produits sont rattachés au <b>catalogue officiel E-Phy</b> (ANSES). C\u2019est lui qui porte les usages autorisés, les doses homologuées et les délais.',
+    'L\u2019<b>IFT réel</b> — dose appliquée divisée par dose homologuée — demande une dose structurée à la saisie. Sans elle, ni l\u2019IFT ni le coût des produits ne peuvent être calculés.',
+    'Ce compte est celui de la <b>campagne consultée</b>. Le cuivre, lui, se suit sur sept ans glissants : il a son propre écran, dans Conformité.'
+  ] },
+
+  'pil.traitement': { t: 'Fenêtre de traitement', p: [
+    'Les créneaux sont calculés sur les <b>prévisions horaires AROME</b> de Météo-France, avec trois conditions réunies sur la même heure : <b>sec</b> (moins de 0,1 mm), <b>vent sous 19 km/h</b>, <b>température sous 25 °C</b>.',
+    'Au-delà de 25 °C, risque de <b>phytotoxicité</b> — soufre, cuivre, foliaires — et efficacité en baisse. Au-delà de 19 km/h, l\u2019application est <b>interdite</b>.',
+    'Le badge « lessivage » signale une <b>pluie annoncée dans les heures qui suivent</b> la fin du créneau : le produit part avant d\u2019avoir agi.',
+    '<b>La météo ne dit rien de vos obligations.</b> Vérifiez vous-même le délai avant récolte (DAR), le délai de rentrée (DRE) et la zone non traitée (ZNT) du produit choisi.',
+    '⚠️ Ce n\u2019est <b>pas</b> un risque maladie. Ma Vigne ne modélise ni mildiou ni oïdium : un modèle faux serait pire que rien.'
   ] },
 
   'pil.cadres': { t: 'Pourquoi les deux totaux diffèrent', p: [

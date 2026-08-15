@@ -113,6 +113,44 @@ for (const [nom, ph] of partis) {
   t(nom + ' est dans la fiche', txt.includes(ph) || txt.includes(ph.replace(/\u2019/g, "'")));
 }
 
+/* ══ 5 bis. « L'EQUIPE & LE MATERIEL » : SIX CARTES, SIX FICHES, SIX CADRES ══
+   Une carte sans ligne de cadre est une carte dont on ne sait pas sur quoi le
+   chiffre a ete calcule. Une fiche sans pastille est une fiche inatteignable.
+   On exige les trois pour chacune des six. */
+const CARTES = ['equipe','presences','tracteur','gnr','phyto','traitement','capacite'];
+for (const c of CARTES) {
+  const app = [...PIL.matchAll(new RegExp("_pilTile\\('" + c + "'[\\s\\S]{0,900}?\\);", 'g'))];
+  t(`la carte « ${c} » est rendue`, app.length >= 1);
+  t(`« ${c} » porte sa fiche`, app.every(m => m[0].includes("'pil." + c + "'")),
+    app.length ? 'appel sans cle' : '');
+  t(`« ${c} » porte une ligne de cadre (jamais null)`,
+    app.every(m => !/,\s*null,\s*null,/.test(m[0].replace(/\n\s*/g,' '))));
+}
+
+/* ══ 5 ter. LES DOUBLONS TROUVES EN DEPLACANT LE TEXTE ══
+   Le meme nombre affiche deux fois sur une carte, c'est le lecteur qui doute. */
+/* §34g : la phrase survit dans le commentaire qui documente le registre. */
+t('Phyto ne redit plus son total dans son corps',
+  !PILNU.includes("interventions enregistrées"));
+t('GNR ne redit plus ses litres dans son corps',
+  !/pil-xxl[\s\S]{0,40}_pilNum\(niveau\)/.test(PIL) && !/31px[^\n]*_pilNum\(niveau\)/.test(PIL));
+t('les criteres de traitement ont quitte l\'ecran',
+  !PIL.includes('phytotoxicité') && !PIL.includes('DAR / DRE / ZNT'));
+t('… et sont dans la fiche',
+  txt.includes('phytotoxicité') && txt.includes('ZNT'));
+t('« hors capacité vigne » a quitte l\'ecran', !nu(PIL).includes('hors capacité vigne'));
+t('… et est dans la fiche', txt.includes('capacité à la vigne'));
+
+/* ══ 5 quater. LA CIBLE HORS REGLAGES ══ */
+t('la cible « entretien » existe', /entretien: \['tracteur'/.test(PILNU));
+t('_pilGo sait appeler un autre commutateur que switchReglTab',
+  /var _sw = C\[3\] \|\| 'switchReglTab'/.test(PILNU));
+t('le commutateur vise existe bien sur window',
+  fs.readFileSync('src/tracteur.js','utf8').includes('window.switchTracOnglet'));
+t('les sept cibles d\'origine gardent leur forme a trois elements',
+  ['saisons','taches','dens','secteurs','equipe','tracteurs'].every(k =>
+    new RegExp(k + ":\\s*\\['reglages',").test(PILNU)));
+
 /* ══ 6. LES DEUX DETTES DE §34i SOLDEES ══ */
 t('_PIL_SEM ne se declare plus dans le module', !/var _PIL_SEM\s*=/.test(PILNU));
 t('_PIL_SEM est exporte par utils.js', /export const _PIL_SEM = \{/.test(UNU));

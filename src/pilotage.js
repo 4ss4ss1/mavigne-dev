@@ -790,16 +790,20 @@ function _pilPanelEquipe(d){
     }
     return _pilLi((m.nom||'?').charAt(0).toUpperCase(), c, m.nom||'—', role, null);
   }).join('') || '<div class="pil-empty">Aucun membre actif</div>';
-  // Sous-titre : bureau + contrats echus. Sans ce rappel, l'effectif baisse du jour
-  // au lendemain sans que rien n'explique pourquoi (cf. bloc EFFECTIF).
+  // ★ LE SOUS-TITRE PORTAIT TROIS CHOSES DE NATURES DIFFERENTES, a la file :
+  //   la composition (cadre), « hors capacite vigne » (methode), et « fiches a
+  //   passer en Inactif » (une action a executer de memoire). Chacune part ou
+  //   elle doit : la ligne de cadre, la fiche « i », un bouton.
   var _sub=[];
-  if(nB>0) _sub.push(nB+' au bureau (hors capacité vigne)');
+  if(_nColl>0) _sub.push(_nColl+' équipe'+(_nColl>1?'s':'')+' collective'+(_nColl>1?'s':'')+' de '+(_nPers-(d.membres.length-_nColl))+' pers.');
+  if(nB>0) _sub.push(nB+' au bureau');
   var _nF=d.nFinis||0;
-  if(_nF>0) _sub.push(_nF+' contrat'+(_nF>1?'s terminés':' terminé')+' · fiche'+(_nF>1?'s':'')+' à passer en Inactif');
-  if(_nColl>0) _sub.unshift(_nColl+' équipe'+(_nColl>1?'s':'')+' collective'+(_nColl>1?'s':'')+' · '+(d.membres.length-_nColl)+' fiche'+((d.membres.length-_nColl)>1?'s':'')+' individuelle'+((d.membres.length-_nColl)>1?'s':''));
+  // ③ « a passer en Inactif » n'est plus une phrase a retenir : c'est un bouton.
+  if(_nF>0) rows+=_pilEmptyGo(_nF+' contrat'+(_nF>1?'s terminés':' terminé')+' : '+(_nF>1?'ces fiches restent':'cette fiche reste')+' à passer en Inactif.','equipe','Réglages \u203a Équipe');
   return _pilTile('equipe','👥','#5B9B3A','Équipe',
     _pilStat(_nColl>0?_nPers:d.membres.length, _nColl>0?' personnes':' actifs', null),
-    (_sub.length?_sub.join(' · '):null), null, '<div class="pil-ip-list">'+rows+'</div>');
+    'au '+_pilDfr(_pilRefDate())+(_sub.length?(' \u00b7 '+_sub.join(' \u00b7 ')):''),
+    null, '<div class="pil-ip-list">'+rows+'</div>', 'pil.equipe');
 }
 function _pilPanelTracteur(d){
   var s=_PIL_STATE.sub||{};
@@ -817,7 +821,13 @@ function _pilPanelTracteur(d){
     return '<div class="pil-li"><span class="pil-av" style="background:#16313F;color:#4A9FC8">🚜</span><div class="pil-li-main"><div class="pil-li-t">'+_pilEsc(t.nom||'Tracteur')+(t.traitementOnly?' <span style="font-size:var(--pt-nano,9.5px);color:var(--orange)">· pulvé</span>':'')+'</div>'+sub+chips+'</div></div>';
   }).join('') || '<div class="pil-empty">Aucun tracteur</div>';
   var n=(d.tracs||[]).length;
-  return _pilTile('tracteur','🚜','#4A9FC8','Parc tracteur', _pilStat(n,' tracteur'+(n>1?'s':''), d.nRepar?('🔧 '+d.nRepar):null), null, null, '<div class="pil-ip-list">'+rows+'</div>');
+  // ① Le cadre remonte l'echeance la plus proche : c'est la seule chose qu'on
+  //   vient verifier sans deplier. Il fallait ouvrir la carte pour la voir.
+  var _pr=null;
+  (d.tracs||[]).forEach(function(t){ if(t.revReste!=null && (_pr===null || t.revReste<_pr.revReste)) _pr=t; });
+  var _cad = _pr ? ('prochaine révision dans '+_pilNum(_pr.revReste)+' h \u00b7 '+_pilEsc(_pilTnom(_pr.nom||'')))
+                 : 'aucune échéance de révision renseignée';
+  return _pilTile('tracteur','🚜','#4A9FC8','Parc tracteur', _pilStat(n,' tracteur'+(n>1?'s':''), d.nRepar?('🔧 '+d.nRepar):null), _cad, null, '<div class="pil-ip-list">'+rows+'</div>', 'pil.tracteur');
 }
 function _pilPanelPresences(d){
   var s=_PIL_STATE.sub||{};
@@ -830,15 +840,27 @@ function _pilPanelPresences(d){
     else { lab='✕ '+(p.motif||'Absent'); col='var(--rouge)'; }
     return '<div class="pil-li"><span class="pil-av" style="background:'+c+'">'+_pilEsc((p.nom||'?').charAt(0).toUpperCase())+'</span><div class="pil-li-main"><div class="pil-li-t">'+_pilEsc(p.nom||'—')+'</div><div class="pil-li-s" style="color:'+col+';font-weight:600">'+_pilEsc(lab)+'</div></div></div>';
   }).join('') || '<div class="pil-empty">Toute l\'équipe est présente aujourd\'hui ✓</div>';
-  return _pilTile('presences','🌴','#C9A84C','Présences du jour', _pilStat((d.nPresent||0)+'/'+((d.membres||[]).length),' présents',null), null, null, '<div class="pil-ip-list">'+rows+'</div>');
+  // ① Le cadre dit CE QUI EST COMPTE et QUAND — sans ca, « 6/12 » se compare a
+  //   tort au pic ou a la moyenne, qui portent sur d'autres fenetres.
+  var _abs=list.length;
+  return _pilTile('presences','🌴','#C9A84C','Présences du jour',
+    _pilStat((d.nPresent||0)+'/'+((d.membres||[]).length),' présents',null),
+    'au champ, aujourd\u2019hui'+(_abs?(' \u00b7 '+_abs+' absence'+(_abs>1?'s':'')+' déclarée'+(_abs>1?'s':'')):''),
+    null, '<div class="pil-ip-list">'+rows+'</div>', 'pil.presences');
 }
 function _pilPanelPhyto(d){
   var rows = d.traits.slice(0,6).map(function(t){
     var nom = t.produit || t.nom || t.produitNom || 'Intervention';
     return _pilLi('🌿','#142838', nom, t.date||'', null, '#5A9FD4');
   }).join('');
-  rows += _pilLi('📋','#142838', d.traits.length+' interventions enregistrées', 'Catalogue E-Phy à jour', null, '#5A9FD4');
-  return _pilTile('phyto','🌿','#5A9FD4','Registre phyto', _pilStat(d.traits.length,' interv.',null), null, null, '<div class="pil-ip-list">'+rows+'</div>');
+  // ★ LA DERNIERE LIGNE REDISAIT LE CHIFFRE DE L'EN-TETE. « 18 interventions
+  //   enregistrees » sous un en-tete qui affiche deja « 18 interv. » n'apprend
+  //   rien ; « Catalogue E-Phy a jour » n'est pas une donnee de cette carte.
+  //   Elles disparaissent, le cadre prend le relais.
+  var _der=(d.traits[0]&&d.traits[0].date)||null;
+  return _pilTile('phyto','🌿','#5A9FD4','Registre phyto', _pilStat(d.traits.length,' interv.',null),
+    _der?('dernière le '+_pilDfr(_der)+' \u00b7 catalogue E-Phy'):'aucune intervention enregistrée',
+    null, '<div class="pil-ip-list">'+rows+'</div>', 'pil.phyto');
 }
 
 // ── Échéances par tâche (jours ouvrés de travail + fin de saison) ─────
@@ -1955,6 +1977,9 @@ function _pilPanelEcheances(d){
 
 // ── Fenêtre de traitement sur 5 jours (sec · vent < 19 km/h · sous 25°, plage 0h–24h) ──
 // Réglages anti-lessivage / probabilité de pluie (défauts)
+// Horizon de la prevision affichee. Il etait en dur dans un slice(0,5) et cite
+// nulle part ailleurs : la ligne de cadre l'annonce desormais, donc il se nomme.
+var PIL_TREAT_DAYS = 5;
 var PIL_TREAT_DRY_H=6;     // heures de séchage surveillées APRÈS la fenêtre
 var PIL_TREAT_LEACH_MM=1;  // pluie cumulée (mm) déclenchant l'alerte lessivage
 var PIL_TREAT_PP_ALERT=40; // proba de pluie (%) sur la plage déclenchant l'alerte
@@ -1976,7 +2001,7 @@ function _pilTreatDays(){
     if(!map[key]){ map[key]={ date:dt, idx:[] }; order.push(key); }
     map[key].idx.push(i);
   }
-  return order.slice(0,5).map(function(key){
+  return order.slice(0,PIL_TREAT_DAYS).map(function(key){
     var day=map[key], idx=day.idx, dt=day.date;
     var lab=(dt.toDateString()===today)?'Aujourd\'hui':(JJ[dt.getDay()]+' '+dt.getDate());
     // Meilleure (plus longue) plage continue >= 2 h
@@ -2015,7 +2040,10 @@ function _pilTBdg(bg,col,txt){ return '<span style="display:inline-flex;align-it
 function _pilMm(v){ return (v%1===0?String(v):v.toFixed(1)).replace('.',',')+' mm'; }
 function _pilPanelTraitement(d){
   var days=_pilTreatDays();
-  var sub='sec · vent < 19 km/h · sous 25° · plage 0h–24h', statHtml, body;
+  // ★ L'ANCIEN SOUS-TITRE ENONCAIT LES CRITERES — « sec · vent < 19 km/h · sous
+  //   25° · plage 0h-24h ». C'est la METHODE, pas le cadre : elle part dans la
+  //   fiche. Le cadre dit d'ou vient la prevision et jusqu'ou elle porte.
+  var sub='prévisions horaires AROME \u00b7 '+PIL_TREAT_DAYS+' jours', statHtml, body;
   if(days===undefined){ statHtml=_pilStat('—',''); body='<div class="pil-empty">Prévisions horaires indisponibles (rechargez avec une connexion).</div>'; }
   else if(!days.length){ statHtml=_pilStat('—',''); body='<div class="pil-empty">Aucune fenêtre claire sur les prochains jours (pluie, vent ≥ 19 km/h ou ≥ 25°). À surveiller.</div>'; }
   else {
@@ -2047,9 +2075,11 @@ function _pilPanelTraitement(d){
         + '</div>';
     }).join('');
     body='<div style="display:flex;flex-direction:column;gap:6px;padding-top:4px">'+rows+'</div>'
-      + '<div style="font-size:var(--pt-micro,11px);color:var(--texte-doux);margin-top:11px;line-height:1.5">Au-delà de 25° : phytotoxicité (soufre, cuivre, foliaires) et efficacité en baisse · vent &gt; 19 km/h interdit. Vérifiez vos délais DAR / DRE / ZNT.</div>';
+      // ★ Les seuils, la phytotoxicite et le rappel DAR/DRE/ZNT expliquent le
+      //   calcul : ils partent dans MV_INFO['pil.traitement'].
+      + '';
   }
-  return _pilTile('traitement','💧','#5A9FD4','Fenêtre de traitement', statHtml, sub, null, body);
+  return _pilTile('traitement','💧','#5A9FD4','Fenêtre de traitement', statHtml, sub, null, body, 'pil.traitement');
 }
 
 // ── Simulateur « et si ? » (réallocation de l'équipe, recalcul des dates en direct) ──
@@ -4527,7 +4557,13 @@ function _pilTabAvc(d){
 function _pilPanelCapacite(d){
   var PP=_pilPicPortee(), cd=_pilCdVue();
   var present=d.presentChamp!=null?d.presentChamp:0;
-  if(!PP.ok && !cd){ return _pilTile('capacite','\u2696\uFE0F','#C9A84C','Capacité vs charge', _pilStat(present,' à la vigne'), null, null, _pilEmptyGo('Renseignez les dates de la campagne pour estimer l\'ETP requis.','saisons','Réglages \u203A Campagne')); }
+  // ⚠️ CE SECOND APPEL ETAIT MUET : ni ligne de cadre, ni pastille. Le client
+  //   qui n'a pas encore date ses periodes tombait sur la seule carte de
+  //   l'onglet incapable de dire ce qu'elle montre. Trouve par le harnais, qui
+  //   exige les trois etages sur CHAQUE appel, pas seulement sur le plus frequent.
+  if(!PP.ok && !cd){ return _pilTile('capacite','\u2696\uFE0F','#C9A84C','Capacité vs charge', _pilStat(present,' à la vigne'),
+    'présence du jour \u00b7 le pic ne peut pas être calculé', null,
+    _pilEmptyGo('Sans dates de campagne, l\'effectif nécessaire la semaine du pic ne se calcule pas : il n\'y a aucune fenêtre sur laquelle chercher ce pic.','saisons','Réglages \u203A Campagne'), 'pil.capacite'); }
   // ★★★ ON NE SOUSTRAIT PLUS DEUX GRANDEURS QUI N'ONT NI LA MEME DATE NI LA
   //   MEME UNITE. AVANT : `manque = PP.pic - d.presentChamp`.
   //     · PP.pic  = le besoin de la SEMAINE DU PIC, quelque part dans l'exercice,
@@ -4578,13 +4614,21 @@ function _pilTabPrs(d){
 // ── Onglet MATÉRIEL ──
 function _pilPanelGnr(d){
   var g=d.gnr;
-  if(!g||!g.capacite){ return _pilTile('gnr','\u26FD','#B85A1A','Cuve GNR', _pilStat('—',''), null, null, '<div class="pil-empty">Cuve GNR à renseigner (Tracteur \u203A Entretien).</div>'); }
+  // ③ « Cuve GNR a renseigner (Tracteur › Entretien) » etait du TEXTE MORT : il
+  //   fallait lire, retenir, sortir du module et retrouver l'onglet. C'est un
+  //   bouton, et il ouvre l'ecran directement.
+  if(!g||!g.capacite){ return _pilTile('gnr','\u26FD','#B85A1A','Cuve GNR', _pilStat('—',''), 'aucune cuve renseignée',
+    null, _pilEmptyGo('Sans capacité de cuve, le niveau ne se calcule pas et le carburant reste à zéro dans tous les budgets.','entretien','Tracteur \u203a Entretien'), 'pil.gnr'); }
   var niveau=Number(g.niveau)||0, cap=Number(g.capacite)||1, pc=Math.round(niveau/cap*100), low=niveau<=(Number(g.seuil)||0);
   var col=low?'var(--rouge)':(pc<=40?'var(--orange)':'var(--vert-med)');
-  var body='<div style="font-size:var(--pt-xxl,31px);font-weight:800;color:'+col+';line-height:1">'+_pilNum(niveau)+'<span style="font-size:var(--pt-base,14px);color:var(--texte-doux)"> L</span></div>'
-    +'<div class="pil-gbar" style="height:14px"><i style="width:'+pc+'%;background:'+col+'"></i></div>'
-    +'<div class="pil-li-s" style="margin-top:7px">'+(low?'\u26A0 Niveau bas · ':'')+pc+' % · cuve '+_pilNum(cap)+' L'+(low?'. Prévois un plein avant la prochaine session.':'')+'</div>';
-  return _pilTile('gnr','\u26FD','#B85A1A','Cuve GNR', _pilStat(pc,' %', low?'bas':null), null, pc, body);
+  // ★ LE GROS CHIFFRE DU CORPS DOUBLONNAIT CELUI DE L'EN-TETE : « 42 % » en
+  //   haut, « 840 L » juste dessous, deux fois la meme grandeur a deux echelles.
+  //   L'en-tete porte desormais les litres — ce qu'on lit pour decider d'un
+  //   plein — et le pourcentage passe en unite. Le corps garde la jauge.
+  var body='<div class="pil-gbar" style="height:14px"><i style="width:'+pc+'%;background:'+col+'"></i></div>'
+    +(low?_pilEmptyGo('Le niveau est sous votre seuil d\u2019alerte : prévoyez un plein avant la prochaine session.','entretien','Tracteur \u203a Entretien'):'');
+  return _pilTile('gnr','\u26FD','#B85A1A','Cuve GNR', _pilStat(_pilNum(niveau),' L sur '+_pilNum(cap), low?'bas':null),
+    'soit '+pc+' % \u00b7 niveau calculé, pas mesuré', pc, body, 'pil.gnr');
 }
 function _pilTabMat(d){
   var H='<div class="pil-panels">';
@@ -8310,7 +8354,13 @@ var _PIL_DIAG_CIBLES = {
   secteurs:  ['reglages','vigne',  'set-sec-secteurs'],
   equipe:    ['reglages','equipe', 'set-sec-equipe'],
   tracteurs: ['reglages','tracteur','set-sec-tracteurs'],
-  parcelles: ['parcelles',null,null]
+  parcelles: ['parcelles',null,null],
+  // ★ PREMIERE CIBLE HORS DES REGLAGES. « Cuve GNR a renseigner (Tracteur ›
+  //   Entretien) » etait du TEXTE MORT : il fallait lire, retenir, sortir du
+  //   module, retrouver l'onglet. Le 4e element nomme le commutateur du module
+  //   vise ; absent, on garde switchReglTab et les sept cibles au-dessus ne
+  //   changent pas d'un iota.
+  entretien: ['tracteur','entretiens',null,'switchTracOnglet']
 };
 
 // Defile jusqu'au bloc et le fait clignoter une seconde. Sans le clignotement, on
@@ -8340,7 +8390,8 @@ window._pilGo = function(cible){
     if(window.goTo) window.goTo(C[0]);
     setTimeout(function(){
       try{
-        if(C[1] && window.switchReglTab) window.switchReglTab(C[1]);
+        var _sw = C[3] || 'switchReglTab';
+        if(C[1] && typeof window[_sw]==='function') window[_sw](C[1]);
         if(!C[2]) return;
         _pilFlash(document.getElementById(C[2]));
       }catch(e2){ if(window.logError) window.logError({level:'info',cat:'pilotage',msg:'diag: ancre '+cible}); }

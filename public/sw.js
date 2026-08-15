@@ -1,4 +1,29 @@
-// MA VIGNE — Service Worker v6.69
+// MA VIGNE — Service Worker v6.70
+// v6.70 (15/08/2026) — « L’EQUIPE & LE MATERIEL » PASSE A LA REGLE DES TROIS
+//   FAMILLES. Six cartes reprises une par une : ce qui CADRE le chiffre devient
+//   sa ligne de cadre, ce qui EXPLIQUE le calcul part dans MV_INFO, ce qui DIT
+//   QUOI FAIRE devient un bouton. Six fiches neuves : equipe, presences,
+//   tracteur, gnr, phyto, traitement.
+//   ★ TROIS DOUBLONS TROUVES EN DEPLACANT, qu'aucun controle ne pouvait voir :
+//     · Phyto refermait sa liste par « 18 interventions enregistrees » sous un
+//       en-tete affichant deja « 18 interv. » — le meme nombre deux fois, plus
+//       « Catalogue E-Phy a jour » qui n'est pas une donnee de cette carte.
+//     · GNR affichait « 840 L » en gros dans le corps sous « 42 % » en gros dans
+//       l'en-tete : une seule grandeur, deux echelles. L'en-tete porte desormais
+//       les litres — c'est eux qu'on lit pour decider d'un plein.
+//     · Equipe empilait dans son sous-titre trois choses de natures differentes :
+//       la composition, « hors capacite vigne », et une action a executer de
+//       memoire. Chacune part ou elle doit.
+//   ★ Le parc tracteur remonte l'echeance de revision la plus proche dans sa
+//     ligne de cadre : c'est la seule chose qu'on venait verifier, et il fallait
+//     deplier pour la voir.
+//   ★ PREMIERE CIBLE DE NAVIGATION HORS DES REGLAGES. « Cuve GNR a renseigner
+//     (Tracteur › Entretien) » etait du texte mort : lire, retenir, sortir du
+//     module, retrouver l'onglet. _PIL_DIAG_CIBLES accepte un 4e element qui
+//     nomme le commutateur du module vise ; sans lui on garde switchReglTab, et
+//     les sept cibles existantes ne changent pas d'un iota.
+//   · PIL_TREAT_DAYS : l'horizon de prevision etait en dur dans un slice(0,5).
+//     La ligne de cadre l'annonce, donc il se nomme.
 // v6.69 (15/08/2026) — LA CARTE A TROIS ETAGES, ET UN DEFAUT QUI S’INVERSE.
 //   Le Pilotage affichait ses dix-huit tuiles OUVERTES des l’arrivee. Or une
 //   tuile ouverte prend toute la ligne : la grille etait reglee sur 2 a 4
@@ -1510,7 +1535,7 @@
 // v2.22 — Fix profils vides : guard vide dans loadData() pour MEMBRES/SAISONS/TACHES
 // v2.17 — Onboarding intégré + tenantId · v2.06 — Firebase Auth · v2.00–v2.05 — divers
 const DEBUG = self.location.hostname === 'localhost' || self.location.hostname === '127.0.0.1';
-const CACHE_NAME   = 'mavigne-v6.69';
+const CACHE_NAME   = 'mavigne-v6.70';
 const TENANT_CACHE = 'mavigne-tenant';   // Cache persistant — préservé à chaque mise à jour SW
 const SYNC_TAG     = 'mavigne-sync';
 
@@ -1526,7 +1551,7 @@ const CDN_URLS = [
 ];
 
 self.addEventListener('install', event => {
-  if(DEBUG) console.log('[SW] Ma Vigne v6.69 installé');
+  if(DEBUG) console.log('[SW] Ma Vigne v6.70 installé');
   event.waitUntil(
     caches.open(CACHE_NAME).then(async cache => {
       // ── Cœur applicatif : STRICT (mise à jour ATOMIQUE) ──
@@ -1542,7 +1567,7 @@ self.addEventListener('install', event => {
 });
 
 self.addEventListener('activate', event => {
-  if(DEBUG) console.log('[SW] Ma Vigne v6.69 activé');
+  if(DEBUG) console.log('[SW] Ma Vigne v6.70 activé');
   event.waitUntil(
     caches.keys().then(keys =>
       Promise.all(
