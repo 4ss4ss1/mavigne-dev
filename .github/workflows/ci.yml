@@ -85,6 +85,13 @@ jobs:
           node scripts/mv-harnais-releve.mjs
           node scripts/mv-harnais-entretien.mjs
 
+      # Cliquet typographique du Pilotage : le module portait 28 tailles de texte
+      # ecrites a la main. Elles vivent desormais sur onze pas nommes. Ce controle
+      # interdit d'en reinventer une — sans lui, la 29e revient au premier ecran
+      # ajoute, et l'echelle est morte sans que rien ne rougisse.
+      - name: Harnais — l'echelle de texte du Pilotage
+        run: node scripts/mv-harnais-echelle.mjs src/pilotage.js
+
       # Vite + inject-precache (postbuild, idempotent).
       - name: Build
         run: npm run build
