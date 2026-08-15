@@ -55,13 +55,21 @@ t('les balises <b> sont refermees',
 /* ══ 2. AUCUNE PASTILLE MORTE, AUCUNE FICHE ORPHELINE ══
    C'est le seul controle qui compte vraiment : un bouton qui ouvre une feuille
    vide est plus deroutant qu'une explication absente. */
+/* ⚠️ VECU AU LOT SUIVANT : cette detection ne cherchait que `_mvInfoBtn('X')`
+   et `data-mvi="X"`. Des que la cle est passee en ARGUMENT (_pilTile(…, 'pil.x')),
+   la fiche passait pour orpheline. On cherche desormais la cle elle-meme,
+   litteralement, partout hors du dictionnaire — c'est vrai quelle que soit la
+   facon dont elle est posee. */
+const HORS = [UNU.slice(0, UNU.indexOf('const MV_INFO = {')) + UNU.slice(UNU.indexOf('\n};', UNU.indexOf('const MV_INFO = {'))),
+              PILNU, HTML].join('\n');
 const posees = new Set([...[UNU, PILNU, HTML].join('\n')
   .matchAll(/_mvInfoBtn\(\s*'([^']+)'|data-mvi="([^"]+)"/g)]
   .map(m => m[1] || m[2]).filter(x => x && !x.includes('+')));
 t('toute pastille posee a sa fiche', [...posees].every(k => cles.includes(k)),
   [...posees].filter(k => !cles.includes(k)).join(', '));
-t('toute fiche est posee quelque part', cles.every(k => posees.has(k)),
-  cles.filter(k => !posees.has(k)).join(', '));
+const estPosee = k => posees.has(k) || HORS.includes("'" + k + "'");
+t('toute fiche est posee quelque part', cles.every(estPosee),
+  cles.filter(k => !estPosee(k)).join(', '));
 
 /* ══ 3. LA CHAINE COMPLETE ══ */
 t('la feuille #ovInfo existe dans index.html', /id="ovInfo"/.test(HTML));

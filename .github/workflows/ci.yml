@@ -90,11 +90,15 @@ jobs:
       # revient au premier ecran ajoute et rien ne rougit. La pastille : aucune
       # ne doit ouvrir une feuille vide, aucune fiche ne doit rester orpheline,
       # et l'ecouteur doit garder son stopPropagation (sans lui, ouvrir la fiche
-      # replie la tuile qu'on cherche a comprendre).
-      - name: Harnais — l'echelle de texte et la pastille « i »
+      # replie la tuile qu'on cherche a comprendre). La carte : le chiffre et sa
+      # ligne de cadre doivent rester DANS l'en-tete — c'est la seule chose qui
+      # autorise le repli par defaut — et la migration de disposition est
+      # EXECUTEE sur de vrais etats memorises, pas relue.
+      - name: Harnais — echelle, pastille « i », carte a trois etages
         run: |
           node scripts/mv-harnais-echelle.mjs
           node scripts/mv-harnais-info.mjs
+          node scripts/mv-harnais-carte.mjs
 
       # Vite + inject-precache (postbuild, idempotent).
       - name: Build

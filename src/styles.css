@@ -2084,7 +2084,12 @@ body.mv-trial-on #app-root{padding-top:calc(env(safe-area-inset-top,0px) + 44px)
 .pil-cmp-leg span{display:flex;align-items:center;gap:6px;}
 .pil-cmp-leg i{width:14px;height:10px;border-radius:3px;display:inline-block;}
 /* — Panneaux info (legacy) + listes — */
-.pil-panels{display:grid;grid-template-columns:repeat(auto-fill,minmax(280px,1fr));gap:16px;align-items:start;margin-top:16px;}
+/* ⚠️ La grille etait deja reglee sur 2 a 4 colonnes — elle ne se remplissait
+   jamais parce que les dix-huit tuiles arrivaient OUVERTES, et qu'une tuile
+   ouverte prend toute la ligne. Depuis que le defaut est « replie » et qu'une
+   seule carte s'ouvre a la fois, elle fait enfin son travail. La largeur
+   minimale descend a 250 px : une carte repliee n'a plus besoin de 280. */
+.pil-panels{display:grid;grid-template-columns:repeat(auto-fill,minmax(250px,1fr));gap:13px;align-items:start;margin-top:16px;}
 .pil-iph{display:flex;align-items:center;gap:8px;margin-bottom:9px;}
 .pil-tt{font-family:'Cormorant Garamond',serif;font-size:16px;font-weight:600;color:var(--texte);flex:1;}
 .pil-cnt{font-size:10.5px;color:var(--texte-doux);background:var(--gris-clair);border-radius:20px;padding:2px 9px;font-weight:600;white-space:nowrap;}
@@ -2113,18 +2118,33 @@ body.mv-trial-on #app-root{padding-top:calc(env(safe-area-inset-top,0px) + 44px)
 /* — Tuiles pliables — */
 .pil-tile{display:flex;flex-direction:column;}
 .pil-tile.open{grid-column:1/-1;border-color:rgba(201,168,76,.45);}
-.pil-th{display:flex;align-items:center;gap:10px;padding:13px 16px;cursor:pointer;user-select:none;-webkit-tap-highlight-color:transparent;min-height:44px;}
+/* ══ LA CARTE A TROIS ETAGES ══
+   ① l'etiquette (capitales, pastille « i », chevron)
+   ② LE CHIFFRE, seul sur sa ligne
+   ③ la ligne de cadre : date, source, perimetre — un filet dore devant.
+   Les trois vivent dans .pil-th, donc restent lisibles CARTE REPLIEE. C'est ce
+   qui autorise le repli par defaut : on lit les sept chiffres d'un onglet sans
+   rien deplier, et le chevron ne cache que le detail. */
+.pil-th{display:block;padding:12px 15px 13px;cursor:pointer;user-select:none;-webkit-tap-highlight-color:transparent;min-height:44px;}
 .pil-th:hover{background:rgba(127,127,127,.035);}
+.pil-th-l1{display:flex;align-items:center;gap:9px;}
 .pil-th .pil-dot{width:7px;height:7px;border-radius:50%;flex:none;}
-.pil-th-ico{width:28px;height:28px;border-radius:9px;background:var(--or-pale);color:var(--terre);display:flex;align-items:center;justify-content:center;flex:none;}
-.pil-th-ico svg{width:15px;height:15px;}
-.pil-th-t{font-family:'Outfit',sans-serif;font-size:11px;letter-spacing:1.4px;text-transform:uppercase;font-weight:600;color:var(--texte-doux);flex:1;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;}
-.pil-th-stat{font-size:12px;color:var(--texte-doux);white-space:nowrap;}
-.pil-th-stat b{font-family:'Cormorant Garamond',serif;font-size:21px;font-weight:600;color:var(--texte);margin-right:3px;font-variant-numeric:tabular-nums;}
-.pil-th-stat b.warn{color:var(--orange);font-size:14px;}
-.pil-th-chev{font-size:12px;color:var(--texte-doux);transition:transform .2s;flex:none;width:14px;text-align:center;}
+.pil-th-ico{width:26px;height:26px;border-radius:8px;background:var(--or-pale);color:var(--terre);display:flex;align-items:center;justify-content:center;flex:none;}
+.pil-th-ico svg{width:14px;height:14px;}
+.pil-th-t{font-family:'Outfit',sans-serif;font-size:var(--pt-lbl,10.5px);letter-spacing:1.5px;text-transform:uppercase;font-weight:600;color:var(--texte-doux);flex:1;min-width:0;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;}
+/* ② Une seule taille de chiffre dans tout le module, une seule place. */
+.pil-th-l2{margin-top:5px;line-height:1;}
+.pil-th-stat{font-size:var(--pt-base,14px);color:var(--texte-doux);white-space:nowrap;display:inline-flex;align-items:baseline;gap:4px;flex-wrap:wrap;}
+.pil-th-stat b{font-family:'Cormorant Garamond',serif;font-size:var(--pt-xxl,31px);font-weight:600;color:var(--texte);margin-right:1px;font-variant-numeric:tabular-nums;line-height:1;}
+.pil-th-stat b.warn{color:var(--orange);font-size:var(--pt-base,14px);font-family:'Outfit',sans-serif;font-weight:700;}
+.pil-th-chev{font-size:var(--pt-txt,12.5px);color:var(--texte-doux);transition:transform .2s;flex:none;width:14px;text-align:center;}
 .pil-tile.open .pil-th-chev{transform:rotate(90deg);}
-.pil-tsub{font-size:10.5px;color:var(--texte-doux);padding:0 16px 10px 54px;margin-top:-6px;}
+/* ③ LA LIGNE DE CADRE. Le filet dore est la signature : partout ou il apparait,
+   la phrase qui suit dit SUR QUOI le chiffre au-dessus a ete calcule. Elle ne
+   se replie jamais — un chiffre sans son cadre ment. */
+.pil-tsub{display:flex;align-items:flex-start;gap:7px;margin-top:7px;padding:0;font-size:var(--pt-micro,11px);line-height:1.45;color:var(--texte-doux);}
+.pil-tsub::before{content:"";width:2px;align-self:stretch;min-height:13px;border-radius:2px;background:var(--or);opacity:.85;flex:none;margin-top:1px;}
+.pil-th .mv-i{margin-left:2px;}
 .pil-tgrad{height:3px;background:linear-gradient(90deg,rgb(181,67,28),rgb(201,112,30),rgb(201,161,42),rgb(132,174,58),rgb(78,140,50));position:relative;opacity:.9;}
 .pil-tgrad i{position:absolute;top:-2px;width:2px;height:7px;background:#fff;border-radius:2px;box-shadow:0 0 3px rgba(0,0,0,.6);}
 .pil-tbody{display:none;padding:4px 16px 16px;border-top:1px solid var(--gris-clair);}

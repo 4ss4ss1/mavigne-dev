@@ -23,7 +23,7 @@ export const GT_ADMIN_EMAIL = 'ngdevpro@gmail.com';
 // WHATS_NEW   : tableau vide = modal desactive pour cette version.
 // Format item : { emoji:'📅', titre:'Titre court', desc:'Phrase utilisateur.' }
 // Regle : seulement les changements visibles par les utilisateurs.
-export const APP_VERSION = '6.15';
+export const APP_VERSION = '6.16';
 // ════ Journal des nouveautés (récap cumulatif) ════
 // Une entrée par version, la PLUS RÉCENTE EN HAUT : { v:'5.10', items:[ {emoji,titre,desc}, … ] }
 // À chaque release visible → AJOUTER un bloc en tête (ne pas remplacer). items:[] = release technique (rien à afficher).
@@ -354,6 +354,12 @@ window._mvGraphRepeindre = function(){
 };
 
 export const WHATS_NEW = [
+  { v:'6.16', items:[
+    { emoji: '\u{1F5C2}', titre: "Le Pilotage arrive rang\u00e9 : le chiffre d\u2019abord, le d\u00e9tail au besoin",
+      desc: "Les blocs du Pilotage s\u2019ouvraient <b>tous en m\u00eame temps</b> d\u00e8s l\u2019arriv\u00e9e. Comme un bloc ouvert prend toute la largeur, sept indicateurs faisaient sept \u00e9crans \u00e0 faire d\u00e9filer, et l\u2019on cherchait un chiffre au milieu de ses explications. D\u00e9sormais chaque bloc est une <b>carte compacte</b>, et elles se rangent <b>c\u00f4te \u00e0 c\u00f4te</b>\u202f: sur un onglet, vous voyez tous les chiffres d\u2019un coup d\u2019\u0153il. <b>Rien n\u2019est cach\u00e9</b>\u202f: le chiffre et la ligne qui dit sur quoi il a \u00e9t\u00e9 calcul\u00e9 \u2014 sa date, sa source, son p\u00e9rim\u00e8tre \u2014 restent affich\u00e9s carte ferm\u00e9e. Touchez une carte pour voir son d\u00e9tail\u202f; elle s\u2019ouvre en grand, et la pr\u00e9c\u00e9dente se referme." },
+    { emoji: '\u{1F4D0}', titre: "Vos blocs d\u00e9pli\u00e9s repartent une fois du r\u00e9glage d\u2019usine",
+      desc: "Cette mise \u00e0 jour <b>remet une seule fois</b> les cartes du Pilotage \u00e0 l\u2019\u00e9tat repli\u00e9, y compris celles que vous aviez ouvertes ou ferm\u00e9es vous-m\u00eame\u202f: la disposition ne veut plus dire la m\u00eame chose qu\u2019avant. <b>Vos autres choix ne bougent pas</b> \u2014 les indicateurs coch\u00e9s dans \u00ab\u202fChoisir les indicateurs\u202f\u00bb, l\u2019onglet du graphe, la vue du camembert restent comme vous les aviez laiss\u00e9s." },
+  ] },
   { v:'6.15', items:[
     { emoji: '\u{2139}', titre: "Les explications de calcul passent derri\u00e8re un petit \u00ab\u202fi\u202f\u00bb",
       desc: "Le Pilotage affichait en permanence <b>neuf pages</b> de texte expliquant comment chaque chiffre est calcul\u00e9. C\u2019est utile la premi\u00e8re fois, encombrant les cent suivantes\u202f: on relisait la m\u00e9thode pour atteindre le nombre. Ces explications se rangent d\u00e9sormais derri\u00e8re un <b>petit rond \u00ab\u202fi\u202f\u00bb</b>, \u00e0 c\u00f4t\u00e9 du chiffre concern\u00e9\u202f: touchez-le et la fiche s\u2019ouvre. <b>Rien n\u2019est perdu</b>, et ce qui <b>cadre</b> un chiffre \u2014 sa date, sa source, son p\u00e9rim\u00e8tre \u2014 reste \u00e0 l\u2019\u00e9cran, en une ligne. Trois endroits l\u2019inaugurent\u202f: la capacit\u00e9 au pic, l\u2019\u00e9cart de cadence, et les deux fa\u00e7ons de compter l\u2019ann\u00e9e. Les autres suivront." },
@@ -1758,6 +1764,7 @@ var MV_AIDE = {
     ico: '\u{1F4CA}', titre: 'Pilotage', ancre: 'pilotage',
     points: [
       ['Rien ne se saisit ici', ": tout est en lecture seule. Les chiffres viennent du journal, du planning et des sessions tracteur."],
+      ['Les cartes arrivent repliées', ": chaque bloc montre son <b>chiffre</b> et la ligne qui dit sur quoi il a été calculé, même fermé — rien n’est caché. Touchez-en une pour voir son détail : elle s’ouvre en grand, et la précédente se referme, pour que les autres restent rangées côte à côte."],
       ['Le petit rond « i » dit d’où vient un chiffre', ": touchez-le, une fiche s’ouvre et explique comment ce chiffre est calculé, sur quelle fenêtre, et ce qu’il ne dit pas. Ce qui <b>cadre</b> un chiffre — sa date, sa source, son périmètre — reste toujours affiché à côté de lui, en une ligne. C’est la méthode qui se range, jamais le cadre."],
       _mvAideOngletsPil,
       ['La barre du haut dit où vous regardez', ": l’exercice entier, ou une campagne. Cliquez une campagne dans la frise de l’année et les quatre chiffres du haut, la frise et les tableaux de la campagne suivent. La croix revient à l’année. <b>Trois écrans ont leur propre cadre</b> et ne se recadrent pas : Économie chiffre la période consultée, la Cave suit le millésime, la Conformité roule sur sept ans — chacun l’écrit au-dessus de ses chiffres."],

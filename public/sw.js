@@ -1,4 +1,28 @@
-// MA VIGNE — Service Worker v6.68
+// MA VIGNE — Service Worker v6.69
+// v6.69 (15/08/2026) — LA CARTE A TROIS ETAGES, ET UN DEFAUT QUI S’INVERSE.
+//   Le Pilotage affichait ses dix-huit tuiles OUVERTES des l’arrivee. Or une
+//   tuile ouverte prend toute la ligne : la grille etait reglee sur 2 a 4
+//   colonnes et ne se remplissait JAMAIS. Sept indicateurs = sept pleines
+//   largeurs empilees. Le systeme de mise en page etait desactive par son
+//   propre reglage d’usine.
+//   ★ _pilTile rend desormais TROIS ETAGES, tous dans .pil-th donc tous
+//     visibles carte repliee : l’etiquette (+ pastille « i » + chevron), LE
+//     CHIFFRE seul sur sa ligne, puis LA LIGNE DE CADRE — filet dore, date,
+//     source, perimetre. Replier ne cache plus aucun nombre, seulement le detail.
+//   ★ Une seule carte depliee a la fois : c’est ce qui rend ses colonnes a la
+//     grille. Le meme chemin d’etat ferme les autres — rien n’est ferme a
+//     l’ecran sans etre ecrit dans `collapsed`, sinon le rendu suivant rouvre.
+//   ⚠️⚠️ _PIL_ST_V — LA MIGRATION QUI REND LE LOT VISIBLE. _pilSaveState grave
+//     l’etat COMPLET des qu’on touche une tuile : les clients installes ont
+//     depuis des mois un `collapsed` tout a zero, et au chargement le memorise
+//     gagne sur le defaut. Changer le defaut sans marqueur ne leur aurait
+//     STRICTEMENT RIEN fait. Meme piege que `avc_etp`/`an_frise`. Seule la
+//     DISPOSITION repart du neuf : `show`, `pie`, `bar`, `sub` survivent.
+//   · Les selecteurs ne bougent pas : .pil-tile, data-pid, .pil-th, .pil-th-t,
+//     .pil-th-stat, .pil-tsub, .pil-tbody, #pil-body-<id>. La visite guidee vise
+//     .pil-tile[data-pid="traitement"] et C22 le verifie.
+//   · .pil-panels descend a minmax(250px) : une carte repliee n’a pas besoin
+//     de 280 px.
 // v6.68 (15/08/2026) — LA PASTILLE « i », ET DEUX CHOSES QUI REMONTENT D’UN CRAN.
 //   Le Pilotage affichait ~25 000 caracteres de prose en permanence : 217 phrases,
 //   neuf pages A4, et AUCUN moyen d’en replier une seule — pas un <details>, pas
@@ -1486,7 +1510,7 @@
 // v2.22 — Fix profils vides : guard vide dans loadData() pour MEMBRES/SAISONS/TACHES
 // v2.17 — Onboarding intégré + tenantId · v2.06 — Firebase Auth · v2.00–v2.05 — divers
 const DEBUG = self.location.hostname === 'localhost' || self.location.hostname === '127.0.0.1';
-const CACHE_NAME   = 'mavigne-v6.68';
+const CACHE_NAME   = 'mavigne-v6.69';
 const TENANT_CACHE = 'mavigne-tenant';   // Cache persistant — préservé à chaque mise à jour SW
 const SYNC_TAG     = 'mavigne-sync';
 
@@ -1502,7 +1526,7 @@ const CDN_URLS = [
 ];
 
 self.addEventListener('install', event => {
-  if(DEBUG) console.log('[SW] Ma Vigne v6.68 installé');
+  if(DEBUG) console.log('[SW] Ma Vigne v6.69 installé');
   event.waitUntil(
     caches.open(CACHE_NAME).then(async cache => {
       // ── Cœur applicatif : STRICT (mise à jour ATOMIQUE) ──
@@ -1518,7 +1542,7 @@ self.addEventListener('install', event => {
 });
 
 self.addEventListener('activate', event => {
-  if(DEBUG) console.log('[SW] Ma Vigne v6.68 activé');
+  if(DEBUG) console.log('[SW] Ma Vigne v6.69 activé');
   event.waitUntil(
     caches.keys().then(keys =>
       Promise.all(

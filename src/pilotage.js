@@ -55,6 +55,16 @@ function _pilDomKey(){ return 'mavigne_pilote_dom_'+_pilTenant(); }
 // Refonte : navigation par onglets thématiques. La perso est désormais une visibilité
 // d'éléments PAR ONGLET (show), mémorisée par utilisateur. pie/bar/collapsed/sub pilotent
 // les comportements internes des panneaux réutilisés.
+// ★ VERSION DE L'ETAT MEMORISE CHEZ LE CLIENT.
+//   _pilSaveState ecrit l'etat COMPLET des qu'on touche une tuile, un onglet de
+//   graphe ou une case. MG et Chapelle ont donc, depuis des mois, un
+//   `collapsed:{...tout a 0}` grave dans leur navigateur — et au chargement,
+//   ce qui est memorise gagne sur le defaut. Changer le defaut sans marqueur
+//   ne leur aurait STRICTEMENT RIEN fait : ils auraient installe la mise a jour
+//   et vu le meme ecran. C'est le piege deja vecu avec `avc_etp` / `an_frise`.
+//   A chaque fois qu'un defaut de disposition change, ce numero monte d'un cran
+//   et _pilMigrEtat repose la disposition neuve — UNE seule fois.
+var _PIL_ST_V = 3;
 var _PIL_DEFAULT = {
   show: {
     // Aujourd'hui (cockpit)
@@ -81,7 +91,15 @@ var _PIL_DEFAULT = {
   },
   pie:   'reste',
   bar:   'saison',
-  collapsed:{echeances:0,carte:0,etp:0,temps:0,equipe:0,tracteur:0,cave:0,presences:0,gnr:0,capacite:0,traitement:0,simulateur:0,phyto:0,cout:0,couteff:0,cuivre:0,ift:0,dre:0},
+  // ★★★ LE DEFAUT S'INVERSE : LES CARTES ARRIVENT REPLIEES.
+  //   Avant, les dix-huit tuiles etaient ouvertes des l'arrivee. Or une tuile
+  //   ouverte prend TOUTE la ligne (.pil-tile.open{grid-column:1/-1}) : la
+  //   grille est reglee sur 2 a 4 colonnes et ne se remplissait JAMAIS. Sept
+  //   indicateurs, sept pleines largeurs empilees, ~4 500 px de defilement.
+  //   ⚠️ Replier NE CACHE AUCUN CHIFFRE : depuis ce lot le chiffre et sa ligne
+  //     de cadre vivent dans l'EN-TETE. On replie le detail, jamais le nombre.
+  collapsed:{echeances:1,carte:1,etp:1,temps:1,equipe:1,tracteur:1,cave:1,presences:1,gnr:1,capacite:1,traitement:1,simulateur:1,phyto:1,cout:1,couteff:1,cuivre:1,ift:1,dre:1},
+  v: _PIL_ST_V,
   sub:   {trac_revision:1,trac_controle:1,trac_repar:1,trac_intercep:1,cave_fml:1,cave_sout:1,cave_ouillage:1,pres_cp:1,pres_recup:1,pres_mal:1,etp_frise:1,etp_courbe:1,etp_ecart:1}
 };
 function _pilCloneDefault(){ return JSON.parse(JSON.stringify(_PIL_DEFAULT)); }
@@ -89,7 +107,9 @@ function _pilNormalize(st){
   if(!st || typeof st!=='object') return null;
   var def=_pilCloneDefault();
   function mergeObj(cur,d){ var o={}; Object.keys(d).forEach(function(k){ o[k]=(cur&&cur[k]!==undefined)?(cur[k]?1:0):d[k]; }); return o; }
-  return { show:mergeObj(st.show,def.show), pie:st.pie||def.pie, bar:st.bar||def.bar, collapsed:mergeObj(st.collapsed,def.collapsed), sub:mergeObj(st.sub,def.sub) };
+  // `v` traverse la normalisation : sans lui, _pilMigrEtat ne saurait jamais
+  // que la migration a deja eu lieu.
+  return { show:mergeObj(st.show,def.show), pie:st.pie||def.pie, bar:st.bar||def.bar, collapsed:mergeObj(st.collapsed,def.collapsed), sub:mergeObj(st.sub,def.sub), v:(st.v|0) };
 }
 function _pilShow(id){ var s=(_PIL_STATE&&_PIL_STATE.show)||{}; return s[id]!==0; }
 // Cles d'indicateurs deplacees d'un onglet a l'autre : le choix memorise suit.
@@ -108,13 +128,30 @@ function _pilMigrShow(st){
 // Les deux onglets composites portent un intertitre par moitie. Sans ce test,
 // masquer tous les indicateurs d'une moitie laisserait son titre orphelin.
 function _pilAnyShow(ids){ for(var i=0;i<ids.length;i++){ if(_pilShow(ids[i])) return true; } return false; }
+// ⚠️ ON NE REPOSE QUE LA DISPOSITION. `show` (les indicateurs choisis), `pie`,
+//   `bar` et `sub` sont des choix de CONTENU : ils survivent. Seul `collapsed`,
+//   dont la signification a change, repart du defaut.
+function _pilMigrEtat(st){
+  if(!st || typeof st!=='object') return st;
+  if((st.v|0) >= _PIL_ST_V) return st;
+  st.collapsed = _pilCloneDefault().collapsed;
+  st.v = _PIL_ST_V;
+  st._migre = true;                       // signal a _pilLoadState : a graver
+  return st;
+}
 function _pilLoadState(){
   // ⚠️⚠️ L'ORDRE COMPTE : ON MIGRE AVANT DE NORMALISER.
   //   _pilNormalize ne conserve que les cles connues des defauts. Place en premier,
   //   il jetait `avc_etp` AVANT que _pilMigrShow ait pu en lire la valeur : le
   //   choix du client etait perdu au lieu d'etre reporte sur le nouveau nom.
-  try{ var raw=localStorage.getItem(_pilUserKey()); if(raw){ var n=_pilNormalize(_pilMigrShow(JSON.parse(raw))); if(n) return n; } }catch(e){}
-  try{ var rawD=localStorage.getItem(_pilDomKey()); if(rawD){ var nd=_pilNormalize(_pilMigrShow(JSON.parse(rawD))); if(nd) return nd; } }catch(e){}
+  // ⚠️ La migration de disposition passe APRES _pilNormalize : celui-ci
+  //   reconstruit l'objet a partir des cles connues et emporterait `v` avec lui,
+  //   donc la migration se rejouerait a chaque chargement.
+  //   ★ On GRAVE tout de suite. Sans ca, tant que le client ne touche a rien,
+  //     rien n'est ecrit et la migration recommence a chaque ouverture — sans
+  //     consequence visible, mais c'est un travail qui ne se termine jamais.
+  try{ var raw=localStorage.getItem(_pilUserKey()); if(raw){ var n=_pilMigrEtat(_pilNormalize(_pilMigrShow(JSON.parse(raw)))); if(n){ if(n._migre){ delete n._migre; _pilSaveState(n); } return n; } } }catch(e){}
+  try{ var rawD=localStorage.getItem(_pilDomKey()); if(rawD){ var nd=_pilMigrEtat(_pilNormalize(_pilMigrShow(JSON.parse(rawD)))); if(nd){ if(nd._migre){ delete nd._migre; _pilSaveState(nd); } return nd; } } }catch(e){}
   return _pilCloneDefault();
 }
 function _pilSaveState(st){ try{ localStorage.setItem(_pilUserKey(), JSON.stringify(st)); }catch(e){} }
@@ -588,17 +625,53 @@ function _pilEmptyGo(txt,cible,lib){
     +'<div style="margin-top:9px"><button class="pil-diag-go ghost" data-diag="'+_pilEsc(cible)
     +'">'+_pilEsc(lib)+' \u203A</button></div></div>';
 }
-function _pilTile(id,ico,dot,title,statHtml,subHtml,gradPct,bodyHtml){
+// ════════════════════════════════════════════════════════════════════════════
+// LA CARTE A TROIS ETAGES
+// ════════════════════════════════════════════════════════════════════════════
+// AVANT, la tuile mettait sur UNE ligne : la pastille de couleur, l'icone,
+// l'etiquette, le chiffre et le chevron. Le chiffre — la seule chose qu'on
+// vient chercher — tenait en 21 px au bout d'une ligne saturee, pendant que
+// trois paragraphes d'explication en occupaient dix dans le corps.
+//
+// DESORMAIS, trois etages, toujours dans le meme ordre :
+//   ① l'ETIQUETTE, en petites capitales, avec la pastille « i » et le chevron
+//   ② LE CHIFFRE, en gros, seul sur sa ligne — une seule taille, une seule place
+//   ③ LA LIGNE DE CADRE, un filet dore devant : la date, la source, le
+//     perimetre. « semaine du 12 mai », « cuve de 2 000 L ».
+//
+// ⚠️⚠️ LES TROIS ETAGES SONT DANS `.pil-th`, DONC TOUJOURS VISIBLES.
+//   C'est ce qui autorise a replier par defaut : on lit les sept chiffres d'un
+//   onglet sans rien deplier. Le chevron ne cache que le DETAIL.
+//   La ligne de cadre etait posee APRES l'en-tete : visible, mais decrochee du
+//   chiffre et indentee de 54 px — on ne la rattachait pas a lui.
+//
+// ⚠️ CE QUI NE BOUGE PAS, ET POURQUOI : `.pil-tile`, `data-pid`, `.pil-th`,
+//   `.pil-th-t`, `.pil-th-stat`, `.pil-tsub`, `.pil-tbody`, `#pil-body-<id>`.
+//   La visite guidee vise `.pil-tile[data-pid="traitement"]` et C22 le verifie.
+//   On change la GRAMMAIRE de l'en-tete, jamais les noms.
+//
+// ★ `infoCle` est un 9e argument OPTIONNEL : les 27 appels existants restent
+//   valides tels quels et posent leur pastille au fur et a mesure que leur
+//   fiche est ecrite.
+function _pilTile(id,ico,dot,title,statHtml,subHtml,gradPct,bodyHtml,infoCle){
   // Garde defensive : _PIL_STATE n'est pose que par renderPilotage. _pilShow() se
   // protegeait deja du cas null, _pilTile non — un appel hors sequence de rendu
   // levait un TypeError qui vidait tout l'onglet. Meme famille que les gardes
   // mortes du §25.15.e : celle-ci, elle, sert.
   var _st=_PIL_STATE||{};
   var open = !(_st.collapsed && _st.collapsed[id]);
+  // La pastille « i » arrete le clic (ecouteur d'utils.js) : sans ca, ouvrir la
+  // fiche replierait la carte qu'on cherche justement a comprendre.
+  var info = infoCle ? _mvInfoBtn(infoCle) : '';
   return '<div class="pil-tile'+(open?' open':'')+'" data-pid="'+id+'">'
-    + '<div class="pil-th"><span class="pil-dot" style="background:'+dot+'"></span><span class="pil-th-ico">'+_pilIcoFor(id)+'</span>'
-    + '<span class="pil-th-t">'+_pilEsc(title)+'</span>'+(statHtml||'')+'<span class="pil-th-chev">▸</span></div>'
-    + (subHtml?'<div class="pil-tsub">'+_pilEsc(subHtml)+'</div>':'')
+    + '<div class="pil-th">'
+    +   '<div class="pil-th-l1"><span class="pil-dot" style="background:'+dot+'"></span>'
+    +     '<span class="pil-th-ico">'+_pilIcoFor(id)+'</span>'
+    +     '<span class="pil-th-t">'+_pilEsc(title)+'</span>'
+    +     info+'<span class="pil-th-chev">▸</span></div>'
+    +   (statHtml?('<div class="pil-th-l2">'+statHtml+'</div>'):'')
+    +   (subHtml?('<div class="pil-tsub">'+_pilEsc(subHtml)+'</div>'):'')
+    + '</div>'
     + (gradPct!=null?'<div class="pil-tgrad"><i style="left:calc('+Math.min(Math.max(gradPct,0),100)+'% - 1px)"></i></div>':'')
     + '<div class="pil-tbody" id="pil-body-'+id+'">'+(bodyHtml||'')+'</div>'
     + '</div>';
@@ -4486,10 +4559,12 @@ function _pilPanelCapacite(d){
     //   part dans MV_INFO['pil.capacite'] : ca se lit une fois, pas cent.
     +'<div class="pil-li-s" style="margin-top:9px;color:var(--texte-doux)">Aujourd\u2019hui : <b>'+_pilEtpFmt(present)+'</b> personne'+(present>1.05?'s':'')+' au champ \u2014 <b>autre date</b> que le pic.</div>'
     +(cd?('<div class="pil-li-s" style="margin-top:4px;color:var(--texte-doux)">Moyenne sur '+_pilEsc(cd.saison)+' : <b>'+_pilEtpFmt(cd.etpCible||0)+'</b> pers. \u2014 <b>autre fen\u00eatre</b> que le pic.</div>'):'');
-  body+='<div style="margin-top:11px">'+_mvInfoBtn('pil.capacite')
-      +'<span style="font-size:var(--pt-micro,11px);color:var(--texte-doux);margin-left:7px;vertical-align:middle">D\u2019o\u00f9 vient ce chiffre</span></div>';
+  // ★ La pastille quitte le corps pour l'EN-TETE : elle doit etre joignable
+  //   sans deplier, comme le chiffre qu'elle explique. Et le cadre quitte le
+  //   TITRE pour la ligne de cadre — un titre n'est pas l'endroit ou l'on ecrit
+  //   sur quelle fenetre un chiffre a ete calcule.
   var sub='pic sur '+cadre+(sem?(' \u00b7 '+sem):'');
-  return _pilTile('capacite','\u2696\uFE0F','#C9A84C','Capacité vs charge · '+cadre, _pilStat(_pilEtpFmt(req),' pers. au pic'), sub, null, body);
+  return _pilTile('capacite','\u2696\uFE0F','#C9A84C','Capacité vs charge', _pilStat(_pilEtpFmt(req),' pers. au pic'), sub, null, body, 'pil.capacite');
 }
 function _pilTabPrs(d){
   var H='<div class="pil-panels">';
@@ -8853,7 +8928,25 @@ function _pilBindContent(content){
     var bs=e.target.closest('#pil-bar-seg button'); if(bs){ var b=bs.getAttribute('data-b'); if(b){ _PIL_STATE.bar=b; _pilSaveState(_PIL_STATE); _pilRenderBar(_pilData()); } return; }
     var ps=e.target.closest('#pil-pie-seg button'); if(ps){ var pm=ps.getAttribute('data-m'); if(pm){ _PIL_STATE.pie=pm; _pilSaveState(_PIL_STATE); _pilRenderPie(_pilData()); } return; }
     var head=e.target.closest('.pil-th');
-    if(head){ var tile=head.closest('.pil-tile'); if(!tile) return; var id=tile.getAttribute('data-pid'); if(!id) return; if(!_PIL_STATE.collapsed)_PIL_STATE.collapsed={}; _PIL_STATE.collapsed[id]=_PIL_STATE.collapsed[id]?0:1; _pilSaveState(_PIL_STATE); tile.classList.toggle('open',!_PIL_STATE.collapsed[id]);
+    if(head){ var tile=head.closest('.pil-tile'); if(!tile) return; var id=tile.getAttribute('data-pid'); if(!id) return; if(!_PIL_STATE.collapsed)_PIL_STATE.collapsed={}; _PIL_STATE.collapsed[id]=_PIL_STATE.collapsed[id]?0:1; var _ouvre=!_PIL_STATE.collapsed[id];
+        // ★ UNE SEULE CARTE DEPLIEE A LA FOIS, sur toute la page.
+        //   Une carte depliee prend toute la ligne — c'est necessaire (une carte,
+        //   une frise de douze mois), et c'est exactement ce qui empechait la
+        //   grille de se remplir quand tout etait ouvert par defaut. En refermer
+        //   une pour en ouvrir une autre coute le meme geste que de l'ouvrir, et
+        //   rend au reste de l'onglet ses deux a quatre colonnes.
+        //   ⚠️ On passe par le MEME chemin d'etat : rien n'est ferme a l'ecran
+        //     sans etre ecrit dans `collapsed`, sinon le prochain rendu rouvrirait.
+        if(_ouvre){
+          var _autres=document.querySelectorAll('.pil-tile.open');
+          for(var _i=0;_i<_autres.length;_i++){
+            var _t=_autres[_i]; if(_t===tile) continue;
+            var _id=_t.getAttribute('data-pid'); if(!_id) continue;
+            _PIL_STATE.collapsed[_id]=1; _t.classList.remove('open');
+            if(_id==='ordrepassage'&&_PIL_OP) _PIL_OP._pick=null;
+          }
+        }
+        _pilSaveState(_PIL_STATE); tile.classList.toggle('open',_ouvre);
         // La barre \u00ab en main \u00bb est en position:fixed : replier le volet doit la
         // l\u00e2cher, sinon elle flotterait au-dessus d'un contenu invisible.
         if(id==='ordrepassage'){ if(_PIL_STATE.collapsed[id]){ if(_PIL_OP) _PIL_OP._pick=null; } else _opBuildMap(); } if(id==='carte'&&!_PIL_STATE.collapsed[id]) _pilBuildMap(_pilData()); return; }
