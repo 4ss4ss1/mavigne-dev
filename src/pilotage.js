@@ -6107,6 +6107,29 @@ function _pecCss(){
   +'.pec-tbl td.n{color:var(--texte);font-weight:600}'
   +'.pec-tbl tbody tr:last-child td{border-bottom:0}'
   +'.pec-tbl tfoot td{border-top:2px solid var(--gris);border-bottom:0;font-weight:700;color:var(--texte);padding-top:12px}'
+  // ══ LA CARTE DE FIABILITE ══
+  //   .pec-a (le pave colore) n'est plus produit par _pecAlertes ; ses regles
+  //   restent en place, d'autres vues peuvent encore s'en servir.
+  +'.pec-fia{border:1px solid;border-radius:13px;padding:13px 15px}'
+  +'.pec-fia.bad{background:var(--rouge-pale);border-color:rgba(160,41,30,.35)}'
+  +'.pec-fia.ok{background:var(--vert-pale);border-color:rgba(61,107,39,.3)}'
+  +'.pec-fia-h{display:flex;align-items:center;gap:13px}'
+  +'.pec-fia-n{font-family:\'Cormorant Garamond\',serif;font-size:var(--pt-xxl,31px);font-weight:700;line-height:1;flex:none;font-variant-numeric:tabular-nums}'
+  +'.pec-fia.bad .pec-fia-n{color:var(--rouge)}'
+  +'.pec-fia.ok .pec-fia-n{color:var(--vert-med)}'
+  +'.pec-fia-h>div{flex:1;min-width:0}'
+  +'.pec-fia-t{font-size:var(--pt-txt,12.5px);font-weight:700;color:var(--texte);line-height:1.3}'
+  +'.pec-fia-s{font-size:var(--pt-micro,11px);color:var(--texte-doux);margin-top:2px;line-height:1.4}'
+  +'.pec-fia-go{display:flex;flex-wrap:wrap;gap:7px;margin-top:11px}'
+  +'.pec-fia-x{font-size:var(--pt-micro,11px);color:var(--texte-doux);font-style:italic;align-self:center}'
+  //   La puce des remarques : le mur, replie en une ligne cliquable.
+  +'.pec-remq{display:flex;align-items:center;gap:9px;width:100%;margin-top:10px;padding:10px 13px;'
+  +'border:1px solid var(--gris);background:var(--bg-card);border-radius:11px;cursor:pointer;'
+  +'font-family:inherit;font-size:var(--pt-txt,12.5px);font-weight:600;color:var(--texte-med);text-align:left}'
+  +'.pec-remq:hover{border-color:var(--or);background:var(--or-pale)}'
+  +'.pec-remq-n{flex:none;min-width:21px;height:21px;border-radius:7px;background:var(--or);color:#1C1813;'
+  +'display:flex;align-items:center;justify-content:center;font-size:var(--pt-micro,11px);font-weight:800}'
+  +'.pec-remq-c{margin-left:auto;color:var(--texte-doux)}'
   +'.pec-a{display:flex;gap:10px;align-items:flex-start;padding:12px 14px;border-radius:12px;border:1px solid;font-size:var(--pt-txt,12.5px);line-height:1.55;color:var(--texte-med)}'
   +'.pec-a+.pec-a{margin-top:9px}'
   +'.pec-a .e{font-size:var(--pt-base,14px);line-height:1.3;flex:none}'
@@ -6846,43 +6869,115 @@ function _pecVerdict(E,TL){
 // ── Alertes : ce qui manque, ce qui dérape, ce qu'on peut corriger ───
 // Chaque alerte dit QUOI, POURQUOI ça compte, et OÙ le régler. Une alerte sans
 // point d'atterrissage n'est qu'un reproche.
-function _pecAlertes(E,TL){
-  var A=[];
-  function push(cls,em,html){ A.push('<div class="pec-a '+cls+'"><span class="e">'+em+'</span><div>'+html+'</div></div>'); }
-  if(!E.hasRate) push('bad','\u26A0\uFE0F','Aucun <b>taux horaire</b> renseign\u00e9 \u2014 la main-d\u2019\u0153uvre compte pour z\u00e9ro dans tous les chiffres de cet onglet. Il se saisit dans la fiche de chaque salari\u00e9, <b>R\u00e9glages \u203A \u00c9quipe</b>.');
-  if(!E.hasGnr) push('warn','\u26FD','Le <b>prix du GNR</b> n\u2019est pas connu : le carburant reste \u00e0 z\u00e9ro. Il se renseigne au prochain <b>appoint de cuve</b> (Tracteur \u203A Entretien) \u2014 la moyenne pond\u00e9r\u00e9e des appoints sert de prix.');
-  if(E.phy && !E.phy.anyDose) push('info','\uD83C\uDF3F','Aucune <b>dose structur\u00e9e</b> sur la p\u00e9riode : le co\u00fbt des produits ne peut pas \u00eatre calcul\u00e9. Renseignez dose + unit\u00e9 dans l\u2019assistant de traitement.');
-  else if(E.phy && E.phy.unpriced && E.phy.unpriced.length) push('warn','\uD83D\uDCB6','<b>'+E.phy.unpriced.length+' produit'+(E.phy.unpriced.length>1?'s':'')+'</b> sans prix unitaire dans La R\u00e9serve ('+_pilEsc(E.phy.unpriced.slice(0,3).join(', '))+(E.phy.unpriced.length>3?'\u2026':'')+') \u2014 leurs traitements sont compt\u00e9s pour z\u00e9ro.');
-  if(E.tracSess>0 && E.tracAnon>0) push('warn','\uD83D\uDE9C','<b>'+E.tracAnon+' session'+(E.tracAnon>1?'s':'')+'</b> sur '+E.tracSess+' sans conducteur identifi\u00e9 (ou sans taux) : ces heures sont valoris\u00e9es au <b>taux moyen du domaine</b>, pas au taux r\u00e9el.');
-  if(!E.projOn && E.avc>0) push('info','\uD83D\uDD0D','Sous <b>15 % d\u2019avancement</b>, la projection du tracteur, du GNR et du phyto est neutralis\u00e9e : leur budget affiche le r\u00e9alis\u00e9 seul. Le chiffre montera m\u00e9caniquement.');
+// ════════════════════════════════════════════════════════════════════════════
+// « CE QU'IL FAUT REGARDER » — DOUZE PARAGRAPHES DEVIENNENT UNE CARTE
+// ════════════════════════════════════════════════════════════════════════════
+// AVANT : jusqu'a douze pavés colorés empilés, de 100 à 350 caractères chacun,
+// tous au meme poids visuel. On ouvrait Économie et on lisait un mur avant
+// d'atteindre un chiffre. Le pire y cotoyait le details : « la main-d'oeuvre
+// compte pour zero » avait la meme taille que « le chiffre montera mecaniquement ».
+//
+// LA REGLE DES TROIS FAMILLES, appliquee :
+//   ① CE QUI CADRE — combien de postes sont a zero. Un chiffre, en gros.
+//   ② CE QUI EXPLIQUE — pourquoi un poste manquant met a zero, et le detail des
+//     remarques du moment : deux fiches « i », dont une VIVANTE.
+//   ③ CE QUI DIT QUOI FAIRE — un bouton par poste manquant, qui ouvre l'ecran.
+//
+// ⚠️ RIEN N'EST SUPPRIME. Les douze constats sont tous calcules, tous lisibles.
+//   Ce qui change, c'est ce qu'on voit SANS RIEN OUVRIR : le nombre de postes
+//   faussés et le geste pour les combler.
+//
+// ⚠️⚠️ DOUBLON CONNU, NON RESOLU ICI. `_pilDiag` (le bouton « à compléter » en
+//   tête de module) porte deja un constat « N fiches sans taux horaire ». Celui
+//   d'ici teste `!E.hasRate` — AUCUN taux, nulle part. Deux constats voisins sur
+//   la meme donnee, a deux endroits de la meme page. C'est la faute de §34 (trois
+//   endroits repondaient a « combien d'ETP ? ») en plus petit. La fusion est un
+//   chantier de moteur, pas d'ergonomie : elle est notee au backlog.
+
+// Un poste de depense qu'une donnee manquante met a ZERO — pas « a peu pres ».
+function _pecZeros(E){
+  var Z=[];
+  if(!E.hasRate) Z.push({ nom:'Main-d\u2019\u0153uvre', quoi:'taux horaire', cible:'equipe',  ou:'R\u00e9glages \u203a \u00c9quipe' });
+  if(!E.hasGnr)  Z.push({ nom:'Carburant',    quoi:'prix du GNR',  cible:'entretien', ou:'Tracteur \u203a Entretien' });
+  if(E.phy && !E.phy.anyDose)
+    Z.push({ nom:'Produits phyto', quoi:'dose structur\u00e9e', cible:null, ou:null });
+  else if(E.phy && E.phy.unpriced && E.phy.unpriced.length)
+    Z.push({ nom:E.phy.unpriced.length+' produit'+(E.phy.unpriced.length>1?'s':''), quoi:'prix unitaire dans La R\u00e9serve', cible:null, ou:null });
+  return Z;
+}
+
+// Les constats qui ne mettent rien a zero : le chiffre sort, il faut seulement
+// savoir comment il est fait. Ils vont dans la fiche vivante.
+function _pecRemarques(E,TL){
+  var R=[];
+  if(E.tracSess>0 && E.tracAnon>0)
+    R.push('<b>'+E.tracAnon+' session'+(E.tracAnon>1?'s':'')+'</b> de tracteur sur '+E.tracSess+' n\u2019'+(E.tracAnon>1?'ont':'a')+' pas de conducteur identifi\u00e9 (ou pas de taux) : ces heures sont valoris\u00e9es au <b>taux moyen du domaine</b>, pas au taux r\u00e9el.');
+  if(!E.projOn && E.avc>0)
+    R.push('Sous <b>15 % d\u2019avancement</b>, la projection du tracteur, du GNR et du phyto est neutralis\u00e9e : leur budget affiche le r\u00e9alis\u00e9 seul. Le chiffre montera m\u00e9caniquement.');
   if(TL && TL.ok && TL.socle>0 && E.engage>0 && TL.socle/E.engage>0.10)
-    push('info','\uD83E\uDE79','<b>'+_pilEsc(_pecEurK(TL.socle))+'</b> de travail fait n\u2019a <b>aucune trace dat\u00e9e</b> au journal (import ou reconstruction) : ces euros sont pos\u00e9s au premier jour de la p\u00e9riode sur la courbe, faute de mieux. Le total, lui, est juste.');
+    R.push('<b>'+_pilEsc(_pecEurK(TL.socle))+'</b> de travail fait n\u2019a <b>aucune trace dat\u00e9e</b> au journal (import ou reconstruction) : ces euros sont pos\u00e9s au premier jour de la p\u00e9riode sur la courbe, faute de mieux. Le total, lui, est juste.');
   var chers=(E.rows||[]).filter(function(r){ return r.surf>0 && E.coutHaB>0 && r.coutHa>E.coutHaB*1.3; })
                         .sort(function(a,b){ return b.coutHa-a.coutHa; });
-  if(chers.length) push('warn','\uD83D\uDCC8','<b>'+chers.length+' parcelle'+(chers.length>1?'s':'')+'</b> d\u00e9passe'+(chers.length>1?'nt':'')+' de plus de 30 % le co\u00fbt moyen \u00e0 l\u2019hectare : '
-    +_pilEsc(chers.slice(0,3).map(function(r){ return r.nom+' ('+_ecoEur(r.coutHa)+'/ha)'; }).join(', '))+(chers.length>3?'\u2026':'')+'. \u00c0 regarder : plants, passages en plus, ou tri des t\u00e2ches.');
+  if(chers.length)
+    R.push('<b>'+chers.length+' parcelle'+(chers.length>1?'s':'')+'</b> d\u00e9passe'+(chers.length>1?'nt':'')+' de plus de 30 % le co\u00fbt moyen \u00e0 l\u2019hectare : '
+      +_pilEsc(chers.slice(0,3).map(function(r){ return r.nom+' ('+_ecoEur(r.coutHa)+'/ha)'; }).join(', '))+(chers.length>3?'\u2026':'')
+      +'. \u00c0 regarder : plants, passages en plus, ou tri des t\u00e2ches.');
   if(E.cad.ok && E.cad.ecart>15){
-    // \u2605 GARDE EXPLICITE, PAS STRUCTURELLE. La branche basse cite E.projFin :
-    //   elle n'a de sens que si la projection applique vraiment l'ecart. Le if/else
-    //   le garantissait deja par construction - et c'est exactement le genre de
-    //   garantie qu'un refactor efface sans bruit. On l'ecrit.
+    // ★ GARDE EXPLICITE, PAS STRUCTURELLE. La branche basse cite E.projFin : elle
+    //   n'a de sens que si la projection applique vraiment l'ecart. Le if/else le
+    //   garantissait par construction — et c'est le genre de garantie qu'un
+    //   refactor efface sans bruit. On l'ecrit.
     if(E.cad.src==='histo' || !E.cad.applic)
-      // ★ LA PHRASE LA PLUS LONGUE DU MODULE, ramenee a son cadre.
-      //   Ce qui reste dit D'OU vient le chiffre (l'an dernier, quelle campagne)
-      //   et CE QU'IL VAUT (un repere, pas une prevision) — sans ca, un chiffre
-      //   d'histoire passe pour une mesure du moment, la faute de §41.
-      //   Le seuil, le biais cave/atelier/bureau et ce que la projection en fait
-      //   sont dans MV_INFO['pil.cadence'].
-      push('warn','\u21a9\ufe0e','L\u2019an dernier, sur la p\u00e9riode homologue (<b>'+_pilEsc(E.cad.histoNom||'campagne pr\u00e9c\u00e9dente')+'</b>), l\u2019\u00e9quipe avait pass\u00e9 <b>'+_pilEsc(_pecPct(E.cad.ecart))+' de temps en plus</b> que le bar\u00e8me h/ha. C\u2019est un <b>rep\u00e8re</b>, pas une pr\u00e9vision. '+_mvInfoBtn('pil.cadence'));
+      R.push('L\u2019an dernier, sur la p\u00e9riode homologue (<b>'+_pilEsc(E.cad.histoNom||'campagne pr\u00e9c\u00e9dente')+'</b>), l\u2019\u00e9quipe avait pass\u00e9 <b>'+_pilEsc(_pecPct(E.cad.ecart))+' de temps en plus</b> que le bar\u00e8me h/ha. Cette p\u00e9riode-ci n\u2019est pas encore assez avanc\u00e9e pour se mesurer elle-m\u00eame ('+Math.round(E.avc)+' % sur '+Math.round(E.cad.seuil)+' % requis) : c\u2019est un <b>rep\u00e8re</b>, pas une pr\u00e9vision.');
     else
-      push('bad','\u23F3','Sur le travail d\u00e9j\u00e0 fait, l\u2019\u00e9quipe a pass\u00e9 <b>'+_pilEsc(_pecPct(E.cad.ecart))+' de temps en plus</b> que le bar\u00e8me h/ha. Si cela tient jusqu\u2019au bout, la p\u00e9riode co\u00fbtera <b>'+_pilEsc(_pecEurK(E.projFin))+'</b> au lieu de '+_pilEsc(_pecEurK(E.budget))+'. Deux causes possibles, et elles se distinguent dans <b>Postes &amp; travaux</b> : un bar\u00e8me trop serr\u00e9 (<b>R\u00e9glages \u203A T\u00e2ches</b>), ou un travail pr\u00e9cis qui d\u00e9rape.');
+      R.push('Sur le travail d\u00e9j\u00e0 fait, l\u2019\u00e9quipe a pass\u00e9 <b>'+_pilEsc(_pecPct(E.cad.ecart))+' de temps en plus</b> que le bar\u00e8me h/ha. Si cela tient jusqu\u2019au bout, la p\u00e9riode co\u00fbtera <b>'+_pilEsc(_pecEurK(E.projFin))+'</b> au lieu de '+_pilEsc(_pecEurK(E.budget))+'. Deux causes possibles, et elles se distinguent dans <b>Postes &amp; travaux</b> : un bar\u00e8me trop serr\u00e9, ou un travail pr\u00e9cis qui d\u00e9rape.');
   }
-  else if(!E.cad.ok && E.avc>10) push('info','\uD83D\uDCD3',(E.cad.src
+  else if(!E.cad.ok && E.avc>10)
+    R.push(E.cad.src
       ? ('L\u2019\u00e9cart de cadence n\u2019est pas encore affich\u00e9 : il demande <b>'+Math.round(E.cad.seuil)+' %</b> du bar\u00e8me r\u00e9alis\u00e9, la p\u00e9riode en est \u00e0 <b>'+Math.round(E.avc)+' %</b>. Rien \u00e0 faire, il appara\u00eetra seul.')
-      : 'L\u2019\u00e9cart de cadence est indisponible : aucune heure de planning sur cette p\u00e9riode, et aucune campagne comparable archiv\u00e9e. C\u2019est le planning qui mesure le temps pass\u00e9, plus les validations du journal.'));
-  if(E.tot.retE>0) push('warn','\u23F1','<b>'+_pilEsc(_ecoEur(E.tot.retE))+'</b> de surco\u00fbt de retard mod\u00e9lis\u00e9 sur '+E.tot.nRet+' parcelle'+(E.tot.nRet>1?'s':'')+' ('+E.rcfg.pct+' %/semaine hors fen\u00eatre, plafond '+E.rcfg.capPct+' %). <b>Mod\u00e9lis\u00e9, jamais pay\u00e9</b> : il n\u2019entre dans aucun total.');
-  if(!A.length) push('ok','\u2705','Toutes les donn\u00e9es de chiffrage sont en place : taux horaires, prix du GNR, doses et prix des produits. Les chiffres de cet onglet sont complets.');
-  return A.join('');
+      : 'L\u2019\u00e9cart de cadence est indisponible : aucune heure de planning sur cette p\u00e9riode, et aucune campagne comparable archiv\u00e9e. C\u2019est le planning qui mesure le temps pass\u00e9.');
+  if(E.tot.retE>0)
+    R.push('<b>'+_pilEsc(_ecoEur(E.tot.retE))+'</b> de surco\u00fbt de retard mod\u00e9lis\u00e9 sur '+E.tot.nRet+' parcelle'+(E.tot.nRet>1?'s':'')+' ('+E.rcfg.pct+' %/semaine hors fen\u00eatre, plafond '+E.rcfg.capPct+' %). <b>Mod\u00e9lis\u00e9, jamais pay\u00e9</b> : il n\u2019entre dans aucun total.');
+  return R;
+}
+
+function _pecAlertes(E,TL){
+  var Z=_pecZeros(E), R=_pecRemarques(E,TL);
+  // La fiche vivante se remplit AVANT que la pastille soit posee. Si elle reste
+  // vide, MV_INFO garde son repli honnete plutot qu'un blanc.
+  if(typeof window._mvInfoSet==='function' && R.length)
+    window._mvInfoSet('pil.eco.remarques', { p:R });
+
+  var H='';
+  if(Z.length){
+    // ① Le chiffre : combien de postes sortent a zero.
+    H+='<div class="pec-fia bad">'
+      +'<div class="pec-fia-h"><span class="pec-fia-n">'+Z.length+'</span>'
+      +'<div><div class="pec-fia-t">poste'+(Z.length>1?'s':'')+' compt\u00e9'+(Z.length>1?'s':'')+' pour z\u00e9ro</div>'
+      +'<div class="pec-fia-s">'+_pilEsc(Z.map(function(z){return z.nom;}).join(' \u00b7 '))+'</div></div>'
+      +(typeof _mvInfoBtn==='function'?_mvInfoBtn('pil.eco.fiabilite'):'')+'</div>'
+      // ③ Un bouton par poste manquant. Ceux qui n'ont pas de cible disent au
+      //   moins ce qui manque, sans promettre une porte qui n'existe pas.
+      +'<div class="pec-fia-go">'
+      +Z.map(function(z){
+         return z.cible
+           ? '<button class="pil-diag-go ghost" data-diag="'+_pilEsc(z.cible)+'">'+_pilEsc(z.ou)+' \u203a</button>'
+           : '<span class="pec-fia-x">'+_pilEsc(z.quoi)+' \u00e0 renseigner</span>';
+       }).join('')
+      +'</div></div>';
+  } else {
+    H+='<div class="pec-fia ok"><div class="pec-fia-h"><span class="pec-fia-n">\u2713</span>'
+      +'<div><div class="pec-fia-t">Le chiffrage est complet</div>'
+      +'<div class="pec-fia-s">taux horaires, prix du GNR, doses et prix des produits</div></div></div></div>';
+  }
+
+  // ② Les remarques : une puce, pas un mur.
+  if(R.length){
+    H+='<button class="pec-remq" data-mvi="pil.eco.remarques">'
+      +'<span class="pec-remq-n">'+R.length+'</span>remarque'+(R.length>1?'s':'')+' sur la lecture de ces chiffres'
+      +'<span class="pec-remq-c">\u203a</span></button>';
+  }
+  return H;
 }
 
 // ── Vue 1 : Synthèse ─────────────────────────────────────────────────
@@ -6898,7 +6993,12 @@ function _pecViewSynthese(E,TL){
       +'<div class="s">'+_pilEsc(_pecPct(E.cons))+' du budget \u00b7 '+_pilEsc(_ecoEur(E.coutHaE))+'/ha</div></div>'
     +'<div class="pec-k"><div class="l">Reste \u00e0 engager</div><div class="v">'+_pilEsc(_ecoEur(E.resteE))+'</div>'
       +'<div class="s">'+_ecoH1(E.tot.rH)+' h de travail encore \u00e0 faire</div></div>'
-    +'<div class="pec-k"><div class="l">\u00c9cart de cadence</div>'
+    // ★ LA PASTILLE VIT A COTE DU CHIFFRE QU'ELLE EXPLIQUE. Elle etait posee dans
+    //   le pave d'alerte ; la refonte du mur l'a emportee avec lui, et la fiche
+    //   `pil.cadence` — le seuil, le biais cave/atelier/bureau, la regle du reste
+    //   a engager — est redevenue inatteignable. Trouve par le harnais, qui exige
+    //   que toute fiche ecrite soit posee quelque part.
+    +'<div class="pec-k"><div class="l">\u00c9cart de cadence'+(typeof _mvInfoBtn==='function'?(' '+_mvInfoBtn('pil.cadence')):'')+'</div>'
       +'<div class="v" style="color:'+dCol+'">'+(ec===null?'\u2014':((ec>0?'+':'')+_pecPct(ec)))+'</div>'
       +'<div class="s">'+(ec===null
           ? (E.cad.src?('mesurable d\u00e8s '+Math.round(E.cad.seuil)+' % du bar\u00e8me r\u00e9alis\u00e9 \u00b7 '+Math.round(E.avc)+' % \u00e0 ce jour'):'aucune heure de planning sur la p\u00e9riode')

@@ -36,8 +36,12 @@ const cles = Object.keys(MV_INFO);
 t('MV_INFO s\'evalue et n\'est pas vide', cles.length > 0, cles.length + ' fiche(s)');
 t('chaque fiche porte un titre et au moins un paragraphe',
   cles.every(k => MV_INFO[k] && MV_INFO[k].t && Array.isArray(MV_INFO[k].p) && MV_INFO[k].p.length));
+/* Un ou deux niveaux apres le module : `pil.gnr`, `pil.eco.remarques`. Le
+   second dit module + ecran + chose — l'assertion d'origine n'autorisait qu'un
+   seul niveau et rejetait le nommage le plus precis. */
+const NOM = /^[a-z]{3,5}(\.[a-z0-9]+){1,2}$/;
 t('chaque cle est nommee par son module (prefixe « xxx. »)',
-  cles.every(k => /^[a-z]{3,5}\.[a-z0-9]+$/.test(k)), cles.filter(k => !/^[a-z]{3,5}\.[a-z0-9]+$/.test(k)).join(', '));
+  cles.every(k => NOM.test(k)), cles.filter(k => !NOM.test(k)).join(', '));
 
 const txt = cles.flatMap(k => [MV_INFO[k].t, ...MV_INFO[k].p]).join('\n');
 t('aucun backslash rendu litteralement', txt.indexOf('\\') === -1);
@@ -150,6 +154,42 @@ t('le commutateur vise existe bien sur window',
 t('les sept cibles d\'origine gardent leur forme a trois elements',
   ['saisons','taches','dens','secteurs','equipe','tracteurs'].every(k =>
     new RegExp(k + ":\\s*\\['reglages',").test(PILNU)));
+
+/* ══ 5 quinquies. LES FICHES VIVANTES ══
+   Un contenu calcule a l'execution echapperait a tout controle statique. La
+   regle : une cle vivante reste DECLAREE dans MV_INFO, avec un repli honnete.
+   _mvInfoSet refuse toute cle non declaree — sinon la porte est ouverte. */
+t('_mvInfoSet existe et est exposee',
+  /export function _mvInfoSet/.test(UNU) && /window\._mvInfoSet\s*=/.test(UNU));
+const setCorps = UNU.slice(UNU.indexOf('function _mvInfoSet'), UNU.indexOf('export function _mvInfoOpen'));
+t('_mvInfoSet refuse une cle non declaree dans MV_INFO', /if \(!MV_INFO\[cle\]\)/.test(setCorps));
+t('… et le trace au lieu de l\'avaler', /cle vivante non declaree/.test(setCorps));
+t('_mvInfoOpen lit le registre vivant AVANT le dictionnaire',
+  /MV_INFO_LIVE\[cle\] \|\| MV_INFO\[cle\]/.test(UNU));
+const vivantes = [...PILNU.matchAll(/_mvInfoSet\('([^']+)'/g)].map(m => m[1]);
+t('toute fiche remplie a l\'execution est declaree', vivantes.every(k => cles.includes(k)),
+  vivantes.filter(k => !cles.includes(k)).join(', '));
+t('… et son repli dit honnetement qu\'elle est vide',
+  vivantes.every(k => /Aucune remarque|pas encore/.test(MV_INFO[k].p.join(' '))));
+
+/* ══ 5 sexies. LE MUR D'ALERTES D'ECONOMIE ══
+   Douze paragraphes empiles, tous au meme poids : ce qui met un chiffre a ZERO
+   avait la meme taille que « le chiffre montera mecaniquement ». */
+t('_pecAlertes ne produit plus de paves .pec-a', !/pec-a [^"]*'\+em\+/.test(PILNU)
+  && !/function _pecAlertes[\s\S]{0,1200}?pec-a /.test(PILNU));
+t('les postes a zero sont separes des remarques',
+  /function _pecZeros\(E\)/.test(PILNU) && /function _pecRemarques\(E,TL\)/.test(PILNU));
+t('… et les deux sont appelees par _pecAlertes',
+  /var Z=_pecZeros\(E\), R=_pecRemarques\(E,TL\);/.test(PILNU));
+t('la carte de fiabilite porte sa fiche', /_mvInfoBtn\('pil\.eco\.fiabilite'\)/.test(PILNU));
+t('chaque poste a zero propose son bouton quand une porte existe',
+  /data-diag="'\+_pilEsc\(z\.cible\)/.test(PILNU));
+t('un poste sans porte ne promet pas de bouton', /pec-fia-x/.test(PILNU));
+t('les remarques sont repliees derriere une puce', /data-mvi="pil\.eco\.remarques"/.test(PILNU));
+t('le cas « tout est en place » a son etat vert', /pec-fia ok/.test(PILNU));
+t('la carte de fiabilite est stylee', /\.pec-fia\{/.test(PILNU) && /\.pec-remq\{/.test(PILNU));
+t('l\'ecart de cadence garde sa fiche a cote de son chiffre',
+  /cart de cadence'\+\(typeof _mvInfoBtn[\s\S]{0,60}?_mvInfoBtn\('pil\.cadence'\)/.test(PILNU));
 
 /* ══ 6. LES DEUX DETTES DE §34i SOLDEES ══ */
 t('_PIL_SEM ne se declare plus dans le module', !/var _PIL_SEM\s*=/.test(PILNU));

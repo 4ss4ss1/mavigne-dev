@@ -23,7 +23,7 @@ export const GT_ADMIN_EMAIL = 'ngdevpro@gmail.com';
 // WHATS_NEW   : tableau vide = modal desactive pour cette version.
 // Format item : { emoji:'📅', titre:'Titre court', desc:'Phrase utilisateur.' }
 // Regle : seulement les changements visibles par les utilisateurs.
-export const APP_VERSION = '6.17';
+export const APP_VERSION = '6.18';
 // ════ Journal des nouveautés (récap cumulatif) ════
 // Une entrée par version, la PLUS RÉCENTE EN HAUT : { v:'5.10', items:[ {emoji,titre,desc}, … ] }
 // À chaque release visible → AJOUTER un bloc en tête (ne pas remplacer). items:[] = release technique (rien à afficher).
@@ -354,6 +354,10 @@ window._mvGraphRepeindre = function(){
 };
 
 export const WHATS_NEW = [
+  { v:'6.18', items:[
+    { emoji: '\u{1F9F1}', titre: "\u00c9conomie\u202f: le mur d\u2019avertissements devient une carte et des boutons",
+      desc: "L\u2019onglet \u00c9conomie pouvait afficher <b>douze pav\u00e9s color\u00e9s</b> les uns sous les autres avant le premier chiffre \u2014 et tous de la m\u00eame taille, si bien que \u00ab\u202fla main-d\u2019\u0153uvre compte pour z\u00e9ro\u202f\u00bb pesait autant que \u00ab\u202fle chiffre montera m\u00e9caniquement\u202f\u00bb. \u00c0 la place\u202f: une <b>carte de fiabilit\u00e9</b> qui dit combien de postes de d\u00e9pense sortent \u00e0 z\u00e9ro, lesquels, et pose <b>un bouton par poste</b> pour aller renseigner ce qui manque. Le reste \u2014 les remarques sur la lecture des chiffres \u2014 se replie derri\u00e8re une puce\u202f: touchez-la pour tout lire. <b>Rien n\u2019est supprim\u00e9\u202f</b>: tout est toujours calcul\u00e9 et toujours lisible." },
+  ] },
   { v:'6.17', items:[
     { emoji: '\u{1F465}', titre: "\u00ab\u202fL\u2019\u00e9quipe & le mat\u00e9riel\u202f\u00bb\u202f: six cartes remises \u00e0 plat",
       desc: "Chaque carte de cet onglet affiche maintenant, <b>sans qu\u2019on la d\u00e9plie</b>, son chiffre et la ligne qui dit sur quoi il a \u00e9t\u00e9 calcul\u00e9. Le parc tracteur remonte la <b>r\u00e9vision la plus proche</b> \u2014 il fallait ouvrir la carte pour la voir. La cuve GNR affiche les <b>litres</b> plut\u00f4t que le pourcentage, parce que c\u2019est ce qu\u2019on lit pour d\u00e9cider d\u2019un plein. Le d\u00e9tail du calcul de chaque chiffre est derri\u00e8re son petit \u00ab\u202fi\u202f\u00bb." },
@@ -1786,6 +1790,7 @@ var MV_AIDE = {
       ['Simuler compte sur la fenêtre du TRAVAIL', ", pas sur le calendrier d’aujourd’hui. Quarante vendangeurs engagés du 26 août au 4 septembre comptent dès maintenant pour l’ordre de passage et la répartition de la vendange — même si vous êtes seul dans les rangs ce matin. Le jour du travail, personne n’est en congé et tous les contrats courent."],
       ['Un contrat de groupe compte pour son effectif', " : une fiche « équipe de vendange » à 40 vaut 40 personnes, pas une ligne. Inutile de créer quarante fiches. L’écran dit toujours sur quelles dates il a compté, et affiche l’écart avec la présence du jour."],
       ['Le manque d’effectif se lit sur la semaine du pic', ", contre ce qui est prévu au planning <b>cette semaine-là</b> — pas contre la présence d’aujourd’hui. Un pic qui tombe dans onze mois ne se compare pas à qui est là ce matin."],
+      ['La carte de fiabilité d’Économie', ": elle dit combien de <b>postes de dépense sortent à zéro</b> faute d’une donnée — un taux horaire, le prix du GNR, une dose. Ce n’est pas « un peu bas » : c’est zéro, et le budget affiché n’est qu’un plancher. Chaque poste manquant porte son bouton. La puce « N remarques » en dessous ouvre tout ce qui n’empêche pas un calcul mais change sa lecture."],
       ['Économie', "compare un budget de barème à ce qui est engagé, sur la <b>période consultée</b> — le coût d’un bilan entier se lit dans sa sous-vue <b>Exercice</b>. Quand l’écart est grand, c’est le barème qu’on corrige dans Réglages, jamais le taux horaire."],
       ['L’écart de cadence cherche sa source dans un ordre', ", et dit toujours laquelle il a trouvée. D’abord <b>la période en cours</b>, dès 40 % de barème réalisé. Sinon <b>la même période de la campagne précédente</b>, si elle est archivée — la ligne porte alors un <b>↩</b> et nomme la campagne : c’est une hypothèse de projection, pas une mesure du moment. Sinon rien, et l’écran l’écrit plutôt que d’afficher un chiffre inventé."],
       ['Conformité', "suit le cuivre sur sept ans, le nombre de passages et les délais de rentrée en cours."],
@@ -1959,6 +1964,21 @@ export const MV_INFO = {
     'Quand l\u2019écart est grand, c\u2019est le <b>barème</b> qu\u2019on corrige dans Réglages \u203a Tâches, <b>jamais le taux horaire</b>.'
   ] },
 
+  // ⚠️ FICHE VIVANTE : ses paragraphes sont remplaces a chaque rendu par
+  //   _pecAlertes (pilotage.js). Ce qui suit est le repli — il s'affiche si le
+  //   module n'a pas encore tourne, et il doit rester vrai dans ce cas-la.
+  'pil.eco.remarques': { t: 'Les remarques du moment', p: [
+    'Aucune remarque à afficher pour l\u2019instant. Ouvrez l\u2019onglet Économie pour que cette fiche se remplisse.'
+  ] },
+
+  'pil.eco.fiabilite': { t: 'Fiabilité des chiffres', p: [
+    'Chaque donnée manquante ne rend pas un chiffre <b>approximatif</b> : elle met un poste entier à <b>zéro</b>. Un budget auquel il manque la main-d\u2019\u0153uvre n\u2019est pas « un peu bas », il est faux.',
+    '<b>Taux horaire</b> — il vit dans la fiche de chaque salarié, Réglages \u203a Équipe. C\u2019est le taux <b>chargé</b> : le coût employeur, cotisations patronales comprises. Sans lui, la main-d\u2019\u0153uvre — le premier poste du domaine — compte pour zéro partout sur cet écran.',
+    '<b>Prix du GNR</b> — il se déduit tout seul des <b>appoints de cuve</b> saisis dans Tracteur \u203a Entretien, en moyenne pondérée. Aucun appoint saisi, aucun prix : le carburant reste à zéro.',
+    '<b>Doses et prix des produits</b> — le coût phyto se calcule à partir d\u2019une dose structurée à la saisie du traitement, et d\u2019un prix unitaire dans La Réserve. Il manque l\u2019un des deux, le traitement compte pour zéro.',
+    'Tant qu\u2019un de ces postes manque, lisez le budget affiché comme un <b>plancher</b>, jamais comme un total.'
+  ] },
+
   'pil.equipe': { t: 'Équipe', p: [
     'Le compte est un nombre de <b>personnes</b>, pas de fiches. Une <b>équipe collective</b> est une seule fiche mais compte pour son effectif réel — sinon l\u2019écran afficherait « 2 actifs » en pleine vendange.',
     'Une personne compte si elle est <b>sous contrat à la date affichée</b>, pas si sa fiche est marquée active. Un saisonnier dont le CDD s\u2019est terminé sort du compte le lendemain, même si personne n\u2019a touché à sa fiche. Passer quelqu\u2019un en « inactif » sert à ne plus avoir à le sélectionner tous les jours ; ça ne retire rien de ce qu\u2019il a fait.',
@@ -2018,10 +2038,38 @@ export function _mvInfoBtn(cle) {
        + '" aria-label="D\u2019ou vient ce chiffre"><span aria-hidden="true">i</span></button>';
 }
 
+// ═══════════════════════════════════════════════════════════════════════════
+// LES FICHES VIVANTES
+// ═══════════════════════════════════════════════════════════════════════════
+// MV_INFO est un dictionnaire ECRIT : il explique une methode, qui ne change
+// pas d'un domaine a l'autre. Mais certaines explications CITENT des chiffres
+// du moment — « 2 parcelles depassent de 30 % », « 3 180 € de surcout modelise ».
+// Elles ne peuvent pas etre ecrites d'avance.
+//
+// ⚠️ ON N'OUVRE PAS UNE PORTE A DU CONTENU LIBRE. Chaque cle reste DECLAREE
+//   dans MV_INFO, avec son titre et un texte de repli honnete. `_mvInfoSet` ne
+//   fait que remplacer les paragraphes a l'execution. Consequences :
+//     · le harnais continue de verifier statiquement que toute pastille posee
+//       a une fiche — une cle vivante n'echappe pas au controle ;
+//     · si le module qui la remplit n'a pas tourne, la fiche s'ouvre quand meme
+//       et dit ce qu'elle sait, au lieu d'un blanc.
+// ⚠️ Le contenu vient TOUJOURS du code de l'app, jamais d'une saisie : c'est ce
+//   qui autorise le HTML dans les paragraphes (C19).
+var MV_INFO_LIVE = {};
+export function _mvInfoSet(cle, fiche) {
+  if (!cle || !fiche || !Array.isArray(fiche.p)) return;
+  if (!MV_INFO[cle]) {
+    // Une fiche vivante sans declaration echapperait au controle statique.
+    if (window.logError) window.logError({ level: 'info', cat: 'info', msg: 'MV_INFO : cle vivante non declaree ' + cle });
+    return;
+  }
+  MV_INFO_LIVE[cle] = { t: fiche.t || MV_INFO[cle].t, p: fiche.p };
+}
+
 export function _mvInfoOpen(cle) {
   var el = document.getElementById('info-inner');
   if (!el) return;
-  var f = MV_INFO[cle];
+  var f = MV_INFO_LIVE[cle] || MV_INFO[cle];
   if (!f) {
     // Une pastille morte est plus deroutante qu'une explication absente : on
     // ouvre quand meme, en le disant. Le harnais interdit ce cas en CI — s'il
@@ -2069,6 +2117,7 @@ if (typeof document !== 'undefined') {
 window.GT_ADMIN_EMAIL     = GT_ADMIN_EMAIL;
 window.MV_INFO            = MV_INFO;
 window._mvInfoOpen        = _mvInfoOpen;
+window._mvInfoSet         = _mvInfoSet;
 window._mvInfoBtn         = _mvInfoBtn;
 window._PIL_SEM           = _PIL_SEM;
 window.showSyncBadge      = showSyncBadge;

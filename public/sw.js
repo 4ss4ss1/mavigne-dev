@@ -1,4 +1,30 @@
-// MA VIGNE — Service Worker v6.70
+// MA VIGNE — Service Worker v6.71
+// v6.71 (15/08/2026) — LE MUR D’ALERTES D’ECONOMIE.
+//   « Ce qu’il faut regarder » empilait jusqu’a DOUZE paves colores, de 100 a
+//   350 caracteres chacun, tous au meme poids visuel. On ouvrait Economie et on
+//   lisait un mur avant d’atteindre un chiffre. Le pire y cotoyait le detail :
+//   « la main-d’oeuvre compte pour zero » avait la meme taille que « le chiffre
+//   montera mecaniquement ».
+//   ★ _pecZeros / _pecRemarques separent les deux natures. Ce qui met un poste
+//     a ZERO devient une CARTE DE FIABILITE : le nombre de postes fausses en
+//     gros, leurs noms, et UN BOUTON PAR POSTE qui ouvre l’ecran de saisie.
+//     Le reste part derriere une puce « N remarques ».
+//   ⚠️ RIEN N’EST SUPPRIME : les douze constats sont tous calcules et tous
+//     lisibles. Ce qui change, c’est ce qu’on voit SANS RIEN OUVRIR.
+//   ★ LES FICHES VIVANTES (_mvInfoSet, utils.js). Certaines explications citent
+//     des chiffres du moment — « 2 parcelles depassent de 30 % » — donc elles ne
+//     peuvent pas etre ecrites d’avance. Mais on n’ouvre pas une porte a du
+//     contenu libre : la cle reste DECLAREE dans MV_INFO avec un repli honnete,
+//     et _mvInfoSet refuse toute cle non declaree. Le controle statique tient.
+//   ⚠️⚠️ DOUBLON CONNU, NON RESOLU. _pilDiag (le bouton « a completer ») porte
+//     deja un constat « N fiches sans taux horaire » ; celui d’Economie teste
+//     « AUCUN taux, nulle part ». Deux constats voisins sur la meme donnee, a
+//     deux endroits de la meme page. C’est la faute de §34 en plus petit. La
+//     fusion est un chantier de moteur, pas d’ergonomie : notee au backlog.
+//   · La pastille de l’ecart de cadence retourne a cote du CHIFFRE (le KPI) :
+//     elle vivait dans le pave d’alerte, et la refonte du mur l’emportait avec
+//     lui — la fiche `pil.cadence` redevenait inatteignable. Trouve par le
+//     harnais, qui exige que toute fiche ecrite soit posee quelque part.
 // v6.70 (15/08/2026) — « L’EQUIPE & LE MATERIEL » PASSE A LA REGLE DES TROIS
 //   FAMILLES. Six cartes reprises une par une : ce qui CADRE le chiffre devient
 //   sa ligne de cadre, ce qui EXPLIQUE le calcul part dans MV_INFO, ce qui DIT
@@ -1535,7 +1561,7 @@
 // v2.22 — Fix profils vides : guard vide dans loadData() pour MEMBRES/SAISONS/TACHES
 // v2.17 — Onboarding intégré + tenantId · v2.06 — Firebase Auth · v2.00–v2.05 — divers
 const DEBUG = self.location.hostname === 'localhost' || self.location.hostname === '127.0.0.1';
-const CACHE_NAME   = 'mavigne-v6.70';
+const CACHE_NAME   = 'mavigne-v6.71';
 const TENANT_CACHE = 'mavigne-tenant';   // Cache persistant — préservé à chaque mise à jour SW
 const SYNC_TAG     = 'mavigne-sync';
 
@@ -1551,7 +1577,7 @@ const CDN_URLS = [
 ];
 
 self.addEventListener('install', event => {
-  if(DEBUG) console.log('[SW] Ma Vigne v6.70 installé');
+  if(DEBUG) console.log('[SW] Ma Vigne v6.71 installé');
   event.waitUntil(
     caches.open(CACHE_NAME).then(async cache => {
       // ── Cœur applicatif : STRICT (mise à jour ATOMIQUE) ──
@@ -1567,7 +1593,7 @@ self.addEventListener('install', event => {
 });
 
 self.addEventListener('activate', event => {
-  if(DEBUG) console.log('[SW] Ma Vigne v6.70 activé');
+  if(DEBUG) console.log('[SW] Ma Vigne v6.71 activé');
   event.waitUntil(
     caches.keys().then(keys =>
       Promise.all(
