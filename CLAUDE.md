@@ -2,7 +2,31 @@
 
 > Document de référence du projet **Ma Vigne** (GUERETTECH). Il est le **porteur de vérité** :
 > la mémoire Claude est plafonnée, ce fichier ne l'est pas.
-> Dernière consolidation : **14 août 2026 (nuit)** — ★★★ **L'ESCALIER DE CADENCE, ET LE FICHIER
+> Dernière consolidation : **15 août 2026** — ★★★ **LE CHANTIER ERGONOMIE DU PILOTAGE, DIX LOTS
+> EN UNE JOURNÉE** (**§42**, section neuve). Parti de trois phrases de Nico : *« j'ai l'impression
+> que ce n'est pas rangé, c'est fouillis, on dépense du temps et de l'énergie à chercher une info ·
+> certains textes ne sont peut-être pas utiles à être affichés tout le temps (infobulles ?) ·
+> améliore l'ergonomie et l'expérience utilisateur fois 100 »*.
+> ★★★ **LA RÈGLE DES TROIS FAMILLES**, écrite dans `utils.js` et appliquée aux huit onglets : ce qui
+> **CADRE** un chiffre reste à l'écran en une ligne · ce qui **EXPLIQUE le calcul** passe derrière une
+> pastille « i » · ce qui **DIT QUOI FAIRE** devient un bouton. ⚠️ **Ce n'est PAS « cacher le
+> texte »** : la moitié de ces phrases est la seule trace écrite d'une convention du domaine, et un
+> chiffre sans son cadre ment. **Rien n'a été supprimé — 34 fiches conservent l'intégralité.**
+> ★★ **Trois primitives neuves** : `MV_INFO` + `_mvInfoOpen` (la pastille), `_mvInfoSet` (les fiches
+> **vivantes**, dont le contenu se calcule mais dont la clé reste déclarée), `_pecFiabCard` (une
+> carte, deux écrans). ★ **`_pilTile` et `_pcavCard`** prennent une clé de fiche en dernier argument
+> **optionnel** : les 43 appels existants restent valides.
+> ★★★ **CE QUE LES CONTRÔLES AUTOMATIQUES NE VOIENT PAS.** Trois défauts de mise en page trouvés
+> **uniquement en regardant une capture** : un `<b>` qui devient son propre item flex et coupe une
+> phrase en trois · un CSS extrait par expression régulière et rendu mutilé · une carte à
+> `width:100%` qui mange la frise. **Aucun preflight ne lit une mise en page.**
+> ⚠️⚠️ **ET LA LEÇON LA PLUS COÛTEUSE EST DANS LES HARNAIS, PAS DANS LE CODE.** Sur dix lots,
+> **zéro bug livré** — mais **une quinzaine d'assertions fausses**, toutes de la même famille : elles
+> cherchaient « au moins une fois » là où il fallait **compter**, une phrase là où il fallait
+> **mesurer**, un préfixe qui se laissait satisfaire par un nom plus long. Détail en §42f.
+> ★ **Le chantier a aussi mesuré ce qu'il déplaçait, écran par écran, EN L'EXÉCUTANT** : un comptage
+> sur le fichier ne distingue pas « à l'écran » de « dans une fiche ». Voir §42g.
+> Consolidation précédente : **14 août 2026 (nuit)** — ★★★ **L'ESCALIER DE CADENCE, ET LE FICHIER
 > QUI NE TROUVE PAS SA PLACE** (**§41**, section neuve). **APP 6.14 · SW 6.67.** Parti d'un seul mot,
 > *« suite »*, sur le backlog technique. **Quatre entrées rayees** (3, 7, 9, 0e) — et **cinq autres
 > trouvées déjà mortes** à l'audit préalable (2, 5, 8, 15, 41). C'est le **troisième** audit du même
@@ -306,6 +330,10 @@ chose est faite ou en attente — dans les deux sens.
 | ★★ **l'aide contextuelle décrit les écrans** | **elle décrivait ceux d'il y a plusieurs mois** |
 | ★★★ **« il n'y a pas d'assistant d'installation »** | **`_agtIns` EXISTAIT et avait servi pour Chapelle** (§18b) |
 | ★★ **« l'import KML n'écrit QUE les polygones »** | vrai de l'**onglet KML**, FAUX de l'**assistant** |
+| ★★★ **la grille du Pilotage est réglée sur 1 colonne** | elle est réglée sur **2 à 4** — elle ne se remplissait jamais parce que **les 18 tuiles arrivaient ouvertes** |
+| ★★ **« il n'existe aucune infobulle dans l'app »** | **exact**, et c'était le problème : zéro `<details>`, zéro popover, dans tout le projet |
+| ★★★ **`PIL_TREAT_DAYS` existe** | **je l'ai inventée.** `node --check` ne voit pas un identifiant inconnu : seule l'exécution l'aurait levé |
+| ★★ **`A8` du harnais d'audit est un cliquet** | c'était un cliquet **à l'envers** : il rougissait quand on AJOUTAIT un bouton de redirection |
 
 À l'inverse, l'audit trouve régulièrement du **travail déjà fait** encore listé au backlog.
 
@@ -364,6 +392,7 @@ au lot suivant : c'est une **condition de clôture**, au même titre que le pref
 | Support | Fichier | Quand il devient faux |
 |---|---|---|
 | **Fiche `MV_AIDE`** du module touché | `src/utils.js` | dès qu'un écran, un geste ou un onglet change |
+| **Fiche `MV_INFO`** du chiffre touché | `src/utils.js` | dès que la MÉTHODE de calcul change, ou qu'un chiffre cesse d'être posé |
 | **Section du guide public** | `guide/NN-<section>.html` → `node scripts/build-guide.mjs` | dès qu'une fonctionnalité décrite change |
 | **Visite guidée** `_mvtSteps` | `src/app.js` | dès qu'un sélecteur visé bouge |
 | **`WHATS_NEW`** | `src/utils.js` | dès que le changement est **visible** par l'utilisateur |
@@ -907,6 +936,25 @@ que le harnais rougit.
 ---
 
 ## 6c. ★★ Preflight v2 — le cliquet anti-régression
+
+### ★ TROIS HARNAIS NEUFS, BRANCHÉS EN CI (15/08, §42)
+
+`.github/workflows/ci.yml`, étape « Harnais — echelle, pastille « i », carte a trois etages » :
+
+| harnais | ce qu'il interdit |
+|---|---|
+| `mv-harnais-echelle.mjs` | qu'une **taille de texte** soit réinventée hors des onze pas ; qu'un appel perde son **repli** ; qu'un pas soit déclaré sans emploi ou invoqué sans déclaration |
+| `mv-harnais-info.mjs` | qu'une **pastille ouvre une fiche vide** ou qu'une fiche reste **orpheline** ; que l'écouteur perde son `stopPropagation` ; qu'une **fiche vivante** échappe à sa déclaration ; qu'un **sous-titre de carte** dépasse la ligne de cadre |
+| `mv-harnais-carte.mjs` | que le **chiffre ou son cadre** sortent de l'en-tête (vérifié **en exécutant `_pilTile`**) ; que la **migration d'état** cesse d'atteindre les clients (vérifiée **en l'exécutant** sur un état mémorisé réaliste) ; que le **chrome** regonfle |
+
+⚠️ **Un harnais qui déménage doit rougir.** Quand l'échelle de texte est passée de `_pilCssV2()` à
+`styles.css`, `mv-harnais-echelle` est monté à **13 rouges** : c'est exactement son travail. Le
+réflexe n'est pas de le contourner, c'est de le **suivre**.
+
+★ **`A8` de `mv-harnais-audit-pil` était un cliquet À L'ENVERS** — il exigeait *exactement* 8 boutons
+de redirection, donc rougissait dès qu'on en **ajoutait** un. Converti : **le compte ne descend
+jamais**. À vérifier sur tout contrôle écrit avec un `===` : compte-t-il ce qu'on veut interdire, ou
+ce qu'on veut encourager ?
 
 `scripts/preflight.mjs` tourne en `prebuild`.
 **C'est un outil de développement : jamais déployé → zéro risque client, aucun bump.**
@@ -2319,8 +2367,23 @@ indissociables dont un **filet de tolérance** en tête de `switchCaveOng`.
 
 ## 20b. Pilotage
 
-> ⚠️ **REFONDU LE 12/08 (soir) — voir §34 pour le récit complet et les six lots.** Ce qui suit
-> décrit l'état d'arrivée. La barre n'est plus une liste de sujets : c'est un **axe de zoom**.
+> ⚠️ **REFONDU DEUX FOIS.** **§34** (12/08) a posé l'**axe de zoom**, la portée unique et le moteur
+> de diagnostic. **§42** (15/08) a traité ce que §34 n'avait pas touché : la **densité**, la
+> **hiérarchie typographique** et le **texte**. Ce qui suit décrit l'état d'arrivée des deux.
+>
+> ★★★ **LES TROIS RÈGLES DU MODULE, à connaître avant d'y toucher (§42b)** :
+> ① ce qui **CADRE** un chiffre reste à l'écran, en une ligne, avec un **filet doré** devant ·
+> ② ce qui **EXPLIQUE le calcul** vit dans `MV_INFO`, derrière une pastille « i » ·
+> ③ ce qui **DIT QUOI FAIRE** est un **bouton**, jamais un chemin à retenir.
+> ⚠️ **Toute carte neuve porte les trois.** Les harnais `mv-harnais-info` et `mv-harnais-carte`
+> refusent une carte sans ligne de cadre, une pastille sans fiche, et une fiche sans pastille.
+>
+> ★★ **La carte a TROIS ÉTAGES, tous dans `.pil-th`** : étiquette (+ pastille + chevron) · LE
+> CHIFFRE · la ligne de cadre. **C'est l'unique justification du repli par défaut** — si le chiffre
+> ou son cadre tombaient dans le corps, replier cacherait une information.
+> ★ **`_pilTile(…, infoCle)` et `_pcavCard(…, infoCle)`** : dernier argument **optionnel**.
+> ★ **L'échelle de texte** — onze pas nommés dans `styles.css` (`--pt-*`), **chaque appel avec son
+> repli**. Toute nouvelle taille passe par là, ou le cliquet rougit.
 
 - ★★★ **8 entrées** (`_PIL_TABS`), **du large au fin** :
   **Aujourd'hui · ① L'année · ② La campagne · ③ L'équipe & les tâches · ④ Simuler ┃ Cave ·
@@ -2349,8 +2412,17 @@ indissociables dont un **filet de tolérance** en tête de `switchCaveOng`.
   ★ `_pilScopeVerif(ann)` nettoie une **portée fantôme** : une période supprimée ou renommée
   laisserait l'écran filtrant sur un nom que plus personne ne porte.
 
+- ★★ **Les cartes arrivent REPLIÉES** (`collapsed` tout à 1) et **une seule s'ouvre à la fois** :
+  c'est ce qui rend ses 2 à 4 colonnes à `.pil-panels`. ⚠️ **Replier ne cache aucun chiffre.**
+  ⚠️⚠️ **Tout changement de défaut de disposition exige un cran de `_PIL_ST_V`** : `_pilSaveState`
+  grave l'état complet chez le client, et **le mémorisé gagne sur le défaut**. Sans le cran, un
+  client installé ne voit **strictement rien**. La migration passe **après** `_pilNormalize`
+  (qui emporterait `v`), et ne repose que `collapsed` — `show`, `pie`, `bar`, `sub` survivent.
+
 - ★★ **Les quatre photos** (`_pilPhotosHtml`) en tête de **tous** les onglets : Travaux · Effectif ·
   Budget · Conformité, à la maille de la portée, chacune menant à l'écran qui la détaille.
+  ★ **En frise d'une ligne sous 700 px.** ⚠️ Elles restent **quatre** et **visibles** : on ne
+  remplace pas quatre chiffres par un bouton « voir les chiffres » — le harnais l'interdit.
   ⚠️ **L'effectif affiche le PIC, jamais la moyenne** — une moyenne annuelle n'existe aucun jour de
   l'année, et c'est le pic qui décide d'un recrutement.
   ⚠️ **Source absente ⇒ tiret, jamais zéro.** Un tableau de bord qui écrit 0 là où il n'a pas su
@@ -3026,6 +3098,25 @@ aucune raison** de réintroduire un `prompt()`.
 
 ## 24. Pièges de build / CSS / HTML / modules ES — checklist
 
+### ★★★ CE QU'AUCUN CONTRÔLE AUTOMATIQUE NE VOIT (ajouté le 15/08, §42h)
+
+**Le preflight, les harnais et la CI ne lisent pas une mise en page.** Trois défauts du chantier
+ergonomie n'ont été trouvés qu'en **regardant une capture** :
+
+- ⚠️⚠️ **Dans un conteneur `display:flex`, CHAQUE élément enfant devient un item séparé.** Un `<b>`
+  au milieu d'une phrase forme sa propre colonne et coupe le texte en morceaux. **Toute ligne
+  susceptible de contenir du HTML doit envelopper son texte dans un `<span>`** (`flex:1;min-width:0`).
+  ★ Le piège est **impossible** quand le contenu est échappé (`_pilEsc`) : aucune balise ne survit.
+- ⚠️ **Une règle de base à `width:100%` sabote une frise horizontale.** Passer une grille en
+  `display:flex` ne suffit pas : il faut **neutraliser la largeur héritée**, sinon le premier
+  élément prend tout.
+- ⚠️ **Ne JAMAIS extraire du CSS injecté par expression régulière.** Elle casse sur les apostrophes
+  échappées et rend une feuille mutilée — on croit alors à un défaut de style.
+  ★ **On exécute la fonction** avec un faux `document` et on récupère ce qu'elle pose.
+
+★ **Corollaire de méthode** : après tout lot qui touche la mise en page, **produire un rendu et le
+regarder**. Une assertion verte n'a jamais montré un texte coupé en trois.
+
 **Build (JS / Rollup / IIFE)**
 1. Toute fonction appelée par un `onclick` injecté doit être exposée sur **`window.*`**.
    ★ Vécu six fois : `selCopMil`, `_caveSeuilMilStep`, `_caveSeuilMilReset`, `_dmrGo`,
@@ -3107,6 +3198,30 @@ aucune raison** de réintroduire un `prompt()`.
 ---
 
 ## 25. Workflow de patch sûr
+
+### ⚠️⚠️ DEUX PIÈGES DE SCRIPT VÉCUS LE 15/08 (§42i)
+
+1. **DEUX « ok » POUR ZÉRO OCTET ÉCRIT.** Un script a affiché « ok » sur ses deux premiers motifs,
+   puis l'assert du troisième a levé — et **l'écriture, placée en fin de script, n'a jamais eu
+   lieu**. Les « ok » n'annonçaient que la réussite du `str.replace` **en mémoire**.
+   ★ **Correctif : écrire après CHAQUE motif, et RELIRE le disque pour confirmer.**
+   ```python
+   def rep(old, new, quoi):
+       s = io.open(P, encoding='utf-8').read()
+       assert s.count(old) == 1, 'ANCRE %s : %d' % (quoi, s.count(old))
+       io.open(P, 'w', encoding='utf-8').write(s.replace(old, new))
+       assert new[:50] in io.open(P, encoding='utf-8').read()   # ← relecture
+       print('  ok', quoi)
+   ```
+2. **UNE CONTRE-ÉPREUVE A LAISSÉ LES FICHIERS ABÎMÉS SUR LE DISQUE.** L'assert « défaut non
+   injecté » tombait **après** avoir posé la version abîmée. Repéré en relisant `git status`, **pas
+   parce que quelque chose avait rougi.** ★ **On repose la référence AVANT de s'arrêter**, jamais
+   dans un bloc final qui peut ne pas s'exécuter.
+
+★ **Et un rappel qui a resservi trois fois** : le fichier mélange des séquences d'échappement
+**littérales** (`\u2019`, `\u203A`) et des caractères accentués **réels**. Une ancre en chaîne
+Python normale interprète les premières. **`r"""…"""` par défaut**, et extraire l'ancre du fichier
+(`repr()`) au moindre doute — une ancre a échoué sur la seule casse de `\u203a` contre `\u203A`.
 
 > **Incident fondateur (`tracSessionId`)** : patcher une copie périmée de `/mnt/project` a réintroduit
 > un bug corrigé. **Toujours repartir du DERNIER fichier livré** — désormais, du dépôt GitHub.
@@ -3572,7 +3687,28 @@ noms d'écrans supprimés dans `src/*.js`, `index.html`, `MV_AIDE` et `guide/` �
 trouvées ainsi, dans quatre fichiers dont deux hors du module refondu (`reglages.js`, `utils.js`).
 **Aucun palier de test ne les aurait vues.**
 
-## 27b. ★★ L'aide contextuelle — `MV_AIDE`
+## 27b. ★★ L'aide contextuelle — `MV_AIDE`, et `MV_INFO`
+
+> ★★★ **DEUX QUESTIONS, DEUX FEUILLES (15/08, §42c).**
+> **`MV_AIDE`** (pastille « ? Aide », en tête de module) répond à *« qu'est-ce que je peux FAIRE sur
+> cet écran ? »* — une fiche par PAGE.
+> **`MV_INFO`** (pastille « i », **à côté du chiffre**) répond à *« d'où vient CE chiffre ? »* — une
+> fiche par chiffre. **34 fiches** aujourd'hui, toutes dans le Pilotage.
+> ⚠️ **Ne jamais poser une fiche `MV_INFO` en tête d'écran** : une notice générale ne répond à
+> aucune question précise. Elle vit **contre le nombre qu'elle explique**.
+> ⚠️⚠️ **`stopPropagation` sur l'écouteur délégué** : la pastille vit dans un en-tête de tuile qui
+> replie la tuile au clic. Sans lui, ouvrir la fiche ferme l'écran qu'on cherche à comprendre.
+> ★ **Clés nommées par module puis par écran** : `pil.gnr`, `pil.eco.remarques`. Deux écrans ne
+> partagent **jamais** une clé — une fiche vivante remplie par l'un s'afficherait sous l'autre.
+> ★ **Les fiches VIVANTES** (`_mvInfoSet`) : le contenu se calcule à l'exécution, mais **la clé
+> reste déclarée** dans `MV_INFO` avec un repli honnête. `_mvInfoSet` refuse toute clé non déclarée
+> — sans quoi le contrôle statique du harnais serait contournable.
+> ★ **Le texte des fiches est ÉCRIT, jamais saisi** : il porte donc son propre `<b>`, contrairement
+> à `MV_AIDE` (voir ci-dessous). Aucune donnée utilisateur ne le traverse (C19).
+> ⚠️ **Et il s'écrit en FRANÇAIS ACCENTUÉ.** Une première version de six fiches est partie sans
+> accents — réflexe de commentaire appliqué à du texte client. Le harnais ne le voit pas ; la
+> relecture, si.
+
 
 **Dix fiches, une par PAGE.** `_mvAideFiche()` lit l'id de `.page.active` → une fiche sans
 `#page-<clé>` correspondante est **écrite mais inatteignable** (C22 le vérifie).
@@ -3834,6 +3970,37 @@ radios/cases, section « pièces à joindre » explicite.
 ---
 
 ## 28. État courant & backlog
+
+### ⚠️ À FAIRE AVANT DE DÉPLOYER LE CHANTIER §42
+
+1. **`npm run lint` et ESLint** — **jamais joués côté Claude de tout le chantier** (`node_modules`
+   absent du bac à sable ; l'échec est identique sur la base d'origine, ce n'est donc pas le lot).
+2. ⚠️⚠️ **REGARDER Simuler et Cave.** Leurs rendus sont vérifiés par assertion mais **n'ont pas été
+   regardés** — budget d'outils épuisé sur le dernier lot. Vu que **trois** défauts du chantier n'ont
+   été trouvés que par l'œil (§42h), c'est le point faible du paquet. En particulier **l'étape 2 du
+   simulateur**, dont la légende de couleurs a été remaniée.
+3. **`test:smoke` et `test:e2e`** — jamais joués côté Claude (CDN Playwright injoignable pour
+   l'installation de Chromium ; les mesures de ce chantier passent par le Chromium déjà présent).
+4. ★ **La migration `_PIL_ST_V` remet la disposition à neuf UNE fois chez MG et Chapelle** : les
+   cartes qu'ils avaient ouvertes ou fermées repartent repliées. C'est annoncé dans le journal des
+   nouveautés — vérifier que le message est bien passé avant qu'ils s'en étonnent.
+
+### NOUVEAU AU BACKLOG (issu de §42)
+
+- ⚠️ **Le doublon `_pilDiag` / `_pecZeros`.** Les deux portent un constat voisin sur « pas de taux
+  horaire », à **deux endroits de la même page** : le bouton « à compléter » en tête de module, et la
+  carte de fiabilité d'Économie. Ils ne disent pas tout à fait la même chose (`N fiches sans taux`
+  contre `aucun taux nulle part`), mais le lecteur, lui, voit deux avertissements sur le même sujet.
+  **C'est §34 en plus petit.** Fusion = chantier de moteur, pas d'ergonomie.
+- **Les cartes sans ligne de cadre.** Toutes les cartes du Pilotage n'en ont pas encore une : celles
+  qui ne passaient aucun sous-titre gardent un en-tête à deux étages. C'est visible, et c'est du
+  travail d'écriture, pas de code.
+- **Le `.pil-cr-note` masqué sur téléphone** : l'instruction « cliquez une campagne pour zoomer »
+  disparaît sous 700 px. Un utilisateur qui n'a que son téléphone ne l'apprendra jamais.
+  Piste : la dire une fois dans la fiche d'aide du module — ou une pastille « i » sur le fil.
+- **Mesurer si les fiches « i » sont ouvertes.** Tout ce chantier parie qu'un vigneron touche la
+  pastille quand il en a besoin. **Ce pari n'est pas vérifié.** Si personne ne l'ouvre jamais, c'est
+  que le texte manque là où il était, pas qu'il était de trop.
 
 ### ⚠️ À FAIRE AVANT DE DÉPLOYER LE CHANTIER §40
 
@@ -6426,3 +6593,254 @@ jargon — il a écrit cette application.
 - ⚠️ **`stats.hFaites` est arrondi à l'entier** par `_calcHistoStats`. Sans effet à cette échelle
   (des centaines d'heures), mais c'est une **perte de précision irréversible** au moment de
   l'archivage : à consigner si un jour un écart de cadence semble décalé de quelques dixièmes.
+
+## 42. ★★★ LE CHANTIER ERGONOMIE DU PILOTAGE — DIX LOTS (15/08)
+
+> ⚠️ **AUCUN NUMÉRO DE VERSION DANS CETTE SECTION, Y COMPRIS DANS SON TITRE.** Les sections §33 à
+> §41 en portent — c'est une entorse tolérée à la **règle d'or n°2**, et elle a coûté cher : deux
+> assertions de `harnais-claude-md.mjs` étaient figées sur « SW 6.66 » et « APP 6.13 », et ont rougi
+> au bump suivant **en accusant le document alors que c'était le contrôle qui était périmé**.
+> Corrigées le 15/08 : elles **lisent** les versions dans `utils.js` et `sw.js`.
+> **Pour situer ce chantier : dix lots, neuf bumps, en une journée.** Les numéros exacts se lisent
+> dans le changelog de `public/sw.js`, qui est leur seule source.
+
+**Point de départ**, mot pour mot : *« Dans pilotage, j'aime beaucoup les informations disponibles.
+Mais : j'ai l'impression que ce n'est pas rangé. C'est fouillis, on dépense du temps et de l'énergie
+à chercher une info. Certains textes ne sont peut-être pas utiles à être affichés tout le temps
+(infobulles ?). Améliore l'ergonomie et l'expérience utilisateur fois 100. »*
+
+⚠️ **Le §34 avait déjà refondu ce module** (l'axe de zoom, la portée unique, le moteur de
+diagnostic). Ce chantier-ci ne rejoue pas §34 : il traite ce que §34 n'avait pas touché — **la
+densité, la hiérarchie typographique, et le texte**.
+
+### 42a. Le diagnostic, mesuré sur le code
+
+| ce que Nico voyait | ce qu'il y avait dessous |
+|---|---|
+| « ce n'est pas rangé » | **les 18 tuiles arrivaient OUVERTES**, et une tuile ouverte prend toute la ligne. La grille était réglée sur 2 à 4 colonnes et **ne se remplissait jamais** : le système de mise en page était désactivé par son propre réglage d'usine |
+| « on cherche une info » | **28 tailles de texte** écrites à la main, de 8,5 à 40 px. Vingt-huit tailles, ce n'est pas une hiérarchie : c'est son absence. L'œil n'a aucun point d'accroche, alors il lit tout |
+| « certains textes… tout le temps » | **≈ 25 000 caractères de prose** affichés en permanence, 217 phrases dans 60 fonctions — neuf pages A4. Et **AUCUN moyen d'en replier une seule** : zéro `<details>`, zéro infobulle, dans tout le projet |
+| — | **cinq bandeaux** avant le premier chiffre. Mesuré au navigateur : **728 px sur téléphone**, pour un écran de 844 |
+
+★★★ **LA CAUSE RACINE :** *le module ne distinguait pas **l'answer**, **ce qui la cadre**, et
+**comment elle est calculée**.* Les trois avaient le même poids visuel, au même endroit.
+
+### 42b. ★★★ LA RÈGLE DES TROIS FAMILLES
+
+Écrite dans `utils.js`, au-dessus de `MV_INFO`, et appliquée aux huit onglets. **Toute phrase
+affichée tombe dans une seule :**
+
+| | quoi | où ça va |
+|---|---|---|
+| ① | ce qui **CADRE** le chiffre — sa date, sa source, son périmètre | **reste** à l'écran, en UNE ligne, toujours à la même place |
+| ② | ce qui **EXPLIQUE le calcul** — méthode, conventions, biais assumés | derrière la pastille **« i »** : ça se lit une fois |
+| ③ | ce qui **DIT QUOI FAIRE** | devient un **BOUTON**, pas un chemin à retenir |
+
+⚠️⚠️ **CE N'EST PAS « CACHER LE TEXTE ».** La moitié de ces phrases est la **seule trace écrite**
+d'une convention du domaine. Les supprimer serait la faute inverse, et plus grave : **un chiffre
+sans son cadre ment** (§34, §41). **Rien n'a été supprimé** — 34 fiches conservent l'intégralité,
+pour ≈ 20 000 caractères de méthode rangés.
+
+★ **La signature visuelle de ① : un filet doré de 2 px devant la ligne.** Partout où ce filet
+apparaît — carte, verdict, sous-titre —, la phrase qui suit dit **sur quoi le chiffre au-dessus a
+été calculé**. C'est le seul élément que rien ne replie jamais.
+
+### 42c. Les primitives créées
+
+- **`MV_INFO` + `_mvInfoOpen(clé)` + `_mvInfoBtn(clé)`** (`utils.js`) et **`#ovInfo`** (`index.html`).
+  Un seul écouteur **délégué** sur le document : aucun module n'a rien à brancher.
+  ⚠️⚠️ **`stopPropagation` est indispensable** : la pastille vit dans un en-tête de tuile qui replie
+  la tuile au clic. Sans lui, ouvrir la fiche **fermerait l'écran qu'on cherche à comprendre**.
+  ★ Elle vit **à côté de `MV_AIDE`**, et pour la même raison : c'est ce fichier que la règle
+  d'accompagnement (règle d'or n°4) couvre. Une fiche posée ailleurs vieillirait sans relecture.
+  ★ `openOv('ovInfo')` : Échap, retour arrière, empilement de z-index et restauration du focus
+  viennent gratuitement. **On ne réinvente pas un overlay.**
+- **`_mvInfoSet(clé, fiche)` — les fiches VIVANTES.** Certaines explications citent des chiffres du
+  moment (« 2 parcelles dépassent de 30 % ») : impossible à écrire d'avance.
+  ⚠️ **On n'ouvre pas une porte à du contenu libre** : la clé reste **DÉCLARÉE** dans `MV_INFO` avec
+  un repli honnête, et `_mvInfoSet` **refuse toute clé non déclarée** (trace en `'info'`). Le
+  contrôle statique du harnais tient donc aussi sur les fiches dynamiques.
+- **`_pecFiabCard(Z, R, cleFia, cleRem, okTxt, okSous)`** — **une carte, deux écrans.** Écrite pour
+  la Synthèse d'Économie, elle répondait déjà à la question de l'Exercice. La ré-implémenter, c'était
+  garantir qu'elles divergeraient. Elle prend ses clés en argument ; le harnais vérifie que les deux
+  écrans **n'en partagent aucune** (une fiche vivante remplie par l'un s'afficherait sinon sous la
+  pastille de l'autre).
+- **`_pilTile(…, infoCle)` et `_pcavCard(…, infoCle)`** — argument **optionnel** en dernière
+  position. Les 43 appels existants restent valides tels quels et posent leur pastille au fur et à
+  mesure que leur fiche est écrite.
+
+### 42d. La carte à trois étages, et le défaut qui s'inverse
+
+`_pilTile` rend désormais **trois étages, tous dans `.pil-th`** — donc tous visibles carte repliée :
+① l'étiquette (+ pastille + chevron) · ② **LE CHIFFRE**, seul sur sa ligne · ③ **la ligne de cadre**.
+
+⚠️ **C'est l'unique justification du repli par défaut.** Si le chiffre ou son cadre tombaient dans le
+corps, replier **cacherait** une information. Le harnais l'exige **en exécutant `_pilTile`** et en
+cherchant la balise fermante qui correspond vraiment — sa première version découpait la source entre
+deux motifs et restait **verte** quand on sortait le chiffre de l'en-tête.
+
+★★★ **`_PIL_ST_V` — LA MIGRATION SANS LAQUELLE LE LOT EST INVISIBLE.** `_pilSaveState` grave l'état
+**complet** dès qu'on touche une tuile, un onglet de graphe ou une case. MG et Chapelle avaient donc,
+depuis des mois, un `collapsed` tout à zéro dans leur navigateur — et **au chargement, le mémorisé
+gagne sur le défaut**. Changer le défaut sans marqueur ne leur aurait **strictement rien fait** :
+installer la mise à jour, voir le même écran. C'est le piège déjà vécu avec `avc_etp` / `an_frise`.
+
+- Un numéro de version d'état, monté d'un cran, et `_pilMigrEtat` repose la disposition **une fois**.
+- ⚠️ **L'ORDRE COMPTE** : la migration passe **APRÈS** `_pilNormalize`, qui reconstruit l'objet à
+  partir des clés connues et emporterait `v` avec lui — la migration se rejouerait sans fin.
+- ⚠️ **Seule la DISPOSITION repart du neuf.** `show`, `pie`, `bar`, `sub` sont des choix de contenu :
+  ils survivent. Vérifié **en exécutant la migration sur un état mémorisé réaliste**, pas en la
+  relisant.
+- ★ **Arbitrage tranché par Nico** (option A) : on repose la disposition pour tout le monde, une
+  fois. Replier ne cache aucun chiffre, donc le seul « réglage perdu » est un choix qui n'a plus le
+  même sens après le lot.
+
+★ **Une seule carte dépliée à la fois**, sur toute la page — c'est ce qui rend ses colonnes à la
+grille. ⚠️ Les autres sont fermées **par le même chemin d'état** : rien n'est fermé à l'écran sans
+être écrit dans `collapsed`, sinon le rendu suivant rouvre.
+
+### 42e. L'échelle de texte — onze pas nommés
+
+28 valeurs en dur → **11 pas nommés par leur rôle**, 259 appels réécrits.
+`hero 40 · xxl 31 · xl 27 · lg 23 · md 20 · sm 17 · base 14 · txt 12,5 · micro 11 · lbl 10,5 · nano 9,5`
+
+- **Aucun déplacement ne dépasse 1 px** — le script s'arrête tout seul si un mouvement l'excède.
+  117 occurrences ne bougent pas, 113 de 0,5 px, 29 de 1 px.
+- ⚠️⚠️ **CHAQUE APPEL PORTE SON REPLI** : `var(--pt-txt,12.5px)`, jamais `var(--pt-txt)`. Une
+  variable inconnue rend la déclaration **invalide** : le navigateur la jette et le texte retombe à
+  la taille héritée, **en silence et partout à la fois**. Le repli protège un client dont le
+  `styles.css` serait en retard sur le JS. **Vérifié dans un vrai navigateur, avec et sans feuille.**
+- ★ L'échelle a d'abord vécu dans `_pilCssV2()` pour être livrée **sans bump**, puis a remonté dans
+  `styles.css` au premier lot qui bumpait — avec `_PIL_SEM` (dette §34i soldée).
+  ⚠️ **Le harnais du premier lot est alors passé à 13 rouges.** C'est exactement son travail : il
+  vérifiait que l'échelle était déclarée dans `_pilCssV2`. **Un déménagement doit faire rougir.**
+
+### 42f. ⚠️⚠️⚠️ LA LEÇON DU CHANTIER : LES ASSERTIONS FAUSSES
+
+**Sur dix lots : zéro bug livré, et une quinzaine d'assertions fausses de ma main.** Toutes de la
+même famille — **elles mesuraient autre chose que ce qu'elles annonçaient**. Le catalogue, parce
+qu'il se répétera :
+
+| la faute | l'exemple vécu |
+|---|---|
+| **« au moins une fois » au lieu de compter** | `_mvInfoBtn(cleFia)` cherché une fois : retirer la pastille de la branche « il manque des postes » restait **vert** grâce à la branche « tout va bien » — or c'est dans le cas problématique qu'on en a besoin |
+| **idem, sur deux chemins d'appel** | `_pilLoadState` a **deux** chemins (clé utilisateur, clé domaine). La contre-épreuve n'en abîmait qu'un, et deux assertions restaient vertes |
+| **piège de préfixe** | `/function _pecZeros/` est satisfait par `_pecZerosX`. Renommer une fonction en lui ajoutant une lettre passait au vert |
+| **idem sur un sélecteur CSS** | `/\.pil-souslig\{/` était satisfait par la règle du **bloc mobile**, qui porte le même sélecteur |
+| **chercher une phrase dans du texte échappé** | un `!includes` sur `la valeur de la r\u00e9colte` est vrai dès qu'un niveau d'échappement diverge — **donc toujours vert**. Remplacé par une **mesure de longueur**, qui ne peut pas se tromper de niveau |
+| **motif trop naïf sur du JS** | `[^)]*` s'arrête au premier `)` de `==='function'?(` — la famille §34g |
+| **découper la source au lieu de l'exécuter** | la tranche entre deux motifs englobait les deux cas : sortir le chiffre de l'en-tête restait vert. **On appelle la fonction, on lit le HTML rendu** |
+| **lire un commentaire** | la phrase déplacée survivait dans le commentaire qui documente son déplacement (§34g, dans l'autre sens) |
+
+★★★ **ET LE SYMÉTRIQUE, PLUS INSIDIEUX : LE DÉFAUT MAL CONSTRUIT.** Deux contre-épreuves
+remplaçaient une phrase courte par une **autre phrase courte** : le bloc ne redevenait pas un pavé,
+donc la mesure de longueur avait **raison** de rester verte. **§34h : vérifier que le défaut
+reproduit la vraie régression, pas seulement qu'il change quelque chose.** Un défaut qui touche le
+mauvais endroit accuse le harnais à tort — vécu aussi avec `capacite:1,`, qui existe dans **deux**
+blocs (`collapsed` et `prs_capacite` de `show`) : le remplacement tombait dans le mauvais.
+
+> **Le geste qui en découle, ajouté à toutes les contre-épreuves du chantier :**
+> elles impriment désormais **le numéro de la ligne modifiée**. Un défaut qui atterrit ailleurs
+> qu'attendu se voit immédiatement, au lieu de faire accuser une assertion correcte.
+
+### 42g. ★★★ MESURER — ET CE QUE LE FICHIER NE PEUT PAS DIRE
+
+**J'ai voulu donner un chiffre global** : « pavés de plus de 150 caractères dans `pilotage.js` »,
+52 au départ, 30 à la fin. **Ce chiffre ne veut presque rien dire**, et il fallait le dire : les
+paragraphes déplacés sont **toujours des chaînes dans le même fichier**, simplement rendues dans une
+feuille au lieu de l'écran. **Un comptage sur le fichier ne peut pas faire la différence.**
+
+★ **Le seul chiffre honnête s'obtient en EXÉCUTANT l'écran**, ancienne et nouvelle version sur le
+**même état**, puis en comptant le texte rendu :
+
+| écran | avant | après |
+|---|---|---|
+| Économie › « Ce qu'il faut regarder » | 1 288 car. | **185** (−86 %) |
+| Économie › Exercice, en tête d'écran | 1 828 car. | **341** (−81 %) |
+| Sous-titres de cartes d'Économie | 1 185 car. | **272** (−77 %) |
+| Le verdict, moyenne des 8 branches | 318 car. | **203** (−36 %) |
+| Onglet Équipe & matériel, hauteur (ordinateur) | ~2 080 px | **237 px** replié, 4 colonnes |
+| **Jusqu'au premier chiffre (téléphone)** | **728 px** | **442 px** (−39 %) |
+
+⚠️ **Un lot a mesuré une hausse et je l'ai annoncée** : le sous-lot « Équipe & matériel » a fait
+**monter** le texte à l'écran de 313 caractères, parce que les lignes de cadre et les textes de
+boutons sont plus longs que les phrases de méthode sorties. **La nature du texte avait changé, pas
+son volume.** Un chantier qui n'annonce que ses bonnes mesures ne mesure pas, il plaide.
+
+### 42h. ⚠️⚠️ CE QU'AUCUN CONTRÔLE AUTOMATIQUE NE VOIT
+
+**Trois défauts trouvés uniquement en regardant une capture d'écran.** Le preflight, les harnais, la
+CI : aucun ne lit une mise en page.
+
+1. **Le `<b>` qui devient son propre item flex.** Dans un conteneur `display:flex`, **chaque élément
+   enfant est un item séparé** : le `<b>` du nom de campagne formait sa propre colonne et coupait la
+   ligne de cadre en trois morceaux. **Correctif : envelopper le texte dans un `<span>`.**
+   ★ Le même piège est **impossible sur les cartes** : `_pilTile` **échappe** son sous-titre, donc
+   aucune balise n'y devient un item — et le harnais vérifie que ça reste vrai.
+2. **La carte à `width:100%` dans une frise.** En passant les quatre photos en bande horizontale, la
+   première occupait presque toute la largeur : la règle de base porte `width:100%`, qu'il fallait
+   neutraliser.
+3. **Un CSS extrait par expression régulière.** Ma première fumée visuelle d'Économie découpait
+   `_pecCss` au regex : elle cassait sur les apostrophes échappées et rendait une feuille **mutilée**
+   — la capture montrait du texte nu, et j'aurais pu conclure à un défaut de style.
+   ★ **Correctif de méthode, valable partout** : on **exécute** `_pecCss()` avec un faux `document`
+   et on récupère ce qu'elle pose vraiment. *Exécuter, ne pas relire* — la même règle que pour
+   `WHATS_NEW`, `MV_INFO` et la migration d'état.
+
+### 42i. Les autres pièges du chantier
+
+- ⚠️⚠️ **DEUX « ok » POUR ZÉRO OCTET ÉCRIT.** Un script de patch a affiché « ok cuivre » et
+  « ok IFT », puis l'assert du motif suivant a levé — et **l'écriture, placée en fin de script,
+  n'a jamais eu lieu**. **Correctif : écrire après CHAQUE motif, et relire le disque pour
+  confirmer.** C'est la variante silencieuse du §25.
+- ⚠️ **Une contre-épreuve a laissé les fichiers abîmés sur le disque** : l'assert « défaut non
+  injecté » tombait **après** avoir posé la version abîmée. Repéré en relisant `git status`, pas
+  parce que quelque chose avait rougi. **On repose la référence AVANT de s'arrêter.**
+- ⚠️ **J'ai inventé une constante.** `PIL_TREAT_DAYS` n'existait nulle part ; `node --check` ne voit
+  pas un identifiant inconnu, seule l'exécution l'aurait levé. L'horizon était en dur dans un
+  `slice(0,5)` : il porte maintenant un nom.
+- ⚠️ **Un cliquet à l'envers, dans un contrôle EXISTANT.** `A8` de `mv-harnais-audit-pil` vérifiait
+  qu'il y a **exactement** 8 boutons de redirection : il rougissait donc dès qu'on en **ajoutait**
+  un — c'est-à-dire chaque fois qu'on faisait ce qu'il existe pour encourager. Converti en vrai
+  cliquet : **le compte ne doit jamais descendre.**
+- ⚠️ **Une ancre de patch a échoué sur une casse** : le fichier écrit `\u203A`, j'avais écrit
+  `\u203a`. L'assert a arrêté le script — c'est son travail.
+- ★ **`pilotage.js` n'avait AUCUN import** : il lisait tout depuis `window`. Ça marche parce que
+  l'ordre de chargement met `utils.js` en premier — et « un appel qui marche par ordre de chargement
+  n'est pas un appel correct ». `_PIL_SEM` et `_mvInfoBtn` y arrivent par un **vrai import**.
+
+### 42j. Le chrome — ce qu'on traverse avant le premier chiffre
+
+**Mesuré en montant le VRAI squelette** (`_pilSkeleton` exécuté avec des bouchons) et en le rendant
+au navigateur. Sur téléphone : masthead 200 · fil d'Ariane 68 · onglets 59 · photos 259 · titre 52.
+
+- **Le bandeau de titre disparaît.** `<h2 class="pil-h2">` répétait **mot pour mot** l'onglet actif,
+  en 26 px, sur deux lignes en mobile. La barre d'onglets le dit déjà, en surbrillance. Le
+  sous-titre des libellés longs descend en une **ligne fine** ; « Choisir les indicateurs » y rejoint
+  la **roue crantée**. ⚠️ **`#pil-gear` garde son nom** : `_pilBind` le retrouve.
+- **Les quatre photos passent en frise** sous 700 px. ⚠️ Elles restent **quatre** et restent
+  **visibles** : on ne remplace pas quatre chiffres par un bouton « voir les chiffres ». Le
+  harnais porte une assertion pour ce cas précis.
+- **L'instruction « cliquez une campagne pour zoomer » quitte la barre COLLANTE** sur téléphone :
+  une ligne qu'on apprend une fois n'a pas à occuper chaque écran en permanence. **Sur grand écran
+  elle reste** — la place ne manque pas.
+
+★ **C'est ce lot qui a rendu fausse la phrase « conçu pour le grand écran »** de la fiche d'aide et
+du guide. Elle était vraie, elle a été **laissée volontairement périmée** pendant tout le chantier,
+et **réécrite par le lot qui la périme** — jamais par un lot « de finition ».
+
+### 42k. Ce qui reste ouvert
+
+- ⚠️ **`npm run lint` et ESLint n'ont jamais tourné côté Claude** de tout le chantier :
+  `node_modules` est absent du bac à sable, et l'échec est identique sur la base d'origine.
+  **À lancer chez Nico avant de pousser.**
+- ⚠️ **Les rendus de Simuler et de Cave sont vérifiés par assertion mais n'ont pas été REGARDÉS**
+  (budget d'outils épuisé sur ce lot). Vu que trois défauts du chantier n'ont été trouvés que par
+  l'œil, **c'est le point faible du paquet** — en particulier l'étape 2 du simulateur, dont la
+  légende a été remaniée.
+- **Le doublon `_pilDiag` / `_pecZeros`** : les deux portent un constat voisin sur « pas de taux
+  horaire », à deux endroits de la même page. C'est §34 en plus petit. **Fusion = chantier de
+  moteur, pas d'ergonomie.**
+- **Les filtres cépage / commune** (§34i-1) et **la carte colorée par avancement** (§34i-3) restent
+  non livrés, pour la raison d'origine : un filtre qui change la liste sans changer les chiffres est
+  un décor.

@@ -11,7 +11,11 @@ let ok=0,ko=0; const t=(n,c)=>{c?(ok++,console.log('  \x1b[32m✓\x1b[0m '+n)):(
 console.log('\n── structure ──');
 t('§40 existe et est unique', (MD.match(/^## 40\. /gm)||[]).length===1);
 t('§14b enrichi de l\'essai borné', /## 14b[\s\S]{0,4000}L\u2019ESSAI EST BORN\u00c9/.test(MD));
-t('§28 porte la checklist de déploiement', /## 28[\s\S]{0,900}AVANT DE D\u00c9PLOYER LE CHANTIER \u00a740/.test(MD));
+/* ⚠️ NE PAS FIGER LE NUMERO DU CHANTIER. Cette assertion cherchait « §40 » : elle
+   a rougi au chantier suivant, dont la checklist s'est posee AVANT en tete de §28
+   — ce qui est le bon ordre. On verifie qu'il Y A une checklist, pas laquelle. */
+t('§28 ouvre sur une checklist de déploiement',
+  /## 28[\s\S]{0,600}AVANT DE D\u00c9PLOYER LE CHANTIER \u00a7\d+/.test(MD));
 t('aucun numéro de section en doublon',
   (()=>{const s=[...MD.matchAll(/^## (\d+[a-z]?)\. /gm)].map(m=>m[1]);return new Set(s).size===s.length;})());
 
@@ -25,9 +29,17 @@ t('TRIAL_WARN_D = 3 · idem',
 t('_FC_TRIAL_DAYS / _FC_TRIAL_MAX existent bien dans admin-gt.js',
   /var _FC_TRIAL_DAYS = 15;/.test(A) && /var _FC_TRIAL_MAX  = 1;/.test(A));
 t('le seuil d<=3 du bandeau existe bien dans app.js', /var sous = \(d<=3\)/.test(AP));
-t('★ SW 6.66 annoncé = SW 6.66 réel', /SW 6\.65 \u2192 6\.66/.test(MD) && /'mavigne-v6\.66'/.test(SW));
-t('★ APP 6.13 annoncé inchangé = APP 6.13 réel',
-  /APP 6\.13 inchang\u00e9/.test(MD) && /APP_VERSION = '6\.13'/.test(U));
+/* ⚠️⚠️ REGLE D'OR N°2, APPLIQUEE AU HARNAIS. Ces deux assertions figeaient les
+   numeros du chantier §40 : elles ont rougi des le bump suivant, en accusant le
+   document alors que c'etait le controle qui etait perime. On LIT les versions
+   dans les fichiers, on ne les recopie pas — et on verifie ce qui ne bouge pas :
+   que le document ne contienne AUCUN numero de version dans son corps courant. */
+const APP_REEL = (R('src/utils.js','utf8')
+  .match(/export const APP_VERSION = '([^']+)'/) || [])[1];
+const SW_REEL  = (SW.match(/const CACHE_NAME\s*=\s*'mavigne-v([^']+)'/) || [])[1];
+t('les deux versions réelles se lisent', !!APP_REEL && !!SW_REEL, APP_REEL + ' / ' + SW_REEL);
+t('les versions ne sont PAS recopiées dans le document (règle d\'or n°2)',
+  !new RegExp('APP_VERSION\\s*=\\s*.' + APP_REEL).test(MD));
 
 console.log('\n── les affirmations vérifiables ──');
 t('★ « rules ignore trial » — c\'est vrai', !/trial_until/.test(RU) && /Aucune r\u00e8gle de `firestore.rules` ne lit/.test(MD));
