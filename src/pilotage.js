@@ -77,17 +77,17 @@ var _PIL_DEFAULT = {
     //   avait demenage — ressuscitait a 1, valeur que _pilMigrShow recopiait
     //   aussitot dans `an_frise`. Une case decochee se recochait donc TOUTE SEULE a
     //   la session suivante, et la migration du lot 3 rejouait indefiniment.
-    an_cadres:1, an_frise:1,
+    an_cadres:1, an_budget:1, an_frise:1,
     // Avancement (`avc_etp` RETIRE : deplace vers `an_frise`, cf. _PIL_SHOW_MIGR)
     avc_gauge:1, avc_bar:1, avc_pie:1, avc_temps:1, avc_echeances:1, avc_carte:1,
     // Personnel
     prs_equipe:1, prs_presences:1, prs_capacite:1,
     // Matériel
-    mat_tracteur:1, mat_gnr:1, mat_phyto:1, mat_traitement:1,
+    mat_tracteur:1, mat_gnr:1,
     // Simulation
     sim_ordre:1, sim_etsi:1, sim_cout:1,
-    // Conformité
-    cfm_cuivre:1, cfm_ift:1, cfm_dre:1
+    // Conformité (`mat_phyto` garde son NOM et change d'onglet — cf. _pilTabCfm)
+    cfm_cuivre:1, cfm_ift:1, cfm_dre:1, mat_phyto:1
   },
   pie:   'reste',
   bar:   'saison',
@@ -98,7 +98,7 @@ var _PIL_DEFAULT = {
   //   indicateurs, sept pleines largeurs empilees, ~4 500 px de defilement.
   //   ⚠️ Replier NE CACHE AUCUN CHIFFRE : depuis ce lot le chiffre et sa ligne
   //     de cadre vivent dans l'EN-TETE. On replie le detail, jamais le nombre.
-  collapsed:{echeances:1,carte:1,etp:1,temps:1,equipe:1,tracteur:1,cave:1,presences:1,gnr:1,capacite:1,traitement:1,simulateur:1,phyto:1,cout:1,couteff:1,cuivre:1,ift:1,dre:1},
+  collapsed:{echeances:1,carte:1,etp:1,anbudget:1,temps:1,equipe:1,tracteur:1,cave:1,presences:1,gnr:1,capacite:1,simulateur:1,phyto:1,cout:1,couteff:1,cuivre:1,ift:1,dre:1},
   v: _PIL_ST_V,
   sub:   {trac_revision:1,trac_controle:1,trac_repar:1,trac_intercep:1,cave_fml:1,cave_sout:1,cave_ouillage:1,pres_cp:1,pres_recup:1,pres_mal:1,etp_frise:1,etp_courbe:1,etp_ecart:1}
 };
@@ -190,7 +190,19 @@ var _PIL_TABS = [
   //   donc le mot, pas la place : l'axe se lit « l'annee › la campagne et ses
   //   taches › les gens et les machines › simuler ».
   ['equ','\uD83D\uDC65','L\'équipe & le matériel'],
-  ['sim','\uD83C\uDF9B\uFE0F','Simuler'],
+  // \u2605\u2605\u2605 \u00ab SIMULER \u00bb NOMMAIT MAL LE SEUL ONGLET QUI AGISSE.
+  //   Deux de ses trois cartes sont en lecture seule et le disent — \u00ab rien n'est
+  //   enregistre \u00bb. La troisieme, l'ordre de passage, ECRIT
+  //   CONFIG.ordre_passage_t, appelle saveData('config') et pilote l'ecran Vigne
+  //   de l'equipe. C'est la seule carte de tout le module qui touche une donnee
+  //   partagee — rangee sous un verbe qui promet qu'il ne se passe rien.
+  //   \u26a0\ufe0f RETOUR EN ARRIERE ASSUME : le lot 5 de \u00a734 avait declare \u00ab Decider \u00bb
+  //     mort. Il l'avait tue quand la barre etait une liste de SUJETS ; depuis,
+  //     c'est un axe de ZOOM, et un verbe d'action en bout d'axe se tient — on
+  //     descend du large au fin, puis on tranche.
+  //   \u26a0\ufe0f La cle reste `sim` : memorisee chez les clients, citee par app.js,
+  //     verifiee par C22. On renomme, on ne renumerote pas.
+  ['sim','\uD83C\uDF9B\uFE0F','D\u00e9cider'],
   ['cav','\uD83C\uDF77','Cave'],
   ['eco','\uD83D\uDCB6','Économie'],
   ['cfm','\uD83D\uDEE1\uFE0F','Conformité']
@@ -206,7 +218,7 @@ var _PIL_TOOLS = [['arc','\uD83D\uDDC3\uFE0F','Archives'],['param','\u2699\uFE0F
 // le lot 5 declarait mort. Et `an` n'avait AUCUNE entree : le titre du niveau ①
 // sortait VIDE, la roue crantee flottant seule dans l'en-tete.
 // ⚠️ Les cles ne bougent pas ; seuls les mots changent.
-var _PIL_LABELS = {auj:'Aujourd\'hui',an:'L\'année — les douze mois, d\'un cadre à l\'autre',avc:'La campagne — avancement, temps et échéances',equ:'L\'équipe & le matériel',cav:'Cave',eco:'Économie — budget, rythme de dépense et prix de revient',cfm:'Conformité — cuivre, passages phyto et délai de rentrée',arc:'Archives des campagnes',sim:'Simuler — effectif, renfort et ordre de passage',param:'Paramétrage'};
+var _PIL_LABELS = {auj:'Aujourd\'hui',an:'L\'année — les douze mois, d\'un cadre à l\'autre',avc:'La campagne — avancement, temps et échéances',equ:'L\'équipe & le matériel',cav:'Cave',eco:'Économie — budget, rythme de dépense et prix de revient',cfm:'Conformité — cuivre, passages phyto et délai de rentrée',arc:'Archives des campagnes',sim:'Décider — ordre de passage, effectif et renfort',param:'Paramétrage'};
 var _PIL_VALID_TAB = {auj:1,an:1,avc:1,equ:1,cav:1,eco:1,cfm:1,arc:1,sim:1,param:1};
 // Migration des onglets memorises avant le regroupement.
 // Migration des cles memorisees : `ecf` (l'onglet composite) part sur l'economie.
@@ -2038,48 +2050,42 @@ function _pilTreatDays(){
 }
 function _pilTBdg(bg,col,txt){ return '<span style="display:inline-flex;align-items:center;gap:4px;font-size:var(--pt-micro,11px);font-weight:700;padding:3px 8px;border-radius:7px;line-height:1.2;background:'+bg+';color:'+col+'">'+txt+'</span>'; }
 function _pilMm(v){ return (v%1===0?String(v):v.toFixed(1)).replace('.',',')+' mm'; }
-function _pilPanelTraitement(d){
-  var days=_pilTreatDays();
-  // ★ L'ANCIEN SOUS-TITRE ENONCAIT LES CRITERES — « sec · vent < 19 km/h · sous
-  //   25° · plage 0h-24h ». C'est la METHODE, pas le cadre : elle part dans la
-  //   fiche. Le cadre dit d'ou vient la prevision et jusqu'ou elle porte.
-  var sub='prévisions horaires AROME \u00b7 '+PIL_TREAT_DAYS+' jours', statHtml, body;
-  if(days===undefined){ statHtml=_pilStat('—',''); body='<div class="pil-empty">Prévisions horaires indisponibles (rechargez avec une connexion).</div>'; }
-  else if(!days.length){ statHtml=_pilStat('—',''); body='<div class="pil-empty">Aucune fenêtre claire sur les prochains jours (pluie, vent ≥ 19 km/h ou ≥ 25°). À surveiller.</div>'; }
-  else {
-    var nbWin=days.filter(function(x){ return x.start!=null; }).length;
-    statHtml=_pilStat(nbWin,' j');
-    var rows=days.map(function(x){
-      if(x.start!=null){
-        var risk=x.leach||(x.ppMax!=null && x.ppMax>=PIL_TREAT_PP_ALERT);
-        var bg=risk?'var(--orange-pale)':'var(--vert-pale)', bd=risk?'var(--orange)':'var(--vert-med)';
-        var bdgs='';
-        if(x.leach) bdgs+=_pilTBdg('var(--orange-pale)','var(--orange)','⚠️ pluie '+_pilMm(x.leachMm)+' dans '+x.leachH+' h → lessivage');
-        else bdgs+=_pilTBdg('var(--vert-pale)','var(--vert-med)','✓ '+PIL_TREAT_DRY_H+' h au sec ensuite');
-        if(x.ppMax!=null){
-          if(x.ppMax>=PIL_TREAT_PP_ALERT) bdgs+=_pilTBdg('var(--orange-pale)','var(--orange)','☔ '+x.ppMax+' % de pluie');
-          else bdgs+=_pilTBdg('rgba(127,127,127,.12)','var(--texte-doux)',x.ppMax+' % de pluie');
-        }
-        return '<div style="padding:8px 11px;border-radius:10px;background:'+bg+';border-left:3px solid '+bd+'">'
-          + '<div style="display:flex;align-items:center;gap:9px">'
-          + '<span style="width:70px;font-size:var(--pt-txt,12.5px);font-weight:700;color:var(--texte);flex:none">'+_pilEsc(x.label)+'</span>'
-          + '<span style="flex:1;font-size:var(--pt-base,14px);font-weight:800;color:'+bd+'">'+x.start+'h → '+x.end+'h</span>'
-          + '<span style="font-size:var(--pt-lbl,10.5px);color:var(--texte-doux);white-space:nowrap">'+x.wMax+' km/h · '+x.tMax+'°</span>'
-          + '</div>'
-          + '<div style="display:flex;flex-wrap:wrap;gap:5px;margin-top:7px">'+bdgs+'</div>'
-          + '</div>';
+// \u2605\u2605\u2605 UNE SEULE FENETRE DE TRAITEMENT, ET ELLE EST DANS LA JOURNEE.
+//   Deux cartes lisaient le MEME _pilTreatDays() : \u00ab Traiter ? \u00bb sur Aujourd'hui
+//   et \u00ab Fen\u00eatre de traitement \u00bb dans L'\u00e9quipe & le mat\u00e9riel. Une source, deux
+//   ecrans, deux onglets — la faute de \u00a734, en plus petit et restee en place.
+//   Le guide tranchait deja la question de la place sans qu'on l'ecoute :
+//   \u00ab c'est l'indicateur qu'on regarde le soir en se demandant s'il faut sortir
+//   le pulverisateur \u00bb. C'est une decision DU JOUR. Elle ne se range pas a cote
+//   d'un parc de tracteurs, dont l'echelle est l'annee.
+//   \u26a0\ufe0f Le dessin des cinq jours n'est pas RECOPIE dans la carte survivante : il
+//     est EXTRAIT ici. Recopier, c'est garantir que les deux divergeront.
+function _pilTreatRows(days){
+  return (days||[]).map(function(x){
+    if(x.start!=null){
+      var risk=x.leach||(x.ppMax!=null && x.ppMax>=PIL_TREAT_PP_ALERT);
+      var bg=risk?'var(--orange-pale)':'var(--vert-pale)', bd=risk?'var(--orange)':'var(--vert-med)';
+      var bdgs='';
+      if(x.leach) bdgs+=_pilTBdg('var(--orange-pale)','var(--orange)','\u26a0\ufe0f pluie '+_pilMm(x.leachMm)+' dans '+x.leachH+' h \u2192 lessivage');
+      else bdgs+=_pilTBdg('var(--vert-pale)','var(--vert-med)','\u2713 '+PIL_TREAT_DRY_H+' h au sec ensuite');
+      if(x.ppMax!=null){
+        if(x.ppMax>=PIL_TREAT_PP_ALERT) bdgs+=_pilTBdg('var(--orange-pale)','var(--orange)','\u2614 '+x.ppMax+' % de pluie');
+        else bdgs+=_pilTBdg('rgba(127,127,127,.12)','var(--texte-doux)',x.ppMax+' % de pluie');
       }
-      return '<div style="display:flex;align-items:center;gap:9px;padding:8px 11px;border-radius:10px;border-left:3px solid var(--gris-clair)">'
-        + '<span style="width:70px;font-size:var(--pt-txt,12.5px);font-weight:700;color:var(--texte-doux);flex:none">'+_pilEsc(x.label)+'</span>'
-        + '<span style="flex:1;font-size:var(--pt-txt,12.5px);color:var(--texte-doux);font-style:italic">aucune fenêtre · '+x.reason+'</span>'
+      return '<div style="padding:8px 11px;border-radius:10px;background:'+bg+';border-left:3px solid '+bd+'">'
+        + '<div style="display:flex;align-items:center;gap:9px">'
+        + '<span style="width:70px;font-size:var(--pt-txt,12.5px);font-weight:700;color:var(--texte);flex:none">'+_pilEsc(x.label)+'</span>'
+        + '<span style="flex:1;font-size:var(--pt-base,14px);font-weight:800;color:'+bd+'">'+x.start+'h \u2192 '+x.end+'h</span>'
+        + '<span style="font-size:var(--pt-lbl,10.5px);color:var(--texte-doux);white-space:nowrap">'+x.wMax+' km/h \u00b7 '+x.tMax+'\u00b0</span>'
+        + '</div>'
+        + '<div style="display:flex;flex-wrap:wrap;gap:5px;margin-top:7px">'+bdgs+'</div>'
         + '</div>';
-    }).join('');
-    body='<div style="display:flex;flex-direction:column;gap:6px;padding-top:4px">'+rows+'</div>'
-      // ★ Les seuils, la phytotoxicite et le rappel DAR/DRE/ZNT expliquent le
-      //   calcul : ils partent dans MV_INFO['pil.traitement'].
-      + '';
-  }
-  return _pilTile('traitement','💧','#5A9FD4','Fenêtre de traitement', statHtml, sub, null, body, 'pil.traitement');
+    }
+    return '<div style="display:flex;align-items:center;gap:9px;padding:8px 11px;border-radius:10px;border-left:3px solid var(--gris-clair)">'
+      + '<span style="width:70px;font-size:var(--pt-txt,12.5px);font-weight:700;color:var(--texte-doux);flex:none">'+_pilEsc(x.label)+'</span>'
+      + '<span style="flex:1;font-size:var(--pt-txt,12.5px);color:var(--texte-doux);font-style:italic">aucune fen\u00eatre \u00b7 '+x.reason+'</span>'
+      + '</div>';
+  }).join('');
 }
 
 // ── Simulateur « et si ? » (réallocation de l'équipe, recalcul des dates en direct) ──
@@ -4421,22 +4427,35 @@ function _pilCkPres(d){
 }
 function _pilCkTraiter(){
   var days=_pilTreatDays(), big, bigCol, body;
-  if(days===undefined){ big='—'; bigCol='var(--texte-doux)'; body='<div class="pil-t2s">prévisions horaires indisponibles</div>'; }
+  if(days===undefined){ big='\u2014'; bigCol='var(--texte-doux)'; body='<div class="pil-t2s">pr\u00e9visions horaires indisponibles</div>'; }
   else {
     var tj=(days||[]).filter(function(x){ return /aujourd/i.test(x.label); })[0] || (days&&days[0]);
     if(tj&&tj.start!=null){
-      big='Oui — '+tj.start+'h \u2192 '+tj.end+'h'; bigCol='var(--vert-med)';
+      big='Oui \u2014 '+tj.start+'h \u2192 '+tj.end+'h'; bigCol='var(--vert-med)';
       var risk=tj.leach||(tj.ppMax!=null&&tj.ppMax>=PIL_TREAT_PP_ALERT);
-      body='<div class="pil-t2s">sec · '+tj.wMax+' km/h · '+tj.tMax+'° · meilleure fenêtre du jour</div>'
-        +(risk?'<div class="pil-t2s" style="color:var(--orange);margin-top:5px">\u26A0 pluie ensuite — risque de lessivage</div>':'');
+      body='<div class="pil-t2s">sec \u00b7 '+tj.wMax+' km/h \u00b7 '+tj.tMax+'\u00b0 \u00b7 meilleure fen\u00eatre du jour</div>'
+        +(risk?'<div class="pil-t2s" style="color:var(--orange);margin-top:5px">\u26A0 pluie ensuite \u2014 risque de lessivage</div>':'');
     } else {
-      big='Pas aujourd\'hui'; bigCol='var(--orange)';
-      body='<div class="pil-t2s">'+(tj?('aucune fenêtre · '+tj.reason):'aucune fenêtre claire')+'</div>';
+      big='Pas aujourd\u2019hui'; bigCol='var(--orange)';
+      body='<div class="pil-t2s">'+(tj?('aucune fen\u00eatre \u00b7 '+tj.reason):'aucune fen\u00eatre claire')+'</div>';
       var nxt=(days||[]).filter(function(x){ return x.start!=null; })[0];
       if(nxt) body+='<div class="pil-t2s" style="margin-top:5px;color:var(--vert-med)">prochaine : '+nxt.label+' '+nxt.start+'h\u2192'+nxt.end+'h</div>';
     }
+    // \u2605 LES CINQ JOURS ARRIVENT ICI, DERRIERE UN DEPLIANT. La carte vit dans une
+    //   grille de trois colonnes : cinq lignes toujours ouvertes etireraient ses
+    //   deux voisines sur toute leur hauteur. Ferme, le depliant ne coute qu'une
+    //   ligne ; ouvert, il porte exactement le dessin de l'ancienne carte.
+    //   \u26a0\ufe0f Ce n'est PAS \u00ab cacher un chiffre \u00bb : le verdict du jour \u2014 le seul qu'on
+    //     lit pour decider ce matin \u2014 reste en gros au-dessus, toujours affiche.
+    if(days && days.length){
+      body+='<details class="pil-t5"><summary>les '+days.length+' prochains jours</summary>'
+        +'<div class="pil-t5b">'+_pilTreatRows(days)+'</div></details>';
+    }
   }
-  return '<div class="pil-tile2"><div class="pil-t2h"><span class="ic">'+_pilIco('drop')+'</span><span class="t">Traiter ?</span></div>'
+  // La pastille suit la carte : la fiche `pil.traitement` etait posee sur celle
+  // qui disparait. Une fiche ecrite et posee nulle part est un rouge de harnais.
+  var _i=(typeof _mvInfoBtn==='function')?_mvInfoBtn('pil.traitement'):'';
+  return '<div class="pil-tile2"><div class="pil-t2h"><span class="ic">'+_pilIco('drop')+'</span><span class="t">Traiter ?</span>'+_i+'</div>'
     +'<div class="pil-t2b"><div class="pil-big" style="color:'+bigCol+'">'+big+'</div>'+body+'</div></div>';
 }
 function _pilCkPrio(d){
@@ -4515,6 +4534,208 @@ function _pilTabAuj(d){
 // La vue d'ensemble. On y voit les douze mois d'un coup, les campagnes qui les
 // decoupent, et le cadre comptable qui dit ou l'annee commence. On zoome
 // depuis ici : cliquer une campagne pose la portee, et tout le module suit.
+// ════════════════════════════════════════════════════════════════════════════
+// LE BUDGET DE L'ANNEE, MOIS PAR MOIS — LE PREVU ET LE DEPENSE
+// ────────────────────────────────────────────────────────────────────────────
+// La carte « Deux façons de compter l'année », juste au-dessus, porte deja les
+// deux TOTAUX. Ce que ce graphe ajoute, c'est QUAND l'ecart s'ouvre : un total
+// ne dit pas si le retard s'est pris en avril ou en aout.
+//
+// ⚠️⚠️⚠️ DEUX PERIMETRES, ET C'EST DELIBERE — LE DIRE EST LA MOITIE DU TRAVAIL.
+//   · Le PREVU est du bareme : heures/ha × surface, etalees mois par mois par la
+//     fenetre de chaque tache (cd.months[].chargeOrd, calcule par planning.js),
+//     valorisees au taux moyen. Perimetre : LE TRAVAIL DE VIGNE, rien d'autre.
+//   · Le DEPENSE vient de _pexData : salaires charges, GNR, achats d'intrants,
+//     poses a la date de leur travail, de leur plein ou de leur achat. Perimetre :
+//     TOUT LE DOMAINE — la cave, l'atelier et le bureau y sont.
+//   L'ecart entre les deux courbes N'EST DONC PAS UN DEPASSEMENT. Pendant la
+//   vendange la cave tourne a plein : la courbe du depense decolle sans qu'un
+//   seul rang coute plus cher. Un ecran qui superposerait ces deux courbes sans
+//   le dire commettrait exactement la faute de §33/§34 — un numerateur et un
+//   denominateur qui ne parlent pas de la meme chose.
+//
+// ⚠️ POURQUOI PAS « BAREME PREVU CONTRE BAREME FAIT », qui serait a perimetre
+//   egal ? Parce que la donnee n'existe pas a l'echelle de l'annee, et le module
+//   l'ecrit deja dans _pilPhotosData : « le pourcentage fait n'a d'assiette que
+//   sur la periode CONSULTEE — calcHeures() ne connait qu'elle ». L'etendre a
+//   l'exercice serait un pourcentage sans denominateur. On ne trace pas une
+//   courbe qu'on ne sait pas calculer.
+//
+// ⚠️ Le depense S'ARRETE AU MOIS COURANT. Le prolonger a plat jusqu'a la cloture
+//   ferait lire « plus rien ne sort » la ou il n'y a simplement pas encore de
+//   donnee. Un trou n'est pas un zero, et un zero est une mesure.
+// ════════════════════════════════════════════════════════════════════════════
+function _pilAnBudgetData(){
+  var ann=null; try{ ann=_pilAnnuelData(); }catch(e){ ann=null; }
+  if(!ann || !ann.ex) return null;
+  var mois=null; try{ mois=_pexMoisWin(ann.ex); }catch(e){ mois=null; }
+  if(!mois || !mois.length) return null;
+
+  var taux=0; try{ taux=Number(_ecoRate())||0; }catch(e){ taux=0; }
+  var idx={}; mois.forEach(function(mo,i){ idx[mo.k]=i; });
+
+  // ── Le prevu : les heures de bareme, mois par mois ────────────────────────
+  // ⚠️ MEME BORNAGE QUE LES PHOTOS. Une campagne entierement hors de l'exercice
+  //   comptable n'entre pas dans un total annonce « sur l'exercice » — ann.hors
+  //   la nomme, et « Deux façons de compter » l'affiche deja en clair.
+  var hPrev=mois.map(function(){ return 0; }), nCd=0, nSansMois=0;
+  ann.pers.forEach(function(p){
+    if(!p.cd) return;
+    if(p.fin<ann.ex.d0 || p.debut>ann.ex.d1) return;
+    if(!p.cd.months || !p.cd.months.length){ nSansMois++; return; }
+    nCd++;
+    p.cd.months.forEach(function(x){
+      var k=x.yr+'-'+x.m;
+      if(idx[k]!=null) hPrev[idx[k]]+=Number(x.chargeOrd)||0;
+    });
+  });
+  var hTot=0; hPrev.forEach(function(h){ hTot+=h; });
+
+  // ── Le depense : le moteur de l'exercice, deja cadre sur des dates ────────
+  // On le CONSOMME, on ne le recalcule pas : un second calcul donnerait un
+  // second chiffre, et c'est la faute que ce module passe son temps a corriger.
+  var X=_pilExoData()||null;
+  var eReel=mois.map(function(mo){
+    if(!X || !X.byM || !X.byM[mo.k]) return null;
+    var b=X.byM[mo.k];
+    return (b.sal||0)+(b.gnr||0)+(b.ach||0);
+  });
+  // Jusqu'ou la mesure porte : le mois qui contient aujourd'hui, ou le dernier
+  // mois de l'exercice s'il est clos. Au-dela, la courbe s'arrete.
+  var auj=(typeof window._mvAujIso==='function')?window._mvAujIso():'';
+  var iMax=mois.length-1;
+  if(auj && auj<=ann.ex.d1){
+    iMax=-1;
+    for(var q=0;q<mois.length;q++){ if(mois[q].d0<=auj) iMax=q; }
+    if(iMax<0) iMax=0;
+  }
+
+  var ePrev=hPrev.map(function(h){ return h*taux; });
+  var cumP=[], cumR=[], aP=0, aR=0, reelTot=0;
+  for(var i=0;i<mois.length;i++){
+    aP+=ePrev[i]; cumP.push(aP);
+    if(i<=iMax && eReel[i]!=null){ aR+=eReel[i]; cumR.push(aR); reelTot=aR; }
+    else cumR.push(null);
+  }
+  return { mois:mois, hPrev:hPrev, ePrev:ePrev, eReel:eReel,
+           cumP:cumP, cumR:cumR, iMax:iMax, taux:taux, hTot:hTot,
+           prevTot:aP, reelTot:reelTot, nCd:nCd, nSansMois:nSansMois,
+           reelOk:!!(X && X.total>0), ex:ann.ex };
+}
+
+function _pilAnBudgetSvg(B,w){
+  if(!B) return window._mvGraphVide('L\u2019exercice comptable n\u2019est pas d\u00e9limit\u00e9',
+    'R\u00e9glages \u203a Campagne : datez vos p\u00e9riodes, et fixez le mois d\u2019ouverture de l\u2019exercice.');
+  if(!(B.taux>0)) return window._mvGraphVide('Aucun taux horaire renseign\u00e9',
+    'Sans taux, les heures de bar\u00e8me ne se convertissent pas en euros. R\u00e9glages \u203a \u00c9quipe.');
+  if(!(B.prevTot>0)) return window._mvGraphVide('Aucune heure de bar\u00e8me sur l\u2019exercice',
+    'Datez vos campagnes et renseignez les heures/ha des travaux : le pr\u00e9vu en d\u00e9coule.');
+
+  var M=B.mois;
+  var maxV=0;
+  B.cumP.forEach(function(v){ if(v>maxV) maxV=v; });
+  B.cumR.forEach(function(v){ if(v!=null && v>maxV) maxV=v; });
+  var top=_pecNiceMax(maxV*1.08);
+
+  var c0=window._mvGraphCadre(w,100), et=c0.etroit;
+  // ⚠️⚠️ DEUX DEFAUTS VUS A LA CAPTURE, ET PAR RIEN D'AUTRE.
+  //   ① LES GRADUATIONS TOMBAIENT SUR DES VALEURS NON RONDES : 33,3 k · 66,7 k ·
+  //     133,3 k. Le cadre par defaut pose `grad` a 6, et _pecNiceMax rend un `top`
+  //     de la forme m x 10^n avec m dans {1 ; 1,5 ; 2 ; 2,5 ; 3 ; 4 ; 5 ; 7,5 ; 10}.
+  //     Divise par 6, AUCUN de ces neuf m ne tombe rond ; divise par 5, TOUS le
+  //     font (0,2 · 0,3 · 0,4 · 0,5 · 0,6 · 0,8 · 1 · 1,5 · 2). En etroit, 2 pas
+  //     jouent le meme role sans charger l'axe. C'est une propriete de
+  //     _pecNiceMax, pas un reglage a l'oeil.
+  //   ② LE « € » DE L'AXE CHEVAUCHAIT LA GRADUATION DU HAUT. L'unite se pose a
+  //     pT-4, la graduation la plus haute a pT+4 : huit pixels d'ecart pour du
+  //     texte de onze. Deux marges de plus en haut, et l'unite remonte d'autant.
+  //   \u26a0\ufe0f Les deux existent aussi dans _pexGraph, d'ou ce dessin est derive. Ils
+  //     n'y sont PAS corriges ici : cet ecran n'est pas dans le lot, et une
+  //     correction non demandee sur un graphe qu'on n'a pas regarde est un pari.
+  //     Note au backlog plutot qu'un geste en passant.
+  var c=window._mvGraphCadre(w, et?222:270, { padL:et?44:58, padR:et?12:18, padT:24, padB:et?30:34,
+                                              grad:(et?2:5) });
+  var W=c.w, pL=c.padL, pR=c.padR, pT=c.padT, iw=c.iw, ih=c.ih;
+  var step=(M.length>1)?(iw/(M.length-1)):iw;
+  function X(i){ return (M.length>1)?(pL+step*i):(pL+iw/2); }
+  function Y(v){ return pT+ih-(v/top)*ih; }
+
+  var g='';
+  for(var k=0;k<=c.grad;k++){
+    var v=top*k/c.grad, y=Y(v);
+    g+='<line x1="'+pL+'" y1="'+y.toFixed(1)+'" x2="'+(W-pR)+'" y2="'+y.toFixed(1)+'" stroke="'+c.col.grille+'" stroke-width="'+c.trait.grille+'"/>'
+      +'<text x="'+(pL-7)+'" y="'+(y+4).toFixed(1)+'" text-anchor="end" font-size="'+(et?c.txt.mini:c.txt.axe)+'" fill="'+c.col.texte+'">'+_pilEsc(_pecAxeEur(v))+'</text>';
+  }
+  g+='<text x="'+(pL-7)+'" y="'+(pT-11)+'" text-anchor="end" font-size="'+c.txt.unite+'" fill="'+c.col.texte+'">\u20AC</text>';
+
+  // Le prevu : trait plein clair sur toute l'annee — c'est un PLAN, il est connu
+  // d'avance jusqu'a la cloture.
+  var dP=''; B.cumP.forEach(function(v,i){ dP+=(i?' L ':'M ')+X(i).toFixed(1)+' '+Y(v).toFixed(1); });
+  g+='<path d="'+dP+'" fill="none" stroke="'+_PEC_COL.mo+'" stroke-width="2.2" stroke-linejoin="round" stroke-linecap="round" stroke-dasharray="6 4"/>';
+
+  // Le depense : trait plein, ARRETE au dernier mois mesure.
+  var dR='', nR=0;
+  B.cumR.forEach(function(v,i){ if(v==null) return; dR+=(nR?' L ':'M ')+X(i).toFixed(1)+' '+Y(v).toFixed(1); nR++; });
+  if(nR>0){
+    g+='<path d="'+dR+'" fill="none" stroke="#2C3E50" stroke-width="2.4" stroke-linejoin="round" stroke-linecap="round"/>';
+    g+='<circle cx="'+X(B.iMax).toFixed(1)+'" cy="'+Y(B.cumR[B.iMax]!=null?B.cumR[B.iMax]:0).toFixed(1)+'" r="3.6" fill="#2C3E50"/>';
+  }
+
+  var pas=et?(M.length>8?3:2):(M.length<=13?1:2);
+  M.forEach(function(mo,i){
+    if(i%pas===0)
+      g+='<text x="'+X(i).toFixed(1)+'" y="'+(c.h-11)+'" text-anchor="middle" font-size="'+(et?c.txt.mini:c.txt.axe)+'" fill="'+c.col.texte+'">'+_pilEsc(mo.lbl)+'</text>';
+  });
+
+  return window._mvGraphSvg(c, 'Cumul mois par mois du budget de vigne pr\u00e9vu au bar\u00e8me et de la d\u00e9pense r\u00e9elle du domaine.', g)
+    +'<div class="pil-anb-leg">'
+    +'<span><em style="background:transparent;border-top:2px dashed '+_PEC_COL.mo+';height:0;border-radius:0"></em>pr\u00e9vu \u00b7 vigne au bar\u00e8me</span>'
+    +'<span><em style="background:#2C3E50"></em>d\u00e9pens\u00e9 \u00b7 tout le domaine</span>'
+    +'</div>';
+}
+
+function _pilPanelAnBudget(){
+  var B=null; try{ B=_pilAnBudgetData(); }catch(e){ B=null;
+    if(window.logError) window.logError({level:'info',cat:'pilotage',msg:'budget annuel : calcul illisible'}); }
+
+  // La ligne de cadre porte LES DEUX PERIMETRES. C'est ce qui empeche de lire
+  // l'ecart comme un depassement — donc elle reste a l'ecran, toujours.
+  var sub = B
+    ? ('bar\u00e8me vigne \u00d7 ' + _ecoEur2(B.taux) + ' \u20ac/h, face \u00e0 la d\u00e9pense r\u00e9elle de tout le domaine')
+    : 'exercice comptable non d\u00e9limit\u00e9';
+  var stat = (B && B.prevTot>0)
+    ? _pilStat(_pilNb(Math.round(B.prevTot/1000)),' k\u20ac pr\u00e9vus', (B.reelOk?null:'sans mesure'))
+    : _pilStat('\u2014','');
+
+  var body='<div style="width:100%;overflow-x:auto" id="pil-g-anb"></div>';
+  window._mvGraphSuivre('#pil-g-anb', function(lg){ return _pilAnBudgetSvg(B,lg); }, {max:1400});
+
+  if(B && B.prevTot>0){
+    var ecart=(B.reelTot||0)-((B.cumP[B.iMax]!=null)?B.cumP[B.iMax]:0);
+    var moisLbl=(B.mois[B.iMax]?B.mois[B.iMax].lbl:'');
+    body+='<div style="font-size:var(--pt-micro,11px);color:var(--texte-doux);margin-top:11px;line-height:1.5;'
+      +'border:1px solid var(--gris-clair);border-radius:9px;padding:9px 12px">';
+    if(B.reelOk && B.reelTot>0){
+      body+='\u00c0 fin <b>'+_pilEsc(moisLbl)+'</b>, le plan de vigne cumule <b>'+_pilEsc(_pecEurK(B.cumP[B.iMax]||0))
+        +'</b> et la d\u00e9pense mesur\u00e9e <b>'+_pilEsc(_pecEurK(B.reelTot))+'</b>. '
+        +'<b>L\u2019\u00e9cart de '+_pilEsc(_pecEurK(Math.abs(ecart)))+' n\u2019est pas un d\u00e9passement</b> : '
+        +'les deux courbes ne couvrent pas le m\u00eame p\u00e9rim\u00e8tre.';
+    } else {
+      body+='La d\u00e9pense r\u00e9elle n\u2019est pas trac\u00e9e : le co\u00fbt de l\u2019exercice n\u2019a pas abouti. '
+        +'Seul le plan de vigne est lisible.';
+    }
+    if(B.nSansMois>0)
+      body+=' <b>'+B.nSansMois+' campagne'+(B.nSansMois>1?'s ne sont pas dat\u00e9es':' n\u2019est pas dat\u00e9e')
+        +'</b> : son bar\u00e8me n\u2019entre pas dans le plan.';
+    body+='</div>';
+    if(!B.reelOk)
+      body+=_pilEmptyGo('Le co\u00fbt de l\u2019exercice ne se calcule pas : ouvrez \u00c9conomie \u203a Exercice pour voir ce qui bloque.','eco','\u00c9conomie \u203a Exercice');
+  }
+
+  return _pilTile('anbudget','\uD83D\uDCB6','#8A5A38','Le budget de l\u2019ann\u00e9e, mois par mois',
+    stat, sub, null, body, 'pil.an.budget');
+}
+
 function _pilTabAn(d){
   // Le bandeau d'alignement annee/vendange est deja DANS _pilPanelEtp
   // (_pilAnneeVigneHtml). On ne le rappelle pas ici : deux cadres de l'annee
@@ -4526,7 +4747,12 @@ function _pilTabAn(d){
     var _a=null; try{ _a=_pilAnnuelData(); }catch(e){ _a=null; }
     if(_a) H+=_pilDeuxCadresHtml(_a);
   }
-  if(_pilShow('an_frise')) H+='<div class="pil-panels">'+_pilPanelEtp(d)+'</div>';
+  // Le graphe se lit APRES les deux cadres — ils disent ce que \u00ab l'annee \u00bb veut
+  // dire — et AVANT la frise des 52 semaines, qui descend au detail hebdomadaire.
+  var _pan='';
+  if(_pilShow('an_budget')) _pan+=_pilPanelAnBudget();
+  if(_pilShow('an_frise'))  _pan+=_pilPanelEtp(d);
+  if(_pan) H+='<div class="pil-panels">'+_pan+'</div>';
   return H || '<div class="pil-empty">Aucun indicateur affiché.</div>';
 }
 
@@ -4634,8 +4860,6 @@ function _pilTabMat(d){
   var H='<div class="pil-panels">';
   if(_pilShow('mat_tracteur')) H+=_pilPanelTracteur(d);
   if(_pilShow('mat_gnr')) H+=_pilPanelGnr(d);
-  if(_pilShow('mat_phyto')) H+=_pilPanelPhyto(d);
-  if(_pilShow('mat_traitement')) H+=_pilPanelTraitement(d);
   H+='</div>';
   return H;
 }
@@ -7951,6 +8175,15 @@ function _pilTabCfm(d){
       H+=_pilTile('ift','\uD83C\uDF3F','#3D6B27','Passages phyto / parcelle', _pilStat(pass.length,' parcelle'+(pass.length>1?'s':''), nOver?('\u2191 '+nOver):null), 'r\u00e9f. '+ref.v+' passages', null, body2);
     }
   }
+  // \u2605\u2605 LE REGISTRE PHYTO EST UNE PIECE DE CONFORMITE, PAS DE MATERIEL.
+  //   Il vivait sous \u00ab L'equipe & le materiel \u00bb, a cote du parc de tracteurs. Or
+  //   il lit LES MEMES traitements que \u00ab Passages phyto / parcelle \u00bb juste
+  //   au-dessus : l'un les agrege par parcelle, l'autre en montre les derniers.
+  //   Une source, deux onglets. Il se range ici, en detail de son propre agregat.
+  //   \u26a0\ufe0f LA CLE `mat_phyto` NE CHANGE PAS. Elle est gravee dans le localStorage
+  //     des clients : la renommer rallumerait la carte chez qui l'avait eteinte.
+  //     On deplace un rendu et une etiquette ; on ne renumerote rien en base.
+  if(_pilShow('mat_phyto')){ any=true; H+=_pilPanelPhyto(d); }
   // DRE
   if(_pilShow('cfm_dre')){
     any=true;
@@ -7979,12 +8212,12 @@ function _pilTabCfm(d){
 
 // ── Personnalisation PAR ONGLET (visibilité des tuiles) ──
 var _PIL_PERSO_DEFS={
-  auj:[['auj_marge','Marge sur objectif'],['auj_charge','Charge restante'],['auj_cadence','Cadence équipe'],['auj_budget','Budget consommé & dérive'],['auj_etp','ETP présents / requis'],['auj_jours','Jours favorables'],['auj_pres','À la vigne aujourd\'hui'],['auj_traiter','Traiter ?'],['auj_prio','Tâche prioritaire'],['auj_alertes','Alertes matériel & cave']],
-  an: [['an_cadres','Deux fa\u00e7ons de compter l\'ann\u00e9e'],['an_frise','Les 52 semaines de l\'exercice']],
+  auj:[['auj_marge','Marge sur objectif'],['auj_charge','Charge restante'],['auj_cadence','Cadence équipe'],['auj_budget','Budget consommé & dérive'],['auj_etp','ETP présents / requis'],['auj_jours','Jours favorables'],['auj_pres','À la vigne aujourd\'hui'],['auj_traiter','Traiter ? · fenêtre 5 jours'],['auj_prio','Tâche prioritaire'],['auj_alertes','Alertes matériel & cave']],
+  an: [['an_cadres','Deux fa\u00e7ons de compter l\'ann\u00e9e'],['an_budget','Le budget de l\'ann\u00e9e, mois par mois'],['an_frise','Les 52 semaines de l\'exercice']],
   avc:[['avc_gauge','Jauge de saison'],['avc_bar','Avancement par tâche'],['avc_pie','Charge (donut)'],['avc_temps','Où va le temps de l\'équipe'],['avc_echeances','Échéances par tâche'],['avc_carte','Carte du domaine']],
-  equ:[['prs_equipe','Équipe'],['prs_presences','Présences du jour'],['prs_capacite','Capacité vs charge'],['mat_tracteur','Parc tracteur'],['mat_gnr','Cuve GNR'],['mat_phyto','Registre phyto'],['mat_traitement','Fenêtre de traitement']],
+  equ:[['prs_equipe','Équipe'],['prs_presences','Présences du jour'],['prs_capacite','Capacité vs charge'],['mat_tracteur','Parc tracteur'],['mat_gnr','Cuve GNR']],
   sim:[['sim_ordre','Ordre de passage'],['sim_etsi','Répartition « et si ? »'],['sim_cout','Renfort : combien et quand']],
-  cfm:[['cfm_cuivre','Cuivre (bio · 7 ans)'],['cfm_ift','Passages phyto / IFT'],['cfm_dre','Délai de rentrée (DRE)']]
+  cfm:[['cfm_cuivre','Cuivre (bio · 7 ans)'],['cfm_ift','Passages phyto / IFT'],['mat_phyto','Registre phyto'],['cfm_dre','Délai de rentrée (DRE)']]
 };
 function _pilPersoHtml(tab){
   var defs=_PIL_PERSO_DEFS[tab]; if(!defs) return '';
@@ -8169,7 +8402,7 @@ function _pilSkeleton(d,tab){
     +'<div class="pil-souslig"><span>'+_pilEsc(_pilTabLabel(tab))+'</span>'
     +(avecPerso?'<button class="pil-gear2" id="pil-gear" title="Choisir les indicateurs" aria-label="Choisir les indicateurs"><span>\u2699</span></button>':'')+'</div>'
     +'<div class="pil-wrap">'
-    +'<div id="pil-photos-host">'+_pilPhotosHtml()+'</div>'
+    +(_pilPhotosIci(tab)?('<div id="pil-photos-host">'+_pilPhotosHtml()+'</div>'):'')
     +'<div class="pil-perso" id="pil-perso"></div>'
     +'<div class="pil-content" id="pil-content"></div>'
     +'</div>';
@@ -8183,8 +8416,20 @@ function _pilSkeleton(d,tab){
 // Ici : une ligne qui dit OU l'on regarde (le fil d'Ariane), et quatre photos
 // qui repondent aux quatre questions d'un domaine — travaux, effectif, budget,
 // conformite — a la maille de la portee. Cliquer une photo descend au detail.
-// ⚠️ Les quatre photos lisent _PIL_SCOPE. Aucune ne garde d'etat a elle.
+// ⚠️ Les photos lisent _PIL_SCOPE. Aucune ne garde d'etat a elle.
+// ★★★ ELLES NE SONT PLUS UN BANDEAU : CE SONT LES CHIFFRES D'UN NIVEAU.
+//   Le bandeau sortait sur les HUIT onglets. Sur Économie et sur Conformite, la
+//   photo repetait mot pour mot l'ecran juste en dessous — et le code l'admettait
+//   deja : cliquer une photo depuis son propre onglet ne navigue pas, elle DEFILE.
+//   Un bouton « voir le detail » qui ne peut que descendre dans la page est
+//   l'aveu qu'il n'avait rien a faire la.
+//   Elles vivent desormais sur les DEUX niveaux de zoom — l'annee et la campagne
+//   — et nulle part ailleurs. Sur « Aujourd'hui », le cockpit repond deja aux
+//   memes questions avec de meilleurs instruments (l'anneau, la marge, la charge
+//   restante, la cadence, le budget consomme) : les photos y faisaient un
+//   troisieme emploi. Sur les cinq ecrans de detail, on y ARRIVE par une photo.
 // ════════════════════════════════════════════════════════════════════════════
+function _pilPhotosIci(tab){ return tab==='an' || tab==='avc'; }
 function _pilCssV2(){
   if(document.getElementById('pil-css-v2')) return;
   // ═══ L'ECHELLE DE TEXTE — ONZE PAS NOMMES ═══
@@ -8215,7 +8460,7 @@ function _pilCssV2(){
   +'.pil-cr .x:hover{opacity:1}'
   +'.pil-cr-sep{color:var(--gris);font-size:var(--pt-txt,12.5px)}'
   +'.pil-cr-note{font-size:var(--pt-micro,11px);color:var(--texte-doux);white-space:nowrap}'
-  +'.pil-photos{display:grid;grid-template-columns:repeat(4,1fr);gap:11px;margin:0 0 18px}'
+  +'.pil-photos{display:grid;grid-template-columns:repeat(3,1fr);gap:11px;margin:0 0 18px}'
   +'.pil-photo{background:var(--bg-card);border:1px solid var(--gris-clair);border-radius:14px;padding:13px 14px 12px;box-shadow:var(--shadow-sm);text-align:left;width:100%;font-family:inherit;cursor:pointer;transition:border-color .12s;min-height:112px;display:block}'
   +'.pil-photo:hover{border-color:var(--or)}'
   +'.pil-photo .k{display:flex;align-items:center;gap:6px;font-size:var(--pt-nano,9.5px);letter-spacing:1.5px;text-transform:uppercase;color:var(--texte-doux);font-weight:700}'
@@ -8268,8 +8513,7 @@ function _pilCssV2(){
   //     carte reste cliquable en entier, la fleche ne servait qu'a le dire.
   //   ★ Les quatre restent VISIBLES d'un coup d'oeil : c'est leur raison d'etre.
   //     On ne remplace pas quatre chiffres par un bouton « voir les chiffres ».
-  +'@media(max-width:880px){.pil-photos{grid-template-columns:1fr 1fr}}'
-  +'@media(max-width:700px){'
+    +'@media(max-width:700px){'
   +'.pil-photos{display:flex;grid-template-columns:none;gap:8px;overflow-x:auto;scroll-snap-type:x proximity;'
   +'-webkit-overflow-scrolling:touch;margin:0 -16px 12px;padding:0 16px 2px}'
   +'.pil-photos::-webkit-scrollbar{display:none}'
@@ -8282,6 +8526,18 @@ function _pilCssV2(){
   +'.pil-portee-in{padding:7px 16px;gap:7px}'
   +'}'
   +'@media(max-width:520px){.pil-tabsep{margin:0 5px}.pil-lvn{margin-right:4px}}'
+  // Le depliant des cinq jours dans \u00ab Traiter ? \u00bb. Il vit ici et non dans
+  // styles.css : c'est une regle de composant, propre a une seule carte.
+  +'.pil-t5{margin-top:10px;border-top:1px solid var(--gris-clair);padding-top:8px}'
+  +'.pil-t5>summary{cursor:pointer;list-style:none;font-size:var(--pt-micro,11px);font-weight:700;letter-spacing:.4px;text-transform:uppercase;color:var(--terre)}'
+  +'.pil-t5>summary::-webkit-details-marker{display:none}'
+  +'.pil-t5>summary::after{content:\" \u25b8\";display:inline-block;transition:transform .15s}'
+  +'.pil-t5[open]>summary::after{transform:rotate(90deg)}'
+  +'.pil-t5b{display:flex;flex-direction:column;gap:6px;margin-top:9px}'
+  // Le graphe du budget annuel : legende sur une ligne, comme celle d'\u00c9conomie.
+  +'.pil-anb-leg{display:flex;gap:15px;flex-wrap:wrap;font-size:var(--pt-micro,11px);color:var(--texte-doux);margin-top:9px}'
+  +'.pil-anb-leg span{display:inline-flex;align-items:center;gap:6px}'
+  +'.pil-anb-leg em{width:15px;height:10px;border-radius:3px;display:inline-block;font-style:normal}'
   +'@media(max-width:430px){.pil-portee-in{padding:7px 12px}}'
   // ══ LE MASTHEAD ══
   //   200 px sur telephone : le nom du domaine passait a la ligne en 26 px, et
@@ -8461,13 +8717,11 @@ function _pilPhotosData(){
   var exo=_pilExoData()||null;
   var campEco=!!(camp && _pilSaisonNom() && camp===_pilSaisonNom());
 
-  // CONFORMITE — le cuivre roule sur sept ans : c'est un chiffre d'ANNEE.
-  var cu=null; try{ cu=_cfmCuivre(); }catch(e){ cu=null; }
 
   return { ann:ann, selP:selP, hTot:hTot, hFait:hFait, pct:pct, nPer:nPer, pic:pic, picW:picW,
            moy:moy, head:head, manque:manque, eur:eur, sansTaux:sansTaux, ecoOk:ecoOk,
            exo:exo, campEco:campEco,
-           cu:cu, trous:(ann&&ann.trous)?ann.trous.length:0, ovl:(ann&&ann.ovl)?ann.ovl.length:0 };
+           trous:(ann&&ann.trous)?ann.trous.length:0, ovl:(ann&&ann.ovl)?ann.ovl.length:0 };
 }
 
 
@@ -8540,26 +8794,17 @@ function _pilPhotosHtml(){
           _pilFlag('r','Ouvrez \u00c9conomie pour voir ce qui bloque'),'budget');
   }
 
-  // CONFORMITE — le cuivre roule sur 7 ans : c'est un chiffre d'ANNEE, il ne
-  // se recadre pas sur une campagne, et l'ecran le dit au lieu de faire semblant.
-  var pCfm;
-  if(D.cu && D.cu.avail && D.cu.rows.length){
-    var mx=D.cu.rows[0];
-    var fC=D.cu.over>0?_pilFlag('r',D.cu.over+' parcelle(s) au-dessus du plafond')
-          :(D.cu.warn>0?_pilFlag('o',D.cu.warn+' parcelle(s) proche(s) du plafond'):'');
-    pCfm=_pilPhotoHtml('Conformit\u00e9','\uD83D\uDEE1\uFE0F',_pilUn(mx.cu),' kg Cu',
-      'la plus charg\u00e9e \u00b7 plafond '+D.cu.plaf+' kg/ha sur 7 ans','cfm',fC,'conf');
-  } else {
-    // ⚠️ SOURCE ABSENTE \u21d2 TIRET, JAMAIS ZERO. Un _cfmCuivre() qui echoue, ou qui
-    //   ne sait pas repondre, sortait « 0 kg Cu · aucun apport enregistre » : un
-    //   calcul qui n'a pas abouti, presente comme une mesure d'absence. Le zero ne
-    //   s'ecrit que si la synthese a bien tourne et n'a rien trouve.
-    pCfm=(!D.cu || !D.cu.avail)
-      ? _pilPhotoHtml('Conformit\u00e9','\uD83D\uDEE1\uFE0F','\u2014','','la synth\u00e8se cuivre n\u2019a pas abouti','cfm',
-          _pilFlag('r','Ouvrez Conformit\u00e9 pour voir ce qui bloque'),'conf')
-      : _pilPhotoHtml('Conformit\u00e9','\uD83D\uDEE1\uFE0F','0',' kg Cu','aucun apport de cuivre enregistr\u00e9','cfm','','conf');
-  }
-  return '<div class="pil-photos">'+pTrav+pEff+pBud+pCfm+'</div>';
+  // ★★★ LA PHOTO CONFORMITE A QUITTE LA BANDE, ET C'EST UNE QUESTION D'ECHELLE.
+  //   Les trois autres sont des statistiques DE LA PORTEE : Travaux en est la
+  //   somme, Effectif le maximum hebdomadaire, Budget la somme en euros. Le
+  //   cuivre, lui, roule sur SEPT ANS GLISSANTS et ignore la portee — le code
+  //   l'ecrivait deja en commentaire, sans en tirer la consequence. Un chiffre qui
+  //   ne bouge pas quand on clique une campagne n'a rien a faire dans une bande
+  //   qui se recadre. Il est consulte avant un controle, pas au fil de l'eau.
+  //   ⚠️ RIEN N'EST PERDU : l'onglet Conformite porte le cuivre en entier, et
+  //     _pilDiag continue de remonter ses constats (touche:['conf']) dans la
+  //     feuille « a completer », qui reste, elle, sur tous les onglets.
+  return '<div class="pil-photos">'+pTrav+pEff+pBud+'</div>';
 }
 function _pilNb(v){ v=Math.round(Number(v)||0); return String(v).replace(/\B(?=(\d{3})+(?!\d))/g,'\u00a0'); }
 function _pilUn(v){ return (Math.round((Number(v)||0)*10)/10).toString().replace('.',','); }
@@ -9134,7 +9379,7 @@ function _pilFillContent(d){
   else if(tab==='equ'){
     var _hEqu=
         (_pilAnyShow(['prs_equipe','prs_presences','prs_capacite'])?'<div class="pil-sec-h">Personnel</div>'+_pilTabPrs(d):'')
-      + (_pilAnyShow(['mat_tracteur','mat_gnr','mat_phyto','mat_traitement'])?'<div class="pil-sec-h">Matériel</div>'+_pilTabMat(d):'');
+      + (_pilAnyShow(['mat_tracteur','mat_gnr'])?'<div class="pil-sec-h">Matériel</div>'+_pilTabMat(d):'');
     // Les six autres onglets ont leur repli ; celui-ci sortait un ECRAN BLANC,
     // sans meme la phrase qui dit comment rallumer les tuiles.
     host.innerHTML=_hEqu || '<div class="pil-empty">Aucun indicateur affiché — activez-les via « Choisir les indicateurs ».</div>';
@@ -9260,6 +9505,12 @@ function _pilBindContent(content){
           }
         }
         _pilSaveState(_PIL_STATE); tile.classList.toggle('open',_ouvre);
+        // \u2605 UN GRAPHE DESSINE DANS UNE CARTE FERMEE L'A ETE A LA LARGEUR PAR
+        //   DEFAUT : .pil-tbody est en display:none, donc clientWidth vaut 0 et
+        //   _mvGraphW retombe sur MV_GRAPH_DEF. En ouvrant, la largeur reelle
+        //   existe enfin. _mvGraphRepeindre ne redessine que ce qui a change de
+        //   largeur : sur une carte sans graphe, il ne fait rien.
+        if(_ouvre && window._mvGraphRepeindre) window._mvGraphRepeindre();
         // La barre \u00ab en main \u00bb est en position:fixed : replier le volet doit la
         // l\u00e2cher, sinon elle flotterait au-dessus d'un contenu invisible.
         if(id==='ordrepassage'){ if(_PIL_STATE.collapsed[id]){ if(_PIL_OP) _PIL_OP._pick=null; } else _opBuildMap(); } if(id==='carte'&&!_PIL_STATE.collapsed[id]) _pilBuildMap(_pilData()); return; }

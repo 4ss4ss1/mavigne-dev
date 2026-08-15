@@ -1428,14 +1428,14 @@ mark{background:rgba(200,176,32,.32);color:var(--cream);border-radius:3px;paddin
 <section id="pilotage">
   <div class="sec-h">
     <div class="sec-ic" aria-hidden="true">📊</div>
-    <div><h2>Pilotage</h2><div class="sub">Aujourd'hui · L'année · La campagne · L'équipe &amp; le matériel · Simuler · Cave · Économie · Conformité</div></div>
+    <div><h2>Pilotage</h2><div class="sub">Aujourd'hui · L'année · La campagne · L'équipe &amp; le matériel · Décider · Cave · Économie · Conformité</div></div>
   </div>
   <p class="lead">Le Pilotage est un tableau de bord <b>en lecture seule</b>, pensé pour décider :
   où en est-on, tiendra-t-on les délais, peut-on traiter demain, combien coûte cet hectare. Il ne
   modifie jamais rien — c'est ce qui permet de l'ouvrir sans crainte.</p>
   <div class="note tip"><span class="ni" aria-hidden="true">📱</span><div>Le <b>grand écran</b> reste le plus
   confortable pour les tableaux et les graphiques. Mais le Pilotage se lit désormais aussi sur
-  <b>téléphone</b> : les quatre chiffres du haut se rangent en une ligne qui défile, le titre de
+  <b>téléphone</b> : les chiffres du haut se rangent en une ligne qui défile, le titre de
   l'onglet ne prend plus de place — la barre d'onglets le dit déjà — et le nom du domaine se fait
   discret. Vous n'avez plus à faire défiler un écran entier avant d'atteindre un chiffre.</div></div>
 
@@ -1515,26 +1515,33 @@ mark{background:rgba(200,176,32,.32);color:var(--cream);border-radius:3px;paddin
   <b>ce qui dit quoi faire est un bouton, jamais une phrase à exécuter de mémoire.</b></p>
 
   <div class="note tip"><span class="ni" aria-hidden="true">✅</span><div>Les <b>huit onglets</b>
-  suivent désormais cette règle, y compris <b>Simuler</b>, <b>Cave</b> et <b>Conformité</b>. Dans le
+  suivent désormais cette règle, y compris <b>Décider</b>, <b>Cave</b> et <b>Conformité</b>. Dans le
   simulateur, chaque étape porte son « i » — il remplace le pavé « comment lire » qui s'intercalait
   entre le titre et le graphique. La <b>légende des couleurs</b>, elle, reste affichée sous le graphe :
   celle-là ne se lit pas, elle se consulte du regard.</div></div>
 
   <h3>🧭 Comment il se lit</h3>
   <p>Les onglets vont du <b>large au fin</b> : l'année, puis la campagne, puis l'équipe et le matériel,
-  puis la simulation. Ils portent leur numéro. Après le trait, la Cave, l'Économie et la Conformité
+  puis la décision. Ils portent leur numéro. Après le trait, la Cave, l'Économie et la Conformité
   sont des <b>écrans de détail</b> — pas des niveaux de zoom.</p>
   <ul class="dot">
     <li><b>La barre du haut dit où vous regardez</b> : l'exercice entier, ou une campagne. Cliquez
-    une campagne dans la frise de l'année et les quatre chiffres du haut, la frise et les tableaux
+    une campagne dans la frise de l'année et les trois chiffres du haut, la frise et les tableaux
     de la campagne suivent. La croix revient à l'année. <b>Trois écrans ont leur propre cadre</b> et
     ne se recadrent pas : l'Économie chiffre la période consultée, la Cave suit le millésime, la
     Conformité roule sur sept ans glissants — chacun l'écrit au-dessus de ses chiffres, plutôt que
     de répondre en silence sur une autre fenêtre que celle affichée.</li>
-    <li><b>Quatre chiffres en tête de toutes les pages</b> : les travaux, l'effectif, le budget, la
-    conformité, à la maille de ce que vous regardez. Toucher l'un d'eux ouvre l'écran qui le détaille.
+    <li><b>Trois chiffres en tête de « L'année » et de « La campagne »</b> : les travaux, l'effectif,
+    le budget, à la maille de ce que vous regardez. Toucher l'un d'eux ouvre l'écran qui le détaille.
     L'effectif affiche le <b>pic</b>, pas la moyenne : une moyenne annuelle n'existe aucun jour de
-    l'année, et c'est le pic qui décide d'un recrutement.</li>
+    l'année, et c'est le pic qui décide d'un recrutement.
+    <br><b>Ils ne s'affichent que sur ces deux onglets</b>, et c'est voulu : ce sont les deux niveaux
+    de zoom. Sur « Aujourd'hui », le cockpit répond déjà aux mêmes questions, en mieux ; sur les
+    écrans de détail, on y arrive justement <i>en touchant</i> un de ces chiffres.
+    <br><b>La conformité n'y figure plus.</b> Le cuivre roule sur <b>sept ans glissants</b> : il ne
+    bouge pas quand vous cliquez une campagne. Un chiffre qui ignore la portée n'a pas sa place dans
+    une ligne qui, elle, se recadre. Il se lit en entier dans l'onglet Conformité, et le bouton
+    « à compléter » continue de remonter ses alertes, sur tous les onglets.</li>
     <li><b>Le bouton « à compléter »</b> liste ce qui empêche vos chiffres d'être justes — périodes sans
     dates, trous dans le calendrier, salariés sans taux horaire, tâches sans heures par hectare… Chaque
     ligne dit <b>ce que ça fausse</b>, et le bouton vous emmène à l'endroit exact, qui clignote une
@@ -1543,6 +1550,19 @@ mark{background:rgba(200,176,32,.32);color:var(--cream);border-radius:3px;paddin
 
   <h3>🗓️ L'année</h3>
   <ul class="dot">
+    <li><b>Le budget de l'année, mois par mois</b> : deux courbes cumulées. En tireté, le
+    <b>prévu</b> — vos heures de barème étalées sur les mois par la fenêtre de chaque travail,
+    valorisées au taux moyen. En trait plein, le <b>dépensé réel</b> — salaires chargés, carburant
+    et achats, posés à leur date. Les deux totaux étaient déjà sur la carte juste au-dessus ; ce que
+    la courbe ajoute, c'est <b>à quel moment</b> l'écart se creuse.
+    <div class="note" style="margin:8px 0 0"><span class="ni" aria-hidden="true">⚠️</span><div><b>L'écart
+    entre les deux courbes n'est pas un dépassement.</b> Elles ne couvrent pas le même périmètre : le
+    prévu ne chiffre que <b>le travail de vigne</b>, la dépense réelle porte <b>tout le domaine</b> —
+    la cave, l'atelier et le bureau compris. Pendant la vendange, la cave tourne à plein : la courbe
+    du dépensé monte sans qu'un seul rang coûte plus cher. L'écran l'écrit sous le graphe, en toutes
+    lettres, plutôt que de vous laisser conclure de travers.</div></div>
+    <br>Le dépensé <b>s'arrête au mois en cours</b> : le prolonger à plat ferait lire « plus rien ne
+    sort » là où il n'y a simplement pas encore de donnée.</li>
     <li><b>Les 52 semaines de l'exercice</b> : vos périodes en couleur, et sous chacune le nombre de
     personnes nécessaires semaine par semaine. Le vert est ce que l'équipe absorbe, le rouge ce qu'il
     reste à recruter — le renfort se lit en hauteur de rouge, sans calcul.</li>
@@ -1607,9 +1627,15 @@ mark{background:rgba(200,176,32,.32);color:var(--cream);border-radius:3px;paddin
     <li><b>Carte du domaine</b> colorée par avancement, libellés masquables.</li>
   </ul>
 
-  <h3>🎛️ Simuler</h3>
+  <h3>🎛️ Décider</h3>
   <p>C'est l'onglet qui répond à <b>« qu'est-ce que je fais&nbsp;? »</b>, et il pose deux questions
   bien distinctes.</p>
+  <div class="note tip"><span class="ni" aria-hidden="true">✏️</span><div>Cet onglet s'appelait
+  <b>Simuler</b>. Deux de ses trois cartes sont bien des simulations — rien n'y est enregistré. Mais
+  la troisième, <b>l'ordre de passage</b>, s'enregistre et <b>part sur l'écran de toute l'équipe</b> :
+  c'est le seul endroit du Pilotage où vous changez ce que les autres voient. Un onglet nommé
+  « Simuler » promettait qu'il ne s'y passe rien. On simule, puis on décide de diffuser — le nom le
+  dit maintenant.</div></div>
   <ul class="dot">
     <li><b>Dans quel ordre passer sur les parcelles</b> : la tournée du jour, au plus court, sur la
     carte du domaine. L'ordre défini par l'administrateur est <b>partagé à toute l'équipe</b> ; les
@@ -1632,7 +1658,7 @@ mark{background:rgba(200,176,32,.32);color:var(--cream);border-radius:3px;paddin
     Ces propositions-là ne vous sont plus présentées : ce qui reste est comparable.</li>
   </ul>
 
-  <h3>👥 Sur quel effectif Simuler compte</h3>
+  <h3>👥 Sur quel effectif Décider compte</h3>
   <div class="note tip"><span class="ni" aria-hidden="true">💡</span><div><b>L'effectif se lit sur la
   fenêtre du travail, pas sur le calendrier d'aujourd'hui.</b> Si vos quarante vendangeurs sont
   engagés du 26 août au 4 septembre, ils comptent dès aujourd'hui pour l'ordre de passage et la
@@ -1668,13 +1694,18 @@ mark{background:rgba(200,176,32,.32);color:var(--cream);border-radius:3px;paddin
     l'effectif <b>prévu au planning cette semaine-là</b> — pas à la présence d'aujourd'hui. Un pic qui
     tombe dans onze mois ne se compare pas à qui est là ce matin. La présence du jour est affichée
     juste en dessous, sous son propre nom.</li>
-    <li><b>Parc tracteur</b> et niveau de la <b>cuve GNR</b>.</li>
-    <li><b>Registre phyto</b> : derniers passages.</li>
-    <li><b>Fenêtre de traitement</b> — voir ci-dessous.</li>
+    <li><b>Parc tracteur</b> et niveau de la <b>cuve GNR</b>. Ce sont les deux seules cartes de la
+    moitié « matériel » : le <b>registre phyto</b> est passé dans <b>Conformité</b>, et la
+    <b>fenêtre de traitement</b> dans <b>Aujourd'hui</b>. L'un est une pièce réglementaire, l'autre
+    une décision du jour — ni l'un ni l'autre ne se lit à l'échelle d'un parc de machines.</li>
   </ul>
 
   <h3>🌦️ La fenêtre de traitement</h3>
-  <p>C'est l'indicateur qu'on regarde le soir en se demandant s'il faut sortir le pulvérisateur.</p>
+  <p>C'est l'indicateur qu'on regarde le soir en se demandant s'il faut sortir le pulvérisateur.
+  Il vit donc dans <b>Aujourd'hui</b>, sur la carte <b>« Traiter&nbsp;? »</b> : le verdict du jour en
+  grand, et les cinq jours à venir sous « les 5 prochains jours », qu'on déplie d'un doigt.
+  Auparavant, la même prévision était affichée à <b>deux endroits</b> — ici et dans « L'équipe &amp;
+  le matériel » — pour une seule source de données.</p>
   <ul class="dot">
     <li>Analyse sur <b>24 heures</b> puis prévision sur <b>5 jours</b>.</li>
     <li>Un créneau est retenu s'il est <b>sec</b>, avec un <b>vent modéré</b> et une
@@ -1704,6 +1735,7 @@ mark{background:rgba(200,176,32,.32);color:var(--cream);border-radius:3px;paddin
     <div class="card"><h4>⚖️ Conformité</h4><ul class="dot">
       <li><b>Cuivre</b> : cumul sur 7 ans face au plafond de 28 kg/ha</li>
       <li><b>Passages phyto / IFT</b> par parcelle</li>
+      <li><b>Registre phyto</b> : les derniers passages, en détail de l'agrégat ci-dessus</li>
       <li><b>Délai de rentrée</b> : parcelles encore interdites d'accès</li>
     </ul></div>
   </div>

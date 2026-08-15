@@ -1,4 +1,53 @@
-// MA VIGNE — Service Worker v6.76
+// MA VIGNE — Service Worker v6.77
+// v6.77 (15/08/2026) — CE QUI N’ETAIT PAS A SA PLACE. Quatre lots, sur retour
+//   de Nico, tous sur la MEME question : un chiffre range sous une echelle qui
+//   n’est pas la sienne.
+//   ★★★ LE BANDEAU DES QUATRE PHOTOS N’EST PLUS UN BANDEAU. Il sortait sur les
+//     HUIT onglets. Sur Economie et sur Conformite, la photo repetait mot pour
+//     mot l’ecran juste en dessous — et le code l’admettait deja : cliquer une
+//     photo depuis son propre onglet ne navigue pas, elle DEFILE. Un « voir le
+//     detail » qui ne peut que descendre dans la page est l’aveu qu’il n’avait
+//     rien a faire la. Les photos vivent desormais sur les DEUX niveaux de zoom
+//     (`an`, `avc`) et nulle part ailleurs — _pilPhotosIci(tab).
+//   ★★ LA PHOTO CONFORMITE PART, ET LA MESURE EST PLUS FINE QUE « QUATRE
+//     ECHELLES ». Travaux est une SOMME sur la portee, Effectif un MAXIMUM
+//     hebdomadaire sur la portee, Budget une somme en euros : trois statistiques
+//     legitimes de la meme fenetre. Le cuivre, lui, roule sur SEPT ANS GLISSANTS
+//     et ignore la portee. C’est le seul vrai intrus. 4 colonnes -> 3.
+//   ★★ UNE SEULE FENETRE DE TRAITEMENT. _pilCkTraiter et _pilPanelTraitement
+//     lisaient le MEME _pilTreatDays() dans deux onglets. Le guide tranchait deja
+//     la place sans qu’on l’ecoute : « l’indicateur qu’on regarde le soir » est une
+//     decision DU JOUR. Le dessin des cinq jours est EXTRAIT (_pilTreatRows), pas
+//     recopie — recopier, c’est garantir la divergence. Il arrive derriere un
+//     <details> : la grille .pil-dec est en trois colonnes, cinq lignes toujours
+//     ouvertes auraient etire les deux cartes voisines.
+//   ★ LE REGISTRE PHYTO DESCEND DANS CONFORMITE, en detail de « Passages phyto »,
+//     qui lit les memes traitements. ⚠️ La cle `mat_phyto` NE CHANGE PAS : elle est
+//     gravee dans le localStorage des clients, la renommer rallumerait la carte
+//     chez qui l’avait eteinte.
+//   ★★ « SIMULER » DEVIENT « DECIDER ». Deux des trois cartes sont en lecture
+//     seule et le disent. La troisieme ECRIT CONFIG.ordre_passage_t et pilote
+//     l’ecran Vigne de l’equipe : la seule carte du module qui touche une donnee
+//     partagee, rangee sous un verbe qui promet qu’il ne se passe rien.
+//     ⚠️ Retour en arriere ASSUME : §34 lot 5 avait declare « Decider » mort. Il
+//     l’avait tue quand la barre etait une liste de SUJETS ; c’est un axe de ZOOM
+//     depuis, et un verbe en bout d’axe se tient. La cle `sim` ne bouge pas.
+//   ★ LE BUDGET DE L’ANNEE, MOIS PAR MOIS (`an_budget`). Deux courbes cumulees :
+//     le prevu au bareme (cd.months[].chargeOrd x _ecoRate) et la depense reelle
+//     (_pexData.byM), arretee au mois courant — la prolonger a plat ferait lire
+//     « plus rien ne sort » la ou il n’y a pas de donnee.
+//     ⚠⚠⚠ LE GRAPHE DEMANDE — « bareme prevu contre bareme FAIT », a perimetre
+//     egal — N’EST PAS CONSTRUCTIBLE, et c’est le module qui l’ecrit lui-meme dans
+//     _pilPhotosData : « le pourcentage fait n’a d’assiette que sur la periode
+//     CONSULTEE — calcHeures() ne connait qu’elle ». L’etendre a l’exercice serait
+//     un pourcentage sans denominateur. On trace donc les deux courbes
+//     CONSTRUCTIBLES, et on NOMME les deux perimetres : le prevu ne chiffre que la
+//     vigne, la depense porte tout le domaine. L’ecart n’est PAS un depassement, et
+//     l’ecran l’ecrit sous le graphe — sans quoi c’est la faute de §33/§34.
+//   · _mvGraphRepeindre() au depliage d’une carte : un graphe dessine dans un
+//     .pil-tbody en display:none l’a ete a la largeur par defaut (clientWidth=0).
+//   · Accompagnement dans le MEME lot : guide/11-pilotage.html, huit points de
+//     MV_AIDE qui decrivaient l’ancien ecran, fiche MV_INFO `pil.an.budget`.
 // v6.76 (15/08/2026) — CE QU’ON TRAVERSE AVANT LE PREMIER CHIFFRE.
 //   MESURE AU NAVIGATEUR, sur le squelette reel monte en executant _pilSkeleton :
 //   sur telephone, il fallait descendre de <b>728 px</b> avant d’atteindre une
@@ -1668,7 +1717,7 @@
 // v2.22 — Fix profils vides : guard vide dans loadData() pour MEMBRES/SAISONS/TACHES
 // v2.17 — Onboarding intégré + tenantId · v2.06 — Firebase Auth · v2.00–v2.05 — divers
 const DEBUG = self.location.hostname === 'localhost' || self.location.hostname === '127.0.0.1';
-const CACHE_NAME   = 'mavigne-v6.76';
+const CACHE_NAME   = 'mavigne-v6.77';
 const TENANT_CACHE = 'mavigne-tenant';   // Cache persistant — préservé à chaque mise à jour SW
 const SYNC_TAG     = 'mavigne-sync';
 
@@ -1684,7 +1733,7 @@ const CDN_URLS = [
 ];
 
 self.addEventListener('install', event => {
-  if(DEBUG) console.log('[SW] Ma Vigne v6.76 installé');
+  if(DEBUG) console.log('[SW] Ma Vigne v6.77 installé');
   event.waitUntil(
     caches.open(CACHE_NAME).then(async cache => {
       // ── Cœur applicatif : STRICT (mise à jour ATOMIQUE) ──
@@ -1700,7 +1749,7 @@ self.addEventListener('install', event => {
 });
 
 self.addEventListener('activate', event => {
-  if(DEBUG) console.log('[SW] Ma Vigne v6.76 activé');
+  if(DEBUG) console.log('[SW] Ma Vigne v6.77 activé');
   event.waitUntil(
     caches.keys().then(keys =>
       Promise.all(
