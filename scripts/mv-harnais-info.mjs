@@ -179,17 +179,54 @@ t('_pecAlertes ne produit plus de paves .pec-a', !/pec-a [^"]*'\+em\+/.test(PILN
   && !/function _pecAlertes[\s\S]{0,1200}?pec-a /.test(PILNU));
 t('les postes a zero sont separes des remarques',
   /function _pecZeros\(E\)/.test(PILNU) && /function _pecRemarques\(E,TL\)/.test(PILNU));
-t('… et les deux sont appelees par _pecAlertes',
-  /var Z=_pecZeros\(E\), R=_pecRemarques\(E,TL\);/.test(PILNU));
-t('la carte de fiabilite porte sa fiche', /_mvInfoBtn\('pil\.eco\.fiabilite'\)/.test(PILNU));
+t('… et les deux alimentent le rendu partage',
+  /_pecFiabCard\(_pecZeros\(E\), _pecRemarques\(E,TL\),/.test(PILNU));
+/* ⚠️ UN SEUL RENDU POUR LES DEUX ECRANS. Deux implementations de la meme carte,
+   c'est la garantie qu'elles divergeront — la faute que ce chantier corrige. */
+t('la carte de fiabilite n\'a qu\'un seul rendu',
+  (PILNU.match(/class="pec-fia bad"/g)||[]).length === 1
+  && (PILNU.match(/class="pec-fia ok"/g)||[]).length === 1);
+t('_pecFiabCard prend ses cles en argument',
+  /function _pecFiabCard\(Z, R, cleFia, cleRem, okTxt, okSous\)/.test(PILNU));
+t('le rendu partage pose la pastille dans SES DEUX etats',
+  (PILNU.match(/_mvInfoBtn\(cleFia\)/g)||[]).length === 2,
+  'trouvee ' + (PILNU.match(/_mvInfoBtn\(cleFia\)/g)||[]).length + ' fois au lieu de 2');
+t('la Synthese lui passe ses deux cles',
+  /'pil\.eco\.fiabilite', 'pil\.eco\.remarques'/.test(PILNU));
 t('chaque poste a zero propose son bouton quand une porte existe',
   /data-diag="'\+_pilEsc\(z\.cible\)/.test(PILNU));
 t('un poste sans porte ne promet pas de bouton', /pec-fia-x/.test(PILNU));
-t('les remarques sont repliees derriere une puce', /data-mvi="pil\.eco\.remarques"/.test(PILNU));
+t('les remarques sont repliees derriere une puce',
+  /class="pec-remq" data-mvi="'\+_pilEsc\(cleRem\)\+'"/.test(PILNU));
 t('le cas « tout est en place » a son etat vert', /pec-fia ok/.test(PILNU));
 t('la carte de fiabilite est stylee', /\.pec-fia\{/.test(PILNU) && /\.pec-remq\{/.test(PILNU));
 t('l\'ecart de cadence garde sa fiche a cote de son chiffre',
   /cart de cadence'\+\(typeof _mvInfoBtn[\s\S]{0,60}?_mvInfoBtn\('pil\.cadence'\)/.test(PILNU));
+
+/* ══ 5 septies. L'EXERCICE PASSE A LA MEME REGLE ══
+   Sept paves colores avant le premier chiffre, comme la Synthese en avait douze.
+   Meme separation, MEME CARTE — on ne re-implemente pas. */
+t('les postes a zero de l\'Exercice sont separes des remarques',
+  /function _pexZeros\(E\)/.test(PILNU) && /function _pexRemarques\(E\)/.test(PILNU));
+t('l\'Exercice consomme le rendu partage',
+  /_pecFiabCard\(_pexZeros\(E\), _pexRemarques\(E\),/.test(PILNU));
+t('… avec SES cles, pas celles de la Synthese',
+  /'pil\.exo\.fiabilite', 'pil\.exo\.remarques'/.test(PILNU));
+t('_pexEntete ne fabrique plus de paves .pec-a',
+  !/function _pexEntete[\s\S]{0,900}?pec-a /.test(PILNU));
+t('la garde comptable garde sa ligne de cadre a l\'ecran',
+  /pas un compte de r\\u00e9sultat/.test(PILNU) && /charges d\\u2019exploitation/.test(PILNU));
+t('… et sa liste est partie dans la fiche',
+  !PILNU.includes('ni le fermage') && txt.includes('ni le fermage'));
+t('la garde porte sa pastille', /_mvInfoBtn\('pil\.exo\.garde'\)/.test(PILNU));
+
+/* Les deux ecrans ne doivent JAMAIS partager une cle : une fiche vivante
+   remplie par l'un s'afficherait sous la pastille de l'autre. */
+const cleSyn = ['pil.eco.fiabilite','pil.eco.remarques'];
+const cleExo = ['pil.exo.fiabilite','pil.exo.remarques'];
+t('les deux ecrans ont des cles distinctes',
+  cleSyn.every(k => cles.includes(k)) && cleExo.every(k => cles.includes(k))
+  && !cleSyn.some(k => cleExo.includes(k)));
 
 /* ══ 6. LES DEUX DETTES DE §34i SOLDEES ══ */
 t('_PIL_SEM ne se declare plus dans le module', !/var _PIL_SEM\s*=/.test(PILNU));

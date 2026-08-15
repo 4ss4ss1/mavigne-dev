@@ -6941,23 +6941,29 @@ function _pecRemarques(E,TL){
   return R;
 }
 
-function _pecAlertes(E,TL){
-  var Z=_pecZeros(E), R=_pecRemarques(E,TL);
-  // La fiche vivante se remplit AVANT que la pastille soit posee. Si elle reste
-  // vide, MV_INFO garde son repli honnete plutot qu'un blanc.
+// ════════════════════════════════════════════════════════════════════════════
+// LA CARTE DE FIABILITE — UN SEUL RENDU, DEUX ECRANS
+// ════════════════════════════════════════════════════════════════════════════
+// Ecrite pour la Synthese, elle sert a l'identique a l'Exercice : meme question
+// (« combien de postes sortent a zero, et comment les combler »), donc meme
+// carte. Deux implementations de la meme chose, c'est la garantie qu'elles
+// divergeront — et la faute que ce chantier passe son temps a corriger.
+//   Z = [{nom, quoi, cible, ou}]  les postes qu'une donnee manquante met a ZERO
+//   R = [html]                    ce qui change la lecture sans rien mettre a zero
+// ⚠️ La fiche des remarques est VIVANTE : ses paragraphes sont poses ici, juste
+//   avant que la pastille soit rendue. Si R est vide, MV_INFO garde son repli.
+function _pecFiabCard(Z, R, cleFia, cleRem, okTxt, okSous){
   if(typeof window._mvInfoSet==='function' && R.length)
-    window._mvInfoSet('pil.eco.remarques', { p:R });
-
+    window._mvInfoSet(cleRem, { p:R });
   var H='';
   if(Z.length){
-    // ① Le chiffre : combien de postes sortent a zero.
     H+='<div class="pec-fia bad">'
       +'<div class="pec-fia-h"><span class="pec-fia-n">'+Z.length+'</span>'
       +'<div><div class="pec-fia-t">poste'+(Z.length>1?'s':'')+' compt\u00e9'+(Z.length>1?'s':'')+' pour z\u00e9ro</div>'
       +'<div class="pec-fia-s">'+_pilEsc(Z.map(function(z){return z.nom;}).join(' \u00b7 '))+'</div></div>'
-      +(typeof _mvInfoBtn==='function'?_mvInfoBtn('pil.eco.fiabilite'):'')+'</div>'
-      // ③ Un bouton par poste manquant. Ceux qui n'ont pas de cible disent au
-      //   moins ce qui manque, sans promettre une porte qui n'existe pas.
+      +(typeof _mvInfoBtn==='function'?_mvInfoBtn(cleFia):'')+'</div>'
+      // Un bouton par poste. Ceux qui n'ont pas de porte disent au moins ce qui
+      // manque, plutot que de promettre un ecran qui n'existe pas.
       +'<div class="pec-fia-go">'
       +Z.map(function(z){
          return z.cible
@@ -6967,17 +6973,22 @@ function _pecAlertes(E,TL){
       +'</div></div>';
   } else {
     H+='<div class="pec-fia ok"><div class="pec-fia-h"><span class="pec-fia-n">\u2713</span>'
-      +'<div><div class="pec-fia-t">Le chiffrage est complet</div>'
-      +'<div class="pec-fia-s">taux horaires, prix du GNR, doses et prix des produits</div></div></div></div>';
+      +'<div><div class="pec-fia-t">'+_pilEsc(okTxt)+'</div>'
+      +'<div class="pec-fia-s">'+_pilEsc(okSous)+'</div></div>'
+      +(typeof _mvInfoBtn==='function'?_mvInfoBtn(cleFia):'')+'</div></div>';
   }
-
-  // ② Les remarques : une puce, pas un mur.
   if(R.length){
-    H+='<button class="pec-remq" data-mvi="pil.eco.remarques">'
+    H+='<button class="pec-remq" data-mvi="'+_pilEsc(cleRem)+'">'
       +'<span class="pec-remq-n">'+R.length+'</span>remarque'+(R.length>1?'s':'')+' sur la lecture de ces chiffres'
       +'<span class="pec-remq-c">\u203a</span></button>';
   }
   return H;
+}
+
+function _pecAlertes(E,TL){
+  return _pecFiabCard(_pecZeros(E), _pecRemarques(E,TL),
+    'pil.eco.fiabilite', 'pil.eco.remarques',
+    'Le chiffrage est complet', 'taux horaires, prix du GNR, doses et prix des produits');
 }
 
 // ── Vue 1 : Synthèse ─────────────────────────────────────────────────
@@ -7559,22 +7570,44 @@ function _pexGraph(E,w){
 }
 
 // Alertes, KPI et le garde-fou « ce n'est pas un compte de resultat ».
+// Les postes de l'EXERCICE qu'une donnee manquante met a ZERO.
+// ⚠️ Ce n'est pas la meme liste que la Synthese : ici on chiffre un bilan
+//   entier, donc les achats d'intrants comptent, et le planning doit avoir ete
+//   charge une fois pour que les heures payees existent.
+function _pexZeros(E){
+  var Z=[];
+  if(!E.hasPlan) Z.push({ nom:'Salaires', quoi:'planning charg\u00e9', cible:null, ou:null });
+  else if(E.nSansTaux>0) Z.push({ nom:E.nSansTaux+' personne'+(E.nSansTaux>1?'s':'')+' sans taux',
+    quoi:'taux horaire', cible:'equipe', ou:'R\u00e9glages \u203a \u00c9quipe' });
+  if(!E.hasGnr && E.tracH>0) Z.push({ nom:'Carburant', quoi:'prix du GNR', cible:'entretien', ou:'Tracteur \u203a Entretien' });
+  if(E.nAchSansPrix>0) Z.push({ nom:E.nAchSansPrix+' achat'+(E.nAchSansPrix>1?'s':'')+' sans prix',
+    quoi:'prix HT dans La R\u00e9serve', cible:null, ou:null });
+  return Z;
+}
+
+// Ce qui ne met rien a zero mais change la lecture du total.
+function _pexRemarques(E){
+  var R=[];
+  if(E.hasPlan && E.nSansTaux>0 && E.hSansTaux>0)
+    R.push('<b>'+_ecoH1(E.hSansTaux)+' h</b> pay\u00e9es sont compt\u00e9es \u00e0 z\u00e9ro faute de taux horaire : la masse salariale est sous-\u00e9valu\u00e9e d\u2019autant.');
+  if(E.salT>0)
+    R.push('Les salaires sont compt\u00e9s au <b>taux horaire charg\u00e9</b> de chaque fiche : le co\u00fbt employeur, cotisations patronales comprises, tel qu\u2019il a \u00e9t\u00e9 saisi. <b>Aucun coefficient n\u2019est ajout\u00e9 par-dessus</b> : ce total vaut ce que valent vos taux. Le montant exact des cotisations reste celui de votre journal de paie.');
+  if(E.enCours)
+    R.push('Exercice <b>en cours</b> : ce total est arr\u00eat\u00e9 aux d\u00e9penses d\u00e9j\u00e0 saisies, ce n\u2019est pas une pr\u00e9vision de cl\u00f4ture. Les mois \u00e0 venir sont \u00e0 z\u00e9ro parce qu\u2019ils n\u2019ont rien \u00e0 montrer, pas parce qu\u2019ils ne co\u00fbteront rien.');
+  if(E.phyConso>0)
+    R.push('Les traitements de l\u2019exercice repr\u00e9sentent <b>'+_pilEsc(_ecoEur(E.phyConso))+'</b> de produit consomm\u00e9. Ce montant n\u2019est <b>pas</b> dans le total : c\u2019est une sortie de stock, l\u2019achat a d\u00e9j\u00e0 \u00e9t\u00e9 compt\u00e9 le jour de la facture. L\u2019\u00e9cart entre les deux, c\u2019est votre stock.');
+  return R;
+}
+
+// ⚠️⚠️ MEME REFONTE QUE LA SYNTHESE, MEME CARTE. Sept paves colores empiles
+//   avant le premier chiffre, tous au meme poids : « le planning n'est pas
+//   charge, les salaires comptent pour zero » pesait autant que « l'ecart entre
+//   les deux, c'est votre stock ». Le rendu est celui de _pecFiabCard — un seul
+//   pour les deux ecrans.
 function _pexEntete(E){
-  var A=[];
-  function push(cls,em,html){ A.push('<div class="pec-a '+cls+'"><span class="e">'+em+'</span><div>'+html+'</div></div>'); }
-  if(!E.hasPlan) push('bad','\u26A0\uFE0F','Le <b>planning</b> n\u2019est pas charg\u00e9\u00a0: les salaires comptent pour z\u00e9ro. Ouvrez une fois le module <b>Planning</b>, puis revenez.');
-  if(E.nSansTaux>0) push('warn','\uD83D\uDCB6','<b>'+E.nSansTaux+' personne'+(E.nSansTaux>1?'s':'')+'</b> sans <b>taux horaire</b>'
-    +(E.hSansTaux>0?(', soit <b>'+_ecoH1(E.hSansTaux)+' h</b> pay\u00e9es compt\u00e9es \u00e0 z\u00e9ro'):'\u00a0: leurs heures comptent pour z\u00e9ro')
-    +' dans la masse salariale\u00a0: le total ci-dessus est sous-\u00e9valu\u00e9 d\u2019autant. Le taux se saisit dans la fiche de chaque salari\u00e9 (<b>R\u00e9glages \u203A \u00c9quipe</b>).');
-  // Ce que contient exactement le poste << salaires >>, dit UNE fois. Deux bandeaux
-  // vivaient ici, qui presentaient le taux des fiches comme un BRUT et invitaient a le
-  // majorer d'un coefficient : c'etait faux, et cela conduisait a compter les
-  // cotisations deux fois. Le taux de la fiche EST le cout employeur.
-  if(E.salT>0) push('info','\uD83E\uDDFE','Les salaires sont compt\u00e9s au <b>taux horaire charg\u00e9</b> de chaque fiche\u00a0: le co\u00fbt employeur, cotisations patronales comprises, tel qu\u2019il a \u00e9t\u00e9 saisi dans <b>R\u00e9glages \u203A \u00c9quipe</b>. Aucun coefficient n\u2019est ajout\u00e9 par-dessus\u00a0: ce total vaut ce que valent vos taux. Le montant exact des cotisations reste celui de votre journal de paie.');
-  if(!E.hasGnr && E.tracH>0) push('warn','\u26FD','Le <b>prix du GNR</b> n\u2019est pas connu\u00a0: le carburant reste \u00e0 z\u00e9ro malgr\u00e9 '+_ecoH1(E.tracH)+' h de tracteur. Il se renseigne au prochain <b>appoint de cuve</b> (Tracteur \u203A Entretien).');
-  if(E.nAchSansPrix>0) push('warn','\uD83E\uDDFE','<b>'+E.nAchSansPrix+' achat'+(E.nAchSansPrix>1?'s':'')+'</b> sans prix HT dans La R\u00e9serve\u00a0: le total des intrants est sous-\u00e9valu\u00e9 d\u2019autant. Le prix se compl\u00e8te sur la ligne d\u2019achat.');
-  if(E.enCours) push('info','\uD83D\uDD53','Exercice <b>en cours</b>\u00a0: ce total est arr\u00eat\u00e9 aux d\u00e9penses d\u00e9j\u00e0 saisies, ce n\u2019est pas une pr\u00e9vision de cl\u00f4ture. Les mois \u00e0 venir sont \u00e0 z\u00e9ro parce qu\u2019ils n\u2019ont rien \u00e0 montrer, pas parce qu\u2019ils ne co\u00fbteront rien.');
-  if(E.phyConso>0) push('info','\uD83C\uDF3F','Les traitements de l\u2019exercice repr\u00e9sentent <b>'+_pilEsc(_ecoEur(E.phyConso))+'</b> de produit consomm\u00e9. Ce montant n\u2019est <b>pas</b> dans le total\u00a0: c\u2019est une sortie de stock, l\u2019achat a d\u00e9j\u00e0 \u00e9t\u00e9 compt\u00e9 le jour de la facture. L\u2019\u00e9cart entre les deux, c\u2019est votre stock.');
+  var A=[_pecFiabCard(_pexZeros(E), _pexRemarques(E),
+    'pil.exo.fiabilite', 'pil.exo.remarques',
+    'Le chiffrage de l\u2019exercice est complet', 'planning charg\u00e9, taux horaires, prix du GNR, prix des achats')];
 
   var cmp=E.cmp, dPct=(cmp&&cmp.total>0)?((E.total-cmp.total)/cmp.total*100):null;
   var kpis='<div class="pec-kpis">'
@@ -7590,11 +7623,16 @@ function _pexEntete(E){
       : '<div class="pec-k"><div class="l">Contre l\u2019an dernier</div><div class="v">\u2014</div><div class="s">pas de donn\u00e9es sur l\u2019exercice pr\u00e9c\u00e9dent</div></div>')
     +'</div>';
 
+  // ★ CE QUI CADRE RESTE, LA LISTE PART. « Ce n'est pas un compte de resultat »
+  //   change la lecture du chiffre : sans cette phrase, on le compare au bilan
+  //   du comptable et on conclut de travers. Elle reste, en une ligne.
+  //   L'inventaire de ce qui n'y est pas — fermage, amortissements, assurances,
+  //   cotisations d'exploitant, embouteillage, frais generaux — se lit une fois :
+  //   il passe dans MV_INFO['pil.exo.garde'].
   var garde='<div class="pec-card"><div class="pec-cb"><div class="pex-warn">'
-    +'<div class="t">\uD83E\uDDFE Ce total n\u2019est pas un compte de r\u00e9sultat</div>'
-    +'<div class="d">Ma Vigne conna\u00eet ce qui passe par elle\u00a0: les heures pay\u00e9es, le carburant, les achats d\u2019intrants. '
-    +'Elle ne conna\u00eet <b>ni le fermage, ni les amortissements, ni les assurances, ni vos cotisations d\u2019exploitant, ni l\u2019embouteillage, ni les frais g\u00e9n\u00e9raux</b>. '
-    +'Ce chiffre sert \u00e0 piloter vos charges d\u2019exploitation d\u2019un bilan \u00e0 l\u2019autre \u2014 il ne remplace pas votre comptable, et il ne se compare pas ligne \u00e0 ligne \u00e0 son bilan.</div>'
+    +'<div class="t">\uD83E\uDDFE Ce total n\u2019est pas un compte de r\u00e9sultat'
+    +(typeof _mvInfoBtn==='function'?(' '+_mvInfoBtn('pil.exo.garde')):'')+'</div>'
+    +'<div class="d">Il chiffre vos <b>charges d\u2019exploitation</b>, d\u2019un bilan \u00e0 l\u2019autre \u2014 pas tout ce que co\u00fbte le domaine.</div>'
     +'</div></div></div>';
 
   var pr=E.postes.map(function(p){

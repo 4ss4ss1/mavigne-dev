@@ -23,7 +23,7 @@ export const GT_ADMIN_EMAIL = 'ngdevpro@gmail.com';
 // WHATS_NEW   : tableau vide = modal desactive pour cette version.
 // Format item : { emoji:'📅', titre:'Titre court', desc:'Phrase utilisateur.' }
 // Regle : seulement les changements visibles par les utilisateurs.
-export const APP_VERSION = '6.18';
+export const APP_VERSION = '6.19';
 // ════ Journal des nouveautés (récap cumulatif) ════
 // Une entrée par version, la PLUS RÉCENTE EN HAUT : { v:'5.10', items:[ {emoji,titre,desc}, … ] }
 // À chaque release visible → AJOUTER un bloc en tête (ne pas remplacer). items:[] = release technique (rien à afficher).
@@ -354,6 +354,10 @@ window._mvGraphRepeindre = function(){
 };
 
 export const WHATS_NEW = [
+  { v:'6.19', items:[
+    { emoji: '\u{1F9FE}', titre: "L\u2019onglet Exercice s\u2019aligne\u202f: sept avertissements deviennent une carte",
+      desc: "M\u00eame changement que la Synth\u00e8se la semaine derni\u00e8re, appliqu\u00e9 au bilan d\u2019un exercice. Vous voyez d\u2019abord <b>combien de postes sortent \u00e0 z\u00e9ro</b> et le bouton pour aller les renseigner\u202f; le reste se replie derri\u00e8re la puce \u00ab\u202fN remarques\u202f\u00bb. Le rappel \u00ab\u202fce total n\u2019est pas un compte de r\u00e9sultat\u202f\u00bb <b>reste affich\u00e9</b> \u2014 c\u2019est lui qui vous \u00e9vite de comparer ce chiffre ligne \u00e0 ligne au bilan de votre comptable. La liste de ce qui n\u2019y est pas (fermage, amortissements, assurances\u2026) est derri\u00e8re son petit \u00ab\u202fi\u202f\u00bb." },
+  ] },
   { v:'6.18', items:[
     { emoji: '\u{1F9F1}', titre: "\u00c9conomie\u202f: le mur d\u2019avertissements devient une carte et des boutons",
       desc: "L\u2019onglet \u00c9conomie pouvait afficher <b>douze pav\u00e9s color\u00e9s</b> les uns sous les autres avant le premier chiffre \u2014 et tous de la m\u00eame taille, si bien que \u00ab\u202fla main-d\u2019\u0153uvre compte pour z\u00e9ro\u202f\u00bb pesait autant que \u00ab\u202fle chiffre montera m\u00e9caniquement\u202f\u00bb. \u00c0 la place\u202f: une <b>carte de fiabilit\u00e9</b> qui dit combien de postes de d\u00e9pense sortent \u00e0 z\u00e9ro, lesquels, et pose <b>un bouton par poste</b> pour aller renseigner ce qui manque. Le reste \u2014 les remarques sur la lecture des chiffres \u2014 se replie derri\u00e8re une puce\u202f: touchez-la pour tout lire. <b>Rien n\u2019est supprim\u00e9\u202f</b>: tout est toujours calcul\u00e9 et toujours lisible." },
@@ -1790,6 +1794,7 @@ var MV_AIDE = {
       ['Simuler compte sur la fenêtre du TRAVAIL', ", pas sur le calendrier d’aujourd’hui. Quarante vendangeurs engagés du 26 août au 4 septembre comptent dès maintenant pour l’ordre de passage et la répartition de la vendange — même si vous êtes seul dans les rangs ce matin. Le jour du travail, personne n’est en congé et tous les contrats courent."],
       ['Un contrat de groupe compte pour son effectif', " : une fiche « équipe de vendange » à 40 vaut 40 personnes, pas une ligne. Inutile de créer quarante fiches. L’écran dit toujours sur quelles dates il a compté, et affiche l’écart avec la présence du jour."],
       ['Le manque d’effectif se lit sur la semaine du pic', ", contre ce qui est prévu au planning <b>cette semaine-là</b> — pas contre la présence d’aujourd’hui. Un pic qui tombe dans onze mois ne se compare pas à qui est là ce matin."],
+      ['Le total de l’Exercice n’est pas un compte de résultat', ": Ma Vigne connaît ce qui passe par elle — heures payées, carburant, achats d’intrants. Ni le fermage, ni les amortissements, ni les assurances, ni vos cotisations d’exploitant. Ce total sert à <b>piloter vos charges d’un bilan à l’autre</b>, pas à remplacer votre comptable."],
       ['La carte de fiabilité d’Économie', ": elle dit combien de <b>postes de dépense sortent à zéro</b> faute d’une donnée — un taux horaire, le prix du GNR, une dose. Ce n’est pas « un peu bas » : c’est zéro, et le budget affiché n’est qu’un plancher. Chaque poste manquant porte son bouton. La puce « N remarques » en dessous ouvre tout ce qui n’empêche pas un calcul mais change sa lecture."],
       ['Économie', "compare un budget de barème à ce qui est engagé, sur la <b>période consultée</b> — le coût d’un bilan entier se lit dans sa sous-vue <b>Exercice</b>. Quand l’écart est grand, c’est le barème qu’on corrige dans Réglages, jamais le taux horaire."],
       ['L’écart de cadence cherche sa source dans un ordre', ", et dit toujours laquelle il a trouvée. D’abord <b>la période en cours</b>, dès 40 % de barème réalisé. Sinon <b>la même période de la campagne précédente</b>, si elle est archivée — la ligne porte alors un <b>↩</b> et nomme la campagne : c’est une hypothèse de projection, pas une mesure du moment. Sinon rien, et l’écran l’écrit plutôt que d’afficher un chiffre inventé."],
@@ -1977,6 +1982,26 @@ export const MV_INFO = {
     '<b>Prix du GNR</b> — il se déduit tout seul des <b>appoints de cuve</b> saisis dans Tracteur \u203a Entretien, en moyenne pondérée. Aucun appoint saisi, aucun prix : le carburant reste à zéro.',
     '<b>Doses et prix des produits</b> — le coût phyto se calcule à partir d\u2019une dose structurée à la saisie du traitement, et d\u2019un prix unitaire dans La Réserve. Il manque l\u2019un des deux, le traitement compte pour zéro.',
     'Tant qu\u2019un de ces postes manque, lisez le budget affiché comme un <b>plancher</b>, jamais comme un total.'
+  ] },
+
+  // ⚠️ FICHE VIVANTE : remplie par _pexEntete (pilotage.js) a chaque rendu.
+  'pil.exo.remarques': { t: 'Les remarques du moment', p: [
+    'Aucune remarque à afficher pour l\u2019instant. Ouvrez l\u2019onglet Économie \u203a Exercice pour que cette fiche se remplisse.'
+  ] },
+
+  'pil.exo.fiabilite': { t: 'Fiabilité de l\u2019exercice', p: [
+    'Une donnée manquante ne rend pas le total <b>approximatif</b> : elle met un poste entier à <b>zéro</b>. Un exercice auquel il manque les salaires n\u2019est pas « un peu bas », il est faux.',
+    '<b>Le planning</b> doit avoir été ouvert au moins une fois dans cette session : c\u2019est lui qui porte les heures payées. Sans lui, les salaires — le premier poste — comptent pour zéro.',
+    '<b>Taux horaire</b> — dans la fiche de chaque salarié, Réglages \u203a Équipe. C\u2019est le taux <b>chargé</b> : coût employeur, cotisations patronales comprises. Aucun coefficient n\u2019est ajouté par-dessus.',
+    '<b>Prix du GNR</b> — déduit des appoints de cuve saisis dans Tracteur \u203a Entretien, en moyenne pondérée.',
+    '<b>Prix HT des achats</b> — il se complète sur la ligne d\u2019achat, dans La Réserve. Sans lui, l\u2019intrant entre en stock sans entrer dans le total.'
+  ] },
+
+  'pil.exo.garde': { t: 'Ce que ce total ne contient pas', p: [
+    'Ma Vigne connaît <b>ce qui passe par elle</b> : les heures payées, le carburant, les achats d\u2019intrants. C\u2019est déjà l\u2019essentiel de vos charges d\u2019exploitation, et c\u2019est ce qui se pilote au fil de l\u2019année.',
+    'Elle ne connaît <b>ni le fermage, ni les amortissements, ni les assurances, ni vos cotisations d\u2019exploitant, ni l\u2019embouteillage, ni les frais généraux</b> — elle ne les voit jamais passer.',
+    'Ce chiffre sert donc à <b>piloter vos charges d\u2019un bilan à l\u2019autre</b> : voir si elles montent, où, et pourquoi. Il ne remplace pas votre comptable, et il ne se compare pas ligne à ligne à son bilan.',
+    'Le <b>produit consommé en traitements</b> n\u2019y est pas non plus : c\u2019est une sortie de stock, et l\u2019achat a déjà été compté le jour de la facture. Le compter deux fois gonflerait le total.'
   ] },
 
   'pil.equipe': { t: 'Équipe', p: [

@@ -1,4 +1,24 @@
-// MA VIGNE — Service Worker v6.71
+// MA VIGNE — Service Worker v6.72
+// v6.72 (15/08/2026) — L’EXERCICE, ET UNE CARTE POUR DEUX ECRANS.
+//   L’onglet Économie › Exercice empilait SEPT paves colores avant le premier
+//   chiffre, tous au meme poids : « le planning n’est pas charge, les salaires
+//   comptent pour zero » pesait autant que « l’ecart entre les deux, c’est
+//   votre stock ». Meme mal que la Synthese, meme remede.
+//   ★★ _pecFiabCard — UN SEUL RENDU POUR LES DEUX ECRANS. La carte ecrite hier
+//     pour la Synthese repondait deja a la question de l’Exercice. La
+//     re-implementer, c’etait garantir qu’elles divergeraient — la faute que ce
+//     chantier passe son temps a corriger. Elle prend ses cles en argument, donc
+//     chaque ecran garde SA fiche et SES remarques.
+//   · _pexZeros / _pexRemarques : la liste de l’Exercice n’est pas celle de la
+//     Synthese. Ici on chiffre un bilan entier — les achats d’intrants comptent,
+//     et le planning doit avoir ete ouvert une fois pour que les heures existent.
+//   ★ LE GARDE COMPTABLE RAMENE A SON CADRE. « Ce total n’est pas un compte de
+//     resultat » change la lecture du chiffre : sans cette phrase on le compare
+//     au bilan et on conclut de travers. Elle RESTE. L’inventaire de ce qui n’y
+//     est pas — fermage, amortissements, assurances, cotisations d’exploitant,
+//     embouteillage, frais generaux — se lit une fois : il passe dans la fiche.
+//   · Mesure sur le meme etat (trois postes manquants) : en tete d’ecran,
+//     1 828 -> 341 caracteres, soit 81 % de moins. Rien n’est supprime.
 // v6.71 (15/08/2026) — LE MUR D’ALERTES D’ECONOMIE.
 //   « Ce qu’il faut regarder » empilait jusqu’a DOUZE paves colores, de 100 a
 //   350 caracteres chacun, tous au meme poids visuel. On ouvrait Economie et on
@@ -1561,7 +1581,7 @@
 // v2.22 — Fix profils vides : guard vide dans loadData() pour MEMBRES/SAISONS/TACHES
 // v2.17 — Onboarding intégré + tenantId · v2.06 — Firebase Auth · v2.00–v2.05 — divers
 const DEBUG = self.location.hostname === 'localhost' || self.location.hostname === '127.0.0.1';
-const CACHE_NAME   = 'mavigne-v6.71';
+const CACHE_NAME   = 'mavigne-v6.72';
 const TENANT_CACHE = 'mavigne-tenant';   // Cache persistant — préservé à chaque mise à jour SW
 const SYNC_TAG     = 'mavigne-sync';
 
@@ -1577,7 +1597,7 @@ const CDN_URLS = [
 ];
 
 self.addEventListener('install', event => {
-  if(DEBUG) console.log('[SW] Ma Vigne v6.71 installé');
+  if(DEBUG) console.log('[SW] Ma Vigne v6.72 installé');
   event.waitUntil(
     caches.open(CACHE_NAME).then(async cache => {
       // ── Cœur applicatif : STRICT (mise à jour ATOMIQUE) ──
@@ -1593,7 +1613,7 @@ self.addEventListener('install', event => {
 });
 
 self.addEventListener('activate', event => {
-  if(DEBUG) console.log('[SW] Ma Vigne v6.71 activé');
+  if(DEBUG) console.log('[SW] Ma Vigne v6.72 activé');
   event.waitUntil(
     caches.keys().then(keys =>
       Promise.all(
