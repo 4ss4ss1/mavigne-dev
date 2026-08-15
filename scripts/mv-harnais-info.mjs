@@ -291,6 +291,46 @@ const PARTIES = [
 for (const [nom, motif] of PARTIES)
   t(nom + ' a quitte l\'ecran', !PILNU.includes(motif));
 
+/* ══ 5 decies. LES QUATRE DERNIERS ONGLETS ══
+   Simuler, Conformite, Cave, La campagne. « Comment lire » est, par definition,
+   ce qu'on lit une fois — c'etait affiche en permanence entre chaque titre
+   d'etape et son graphe. */
+t('les cinq etapes du simulateur portent leur fiche',
+  ['frise','semaine','cout','plan','modele'].every(k => PILNU.includes("_mvInfoBtn('pil.sim." + k + "')")));
+t('plus aucun « Comment lire » a l\'ecran', !PILNU.includes('Comment lire'));
+t('… et les explications sont dans les fiches',
+  txt.includes('ligne par travail') && txt.includes('une fois l\u2019\u00e9ch\u00e9ance tranch\u00e9e'.replace(/\\u2019/g,'\u2019')));
+/* La legende de couleurs RESTE : on ne la lit pas, on la consulte du regard. */
+t('la legende des couleurs reste a l\'ecran',
+  /rf-k[\s\S]{0,200}Vert[\s\S]{0,200}Hachur[\s\S]{0,200}Rouge/.test(PILNU));
+/* ⚠️ ON MESURE, ON NE CHERCHE PAS UNE PHRASE. Un `!includes` sur du texte
+   echappe est vrai des qu'un niveau d'echappement diverge — donc toujours vert.
+   La longueur du bloc, elle, ne ment pas. */
+const RFLIM = (PILNU.match(/rf-lim">[\s\S]{0,1200}?<\/div>'/) || [''])[0];
+t('« ce que le modele suppose » ne garde que son fait utile',
+  RFLIM.length > 0 && RFLIM.length < 400, RFLIM.length + ' caracteres (400 max)');
+
+t('les trois cartes de Conformite portent leur fiche',
+  ['cuivre','ift','dre'].every(k => PILNU.includes("_mvInfoBtn('pil.cfm." + k + "')")));
+t('le fait qui protege reste a l\'ecran (delai de rentree)',
+  /Ne pas p\\u00e9n\\u00e9trer la parcelle/.test(PILNU));
+t('le detail CLP est parti dans la fiche',
+  !PILNU.includes('phrases de risque CLP') && txt.includes('phrases de risque CLP'));
+
+t('_pcavCard accepte une cle de fiche (7e argument)',
+  /function _pcavCard\(ico,dot,titre,stat,body,mini,infoCle\)/.test(PILNU));
+t('… et la pose dans l\'en-tete, pas dans le pied',
+  /pcav-t">'\+_pilEsc\(titre\)\+'<\/span>'\s*\+\(infoCle/.test(PILNU));
+t('les quatre cartes de la Cave portent leur fiche',
+  ['anges','malo','ouillage','rdt'].every(k => PILNU.includes("'pil.cav." + k + "'")));
+const ANGES = (PILNU.match(/'[^']{0,400}',\s*'pil\.cav\.anges'\)/) || [''])[0];
+t('la note de la part des anges est ramenee a une ligne',
+  ANGES.length > 0 && ANGES.length < 130, ANGES.length + ' caracteres (130 max)');
+t('… et la mesure est dans la fiche', /exactement ce qui s.{0,3}est/.test(txt));
+
+t('« une moyenne n\'est pas un pic » garde sa fiche',
+  PILNU.includes("_mvInfoBtn('pil.avc.temps')"));
+
 /* ══ 6. LES DEUX DETTES DE §34i SOLDEES ══ */
 t('_PIL_SEM ne se declare plus dans le module', !/var _PIL_SEM\s*=/.test(PILNU));
 t('_PIL_SEM est exporte par utils.js', /export const _PIL_SEM = \{/.test(UNU));

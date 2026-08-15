@@ -132,6 +132,27 @@ t('#pil-body-<id> intact', /pil-body-'\+id/.test(P));
 t('les 27 appels a _pilTile tiennent toujours',
   (PIL.match(/_pilTile\(/g) || []).length >= 27);
 
+/* ══ 5 bis. LE CHROME — CE QU'ON TRAVERSE AVANT LE PREMIER CHIFFRE ══
+   Mesure au navigateur sur le squelette reel : 728 px sur telephone, pour un
+   ecran de 844. Presque tout l'ecran avant d'atteindre une donnee. */
+const SQ = corps('_pilSkeleton');
+t('le bandeau de titre a disparu', !/pil-tabhead/.test(SQ) && !/pil-h2/.test(P));
+t('le sous-titre de l\'onglet reste, en une ligne', /pil-souslig/.test(SQ) && /_pilTabLabel\(tab\)/.test(SQ));
+t('« Choisir les indicateurs » garde son id (le gestionnaire le retrouve)',
+  /id="pil-gear"/.test(SQ) && /getElementById\('pil-gear'\)/.test(P));
+t('la sous-ligne est stylee', /\.pil-souslig\{max-width:\d+px/.test(P)
+  && /\.pil-souslig>span\{flex:1/.test(P));
+/* Les quatre photos ne se remplacent pas par un bouton : elles doivent rester
+   visibles d'un coup d'oeil. En frise, pas repliees. */
+t('les photos passent en frise sous 700 px', /max-width:700px[\s\S]{0,400}\.pil-photos\{display:flex/.test(P));
+t('… et gardent leurs quatre cartes', /_pilPhotosHtml/.test(SQ));
+t('la fleche « voir le detail » seule disparait en frise', /\.pil-photo \.go\{display:none\}/.test(P));
+t('la largeur des photos est bornee en frise', /\.pil-photo\{flex:0 0 auto;width:auto;min-width:\d+px;max-width:\d+px/.test(P));
+t('le masthead se compacte sur telephone', /max-width:700px[\s\S]{0,900}\.pil-dom\{font-size:var\(--pt-lg/.test(P));
+t('l\'instruction du fil d\'Ariane quitte la barre collante sur telephone',
+  /max-width:700px[\s\S]{0,700}\.pil-cr-note\{display:none\}/.test(P));
+t('… mais reste sur grand ecran', /pil-cr-note">l\\u2019ann\\u00e9e enti\\u00e8re/.test(P));
+
 /* ══════════════════════════════════════════════════════════════════════════
    6. LA MIGRATION, EXECUTEE — pas relue.
    Le point qui decide si le lot est visible chez MG et Chapelle ne se prouve

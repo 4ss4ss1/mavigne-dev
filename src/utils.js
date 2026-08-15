@@ -23,7 +23,7 @@ export const GT_ADMIN_EMAIL = 'ngdevpro@gmail.com';
 // WHATS_NEW   : tableau vide = modal desactive pour cette version.
 // Format item : { emoji:'📅', titre:'Titre court', desc:'Phrase utilisateur.' }
 // Regle : seulement les changements visibles par les utilisateurs.
-export const APP_VERSION = '6.21';
+export const APP_VERSION = '6.23';
 // ════ Journal des nouveautés (récap cumulatif) ════
 // Une entrée par version, la PLUS RÉCENTE EN HAUT : { v:'5.10', items:[ {emoji,titre,desc}, … ] }
 // À chaque release visible → AJOUTER un bloc en tête (ne pas remplacer). items:[] = release technique (rien à afficher).
@@ -354,6 +354,20 @@ window._mvGraphRepeindre = function(){
 };
 
 export const WHATS_NEW = [
+  { v:'6.23', items:[
+    { emoji: '\u{1F4F1}', titre: "Le Pilotage tient enfin sur un t\u00e9l\u00e9phone",
+      desc: "Sur t\u00e9l\u00e9phone, il fallait descendre de <b>728 pixels</b> \u2014 presque un \u00e9cran entier \u2014 avant d\u2019atteindre le premier chiffre. Cinq bandeaux s\u2019empilaient\u202f: le nom du domaine, le fil d\u2019Ariane, les onglets, les quatre chiffres du haut, puis le titre de l\u2019onglet. C\u2019est tomb\u00e9 \u00e0 <b>442 pixels</b>. Le <b>titre de l\u2019onglet</b> a disparu\u202f: la barre d\u2019onglets le disait d\u00e9j\u00e0. Les <b>quatre chiffres du haut</b> se rangent en une ligne qui d\u00e9file, au lieu de deux rang\u00e9es \u2014 ils restent tous les quatre, et tous visibles. Le <b>nom du domaine</b> prend moins de place\u202f: on sait chez qui on est." },
+    { emoji: '\u{2699}', titre: "\u00ab\u202fChoisir les indicateurs\u202f\u00bb devient une roue crant\u00e9e",
+      desc: "Le bouton occupait une ligne enti\u00e8re \u00e0 lui seul. Il est maintenant \u00e0 droite du sous-titre de l\u2019onglet, sous forme de <b>roue crant\u00e9e</b>. Le panneau qu\u2019il ouvre n\u2019a pas boug\u00e9." },
+  ] },
+  { v:'6.22', items:[
+    { emoji: '\u{1F39B}', titre: "Le simulateur\u202f: les notices \u00ab\u202fcomment lire\u202f\u00bb passent derri\u00e8re le \u00ab\u202fi\u202f\u00bb",
+      desc: "Chaque \u00e9tape du simulateur portait un pav\u00e9 \u00ab\u202fComment lire\u202f\u00bb entre son titre et son graphique \u2014 six au total. Utile la premi\u00e8re fois\u202f; ensuite on le traversait pour atteindre le dessin. Ils sont maintenant derri\u00e8re le petit \u00ab\u202fi\u202f\u00bb du titre d\u2019\u00e9tape. <b>La l\u00e9gende des couleurs reste affich\u00e9e</b>\u202f: celle-l\u00e0, on ne la lit pas, on la consulte du regard \u00e0 chaque retour sur le graphe." },
+    { emoji: '\u{1F6E1}', titre: "Conformit\u00e9 et Cave suivent la m\u00eame r\u00e8gle",
+      desc: "Cuivre sur sept ans, passages et IFT, d\u00e9lai de rentr\u00e9e, part des anges, soutirage et malo, ouillages, rendements\u202f: chaque carte garde <b>une ligne</b> sous son titre, et son mode de calcul derri\u00e8re le \u00ab\u202fi\u202f\u00bb. <b>Ce qui vous prot\u00e8ge reste affich\u00e9\u202f</b>: \u00ab\u202fne pas p\u00e9n\u00e9trer la parcelle sans \u00e9quipement avant l\u2019heure indiqu\u00e9e\u202f\u00bb ne se replie pas." },
+    { emoji: '\u{2705}', titre: "Les huit onglets du Pilotage sont align\u00e9s",
+      desc: "C\u2019est la fin de ce chantier. Partout dans le Pilotage\u202f: le <b>chiffre</b> d\u2019abord, une <b>ligne</b> qui dit sur quoi il porte, le <b>d\u00e9tail du calcul</b> derri\u00e8re le \u00ab\u202fi\u202f\u00bb, et un <b>bouton</b> quand il y a quelque chose \u00e0 faire. Rien n\u2019a \u00e9t\u00e9 supprim\u00e9 en chemin\u202f: <b>34 fiches</b> conservent l\u2019int\u00e9gralit\u00e9 des explications." },
+  ] },
   { v:'6.21', items:[
     { emoji: '\u{1F4CE}', titre: "\u00c9conomie\u202f: les derniers pav\u00e9s d\u2019explication passent derri\u00e8re le \u00ab\u202fi\u202f\u00bb",
       desc: "Chaque carte d\u2019\u00c9conomie portait sous son titre un paragraphe qui expliquait <b>comment</b> son chiffre est fabriqu\u00e9\u202f: l\u2019hypoth\u00e8se de conversion du prix de revient, le d\u00e9tail des colonnes du tableau des parcelles, la diff\u00e9rence entre heures pay\u00e9es et heures au champ\u2026 Utile la premi\u00e8re fois, relu cent fois ensuite. Ces paragraphes sont maintenant derri\u00e8re le petit \u00ab\u202fi\u202f\u00bb de chaque carte. Sous le titre, il ne reste plus qu\u2019une ligne\u202f: <b>sur quoi porte le chiffre</b>. L\u2019onglet \u00c9conomie est d\u00e9sormais enti\u00e8rement pass\u00e9 \u00e0 cette r\u00e8gle." },
@@ -1810,7 +1824,8 @@ var MV_AIDE = {
       ['Conformité', "suit le cuivre sur sept ans, le nombre de passages et les délais de rentrée en cours."],
       ['Cave', "dit ce qui presse aujourd’hui, où en est le millésime, et ce que coûte le parc à fûts."],
       ['Archives', "empile les campagnes sur un même axe, du 1er août au 31 juillet : le décalage d’une année sur l’autre se lit d’un coup d’œil."],
-      ['Conçu pour le grand écran.', "Sur téléphone il fonctionne, mais tout ne tient pas de front."]
+      ['Le « i » est partout, maintenant', ": les huit onglets suivent la même règle — le chiffre, une ligne qui dit sur quoi il porte, le détail du calcul derrière le « i ». Dans <b>Simuler</b>, chaque étape a le sien : il remplace les pavés « comment lire » qui séparaient le titre du graphique. La <b>légende des couleurs</b>, elle, reste affichée : on ne la lit pas, on la consulte."],
+      ['Il se lit aussi sur téléphone', ": les quatre chiffres du haut se rangent en une ligne qui défile, et le titre de l’onglet ne prend plus de place — la barre d’onglets le dit déjà. Le grand écran reste plus confortable pour les tableaux et les graphiques, mais vous n’avez plus à faire défiler un écran entier avant d’atteindre un chiffre."]
     ]
   },
   reglages: {
@@ -1994,6 +2009,101 @@ export const MV_INFO = {
   ] },
 
   // ⚠️ FICHE VIVANTE : remplie par _pexEntete (pilotage.js) a chaque rendu.
+  // ══ SIMULER ══
+  'pil.sim.frise': { t: 'Quand chaque travail peut se faire', p: [
+    'Une <b>ligne par travail</b>, une <b>barre par fenêtre</b> : du premier jour où il peut se faire au dernier jour où il devrait être fini.',
+    'C\u2019est ce qui explique qu\u2019on ne puisse pas <b>prendre de l\u2019avance</b> : l\u2019effeuillage ne se fait pas en avril, même avec dix personnes disponibles. Le renfort ne sert que s\u2019il tombe <b>dans la fenêtre</b>.',
+    'Les fenêtres viennent des <b>dates que vous avez saisies</b> dans Réglages \u203a Campagne. Une fenêtre absente prend la fenêtre par défaut, et l\u2019écran le dit plutôt que d\u2019écraser tout le travail sur un seul jour.'
+  ] },
+
+  'pil.sim.fenetres': { t: 'Le tableau des fenêtres', p: [
+    '<b>Il faudrait</b> = le monde qu\u2019il faudrait en continu sur cette fenêtre pour ce travail <b>seul</b>.',
+    '<b>Déjà là</b> = l\u2019effectif déjà sous contrat sur cette fenêtre, <b>vendangeurs et saisonniers compris</b> — mais <b>partagé avec les autres travaux ouverts</b> en même temps.',
+    'C\u2019est pourquoi la dernière colonne <b>n\u2019est pas la différence des deux</b> : elle est <b>vérifiée en simulant</b>, par dichotomie sur la vraie simulation.',
+    'Un renfort posé <b>en dehors</b> de la fenêtre ne sert pas ce travail : il est payé sans travail ouvert.'
+  ] },
+
+  'pil.sim.semaine': { t: 'Semaine par semaine', p: [
+    '<b>Vert</b> : les gens qui travaillent vraiment cette semaine-là. <b>Hachuré</b> : les gens <b>payés sans travail ouvert</b> — présents, mais aucune fenêtre de tâche n\u2019est ouverte pour eux.',
+    '<b>Rouge</b> : le travail <b>en retard</b>. Ce n\u2019est pas ce qui reste à faire, c\u2019est ce qui <b>aurait dû être fini</b>. Il n\u2019apparaît qu\u2019après la date de fin d\u2019une tâche, et chaque semaine de plus la rend plus longue — sauf pour un travail <b>sans rattrapage</b> comme la vendange, où ce qui reste est <b>perdu</b>, pas reporté.',
+    'La <b>ligne noire</b> est l\u2019équipe déjà sous contrat, <b>vendangeurs et saisonniers compris</b>. C\u2019est la même que la frise des 52 semaines dans « L\u2019année ». Le renfort que vous posez s\u2019<b>ajoute</b> à cette ligne — il ne la remplace pas.',
+    'L\u2019écart entre la ligne noire et le vert compte aussi les <b>congés, absences et fermetures déjà saisis au Planning</b> : ces heures sont payées, mais personne n\u2019est dans les rangs.',
+    'Quand la campagne a commencé, le graphique démarre <b>aujourd\u2019hui</b> : la zone grisée à gauche est passée, et chaque travail ne compte plus que pour ce qu\u2019il en reste.'
+  ] },
+
+  'pil.sim.cout': { t: 'Ce que ce choix coûte', p: [
+    'Le coût <b>ne se lit qu\u2019une fois l\u2019échéance tranchée</b>. Les stratégies qui tiennent les fenêtres sont en haut du tableau ; celles qui débordent sont sous le trait rouge.',
+    'Ces dernières sont souvent <b>les moins chères sur le papier</b> — elles ne répondent simplement pas à la même question. Comparer leur prix à celui d\u2019une stratégie qui tient, c\u2019est comparer deux choses différentes.',
+    'La barre ne montre que <b>ce que vous décidez</b> : le socle des permanents est le même dans tous les scénarios, il ne peut pas les départager.'
+  ] },
+
+  'pil.sim.plan': { t: 'Le plan de départ', p: [
+    'Le même graphique, mais sur la campagne <b>entière</b> et avec la charge <b>théorique</b> : ce que le barème demandait au départ, sans rien déduire de ce qui est déjà fait.',
+    'C\u2019est un <b>repère de dimensionnement</b> — utile en début de campagne, et pour préparer la suivante.',
+    '<b>La décision, elle, se prend à l\u2019étape 2</b>, sur ce qu\u2019il reste réellement à faire.'
+  ] },
+
+  'pil.sim.modele': { t: 'Ce que le modèle suppose', p: [
+    'Le travail <b>finit par se faire</b>, même après la campagne : une stratégie qui déborde mord sur la suivante, et <b>ce report n\u2019est pas chiffré</b>.',
+    '<b>Sauf les travaux sans rattrapage</b> — la vendange. Ce qui n\u2019est pas fait dans la fenêtre est <b>perdu</b> : les heures perdues sont comptées, la <b>valeur de la récolte non rentrée ne l\u2019est pas</b>, volontairement. Mettre un prix sur une récolte perdue supposerait un cours et un rendement que Ma Vigne ne connaît pas.',
+    'Les <b>heures induites par le retard</b>, elles, sont comptées : chaque semaine hors fenêtre rend le travail plus long.',
+    'Les fenêtres viennent des <b>dates que vous avez saisies</b> ; ce qui est déjà fait vient de l\u2019<b>avancement réel des parcelles</b>. Le hachuré ne compte que le travail de vigne : le tracteur est déduit, la cave et l\u2019entretien ne le sont pas encore.',
+    'Ces réglages se modifient dans <b>Outils \u203a Paramétrage</b>. <b>Rien n\u2019est enregistré ici</b> : une simulation ne change aucune donnée du domaine.'
+  ] },
+
+  // ══ CONFORMITÉ ══
+  'pil.cfm.cuivre': { t: 'Le cuivre sur sept ans', p: [
+    'Le cumul porte sur le <b>cuivre métal</b> — pas sur le poids de bouillie —, sur <b>sept années glissantes</b>, face au plafond européen de <b>28 kg/ha</b> en bio.',
+    'Glissant veut dire que le compteur <b>descend</b> quand une vieille année sort de la fenêtre. Une campagne chargée n\u2019est donc pas définitive.',
+    '\u26a0\ufe0f <b>Indicatif.</b> Votre organisme certificateur peut appliquer une règle plus stricte, ou compter autrement. Ce chiffre vous alerte ; c\u2019est lui qui fait foi.'
+  ] },
+
+  'pil.cfm.ift': { t: 'Passages et IFT', p: [
+    'Un <b>passage</b> compte pour une intervention, quel que soit le nombre de produits mélangés dans la cuve.',
+    'L\u2019<b>IFT réel</b> — dose appliquée divisée par dose homologuée — demande une <b>dose structurée</b> à la saisie du traitement. Sans elle, le compteur reste sur les passages seuls.',
+    'La <b>référence régionale</b> à laquelle vos passages sont comparés est réglable : ce n\u2019est pas une norme, c\u2019est un repère de comparaison entre domaines voisins.'
+  ] },
+
+  'pil.cfm.dre': { t: 'Le délai de rentrée', p: [
+    'Le délai est <b>dérivé des phrases de risque CLP</b> du produit : <b>6 h</b> par défaut, <b>24 h</b> ou <b>48 h</b> selon la mention portée par l\u2019étiquette.',
+    'Il court à partir de la <b>fin de l\u2019application</b>, pas du début du traitement.',
+    'L\u2019heure affichée est celle à partir de laquelle on peut revenir <b>sans équipement de protection</b>. Avant elle, l\u2019accès reste possible équipé — c\u2019est la réglementation qui le dit, pas le logiciel.'
+  ] },
+
+  // ══ CAVE ══
+  'pil.cav.anges': { t: 'La part des anges', p: [
+    'Ce que vous remettez en <b>ouillage</b> est exactement ce qui s\u2019est <b>évaporé</b> : c\u2019est une <b>mesure</b>, pas une valeur théorique tirée d\u2019un abaque.',
+    'Chaque millésime a sa ligne — <b>on n\u2019ouille pas les fûts d\u2019une année avec le vin d\u2019une autre</b>.',
+    '\u26a0\ufe0f Un <b>soutirage</b> retire aussi du volume sans être une évaporation. Sur un mois où vous avez soutiré, le chiffre est donc surévalué.',
+    'Le calcul demande le <b>volume total saisi à chaque ouillage</b>. Sans lui, cet écran reste vide plutôt que d\u2019inventer une moyenne.'
+  ] },
+
+  'pil.cav.malo': { t: 'Soutirage et malo', p: [
+    'Le soutirage se déclenche à la <b>fin de la malo</b>, pas à une date du calendrier : cet écran ne parle donc <b>jamais de retard</b>.',
+    'La projection vient des valeurs d\u2019<b>acide malique mesurées</b> sur chaque cuvée, jamais d\u2019une durée moyenne.',
+    '<b>Deux pentes</b> sont calculées : la moyenne sur trois analyses <b>projette la fin</b>, les deux dernières <b>détectent un blocage</b>. Une moyenne seule lisserait le décrochage et ne le verrait pas.',
+    'Une remontée de malique entre deux analyses signale une <b>erreur de saisie</b> : le malique ne se recrée pas.'
+  ] },
+
+  'pil.cav.ouillage': { t: 'Les ouillages à faire', p: [
+    'Chaque millésime a son <b>propre délai d\u2019alerte</b>, réglable dans les réglages du Chai : un vin jeune se rattrape plus souvent qu\u2019un vin d\u2019un an.',
+    'Le <b>volume à compléter</b> est déduit des ouillages passés de la cuvée — pas d\u2019une moyenne théorique par fût.',
+    'Un fût qui n\u2019a jamais été ouillé n\u2019a pas d\u2019historique : l\u2019écran le signale plutôt que de lui prêter le comportement des autres.'
+  ] },
+
+  'pil.cav.rdt': { t: 'Rendement face au plafond', p: [
+    'Le <b>trait vertical</b> est le plafond que vous avez renseigné <b>par parcelle</b>, depuis Le millésime. Ce n\u2019est pas une valeur du logiciel.',
+    'L\u2019échelle va jusqu\u2019à <b>115 % du plafond</b> : c\u2019est ce qui permet à un dépassement de se voir déborder, au lieu d\u2019être écrasé contre le bord.',
+    'Les parcelles <b>sans plafond renseigné</b> n\u2019entrent pas dans la comparaison — elles sont listées à part plutôt que comptées comme conformes.'
+  ] },
+
+  // ══ LA CAMPAGNE ══
+  'pil.avc.temps': { t: 'Où va le temps de l\u2019équipe', p: [
+    'La répartition compte la <b>présence au planning</b>, découpée entre vigne, tracteur et le reste. Elle ne vient pas du journal : le journal dit <b>qui</b> a travaillé, jamais combien d\u2019heures.',
+    '<b>Une moyenne n\u2019est pas un pic.</b> Cet écran donne une moyenne sur la campagne ; la <b>frise des 52 semaines</b>, dans « L\u2019année », donne la semaine la plus chargée — et c\u2019est elle qui décide d\u2019un recrutement.',
+    'Le poste « Autres » se vide à mesure que vous renseignez un <b>barème h/ha par activité</b> dans Réglages \u203a Tracteur : tant qu\u2019il est vide, le tracteur ne peut pas être détaché du reste.'
+  ] },
+
   'pil.eco.revient': { t: 'Le prix de revient', p: [
     'Ce sont les <b>coûts de culture</b> : ce qu\u2019il a fallu pour amener le raisin jusqu\u2019au bout du rang. <b>Ni vinification, ni sèche, ni foncier, ni amortissement</b> — ces postes-là ne passent pas par Ma Vigne.',
     'Le coût <b>à la bouteille</b> repose sur une <b>hypothèse de conversion</b> : un nombre de kilos de raisin par col. C\u2019est un réglage, pas une mesure — il se change dans <b>Outils \u203a Paramétrage</b>, avec la journée de référence.',

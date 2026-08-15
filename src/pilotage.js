@@ -1917,7 +1917,7 @@ function _pilPanelTemps(d){
   }
   // ★ Une moyenne n'est pas un pic : le dire ICI, a cote du chiffre moyen, est le
   //   seul endroit ou quelqu'un risque de le confondre avec un besoin reel.
-  _footR+=' <b>Une moyenne n\u2019est pas un pic</b> \u2014 la frise des 52 semaines, dans <b>L\u2019ann\u00e9e</b>, donne la semaine la plus charg\u00e9e.';
+  _footR+=' <b>Une moyenne n\u2019est pas un pic.</b>'+(typeof _mvInfoBtn==='function'?(' '+_mvInfoBtn('pil.avc.temps')):'')+'';
   var repartBlock='<div style="border:1px solid var(--gris);border-radius:11px;padding:12px 14px;margin-bottom:12px;background:#fff">'
     +'<div style="font-size:var(--pt-micro,11px);font-weight:700;text-transform:uppercase;letter-spacing:.6px;color:var(--texte-doux)">O\u00f9 va le temps de l\u2019\u00e9quipe</div>'
     +'<div style="display:flex;align-items:baseline;gap:7px;margin:8px 0 3px"><span style="font-family:\'Cormorant Garamond\',serif;font-size:var(--pt-xl,27px);font-weight:700;color:var(--cave)">'+_pilNum(_prez)+' h</span><span style="font-size:var(--pt-txt,12.5px);color:var(--texte-doux)">pr\u00e9sence \u00b7 '+_etpF(_prez)+' ETP \u00e9quipe</span></div>'
@@ -3738,11 +3738,8 @@ function _rfBesoinHtml(ctx){
       +'<td class="r">'+_ecoH1(x.dispo)+' pers.</td>'
       +'<td class="r">'+rr+'</td></tr>';
   }).join('')+'</table></div>'
-   +'<div class="rf-how" style="margin-top:8px"><b>Comment lire ce tableau.</b> '
-   +'<b>Il faudrait</b> = le monde qu\u2019il faudrait en continu sur cette fen\u00eatre pour ce travail SEUL. '
-   +'<b>D\u00e9j\u00e0 l\u00e0</b> = l\u2019effectif '+_pilEsc(ctx.baseLbl||'')+' sur cette fen\u00eatre, <b>vendangeurs et saisonniers d\u00e9j\u00e0 embauch\u00e9s compris</b> \u2014 mais partag\u00e9 avec les autres travaux ouverts en m\u00eame temps, '
-   +'c\u2019est pourquoi la derni\u00e8re colonne n\u2019est pas la simple diff\u00e9rence des deux : elle est <b>v\u00e9rifi\u00e9e en simulant</b>. '
-   +'Un renfort pos\u00e9 en dehors de la fen\u00eatre ne sert pas ce travail : il est pay\u00e9 sans travail ouvert.</div>';
+   +'<div class="rf-how" style="margin-top:8px">La derni\u00e8re colonne est <b>v\u00e9rifi\u00e9e en simulant</b>, pas d\u00e9duite'
+   +(typeof _mvInfoBtn==='function'?(' '+_mvInfoBtn('pil.sim.fenetres')):'')+'</div>';
   return h;
 }
 
@@ -3904,25 +3901,29 @@ function _rfBody(d){
   var H='<div class="pil-cockpit-card" style="margin-bottom:12px"><div class="pil-cks">'+kpi+'</div></div>'
     +'<div class="rf-how">'+perim+'</div>';
 
-  H+='<div class="rf-step"><div class="rf-n">1</div><div class="rf-t">Quand chaque travail peut se faire</div></div>'
-    +'<div class="rf-how"><b>Comment lire.</b> Une ligne par travail, une barre par fen\u00eatre : du premier jour o\u00f9 il peut se faire au dernier jour o\u00f9 il devrait \u00eatre fini. '
-    +'C\u2019est ce qui explique qu\u2019on ne puisse pas prendre d\u2019avance \u2014 l\u2019effeuillage ne se fait pas en avril, m\u00eame avec dix personnes disponibles.</div>'
+  // ★★ « COMMENT LIRE » EST, PAR DEFINITION, CE QU'ON LIT UNE FOIS.
+  //   Cinq blocs de 130 a 300 caracteres expliquaient chacun la lecture d'un
+  //   graphe, affiches en permanence entre le titre de l'etape et le graphe
+  //   lui-meme. Une fois qu'on sait lire une frise, on ne relit pas la notice —
+  //   on la traverse pour atteindre le dessin. Ils passent derriere la pastille
+  //   du titre d'etape, ou ils restent a un doigt.
+  H+='<div class="rf-step"><div class="rf-n">1</div><div class="rf-t">Quand chaque travail peut se faire'
+    +(typeof _mvInfoBtn==='function'?(' '+_mvInfoBtn('pil.sim.frise')):'')+'</div></div>'
     +'<div style="width:100%;overflow-x:auto" id="rf-g-frise"></div>';
   if(typeof _pilFriseSvg==='function') window._mvGraphSuivre('#rf-g-frise', function(lg){ return _pilFriseSvg(ctxP.cd,real,lg); });
 
-  H+='<div class="rf-step"><div class="rf-n">2</div><div class="rf-t">'+(deux?'Ce qu\u2019il te reste \u00e0 faire, semaine par semaine':'Ton renfort, semaine par semaine')+'</div></div>'
-    +'<div class="rf-how"><b>Comment lire.</b> '
-    +(deux?'Le graphique d\u00e9marre <b>aujourd\u2019hui</b> : la zone gris\u00e9e \u00e0 gauche est d\u00e9j\u00e0 pass\u00e9e, et chaque travail ne compte plus que pour ce qu\u2019il en reste. ':'')
-    +'<span class="rf-k" style="background:#5C8A3E"></span>Vert : les gens qui travaillent vraiment cette semaine-l\u00e0. '
-    +'<span class="rf-k" style="background:#DCD6C6"></span>Hachur\u00e9 : les gens <b>pay\u00e9s sans travail ouvert</b>. '
-    +'<span class="rf-k" style="background:#9B2D1F"></span>Rouge : le travail <b>en retard</b> \u2014 pas ce qui reste \u00e0 faire, mais ce qui aurait d\u00fb \u00eatre fini. '
-    +'Il n\u2019appara\u00eet qu\u2019apr\u00e8s la date de fin d\u2019une t\u00e2che, et chaque semaine de plus la rend <b>'+_pilNum(ctx.c.k*100)+' % plus longue</b> \u2014 '
-    +'sauf pour un travail <b>sans rattrapage</b> comme la vendange : pass\u00e9 la date, ce qui reste est perdu, pas report\u00e9. '
-    +'<span class="rf-k" style="background:#2C3E50"></span>Bleu ardoise : ceux qui sont partis au tracteur. '
-    +'L\u2019\u00e9cart entre la ligne noire et le vert compte aussi les <b>cong\u00e9s, absences et fermetures d\u00e9j\u00e0 saisis au Planning</b> : ces heures sont pay\u00e9es, mais personne n\u2019est dans les rangs. '
-    +'<span class="rf-k" style="background:#14110D"></span>La ligne noire, l\u2019effectif <b>'+_pilEsc(ctx.baseLbl||'')+'</b> \u2014 elle monte et descend avec les contrats saisis, '
-    +'<b>vendangeurs et saisonniers d\u00e9j\u00e0 embauch\u00e9s compris</b> : c\u2019est la m\u00eame que la frise des 52 semaines, dans <b>L\u2019ann\u00e9e</b>.<br>'
-    +'<b>Choisissez votre renfort dans les listes ci-dessous</b>, ou partez d\u2019une proposition. Le renfort s\u2019<b>ajoute</b> \u00e0 cette ligne \u2014 il ne la remplace pas.</div>'
+  H+='<div class="rf-step"><div class="rf-n">2</div><div class="rf-t">'+(deux?'Ce qu\u2019il te reste \u00e0 faire, semaine par semaine':'Ton renfort, semaine par semaine')
+    +(typeof _mvInfoBtn==='function'?(' '+_mvInfoBtn('pil.sim.semaine')):'')+'</div></div>'
+    // ★ LA LEGENDE DES COULEURS RESTE : on ne la lit pas, on la CONSULTE du
+    //   regard, chaque fois qu'on revient sur le graphe. Ce qui part, c'est ce
+    //   que chaque couleur veut dire en profondeur — la definition du « retard »,
+    //   la majoration par semaine, les conges compris dans l'ecart.
+    +'<div class="rf-how">'
+    +'<span class="rf-k" style="background:#5C8A3E"></span>Vert : au travail. '
+    +'<span class="rf-k" style="background:#DCD6C6"></span>Hachur\u00e9 : pay\u00e9s sans travail ouvert. '
+    +'<span class="rf-k" style="background:#9B2D1F"></span>Rouge : en retard. '
+    +'<b>Ligne noire</b> : l\u2019\u00e9quipe d\u00e9j\u00e0 sous contrat, vendangeurs compris. '
+    +'<b>Choisissez votre renfort dans les listes ci-dessous</b> \u2014 il s\u2019<b>ajoute</b> \u00e0 cette ligne.</div>'
     +_rfSelHtml(ctx)
     +'<div class="rf-strats">'+boutons+'</div>'
     +'<div style="width:100%;overflow-x:auto" id="rf-g-prof"></div>';
@@ -3981,10 +3982,8 @@ function _rfBody(d){
   H+='<div class="rf-step"><div class="rf-n">3</div><div class="rf-t">Est-ce que \u00e7a tient dans les fen\u00eatres ?</div></div>'
     +_rfBesoinHtml(ctx)+verdict+conseil;
 
-  H+='<div class="rf-step" style="margin-top:18px"><div class="rf-n">4</div><div class="rf-t">Ce que ce choix co\u00fbte</div></div>'
-    +'<div class="rf-how"><b>Comment lire.</b> Le co\u00fbt ne se lit qu\u2019une fois l\u2019\u00e9ch\u00e9ance tranch\u00e9e : les strat\u00e9gies qui tiennent les fen\u00eatres sont en haut du tableau, celles qui d\u00e9bordent en dessous du trait rouge. '
-    +'Ces derni\u00e8res sont souvent les moins ch\u00e8res sur le papier \u2014 elles ne r\u00e9pondent simplement pas \u00e0 la m\u00eame question. '
-    +'La barre ne montre que ce que vous d\u00e9cidez : le socle des permanents est le m\u00eame partout, il ne peut pas les d\u00e9partager.</div>'
+  H+='<div class="rf-step" style="margin-top:18px"><div class="rf-n">4</div><div class="rf-t">Ce que ce choix co\u00fbte'
+    +(typeof _mvInfoBtn==='function'?(' '+_mvInfoBtn('pil.sim.cout')):'')+'</div></div>'
     +'<div style="width:100%;overflow-x:auto" id="rf-g-cout"></div>'
     +tab.html;
   window._mvGraphSuivre('#rf-g-cout', function(lg){ return _rfCoutSvg(ctx,res,tab.meilleur,lg); });
@@ -3995,20 +3994,21 @@ function _rfBody(d){
   if(deux){
     var resP=_rfSim(ctxP,_rfProf(ctxP,{R:0,a:0,b:0}));
     window._mvGraphSuivre('#rf-g-prof0', function(lg){ return _rfProfilSvg(ctxP,resP,null,{note:'le plan de d\u00e9part, avec '+(ctxP.baseLbl||'l\u2019\u00e9quipe'),axe:'CAMPAGNE ENTI\u00c8RE'},lg); });
-    H+='<div class="rf-step"><div class="rf-n">5</div><div class="rf-t">Le plan de d\u00e9part \u2014 toute la campagne</div></div>'
-      +'<div class="rf-how"><b>Comment lire.</b> Le m\u00eame graphique, mais sur la campagne <b>enti\u00e8re</b> et avec la charge <b>th\u00e9orique</b> : ce que le bar\u00e8me demandait au d\u00e9part, sans rien d\u00e9duire de ce qui est fait. '
-      +'C\u2019est un rep\u00e8re de dimensionnement \u2014 utile en d\u00e9but de campagne, et pour pr\u00e9parer la suivante. <b>La d\u00e9cision, elle, se prend en \u00e9tape 2</b>, sur ce qu\u2019il reste.</div>'
+    H+='<div class="rf-step"><div class="rf-n">5</div><div class="rf-t">Le plan de d\u00e9part \u2014 toute la campagne'
+      +(typeof _mvInfoBtn==='function'?(' '+_mvInfoBtn('pil.sim.plan')):'')+'</div></div>'
       +'<div style="width:100%;overflow-x:auto" id="rf-g-prof0"></div>'
       +'<div class="rf-how">Sur la campagne enti\u00e8re : <b>'+_pilNum(ctxP.charge)+' h</b> de travail pour <b>'+_pilNum(ctxP.capDispo)+' h</b> de capacit\u00e9 disponible ('+_pilEsc(ctxP.baseLbl||'')+', tracteur d\u00e9duit). '
       +(ctxP.manque>0?('Il en manquait <b style="color:#9B2D1F">'+_pilNum(ctxP.manque)+' h</b>, soit au moins <b>'+_ecoH1(ctxP.renfortMini)+'</b> renfort sur toute la p\u00e9riode.'):'L\u2019effectif d\u00e9j\u00e0 en place suffisait sur le papier.')
       +' Sans aucun renfort de plus, il restait <b>'+_pilNum(resP.inemploye)+' h</b> pay\u00e9es sans travail ouvert.</div>';
   }
 
-  H+='<div class="rf-lim"><b>Ce que le mod\u00e8le suppose.</b> Le travail finit par se faire, m\u00eame apr\u00e8s la campagne : une strat\u00e9gie qui d\u00e9borde mord sur la suivante, et ce report n\u2019est pas chiffr\u00e9. '
-    +'<b>Sauf les travaux sans rattrapage</b> \u2014 la vendange \u2014 o\u00f9 ce qui n\u2019est pas fait dans la fen\u00eatre est perdu : les heures perdues sont compt\u00e9es, la valeur de la r\u00e9colte non rentr\u00e9e ne l\u2019est pas, volontairement. '
-    +'Les heures induites par le retard, elles, le sont. '
-    +'Les fen\u00eatres viennent des dates que vous avez saisies ; ce qui est d\u00e9j\u00e0 fait vient de l\u2019avancement r\u00e9el des parcelles. Le hachur\u00e9 ne compte que le travail de vigne : le tracteur est d\u00e9duit, la cave et l\u2019entretien ne le sont pas encore. '
-    +'Ces r\u00e9glages se modifient dans <b>Pilotage \u203a Outils \u203a Param\u00e9trage</b>. Rien n\u2019est enregistr\u00e9 ici.</div>';
+  // ★ « CE QUE LE MODELE SUPPOSE » est de la methode pure : cinq phrases sur les
+  //   conventions du simulateur. Elles ne disparaissent pas — elles cessent
+  //   d'etre lues a chaque simulation. La ligne qui reste porte le seul fait qui
+  //   change la lecture d'un resultat : rien n'est enregistre ici.
+  H+='<div class="rf-lim"><b>Ce que le mod\u00e8le suppose</b>'
+    +(typeof _mvInfoBtn==='function'?(' '+_mvInfoBtn('pil.sim.modele')):'')
+    +' \u00b7 aucune de ces simulations n\u2019est enregistr\u00e9e.</div>';
   return H;
 }
 
@@ -4794,9 +4794,14 @@ function _pcavRow(pt,html,when,act,kind,ref){
     +(when?'<span class="pcav-when">'+_pilEsc(when)+'</span>':'')+b+'</div>';
 }
 function _pcavSub(t){ return '<div class="pcav-sub">'+t+'</div>'; }
-function _pcavCard(ico,dot,titre,stat,body,mini){
+// ★ 7e ARGUMENT OPTIONNEL, comme _pilTile : la cle de la fiche « i ». Les
+//   appels existants restent valides tels quels et posent leur pastille au fur
+//   et a mesure que leur fiche est ecrite. La pastille va dans l'EN-TETE, a
+//   cote du titre — pas dans le pied, ou elle serait sous le graphe.
+function _pcavCard(ico,dot,titre,stat,body,mini,infoCle){
   return '<div class="pcav-card"><div class="pcav-h"><span class="pcav-dot" style="background:'+dot+'"></span>'
     +'<span class="pcav-ico">'+ico+'</span><span class="pcav-t">'+_pilEsc(titre)+'</span>'
+    +(infoCle&&typeof _mvInfoBtn==='function'?_mvInfoBtn(infoCle):'')
     +(stat?'<span class="pcav-stat">'+stat+'</span>':'')+'</div>'
     +'<div class="pcav-b">'+body+'</div>'
     +(mini?'<div class="pcav-mini">'+mini+'</div>':'')+'</div>';
@@ -4855,8 +4860,8 @@ function _pcavOuillage(c){
   return _pcavCard('\uD83E\uDEA3','#B23A52','Ouillage',
     nDue?('<b>'+nDue+'</b> en retard'):'\u00e0 jour', rows,
     multi
-      ? 'Chaque mill\u00e9sime a son propre d\u00e9lai d\u2019alerte, r\u00e9glable dans les r\u00e9glages du Chai : un vin jeune se rattrape plus souvent qu\u2019un vin d\u2019un an. Le volume \u00e0 compl\u00e9ter est d\u00e9duit des ouillages pass\u00e9s de la cuv\u00e9e.'
-      : 'Le seuil vient de vos r\u00e9glages Cave. Le volume \u00e0 compl\u00e9ter est d\u00e9duit de vos ouillages pass\u00e9s, pas d\u2019une moyenne th\u00e9orique.');
+      ? 'd\u00e9lai d\u2019alerte propre \u00e0 chaque mill\u00e9sime'
+      : 'seuil de vos r\u00e9glages Cave', 'pil.cav.ouillage');
 }
 
 // Le seuil affiche vient du Chai (_caveSeuilOu) : une regle recopiee ici
@@ -5158,12 +5163,12 @@ function _pcavSout(c){
   var suiv=l.filter(function(x){ return x.cas==='suivie'; }).length;
   var stat = aS.length ? ('<b>'+aS.length+'</b> à soutirer')
            : (suiv ? ('<b>'+suiv+'</b> malo'+(suiv>1?'s':'')+' suivie'+(suiv>1?'s':'')) : 'suivi');
-  var mini='Le soutirage se déclenche à la fin de la malo, pas à une date : cet écran ne parle jamais de retard.'
+  var mini='projection sur l\u2019acide malique mesur\u00e9, jamais sur une dur\u00e9e moyenne'
     +' La projection vient des valeurs d’acide malique mesurées sur chaque cuvée, jamais d’une durée moyenne.'
     +' Deux pentes sont calculées : la moyenne sur trois analyses projette la fin, les deux dernières détectent un blocage.';
   // _pcavCard applique _pilEsc : passer « &amp; » produirait « &amp;amp; ».
   return _pcavCard('\uD83D\uDD04','#3D6B27','Soutirage & malo', stat,
-    rows+_pcavMaloCourbe(l), mini);
+    rows+_pcavMaloCourbe(l), mini, 'pil.cav.malo');
 }
 
 // ── Verdict : le titre de l'onglet, un CONSTAT, jamais un jugement ───
@@ -5353,8 +5358,8 @@ function _pcavRdt(c,mil){
     over?('<b>'+over+'</b> au-dessus'):(avecMax.length?'dans les clous':'plafonds non renseignés'),
     '<div class="pcav-pyr">'+rows+leg+'</div>',
     avecMax.length
-      ? 'Le trait vertical est le plafond que vous avez renseigné par parcelle. L’échelle va jusqu’à 115 % du plafond pour qu’un dépassement se voie déborder.'
-      : 'Aucun plafond n’est renseigné. Posez-le une fois par parcelle depuis Le millésime pour obtenir la comparaison.');
+      ? 'trait vertical : votre plafond par parcelle'
+      : 'Aucun plafond n’est renseigné. Posez-le une fois par parcelle depuis Le millésime pour obtenir la comparaison.', 'pil.cav.rdt');
 }
 
 // ── Face a l'an dernier ──────────────────────────────────────────────
@@ -5476,7 +5481,7 @@ function _pcavAngesCard(c){
   if(!rows) rows='<div class="pcav-vide">Les ouillages des douze derniers mois ne se rattachent \u00e0 aucune cuv\u00e9e encore en \u00e9levage.</div>';
   var stat=a.lignes.length?('<b>'+_pcavF1(a.hlPerdu)+'</b> hL sur douze mois'):'\u2014';
   return _pcavCard('\u23F3','#A0291E','Part des anges', stat, '<div class="pcav-agt">'+rows+'</div>',
-    'Ce que vous remettez en ouillage est exactement ce qui s\u2019est \u00e9vapor\u00e9 : c\u2019est une mesure, pas une valeur th\u00e9orique. Chaque mill\u00e9sime a sa ligne \u2014 on n\u2019ouille pas les f\u00fbts d\u2019une ann\u00e9e avec le vin d\u2019une autre. \u26a0\ufe0f Un soutirage retire aussi du volume, sans \u00eatre une \u00e9vaporation.');
+    'douze derniers mois \u00b7 une ligne par mill\u00e9sime', 'pil.cav.anges');
 }
 
 function _pcavMouv(c){
@@ -7919,7 +7924,7 @@ function _pilTabCfm(d){
           +'<div class="pil-li-r" style="color:var('+col+')">'+(Math.round(r.cu*10)/10).toLocaleString('fr-FR')+'<span style="font-size:var(--pt-lbl,10.5px);font-weight:500;color:var(--texte-doux)"> kg/ha</span></div></div>';
       }).join('');
       var body='<div class="pil-ip-list">'+crows+'</div>'
-        +'<div class="pil-li-s" style="margin-top:10px;line-height:1.5">Cumul de <b>cuivre m\u00e9tal</b> sur 7 ans face au plafond UE de <b>28 kg/ha</b> (bio). Indicatif \u2014 ajustez selon votre organisme certificateur.</div>';
+        +'<div class="pil-li-s" style="margin-top:10px;line-height:1.5"><b>Cuivre m\u00e9tal</b> sur 7 ans glissants \u00b7 plafond UE <b>28 kg/ha</b>'+(typeof _mvInfoBtn==='function'?(' '+_mvInfoBtn('pil.cfm.cuivre')):'')+'</div>';
       var sw=cu.over?('\u26A0 '+cu.over):(cu.warn?('\u2191 '+cu.warn):null);
       H+=_pilTile('cuivre','\uD83D\uDD35','#5B8DBF','Cuivre \u00b7 bio (7 ans)', _pilStat(cu.rows.length,' parcelle'+(cu.rows.length>1?'s':''), sw), null, null, body);
     }
@@ -7941,7 +7946,7 @@ function _pilTabCfm(d){
           +'<div class="pil-li-r" style="color:var('+col+')">'+r.pass+'<span style="font-size:var(--pt-lbl,10.5px);font-weight:500;color:var(--texte-doux)"> passages</span></div></div>';
       }).join('');
       var body2='<div class="pil-ip-list">'+prows+'</div>'
-        +'<div class="pil-note" style="margin-top:12px"><span>\u2139\uFE0F</span><div><b>Passages compt\u00e9s</b> (un passage = une intervention, quel que soit le nombre de produits m\u00e9lang\u00e9s). L\u2019<b>IFT r\u00e9el</b> (dose appliqu\u00e9e / dose homologu\u00e9e) n\u00e9cessite des doses structur\u00e9es \u2014 <b>\u00e0 activer</b>. R\u00e9f. indicative : <b>'+ref.v+' passages</b>'+(ref.def?' (d\u00e9faut Bourgogne \u2014 \u00e0 ajuster dans R\u00e9glages)':'')+'.</div></div>';
+        +'<div class="pil-li-s" style="margin-top:10px;line-height:1.5">Un <b>passage</b> = une intervention, quel que soit le nombre de produits'+(typeof _mvInfoBtn==='function'?(' '+_mvInfoBtn('pil.cfm.ift')):'')+'</div>';
       var nOver=pass.filter(function(r){return r.pass>ref.v;}).length;
       H+=_pilTile('ift','\uD83C\uDF3F','#3D6B27','Passages phyto / parcelle', _pilStat(pass.length,' parcelle'+(pass.length>1?'s':''), nOver?('\u2191 '+nOver):null), 'r\u00e9f. '+ref.v+' passages', null, body2);
     }
@@ -7963,7 +7968,7 @@ function _pilTabCfm(d){
           +'<div class="pil-li-s">'+_pilEsc(a.produit||'traitement')+' \u00b7 DRE '+a.dreH+' h ('+_pilDfr(a.date)+')</div></div></div>';
       }).join('');
       var body3='<div class="pil-ip-list">'+drows+'</div>'
-        +'<div class="pil-li-s" style="margin-top:10px;line-height:1.5">D\u00e9lai de r\u00e9entr\u00e9e apr\u00e8s traitement (d\u00e9riv\u00e9 des phrases de risque CLP : 6 h par d\u00e9faut, 24\u201348 h selon la mention). Ne pas p\u00e9n\u00e9trer la parcelle sans \u00e9quipement avant l\u2019heure indiqu\u00e9e.</div>';
+        +'<div class="pil-li-s" style="margin-top:10px;line-height:1.5"><b>Ne pas p\u00e9n\u00e9trer la parcelle sans \u00e9quipement avant l\u2019heure indiqu\u00e9e.</b>'+(typeof _mvInfoBtn==='function'?(' '+_mvInfoBtn('pil.cfm.dre')):'')+'</div>';
       H+=_pilTile('dre','\u23F1\uFE0F','#B85A1A','D\u00e9lai de rentr\u00e9e (DRE)', _pilStat(dre.active.length,' parcelle'+(dre.active.length>1?'s':''),'actif'), null, null, body3);
     }
   }
@@ -8138,7 +8143,18 @@ function _pilHdrHtml(d){
 function _pilSkeleton(d,tab){
   // L'onglet Économie n'a pas de roue crantée : ses trois sous-vues remplacent la
   // liste de cases à cocher, et l'on ne masque pas un poste de dépense à la carte.
-  var perso=(tab==='auj'||tab==='an'||tab==='avc'||tab==='equ'||tab==='sim'||tab==='cfm')?'<button class="pil-gear2" id="pil-gear"><span>\u2699</span> Choisir les indicateurs</button>':'';
+  // ★★★ LE BANDEAU DE TITRE DISPARAIT.
+  //   `<h2 class="pil-h2">` repetait mot pour mot l'onglet actif, en 26 px, sur
+  //   une ligne a lui — et sur telephone, sur DEUX lignes. La barre d'onglets le
+  //   dit deja, en surbrillance. Ce que le titre apportait en plus, c'est le
+  //   SOUS-TITRE des libelles longs (« L'annee — les douze mois, d'un cadre a
+  //   l'autre ») : il descend en une ligne fine sous les onglets.
+  //   ⚠️ `_pilTabLabel` reste utilise : c'est lui qui porte ce sous-titre.
+  //   ★ « Choisir les indicateurs » occupait le reste de la ligne. Il rejoint le
+  //     menu ⚙ Outils, ou vivent deja Archives et Parametrage — c'est le meme
+  //     genre de geste, rare et volontaire. `#pil-gear` ne bouge pas de nom :
+  //     _pilBind le retrouve, et le panneau s'ouvre au meme endroit.
+  var avecPerso=(tab==='auj'||tab==='an'||tab==='avc'||tab==='equ'||tab==='sim'||tab==='cfm');
   _pilCssV2(); _pilScopeLoad();
   // La barre de portee se pose ENTRE le masthead et les onglets : elle dit ou
   // l'on regarde avant de dire ce que l'on regarde. Les photos ouvrent le
@@ -8150,9 +8166,10 @@ function _pilSkeleton(d,tab){
     +'</div></div>'
     +'<div class="pil-diagwrap" id="pil-diagwrap"><div class="pil-diagsheet" id="pil-diagsheet"></div></div>'
     +'<div class="pil-tabsbar">'+_pilTabsHtml(tab)+'</div>'
+    +'<div class="pil-souslig"><span>'+_pilEsc(_pilTabLabel(tab))+'</span>'
+    +(avecPerso?'<button class="pil-gear2" id="pil-gear" title="Choisir les indicateurs" aria-label="Choisir les indicateurs"><span>\u2699</span></button>':'')+'</div>'
     +'<div class="pil-wrap">'
     +'<div id="pil-photos-host">'+_pilPhotosHtml()+'</div>'
-    +'<div class="pil-tabhead"><h2 class="pil-h2">'+_pilEsc(_pilTabLabel(tab))+'</h2>'+perso+'</div>'
     +'<div class="pil-perso" id="pil-perso"></div>'
     +'<div class="pil-content" id="pil-content"></div>'
     +'</div>';
@@ -8236,9 +8253,48 @@ function _pilCssV2(){
   +'.pil-diag-go{margin-top:9px;border:1px solid var(--cave);background:var(--cave);color:var(--or-clair);border-radius:8px;padding:7px 13px;font-size:var(--pt-txt,12.5px);font-weight:700;font-family:inherit;cursor:pointer;min-height:34px}'
   +'.pil-diag-go.ghost{background:var(--bg-card);color:var(--cave)}'
   +'.pil-flag{cursor:pointer}'
+  // ══ LA SOUS-LIGNE — ce qui reste du bandeau de titre ══
+  +'.pil-souslig{max-width:1280px;margin:0 auto;padding:7px 24px 0;display:flex;align-items:center;gap:10px;'
+  +'font-size:var(--pt-micro,11px);color:var(--texte-doux);line-height:1.35}'
+  +'.pil-souslig>span{flex:1;min-width:0}'
+  +'.pil-souslig .pil-gear2{flex:none;padding:5px 9px;font-size:var(--pt-txt,12.5px);line-height:1}'
+  // ══ LES QUATRE PHOTOS ══
+  //   ⚠️⚠️ SUR TELEPHONE, ELLES PRENAIENT 259 px — MESURE, PAS ESTIME. Deux
+  //     rangees de deux, chacune avec son etiquette, son chiffre, son sous-titre
+  //     et son « voir le detail ». A elles seules, un tiers de l'ecran avant le
+  //     premier chiffre du contenu.
+  //   En frise d'une seule ligne, qui defile : le chiffre passe A COTE de
+  //     l'etiquette au lieu d'etre dessous, et « voir le detail » disparait — la
+  //     carte reste cliquable en entier, la fleche ne servait qu'a le dire.
+  //   ★ Les quatre restent VISIBLES d'un coup d'oeil : c'est leur raison d'etre.
+  //     On ne remplace pas quatre chiffres par un bouton « voir les chiffres ».
   +'@media(max-width:880px){.pil-photos{grid-template-columns:1fr 1fr}}'
+  +'@media(max-width:700px){'
+  +'.pil-photos{display:flex;grid-template-columns:none;gap:8px;overflow-x:auto;scroll-snap-type:x proximity;'
+  +'-webkit-overflow-scrolling:touch;margin:0 -16px 12px;padding:0 16px 2px}'
+  +'.pil-photos::-webkit-scrollbar{display:none}'
+  +'.pil-photo{flex:0 0 auto;width:auto;min-width:142px;max-width:220px;padding:9px 12px;scroll-snap-align:start}'
+  +'.pil-photo .v{display:inline;font-size:var(--pt-lg,23px);margin:0}'
+  +'.pil-photo .s{white-space:nowrap;overflow:hidden;text-overflow:ellipsis;max-width:190px}'
+  +'.pil-photo .go{display:none}'
+  +'.pil-souslig{padding:6px 16px 0}'
+  +'.pil-cr-note{display:none}'
+  +'.pil-portee-in{padding:7px 16px;gap:7px}'
+  +'}'
   +'@media(max-width:520px){.pil-tabsep{margin:0 5px}.pil-lvn{margin-right:4px}}'
-  +'@media(max-width:430px){.pil-photo .v{font-size:var(--pt-xl,27px)}.pil-portee-in{padding:8px 11px}}';
+  +'@media(max-width:430px){.pil-portee-in{padding:7px 12px}}'
+  // ══ LE MASTHEAD ══
+  //   200 px sur telephone : le nom du domaine passait a la ligne en 26 px, et
+  //   Periode / Vignoble s'empilaient dessous. On sait chez qui on est — ce nom
+  //   se lit une fois, pas a chaque ouverture. Il reste, plus petit, et les deux
+  //   cellules tiennent sur une ligne.
+  +'@media(max-width:700px){'
+  +'.pil-mast-in{padding:calc(env(safe-area-inset-top,0px) + 12px) 16px 12px;gap:11px;align-items:center}'
+  +'.pil-dom{font-size:var(--pt-lg,23px);margin-top:2px}'
+  +'.pil-mast-right{gap:14px;width:100%}'
+  +'.pil-cell .s2{font-size:var(--pt-base,14px)}'
+  +'.pil-icon{width:32px;height:32px;font-size:var(--pt-sm,17px)}'
+  +'}';
   var el=document.createElement('style'); el.id='pil-css-v2'; el.textContent=css;
   document.head.appendChild(el);
 }
@@ -8305,6 +8361,10 @@ function _pilCrumbHtml(){
     h+='<span class="pil-cr-sep">\u203A</span><span class="pil-cr sel">\uD83C\uDF47 '+_pilEsc(_PIL_SCOPE.camp)
       +'<button class="x" id="pil-cr-x" title="Revenir \u00e0 l\u2019ann\u00e9e">\u00d7</button></span>';
   } else {
+    // ★ « cliquez une campagne dans la frise pour zoomer » est une INSTRUCTION :
+    //   on l'apprend une fois, puis on la traverse. Elle disparait sur telephone,
+    //   ou elle prenait une ligne entiere de la barre collante — donc de chaque
+    //   ecran, en permanence. Sur grand ecran elle reste : la place ne manque pas.
     h+='<span class="pil-cr-note">l\u2019ann\u00e9e enti\u00e8re \u2014 cliquez une campagne dans la frise pour zoomer</span>';
   }
   return h;

@@ -1,4 +1,51 @@
-// MA VIGNE — Service Worker v6.74
+// MA VIGNE — Service Worker v6.76
+// v6.76 (15/08/2026) — CE QU’ON TRAVERSE AVANT LE PREMIER CHIFFRE.
+//   MESURE AU NAVIGATEUR, sur le squelette reel monte en executant _pilSkeleton :
+//   sur telephone, il fallait descendre de <b>728 px</b> avant d’atteindre une
+//   donnee — pour un ecran de 844. Presque tout l’ecran en chrome. Cinq bandeaux
+//   empiles : masthead 200, fil d’Ariane 68, onglets 59, photos 259, titre 52.
+//   ★ LE BANDEAU DE TITRE DISPARAIT. `<h2 class="pil-h2">` repetait mot pour mot
+//     l’onglet actif, en 26 px, sur une ligne a lui — deux sur telephone. La
+//     barre d’onglets le dit deja, en surbrillance. Ce qu’il apportait en plus,
+//     le sous-titre des libelles longs, descend en une ligne fine.
+//     « Choisir les indicateurs » rejoint la meme ligne, en roue crantee.
+//     ⚠️ `#pil-gear` garde son nom : _pilBind le retrouve, le panneau s’ouvre
+//     au meme endroit. On deplace un bouton, on ne renomme rien.
+//   ★ LES QUATRE PHOTOS PASSENT EN FRISE sous 700 px : une ligne qui defile, le
+//     chiffre a cote de l’etiquette au lieu d’etre dessous. 259 -> 114 px.
+//     ⚠️ Elles restent QUATRE et restent VISIBLES : on ne remplace pas quatre
+//     chiffres par un bouton « voir les chiffres ». Seule la fleche « voir le
+//     detail » disparait — la carte entiere etait deja cliquable.
+//   ★ Le masthead se compacte (200 -> 124) et l’instruction « cliquez une
+//     campagne pour zoomer » quitte la barre COLLANTE sur telephone : une ligne
+//     qu’on apprend une fois n’a pas a occuper chaque ecran en permanence.
+//     Sur grand ecran elle reste — la place ne manque pas.
+//   · Resultat mesure : <b>728 -> 442 px</b> sur telephone (-39 %), et la hauteur
+//     collante en permanence passe de 127 a 108 px.
+//   ⚠️ UN DEFAUT VU A LA CAPTURE ET PAR RIEN D’AUTRE : en frise, la premiere
+//     photo occupait presque toute la largeur — `.pil-photo` porte `width:100%`
+//     dans sa regle de base, qu’il fallait neutraliser. Aucun controle ne lit
+//     une mise en page.
+// v6.75 (15/08/2026) — LES QUATRE DERNIERS ONGLETS, EN UN SEUL LOT.
+//   Simuler, Conformite, Cave, La campagne. Le chantier de texte est termine :
+//   les huit onglets du Pilotage suivent la meme regle.
+//   ★★ « COMMENT LIRE » EST, PAR DEFINITION, CE QU’ON LIT UNE FOIS. Le
+//     simulateur affichait SIX blocs de ce nom, de 130 a 730 caracteres, coinces
+//     entre chaque titre d’etape et son graphe. Une fois qu’on sait lire une
+//     frise, on ne relit pas la notice — on la traverse pour atteindre le dessin.
+//     Ils passent derriere la pastille du titre d’etape, ou ils restent a un doigt.
+//   ★ LA LEGENDE DES COULEURS, ELLE, RESTE. On ne la LIT pas, on la CONSULTE du
+//     regard, chaque fois qu’on revient au graphe. Ce qui part, c’est ce que
+//     chaque couleur veut dire en profondeur : la definition du « retard », la
+//     majoration par semaine, les conges compris dans l’ecart.
+//   ★ CONFORMITE — le fait qui PROTEGE reste affiche : « ne pas penetrer la
+//     parcelle sans equipement avant l’heure indiquee ». C’est le derive des
+//     phrases de risque CLP qui passe dans la fiche, pas la consigne.
+//   ★ CAVE — _pcavCard prend une cle de fiche en 7e argument, comme _pilTile.
+//     La pastille va dans l’EN-TETE, pas dans le pied : sous le graphe, elle
+//     serait deja hors de vue.
+//   · 14 fiches neuves. Le module en compte 34, pour 20 000 caracteres de
+//     methode ranges — et plus une seule notice en travers d’un graphe.
 // v6.74 (15/08/2026) — LE SOUS-TITRE D’UNE CARTE EST UNE LIGNE DE CADRE.
 //   Dernier morceau d’Economie : les sept sous-titres qui restaient. Ils ne
 //   disaient pas SUR QUOI porte le chiffre — ils expliquaient comment il est
@@ -1621,7 +1668,7 @@
 // v2.22 — Fix profils vides : guard vide dans loadData() pour MEMBRES/SAISONS/TACHES
 // v2.17 — Onboarding intégré + tenantId · v2.06 — Firebase Auth · v2.00–v2.05 — divers
 const DEBUG = self.location.hostname === 'localhost' || self.location.hostname === '127.0.0.1';
-const CACHE_NAME   = 'mavigne-v6.74';
+const CACHE_NAME   = 'mavigne-v6.76';
 const TENANT_CACHE = 'mavigne-tenant';   // Cache persistant — préservé à chaque mise à jour SW
 const SYNC_TAG     = 'mavigne-sync';
 
@@ -1637,7 +1684,7 @@ const CDN_URLS = [
 ];
 
 self.addEventListener('install', event => {
-  if(DEBUG) console.log('[SW] Ma Vigne v6.74 installé');
+  if(DEBUG) console.log('[SW] Ma Vigne v6.76 installé');
   event.waitUntil(
     caches.open(CACHE_NAME).then(async cache => {
       // ── Cœur applicatif : STRICT (mise à jour ATOMIQUE) ──
@@ -1653,7 +1700,7 @@ self.addEventListener('install', event => {
 });
 
 self.addEventListener('activate', event => {
-  if(DEBUG) console.log('[SW] Ma Vigne v6.74 activé');
+  if(DEBUG) console.log('[SW] Ma Vigne v6.76 activé');
   event.waitUntil(
     caches.keys().then(keys =>
       Promise.all(
