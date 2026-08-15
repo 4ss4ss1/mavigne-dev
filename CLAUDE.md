@@ -2,31 +2,7 @@
 
 > Document de référence du projet **Ma Vigne** (GUERETTECH). Il est le **porteur de vérité** :
 > la mémoire Claude est plafonnée, ce fichier ne l'est pas.
-> Dernière consolidation : **15 août 2026** — ★★★ **LE CHANTIER ERGONOMIE DU PILOTAGE, DIX LOTS
-> EN UNE JOURNÉE** (**§42**, section neuve). Parti de trois phrases de Nico : *« j'ai l'impression
-> que ce n'est pas rangé, c'est fouillis, on dépense du temps et de l'énergie à chercher une info ·
-> certains textes ne sont peut-être pas utiles à être affichés tout le temps (infobulles ?) ·
-> améliore l'ergonomie et l'expérience utilisateur fois 100 »*.
-> ★★★ **LA RÈGLE DES TROIS FAMILLES**, écrite dans `utils.js` et appliquée aux huit onglets : ce qui
-> **CADRE** un chiffre reste à l'écran en une ligne · ce qui **EXPLIQUE le calcul** passe derrière une
-> pastille « i » · ce qui **DIT QUOI FAIRE** devient un bouton. ⚠️ **Ce n'est PAS « cacher le
-> texte »** : la moitié de ces phrases est la seule trace écrite d'une convention du domaine, et un
-> chiffre sans son cadre ment. **Rien n'a été supprimé — 34 fiches conservent l'intégralité.**
-> ★★ **Trois primitives neuves** : `MV_INFO` + `_mvInfoOpen` (la pastille), `_mvInfoSet` (les fiches
-> **vivantes**, dont le contenu se calcule mais dont la clé reste déclarée), `_pecFiabCard` (une
-> carte, deux écrans). ★ **`_pilTile` et `_pcavCard`** prennent une clé de fiche en dernier argument
-> **optionnel** : les 43 appels existants restent valides.
-> ★★★ **CE QUE LES CONTRÔLES AUTOMATIQUES NE VOIENT PAS.** Trois défauts de mise en page trouvés
-> **uniquement en regardant une capture** : un `<b>` qui devient son propre item flex et coupe une
-> phrase en trois · un CSS extrait par expression régulière et rendu mutilé · une carte à
-> `width:100%` qui mange la frise. **Aucun preflight ne lit une mise en page.**
-> ⚠️⚠️ **ET LA LEÇON LA PLUS COÛTEUSE EST DANS LES HARNAIS, PAS DANS LE CODE.** Sur dix lots,
-> **zéro bug livré** — mais **une quinzaine d'assertions fausses**, toutes de la même famille : elles
-> cherchaient « au moins une fois » là où il fallait **compter**, une phrase là où il fallait
-> **mesurer**, un préfixe qui se laissait satisfaire par un nom plus long. Détail en §42f.
-> ★ **Le chantier a aussi mesuré ce qu'il déplaçait, écran par écran, EN L'EXÉCUTANT** : un comptage
-> sur le fichier ne distingue pas « à l'écran » de « dans une fiche ». Voir §42g.
-> Consolidation précédente : **14 août 2026 (nuit)** — ★★★ **L'ESCALIER DE CADENCE, ET LE FICHIER
+> Dernière consolidation : **14 août 2026 (nuit)** — ★★★ **L'ESCALIER DE CADENCE, ET LE FICHIER
 > QUI NE TROUVE PAS SA PLACE** (**§41**, section neuve). **APP 6.14 · SW 6.67.** Parti d'un seul mot,
 > *« suite »*, sur le backlog technique. **Quatre entrées rayees** (3, 7, 9, 0e) — et **cinq autres
 > trouvées déjà mortes** à l'audit préalable (2, 5, 8, 15, 41). C'est le **troisième** audit du même
@@ -330,10 +306,6 @@ chose est faite ou en attente — dans les deux sens.
 | ★★ **l'aide contextuelle décrit les écrans** | **elle décrivait ceux d'il y a plusieurs mois** |
 | ★★★ **« il n'y a pas d'assistant d'installation »** | **`_agtIns` EXISTAIT et avait servi pour Chapelle** (§18b) |
 | ★★ **« l'import KML n'écrit QUE les polygones »** | vrai de l'**onglet KML**, FAUX de l'**assistant** |
-| ★★★ **la grille du Pilotage est réglée sur 1 colonne** | elle est réglée sur **2 à 4** — elle ne se remplissait jamais parce que **les 18 tuiles arrivaient ouvertes** |
-| ★★ **« il n'existe aucune infobulle dans l'app »** | **exact**, et c'était le problème : zéro `<details>`, zéro popover, dans tout le projet |
-| ★★★ **`PIL_TREAT_DAYS` existe** | **je l'ai inventée.** `node --check` ne voit pas un identifiant inconnu : seule l'exécution l'aurait levé |
-| ★★ **`A8` du harnais d'audit est un cliquet** | c'était un cliquet **à l'envers** : il rougissait quand on AJOUTAIT un bouton de redirection |
 
 À l'inverse, l'audit trouve régulièrement du **travail déjà fait** encore listé au backlog.
 
@@ -392,7 +364,6 @@ au lot suivant : c'est une **condition de clôture**, au même titre que le pref
 | Support | Fichier | Quand il devient faux |
 |---|---|---|
 | **Fiche `MV_AIDE`** du module touché | `src/utils.js` | dès qu'un écran, un geste ou un onglet change |
-| **Fiche `MV_INFO`** du chiffre touché | `src/utils.js` | dès que la MÉTHODE de calcul change, ou qu'un chiffre cesse d'être posé |
 | **Section du guide public** | `guide/NN-<section>.html` → `node scripts/build-guide.mjs` | dès qu'une fonctionnalité décrite change |
 | **Visite guidée** `_mvtSteps` | `src/app.js` | dès qu'un sélecteur visé bouge |
 | **`WHATS_NEW`** | `src/utils.js` | dès que le changement est **visible** par l'utilisateur |
@@ -936,25 +907,6 @@ que le harnais rougit.
 ---
 
 ## 6c. ★★ Preflight v2 — le cliquet anti-régression
-
-### ★ TROIS HARNAIS NEUFS, BRANCHÉS EN CI (15/08, §42)
-
-`.github/workflows/ci.yml`, étape « Harnais — echelle, pastille « i », carte a trois etages » :
-
-| harnais | ce qu'il interdit |
-|---|---|
-| `mv-harnais-echelle.mjs` | qu'une **taille de texte** soit réinventée hors des onze pas ; qu'un appel perde son **repli** ; qu'un pas soit déclaré sans emploi ou invoqué sans déclaration |
-| `mv-harnais-info.mjs` | qu'une **pastille ouvre une fiche vide** ou qu'une fiche reste **orpheline** ; que l'écouteur perde son `stopPropagation` ; qu'une **fiche vivante** échappe à sa déclaration ; qu'un **sous-titre de carte** dépasse la ligne de cadre |
-| `mv-harnais-carte.mjs` | que le **chiffre ou son cadre** sortent de l'en-tête (vérifié **en exécutant `_pilTile`**) ; que la **migration d'état** cesse d'atteindre les clients (vérifiée **en l'exécutant** sur un état mémorisé réaliste) ; que le **chrome** regonfle |
-
-⚠️ **Un harnais qui déménage doit rougir.** Quand l'échelle de texte est passée de `_pilCssV2()` à
-`styles.css`, `mv-harnais-echelle` est monté à **13 rouges** : c'est exactement son travail. Le
-réflexe n'est pas de le contourner, c'est de le **suivre**.
-
-★ **`A8` de `mv-harnais-audit-pil` était un cliquet À L'ENVERS** — il exigeait *exactement* 8 boutons
-de redirection, donc rougissait dès qu'on en **ajoutait** un. Converti : **le compte ne descend
-jamais**. À vérifier sur tout contrôle écrit avec un `===` : compte-t-il ce qu'on veut interdire, ou
-ce qu'on veut encourager ?
 
 `scripts/preflight.mjs` tourne en `prebuild`.
 **C'est un outil de développement : jamais déployé → zéro risque client, aucun bump.**
@@ -2367,23 +2319,8 @@ indissociables dont un **filet de tolérance** en tête de `switchCaveOng`.
 
 ## 20b. Pilotage
 
-> ⚠️ **REFONDU DEUX FOIS.** **§34** (12/08) a posé l'**axe de zoom**, la portée unique et le moteur
-> de diagnostic. **§42** (15/08) a traité ce que §34 n'avait pas touché : la **densité**, la
-> **hiérarchie typographique** et le **texte**. Ce qui suit décrit l'état d'arrivée des deux.
->
-> ★★★ **LES TROIS RÈGLES DU MODULE, à connaître avant d'y toucher (§42b)** :
-> ① ce qui **CADRE** un chiffre reste à l'écran, en une ligne, avec un **filet doré** devant ·
-> ② ce qui **EXPLIQUE le calcul** vit dans `MV_INFO`, derrière une pastille « i » ·
-> ③ ce qui **DIT QUOI FAIRE** est un **bouton**, jamais un chemin à retenir.
-> ⚠️ **Toute carte neuve porte les trois.** Les harnais `mv-harnais-info` et `mv-harnais-carte`
-> refusent une carte sans ligne de cadre, une pastille sans fiche, et une fiche sans pastille.
->
-> ★★ **La carte a TROIS ÉTAGES, tous dans `.pil-th`** : étiquette (+ pastille + chevron) · LE
-> CHIFFRE · la ligne de cadre. **C'est l'unique justification du repli par défaut** — si le chiffre
-> ou son cadre tombaient dans le corps, replier cacherait une information.
-> ★ **`_pilTile(…, infoCle)` et `_pcavCard(…, infoCle)`** : dernier argument **optionnel**.
-> ★ **L'échelle de texte** — onze pas nommés dans `styles.css` (`--pt-*`), **chaque appel avec son
-> repli**. Toute nouvelle taille passe par là, ou le cliquet rougit.
+> ⚠️ **REFONDU LE 12/08 (soir) — voir §34 pour le récit complet et les six lots.** Ce qui suit
+> décrit l'état d'arrivée. La barre n'est plus une liste de sujets : c'est un **axe de zoom**.
 
 - ★★★ **8 entrées** (`_PIL_TABS`), **du large au fin** :
   **Aujourd'hui · ① L'année · ② La campagne · ③ L'équipe & les tâches · ④ Simuler ┃ Cave ·
@@ -2412,17 +2349,8 @@ indissociables dont un **filet de tolérance** en tête de `switchCaveOng`.
   ★ `_pilScopeVerif(ann)` nettoie une **portée fantôme** : une période supprimée ou renommée
   laisserait l'écran filtrant sur un nom que plus personne ne porte.
 
-- ★★ **Les cartes arrivent REPLIÉES** (`collapsed` tout à 1) et **une seule s'ouvre à la fois** :
-  c'est ce qui rend ses 2 à 4 colonnes à `.pil-panels`. ⚠️ **Replier ne cache aucun chiffre.**
-  ⚠️⚠️ **Tout changement de défaut de disposition exige un cran de `_PIL_ST_V`** : `_pilSaveState`
-  grave l'état complet chez le client, et **le mémorisé gagne sur le défaut**. Sans le cran, un
-  client installé ne voit **strictement rien**. La migration passe **après** `_pilNormalize`
-  (qui emporterait `v`), et ne repose que `collapsed` — `show`, `pie`, `bar`, `sub` survivent.
-
 - ★★ **Les quatre photos** (`_pilPhotosHtml`) en tête de **tous** les onglets : Travaux · Effectif ·
   Budget · Conformité, à la maille de la portée, chacune menant à l'écran qui la détaille.
-  ★ **En frise d'une ligne sous 700 px.** ⚠️ Elles restent **quatre** et **visibles** : on ne
-  remplace pas quatre chiffres par un bouton « voir les chiffres » — le harnais l'interdit.
   ⚠️ **L'effectif affiche le PIC, jamais la moyenne** — une moyenne annuelle n'existe aucun jour de
   l'année, et c'est le pic qui décide d'un recrutement.
   ⚠️ **Source absente ⇒ tiret, jamais zéro.** Un tableau de bord qui écrit 0 là où il n'a pas su
@@ -3098,25 +3026,6 @@ aucune raison** de réintroduire un `prompt()`.
 
 ## 24. Pièges de build / CSS / HTML / modules ES — checklist
 
-### ★★★ CE QU'AUCUN CONTRÔLE AUTOMATIQUE NE VOIT (ajouté le 15/08, §42h)
-
-**Le preflight, les harnais et la CI ne lisent pas une mise en page.** Trois défauts du chantier
-ergonomie n'ont été trouvés qu'en **regardant une capture** :
-
-- ⚠️⚠️ **Dans un conteneur `display:flex`, CHAQUE élément enfant devient un item séparé.** Un `<b>`
-  au milieu d'une phrase forme sa propre colonne et coupe le texte en morceaux. **Toute ligne
-  susceptible de contenir du HTML doit envelopper son texte dans un `<span>`** (`flex:1;min-width:0`).
-  ★ Le piège est **impossible** quand le contenu est échappé (`_pilEsc`) : aucune balise ne survit.
-- ⚠️ **Une règle de base à `width:100%` sabote une frise horizontale.** Passer une grille en
-  `display:flex` ne suffit pas : il faut **neutraliser la largeur héritée**, sinon le premier
-  élément prend tout.
-- ⚠️ **Ne JAMAIS extraire du CSS injecté par expression régulière.** Elle casse sur les apostrophes
-  échappées et rend une feuille mutilée — on croit alors à un défaut de style.
-  ★ **On exécute la fonction** avec un faux `document` et on récupère ce qu'elle pose.
-
-★ **Corollaire de méthode** : après tout lot qui touche la mise en page, **produire un rendu et le
-regarder**. Une assertion verte n'a jamais montré un texte coupé en trois.
-
 **Build (JS / Rollup / IIFE)**
 1. Toute fonction appelée par un `onclick` injecté doit être exposée sur **`window.*`**.
    ★ Vécu six fois : `selCopMil`, `_caveSeuilMilStep`, `_caveSeuilMilReset`, `_dmrGo`,
@@ -3198,30 +3107,6 @@ regarder**. Une assertion verte n'a jamais montré un texte coupé en trois.
 ---
 
 ## 25. Workflow de patch sûr
-
-### ⚠️⚠️ DEUX PIÈGES DE SCRIPT VÉCUS LE 15/08 (§42i)
-
-1. **DEUX « ok » POUR ZÉRO OCTET ÉCRIT.** Un script a affiché « ok » sur ses deux premiers motifs,
-   puis l'assert du troisième a levé — et **l'écriture, placée en fin de script, n'a jamais eu
-   lieu**. Les « ok » n'annonçaient que la réussite du `str.replace` **en mémoire**.
-   ★ **Correctif : écrire après CHAQUE motif, et RELIRE le disque pour confirmer.**
-   ```python
-   def rep(old, new, quoi):
-       s = io.open(P, encoding='utf-8').read()
-       assert s.count(old) == 1, 'ANCRE %s : %d' % (quoi, s.count(old))
-       io.open(P, 'w', encoding='utf-8').write(s.replace(old, new))
-       assert new[:50] in io.open(P, encoding='utf-8').read()   # ← relecture
-       print('  ok', quoi)
-   ```
-2. **UNE CONTRE-ÉPREUVE A LAISSÉ LES FICHIERS ABÎMÉS SUR LE DISQUE.** L'assert « défaut non
-   injecté » tombait **après** avoir posé la version abîmée. Repéré en relisant `git status`, **pas
-   parce que quelque chose avait rougi.** ★ **On repose la référence AVANT de s'arrêter**, jamais
-   dans un bloc final qui peut ne pas s'exécuter.
-
-★ **Et un rappel qui a resservi trois fois** : le fichier mélange des séquences d'échappement
-**littérales** (`\u2019`, `\u203A`) et des caractères accentués **réels**. Une ancre en chaîne
-Python normale interprète les premières. **`r"""…"""` par défaut**, et extraire l'ancre du fichier
-(`repr()`) au moindre doute — une ancre a échoué sur la seule casse de `\u203a` contre `\u203A`.
 
 > **Incident fondateur (`tracSessionId`)** : patcher une copie périmée de `/mnt/project` a réintroduit
 > un bug corrigé. **Toujours repartir du DERNIER fichier livré** — désormais, du dépôt GitHub.
@@ -3458,14 +3343,8 @@ Options : `OPT-KML`, `OPT-FOR`, `OPT-MIG` (dès 200 €), `OPT-CUSTOM`. Codes ab
 **Offre de lancement** : −50 % sur l'installation **+** plan Domaine au tarif Vigneron.
 ⚠️ **Durée jamais bornée — à trancher**, au plus tard avec le devis Garraud.
 
-**Argument ROI en public** : exprimé en **temps, pas en euros**.
-⚠️⚠️⚠️ **TROIS CHIFFRES CONTRADICTOIRES CIRCULAIENT** — démo **111 h**, brochure **215 h/an pour
-10 ha**, argumentaire oral **3 à 5 h de bureau par mois** (36 à 60 h/an). **Un prospect qui reçoit
-la plaquette et clique la démo voit du simple au double** : ça n'attaque pas le produit, ça attaque
-la crédibilité du vendeur.
-★ **Depuis le 15/08 (§43), la source unique est `DEMO2_CREDITS`** : **≈ 127 h démontrées**, plus
-**37 h hors total** (« retrouver l'info »), soit **164 h** pour qui compte la ligne molle.
-⚠️ **`mvprint.py` (215 h) et l'argumentaire oral ne sont PAS encore alignés** — voir backlog.
+**Argument ROI en public** : exprimé en **temps, pas en euros** — « 3 à 5 heures de bureau par
+mois ». En brochure : **215 h/an** pour 10 ha.
 
 **Essai** : **15 jours**, claim `trial_until` + `plan` ; bandeau J-X ; à l'expiration **lecture
 seule, données conservées**.
@@ -3693,28 +3572,7 @@ noms d'écrans supprimés dans `src/*.js`, `index.html`, `MV_AIDE` et `guide/` �
 trouvées ainsi, dans quatre fichiers dont deux hors du module refondu (`reglages.js`, `utils.js`).
 **Aucun palier de test ne les aurait vues.**
 
-## 27b. ★★ L'aide contextuelle — `MV_AIDE`, et `MV_INFO`
-
-> ★★★ **DEUX QUESTIONS, DEUX FEUILLES (15/08, §42c).**
-> **`MV_AIDE`** (pastille « ? Aide », en tête de module) répond à *« qu'est-ce que je peux FAIRE sur
-> cet écran ? »* — une fiche par PAGE.
-> **`MV_INFO`** (pastille « i », **à côté du chiffre**) répond à *« d'où vient CE chiffre ? »* — une
-> fiche par chiffre. **34 fiches** aujourd'hui, toutes dans le Pilotage.
-> ⚠️ **Ne jamais poser une fiche `MV_INFO` en tête d'écran** : une notice générale ne répond à
-> aucune question précise. Elle vit **contre le nombre qu'elle explique**.
-> ⚠️⚠️ **`stopPropagation` sur l'écouteur délégué** : la pastille vit dans un en-tête de tuile qui
-> replie la tuile au clic. Sans lui, ouvrir la fiche ferme l'écran qu'on cherche à comprendre.
-> ★ **Clés nommées par module puis par écran** : `pil.gnr`, `pil.eco.remarques`. Deux écrans ne
-> partagent **jamais** une clé — une fiche vivante remplie par l'un s'afficherait sous l'autre.
-> ★ **Les fiches VIVANTES** (`_mvInfoSet`) : le contenu se calcule à l'exécution, mais **la clé
-> reste déclarée** dans `MV_INFO` avec un repli honnête. `_mvInfoSet` refuse toute clé non déclarée
-> — sans quoi le contrôle statique du harnais serait contournable.
-> ★ **Le texte des fiches est ÉCRIT, jamais saisi** : il porte donc son propre `<b>`, contrairement
-> à `MV_AIDE` (voir ci-dessous). Aucune donnée utilisateur ne le traverse (C19).
-> ⚠️ **Et il s'écrit en FRANÇAIS ACCENTUÉ.** Une première version de six fiches est partie sans
-> accents — réflexe de commentaire appliqué à du texte client. Le harnais ne le voit pas ; la
-> relecture, si.
-
+## 27b. ★★ L'aide contextuelle — `MV_AIDE`
 
 **Dix fiches, une par PAGE.** `_mvAideFiche()` lit l'id de `.page.active` → une fiche sans
 `#page-<clé>` correspondante est **écrite mais inatteignable** (C22 le vérifie).
@@ -3903,118 +3761,31 @@ Corrigé le 09/08 : **Pilotage** · **Cave** · **La Réserve** · **Phyto** · 
 
 ---
 
-## 27e. ★★ La démo guidée & les supports imprimés
+## 27e. ★ La démo guidée & les supports imprimés
 
-### La visite guidée (`?demo=visite`) — REFAITE LE 15/08 (§43)
+### La visite guidée (`?demo=visite`)
 
-⚠️⚠️ **Cette section disait « 14 moments » et « la démo ne connaît aucun des lots d'août ». Les deux
-étaient FAUX** au moment où on l'a relue : il y avait 19 moments, Cave et Conformité comprises.
-**Une section de CLAUDE.md se vérifie sur le code comme le reste** (règle d'or n°3).
+**14 moments** : météo → priorité du jour → validation → journal → registre phyto → Réserve → Chai →
+Cuvier → planning → récap salaire → décision Pilotage → **coût réel par parcelle** → simulateur
+Renfort → **addition**.
 
-**19 moments, TROIS ACTES**, ≈ 4 min annoncées (mesuré : 3 414 car. de narration ≈ 3,8 min de
-lecture + ~1,3 min de navigation — « trois minutes » était une promesse rompue au premier écran) :
-- **I — avant que l'équipe arrive (décider)** : météo par secteur · « Traiter ou pas ? » · le cap du jour ;
-- **II — la journée s'écrit toute seule** : **l'écran de l'ouvrier** · le ✓ · le journal · la carte ·
-  le tracteur (chrono §31) · traitement + E-Phy + Réserve · **le jour du contrôle** · le Chai · le millésime ;
-- **III — ce que ça rend** : pointage · fiche de Jean · le verdict · **la date qui ne rentre pas** ·
-  coût par parcelle · le renfort · les 22 documents + archives.
-★ **Le Cuvier et la Réserve sortent du parcours** et restent dans les 26 chapitres : trois moments
-de cave d'affilée cassaient le rythme, et la Réserve se dit en une incise sous le traitement.
+⚠️⚠️ **BUG CORRIGÉ LE 09/08 — cas d'école.** Les moments 12 visaient
+`#pil-tabs [data-tab="ecf"]`, clé disparue au regroupement des onglets.
+**`querySelector` renvoie `null` sans lever** → le `catch` de repli **ne s'est jamais déclenché** →
+projecteur au hasard, **sur le lien de démo publié**.
+**Correctif** : la bonne clé, **plus un filet** `else if(window.logError)`. **Et C22 pour que ça ne
+puisse plus arriver.**
 
-★★★ **LES TROIS MOMENTS QUI MANQUAIENT, et pourquoi ce sont eux** :
-1. **« Ce que voit Jean »** — l'objection n°1 d'un patron de domaine n'est pas le prix, c'est
-   *« mes gars ne s'en serviront pas »*. La visite entière se jouait depuis le fauteuil du chef.
-   Le geste est contre-intuitif — **montrer moins** — donc il se retient.
-2. **« Le jour du contrôle » avec deux parcelles FERMÉES** — le seul moment où le logiciel
-   **rattrape** l'utilisateur au lieu de l'assister. Un écran qui protège vaut trois écrans qui
-   font gagner du temps : il répond à une peur, pas à une corvée.
-3. **« La date qui ne rentre pas »** — une **date** et des **heures restantes** frappent dix fois
-   plus fort qu'un pourcentage d'avancement. Le seul écran qui dit au vigneron quelque chose
-   qu'il ne sait pas encore.
+⚠️ **`DEMO2_CREDITS` est la source unique de tous les chiffres de ROI**, **toujours exécutée en Node
+avant livraison**. Campagne = **12 mois, d'une récolte à la suivante**.
+★ **Calage Nico** : **250 tâches validées de janvier à juillet** → 5 min × 400 tâches/an.
 
-### ⚠️⚠️⚠️ `DEMO2_CREDITS` — LA RÈGLE, ÉCRITE APRÈS COUP
+⚠️ **Trois bugs vécus, tous silencieux** : spotlights vides · simulateur vide (saisons sans
+`debut`/`fin`) · Cuvier vide (`c.parcelles.map is not a function`).
+**Leçon : quand un écran de démo reste vide, extraire et exécuter la vraie fonction de rendu.**
 
-> **ON NE FACTURE QUE CE QU'ON A MONTRÉ.** Toute ligne du chiffrage est **démontrée par un moment**.
-> Une ligne qu'aucun écran ne démontre est une ligne que le prospect découvre à la caisse — et
-> c'est celle qu'il refusera, en emportant le total avec.
-
-**Ce qui n'allait pas** : la plus grosse ligne (`info`, 10 min × 220 j = **37 h**, un tiers du total)
-n'était **créditée par aucun moment**. Le compteur du parcours montait à **40 min** (3 clés sur 7),
-puis l'addition sortait 111 h de nulle part. C'était aussi **la seule ligne qu'un vigneron peut
-refuser en bloc** — et son refus faisait tomber le résultat sous le seuil affiché.
-
-**Table actuelle — 9 lignes, ≈ 127 h, toutes démontrées** : phyto 5 · validations 33 ·
-**pointage du soir 37** · fins de mois 18 · saisonniers 8 · **carnet tracteur 10** · cave 6 ·
-Réserve 4 · **papiers du contrôle 6**.
-★ **`DEMO2_HORS`** porte la ligne molle **hors du total** (+37 h, annoncés à part) : celui qui y
-croit arrive à 164 h — proche de la brochure ; celui qui la refuse reste à 127, **et l'argument
-tient quand même**.
-
-⚠️ **`min` du tableau ≠ `min` crédité au compteur.** Le tableau compte **par occurrence** (90 min
-pour une fin de mois) ; le compteur compte **ce que cette journée-là fait gagner** (100 min au
-total sur les 19 moments). `min:0` marque une ligne **démontrée sans rien créditer** — sinon
-« aujourd'hui » cesse d'être crédible.
-
-### ★★★ L'addition — la clôture ne se saborde plus
-
-**Avant** : `2 200 € − 948 − 990 = **+260 €** la première année`. Après quatre minutes de
-démonstration, la dernière chose lue était un gain de 260 €. **Une marge plus mince que le
-scepticisme du lecteur est un couteau qu'on lui tend** — et une soustraction s'audite au lieu de
-se ressentir.
-**Maintenant** : le gain reste en **heures** (§26), le coût se dit **en heures de main-d'œuvre**
-(47 h d'abonnement, 50 h d'installation à 20 €/h), et la clôture donne un **seuil horaire** que le
-lecteur valide avec **son** taux : *« 7,45 € l'heure rendue, 15,22 € la première année. Votre heure
-vaut 20 à 25. »* Quel que soit le chiffre qu'il a en tête, il fait le calcul dans le bon sens.
-
-### Les défauts de moteur corrigés
-
-- ⚠️⚠️ **« Passer » promettait un saut et faisait une sortie** : `_mvtSkip` ouvrait le menu, donc
-  sauter *un* écran faisait perdre tous les suivants **et l'addition**. Deux boutons distincts
-  désormais ; **« Quitter » mène à l'addition**, pas au menu.
-- ★★★ **`_mvtQuery` refuse une cible invisible** (`_mvtVisible`). Depuis §42 les cartes du Pilotage
-  arrivent **repliées** et `.pil-tbody{display:none}` : `querySelector` trouve l'élément, il mesure
-  zéro, `_mvtReposition` rend `r=null` et **les quatre masques couvrent l'écran entier**. Le repli
-  ultime ne s'armait que sur `null` : il ne voyait pas ce cas.
-  ⚠️ **Aucun moment ne tombait dedans le 15/08** — vérifié : l'onglet Économie ne contient aucun
-  `_pilTile`, donc le moment du coût par parcelle se rabattait sur `#pil-content`. **La garde est
-  posée avant que le premier n'y tombe**, pas après.
-  ⚠️⚠️ **C22 vérifie qu'un sélecteur EXISTE dans les sources, jamais qu'il est VISIBLE au moment
-  où la visite le vise.** C'est le trou par lequel le bug du 09/08 était passé, sous une autre forme.
-- **L'onglet Économie s'ouvre sur `_PEC_SUB='syn'`** pendant que la narration parlait du coût par
-  parcelle. `_mvtPecSub('par')` et `_mvtPilOuvrir('echeances')` **cliquent** (ils ne écrivent pas
-  dans l'état) : le handler délégué referme les autres cartes, construit celles qui ont besoin de
-  largeur et grave l'état — le contourner, c'est réimplémenter trois règles à côté.
-- ★ **`s.wait`** : délai par moment quand la navigation enchaîne plusieurs rendus. 420 ms fixes
-  posaient le projecteur sur le DOM d'avant.
-- **`window._visiteDrae={}` annulait le délai de rentrée** sur les fiches parcelle, alors que
-  `_cfmDre()` (qui lit `TRAITEMENTS` et **ignore cette table**) affichait déjà les mêmes parcelles
-  comme fermées dans le Pilotage. **La liste disait le contraire du Pilotage.** Semé sur
-  *Les Charmes* et *La Combotte* — un délai actif **ne bloque pas** la validation (badge + liseré
-  rouge, rien d'autre) et aucune des deux n'est la première carte : le moment d'action est intact.
-- **La bascule ouvrier est réversible** (`_mvtRoleOuvrier`) et le retour est armé **à trois
-  endroits** : le moment suivant, `_mvtEnd`, et la fermeture d'un chapitre. Un rôle laissé en place
-  ampute les quinze moments suivants.
-
-### ★★★ `mv-harnais-demo` + sa contre-épreuve (branchés en CI)
-
-**144 assertions · 7 contre-épreuves.** Deux règles qu'aucun autre contrôle ne porte :
-① toute clé de `DEMO2_CREDITS` est démontrée par un moment · ② aucun `sel` ne vise `.pil-tbody`
-ni `#pil-body-*`. Plus : les crédits orphelins, l'existence de chaque jeton de sélecteur, le total,
-et le fait que la clôture ne soustraie plus.
-
-⚠️⚠️ **CE QUE LA CONTRE-ÉPREUVE A TROUVÉ, ET QU'AUCUNE RELECTURE N'AURAIT VU** : l'assertion
-« ce sélecteur existe dans les sources » **se prouvait toute seule** — elle cherchait la cible dans
-`app.js`, c'est-à-dire dans le fichier qui l'écrit. `sansCitations()` retire donc `_mvtSteps` et
-`_MVT_CHAPS` du corpus avant de chercher. **C'est le quatrième cas de « stub plus généreux que la
-vraie fonction » du mois.**
-★ `corps()` ôte les commentaires avant toute assertion : un commentaire qui cite `.pil-tbody` ne
-doit pas rougir (§34g).
-
-⚠️⚠️⚠️ **ET UNE FAUTE COMMISE PENDANT CE LOT MÊME, QUI A DONNÉ L'ASSERTION 6** : `_mvtCredits` a été
-**appelé avant d'être écrit**. `node --check` est passé — la syntaxe était valable — le preflight
-aussi, et la visite aurait planté au premier moment. **Aucun contrôle du dépôt ne voyait un appel
-vers une fonction inexistante.** L'assertion 6 vérifie désormais que tout `_mvt*` / `_demo2*`
-appelé dans `app.js` a bien son `function …(` — 36 fonctions couvertes.
+★★ **La démo ne connaît AUCUN des lots d'août.** **Un 15ᵉ moment « la cave qui vous dit ce qui
+arrive » serait le plus vendeur du parcours** — backlog.
 
 ### ✅ Les supports imprimés — `mvprint.py`
 
@@ -4064,54 +3835,6 @@ radios/cases, section « pièces à joindre » explicite.
 
 ## 28. État courant & backlog
 
-### ⚠️ À FAIRE AVANT DE DÉPLOYER LE CHANTIER §43 (la visite guidée)
-
-1. ⚠️⚠️⚠️ **ALIGNER LES TROIS CHIFFRES DU ROI.** La démo dit **127 h (+37 hors total)**.
-   `mvprint.py` dit **215 h/an pour 10 ha** et l'argumentaire oral **3 à 5 h/mois**. Tant que les
-   trois ne disent pas la même chose, la plaquette contredit la démo devant le même prospect.
-   **C'est le point n°1, avant le devis Garraud.**
-2. ⚠️⚠️ **REGARDER LES 19 MOMENTS EN VRAI.** Le harnais vérifie ce qu'on facture et ce qu'on vise ;
-   **il ne voit pas un projecteur mal posé**. En particulier : le moment ouvrier (bascule + retour),
-   le dépli des échéances, la sous-vue Parcelles d'Économie, et les deux moments qui enchaînent
-   plusieurs rendus (`wait`).
-3. ★ **Caler les trois estimations neuves** : pointage 10 min × 220, carnet tracteur 10 min × 60,
-   papiers du contrôle 60 min × 6. Elles sont de moi, pas de Nico — lui seul peut les signer,
-   comme il a signé les 250 tâches de janvier à juillet.
-4. **`lint-cliquet` / ESLint** : jamais joué côté Claude (`node_modules` absent) — **l'échec est
-   identique sur la base d'origine**, vérifié.
-5. **`test:smoke` / `test:e2e`** : jamais joués côté Claude (Chromium injoignable).
-
-### ⚠️ À FAIRE AVANT DE DÉPLOYER LE CHANTIER §42
-
-1. **`npm run lint` et ESLint** — **jamais joués côté Claude de tout le chantier** (`node_modules`
-   absent du bac à sable ; l'échec est identique sur la base d'origine, ce n'est donc pas le lot).
-2. ⚠️⚠️ **REGARDER Simuler et Cave.** Leurs rendus sont vérifiés par assertion mais **n'ont pas été
-   regardés** — budget d'outils épuisé sur le dernier lot. Vu que **trois** défauts du chantier n'ont
-   été trouvés que par l'œil (§42h), c'est le point faible du paquet. En particulier **l'étape 2 du
-   simulateur**, dont la légende de couleurs a été remaniée.
-3. **`test:smoke` et `test:e2e`** — jamais joués côté Claude (CDN Playwright injoignable pour
-   l'installation de Chromium ; les mesures de ce chantier passent par le Chromium déjà présent).
-4. ★ **La migration `_PIL_ST_V` remet la disposition à neuf UNE fois chez MG et Chapelle** : les
-   cartes qu'ils avaient ouvertes ou fermées repartent repliées. C'est annoncé dans le journal des
-   nouveautés — vérifier que le message est bien passé avant qu'ils s'en étonnent.
-
-### NOUVEAU AU BACKLOG (issu de §42)
-
-- ⚠️ **Le doublon `_pilDiag` / `_pecZeros`.** Les deux portent un constat voisin sur « pas de taux
-  horaire », à **deux endroits de la même page** : le bouton « à compléter » en tête de module, et la
-  carte de fiabilité d'Économie. Ils ne disent pas tout à fait la même chose (`N fiches sans taux`
-  contre `aucun taux nulle part`), mais le lecteur, lui, voit deux avertissements sur le même sujet.
-  **C'est §34 en plus petit.** Fusion = chantier de moteur, pas d'ergonomie.
-- **Les cartes sans ligne de cadre.** Toutes les cartes du Pilotage n'en ont pas encore une : celles
-  qui ne passaient aucun sous-titre gardent un en-tête à deux étages. C'est visible, et c'est du
-  travail d'écriture, pas de code.
-- **Le `.pil-cr-note` masqué sur téléphone** : l'instruction « cliquez une campagne pour zoomer »
-  disparaît sous 700 px. Un utilisateur qui n'a que son téléphone ne l'apprendra jamais.
-  Piste : la dire une fois dans la fiche d'aide du module — ou une pastille « i » sur le fil.
-- **Mesurer si les fiches « i » sont ouvertes.** Tout ce chantier parie qu'un vigneron touche la
-  pastille quand il en a besoin. **Ce pari n'est pas vérifié.** Si personne ne l'ouvre jamais, c'est
-  que le texte manque là où il était, pas qu'il était de trop.
-
 ### ⚠️ À FAIRE AVANT DE DÉPLOYER LE CHANTIER §40
 
 1. **Ordre non négociable** :
@@ -4129,6 +3852,19 @@ bloquant du devis Garraud depuis trois sessions. **Reste à trancher : ce qui se
 L'hypothèse en vigueur — la lecture seule dure — n'a jamais été confirmée explicitement.
 
 ### NOUVEAU AU BACKLOG (issu de §40)
+
+### ⚠️⚠️ NOUVEAU AU BACKLOG (issu de §42 — 15/08)
+
+- ⚠️⚠️ **Refondre l'export JSON** — `reglages.js:3078` couvre 8 clés sur 24. Dériver la liste **de
+  `COLLECTIONS`**, ne jamais maintenir deux listes. Détail et checklist : **§42f**.
+- ⚠️⚠️ **Vérifier la persistance cloud tenant par tenant** — le code est bon, l'existence des
+  documents chez chaque client n'est pas prouvée. Procédure : **§42g**.
+- ⚠️ **La marge en jours n'est surveillée par aucun test** — bloqué par l'export. **§42f**.
+- **Ajouter la vérification des six clés à la fin de toute mise en route** (§27f).
+- **Clôture d'une saison très incomplète** — `Hiver 2025–2026` archivé à 32 %. Empêcher, ou
+  signaler ?
+- **Rejouer les 6 contre-épreuves de `cadAppl`** — écrites avant les gardes 2 et 3, la redondance
+  a pu en rendre certaines aveugles (piège de **§42e**).
 
 - ⚠️ **`trialExp` / `trial_until` peuvent diverger.** Trois chemins les écrivent ensemble
   (`_fcSaveAbo`, `agtInsTrialGo`, `gtRenewTrial`). Un quatrième qui l'oublierait ferait mentir la
@@ -6704,253 +6440,228 @@ jargon — il a écrit cette application.
   (des centaines d'heures), mais c'est une **perte de précision irréversible** au moment de
   l'archivage : à consigner si un jour un écart de cadence semble décalé de quelques dixièmes.
 
-## 42. ★★★ LE CHANTIER ERGONOMIE DU PILOTAGE — DIX LOTS (15/08)
+## 42. ★★★ LE CHIFFRE QUI MENT, ET LE BANC QUI MANQUAIT (14-15/08 — `pilotage.js` seul, aucun bump)
 
-> ⚠️ **AUCUN NUMÉRO DE VERSION DANS CETTE SECTION, Y COMPRIS DANS SON TITRE.** Les sections §33 à
-> §41 en portent — c'est une entorse tolérée à la **règle d'or n°2**, et elle a coûté cher : deux
-> assertions de `harnais-claude-md.mjs` étaient figées sur « SW 6.66 » et « APP 6.13 », et ont rougi
-> au bump suivant **en accusant le document alors que c'était le contrôle qui était périmé**.
-> Corrigées le 15/08 : elles **lisent** les versions dans `utils.js` et `sw.js`.
-> **Pour situer ce chantier : dix lots, neuf bumps, en une journée.** Les numéros exacts se lisent
-> dans le changelog de `public/sw.js`, qui est leur seule source.
+**Point de départ** : une capture d'écran et six mots. *« qu'est-ce qu'il se passe ? c'est quoi
+cette valeur ??? »* L'accueil affichait **« -202 j de retard »** et **« cadence mesurée ×2,93 »**
+sur un domaine de 12,5 ha qui, la veille, affichait **un jour d'avance**.
 
-**Point de départ**, mot pour mot : *« Dans pilotage, j'aime beaucoup les informations disponibles.
-Mais : j'ai l'impression que ce n'est pas rangé. C'est fouillis, on dépense du temps et de l'énergie
-à chercher une info. Certains textes ne sont peut-être pas utiles à être affichés tout le temps
-(infobulles ?). Améliore l'ergonomie et l'expérience utilisateur fois 100. »*
+**La régression venait du lot livré le matin même** — la marche 2 de l'escalier de cadence (§41b).
 
-⚠️ **Le §34 avait déjà refondu ce module** (l'axe de zoom, la portée unique, le moteur de
-diagnostic). Ce chantier-ci ne rejoue pas §34 : il traite ce que §34 n'avait pas touché — **la
-densité, la hiérarchie typographique, et le texte**.
+---
 
-### 42a. Le diagnostic, mesuré sur le code
+### 42a. ⚠️ LE DIAGNOSTIC S'EST TROMPÉ, ET IL A ÉTÉ ANNONCÉ AVANT D'ÊTRE MESURÉ
 
-| ce que Nico voyait | ce qu'il y avait dessous |
+**Premier diagnostic livré à Nico (faux)** : *« le rapport présence/barème compte toute la cave
+pendant les vendanges, d'où le ×2,93 »*. Cohérent, plausible, **entièrement inventé**. Il reposait
+sur une lecture du code et sur zéro donnée.
+
+**Ce que l'export réel a montré, le lendemain** :
+
+| mesuré sur les données de MG | valeur |
 |---|---|
-| « ce n'est pas rangé » | **les 18 tuiles arrivaient OUVERTES**, et une tuile ouverte prend toute la ligne. La grille était réglée sur 2 à 4 colonnes et **ne se remplissait jamais** : le système de mise en page était désactivé par son propre réglage d'usine |
-| « on cherche une info » | **28 tailles de texte** écrites à la main, de 8,5 à 40 px. Vingt-huit tailles, ce n'est pas une hiérarchie : c'est son absence. L'œil n'a aucun point d'accroche, alors il lit tout |
-| « certains textes… tout le temps » | **≈ 25 000 caractères de prose** affichés en permanence, 217 phrases dans 60 fonctions — neuf pages A4. Et **AUCUN moyen d'en replier une seule** : zéro `<details>`, zéro infobulle, dans tout le projet |
-| — | **cinq bandeaux** avant le premier chiffre. Mesuré au navigateur : **728 px sur téléphone**, pour un écran de 844 |
+| saison active | `Vendanges`, début **2026-08-01** |
+| sa position sur l'axe campagne | **0** (l'axe s'ouvre le 1er août) |
+| période appariée par `_pilCmpSnapshot` | **`Hiver 2025–2026`** |
+| sa position sur l'axe | **61** |
+| écart / tolérance | 61 ≤ **75** → accepté |
+| **recouvrement réel des deux périodes** | **0 %** |
+| dénominateur `stats.hFaites` | **787 h** |
+| **achèvement de la période appariée** | **32 %** |
 
-★★★ **LA CAUSE RACINE :** *le module ne distinguait pas **l'answer**, **ce qui la cadre**, et
-**comment elle est calculée**.* Les trois avaient le même poids visuel, au même endroit.
+★★★ **Le code appariait un HIVER à une VENDANGE.** Pas la cave : un appariement absurde, plus un
+dénominateur amputé. Le ×2,93 = présence de six mois d'hiver ÷ le tiers de travail qui avait été
+validé.
 
-### 42b. ★★★ LA RÈGLE DES TROIS FAMILLES
+★ **La leçon n'est pas « je me suis trompé »** — c'est *« j'ai livré une explication à un client
+sans l'avoir mesurée »*. Une hypothèse plausible énoncée sur le ton du constat vaut faux témoignage.
+Le mot manquant tenait en trois lettres : **« sans doute »**.
 
-Écrite dans `utils.js`, au-dessus de `MV_INFO`, et appliquée aux huit onglets. **Toute phrase
-affichée tombe dans une seule :**
+---
 
-| | quoi | où ça va |
+### 42b. Pourquoi la tolérance de 75 jours ne protégeait pas
+
+Le commentaire de `_PIL_CMP_TOL` affirmait : *« 75 jours … sans jamais confondre un printemps avec
+un hiver (151 jours d'écart sur l'axe) »*. **Exact — et calibré sur cette seule paire.**
+
+L'axe campagne s'ouvre le **1er août**. Une vendange qui démarre ce jour-là est à l'offset **0** ;
+un hiver ouvert le 1er octobre est à **61**. La paire vendange/hiver n'a **jamais été vérifiée**.
+
+★★★ **Un garde-fou calibré sur un exemple protège de cet exemple.** Il faut l'éprouver sur toutes
+les paires que les données peuvent produire, pas sur celle qu'on avait en tête en l'écrivant.
+
+⚠️ La borne `k ∈ [0,5 ; 3]` n'a pas rattrapé non plus : **2,93 passe à 0,07 près**. Et son propre
+commentaire annonçait le cas — *« un facteur hors bornes ne mesure plus une cadence, il mesure un
+trou de saisie »*. C'était exactement un trou de saisie, et la borne l'a laissé passer.
+
+---
+
+### 42c. Les trois correctifs
+
+| # | correctif | effet |
 |---|---|---|
-| ① | ce qui **CADRE** le chiffre — sa date, sa source, son périmètre | **reste** à l'écran, en UNE ligne, toujours à la même place |
-| ② | ce qui **EXPLIQUE le calcul** — méthode, conventions, biais assumés | derrière la pastille **« i »** : ça se lit une fois |
-| ③ | ce qui **DIT QUOI FAIRE** | devient un **BOUTON**, pas un chemin à retenir |
+| 1 | `cadAppl` — **seule la marche 1 pilote une projection** | l'écart historique reste *lu*, il ne multiplie plus ni charge ni budget |
+| 2 | `_pilCmpRecouvre` ≥ **50 %** | deux périodes homologues **se recouvrent** ; la distance entre leurs débuts ne suffit pas |
+| 3 | `_pilCmpAcheve` ≥ **80 %** | une période archivée incomplète n'est plus une référence |
 
-⚠️⚠️ **CE N'EST PAS « CACHER LE TEXTE ».** La moitié de ces phrases est la **seule trace écrite**
-d'une convention du domaine. Les supprimer serait la faute inverse, et plus grave : **un chiffre
-sans son cadre ment** (§34, §41). **Rien n'a été supprimé** — 34 fiches conservent l'intégralité,
-pour ≈ 20 000 caractères de méthode rangés.
+**Cinq sites de projection gardés** : facteur `k` de la date, budget projeté, ligne de fin du
+graphe, sa légende, KPI budget de l'accueil.
 
-★ **La signature visuelle de ① : un filet doré de 2 px devant la ligne.** Partout où ce filet
-apparaît — carte, verdict, sous-titre —, la phrase qui suit dit **sur quoi le chiffre au-dessus a
-été calculé**. C'est le seul élément que rien ne replie jamais.
+⚠️ **Le cinquième avait été oublié le matin.** §41b annonçait « quatre points d'affichage repris
+pour annoncer la source » — **les quatre étaient dans l'onglet Économie**. Le verdict et le KPI de
+l'**accueil** disaient toujours « cadence mesurée ×2,93 » au présent. **La faute de §34, commise sur
+les deux premiers chiffres que voit l'utilisateur.**
 
-### 42c. Les primitives créées
+★ **Compter les sites ne suffit pas : il faut les situer.** « J'en ai traité quatre » ne dit rien si
+les quatre sont sur le même écran.
 
-- **`MV_INFO` + `_mvInfoOpen(clé)` + `_mvInfoBtn(clé)`** (`utils.js`) et **`#ovInfo`** (`index.html`).
-  Un seul écouteur **délégué** sur le document : aucun module n'a rien à brancher.
-  ⚠️⚠️ **`stopPropagation` est indispensable** : la pastille vit dans un en-tête de tuile qui replie
-  la tuile au clic. Sans lui, ouvrir la fiche **fermerait l'écran qu'on cherche à comprendre**.
-  ★ Elle vit **à côté de `MV_AIDE`**, et pour la même raison : c'est ce fichier que la règle
-  d'accompagnement (règle d'or n°4) couvre. Une fiche posée ailleurs vieillirait sans relecture.
-  ★ `openOv('ovInfo')` : Échap, retour arrière, empilement de z-index et restauration du focus
-  viennent gratuitement. **On ne réinvente pas un overlay.**
-- **`_mvInfoSet(clé, fiche)` — les fiches VIVANTES.** Certaines explications citent des chiffres du
-  moment (« 2 parcelles dépassent de 30 % ») : impossible à écrire d'avance.
-  ⚠️ **On n'ouvre pas une porte à du contenu libre** : la clé reste **DÉCLARÉE** dans `MV_INFO` avec
-  un repli honnête, et `_mvInfoSet` **refuse toute clé non déclarée** (trace en `'info'`). Le
-  contrôle statique du harnais tient donc aussi sur les fiches dynamiques.
-- **`_pecFiabCard(Z, R, cleFia, cleRem, okTxt, okSous)`** — **une carte, deux écrans.** Écrite pour
-  la Synthèse d'Économie, elle répondait déjà à la question de l'Exercice. La ré-implémenter, c'était
-  garantir qu'elles divergeraient. Elle prend ses clés en argument ; le harnais vérifie que les deux
-  écrans **n'en partagent aucune** (une fiche vivante remplie par l'un s'afficherait sinon sous la
-  pastille de l'autre).
-- **`_pilTile(…, infoCle)` et `_pcavCard(…, infoCle)`** — argument **optionnel** en dernière
-  position. Les 43 appels existants restent valides tels quels et posent leur pastille au fur et à
-  mesure que leur fiche est écrite.
+**Non-régression vérifiée** : `Saison verte 2027` trouve toujours `Printemps 2026` — recouvrement
+100 %, achèvement 100 %. *Un correctif qui bloque tout est aussi faux qu'un correctif qui apparie
+tout.*
 
-### 42d. La carte à trois étages, et le défaut qui s'inverse
+---
 
-`_pilTile` rend désormais **trois étages, tous dans `.pil-th`** — donc tous visibles carte repliée :
-① l'étiquette (+ pastille + chevron) · ② **LE CHIFFRE**, seul sur sa ligne · ③ **la ligne de cadre**.
+### 42d. ★★★ LE BANC DE CHIFFRES — `scripts/banc/`
 
-⚠️ **C'est l'unique justification du repli par défaut.** Si le chiffre ou son cadre tombaient dans le
-corps, replier **cacherait** une information. Le harnais l'exige **en exécutant `_pilTile`** et en
-cherchant la balise fermante qui correspond vraiment — sa première version découpait la source entre
-deux motifs et restait **verte** quand on sortait le chiffre de l'en-tête.
+**La vraie faille n'était pas dans la cadence.** C'était : *rien ne surveille les valeurs
+affichées.* Le preflight contrôle la **forme** — sélecteurs, ancres, `catch{}`. L'accueil pouvait
+passer de +1 j à -202 j sans qu'une ligne rougisse.
 
-★★★ **`_PIL_ST_V` — LA MIGRATION SANS LAQUELLE LE LOT EST INVISIBLE.** `_pilSaveState` grave l'état
-**complet** dès qu'on touche une tuile, un onglet de graphe ou une case. MG et Chapelle avaient donc,
-depuis des mois, un `collapsed` tout à zéro dans leur navigateur — et **au chargement, le mémorisé
-gagne sur le défaut**. Changer le défaut sans marqueur ne leur aurait **strictement rien fait** :
-installer la mise à jour, voir le même écran. C'est le piège déjà vécu avec `avc_etp` / `an_frise`.
-
-- Un numéro de version d'état, monté d'un cran, et `_pilMigrEtat` repose la disposition **une fois**.
-- ⚠️ **L'ORDRE COMPTE** : la migration passe **APRÈS** `_pilNormalize`, qui reconstruit l'objet à
-  partir des clés connues et emporterait `v` avec lui — la migration se rejouerait sans fin.
-- ⚠️ **Seule la DISPOSITION repart du neuf.** `show`, `pie`, `bar`, `sub` sont des choix de contenu :
-  ils survivent. Vérifié **en exécutant la migration sur un état mémorisé réaliste**, pas en la
-  relisant.
-- ★ **Arbitrage tranché par Nico** (option A) : on repose la disposition pour tout le monde, une
-  fois. Replier ne cache aucun chiffre, donc le seul « réglage perdu » est un choix qui n'a plus le
-  même sens après le lot.
-
-★ **Une seule carte dépliée à la fois**, sur toute la page — c'est ce qui rend ses colonnes à la
-grille. ⚠️ Les autres sont fermées **par le même chemin d'état** : rien n'est fermé à l'écran sans
-être écrit dans `collapsed`, sinon le rendu suivant rouvre.
-
-### 42e. L'échelle de texte — onze pas nommés
-
-28 valeurs en dur → **11 pas nommés par leur rôle**, 259 appels réécrits.
-`hero 40 · xxl 31 · xl 27 · lg 23 · md 20 · sm 17 · base 14 · txt 12,5 · micro 11 · lbl 10,5 · nano 9,5`
-
-- **Aucun déplacement ne dépasse 1 px** — le script s'arrête tout seul si un mouvement l'excède.
-  117 occurrences ne bougent pas, 113 de 0,5 px, 29 de 1 px.
-- ⚠️⚠️ **CHAQUE APPEL PORTE SON REPLI** : `var(--pt-txt,12.5px)`, jamais `var(--pt-txt)`. Une
-  variable inconnue rend la déclaration **invalide** : le navigateur la jette et le texte retombe à
-  la taille héritée, **en silence et partout à la fois**. Le repli protège un client dont le
-  `styles.css` serait en retard sur le JS. **Vérifié dans un vrai navigateur, avec et sans feuille.**
-- ★ L'échelle a d'abord vécu dans `_pilCssV2()` pour être livrée **sans bump**, puis a remonté dans
-  `styles.css` au premier lot qui bumpait — avec `_PIL_SEM` (dette §34i soldée).
-  ⚠️ **Le harnais du premier lot est alors passé à 13 rouges.** C'est exactement son travail : il
-  vérifiait que l'échelle était déclarée dans `_pilCssV2`. **Un déménagement doit faire rougir.**
-
-### 42f. ⚠️⚠️⚠️ LA LEÇON DU CHANTIER : LES ASSERTIONS FAUSSES
-
-**Sur dix lots : zéro bug livré, et une quinzaine d'assertions fausses de ma main.** Toutes de la
-même famille — **elles mesuraient autre chose que ce qu'elles annonçaient**. Le catalogue, parce
-qu'il se répétera :
-
-| la faute | l'exemple vécu |
+| fichier | rôle |
 |---|---|
-| **« au moins une fois » au lieu de compter** | `_mvInfoBtn(cleFia)` cherché une fois : retirer la pastille de la branche « il manque des postes » restait **vert** grâce à la branche « tout va bien » — or c'est dans le cas problématique qu'on en a besoin |
-| **idem, sur deux chemins d'appel** | `_pilLoadState` a **deux** chemins (clé utilisateur, clé domaine). La contre-épreuve n'en abîmait qu'un, et deux assertions restaient vertes |
-| **piège de préfixe** | `/function _pecZeros/` est satisfait par `_pecZerosX`. Renommer une fonction en lui ajoutant une lettre passait au vert |
-| **idem sur un sélecteur CSS** | `/\.pil-souslig\{/` était satisfait par la règle du **bloc mobile**, qui porte le même sélecteur |
-| **chercher une phrase dans du texte échappé** | un `!includes` sur `la valeur de la r\u00e9colte` est vrai dès qu'un niveau d'échappement diverge — **donc toujours vert**. Remplacé par une **mesure de longueur**, qui ne peut pas se tromper de niveau |
-| **motif trop naïf sur du JS** | `[^)]*` s'arrête au premier `)` de `==='function'?(` — la famille §34g |
-| **découper la source au lieu de l'exécuter** | la tranche entre deux motifs englobait les deux cas : sortir le chiffre de l'en-tête restait vert. **On appelle la fonction, on lit le HTML rendu** |
-| **lire un commentaire** | la phrase déplacée survivait dans le commentaire qui documente son déplacement (§34g, dans l'autre sens) |
+| `scripts/banc/extrait.mjs` | découpe les **fonctions réelles** de `src/pilotage.js` (équilibre d'accolades, chaînes et commentaires sautés) et les exécute sur un faux `window` |
+| `scripts/banc/banc.mjs` | mesures + valeurs figées + règles de bon sens + scénarios |
+| `scripts/banc/instantane.json` | données réelles **réduites et anonymisées** (1,6 ko) |
+| `scripts/banc/baseline.json` | les chiffres gravés |
+| `scripts/banc/garde-projection.mjs` | 18 assertions sur les gardes de projection |
+| `scripts/banc/LISEZ-MOI.md` | notice |
 
-★★★ **ET LE SYMÉTRIQUE, PLUS INSIDIEUX : LE DÉFAUT MAL CONSTRUIT.** Deux contre-épreuves
-remplaçaient une phrase courte par une **autre phrase courte** : le bloc ne redevenait pas un pavé,
-donc la mesure de longueur avait **raison** de rester verte. **§34h : vérifier que le défaut
-reproduit la vraie régression, pas seulement qu'il change quelque chose.** Un défaut qui touche le
-mauvais endroit accuse le harnais à tort — vécu aussi avec `capacite:1,`, qui existe dans **deux**
-blocs (`collapsed` et `prs_capacite` de `show`) : le remplacement tombait dans le mauvais.
+Branché sur `npm run check` **et** `prebuild` : il tourne avant chaque build.
 
-> **Le geste qui en découle, ajouté à toutes les contre-épreuves du chantier :**
-> elles impriment désormais **le numéro de la ligne modifiée**. Un défaut qui atterrit ailleurs
-> qu'attendu se voit immédiatement, au lieu de faire accuser une assertion correcte.
+    npm run banc                              contrôle
+    node scripts/banc/banc.mjs --engraver     re-graver un changement VOULU
 
-### 42g. ★★★ MESURER — ET CE QUE LE FICHIER NE PEUT PAS DIRE
+**Deux mécanismes, pas un** :
+- **valeurs figées** — « ça a changé ». Seules, elles auraient gravé -202 j comme référence.
+- **règles de bon sens** — « c'est faux ». Vraies quelles que soient les données.
 
-**J'ai voulu donner un chiffre global** : « pavés de plus de 150 caractères dans `pilotage.js` »,
-52 au départ, 30 à la fin. **Ce chiffre ne veut presque rien dire**, et il fallait le dire : les
-paragraphes déplacés sont **toujours des chaînes dans le même fichier**, simplement rendues dans une
-feuille au lieu de l'écran. **Un comptage sur le fichier ne peut pas faire la différence.**
+⚠️ **Aucune règle n'exige qu'un appariement soit trouvé.** Exiger qu'on trouve toujours un homologue,
+c'est le travers d'origine : **plutôt rien que n'importe quoi**.
 
-★ **Le seul chiffre honnête s'obtient en EXÉCUTANT l'écran**, ancienne et nouvelle version sur le
-**même état**, puis en comptant le texte rendu :
+⚠️ **Le banc n'utilise jamais une copie de la fonction qu'il mesure** (§40). Une copie diverge au
+premier lot et verdit sur du code mort.
 
-| écran | avant | après |
+---
+
+### 42e. ★★★ QUATRE CONTRE-ÉPREUVES VERTES À TORT — DEUX GARDES QUI SE MASQUENT
+
+Premier jeu de contre-épreuves sur les correctifs 2 et 3 : **retirer le recouvrement → vert.
+Retirer l'achèvement → vert. Neutraliser le seuil → vert.** Le banc semblait ne rien protéger.
+
+**Explication** : les deux gardes rejetaient déjà l'`Hiver` **chacune séparément**. En retirer une
+ne changeait pas le résultat. Le banc ne mentait pas — il ne pouvait pas distinguer laquelle
+protégeait.
+
+★★★ **Deux gardes redondantes sur le même cas sont chacune non testables.** Il faut un scénario
+où **une seule** peut jouer :
+
+| scénario | archive | attendu |
 |---|---|---|
-| Économie › « Ce qu'il faut regarder » | 1 288 car. | **185** (−86 %) |
-| Économie › Exercice, en tête d'écran | 1 828 car. | **341** (−81 %) |
-| Sous-titres de cartes d'Économie | 1 185 car. | **272** (−77 %) |
-| Le verdict, moyenne des 8 branches | 318 car. | **203** (−36 %) |
-| Onglet Équipe & matériel, hauteur (ordinateur) | ~2 080 px | **237 px** replié, 4 colonnes |
-| **Jusqu'au premier chiffre (téléphone)** | **728 px** | **442 px** (−39 %) |
+| `scenario_garde_recouvrement` | achevée à **100 %**, disjointe | `null` — seul le recouvrement peut rejeter |
+| `scenario_garde_achevement` | recouvrante à **100 %**, close à **32 %** | `null` — seul l'achèvement peut rejeter |
+| `scenario_temoin_acheve` | recouvrante, close à **95 %** | apparié — la garde ne bloque pas tout |
+| `scenario_legitime` | données réelles | `Printemps 2026` |
 
-⚠️ **Un lot a mesuré une hausse et je l'ai annoncée** : le sous-lot « Équipe & matériel » a fait
-**monter** le texte à l'écran de 313 caractères, parce que les lignes de cadre et les textes de
-boutons sont plus longs que les phrases de méthode sorties. **La nature du texte avait changé, pas
-son volume.** Un chantier qui n'annonce que ses bonnes mesures ne mesure pas, il plaide.
+Après ajout : **8 contre-épreuves, 8 rouges.** Le cas nominal reste sur données réelles ; les
+scénarios ciblés sont synthétiques **et assumés comme tels** — ils ne mesurent pas un domaine, ils
+prouvent que chaque garde mord.
 
-### 42h. ⚠️⚠️ CE QU'AUCUN CONTRÔLE AUTOMATIQUE NE VOIT
+---
 
-**Trois défauts trouvés uniquement en regardant une capture d'écran.** Le preflight, les harnais, la
-CI : aucun ne lit une mise en page.
+### 42f. ⚠️⚠️ L'EXPORT JSON EST INCOMPLET — À REFAIRE
 
-1. **Le `<b>` qui devient son propre item flex.** Dans un conteneur `display:flex`, **chaque élément
-   enfant est un item séparé** : le `<b>` du nom de campagne formait sa propre colonne et coupait la
-   ligne de cadre en trois morceaux. **Correctif : envelopper le texte dans un `<span>`.**
-   ★ Le même piège est **impossible sur les cartes** : `_pilTile` **échappe** son sous-titre, donc
-   aucune balise n'y devient un item — et le harnais vérifie que ça reste vrai.
-2. **La carte à `width:100%` dans une frise.** En passant les quatre photos en bande horizontale, la
-   première occupait presque toute la largeur : la règle de base porte `width:100%`, qu'il fallait
-   neutraliser.
-3. **Un CSS extrait par expression régulière.** Ma première fumée visuelle d'Économie découpait
-   `_pecCss` au regex : elle cassait sur les apostrophes échappées et rendait une feuille **mutilée**
-   — la capture montrait du texte nu, et j'aurais pu conclure à un défaut de style.
-   ★ **Correctif de méthode, valable partout** : on **exécute** `_pecCss()` avec un faux `document`
-   et on récupère ce qu'elle pose vraiment. *Exécuter, ne pas relire* — la même règle que pour
-   `WHATS_NEW`, `MV_INFO` et la migration d'état.
+`src/reglages.js:3078` exporte **8 collections sur les 24** de `COLLECTIONS` (`src/firebase.js:232`).
 
-### 42i. Les autres pièges du chantier
+**Ce que l'export contient** : `parcelles`, `journal` (hors météo), `sessions`, `traitements`,
+`membres` *(réduits à `nom`/`roles`/`statut`)*, `saisons`, `taches`, `historique`.
 
-- ⚠️⚠️ **DEUX « ok » POUR ZÉRO OCTET ÉCRIT.** Un script de patch a affiché « ok cuivre » et
-  « ok IFT », puis l'assert du motif suivant a levé — et **l'écriture, placée en fin de script,
-  n'a jamais eu lieu**. **Correctif : écrire après CHAQUE motif, et relire le disque pour
-  confirmer.** C'est la variante silencieuse du §25.
-- ⚠️ **Une contre-épreuve a laissé les fichiers abîmés sur le disque** : l'assert « défaut non
-  injecté » tombait **après** avoir posé la version abîmée. Repéré en relisant `git status`, pas
-  parce que quelque chose avait rougi. **On repose la référence AVANT de s'arrêter.**
-- ⚠️ **J'ai inventé une constante.** `PIL_TREAT_DAYS` n'existait nulle part ; `node --check` ne voit
-  pas un identifiant inconnu, seule l'exécution l'aurait levé. L'horizon était en dur dans un
-  `slice(0,5)` : il porte maintenant un nom.
-- ⚠️ **Un cliquet à l'envers, dans un contrôle EXISTANT.** `A8` de `mv-harnais-audit-pil` vérifiait
-  qu'il y a **exactement** 8 boutons de redirection : il rougissait donc dès qu'on en **ajoutait**
-  un — c'est-à-dire chaque fois qu'on faisait ce qu'il existe pour encourager. Converti en vrai
-  cliquet : **le compte ne doit jamais descendre.**
-- ⚠️ **Une ancre de patch a échoué sur une casse** : le fichier écrit `\u203A`, j'avais écrit
-  `\u203a`. L'assert a arrêté le script — c'est son travail.
-- ★ **`pilotage.js` n'avait AUCUN import** : il lisait tout depuis `window`. Ça marche parce que
-  l'ordre de chargement met `utils.js` en premier — et « un appel qui marche par ordre de chargement
-  n'est pas un appel correct ». `_PIL_SEM` et `_mvInfoBtn` y arrivent par un **vrai import**.
+**Ce qui manque — et qui bloque le banc :**
 
-### 42j. Le chrome — ce qu'on traverse avant le premier chiffre
+| clé absente | ce qu'on ne peut pas recalculer sans elle |
+|---|---|
+| `planning_entries` | **la présence** — numérateur de tout écart de cadence |
+| `planning_templates` | les heures contractuelles, la capacité |
+| `planning_acomptes`, `planning_hsup` | la masse salariale réelle |
+| `travaux` | la charge restante, le % d'avancement |
+| `config` | `CONFIG.eco`, `objectifs_fin`, `task_windows` — le budget et l'objectif |
+| **contrats des membres** | l'effectif au pic, les dates d'entrée/sortie |
+| `paie` | les taux horaires — **admin-only** en lecture (`firestore.rules`) |
 
-**Mesuré en montant le VRAI squelette** (`_pilSkeleton` exécuté avec des bouchons) et en le rendant
-au navigateur. Sur téléphone : masthead 200 · fil d'Ariane 68 · onglets 59 · photos 259 · titre 52.
+★★★ **Conséquence directe : le chiffre le plus gros de l'accueil — la marge en jours — n'est
+surveillé par personne.** Le banc attrape ce qui a dérapé cette fois-ci, pas la famille entière.
 
-- **Le bandeau de titre disparaît.** `<h2 class="pil-h2">` répétait **mot pour mot** l'onglet actif,
-  en 26 px, sur deux lignes en mobile. La barre d'onglets le dit déjà, en surbrillance. Le
-  sous-titre des libellés longs descend en une **ligne fine** ; « Choisir les indicateurs » y rejoint
-  la **roue crantée**. ⚠️ **`#pil-gear` garde son nom** : `_pilBind` le retrouve.
-- **Les quatre photos passent en frise** sous 700 px. ⚠️ Elles restent **quatre** et restent
-  **visibles** : on ne remplace pas quatre chiffres par un bouton « voir les chiffres ». Le
-  harnais porte une assertion pour ce cas précis.
-- **L'instruction « cliquez une campagne pour zoomer » quitte la barre COLLANTE** sur téléphone :
-  une ligne qu'on apprend une fois n'a pas à occuper chaque écran en permanence. **Sur grand écran
-  elle reste** — la place ne manque pas.
+**À faire :**
 
-★ **C'est ce lot qui a rendu fausse la phrase « conçu pour le grand écran »** de la fiche d'aide et
-du guide. Elle était vraie, elle a été **laissée volontairement périmée** pendant tout le chantier,
-et **réécrite par le lot qui la périme** — jamais par un lot « de finition ».
+1. **Refondre `exportJSON`** pour couvrir les 24 clés de `COLLECTIONS`. Ne pas maintenir deux
+   listes : **dériver la liste d'export DE `COLLECTIONS`**, sinon toute clé future sera oubliée en
+   silence — c'est exactement ce qui s'est produit ici.
+2. **Cesser de tronquer `membres`.** La réduction à `{nom, roles, statut}` était une précaution
+   RGPD ; elle ampute l'export de tout le modèle contractuel. Remplacer par un **choix explicite à
+   l'export** : *« avec les données de paie »* / *« sans »*.
+3. **`paie` : jamais dans un export par défaut.** Taux nominatifs. Case à cocher séparée, admin
+   uniquement, et mention dans le fichier produit.
+4. **Monter la version d'export** — elle est figée à `'4.7'` alors que le format changera.
+5. Une fois l'export complet : **étendre le banc** à la marge en jours, la date de fin, le budget
+   projeté et l'effectif au pic, puis **graver la référence sur un état connu bon** (par ex. l'état
+   du 13/08, qui affichait « +1 j d'avance »).
 
-### 42k. Ce qui reste ouvert
+---
 
-- ⚠️ **`npm run lint` et ESLint n'ont jamais tourné côté Claude** de tout le chantier :
-  `node_modules` est absent du bac à sable, et l'échec est identique sur la base d'origine.
-  **À lancer chez Nico avant de pousser.**
-- ⚠️ **Les rendus de Simuler et de Cave sont vérifiés par assertion mais n'ont pas été REGARDÉS**
-  (budget d'outils épuisé sur ce lot). Vu que trois défauts du chantier n'ont été trouvés que par
-  l'œil, **c'est le point faible du paquet** — en particulier l'étape 2 du simulateur, dont la
-  légende a été remaniée.
-- **Le doublon `_pilDiag` / `_pecZeros`** : les deux portent un constat voisin sur « pas de taux
-  horaire », à deux endroits de la même page. C'est §34 en plus petit. **Fusion = chantier de
-  moteur, pas d'ergonomie.**
-- **Les filtres cépage / commune** (§34i-1) et **la carte colorée par avancement** (§34i-3) restent
-  non livrés, pour la raison d'origine : un filtre qui change la liste sans changer les chiffres est
-  un décor.
+### 42g. ⚠️ VÉRIFIER LA PERSISTANCE CLOUD — TOUS LES CLIENTS
+
+**Côté code, c'est bon** — vérifié le 15/08 :
+
+- `saveData` (`src/app.js:702`) construit bien `planning_templates`, `planning_entries`,
+  `planning_acomptes`, `planning_hsup`, `travaux`, `config`, `membres` complets.
+- `COLLECTIONS` (`src/firebase.js:232`) les lit toutes au démarrage.
+- `FB_REALTIME` (`:272`) inclut les quatre clés de planning.
+- `fbSave` écrit **une clé par document**, sans liste blanche restrictive.
+
+⚠️ **Mais du code correct ne prouve pas que les documents existent chez chaque client.** Un domaine
+qui n'a jamais ouvert un module n'a pas son document — et personne ne s'en apercevra tant que le
+sujet ne devient pas critique.
+
+**Vérification à mener, tenant par tenant** (`marchand-grillot`, `domaine-chapelle-et-fils`, puis
+tout nouveau slug à la fin de sa mise en route) :
+
+1. Console Firestore → le doc de chaque tenant → **présence ET non-vacuité** de : `planning_entries`,
+   `planning_templates`, `travaux`, `config`, `membres`, `historique`.
+2. Pour `config` : vérifier que `CONFIG.eco` et `objectifs_fin` sont **renseignés**, pas seulement
+   présents. Un `{}` passe tous les tests d'existence et ne pilote rien.
+3. Pour `membres` : vérifier que **les contrats sont là**, pas juste les noms.
+4. `paie` : présent ? Sinon les taux ne sont nulle part, et toute l'Économie tourne sur des valeurs
+   par défaut **sans le dire**.
+
+★ **À inscrire dans la procédure de mise en route** (§27f) : la dernière étape d'une installation
+est de vérifier que les six clés existent et sont peuplées. Une installation « finie » avec un
+`config` vide est une installation qui mentira dans trois mois.
+
+★ **Piste** : une vérification automatique côté app — au chargement, si une clé attendue est absente
+ou vide, une entrée `logError` de niveau `warning`. Elle remonte dans « Signaler un problème » sans
+déranger l'utilisateur.
+
+---
+
+### 42h. Ce qui reste ouvert
+
+- ⚠️ **La marge en jours n'est toujours pas surveillée** — bloqué par 42f.
+- **`test:smoke` / `test:e2e` jamais joués** (CDN Playwright injoignable du bac à sable). Trois
+  écrans changent : verdict d'accueil, KPI budget, alertes de l'Économie.
+- **Après correctif, MG n'a plus aucune période comparable** : l'`Hiver` est disjoint, le
+  `Printemps` trop loin. L'écran affiche « Aucune saison comparable archivée ». **C'est le
+  comportement juste** — mais à confirmer de visu chez Nico.
+- **`Hiver 2025–2026` est archivé à 32 %.** Le correctif l'écarte, il ne le répare pas. Question de
+  fond : faut-il **empêcher de clôturer** une saison très incomplète, ou au moins le signaler ?
+- ⚠️ **`stats.hFaites` arrondi à l'entier** par `_calcHistoStats` — déjà noté en §41f, toujours vrai.
+- **Rejouer les contre-épreuves du 14/08 soir** (les 6 sur `cadAppl`) : elles ont été écrites avant
+  les correctifs 2 et 3, la redondance a pu en rendre certaines aveugles. Même piège qu'en 42e.

@@ -1,0 +1,135 @@
+{
+ "origine": "export MG 2026-08-14, reduit et anonymise pour le banc",
+ "saisons": [
+  {
+   "nom": "Hiver 2025–2026",
+   "debut": "2025-10-01",
+   "fin": "2026-03-31",
+   "active": false
+  },
+  {
+   "nom": "Printemps 2026",
+   "debut": "2026-03-01",
+   "fin": "2026-07-31",
+   "active": false
+  },
+  {
+   "nom": "Hiver 2026 - 2027",
+   "debut": "2026-10-01",
+   "fin": "2027-03-31",
+   "active": false
+  },
+  {
+   "nom": "Vendanges",
+   "debut": "2026-08-01",
+   "fin": "2026-09-30",
+   "active": true
+  },
+  {
+   "nom": "Saison verte 2027",
+   "debut": "2027-04-01",
+   "fin": "2027-07-31",
+   "active": false
+  }
+ ],
+ "historique": [
+  {
+   "saisonNom": "Printemps 2026",
+   "periode": "Mars – Juillet 2026",
+   "archivedAt": "2026-07-16",
+   "stats": {
+    "hFaites": 5067,
+    "tachesStats": [
+     {
+      "nom": "Reparation",
+      "h_done": 352.9,
+      "h_total": 353,
+      "pct": 100
+     },
+     {
+      "nom": "Pliage",
+      "h_done": 529.4,
+      "h_total": 529,
+      "pct": 100
+     },
+     {
+      "nom": "Entreplantation",
+      "h_done": 0,
+      "h_total": 0,
+      "pct": 100
+     },
+     {
+      "nom": "Ebourgeonnage",
+      "h_done": 588.2,
+      "h_total": 588,
+      "pct": 100
+     },
+     {
+      "nom": "Pioche",
+      "h_done": 67,
+      "h_total": 67,
+      "pct": 100
+     },
+     {
+      "nom": "Relevage",
+      "h_done": 1176.4,
+      "h_total": 1176,
+      "pct": 100
+     },
+     {
+      "nom": "Accolage",
+      "h_done": 588.2,
+      "h_total": 588,
+      "pct": 100
+     }
+    ]
+   }
+  },
+  {
+   "saisonNom": "Hiver 2025–2026",
+   "periode": "Déc 2025 – Fév 2026",
+   "archivedAt": "2026-07-26",
+   "stats": {
+    "hFaites": 787,
+    "tachesStats": [
+     {
+      "nom": "Taille",
+      "h_done": 495.3,
+      "h_total": 823,
+      "pct": 60
+     },
+     {
+      "nom": "Tirage",
+      "h_done": 145,
+      "h_total": 588,
+      "pct": 25
+     },
+     {
+      "nom": "Brulage",
+      "h_done": 143.1,
+      "h_total": 471,
+      "pct": 30
+     },
+     {
+      "nom": "Reparation",
+      "h_done": 0,
+      "h_total": 529,
+      "pct": 0
+     },
+     {
+      "nom": "Entreplantation",
+      "h_done": 0,
+      "h_total": 0,
+      "pct": 0
+     },
+     {
+      "nom": "Vendange",
+      "h_done": null,
+      "h_total": null,
+      "pct": 0
+     }
+    ]
+   }
+  }
+ ]
+}

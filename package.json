@@ -6,10 +6,10 @@
   "private": true,
   "scripts": {
     "dev": "vite",
-    "check": "node scripts/preflight.mjs",
+    "check": "node scripts/preflight.mjs && node scripts/banc/banc.mjs && node scripts/banc/garde-projection.mjs",
     "lint": "node scripts/lint-cliquet.mjs",
     "lint:vocabulaire": "node scripts/lint-vocabulaire.mjs",
-    "prebuild": "node scripts/preflight.mjs",
+    "prebuild": "node scripts/preflight.mjs && node scripts/banc/banc.mjs && node scripts/banc/garde-projection.mjs",
     "build": "vite build && node scripts/inject-precache.mjs",
     "preview": "vite preview",
     "test:smoke": "node scripts/smoke.mjs",
@@ -17,7 +17,9 @@
     "seed:e2e": "node scripts/e2e-seed.mjs",
     "test:e2e": "node scripts/e2e-local.mjs",
     "test:e2e:emu": "node scripts/e2e.mjs",
-    "deploy:staging": "firebase hosting:channel:deploy staging --expires 30d"
+    "deploy:staging": "firebase hosting:channel:deploy staging --expires 30d",
+    "banc": "node scripts/banc/banc.mjs",
+    "banc:projection": "node scripts/banc/garde-projection.mjs"
   },
   "devDependencies": {
     "eslint": "^10.4.1",

@@ -1,0 +1,17 @@
+{
+ "saison_active": "Vendanges",
+ "saison_active_offset": 0,
+ "saison_active_campagne": 2026,
+ "periode_appariee": null,
+ "appariee_offset": null,
+ "ecart_axe_jours": null,
+ "tolerance": 75,
+ "recouvrement_pct": null,
+ "hBar_denominateur": null,
+ "appariee_completion_pct": null,
+ "nb_fonctions_extraites": 10,
+ "scenario_legitime": "Printemps 2026",
+ "scenario_garde_recouvrement": null,
+ "scenario_garde_achevement": null,
+ "scenario_temoin_acheve": "VendPrec"
+}
