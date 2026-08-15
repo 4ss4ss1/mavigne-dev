@@ -7108,7 +7108,12 @@ function _pecViewSynthese(E,TL){
   }
   if(E.hasPlant) mini+='<div><div class="l">Co\u00fbt du plant</div><div class="v">'+_pilEsc(_ecoEur2(E.eurPlant))+'<small> \u20AC</small></div><div class="s">'+_pilNum(E.tot.trous)+' plants \u00e0 '+E.minTrou+' min</div></div>';
   mini+='<div><div class="l">Co\u00fbt de l\u2019heure</div><div class="v">'+_pilEsc(_ecoEur2(E.rate))+'<small> \u20AC/h</small></div><div class="s">taux moyen de l\u2019\u00e9quipe de terrain</div></div>';
-  H+='<div class="pec-card"><div class="pec-ch"><div class="pec-ct">Prix de revient</div><div class="pec-cs">'+recTxt+'. Le co\u00fbt \u00e0 la bouteille repose sur une <b>hypoth\u00e8se de conversion</b> ('+_pilEsc(_ecoEur2(E.kgB))+' kg de raisin par col), r\u00e9glable dans <b>Outils \u203A Param\u00e9trage</b> avec la journ\u00e9e de r\u00e9f\u00e9rence. Ce sont les co\u00fbts de <b>culture</b> : ni vinification, ni s\u00e8che, ni foncier, ni amortissement.</div></div>'
+  // ① Le cadre dit SUR QUELLE RECOLTE le prix est calcule. L'hypothese de
+  //   conversion et ce que le prix ne contient pas expliquent le CALCUL : fiche.
+  //   ③ Le bouton « Regler les hypotheses » existait deja, deux lignes plus bas.
+  H+='<div class="pec-card"><div class="pec-ch"><div class="pec-ct">Prix de revient</div>'
+    +'<div class="pec-cs">'+recTxt+' \u00b7 co\u00fbts de <b>culture</b> seulement'
+    +(typeof _mvInfoBtn==='function'?(' '+_mvInfoBtn('pil.eco.revient')):'')+'</div></div>'
     +'<div class="pec-cb"><div class="pec-mini">'+mini+'</div>'
     +'<div class="pec-acts"><button class="pec-btn" data-pec="param"><span>\u2699\uFE0F</span> R\u00e9gler les hypoth\u00e8ses</button>'
     +'<button class="pec-btn" data-pec="sub" data-v="pos"><span>\uD83E\uDDED</span> Voir o\u00f9 part l\u2019argent</button></div></div></div>';
@@ -7135,8 +7140,12 @@ function _pecViewPostes(E){
       +'<td class="r">\u2014</td><td class="r" style="color:'+_PEC_COL.ret+'">+'+_pilEsc(_ecoEur(E.tot.retE))+'</td><td class="r">\u2014</td><td class="r">\u2014</td>'
       +'<td style="color:var(--texte-doux)">'+_ecoH1(E.tot.retH)+' h mod\u00e9lis\u00e9es, jamais pay\u00e9es</td></tr>'
     : '';
+  // ① Ce qui reste : la maille, et l'etat de la projection — deux choses qui
+  //   changent la lecture des montants. Le POURQUOI (bareme complet contre
+  //   realise) part dans la fiche.
   var H='<div class="pec-card"><div class="pec-ch"><div class="pec-ct">O\u00f9 part l\u2019argent</div>'
-    +'<div class="pec-cs">R\u00e9partition du <b>budget</b> de la p\u00e9riode. La main-d\u2019\u0153uvre vigne est un bar\u00e8me complet ; tracteur, GNR et phyto ne sont connus qu\u2019en r\u00e9alis\u00e9 et sont '+(E.projOn?'extrapol\u00e9s au rythme constat\u00e9':'affich\u00e9s en r\u00e9alis\u00e9 seul (avancement trop faible pour projeter)')+'.</div></div>'
+    +'<div class="pec-cs"><b>Budget</b> de la p\u00e9riode \u00b7 '+(E.projOn?'tracteur, GNR et phyto extrapol\u00e9s':'tracteur, GNR et phyto en r\u00e9alis\u00e9 seul')
+    +(typeof _mvInfoBtn==='function'?(' '+_mvInfoBtn('pil.eco.postes')):'')+'</div></div>'
     +'<div class="pec-cb"><div class="pec-grid2">'
     +'<div>'+_pecDonutSvg(items,_pecEurK(E.budget),'budget')+'</div>'
     +'<div class="pec-scroll"><table class="pec-tbl" style="min-width:520px"><thead><tr><th>Poste</th><th class="r">Engag\u00e9</th><th class="r">Budget</th><th class="r">Part</th><th class="r">\u20AC/ha</th><th>Base de calcul</th></tr></thead>'
@@ -7156,7 +7165,8 @@ function _pecViewPostes(E){
   }).join('');
   window._mvGraphSuivre('#pec-g-task', function(w){ return _pecTaskSvg(E,w); });
   H+='<div class="pec-card"><div class="pec-ch"><div class="pec-ct">Co\u00fbt par travail</div>'
-    +'<div class="pec-cs">Le total d\u2019une parcelle d\u00e9pend surtout de sa taille. Le co\u00fbt d\u2019un <b>travail</b>, lui, se d\u00e9cide : m\u00e9caniser, prendre un renfort, changer la conduite. Main-d\u2019\u0153uvre vigne uniquement (bar\u00e8me h/ha \u00d7 surface \u00d7 taux de l\u2019\u00e9quipe).</div></div>'
+    +'<div class="pec-cs">Main-d\u2019\u0153uvre vigne uniquement'
+    +(typeof _mvInfoBtn==='function'?(' '+_mvInfoBtn('pil.eco.travaux')):'')+'</div></div>'
     +'<div class="pec-cb"><div id="pec-g-task"></div>'
     +'<div class="pec-scroll" style="margin-top:14px"><table class="pec-tbl"><thead><tr><th>Travail</th><th class="r">Heures</th><th class="r">Fait</th><th class="r">Engag\u00e9</th><th class="r">Reste</th><th class="r">Budget</th><th class="r">\u20AC/ha</th><th class="r">Part</th></tr></thead>'
     +'<tbody>'+(trows||'<tr><td colspan="8" class="pec-empty">Aucun travail chiffr\u00e9.</td></tr>')+'</tbody></table></div>'
@@ -7219,7 +7229,11 @@ function _pecViewParcelles(E){
     +'<td class="r">'+_pilEsc(_ecoEur(E.engage))+'</td><td class="r">'+_pilEsc(_ecoEur(E.tot.moR))+'</td>'
     +'<td class="r">'+_pilEsc(_ecoEur(E.budget))+'</td><td class="r">'+_pilEsc(_ecoEur(E.coutHaB))+'</td></tr>';
   var H='<div class="pec-card"><div class="pec-ch"><div class="pec-ct">Co\u00fbt parcelle par parcelle</div>'
-    +'<div class="pec-cs">Cliquez sur un en-t\u00eate pour trier. <b>MO</b> = main-d\u2019\u0153uvre d\u00e9j\u00e0 faite ; <b>Reste</b> = main-d\u2019\u0153uvre encore \u00e0 faire ; <b>Budget</b> = total de la p\u00e9riode. Tracteur, GNR et phyto sont du r\u00e9alis\u00e9.</div></div>'
+    // ★ LA LEGENDE DES COLONNES N'EST PAS UN CADRE : c'est un mode d'emploi du
+    //   tableau. On le lit une fois, puis on connait ses colonnes. Il part dans
+    //   la fiche, avec « cliquez pour trier ».
+    +'<div class="pec-cs"><b>Budget</b> de la p\u00e9riode, parcelle par parcelle'
+    +(typeof _mvInfoBtn==='function'?(' '+_mvInfoBtn('pil.eco.parcelles')):'')+'</div></div>'
     +'<div class="pec-cb"><div class="pec-scroll"><table class="pec-tbl" style="min-width:900px"><thead><tr>'+head+'</tr></thead><tbody>'+body+'</tbody><tfoot>'+foot+'</tfoot></table></div>'
     +'<div class="pec-acts"><button class="pec-btn" data-pec="csv"><span>\u2B07\uFE0F</span> T\u00e9l\u00e9charger le tableau (CSV)</button>'
     +'<button class="pec-btn" data-pec="copy"><span>\uD83D\uDCCB</span> Copier pour un tableur</button></div>'
@@ -7227,7 +7241,8 @@ function _pecViewParcelles(E){
     +'</div></div>';
   window._mvGraphSuivre('#pec-g-ecart', function(w){ return _pecEcartSvg(E,w); });
   H+='<div class="pec-card"><div class="pec-ch"><div class="pec-ct">\u00c9cart au co\u00fbt moyen \u00e0 l\u2019hectare</div>'
-    +'<div class="pec-cs">Ce qu\u2019une parcelle a de particulier, une fois la surface neutralis\u00e9e : plants \u00e0 remplacer, passages en plus, \u00e9quipe plus ch\u00e8re, tri des t\u00e2ches.</div></div>'
+    +'<div class="pec-cs">\u00c0 surface \u00e9gale'
+    +(typeof _mvInfoBtn==='function'?(' '+_mvInfoBtn('pil.eco.parcelles')):'')+'</div></div>'
     +'<div class="pec-cb"><div id="pec-g-ecart"></div></div></div>';
   return H;
 }
@@ -7691,7 +7706,10 @@ function _pexEntete(E){
       +'<td style="color:var(--texte-doux)">'+_pilEsc(p.det)+'</td></tr>';
   }).join('');
   var tPostes='<div class="pec-card"><div class="pec-ch"><div class="pec-ct">O\u00f9 est parti l\u2019argent</div>'
-    +'<div class="pec-cs">Trois postes, et rien d\u2019autre. La <b>conduite</b> du tracteur est dans les salaires \u2014 la compter aussi en tracteur reviendrait \u00e0 payer deux fois le tractoriste\u00a0; seul son <b>carburant</b> s\u2019ajoute.</div></div>'
+    // ★ Le POURQUOI de « trois postes » — la conduite deja comptee dans les
+    //   salaires — explique le calcul. Il part dans la fiche de l'exercice.
+    +'<div class="pec-cs">Trois postes, et rien d\u2019autre'
+    +(typeof _mvInfoBtn==='function'?(' '+_mvInfoBtn('pil.exo.postes')):'')+'</div></div>'
     +'<div class="pec-cb"><div class="pec-scroll"><table class="pec-tbl" style="min-width:560px">'
     +'<thead><tr><th>Poste</th><th class="r">Montant</th><th class="r">Part</th><th class="r">\u20AC/ha</th><th class="r">vs '+_pilEsc(cmp?cmp.ex.court:'N-1')+'</th><th>Base de calcul</th></tr></thead>'
     +'<tbody>'+pr+'</tbody>'
@@ -7730,7 +7748,7 @@ function _pexTableSal(E){
   }).join('');
   var cpT=Math.max(0,E.hPaid-E.hWork);
   return '<div class="pec-card"><div class="pec-ch"><div class="pec-ct">Les salaires, personne par personne</div>'
-    +'<div class="pec-cs">Heures <b>pay\u00e9es</b> (un cong\u00e9 pay\u00e9 en fait partie) et heures <b>au champ</b>\u00a0: l\u2019\u00e9cart entre les deux, ce sont les cong\u00e9s et les absences r\u00e9mun\u00e9r\u00e9es. Une ligne d\u2019\u00e9quipe compte son effectif r\u00e9el, jour par jour.'
+    +'<div class="pec-cs">Heures <b>pay\u00e9es</b> et heures <b>au champ</b>'+(typeof _mvInfoBtn==='function'?(' '+_mvInfoBtn('pil.exo.salaires')):'')+''
     +' Le taux affich\u00e9 est le <b>taux horaire charg\u00e9</b> de la fiche \u2014 le co\u00fbt employeur\u00a0: heures pay\u00e9es \u00d7 taux = co\u00fbt.'
     +' Chaque heure est valoris\u00e9e au taux qui valait <b>ce jour-l\u00e0</b>\u00a0: quand un taux a chang\u00e9 dans l\u2019exercice, la colonne montre les deux, et le mois du changement est coup\u00e9 \u00e0 la bonne date.'
     +'</div></div>'
@@ -7770,7 +7788,8 @@ function _pexView(){
     + V.kpis
     + (V.alertes?('<div class="pec-card"><div class="pec-cb">'+V.alertes+'</div></div>'):'')
     + '<div class="pec-card"><div class="pec-ch"><div class="pec-ct">Le rythme de l\u2019exercice</div>'
-      + '<div class="pec-cs">Mois par mois, ce qui est sorti. Un exercice viticole n\u2019est pas r\u00e9gulier \u2014 c\u2019est justement ce qu\u2019on veut voir.</div></div>'
+      + '<div class="pec-cs">Mois par mois, ce qui est sorti'
+      +(typeof _mvInfoBtn==='function'?(' '+_mvInfoBtn('pil.exo.postes')):'')+'</div></div>'
       + '<div class="pec-cb"><div id="pec-g-pex"></div></div></div>'
     + V.tPostes
     + V.garde

@@ -23,7 +23,7 @@ export const GT_ADMIN_EMAIL = 'ngdevpro@gmail.com';
 // WHATS_NEW   : tableau vide = modal desactive pour cette version.
 // Format item : { emoji:'📅', titre:'Titre court', desc:'Phrase utilisateur.' }
 // Regle : seulement les changements visibles par les utilisateurs.
-export const APP_VERSION = '6.20';
+export const APP_VERSION = '6.21';
 // ════ Journal des nouveautés (récap cumulatif) ════
 // Une entrée par version, la PLUS RÉCENTE EN HAUT : { v:'5.10', items:[ {emoji,titre,desc}, … ] }
 // À chaque release visible → AJOUTER un bloc en tête (ne pas remplacer). items:[] = release technique (rien à afficher).
@@ -354,6 +354,10 @@ window._mvGraphRepeindre = function(){
 };
 
 export const WHATS_NEW = [
+  { v:'6.21', items:[
+    { emoji: '\u{1F4CE}', titre: "\u00c9conomie\u202f: les derniers pav\u00e9s d\u2019explication passent derri\u00e8re le \u00ab\u202fi\u202f\u00bb",
+      desc: "Chaque carte d\u2019\u00c9conomie portait sous son titre un paragraphe qui expliquait <b>comment</b> son chiffre est fabriqu\u00e9\u202f: l\u2019hypoth\u00e8se de conversion du prix de revient, le d\u00e9tail des colonnes du tableau des parcelles, la diff\u00e9rence entre heures pay\u00e9es et heures au champ\u2026 Utile la premi\u00e8re fois, relu cent fois ensuite. Ces paragraphes sont maintenant derri\u00e8re le petit \u00ab\u202fi\u202f\u00bb de chaque carte. Sous le titre, il ne reste plus qu\u2019une ligne\u202f: <b>sur quoi porte le chiffre</b>. L\u2019onglet \u00c9conomie est d\u00e9sormais enti\u00e8rement pass\u00e9 \u00e0 cette r\u00e8gle." },
+  ] },
   { v:'6.20', items:[
     { emoji: '\u{1F4CA}', titre: "Le verdict d\u2019\u00c9conomie va droit au but",
       desc: "La carte qui r\u00e9pond \u00e0 \u00ab\u202fo\u00f9 j\u2019en suis\u202f\u00bb m\u00e9langeait trois choses dans un m\u00eame paragraphe\u202f: le constat, la mise en garde sur la fa\u00e7on dont le chiffre est calcul\u00e9, et un chemin \u00e0 retenir. D\u00e9sormais le constat tient en une ou deux phrases, la mise en garde est derri\u00e8re le petit \u00ab\u202fi\u202f\u00bb, et \u00ab\u202fR\u00e9glages \u203a T\u00e2ches\u202f\u00bb ou \u00ab\u202fPostes & travaux\u202f\u00bb sont des <b>boutons</b>. Quand la cadence affich\u00e9e vient de la campagne pr\u00e9c\u00e9dente, une ligne sous le texte le dit, avec le nom de la campagne et l\u2019avancement qu\u2019il reste \u00e0 atteindre." },
@@ -1990,6 +1994,49 @@ export const MV_INFO = {
   ] },
 
   // ⚠️ FICHE VIVANTE : remplie par _pexEntete (pilotage.js) a chaque rendu.
+  'pil.eco.revient': { t: 'Le prix de revient', p: [
+    'Ce sont les <b>coûts de culture</b> : ce qu\u2019il a fallu pour amener le raisin jusqu\u2019au bout du rang. <b>Ni vinification, ni sèche, ni foncier, ni amortissement</b> — ces postes-là ne passent pas par Ma Vigne.',
+    'Le coût <b>à la bouteille</b> repose sur une <b>hypothèse de conversion</b> : un nombre de kilos de raisin par col. C\u2019est un réglage, pas une mesure — il se change dans <b>Outils \u203a Paramétrage</b>, avec la journée de référence.',
+    'Le coût <b>au kilo</b>, lui, ne dépend d\u2019aucune hypothèse : il divise simplement le coût de culture par la récolte pesée.',
+    'Quand aucune récolte n\u2019est enregistrée, l\u2019écran le dit plutôt que d\u2019afficher un prix. Les rendements se saisissent au <b>Cuvier</b>.'
+  ] },
+
+  'pil.eco.postes': { t: 'Où part l\u2019argent', p: [
+    'Les quatre postes ne sont pas connus de la même façon, et c\u2019est ce qui explique leurs écarts de fiabilité.',
+    'La <b>main-d\u2019\u0153uvre vigne</b> est un <b>barème complet</b> : surface \u00d7 heures par hectare \u00d7 taux de l\u2019équipe, sur toute la période — y compris le travail qui reste à faire.',
+    '<b>Tracteur, GNR et phyto</b> ne sont connus qu\u2019en <b>réalisé</b> : ils n\u2019existent que là où une session ou un traitement a été saisi. Au-delà de <b>15 % d\u2019avancement</b>, ils sont extrapolés au rythme constaté ; en dessous, ils affichent le réalisé seul, parce qu\u2019extrapoler sur trois sessions ne veut rien dire.',
+    'Un poste extrapolé <b>montera mécaniquement</b> au fil de la période. Ce n\u2019est pas une dérive.'
+  ] },
+
+  'pil.eco.travaux': { t: 'Le coût par travail', p: [
+    'Le total d\u2019une parcelle dépend surtout de sa <b>taille</b> : une grande parcelle coûte cher parce qu\u2019elle est grande. Le coût d\u2019un <b>travail</b>, lui, se décide — mécaniser, prendre un renfort, changer la conduite. C\u2019est là qu\u2019il y a des choix à faire.',
+    'Le calcul est un <b>barème</b> : surface \u00d7 heures par hectare \u00d7 taux moyen de l\u2019équipe qui l\u2019a faite. Il ne lit pas les heures du journal — le journal dit <b>qui</b> a travaillé, jamais combien d\u2019heures.',
+    '<b>Main-d\u2019\u0153uvre vigne uniquement.</b> Le tracteur, le GNR et le phyto ne sont pas répartis par travail : ils n\u2019en portent pas la trace.',
+    'Quand un travail dépasse durablement son barème, c\u2019est le <b>barème</b> qu\u2019on corrige dans Réglages \u203a Tâches — jamais le taux horaire.'
+  ] },
+
+  'pil.eco.parcelles': { t: 'Le tableau des parcelles', p: [
+    '<b>Cliquez sur un en-tête</b> pour trier. Recliquer la même colonne inverse le sens.',
+    '<b>MO</b> = main-d\u2019\u0153uvre <b>déjà faite</b>. <b>Reste</b> = main-d\u2019\u0153uvre <b>encore à faire</b>. <b>Budget</b> = le total de la période, les deux réunis.',
+    '<b>Tracteur, GNR et phyto</b> sont du <b>réalisé</b> : seulement ce qui a été saisi, sans projection.',
+    'Le <b>coût à l\u2019hectare</b> neutralise la taille. Ce qui reste, c\u2019est ce qu\u2019une parcelle a de particulier : plants à remplacer, passages en plus, équipe plus chère, tri des tâches.',
+    'La répartition d\u2019une journée entre plusieurs parcelles suit une <b>règle 1/N</b> : c\u2019est la seule convention inventée par le logiciel, et elle suppose qu\u2019une parcelle se fait dans la journée.'
+  ] },
+
+  'pil.exo.postes': { t: 'Les trois postes de l\u2019exercice', p: [
+    '<b>Trois postes, et rien d\u2019autre</b> : les salaires, le tracteur, les intrants.',
+    'La <b>conduite</b> du tracteur est déjà dans les salaires — c\u2019est du temps de travail payé. La compter une seconde fois au poste tracteur reviendrait à <b>payer deux fois le tractoriste</b>. Seul son <b>carburant</b> s\u2019ajoute.',
+    'Le graphique <b>mois par mois</b> montre ce qui est sorti, à la date où c\u2019est sorti. Un exercice viticole n\u2019est pas régulier : la taille en hiver, les vendanges à l\u2019automne, un creux en été. Ces bosses sont normales — c\u2019est justement ce qu\u2019on vient regarder.',
+    'Sur un exercice <b>en cours</b>, les mois à venir sont à zéro parce qu\u2019ils n\u2019ont rien à montrer, pas parce qu\u2019ils ne coûteront rien.'
+  ] },
+
+  'pil.exo.salaires': { t: 'Heures payées, heures au champ', p: [
+    'Les <b>heures payées</b> incluent les congés payés, les récupérations et les absences rémunérées. Les <b>heures au champ</b> ne comptent que le travail effectif.',
+    'L\u2019écart entre les deux, ce sont donc précisément <b>les congés et les absences rémunérées</b>. Il est normal ; c\u2019est son évolution qui parle.',
+    'Une <b>ligne d\u2019équipe</b> compte son effectif réel, jour par jour : une équipe de quatre sur trois jours vaut douze journées-personne, pas trois.',
+    '\u{1F512} Ce tableau nomme la rémunération de chaque personne : il est réservé aux administrateurs, comme partout ailleurs dans Ma Vigne.'
+  ] },
+
   'pil.exo.remarques': { t: 'Les remarques du moment', p: [
     'Aucune remarque à afficher pour l\u2019instant. Ouvrez l\u2019onglet Économie \u203a Exercice pour que cette fiche se remplisse.'
   ] },

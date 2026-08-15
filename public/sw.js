@@ -1,4 +1,19 @@
-// MA VIGNE — Service Worker v6.73
+// MA VIGNE — Service Worker v6.74
+// v6.74 (15/08/2026) — LE SOUS-TITRE D’UNE CARTE EST UNE LIGNE DE CADRE.
+//   Dernier morceau d’Economie : les sept sous-titres qui restaient. Ils ne
+//   disaient pas SUR QUOI porte le chiffre — ils expliquaient comment il est
+//   fabrique, en 100 a 330 caracteres, relus a chaque ouverture de l’ecran.
+//   Six fiches neuves : prix de revient, ou part l’argent, cout par travail,
+//   tableau des parcelles, heures payees / au champ, les trois postes.
+//   ★ LE HARNAIS A TROUVE CE QUE MA RELECTURE AVAIT MANQUE. Une assertion neuve
+//     — « aucun sous-titre ne depasse 95 caracteres » — a designe DEUX cartes de
+//     l’Exercice que je n’avais pas vues : « trois postes, et rien d’autre… »
+//     (178 car.) et le graphe mois par mois (105). Une regle mecanique voit ce
+//     qu’une relecture attentive laisse passer.
+//   ⚠️ Et elle a rougi une fois A TORT : « hypothese de conversion » survit dans
+//     le libelle du REGLAGE lui-meme (_PEC_HYPO), ou il est a sa place. Devant un
+//     rouge, la premiere question reste : lequel des deux a tort ?
+//   · Le module compte desormais 19 fiches « i ».
 // v6.73 (15/08/2026) — LE VERDICT D’ECONOMIE.
 //   C’est la premiere chose qu’on lit en ouvrant l’onglet, et la seule qui
 //   reponde a « ou j’en suis ». Une seule branche s’affiche a la fois : ce
@@ -1606,7 +1621,7 @@
 // v2.22 — Fix profils vides : guard vide dans loadData() pour MEMBRES/SAISONS/TACHES
 // v2.17 — Onboarding intégré + tenantId · v2.06 — Firebase Auth · v2.00–v2.05 — divers
 const DEBUG = self.location.hostname === 'localhost' || self.location.hostname === '127.0.0.1';
-const CACHE_NAME   = 'mavigne-v6.73';
+const CACHE_NAME   = 'mavigne-v6.74';
 const TENANT_CACHE = 'mavigne-tenant';   // Cache persistant — préservé à chaque mise à jour SW
 const SYNC_TAG     = 'mavigne-sync';
 
@@ -1622,7 +1637,7 @@ const CDN_URLS = [
 ];
 
 self.addEventListener('install', event => {
-  if(DEBUG) console.log('[SW] Ma Vigne v6.73 installé');
+  if(DEBUG) console.log('[SW] Ma Vigne v6.74 installé');
   event.waitUntil(
     caches.open(CACHE_NAME).then(async cache => {
       // ── Cœur applicatif : STRICT (mise à jour ATOMIQUE) ──
@@ -1638,7 +1653,7 @@ self.addEventListener('install', event => {
 });
 
 self.addEventListener('activate', event => {
-  if(DEBUG) console.log('[SW] Ma Vigne v6.73 activé');
+  if(DEBUG) console.log('[SW] Ma Vigne v6.74 activé');
   event.waitUntil(
     caches.keys().then(keys =>
       Promise.all(

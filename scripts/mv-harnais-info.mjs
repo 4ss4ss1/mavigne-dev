@@ -265,6 +265,32 @@ t('… et le CSS ne le laisse pas retrecir', /\.pec-vcadre>span\{flex:1;min-widt
 t('la ligne de cadre des cartes echappe son contenu (pas de HTML, pas de piege)',
   /pil-tsub">'\+_pilEsc\(subHtml\)/.test(PILNU));
 
+/* ══ 5 nonies. LE SOUS-TITRE D'UNE CARTE EST UNE LIGNE DE CADRE ══
+   Pas un mode d'emploi. Un sous-titre long, c'est de la methode restee a
+   l'ecran — on la lit a chaque ouverture au lieu d'une fois. */
+const CS = [...PILNU.matchAll(/pec-cs">([^']{0,600})/g)].map(m => m[1]);
+const CS_LONGS = CS.filter(x => x.replace(/<[^>]+>/g,'').replace(/\\u[0-9A-Fa-f]{4}/g,'').length > 95);
+t('aucun sous-titre de carte ne depasse la ligne de cadre',
+  CS_LONGS.length === 0, CS_LONGS.length + ' trop long(s), dont : ' + (CS_LONGS[0]||'').slice(0,110));
+
+const CARTES_ECO = ['pil.eco.revient','pil.eco.postes','pil.eco.travaux','pil.eco.parcelles','pil.exo.salaires'];
+for (const k of CARTES_ECO)
+  t(`la carte « ${k.split('.').pop()} » porte sa fiche`, PILNU.includes("_mvInfoBtn('" + k + "')"));
+
+/* Les phrases deplacees ne doivent pas etre restees en double a l'ecran. */
+const PARTIES = [
+  // ⚠️ Ce motif existe AUSSI dans le libelle du reglage lui-meme (_PEC_HYPO), ou
+  //   il est a sa place. On ne le cherche que dans la vue qui l'affichait en trop.
+  ['l\'hypothese de conversion', 'hypoth\\u00e8se de conversion</b> (', ],
+  ['le detail des colonnes MO / Reste / Budget', 'main-d\\u2019\\u0153uvre d\\u00e9j\\u00e0 faite'],
+  ['« cliquez pour trier »', 'Cliquez sur un en-t\\u00eate'],
+  ['le bareme complet contre le realise', 'bar\\u00e8me complet'],
+  ['« ce qu\'une parcelle a de particulier »', 'a de particulier, une fois la surface'],
+  ['l\'ecart conges / absences remunerees', 'ce sont les cong\\u00e9s et les absences'],
+];
+for (const [nom, motif] of PARTIES)
+  t(nom + ' a quitte l\'ecran', !PILNU.includes(motif));
+
 /* ══ 6. LES DEUX DETTES DE §34i SOLDEES ══ */
 t('_PIL_SEM ne se declare plus dans le module', !/var _PIL_SEM\s*=/.test(PILNU));
 t('_PIL_SEM est exporte par utils.js', /export const _PIL_SEM = \{/.test(UNU));
