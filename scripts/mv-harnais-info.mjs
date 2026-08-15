@@ -13,6 +13,12 @@ const U    = fs.readFileSync('src/utils.js', 'utf8');
 const PIL  = fs.readFileSync('src/pilotage.js', 'utf8');
 const HTML = fs.readFileSync('index.html', 'utf8');
 const CSS  = fs.readFileSync('src/styles.css', 'utf8');
+function corpsPil(nom){
+  const i = PILNU.indexOf('function '+nom+'('); if(i<0) return '';
+  let d=0, k=PILNU.indexOf('{', i);
+  for(let x=k;x<PILNU.length;x++){ if(PILNU[x]==='{')d++; else if(PILNU[x]==='}'){d--; if(!d) return PILNU.slice(i,x+1);} }
+  return '';
+}
 const nu = s => s.split('\n').filter(l => !l.trimStart().startsWith('//')).join('\n');
 const UNU = nu(U), PILNU = nu(PIL);
 
@@ -227,6 +233,37 @@ const cleExo = ['pil.exo.fiabilite','pil.exo.remarques'];
 t('les deux ecrans ont des cles distinctes',
   cleSyn.every(k => cles.includes(k)) && cleExo.every(k => cles.includes(k))
   && !cleSyn.some(k => cleExo.includes(k)));
+
+/* ══ 5 octies. LE VERDICT D'ECONOMIE ══
+   Chaque branche melangeait le verdict, la mise en garde de methode et un chemin
+   a retenir. La methode etait meme dite DEUX fois : le paragraphe reprenait mot
+   pour mot la fiche `pil.cadence`, et les deux auraient vieilli separement. */
+const VERD = corpsPil('_pecVerdict');
+t('le verdict porte la fiche de la cadence (une seule source)',
+  /_mvInfoBtn\('pil\.cadence'\)/.test(VERD));
+t('la mise en garde cave/atelier a quitte le verdict',
+  !/cave et l..atelier/.test(VERD) && !/contient aussi la cave/.test(VERD));
+t('… et vit toujours dans la fiche', /la cave, l\u2019atelier et le bureau|cave, l’atelier et le bureau/.test(txt));
+t('les chemins sont devenus des boutons',
+  /data-diag="'\+_pilEsc\(a\[1\]\)/.test(VERD) && /data-pec="sub" data-v="'\+_pilEsc\(a\[1\]\)/.test(VERD));
+const VERD_PROSE = VERD.replace(/act\.push\(\[[^\]]*\]\);/g, '')
+                       .replace(/var boutons=act\.map\([\s\S]*?\}\)\.join\(''\);/, '');
+t('plus aucun chemin ecrit en toutes lettres dans un paragraphe du verdict',
+  !/\\u203[Aa]/.test(VERD_PROSE) && !/Postes &amp; travaux|est dans <b>Postes/.test(VERD_PROSE),
+  'chevron ou renvoi trouve hors des boutons');
+t('la source « an dernier » a sa ligne de cadre', /pec-vcadre/.test(VERD));
+
+/* ⚠️⚠️ LE PIEGE QU'AUCUN CONTROLE NE VOIT, TROUVE A LA CAPTURE.
+   Dans un conteneur flex, CHAQUE element enfant devient un item a part : le <b>
+   du nom de campagne formait sa propre colonne et la phrase se coupait en trois.
+   Toute ligne de cadre pouvant contenir du HTML doit envelopper son texte. */
+t('la ligne de cadre du verdict enveloppe son texte dans un span',
+  /pec-vcadre"><span>/.test(VERD));
+t('… et le CSS ne le laisse pas retrecir', /\.pec-vcadre>span\{flex:1;min-width:0\}/.test(PILNU));
+/* Le pendant pour les cartes : _pilTile ECHAPPE son sous-titre, donc aucun <b>
+   n'y devient un item. C'est ce qui rend le meme piege impossible la-bas. */
+t('la ligne de cadre des cartes echappe son contenu (pas de HTML, pas de piege)',
+  /pil-tsub">'\+_pilEsc\(subHtml\)/.test(PILNU));
 
 /* ══ 6. LES DEUX DETTES DE §34i SOLDEES ══ */
 t('_PIL_SEM ne se declare plus dans le module', !/var _PIL_SEM\s*=/.test(PILNU));

@@ -6148,6 +6148,18 @@ function _pecCss(){
   +'.pec-verdict .t{font-family:\'Cormorant Garamond\',serif;font-size:var(--pt-lg,23px);font-weight:600;color:var(--texte);line-height:1.22}'
   +'.pec-verdict .d{font-size:var(--pt-txt,12.5px);color:var(--texte-doux);margin-top:5px;line-height:1.6}'
   +'.pec-verdict .d b{color:var(--texte-med)}'
+  // ★ MEME GRAMMAIRE QUE LA CARTE A TROIS ETAGES : filet dore devant, meme
+  //   taille, meme encre. Partout ou ce filet apparait, la phrase qui suit dit
+  //   SUR QUOI le chiffre au-dessus a ete calcule.
+  //   ⚠️ Le texte est enveloppe dans un <span> : dans un conteneur flex, CHAQUE
+  //     element enfant devient un item a part. Sans le span, le <b> du nom de
+  //     campagne formait sa propre colonne et la phrase se coupait en morceaux.
+  //     Vu a la capture, pas au preflight — aucun controle ne lit une mise en page.
+  +'.pec-vcadre{display:flex;align-items:flex-start;gap:7px;margin-top:9px;font-size:var(--pt-micro,11px);line-height:1.45;color:var(--texte-doux)}'
+  +'.pec-vcadre::before{content:"";width:2px;align-self:stretch;min-height:13px;border-radius:2px;background:var(--or);opacity:.85;flex:none;margin-top:1px}'
+  +'.pec-vcadre>span{flex:1;min-width:0}'
+  +'.pec-vcadre b{color:var(--texte-med)}'
+  +'.pec-vgo{display:flex;flex-wrap:wrap;gap:7px;margin-top:11px}'
   +'.pec-pill{display:inline-block;font-size:var(--pt-lbl,10.5px);font-weight:700;border-radius:9px;padding:3px 9px;line-height:1.5}'
   +'.pec-mini{display:grid;grid-template-columns:repeat(auto-fit,minmax(140px,1fr));gap:1px;background:var(--gris-clair);border-radius:12px;overflow:hidden;border:1px solid var(--gris-clair)}'
   +'.pec-mini>div{background:var(--bg-card);padding:12px 14px}'
@@ -6819,51 +6831,84 @@ function _pecEcartSvg(E,w){
 }
 
 // ── Verdict : une phrase, celle qu'on dirait à voix haute ────────────
+// ════════════════════════════════════════════════════════════════════════════
+// LE VERDICT — CE QUI SE PASSE, PAS COMMENT ON LE CALCULE
+// ════════════════════════════════════════════════════════════════════════════
+// C'est la premiere chose qu'on lit en ouvrant Economie, et la seule qui reponde
+// a « ou j'en suis ». Une seule branche s'affiche a la fois : ce n'etait donc
+// pas un mur. Le defaut etait ailleurs — CHAQUE branche melangeait trois choses
+// dans un meme paragraphe de 200 a 500 caracteres :
+//   ① le verdict lui-meme (l'ecart, la projection, l'engage) ;
+//   ② la mise en garde sur la METHODE — « la presence vient du planning, elle
+//     contient aussi la cave et l'atelier » — deja ecrite mot pour mot dans la
+//     fiche `pil.cadence` depuis le lot du 15/08. Elle etait donc dite DEUX fois,
+//     et la version du verdict vieillira separement de l'autre ;
+//   ③ un chemin a retenir : « Reglages › Taches », « Postes & travaux ».
+// Desormais : le verdict tient en une ou deux phrases, la methode est derriere
+// la pastille (une seule source), et les chemins sont des boutons.
+// ⚠️ La pastille est celle de `pil.cadence` — on n'ecrit pas une deuxieme fiche
+//   qui dirait la meme chose sous un autre nom.
 function _pecVerdict(E,TL){
-  var em='\uD83D\uDCCA', t='', d='';
+  var em='\uD83D\uDCCA', t='', d='', act=[];
   var ec=E.cad.ok?E.cad.ecart:null;
   var sup=(ec!=null)?Math.max(0,E.projFin-E.budget):0;
   if(!E.hasRate){
     em='\uD83D\uDD0C'; t='Le chiffrage n\u2019est pas branch\u00e9';
-    d='Sans <b>taux horaire</b> dans les fiches salari\u00e9s, la main-d\u2019\u0153uvre \u2014 le premier poste du domaine \u2014 compte pour z\u00e9ro. Tout le reste de cet onglet reste faux tant que ce n\u2019est pas fait.';
+    d='Sans <b>taux horaire</b> dans les fiches salari\u00e9s, la main-d\u2019\u0153uvre \u2014 le premier poste du domaine \u2014 compte pour z\u00e9ro.';
+    act.push(['diag','equipe','R\u00e9glages \u203a \u00c9quipe']);
   } else if(E.avc<3){
     em='\uD83C\uDF31'; t='La p\u00e9riode d\u00e9marre';
-    d='Budget de r\u00e9f\u00e9rence : <b>'+_pilEsc(_ecoEur(E.budget))+'</b>, soit <b>'+_pilEsc(_ecoEur(E.coutHaB))+' \u00e0 l\u2019hectare</b> sur '+_pilHa(E.tot.surf)+' ha. L\u2019\u00e9cart de cadence devient lisible d\u00e8s qu\u2019un tiers du travail fait porte une \u00e9quipe nomm\u00e9e au journal.';
+    d='Budget de r\u00e9f\u00e9rence : <b>'+_pilEsc(_ecoEur(E.budget))+'</b>, soit <b>'+_pilEsc(_ecoEur(E.coutHaB))+' \u00e0 l\u2019hectare</b> sur '+_pilHa(E.tot.surf)+' ha.';
   } else if(ec===null){
     em='\uD83D\uDCD3'; t='Le budget tient, la cadence reste \u00e0 mesurer';
     d='<b>'+_pilEsc(_ecoEur(E.engage))+'</b> engag\u00e9s sur <b>'+_pilEsc(_ecoEur(E.budget))+'</b> ('+_pilEsc(_pecPct(E.cons))+'), pour '+_pilEsc(_pecPct(E.avc))+' du travail fait. '
       +(E.cad.src
-         ? ('L\u2019\u00e9cart de cadence n\u2019est pas encore affich\u00e9 : il compare les heures du planning au bar\u00e8me du travail fait, et sous <b>'+Math.round(E.cad.seuil)+' %</b> d\u2019avancement le travail d\u00e9j\u00e0 r\u00e9alis\u00e9 ne ressemble pas assez \u00e0 celui de toute la p\u00e9riode. Il appara\u00eetra seul.')
+         ? ('L\u2019\u00e9cart de cadence appara\u00eetra seul, d\u00e8s <b>'+Math.round(E.cad.seuil)+' %</b> d\u2019avancement.')
          : 'L\u2019\u00e9cart de cadence est indisponible : aucune heure de planning sur cette p\u00e9riode.');
   } else if(ec>15){
     em='\uD83D\uDD34'; t='Le travail prend plus de temps que le bar\u00e8me';
-    d='Sur ce qui est fait, l\u2019\u00e9quipe a pass\u00e9 <b>'+_pilEsc(_pecPct(ec))+' de temps en plus</b> que le bar\u00e8me h/ha ne le pr\u00e9voit \u2014 '+_ecoH1(E.cad.hReel)+' h de pr\u00e9sence contre '+_ecoH1(E.cad.hBar)+' h pr\u00e9vues. \u00c0 cette cadence, le reste \u00e0 engager porte la p\u00e9riode autour de <b>'+_pilEsc(_pecEurK(E.projFin))+'</b>, soit <b>'+_pilEsc(_pecEurK(sup))+'</b> au-dessus du budget. \u26a0 La pr\u00e9sence vient du planning : elle contient aussi la cave et l\u2019atelier, une partie de cet \u00e9cart peut ne pas \u00eatre du travail de vigne.';
+    d='Sur ce qui est fait, l\u2019\u00e9quipe a pass\u00e9 <b>'+_pilEsc(_pecPct(ec))+' de temps en plus</b> que le bar\u00e8me h/ha \u2014 '+_ecoH1(E.cad.hReel)+' h de pr\u00e9sence contre '+_ecoH1(E.cad.hBar)+' h pr\u00e9vues. \u00c0 cette cadence, la p\u00e9riode irait vers <b>'+_pilEsc(_pecEurK(E.projFin))+'</b>, soit <b>'+_pilEsc(_pecEurK(sup))+'</b> au-dessus du budget.';
+    act.push(['sub','pos','Voir quel travail d\u00e9rape']);
+    act.push(['diag','taches','R\u00e9glages \u203a T\u00e2ches']);
   } else if(ec>5){
     em='\uD83D\uDFE0'; t='L\u00e9g\u00e8re d\u00e9rive de cadence';
-    d='<b>'+_pilEsc(_pecPct(ec))+'</b> de temps en plus que le bar\u00e8me sur le travail fait. Rien d\u2019alarmant \u2014 mais si cela tient jusqu\u2019au bout, la p\u00e9riode co\u00fbtera <b>'+_pilEsc(_pecEurK(E.projFin))+'</b> au lieu de '+_pilEsc(_pecEurK(E.budget))+'. Le d\u00e9tail travail par travail est dans <b>Postes &amp; travaux</b>.';
+    d='<b>'+_pilEsc(_pecPct(ec))+'</b> de temps en plus que le bar\u00e8me sur le travail fait. Rien d\u2019alarmant \u2014 mais si cela tient jusqu\u2019au bout, la p\u00e9riode co\u00fbtera <b>'+_pilEsc(_pecEurK(E.projFin))+'</b> au lieu de '+_pilEsc(_pecEurK(E.budget))+'.';
+    act.push(['sub','pos','Voir travail par travail']);
   } else if(ec<-8){
     em='\uD83D\uDFE2'; t='L\u2019\u00e9quipe va plus vite que le bar\u00e8me';
-    d='<b>'+_pilEsc(_pecPct(Math.abs(ec)))+' de temps en moins</b> que pr\u00e9vu sur le travail fait. Deux lectures, qui ne s\u2019excluent pas : le bar\u00e8me h/ha est large, ou l\u2019\u00e9quipe est rod\u00e9e. La pr\u00e9sence est mesur\u00e9e au <b>planning</b> et inclut la cave et l\u2019atelier, donc elle est plut\u00f4t g\u00e9n\u00e9reuse : un \u00e9cart n\u00e9gatif en est d\u2019autant plus significatif. Un bar\u00e8me trop large fausse aussi la planification \u2014 il se r\u00e8gle dans <b>R\u00e9glages \u203A T\u00e2ches</b>.';
+    d='<b>'+_pilEsc(_pecPct(Math.abs(ec)))+' de temps en moins</b> que pr\u00e9vu sur le travail fait. Deux lectures, qui ne s\u2019excluent pas : le bar\u00e8me h/ha est large, ou l\u2019\u00e9quipe est rod\u00e9e.';
+    act.push(['diag','taches','R\u00e9glages \u203a T\u00e2ches']);
   } else {
     em='\uD83D\uDFE2'; t='La cadence colle au bar\u00e8me';
     d='\u00c9cart de <b>'+_pilEsc(_pecPct(Math.abs(ec)))+'</b> entre le temps pass\u00e9 et le bar\u00e8me : le budget de <b>'+_pilEsc(_ecoEur(E.budget))+'</b> est cr\u00e9dible. Engag\u00e9 \u00e0 ce jour <b>'+_pilEsc(_ecoEur(E.engage))+'</b>, reste \u00e0 engager <b>'+_pilEsc(_ecoEur(E.resteE))+'</b>.';
   }
   if(TL && TL.ok && TL.pace>0 && TL.projMs && TL.objMs && TL.projMs>TL.objMs){
-    d+=' \u23F1 Au rythme de d\u00e9pense actuel, le budget serait \u00e9puis\u00e9 le <b>'+_pilEsc(_pecDfrMs(TL.projMs))+'</b>, apr\u00e8s l\u2019objectif de fin des travaux.';
+    d+=' \u23F1 Au rythme actuel, le budget serait \u00e9puis\u00e9 le <b>'+_pilEsc(_pecDfrMs(TL.projMs))+'</b>, apr\u00e8s l\u2019objectif de fin des travaux.';
   }
   // ★ MARCHE 2 : la cadence ne vient PAS de la periode en cours. Le dire avant tout le
-  //   reste, et remplacer le titre : les quatre branches ci-dessus sont ecrites au present
-  //   (« l'equipe a passe », « la cadence colle ») et decriraient une periode qui n'est pas
-  //   celle affichee. Un chiffre d'histoire presente comme une mesure du moment est
+  //   reste, et remplacer le titre : les branches ci-dessus sont ecrites au present
+  //   (« l'equipe a passe », « la cadence colle ») et decriraient une periode qui n'est
+  //   pas celle affichee. Un chiffre d'histoire presente comme une mesure du moment est
   //   exactement la faute de §34.
+  //   ⚠️ Ce qui reste ici est le CADRE — d'ou vient le chiffre, et qu'il sera remplace.
+  //   Le « pourquoi un seuil » est dans la fiche.
+  var cadre=null;
   if(ec!=null && E.cad.src==='histo'){
     t=t.replace(/^La cadence colle au bar\u00e8me$/,'La cadence de l\u2019an dernier collait au bar\u00e8me');
     t='\u21a9\ufe0e '+t+' \u2014 mesur\u00e9 sur la campagne pr\u00e9c\u00e9dente';
-    d='<b>Cette p\u00e9riode n\u2019est pas encore assez avanc\u00e9e</b> ('+Math.round(E.avc)+' %, il en faut '+Math.round(E.cad.seuil)+' %) : '
-      +'la cadence affich\u00e9e est celle de <b>'+_pilEsc(E.cad.histoNom||'la campagne pr\u00e9c\u00e9dente')+'</b>, sa p\u00e9riode homologue. '
-      +'Elle sert d\u2019hypoth\u00e8se de projection, pas de mesure du moment \u2014 elle sera remplac\u00e9e par la mesure r\u00e9elle d\u00e8s le seuil atteint. '+d;
+    cadre='mesur\u00e9 sur <b>'+_pilEsc(E.cad.histoNom||'la campagne pr\u00e9c\u00e9dente')+'</b> \u2014 cette p\u00e9riode en est \u00e0 '+Math.round(E.avc)+' % sur '+Math.round(E.cad.seuil)+' %';
   }
-  return '<div class="pec-card"><div class="pec-verdict"><div class="em">'+em+'</div><div><div class="t">'+t+'</div><div class="d">'+d+'</div></div></div></div>';
+  var boutons=act.map(function(a){
+    return a[0]==='diag'
+      ? '<button class="pil-diag-go ghost" data-diag="'+_pilEsc(a[1])+'">'+_pilEsc(a[2])+' \u203a</button>'
+      : '<button class="pil-diag-go ghost" data-pec="sub" data-v="'+_pilEsc(a[1])+'">'+_pilEsc(a[2])+' \u203a</button>';
+  }).join('');
+  return '<div class="pec-card"><div class="pec-verdict"><div class="em">'+em+'</div><div>'
+    +'<div class="t">'+t+(typeof _mvInfoBtn==='function'?(' '+_mvInfoBtn('pil.cadence')):'')+'</div>'
+    +'<div class="d">'+d+'</div>'
+    +(cadre?('<div class="pec-vcadre"><span>'+cadre+'</span></div>'):'')
+    +(boutons?('<div class="pec-vgo">'+boutons+'</div>'):'')
+    +'</div></div></div>';
 }
 
 // ── Alertes : ce qui manque, ce qui dérape, ce qu'on peut corriger ───

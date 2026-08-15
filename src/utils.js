@@ -23,7 +23,7 @@ export const GT_ADMIN_EMAIL = 'ngdevpro@gmail.com';
 // WHATS_NEW   : tableau vide = modal desactive pour cette version.
 // Format item : { emoji:'📅', titre:'Titre court', desc:'Phrase utilisateur.' }
 // Regle : seulement les changements visibles par les utilisateurs.
-export const APP_VERSION = '6.19';
+export const APP_VERSION = '6.20';
 // ════ Journal des nouveautés (récap cumulatif) ════
 // Une entrée par version, la PLUS RÉCENTE EN HAUT : { v:'5.10', items:[ {emoji,titre,desc}, … ] }
 // À chaque release visible → AJOUTER un bloc en tête (ne pas remplacer). items:[] = release technique (rien à afficher).
@@ -354,6 +354,10 @@ window._mvGraphRepeindre = function(){
 };
 
 export const WHATS_NEW = [
+  { v:'6.20', items:[
+    { emoji: '\u{1F4CA}', titre: "Le verdict d\u2019\u00c9conomie va droit au but",
+      desc: "La carte qui r\u00e9pond \u00e0 \u00ab\u202fo\u00f9 j\u2019en suis\u202f\u00bb m\u00e9langeait trois choses dans un m\u00eame paragraphe\u202f: le constat, la mise en garde sur la fa\u00e7on dont le chiffre est calcul\u00e9, et un chemin \u00e0 retenir. D\u00e9sormais le constat tient en une ou deux phrases, la mise en garde est derri\u00e8re le petit \u00ab\u202fi\u202f\u00bb, et \u00ab\u202fR\u00e9glages \u203a T\u00e2ches\u202f\u00bb ou \u00ab\u202fPostes & travaux\u202f\u00bb sont des <b>boutons</b>. Quand la cadence affich\u00e9e vient de la campagne pr\u00e9c\u00e9dente, une ligne sous le texte le dit, avec le nom de la campagne et l\u2019avancement qu\u2019il reste \u00e0 atteindre." },
+  ] },
   { v:'6.19', items:[
     { emoji: '\u{1F9FE}', titre: "L\u2019onglet Exercice s\u2019aligne\u202f: sept avertissements deviennent une carte",
       desc: "M\u00eame changement que la Synth\u00e8se la semaine derni\u00e8re, appliqu\u00e9 au bilan d\u2019un exercice. Vous voyez d\u2019abord <b>combien de postes sortent \u00e0 z\u00e9ro</b> et le bouton pour aller les renseigner\u202f; le reste se replie derri\u00e8re la puce \u00ab\u202fN remarques\u202f\u00bb. Le rappel \u00ab\u202fce total n\u2019est pas un compte de r\u00e9sultat\u202f\u00bb <b>reste affich\u00e9</b> \u2014 c\u2019est lui qui vous \u00e9vite de comparer ce chiffre ligne \u00e0 ligne au bilan de votre comptable. La liste de ce qui n\u2019y est pas (fermage, amortissements, assurances\u2026) est derri\u00e8re son petit \u00ab\u202fi\u202f\u00bb." },
@@ -1797,6 +1801,7 @@ var MV_AIDE = {
       ['Le total de l’Exercice n’est pas un compte de résultat', ": Ma Vigne connaît ce qui passe par elle — heures payées, carburant, achats d’intrants. Ni le fermage, ni les amortissements, ni les assurances, ni vos cotisations d’exploitant. Ce total sert à <b>piloter vos charges d’un bilan à l’autre</b>, pas à remplacer votre comptable."],
       ['La carte de fiabilité d’Économie', ": elle dit combien de <b>postes de dépense sortent à zéro</b> faute d’une donnée — un taux horaire, le prix du GNR, une dose. Ce n’est pas « un peu bas » : c’est zéro, et le budget affiché n’est qu’un plancher. Chaque poste manquant porte son bouton. La puce « N remarques » en dessous ouvre tout ce qui n’empêche pas un calcul mais change sa lecture."],
       ['Économie', "compare un budget de barème à ce qui est engagé, sur la <b>période consultée</b> — le coût d’un bilan entier se lit dans sa sous-vue <b>Exercice</b>. Quand l’écart est grand, c’est le barème qu’on corrige dans Réglages, jamais le taux horaire."],
+      ['La carte de verdict d’Économie', ": elle dit en une phrase où vous en êtes, et pose les boutons pour agir — voir quel travail dérape, ouvrir le barème. Quand la cadence affichée vient de la campagne précédente, une ligne sous le texte le dit, avec le nom de cette campagne. Le <b>comment</b> du calcul est derrière son petit « i »."],
       ['L’écart de cadence cherche sa source dans un ordre', ", et dit toujours laquelle il a trouvée. D’abord <b>la période en cours</b>, dès 40 % de barème réalisé. Sinon <b>la même période de la campagne précédente</b>, si elle est archivée — la ligne porte alors un <b>↩</b> et nomme la campagne : c’est une hypothèse de projection, pas une mesure du moment. Sinon rien, et l’écran l’écrit plutôt que d’afficher un chiffre inventé."],
       ['Conformité', "suit le cuivre sur sept ans, le nombre de passages et les délais de rentrée en cours."],
       ['Cave', "dit ce qui presse aujourd’hui, où en est le millésime, et ce que coûte le parc à fûts."],

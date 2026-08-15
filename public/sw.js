@@ -1,4 +1,29 @@
-// MA VIGNE — Service Worker v6.72
+// MA VIGNE — Service Worker v6.73
+// v6.73 (15/08/2026) — LE VERDICT D’ECONOMIE.
+//   C’est la premiere chose qu’on lit en ouvrant l’onglet, et la seule qui
+//   reponde a « ou j’en suis ». Une seule branche s’affiche a la fois : ce
+//   n’etait donc pas un mur. Le defaut etait ailleurs — CHAQUE branche melangeait
+//   trois choses dans un paragraphe de 200 a 550 caracteres : le verdict, la mise
+//   en garde de METHODE, et un chemin a retenir.
+//   ⚠️⚠️ LA MISE EN GARDE ETAIT DITE DEUX FOIS. « La presence vient du planning,
+//     elle contient aussi la cave et l’atelier » etait ecrite mot pour mot dans
+//     le verdict ET dans la fiche `pil.cadence` depuis le 15/08. Deux copies qui
+//     auraient vieilli separement. Il n’en reste qu’une, et le verdict pose la
+//     pastille de cette fiche-la au lieu d’en ecrire une seconde.
+//   ★ « Reglages › Taches » et « Postes & travaux » deviennent des boutons. Le
+//     second passe par data-pec="sub", le commutateur de sous-vue qui existait
+//     deja — on ne recree pas une navigation.
+//   ★ Quand le chiffre vient de l’an dernier, sa provenance descend dans une
+//     LIGNE DE CADRE, avec le meme filet dore que les cartes du module.
+//   ⚠️⚠️ UN PIEGE DE MISE EN PAGE, TROUVE A LA CAPTURE ET PAR RIEN D’AUTRE :
+//     dans un conteneur flex, CHAQUE element enfant devient un item a part. Le
+//     <b> du nom de campagne formait sa propre colonne et la phrase se coupait en
+//     trois morceaux. Le texte est enveloppe dans un <span>. Aucun controle
+//     automatique ne lit une mise en page — seule une capture regardee le voit.
+//     ★ Le meme piege est impossible sur les cartes : _pilTile ECHAPPE son
+//       sous-titre, donc aucune balise n’y devient un item.
+//   · Mesure sur les huit branches, executees : 318 -> 203 caracteres en moyenne
+//     (-36 %), et -41 % sur la plus chargee. Rien n’est supprime.
 // v6.72 (15/08/2026) — L’EXERCICE, ET UNE CARTE POUR DEUX ECRANS.
 //   L’onglet Économie › Exercice empilait SEPT paves colores avant le premier
 //   chiffre, tous au meme poids : « le planning n’est pas charge, les salaires
@@ -1581,7 +1606,7 @@
 // v2.22 — Fix profils vides : guard vide dans loadData() pour MEMBRES/SAISONS/TACHES
 // v2.17 — Onboarding intégré + tenantId · v2.06 — Firebase Auth · v2.00–v2.05 — divers
 const DEBUG = self.location.hostname === 'localhost' || self.location.hostname === '127.0.0.1';
-const CACHE_NAME   = 'mavigne-v6.72';
+const CACHE_NAME   = 'mavigne-v6.73';
 const TENANT_CACHE = 'mavigne-tenant';   // Cache persistant — préservé à chaque mise à jour SW
 const SYNC_TAG     = 'mavigne-sync';
 
@@ -1597,7 +1622,7 @@ const CDN_URLS = [
 ];
 
 self.addEventListener('install', event => {
-  if(DEBUG) console.log('[SW] Ma Vigne v6.72 installé');
+  if(DEBUG) console.log('[SW] Ma Vigne v6.73 installé');
   event.waitUntil(
     caches.open(CACHE_NAME).then(async cache => {
       // ── Cœur applicatif : STRICT (mise à jour ATOMIQUE) ──
@@ -1613,7 +1638,7 @@ self.addEventListener('install', event => {
 });
 
 self.addEventListener('activate', event => {
-  if(DEBUG) console.log('[SW] Ma Vigne v6.72 activé');
+  if(DEBUG) console.log('[SW] Ma Vigne v6.73 activé');
   event.waitUntil(
     caches.keys().then(keys =>
       Promise.all(
