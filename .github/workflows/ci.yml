@@ -100,6 +100,23 @@ jobs:
           node scripts/mv-harnais-info.mjs
           node scripts/mv-harnais-carte.mjs
 
+      # La visite guidee est la VITRINE : une demo cassee est cassee en public.
+      # Deux regles qu'aucun autre controle ne porte. ① On ne facture que ce
+      # qu'on a montre : toute ligne de DEMO2_CREDITS doit etre demontree par
+      # un moment (la plus grosse ligne du chiffrage ne l'etait pas). ② Aucun
+      # moment ne vise le corps d'une carte du Pilotage : depuis §42 elles
+      # arrivent repliees, `querySelector` trouve un element qui mesure zero,
+      # et les masques couvrent l'ecran ENTIER. C22 voit qu'un selecteur EXISTE,
+      # jamais qu'il est VISIBLE.
+      # ⚠️ La contre-epreuve tourne AUSSI en CI : un harnais qui ne rougit
+      #   jamais ne prouve rien, et c'est elle qui a trouve que l'assertion sur
+      #   les selecteurs se prouvait toute seule (elle cherchait la cible dans
+      #   le fichier qui l'ecrit).
+      - name: Harnais — la visite guidee, et sa contre-epreuve
+        run: |
+          node scripts/harnais-demo.mjs
+          node scripts/harnais-demo-contre.mjs
+
       # Vite + inject-precache (postbuild, idempotent).
       - name: Build
         run: npm run build

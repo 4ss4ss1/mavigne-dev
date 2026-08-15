@@ -1537,7 +1537,16 @@ function _visiteScenario(){
     _actP.forEach(function(p){ if(!p.taches)p.taches={}; if(_cumS < _totS*0.45){ p.taches[_tache]={ov:null,p1:'Valid\u00e9',p2:'Valid\u00e9'}; _cumS+=(+p.surface||0); } });
     if(typeof recalcTravaux==='function') recalcTravaux(_tache);
   }catch(e){}
-  window._visiteDrae={};
+  // ★★ LE DELAI DE RENTREE EST SEME, IL N'EST PLUS ANNULE.
+  //   `{}` vide neutralisait le badge rouge sur les fiches parcelle — alors que
+  //   les donnees de la visite portent un Profiler d'HIER, drae 48 h, sur ces
+  //   deux parcelles, et que la tuile DRE du Pilotage (_cfmDre, qui lit
+  //   TRAITEMENTS et ignore cette table) les affiche DEJA comme fermees. La
+  //   liste disait donc le contraire du Pilotage. Un delai actif ne bloque pas
+  //   la validation (app.js ~6529 : badge + liseré rouge, rien d'autre), et
+  //   aucune des deux n'est la premiere carte de la liste : le moment d'action
+  //   n'est pas touche.
+  window._visiteDrae={'Les Charmes':18,'La Combotte':18};
   try{ var _tnp=(localStorage.getItem('mavigne_tenant')||'domaine-dupont'); localStorage.setItem('mavigne_pil_tab_'+_tnp,'auj'); }catch(e){}
 
   // 4) Conducteurs + activités (objets : sinon .nom indéfini)
@@ -1903,7 +1912,7 @@ function _mvtWelcome(){
     +_mvtCap('\uD83D\uDDA8\uFE0F','22 documents pr\u00eats \u00e0 imprimer')
     +_mvtCap('\uD83D\uDCCA','Pilotage : décider d\'un coup d\'œil')
     +'</div>'
-    +'<div class="mvtwc-foot"><div class="mvtwc-note">Suivez une journée type au domaine — trois minutes, montre en main. Puis '+_MVT_CHAPS.length+' écrans à explorer librement.</div>'
+    +'<div class="mvtwc-foot"><div class="mvtwc-note">Suivez une journée type au domaine — quatre minutes, montre en main. Puis '+_MVT_CHAPS.length+' écrans à explorer librement.</div>'
     +'<button class="mvtwc-go" id="mvtwc-go">Commencer la visite&nbsp;&nbsp;\u25B6</button>'
     +'<button class="mvtwc-skip" id="mvtwc-skip">Explorer par moi-même</button></div>'
     +'</div>';
@@ -2018,16 +2027,35 @@ var _mvtCss = `
 //    Créditée par le compteur pendant la visite, affichée par l'écran final.
 //    Une seule définition des nombres (règle §25.16) — le harnais l'exécute.
 var DEMO2_CREDITS = [
-  { k:'phyto',      min:20, freq:16,  lab:'Registre phyto',                          hyp:'Estimation : 25 min de classeur ramen\u00e9es \u00e0 5 \u2014 mon propre registre papier, trois campagnes.' },
-  { k:'validation', min:5,  freq:400, lab:'Journal & validations',                   hyp:'Estimation prudente : 5 min de papier par t\u00e2che valid\u00e9e \u2014 250 valid\u00e9es chez moi de janvier \u00e0 juillet.' },
+  { k:'phyto',      min:20, freq:16,  lab:'Registre phyto',
+    hyp:'Estimation : 25 min de classeur ramen\u00e9es \u00e0 5 \u2014 mon propre registre papier, trois campagnes.' },
+  { k:'validation', min:5,  freq:400, lab:'Journal & validations',
+    hyp:'Estimation prudente : 5 min de papier par t\u00e2che valid\u00e9e \u2014 250 valid\u00e9es chez moi de janvier \u00e0 juillet.' },
+  { k:'pointage',   min:10, freq:220, lab:'Pointage du soir \u2014 heures, retards, r\u00e9cup',
+    hyp:'La feuille d\u2019heures du soir, report compris : 10 min par jour ouvr\u00e9.' },
   { k:'finmois',    min:90, freq:12,  lab:'Fins de mois \u2014 heures, CP, PDF MSA', hyp:'' },
-  { k:'saisonniers',min:40, freq:12,  lab:'Saisonniers & vendanges \u2014 dossiers, heures, relev\u00e9s', hyp:'' },
-  { k:'cuvees',     min:15, freq:24,  lab:'Chai & Cuvier \u2014 suivi des cuv\u00e9es', hyp:'Estimation : 15 min de cahier de cave par op\u00e9ration \u2014 ouillage, soutirage, analyse.' },
+  { k:'saisonniers',min:40, freq:12,  lab:'Saisonniers & vendanges \u2014 dossiers, relev\u00e9s', hyp:'' },
+  { k:'tracteur',   min:10, freq:60,  lab:'Carnet tracteur \u2014 pleins, entretiens, GNR',
+    hyp:'Un passage sur deux laisse une ligne \u00e0 \u00e9crire : plein, vidange, anomalie.' },
+  { k:'cuvees',     min:15, freq:24,  lab:'Chai & Cuvier \u2014 suivi des cuv\u00e9es',
+    hyp:'Estimation : 15 min de cahier de cave par op\u00e9ration \u2014 ouillage, soutirage, analyse.' },
   { k:'reserve',    min:20, freq:12,  lab:'La R\u00e9serve \u2014 stock & bilan mati\u00e8re', hyp:'' },
-  { k:'info',       min:10, freq:220, lab:'Retrouver l\u2019info, \u00e9viter le d\u00e9placement pour rien', hyp:'' }
+  { k:'controle',   min:60, freq:6,   lab:'Les papiers \u2014 ressortir, recompter, imprimer',
+    hyp:'Six fois l\u2019an on ressort un registre, un relev\u00e9, un inventaire. Une heure \u00e0 chaque fois.' }
 ];
+// ★★★ LA LIGNE QU'ON NE COMPTE PAS AU TOTAL.
+//   « Retrouver l'info, eviter le deplacement pour rien » est reelle, et c'etait
+//   la PLUS GROSSE ligne du chiffrage — 37 h, un tiers du total — alors
+//   qu'AUCUN moment de la visite ne la demontrait. Une ligne qu'on ne montre
+//   pas est une ligne que le prospect decouvre a la caisse : c'est celle qu'il
+//   refusera, et il fera tomber le total avec. Elle sort du total, elle est
+//   annoncee a part, et le lecteur l'ajoute lui-meme s'il y croit.
+// ⚠️ REGLE : toute cle de DEMO2_CREDITS est DEMONTREE par un moment (le harnais
+//   mv-harnais-demo le verifie). On ne facture que ce qu'on a montre.
+var DEMO2_HORS = { min:10, freq:220, lab:'Retrouver l\u2019info, \u00e9viter le d\u00e9placement pour rien' };
 function _demo2H(c){ return Math.round(c.min*c.freq/60); }
 function _demo2TotalH(){ var s=0; DEMO2_CREDITS.forEach(function(c){ s+=c.min*c.freq; }); return s/60; }
+function _demo2HorsH(){ return Math.round(DEMO2_HORS.min*DEMO2_HORS.freq/60); }
 function _demo2Hyp(k){ for(var i=0;i<DEMO2_CREDITS.length;i++){ if(DEMO2_CREDITS[i].k===k) return DEMO2_CREDITS[i].hyp||''; } return ''; }
 
 // ── Les 9 moments : une phrase de d\u00e9cor, un geste, une cons\u00e9quence visible.
@@ -2047,97 +2075,163 @@ function _mvtPilTab(tab){
     else if(window.logError){ window.logError({level:'info',cat:'visite',msg:'_pilSetTab absent : onglet '+tab+' non force'}); }
   }catch(e){ if(window.logError)window.logError({level:'info',cat:'visite',msg:'pilTab '+tab}); }
 }
+// ★★ OUVRIR UNE CARTE REPLIEE — EN CLIQUANT SON EN-TETE, pas en ecrivant dans
+//   `_PIL_STATE`. Le handler delegue fait trois choses de plus que l'ecriture :
+//   il referme les autres (une seule ouverte a la fois), il construit les
+//   cartes qui ont besoin de largeur (carte, ordre de passage), et il grave
+//   l'etat. Contourner le handler, c'est reimplementer trois regles a cote.
+function _mvtPilOuvrir(pid){
+  try{
+    var t=document.querySelector('.pil-tile[data-pid="'+pid+'"]');
+    if(!t){ if(window.logError) window.logError({level:'info',cat:'visite',msg:'carte absente : '+pid}); return; }
+    if(t.classList.contains('open')) return;
+    var h=t.querySelector('.pil-th'); if(h) h.click();
+  }catch(e){ if(window.logError)window.logError({level:'info',cat:'visite',msg:'ouvrir carte '+pid}); }
+}
+// ⚠️ L'onglet Economie arrive sur « Synthese » (_PEC_SUB='syn'). Le moment du
+//   cout par parcelle parlait donc d'un tableau que l'ecran ne montrait pas.
+function _mvtPecSub(v){
+  try{
+    var b=document.querySelector('.pec-sub [data-pec="sub"][data-v="'+v+'"]');
+    if(!b){ if(window.logError) window.logError({level:'info',cat:'visite',msg:'sous-vue Economie absente : '+v}); return; }
+    if(!b.classList.contains('on')) b.click();
+  }catch(e){ if(window.logError)window.logError({level:'info',cat:'visite',msg:'sous-vue '+v}); }
+}
+// ★ La bascule ouvrier est REVERSIBLE et le retour est arme a trois endroits :
+//   le moment suivant, la sortie de visite (_mvtEnd) et la fermeture d'un
+//   chapitre. Un role laisse en place ampute les quinze moments suivants.
+function _mvtRoleOuvrier(on){
+  try{
+    var r = on ? ['ouvrier'] : ['admin','ouvrier','tractoriste'];
+    if(window.currentUser){ window.currentUser.roles=r.slice(); }
+    if(typeof currentUser!=='undefined'){ currentUser.roles=r.slice(); }
+    if(typeof applyRoles==='function') applyRoles();
+    window._mvtOuvrierActive=!!on;
+  }catch(e){ if(window.logError)window.logError({level:'info',cat:'visite',msg:'role ouvrier '+(on?'on':'off')}); }
+}
 function _mvtPilTabRendre(){
   if(_mvtPilTabAvant===null) return;
   try{ if(typeof window._pilSetTab==='function') window._pilSetTab(_mvtPilTabAvant, true); }
   catch(e){ if(window.logError)window.logError({level:'info',cat:'visite',msg:'pilTab restauration'}); }
   _mvtPilTabAvant=null;
 }
+// ★★★ DIX-NEUF MOMENTS, TROIS ACTES. Un acte = une promesse tenue a sa fin.
+//   I  — avant que l'equipe arrive : DECIDER.
+//   II — la journee : la trace S'ECRIT TOUTE SEULE.
+//   III— le soir : CE QUE CA REND.
+//   ⚠️ `credits` (tableau) remplace `credit` : un moment peut DEMONTRER
+//     plusieurs lignes du chiffrage. Un credit a min:0 marque la ligne comme
+//     montree sans rien ajouter au compteur du jour — 90 min de fin de mois
+//     n'ont rien a faire dans le total d'une seule journee.
+//   ⚠️ `wait` : delai avant de poser le projecteur, quand la navigation
+//     enchaine plusieurs rendus (onglet -> sous-vue -> depli d'une carte).
 var _mvtSteps = [
-  // ── Le matin : ce que dit le ciel, et ce qu'on decide d'en faire ──
-  { kick:'8 h', tx:'Lundi. 7 hectares, 4 personnes \u2014 et la m\u00e9t\u00e9o d\u00e9j\u00e0 parcelle par parcelle. Aujourd\u2019hui, c\u2019est sec.',
-    sel:['.home-w[data-w="meteo5"]','#home-meteo5'] },
-  { kick:'8 h 05', tx:'Vos vignes sont sur trois communes. Trois pr\u00e9visions distinctes, pas une moyenne : il pleut \u00e0 Fixin, pas \u00e0 Gevrey. C\u2019est ce qui d\u00e9cide o\u00f9 part l\u2019\u00e9quipe.',
-    hyp:'Chaque secteur suit ses propres coordonn\u00e9es \u2014 rien \u00e0 param\u00e9trer, les parcelles portent leur commune.',
+  // ══ ACTE I — AVANT QUE L'EQUIPE ARRIVE ══
+  { kick:'7 h 40', tx:'Lundi. 7 hectares, 4 personnes. Vos vignes sont sur trois communes : il pleut \u00e0 Fixin, pas \u00e0 Gevrey. Trois pr\u00e9visions, pas une moyenne \u2014 c\u2019est ce qui d\u00e9cide o\u00f9 part l\u2019\u00e9quipe.',
+    hyp:'Chaque secteur suit ses propres coordonn\u00e9es. Rien \u00e0 param\u00e9trer : les parcelles portent leur commune.',
     nav:function(){ if(window.goTo) window.goTo('home'); setTimeout(function(){ var el=document.getElementById('home-meteo-communes'); if(el){ try{ el.scrollIntoView({block:'center'}); }catch(e){ if(window.logError)window.logError({level:'info',cat:'visite',msg:'scroll secteurs'}); } } },260); },
     sel:['#home-meteo-communes','.home-w[data-w="meteo5"]'] },
+
+  { kick:'7 h 50', tx:'La question du matin, d\u00e9j\u00e0 tranch\u00e9e : fen\u00eatre favorable, vent, d\u00e9lai avant r\u00e9colte, parcelles encore ferm\u00e9es. Vous ne cherchez pas la r\u00e9ponse \u2014 elle est l\u00e0.',
+    hyp:'Cinq jours de pr\u00e9vision crois\u00e9s avec vos traitements : le verdict du jour, puis les jours suivants d\u2019un doigt.',
+    nav:function(){ _mvtPilTab('auj'); },
+    sel:['[data-mvt="traiter"]','.pil-cockpit-card','#pil-content'], wait:620 },
+
   { kick:'Le cap du jour', tx:'Avant que l\u2019\u00e9quipe arrive : la t\u00e2che du moment, un mot pour tous.',
     mission:'Touchez \u00ab Diffuser la priorit\u00e9 \u00bb',
     nav:function(){ try{ openPriorityEdit(); }catch(e){ if(window.logError)window.logError({level:'info',cat:'visite',msg:'openPriorityEdit'}); } }, sel:'#ovPriority .modal', clickSel:'#ovPriority .mbtn.verte' },
 
-  // ── Le geste du terrain, et sa trace ──
-  { kick:'9 h 40', tx:'L\u2019\u00e9quipe vient de finir une parcelle. Notez-le.',
+  // ══ ACTE II — LA JOURNEE S'ECRIT TOUTE SEULE ══
+  // ★★★ LE MOMENT QUI MANQUAIT. L'objection numero un d'un patron de domaine
+  //   n'est pas le prix, c'est « mes gars ne s'en serviront pas ». La visite
+  //   entiere se jouait depuis le fauteuil du chef. Le geste est
+  //   contre-intuitif — MONTRER MOINS — donc il se retient.
+  { kick:'8 h 10', tx:'Sur le t\u00e9l\u00e9phone de Jean, il n\u2019y a pas de tableau de bord. Sa t\u00e2che, ses parcelles, un \u2713. On lui a tout enlev\u00e9 \u2014 c\u2019est la seule fa\u00e7on qu\u2019il s\u2019en serve.',
+    hyp:'Bascule r\u00e9elle sur le r\u00f4le ouvrier. Aucun r\u00e9glage \u00e0 faire, aucun chiffre qui ne le regarde pas.',
+    nav:function(){ _mvtRoleOuvrier(true); if(window.goTo) window.goTo('home'); },
+    sel:['#page-home .content','#page-home'], wait:520 },
+
+  { kick:'9 h 40', tx:'Vous reprenez la main. L\u2019\u00e9quipe vient de finir une parcelle \u2014 notez-le.',
     mission:'Touchez le \u2713',
-    nav:function(){ try{ pTacheFilter=window._visiteTache||'Ebourgeonnage'; }catch(e){ if(window.logError)window.logError({level:'info',cat:'visite',msg:'pTacheFilter'}); } if(window.switchVigneOng) window.switchVigneOng('parcelles'); },
-    sel:'.pcard-qv .pc-validate', clickSel:'.pcard-qv .pc-validate', actDelay:1700 },
+    nav:function(){ _mvtRoleOuvrier(false); try{ pTacheFilter=window._visiteTache||'Ebourgeonnage'; }catch(e){ if(window.logError)window.logError({level:'info',cat:'visite',msg:'pTacheFilter'}); } if(window.switchVigneOng) window.switchVigneOng('parcelles'); },
+    sel:'.pcard-qv .pc-validate', clickSel:'.pcard-qv .pc-validate', actDelay:1700, wait:560 },
+
   { kick:'C\u2019est trac\u00e9', tx:'Votre validation est au journal : parcelle, \u00e9quipe, m\u00e9t\u00e9o du jour. Rien \u00e0 remplir.',
     nav:function(){ if(window.switchVigneOng) window.switchVigneOng('journal'); try{ renderJournal(); }catch(e){ if(window.logError)window.logError({level:'info',cat:'visite',msg:'renderJournal'}); } },
-    sel:'.jcard', credit:{ k:'validation', min:5 } },
+    sel:'.jcard', credits:[{ k:'validation', min:5 }] },
+
   { kick:'10 h 15', tx:'Les m\u00eames parcelles vues d\u2019en haut. La couleur, c\u2019est l\u2019avancement : ce qui reste se voit sans ouvrir une liste.',
     hyp:'Parcelles g\u00e9olocalis\u00e9es \u2014 surfaces, c\u00e9pages et contours viennent de votre relev\u00e9.',
     nav:function(){ if(window.goTo) window.goTo('parcelles'); setTimeout(function(){ try{ if(window.switchPTab) window.switchPTab('carte'); }catch(e){ if(window.logError)window.logError({level:'info',cat:'visite',msg:'switchPTab carte'}); } },240); },
     sel:['#pwrapcarte','#page-parcelles'] },
 
-  // ── Midi : la machine ──
-  { kick:'12 h 30', tx:'Le plein. La cuve GNR est \u00e0 255 L sur 1 000 \u2014 sous votre seuil \u2014 et le New Holland affiche 482 h : r\u00e9vision \u00e0 500. Le mat\u00e9riel pr\u00e9vient avant de tomber en panne.',
-    hyp:'Pleins, vidanges, filtres, anomalies : le carnet d\u2019entretien s\u2019\u00e9crit \u00e0 chaque passage.',
-    nav:function(){ if(window.goTo) window.goTo('tracteur'); setTimeout(function(){ try{ if(window.switchTracOnglet) window.switchTracOnglet('entretiens'); }catch(e){ if(window.logError)window.logError({level:'info',cat:'visite',msg:'switchTracOnglet'}); } },240); },
-    sel:['#trac-panel-entretiens','#page-tracteur'] },
+  // ★ LE TRACTEUR NE SE RESUME PAS A UNE JAUGE. Le chrono inverse (§31) est ce
+  //   qui distingue l'outil d'un carnet : le temps se pose sur les parcelles
+  //   REELLEMENT faites, pas au prorata de la surface.
+  { kick:'11 h 30', tx:'Le chrono a tourn\u00e9 pendant le passage : machine, conducteur, et les parcelles r\u00e9ellement faites. Le temps se r\u00e9partit sur celles-l\u00e0 \u2014 jamais au prorata de la surface.',
+    hyp:'Et le mat\u00e9riel pr\u00e9vient avant de tomber : cuve GNR \u00e0 255 L sur 1 000, New Holland \u00e0 482 h \u2014 r\u00e9vision \u00e0 500.',
+    nav:function(){ if(window.goTo) window.goTo('tracteur'); setTimeout(function(){ try{ if(window.switchTracOnglet) window.switchTracOnglet('sessions'); }catch(e){ if(window.logError)window.logError({level:'info',cat:'visite',msg:'switchTracOnglet sessions'}); } },240); },
+    sel:['#trac-panel-sessions','#page-tracteur'], credits:[{ k:'tracteur', min:10 }] },
 
-  // ── L'apres-midi : le traitement, sa preuve, ses consequences ──
-  { kick:'16 h 20', tx:'Le traitement d\u2019hier est au registre : n\u00b0 AMM, dose, DAR, ZNT remplis depuis le catalogue officiel E-Phy. Demain, la parcelle trait\u00e9e s\u2019affichera ferm\u00e9e.',
+  { kick:'16 h 20', tx:'Le traitement de ce matin est au registre : n\u00b0 AMM, dose, DAR, ZNT \u2014 remplis depuis le catalogue officiel E-Phy. Et la R\u00e9serve a d\u00e9duit la bouillie du stock toute seule.',
     nav:function(){ if(window.goTo) window.goTo('phyto'); },
-    sel:'#page-phyto .content', credit:{ k:'phyto', min:20 } },
-  { kick:'16 h 25', tx:'Le m\u00eame registre, vu du contr\u00f4le : cuivre m\u00e9tal cumul\u00e9 sur sept ans face au plafond bio, passages par parcelle, d\u00e9lai de rentr\u00e9e en cours. Rien \u00e0 recalculer la veille.',
+    sel:'#page-phyto .content', credits:[{ k:'phyto', min:20 },{ k:'reserve', min:20 }] },
+
+  // ★★★ LE SEUL MOMENT OU LE LOGICIEL RATTRAPE L'UTILISATEUR au lieu de
+  //   l'assister. Un ecran qui protege vaut trois ecrans qui font gagner du
+  //   temps : il repond a une peur, pas a une corvee.
+  { kick:'16 h 25', tx:'Le m\u00eame registre, vu du contr\u00f4le. Cuivre m\u00e9tal cumul\u00e9 sur sept ans face au plafond bio, passages par parcelle \u2014 et Les Charmes et La Combotte sont ferm\u00e9es jusqu\u2019\u00e0 demain matin. Personne n\u2019y entrera par erreur.',
     hyp:'Le cumul se met \u00e0 jour \u00e0 chaque traitement saisi \u2014 personne ne tient ce tableau \u00e0 la main.',
     nav:function(){ _mvtPilTab('cfm'); },
-    sel:['.pil-tile[data-pid="cuivre"]','.pil-panels','#pil-content'] },
-  { kick:'16 h 30', tx:'La R\u00e9serve a suivi toute seule : la bouillie du registre est sortie du stock. Achats, inventaires, f\u00fbts \u2014 et le bilan mati\u00e8re s\u2019\u00e9crit au fil des traitements.',
-    hyp:'\u2248 4 h d\u2019inventaires par an \u2014 et le bilan mati\u00e8re r\u00e9glementaire toujours \u00e0 jour.',
-    nav:function(){ if(window.goTo) window.goTo('reserve'); setTimeout(function(){ try{ if(window._rsvTabTo) window._rsvTabTo('audit'); }catch(e){ if(window.logError)window.logError({level:'info',cat:'visite',msg:'rsvTabTo'}); } },240); },
-    sel:['#mvr-body','#page-reserve'] },
+    selAll:'.pil-tile', n:3, wait:620 },
 
-  // ── Le soir : la cave ──
   { kick:'17 h', tx:'Au Chai, chaque cuv\u00e9e suit ses f\u00fbts, sa part des anges et ses analyses \u2014 SO2 et acidit\u00e9 se comparent d\u2019un relev\u00e9 \u00e0 l\u2019autre, l\u2019ouillage en retard s\u2019est signal\u00e9 tout seul.',
     nav:function(){ if(window.goTo) window.goTo('cave'); setTimeout(function(){ try{ if(window.selectCaveSection) window.selectCaveSection('elevage'); }catch(e){ if(window.logError)window.logError({level:'error',cat:'visite',msg:'chai: '+(e&&e.message)}); } },240); },
-    sel:['#mvc-elevage','#page-cave'], credit:{ k:'cuvees', min:15 } },
-  { kick:'17 h 10', tx:'Le Cuvier suit la vendange cuve par cuve : un relev\u00e9 de densit\u00e9 par jour, et la cin\u00e9tique de fermentation se dessine toute seule.',
-    hyp:'Apports, caisses, rendement par parcelle : tout se garde d\u2019un mill\u00e9sime \u00e0 l\u2019autre.',
-    nav:function(){ if(window.goTo) window.goTo('cave'); setTimeout(function(){ try{ if(window.selectCaveSection) window.selectCaveSection('vendange'); }catch(e){ if(window.logError)window.logError({level:'error',cat:'visite',msg:'cuvier: '+(e&&e.message)}); } },260); },
-    sel:['#mvv-body','#cave-view-vend','#page-cave'] },
-  { kick:'17 h 20', tx:'Et la question du lendemain : qu\u2019est-ce qui m\u2019attend ? Ouillages dus, cuves \u00e0 mesurer, f\u00fbts \u00e0 pr\u00e9parer \u2014 la semaine se range toute seule, du raisin \u00e0 la bouteille.',
-    hyp:'Le mill\u00e9sime est un fil : la parcelle, la cuve, le f\u00fbt et la bouteille sont le m\u00eame vin.',
+    sel:['#mvc-elevage','#page-cave'], credits:[{ k:'cuvees', min:15 }] },
+
+  { kick:'17 h 15', tx:'Et la question du lendemain : qu\u2019est-ce qui m\u2019attend ? Ouillages dus, cuves \u00e0 mesurer, f\u00fbts \u00e0 pr\u00e9parer \u2014 la semaine se range toute seule, du raisin \u00e0 la bouteille.',
+    hyp:'Le mill\u00e9sime est un fil : la parcelle, la cuve, le f\u00fbt et la bouteille sont le m\u00eame vin. Le Cuvier et la vendange cuve par cuve vous attendent dans les \u00e9crans.',
     nav:function(){ if(window.goTo) window.goTo('cave'); setTimeout(function(){ try{ if(window.selectCaveSection) window.selectCaveSection('millesime'); }catch(e){ if(window.logError)window.logError({level:'error',cat:'visite',msg:'millesime: '+(e&&e.message)}); } },260); },
     sel:['#ml-body','#cave-view-mil','#page-cave'] },
 
-  // ── Le soir : les gens ──
+  // ══ ACTE III — CE QUE CA REND ══
   { kick:'17 h 30', tx:'Le pointage du soir tient en deux gestes. Et l\u2019\u00e9cart se voit : Jean, une heure de retard \u2014 saisie en heures, elle tire sur son compteur.',
     hyp:'La feuille d\u2019heures du soir n\u2019existe plus.',
     nav:function(){ if(window.goTo) window.goTo('planning'); },
-    sel:['#page-planning .pl2-board','#page-planning'] },
+    sel:['#page-planning .pl2-board','#page-planning'], credits:[{ k:'pointage', min:10 }] },
+
   { kick:'17 h 40', tx:'La fiche de Jean, pr\u00eate pour la paie : acompte de 300 \u20ac, heures sup au compteur, retard et r\u00e9cup d\u00e9j\u00e0 compt\u00e9s \u2014 le relev\u00e9 MSA sort en PDF.',
     hyp:'\u2248 18 h de fins de mois par an \u2014 et chaque saisonnier de vendanges suivi sans classeur.',
     nav:function(){ setTimeout(function(){ try{ if(window.openPlanFiche) openPlanFiche('Jean'); }catch(e){ if(window.logError)window.logError({level:'info',cat:'visite',msg:'planFiche'}); } },180); },
-    sel:['#ovPlanFiche .modal','#ovPlanFiche'] },
+    sel:['#ovPlanFiche .modal','#ovPlanFiche'], credits:[{ k:'finmois', min:20 },{ k:'saisonniers', min:0 }] },
 
-  // ── Le soir : decider ──
-  { kick:'18 h', tx:'Le soir, la d\u00e9cision du jour est pr\u00eate \u2014 fen\u00eatre de traitement, mat\u00e9riel, cave. Rien \u00e0 chercher.',
+  { kick:'18 h', tx:'La marge sur votre objectif, la charge qui reste, la cadence tenue \u2014 et la d\u00e9cision du jour, d\u00e9j\u00e0 \u00e9crite. Rien \u00e0 chercher.',
     nav:function(){ try{ if(window.closePlanFiche) closePlanFiche(); }catch(e2){ if(window.logError)window.logError({level:'info',cat:'visite',msg:'closeFiche'}); } _mvtPilTab('auj'); },
-    sel:['.pil-dec','.pil-cockpit-card','#pil-content'] },
-  { kick:'18 h 05', tx:'Chaque parcelle porte son co\u00fbt r\u00e9el de main-d\u2019\u0153uvre \u2014 en euros, et \u00e0 l\u2019hectare, pond\u00e9r\u00e9 par l\u2019\u00e9quipe qui y est vraiment pass\u00e9e.',
-    nav:function(){ _mvtPilTab('eco'); },
-    sel:['.pil-tbody','.pil-panels','#pil-content'] },
-  { kick:'18 h 10', tx:'La question du renfort : combien, et quand ? Demandez au moteur \u2014 il essaie des centaines de placements et ne garde que ce qui boucle.',
+    sel:['.pil-dec','.pil-cockpit-card','#pil-content'], wait:620 },
+
+  // ★★★ LE PREVISIONNEL. Une DATE et un NOMBRE D'HEURES QUI MANQUENT frappent
+  //   dix fois plus fort qu'un pourcentage d'avancement : c'est le seul ecran
+  //   qui dit au vigneron quelque chose qu'il ne sait pas encore.
+  { kick:'18 h 05', tx:'Et la question que personne ne pose \u00e0 temps : \u00e0 la cadence tenue depuis le d\u00e9but, voil\u00e0 quand chaque t\u00e2che finit. En jours ouvr\u00e9s et en heures restantes \u2014 pas en pourcentage.',
+    hyp:'La cadence vient de vos quatre derni\u00e8res semaines de pr\u00e9sence r\u00e9elle. Elle ne s\u2019applique qu\u2019au travail qui reste.',
+    nav:function(){ _mvtPilTab('avc'); setTimeout(function(){ _mvtPilOuvrir('echeances'); },300); },
+    sel:['.pil-tile[data-pid="echeances"]','.pil-panels','#pil-content'], wait:880 },
+
+  { kick:'18 h 10', tx:'Chaque parcelle porte son co\u00fbt r\u00e9el de main-d\u2019\u0153uvre \u2014 en euros, et \u00e0 l\u2019hectare, pond\u00e9r\u00e9 par l\u2019\u00e9quipe qui y est vraiment pass\u00e9e.',
+    hyp:'Co\u00fbt de culture : main-d\u2019\u0153uvre, tracteur, GNR, produits. Ni vinification, ni foncier, ni amortissement.',
+    nav:function(){ _mvtPilTab('eco'); setTimeout(function(){ _mvtPecSub('par'); },300); },
+    sel:['.pec-tbl','.pec-card','#pil-content'], wait:880 },
+
+  { kick:'18 h 15', tx:'La question du renfort : combien, et quand ? Demandez au moteur \u2014 il essaie des centaines de placements et ne garde que ce qui boucle.',
     hyp:'Chaque proposition affiche son co\u00fbt \u2014 le classement se fait parmi ce qui boucle.',
     mission:'Touchez \u00ab Le meilleur placement trouv\u00e9 \u00bb',
     nav:function(){ _mvtPilTab('sim'); },
-    sel:['.rf-strats','.pil-panels','#pil-content'], clickSel:'.rf-strat.best', actDelay:900 },
+    sel:['.rf-strats','.pil-panels','#pil-content'], clickSel:'.rf-strat.best', actDelay:900, wait:700 },
 
-  // ── Et le jour du controle ──
   { kick:'18 h 20', tx:'Reste le classeur. Registre phyto, synth\u00e8se cuivre, relev\u00e9s d\u2019heures MSA, inventaires, sauvegarde : vingt-deux documents, chacun \u00e0 un clic. Le registre phyto \u00e9lectronique devient obligatoire au 1\u1d49\u02b3 janvier 2027 \u2014 le v\u00f4tre sera pr\u00eat.',
-    hyp:'Ma Vigne pr\u00e9pare, vous d\u00e9clarez : ce sont vos \u00e9tats internes, mis au format attendu.',
+    hyp:'Et rien ne se perd : chaque campagne s\u2019archive, et se compare \u00e0 la suivante sur le m\u00eame axe.',
     nav:function(){ if(window.goTo) window.goTo('reglages'); setTimeout(function(){ try{ if(window.openDocs) window.openDocs(); }catch(e){ if(window.logError)window.logError({level:'info',cat:'visite',msg:'openDocs'}); } },300); },
-    sel:['#docs-list','#ovDocs .modal','#ovDocs'] }
+    sel:['#docs-list','#ovDocs .modal','#ovDocs'], credits:[{ k:'controle', min:0 }] }
 ];
 var _mvtCur=-1, _mvtEl=null, _mvtEls=null, _mvtOne=null, _mvtBuilt=false, _mvtEarn=0, _mvtDone={};
 function _mvtBuild(){
@@ -2161,10 +2255,23 @@ function _mvtStart(){
   _mvtCur=-1; _mvtNext();
 }
 window.mvTourStart=_mvtStart;
+// ★★★ UN SELECTEUR QUI REPOND N'EST PAS UNE CIBLE VISIBLE.
+//   Depuis §42, toutes les cartes du Pilotage arrivent REPLIEES et
+//   `.pil-tbody{display:none}` : `querySelector` trouve l'element, il mesure
+//   zero, et `_mvtReposition` masque alors l'ECRAN ENTIER — voile noir. Le
+//   repli ultime plus bas ne s'arme que si `querySelector` rend `null` : il ne
+//   voyait pas ce cas. On mesure donc AVANT d'accepter, comme
+//   `_mvtPageActive` le fait deja pour la page.
+//   ⚠️ C22 verifie qu'un selecteur EXISTE dans les sources, jamais qu'il est
+//     VISIBLE au moment ou la visite le vise. C'est ce trou-la qu'on bouche.
+function _mvtVisible(e){
+  try{ return (e && document.body.contains(e) && e.getBoundingClientRect().width>0) ? e : null; }
+  catch(err){ return null; }
+}
 function _mvtQuery(sel){
   if(!sel) return _mvtPageActive();
-  if(typeof sel==='string'){ return document.querySelector(sel) || _mvtPageActive(); }
-  for(var i=0;i<sel.length;i++){ var e=document.querySelector(sel[i]); if(e) return e; }
+  if(typeof sel==='string'){ return _mvtVisible(document.querySelector(sel)) || _mvtPageActive(); }
+  for(var i=0;i<sel.length;i++){ var e=_mvtVisible(document.querySelector(sel[i])); if(e) return e; }
   // ★ REPLI ULTIME. Sans lui, un selecteur qui ne repond pas rend _mvtEl null,
   //   et _mvtReposition masque l'ecran ENTIER : voile noir, plus rien de
   //   surligne, le visiteur croit l'appli plantee. Montrer l'ecran en cours est
@@ -2195,7 +2302,10 @@ function _mvtNext(){
     }
     requestAnimationFrame(function(){ _mvtPlace(s); });
   };
-  if(s.nav){ try{ s.nav(); }catch(e){} setTimeout(doPlace, 420); }
+  // `wait` : quand la navigation enchaine plusieurs rendus (onglet -> sous-vue
+  //   -> depli d'une carte), 420 ms ne suffisent pas et le projecteur se pose
+  //   sur le DOM d'avant, qui va disparaitre sous lui.
+  if(s.nav){ try{ s.nav(); }catch(e){} setTimeout(doPlace, s.wait||420); }
   else { requestAnimationFrame(doPlace); }
 }
 function _mvtPlace(s){
@@ -2222,14 +2332,22 @@ function _mvtPlace(s){
   } else {
     mid='<button class="mvt-bnext on" id="mvt-next" type="button"><span>Continuer \u203a</span></button>';
   }
-  var hyp=(s.credit && !_mvtDone[s.credit.k]) ? _demo2Hyp(s.credit.k) : (s.hyp||'');
+  var _crs=_mvtCredits(s);
+  var _cr0=null; for(var _ci=0;_ci<_crs.length;_ci++){ if(!_mvtDone[_crs[_ci].k]){ _cr0=_crs[_ci]; break; } }
+  var hyp=(_cr0 && _demo2Hyp(_cr0.k)) ? _demo2Hyp(_cr0.k) : (s.hyp||'');
   bar.innerHTML='<div class="mvt-bar-in"><div class="mvt-bk">'+s.kick+' \u00b7 '+(_mvtCur+1)+' sur '+_tot+'</div>'
     +'<div class="mvt-btx">'+s.tx+'</div>'
     +(hyp?'<div class="mvt-bh">'+hyp+'</div>':'')
+    // ⚠️⚠️ « Passer » PROMETTAIT UN SAUT ET FAISAIT UNE SORTIE. Un visiteur qui
+    //   voulait sauter UN ecran perdait tous les suivants ET l'addition — donc
+    //   le chiffrage, le prix et le bouton d'essai. Deux boutons distincts
+    //   desormais, et « Quitter » emmene a l'addition, pas au menu.
     +'<div class="mvt-brow">'+mid
     +'<span class="mvt-dots">'+dots+'</span>'
-    +'<button class="mvt-skip" id="mvt-skip" type="button"><span>Passer</span></button></div></div>';
+    +(isAct?'<button class="mvt-skip" id="mvt-pass" type="button"><span>Passer ce moment</span></button>':'')
+    +'<button class="mvt-skip" id="mvt-skip" type="button"><span>Quitter</span></button></div></div>';
   var nx=document.getElementById('mvt-next'); if(nx) nx.addEventListener('click', _mvtNext);
+  var pa=document.getElementById('mvt-pass'); if(pa) pa.addEventListener('click', _mvtNext);
   var sk=document.getElementById('mvt-skip'); if(sk) sk.addEventListener('click', _mvtSkip);
   var c=document.getElementById('mvt-c'); if(c) c.style.display = isAct ? 'none' : 'block';
   var ring=document.getElementById('mvt-ring'); if(ring) ring.classList.toggle('act', isAct);
@@ -2237,21 +2355,37 @@ function _mvtPlace(s){
     if(!s.clickSel) _clk=_mvtEl;
     if(_clk){ var fn=function(){ setTimeout(_mvtNext, s.actDelay||320); }; _clk.addEventListener('click', fn); _mvtOne={el:_clk, fn:fn}; }
   }
-  if(s.credit && !_mvtDone[s.credit.k]){
-    (function(cr){ setTimeout(function(){ _mvtCredit(cr.k, cr.min); }, 750); })(s.credit);
-  }
+  // Les credits s'enchainent : deux vols simultanes vers la meme pastille ne
+  //   se lisent pas. 820 ms d'ecart, la duree de l'animation plus une respiration.
+  var _cn=0;
+  _crs.forEach(function(cr){
+    if(_mvtDone[cr.k]) return;
+    (function(c,rang){ setTimeout(function(){ _mvtCredit(c.k, c.min); }, 750+rang*820); })(cr,_cn);
+    _cn++;
+  });
   _mvtReposition();
 }
-function _mvtSkip(){
-  _mvtClearOne();
-  _mvtPilTabRendre();
-  var t=document.getElementById('mvt'); if(t){ t.style.display='none'; }
-  _mvtMenu();
-}
+// « Quitter » : on s'arrete, mais on ne prive personne de l'addition. Le menu
+//   des chapitres reste accessible DEPUIS l'addition (« Voir les N ecrans »).
+function _mvtSkip(){ _mvtEnd(); }
 // Cr\u00e9dit du compteur : le montant vole du spotlight vers la pastille, puis
 // le total monte (rAF \u2014 piège du 1er ts \u00e0 0 : t0===null, jamais !t0).
+// Un moment peut DEMONTRER plusieurs lignes du chiffrage. La forme d'origine
+// `credit:{…}` (singulier) reste acceptee : rien n'oblige a reecrire un moment
+// qui n'en porte qu'une.
+function _mvtCredits(s){
+  if(s && s.credits && s.credits.length) return s.credits;
+  if(s && s.credit) return [s.credit];
+  return [];
+}
+// ⚠️ `min` est ce que la ligne fait gagner CE JOUR-LA, pas le `min` du
+//   tableau de chiffrage (qui est par occurrence : 90 min pour une fin de
+//   mois n'ont rien a faire dans le total d'une seule journee). `min:0` marque
+//   la ligne comme DEMONTREE sans rien crediter : c'est ce que verifie le
+//   harnais, et ce qui garde « aujourd'hui » credible.
 function _mvtCredit(key, min){
   if(_mvtDone[key]) return; _mvtDone[key]=1;
+  if(!(min>0)) return;
   var chip=document.getElementById('mvt-chip'); if(!chip) return;
   chip.classList.add('on');
   var vEl=chip.querySelector('.v');
@@ -2307,11 +2441,27 @@ function _mvtReposition(){
   if(ring){ ring.style.left=(r.left-pad)+'px'; ring.style.top=(r.top-pad)+'px'; ring.style.width=(r.width+2*pad)+'px'; ring.style.height=(r.height+2*pad)+'px'; }
 }
 // ── L'addition : plein \u00e9cran sobre, calcul\u00e9 depuis DEMO2_CREDITS. ──
+// ★★★ L'ADDITION — CE QUI A CHANGE, ET POURQUOI.
+//   AVANT : le total etait converti en euros, puis on soustrayait l'abonnement
+//   et l'installation. La derniere chose que le prospect lisait, apres quatre
+//   minutes de demonstration, etait « +260 EUR la premiere annee ». Deux
+//   defauts dans une seule ligne : ca pose l'idee que l'app est A PEINE
+//   rentable, et ca invite a auditer la soustraction au lieu de sentir le
+//   soulagement. Une marge plus mince que le scepticisme du lecteur est un
+//   couteau qu'on lui tend.
+//   MAINTENANT : le gain reste en HEURES (§26 : le ROI s'exprime en temps), le
+//   cout se dit en heures de main-d'oeuvre, et la cloture donne un SEUIL
+//   HORAIRE que le lecteur valide avec SON propre taux. Quel que soit le
+//   chiffre qu'il a en tete, il fait le calcul dans le bon sens.
+function _mvtEur2(x){ return (Math.round(x*100)/100).toFixed(2).replace('.',','); }
 function _mvtAddition(){
   var old=document.getElementById('mvt-add'); if(old) old.remove();
   var totalH=_demo2TotalH();
-  var eur=Math.round(totalH*20/100)*100;
-  var abo=79*12, r1=Math.round((eur-abo-990)/10)*10, r1a=Math.round((eur-790-990)/10)*10, rn=Math.round((eur-abo)/10)*10;
+  var horsH=_demo2HorsH();
+  var jours=Math.round(totalH/8);
+  var TAUX=20, ABO=79*12, ABOAN=790, INST=990;
+  var hAbo=Math.round(ABO/TAUX), hInst=Math.round(INST/TAUX);
+  var eurH=_mvtEur2(ABO/totalH), eurH1=_mvtEur2((ABO+INST)/totalH);
   var rows='';
   DEMO2_CREDITS.forEach(function(c){ rows+='<div class="mvt-add-row"><span>'+c.lab+'</span><i>\u2248 '+_demo2H(c)+' h</i></div>'; });
   var today=(_mvtEarn>0)?('<div class="mvt-add-td">Avec vous, aujourd\u2019hui : <b>'+_mvtEarn+' min de moins qu\u2019au papier</b>.</div>'):'';
@@ -2320,16 +2470,17 @@ function _mvtAddition(){
     +'<div class="mvt-add-eye">La journ\u00e9e est finie</div>'
     +today
     +'<div class="mvt-add-big">\u2248 '+Math.round(totalH)+' h</div>'
-    +'<div class="mvt-add-sub">sur une campagne compl\u00e8te \u2014 12 mois, d\u2019une r\u00e9colte \u00e0 l\u2019autre.</div>'
+    +'<div class="mvt-add-sub">par campagne \u2014 12 mois, d\u2019une r\u00e9colte \u00e0 l\u2019autre. <b>'+jours+' journ\u00e9es de bureau.</b></div>'
     +'<div class="mvt-add-rows">'+rows+'</div>'
-    +'<div class="mvt-add-hyp">Hypoth\u00e8ses, sur ces 12 mois : 16 traitements, \u2248 400 t\u00e2ches valid\u00e9es (compt\u00e9 chez moi : 250 de janvier \u00e0 juillet), 12 fins de mois, 24 op\u00e9rations de cave, une dizaine de dossiers saisonniers \u2014 et 10 minutes par jour ouvr\u00e9 \u00e0 ne plus chercher l\u2019info ni se d\u00e9placer pour rien. Des estimations franches, arrondies sans exc\u00e8s. Le v\u00f4tre donnera ses propres chiffres.</div>'
-    +'<div class="mvt-add-eur">En main-d\u2019\u0153uvre charg\u00e9e \u00e0 20 \u20ac/h, cela repr\u00e9sente autour de '+eur.toLocaleString('fr-FR')+' \u20ac par campagne.</div>'
-    +'<div class="mvt-add-plus"><div class="ph">Et ce qui ne se compte pas en minutes</div>'
+    +'<div class="mvt-add-hyp">Hypoth\u00e8ses sur ces douze mois : 16 traitements \u00b7 \u2248 400 t\u00e2ches valid\u00e9es (compt\u00e9 chez moi : 250 de janvier \u00e0 juillet) \u00b7 220 pointages du soir \u00b7 12 fins de mois \u00b7 24 op\u00e9rations de cave \u00b7 60 passages tracteur. Des estimations franches, arrondies sans exc\u00e8s. Chaque ligne correspond \u00e0 un \u00e9cran que vous venez de voir. Le v\u00f4tre donnera ses propres chiffres.</div>'
+    +'<div class="mvt-add-plus"><div class="ph">Et ce qu\u2019on ne sait pas compter au chronom\u00e8tre</div>'
+    +'<div class="mvt-add-pr"><span class="pi">\u{1F50E}</span><span>'+DEMO2_HORS.lab+' : \u2248 '+DEMO2_HORS.min+' min par jour ouvr\u00e9. Si vous les comptez, ajoutez <b>'+horsH+' h</b>. <b>Hors total</b> \u2014 je pr\u00e9f\u00e8re le dire que le facturer.</span></div></div>'
+    +'<div class="mvt-add-plus"><div class="ph">Et ce qui ne se compte pas en heures</div>'
     +'<div class="mvt-add-pr"><span class="pi">\u{1F9FE}</span><span><b>La tra\u00e7abilit\u00e9, sans y penser.</b> Du traitement au stock : registre phyto, d\u00e9lais de rentr\u00e9e, bilan mati\u00e8re \u2014 pr\u00eats le jour du contr\u00f4le.</span></div>'
     +'<div class="mvt-add-pr"><span class="pi">\u{1F4C5}</span><span><b>La m\u00e9moire du domaine.</b> Rendements par parcelle, co\u00fbts, avancement : chaque mill\u00e9sime se garde et se compare au suivant.</span></div>'
-    +'<div class="mvt-add-pr"><span class="pi">\u{1F9ED}</span><span><b>Et d\u00e9cider.</b> Les d\u00e9cisions du Pilotage, elles, ne se comptent pas en minutes.</span></div></div>'
-    +'<div class="mvt-add-eur">En face, ce que \u00e7a co\u00fbte : abonnement Domaine <b>79 \u20ac/mois</b> (948 \u20ac/an \u2014 790 \u20ac en formule annuelle) et l\u2019installation, une fois : <b>990 \u20ac</b>.</div>'
-    +'<div class="mvt-add-inst">Premi\u00e8re ann\u00e9e, tout compris : \u2248 '+eur.toLocaleString('fr-FR')+' \u2212 '+abo+' \u2212 990 = <b>+\u2248 '+r1.toLocaleString('fr-FR')+' \u20ac</b> \u2014 l\u2019app est pay\u00e9e, et vous \u00eates d\u00e9j\u00e0 gagnant (+\u2248 '+r1a.toLocaleString('fr-FR')+' \u20ac en annuel). Ensuite : <b>\u2248 '+rn.toLocaleString('fr-FR')+' \u20ac de gagn\u00e9 chaque ann\u00e9e</b>.</div>'
+    +'<div class="mvt-add-pr"><span class="pi">\u{1F9ED}</span><span><b>Et d\u00e9cider.</b> La date qui ne rentre pas, le renfort qui boucle : \u00e7a, \u00e7a ne se compte pas en minutes.</span></div></div>'
+    +'<div class="mvt-add-eur">L\u2019abonnement Domaine : <b>79 \u20ac/mois</b> ('+ABO+' \u20ac/an, '+ABOAN+' \u20ac en formule annuelle). \u00c0 '+TAUX+' \u20ac de l\u2019heure charg\u00e9e, il vous co\u00fbte <b>'+hAbo+' h de main-d\u2019\u0153uvre par an</b>. Il vous en rend <b>'+Math.round(totalH)+'</b>.<br>L\u2019installation, une fois : <b>'+INST+' \u20ac</b> \u2014 '+hInst+' h, la premi\u00e8re ann\u00e9e seulement.</div>'
+    +'<div class="mvt-add-inst">Autrement dit : Ma Vigne vous co\u00fbte <b>'+eurH+' \u20ac l\u2019heure rendue</b>. <b>'+eurH1+' \u20ac</b> la premi\u00e8re ann\u00e9e, installation comprise.<br><b>Votre heure charg\u00e9e vaut 20 \u00e0 25 \u20ac.</b></div>'
     +'<a class="mvt-add-cta" href="/essai.html" target="_blank" rel="noopener">Essayer 15 jours sur mes parcelles</a>'
     +'<button class="mvt-add-ghost" id="mvt-add-ch" type="button"><span>Voir les '+_MVT_CHAPS.length+' \u00e9crans \u203a</span></button>'
     +'<div class="mvt-add-sign">\u2014 Nicolas, chef d\u2019\u00e9quipe viticole en C\u00f4te de Nuits.<br>Compt\u00e9 sur mes propres journ\u00e9es.</div>'
@@ -2342,11 +2493,16 @@ function _mvtEnd(){
   _mvtClearOne();
   var t=document.getElementById('mvt'); if(t){ t.style.display='none'; }
   _mvtPilTabRendre();
-  // Le 19e moment laisse le hub Documents ouvert : l'addition se dessinerait
-  // dessous, et le bouton d'essai ne serait jamais vu.
-  if(document.getElementById('ovDocs') && typeof window.closeOv==='function'){
-    try{ window.closeOv(null,'ovDocs'); }catch(e){ if(window.logError)window.logError({level:'info',cat:'visite',msg:'closeOv ovDocs'}); }
-  }
+  // Le dernier moment laisse le hub Documents ouvert : l'addition se
+  // dessinerait dessous, et le bouton d'essai ne serait jamais vu. Depuis que
+  // « Quitter » mene ici, la sortie peut aussi tomber sur la fiche d'un
+  // salarie ou sur la priorite du jour : on ferme les trois.
+  ['ovDocs','ovPlanFiche','ovPriority'].forEach(function(id){
+    if(document.getElementById(id) && typeof window.closeOv==='function'){
+      try{ window.closeOv(null,id); }catch(e){ if(window.logError)window.logError({level:'info',cat:'visite',msg:'closeOv '+id}); }
+    }
+  });
+  if(window._mvtOuvrierActive) _mvtRoleOuvrier(false);
   _mvtAddition();
 }
 // ── Menu de chapitres (exploration libre, écrans réels) ──

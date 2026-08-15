@@ -3458,8 +3458,14 @@ Options : `OPT-KML`, `OPT-FOR`, `OPT-MIG` (dès 200 €), `OPT-CUSTOM`. Codes ab
 **Offre de lancement** : −50 % sur l'installation **+** plan Domaine au tarif Vigneron.
 ⚠️ **Durée jamais bornée — à trancher**, au plus tard avec le devis Garraud.
 
-**Argument ROI en public** : exprimé en **temps, pas en euros** — « 3 à 5 heures de bureau par
-mois ». En brochure : **215 h/an** pour 10 ha.
+**Argument ROI en public** : exprimé en **temps, pas en euros**.
+⚠️⚠️⚠️ **TROIS CHIFFRES CONTRADICTOIRES CIRCULAIENT** — démo **111 h**, brochure **215 h/an pour
+10 ha**, argumentaire oral **3 à 5 h de bureau par mois** (36 à 60 h/an). **Un prospect qui reçoit
+la plaquette et clique la démo voit du simple au double** : ça n'attaque pas le produit, ça attaque
+la crédibilité du vendeur.
+★ **Depuis le 15/08 (§43), la source unique est `DEMO2_CREDITS`** : **≈ 127 h démontrées**, plus
+**37 h hors total** (« retrouver l'info »), soit **164 h** pour qui compte la ligne molle.
+⚠️ **`mvprint.py` (215 h) et l'argumentaire oral ne sont PAS encore alignés** — voir backlog.
 
 **Essai** : **15 jours**, claim `trial_until` + `plan` ; bandeau J-X ; à l'expiration **lecture
 seule, données conservées**.
@@ -3897,31 +3903,118 @@ Corrigé le 09/08 : **Pilotage** · **Cave** · **La Réserve** · **Phyto** · 
 
 ---
 
-## 27e. ★ La démo guidée & les supports imprimés
+## 27e. ★★ La démo guidée & les supports imprimés
 
-### La visite guidée (`?demo=visite`)
+### La visite guidée (`?demo=visite`) — REFAITE LE 15/08 (§43)
 
-**14 moments** : météo → priorité du jour → validation → journal → registre phyto → Réserve → Chai →
-Cuvier → planning → récap salaire → décision Pilotage → **coût réel par parcelle** → simulateur
-Renfort → **addition**.
+⚠️⚠️ **Cette section disait « 14 moments » et « la démo ne connaît aucun des lots d'août ». Les deux
+étaient FAUX** au moment où on l'a relue : il y avait 19 moments, Cave et Conformité comprises.
+**Une section de CLAUDE.md se vérifie sur le code comme le reste** (règle d'or n°3).
 
-⚠️⚠️ **BUG CORRIGÉ LE 09/08 — cas d'école.** Les moments 12 visaient
-`#pil-tabs [data-tab="ecf"]`, clé disparue au regroupement des onglets.
-**`querySelector` renvoie `null` sans lever** → le `catch` de repli **ne s'est jamais déclenché** →
-projecteur au hasard, **sur le lien de démo publié**.
-**Correctif** : la bonne clé, **plus un filet** `else if(window.logError)`. **Et C22 pour que ça ne
-puisse plus arriver.**
+**19 moments, TROIS ACTES**, ≈ 4 min annoncées (mesuré : 3 414 car. de narration ≈ 3,8 min de
+lecture + ~1,3 min de navigation — « trois minutes » était une promesse rompue au premier écran) :
+- **I — avant que l'équipe arrive (décider)** : météo par secteur · « Traiter ou pas ? » · le cap du jour ;
+- **II — la journée s'écrit toute seule** : **l'écran de l'ouvrier** · le ✓ · le journal · la carte ·
+  le tracteur (chrono §31) · traitement + E-Phy + Réserve · **le jour du contrôle** · le Chai · le millésime ;
+- **III — ce que ça rend** : pointage · fiche de Jean · le verdict · **la date qui ne rentre pas** ·
+  coût par parcelle · le renfort · les 22 documents + archives.
+★ **Le Cuvier et la Réserve sortent du parcours** et restent dans les 26 chapitres : trois moments
+de cave d'affilée cassaient le rythme, et la Réserve se dit en une incise sous le traitement.
 
-⚠️ **`DEMO2_CREDITS` est la source unique de tous les chiffres de ROI**, **toujours exécutée en Node
-avant livraison**. Campagne = **12 mois, d'une récolte à la suivante**.
-★ **Calage Nico** : **250 tâches validées de janvier à juillet** → 5 min × 400 tâches/an.
+★★★ **LES TROIS MOMENTS QUI MANQUAIENT, et pourquoi ce sont eux** :
+1. **« Ce que voit Jean »** — l'objection n°1 d'un patron de domaine n'est pas le prix, c'est
+   *« mes gars ne s'en serviront pas »*. La visite entière se jouait depuis le fauteuil du chef.
+   Le geste est contre-intuitif — **montrer moins** — donc il se retient.
+2. **« Le jour du contrôle » avec deux parcelles FERMÉES** — le seul moment où le logiciel
+   **rattrape** l'utilisateur au lieu de l'assister. Un écran qui protège vaut trois écrans qui
+   font gagner du temps : il répond à une peur, pas à une corvée.
+3. **« La date qui ne rentre pas »** — une **date** et des **heures restantes** frappent dix fois
+   plus fort qu'un pourcentage d'avancement. Le seul écran qui dit au vigneron quelque chose
+   qu'il ne sait pas encore.
 
-⚠️ **Trois bugs vécus, tous silencieux** : spotlights vides · simulateur vide (saisons sans
-`debut`/`fin`) · Cuvier vide (`c.parcelles.map is not a function`).
-**Leçon : quand un écran de démo reste vide, extraire et exécuter la vraie fonction de rendu.**
+### ⚠️⚠️⚠️ `DEMO2_CREDITS` — LA RÈGLE, ÉCRITE APRÈS COUP
 
-★★ **La démo ne connaît AUCUN des lots d'août.** **Un 15ᵉ moment « la cave qui vous dit ce qui
-arrive » serait le plus vendeur du parcours** — backlog.
+> **ON NE FACTURE QUE CE QU'ON A MONTRÉ.** Toute ligne du chiffrage est **démontrée par un moment**.
+> Une ligne qu'aucun écran ne démontre est une ligne que le prospect découvre à la caisse — et
+> c'est celle qu'il refusera, en emportant le total avec.
+
+**Ce qui n'allait pas** : la plus grosse ligne (`info`, 10 min × 220 j = **37 h**, un tiers du total)
+n'était **créditée par aucun moment**. Le compteur du parcours montait à **40 min** (3 clés sur 7),
+puis l'addition sortait 111 h de nulle part. C'était aussi **la seule ligne qu'un vigneron peut
+refuser en bloc** — et son refus faisait tomber le résultat sous le seuil affiché.
+
+**Table actuelle — 9 lignes, ≈ 127 h, toutes démontrées** : phyto 5 · validations 33 ·
+**pointage du soir 37** · fins de mois 18 · saisonniers 8 · **carnet tracteur 10** · cave 6 ·
+Réserve 4 · **papiers du contrôle 6**.
+★ **`DEMO2_HORS`** porte la ligne molle **hors du total** (+37 h, annoncés à part) : celui qui y
+croit arrive à 164 h — proche de la brochure ; celui qui la refuse reste à 127, **et l'argument
+tient quand même**.
+
+⚠️ **`min` du tableau ≠ `min` crédité au compteur.** Le tableau compte **par occurrence** (90 min
+pour une fin de mois) ; le compteur compte **ce que cette journée-là fait gagner** (100 min au
+total sur les 19 moments). `min:0` marque une ligne **démontrée sans rien créditer** — sinon
+« aujourd'hui » cesse d'être crédible.
+
+### ★★★ L'addition — la clôture ne se saborde plus
+
+**Avant** : `2 200 € − 948 − 990 = **+260 €** la première année`. Après quatre minutes de
+démonstration, la dernière chose lue était un gain de 260 €. **Une marge plus mince que le
+scepticisme du lecteur est un couteau qu'on lui tend** — et une soustraction s'audite au lieu de
+se ressentir.
+**Maintenant** : le gain reste en **heures** (§26), le coût se dit **en heures de main-d'œuvre**
+(47 h d'abonnement, 50 h d'installation à 20 €/h), et la clôture donne un **seuil horaire** que le
+lecteur valide avec **son** taux : *« 7,45 € l'heure rendue, 15,22 € la première année. Votre heure
+vaut 20 à 25. »* Quel que soit le chiffre qu'il a en tête, il fait le calcul dans le bon sens.
+
+### Les défauts de moteur corrigés
+
+- ⚠️⚠️ **« Passer » promettait un saut et faisait une sortie** : `_mvtSkip` ouvrait le menu, donc
+  sauter *un* écran faisait perdre tous les suivants **et l'addition**. Deux boutons distincts
+  désormais ; **« Quitter » mène à l'addition**, pas au menu.
+- ★★★ **`_mvtQuery` refuse une cible invisible** (`_mvtVisible`). Depuis §42 les cartes du Pilotage
+  arrivent **repliées** et `.pil-tbody{display:none}` : `querySelector` trouve l'élément, il mesure
+  zéro, `_mvtReposition` rend `r=null` et **les quatre masques couvrent l'écran entier**. Le repli
+  ultime ne s'armait que sur `null` : il ne voyait pas ce cas.
+  ⚠️ **Aucun moment ne tombait dedans le 15/08** — vérifié : l'onglet Économie ne contient aucun
+  `_pilTile`, donc le moment du coût par parcelle se rabattait sur `#pil-content`. **La garde est
+  posée avant que le premier n'y tombe**, pas après.
+  ⚠️⚠️ **C22 vérifie qu'un sélecteur EXISTE dans les sources, jamais qu'il est VISIBLE au moment
+  où la visite le vise.** C'est le trou par lequel le bug du 09/08 était passé, sous une autre forme.
+- **L'onglet Économie s'ouvre sur `_PEC_SUB='syn'`** pendant que la narration parlait du coût par
+  parcelle. `_mvtPecSub('par')` et `_mvtPilOuvrir('echeances')` **cliquent** (ils ne écrivent pas
+  dans l'état) : le handler délégué referme les autres cartes, construit celles qui ont besoin de
+  largeur et grave l'état — le contourner, c'est réimplémenter trois règles à côté.
+- ★ **`s.wait`** : délai par moment quand la navigation enchaîne plusieurs rendus. 420 ms fixes
+  posaient le projecteur sur le DOM d'avant.
+- **`window._visiteDrae={}` annulait le délai de rentrée** sur les fiches parcelle, alors que
+  `_cfmDre()` (qui lit `TRAITEMENTS` et **ignore cette table**) affichait déjà les mêmes parcelles
+  comme fermées dans le Pilotage. **La liste disait le contraire du Pilotage.** Semé sur
+  *Les Charmes* et *La Combotte* — un délai actif **ne bloque pas** la validation (badge + liseré
+  rouge, rien d'autre) et aucune des deux n'est la première carte : le moment d'action est intact.
+- **La bascule ouvrier est réversible** (`_mvtRoleOuvrier`) et le retour est armé **à trois
+  endroits** : le moment suivant, `_mvtEnd`, et la fermeture d'un chapitre. Un rôle laissé en place
+  ampute les quinze moments suivants.
+
+### ★★★ `mv-harnais-demo` + sa contre-épreuve (branchés en CI)
+
+**144 assertions · 7 contre-épreuves.** Deux règles qu'aucun autre contrôle ne porte :
+① toute clé de `DEMO2_CREDITS` est démontrée par un moment · ② aucun `sel` ne vise `.pil-tbody`
+ni `#pil-body-*`. Plus : les crédits orphelins, l'existence de chaque jeton de sélecteur, le total,
+et le fait que la clôture ne soustraie plus.
+
+⚠️⚠️ **CE QUE LA CONTRE-ÉPREUVE A TROUVÉ, ET QU'AUCUNE RELECTURE N'AURAIT VU** : l'assertion
+« ce sélecteur existe dans les sources » **se prouvait toute seule** — elle cherchait la cible dans
+`app.js`, c'est-à-dire dans le fichier qui l'écrit. `sansCitations()` retire donc `_mvtSteps` et
+`_MVT_CHAPS` du corpus avant de chercher. **C'est le quatrième cas de « stub plus généreux que la
+vraie fonction » du mois.**
+★ `corps()` ôte les commentaires avant toute assertion : un commentaire qui cite `.pil-tbody` ne
+doit pas rougir (§34g).
+
+⚠️⚠️⚠️ **ET UNE FAUTE COMMISE PENDANT CE LOT MÊME, QUI A DONNÉ L'ASSERTION 6** : `_mvtCredits` a été
+**appelé avant d'être écrit**. `node --check` est passé — la syntaxe était valable — le preflight
+aussi, et la visite aurait planté au premier moment. **Aucun contrôle du dépôt ne voyait un appel
+vers une fonction inexistante.** L'assertion 6 vérifie désormais que tout `_mvt*` / `_demo2*`
+appelé dans `app.js` a bien son `function …(` — 36 fonctions couvertes.
 
 ### ✅ Les supports imprimés — `mvprint.py`
 
@@ -3970,6 +4063,23 @@ radios/cases, section « pièces à joindre » explicite.
 ---
 
 ## 28. État courant & backlog
+
+### ⚠️ À FAIRE AVANT DE DÉPLOYER LE CHANTIER §43 (la visite guidée)
+
+1. ⚠️⚠️⚠️ **ALIGNER LES TROIS CHIFFRES DU ROI.** La démo dit **127 h (+37 hors total)**.
+   `mvprint.py` dit **215 h/an pour 10 ha** et l'argumentaire oral **3 à 5 h/mois**. Tant que les
+   trois ne disent pas la même chose, la plaquette contredit la démo devant le même prospect.
+   **C'est le point n°1, avant le devis Garraud.**
+2. ⚠️⚠️ **REGARDER LES 19 MOMENTS EN VRAI.** Le harnais vérifie ce qu'on facture et ce qu'on vise ;
+   **il ne voit pas un projecteur mal posé**. En particulier : le moment ouvrier (bascule + retour),
+   le dépli des échéances, la sous-vue Parcelles d'Économie, et les deux moments qui enchaînent
+   plusieurs rendus (`wait`).
+3. ★ **Caler les trois estimations neuves** : pointage 10 min × 220, carnet tracteur 10 min × 60,
+   papiers du contrôle 60 min × 6. Elles sont de moi, pas de Nico — lui seul peut les signer,
+   comme il a signé les 250 tâches de janvier à juillet.
+4. **`lint-cliquet` / ESLint** : jamais joué côté Claude (`node_modules` absent) — **l'échec est
+   identique sur la base d'origine**, vérifié.
+5. **`test:smoke` / `test:e2e`** : jamais joués côté Claude (Chromium injoignable).
 
 ### ⚠️ À FAIRE AVANT DE DÉPLOYER LE CHANTIER §42
 

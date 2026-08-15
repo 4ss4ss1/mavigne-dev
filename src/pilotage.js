@@ -4455,7 +4455,11 @@ function _pilCkTraiter(){
   // La pastille suit la carte : la fiche `pil.traitement` etait posee sur celle
   // qui disparait. Une fiche ecrite et posee nulle part est un rouge de harnais.
   var _i=(typeof _mvInfoBtn==='function')?_mvInfoBtn('pil.traitement'):'';
-  return '<div class="pil-tile2"><div class="pil-t2h"><span class="ic">'+_pilIco('drop')+'</span><span class="t">Traiter ?</span>'+_i+'</div>'
+  // ⚠️ `data-mvt="traiter"` EST UN POINT D'ACCROCHE DE LA VISITE GUIDEE, au
+  //   meme titre que `.pil-dec` et `.pil-cockpit-card` (§20b). Sans lui, le
+  //   moment « Je traite ou pas ? » vise `.pil-tile2` et attrape « A la vigne
+  //   aujourd'hui », la premiere carte du cockpit. Ne pas renommer.
+  return '<div class="pil-tile2" data-mvt="traiter"><div class="pil-t2h"><span class="ic">'+_pilIco('drop')+'</span><span class="t">Traiter ?</span>'+_i+'</div>'
     +'<div class="pil-t2b"><div class="pil-big" style="color:'+bigCol+'">'+big+'</div>'+body+'</div></div>';
 }
 function _pilCkPrio(d){

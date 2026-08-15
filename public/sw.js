@@ -1,4 +1,38 @@
-// MA VIGNE — Service Worker v6.77
+// MA VIGNE — Service Worker v6.78
+// v6.78 (15/08/2026) — LA VISITE GUIDEE, REVUE DE BOUT EN BOUT.
+//   ★★★ TROIS MOMENTS QUI MANQUAIENT. « Ce que voit Jean » (bascule reelle sur
+//     le role ouvrier) : l'objection numero un d'un patron n'est pas le prix,
+//     c'est « mes gars ne s'en serviront pas », et la visite entiere se jouait
+//     depuis le fauteuil du chef. « Le jour du controle » montre desormais deux
+//     parcelles FERMEES par un delai de rentree — le seul moment ou le logiciel
+//     rattrape l'utilisateur au lieu de l'assister. « La date qui ne rentre
+//     pas » ouvre les echeances par tache : une date et des heures restantes,
+//     pas un pourcentage.
+//   ★★★ LE CHIFFRAGE NE FACTURE PLUS CE QU'IL NE MONTRE PAS. La plus grosse
+//     ligne du total (« retrouver l'info », 37 h, un tiers) n'etait demontree
+//     par AUCUN moment : elle sort du total et s'annonce a part. Trois lignes
+//     neuves la remplacent, chacune adossee a un ecran : pointage du soir,
+//     carnet tracteur, papiers du controle. 111 h -> 127 h demontrables.
+//   ★★★ LA CLOTURE NE SE SABORDE PLUS. Elle finissait sur « +260 EUR la
+//     premiere annee » : une marge plus mince que le scepticisme du lecteur.
+//     Le gain reste en HEURES, le cout se dit en heures de main-d'oeuvre, et
+//     la fin donne un SEUIL HORAIRE que le lecteur valide avec son propre taux.
+//   ★★ « PASSER » PROMETTAIT UN SAUT ET FAISAIT UNE SORTIE : sauter un ecran
+//     faisait perdre tous les suivants ET l'addition. Deux boutons distincts,
+//     et « Quitter » mene desormais a l'addition, pas au menu.
+//   ★★ _mvtQuery REFUSE UNE CIBLE INVISIBLE. Depuis §42 les cartes du Pilotage
+//     arrivent repliees (.pil-tbody en display:none) : querySelector trouvait
+//     l'element, il mesurait zero, et les masques couvraient l'ecran ENTIER.
+//     Aucun moment ne tombait dedans aujourd'hui — la garde est posee avant
+//     que le premier n'y tombe. C22 voit qu'un selecteur existe, jamais qu'il
+//     est visible.
+//   ★ L'onglet Economie s'ouvrait sur « Synthese » pendant qu'on parlait du
+//     cout par parcelle : la sous-vue est desormais forcee, comme le depli de
+//     la carte des echeances (_mvtPecSub, _mvtPilOuvrir, et un delai `wait`
+//     par moment).
+//   ★ Duree annoncee : quatre minutes (mesuree a ~5, annoncee a 3).
+//   ★ Le Cuvier sort du parcours et reste dans les 26 ecrans : trois moments
+//     de cave d'affilee cassaient le rythme.
 // v6.77 (15/08/2026) — CE QUI N’ETAIT PAS A SA PLACE. Quatre lots, sur retour
 //   de Nico, tous sur la MEME question : un chiffre range sous une echelle qui
 //   n’est pas la sienne.
@@ -1717,7 +1751,7 @@
 // v2.22 — Fix profils vides : guard vide dans loadData() pour MEMBRES/SAISONS/TACHES
 // v2.17 — Onboarding intégré + tenantId · v2.06 — Firebase Auth · v2.00–v2.05 — divers
 const DEBUG = self.location.hostname === 'localhost' || self.location.hostname === '127.0.0.1';
-const CACHE_NAME   = 'mavigne-v6.77';
+const CACHE_NAME   = 'mavigne-v6.78';
 const TENANT_CACHE = 'mavigne-tenant';   // Cache persistant — préservé à chaque mise à jour SW
 const SYNC_TAG     = 'mavigne-sync';
 
@@ -1733,7 +1767,7 @@ const CDN_URLS = [
 ];
 
 self.addEventListener('install', event => {
-  if(DEBUG) console.log('[SW] Ma Vigne v6.77 installé');
+  if(DEBUG) console.log('[SW] Ma Vigne v6.78 installé');
   event.waitUntil(
     caches.open(CACHE_NAME).then(async cache => {
       // ── Cœur applicatif : STRICT (mise à jour ATOMIQUE) ──
@@ -1749,7 +1783,7 @@ self.addEventListener('install', event => {
 });
 
 self.addEventListener('activate', event => {
-  if(DEBUG) console.log('[SW] Ma Vigne v6.77 activé');
+  if(DEBUG) console.log('[SW] Ma Vigne v6.78 activé');
   event.waitUntil(
     caches.keys().then(keys =>
       Promise.all(
