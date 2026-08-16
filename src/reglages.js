@@ -734,10 +734,25 @@ var _EMH_GRILLES_DEF=['standard'];
 function _emhFmt(iso){ if(!iso) return '\u2014'; var p=String(iso).split('-'); return p.length===3?(p[2]+'/'+p[1]+'/'+p[0]):iso; }
 function _emhJours(a,b){ var x=Date.parse(a+'T00:00:00'), y=Date.parse(b+'T00:00:00');
   return (isFinite(x)&&isFinite(y))?Math.round((y-x)/86400000):0; }
-function _emhGrilles(){
+// Les grilles proposables : les modèles de l'année (base) + les grilles
+// INTÉGRÉES (planning.js, window.PLAN_DEF) + celle que porte déjà la fiche.
+// ★★ LES TROIS SOURCES SONT NÉCESSAIRES, et il en manquait deux :
+//   ① window.PLAN_DEF valait undefined — PLAN_DEF est en portée module dans
+//     planning.js et n'était pas exporté. Le `if` échouait sans un mot, donc
+//     'standard' et 'nico' n'apparaissaient JAMAIS. Sur un domaine sans modèle
+//     en base la liste tombait sur le repli à un seul élément.
+//   ② `cur` — la grille effectivement portée par la fiche. Une grille absente
+//     de la liste s'affiche non sélectionnée : le premier appui la REMPLACE,
+//     et _mvHistMirror réécrit alors m.planning_id sans que rien ne le dise.
+//     Une liste qui ne contient pas la valeur courante ne montre pas un choix,
+//     elle en impose un.
+// ⚠️ Ne pas confondre « la grille n'est pas en base » et « la grille n'existe
+// pas » : _planGetTpl retombe sur PLAN_DEF, donc une grille hors base tourne.
+function _emhGrilles(cur){
   var out=[], T=(window.PLANNING_TEMPLATES&&window.PLANNING_TEMPLATES[new Date().getFullYear()])||null;
   if(T) Object.keys(T).forEach(function(k){ if(out.indexOf(k)<0) out.push(k); });
   if(window.PLAN_DEF) Object.keys(window.PLAN_DEF).forEach(function(k){ if(out.indexOf(k)<0) out.push(k); });
+  if(cur && out.indexOf(cur)<0) out.push(cur);
   return out.length?out:_EMH_GRILLES_DEF;
 }
 // Ecrit le journal, reconstruit les miroirs, enregistre. Un seul chemin.
@@ -1889,7 +1904,7 @@ function _emhTyPick(){
 }
 function _emhGrPick(){
   var el=document.getElementById('emh-gr'); if(!el) return;
-  el.innerHTML=_emhGrilles().map(function(g){
+  el.innerHTML=_emhGrilles(window._EMH&&window._EMH.grille).map(function(g){
     return '<div class="pchk'+(window._EMH.grille===g?' sel vert':'')+'" onclick="window._EMH.grille=\''+_escAttr(g)+'\';_emhGrPick();_emhEff()">'+_escHtml(g)+'</div>';
   }).join('');
 }
