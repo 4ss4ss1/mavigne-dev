@@ -2,7 +2,16 @@
 
 > Document de référence du projet **Ma Vigne** (GUERETTECH). Il est le **porteur de vérité** :
 > la mémoire Claude est plafonnée, ce fichier ne l'est pas.
-> Dernière consolidation : **15 août 2026** — ★★★ **LE CHANTIER ERGONOMIE DU PILOTAGE, DIX LOTS
+> Dernière consolidation : **16 août 2026** — ⚠️⚠️⚠️ **AUDIT DE DÉRIVE DU DOCUMENT (§44)**.
+> Le backlog s'ouvrait sur *« 0a. DÉPLOYER — APP 6.06 · SW 6.56, jamais mis en ligne »* alors que le
+> dépôt portait **dix-neuf versions APP et vingt-trois versions SW de plus**. **Onze entrées
+> décrivaient du travail déjà fait** ; **quatre chiffres avaient grossi** sans que personne le voie ;
+> et **neuf harnais sur vingt-six ne peuvent pas démarrer**, dont **six qui portent un chemin de bac
+> à sable en dur** — ils se lisent comme des succès. **Détail et preuves en §44.**
+> ★★★ **La leçon, et c'est la troisième fois** : *un backlog non re-mesuré dérive DANS LES DEUX
+> SENS.* Il fait travailler dans le vide sur ce qui est fait, et il tait ce qui a empiré.
+>
+> ★ Consolidation précédente : **15 août 2026** — ★★★ **LE CHANTIER ERGONOMIE DU PILOTAGE, DIX LOTS
 > EN UNE JOURNÉE** (**§42**, section neuve). Parti de trois phrases de Nico : *« j'ai l'impression
 > que ce n'est pas rangé, c'est fouillis, on dépense du temps et de l'énergie à chercher une info ·
 > certains textes ne sont peut-être pas utiles à être affichés tout le temps (infobulles ?) ·
@@ -4095,20 +4104,6 @@ radios/cases, section « pièces à joindre » explicite.
 
 ## 28. État courant & backlog
 
-### ✅ LA FUSION DE `pilotage.js` EST FAITE (commit `2e002ae`)
-
-**Le commit `banc` avait remplacé `src/pilotage.js` par un fichier d'une autre lignée** — 1 690
-lignes changées, 1 164 suppressions : `_mvInfoBtn` 28→0, `MV_INFO` 4→0, `_PIL_ST_V` 4→0,
-`_pecFiabCard` 4→0, `_pilTile` passé de 9 à 8 arguments. **Signature d'un fichier restauré depuis
-une sauvegarde, pas d'une décision** : `utils.js` gardait ses 11 fiches `MV_INFO` sans pastille où
-les poser, et la CI lançait toujours trois harnais devenus rouges.
-⚠️ **Les deux lignées ne se recouvraient pas** — `7a509b4` portait l'ergonomie sans
-`_PIL_CMP_RECOUV`, `c638402` la cadence sans l'ergonomie : **aucun n'était un sur-ensemble de
-l'autre**, il a fallu fusionner à la main. **Fait par Nico.** Vérifié : 9 660 lignes, les six
-marqueurs présents, `banc` + `garde-projection` + les trois harnais Pilotage tous verts.
-★ **La leçon** : quand un fichier maigrit de 600 lignes entre deux clones, **c'est le nombre de
-lignes qu'il faut regarder en premier** — pas le diff, qui noie le signal dans le bruit.
-
 ### ⚠️ À FAIRE AVANT DE DÉPLOYER LE CHANTIER §43 (la visite guidée)
 
 1. ⚠️⚠️⚠️ **ALIGNER LES TROIS CHIFFRES DU ROI.** La démo dit **127 h (+37 hors total)**.
@@ -4125,6 +4120,39 @@ lignes qu'il faut regarder en premier** — pas le diff, qui noie le signal dans
 4. **`lint-cliquet` / ESLint** : jamais joué côté Claude (`node_modules` absent) — **l'échec est
    identique sur la base d'origine**, vérifié.
 5. **`test:smoke` / `test:e2e`** : jamais joués côté Claude (Chromium injoignable).
+
+### ⚠️⚠️⚠️ AUDIT DU 16/08 — LIRE §44 AVANT DE TRAVAILLER DANS CE BACKLOG
+
+**Ce backlog a été confronté aux fichiers le 16/08, entrée par entrée.** Résultat : **onze entrées
+rayées** (le code les avait déjà réglées), **quatre chiffres corrigés à la hausse**, et **neuf
+harnais sur vingt-six qui ne peuvent pas démarrer** — dont six qui portent un chemin de bac à sable
+en dur et se lisent donc comme des succès.
+
+**Les trois priorités qui en sortent** :
+
+1. ⚠️⚠️ **`_pl2Cell`** — un retard d'une heure et une journée d'absence s'affichent pareil chez MG
+   et Chapelle, tous les jours. **Le défaut le plus visible côté client de tout le backlog.**
+2. ⚠️⚠️ **Les six harnais à chemin absolu** (§44c) — une ligne chacun, et neuf filets se remettent
+   à protéger quelque chose.
+3. ⚠️ **0a-quater** — la masse salariale exclut les bureaux pendant que son commentaire dit
+   l'inverse. **`avecBureau` : 0 occurrence.**
+
+⚠️ **L'audit n'a PAS pu vérifier l'état EN LIGNE** (bac à sable sans accès au domaine) : tout ce qui
+suit décrit **le dépôt**, pas la production. **Détail, preuves et règles nouvelles : §44.**
+
+### ✅ LA FUSION DE `pilotage.js` EST FAITE (commit `2e002ae`)
+
+**Le commit `banc` avait remplacé `src/pilotage.js` par un fichier d'une autre lignée** — 1 690
+lignes changées, 1 164 suppressions : `_mvInfoBtn` 28→0, `MV_INFO` 4→0, `_PIL_ST_V` 4→0,
+`_pecFiabCard` 4→0, `_pilTile` passé de 9 à 8 arguments. **Signature d'un fichier restauré depuis
+une sauvegarde, pas d'une décision** : `utils.js` gardait ses 11 fiches `MV_INFO` sans pastille où
+les poser, et la CI lançait toujours trois harnais devenus rouges.
+⚠️ **Les deux lignées ne se recouvraient pas** — `7a509b4` portait l'ergonomie sans
+`_PIL_CMP_RECOUV`, `c638402` la cadence sans l'ergonomie : **aucun n'était un sur-ensemble de
+l'autre**, il a fallu fusionner à la main. **Fait par Nico.** Vérifié : 9 660 lignes, les six
+marqueurs présents, `banc` + `garde-projection` + les trois harnais Pilotage tous verts.
+★ **La leçon** : quand un fichier maigrit de 600 lignes entre deux clones, **c'est le nombre de
+lignes qu'il faut regarder en premier** — pas le diff, qui noie le signal dans le bruit.
 
 ### ⚠️ À FAIRE AVANT DE DÉPLOYER LE CHANTIER §42
 
@@ -4168,9 +4196,26 @@ lignes qu'il faut regarder en premier** — pas le diff, qui noie le signal dans
 - **Le chrono tracteur n'est jamais visible en démo** (`CONFIG.chrono_mode` à 'off', aucune mesure
   ouverte). Soit on le sème pour en faire un moment — c'est l'argument de précision le plus fort
   du module — soit on l'assume hors parcours. Aujourd'hui : hors parcours.
-- **Deux harnais périmés rougissent la CI** : `harnais-bandeau-essai` (épinglé sur `APP_VERSION
-  6.13`) et `harnais-cadence-escalier` (règle d'alerte antérieure). Un rouge permanent masque le
-  prochain vrai rouge.
+- ⚠️⚠️⚠️ **NEUF HARNAIS SUR VINGT-SIX NE PROTÈGENT RIEN** — l'entrée disait « deux harnais périmés
+  rougissent la CI ». **Les deux existent bien**, mais le constat était faux sur deux points, et
+  incomplet sur le reste. Mesuré le 16/08, chaque script lancé un par un :
+  · **Ni l'un ni l'autre n'est dans `ci.yml`.** Ils ne rougissent donc **rien du tout** — ils se
+    taisent, ce qui est pire.
+  · `harnais-bandeau-essai` : **2 rouges sur 15**, dont *« APP_VERSION délibérément inchangé
+    (6.13) »* — il fige une version que le dépôt a dépassée de douze crans.
+  · `harnais-cadence-escalier` : **1 rouge sur 28** — *« l'alerte >15 % ne crie plus au dérapage sur
+    un chiffre d'histoire »*.
+  · ★★★ **SIX SCRIPTS PORTENT `/home/claude/mavigne-dev/` EN DUR** : `harnais-bandeau-essai`,
+    `harnais-cadence-escalier`, `harnais-claude-md`, `harnais-parcours-prospect`,
+    `harnais-reconduction`, `harnais-vitrine`. **Ils ne peuvent démarrer que dans le bac à sable.**
+    Chez Nico comme en CI, ils sortent en `ENOENT` — et un script qui ne démarre pas se lit comme un
+    succès. **C'est l'entrée 0h (`lint-cliquet`), mais multipliée par six et jamais consignée.**
+  · `harnais-vitrine` et `contre-epreuves` : `ENOENT` sur `logiciel-vigne.html` — chemin relatif au
+    répertoire courant, pas au dépôt.
+  · `harnais-essai-borne.cjs` : `Cannot find module 'firebase-admin'`.
+  · `harnais-claude-md` : **1 rouge sur 23** — c'est ce document lui-même qui se déclare périmé.
+  → **Correctif type, une ligne par script** : `new URL('../<chemin>', import.meta.url)` au lieu du
+  chemin absolu, et `os.tmpdir()` pour les fichiers de contre-épreuve. Détail en **§44c**.
 
 ### ⚠️ À FAIRE AVANT DE DÉPLOYER LE CHANTIER §40
 
@@ -4192,8 +4237,12 @@ L'hypothèse en vigueur — la lecture seule dure — n'a jamais été confirmé
 
 ### ⚠️⚠️ NOUVEAU AU BACKLOG (issu de §43 — 15/08)
 
-- ⚠️⚠️ **Refondre l'export JSON** — `reglages.js:3078` couvre 8 clés sur 24. Dériver la liste **de
-  `COLLECTIONS`**, ne jamais maintenir deux listes. Détail et checklist : **§43f**.
+- ⚠️⚠️ **Refondre l'export JSON** — ⚠️ **le dénominateur a bougé : 8 clés sur 27**, pas 24
+  (`COLLECTIONS`, `firebase.js:232`, compté le 16/08). L'export manque toujours `travaux`,
+  `catalogue`, `conducteurs`, `activites`, `tracteurs_list`, `entretiens`, `reparateur`,
+  `reparateur_hist`, `cave_elevage`, `cave_vendange`, les cinq clés `planning_*`, `kml_polygons`,
+  `intrants` et `paie`. **La liste s'allonge pendant que l'export reste figé** : c'est exactement
+  l'argument de la dériver de `COLLECTIONS` au lieu de la maintenir. Détail : **§43f**.
 - ⚠️⚠️ **Vérifier la persistance cloud tenant par tenant** — le code est bon, l'existence des
   documents chez chaque client n'est pas prouvée. Procédure : **§43g**.
 - ⚠️ **La marge en jours n'est surveillée par aucun test** — bloqué par l'export. **§43f**.
@@ -4415,10 +4464,18 @@ appliquée au document lui-même.
 ★ **AJOUT DU 12/08 — les entrées 0a à 0d sortent du chantier ETP/année/contrats (§33).** Elles
 sont neuves, donc **non auditées** : les traiter comme des hypothèses jusqu'à re-mesure.
 
-0a. ★★★ **DÉPLOYER — APP 6.06 · SW 6.56.** ⚠️ **Le paquet a GROSSI trois fois depuis le 12/08 au
-   matin** : les trois lots ETP/contrats (§33), les six du chantier Pilotage (§34), les cinq retours
-   du soir (§35), **et le lot des salaires datés (§36)**. Livrés, preflight **0/0**, harnais verts,
-   **jamais mis en ligne**. `npm run build && firebase deploy` —
+0a. ✅ ~~**DÉPLOYER — APP 6.06 · SW 6.56**~~ — **RAYÉ LE 16/08, ET C'EST LE PLUS GROS DÉFAUT
+   D'ENTRETIEN DE CE DOCUMENT À CE JOUR.** L'entrée est restée en tête de backlog, trois étoiles,
+   pendant **dix-neuf versions APP et vingt-trois versions SW**. Le dépôt lu le 16/08 porte tout
+   §37, §38, §40, §41, §42 et §43 par-dessus : le paquet décrit ici comme « jamais mis en ligne »
+   a été déployé, puis recouvert six fois.
+   ★★★ **La leçon est de méthode** : *une entrée « À DÉPLOYER » est la seule du backlog qui se
+   périme toute seule.* Elle ne demande pas de travail, elle demande une lecture — et tant qu'on ne
+   la relit pas, elle occupe la première place en criant sur un fait faux.
+   → **Règle** : toute entrée « à déployer » se relit **en tête de session**, en comparant les
+   numéros qu'elle cite à `APP_VERSION` et `CACHE_NAME`. Si elle cite plus bas, elle part.
+   Détail en **§44a**.
+   ⚠️ **Ce qui reste vrai et qu'il ne faut pas jeter avec** : `npm run build && firebase deploy` —
    ⚠️ **un seul `&&`** : `inject-precache` tourne déjà en postbuild, un second passage sort en 1
    et annule le déploiement. Tant que ce n'est pas fait, les clients lisent encore
    « manque 15,8 ETP » sur une vendange couverte, et **une augmentation de salaire continue de
@@ -4427,16 +4484,12 @@ sont neuves, donc **non auditées** : les traiter comme des hypothèses jusqu'à
    baseline a été **regravée** sur une diminution réelle (un `catch{}` vide parti avec
    `_paieHistTxt`). Sans elle, le prochain preflight avertit sans raison — et un avertissement
    qu'on apprend à ignorer est un cliquet mort.
-0a-bis. ★★ **UNE LIGNE D'`utils.js` EN ATTENTE D'UNE DÉCISION DE DONNÉE — pas de code.**
-   `_mvEnContratSurPeriode` (utils.js l.2449) fait `if(!P.length) return m.statut !== 'Inactif';`.
-   La convention posée par Nico le **09/07** est *« CDI sans date = présent en permanence »* — le
-   statut n'y figure pas. Aujourd'hui une fiche **sans aucune date** passée en Inactif sort de
-   **toutes** les périodes, **passées comprises**. Correction = `return true;`.
-   ⚠️ **Ce qui bloque** : la fiche **`Pilotage`** du tenant de référence est Inactive et **sans
-   dates**. La ligne en ferait un CDI permanent — +1 sur chaque courbe, entrée dans la **masse
-   salariale** (pilotage.js l.6933) et dans le **coût MO par parcelle** (l.5525). **Aucun marqueur
-   « compte de service » n'existe dans le modèle.** → Cocher **Bureau** sur `Pilotage`, ou supprimer
-   la fiche. Ensuite la ligne part : `utils.js`, donc **bump APP + SW**. Détail en **§39g**.
+0a-bis. ✅ ~~**UNE LIGNE D'`utils.js` EN ATTENTE D'UNE DÉCISION DE DONNÉE**~~ — **FAITE, vérifié
+   le 16/08.** `_mvEnContratSurPeriode` (désormais **utils.js l.2936**, plus l.2449) porte
+   `if(!P.length) return true;`, précédé du commentaire de convention en dix lignes qui explique
+   *pourquoi* le statut n'entre pas dans la réponse. Le blocage de donnée était levé dès le 14/08 —
+   Nico a supprimé la fiche `Pilotage` (§39g). **L'entrée décrivait donc un travail fait depuis
+   deux jours au moment de la consolidation du 15/08 : elle aurait dû partir avec §39.**
 0a-ter. ★★★ **COMPTER LES ETP BUREAU — orientation produit, 14/08.** Nico :
    *« je veux compter aussi les ETP bureaux pour pouvoir budgéter au plus près de la réalité (on
    fera ça sur une prochaine mise à jour) »*. ⚠️ **Ce n'est pas un simple retrait du filtre** :
@@ -4474,9 +4527,11 @@ sont neuves, donc **non auditées** : les traiter comme des hypothèses jusqu'à
    livrés volontairement** (§34i). Ils exigent que le calcul de charge descende à la parcelle.
    ⚠️ **Un filtre qui change la liste sans changer les chiffres est un décor.** Les données existent
    déjà : `p.cepages[]` et `p.commune`. Aucune saisie neuve à demander au client.
-0c-ter. ★ **Déplacer `_PIL_SEM` dans `utils.js`** au prochain lot qui bumpe — une palette
-   sémantique ne devrait pas vivre dans un module. Elle est dans `pilotage.js` pour avoir pu être
-   livrée sans bump (§20b).
+0c-ter. ✅ ~~**Déplacer `_PIL_SEM` dans `utils.js`**~~ — **FAIT, vérifié le 16/08.**
+   `utils.js:1968` la définit, `utils.js:2345` l'expose, `pilotage.js:15` l'importe, et
+   `pilotage.js:9650` porte le commentaire *« n'est plus exposé ici »*.
+   ⚠️ **Effet de bord jamais consigné** : `mv-harnais-frise` cherche encore la palette dans
+   `pilotage.js` — **il rougit sur trois assertions à cause de ce déplacement réussi** (§44c).
 
 0d. ★★ **Le pont coût annuel ↔ campagnes** — le gros morceau ouvert par Nico le 12/08, détaillé en
    fin de §33. Coût annuel **par date**, part d'une campagne **par tâche**, et le **reste**
@@ -4507,17 +4562,24 @@ sont neuves, donc **non auditées** : les traiter comme des hypothèses jusqu'à
    `INSTALLER-UN-DOMAINE.md`). Les lots sont déployés ; **le « 20 h → ~9 h » n'a jamais été vérifié.**
    ⚠️ **Un essai consomme un identifiant** : `onboardTenant` refuse un domaine déjà peuplé. Prendre
    un nom jetable, **jamais `chateau-garraud`**.
-2. ★★ **Vérifier si un `rewrite` existe en ligne** (`/api/lead`). ⚠️ **Vérifié le 11/08 :
-   `grep rewrite firebase.json` renvoie ZÉRO.** Si un rewrite existe en ligne, il n'est pas dans le
-   dépôt — ce qui est un problème en soi. Si oui, en ajouter un pour `/api/mise-en-route`.
+2. ✅ ~~**Vérifier si un `rewrite` existe en ligne**~~ — **RAYÉ, vérifié le 16/08.** Les **deux**
+   sont dans `firebase.json` : `/api/lead` (l.19) et `/api/mise-en-route` (l.26), sous la clé
+   `rewrites` ouverte l.17. Le ZÉRO du 11/08 était juste **à cette date** ; ils ont été ajoutés
+   depuis, sans que l'entrée soit relue. ★ `harnais-claude-md` le vérifie déjà à chaque passage.
 3. ~~**Fusionner les deux écrans de congés**~~ — ✅ **FAIT le 14/08** (APP 6.14 · SW 6.67).
    `openPlanCP(fromSel)` est le point d'entrée unique ; `openPlanCPSel` est supprimée, son
    exposition `window` retirée, le bouton de la barre de sélection appelle `openPlanCP(true)`.
    La 5ᵉ feuille est ramenée à 4 (§19a).
-4. ★ **Corriger `_findDebutTache`** — `app.js:3116`. **Vérifié : le `reduce` prend toujours le
-   minimum sur tout le journal filtré, sans borne de période.** 2 lignes, bump SW (§15).
-5. ★ **Breakpoint 760 → 767.98** — **vérifié : `styles.css:2084` porte encore `max-width:760px`**
-   face au `min-width:768px`. Le trou est intact. 1 ligne CSS, 0 JS, **en attente du go** (§21d).
+4. ✅ ~~**Corriger `_findDebutTache`**~~ — **RAYÉ, vérifié le 16/08.** La fonction est passée en
+   `app.js:3572` et **porte désormais ses bornes** : elle résout la période par `_saisonForDate`,
+   retombe sur `_mvCampagneDe`, et en dernier recours sur le jour même. Le `reduce` ne s'applique
+   plus qu'à `ok`, filtré par `dans(j.date)`. ⚠️ **L'entrée citait `app.js:3116` — un numéro de
+   ligne de backlog vieillit encore plus vite qu'un chiffre** (§44b).
+5. ✅ ~~**Breakpoint 760 → 767.98**~~ — **RAYÉ, vérifié le 16/08.** `styles.css` porte
+   `@media(max-width:767.98px)` ; le trou 761–767 est bouché. La seule occurrence restante de `760`
+   est `@media(min-width:768px){ .mvr-body{max-width:760px} }` — **une largeur de corps, pas un
+   point de rupture** : ne pas la « corriger », elle est juste. ★ L'entrée attendait un go qui
+   n'était plus nécessaire.
 6. ★ **Découper `demarrage.html`** sur le modèle du guide — **938 lignes, monolithique** (§27d).
    ✅ La section **Données** est faite : `guide/13-donnees.html` existe (7,5 ko).
 7. ~~**Escalier de sources pour la cadence**~~ — ✅ **FAIT le 14/08** (APP 6.14 · SW 6.67), §41.
@@ -4525,9 +4587,13 @@ sont neuves, donc **non auditées** : les traiter comme des hypothèses jusqu'à
    période de la campagne précédente**. `hBar` vient du snapshot (`stats.hFaites`), `hReel` se
    **recalcule** sur `PLANNING_ENTRIES` — clé par année, jamais purgé. **Quatre points d'affichage
    annoncent la source.** Harnais : 28 assertions, 5 contre-épreuves.
-8. **Purger le calcul de pic mort dans `_rfCtx`** — ✅ **le nom était bon, le doute est levé** :
-   `pilotage.js:1925` calcule `pic`, la ligne 1976 le renvoie dans l'objet, et **`grep '\.pic'`
-   ne trouve AUCUN consommateur**. Suppression franche.
+8. ✅ ~~**Purger le calcul de pic mort dans `_rfCtx`**~~ — **FAIT, vérifié le 16/08.**
+   `pilotage.js:3193` porte le commentaire de purge : *« `pic` était calculé ici et renvoyé dans le
+   contexte […] après vérification (`grep '.pic'` = 0 consommateur) »*. ⚠️ **Ne pas confondre avec
+   les `pic` VIVANTS** : `_rfWeeks` (l.1387) et `_pilAnnuCtx` (l.8764) en renvoient un, consommé
+   l.1841 et l.4427 — ceux-là sont utiles.
+   ⚠️ **Effet de bord jamais consigné** : `mv-harnais-portee` exige encore *« le pic est calculé »*
+   et **rougit sur quatre assertions à cause de cette purge réussie** (§44c).
 9. ~~**Pondérer `_ecoRate` par les heures**~~ — ✅ **FAIT le 14/08** (APP 6.14 · SW 6.67).
    Moyenne pondérée par les heures annuelles du gabarit (`window._planGetRefH` sur 12 mois).
    ★ **Repli sur `h=1` si le planning n'est pas chargé** — résultat identique à l'ancien, donc
@@ -4541,12 +4607,16 @@ sont neuves, donc **non auditées** : les traiter comme des hypothèses jusqu'à
     `p.tachesAll`, `p.rendement_hist`, `p.rdt_max`.
 12. ★★ **Le rattachement des anciens fûts à une référence** — maquetté et validé, **non intégré** :
     0 trace dans `reserve.js`.
-13. ★★ **Un 14ᵉ moment de démo sur la cave** — ⚠️ **le backlog disait « 15ᵉ » : c'est faux.**
-    `grep -c "sur 13"` = **13**. La visite en compte treize, pas quatorze. Le plus vendeur du parcours.
+13. ❌ **ENTRÉE PÉRIMÉE, RÉÉCRITE LE 16/08.** Elle disait « un 14ᵉ moment », après avoir corrigé
+    « 15ᵉ » en « 13 ». **La visite en compte DIX-NEUF** depuis §43 (`harnais-demo` : *« 19 moments »*).
+    ★★ **Trois chiffres successifs dans la même entrée, tous faux au moment où on la lit** : c'est le
+    symptôme, pas l'exception. Ce qui reste vrai : **la cave n'a toujours pas son moment**, et c'est
+    le plus vendeur du parcours. **Renuméroter n'est pas le travail — l'ajouter l'est.**
 14. ★ **Le Cuvier n'enregistre pas d'intervenant** là où le Chai le fait — **`cave.js:6290` le dit
     à l'écran** (« la colonne reste vide pour celles-ci »). Le défaut est assumé, pas corrigé.
-15. **`.cave-tabs`** — ✅ **les deux barres d'onglets mortes sont purgées** (`index.html:1734`
-    porte le commentaire « purgé »). **Reste la règle CSS orpheline `styles.css:1447`.** 1 ligne.
+15. ✅ ~~**`.cave-tabs`**~~ — **RAYÉ ENTIÈREMENT, vérifié le 16/08.** Les deux barres mortes sont
+    purgées (`index.html:1745` porte le commentaire) **et la règle CSS orpheline est partie aussi** :
+    `grep cave-tabs styles.css` = **0**. L'entrée ne gardait qu'un reliquat déjà traité.
 16. **`_pl2Annual` (`planning.js:1669`) vs `_planGetRefH` (`l.349`)** — 1 ligne, mais **décision de
     conception d'abord**.
 17. **Terminologie heures sup** : « Solde cumulé » (`planning.js:2319`) vs « Reste à prendre »
@@ -4554,8 +4624,10 @@ sont neuves, donc **non auditées** : les traiter comme des hypothèses jusqu'à
 17b. ★ **Le nom d'un salarié, dans la grille, coche sa ligne** et n'ouvre plus sa fiche (§19a).
     Décision assumée — une cible, un effet — mais **à confirmer à l'usage** : c'est le seul point de
     dépaysement de la refonte, et il est réversible en une ligne.
-18. **Batch a11y** · résorption des `catch{}` vides — ⚠️ **chiffre corrigé : 200, pas ~234.**
-    **151 sont dans `app.js` à eux seuls** (puis `pilotage.js` 14, `firebase.js` 12, `utils.js` 10).
+18. **Batch a11y** · résorption des `catch{}` vides — ⚠️ **RE-MESURÉ LE 16/08 : 193, pas 200.**
+    **135 sont dans `app.js` à eux seuls** (puis `pilotage.js` 15, `onboarding.js` et
+    `tracteur.js` 4, `cave.js` 3). ★ **C'est la seule ligne du backlog qui a BAISSÉ deux audits de
+    suite** — 234 → 200 → 193. Le cliquet C14 travaille.
     **La baisse est réelle** (C14 fait son travail) : le cliquet interdit d'en ajouter, il ne purge
     pas l'existant. **Un lot ciblé `app.js` réglerait les trois quarts du sujet.**
 19. **Rôle `pilotage` (`pil:true`)** — **0 occurrence, vérifié.** 2 arbitrages préalables.
@@ -4565,12 +4637,18 @@ sont neuves, donc **non auditées** : les traiter comme des hypothèses jusqu'à
     `window.METEO_HOURLY` avec `precipitation` heure par heure et le met en cache
     (`mavigne_meteohr_cache`). **Ce qui manque n'est pas la donnée, c'est son exploitation.**
     L'historique reste irrécupérable rétroactivement.
-22. **DRY surface** — ⚠️ **22 sommes à la main, pas 32** (`grep '\.surface||0'`).
-23. **UI d'activation d'essai client** — `fc.trialDays` / `fc.activatedAt` existent
-    (`admin-gt.js:2704`), **aucun écran pour les poser**.
-24. **Fusion de fûts à l'ÉDITION** (La Réserve) — ⚠️ **`reserve.js:324` porte le commentaire qui
-    décrit exactement ce qui manque** : « le formulaire doit fusionner les quantités — comme le fait
-    déjà le +/- ». Le code se documente lui-même comme incomplet.
+22. **DRY surface** — ⚠️ **21 sommes à la main au 16/08** (22 au 11/08, 32 à l'origine).
+23. ✅ ~~**UI d'activation d'essai client**~~ — **RAYÉ, vérifié le 16/08.** L'écran existe :
+    `admin-gt.js:1299` lit `agt-trial-input`, borne la valeur à `[0, 90]` (l.1301) et l'écrit dans
+    `clients[slug]` (l.1310) ; la pastille de récap l'affiche l.2886. **Posé par le chantier §40
+    sans que l'entrée soit relue.**
+24. ✅ ~~**Fusion de fûts à l'ÉDITION**~~ — **FAIT, vérifié le 16/08.** `_futSameLot(x, four, ref,
+    annee)` compare fournisseur + référence + millésime en tolérant casse et espaces ; `_rsvSaveFut`
+    cherche le doublon et fait `dup.qte = (parseInt(dup.qte)||0) + qte` au lieu de pousser une
+    seconde carte. ⚠️ **Le commentaire que l'entrée citait est TOUJOURS LÀ** — il décrit désormais
+    l'intention du code au-dessous, plus un manque. ★★ **Piège de méthode** : *un commentaire qui
+    décrit un défaut ne disparaît pas quand le défaut est corrigé.* Ne jamais conclure à l'absence
+    en lisant un commentaire ; lire la fonction (règle vécue avec `mvprint.py` et DOCK).
 25. ✅ ~~**Ancien catalogue « Mes produits »**~~ — **RAYÉ. 0 occurrence dans tout `src/`.**
     Le backlog annonçait « 5 fichiers à arbitrer » : il n'y a plus rien à arbitrer.
 26. ★ **Vérifier les autres tâches `anytime:true`** — **cinq, vérifiées** : Entreplantation,
@@ -4579,22 +4657,41 @@ sont neuves, donc **non auditées** : les traiter comme des hypothèses jusqu'à
     le guyot double et les vignes de plus de 20 ans. **Reste la vérification documentaire :
     qu'aucun avenant postérieur à 2021 n'a révisé ces temps** (§30a).
 28. ★ **Type de contrat « tâcheron »** (§30f) — **0 occurrence, vérifié.** À prévoir, pas urgent.
-29. **Tokeniser les hex des JS** — ⚠️ **chiffre corrigé : 2 922, pas ~2 300.** +27 % depuis la
-    dernière mesure. **Il grossit à chaque lot** : le classer bas ne le fait pas rétrécir.
+29. **Tokeniser les hex des JS** — ⚠️⚠️ **RE-MESURÉ LE 16/08 : 3 319.** ~2 300 → 2 922 → **3 319**,
+    soit **+14 % en cinq jours** et +44 % depuis l'origine. **Il grossit à chaque lot** : le classer
+    bas ne le fait pas rétrécir, ça ne fait que rendre le lot plus cher quand il arrivera.
 30. **Mise à jour SW choisie — niveau 1** (§8). Le socle est là : `updatefound` (`app.js:9083`)
     et `SKIP_WAITING` (`sw.js:1047`).
 31. **Lot 8 différé** (Google Play TWA) — jusqu'à **5+ clients actifs**.
 32. **Une passe Lighthouse sur `staging`.**
 33. ★ **Thème saisonnier** — étude faite, maquette 4 saisons à produire, **décision de Nico** (§21d).
-34. ⚠️ **Surveiller la taille de `cave.js`** — **407 ko, pas ~375.** Pour repère : `app.js` 633 ko,
-    `pilotage.js` 461 ko. **La surveillance sans seuil ne surveille rien** : poser un plafond
-    (500 ko ?) ou retirer l'entrée.
+34. ⚠️⚠️ **Surveiller la taille des gros modules** — **RE-MESURÉ LE 16/08, et ce n'est plus
+    `cave.js` le sujet** :
+
+    | Fichier | 11/08 | 16/08 | |
+    |---|---|---|---|
+    | `pilotage.js` | 461 ko | **657 ko** | **+42 % en cinq jours** |
+    | `app.js` | 633 ko | 667 ko | +5 % |
+    | `cave.js` | 407 ko | 456 ko | +12 % |
+
+    ★★★ **`pilotage.js` a pris 196 ko** — c'est §42 (dix lots d'ergonomie) qui les a posés, et
+    personne ne l'a vu passer. **Il est désormais le deuxième fichier de l'app.**
+    ⚠️ **La surveillance sans seuil ne surveille rien** : trois audits de suite ont écrit « à
+    surveiller » et le chiffre a monté trois fois. → **Poser un plafond dans le preflight** (700 ko ?)
+    ou **retirer l'entrée** — les deux valent mieux qu'une veille qui ne déclenche jamais.
 35. ✅ ~~**Committer ce document dans le dépôt**~~ — **FAIT.** `CLAUDE.md` est à la racine et se lit
     par `git clone`. C'est ce qui rend cet audit possible sans upload.
-36. ★★★ **L'ÉCHELLE TYPOGRAPHIQUE — le plus gros effet client du backlog** (audit du 11/08).
-    ⚠️ **Chiffres corrigés, et ils ont EMPIRÉ : 1 639 sites sous 12 px** (153 en ligne dans
-    `index.html` + 414 dans `styles.css` + **1 072 dans les JS**) et **277 sites sous 10 px**.
-    Le backlog disait 1 625 / 257. **Chaque lot en ajoute.**
+36. ★★★ **L'ÉCHELLE TYPOGRAPHIQUE — le plus gros effet client du backlog** (audit du 11/08,
+    re-mesuré le 16/08).
+    ⚠️ **1 593 sites sous 12 px** (153 dans `index.html` + 419 dans `styles.css` + **1 021 dans les
+    JS**) et ⚠️⚠️ **295 sites sous 10 px**. Suite complète : 1 625 → 1 639 → **1 593** sous 12 px,
+    mais 257 → 277 → **295** sous 10 px.
+    ★★★ **Lire les deux ensemble** : le total baisse pendant que **le plancher s'enfonce**. §42 a
+    unifié la typographie du Pilotage sur `--pt-*` — ce qui explique la baisse — mais l'échelle
+    posée dans `styles.css` **descend elle-même à `--pt-nano:9.5px` et `--pt-lbl:10.5px`**. La
+    variable a rendu le 9,5 px *légitime et réutilisable*. **On a industrialisé le trop petit.**
+    → **Le lot A n'est plus un remplacement de valeurs en dur : c'est un relèvement de l'échelle
+    elle-même**, `--pt-nano` et `--pt-lbl` en tête. Deux lignes touchent alors 1 021 sites JS.
     ★★ **La vraie surprise est la répartition** : les deux tiers sont **dans les JS**, en HTML
     généré — un lot qui ne toucherait que `styles.css` ne réglerait qu'un quart du problème.
     **Lot A : le plancher.** Les 277 sites sous 10 px remontés à 11 px minimum.
@@ -4625,12 +4722,20 @@ sont neuves, donc **non auditées** : les traiter comme des hypothèses jusqu'à
     `_canModule` (`app.js:3860`, socle en `admin-gt.js:2664`) = formule ∧ masquage manuel, le rôle
     n'entre nulle part.**
     ⚠️ **Gain direct sur Garraud : 12 personnes × 7 arbitrages.** À faire **avant** l'installation.
-41. **44 occurrences de `var(--texte-doux,#8B8175)`** — **compté exactement 44, vérifié.** Le repli
-    est à **3,66:1**, sous AA. Il ne sert jamais (la variable est toujours définie) mais il est
-    faux. → `#5F5F5F`.
-42. **Points de rupture responsive** — ⚠️ **neuf, pas huit : 400, 560, 600, 640, 760, 768, 900,
-    980, 1200.** Le 400 manquait à la liste. Les ramener à trois. **Après** le lot typographique,
-    pas avant.
+41. ✅ ~~**44 occurrences de `var(--texte-doux,#8B8175)`**~~ — **RAYÉ, vérifié le 16/08 :
+    0 occurrence** dans `src/*.js`, `styles.css` et `index.html`. Le repli fautif à 3,66:1 a
+    disparu — **par quel lot, on ne sait pas** : aucun `WHATS_NEW` ne le mentionne. ★ **C'est le
+    bon cas de figure quand même** : un défaut parti sans trace vaut mieux qu'un défaut tracé qui
+    reste, mais ça rappelle qu'un audit ne se remplace pas par un changelog.
+42. ⚠️⚠️ **Points de rupture responsive — QUATORZE, pas neuf** (re-compté le 16/08, `@media` de
+    `styles.css` **ET** des JS) : **360, 400, 430, 520, 560, 600, 640, 700, 767.98, 768, 880, 900,
+    980, 1200.** Le `760` est devenu `767.98` (entrée 5, ✅).
+    ★★★ **Voilà pourquoi les audits précédents disaient neuf** : ils comptaient `styles.css`.
+    **Cinq points de rupture — 360, 430, 520, 700, 880 — vivent dans du CSS injecté depuis le JS**,
+    posés par §42 et invisibles à tout `grep` sur la feuille de style.
+    ⚠️ **C'est le vrai sujet, et il est plus gros que l'entrée ne le disait** : la moitié des règles
+    responsive a quitté la feuille de style. Les ramener à trois suppose d'abord de savoir où elles
+    sont — et **le preflight ne le sait pas non plus**. **Après** le lot typographique, pas avant.
 
 
 ### ✅ Rayés du backlog
@@ -7324,3 +7429,235 @@ depuis le **workflow CI**, pas seulement depuis `package.json` : le CI lançait 
 - ⚠️ **`stats.hFaites` arrondi à l'entier** par `_calcHistoStats` — déjà noté en §41f, toujours vrai.
 - **Rejouer les contre-épreuves du 14/08 soir** (les 6 sur `cadAppl`) : elles ont été écrites avant
   les correctifs 2 et 3, la redondance a pu en rendre certaines aveugles. Même piège qu'en 42e.
+
+---
+
+## 44. ★★★ L'AUDIT DE DÉRIVE DU DOCUMENT (16/08 — aucun code touché)
+
+**Point de départ, une phrase de Nico** : *« Que reste-t-il à faire ? Compare ce qui est écrit dans
+CLAUDE.md et les fichiers de l'app. »* Pas un chantier — **un contrôle du porteur de vérité
+lui-même**. Le dépôt a été cloné, les 7 326 lignes de ce document relues, et **chaque affirmation
+vérifiable confrontée au fichier qu'elle décrit**.
+
+**Verdict** : le document décrivait bien l'architecture, les arbitrages et les leçons. **Il décrivait
+mal l'état.** Onze entrées de backlog demandaient du travail déjà fait, quatre chiffres avaient
+grossi sans que personne le voie, et neuf filets de test sur vingt-six ne peuvent pas démarrer.
+
+> **État lu le 16/08 : APP 6.25 · SW 6.79.** *(À relire dans les fichiers à chaque session, jamais
+> depuis ici — c'est précisément la faute que cet audit documente.)*
+
+★★★ **LA LEÇON D'ENSEMBLE, ET C'EST LA TROISIÈME FOIS QU'ELLE S'ÉCRIT.** L'audit du 11/08 la posait
+déjà : *« un backlog non audité dérive DANS LES DEUX SENS »*. Elle est restée vraie **cinq jours de
+plus**, avec les mêmes symptômes. Ce qui change au 16/08, c'est qu'on peut nommer **pourquoi** : les
+consolidations de fin de session écrivent ce que le lot vient de faire, **elles ne relisent pas ce
+que les lots précédents ont rendu caduc**. Écrire est un réflexe ; **relire n'en est pas un**.
+
+---
+
+### 44a. L'entrée qui se périme toute seule
+
+La première ligne du backlog technique, trois étoiles, était :
+
+> *0a. ★★★ **DÉPLOYER — APP 6.06 · SW 6.56.** […] Livrés, preflight 0/0, harnais verts, **jamais mis
+> en ligne**. […] Tant que ce n'est pas fait, les clients lisent encore « manque 15,8 ETP » sur une
+> vendange couverte.*
+
+Le dépôt porte **dix-neuf versions APP et vingt-trois versions SW de plus**. Tout §37, §38, §40,
+§41, §42 et §43 s'est déposé par-dessus. Le paquet était déployé depuis longtemps.
+
+★★★ **Ce qui rend cette entrée particulière** : toutes les autres décrivent un travail à faire, qui
+reste à faire tant que personne ne le fait. **Celle-là décrit un fait extérieur** — l'état du monde.
+Elle ne s'use pas par l'inaction : **elle devient fausse toute seule**, et elle occupe la première
+place du backlog en criant sur un fait qui a cessé d'être vrai.
+
+→ **RÈGLE POSÉE** : *toute entrée « à déployer » se relit en tête de session*, en comparant les
+numéros qu'elle cite à `APP_VERSION` (`src/utils.js`) et `CACHE_NAME` (`public/sw.js`). Si elle cite
+plus bas, elle part — **sans débat, avant de lire le reste du backlog.**
+
+★ **Corollaire** : ne jamais écrire une entrée « à déployer » **sans y inscrire les deux numéros**.
+Une entrée qui dit « à déployer » sans dire *quoi* ne peut pas se périmer proprement — elle se
+contente de vieillir.
+
+---
+
+### 44b. Onze entrées rayées — le code les avait déjà réglées
+
+Chacune vérifiée dans le fichier, pas dans un changelog.
+
+| # | Entrée | Preuve au 16/08 |
+|---|---|---|
+| 2 | `rewrite` en ligne | `firebase.json` l.19 **et** l.26 — les deux `/api/` y sont |
+| 4 | `_findDebutTache` sans borne | `app.js:3572` résout par `_saisonForDate` / `_mvCampagneDe` |
+| 5 | Breakpoint 760 → 767.98 | `@media(max-width:767.98px)` existe, le trou est bouché |
+| 8 | `pic` mort dans `_rfCtx` | purgé, commentaire de purge l.3193 |
+| 13 | « un 14ᵉ moment de démo » | la visite en compte **19** (`harnais-demo`) |
+| 15 | Règle CSS `.cave-tabs` | 0 occurrence dans `styles.css` |
+| 23 | UI d'activation d'essai | `agt-trial-input`, `admin-gt.js:1299-1310` |
+| 24 | Fusion de fûts à l'édition | `_futSameLot` + `dup.qte += qte` dans `_rsvSaveFut` |
+| 41 | `--texte-doux,#8B8175` ×44 | **0** occurrence |
+| 0a-bis | `!P.length` | `utils.js:2936` porte `return true;` |
+| 0c-ter | `_PIL_SEM` hors module | défini `utils.js:1968`, importé `pilotage.js:15` |
+
+★★ **Trois de ces onze étaient déjà réglées AU MOMENT de la consolidation du 15/08** (0a-bis par
+§39g, 5 et 15 par §42). **La consolidation les a recopiées sans les relire** — c'est le mécanisme
+exact de la dérive, pris sur le fait.
+
+★★★ **UN NUMÉRO DE LIGNE VIEILLIT PLUS VITE QU'UN CHIFFRE.** Les entrées citaient
+`app.js:3116`, `utils.js:2449`, `styles.css:2084`, `reserve.js:324`, `styles.css:1447`,
+`admin-gt.js:2704` — **aucun n'était encore juste.** Les fonctions ont bougé de 100 à 500 lignes.
+→ **Citer le NOM d'abord, la ligne ensuite et entre parenthèses.** Un `grep` sur `_findDebutTache`
+trouve la fonction pour toujours ; un `sed -n '3116p'` ne trouve rien après le prochain lot.
+
+★★ **ET UN COMMENTAIRE QUI DÉCRIT UN DÉFAUT NE PART PAS AVEC LE DÉFAUT.** L'entrée 24 s'appuyait sur
+*« `reserve.js:324` porte le commentaire qui décrit exactement ce qui manque »*. Le commentaire est
+toujours là — mais il décrit désormais **l'intention du code au-dessous**, pas un manque. Le défaut,
+lui, est corrigé. **Ne jamais conclure à l'absence en lisant un commentaire : lire la fonction.**
+(Même famille que `mvprint.py` et le lot DOCK : *varier la méthode avant de conclure.*)
+
+---
+
+### 44c. ★★★ Neuf harnais sur vingt-six ne peuvent pas démarrer
+
+**C'est le constat le plus grave de l'audit**, et il n'était nulle part au backlog. Chaque script de
+`scripts/` a été lancé un par un, et son **code de sortie réel** relevé.
+
+| Script | État | Cause |
+|---|---|---|
+| `harnais-bandeau-essai` | **2 rouges / 15** | fige `APP_VERSION` à `6.13` · chemins en dur |
+| `harnais-cadence-escalier` | **1 rouge / 28** | règle d'alerte antérieure · chemins en dur |
+| `harnais-claude-md` | **1 rouge / 23** | ce document se déclare périmé · chemins en dur |
+| `harnais-vitrine` | **ENOENT** | `logiciel-vigne.html` relatif au `cwd` |
+| `contre-epreuves` | **ENOENT** | idem |
+| `harnais-essai-borne.cjs` | **crash** | `firebase-admin` absent |
+| `lint-cliquet` | **crash** | `eslint` absent (entrée 0h, connue) |
+| `harnais-parcours-prospect` | vert, mais | chemins en dur |
+| `harnais-reconduction` | vert, mais | chemins en dur |
+
+⚠️⚠️⚠️ **SIX SCRIPTS PORTENT `/home/claude/mavigne-dev/` EN DUR.** C'est un chemin de bac à sable :
+**chez Nico et en CI, ils sortent en `ENOENT`**. Deux d'entre eux sont verts ici — ils ne le seront
+nulle part ailleurs.
+
+★★★ **LA LEÇON, ET ELLE EST DÉJÀ ÉCRITE EN 0h POUR `lint-cliquet`** : *un filet qui ne démarre pas
+se lit comme un succès.* Ce qui est neuf, c'est **l'échelle** : ce n'était pas un accident isolé,
+c'est **un défaut d'origine de six harnais sur six**, tous écrits dans le bac à sable, tous livrés
+sans qu'on se demande une seule fois **où ils tourneraient ensuite**.
+→ **RÈGLE POSÉE** : *un harnais ne se livre pas avec un chemin absolu.*
+`new URL('../src/pilotage.js', import.meta.url)` pour les sources, `os.tmpdir()` pour les fichiers
+de contre-épreuve. **Et il se lance une fois depuis un autre répertoire avant d'être livré** —
+`cd /tmp && node /chemin/vers/scripts/x.mjs`. Trente secondes, et le défaut saute aux yeux.
+
+★★ **DEUX ROUGES SONT DES CONTRE-ÉPREUVES À L'ENVERS — ILS PROUVENT QUE LE TRAVAIL EST FAIT.**
+Ce sont les harnais du 12/08 (§33-§34), joués contre le code du 16/08 :
+· `mv-harnais-frise` exige `_PIL_SEM` dans `pilotage.js` → **il rougit parce que 0c-ter est faite.**
+· `mv-harnais-portee` exige *« le pic est calculé »* → **il rougit parce que l'entrée 8 est faite.**
+· `mv-harnais-niveaux` exige les anciens libellés d'onglets → **il rougit parce que §42 les a
+  renommés.**
+→ **Un harnais écrit pour un lot devient un frein au lot suivant si personne ne le rebase.** Il ne
+teste plus le comportement, il teste **une photo du code**. Avant de le déclarer rouge, se demander
+*ce qu'il assertait* : ici, la bonne réponse n'est pas « réparer le code », c'est **réécrire ou
+archiver le harnais**.
+
+⚠️ **ÉCART `npm run check` ↔ `ci.yml` — ET IL VA DANS LES DEUX SENS.** §43i notait que
+`mv-harnais-echelle` ne tournait qu'en CI. Le contrôle en sens inverse n'avait pas été fait :
+· `check` lance `banc` et `garde-projection` — **le CI ne les lance pas.**
+· le CI lance onze harnais que `check` ignore.
+· **neuf scripts ne sont lancés par personne**, ni `check`, ni `ci.yml`.
+→ **Un inventaire des filets se lit dans LES DEUX fichiers, et il compte aussi les orphelins.**
+Piste : un contrôle qui liste `scripts/*.mjs` et signale ceux qu'aucun appelant ne nomme.
+
+---
+
+### 44d. Les chiffres qui ont bougé — quatre ont empiré
+
+Toutes les entrées chiffrées du backlog ont été re-mesurées à la commande, jamais recopiées.
+
+| Entrée | 11/08 | **16/08** | |
+|---|---|---|---|
+| 36 · sites sous **10 px** | 277 | **295** | ⚠️ le plancher s'enfonce |
+| 29 · hex dans les JS | 2 922 | **3 319** | ⚠️ +14 % en cinq jours |
+| 34 · `pilotage.js` | 461 ko | **657 ko** | ⚠️⚠️ **+42 %** |
+| 34 · `cave.js` | 407 ko | **456 ko** | ⚠️ |
+| 34 · `app.js` | 633 ko | 667 ko | |
+| 42 · points de rupture | « 9 » | **14** | ⚠️ 5 étaient invisibles |
+| 36 · sites sous 12 px | 1 639 | 1 593 | ✅ |
+| 18 · `catch{}` vides | 200 | 193 | ✅ |
+| 22 · sommes de surface | 22 | 21 | ✅ |
+| 43f · export JSON | 8 / 24 | 8 / **27** | ⚠️ le dénominateur monte |
+
+★★★ **LE CHIFFRE QUI RACONTE LE MIEUX LE CHANTIER §42.** `pilotage.js` a pris **196 ko en cinq
+jours** — c'est le poids des dix lots d'ergonomie. **Personne ne l'a vu passer**, et il est
+désormais le deuxième fichier de l'app. L'entrée 34 disait « surveiller `cave.js` » : elle
+surveillait le mauvais fichier.
+
+★★★ **ET LE PLUS INSTRUCTIF : LA TYPOGRAPHIE BAISSE ET LE PLANCHER S'ENFONCE EN MÊME TEMPS.**
+1 639 → 1 593 sites sous 12 px, mais 277 → **295** sous 10 px. §42 a unifié le Pilotage sur
+l'échelle `--pt-*` — d'où la baisse — mais **cette échelle descend elle-même à `--pt-nano:9.5px` et
+`--pt-lbl:10.5px`**. La variable a rendu le 9,5 px *légitime, nommé et réutilisable*.
+⚠️⚠️ **On a industrialisé le trop petit.** → Le lot A de l'entrée 36 change de nature : ce n'est
+plus une chasse aux valeurs en dur, **c'est un relèvement de l'échelle elle-même**. Deux lignes dans
+`styles.css` touchent alors les 1 021 sites des JS.
+
+★★ **UNE VEILLE SANS SEUIL N'EST PAS UNE VEILLE.** Trois audits de suite ont écrit « surveiller la
+taille de `cave.js` », et le chiffre a monté trois fois. **Écrire « à surveiller » ne surveille
+rien.** → Poser un plafond dans le preflight (700 ko ?) **ou retirer l'entrée** : les deux valent
+mieux qu'un mot qui ne déclenche jamais.
+
+---
+
+### 44e. Ce que l'audit n'a PAS pu vérifier — et pourquoi c'est écrit ici
+
+★ **Un audit qui ne dit pas ses angles morts se lit comme complet.** Quatre points sont restés hors
+de portée depuis le bac à sable :
+
+1. ⚠️⚠️ **L'ÉTAT EN LIGNE.** `mavigneapp.fr` n'est pas joignable depuis le bac à sable (liste de
+   domaines autorisés). **Impossible de dire si APP 6.25 · SW 6.79 sont déployés ou seulement
+   commités.** Tout ce qui précède décrit **le dépôt**, pas la production.
+   → Le seul geste qui tranche : ouvrir la console Firebase Hosting, ou lire `/sw.js` en ligne.
+2. ⚠️ **`mvprint.py` N'EST PAS DANS LE DÉPÔT.** Sur les **trois chiffres du roi** que la checklist
+   §43 demande d'aligner, **un seul est lisible** : les *127 h* de la démo
+   (`harnais-demo.mjs:107`). Les *215 h/an pour 10 ha* et les *3 à 5 h/mois* **n'existent dans aucun
+   fichier consultable** — ni `src/`, ni `public/`, ni `scripts/`.
+   ★★ **Un chiffre commercial qui ne vit nulle part dans le dépôt ne peut pas être aligné par un
+   contrôle automatique** : il ne se compare qu'à la main, et donc il dérive. C'est exactement ce
+   qui s'est passé.
+3. **La persistance cloud tenant par tenant** (§43g) — se prouve dans la console Firestore.
+4. **`test:smoke` et `test:e2e`** — Chromium injoignable ; **toujours jamais joués côté Claude.**
+
+---
+
+### 44f. Ce qui reste ouvert au 16/08 — le backlog après ménage
+
+**Confirmés ouverts, vérifiés un par un dans le code** (numéros de l'entrée d'origine en §28) :
+
+- ⚠️⚠️ **`_pl2Cell` : un retard d'une heure et une absence d'une journée s'affichent pareil.**
+  `if(e&&e.absent) return {txt:'✕', cls:'pl2c-abs'}` tombe avant toute lecture de `motif_h`.
+  **C'est le défaut le plus visible côté client de toute cette liste**, et il touche MG et Chapelle
+  tous les jours. → **n°1 fonctionnel.**
+- ⚠️⚠️ **0a-quater : la masse salariale perd tous les bureaux.** `_pexData` (`pilotage.js:7683`)
+  filtre par `_mvEnContratSurPeriode`, dont la première ligne est `if(!m || m.bureau) return false;`
+  — **pendant que le commentaire trois lignes au-dessus dit l'inverse**, mot pour mot :
+  *« Le "bureau" N'EST PAS exclu : c'est un salaire »*. **`avecBureau` : 0 occurrence dans tout
+  `src/`.** À faire au même lot que 0a-ter.
+- ⚠️ **Les six harnais à chemin absolu** (§44c) — **n°1 outillage**, une ligne par script.
+- **1** installation à blanc sur slug jetable · **6** `demarrage.html` (938 lignes) · **11** import
+  KML en merge (`admin-gt.js:2326`) · **12** rattachement des anciens fûts (0 trace dans
+  `reserve.js`) · **14** le Cuvier sans intervenant (`cave.js:6713`) · **16** `_pl2Annual` vs
+  `_planGetRefH` · **17** « Solde cumulé » vs « Reste à prendre » (les deux coexistent) ·
+  **19** rôle `pil:true` (0 occurrence) · **28** contrat « tâcheron » (0 occurrence) ·
+  **37** `mvDate()` / `mvNum()` (0 occurrence) · **38** boucle `for..in` de `phyto.js:1165` ·
+  **39** `.val-toggle` toujours à **26 px** (`styles.css:305`) · **40** modules par rôle.
+- **Le doublon `_pilDiag` / `_pecZeros`** (§42) — 22 occurrences contre 2, toujours deux
+  avertissements sur le même sujet à deux endroits de la même page.
+- **`.pil-cr-note{display:none}`** (§42) — l'instruction « cliquez une campagne pour zoomer »
+  disparaît toujours sur téléphone.
+
+★★★ **CE QUI CHANGE DANS LA FAÇON DE TENIR CE DOCUMENT** — trois règles nées de cet audit :
+
+1. **Une entrée « à déployer » se relit en tête de session** et porte ses deux numéros (§44a).
+2. **Une entrée cite un NOM, la ligne vient après et entre parenthèses** (§44b).
+3. **Un harnais ne se livre pas avec un chemin absolu, et se lance une fois depuis `/tmp`** (§44c).
+
+⚠️ **Et la règle qui les précède toutes, redite une troisième fois parce qu'elle n'a pas pris** :
+*une entrée de backlog non re-mesurée depuis une semaine est une hypothèse, pas un constat.*
+**Écrire est un réflexe ; relire n'en est pas un.** → **Re-mesurer tout le backlog chiffré à chaque
+consolidation de fin de journée**, pas seulement à l'audit suivant.
