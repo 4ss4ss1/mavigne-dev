@@ -1,4 +1,25 @@
-// MA VIGNE — Service Worker v6.86
+// MA VIGNE — Service Worker v6.87
+// v6.87 (17/08/2026) — LES CINQ DERNIERS BANDEAUX + LES MODULES DU BAS EN RELIEF.
+//   ★ BANDEAUX : Planning, La Reserve, Le Chai, Le Cuvier, Le millesime gardaient
+//     leurs anciens dessins — 13 glyphes. ⚠️ Les trois en-tetes de la Cave etaient
+//     ECRASES en `textContent` a chaque changement de section : l'icone SVG posee
+//     dans index.html au lot 6.32 disparaissait des le premier clic. Passes par
+//     `_mvSetIcon`, avec le nom de l'ONGLET DE SECTION correspondant.
+//   ★ SPRITE 57 -> 59 : `barrique` (barrel) et `parcours` (waypoints). Un CADDIE
+//     pour des futs et un BARIL DE PETROLE pour un chai disaient autre chose que
+//     ce qu'on compte ; une HELICE D'ADN pour la ligne de vie du vin, de meme.
+//     Regenere par build-sprite.mjs, les 57 formes existantes identiques a
+//     l'octet pres (lucide 1.31.0, la meme que le sprite en place).
+//   ★ DOCK : l'icone flottait nue. Elle vit dans un carre de 40 px, CREUSE au
+//     repos, qui RESSORT en or quand on l'ouvre — deux ombres interieures
+//     opposees, plus le filet de lumiere sur l'arete haute.
+//     ⚠️ Le filet dore de 3 px au-dessus de l'onglet actif est RETIRE : deux
+//       marqueurs pour un meme etat, c'est celui du haut qu'on ne lit jamais.
+//     ⚠️ La couleur au repos n'est plus `--texte-doux` : #5F5F5F en theme clair,
+//       elle etait deja plus sombre que son propre libelle sur le fond cave.
+//   ★ `WHATS_NEW` accepte un NOM D'ICONE dans son champ `emoji` (_wnIco), et le
+//     harnais LIT ce champ — sinon un nom mal ecrit rendait un carre pointille
+//     sur l'ecran que tous les clients voient apres une mise a jour.
 // v6.86 (17/08/2026) — METEO PAR SECTEUR + LES BANDEAUX DU HAUT.
 //   ⚠️⚠️ « soleil » et « nuage » ECRITS EN TOUTES LETTRES par-dessus le nom de
 //     la commune. `wx.emoji` porte un NOM d'icone depuis 6.82 et etait insere
@@ -2091,7 +2112,7 @@
 // v2.22 — Fix profils vides : guard vide dans loadData() pour MEMBRES/SAISONS/TACHES
 // v2.17 — Onboarding intégré + tenantId · v2.06 — Firebase Auth · v2.00–v2.05 — divers
 const DEBUG = self.location.hostname === 'localhost' || self.location.hostname === '127.0.0.1';
-const CACHE_NAME   = 'mavigne-v6.86';
+const CACHE_NAME   = 'mavigne-v6.87';
 const TENANT_CACHE = 'mavigne-tenant';   // Cache persistant — préservé à chaque mise à jour SW
 const SYNC_TAG     = 'mavigne-sync';
 
@@ -2107,7 +2128,7 @@ const CDN_URLS = [
 ];
 
 self.addEventListener('install', event => {
-  if(DEBUG) console.log('[SW] Ma Vigne v6.86 installé');
+  if(DEBUG) console.log('[SW] Ma Vigne v6.87 installé');
   event.waitUntil(
     caches.open(CACHE_NAME).then(async cache => {
       // ── Cœur applicatif : STRICT (mise à jour ATOMIQUE) ──
@@ -2123,7 +2144,7 @@ self.addEventListener('install', event => {
 });
 
 self.addEventListener('activate', event => {
-  if(DEBUG) console.log('[SW] Ma Vigne v6.86 activé');
+  if(DEBUG) console.log('[SW] Ma Vigne v6.87 activé');
   event.waitUntil(
     caches.keys().then(keys =>
       Promise.all(

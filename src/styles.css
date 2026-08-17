@@ -1815,17 +1815,63 @@ body.mv-trial-on #app-root{padding-top:calc(env(safe-area-inset-top,0px) + 44px)
 #mv-dock::before{content:'';position:absolute;top:0;left:0;right:0;height:2px;background:var(--horizon);opacity:.85;}
 #mv-dock-inner{display:flex;width:100%;}
 @media(min-width:768px){ #mv-dock-inner{max-width:600px;} }
-.mv-dk{flex:1;display:flex;flex-direction:column;align-items:center;gap:4px;padding:9px 2px 8px;position:relative;background:none;border:none;cursor:pointer;-webkit-tap-highlight-color:transparent;}
+/* ⚠️ Espacements pris dans l'echelle DS-3 (`--e-*`), pas ecrits a la main : le
+   cliquet de scripts/mv-harnais-echelle.mjs refuse toute valeur hors des neuf
+   pas — l'ancien `padding:9px 2px 8px` en portait justement une (le 9). */
+.mv-dk{flex:1;display:flex;flex-direction:column;align-items:center;gap:var(--e-1,4px);padding:var(--e-2,8px) var(--e-0,2px) var(--e-1,4px);position:relative;background:none;border:none;cursor:pointer;-webkit-tap-highlight-color:transparent;}
 /* ⚠️ `filter:grayscale()` etait la pour DESATURER UN EMOJI, qui gardait sa
    couleur quoi qu'on fasse. Une icone du sprite suit `currentColor` : on
    eteint l'onglet inactif par la COULEUR, pas par un filtre — un filtre
    grise le trait au lieu de l'attenuer, et se voit en mode sombre. */
-.mv-dk-ic{display:flex;align-items:center;justify-content:center;line-height:1;color:var(--texte-doux);transition:.18s;}
+/* ── LA TUILE DE MODULE (lot DS-4) — « relief avec verre » ────────────────
+   L'icone flottait nue au-dessus de son mot : rien ne la portait, et le seul
+   signe de l'onglet actif etait un filet de 3 px tout en haut, hors du regard.
+   Elle vit maintenant dans un carre de 40 px, CREUSE au repos et qui RESSORT
+   en or quand on l'ouvre. Deux recettes superposees, d'ou le nom :
+     · le RELIEF  = deux ombres INTERIEURES opposees (clair en haut, sombre en
+       bas) — c'est ce qui donne le creux, puis la bosse quand on les inverse ;
+     · le VERRE   = le filet de lumiere sur l'arete haute + une bordure d'un
+       cheveu, pour que le carre existe sans etre dessine.
+   ⚠️ LA COULEUR DE L'ICONE AU REPOS N'EST PLUS `--texte-doux`. Cette variable
+     vaut #5F5F5F en theme clair : posee sur le fond `--cave`, elle etait deja
+     plus sombre que son propre libelle, et le creux l'aurait rendue illisible.
+     Le dock est sombre dans LES DEUX themes — sa couleur de texte doit donc
+     etre ecrite pour le fond sombre, comme `.mvu-tab` le fait deja.
+   ⚠️ Le carre fait 40 px = `--e-8`, l'icone reste a 20 px : on ne touche pas a
+     l'echelle de tailles du jeu (16/18/20/24/40), le harnais la verifie. */
+.mv-dk-ic{
+  width:40px; height:40px; border-radius:12px; flex:none;
+  display:flex; align-items:center; justify-content:center; line-height:1;
+  color:rgba(240,226,200,.55);
+  background:linear-gradient(155deg,#241E17,#15110C);
+  border:1px solid rgba(255,255,255,.07);
+  box-shadow:inset 0 1px 0 rgba(255,255,255,.10),
+             inset 0 -2px 3px rgba(0,0,0,.55),
+             0 1px 1px rgba(0,0,0,.40);
+  transition:background .18s,color .18s,box-shadow .18s,border-color .18s,transform .18s;
+}
 .mv-dk-lb{font-size:9.5px;font-weight:600;color:rgba(255,255,255,.42);letter-spacing:.01em;transition:.18s;font-family:'Outfit',sans-serif;}
-.mv-dk.on .mv-dk-ic{color:var(--vert-med);transform:translateY(-1px);}
+/* Actif : les deux ombres interieures s'inversent, le carre monte d'un pixel
+   et prend la chaleur terre-or. L'icone passe en SOMBRE — sur un fond dore,
+   un trait clair disparait. */
+.mv-dk.on .mv-dk-ic{
+  color:var(--cave);
+  background:linear-gradient(155deg,#D8A642,#8A5A38);
+  border-color:rgba(232,210,148,.45);
+  box-shadow:inset 0 1px 0 rgba(255,255,255,.38),
+             inset 0 -2px 3px rgba(0,0,0,.22),
+             0 3px 9px rgba(0,0,0,.42),
+             0 0 0 1px rgba(232,210,148,.16);
+  transform:translateY(-1px);
+}
 .mv-dk.on .mv-dk-lb{color:var(--or-clair);}
-.mv-dk.on::before{content:'';position:absolute;top:0;left:50%;transform:translateX(-50%);width:26px;height:3px;border-radius:3px;background:var(--horizon);}
-.mv-dk:active{background:rgba(255,255,255,.05);}
+/* ⚠️ L'ancien filet `.mv-dk.on::before` (26x3 px, degrade horizon, colle au
+   bord haut) est RETIRE : le carre dore porte desormais l'etat a lui seul, et
+   deux marqueurs pour un meme etat, c'est celui du haut qu'on ne lit jamais.
+   Le filet horizon du dock lui-meme (`#mv-dock::before`) reste, lui : il
+   separe la barre du contenu, ce n'est pas un indicateur d'onglet. */
+.mv-dk:active .mv-dk-ic{ transform:translateY(1px);
+  box-shadow:inset 0 2px 5px rgba(0,0,0,.60), inset 0 -1px 0 rgba(255,255,255,.05); }
 #mv-dock-sheet-bg{position:fixed;inset:0;background:rgba(10,8,6,.55);z-index:95;opacity:0;pointer-events:none;transition:.22s;}
 #mv-dock-sheet-bg.show{opacity:1;pointer-events:auto;}
 #mv-dock-sheet{position:fixed;left:0;right:0;bottom:0;background:var(--bg-app);border-radius:22px 22px 0 0;z-index:96;transform:translateY(115%);transition:transform .28s cubic-bezier(.2,.8,.2,1);padding:8px 16px calc(20px + env(safe-area-inset-bottom,4px));box-shadow:0 -8px 30px rgba(0,0,0,.2);}
@@ -1833,7 +1879,22 @@ body.mv-trial-on #app-root{padding-top:calc(env(safe-area-inset-top,0px) + 44px)
 .mv-sheet-handle{width:38px;height:4px;border-radius:3px;background:var(--gris);margin:8px auto 14px;}
 #mv-dock-sheet-items{display:grid;grid-template-columns:repeat(3,1fr);gap:11px;}
 .mv-sg{background:var(--bg-card);border:1px solid var(--gris-clair);border-radius:14px;padding:16px 8px;box-shadow:var(--shadow-sm);cursor:pointer;display:flex;flex-direction:column;align-items:center;gap:7px;}
-.mv-sg-ic{display:flex;align-items:center;justify-content:center;color:var(--texte-med);}
+/* Meme recette, retournee pour une carte claire : le creux se fait avec une
+   ombre TERRE plutot que noire, sinon il vire au gris sale.
+   ⚠️ Tout passe par `color-mix` des variables du theme : un pastel fige serait
+     juste sur la carte claire et faux en mode sombre — c'est la regle DS-2. */
+.mv-sg-ic{
+  width:40px; height:40px; border-radius:12px; flex:none;
+  display:flex; align-items:center; justify-content:center; color:var(--texte-med);
+  background:linear-gradient(155deg, var(--or-pale), color-mix(in srgb, var(--or) 20%, var(--bg-card)));
+  border:1px solid var(--gris-clair);
+  box-shadow:inset 0 1px 0 color-mix(in srgb, var(--blanc) 80%, transparent),
+             inset 0 -2px 3px color-mix(in srgb, var(--terre) 16%, transparent),
+             0 1px 2px rgba(40,30,15,.10);
+  transition:transform .15s, box-shadow .15s;
+}
+.mv-sg:active .mv-sg-ic{ transform:translateY(1px);
+  box-shadow:inset 0 2px 4px color-mix(in srgb, var(--terre) 24%, transparent); }
 .mv-sg-lb{font-size:11.5px;font-weight:600;color:var(--texte-med);font-family:'Outfit',sans-serif;}
 
 

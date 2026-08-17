@@ -14,7 +14,7 @@
 // \u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550
 
 import { isAdmin, isSaisonnier, canWrite, showToast, showSyncBadge, _escHtml,
-         _mvBadge, _mvIcon } from './utils.js';
+         _mvBadge, _mvIcon, _mvSetIcon } from './utils.js';
 
 const DEBUG = location.hostname === 'localhost' || location.hostname === '127.0.0.1';
 
@@ -549,7 +549,7 @@ function _mvcRenderHeader(){
   var okPct=act.length?Math.round(okN/act.length*100):100;
   var kpis=[[act.length,'Cuvées',false],[futs,'Fûts',false],[hl,'hL',false],[due,'À ouiller',true]];
   // En-t\u00EAte UNIQUE : on alimente le bandeau commun (plus de second en-t\u00EAte empil\u00E9)
-  var _ico=document.getElementById('cave-hdr-ico'); if(_ico) _ico.textContent='\ud83d\udee2\ufe0f';
+  var _ico=document.getElementById('cave-hdr-ico'); _mvSetIcon(_ico,'cuve',20);
   var _ttl=document.getElementById('cave-hdr-title'); if(_ttl) _ttl.textContent='Le Chai';
   var _sub=document.getElementById('cave-hdr-sub'); if(_sub) _sub.textContent=(window.DOMAINE_NOM||'Mon domaine');
   var _bdg=document.getElementById('cave-hdr-badge');
@@ -567,7 +567,7 @@ function _mvcRenderHeader(){
     +'<div class="mvc-health-lbl"><span><b>'+okN+'</b> \u00e0 jour</span><span>'+(due?'<b>'+due+'</b> en retard':'Chai sous contr\u00f4le \u2713')+'</span></div></div>';
   if(typeof window._mvMetaSync==='function') window._mvMetaSync();
   var tabCuv=document.getElementById('mvc-tbtn-cuv');
-  if(tabCuv) tabCuv.innerHTML='\ud83d\udee2\ufe0f Cuv\u00e9es'+(due>0?' <span class="mvc-tab-badge">'+due+'</span>':'');
+  if(tabCuv) tabCuv.innerHTML='<span class="mvu-tab-em">'+_mvIcon('barrique',18)+'</span>Cuv\u00e9es'+(due>0?' <span class="mvc-tab-badge">'+due+'</span>':'');
 }
 function _caveGaugeHtml(c){
   var seuil=_caveSeuilOu(c);
@@ -1804,7 +1804,7 @@ function _vendRenderTab(){
 
 function renderCaveVendange() {
   _vendInjectCss();
-  var icoEl=document.getElementById('cave-hdr-ico'); if(icoEl) icoEl.textContent='\uD83C\uDF47';
+  var icoEl=document.getElementById('cave-hdr-ico'); _mvSetIcon(icoEl,'raisin',20);
   var titleEl=document.getElementById('cave-hdr-title'); if(titleEl) titleEl.textContent='Le Cuvier';
   var subEl=document.getElementById('cave-hdr-sub'); if(subEl) subEl.textContent=(window.DOMAINE_NOM||'Mon domaine');
   var bdgV=document.getElementById('cave-hdr-badge'); if(bdgV) bdgV.textContent='Campagne '+(new Date().getFullYear());
@@ -6281,7 +6281,7 @@ function _mlSetTab(t){ _mlTab=(t==='vie')?'vie':'venir'; renderCaveMillesime(); 
 
 function renderCaveMillesime(){
   _mlInjectCss();
-  var icoEl=document.getElementById('cave-hdr-ico'); if(icoEl) icoEl.textContent='\u{1F570}\u{FE0F}';
+  var icoEl=document.getElementById('cave-hdr-ico'); _mvSetIcon(icoEl,'chrono',20);
   var ttlEl=document.getElementById('cave-hdr-title'); if(ttlEl) ttlEl.textContent='Le mill\u00e9sime';
   var subEl=document.getElementById('cave-hdr-sub'); if(subEl) subEl.textContent=(window.DOMAINE_NOM||'Mon domaine');
   var bdg=document.getElementById('cave-hdr-badge'); if(bdg) bdg.textContent='Campagne '+_mlCampagne();

@@ -23,7 +23,7 @@ export const GT_ADMIN_EMAIL = 'ngdevpro@gmail.com';
 // WHATS_NEW   : tableau vide = modal desactive pour cette version.
 // Format item : { emoji:'📅', titre:'Titre court', desc:'Phrase utilisateur.' }
 // Regle : seulement les changements visibles par les utilisateurs.
-export const APP_VERSION = '6.32';
+export const APP_VERSION = '6.33';
 // ════ Journal des nouveautés (récap cumulatif) ════
 // Une entrée par version, la PLUS RÉCENTE EN HAUT : { v:'5.10', items:[ {emoji,titre,desc}, … ] }
 // À chaque release visible → AJOUTER un bloc en tête (ne pas remplacer). items:[] = release technique (rien à afficher).
@@ -354,6 +354,12 @@ window._mvGraphRepeindre = function(){
 };
 
 export const WHATS_NEW = [
+  { v:'6.33', items:[
+    { emoji: 'barrique', titre: "Cinq \u00e9crans gardaient encore les anciens dessins",
+      desc: "Le Planning, La R\u00e9serve, Le Chai, Le Cuvier et Le mill\u00e9sime affichaient toujours de vieux pictogrammes en haut de page, l\u00e0 o\u00f9 le reste de l\u2019application avait chang\u00e9. C\u2019est align\u00e9. Au passage, <b>les f\u00fbts ont enfin un dessin de f\u00fbt</b> \u2014 c\u2019\u00e9tait un caddie dans La R\u00e9serve et un bidon dans Le Chai." },
+    { emoji: 'plus', titre: "Les modules du bas se voient mieux",
+      desc: "Dans la barre du bas, chaque module vit d\u00e9sormais dans un carr\u00e9 en relief : creus\u00e9 quand il est ferm\u00e9, <b>en or quand il est ouvert</b>. Le petit trait dor\u00e9 tout en haut de la barre, qu\u2019on ne remarquait jamais, dispara\u00eet." }
+  ] },
   { v:'6.32', items:[
     { emoji: '\u{1F326}\uFE0F', titre: "La m\u00e9t\u00e9o par secteur affichait un mot \u00e0 la place du dessin",
       desc: "Sur l\u2019accueil, chaque commune montrait \u00ab\u202fsoleil\u202f\u00bb ou \u00ab\u202fnuage\u202f\u00bb \u00e9crit en gros par-dessus son nom. C\u2019est corrig\u00e9 : le dessin revient, et <b>vos relev\u00e9s d\u00e9j\u00e0 enregistr\u00e9s restent lisibles</b>." },
@@ -1105,9 +1111,19 @@ function _whatsNewSince(seen) {
     return b && b.items && b.items.length && _cmpVer(b.v, seen) > 0 && _cmpVer(b.v, APP_VERSION) <= 0;
   }).sort(function(a, b) { return _cmpVer(b.v, a.v); });
 }
+// Le pastillon du journal des nouveautes accepte les DEUX ecritures : un EMOJI
+// (les trente blocs deja ecrits, qu'on ne reecrit pas) ou un NOM D'ICONE (les
+// blocs a venir). Meme regle que `_mvSetIcon`, en version « rend une chaine ».
+// ⚠️ Sur : `_wnRow` s'execute a l'OUVERTURE du modal, jamais au chargement du
+//   module — le sprite est donc lu et analyse depuis longtemps.
+function _wnIco(v) {
+  var s = String(v == null ? '' : v);
+  var noms = _mvIconNoms();
+  return (/^[a-z][a-z0-9-]*$/.test(s) && (!noms || noms[s])) ? _mvIcon(s, 20) : s;
+}
 function _wnRow(item, sep) {
   return '<div style="display:flex;gap:12px;align-items:flex-start;padding:10px 0;' + sep + '">'
-    + '<div style="width:32px;height:32px;background:var(--gris-clair);border-radius:8px;display:flex;align-items:center;justify-content:center;flex-shrink:0;font-size:15px;">' + item.emoji + '</div>'
+    + '<div style="width:32px;height:32px;background:var(--gris-clair);border-radius:8px;display:flex;align-items:center;justify-content:center;flex-shrink:0;font-size:15px;">' + _wnIco(item.emoji) + '</div>'
     + '<div><div style="font-size:13px;font-weight:500;color:var(--texte);line-height:1.3;">' + item.titre + '</div>'
     + '<div style="font-size:11px;color:var(--texte-doux);margin-top:3px;line-height:1.5;">' + item.desc + '</div></div>'
     + '</div>';

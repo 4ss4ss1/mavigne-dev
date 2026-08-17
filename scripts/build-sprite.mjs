@@ -36,7 +36,13 @@ export const MAP = {
   orage:'cloud-lightning', brouillard:'cloud-fog',
   plus:'ellipsis', rang:'fence', retour:'undo-2', rotation:'refresh-cw', sablier:'hourglass',
   verre:'wine',
-  secateur:'scissors', tariere:'drill', tracteur:'tractor'
+  secateur:'scissors', tariere:'drill', tracteur:'tractor',
+  /* ── DS-4 : les deux formes que le metier reclamait et que le jeu n'avait pas.
+     `barrique` remplace un CADDIE (Reserve > Futs) et un BARIL DE PETROLE
+     (Le Chai) : deux glyphes qui disaient autre chose que ce qu'on compte.
+     `parcours` remplace une HELICE D'ADN sur « La ligne de vie » — le flux
+     benne -> cuve -> fut -> bouteille est une suite d'etapes, pas un genome. */
+  barrique:'barrel', parcours:'waypoints'
 };
 
 export function corps(lucide) {

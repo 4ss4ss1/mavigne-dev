@@ -17,7 +17,7 @@
 //   œno    → opérations Cave (op.data.so2_total_g) — actif dès aujourd'hui.
 // ═══════════════════════════════════════════════════════════════════════════
 
-import { isAdmin, showToast, _escHtml, _escAttr } from './utils.js';
+import { isAdmin, showToast, _escHtml, _escAttr, _mvIcon } from './utils.js';
 
 const DEBUG = location.hostname === 'localhost' || location.hostname === '127.0.0.1';
 
@@ -139,7 +139,7 @@ function renderReserve(){
   var head=''
     +'<div class="mod-header h-reserve">'
       +'<div class="mod-header-top">'
-        +'<span class="mod-header-icon">\uD83D\uDCE6</span>'
+        +'<span class="mod-header-icon">'+_mvIcon('carton',20)+'</span>'
         +'<div class="mod-header-titles">'
           +'<div class="mod-header-title">La Réserve</div>'
           +'<div class="mod-header-sub">Intrants, stock &amp; fûts</div>'
@@ -152,9 +152,9 @@ function renderReserve(){
         +'<div class="hv2-date" data-mv-date></div>'
       +'</div>'
       +'<div class="mvu-tabs mvr-tabs">'
-        +'<button class="mvu-tab'+(_rsvTab==='futs'?' on':'')+'" onclick="_rsvTabTo(\'futs\')"><span class="mvu-tab-em">\uD83D\uDED2</span>Fûts</button>'
-        +'<button class="mvu-tab'+(_rsvTab==='intrants'?' on':'')+'" onclick="_rsvTabTo(\'intrants\')"><span class="mvu-tab-em">\uD83E\uDDEA</span>Intrants</button>'
-        +'<button class="mvu-tab'+(_rsvTab==='audit'?' on':'')+'" onclick="_rsvTabTo(\'audit\')"><span class="mvu-tab-em">\uD83D\uDCCB</span>Bilan matière</button>'
+        +'<button class="mvu-tab'+(_rsvTab==='futs'?' on':'')+'" onclick="_rsvTabTo(\'futs\')"><span class="mvu-tab-em">'+_mvIcon('barrique',18)+'</span>Fûts</button>'
+        +'<button class="mvu-tab'+(_rsvTab==='intrants'?' on':'')+'" onclick="_rsvTabTo(\'intrants\')"><span class="mvu-tab-em">'+_mvIcon('fiole',18)+'</span>Intrants</button>'
+        +'<button class="mvu-tab'+(_rsvTab==='audit'?' on':'')+'" onclick="_rsvTabTo(\'audit\')"><span class="mvu-tab-em">'+_mvIcon('liste',18)+'</span>Bilan matière</button>'
       +'</div>'
     +'</div>';
   page.innerHTML=head+'<div id="mvr-body" class="mvr-body"></div>';

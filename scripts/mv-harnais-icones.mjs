@@ -172,6 +172,16 @@ const RE_TABLES = /(?:var|const|export const)\s+([A-Za-z_$][\w$]*_(?:IC|ICO|ICON
      et fausse se corrige ; un trou silencieux, non. Toute nouvelle table
      d'icones s'ajoute ici — sinon l'e2e la trouvera, plus tard et plus cher. */
 const TABLES_TRIPLET = [['pilotage', '_PIL_TABS'], ['pilotage', '_PIL_TOOLS']];
+/* ⚠️ CINQUIEME ANGLE MORT, ferme des l'ecriture cette fois. `WHATS_NEW` porte un
+   champ `emoji:` qui accepte desormais les DEUX ecritures (_wnIco) : un emoji
+   pour les trente blocs deja ecrits, un NOM D'ICONE pour les suivants. Sans
+   cette lecture, un nom mal orthographie rendrait un carre pointille dans le
+   journal des nouveautes — l'ecran que TOUS les clients voient apres une mise
+   a jour. Les anciennes valeurs commencent par « \ » et ne matchent pas. */
+for (const m5 of sources.utils.matchAll(/emoji:\s*'([a-z][a-z0-9-]*)'/g)) {
+  if (!appels.has(m5[1])) appels.set(m5[1], []);
+  if (!appels.get(m5[1]).includes('WHATS_NEW')) appels.get(m5[1]).push('WHATS_NEW');
+}
 for (const [mod, nom] of TABLES_TRIPLET) {
   const i = sources[mod].indexOf(nom + ' =') >= 0
     ? sources[mod].indexOf(nom + ' =') : sources[mod].indexOf(nom + '=');
