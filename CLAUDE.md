@@ -2,7 +2,12 @@
 
 > Document de référence du projet **Ma Vigne** (GUERETTECH). Il est le **porteur de vérité** :
 > la mémoire Claude est plafonnée, ce fichier ne l'est pas.
-> Dernière consolidation : **17 août 2026 (soir)** — ★★★ **PILOTAGE NE RÉPONDAIT PLUS (§49)**.
+> Dernière consolidation : **17 août 2026 (nuit)** — ★★★ **LE COMPTEUR MENTAIT (§50)**.
+> **APP 6.30 · SW 6.84.** Un émoji écrit `\\uD83D\\uDD17` est invisible à un compteur qui lit
+> le texte du fichier. ★★★ **Le compte réel n'est pas 169 mais 1358** — tous les chiffres
+> annoncés pour DS-1/DS-2/DS-3 sont faux. Le compteur décode désormais avant de compter.
+>
+> ★ Précédente : **17 août 2026 (soir)** — ★★★ **PILOTAGE NE RÉPONDAIT PLUS (§49)**.
 > **APP 6.29 · SW 6.83.** `_opEmo is not defined` en production. ★★★ **Nouveau contrôle C23** :
 > tout `_xxx()` appelé doit être déclaré, importé ou exposé — la règle que ni `node --check`
 > ni ESLint ne fait, et qui aurait attrapé les deux incidents de la journée.
@@ -8163,6 +8168,47 @@ Le harnais compte les tons déclarés, refuse un ton inconnu à l'appel, et vér
 
 ★ **Le vrai reste visible par un client tourne autour de 40 glyphes, dont une bonne moitié est
 légitime** (typographie, données, journal). Le lot a atteint son objet.
+
+---
+
+## 50. ★★★ LE COMPTEUR MENTAIT DEPUIS LE PREMIER JOUR (17/08 · 6.30 / 6.84)
+
+> Dix carrés pointillés sur les onglets du Pilotage. Le correctif tient en dix lignes.
+> **Ce que l'incident a révélé rend faux tous les chiffres de DS-1, DS-2 et DS-3.**
+
+### 50a. ⚠️⚠️⚠️ UN ÉMOJI ÉCRIT EN ÉCHAPPEMENT EST INVISIBLE AU COMPTEUR
+
+`['auj','\uD83E\uDDED','Aujourd\'hui']` **ne contient aucun caractère pictographique** : ce sont
+des lettres ASCII. Le compteur lisait le texte du fichier, donc il mesurait **l'écriture** au lieu
+de mesurer **ce que voit l'utilisateur**.
+
+→ Le compteur **décode** désormais `\uXXXX` et `\u{XXXXX}`, paires de substituts comprises, avant
+de compter. ★★ **Le compte réel n'est pas 169 mais 1358, et il ne l'a jamais été.** Les
+« 920 → 169, 82 % de moins » que j'ai annoncés tout au long de la journée sont **faux**.
+
+⚠️ **Conséquence directe et assumée** : « zéro émoji rendu dans `reglages.js` » était **vrai sur
+un comptage aveugle et faux en réalité** — il en reste **115**, tous en échappement.
+★ On ne baisse pas une exigence en douce : l'assertion devient un **cliquet** (le compte ne peut
+que descendre) au lieu d'une cible fausse, et la raison est écrite dans le harnais.
+**Une assertion verte pour une mauvaise raison vaut moins que rien.**
+
+### 50b. La cause immédiate : un script de patch interrompu
+
+Les dix entrées de `_PIL_TABS`/`_PIL_TOOLS` portaient encore des émojis alors que leurs **trois
+rendus** étaient déjà passés à `_mvIcon`. Mon script avait échoué sur sa dernière ancre — donc
+**n'avait rien écrit** — et j'avais supposé que sa première moitié avait pris.
+
+★★★ **C'est la QUATRIÈME fois dans la journée que ce mécanisme me piège** (`admin-gt` trois fois,
+puis ici). La règle existe depuis §25 et je ne l'applique pas :
+→ **après tout script de patch, relire le fichier et vérifier CE QUI A REELLEMENT CHANGÉ**, pas
+supposer d'après le message de sortie.
+
+### 50c. Ce que ça dit du reste du lot
+
+Aucun défaut fonctionnel supplémentaire n'est démontré : les écrans migrés fonctionnent, la
+charte tient, les icônes s'affichent. **Ce qui est faux, c'est la MESURE du travail restant.**
+Le vrai reste à traiter est de l'ordre de **1358 pictogrammes**, dont une part importante en
+échappements jamais examinés. → à reprendre module par module, avec un compteur qui voit enfin.
 
 ---
 

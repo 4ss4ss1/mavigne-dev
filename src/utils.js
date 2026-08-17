@@ -23,7 +23,7 @@ export const GT_ADMIN_EMAIL = 'ngdevpro@gmail.com';
 // WHATS_NEW   : tableau vide = modal desactive pour cette version.
 // Format item : { emoji:'📅', titre:'Titre court', desc:'Phrase utilisateur.' }
 // Regle : seulement les changements visibles par les utilisateurs.
-export const APP_VERSION = '6.29';
+export const APP_VERSION = '6.30';
 // ════ Journal des nouveautés (récap cumulatif) ════
 // Une entrée par version, la PLUS RÉCENTE EN HAUT : { v:'5.10', items:[ {emoji,titre,desc}, … ] }
 // À chaque release visible → AJOUTER un bloc en tête (ne pas remplacer). items:[] = release technique (rien à afficher).
@@ -354,6 +354,10 @@ window._mvGraphRepeindre = function(){
 };
 
 export const WHATS_NEW = [
+  { v:'6.30', items:[
+    { emoji: '\u{1F9ED}', titre: "Les onglets du Pilotage affichaient un carr\u00e9 rouge",
+      desc: "Les neuf onglets de l\u2019\u00e9cran Pilotage montraient un carr\u00e9 rouge en pointill\u00e9s \u00e0 la place de leur ic\u00f4ne. C\u2019est corrig\u00e9 : ils ont les m\u00eames ic\u00f4nes que le reste de l\u2019application." }
+  ] },
   { v:'6.29', items:[
     { emoji: '\u{1F6E0}\uFE0F', titre: "Pilotage \u00e0 nouveau utilisable",
       desc: "L\u2019\u00e9cran Pilotage ne r\u00e9pondait plus aux clics depuis la derni\u00e8re mise \u00e0 jour. <b>C\u2019est r\u00e9par\u00e9.</b> Au passage, la m\u00e9t\u00e9o de l\u2019en-t\u00eate affichait \u00ab\u202fnuage\u202f\u00bb \u00e9crit en toutes lettres, et la barre d\u2019onglets \u00e9tait la derni\u00e8re \u00e0 garder des \u00e9mojis : les deux sont corrig\u00e9es." },

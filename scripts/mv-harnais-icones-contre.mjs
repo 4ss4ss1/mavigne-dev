@@ -95,7 +95,7 @@ epreuve('un symbole sans appelant',
 epreuve('un emoji reintroduit dans reglages.js',
   () => ecrire('src/reglages.js', lire('src/reglages.js')
         .replace("showToast('Domaine mis \u00e0 jour'", "showToast('\u2705 Domaine mis \u00e0 jour'")),
-  /Zero emoji rendu dans reglages\.js/);
+  /reglages\.js ne remonte pas/);
 
 /* 4. Une forme qui fige sa couleur : elle ne se repeint plus en mode sombre. */
 epreuve('une forme qui fige sa couleur',

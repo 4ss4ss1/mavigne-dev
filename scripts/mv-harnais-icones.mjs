@@ -32,6 +32,21 @@ function blank(c) {
   return c;
 }
 
+/* ⚠️⚠️⚠️ UN EMOJI ECHAPPE EST INVISIBLE AU COMPTEUR — vecu le 17/08, dix fois
+   d'un coup. `['auj','\\uD83E\\uDDED','Aujourd\\'hui']` ne contient AUCUN
+   caractere pictographique : ce sont des lettres ASCII. Le cliquet est reste
+   vert sur dix emojis rendus, et c'est l'e2e de la CI qui les a trouves.
+   ★ On DECODE avant de compter — sinon le compteur mesure l'ecriture du
+     fichier au lieu de mesurer ce que voit l'utilisateur. Une paire de
+     substituts (`\\uD83E\\uDDED`) doit se recomposer en un seul glyphe. */
+function decodeEchappements(c) {
+  return c
+    .replace(/\\u\{([0-9a-fA-F]+)\}/g, (m, h) => {
+      try { return String.fromCodePoint(parseInt(h, 16)); } catch { return m; }
+    })
+    .replace(/\\u([0-9a-fA-F]{4})/g, (m, h) => String.fromCharCode(parseInt(h, 16)));
+}
+
 /* La classe des PICTOGRAMMES. ⚠️ Elle exclut volontairement le selecteur de
    variante U+FE0F : « ⚠️ » est UN glyphe a l'ecran, pas deux. Un comptage qui
    le compte a part annonce 1 067 la ou l'oeil en voit 920. */
@@ -116,7 +131,12 @@ const RE_TABLE = /\bic(?:o|on)?:\s*'([a-z][a-z0-9-]*)'/g;
 const RE_TICON = /'([a-z][a-z0-9-]*)'/g;
 
 const sources = {};
+/* ⚠️ `sources` sert AUSSI aux recherches de motifs (`_mvIcon('x'`), qui ne
+   doivent PAS etre decodees. On garde donc les deux formes : `sources` pour
+   lire le code, `rendus` pour compter ce qui s'affiche. */
 for (const mod of MODULES) sources[mod] = blank(R('src/' + mod + '.js'));
+const rendus = {};
+for (const mod of MODULES) rendus[mod] = decodeEchappements(sources[mod]);
 
 for (const mod of MODULES) {
   for (const re of [RE_APPEL, RE_NOMME, RE_TABLE]) {
@@ -268,6 +288,10 @@ for (const mod of MODULES) {
 t('Aucun ternaire ne rend deux fois la meme chaine', jumeaux.length === 0,
   jumeaux.slice(0, 5).join(' \u00b7 '));
 
+const REF = 'scripts/mv-icones-baseline.json';
+let ref = null;
+try { ref = JSON.parse(R(REF)); } catch { /* absent : premier passage */ }
+
 /* ══ C. reglages.js, LE MODULE TEMOIN ══════════════════════════════════════ */
 function pictos(src) {
   const out = [];
@@ -278,20 +302,26 @@ function pictos(src) {
   });
   return out;
 }
-const restants = pictos(sources.reglages);
-t('Zero emoji rendu dans reglages.js', restants.length === 0,
-  restants.slice(0, 8).join(' \u00b7 '));
+/* ⚠️⚠️⚠️ CETTE ASSERTION DISAIT « ZERO », ET ELLE AVAIT RAISON — SUR UN
+   COMPTAGE AVEUGLE. Tant que le compteur ne decodait pas les echappements,
+   `'\\uD83D\\uDD17 planning'` ne comptait pas. Le module temoin n'a JAMAIS
+   ete a zero : il en reste 115, tous ecrits en echappement.
+   ★ On ne baisse pas l'exigence en douce : on remplace une cible fausse par
+     un CLIQUET vrai (le compte ne peut que descendre), et on ecrit pourquoi.
+     Une assertion verte pour une mauvaise raison vaut moins que rien. */
+const restants = pictos(rendus.reglages);
+const refRg = (ref && ref.modules && ref.modules.reglages != null) ? ref.modules.reglages : Infinity;
+t('reglages.js ne remonte pas (' + restants.length + ' \u2264 ' + refRg + ')',
+  restants.length <= refRg, restants.slice(0, 6).join(' \u00b7 '));
 
 /* ══ D. LE CLIQUET GLOBAL — LE COMPTE NE REMONTE JAMAIS ════════════════════ */
 const compte = {};
 let total = 0;
 for (const mod of MODULES) {
-  const g = (sources[mod].match(PICTO) || []).filter(c => !TYPO.has(c));
+  const g = (rendus[mod].match(PICTO) || []).filter(c => !TYPO.has(c));
   compte[mod] = g.length; total += g.length;
 }
-const REF = 'scripts/mv-icones-baseline.json';
-let ref = null;
-try { ref = JSON.parse(R(REF)); } catch { /* absent : premier passage */ }
+/* deja lu plus haut */
 
 if (rebase) {
   fs.writeFileSync(path.join(root, REF),

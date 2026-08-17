@@ -180,16 +180,16 @@ var _PIL_CAVSUB = 'urg';
 //    on reordonne ; on ne renumerote rien en base.
 // ════════════════════════════════════════════════════════════════════════════
 var _PIL_TABS = [
-  ['auj','\uD83E\uDDED','Aujourd\'hui'],
-  ['an', '\uD83D\uDDD3\uFE0F','L\'année'],
-  ['avc','\uD83C\uDF47','La campagne'],
+  ['auj','chrono','Aujourd\'hui'],
+  ['an', 'calendrier','L\'année'],
+  ['avc','raisin','La campagne'],
   // ★★ « L'equipe & les taches » ne montrait AUCUNE tache : son contenu est
   //   Personnel + Materiel. Les taches vivent au niveau ② (avancement par tache,
   //   echeances) et dans Economie › Postes. Les descendre ici les DUPLIQUERAIT —
   //   la faute que la refonte venait de corriger sur « Charge & ETP ». On corrige
   //   donc le mot, pas la place : l'axe se lit « l'annee › la campagne et ses
   //   taches › les gens et les machines › simuler ».
-  ['equ','\uD83D\uDC65','L\'équipe & le matériel'],
+  ['equ','equipe','L\'équipe & le matériel'],
   // \u2605\u2605\u2605 \u00ab SIMULER \u00bb NOMMAIT MAL LE SEUL ONGLET QUI AGISSE.
   //   Deux de ses trois cartes sont en lecture seule et le disent — \u00ab rien n'est
   //   enregistre \u00bb. La troisieme, l'ordre de passage, ECRIT
@@ -202,16 +202,16 @@ var _PIL_TABS = [
   //     descend du large au fin, puis on tranche.
   //   \u26a0\ufe0f La cle reste `sim` : memorisee chez les clients, citee par app.js,
   //     verifiee par C22. On renomme, on ne renumerote pas.
-  ['sim','\uD83C\uDF9B\uFE0F','D\u00e9cider'],
-  ['cav','\uD83C\uDF77','Cave'],
-  ['eco','\uD83D\uDCB6','Économie'],
-  ['cfm','\uD83D\uDEE1\uFE0F','Conformité']
+  ['sim','curseurs','D\u00e9cider'],
+  ['cav','verre','Cave'],
+  ['eco','euro','Économie'],
+  ['cfm','alerte','Conformité']
 ];
 // Ou s'arrete le zoom et ou commencent les ecrans de detail. La barre pose un
 // filet entre les deux : sans lui, « Cave » se lit comme un cinquieme niveau.
 var _PIL_ZOOM_FIN = 'sim';
 // Outils : accessibles par le bouton dedie, pas dans la barre.
-var _PIL_TOOLS = [['arc','\uD83D\uDDC3\uFE0F','Archives'],['param','\u2699\uFE0F','Paramétrage']];
+var _PIL_TOOLS = [['arc','carton','Archives'],['param','curseurs','Paramétrage']];
 // ★★ LA BARRE ET LE TITRE DISENT ENFIN LA MEME CHOSE. La refonte avait renomme
 // _PIL_TABS sans toucher a _PIL_LABELS : on cliquait « La campagne » et on
 // atterrissait sous « Avancement », « Simuler » sous « Decider » — le libelle que

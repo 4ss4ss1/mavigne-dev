@@ -1,4 +1,21 @@
-// MA VIGNE — Service Worker v6.83
+// MA VIGNE — Service Worker v6.84
+// v6.84 (17/08/2026) — LES ONGLETS DU PILOTAGE + LE COMPTEUR QUI MENTAIT.
+//   ⚠️ Les 10 entrees de `_PIL_TABS`/`_PIL_TOOLS` portaient encore des emojis
+//     alors que leurs TROIS rendus etaient deja passes a `_mvIcon` : dix carres
+//     pointilles a l'ecran. Cause : un script de patch interrompu en cours
+//     n'ecrit RIEN, et j'avais suppose que sa premiere moitie avait pris.
+//   ★★★ MAIS LE VRAI DEFAUT EST AILLEURS ET IL EST GRAVE : UN EMOJI ECRIT EN
+//     ECHAPPEMENT EST INVISIBLE AU COMPTEUR. `'\uD83D\uDD17 planning'` ne
+//     contient aucun caractere pictographique — ce sont des lettres ASCII.
+//     Le cliquet mesurait l'ECRITURE du fichier, pas ce que voit l'utilisateur.
+//     → Le compteur DECODE desormais avant de compter. Le compte reel n'est pas
+//       169 mais 1358, et il ne l'a jamais ete : les chiffres annonces tout au
+//       long des lots DS-1/DS-2 etaient faux, tous.
+//   ⚠️ Consequence assumee : « zero emoji dans reglages.js » etait vrai sur un
+//     comptage aveugle et faux en realite (115 restants). L'assertion devient
+//     un CLIQUET (le compte ne peut que descendre) au lieu d'une cible fausse.
+//     On ne baisse pas une exigence en douce : on remplace une cible fausse par
+//     une mesure vraie, et on l'ecrit.
 // v6.83 (17/08/2026) — PILOTAGE NE REPONDAIT PLUS. Correctif + le filet qui
 //   manquait.
 //   ⚠️⚠️⚠️ `_opEmo is not defined` : j'avais supprime la fonction en cherchant
@@ -2046,7 +2063,7 @@
 // v2.22 — Fix profils vides : guard vide dans loadData() pour MEMBRES/SAISONS/TACHES
 // v2.17 — Onboarding intégré + tenantId · v2.06 — Firebase Auth · v2.00–v2.05 — divers
 const DEBUG = self.location.hostname === 'localhost' || self.location.hostname === '127.0.0.1';
-const CACHE_NAME   = 'mavigne-v6.83';
+const CACHE_NAME   = 'mavigne-v6.84';
 const TENANT_CACHE = 'mavigne-tenant';   // Cache persistant — préservé à chaque mise à jour SW
 const SYNC_TAG     = 'mavigne-sync';
 
@@ -2062,7 +2079,7 @@ const CDN_URLS = [
 ];
 
 self.addEventListener('install', event => {
-  if(DEBUG) console.log('[SW] Ma Vigne v6.83 installé');
+  if(DEBUG) console.log('[SW] Ma Vigne v6.84 installé');
   event.waitUntil(
     caches.open(CACHE_NAME).then(async cache => {
       // ── Cœur applicatif : STRICT (mise à jour ATOMIQUE) ──
@@ -2078,7 +2095,7 @@ self.addEventListener('install', event => {
 });
 
 self.addEventListener('activate', event => {
-  if(DEBUG) console.log('[SW] Ma Vigne v6.83 activé');
+  if(DEBUG) console.log('[SW] Ma Vigne v6.84 activé');
   event.waitUntil(
     caches.keys().then(keys =>
       Promise.all(
