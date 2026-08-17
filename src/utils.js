@@ -23,7 +23,7 @@ export const GT_ADMIN_EMAIL = 'ngdevpro@gmail.com';
 // WHATS_NEW   : tableau vide = modal desactive pour cette version.
 // Format item : { emoji:'📅', titre:'Titre court', desc:'Phrase utilisateur.' }
 // Regle : seulement les changements visibles par les utilisateurs.
-export const APP_VERSION = '6.30';
+export const APP_VERSION = '6.31';
 // ════ Journal des nouveautés (récap cumulatif) ════
 // Une entrée par version, la PLUS RÉCENTE EN HAUT : { v:'5.10', items:[ {emoji,titre,desc}, … ] }
 // À chaque release visible → AJOUTER un bloc en tête (ne pas remplacer). items:[] = release technique (rien à afficher).
@@ -354,6 +354,10 @@ window._mvGraphRepeindre = function(){
 };
 
 export const WHATS_NEW = [
+  { v:'6.31', items:[
+    { emoji: '\u{1F4B6}', titre: "L\u2019onglet \u00c9conomie du Pilotage retrouve son ic\u00f4ne",
+      desc: "Dernier carr\u00e9 rouge en pointill\u00e9s : l\u2019onglet \u00c9conomie du Pilotage. C\u2019est corrig\u00e9." }
+  ] },
   { v:'6.30', items:[
     { emoji: '\u{1F9ED}', titre: "Les onglets du Pilotage affichaient un carr\u00e9 rouge",
       desc: "Les neuf onglets de l\u2019\u00e9cran Pilotage montraient un carr\u00e9 rouge en pointill\u00e9s \u00e0 la place de leur ic\u00f4ne. C\u2019est corrig\u00e9 : ils ont les m\u00eames ic\u00f4nes que le reste de l\u2019application." }

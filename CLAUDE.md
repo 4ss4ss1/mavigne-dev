@@ -2,7 +2,12 @@
 
 > Document de référence du projet **Ma Vigne** (GUERETTECH). Il est le **porteur de vérité** :
 > la mémoire Claude est plafonnée, ce fichier ne l'est pas.
-> Dernière consolidation : **17 août 2026 (nuit)** — ★★★ **LE COMPTEUR MENTAIT (§50)**.
+> Dernière consolidation : **17 août 2026 (nuit)** — ★★★ **TROIS PANNES CAUSÉES PAR MA PROPRE
+> ASSERTION (§51)**. **APP 6.31 · SW 6.85.** « Aucun symbole sans emploi » m'a fait supprimer
+> quatre symboles vivants. ★★★ **Un contrôle dont l'action corrective est « supprimer » doit
+> être tenu pour suspect.** Passé en avertissement.
+>
+> ★ Précédente : **17 août 2026 (nuit)** — ★★★ **LE COMPTEUR MENTAIT (§50)**.
 > **APP 6.30 · SW 6.84.** Un émoji écrit `\\uD83D\\uDD17` est invisible à un compteur qui lit
 > le texte du fichier. ★★★ **Le compte réel n'est pas 169 mais 1358** — tous les chiffres
 > annoncés pour DS-1/DS-2/DS-3 sont faux. Le compteur décode désormais avant de compter.
@@ -8168,6 +8173,45 @@ Le harnais compte les tons déclarés, refuse un ton inconnu à l'appel, et vér
 
 ★ **Le vrai reste visible par un client tourne autour de 40 glyphes, dont une bonne moitié est
 légitime** (typographie, données, journal). Le lot a atteint son objet.
+
+---
+
+## 51. ★★★ TROIS PANNES CAUSÉES PAR MA PROPRE ASSERTION (17/08 · 6.31 / 6.85)
+
+> `icone inconnue : euro`. Avant lui : `equipe`, puis `soleil`, puis `cle`.
+> **Quatre symboles supprimés, trois carrés pointillés chez le client.**
+> Le fautif n'est pas l'oubli : c'est **le contrôle qui m'a dit de les supprimer**.
+
+### 51a. ⚠️⚠️⚠️ « AUCUN SYMBOLE DÉCLARÉ SANS EMPLOI » — UN FILET QUI POUSSE À CASSER
+
+L'assertion ne voyait que les **appels littéraux** `_mvIcon('x')`. Un nom rangé dans une table
+et résolu à l'exécution lui était invisible. À chaque rouge, j'ai obéi et supprimé le symbole —
+et à chaque fois une table le réclamait.
+
+★★ **Elle optimisait un non-problème** : quelques centaines d'octets de SVG dans un sprite déjà
+précaché. Le bénéfice était nul, le coût trois pannes.
+→ Elle passe en **AVERTISSEMENT**, et la règle d'usage devient : **on n'enlève un symbole que sur
+preuve**, jamais sur ce signal seul.
+
+★★★ **La leçon dépasse les icônes : un contrôle dont l'action corrective est « supprimer » doit
+être tenu pour suspect.** Un filet est là pour empêcher de casser, pas pour y inviter.
+
+### 51b. La convention de nom ne suffisait pas non plus
+
+`_PIL_TABS` est une table de **triplets** `['cle','icone','Libelle']` : son nom ne finit pas par
+`_IC`, et on ne peut pas lire toutes ses chaînes — la clé et le libellé n'en sont pas.
+**Deux fois de suite** un nom y est resté invisible (`equipe`, puis `euro`).
+
+→ Le harnais tient désormais un **registre en dur** des tables à triplets. ★ **C'est assumé :
+une liste explicite et fausse se corrige ; un trou silencieux, non.** Toute nouvelle table s'y
+ajoute — sinon l'e2e la trouvera, plus tard et plus cher.
+
+### 51c. Ce que trois allers-retours CI auraient dû m'apprendre plus tôt
+
+Trois pushs, trois rouges, trois correctifs d'une ligne. À chaque fois j'ai corrigé **le symptôme
+signalé** sans chercher **la même faute ailleurs**. Le scan complet des tables — dix noms vérifiés
+en une commande — je ne l'ai fait qu'au troisième tour. ★★ **Devant un défaut trouvé par un
+contrôle externe, chercher immédiatement ses frères, avant de re-livrer.**
 
 ---
 

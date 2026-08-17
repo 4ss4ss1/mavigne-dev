@@ -1,4 +1,19 @@
-// MA VIGNE — Service Worker v6.84
+// MA VIGNE — Service Worker v6.85
+// v6.85 (17/08/2026) — `euro` MANQUANT, ET LA REGLE QUI M'A FAIT LE SUPPRIMER.
+//   ⚠️⚠️⚠️ TROISIEME PANNE CAUSEE PAR MA PROPRE ASSERTION « aucun symbole
+//     declare sans emploi ». Elle m'a fait retirer `equipe`, `soleil`, `cle`
+//     puis `euro` parce qu'aucun APPEL LITTERAL ne les citait — alors qu'une
+//     table les demandait a l'execution. Trois carres pointilles chez le client.
+//     ★★ Elle optimisait un NON-PROBLEME : quelques centaines d'octets de SVG
+//       dans un sprite deja precache. Elle passe en AVERTISSEMENT, et la regle
+//       devient : ON N'ENLEVE UN SYMBOLE QUE SUR PREUVE.
+//       Un filet qui pousse a casser n'est pas un filet.
+//   ⚠️ La convention de nom (_IC/_ICO/...) ne suffisait pas : `_PIL_TABS` est
+//     une table de TRIPLETS `['cle','icone','Libelle']`. On ne peut pas lire
+//     toutes ses chaines (la cle et le libelle n'en sont pas). Le harnais tient
+//     donc un REGISTRE EN DUR des tables a triplets — assume : une liste
+//     explicite et fausse se corrige, un trou silencieux non.
+//   Sprite : 54 symboles.
 // v6.84 (17/08/2026) — LES ONGLETS DU PILOTAGE + LE COMPTEUR QUI MENTAIT.
 //   ⚠️ Les 10 entrees de `_PIL_TABS`/`_PIL_TOOLS` portaient encore des emojis
 //     alors que leurs TROIS rendus etaient deja passes a `_mvIcon` : dix carres
@@ -2063,7 +2078,7 @@
 // v2.22 — Fix profils vides : guard vide dans loadData() pour MEMBRES/SAISONS/TACHES
 // v2.17 — Onboarding intégré + tenantId · v2.06 — Firebase Auth · v2.00–v2.05 — divers
 const DEBUG = self.location.hostname === 'localhost' || self.location.hostname === '127.0.0.1';
-const CACHE_NAME   = 'mavigne-v6.84';
+const CACHE_NAME   = 'mavigne-v6.85';
 const TENANT_CACHE = 'mavigne-tenant';   // Cache persistant — préservé à chaque mise à jour SW
 const SYNC_TAG     = 'mavigne-sync';
 
@@ -2079,7 +2094,7 @@ const CDN_URLS = [
 ];
 
 self.addEventListener('install', event => {
-  if(DEBUG) console.log('[SW] Ma Vigne v6.84 installé');
+  if(DEBUG) console.log('[SW] Ma Vigne v6.85 installé');
   event.waitUntil(
     caches.open(CACHE_NAME).then(async cache => {
       // ── Cœur applicatif : STRICT (mise à jour ATOMIQUE) ──
@@ -2095,7 +2110,7 @@ self.addEventListener('install', event => {
 });
 
 self.addEventListener('activate', event => {
-  if(DEBUG) console.log('[SW] Ma Vigne v6.84 activé');
+  if(DEBUG) console.log('[SW] Ma Vigne v6.85 activé');
   event.waitUntil(
     caches.keys().then(keys =>
       Promise.all(

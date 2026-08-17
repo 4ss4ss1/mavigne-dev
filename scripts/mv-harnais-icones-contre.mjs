@@ -86,10 +86,13 @@ epreuve('un symbole renomme',
   /Toute icone appelee a son symbole[\s\S]*corbeille/);
 
 /* 2. Un symbol declare que personne n'appelle : du poids mort dans index.html. */
-epreuve('un symbole sans appelant',
-  () => ecrire('index.html', lire('index.html').replace('</svg>\n<div id="mv-trial-bar"',
-        '  <symbol id="ic-fantome" viewBox="0 0 24 24"><path d="M4 4h16"/></symbol>\n</svg>\n<div id="mv-trial-bar"')),
-  /Aucun symbole declare sans emploi[\s\S]*fantome/);
+/* ⚠️ L'ancienne epreuve visait « symbole sans emploi », devenue un simple
+   avertissement parce qu'elle poussait a supprimer des symboles vivants.
+   On la remplace par celle qui aurait evite `equipe` PUIS `euro`. */
+epreuve('un triplet qui cite un symbole absent',
+  () => ecrire('src/pilotage.js', lire('src/pilotage.js')
+        .replace("['eco','euro',", "['eco','nexistepas',")),
+  /Toute icone appelee a son symbole[\s\S]*nexistepas/);
 
 /* 3. Un emoji qui revient dans le module temoin. */
 epreuve('un emoji reintroduit dans reglages.js',

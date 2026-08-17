@@ -162,6 +162,27 @@ for (const mod of MODULES) {
    positifs — la collision de nom qui rend un harnais inutilisable, donc
    ignore, donc mort. Une table d'icones se NOMME, c'est la convention. */
 const RE_TABLES = /(?:var|const|export const)\s+([A-Za-z_$][\w$]*_(?:IC|ICO|ICON|ICONE|ICONES))\s*=\s*[{[]/g;
+
+/* ⚠️⚠️⚠️ LA CONVENTION DE NOM NE SUFFIT PAS, ET ELLE A COUTE DEUX PANNES.
+   `_PIL_TABS` est une table de TRIPLETS `['cle','icone','Libelle']` : son nom
+   ne finit pas par _IC, et on ne peut pas lire toutes ses chaines (la cle et
+   le libelle n'en sont pas). Deux fois de suite un nom y est reste invisible
+   — `equipe`, puis `euro` — et c'est l'e2e qui a paye.
+   ★ Ce registre est une liste EN DUR, et c'est assume : une liste explicite
+     et fausse se corrige ; un trou silencieux, non. Toute nouvelle table
+     d'icones s'ajoute ici — sinon l'e2e la trouvera, plus tard et plus cher. */
+const TABLES_TRIPLET = [['pilotage', '_PIL_TABS'], ['pilotage', '_PIL_TOOLS']];
+for (const [mod, nom] of TABLES_TRIPLET) {
+  const i = sources[mod].indexOf(nom + ' =') >= 0
+    ? sources[mod].indexOf(nom + ' =') : sources[mod].indexOf(nom + '=');
+  if (i < 0) { t('La table ' + nom + ' existe encore', false); continue; }
+  const fin = sources[mod].indexOf('];', i);
+  const tranche = sources[mod].slice(i, fin);
+  for (const m3 of tranche.matchAll(/\[\s*'[a-z0-9_-]+'\s*,\s*'([a-z][a-z0-9-]+)'\s*,/g)) {
+    if (!appels.has(m3[1])) appels.set(m3[1], []);
+    if (!appels.get(m3[1]).includes(nom)) appels.get(m3[1]).push(nom);
+  }
+}
 for (const mod of MODULES) {
   RE_TABLES.lastIndex = 0;
   let mt;
@@ -207,8 +228,21 @@ t('Toute icone appelee a son symbole',
   orphelins.map(n => n + ' (' + appels.get(n).join(', ') + ')').join(' \u00b7 '));
 
 /* ══ B. AUCUN SYMBOLE MORT ═════════════════════════════════════════════════ */
+/* ⚠️⚠️⚠️ CETTE ASSERTION A CAUSE TROIS PANNES EN PRODUCTION. Elle m'a fait
+   supprimer `equipe`, `soleil`, `cle` puis `euro` parce qu'aucun APPEL LITTERAL
+   ne les citait — alors qu'une table les demandait a l'execution. Chaque fois,
+   l'ecran a rendu un carre pointille chez le client.
+   ★★ Elle optimise un non-probleme : quelques centaines d'octets de SVG dans un
+     sprite deja precache. Elle passe donc en AVERTISSEMENT, et la regle
+     d'usage devient : ON N'ENLEVE UN SYMBOLE QUE SUR PREUVE, jamais sur ce
+     signal seul. Un filet qui pousse a casser n'est pas un filet. */
 const morts = [...symboles.keys()].filter(n => !appels.has(n));
-t('Aucun symbole declare sans emploi', morts.length === 0, morts.join(' \u00b7 '));
+if (morts.length) {
+  console.log('  \x1b[33m!\x1b[0m ' + morts.length + ' symbole(s) sans appel litteral : '
+    + morts.join(' \u00b7 '));
+  console.log('      \u2192 AVERTISSEMENT, pas une faute. Ne PAS les retirer sans preuve :');
+  console.log('        une table peut les demander a l\'execution (vecu 3 fois).');
+} else ok++;
 
 /* ══ F. UN DOCUMENT IMPRIME N'A PAS LE SPRITE ══════════════════════════════
    Les fonctions qui fabriquent un document autonome (elles portent toutes un
