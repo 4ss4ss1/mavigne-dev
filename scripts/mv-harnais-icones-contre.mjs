@@ -27,7 +27,7 @@ const MODULES = ['app', 'utils', 'pilotage', 'planning', 'reglages', 'cave',
                  'tracteur', 'phyto', 'reserve', 'admin-gt', 'firebase', 'onboarding'];
 for (const m of MODULES)
   fs.copyFileSync(path.join(root, 'src', m + '.js'), path.join(bac, 'src', m + '.js'));
-for (const f of ['mv-harnais-icones.mjs', 'mv-icones-baseline.json',
+for (const f of ['mv-harnais-icones.mjs', 'mv-icones-baseline.json', 'preflight.mjs', 'preflight-baseline.json',
                  'mv-harnais-echelle.mjs', 'mv-espace-baseline.json'])
   fs.copyFileSync(path.join(root, 'scripts', f), path.join(bac, 'scripts', f));
 fs.copyFileSync(path.join(root, 'index.html'), path.join(bac, 'index.html'));
@@ -172,6 +172,14 @@ epreuve('une table qui demande un symbole absent',
   () => ecrire('src/pilotage.js', lire('src/pilotage.js')
         .replace("equipe:'equipe'", "equipe:'nexistepas'")),
   /Toute icone appelee a son symbole[\s\S]*nexistepas/);
+
+/* 5nonies. UN AIDE PRIVE APPELE MAIS DISPARU — la panne du 17/08 en production.
+      Ni `node --check` ni ESLint ne la voyaient. C23 la voit.
+      ⚠️ Cette epreuve lance le PREFLIGHT, pas le harnais d'icones. */
+epreuve('un aide prive appele mais disparu',
+  () => ecrire('src/pilotage.js', lire('src/pilotage.js')
+        .replace("_pilEsc(_opTNom(x.nom))", "_opEmo(x.nom)+_pilEsc(_opTNom(x.nom))")),
+  /C23[\s\S]*_opEmo/, 'preflight.mjs');
 
 /* 6. Un document imprime qui appelle `_mvIcon` : le sprite n'existe pas dans
       l'onglet ou il s'ouvre, le cadre sort vide et rien ne le signale. */

@@ -2,7 +2,12 @@
 
 > Document de référence du projet **Ma Vigne** (GUERETTECH). Il est le **porteur de vérité** :
 > la mémoire Claude est plafonnée, ce fichier ne l'est pas.
-> Dernière consolidation : **17 août 2026** — ★★★ **CE QUE LA CI A TROUVÉ (§48)**.
+> Dernière consolidation : **17 août 2026 (soir)** — ★★★ **PILOTAGE NE RÉPONDAIT PLUS (§49)**.
+> **APP 6.29 · SW 6.83.** `_opEmo is not defined` en production. ★★★ **Nouveau contrôle C23** :
+> tout `_xxx()` appelé doit être déclaré, importé ou exposé — la règle que ni `node --check`
+> ni ESLint ne fait, et qui aurait attrapé les deux incidents de la journée.
+>
+> ★ Précédente : **17 août 2026** — ★★★ **CE QUE LA CI A TROUVÉ (§48)**.
 > **APP 6.28 · SW 6.82.** Un seul rouge e2e — `icone inconnue : equipe` — et il en cachait
 > trois. ★★★ **Le vrai défaut était dans le harnais : un `continue` qui rendait une
 > assertion INCAPABLE d'échouer.** Corrigé, il a trouvé un second symbole manquant que la
@@ -8158,6 +8163,61 @@ Le harnais compte les tons déclarés, refuse un ton inconnu à l'appel, et vér
 
 ★ **Le vrai reste visible par un client tourne autour de 40 glyphes, dont une bonne moitié est
 légitime** (typographie, données, journal). Le lot a atteint son objet.
+
+---
+
+## 49. ★★★ PILOTAGE NE RÉPONDAIT PLUS — ET LE FILET QUI MANQUAIT (17/08 · 6.29 / 6.83)
+
+> `Promesse rejetée : _opEmo is not defined` — **l'écran entier mort, plus un clic.**
+> Chez un client, en production.
+
+### 49a. La faute
+
+J'ai supprimé `_opEmo` en cherchant ses usages sous d'autres formes — `emo+`, `.emos`,
+`_opParcTaskEmos` — **mais pas `_opEmo(` lui-même**. Une seule occurrence restait, dans les
+puces de tâches de l'ordre de passage.
+
+★★ **Ni `node --check` ni ESLint ne le voient** : la syntaxe est valable, et `no-undef` est
+désactivé dans `eslint.config.js` — **à raison**, parce que les modules s'appellent entre eux par
+le `window`. Je m'appuyais donc sur un lint pour une vérification qu'il ne fait pas.
+
+### 49b. ★★★ LE CONTRÔLE C23 — la règle qui manquait depuis le début
+
+La convention du projet est claire et **jamais vérifiée** : un identifiant qui commence par `_`
+est **privé au module**. On peut donc contrôler exactement ça, sans faux positif :
+
+> tout `_xxx(` appelé doit être **déclaré dans le fichier**, **importé**, ou **exposé sur
+> `window`** quelque part dans le corpus.
+
+C23 rejoue la panne du jour et rougit. ★ **Il aurait aussi attrapé `_agtIco` deux heures plus
+tôt** — même famille, même journée, passée entre les mailles.
+
+⚠️ Deux faux positifs à sa première exécution, corrigés avant de le brancher :
+`var _a=…, _b=…` (seul le premier déclarateur était vu) et les **expositions croisées**
+(`window._openOv = _openOv` dans un autre module).
+★ **Un contrôle qui crie au loup est un contrôle qu'on désactive.**
+
+### 49c. Deux défauts trouvés dans la même capture
+
+⚠️ **La météo de l'en-tête affichait « nuage » en toutes lettres.** Le champ porte un nom d'icône
+depuis 6.82 et était inséré tel quel. Repli sur la forme, comme partout ailleurs — le cache
+d'hier reste lisible. ★ **Une bascule de format doit être traitée à CHAQUE point de lecture, pas
+seulement au point d'écriture.**
+
+⚠️ **La barre d'onglets de Pilotage était la dernière en émojis** — neuf onglets plus deux
+outils, juste au-dessus d'une barre de navigation déjà migrée. C'est de la navigation : elle
+passe au sprite.
+★ **Les clés (`auj`, `an`, `avc`, `equ`, `sim`, `cav`, `eco`, `cfm`) ne bougent pas** :
+mémorisées chez les clients, citées par `app.js`, vérifiées par C22. **On change l'icône, jamais
+la clé.**
+
+### 49d. Ce que trois échecs de patch dans la même heure disent
+
+Mes ancres textuelles ont raté **trois fois de suite** sur le même fichier : un `\u2713` échappé
+dans la source que je cherchais en clair, un `'</span>'` fermé que le fichier enchaînait en
+`</span><span`, un `++` créé par un remplacement. ★★ **Chercher la forme du FICHIER, pas celle
+que l'œil imagine** — et quand deux ancres de suite ratent, passer au traitement **par ligne
+identifiée par son contenu**, ce que j'aurais dû faire au deuxième échec, pas au troisième.
 
 ---
 

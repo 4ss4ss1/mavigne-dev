@@ -790,6 +790,56 @@ function checkPaiePrivacy() {
 }
 
 // ============================================================================
+//  C23 — UN AIDE PRIVE APPELE MAIS PAS DECLARE
+//  ─────────────────────────────────────────────────────────────────────────
+//  ⚠️⚠️⚠️ VECU LE 17/08, EN PRODUCTION : `_opEmo is not defined` a casse TOUT
+//  l'ecran Pilotage (promesse rejetee, plus un clic possible). J'avais supprime
+//  la fonction en cherchant ses usages sous d'autres formes, sans chercher
+//  `_opEmo(` lui-meme. Meme famille deux heures plus tot avec `_agtIco`.
+//
+//  ★★ NI `node --check` NI ESLINT NE VOIENT CA : la syntaxe est valable, et
+//  `no-undef` est desactive dans eslint.config.js — a raison, parce que les
+//  modules s'appellent entre eux par le `window`. Mais la CONVENTION du projet
+//  est claire : un identifiant qui commence par `_` est PRIVE AU MODULE.
+//  On peut donc verifier exactement ca, sans faux positifs :
+//     tout `_xxx(` appele doit etre declare dans le meme fichier, ou importe,
+//     ou explicitement pris sur `window.`.
+//  ★ C'est la regle qui manquait, et elle aurait attrape les deux incidents.
+function checkHelpersOrphelins() {
+  const CORPUS_JS = listDir('src', '.js').map(x => read(x) || '').join('\n');
+  for (const f of listDir('src', '.js')) {
+    const brut = read(f); if (!brut) continue;
+    const src = stripComments(brut);
+    /* Declare dans le fichier : function _x, var/let/const _x =, ou _x = function */
+    const declares = new Set();
+    for (const re of [/function\s+(_[A-Za-z0-9_$]+)/g,
+                      /(?:var|let|const)\s+(_[A-Za-z0-9_$]+)\s*=/g,
+                      /,\s*(_[A-Za-z0-9_$]+)\s*=/g,   /* 2e declarateur : var _a=..,_b=.. */
+                      /(_[A-Za-z0-9_$]+)\s*=\s*(?:function|\()/g,
+                      /window\.(_[A-Za-z0-9_$]+)/g]) {
+      let m; while ((m = re.exec(src))) declares.add(m[1]);
+    }
+    /* ⚠️ Un aide expose par un AUTRE module (`window._openOv = _openOv`) est
+       legitimement appelable ici. On lit donc les expositions de tout le
+       corpus — sinon on crie au loup sur des appels parfaitement valides. */
+    let me; const reW = /window\.(_[A-Za-z0-9_$]+)\s*=/g;
+    while ((me = reW.exec(CORPUS_JS))) declares.add(me[1]);
+    /* Importe depuis un autre module */
+    const imp = src.match(/import\s*\{([\s\S]*?)\}\s*from/g) || [];
+    for (const bloc of imp)
+      for (const n of bloc.match(/_[A-Za-z0-9_$]+/g) || []) declares.add(n);
+    /* Appele */
+    const appels = new Set();
+    let m2; const reA = /(?<![.\w$])(_[A-Za-z0-9_$]+)\s*\(/g;
+    while ((m2 = reA.exec(src))) appels.add(m2[1]);
+    const orphelins = [...appels].filter(n => !declares.has(n));
+    for (const n of orphelins)
+      add('ERROR', f, null, 'C23 : `' + n + '()` est appele mais n\'est declare ni ici, '
+        + 'ni dans un import, ni sur window. Un appel a une fonction disparue casse '
+        + 'l\'ecran entier, et ni node --check ni ESLint ne le voient.');
+  }
+}
+
 //  C22 — L'ACCOMPAGNEMENT NE DOIT PAS DECROCHER DU CODE
 //        L'aide contextuelle (MV_AIDE) et la visite guidee (_mvtSteps) decrivent
 //        des ecrans. Quand un ecran bouge, elles mentent — et en SILENCE :
@@ -1039,6 +1089,7 @@ checkUnescaped();        // C19
 checkGuardBehaviour();   // C20
 checkPaiePrivacy();      // C21
 checkAideEtVisite();     // C22
+checkHelpersOrphelins(); // C23
 checkHandlerScope();     // C23
 
 // ---- baseline : regravure explicite, ou signalement si absente ---------------

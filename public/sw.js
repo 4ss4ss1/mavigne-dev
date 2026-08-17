@@ -1,4 +1,25 @@
-// MA VIGNE — Service Worker v6.82
+// MA VIGNE — Service Worker v6.83
+// v6.83 (17/08/2026) — PILOTAGE NE REPONDAIT PLUS. Correctif + le filet qui
+//   manquait.
+//   ⚠️⚠️⚠️ `_opEmo is not defined` : j'avais supprime la fonction en cherchant
+//     ses usages sous d'autres formes (`emo+`, `.emos`, `_opParcTaskEmos`) mais
+//     PAS `_opEmo(` lui-meme. Promesse rejetee -> plus un clic sur l'ecran.
+//     ★★ NI `node --check` NI ESLINT NE LE VOIENT : la syntaxe est valable et
+//       `no-undef` est desactive (a raison : les modules s'appellent par window).
+//   ★★★ NOUVEAU CONTROLE C23 dans preflight : tout `_xxx(` appele doit etre
+//     declare dans le fichier, importe, ou expose sur window quelque part.
+//     La convention `_` = prive au module rend le controle exact, sans faux
+//     positif. Il rejoue la panne du jour et rougit. 15e contre-epreuve.
+//     ⚠️ Il a aussi fallu lui apprendre `var _a=.., _b=..` (2e declarateur) et
+//       les expositions croisees, sinon deux faux positifs.
+//   ★ METEO DE L'EN-TETE PILOTAGE : affichait « nuage » EN TOUTES LETTRES. Le
+//     champ porte un nom d'icone depuis 6.82 et etait insere tel quel. Repli
+//     sur la forme, comme ailleurs — le cache d'hier reste lisible.
+//   ★ LA BARRE D'ONGLETS DE PILOTAGE etait la DERNIERE en emojis (9 onglets +
+//     2 outils). C'est de la navigation : elle passe au sprite.
+//     ⚠️ Les CLES (`auj`,`an`,`avc`,`equ`,`sim`,`cav`,`eco`,`cfm`) ne bougent
+//       pas : memorisees chez les clients, citees par app.js, verifiees par C22.
+//       On change l'icone, jamais la cle.
 // v6.82 (17/08/2026) — DEUX SYMBOLES ABSENTS, ET LE HARNAIS QUI NE POUVAIT PAS
 //   LES VOIR. Trouve par l'E2E DE LA CI, pas ici : « [icone] icone inconnue :
 //   equipe » sur la page d'accueil.
@@ -2025,7 +2046,7 @@
 // v2.22 — Fix profils vides : guard vide dans loadData() pour MEMBRES/SAISONS/TACHES
 // v2.17 — Onboarding intégré + tenantId · v2.06 — Firebase Auth · v2.00–v2.05 — divers
 const DEBUG = self.location.hostname === 'localhost' || self.location.hostname === '127.0.0.1';
-const CACHE_NAME   = 'mavigne-v6.82';
+const CACHE_NAME   = 'mavigne-v6.83';
 const TENANT_CACHE = 'mavigne-tenant';   // Cache persistant — préservé à chaque mise à jour SW
 const SYNC_TAG     = 'mavigne-sync';
 
@@ -2041,7 +2062,7 @@ const CDN_URLS = [
 ];
 
 self.addEventListener('install', event => {
-  if(DEBUG) console.log('[SW] Ma Vigne v6.82 installé');
+  if(DEBUG) console.log('[SW] Ma Vigne v6.83 installé');
   event.waitUntil(
     caches.open(CACHE_NAME).then(async cache => {
       // ── Cœur applicatif : STRICT (mise à jour ATOMIQUE) ──
@@ -2057,7 +2078,7 @@ self.addEventListener('install', event => {
 });
 
 self.addEventListener('activate', event => {
-  if(DEBUG) console.log('[SW] Ma Vigne v6.82 activé');
+  if(DEBUG) console.log('[SW] Ma Vigne v6.83 activé');
   event.waitUntil(
     caches.keys().then(keys =>
       Promise.all(

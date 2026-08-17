@@ -2709,7 +2709,7 @@ function _opBody(){
   h+='<div style="font-size:var(--pt-nano,9.5px);font-weight:700;letter-spacing:.4px;color:var(--texte-doux);text-transform:uppercase;margin:0 0 5px 2px">T\u00e2ches \u2014 plusieurs possibles</div>';
   h+='<div style="display:flex;flex-wrap:wrap;gap:6px;margin-bottom:12px">'+D.tasks.map(function(x){
     var on=OP.tasks.indexOf(x.nom)>=0;
-    return '<button'+(edit?' data-op="task" data-nom="'+_pilEsc(x.nom)+'"':'')+' style="border:1px solid '+(on?'var(--or)':'var(--gris-clair)')+';background:'+(on?'rgba(201,168,76,.14)':'transparent')+';color:'+(on?'var(--or)':'var(--texte-doux)')+';border-radius:20px;padding:6px 12px;font-size:var(--pt-txt,12.5px);font-weight:'+(on?'700':'600')+';cursor:'+(edit?'pointer':'default')+'">'+(on?'\u2713 ':'')+_opEmo(x.nom)+' '+_pilEsc(_opTNom(x.nom))+'</button>';
+    return '<button'+(edit?' data-op="task" data-nom="'+_pilEsc(x.nom)+'"':'')+' style="border:1px solid '+(on?'var(--or)':'var(--gris-clair)')+';background:'+(on?'rgba(201,168,76,.14)':'transparent')+';color:'+(on?'var(--or)':'var(--texte-doux)')+';border-radius:20px;padding:6px 12px;font-size:var(--pt-txt,12.5px);font-weight:'+(on?'700':'600')+';cursor:'+(edit?'pointer':'default')+'">'+(on?_mvIcon('check',16)+' ':'')+_pilEsc(_opTNom(x.nom))+'</button>';
   }).join('')+'</div>';
 
   // ── Départ (admin) — cale le tri au plus proche ──
@@ -8375,13 +8375,13 @@ function _pilTabsHtml(tab){
     if(!apres && t[0]!=='auj') n='<span class="pil-lvn">'+(++niv)+'</span>';
     if(t[0]===_PIL_ZOOM_FIN){ apres=true; poseSep=true; }
     return sep+'<button class="mvu-tab'+(t[0]===tab?' active':'')+'" data-tab="'+t[0]+'">'
-      +n+'<span class="mvu-tab-em">'+t[1]+'</span>'+_pilEsc(t[2])+'</button>';
+      +n+'<span class="mvu-tab-em">'+_mvIcon(t[1],18)+'</span>'+_pilEsc(t[2])+'</button>';
   }).join('');
   // Outil actif : epingle en fin de barre pour que l'utilisateur voie ou il se trouve.
-  if(cur) h+='<button class="mvu-tab active" data-tab="'+cur[0]+'"><span class="mvu-tab-em">'+cur[1]+'</span>'+_pilEsc(cur[2])+'</button>';
-  h+='<button class="mvu-tab pil-outils-btn" id="pil-outils-btn" aria-label="Outils du pilotage" title="Outils"><span class="mvu-tab-em">\u2699\uFE0F</span>Outils</button></div>';
+  if(cur) h+='<button class="mvu-tab active" data-tab="'+cur[0]+'"><span class="mvu-tab-em">'+_mvIcon(cur[1],18)+'</span>'+_pilEsc(cur[2])+'</button>';
+  h+='<button class="mvu-tab pil-outils-btn" id="pil-outils-btn" aria-label="Outils du pilotage" title="Outils"><span class="mvu-tab-em">'+_mvIcon('curseurs',18)+'</span>Outils</button></div>';
   h+='<div class="pil-outils-menu" id="pil-outils-menu">'+_PIL_TOOLS.map(function(t){
-    return '<button data-tool="'+t[0]+'"><span class="pom-ic">'+t[1]+'</span><span class="pom-t">'+t[2]+'</span><span class="pom-c">\u203A</span></button>';
+    return '<button data-tool="'+t[0]+'"><span class="pom-ic">'+_mvIcon(t[1],20)+'</span><span class="pom-t">'+t[2]+'</span><span class="pom-c">\u203A</span></button>';
   }).join('')+'</div>';
   return h;
 }
@@ -9392,9 +9392,16 @@ function _pilRenderMeteo(d){
   var el=document.getElementById('pil-meteo'); if(!el) return;
   if(!d.meteo){ el.style.display='none'; return; }
   el.style.display='';
+// ⚠️ Le cache meteo d'AVANT ce lot contient un emoji, celui d'apres un nom
+//   d'icone. On tranche sur la forme, sinon l'en-tete affiche « nuage » en
+//   toutes lettres — ce qui est exactement ce qui est arrive en production.
+  function _pilMeteoIco(v){
+    var x=String(v==null?'':v);
+    return /^[a-z][a-z0-9-]*$/.test(x) ? _mvIcon(x,20) : (x||_mvIcon('nuage',20));
+  }
   var jrs=['dimanche','lundi','mardi','mercredi','jeudi','vendredi','samedi'];
   var now=new Date(); var dateStr=jrs[now.getDay()]+' '+now.getDate()+' '+['janv.','févr.','mars','avr.','mai','juin','juil.','août','sept.','oct.','nov.','déc.'][now.getMonth()];
-  el.innerHTML='<span class="ico">'+(d.meteo.emoji||'⛅')+'</span><span class="t">'+(d.meteo.temp!=null?d.meteo.temp+'°':'—')+'</span>'
+  el.innerHTML='<span class="ico">'+_pilMeteoIco(d.meteo.emoji)+'</span><span class="t">'+(d.meteo.temp!=null?d.meteo.temp+'°':'—')+'</span>'
     + '<span class="sub">'+(d.meteo.wind!=null?('vent '+d.meteo.wind+' km/h'):'')+'<br>'+dateStr+'</span>';
 }
 
