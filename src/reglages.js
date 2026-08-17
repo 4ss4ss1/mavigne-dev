@@ -3731,7 +3731,7 @@ function exportPDFMois(){
           const affQui=r.equipe?'Équipe':(r.qui||'—');
           const _mjK=r.tache+'||'+r.parcelle;const _mjDts=_mjDateMap[_mjK];
           const _mjBadge=_mjDts?`<span class="mj-badge">J${_mjDts.indexOf(r.date)+1}/${_mjDts.length}</span>`:'';
-          return`<tr><td>${_mvIconInline((window.TICON&&window.TICON[r.tache])||'feuille',16)} ${r.tache}${_mjBadge}</td><td>${r.parcelle}</td><td>${affQui}</td><td><span class="badge ${sb}">${r.statut}</span></td></tr>`;
+          return`<tr><td>${_mvIconInline((window.TACHE_ICO&&window.TACHE_ICO[r.tache])||'feuille',16)} ${r.tache}${_mjBadge}</td><td>${r.parcelle}</td><td>${affQui}</td><td><span class="badge ${sb}">${r.statut}</span></td></tr>`;
         }).join('')}</table>
       </div>`;
     }).join('')

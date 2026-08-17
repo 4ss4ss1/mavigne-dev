@@ -2,7 +2,13 @@
 
 > Document de référence du projet **Ma Vigne** (GUERETTECH). Il est le **porteur de vérité** :
 > la mémoire Claude est plafonnée, ce fichier ne l'est pas.
-> Dernière consolidation : **16 août 2026 (soir)** — ★★★ **LA CHARTE D'ÎLOTS, LOT DS-2**
+> Dernière consolidation : **17 août 2026** — ★★★ **CE QUE LA CI A TROUVÉ (§48)**.
+> **APP 6.28 · SW 6.82.** Un seul rouge e2e — `icone inconnue : equipe` — et il en cachait
+> trois. ★★★ **Le vrai défaut était dans le harnais : un `continue` qui rendait une
+> assertion INCAPABLE d'échouer.** Corrigé, il a trouvé un second symbole manquant que la
+> CI n'avait pas atteint (`soleil` — le beau temps rendait un carré pointillé).
+>
+> ★ Consolidation précédente : **16 août 2026 (soir)** — ★★★ **LA CHARTE D'ÎLOTS, LOT DS-2**
 > (**§46**). **APP 6.27 · SW 6.81.** ★★★ **DS-1 A CHANGÉ LES PICTOGRAMMES ET ÇA N'A PAS SUFFI.**
 > Quatre jeux d'icônes livrés, trois refusés, et le verdict restait le même. Ce qui faisait
 > brouillon n'était pas l'icône, **c'était le CONTENANT** : des blocs empilés séparés par des
@@ -8152,6 +8158,61 @@ Le harnais compte les tons déclarés, refuse un ton inconnu à l'appel, et vér
 
 ★ **Le vrai reste visible par un client tourne autour de 40 glyphes, dont une bonne moitié est
 légitime** (typographie, données, journal). Le lot a atteint son objet.
+
+---
+
+## 48. ★★★ CE QUE LA CI A TROUVÉ, ET QUE LE HARNAIS NE POUVAIT PAS TROUVER
+### (17/08 — APP 6.28 · SW 6.82)
+
+> `✖ Page home — [console] [MaVigne Error] INFO [icone] icone inconnue : equipe`
+> **Un seul problème sur tout le parcours e2e. Il en cachait trois.**
+
+### 48a. Le filet a fonctionné — et c'est sa justification rétrospective
+
+`_mvIcon` rend un **carré pointillé rouge** et écrit au journal quand un nom est inconnu. Sans
+ce repli, `<use href="#ic-equipe">` aurait rendu **un blanc**, l'e2e serait passé vert, et le
+défaut serait parti en production. ★ **On avait débattu de l'intérêt d'un repli visible : voilà
+la réponse.**
+
+### 48b. ⚠️⚠️⚠️ LE VRAI DÉFAUT ÉTAIT DANS LE HARNAIS — UN CONTRÔLE QUI NE PEUT PAS ÉCHOUER
+
+Son lecteur de tables faisait :
+
+```js
+if (!symboles.has(mv[1])) continue;   // « une clé qui n'est pas un nom d'icône »
+```
+
+Il **sautait** les noms absents au lieu de les signaler. ★★★ **Par construction, cette assertion
+ne pouvait pas rougir.** Elle est restée verte pendant tout le lot pendant que `_PIL_IC`
+réclamait `equipe`, retiré du sprite deux heures plus tôt.
+
+→ Il lit désormais la **valeur** de chaque paire `clé:'valeur'` ; un nom absent est un **rouge**.
+★ **Dès sa correction il a trouvé un second cas que la CI n'avait pas atteint** : `soleil`
+(`MV_METEO_IC`) — **le beau temps rendait un carré pointillé** sur l'accueil.
+
+★★ **C'est la sixième variante du même angle mort en une journée, et la seule qui comptait.**
+Les cinq premières étaient des oublis de lecture ; celle-ci était une impossibilité structurelle
+de détecter. → **Devant une assertion qui n'a jamais rougi, se demander si elle en est capable.**
+
+### 48c. Les deux dégâts collatéraux, corrigés
+
+⚠️ **`FB_STATIC` finit par « IC »** → douze faux positifs dès la correction. Un harnais qui crie
+au loup est un harnais qu'on ignore, donc mort. Le motif exige maintenant un **dernier segment
+souligné** (`_IC`/`_ICO`/`_ICON`/`_ICONE`/`_ICONES`), et `TICON` devient **`TACHE_ICO`** pour
+suivre la convention. **Une table d'icônes se nomme.**
+
+⚠️ **Pilotage avait DEUX tables en cascade** : `_PIL_TILE_ICO` → `_PIL_IC` → sprite. ★ **Une
+table dont les valeurs ne sont pas des noms d'icônes est indistinguable, pour un contrôle
+automatique, d'une table dont elles le sont.** L'indirection est supprimée : une seule table,
+toutes valeurs = sprite. **Sprite : 53 symboles.**
+
+★ **14ᵉ contre-épreuve** : « une table qui demande un symbole absent ». Elle existe pour que ce
+lecteur ne redevienne jamais muet.
+
+### 48d. ⚠️ Le bump n'était pas optionnel
+
+Le lot précédent **était poussé** — la CI a tourné dessus. Réutiliser 6.81 aurait **gelé
+l'`index.html` précédent** chez tout client l'ayant déjà pris. **6.28 / 6.82**, sans hésiter.
 
 ---
 

@@ -44,7 +44,8 @@ execFileSync('node', [path.join(bac, 'scripts', 'mv-harnais-icones.mjs'), '--bas
 const lire  = (f) => fs.readFileSync(path.join(bac, f), 'utf8');
 const ecrire = (f, c) => fs.writeFileSync(path.join(bac, f), c);
 const neuf  = {};
-for (const f of ['index.html', 'src/reglages.js', 'src/utils.js', 'src/app.js', 'src/styles.css'])
+for (const f of ['index.html', 'src/reglages.js', 'src/utils.js', 'src/app.js', 'src/styles.css',
+                 'src/pilotage.js'])
   neuf[f] = lire(f);
 const restaurer = () => { for (const f in neuf) ecrire(f, neuf[f]); };
 
@@ -162,6 +163,15 @@ epreuve('un espacement ecrit a la main dans la charte',
         .replace('.mv-act{ display:flex; gap:var(--e-2); }',
                  '.mv-act{ display:flex; gap:9px; }')),
   /espacement a la main/, 'mv-harnais-echelle.mjs');
+
+/* 5octies. UNE TABLE QUI DEMANDE UN SYMBOLE ABSENT. C'est le defaut que la CI
+      a trouve et que le harnais laissait passer : il SAUTAIT les noms inconnus
+      d'une table au lieu de les signaler — un controle qui ne peut pas echouer.
+      Cette epreuve existe pour qu'il ne redevienne jamais muet. */
+epreuve('une table qui demande un symbole absent',
+  () => ecrire('src/pilotage.js', lire('src/pilotage.js')
+        .replace("equipe:'equipe'", "equipe:'nexistepas'")),
+  /Toute icone appelee a son symbole[\s\S]*nexistepas/);
 
 /* 6. Un document imprime qui appelle `_mvIcon` : le sprite n'existe pas dans
       l'onglet ou il s'ouvre, le cadre sort vide et rien ne le signale. */

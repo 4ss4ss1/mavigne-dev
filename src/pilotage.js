@@ -256,17 +256,18 @@ var _PIL_TASK_COL={reparation:'#8A5A38',pliage:'#C8B020',entreplantation:'#7A102
 function _taskColor(nom){ return _PIL_TASK_COL[_friseNorm(nom)]||'#8A5A38'; }
 
 // ── Icônes SVG trait fin (remplaçant les emojis des en-têtes) ──
-// ⚠️ Ce module avait SA PROPRE bibliotheque d'icones : quinze formes en SVG
-//   inline, avec sa propre epaisseur de trait (1,6 contre 1,75). Deux
-//   bibliotheques, c'est deux grilles et, un jour, deux dessins pour la meme
-//   idee. Il ne reste qu'une CORRESPONDANCE vers le sprite commun.
-var _PIL_IC={users:'equipe',drop:'goutte',target:'cible',map:'carte',tractor:'tracteur',
-  wine:'verre',leaf:'feuille',calendar:'calendrier',scale:'balance',
-  sliders:'curseurs',fuel:'carburant',spray:'pulverisateur',cloud:'nuage',
-  flask:'fiole',chart:'graphique'};
-function _pilIco(n){ return _mvIcon(_PIL_IC[n]||'graphique',16); }
-var _PIL_TILE_ICO={couteff:'scale',carte:'map',temps:'scale',equipe:'users',tracteur:'tractor',cave:'wine',presences:'users',phyto:'leaf',echeances:'calendar',etp:'scale',capacite:'scale',simulateur:'sliders',ordrepassage:'target',gnr:'fuel',traitement:'spray',meteo:'cloud',vinif:'flask',cout:'scale',cuivre:'flask',ift:'spray',dre:'drop'};
-function _pilIcoFor(id){ return _pilIco(_PIL_TILE_ICO[id]||'chart'); }
+// ⚠️ DEUX TABLES POUR UNE SEULE IDEE, C'ETAIT UNE DE TROP. `_PIL_TILE_ICO`
+//   donnait une cle de `_PIL_IC`, qui donnait un nom du sprite : deux sauts
+//   pour rien. Et surtout, une table dont les VALEURS ne sont pas des noms
+//   d'icones est indistinguable, pour un controle automatique, d'une table
+//   dont elles le sont. Une seule table desormais, toutes valeurs = sprite.
+var _PIL_TILE_ICO={couteff:'balance',carte:'carte',temps:'balance',equipe:'equipe',
+  tracteur:'tracteur',cave:'verre',presences:'equipe',phyto:'feuille',echeances:'calendrier',
+  etp:'balance',capacite:'balance',simulateur:'curseurs',ordrepassage:'cible',gnr:'carburant',
+  traitement:'pulverisateur',meteo:'nuage',vinif:'fiole',cout:'balance',cuivre:'fiole',
+  ift:'pulverisateur',dre:'goutte'};
+function _pilIco(n){ return _mvIcon(n,16); }
+function _pilIcoFor(id){ return _pilIco(_PIL_TILE_ICO[id]||'graphique'); }
 function _pilHa(v){ return (Number(v)||0).toLocaleString('fr-FR',{minimumFractionDigits:0,maximumFractionDigits:2}).replace(/\u202f/g,' '); }
 
 // ── EFFECTIF : qui compte, et a quelle date ──────────────────────────
@@ -4449,7 +4450,7 @@ function _pilCkPres(d){
   var tot=(d.presences||[]).filter(function(p){return !p.bureau;}).length;
   var pc=(d.presentFiches!=null?d.presentFiches:(d.presentChamp||0));
   var pers=(d.presentChamp!=null?d.presentChamp:pc);
-  return '<div class="pil-tile2"><div class="pil-t2h"><span class="ic">'+_pilIco('users')+'</span><span class="t">À la vigne aujourd\'hui</span></div>'
+  return '<div class="pil-tile2"><div class="pil-t2h"><span class="ic">'+_pilIco('equipe')+'</span><span class="t">À la vigne aujourd\'hui</span></div>'
     +'<div class="pil-t2b"><div class="pil-big green">'+pc+' présent'+(pc>1?'s':'')+'</div>'
     +'<div class="pil-t2s">sur '+tot+(ind.length?' · '+ind.length+' indisponible'+(ind.length>1?'s':''):' · équipe au complet')
       +(pers>pc+0.5?(' · <b>'+_pilEtpFmt(pers)+' personnes</b> au total (équipe collective)'):'')+'</div>'
@@ -4489,14 +4490,14 @@ function _pilCkTraiter(){
   //   meme titre que `.pil-dec` et `.pil-cockpit-card` (§20b). Sans lui, le
   //   moment « Je traite ou pas ? » vise `.pil-tile2` et attrape « A la vigne
   //   aujourd'hui », la premiere carte du cockpit. Ne pas renommer.
-  return '<div class="pil-tile2" data-mvt="traiter"><div class="pil-t2h"><span class="ic">'+_pilIco('drop')+'</span><span class="t">Traiter ?</span>'+_i+'</div>'
+  return '<div class="pil-tile2" data-mvt="traiter"><div class="pil-t2h"><span class="ic">'+_pilIco('goutte')+'</span><span class="t">Traiter ?</span>'+_i+'</div>'
     +'<div class="pil-t2b"><div class="pil-big" style="color:'+bigCol+'">'+big+'</div>'+body+'</div></div>';
 }
 function _pilCkPrio(d){
   var p=d.prio;
-  if(!p) return '<div class="pil-tile2"><div class="pil-t2h"><span class="ic">'+_pilIco('target')+'</span><span class="t">Tâche prioritaire</span></div><div class="pil-t2b"><div class="pil-t2s">aucune tâche en cours</div></div></div>';
+  if(!p) return '<div class="pil-tile2"><div class="pil-t2h"><span class="ic">'+_pilIco('cible')+'</span><span class="t">Tâche prioritaire</span></div><div class="pil-t2b"><div class="pil-t2s">aucune tâche en cours</div></div></div>';
   var col=_pilPctColor(p.pct||0);
-  return '<div class="pil-tile2"><div class="pil-t2h"><span class="ic">'+_pilIco('target')+'</span><span class="t">Tâche prioritaire</span></div>'
+  return '<div class="pil-tile2"><div class="pil-t2h"><span class="ic">'+_pilIco('cible')+'</span><span class="t">Tâche prioritaire</span></div>'
     +'<div class="pil-t2b"><div class="pil-big">'+_pilEsc(_pilTnom(p.nom))+'</div>'
     +'<div class="pil-t2s">'+_pilNum(p.h_reste)+' h restantes · <b style="color:var(--or)">pôle long</b></div>'
     +'<div class="pil-gbar"><i style="width:'+Math.min(p.pct||0,100)+'%;background:'+col+'"></i></div>'

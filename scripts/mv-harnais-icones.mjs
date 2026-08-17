@@ -137,7 +137,11 @@ for (const mod of MODULES) {
    ICON ou ICONES est lue, dans n'importe quel module.
    ★ Une liste en dur qu'on rallonge a chaque incident n'est pas un filet,
      c'est un journal des incidents passes. */
-const RE_TABLES = /(?:var|const|export const)\s+([A-Za-z_$][\w$]*(?:IC|ICO|ICON|ICONES))\s*=\s*[{[]/g;
+/* ⚠️ Le dernier segment SOULIGNE doit valoir IC/ICO/ICON/ICONE/ICONES.
+   Sans le souligne, `FB_STATIC` entrait dans le filet et sortait douze faux
+   positifs — la collision de nom qui rend un harnais inutilisable, donc
+   ignore, donc mort. Une table d'icones se NOMME, c'est la convention. */
+const RE_TABLES = /(?:var|const|export const)\s+([A-Za-z_$][\w$]*_(?:IC|ICO|ICON|ICONE|ICONES))\s*=\s*[{[]/g;
 for (const mod of MODULES) {
   RE_TABLES.lastIndex = 0;
   let mt;
@@ -147,11 +151,22 @@ for (const mod of MODULES) {
     const fin = sources[mod].indexOf(clot + ';', deb);
     if (fin < 0) continue;
     const tranche = sources[mod].slice(deb, fin);
-    let mv; const re5 = /'([a-z][a-z0-9-]*)'/g;
-    while ((mv = re5.exec(tranche))) {
-      if (!symboles.has(mv[1])) continue;      // une cle qui n'est pas un nom d'icone
-      if (!appels.has(mv[1])) appels.set(mv[1], []);
-      if (!appels.get(mv[1]).includes(mt[1])) appels.get(mv[1]).push(mt[1]);
+    /* ⚠️⚠️⚠️ CE BLOC A ETE FAUX PENDANT TOUT LE LOT, ET C'EST LE PIRE DEFAUT
+       DE LA JOURNEE : il sautait (`continue`) les noms absents du sprite au
+       lieu de les SIGNALER. Un controle qui, par construction, ne peut pas
+       echouer. `_PIL_IC` demandait « equipe », retire du sprite deux heures
+       plus tot, et le harnais est reste vert du debut a la fin — c'est l'e2e
+       de la CI qui l'a trouve, via le repli visible de `_mvIcon`.
+       ★ On ne lit plus toutes les chaines de la table : on lit la VALEUR de
+         chaque paire `cle:'valeur'` (et chaque entree d'un tableau). Une cle
+         n'est pas un nom d'icone ; une valeur, si — et si elle n'existe pas,
+         c'est un ROUGE, pas un silence. */
+    const valeurs = clot === '}'
+      ? [...tranche.matchAll(/[\w$'"-]+\s*:\s*'([a-z][a-z0-9-]*)'/g)].map(x => x[1])
+      : [...tranche.matchAll(/'([a-z][a-z0-9-]*)'/g)].map(x => x[1]);
+    for (const nom of valeurs) {
+      if (!appels.has(nom)) appels.set(nom, []);
+      if (!appels.get(nom).includes(mt[1])) appels.get(nom).push(mt[1]);
     }
   }
 }

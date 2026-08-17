@@ -1,4 +1,25 @@
-// MA VIGNE — Service Worker v6.81
+// MA VIGNE — Service Worker v6.82
+// v6.82 (17/08/2026) — DEUX SYMBOLES ABSENTS, ET LE HARNAIS QUI NE POUVAIT PAS
+//   LES VOIR. Trouve par l'E2E DE LA CI, pas ici : « [icone] icone inconnue :
+//   equipe » sur la page d'accueil.
+//   ★ Le repli visible de `_mvIcon` a fait son travail : carre pointille a
+//     l'ecran + ligne au journal. Sans lui, un blanc, et personne n'aurait rien
+//     vu. C'est la justification retrospective du filet.
+//   ⚠️⚠️⚠️ LE VRAI DEFAUT ETAIT DANS LE HARNAIS : son lecteur de tables faisait
+//     `if (!symboles.has(nom)) continue;` — il SAUTAIT les noms absents au lieu
+//     de les signaler. UN CONTROLE QUI, PAR CONSTRUCTION, NE PEUT PAS ECHOUER.
+//     Il est reste vert du debut a la fin du lot.
+//     → Il lit desormais la VALEUR de chaque paire `cle:'valeur'`, et un nom
+//       absent est un ROUGE. Des sa correction il a trouve `soleil` (MV_METEO_IC)
+//       en plus d'`equipe` : le beau temps rendait un carre pointille.
+//   ⚠️ `FB_STATIC` finit par « IC » : douze faux positifs. Le motif exige
+//     maintenant un dernier SEGMENT SOULIGNE (_IC/_ICO/_ICON/_ICONE/_ICONES).
+//     `TICON` devient `TACHE_ICO` pour suivre la convention.
+//   ⚠️ Pilotage avait DEUX tables en cascade (`_PIL_TILE_ICO` -> `_PIL_IC` ->
+//     sprite). Une table dont les valeurs ne sont PAS des noms d'icones est
+//     indistinguable d'une table dont elles le sont : l'indirection est
+//     supprimee, une seule table, toutes valeurs = sprite. Sprite : 53.
+//   ★ 14e contre-epreuve : « une table qui demande un symbole absent ».
 // v6.81 (16/08/2026) — LA CHARTE D'ILOTS : ACCUEIL ET PARCELLES (DS-2).
 //   DS-1 avait change les pictogrammes et ca n'a PAS suffi : ce qui faisait
 //   brouillon n'etait pas l'icone, c'etait le CONTENANT. Quatre briques dans
@@ -2004,7 +2025,7 @@
 // v2.22 — Fix profils vides : guard vide dans loadData() pour MEMBRES/SAISONS/TACHES
 // v2.17 — Onboarding intégré + tenantId · v2.06 — Firebase Auth · v2.00–v2.05 — divers
 const DEBUG = self.location.hostname === 'localhost' || self.location.hostname === '127.0.0.1';
-const CACHE_NAME   = 'mavigne-v6.81';
+const CACHE_NAME   = 'mavigne-v6.82';
 const TENANT_CACHE = 'mavigne-tenant';   // Cache persistant — préservé à chaque mise à jour SW
 const SYNC_TAG     = 'mavigne-sync';
 
@@ -2020,7 +2041,7 @@ const CDN_URLS = [
 ];
 
 self.addEventListener('install', event => {
-  if(DEBUG) console.log('[SW] Ma Vigne v6.81 installé');
+  if(DEBUG) console.log('[SW] Ma Vigne v6.82 installé');
   event.waitUntil(
     caches.open(CACHE_NAME).then(async cache => {
       // ── Cœur applicatif : STRICT (mise à jour ATOMIQUE) ──
@@ -2036,7 +2057,7 @@ self.addEventListener('install', event => {
 });
 
 self.addEventListener('activate', event => {
-  if(DEBUG) console.log('[SW] Ma Vigne v6.81 activé');
+  if(DEBUG) console.log('[SW] Ma Vigne v6.82 activé');
   event.waitUntil(
     caches.keys().then(keys =>
       Promise.all(

@@ -23,7 +23,7 @@ export const GT_ADMIN_EMAIL = 'ngdevpro@gmail.com';
 // WHATS_NEW   : tableau vide = modal desactive pour cette version.
 // Format item : { emoji:'📅', titre:'Titre court', desc:'Phrase utilisateur.' }
 // Regle : seulement les changements visibles par les utilisateurs.
-export const APP_VERSION = '6.27';
+export const APP_VERSION = '6.28';
 // ════ Journal des nouveautés (récap cumulatif) ════
 // Une entrée par version, la PLUS RÉCENTE EN HAUT : { v:'5.10', items:[ {emoji,titre,desc}, … ] }
 // À chaque release visible → AJOUTER un bloc en tête (ne pas remplacer). items:[] = release technique (rien à afficher).
@@ -354,6 +354,10 @@ window._mvGraphRepeindre = function(){
 };
 
 export const WHATS_NEW = [
+  { v:'6.28', items:[
+    { emoji: '\u{1F527}', titre: "Deux ic\u00f4nes manquantes r\u00e9par\u00e9es",
+      desc: "Sur le tableau de bord, la vignette \u00c9quipe et l\u2019ic\u00f4ne de beau temps affichaient un carr\u00e9 rouge en pointill\u00e9s \u00e0 la place du dessin. C\u2019est corrig\u00e9. <b>Ce carr\u00e9 n\u2019est pas un bogue d\u2019affichage, c\u2019est un signal volontaire</b> : plut\u00f4t qu\u2019un blanc qu\u2019on ne remarque jamais, une ic\u00f4ne absente se voit tout de suite." }
+  ] },
   { v:'6.27', items:[
     { emoji: '\u{1F4D0}', titre: "L\u2019accueil et les parcelles ont \u00e9t\u00e9 remis \u00e0 plat",
       desc: "Les informations \u00e9taient empil\u00e9es les unes sous les autres, s\u00e9par\u00e9es par des traits, et tout avait la m\u00eame importance \u00e0 l\u2019\u0153il. D\u00e9sormais <b>chaque parcelle est une carte</b>, avec de l\u2019air autour, et <b>trois niveaux de lecture</b> : le nom, le chiffre qui compte, et le d\u00e9tail en petit. Sur l\u2019accueil, l\u2019avancement de la saison devient le sujet de l\u2019\u00e9cran au lieu d\u2019une vignette parmi d\u2019autres." },
@@ -1147,7 +1151,7 @@ export const TABREV = {
 // ⚠️ `TEMOJI` A ETE SUPPRIMEE (lot DS-2). Elle associait un emoji a chaque
 //   travail et etait lue par app.js, pilotage.js et reglages.js. Partout,
 //   l'emoji precedait un NOM DE TACHE deja ecrit a cote : il ne disait rien
-//   de plus. `TICON` la remplace et rend un NOM D'ICONE, pour les rares
+//   de plus. `TACHE_ICO` la remplace et rend un NOM D'ICONE, pour les rares
 //   endroits ou un pictogramme sert encore a quelque chose.
 //   ⚠️ Ne pas la reintroduire « juste pour une liste » : c'est comme ca
 //     qu'elle etait arrivee.
@@ -2437,7 +2441,7 @@ export function _mvSetIcon(el, val, taille) {
 // ── L'icone d'un TRAVAIL ────────────────────────────────────────────────────
 // Ce qui reste de TEMOJI : une correspondance travail -> NOM D'ICONE, pour les
 // rares endroits ou un pictogramme sert encore. Plus aucun emoji.
-export const TICON = {
+export const TACHE_ICO = {
   Taille:'secateur', Tirage:'retour', Brulage:'flamme', Pliage:'lien', Reparation:'outil',
   Plantation:'pousse', Entreplantation:'pousse',
   Ebourgeonnage:'feuille', Ebourgeonnage1:'feuille', Ebourgeonnage2:'feuille',
@@ -2446,7 +2450,7 @@ export const TICON = {
   'R\u00e9paration ponctuelle':'outil'
 };
 export function _mvIconTache(nom, taille) {
-  return _mvIcon(TICON[nom] || 'feuille', taille);
+  return _mvIcon(TACHE_ICO[nom] || 'feuille', taille);
 }
 
 // ── L'icone d'un TYPE D'ACTIVITE tracteur ───────────────────────────────────
@@ -2559,7 +2563,7 @@ window._mvIconTache       = _mvIconTache;
 window._mvIconTuile       = _mvIconTuile;
 window._mvBadge           = _mvBadge;
 window.MV_TONS            = MV_TONS;
-window.TICON              = TICON;
+window.TACHE_ICO              = TACHE_ICO;
 window.ACT_ICONES         = ACT_ICONES;
 window._actIcone          = _actIcone;
 window._PIL_SEM           = _PIL_SEM;
