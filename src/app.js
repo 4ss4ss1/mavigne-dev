@@ -8,9 +8,10 @@
 import './styles.css';
 // ── Import Firebase (doit être en tête — fournit window.firebase, fbSave, etc.) ──
 import { isAdmin, isTractoriste, isSaisonnier, canWrite,
-         getRoleLabel, showToast, showSyncBadge, wmoDesc, wmoEmoji, TABREV, tNom,
+         getRoleLabel, showToast, showSyncBadge, wmoDesc, wmoIcone, TABREV, tNom,
          applyTheme, setThemeMode, initTheme, logError, _closeCriticalOverlay, _escHtml, _escAttr,
-         GT_ADMIN_EMAIL, DEMO_TENANT, DEMO_FIREBASE_EMAIL, DEMO_FIREBASE_PWD, dreEffectif
+         GT_ADMIN_EMAIL, DEMO_TENANT, DEMO_FIREBASE_EMAIL, DEMO_FIREBASE_PWD, dreEffectif,
+         _mvBadge, _mvIcon,
 } from './utils.js';
 // Exposer constantes démo sur window pour accès cross-module
 import './firebase.js';
@@ -767,7 +768,7 @@ function saveData(keyHint, toastMsg) {
       if(!navigator.onLine) {
         // Hors ligne : sauvegarde locale OK, toast orange
         window.fbSave(key, value);
-        showToast('📵 Sauvegardé localement', '#B85A1A');
+        showToast('Sauvegardé localement', '#B85A1A');
         return;
       }
       // En ligne : attendre la promesse Firebase
@@ -776,7 +777,7 @@ function saveData(keyHint, toastMsg) {
         p.then(function() {
           showToast(toastMsg, '#3D6B27');
         }).catch(function() {
-          showToast('📵 Sauvegardé localement', '#B85A1A');
+          showToast('Sauvegardé localement', '#B85A1A');
         });
       } else {
         // fbSave ne retourne pas de promesse (ex: queue offline) → toast immédiat
@@ -843,11 +844,11 @@ function resetData() {
 // ── Zone dangereuse : overlay de confirmation ──
 const DANGER_CFG = {
   reset: {
-    icon:'🗑️',
+    icon:'corbeille',
     title:'Réinitialiser l\'application',
     sub:'Cette action est irréversible et immédiate.',
     word:'EFFACER',
-    btn:'🗑️ Réinitialiser l\'application',
+    btn:'Réinitialiser l\'application',
     successSub:'L\'application va se recharger…',
     items:[
       'Toutes les données locales seront supprimées',
@@ -865,7 +866,8 @@ function openOvDanger(action) {
   if(!DANGER_CFG[action]) return;
   _dangerAction = action;
   const cfg = DANGER_CFG[action];
-  document.getElementById('ovDangerIcon').textContent = cfg.icon;
+  if(window._mvSetIcon) window._mvSetIcon(document.getElementById('ovDangerIcon'), cfg.icon, 30);
+  else document.getElementById('ovDangerIcon').textContent = cfg.icon;
   document.getElementById('ovDangerTitle').textContent = cfg.title;
   document.getElementById('ovDangerSub').textContent = cfg.sub;
   document.getElementById('ovDangerWord').textContent = cfg.word;
@@ -1230,7 +1232,7 @@ function initLogin(){
     var _tenant = localStorage.getItem('mavigne_tenant') || '(absent)';
     profiles.style.display = 'block';
     profiles.innerHTML = '<div style="text-align:center;padding:40px 20px;color:rgba(255,255,255,0.4);font-family:Outfit,sans-serif;font-size:13px;letter-spacing:.08em">'
-      + '<div style="font-size:28px;margin-bottom:12px;animation:spin 1.2s linear infinite;display:inline-block">⏳</div>'
+      + '<div style="margin-bottom:12px;animation:spin 1.2s linear infinite;display:inline-flex;color:var(--texte-doux)">'+_mvIcon('sablier',40)+'</div>'
       + '<div>Chargement… (' + window._loginRetryCount + ')</div>'
       + '<div style="margin-top:8px;font-size:10px;opacity:.5">tenant: ' + _tenant + '</div>'
       + (window._loginRetryCount >= 4 ? '<div style="margin-top:16px;font-size:11px;color:var(--rouge,#E74C3C)">Firebase lent — vérifie ta connexion.</div>' : '')
@@ -1506,7 +1508,7 @@ function _visiteScenario(){
   // Météo par secteur PRÉ-CALCULÉE (sinon le rendu déclencherait un appel réseau réel)
   try{
     window._domaineCommuneNom='Gevrey-Chambertin';
-    var _wx=function(code,tp,wd,tn,tx,pp){ return {temp:tp,code:code,wind:wd,tmin:tn,tmax:tx,pp:pp,emoji:wmoEmoji(code),desc:wmoDesc(code)}; };
+    var _wx=function(code,tp,wd,tn,tx,pp){ return {temp:tp,code:code,wind:wd,tmin:tn,tmax:tx,pp:pp,emoji:wmoIcone(code),desc:wmoDesc(code)}; };
     var _grp=(window._communesActives?window._communesActives():[]);
     var _byNom={
       'Gevrey-Chambertin':_wx(1,18,8,11,21,5),
@@ -2772,13 +2774,13 @@ async function confirmLogin(){
   var m = MEMBRES[loginPendingIdx];
   var saisi = document.getElementById('login-pwd-input').value;
   if(!m.email) {
-    document.getElementById('login-pwd-error').textContent = '❌ Aucun email associé à ce compte.';
+    document.getElementById('login-pwd-error').textContent = 'Aucun email associé à ce compte.';
     document.getElementById('login-pwd-error').style.display = 'block';
     return;
   }
   const btn = document.getElementById('login-pwd-btn');
   btn.disabled = true;
-  btn.textContent = '⏳ Connexion…';
+  btn.textContent = 'Connexion…';
   try {
     const cred = await firebase.auth().signInWithEmailAndPassword(m.email, saisi);
 
@@ -2802,7 +2804,7 @@ async function confirmLogin(){
     currentUser = m;
     window.currentUser = currentUser;
     try{ _mvSessArm(cred.user && cred.user.uid); }catch(e){}
-    if(DEBUG) console.log('✅ Login Firebase OK:', m.nom, 'roles:', m.roles);
+    if(DEBUG) console.log('Login Firebase OK:', m.nom, 'roles:', m.roles);
     loginPendingIdx = -1;
     document.getElementById('login-screen').style.display = 'none';
     document.getElementById('login-profiles').style.display = 'grid';
@@ -2845,24 +2847,24 @@ async function confirmLogin(){
   } catch(e) {
     btn.disabled = false;
     btn.textContent = 'Se connecter';
-    var _loginErr = '❌ Mot de passe incorrect.';
+    var _loginErr = 'Mot de passe incorrect.';
     if (e.code === 'auth/invalid-email') {
-      _loginErr = '❌ Email invalide pour ce compte. Contactez l\'administrateur.';
+      _loginErr = 'Email invalide pour ce compte. Contactez l\'administrateur.';
     } else if (e.code === 'auth/user-not-found') {
-      _loginErr = '❌ Compte introuvable. Contactez l\'administrateur.';
+      _loginErr = 'Compte introuvable. Contactez l\'administrateur.';
     } else if (e.code === 'auth/user-disabled') {
-      _loginErr = '❌ Ce compte a été désactivé.';
+      _loginErr = 'Ce compte a été désactivé.';
     } else if (e.code === 'auth/network-request-failed') {
-      _loginErr = '❌ Pas de connexion réseau.';
+      _loginErr = 'Pas de connexion réseau.';
     } else if (!e.code) {
-      _loginErr = '❌ Connexion bloquée (extension navigateur ou VPN). Désactivez uBlock / MetaMask et réessayez.';
+      _loginErr = 'Connexion bloquée (extension navigateur ou VPN). Désactivez uBlock / MetaMask et réessayez.';
     }
     console.warn('[Login] Erreur Firebase:', e.code, m.email);
     document.getElementById('login-pwd-error').textContent = _loginErr;
     document.getElementById('login-pwd-error').style.display = 'block';
     document.getElementById('login-pwd-input').value = '';
     document.getElementById('login-pwd-input').focus();
-    console.warn('❌ Login Firebase error:', e.code);
+    console.warn('Login Firebase error:', e.code);
   }
 }
 
@@ -2986,11 +2988,11 @@ function _mvSessShow(){
   o.style.cssText='position:fixed;inset:0;z-index:100000;background:rgba(10,8,6,0.86);display:flex;align-items:center;justify-content:center;padding:22px;';
   o.innerHTML =
     '<div style="max-width:420px;width:100%;background:#FBFAF6;border-radius:18px;padding:26px 24px;box-shadow:0 24px 60px rgba(0,0,0,0.4);text-align:center;">'
-    + '<div style="font-size:40px;line-height:1;margin-bottom:12px;">🔒</div>'
+    + '<div style="display:flex;justify-content:center;margin-bottom:12px;color:#8A857A">'+_mvIcon('cle',40)+'</div>'
     + '<div style="font-family:Georgia,serif;font-size:26px;font-weight:600;color:#14110D;margin-bottom:10px;">Session interrompue</div>'
     + '<div style="font-size:15px;line-height:1.55;color:#4A463E;margin-bottom:18px;">La démonstration (ou une autre connexion) a remplacé ta session dans <b>ce navigateur</b>. Les modifications sont bloquées tant que la connexion à ton domaine n&#39;est pas rétablie.</div>'
     + '<button id="mv-sess-recover" style="width:100%;border:none;border-radius:12px;padding:14px;font-size:16px;font-weight:600;color:#fff;background:#7A1020;cursor:pointer;">Se reconnecter à mon domaine</button>'
-    + '<div style="font-size:12.5px;line-height:1.5;color:#8A857A;margin-top:14px;">💡 Pour éviter cela, ouvre la démo en <b>navigation privée</b> ou dans un autre profil de navigateur.</div>'
+    + '<div style="font-size:12.5px;line-height:1.5;color:#8A857A;margin-top:14px;">Pour éviter cela, ouvre la démo en <b>navigation privée</b> ou dans un autre profil de navigateur.</div>'
     + '</div>';
   document.body.appendChild(o);
   var b=document.getElementById('mv-sess-recover'); if(b) b.onclick=_mvSessRecover;
@@ -3054,7 +3056,7 @@ function _renderMeteoMini(emoji,temp,wind,isCache){
   if(!mini)return;
   mini.style.display='flex';
   mini.style.opacity=isCache?'0.7':'1';
-  if(icoEl)icoEl.textContent=emoji;
+  if(icoEl)window._mvSetIcon(icoEl, emoji, 22);
   if(tempEl)tempEl.textContent=temp+'°C';
   if(descEl)descEl.textContent='Vent '+wind+' km/h';
 }
@@ -3191,7 +3193,7 @@ function _wxFromApi(d){
     tmin:(dy.temperature_2m_min&&dy.temperature_2m_min[0]!=null)?Math.round(dy.temperature_2m_min[0]):null,
     tmax:(dy.temperature_2m_max&&dy.temperature_2m_max[0]!=null)?Math.round(dy.temperature_2m_max[0]):null,
     pp:(dy.precipitation_probability_max&&dy.precipitation_probability_max[0]!=null)?dy.precipitation_probability_max[0]:null,
-    emoji:wmoEmoji(d.current.weathercode), desc:wmoDesc(d.current.weathercode)
+    emoji:wmoIcone(d.current.weathercode), desc:wmoDesc(d.current.weathercode)
   };
 }
 async function _wxCurrent(lat,lng){
@@ -3486,7 +3488,7 @@ async function fetchMeteo(){
     const wind=Math.round(cur.windspeed_10m);
     const rain=Math.round((cur.precipitation||0)*10)/10;
     const desc=wmoDesc(code);
-    const emoji=wmoEmoji(code);
+    const emoji=wmoIcone(code);
     meteoData={temp,desc,wind,emoji,date:new Date().toISOString().split('T')[0]};
     window.meteoData=meteoData;
     // Gel calculé avant la mise en cache (lu par le journal d'alertes du hub)
@@ -3512,7 +3514,7 @@ async function fetchMeteo(){
       {
         const jrs=['ce soir','demain','après-demain','dans 3 jours','dans 4 jours'];
         const alertDiv=document.getElementById('home-gel-alert')||(()=>{const el=document.createElement('div');el.id='home-gel-alert';el.style.cssText='margin:8px 16px 0;background:#FFF8E8;border:1px solid #F0D080;border-radius:12px;padding:9px 14px;font-size:12px;color:#7A5C10;display:flex;align-items:center;gap:8px;';const card=document.getElementById('home-stat-card');if(card&&card.parentNode)card.parentNode.insertBefore(el,card);return el;})();
-        alertDiv.innerHTML=`⚠️ Risque de gel ${jrs[gelIdx]||''} (${Math.round(d.daily.temperature_2m_min[gelIdx])}°C)`;
+        alertDiv.innerHTML=`${_mvIcon('alerte',16)} Risque de gel ${jrs[gelIdx]||''} (${Math.round(d.daily.temperature_2m_min[gelIdx])}°C)`;
       }
     }
     // Météo par secteur (≥2 communes) — sinon météo unique du domaine
@@ -3538,11 +3540,11 @@ async function fetchMeteo(){
           else{const d=ts.toLocaleDateString('fr-FR',{day:'2-digit',month:'2-digit'});label=`le ${d} à ${ts.getHours()}h${String(ts.getMinutes()).padStart(2,'0')}`;}
         }
         // Afficher en cache dans le badge mini (opacité réduite)
-        _renderMeteoMini(cache.emoji||'☁️',cache.temp||'—',cache.wind||'—',true);
+        _renderMeteoMini(cache.emoji||'',cache.temp||'—',cache.wind||'—',true);
       } else {
         // Badge vide offline
         const mini=document.getElementById('hv2-meteo-mini');
-        if(mini){mini.style.display='flex';document.getElementById('hv2-mini-ico').textContent='📡';document.getElementById('hv2-mini-temp').textContent='—';document.getElementById('hv2-mini-desc').textContent='Hors ligne';}
+        if(mini){mini.style.display='flex';document.getElementById('hv2-mini-ico').textContent='';document.getElementById('hv2-mini-temp').textContent='—';document.getElementById('hv2-mini-desc').textContent='Hors ligne';}
       }
     }catch(e2){}
   }
@@ -3623,7 +3625,7 @@ async function fetchMeteoMoyenne(dateDebut, dateFin){
     codes.forEach(function(c){codeFreq[c]=(codeFreq[c]||0)+1;});
     var codeTop=parseInt(Object.entries(codeFreq).sort(function(a,b){return b[1]-a[1];})[0][0]);
     return{temp_moy:tempMoy,temp_min:tempMin,temp_max:tempMax,vent_moy:ventMoy,precip_tot:precipTot,
-      emoji:wmoEmoji(codeTop),desc:wmoDesc(codeTop),
+      emoji:wmoIcone(codeTop),desc:wmoDesc(codeTop),
       date_debut:dateDebut,date_fin:dateFin,nb_jours:d.daily.time.length};
   }catch(e){
     console.warn('[fetchMeteoMoyenne]',e);
@@ -3877,17 +3879,17 @@ function _mvReconApply(res){
   try{ if(typeof saveData==='function') saveData('parcelles'); }catch(e){}
   try{ Object.keys(TRAVAUX).forEach(function(k){delete TRAVAUX[k];}); TACHES.forEach(function(t){recalcTravaux(t.nom);}); window.TRAVAUX=TRAVAUX; }catch(e){}
   try{ if(typeof _renderAfterSaison==='function') _renderAfterSaison(); }catch(e){}
-  if(typeof showToast==='function') showToast('✅ Avancement reconstruit — '+n+' validation'+(n>1?'s':'')+' ajoutée'+(n>1?'s':'')+' à « '+res.vn+' »','#3D6B27');
+  if(typeof showToast==='function') showToast('Avancement reconstruit — '+n+' validation'+(n>1?'s':'')+' ajoutée'+(n>1?'s':'')+' à « '+res.vn+' »','#3D6B27');
 }
 function _mvRepairSaisonProg(){
   try{
     var res=_mvReconPlan();
-    if(res.err){ if(typeof showToast==='function') showToast('⚠️ '+res.err,'#B85A1A'); return; }
-    if(!res.plan.length){ if(typeof showToast==='function') showToast('✅ Rien à reconstruire — l'+"'"+'avancement de « '+res.vn+' » reflète déjà le journal','#3D6B27'); return; }
+    if(res.err){ if(typeof showToast==='function') showToast(res.err,'#B85A1A'); return; }
+    if(!res.plan.length){ if(typeof showToast==='function') showToast('Rien à reconstruire — l'+"'"+'avancement de « '+res.vn+' » reflète déjà le journal','#3D6B27'); return; }
     var tot=res.plan.length;
     var det=Object.keys(res.parTache).sort().map(function(t){ return t+' : '+res.parTache[t]; }).join('   ·   ');
     var sub=det+'   → « Validé ». Rien ne sera supprimé.';
-    openConfirmDel('Reconstruire « '+res.vn+' » ?', sub, function(){ _mvReconApply(res); }, '🩹', 'Reconstruire ('+tot+')', '#3D6B27');
+    openConfirmDel('Reconstruire « '+res.vn+' » ?', sub, function(){ _mvReconApply(res); }, 'rotation', 'Reconstruire ('+tot+')', '#3D6B27');
   }catch(e){ console.error('[reconstruction]',e); if(typeof showToast==='function') showToast('Erreur reconstruction','#B85A1A'); }
 }
 window._mvRepairSaisonProg=_mvRepairSaisonProg;
@@ -4038,7 +4040,11 @@ function renderHeuresCard(containerId){
   function _bar(pct,col){return `<div class="htache-bar-track" aria-hidden="true"><div class="htache-bar-fill" style="width:${pct}%;background:${col}"></div></div>`;}
   // Grid CSS aligné : col1=label(72px) col2=barre(1fr) col3=%(40px) col4=h_total(90px)
   const G='display:grid;grid-template-columns:72px 1fr 40px 90px;gap:0 6px;align-items:center;';
-  c.innerHTML=`<div class="hc-head"><div class="hc-title">Avancement — ${_visuSaison()}</div><div class="hc-total"><div class="hc-total-val">${totalReste}h</div><div class="hc-total-lbl">Restantes</div></div></div>`
+  c.innerHTML=`<div class="mv-hd" style="margin-bottom:14px">
+      <div><div class="mv-l">Avancement par t\u00e2che</div>
+        <div class="mv-t" style="margin-top:1px">${_escHtml(_visuSaison())}</div></div>
+      <div style="text-align:right;flex:none"><div class="mv-n">${totalReste}<span style="font-size:13px"> h</span></div>
+        <div class="mv-l">restantes</div></div></div>`
     +data.map(t=>{
       const col=_col(t.pct);
       // ── Multi-niveaux (Relevage) : ligne parent globale + sous-ligne par niveau ──
@@ -4055,7 +4061,7 @@ function renderHeuresCard(containerId){
         // Ligne parent : barre globale (h_done/h_total) + sous-lignes
         return `<div class="htache-row" style="flex-direction:column;align-items:stretch;gap:1px">
           <div style="${G}padding:5px 0 2px;">
-            <div class="htache-nom" style="font-size:12px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap">${TEMOJI[t.nom]||'🌿'} ${tNom(t.nom)}</div>
+            <div class="htache-nom" style="font-size:12px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap">${tNom(t.nom)}</div>
             ${_bar(t.pct,col)}
             <div class="htache-pct" style="color:${col};text-align:right;font-size:13px">${t.pct}%</div>
             <div style="font-size:10px;color:var(--texte-doux);text-align:right">${t.h_done}h/${t.h_total}h</div>
@@ -4069,7 +4075,7 @@ function renderHeuresCard(containerId){
         if(t.detail.length===1){
           const pas=t.detail[0];const nc=_col(pas.pct);
           return `<div class="htache-row" style="${G}padding:6px 0;">
-            <div class="htache-nom" style="font-size:12px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap">${TEMOJI[t.nom]||'🌿'} ${tNom(t.nom)}</div>
+            <div class="htache-nom" style="font-size:12px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap">${tNom(t.nom)}</div>
             ${_bar(pas.pct,nc)}
             <div class="htache-pct" style="color:${nc};text-align:right;font-size:13px">${pas.pct}%</div>
             <div style="font-size:10px;color:var(--texte-doux);text-align:right">${pas.h_done}/${pas.h_total}h</div>
@@ -4087,7 +4093,7 @@ function renderHeuresCard(containerId){
         }).join('');
         return `<div class="htache-row" style="flex-direction:column;align-items:stretch;gap:1px">
           <div style="${G}padding:5px 0 2px;">
-            <div class="htache-nom" style="font-size:12px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap">${TEMOJI[t.nom]||'🌿'} ${tNom(t.nom)}</div>
+            <div class="htache-nom" style="font-size:12px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap">${tNom(t.nom)}</div>
             ${_bar(t.pct,col)}
             <div class="htache-pct" style="color:${col};text-align:right;font-size:13px">${t.pct}%</div>
             <div style="font-size:10px;color:var(--texte-doux);text-align:right">${t.h_done}h/${t.h_total}h</div>
@@ -4097,7 +4103,7 @@ function renderHeuresCard(containerId){
       }
       // ── Simple ────────────────────────────────────────────────────────
       return `<div class="htache-row" style="${G}padding:6px 0;">
-        <div class="htache-nom" style="font-size:12px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap">${TEMOJI[t.nom]||'🌿'} ${tNom(t.nom)}</div>
+        <div class="htache-nom" style="font-size:12px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap">${tNom(t.nom)}</div>
         ${_bar(t.pct,col)}
         <div class="htache-pct" style="color:${col};text-align:right;font-size:13px">${t.pct}%</div>
         <div style="font-size:10px;color:var(--texte-doux);text-align:right">${t.h_done}h / ${t.h_total}h</div>
@@ -4263,17 +4269,21 @@ function _goLanding(){
 window._goLanding=_goLanding;
 function _dockDef(){
   var it=[];
-  if(_canPilotage()&&_mvCan('pilotage')) it.push({p:'pilotage',ic:'\uD83D\uDCCA',l:'Pilotage'});
-  if(_mvCan('vigne')) it.push({p:'home',ic:'\uD83C\uDF3F',l:'Vigne'});
-  if(_mvCan('tracteur')) it.push({p:'tracteur',ic:'\uD83D\uDE9C',l:'Tracteur'});
-  if(_mvCan('phyto')) it.push({p:'phyto',ic:'\uD83E\uDDEA',l:'Phyto'});
-  if(_mvCan('cave')) it.push({p:'cave',ic:'\uD83C\uDF77',l:'Cave'});
-  if(_mvCan('reserve')) it.push({p:'reserve',ic:'\uD83D\uDCE6',l:'R\u00e9serve'});
-  if(_mvCan('planning')) it.push({p:'planning',ic:'\uD83D\uDCC5',l:'Planning'});
+  // ⚠️ La NAVIGATION est l'un des trois endroits ou l'icone est legitime — c'est
+  //   meme le principal. `ic` porte desormais un NOM DU SPRITE, plus un emoji :
+  //   un emoji de barre de navigation se dessine autrement sur chaque telephone
+  //   et ne prend jamais la couleur de l'onglet actif.
+  if(_canPilotage()&&_mvCan('pilotage')) it.push({p:'pilotage',ic:'graphique',l:'Pilotage'});
+  if(_mvCan('vigne')) it.push({p:'home',ic:'feuille',l:'Vigne'});
+  if(_mvCan('tracteur')) it.push({p:'tracteur',ic:'tracteur',l:'Tracteur'});
+  if(_mvCan('phyto')) it.push({p:'phyto',ic:'eprouvette',l:'Phyto'});
+  if(_mvCan('cave')) it.push({p:'cave',ic:'verre',l:'Cave'});
+  if(_mvCan('reserve')) it.push({p:'reserve',ic:'carton',l:'R\u00e9serve'});
+  if(_mvCan('planning')) it.push({p:'planning',ic:'calendrier',l:'Planning'});
   // Reglages : JAMAIS gate. C'est le socle (mot de passe, theme, deconnexion) et
   // la garantie que le dock n'est jamais vide, quelle que soit la formule ou les
   // cases decochees dans la fiche du membre.
-  it.push({p:'reglages',ic:'\u2699\uFE0F',l:'R\u00e9glages'});
+  it.push({p:'reglages',ic:'curseurs',l:'R\u00e9glages'});
   // Mode tracteur : on RANGE, on ne retire pas. Les 3 modules du jour passent en
   // tete ; le reste glisse sous « Plus » et reste a un tap.
   if(_mvMode()==='tracteur'){
@@ -4294,12 +4304,12 @@ function _dockBuild(){
   var pc=!!(window.matchMedia&&window.matchMedia('(min-width:768px)').matches);
   var main,ov;
   if(pc||items.length<=5){ main=items; ov=[]; } else { main=items.slice(0,4); ov=items.slice(4); }
-  inner.innerHTML=main.map(function(x){return '<button class="mv-dk" data-page="'+x.p+'"><span class="mv-dk-ic">'+x.ic+'</span><span class="mv-dk-lb">'+x.l+'</span></button>';}).join('')
-    +(ov.length?'<button class="mv-dk mv-dk-plus" data-plus="1"><span class="mv-dk-ic">\u22EF</span><span class="mv-dk-lb">Plus</span></button>':'');
+  inner.innerHTML=main.map(function(x){return '<button class="mv-dk" data-page="'+x.p+'"><span class="mv-dk-ic">'+_mvIcon(x.ic,20)+'</span><span class="mv-dk-lb">'+x.l+'</span></button>';}).join('')
+    +(ov.length?'<button class="mv-dk mv-dk-plus" data-plus="1"><span class="mv-dk-ic">'+_mvIcon('plus',20)+'</span><span class="mv-dk-lb">Plus</span></button>':'');
   Array.prototype.forEach.call(inner.querySelectorAll('.mv-dk'),function(b){ b.onclick=function(){ if(b.getAttribute('data-plus')){ _dockPlus(); } else { _dockGo(b.getAttribute('data-page')); } }; });
   if(sheet){
-    sheet.innerHTML=ov.map(function(x){return '<button class="mv-sg" data-page="'+x.p+'"><span class="mv-sg-ic">'+x.ic+'</span><span class="mv-sg-lb">'+x.l+'</span></button>';}).join('')
-      +(_mvMode()?'<button class="mv-sg mv-sg-mode" data-mode="1"><span class="mv-sg-ic">\uD83D\uDD01</span><span class="mv-sg-lb">'
+    sheet.innerHTML=ov.map(function(x){return '<button class="mv-sg" data-page="'+x.p+'"><span class="mv-sg-ic">'+_mvIcon(x.ic,20)+'</span><span class="mv-sg-lb">'+x.l+'</span></button>';}).join('')
+      +(_mvMode()?'<button class="mv-sg mv-sg-mode" data-mode="1"><span class="mv-sg-ic">'+_mvIcon('rotation',20)+'</span><span class="mv-sg-lb">'
         +(_mvMode()==='tracteur'?'Mode tracteur':'Mode terrain')+'</span></button>':'');
     Array.prototype.forEach.call(sheet.querySelectorAll('.mv-sg'),function(b){ b.onclick=function(){ if(b.getAttribute('data-mode')){ _mvModeChanger(); } else { _dockGo(b.getAttribute('data-page')); } }; });
   }
@@ -4976,7 +4986,7 @@ function goTo(page){
         _ov = document.createElement('div');
         _ov.id = 'regl-wait-ov';
         _ov.style.cssText = 'position:absolute;inset:0;background:rgba(240,238,232,0.92);z-index:100;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:12px;';
-        _ov.innerHTML = '<div style="font-size:28px">⏳</div><div style="font-size:13px;color:var(--texte-med,#5F5F5F);font-family:Outfit,sans-serif">Chargement en cours...</div>';
+        _ov.innerHTML = '<div style="display:flex;justify-content:center;color:var(--texte-doux)">'+_mvIcon('sablier',40)+'</div><div style="font-size:13px;color:var(--texte-med,#5F5F5F);font-family:Outfit,sans-serif">Chargement en cours...</div>';
         var pg = document.getElementById('page-reglages');
         if(pg) { pg.style.position='relative'; pg.appendChild(_ov); }
       }
@@ -5066,26 +5076,44 @@ function renderHomeCard(){
   const _content=document.getElementById('home-stat-content');
   const barCol=pctGlobal>=75?'var(--vert-med)':pctGlobal>=40?'var(--or)':'var(--orange)';
   if(homeCardMode===0){
-    _picto.textContent='🌿';
-    _chip.textContent=_visuSaison();
-    _content.innerHTML=`<div style="font-family:Cormorant Garamond,serif;font-size:38px;font-weight:600;line-height:1;color:var(--texte)">${pctGlobal}%</div>
-      <div class="hv2-prog-track" aria-hidden="true"><div class="hv2-prog-fill" style="width:${pctGlobal}%;background:${barCol}"></div></div>
-      <div style="font-size:12px;font-weight:500;color:var(--texte-med)">Avancement saison</div>
-      <div style="font-size:11px;color:var(--texte-doux);margin-top:2px">${parcActives.length} parcelles · ${parcActives.reduce((s,p)=>s+(parseFloat(p.surface)||0),0).toLocaleString('fr-FR',{minimumFractionDigits:0,maximumFractionDigits:2})} ha</div>`;
+    // ── Charte DS-2 ── Le pourcentage est LE sujet : il passe en heros, la
+    //   jauge se cale a cote, et le contexte descend en etiquette douce.
+    _picto.textContent='';
+    _chip.textContent='';
+    _content.innerHTML=`<div class="mv-hd"><div><div class="mv-l">Avancement de la saison</div>
+        <div class="mv-t" style="margin-top:1px">${_escHtml(_visuSaison())}</div></div>
+        ${_mvBadge(pctGlobal>=100?'Termin\u00e9e':'En cours',pctGlobal>=100?'vert':'ambre')}</div>
+      <div style="display:flex;align-items:flex-end;gap:14px;margin-top:14px">
+        <div class="mv-hn">${pctGlobal}<span style="font-size:22px;font-weight:600">%</span></div>
+        <div style="flex:1;padding-bottom:7px">
+          <div class="mv-track"><div class="mv-fill" style="width:${pctGlobal}%;background:${barCol}"></div></div>
+          <div class="mv-l" style="margin-top:6px">${parcActives.length} parcelles \u00b7 ${parcActives.reduce((s,p)=>s+(parseFloat(p.surface)||0),0).toLocaleString('fr-FR',{minimumFractionDigits:0,maximumFractionDigits:2})} ha</div>
+        </div></div>`;
   } else {
     const t=tacheLaPlusAvancee;
-    _picto.textContent=t?(TEMOJI[t.nom]||'🌾'):'✅';
-    _chip.textContent=t?'En cours':'Saison complète';
+    _picto.textContent='';
+    _chip.textContent='';
     if(t){
       const colT=t.pct>=75?'var(--or)':'var(--orange)';
-      _content.innerHTML=`<div style="font-family:Cormorant Garamond,serif;font-size:38px;font-weight:600;line-height:1;color:var(--texte)">${t.pct}%</div>
-        <div class="hv2-prog-track" aria-hidden="true"><div class="hv2-prog-fill" style="width:${t.pct}%;background:${colT}"></div></div>
-        <div style="font-size:12px;font-weight:500;color:var(--texte-med)">${tNom(t.nom)}</div>
-        <div style="font-size:11px;color:var(--texte-doux);margin-top:2px">${t.val}/${t.total} parcelles</div>`;
+      _content.innerHTML=`<div class="mv-hd"><div><div class="mv-l">Le travail le plus avanc\u00e9</div>
+          <div class="mv-t" style="margin-top:1px">${_escHtml(tNom(t.nom))}</div></div>
+          ${_mvBadge('En cours','ambre')}</div>
+        <div style="display:flex;align-items:flex-end;gap:14px;margin-top:14px">
+          <div class="mv-hn">${t.pct}<span style="font-size:22px;font-weight:600">%</span></div>
+          <div style="flex:1;padding-bottom:7px">
+            <div class="mv-track"><div class="mv-fill" style="width:${t.pct}%;background:${colT}"></div></div>
+            <div class="mv-l" style="margin-top:6px">${t.val}/${t.total} parcelles faites</div>
+          </div></div>`;
     } else {
-      _content.innerHTML=`<div style="font-family:Cormorant Garamond,serif;font-size:38px;font-weight:600;color:var(--vert-med)">✅</div>
-        <div style="font-size:12px;font-weight:500;color:var(--texte-med);margin-top:8px">Toutes les tâches</div>
-        <div style="font-size:11px;color:var(--texte-doux);margin-top:2px">Saison complète !</div>`;
+      // ⚠️ Pas de coche verte geante : la saison finie se dit par le mot et le
+      //   badge, pas par un pictogramme de 38 px.
+      _content.innerHTML=`<div class="mv-hd"><div><div class="mv-l">Tous les travaux de la saison</div>
+          <div class="mv-t" style="margin-top:1px">${_escHtml(_visuSaison())}</div></div>
+          ${_mvBadge('Termin\u00e9e','vert')}</div>
+        <div style="display:flex;align-items:flex-end;gap:14px;margin-top:14px">
+          <div class="mv-hn" style="color:var(--vert-med)">100<span style="font-size:22px;font-weight:600">%</span></div>
+          <div style="flex:1;padding-bottom:7px"><div class="mv-track"><div class="mv-fill" style="width:100%;background:var(--vert-med)"></div></div>
+          <div class="mv-l" style="margin-top:6px">Plus rien en attente.</div></div></div>`;
     }
   }
   // Animation tap
@@ -5119,7 +5147,7 @@ function _showAppLoader() {
     el = document.createElement('div');
     el.id = 'app-loader';
     el.style.cssText = 'position:fixed;inset:0;background:#F0EEE8;z-index:8000;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:16px;';
-    el.innerHTML = '<div style="font-size:40px">🍇</div>'
+    el.innerHTML = '<div style="display:flex;justify-content:center;color:var(--texte-doux)">'+_mvIcon('raisin',40)+'</div>'
       + '<div style="width:36px;height:36px;border:3px solid rgba(61,107,39,0.2);border-top-color:#3D6B27;border-radius:50%;animation:spin 0.8s linear infinite"></div>'
       + '<div style="font-family:Outfit,sans-serif;font-size:13px;color:var(--texte-med,#5F5F5F);font-weight:500">Chargement des données...</div>';
     var root = document.getElementById('app-root') || document.body;
@@ -5216,15 +5244,13 @@ function renderHome(){
   if(pillTxt){
     if(pm){
       pillTxt.textContent=pm.length>60?pm.substring(0,60)+'…':pm;
-      if(pillEl){pillEl.style.background='var(--or-pale)';pillEl.style.borderColor='rgba(184,145,58,0.35)';}
-      if(pillTxt)pillTxt.style.color='var(--or)';
+      if(pillEl)pillEl.classList.add('home-prio-on');
       if(editBtn)editBtn.style.display='none';
       if(detailTxt)detailTxt.textContent=pm;
       if(pillWrap)pillWrap.classList.remove('home-prio-pill-vide');
     } else {
       pillTxt.textContent='Aucune priorité définie';
-      if(pillEl){pillEl.style.background='var(--gris-clair)';pillEl.style.borderColor='var(--gris)';}
-      if(pillTxt)pillTxt.style.color='var(--texte-doux)';
+      if(pillEl)pillEl.classList.remove('home-prio-on');
       if(editBtn)editBtn.style.display='none';
       if(detailTxt)detailTxt.textContent='';
       if(pillWrap)pillWrap.classList.add('home-prio-pill-vide');
@@ -5251,13 +5277,18 @@ function renderHome(){
     }).join('');
   }
   const tracNb=document.getElementById('hv2-trac-nb');
-  if(tracNb)tracNb.innerHTML=_sessVue.length+' <span>sessions</span>';
+  // ⚠️ Le <span> reprend la taille de la charte : sans style ici, il heriterait
+  //   du 22 px de .mv-n et « sessions » pese autant que le chiffre.
+  if(tracNb)tracNb.innerHTML=_sessVue.length+' <span style="font-size:13px">session'
+    +(_sessVue.length>1?'s':'')+'</span>';
 
   // Heures card
   renderHeuresCard('heures-card-home');
 
   // Derniers travaux — nouveau markup
+  // Charte DS-2 : la liste vit dans UN ilot, pas quatre blocs empiles.
   const dt=document.getElementById('derniers-travaux');
+  if(dt)dt.className='hv2-travaux mv-c';
   const recent=JOURNAL.filter(j=>!j.meteo).slice(0,4);
   dt.innerHTML=recent.map(r=>{
     const isEq=r.equipe||r.qui==='Equipe';
@@ -5265,18 +5296,17 @@ function renderHome(){
     const isVal=r.statut==='Validé';
     const dotCls=isVal?'hv2-dot-v':'hv2-dot-e';
     const badgeCls=isVal?'bv2-v':'bv2-e';
-    return `<div class="hv2-tv-item" onclick="goTo('journal')">
-      <div class="hv2-tv-dot ${dotCls}">${TEMOJI[r.tache]||'📋'}</div>
-      <div class="hv2-tv-corps">
-        <div class="hv2-tv-tache">${r.tache}</div>
-        <div class="hv2-tv-meta">${quiAff} · ${r.parcelle}</div>
+    return `<div class="mv-tr" onclick="goTo('journal')" style="cursor:pointer">
+      <div style="min-width:0">
+        <div class="mv-v" style="font-size:13.5px;font-weight:600;color:var(--texte)">${_escHtml(r.tache)}</div>
+        <div class="mv-l">${_escHtml(quiAff)} \u00b7 ${_escHtml(r.parcelle)} \u00b7 ${fmtDate(r.date)}</div>
       </div>
-      <div class="hv2-tv-right">
-        <div class="hv2-tv-date">${fmtDate(r.date)}</div>
-        <div class="hv2-tv-badge ${badgeCls}">${r.statut}</div>
-      </div>
+      ${_mvBadge(r.statut, isVal?'vert':'ambre')}
     </div>`;
   }).join('');
+  // ⚠️ `dotCls` et `badgeCls` ne servent plus : la couleur vient du ton du badge.
+  //   On les laisse calcules au-dessus le temps que le journal passe aussi a la
+  //   charte — les supprimer ici obligerait a toucher deux fonctions pour rien.
 
   // Nouveaux widgets personnalisables (v4.34)
   _renderHomeWidgets();
@@ -5309,7 +5339,7 @@ function renderHomeMeteo5(){
     for(var i=1;i<md.time.length;i++){
       if((md.pp[i]||0)>=50){rainTxt=' \u00b7 \uD83C\uDF27\uFE0F '+jn[new Date(md.time[i]+'T12:00:00').getDay()]+'. '+md.pp[i]+'%';break;}
     }
-    c.innerHTML='<div class="hm5-mini">'+wmoEmoji(md.code[0])+' <b>'+t0+'</b> aujourd\u2019hui'+rainTxt+'</div>';
+    c.innerHTML='<div class="hm5-mini">'+_mvIcon(wmoIcone(md.code[0]),16)+' <b>'+t0+'</b> aujourd\u2019hui'+rainTxt+'</div>';
     return;
   }
   var html='<div class="hm5">';
@@ -5318,7 +5348,7 @@ function renderHomeMeteo5(){
     var gel=(md.tmin[i]!=null&&md.tmin[i]<3);
     html+='<div class="hm5-d'+(i===0?' today':'')+(gel?' gel':'')+'">'
       +'<div class="hm5-n">'+(i===0?'Auj.':jn[d.getDay()])+'</div>'
-      +'<div class="hm5-i">'+wmoEmoji(md.code[i])+'</div>'
+      +'<div class="hm5-i">'+_mvIcon(wmoIcone(md.code[i]),20)+'</div>'
       +'<div class="hm5-tx">'+(md.tmax[i]!=null?Math.round(md.tmax[i])+'\u00b0':'\u2014')+'</div>'
       +'<div class="hm5-tn">'+(md.tmin[i]!=null?Math.round(md.tmin[i])+'\u00b0':'')+'</div>'
       +'<div class="hm5-p">'+((md.pp[i]||0)>=30?('\uD83D\uDCA7'+md.pp[i]+'%'):'')+'</div>'
@@ -5359,7 +5389,9 @@ function renderHomeMaSemaine(){
   var totTxt=tot>0?('\u2248 '+(Math.round(tot*2)/2)+'h'):String(nbInt);
   var totLbl=tot>0?'estim\u00e9es cette semaine':'intervention'+(nbInt>1?'s':'')+' cette semaine';
   if(_homeIsCompact('masemaine')){
-    c.innerHTML='<div class="hmsem-mini">\uD83D\uDC64 <b>'+totTxt+'</b> '+totLbl+' \u00b7 '+nbInt+' entr\u00e9e'+(nbInt>1?'s':'')+' journal</div>';
+    c.innerHTML='<div class="mv-c"><div class="mv-hd"><div><div class="mv-n">'+totTxt+'</div>'
+      +'<div class="mv-l">'+totLbl+'</div></div>'
+      +_mvBadge(nbInt+' entr\u00e9e'+(nbInt>1?'s':''),'neutre')+'</div></div>';
     return;
   }
   var maxH=Math.max.apply(null,hours.concat([1]));
@@ -5368,7 +5400,11 @@ function renderHomeMaSemaine(){
     var pct=Math.round(h/maxH*100);
     return '<div class="hmsem-b'+(h<=0?' off':'')+'"><div class="hmsem-bar" style="height:'+Math.max(5,pct)+'%"></div><div class="hmsem-bl">'+bl[i]+'</div></div>';
   }).join('');
-  c.innerHTML='<div class="hmsem"><div><div class="hmsem-v">'+totTxt+'</div><div class="hmsem-l">'+totLbl+'</div></div><div class="hmsem-bars">'+bars+'</div></div>';
+  // Charte DS-2 : le chiffre de la semaine en tete, les barres a cote.
+  c.innerHTML='<div class="mv-c"><div class="mv-hd">'
+    +'<div><div class="mv-n">'+totTxt+'</div><div class="mv-l">'+totLbl+'</div></div>'
+    +_mvBadge(nbInt+' entr\u00e9e'+(nbInt>1?'s':''),'neutre')+'</div>'
+    +'<div class="hmsem-bars" style="margin-top:14px">'+bars+'</div></div>';
 }
 
 // ── Délai de rentrée (DRE) : sessions traitement T3, max drae des produits ──
@@ -5402,22 +5438,23 @@ function renderHomeDRE(){
   rows=rows.slice(0,3);
   var nbWait=rows.filter(function(r){return r.diffH>0;}).length;
   if(_homeIsCompact('dre')){
-    if(!rows.length){c.innerHTML='<div class="hdre-empty">\u2705 Aucune restriction de rentr\u00e9e</div>';return;}
+    if(!rows.length){c.innerHTML='<div class="mv-c"><div class="mv-hd"><div class="mv-l">Aucune restriction de rentr\u00e9e</div>'+_mvBadge('Libre','vert')+'</div></div>';return;}
     if(nbWait>0){
       var next=rows.filter(function(r){return r.diffH>0;}).sort(function(a,b){return a.fin-b.fin;})[0];
       var hh=('0'+next.fin.getHours()).slice(-2)+'h'+('0'+next.fin.getMinutes()).slice(-2);
       var jourTxt=(next.fin.toDateString()===now.toDateString())?'':' demain';
-      c.innerHTML='<div class="hdre-mini">\u23F3 <b>'+nbWait+' zone'+(nbWait>1?'s':'')+' en d\u00e9lai de rentr\u00e9e</b> \u2014 prochaine'+jourTxt+' '+hh+'</div>';
+      c.innerHTML='<div class="mv-c mv-c-al"><div class="mv-hd"><div class="mv-l"><b style="color:var(--rouge)">'+nbWait+' zone'+(nbWait>1?'s':'')+' en d\u00e9lai de rentr\u00e9e</b><br>prochaine'+jourTxt+' \u00e0 '+hh+'</div>'+_mvBadge('Attendre','rouge')+'</div></div>';
     }else{
-      c.innerHTML='<div class="hdre-mini">\u2705 Rentr\u00e9e autoris\u00e9e sur toutes les zones trait\u00e9es</div>';
+      c.innerHTML='<div class="mv-c"><div class="mv-hd"><div class="mv-l">Rentr\u00e9e autoris\u00e9e sur toutes les zones trait\u00e9es</div>'+_mvBadge('Libre','vert')+'</div></div>';
     }
     return;
   }
   if(!rows.length){
-    c.innerHTML='<div class="hdre-empty">\u2705 Aucune restriction de rentr\u00e9e en cours</div>';
+    c.innerHTML='<div class="mv-c"><div class="mv-hd"><div class="mv-l">Aucune restriction de rentr\u00e9e en cours</div>'+_mvBadge('Libre','vert')+'</div></div>';
     return;
   }
-  c.innerHTML='<div class="hdre">'+rows.map(function(r){
+  // La liste vit dans un ilot : une carte, des lignes, pas des blocs empiles.
+  c.innerHTML='<div class="mv-c'+(nbWait>0?' mv-c-al':'')+'">'+rows.map(function(r){
     var g=r.g;var wait=r.diffH>0;
     var badge;
     if(wait){
@@ -5425,11 +5462,11 @@ function renderHomeDRE(){
     }else badge='rentr\u00e9e OK';
     var nbP=(g.parcelles||[]).length;
     var sub=fmtDate(g.date)+(g.heure?' '+_escHtml(g.heure):'')+' \u00b7 '+(nbP?nbP+' parcelle'+(nbP>1?'s':''):'domaine')+' \u00b7 DRE '+r.drae+'h';
-    if(g.dreAnticipe)sub+=' \u00b7 \u26A0\uFE0F '+_escHtml(g.dreAnticipe);
-    return '<div class="hdre-row '+(wait?'wait':'ok')+'">'
-      +'<div class="hdre-ico">'+(wait?'\u23F3':'\u2705')+'</div>'
-      +'<div><div class="hdre-tit">'+_escHtml(g.produits.join(' + ')||'Traitement')+'</div><div class="hdre-sub">'+sub+'</div></div>'
-      +'<div class="hdre-bad '+(wait?'wait':'ok')+'">'+badge+'</div></div>';
+    if(g.dreAnticipe)sub+=' \u00b7 d\u00e9lai anticip\u00e9 : '+_escHtml(g.dreAnticipe);
+    return '<div class="mv-tr">'
+      +'<div style="min-width:0"><div class="mv-v" style="font-size:13.5px;font-weight:600;color:var(--texte)">'
+        +_escHtml(g.produits.join(' + ')||'Traitement')+'</div><div class="mv-l">'+sub+'</div></div>'
+      +_mvBadge(badge, wait?'rouge':'vert')+'</div>';
   }).join('')+'</div>';
 }
 
@@ -5438,13 +5475,16 @@ function renderHomeRaccourcis(){
   var c=document.getElementById('home-shc');if(!c)return;
   var cmp=_homeIsCompact('raccourcis');
   var btns=[];
-  if(typeof canWrite==='function'&&canWrite())btns.push({i:'\uD83D\uDCDD',l:'+ Journal',a:'journal'});
-  btns.push({i:'\u2705',l:'Valider',a:'valider'});
-  btns.push({i:'\u{1F4D6}',l:'Ma trace',a:'trace'});
-  if(typeof isTractoriste==='function'&&isTractoriste())btns.push({i:'\uD83D\uDE9C',l:'Session',a:'session'});
+  // ⚠️ Un raccourci EST un bouton d'action : c'est l'un des trois cas ou
+  //   l'icone reste legitime. Elle vient du sprite, plus d'un emoji.
+  if(typeof canWrite==='function'&&canWrite())btns.push({i:'crayon',l:'+ Journal',a:'journal'});
+  btns.push({i:'check',l:'Valider',a:'valider'});
+  btns.push({i:'liste',l:'Ma trace',a:'trace'});
+  if(typeof isTractoriste==='function'&&isTractoriste())btns.push({i:'tracteur',l:'Session',a:'session'});
   c.style.gridTemplateColumns='repeat('+btns.length+',1fr)';
   c.innerHTML=btns.map(function(b){
-    var inner=cmp?('<span class="shc-l">'+b.i+' '+b.l+'</span>'):('<span class="shc-i">'+b.i+'</span><span class="shc-l">'+b.l+'</span>');
+    var inner=cmp?('<span class="shc-l">'+b.l+'</span>')
+      :('<span class="shc-i">'+_mvIcon(b.i,20)+'</span><span class="shc-l">'+b.l+'</span>');
     return '<button onclick="homeShortcut(\''+b.a+'\')">'+inner+'</button>';
   }).join('');
 }
@@ -5695,7 +5735,7 @@ function renderHomeDemarrage(){
     var k = cons[0];
     if (!k) { cacher(); return; }
     if (lbl) lbl.textContent = 'Pour aller plus loin';
-    c.innerHTML = '<div class="dmr-cons" onclick="_dmrGo(\'' + k.go + '\')">'
+    c.innerHTML = '<div class="mv-c mv-c-clic dmr-cons" onclick="_dmrGo(\'' + k.go + '\')">'
       + '<span class="dmr-tx"><span class="dmr-t">' + _escHtml(k.t) + '</span>'
       + '<span class="dmr-f" style="display:block">' + _escHtml(k.f) + '</span></span>'
       + '<span class="dmr-ar">\u203A</span></div>';
@@ -5705,25 +5745,29 @@ function renderHomeDemarrage(){
   var faites = et.length - reste.length;
   if (lbl) lbl.textContent = 'Mise en route';
   if (_homeIsCompact('demarrage')) {
-    c.innerHTML = '<div class="dmr-mini">' + faites + ' étape' + (faites > 1 ? 's' : '') + ' sur '
-      + et.length + ' \u00b7 ' + _escHtml(reste[0].t.toLowerCase()) + ' \u00e0 faire</div>';
+    c.innerHTML = '<div class="mv-c"><div class="mv-hd"><div class="mv-l">' + faites + ' étape'
+      + (faites > 1 ? 's' : '') + ' sur ' + et.length + ' \u00b7 ' + _escHtml(reste[0].t.toLowerCase())
+      + ' \u00e0 faire</div>' + _mvBadge(reste.length + ' \u00e0 faire', 'ambre') + '</div></div>';
     return;
   }
 
-  var h = '<div class="dmr">';
+  // Charte DS-2 : les etapes vivent dans UN ilot, avec le compte en badge.
+  var h = '<div class="mv-c"><div class="mv-hd" style="margin-bottom:6px">'
+    + '<div class="mv-l">' + faites + ' \u00e9tape' + (faites > 1 ? 's' : '') + ' sur ' + et.length + '</div>'
+    + _mvBadge(reste.length + ' \u00e0 faire', reste.length ? 'ambre' : 'vert') + '</div><div class="dmr">';
   for (var i = 0; i < et.length; i++) {
     var e = et[i];
     var cliquable = (!e.ok && e.go);
     h += '<div class="dmr-it' + (e.ok ? ' done' : '') + (cliquable ? ' go' : '') + '"'
       + (cliquable ? ' onclick="_dmrGo(\'' + e.go + '\')"' : '') + '>'
-      + '<span class="dmr-mk ' + (e.ok ? 'on' : 'off') + '">' + (e.ok ? '\u2713' : '') + '</span>'
+      + '<span class="dmr-mk ' + (e.ok ? 'on' : 'off') + '">' + (e.ok ? _mvIcon('check',16) : '') + '</span>'
       + '<span class="dmr-tx"><span class="dmr-t">' + _escHtml(e.t) + '</span>'
       + (e.ok ? '' : '<span class="dmr-f" style="display:block">' + _escHtml(e.f) + '</span>')
       + '</span>'
       + (cliquable ? '<span class="dmr-ar">\u203A</span>' : '')
       + '</div>';
   }
-  h += '</div>';
+  h += '</div></div>';
   c.innerHTML = h;
 }
 
@@ -5741,16 +5785,19 @@ function renderHomeMaPart(){
   var pMine=r.tot>0?(r.mine/r.tot*100):0;
   var pThem=r.tot>0?(r.them/r.tot*100):0;
   var ha=function(v){return (Math.round((parseFloat(v)||0)*100)/100).toFixed(2).replace('.',',');};
-  var titre=(window.TEMOJI&&window.TEMOJI[tache]||'\u{1F33F}')+' '+_escHtml(tNom(tache));
+  var titre=_escHtml(tNom(tache));
 
   if(_homeIsCompact('mapart')){
-    c.innerHTML='<div class="hmp-mini">'+titre+' \u00b7 <b>'+ha(r.mine)+' ha</b> de vous sur '+ha(r.done)+' ha faits</div>';
+    c.innerHTML='<div class="mv-c"><div class="mv-hd"><div><div class="mv-t">'+titre+'</div>'
+      +'<div class="mv-l">'+ha(r.mine)+' ha de vous sur '+ha(r.done)+' ha faits</div></div>'
+      +_mvBadge(r.pct+' %','neutre')+'</div></div>';
     return;
   }
 
-  c.innerHTML='<div class="hmp" onclick="goTo(\'parcelles\')">'
-    +'<div class="hmp-top"><span class="hmp-n">'+titre+'</span><span class="hmp-p">'+r.pct+' %</span></div>'
-    +'<div class="hmp-sub">'+ha(r.done)+' ha faits sur '+ha(r.tot)+' ha</div>'
+  c.innerHTML='<div class="mv-c mv-c-clic hmp" onclick="goTo(\'parcelles\')">'
+    +'<div class="mv-hd"><div><div class="mv-t">'+titre+'</div>'
+      +'<div class="mv-l" style="margin-top:2px">'+ha(r.done)+' ha faits sur '+ha(r.tot)+' ha</div></div>'
+      +'<div class="mv-n">'+r.pct+'<span style="font-size:13px"> %</span></div></div>'
     +'<div class="hmp-bar" aria-hidden="true"><span class="mine" style="width:'+pMine.toFixed(1)+'%"></span>'
       +'<span class="them" style="width:'+pThem.toFixed(1)+'%"></span></div>'
     +'<div class="hmp-leg">'
@@ -5830,7 +5877,6 @@ function renderMaTrace(){
     h+='<div class="mtr-lab">Par tâche</div><div class="mtr-card">'
       +d.taches.map(function(t){
         return '<div class="mtr-r">'
-          +'<span class="em">'+((window.TEMOJI&&window.TEMOJI[t.nom])||'\u{1F33F}')+'</span>'
           +'<span class="nm"><b>'+_escHtml(tNom(t.nom))+'</b><span>'+t.n+' parcelle'+(t.n>1?'s':'')+'</span></span>'
           +'<span class="vv">'+ha(t.ha)+'<em>ha</em></span></div>';
       }).join('')+'</div>';
@@ -6020,7 +6066,7 @@ function renderMur(){
   if(rest.length){
     h+='<div class="mur-lab">Ce qui reste ouvert</div><div class="mur-card">'
       +rest.map(function(r){
-        return '<div class="mur-row"><span class="em">'+((window.TEMOJI&&window.TEMOJI[r.nom])||'\u{1F33F}')+'</span>'
+        return '<div class="mur-row">'
           +'<span class="in"><b>'+_escHtml(tNom(r.nom))+'</b><span>'+r.n+' parcelle'+(r.n>1?'s':'')+' \u00b7 '+ha(r.rest)+' ha</span></span>'
           +'<span class="hb">'+r.pct+'<em> %</em></span></div>';
       }).join('')+'</div>';
@@ -6178,7 +6224,7 @@ function _relNivBadgesHtml(p) {
     return '<span style="display:inline-flex;align-items:center;padding:2px 7px;border-radius:5px;font-size:11px;font-weight:700;background:'+bg+';color:'+col+';border:1px solid '+brd+'">'+lbl+' N'+l+'</span>';
   }).join('');
   if(st.ov != null && st.ov < planGlobal) {
-    html += ' <span style="font-size:11px;color:var(--ink-info,#4A9FC8)">⚙</span>';
+    html += ' <span style="font-size:11px;color:var(--ink-info,#4A9FC8)"></span>';
   }
   return html;
 }
@@ -6200,7 +6246,7 @@ function _passBadgesHtml(p, nomTache) {
   }
   // Icône ⚙ seulement si ov < global (parcelle avec moins de passages que le standard)
   if (s && typeof s === 'object' && s.ov != null && s.ov < globalNb) {
-    html += ' <span style="font-size:11px;color:var(--ink-info,#4A9FC8)">⚙</span>';
+    html += ' <span style="font-size:11px;color:var(--ink-info,#4A9FC8)"></span>';
   }
   return html;
 }
@@ -6359,11 +6405,11 @@ function getPCls(p){
   const totalSaison=tachesActives.length;
   const nbDone=tachesActives.filter(t=>getTacheStatut(p,t.nom)==='Validé').length;
   const pct=totalSaison>0?Math.round(nbDone/totalSaison*100):0;
-  if(p.statut==='Arrachee')return{a:'ava-x',d:'dr',cl:'pr',col:'var(--rouge)',fill:'var(--rouge)',em:'🚫',pct,nbDone,nbTotal:totalSaison};
+  if(p.statut==='Arrachee')return{a:'ava-x',d:'dr',cl:'pr',col:'var(--rouge)',fill:'var(--rouge)',pct,nbDone,nbTotal:totalSaison};
   var _gc=pctColor(pct);
-  if(pct===100)return{a:'ava-c',d:'dc',cl:'pv',col:_gc,fill:_gc,em:'✅',pct,nbDone,nbTotal:totalSaison};
-  if(pct>=75)return{a:'ava-a',d:'da',cl:'pa',col:_gc,fill:_gc,em:'🌿',pct,nbDone,nbTotal:totalSaison};
-  return{a:'ava-r',d:'dr',cl:'pr',col:_gc,fill:_gc,em:'🍇',pct,nbDone,nbTotal:totalSaison};
+  if(pct===100)return{a:'ava-c',d:'dc',cl:'pv',col:_gc,fill:_gc,pct,nbDone,nbTotal:totalSaison};
+  if(pct>=75)return{a:'ava-a',d:'da',cl:'pa',col:_gc,fill:_gc,pct,nbDone,nbTotal:totalSaison};
+  return{a:'ava-r',d:'dr',cl:'pr',col:_gc,fill:_gc,pct,nbDone,nbTotal:totalSaison};
 }
 function computePStats(){
   let c=0,e=0,r=0,a=0;
@@ -6514,7 +6560,7 @@ function _pvRenderOrdreBar(){
   if(!dispo.length || !_pOrdPeriodeOK()){ el.innerHTML=''; el.style.display='none'; return; }
   el.style.display='';
   if(_pOrdOff()){
-    el.innerHTML='<button onclick="pOrdreToggle()" style="width:100%;display:flex;align-items:center;justify-content:center;gap:8px;min-height:40px;border:1.5px dashed var(--or);border-radius:12px;background:transparent;color:var(--or);font-size:13px;font-weight:600;font-family:inherit;cursor:pointer">🧭 Reprendre la tournée du domaine</button>';
+    el.innerHTML='<button onclick="pOrdreToggle()" style="width:100%;display:flex;align-items:center;justify-content:center;gap:8px;min-height:40px;border:1.5px dashed var(--or);border-radius:12px;background:transparent;color:var(--or);font-size:13px;font-weight:600;font-family:inherit;cursor:pointer">Reprendre la tournée du domaine</button>';
     return;
   }
   var t=_pOrdTache();
@@ -6522,7 +6568,7 @@ function _pvRenderOrdreBar(){
     var o=window._mvOrdreFor(t)||{}, n=_pOrdRangs.n||0, d=_pOrdDateFr(o.date);
     var sub=(n>0?(n+' parcelle'+(n>1?'s':'')+' à faire, dans l’ordre'):'tout est fait sur ce travail')+(d?(' · ordre du '+d):'');
     el.innerHTML='<div style="display:flex;align-items:center;gap:10px;background:var(--bg-card);border:1.5px solid var(--or);border-radius:12px;padding:9px 12px">'
-      +'<span style="font-size:17px;flex-shrink:0">🧭</span>'
+      +'<span style="font-size:17px;flex-shrink:0"></span>'
       +'<div style="flex:1;min-width:0"><div style="font-size:13px;font-weight:700;color:var(--texte);white-space:nowrap;overflow:hidden;text-overflow:ellipsis">Tournée du domaine · '+_escHtml(t)+'</div>'
       +'<div style="font-size:11px;color:var(--texte-doux)">'+_escHtml(sub)+'</div></div>'
       +'<button onclick="pOrdreToggle()" style="border:none;background:var(--gris-clair);border-radius:9px;min-height:34px;padding:0 11px;font-size:12px;font-weight:600;color:var(--texte);cursor:pointer;font-family:inherit;flex-shrink:0">Tri normal</button></div>';
@@ -6532,10 +6578,9 @@ function _pvRenderOrdreBar(){
   // appliquer. On le dit, et on donne l'accès en un tap.
   if(pTacheFilter==='toutes'){
     el.innerHTML='<div style="background:var(--bg-card);border:1px solid var(--gris-clair);border-radius:12px;padding:8px 11px">'
-      +'<div style="font-size:11.5px;color:var(--texte-doux);margin-bottom:6px">🧭 Tournée définie pour :</div>'
+      +'<div style="font-size:11.5px;color:var(--texte-doux);margin-bottom:6px">Tournée définie pour :</div>'
       +'<div style="display:flex;flex-wrap:wrap;gap:6px">'
       +dispo.map(function(nm){
-          var em=(window.TEMOJI&&window.TEMOJI[nm])?window.TEMOJI[nm]:'🌿';
           return '<button onclick="setPTacheFilter(\''+_escAttr(nm)+'\')" style="border:1px solid var(--or);background:rgba(201,168,76,.12);color:var(--or);border-radius:20px;min-height:34px;padding:0 12px;font-size:12.5px;font-weight:700;cursor:pointer;font-family:inherit">'+em+' '+_escHtml(nm)+'</button>';
         }).join('')
       +'</div></div>';
@@ -6547,7 +6592,7 @@ function _pvRenderProxBar(){
   var el=document.getElementById('p-prox-bar');
   if(!el)return;
   if(_pProxLoading){
-    el.innerHTML='<button disabled style="width:100%;display:flex;align-items:center;justify-content:center;gap:8px;min-height:44px;border:none;border-radius:12px;background:var(--gris-clair);color:var(--texte-doux);font-size:14px;font-weight:600;font-family:inherit">📍 Localisation…</button>';
+    el.innerHTML='<button disabled style="width:100%;display:flex;align-items:center;justify-content:center;gap:8px;min-height:44px;border:none;border-radius:12px;background:var(--gris-clair);color:var(--texte-doux);font-size:14px;font-weight:600;font-family:inherit">Localisation…</button>';
     return;
   }
   if(_pProxPos){
@@ -6556,9 +6601,9 @@ function _pvRenderProxBar(){
       +'<span style="width:11px;height:11px;border-radius:50%;background:#C0845A;flex-shrink:0"></span>'
       +'<div style="flex:1;min-width:0"><div style="font-size:13px;font-weight:600;color:var(--texte)">Trié par proximité</div>'
       +'<div style="font-size:11px;color:var(--texte-doux)">'+sub+'</div></div>'
-      +'<button onclick="pToggleProximite()" style="border:none;background:var(--gris-clair);border-radius:9px;min-height:34px;padding:0 11px;font-size:13px;font-weight:600;color:var(--texte);cursor:pointer;font-family:inherit">✕</button></div>';
+      +'<button onclick="pToggleProximite()" style="border:none;background:var(--gris-clair);border-radius:9px;min-height:34px;padding:0 11px;font-size:13px;font-weight:600;color:var(--texte);cursor:pointer;font-family:inherit">'+_mvIcon('croix',16)+'</button></div>';
   } else {
-    el.innerHTML='<button onclick="pToggleProximite()" style="width:100%;display:flex;align-items:center;justify-content:center;gap:8px;min-height:44px;border:none;border-radius:12px;background:#2B1A10;color:#F0E2C8;font-size:14px;font-weight:600;font-family:inherit;cursor:pointer">📍 Trier par proximité</button>';
+    el.innerHTML='<button onclick="pToggleProximite()" style="width:100%;display:flex;align-items:center;justify-content:center;gap:8px;min-height:44px;border:none;border-radius:12px;background:#2B1A10;color:#F0E2C8;font-size:14px;font-weight:600;font-family:inherit;cursor:pointer">Trier par proximité</button>';
   }
 }
 window.pToggleProximite=pToggleProximite;
@@ -6585,8 +6630,7 @@ function renderParcelles(){
       if(_prioTaskOK){
         pTaskRow.style.display='';
         if(pTaskTxt)pTaskTxt.textContent=_prioIts.map(function(it){
-          var _em=(window.TEMOJI&&window.TEMOJI[it.t])?window.TEMOJI[it.t]:String.fromCodePoint(0x2B50);
-          return _em+' '+(typeof tNom==='function'?tNom(it.t):it.t);
+          return (typeof tNom==='function'?tNom(it.t):it.t);
         }).join('  \u00B7  ');
       } else { pTaskRow.style.display='none'; }
     }
@@ -6612,20 +6656,19 @@ function renderParcelles(){
       var _tgt=String.fromCodePoint(0x2B50);
       var _mePr=(currentUser&&currentUser.nom)||'';
       var _chipsP=_prioIts.map(function(it,i){
-        var _em=(window.TEMOJI&&window.TEMOJI[it.t])?window.TEMOJI[it.t]:String.fromCodePoint(0x1F3AF);
         var _mine=_mePr&&(it.equipe||[]).indexOf(_mePr)>=0;
         var _on=(pTacheFilter===it.t);
         return '<span class="p-focus-tache'+(_on?' pft-on':'')+(_prioIts.length>1?' pft-click':'')+'" onclick="_prioPick('+i+')">'
-          +_em+' '+_escHtml(typeof tNom==='function'?tNom(it.t):it.t)
+          +_escHtml(typeof tNom==='function'?tNom(it.t):it.t)
           +(_mine?' <span class="pft-me">'+String.fromCodePoint(0x1F464)+' Toi</span>':'')
           +'</span>';
       }).join('');
       tfRow.innerHTML='<div class="p-focus-bar"><span class="p-focus-lbl">'+_tgt+' Priorit\u00e9 du moment</span>'+_chipsP+'<button class="p-focus-all" onclick="_prioShowAll()">Voir toutes les t\u00e2ches</button></div>';
     } else {
-    var showDoneBtn=pTacheFilter!=='toutes'?`<div class="ptfchip${window.pShowDone?' active ac':''}" onclick="window.pShowDone=!window.pShowDone;renderParcelles()" style="margin-left:auto;flex-shrink:0;border-style:dashed">${window.pShowDone?'👁 Toutes':'🔲 À faire'}</div>`:'';
+    var showDoneBtn=pTacheFilter!=='toutes'?`<div class="ptfchip${window.pShowDone?' active ac':''}" onclick="window.pShowDone=!window.pShowDone;renderParcelles()" style="margin-left:auto;flex-shrink:0;border-style:dashed">${window.pShowDone?'Toutes':'À faire'}</div>`:'';
     var backPrio=(_prioTaskOK&&!isAdmin()&&_prioOverride)?'<div class="ptfchip pfc-back" onclick="_prioBackToPriority()">\u2190 Priorit\u00e9</div>':'';
     tfRow.innerHTML=backPrio+`<div class="ptfchip${pTacheFilter==='toutes'?' active':''}" data-t="toutes" onclick="setPTacheFilter('toutes',this)">Toutes tâches</div>`
-      +tachesSaisonFSorted.map(t=>`<div class="ptfchip${pTacheFilter===t.nom?' active':''}" data-t="${t.nom}" onclick="setPTacheFilter('${_escAttr(t.nom)}',this)">${TEMOJI[t.nom]||'🌿'} ${t.nom}</div>`).join('')
+      +tachesSaisonFSorted.map(t=>`<div class="ptfchip${pTacheFilter===t.nom?' active':''}" data-t="${t.nom}" onclick="setPTacheFilter('${_escAttr(t.nom)}',this)">${t.nom}</div>`).join('')
       +showDoneBtn;
     }
   }
@@ -6687,7 +6730,7 @@ function renderParcelles(){
     const cl=getPCls(p);
     const _proxD=_pProxPos?_pProxDistOf(p):null;
     const _proxHere=!!(_pProxPos&&_pProxHere&&p.nom===_pProxHere);
-    const _proxPill=(_proxD!=null)?`<span style="display:inline-flex;align-items:center;gap:3px;background:${_proxHere?'#C0845A':'var(--gris-clair)'};color:${_proxHere?'#fff':'var(--texte-doux)'};border-radius:20px;padding:2px 8px;font-size:11px;font-weight:700;margin-left:6px">${_proxHere?'📍 ici':'↳ '+_geoFmtDist(_proxD)}</span>`:'';
+    const _proxPill=(_proxD!=null)?`<span style="display:inline-flex;align-items:center;gap:3px;background:${_proxHere?'#C0845A':'var(--gris-clair)'};color:${_proxHere?'#fff':'var(--texte-doux)'};border-radius:20px;padding:2px 8px;font-size:11px;font-weight:700;margin-left:6px">${_proxHere?'ici':''+_geoFmtDist(_proxD)}</span>`:'';
     const _proxStyle=_proxHere?'border-color:#C0845A;box-shadow:inset 3px 0 0 #C0845A;':'';
     const tps=getTachesSaison().map(t=>([t.nom,getTacheStatut(p,t.nom)||'Non démarré']));
     let chips,more;
@@ -6698,8 +6741,7 @@ function renderParcelles(){
       } else {
         const statutFiltre=getTacheStatut(p,pTacheFilter)||'Non démarré';
         const badgeCls=statutFiltre==='En cours'?'tce':'tc-nd';
-        const badgeEmoji=statutFiltre==='En cours'?'⏳':'🔲';
-        chips=`<span class="tc ${badgeCls}" style="font-weight:700">${badgeEmoji} ${pTacheFilter} · ${statutFiltre}</span>`
+        chips=`<span class="tc ${badgeCls}" style="font-weight:700">${pTacheFilter} · ${statutFiltre}</span>`
           +tps.filter(([t])=>t!==pTacheFilter).slice(0,2).map(([t,s])=>`<span class="tc ${s==='Validé'?'tcv':'tce'}">${t}</span>`).join('');
       }
       more='';
@@ -6709,20 +6751,39 @@ function renderParcelles(){
     }
     var draeInfo=getDraeParcelle(p.nom);
     var hasDrae=draeInfo&&draeInfo.heures>0;
-    var draeBadge=hasDrae?'<span class="pc-drae-badge">⚠️ DRAE '+draeInfo.heures+'h</span>':'';
+    // ⚠️ Le delai de reentree est REGLEMENTAIRE : il passe en badge rouge, lisible
+  //   a un metre, au lieu d'un liseré sur le bord de la carte.
+  var draeBadge=hasDrae?_mvBadge('DRAE '+draeInfo.heures+' h','rouge'):'';
     var draeStyle=hasDrae?'border-color:var(--rouge);box-shadow:inset 3px 0 0 var(--rouge);':'';
+    // ── Charte DS-2 ── Le nom en Cormorant, le pourcentage en chiffres
+    //   tabulaires TOUJOURS au meme endroit, l'etat en badge cale a droite.
+    //   ⚠️ Plus aucune icone ici : une liste se lit a la typographie. Le seul
+    //     signal visuel qui reste est le badge, et il est reserve a l'etat.
+    var _etat = (p.statut==='Arrachee') ? ['Arrach\u00e9e','rouge']
+              : (cl.pct===100)          ? ['Saison termin\u00e9e','vert']
+              : (cl.pct>=75)            ? ['Bient\u00f4t fini','ambre']
+                                        : ['En cours','neutre'];
+    var _cep = (p.cepages&&p.cepages.length) ? p.cepages.join(' \u00b7 ') : (p.cepage||'');
     const _pvInner=`
-      <div class="pc-main">
-        <div class="pc-info"><div class="pc-nom">${_pOrdPill(p.nom)+p.nom+draeBadge}</div><div class="pc-meta"><span class="pc-surf">📐 ${p.surface} ha</span><span class="pc-st ${p.statut==='Arrachee'?'st-arr':'st-act'}">${p.statut}</span>${_proxPill}</div></div>
-        <div class="pc-right"><div class="pc-pct ${cl.cl}" style="color:${cl.col}">${cl.pct}%</div><div class="pc-pct-lbl">${cl.nbDone}/${cl.nbTotal} tâches</div></div>
+      <div class="mv-hd">
+        <div style="min-width:0">
+          <div class="mv-t">${_pOrdPill(p.nom)+_escHtml(p.nom)}</div>
+          <div class="mv-l" style="margin-top:2px">${p.surface} ha${_cep?' \u00b7 '+_escHtml(_cep):''}</div>
+        </div>
+        <div style="text-align:right;flex:none">
+          <div class="mv-n" style="color:${cl.pct===100?'var(--vert-med)':'var(--texte)'}">${cl.pct}<span style="font-size:13px">%</span></div>
+          <div class="mv-l">${cl.nbDone}/${cl.nbTotal} t\u00e2ches</div>
+        </div>
       </div>
-      <div class="pc-bar"><div class="pc-bar-fill" style="width:${cl.pct}%;background:${cl.fill}"></div></div>
-      <div class="pc-tchips">${chips}${more}</div>`;
+      <div class="mv-track" style="margin-top:12px"><div class="mv-fill" style="width:${cl.pct}%;background:${cl.fill}"></div></div>
+      <div class="mv-ft" style="margin-top:12px;padding-top:11px">
+        <div style="display:flex;gap:6px;flex-wrap:wrap;min-width:0">${_mvBadge(_etat[0],_etat[1])}${draeBadge}${_proxPill}</div>
+      </div>`;
     const _pvAct=(pTacheFilter!=='toutes')?_pvActions(p):'';
     if(_pvAct){
-      return `<div class="pcard pcard-qv${hasDrae?' pcard-drae':''}" data-nom="${_escAttr(p.nom)}" style="${draeStyle}${_proxStyle}"><div class="pc-row"><div class="pc-left" onclick="openDP('${_escAttr(p.nom)}')">${_pvInner}</div>${_pvAct}</div></div>`;
+      return `<div class="mv-c mv-c-clic pcard-qv${hasDrae?' mv-c-al':''}" data-nom="${_escAttr(p.nom)}" style="${_proxStyle}"><div class="pc-row"><div class="pc-left" onclick="openDP('${_escAttr(p.nom)}')">${_pvInner}</div>${_pvAct}</div></div>`;
     }
-    return `<div class="pcard${hasDrae?' pcard-drae':''}" onclick="openDP('${_escAttr(p.nom)}')" style="${draeStyle}${_proxStyle}">${_pvInner}</div>`;
+    return `<div class="mv-c mv-c-clic${hasDrae?' mv-c-al':''}" onclick="openDP('${_escAttr(p.nom)}')" style="${_proxStyle}">${_pvInner}</div>`;
   }).join('');
   _pvRenderProxBar();
   _pvRenderOrdreBar();
@@ -6772,7 +6833,7 @@ function saveDPCepage(){
   var v1=document.getElementById('dpc-cepage-sel-1').value;
   var v2=isComp?(document.getElementById('dpc-cepage-sel-2').value||''):'';
   var v3=isComp?(document.getElementById('dpc-cepage-sel-3').value||''):'';
-  if(!v1)return showToast('⚠️ Choisir au moins un cépage','#B85A1A');
+  if(!v1)return showToast('Choisir au moins un cépage','#B85A1A');
   var p=PARCELLES.find(function(x){return x.nom===nom;});
   if(!p)return;
   p.cepages=[v1,v2,v3].filter(function(v){return v;});
@@ -6781,7 +6842,7 @@ function saveDPCepage(){
   saveData('parcelles');
   closeOv(null,'ovCepage');
   openDP(nom);
-  showToast('🍇 Cépage(s) enregistré(s)','#3D6B27');
+  showToast('Cépage(s) enregistré(s)','#3D6B27');
 }
 
 // ══════ Fork b — Historique des rendements par millésime (détail parcelle Vigne) ══════
@@ -6850,7 +6911,7 @@ function _dpRendHistHtml(p){
       +'<div class="dprh-val">'+valH+'</div>'+delta+'</div>'
       +'<div class="dprh-sub2">'+(r.kg||0).toLocaleString('fr-FR')+' kg · '+(r.caisses||0)+' caisse'+((r.caisses||0)>1?'s':'')+'</div>';
   }).join('');
-  return '<div class="dprh-card"><div class="dprh-head"><span class="dprh-ico">📊</span> Rendements par millésime'
+  return '<div class="dprh-card"><div class="dprh-head"><span class="dprh-ico"></span> Rendements par millésime'
     +(surf>0?'<span class="dprh-surf">'+(Math.round(surf*10)/10).toLocaleString('fr-FR')+' ha</span>':'')+'</div>'
     +body+'</div>';
 }
@@ -6898,7 +6959,13 @@ function openDP(nom){
   const pe=document.getElementById('dp-pct');
   pe.textContent=cl.pct+'%';
   pe.style.cssText='float:right;font-family:"Cormorant Garamond",serif;font-size:38px;font-weight:600;color:'+(cl.pct===100?'var(--vert)':cl.pct>=75?'var(--or)':'var(--orange)');
-  document.getElementById('dp-surf').textContent=p.surface+' ha';
+  // ⚠️ innerHTML et non textContent : l'unite descend en petit, sinon « 0,42 ha »
+  //   pese autant que le chiffre et la hierarchie a trois niveaux tombe a deux.
+  document.getElementById('dp-surf').innerHTML=p.surface+'<span style="font-size:13px"> ha</span>';
+  var _dpNbt=document.getElementById('dp-nbt');
+  if(_dpNbt)_dpNbt.innerHTML=cl.nbDone+'<span style="font-size:13px">/'+cl.nbTotal+'</span>';
+  var _dpBar=document.getElementById('dp-bar');
+  if(_dpBar){_dpBar.style.width=cl.pct+'%';_dpBar.style.background=cl.fill;}
   // Heures restantes (hors tâches exclues)
   const tachesSaison=getTachesSaison();
   const exclues=p.tachesExclues||[];
@@ -6907,7 +6974,7 @@ function openDP(nom){
     if(exclues.includes(t.nom))return;
     if(getTacheStatut(p,t.nom)!=='Validé')hReste+=((t.trous||t.nom==='Entreplantation')&&(p.plantation_trous||0)>0)?(p.plantation_trous*_plantMinTrou()/60):(t.hha*p.surface);
   });
-  document.getElementById('dp-hreste').textContent=Math.round(hReste)+'h';
+  document.getElementById('dp-hreste').innerHTML=Math.round(hReste)+'<span style="font-size:13px"> h</span>';
   var _dpVS=(typeof _visuSaison==='function'?_visuSaison():((getSaisonActive()||{}).nom||''));
   var _dpRO=(typeof _mvOnActiveSaison==='function'&&!_mvOnActiveSaison());
   var _dpLbl=document.getElementById('dp-saison-label');
@@ -6929,8 +6996,13 @@ function openDP(nom){
       const tLast=traitementsActifs[0];
       const prLast=CATALOGUE.find(c=>c.nom===tLast.produit);
       const draeRLast=Math.max(0,prLast.drae-Math.floor((today2-new Date(tLast.date))/3600000));
-      draeEl.style.display='flex';
-      draeEl.innerHTML=`<span style="font-size:18px">⚠️</span><div><strong>DRAE en cours — ${draeRLast}h restantes</strong><div style="font-size:11px;margin-top:2px;opacity:0.85">${_escHtml(tLast.produit)} · traité le ${fmtDate(tLast.date)} · Pas d'entrée équipe sol</div></div>`;
+      draeEl.style.display='block';
+      draeEl.innerHTML='<div style="display:flex;gap:11px;align-items:flex-start">'
+        +_mvIcon('alerte',20)
+        +'<div style="flex:1;min-width:0"><div style="font-size:13px;font-weight:600;color:var(--rouge)">D\u00e9lai de r\u00e9entr\u00e9e en cours</div>'
+        +'<div class="mv-l" style="margin-top:3px">'+_escHtml(tLast.produit)+', trait\u00e9 le '+fmtDate(tLast.date)+'.</div></div>'
+        +'<div style="text-align:right;flex:none"><div class="mv-n" style="color:var(--rouge)">'+draeRLast
+        +'<span style="font-size:13px"> h</span></div><div class="mv-l">restantes</div></div></div>';
     } else {
       draeEl.style.display='none';
     }
@@ -6948,10 +7020,10 @@ function openDP(nom){
     const statusColor=isExclu?'var(--texte-doux)':isOn?'var(--vert)':isEnCours?'var(--or)':'var(--texte-doux)';
     const statusLabel=isExclu?'Non applicable':isOn?'Validé':isEnCours?'En cours':'À faire';
     if(isExclu){
-      return `<div class="val-row" style="display:flex;align-items:center;justify-content:space-between;padding:10px 0;border-bottom:1px solid var(--gris-clair);opacity:0.45">
+      return `<div class="val-row mv-tr" style="opacity:.45">
         <div style="flex:1">
-          <div style="font-size:13px;font-weight:600;color:var(--texte-doux);text-decoration:line-through">🚫 ${t.nom}</div>
-          <div style="font-size:10px;color:var(--texte-doux);margin-top:2px">Non applicable sur cette parcelle</div>
+          <div class="mv-v" style="font-size:13.5px;font-weight:600;color:var(--texte-doux);text-decoration:line-through">${_escHtml(t.nom)}</div>
+          <div class="mv-l">Non applicable sur cette parcelle</div>
         </div>
         ${canEdit?`<button onclick="toggleExcluTache('${_escAttr(nomParcelle)}','${_escAttr(t.nom)}')" style="background:var(--gris-clair);border:none;border-radius:8px;padding:5px 10px;font-size:10px;font-weight:600;color:var(--texte-doux);cursor:pointer;white-space:nowrap;margin-left:10px">Réactiver</button>`:''}
       </div>`;
@@ -6960,45 +7032,45 @@ function openDP(nom){
     if(t.type==='niveaux'){
       const badgesHtml=_relNivBadgesHtml(p);
       const hhaDetail=(t.niveaux||[]).map(n=>'N'+n.num+' '+n.hha+'h/ha').join(' · ');
-      return `<div class="val-row" style="display:flex;align-items:center;justify-content:space-between;padding:12px 0;border-bottom:1px solid var(--gris-clair);gap:8px">
+      return `<div class="val-row mv-tr">
         <div style="flex:1;min-width:0">
-          <div style="font-size:13px;font-weight:600">${TEMOJI[t.nom]||'↑'} ${t.nom}</div>
+          <div style="font-size:13px;font-weight:600">${t.nom}</div>
           <div style="font-size:10px;color:var(--texte-doux);margin-top:2px">${hhaDetail} · <span style="color:${statusColor};font-weight:600">${statusLabel}</span></div>
           <div style="display:flex;gap:4px;flex-wrap:wrap;margin-top:5px">${badgesHtml}</div>
         </div>
         <div style="display:flex;align-items:center;gap:6px;flex-shrink:0">
           ${canEdit?`<button onclick="openNiveauxPanel('${_escAttr(nomParcelle)}','${_escAttr(t.nom)}')" style="background:rgba(74,159,200,0.12);border:1px solid rgba(74,159,200,0.3);border-radius:8px;padding:7px 11px;font-size:11px;font-weight:600;color:var(--acier-med);cursor:pointer;white-space:nowrap">${isOn?'✏ Modifier':'↑ Niveaux'}</button>`:''}
           ${canEdit&&stat!=='Non démarré'?`<button onclick="annulerTache('${_escAttr(nomParcelle)}','${_escAttr(t.nom)}')" style="min-height:44px;min-width:44px;background:rgba(184,90,26,0.08);border:1px solid rgba(184,90,26,0.28);border-radius:8px;padding:7px 9px;font-size:11px;font-weight:600;color:#B85A1A;cursor:pointer" title="Annuler">↩</button>`:''}
-          ${canEdit&&!isOn?`<button onclick="toggleExcluTache('${_escAttr(nomParcelle)}','${_escAttr(t.nom)}')" style="min-height:44px;min-width:44px;background:var(--gris-clair);border:none;border-radius:8px;padding:5px 6px;font-size:12px;cursor:pointer" title="Désactiver">🚫</button>`:''}
+          ${canEdit&&!isOn?`<button onclick="toggleExcluTache('${_escAttr(nomParcelle)}','${_escAttr(t.nom)}')" style="min-height:44px;min-width:44px;background:var(--gris-clair);border:none;border-radius:8px;padding:5px 6px;font-size:12px;cursor:pointer" title="Désactiver">${_mvIcon('croix',16)}</button>`:''}
         </div>
       </div>`;
     }
     // ── Multi-passages (Ebourgeonnage, Pioche) ──────────────────────────────
     if(t.type==='passages'){
       const badgesHtml=_passBadgesHtml(p,t.nom);
-      return `<div class="val-row" style="display:flex;align-items:center;justify-content:space-between;padding:12px 0;border-bottom:1px solid var(--gris-clair);gap:8px">
+      return `<div class="val-row mv-tr">
         <div style="flex:1;min-width:0">
-          <div style="font-size:13px;font-weight:600">${TEMOJI[t.nom]||'🔄'} ${t.nom}</div>
+          <div style="font-size:13px;font-weight:600">${t.nom}</div>
           <div style="font-size:10px;color:var(--texte-doux);margin-top:2px">${t.hha}h/ha/passage · ~${hEstim}h · <span style="color:${statusColor};font-weight:600">${statusLabel}</span></div>
           <div style="display:flex;gap:4px;flex-wrap:wrap;margin-top:5px">${badgesHtml}</div>
         </div>
         <div style="display:flex;align-items:center;gap:6px;flex-shrink:0">
           ${canEdit?`<button onclick="openPassagesPanel('${_escAttr(nomParcelle)}','${_escAttr(t.nom)}')" style="background:rgba(90,156,74,0.1);border:1px solid rgba(90,156,74,0.28);border-radius:8px;padding:7px 11px;font-size:11px;font-weight:600;color:var(--vert);cursor:pointer;white-space:nowrap">${isOn?'✏ Modifier':'▶ Passages'}</button>`:''}
           ${canEdit&&isOn&&isAdmin()?`<button onclick="annulerTache('${_escAttr(nomParcelle)}','${_escAttr(t.nom)}')" style="min-height:44px;min-width:44px;background:rgba(184,90,26,0.12);border:1px solid rgba(184,90,26,0.3);border-radius:8px;padding:7px 9px;font-size:11px;font-weight:600;color:#B85A1A;cursor:pointer" title="Admin : tout annuler">↩</button>`:''}
-          ${canEdit&&!isOn?`<button onclick="toggleExcluTache('${_escAttr(nomParcelle)}','${_escAttr(t.nom)}')" style="min-height:44px;min-width:44px;background:var(--gris-clair);border:none;border-radius:8px;padding:5px 6px;font-size:12px;cursor:pointer" title="Désactiver">🚫</button>`:''}
+          ${canEdit&&!isOn?`<button onclick="toggleExcluTache('${_escAttr(nomParcelle)}','${_escAttr(t.nom)}')" style="min-height:44px;min-width:44px;background:var(--gris-clair);border:none;border-radius:8px;padding:5px 6px;font-size:12px;cursor:pointer" title="Désactiver">${_mvIcon('croix',16)}</button>`:''}
         </div>
       </div>`;
     }
     // ── Simple (défaut) ────────────────────────────────────────────────────
-    return `<div class="val-row" style="display:flex;align-items:center;justify-content:space-between;padding:12px 0;border-bottom:1px solid var(--gris-clair);gap:8px">
+    return `<div class="val-row mv-tr">
       <div style="flex:1;min-width:0">
-        <div style="font-size:13px;font-weight:600">${TEMOJI[t.nom]||'🌿'} ${t.nom}</div>
-        <div style="font-size:10px;color:var(--texte-doux);margin-top:2px">${(t.trous||t.nom==='Entreplantation')?(_plTr>0?('🪛 '+_plTr+' trous · ~'+hEstim+'h'):'🪛 Tarière · aucun trou'):((t.tempsReel?(t.hha?('~'+t.hha+'h/ha estimé'):'temps réel'):(t.hha+'h/ha'))+' · ~'+hEstim+'h')} · <span style="color:${statusColor};font-weight:600">${statusLabel}</span></div>
+        <div class="mv-v" style="font-size:13.5px;font-weight:600;color:var(--texte)">${_escHtml(t.nom)}</div>
+        <div style="font-size:10px;color:var(--texte-doux);margin-top:2px">${(t.trous||t.nom==='Entreplantation')?(_plTr>0?(_plTr+' trous · ~'+hEstim+'h'):'Tarière · aucun trou'):((t.tempsReel?(t.hha?('~'+t.hha+'h/ha estimé'):'temps réel'):(t.hha+'h/ha'))+' · ~'+hEstim+'h')} · <span style="color:${statusColor};font-weight:600">${statusLabel}</span></div>
       </div>
       <div style="display:flex;align-items:center;gap:6px;flex-shrink:0">
         ${canEdit?`<button onclick="tapTacheSimple('${_escAttr(nomParcelle)}','${_escAttr(t.nom)}',this)" style="min-height:44px;padding:6px 11px;border-radius:8px;font-family:inherit;font-size:11px;font-weight:700;cursor:${isOn?'default':'pointer'};border:1.5px solid ${isOn?'rgba(90,156,74,0.38)':isEnCours?'rgba(220,140,30,0.4)':'rgba(255,255,255,0.08)'};background:${isOn?'rgba(90,156,74,0.14)':isEnCours?'rgba(220,140,30,0.13)':'rgba(255,255,255,0.03)'};color:${isOn?'#6AB855':isEnCours?'#DCA030':'var(--texte-doux)'};white-space:nowrap">${isOn?'✓ Validé':isEnCours?'✓ Valider':'▶ Démarrer'}</button>`:`<span class="jst" style="font-size:10px;color:${isOn?'var(--vert)':isEnCours?'var(--or)':'var(--texte-doux)'}">${stat}</span>`}
         ${canEdit&&stat!=='Non démarré'?`<button onclick="annulerTache('${_escAttr(nomParcelle)}','${_escAttr(t.nom)}')" style="min-height:44px;min-width:44px;background:rgba(184,90,26,0.08);border:1px solid rgba(184,90,26,0.28);border-radius:8px;padding:6px 9px;font-size:13px;font-weight:600;color:#B85A1A;cursor:pointer" title="Annuler">↩</button>`:''}
-        ${canEdit&&!isOn&&!isEnCours?`<button onclick="toggleExcluTache('${_escAttr(nomParcelle)}','${_escAttr(t.nom)}')" style="min-height:44px;min-width:44px;background:var(--gris-clair);border:none;border-radius:8px;padding:5px 6px;font-size:12px;cursor:pointer" title="Désactiver cette tâche pour cette parcelle">🚫</button>`:''}
+        ${canEdit&&!isOn&&!isEnCours?`<button onclick="toggleExcluTache('${_escAttr(nomParcelle)}','${_escAttr(t.nom)}')" style="min-height:44px;min-width:44px;background:var(--gris-clair);border:none;border-radius:8px;padding:5px 6px;font-size:12px;cursor:pointer" title="Désactiver cette tâche pour cette parcelle">${_mvIcon('croix',16)}</button>`:''}
       </div>
     </div>`;
   }).join('');
@@ -7057,7 +7129,7 @@ function saveRepPonct(){
   if(navigator.vibrate)navigator.vibrate(60);
   saveData('journal');
   closeOv(null,'ovRepPonct');
-  showToast('🔧 Réparation notée · '+_repTypes.join(', ')+(_repQ>0?(' ×'+_repQ):''),'#3D6B27');
+  showToast('Réparation notée · '+_repTypes.join(', ')+(_repQ>0?(' ×'+_repQ):''),'#3D6B27');
   try{renderJournalList();}catch(e){}
   try{renderHome();}catch(e){}
 }
@@ -7121,7 +7193,7 @@ function marquerEnCours(nomParcelle,nomTache,btn){
     const idx=JOURNAL.findIndex(j=>j.parcelle===nomParcelle&&j.tache===nomTache&&j.statut==='En cours'&&!j.meteo);
     if(idx>=0) JOURNAL.splice(idx,1);
     saveData('journal');
-    showToast('↩️ Démarrage annulé — non enregistré','#7A4F2E');
+    showToast('Démarrage annulé — non enregistré','#7A4F2E');
   } else {
     p.taches[nomTache]='En cours';
     const today=new Date().toISOString().split('T')[0];
@@ -7130,7 +7202,7 @@ function marquerEnCours(nomParcelle,nomTache,btn){
     saveData('journal');
   }
   if(navigator.vibrate)navigator.vibrate(40);
-  saveData('parcelles', '⏳ En cours enregistré');
+  saveData('parcelles', 'En cours enregistré');
   renderParcelles();computePStats();
   openDP(nomParcelle);
 }
@@ -7186,11 +7258,10 @@ function _prioEditRender(){
   _prioEdit.forEach(function(x){ (x.equipe||[]).forEach(function(n){ taken[n]=x.t; }); });
   c.innerHTML=_prioEditTasks.map(function(t,ti){
     var it=_prioEditFind(t); var on=!!it;
-    var em=(window.TEMOJI&&window.TEMOJI[t])?window.TEMOJI[t]:String.fromCodePoint(0x1F33F);
     var h='<div class="pe-row'+(on?' on':'')+'">'
       +'<div class="pe-main" onclick="_prioEditStar('+ti+')">'
       +'<span class="pe-star">'+(on?String.fromCodePoint(0x2B50):String.fromCodePoint(0x2606))+'</span>'
-      +'<span class="pe-nm">'+em+' '+_escHtml(typeof tNom==='function'?tNom(t):t)+'</span>'
+      +'<span class="pe-nm">'+_escHtml(typeof tNom==='function'?tNom(t):t)+'</span>'
       +'</div>';
     if(on){
       h+='<div class="pe-chips">'+_prioEditMbrs.map(function(n,mi){
@@ -7269,7 +7340,7 @@ function toggleTravail(nomParcelle,nomTache,btn){
     saveData('parcelles');
     renderParcelles();computePStats();
     if(navigator.vibrate)navigator.vibrate(40);
-    showToast('↩️ '+tNom(nomTache)+' remis en cours','#B85A1A');
+    showToast(tNom(nomTache)+' remis en cours','#B85A1A');
   } else {
     // Ouvrir le mini-panneau de validation avec choix équipe/seul
     openValidationPanel(nomParcelle,nomTache,btn);
@@ -7279,7 +7350,7 @@ function toggleTravail(nomParcelle,nomTache,btn){
 let _validParcelle='',_validTache='',_validBtn=null;
 function openValidationPanel(nomParcelle,nomTache,btn){
   _validParcelle=nomParcelle;_validTache=nomTache;_validBtn=btn;
-  document.getElementById('vp-titre').textContent=`${TEMOJI[nomTache]||'🌿'} ${nomTache}`;
+  document.getElementById('vp-titre').textContent=nomTache;
   document.getElementById('vp-parcelle').textContent=nomParcelle;
   document.getElementById('vp-date').value=new Date().toISOString().split('T')[0];
   // Reset mode Seul
@@ -7290,7 +7361,7 @@ function openValidationPanel(nomParcelle,nomTache,btn){
   _buildMembresCheckboxes('vp-membres-pick',nomParcelle);
   var jEC=JOURNAL.find(function(j){return j.parcelle===nomParcelle&&j.tache===nomTache&&j.statut==='En cours'&&!j.meteo&&j.ts_debut;});
   var vpT=document.getElementById('vp-temps-ecoule');
-  if(jEC&&vpT){var el=Date.now()-jEC.ts_debut,hh=Math.floor(el/3600000),mm=Math.floor((el%3600000)/60000);vpT.style.display='block';vpT.textContent='⏱ Démarré il y a '+(hh>0?hh+'h ':'')+mm+'min';}
+  if(jEC&&vpT){var el=Date.now()-jEC.ts_debut,hh=Math.floor(el/3600000),mm=Math.floor((el%3600000)/60000);vpT.style.display='block';vpT.textContent='Démarré il y a '+(hh>0?hh+'h ':'')+mm+'min';}
   else if(vpT){vpT.style.display='none';}
   // Section trous tarrière — visible uniquement pour Plantation
   var vpPlant=document.getElementById('vp-plantation-section');
@@ -7352,7 +7423,7 @@ async function confirmValidation(){
       trous=trousVal;
     }
   }
-  if(_validBtn){_validBtn.classList.add('on');_validBtn.classList.remove('off');_validBtn.textContent='✓';_validBtn.title='Validé — cliquer pour annuler';}
+  if(_validBtn){_validBtn.classList.add('on');_validBtn.classList.remove('off');_validBtn.textContent='';_validBtn.title='Validé — cliquer pour annuler';}
   var jEntry={id:Date.now().toString(16),date,parcelle:_validParcelle,tache:_validTache,qui:currentUser.nom,statut:'Validé',equipe,membresEquipe};
   if(trous)jEntry.plantation_trous=trous;
   // Météo moyenne sur la période de la tâche (du premier "En cours" à aujourd'hui)
@@ -7394,7 +7465,7 @@ function _jeBuildTaches(){
   var dans=noms?TACHES.filter(function(t){return t&&noms.indexOf(t.nom)>=0;}):getTachesSaison();
   var autres=TACHES.filter(function(t){return t&&dans.indexOf(t)<0;});
   var opt=function(t){
-    return '<option value="'+_escAttr(t.nom)+'">'+(TEMOJI[t.nom]||'')+' '+_escHtml(t.nom)+'</option>';
+    return '<option value="'+_escAttr(t.nom)+'">'+_escHtml(t.nom)+'</option>';
   };
   var h='';
   if(dans.length){
@@ -7458,7 +7529,7 @@ async function saveJournalEntry(){
   injectMeteoIfNeeded(date);
   if(navigator.vibrate)navigator.vibrate(60);
   saveData('journal');
-  showToast('📝 Entrée enregistrée ✓','#3D6B27');
+  showToast('Entrée enregistrée','#3D6B27');
   document.getElementById('ovJournalEntry').classList.remove('open');
   renderJournalList();
   renderHome();
@@ -7725,7 +7796,7 @@ function _mvdsOpen(o){
   } else {
     h='<div class="mvds-sheet">'
       +'<span class="mvds-grab"></span>'
-      +'<span class="mvds-tick">✓</span>'
+      +'<span class="mvds-tick">'+_mvIcon('check',16)+'</span>'
       +'<span class="mvds-t">'+_escHtml(parc)+', c\'est fait</span>'
       +'<span class="mvds-s">'+_escHtml(tNom(tache))+(o.detail?' · '+_escHtml(o.detail):'')
         +(o.surf?' · '+_mvdsHa(o.surf)+' ha':'')+'</span>'
@@ -7938,7 +8009,7 @@ function openNiveauxPanel(nomParcelle, nomTache) {
   var titEl=document.getElementById('niv-titre');
   var parEl=document.getElementById('niv-parcelle');
   var dateEl=document.getElementById('niv-date');
-  if(titEl)titEl.textContent=(TEMOJI[nomTache]||'↑')+' '+nomTache;
+  if(titEl)titEl.textContent=nomTache;
   if(parEl)parEl.textContent=nomParcelle;
   if(dateEl)dateEl.value=new Date().toISOString().split('T')[0];
   var ab=document.getElementById('niv-admin-badge');
@@ -8110,7 +8181,7 @@ function openPassagesPanel(nomParcelle, nomTache){
   var titEl=document.getElementById('pass-titre');
   var parEl=document.getElementById('pass-parcelle');
   var dateEl=document.getElementById('pass-date');
-  if(titEl)titEl.textContent=(TEMOJI[nomTache]||'🔄')+' '+nomTache;
+  if(titEl)titEl.textContent=nomTache;
   if(parEl)parEl.textContent=nomParcelle;
   if(dateEl)dateEl.value=new Date().toISOString().split('T')[0];
   // Reset team picker
@@ -8153,7 +8224,7 @@ function _renderPassagesModal(){
       +'</div>';
   }
   if(_passOv!==null&&_passOv!==planDef){
-    html+='<div style="margin-top:8px;padding:8px 12px;border-radius:7px;background:rgba(74,159,200,0.08);border:1px solid rgba(74,159,200,0.2);color:var(--acier-med);font-size:11px">⚙ Override activé — cette parcelle diffère du plan saison</div>';
+    html+='<div style="margin-top:8px;padding:8px 12px;border-radius:7px;background:rgba(74,159,200,0.08);border:1px solid rgba(74,159,200,0.2);color:var(--acier-med);font-size:11px">Override activé — cette parcelle diffère du plan saison</div>';
   }
   html+='</div>';
   body.innerHTML=html;
@@ -8230,7 +8301,7 @@ function saveSaisonPassages(nomTache, nb){
   if(window.fbSave)window.fbSave('config',CONFIG);
   delete TRAVAUX[nomTache]; recalcTravaux(nomTache); window.TRAVAUX=TRAVAUX;
   var typeLabel=nomTache==='Relevage'?'niveau'+(nb>1?'x':''):'passage'+(nb>1?'s':'');
-  showToast('✅ '+nomTache+' : '+nb+' '+typeLabel+' par saison','#3D6B27');
+  showToast(nomTache+' : '+nb+' '+typeLabel+' par saison','#3D6B27');
   window.renderReglages();
 }
 
@@ -8418,7 +8489,6 @@ function _mvMapQuickOpen(nom){
   _mvMapQuickNom=nom;
   var cl=getPCls(p);
   var task=pTacheFilter,type=_pvType(task);
-  var em=(window.TEMOJI&&window.TEMOJI[task])?window.TEMOJI[task]:String.fromCodePoint(0x1F3AF);
   var _e=document.getElementById('mq-nom'); if(_e)_e.textContent=p.nom;
   var _s=document.getElementById('mq-sub'); if(_s)_s.textContent=p.statut+' '+String.fromCodePoint(0x00b7)+' '+p.surface+' ha';
   var pe=document.getElementById('mq-pct');
@@ -8510,7 +8580,7 @@ function toggleMapLabels(){
     });
   }
   var btn=document.getElementById('map-lbl-btn');
-  if(btn)btn.textContent=_mapLabelsVisible?'🏷 Noms ✓':'🏷 Noms';
+  if(btn)btn.textContent=_mapLabelsVisible?'Masquer les noms':'Afficher les noms';
 }
 function _updateMapOfflineBanner(){
   var b=document.getElementById('map-offline-banner');
@@ -8527,12 +8597,12 @@ function renderJournal(){
   // Chips ouvriers
   const orow=document.getElementById('ouvrier-chips-row');
   const membres=MEMBRES.filter(m=>m.statut!=='Inactif');
-  orow.innerHTML=`<div class="ochip active" data-qui="tous" onclick="setJQui('tous',this)"><span>👥</span> Tous</div>`
+  orow.innerHTML=`<div class="ochip active" data-qui="tous" onclick="setJQui('tous',this)"><span></span> Tous</div>`
     +membres.map(m=>`<div class="ochip" data-qui="${m.nom}" onclick="setJQui('${m.nom}',this)"><div class="oava" style="background:${m.couleur||'#888'}">${m.nom[0]}</div> ${m.nom}</div>`).join('');
   // Chips tâches
   const trow=document.getElementById('tache-chips-row');
   if(trow) trow.innerHTML=`<div class="tfchip active" data-t="toutes" onclick="setJTache('toutes',this)">Toutes</div>`
-    +TACHES.map(t=>`<div class="tfchip" data-t="${t.nom}" onclick="setJTache('${t.nom}',this)">${TEMOJI[t.nom]||''} ${t.nom}</div>`).join('');
+    +TACHES.map(t=>`<div class="tfchip" data-t="${t.nom}" onclick="setJTache('${t.nom}',this)">${t.nom}</div>`).join('');
   renderJournalList();
 }
 function setPTacheFilter(v,el){window.pShowDone=false;pCurStep=_pvSmartStep(v);
@@ -8551,7 +8621,7 @@ function renderParcelleFilterChips(){
   const parcelles=[...new Set(JOURNAL.filter(j=>!j.meteo).map(j=>j.parcelle))].sort();
   if(parcelles.length===0){row.style.display='none';return;}
   row.style.display='flex';
-  row.innerHTML=`<div class="tfchip ${jParcelle==='toutes'?'active':''}" onclick="setJParcelle('toutes')">📍 Toutes</div>`
+  row.innerHTML=`<div class="tfchip ${jParcelle==='toutes'?'active':''}" onclick="setJParcelle('toutes')">Toutes</div>`
     +parcelles.map(p=>`<div class="tfchip ${jParcelle===p?'active':''}" onclick="setJParcelle('${p.replace(/'/g,"\\'")}')" style="white-space:nowrap">${p}</div>`).join('');
 }
 // ── Snapshot météo dans la fiche journal ──
@@ -8561,12 +8631,12 @@ function _renderMeteoSnapshot(s){
   if(s.date_debut&&s.date_fin&&s.date_debut!==s.date_fin){
     periode='<span class="jms-periode">'+_fd(s.date_debut)+' → '+_fd(s.date_fin)+'</span>';
   }
-  var precipStr=s.precip_tot>0?' · 🌧 '+s.precip_tot+'mm':'';
+  var precipStr=s.precip_tot>0?' · '+s.precip_tot+'mm':'';
   var joursStr=s.nb_jours>1?' · '+s.nb_jours+' j':'';
   return '<div class="jcard-meteo-snap">'+periode+(s.emoji||'🌤')+' '
     +(s.temp_moy!==undefined?s.temp_moy+'°C moy':'—')
     +' · ↑'+s.temp_max+'° ↓'+s.temp_min+'°'
-    +' · 💨 '+s.vent_moy+'km/h'
+    +' · '+s.vent_moy+'km/h'
     +precipStr+joursStr+'</div>';
 }
 
@@ -8610,7 +8680,7 @@ function renderJournalList(){
   if(_pillEl){
     if(_jFiltres.length>0){
       _pillEl.style.display='inline-flex';
-      _pillEl.innerHTML=`<div class="j-filtres-pill-dot"></div><span>${_jFiltres.length} filtre${_jFiltres.length>1?'s':''} actif${_jFiltres.length>1?'s':''} — ${_jFiltres.join(' · ')}</span><span class="j-filtres-pill-clear" onclick="clearAllJFiltres()">✕</span>`;
+      _pillEl.innerHTML=`<div class="j-filtres-pill-dot"></div><span>${_jFiltres.length} filtre${_jFiltres.length>1?'s':''} actif${_jFiltres.length>1?'s':''} — ${_jFiltres.join(' · ')}</span><span class="j-filtres-pill-clear" onclick="clearAllJFiltres()">${_mvIcon('croix',16)}</span>`;
     } else {
       _pillEl.style.display='none';
     }
@@ -8634,9 +8704,7 @@ function renderJournalList(){
         const isValide=r.statut==='Validé';
         const isInfo=r.statut==='Info';
         const sc=isValide?'jdv':isInfo?'jdm':'jde';
-        const sb=isValide?'jsv':isInfo?'jsm':'jse';
         const barCls=isValide?'jcard-bar-v':isInfo?'jcard-bar-m':'jcard-bar-e';
-        const badgeIcon=isValide?'✓':'…';
         const m=MEMBRES.find(x=>x.nom===r.qui);
         const col=m?.couleur||COULEURS_MBR[r.qui]||'#888';
         const isEq=r.equipe||r.qui==='Equipe';
@@ -8646,7 +8714,7 @@ function renderJournalList(){
         const repSuffix=(r.reparation_types&&r.reparation_types.length)?_escHtml(' · '+r.reparation_types.join(', ')+(r.reparation_qte?(' ×'+r.reparation_qte):'')):'';
         const quiAffE=_escHtml(quiAff);
         const parcelleE=_escHtml(r.parcelle);
-        return `<div class="jitem"><div class="jdotcol"><div class="jdot ${sc}"></div>${hasNext?'<div class="jlinev"></div>':''}</div><div class="jcard"><div class="jcard-bar ${barCls}"></div><div class="jcard-col"><div class="jcard-inner"><div style="flex:1;min-width:0"><div class="jtache">${TEMOJI[r.tache]||'📋'} ${tacheAff}${repSuffix}</div><div class="jmeta"><div class="java" style="background:${col}">${_escHtml((r.qui||'?')[0])}</div><span style="white-space:nowrap;overflow:hidden;text-overflow:ellipsis">${quiAffE}</span>${isEq?'<span class="eq-tag">👥</span>':''}<span style="color:var(--gris-clair)">·</span><span style="white-space:nowrap;overflow:hidden;text-overflow:ellipsis">📍 ${parcelleE}</span></div></div><div class="jst ${sb}">${badgeIcon} ${r.statut}</div></div>${r.meteo_snapshot?_renderMeteoSnapshot(r.meteo_snapshot):''}</div></div></div>`;
+        return `<div class="jitem"><div class="jdotcol"><div class="jdot ${sc}"></div>${hasNext?'<div class="jlinev"></div>':''}</div><div class="jcard mv-c" style="margin-bottom:0"><div class="jcard-bar ${barCls}"></div><div class="jcard-col"><div class="jcard-inner"><div class="mv-hd" style="flex:1;min-width:0"><div style="min-width:0"><div class="mv-v" style="font-size:14px;font-weight:600;color:var(--texte)">${tacheAff}${repSuffix}</div><div class="jmeta"><div class="java" style="background:${col}">${_escHtml((r.qui||'?')[0])}</div><span style="white-space:nowrap;overflow:hidden;text-overflow:ellipsis">${quiAffE}</span><span style="color:var(--gris-clair)">\u00b7</span><span style="white-space:nowrap;overflow:hidden;text-overflow:ellipsis">${parcelleE}</span></div></div>${_mvBadge(r.statut, isValide?'vert':isInfo?'neutre':'ambre')}</div></div>${r.meteo_snapshot?_renderMeteoSnapshot(r.meteo_snapshot):''}</div></div></div>`;
       }).join('')}
     </div>`).join('');
   // ── Bouton "Charger plus" ──────────────────────────────────────────────────
@@ -8654,7 +8722,7 @@ function renderJournalList(){
     var _btnMore=document.createElement('button');
     _btnMore.className='j-load-more-btn';
     _btnMore.onclick=function(){_jPage++;renderJournalList();};
-    _btnMore.innerHTML='<span>📋</span> Voir '+_remaining+' entrée'+(_remaining>1?'s':'')+' de plus';
+    _btnMore.textContent='Voir '+_remaining+' entrée'+(_remaining>1?'s':'')+' de plus';
     tl.appendChild(_btnMore);
   }
 }
@@ -8904,10 +8972,10 @@ var _chatDMUnsub = null;
 
 var CHAT_CANAUX = {
   general:  {ico:'#',  label:'Général',  desc:'Discussion générale du domaine'},
-  travaux:  {ico:'🌿', label:'Travaux',  desc:'Suivi des travaux en cours'},
-  tracteur: {ico:'🚜', label:'Tracteur', desc:'Passages et sessions tracteur'},
-  phyto:    {ico:'🧪', label:'Phyto',    desc:'Traitements phytosanitaires'},
-  meteo:    {ico:'🌤', label:'Météo',    desc:'Alertes météo et gel'}
+  travaux:  {ico:'feuille', label:'Travaux',  desc:'Suivi des travaux en cours'},
+  tracteur: {ico:'tracteur', label:'Tracteur', desc:'Passages et sessions tracteur'},
+  phyto:    {ico:'eprouvette', label:'Phyto',    desc:'Traitements phytosanitaires'},
+  meteo:    {ico:'nuage', label:'Météo',    desc:'Alertes météo et gel'}
 };
 
 function _chatDoc(canal){
@@ -8941,7 +9009,7 @@ function chatInit(){
 function chatLoad(){
   var area = document.getElementById('chat-msgs-area');
   if(!area) return;
-  area.innerHTML = '<div class="chat-system">⏳ Chargement…</div>';
+  area.innerHTML = '<div class="chat-system">Chargement…</div>';
 
   // Détacher les anciens listeners
   if(_chatUnsub){ _chatUnsub(); _chatUnsub = null; }
@@ -8954,7 +9022,7 @@ function chatLoad(){
       var msgs = (snap.exists && snap.data() && snap.data().msgs) ? snap.data().msgs : [];
       chatRenderMsgs(msgs, area);
     }).catch(function(e){
-      area.innerHTML = '<div class="chat-system">⚠️ Erreur : ' + e.code + '</div>';
+      area.innerHTML = '<div class="chat-system">Erreur : ' + e.code + '</div>';
     });
     // Listener temps réel
     _chatDMUnsub = dmRef.onSnapshot(function(snap){
@@ -8973,7 +9041,7 @@ function chatLoad(){
       var msgs = (snap.exists && snap.data() && snap.data().msgs) ? snap.data().msgs : [];
       chatRenderMsgs(msgs, area);
     }).catch(function(e){
-      area.innerHTML = '<div class="chat-system">⚠️ Erreur : ' + e.code + '</div>';
+      area.innerHTML = '<div class="chat-system">Erreur : ' + e.code + '</div>';
     });
     // Listener temps réel
     _chatUnsub = cRef.onSnapshot(function(snap){
@@ -9000,7 +9068,7 @@ function chatUpdateTopbar(){
     if(ta) ta.placeholder = 'Message à ' + _chatDMTarget + '…';
   } else {
     var cfg = CHAT_CANAUX[_chatCanal] || {ico:'#', label:_chatCanal, desc:''};
-    if(ico) ico.textContent = cfg.ico;
+    if(ico) window._mvSetIcon(ico, cfg.ico, 20);
     if(name) name.textContent = cfg.label;
     if(desc) desc.textContent = cfg.desc;
     if(ta) ta.placeholder = 'Message #' + cfg.label + '…';
@@ -9071,7 +9139,7 @@ function chatOpenDM(el, nom){
 
 // ── Envoi message ──
 async function chatSend(){
-  if(isSaisonnier()){ showToast('🔒 Lecture seule · envoi impossible','#C0392B'); return; }
+  if(isSaisonnier()){ showToast('Lecture seule · envoi impossible','#C0392B'); return; }
   var ta = document.getElementById('chat-ta');
   var txt = ta.value.trim();
   if(!txt) return;
@@ -9096,7 +9164,7 @@ async function chatSend(){
     }
   } catch(e){
     console.error('[Chat] Envoi échoué', e);
-    showSyncBadge('⚠️ Message non envoyé', '#B85A1A');
+    showSyncBadge('Message non envoyé', '#B85A1A');
   }
 }
 
@@ -9152,9 +9220,13 @@ function clearJSearch(){
 
 // ════ DOMAINE_NOM ════
 var _confirmDelCb=null;
+// `icon` accepte DEUX ecritures, et ce n'est pas une hesitation : un nom
+// d'icone du sprite (« corbeille ») pour les modules migres, un emoji pour
+// ceux qui ne le sont pas encore (DS-M). `_mvSetIcon` tranche sur la forme.
 function openConfirmDel(title,sub,cb,icon,btnLabel,btnColor){
   _confirmDelCb=cb||null;
-  document.getElementById('ocd-icon').textContent=icon||'⚠️';
+  if(window._mvSetIcon) window._mvSetIcon(document.getElementById('ocd-icon'),(icon==null?'alerte':icon),30);
+  else document.getElementById('ocd-icon').textContent=icon||'⚠️';
   document.getElementById('ocd-title').textContent=title||'Confirmer ?';
   document.getElementById('ocd-sub').textContent=sub||'';
   var _ocdBtn=document.getElementById('ocd-btn');
@@ -9182,7 +9254,8 @@ function openPrompt(o){
   var el=g('mvp-input');
   if(!el){ showToast('Saisie indisponible','#C0392B'); return; }
   _mvPromptCb=(typeof o.cb==='function')?o.cb:null;
-  g('mvp-icon').textContent  = o.icone||'\u270F\uFE0F';
+  if(window._mvSetIcon) window._mvSetIcon(g('mvp-icon'),(o.icone==null?'crayon':o.icone),28);
+  else g('mvp-icon').textContent = o.icone||'\u270F\uFE0F';
   g('mvp-title').textContent = o.titre||'Saisir une valeur';
   g('mvp-sub').textContent   = o.sub||'';
   g('mvp-unit').textContent  = o.unite||'';
@@ -9260,7 +9333,7 @@ function ouvrirExportEntretien(){
       return '<label style="display:flex;align-items:center;gap:12px;padding:11px 0;border-bottom:1px solid var(--gris-clair);cursor:pointer;min-height:44px">'
         +'<input type="checkbox" class="exp-ent-trac-cb" value="'+t.id+'" onchange="_updateExportSummary()" checked style="width:18px;height:18px;accent-color:'+col+';cursor:pointer">'
         +'<div><div style="font-weight:600;font-size:13px">'+_escHtml(t.nom)+(t.traitementOnly?' <span style="font-size:9px;background:var(--orange-pale);color:var(--orange);border-radius:4px;padding:1px 5px">Traitement</span>':'')+'</div>'
-        +'<div style="font-size:11px;color:'+col+'">🔩 '+_escHtml(t.modele||'—')+' · '+_escHtml(t.type)+'</div></div>'
+        +'<div style="font-size:11px;color:'+col+'">'+_escHtml(t.modele||'—')+' · '+_escHtml(t.type)+'</div></div>'
       +'</label>';
     }).join('');
   }
@@ -9299,15 +9372,15 @@ function lancerExportEntretienPDF(){
       var defTracNom=actDef?((TRACTEURS_LIST.find(function(x){return x.id===actDef.tracteurDefautId;}))||{}).nom||'—':'—';
       var tracNom=((TRACTEURS_LIST.find(function(x){return x.id===f.tracteurId;}))||{}).nom||'';
       var overrideInfo=f.tracteurOverride?'<div style="background:#FEF3E2;border-left:3px solid #E07B2A;padding:5px 10px;font-size:10px;color:#935116;margin-top:4px">✱ Tracteur utilisé : '+_escHtml(tracNom)+' (défaut : '+_escHtml(defTracNom)+')</div>':'';
-      return '<div class="fiche-bloc'+(f.anomalie?' has-anomalie':'')+'"><div class="fiche-header"><div><div class="fiche-date">📅 '+fmtD(f.date)+'</div><div class="fiche-meta">👤 '+_escHtml(f.conducteur)+(f.activite?' · 🚜 '+_escHtml(f.activite):'')+(tracNom&&!f.tracteurOverride?' · '+_escHtml(tracNom):'')+'</div></div><div class="fiche-score '+(nb===6?'score-ok':'score-warn')+'">'+nb+'/6</div></div><div class="check-grid">'+checkHtml+'</div>'+(f.anomalie?'<div class="anomalie">⚠️ Anomalie : '+_escHtml(f.anomalie)+'</div>':'')+overrideInfo+'</div>';
+      return '<div class="fiche-bloc'+(f.anomalie?' has-anomalie':'')+'"><div class="fiche-header"><div><div class="fiche-date">'+fmtD(f.date)+'</div><div class="fiche-meta">'+_escHtml(f.conducteur)+(f.activite?' · '+_escHtml(f.activite):'')+(tracNom&&!f.tracteurOverride?' · '+_escHtml(tracNom):'')+'</div></div><div class="fiche-score '+(nb===6?'score-ok':'score-warn')+'">'+nb+'/6</div></div><div class="check-grid">'+checkHtml+'</div>'+(f.anomalie?'<div class="anomalie">Anomalie : '+_escHtml(f.anomalie)+'</div>':'')+overrideInfo+'</div>';
     }).join('');
     var repsHTML=!repsAll.length?'<p class="empty">Aucun passage réparateur pour '+annee+'.</p>':repsAll.map(function(r){
       var retour=r.retour_reel||null;var enCours=!retour;
       var nbJ=retour?Math.ceil((new Date(retour)-new Date(r.depuis))/86400000):Math.ceil((new Date()-new Date(r.depuis))/86400000);
       var depasse=r.prevu_retour&&!retour&&new Date()>new Date(r.prevu_retour);
-      return '<div class="rep-bloc'+(enCours?' rep-en-cours':'')+(depasse?' rep-depasse':'')+'"><div class="rep-header"><div><div class="rep-motif">'+_escHtml(r.motif)+'</div><div class="rep-dates">Entrée : <strong>'+fmtD(r.depuis)+'</strong>'+(r.prevu_retour?' · Retour prévu : <strong>'+fmtD(r.prevu_retour)+'</strong>':'')+(retour?' · Retour réel : <strong>'+fmtD(retour)+'</strong>':'')+'</div></div><div class="rep-badge '+(enCours?'badge-cours':'badge-ok')+'">'+( enCours?(depasse?'⚠️ Dépassé':'🔧 En cours'):'✓ '+nbJ+'j')+'</div></div></div>';
+      return '<div class="rep-bloc'+(enCours?' rep-en-cours':'')+(depasse?' rep-depasse':'')+'"><div class="rep-header"><div><div class="rep-motif">'+_escHtml(r.motif)+'</div><div class="rep-dates">Entrée : <strong>'+fmtD(r.depuis)+'</strong>'+(r.prevu_retour?' · Retour prévu : <strong>'+fmtD(r.prevu_retour)+'</strong>':'')+(retour?' · Retour réel : <strong>'+fmtD(retour)+'</strong>':'')+'</div></div><div class="rep-badge '+(enCours?'badge-cours':'badge-ok')+'">'+( enCours?(depasse?'Dépassé':'En cours'):''+nbJ+'j')+'</div></div></div>';
     }).join('');
-    return '<section class="tracteur-section"><div class="tracteur-title"><div><div class="tracteur-nom">'+_escHtml(t.nom)+(t.traitementOnly?' <span class="badge-trait">Traitement</span>':'')+'</div><div class="tracteur-modele">🔩 '+_escHtml(t.modele||'—')+' · '+_escHtml(t.type)+'</div></div><div class="tracteur-annee">'+annee+'</div></div>'+resumeHTML+'<h3 class="section-sub">📋 Fiches d\'entretien</h3>'+fichesHTML+'<h3 class="section-sub" style="margin-top:20px">🔧 Passages réparateur</h3>'+repsHTML+'</section>';
+    return '<section class="tracteur-section"><div class="tracteur-title"><div><div class="tracteur-nom">'+_escHtml(t.nom)+(t.traitementOnly?' <span class="badge-trait">Traitement</span>':'')+'</div><div class="tracteur-modele">'+_escHtml(t.modele||'—')+' · '+_escHtml(t.type)+'</div></div><div class="tracteur-annee">'+annee+'</div></div>'+resumeHTML+'<h3 class="section-sub">Fiches d\'entretien</h3>'+fichesHTML+'<h3 class="section-sub" style="margin-top:20px">Passages réparateur</h3>'+repsHTML+'</section>';
   }).join('<div class="page-break"></div>');
   var aujourd_hui=fmtD(new Date().toISOString().slice(0,10));
   // ★ CHARTE MV_DOC. Ce document titrait « Ma Vigne — Entretien tracteurs » et
@@ -9657,9 +9730,9 @@ function _swReload() {
 
 // ════ REFRESH SANS DÉCONNEXION ════
 async function refreshApp(){
-  if(!navigator.onLine){showToast('📵 Hors ligne','#7A4F2E');return;}
-  if(!currentUser){showToast('⚠️ Non connecté','#C0392B');return;}
-  showSyncBadge('🔄 Actualisation…','#1A4A7A');
+  if(!navigator.onLine){showToast('Hors ligne','#7A4F2E');return;}
+  if(!currentUser){showToast('Non connecté','#C0392B');return;}
+  showSyncBadge('Actualisation…','#1A4A7A');
   var btn=document.getElementById('hv2-refresh-btn');
   if(btn){btn.style.transform='rotate(360deg)';btn.style.transition='transform 0.6s ease';}
   try{
@@ -9673,9 +9746,9 @@ async function refreshApp(){
       if(pid==='page-phyto')renderPhyto();
       if(pid==='page-reglages')window.renderReglages();
     }
-    showSyncBadge('✅ Actualisé','#3D6B27');
-    showToast('✅ Données actualisées','#3D6B27');
-  }catch(e){showToast('⚠️ Erreur actualisation','#C0392B');}
+    showSyncBadge('Actualisé','#3D6B27');
+    showToast('Données actualisées','#3D6B27');
+  }catch(e){showToast('Erreur actualisation','#C0392B');}
   setTimeout(function(){if(btn){btn.style.transform='';btn.style.transition='';}},700);
 }
 (function(){
@@ -10052,9 +10125,9 @@ function _pvRenderTeamBar(){
   if(pTacheFilter==='toutes'||!canWrite()){w.innerHTML='';return;}
   var team=_eqtFor(pTacheFilter);
   var names=team.length?team.join(', '):'Moi seul';
-  var avs=team.length?team.slice(0,4).map(function(n){return '<div class="pv-team-av" style="background:'+(COULEURS_MBR[n]||'#3D6B27')+'">'+(n[0]||'?')+'</div>';}).join(''):'<div class="pv-team-av" style="background:#3D6B27">🙋</div>';
+  var avs=team.length?team.slice(0,4).map(function(n){return '<div class="pv-team-av" style="background:'+(COULEURS_MBR[n]||'#3D6B27')+'">'+(n[0]||'?')+'</div>';}).join(''):'<div class="pv-team-av" style="background:#3D6B27"></div>';
   var tl=(typeof tNom==='function')?tNom(pTacheFilter):pTacheFilter;
-  w.innerHTML='<div class="pv-team-bar" onclick="openPTeamJour()"><span class="pv-team-ico">👥</span><div class="pv-team-info"><div class="pv-team-lbl">Équipe sur <b>'+_escHtml(tl)+'</b></div><div class="pv-team-names">'+_escHtml(names)+'</div></div><div class="pv-team-avs">'+avs+'</div><span class="pv-team-edit">Changer</span></div>';
+  w.innerHTML='<div class="pv-team-bar" onclick="openPTeamJour()"><span class="pv-team-ico"></span><div class="pv-team-info"><div class="pv-team-lbl">Équipe sur <b>'+_escHtml(tl)+'</b></div><div class="pv-team-names">'+_escHtml(names)+'</div></div><div class="pv-team-avs">'+avs+'</div><span class="pv-team-edit">Changer</span></div>';
 }
 
 var _pvTeamSel=[];
@@ -10066,7 +10139,7 @@ function openPTeamJour(){
 function _pvBuildRecent(){
   var c=document.getElementById('pv-team-recent');if(!c)return;
   var cur=_eqtFor(pTacheFilter);
-  var h='<div class="pv-recent-chip'+(cur.length===0?' sel':'')+'" onclick="_pvApplyTeam([])"><span class="pv-recent-ico">🙋</span><span class="pv-recent-txt">Moi seul</span><span class="pv-recent-go">Affecter</span></div>';
+  var h='<div class="pv-recent-chip'+(cur.length===0?' sel':'')+'" onclick="_pvApplyTeam([])"><span class="pv-recent-ico"></span><span class="pv-recent-txt">Moi seul</span><span class="pv-recent-go">Affecter</span></div>';
   (EQUIPE_RECENT||[]).forEach(function(t){
     var team=_eqtClean(t);if(!team.length)return;
     var same=_eqtSameTeam(team,cur);
@@ -10087,7 +10160,7 @@ function _pvToggleTeamMbr(n){var i=_pvTeamSel.indexOf(n);if(i>=0)_pvTeamSel.spli
 function _pvApplyTeam(team){
   _eqtSet(pTacheFilter,team);closeOv(null,'ovPTeam');_pvRenderTeamBar();
   var t=_eqtClean(team),tl=(typeof tNom==='function')?tNom(pTacheFilter):pTacheFilter;
-  showToast((t.length?'👥 '+t.join(', '):'🙋 Seul')+' → '+tl,'#3D6B27');
+  showToast((t.length?t.join(', '):'Seul')+' → '+tl,'#3D6B27');
 }
 function savePTeamJour(){_pvApplyTeam(_pvTeamSel.slice());}
 
@@ -10107,7 +10180,7 @@ function _pvHideToast(){var t=document.getElementById('pv-toast');if(t)t.classLi
 /* Validation rapide 1-tap */
 function pQuickValidate(nom,evt){
   if(_mvValidBlocked())return;
-  if(!canWrite()){showToast('🔒 Lecture seule','#7A4F2E');return;}
+  if(!canWrite()){showToast('Lecture seule','#7A4F2E');return;}
   var p=PARCELLES.find(function(x){return x.nom===nom;});if(!p)return;
   var task=pTacheFilter,type=_pvType(task);
   if(type!=='simple'&&pCurStep>_pvEffPlan(p,task)){openDP(nom);return;}
@@ -10136,7 +10209,7 @@ function pQuickValidate(nom,evt){
     }
     p.taches[task]=cur;
     var g=getTacheStatut(p,task);
-    label=tNom(task)+' '+_pvStepLabel(task)+pCurStep+(g==='Validé'?' · terminé ✓':'');
+    label=tNom(task)+' '+_pvStepLabel(task)+pCurStep+(g==='Validé'?' · terminé':'');
     extra.statut=g;
   }
   var jEntry=Object.assign({id:jid,date:date,parcelle:nom,tache:task,qui:currentUser.nom,equipe:equipe,membresEquipe:membresEquipe},extra);
@@ -10151,7 +10224,7 @@ function pQuickValidate(nom,evt){
                membres:equipe?[currentUser.nom].concat(membresEquipe.filter(function(n){return n!==currentUser.nom;})):[],
                undo:function(){pQuickUndoEntry(nom,task,prev,jid);}});
   } else {
-    _pvToast('✅ '+label+' · '+nom+' · '+who, function(){pQuickUndoEntry(nom,task,prev,jid);});
+    _pvToast(label+' · '+nom+' · '+who, function(){pQuickUndoEntry(nom,task,prev,jid);});
   }
   (async function(){try{var _d=_findDebutTache(nom,task,date)||date;var _m=await fetchMeteoMoyenne(_d,date);if(_m){jEntry.meteo_snapshot=_m;saveData('journal');}}catch(e){}})();
   var card=evt&&evt.target?evt.target.closest('.pcard'):null;
@@ -10170,7 +10243,7 @@ function pQuickUndoEntry(nom,task,prev,jid){
   saveData('parcelles');saveData('journal');saveData('travaux');
   if(navigator.vibrate)navigator.vibrate(30);
   renderParcelles();computePStats();
-  showToast('↩︎ Validation annulée · '+nom,'#7A4F2E');
+  showToast('Validation annulée · '+nom,'#7A4F2E');
 }
 function pQuickUndo(nom){
   if(!canWrite())return;
@@ -10182,7 +10255,7 @@ function pQuickUndo(nom){
   saveData('parcelles');saveData('travaux');
   if(navigator.vibrate)navigator.vibrate(30);
   renderParcelles();computePStats();
-  showToast('↩︎ '+tNom(task)+(type!=='simple'?' '+_pvStepLabel(task)+pCurStep:'')+' remis · '+nom,'#B85A1A');
+  showToast(tNom(task)+(type!=='simple'?' '+_pvStepLabel(task)+pCurStep:'')+' remis · '+nom,'#B85A1A');
 }
 function pQuickStart(nom,evt){
   if(_mvValidBlocked())return;
@@ -10362,11 +10435,11 @@ function _syncRefresh(){
 }
 function _syncFromMessage(msg){
   msg=String(msg||'');
-  if(/Synchronisation|🔄|rétablie|📶|Chargement|Connexion|Actualisation/.test(msg)){
+  if(/Synchronisation|rétablie|Chargement|Connexion|Actualisation/.test(msg)){
     _syncTransient=true;_syncSetState('syncing',0);
     clearTimeout(_syncTT);_syncTT=setTimeout(function(){_syncTransient=false;_syncRefresh();},1400);
   }else{
-    if(/✅|Synchronisé|synchronisée|Actualisé/.test(msg))_syncLastSync=Date.now();
+    if(/Synchronisé|synchronisée|Actualisé/.test(msg))_syncLastSync=Date.now();
     _syncTransient=false;clearTimeout(_syncTT);_syncRefresh();
   }
 }
@@ -10385,12 +10458,12 @@ function _syncOpenDetail(){
   var b=document.getElementById('sync-pop-body');if(!b){_syncRefresh();return;}
   var pending=_syncPending(),online=navigator.onLine,h='';
   if(online&&pending===0){
-    h='<div class="sync-pop-hd"><div class="sync-pop-ico synced">✓</div><div><div class="sync-pop-t">Tout est enregistré</div></div></div>'
+    h='<div class="sync-pop-hd"><div class="sync-pop-ico synced">'+_mvIcon('check',18)+'</div><div><div class="sync-pop-t">Tout est enregistré</div></div></div>'
      +'<div class="sync-pop-d">Toutes les modifications sont synchronisées dans le cloud.</div>'
      +'<div class="sync-pop-foot">Dernière synchro : '+_syncAgo()+'</div>';
   }else{
     var keys=_syncQueueBreakdown();
-    h='<div class="sync-pop-hd"><div class="sync-pop-ico offline">📵</div><div><div class="sync-pop-t">'+(online?'Modifications en attente':'Hors ligne')+'</div></div></div>'
+    h='<div class="sync-pop-hd"><div class="sync-pop-ico offline">'+_mvIcon('croix',18)+'</div><div><div class="sync-pop-t">'+(online?'Modifications en attente':'Hors ligne')+'</div></div></div>'
      +'<div class="sync-pop-d">'+(pending>0?(pending+' modification'+(pending>1?'s':'')+' enregistrée'+(pending>1?'s':'')+' sur l\'appareil. '):'')
         +(online?'Synchronisation en cours…':'Elles partiront automatiquement au retour du réseau — tu peux continuer à travailler.')+'</div>';
     if(keys.length){

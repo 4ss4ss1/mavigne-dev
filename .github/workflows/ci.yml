@@ -96,9 +96,25 @@ jobs:
       # EXECUTEE sur de vrais etats memorises, pas relue.
       - name: Harnais — echelle, pastille « i », carte a trois etages
         run: |
-          node scripts/mv-harnais-echelle.mjs
+          node scripts/mv-harnais-echelle.mjs   # + le cliquet d'espacement (DS-3)
           node scripts/mv-harnais-info.mjs
           node scripts/mv-harnais-carte.mjs
+
+      # Le jeu d'icones (DS-1). Un <use> qui vise un symbol absent ne rend RIEN,
+      # en silence : c'est le piege du repli CSS applique aux icones. Le harnais
+      # verifie que tout appel a son symbol, qu'aucun symbol ne dort sans emploi,
+      # qu'aucune forme ne fige sa couleur (elle ne se repeindrait plus en mode
+      # sombre), qu'aucun DOCUMENT IMPRIME n'appelle `_mvIcon` (le sprite n'existe
+      # pas dans l'onglet ou il s'ouvre) et que le compte d'emojis rendus NE
+      # REMONTE JAMAIS — module par module, pas seulement au total.
+      # ⚠️ La contre-epreuve tourne AUSSI : un harnais qui ne rougit jamais ne
+      #   prouve rien. Elle repose les six fautes, une par une, sur une copie.
+      # ⚠️ Le sprite est COMMITE et `lucide-static` n'est PAS une dependance :
+      # la CI n'installe rien de plus. `build-sprite.mjs` est un outil manuel.
+      - name: Harnais — le jeu d'icones, et sa contre-epreuve
+        run: |
+          node scripts/mv-harnais-icones.mjs
+          node scripts/mv-harnais-icones-contre.mjs
 
       # La visite guidee est la VITRINE : une demo cassee est cassee en public.
       # Deux regles qu'aucun autre controle ne porte. ① On ne facture que ce

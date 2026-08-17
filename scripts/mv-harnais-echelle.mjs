@@ -8,10 +8,14 @@
       plus dans _pilCssV2(). Le harnais suit — il avait 13 rouges le jour du
       demenagement, ce qui est exactement son travail.
    ─────────────────────────────────────────────────────────────────────────── */
-import { readFileSync } from 'node:fs';
+import { readFileSync, writeFileSync } from 'node:fs';
 
-const JS  = process.argv[2] || 'src/pilotage.js';
-const CSS = process.argv[3] || 'src/styles.css';
+// ⚠️ Les DRAPEAUX sont ecartes des chemins : `--baseline` etait lu comme un
+//   nom de fichier et le harnais mourait sur un ENOENT. Un argument
+//   positionnel et un drapeau ne se melangent pas sans filtre.
+const _args = process.argv.slice(2).filter(a => !a.startsWith('--'));
+const JS  = _args[0] || 'src/pilotage.js';
+const CSS = _args[1] || 'src/styles.css';
 const BRUT = readFileSync(JS, 'utf8');
 const FEUILLE = readFileSync(CSS, 'utf8');
 
@@ -44,6 +48,45 @@ t('les onze pas sont dans :root', PAS.every(([n]) => bloc.includes(`--pt-${n}:`)
 /* 3. L'echelle N'EST PLUS dans le module : une valeur declaree deux fois, c'est
       deux verites en puissance. */
 t('aucun pas n\'est re-declare dans le module', !/--pt-[a-z]+\s*:\s*[0-9.]+px\s*;/.test(SRC));
+
+/* ══ L'ECHELLE D'ESPACEMENT (lot DS-3) ═════════════════════════════════════
+   La feuille portait vingt valeurs de padding, de 1 a 20 px. On ne la reecrit
+   PAS d'un coup : remapper 800 declarations sans pouvoir verifier une seule
+   capture serait un pari. On pose l'echelle, la charte s'y range, et le RESTE
+   est tenu par un CLIQUET — le nombre de valeurs hors echelle ne peut plus
+   monter. La dette se resorbe ecran par ecran au lieu d'empirer.
+   ⚠️ Le compte se fait sur la feuille SANS COMMENTAIRES : sinon un exemple
+     ecrit dans une explication compterait comme une faute. */
+const PAS_E = [2, 4, 8, 12, 16, 20, 24, 32, 40];
+t('les neuf pas d\'espacement sont dans :root',
+  PAS_E.every((v, i) => bloc.includes('--e-' + i + ':' + v + 'px')));
+
+/* La charte DS-2 n'a pas le droit d'ecrire un espacement a la main. */
+const chartes = (CSSNU.match(/\.mv-(?:c|hd|ft|kv|tr|act|bdg|gh|track)\b[^{]*\{[^}]*\}/g) || []).join('\n');
+const espDur = (chartes.match(/(?:padding|margin|gap)(?:-[a-z]+)?:\s*[^;}]*\b\d+px/g) || [])
+  .filter(x => !/var\(--e-/.test(x));
+t('la charte DS-2 n\'ecrit aucun espacement a la main', espDur.length === 0, espDur.join(' · '));
+
+/* Le cliquet sur le reste de la feuille. */
+const horsEch = (CSSNU.match(/(?:padding|margin|gap)(?:-[a-z]+)?:\s*[^;}]*?(\d+)px/g) || [])
+  .flatMap(d => (d.match(/(\d+)px/g) || []).map(v => parseInt(v)))
+  .filter(v => v > 0 && !PAS_E.includes(v));
+const REF_E = 'scripts/mv-espace-baseline.json';
+let refE = null;
+try { refE = JSON.parse(readFileSync(REF_E, 'utf8')); } catch { /* premier passage */ }
+if (process.argv.includes('--baseline')) {
+  writeFileSync(REF_E, JSON.stringify({ horsEchelle: horsEch.length }, null, 2) + '\n');
+  console.log('\n  cliquet d\'espacement grave : ' + horsEch.length);
+} else if (!refE) {
+  t('le cliquet d\'espacement existe', false,
+    'lancer : node scripts/mv-harnais-echelle.mjs --baseline');
+} else {
+  t('les valeurs d\'espacement hors echelle ne remontent pas ('
+    + horsEch.length + ' \u2264 ' + refE.horsEchelle + ')', horsEch.length <= refE.horsEchelle);
+  if (horsEch.length < refE.horsEchelle)
+    console.log('    \x1b[33m\u2193\x1b[0m ' + (refE.horsEchelle - horsEch.length)
+      + ' de moins \u2014 regraver : node scripts/mv-harnais-echelle.mjs --baseline');
+}
 
 /* 4. AUCUNE taille inventee sur place. C'est le cliquet du lot. */
 const enDur = [];

@@ -1,0 +1,84 @@
+/* ═══════════════════════════════════════════════════════════════════════════
+   FABRIQUE LE SPRITE D'ICONES A PARTIR DU PAQUET LUCIDE
+   Lancer :  npm i -D lucide-static      (une fois)
+             node scripts/build-sprite.mjs > /tmp/sprite.html
+             puis remplacer le bloc <svg id="mv-sprite"> d'index.html
+
+   ⚠️ VOLONTAIREMENT HORS DU BUILD, et hors de package.json. Le sprite est
+     COMMITE : ni la CI ni un client n'ont besoin de lucide-static. Le paquet
+     ne sert qu'a regenerer, a la main, quand la correspondance change.
+   ⚠️ NE JAMAIS RETOUCHER UNE FORME DANS index.html. Elle serait ecrasee au
+     prochain passage ici, sans bruit. Ce fichier est la source.
+   ★ Trois jeux dessines a la main ont ete refuses avant d'en arriver la
+     (§45h) : la coherence d'une bibliotheque entretenue ne se rattrape pas
+     a la main sur 36 dessins.
+   ═══════════════════════════════════════════════════════════════════════════ */
+import fs from 'node:fs';
+const DIR = 'node_modules/lucide-static/icons/';
+if (!fs.existsSync(DIR)) {
+  console.error('\n  lucide-static est absent. Lancer :  npm i -D lucide-static\n');
+  process.exit(1);
+}
+const V = JSON.parse(fs.readFileSync('node_modules/lucide-static/package.json','utf8')).version;
+
+/* nom Ma Vigne  →  nom Lucide  ·  a quoi il sert dans l'app */
+export const MAP = {
+  alerte:'triangle-alert', beche:'shovel', bureau:'building-2', calendrier:'calendar',
+  carburant:'fuel', carton:'archive', check:'check', chrono:'timer', cle:'key-round',
+  corbeille:'trash-2', crayon:'pencil', croix:'x', curseurs:'sliders-horizontal',
+  dossier:'folder', eclair:'zap', epingle:'map-pin', eprouvette:'test-tube',
+  feuille:'leaf', flamme:'flame', goutte:'droplet', graphique:'chart-column', lien:'link',
+  liste:'clipboard-list', outil:'wrench', personne:'user', pousse:'sprout', raisin:'grape',
+  info:'info', balance:'scale', pulverisateur:'spray-can', fiole:'flask-conical', cible:'target',
+  livre:'book-open', bogue:'bug', carte:'map', journal:'notebook-pen',
+  nuage:'cloud', pluie:'cloud-rain', neige:'cloud-snow', bruine:'cloud-drizzle',
+  orage:'cloud-lightning', brouillard:'cloud-fog',
+  plus:'ellipsis', rang:'fence', retour:'undo-2', rotation:'refresh-cw', sablier:'hourglass',
+  verre:'wine',
+  secateur:'scissors', tariere:'drill', tracteur:'tractor'
+};
+
+export function corps(lucide) {
+  const brut = fs.readFileSync(DIR + lucide + '.svg', 'utf8');
+  const m = brut.match(/<svg[^>]*>([\s\S]*?)<\/svg>/);
+  if (!m) throw new Error('forme illisible : ' + lucide);
+  const c = m[1].replace(/<!--[\s\S]*?-->/g, '').replace(/\s+/g, ' ').trim();
+  /* ⚠️ Lucide porte stroke-width sur la balise <svg>, PAS sur les formes : c'est
+     exactement ce qu'il faut ici, la graisse reste heritee de .mv-ic. On verifie. */
+  /* `fill="currentColor"` est TOLERE : il suit encore la couleur du texte
+     (Lucide s'en sert pour un point plein, ex. le trou de la cle). Ce qui est
+     interdit, c'est une couleur EN DUR ou une graisse posee sur la forme. */
+  const fautif = (c.match(/(?:stroke-width|stroke|fill)="[^"]*"/g) || [])
+    .filter(a => a !== 'fill="none"' && a !== 'fill="currentColor"' && a !== 'stroke="none"');
+  if (fautif.length) throw new Error(lucide + ' fige : ' + fautif.join(' '));
+  return c;
+}
+
+export const VERSION = V;
+if (process.argv[2] === '--print') {
+  const noms = Object.keys(MAP).sort();
+  let s = '<!-- ════════════════════════════════════════════════════════════════════════\n'
+    + '     LE SPRITE D\'ICONES (lot DS-1)\n'
+    + '     ★ Les formes viennent de LUCIDE v' + V + ' (licence ISC — lucide.dev),\n'
+    + '       recopiees telles quelles depuis le paquet `lucide-static`. Trois jeux\n'
+    + '       dessines a la main ont ete refuses avant : la coherence d\'une\n'
+    + '       bibliotheque entretenue ne se retrouve pas a la main sur 36 dessins.\n'
+    + '     ⚠️ NE PAS RETOUCHER UNE FORME ICI. Le sprite se REGENERE :\n'
+    + '          node scripts/build-sprite.mjs\n'
+    + '        La correspondance nom-maison → nom-Lucide y vit, et elle seule.\n'
+    + '     ⚠️ Les formes ne portent NI stroke NI stroke-width NI fill : tout est\n'
+    + '        herite de .mv-ic (styles.css). C\'est deja la convention de Lucide,\n'
+    + '        qui pose ces attributs sur la balise <svg> ; le script le verifie.\n'
+    + '     ⚠️ Un symbol absent ne rend RIEN, en silence : le harnais l\'interdit,\n'
+    + '        `_mvIcon` rend un carre pointille et le journal le note.\n'
+    + '     ⚠️ Ce bloc doit rester AVANT #app-root : `_mvIconInline` (documents\n'
+    + '        imprimes) lit ces formes dans le DOM.\n'
+    + '     ════════════════════════════════════════════════════════════════════ -->\n'
+    + '<svg id="mv-sprite" data-lucide="' + V + '" aria-hidden="true" focusable="false"'
+    + ' style="display:none" xmlns="http://www.w3.org/2000/svg">\n';
+  for (const n of noms)
+    s += '  <symbol id="ic-' + n + '" viewBox="0 0 24 24" data-src="' + MAP[n] + '">'
+       + corps(MAP[n]) + '</symbol>\n';
+  s += '</svg>\n';
+  process.stdout.write(s);
+}

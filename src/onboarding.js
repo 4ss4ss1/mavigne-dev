@@ -15,7 +15,7 @@
 //   firebase.auth()                      ← CDN global (SDK compat)
 //
 // GT_ADMIN_EMAIL importé depuis utils.js — source de vérité unique
-import { GT_ADMIN_EMAIL, _escHtml } from './utils.js';
+import { GT_ADMIN_EMAIL, _escHtml, _mvIcon } from './utils.js';
 // ════════════════════════════════════════════════════════════════
 
 const DEBUG = location.hostname === 'localhost' || location.hostname === '127.0.0.1';
@@ -105,7 +105,7 @@ function obRenderParcelles() {
     return '<div class="ob-parcelle-item">'
       +'<div class="ob-parcelle-nom">'+_escHtml(p.nom)+'</div>'
       +'<div class="ob-parcelle-surf">'+p.surface.toFixed(2)+' ha</div>'
-      +'<div class="ob-parcelle-del" onclick="obRemoveParcelle('+i+')">✕</div>'
+      +'<div class="ob-parcelle-del" onclick="obRemoveParcelle('+i+')">'+_mvIcon('croix',16)+'</div>'
       +'</div>';
   }).join('');
 }
@@ -138,7 +138,7 @@ function obRenderMembres() {
       +'<div class="ob-mbr-avatar" style="background:'+m.couleur+'">'+m.nom.charAt(0).toUpperCase()+'</div>'
       +'<div class="ob-mbr-info"><div class="ob-mbr-nom">'+_escHtml(m.nom)+'</div>'
       +'<div class="ob-mbr-roles">'+m.roles.join(', ')+' · '+_escHtml(m.email)+'</div></div>'
-      +'<div class="ob-mbr-del" onclick="obRemoveMembre('+i+')">✕</div>'
+      +'<div class="ob-mbr-del" onclick="obRemoveMembre('+i+')">'+_mvIcon('croix',16)+'</div>'
       +'</div>';
   }).join('');
 }
@@ -173,7 +173,7 @@ function obRenderTachesGrid() {
     var isActive = _obTachesSel.indexOf(t.nom)>=0;
     var cls = 'ob-tache-chip'+(isActive?' active':'')+(t.custom?' ob-custom':'');
     return '<div class="'+cls+'" onclick="obToggleTache(\'' + t.nom + '\',this)">'
-      +'<div class="ob-tache-nom">'+t.label+(t.custom?' <span style="font-size:9px;opacity:0.5">✦</span>':'')+'</div>'
+      +'<div class="ob-tache-nom">'+t.label+(t.custom?' <span style="font-size:9px;opacity:0.5"></span>':'')+'</div>'
       +'<div class="ob-tache-hha">'+(t.hha||'—')+' h/ha</div>'
       +'</div>';
   }).join('');
@@ -237,7 +237,7 @@ function obGoToStep(n) {
   var footer=document.getElementById('ob-footer');
   if(btnBack) btnBack.style.display=(n>1&&n<=4)?'':'none';
   if(n===4){
-    if(btnNext){btnNext.textContent='✓ Lancer Ma Vigne';btnNext.classList.add('ob-green');}
+    if(btnNext){btnNext.textContent='Lancer Ma Vigne';btnNext.classList.add('ob-green');}
   } else if(n===5){
     if(footer) footer.style.display='none';
   } else {
@@ -427,10 +427,10 @@ async function obFinalize() {
     console.error('[Onboarding] Erreur:', e);
     var _ac = (e && e.details && e.details.authCode) || (e && e.code) || '';
     var msg = (String(_ac).indexOf('email-already') >= 0)
-      ? '❌ Cet email est déjà utilisé. Choisissez-en un autre.'
+      ? 'Cet email est déjà utilisé. Choisissez-en un autre.'
       : (String(_ac).indexOf('weak-password') >= 0)
-      ? '❌ Mot de passe trop faible (6 caractères minimum).'
-      : '❌ ' + ((e && e.message) || 'Erreur — réessayez.');
+      ? 'Mot de passe trop faible (6 caractères minimum).'
+      : '' + ((e && e.message) || 'Erreur — réessayez.');
     obShowToast(msg);
     // Revenir a l'ecran 4 (recap + champs admin/email) pour corriger et relancer.
     // obGoToStep(4) reaffiche le footer, repositionne les barres d'etapes et restaure
@@ -743,18 +743,18 @@ async function confirmGTLogin() {
   var pwd   = pwdInp.value;
 
   if (!email || !pwd) {
-    errDiv.textContent = '❌ Renseignez l\'email et le mot de passe.';
+    errDiv.textContent = 'Renseignez l\'email et le mot de passe.';
     errDiv.style.display = 'block';
     return;
   }
   if (email !== GT_ADMIN_EMAIL) {
-    errDiv.textContent = '❌ Ce panneau est réservé à l\'opérateur GUERETTECH.';
+    errDiv.textContent = 'Ce panneau est réservé à l\'opérateur GUERETTECH.';
     errDiv.style.display = 'block';
     return;
   }
 
   btn.disabled = true;
-  btn.textContent = '⏳ Connexion…';
+  btn.textContent = 'Connexion…';
   errDiv.style.display = 'none';
 
   try {
@@ -807,10 +807,10 @@ async function confirmGTLogin() {
     return;
 
   } catch(e) {
-    var msg = '❌ Connexion impossible.';
-    if (e.code === 'auth/wrong-password' || e.code === 'auth/invalid-credential') msg = '❌ Mot de passe incorrect.';
-    if (e.code === 'auth/user-not-found')         msg = '❌ Compte introuvable dans Firebase.';
-    if (e.code === 'auth/network-request-failed') msg = '❌ Pas de connexion réseau.';
+    var msg = 'Connexion impossible.';
+    if (e.code === 'auth/wrong-password' || e.code === 'auth/invalid-credential') msg = 'Mot de passe incorrect.';
+    if (e.code === 'auth/user-not-found')         msg = 'Compte introuvable dans Firebase.';
+    if (e.code === 'auth/network-request-failed') msg = 'Pas de connexion réseau.';
     errDiv.textContent = msg;
     errDiv.style.display = 'block';
   }

@@ -1,0 +1,17 @@
+{
+  "total": 169,
+  "modules": {
+    "app": 58,
+    "utils": 47,
+    "pilotage": 6,
+    "planning": 2,
+    "reglages": 18,
+    "cave": 2,
+    "tracteur": 7,
+    "phyto": 10,
+    "reserve": 1,
+    "admin-gt": 7,
+    "firebase": 11,
+    "onboarding": 0
+  }
+}

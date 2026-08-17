@@ -6,7 +6,7 @@
 // ════════════════════════════════════
 
 // Fonctions pures importées d'utils.js (mêmes exports que tracteur.js)
-import { isAdmin, isTractoriste, showToast, _escHtml, _escAttr, dreEffectif } from './utils.js';
+import { isAdmin, isTractoriste, showToast, _escHtml, _escAttr, dreEffectif, _mvIcon } from './utils.js';
 
 // Flag debug (console.log silencieux en prod) — const par module (cf. tracteur.js)
 const DEBUG = location.hostname === 'localhost' || location.hostname === '127.0.0.1';
@@ -76,7 +76,7 @@ function openCatDetail(nom){
   if(!ov){
     ov=document.createElement('div');ov.id=ovId;ov.className='overlay';
     ov.innerHTML=`<div class="ov-panel"><div class="ov-drag"></div>
-      <div class="ov-hd"><div class="ov-title" id="ocd-title"></div><div class="ov-close" onclick="closeOv(null,'${ovId}')">✕</div></div>
+      <div class="ov-hd"><div class="ov-title" id="ocd-title"></div><div class="ov-close" onclick="closeOv(null,'${ovId}')">${_mvIcon('croix',18)}</div></div>
       <div id="ocd-body" style="padding:0 20px 20px;overflow-y:auto;max-height:70vh"></div>
       <div style="padding:16px 20px">
         <button class="mbtn" onclick="closeOv(null,'${ovId}')" style="width:100%;font-family:Outfit,sans-serif;font-size:13px;padding:12px;border-radius:12px;border:1.5px solid var(--gris);background:var(--bg-card);color:var(--texte-doux);cursor:pointer">Fermer</button>
@@ -85,7 +85,7 @@ function openCatDetail(nom){
     document.body.appendChild(ov);
   }
   const title=document.getElementById('ocd-title');
-  title.textContent=(TEMJ[p.type]||'🧪')+' '+p.nom;
+  title.textContent=(TEMJ[p.type]||'')+' '+p.nom;
   title.dataset.nom=p.nom;
   document.getElementById('ocd-body').innerHTML=`
     <div style="display:grid;grid-template-columns:1fr 1fr;gap:10px;margin-bottom:12px">
@@ -120,11 +120,11 @@ function openCatDetail(nom){
       <div style="font-size:16px;font-weight:700">${p.dose}</div>
     </div>
     ${p.cible?`<div style="background:var(--vert-pale);border-radius:12px;padding:14px;margin-bottom:12px">
-      <div style="font-size:9px;text-transform:uppercase;color:var(--texte-doux);font-weight:600;margin-bottom:6px">🎯 Cibles</div>
+      <div style="font-size:9px;text-transform:uppercase;color:var(--texte-doux);font-weight:600;margin-bottom:6px">Cibles</div>
       <div style="font-size:13px;font-weight:600;color:var(--vert)">${p.cible}</div>
     </div>`:''}
     ${p.usage?`<div style="background:var(--tag-amber-bg,#FFF8E8);border:1.5px solid #E8C840;border-radius:12px;padding:14px">
-      <div style="font-size:9px;text-transform:uppercase;color:var(--tag-amber-tx,#7A5C10);font-weight:600;margin-bottom:6px">⚠️ Conditions d'emploi</div>
+      <div style="font-size:9px;text-transform:uppercase;color:var(--tag-amber-tx,#7A5C10);font-weight:600;margin-bottom:6px">Conditions d'emploi</div>
       <div style="font-size:12px;color:var(--tag-amber-tx,#4A3A08);line-height:1.5">${p.usage}</div>
     </div>`:''}
   `;
@@ -703,7 +703,7 @@ window._tratSave=function(){
   });
   saveData('sessions');saveData('traitements');
   window._tratClose();
-  showToast('🌿 Traitement enregistré','#2C6E29');
+  showToast('Traitement enregistré','#2C6E29');
   if(typeof renderTracteur==='function')renderTracteur();
   if(typeof renderPhyto==='function')renderPhyto();
   if(typeof renderParcelles==='function')renderParcelles();
@@ -724,8 +724,8 @@ function openTraitDetail(idx){
   const draeH=_dre.h;
   const draeR=draeH>0?Math.max(0,draeH-Math.floor((today-new Date(t.date))/3600000)):0;
   const _canEd=isAdmin()||isTractoriste();
-  document.getElementById('otd-title').textContent=(TEMJ[m.type]||'🧪')+' '+t.produit;
-  document.getElementById('otd-sub').textContent=fmtDate(t.date)+((t.conducteur||t.operateur)?' · 👤 '+(t.conducteur||t.operateur):'');
+  document.getElementById('otd-title').textContent=(TEMJ[m.type]||'')+' '+t.produit;
+  document.getElementById('otd-sub').textContent=fmtDate(t.date)+((t.conducteur||t.operateur)?' · '+(t.conducteur||t.operateur):'');
   document.getElementById('otd-body').innerHTML=`
     <div style="display:grid;grid-template-columns:1fr 1fr;gap:10px;margin-bottom:14px">
       <div style="background:var(--gris-clair);border-radius:12px;padding:12px">
@@ -740,11 +740,11 @@ function openTraitDetail(idx){
     <div style="display:grid;grid-template-columns:1fr 1fr;gap:10px;margin-bottom:14px">
       <div style="background:${darR>0?'var(--rouge-pale)':'var(--vert-pale)'};border-radius:12px;padding:12px">
         <div style="font-size:10px;color:var(--texte-doux);text-transform:uppercase">DAR récolte</div>
-        <div style="font-size:16px;font-weight:700;margin-top:4px;color:${darR>0?'var(--rouge)':'var(--vert)'}">${darR!==null?(darR>0?darR+'j restants':'✅ Libre'):'—'}</div>
+        <div style="font-size:16px;font-weight:700;margin-top:4px;color:${darR>0?'var(--rouge)':'var(--vert)'}">${darR!==null?(darR>0?darR+'j restants':'Libre'):'—'}</div>
       </div>
       <div style="background:${_dre.na?'var(--gris-clair)':(draeR>0?'#FFF3CD':'var(--vert-pale)')};border-radius:12px;padding:12px">
         <div style="font-size:10px;color:var(--texte-doux);text-transform:uppercase">Délai de réentrée</div>
-        <div style="font-size:16px;font-weight:700;margin-top:4px;color:${_dre.na?'var(--texte-doux)':(draeR>0?'#856404':'var(--vert)')}">${_dre.na?'Non concerné':(draeR>0?draeR+'h restantes':'✅ Libre')}</div>
+        <div style="font-size:16px;font-weight:700;margin-top:4px;color:${_dre.na?'var(--texte-doux)':(draeR>0?'#856404':'var(--vert)')}">${_dre.na?'Non concerné':(draeR>0?draeR+'h restantes':'Libre')}</div>
         ${_dre.defaut&&!_dre.na?'<div style="font-size:9px;color:var(--texte-doux);margin-top:3px">minimum réglementaire</div>':''}
       </div>
     </div>
@@ -758,11 +758,11 @@ function openTraitDetail(idx){
         <div style="font-size:16px;font-weight:700;margin-top:4px">${m.znt!=null?m.znt+' m':'—'}</div>
       </div>
     </div>
-    ${t.note?`<div style="background:var(--gris-clair);border-radius:12px;padding:12px;font-size:12px;color:var(--texte-doux);font-style:italic">💬 ${_escHtml(t.note)}</div>`:''}
+    ${t.note?`<div style="background:var(--gris-clair);border-radius:12px;padding:12px;font-size:12px;color:var(--texte-doux);font-style:italic">${_escHtml(t.note)}</div>`:''}
     ${(t.parcelles&&t.parcelles.length>0)?`<div style="margin-top:10px"><div style="font-size:10px;color:var(--texte-doux);text-transform:uppercase;font-weight:600;margin-bottom:5px">Parcelles traitées</div><div style="display:flex;flex-wrap:wrap;gap:5px">${t.parcelles.map(n=>'<span style="font-size:11px;background:var(--gris-clair);border-radius:6px;padding:3px 8px">'+_escHtml(n)+'</span>').join('')}</div></div>`:''}
-    ${t.stade?`<div style="background:rgba(160,96,224,0.08);border-radius:10px;padding:9px 12px;margin-top:8px;font-size:12px;color:#A060E0">📋 Stade : ${_escHtml(t.stade)}</div>`:''}
-    ${t.heureDebut?`<div style="background:var(--gris-clair);border-radius:10px;padding:9px 12px;margin-top:8px;font-size:12px">🕐 Horaires : ${t.heureDebut}–${t.heureFin||'?'}</div>`:''}
-    ${t.dreAnticipe?`<div style="background:rgba(184,90,26,0.08);border-radius:10px;padding:9px 12px;margin-top:8px;font-size:12px;color:var(--orange)">⚠️ DRE anticipé : ${_escHtml(t.dreAnticipe)}</div>`:''}
+    ${t.stade?`<div style="background:rgba(160,96,224,0.08);border-radius:10px;padding:9px 12px;margin-top:8px;font-size:12px;color:#A060E0">Stade : ${_escHtml(t.stade)}</div>`:''}
+    ${t.heureDebut?`<div style="background:var(--gris-clair);border-radius:10px;padding:9px 12px;margin-top:8px;font-size:12px">Horaires : ${t.heureDebut}–${t.heureFin||'?'}</div>`:''}
+    ${t.dreAnticipe?`<div style="background:rgba(184,90,26,0.08);border-radius:10px;padding:9px 12px;margin-top:8px;font-size:12px;color:var(--orange)">DRE anticipé : ${_escHtml(t.dreAnticipe)}</div>`:''}
     ${typeof t.modeAb!=='undefined'?`<div style="margin-top:8px;font-size:12px;color:var(--texte-doux)">Mode : <strong style="color:${t.modeAb?'#40C080':'var(--texte)'}">${t.modeAb?'🌿 Agriculture Biologique (AB)':'🌾 Conventionnel'}</strong></div>`:''}
     ${_canEd?`<button onclick="openTraitEdit(${idx})" style="width:100%;margin-top:16px;padding:13px;border-radius:11px;border:1.5px solid var(--phyto);background:rgba(90,45,142,0.12);color:#9B70D4;font-size:14px;font-weight:700;cursor:pointer;font-family:'Outfit',sans-serif;min-height:44px"><span>✏️ Modifier ce traitement</span></button>`:''}
   `;
@@ -1091,7 +1091,7 @@ function _phytoExportChoix(){
     ov = document.createElement('div'); ov.id = ovId; ov.className = 'overlay';
     ov.setAttribute('onclick', "closeOv(event,'"+ovId+"')");
     ov.innerHTML = `<div class="ov-panel"><div class="ov-drag"></div>
-      <div class="ov-hd"><div class="ov-title">📊 Exporter le registre</div><div class="ov-close" onclick="closeOv(null,'${ovId}')">✕</div></div>
+      <div class="ov-hd"><div class="ov-title">Exporter le registre</div><div class="ov-close" onclick="closeOv(null,'${ovId}')">${_mvIcon('croix',18)}</div></div>
       <div id="phx-body" style="padding:0 20px 20px;overflow-y:auto;max-height:70vh"></div>
       <div style="padding:0 20px 16px">
         <button class="mbtn" onclick="closeOv(null,'${ovId}')" style="width:100%;font-family:Outfit,sans-serif;font-size:13px;padding:12px;border-radius:12px;border:1.5px solid var(--gris);background:var(--bg-card);color:var(--texte-doux);cursor:pointer;min-height:44px">Annuler</button>

@@ -1,4 +1,226 @@
-// MA VIGNE — Service Worker v6.79
+// MA VIGNE — Service Worker v6.81
+// v6.81 (16/08/2026) — LA CHARTE D'ILOTS : ACCUEIL ET PARCELLES (DS-2).
+//   DS-1 avait change les pictogrammes et ca n'a PAS suffi : ce qui faisait
+//   brouillon n'etait pas l'icone, c'etait le CONTENANT. Quatre briques dans
+//   styles.css — l'ilot `.mv-c`, la hierarchie a TROIS niveaux (.mv-t / .mv-n /
+//   .mv-l), le badge `.mv-bdg` et le bouton fantome `.mv-gh`.
+//   ★ TROIS NIVEAUX DE TEXTE, JAMAIS QUATRE. Un quatrieme et la hierarchie ne
+//     se lit plus : c'est precisement ce qui donnait l'effet brouillon.
+//   ★ L'ETAT SE POSE A DROITE, toujours — c'est l'alignement vertical des
+//     badges qui rend une liste de 46 parcelles scannable. Et `tabular-nums`
+//     sur les chiffres : sans lui, « 62 % » et « 100 % » ne s'alignent pas
+//     d'une carte a l'autre.
+//   ★ QUATRE TONS DE BADGE, ENSEMBLE FERME (`_mvBadge`) : vert / ambre /
+//     rouge / neutre. Un ton inconnu retombe sur neutre ET part au journal.
+//   ⚠️ AUCUNE COULEUR D'ETAT EN DUR. Les fonds sont en `color-mix` de la teinte
+//     du theme : un #EAF5E4 ecrit en dur est juste sur la carte claire et vire
+//     sale en sombre. Le harnais garde les quatre tons et les 12 briques.
+//   ★ LE DRAE PASSE EN BADGE ROUGE puis en encart dedie dans la fiche : c'est
+//     reglementaire, ca doit arreter l'oeil, pas se deviner sur un liseré.
+//   ★ REGLAGES Y EST PASSE AUSSI : ligne d'un travail, activite tracteur,
+//     rubriques de la fiche membre. Les badges maison a couleur ecrite en dur
+//     (#4A9FC8, rgba(61,107,39,...)) sont remplaces par `_mvBadge`.
+//   ★ LE CLIQUET A FAIT SON TRAVAIL : en retirant les icones decoratives des
+//     listes, trois symboles se sont retrouves sans appelant (cle, euro,
+//     soleil). Retires de la CORRESPONDANCE (scripts/build-sprite.mjs), pas
+//     du sprite a la main : 36 -> 33 symboles.
+//   ★ ACCUEIL : le delai de rentree et « ma semaine » passent a la charte.
+//     ⚠️ `home_layout` n'etait PAS un blocage : il indexe par la CLE du widget
+//       (data-w), pas par la structure interne. Annonce comme bloquant sans
+//       avoir ete lu — verifier, ne pas croire, y compris sa propre prudence.
+//   ⚠️⚠️ REGRESSION CAUSEE PAR CE LOT, ET REPAREE : le mode COMPACT de
+//     l'accueil visait les enfants de #home-stat-content PAR LEUR RANG
+//     (`>div:first-child`). La charte a change cet ordre : la regle visait le
+//     mauvais bloc, en silence. Le mode compact est une preference PAR
+//     UTILISATEUR — personne ne l'aurait vu. Les regles visent des CLASSES
+//     desormais, et le harnais interdit le selecteur de rang.
+//   ⚠️ Un element VIDE garde son fond et sa marge : #home-stat-picto et
+//     #home-stat-chip sont masques par `:empty`. Vider n'est pas masquer.
+//   ★ ACCUEIL COMPLET : delai de rentree, ma semaine, derniers travaux, ma
+//     part du chantier, raccourcis, pastille de priorite.
+//   ★ BARRE DE NAVIGATION : les emojis passent au sprite (35 symboles, +verre
+//     +plus). ⚠️ `filter:grayscale()` etait la pour DESATURER UN EMOJI, qui
+//     gardait sa couleur quoi qu'on fasse. Une icone suit `currentColor` :
+//     l'onglet inactif s'eteint par la COULEUR, pas par un filtre qui grise
+//     le trait et se voit en sombre.
+//   ⚠️ Le harnais ne voyait pas les noms passes par une TABLE (`ic:'verre'`) :
+//     `verre` passait pour mort, et les autres n'echappaient au rouge que
+//     parce qu'ils servaient AUSSI ailleurs — par chance. Corrige.
+//   ★ ACCUEIL TERMINE : mise en route, avancement par tache, carte tracteur.
+//     ⚠️ La carte tracteur GARDE son fond sombre (contraste en cabine) : elle
+//       prend la hierarchie de la charte, pas son fond. La charte encadre,
+//       elle n'uniformise pas ce qui a une raison d'etre different.
+//   ★ JOURNAL : chaque entree devient un ilot, l'etat en badge a droite.
+//     ⚠️ La FRISE verticale de gauche reste : elle porte la lecture du temps.
+//     La pastille 👥 disparait — « Equipe (Victor + Lea) » le dit deja en mots ;
+//     sa regle CSS part avec elle, une regle morte finit par etre recopiee.
+//   ★ TRACTEUR : 127 -> 35 pictogrammes. Sessions, parc, fiches de controle,
+//     historique de reparations. Les badges maison (tpc-badge, tpc-pill,
+//     sc-st) passent a `_mvBadge`.
+//     ⚠️ `.scard-enc` GARDE son fond sombre : une session en cours se lit en
+//       cabine, au soleil. Elle prend la hierarchie, pas le fond.
+//     ⚠️ `✱` RESTE : c'est un signe de renvoi typographique, pas un emoji.
+//     ⚠️ Vider une variable (`var em=''`) laisse une espace en tete de titre :
+//       « ␣Broyage ». On SUPPRIME la variable, on ne la vide pas.
+//   ★ CAVE : 73 -> 17 pictogrammes. Recoltes, cuves, analyses, clients vrac.
+//     Les huit operations de cuve perdent leur emoji : huit dessins a retenir,
+//     c'etait sept de trop — le mot les dit mieux.
+//     ⚠️⚠️ TROISIEME FOIS AUJOURD'HUI : la passe de retrait a VIDE les deux
+//       etats vides (`<div class="mvv-empty-ic"></div>`). Un ECRAN VIDE est
+//       l'un des trois cas ou l'icone RESTE. Restaures.
+//     ⚠️⚠️ `_mvIcon` a ete pose dans cave.js SANS ETRE IMPORTE : ESLint n'a
+//       rien dit (no-undef ne couvre pas les globales) et l'ecran aurait
+//       plante a l'ouverture. Un appel sans import ne se voit qu'a l'usage.
+//   ★ APP : 177 -> 125. Messages de connexion, ecrans d'attente et de verrou,
+//     filtres par tache, avancement par tache, alerte gel.
+//   ⚠️⚠️ REGRESSION DE MA PROPRE PASSE, ATTRAPEE : le « ✓ » de
+//     `_mapLabelsVisible ? '🏷 Noms ✓' : '🏷 Noms'` etait la SEULE difference
+//     entre les deux etats. Le retirer a donne deux branches identiques : le
+//     bouton ne disait plus rien, et RIEN NE PLANTAIT. Nouvelle assertion —
+//     « aucun ternaire ne rend deux fois la meme chaine » — qui a trouve DEUX
+//     autres cas des sa premiere execution, dont un anterieur au lot
+//     (planning.js:425, un faux choix depuis toujours).
+//   ★ Avant de retirer un glyphe : verifier qu'il ne porte pas a lui seul une
+//     DIFFERENCE entre deux etats.
+//   ★ UTILS + METEO : 74 -> 66. Les ONZE fiches d'aide portent un nom du
+//     sprite dans `ico` ; `wmoEmoji` devient `wmoIcone` et rend un NOM.
+//     ⚠️ `wmoEmoji` reste EXPORTEE en repli : un module non migre qui
+//       appellerait `wmoIcone` afficherait « nuage » en toutes lettres.
+//     ⚠️ Le champ `emoji:` GARDE son nom : il part en cache et dans les
+//       instantanes meteo du journal. On change ce qu'on y MET, pas son nom.
+//       `_mvSetIcon` tranche sur la forme : le cache d'hier reste lisible.
+//     ⚠️ La correspondance meteo vit dans une TABLE (`MV_METEO_IC`), pas dans
+//       une cascade de `return` : des noms rendus en dur par une fonction
+//       sont invisibles au harnais, qui les declarait « symboles morts ».
+//   Sprite : 46 symboles (+10 : meteo, livre, bogue, carte, journal).
+//   ⚠️ Sur les 66 restants d'utils.js : 26 sont les EMOJIS DU JOURNAL DES
+//     NOUVEAUTES (un par entree — c'est un journal, pas de l'habillage) et 19
+//     sont TEMOJI, encore lu par pilotage.js. Il reste donc 21 vrais.
+//   ★★ PILOTAGE : 29 -> 6, et surtout LA DEUXIEME BIBLIOTHEQUE D'ICONES
+//     DISPARAIT. `_pilIco` embarquait QUINZE formes en SVG inline, avec sa
+//     propre epaisseur (1,6 contre 1,75). Deux bibliotheques, c'est deux
+//     grilles et un jour deux dessins pour la meme idee. Il ne reste qu'une
+//     correspondance `_PIL_IC` vers le sprite commun. Sprite : 50 symboles.
+//     ⚠️ `_pilTile(id, ico, ...)` : le 2e argument n'etait PLUS LU depuis que
+//       l'en-tete passe par `_pilIcoFor(id)`. Il ne transportait que des
+//       emojis morts. Retire des 25 appels. Un parametre qu'on ne lit plus
+//       finit par mentir.
+//     ⚠️ `.pil-th-ico svg{width:14px}` ECRASAIT la taille posee par `_mvIcon`
+//       (le CSS l'emporte sur un attribut de presentation) — le piege deja
+//       documente dans .mv-ic, et il etait la AVANT le lot.
+//     ★ L'echelle `--pt-*` de ce module N'EST PAS TOUCHEE : elle a onze pas,
+//       son propre harnais, et la charte n'en a que trois. Les unifier est un
+//       arbitrage, pas une conversion — c'est DS-3.
+//   ⚠️⚠️ QUATRIEME angle mort du meme type dans le harnais : un nom d'icone
+//     range dans une TABLE lui est invisible. La liste en dur qu'on rallonge
+//     a chaque incident est remplacee par une REGLE : toute table dont le nom
+//     finit par IC/ICO/ICON/ICONES est lue, dans n'importe quel module.
+//   ★★★ `TEMOJI` EST SUPPRIMEE. Elle associait un emoji a chaque travail et
+//     etait lue 14 fois dans app.js, 2 dans pilotage.js, 3 dans reglages.js.
+//     Partout, l'emoji precedait un NOM DE TACHE deja ecrit a cote : il ne
+//     disait rien de plus. `TICON` la remplace et rend un NOM D'ICONE.
+//     ⚠️ Ne pas la reintroduire « juste pour une liste » : c'est comme ca
+//       qu'elle etait arrivee.
+//   ★ PHYTO (25->10), FIREBASE (25->11), ONBOARDING (14->0). Le bandeau de
+//     synchro, les erreurs de connexion, la premiere installation : des
+//     puits de texte pur, ou la couleur disait deja tout.
+//   ⚠️ LA CONTRE-EPREUVE DEPENDAIT DE L'ORDRE D'EXECUTION : l'epreuve « le
+//     compte remonte » restait verte si la reference du depot datait d'avant
+//     une baisse. Le bac regrave desormais SON cliquet avant d'injecter.
+//     Une contre-epreuve ne doit dependre que de la faute qu'elle pose.
+//   ★ TRACTEUR 35 -> 7, APP 119 -> 92. Boutons d'une fiche parcelle, points de
+//     controle, canaux de discussion, pastilles d'etat.
+//     ⚠️⚠️ EN SUPPRIMANT LE CHAMP `icon` DES SIX POINTS DE CONTROLE, J'AI
+//       LAISSE TROIS LECTURES DE CE CHAMP : elles auraient rendu « undefined »
+//       a l'ecran. ESLint ne dit rien d'un champ d'objet absent. C'est le
+//       revers du piege « vider n'est pas supprimer » : supprimer la SOURCE
+//       sans chercher qui la LIT. Cherche `\.champ\b` apres chaque retrait.
+//     ⚠️ Meme famille : l'ancre d'un des retraits existait DEUX fois avec la
+//       meme indentation — l'assert count==1 a sauve la mise.
+//   ★ RESTENT TYPOGRAPHIQUES, donc conserves : « ↩ » dans la phrase qui decrit
+//     le geste (« Tap 1 = commence, ↩ annule ») et « ↑ 24° ↓ 12° » (min/max).
+//   ★ APP 92 -> 58. Bandeau de synchro, bulle d'etat, equipe du jour, filtre
+//     du journal, roue d'attente, parc tracteur en mode GT.
+//     ⚠️⚠️ DEUX FILTRES TESTAIENT LA PRESENCE D'UN EMOJI DANS LE MESSAGE du
+//       bandeau (`/Synchronisation|🔄|rétablie|📶|…/`). Les messages n'en ont
+//       plus : le test ne serait plus JAMAIS tombe juste, et le bandeau aurait
+//       garde la mauvaise couleur. Ils testent desormais les MOTS.
+//       ★ Retirer un emoji d'un message, c'est aussi casser qui le CHERCHE.
+//     ★ L'assert `count==1` a de nouveau mordu : le champ `icon` des points de
+//       controle avait ENCORE un lecteur ici (doublon GT de tracteur.js).
+//       La regle posee au tour precedent a servi des le tour suivant.
+//   ★ ADMIN-GT : 72 -> 7. La console operateur passe aux memes icones.
+//     ⚠️ Le JOURNAL D'ACCES est ecrit en base : les lignes d'avant ce lot
+//       portent un emoji, celles d'apres un nom. `_agtIco` traduit A LA
+//       LECTURE — un journal qu'on reecrit n'est plus un journal.
+//     ⚠️⚠️ TROIS ECHECS PARTIELS DE SUITE SUR CE FICHIER, meme cause : un
+//       script qui echoue au milieu N'ECRIT RIEN, mais les scripts PRECEDENTS
+//       ont ecrit. L'etat reel n'est jamais celui qu'on croit. Ici `_agtIco`
+//       etait APPELE sans etre DEFINI — invisible jusqu'a l'ouverture.
+//       → Relire le fichier avant chaque lot d'ancres (§25).
+//   ★ LE LOGO GT remplace l'emoji grappe sur les TROIS ecrans d'entree :
+//     connexion, onboarding, fin d'installation.
+//     ⚠️ L'ID `login-logo-tap` RESTE SUR LE CONTENEUR, pas sur l'image : le
+//       geste des CINQ TAPS qui ouvre la console GT y est branche
+//       (onboarding.js). Le deplacer aurait coupe l'acces operateur en
+//       silence — et personne d'autre que Nico ne l'aurait vu.
+//     ⚠️ `font-size` ne dimensionne plus rien quand le contenu devient une
+//       IMAGE : les trois conteneurs passent a une hauteur FIXE, sinon
+//       l'ecran saute pendant le chargement.
+//     ★ `logo-gt.png` etait deja dans SHELL_STATIC : en cache des
+//       l'installation, donc present hors ligne au tout premier ecran.
+//   Cliquet : 920 -> 169 pictogrammes rendus (82 % de moins).
+//   ★★ DS-3 — LES DEUX ECHELLES. `--e-0..8` (multiples de 4) pour l'espace,
+//     et la charte DS-2 adopte `--pt-*` pour le texte.
+//     ⚠️⚠️ `--pt-*` ETAIT DEJA DANS :root — ce n'est PAS l'echelle de Pilotage,
+//       c'est celle de l'APPLICATION, et ma charte l'avait ignoree en ecrivant
+//       six tailles a la main. Une echelle qu'on ignore n'en est plus une.
+//     ⚠️ LA FEUILLE N'EST PAS REECRITE D'UN COUP : remapper 800 declarations
+//       sans pouvoir verifier une capture serait un pari. La charte s'y range,
+//       le reste est tenu par un CLIQUET (1004 valeurs hors echelle, qui ne
+//       peut plus monter) et se resorbe ecran par ecran.
+//     ⚠️ Le harnais d'echelle ne COMPILAIT PLUS apres mon ajout (collision de
+//       nom `enDur`) : ses 25 assertions ne tournaient plus du tout, et le
+//       lanceur affichait quand meme un resultat. Et `--baseline` etait lu
+//       comme un nom de fichier — drapeaux desormais filtres des chemins.
+//   ⚠️ RESTENT, et pourquoi : utils 47 (dont 26 = un emoji par entree du
+//     journal des nouveautes, c'est sa forme), app 58 (dont 14 de semence
+//     ACTIVITES bloquee par les <option>, et des legendes ✓▶○ typographiques),
+//     reglages 18 (_ACT_EMOJIS, exemptes), firebase 11, phyto 10.
+// v6.80 (16/08/2026) — LES EMOJIS DE REGLAGES DEVIENNENT UN JEU D'ICONES (DS-1).
+//   Sprite de 36 <symbol> LUCIDE dans index.html + `_mvIcon` / `_mvIconInline` /
+//   `_mvSetIcon` dans utils.js. reglages.js : 243 pictogrammes -> 0 rendu.
+//   ⚠️ TROIS PUITS NE PEUVENT PAS RECEVOIR DE SVG, et c'est structurel :
+//     · showToast fait `m.textContent = msg` — 82 glyphes retires, la pastille
+//       de couleur disait deja refus / avertissement / succes ;
+//     · un DOCUMENT IMPRIME s'ouvre dans un autre onglet, sans le sprite :
+//       <use href="#ic-x"> n'y rend RIEN. D'ou `_mvIconInline`, qui recopie la
+//       forme relue dans le sprite du DOM. Une seule source, pas deux tables ;
+//     · une balise <option> ne peut pas contenir d'icone — `a.emoji` reste donc
+//       un emoji en base, range dans `data-emoji`, traduit par `_actIcone` a
+//       l'affichage. Zero ecriture en base. La bascule viendra avec les <option>.
+//   ★★ LES FORMES VIENNENT DE LUCIDE (ISC, lucide.dev), regenerees par
+//     scripts/build-sprite.mjs a partir du paquet `lucide-static`. TROIS jeux
+//     dessines a la main ont ete refuses avant : sur 36 dessins, la coherence
+//     d'une bibliotheque entretenue ne se rattrape pas a la main.
+//     ⚠️ NE JAMAIS retoucher une forme dans index.html : le prochain passage
+//       du script l'ecrase sans bruit. La correspondance est dans le script.
+//     ⚠️ `lucide-static` n'est PAS dans package.json : le sprite est commite,
+//       ni la CI ni un client n'en ont besoin.
+//   ★ UNE SEULE GRAISSE (1,75 dans .mv-ic) et UNE SEULE ECHELLE DE TAILLES :
+//     16 en ligne · 18 bouton · 20 ligne · 24 tuile · 40 ecran vide. 78 appels
+//     ramenes dessus. Deux icones de meme niveau a deux tailles differentes,
+//     c'est le premier signe du bricolage : le harnais le refuse.
+//   ★ LA TUILE `_mvIconTuile` : l'icone dans un carre teinte de 34 px, pour
+//     les LIGNES et les RUBRIQUES seulement — jamais en pastille, ou elle
+//     ecraserait le texte. Fond en `color-mix` : suit le theme.
+//   ★ `▲ ▼ →` RESTENT : un triangle colle a un pourcentage est un signe de
+//     delta, une fleche dans une phrase est de la ponctuation. Exemptions
+//     nommees dans le harnais, pas un zero absolu.
+//   ★ Harnais `mv-harnais-icones.mjs` + sa contre-epreuve, branches en CI :
+//     tout appel a son symbol, aucun symbol mort, aucune forme ne fige sa
+//     couleur, aucun document imprime n'appelle `_mvIcon`, et le compte global
+//     d'emojis ne remonte jamais (cliquet a 654).
 // v6.79 (15/08/2026) — CINQ VIGNETTES RECALEES A L'OEIL, ET PLUS AUCUN MONTANT.
 //   ⚠️ 144 assertions vertes n'avaient PAS vu ces cinq-la. Un harnais verifie
 //     ce qu'on facture et ce qu'on vise ; il ne voit pas un projecteur mal pose
@@ -1782,7 +2004,7 @@
 // v2.22 — Fix profils vides : guard vide dans loadData() pour MEMBRES/SAISONS/TACHES
 // v2.17 — Onboarding intégré + tenantId · v2.06 — Firebase Auth · v2.00–v2.05 — divers
 const DEBUG = self.location.hostname === 'localhost' || self.location.hostname === '127.0.0.1';
-const CACHE_NAME   = 'mavigne-v6.79';
+const CACHE_NAME   = 'mavigne-v6.81';
 const TENANT_CACHE = 'mavigne-tenant';   // Cache persistant — préservé à chaque mise à jour SW
 const SYNC_TAG     = 'mavigne-sync';
 
@@ -1798,7 +2020,7 @@ const CDN_URLS = [
 ];
 
 self.addEventListener('install', event => {
-  if(DEBUG) console.log('[SW] Ma Vigne v6.79 installé');
+  if(DEBUG) console.log('[SW] Ma Vigne v6.81 installé');
   event.waitUntil(
     caches.open(CACHE_NAME).then(async cache => {
       // ── Cœur applicatif : STRICT (mise à jour ATOMIQUE) ──
@@ -1814,7 +2036,7 @@ self.addEventListener('install', event => {
 });
 
 self.addEventListener('activate', event => {
-  if(DEBUG) console.log('[SW] Ma Vigne v6.79 activé');
+  if(DEBUG) console.log('[SW] Ma Vigne v6.81 activé');
   event.waitUntil(
     caches.keys().then(keys =>
       Promise.all(

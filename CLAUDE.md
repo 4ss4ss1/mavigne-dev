@@ -2,7 +2,26 @@
 
 > Document de référence du projet **Ma Vigne** (GUERETTECH). Il est le **porteur de vérité** :
 > la mémoire Claude est plafonnée, ce fichier ne l'est pas.
-> Dernière consolidation : **16 août 2026** — ⚠️⚠️⚠️ **AUDIT DE DÉRIVE DU DOCUMENT (§44)**.
+> Dernière consolidation : **16 août 2026 (soir)** — ★★★ **LA CHARTE D'ÎLOTS, LOT DS-2**
+> (**§46**). **APP 6.27 · SW 6.81.** ★★★ **DS-1 A CHANGÉ LES PICTOGRAMMES ET ÇA N'A PAS SUFFI.**
+> Quatre jeux d'icônes livrés, trois refusés, et le verdict restait le même. Ce qui faisait
+> brouillon n'était pas l'icône, **c'était le CONTENANT** : des blocs empilés séparés par des
+> filets, où tout a la même importance visuelle. Quatre briques dans `styles.css` — l'îlot,
+> la hiérarchie à **trois** niveaux, le badge, le bouton fantôme. Appliquées à **l'accueil**
+> et aux **parcelles** (carte de liste + fiche). ⚠️ **Réglages n'y est PAS encore passé.**
+> Détail en **§46**.
+>
+> ★ Consolidation précédente : **16 août 2026 (après-midi)** — ★★★ **LE JEU D'ICÔNES, LOT DS-1**
+> (**§45**, section neuve). **APP 6.26 · SW 6.80.** Parti d'une phrase de Nico : *« je veux que
+> l'app fasse le plus professionnel possible »*. **920 pictogrammes** rendus dans l'application
+> (et non 1 033 : l'écart tenait au **sélecteur de variante** `U+FE0F`, compté à part par l'outil
+> de Nico — `⚠️` est **un** glyphe à l'écran, pas deux). `reglages.js`, module témoin,
+> passe de **243 à 0**. ★★★ **TROIS PUITS NE PEUVENT PAS RECEVOIR DE SVG, ET C'EST STRUCTUREL** —
+> un `textContent`, un **document imprimé** (qui n'a pas le sprite), une balise **`<option>`**.
+> La bonne réponse n'était pas « une icône partout », c'était **trois réponses différentes**.
+> Détail et preuves en **§45**.
+>
+> ★ Consolidation précédente : **16 août 2026 (matin)** — ⚠️⚠️⚠️ **AUDIT DE DÉRIVE DU DOCUMENT (§44)**.
 > Le backlog s'ouvrait sur *« 0a. DÉPLOYER — APP 6.06 · SW 6.56, jamais mis en ligne »* alors que le
 > dépôt portait **dix-neuf versions APP et vingt-trois versions SW de plus**. **Onze entrées
 > décrivaient du travail déjà fait** ; **quatre chiffres avaient grossi** sans que personne le voie ;
@@ -7661,3 +7680,575 @@ de portée depuis le bac à sable :
 *une entrée de backlog non re-mesurée depuis une semaine est une hypothèse, pas un constat.*
 **Écrire est un réflexe ; relire n'en est pas un.** → **Re-mesurer tout le backlog chiffré à chaque
 consolidation de fin de journée**, pas seulement à l'audit suivant.
+
+---
+
+## 45. ★★★ LE JEU D'ICÔNES — LOT DS-1 (16/08 — APP 6.25 → 6.26 · SW 6.79 → 6.80)
+
+> Parti d'une seule phrase, après un point d'étape qui posait trois questions de périmètre :
+> *« je veux que l'app fasse le plus professionnel possible »*. Réponse retenue : **on va au
+> bout**, et on écrit noir sur blanc les trois endroits où aller au bout est **impossible**.
+
+### 45a. La mesure, refaite — et pourquoi elle ne tombait pas sur le même chiffre
+
+La note de cadrage annonçait **1 033** pictogrammes rendus. Le comptage refait avec le
+blanchiment de commentaires **de `preflight.mjs`** en trouve **920**.
+
+⚠️ **L'écart n'est pas une erreur, c'est une définition.** En comptant le **sélecteur de variante
+`U+FE0F`** comme un caractère de plus, on retombe sur **1 067** — et surtout sur `utils.js = 100`,
+`admin-gt.js = 83`, `pilotage.js = 39`, **exactement** les chiffres de la note. L'outil de Nico
+comptait `⚠️` pour deux. **À l'écran c'est un glyphe.** Le cliquet du harnais retient donc
+**920** au départ, et la définition est écrite dans le fichier du harnais — pour qu'on ne
+re-dispute pas ce chiffre dans six mois.
+
+★ **Répartition de départ** : `reglages 243 · app 204 · tracteur 137 · cave 80 · utils 75 ·
+admin-gt 72 · pilotage 35 · firebase 31 · phyto 25 · onboarding 15 · planning 2 · reserve 1`.
+
+### 45b. ★★★ TROIS PUITS NE PEUVENT PAS RECEVOIR DE SVG — la vraie découverte du lot
+
+Le cadrage supposait un problème d'affichage. C'est un problème de **destination**.
+
+| Puits | Pourquoi un SVG n'y entre pas | Ce qu'on fait à la place |
+|---|---|---|
+| **`showToast`** et tout `.textContent` | `m.textContent = msg` — une balise y ressort en texte brut | **On retire le glyphe.** Le bandeau porte déjà une **pastille de couleur** : `✅` devant « Lien envoyé » disait la même chose une deuxième fois |
+| **Un document imprimé** | il s'ouvre **dans un autre onglet**, qui n'a pas le sprite : `<use href="#ic-x">` n'y rend **RIEN**, sans la moindre erreur | **`_mvIconInline`**, qui **recopie** la forme — relue dans le sprite du DOM de l'app au moment où le document se fabrique. **Une seule source, pas deux tables qui divergent** |
+| **Une balise `<option>`** | elle ne peut structurellement contenir aucun élément | `a.emoji` **reste un emoji en base**, rangé dans `data-emoji`, traduit par `_actIcone` à l'affichage |
+
+⚠️⚠️ **Le deuxième cas est le piège du repli CSS, appliqué aux icônes.** Un document imprimé qui
+appelle `_mvIcon` sort avec des cadres vides et **aucun contrôle ne le dit**. C'est une assertion
+dédiée du harnais, et une contre-épreuve.
+
+### 45c. La mécanique — même patron que `MV_INFO`
+
+- **Le sprite** : `<svg id="mv-sprite" style="display:none">` + **36 `<symbol id="ic-…">`**, dans
+  `index.html`, **avant `#app-root`** — `_mvIconInline` relit ces formes dans le DOM.
+- **`_mvIcon(nom, taille)`** (`utils.js`, à côté de `_mvInfoBtn`) → `<svg class="mv-ic"><use
+  href="#ic-…"></use></svg>`. ★ **`href` sans `xlink` suffit** : Safari le gère depuis la version 12,
+  et un fragment du **même document** ne déclenche **aucune requête** — la CSP en enforce n'a rien
+  à filtrer.
+- **`_mvSetIcon(el, val, taille)`** pour les éléments dont on posait le `textContent`. Il accepte
+  **encore un emoji** : les huit modules non migrés (DS-M) continuent de tourner sans rien changer.
+  La bascule se fait sur la **forme** du nom (`/^[a-z][a-z0-9-]*$/`).
+- **`.mv-ic`** (`styles.css`) : `stroke:currentColor; fill:none; stroke-width:1.5`.
+  ⚠️⚠️ **AUCUNE LARGEUR EN CSS.** `_mvIcon` pose `width`/`height` en **attribut** ; une règle CSS
+  de largeur les écraserait (le CSS l'emporte sur un attribut de présentation) et l'argument de
+  taille ne servirait plus à rien.
+- ⚠️⚠️ **Les `<symbol>` ne portent NI `fill` NI `stroke`.** Ces propriétés sont **héritées** à
+  travers le `<use>` : c'est la seule façon de repeindre une forme qui vit dans l'ombre du DOM.
+  Une forme qui porte sa couleur ne se repeint plus — ni en mode sombre, ni en plein soleil.
+  **Une exception commentée** : le point du panneau d'alerte, qui doit être plein.
+- **`TICON`** (miroir de `TEMOJI`) + **`_mvIconTache(nom, taille)`**.
+  ⚠️ **Ne pas supprimer `TEMOJI`** : `app.js` (38 fois) et `pilotage.js` (12 fois) le lisent encore.
+
+### 45d. ★★★ CE QU'UN SYMBOLE ABSENT DOIT FAIRE — se voir
+
+Un `<use>` qui vise un `id` inexistant rend **une zone vide**, sans erreur, sans `catch`. C'est
+exactement le défaut que §27a décrit pour les sélecteurs de la visite guidée. **Trois filets** :
+
+1. le harnais l'**interdit en CI** ;
+2. `_mvIcon` rend un **carré pointillé rouge** au lieu du vide ;
+3. l'incident part au **journal des erreurs** (`cat:'icone'`), une fois par nom.
+
+★ Même principe que `_mvInfoOpen` sur une clé inconnue : *s'il arrive quand même, il doit se voir,
+pas se taire.*
+
+### 45e. Le module témoin — 243 → 0, en trois passes
+
+1. **82 glyphes retirés** des puits de texte pur (80 lignes).
+   ⚠️ **Le premier script mangeait les espaces légitimes** : `'Période '+nom` devenait
+   `'Période'+nom`. Attrapé **en relisant le diff**, pas par une assertion. Corrigé, rejoué.
+   **Un `re.sub` qui nettoie « les espaces en trop » ne sait pas lesquels sont en trop.**
+2. **94 remplacements** vers `_mvIcon`.
+   ⚠️ **Piège d'ancre** : mes motifs portaient `\"` là où le fichier a un `"` nu — dans une chaîne
+   JS **simple-quotée**, les guillemets doubles ne sont pas échappés. **70 ancres à recaler d'un
+   coup.** Les `assert` ont tenu : zéro remplacement à l'aveugle.
+3. **35 remplacements** dans les documents imprimés et le sélecteur d'activité.
+   ★ **Les titres de section d'un document imprimé ne gagnent pas d'icône** : petites capitales
+   espacées, filet dessous — **la typographie fait déjà le travail**, et un pictogramme dans un
+   document réglementaire fait bricolage.
+
+### 45f. Ce qui RESTE dans `reglages.js`, et pourquoi c'est écrit
+
+- **`▲ ▼ → ＋`** — ★ **ce n'est pas de l'emoji, c'est de la typographie.** Un triangle collé à un
+  pourcentage est un **signe de delta** ; une flèche dans une phrase est de la **ponctuation**.
+  Les remplacer serait une faute de mise en page, pas un progrès. **Liste nommée dans le harnais**,
+  jamais devinée.
+- **Les 18 emojis de `_ACT_EMOJIS`** — ★ **vocabulaire de DONNÉES, jamais affiché tel quel.**
+  C'est la valeur enregistrée dans `a.emoji`, que `tracteur.js` rend dans des **`<option>`**.
+  `_actIcone` la traduit avant tout rendu à l'écran. **Exemption écrite, avec sa raison** ;
+  elle saute le jour où les `<option>` deviennent un sélecteur maison.
+
+⚠️ **Le pont vers `tracteur.js` — une ligne, et elle était obligatoire.** `tracteur.js:2576` lisait
+`emojiBtn.textContent.trim()` pour enregistrer l'activité : avec une icône dans le bouton, **il
+aurait enregistré une chaîne vide**. Il lit désormais `dataset.emoji` d'abord, `textContent`
+ensuite (repli pour l'ancien HTML). ★ **Trouvé en cherchant qui LIT, pas en lisant qui ÉCRIT.**
+
+### 45g. Le harnais — 17 assertions, 6 contre-épreuves
+
+`scripts/mv-harnais-icones.mjs` (+ `-contre.mjs`), **branchés dans `ci.yml` ET dans
+`npm run check` / `prebuild`** — *un cliquet écrit n'est pas un cliquet branché*.
+
+| Ce qu'il interdit |
+|---|
+| qu'un `_mvIcon('x')` vise un `symbol` absent |
+| qu'un `symbol` déclaré ne serve nulle part (poids mort dans `index.html`) |
+| qu'une forme fige sa couleur (`fill`/`stroke` en dur) |
+| qu'un **document imprimé** appelle `_mvIcon` au lieu de `_mvIconInline` |
+| qu'un emoji revienne dans `reglages.js` |
+| que le compte d'emojis remonte — **module par module**, pas seulement au total |
+
+★★ **Sept assertions EXÉCUTENT les vraies fonctions** dans un DOM minimal bâti sur le vrai sprite :
+le `<use>` pointe bien, le repli d'un nom inconnu est **visible** *et* journalisé, `_mvIconInline`
+ne contient **aucun `<use>`**, `_mvSetIcon` distingue un nom d'un emoji, et **les 18 emojis
+d'activité tombent tous sur une icône réelle** — un seul oubli et l'activité d'un client
+s'afficherait en tracteur.
+
+★ **La contre-épreuve exige que le rouge NOMME la faute posée**, pas seulement qu'il y ait un rouge :
+§42f a montré qu'une assertion se laisse satisfaire par un rouge d'une autre famille.
+
+★ **Trois symboles ont été SUPPRIMÉS parce que le harnais les a déclarés morts** (`drapeau`,
+`enveloppe`, `equipe`) : ils avaient été dessinés pour des libellés de bouton qu'on a finalement
+laissés en texte seul. **Le cliquet a fait son travail dès le premier passage.**
+
+### 45h. ★★★ CE QUE SEUL L'ŒIL A VU — et le jeu entièrement redessiné
+
+Le comptage était vert bien avant que le jeu soit présentable. **Rendu en image, à la taille
+réelle, à côté de son libellé réel**, six dessins étaient à refaire :
+
+| Icône | Ce qu'elle donnait | Correctif |
+|---|---|---|
+| `cle` | une **loupe** | cercle à gauche, tige à droite, deux dents |
+| `feuille` | un **ballon de rugby** | base ronde, pointe en haut, **queue qui sort** en bas |
+| `pioche` | un **parapluie** — deux fois | remplacée par une **bêche**, lisible du premier coup |
+| `trou` | un **œil** | supprimée ; l'entreplantation prend « jeune plant » |
+| `rang` | un **pont** | convergence seule, sans ligne d'horizon |
+| `tariere` | une **arête de poisson**, illisible à 12 px | mèche triangulaire à poignée en T |
+
+★★ **Et la deuxième passe visuelle a été faite À LA TAILLE D'EMPLOI, pas sur une planche à 48 px.**
+`bureau` et `carburant` étaient nets en grand et **bouchés à 12-13 px** : détails retirés.
+**Un jeu d'icônes se juge à sa plus petite taille d'emploi, jamais à sa plus grande.**
+
+★★★ **PUIS TOUT A ÉTÉ REFAIT — et c'est la vraie leçon du lot.** Verdict de Nico sur la
+maquette : *« c'est du truc moche »*, avec une référence précise — les icônes **pleines** du
+Meta Quest. **Le jeu au trait était techniquement irréprochable et visuellement amateur.**
+Un trait de 1,5 sur une grille de 24, ramené à 12 px, ne fait plus que 0,75 px : il grisaille
+au lieu de dessiner. **Les 36 icônes sont repassées en silhouettes pleines**, `fill:currentColor`,
+`stroke:none`.
+
+⚠️ **Elles ne sont plus dessinées à la main mais GÉNÉRÉES PAR PRIMITIVES** — `bar()`,
+`disc()`, `rr()`, `arcBande()`, `pointeArc()`. Sur 36 icônes, **une épaisseur tenue à la main
+ne tient pas** : la première version avait six poids différents sans que ça se voie icône par
+icône. Un `bar(x1,y1,x2,y2,3.2)` donne le même trait partout, bouts arrondis compris.
+
+⚠️ **`arcBande` partait à l'envers dès qu'un arc dépassait le demi-tour** : `a1 < a0` avec
+`large-arc = 0` dessine l'arc complémentaire. Une ligne de normalisation (`while (a1 <= a0)
+a1 += 360`). Ça n'a cassé qu'une icône, `rotation` — **et ça ne se voyait que rendu en image**.
+
+★ **Le piege propre au jeu plein : creuser un trou avec du blanc.** `fill="#fff"` est
+impeccable sur la carte claire et **faux partout ailleurs** — bandeau sombre, encart vert,
+document imprimé. Les trous passent par **`fill-rule="evenodd"`**. C'est une assertion du
+harnais et une contre-épreuve de plus (**7 au total**).
+
+★ **Le repli d'un nom inconnu est POINTILLÉ** : un trait plein se confondrait avec une icône,
+un pointillé ne ressemble à rien d'autre qu'à une faute.
+
+★★★ **PUIS LE JEU PLEIN A ÉTÉ REFUSÉ À SON TOUR** — *« ça fait Windows 95, ou vieux
+téléphone »*. Et c'était juste : **une masse pleine qui touche les bords de la case, c'est le
+dessin des interfaces d'il y a vingt ans.** J'avais compensé le problème de lisibilité à 12 px
+en ajoutant de l'encre, alors que la lisibilité à 12 px n'était pas un problème d'encre : c'était
+**un problème de taille d'appel**.
+
+★★★ **LE REGISTRE RETENU — TRAIT FIN, BEAUCOUP D'AIR, TRÈS PEU DE DÉTAILS.** Trois règles,
+tenues sur les 36 :
+
+| Règle | Pourquoi |
+|---|---|
+| **zone vivante 5 → 19** sur une grille de 24 | une marge de **cinq**, pas de deux. **L'air autour du dessin est le premier signal**, avant le trait lui-même |
+| **quatre chemins maximum**, aucun détail intérieur | pas de vitres, pas de nervures, pas de grille d'aération. **Ce qu'on retire fait le style** |
+| **la graisse vit dans `.mv-ic`**, jamais dans les formes | sinon une icône ne suivrait pas un changement de graisse — et ne se repeindrait plus avec le texte |
+
+⚠⚠ **AUCUNE ICÔNE SOUS 14 px, ET C'EST UNE ASSERTION.** À 12 px, un trait de 1,35 sur une
+grille de 24 ne fait plus que **0,68 px** : l'icône grisaille au lieu de dessiner. **42 appels
+ont été remontés** — j'avais mis des icônes à 10 et 11 px parce qu'il y en avait trop pour
+tenir autrement. Le harnais l'interdit désormais (**19 assertions, 8 contre-épreuves**).
+
+★★★ **PUIS LE TRAIT FIN MAISON A ÉTÉ REMPLACÉ PAR LUCIDE — ET C'EST LA BONNE FIN.**
+Nico a envoyé un cadrage de design complet dont le point central sur les icônes tenait en une
+ligne : *« utilise une seule et unique bibliothèque »*. Il avait raison, et contre mon réflexe :
+**36 dessins faits à la main n'atteignent pas la cohérence d'une bibliothèque entretenue**, quel
+que soit le soin mis à la règle de construction. Trois jeux maison refusés valent démonstration.
+
+★ **Lucide v1.31, licence ISC**, et le vocabulaire viticole y est en entier : `tractor`, `grape`,
+`leaf`, `sprout`, `shovel`, `drill`, `fence`, `test-tube`, `fuel`. **Aucune forme n'est recopiée
+de mémoire** : `scripts/build-sprite.mjs` les lit dans le paquet `lucide-static`.
+
+⚠⚠ **`lucide-static` N'EST PAS DANS `package.json`.** Le sprite est **commité** : ni la CI ni un
+client n'ont besoin du paquet. Il se réinstalle à la main (`npm i -D lucide-static`) le jour où
+la correspondance change. → **pas de `package-lock.json` à toucher, donc pas de risque CI.**
+
+⚠⚠ **NE JAMAIS RETOUCHER UNE FORME DANS `index.html`** : le prochain passage du script l'écrase
+**sans bruit**. Deux marques rendent la règle vérifiable et le harnais les exige : `data-lucide`
+(la version) sur le sprite, `data-src` (le nom d'origine) sur chaque `<symbol>`.
+
+★ **UNE SEULE GRAISSE, UNE SEULE ÉCHELLE.** `stroke-width:1.75` déclaré une fois dans `.mv-ic`
+— le harnais compte les déclarations. Et une échelle **fermée** : `16 / 18 / 20 / 24 / 40`
+(en ligne / bouton / ligne de liste / tuile / écran vide). **78 appels ramenés dessus.** Une
+valeur hors échelle est un **rouge**, pas un avertissement : sinon l'échelle se délite en six mois.
+
+★ **LA TUILE — `_mvIconTuile(nom, ton)`.** L'icône dans un carré teinté de 34 px. C'est le geste
+qui sépare le « fait main » du « pensé » : nue, l'icône flotte devant la ligne ; dans son carré,
+elle prend une colonne et la ligne s'aligne. ⚠️ **Sur des LIGNES et des RUBRIQUES seulement** —
+dans une pastille en ligne, 34 px écraseraient le texte. Fond en `color-mix` de la teinte, donc
+il suit le thème au lieu d'être un gris figé qui vire sale en sombre.
+
+⚠⚠⚠ **DEUX FOIS LE HARNAIS EST DEVENU VERT PAR LE VIDE, LE MÊME JOUR.** En ajoutant `data-src`
+aux `<symbol>`, le motif de lecture (`viewBox="0 0 24 24">` en dur) n'a plus rien trouvé :
+**0 symbole lu, et la moitié des assertions au vert**. Puis une contre-épreuve a cessé de mordre
+parce que sa chaîne cible avait changé de taille. → **Le COMPTE d'objets lus est lui-même une
+assertion, placée avant toutes les autres** ; et une contre-épreuve doit échouer si son injection
+ne s'applique pas, jamais rester silencieuse.
+
+★★ **CE QUE CES QUATRE PASSES COÛTENT, ET CE QU'ELLES APPRENNENT.** Quatre registres livrés,
+trois refusés. Les deux premiers ont été proposés **sans référence visuelle** — j'ai dessiné
+contre un adjectif (*« professionnel »*), pas contre une cible. Le tournant a été le mot
+*« Meta Quest »*, puis *« Windows 95 »* : **deux références précises valent dix adjectifs.**
+→ Sur tout lot visuel, **réclamer une référence avant de dessiner**, et rendre une planche
+comparée **aux tailles réelles d'emploi** avant d'intégrer quoi que ce soit.
+
+★★★ **ET LA LEÇON QUI VAUT POUR LE PROCHAIN LOT VISUEL : NE PAS DESSINER CE QUI EXISTE.**
+J'ai produit trois jeux d'icônes avant d'installer une bibliothèque. Le premier réflexe
+aurait dû être l'inverse. **Ce qui appartient à Ma Vigne, c'est la CORRESPONDANCE**
+(`raisin → grape`, `rang → fence`, `tariere → drill`) **et l'intégration** — la primitive,
+l'échelle, la tuile, le harnais. Pas les tracés.
+
+### 45i. Accompagnement (règle d'or n°4)
+
+- **Fiche `MV_AIDE` de Réglages relue à voix haute contre l'écran neuf : rien à changer** — elle ne
+  décrit aucun écran par son emoji. **C'est un constat, pas un oubli.**
+- **Guide public** : une seule phrase mentait — `guide/12-reglages.html` nommait le bouton
+  *« ⏱ Chronométrer le temps réel »*. Source corrigée, **`node scripts\build-guide.mjs` rejoué**,
+  `--check` vert. ⚠️ **On livre la source, jamais `public/guide.html`.**
+- `WHATS_NEW` : **4 items**, rédigés du point de vue de l'utilisateur, **vérifiés en Node**.
+
+### 45j. Ce que ce lot ouvre et ne ferme pas
+
+- **DS-M — les huit autres modules.** `654` pictogrammes restants : `app 194 · tracteur 127 ·
+  cave 73 · admin-gt 72 · utils 74 · pilotage 29 · phyto 25 · firebase 25 · onboarding 14 ·
+  planning 2 · reserve 1 · reglages 18 (exemptés)`.
+- ⚠️ **`index.html` n'a PAS été migré** (hors sprite et bouton d'icône d'activité). Le `🌿` de
+  `.ver-tag` et le `📍 Centrer sur mes parcelles` y sont toujours — **et le guide les décrit
+  encore justement, pour cette raison même**.
+- ⚠️ **Les `<option>` de `tracteur.js`** (lignes 1477, 2119, 2206) : tant qu'elles rendent
+  `a.emoji`, la donnée ne peut pas devenir un nom d'icône. **C'est le préalable de DS-M**, pas un
+  détail de finition.
+- ⚠️ **`MV_AIDE[x].ico`** est un emoji, rendu en tête de chaque fiche d'aide des **dix** modules.
+  Il vit dans `utils.js` : c'est un lot DS-M à lui seul, et il se voit sur tous les écrans.
+- ⚠️ **Le smoke et l'e2e n'ont PAS tourné** : Playwright ne s'installe pas dans le bac à sable
+  (le CDN des navigateurs n'est pas joignable). **Le build passe, le sprite survit au bundle**
+  (36 `<symbol>` dans `dist/index.html`), mais **c'est la CI qui donnera le vrai vert**.
+
+---
+
+## 46. ★★★ LA CHARTE D'ÎLOTS — LOT DS-2 (16/08 — APP 6.26 → 6.27 · SW 6.80 → 6.81)
+
+> ★★★ **LA LEÇON DU JOUR, ET ELLE COÛTE CHER : QUATRE JEUX D'ICÔNES N'ONT PAS SUFFI.**
+> Trois refusés (*« moche »*, *« Windows 95 »*, *« récupéré sur le net »*), le quatrième pris
+> dans une vraie bibliothèque — et le verdict restait *« ça ne fait toujours pas pro »*.
+> **Le problème n'a jamais été l'icône. C'était le contenant.**
+
+### 46a. Ce qui faisait « brouillon », nommé
+
+| Le symptôme | La cause |
+|---|---|
+| l'œil est agressé | des blocs **empilés**, séparés par des **filets**, sans respiration |
+| rien n'accroche | **tout a la même importance visuelle** — quatre, cinq niveaux de texte concurrents |
+| une liste ne se scanne pas | l'**état** est noyé dans le texte au lieu d'être **calé à droite** |
+| « 62 % » et « 100 % » sautent | pas de `tabular-nums` : l'œil rattrape le décalage à **chaque ligne** |
+
+### 46b. Quatre briques, pas trente (`styles.css`)
+
+- **L'îlot `.mv-c`** — un objet métier = une carte. 16 de *padding*, 16 de rayon, une bordure
+  d'un cheveu. ★ **On remplace les lignes de séparation par du vide**, pas par d'autres lignes.
+- **La hiérarchie** — ⚠️⚠️ **TROIS NIVEAUX, JAMAIS QUATRE.** `.mv-t` (le nom, Cormorant),
+  `.mv-n` (le chiffre qui compte, **`tabular-nums`**), `.mv-l` (l'étiquette technique).
+  Un quatrième niveau et la hiérarchie ne se lit plus — **c'est exactement ce qui donnait
+  l'effet brouillon**.
+- **Le badge `.mv-bdg`** — l'état, **toujours à droite**. C'est l'alignement vertical des badges
+  qui rend une liste de 46 parcelles scannable.
+- **Le bouton fantôme `.mv-gh`** — l'action attend, elle ne crie pas. Couleur au survol
+  seulement, rouge **uniquement** pour ce qui détruit.
+
+⚠️ **38 px et non 44 pour `.mv-gh`** : la cible tactile est portée par **la carte entière**.
+Un bouton de 44 dans une carte à 16 de padding mange la ligne.
+
+### 46c. ⚠️⚠️ AUCUNE COULEUR D'ÉTAT EN DUR — et c'est vérifié
+
+Un `#EAF5E4` écrit en dur est **juste sur la carte claire et faux partout ailleurs** : mode
+sombre, plein soleil, document imprimé. Tous les fonds de badge sont en
+**`color-mix(in srgb, var(--ton) 14%, transparent)`** : ils suivent le thème.
+
+★ **`_mvBadge(texte, ton)` — ensemble FERMÉ de quatre tons** : `vert` fait · `ambre` en cours ·
+`rouge` bloquant · `neutre` à faire. Un cinquième ton et deux écrans finissent par dire la même
+chose de deux couleurs différentes. Un ton inconnu retombe sur `neutre` **et part au journal**.
+Le harnais compte les tons déclarés, refuse un ton inconnu à l'appel, et vérifie que
+**les 12 briques existent** — une classe absente ne casse rien, elle rend un bloc nu, en silence.
+
+### 46d. Ce qui est passé à la charte
+
+| Écran | Ce qui change |
+|---|---|
+| **Accueil** (`renderHomeCard`) | le pourcentage devient le **sujet** : héros en Cormorant 46, jauge à côté, contexte en étiquette. Plus de picto de 38 px, plus de coche verte géante |
+| **Carte parcelle** (`_pvInner`) | îlot cliquable, nom + cépage, pourcentage tabulaire à droite, jauge, **badge d'état calé à droite**. ★ **Plus une seule icône** : une liste se lit à la typographie |
+| **Fiche parcelle** (`openDP`) | trois chiffres en tête (avancement / surface / travaux faits), les travaux en lignes `.mv-tr`, les pictogrammes retirés des libellés |
+| **DRAE** | ⚠️ **réglementaire** : badge rouge dans la liste, **encart dédié** dans la fiche avec les heures restantes en gros. **La seule icône de la fiche** — un statut critique doit arrêter l'œil |
+
+### 46e. ⚠️ CE QUI N'EST PAS FAIT
+
+- ~~Les écrans de Réglages~~ → **FAIT (DS-2b, même livraison)** : ligne d'un travail, activité
+  tracteur, rubriques de la fiche membre. Les badges maison à couleur écrite en dur
+  (`#4A9FC8`, `rgba(61,107,39,…)`) sont passés à `_mvBadge`.
+  ★★ **Le cliquet a fait son travail sans qu'on le lui demande** : en retirant les icônes
+  décoratives des listes, **`cle`, `euro` et `soleil` se sont retrouvés sans appelant**.
+  Retirés de la **correspondance** (`scripts/build-sprite.mjs`), jamais du sprite à la main —
+  **36 → 33 symboles**. C'est le bon sens de marche : on supprime la source, on régénère.
+- ~~Les trois derniers widgets d'accueil~~ → **FAITS** : mise en route, avancement par tâche,
+  carte tracteur. ⚠️ **La carte tracteur garde son fond sombre** (contraste en cabine) : elle
+  prend la **hiérarchie** de la charte, pas son fond. ★ **La charte encadre, elle n'uniformise
+  pas ce qui a une raison d'être différent.**
+- ~~Journal~~ → **FAIT.** Chaque entrée devient un îlot, l'état en badge à droite.
+  ⚠️ **La frise verticale de gauche reste** : elle porte la lecture du temps, ce n'est pas de
+  la décoration. La pastille `👥` disparaît — « Équipe (Victor + Léa) » le dit déjà en mots —
+  et **sa règle CSS part avec elle** : une règle morte finit toujours par être recopiée ailleurs.
+- ~~Tracteur~~ → **FAIT. 127 → 35 pictogrammes**, le plus gros morceau du lot. Sessions, parc
+  de machines, fiches de contrôle, historique de réparations. Les badges maison (`tpc-badge`,
+  `tpc-pill`, `sc-st`) passent à `_mvBadge`.
+  ⚠️ **`.scard-enc` garde son fond sombre** : une session en cours se lit **en cabine, au
+  soleil**. Hiérarchie oui, fond non.
+  ⚠️ **`✱` reste** — signe de renvoi typographique, comme un astérisque de note.
+  ★ **Vider une variable n'est pas la supprimer** : `var em=''` laissait une espace en tête de
+  titre (« ␣Broyage »). Trois occurrences, invisibles à la relecture, visibles à l'écran.
+- ~~Cave~~ → **FAIT. 73 → 17 pictogrammes.** Récoltes, cuves, analyses, clients vrac.
+  Les **huit opérations de cuve** perdent leur émoji : huit dessins à retenir, c'était sept de
+  trop — « Chaptalisation » ne se confond avec rien.
+  ⚠️⚠️ **TROISIÈME FOIS DE LA JOURNÉE, MÊME FAMILLE** : la passe de retrait a **vidé** les deux
+  écrans vides (`<div class="mvv-empty-ic"></div>`, un bloc de 34 px de haut, vide). ★ **Un
+  écran vide est l'un des trois cas où l'icône RESTE** — elle n'aurait jamais dû partir.
+  Après les éléments vides qui gardent leur marge et la variable vidée qui laisse une espace,
+  c'est la règle du jour : **une passe de retrait doit lister ce qu'elle NE retire PAS.**
+  ⚠️⚠️ **`_mvIcon` posé dans `cave.js` sans être importé.** ESLint n'a rien dit — `no-undef` ne
+  couvre pas les globales — et l'écran aurait planté à l'ouverture. ★ **Un appel sans import ne
+  se voit qu'à l'usage** : après chaque ajout d'appel dans un module neuf, vérifier l'import.
+- **app.js** → **177 → 125.** Messages de connexion, écrans d'attente et de verrou, filtres par
+  tâche, avancement par tâche, alerte gel.
+  ⚠️⚠️⚠️ **LA FAUTE LA PLUS INSTRUCTIVE DU LOT.** `_mapLabelsVisible ? '🏷 Noms ✓' : '🏷 Noms'` :
+  le **`✓` était la SEULE différence entre les deux états**. Ma passe de retrait l'a emporté →
+  `? 'Noms' : 'Noms'`. **Le bouton ne disait plus rien, et rien ne plantait.**
+  → Nouvelle assertion : **« aucun ternaire ne rend deux fois la même chaîne »**. Elle a trouvé
+  **deux autres cas dès sa première exécution**, dont un **antérieur au lot** (`planning.js:425`,
+  un faux choix qui laissait croire à un calcul dynamique depuis toujours).
+  ★★ **Avant de retirer un glyphe, vérifier qu'il ne porte pas à lui seul une DIFFÉRENCE entre
+  deux états.** Un ternaire à branches égales est le signe le plus net d'un retrait de trop.
+  ★ `cle` est **revenu au sprite** : il avait été retiré quand plus personne ne l'appelait, et
+  l'écran de verrou d'accès le redemande. Le cliquet fonctionne dans les deux sens.
+- **utils.js + la météo** → **74 → 66.** Les **onze fiches d'aide** portent un nom du sprite
+  dans `ico` ; `wmoEmoji` devient **`wmoIcone`** et rend un **nom**.
+  ⚠️ **`wmoEmoji` reste exportée en repli** : un module non migré qui appellerait `wmoIcone`
+  afficherait « nuage » en toutes lettres. On ne redirige pas, on double le temps de la bascule.
+  ⚠️ **Le champ `emoji:` garde son nom** : il part en cache et dans les instantanés météo du
+  journal. ★ **On change ce qu'on y met, pas son nom** — `_mvSetIcon` tranche sur la forme, donc
+  le cache d'hier reste lisible.
+  ⚠️⚠️ **La correspondance météo vit dans une TABLE (`MV_METEO_IC`), pas dans une cascade de
+  `return`.** Des noms rendus en dur par une fonction sont **invisibles au harnais**, qui les a
+  déclarés « symboles morts ». ★ **Troisième forme du même défaut aujourd'hui** (après `ic:` dans
+  la barre de navigation, puis `ico:` dans les fiches) : **tout nom d'icône doit vivre dans un
+  appel littéral ou dans une table déclarée**, jamais dans un `return` en dur.
+  ★★ **ET J'AI ANNONCÉ « 74 → 32 » SANS RELIRE LE RELEVÉ** : le compte réel est **66**. Sur ces
+  66, **26 sont les émojis du journal des nouveautés** (un par entrée — c'est un journal, pas de
+  l'habillage) et **19 sont `TEMOJI`**, encore lu par `pilotage.js`. Il reste donc **21 vrais**.
+  → **Vérifier, ne pas croire — y compris ses propres annonces de fin de lot.**
+- **Pilotage** → **29 → 6**, et surtout ★★★ **LA DEUXIÈME BIBLIOTHÈQUE D'ICÔNES DISPARAÎT.**
+  `_pilIco` embarquait **quinze formes en SVG inline**, avec sa propre épaisseur de trait
+  (1,6 contre 1,75). C'est exactement ce que le cadrage de Nico interdisait — et **ça précédait
+  le lot**. Il ne reste qu'une correspondance `_PIL_IC` vers le sprite commun. **Sprite : 50.**
+  ⚠️ **`_pilTile(id, ico, …)` : le 2ᵉ argument n'était plus lu** depuis que l'en-tête passe par
+  `_pilIcoFor(id)`. Il ne transportait que des émojis morts, sur **25 appels**.
+  ★ **Un paramètre qu'on ne lit plus finit par mentir.**
+  ⚠️ **`.pil-th-ico svg{width:14px}` écrasait la taille posée par `_mvIcon`** — le CSS l'emporte
+  sur un attribut de présentation. C'est le piège documenté dans `.mv-ic`, **déjà présent avant
+  le lot** : la règle existait, l'endroit où elle était violée n'avait pas été cherché.
+  ★ **L'échelle `--pt-*` n'est PAS touchée.** Onze pas, son propre harnais, contre trois niveaux
+  pour la charte. Les unifier est un **arbitrage**, pas une conversion → **DS-3**.
+- ⚠️⚠️⚠️ **QUATRIÈME FOIS QUE LE MÊME ANGLE MORT MORD LE HARNAIS.** Un nom d'icône rangé dans une
+  **table** lui est invisible : `TICON`, `ACT_ICONES`, `ic:` (navigation), `ico:` (fiches),
+  `MV_METEO_IC`, puis `_PIL_IC`. À chaque fois il a déclaré morts des symboles vivants — et
+  surtout, **les autres n'échappaient au rouge que parce qu'ils servaient aussi ailleurs**.
+  → La liste en dur est remplacée par une **règle** : toute table dont le nom finit par
+  `IC`/`ICO`/`ICON`/`ICONES` est lue, dans n'importe quel module.
+  ★★ **Une liste en dur qu'on rallonge à chaque incident n'est pas un filet, c'est un journal
+  des incidents passés.**
+- ★★★ **`TEMOJI` EST SUPPRIMÉE.** Elle associait un émoji à chaque travail et était lue
+  **14 fois dans `app.js`**, 2 dans `pilotage.js`, 3 dans `reglages.js`. ★ **Partout, l'émoji
+  précédait un NOM DE TÂCHE déjà écrit à côté** : il ne disait rien de plus. `TICON` la remplace
+  et rend un **nom d'icône**. ⚠️ **Ne pas la réintroduire « juste pour une liste »** — c'est
+  comme ça qu'elle était arrivée.
+  ★ Dans Pilotage, `x.emos` collait bout à bout les émojis des tâches restantes : « 🌿🌿🍇 ».
+  **Trois feuilles quasi identiques ne disent pas QUELLES tâches, seulement COMBIEN** — la ligne
+  rend désormais le compte, qui est l'information réelle.
+- **Phyto** (25 → 10), **firebase** (25 → 11), **onboarding** (14 → **0**). Bandeau de synchro,
+  erreurs de connexion, première installation : des puits de texte pur, où **la couleur disait
+  déjà tout**.
+- ⚠️⚠️ **LA CONTRE-ÉPREUVE DÉPENDAIT DE L'ORDRE D'EXÉCUTION.** L'épreuve « le compte remonte »
+  restait **verte** si la référence du dépôt datait d'avant une baisse : ajouter trois émojis ne
+  dépassait pas une référence périmée. Le bac **regrave son propre cliquet avant d'injecter**.
+  ★★ **Une contre-épreuve ne doit dépendre que de la faute qu'elle pose** — vérifié en remettant
+  volontairement une référence à 999 : les douze mordent toujours.
+- **Tracteur** 35 → **7**, **app.js** 119 → **92**. Boutons d'une fiche parcelle, points de
+  contrôle, canaux de discussion, pastilles d'état.
+  ⚠️⚠️ **EN SUPPRIMANT LE CHAMP `icon` DES SIX POINTS DE CONTRÔLE, J'AI LAISSÉ TROIS LECTURES
+  DE CE CHAMP.** Elles auraient rendu **« undefined »** à l'écran, et **ESLint ne dit rien d'un
+  champ d'objet absent**. ★★ C'est le revers exact du piège « vider n'est pas supprimer » :
+  cette fois j'ai supprimé **la source sans chercher qui la lit**.
+  → **Après chaque retrait d'un champ, chercher `\.champ\b` dans tout le module.**
+  ⚠️ Même famille, même minute : l'ancre d'un de ces retraits existait **deux fois avec la même
+  indentation**. L'`assert count==1` a mordu — c'est exactement ce pour quoi il existe.
+- ★ **Restent typographiques, donc conservés** : « ↩ » dans la phrase qui décrit le geste
+  (« Tap 1 = commence, ↩ annule ») et « ↑ 24° ↓ 12° » (min/max d'un relevé météo).
+- **app.js** 92 → **58.** Bandeau de synchro, bulle d'état, équipe du jour, filtre du journal,
+  roue d'attente, parc tracteur en mode GT.
+  ⚠️⚠️ **DEUX FILTRES TESTAIENT LA PRÉSENCE D'UN ÉMOJI DANS LE MESSAGE** du bandeau :
+  `/Synchronisation|🔄|rétablie|📶|…/.test(msg)`. Les messages n'en ont plus — **le test ne serait
+  plus jamais tombé juste, et le bandeau aurait gardé la mauvaise couleur**. Ils testent
+  désormais les mots. ★★ **Retirer un émoji d'un message, c'est aussi casser qui le CHERCHE.**
+  → Après chaque nettoyage de messages, grepper les `test(` / `indexOf(` / `includes(` sur ces
+  mêmes glyphes.
+  ★ L'`assert count==1` a **de nouveau mordu** : le champ `icon` des points de contrôle avait
+  **encore un lecteur ici** (doublon GT de `tracteur.js`). La règle posée au tour précédent a
+  servi au tour suivant.
+- **admin-gt** 72 → **7.** La console opérateur passe aux mêmes icônes.
+  ⚠️ **Le journal d'accès est écrit en base** : les lignes d'avant ce lot portent un émoji,
+  celles d'après un nom. `_agtIco` traduit **à la lecture**. ★ **Un journal qu'on réécrit n'est
+  plus un journal.**
+  ⚠️⚠️ **TROIS ÉCHECS PARTIELS DE SUITE SUR CE FICHIER**, toujours la même cause : **un script
+  qui échoue au milieu n'écrit rien, mais les scripts précédents ont écrit.** L'état réel n'est
+  jamais celui qu'on croit. Ici `_agtIco` s'est retrouvé **appelé sans être défini** — invisible
+  au lint, invisible au build, visible seulement à l'ouverture de l'écran.
+  → **Relire le fichier avant chaque lot d'ancres**, et n'asserter que ce qui manque encore.
+  C'est §25 appliqué à soi-même.
+
+### 46h. ★ OÙ EN EST LE CLIQUET, ET CE QUI RESTE VOLONTAIREMENT
+
+**920 → 169 pictogrammes rendus — 82 % de moins.**
+
+| Module | Reste | Nature |
+|---|---|---|
+| `app` | 58 | dont **14 de semence `ACTIVITES`** (bloquée par les `<option>`) et des légendes `✓ ▶ ○` **typographiques** |
+| `utils` | 47 | dont **26 = un émoji par entrée du journal des nouveautés** — c'est sa forme, pas de l'habillage |
+| `reglages` | 18 | `_ACT_EMOJIS`, **exemptés et documentés** |
+| `firebase` | 11 | messages internes |
+| `phyto` | 10 | reliquat d'écrans |
+| `tracteur` / `admin-gt` | 7 / 7 | reliquat |
+| `pilotage` · `cave` · `planning` · `reserve` | 6 · 2 · 2 · 1 | typographie pour l'essentiel |
+| `onboarding` | **0** | |
+
+★ **Le vrai reste visible par un client tourne autour de 40 glyphes, dont une bonne moitié est
+légitime** (typographie, données, journal). Le lot a atteint son objet.
+
+---
+
+## 47. LES DEUX ÉCHELLES — LOT DS-3 (16/08 — même livraison, APP 6.27 · SW 6.81)
+
+### 47a. ⚠️⚠️ `--pt-*` ÉTAIT DÉJÀ DANS `:root`
+
+Je l'ai appelée « l'échelle de Pilotage » pendant trois tours. **Elle est déclarée dans `:root`,
+donc globale : c'est l'échelle de l'APPLICATION**, et ma charte DS-2 l'a ignorée en écrivant six
+`font-size` à la main. ★★ **Une échelle qu'on ignore n'en est plus une** — et j'ai failli en
+créer une seconde en croyant en réconcilier deux.
+
+La charte s'y range : `.mv-t → --pt-md`, `.mv-n → --pt-lg`, `.mv-hn → --pt-hero`,
+`.mv-l → --pt-micro`, `.mv-v → --pt-txt`, `.mv-bdg → --pt-lbl`. **Trois correspondances exactes,
+trois à ±1 px.**
+⚠️ Le rôle écrit à côté de `--pt-lg` dit « titre serif d'un panneau » : il a été nommé pour
+Pilotage, pas pour un chiffre. **La taille est juste, l'étiquette ment** — noté, pas corrigé en
+douce.
+
+### 47b. L'échelle d'espacement — `--e-0` à `--e-8`
+
+La feuille portait **vingt valeurs de padding, de 1 à 20 px** : 129 fois 10, 126 fois 8, 88 fois
+6, 73 fois 9, 66 fois 11. ★ **Vingt valeurs, ce n'est pas un rythme, c'est vingt décisions prises
+une par une** — et c'est ce qui fait « brouillon » avant même qu'on lise le contenu.
+
+⚠️⚠️ **LA FEUILLE N'EST PAS RÉÉCRITE D'UN COUP, ET C'EST DÉLIBÉRÉ.** Remapper 800 déclarations
+**sans pouvoir vérifier une seule capture** (Playwright ne s'installe pas ici) serait un pari,
+pas un lot. La charte DS-2 s'y range ; le reste est tenu par un **cliquet à 1004** : le nombre de
+valeurs hors échelle **ne peut plus monter**, et se résorbe écran par écran.
+★ **Transformer une dette en cliquet vaut mieux que la solder à l'aveugle.**
+
+### 47c. ⚠️⚠️⚠️ LE HARNAIS NE COMPILAIT PLUS, ET AFFICHAIT QUAND MÊME UN RÉSULTAT
+
+En ajoutant le cliquet, j'ai déclaré `const enDur` — **un nom déjà pris plus bas dans le même
+fichier**. Le module ne compilait plus : **ses 25 assertions ne tournaient plus du tout**, et la
+boucle de vérification affichait tout de même une ligne. ★★ **Un harnais qui ne démarre pas est
+pire qu'un harnais rouge** : le rouge se voit.
+→ C'est la troisième forme du « vert par le vide » de la journée, après le sprite lu à zéro et la
+contre-épreuve qui ne mordait pas.
+
+⚠️ Et `--baseline` était lu comme un **nom de fichier** (`process.argv[2]`) : le harnais mourait
+sur un `ENOENT`. **Un argument positionnel et un drapeau ne se mélangent pas sans filtre.**
+- ~~La personnalisation d'accueil~~ → **VÉRIFIÉ, LE BLOCAGE N'EXISTAIT PAS.** `home_layout` est
+  indexé par la **clé du widget** (`data-w="avancement"`), pas par la structure interne : on peut
+  refaire l'intérieur d'un widget sans toucher à la donnée. ★ **Je l'avais annoncé comme bloquant
+  sans l'avoir lu** — vérifier, ne pas croire, y compris sa propre prudence.
+  Sont passés à la charte : **délai de rentrée, ma semaine, derniers travaux, ma part du
+  chantier, raccourcis, pastille de priorité**. Restent `demarrage`, `heures`, `tracteur`.
+- ~~La barre de navigation~~ → **FAITE.** Les émojis passent au sprite (**35 symboles**,
+  `verre` et `plus` ajoutés). ⚠️ **`filter:grayscale(.35)` + `opacity:.62` étaient là pour
+  DÉSATURER UN ÉMOJI**, qui garde sa couleur quoi qu'on fasse. Une icône suit `currentColor` :
+  l'onglet inactif s'éteint **par la couleur**, pas par un filtre — un filtre grise le trait au
+  lieu de l'atténuer, et se voit en mode sombre. ★ **Un contournement survit toujours à la cause
+  qu'il contournait** : chaque fois qu'on remplace un émoji, chercher ce qui a été mis en place
+  pour compenser ses défauts.
+- ⚠️⚠️ **Le harnais ne voyait pas les noms passés par une TABLE** (`{p:'cave', ic:'verre'}`).
+  `verre` a été déclaré mort à tort — et surtout, **les autres n'échappaient au rouge que parce
+  qu'ils servaient AUSSI ailleurs, par chance**. Corrigé : le harnais lit aussi `ic:'…'`.
+  ★ **Un contrôle qui passe pour la mauvaise raison est un contrôle qui ne passe pas.**
+- ⚠️ **La pastille de priorité** posait sa couleur en JS (`pillEl.style.background='var(--or-pale)'`,
+  trois propriétés). Une couleur écrite en JS **échappe au thème**. Passée en classe.
+- **L'échelle d'espacement 4/8 px** réclamée dans le cadrage n'est pas faite : elle touche
+  `styles.css` en entier. → **DS-3.**
+- **Le smoke et l'e2e n'ont pas tourné** (Playwright ne s'installe pas dans le bac à sable).
+  Preflight 0/0 après regravure du cliquet — **13 interpolations non échappées contre 15 en
+  référence, une baisse**, due au passage de libellés en `_escHtml`.
+
+### 46g. ⚠️⚠️⚠️ LA RÉGRESSION QUE J'AI CAUSÉE, ET QUE PERSONNE N'AURAIT VUE
+
+En refaisant `#home-stat-content` à la charte, j'ai changé **l'ordre de ses enfants**. Or le
+**mode compact** de l'accueil les visait **par leur rang** :
+
+```css
+.home-w-compact #home-stat-content>div:first-child{font-size:24px;}
+.home-w-compact #home-stat-content>div:nth-child(n+4){display:none;}
+```
+
+Après la charte, `:first-child` visait l'en-tête au lieu du chiffre, et `:nth-child(n+4)` ne
+visait plus rien. ★★ **Le mode compact est une préférence PAR UTILISATEUR** : elle ne s'ouvre
+jamais en développant. Le défaut serait parti en production et se serait manifesté chez la
+seule personne qui a compacté sa carte d'accueil.
+
+→ **Règle : aucune règle CSS ne vise un enfant par son rang dans un bloc que la charte remanie.**
+Un rang se décale au premier remaniement, une classe non. C'est une assertion du harnais
+(`#home-stat-content`, `#dp-taches`, `#home-dre`, `#home-msem`) et une contre-épreuve.
+
+★ Même famille, même jour : `#home-stat-picto` et `#home-stat-chip` sont **vidés** par la charte,
+et un élément vide **garde son fond, sa marge et son interligne** — il laisse un trou. `:empty`
+les masque. **Vider n'est pas masquer.**
+
+### 46f. ★ Ce que ces deux lots apprennent ensemble
+
+★★★ **On m'a demandé quatre fois de refaire les icônes. La bonne réponse était de refuser la
+question et de regarder le contenant.** Le signal aurait dû être le deuxième refus, pas le
+quatrième : quand une correction ciblée ne change pas le verdict, **c'est le diagnostic qu'il
+faut refaire, pas la correction**.
+
+★ Et l'ordre des lots avait un sens caché : DS-1 était le **prérequis** de DS-2. Sans un jeu
+d'icônes cohérent et une échelle de tailles fermée, la charte d'îlots n'aurait fait que
+déplacer le désordre.

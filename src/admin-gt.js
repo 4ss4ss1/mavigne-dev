@@ -13,7 +13,7 @@
 //   window.goHub, window.openOv, window.closeOv ← app.js
 //
 // Constantes locales (source de vérité : app.js — synchroniser si modifié)
-import { GT_ADMIN_EMAIL } from './utils.js';
+import { GT_ADMIN_EMAIL, _mvIcon } from './utils.js';
 const GT_BASE_URL    = 'https://mavigneapp.fr';
 // ════════════════════════════════════════════════════════════════
 
@@ -60,11 +60,19 @@ var _agtConnexions = {};  // slug -> {last, members:[…]} — dernières connex
 
 // ─── Helpers design ──────────────────────────────────────────────────────────
 var _AGT_SAISON = '#E8708A';
+// ⚠️ Le journal d'acces est ECRIT EN BASE : les lignes d'avant ce lot portent
+//   un emoji, celles d'apres un nom d'icone. On traduit A LA LECTURE plutot
+//   que de reecrire l'historique — un journal qu'on reecrit n'est plus un
+//   journal. Meme patron que l'emoji d'activite tracteur.
+function _agtIco(v){
+  var x = String(v == null ? '' : v);
+  return /^[a-z][a-z0-9-]*$/.test(x) ? _mvIcon(x, 16) : x;
+}
 var _AGT_LVL = {
-  critical:{ icon:'🚨', color:'#EF4444', bg:'rgba(239,68,68,0.10)', border:'rgba(239,68,68,0.28)' },
-  error:   { icon:'🔴', color:'#F97316', bg:'rgba(249,115,22,0.09)', border:'rgba(249,115,22,0.25)' },
-  warning: { icon:'⚠️', color:'#EAB308', bg:'rgba(234,179,8,0.08)',  border:'rgba(234,179,8,0.22)' },
-  info:    { icon:'ℹ️', color:'#4A9FC8', bg:'rgba(74,159,200,0.08)', border:'rgba(74,159,200,0.22)' }
+  critical:{ icon:'alerte', color:'#EF4444', bg:'rgba(239,68,68,0.10)', border:'rgba(239,68,68,0.28)' },
+  error:   { icon:'croix', color:'#F97316', bg:'rgba(249,115,22,0.09)', border:'rgba(249,115,22,0.25)' },
+  warning: { icon:'alerte', color:'#EAB308', bg:'rgba(234,179,8,0.08)',  border:'rgba(234,179,8,0.22)' },
+  info:    { icon:'info', color:'#4A9FC8', bg:'rgba(74,159,200,0.08)', border:'rgba(74,159,200,0.22)' }
 };
 var _AGT_CAT = { firebase:'Firebase', network:'Réseau', runtime:'JS Runtime', ui:'Interface', auth:'Auth' };
 
@@ -406,7 +414,7 @@ async function renderAdminGT(){
   // Barre basse — alerte critique
   var statusEl=document.getElementById('agt-bottom-status');
   if(statusEl&&totalErrCrit>0){
-    statusEl.outerHTML='<div id="agt-bottom-status" style="font-size:10px;font-weight:700;color:#FCA5A5;background:rgba(239,68,68,0.15);border:1px solid rgba(239,68,68,0.3);border-radius:8px;padding:2px 7px">🚨 '+totalErrCrit+' critique'+(totalErrCrit>1?'s':'')+'</div>';
+    statusEl.outerHTML='<div id="agt-bottom-status" style="font-size:10px;font-weight:700;color:#FCA5A5;background:rgba(239,68,68,0.15);border:1px solid rgba(239,68,68,0.3);border-radius:8px;padding:2px 7px">'+totalErrCrit+' critique'+(totalErrCrit>1?'s':'')+'</div>';
   }
 
   agtRenderBody();
@@ -616,7 +624,7 @@ async function agtResolveReport(id, slug){
 }
 
 async function agtLogAccess(slug, action, icon){
-  var entry={id:'al'+Date.now(),ts:new Date().toISOString(),tenant:slug,action:action,icon:icon||'👁'};
+  var entry={id:'al'+Date.now(),ts:new Date().toISOString(),tenant:slug,action:action,icon:icon||''};
   _agtAccessLog.unshift(entry);
   if(_agtAccessLog.length>100)_agtAccessLog.length=100;
   if(window.fbAdminWriteGT)window.fbAdminWriteGT('access_log',{value:_agtAccessLog}).catch(function(){});
@@ -625,22 +633,22 @@ async function agtLogAccess(slug, action, icon){
 // ─── Maintenance : resynchro catalogue E-Phy (ANSES) ──────────────────────────
 async function agtSyncEphy(btn){
   if(!window.fbCallFn){ showToast('Indisponible','#E07060'); return; }
-  var orig=btn?btn.innerHTML:''; if(btn){ btn.disabled=true; btn.innerHTML='⏳ Synchronisation…'; }
+  var orig=btn?btn.innerHTML:''; if(btn){ btn.disabled=true; btn.innerHTML='Synchronisation…'; }
   var st=document.getElementById('agt-ephy-status'); if(st){ st.style.color='rgba(255,255,255,0.35)'; st.textContent='Téléchargement + parsing E-Phy… (jusqu’à ~2 min)'; }
   try{
     var r=await window.fbCallFn('syncEphyVigneNow',{},{ timeout:540000 });
     var n=(r&&r.count!=null)?r.count:'?';
     var bt=(r&&r.byType)?r.byType:{};
     var fams=Object.keys(bt).sort(function(a,b){return bt[b]-bt[a];}).slice(0,6).map(function(k){return k+' '+bt[k];}).join(' · ');
-    showToast('✅ E-Phy resynchronisé — '+n+' produits','#1F7A3D');
+    showToast('E-Phy resynchronisé — '+n+' produits','#1F7A3D');
     if(window._fbLoadEphy) window._fbLoadEphy();
-    if(st){ st.style.color='#6BA34A'; st.innerHTML='✅ '+n+' produits'+(fams?' · '+_escHtml(fams):'')+' · '+new Date().toLocaleTimeString('fr-FR'); }
+    if(st){ st.style.color='#6BA34A'; st.innerHTML=n+' produits'+(fams?' · '+_escHtml(fams):'')+' · '+new Date().toLocaleTimeString('fr-FR'); }
   }catch(e){
     var code=(e&&e.code)||''; var msg=(e&&e.message)||'échec';
     if(code.indexOf('permission-denied')>=0) msg='Connecte-toi avec le compte GUERETTECH (claim gtAdmin) puis réessaie.';
     else if(code.indexOf('deadline')>=0) msg='Délai client dépassé — la synchro continue côté serveur, vérifie le doc ephy/vigne dans 1–2 min.';
     showToast('E-Phy : '+msg,'#E07060');
-    if(st){ st.style.color='#FCA5A5'; st.textContent='⚠️ '+msg; }
+    if(st){ st.style.color='#FCA5A5'; st.textContent=msg; }
   }finally{ if(btn){ btn.disabled=false; btn.innerHTML=orig; } }
 }
 
@@ -668,7 +676,7 @@ function _agtCnxBadge(slug){
   var c=_agtConnexions[slug];
   if(!c) return '';  // pas encore chargé / indisponible
   var f=_agtCnxFmt(c.last);
-  var label = c.last ? ('📶 Dernière connexion · '+f.txt) : '📶 Aucune connexion';
+  var label = c.last ? ('Dernière connexion · '+f.txt) : 'Aucune connexion';
   return '<div style="display:inline-flex;align-items:center;gap:6px;margin-top:9px;font-size:11px;font-weight:600;padding:3px 9px;border-radius:8px;background:'+f.bg+';color:'+f.c+'">'
        + '<span style="width:6px;height:6px;border-radius:50%;background:'+f.dot+'"></span>'+label+'</div>';
 }
@@ -681,7 +689,7 @@ function _agtCnxSection(slug){
     if(!a.lastActive) return 1; if(!b.lastActive) return -1;
     return new Date(b.lastActive)-new Date(a.lastActive);
   });
-  var h='<div class="agt-section-lbl" style="margin-bottom:8px">📶 Connexions par membre — '+ms.length+'</div>';
+  var h='<div class="agt-section-lbl" style="margin-bottom:8px">Connexions par membre — '+ms.length+'</div>';
   h+='<div style="margin-bottom:12px">';
   for(var i=0;i<ms.length;i++){
     var m=ms[i], f=_agtCnxFmt(m.lastActive);
@@ -794,7 +802,7 @@ function _agtFicheAcces(slug){
   } else {
     l.slice(0,5).forEach(function(a){
       c+='<div style="display:flex;align-items:center;gap:8px;padding:3px 0;font-size:11px;flex-wrap:wrap">';
-      c+='<span style="flex-shrink:0">'+(a.icon||'\uD83D\uDC41')+'</span>';
+      c+='<span style="flex-shrink:0;display:inline-flex">'+_agtIco(a.icon)+'</span>';
       c+='<span style="flex:1;min-width:120px;color:rgba(255,255,255,0.5)">'+_escHtml(a.action||'')+'</span>';
       c+='<span style="color:rgba(255,255,255,0.25)">'+_agtRelTime(a.ts)+'</span>';
       c+='</div>';
@@ -852,24 +860,24 @@ function _agtBuildClients(){
       h+=_agtFicheIncid(t);
       h+=_agtFicheAcces(t.slug);
       h+='<div class="agt-section-lbl" style="margin:12px 0 8px">Actions</div>';
-      h+='<button class="agt-btn" style="width:100%;background:linear-gradient(135deg,rgba(124,77,214,0.25),rgba(139,92,246,0.18));border-color:rgba(139,92,246,0.4);color:#C4B5FD;font-weight:600;margin-bottom:8px" onclick="agtShowFiche(\''+t.slug+'\')">🗂️ Fiche client — tout paramétrer</button>';
+      h+='<button class="agt-btn" style="width:100%;background:linear-gradient(135deg,rgba(124,77,214,0.25),rgba(139,92,246,0.18));border-color:rgba(139,92,246,0.4);color:#C4B5FD;font-weight:600;margin-bottom:8px" onclick="agtShowFiche(\''+t.slug+'\')">Fiche client — tout paramétrer</button>';
       h+='<div style="display:flex;gap:8px;margin-bottom:8px">';
-      h+='<button class="agt-btn fill" onclick="agtAccedeTenant(\''+t.slug+'\')">🔑 Accéder</button>';
-      h+='<button class="agt-btn" onclick="copyTenantLink(\''+t.slug+'\',this)">🔗 Invitation</button>';
+      h+='<button class="agt-btn fill" onclick="agtAccedeTenant(\''+t.slug+'\')">Accéder</button>';
+      h+='<button class="agt-btn" onclick="copyTenantLink(\''+t.slug+'\',this)">Invitation</button>';
       h+='</div>';
       h+='<div style="display:flex;gap:8px;flex-wrap:wrap;margin-bottom:10px">';
-      h+='<button class="agt-btn sm" onclick="agtShowJournal(\''+t.slug+'\')">📋 Journal</button>';
-      h+='<button class="agt-btn sm" onclick="agtShowParcelles(\''+t.slug+'\')">🍇 Parcelles</button>';
-      h+='<button class="agt-btn sm" onclick="agtShowConfig(\''+t.slug+'\')">⚙️ Config</button>';
-      h+='<button class="agt-btn sm" onclick="agtShowMembres(\''+t.slug+'\')">👥 Membres</button>';
-      h+='<button class="agt-btn sm" onclick="agtShowErreurs(\''+t.slug+'\')">🐛 Erreurs'+(t.errorsOpen>0?' ('+t.errorsOpen+')':'')+'</button>';
+      h+='<button class="agt-btn sm" onclick="agtShowJournal(\''+t.slug+'\')">Journal</button>';
+      h+='<button class="agt-btn sm" onclick="agtShowParcelles(\''+t.slug+'\')">Parcelles</button>';
+      h+='<button class="agt-btn sm" onclick="agtShowConfig(\''+t.slug+'\')">Config</button>';
+      h+='<button class="agt-btn sm" onclick="agtShowMembres(\''+t.slug+'\')">Membres</button>';
+      h+='<button class="agt-btn sm" onclick="agtShowErreurs(\''+t.slug+'\')">Erreurs'+(t.errorsOpen>0?' ('+t.errorsOpen+')':'')+'</button>';
       h+='</div>';
       if(t.slug==='marchand-grillot'){
-        h+='<div style="font-size:11px;color:rgba(255,255,255,0.28);text-align:center;padding:9px;background:rgba(255,255,255,0.03);border:1px solid rgba(255,255,255,0.06);border-radius:8px;margin-bottom:8px">🔒 Domaine de production — suppression désactivée</div>';
+        h+='<div style="font-size:11px;color:rgba(255,255,255,0.28);text-align:center;padding:9px;background:rgba(255,255,255,0.03);border:1px solid rgba(255,255,255,0.06);border-radius:8px;margin-bottom:8px">Domaine de production — suppression désactivée</div>';
       } else {
-        h+='<button class="agt-btn" style="width:100%;background:rgba(239,68,68,0.08);border-color:rgba(239,68,68,0.28);color:#FCA5A5;margin-bottom:8px" onclick="agtDeleteTenant(\''+t.slug+'\')">🗑️ Supprimer le domaine</button>';
+        h+='<button class="agt-btn" style="width:100%;background:rgba(239,68,68,0.08);border-color:rgba(239,68,68,0.28);color:#FCA5A5;margin-bottom:8px" onclick="agtDeleteTenant(\''+t.slug+'\')">Supprimer le domaine</button>';
       }
-      h+='<div style="font-size:10px;color:rgba(196,181,253,0.25);padding:6px 8px;background:rgba(139,92,246,0.06);border-radius:6px;line-height:1.5">⚠️ Cet accès sera enregistré dans le log GUERETTECH</div>';
+      h+='<div style="font-size:10px;color:rgba(196,181,253,0.25);padding:6px 8px;background:rgba(139,92,246,0.06);border-radius:6px;line-height:1.5">Cet accès sera enregistré dans le log GUERETTECH</div>';
       h+='</div>';
     }
     h+='</div>';
@@ -885,7 +893,7 @@ function _agtBuildClients(){
 }
 
 async function agtAccedeTenant(slug){
-  await agtLogAccess(slug,'Accès dashboard','🔑');
+  await agtLogAccess(slug,'Accès dashboard','cle');
   // Inspection support : ouvre le domaine dans un nouvel onglet (même origine → session GT
   // partagée, gtAdmin lit toutes les données). Pour TESTER l'onboarding comme un prospect
   // (sans session), utiliser le lien d'invitation en navigation privée.
@@ -897,7 +905,7 @@ async function agtAccedeTenant(slug){
 // ─── Onglet Accès log ─────────────────────────────────────────────────────────
 function _agtBuildLog(){
   var h='<div class="agt-section-lbl">Log d\'accès GT — '+(_agtAccessLog.length)+' entrée(s)</div>';
-  h+='<div class="agt-infobox">🔒 Accès enregistrés conformément aux CGU (support/maintenance). Conservés 90 jours.</div>';
+  h+='<div class="agt-infobox">Accès enregistrés conformément aux CGU (support/maintenance). Conservés 90 jours.</div>';
   if(!_agtAccessLog.length){
     h+='<div style="text-align:center;padding:28px;color:rgba(255,255,255,0.2);font-size:13px">Aucun accès enregistré</div>';
     return h;
@@ -905,7 +913,7 @@ function _agtBuildLog(){
   for(var i=0;i<Math.min(_agtAccessLog.length,50);i++){
     var e=_agtAccessLog[i];
     h+='<div style="display:flex;gap:12px;align-items:flex-start;padding:12px 0;border-bottom:1px solid rgba(255,255,255,0.05)">';
-    h+='<div style="width:34px;height:34px;border-radius:10px;flex-shrink:0;background:rgba(139,92,246,0.10);border:1px solid rgba(139,92,246,0.15);display:flex;align-items:center;justify-content:center;font-size:15px">'+(e.icon||'👁')+'</div>';
+    h+='<div style="width:34px;height:34px;border-radius:10px;flex-shrink:0;background:rgba(139,92,246,0.10);border:1px solid rgba(139,92,246,0.15);display:flex;align-items:center;justify-content:center;font-size:15px">'+(e.icon||'')+'</div>';
     h+='<div style="flex:1">';
     h+='<div style="font-size:13px;font-weight:500;color:rgba(255,255,255,0.8)">'+_escHtml(e.action)+'</div>';
     h+='<div style="display:flex;gap:8px;margin-top:3px;align-items:center">';
@@ -1126,7 +1134,7 @@ function _agtBuildErrors(){
 
     h+='<div style="background:'+(clos?'rgba(255,255,255,0.025)':m.bg)+';border:1px solid rgba(255,255,255,0.07);border-left:3px solid '+(clos?'rgba(255,255,255,0.08)':m.color)+';border-radius:10px;padding:10px 12px;margin-bottom:8px;opacity:'+(clos?'0.55':'1')+'">';
     h+='<div style="display:flex;align-items:flex-start;gap:8px">';
-    h+='<span style="font-size:15px;flex-shrink:0;margin-top:1px">'+m.icon+'</span>';
+    h+='<span style="flex-shrink:0;margin-top:1px;display:inline-flex">'+_mvIcon(m.icon,16)+'</span>';
     h+='<div style="flex:1;min-width:0">';
     h+='<div style="color:#E8E8E0;font-size:12px;font-weight:600;line-height:1.45">'+_escHtml(g.msg)+'</div>';
 
@@ -1266,8 +1274,8 @@ function copyTenantLink(slug, btn) {
   var link = GT_BASE_URL + '/?tenant=' + slug;
   if(navigator.clipboard && navigator.clipboard.writeText) {
     navigator.clipboard.writeText(link).then(function() {
-      showToast('Lien copié ✓', '#3D6B27');
-      if(btn) { var orig=btn.textContent; btn.textContent='✓ Copié'; setTimeout(function(){btn.textContent=orig;},2000); }
+      showToast('Lien copié', '#3D6B27');
+      if(btn) { var orig=btn.textContent; btn.textContent='Copié'; setTimeout(function(){btn.textContent=orig;},2000); }
     }).catch(function() { _fallbackCopyGT(link); });
   } else { _fallbackCopyGT(link); }
 }
@@ -1275,7 +1283,7 @@ function _fallbackCopyGT(link) {
   var ta=document.createElement('textarea');
   ta.value=link;ta.style.position='fixed';ta.style.opacity='0';
   document.body.appendChild(ta);ta.select();
-  try{document.execCommand('copy');showToast('Lien copié ✓','#3D6B27');}
+  try{document.execCommand('copy');showToast('Lien copié','#3D6B27');}
   catch(e){showToast(link,'#1A4A7A');}
   document.body.removeChild(ta);
 }
@@ -1918,7 +1926,7 @@ async function agtShowParcelles(slug) {
   ov.style.cssText = 'position:fixed;inset:0;background:rgba(10,8,18,0.96);z-index:9999;display:flex;flex-direction:column;font-family:Outfit,sans-serif;';
   ov.innerHTML = '<div style="display:flex;align-items:center;justify-content:space-between;padding:18px 20px 14px;border-bottom:1px solid rgba(139,92,246,0.15)">'
     + '<div style="display:flex;align-items:center;gap:10px">'
-    + '<div style="width:32px;height:32px;border-radius:10px;background:rgba(139,92,246,0.15);border:1px solid rgba(139,92,246,0.3);display:flex;align-items:center;justify-content:center;font-size:15px">🍇</div>'
+    + '<div style="width:32px;height:32px;border-radius:10px;background:rgba(139,92,246,0.15);border:1px solid rgba(139,92,246,0.3);display:flex;align-items:center;justify-content:center;font-size:15px"></div>'
     + '<div><div style="font-size:15px;font-weight:600;color:#fff">Parcelles</div>'
     + '<div style="font-size:11px;color:rgba(196,181,253,0.5);margin-top:1px">'+_escHtml(slug)+'</div></div>'
     + '</div>'
@@ -1928,8 +1936,8 @@ async function agtShowParcelles(slug) {
     + '<div style="text-align:center;padding:40px;color:rgba(255,255,255,0.3);font-size:13px">Chargement…</div>'
     + '</div>'
     + '<div id="agt-prc-foot" style="padding:14px 20px;border-top:1px solid rgba(139,92,246,0.12);display:none;gap:8px">'
-    + '<button id="agt-prc-copy" style="flex:1;background:#7C4DD6;border:none;border-radius:12px;color:#fff;font-size:13px;font-weight:600;padding:12px;cursor:pointer;font-family:Outfit,sans-serif">📋 Copier les noms</button>'
-    + '<button id="agt-prc-json" style="flex:1;background:transparent;border:1px solid rgba(139,92,246,0.4);border-radius:12px;color:#C4B5FD;font-size:13px;font-weight:600;padding:12px;cursor:pointer;font-family:Outfit,sans-serif">⬇️ Export JSON</button>'
+    + '<button id="agt-prc-copy" style="flex:1;background:#7C4DD6;border:none;border-radius:12px;color:#fff;font-size:13px;font-weight:600;padding:12px;cursor:pointer;font-family:Outfit,sans-serif">Copier les noms</button>'
+    + '<button id="agt-prc-json" style="flex:1;background:transparent;border:1px solid rgba(139,92,246,0.4);border-radius:12px;color:#C4B5FD;font-size:13px;font-weight:600;padding:12px;cursor:pointer;font-family:Outfit,sans-serif">Export JSON</button>'
     + '</div>';
   document.body.appendChild(ov);
   var prc = window.fbAdminRead ? await window.fbAdminRead(slug, 'parcelles') : null;
@@ -1964,7 +1972,7 @@ async function agtShowParcelles(slug) {
 }
 function agtCopyParcNoms(noms, btn){
   var txt=(noms||[]).join('\n');
-  function _ok(){ if(btn){ var o=btn.innerHTML; btn.innerHTML='✓ Copié'; setTimeout(function(){ btn.innerHTML=o; },1200); } }
+  function _ok(){ if(btn){ var o=btn.innerHTML; btn.innerHTML='Copié'; setTimeout(function(){ btn.innerHTML=o; },1200); } }
   if(navigator.clipboard && navigator.clipboard.writeText){
     navigator.clipboard.writeText(txt).then(_ok, function(){ if(window.showToast) showToast(txt,'#1A4A7A'); });
   } else {
@@ -1979,7 +1987,7 @@ function agtExportParcJson(slug, jsonParc){
   var a=document.createElement('a'); a.href=url; a.download=slug+'-parcelles.json';
   document.body.appendChild(a); a.click(); a.remove();
   setTimeout(function(){ URL.revokeObjectURL(url); },1500);
-  if(window.showToast) showToast('✅ '+(jsonParc?jsonParc.length:0)+' parcelle(s) exportée(s)','#3D6B27');
+  if(window.showToast) showToast((jsonParc?jsonParc.length:0)+' parcelle(s) exportée(s)','#3D6B27');
 }
 
 async function agtShowConfig(slug) {
@@ -2136,7 +2144,7 @@ function _agtBuildReports(){
   h+='<div style="flex:1;background:rgba(249,115,22,0.07);border-radius:12px;padding:10px 8px;text-align:center;border:1px solid '+(open>0?'rgba(249,115,22,0.2)':'transparent')+'"><div style="font-size:22px;font-weight:700;color:#F97316">'+open+'</div><div style="font-size:10px;color:rgba(255,255,255,0.3);margin-top:4px">Ouverts</div></div>';
   h+='<div style="flex:1;background:rgba(255,255,255,0.05);border-radius:12px;padding:10px 8px;text-align:center"><div style="font-size:22px;font-weight:700;color:#C4B5FD">'+pre+'</div><div style="font-size:10px;color:rgba(255,255,255,0.3);margin-top:4px">Avant login</div></div>';
   h+='</div>';
-  h+='<div class="agt-infobox">💬 Signalements envoyés par les membres depuis les Réglages ou la page de connexion. Le contexte technique (page, appareil, dernières erreurs) est joint automatiquement.</div>';
+  h+='<div class="agt-infobox">Signalements envoyés par les membres depuis les Réglages ou la page de connexion. Le contexte technique (page, appareil, dernières erreurs) est joint automatiquement.</div>';
 
   if(!merged.length){
     h+='<div style="text-align:center;padding:32px;color:rgba(255,255,255,0.2);font-size:13px">Aucun signalement pour le moment</div>';
@@ -2145,8 +2153,8 @@ function _agtBuildReports(){
   merged.slice(0,40).forEach(function(r){
     var accent=r.resolved?'rgba(255,255,255,0.08)':'#B5621A';
     var tenantTag=r._tenantSlug
-      ? '<span style="font-size:10px;background:rgba(139,92,246,0.12);border:1px solid rgba(139,92,246,0.2);border-radius:5px;padding:1px 6px;color:rgba(196,181,253,0.7);font-weight:600">🏢 '+_escHtml(r._tenantNom||'?')+'</span>'
-      : '<span style="font-size:10px;background:rgba(201,168,76,0.12);border:1px solid rgba(201,168,76,0.28);border-radius:5px;padding:1px 6px;color:#E6D08A;font-weight:600">🔓 Avant connexion</span>';
+      ? '<span style="font-size:10px;background:rgba(139,92,246,0.12);border:1px solid rgba(139,92,246,0.2);border-radius:5px;padding:1px 6px;color:rgba(196,181,253,0.7);font-weight:600">'+_escHtml(r._tenantNom||'?')+'</span>'
+      : '<span style="font-size:10px;background:rgba(201,168,76,0.12);border:1px solid rgba(201,168,76,0.28);border-radius:5px;padding:1px 6px;color:#E6D08A;font-weight:600">Avant connexion</span>';
     var roles=(Array.isArray(r.roles)&&r.roles.length)?(' · '+_escHtml(r.roles.join(', '))):'';
     var recent=(Array.isArray(r.recentErrors)&&r.recentErrors.length)
       ? r.recentErrors.map(function(e){return '['+_escHtml(e.level||'?')+'] '+_escHtml(e.msg||'')+' — '+_escHtml(e.page||'');}).join('<br>')
@@ -2157,22 +2165,22 @@ function _agtBuildReports(){
     h+='<div style="color:#E8E8E0;font-size:13px;font-weight:500;line-height:1.5">« '+_escHtml(r.desc||'')+' »</div>';
     h+='<div style="display:flex;gap:6px;margin-top:8px;flex-wrap:wrap;align-items:center">';
     h+=tenantTag;
-    h+='<span style="font-size:10px;color:rgba(255,255,255,0.32)">👤 '+_escHtml(r.user||'—')+roles+'</span>';
-    h+='<span style="font-size:10px;color:rgba(255,255,255,0.32)">📄 '+_escHtml(r.page||'—')+'</span>';
-    h+='<span style="font-size:10px;color:rgba(255,255,255,0.28)">🕐 '+_escHtml(_agtRelTime(r.ts))+'</span>';
+    h+='<span style="font-size:10px;color:rgba(255,255,255,0.32)">'+_escHtml(r.user||'—')+roles+'</span>';
+    h+='<span style="font-size:10px;color:rgba(255,255,255,0.32)">'+_escHtml(r.page||'—')+'</span>';
+    h+='<span style="font-size:10px;color:rgba(255,255,255,0.28)">'+_escHtml(_agtRelTime(r.ts))+'</span>';
     h+='</div>';
     h+='<details style="margin-top:9px"><summary style="font-size:10px;color:rgba(196,181,253,0.6);cursor:pointer;list-style:none">Contexte technique ›</summary>';
     h+='<div style="font-size:10px;color:rgba(255,255,255,0.4);line-height:1.7;margin-top:6px;padding:8px 10px;background:rgba(0,0,0,0.2);border-radius:8px">';
-    h+='📱 '+_escHtml(r.ua||'—')+'<br>';
-    h+='📦 Version app : '+_escHtml(r.appVersion||'—')+'<br>';
-    h+='🕐 Reçu : '+_escHtml((r.ts||'').replace('T',' ').slice(0,19))+'<br>';
-    h+='⚠️ Dernières erreurs locales :<br>'+recent;
+    h+=_escHtml(r.ua||'—')+'<br>';
+    h+='Version app : '+_escHtml(r.appVersion||'—')+'<br>';
+    h+='Reçu : '+_escHtml((r.ts||'').replace('T',' ').slice(0,19))+'<br>';
+    h+='Dernières erreurs locales :<br>'+recent;
     h+='</div></details>';
     h+='</div>';
     if(!r.resolved){
-      h+='<button class="agt-btn sm" style="flex-shrink:0" onclick="agtResolveReport(&#39;'+r.id+'&#39;,&#39;'+(r._tenantSlug||'')+'&#39;)">✓ Résolu</button>';
+      h+='<button class="agt-btn sm" style="flex-shrink:0" onclick="agtResolveReport(&#39;'+r.id+'&#39;,&#39;'+(r._tenantSlug||'')+'&#39;)">Résolu</button>';
     } else {
-      h+='<span style="flex-shrink:0;font-size:10px;color:rgba(107,163,74,0.7);font-weight:600;white-space:nowrap">✓ résolu</span>';
+      h+='<span style="flex-shrink:0;font-size:10px;color:rgba(107,163,74,0.7);font-weight:600;white-space:nowrap">résolu</span>';
     }
     h+='</div></div>';
   });
@@ -2366,7 +2374,7 @@ function agtKmlFileChange(input) {
 
 function _agtBuildKml() {
   var h = '<div style="padding:0 0 20px">';
-  h += '<div class="agt-section-title" style="margin-bottom:6px">📍 Import KML</div>';
+  h += '<div class="agt-section-title" style="margin-bottom:6px">Import KML</div>';
   h += '<p style="font-size:12px;color:rgba(255,255,255,0.4);line-height:1.6;margin:0 0 16px">Charger les polygones de parcelles d\'un domaine client depuis son fichier KML Google Earth.</p>';
 
   // Sélecteur domaine
@@ -2390,7 +2398,7 @@ function _agtBuildKml() {
     h += '<div style="background:rgba(61,107,39,0.15);border:1px solid rgba(61,107,39,0.3);';
     h += 'border-radius:10px;padding:12px;margin-bottom:14px">';
     h += '<div style="font-size:12px;font-weight:700;color:#6BA34A;margin-bottom:8px">';
-    h += '✅ ' + _agtKmlPolygons.length + ' polygone' + (_agtKmlPolygons.length > 1 ? 's' : '');
+    h += _agtKmlPolygons.length + ' polygone' + (_agtKmlPolygons.length > 1 ? 's' : '');
     h += ' — ' + _escHtml(_agtKmlFileName) + '</div>';
     h += '<div style="font-size:11px;color:rgba(255,255,255,0.45);line-height:1.8;';
     h += 'max-height:150px;overflow-y:auto;font-family:monospace">';
@@ -2404,7 +2412,7 @@ function _agtBuildKml() {
     h += '</div></div>';
     h += '<button onclick="agtKmlSave()" style="width:100%;padding:13px;border-radius:10px;';
     h += 'border:none;font-size:14px;font-weight:700;font-family:Outfit,sans-serif;cursor:pointer;';
-    h += 'background:#3D6B27;color:white;margin-bottom:8px">💾 Enregistrer pour ce domaine</button>';
+    h += 'background:#3D6B27;color:white;margin-bottom:8px">Enregistrer pour ce domaine</button>';
   }
 
   // État KML par domaine
@@ -2419,7 +2427,7 @@ function _agtBuildKml() {
     h += '</div>';
     h += '<button style="font-size:11px;background:rgba(74,159,200,0.12);border:1px solid rgba(74,159,200,0.25);';
     h += 'color:#4A9FC8;border-radius:6px;padding:5px 12px;cursor:pointer;font-family:Outfit,sans-serif;white-space:nowrap" ';
-    h += 'onclick="agtCheckKml(\'' + t.slug + '\',this)">🔍 Vérifier</button>';
+    h += 'onclick="agtCheckKml(\'' + t.slug + '\',this)">Vérifier</button>';
     h += '</div>';
   });
 
@@ -2436,7 +2444,7 @@ async function agtKmlSave() {
     if (!window.fbAdminWrite) throw new Error('fbAdminWrite indisponible');
     var _ok = await window.fbAdminWrite(slug, 'kml_polygons', _agtKmlPolygons);
     if (!_ok) throw new Error('écriture refusée (droits Firestore / réseau) — voir console [fbAdminWrite]');
-    showToast('✅ KML enregistré — ' + _agtKmlPolygons.length + ' polygones pour ' + slug, '#3D6B27');
+    showToast('KML enregistré — ' + _agtKmlPolygons.length + ' polygones pour ' + slug, '#3D6B27');
     _agtKmlPolygons = [];
     _agtKmlFileName = '';
     agtRenderBody();
@@ -2454,7 +2462,7 @@ async function agtCheckKml(slug, btn) {
       var btn2 = row.querySelector('button');
       if (btn2) {
         if (Array.isArray(data) && data.length > 0) {
-          btn2.outerHTML = '<span style="font-size:11px;color:#6BA34A;font-weight:600">✅ ' + data.length + ' polygones</span>';
+          btn2.outerHTML = '<span style="font-size:11px;color:#6BA34A;font-weight:600">' + data.length + ' polygones</span>';
         } else {
           btn2.outerHTML = '<span style="font-size:11px;color:rgba(255,255,255,0.3)">— KML statique</span>';
         }
@@ -2477,7 +2485,7 @@ function agtDeleteTenant(slug){
   ov.innerHTML=
      '<div style="width:100%;max-width:410px;background:rgba(18,14,28,0.97);border:1px solid rgba(239,68,68,0.3);border-radius:20px;padding:22px;box-shadow:0 24px 60px rgba(0,0,0,0.6)">'
     +'<div style="display:flex;align-items:center;gap:11px">'
-    +'<div style="width:38px;height:38px;border-radius:11px;background:rgba(239,68,68,0.14);border:1px solid rgba(239,68,68,0.35);display:flex;align-items:center;justify-content:center;font-size:18px">⚠️</div>'
+    +'<div style="width:38px;height:38px;border-radius:11px;background:rgba(239,68,68,0.14);border:1px solid rgba(239,68,68,0.35);display:flex;align-items:center;justify-content:center;font-size:18px"></div>'
     +'<div style="font-size:16px;font-weight:700;color:#fff">Supprimer le domaine</div>'
     +'</div>'
     +'<div style="font-size:12.5px;line-height:1.55;color:rgba(255,255,255,0.6);margin-top:12px">Tu vas <b style="color:#FCA5A5">effacer définitivement</b> le domaine <b style="color:#FCA5A5">'+sg+'</b>. Cette action est <b style="color:#FCA5A5">irréversible</b>.</div>'
@@ -2518,14 +2526,14 @@ async function agtDeleteTenantConfirm(slug){
   if(s.value.trim()!==slug || !p.value) return;
   function _err(msg){ if(err){ err.textContent=msg; err.style.display='block'; } }
   if(err) err.style.display='none';
-  btn.disabled=true; btn.textContent='⏳ Suppression…'; btn.style.cursor='wait';
+  btn.disabled=true; btn.textContent='Suppression…'; btn.style.cursor='wait';
   try{
     if(!window._fbDeleteTenant) throw new Error('_fbDeleteTenant indisponible');
     var r=await window._fbDeleteTenant(slug, p.value);
     var ov=document.getElementById('agt-deltenant-overlay'); if(ov) ov.remove();
     var nA=(r&&typeof r.authDeleted==='number')?r.authDeleted:0;
     var nD=(r&&typeof r.docsDeleted==='number')?r.docsDeleted:0;
-    showToast('✅ Domaine supprimé : '+nA+' compte'+(nA>1?'s':'')+', '+nD+' doc'+(nD>1?'s':''),'#3D6B27');
+    showToast('Domaine supprimé : '+nA+' compte'+(nA>1?'s':'')+', '+nD+' doc'+(nD>1?'s':''),'#3D6B27');
     if(window.renderAdminGT) await window.renderAdminGT();
   }catch(e){
     var reason=(e&&e.details&&e.details.reason)||'';
@@ -2534,7 +2542,7 @@ async function agtDeleteTenantConfirm(slug){
     else if(reason==='protected') msg='Ce domaine est protégé.';
     else if(reason==='no_guard')  msg='Mot de passe non configuré (poser delete_guard_hash dans _guerettech/config).';
     else if(reason==='throttled') msg='Trop de tentatives, réessayez plus tard.';
-    _err('❌ '+msg);
+    _err(msg);
     btn.disabled=false; btn.textContent='Supprimer le domaine'; btn.style.cursor='pointer';
   }
 }
@@ -2713,7 +2721,7 @@ function _fcModsHtml(){
   if(_FC.featOv) Object.keys(_FC.featOv).forEach(function(id){ if(_FC.featOv[id]===_FC_PLANDEF[plan][id]) delete _FC.featOv[id]; });
   return _FC_MODS.map(function(m){
     var eff=_fcModEff(m.id), forced=_fcModForced(m.id), def=_FC_PLANDEF[plan][m.id];
-    var badge=forced?(eff?'<span class="agt-b agt-b-on">✓ forcé actif</span>':'<span class="agt-b agt-b-off">✕ forcé masqué</span>'):'<span class="agt-b agt-b-herit">hérité · '+(def?'actif':'masqué')+'</span>';
+    var badge=forced?(eff?'<span class="agt-b agt-b-on">forcé actif</span>':'<span class="agt-b agt-b-off">forcé masqué</span>'):'<span class="agt-b agt-b-herit">hérité · '+(def?'actif':'masqué')+'</span>';
     var reset=forced?'<span class="agt-mod-reset" onclick="_fcModReset(\''+m.id+'\')">rétablir la formule</span>':'';
     return '<div class="agt-mod-row'+(forced?' on':'')+'">'
       +'<div class="agt-mod-emoji">'+m.emoji+'</div>'
@@ -2796,24 +2804,24 @@ function _fcTrialStatusHtml(fc){
   }
   var exp=_fcTrialExpMs(fc), now=Date.now();
   if(exp>0){
-    if(exp<=now) return box('rgba(224,112,96,0.08)','rgba(224,112,96,0.28)','rgba(224,112,96,0.15)','⛔','#F0B4A8','rgba(240,180,168,0.7)','Essai expiré le '+_fcTrialFmt(exp),'client en lecture seule — régler un nouvel essai ou convertir');
+    if(exp<=now) return box('rgba(224,112,96,0.08)','rgba(224,112,96,0.28)','rgba(224,112,96,0.15)','','#F0B4A8','rgba(240,180,168,0.7)','Essai expiré le '+_fcTrialFmt(exp),'client en lecture seule — régler un nouvel essai ou convertir');
     var left=Math.max(0,Math.ceil((exp-now)/86400000));
     var lbl=left>0?('Essai en cours · <span style="color:#E8C860">J-'+left+'</span>'):('Essai en cours · <span style="color:#E8C860">expire aujourd&#39;hui</span>');
     // ★ « J-4 » ne dit pas ce qui se passe apres. La suite depend d'un seul fait : la
     //   reconduction unique est-elle encore disponible.
     var _rn=(typeof fc.trialRenewals==='number')?fc.trialRenewals:0;
     var _suite=(_rn<1)?' · reconduction encore possible':' · reconduction déjà utilisée';
-    return box('rgba(201,168,76,0.08)','rgba(201,168,76,0.28)','rgba(201,168,76,0.15)','⏳','#E8D89A','rgba(232,200,96,0.65)',lbl,'expire le '+_fcTrialFmt(exp)+_suite);
+    return box('rgba(201,168,76,0.08)','rgba(201,168,76,0.28)','rgba(201,168,76,0.15)','','#E8D89A','rgba(232,200,96,0.65)',lbl,'expire le '+_fcTrialFmt(exp)+_suite);
   }
   if(fc.trialDays>0){
-    if(fc.cliStatus==='pending') return box('rgba(139,92,246,0.08)','rgba(196,181,253,0.22)','rgba(139,92,246,0.15)','⌛','#C4B5FD','rgba(196,181,253,0.6)','Essai de '+fc.trialDays+' j','démarre à la 1ère connexion du client');
-    return box('rgba(139,92,246,0.08)','rgba(196,181,253,0.22)','rgba(139,92,246,0.15)','⌛','#C4B5FD','rgba(196,181,253,0.6)','Essai de '+fc.trialDays+' j accordés','date d&#39;expiration inconnue — ré-enregistrer pour suivre le décompte');
+    if(fc.cliStatus==='pending') return box('rgba(139,92,246,0.08)','rgba(196,181,253,0.22)','rgba(139,92,246,0.15)','','#C4B5FD','rgba(196,181,253,0.6)','Essai de '+fc.trialDays+' j','démarre à la 1ère connexion du client');
+    return box('rgba(139,92,246,0.08)','rgba(196,181,253,0.22)','rgba(139,92,246,0.15)','','#C4B5FD','rgba(196,181,253,0.6)','Essai de '+fc.trialDays+' j accordés','date d&#39;expiration inconnue — ré-enregistrer pour suivre le décompte');
   }
   // ⚠️ Un domaine installe « essai a la remise » n'a ni trial_until ni trialDays : sans
   //    cette branche, la fiche annoncerait un ABONNEMENT ACTIF d'un client qui n'a rien
   //    signe. Un ecran qui se trompe d'etat vaut moins qu'un ecran muet.
-  if(fc.trialPrevu>0) return box('rgba(201,168,76,0.08)','rgba(201,168,76,0.28)','rgba(201,168,76,0.15)','⌛','#E8D89A','rgba(232,200,96,0.65)','Essai de '+fc.trialPrevu+' j prévu','non démarré — acc&#232;s complet en attendant ; il part &#224; la remise, ou en enregistrant la fiche ci-dessous');
-  return box('rgba(61,109,39,0.08)','rgba(134,239,172,0.22)','rgba(61,109,39,0.18)','✅','#B7E8C4','rgba(183,232,196,0.6)','Abonnement actif','pas d&#39;essai en cours');
+  if(fc.trialPrevu>0) return box('rgba(201,168,76,0.08)','rgba(201,168,76,0.28)','rgba(201,168,76,0.15)','','#E8D89A','rgba(232,200,96,0.65)','Essai de '+fc.trialPrevu+' j prévu','non démarré — acc&#232;s complet en attendant ; il part &#224; la remise, ou en enregistrant la fiche ci-dessous');
+  return box('rgba(61,109,39,0.08)','rgba(134,239,172,0.22)','rgba(61,109,39,0.18)','','#B7E8C4','rgba(183,232,196,0.6)','Abonnement actif','pas d&#39;essai en cours');
 }
 
 function _fcSecAbo(){
@@ -2848,7 +2856,7 @@ function _fcSecAbo(){
     +'<div style="margin-bottom:13px"><div style="font-size:11px;color:rgba(255,255,255,0.35);margin-bottom:6px">Régler l&#39;essai — jours dès aujourd&#39;hui</div><input id="agt-fc-trial" type="number" min="0" max="90" value="'+tdInput+'" style="'+_FC_INP_STYLE+'"><div style="font-size:10px;color:rgba(255,255,255,0.3);margin-top:5px;line-height:1.4">Enregistrer repositionne l&#39;expiration à aujourd&#39;hui + N jours. <b style="color:rgba(255,255,255,0.45)">0</b> = convertir en payant.</div></div>'
     +'</div>'
     +_fcRenewHtml()
-    +'<div style="font-size:11px;color:rgba(255,255,255,0.35);margin:8px 0 9px">🎛️ Modules visibles par ce client</div>'
+    +'<div style="font-size:11px;color:rgba(255,255,255,0.35);margin:8px 0 9px">Modules visibles par ce client</div>'
     +'<div id="agt-fc-mods">'+_fcModsHtml()+'</div>';
 }
 

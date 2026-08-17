@@ -12,7 +12,7 @@
 //   marche par ordre de chargement n'est pas un appel correct ». La palette
 //   semantique arrive par un VRAI import, resolu au build : elle ne peut plus
 //   etre absente au moment ou un graphe la lit.
-import { _PIL_SEM, _mvInfoBtn } from './utils.js';
+import { _PIL_SEM, _mvInfoBtn, _mvIcon, _mvBadge } from './utils.js';
 
 const DEBUG = location.hostname === 'localhost' || location.hostname === '127.0.0.1';
 if (DEBUG) console.log('[Ma Vigne] pilotage.js chargé');
@@ -256,26 +256,15 @@ var _PIL_TASK_COL={reparation:'#8A5A38',pliage:'#C8B020',entreplantation:'#7A102
 function _taskColor(nom){ return _PIL_TASK_COL[_friseNorm(nom)]||'#8A5A38'; }
 
 // ── Icônes SVG trait fin (remplaçant les emojis des en-têtes) ──
-function _pilIco(n){
-  var P={
-    users:'<path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"/><circle cx="9" cy="7" r="4"/><path d="M23 21v-2a4 4 0 0 0-3-3.87M16 3.13a4 4 0 0 1 0 7.75"/>',
-    drop:'<path d="M12 2.7 6.4 9.2a7 7 0 1 0 11.2 0L12 2.7z"/>',
-    target:'<circle cx="12" cy="12" r="9"/><circle cx="12" cy="12" r="4.5"/><path d="M12 1.5V5M12 19v3.5M1.5 12H5M19 12h3.5"/>',
-    map:'<path d="M9 20l-6-3V4l6 3 6-3 6 3v13l-6-3-6 3z"/><path d="M9 7v13M15 4v13"/>',
-    tractor:'<circle cx="7" cy="17" r="4"/><circle cx="18" cy="18" r="2.5"/><path d="M11 17h4.5M7 13V7h7l3 6"/><path d="M14 7V4h-4"/>',
-    wine:'<path d="M8 22h8M12 15v7M8 2h8l-1 8a3.5 3.5 0 0 1-6 0L8 2z"/>',
-    leaf:'<path d="M11 20A7 7 0 0 1 9.8 6.1C15.5 5 17 4.5 19 2c1 2 2 4.2 2 8 0 5.5-4.8 10-10 10z"/><path d="M2 21c0-3 1.9-5.4 5.1-6"/>',
-    calendar:'<rect x="3" y="4" width="18" height="18" rx="3"/><path d="M16 2v4M8 2v4M3 10h18"/>',
-    scale:'<path d="M12 3v18M3 21h18"/><path d="M5 7l-3 6a3.5 3.5 0 0 0 7 0L6 7M19 7l-3 6a3.5 3.5 0 0 0 7 0l-3-6"/><path d="M4 7h16"/>',
-    sliders:'<path d="M4 21v-7M4 10V3M12 21v-9M12 8V3M20 21v-5M20 12V3"/><path d="M1 14h6M9 8h6M17 16h6"/>',
-    fuel:'<path d="M5 22V4a2 2 0 0 1 2-2h6a2 2 0 0 1 2 2v18"/><path d="M3 22h14M15 9h3a2 2 0 0 1 2 2v6a1.5 1.5 0 0 0 3 0V9l-3-3"/>',
-    spray:'<path d="M12 2v7"/><path d="M5 10a7 7 0 0 0 14 0"/><path d="M12 17v5M8 22h8"/>',
-    cloud:'<path d="M20 17.6A5 5 0 0 0 18 8h-1.3A8 8 0 1 0 4 16.3"/>',
-    flask:'<path d="M10 2v6L4.5 18a2.5 2.5 0 0 0 2.2 3.7h10.6a2.5 2.5 0 0 0 2.2-3.7L14 8V2"/><path d="M8 2h8M7 15h10"/>',
-    chart:'<path d="M3 3v18h18"/><path d="M7 14l4-4 4 3 5-6"/>'
-  };
-  return '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">'+(P[n]||P.chart)+'</svg>';
-}
+// ⚠️ Ce module avait SA PROPRE bibliotheque d'icones : quinze formes en SVG
+//   inline, avec sa propre epaisseur de trait (1,6 contre 1,75). Deux
+//   bibliotheques, c'est deux grilles et, un jour, deux dessins pour la meme
+//   idee. Il ne reste qu'une CORRESPONDANCE vers le sprite commun.
+var _PIL_IC={users:'equipe',drop:'goutte',target:'cible',map:'carte',tractor:'tracteur',
+  wine:'verre',leaf:'feuille',calendar:'calendrier',scale:'balance',
+  sliders:'curseurs',fuel:'carburant',spray:'pulverisateur',cloud:'nuage',
+  flask:'fiole',chart:'graphique'};
+function _pilIco(n){ return _mvIcon(_PIL_IC[n]||'graphique',16); }
 var _PIL_TILE_ICO={couteff:'scale',carte:'map',temps:'scale',equipe:'users',tracteur:'tractor',cave:'wine',presences:'users',phyto:'leaf',echeances:'calendar',etp:'scale',capacite:'scale',simulateur:'sliders',ordrepassage:'target',gnr:'fuel',traitement:'spray',meteo:'cloud',vinif:'flask',cout:'scale',cuivre:'flask',ift:'spray',dre:'drop'};
 function _pilIcoFor(id){ return _pilIco(_PIL_TILE_ICO[id]||'chart'); }
 function _pilHa(v){ return (Number(v)||0).toLocaleString('fr-FR',{minimumFractionDigits:0,maximumFractionDigits:2}).replace(/\u202f/g,' '); }
@@ -704,7 +693,10 @@ function _pilEmptyGo(txt,cible,lib){
 // ★ `infoCle` est un 9e argument OPTIONNEL : les 27 appels existants restent
 //   valides tels quels et posent leur pastille au fur et a mesure que leur
 //   fiche est ecrite.
-function _pilTile(id,ico,dot,title,statHtml,subHtml,gradPct,bodyHtml,infoCle){
+// ⚠️ Le 2e argument `ico` a ete RETIRE : il n'etait plus lu depuis que
+//   l'en-tete passe par `_pilIcoFor(id)`, et ne transportait que des emojis
+//   morts. Un parametre qu'on ne lit plus finit par mentir.
+function _pilTile(id,dot,title,statHtml,subHtml,gradPct,bodyHtml,infoCle){
   // Garde defensive : _PIL_STATE n'est pose que par renderPilotage. _pilShow() se
   // protegeait deja du cas null, _pilTile non — un appel hors sequence de rendu
   // levait un TypeError qui vidait tout l'onglet. Meme famille que les gardes
@@ -733,7 +725,7 @@ function _pilPanelCarte(d){
     + '<div class="pil-map-leg"><span>0 %</span><span class="pil-map-bar"></span><span>100 %</span>'
     + '<span style="display:flex;align-items:center;gap:6px"><span class="pil-map-sw" style="background:rgba(192,57,43,.5);border-color:#C0392B"></span>Arrachée</span>'
     + '<button type="button" class="pil-names-btn">'+(_pilNamesOn?'\uD83C\uDFF7 Noms \u2713':'\uD83C\uDFF7 Noms')+'</button></div>';
-  return _pilTile('carte','🗺️','#7FA83A','Carte du domaine', _pilStat(d.gaugePct,' %',null), d.nActives+' parcelles · '+ha+' ha', d.gaugePct, body);
+  return _pilTile('carte','#7FA83A','Carte du domaine', _pilStat(d.gaugePct,' %',null), d.nActives+' parcelles · '+ha+' ha', d.gaugePct, body);
 }
 // Detruire une carte Leaflet pendant qu'une animation de zoom est en vol leve
 // « Cannot read properties of undefined (reading '_leaflet_pos') » 250 ms plus tard :
@@ -833,11 +825,11 @@ function _pilPanelEquipe(d){
   var rows = d.membres.map(function(m){
     var c=(window.COULEURS_MBR&&(window.COULEURS_MBR[m.nom]))||'#3D6B27';
     var role = rl ? window.getRoleLabel(m.roles) : (m.roles?m.roles.join(' · '):'');
-    if(m.bureau) role = (role?role+' · ':'')+'🏢 bureau';
+    if(m.bureau) role = (role?role+' · ':'')+'bureau';
     if(_mvEC(m)){
       var _n=_mvED(m);
-      role = '👥 équipe · '+_n+' personne'+(_n>1?'s':'');
-      return _pilLi('👥', '#8A5A38', m.nom||'—', role, null);
+      role = 'équipe · '+_n+' personne'+(_n>1?'s':'');
+      return _pilLi('', '#8A5A38', m.nom||'—', role, null);
     }
     return _pilLi((m.nom||'?').charAt(0).toUpperCase(), c, m.nom||'—', role, null);
   }).join('') || '<div class="pil-empty">Aucun membre actif</div>';
@@ -851,7 +843,7 @@ function _pilPanelEquipe(d){
   var _nF=d.nFinis||0;
   // ③ « a passer en Inactif » n'est plus une phrase a retenir : c'est un bouton.
   if(_nF>0) rows+=_pilEmptyGo(_nF+' contrat'+(_nF>1?'s terminés':' terminé')+' : '+(_nF>1?'ces fiches restent':'cette fiche reste')+' à passer en Inactif.','equipe','Réglages \u203a Équipe');
-  return _pilTile('equipe','👥','#5B9B3A','Équipe',
+  return _pilTile('equipe','#5B9B3A','Équipe',
     _pilStat(_nColl>0?_nPers:d.membres.length, _nColl>0?' personnes':' actifs', null),
     'au '+_pilDfr(_pilRefDate())+(_sub.length?(' \u00b7 '+_sub.join(' \u00b7 ')):''),
     null, '<div class="pil-ip-list">'+rows+'</div>', 'pil.equipe');
@@ -862,14 +854,14 @@ function _pilPanelTracteur(d){
     var sub='';
     if(s.trac_revision){
       if(t.revReste!=null){ var col=t.revReste<=50?'var(--rouge)':t.revReste<=120?'var(--orange)':'var(--vert-med)';
-        sub += '<div class="pil-li-s" style="color:'+col+';font-weight:600">⚙ Révision dans '+_pilNum(t.revReste)+' h</div>';
-      } else { sub += '<div class="pil-li-s" style="opacity:.6">⚙ Révision : à renseigner</div>'; }
+        sub += '<div class="pil-li-s" style="color:'+col+';font-weight:600">Révision dans '+_pilNum(t.revReste)+' h</div>';
+      } else { sub += '<div class="pil-li-s" style="opacity:.6">Révision : à renseigner</div>'; }
     }
-    if(s.trac_controle){ sub += '<div class="pil-li-s">📋 Dernier contrôle : '+(t.lastCtrl?_pilDfr(t.lastCtrl):'jamais')+'</div>'; }
+    if(s.trac_controle){ sub += '<div class="pil-li-s">Dernier contrôle : '+(t.lastCtrl?_pilDfr(t.lastCtrl):'jamais')+'</div>'; }
     if(s.trac_intercep && t.sess && t.sAdv<100){ var isI=/intercep/i.test(t.sess.activite||''); sub += '<div class="pil-li-s" style="color:var(--acier-med)">'+(isI?'✂️':'🚜')+' '+_pilEsc(t.sess.activite||'Session')+' · '+t.sAdv+' %</div>'; }
     var chips='';
-    if(s.trac_repar && t.rep){ chips += _pilChip('🔧 '+_pilEsc(t.rep.motif||'Réparation')+(t.rep.prevu_retour?' · retour '+_pilDfr(t.rep.prevu_retour):''),'var(--rouge)'); }
-    return '<div class="pil-li"><span class="pil-av" style="background:#16313F;color:#4A9FC8">🚜</span><div class="pil-li-main"><div class="pil-li-t">'+_pilEsc(t.nom||'Tracteur')+(t.traitementOnly?' <span style="font-size:var(--pt-nano,9.5px);color:var(--orange)">· pulvé</span>':'')+'</div>'+sub+chips+'</div></div>';
+    if(s.trac_repar && t.rep){ chips += _pilChip(_pilEsc(t.rep.motif||'Réparation')+(t.rep.prevu_retour?' · retour '+_pilDfr(t.rep.prevu_retour):''),'var(--rouge)'); }
+    return '<div class="pil-li"><span class="pil-av" style="background:#16313F;color:#4A9FC8">'+_mvIcon('tracteur',16)+'</span><div class="pil-li-main"><div class="pil-li-t">'+_pilEsc(t.nom||'Tracteur')+(t.traitementOnly?' <span style="font-size:var(--pt-nano,9.5px);color:var(--orange)">· pulvé</span>':'')+'</div>'+sub+chips+'</div></div>';
   }).join('') || '<div class="pil-empty">Aucun tracteur</div>';
   var n=(d.tracs||[]).length;
   // ① Le cadre remonte l'echeance la plus proche : c'est la seule chose qu'on
@@ -878,23 +870,23 @@ function _pilPanelTracteur(d){
   (d.tracs||[]).forEach(function(t){ if(t.revReste!=null && (_pr===null || t.revReste<_pr.revReste)) _pr=t; });
   var _cad = _pr ? ('prochaine révision dans '+_pilNum(_pr.revReste)+' h \u00b7 '+_pilEsc(_pilTnom(_pr.nom||'')))
                  : 'aucune échéance de révision renseignée';
-  return _pilTile('tracteur','🚜','#4A9FC8','Parc tracteur', _pilStat(n,' tracteur'+(n>1?'s':''), d.nRepar?('🔧 '+d.nRepar):null), _cad, null, '<div class="pil-ip-list">'+rows+'</div>', 'pil.tracteur');
+  return _pilTile('tracteur','#4A9FC8','Parc tracteur', _pilStat(n,' tracteur'+(n>1?'s':''), d.nRepar?('🔧 '+d.nRepar):null), _cad, null, '<div class="pil-ip-list">'+rows+'</div>', 'pil.tracteur');
 }
 function _pilPanelPresences(d){
   var s=_PIL_STATE.sub||{};
   var list=(d.presences||[]).filter(function(p){ if(p.etat==='cp')return s.pres_cp; if(p.etat==='recup')return s.pres_recup; if(p.etat==='maladie'||p.etat==='absent')return s.pres_mal; return false; });
   var rows=list.map(function(p){
     var c=(window.COULEURS_MBR&&window.COULEURS_MBR[p.nom])||'#3D6B27', lab, col;
-    if(p.etat==='cp'){ lab='☀️ Congé payé'; col='var(--orange)'; }
-    else if(p.etat==='recup'){ lab='↺ Récup'; col='#7B6DB8'; }
-    else if(p.etat==='maladie'){ lab='🤒 Maladie'; col='var(--rouge)'; }
-    else { lab='✕ '+(p.motif||'Absent'); col='var(--rouge)'; }
+    if(p.etat==='cp'){ lab='Congé payé'; col='var(--orange)'; }
+    else if(p.etat==='recup'){ lab='Récup'; col='#7B6DB8'; }
+    else if(p.etat==='maladie'){ lab='Maladie'; col='var(--rouge)'; }
+    else { lab=(p.motif||'Absent'); col='var(--rouge)'; }
     return '<div class="pil-li"><span class="pil-av" style="background:'+c+'">'+_pilEsc((p.nom||'?').charAt(0).toUpperCase())+'</span><div class="pil-li-main"><div class="pil-li-t">'+_pilEsc(p.nom||'—')+'</div><div class="pil-li-s" style="color:'+col+';font-weight:600">'+_pilEsc(lab)+'</div></div></div>';
-  }).join('') || '<div class="pil-empty">Toute l\'équipe est présente aujourd\'hui ✓</div>';
+  }).join('') || '<div class="pil-empty">Toute l\'équipe est présente aujourd\'hui</div>';
   // ① Le cadre dit CE QUI EST COMPTE et QUAND — sans ca, « 6/12 » se compare a
   //   tort au pic ou a la moyenne, qui portent sur d'autres fenetres.
   var _abs=list.length;
-  return _pilTile('presences','🌴','#C9A84C','Présences du jour',
+  return _pilTile('presences','#C9A84C','Présences du jour',
     _pilStat((d.nPresent||0)+'/'+((d.membres||[]).length),' présents',null),
     'au champ, aujourd\u2019hui'+(_abs?(' \u00b7 '+_abs+' absence'+(_abs>1?'s':'')+' déclarée'+(_abs>1?'s':'')):''),
     null, '<div class="pil-ip-list">'+rows+'</div>', 'pil.presences');
@@ -902,14 +894,14 @@ function _pilPanelPresences(d){
 function _pilPanelPhyto(d){
   var rows = d.traits.slice(0,6).map(function(t){
     var nom = t.produit || t.nom || t.produitNom || 'Intervention';
-    return _pilLi('🌿','#142838', nom, t.date||'', null, '#5A9FD4');
+    return _pilLi('','#142838', nom, t.date||'', null, '#5A9FD4');
   }).join('');
   // ★ LA DERNIERE LIGNE REDISAIT LE CHIFFRE DE L'EN-TETE. « 18 interventions
   //   enregistrees » sous un en-tete qui affiche deja « 18 interv. » n'apprend
   //   rien ; « Catalogue E-Phy a jour » n'est pas une donnee de cette carte.
   //   Elles disparaissent, le cadre prend le relais.
   var _der=(d.traits[0]&&d.traits[0].date)||null;
-  return _pilTile('phyto','🌿','#5A9FD4','Registre phyto', _pilStat(d.traits.length,' interv.',null),
+  return _pilTile('phyto','#5A9FD4','Registre phyto', _pilStat(d.traits.length,' interv.',null),
     _der?('dernière le '+_pilDfr(_der)+' \u00b7 catalogue E-Phy'):'aucune intervention enregistrée',
     null, '<div class="pil-ip-list">'+rows+'</div>', 'pil.phyto');
 }
@@ -1828,7 +1820,7 @@ function _pilPanelEtp(d){
   var cd=_pilCdVue();
   var PP=_pilPicPortee();
   if(!cd||!cd.months.length){
-    return _pilTile('etp','\u2696\uFE0F','#C9A84C','Charge & ETP \u00b7 saison', _pilStat('\u2014',''), 'datez la saison pour estimer la charge', null,
+    return _pilTile('etp','#C9A84C','Charge & ETP \u00b7 saison', _pilStat('\u2014',''), 'datez la saison pour estimer la charge', null,
       _pilEmptyGo('Renseignez les dates de d\u00e9but et de fin de la campagne active pour calculer la charge et l\'ETP n\u00e9cessaire.','saisons','R\u00e9glages \u203a Campagne'));
   }
   function _e(v){ return (Math.round((v||0)*10)/10).toString().replace('.',','); }
@@ -1905,7 +1897,7 @@ function _pilPanelEtp(d){
   body+='<div style="margin-top:10px;padding:9px 11px;border-radius:9px;background:'+sBg+';color:'+sCol+';font-size:var(--pt-txt,12.5px);font-weight:600">'+synth+'</div>';
   var cov=peak4>0?Math.min(presAtPeak/peak4*100,100):100;
   var _sub=_e(presAtPeak)+' pr\u00e9sents au pic'+(pkw?(' \u00b7 '+_semLab(pkw)):'');
-  return _pilTile('etp','\u2696\uFE0F','#C9A84C','Charge & ETP \u00b7 '+cadre, _pilStat(_e(peak4),' au pic'), _sub, cov, body);
+  return _pilTile('etp','#C9A84C','Charge & ETP \u00b7 '+cadre, _pilStat(_e(peak4),' au pic'), _sub, cov, body);
 }
 
 // ── NIVEAU ② — LA CAMPAGNE : ou part le temps de l'equipe ───────────────────
@@ -1917,7 +1909,7 @@ function _pilPanelEtp(d){
 function _pilPanelTemps(d){
   var cd=_pilCdVue();
   if(!cd||!cd.months.length){
-    return _pilTile('temps','\u23F1\uFE0F','#4A9FC8','Le temps de l\u2019\u00e9quipe', _pilStat('\u2014',''), 'datez la campagne pour r\u00e9partir le temps', null,
+    return _pilTile('temps','#4A9FC8','Le temps de l\u2019\u00e9quipe', _pilStat('\u2014',''), 'datez la campagne pour r\u00e9partir le temps', null,
       _pilEmptyGo('Renseignez les dates de d\u00e9but et de fin de la campagne : la r\u00e9partition du temps, la frise et la courbe en d\u00e9coulent.','saisons','R\u00e9glages \u203a Campagne'));
   }
   var s=_PIL_STATE.sub||{};
@@ -1986,7 +1978,7 @@ function _pilPanelTemps(d){
     window._mvGraphSuivre('#pil-g-dem', function(lg){ return _pilDemandSvg(cd,lg); }, {max:1800}); }
   if(s.etp_ecart!==0){ body+='<div style="'+secTtl+'">\u00c9cart pr\u00e9vu / r\u00e9el</div>'+_pilEcartHtml(cd,real); }
   var _subT=_pilNum(_vig)+' h de bar\u00e8me \u00b7 '+_etpF(_vig)+' ETP vigne'+((_tH>0)?(' \u00b7 '+_etpF(_tH)+' ETP tracteur'):'');
-  return _pilTile('temps','\u23F1\uFE0F','#4A9FC8','Le temps de l\u2019\u00e9quipe \u00b7 '+cd.saison, _pilStat(_pilNum(_prez),' h de pr\u00e9sence'), _subT, Math.min(100,_pV), body);
+  return _pilTile('temps','#4A9FC8','Le temps de l\u2019\u00e9quipe \u00b7 '+cd.saison, _pilStat(_pilNum(_prez),' h de pr\u00e9sence'), _subT, Math.min(100,_pV), body);
 }
 
 function _pilFmtD(iso){ var pp=String(iso||'').split('-'); if(pp.length!==3)return String(iso||''); var mo=['janv.','févr.','mars','avr.','mai','juin','juil.','août','sept.','oct.','nov.','déc.']; var mi=parseInt(pp[1],10)-1; return parseInt(pp[2],10)+' '+(mo[mi]||''); }
@@ -2010,10 +2002,10 @@ function _pilPanelEcheances(d){
   else if(cadH<=0){ body='<div class="pil-empty">Cadence indisponible : les jours ouvrés se calculent sur le planning (4 dernières semaines).</div>'; }
   else {
     body='<div class="pil-ip-list">'+rows.map(function(r){
-      var col=_pilPctColor(r.pct), emo=(window.TEMOJI&&window.TEMOJI[r.nom])?window.TEMOJI[r.nom]:'🌿';
+      var col=_pilPctColor(r.pct);
       var pole=(rows.length>1 && r.jours===maxJ);
       return '<div class="pil-li">'
-        + '<span class="pil-av" style="background:'+col+'26;color:'+col+'">'+emo+'</span>'
+        + '<span class="pil-av" style="background:'+col+'26;color:'+col+'"></span>'
         + '<div class="pil-li-main">'
         +   '<div class="pil-li-t">'+_pilEsc(_pilTnom(r.nom))+'</div>'
         +   '<div class="pil-li-s">'+r.pct+'% fait · '+_pilNum(r.hreste)+' h restantes'+((r.ech&&(r.ech.d1||r.ech.d2))?' · '+_pilEchWin(r.ech):'')+(pole?' · <b style="color:var(--or)">pôle long</b>':'')+'</div>'
@@ -2022,7 +2014,7 @@ function _pilPanelEcheances(d){
         + '</div>';
     }).join('')+'</div>';
   }
-  return _pilTile('echeances','📅','#C9A84C','Échéances par tâche', statHtml, subHtml, null, body);
+  return _pilTile('echeances','#C9A84C','Échéances par tâche', statHtml, subHtml, null, body);
 }
 
 
@@ -2245,9 +2237,9 @@ function _pilSimBody(){
   var maxJ=0; calc.forEach(function(c){ if(c.j!=null&&c.j>maxJ)maxJ=c.j; });
   h+='<div class="pil-ip-list">';
   D.tasks.forEach(function(t,i){
-    var c=calc[i], emo=(window.TEMOJI&&window.TEMOJI[t.nom])?window.TEMOJI[t.nom]:'🌿', pole=(D.tasks.length>1&&c.j!=null&&c.j===maxJ);
+    var c=calc[i], pole=(D.tasks.length>1&&c.j!=null&&c.j===maxJ);
     var dS=(c.delta==null||c.delta===0)?'':' <b style="color:'+(c.delta<0?'var(--vert-med)':'var(--rouge)')+'">'+(c.delta<0?c.delta:'+'+c.delta)+'j</b>';
-    h+='<div class="pil-li"><span class="pil-av" style="background:#16313F;color:#4A9FC8">'+emo+'</span>'
+    h+='<div class="pil-li"><span class="pil-av" style="background:#16313F;color:#4A9FC8"></span>'
       + '<div class="pil-li-main"><div class="pil-li-t">'+_pilEsc(_pilTnom(t.nom))+(pole?' <span style="font-size:var(--pt-nano,9.5px);color:var(--or)">· pôle long</span>':'')+'</div>'
       + '<div class="pil-li-s">'+(c.j!=null?(c.j+' j à cet effectif'):'à l\'arrêt')+dS+'</div></div>'
       + '<div class="pil-li-r">'+_pilSimStepper('task',i,S.alloc[i],S.alloc[i]>0,free>0)+'</div></div>';
@@ -2273,7 +2265,7 @@ function _pilSimAction(act, ti){
 function _pilPanelSimulateur(d){
   _pilSimInitData(d);
   var statHtml=_pilStat(_PIL_SIM_DATA?_PIL_SIM_DATA.present:0,' présents');
-  return _pilTile('simulateur','🎛️','#C9A84C','Simulateur — et si ?', statHtml, 'déplace l\'équipe entre les tâches · recalcul en direct', null, '<div id="pil-sim-body">'+_pilSimBody()+'</div>');
+  return _pilTile('simulateur','#C9A84C','Simulateur — et si ?', statHtml, 'déplace l\'équipe entre les tâches · recalcul en direct', null, '<div id="pil-sim-body">'+_pilSimBody()+'</div>');
 }
 
 // ════════════════════════════════════════════════════════════════════
@@ -2305,7 +2297,6 @@ function _opTm(p){ return (typeof window._tachesFor==='function') ? window._tach
 function _opPassHha(def,i){ return (def.passagesHha && def.passagesHha[i-1]!=null) ? def.passagesHha[i-1] : ((def.hha)||0); }
 function _opMinTrou(def){ return (typeof window._plantMinTrou==='function') ? window._plantMinTrou() : ((def&&def.minTrou)||3); }
 function _opParcByNom(nom){ return (window.PARCELLES||[]).find(function(p){ return p && p.nom===nom; }) || null; }
-function _opEmo(nom){ return (window.TEMOJI&&window.TEMOJI[nom])?window.TEMOJI[nom]:String.fromCodePoint(0x1F33F); }
 function _opTNom(nom){ return (typeof window.tNom==='function')?window.tNom(nom):nom; }
 
 // ── Géo ──
@@ -2363,7 +2354,7 @@ function _opParcReste(p,def){
 function _opParcResteM(p){ var defs=_opDefs(), s=0; defs.forEach(function(d){ if(_opApplic(p,d)) s+=_opParcReste(p,d); }); return s; }
 function _opParcFullM(p){ var defs=_opDefs(), s=0; defs.forEach(function(d){ if(_opApplic(p,d)) s+=_opParcFull(p,d); }); return s; }
 function _opParcPctM(p){ var full=_opParcFullM(p), r=_opParcResteM(p); return full>0?Math.max(0,Math.min(100,Math.round((full-r)/full*100))):100; }
-function _opParcTaskEmos(p){ return _opDefs().filter(function(d){ return _opApplic(p,d) && _opParcReste(p,d)>0.05; }).map(function(d){ return _opEmo(d.nom); }).join(''); }
+function _opParcTaskNb(p){ return _opDefs().filter(function(d){ return _opApplic(p,d) && _opParcReste(p,d)>0.05; }).length; }
 function _opActTodo(){ return _opParcActive().filter(function(p){ return _opParcResteM(p)>0.05; }); }
 function _opDoneGeo(){ return _opParcActive().filter(function(p){ return _opParcResteM(p)<=0.05 && _opGeoOK(p); }); }
 
@@ -2427,7 +2418,7 @@ function _opParcelles(){
   ord.forEach(function(nm){ if(byName[nm]){ out.push(byName[nm]); delete byName[nm]; } });
   act.forEach(function(p){ if(byName[p.nom]) out.push(p); });
   _PIL_OP.order=out.map(function(p){return p.nom;});
-  return out.map(function(p){ return { p:p, nom:p.nom, s:parseFloat(p.surface)||0, reste:Math.round(_opParcResteM(p)*10)/10, pct:_opParcPctM(p), geo:_opGeoOK(p), emos:_opParcTaskEmos(p) }; });
+  return out.map(function(p){ return { p:p, nom:p.nom, s:parseFloat(p.surface)||0, reste:Math.round(_opParcResteM(p)*10)/10, pct:_opParcPctM(p), geo:_opGeoOK(p), emos:_opParcTaskNb(p) }; });
 }
 // « Enregistre » ne vaut que si CHAQUE tache cochee porte exactement cet ordre :
 // cocher deux travaux dont l'un seulement est a jour doit se voir.
@@ -2780,7 +2771,7 @@ function _opBody(){
     var com=(hasCom&&_opCom(x.p))?('\uD83D\uDCCD '+_pilEsc(_opCom(x.p))+' \u00b7 '):'';
     return '<div style="'+_OP_BOX+(pk?'opacity:.45;border-style:dashed;':'')+'">'
       +'<span style="flex:0 0 auto;width:24px;height:24px;border-radius:7px;background:var(--gris-clair);color:var(--texte-doux);font-size:var(--pt-txt,12.5px);font-weight:800;display:flex;align-items:center;justify-content:center">'+(ri+1)+'</span>'
-      +'<div style="flex:1;min-width:0"><div style="font-weight:600;font-size:var(--pt-base,14px);color:var(--texte);white-space:nowrap;overflow:hidden;text-overflow:ellipsis">'+_pilEsc(x.nom)+(multi&&x.emos?' <span style="font-size:var(--pt-txt,12.5px)">'+x.emos+'</span>':'')+(badge||'')+'</div>'
+      +'<div style="flex:1;min-width:0"><div style="font-weight:600;font-size:var(--pt-base,14px);color:var(--texte);white-space:nowrap;overflow:hidden;text-overflow:ellipsis">'+_pilEsc(x.nom)+(multi&&x.emos>1?' <span style="font-size:var(--pt-txt,12.5px);color:var(--texte-doux);font-weight:500">'+x.emos+' travaux</span>':'')+(badge||'')+'</div>'
       +'<div style="font-size:var(--pt-micro,11px);color:var(--texte-doux);margin-top:1px">'+hop+com+'<b>'+_opFmtHa(x.s)+'</b> \u00b7 '+x.pct+'% fait</div></div>'
       +'<div style="text-align:right;flex:0 0 auto"><div style="font-weight:700;font-size:var(--pt-base,14px);color:var(--texte);font-variant-numeric:tabular-nums">'+_opFmtH(x.reste)+'</div><div style="font-size:var(--pt-nano,9.5px);color:var(--texte-doux)">restantes</div></div>'
       +((edit&&!pk)?'<button data-op="pick" data-nom="'+_pilEsc(x.nom)+'" title="D\u00e9placer" style="flex:0 0 auto;width:38px;height:44px;border:1px solid var(--gris-clair);background:transparent;color:var(--texte-doux);border-radius:9px;cursor:pointer;font-size:var(--pt-base,14px);line-height:1;font-family:inherit">\u21C5</button>':'')
@@ -2920,7 +2911,7 @@ function _opEffAppliquer(){
 function _pilPanelOrdrePassage(d){
   _opInit(d);
   var statHtml=_pilStat(_PIL_OP_DATA?_PIL_OP_DATA.present:0,' pr\u00e9sents');
-  return _pilTile('ordrepassage', null, '#C9A84C', 'Ordre de passage \u2014 jusqu\'o\u00f9 aujourd\'hui ?', statHtml, 'tourn\u00e9e au plus court \u00b7 diffus\u00e9e \u00e0 l\'\u00e9quipe, par travail', null, '<div id="pil-op-body">'+_opBody()+'</div>');
+  return _pilTile('ordrepassage', '#C9A84C', 'Ordre de passage \u2014 jusqu\'o\u00f9 aujourd\'hui ?', statHtml, 'tourn\u00e9e au plus court \u00b7 diffus\u00e9e \u00e0 l\'\u00e9quipe, par travail', null, '<div id="pil-op-body">'+_opBody()+'</div>');
 }
 
 // ── Onglet SIMULATION ──
@@ -4064,7 +4055,7 @@ function _pilPanelRenfort(d){
     var r=_rfSim(ctx,_rfProf(ctx,_RF_SEL));
     stat=_pilStat(r.pointe,' renfort'+(r.pointe>1?'s':'')+' \u00b7 '+_ecoEur(r.decide));
   }
-  return _pilTile('renfort','\uD83D\uDC65','#C9A84C','Renfort \u2014 combien, et quand', stat,
+  return _pilTile('renfort','#C9A84C','Renfort \u2014 combien, et quand', stat,
     'ce qu\u2019il reste \u00e0 faire, et ce que le moment change', null,
     '<div id="pil-rf-body">'+_rfBody(d)+'</div>');
 }
@@ -4504,9 +4495,9 @@ function _pilCkTraiter(){
 function _pilCkPrio(d){
   var p=d.prio;
   if(!p) return '<div class="pil-tile2"><div class="pil-t2h"><span class="ic">'+_pilIco('target')+'</span><span class="t">Tâche prioritaire</span></div><div class="pil-t2b"><div class="pil-t2s">aucune tâche en cours</div></div></div>';
-  var emo=(window.TEMOJI&&window.TEMOJI[p.nom])?window.TEMOJI[p.nom]+' ':'', col=_pilPctColor(p.pct||0);
+  var col=_pilPctColor(p.pct||0);
   return '<div class="pil-tile2"><div class="pil-t2h"><span class="ic">'+_pilIco('target')+'</span><span class="t">Tâche prioritaire</span></div>'
-    +'<div class="pil-t2b"><div class="pil-big">'+emo+_pilEsc(_pilTnom(p.nom))+'</div>'
+    +'<div class="pil-t2b"><div class="pil-big">'+_pilEsc(_pilTnom(p.nom))+'</div>'
     +'<div class="pil-t2s">'+_pilNum(p.h_reste)+' h restantes · <b style="color:var(--or)">pôle long</b></div>'
     +'<div class="pil-gbar"><i style="width:'+Math.min(p.pct||0,100)+'%;background:'+col+'"></i></div>'
     +'<div class="pil-t2s" style="margin-top:5px">'+(p.pct||0)+'% fait</div></div></div>';
@@ -4775,7 +4766,7 @@ function _pilPanelAnBudget(){
       body+=_pilEmptyGo('Le co\u00fbt de l\u2019exercice ne se calcule pas : ouvrez \u00c9conomie \u203a Exercice pour voir ce qui bloque.','eco','\u00c9conomie \u203a Exercice');
   }
 
-  return _pilTile('anbudget','\uD83D\uDCB6','#8A5A38','Le budget de l\u2019ann\u00e9e, mois par mois',
+  return _pilTile('anbudget','#8A5A38','Le budget de l\u2019ann\u00e9e, mois par mois',
     stat, sub, null, body, 'pil.an.budget');
 }
 
@@ -4830,7 +4821,7 @@ function _pilPanelCapacite(d){
   //   qui n'a pas encore date ses periodes tombait sur la seule carte de
   //   l'onglet incapable de dire ce qu'elle montre. Trouve par le harnais, qui
   //   exige les trois etages sur CHAQUE appel, pas seulement sur le plus frequent.
-  if(!PP.ok && !cd){ return _pilTile('capacite','\u2696\uFE0F','#C9A84C','Capacité vs charge', _pilStat(present,' à la vigne'),
+  if(!PP.ok && !cd){ return _pilTile('capacite','#C9A84C','Capacité vs charge', _pilStat(present,' à la vigne'),
     'présence du jour \u00b7 le pic ne peut pas être calculé', null,
     _pilEmptyGo('Sans dates de campagne, l\'effectif nécessaire la semaine du pic ne se calcule pas : il n\'y a aucune fenêtre sur laquelle chercher ce pic.','saisons','Réglages \u203A Campagne'), 'pil.capacite'); }
   // ★★★ ON NE SOUSTRAIT PLUS DEUX GRANDEURS QUI N'ONT NI LA MEME DATE NI LA
@@ -4869,7 +4860,7 @@ function _pilPanelCapacite(d){
   //   TITRE pour la ligne de cadre — un titre n'est pas l'endroit ou l'on ecrit
   //   sur quelle fenetre un chiffre a ete calcule.
   var sub='pic sur '+cadre+(sem?(' \u00b7 '+sem):'');
-  return _pilTile('capacite','\u2696\uFE0F','#C9A84C','Capacité vs charge', _pilStat(_pilEtpFmt(req),' pers. au pic'), sub, null, body, 'pil.capacite');
+  return _pilTile('capacite','#C9A84C','Capacité vs charge', _pilStat(_pilEtpFmt(req),' pers. au pic'), sub, null, body, 'pil.capacite');
 }
 function _pilTabPrs(d){
   var H='<div class="pil-panels">';
@@ -4886,7 +4877,7 @@ function _pilPanelGnr(d){
   // ③ « Cuve GNR a renseigner (Tracteur › Entretien) » etait du TEXTE MORT : il
   //   fallait lire, retenir, sortir du module et retrouver l'onglet. C'est un
   //   bouton, et il ouvre l'ecran directement.
-  if(!g||!g.capacite){ return _pilTile('gnr','\u26FD','#B85A1A','Cuve GNR', _pilStat('—',''), 'aucune cuve renseignée',
+  if(!g||!g.capacite){ return _pilTile('gnr','#B85A1A','Cuve GNR', _pilStat('—',''), 'aucune cuve renseignée',
     null, _pilEmptyGo('Sans capacité de cuve, le niveau ne se calcule pas et le carburant reste à zéro dans tous les budgets.','entretien','Tracteur \u203a Entretien'), 'pil.gnr'); }
   var niveau=Number(g.niveau)||0, cap=Number(g.capacite)||1, pc=Math.round(niveau/cap*100), low=niveau<=(Number(g.seuil)||0);
   var col=low?'var(--rouge)':(pc<=40?'var(--orange)':'var(--vert-med)');
@@ -4896,7 +4887,7 @@ function _pilPanelGnr(d){
   //   plein — et le pourcentage passe en unite. Le corps garde la jauge.
   var body='<div class="pil-gbar" style="height:14px"><i style="width:'+pc+'%;background:'+col+'"></i></div>'
     +(low?_pilEmptyGo('Le niveau est sous votre seuil d\u2019alerte : prévoyez un plein avant la prochaine session.','entretien','Tracteur \u203a Entretien'):'');
-  return _pilTile('gnr','\u26FD','#B85A1A','Cuve GNR', _pilStat(_pilNum(niveau),' L sur '+_pilNum(cap), low?'bas':null),
+  return _pilTile('gnr','#B85A1A','Cuve GNR', _pilStat(_pilNum(niveau),' L sur '+_pilNum(cap), low?'bas':null),
     'soit '+pc+' % \u00b7 niveau calculé, pas mesuré', pc, body, 'pil.gnr');
 }
 function _pilTabMat(d){
@@ -8177,9 +8168,9 @@ function _pilTabCfm(d){
     any=true;
     var cu=_cfmCuivre();
     if(!cu.avail){
-      H+=_pilTile('cuivre','\uD83D\uDD35','#5B8DBF','Cuivre \u00b7 bio', _pilStat('\u2014',''), null, null, '<div class="pil-empty">Synth\u00e8se cuivre indisponible.</div>');
+      H+=_pilTile('cuivre','#5B8DBF','Cuivre \u00b7 bio', _pilStat('\u2014',''), null, null, '<div class="pil-empty">Synth\u00e8se cuivre indisponible.</div>');
     } else if(!cu.rows.length){
-      H+=_pilTile('cuivre','\uD83D\uDD35','#5B8DBF','Cuivre \u00b7 bio (7 ans)', _pilStat('0',' apport'), null, null, '<div class="pil-empty">Aucun apport de cuivre enregistr\u00e9. Le suivi se remplit avec les traitements \u00e0 base de cuivre.</div>');
+      H+=_pilTile('cuivre','#5B8DBF','Cuivre \u00b7 bio (7 ans)', _pilStat('0',' apport'), null, null, '<div class="pil-empty">Aucun apport de cuivre enregistr\u00e9. Le suivi se remplit avec les traitements \u00e0 base de cuivre.</div>');
     } else {
       var crows=cu.rows.map(function(r){
         var col=_cfmCuCol(r.ratio), pct=Math.min(r.ratio*100,100);
@@ -8193,7 +8184,7 @@ function _pilTabCfm(d){
       var body='<div class="pil-ip-list">'+crows+'</div>'
         +'<div class="pil-li-s" style="margin-top:10px;line-height:1.5"><b>Cuivre m\u00e9tal</b> sur 7 ans glissants \u00b7 plafond UE <b>28 kg/ha</b>'+(typeof _mvInfoBtn==='function'?(' '+_mvInfoBtn('pil.cfm.cuivre')):'')+'</div>';
       var sw=cu.over?('\u26A0 '+cu.over):(cu.warn?('\u2191 '+cu.warn):null);
-      H+=_pilTile('cuivre','\uD83D\uDD35','#5B8DBF','Cuivre \u00b7 bio (7 ans)', _pilStat(cu.rows.length,' parcelle'+(cu.rows.length>1?'s':''), sw), null, null, body);
+      H+=_pilTile('cuivre','#5B8DBF','Cuivre \u00b7 bio (7 ans)', _pilStat(cu.rows.length,' parcelle'+(cu.rows.length>1?'s':''), sw), null, null, body);
     }
   }
   // Passages / IFT
@@ -8201,7 +8192,7 @@ function _pilTabCfm(d){
     any=true;
     var ref=_cfmIftRef(), pass=_cfmPassages();
     if(!pass.length){
-      H+=_pilTile('ift','\uD83C\uDF3F','#3D6B27','Passages phyto', _pilStat('0',' passage'), null, null, '<div class="pil-empty">Aucun traitement enregistr\u00e9 cette saison.</div>');
+      H+=_pilTile('ift','#3D6B27','Passages phyto', _pilStat('0',' passage'), null, null, '<div class="pil-empty">Aucun traitement enregistr\u00e9 cette saison.</div>');
     } else {
       var maxP=pass.reduce(function(a,b){return Math.max(a,b.pass);},0)||1;
       var prows=pass.map(function(r){
@@ -8215,7 +8206,7 @@ function _pilTabCfm(d){
       var body2='<div class="pil-ip-list">'+prows+'</div>'
         +'<div class="pil-li-s" style="margin-top:10px;line-height:1.5">Un <b>passage</b> = une intervention, quel que soit le nombre de produits'+(typeof _mvInfoBtn==='function'?(' '+_mvInfoBtn('pil.cfm.ift')):'')+'</div>';
       var nOver=pass.filter(function(r){return r.pass>ref.v;}).length;
-      H+=_pilTile('ift','\uD83C\uDF3F','#3D6B27','Passages phyto / parcelle', _pilStat(pass.length,' parcelle'+(pass.length>1?'s':''), nOver?('\u2191 '+nOver):null), 'r\u00e9f. '+ref.v+' passages', null, body2);
+      H+=_pilTile('ift','#3D6B27','Passages phyto / parcelle', _pilStat(pass.length,' parcelle'+(pass.length>1?'s':''), nOver?('\u2191 '+nOver):null), 'r\u00e9f. '+ref.v+' passages', null, body2);
     }
   }
   // \u2605\u2605 LE REGISTRE PHYTO EST UNE PIECE DE CONFORMITE, PAS DE MATERIEL.
@@ -8232,9 +8223,9 @@ function _pilTabCfm(d){
     any=true;
     var dre=_cfmDre();
     if(dre.none){
-      H+=_pilTile('dre','\u23F1\uFE0F','#B85A1A','D\u00e9lai de rentr\u00e9e (DRE)', _pilStat('\u2014',''), null, null, '<div class="pil-empty">Aucun traitement enregistr\u00e9.</div>');
+      H+=_pilTile('dre','#B85A1A','D\u00e9lai de rentr\u00e9e (DRE)', _pilStat('\u2014',''), null, null, '<div class="pil-empty">Aucun traitement enregistr\u00e9.</div>');
     } else if(!dre.active.length){
-      H+=_pilTile('dre','\u23F1\uFE0F','#5B9B3A','D\u00e9lai de rentr\u00e9e (DRE)', _pilStat('0',' actif'), 'aucune parcelle en d\u00e9lai', null, '<div class="pil-empty" style="color:var(--vert-med);font-style:normal">\u2705 Aucun d\u00e9lai de rentr\u00e9e en cours \u2014 toutes les parcelles sont accessibles.</div>');
+      H+=_pilTile('dre','#5B9B3A','D\u00e9lai de rentr\u00e9e (DRE)', _pilStat('0',' actif'), 'aucune parcelle en d\u00e9lai', null, '<div class="pil-empty" style="color:var(--vert-med);font-style:normal">\u2705 Aucun d\u00e9lai de rentr\u00e9e en cours \u2014 toutes les parcelles sont accessibles.</div>');
     } else {
       var drows=dre.active.map(function(a){
         var urg=a.remainH<=2, col=urg?'--rouge':'--orange';
@@ -8245,7 +8236,7 @@ function _pilTabCfm(d){
       }).join('');
       var body3='<div class="pil-ip-list">'+drows+'</div>'
         +'<div class="pil-li-s" style="margin-top:10px;line-height:1.5"><b>Ne pas p\u00e9n\u00e9trer la parcelle sans \u00e9quipement avant l\u2019heure indiqu\u00e9e.</b>'+(typeof _mvInfoBtn==='function'?(' '+_mvInfoBtn('pil.cfm.dre')):'')+'</div>';
-      H+=_pilTile('dre','\u23F1\uFE0F','#B85A1A','D\u00e9lai de rentr\u00e9e (DRE)', _pilStat(dre.active.length,' parcelle'+(dre.active.length>1?'s':''),'actif'), null, null, body3);
+      H+=_pilTile('dre','#B85A1A','D\u00e9lai de rentr\u00e9e (DRE)', _pilStat(dre.active.length,' parcelle'+(dre.active.length>1?'s':''),'actif'), null, null, body3);
     }
   }
   H+='</div>';

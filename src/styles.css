@@ -22,6 +22,20 @@
         Elle remonte ici au premier lot qui bumpe, avec _PIL_SEM. Les appels
         gardent leur repli : var(--pt-txt,12.5px) reste juste si ce fichier est
         en retard chez un client. */
+  /* ═══ L'ECHELLE D'ESPACEMENT — HUIT PAS, MULTIPLES DE 4 ═══ (lot DS-3)
+     La feuille portait 1 à 20 px de padding, chaque valeur utilisee : 129 fois
+     10 px, 126 fois 8, 88 fois 6, 73 fois 9, 66 fois 11... Vingt valeurs, ce
+     n'est pas un rythme, c'est vingt decisions prises une par une. Rien ne
+     s'aligne sur rien, et c'est ce qui fait « brouillon » avant meme qu'on
+     lise le contenu.
+     ⚠️ LA FEUILLE N'EST PAS REECRITE D'UN COUP. Remapper 800 declarations sans
+       pouvoir verifier une seule capture serait un pari, pas un lot. La charte
+       DS-2 passe a l'echelle ; le RESTE est tenu par un CLIQUET (le nombre de
+       valeurs hors echelle ne peut plus monter) et se resorbe ecran par ecran.
+     ★ Multiples de 4, sauf --e-1 : 2 px existe pour un ecart optique, pas pour
+       une marge. */
+  --e-0:2px; --e-1:4px; --e-2:8px; --e-3:12px;
+  --e-4:16px; --e-5:20px; --e-6:24px; --e-7:32px; --e-8:40px;
   --pt-hero:40px;   /* le verdict, une seule fois par ecran      */
   --pt-xxl:31px;    /* LE chiffre d'une carte                    */
   --pt-xl:27px;     /* chiffre secondaire                        */
@@ -160,7 +174,13 @@ body{font-family:'Outfit',sans-serif;background:#0F1319;color:var(--texte);max-w
 #demo-banner{display:none;position:fixed;top:0;left:0;right:0;z-index:9991;background:linear-gradient(90deg,#C9A84C 0%,#E8C860 100%);padding:9px 16px 9px calc(16px + env(safe-area-inset-left,0px));align-items:center;justify-content:space-between;gap:12px;box-shadow:0 2px 12px rgba(0,0,0,.3);}
 .demo-banner-txt{font-family:'Outfit',sans-serif;font-size:12px;font-weight:700;color:#0C1A0A;letter-spacing:.04em;}
 .demo-banner-link{font-family:'Outfit',sans-serif;font-size:11px;font-weight:600;color:rgba(12,26,10,.65);text-decoration:none;white-space:nowrap;}
-.login-logo{font-size:52px;margin-bottom:20px;filter:drop-shadow(0 0 18px rgba(255,255,255,0.12));}
+/* ⚠️ Le logo n'est plus un emoji mais une IMAGE : plus de `font-size`, et une
+   hauteur FIXE pour que l'ecran ne saute pas pendant le chargement.
+   `logo-gt.png` est deja dans SHELL_STATIC du service worker : il est en
+   cache des l'installation, donc present hors ligne au premier ecran. */
+.login-logo{display:flex;align-items:center;justify-content:center;height:96px;
+  margin-bottom:20px;filter:drop-shadow(0 0 18px rgba(255,255,255,0.12));}
+.login-logo img,.ob-logo img,.ob-finish-icon img{display:block;height:100%;width:auto;}
 .login-title{font-family:'Cormorant Garamond',serif;color:white;font-size:34px;font-weight:600;margin-bottom:5px;letter-spacing:0.02em;}
 .login-sub{color:rgba(255,255,255,0.38);font-size:12px;margin-bottom:42px;letter-spacing:1.5px;text-transform:uppercase;}
 .login-label{color:rgba(255,255,255,0.5);font-size:11px;font-weight:600;text-transform:uppercase;letter-spacing:1.5px;margin-bottom:8px;align-self:flex-start;width:100%;}
@@ -345,7 +365,9 @@ body{font-family:'Outfit',sans-serif;background:#0F1319;color:var(--texte);max-w
 .jtache{font-size:13px;font-weight:700;color:var(--texte);white-space:nowrap;overflow:hidden;text-overflow:ellipsis;}
 .jmeta{font-size:11px;color:var(--texte-doux);margin-top:2px;display:flex;align-items:center;gap:4px;flex-wrap:nowrap;overflow:hidden;}
 .java{width:14px;height:14px;border-radius:50%;display:flex;align-items:center;justify-content:center;font-size:7px;font-weight:700;color:white;flex-shrink:0;}
-.eq-tag{font-size:9px;font-weight:700;background:var(--bleu-pale);color:var(--bleu);padding:1px 4px;border-radius:4px;margin-left:2px;flex-shrink:0;}
+/* `.eq-tag` (la pastille 👥) a ete retiree du journal par la charte DS-2 :
+   « Equipe (Victor + Lea) » dit deja la meme chose, en mots. La regle part
+   avec l'usage — une regle morte finit toujours par etre recopiee ailleurs. */
 .jst{font-size:10px;font-weight:700;padding:3px 7px;border-radius:6px;text-transform:uppercase;letter-spacing:0.4px;flex-shrink:0;white-space:nowrap;}
 .jsv{background:var(--vert-pale);color:var(--vert-clair);}.jsf{background:var(--or-pale);color:var(--or);}.jse{background:var(--orange-pale);color:var(--orange);}.jsm{background:var(--bleu-pale);color:var(--bleu);}
 .meteo-card{background:linear-gradient(135deg,#152E55,#1C5E9A);border-radius:10px;padding:9px 13px;margin-bottom:6px;display:flex;align-items:center;justify-content:space-between;}
@@ -1020,6 +1042,9 @@ body.mv-trial-on #app-root{padding-top:calc(env(safe-area-inset-top,0px) + 44px)
 .hv2-card-vert{background:var(--vert-pale);border:1px solid rgba(61,107,39,0.18);}
 .hv2-card-terre{background:var(--terre-pale);border:1px solid rgba(122,79,46,0.18);}
 .hv2-card-picto{font-size:22px;margin-bottom:14px;line-height:1;}
+/* ⚠️ Vide depuis la charte DS-2 : un element vide garde son fond, sa marge
+   et son interligne — il laisse un trou. On le masque au lieu de le vider. */
+.hv2-card-picto:empty,.hv2-chip:empty{display:none;}
 .hv2-card-val{font-family:'Cormorant Garamond',serif;font-size:38px;font-weight:600;line-height:1;color:var(--texte);}
 .hv2-card-label{font-size:12px;font-weight:500;color:var(--texte-med);margin-top:5px;}
 .hv2-card-sub{font-size:11px;color:var(--texte-doux);margin-top:2px;}
@@ -1167,7 +1192,7 @@ body.mv-trial-on #app-root{padding-top:calc(env(safe-area-inset-top,0px) + 44px)
 #onboarding-screen::before{content:'';position:absolute;top:-80px;right:-60px;width:280px;height:280px;border-radius:50%;background:radial-gradient(circle,rgba(61,107,39,0.12) 0%,transparent 70%);pointer-events:none;}
 #onboarding-screen::after{content:'';position:absolute;bottom:-60px;left:-40px;width:200px;height:200px;border-radius:50%;background:radial-gradient(circle,rgba(184,145,58,0.08) 0%,transparent 70%);pointer-events:none;}
 .ob-header{padding:max(52px, calc(env(safe-area-inset-top,0px) + 16px)) 24px 20px;position:relative;z-index:2;flex-shrink:0;}
-.ob-logo{font-size:40px;margin-bottom:12px;}
+.ob-logo{display:flex;align-items:center;justify-content:center;height:72px;margin-bottom:12px;}
 .ob-title{font-family:'Cormorant Garamond',serif;color:white;font-size:28px;font-weight:600;margin-bottom:4px;}
 .ob-sub{color:rgba(255,255,255,0.38);font-size:11px;letter-spacing:1.5px;text-transform:uppercase;}
 .ob-progress{padding:0 24px 20px;position:relative;z-index:2;flex-shrink:0;}
@@ -1238,7 +1263,7 @@ body.mv-trial-on #app-root{padding-top:calc(env(safe-area-inset-top,0px) + 44px)
 .ob-btn-next.ob-green{background:linear-gradient(135deg,#3D6B27,#6BA34A);color:white;}
 .ob-btn-solo{width:100%;background:rgba(255,255,255,0.95);border:none;border-radius:14px;padding:15px;color:#1A1F2E;font-size:14px;font-weight:700;font-family:'Outfit',sans-serif;cursor:pointer;min-height:50px;}
 .ob-pwd-strength{height:3px;border-radius:3px;margin-bottom:12px;margin-top:-10px;transition:background 0.3s,width 0.3s;}
-.ob-finish-icon{font-size:60px;margin-bottom:20px;display:block;text-align:center;}
+.ob-finish-icon{display:flex;align-items:center;justify-content:center;height:56px;margin-bottom:20px;}
 .ob-finish-title{font-family:'Cormorant Garamond',serif;color:white;font-size:28px;font-weight:600;margin-bottom:10px;text-align:center;}
 .ob-finish-sub{color:rgba(255,255,255,0.45);font-size:13px;line-height:1.6;margin-bottom:32px;text-align:center;}
 .ob-finish-badges{display:flex;flex-wrap:wrap;gap:8px;justify-content:center;margin-bottom:32px;}
@@ -1286,8 +1311,16 @@ body.mv-trial-on #app-root{padding-top:calc(env(safe-area-inset-top,0px) + 44px)
 /* tailles compactes des blocs existants */
 .home-w-compact #home-stat-card{height:auto;padding:13px 16px;}
 .home-w-compact #home-stat-card .hv2-tap-hint{display:none;}
-.home-w-compact #home-stat-content>div:first-child{font-size:24px;}
-.home-w-compact #home-stat-content>div:nth-child(n+4){display:none;}
+/* ⚠️ CES DEUX REGLES VISAIENT LES ENFANTS PAR LEUR RANG (`>div:first-child`,
+   `>div:nth-child(n+4)`). La charte DS-2 a change la structure de
+   #home-stat-content et elles se sont mises a viser le mauvais bloc — en
+   SILENCE, parce que le mode compact est une preference par utilisateur que
+   personne n'ouvre en developpant. Elles visent desormais les CLASSES de la
+   charte : un rang se decale au premier remaniement, une classe non. */
+.home-w-compact #home-stat-content .mv-hn{font-size:27px;}
+.home-w-compact #home-stat-content .mv-t{font-size:15px;}
+.home-w-compact #home-stat-content .mv-l{display:none;}
+.home-w-compact #home-stat-content .mv-hd{align-items:center;}
 .home-w-compact .home-prio-pill{padding:8px 13px;}
 .home-w-compact .home-prio-pill-txt{white-space:nowrap;overflow:hidden;text-overflow:ellipsis;}
 .home-w-compact .heures-card>div:nth-child(n+5){display:none;}
@@ -1783,9 +1816,13 @@ body.mv-trial-on #app-root{padding-top:calc(env(safe-area-inset-top,0px) + 44px)
 #mv-dock-inner{display:flex;width:100%;}
 @media(min-width:768px){ #mv-dock-inner{max-width:600px;} }
 .mv-dk{flex:1;display:flex;flex-direction:column;align-items:center;gap:4px;padding:9px 2px 8px;position:relative;background:none;border:none;cursor:pointer;-webkit-tap-highlight-color:transparent;}
-.mv-dk-ic{font-size:21px;line-height:1;filter:grayscale(.35);opacity:.62;transition:.18s;}
+/* ⚠️ `filter:grayscale()` etait la pour DESATURER UN EMOJI, qui gardait sa
+   couleur quoi qu'on fasse. Une icone du sprite suit `currentColor` : on
+   eteint l'onglet inactif par la COULEUR, pas par un filtre — un filtre
+   grise le trait au lieu de l'attenuer, et se voit en mode sombre. */
+.mv-dk-ic{display:flex;align-items:center;justify-content:center;line-height:1;color:var(--texte-doux);transition:.18s;}
 .mv-dk-lb{font-size:9.5px;font-weight:600;color:rgba(255,255,255,.42);letter-spacing:.01em;transition:.18s;font-family:'Outfit',sans-serif;}
-.mv-dk.on .mv-dk-ic{filter:none;opacity:1;transform:translateY(-1px);}
+.mv-dk.on .mv-dk-ic{color:var(--vert-med);transform:translateY(-1px);}
 .mv-dk.on .mv-dk-lb{color:var(--or-clair);}
 .mv-dk.on::before{content:'';position:absolute;top:0;left:50%;transform:translateX(-50%);width:26px;height:3px;border-radius:3px;background:var(--horizon);}
 .mv-dk:active{background:rgba(255,255,255,.05);}
@@ -1796,7 +1833,7 @@ body.mv-trial-on #app-root{padding-top:calc(env(safe-area-inset-top,0px) + 44px)
 .mv-sheet-handle{width:38px;height:4px;border-radius:3px;background:var(--gris);margin:8px auto 14px;}
 #mv-dock-sheet-items{display:grid;grid-template-columns:repeat(3,1fr);gap:11px;}
 .mv-sg{background:var(--bg-card);border:1px solid var(--gris-clair);border-radius:14px;padding:16px 8px;box-shadow:var(--shadow-sm);cursor:pointer;display:flex;flex-direction:column;align-items:center;gap:7px;}
-.mv-sg-ic{font-size:24px;}
+.mv-sg-ic{display:flex;align-items:center;justify-content:center;color:var(--texte-med);}
 .mv-sg-lb{font-size:11.5px;font-weight:600;color:var(--texte-med);font-family:'Outfit',sans-serif;}
 
 
@@ -2130,7 +2167,9 @@ body.mv-trial-on #app-root{padding-top:calc(env(safe-area-inset-top,0px) + 44px)
 .pil-th-l1{display:flex;align-items:center;gap:9px;}
 .pil-th .pil-dot{width:7px;height:7px;border-radius:50%;flex:none;}
 .pil-th-ico{width:26px;height:26px;border-radius:8px;background:var(--or-pale);color:var(--terre);display:flex;align-items:center;justify-content:center;flex:none;}
-.pil-th-ico svg{width:14px;height:14px;}
+/* ⚠️ Pas de largeur ici : elle ecraserait celle que pose _mvIcon en attribut,
+   et l echelle de tailles ne servirait plus a rien sur cet ecran. */
+.pil-th-ico svg{flex:none;}
 .pil-th-t{font-family:'Outfit',sans-serif;font-size:var(--pt-lbl,10.5px);letter-spacing:1.5px;text-transform:uppercase;font-weight:600;color:var(--texte-doux);flex:1;min-width:0;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;}
 /* ② Une seule taille de chiffre dans tout le module, une seule place. */
 .pil-th-l2{margin-top:5px;line-height:1;}
@@ -3896,6 +3935,153 @@ a[href^="mailto:"]{color:var(--or-tx);}
 }
 .mvi-bd p:last-child{ margin-bottom:2px; }
 .mvi-bd b{ color:var(--texte); font-weight:600; }
+
+/* — LES ICONES (lot DS-1) —
+   Un emoji se dessine autrement sur chaque systeme, ne s'aligne pas sur la
+   ligne de texte et garde SA couleur — y compris en mode sombre et en plein
+   soleil. Une icone du sprite herite de la couleur du texte a cote.
+   ★ LES FORMES VIENNENT DE LUCIDE (ISC, lucide.dev), regenerees par
+      scripts/build-sprite.mjs. Trois jeux dessines a la main ont ete refuses
+      avant : sur 36 dessins, la coherence d'une bibliotheque entretenue ne se
+      rattrape pas a la main.
+   ⚠️ LA GRAISSE VIT ICI, UNE SEULE FOIS, pas dans les formes. Une icone qui
+      porte la sienne ne suivrait pas un changement de graisse — et c'est
+      exactement comme ca qu'une application finit avec trois epaisseurs.
+      Changer cette valeur, c'est changer le jeu entier : c'est voulu.
+   ⚠️ UNE SEULE ECHELLE DE TAILLES : 16 en ligne · 18 bouton · 20 ligne de
+      liste · 24 tuile · 40 ecran vide. Le harnais refuse toute autre valeur.
+      Deux icones de meme niveau a deux tailles differentes, c'est le premier
+      signe du bricolage.
+   ⚠️ AUCUNE largeur ici. `_mvIcon(nom, taille)` pose width/height en attribut ;
+      une regle CSS de largeur les ECRASERAIT et l'argument de taille ne
+      servirait plus a rien (le CSS l'emporte sur un attribut de presentation).
+   ⚠️ `stroke`, `stroke-width` et `fill` sont HERITES a travers le <use> :
+      c'est la seule facon d'atteindre une forme qui vit dans l'ombre du DOM.
+      Les <symbol> n'en portent donc aucun. */
+.mv-ic{
+  display:inline-block; flex:none; vertical-align:-0.15em;
+  fill:none; stroke:currentColor; stroke-width:1.75;
+  stroke-linecap:round; stroke-linejoin:round;
+  overflow:visible;
+}
+/* Le repli VISIBLE d'un nom d'icone inconnu. Un carre pointille se remarque ;
+   un blanc, non — et c'est un blanc qu'on ne diagnostique jamais. */
+.mv-ic-abs{ stroke:var(--rouge,#C0392B); stroke-width:1.6; opacity:.85; }
+/* Un bouton ou une etiquette qui melange icone et mot : l'ecart se pose ici,
+   pas par une espace dans la chaine (qui se replie et se coupe en fin de ligne). */
+.mv-ic + span,.mv-icl{ margin-left:7px; }
+.mv-icw{ display:inline-flex; align-items:center; gap:7px; }
+
+/* — LA TUILE D'ICONE —
+   Une icone posee nue devant une ligne flotte ; la meme dans un carre teinte
+   s'ancre, et la ligne gagne une colonne stable. C'est le geste qui separe le
+   « fait main » du « pense ». On ne la met QUE sur des LIGNES et des
+   RUBRIQUES — jamais dans une pastille en ligne, ou elle ecraserait le texte.
+   ⚠️ Le fond est un `color-mix` de la teinte : il suit donc le theme au lieu
+      d'etre un gris fige qui vire sale en mode sombre. */
+.mv-ict{
+  width:34px; height:34px; border-radius:10px; flex:none;
+  display:inline-flex; align-items:center; justify-content:center;
+  background:var(--gris-clair); color:var(--texte-med);
+}
+.mv-ict-terre{ background:color-mix(in srgb, var(--terre) 12%, transparent); color:var(--terre); }
+.mv-ict-vert { background:color-mix(in srgb, var(--vert)  14%, transparent); color:var(--vert-med,var(--vert)); }
+.mv-ict-or   { background:color-mix(in srgb, var(--or)    16%, transparent); color:var(--or-fonce,var(--terre)); }
+.mv-ict-rouge{ background:color-mix(in srgb, var(--rouge) 12%, transparent); color:var(--rouge); }
+/* La ligne qui porte une tuile : la tuile, le texte, et l'action a droite. */
+.mv-lgn{ display:flex; align-items:center; gap:12px; padding:12px 0; }
+.mv-lgn-t{ flex:1; min-width:0; }
+/* La pastille de priorite : sa couleur vient d'une CLASSE, plus de trois
+   `style.background=` poses en JS — une couleur ecrite en JS echappe au
+   theme et ne suit ni le mode sombre ni le plein soleil. */
+.home-prio-pill{ background:var(--gris-clair); border-color:var(--gris); }
+.home-prio-pill .home-prio-pill-txt{ color:var(--texte-doux); }
+.home-prio-pill.home-prio-on{ background:var(--or-pale); border-color:color-mix(in srgb,var(--or) 40%, transparent); }
+.home-prio-pill.home-prio-on .home-prio-pill-txt{ color:var(--or); }
+
+/* ══════════════════════════════════════════════════════════════════════════
+   LA CHARTE D'ILOTS — lot DS-2
+   Le lot DS-1 a change les pictogrammes et ca n'a pas suffi : ce qui faisait
+   brouillon n'etait pas l'icone, c'etait le CONTENANT. Des blocs empiles,
+   separes par des filets, ou tout a la meme importance visuelle.
+   Quatre briques, pas trente. Toute nouvelle carte passe par ici.
+   ⚠️ TROIS NIVEAUX DE TEXTE, JAMAIS QUATRE : `.mv-t` (le nom), `.mv-n` (le
+      chiffre qui compte), `.mv-l` (l'etiquette technique). Un quatrieme niveau
+      et la hierarchie ne se lit plus — c'est ce qui donnait l'effet brouillon.
+   ⚠️ L'ETAT SE POSE A DROITE, toujours. C'est l'alignement vertical des badges
+      qui fait qu'une liste de quarante-six parcelles se scanne.
+   ══════════════════════════════════════════════════════════════════════════ */
+
+/* — L'ilot — un objet metier = une carte. Une bordure d'un cheveu, PAS un
+     filet de separation de plus : on remplace les lignes par du vide. */
+.mv-c{
+  background:var(--bg-card); border:1px solid var(--gris-clair);
+  border-radius:16px; padding:var(--e-4); margin-bottom:var(--e-3);
+}
+.mv-c-clic{ cursor:pointer; transition:border-color .15s, transform .15s; }
+.mv-c-clic:active{ transform:scale(.985); }
+@media(hover:hover){ .mv-c-clic:hover{ border-color:color-mix(in srgb, var(--terre) 40%, transparent); } }
+/* La carte d'alerte : le seul endroit d'une fiche ou une icone reste. */
+.mv-c-al{
+  border-color:color-mix(in srgb, var(--rouge) 38%, transparent);
+  background:color-mix(in srgb, var(--rouge) 6%, var(--bg-card));
+  color:var(--rouge);
+}
+
+/* — La hierarchie — trois niveaux, et c'est tout. */
+.mv-t { font-family:'Cormorant Garamond',serif; font-size:var(--pt-md); font-weight:600;
+        color:var(--texte); line-height:1.15; }
+.mv-n { font-size:var(--pt-lg); font-weight:700; color:var(--texte); line-height:1.1;
+        font-variant-numeric:tabular-nums; }
+/* ⚠️ `tabular-nums` n'est pas une coquetterie : sans lui, « 62 % » et « 100 % »
+   ne s'alignent pas d'une carte a l'autre et l'oeil rattrape le decalage a
+   chaque ligne. Sur quarante-six parcelles, ca se sent. */
+.mv-hn{ font-family:'Cormorant Garamond',serif; font-size:var(--pt-hero); font-weight:600;
+        line-height:.9; color:var(--texte); font-variant-numeric:tabular-nums; }
+.mv-l { font-size:var(--pt-micro); color:var(--texte-doux); line-height:1.35; }
+.mv-v { font-size:var(--pt-txt); color:var(--texte-med); font-weight:500; }
+/* ⚠️ Le ROLE ecrit a cote de --pt-lg dit « titre serif d'un panneau » : il a ete
+   nomme pour Pilotage, pas pour un chiffre. La taille est juste, l'etiquette
+   ment. A revoir quand les onze roles seront relus — pas en douce ici. */
+
+/* — Les assemblages — */
+.mv-hd{ display:flex; align-items:flex-start; justify-content:space-between; gap:var(--e-3); }
+.mv-kv{ display:flex; gap:var(--e-6); flex-wrap:wrap; }
+.mv-ft{ display:flex; align-items:center; justify-content:space-between; gap:var(--e-3);
+        margin-top:var(--e-4); padding-top:var(--e-3); border-top:1px solid var(--gris-clair); }
+.mv-tr{ display:flex; align-items:center; justify-content:space-between; gap:var(--e-3);
+        padding:var(--e-3) 0; border-bottom:1px solid var(--gris-clair); }
+.mv-tr:last-child{ border-bottom:none; }
+.mv-act{ display:flex; gap:var(--e-2); }
+
+/* — La jauge — */
+.mv-track{ height:6px; border-radius:99px; background:var(--gris-clair); overflow:hidden; }
+.mv-fill { height:100%; border-radius:99px; background:var(--or); transition:width .4s ease; }
+
+/* — Le badge — l'etat se lit sans lire.
+     ⚠️ Fond en `color-mix` de la teinte du THEME, jamais un pastel fige : un
+       #EAF5E4 ecrit en dur est juste sur la carte claire et vire sale en
+       sombre. Quatre tons, un par etat — jamais deux nuances du meme. */
+.mv-bdg{ font-size:var(--pt-lbl); font-weight:600; letter-spacing:.2px; border-radius:7px;
+         padding:var(--e-1) var(--e-2); white-space:nowrap; flex:none; display:inline-block; }
+.mv-bdg-vert  { background:color-mix(in srgb, var(--vert)   14%, transparent); color:var(--vert-med); }
+.mv-bdg-ambre { background:color-mix(in srgb, var(--orange) 15%, transparent); color:var(--orange); }
+.mv-bdg-rouge { background:color-mix(in srgb, var(--rouge)  13%, transparent); color:var(--rouge); }
+.mv-bdg-neutre{ background:var(--gris-clair); color:var(--texte-doux); }
+
+/* — Le bouton fantome — l'action attend, elle ne crie pas. La couleur
+     n'apparait qu'au survol, et le rouge seulement pour ce qui detruit. */
+.mv-gh{ width:38px; height:38px; border-radius:10px; border:1px solid var(--gris-clair);
+        background:transparent; color:var(--texte-doux); cursor:pointer;
+        display:inline-flex; align-items:center; justify-content:center; transition:.15s;
+        flex:none; }
+@media(hover:hover){
+  .mv-gh:hover{ background:var(--gris-clair); color:var(--texte); }
+  .mv-gh-vert:hover { background:color-mix(in srgb, var(--vert)  12%, transparent); color:var(--vert-med); border-color:color-mix(in srgb, var(--vert)  35%, transparent); }
+  .mv-gh-rouge:hover{ background:color-mix(in srgb, var(--rouge) 12%, transparent); color:var(--rouge);    border-color:color-mix(in srgb, var(--rouge) 35%, transparent); }
+}
+/* ⚠️ 38 px, pas 44 : la cible tactile est portee par la carte entiere, pas par
+   le bouton. Un bouton de 44 dans une carte de 16 de padding mange la ligne. */
 
 
 /* ═══════════════════════════════════════════════════════════════════════

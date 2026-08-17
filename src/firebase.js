@@ -40,7 +40,7 @@ import {
 } from 'firebase/auth';
 
 const DEBUG = location.hostname === 'localhost' || location.hostname === '127.0.0.1';
-if(DEBUG) console.log('🔥 Firebase modulaire v10 chargé');
+if(DEBUG) console.log('Firebase modulaire v10 chargé');
 
 // ── Configuration ──
 const firebaseConfig = {
@@ -288,8 +288,8 @@ function _queueSave(key, value) {
 // ── Badge persistant : nombre de modifications en attente de synchro ──
 function _showOfflineQueueBadge() {
   var n = Object.keys(_offlineQueue).length;
-  if (n === 0) { showSyncBadge('📵 Hors ligne', '#7A4F2E'); return; }
-  showSyncBadge('📵 Hors ligne — ' + n + ' modification' + (n > 1 ? 's' : '') + ' en attente', '#7A4F2E');
+  if (n === 0) { showSyncBadge('Hors ligne', '#7A4F2E'); return; }
+  showSyncBadge('Hors ligne — ' + n + ' modification' + (n > 1 ? 's' : '') + ' en attente', '#7A4F2E');
 }
 window._offlineQueueCount = function () { return Object.keys(_offlineQueue).length; };
 
@@ -305,7 +305,7 @@ async function _flushQueue() {
   var keys = Object.keys(_offlineQueue);
   if (keys.length === 0) return;
   if(DEBUG) console.log('[Sync] Vidage queue hors ligne :', keys);
-  showSyncBadge('🔄 Synchronisation…', '#1A4A7A');
+  showSyncBadge('Synchronisation…', '#1A4A7A');
   var success = true;
   for (var i = 0; i < keys.length; i++) {
     var key = keys[i];
@@ -333,10 +333,10 @@ async function _flushQueue() {
   }
   try { localStorage.setItem('mavigne_offline_queue', JSON.stringify(_offlineQueue)); } catch (e) {}
   if (success && keys.length > 0) {
-    showSyncBadge('✅ ' + keys.length + ' modif. synchronisée' + (keys.length > 1 ? 's' : ''), '#3D6B27');
+    showSyncBadge(+ keys.length + ' modif. synchronisée' + (keys.length > 1 ? 's' : ''), '#3D6B27');
   } else if (!success) {
     var nRest = Object.keys(_offlineQueue).length;
-    showSyncBadge('⚠️ Synchro partielle — ' + nRest + ' en attente', '#B85A1A');
+    showSyncBadge('Synchro partielle — ' + nRest + ' en attente', '#B85A1A');
   }
 }
 
@@ -363,7 +363,7 @@ function showSyncBadge(msg, color) {
   // le sinistre que la couverture FB_REALTIME/FB_STATIC sert à empêcher.
   // Comparaison sur l'égalité EXACTE (3 sites d'appel) plutôt que sur une sous-chaîne :
   // « ✅ N modif. synchronisée » parle de la file d'écriture et reste vrai, lui.
-  if (msg === '✅ Synchronisé' && _fbDeadCount()) { msg = '⚠️ Synchro partielle'; color = '#B85A1A'; }
+  if (msg === 'Synchronisé' && _fbDeadCount()) { msg = 'Synchro partielle'; color = '#B85A1A'; }
   if (typeof window.showSyncBadge === 'function') {
     window.showSyncBadge(msg, color);
   } else {
@@ -374,12 +374,12 @@ function showSyncBadge(msg, color) {
 // ── Écoute réseau ──
 window.addEventListener('online', function () {
   if(DEBUG) console.log('[Réseau] Connexion rétablie');
-  showSyncBadge('📶 Connexion rétablie…', '#1A4A7A');
+  showSyncBadge('Connexion rétablie…', '#1A4A7A');
   if (typeof window._updateMapOfflineBanner === 'function') window._updateMapOfflineBanner();
   setTimeout(function(){ _flushQueue().catch(function(e){ if(window.logError) window.logError({level:'warning',cat:'sync',msg:'Flush offline échoué',detail:String(e)}); }); }, 800);
   setTimeout(function () {
     fbPullAll().then(function () {
-      showSyncBadge('✅ Synchronisé', '#3D6B27');
+      showSyncBadge('Synchronisé', '#3D6B27');
       if (window.currentUser) {
         if (window.renderHome)     window.renderHome();
         if (window.renderParcelles) window.renderParcelles();
@@ -639,8 +639,8 @@ function _fbSubscribe(key) {
           if ((key==='reparateur'||key==='entretiens'||key==='reparateur_hist')  && pid==='page-tracteur'  && window.renderTracteur) window.renderTracteur();
           if ((key==='planning_templates'||key==='planning_entries'||key==='planning_hsup') && pid==='page-planning' && window.renderPlanning) window.renderPlanning();
         }
-        showSyncBadge('🔄 Mis à jour', '#1A4A7A');
-        setTimeout(function () { showSyncBadge('✅ Synchronisé', '#3D6B27'); }, 1500);
+        showSyncBadge('Mis à jour', '#1A4A7A');
+        setTimeout(function () { showSyncBadge('Synchronisé', '#3D6B27'); }, 1500);
       }
     }, function (e) { _fbListenFailed(key, e); });
 }
@@ -890,7 +890,7 @@ window.fbSave = async function (key, value) {
   // la demo repart du jeu de donnees d'origine (re-lu depuis Firestore). Aucune pollution,
   // aucune collision entre prospects, aucune surface d'ecriture exposee.
   if (TENANT_ID === 'domaine-dupont') {
-    if (typeof showSyncBadge === 'function') showSyncBadge('✅ Sauvegardé', '#3D6B27');
+    if (typeof showSyncBadge === 'function') showSyncBadge('Sauvegardé', '#3D6B27');
     return;
   }
   _ignoreNext[key]   = true;
@@ -921,7 +921,7 @@ window.fbSave = async function (key, value) {
       }
       await _retryAsync(function(){ return setDoc(fbDocRef(key), { value: _fbClone(key, value) }); }, 3, 1000);
     }
-    showSyncBadge('✅ Sauvegardé', '#3D6B27');
+    showSyncBadge('Sauvegardé', '#3D6B27');
     // Une modif a pu être mise en file lors d'un échec précédent ALORS QU'ON RESTAIT
     // en ligne (aucun event 'online' pour la retenter). On profite de ce succès pour
     // vider la file — la modif coincée repart sans attendre un rechargement.

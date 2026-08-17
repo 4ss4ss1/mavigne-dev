@@ -422,7 +422,7 @@ function _planDefTiming(pl,plId,m,d,yr){
       }
     }
   }
-  return PLAN_DEF_T[pl]||{d:'07:00',f:_computeEnd&&typeof _computeEnd==='function'?'16:00':'16:00'};
+  return PLAN_DEF_T[pl]||{d:'07:00',f:'16:00'};
 }
 function _planFmt(h){
   if(h===null||h===undefined)return '\u2014';
@@ -5203,16 +5203,6 @@ window._paDoc        = _paDoc;
 // ════════════════════════════════════════════════════════════════════
 
 // ── Données (refs partagées initialisées en tête de module) ──
-// ★ PLAN_DEF est exposé parce qu'il est la SOURCE des grilles intégrées
-// ('standard', et 'nico' chez le domaine de référence). _planGetTpl y retombe
-// dès que PLANNING_TEMPLATES[annee][id] manque : une grille peut donc être
-// PLEINEMENT EN USAGE sans exister une seule fois en base. Le sélecteur de
-// grille de la modale « Embauche » (reglages.js, _emhGrilles) le lisait déjà
-// via window — mais PLAN_DEF était en portée module, donc window.PLAN_DEF
-// valait undefined et le test `if(window.PLAN_DEF)` échouait EN SILENCE.
-// ⚠️ Référence partagée, jamais réassignée : le bloc _PLAN_IS_MG MUTE l'objet
-// (PLAN_DEF.nico) au chargement du module, donc l'export ci-dessous le porte.
-window.PLAN_DEF           = PLAN_DEF;
 window.PLANNING_TEMPLATES = PLANNING_TEMPLATES;
 window.PLANNING_ENTRIES   = PLANNING_ENTRIES;
 window.PLANNING_ACOMPTES  = PLANNING_ACOMPTES;

@@ -23,7 +23,7 @@ export const GT_ADMIN_EMAIL = 'ngdevpro@gmail.com';
 // WHATS_NEW   : tableau vide = modal desactive pour cette version.
 // Format item : { emoji:'📅', titre:'Titre court', desc:'Phrase utilisateur.' }
 // Regle : seulement les changements visibles par les utilisateurs.
-export const APP_VERSION = '6.25';
+export const APP_VERSION = '6.27';
 // ════ Journal des nouveautés (récap cumulatif) ════
 // Une entrée par version, la PLUS RÉCENTE EN HAUT : { v:'5.10', items:[ {emoji,titre,desc}, … ] }
 // À chaque release visible → AJOUTER un bloc en tête (ne pas remplacer). items:[] = release technique (rien à afficher).
@@ -354,6 +354,54 @@ window._mvGraphRepeindre = function(){
 };
 
 export const WHATS_NEW = [
+  { v:'6.27', items:[
+    { emoji: '\u{1F4D0}', titre: "L\u2019accueil et les parcelles ont \u00e9t\u00e9 remis \u00e0 plat",
+      desc: "Les informations \u00e9taient empil\u00e9es les unes sous les autres, s\u00e9par\u00e9es par des traits, et tout avait la m\u00eame importance \u00e0 l\u2019\u0153il. D\u00e9sormais <b>chaque parcelle est une carte</b>, avec de l\u2019air autour, et <b>trois niveaux de lecture</b> : le nom, le chiffre qui compte, et le d\u00e9tail en petit. Sur l\u2019accueil, l\u2019avancement de la saison devient le sujet de l\u2019\u00e9cran au lieu d\u2019une vignette parmi d\u2019autres." },
+    { emoji: '\u{1F7E2}', titre: "L\u2019\u00e9tat d\u2019une parcelle se lit d\u2019un coup d\u2019\u0153il",
+      desc: "Chaque carte porte une <b>\u00e9tiquette de couleur cal\u00e9e \u00e0 droite</b> \u2014 en cours, bient\u00f4t fini, saison termin\u00e9e. Elles sont toujours au m\u00eame endroit : en descendant une liste de quarante parcelles, l\u2019\u0153il suit une colonne au lieu de chercher. Les pourcentages sont align\u00e9s au chiffre pr\u00e8s, \u00ab\u202f62\u202f%\u202f\u00bb et \u00ab\u202f100\u202f%\u202f\u00bb ne se d\u00e9calent plus." },
+    { emoji: '\u26A0\uFE0F', titre: "Le d\u00e9lai de r\u00e9entr\u00e9e ne se rate plus",
+      desc: "Un d\u00e9lai de r\u00e9entr\u00e9e en cours \u00e9tait signal\u00e9 par un fin liser\u00e9 rouge sur le bord de la carte. C\u2019est maintenant une <b>\u00e9tiquette rouge dans la liste</b> et, dans la fiche, <b>un encart \u00e0 part avec le nombre d\u2019heures restantes en gros</b>. C\u2019est une obligation r\u00e9glementaire : elle doit arr\u00eater l\u2019\u0153il, pas se deviner." },
+    { emoji: '\u{1F347}', titre: "Le logo GUERETTECH remplace la grappe g\u00e9n\u00e9rique",
+      desc: "L\u2019\u00e9cran de connexion et la premi\u00e8re installation affichaient l\u2019\u00e9moji grappe du t\u00e9l\u00e9phone \u2014 diff\u00e9rent sur chaque appareil. Ils affichent maintenant <b>le vrai logo</b>." },
+    { emoji: '\u{1F4CF}', titre: "Les espaces suivent enfin une r\u00e8gle",
+      desc: "Les marges de l\u2019application \u00e9taient choisies une par une \u2014 vingt valeurs diff\u00e9rentes, de 1 \u00e0 20 pixels. Les nouvelles cartes suivent maintenant <b>une \u00e9chelle unique par multiples de 4</b>, et les tailles de texte aussi. Les \u00e9crans respirent au m\u00eame rythme. Le reste de l\u2019application s\u2019y rangera \u00e9cran par \u00e9cran." },
+    { emoji: '\u{1F6E1}\uFE0F', titre: "La console d\u2019administration aussi",
+      desc: "L\u2019\u00e9cran r\u00e9serv\u00e9 \u00e0 l\u2019\u00e9diteur passe aux m\u00eames ic\u00f4nes. <b>Le journal des acc\u00e8s d\u00e9j\u00e0 enregistr\u00e9 reste lisible tel quel</b> : les lignes anciennes gardent leur pictogramme, on ne r\u00e9\u00e9crit pas un journal." },
+    { emoji: '\u{1F503}', titre: "Le bandeau de synchronisation et l\u2019\u00e9quipe du jour",
+      desc: "Le bandeau du haut, la bulle de synchronisation, les pastilles d\u2019\u00e9quipe et le filtre du journal sont pass\u00e9s aux m\u00eames ic\u00f4nes. <b>Le bandeau reste color\u00e9</b> \u2014 vert quand tout est \u00e0 jour, orange quand il reste des modifications en attente." },
+    { emoji: '\u2705', titre: "Les boutons d\u2019une parcelle et les contr\u00f4les tracteur",
+      desc: "Les boutons Niveaux, Passages, Annuler et Exclure d\u2019une fiche parcelle ont de vraies ic\u00f4nes. Les <b>six points de contr\u00f4le tracteur</b> (plein, huile, filtre, radiateur, pneus, lavage) n\u2019ont plus de pictogramme : leur nom est \u00e9crit juste \u00e0 c\u00f4t\u00e9, il y en avait six \u00e0 retenir pour rien." },
+    { emoji: '\u{1F9F9}', titre: "Phyto, synchronisation et premi\u00e8re installation nettoy\u00e9s",
+      desc: "Le bandeau de synchronisation en haut d\u2019\u00e9cran, les messages d\u2019erreur de connexion et l\u2019\u00e9cran de premi\u00e8re installation ne portent plus de petits dessins : la <b>couleur du bandeau dit d\u00e9j\u00e0</b> si c\u2019est en cours, r\u00e9ussi ou en attente." },
+    { emoji: '\u{1F4C8}', titre: "Pilotage : un seul jeu d\u2019ic\u00f4nes pour toute l\u2019application",
+      desc: "L\u2019\u00e9cran Pilotage avait ses propres dessins, avec un trait un peu plus fin que partout ailleurs \u2014 une diff\u00e9rence qu\u2019on ne voit pas mais qu\u2019on sent. Il utilise maintenant <b>les m\u00eames ic\u00f4nes que le reste de l\u2019application</b>. Les pictogrammes des t\u00e2ches ont \u00e9t\u00e9 retir\u00e9s des listes : le nom du travail suffit." },
+    { emoji: '\u{1F326}\uFE0F', titre: "La m\u00e9t\u00e9o et les fiches d\u2019aide en vraies ic\u00f4nes",
+      desc: "Le soleil, le nuage et la pluie affich\u00e9s sur l\u2019accueil \u00e9taient des \u00e9mojis : ils sont devenus des ic\u00f4nes nettes, de la m\u00eame famille que le reste. Les onze fiches d\u2019aide (le bouton \u00ab\u202f?\u202f\u00bb de chaque \u00e9cran) aussi. <b>Vos rel\u00e9v\u00e9s m\u00e9t\u00e9o d\u00e9j\u00e0 enregistr\u00e9s continuent de s\u2019afficher normalement</b>." },
+    { emoji: '\u{1F5FA}\uFE0F', titre: "Moins de pictogrammes partout ailleurs",
+      desc: "Messages de connexion, \u00e9crans d\u2019attente, filtres par t\u00e2che, avancement par t\u00e2che, alerte gel : les petits dessins qui pr\u00e9c\u00e9daient les textes ont \u00e9t\u00e9 retir\u00e9s ou remplac\u00e9s par de vraies ic\u00f4nes. Sur l\u2019ensemble de l\u2019application, on est pass\u00e9 de <b>920 pictogrammes \u00e0 422</b>." },
+    { emoji: '\u{1F377}', titre: "La Cave se lit comme le reste",
+      desc: "R\u00e9coltes, cuves, analyses et clients vrac passent aux m\u00eames \u00e9tiquettes de couleur. Les huit op\u00e9rations de cuve (chaptalisation, saign\u00e9e, levurage\u2026) <b>n\u2019ont plus de pictogramme</b> : le mot les dit mieux \u2014 huit petits dessins \u00e0 retenir, c\u2019\u00e9tait sept de trop." },
+    { emoji: '\u{1F69C}', titre: "Les sessions tracteur adoptent les m\u00eames cartes",
+      desc: "Sessions, parc de machines, fiches de contr\u00f4le et historique de r\u00e9parations passent \u00e0 la m\u00eame pr\u00e9sentation : l\u2019activit\u00e9 en t\u00eate, <b>l\u2019\u00e9tat en \u00e9tiquette de couleur \u00e0 droite</b>, l\u2019avancement en gros chiffre. <b>La carte sombre d\u2019une session en cours reste sombre</b> \u2014 elle est faite pour se lire en cabine, au soleil." },
+    { emoji: '\u{1F4D3}', titre: "Le journal se lit comme les parcelles",
+      desc: "Chaque entr\u00e9e du journal devient une carte, avec le travail en t\u00eate, la personne et la parcelle en dessous, et <b>l\u2019\u00e9tat en \u00e9tiquette de couleur cal\u00e9e \u00e0 droite</b>. Le pictogramme qui pr\u00e9c\u00e9dait chaque travail a \u00e9t\u00e9 retir\u00e9. <b>La frise verticale \u00e0 gauche reste</b> : c\u2019est elle qui donne le fil du temps." },
+    { emoji: '\u{1F9ED}', titre: "La barre du bas a de vraies ic\u00f4nes",
+      desc: "Les pictogrammes de la barre de navigation \u00e9taient des \u00e9mojis gris\u00e9s par un filtre. Ce sont maintenant <b>de vraies ic\u00f4nes</b>, toutes de la m\u00eame taille, qui <b>prennent la couleur verte de l\u2019onglet actif</b> au lieu d\u2019\u00eatre \u00e9teintes par un voile gris. C\u2019est plus net, et lisible en plein soleil." },
+    { emoji: '\u2699\uFE0F', titre: "Les \u00e9crans de R\u00e9glages passent aux m\u00eames cartes",
+      desc: "Vos travaux, vos activit\u00e9s tracteur et les fiches d\u2019\u00e9quipe adoptent la m\u00eame pr\u00e9sentation que les parcelles : <b>une carte par \u00e9l\u00e9ment</b>, le nom en t\u00eate, les \u00e9tiquettes d\u2019\u00e9tat cal\u00e9es \u00e0 droite, et les boutons Modifier et Supprimer regroup\u00e9s en bas. <b>Rien ne change dans ce que font ces \u00e9crans</b> \u2014 ils se lisent simplement plus vite." },
+    { emoji: '\u{1F50D}', titre: "La fiche d\u2019une parcelle tient sur un regard",
+      desc: "Trois chiffres en t\u00eate \u2014 avancement, surface, travaux faits \u2014 puis les travaux de la saison en lignes align\u00e9es. Les pictogrammes qui pr\u00e9c\u00e9daient chaque ligne ont \u00e9t\u00e9 retir\u00e9s : <b>dans une liste, c\u2019est le texte qui porte l\u2019information</b>, et l\u2019\u0153il descend plus vite sans eux." }
+  ] },
+  { v:'6.26', items:[
+    { emoji: '\u{1F3A8}', titre: "Les pictogrammes de R\u00e9glages sont devenus de vraies ic\u00f4nes",
+      desc: "Les petits dessins color\u00e9s de l\u2019\u00e9cran R\u00e9glages \u00e9taient des \u00e9mojis : chaque t\u00e9l\u00e9phone les dessinait \u00e0 sa fa\u00e7on, ils ne s\u2019alignaient jamais avec le texte et gardaient leur couleur, m\u00eame en mode sombre ou en plein soleil. Ils sont remplac\u00e9s par un <b>jeu d\u2019ic\u00f4nes dessin\u00e9 pour l\u2019application</b>, identique partout, qui prend la couleur du texte \u00e0 c\u00f4t\u00e9 \u2014 et qui reste lisible \u00e0 la taille d\u2019un badge. <b>Rien ne change dans ce que fait l\u2019\u00e9cran</b> \u2014 c\u2019est son aspect qui change. Les autres \u00e9crans suivront." },
+    { emoji: '\u{1F69C}', titre: "L\u2019ic\u00f4ne d\u2019un type d\u2019activit\u00e9 se choisit dans une planche, plus dans une liste d\u2019\u00e9mojis",
+      desc: "Quand vous cr\u00e9ez ou modifiez un type d\u2019activit\u00e9 tracteur, vous choisissez maintenant parmi <b>dix-huit ic\u00f4nes</b> au lieu de dix-huit \u00e9mojis. <b>Vos activit\u00e9s existantes gardent leur dessin</b> : rien n\u2019a \u00e9t\u00e9 r\u00e9\u00e9crit dans vos donn\u00e9es, l\u2019ancien \u00e9moji est simplement traduit \u00e0 l\u2019affichage." },
+    { emoji: '\u{1F4C4}', titre: "Le rapport mensuel et le registre phyto n\u2019impriment plus d\u2019\u00e9mojis",
+      desc: "Sur un document imprim\u00e9 ou transform\u00e9 en PDF, un \u00e9moji sort en couleur au milieu d\u2019une page en noir \u2014 quand il ne sort pas en carr\u00e9 vide. Les documents produits depuis R\u00e9glages (rapport du mois, registre phytosanitaire, d\u00e9tail tracteur) utilisent d\u00e9sormais <b>les m\u00eames ic\u00f4nes que l\u2019\u00e9cran</b>, en noir, et les titres de section s\u2019appuient sur leur typographie plut\u00f4t que sur un pictogramme." },
+    { emoji: '\u2705', titre: "Les messages de confirmation ne r\u00e9p\u00e8tent plus leur pastille",
+      desc: "\u00ab\u202f\u2705 Lien envoy\u00e9\u202f\u00bb, \u00ab\u202f\u274c Erreur\u202f\u00bb : le bandeau qui appara\u00eet en bas de l\u2019\u00e9cran porte <b>d\u00e9j\u00e0 une pastille de couleur</b> qui dit si \u00e7a a march\u00e9. L\u2019\u00e9moji en t\u00eate du message disait la m\u00eame chose une deuxi\u00e8me fois. Les messages ne gardent que leur phrase." }
+  ] },
   { v:'6.25', items:[
     { emoji: '\u{1F477}', titre: "La visite guid\u00e9e montre l\u2019\u00e9cran d\u2019un ouvrier \u2014 et qu\u2019un oubli se rattrape",
       desc: "La d\u00e9mo publique (le lien \u00ab\u202fVoir la d\u00e9mo\u202f\u00bb) faisait visiter le domaine depuis votre fauteuil, jamais depuis le t\u00e9l\u00e9phone de vos salari\u00e9s. Elle bascule d\u00e9sormais sur <b>la liste des parcelles telle qu\u2019un ouvrier l\u2019ouvre</b> : la t\u00e2che du jour, ses parcelles, un \u2713 \u00e0 cocher, rien d\u2019autre. Et le moment suivant montre que <b>vous pouvez cocher \u00e0 sa place</b> si personne ne l\u2019a fait \u2014 c\u2019est la premi\u00e8re question que pose tout le monde. <b>Rien ne change dans l\u2019application</b> : c\u2019est la vitrine qui change." },
@@ -1096,12 +1144,13 @@ export const TABREV = {
   Arrachage:'Arrach.', Desherbage:'Désherb.', Effeuillage:'Effeuill.', Vendange:'Vend.',
   Accolage:'Accol.', Palissage:'Paliss.', Relevage:'Relev.'
 };
-export const TEMOJI = {
-  Taille:'🌿',Tirage:'🔄',Brulage:'🔥',Pliage:'🔗',Reparation:'🛠️',
-  Plantation:'🌱',Entreplantation:'🕳️',Ebourgeonnage:'🌾',Ebourgeonnage1:'🌾',Ebourgeonnage2:'🌾',
-  Pioche:'⛏️',Relevage:'⬆️',Accolage:'🔗',Palissage:'🪵',
-  Arrachage:'🪓',Desherbage:'🧹',Effeuillage:'🍃',Vendange:'🍇','Réparation ponctuelle':'🔧'
-};
+// ⚠️ `TEMOJI` A ETE SUPPRIMEE (lot DS-2). Elle associait un emoji a chaque
+//   travail et etait lue par app.js, pilotage.js et reglages.js. Partout,
+//   l'emoji precedait un NOM DE TACHE deja ecrit a cote : il ne disait rien
+//   de plus. `TICON` la remplace et rend un NOM D'ICONE, pour les rares
+//   endroits ou un pictogramme sert encore a quelque chose.
+//   ⚠️ Ne pas la reintroduire « juste pour une liste » : c'est comme ca
+//     qu'elle etait arrivee.
 export const TCLS = {
   Cuivre:'tcc',Soufre:'tsc',Fongicide:'tfc',
   Insecticide:'tic',Herbicide:'thc','Biocontrôle':'tbc',
@@ -1166,11 +1215,33 @@ export function wmoDesc(c) {
   };
   return m[c] || 'Variable';
 }
-export function wmoEmoji(c) {
-  if(c===0)return'☀️';if(c<=2)return'🌤️';if(c===3)return'☁️';
-  if(c<=48)return'🌫️';if(c<=65)return'🌧️';if(c<=77)return'❄️';
-  if(c<=82)return'🌦️';return'⛈️';
+// ⚠️ La correspondance vit dans une TABLE, pas dans une cascade de `return` :
+//   des noms rendus en dur par une fonction sont invisibles au harnais, qui
+//   les declarerait « symboles morts ». Une table, il sait la lire.
+export const MV_METEO_IC = {
+  soleil:'soleil', nuage:'nuage', brouillard:'brouillard', bruine:'bruine',
+  pluie:'pluie', neige:'neige', orage:'orage'
+};
+export function wmoIcone(c) {
+  if (c <= 2) return MV_METEO_IC.soleil;
+  if (c === 3) return MV_METEO_IC.nuage;
+  if (c <= 48) return MV_METEO_IC.brouillard;
+  if (c <= 55) return MV_METEO_IC.bruine;
+  if (c <= 65) return MV_METEO_IC.pluie;
+  if (c <= 77) return MV_METEO_IC.neige;
+  if (c <= 82) return MV_METEO_IC.pluie;
+  return MV_METEO_IC.orage;
 }
+
+// ⚠️ REPLI, le temps que tous les appelants passent a `wmoIcone`. Un module non
+//   migre qui appellerait `wmoIcone` afficherait « nuage » en toutes lettres :
+//   on garde donc l'ancienne fonction telle quelle plutot que de la rediriger.
+export function wmoEmoji(c) {
+  if (c === 0) return '\u2600\uFE0F'; if (c <= 2) return '\u{1F324}\uFE0F'; if (c === 3) return '\u2601\uFE0F';
+  if (c <= 48) return '\u{1F32B}\uFE0F'; if (c <= 65) return '\u{1F327}\uFE0F'; if (c <= 77) return '\u2744\uFE0F';
+  if (c <= 82) return '\u{1F326}\uFE0F'; return '\u26C8\uFE0F';
+}
+
 
 // ════ BADGE DE SYNCHRONISATION ════
 export function showSyncBadge(msg, color) {
@@ -1711,7 +1782,7 @@ function _mvAideOngletsPil() {
 
 var MV_AIDE = {
   home: {
-    ico: '\u{1F33F}', titre: 'Accueil', ancre: 'vigne',
+    ico: 'feuille', titre: 'Accueil', ancre: 'vigne',
     points: [
       ['La priorité du moment', "reste épinglée en haut : c’est ce que l’équipe attaque aujourd’hui."],
       ['La mise en route', "n’apparaît que chez l’administrateur d’un domaine neuf : sept étapes qui se cochent en lisant ce qui est déjà enregistré, rien à pointer à la main. Le bloc s’efface tout seul quand tout est fait."],
@@ -1724,7 +1795,7 @@ var MV_AIDE = {
     ]
   },
   parcelles: {
-    ico: '\u{1F5FA}\u{FE0F}', titre: 'Mes Parcelles', ancre: 'vigne',
+    ico: 'carte', titre: 'Mes Parcelles', ancre: 'vigne',
     points: [
       ['Les filtres du haut', "trient par état : finies, en cours, arrachées."],
       ['Le bouton vert', "sur une carte valide la tâche en cours sans ouvrir la parcelle."],
@@ -1735,7 +1806,7 @@ var MV_AIDE = {
     ]
   },
   journal: {
-    ico: '\u{1F4D3}', titre: 'Journal', ancre: 'vigne',
+    ico: 'journal', titre: 'Journal', ancre: 'vigne',
     points: [
       ['Chaque tâche validée', "écrit une ligne ici, avec la parcelle, la personne et la durée."],
       ['Une équipe au travail', "tient en une seule entrée : tous les noms y figurent, et le travail se partage entre eux."],
@@ -1745,7 +1816,7 @@ var MV_AIDE = {
     ]
   },
   tracteur: {
-    ico: '\u{1F69C}', titre: 'Tracteur', ancre: 'tracteur',
+    ico: 'tracteur', titre: 'Tracteur', ancre: 'tracteur',
     points: [
       ['Onglet Sessions', ": le travail fait avec la machine. Onglet Entretien : révisions, réparations, appoints de cuve."],
       ['Le parc', "s’affiche en pastilles sous les chiffres — toucher une machine filtre l’écran."],
@@ -1762,7 +1833,7 @@ var MV_AIDE = {
     ]
   },
   phyto: {
-    ico: '\u{1F9EA}', titre: 'Phyto', ancre: 'phyto',
+    ico: 'eprouvette', titre: 'Phyto', ancre: 'phyto',
     points: [
       ['Le catalogue produits', "vient d’E-Phy (ANSES) et se met à jour tout seul chaque semaine."],
       ['Un traitement', "= des produits, les parcelles cochées et un conducteur. La surface se calcule seule."],
@@ -1774,7 +1845,7 @@ var MV_AIDE = {
     ]
   },
   planning: {
-    ico: '\u{1F4C5}', titre: 'Planning', ancre: 'planning',
+    ico: 'calendrier', titre: 'Planning', ancre: 'planning',
     points: [
       ['Trois onglets', ": Le mois, la grille de toute l’équipe. Les gens, une ligne par salarié et sa fiche. Le cadre, ce qui se règle une fois par an. Un salarié qui n’est pas administrateur n’a pas d’onglets : il arrive sur son mois."],
       ['Toucher une case', "la coche. Toucher le numéro du jour, en haut, coche toute l’équipe ce jour-là ; toucher un nom coche sa ligne ; toucher « Salarié », dans le coin, coche tout ce qui est affiché. Un deuxième appui décoche."],
@@ -1789,7 +1860,7 @@ var MV_AIDE = {
     ]
   },
   cave: {
-    ico: '\u{1F377}', titre: 'Cave', ancre: 'cave',
+    ico: 'verre', titre: 'Cave', ancre: 'cave',
     points: [
       function () {
         return _mvAideSections('#cave-sec-tabs .mvu-tab', 'sections',
@@ -1805,7 +1876,7 @@ var MV_AIDE = {
     ]
   },
   reserve: {
-    ico: '\u{1F4E6}', titre: 'La Réserve', ancre: 'reserve',
+    ico: 'carton', titre: 'La Réserve', ancre: 'reserve',
     points: [
       function () {
         return _mvAideSections('.mvr-tabs .mvu-tab', 'onglets',
@@ -1821,7 +1892,7 @@ var MV_AIDE = {
     ]
   },
   pilotage: {
-    ico: '\u{1F4CA}', titre: 'Pilotage', ancre: 'pilotage',
+    ico: 'graphique', titre: 'Pilotage', ancre: 'pilotage',
     points: [
       ['Rien ne se saisit ici', ": tout est en lecture seule. Les chiffres viennent du journal, du planning et des sessions tracteur."],
       ['Les cartes arrivent repliées', ": chaque bloc montre son <b>chiffre</b> et la ligne qui dit sur quoi il a été calculé, même fermé — rien n’est caché. Touchez-en une pour voir son détail : elle s’ouvre en grand, et la précédente se referme, pour que les autres restent rangées côte à côte."],
@@ -1856,7 +1927,7 @@ var MV_AIDE = {
     ]
   },
   reglages: {
-    ico: '\u{2699}\u{FE0F}', titre: 'Réglages', ancre: 'reglages',
+    ico: 'curseurs', titre: 'Réglages', ancre: 'reglages',
     points: [
       function () {
         return _mvAideSections('#regl-tabs-row .mvu-tab', 'onglets',
@@ -1875,7 +1946,7 @@ var MV_AIDE = {
 };
 
 var MV_AIDE_DEFAUT = {
-  ico: '\u{1F4D6}', titre: 'Aide', ancre: 'contenu',
+  ico: 'livre', titre: 'Aide', ancre: 'contenu',
   points: [
     ['Le guide complet', "couvre tous les modules, écran par écran."],
     ['Un souci ?', "Signalez-le : le contexte technique part avec votre message."]
@@ -1911,8 +1982,8 @@ function openAide() {
        + _escHtml(p[0]) + '</b> ' + _escHtml(p[1] || '') + '</span></div>';
   }
   h += '</div><div class="mva-foot">'
-     + '<button type="button" class="mva-fbtn" id="mva-guide">\u{1F4D6} Guide complet</button>'
-     + '<button type="button" class="mva-fbtn mva-bug" id="mva-bug">\u{1F41B} Un problème</button>'
+     + '<button type="button" class="mva-fbtn" id="mva-guide">' + _mvIcon('livre',16) + ' Guide complet</button>'
+     + '<button type="button" class="mva-fbtn mva-bug" id="mva-bug">' + _mvIcon('bogue',16) + ' Un problème</button>'
      + '</div>';
   el.innerHTML = h;
   var g = document.getElementById('mva-guide');
@@ -2262,6 +2333,145 @@ export function _mvInfoBtn(cle) {
 }
 
 // ═══════════════════════════════════════════════════════════════════════════
+// LES ICONES — lot DS-1
+// ═══════════════════════════════════════════════════════════════════════════
+// Un emoji se dessine autrement sur chaque systeme, ne s'aligne pas sur le
+// texte et ne prend pas la couleur qui l'entoure. Il est remplace par un
+// sprite de <symbol> pose dans index.html, tire par <use>.
+//
+// ⚠️ TROIS ECRITURES, TROIS USAGES — ne pas les confondre :
+//   · `_mvIcon(nom, taille)`       → dans une chaine HTML DE L'APPLICATION.
+//   · `_mvIconInline(nom, taille)` → dans un DOCUMENT IMPRIME. Une page ouverte
+//        dans un autre onglet n'a pas le sprite : <use href="#ic-x"> n'y rend
+//        RIEN. On y recopie donc la forme, relue dans le sprite du DOM — une
+//        seule source, pas deux tables qui divergent.
+//   · `_mvSetIcon(el, nom)`        → dans un element dont on posait le
+//        `textContent`. Il accepte encore un emoji : les huit modules pas
+//        encore migres (DS-M) continuent de fonctionner sans rien changer.
+//
+// ⚠️⚠️ UN SYMBOLE ABSENT NE REND RIEN, EN SILENCE. C'est exactement le piege
+//   du repli CSS. Trois filets : le harnais l'interdit en CI
+//   (scripts/mv-harnais-icones.mjs), `_mvIcon` rend un CARRE POINTILLE visible
+//   au lieu du vide, et l'incident part au journal. Une faute doit se voir.
+var _MV_IC_SET = null;        // noms lus dans le sprite, une fois
+var _MV_IC_DIT = {};          // pour ne pas noyer le journal du meme nom
+
+function _mvIconNoms() {
+  if (_MV_IC_SET) return _MV_IC_SET;
+  if (typeof document === 'undefined') return null;   // Node : pas de DOM
+  var sp = document.getElementById('mv-sprite');
+  if (!sp) return null;                               // pas encore analyse : on ne bloque pas
+  var m = {}, l = sp.querySelectorAll('symbol[id^="ic-"]');
+  for (var i = 0; i < l.length; i++) m[l[i].id.slice(3)] = 1;
+  _MV_IC_SET = m;
+  return m;
+}
+function _mvIconInconnue(nom) {
+  if (_MV_IC_DIT[nom]) return;
+  _MV_IC_DIT[nom] = 1;
+  if (window.logError) window.logError({ level: 'info', cat: 'icone', msg: 'icone inconnue : ' + nom });
+}
+
+export function _mvIcon(nom, taille) {
+  var n = String(nom == null ? '' : nom);
+  var t = (taille > 0) ? taille : 16;
+  var noms = _mvIconNoms();
+  if (noms && !noms[n]) {
+    _mvIconInconnue(n);
+    // ⚠️ Le repli est POINTILLE : un trait plein se confondrait avec une icone,
+    //   un pointille ne ressemble a rien d'autre qu'a une faute.
+    return '<svg class="mv-ic mv-ic-abs" width="' + t + '" height="' + t + '" viewBox="0 0 24 24"'
+         + ' role="img" aria-label="icone manquante"><rect x="3.5" y="3.5" width="17" height="17" rx="3"'
+         + ' stroke-dasharray="3 2.5"></rect></svg>';
+  }
+  return '<svg class="mv-ic" width="' + t + '" height="' + t + '" viewBox="0 0 24 24"'
+       + ' aria-hidden="true" focusable="false"><use href="#ic-' + n + '"></use></svg>';
+}
+
+// L'ETAT, EN BADGE (charte DS-2). Quatre tons, pas un de plus :
+//   'vert' fait / 'ambre' en cours / 'rouge' bloquant / 'neutre' a faire.
+// ⚠️ L'ensemble est FERME. Un cinquieme ton, et deux ecrans finissent par
+//   dire la meme chose de deux couleurs differentes — c'est exactement ce
+//   qu'on vient de corriger. Un ton inconnu retombe sur 'neutre' ET part au
+//   journal : il ne disparait pas en silence.
+export var MV_TONS = ['vert', 'ambre', 'rouge', 'neutre'];
+export function _mvBadge(texte, ton) {
+  var t = MV_TONS.indexOf(ton) >= 0 ? ton : 'neutre';
+  if (t !== ton && window.logError)
+    window.logError({ level: 'info', cat: 'badge', msg: 'ton inconnu : ' + ton });
+  return '<span class="mv-bdg mv-bdg-' + t + '">' + _escHtml(String(texte == null ? '' : texte)) + '</span>';
+}
+
+// L'icone dans son CARRE TEINTE. A reserver aux LIGNES et aux RUBRIQUES : dans
+// une pastille en ligne, un carre de 34 px ecraserait le texte a cote.
+// `ton` : '' (neutre) | 'terre' | 'vert' | 'or' | 'rouge'.
+export function _mvIconTuile(nom, ton) {
+  return '<span class="mv-ict' + (ton ? ' mv-ict-' + ton : '') + '">' + _mvIcon(nom, 18) + '</span>';
+}
+
+// La meme icone, autonome, pour un document qui part dans un autre onglet.
+// ⚠️ Les attributs de trace sont portes par la balise : le document imprime
+//   n'a pas styles.css, donc pas de .mv-ic.
+export function _mvIconInline(nom, taille) {
+  var n = String(nom == null ? '' : nom);
+  var t = (taille > 0) ? taille : 13;
+  var sym = (typeof document !== 'undefined') ? document.getElementById('ic-' + n) : null;
+  if (!sym) { _mvIconInconnue(n); return ''; }
+  return '<svg width="' + t + '" height="' + t + '" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg"'
+       + ' fill="none" stroke="currentColor" stroke-width="1.45" stroke-linecap="round"'
+       + ' stroke-linejoin="round" style="vertical-align:-0.15em;flex-shrink:0">' + sym.innerHTML + '</svg>';
+}
+
+// Poser une icone la ou le code posait un emoji en `textContent`.
+// ⚠️ Un nom d'icone ne contient que des minuscules : c'est ce qui permet de
+//   distinguer « corbeille » (une icone) de « 🗑️ » (un emoji d'un module pas
+//   encore migre) sans casser ces modules.
+export function _mvSetIcon(el, val, taille) {
+  if (!el) return;
+  var v = String(val == null ? '' : val);
+  var noms = _mvIconNoms();
+  if (/^[a-z][a-z0-9-]*$/.test(v) && (!noms || noms[v])) el.innerHTML = _mvIcon(v, taille || 26);
+  else el.textContent = v;
+}
+
+// ── L'icone d'un TRAVAIL ────────────────────────────────────────────────────
+// Ce qui reste de TEMOJI : une correspondance travail -> NOM D'ICONE, pour les
+// rares endroits ou un pictogramme sert encore. Plus aucun emoji.
+export const TICON = {
+  Taille:'secateur', Tirage:'retour', Brulage:'flamme', Pliage:'lien', Reparation:'outil',
+  Plantation:'pousse', Entreplantation:'pousse',
+  Ebourgeonnage:'feuille', Ebourgeonnage1:'feuille', Ebourgeonnage2:'feuille',
+  Pioche:'beche', Relevage:'rang', Accolage:'lien', Palissage:'rang',
+  Arrachage:'beche', Desherbage:'beche', Effeuillage:'feuille', Vendange:'raisin',
+  'R\u00e9paration ponctuelle':'outil'
+};
+export function _mvIconTache(nom, taille) {
+  return _mvIcon(TICON[nom] || 'feuille', taille);
+}
+
+// ── L'icone d'un TYPE D'ACTIVITE tracteur ───────────────────────────────────
+// Le choix est une DONNEE : il est enregistre dans `a.emoji`. On n'ecrit donc
+// rien en base — les valeurs deja enregistrees (des emojis) sont traduites A
+// LA LECTURE, et seules les activites modifiees passent au nom d'icone.
+// Meme patron que la serie datee des salaires : migration a zero ecriture.
+export const ACT_ICONES = ['tracteur','secateur','pousse','feuille','beche','goutte',
+  'flamme','eclair','raisin','outil','rang','eprouvette','epingle','rotation',
+  'chrono','carton','liste','lien'];
+var ACT_LEGACY = {
+  '\u{1F69C}':'tracteur', '\u2702':'secateur', '\u{1F331}':'pousse', '\u{1F33F}':'feuille',
+  '\u{1F573}':'pousse',   '\u{1F4A7}':'goutte', '\u{1F525}':'flamme', '\u26A1':'eclair',
+  '\u{1F33E}':'pousse',   '\u{1FA9A}':'outil',  '\u{1F529}':'outil',  '\u{1F9EA}':'eprouvette',
+  '\u{1F6E4}':'rang',     '\u{1F4CD}':'epingle','\u{1F300}':'rotation','\u{1F504}':'rotation',
+  '\u26CF':'beche',       '\u{1F517}':'lien',   '\u{1F347}':'raisin'
+};
+export function _actIcone(val) {
+  var v = String(val == null ? '' : val);
+  if (!v) return 'tracteur';
+  if (/^[a-z][a-z0-9-]*$/.test(v)) return v;
+  return ACT_LEGACY[v.replace(/\uFE0F/g, '')] || 'tracteur';
+}
+
+// ═══════════════════════════════════════════════════════════════════════════
 // LES FICHES VIVANTES
 // ═══════════════════════════════════════════════════════════════════════════
 // MV_INFO est un dictionnaire ECRIT : il explique une methode, qui ne change
@@ -2342,6 +2552,16 @@ window.MV_INFO            = MV_INFO;
 window._mvInfoOpen        = _mvInfoOpen;
 window._mvInfoSet         = _mvInfoSet;
 window._mvInfoBtn         = _mvInfoBtn;
+window._mvIcon            = _mvIcon;
+window._mvIconInline      = _mvIconInline;
+window._mvSetIcon         = _mvSetIcon;
+window._mvIconTache       = _mvIconTache;
+window._mvIconTuile       = _mvIconTuile;
+window._mvBadge           = _mvBadge;
+window.MV_TONS            = MV_TONS;
+window.TICON              = TICON;
+window.ACT_ICONES         = ACT_ICONES;
+window._actIcone          = _actIcone;
 window._PIL_SEM           = _PIL_SEM;
 window.showSyncBadge      = showSyncBadge;
 window.showToast          = showToast;
@@ -2350,6 +2570,8 @@ window.applyTheme         = applyTheme;
 window.initTheme          = initTheme;
 window.tNom               = tNom;
 window.wmoDesc            = wmoDesc;
+window.wmoIcone           = wmoIcone;
+window.MV_METEO_IC        = MV_METEO_IC;
 window.wmoEmoji           = wmoEmoji;
 window.isAdmin            = isAdmin;
 window.isTractoriste      = isTractoriste;
@@ -3520,7 +3742,6 @@ window._saisonTaches      = _saisonTaches;
 
 // Constantes sur window pour accès depuis modules non-ES (firebase compat, inline HTML)
 window.TABREV             = TABREV;
-window.TEMOJI             = TEMOJI;
 window.TCLS               = TCLS;
 window.TEMJ               = TEMJ;
 window.COULEURS_MBR       = COULEURS_MBR;

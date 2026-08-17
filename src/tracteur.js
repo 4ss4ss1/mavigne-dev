@@ -7,7 +7,7 @@
 
 import { isAdmin, isTractoriste, isSaisonnier, canWrite,
          showToast, _escHtml, _escAttr, tNom, logError, _swNotify, dreEffectif
-} from './utils.js';
+, _mvBadge, _mvIcon } from './utils.js';
 
 // ── Flag debug (console.log silencieux en prod — manquait après extraction du module) ──
 const DEBUG = location.hostname === 'localhost' || location.hostname === '127.0.0.1';
@@ -34,7 +34,7 @@ var _tracOnglet = 'sessions'; // 'sessions' | 'entretiens'
 
 function renderCatalogueTrac(){
   const el=document.getElementById('catalogue-list-trac');if(!el)return;
-  el.innerHTML=CATALOGUE.map(p=>`<div class="catitem" onclick="openCatDetail('${_escHtml(p.nom).replace(/'/g,"\\'")}')"><div class="cat-l"><div class="cat-nom">${TEMJ[p.type]} ${_escHtml(p.nom)}</div><div class="cat-det">AMM ${_escHtml(p.amm)} · ${_escHtml(p.dose)}${p.cible?' · 🎯 '+_escHtml(p.cible):''}</div>${p.usage?`<div style="font-size:9px;color:var(--texte-doux);margin-top:2px">ℹ️ ${_escHtml(p.usage)}</div>`:''}</div><div class="cat-r"><span class="cat-db ${TCLS[p.type]||'tfc'}">${_escHtml(p.type)}</span><span style="font-size:10px;color:var(--texte-doux);display:block">DAR ${p.dar}j</span>${p.drae>0?`<span style="font-size:9px;color:var(--tag-amber-tx,#856404);font-weight:600;display:block">DRAE ${p.drae}h</span>`:''}${p.znt?`<span style="font-size:9px;color:var(--rouge);font-weight:600;display:block">ZNT ${p.znt}m</span>`:''}</div></div>`).join('');
+  el.innerHTML=CATALOGUE.map(p=>`<div class="catitem" onclick="openCatDetail('${_escHtml(p.nom).replace(/'/g,"\\'")}')"><div class="cat-l"><div class="cat-nom">${TEMJ[p.type]} ${_escHtml(p.nom)}</div><div class="cat-det">AMM ${_escHtml(p.amm)} · ${_escHtml(p.dose)}${p.cible?' · '+_escHtml(p.cible):''}</div>${p.usage?`<div style="font-size:9px;color:var(--texte-doux);margin-top:2px">ℹ️ ${_escHtml(p.usage)}</div>`:''}</div><div class="cat-r"><span class="cat-db ${TCLS[p.type]||'tfc'}">${_escHtml(p.type)}</span><span style="font-size:10px;color:var(--texte-doux);display:block">DAR ${p.dar}j</span>${p.drae>0?`<span style="font-size:9px;color:var(--tag-amber-tx,#856404);font-weight:600;display:block">DRAE ${p.drae}h</span>`:''}${p.znt?`<span style="font-size:9px;color:var(--rouge);font-weight:600;display:block">ZNT ${p.znt}m</span>`:''}</div></div>`).join('');
 }
 // ════ Catalogue E-Phy (ANSES) — référentiel officiel vigne, lecture seule ════
 var _catSub = 'ephy';
@@ -77,10 +77,10 @@ function ephyRender(){
   var all = _ephyList();
   if(!all.length){
     var st=window._ephyStatus||'loading', msg, retry='';
-    if(st==='error'){ msg='⚠️ Catalogue momentanément indisponible.'; retry='<div style="margin-top:12px"><button class="ephy-chip" style="cursor:pointer" onclick="if(window._fbLoadEphy)window._fbLoadEphy()">↻ Réessayer</button></div>'; }
-    else if(st==='offline'){ msg='📡 Catalogue indisponible hors connexion.'; }
+    if(st==='error'){ msg='Catalogue momentanément indisponible.'; retry='<div style="margin-top:12px"><button class="ephy-chip" style="cursor:pointer" onclick="if(window._fbLoadEphy)window._fbLoadEphy()">Réessayer</button></div>'; }
+    else if(st==='offline'){ msg='Catalogue indisponible hors connexion.'; }
     else if(st==='empty'){ msg='Catalogue E-Phy vide pour le moment.'; }
-    else{ msg='⏳ Catalogue E-Phy en cours de chargement…'; }
+    else{ msg='Catalogue E-Phy en cours de chargement…'; }
     listEl.innerHTML = '<div style="padding:30px 16px;text-align:center;color:var(--texte-doux);font-size:13px">'+msg+retry+'</div>';
     var c0=document.getElementById('ephy-cnt'); if(c0) c0.textContent='—'; return;
   }
@@ -162,7 +162,7 @@ function _phParcTxt(t){
 function renderPhytoTrac(){
   const el=document.getElementById('traitements-list-trac');if(!el)return;
   const list=[...TRAITEMENTS].sort((a,b)=>b.date.localeCompare(a.date));
-  if(!list.length){el.innerHTML='<div class="empty-state" style="margin-top:40px"><div class="ei">🧪</div><p>Aucun traitement cette saison</p></div>';return;}
+  if(!list.length){el.innerHTML='<div class="empty-state" style="margin-top:40px"><div class="ei">'+_mvIcon('eprouvette',40)+'</div><p>Aucun traitement cette saison</p></div>';return;}
   const now=new Date();
   const TC={'Cuivre':'var(--tag-blue-tx,#1A4A7A)','Soufre':'var(--tag-amber-tx,#7D6608)','Fongicide':'var(--tag-purple-tx,#4A2060)','Insecticide':'var(--tag-red-tx,#A0291E)','Herbicide':'var(--tag-green-tx,#1E3A12)','Biocontrôle':'var(--tag-teal-tx,#2C6E49)'};
   const TB={'Cuivre':'var(--tag-blue-bg,rgba(26,74,122,0.14))','Soufre':'var(--tag-amber-bg,rgba(125,102,8,0.16))','Fongicide':'var(--tag-purple-bg,rgba(90,45,142,0.16))','Insecticide':'var(--tag-red-bg,rgba(160,41,30,0.14))','Herbicide':'var(--tag-green-bg,rgba(30,58,18,0.14))','Biocontrôle':'var(--tag-teal-bg,rgba(44,110,73,0.14))'};
@@ -180,7 +180,7 @@ function renderPhytoTrac(){
     let draeBadge='';
     if(dreInfo.h>0&&t.date){
       const draeR=Math.max(0,dreInfo.h-Math.floor((now-new Date(t.date))/3600000));
-      if(draeR>0) draeBadge='<span style="background:var(--tag-amber-bg,#FFF3CD);color:var(--tag-amber-tx,#856404);font-size:10px;font-weight:700;padding:2px 8px;border-radius:8px">⏱️ Réentrée '+draeR+'h</span>';
+      if(draeR>0) draeBadge='<span style="background:var(--tag-amber-bg,#FFF3CD);color:var(--tag-amber-tx,#856404);font-size:10px;font-weight:700;padding:2px 8px;border-radius:8px">Réentrée '+draeR+'h</span>';
     }
     const tc=TC[m.type]||'var(--texte-doux)', tb=TB[m.type]||'var(--gris-clair)';
     const emj=(typeof TEMJ!=='undefined'&&TEMJ[m.type])?TEMJ[m.type]+' ':'';
@@ -198,7 +198,7 @@ function renderPhytoTrac(){
         ${darBadge}
         ${draeBadge}
       </div>
-      ${meta3?`<div style="display:flex;flex-wrap:wrap;gap:4px 12px;font-size:11px;color:var(--texte-doux);align-items:center">${parc?'<span>📍 '+_escHtml(parc)+'</span>':''}${cond?'<span>👤 '+_escHtml(cond)+'</span>':''}<span style="margin-left:auto;color:var(--gris)">›</span></div>`:''}
+      ${meta3?`<div style="display:flex;flex-wrap:wrap;gap:4px 12px;font-size:11px;color:var(--texte-doux);align-items:center">${parc?'<span>'+_escHtml(parc)+'</span>':''}${cond?'<span>'+_escHtml(cond)+'</span>':''}<span style="margin-left:auto;color:var(--gris)">›</span></div>`:''}
     </div>`;
   }).join('');
 }
@@ -232,8 +232,8 @@ function renderTracParcPills(){
       var depasse = retour && today>retour;
       var proche  = retour && (today===retour || today===addDays(retour,-1));
       var pc = depasse?'bad':(proche?'warn':'info');
-      var ptxt = retour ? ('🔧 Retour '+_fmtDate(retour)) : '🔧 Au garage';
-      badge = '<span class="tpc-badge">🔧 GARAGE</span>';
+      var ptxt = retour ? ('Retour '+_fmtDate(retour)) : 'Au garage';
+      badge = _mvBadge('Au garage','rouge');
       pill  = '<span class="tpc-pill '+pc+'">'+ptxt+'</span>';
     } else {
       var comp=t.compteur_h, rev=t.revision_h;
@@ -241,14 +241,14 @@ function renderTracParcPills(){
       if(hasComp){
         var reste=Number(rev)-Number(comp);
         var rc=reste<=50?'bad':(reste<=120?'warn':'ok');
-        pill='<span class="tpc-pill '+rc+'">🛠️ Révision '+_gnrNum(reste)+' h</span>';
+        pill=_mvBadge('Révision dans '+_gnrNum(reste)+' h', rc==='urg'?'rouge':rc==='soon'?'ambre':'neutre');
       } else {
-        pill='<span class="tpc-pill none">🛠️ À renseigner</span>';
+        pill=_mvBadge('Révision à renseigner','neutre');
       }
     }
     return '<div class="tpc'+(rep?' rep':'')+'" onclick="switchTracOnglet(\'entretiens\');selectTracteur(\''+_escAttr(t.id)+'\')">'
       +badge
-      +'<div class="tpc-ic" style="background:'+col+'26">🚜</div>'
+      +'<div class="tpc-ic" style="background:'+col+'26;color:'+col+'">'+_mvIcon('tracteur',20)+'</div>'
       +'<div class="tpc-b">'
         +'<div class="tpc-n">'+_escHtml(t.nom)+'</div>'
         +'<div class="tpc-m">'+_escHtml(t.modele||t.type||'')+'</div>'
@@ -262,12 +262,12 @@ function renderTracParcPills(){
 function renderEntTracFilter(){
   var el = document.getElementById('ent-trac-filter');
   if(!el) return;
-  el.innerHTML = '<button onclick="selectTracteur(null)" class="chip'+((!_tracSelId)?'  active ac':'')+'" style="min-height:44px">🚜 Tous</button>'
+  el.innerHTML = '<button onclick="selectTracteur(null)" class="chip'+((!_tracSelId)?'  active ac':'')+'" style="min-height:44px">Tous</button>'
     + TRACTEURS_LIST.map(function(t){
       var active = _tracSelId===t.id;
       var enR = REPARATEUR[t.id];
       return '<button onclick="selectTracteur(\''+_escAttr(t.id)+'\')" class="chip'+(active?' active ac':'')+'" style="min-height:44px">'
-        +(enR?'⚠️ ':'🚜 ')+_escHtml(t.nom)
+        +_escHtml(t.nom)
       +'</button>';
     }).join('');
 }
@@ -328,7 +328,7 @@ function renderRepBanner(){
   var nbJ=Math.max(0,Math.ceil((new Date(today)-new Date(rep.depuis))/86400000));
   var couleur=depasse?'var(--rouge)':jourJ||demain?'var(--orange)':'var(--bleu)';
   var bgCouleur=depasse?'var(--rouge-pale)':jourJ||demain?'var(--orange-pale)':'var(--bleu-pale)';
-  var titre=depasse?'⚠️ Retour dépassé':jourJ?'📅 Retour prévu aujourd\'hui':demain?'📅 Retour prévu demain':'🔧 Chez le réparateur';
+  var titre=depasse?'Retour dépassé':jourJ?'Retour prévu aujourd\'hui':demain?'Retour prévu demain':'Chez le réparateur';
   var depasseInfo=depasse&&retour?(' — dépassé de '+Math.ceil((new Date(today)-new Date(retour))/86400000)+'j'):'';
   wrap.innerHTML='<div class="rep-banner" style="background:'+bgCouleur+';border:1px solid '+couleur+'">'
     +'<div style="font-weight:700;color:'+couleur+';font-size:13px;margin-bottom:6px;display:flex;justify-content:space-between;align-items:center">'
@@ -338,8 +338,8 @@ function renderRepBanner(){
     +'<div style="font-size:12px;margin-bottom:4px">'+_escHtml(rep.motif)+'</div>'
     +(retour?'<div style="font-size:11px;color:var(--texte-doux);margin-bottom:12px">Retour prévu : <strong style="color:'+couleur+'">'+_fmtDate(retour)+'</strong>'+depasseInfo+'</div>':'<div style="margin-bottom:12px"></div>')
     +((isAdmin()||isTractoriste())?('<div class="rep-banner-btns">'
-      +'<button class="rep-banner-btn" style="border:1.5px solid var(--vert);background:transparent;color:var(--vert)" onclick="retourReparateur()">✅ Rentré</button>'
-      +'<button class="rep-banner-btn" style="border:1.5px solid var(--orange);background:transparent;color:var(--orange)" onclick="_openOv(\'ovReporter\')">📅 Reporter</button>'
+      +'<button class="rep-banner-btn" style="border:1.5px solid var(--vert);background:transparent;color:var(--vert)" onclick="retourReparateur()">Rentré</button>'
+      +'<button class="rep-banner-btn" style="border:1.5px solid var(--orange);background:transparent;color:var(--orange)" onclick="_openOv(\'ovReporter\')">Reporter</button>'
     +'</div>'):'')
   +'</div>';
 }
@@ -367,13 +367,13 @@ function renderRepHist(){
     var dur=Math.max(1,Math.round((new Date(r.retour)-new Date(r.depuis))/86400000));
     return '<div class="rephist-card"><div class="rephist-top">'
       +'<div class="rephist-motif">'+(it.nom?'<span class="rephist-trac">'+_escHtml(it.nom)+'</span> ':'')+_escHtml(r.motif||'Réparation')+'</div>'
-      +(canEdit?'<button class="rephist-del" onclick="delRepHist(\''+_escAttr(it.tracId)+'\','+it.idx+')">🗑️</button>':'')
+      +(canEdit?'<button class="mv-gh rephist-del" onclick="delRepHist(\''+_escAttr(it.tracId)+'\','+it.idx+')" title="Supprimer" aria-label="Supprimer">'+_mvIcon('corbeille',18)+'</button>':'')
       +'</div><div class="rephist-meta">'
       +'<span class="rephist-dates">'+_fmtDate(r.depuis)+' <span class="rephist-arr">→</span> '+_fmtDate(r.retour)+'</span>'
       +'<span class="rephist-dur">'+dur+' jour'+(dur>1?'s':'')+'</span>'
       +'</div></div>';
   }).join('');
-  el.innerHTML='<div class="rephist-head"><span class="rephist-h-t">🗂️ Historique réparations</span><span class="rephist-h-n">'+items.length+'</span></div><div class="rephist-list">'+cards+'</div>';
+  el.innerHTML='<div class="rephist-head"><span class="rephist-h-t">Historique réparations</span><span class="rephist-h-n">'+items.length+'</span></div><div class="rephist-list">'+cards+'</div>';
 }
 
 function delRepHist(tracId,idx){
@@ -436,8 +436,8 @@ function retourReparateur(){
     _saveData('reparateur');
     renderTracTabs();
     renderRepBanner();
-    showToast('Tracteur de retour ✓ — réparation archivée','#3D6B27');
-  },'✅','Oui, rentré','#3D6B27');
+    showToast('Tracteur de retour — réparation archivée','#3D6B27');
+  },'','Oui, rentré','#3D6B27');
 }
 
 function saveReporter(){
@@ -453,7 +453,7 @@ function saveReporter(){
   _closeOv(null,'ovReporter');
   renderRepBanner();
   checkRepNotifications();
-  showToast('Date de retour mise à jour ✓','#E07B2A');
+  showToast('Date de retour mise à jour','#E07B2A');
 }
 
 // Ouvrir l'overlay reporter en pré-remplissant la date actuelle
@@ -473,13 +473,13 @@ function checkRepNotifications(){
     var last=localStorage.getItem(key)||'';
     var nom=t.nom+(t.modele?' ('+t.modele+')':'');
     if(today===veille&&last!=='veille_'+retour){
-      _swNotify('Ma Vigne 🚜',{body:nom+' — retour prévu demain ('+_fmtDate(retour)+')',icon:'icon-192.png',tag:'rep_veille_'+t.id});
+      _swNotify('Ma Vigne',{body:nom+' — retour prévu demain ('+_fmtDate(retour)+')',icon:'icon-192.png',tag:'rep_veille_'+t.id});
       localStorage.setItem(key,'veille_'+retour);
     } else if(today===retour&&last!=='jour_'+retour){
-      _swNotify('Ma Vigne 🚜',{body:nom+' — retour prévu aujourd\'hui !',icon:'icon-192.png',tag:'rep_jour_'+t.id});
+      _swNotify('Ma Vigne',{body:nom+' — retour prévu aujourd\'hui !',icon:'icon-192.png',tag:'rep_jour_'+t.id});
       localStorage.setItem(key,'jour_'+retour);
     } else if(today>retour&&last!=='depasse_'+retour){
-      _swNotify('Ma Vigne ⚠️',{body:nom+' — retour prévu dépassé ('+_fmtDate(retour)+')',icon:'icon-192.png',tag:'rep_depasse_'+t.id});
+      _swNotify('Ma Vigne',{body:nom+' — retour prévu dépassé ('+_fmtDate(retour)+')',icon:'icon-192.png',tag:'rep_depasse_'+t.id});
       localStorage.setItem(key,'depasse_'+retour);
     }
   });
@@ -488,12 +488,12 @@ function checkRepNotifications(){
 // ════ ENTRETIEN ════
 
 var _entFields=[
-  {key:'plein',label:'Plein fait',icon:'⛽'},
-  {key:'huile',label:'Niveau huile',icon:'🛢️'},
-  {key:'filtre_air',label:'Filtre à air',icon:'💨'},
-  {key:'radiateur',label:'Radiateur',icon:'🌀'},
-  {key:'pression_pneu',label:'Pression pneus',icon:'🔵'},
-  {key:'lavage',label:'Lavage',icon:'🪣'},
+  {key:'plein',label:'Plein fait'},
+  {key:'huile',label:'Niveau huile'},
+  {key:'filtre_air',label:'Filtre à air'},
+  {key:'radiateur',label:'Radiateur'},
+  {key:'pression_pneu',label:'Pression pneus'},
+  {key:'lavage',label:'Lavage'},
 ];
 
 function openOvEntretien(){
@@ -510,7 +510,6 @@ function openOvEntretien(){
   var grid=document.getElementById('ent-checklist');
   grid.innerHTML=_entFields.map(function(f){
     return '<button class="ent-btn" id="ent-btn-'+f.key+'" onclick="toggleEntBtn(this,\''+f.key+'\')">'
-      +'<span class="ent-btn-ico">'+f.icon+'</span>'
       +'<span style="display:flex;flex-direction:column"><span class="ent-btn-lbl">'+f.label+'</span><span class="ent-btn-sub">Non fait</span></span>'
     +'</button>';
   }).join('');
@@ -520,7 +519,6 @@ function openOvEntretien(){
   if(efGrid&&!efGrid.children.length){
     efGrid.innerHTML=_entFields.map(function(f){
       return '<button class="ent-btn" id="ef-btn-'+f.key+'" onclick="toggleEntBtn(this,\''+f.key+'\')">'
-        +'<span class="ent-btn-ico">'+f.icon+'</span>'
         +'<span style="display:flex;flex-direction:column"><span class="ent-btn-lbl">'+f.label+'</span><span class="ent-btn-sub">Non fait</span></span>'
       +'</button>';
     }).join('');
@@ -539,7 +537,7 @@ function openOvEntretien(){
 function toggleEntBtn(el,key){
   el.classList.toggle('checked');
   var sub=el.querySelector('.ent-btn-sub');
-  if(el.classList.contains('checked')){sub.textContent='OK ✓';}
+  if(el.classList.contains('checked')){sub.textContent='OK';}
   else{sub.textContent='Non fait';}
 }
 
@@ -558,7 +556,7 @@ function confirmEntretien(){
   var anoLine=document.getElementById('ent-conf-ano');
   if(anomalie){
     anoLine.style.display='block';
-    anoLine.textContent=traitee?'✅ Anomalie marquée traitée':'⚠️ Anomalie signalée — non traitée';
+    anoLine.textContent=traitee?'Anomalie marquée traitée':'Anomalie signalée — non traitée';
     anoLine.style.color=traitee?'var(--vert)':'var(--rouge)';
     anoLine.style.fontWeight='600';
   } else {
@@ -592,7 +590,7 @@ function saveEntretien(){
   _closeOv(null,'ovConfirmEntretien');
   _closeOv(null,'ovEntretien');
   renderEntretiens();
-  showToast('Fiche enregistrée ✓','#3D6B27');
+  showToast('Fiche enregistrée','#3D6B27');
 }
 
 // ── Toggle case "Anomalie traitée" dans ovEntretien ──
@@ -604,7 +602,7 @@ function toggleEntAnoTraitee(){
   var lbl=btn.querySelector('.ent-ano-lbl');
   if(on){
     btn.style.borderColor='var(--vert)';btn.style.background='var(--vert-pale)';btn.style.color='var(--vert)';
-    if(ico){ico.style.background='var(--vert)';ico.style.borderColor='var(--vert)';ico.textContent='✓';}
+    if(ico){ico.style.background='var(--vert)';ico.style.borderColor='var(--vert)';ico.textContent='';}
     if(lbl)lbl.textContent='Anomalie traitée';
   } else {
     btn.style.borderColor='rgba(192,57,43,0.4)';btn.style.background='rgba(192,57,43,0.05)';btn.style.color='var(--rouge)';
@@ -636,7 +634,7 @@ function toggleAnomalieTraitee(id){
   // Re-render la liste si le modal est ouvert
   var ov=document.getElementById('ovListeFiches');
   if(ov&&ov.classList.contains('open'))renderListeFiches();
-  showToast(f.anomalie_traitee?'Anomalie marquée traitée ✓':'Anomalie rouverte','#3D6B27');
+  showToast(f.anomalie_traitee?'Anomalie marquée traitée':'Anomalie rouverte','#3D6B27');
 }
 
 // ════ CUVE GNR + PROCHAINE RÉVISION (saisie, écriture tractoriste/admin) ════
@@ -666,7 +664,7 @@ function _gnrCardHtml(){
     var fCss='width:100%;padding:9px 11px;border:1.5px solid var(--gris);border-radius:9px;font-size:16px;font-family:inherit;background:var(--bg-card);color:var(--texte);box-sizing:border-box';
     var lCss='font-size:12px;color:var(--texte-doux);margin-bottom:3px';
     return '<div class="ent-resume-card" style="margin-bottom:12px">'
-      +'<div style="font-size:13px;font-weight:600;color:var(--texte);margin-bottom:4px">🛢️ Appoint de cuve</div>'
+      +'<div style="font-size:13px;font-weight:600;color:var(--texte);margin-bottom:4px">Appoint de cuve</div>'
       +'<div style="font-size:11px;color:var(--texte-doux);margin-bottom:10px">Livraison ou remplissage de la cuve du domaine. Le prix saisi ici alimente le coût du GNR dans Pilotage › Économie.</div>'
       +'<div style="margin-bottom:8px"><div style="'+lCss+'">Litres livrés</div><input type="number" id="gnr-ap-l" min="1" step="1" inputmode="decimal" placeholder="ex. 500" style="'+fCss+'"></div>'
       +'<div style="margin-bottom:8px"><div style="'+lCss+'">Prix du litre (€/L)</div><input type="number" id="gnr-ap-pu" min="0" step="0.001" inputmode="decimal" placeholder="ex. 1,24" style="'+fCss+'"></div>'
@@ -681,7 +679,7 @@ function _gnrCardHtml(){
   if(_gnrAct==='corr' && canEdit){
     var gc=g||{};
     return '<div class="ent-resume-card" style="margin-bottom:12px">'
-      +'<div style="font-size:13px;font-weight:600;color:var(--texte);margin-bottom:4px">🔧 Corriger le niveau</div>'
+      +'<div style="font-size:13px;font-weight:600;color:var(--texte);margin-bottom:4px">Corriger le niveau</div>'
       +'<div style="font-size:11px;color:var(--texte-doux);margin-bottom:10px">À utiliser si un plein n\'a pas été noté.</div>'
       +_gnrField('gnr-corr','Litrage restant réel (L)',gc.niveau)
       +'<div style="display:flex;gap:8px;margin-top:6px">'
@@ -706,8 +704,8 @@ function _gnrCardHtml(){
     +'<div style="height:8px;border-radius:5px;background:var(--gris-clair);overflow:hidden;margin-top:9px"><i style="display:block;height:100%;width:'+Math.min(pc,100)+'%;background:'+col+'"></i></div>'
     +(isAdmin()?_gnrPrixLigne():'')
     +(canEdit?'<div style="display:flex;gap:8px;margin-top:11px">'
-      +(isAdmin()?'<button onclick="window.openGnrAppoint()" style="flex:1;padding:9px;border:1px solid var(--vert-med);border-radius:9px;background:transparent;color:var(--vert-med);font-family:\'Outfit\',sans-serif;font-size:12.5px;font-weight:600;cursor:pointer;min-height:44px">🛢️ Appoint de cuve</button>':'')
-      +'<button onclick="window.openGnrCorr()" style="flex:1;padding:9px;border:1px solid var(--gris);border-radius:9px;background:transparent;color:var(--texte-doux);font-family:\'Outfit\',sans-serif;font-size:12.5px;font-weight:600;cursor:pointer;min-height:44px">🔧 Corriger le niveau</button>'
+      +(isAdmin()?'<button onclick="window.openGnrAppoint()" style="flex:1;padding:9px;border:1px solid var(--vert-med);border-radius:9px;background:transparent;color:var(--vert-med);font-family:\'Outfit\',sans-serif;font-size:12.5px;font-weight:600;cursor:pointer;min-height:44px">Appoint de cuve</button>':'')
+      +'<button onclick="window.openGnrCorr()" style="flex:1;padding:9px;border:1px solid var(--gris);border-radius:9px;background:transparent;color:var(--texte-doux);font-family:\'Outfit\',sans-serif;font-size:12.5px;font-weight:600;cursor:pointer;min-height:44px">Corriger le niveau</button>'
     +'</div>':'')
   +'</div>';
 }
@@ -816,7 +814,7 @@ function openPlein(){
   var cfg=window.CONFIG||{}, g=cfg.gnr;
   var sub=document.getElementById('plein-sub'); if(sub)sub.textContent=t?(t.nom+(t.modele?' — '+t.modele:'')):'Réservoir';
   var who=(currentUser&&currentUser.nom)||'';
-  var cuveTxt=(g&&g.capacite)?('Cuve GNR : '+_gnrNum(g.niveau)+' / '+_gnrNum(g.capacite)+' L restants'):'⚠ Cuve GNR non renseignée';
+  var cuveTxt=(g&&g.capacite)?('Cuve GNR : '+_gnrNum(g.niveau)+' / '+_gnrNum(g.capacite)+' L restants'):'Cuve GNR non renseignée';
   var info=document.getElementById('plein-cuve-info'); if(info)info.innerHTML=cuveTxt+'<br>Enregistre une fiche « Plein fait » ce jour'+(who?(' au nom de '+_escHtml(who)):'');
   var inp=document.getElementById('plein-litres'); if(inp)inp.value='';
   _openOv('ovPlein');
@@ -843,7 +841,7 @@ function savePleinFiche(){
   _saveData('entretiens'); _saveData('config');
   _closeOv(null,'ovPlein'); renderEntretiens();
   var bas=(lvl<=(Number(g.seuil)||0));
-  showToast('Plein noté · -'+_gnrNum(n)+' L · cuve à '+_gnrNum(lvl)+' L'+(bas?' · ⚠ bas':''), bas?'#C0392B':'#3D6B27');
+  showToast('Plein noté · -'+_gnrNum(n)+' L · cuve à '+_gnrNum(lvl)+' L'+(bas?' · bas':''), bas?'#C0392B':'#3D6B27');
 }
 function saveGnrCorr(){
   if(!isAdmin()&&!isTractoriste()){showToast('Réservé aux tractoristes et à l’admin','#C0392B');return;}
@@ -854,7 +852,7 @@ function saveGnrCorr(){
   g.niveau=v; g.maj=_gnrTodayISO(); window.CONFIG=cfg;
   _saveData('config'); _gnrAct=''; renderEntretiens();
   var bas=(v<=(Number(g.seuil)||0));
-  showToast('Cuve corrigée · '+_gnrNum(v)+' L'+(bas?' · ⚠ bas':''), bas?'#C0392B':'#3D6B27');
+  showToast('Cuve corrigée · '+_gnrNum(v)+' L'+(bas?' · bas':''), bas?'#C0392B':'#3D6B27');
 }
 
 // ── Encart résumé compact (remplace l'ancienne liste inline) ──
@@ -897,7 +895,6 @@ function renderEntretiens(){
     var d=lastDates[fi.key];
     var ok=!!d;
     return '<div class="ent-resume-cell">'
-      +'<span style="font-size:16px">'+fi.icon+'</span>'
       +'<div>'
         +'<div style="font-size:11px;color:var(--texte-doux);line-height:1.2">'+fi.label+'</div>'
         +'<div style="font-size:12px;font-weight:600;color:'+(ok?'var(--vert)':'var(--rouge)')+';margin-top:1px">'+(ok?_fmtDate(d):'Jamais')+'</div>'
@@ -914,19 +911,19 @@ function renderEntretiens(){
       +'</div>';
     }).join('');
     anoBanner='<div class="ent-ano-banner">'
-      +'<div style="font-size:11px;font-weight:700;color:var(--rouge);margin-bottom:6px">⚠️ Anomalie'+(anomActives.length>1?'s':'')+' en attente de traitement</div>'
+      +'<div style="font-size:11px;font-weight:700;color:var(--rouge);margin-bottom:6px">Anomalie'+(anomActives.length>1?'s':'')+' en attente de traitement</div>'
       +rows
       +'<div style="font-size:10px;color:var(--texte-doux);margin-top:6px">Ouvrez les fiches pour marquer comme traitée →</div>'
     +'</div>';
   }
 
   var nbF=fiches.length;
-  var nbAnoText=hasAnoActive?('<span style="margin-left:8px;color:var(--rouge);font-weight:700">⚠️ '+anomActives.length+' non traitée'+(anomActives.length>1?'s':'')+'</span>'):'';
+  var nbAnoText=hasAnoActive?('<span style="margin-left:8px;color:var(--rouge);font-weight:700">'+anomActives.length+' non traitée'+(anomActives.length>1?'s':'')+'</span>'):'';
 
   el.innerHTML=(_gnrCardHtml()+_revCardHtml(t))+'<div class="ent-resume-card'+(hasAnoActive?' has-ano-active':'')+'">'
     +'<div class="ent-resume-hd">'
       +'<div>'
-        +'<div style="font-size:13px;font-weight:600;color:var(--texte)">📋 Derniers contrôles</div>'
+        +'<div style="font-size:13px;font-weight:600;color:var(--texte)">Derniers contrôles</div>'
         +'<div style="font-size:11px;color:var(--texte-doux);margin-top:2px">'+nbF+' fiche'+(nbF>1?'s':'')+nbAnoText+'</div>'
       +'</div>'
       +'<button onclick="openListeFiches()" style="padding:6px 12px;border-radius:8px;border:1.5px solid var(--acier);background:transparent;color:var(--acier);font-size:12px;font-weight:600;font-family:\'Outfit\',sans-serif;cursor:pointer;min-height:44px">Voir tout →</button>'
@@ -966,24 +963,24 @@ function renderListeFiches(){
 
     // Checklist en grille 3 colonnes
     var checkHtml=_entFields.map(function(ef){
-      return '<div class="fiche-item"><span style="font-size:13px">'+(f[ef.key]?'✅':'❌')+'</span>'
+      return '<div class="fiche-item"><span style="display:inline-flex;color:'+(f[ef.key]?'var(--vert-med)':'var(--rouge)')+'">'+_mvIcon(f[ef.key]?'check':'croix',16)+'</span>'
         +'<span style="color:'+(f[ef.key]?'var(--texte)':'var(--texte-doux)')+'">'+ef.label+'</span></div>';
     }).join('');
 
     // Boutons admin
     var adminHtml=admin?'<div class="fiche-admin-btns">'
-      +'<button class="fiche-admin-btn" data-id="'+f.id+'" onclick="openOvEditFiche(\''+f.id+'\')">✏️</button>'
-      +'<button class="fiche-admin-btn del" data-id="'+f.id+'" onclick="deleteFiche(\''+f.id+'\')">🗑️</button>'
+      +'<button class="mv-gh fiche-admin-btn" data-id="'+f.id+'" onclick="openOvEditFiche(\''+f.id+'\')" title="Modifier" aria-label="Modifier">'+_mvIcon('crayon',18)+'</button>'
+      +'<button class="mv-gh mv-gh-rouge fiche-admin-btn del" data-id="'+f.id+'" onclick="deleteFiche(\''+f.id+'\')" title="Supprimer" aria-label="Supprimer">'+_mvIcon('corbeille',18)+'</button>'
     +'</div>':'';
 
     // Bloc anomalie
     var anoHtml='';
     if(hasAno){
-      var toggleLabel=traitee?'✓ Anomalie traitée — appuyer pour annuler':'Marquer comme traitée';
+      var toggleLabel=traitee?'Anomalie traitée — appuyer pour annuler':'Marquer comme traitée';
       var toggleCls=traitee?'fiche-ano-toggle traite':'fiche-ano-toggle non-traite';
       anoHtml='<div class="fiche-ano-bloc">'
         +'<div style="font-size:12px;color:var(--texte);display:flex;gap:6px;align-items:flex-start;margin-bottom:8px">'
-          +'<span>'+(traitee?'✅':'⚠️')+'</span><span>'+_escHtml(f.anomalie)+'</span>'
+          +_mvBadge(traitee?'Traitée':'Anomalie', traitee?'vert':'rouge')+'<span>'+_escHtml(f.anomalie)+'</span>'
         +'</div>'
         +'<button class="'+toggleCls+'" onclick="toggleAnomalieTraitee(\''+f.id+'\')">'+toggleLabel+'</button>'
       +'</div>';
@@ -1036,7 +1033,7 @@ function openOvEditFiche(id){
     var btn=document.getElementById('ef-btn-'+fi.key);
     if(!btn)return;
     var sub=btn.querySelector('.ent-btn-sub');
-    if(f[fi.key]){btn.classList.add('checked');if(sub)sub.textContent='OK ✓';}
+    if(f[fi.key]){btn.classList.add('checked');if(sub)sub.textContent='OK';}
     else{btn.classList.remove('checked');if(sub)sub.textContent='Non fait';}
   });
   // Anomalie
@@ -1063,7 +1060,7 @@ function toggleEfAnoTraitee(){
   var lbl=btn.querySelector('.ent-ano-lbl');
   if(on){
     btn.style.borderColor='var(--vert)';btn.style.background='var(--vert-pale)';btn.style.color='var(--vert)';
-    if(ico){ico.style.background='var(--vert)';ico.style.borderColor='var(--vert)';ico.textContent='✓';}
+    if(ico){ico.style.background='var(--vert)';ico.style.borderColor='var(--vert)';ico.textContent='';}
     if(lbl)lbl.textContent='Anomalie traitée';
   } else {
     btn.style.borderColor='rgba(192,57,43,0.4)';btn.style.background='rgba(192,57,43,0.05)';btn.style.color='var(--rouge)';
@@ -1101,7 +1098,7 @@ function saveEditFiche(){
   // Rouvrir la liste
   renderListeFiches();
   _openOv('ovListeFiches');
-  showToast('Fiche modifiée ✓','#3D6B27');
+  showToast('Fiche modifiée','#3D6B27');
 }
 
 // ════ GESTION DU PARC TRACTEURS (Réglages) ════
@@ -1121,10 +1118,10 @@ function renderTracteurSet(){
     if(enR)badges+='<span style="font-size:9px;background:var(--rouge-pale);color:var(--rouge);border-radius:5px;padding:1px 6px;margin-left:4px">En réparation</span>';
     return '<div class="trac-set-card"><div style="display:flex;align-items:center;gap:12px">'+dot
       +'<div><div style="display:flex;align-items:center;gap:4px"><span style="font-weight:700;font-size:14px">'+_escHtml(t.nom)+'</span>'+badges+'</div>'
-      +'<div style="font-size:12px;color:var(--texte-doux);margin-top:2px">🔩 '+_escHtml(t.modele||'—')+'</div>'
+      +'<div style="font-size:12px;color:var(--texte-doux);margin-top:2px">'+_escHtml(t.modele||'—')+'</div>'
       +'<div style="font-size:11px;color:'+couleurTracType(t.type)+';margin-top:2px">'+_escHtml(t.type)+'</div>'
     +'</div></div>'
-    +'<button onclick="openEditTracteur(\''+t.id+'\')" style="padding:8px 12px;background:transparent;border:1px solid var(--gris);color:var(--texte-doux);border-radius:8px;font-family:\'Outfit\',sans-serif;font-size:13px;cursor:pointer;min-width:44px;min-height:44px">✏️</button>'
+    +'<button class="mv-gh" onclick="openEditTracteur(\''+t.id+'\')" title="Modifier" aria-label="Modifier">'+_mvIcon('crayon',18)+'</button>'
     +'</div>';
   }).join('');
 }
@@ -1161,7 +1158,7 @@ function updateTracTraitBtn(pfx){
   var lbl=document.getElementById(pfx+'-trait-lbl');
   if(!btn)return;
   btn.className='trac-trait-toggle'+(on?' on':'');
-  if(ico)ico.textContent=on?'✅':'⬜';
+  if(ico)ico.textContent=on?'':'';
   if(lbl)lbl.style.color=on?'var(--orange)':'var(--texte)';
 }
 
@@ -1181,14 +1178,14 @@ function saveAddTracteur(){
   _closeOv(null,'ovAddTracteur');
   renderTracTabs();
   renderTracteurSet();
-  showToast(nom+' ajouté ✓','#3D6B27');
+  showToast(nom+' ajouté','#3D6B27');
 }
 
 function openEditTracteur(id){
   var t=TRACTEURS_LIST.find(function(x){return x.id===id;});
   if(!t)return;
   document.getElementById('et-id').value=id;
-  document.getElementById('et-title').textContent='✏️ Modifier — '+t.nom;
+  document.getElementById('et-title').textContent='Modifier — '+t.nom;
   document.getElementById('et-nom').value=t.nom;
   document.getElementById('et-modele').value=t.modele||'';
   document.getElementById('et-type').value=t.type;
@@ -1217,7 +1214,7 @@ function saveEditTracteur(){
   renderTracTabs();
   renderTracInfoBar();
   renderTracteurSet();
-  showToast('Tracteur modifié ✓','#3D6B27');
+  showToast('Tracteur modifié','#3D6B27');
 }
 
 function deleteTracteur(){
@@ -1249,9 +1246,9 @@ function deleteTracteur(){
 // ── Libellé dates d'une session : début → fin (flèche) ──
 function _sessDates(s){
   var deb=s.date||'', fin=s.dateFin||'';
-  if(s.statut==='En cours') return '📅 '+_fmtDate(deb)+' → en cours';
-  if(fin && fin!==deb){ var nd=Math.round((new Date(fin)-new Date(deb))/86400000); return '📅 '+_fmtDate(deb)+' → '+_fmtDate(fin)+(nd>0?' · '+nd+' j':''); }
-  return '📅 '+_fmtDate(deb);
+  if(s.statut==='En cours') return ''+_fmtDate(deb)+' → en cours';
+  if(fin && fin!==deb){ var nd=Math.round((new Date(fin)-new Date(deb))/86400000); return ''+_fmtDate(deb)+' → '+_fmtDate(fin)+(nd>0?' · '+nd+' j':''); }
+  return ''+_fmtDate(deb);
 }
 
 // ════ TRACTEUR ════
@@ -1332,10 +1329,10 @@ function renderTracteur(){
 
   // Filtres conducteurs
   const cc=document.getElementById('cond-chips');
-  if(cc)cc.innerHTML=`<div class="chip ${window.fCond==='tous'?'active ac':''}" onclick="window.fCond='tous';renderTracteur()">👥 Tous</div>`
-    +_condList().map(c=>`<div class="chip ${window.fCond===c.nom?'active ac':''}" onclick="window.fCond='${_escAttr(c.nom)}';renderTracteur()">${c.statut==='En formation'?'🎓':'✅'} ${_escHtml(c.nom)}${isAdmin()?`<span style="opacity:0.5;margin-left:4px;padding:12px 8px;margin-top:-12px;margin-bottom:-12px;display:inline-flex;align-items:center" onclick="event.stopPropagation();editCond('${_escAttr(c.nom)}')">✏️</span>`:''}</div>`).join('');
+  if(cc)cc.innerHTML=`<div class="chip ${window.fCond==='tous'?'active ac':''}" onclick="window.fCond='tous';renderTracteur()">Tous</div>`
+    +_condList().map(c=>`<div class="chip ${window.fCond===c.nom?'active ac':''}" onclick="window.fCond='${_escAttr(c.nom)}';renderTracteur()">${c.statut==='En formation'?'':''} ${_escHtml(c.nom)}${isAdmin()?`<span style="opacity:0.5;margin-left:4px;padding:12px 8px;margin-top:-12px;margin-bottom:-12px;display:inline-flex;align-items:center" onclick="event.stopPropagation();editCond('${_escAttr(c.nom)}')"></span>`:''}</div>`).join('');
 
-  if(cc && typeof isAdmin==='function' && isAdmin()) cc.insertAdjacentHTML('beforeend','<div class="chip" style="border-style:dashed;opacity:0.85;cursor:pointer" onclick="openAddConducteur()">➕ Conducteur</div>');
+  if(cc && typeof isAdmin==='function' && isAdmin()) cc.insertAdjacentHTML('beforeend','<div class="chip" style="border-style:dashed;opacity:0.85;cursor:pointer" onclick="openAddConducteur()">Conducteur</div>');
 
   // Filtres activités
   const ac=document.getElementById('act-chips');
@@ -1394,18 +1391,16 @@ function renderTracteur(){
       var npTag='<span class="sc-phyto-badge">PHYTO</span>';
       return '<div class="scard scard-traitement">'
         +'<div class="sc-hd">'
-        +'<div class="sc-ico">🌿</div>'
         +'<div class="sc-info">'
-        +'<div class="sc-act">Traitement '+npTag+abBadge+'</div>'
-        +'<div class="sc-meta"><span class="sc-date">📅 '+_fmtDate(s.date)+'</span>'
-        +'<span class="sc-cond">👤 '+_escHtml(s.conducteur||'—')+'</span></div>'
-        +'<div style="font-size:11px;color:var(--texte-doux);margin-top:2px">'+nbP+' produit'+(nbP>1?'s':'')+' · '+(s.parcelles||[]).length+' parc.</div>'
+        +'<div class="mv-t">Traitement '+npTag+abBadge+'</div>'
+        +'<div class="sc-meta"><span class="sc-date">'+_fmtDate(s.date)+'</span>'
+        +'<span class="sc-cond">'+_escHtml(s.conducteur||'—')+'</span></div>'
+        +'<div class="mv-l" style="margin-top:2px">'+nbP+' produit'+(nbP>1?'s':'')+' · '+(s.parcelles||[]).length+' parcelle'+((s.parcelles||[]).length>1?'s':'')+'</div>'
         +'</div>'
-        +'<div class="sc-right"><div class="sc-st sster">Terminé</div><div class="sc-pct">100%</div></div>'
+        +'<div class="sc-right">'+_mvBadge('Terminé','vert')+'</div>'
         +'</div>'
         +'</div>';
     }
-    const em=amap[s.activite]?.emoji||'🚜';
     const isEnc=s.statut==='En cours';
     const pct=s.avancement!=null?s.avancement:0;
     const skip=s.parcellesSkip||[];
@@ -1415,7 +1410,7 @@ function renderTracteur(){
     const doneSurf=actives.filter(p=>doneNoms.includes(p.nom)).reduce((acc,p)=>acc+(parseFloat(p.surface)||0),0);
     const canOpen=(isTractoriste()&&isEnc)||isAdm;
     const clk=canOpen?`onclick="openSessionDetail('${s.id}')" style="cursor:pointer"`:'';
-    const editBtn=isAdm?`<button class="sc-edit-btn" onclick="event.stopPropagation();openEditSession('${s.id}')" style="min-height:44px;min-width:44px">✏️</button>`:'';
+    const editBtn=isAdm?`<button class="mv-gh sc-edit-btn" onclick="event.stopPropagation();openEditSession('${s.id}')" title="Modifier" aria-label="Modifier">${_mvIcon('crayon',18)}</button>`:'';
     const encCls=isEnc?' scard-enc':'';
     // Badge tracteur
     const actDef=ACTIVITES.find(a=>a.nom===s.activite);
@@ -1424,15 +1419,17 @@ function renderTracteur(){
     const tracRep=s.tracteurId&&REPARATEUR[s.tracteurId];
     const tracBadgeCls=tracRep?'en-rep':isOverride?'override':'defaut';
     const tracNom=trac?_escHtml(trac.nom):'';
-    const tracBadge=tracNom?`<span class="sc-trac-badge ${tracBadgeCls}">🚜 ${tracNom}${isOverride?' ✱':''}</span>`:'';
-    const tracRepBadge=tracRep&&isEnc?`<span class="sc-trac-badge en-rep" style="margin-left:4px">⚠️ En répar.</span>`:'';
+    // ⚠️ « ✱ » RESTE : c'est un signe typographique de renvoi, comme un
+    //   asterisque de note de bas de page. Ce n'est pas un pictogramme.
+    const tracBadge=tracNom?`<span class="sc-trac-badge ${tracBadgeCls}">${tracNom}${isOverride?' ✱':''}</span>`:'';
+    const tracRepBadge=tracRep&&isEnc?_mvBadge('En réparation','rouge'):'';
     const overrideAlert=isOverride&&actDef?.tracteurDefautId?`<div class="sc-override-alert">✱ Tracteur modifié — défaut : ${_escHtml(TRACTEURS_LIST.find(t=>t.id===actDef.tracteurDefautId)?.nom||'—')}</div>`:'';
     // Hint tactile si en cours + tractoriste
     const hint=isEnc&&isTractoriste()?`<div class="scard-enc-hint">Tap pour enregistrer l'avancement →</div>`:'';
     return `<div class="scard${encCls}" ${clk}>`
-      +`<div class="sc-hd"><div class="sc-ico">${em}</div><div class="sc-info"><div class="sc-act">${_escHtml(s.activite)}</div><div class="sc-meta"><span class="sc-date">${_sessDates(s)}</span><span class="sc-cond">👤 ${_escHtml(s.conducteur)}</span>${tracBadge}${tracRepBadge}</div></div><div class="sc-right">${editBtn}<div class="sc-st ${isEnc?'ssenc':'sster'}">${s.statut}</div><div class="sc-pct">${pct}%</div></div></div>`
+      +`<div class="sc-hd"><div class="sc-info"><div class="mv-t" style="color:inherit">${_escHtml(s.activite)}</div><div class="sc-meta"><span class="sc-date">${_sessDates(s)}</span><span class="sc-cond">${_escHtml(s.conducteur)}</span>${tracBadge}${tracRepBadge}</div></div><div class="sc-right">${editBtn}${_mvBadge(s.statut, isEnc?'ambre':'vert')}<div class="mv-n" style="color:inherit;margin-top:4px">${pct}<span style="font-size:13px">%</span></div></div></div>`
       +`<div class="sc-bwrap"><div class="sc-blbl"><span>Avancement domaine</span><span>${doneSurf.toFixed(2)}/${totalSurf.toFixed(2)} ha</span></div><div class="sc-btrack"><div class="sc-bfill ${isEnc?'sc-bfill-enc':''}" style="width:${pct}%"></div></div></div>`
-      +(s.note?`<div style="padding:0 16px 12px;font-size:11px;color:${isEnc?'rgba(255,255,255,0.45)':'var(--texte-doux)'}">💬 ${_escHtml(s.note)}</div>`:'')
+      +(s.note?`<div style="padding:0 16px 12px;font-size:11px;color:${isEnc?'rgba(255,255,255,0.45)':'var(--texte-doux)'}">« ${_escHtml(s.note)} »</div>`:'')
       +overrideAlert+hint
     +`</div>`;
   };
@@ -1453,11 +1450,11 @@ function renderTracteur(){
     }).join('');
     return '<div class="scard scard-traitement">'
       +'<div class="sc-hd">'
-      +'<div class="sc-ico">🌿</div>'
+      +'<div class="sc-ico"></div>'
       +'<div class="sc-info">'
       +'<div class="sc-act">Traitement '+npTag+abBadge+'</div>'
-      +'<div class="sc-meta"><span class="sc-date">📅 '+_fmtDate(g.date)+'</span>'
-      +'<span class="sc-cond">👤 '+_escHtml(condTxt)+'</span>'+passTag+'</div>'
+      +'<div class="sc-meta"><span class="sc-date">'+_fmtDate(g.date)+'</span>'
+      +'<span class="sc-cond">'+_escHtml(condTxt)+'</span>'+passTag+'</div>'
       +'<div style="font-size:11px;color:var(--texte-doux);margin-top:2px">'+nbProd+' produit'+(nbProd>1?'s':'')+' · '+g.nbParc+' parc.</div>'
       +'</div>'
       +'<div class="sc-right"><div class="sc-st sster">Terminé</div><div class="sc-pct">100%</div></div>'
@@ -1872,8 +1869,7 @@ function openSessionDetail(id){
   if(!s.parcellesFaites)s.parcellesFaites=[];
   if(!s.parcellesSkip)s.parcellesSkip=[];
   const amap=ACTIVITES.reduce((m,a)=>{m[a.nom]=a;return m},{});
-  const em=amap[s.activite]?.emoji||'🚜';
-  document.getElementById('sd-titre').textContent=`${em} ${s.activite}`;
+  document.getElementById('sd-titre').textContent=s.activite;
   document.getElementById('sd-meta').textContent=`${_fmtDate(s.date)} · ${s.conducteur}`;
   renderSDTracEncart();
   closeSdTracPicker();
@@ -1885,7 +1881,7 @@ function openSessionDetail(id){
   var sdAdminZone=document.getElementById('sd-admin-zone');
   if(sdAdminZone)sdAdminZone.style.display=isAdmin()?'block':'none';
   var sdDelBtn=document.getElementById('sd-del-btn');
-  if(sdDelBtn){sdDelBtn.dataset.confirm='';sdDelBtn.textContent='🗑 Supprimer cette session';sdDelBtn.style.background='';sdDelBtn.style.color='';}
+  if(sdDelBtn){sdDelBtn.dataset.confirm='';sdDelBtn.textContent='Supprimer cette session';sdDelBtn.style.background='';sdDelBtn.style.color='';}
   _openOv('ovSessionDetail');
 }
 function updateSDSkipBtn(){
@@ -1914,7 +1910,7 @@ function renderSDParcelles(){
   }
   const btn=document.getElementById('sd-show-done-btn');
   if(btn)btn.textContent=sdShowDone?'Masquer faites':'Voir toutes';
-  if(toShow.length===0){document.getElementById('sd-parcelles').innerHTML='<div style="text-align:center;padding:24px;color:var(--texte-doux);font-size:13px">✅ Toutes les parcelles sont cochées</div>';_renderChronoBar();return;}
+  if(toShow.length===0){document.getElementById('sd-parcelles').innerHTML='<div style="text-align:center;padding:24px;color:var(--texte-doux);font-size:13px">Toutes les parcelles sont cochées</div>';_renderChronoBar();return;}
   // Activité courante pour savoir si il y a un champ custom
   var act=ACTIVITES.find(function(a){return a.nom===s.activite;});
   var hasChamp=!!(act&&act.champCustom&&act.champCustom.label);
@@ -2013,7 +2009,7 @@ function toggleSessionParcelle(nom,row){
     // Ouvrir overlay de saisie
     _ocvNomParcelle=nom;
     document.getElementById('ocv-titre').textContent='Valider — '+nom;
-    document.getElementById('ocv-sub').textContent=(act.emoji||'🚜')+' '+s.activite;
+    document.getElementById('ocv-sub').textContent=(act.emoji||'')+' '+s.activite;
     document.getElementById('ocv-label').textContent=act.champCustom.label+' *';
     var ocvVal=document.getElementById('ocv-val');
     ocvVal.type=act.champCustom.type==='nombre'?'number':'text';
@@ -2047,7 +2043,7 @@ function confirmerValidationChamp(){
   _ocvNomParcelle=null;
   _closeOv(null,'ovChampValidation');
   _saveData('sessions');renderSessionProgress();renderSDParcelles();
-  showToast(nomAff+' validée ✓','#3D6B27');
+  showToast(nomAff+' validée','#3D6B27');
 }
 function toggleSessionSkip(nom){
   const s=SESSIONS.find(x=>x.id===window.tracSessionId);if(!s)return;
@@ -2078,19 +2074,19 @@ function closeSessionDetail(){
   _chronoFinalizeOnClose();
   _closeOv(null,'ovSessionDetail');
   renderTracteur();
-  showToast('Passage enregistré ✓','#3D6B27');
+  showToast('Passage enregistré','#3D6B27');
 }
 function deleteSessionFromDetail(btn){
   if(!isAdmin())return;
   if(btn.dataset.confirm!=='1'){
     btn.dataset.confirm='1';
-    btn.textContent='⚠️ Confirmer la suppression';
+    btn.textContent='Confirmer la suppression';
     btn.style.background='var(--rouge)';
     btn.style.color='white';
     setTimeout(function(){
       if(btn.dataset.confirm==='1'){
         btn.dataset.confirm='';
-        btn.textContent='🗑 Supprimer cette session';
+        btn.textContent='Supprimer cette session';
         btn.style.background='';
         btn.style.color='';
       }
@@ -2162,19 +2158,19 @@ function saveEditSession(){
   _saveData('sessions');
   _closeOv(null,'ovEditSession');
   renderTracteur();
-  showToast('Session modifiée ✓','#3D6B27');
+  showToast('Session modifiée','#3D6B27');
 }
 function confirmDeleteSession(btn){
   if(btn.dataset.confirm==='1'){
     deleteSession();
   } else {
     btn.dataset.confirm='1';
-    btn.textContent='⚠️ Confirmer la suppression';
+    btn.textContent='Confirmer la suppression';
     btn.style.background='var(--rouge)';
     btn.style.color='white';
     setTimeout(function(){
       btn.dataset.confirm='';
-      btn.textContent='🗑 Supprimer cette session';
+      btn.textContent='Supprimer cette session';
       btn.style.background='';
       btn.style.color='';
     }, 3000);
@@ -2189,7 +2185,7 @@ function deleteSession(){
   const idx=SESSIONS.findIndex(x=>x.id===id);
   if(navigator.vibrate)navigator.vibrate([80,60,80]);
   if(idx>=0)SESSIONS.splice(idx,1);
-  _saveData('sessions', '🗑️ Session supprimée');
+  _saveData('sessions', 'Session supprimée');
   document.getElementById('ovEditSession').classList.remove('open');
   renderTracteur();
 }
@@ -2238,12 +2234,11 @@ function _openRepBlock(actNom,defTracId){
   var trac=TRACTEURS_LIST.find(function(t){return t.id===defTracId;});
   var rep=REPARATEUR[defTracId]||{};
   // Titre
-  var em=act?act.emoji:'🚜';
-  document.getElementById('rb-titre').textContent=em+' '+actNom;
+  document.getElementById('rb-titre').textContent=actNom;
   document.getElementById('rb-sub').textContent=(trac?trac.nom:'')+(trac&&trac.modele?' — '+trac.modele:'')+' est chez le réparateur';
   // Info répar
   var infoEl=document.getElementById('rb-info');
-  infoEl.innerHTML='<div style="font-size:12px;color:var(--rouge,#E07070);font-weight:600;margin-bottom:4px">🔧 '+_escHtml(rep.motif||'Réparation en cours')+'</div>'
+  infoEl.innerHTML='<div style="font-size:12px;color:var(--rouge,#E07070);font-weight:600;margin-bottom:4px">'+_escHtml(rep.motif||'Réparation en cours')+'</div>'
     +'<div style="font-size:11px;color:rgba(255,255,255,0.45)">Depuis le '+_fmtDate(rep.depuis||'')+(rep.prevu_retour?' · Retour prévu le '+_fmtDate(rep.prevu_retour):'')+'</div>';
   // Liste alternatifs
   var eligible=actNom==='Traitement'
@@ -2259,7 +2254,7 @@ function _openRepBlock(actNom,defTracId){
       +'<div class="sd-trac-sheet-radio"></div>'
       +'<div style="flex:1;min-width:0">'
         +'<div style="font-size:14px;font-weight:500;color:'+(rep2?'#E07070':'rgba(255,255,255,0.85)')+'">'+_escHtml(t.nom)+(t.modele?'<span style="font-weight:400;font-size:12px;margin-left:6px;color:rgba(255,255,255,0.4)">'+_escHtml(t.modele)+'</span>':'')+' </div>'
-        +'<div style="font-size:11px;margin-top:2px;color:'+col+'">'+_escHtml(t.type)+(rep2?' · <span style="color:var(--rouge,#E07070)">⚠️ En répar.</span>':'')+'</div>'
+        +'<div style="font-size:11px;margin-top:2px;color:'+col+'">'+_escHtml(t.type)+(rep2?' · <span style="color:var(--rouge,#E07070)">En répar.</span>':'')+'</div>'
       +'</div>'
     +'</div>';
   }).join('');
@@ -2276,7 +2271,7 @@ function _rbPick(el,tracId,actNom,defTracId){
     var sel=b.dataset.tracid===tracId;
     b.classList.toggle('sel',sel);
     var radio=b.querySelector('.sd-trac-sheet-radio');
-    if(radio){radio.textContent=sel?'✓':'';radio.style.background=sel?'var(--acier)':'transparent';radio.style.borderColor=sel?'var(--acier)':'rgba(255,255,255,0.2)';}
+    if(radio){window._mvSetIcon(radio, sel?'check':'', 15);radio.style.background=sel?'var(--acier)':'transparent';radio.style.borderColor=sel?'var(--acier)':'rgba(255,255,255,0.2)';}
   });
   // Avertissement si choix lui-même en répar
   var rep=REPARATEUR[tracId];
@@ -2363,10 +2358,10 @@ function renderSDTracEncart(){
   encart.style.display='flex';
   encart.innerHTML=dot
     +'<div class="sd-trac-encart-info">'
-      +'<div class="'+nomCls+'">'+tracNomAff+(tracRep?' ⚠️':'')+'</div>'
+      +'<div class="'+nomCls+'">'+tracNomAff+(tracRep?'':'')+'</div>'
       +'<div class="sd-trac-encart-sub">'+sub+'</div>'
     +'</div>'
-    +'<button class="'+btnCls+'" onclick="openSdTracPicker()">🔄 Changer</button>';
+    +'<button class="'+btnCls+'" onclick="openSdTracPicker()">Changer</button>';
 }
 
 function openSdTracPicker(){
@@ -2377,8 +2372,7 @@ function openSdTracPicker(){
   var defId=act?act.tracteurDefautId:'';
   var actNom=s.activite;
   // Sous-titre
-  var em=act?act.emoji:'🚜';
-  document.getElementById('sd-picker-sub').textContent='Session en cours · '+em+' '+actNom;
+  document.getElementById('sd-picker-sub').textContent='Session en cours · '+actNom;
   // Liste tracteurs éligibles
   var eligible=actNom==='Traitement'
     ?TRACTEURS_LIST.filter(function(t){return t.traitementOnly;})
@@ -2392,10 +2386,10 @@ function openSdTracPicker(){
     var rep=REPARATEUR[t.id];
     var isDefaut=t.id===defId;
     return '<div class="sd-trac-sheet-btn'+(sel?' sel':'')+'" data-tracid="'+t.id+'" onclick="_sdPickTrac(this,\''+t.id+'\')">'
-      +'<div class="sd-trac-sheet-radio"'+(sel?' style="border-color:var(--acier);background:var(--acier)"':'')+'>'+( sel?'✓':'')+'</div>'
+      +'<div class="sd-trac-sheet-radio"'+(sel?' style="border-color:var(--acier);background:var(--acier)"':'')+'>'+(sel?_mvIcon('check',16):'')+'</div>'
       +'<div style="flex:1;min-width:0">'
         +'<div style="font-size:14px;font-weight:'+(sel?'700':'500')+';color:'+(rep?'#E07070':sel?'var(--acier)':'rgba(255,255,255,0.8)')+'">'+_escHtml(t.nom)+(t.modele?'<span style="font-weight:400;font-size:12px;margin-left:6px;color:rgba(255,255,255,0.4)">'+_escHtml(t.modele)+'</span>':'')+'</div>'
-        +'<div style="font-size:11px;margin-top:2px;display:flex;gap:6px"><span style="color:'+col+'">'+t.type+'</span>'+(isDefaut?'<span style="color:rgba(255,255,255,0.3)">· Défaut '+actNom+'</span>':'')+(rep?'<span style="color:var(--rouge,#E07070)">· ⚠️ En répar.</span>':'')+'</div>'
+        +'<div style="font-size:11px;margin-top:2px;display:flex;gap:6px"><span style="color:'+col+'">'+t.type+'</span>'+(isDefaut?'<span style="color:rgba(255,255,255,0.3)">· Défaut '+actNom+'</span>':'')+(rep?'<span style="color:var(--rouge,#E07070)">· En répar.</span>':'')+'</div>'
       +'</div>'
       +(sel?'<span style="font-size:10px;font-weight:600;padding:2px 8px;border-radius:6px;background:rgba(255,255,255,0.08);color:rgba(255,255,255,0.4)">Actuel</span>':'')
     +'</div>';
@@ -2416,7 +2410,7 @@ function _sdPickTrac(el,tracId){
     var sel=b.dataset.tracid===tracId;
     b.classList.toggle('sel',sel);
     var radio=b.querySelector('.sd-trac-sheet-radio');
-    if(radio){radio.textContent=sel?'✓':'';radio.style.background=sel?'var(--acier)':'transparent';radio.style.borderColor=sel?'var(--acier)':'rgba(255,255,255,0.2)';}
+    if(radio){window._mvSetIcon(radio, sel?'check':'', 15);radio.style.background=sel?'var(--acier)':'transparent';radio.style.borderColor=sel?'var(--acier)':'rgba(255,255,255,0.2)';}
   });
   // Warning si en répar
   var rep=REPARATEUR[tracId];
@@ -2488,13 +2482,13 @@ function _fillTracPickWithId(pfx, actNom, selId, defId){
     var isDefaut=t.id===defId;
     return '<div class="trac-sel-btn'+(sel?' selected':'')+'" data-pfx="'+pfx+'" data-tracid="'+t.id+'" data-defid="'+defId+'"'+(sel?' style="border-color:'+col+';background:'+col+'18"':'')+'>'+
       '<div style="display:flex;align-items:center;gap:10px">'+
-        '<div class="trac-sel-radio"'+(sel?' style="border-color:'+col+';background:'+col+'"':'')+'>'+( sel?'✓':'')+'</div>'+
+        '<div class="trac-sel-radio"'+(sel?' style="border-color:'+col+';background:'+col+'"':'')+'>'+(sel?_mvIcon('check',16):'')+'</div>'+
         '<div>'+
           '<div style="font-size:13px;font-weight:'+(sel?'700':'500')+';color:'+(sel?'var(--texte)':'var(--texte-doux)')+'">'+_escHtml(t.nom)+' — '+_escHtml(t.modele)+'</div>'+
           '<div style="font-size:10px;color:'+col+'">'+t.type+(isDefaut?' · Défaut pour '+actNom:'')+'</div>'+
         '</div>'+
       '</div>'+
-      (rep?'<span style="font-size:10px;font-weight:600;background:var(--rouge-pale);color:var(--rouge);border-radius:6px;padding:2px 8px">⚠️ En répar.</span>':'')+
+      (rep?'<span style="font-size:10px;font-weight:600;background:var(--rouge-pale);color:var(--rouge);border-radius:6px;padding:2px 8px">En répar.</span>':'')+
       ((!rep&&isDefaut)?'<span style="font-size:10px;background:var(--acier-pale);color:var(--acier-med);border-radius:6px;padding:2px 8px">Défaut</span>':'')+
     '</div>';
   }).join('');
@@ -2527,7 +2521,7 @@ function _updateTracRepAlert(pfx, id){
   var trac=TRACTEURS_LIST.find(function(t){return t.id===id;});
   if(rep&&trac){
     alertEl.style.display='block';
-    alertEl.innerHTML='⚠️ <strong>'+_escHtml(trac.nom)+'</strong> est actuellement chez le réparateur ('+_escHtml(rep.motif)+'). La session sera créée et signalée dans les exports.';
+    alertEl.innerHTML='<strong>'+_escHtml(trac.nom)+'</strong> est actuellement chez le réparateur ('+_escHtml(rep.motif)+'). La session sera créée et signalée dans les exports.';
   } else {
     alertEl.style.display='none';
   }
@@ -2560,7 +2554,7 @@ function saveSession(){
   _saveData('sessions');
   _closeOv(null,'ovSession');
   renderTracteur();
-  showToast('Session '+(a||'')+ ' démarrée ✓','#2C3E50');
+  showToast('Session '+(a||'')+ ' démarrée','#2C3E50');
 }
 function saveActivite(){
   if(!isAdmin()){showToast('Réservé aux administrateurs','#C0392B');return;}
@@ -2573,7 +2567,10 @@ function saveActivite(){
   var champType=document.getElementById('new-act-champ-type-val').value||'nombre';
   var champCustom=(champActif&&champLabel)?{label:champLabel,type:champType}:null;
   var emojiBtn=document.getElementById('new-act-emoji-btn');
-  var emoji=emojiBtn?emojiBtn.textContent.trim():'🚜';
+  // Le bouton porte desormais une ICONE (lot DS-1) : son textContent est vide.
+  // La valeur enregistree reste un emoji, rangee dans data-emoji — les <option>
+  // de ce module ne peuvent pas contenir de SVG. Le repli couvre l'ancien HTML.
+  var emoji=(emojiBtn&&(emojiBtn.dataset.emoji||emojiBtn.textContent.trim()))||'\u{1F69C}';
   ACTIVITES.push({nom:nom,emoji:emoji,tracteurDefautId:tracId,champCustom:champCustom});
   window.ACTIVITES=ACTIVITES;
   _saveData('activites');
@@ -2581,7 +2578,7 @@ function saveActivite(){
   document.getElementById('new-act').value='';
   renderActTracList();
   renderTracteur();
-  showToast('Activité "'+nom+'" créée ✓','#3D6B27');
+  showToast('Activité "'+nom+'" créée','#3D6B27');
 }
 function openAddConducteur(){
   if(typeof isAdmin==='function' && !isAdmin()){ if(window.showToast)showToast('Réservé aux administrateurs','#C0392B'); return; }
@@ -2600,13 +2597,13 @@ function saveConducteur(){
 function editCond(nom){
   if(!isAdmin()){return;} // lecture seule pour tous sauf admin
   const c=CONDUCTEURS.find(x=>x.nom===nom);if(!c)return;
-  document.getElementById('ec-title').textContent='✏️ '+nom;
+  document.getElementById('ec-title').textContent=nom;
   document.getElementById('ec-nom').value=nom;
   document.querySelectorAll('#ec-st-pick .pchk').forEach(el=>{el.classList.toggle('sel',el.dataset.val===c.statut);el.classList.toggle('acre',el.dataset.val===c.statut);});
   document.getElementById('ec-st').value=c.statut;
   _openOv('ovEditCond');
 }
-function saveEditCond(){if(!isAdmin())return;const nom=document.getElementById('ec-nom').value;const c=CONDUCTEURS.find(x=>x.nom===nom);if(c)c.statut=document.getElementById('ec-st').value;_saveData('conducteurs','🚜 Conducteur mis à jour');document.getElementById('ovEditCond').classList.remove('open');renderTracteur();}
+function saveEditCond(){if(!isAdmin())return;const nom=document.getElementById('ec-nom').value;const c=CONDUCTEURS.find(x=>x.nom===nom);if(c)c.statut=document.getElementById('ec-st').value;_saveData('conducteurs','Conducteur mis à jour');document.getElementById('ovEditCond').classList.remove('open');renderTracteur();}
 function deleteCond(){const nom=document.getElementById('ec-nom').value;if(nom==='Nico'){showToast('Impossible — admin protégé','#C0392B');return;}_openConfirmDel('Supprimer '+nom+' ?','Ce conducteur sera retiré de la liste.',function(){CONDUCTEURS=CONDUCTEURS.filter(c=>c.nom!==nom);window.CONDUCTEURS=CONDUCTEURS;_saveData('conducteurs');_closeOv(null,'ovEditCond');renderTracteur();showToast(nom+' supprimé','#C0392B');});}
 
 

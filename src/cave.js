@@ -13,7 +13,8 @@
 //
 // \u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550
 
-import { isAdmin, isSaisonnier, canWrite, showToast, showSyncBadge, _escHtml } from './utils.js';
+import { isAdmin, isSaisonnier, canWrite, showToast, showSyncBadge, _escHtml,
+         _mvBadge, _mvIcon } from './utils.js';
 
 const DEBUG = location.hostname === 'localhost' || location.hostname === '127.0.0.1';
 
@@ -1698,8 +1699,8 @@ function _vendFrDate(s){ if(!s) return ''; var p=String(s).split('-'); return p.
 function _vendFaPct(d){ if(!d) return 0; return Math.max(0,Math.min(100,Math.round((1085-d)/(1085-990)*100))); }
 function _vendHlRange(kg){ var c=_vendCfg(); if(!kg) return '0'; return (kg/c.ratio_max).toFixed(1)+'–'+(kg/c.ratio_min).toFixed(1); }
 function _vendEtatBadge(p){ p=parseInt(p)||0;
-  if(p>=80) return '<span class="mvv-b san-hi">✔ Sanitaire '+p+'%</span>';
-  if(p>=55) return '<span class="mvv-b san-mid">◐ Sanitaire '+p+'%</span>';
+  if(p>=80) return _mvBadge('Sanitaire '+p+' %','vert');
+  if(p>=55) return _mvBadge('Sanitaire '+p+' %','ambre');
   return '<span class="mvv-b san-lo">▲ Tri renforcé '+p+'%</span>';
 }
 var _VEND_STAT={setup:{i:0,lbl:'Setup'},mpf:{i:1,lbl:'MPF'},fa:{i:2,lbl:'FA'},decuvage:{i:3,lbl:'Décuvage'},fml:{i:4,lbl:'FML'},termine:{i:5,lbl:'Terminé'}};
@@ -1766,10 +1767,10 @@ function _vendCockpitHtml(){
     +'<div class="mvv-health"><div class="mvv-health-track" id="mvv-health-track"></div><div class="mvv-health-lbl" id="mvv-health-lbl"></div></div>'
     +'</div>'
     +'<div class="mvu-tabs mvu-sub">'
-    +'<button class="mvu-tab" id="mvv-tab-ana" onclick="switchVendOng(\'ana\')"><span class="t-ico">🔬</span> Analyses</button>'
-    +'<button class="mvu-tab" id="mvv-tab-rec" onclick="switchVendOng(\'rec\')"><span class="t-ico">🍇</span> Récoltes</button>'
-    +'<button class="mvu-tab" id="mvv-tab-cuves" onclick="switchVendOng(\'cuves\')"><span class="t-ico">🫗</span> Cuvier</button>'
-    +'<button class="mvu-tab" id="mvv-tab-param" onclick="switchVendOng(\'param\')"><span class="t-ico">⚙️</span> Réglages</button>'
+    +'<button class="mvu-tab" id="mvv-tab-ana" onclick="switchVendOng(\'ana\')"><span class="t-ico"></span> Analyses</button>'
+    +'<button class="mvu-tab" id="mvv-tab-rec" onclick="switchVendOng(\'rec\')"><span class="t-ico"></span> Récoltes</button>'
+    +'<button class="mvu-tab" id="mvv-tab-cuves" onclick="switchVendOng(\'cuves\')"><span class="t-ico"></span> Cuvier</button>'
+    +'<button class="mvu-tab" id="mvv-tab-param" onclick="switchVendOng(\'param\')"><span class="t-ico"></span> Réglages</button>'
     +'</div>';
 }
 function _vendRefreshCockpit(){
@@ -1836,7 +1837,7 @@ function renderVendRec() {
       +'<div><div class="mvv-camp-n">'+(kg/1000).toFixed(1)+'<span class="u">t</span></div><div class="mvv-camp-cl">Récoltés</div></div>'
       +'<div><div class="mvv-camp-n">'+(kgCuve/cfg.ratio_max).toFixed(0)+'<span class="u">hL</span></div><div class="mvv-camp-cl">Estimés cuvés</div></div>'
       +'</div>'
-      +(kgVendu>0?'<div class="mvv-camp-sold">🤝 '+kgVendu.toLocaleString('fr-FR')+' kg vendus en raisin (non vinifiés)</div>':'')
+      +(kgVendu>0?'<div class="mvv-camp-sold">'+kgVendu.toLocaleString('fr-FR')+' kg vendus en raisin (non vinifiés)</div>':'')
       +'</div>';
     window._mvGraphOublier('#mvg-ap-');
     html+='<div class="mvmat-card"><div class="mvmat-ttl">Apports par parcelle</div>'
@@ -1851,7 +1852,7 @@ function renderVendRec() {
         +'<div class="mvv-rec-mt">'+_vendFrDate(r.date)+' · '+(r.nb_caisses||0)+' caisses</div>'
         +'<div class="mvv-rec-badges">'+_vendEtatBadge(r.etat_pct||0)
         +'<span class="mvv-b er">'+_vendErLbl(r)+'</span>'
-        +(r.client?'<span class="mvv-b vendu">🤝 '+_escHtml(r.client)+'</span>':(r.vendu?'<span class="mvv-b vendu">🤝 Vendu raisin</span>':''))
+        +(r.client?_mvBadge(r.client,'neutre'):(r.vendu?_mvBadge('Vendu raisin','neutre'):''))
         +'</div></div>'
         +'<div class="mvv-rec-r">'
         +(_recSold(r)?'<div class="mvv-rec-hl sold">vendu</div>':'<div class="mvv-rec-hl">'+_vendHlRange(kg_)+'<span class="su">hL est.</span></div>')
@@ -1860,7 +1861,7 @@ function renderVendRec() {
         +'</div></div>';
     });
   } else {
-    html+='<div class="mvv-empty"><div class="mvv-empty-ic">🍇</div><div class="mvv-empty-tx">Aucune récolte saisie.<br>Pesez votre première benne pour lancer la campagne.</div></div>';
+    html+='<div class="mvv-empty"><div class="mvv-empty-ic">'+_mvIcon('raisin',40)+'</div><div class="mvv-empty-tx">Aucune récolte saisie.<br>Pesez votre première benne pour lancer la campagne.</div></div>';
   }
   html+=_vendRendHistHtml();
   if(canEdit) html+='<div class="mvv-fab"><button class="mvv-fab-btn" onclick="openOvVendRec(null)">＋ Nouvelle récolte</button></div>';
@@ -1885,7 +1886,7 @@ function renderVendCuves() {
   var due=actives.filter(function(c){return _vendIsActive(c)&&_vendStale(c)>=1;});
   var h=_caveSaisBanner();
   if(due.length){
-    h+='<div class="mvv-alert"><div class="mvv-alert-t">🍇 '+due.length+' cuve'+(due.length>1?'s':'')+' à mesurer</div>'
+    h+='<div class="mvv-alert"><div class="mvv-alert-t">'+due.length+' cuve'+(due.length>1?'s':'')+' à mesurer</div>'
       +'<div class="mvv-alert-d">En fermentation active, un relevé de densité par jour suit la cinétique et anticipe un arrêt.</div>'
       +'<div class="mvv-alert-chips">'+due.map(function(c){
         return '<button class="mvv-alert-chip" onclick="openOvVendMesure(\''+c.id+'\')">'+_escHtml(c.nom)+' <small>· '+_vendStale(c)+' j</small></button>';
@@ -1909,7 +1910,7 @@ function renderVendCuves() {
         +(c.parcelles&&c.parcelles.length?'<div class="mvv-cuve-par">'+c.parcelles.map(function(p){return _escHtml(p);}).join(' · ')+'</div>':'')
         +'</div>'
         +'<div class="mvv-vol"><div class="mvv-vol-n">'+(c.volume_hl||0)+'</div><div class="mvv-vol-u">hL</div>'
-        +(canEdit?'<button class="mvv-edit" onclick="event.stopPropagation();openOvVendCuve(\''+c.id+'\')">✎</button>':'')
+        +(canEdit?'<button class="mv-gh mvv-edit" onclick="event.stopPropagation();openOvVendCuve(\''+c.id+'\')" title="Modifier" aria-label="Modifier">'+_mvIcon('crayon',18)+'</button>':'')
         +'</div></div>';
       h+=_vendStepper(c.statut);
       if(last && active){
@@ -1927,14 +1928,14 @@ function renderVendCuves() {
           h+='<div id="mvg-fa-'+_mvgId(c.id)+'"></div>';
         }
         h+='<div class="mvv-chips">'
-          +(last.temp_c!=null?'<span class="mvv-chip '+_vendTempCls(last.temp_c)+'">'+(last.temp_c>=30?'🔥':'🌡')+' '+last.temp_c+'<span class="u">°C</span></span>':'')
-          +(last.remontages>0?'<span class="mvv-chip">🔄 '+last.remontages+'<span class="u">remont.</span></span>':'')
-          +(last.pigeages>0?'<span class="mvv-chip">⬇ '+last.pigeages+'<span class="u">pigeage</span></span>':'')
+          +(last.temp_c!=null?'<span class="mvv-chip '+_vendTempCls(last.temp_c)+'">'+last.temp_c+'<span class="u">°C</span></span>':'')
+          +(last.remontages>0?'<span class="mvv-chip">'+last.remontages+'<span class="u">remont.</span></span>':'')
+          +(last.pigeages>0?'<span class="mvv-chip">'+last.pigeages+'<span class="u">pigeage</span></span>':'')
           +'</div>';
         var rc=stale===0?'ok':stale===1?'watch':'late';
-        var rt=stale===0?'⏱ Mesuré aujourd\'hui':stale===1?'⏱ Dernier relevé hier':'<span class="pulse">⚠</span> '+stale+' j sans relevé — à contrôler';
+        var rt=stale===0?'Mesuré aujourd\'hui':stale===1?'Dernier relevé hier':'<span class="pulse"></span> '+stale+' j sans relevé — à contrôler';
         h+='<div class="mvv-recency '+rc+'">'+rt+'</div>';
-        if(canEdit) h+='<button class="mvv-act-btn measure" onclick="openOvVendMesure(\''+c.id+'\')">📊 Saisir une mesure</button>';
+        if(canEdit) h+='<button class="mvv-act-btn measure" onclick="openOvVendMesure(\''+c.id+'\')">Saisir une mesure</button>';
         h+=_vendOpsSummary(c);
         if(canEdit) h+=_vendActRow(c);
       } else if(c.statut==='setup'){
@@ -1942,14 +1943,14 @@ function renderVendCuves() {
         if(canEdit) h+='<button class="mvv-act-btn ghost" onclick="openOvVendCuve(\''+c.id+'\')">Démarrer la fermentation</button>';
         h+=_vendOpsSummary(c);
       } else {
-        h+='<div class="mvv-done-tag">✔ '+_vendStatLbl(c.statut)+' — cuvaison terminée</div>';
+        h+='<div class="mvv-done-tag">'+_mvBadge(_vendStatLbl(c.statut)+' — cuvaison terminée','vert')+'</div>';
         h+=_vendOpsSummary(c);
         if(canEdit) h+=_vendActRow(c);
       }
       h+='</div>';
     });
   } else if(!decuvees.length){
-    h+='<div class="mvv-empty"><div class="mvv-empty-ic">🫗</div><div class="mvv-empty-tx">Aucune cuve de vinification.<br>Créez votre première cuve pour suivre la fermentation.</div></div>';
+    h+='<div class="mvv-empty"><div class="mvv-empty-ic">'+_mvIcon('verre',40)+'</div><div class="mvv-empty-tx">Aucune cuve de vinification.<br>Créez votre première cuve pour suivre la fermentation.</div></div>';
   }
   h+=_vendDecuveesSection(decuvees);
   if(canEdit) h+='<div class="mvv-fab"><button class="mvv-fab-btn" onclick="openOvVendCuve(null)">＋ Nouvelle cuve</button></div>';
@@ -1966,18 +1967,18 @@ function renderVendParam() {
   var ex=100*pck;
   var admin=(typeof isAdmin==='function'&&isAdmin());
   var html=_caveSaisBanner();
-  html+='<div class="mvv-set"><div class="mvv-set-t">⚖️ Pesée</div>'
+  html+='<div class="mvv-set"><div class="mvv-set-t">Pesée</div>'
     +'<div class="mvv-set-d">Poids moyen d\'une caisse de vendange, utilisé pour convertir les caisses en kilos.</div>'
     +'<div class="mvv-prow"><div class="mvv-prow-l">Poids par caisse</div><div style="display:flex;align-items:center;gap:7px"><input class="mvv-fi" id="vpfi-pck" type="number" min="10" max="60" value="'+pck+'"><span style="font-size:11px;color:var(--texte-doux,#5F5F5F)">kg</span></div></div></div>';
-  html+='<div class="mvv-set"><div class="mvv-set-t">💧 Rendement jus</div>'
+  html+='<div class="mvv-set"><div class="mvv-set-t">Rendement jus</div>'
     +'<div class="mvv-set-d">Kilos de raisin pour produire 1 hL de jus. Standard Bourgogne rouge : 130–140 kg/hL.</div>'
     +'<div class="mvv-prow"><div class="mvv-prow-l">Ratio minimum</div><div style="display:flex;align-items:center;gap:7px"><input class="mvv-fi" id="vpfi-rmin" type="number" min="80" max="200" value="'+rMin+'"><span style="font-size:11px;color:var(--texte-doux,#5F5F5F)">kg/hL</span></div></div>'
     +'<div class="mvv-prow"><div class="mvv-prow-l">Ratio maximum</div><div style="display:flex;align-items:center;gap:7px"><input class="mvv-fi" id="vpfi-rmax" type="number" min="80" max="200" value="'+rMax+'"><span style="font-size:11px;color:var(--texte-doux,#5F5F5F)">kg/hL</span></div></div>'
     +'<div class="mvv-preview">100 caisses de '+pck+' kg → <b>'+(ex/rMax).toFixed(1)+'–'+(ex/rMin).toFixed(1)+' hL</b></div></div>';
-  html+='<div class="mvv-set"><div class="mvv-set-t">🍬 Chaptalisation</div>'
+  html+='<div class="mvv-set"><div class="mvv-set-t">Chaptalisation</div>'
     +'<div class="mvv-set-d">Sucre pour enrichir de 1° d’alcool potentiel. Standard : 16,83 g/L (≈ 17 g/L). Utilisé par l’assistant d’opération sur cuve.</div>'
     +'<div class="mvv-prow"><div class="mvv-prow-l">Sucre par degré</div><div style="display:flex;align-items:center;gap:7px"><input class="mvv-fi" id="vpfi-spd" type="number" min="15" max="20" step="0.01" value="'+cfg.sucre_par_degre+'"><span style="font-size:11px;color:var(--texte-doux,#5F5F5F)">g/L</span></div></div></div>';
-  html+='<div class="mvv-set"><div class="mvv-set-t">🤝 Clients vrac</div>'
+  html+='<div class="mvv-set"><div class="mvv-set-t">Clients vrac</div>'
     +'<div class="mvv-set-d">Acheteurs de raisin en vrac, avec leur poids par caisse. Sert à convertir les caisses vendues et suivre les volumes livrés.</div>'
     +(canWrite()?'<button class="mvv-save ghost2" style="margin-top:12px" onclick="openVendClients()">Gérer les clients ('+_vendClients().length+')</button>':'')+'</div>';
   if(admin) html+='<button class="mvv-save" onclick="_vendSaveParam()">Enregistrer les paramètres</button>';
@@ -2417,8 +2418,8 @@ function openVendDecuvage(cuveId){
     _vendDecChoix=window._mvFutProposer(window._mvFutStock(window.INTRANTS), _vendDecNb);
   }
   var html=''
-    +'<div class="mvv-sheet-hd"><div class="mvv-sheet-t">🍷 Décuver → Le Chai</div>'
-    +'<button class="mvv-sheet-x" onclick="_vendSheetClose()">✕</button></div>'
+    +'<div class="mvv-sheet-hd"><div class="mvv-sheet-t">Décuver → Le Chai</div>'
+    +'<button class="mv-gh mvv-sheet-x" onclick="_vendSheetClose()" title="Fermer" aria-label="Fermer">'+_mvIcon('croix',18)+'</button></div>'
     +'<div class="mvv-sheet-sub">La cuve sort du Cuvier et devient une cuvée en élevage dans « Le Chai ». Le vin en barrique commence son suivi d\'ouillage.</div>'
     +'<label class="mvv-flbl">Nom de la cuvée</label>'
     +'<input id="vdec-nom" class="mvv-tin" type="text" value="'+_escHtml(c.nom||'')+'">'
@@ -2537,36 +2538,35 @@ function saveVendDecuvage(){
   window.CAVE_ELEVAGE=CAVE_ELEVAGE;
   if(window.fbSave){ window.fbSave('cave_vendange',CAVE_VENDANGE); window.fbSave('cave_elevage',CAVE_ELEVAGE); }
   _vendSheetClose();
-  showToast('🍷 '+nom+' → Le Chai ('+nb+' barrique'+(nb>1?'s':'')+')'
+  showToast(nom+' → Le Chai ('+nb+' barrique'+(nb>1?'s':'')+')'
     +((_ton&&_ton.length)?' · sorties du parc':''),'#3D6B27');
   renderVendCuves();
 }
 
 // —— Opérations sur cuve (chaptalisation, saignée, thermo, levurage, nutriment, SO₂, délestage) ——
 var _VEND_OPS=[
-  {k:'chaptalisation',ic:'🍬',lbl:'Chaptalisation'},
-  {k:'saignee',ic:'🩸',lbl:'Saignée'},
-  {k:'refroidissement',ic:'❄️',lbl:'Refroidir'},
-  {k:'rechauffement',ic:'🔥',lbl:'Réchauffer'},
-  {k:'levurage',ic:'🧫',lbl:'Levurage'},
-  {k:'nutriment',ic:'💊',lbl:'Nutriment'},
-  {k:'so2',ic:'🧪',lbl:'SO₂'},
-  {k:'delestage',ic:'🔁',lbl:'Délestage'}
+  {k:'chaptalisation',lbl:'Chaptalisation'},
+  {k:'saignee',lbl:'Saignée'},
+  {k:'refroidissement',lbl:'Refroidir'},
+  {k:'rechauffement',lbl:'Réchauffer'},
+  {k:'levurage',lbl:'Levurage'},
+  {k:'nutriment',lbl:'Nutriment'},
+  {k:'so2',lbl:'SO₂'},
+  {k:'delestage',lbl:'Délestage'}
 ];
 var _vendOpType='chaptalisation', _vendOpCuveId=null;
 function _vendOpLbl(k){ var o=_VEND_OPS.find(function(x){return x.k===k;}); return o?o.lbl:k; }
-function _vendOpIc(k){ var o=_VEND_OPS.find(function(x){return x.k===k;}); return o?o.ic:'⚗️'; }
 function openVendOp(cuveId){
   if(!canWrite()) return;
   var c=(CAVE_VENDANGE.cuves_vinif||[]).find(function(x){return x.id===cuveId;});
   if(!c) return;
   _vendOpCuveId=cuveId; _vendOpType='chaptalisation';
   var chips=_VEND_OPS.map(function(o){
-    return '<button class="mvv-optab'+(o.k===_vendOpType?' on':'')+'" onclick="_vendOpSet(\''+o.k+'\')">'+o.ic+' '+o.lbl+'</button>';
+    return '<button class="mvv-optab'+(o.k===_vendOpType?' on':'')+'" onclick="_vendOpSet(\''+o.k+'\')">'+o.lbl+'</button>';
   }).join('');
   var html=''
-    +'<div class="mvv-sheet-hd"><div class="mvv-sheet-t">⚗️ Opération — '+_escHtml(c.nom)+'</div>'
-    +'<button class="mvv-sheet-x" onclick="_vendSheetClose()">✕</button></div>'
+    +'<div class="mvv-sheet-hd"><div class="mvv-sheet-t">Opération — '+_escHtml(c.nom)+'</div>'
+    +'<button class="mv-gh mvv-sheet-x" onclick="_vendSheetClose()" title="Fermer" aria-label="Fermer">'+_mvIcon('croix',18)+'</button></div>'
     +'<div class="mvv-optabs">'+chips+'</div>'
     +'<label class="mvv-flbl">Date</label><input id="vop-date" class="mvv-tin" type="date" value="'+new Date().toISOString().slice(0,10)+'">'
     +'<div id="vop-fields"></div>'
@@ -2592,7 +2592,7 @@ function _vendOpFields(c){
       +'<div class="mvv-bigcalc"><div class="mvv-bigcalc-n" id="vop-kg">—</div><div class="mvv-bigcalc-l">kg de sucre <span style="opacity:.6">· base '+spd+' g/L</span></div><div class="mvv-bigcalc-cum" id="vop-cum"></div></div>';
   } else if(_vendOpType==='saignee'){
     h='<label class="mvv-flbl">Volume saigné (hL)</label><input id="vop-vol" class="mvv-tin" type="number" value="0" min="0" max="'+vol+'" step="0.1">'
-      +'<div class="mvv-fnote">⚠️ Réduit le volume de la cuve (actuel : '+vol+' hL).</div>';
+      +'<div class="mvv-fnote">Réduit le volume de la cuve (actuel : '+vol+' hL).</div>';
   } else if(_vendOpType==='refroidissement'||_vendOpType==='rechauffement'){
     h='<label class="mvv-flbl">Température cible (°C)</label><input id="vop-temp" class="mvv-tin" type="number" value="" min="0" max="45" step="0.5" placeholder="ex. 18">';
   } else if(_vendOpType==='levurage'){
@@ -2658,7 +2658,7 @@ function saveVendOp(){
   window.CAVE_VENDANGE=CAVE_VENDANGE;
   if(window.fbSave) window.fbSave('cave_vendange',CAVE_VENDANGE);
   _vendSheetClose();
-  showToast('✅ '+_vendOpLbl(_vendOpType)+' enregistrée','#3D6B27');
+  showToast(_vendOpLbl(_vendOpType)+' enregistrée','#3D6B27');
   renderVendCuves();
 }
 function _vendOpsSummary(c){
@@ -2670,13 +2670,13 @@ function _vendOpsSummary(c){
   else if(last.type==='delestage') extra=' · '+(last.nb||1)+'×';
   else if(last.temp_c!=null) extra=' · '+last.temp_c+'°C';
   else if(last.dose!=null) extra=' · '+last.dose+' g/hL';
-  return '<div class="mvv-opslist">'+_vendOpIc(last.type)+' '+_vendOpLbl(last.type)+' <span class="u">'+_vendFrDate(last.date)+extra+'</span>'
+  return '<div class="mvv-opslist">'+_vendOpLbl(last.type)+' <span class="u">'+_vendFrDate(last.date)+extra+'</span>'
     +(ops.length>1?' <span class="u">· +'+(ops.length-1)+' autre'+(ops.length>2?'s':'')+'</span>':'')+'</div>';
 }
 function _vendActRow(c){
   return '<div class="mvv-actrow">'
-    +'<button class="mvv-act2" onclick="openVendOp(\''+c.id+'\')">⚗️ Opération</button>'
-    +'<button class="mvv-act2 dec" onclick="openVendDecuvage(\''+c.id+'\')">🍷 Décuver</button></div>';
+    +'<button class="mvv-act2" onclick="openVendOp(\''+c.id+'\')">Opération</button>'
+    +'<button class="mvv-act2 dec" onclick="openVendDecuvage(\''+c.id+'\')">Décuver</button></div>';
 }
 function _vendDecuveesSection(list){
   if(!list.length) return '';
@@ -2684,7 +2684,7 @@ function _vendDecuveesSection(list){
     var d=c.decuvage||{};
     return '<div class="mvv-decrow"><span>'+_escHtml(c.nom)+'</span><span class="u">'+(d.date?_vendFrDate(d.date):'')+' · '+(c.volume_hl||0)+' hL → Le Chai</span></div>';
   }).join('');
-  return '<details class="mvv-decwrap"><summary class="mvv-decsum">🍷 Décuvées ('+list.length+')</summary>'+rows+'</details>';
+  return '<details class="mvv-decwrap"><summary class="mvv-decsum">Décuvées ('+list.length+')</summary>'+rows+'</details>';
 }
 
 // —— Gestionnaire de clients vrac ——
@@ -2696,12 +2696,12 @@ function openVendClients(){
     var tot=totBy[c.nom]||0;
     return '<div class="mvv-clrow"><div style="flex:1;min-width:0"><div class="mvv-clrow-nm">'+_escHtml(c.nom)+'</div>'
       +'<div class="mvv-clrow-mt">'+(c.poids_caisse_kg||25)+' kg/caisse'+(tot>0?' · '+tot.toLocaleString('fr-FR')+' kg livrés':'')+'</div></div>'
-      +'<div class="mvv-clrow-r"><button class="mvv-icbtn" onclick="openVendClient('+i+')">✎</button>'
-      +'<button class="mvv-icbtn" onclick="deleteVendClient('+i+')">🗑</button></div></div>';
+      +'<div class="mvv-clrow-r"><button class="mv-gh mvv-icbtn" onclick="openVendClient('+i+')" title="Modifier" aria-label="Modifier">'+_mvIcon('crayon',18)+'</button>'
+      +'<button class="mv-gh mv-gh-rouge mvv-icbtn" onclick="deleteVendClient('+i+')" title="Supprimer" aria-label="Supprimer">'+_mvIcon('corbeille',18)+'</button></div></div>';
   }).join(''):'<div class="mvv-fnote">Aucun client vrac. Ajoutez-en un pour tracer les ventes de raisin en vrac et leur poids par caisse.</div>';
   var html=''
-    +'<div class="mvv-sheet-hd"><div class="mvv-sheet-t">🤝 Clients vrac</div>'
-    +'<button class="mvv-sheet-x" onclick="_vendSheetClose()">✕</button></div>'
+    +'<div class="mvv-sheet-hd"><div class="mvv-sheet-t">Clients vrac</div>'
+    +'<button class="mv-gh mvv-sheet-x" onclick="_vendSheetClose()" title="Fermer" aria-label="Fermer">'+_mvIcon('croix',18)+'</button></div>'
     +'<div class="mvv-sheet-sub">Référentiel propre à la vendange. Le poids par caisse de chaque client sert à convertir les caisses vendues en kilos.</div>'
     +'<div class="mvv-cllist">'+rows+'</div>'
     +'<button class="mvv-save ghost2" style="margin-top:14px" onclick="openVendClient(-1)">＋ Ajouter un client</button>';
@@ -2711,12 +2711,12 @@ function openVendClient(i){
   _vendClientEdit=i;
   var cls=_vendClients(); var c=(i>=0)?cls[i]:null;
   var html=''
-    +'<div class="mvv-sheet-hd"><div class="mvv-sheet-t">'+(c?'✎ Modifier le client':'🤝 Nouveau client')+'</div>'
-    +'<button class="mvv-sheet-x" onclick="openVendClients()">✕</button></div>'
+    +'<div class="mvv-sheet-hd"><div class="mvv-sheet-t">'+(c?'Modifier le client':'Nouveau client')+'</div>'
+    +'<button class="mv-gh mvv-sheet-x" onclick="openVendClients()" title="Fermer" aria-label="Fermer">'+_mvIcon('croix',18)+'</button></div>'
     +'<label class="mvv-flbl">Nom du client</label><input id="vcl-nom" class="mvv-tin" type="text" value="'+_escHtml(c?c.nom:'')+'" placeholder="ex. Maison Bouchard">'
     +'<label class="mvv-flbl">Poids par caisse (kg)</label><input id="vcl-pck" class="mvv-tin" type="number" value="'+(c?(c.poids_caisse_kg||25):25)+'" min="10" max="60">'
     +'<button class="mvv-save" style="margin-top:18px" onclick="saveVendClient()">Enregistrer</button>'
-    +(c?'<button class="mvv-del" onclick="deleteVendClient('+i+')">🗑 Supprimer ce client</button>':'');
+    +(c?'<button class="mvv-del" onclick="deleteVendClient('+i+')">Supprimer ce client</button>':'');
   _vendSheet(html);
 }
 function saveVendClient(){
@@ -2735,7 +2735,7 @@ function saveVendClient(){
   }
   window.CAVE_VENDANGE=CAVE_VENDANGE;
   if(window.fbSave) window.fbSave('cave_vendange',CAVE_VENDANGE);
-  showToast('✅ Client enregistré','#3D6B27');
+  showToast('Client enregistré','#3D6B27');
   openVendClients();
 }
 function deleteVendClient(i){
@@ -2750,7 +2750,7 @@ function deleteVendClient(i){
     arr.splice(idx,1);
     window.CAVE_VENDANGE=CAVE_VENDANGE;
     if(window.fbSave) window.fbSave('cave_vendange',CAVE_VENDANGE);
-    showToast('🗑 Client supprimé','#B85A1A');
+    showToast('Client supprimé','#B85A1A');
     openVendClients();
   });
 }
@@ -3276,13 +3276,13 @@ window.exportVendRecoltesPdf = function(){
   function _tot(list){var c=list.reduce(function(s,r){return s+(r.nb_caisses||0);},0);var k=list.reduce(function(s,r){return s+_recKg(r);},0);return {c:c,k:k};}
   var tc=_tot(cuvier), tv=_tot(vrac), ta=_tot(recs);
   var secCuvier=cuvier.length?(
-    '<h2>🫙 Parti au cuvier — '+cuvier.length+' récolte'+(cuvier.length>1?'s':'')+'</h2>'
+    '<h2>Parti au cuvier — '+cuvier.length+' récolte'+(cuvier.length>1?'s':'')+'</h2>'
     +'<table><thead><tr><th>Parcelle</th><th>Date</th><th>Cuvée</th><th>Caisses</th><th>kg</th><th>Rendement</th><th>État</th><th>Éraflage</th><th>hL est.</th></tr></thead><tbody>'
     +cuvier.map(function(r){return _row(r,false);}).join('')
     +'<tr class="tot"><td colspan="3">Total cuvier</td><td class="n">'+tc.c+'</td><td class="n">'+tc.k.toLocaleString('fr-FR')+'</td><td colspan="4"></td></tr>'
     +'</tbody></table>'):'';
   var secVrac=vrac.length?(
-    '<h2>🤝 Vendu en vrac — '+vrac.length+' récolte'+(vrac.length>1?'s':'')+'</h2>'
+    '<h2>Vendu en vrac — '+vrac.length+' récolte'+(vrac.length>1?'s':'')+'</h2>'
     +'<table><thead><tr><th>Parcelle</th><th>Date</th><th>Client</th><th>Caisses</th><th>kg</th><th>Rendement</th><th>État</th><th>Éraflage</th></tr></thead><tbody>'
     +vrac.map(function(r){return _row(r,true);}).join('')
     +'<tr class="tot"><td colspan="3">Total vrac</td><td class="n">'+tv.c+'</td><td class="n">'+tv.k.toLocaleString('fr-FR')+'</td><td colspan="3"></td></tr>'
@@ -3440,7 +3440,7 @@ function _vendRendHistHtml(){
   var data=_vendRendHistData();
   if(!data.length) return '';
   _vendRendInjectCss();
-  var html='<div class="mvv-rh"><div class="mvv-seclbl">📊 Rendements par climat · pluriannuel</div>';
+  var html='<div class="mvv-rh"><div class="mvv-seclbl">Rendements par climat · pluriannuel</div>';
   data.forEach(function(d){
     var vals=d.rows.map(function(r){return r.kg_ha||0;});
     var max=Math.max.apply(null,vals.concat([1]));
@@ -4894,7 +4894,7 @@ function _parcCoul(nom){
   return vu || '?';
 }
 function _vendSetCoul(nom, c){
-  if(!canWrite()){ showToast('Accès lecture seule 🔒', '#B85A1A'); return; }
+  if(!canWrite()){ showToast('Accès lecture seule', '#B85A1A'); return; }
   if(!CAVE_VENDANGE.config) CAVE_VENDANGE.config = {};
   if(!CAVE_VENDANGE.config.coul_parc) CAVE_VENDANGE.config.coul_parc = {};
   if(CAVE_VENDANGE.config.coul_parc[nom] === c) delete CAVE_VENDANGE.config.coul_parc[nom];
@@ -5223,7 +5223,7 @@ function renderVendAna(){
       var lastSuc=_matSuc(last,spd);
       html+='<div class="mva-card"><div class="mva-cname">'+_escHtml(p)+'</div>'
         +'<div class="mva-meta">'+arr.length+' analyse'+(arr.length>1?'s':'')+' · dernière le '+(last.date?last.date.slice(8)+'/'+last.date.slice(5,7):'')+'</div>'
-        +'<div class="mva-line"><span>🍬 '+Math.round(lastSuc)+' g/L</span><span class="pot">🍷 ~'+_mvF1(_vendAnaAlc(last))+'% vol potentiel</span></div>'
+        +'<div class="mva-line"><span>'+Math.round(lastSuc)+' g/L</span><span class="pot">~'+_mvF1(_vendAnaAlc(last))+'% vol potentiel</span></div>'
         +'<div id="mvg-mat-'+pi+'"></div>';
       (function(a2,ix){ window._mvGraphSuivre('#mvg-mat-'+ix, function(lg){ return _vendAnaSpark(a2,lg); }); })(arr,pi);
       html+='<div class="mva-rows">';
@@ -5259,7 +5259,7 @@ function _vendAnaLive(){
   var de=document.getElementById('mva-d-est'); if(de) de.textContent='~'+_mvF1(alc)+'% vol';
 }
 function _vendAnaAdd(){
-  if(!canWrite()){ showToast('Accès lecture seule 🔒','#B85A1A'); return; }
+  if(!canWrite()){ showToast('Accès lecture seule','#B85A1A'); return; }
   var p=(document.getElementById('mva-parc')||{}).value||'';
   var d=(document.getElementById('mva-date')||{}).value||'';
   var v=parseFloat((document.getElementById('mva-val')||{}).value);
@@ -5270,11 +5270,11 @@ function _vendAnaAdd(){
     mode:_vendAnaUnitMode,val:v,spd:(_vendCfg().sucre_par_degre)||16.83});
   window.CAVE_VENDANGE=CAVE_VENDANGE;
   if(window.fbSave) window.fbSave('cave_vendange',CAVE_VENDANGE);
-  showToast('🔬 Analyse enregistrée','#C0845A');
+  showToast('Analyse enregistrée','#C0845A');
   renderVendAna();
 }
 function _vendAnaDel(id){
-  if(!canWrite()){ showToast('Accès lecture seule 🔒','#B85A1A'); return; }
+  if(!canWrite()){ showToast('Accès lecture seule','#B85A1A'); return; }
   CAVE_VENDANGE.analyses=(CAVE_VENDANGE.analyses||[]).filter(function(a){return a.id!==id;});
   window.CAVE_VENDANGE=CAVE_VENDANGE;
   if(window.fbSave) window.fbSave('cave_vendange',CAVE_VENDANGE);
@@ -5377,15 +5377,15 @@ function renderCaveBouteille(){
       html+='<div class="mvb-card"><div class="mvb-badge">\u2019'+String(c.millesime||'').slice(-2)+'</div>'
         +'<div class="mvb-name">'+_escHtml(c.nom)+'</div>'
         +'<div class="mvb-meta">Millésime '+(c.millesime||'?')+' · '+_caveNbTonneaux(c)+' fûts · '+_mvF1(hl)+' hL élevés</div>'
-        +'<div class="mvb-line">🍾 théorique <b>'+auto+'</b> bouteilles</div>';
+        +'<div class="mvb-line">théorique <b>'+auto+'</b> bouteilles</div>';
       if(w){
         if(_caveBtlConfirm===c.id){
           html+='<div class="mvb-ask">Mettre « '+_escHtml(c.nom)+' » en bouteille ? Elle quittera le chai.</div>'
             +'<div class="mvb-frow"><div class="mvb-fld"><label>Bouteilles réelles</label><input id="mvb-reel-'+c.id+'" type="number" value="'+auto+'"></div>'
-            +'<button class="mvb-yes" onclick="_caveBtlConfirmYes(\''+c.id+'\')">✓ Confirmer</button>'
+            +'<button class="mvb-yes" onclick="_caveBtlConfirmYes(\''+c.id+'\')">Confirmer</button>'
             +'<button class="mvb-no" onclick="_caveBtlConfirmNo()">Annuler</button></div>';
         } else {
-          html+='<div class="mvb-frow"><button class="mvb-btn" onclick="_caveMettreEnBouteille(\''+c.id+'\')">🍾 Mettre en bouteille</button></div>';
+          html+='<div class="mvb-frow"><button class="mvb-btn" onclick="_caveMettreEnBouteille(\''+c.id+'\')">Mettre en bouteille</button></div>';
         }
       }
       html+='</div>';
@@ -5427,12 +5427,12 @@ function renderCaveBouteille(){
   el.innerHTML=html;
 }
 function _caveMettreEnBouteille(id){
-  if(!canWrite()){ showToast('Accès lecture seule 🔒','#B85A1A'); return; }
+  if(!canWrite()){ showToast('Accès lecture seule','#B85A1A'); return; }
   _caveBtlConfirm=id; renderCaveBouteille();
 }
 function _caveBtlConfirmNo(){ _caveBtlConfirm=null; renderCaveBouteille(); }
 function _caveBtlConfirmYes(id){
-  if(!canWrite()){ showToast('Accès lecture seule 🔒','#B85A1A'); return; }
+  if(!canWrite()){ showToast('Accès lecture seule','#B85A1A'); return; }
   var c=(CAVE_ELEVAGE.cuvees||[]).find(function(x){return x.id===id;}); if(!c) return;
   var hl=_caveNbTonneaux(c)*_caveFutHl();
   var reel=parseInt((document.getElementById('mvb-reel-'+id)||{}).value)||_mvBtl(hl);
@@ -5452,14 +5452,14 @@ function _caveBtlConfirmYes(id){
   _caveBtlConfirm=null;
   window.CAVE_ELEVAGE=CAVE_ELEVAGE;
   if(window.fbSave) window.fbSave('cave_elevage',CAVE_ELEVAGE);
-  showToast('🍾 « '+c.nom+' » embouteillée'
+  showToast('« '+c.nom+' » embouteillée'
     +(_rendus?(' — '+_rendus+' fût'+(_rendus>1?'s':'')+' revenu'+(_rendus>1?'s':'')+' au parc')
              :' — retirée du chai'),'#C0845A');
   if(typeof _mvcRenderHeader==='function') _mvcRenderHeader();
   renderCaveBouteille();
 }
 function _caveBtlEditReel(id,val){
-  if(!canWrite()){ showToast('Accès lecture seule 🔒','#B85A1A'); return; }
+  if(!canWrite()){ showToast('Accès lecture seule','#B85A1A'); return; }
   var c=(CAVE_ELEVAGE.cuvees||[]).find(function(x){return x.id===id;}); if(!c) return;
   c.nb_bouteilles=parseInt(val)||0;
   window.CAVE_ELEVAGE=CAVE_ELEVAGE;

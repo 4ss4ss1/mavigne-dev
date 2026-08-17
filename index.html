@@ -56,6 +56,76 @@
 
 </head>
 <body ontouchstart="">
+<!-- ════════════════════════════════════════════════════════════════════════
+     LE SPRITE D'ICONES (lot DS-1)
+     ★ Les formes viennent de LUCIDE v1.31.0 (licence ISC — lucide.dev),
+       recopiees telles quelles depuis le paquet `lucide-static`. Trois jeux
+       dessines a la main ont ete refuses avant : la coherence d'une
+       bibliotheque entretenue ne se retrouve pas a la main sur 36 dessins.
+     ⚠️ NE PAS RETOUCHER UNE FORME ICI. Le sprite se REGENERE :
+          node scripts/build-sprite.mjs
+        La correspondance nom-maison → nom-Lucide y vit, et elle seule.
+     ⚠️ Les formes ne portent NI stroke NI stroke-width NI fill : tout est
+        herite de .mv-ic (styles.css). C'est deja la convention de Lucide,
+        qui pose ces attributs sur la balise <svg> ; le script le verifie.
+     ⚠️ Un symbol absent ne rend RIEN, en silence : le harnais l'interdit,
+        `_mvIcon` rend un carre pointille et le journal le note.
+     ⚠️ Ce bloc doit rester AVANT #app-root : `_mvIconInline` (documents
+        imprimes) lit ces formes dans le DOM.
+     ════════════════════════════════════════════════════════════════════ -->
+<svg id="mv-sprite" data-lucide="1.31.0" aria-hidden="true" focusable="false" style="display:none" xmlns="http://www.w3.org/2000/svg">
+  <symbol id="ic-alerte" viewBox="0 0 24 24" data-src="triangle-alert"><path d="m21.73 18-8-14a2 2 0 0 0-3.48 0l-8 14A2 2 0 0 0 4 21h16a2 2 0 0 0 1.73-3" /> <path d="M12 9v4" /> <path d="M12 17h.01" /></symbol>
+  <symbol id="ic-balance" viewBox="0 0 24 24" data-src="scale"><path d="M12 3v18" /> <path d="m19 8 3 8a5 5 0 0 1-6 0zV7" /> <path d="M3 7h1a17 17 0 0 0 8-2 17 17 0 0 0 8 2h1" /> <path d="m5 8 3 8a5 5 0 0 1-6 0zV7" /> <path d="M7 21h10" /></symbol>
+  <symbol id="ic-beche" viewBox="0 0 24 24" data-src="shovel"><path d="M21.56 4.56a1.5 1.5 0 0 1 0 2.122l-.47.47a3 3 0 0 1-4.212-.03 3 3 0 0 1 0-4.243l.44-.44a1.5 1.5 0 0 1 2.121 0z" /> <path d="M3 22a1 1 0 0 1-1-1v-3.586a1 1 0 0 1 .293-.707l3.355-3.355a1.205 1.205 0 0 1 1.704 0l3.296 3.296a1.205 1.205 0 0 1 0 1.704l-3.355 3.355a1 1 0 0 1-.707.293z" /> <path d="m9 15 7.879-7.878" /></symbol>
+  <symbol id="ic-bogue" viewBox="0 0 24 24" data-src="bug"><path d="M12 20v-9" /> <path d="M14 7a4 4 0 0 1 4 4v3a6 6 0 0 1-12 0v-3a4 4 0 0 1 4-4z" /> <path d="M14.12 3.88 16 2" /> <path d="M21 21a4 4 0 0 0-3.81-4" /> <path d="M21 5a4 4 0 0 1-3.55 3.97" /> <path d="M22 13h-4" /> <path d="M3 21a4 4 0 0 1 3.81-4" /> <path d="M3 5a4 4 0 0 0 3.55 3.97" /> <path d="M6 13H2" /> <path d="m8 2 1.88 1.88" /> <path d="M9 7.13V6a3 3 0 1 1 6 0v1.13" /></symbol>
+  <symbol id="ic-brouillard" viewBox="0 0 24 24" data-src="cloud-fog"><path d="M4 14.899A7 7 0 1 1 15.71 8h1.79a4.5 4.5 0 0 1 2.5 8.242" /> <path d="M16 17H7" /> <path d="M17 21H9" /></symbol>
+  <symbol id="ic-bruine" viewBox="0 0 24 24" data-src="cloud-drizzle"><path d="M4 14.899A7 7 0 1 1 15.71 8h1.79a4.5 4.5 0 0 1 2.5 8.242" /> <path d="M8 19v1" /> <path d="M8 14v1" /> <path d="M16 19v1" /> <path d="M16 14v1" /> <path d="M12 21v1" /> <path d="M12 16v1" /></symbol>
+  <symbol id="ic-bureau" viewBox="0 0 24 24" data-src="building-2"><path d="M10 12h4" /> <path d="M10 8h4" /> <path d="M14 21v-3a2 2 0 0 0-4 0v3" /> <path d="M6 10H4a2 2 0 0 0-2 2v7a2 2 0 0 0 2 2h16a2 2 0 0 0 2-2V9a2 2 0 0 0-2-2h-2" /> <path d="M6 21V5a2 2 0 0 1 2-2h8a2 2 0 0 1 2 2v16" /></symbol>
+  <symbol id="ic-calendrier" viewBox="0 0 24 24" data-src="calendar"><path d="M8 2v3" /> <path d="M16 2v3" /> <rect x="3" y="3" width="18" height="18" rx="2" /> <path d="M3 9h18" /></symbol>
+  <symbol id="ic-carburant" viewBox="0 0 24 24" data-src="fuel"><path d="M14 13h2a2 2 0 0 1 2 2v2a2 2 0 0 0 4 0v-6.998a2 2 0 0 0-.59-1.42L18 5" /> <path d="M14 21V5a2 2 0 0 0-2-2H5a2 2 0 0 0-2 2v16" /> <path d="M2 21h13" /> <path d="M3 9h11" /></symbol>
+  <symbol id="ic-carte" viewBox="0 0 24 24" data-src="map"><path d="M14.106 5.553a2 2 0 0 0 1.788 0l3.659-1.83A1 1 0 0 1 21 4.619v12.764a1 1 0 0 1-.553.894l-4.553 2.277a2 2 0 0 1-1.788 0l-4.212-2.106a2 2 0 0 0-1.788 0l-3.659 1.83A1 1 0 0 1 3 19.381V6.618a1 1 0 0 1 .553-.894l4.553-2.277a2 2 0 0 1 1.788 0z" /> <path d="M15 5.764v15" /> <path d="M9 3.236v15" /></symbol>
+  <symbol id="ic-carton" viewBox="0 0 24 24" data-src="archive"><rect width="20" height="5" x="2" y="3" rx="1" /> <path d="M4 8v11a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8" /> <path d="M10 12h4" /></symbol>
+  <symbol id="ic-check" viewBox="0 0 24 24" data-src="check"><path d="M20 6 9 17l-5-5" /></symbol>
+  <symbol id="ic-chrono" viewBox="0 0 24 24" data-src="timer"><line x1="10" x2="14" y1="2" y2="2" /> <line x1="12" x2="15" y1="14" y2="11" /> <circle cx="12" cy="14" r="8" /></symbol>
+  <symbol id="ic-cible" viewBox="0 0 24 24" data-src="target"><circle cx="12" cy="12" r="10" /> <circle cx="12" cy="12" r="6" /> <circle cx="12" cy="12" r="2" /></symbol>
+  <symbol id="ic-cle" viewBox="0 0 24 24" data-src="key-round"><path d="M2.586 17.414A2 2 0 0 0 2 18.828V21a1 1 0 0 0 1 1h3a1 1 0 0 0 1-1v-1a1 1 0 0 1 1-1h1a1 1 0 0 0 1-1v-1a1 1 0 0 1 1-1h.172a2 2 0 0 0 1.414-.586l.814-.814a6.5 6.5 0 1 0-4-4z" /> <circle cx="16.5" cy="7.5" r=".5" fill="currentColor" /></symbol>
+  <symbol id="ic-corbeille" viewBox="0 0 24 24" data-src="trash-2"><path d="M10 11v6" /> <path d="M14 11v6" /> <path d="M19 6v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6" /> <path d="M3 6h18" /> <path d="M8 6V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2" /></symbol>
+  <symbol id="ic-crayon" viewBox="0 0 24 24" data-src="pencil"><path d="M21.174 6.812a1 1 0 0 0-3.986-3.987L3.842 16.174a2 2 0 0 0-.5.83l-1.321 4.352a.5.5 0 0 0 .623.622l4.353-1.32a2 2 0 0 0 .83-.497z" /> <path d="m15 5 4 4" /></symbol>
+  <symbol id="ic-croix" viewBox="0 0 24 24" data-src="x"><path d="M18 6 6 18" /> <path d="m6 6 12 12" /></symbol>
+  <symbol id="ic-curseurs" viewBox="0 0 24 24" data-src="sliders-horizontal"><path d="M10 5H3" /> <path d="M12 19H3" /> <path d="M14 3v4" /> <path d="M16 17v4" /> <path d="M21 12h-9" /> <path d="M21 19h-5" /> <path d="M21 5h-7" /> <path d="M8 10v4" /> <path d="M8 12H3" /></symbol>
+  <symbol id="ic-dossier" viewBox="0 0 24 24" data-src="folder"><path d="M20 20a2 2 0 0 0 2-2V8a2 2 0 0 0-2-2h-7.9a2 2 0 0 1-1.69-.9L9.6 3.9A2 2 0 0 0 7.93 3H4a2 2 0 0 0-2 2v13a2 2 0 0 0 2 2Z" /></symbol>
+  <symbol id="ic-eclair" viewBox="0 0 24 24" data-src="zap"><path d="M15.914 4a1.5 1.5 0 00-2.474-1.561l-9 9A1.5 1.5 0 005.5 14h4.002a.5.5 0 01.471.666L8.086 20a1.5 1.5 0 002.475 1.56l9-9A1.5 1.5 0 0018.5 10h-3.997a.5.5 0 01-.472-.667z" /></symbol>
+  <symbol id="ic-epingle" viewBox="0 0 24 24" data-src="map-pin"><path d="M20 10c0 4.993-5.539 10.193-7.399 11.799a1 1 0 0 1-1.202 0C9.539 20.193 4 14.993 4 10a8 8 0 0 1 16 0" /> <circle cx="12" cy="10" r="3" /></symbol>
+  <symbol id="ic-eprouvette" viewBox="0 0 24 24" data-src="test-tube"><path d="M14.5 2v17.5c0 1.4-1.1 2.5-2.5 2.5c-1.4 0-2.5-1.1-2.5-2.5V2" /> <path d="M8.5 2h7" /> <path d="M14.5 16h-5" /></symbol>
+  <symbol id="ic-feuille" viewBox="0 0 24 24" data-src="leaf"><path d="M11 20A7 7 0 0 1 9.8 6.1C15.5 5 17 4.48 19 2c1 2 2 4.18 2 8 0 5.5-4.78 10-10 10Z" /> <path d="M2 21c0-3 1.85-5.36 5.08-6C9.5 14.52 12 13 13 12" /></symbol>
+  <symbol id="ic-fiole" viewBox="0 0 24 24" data-src="flask-conical"><path d="M14 2v6a2 2 0 0 0 .245.96l5.51 10.08A2 2 0 0 1 18 22H6a2 2 0 0 1-1.755-2.96l5.51-10.08A2 2 0 0 0 10 8V2" /> <path d="M6.453 15h11.094" /> <path d="M8.5 2h7" /></symbol>
+  <symbol id="ic-flamme" viewBox="0 0 24 24" data-src="flame"><path d="M12 3q1 4 4 6.5t3 5.5a1 1 0 0 1-14 0 5 5 0 0 1 1-3 1 1 0 0 0 5 0c0-2-1.5-3-1.5-5q0-2 2.5-4" /></symbol>
+  <symbol id="ic-goutte" viewBox="0 0 24 24" data-src="droplet"><path d="M12 22a7 7 0 0 0 7-7c0-2-1-3.9-3-5.5s-3.5-4-4-6.5c-.5 2.5-2 4.9-4 6.5C6 11.1 5 13 5 15a7 7 0 0 0 7 7z" /></symbol>
+  <symbol id="ic-graphique" viewBox="0 0 24 24" data-src="chart-column"><path d="M3 3v16a2 2 0 0 0 2 2h16" /> <path d="M18 17V9" /> <path d="M13 17V5" /> <path d="M8 17v-3" /></symbol>
+  <symbol id="ic-info" viewBox="0 0 24 24" data-src="info"><circle cx="12" cy="12" r="10" /> <path d="M12 16v-4" /> <path d="M12 8h.01" /></symbol>
+  <symbol id="ic-journal" viewBox="0 0 24 24" data-src="notebook-pen"><path d="M13.4 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2v-7.4" /> <path d="M2 6h4" /> <path d="M2 10h4" /> <path d="M2 14h4" /> <path d="M2 18h4" /> <path d="M21.378 5.626a1 1 0 1 0-3.004-3.004l-5.01 5.012a2 2 0 0 0-.506.854l-.837 2.87a.5.5 0 0 0 .62.62l2.87-.837a2 2 0 0 0 .854-.506z" /></symbol>
+  <symbol id="ic-lien" viewBox="0 0 24 24" data-src="link"><path d="M10 13a5 5 0 0 0 7.54.54l3-3a5 5 0 0 0-7.07-7.07l-1.72 1.71" /> <path d="M14 11a5 5 0 0 0-7.54-.54l-3 3a5 5 0 0 0 7.07 7.07l1.71-1.71" /></symbol>
+  <symbol id="ic-liste" viewBox="0 0 24 24" data-src="clipboard-list"><rect width="8" height="4" x="8" y="2" rx="1" ry="1" /> <path d="M16 4h2a2 2 0 0 1 2 2v14a2 2 0 0 1-2 2H6a2 2 0 0 1-2-2V6a2 2 0 0 1 2-2h2" /> <path d="M12 11h4" /> <path d="M12 16h4" /> <path d="M8 11h.01" /> <path d="M8 16h.01" /></symbol>
+  <symbol id="ic-livre" viewBox="0 0 24 24" data-src="book-open"><path d="M12 5v16" /> <path d="M20.001 19A2 2 0 0022 17V5a2 2 0 00-1.999-2L16 3.002A5 5 0 0012 5a5 5 0 00-4-2H4a2 2 0 00-2 2v12a2 2 0 001.999 2H8a5 5 0 014 2 5 5 0 014-2z" /></symbol>
+  <symbol id="ic-neige" viewBox="0 0 24 24" data-src="cloud-snow"><path d="M4 14.899A7 7 0 1 1 15.71 8h1.79a4.5 4.5 0 0 1 2.5 8.242" /> <path d="M8 15h.01" /> <path d="M8 19h.01" /> <path d="M12 17h.01" /> <path d="M12 21h.01" /> <path d="M16 15h.01" /> <path d="M16 19h.01" /></symbol>
+  <symbol id="ic-nuage" viewBox="0 0 24 24" data-src="cloud"><path d="M17.5 19H9a7 7 0 1 1 6.71-9h1.79a4.5 4.5 0 1 1 0 9Z" /></symbol>
+  <symbol id="ic-orage" viewBox="0 0 24 24" data-src="cloud-lightning"><path d="M6 16.326A7 7 0 1 1 15.71 8h1.79a4.5 4.5 0 0 1 .5 8.973" /> <path d="m13 12-3 5h4l-3 5" /></symbol>
+  <symbol id="ic-outil" viewBox="0 0 24 24" data-src="wrench"><path d="M14.7 6.3a1 1 0 0 0 0 1.4l1.6 1.6a1 1 0 0 0 1.4 0l3.106-3.105c.32-.322.863-.22.983.218a6 6 0 0 1-8.259 7.057l-7.91 7.91a1 1 0 0 1-2.999-3l7.91-7.91a6 6 0 0 1 7.057-8.259c.438.12.54.662.219.984z" /></symbol>
+  <symbol id="ic-personne" viewBox="0 0 24 24" data-src="user"><path d="M19 21v-2a4 4 0 0 0-4-4H9a4 4 0 0 0-4 4v2" /> <circle cx="12" cy="7" r="4" /></symbol>
+  <symbol id="ic-pluie" viewBox="0 0 24 24" data-src="cloud-rain"><path d="M4 14.899A7 7 0 1 1 15.71 8h1.79a4.5 4.5 0 0 1 2.5 8.242" /> <path d="M16 14v6" /> <path d="M8 14v6" /> <path d="M12 16v6" /></symbol>
+  <symbol id="ic-plus" viewBox="0 0 24 24" data-src="ellipsis"><circle cx="12" cy="12" r="1" /> <circle cx="19" cy="12" r="1" /> <circle cx="5" cy="12" r="1" /></symbol>
+  <symbol id="ic-pousse" viewBox="0 0 24 24" data-src="sprout"><path d="M14 9.536V7a4 4 0 0 1 4-4h1.5a.5.5 0 0 1 .5.5V5a4 4 0 0 1-4 4 4 4 0 0 0-4 4c0 2 1 3 1 5a5 5 0 0 1-1 3" /> <path d="M4 9a5 5 0 0 1 8 4 5 5 0 0 1-8-4" /> <path d="M5 21h14" /></symbol>
+  <symbol id="ic-pulverisateur" viewBox="0 0 24 24" data-src="spray-can"><path d="M3 3h.01" /> <path d="M7 5h.01" /> <path d="M11 7h.01" /> <path d="M3 7h.01" /> <path d="M7 9h.01" /> <path d="M3 11h.01" /> <rect width="4" height="4" x="15" y="5" /> <path d="m19 9 2 2v10c0 .6-.4 1-1 1h-6c-.6 0-1-.4-1-1V11l2-2" /> <path d="m13 14 8-2" /> <path d="m13 19 8-2" /></symbol>
+  <symbol id="ic-raisin" viewBox="0 0 24 24" data-src="grape"><path d="M22 5V2l-5.89 5.89" /> <circle cx="16.6" cy="15.89" r="3" /> <circle cx="8.11" cy="7.4" r="3" /> <circle cx="12.35" cy="11.65" r="3" /> <circle cx="13.91" cy="5.85" r="3" /> <circle cx="18.15" cy="10.09" r="3" /> <circle cx="6.56" cy="13.2" r="3" /> <circle cx="10.8" cy="17.44" r="3" /> <circle cx="5" cy="19" r="3" /></symbol>
+  <symbol id="ic-rang" viewBox="0 0 24 24" data-src="fence"><path d="M4 3 2 5v15c0 .6.4 1 1 1h2c.6 0 1-.4 1-1V5Z" /> <path d="M6 8h4" /> <path d="M6 18h4" /> <path d="m12 3-2 2v15c0 .6.4 1 1 1h2c.6 0 1-.4 1-1V5Z" /> <path d="M14 8h4" /> <path d="M14 18h4" /> <path d="m20 3-2 2v15c0 .6.4 1 1 1h2c.6 0 1-.4 1-1V5Z" /></symbol>
+  <symbol id="ic-retour" viewBox="0 0 24 24" data-src="undo-2"><path d="M9 14 4 9l5-5" /> <path d="M4 9h10.5a5.5 5.5 0 0 1 5.5 5.5a5.5 5.5 0 0 1-5.5 5.5H11" /></symbol>
+  <symbol id="ic-rotation" viewBox="0 0 24 24" data-src="refresh-cw"><path d="M3 12a9 9 0 0 1 9-9 9.75 9.75 0 0 1 6.74 2.74L21 8" /> <path d="M21 3v5h-5" /> <path d="M21 12a9 9 0 0 1-9 9 9.75 9.75 0 0 1-6.74-2.74L3 16" /> <path d="M8 16H3v5" /></symbol>
+  <symbol id="ic-sablier" viewBox="0 0 24 24" data-src="hourglass"><path d="M5 22h14" /> <path d="M5 2h14" /> <path d="M17 22v-4.172a2 2 0 0 0-.586-1.414L12 12l-4.414 4.414A2 2 0 0 0 7 17.828V22" /> <path d="M7 2v4.172a2 2 0 0 0 .586 1.414L12 12l4.414-4.414A2 2 0 0 0 17 6.172V2" /></symbol>
+  <symbol id="ic-secateur" viewBox="0 0 24 24" data-src="scissors"><circle cx="6" cy="6" r="3" /> <path d="M8.12 8.12 12 12" /> <path d="M20 4 8.12 15.88" /> <circle cx="6" cy="18" r="3" /> <path d="M14.8 14.8 20 20" /></symbol>
+  <symbol id="ic-tariere" viewBox="0 0 24 24" data-src="drill"><path d="M10 18a1 1 0 0 1 1 1v2a1 1 0 0 1-1 1H5a3 3 0 0 1-3-3 1 1 0 0 1 1-1z" /> <path d="M13 10H4a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2h9a1 1 0 0 1 1 1v6a1 1 0 0 1-1 1l-.81 3.242a1 1 0 0 1-.97.758H8" /> <path d="M14 4h3a1 1 0 0 1 1 1v2a1 1 0 0 1-1 1h-3" /> <path d="M18 6h4" /> <path d="m5 10-2 8" /> <path d="m7 18 2-8" /></symbol>
+  <symbol id="ic-tracteur" viewBox="0 0 24 24" data-src="tractor"><path d="m10 11 11 .9a1 1 0 0 1 .8 1.1l-.665 4.158a1 1 0 0 1-.988.842H20" /> <path d="M16 18h-5" /> <path d="M18 5a1 1 0 0 0-1 1v5.573" /> <path d="M3 4h8.129a1 1 0 0 1 .99.863L13 11.246" /> <path d="M4 11V4" /> <path d="M7 15h.01" /> <path d="M8 10.1V4" /> <circle cx="18" cy="18" r="2" /> <circle cx="7" cy="15" r="5" /></symbol>
+  <symbol id="ic-verre" viewBox="0 0 24 24" data-src="wine"><path d="M8 22h8" /> <path d="M7 10h10" /> <path d="M12 15v7" /> <path d="M12 15a5 5 0 0 0 5-5c0-2-.5-4-2-8H9c-1.5 4-2 6-2 8a5 5 0 0 0 5 5Z" /></symbol>
+</svg>
 <div id="mv-trial-bar" role="status" aria-live="polite"></div>
 <div id="app-root">
 
@@ -234,7 +304,7 @@
 <!-- ══ ONBOARDING ══ -->
 <div id="onboarding-screen" style="display:none">
   <div class="ob-header">
-    <div class="ob-logo">🍇</div>
+    <div class="ob-logo"><img src="/logo-gt.png" alt="" width="72" height="72" draggable="false"></div>
     <div class="ob-title">Ma Vigne</div>
     <div class="ob-sub">Configuration initiale</div>
   </div>
@@ -338,7 +408,7 @@
     <!-- Écran final -->
     <div class="ob-screen" id="ob-screen-5">
       <div style="padding:40px 0 20px">
-        <span class="ob-finish-icon">🍇</span>
+        <span class="ob-finish-icon"><img src="/logo-gt.png" alt="" width="56" height="56" draggable="false"></span>
         <div class="ob-finish-title">Création du compte…</div>
         <div class="ob-finish-sub" id="ob-finish-sub">Configuration en cours, veuillez patienter.</div>
         <div class="ob-finish-badges" id="ob-finish-badges"></div>
@@ -359,7 +429,12 @@
   <a href="https://mavigneapp.fr" class="demo-banner-link" target="_blank">mavigneapp.fr</a>
 </div>
 <div id="login-screen">
-  <div class="login-logo" id="login-logo-tap">🍇</div>
+  <!-- ⚠️ `id` sur le CONTENEUR, jamais sur l'image : le geste des cinq taps
+       qui ouvre la console GT y est branche (onboarding.js). Les clics sur
+       l'image remontent au conteneur. -->
+  <div class="login-logo" id="login-logo-tap">
+    <img src="/logo-gt.png" alt="" width="96" height="96" draggable="false">
+  </div>
   <div class="login-title">Ma Vigne</div>
   <div class="login-sub" id="login-sub-txt">Choisissez votre profil</div>
   <div class="login-profiles" id="login-profiles"></div>
@@ -481,7 +556,7 @@
         <p style="margin:0 0 14px">Firebase / Google LLC — 1600 Amphitheatre Pkwy, Mountain View, CA 94043, USA. Transfert encadré par les clauses contractuelles types de la Commission européenne.</p>
         <div style="font-weight:700;font-size:13px;margin-bottom:6px;color:#4A2060">Cookies &amp; traceurs</div>
         <p style="margin:0 0 14px">Aucun cookie publicitaire. L'application utilise uniquement le stockage local (localStorage) pour sauvegarder vos données de travail sur votre appareil.</p>
-        <div style="text-align:center;color:#9A9A8A;font-size:10px;margin-top:8px">© 2026 Nicolas GUERET / GUERETTECH · Ma Vigne · v6.25</div>
+        <div style="text-align:center;color:#9A9A8A;font-size:10px;margin-top:8px">© 2026 Nicolas GUERET / GUERETTECH · Ma Vigne · v6.27</div>
         <button onclick="document.getElementById('login-mentions-ov').style.display='none'" style="display:block;width:100%;margin-top:20px;padding:14px;background:#3D6B27;color:white;border:none;border-radius:12px;font-family:'Outfit',sans-serif;font-size:14px;font-weight:600;cursor:pointer;-webkit-tap-highlight-color:transparent">Fermer</button>
       </div>
     </div>
@@ -534,7 +609,7 @@
   <div class="home-prio-pill-wrap" id="home-prio-pill-wrap">
     <div class="home-prio-pill-row" onclick="togglePrioPill()">
       <div class="home-prio-pill" id="home-prio-pill">
-        <span style="font-size:14px">⚡</span>
+        <svg class="mv-ic" width="16" height="16" viewBox="0 0 24 24" aria-hidden="true"><use href="#ic-eclair"></use></svg>
         <span class="home-prio-pill-txt" id="home-prio-pill-txt">Aucune priorité définie</span>
         <span class="home-prio-pill-chevron" id="home-prio-chevron">▼</span>
       </div>
@@ -596,7 +671,7 @@
     <div class="hv2-voir-tout">Détail ›</div>
   </div>
   <div class="hv2-hcard-wrap" id="hv2-hcard">
-    <div class="heures-card" id="heures-card-home"></div>
+    <div class="heures-card mv-c" id="heures-card-home"></div>
   </div>
   </div><!-- /home-w heures -->
 
@@ -605,8 +680,8 @@
   <div class="hv2-section-label" style="margin-top:20px">Travaux mécaniques</div>
   <div class="hv2-trac-card" onclick="goTo('tracteur')">
     <div class="hv2-trac-left">
-      <div class="hv2-trac-val" id="hv2-trac-nb">3 <span>sessions</span></div>
-      <div class="hv2-trac-sub">Saison 2026</div>
+      <div class="mv-n" id="hv2-trac-nb" style="color:inherit">3 <span style="font-size:13px">sessions</span></div>
+      <div class="mv-l" style="color:inherit;opacity:.7">Saison 2026</div>
     </div>
     <div class="hv2-trac-bars" id="hv2-trac-bars"></div>
   </div>
@@ -788,9 +863,16 @@
       </div>
     </div>
     <div class="modal-body">
-      <div style="display:grid;grid-template-columns:1fr 1fr;gap:10px;margin-bottom:12px">
-        <div style="background:var(--gris-clair);border-radius:12px;padding:12px"><div style="font-size:10px;color:var(--texte-doux);text-transform:uppercase">Surface</div><div style="font-family:'Cormorant Garamond',serif;font-size:20px;font-weight:600;margin-top:2px" id="dp-surf"></div></div>
-        <div style="background:var(--gris-clair);border-radius:12px;padding:12px"><div style="font-size:10px;color:var(--texte-doux);text-transform:uppercase">H restantes</div><div style="font-family:'Cormorant Garamond',serif;font-size:20px;font-weight:600;margin-top:2px;color:var(--orange)" id="dp-hreste"></div></div>
+      <!-- Charte DS-2 : trois chiffres en tete, meme grille que la carte de
+           liste. ⚠️ #dp-pct vit dans l'en-tete du modal, il n'est pas duplique
+           ici : c'est `openDP` qui le remplit. -->
+      <div class="mv-c">
+        <div class="mv-kv">
+          <div><div class="mv-n" id="dp-surf"></div><div class="mv-l">surface</div></div>
+          <div><div class="mv-n" id="dp-hreste" style="color:var(--orange)"></div><div class="mv-l">restantes</div></div>
+          <div><div class="mv-n" id="dp-nbt"></div><div class="mv-l">travaux faits</div></div>
+        </div>
+        <div class="mv-track" style="margin-top:14px"><div class="mv-fill" id="dp-bar" style="width:0%"></div></div>
       </div>
       <div id="dp-cepage-row" style="display:none;background:var(--gris-clair);border-radius:12px;padding:10px 14px;margin-bottom:14px">
         <div style="display:flex;align-items:center;justify-content:space-between">
@@ -808,7 +890,9 @@
         <div id="dp-commune-val" style="margin-top:5px"></div>
       </div>
       <div style="font-size:11px;font-weight:700;text-transform:uppercase;letter-spacing:1px;color:var(--texte-doux);margin-bottom:10px">Tâches — <span id="dp-saison-label"></span></div>
-      <div id="dp-drae-alert" style="display:none;background:#FFF3CD;border:1.5px solid #F0AD00;border-radius:12px;padding:12px 14px;margin-bottom:14px;gap:10px;align-items:flex-start;font-size:12px;color:#856404;font-weight:600;line-height:1.5"></div>
+      <!-- Le delai de reentree est un statut CRITIQUE et REGLEMENTAIRE : c'est
+           le seul endroit de la fiche ou une icone reste. -->
+      <div id="dp-drae-alert" class="mv-c mv-c-al" style="display:none"></div>
       <div id="dp-taches"></div>
     </div>
   </div>
@@ -1097,7 +1181,7 @@
       <span class="mod-header-icon">⚙️</span>
       <div class="mod-header-titles">
         <div class="mod-header-title">Réglages</div>
-        <div class="mod-header-sub">Ma Vigne v6.25</div>
+        <div class="mod-header-sub">Ma Vigne v6.27</div>
       </div>
       <span class="mod-header-badge" style="background:rgba(61,107,39,0.2);color:#7CB95A;border:1px solid rgba(61,107,39,0.3)" id="regl-role-badge">Admin</span>
       <button class="mod-home-btn" onclick="goHub()" style="margin-left:6px">⌂</button>
@@ -1264,7 +1348,7 @@
         <div class="set-row set-danger-row" style="border-radius:16px;border:1.5px solid var(--rouge)" onclick="openOvDanger(&#39;reset&#39;)"><div class="sr-l"><div class="sr-ico" style="background:var(--rouge-pale)">🗑️</div><div><div class="sr-lbl" style="color:var(--rouge);font-weight:700">Réinitialiser l'application</div><div class="sr-sub">Efface toutes les sauvegardes locales</div></div></div><div class="sr-arr" style="color:var(--rouge)">›</div></div>
       </div>
     </div>
-    <div class="ver-tag">Ma Vigne v6.25 · Catalogue phyto officiel E-Phy (ANSES) 🌿</div>
+    <div class="ver-tag">Ma Vigne v6.27 · Catalogue phyto officiel E-Phy (ANSES) 🌿</div>
     <div class="mv-legal-foot" style="text-align:center;font-size:10px;color:var(--texte-doux);padding:0 0 16px;line-height:1.9"><a href="/mentions-legales.html" target="_blank" rel="noopener" style="color:var(--texte-doux);text-decoration:underline">Mentions légales</a> · <a href="/confidentialite.html" target="_blank" rel="noopener" style="color:var(--texte-doux);text-decoration:underline">Confidentialité</a> · <a href="/cgu.html" target="_blank" rel="noopener" style="color:var(--texte-doux);text-decoration:underline">CGU</a></div>
   </div>
 </div>
@@ -2290,7 +2374,7 @@
 <div class="overlay" id="ovActivite" onclick="closeOv(event,'ovActivite')"><div class="modal" onclick="event.stopPropagation()" style="max-height:90vh;overflow-y:auto"><div class="modal-handle"></div><div class="modal-hd"><div class="modal-title">⚙️ Nouvelle activité tracteur</div></div><div class="modal-body">
   <div class="fl">Emoji + Nom</div>
   <div style="display:flex;gap:10px;margin-bottom:14px">
-    <button id="new-act-emoji-btn" onclick="_toggleActEmojiPick('new')" style="width:52px;height:52px;border-radius:12px;background:var(--gris-clair);border:1.5px solid var(--gris);font-size:22px;cursor:pointer;flex-shrink:0">🚜</button>
+    <button id="new-act-emoji-btn" data-emoji="🚜" onclick="_toggleActEmojiPick('new')" style="width:52px;height:52px;border-radius:12px;background:var(--gris-clair);border:1.5px solid var(--gris);color:var(--texte);display:inline-flex;align-items:center;justify-content:center;cursor:pointer;flex-shrink:0"><svg class="mv-ic" width="24" height="24" viewBox="0 0 24 24" aria-hidden="true" focusable="false"><use href="#ic-tracteur"></use></svg></button>
     <input type="text" class="fi ac" id="new-act" placeholder="Ex : Tarière, Oreille de cochon…" style="flex:1;margin:0">
   </div>
   <div id="new-act-emoji-pick" style="display:none;flex-wrap:wrap;gap:6px;margin-bottom:14px;background:var(--gris-clair);border-radius:12px;padding:10px" class="ppicker"></div>
@@ -3253,7 +3337,7 @@
         <div style="font-size:10px;color:rgba(240,226,200,0.55);letter-spacing:1.2px;margin-top:2px;">MISE &#xC0; JOUR</div>
       </div>
       <div style="background:rgba(200,176,32,0.12);border:1px solid rgba(200,176,32,0.35);border-radius:7px;padding:4px 10px;flex-shrink:0;">
-        <span id="wn-version-badge" style="color:#C8B020;font-size:12px;font-weight:600;">v6.25</span>
+        <span id="wn-version-badge" style="color:#C8B020;font-size:12px;font-weight:600;">v6.27</span>
       </div>
     </div>
     <div class="modal-body">
