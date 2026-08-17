@@ -3288,19 +3288,28 @@ async function fetchMeteoCommunes(){
   }
 }
 
+// Le cache d'AVANT 6.82 contient un emoji, celui d'apres un nom d'icone.
+// On tranche sur la forme : les releves d'hier restent lisibles.
+// ⚠️ TROISIEME point de lecture de `wx.emoji` decouvert apres coup, apres
+//   l'en-tete Pilotage et la mini-meteo. Une bascule de format se traite en
+//   cherchant TOUS les lecteurs d'un coup, pas au fil des captures d'ecran.
+function _wxIco(v,t){
+  var x=String(v==null?'':v);
+  return /^[a-z][a-z0-9-]*$/.test(x) ? _mvIcon(x,t||24) : (x||_mvIcon('nuage',t||24));
+}
 function _wxStoreCard(g,store){
   var d=store&&store[g.key]; var wx=d&&d.wx;
   if(!wx){
-    return '<div class="cm-wx-card"><div class="cm-wx-emoji">\u23F3</div><div class="cm-wx-mid"><div class="cm-wx-nom">'+_escHtml(g.nom)+'</div><div class="cm-wx-sub">'+g.nbParc+' parcelle'+(g.nbParc>1?'s':'')+'</div></div></div>';
+    return '<div class="cm-wx-card"><div class="cm-wx-emoji">'+_mvIcon('sablier',24)+'</div><div class="cm-wx-mid"><div class="cm-wx-nom">'+_escHtml(g.nom)+'</div><div class="cm-wx-sub">'+g.nbParc+' parcelle'+(g.nbParc>1?'s':'')+'</div></div></div>';
   }
   var frost=wx.tmin!=null&&wx.tmin<=1;
-  var badge=frost?('<span class="cm-wx-badge frost">\u2744 Gel '+wx.tmin+'\u00b0</span>')
-            :((wx.pp!=null&&wx.pp>=50)?('<span class="cm-wx-badge rain">\uD83D\uDCA7 '+wx.pp+'%</span>'):'');
+  var badge=frost?('<span class="cm-wx-badge frost">Gel '+wx.tmin+'\u00b0</span>')
+            :((wx.pp!=null&&wx.pp>=50)?('<span class="cm-wx-badge rain">'+wx.pp+'% pluie</span>'):'');
   return '<div class="cm-wx-card'+(frost?' alert':'')+'">'+badge
-    +'<div class="cm-wx-emoji">'+wx.emoji+'</div>'
+    +'<div class="cm-wx-emoji">'+_wxIco(wx.emoji,24)+'</div>'
     +'<div class="cm-wx-mid"><div class="cm-wx-nom">'+_escHtml(g.nom)+'</div><div class="cm-wx-sub">'+wx.desc
       +(wx.tmin!=null?(' \u00b7 '+wx.tmin+'\u00b0/'+wx.tmax+'\u00b0'):'')+' \u00b7 '+g.nbParc+' p.</div></div>'
-    +'<div class="cm-wx-temp"><div class="cm-wx-t">'+wx.temp+'\u00b0</div><div class="cm-wx-w">\uD83C\uDF2C '+wx.wind+'</div></div>'
+    +'<div class="cm-wx-temp"><div class="cm-wx-t">'+wx.temp+'\u00b0</div><div class="cm-wx-w">'+wx.wind+' km/h</div></div>'
     +'</div>';
 }
 // Cartes météo par secteur sur l'accueil (uniquement si ≥2 communes)
@@ -3317,7 +3326,7 @@ function renderHomeMeteoCommunes(){
     setTimeout(function(){ try{fetchMeteoCommunes();}catch(e){} },50);   // le verrou est tenu par fetchMeteoCommunes
   }
   var age=_wxAgeTxt(ts);
-  var html='<div class="cm-wx-head">\uD83D\uDDFA\uFE0F M\u00e9t\u00e9o par secteur'
+  var html='<div class="cm-wx-head">M\u00e9t\u00e9o par secteur'
     +(age?('<span class="cm-wx-age">'+_escHtml(age)+'</span>'):'')+'</div><div class="cm-wx-grid">';
   groups.forEach(function(g){ html+=_wxStoreCard(g,store); });
   html+='</div>';

@@ -1,4 +1,17 @@
-// MA VIGNE — Service Worker v6.85
+// MA VIGNE — Service Worker v6.86
+// v6.86 (17/08/2026) — METEO PAR SECTEUR + LES BANDEAUX DU HAUT.
+//   ⚠️⚠️ « soleil » et « nuage » ECRITS EN TOUTES LETTRES par-dessus le nom de
+//     la commune. `wx.emoji` porte un NOM d'icone depuis 6.82 et etait insere
+//     tel quel. ★ TROISIEME point de lecture de ce champ decouvert APRES COUP
+//     (en-tete Pilotage, mini-meteo, puis secteurs) : une bascule de format se
+//     traite en cherchant TOUS les lecteurs d'un coup, pas au fil des captures.
+//   ★ BANDEAUX : en-tete de module, sous-onglets, boutons ronds, pastille de
+//     saison, mini-meteo — 39 glyphes sur 39 lignes. Sprite : 57 symboles.
+//     ⚠️ `font-size` ne dimensionne plus rien quand le contenu devient une
+//       image : .mod-header-icon et .mvu-tab-em passent en flex centre.
+//       TROISIEME fois que ce piege revient (logo, ob-logo, ici).
+//   ⚠️ RESTE ~260 pictogrammes dans index.html (overlays, formulaires, aides).
+//     Le compteur les voit desormais : ils ne se cacheront plus.
 // v6.85 (17/08/2026) — `euro` MANQUANT, ET LA REGLE QUI M'A FAIT LE SUPPRIMER.
 //   ⚠️⚠️⚠️ TROISIEME PANNE CAUSEE PAR MA PROPRE ASSERTION « aucun symbole
 //     declare sans emploi ». Elle m'a fait retirer `equipe`, `soleil`, `cle`
@@ -2078,7 +2091,7 @@
 // v2.22 — Fix profils vides : guard vide dans loadData() pour MEMBRES/SAISONS/TACHES
 // v2.17 — Onboarding intégré + tenantId · v2.06 — Firebase Auth · v2.00–v2.05 — divers
 const DEBUG = self.location.hostname === 'localhost' || self.location.hostname === '127.0.0.1';
-const CACHE_NAME   = 'mavigne-v6.85';
+const CACHE_NAME   = 'mavigne-v6.86';
 const TENANT_CACHE = 'mavigne-tenant';   // Cache persistant — préservé à chaque mise à jour SW
 const SYNC_TAG     = 'mavigne-sync';
 
@@ -2094,7 +2107,7 @@ const CDN_URLS = [
 ];
 
 self.addEventListener('install', event => {
-  if(DEBUG) console.log('[SW] Ma Vigne v6.85 installé');
+  if(DEBUG) console.log('[SW] Ma Vigne v6.86 installé');
   event.waitUntil(
     caches.open(CACHE_NAME).then(async cache => {
       // ── Cœur applicatif : STRICT (mise à jour ATOMIQUE) ──
@@ -2110,7 +2123,7 @@ self.addEventListener('install', event => {
 });
 
 self.addEventListener('activate', event => {
-  if(DEBUG) console.log('[SW] Ma Vigne v6.85 activé');
+  if(DEBUG) console.log('[SW] Ma Vigne v6.86 activé');
   event.waitUntil(
     caches.keys().then(keys =>
       Promise.all(

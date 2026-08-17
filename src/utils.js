@@ -23,7 +23,7 @@ export const GT_ADMIN_EMAIL = 'ngdevpro@gmail.com';
 // WHATS_NEW   : tableau vide = modal desactive pour cette version.
 // Format item : { emoji:'📅', titre:'Titre court', desc:'Phrase utilisateur.' }
 // Regle : seulement les changements visibles par les utilisateurs.
-export const APP_VERSION = '6.31';
+export const APP_VERSION = '6.32';
 // ════ Journal des nouveautés (récap cumulatif) ════
 // Une entrée par version, la PLUS RÉCENTE EN HAUT : { v:'5.10', items:[ {emoji,titre,desc}, … ] }
 // À chaque release visible → AJOUTER un bloc en tête (ne pas remplacer). items:[] = release technique (rien à afficher).
@@ -354,6 +354,12 @@ window._mvGraphRepeindre = function(){
 };
 
 export const WHATS_NEW = [
+  { v:'6.32', items:[
+    { emoji: '\u{1F326}\uFE0F', titre: "La m\u00e9t\u00e9o par secteur affichait un mot \u00e0 la place du dessin",
+      desc: "Sur l\u2019accueil, chaque commune montrait \u00ab\u202fsoleil\u202f\u00bb ou \u00ab\u202fnuage\u202f\u00bb \u00e9crit en gros par-dessus son nom. C\u2019est corrig\u00e9 : le dessin revient, et <b>vos relev\u00e9s d\u00e9j\u00e0 enregistr\u00e9s restent lisibles</b>." },
+    { emoji: '\u{1F9ED}', titre: "Les bandeaux du haut passent aux m\u00eames ic\u00f4nes",
+      desc: "Le titre de chaque \u00e9cran, les sous-onglets (Accueil, Parcelles, Journal\u2026) et les boutons ronds en haut \u00e0 droite \u00e9taient rest\u00e9s en \u00e9mojis. Ils rejoignent le jeu d\u2019ic\u00f4nes du reste de l\u2019application \u2014 <b>trente-neuf pictogrammes remplac\u00e9s</b>." }
+  ] },
   { v:'6.31', items:[
     { emoji: '\u{1F4B6}', titre: "L\u2019onglet \u00c9conomie du Pilotage retrouve son ic\u00f4ne",
       desc: "Dernier carr\u00e9 rouge en pointill\u00e9s : l\u2019onglet \u00c9conomie du Pilotage. C\u2019est corrig\u00e9." }

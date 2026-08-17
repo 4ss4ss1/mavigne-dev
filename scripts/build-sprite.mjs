@@ -29,6 +29,7 @@ export const MAP = {
   dossier:'folder', eclair:'zap', epingle:'map-pin', eprouvette:'test-tube',
   feuille:'leaf', flamme:'flame', goutte:'droplet', graphique:'chart-column', lien:'link',
   liste:'clipboard-list', outil:'wrench', personne:'user', pousse:'sprout', raisin:'grape',
+  maison:'house', chevron:'chevron-down', cuve:'warehouse',
   info:'info', balance:'scale', equipe:'users', soleil:'sun', euro:'euro', pulverisateur:'spray-can', fiole:'flask-conical', cible:'target',
   livre:'book-open', bogue:'bug', carte:'map', journal:'notebook-pen',
   nuage:'cloud', pluie:'cloud-rain', neige:'cloud-snow', bruine:'cloud-drizzle',
