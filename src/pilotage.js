@@ -6192,7 +6192,7 @@ function _pecGnrDet(src,litres,n,nSans,cle,pu){
   }
   return _pilNum(litres)+' L relev\u00e9s \u00b7 '+n+' plein'+(n>1?'s':'')
     +(cle==='surface'?' \u00b7 r\u00e9parti \u00e0 la surface':'')
-    +(nSans>0?(' \u00b7 \u26A0 '+nSans+' plein'+(nSans>1?'s':'')+' sans litres, non compt\u00e9'+(nSans>1?'s':'')):'');
+    +(nSans>0?(' \u00b7 '+nSans+' plein'+(nSans>1?'s':'')+' sans litres, non compt\u00e9'+(nSans>1?'s':'')):'');
 }
 function _ecoGnrPuAt(iso){
   var pu=(window._mvPaieGnrPuAt)?Number(window._mvPaieGnrPuAt(iso)):0;

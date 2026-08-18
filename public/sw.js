@@ -1,5 +1,5 @@
-// MA VIGNE — Service Worker v6.88
-// v6.88 (18/08/2026) — LE CARBURANT COMPTE LES PLEINS REELS, PLUS UNE ESTIMATION.
+// MA VIGNE — Service Worker v6.89
+// v6.89 (18/08/2026) — LE CARBURANT COMPTE LES PLEINS REELS, PLUS UNE ESTIMATION.
 //   Le cout GNR etait heures de session x conso L/h x prix : une somme d'estimations,
 //   dont une session non notee retirait silencieusement une part. Il vaut desormais la
 //   somme des pleins releves, chacun au prix du litre a SA date ; les heures ne servent
@@ -7,7 +7,22 @@
 //   si aucun plein n'est releve — et l'ecran affiche alors « L ESTIMES ».
 //   Cote saisie, cocher « Plein fait » dans une fiche d'entretien EXIGE les litres et
 //   decompte la cuve, comme le bouton « Plein ».
-//   BUMP : utils.js modifie (MV_AIDE + WHATS_NEW + APP_VERSION). APP 6.33 -> 6.34.
+//   ⚠️⚠️ CE LOT A D'ABORD ETE LIVRE EN 6.34/6.88 — numeros DEJA PRIS par le
+//     correctif .mod-header-icon du 17/08. Construit sur un clone anterieur, il a
+//     ecrase l'entree WHATS_NEW 6.34 et ce changelog 6.88, tous deux RESTAURES ici.
+//     Le correctif lui-meme n'a rien perdu : il vit dans styles.css, jamais touche.
+//     Lecon : cloner AVANT d'ecrire, pas avant de concevoir.
+//   BUMP : utils.js modifie (MV_AIDE + WHATS_NEW + APP_VERSION). APP 6.34 -> 6.35.
+// v6.88 (17/08/2026) — .mod-header-icon N'AVAIT JAMAIS DE COULEUR.
+//   ⚠️ MEME PIEGE QUE LE DOCK EN 6.87, UNE REGLE PLUS LOIN. `.mod-header-icon`
+//     n'a jamais eu de `color` : l'icone (currentColor) heritait de `--texte`,
+//     sombre en theme clair, sur le fond sombre du bandeau — invisible tant
+//     que c'etaient des emojis, expose des le passage en SVG (6.32 puis 6.33).
+//     Titre, sous-titre et .mvu-tab avaient deja leur creme en dur ; l'icone
+//     du bandeau principal, non. Meme correction : color:#F4ECD8 !important,
+//     coherent avec le garde-fou deja pose contre un bandeau qui reclaircit.
+//   ★ Partage par les 9 modules : corrige tous les bandeaux d'un coup, pas
+//     que Planning.
 // v6.87 (17/08/2026) — LES CINQ DERNIERS BANDEAUX + LES MODULES DU BAS EN RELIEF.
 //   ★ BANDEAUX : Planning, La Reserve, Le Chai, Le Cuvier, Le millesime gardaient
 //     leurs anciens dessins — 13 glyphes. ⚠️ Les trois en-tetes de la Cave etaient
@@ -2121,7 +2136,7 @@
 // v2.22 — Fix profils vides : guard vide dans loadData() pour MEMBRES/SAISONS/TACHES
 // v2.17 — Onboarding intégré + tenantId · v2.06 — Firebase Auth · v2.00–v2.05 — divers
 const DEBUG = self.location.hostname === 'localhost' || self.location.hostname === '127.0.0.1';
-const CACHE_NAME   = 'mavigne-v6.88';
+const CACHE_NAME   = 'mavigne-v6.89';
 const TENANT_CACHE = 'mavigne-tenant';   // Cache persistant — préservé à chaque mise à jour SW
 const SYNC_TAG     = 'mavigne-sync';
 
@@ -2137,7 +2152,7 @@ const CDN_URLS = [
 ];
 
 self.addEventListener('install', event => {
-  if(DEBUG) console.log('[SW] Ma Vigne v6.88 installé');
+  if(DEBUG) console.log('[SW] Ma Vigne v6.89 installé');
   event.waitUntil(
     caches.open(CACHE_NAME).then(async cache => {
       // ── Cœur applicatif : STRICT (mise à jour ATOMIQUE) ──
@@ -2153,7 +2168,7 @@ self.addEventListener('install', event => {
 });
 
 self.addEventListener('activate', event => {
-  if(DEBUG) console.log('[SW] Ma Vigne v6.88 activé');
+  if(DEBUG) console.log('[SW] Ma Vigne v6.89 activé');
   event.waitUntil(
     caches.keys().then(keys =>
       Promise.all(

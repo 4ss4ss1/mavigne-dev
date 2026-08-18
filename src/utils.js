@@ -23,7 +23,7 @@ export const GT_ADMIN_EMAIL = 'ngdevpro@gmail.com';
 // WHATS_NEW   : tableau vide = modal desactive pour cette version.
 // Format item : { emoji:'📅', titre:'Titre court', desc:'Phrase utilisateur.' }
 // Regle : seulement les changements visibles par les utilisateurs.
-export const APP_VERSION = '6.34';
+export const APP_VERSION = '6.35';
 // ════ Journal des nouveautés (récap cumulatif) ════
 // Une entrée par version, la PLUS RÉCENTE EN HAUT : { v:'5.10', items:[ {emoji,titre,desc}, … ] }
 // À chaque release visible → AJOUTER un bloc en tête (ne pas remplacer). items:[] = release technique (rien à afficher).
@@ -354,13 +354,17 @@ window._mvGraphRepeindre = function(){
 };
 
 export const WHATS_NEW = [
-  { v:'6.34', items:[
+  { v:'6.35', items:[
     { emoji: 'tracteur', titre: "Le carburant compte enfin vos vrais pleins",
       desc: "Vous mettez 30\u202fL dans un tracteur : jusqu\u2019ici, ces 30\u202fL n\u2019entraient nulle part dans le coût. Le carburant était <b>deviné</b> — heures de session × 6\u202fL/h × prix — et une session non notée faisait <b>disparaître</b> du carburant. Désormais le total, c\u2019est la somme de vos pleins. Les heures ne servent plus qu\u2019à le <b>répartir</b> entre les parcelles : une heure oubliée déplace du carburant d\u2019une parcelle à l\u2019autre, elle n\u2019en efface plus. Et chaque plein est valorisé au prix du litre <b>en vigueur à sa date</b>, plus au prix moyen de toute l\u2019année." },
     { emoji: 'goutte', titre: "Un plein se note toujours en litres",
       desc: "Cocher «\u202fPlein fait\u202f» dans une fiche d\u2019entretien ne demandait <b>aucun litre</b> : le plein était enregistré, le chiffre perdu. Le champ apparaît maintenant dès que vous cochez la case, et la cuve en est décomptée comme avec le bouton «\u202fPlein\u202f». Corriger un chiffre trop haut ou décocher la case <b>rend les litres à la cuve</b>. Les litres s\u2019affichent aussi dans le carnet, à côté du point de contrôle." },
     { emoji: 'alerte', titre: "Un poste qui n\u2019est pas mesuré le dit",
       desc: "Tant qu\u2019aucun plein n\u2019est relevé sur la période, le carburant reste calculé à l\u2019ancienne — et la ligne affiche «\u202fL ESTIMÉS\u202f» au lieu de «\u202fL relevés\u202f». Si des pleins ont été cochés sans litres, leur nombre est indiqué : c\u2019est toute la différence entre «\u202fpeu de carburant\u202f» et «\u202fcarburant mal relevé\u202f»." }
+  ] },
+  { v:'6.34', items:[
+    { emoji: 'check', titre: "Les ic\u00f4nes des bandeaux du haut \u00e9taient presque invisibles",
+      desc: "\u00c0 c\u00f4t\u00e9 du titre de chaque \u00e9cran, l\u2019ic\u00f4ne se fondait dans le fond sombre du bandeau et devenait tr\u00e8s difficile \u00e0 voir. C\u2019est corrig\u00e9 : elle reprend <b>la m\u00eame couleur cr\u00e8me que le titre</b>." }
   ] },
   { v:'6.33', items:[
     { emoji: 'barrique', titre: "Cinq \u00e9crans gardaient encore les anciens dessins",
