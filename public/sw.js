@@ -1,4 +1,20 @@
-// MA VIGNE — Service Worker v6.89
+// MA VIGNE — Service Worker v6.90
+// v6.90 (18/08/2026) — LA CARTE DE PARCELLE, RANGEE.
+//   ⚠️⚠️ UNE REGLE CSS ORPHELINE DEPUIS LA CHARTE DS-2. `.pc-ord` (le rang de
+//     tournee) n'etait style que sous `.pc-nom`, le titre d'AVANT DS-2, que plus
+//     aucun ecran n'emet. La pastille sortait sans aucun style : « 1Comble ».
+//     Elle vit maintenant sous `.mv-t-ord`, avec une GOUTTIERE DE LARGEUR FIXE
+//     — sinon « 1 » et « 12 » ne demarrent pas le nom au meme endroit.
+//   Le rail d'action sort du padding de la carte et vient a fleur du bord, sur
+//   toute la hauteur (`.pcard-qv{padding:0;overflow:hidden}` + padding sur
+//   `.pc-left`) : le filet ne touche plus le pourcentage, et les 16 px de vide
+//   a droite des boutons disparaissent.
+//   ⚠️ Les deux glyphes du rail etaient des EMOJIS (0x2713, 0x23F3) : un emoji
+//     ignore `color` et se dessine autrement sur chaque systeme. Sprite DS-1
+//     (`check`, `sablier`), plus un libelle « Debut » / « Valider » / « Fait ».
+//   Surface ecrite en francais (virgule), espace insecable avant le %.
+//   Accompagnement (regle d'or n°4) : fiche MV_AIDE `parcelles` et guide 04-vigne
+//   decrivent le rail et le numero de tournee.
 // v6.89 (18/08/2026) — LE CARBURANT COMPTE LES PLEINS REELS, PLUS UNE ESTIMATION.
 //   Le cout GNR etait heures de session x conso L/h x prix : une somme d'estimations,
 //   dont une session non notee retirait silencieusement une part. Il vaut desormais la
@@ -2136,7 +2152,7 @@
 // v2.22 — Fix profils vides : guard vide dans loadData() pour MEMBRES/SAISONS/TACHES
 // v2.17 — Onboarding intégré + tenantId · v2.06 — Firebase Auth · v2.00–v2.05 — divers
 const DEBUG = self.location.hostname === 'localhost' || self.location.hostname === '127.0.0.1';
-const CACHE_NAME   = 'mavigne-v6.89';
+const CACHE_NAME   = 'mavigne-v6.90';
 const TENANT_CACHE = 'mavigne-tenant';   // Cache persistant — préservé à chaque mise à jour SW
 const SYNC_TAG     = 'mavigne-sync';
 
@@ -2152,7 +2168,7 @@ const CDN_URLS = [
 ];
 
 self.addEventListener('install', event => {
-  if(DEBUG) console.log('[SW] Ma Vigne v6.89 installé');
+  if(DEBUG) console.log('[SW] Ma Vigne v6.90 installé');
   event.waitUntil(
     caches.open(CACHE_NAME).then(async cache => {
       // ── Cœur applicatif : STRICT (mise à jour ATOMIQUE) ──
@@ -2168,7 +2184,7 @@ self.addEventListener('install', event => {
 });
 
 self.addEventListener('activate', event => {
-  if(DEBUG) console.log('[SW] Ma Vigne v6.89 activé');
+  if(DEBUG) console.log('[SW] Ma Vigne v6.90 activé');
   event.waitUntil(
     caches.keys().then(keys =>
       Promise.all(

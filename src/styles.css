@@ -801,7 +801,33 @@ html.mv-ov-lock,body.mv-ov-lock{overflow:hidden!important;}
    Numérotation VIVANTE : le rang est recalculé sur les parcelles affichées,
    donc 1, 2, 3… sans trou quand une parcelle est terminée. Deux endroits :
    la fiche de parcelle (.pc-ord) et l'étiquette de la carte (.pl-ord). */
+/* ⚠️⚠️ CETTE REGLE ETAIT ORPHELINE. Elle ciblait `.pc-nom`, le titre d'avant la
+   charte DS-2 — plus aucun ecran ne l'emet. La pastille de tournee sortait donc
+   SANS AUCUN STYLE : « 1Comble », le chiffre colle au nom, largeur variable
+   selon le rang. Elle vit maintenant sous `.mv-t-ord`, le titre reel.
+   Le selecteur `.pc-nom` est conserve : il ne coute rien et redeviendra juste
+   si un ecran ancien remonte. */
 .pc-nom .pc-ord{display:inline-flex;align-items:center;justify-content:center;min-width:20px;height:20px;padding:0 5px;margin-right:6px;border-radius:6px;background:var(--or);color:#1C1813;font-size:11px;font-weight:800;font-variant-numeric:tabular-nums;vertical-align:2px;}
+/* ── Le titre A GOUTTIERE — le rang de tournee occupe une largeur FIXE ──
+   ⚠️ La largeur fixe n'est pas une coquetterie : sans elle « 1 » et « 12 »
+     ne demarrent pas le nom au meme endroit, et la colonne des noms se lit
+     en zigzag sur quarante-six lignes. Meme raison que `tabular-nums`.
+   ⚠️ `align-items:baseline` et NON `center` : un nom long passe a la ligne, et
+     une pastille centree sur deux lignes flotte au milieu de nulle part.
+   ⚠️⚠️ ET NON `flex-start` NON PLUS. Cale en haut, la pastille demandait un
+     `margin-top:1px` pour retomber juste — un nombre magique, hors de l'echelle
+     DS-3, et le cliquet d'espacement l'a refuse. Il avait raison : la bonne
+     reponse n'etait pas un pixel invente mais la LIGNE DE BASE. Le chiffre de
+     la pastille s'aligne sur celle du nom, ce qui est exact par construction et
+     le reste si la taille du titre change un jour. */
+.mv-t-ord{display:flex;align-items:baseline;gap:var(--e-2);}
+.mv-t-ord .mv-t-nom{min-width:0;}
+.mv-t-ord .pc-ord{flex:none;display:inline-flex;align-items:center;justify-content:center;
+  min-width:24px;height:22px;padding:0 var(--e-1);border-radius:7px;
+  background:var(--or-pale);color:var(--terre);
+  border:1px solid color-mix(in srgb, var(--or) 45%, transparent);
+  font-family:'Outfit',sans-serif;font-size:var(--pt-micro);font-weight:700;
+  font-variant-numeric:tabular-nums;letter-spacing:.02em;}
 .leaflet-tooltip.parcel-label .pl-ord{display:inline-block;min-width:13px;height:13px;line-height:13px;padding:0 3px;margin-right:4px;border-radius:4px;background:#C9A84C;color:#1C1813;font-size:9px;font-weight:800;text-align:center;font-variant-numeric:tabular-nums;}
 #app-root[data-theme="dark"] .leaflet-tooltip.parcel-label{background:rgba(10,5,8,0.82);border-color:rgba(200,176,32,0.45);color:#F0E2C8;box-shadow:0 1px 6px rgba(0,0,0,0.5);}
 @media(prefers-color-scheme:dark){#app-root:not([data-theme="light"]) .leaflet-tooltip.parcel-label{background:rgba(10,5,8,0.82);border-color:rgba(200,176,32,0.45);color:#F0E2C8;box-shadow:0 1px 6px rgba(0,0,0,0.5);}}
@@ -1898,18 +1924,43 @@ body.mv-trial-on #app-root{padding-top:calc(env(safe-area-inset-top,0px) + 44px)
 .mv-sg-lb{font-size:11.5px;font-weight:600;color:var(--texte-med);font-family:'Outfit',sans-serif;}
 
 
-/* ── LOT 1 : validation rapide (v4.43) ── */
+/* ── LE RAIL D'ACTION (ex-"LOT 1 : validation rapide") ──
+   ⚠️⚠️ AVANT, LA COLONNE VIVAIT DANS LE PADDING DE LA CARTE. Son filet de
+     gauche touchait le pourcentage aligne a droite — « 0 % » colle au sablier —
+     et il restait 16 px de vide inutile A DROITE des boutons. Le rail sort
+     desormais du padding : la carte passe a `padding:0`, le padding revient sur
+     `.pc-left`, et le rail vient A FLEUR DU BORD, pleine hauteur.
+   ⚠️ `overflow:hidden` sur la carte est ce qui CLIPPE les coins du rail sur le
+     rayon de la carte. Sans lui, le rail deborde en angle droit sur un coin
+     arrondi. Le liseré `inset 3px 0 0` de la proximite GPS y survit : un
+     box-shadow interne n'est pas rogne par `overflow`.
+   ⚠️ LES GLYPHES NE SONT PLUS DES EMOJIS. Un emoji ne prend pas la couleur du
+     texte et se dessine autrement sur chaque systeme : `.pc-validate` gardait
+     `color:var(--vert-med)` sans effet sur un ✓ noir d'Android. Les icones
+     viennent du sprite DS-1 (`check`, `sablier`) et heritent de `currentColor`. */
+.pcard-qv{padding:0;overflow:hidden;}
 .pcard-qv .pc-row{display:flex;align-items:stretch;}
-.pcard-qv .pc-left{flex:1;min-width:0;cursor:pointer;}
-.pc-actions{display:flex;flex-direction:column;border-left:1px solid var(--gris-clair);flex-shrink:0;}
-.pc-validate{flex:1;width:60px;min-height:60px;border:none;background:transparent;color:var(--vert-med);font-size:23px;font-weight:700;cursor:pointer;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:1px;transition:background .15s;-webkit-tap-highlight-color:transparent;}
-.pc-validate .pcv-sub{font-size:9px;font-weight:700;letter-spacing:.04em;opacity:.8;}
+.pcard-qv .pc-left{flex:1;min-width:0;cursor:pointer;padding:var(--e-4);}
+.pc-actions{display:flex;flex-direction:column;flex:none;width:68px;
+  border-left:1px solid var(--gris-clair);
+  background:color-mix(in srgb, var(--gris-clair) 30%, transparent);}
+.pc-validate,.pc-start{width:100%;border:none;background:transparent;cursor:pointer;
+  display:flex;flex-direction:column;align-items:center;justify-content:center;gap:3px;
+  font-family:'Outfit',sans-serif;transition:background .15s;
+  -webkit-tap-highlight-color:transparent;}
+/* Le libelle sous l'icone : une action NOMMEE vaut mieux qu'un pictogramme a
+   deviner, et 9,5 px tiennent dans 68 px sans couper. */
+.pc-lb{font-size:var(--pt-nano);font-weight:700;letter-spacing:.05em;
+  text-transform:uppercase;line-height:1;}
+.pc-validate{flex:1;min-height:56px;color:var(--vert-med);}
+.pc-validate .pcv-sub{font-size:var(--pt-nano);font-weight:700;letter-spacing:.04em;opacity:.8;}
 .pc-validate:active{background:var(--vert-pale);}
 .pc-validate.done{color:var(--vert-clair);}
+.pc-validate.done .pc-lb{opacity:.75;}
 /* bouton "Commencer" (mode tâche filtrée / priorité) */
-.pc-start{width:60px;min-height:34px;border:none;background:var(--orange-pale);color:var(--orange);font-size:17px;font-weight:700;cursor:pointer;display:flex;align-items:center;justify-content:center;border-bottom:1px solid var(--gris-clair);transition:background .15s;-webkit-tap-highlight-color:transparent;}
+.pc-start{min-height:56px;flex:none;background:var(--orange-pale);color:var(--orange);
+  border-bottom:1px solid var(--gris-clair);}
 .pc-start:active{background:rgba(184,90,26,.22);}
-.pc-start + .pc-validate{min-height:36px;}
 /* bandeau focus tâche prioritaire (équipe verrouillée) */
 .p-focus-bar{display:flex;align-items:center;gap:9px;flex-wrap:wrap;background:linear-gradient(135deg,#FFF8E8,#F7E9C0);border:1.5px solid #E8C840;border-radius:14px;padding:9px 13px;}
 .p-focus-lbl{font-size:10px;font-weight:800;letter-spacing:.06em;text-transform:uppercase;color:#7A5C10;flex-shrink:0;}

@@ -11,7 +11,7 @@ import { isAdmin, isTractoriste, isSaisonnier, canWrite,
          getRoleLabel, showToast, showSyncBadge, wmoDesc, wmoIcone, TABREV, tNom,
          applyTheme, setThemeMode, initTheme, logError, _closeCriticalOverlay, _escHtml, _escAttr,
          GT_ADMIN_EMAIL, DEMO_TENANT, DEMO_FIREBASE_EMAIL, DEMO_FIREBASE_PWD, dreEffectif,
-         _mvBadge, _mvIcon,
+         _mvBadge, _mvIcon, _mvIconTache,
 } from './utils.js';
 // Exposer constantes démo sur window pour accès cross-module
 import './firebase.js';
@@ -6552,6 +6552,11 @@ function _pOrdCalc(noms){
 }
 function _pOrdRang(nom){ var r=(_pOrdRangs&&_pOrdRangs.rang)?_pOrdRangs.rang[nom]:null; return (r>0)?r:null; }
 function _pOrdPill(nom){ var r=_pOrdRang(nom); return r?('<span class="pc-ord">'+r+'</span>'):''; }
+// La surface, ECRITE EN FRANCAIS. `p.surface` sortait tel quel : « 0.2961 ha »,
+// separateur anglais dans une application de gestion francaise.
+// ⚠️ La PRECISION n'est pas touchee : une surface cadastrale se lit au dixieme
+//   d'are, l'arrondir a deux decimales ferait perdre 0,0061 ha a une parcelle.
+function _pvSurfFr(s){ if(s==null||s==='')return ''; return String(s).replace('.',','); }
 function _pOrdDateFr(iso){ var m=/^(\d{4})-(\d{2})-(\d{2})$/.exec(String(iso||'')); return m?(m[3]+'/'+m[2]):''; }
 // Étiquette de carte : le numéro devant le nom quand la tournée est active.
 function _pOrdMapLabel(nom){ var r=_pOrdRang(nom); return (r?('<span class="pl-ord">'+r+'</span>'):'')+_escHtml(nom||''); }
@@ -6776,11 +6781,11 @@ function renderParcelles(){
     const _pvInner=`
       <div class="mv-hd">
         <div style="min-width:0">
-          <div class="mv-t">${_pOrdPill(p.nom)+_escHtml(p.nom)}</div>
-          <div class="mv-l" style="margin-top:2px">${p.surface} ha${_cep?' \u00b7 '+_escHtml(_cep):''}</div>
+          <div class="mv-t mv-t-ord">${_pOrdPill(p.nom)}<span class="mv-t-nom">${_escHtml(p.nom)}</span></div>
+          <div class="mv-l" style="margin-top:2px">${_pvSurfFr(p.surface)} ha${_cep?' \u00b7 '+_escHtml(_cep):''}</div>
         </div>
         <div style="text-align:right;flex:none">
-          <div class="mv-n" style="color:${cl.pct===100?'var(--vert-med)':'var(--texte)'}">${cl.pct}<span style="font-size:13px">%</span></div>
+          <div class="mv-n" style="color:${cl.pct===100?'var(--vert-med)':'var(--texte)'}">${cl.pct}<span style="font-size:13px">&nbsp;%</span></div>
           <div class="mv-l">${cl.nbDone}/${cl.nbTotal} t\u00e2ches</div>
         </div>
       </div>
@@ -8504,15 +8509,24 @@ function _mvMapQuickOpen(nom){
   if(pe){pe.textContent=cl.pct+'%';pe.style.color=(cl.pct===100?'var(--vert)':cl.pct>=75?'var(--or)':'var(--orange)');}
   var bar=document.getElementById('mq-bar-fill'); if(bar){bar.style.width=cl.pct+'%';bar.style.background=cl.col;}
   var stepLbl=(type!=='simple')?(' '+_pvStepLabel(task)+pCurStep):'';
-  var _t=document.getElementById('mq-task'); if(_t)_t.textContent=em+' '+(typeof tNom==='function'?tNom(task):task)+stepLbl;
+  // ⚠️⚠️ ICI VIVAIT UN PLANTAGE. La ligne lisait `em`, identifiant DECLARE NULLE
+  //   PART — ni dans cette fonction, ni en portee. Un module ESM est en mode
+  //   strict : c'est un ReferenceError, donc `_mvMapQuickOpen` s'arretait la et
+  //   LE PANNEAU RAPIDE DE LA CARTE NE S'OUVRAIT PAS. Meme famille que §49.
+  //   C23 ne pouvait pas le voir : il controle les appels `_xxx()`, pas les
+  //   identifiants nus. Le pictogramme du travail prend la place de `em`.
+  var _t=document.getElementById('mq-task');
+  if(_t)_t.innerHTML=_mvIconTache(task,16)+'<span>'+_escHtml((typeof tNom==='function'?tNom(task):task)+stepLbl)+'</span>';
   var here=(typeof _pProxHere!=='undefined'&&_pProxHere===nom);
   var _h=document.getElementById('mq-here'); if(_h)_h.style.display=here?'':'none';
   var done=_pvCurDone(p,task), started=_pvCurStarted(p,task);
   var bStart=document.getElementById('mq-start'), bVal=document.getElementById('mq-validate');
   if(bStart)bStart.style.display=(done||started)?'none':'';
   if(bVal){
-    if(done){bVal.textContent=String.fromCodePoint(0x2713)+' D\u00e9j\u00e0 fait';bVal.classList.add('mq-done');bVal.disabled=true;}
-    else {bVal.textContent=String.fromCodePoint(0x2713)+' Valider'+stepLbl;bVal.classList.remove('mq-done');bVal.disabled=false;}
+    // Meme geste que le rail de la liste, donc meme icone : le sprite DS-1,
+    // pas un emoji que `color:#fff` ne teindra jamais.
+    if(done){bVal.innerHTML=_mvIcon('check',16)+'<span>D\u00e9j\u00e0 fait</span>';bVal.classList.add('mq-done');bVal.disabled=true;}
+    else {bVal.innerHTML=_mvIcon('check',16)+'<span>Valider'+_escHtml(stepLbl)+'</span>';bVal.classList.remove('mq-done');bVal.disabled=false;}
   }
   openOv('ovMapQuick');
 }
@@ -10290,7 +10304,11 @@ function pQuickStart(nom,evt){
   }
   saveData('parcelles');
   if(navigator.vibrate)navigator.vibrate(40);
-  showToast(String.fromCodePoint(0x23F3)+' '+tNom(task)+(type!=='simple'?' '+_pvStepLabel(task)+pCurStep:'')+' commenc\u00e9 \u00b7 '+nom,'#B85A1A');
+  // ⚠️ `showToast` ecrit en `textContent` : c'est l'un des trois puits de DS-1
+  //   qui ne peuvent PAS recevoir de SVG. La bonne reponse n'est pas d'y forcer
+  //   une icone, c'est de retirer l'emoji : le POINT COLORE du toast porte deja
+  //   le signal, et il suit le theme.
+  showToast(tNom(task)+(type!=='simple'?' '+_pvStepLabel(task)+pCurStep:'')+' commenc\u00e9 \u00b7 '+nom,'#B85A1A');
   renderParcelles();computePStats();
   if(typeof refreshMapColors==='function')refreshMapColors();
 }
@@ -10361,8 +10379,14 @@ function _pvActions(p){
   var done=_pvCurDone(p,task);
   var started=_pvCurStarted(p,task);
   var sub=(type!=='simple')?('<span class="pcv-sub">'+_pvStepLabel(task)+pCurStep+'</span>'):'';
-  var CK=String.fromCodePoint(0x2713), HG=String.fromCodePoint(0x23F3);
-  if(done)return '<div class="pc-actions"><button class="pc-validate done" onclick="pQuickUndo(\''+_escAttr(p.nom)+'\')" aria-label="Annuler">'+CK+sub+'</button></div>';
+  // ⚠️ PLUS D'EMOJI ICI. Les deux glyphes etaient ecrits en points de code
+  //   (0x2713, 0x23F3) : un emoji ignore `color`, se dessine autrement sur
+  //   chaque systeme, et le sablier d'Android n'a rien a voir avec celui d'iOS.
+  //   Sprite DS-1, `currentColor` — la couleur du bouton s'applique enfin.
+  var CK=_mvIcon('check',24)+'<span class="pc-lb">Valider</span>';
+  var CKD=_mvIcon('check',24)+'<span class="pc-lb">Fait</span>';
+  var HG=_mvIcon('sablier',20)+'<span class="pc-lb">D\u00e9but</span>';
+  if(done)return '<div class="pc-actions"><button class="pc-validate done" onclick="pQuickUndo(\''+_escAttr(p.nom)+'\')" aria-label="Annuler">'+CKD+sub+'</button></div>';
   var startBtn=started?'':'<button class="pc-start" onclick="pQuickStart(\''+_escAttr(p.nom)+'\',event)" aria-label="Commencer">'+HG+'</button>';
   return '<div class="pc-actions">'+startBtn+'<button class="pc-validate" onclick="pQuickValidate(\''+_escAttr(p.nom)+'\',event)" aria-label="Valider '+_escAttr(tNom(task))+'">'+CK+sub+'</button></div>';
 }

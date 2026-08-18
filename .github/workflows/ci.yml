@@ -116,6 +116,24 @@ jobs:
           node scripts/mv-harnais-icones.mjs
           node scripts/mv-harnais-icones-contre.mjs
 
+      # La carte d'une PARCELLE dans la liste (a ne pas confondre avec
+      # `mv-harnais-carte.mjs`, qui vise la carte a trois etages du Pilotage).
+      # ⚠️ Il existe parce qu'une regle CSS a vecu des mois SANS ATTEINDRE son
+      #   element : `.pc-ord` etait ecrite `.pc-nom .pc-ord`, or `.pc-nom` est le
+      #   titre d'AVANT la charte DS-2 et plus aucun ecran ne l'emet. Le rang de
+      #   tournee sortait en texte brut, colle au nom. Une regle qui ne s'applique
+      #   a rien ne casse pas : elle se tait. Ni node --check, ni ESLint, ni le
+      #   preflight ne pouvaient la voir. Le harnais reconstruit la CHAINE
+      #   D'ANCETRES emise par app.js et exige qu'une regle la MATCHE.
+      # ⚠️⚠️ La contre-epreuve tourne AUSSI, et elle a servi le jour meme : la
+      #   premiere version du controle cherchait `.pc-ord` QUELQUE PART dans la
+      #   feuille — et `.pc-nom .pc-ord` contient cette chaine. Elle repondait
+      #   vert sur le defaut exact qu'elle visait. Meme famille que §48.
+      - name: Harnais — la carte de parcelle, et sa contre-epreuve
+        run: |
+          node scripts/mv-harnais-carte-parcelle.mjs
+          node scripts/mv-harnais-carte-parcelle.mjs --contre
+
       # La visite guidee est la VITRINE : une demo cassee est cassee en public.
       # Deux regles qu'aucun autre controle ne porte. ① On ne facture que ce
       # qu'on a montre : toute ligne de DEMO2_CREDITS doit etre demontree par

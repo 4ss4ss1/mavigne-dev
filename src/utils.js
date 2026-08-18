@@ -23,7 +23,7 @@ export const GT_ADMIN_EMAIL = 'ngdevpro@gmail.com';
 // WHATS_NEW   : tableau vide = modal desactive pour cette version.
 // Format item : { emoji:'📅', titre:'Titre court', desc:'Phrase utilisateur.' }
 // Regle : seulement les changements visibles par les utilisateurs.
-export const APP_VERSION = '6.35';
+export const APP_VERSION = '6.36';
 // ════ Journal des nouveautés (récap cumulatif) ════
 // Une entrée par version, la PLUS RÉCENTE EN HAUT : { v:'5.10', items:[ {emoji,titre,desc}, … ] }
 // À chaque release visible → AJOUTER un bloc en tête (ne pas remplacer). items:[] = release technique (rien à afficher).
@@ -354,6 +354,16 @@ window._mvGraphRepeindre = function(){
 };
 
 export const WHATS_NEW = [
+  { v:'6.36', items:[
+    { emoji: 'carte', titre: "Le numéro de tournée n’est plus collé au nom",
+      desc: "Quand une tournée est fixée, chaque parcelle porte son rang de passage. Il sortait en <b>chiffre nu, collé au nom</b> : « 1Comble ». Pire, il poussait le nom d’une largeur différente selon le rang, si bien qu’aucun nom ne commençait au même endroit d’une ligne à l’autre. Le numéro reprend sa pastille et une <b>largeur fixe</b> : la colonne des noms se lit d’un trait, même à quarante parcelles." },
+    { emoji: 'check', titre: "Les boutons de validation ont de l’air et un nom",
+      desc: "La colonne de droite était <b>collée au pourcentage</b>, avec du vide perdu à sa droite. Elle vient désormais au bord de la carte, sur toute la hauteur, et le pourcentage retrouve sa marge. Les deux gestes ne sont plus des pictogrammes à deviner : ils s’appellent <b>Début</b> et <b>Valider</b>." },
+    { emoji: 'alerte', titre: "Le sablier et la coche s’affichaient au hasard du téléphone",
+      desc: "C’étaient des émoji : chaque système les dessine à sa manière, et aucun ne prenait la couleur voulue — la coche s’affichait en noir sur certains Android alors qu’elle est censée être verte. Elles viennent maintenant du jeu d’icônes de l’application : même trait, même couleur, sur tous les téléphones." },
+    { emoji: 'raisin', titre: "Les surfaces s’écrivent en français",
+      desc: "La liste affichait « 0.2961 ha », avec un point. C’est une virgule : « 0,2961 ha ». La précision ne bouge pas." }
+  ] },
   { v:'6.35', items:[
     { emoji: 'tracteur', titre: "Le carburant compte enfin vos vrais pleins",
       desc: "Vous mettez 30\u202fL dans un tracteur : jusqu\u2019ici, ces 30\u202fL n\u2019entraient nulle part dans le coût. Le carburant était <b>deviné</b> — heures de session × 6\u202fL/h × prix — et une session non notée faisait <b>disparaître</b> du carburant. Désormais le total, c\u2019est la somme de vos pleins. Les heures ne servent plus qu\u2019à le <b>répartir</b> entre les parcelles : une heure oubliée déplace du carburant d\u2019une parcelle à l\u2019autre, elle n\u2019en efface plus. Et chaque plein est valorisé au prix du litre <b>en vigueur à sa date</b>, plus au prix moyen de toute l\u2019année." },
@@ -1848,7 +1858,8 @@ var MV_AIDE = {
     ico: 'carte', titre: 'Mes Parcelles', ancre: 'vigne',
     points: [
       ['Les filtres du haut', "trient par état : finies, en cours, arrachées."],
-      ['Le bouton vert', "sur une carte valide la tâche en cours sans ouvrir la parcelle."],
+      ['La colonne de droite', "porte les deux gestes du terrain, sans ouvrir la parcelle : « Début » signale qu’on attaque, « Valider » que c’est fini. Une tâche à passages affiche en plus le passage en cours (P1, P2, N1…)."],
+      ['Le numéro devant le nom', "est le rang de la tournée du domaine. Il n’apparaît que si une tournée est fixée, et les parcelles se rangent dans cet ordre."],
       ['Onglet Carte', ": les contours viennent de votre export PAC ou d’un fichier KML."],
       ['La recherche', "accepte le nom du climat comme le lieu-dit."],
       ['Une parcelle arrachée', "sort des totaux mais reste dans l’historique."],
