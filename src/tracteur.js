@@ -496,6 +496,69 @@ var _entFields=[
   {key:'lavage',label:'Lavage'},
 ];
 
+// ════ LITRES D'UN PLEIN NOTE DANS UNE FICHE D'ENTRETIEN ════
+// Deux chemins notent un plein : le bouton « Plein » (qui ecrivait deja
+// `litres_plein`) et la case « Plein fait » d'une fiche d'entretien, qui ne
+// demandait JAMAIS les litres. Le cout carburant du Pilotage se calcule sur ces
+// litres : un plein sans litres n'est pas un detail de saisie, c'est un trou dans
+// le calcul. Le champ est donc EXIGE des que la case est cochee, des deux cotes.
+// ⚠️ `_entFields` n'est PAS touche : quatre boucles le parcourent en supposant que
+//   chaque cle porte un BOOLEEN (grille de resume, checklist, fiche, edition).
+//   Les litres vivent A COTE, jamais dedans.
+// ⚠️ Les deux overlays vivent dans `index.html`, mais leurs grilles sont peuplees
+//   en JS : le champ est INJECTE ici, donc index.html reste intact et le lot ne
+//   demande aucun bump de version.
+function _pleinWrapId(pfx){ return pfx+'-plein-l-wrap'; }
+function _pleinInpId(pfx){ return pfx+'-plein-l'; }
+function _pleinBlocEnsure(pfx){
+  var grid=document.getElementById(pfx+'-checklist'); if(!grid) return null;
+  var w=document.getElementById(_pleinWrapId(pfx));
+  if(!w){
+    grid.insertAdjacentHTML('afterend',
+      '<div id="'+_pleinWrapId(pfx)+'" style="display:none;margin:-2px 0 14px">'
+      +'<div class="fl">Litres mis dans le r\u00e9servoir</div>'
+      +'<input type="number" class="fi ac" id="'+_pleinInpId(pfx)+'" inputmode="decimal" min="0.1" step="0.1" placeholder="ex. 40">'
+      +'<div id="'+pfx+'-plein-l-note" style="font-size:11px;color:var(--texte-doux);margin:6px 2px 0;line-height:1.45"></div>'
+      +'</div>');
+    w=document.getElementById(_pleinWrapId(pfx));
+  }
+  return w;
+}
+function _pleinBlocVal(pfx){
+  var e=document.getElementById(_pleinInpId(pfx));
+  var v=parseFloat(String((e&&e.value)||'').replace(',','.'));
+  return (isFinite(v)&&v>0)?v:0;
+}
+function _pleinBlocSet(pfx,v){ var e=document.getElementById(_pleinInpId(pfx)); if(e) e.value=(Number(v)>0?v:''); }
+// Le champ suit l'etat du bouton « Plein fait » : masque tant qu'il n'est pas coche.
+function _pleinBlocSync(pfx){
+  var w=_pleinBlocEnsure(pfx); if(!w) return;
+  var b=document.getElementById(pfx+'-btn-plein');
+  var on=!!(b&&b.classList.contains('checked'));
+  w.style.display=on?'':'none';
+  var nt=document.getElementById(pfx+'-plein-l-note');
+  if(nt){
+    var g=(window.CONFIG&&window.CONFIG.gnr)||null;
+    nt.textContent=(g&&g.capacite)
+      ? ('Cuve GNR : '+_gnrNum(g.niveau)+' / '+_gnrNum(g.capacite)+' L avant ce plein. Ces litres en seront d\u00e9compt\u00e9s.')
+      : 'Cuve GNR non renseign\u00e9e \u2014 le plein sera not\u00e9, sans d\u00e9compte de cuve.';
+  }
+}
+// ⚠️ UN SEUL point d'ecriture du niveau de cuve, pour les trois chemins (bouton
+// « Plein », fiche d'entretien, correction de fiche). `d` en litres : negatif pour
+// un plein qui sort de la cuve, positif pour des litres RENDUS a la cuve quand une
+// saisie est corrigee a la baisse ou decochee. Rend le nouveau niveau, ou null si
+// aucune cuve n'est renseignee (le plein reste note, il n'est juste pas decompte).
+function _gnrCuveDelta(d){
+  var cfg=window.CONFIG||{}, g=cfg.gnr;
+  if(!g||!g.capacite||!Number(d)) return null;
+  var cap=Number(g.capacite)||0;
+  var lvl=Math.min(cap,Math.max(0,(Number(g.niveau)||0)+Number(d)));
+  g.niveau=lvl; g.maj=_gnrTodayISO(); window.CONFIG=cfg;
+  _saveData('config');
+  return lvl;
+}
+
 function openOvEntretien(){
   if(!isTractoriste()&&!isAdmin()){showToast('Réservé aux tractoristes','#C0392B');return;}
   var t=getTracteurSel();if(!t)return;
@@ -531,6 +594,11 @@ function openOvEntretien(){
   var btn=document.getElementById('ent-anomalie-traitee');
   if(btn&&btn.classList.contains('checked'))toggleEntAnoTraitee();
 
+  // Champ litres : pose des l'ouverture, vide, masque tant que « Plein fait »
+  // n'est pas coche. `ef-` est prepare ici aussi, comme sa checklist juste au-dessus.
+  _pleinBlocEnsure('ent'); _pleinBlocSet('ent',0); _pleinBlocSync('ent');
+  _pleinBlocEnsure('ef');
+
   _openOv('ovEntretien');
 }
 
@@ -539,6 +607,10 @@ function toggleEntBtn(el,key){
   var sub=el.querySelector('.ent-btn-sub');
   if(el.classList.contains('checked')){sub.textContent='OK';}
   else{sub.textContent='Non fait';}
+  // Le champ litres apparait avec la case « Plein fait ». Le prefixe se lit sur
+  // l'id du bouton : `ent-btn-plein` (creation) ou `ef-btn-plein` (edition) —
+  // cette fonction sert les DEUX overlays, elle ne peut pas supposer lequel.
+  if(key==='plein'){ _pleinBlocSync(String(el.id||'').indexOf('ef-')===0?'ef':'ent'); }
 }
 
 // ── Préparer et afficher la confirmation avant saveEntretien ──
@@ -548,11 +620,21 @@ function confirmEntretien(){
   var cond=document.getElementById('ent-cond').value;
   if(!date||!cond){showToast('Date et conducteur requis','#C0392B');return;}
   var nb=_entFields.filter(function(f){return document.getElementById('ent-btn-'+f.key)?.classList.contains('checked');}).length;
+  // Un plein sans litres ne peut pas etre compte. On refuse ICI, avant la modale :
+  // c'est le dernier ecran ou le champ est encore visible et corrigeable.
+  var _pb=document.getElementById('ent-btn-plein');
+  var pleinOn=!!(_pb&&_pb.classList.contains('checked'));
+  var pleinL=pleinOn?_pleinBlocVal('ent'):0;
+  if(pleinOn&&!(pleinL>0)){
+    showToast('Indique les litres mis dans le r\u00e9servoir','#C0392B');
+    var _lEl=document.getElementById(_pleinInpId('ent')); if(_lEl&&_lEl.focus)_lEl.focus();
+    return;
+  }
   var anomalie=document.getElementById('ent-anomalie').value.trim();
   var traitee=document.getElementById('ent-anomalie-traitee')?.classList.contains('checked')||false;
   // Peupler la modal de confirmation
   document.getElementById('ent-conf-date').textContent=_fmtDate(date)+' · '+cond;
-  document.getElementById('ent-conf-score').textContent=nb+'/6 points OK';
+  document.getElementById('ent-conf-score').textContent=nb+'/6 points OK'+(pleinL>0?(' \u00b7 plein de '+_gnrNum(pleinL)+' L'):'');
   var anoLine=document.getElementById('ent-conf-ano');
   if(anomalie){
     anoLine.style.display='block';
@@ -584,13 +666,18 @@ function saveEntretien(){
   _entFields.forEach(function(f){
     fiche[f.key]=document.getElementById('ent-btn-'+f.key)?.classList.contains('checked')||false;
   });
+  // Litres du plein : meme regle que le bouton « Plein » dedie. La fiche porte le
+  // chiffre, la cuve en est decomptee UNE fois. Sans case cochee, aucun champ.
+  var _pl=fiche.plein?_pleinBlocVal('ent'):0;
+  if(_pl>0) fiche.litres_plein=_pl;
   ENTRETIENS.unshift(fiche);
   window.ENTRETIENS=ENTRETIENS;
   _saveData('entretiens');
+  var _nv=(_pl>0)?_gnrCuveDelta(-_pl):null;
   _closeOv(null,'ovConfirmEntretien');
   _closeOv(null,'ovEntretien');
   renderEntretiens();
-  showToast('Fiche enregistrée','#3D6B27');
+  showToast('Fiche enregistrée'+(_pl>0?(' \u00b7 -'+_gnrNum(_pl)+' L'+(_nv!=null?(' \u00b7 cuve \u00e0 '+_gnrNum(_nv)+' L'):'')):''),'#3D6B27');
 }
 
 // ── Toggle case "Anomalie traitée" dans ovEntretien ──
@@ -829,16 +916,16 @@ function savePleinFiche(){
   var t=_tracSelId?getTracteurSel():null; if(!t){showToast('Sélectionne un tracteur','#C0392B');return;}
   var inp=document.getElementById('plein-litres'); var n=parseFloat(inp&&inp.value)||0;
   if(n<=0){showToast('Indique les litres mis dans le réservoir','#C0392B');return;}
-  // 1) Cuve : décompte du plein
-  var lvl=Math.max(0,(Number(g.niveau)||0)-n);
-  g.niveau=lvl; g.maj=_gnrTodayISO(); window.CONFIG=cfg;
+  // 1) Cuve : decompte du plein — par _gnrCuveDelta, seul point d'ecriture du
+  //    niveau. Le repli couvre le cas « pas de cuve » (deja refuse plus haut).
+  var lvl=_gnrCuveDelta(-n); if(lvl==null) lvl=Number(g.niveau)||0;
   // 2) Fiche d'entretien auto : « Plein fait » coché, date du jour, au nom du conducteur courant
   var cond=(currentUser&&currentUser.nom)||(_condList()[0]&&_condList()[0].nom)||'';
   var fiche={ id:'ent'+Date.now(), tracteurId:t.id, date:todayStr(), conducteur:cond, anomalie:'', anomalie_traitee:false, litres_plein:n };
   _entFields.forEach(function(f){ fiche[f.key]=(f.key==='plein'); });
   ENTRETIENS.unshift(fiche); window.ENTRETIENS=ENTRETIENS;
   // 3) Sauvegardes
-  _saveData('entretiens'); _saveData('config');
+  _saveData('entretiens');
   _closeOv(null,'ovPlein'); renderEntretiens();
   var bas=(lvl<=(Number(g.seuil)||0));
   showToast('Plein noté · -'+_gnrNum(n)+' L · cuve à '+_gnrNum(lvl)+' L'+(bas?' · bas':''), bas?'#C0392B':'#3D6B27');
@@ -963,8 +1050,11 @@ function renderListeFiches(){
 
     // Checklist en grille 3 colonnes
     var checkHtml=_entFields.map(function(ef){
+      // Les litres etaient ecrits en base et affiches NULLE PART. Ils se lisent ici,
+      // a cote du point de controle qu'ils chiffrent.
+      var _lp=(ef.key==='plein'&&Number(f.litres_plein)>0)?(' \u2014 '+_gnrNum(f.litres_plein)+' L'):'';
       return '<div class="fiche-item"><span style="display:inline-flex;color:'+(f[ef.key]?'var(--vert-med)':'var(--rouge)')+'">'+_mvIcon(f[ef.key]?'check':'croix',16)+'</span>'
-        +'<span style="color:'+(f[ef.key]?'var(--texte)':'var(--texte-doux)')+'">'+ef.label+'</span></div>';
+        +'<span style="color:'+(f[ef.key]?'var(--texte)':'var(--texte-doux)')+'">'+ef.label+_lp+'</span></div>';
     }).join('');
 
     // Boutons admin
@@ -1029,6 +1119,8 @@ function openOvEditFiche(id){
   var cs=document.getElementById('ef-cond');
   cs.innerHTML=_condList().map(function(c){return '<option'+(c.nom===f.conducteur?' selected':'')+'>'+_escHtml(c.nom)+'</option>';}).join('');
   // Checklist
+  _pleinBlocEnsure('ef');
+  _pleinBlocSet('ef',Number(f.litres_plein)||0);
   _entFields.forEach(function(fi){
     var btn=document.getElementById('ef-btn-'+fi.key);
     if(!btn)return;
@@ -1048,6 +1140,8 @@ function openOvEditFiche(id){
     else{if(btn.classList.contains('checked'))toggleEfAnoTraitee();}
   }
   // Fermer la liste et ouvrir édition
+  // Apres la boucle : les boutons portent leur etat, le champ peut se caler dessus.
+  _pleinBlocSync('ef');
   _closeOv(null,'ovListeFiches');
   _openOv('ovEditFiche');
 }
@@ -1083,6 +1177,19 @@ function saveEditFiche(){
   var id=document.getElementById('ef-id').value;
   var f=ENTRETIENS.find(function(x){return x.id===id;});
   if(!f)return;
+  // ⚠️ La validation passe AVANT la premiere ecriture sur `f` : un refus a
+  //   mi-parcours laisserait la fiche a moitie modifiee en memoire, sauvee ou
+  //   non au prochain _saveData d'un autre chemin.
+  var _efPb=document.getElementById('ef-btn-plein');
+  var _efPleinOn=!!(_efPb&&_efPb.classList.contains('checked'));
+  var _ap=_efPleinOn?_pleinBlocVal('ef'):0;
+  if(_efPleinOn&&!(_ap>0)){
+    showToast('Indique les litres mis dans le r\u00e9servoir','#C0392B');
+    var _eEl=document.getElementById(_pleinInpId('ef')); if(_eEl&&_eEl.focus)_eEl.focus();
+    return;
+  }
+  // Litres deja portes par la fiche, AVANT modification : sert au delta de cuve.
+  var _av=(f.plein&&Number(f.litres_plein)>0)?Number(f.litres_plein):0;
   f.date=document.getElementById('ef-date').value;
   f.conducteur=document.getElementById('ef-cond').value;
   var anomalie=document.getElementById('ef-anomalie').value.trim();
@@ -1091,6 +1198,10 @@ function saveEditFiche(){
   _entFields.forEach(function(fi){
     f[fi.key]=document.getElementById('ef-btn-'+fi.key)?.classList.contains('checked')||false;
   });
+  // Corriger a la baisse ou decocher « Plein fait » REND les litres a la cuve.
+  // Sans ce delta, une faute de frappe laisserait le niveau faux pour toujours.
+  if(_ap>0) f.litres_plein=_ap; else delete f.litres_plein;
+  if(_av!==_ap) _gnrCuveDelta(_av-_ap);
   window.ENTRETIENS=ENTRETIENS;
   _saveData('entretiens');
   _closeOv(null,'ovEditFiche');

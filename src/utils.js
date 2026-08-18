@@ -23,7 +23,7 @@ export const GT_ADMIN_EMAIL = 'ngdevpro@gmail.com';
 // WHATS_NEW   : tableau vide = modal desactive pour cette version.
 // Format item : { emoji:'📅', titre:'Titre court', desc:'Phrase utilisateur.' }
 // Regle : seulement les changements visibles par les utilisateurs.
-export const APP_VERSION = '6.33';
+export const APP_VERSION = '6.34';
 // ════ Journal des nouveautés (récap cumulatif) ════
 // Une entrée par version, la PLUS RÉCENTE EN HAUT : { v:'5.10', items:[ {emoji,titre,desc}, … ] }
 // À chaque release visible → AJOUTER un bloc en tête (ne pas remplacer). items:[] = release technique (rien à afficher).
@@ -354,6 +354,10 @@ window._mvGraphRepeindre = function(){
 };
 
 export const WHATS_NEW = [
+  { v:'6.34', items:[
+    { emoji: 'check', titre: "Les ic\u00f4nes des bandeaux du haut \u00e9taient presque invisibles",
+      desc: "\u00c0 c\u00f4t\u00e9 du titre de chaque \u00e9cran, l\u2019ic\u00f4ne se fondait dans le fond sombre du bandeau et devenait tr\u00e8s difficile \u00e0 voir. C\u2019est corrig\u00e9 : elle reprend <b>la m\u00eame couleur cr\u00e8me que le titre</b>." }
+  ] },
   { v:'6.33', items:[
     { emoji: 'barrique', titre: "Cinq \u00e9crans gardaient encore les anciens dessins",
       desc: "Le Planning, La R\u00e9serve, Le Chai, Le Cuvier et Le mill\u00e9sime affichaient toujours de vieux pictogrammes en haut de page, l\u00e0 o\u00f9 le reste de l\u2019application avait chang\u00e9. C\u2019est align\u00e9. Au passage, <b>les f\u00fbts ont enfin un dessin de f\u00fbt</b> \u2014 c\u2019\u00e9tait un caddie dans La R\u00e9serve et un bidon dans Le Chai." },

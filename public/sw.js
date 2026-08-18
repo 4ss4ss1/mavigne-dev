@@ -1,4 +1,14 @@
-// MA VIGNE — Service Worker v6.87
+// MA VIGNE — Service Worker v6.88
+// v6.88 (17/08/2026) — .mod-header-icon N'AVAIT JAMAIS DE COULEUR.
+//   ⚠️ MEME PIEGE QUE LE DOCK EN 6.87, UNE REGLE PLUS LOIN. `.mod-header-icon`
+//     n'a jamais eu de `color` : l'icone (currentColor) heritait de `--texte`,
+//     sombre en theme clair, sur le fond sombre du bandeau — invisible tant
+//     que c'etaient des emojis, expose des le passage en SVG (6.32 puis 6.33).
+//     Titre, sous-titre et .mvu-tab avaient deja leur creme en dur ; l'icone
+//     du bandeau principal, non. Meme correction : color:#F4ECD8 !important,
+//     coherent avec le garde-fou deja pose contre un bandeau qui reclaircit.
+//   ★ Partage par les 9 modules : corrige tous les bandeaux d'un coup, pas
+//     que Planning.
 // v6.87 (17/08/2026) — LES CINQ DERNIERS BANDEAUX + LES MODULES DU BAS EN RELIEF.
 //   ★ BANDEAUX : Planning, La Reserve, Le Chai, Le Cuvier, Le millesime gardaient
 //     leurs anciens dessins — 13 glyphes. ⚠️ Les trois en-tetes de la Cave etaient
@@ -2112,7 +2122,7 @@
 // v2.22 — Fix profils vides : guard vide dans loadData() pour MEMBRES/SAISONS/TACHES
 // v2.17 — Onboarding intégré + tenantId · v2.06 — Firebase Auth · v2.00–v2.05 — divers
 const DEBUG = self.location.hostname === 'localhost' || self.location.hostname === '127.0.0.1';
-const CACHE_NAME   = 'mavigne-v6.87';
+const CACHE_NAME   = 'mavigne-v6.88';
 const TENANT_CACHE = 'mavigne-tenant';   // Cache persistant — préservé à chaque mise à jour SW
 const SYNC_TAG     = 'mavigne-sync';
 
@@ -2128,7 +2138,7 @@ const CDN_URLS = [
 ];
 
 self.addEventListener('install', event => {
-  if(DEBUG) console.log('[SW] Ma Vigne v6.87 installé');
+  if(DEBUG) console.log('[SW] Ma Vigne v6.88 installé');
   event.waitUntil(
     caches.open(CACHE_NAME).then(async cache => {
       // ── Cœur applicatif : STRICT (mise à jour ATOMIQUE) ──
@@ -2144,7 +2154,7 @@ self.addEventListener('install', event => {
 });
 
 self.addEventListener('activate', event => {
-  if(DEBUG) console.log('[SW] Ma Vigne v6.87 activé');
+  if(DEBUG) console.log('[SW] Ma Vigne v6.88 activé');
   event.waitUntil(
     caches.keys().then(keys =>
       Promise.all(
