@@ -1319,6 +1319,26 @@ window.fbPullStatic = fbPullStatic;
 // SEC-2 — `password` est désormais FACULTATIF. Omis (ou vide), le serveur génère un mot
 // de passe prononçable unique et le renvoie : l'appelant DOIT l'afficher à l'admin, car
 // il n'existe plus nulle part ensuite. Le compte porte mustChangePwd → 1er login forcé.
+// ⚠️⚠️ TIMEOUT MAISON (18/08) — SANS LUI CET APPEL PEUT NE JAMAIS SE REGLER.
+//   Symptome vecu : bouton bloque sur « Création… », rien en base, AUCUNE erreur —
+//   jusqu'à ce qu'on réessaie et que ça marche, une 2e fois, sans rien changer entre
+//   les deux. Cause : createMemberAccount exige App Check, et l'obtention du jeton
+//   reCAPTCHA peut rester en attente — réseau faible, le quotidien en Côte de Nuits —
+//   AVANT MEME que la requête ne parte. Le timeout par défaut du SDK (70s, course
+//   interne à httpsCallable) ne couvre PAS cette attente-là : son propre chrono ne
+//   démarre qu'une fois la requête effectivement envoyée. D'où une promesse qui ne se
+//   résout ni ne rejette jamais côté appelant — le bouton reste bloqué indéfiniment.
+//   Correctif : une course MAISON, posée ICI, hors SDK — elle règle TOUJOURS la
+//   promesse sous `_CAA_TIMEOUT_MS`, quelle que soit la cause du blocage.
+//   ⚠️ L'appel Cloud Function continue en arrière-plan même après ce timeout (rien ne
+//   peut l'annuler côté client, httpsCallable n'expose pas d'AbortController) : s'il
+//   finit par réussir malgré tout, le compte existe sans que l'app le sache. C'est le
+//   MEME risque de compte orphelin que celui déjà documenté juste au-dessus pour
+//   l'ancien fallback « app secondaire » — pas nouveau, juste rendu visible plus tôt
+//   qu'avant (avant : indéfini ; désormais : borné à 25s). Recours identique :
+//   réessayer avec le même e-mail — « déjà utilisé » confirme que la 1re tentative
+//   avait fini par passer, il suffit de rafraîchir la liste des membres.
+const _CAA_TIMEOUT_MS = 25000;
 window.createAuthAccount = async function (email, password, opts) {
   try {
     // ⚠️ `opts.tenant` AVANT TENANT_ID, et ce n'est pas un detail : depuis le panneau
@@ -1329,10 +1349,24 @@ window.createAuthAccount = async function (email, password, opts) {
     //    apparaissait dans l'equipe et ne pouvait pas se connecter : panne differee, sans
     //    trace. Un appelant client ne passe pas `tenant` et retombe sur TENANT_ID : le
     //    chemin Reglages › Equipe ne change pas d'un iota.
-    const res = await window.fbCallFn('createMemberAccount', {
-      email: email, password: password || undefined,
-      tenant: (opts && opts.tenant) || TENANT_ID, roles: (opts && opts.roles) || []
+    let _tId;
+    const _timeout = new Promise(function (_, reject) {
+      _tId = setTimeout(function () {
+        reject(Object.assign(new Error('Délai dépassé (réseau faible ?) — réessayer.'), { code: 'mv/timeout' }));
+      }, _CAA_TIMEOUT_MS);
     });
+    let res;
+    try {
+      res = await Promise.race([
+        window.fbCallFn('createMemberAccount', {
+          email: email, password: password || undefined,
+          tenant: (opts && opts.tenant) || TENANT_ID, roles: (opts && opts.roles) || []
+        }),
+        _timeout
+      ]);
+    } finally {
+      clearTimeout(_tId);
+    }
     return { user: { uid: res.uid, email: res.email }, password: res.password, generated: !!res.generated };
   } catch (e) {
     // Codes auth/* préservés pour les messages d'erreur existants (reglages/admin-gt)

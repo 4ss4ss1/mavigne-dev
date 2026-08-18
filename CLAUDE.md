@@ -8463,3 +8463,72 @@ faut refaire, pas la correction**.
 ★ Et l'ordre des lots avait un sens caché : DS-1 était le **prérequis** de DS-2. Sans un jeu
 d'icônes cohérent et une échelle de tailles fermée, la charte d'îlots n'aurait fait que
 déplacer le désordre.
+
+## 52. ★★★ LE TIMEOUT MAISON SUR LA CRÉATION DE COMPTE (18/08 — `firebase.js` seul, aucun bump)
+
+> **Point de départ** : « La création d'un membre via réglage est longue, j'ai quitté l'App et
+> revenu dessus après 5 min, ce n'est toujours pas créé. »
+
+### 52a. Le diagnostic
+
+`saveMembre` (reglages.js) → `window.createAuthAccount` (firebase.js) → Cloud Function
+`createMemberAccount`, seul chemin de création depuis SEC-1 (§8c). Rien côté Cloud Function
+n'explique plusieurs minutes : pas de boucle non bornée sur le chemin courant (l'appelant porte
+déjà `plan` dans ses claims dans le cas normal → `_tenantPlanTrial` répond au 1er test, §14),
+aucun e-mail envoyé par cette fonction.
+
+Le blocage est **côté client, avant même l'envoi de la requête** : `createMemberAccount` exige
+App Check (`enforceAppCheck:true`), et l'obtention du jeton reCAPTCHA peut rester en attente sur
+réseau faible — le quotidien en Côte de Nuits (commentaire « réseau fantôme », firebase.js l.84).
+Le timeout par défaut du SDK (70s, course interne à `httpsCallable`) ne couvre **pas** cette
+attente : son propre chrono ne démarre qu'une fois la requête effectivement envoyée. D'où une
+promesse qui ne se règle jamais, et un bouton « Création… » bloqué sans qu'aucune erreur ne
+remonte — le symptôme vécu.
+
+★★★ **Confirmé sur le terrain, pas seulement déduit du code** : 1re tentative bloquée puis
+abandonnée ; 2e tentative, même e-mail, immédiate — **aucun** « déjà utilisé ». Preuve que la 1re
+tentative n'avait **rien** créé côté Firebase : le blocage a eu lieu avant `createUser`,
+cohérent avec un jeton App Check jamais obtenu plutôt qu'une Cloud Function lente à répondre.
+
+### 52b. Le correctif
+
+Une course maison (`Promise.race`) posée **autour de** `window.fbCallFn('createMemberAccount', …)`
+dans `createAuthAccount`, hors SDK : elle règle toujours la promesse sous 25 s
+(`_CAA_TIMEOUT_MS`), quelle que soit la cause du blocage. Le `catch` déjà en place dans
+`saveMembre` (reglages.js) et dans `agtSaveAddMembre`/`agtLotGo` (admin-gt.js) gérait déjà un
+message générique — aucune de ces trois fonctions n'a eu besoin d'être touchée : elles reçoivent
+maintenant une vraie erreur (`code:'mv/timeout'`) au lieu d'une promesse qui ne se règle jamais,
+et réaffichent le bouton normalement. ★ Bénéfice non cherché au départ : `agtLotGo` crée les
+comptes **un par un dans une boucle séquentielle** (§18b lot 2) — sans ce correctif, un seul
+blocage réseau au milieu d'une création en lot aurait gelé tout le lot, pas seulement un compte.
+
+⚠️ **Le minuteur est nettoyé (`clearTimeout`) dans un `finally`** : sans ça, un appel qui réussit
+avant les 25 s laisserait quand même le minuteur s'exécuter plus tard et rejeter dans le vide —
+un rejet de promesse non géré, silencieux mais sale. Vérifié en contre-épreuve (52c).
+
+⚠️⚠️ **Ce que ce correctif NE règle PAS** : `httpsCallable` n'expose pas d'`AbortController` —
+l'appel Cloud Function continue en arrière-plan même après le timeout côté client. S'il finit
+par réussir malgré tout, le compte Auth existe sans que l'app le sache : même risque de compte
+orphelin que celui déjà documenté pour l'ancien fallback « app secondaire » (SEC-1, commentaire
+juste au-dessus de `createAuthAccount`) — pas nouveau, juste rendu visible plus tôt (avant :
+indéfini ; désormais : borné à 25 s au lieu de rester invisible pendant potentiellement des
+minutes). Recours identique et déjà vérifié en conditions réelles : réessayer avec le même
+e-mail — « déjà utilisé » confirme que la 1re tentative avait fini par passer.
+
+### 52c. Contre-épreuves (Node, hors dépôt)
+
+| scénario simulé | attendu | obtenu |
+|---|---|---|
+| appel qui ne se règle jamais (App Check bloqué) | rejette sous 25 s, `code:'mv/timeout'` | ✅ |
+| appel qui réussit normalement avant 25 s | résultat inchangé, **aucun** rejet tardif après le délai | ✅ |
+
+### 52d. Ce qui reste ouvert
+
+La réconciliation d'un compte Auth orphelin (créé côté serveur après un timeout côté client, sans
+fiche `membres` correspondante) reste à faire — **explicitement classée en second par Nico** :
+« utile en filet, mais pas ce qui s'est passé cette fois ». Piste pour plus tard : un
+`gtBackfillClaims`-like qui liste les comptes Auth du tenant absents de `membres`.
+
+⚠️ **25 s est un choix, pas une mesure** — assez large pour un cold start + le pire cas de
+`_tenantPlanTrial` (boucle séquentielle de `getUserByEmail` si l'appelant n'a pas `plan` en
+claim), assez court pour rester utilisable. À resserrer ou élargir si l'usage réel le justifie.
