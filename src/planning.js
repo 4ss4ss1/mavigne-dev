@@ -560,7 +560,7 @@ function _planCollNote(mbr){
   var n=_planEffMax(mbr,planMonth),ch=_planCollH(mbr,planMonth);
   return '<div style="background:var(--tag-amber-bg,#fffbeb);border:1.5px solid #fcd34d;border-radius:12px;padding:13px 14px;margin-top:10px">'
     +'<div style="font-size:13px;font-weight:700;color:var(--tag-amber-tx,#92400e);margin-bottom:4px">\u{1F465} \u00c9quipe collective \u00b7 '+n+' personne'+(n>1?'s':'')+' au plus fort</div>'
-    +'<div style="font-size:15px;font-weight:700;color:var(--tag-amber-tx,#92400e);margin-bottom:6px">'+_planFmt(ch)+' h '+PLAN_MOIS[planMonth]+'</div>'
+    +'<div style="font-size:15px;font-weight:700;color:var(--tag-amber-tx,#92400e);margin-bottom:6px">'+_planFmt(ch)+' '+PLAN_MOIS[planMonth]+'</div>'
     +'<div style="font-size:11.5px;color:var(--tag-amber-tx,#92400e);line-height:1.5">Heures d\u2019une journ\u00e9e multipli\u00e9es par le nombre de personnes pr\u00e9sentes ce jour-l\u00e0. Une \u00e9quipe collective n\u2019a ni compteur des 1607\u00a0h, ni cong\u00e9s pay\u00e9s, ni heures suppl\u00e9mentaires, ni relev\u00e9 individuel\u00a0: ces compteurs sont propres \u00e0 UN salari\u00e9. Le nombre par d\u00e9faut se r\u00e8gle dans R\u00e9glages \u203a \u00c9quipe, jour par jour ici via <b>S\u00e9lection multiple \u2192 \u{1F465} Effectif</b>.</div>'
   +'</div>';
 }
@@ -1839,7 +1839,7 @@ function _pl2Board(){
     var s=_planSummary(mbr,planMonth),plId=_planPlId(mbr),nomA=_escAttr(mbr.nom);
     var _coll=!!(window._mvEstCollectif&&window._mvEstCollectif(mbr));
     var _sub=_coll
-      ?('\u{1F465} '+_planEffMax(mbr,planMonth)+' pers. \u00b7 '+_planFmt(_planCollH(mbr,planMonth))+' h')
+      ?('\u{1F465} '+_planEffMax(mbr,planMonth)+' pers. \u00b7 '+_planFmt(_planCollH(mbr,planMonth)))
       :(_planFmt(s.worked)+' / '+_planFmt(s.ref));
     var pulse=_pl2PulseNom===mbr.nom?' pl2-pulse':'';
     // Le nom coche la LIGNE : cette personne, sur toute la vue. Sa fiche s'ouvre
@@ -1908,10 +1908,10 @@ function _pl2Synth(){
       +'<span class="pl2-ava pl2-ava-lg" style="background:'+(mbr.couleur||'#3D6B27')+'">'+_escHtml(mbr.nom.charAt(0))+'</span>'
       +'<span class="pl2-mc-mid">'
         +'<span class="pl2-mc-n">'+_escHtml(mbr.nom)+badges+'</span>'
-        +'<span class="pl2-mc-s">'+_planFmt(s.worked)+' h travaill\u00e9es \u00b7 '+_planFmt(s.ref)+' h pr\u00e9vues</span>'
+        +'<span class="pl2-mc-s">'+_planFmt(s.worked)+' travaill\u00e9es \u00b7 '+_planFmt(s.ref)+' pr\u00e9vues</span>'
         +'<span class="pl2-mc-track" aria-hidden="true"><span class="pl2-mc-fill" style="width:'+Math.min(100,s.etp*100)+'%;background:'+col+'"></span></span>'
       +'</span>'
-      +'<span class="pl2-mc-right"><span class="pl2-mc-e" style="color:'+col+'">'+_planFmtE(s.ecart)+' h</span><span class="pl2-mc-etp">ETP '+_planFmtEtp(s.etp)+'</span></span>'
+      +'<span class="pl2-mc-right"><span class="pl2-mc-e" style="color:'+col+'">'+_planFmtE(s.ecart)+'</span><span class="pl2-mc-etp">ETP '+_planFmtEtp(s.etp)+'</span></span>'
       +'<span class="pl2-chev">\u203a</span>'
     +'</button>';
   });
@@ -1933,7 +1933,7 @@ function _pl2SynthColl(mbr,nomA){
       +'<span class="pl2-mc-n">'+_escHtml(mbr.nom)+'<span class="plan-badge" style="background:var(--tag-amber-bg,#fffbeb);color:var(--tag-amber-tx,#92400e)">\u00e9quipe</span></span>'
       +'<span class="pl2-mc-s">'+n+' personne'+(n>1?'s':'')+' au plus fort \u00b7 '+jours+' jour'+(jours>1?'s':'')+' travaill\u00e9'+(jours>1?'s':'')+'</span>'
     +'</span>'
-    +'<span class="pl2-mc-right"><span class="pl2-mc-e" style="color:var(--terre,#8A5A38)">'+_planFmt(ch)+' h</span><span class="pl2-mc-etp">au total</span></span>'
+    +'<span class="pl2-mc-right"><span class="pl2-mc-e" style="color:var(--terre,#8A5A38)">'+_planFmt(ch)+'</span><span class="pl2-mc-etp">au total</span></span>'
     +'<span class="pl2-chev">\u203a</span>'
   +'</button>';
 }
@@ -2039,7 +2039,7 @@ function _planGensArchives(){
     if(mbr.fin_contrat){var fd=mbr.fin_contrat.split('-');cinfo=' \u00b7 fin '+parseInt(fd[2],10)+'/'+parseInt(fd[1],10)+'/'+fd[0];}
     h+='<div class="pl2-arc-row">'
       +'<span class="pl2-ava" style="background:'+(mbr.couleur||'#888')+';opacity:.6">'+_escHtml(mbr.nom.charAt(0))+'</span>'
-      +'<span class="pl2-arc-mid"><span class="pl2-arc-n">'+_escHtml(mbr.nom)+'</span><span class="pl2-arc-s">'+_planFmt(s.worked)+' / '+_planFmt(s.ref)+' h \u00b7 '+_escHtml(tc)+cinfo+'</span></span>'
+      +'<span class="pl2-arc-mid"><span class="pl2-arc-n">'+_escHtml(mbr.nom)+'</span><span class="pl2-arc-s">'+_planFmt(s.worked)+' / '+_planFmt(s.ref)+' \u00b7 '+_escHtml(tc)+cinfo+'</span></span>'
       +'<button class="plan-btn-saisir" onclick="openPlanFiche(\''+nomA+'\')">Heures</button>'
       +'<button class="plan-btn-pdf" onclick="planExportPDF(\''+nomA+'\')">PDF</button>'
     +'</div>';
@@ -2504,7 +2504,7 @@ function _planCompteCard(mbr,uptoMonth,a){
   +'</div>';
   h+='<div style="font-size:11px;color:var(--texte-doux);margin-top:11px;line-height:1.4">'
     +'<b>Pas d\u2019annualisation</b> pour ce type de contrat\u00a0: les heures sont pay\u00e9es \u00e0 l\u2019heure. '
-    +'Ni plafond de '+_planFmt(_planLegal().plafAnnuel)+'\u00a0h, ni modulation, ni solde \u00e0 la cl\u00f4ture. '
+    +'Ni plafond de '+_planFmt(_planLegal().plafAnnuel)+', ni modulation, ni solde \u00e0 la cl\u00f4ture. '
     +'Mesur\u00e9 en travail effectif\u00a0: cong\u00e9s, arr\u00eats et r\u00e9cup n\u2019y entrent pas.'
   +'</div>';
   return h+'</div>';
@@ -2544,11 +2544,11 @@ function _planAnnuCard(mbr,uptoMonth){
         +'</div>'
         +'<div style="display:flex;align-items:center;gap:9px">'
         +'<div><span style="font-size:22px;font-weight:800;font-variant-numeric:tabular-nums">'+_planFmt(pa.cumul)+'</span>'
-        +'<span style="font-size:11px;color:var(--texte-doux);margin-left:3px">h sur '+_planFmt(pa.plafond)+'\u00a0h</span></div>'
+        +'<span style="font-size:11px;color:var(--texte-doux);margin-left:3px"> sur '+_planFmt(pa.plafond)+'</span></div>'
         +'<div style="flex:1;height:7px;background:var(--gris-clair);border-radius:4px;position:relative;overflow:hidden">'
         +'<div style="position:absolute;left:0;top:0;bottom:0;border-radius:4px;width:'+pct+'%;background:'+col2+'"></div>'
         +'</div>'
-        +'<div style="font-size:11px;font-weight:700;color:'+(over2?'var(--orange)':'var(--vert-med)')+'">'+_planFmt(Math.abs(pa.reste))+'\u00a0h '+(over2?'au-dessus':'cr\u00e9dit')+'</div>'
+        +'<div style="font-size:11px;font-weight:700;color:'+(over2?'var(--orange)':'var(--vert-med)')+'">'+_planFmt(Math.abs(pa.reste))+' '+(over2?'au-dessus':'cr\u00e9dit')+'</div>'
         +'</div>'
         +'</div>';
     });
@@ -2566,35 +2566,35 @@ function _planAnnuCard(mbr,uptoMonth){
     +'<span style="margin-left:auto;font-size:10px;font-weight:700;color:'+pill.c+';background:'+pill.bg+';border:1px solid '+pill.b+';padding:2px 8px;border-radius:20px">'+pill.t+'</span>'
   +'</div>';
   h+='<div style="display:flex;align-items:flex-end;justify-content:space-between;gap:10px">'
-    +'<div><span style="font-size:32px;font-weight:800;line-height:1;font-variant-numeric:tabular-nums">'+_planFmt(a.cumul)+'</span><span style="font-size:12px;font-weight:600;color:var(--texte-doux);margin-left:4px">h faites</span></div>'
-    +'<div style="text-align:right;font-size:11px;color:var(--texte-doux);line-height:1.35">plafond<b style="display:block;font-size:14px;color:var(--texte);font-variant-numeric:tabular-nums">'+_planFmt(a.plafond)+' h</b></div>'
+    +'<div><span style="font-size:32px;font-weight:800;line-height:1;font-variant-numeric:tabular-nums">'+_planFmt(a.cumul)+'</span><span style="font-size:12px;font-weight:600;color:var(--texte-doux);margin-left:4px"> faites</span></div>'
+    +'<div style="text-align:right;font-size:11px;color:var(--texte-doux);line-height:1.35">plafond<b style="display:block;font-size:14px;color:var(--texte);font-variant-numeric:tabular-nums">'+_planFmt(a.plafond)+'</b></div>'
   +'</div>';
   h+='<div style="position:relative;height:13px;background:var(--gris-clair);border-radius:7px;margin:13px 0 6px">'
     +'<div style="position:absolute;left:0;top:0;bottom:0;border-radius:7px;width:'+Math.min(100,a.cumul/ech*100)+'%;background:'+(over?'var(--orange)':'var(--vert-med)')+'"></div>'
     +'<div style="position:absolute;top:-3px;bottom:-3px;width:2.5px;background:var(--terre);left:'+Math.min(100,a.plafond/ech*100)+'%"></div>'
   +'</div>';
-  h+='<div style="display:flex;justify-content:space-between;font-size:10px;color:var(--texte-doux)"><span>0 h</span><span>'+_planFmt(ech)+' h</span></div>';
+  h+='<div style="display:flex;justify-content:space-between;font-size:10px;color:var(--texte-doux)"><span>0h</span><span>'+_planFmt(ech)+'</span></div>';
   h+='<div style="display:flex;gap:7px;margin-top:12px">'
     +'<div style="flex:1;text-align:center;padding:9px 4px;background:var(--bg-app);border-radius:10px"><div style="font-size:15px;font-weight:800;color:'+(a.reste<0?'var(--orange)':'var(--vert-med)')+'">'+_planFmt(Math.abs(a.reste))+'</div><div style="font-size:9px;text-transform:uppercase;letter-spacing:.4px;color:var(--texte-doux);margin-top:2px">'+(a.reste<0?'Au-dessus':'Reste')+'</div></div>'
     +'<div style="flex:1;text-align:center;padding:9px 4px;background:var(--bg-app);border-radius:10px"><div style="font-size:15px;font-weight:800">'+a.moisRest+'</div><div style="font-size:9px;text-transform:uppercase;letter-spacing:.4px;color:var(--texte-doux);margin-top:2px">Mois rest.</div></div>'
     +'<div style="flex:1;text-align:center;padding:9px 4px;background:var(--bg-app);border-radius:10px"><div style="font-size:15px;font-weight:800">'+(a.moisRest>0?_planFmt(a.cadence):'\u2014')+'</div><div style="font-size:9px;text-transform:uppercase;letter-spacing:.4px;color:var(--texte-doux);margin-top:2px">h / mois</div></div>'
   +'</div>';
-  var nt='Mesur\u00e9 en <b>travail effectif</b>\u00a0: cong\u00e9s, arr\u00eats et r\u00e9cup n\u2019y entrent pas. Les '+_planFmt(L.plafAnnuel)+' h sont d\u00e9j\u00e0 calcul\u00e9es cong\u00e9s d\u00e9duits.';
-  if(a.susp>0.0001)nt='<b>Suspension de contrat prise en compte\u00a0:</b> le plafond descend de '+_planFmt(a.susp)+' h. Ces heures ne sont ni \u00e0 rattraper, ni compt\u00e9es en d\u00e9ficit. '+nt;
+  var nt='Mesur\u00e9 en <b>travail effectif</b>\u00a0: cong\u00e9s, arr\u00eats et r\u00e9cup n\u2019y entrent pas. Les '+_planFmt(L.plafAnnuel)+' sont d\u00e9j\u00e0 calcul\u00e9es cong\u00e9s d\u00e9duits.';
+  if(a.susp>0.0001)nt='<b>Suspension de contrat prise en compte\u00a0:</b> le plafond descend de '+_planFmt(a.susp)+'. Ces heures ne sont ni \u00e0 rattraper, ni compt\u00e9es en d\u00e9ficit. '+nt;
   else if(a.plafond<L.plafAnnuel-1)nt='<b>Plafond proratis\u00e9</b> \u00e0 la dur\u00e9e du contrat. '+nt;
   h+='<div style="font-size:11px;color:var(--texte-doux);margin-top:10px;line-height:1.4">'+nt+'</div>';
   var _mdl=_planModelTotal(_planPlId(mbr)),_dev=_mdl-L.plafAnnuel,_devAb=Math.abs(_dev);
   h+='<div style="margin-top:12px;padding-top:11px;border-top:1px solid var(--gris-clair)">';
-  h+='<div style="display:flex;align-items:baseline;justify-content:space-between"><span style="font-size:12.5px;color:var(--texte-doux)">Mod\u00e8le \u00ab\u00a0'+_escHtml(_planPlId(mbr))+'\u00a0\u00bb sur l\u2019ann\u00e9e</span><span style="font-size:14px;font-weight:800;color:'+(_devAb>10?'var(--orange)':'var(--vert-med)')+';font-variant-numeric:tabular-nums">'+_planFmt(_mdl)+' h</span></div>';
+  h+='<div style="display:flex;align-items:baseline;justify-content:space-between"><span style="font-size:12.5px;color:var(--texte-doux)">Mod\u00e8le \u00ab\u00a0'+_escHtml(_planPlId(mbr))+'\u00a0\u00bb sur l\u2019ann\u00e9e</span><span style="font-size:14px;font-weight:800;color:'+(_devAb>10?'var(--orange)':'var(--vert-med)')+';font-variant-numeric:tabular-nums">'+_planFmt(_mdl)+'</span></div>';
   h+='<div style="font-size:11px;color:'+(_devAb>10?'var(--orange)':'var(--texte-doux)')+';margin-top:5px;line-height:1.4">'
     +(_devAb>10
-      ?'<b>\u00c9cart de '+(_dev>0?'+':'\u2212')+_planFmt(_devAb)+' h avec les '+_planFmt(L.plafAnnuel)+' h attendues.</b> Corrige la grille du mod\u00e8le dans R\u00e9glages\u00a0: l\u2019\u00e9cart se reporte sur chaque salari\u00e9 qui l\u2019utilise.'
-      :'Conforme aux '+_planFmt(L.plafAnnuel)+' h attendues ('+(_dev>=0?'+':'\u2212')+_planFmt(_devAb)+' h).')
+      ?'<b>\u00c9cart de '+(_dev>0?'+':'\u2212')+_planFmt(_devAb)+' avec les '+_planFmt(L.plafAnnuel)+' attendues.</b> Corrige la grille du mod\u00e8le dans R\u00e9glages\u00a0: l\u2019\u00e9cart se reporte sur chaque salari\u00e9 qui l\u2019utilise.'
+      :'Conforme aux '+_planFmt(L.plafAnnuel)+' attendues ('+(_dev>=0?'+':'\u2212')+_planFmt(_devAb)+').')
   +'</div>';
   h+='</div><div style="margin-top:12px;padding-top:11px;border-top:1px solid var(--gris-clair)">';
   var mOver=(a.modul>a.modulMax+0.0001),mWarn=(a.modul>a.modulMax*0.8);
   var mCol=mOver?'var(--rouge)':mWarn?'var(--orange)':'var(--plan-acc)';
-  h+='<div style="display:flex;align-items:baseline;justify-content:space-between"><span style="font-size:12.5px;color:var(--texte-doux)">Heures de modulation \u00b7 au-del\u00e0 de '+_planFmt(L.hebdoLeg)+' h/sem.</span><span style="font-size:14px;font-weight:800;color:'+mCol+';font-variant-numeric:tabular-nums">'+_planFmt(a.modul)+' / '+_planFmt(a.modulMax)+'</span></div>';
+  h+='<div style="display:flex;align-items:baseline;justify-content:space-between"><span style="font-size:12.5px;color:var(--texte-doux)">Heures de modulation \u00b7 au-del\u00e0 de '+_planFmt(L.hebdoLeg)+'/sem.</span><span style="font-size:14px;font-weight:800;color:'+mCol+';font-variant-numeric:tabular-nums">'+_planFmt(a.modul)+' / '+_planFmt(a.modulMax)+'</span></div>';
   h+='<div style="position:relative;height:9px;background:var(--gris-clair);border-radius:5px;margin-top:8px"><div style="position:absolute;left:0;top:0;bottom:0;border-radius:5px;width:'+Math.min(100,a.modul/Math.max(1,a.modulMax)*100)+'%;background:'+mCol+'"></div></div>';
   h+='<div style="font-size:11px;color:'+(mOver?'var(--rouge)':'var(--texte-doux)')+';margin-top:8px;line-height:1.4">'
     +(mOver?'<b>Plafond d\u00e9pass\u00e9.</b> Au-del\u00e0, les heures sortent de la modulation. Un accord peut relever ce plafond.'
@@ -2948,7 +2948,7 @@ function _planFicheRender(){
           +(e&&e.comment&&!e.absent?'<span class="pl2-drow-t">\ud83d\udcac '+_escHtml(e.comment)+'</span>':'')
           +(e&&e.absent&&e.comment?'<span class="pl2-drow-t">'+_escHtml(e.comment)+'</span>':'')
         +'</span>'
-        +'<span class="pl2-drow-h" style="color:'+st.c+'">'+(e&&e.absent?'0 h':(e&&e.type==='recup'?'\u21ba':_planFmt(eff)+' h'))+'</span>'
+        +'<span class="pl2-drow-h" style="color:'+st.c+'">'+(e&&e.absent?'0h':(e&&e.type==='recup'?'\u21ba':_planFmt(eff)))+'</span>'
       +'</button>';
     });
     h+='<div class="pl2-note" style="margin-top:8px">\u270f\ufe0f Toucher un jour l\u2019ouvre dans la feuille \u2014 la grille compl\u00e8te est dans l\u2019onglet <b>Le mois</b>.</div>';
@@ -3702,7 +3702,7 @@ function _planRenderGridEditor(){
     html+='<div class="plan-ref-mo'+(mi===m?' active':'')+'" onclick="planEditorSetMonth('+mi+')">'      +'<span class="plan-ref-mo-n">'+PLAN_MOIS_C[mi]+'</span>'      +'<span class="plan-ref-mo-h">'+(mRef>0?_planFmt(mRef):'—')+'</span>'    +'</div>';
   }
   html+='</div>';
-  html+='<div class="plan-ref-total">Total annuel\u202f: <strong>'+_planFmt(annuelTotal)+'</strong> h de r\u00e9f\u00e9rence</div>';
+  html+='<div class="plan-ref-total">Total annuel\u202f: <strong>'+_planFmt(annuelTotal)+'</strong> de r\u00e9f\u00e9rence</div>';
 
   // Sélection mois
   html+='<div class="plan-month-tabs" style="margin-bottom:12px">';
@@ -4039,8 +4039,8 @@ function _planSheetOneHtml(mode){
   var dowL=PLAN_JOURS_L[_planDow(planMonth,day)];
   var plDisplay=_planDayH(plId,planMonth,day,null);
   var tot=_planDays(planMonth);
-  var sub=f?('\ud83c\udfd6 '+f+' \u2014 f\u00e9ri\u00e9'+(pl>0?' \u00b7 pr\u00e9vu '+_planFmt(plDisplay)+' h':''))
-    :(pl>0?('Pr\u00e9vu\u00a0: '+_planFmt(plDisplay)+' h'+(defT.d?' \u00b7 '+defT.d+' \u2192 '+defT.f:'')+' \u00b7 planning '+plId)
+  var sub=f?('\ud83c\udfd6 '+f+' \u2014 f\u00e9ri\u00e9'+(pl>0?' \u00b7 pr\u00e9vu '+_planFmt(plDisplay):''))
+    :(pl>0?('Pr\u00e9vu\u00a0: '+_planFmt(plDisplay)+(defT.d?' \u00b7 '+defT.d+' \u2192 '+defT.f:'')+' \u00b7 planning '+plId)
     :'Repos pr\u00e9vu \u2014 heures saisies = jour suppl\u00e9mentaire \u00b7 CP / absence possibles (1 j, 0 h)');
 
   var strip='';
@@ -4057,7 +4057,7 @@ function _planSheetOneHtml(mode){
       :(ent.canicule)?'les horaires chaleur'
       :'les heures saisies';
     var _clBack=f?'La journ\u00e9e redevient un jour f\u00e9ri\u00e9.'
-      :(pl>0?('La journ\u00e9e revient au planning pr\u00e9vu \u00b7 '+_planFmt(plDisplay)+' h.')
+      :(pl>0?('La journ\u00e9e revient au planning pr\u00e9vu \u00b7 '+_planFmt(plDisplay)+'.')
             :'La journ\u00e9e revient en repos pr\u00e9vu.');
     clrHtml='<button type="button" onclick="planClearDay()" '
       +'style="display:block;width:100%;margin-top:16px;padding:11px 13px;border:1.5px solid var(--gris-clair);border-radius:12px;background:var(--bg-card);font-family:inherit;cursor:pointer;text-align:left">'
@@ -4084,7 +4084,7 @@ function _planSheetOneHtml(mode){
   +'<div id="plan-modal-body" style="overflow-y:auto;flex:1;padding:18px 24px 8px">'
     +_planSheetModes(true)
     +_planSheetTiming(isNP?'Heures travaill\u00e9es':'Horaires de la journ\u00e9e',initCont,_planEdHeat,rempHtml)
-    +_planSheetAbsSection(_planAbsH(ent),(ent&&ent.absent)?initComment:'',false,'h sur '+_planFmt(plDisplay)+' h pr\u00e9vues')
+    +_planSheetAbsSection(_planAbsH(ent),(ent&&ent.absent)?initComment:'',false,'h sur '+_planFmt(plDisplay)+' pr\u00e9vues')
     +'<div id="plan-cp-section" style="display:none">'
       +'<div class="plan-modal-lbl">Heures d\u00e9compt\u00e9es</div>'
       +'<div style="display:flex;gap:12px;align-items:center;margin-bottom:12px">'
@@ -4283,7 +4283,7 @@ function planCalcResult(){
     var nn=_planEdRemp?_pmhNPStats(_planEdKeys).np:_planEdKeys.length;
     res.innerHTML='<span style="font-size:11px;color:var(--texte-doux)">'+debut+' \u2192 '+fin+(cont?' \u00b7 continu':'')+(h>6&&!cont?' \u00b7 \u2212'+_pauseLbl+' de coupure':'')+'</span>'
       +'<div><span style="font-size:22px;font-weight:700;color:var(--texte)">'+_planFmt(h)+'</span>'
-      +'<span style="font-size:12px;font-weight:600;color:var(--texte-doux)">\u00a0h/j \u00b7 '+nn+' jour'+(nn>1?'s':'')+'</span></div>';
+      +'<span style="font-size:12px;font-weight:600;color:var(--texte-doux)">/j \u00b7 '+nn+' jour'+(nn>1?'s':'')+'</span></div>';
     return;
   }
   var plId=_planPlId(_planEditDay.mbr);

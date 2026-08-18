@@ -112,7 +112,7 @@ a{color:var(--terre)}
 .eyebrow.mid{justify-content:center}
 .nuit .eyebrow{color:var(--or)}
 h2{font-family:var(--serif); font-weight:600; font-size:clamp(31px,5.1vw,50px);
-  line-height:1.05; letter-spacing:.1px; margin:14px 0 0; max-width:19ch}
+  line-height:1.05; letter-spacing:.1px; margin:14px 0 0; max-width:22ch}
 h2 em{font-style:italic; color:var(--terre)}
 .nuit h2 em{color:var(--or)}
 h3{font-family:var(--serif); font-weight:600; font-size:22px; line-height:1.18; margin:0}
@@ -120,7 +120,7 @@ h3{font-family:var(--serif); font-weight:600; font-size:22px; line-height:1.18; 
   line-height:1.68; margin:18px 0 0; max-width:60ch}
 .tete{margin:0 0 clamp(38px,4.5vw,58px)}
 .tete.mid{text-align:center; margin-left:auto; margin-right:auto; max-width:760px}
-.tete.mid h2{margin-left:auto; margin-right:auto; max-width:22ch}
+.tete.mid h2{margin-left:auto; margin-right:auto; max-width:24ch}
 .tete.mid .lede{margin-left:auto; margin-right:auto}
 .nb{font-family:var(--serif); font-weight:600; font-variant-numeric:tabular-nums; letter-spacing:-.01em}
 
@@ -384,21 +384,39 @@ h3{font-family:var(--serif); font-weight:600; font-size:22px; line-height:1.18; 
 /* ══════════════════════════════════════════════════════════════════════
    LES ÉCRANS
    ══════════════════════════════════════════════════════════════════════ */
-.ecrans{display:grid; gap:clamp(22px,3vw,30px); grid-template-columns:repeat(12,1fr)}
+.ecrans{display:grid; gap:clamp(22px,3vw,34px); grid-template-columns:repeat(12,1fr); align-items:start}
 .cadre{background:var(--papier); border:1px solid var(--trait); border-radius:16px;
-  box-shadow:var(--ombre); overflow:hidden; display:flex; flex-direction:column}
+  box-shadow:var(--ombre); overflow:hidden; display:flex; flex-direction:column; margin:0}
 .cadre .chrome{display:flex; align-items:center; gap:6px; padding:10px 14px;
   border-bottom:1px solid var(--trait); background:rgba(20,17,13,.025)}
 .cadre .chrome i{width:8px; height:8px; border-radius:50%; background:rgba(20,17,13,.14); display:block}
 .cadre .chrome span{margin-left:8px; font-size:11px; color:var(--tres-doux); letter-spacing:.04em}
 .cadre img{width:100%; height:auto}
-.cadre figcaption{padding:15px 18px 17px; font-size:14px; color:var(--doux); font-weight:300; line-height:1.55}
+/* ★ La legende courait sur toute la largeur du cadre — 1076 px, ~140 signes
+   par ligne sur un ecran de bureau. Une legende se lit d'un coup d'oeil ou
+   ne se lit pas : mesure bridee, et centree sous les cadres etroits. */
+.cadre figcaption{padding:15px 18px 17px; font-size:14px; color:var(--doux); font-weight:300;
+  line-height:1.55; max-width:64ch}
 .cadre figcaption b{display:block; color:var(--encre); font-weight:500; font-size:14.5px; margin-bottom:3px}
 .e-large{grid-column:span 12}
 .e-demi{grid-column:span 6}
+/* ⚠️ Les deux captures de bureau n'ont pas ete prises au meme zoom : le
+   texte de l'ecran Economie est nativement plus petit. La reduire encore
+   aggraverait l'ecart — elle est donc posee a sa taille NATIVE (781 px),
+   centree. Pixel pour pixel, rien a reechantillonner. */
+.e-mid{grid-column:span 12; max-width:781px; margin-left:auto; margin-right:auto}
+/* Cadre « nu » : le telephone porte sa propre ombre, le cadre ne doit ni
+   la rogner (overflow) ni ajouter la sienne. */
+.e-nu{background:transparent; border:0; box-shadow:none; overflow:visible}
+.e-nu figcaption{padding-left:0; padding-right:0; text-align:center; max-width:40ch; margin:0 auto}
+/* Sous une capture pleine largeur, 64ch laissent trop de blanc a droite. */
+.e-large figcaption{max-width:78ch; padding-right:26px}
 @media(max-width:760px){ .e-demi{grid-column:span 12} }
-.tel{background:var(--nuit); border-radius:22px; padding:9px; box-shadow:0 20px 50px rgba(20,17,13,.2)}
-.tel img{border-radius:14px}
+/* Un telephone reste large comme un telephone : 332 px, pas la moitie de
+   la page. Au-dela, la capture cesse de se lire comme un appareil. */
+.tel{background:var(--nuit); border-radius:26px; padding:8px; box-shadow:0 22px 54px rgba(20,17,13,.24);
+  max-width:332px; margin:0 auto}
+.tel img{border-radius:19px; width:100%; display:block}
 
 /* ══════════════════════════════════════════════════════════════════════
    L'INDEX — les modules rangés par lieu
@@ -503,6 +521,34 @@ h3{font-family:var(--serif); font-weight:600; font-size:22px; line-height:1.18; 
 .pied nav a:hover{color:var(--or-clair)}
 .pied-b{margin-top:28px; padding-top:20px; border-top:1px solid var(--trait-inv);
   display:flex; flex-wrap:wrap; gap:10px 22px; justify-content:space-between; font-size:12px; color:#6F6656}
+
+/* ══════════════════════════════════════════════════════════════════════
+   COMPOSITION — mesure, equilibre, justification (§21)
+   Trois maux distincts, trois remedes, dans cet ordre :
+   1. les titres se cassaient en confettis      → text-wrap:balance
+   2. les paragraphes laissaient des veuves     → text-wrap:pretty
+   3. les blocs longs couraient sur 1076 px     → mesure en ch + justification
+      AVEC cesure, et seulement au-dela de 1000 px : justifier le francais
+      sans cesure ouvre des rivieres, et une colonne etroite justifiee est
+      pire qu'une colonne en drapeau. Les blocs centres restent centres.
+   ══════════════════════════════════════════════════════════════════════ */
+h1,h2,h3,.chute,.moment .dit,.quinze,.plan .nom2,.lieu .n,.endroits .quoi,.q summary{
+  text-wrap:balance}
+p,.lede,.lieu .x,.ligne .hyp,.q .rep,.honnete,.aveu,.calendrier .q,.cadre figcaption,
+.moment .fait,.auteur p,.totem .msg{text-wrap:pretty}
+
+@media(min-width:1000px){
+  .lede,.moment .fait,.auteur p,.q .rep,.aveu,.honnete{
+    text-align:justify; text-align-last:left;
+    hyphens:auto; -webkit-hyphens:auto; hyphenate-limit-chars:6 3 3}
+  /* ⚠️ Ce qui etait centre le reste : la regle ci-dessus attrape .lede
+     partout, y compris sous .tete.mid et dans la cloture. */
+  .tete.mid .lede,.cloture .lede{
+    text-align:center; text-align-last:center; hyphens:manual; -webkit-hyphens:manual}
+  .forfait,.legal{text-align:center; hyphens:manual; -webkit-hyphens:manual}
+  /* Les chiffres alignes en colonne ne se coupent jamais. */
+  .nb,.verdict-stats .v,.ligne .h,.totem .gros,.plan .prix b,.moment .heure{hyphens:none}
+}
 
 /* ── Accessibilité / mouvement réduit ──────────────────────────────── */
 .saut{position:absolute; left:-9999px; top:0; background:var(--or); color:#1E1607;
@@ -610,7 +656,7 @@ h3{font-family:var(--serif); font-weight:600; font-size:22px; line-height:1.18; 
             <span class="val"><b id="pc">0<span style="font-size:.55em">%</span></b><i>Saison faite</i></span>
           </div>
           <div class="verdict-dit">
-            <div class="lbl">Marge sur l&rsquo;objectif</div>
+            <div class="lbl">Marge sur votre objectif</div>
             <p class="mot">pile dans les temps</p>
             <p class="det">À la cadence actuelle (~39&nbsp;h/j sur 4&nbsp;semaines), tout est fini le <b>jeudi 17 septembre</b>. Objectif fixé&nbsp;: 17/09.</p>
           </div>
@@ -618,7 +664,7 @@ h3{font-family:var(--serif); font-weight:600; font-size:22px; line-height:1.18; 
         <div class="verdict-stats">
           <div><div class="k">Charge restante</div><div class="v" id="s1">0<small> h</small></div></div>
           <div><div class="k">Cadence équipe</div><div class="v" id="s2">0<small> h/j</small></div></div>
-          <div><div class="k">À la vigne</div><div class="v" id="s3">0<small> /5</small></div></div>
+          <div><div class="k">Budget consommé</div><div class="v" id="s3">0<small> %</small></div></div>
           <div><div class="k">Jours favorables</div><div class="v" id="s4">0<small> /5 j</small></div></div>
         </div>
         <figcaption class="verdict-pied">Aperçu de l&rsquo;écran d&rsquo;accueil — données de démonstration.</figcaption>
@@ -783,30 +829,39 @@ h3{font-family:var(--serif); font-weight:600; font-size:22px; line-height:1.18; 
   <div class="wrap">
     <div class="tete mid mont">
       <p class="eyebrow mid">En images</p>
-      <h2>Des écrans qui répondent à une question, pas des tableaux de bord décoratifs.</h2>
+      <h2>Quatre écrans, <em>quatre questions</em>.</h2>
+      <p class="lede">Pas de tableau de bord décoratif&nbsp;: chaque écran existe parce qu&rsquo;une question revient tous les jours. Captures prises dans l&rsquo;application, sur le domaine de démonstration.</p>
     </div>
 
     <div class="ecrans">
-      <figure class="cadre e-large mont" style="margin:0">
+      <figure class="cadre e-large mont">
         <div class="chrome"><i></i><i></i><i></i><span>mavigneapp.fr &#183; Pilotage</span></div>
-        <img src="/mv-shot-pilotage.png" width="1451" height="766" loading="lazy" decoding="async"
-             alt="Écran d&rsquo;accueil de Ma Vigne : verdict de saison, charge restante, cadence de l&rsquo;équipe, décision du jour et alertes matériel">
-        <figcaption><b>La question du matin&nbsp;: est-ce qu&rsquo;on tient les délais&nbsp;?</b>
-        Une date de fin calculée sur la cadence réelle, la date que vous visez, et l&rsquo;écart entre les deux — en clair, pas en pourcentage.</figcaption>
+        <img src="/mv-shot-pilotage.png" width="1189" height="630" loading="lazy" decoding="async"
+             alt="Écran d&rsquo;accueil du pilotage&nbsp;: marge sur l&rsquo;objectif, charge restante, cadence de l&rsquo;équipe, budget consommé et jours favorables">
+        <figcaption><b>Premier jour des vendanges&nbsp;: est-ce qu&rsquo;on tient la date&nbsp;?</b>
+        Rien n&rsquo;est encore fait — 0&nbsp;% — et l&rsquo;écran annonce déjà la fin au 3 septembre pour un objectif au 6. Il dit aussi ce qu&rsquo;il ne sait pas&nbsp;: tant que la cadence n&rsquo;est pas mesurable, il compte une heure présente pour une heure de barème, et il l&rsquo;écrit noir sur blanc.</figcaption>
       </figure>
 
-      <figure class="cadre e-demi mont" style="margin:0;background:transparent;border:0;box-shadow:none">
-        <div class="tel"><img src="/mv-shot-avancement-mobile.png" width="640" height="948" loading="lazy" decoding="async"
-             alt="Avancement par tâche et par passage sur téléphone, avec les heures restantes"></div>
-        <figcaption style="padding-left:0;padding-right:0"><b>L&rsquo;avancement, passage par passage</b>
-        Ébourgeonnage P1 et P2, relevage N1 à N3&nbsp;: le détail que le vigneron a en tête, et que le tableur n&rsquo;a jamais.</figcaption>
+      <figure class="cadre e-demi e-nu mont">
+        <div class="tel"><img src="/mv-shot-parcelles-mobile.png" width="760" height="1507" loading="lazy" decoding="async"
+             alt="Liste des parcelles sur téléphone&nbsp;: surface, cépage, avancement de la tâche du jour et validation en un tap"></div>
+        <figcaption><b>Dans le rang</b>
+        Les parcelles du jour, l&rsquo;avancement, une coche. C&rsquo;est tout ce que voit celui qui travaille&nbsp;: ni coûts, ni heures des autres.</figcaption>
       </figure>
 
-      <figure class="cadre e-demi mont" style="margin:0;background:transparent;border:0;box-shadow:none">
-        <div class="tel"><img src="/mv-shot-cave-mobile.png" width="640" height="861" loading="lazy" decoding="async"
-             alt="Suivi des cuvées en élevage sur téléphone : ouillage, analyses, alertes"></div>
-        <figcaption style="padding-left:0;padding-right:0"><b>Le chai, cuvée par cuvée</b>
-        Ouillage en retard, analyse à programmer, part des anges&nbsp;: les rappels arrivent avant que vous y pensiez.</figcaption>
+      <figure class="cadre e-demi e-nu mont">
+        <div class="tel"><img src="/mv-shot-phyto-mobile.png" width="760" height="1507" loading="lazy" decoding="async"
+             alt="Registre phytosanitaire sur téléphone&nbsp;: produit, famille, dose à l&rsquo;hectare, parcelles traitées, applicateur et date"></div>
+        <figcaption><b>Le registre, écrit le jour même</b>
+        Produit, famille, dose, parcelles, applicateur, date. Douze traitements déjà en ligne — et prêts à l&rsquo;export réglementaire.</figcaption>
+      </figure>
+
+      <figure class="cadre e-mid mont">
+        <div class="chrome"><i></i><i></i><i></i><span>mavigneapp.fr &#183; Économie</span></div>
+        <img src="/mv-shot-economie.png" width="781" height="664" loading="lazy" decoding="async"
+             alt="Écran Économie&nbsp;: dépenses de l&rsquo;exercice, coût à l&rsquo;hectare, part des salaires, écart avec l&rsquo;exercice précédent et rythme mois par mois">
+        <figcaption><b>Ce que l&rsquo;année a coûté, sans rouvrir le tableur</b>
+        Le total de l&rsquo;exercice, le coût à l&rsquo;hectare, la part des salaires, l&rsquo;écart avec l&rsquo;année d&rsquo;avant. Et, avant les chiffres, ce qui leur manque encore&nbsp;: trois achats sans prix, comptés pour zéro plutôt que devinés.</figcaption>
       </figure>
     </div>
 
@@ -1098,7 +1153,7 @@ h3{font-family:var(--serif); font-weight:600; font-size:22px; line-height:1.18; 
     monte(document.getElementById("pc"), 10, '<span style="font-size:.55em">%</span>', 1200);
     monte(document.getElementById("s1"), 2142, "<small> h</small>", 1400);
     monte(document.getElementById("s2"), 39, "<small> h/j</small>", 1100);
-    monte(document.getElementById("s3"), 5, "<small> /5</small>", 900);
+    monte(document.getElementById("s3"), 46, "<small> %</small>", 900);
     monte(document.getElementById("s4"), 4, "<small> /5 j</small>", 1000);
   }, 420);
 
