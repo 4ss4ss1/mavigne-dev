@@ -1,14 +1,13 @@
 // MA VIGNE — Service Worker v6.88
-// v6.88 (17/08/2026) — .mod-header-icon N'AVAIT JAMAIS DE COULEUR.
-//   ⚠️ MEME PIEGE QUE LE DOCK EN 6.87, UNE REGLE PLUS LOIN. `.mod-header-icon`
-//     n'a jamais eu de `color` : l'icone (currentColor) heritait de `--texte`,
-//     sombre en theme clair, sur le fond sombre du bandeau — invisible tant
-//     que c'etaient des emojis, expose des le passage en SVG (6.32 puis 6.33).
-//     Titre, sous-titre et .mvu-tab avaient deja leur creme en dur ; l'icone
-//     du bandeau principal, non. Meme correction : color:#F4ECD8 !important,
-//     coherent avec le garde-fou deja pose contre un bandeau qui reclaircit.
-//   ★ Partage par les 9 modules : corrige tous les bandeaux d'un coup, pas
-//     que Planning.
+// v6.88 (18/08/2026) — LE CARBURANT COMPTE LES PLEINS REELS, PLUS UNE ESTIMATION.
+//   Le cout GNR etait heures de session x conso L/h x prix : une somme d'estimations,
+//   dont une session non notee retirait silencieusement une part. Il vaut desormais la
+//   somme des pleins releves, chacun au prix du litre a SA date ; les heures ne servent
+//   plus qu'a repartir cette enveloppe entre les parcelles. Repli sur l'ancien modele
+//   si aucun plein n'est releve — et l'ecran affiche alors « L ESTIMES ».
+//   Cote saisie, cocher « Plein fait » dans une fiche d'entretien EXIGE les litres et
+//   decompte la cuve, comme le bouton « Plein ».
+//   BUMP : utils.js modifie (MV_AIDE + WHATS_NEW + APP_VERSION). APP 6.33 -> 6.34.
 // v6.87 (17/08/2026) — LES CINQ DERNIERS BANDEAUX + LES MODULES DU BAS EN RELIEF.
 //   ★ BANDEAUX : Planning, La Reserve, Le Chai, Le Cuvier, Le millesime gardaient
 //     leurs anciens dessins — 13 glyphes. ⚠️ Les trois en-tetes de la Cave etaient

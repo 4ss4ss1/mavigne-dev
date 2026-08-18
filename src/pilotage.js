@@ -6163,6 +6163,74 @@ function _ecoRetardByParc(){
   return out;
 }
 
+// ════════ CARBURANT REEL : LES LITRES DES PLEINS, PAS UN MODELE ════════
+// AVANT : le carburant etait ESTIME — heures de session x conso L/h x prix du litre.
+//   Le total n'etait donc que la somme d'estimations, et une session non notee
+//   faisait DISPARAITRE du carburant.
+// POURQUOI CA NE TENAIT PAS : les heures de session ne sont pas systematiquement
+//   saisies. Elles servent d'abord a etablir les moyennes h/ha par travail, pas a
+//   mesurer un volume consomme. Batir un cout dessus, c'est batir sur une base
+//   volontairement partielle.
+// APRES : le total EST la somme des pleins reellement faits — fiches d'entretien
+//   portant `litres_plein`. Les heures ne servent plus qu'a REPARTIR cette enveloppe
+//   entre les parcelles. Une heure oubliee DEPLACE desormais du carburant d'une
+//   parcelle vers une autre ; elle n'en fait plus disparaitre.
+// ⚠️ CE QUI RESTE APPROCHE, ET QUI EST DIT A L'ECRAN : la CLE de repartition. Un plein
+//   est date et rattache a un TRACTEUR, jamais a une parcelle — aucune donnee ne dit
+//   quels litres ont brule sur quelle parcelle. L'enveloppe est juste, sa ventilation
+//   est proportionnelle. C'est l'inverse exact d'avant, ou la ventilation etait
+//   coherente et l'enveloppe fausse.
+// ⚠️ REPLI ASSUME : aucun plein releve sur la fenetre => l'ancien modele reprend la
+//   main, ET L'ECRAN LE DIT. Un chiffre estime annonce comme mesure serait pire que
+//   l'estime annonce comme tel.
+// Libelle du poste carburant. UNE seule formulation pour la campagne et pour
+// l'exercice : deux ecrans qui affichent le meme poste doivent le decrire pareil.
+function _pecGnrDet(src,litres,n,nSans,cle,pu){
+  if(src!=='reel'){
+    return _pilNum(litres)+' L ESTIM\u00c9S \u00e0 '+_ecoEur2(pu)+' \u20AC/L \u2014 aucun plein relev\u00e9'
+      +(nSans>0?(' ('+nSans+' plein'+(nSans>1?'s':'')+' sans litres)'):'');
+  }
+  return _pilNum(litres)+' L relev\u00e9s \u00b7 '+n+' plein'+(n>1?'s':'')
+    +(cle==='surface'?' \u00b7 r\u00e9parti \u00e0 la surface':'')
+    +(nSans>0?(' \u00b7 \u26A0 '+nSans+' plein'+(nSans>1?'s':'')+' sans litres, non compt\u00e9'+(nSans>1?'s':'')):'');
+}
+function _ecoGnrPuAt(iso){
+  var pu=(window._mvPaieGnrPuAt)?Number(window._mvPaieGnrPuAt(iso)):0;
+  if(isFinite(pu)&&pu>0) return pu;
+  return _ecoCfg().gnrL;
+}
+// `win` = {d0,d1} en ISO, sinon la campagne consultee. MEME regle d'appartenance que
+// _ecoTracHByParc / _ecoPhytoByParc (_saisonForDate), pour que les trois ecrans
+// parlent de la meme periode.
+function _ecoGnrReel(win){
+  var out={ L:0, eur:0, n:0, nSansLitres:0, nSansPrix:0, byDate:{}, litresByDate:{}, ok:false };
+  var s=(typeof window._pilSaison==='function')?window._pilSaison():null;
+  var seasonNom=(s&&s.nom)?s.nom:'';
+  function _in(iso){
+    if(win&&win.d0&&win.d1) return !!iso && iso>=win.d0 && iso<=win.d1;
+    var sn=(window._saisonForDate&&iso)?window._saisonForDate(iso):null; sn=sn||'';
+    if(sn) return sn===seasonNom;
+    return seasonNom===(((window.getSaisonActive&&window.getSaisonActive())||{}).nom||'');
+  }
+  (window.ENTRETIENS||[]).forEach(function(f){
+    if(!f||!f.plein) return;
+    var iso=String(f.date||'').slice(0,10);
+    if(!iso||!_in(iso)) return;
+    var L=Number(f.litres_plein)||0;
+    // ⚠️ Un plein coche SANS litres est compte a part, jamais ignore en silence : c'est
+    //   la seule facon de distinguer « peu de carburant » de « carburant mal releve ».
+    //   Les fiches anterieures a la saisie obligatoire tombent toutes ici.
+    if(!(L>0)){ out.nSansLitres++; return; }
+    var pu=_ecoGnrPuAt(iso);
+    if(!(pu>0)) out.nSansPrix++;
+    var e=L*(pu>0?pu:0);
+    out.n++; out.L+=L; out.eur+=e;
+    out.byDate[iso]=(out.byDate[iso]||0)+e;
+    out.litresByDate[iso]=(out.litresByDate[iso]||0)+L;
+  });
+  out.ok = out.n>0;
+  return out;
+}
 // Heures tracteur par parcelle + COÛT au taux du conducteur de chaque session.
 // Le tractoriste est un ouvrier du domaine la plupart du temps : son taux est connu
 // (fiche membre → `paie`). Le valoriser à la moyenne d'équipe sous-évaluait le poste
@@ -6173,7 +6241,7 @@ function _ecoRetardByParc(){
 //   entre deux bilans et non par campagne. APPELEE SANS ARGUMENT, LA FONCTION EST
 //   STRICTEMENT INCHANGEE — une seule definition de « ce que coute une session ».
 function _ecoTracHByParc(win){
-  var out={h:{},cost:{},qui:{},nAnon:0,nSess:0,byDate:{},gnrByDate:{},hByDate:{}};
+  var out={h:{},cost:{},qui:{},nAnon:0,nSess:0,byDate:{},gnrByDate:{},hByDate:{},condByDate:{}};
   var _rate0=_ecoRate(), _cfgT=_ecoCfg();
   var _mBy={}; (window.MEMBRES||[]).forEach(function(m){ if(m&&m.nom) _mBy[m.nom]=m; });
   // ★ TAUX A LA DATE DE LA SESSION. Une session de mars se valorise au taux de mars,
@@ -6209,6 +6277,11 @@ function _ecoTracHByParc(win){
       // Une seule definition de « ce que coute une session » — celle-ci.
       if(se.date){
         out.byDate[se.date]=(out.byDate[se.date]||0)+h*_tu+h*_cfgT.conso*_cfgT.gnrL;
+        // ★ AJOUT PUR : la CONDUITE seule, sans carburant. `byDate` ci-dessus melange les
+        //   deux et reste le REPLI (aucun plein releve). Des qu'on a des pleins, la courbe
+        //   d'engagement veut la conduite a la date de la SESSION et le carburant a la date
+        //   du PLEIN : deux evenements dates, et ce ne sont pas les memes dates.
+        out.condByDate[se.date]=(out.condByDate[se.date]||0)+h*_tu;
         // ★ AJOUT PUR : la courbe d'engagement de la campagne veut le total (conduite +
         //   carburant) ; l'exercice comptable veut le CARBURANT SEUL, parce que la conduite
         //   est deja dans la masse salariale du planning. Deux besoins, un seul parcours.
@@ -6601,6 +6674,18 @@ function _pecData(){
   var eqp=_ecoEquipeByParc(), ret=_ecoRetardByParc(), rcfg=_ecoRetardCfg();
   var defs=_ecoAllDefs();
   var parc=(window.PARCELLES||[]).filter(function(p){ return p && p.statut!=='Arrachee'; });
+  // ── Carburant : enveloppe reelle + cle de repartition ────────────────
+  var gnrR=_ecoGnrReel();
+  // Cle = heures machine par parcelle. Repli SURFACE si aucune heure n'a ete saisie
+  // sur la campagne : sans lui, une enveloppe reelle de 900 L n'irait nulle part et
+  // le carburant retomberait a zero alors qu'on le connait au litre pres.
+  var _kBy={}, _kSum=0, _kSurf=false;
+  parc.forEach(function(p){ var k=tracH.h[p.nom]||0; _kBy[p.nom]=k; _kSum+=k; });
+  if(!(_kSum>0)){
+    _kSurf=true; _kSum=0;
+    parc.forEach(function(p){ var k=parseFloat(p.surface)||0; _kBy[p.nom]=k; _kSum+=k; });
+  }
+  var _gnrOn = gnrR.ok && _kSum>0;
   var rows=[], tasks={}, tOrder=[], pairs=[];
   var T={ bH:0,fH:0,rH:0, moB:0,moF:0,moR:0, tracF:0,tracH:0, gnrF:0, litres:0, phyF:0,
           surf:0, retH:0, retE:0, nRet:0, nReel:0, trous:0, plantH:0, plantE:0, nSansTaux:0 };
@@ -6627,7 +6712,10 @@ function _pecData(){
       if(rst>0.01) tks.push(def.nom);
     });
     var thH=tracH.h[p.nom]||0, tracF=tracH.cost[p.nom]||0;
-    var litres=thH*cfg.conso, gnrF=litres*cfg.gnrL, phyF=phy.cost[p.nom]||0;
+    var litres, gnrF;
+    if(_gnrOn){ var _q=(_kBy[p.nom]||0)/_kSum; litres=gnrR.L*_q; gnrF=gnrR.eur*_q; }
+    else { litres=thH*cfg.conso; gnrF=litres*cfg.gnrL; }
+    var phyF=phy.cost[p.nom]||0;
     var reel=tracF+gnrF+phyF;
     var rr=ret[p.nom]||null, retH=rr?rr.h:0, retE=retH*tx;
     var pl=_ecoParcPlant(p);
@@ -6651,7 +6739,17 @@ function _pecData(){
   });
   // Sources DATÉES pour la courbe d'engagement — reprises telles quelles des deux
   // agrégateurs existants (une seule définition de « combien coûte une session »).
-  T.byDateTrac = tracH.byDate || {};
+  if(_gnrOn){
+    var _bd={};
+    Object.keys(tracH.condByDate||{}).forEach(function(iso){ _bd[iso]=(_bd[iso]||0)+(tracH.condByDate[iso]||0); });
+    Object.keys(gnrR.byDate||{}).forEach(function(iso){ _bd[iso]=(_bd[iso]||0)+(gnrR.byDate[iso]||0); });
+    T.byDateTrac=_bd;
+  } else {
+    T.byDateTrac = tracH.byDate || {};
+  }
+  // Tracabilite de la source, lue par le poste GNR et la carte de fiabilite.
+  T.gnrSrc = _gnrOn?'reel':'modele';
+  T.gnrN = gnrR.n; T.gnrNSansLitres = gnrR.nSansLitres; T.gnrCle = _kSurf?'surface':'heures';
   T.byDatePhy  = phy.byDate  || {};
 
   // Avancement de référence = heures de barème réalisées / heures de barème totales.
@@ -6754,7 +6852,7 @@ function _pecData(){
   var postes = [
     { k:'mo',   lab:'Main-d\u2019\u0153uvre vigne', col:_PEC_COL.mo,   fait:T.moF,   budget:T.moB, proj:false, det:_ecoH1(T.fH)+' h faites sur '+_ecoH1(T.bH)+' h de bar\u00e8me' },
     { k:'trac', lab:'Conduite tracteur',            col:_PEC_COL.trac, fait:T.tracF, budget:tracB, proj:projOn, det:_ecoH1(T.tracH)+' h de sessions' },
-    { k:'gnr',  lab:'Carburant GNR',                col:_PEC_COL.gnr,  fait:T.gnrF,  budget:gnrB,  proj:projOn, det:_pilNum(T.litres)+' L \u00e0 '+_ecoEur2(cfg.gnrL)+' \u20AC/L' },
+    { k:'gnr',  lab:'Carburant GNR',                col:_PEC_COL.gnr,  fait:T.gnrF,  budget:gnrB,  proj:projOn, det:_pecGnrDet(T.gnrSrc,T.litres,T.gnrN,T.gnrNSansLitres,T.gnrCle,cfg.gnrL) },
     { k:'phy',  lab:'Produits phyto',               col:_PEC_COL.phy,  fait:T.phyF,  budget:phyB,  proj:projOn, det:'doses \u00d7 surface \u00d7 prix R\u00e9serve' }
   ];
 
@@ -7590,7 +7688,10 @@ function _pecSubNav(E){
 // LES TROIS POSTES, ET RIEN D'AUTRE :
 //   SALAIRES CHARGES  planning (_planPaidRange) x taux individuel (paie) — tout le
 //                     travail humain, effectif des equipes collectives compris.
-//   CARBURANT GNR     heures de session x conso x prix du litre, sessions DATEES.
+//   CARBURANT GNR     les LITRES DES PLEINS releves sur l'exercice, chacun a SA date,
+//                     au prix du litre en vigueur A CETTE DATE (moyenne ponderee des
+//                     appoints livres jusque-la). Aucun plein releve : repli sur
+//                     l'ancien modele heures x conso x prix, et l'ecran le dit.
 //   ACHATS D'INTRANTS le prix HT porte par chaque achat de La Reserve, a sa date.
 //                     C'est la FACTURE, pas la valorisation de stock : c'est elle
 //                     qui entre dans un compte de resultat.
@@ -7740,13 +7841,23 @@ function _pexData(ex, noCmp){
   // dates au lieu de la periode. Aucune copie privee de « ce que coute une session ».
   var trac=_ecoTracHByParc({d0:ex.d0,d1:ex.d1});
   var gnrT=0, tracH=0;
-  Object.keys(trac.gnrByDate||{}).forEach(function(iso){
-    var v=trac.gnrByDate[iso]||0; gnrT+=v;
+  Object.keys(trac.hByDate||{}).forEach(function(iso){ tracH+=trac.hByDate[iso]||0; });
+  // ★ Ici, AUCUNE repartition a faire : l'exercice raisonne par mois, et un plein porte
+  //   deja sa date. Les litres tombent dans leur mois, exactement.
+  var gnrR=_ecoGnrReel({d0:ex.d0,d1:ex.d1});
+  var gnrSrc=gnrR.ok?'reel':'modele', litres=0;
+  function _gnrMois(iso,v){
+    gnrT+=v;
     var k=parseInt(iso.slice(0,4),10)+'-'+(parseInt(iso.slice(5,7),10)-1);
     if(byM[k]) byM[k].gnr+=v;
-  });
-  Object.keys(trac.hByDate||{}).forEach(function(iso){ tracH+=trac.hByDate[iso]||0; });
-  var litres=(cfg.conso>0)?tracH*cfg.conso:0;
+  }
+  if(gnrR.ok){
+    litres=gnrR.L;
+    Object.keys(gnrR.byDate).forEach(function(iso){ _gnrMois(iso, gnrR.byDate[iso]||0); });
+  } else {
+    Object.keys(trac.gnrByDate||{}).forEach(function(iso){ _gnrMois(iso, trac.gnrByDate[iso]||0); });
+    litres=(cfg.conso>0)?tracH*cfg.conso:0;
+  }
 
   // ── 3) ACHATS D'INTRANTS (La Reserve) ──────────────────────────────
   // Le prix HT est OPTIONNEL a la saisie : on compte les lignes sans prix et on le
@@ -7783,7 +7894,7 @@ function _pexData(ex, noCmp){
     { k:'sal', lab:_pexSalLab(), col:_PEC_COL.mo,  eur:salT,
       det:_ecoH1(hPaid)+' h pay\u00e9es \u00b7 '+gens.length+' personne'+(gens.length>1?'s':'')
           +' \u00b7 co\u00fbt employeur (taux charg\u00e9 des fiches)' },
-    { k:'gnr', lab:'Carburant GNR',         col:_PEC_COL.gnr, eur:gnrT, det:_pilNum(litres)+' L \u00e0 '+_ecoEur2(cfg.gnrL)+' \u20AC/L' },
+    { k:'gnr', lab:'Carburant GNR',         col:_PEC_COL.gnr, eur:gnrT, det:_pecGnrDet(gnrSrc,litres,gnrR.n,gnrR.nSansLitres,'',cfg.gnrL) },
     { k:'ach', lab:'Achats d\u2019intrants', col:_PEC_COL.phy, eur:achT, det:nAch+' achat'+(nAch>1?'s':'')+' de La R\u00e9serve' }
   ];
   postes.forEach(function(p){ p.part = total>0 ? (p.eur/total*100) : 0; });
@@ -7795,6 +7906,7 @@ function _pexData(ex, noCmp){
   }
   return { ex:ex, mois:mois, byM:byM, gens:gens, postes:postes, achRows:achRows,
            salT:salT, gnrT:gnrT, achT:achT, total:total,
+           gnrSrc:gnrSrc, gnrN:gnrR.n, gnrNSansLitres:gnrR.nSansLitres,
            hPaid:hPaid, hWork:hWork, tracH:tracH, litres:litres, phyConso:phyConso,
            surf:surf, coutHa:(surf>0?total/surf:0),
            nSansTaux:nSansTaux, hSansTaux:hSansTaux,

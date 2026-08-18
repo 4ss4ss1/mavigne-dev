@@ -70,6 +70,10 @@
     <div class="card"><h4>⛽ Cuve GNR</h4><ul class="dot">
       <li>La cuve est celle <b>du domaine</b>, pas d'un tracteur en particulier</li>
       <li><b>Faire un plein</b> décompte le niveau et crée la fiche d'entretien correspondante</li>
+      <li>Cocher <b>« Plein fait »</b> dans une fiche d'entretien demande aussi les <b>litres</b>, et
+      décompte la cuve de la même façon. Les deux chemins mènent au même endroit</li>
+      <li>Ces litres <b>sont</b> votre coût carburant dans le Pilotage. Un plein non noté n'est pas
+      seulement un niveau de cuve faux : c'est du carburant absent de vos coûts</li>
       <li><b>Corriger le niveau</b> permet de réajuster à la jauge</li>
       <li><b>Appoint de cuve</b> : litres livrés et prix au litre — réservé à l'administrateur, c'est un
       prix d'achat. Le coût moyen se met à jour tout seul</li>
@@ -96,6 +100,15 @@
     <div class="dbody">Les <b>tractoristes</b> et les <b>administrateurs</b>. La suppression d'un
     tracteur et les exports sont réservés à l'administrateur.</div></details>
   <details><summary>Le plein n'apparaît pas dans le niveau de la cuve</summary>
-    <div class="dbody">Le décompte se fait <b>à la création</b> du plein. Si vous avez modifié la fiche
-    après coup, utilisez <b>Corriger le niveau</b> pour aligner la cuve sur la jauge réelle.</div></details>
+    <div class="dbody">Le décompte se fait <b>à la création</b> du plein — et aussi quand vous
+    <b>modifiez</b> la fiche : corriger 30 L en 20 L rend les 10 L à la cuve, décocher « Plein fait »
+    les rend tous. Si le niveau reste faux malgré tout, c'est que la cuve a servi hors application
+    (bidon, prêt, jauge qui dérive) : utilisez <b>Corriger le niveau</b> pour l'aligner sur la
+    jauge réelle.</div></details>
+  <details><summary>J'ai fait un plein et le coût carburant du Pilotage n'a pas bougé</summary>
+    <div class="dbody">Vérifiez que le plein porte bien des <b>litres</b>. Une fiche où « Plein fait »
+    est coché sans litres — c'est le cas des fiches créées avant cette version — ne peut pas être
+    chiffrée : elle est comptée à part et son nombre s'affiche sur la ligne « Carburant GNR » du
+    Pilotage. Vérifiez aussi qu'un <b>appoint de cuve</b> avec son prix au litre a été saisi : sans
+    prix connu, les litres existent mais valent zéro euro.</div></details>
 </section>

@@ -355,8 +355,12 @@ window._mvGraphRepeindre = function(){
 
 export const WHATS_NEW = [
   { v:'6.34', items:[
-    { emoji: 'check', titre: "Les ic\u00f4nes des bandeaux du haut \u00e9taient presque invisibles",
-      desc: "\u00c0 c\u00f4t\u00e9 du titre de chaque \u00e9cran, l\u2019ic\u00f4ne se fondait dans le fond sombre du bandeau et devenait tr\u00e8s difficile \u00e0 voir. C\u2019est corrig\u00e9 : elle reprend <b>la m\u00eame couleur cr\u00e8me que le titre</b>." }
+    { emoji: 'tracteur', titre: "Le carburant compte enfin vos vrais pleins",
+      desc: "Vous mettez 30\u202fL dans un tracteur : jusqu\u2019ici, ces 30\u202fL n\u2019entraient nulle part dans le coût. Le carburant était <b>deviné</b> — heures de session × 6\u202fL/h × prix — et une session non notée faisait <b>disparaître</b> du carburant. Désormais le total, c\u2019est la somme de vos pleins. Les heures ne servent plus qu\u2019à le <b>répartir</b> entre les parcelles : une heure oubliée déplace du carburant d\u2019une parcelle à l\u2019autre, elle n\u2019en efface plus. Et chaque plein est valorisé au prix du litre <b>en vigueur à sa date</b>, plus au prix moyen de toute l\u2019année." },
+    { emoji: 'goutte', titre: "Un plein se note toujours en litres",
+      desc: "Cocher «\u202fPlein fait\u202f» dans une fiche d\u2019entretien ne demandait <b>aucun litre</b> : le plein était enregistré, le chiffre perdu. Le champ apparaît maintenant dès que vous cochez la case, et la cuve en est décomptée comme avec le bouton «\u202fPlein\u202f». Corriger un chiffre trop haut ou décocher la case <b>rend les litres à la cuve</b>. Les litres s\u2019affichent aussi dans le carnet, à côté du point de contrôle." },
+    { emoji: 'alerte', titre: "Un poste qui n\u2019est pas mesuré le dit",
+      desc: "Tant qu\u2019aucun plein n\u2019est relevé sur la période, le carburant reste calculé à l\u2019ancienne — et la ligne affiche «\u202fL ESTIMÉS\u202f» au lieu de «\u202fL relevés\u202f». Si des pleins ont été cochés sans litres, leur nombre est indiqué : c\u2019est toute la différence entre «\u202fpeu de carburant\u202f» et «\u202fcarburant mal relevé\u202f»." }
   ] },
   { v:'6.33', items:[
     { emoji: 'barrique', titre: "Cinq \u00e9crans gardaient encore les anciens dessins",
@@ -2143,7 +2147,8 @@ export const MV_INFO = {
   'pil.eco.fiabilite': { t: 'Fiabilité des chiffres', p: [
     'Chaque donnée manquante ne rend pas un chiffre <b>approximatif</b> : elle met un poste entier à <b>zéro</b>. Un budget auquel il manque la main-d\u2019\u0153uvre n\u2019est pas « un peu bas », il est faux.',
     '<b>Taux horaire</b> — il vit dans la fiche de chaque salarié, Réglages \u203a Équipe. C\u2019est le taux <b>chargé</b> : le coût employeur, cotisations patronales comprises. Sans lui, la main-d\u2019\u0153uvre — le premier poste du domaine — compte pour zéro partout sur cet écran.',
-    '<b>Prix du GNR</b> — il se déduit tout seul des <b>appoints de cuve</b> saisis dans Tracteur \u203a Entretien, en moyenne pondérée. Aucun appoint saisi, aucun prix : le carburant reste à zéro.',
+    '<b>Prix du GNR</b> — il se déduit tout seul des <b>appoints de cuve</b> saisis dans Tracteur \u203a Entretien, en moyenne pondérée arrêtée à la date de chaque plein. Aucun appoint saisi, aucun prix : le carburant reste à zéro.',
+    '<b>Les litres</b> — ils viennent des <b>pleins</b> notés sur les fiches d\u2019entretien, pas d\u2019une consommation théorique. Un plein non noté est du carburant absent du coût.',
     '<b>Doses et prix des produits</b> — le coût phyto se calcule à partir d\u2019une dose structurée à la saisie du traitement, et d\u2019un prix unitaire dans La Réserve. Il manque l\u2019un des deux, le traitement compte pour zéro.',
     'Tant qu\u2019un de ces postes manque, lisez le budget affiché comme un <b>plancher</b>, jamais comme un total.'
   ] },
@@ -2254,7 +2259,9 @@ export const MV_INFO = {
   'pil.eco.postes': { t: 'Où part l\u2019argent', p: [
     'Les quatre postes ne sont pas connus de la même façon, et c\u2019est ce qui explique leurs écarts de fiabilité.',
     'La <b>main-d\u2019\u0153uvre vigne</b> est un <b>barème complet</b> : surface \u00d7 heures par hectare \u00d7 taux de l\u2019équipe, sur toute la période — y compris le travail qui reste à faire.',
-    '<b>Tracteur, GNR et phyto</b> ne sont connus qu\u2019en <b>réalisé</b> : ils n\u2019existent que là où une session ou un traitement a été saisi. Au-delà de <b>15 % d\u2019avancement</b>, ils sont extrapolés au rythme constaté ; en dessous, ils affichent le réalisé seul, parce qu\u2019extrapoler sur trois sessions ne veut rien dire.',
+    'Le <b>tracteur</b> et le <b>phyto</b> ne sont connus qu\u2019en <b>réalisé</b> : ils n\u2019existent que là où une session ou un traitement a été saisi. Au-delà de <b>15 % d\u2019avancement</b>, ils sont extrapolés au rythme constaté ; en dessous, ils affichent le réalisé seul, parce qu\u2019extrapoler sur trois sessions ne veut rien dire.',
+    'Le <b>GNR</b>, lui, est <b>mesuré</b> : c\u2019est la somme de vos pleins, au litre près. Ce qui reste approché, c\u2019est sa <b>répartition</b> entre parcelles — un plein est rattaché à une machine et à une date, jamais à une parcelle. Le total est juste, sa ventilation est proportionnelle aux heures machine.',
+    'Tant qu\u2019<b>aucun plein n\u2019est relevé</b> sur la période, le carburant repasse à l\u2019ancien calcul — heures × consommation × prix — et la ligne affiche «\u202fL ESTIMÉS\u202f». Le mot est là pour être lu.',
     'Un poste extrapolé <b>montera mécaniquement</b> au fil de la période. Ce n\u2019est pas une dérive.'
   ] },
 
@@ -2268,7 +2275,7 @@ export const MV_INFO = {
   'pil.eco.parcelles': { t: 'Le tableau des parcelles', p: [
     '<b>Cliquez sur un en-tête</b> pour trier. Recliquer la même colonne inverse le sens.',
     '<b>MO</b> = main-d\u2019\u0153uvre <b>déjà faite</b>. <b>Reste</b> = main-d\u2019\u0153uvre <b>encore à faire</b>. <b>Budget</b> = le total de la période, les deux réunis.',
-    '<b>Tracteur, GNR et phyto</b> sont du <b>réalisé</b> : seulement ce qui a été saisi, sans projection.',
+    '<b>Tracteur et phyto</b> sont du <b>réalisé</b> : seulement ce qui a été saisi, sans projection. Le <b>GNR</b> est l\u2019enveloppe réelle de vos pleins, répartie entre les parcelles au prorata des heures machine — à défaut d\u2019heures saisies, au prorata de la <b>surface</b>.',
     'Le <b>coût à l\u2019hectare</b> neutralise la taille. Ce qui reste, c\u2019est ce qu\u2019une parcelle a de particulier : plants à remplacer, passages en plus, équipe plus chère, tri des tâches.',
     'La répartition d\u2019une journée entre plusieurs parcelles suit une <b>règle 1/N</b> : c\u2019est la seule convention inventée par le logiciel, et elle suppose qu\u2019une parcelle se fait dans la journée.'
   ] },
@@ -2295,7 +2302,8 @@ export const MV_INFO = {
     'Une donnée manquante ne rend pas le total <b>approximatif</b> : elle met un poste entier à <b>zéro</b>. Un exercice auquel il manque les salaires n\u2019est pas « un peu bas », il est faux.',
     '<b>Le planning</b> doit avoir été ouvert au moins une fois dans cette session : c\u2019est lui qui porte les heures payées. Sans lui, les salaires — le premier poste — comptent pour zéro.',
     '<b>Taux horaire</b> — dans la fiche de chaque salarié, Réglages \u203a Équipe. C\u2019est le taux <b>chargé</b> : coût employeur, cotisations patronales comprises. Aucun coefficient n\u2019est ajouté par-dessus.',
-    '<b>Prix du GNR</b> — déduit des appoints de cuve saisis dans Tracteur \u203a Entretien, en moyenne pondérée.',
+    '<b>Prix du GNR</b> — déduit des appoints de cuve saisis dans Tracteur \u203a Entretien, en moyenne pondérée arrêtée à la date de chaque plein.',
+    '<b>Les pleins</b> — ce sont eux qui <b>font</b> le poste carburant, chacun à sa date. Un plein coché sans litres ne compte pas : leur nombre est affiché sur la ligne, pour que «\u202fpeu de carburant\u202f» ne se confonde jamais avec «\u202fmal relevé\u202f».',
     '<b>Prix HT des achats</b> — il se complète sur la ligne d\u2019achat, dans La Réserve. Sans lui, l\u2019intrant entre en stock sans entrer dans le total.'
   ] },
 
@@ -2326,9 +2334,10 @@ export const MV_INFO = {
   ] },
 
   'pil.gnr': { t: 'Cuve GNR', p: [
-    'Le niveau est <b>calculé, pas mesuré</b> : appoints saisis moins la consommation des sessions. Il n\u2019y a pas de jauge connectée à la cuve. Un plein oublié ou une session non saisie le fait dériver.',
+    'Le niveau est <b>calculé, pas mesuré</b> : appoints de cuve saisis, moins les <b>pleins</b> faits dans les machines. Il n\u2019y a pas de jauge connectée à la cuve. Un plein oublié le fait dériver — pas une session non saisie, qui ne touche jamais le niveau.',
     'Le <b>seuil bas</b> est celui que vous avez réglé dans Tracteur \u203a Entretien, pas une valeur du logiciel.',
-    'Le prix au litre utilisé dans les budgets est la <b>moyenne pondérée des appoints</b> saisis. Sans aucun appoint, le carburant reste à <b>zéro</b> dans tous les coûts — pas « à peu près », à zéro.'
+    'Le prix au litre est la <b>moyenne pondérée des appoints</b>, arrêtée <b>à la date de chaque plein</b> : un plein de mars ne se valorise pas au prix moyen incluant les livraisons de septembre. Sans aucun appoint, le carburant reste à <b>zéro</b> dans tous les coûts — pas «\u202fà peu près\u202f», à zéro.',
+    'Ces mêmes pleins <b>sont</b> le coût carburant du Pilotage. Un plein non noté n\u2019est pas seulement un niveau de cuve faux : c\u2019est du carburant absent de vos coûts.'
   ] },
 
   'pil.phyto': { t: 'Registre phyto', p: [

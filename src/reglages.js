@@ -4423,6 +4423,27 @@ window._mvPaieApply = function(nom, val, dEffet, rows){
 window._mvPaieSetTaux = function(nom, val){ return window._mvPaieApply(nom, val, '', null); };
 // Prix du litre de GNR = moyenne PONDÉRÉE des appoints de cuve (PMP). Repli sur
 // l'ancien champ Réglages CONFIG.eco.prix_gnr_litre tant qu'aucun appoint n'est saisi.
+// Prix du litre A UNE DATE DONNEE : moyenne ponderee des appoints LIVRES JUSQUE-LA.
+// Un plein de mars ne doit pas etre valorise au prix moyen incluant les livraisons de
+// septembre — c'est exactement le genre d'a-peu-pres que le calcul au reel supprime.
+// Meme regle que le taux horaire, deja pris « a la date de la session ».
+// Repli en cascade : aucun appoint anterieur -> PMP global -> champ manuel Reglages.
+// ⚠️ `paie` est admin-only en LECTURE : un profil `pilotage` non-admin lit 0 ici, donc
+//    carburant a zero. Comportement deja en place pour le PMP global, inchange.
+window._mvPaieGnrPuAt = function(iso){
+  var d=String(iso||'').slice(0,10);
+  if(d){
+    var ap=_paie().gnr_appoints, L=0, E=0;
+    ap.forEach(function(a){
+      var ad=String((a&&a.d)||'').slice(0,10);
+      if(!ad||ad>d) return;
+      var l=Number(a&&a.l)||0, pu=Number(a&&a.pu)||0;
+      if(l>0&&pu>0){ L+=l; E+=l*pu; }
+    });
+    if(L>0) return E/L;
+  }
+  return window._mvPaieGnrPMP();
+};
 window._mvPaieGnrPMP = function(){
   var ap=_paie().gnr_appoints, L=0, E=0;
   ap.forEach(function(a){ var l=Number(a&&a.l)||0, pu=Number(a&&a.pu)||0; if(l>0&&pu>0){ L+=l; E+=l*pu; } });

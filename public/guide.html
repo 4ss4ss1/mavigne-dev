@@ -829,6 +829,10 @@ mark{background:rgba(200,176,32,.32);color:var(--cream);border-radius:3px;paddin
     <div class="card"><h4>⛽ Cuve GNR</h4><ul class="dot">
       <li>La cuve est celle <b>du domaine</b>, pas d'un tracteur en particulier</li>
       <li><b>Faire un plein</b> décompte le niveau et crée la fiche d'entretien correspondante</li>
+      <li>Cocher <b>« Plein fait »</b> dans une fiche d'entretien demande aussi les <b>litres</b>, et
+      décompte la cuve de la même façon. Les deux chemins mènent au même endroit</li>
+      <li>Ces litres <b>sont</b> votre coût carburant dans le Pilotage. Un plein non noté n'est pas
+      seulement un niveau de cuve faux : c'est du carburant absent de vos coûts</li>
       <li><b>Corriger le niveau</b> permet de réajuster à la jauge</li>
       <li><b>Appoint de cuve</b> : litres livrés et prix au litre — réservé à l'administrateur, c'est un
       prix d'achat. Le coût moyen se met à jour tout seul</li>
@@ -855,8 +859,17 @@ mark{background:rgba(200,176,32,.32);color:var(--cream);border-radius:3px;paddin
     <div class="dbody">Les <b>tractoristes</b> et les <b>administrateurs</b>. La suppression d'un
     tracteur et les exports sont réservés à l'administrateur.</div></details>
   <details><summary>Le plein n'apparaît pas dans le niveau de la cuve</summary>
-    <div class="dbody">Le décompte se fait <b>à la création</b> du plein. Si vous avez modifié la fiche
-    après coup, utilisez <b>Corriger le niveau</b> pour aligner la cuve sur la jauge réelle.</div></details>
+    <div class="dbody">Le décompte se fait <b>à la création</b> du plein — et aussi quand vous
+    <b>modifiez</b> la fiche : corriger 30 L en 20 L rend les 10 L à la cuve, décocher « Plein fait »
+    les rend tous. Si le niveau reste faux malgré tout, c'est que la cuve a servi hors application
+    (bidon, prêt, jauge qui dérive) : utilisez <b>Corriger le niveau</b> pour l'aligner sur la
+    jauge réelle.</div></details>
+  <details><summary>J'ai fait un plein et le coût carburant du Pilotage n'a pas bougé</summary>
+    <div class="dbody">Vérifiez que le plein porte bien des <b>litres</b>. Une fiche où « Plein fait »
+    est coché sans litres — c'est le cas des fiches créées avant cette version — ne peut pas être
+    chiffrée : elle est comptée à part et son nombre s'affiche sur la ligne « Carburant GNR » du
+    Pilotage. Vérifiez aussi qu'un <b>appoint de cuve</b> avec son prix au litre a été saisi : sans
+    prix connu, les litres existent mais valent zéro euro.</div></details>
 </section>
 
 
@@ -1479,7 +1492,8 @@ mark{background:rgba(200,176,32,.32);color:var(--cream);border-radius:3px;paddin
   d'avertissements.</p>
   <ul class="dot">
     <li><b>Ce qui met un chiffre à zéro.</b> Sans taux horaire, la main-d'œuvre — votre premier poste —
-    compte pour <b>zéro</b>. Sans prix du GNR, le carburant aussi. Ce n'est pas une approximation :
+    compte pour <b>zéro</b>. Sans prix du GNR, le carburant aussi — et sans <b>pleins relevés</b>, il
+    retombe sur une estimation, signalée par « L ESTIMÉS » sur la ligne. Ce n'est pas une approximation :
     le budget affiché est un <b>plancher</b>. La carte de fiabilité dit combien de postes sont dans ce
     cas, lesquels, et pose <b>un bouton par poste</b> pour aller saisir ce qui manque.</li>
     <li><b>Ce qui change seulement la lecture.</b> La projection neutralisée sous 15 % d'avancement,
@@ -1553,7 +1567,8 @@ mark{background:rgba(200,176,32,.32);color:var(--cream);border-radius:3px;paddin
     <li><b>Le budget de l'année, mois par mois</b> : deux courbes cumulées. En tireté, le
     <b>prévu</b> — vos heures de barème étalées sur les mois par la fenêtre de chaque travail,
     valorisées au taux moyen. En trait plein, le <b>dépensé réel</b> — salaires chargés, carburant
-    et achats, posés à leur date. Les deux totaux étaient déjà sur la carte juste au-dessus ; ce que
+    et achats, posés à leur date. Le carburant se pose à la date du <b>plein</b>, pas à celle des
+    sessions : ce sont deux évènements datés, et ce ne sont pas les mêmes dates. Les deux totaux étaient déjà sur la carte juste au-dessus ; ce que
     la courbe ajoute, c'est <b>à quel moment</b> l'écart se creuse.
     <div class="note" style="margin:8px 0 0"><span class="ni" aria-hidden="true">⚠️</span><div><b>L'écart
     entre les deux courbes n'est pas un dépassement.</b> Elles ne couvrent pas le même périmètre : le
@@ -1731,6 +1746,10 @@ mark{background:rgba(200,176,32,.32);color:var(--cream);border-radius:3px;paddin
       <li>Synthèse des coûts de la saison</li>
       <li><b>Coût par hectare et par parcelle</b> : main-d'œuvre, tracteur, carburant, phyto</li>
       <li>S'appuie sur les taux horaires et le prix réel du GNR</li>
+      <li>Le carburant est <b>mesuré</b>, pas estimé : c'est la somme de vos pleins, répartie entre
+      les parcelles au prorata des heures machine — à défaut, de la surface. Le total est juste au
+      litre près ; c'est sa ventilation par parcelle qui reste proportionnelle, faute d'une donnée
+      qui dirait quels litres ont brûlé sur quelle parcelle</li>
     </ul></div>
     <div class="card"><h4>⚖️ Conformité</h4><ul class="dot">
       <li><b>Cuivre</b> : cumul sur 7 ans face au plafond de 28 kg/ha</li>
