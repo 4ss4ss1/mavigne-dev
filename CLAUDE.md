@@ -2,7 +2,16 @@
 
 > Document de référence du projet **Ma Vigne** (GUERETTECH). Il est le **porteur de vérité** :
 > la mémoire Claude est plafonnée, ce fichier ne l'est pas.
-> Dernière consolidation : **17 août 2026 (nuit)** — ★★★ **TROIS PANNES CAUSÉES PAR MA PROPRE
+> Dernière consolidation : **20 août 2026** — ★★★ **L'IMPORT KML EFFAÇAIT LE PARCELLAIRE (§53)**.
+> **APP 6.36 · SW 6.90, aucun bump** (`admin-gt.js` seul). Alexandre envoie un KML d'**une**
+> parcelle ; l'onglet aurait écrit ce fichier tel quel et **fait disparaître les autres de la
+> carte** — sans avertissement, sans retour possible. ★★★ **Le défaut n'était pas dans le code,
+> il était dans l'écran** : un bouton qui remplace là où l'opérateur croit ajouter. L'écran lit
+> désormais la base AVANT d'écrire et sépare deux gestes qui n'ont rien à voir.
+> ⚠️ **Et deux de mes cinq premières contre-épreuves étaient fausses** — elles cherchaient un
+> motif de texte que la même phrase, écrite ailleurs dans le fichier, satisfaisait déjà.
+>
+> ★ Précédente : **17 août 2026 (nuit)** — ★★★ **TROIS PANNES CAUSÉES PAR MA PROPRE
 > ASSERTION (§51)**. **APP 6.31 · SW 6.85.** « Aucun symbole sans emploi » m'a fait supprimer
 > quatre symboles vivants. ★★★ **Un contrôle dont l'action corrective est « supprimer » doit
 > être tenu pour suspect.** Passé en avertissement.
@@ -8532,3 +8541,102 @@ fiche `membres` correspondante) reste à faire — **explicitement classée en s
 ⚠️ **25 s est un choix, pas une mesure** — assez large pour un cold start + le pire cas de
 `_tenantPlanTrial` (boucle séquentielle de `getUserByEmail` si l'appelant n'a pas `plan` en
 claim), assez court pour rester utilisable. À resserrer ou élargir si l'usage réel le justifie.
+
+## 53. ★★★ L'IMPORT KML EFFAÇAIT LE PARCELLAIRE (20/08 — `admin-gt.js` seul, aucun bump)
+
+> **Point de départ** : « alexandre vient de m'envoyer un kml, il faut rajouter une parcelle […]
+> si le kml ne contient que cette parcelle, cela ne risque pas d'effacer les autres ? »
+
+**La question de Nico était la bonne, et la réponse était oui.** Le fichier reçu
+(`Projet_de_carte_sans_titre.kml`) porte **un seul** `Placemark` : « Vris Bas », 7 points,
+**0,66 ha** au calcul de `_agtGeoArea`, centroïde 47,0857 / 4,8791 — Chapelle, pas Garraud.
+
+### 53a. Le défaut
+
+`agtKmlSave` faisait `fbAdminWrite(slug,'kml_polygons', _agtKmlPolygons)`. Cette écriture
+**remplace la clé entière**. Charger un fichier partiel effaçait donc tous les autres contours
+du domaine, en silence, sans que l'écran l'annonce ni qu'un retour arrière soit possible.
+
+★★★ **Le défaut n'était pas dans le code — il faisait exactement ce qui était écrit.** Il était
+dans l'écran : un bouton nommé « Enregistrer pour ce domaine » qui **remplace** pendant que
+l'opérateur croit **ajouter**. Aucun contrôle automatique ne trouve ce genre de défaut ; il ne
+se voit qu'en se demandant ce que la personne devant l'écran croit être en train de faire.
+
+### 53b. Les deux pièges trouvés en lisant le code avant de patcher
+
+⚠️ **`parcelles` et `kml_polygons` sont deux clés séparées, reliées par le seul NOM.**
+`initMap` fait `PARCELLES.find(x => x.nom.toLowerCase() === k.name.toLowerCase())`, et
+`_pProxPolyOf` la même chose. Écrire le contour seul aurait donné **un polygone gris sans
+fiche**, invisible dans tous les autres écrans. Une parcelle ajoutée à moitié est un piège
+pire qu'une parcelle absente : elle se voit sur la carte, donc on la croit là.
+
+⚠️⚠️ **`_pProxKmlSrc()` est un tout-ou-rien.** Dès que `kml_polygons` est non vide, il cesse de
+lire `KML_DATA`. Or ce jeu en dur n'existe **que** pour `marchand-grillot` (`_MV_IS_MG`,
+app.js l.33) : y écrire un fichier d'une parcelle aurait fait disparaître **les 46 contours du
+domaine de production**. Garde-fou explicite sur ce seul slug — pour les autres domaines, une
+base vide veut simplement dire « premier parcellaire », et l'écriture est légitime. ★ **Le même
+avertissement pour tous aurait été faux dans les deux sens** : alarmiste sur un domaine neuf,
+et noyé dans le bruit là où il compte.
+
+### 53c. Ce qui a été fait
+
+| | |
+|---|---|
+| **Deux gestes** | « **Compléter** » (défaut) garde les contours absents du fichier · « **Tout remplacer** » = l'ancien comportement, derrière une case à cocher qui nomme le nombre de contours perdus |
+| **Rapprochement** | par `_agtInsKey` — accents, casse et ponctuation ôtés. « LES GRAVIERES. » met à jour « Les Gravières » au lieu de créer un doublon |
+| **Aperçu** | ajoutées / mises à jour / conservées / supprimées, comptées **et** listées ligne à ligne avant d'écrire |
+| **Fiches** | les fiches `parcelles` manquantes sont créées dans le même geste, surface calculée sur le contour |
+| **Relecture** | le plan écrit se calcule sur une **relecture fraîche**, pas sur l'aperçu — le client travaille pendant que l'écran est ouvert |
+| **État de la base** | `_agtKmlLu` distingue « base vide » de « lecture ratée ». Une lecture ratée **bloque** l'écriture au lieu de la traiter comme une base vide |
+
+★ `agtKmlSave` ne lit plus le `<select>` du DOM mais l'état `_agtKmlSlug` : `agtRenderBody`
+reconstruit tout le corps de l'onglet et **le choix du domaine se perdait à chaque rendu** —
+défaut qui existait déjà avant ce lot et que personne n'avait vu.
+
+★ **Échec partiel dit comme tel** : si les contours passent et les fiches sont refusées, le
+message est « Contours enregistrés, fiches NON créées » — pas un succès, pas un échec.
+
+### 53d. ⚠️⚠️⚠️ DEUX DE MES CINQ PREMIÈRES CONTRE-ÉPREUVES ÉTAIENT FAUSSES
+
+Le harnais est sorti **46 verts / 2 rouges** — et les deux rouges étaient **mes assertions**,
+pas le code. Même famille que §42f, une fois de plus :
+
+- **C2** vérifiait `sortie.length === 3` pour prouver qu'un nom mal accentué est reconnu. Or le
+  défaut donne **aussi** 3 : sans normalisation, « Les Gravières » sort des `gardes` *et* rentre
+  comme nouveau. **Seul `majs.length` distingue** une mise à jour d'un remplacement silencieux.
+- **C5** cherchait le motif `_agtKmlLu !== 'ok'` dans le fichier après l'avoir supprimé de
+  `agtKmlSave`. **La même phrase existe dans `_agtKmlEtatHtml`** : la contre-épreuve disait vert
+  sur du code dont la garde avait disparu.
+
+★★★ **La règle** : *une contre-épreuve qui lit du texte ne prouve rien sur du comportement.*
+Les six sont maintenant **fonctionnelles** — elles exécutent le code muté et regardent ce qui
+est écrit. ★ Et une mutation qui **casse la syntaxe** fait rougir sans rien prouver : le harnais
+passe désormais chaque mutant à `node --check` avant de conclure.
+
+### 53e. Le harnais
+
+`scripts/mv-harnais-kml-fusion.mjs` — **50 assertions**, branché dans `check` **et** `prebuild`.
+Méthode C20 : les vraies fonctions sont extraites du fichier livré et **exécutées** sur des
+stubs de `fbAdminRead`/`fbAdminWrite`.
+
+⚠️ **Aucun chemin de bac à sable en dur** (§44 : six harnais du dépôt en portaient un et se
+lisaient comme des succès sans jamais démarrer). Le défaut est
+`new URL('../src/admin-gt.js', import.meta.url)` — vérifié en le lançant depuis `/tmp`.
+
+⚠️ **L'extracteur perdait le mot-clé `async`** en cherchant `lastIndexOf('function')` : les
+fonctions asynchrones remontaient sans lui et le harnais **plantait** au lieu de tester. Un
+harnais qui plante compte pour rouge — c'est ce qui l'a fait voir.
+
+**Contre-épreuve de la chaîne elle-même** : le défaut d'origine réintroduit → `npm run check`
+sort en 1 ; `_agtKmlPlan` supprimée → le harnais sort en 1. Vérifié, pas déduit.
+
+### 53f. Ce qui reste ouvert
+
+- ⚠️ **La vraie liste des contours de Chapelle n'a pas été lue** — je n'ai pas accès à Firestore.
+  Les 11 noms des captures sont des noms de test. L'écran affichera le vrai décompte.
+- ⚠️ Le harnais `harnais-claude-md.mjs` sort **1 rouge préexistant** (`app.js:703` — `saveData`
+  ne refuse plus à cette ligne). Antérieur à ce lot, laissé tel quel.
+- Une mise à jour de contour **ne touche pas** la surface saisie dans la fiche. Choix assumé :
+  la surface du cadastre et celle du contour dessiné ne sont pas la même chose.
+- Le mode « Tout remplacer » ne supprime **aucune fiche** — seul le contour part.
+- `smoke` et `e2e` **non joués** (Playwright ne s'installe pas dans le bac à sable).

@@ -39,6 +39,24 @@ var _agtEssais     = [];  // tokens d'essai 30j
 var _agtDemoStats  = null;  // stats démo visite guidée {connexions,uniques,last,jours}
 var _agtKmlPolygons = []; // polygones parsés en attente d'upload
 var _agtKmlFileName = '';
+// ─── Fusion des contours (lot KML-FUSION) ────────────────────────────────────
+// ⚠️ `fbAdminWrite(slug,'kml_polygons',…)` REMPLACE la clé entière. Charger un
+//    fichier d'une seule parcelle effaçait donc toutes les autres de la carte,
+//    sans avertissement et sans retour possible. L'écran lit désormais l'état
+//    de la base AVANT d'écrire, et sépare deux gestes qui n'ont rien à voir :
+//    compléter un parcellaire, ou le remplacer.
+// ⚠️ Même piège sur `parcelles` : la fiche d'une parcelle neuve ne peut être
+//    ajoutée qu'en réécrivant la clé entière. D'où la relecture au moment de
+//    l'enregistrement (agtKmlSave) et non celle, plus ancienne, de l'aperçu.
+var _agtKmlSlug     = '';      // domaine retenu ENTRE deux rendus : agtRenderBody
+                               // reconstruit le <select> et perdrait la sélection
+var _agtKmlMode     = 'merge'; // 'merge' = compléter · 'replace' = tout remplacer
+var _agtKmlBase     = null;    // contours déjà en base (null tant que non lu)
+var _agtKmlFiches   = null;    // fiches `parcelles` du domaine (null tant que non lu)
+var _agtKmlLu       = '';      // '' | 'load' | 'ok' | 'err' — état de cette lecture
+var _agtKmlCreerF   = true;    // créer aussi la fiche des parcelles nouvelles
+var _agtKmlConfirm  = false;   // case du geste destructif, remise à zéro à chaque changement
+var _agtKmlBusy     = false;
 var _agtErrTenant  = 'all';
 var _agtAccessLog  = [];
 // --- AXE A : registre de vente + demandes entrantes ---
@@ -2359,6 +2377,9 @@ function _parseKML(text) {
 
 function agtKmlFileChange(input) {
   var file = input.files && input.files[0];
+  // ⚠️ Un fichier neuf = un plan neuf : la case du geste destructif ne doit JAMAIS
+  //    survivre au fichier qu'elle a servi à confirmer.
+  _agtKmlConfirm = false;
   if (!file) { _agtKmlPolygons = []; _agtKmlFileName = ''; agtRenderBody(); return; }
   _agtKmlFileName = file.name;
   var reader = new FileReader();
@@ -2372,19 +2393,90 @@ function agtKmlFileChange(input) {
   reader.readAsText(file, 'utf-8');
 }
 
+// ─── Lecture de l'existant ───────────────────────────────────────────────────
+// Appelée au choix du domaine. Sans elle, l'écran ne peut RIEN dire de juste sur
+// ce qu'une écriture va détruire.
+async function agtKmlSlugChange(sel) {
+  _agtKmlSlug    = sel ? sel.value : '';
+  _agtKmlBase    = null;
+  _agtKmlFiches  = null;
+  _agtKmlConfirm = false;
+  _agtKmlMode    = 'merge';
+  if (!_agtKmlSlug) { _agtKmlLu = ''; agtRenderBody(); return; }
+  _agtKmlLu = 'load';
+  agtRenderBody();
+  try {
+    if (!window.fbAdminRead) throw new Error('fbAdminRead indisponible');
+    var k = await window.fbAdminRead(_agtKmlSlug, 'kml_polygons');
+    var p = await window.fbAdminRead(_agtKmlSlug, 'parcelles');
+    _agtKmlBase   = Array.isArray(k) ? k : [];
+    _agtKmlFiches = Array.isArray(p) ? p : [];
+    _agtKmlLu     = 'ok';
+  } catch (e) {
+    // ⚠️ On ne bascule PAS sur « base vide » : une lecture ratée et une base vide
+    //    donnent le même écran mais pas le même risque. Le bouton reste bloqué.
+    _agtKmlBase = null; _agtKmlFiches = null; _agtKmlLu = 'err';
+  }
+  agtRenderBody();
+}
+
+function agtKmlMode(m) { _agtKmlMode = m; _agtKmlConfirm = false; agtRenderBody(); }
+function agtKmlCreerF(el) { _agtKmlCreerF = !!(el && el.checked); agtRenderBody(); }
+function agtKmlConfirmSet(el) { _agtKmlConfirm = !!(el && el.checked); agtRenderBody(); }
+
+// ─── Le plan d'écriture ──────────────────────────────────────────────────────
+// Une seule fonction calcule ce qui va se passer ; l'aperçu et l'écriture la
+// partagent, pour qu'aucun écart ne puisse s'installer entre ce qui est annoncé
+// et ce qui est fait. `base` et `fiches` sont passés en argument : l'aperçu les
+// prend de la lecture d'ouverture, l'écriture d'une relecture fraîche.
+// Rapprochement par le NOM — c'est déjà la seule clé qui relie un contour à sa
+// fiche partout ailleurs (initMap, _pProxPolyOf).
+function _agtKmlPlan(base, fiches) {
+  base   = Array.isArray(base) ? base : [];
+  fiches = Array.isArray(fiches) ? fiches : [];
+  var kBase = {}, kNouv = {};
+  base.forEach(function (p) { kBase[_agtInsKey(p && p.name)] = true; });
+  _agtKmlPolygons.forEach(function (p) { kNouv[_agtInsKey(p && p.name)] = true; });
+
+  var nouveaux = _agtKmlPolygons.filter(function (p) { return !kBase[_agtInsKey(p.name)]; });
+  var majs     = _agtKmlPolygons.filter(function (p) { return  kBase[_agtInsKey(p.name)]; });
+  var gardes   = base.filter(function (p) { return !kNouv[_agtInsKey(p && p.name)]; });
+
+  var kFiche = {};
+  fiches.forEach(function (f) { kFiche[_agtInsKey(f && f.nom)] = true; });
+  var fichesAcreer = nouveaux.filter(function (p) { return !kFiche[_agtInsKey(p.name)]; });
+
+  // Le tableau réellement écrit. En fusion : l'existant non touché, puis le fichier.
+  var sortie;
+  if (_agtKmlMode === 'replace') {
+    sortie = _agtKmlPolygons.map(function (p) { return { name: p.name, pts: p.pts }; });
+  } else {
+    sortie = gardes.map(function (p) { return { name: p.name, pts: p.pts }; })
+      .concat(_agtKmlPolygons.map(function (p) { return { name: p.name, pts: p.pts }; }));
+  }
+  return {
+    nouveaux: nouveaux, majs: majs, gardes: gardes,
+    perdus: (_agtKmlMode === 'replace') ? gardes : [],
+    fichesAcreer: fichesAcreer, sortie: sortie
+  };
+}
+
 function _agtBuildKml() {
   var h = '<div style="padding:0 0 20px">';
   h += '<div class="agt-section-title" style="margin-bottom:6px">Import KML</div>';
-  h += '<p style="font-size:12px;color:rgba(255,255,255,0.4);line-height:1.6;margin:0 0 16px">Charger les polygones de parcelles d\'un domaine client depuis son fichier KML Google Earth.</p>';
+  h += '<p style="font-size:12px;color:rgba(255,255,255,0.4);line-height:1.6;margin:0 0 16px">Charger les contours de parcelles d\'un domaine client depuis son fichier KML Google Earth. Un fichier partiel complète le parcellaire, il ne le remplace pas.</p>';
 
-  // Sélecteur domaine
+  // Sélecteur domaine — `selected` sur l'état, sinon agtRenderBody perd le choix
   h += '<div class="fl" style="color:rgba(255,255,255,0.5)">Domaine cible</div>';
-  h += '<select id="agt-kml-slug" class="ov-input" style="margin-bottom:14px;background:#1A1428;color:#E8DFF8;border-color:rgba(196,181,253,0.2)">';
+  h += '<select id="agt-kml-slug" class="ov-input" style="margin-bottom:14px;background:#1A1428;color:#E8DFF8;border-color:rgba(196,181,253,0.2)" onchange="agtKmlSlugChange(this)">';
   h += '<option value="">— Choisir un domaine —</option>';
-  _agtTenants.forEach(function(t) {
-    h += '<option value="' + t.slug + '">' + _escHtml(t.nom) + ' (' + t.slug + ')</option>';
+  _agtTenants.forEach(function (t) {
+    h += '<option value="' + t.slug + '"' + (t.slug === _agtKmlSlug ? ' selected' : '') + '>' + _escHtml(t.nom) + ' (' + t.slug + ')</option>';
   });
   h += '</select>';
+
+  // État de la base pour ce domaine
+  if (_agtKmlSlug) h += _agtKmlEtatHtml();
 
   // Input fichier
   h += '<div class="fl" style="color:rgba(255,255,255,0.5)">Fichier .kml</div>';
@@ -2393,31 +2485,11 @@ function _agtBuildKml() {
   h += 'margin-bottom:14px;width:100%;box-sizing:border-box" ';
   h += 'onchange="agtKmlFileChange(this)">';
 
-  // Preview
-  if (_agtKmlPolygons.length > 0) {
-    h += '<div style="background:rgba(61,107,39,0.15);border:1px solid rgba(61,107,39,0.3);';
-    h += 'border-radius:10px;padding:12px;margin-bottom:14px">';
-    h += '<div style="font-size:12px;font-weight:700;color:#6BA34A;margin-bottom:8px">';
-    h += _agtKmlPolygons.length + ' polygone' + (_agtKmlPolygons.length > 1 ? 's' : '');
-    h += ' — ' + _escHtml(_agtKmlFileName) + '</div>';
-    h += '<div style="font-size:11px;color:rgba(255,255,255,0.45);line-height:1.8;';
-    h += 'max-height:150px;overflow-y:auto;font-family:monospace">';
-    var shown = _agtKmlPolygons.slice(0, 14);
-    shown.forEach(function(p) {
-      h += _escHtml(p.name) + ' · ' + p.pts.length + ' pts<br>';
-    });
-    if (_agtKmlPolygons.length > 14) {
-      h += '… et ' + (_agtKmlPolygons.length - 14) + ' autres';
-    }
-    h += '</div></div>';
-    h += '<button onclick="agtKmlSave()" style="width:100%;padding:13px;border-radius:10px;';
-    h += 'border:none;font-size:14px;font-weight:700;font-family:Outfit,sans-serif;cursor:pointer;';
-    h += 'background:#3D6B27;color:white;margin-bottom:8px">Enregistrer pour ce domaine</button>';
-  }
+  if (_agtKmlPolygons.length > 0) h += _agtKmlApercuHtml();
 
   // État KML par domaine
   h += '<div class="agt-section-title" style="margin-top:22px;margin-bottom:10px">État KML par domaine</div>';
-  _agtTenants.forEach(function(t) {
+  _agtTenants.forEach(function (t) {
     h += '<div id="agt-kml-row-' + t.slug + '" style="display:flex;align-items:center;';
     h += 'justify-content:space-between;padding:10px 14px;border-radius:8px;';
     h += 'background:rgba(255,255,255,0.04);margin-bottom:6px">';
@@ -2435,22 +2507,222 @@ function _agtBuildKml() {
   return h;
 }
 
-async function agtKmlSave() {
-  var slugEl = document.getElementById('agt-kml-slug');
-  var slug = slugEl ? slugEl.value : '';
-  if (!slug) { showToast('Choisissez un domaine cible', '#E07060'); return; }
-  if (!_agtKmlPolygons.length) { showToast('Aucun polygone à enregistrer', '#E07060'); return; }
-  try {
-    if (!window.fbAdminWrite) throw new Error('fbAdminWrite indisponible');
-    var _ok = await window.fbAdminWrite(slug, 'kml_polygons', _agtKmlPolygons);
-    if (!_ok) throw new Error('écriture refusée (droits Firestore / réseau) — voir console [fbAdminWrite]');
-    showToast('KML enregistré — ' + _agtKmlPolygons.length + ' polygones pour ' + slug, '#3D6B27');
-    _agtKmlPolygons = [];
-    _agtKmlFileName = '';
-    agtRenderBody();
-  } catch(e) {
-    showToast('Erreur : ' + (e.message || e.code || 'inconnue'), '#E07060');
+// Ce que la base contient AUJOURD'HUI pour le domaine choisi.
+function _agtKmlEtatHtml() {
+  var h = '';
+  if (_agtKmlLu === 'load') {
+    return '<div style="background:rgba(255,255,255,0.04);border-radius:10px;padding:11px 13px;margin-bottom:14px;font-size:12px;color:rgba(255,255,255,0.45)">Lecture de la base…</div>';
   }
+  if (_agtKmlLu === 'err') {
+    return '<div style="background:rgba(224,112,96,0.12);border:1px solid rgba(224,112,96,0.35);border-radius:10px;padding:11px 13px;margin-bottom:14px">'
+      + '<div style="font-size:12px;font-weight:700;color:#E07060;margin-bottom:4px">Base illisible</div>'
+      + '<div style="font-size:11px;color:rgba(255,255,255,0.55);line-height:1.6">Impossible de savoir ce que ce domaine contient déjà. Rien ne sera écrit tant que la lecture n\'aura pas abouti — rechoisissez le domaine pour réessayer.</div></div>';
+  }
+  if (_agtKmlLu !== 'ok') return '';
+
+  var nb = (_agtKmlBase || []).length, nf = (_agtKmlFiches || []).length;
+
+  // ⚠️ Le jeu de contours en dur (KML_DATA, app.js) n'existe QUE pour marchand-grillot,
+  //    et _pProxKmlSrc() cesse de le lire dès que kml_polygons est non vide. Écrire ici
+  //    un fichier partiel ferait donc disparaître les 46 contours du domaine de prod.
+  if (!nb && _agtKmlSlug === 'marchand-grillot') {
+    return '<div style="background:rgba(142,47,38,0.18);border:1px solid rgba(224,112,96,0.45);border-radius:10px;padding:12px 14px;margin-bottom:14px">'
+      + '<div style="font-size:12px;font-weight:700;color:#E88B7C;margin-bottom:5px">Ce domaine tire ses contours de l\'application</div>'
+      + '<div style="font-size:11px;color:rgba(255,255,255,0.6);line-height:1.65">Ses 46 contours sont intégrés au code, pas en base. Dès qu\'un contour est écrit ici, ce jeu intégré cesse d\'être lu et <b>seul le contenu du fichier reste visible sur la carte</b>. Pour ajouter une parcelle à ce domaine, chargez un fichier contenant <b>toutes</b> ses parcelles.</div></div>';
+  }
+
+  h += '<div style="background:rgba(74,159,200,0.10);border:1px solid rgba(74,159,200,0.26);border-radius:10px;padding:11px 13px;margin-bottom:14px">';
+  h += '<div style="font-size:12px;color:rgba(255,255,255,0.7)">';
+  h += nb ? ('<b style="color:#6FBEE0">' + nb + '</b> contour' + (nb > 1 ? 's' : '') + ' en base') : 'Aucun contour en base';
+  h += ' · <b style="color:#6FBEE0">' + nf + '</b> fiche' + (nf > 1 ? 's' : '') + ' de parcelle';
+  h += '</div>';
+  if (!nb) h += '<div style="font-size:11px;color:rgba(255,255,255,0.4);line-height:1.6;margin-top:4px">Ce fichier sera le premier parcellaire de ce domaine.</div>';
+  h += '</div>';
+  return h;
+}
+
+// L'aperçu : ce que l'écriture va faire, ligne à ligne, avant de la faire.
+function _agtKmlApercuHtml() {
+  var h = '';
+  var lu = (_agtKmlLu === 'ok');
+  var p  = _agtKmlPlan(_agtKmlBase, _agtKmlFiches);
+
+  // Le fichier lu
+  h += '<div style="background:rgba(61,107,39,0.15);border:1px solid rgba(61,107,39,0.3);';
+  h += 'border-radius:10px;padding:12px;margin-bottom:14px">';
+  h += '<div style="font-size:12px;font-weight:700;color:#6BA34A;margin-bottom:8px">';
+  h += _agtKmlPolygons.length + ' contour' + (_agtKmlPolygons.length > 1 ? 's' : '');
+  h += ' — ' + _escHtml(_agtKmlFileName) + '</div>';
+  h += '<div style="font-size:11px;color:rgba(255,255,255,0.45);line-height:1.8;';
+  h += 'max-height:150px;overflow-y:auto;font-family:monospace">';
+  _agtKmlPolygons.slice(0, 14).forEach(function (x) {
+    h += _escHtml(x.name) + ' · ' + x.pts.length + ' pts · ' + _agtGeoArea(x.pts).toFixed(2) + ' ha<br>';
+  });
+  if (_agtKmlPolygons.length > 14) h += '… et ' + (_agtKmlPolygons.length - 14) + ' autres';
+  h += '</div></div>';
+
+  if (!_agtKmlSlug) {
+    h += '<div style="font-size:12px;color:rgba(255,255,255,0.4);padding:4px 0 10px">Choisissez un domaine cible pour voir ce que cette écriture va changer.</div>';
+    return h;
+  }
+  if (!lu) return h;
+
+  // Les deux gestes
+  h += '<div class="fl" style="color:rgba(255,255,255,0.5)">Que faire des contours déjà en base ?</div>';
+  h += '<div style="display:grid;grid-template-columns:1fr 1fr;gap:10px;margin-bottom:14px">';
+  h += _agtKmlModeBtn('merge', 'Compléter', 'Les contours absents du fichier sont conservés. Un contour de même nom prend la forme du fichier.');
+  h += _agtKmlModeBtn('replace', 'Tout remplacer', 'La base ne garde que ce fichier. Tout contour absent du fichier disparaît de la carte.');
+  h += '</div>';
+
+  // Le décompte
+  h += '<div style="display:flex;gap:8px;flex-wrap:wrap;margin-bottom:12px">';
+  if (p.nouveaux.length) h += _agtKmlPill(p.nouveaux.length + ' ajoutée' + (p.nouveaux.length > 1 ? 's' : ''), '#8CC26A', 'rgba(61,107,39,0.16)', 'rgba(107,163,74,0.4)');
+  if (p.majs.length)     h += _agtKmlPill(p.majs.length + ' mise' + (p.majs.length > 1 ? 's' : '') + ' à jour', '#6FBEE0', 'rgba(74,159,200,0.14)', 'rgba(74,159,200,0.35)');
+  if (_agtKmlMode === 'merge' && p.gardes.length) h += _agtKmlPill(p.gardes.length + ' conservée' + (p.gardes.length > 1 ? 's' : ''), 'rgba(255,255,255,0.55)', 'rgba(255,255,255,0.05)', 'rgba(255,255,255,0.12)');
+  if (_agtKmlMode === 'replace' && p.perdus.length) h += _agtKmlPill(p.perdus.length + ' supprimée' + (p.perdus.length > 1 ? 's' : ''), '#E88B7C', 'rgba(224,112,96,0.14)', 'rgba(224,112,96,0.4)');
+  h += '</div>';
+
+  // Le détail
+  h += '<div style="max-height:230px;overflow-y:auto;margin-bottom:14px">';
+  p.nouveaux.forEach(function (x) { h += _agtKmlRow(x.name, x.pts.length + ' pts · ' + _agtGeoArea(x.pts).toFixed(2) + ' ha', 'nouvelle', '#8CC26A', 'rgba(61,107,39,0.3)'); });
+  p.majs.forEach(function (x) { h += _agtKmlRow(x.name, 'contour remplacé · ' + x.pts.length + ' pts', 'mise à jour', '#6FBEE0', 'rgba(74,159,200,0.22)'); });
+  if (_agtKmlMode === 'merge') {
+    p.gardes.forEach(function (x) { h += _agtKmlRow(x.name, ((x.pts || []).length) + ' pts', 'conservée', 'rgba(255,255,255,0.38)', 'rgba(255,255,255,0.07)'); });
+  } else {
+    p.perdus.forEach(function (x) { h += _agtKmlRow(x.name, 'disparaît de la carte', 'supprimée', '#E88B7C', 'rgba(224,112,96,0.22)'); });
+  }
+  h += '</div>';
+
+  // Les fiches de parcelle
+  // ⚠️ Un contour sans fiche sort en gris sur la carte (initMap : PARCELLES.find sur
+  //    le nom) et n'existe dans AUCUN autre écran. Livrer l'un sans l'autre, c'est
+  //    livrer une parcelle à moitié.
+  if (p.fichesAcreer.length) {
+    h += '<label style="display:flex;align-items:flex-start;gap:10px;padding:11px 13px;border-radius:10px;background:rgba(255,255,255,0.035);margin-bottom:10px;cursor:pointer">';
+    h += '<input type="checkbox"' + (_agtKmlCreerF ? ' checked' : '') + ' onchange="agtKmlCreerF(this)" style="margin-top:2px;width:16px;height:16px;accent-color:#6BA34A;flex:none">';
+    h += '<div><div style="font-size:13px;color:rgba(255,255,255,0.82)">Créer aussi la fiche de ' + p.fichesAcreer.length + ' parcelle' + (p.fichesAcreer.length > 1 ? 's' : '') + '</div>';
+    h += '<div style="font-size:11px;color:rgba(255,255,255,0.38);line-height:1.5;margin-top:2px">';
+    h += p.fichesAcreer.map(function (x) { return _escHtml(x.name) + ' — ' + _agtGeoArea(x.pts).toFixed(2) + ' ha'; }).join(' · ');
+    h += '<br>Sans sa fiche, une parcelle sort en gris sur la carte et n\'apparaît dans aucun écran. La surface est calculée sur le contour et reste modifiable dans Réglages.</div></div></label>';
+  } else if (p.nouveaux.length) {
+    h += '<div style="background:rgba(74,159,200,0.10);border:1px solid rgba(74,159,200,0.26);border-radius:10px;padding:11px 13px;margin-bottom:10px;font-size:12px;color:rgba(255,255,255,0.55)">Les parcelles ajoutées ont déjà leur fiche dans ce domaine. Rien d\'autre à créer.</div>';
+  }
+
+  // Garde-fou du geste destructif
+  if (_agtKmlMode === 'replace' && p.perdus.length) {
+    h += '<label style="display:flex;align-items:flex-start;gap:10px;padding:11px 13px;border-radius:10px;background:rgba(142,47,38,0.15);margin-bottom:10px;cursor:pointer">';
+    h += '<input type="checkbox"' + (_agtKmlConfirm ? ' checked' : '') + ' onchange="agtKmlConfirmSet(this)" style="margin-top:2px;width:16px;height:16px;accent-color:#E07060;flex:none">';
+    h += '<div><div style="font-size:13px;color:#E88B7C">Je comprends que ' + p.perdus.length + ' contour' + (p.perdus.length > 1 ? 's' : '') + ' vont disparaître de la carte</div>';
+    h += '<div style="font-size:11px;color:rgba(255,255,255,0.38);line-height:1.5;margin-top:2px">Les fiches de ces parcelles ne sont pas supprimées — seule leur forme sur la carte est perdue.</div></div></label>';
+  }
+
+  // Le bouton
+  var bloque = _agtKmlBusy || (_agtKmlMode === 'replace' && p.perdus.length > 0 && !_agtKmlConfirm);
+  var lib = _agtKmlBusy ? 'Enregistrement…'
+    : (_agtKmlMode === 'replace'
+      ? 'Remplacer par ce fichier — ' + p.sortie.length + ' contours'
+      : 'Enregistrer — ' + p.sortie.length + ' contours au total');
+  h += '<button onclick="agtKmlSave()"' + (bloque ? ' disabled' : '') + ' style="width:100%;padding:13px;border-radius:10px;';
+  h += 'border:none;font-size:14px;font-weight:700;font-family:Outfit,sans-serif;cursor:' + (bloque ? 'not-allowed' : 'pointer') + ';';
+  h += 'background:' + (_agtKmlMode === 'replace' ? '#8E2F26' : '#3D6B27') + ';color:white;margin-bottom:8px;opacity:' + (bloque ? '0.45' : '1') + '">' + lib + '</button>';
+  return h;
+}
+
+function _agtKmlModeBtn(m, titre, desc) {
+  var on = (_agtKmlMode === m), dg = (m === 'replace');
+  var bd = on ? (dg ? 'rgba(224,112,96,0.55)' : 'rgba(107,163,74,0.55)') : 'rgba(255,255,255,0.1)';
+  var bg = on ? (dg ? 'rgba(142,47,38,0.18)' : 'rgba(61,107,39,0.16)') : 'rgba(255,255,255,0.03)';
+  return '<button onclick="agtKmlMode(\'' + m + '\')" style="border-radius:12px;padding:12px;text-align:left;cursor:pointer;'
+    + 'font-family:Outfit,sans-serif;border:1px solid ' + bd + ';background:' + bg + '">'
+    // ⚠️ <span> et non <div> : un <div> dans un <button> est invalide en HTML5 (§24).
+    //    Le display:block leur rend la mise en page d'un bloc sans la balise interdite.
+    + '<span style="display:block;font-size:13px;font-weight:700;color:#fff;margin-bottom:3px">' + titre + '</span>'
+    + '<span style="display:block;font-size:11px;color:rgba(255,255,255,0.45);line-height:1.5">' + desc + '</span></button>';
+}
+
+function _agtKmlPill(txt, col, bg, bd) {
+  return '<span style="border-radius:999px;padding:5px 12px;font-size:12px;font-weight:600;'
+    + 'color:' + col + ';background:' + bg + ';border:1px solid ' + bd + '">' + txt + '</span>';
+}
+
+function _agtKmlRow(nom, sub, tag, col, bg) {
+  return '<div style="display:flex;align-items:center;justify-content:space-between;gap:10px;'
+    + 'padding:9px 12px;border-radius:9px;background:rgba(255,255,255,0.035);margin-bottom:5px">'
+    + '<div><div style="font-size:13px;color:rgba(255,255,255,0.82)">' + _escHtml(nom) + '</div>'
+    + '<div style="font-size:11px;color:rgba(255,255,255,0.3);font-family:monospace">' + _escHtml(sub) + '</div></div>'
+    + '<span style="font-size:10px;font-weight:700;letter-spacing:0.05em;text-transform:uppercase;'
+    + 'padding:3px 8px;border-radius:5px;white-space:nowrap;color:' + col + ';background:' + bg + '">' + tag + '</span></div>';
+}
+async function agtKmlSave() {
+  var slug = _agtKmlSlug;
+  if (!slug) { showToast('Choisissez un domaine cible', '#E07060'); return; }
+  if (!_agtKmlPolygons.length) { showToast('Aucun contour à enregistrer', '#E07060'); return; }
+  if (_agtKmlLu !== 'ok') { showToast('État de la base inconnu — rechoisissez le domaine', '#E07060'); return; }
+  if (_agtKmlBusy) return;
+  _agtKmlBusy = true; agtRenderBody();
+  try {
+    if (!window.fbAdminWrite || !window.fbAdminRead) throw new Error('accès Firestore indisponible');
+
+    // ⚠️ RELECTURE. L'aperçu peut dater de plusieurs minutes, et le client travaille
+    //    pendant ce temps. Le plan écrit se calcule sur ce que la base contient
+    //    MAINTENANT, pas sur ce qu'elle contenait à l'ouverture de l'écran.
+    var baseNow   = await window.fbAdminRead(slug, 'kml_polygons');
+    var fichesNow = await window.fbAdminRead(slug, 'parcelles');
+    baseNow   = Array.isArray(baseNow) ? baseNow : [];
+    fichesNow = Array.isArray(fichesNow) ? fichesNow : [];
+    var p = _agtKmlPlan(baseNow, fichesNow);
+
+    // ⚠️ Un plan de fusion qui n'écrirait RIEN de plus que la base, alors que le
+    //    fichier apporte des contours, est le signe que quelque chose a mal tourné.
+    if (!p.sortie.length) throw new Error('plan vide — rien ne sera écrit');
+
+    var ok1 = await window.fbAdminWrite(slug, 'kml_polygons', p.sortie);
+    if (!ok1) throw new Error('écriture refusée (droits Firestore / réseau) — voir console [fbAdminWrite]');
+
+    // Les fiches. Écrites APRÈS les contours et seulement s'il y en a à créer :
+    // une écriture de `parcelles` réécrit la clé entière, on ne la touche pas pour rien.
+    var nf = 0;
+    if (_agtKmlCreerF && p.fichesAcreer.length) {
+      var fusion = fichesNow.concat(p.fichesAcreer.map(function (x) {
+        return { nom: x.name, surface: Math.round(_agtGeoArea(x.pts) * 100) / 100, statut: 'Active', taches: {} };
+      }));
+      var ok2 = await window.fbAdminWrite(slug, 'parcelles', fusion);
+      if (!ok2) {
+        // Échec partiel : les contours SONT écrits. Le dire précisément, plutôt que
+        // de laisser croire que rien n'a été fait.
+        showToast('Contours enregistrés, fiches NON créées — à saisir dans Réglages', '#B85A1A');
+        _agtKmlPolygons = []; _agtKmlFileName = ''; _agtKmlConfirm = false;
+        _agtKmlBusy = false;
+        await agtKmlRelire(slug);
+        return;
+      }
+      nf = p.fichesAcreer.length;
+    }
+
+    var msg = p.sortie.length + ' contour' + (p.sortie.length > 1 ? 's' : '') + ' pour ' + slug;
+    if (nf) msg += ' · ' + nf + ' fiche' + (nf > 1 ? 's' : '') + ' créée' + (nf > 1 ? 's' : '');
+    showToast('Enregistré — ' + msg, '#3D6B27');
+    _agtKmlPolygons = []; _agtKmlFileName = ''; _agtKmlConfirm = false;
+    _agtKmlBusy = false;
+    await agtKmlRelire(slug);
+  } catch (e) {
+    _agtKmlBusy = false;
+    showToast('Erreur : ' + (e.message || e.code || 'inconnue'), '#E07060');
+    agtRenderBody();
+  }
+}
+
+// Relit la base après écriture : l'état affiché doit décrire ce qui EST en base,
+// pas ce qu'on croit y avoir mis.
+async function agtKmlRelire(slug) {
+  try {
+    var k = await window.fbAdminRead(slug, 'kml_polygons');
+    var p = await window.fbAdminRead(slug, 'parcelles');
+    _agtKmlBase   = Array.isArray(k) ? k : [];
+    _agtKmlFiches = Array.isArray(p) ? p : [];
+    _agtKmlLu     = 'ok';
+  } catch (e) { _agtKmlBase = null; _agtKmlFiches = null; _agtKmlLu = 'err'; }
+  agtRenderBody();
 }
 
 async function agtCheckKml(slug, btn) {
@@ -5660,6 +5932,10 @@ window.agtRevokeEssai    = agtRevokeEssai;
 window.agtCopyEssaiCode  = agtCopyEssaiCode;
 window.agtKmlFileChange  = agtKmlFileChange;
 window.agtKmlSave        = agtKmlSave;
+window.agtKmlSlugChange  = agtKmlSlugChange;
+window.agtKmlMode        = agtKmlMode;
+window.agtKmlCreerF      = agtKmlCreerF;
+window.agtKmlConfirmSet  = agtKmlConfirmSet;
 window.agtCheckKml       = agtCheckKml;
 window.agtSyncEphy       = agtSyncEphy;
 window.agtDeleteTenant        = agtDeleteTenant;
