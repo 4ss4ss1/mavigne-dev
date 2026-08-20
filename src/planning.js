@@ -883,6 +883,27 @@ function _planRempH(mbr,m){
   return h;
 }
 window._planRempH=_planRempH;
+// \u2605 Heures ASSIMILEES a du travail effectif (formation, evenement familial).
+//   Elles sont comptees dans les heures du mois mais la personne n'etait PAS au
+//   domaine : sans ce decompte, la feuille affichait « 104h30 travaille » a cote
+//   de « 8 jours travailles », soit 13 h par jour. Un motif est passe en argument
+//   parce que la formation et l'evenement familial ne se rangent pas dans la
+//   meme case, meme s'ils partagent le drapeau assim.
+function _planAssimMonth(mbr,m,motifId){
+  var plId=_planPlId(mbr),ent=_pEntMonth(mbr.nom,m),h=0,j=0;
+  for(var d=1;d<=_planDays(m);d++){
+    if(!_planInContractCtr(mbr,m,d))continue;
+    var e=ent[d];
+    if(!e||!e.absent)continue;
+    var mo=_planAbsMotif(e);
+    if(!mo.assim)continue;
+    if(motifId&&mo.id!==motifId)continue;
+    var hh=_planDayH(plId,m,d,e);
+    if(hh>0.0001){ h+=hh; j++; }
+  }
+  return {h:h,j:j};
+}
+window._planAssimMonth=_planAssimMonth;
 function _planSummary(mbr,m){
   var plId=_planPlId(mbr);
   // ref : heures prévues sur les jours sous contrat — hors jours pris en récup
@@ -4944,6 +4965,12 @@ function _planExportPDF_(nom,mbr,_ctr){
     var sup=_planSupMonth(mbr,planMonth);
   var recupH=_planRecupH(mbr,planMonth);
   var joursTrav=_planDaysWorked(mbr,planMonth);
+  // Ventilation des heures du mois : ce qui a ete fait AU DOMAINE et ce qui compte
+  // sans y avoir ete. La soustraction se fait sur s.worked, jamais sur un second
+  // parcours du mois — deux totaux calcules separement finissent par diverger.
+  var _fo=_planAssimMonth(mbr,planMonth,'formation');
+  var _fa=_planAssimMonth(mbr,planMonth,'famille');
+  var _hDom=Math.max(0,s.worked-_fo.h-_fa.h);
   var paye=Math.min(Math.max(0,_planHsupPaye(nom,planMonth)),sup);
   var bank=_planBank(mbr,planMonth);
   var payBankP=Math.max(0,_planHsupPayeBank(nom,planMonth));
@@ -4985,24 +5012,22 @@ function _planExportPDF_(nom,mbr,_ctr){
     var acoItems=aco.map(function(a){var dp=(a.date||'').split('-');return a.montant.toLocaleString('fr-FR')+'\u202f\u20ac le '+(dp.length>=3?parseInt(dp[2],10)+'/'+parseInt(dp[1],10):'');}).join(' \u00b7 ');
     acoHtml='<div class="acomptes">\uD83D\uDCB6 Acomptes vers\u00e9s \u2014 '+acoItems+' \u2014 Total <b>'+acoTot.toLocaleString('fr-FR')+'\u202f\u20ac</b></div>';
   }
-  // \u2605 Le chiffre que le gestionnaire cherche. Il est desormais TOUJOURS affiche,
-  //   en tete de feuille : un bloc absent quand rien n'est a payer obligeait a relire
-  //   tout le document pour en etre sur. Quand il n'y a rien a payer, le bloc le dit.
-  var _apOn=(aPayer>0.0001);
-  var _apSub;
-  if(_apOn){
-    _apSub=(payBankP>0.0001
-      ?_planFmt(paye)+' faites en '+PLAN_MOIS_C[planMonth]+' + '+_planFmt(payBankP)+' prises sur le compteur'
-      :_planFmt(paye)+' faites en '+PLAN_MOIS_C[planMonth])
-      +' \u00b7 reste '+_planFmtE(yb.net)+' apr\u00e8s paiement';
-  } else if(sup>0.0001){
-    _apSub=_planFmt(sup)+' report\u00e9es au compteur \u00b7 reste \u00e0 prendre '+_planFmtE(yb.net);
-  } else {
-    _apSub='Aucune heure suppl\u00e9mentaire ce mois \u00b7 reste \u00e0 prendre '+_planFmtE(yb.net);
+  // \u2605 HISTOIRE DE CE BLOC \u2014 a lire avant de le reintroduire.
+  //   Il a d'abord ete rendu TOUJOURS visible, en tete de feuille : son absence
+  //   quand rien n'etait du obligeait a relire tout le document pour en etre sur.
+  //   L'intention etait juste, la forme non : 26 px pour un zero onze mois sur
+  //   douze, au-dessus de tout le reste. Et « a payer » presumait du choix, alors
+  //   qu'une heure supplementaire se RATTRAPE aussi bien qu'elle se paie.
+  //   \u2605 L'information reste donc TOUJOURS affichee \u2014 exigence d'origine intacte \u2014
+  //   mais dans la ligne « Ce mois » sous la grille, et le suivi vit dans le
+  //   tableau mois par mois, qui distingue deja Sup. / Recup / Paye / Reste.
+  //   Ce qu'il apprenait d'irremplacable, la part prise sur le compteur, descend
+  //   dans _apDet.
+  var _apDet='';
+  if(aPayer>0.0001){
+    _apDet=' \u00b7 pay\u00e9 <b>'+_planFmt(aPayer)+'</b>'
+      +(payBankP>0.0001?(' <span class="nb">dont '+_planFmt(payBankP)+' pris sur le compteur</span>'):'');
   }
-  var apHtml='<div class="apay'+(_apOn?'':' off')+'">'
-    +'<div><div class="t">Heures suppl\u00e9mentaires \u00e0 payer</div><div class="s">'+_apSub+'</div></div>'
-    +'<div class="v">'+_planFmt(aPayer)+'</div></div>';
   var dom=(window.DOMAINE_NOM||'');
   // Janvier -> mois affiche, jamais au-dela. Un releve mensuel ne montre pas des
   // mois a venir : ils reposent sur du planning previsionnel, pas sur du travail fait.
@@ -5068,7 +5093,18 @@ function _planExportPDF_(nom,mbr,_ctr){
     +'.sheet{padding:6px}.hdr{display:flex;justify-content:space-between;align-items:flex-start;border-bottom:2px solid #e7e5e4;padding-bottom:9px;margin-bottom:10px}'
     +'.hdr h1{font-size:19px;font-weight:800}.hdr .sub{font-size:11px;color:#78716c;margin-top:3px}.badge{display:inline-block;background:#f1eefa;color:#7B6DB8;font-weight:700;font-size:9px;padding:1px 7px;border-radius:6px;margin-right:6px}'
     +'.mo{font-size:17px;font-weight:700;color:#7B6DB8;text-align:right}.etp{font-size:10px;color:#a8a29e;text-align:right;margin-top:3px}'
-    +'.summ{display:flex;gap:6px;margin-bottom:9px}.box{flex:1;background:#fafaf9;border:1px solid #e7e5e4;border-radius:6px;padding:6px 4px;text-align:center}.box .v{font-size:16px;font-weight:800}.box .l{font-size:8px;color:#a8a29e;text-transform:uppercase;letter-spacing:.5px;margin-top:1px}'
+    +'.tete{display:flex;border:1.5px solid #d8c3a3;border-radius:8px;overflow:hidden;margin-bottom:9px}'
+    +'.tmain{padding:9px 14px;background:#faf6ef;min-width:186px}'
+    +'.tmain .lab{font-size:8px;font-weight:700;text-transform:uppercase;letter-spacing:.6px;color:#8A5A38}'
+    +'.tmain .big{font-size:30px;font-weight:800;line-height:1.03;letter-spacing:-.9px;margin-top:1px}'
+    +'.tmain .tsub{font-size:9.5px;color:#78716c;margin-top:2px}.tmain .tsub b{color:#44403c}'
+    +'.tsplit{flex:1;display:flex;border-left:1.5px solid #e7ddc9}'
+    +'.tc{flex:1;padding:9px 11px;border-right:1px solid #efe7da}.tc:last-child{border-right:0}'
+    +'.tc .n{font-size:18px;font-weight:800;line-height:1.05}'
+    +'.tc .l{font-size:8px;color:#8b8580;text-transform:uppercase;letter-spacing:.5px;margin-top:2px;line-height:1.3}'
+    +'.tc.fo{background:#f4f7fb}.tc.fo .n{color:#2c5f8f}.tc.fa{background:#f7f4fa}.tc.fa .n{color:#6b5a8a}'
+    +'.cemois{font-size:9px;color:#8b8580;border:1px solid #eeebe7;border-radius:6px;padding:5px 11px;margin-top:9px}'
+    +'.cemois b{color:#57534e;font-weight:700}.cemois .nb{color:#a8a29e}'
     +'.apay{display:flex;align-items:center;justify-content:space-between;border:2px solid #b45309;background:#fffbeb;border-radius:8px;padding:8px 13px;margin-bottom:9px}.apay .t{font-size:9.5px;font-weight:700;text-transform:uppercase;letter-spacing:.5px;color:#b45309}.apay .s{font-size:10px;color:#78716c;margin-top:2px}.apay .v{font-size:26px;font-weight:800;color:#b45309;line-height:1}.apay.off{border:1.5px solid #e7e5e4;background:#fafaf9}.apay.off .t{color:#78716c}.apay.off .v{color:#a8a29e}'
     +'.soldean{border:1.5px solid #d8c3a3;background:#faf6ef;border-radius:8px;padding:7px 12px;margin-bottom:9px;display:flex;flex-wrap:wrap;gap:4px 16px;align-items:center}.soldean .t{font-size:9px;font-weight:700;text-transform:uppercase;letter-spacing:.5px;color:#8A5A38;width:100%;margin-bottom:1px}.soldean .it{font-size:11px;color:#57534e}.soldean .it b{font-size:12px}.soldean .net{margin-left:auto;font-size:14px;font-weight:800}'
     +'.days{display:flex;gap:14px}.col{flex:1}table{width:100%;border-collapse:collapse}thead tr{background:#1C1A2E;color:#fff}th{padding:4px 6px;text-align:left;font-size:8px;text-transform:uppercase;letter-spacing:.4px;font-weight:700}th.c,td.c{text-align:center}th.r2,td.r2{text-align:right}td{padding:2px 6px;border-bottom:1px solid #f0ece8;font-size:9.5px;line-height:1.2}'
@@ -5080,20 +5116,39 @@ function _planExportPDF_(nom,mbr,_ctr){
       +(_ctrTxt?('<div class="sub" style="margin-top:2px;font-weight:600;color:#8A5A38">'+_escHtml(_ctrTxt)+'</div>'):'')
     +'</div>'
     +'<div><div class="mo">'+PLAN_MOIS[planMonth]+' '+planYear+'</div><div class="etp">ETP '+_planFmtEtp(s.etp)+'</div></div></div>'
-    +apHtml
-    +'<div class="summ">'
-      +'<div class="box"><div class="v">'+_planFmt(s.ref)+'</div><div class="l">R\u00e9f\u00e9rence</div></div>'
-      +'<div class="box"><div class="v">'+_planFmt(s.worked)+'</div><div class="l">Travaill\u00e9</div></div>'
-      +'<div class="box"><div class="v" style="color:'+(s.ecart>=0?'#16a34a':'#dc2626')+'">'+_planFmtE(s.ecart)+'</div><div class="l">\u00c9cart</div></div>'
-      +'<div class="box"><div class="v">'+joursTrav+'</div><div class="l">Jours travaill\u00e9s</div></div>'
-      +'<div class="box"><div class="v" style="color:var(--phyto-med,#7B6DB8)">'+_planFmt(recupH)+'</div><div class="l">R\u00e9cup prise</div></div>'
-      +'<div class="box"><div class="v" style="color:var(--phyto-med,#7B6DB8)">'+_planFmt(bank.solde)+'</div><div class="l">Compteur</div></div>'
+    // \u2605 Le chiffre le plus gros de la page est celui qu'on vient chercher : les
+    //   heures du mois. Le bandeau « heures supplementaires a payer » a disparu —
+    //   il donnait 26 px a un zero onze mois sur douze, et il presumait du choix
+    //   (une heure sup se RATTRAPE ou se paie). Le suivi vit dans le tableau
+    //   mois par mois, qui distingue deja Sup. / Recup / Paye / Reste a prendre.
+    +'<div class="tete">'
+      +'<div class="tmain"><div class="lab">Heures compt\u00e9es ce mois</div>'
+        +'<div class="big">'+_planFmt(s.worked)+'</div>'
+        +'<div class="tsub">R\u00e9f\u00e9rence <b>'+_planFmt(s.ref)+'</b></div></div>'
+      +'<div class="tsplit">'
+        +'<div class="tc"><div class="n">'+_planFmt(_hDom)+'</div>'
+          +'<div class="l">au domaine<br>'+joursTrav+' jour'+(joursTrav>1?'s':'')+'</div></div>'
+        +(_fo.j?('<div class="tc fo"><div class="n">'+_planFmt(_fo.h)+'</div>'
+          +'<div class="l">en formation<br>'+_fo.j+' jour'+(_fo.j>1?'s':'')+'</div></div>'):'')
+        +(_fa.j?('<div class="tc fa"><div class="n">'+_planFmt(_fa.h)+'</div>'
+          +'<div class="l">\u00e9v\u00e9nement familial<br>'+_fa.j+' jour'+(_fa.j>1?'s':'')+'</div></div>'):'')
+        +'<div class="tc'+(s.ecart===0?' eq':'')+'"><div class="n" style="color:'
+          +(s.ecart>0?'#b45309':(s.ecart<0?'#dc2626':'#16a34a'))+'">'+_planFmtE(s.ecart)+'</div>'
+          +'<div class="l">\u00e9cart au<br>pr\u00e9vu</div></div>'
+      +'</div>'
     +'</div>'
+    +'<div class="days"><div class="col"><table><thead><tr><th class="c" style="width:34px">Jr</th><th>Statut</th><th class="r2" style="width:42px">Eff.</th></tr></thead><tbody>'+c1+'</tbody></table></div>'
+    +'<div class="col"><table><thead><tr><th class="c" style="width:34px">Jr</th><th>Statut</th><th class="r2" style="width:42px">Eff.</th></tr></thead><tbody>'+c2+'</tbody></table></div></div>'
     +_plRvContratsHtml(mbr)
     +_plRvCpHtml(mbr)
     +annuCptHtml
-    +'<div class="days"><div class="col"><table><thead><tr><th class="c" style="width:34px">Jr</th><th>Statut</th><th class="r2" style="width:42px">Eff.</th></tr></thead><tbody>'+c1+'</tbody></table></div>'
-    +'<div class="col"><table><thead><tr><th class="c" style="width:34px">Jr</th><th>Statut</th><th class="r2" style="width:42px">Eff.</th></tr></thead><tbody>'+c2+'</tbody></table></div></div>'
+    // Ce que le mois a produit, en une ligne : le detail est juste en dessous,
+    // dans le tableau. Conserve meme a zero — l'absence d'heures sup est une
+    // information, elle ne merite simplement pas 26 px.
+    +'<div class="cemois">Ce mois \u00b7 heures suppl\u00e9mentaires <b>'+_planFmt(sup)+'</b>'
+      +' \u00b7 r\u00e9cup\u00e9ration prise <b>'+_planFmt(recupH)+'</b>'
+      +_apDet
+      +' \u00b7 reste \u00e0 prendre <b>'+_planFmtE(yb.net)+'</b></div>'
     +annuHtml
     +acoHtml
     +'<div class="foot"><div class="sig">Signature salari\u00e9</div><div class="sig">Signature employeur</div></div>'
@@ -5202,7 +5257,7 @@ function _paGrille(plId,yr,mbr){
 // pour le modele et faux pour elle.
 // \u26a0\ufe0f Lecture DIRECTE du store a l'annee demandee : _pEntMonth passe par _pY(),
 //   qui rend l'annee AFFICHEE et non celle du document.
-var _PA_MK={ecole:'CFA',cp:'CP',rec:'R\u00e9c',abs:'Abs'};
+var _PA_MK={ecole:'Form.',fam:'Fam.',cp:'CP',rec:'R\u00e9c',abs:'Abs'};
 function _paMarques(nom,yr){
   var MK={};
   try{
@@ -5218,7 +5273,12 @@ function _paMarques(nom,yr){
         else if(e.type==='recup')  k='rec';
         else if(e.absent){
           var mo2=_planAbsMotif(e);
-          k=mo2.assim?'ecole':'abs';   // assimile travail effectif = formation / evenement familial
+          // \u26a0\ufe0f DEUX motifs sont assimiles a du travail effectif : la formation ET
+          //   l'evenement familial. Les confondre faisait sortir un mariage marque
+          //   « CFA » et compte en heures de formation.
+          k = (mo2.id==='formation') ? 'ecole'
+            : mo2.assim              ? 'fam'
+            :                          'abs';
         }
         if(!k) continue;
         if(!MK[m]) MK[m]={};
@@ -5483,6 +5543,7 @@ var _PA_CSS =
   // \u2605 Marques du document NOMINATIF. Fonds pales : la case doit rester lisible
   //   en noir et blanc, une feuille de planning se photocopie.
   '.pa-mk-ecole{background:#DCE9F7!important}'
++ '.pa-mk-fam{background:#E8DFF0!important}'
 + '.pa-mk-cp{background:#FBE08A!important}'
 + '.pa-mk-rec{background:#E5DFF5!important}'
 + '.pa-mk-abs{background:#F2D5CE!important}'
@@ -5640,18 +5701,24 @@ function _paDocNom(yr,nom,e){
   // Le total se ventile : ce qui est fait AU DOMAINE et ce qui est fait AILLEURS
   // mais compte quand meme (CFA, evenement familial). Un apprenti dont on
   // additionnerait les deux sans le dire croirait devoir 1 607 h de vigne.
-  var tot=0,nj=0,hEcole=0,jEcole=0,hCp=0,jCp=0;
+  var tot=0,nj=0,hEcole=0,jEcole=0,hCp=0,jCp=0,hFam=0,jFam=0;
   for(var m=0;m<12;m++) for(var d in g[m]){
     var h=g[m][d]; if(!(h>0)) continue;
     var k=(MK[m]&&MK[m][parseInt(d,10)])||null;
     if(k==='ecole'){ hEcole+=h; jEcole++; tot+=h; continue; }
+    // Paye et compte dans le total, mais ni domaine ni formation.
+    if(k==='fam'){ hFam+=h; jFam++; tot+=h; continue; }
     if(k==='cp'){ hCp+=h; jCp++; continue; }
     if(k==='rec'||k==='abs') continue;
     tot+=h; nj++;
   }
   var r1=function(x){ return Math.round(x*10)/10; };
-  tot=r1(tot); hEcole=r1(hEcole); hCp=r1(hCp);
-  var hDom=r1(tot-hEcole);
+  tot=r1(tot); hEcole=r1(hEcole); hCp=r1(hCp); hFam=r1(hFam);
+  // \u26a0\ufe0f Retrancher AUSSI l'evenement familial : sans lui, les heures du domaine
+  //   incluaient un mariage que le compteur de JOURS excluait deja. Les deux
+  //   chiffres de la meme case se contredisaient (faux vert : mon harnais portait
+  //   la meme erreur, seul l'ecart jours/heures l'a revele).
+  var hDom=r1(tot-hEcole-hFam);
 
   var per=_paPeriodes(mbr)||[];
   var ctr=per.length
@@ -5664,6 +5731,7 @@ function _paDocNom(yr,nom,e){
   var vent='<div class="pa-vent">'
     +'<div><b>'+_paFmt(hDom)+' h</b><span>au domaine \u00b7 '+nj+' jours</span></div>'
     +(jEcole?('<div><b>'+_paFmt(hEcole)+' h</b><span>en formation \u00b7 '+jEcole+' jours</span></div>'):'')
+    +(jFam?('<div><b>'+_paFmt(hFam)+' h</b><span>\u00e9v\u00e9nement familial \u00b7 '+jFam+' jours</span></div>'):'')
     +(jCp?('<div><b>'+_paFmt(hCp)+' h</b><span>cong\u00e9s pos\u00e9s \u00b7 '+jCp+' jours</span></div>'):'')
     +'<div><b>'+_paFmt(tot)+' h</b><span>total comptabilis\u00e9</span></div>'
     +'</div>';
@@ -5672,7 +5740,8 @@ function _paDocNom(yr,nom,e){
        + (reg?'<span><i style="background:#C7E3F5"></i>Journ\u00e9e courte</span>':'')
        + '<span><i style="background:#DDD8CF"></i>Week-end</span>'
        + '<span><i style="background:#F0AF9B"></i>Jour f\u00e9ri\u00e9</span>'
-       + (jEcole?'<span><i style="background:#DCE9F7"></i>Formation (CFA)</span>':'')
+       + (jEcole?'<span><i style="background:#DCE9F7"></i>Formation</span>':'')
+       + (jFam?'<span><i style="background:#E8DFF0"></i>\u00c9v\u00e9nement familial</span>':'')
        + (jCp?'<span><i style="background:#FBE08A"></i>Cong\u00e9 pos\u00e9</span>':'');
 
   var lim='<div class="mvdoc-lim"><b>Planning pr\u00e9visionnel.</b> Les dur\u00e9es sont des heures '
