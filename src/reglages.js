@@ -49,19 +49,42 @@ function calcEtpLive(){
   }
 }
 // ── Liaison Planning → PDF mensuel ──
+// ★★ TROIS DEFAUTS DE LA MEME FAMILLE, corriges ensemble le 20/08/2026.
+//   ① L'ANNEE du champ n'etait lue nulle part : choisir « juin 2025 » chiffrait
+//     juin de l'annee AFFICHEE dans le Planning. _planSurAnnee pose le contexte
+//     de calcul, meme patron que les fenetres du Pilotage.
+//   ② Les membres venaient de _planMbrs : un PDF de juin edite en aout perdait
+//     tous ceux dont le contrat s'etait termine entre-temps — des heures faites,
+//     effacees par un rangement de liste.
+//   ③ La reference venait de _planGetRefH, le modele NU : un salarie embauche en
+//     cours d'annee portait du « prevu » sur des mois ou il n'etait pas la, et
+//     son ETP affiche tombait sous 100 % sans qu'il ait manque une heure.
 function planFillPDFFromMonth(moisVal){
   if(!moisVal)return;
-  var m=parseInt(moisVal.split('-')[1])-1; // 0-based
-  var mbrs=(typeof window._planMbrs==='function')?window._planMbrs():[];
+  var _pv=String(moisVal).split('-');
+  var yr=parseInt(_pv[0],10)||0, m=parseInt(_pv[1],10)-1; // 0-based
+  var _run=(yr&&typeof window._planSurAnnee==='function')
+    ? function(fn){ return window._planSurAnnee(yr,fn); }
+    : function(fn){ return fn(); };
+  _run(function(){ _planFillPDFMois(m); });
+  calcEtpLivePdf();
+}
+function _planFillPDFMois(m){
+  var mbrs=(typeof window._planMbrsMois==='function')?window._planMbrsMois(m)
+          :((typeof window._planMbrs==='function')?window._planMbrs():[]);
+  var _ref=function(mbr){
+    if(typeof window._planSummary==='function'){var s=window._planSummary(mbr,m);if(s)return s.ref||0;}
+    return (typeof window._planGetRefH==='function')?window._planGetRefH(window._planPlId(mbr),m):0;
+  };
   var hEl=document.getElementById('pdf-heures');
   var dEl=document.getElementById('pdf-heures-dues');
   var bH=document.getElementById('pdf-badge-h');
   var bD=document.getElementById('pdf-badge-d');
-  if(mbrs.length&&typeof window._planCalcMonth==='function'&&typeof window._planGetRefH==='function'){
+  if(mbrs.length&&typeof window._planCalcMonth==='function'){
     var tw=mbrs.reduce(function(s,mbr){return s+window._planCalcMonth(mbr,m);},0);
-    var tr=mbrs.reduce(function(s,mbr){return s+window._planGetRefH(window._planPlId(mbr),m);},0);
+    var tr=mbrs.reduce(function(s,mbr){return s+_ref(mbr);},0);
     // Compter les membres ayant des heures planifiées ou travaillées ce mois
-    var nbMbres=mbrs.filter(function(mbr){return window._planCalcMonth(mbr,m)>0||window._planGetRefH(window._planPlId(mbr),m)>0;}).length;
+    var nbMbres=mbrs.filter(function(mbr){return window._planCalcMonth(mbr,m)>0||_ref(mbr)>0;}).length;
     var nbEl=document.getElementById('pdf-nb-membres');
     if(nbEl)nbEl.value=nbMbres||1;
     if(hEl&&tw>0){hEl.value=Math.round(tw*10)/10;hEl.style.borderColor='#4A9FC8';hEl.style.background='rgba(74,159,200,0.07)';}
@@ -74,7 +97,7 @@ function planFillPDFFromMonth(moisVal){
       var rows='';
       mbrs.forEach(function(mbr){
         var w=window._planCalcMonth(mbr,m);
-        var r=window._planGetRefH(window._planPlId(mbr),m);
+        var r=_ref(mbr);
         if(!w&&!r)return;
         var etp=r>0?(w/r*100).toFixed(0):'—';
         var etpColor=r>0?(w/r>=0.98?'#3D6B27':w/r>=0.90?'#C8913A':'#C0392B'):'var(--texte-doux)';
@@ -88,7 +111,6 @@ function planFillPDFFromMonth(moisVal){
       detEl.innerHTML=rows||'<div style="font-size:12px;color:var(--texte-doux);padding:6px 0">Aucune donn\u00e9e planning pour ce mois</div>';
     }
   }
-  calcEtpLivePdf();
 }
 function calcEtpLivePdf(){
   var h=parseFloat(document.getElementById('pdf-heures')?.value)||0;
@@ -5344,7 +5366,7 @@ function _docsReleveOpen(){
   if(!pane){ if(window.showToast) window.showToast('\u00c9cran indisponible', '#B85A1A'); return; }
   var mbrs = (typeof window._planReleveMbrs === 'function') ? (window._planReleveMbrs() || []) : [];
   if(!mbrs.length){
-    if(window.showToast) window.showToast('Aucun salari\u00e9 actif', '#B85A1A');
+    if(window.showToast) window.showToast('Aucun salari\u00e9 enregistr\u00e9', '#B85A1A');
     return;
   }
   var host = document.getElementById('docs-pane-releve');
@@ -5363,7 +5385,7 @@ function _docsReleveOpen(){
     + '<select class="fi" id="docs-rlv-nom" style="width:100%;margin-bottom:10px">'
       + mbrs.map(function(m){
           return '<option value="' + _docsEsc(m.nom) + '">' + _docsEsc(m.nom)
-            + (m.coll ? ' \u2014 \u00e9quipe' : '') + '</option>';
+            + (m.coll ? ' \u2014 \u00e9quipe' : (m.anc ? ' \u2014 ancien salari\u00e9' : '')) + '</option>';
         }).join('')
     + '</select>'
     + '<div class="fl" style="margin-top:0">Mois \u00b7 ' + an + '</div>'
@@ -5407,7 +5429,7 @@ function _docsPlanNomOpen(){
   if(!pane){ if(window.showToast) window.showToast('\u00c9cran indisponible', '#B85A1A'); return; }
   var mbrs = (typeof window._planReleveMbrs === 'function') ? (window._planReleveMbrs() || []) : [];
   if(!mbrs.length){
-    if(window.showToast) window.showToast('Aucun salari\u00e9 actif', '#B85A1A');
+    if(window.showToast) window.showToast('Aucun salari\u00e9 enregistr\u00e9', '#B85A1A');
     return;
   }
   var host = document.getElementById('docs-pane-plannom');
@@ -5431,7 +5453,7 @@ function _docsPlanNomOpen(){
     + '<select class="fi" id="docs-pn-nom" style="width:100%;margin-bottom:10px">'
       + mbrs.map(function(m){
           return '<option value="' + _docsEsc(m.nom) + '">' + _docsEsc(m.nom)
-            + (m.coll ? ' \u2014 \u00e9quipe' : '') + '</option>';
+            + (m.coll ? ' \u2014 \u00e9quipe' : (m.anc ? ' \u2014 ancien salari\u00e9' : '')) + '</option>';
         }).join('')
     + '</select>'
     + '<div class="fl" style="margin-top:0">Ann\u00e9e</div>'

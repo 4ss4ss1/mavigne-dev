@@ -1,4 +1,28 @@
-// MA VIGNE — Service Worker v6.90
+// MA VIGNE — Service Worker v6.91
+// v6.91 (20/08/2026) — « INACTIF » N'EFFACE PLUS LE PASSE.
+//   ⚠️⚠️ SEPT FICHES RANGEES EN FIN DE SAISON, ET JANVIER->JUILLET TOMBE A ZERO.
+//     Sept ecrans du Planning partaient de _planMbrs(), qui filtre statut !==
+//     'Inactif'. Or ce statut se pose A LA MAIN a la fin d'un contrat : il
+//     effacait RETROACTIVEMENT des heures qui ont ete faites. Meme famille que
+//     la mesure du 03/08 sur le Pilotage, restee non traitee cote Planning.
+//   Une primitive unique, _planCouvre(mbr,d0,d1) + _planMbrsMois/_planMbrsAn :
+//     « son contrat recoupe-t-il la periode ? », TOUS contrats confondus, le
+//     statut ignore. Sept points d'appel : la grille du mois, la bande de KPI,
+//     le badge d'effectif, « hors contrat », les anciens salaries, le recap
+//     annuel, la cadence du Pilotage, le planning annuel imprime.
+//   ⚠️ Sans AUCUNE date de contrat une fiche ne peut pas etre situee dans le
+//     temps : active elle compte (CDI sans date), inactive elle ne compte que
+//     si l'annee demandee porte des heures saisies.
+//   Le recap annuel devient l'ENTREE DE MESURE 5/5 (mode large) : sa reference
+//     se lit par _planSummary, bornee aux contrats, et non plus sur le modele
+//     nu — un permanent embauche en aout portait sept mois de « prevu » face a
+//     zero heure faite, et les barres tombaient au plancher. Une ligne de cadre
+//     dit desormais ce que mesure la hauteur.
+//   Reglages : le PDF mensuel lit enfin l'ANNEE du champ (_planSurAnnee) et
+//     borne sa reference aux contrats ; les deux documents nominatifs proposent
+//     les anciens salaries, marques comme tels.
+//   ⚰️ _planHasContractThisMonth supprimee : zero appelant apres ce lot, preuve
+//     par grep sur tout le depot AVANT d'obeir a C15 (cf. §51).
 // v6.90 (18/08/2026) — LA CARTE DE PARCELLE, RANGEE.
 //   ⚠️⚠️ UNE REGLE CSS ORPHELINE DEPUIS LA CHARTE DS-2. `.pc-ord` (le rang de
 //     tournee) n'etait style que sous `.pc-nom`, le titre d'AVANT DS-2, que plus
@@ -2152,7 +2176,7 @@
 // v2.22 — Fix profils vides : guard vide dans loadData() pour MEMBRES/SAISONS/TACHES
 // v2.17 — Onboarding intégré + tenantId · v2.06 — Firebase Auth · v2.00–v2.05 — divers
 const DEBUG = self.location.hostname === 'localhost' || self.location.hostname === '127.0.0.1';
-const CACHE_NAME   = 'mavigne-v6.90';
+const CACHE_NAME   = 'mavigne-v6.91';
 const TENANT_CACHE = 'mavigne-tenant';   // Cache persistant — préservé à chaque mise à jour SW
 const SYNC_TAG     = 'mavigne-sync';
 
@@ -2168,7 +2192,7 @@ const CDN_URLS = [
 ];
 
 self.addEventListener('install', event => {
-  if(DEBUG) console.log('[SW] Ma Vigne v6.90 installé');
+  if(DEBUG) console.log('[SW] Ma Vigne v6.91 installé');
   event.waitUntil(
     caches.open(CACHE_NAME).then(async cache => {
       // ── Cœur applicatif : STRICT (mise à jour ATOMIQUE) ──
@@ -2184,7 +2208,7 @@ self.addEventListener('install', event => {
 });
 
 self.addEventListener('activate', event => {
-  if(DEBUG) console.log('[SW] Ma Vigne v6.90 activé');
+  if(DEBUG) console.log('[SW] Ma Vigne v6.91 activé');
   event.waitUntil(
     caches.keys().then(keys =>
       Promise.all(

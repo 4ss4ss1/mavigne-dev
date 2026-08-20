@@ -23,7 +23,7 @@ export const GT_ADMIN_EMAIL = 'ngdevpro@gmail.com';
 // WHATS_NEW   : tableau vide = modal desactive pour cette version.
 // Format item : { emoji:'📅', titre:'Titre court', desc:'Phrase utilisateur.' }
 // Regle : seulement les changements visibles par les utilisateurs.
-export const APP_VERSION = '6.36';
+export const APP_VERSION = '6.37';
 // ════ Journal des nouveautés (récap cumulatif) ════
 // Une entrée par version, la PLUS RÉCENTE EN HAUT : { v:'5.10', items:[ {emoji,titre,desc}, … ] }
 // À chaque release visible → AJOUTER un bloc en tête (ne pas remplacer). items:[] = release technique (rien à afficher).
@@ -354,6 +354,18 @@ window._mvGraphRepeindre = function(){
 };
 
 export const WHATS_NEW = [
+  { v:'6.37', items:[
+    { emoji: 'equipe', titre: "Les heures d\u2019un salari\u00e9 parti disparaissaient de tout l\u2019historique",
+      desc: "Le jour o\u00f9 vous passez une fiche en <b>Inactif</b>, ses heures d\u00e9j\u00e0 faites s\u2019effa\u00e7aient de partout\u00a0: le r\u00e9cap annuel, la grille des mois pass\u00e9s, les totaux du mois, la cadence du Pilotage et le planning de l\u2019ann\u00e9e imprim\u00e9. Sur un domaine r\u00e9el, sept fiches rang\u00e9es en fin de saison ont ramen\u00e9 <b>janvier \u00e0 juillet \u00e0 z\u00e9ro</b>. Un contrat termin\u00e9 n\u2019efface plus le travail qui a \u00e9t\u00e9 fait\u00a0: chaque \u00e9cran regarde d\u00e9sormais <b>qui \u00e9tait l\u00e0 \u00e0 ce moment-l\u00e0</b>, pas qui est l\u00e0 aujourd\u2019hui." },
+    { emoji: 'calendrier', titre: "Un ancien salari\u00e9 remonte dans la liste du mois o\u00f9 il travaillait",
+      desc: "Dans <b>Les gens</b>, la liste et la grille suivent maintenant le mois affich\u00e9. Reculez en juin\u00a0: la saisonni\u00e8re dont le contrat s\u2019est termin\u00e9 en juillet y reprend sa ligne, avec ses heures. La section <b>Anciens salari\u00e9s</b>, en bas, ne garde que ceux qui n\u2019\u00e9taient pas sous contrat ce mois-l\u00e0 \u2014 plus personne n\u2019appara\u00eet deux fois." },
+    { emoji: 'graphique', titre: "Le r\u00e9cap annuel dit enfin ce qu\u2019il mesure",
+      desc: "Les douze barres ne sont pas un volume d\u2019heures\u00a0: c\u2019est la <b>part du pr\u00e9vu r\u00e9alis\u00e9e</b>, mois par mois. Une ligne sous les barres le dit, avec le total des heures faites et pr\u00e9vues sur l\u2019ann\u00e9e. Et le \u00ab\u00a0pr\u00e9vu\u00a0\u00bb est maintenant born\u00e9 aux contrats\u00a0: un permanent embauch\u00e9 en ao\u00fbt ne tra\u00eene plus sept mois de pr\u00e9visionnel face \u00e0 z\u00e9ro heure faite." },
+    { emoji: 'dossier', titre: "Le relev\u00e9 et le planning d\u2019un ancien salari\u00e9 s\u2019\u00e9ditent encore",
+      desc: "Les deux documents nominatifs refusaient de proposer une personne d\u00e8s que sa fiche passait en Inactif \u2014 exactement au moment o\u00f9 elle les demande, son d\u00e9part. Elle est de nouveau dans la liste, marqu\u00e9e \u00ab\u00a0ancien salari\u00e9\u00a0\u00bb." },
+    { emoji: 'alerte', titre: "Le PDF mensuel chiffrait la mauvaise ann\u00e9e",
+      desc: "Choisir \u00ab\u00a0juin 2025\u00a0\u00bb dans <b>R\u00e9glages \u203a Documents</b> pr\u00e9-remplissait les heures de juin de l\u2019ann\u00e9e ouverte dans le Planning, sans le dire. L\u2019ann\u00e9e du champ est enfin lue." }
+  ] },
   { v:'6.36', items:[
     { emoji: 'carte', titre: "Le numéro de tournée n’est plus collé au nom",
       desc: "Quand une tournée est fixée, chaque parcelle porte son rang de passage. Il sortait en <b>chiffre nu, collé au nom</b> : « 1Comble ». Pire, il poussait le nom d’une largeur différente selon le rang, si bien qu’aucun nom ne commençait au même endroit d’une ligne à l’autre. Le numéro reprend sa pastille et une <b>largeur fixe</b> : la colonne des noms se lit d’un trait, même à quarante parcelles." },
@@ -1914,9 +1926,10 @@ var MV_AIDE = {
       ['Sur une période plus longue', "que la vue affichée, deux boutons au-dessus de la grille posent des congés ou des horaires chaleur du jour au jour, pour plusieurs salariés."],
       ['Les heures dues', "se décomptent sur une absence injustifiée ou un retard. Un arrêt de travail est neutre, une formation compte comme du travail."],
       ['Présence, coupure, heures dues', "trois nombres qui se ressemblent et ne disent pas la même chose. La ‹‹ présence ›› va de l’arrivée au départ. La ‹‹ coupure ›› est le temps non travaillé au milieu : sa durée et son heure sont fixées par le domaine, dans l’onglet Le cadre, ce n’est pas un moment que chacun choisit. Les ‹‹ heures dues ›› sont ce qui part en paie et alimente le compteur des 1 607 h. Une journée de 09:00 à 16:00 avec une heure de coupure fait 7 h de présence et 6 h dues."],
-      ['Le planning de l’année', "s’imprime depuis le même endroit : le rythme sur douze mois, avec les heures de prise et de fin de service et la coupure déjeuner. Une page par modèle de semaine, pas une par salarié — c’est le document qu’on remet à l’équipe pour l’année à venir."],
+      ['Le planning de l’année', "s’imprime depuis le même endroit : le rythme sur douze mois, avec les heures de prise et de fin de service et la coupure déjeuner. Une page par modèle de semaine — c’est le document qu’on remet à l’équipe pour l’année à venir. Une variante nominative sort la même grille pour une seule personne, bornée à ses contrats, avec ses jours de formation et ses congés déjà posés."],
       ['Le relevé mensuel', "s’imprime depuis Réglages, onglet App, « Documents & impressions ». C’est un relevé d’heures, pas un bulletin de paie."],
-      ['Le relevé d’un seul salarié', "s’imprime au même endroit, en choisissant la personne et le mois : son mois jour par jour, ses contrats avec leurs coupures, ses congés payés, son compteur d’heures et son annualisation, avec deux lignes de signature. Le bouton PDF de sa fiche sort exactement le même document."],
+      ['Le relevé d’un seul salarié', "s’imprime au même endroit, en choisissant la personne et le mois : son mois jour par jour, ses contrats avec leurs coupures, ses congés payés, son compteur d’heures et son annualisation, avec deux lignes de signature. Le bouton PDF de sa fiche sort exactement le même document. Les anciens salariés y figurent aussi, marqués comme tels : un relevé est un document d’histoire."],
+      ['Un ancien salarié', "reste compté dans les mois où il était sous contrat. Reculez d’un mois dans Les gens : il reprend sa ligne dans la liste, avec ses heures, et il disparaît de la section Anciens salariés ce mois-là. Passer une fiche en Inactif ferme son accès à l’application, cela n’efface aucune heure déjà faite."],
       ['Taux horaires et acomptes', ": administrateurs seulement, et jamais enregistrés sur l’appareil."]
     ]
   },

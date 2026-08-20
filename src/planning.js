@@ -432,6 +432,57 @@ function _planFmt(h){
 function _planFmtE(h){return h===0?'=':(h>0?'+':'')+_planFmt(h);}
 function _planFmtEtp(r){return (r||0).toFixed(2);}
 function _planMbrs(){return (window.MEMBRES||[]).filter(function(m){return m.statut!=='Inactif';});}
+// ★★★ QUI EST LA AUJOURD'HUI ≠ QUI ETAIT LA A CE MOMENT-LA
+// _planMbrs ci-dessus repond a la premiere question, et c'est la bonne pour
+// assigner un modele de semaine, proposer un profil de connexion ou lister qui
+// peut recevoir une tache. Ce n'est PAS la question que posent une grille de mois
+// passe, un total d'heures, une cadence ou un document d'annee.
+// ⚠️⚠️ LES CONFONDRE EFFACE LE PASSE. Le statut « Inactif » se pose A LA MAIN a la
+//   fin d'un contrat — le Pilotage le conseille meme en toutes lettres — et il
+//   faisait alors disparaitre RETROACTIVEMENT des heures qui ont ete faites.
+//   Mesure du 19/08/2026 sur un domaine reel : sept fiches passees Inactif, et
+//   janvier->juillet du recap annuel retombe a la barre plancher.
+// Meme doctrine que _mvEnContratSurPeriode (utils.js), ecrite ici UNE fois pour
+// les sept ecrans du Planning qui en dependent : deux definitions de « etait-il
+// la ? » = deux ecrans qui se contredisent (cf. head[] vs tetes, 26/07).
+// ⚠️ Sans AUCUNE date de contrat la fiche ne peut pas etre situee dans le temps :
+//   une fiche ACTIVE compte (CDI sans date = present depuis toujours), une fiche
+//   INACTIVE ne compte que si la periode demandee porte des heures saisies —
+//   sinon une fiche morte depuis deux ans pese sur toutes les mesures de toutes
+//   les annees, avec de la reference face a zero heure faite.
+function _planEntAn(nom,yr){var b=PLANNING_ENTRIES[nom];return !!(b&&b[yr]);}
+function _planCouvre(mbr,d0,d1){
+  if(!mbr)return false;
+  var P=(typeof window._mvContrats==='function')?window._mvContrats(mbr):[];
+  if(!P.length){
+    if(mbr.statut!=='Inactif')return true;
+    var y0=parseInt(String(d0||'').slice(0,4),10)||_pY();
+    var y1=parseInt(String(d1||'').slice(0,4),10)||y0;
+    for(var y=y0;y<=y1;y++){if(_planEntAn(mbr.nom,y))return true;}
+    return false;
+  }
+  for(var i=0;i<P.length;i++){
+    if(P[i].debut&&d1&&P[i].debut>d1)continue;
+    if(P[i].fin&&d0&&P[i].fin<d0)continue;
+    return true;
+  }
+  return false;
+}
+function _planMbrsPer(d0,d1){return (window.MEMBRES||[]).filter(function(m){return _planCouvre(m,d0,d1);});}
+function _planMbrsMois(m,yr){
+  var _y=(yr!=null?yr:_pY()),mm=String(m+1).padStart(2,'0');
+  var _n=new Date(_y,m+1,0).getDate();
+  return _planMbrsPer(_y+'-'+mm+'-01',_y+'-'+mm+'-'+String(_n).padStart(2,'0'));
+}
+function _planMbrsAn(yr){return _planMbrsPer(yr+'-01-01',yr+'-12-31');}
+// Poser l'annee de CALCUL le temps d'une mesure. Meme patron que _planWide : la
+// valeur precedente est restauree, pas null, pour supporter l'imbrication.
+// ⚠️ Sans lui, un ecran exterieur au Planning (le PDF mensuel de Reglages) qui
+//   demande « juin 2025 » chiffre juin de l'annee AFFICHEE dans le Planning.
+window._planSurAnnee=function(yr,fn){
+  var _sv=_planCtxYear; _planCtxYear=(yr!=null?yr:_sv);
+  try{ return fn(); } finally { _planCtxYear=_sv; }
+};
 function _planInContract(mbr,m,d){
   // Retourne true si le jour d du mois m est dans la période de contrat du membre
   // Comparaison sur chaînes YYYY-MM-DD (tri lexicographique = tri chronologique)
@@ -474,7 +525,7 @@ function _planJourCouvert(mbr,m,d){
   return false;
 }
 // Drapeau de contexte, meme patron que _planCtxYear. Pose UNIQUEMENT par les
-// quatre entrees de mesure ci-dessous ; partout ailleurs il vaut false et le
+// cinq entrees de mesure ci-dessous ; partout ailleurs il vaut false et le
 // code se comporte a l'octet pres comme avant ce lot.
 var _planWideCtx=false;
 // Deuxieme contexte, oppose au premier : borner a UN contrat precis au lieu de
@@ -512,17 +563,15 @@ function _planSurContrat(c,fn){
   var _sv=_planCtrCtx; _planCtrCtx=c||null;
   try{ return fn(); } finally { _planCtrCtx=_sv; }
 }
-function _planHasContractThisMonth(mbr,planMonth){
-  // Retourne true si le membre a au moins un jour de contrat dans le mois planMonth
-  if(!mbr.debut_contrat&&!mbr.fin_contrat)return true;
-  var year=_pY();
-  var mm=String(planMonth+1).padStart(2,'0');
-  var firstDay=year+'-'+mm+'-01';
-  var lastDay=year+'-'+mm+'-'+String(_planDays(planMonth)).padStart(2,'0');
-  if(mbr.debut_contrat&&mbr.debut_contrat>lastDay)return false; // contrat commence après le mois
-  if(mbr.fin_contrat&&mbr.fin_contrat<firstDay)return false;    // contrat terminé avant le mois
-  return true;
-}
+// ⚰️ _planHasContractThisMonth a ete SUPPRIMEE ici le 20/08/2026, sous preuve.
+//   Elle ne lisait que le couple debut_contrat/fin_contrat EN COURS, donc elle
+//   ignorait les contrats archives, et elle n'avait plus aucun appelant apres ce
+//   lot : quatre dans planning.js remplaces par _planMbrsMois/_pl2Actifs, zero
+//   ailleurs (grep sur src/, public/, functions/, scripts/, guide/, index.html).
+//   ⚠️ §51 : un controle dont l'action corrective est « supprimer » est suspect —
+//   la preuve d'injoignabilite a donc ete faite AVANT d'obeir a C15, pas apres.
+//   Ce qu'elle repondait se demande desormais a _planCouvre(mbr,d0,d1), qui lit
+//   TOUS les contrats de la fiche.
 function _planPlId(m){return m.planning_id||'standard';}
 
 // ══ EQUIPE COLLECTIVE — l'effectif d'une ligne, jour par jour ══
@@ -657,7 +706,7 @@ function _planWorkRange(mbr,from,to){
 //      une ligne « 8 vendangeurs » pesait UNE personne dans la masse salariale.
 //      _planCtxYear etant pose sur l'annee du jour courant, _pEntDay lit la bonne annee
 //      — une fenetre a cheval sur deux annees civiles reste juste.
-// ENTREE DE MESURE 1/4 — fenetre de dates. Appelee seulement par
+// ENTREE DE MESURE 1/5 — fenetre de dates. Appelee seulement par
 // _planPaidRange / _planWorkPersRange, donc seulement par le Pilotage.
 function _planRangeH(mbr,from,to,mode){
   return _planWide(function(){ return _planRangeH_(mbr,from,to,mode); });
@@ -904,7 +953,7 @@ function _chargeSaisonData(s){
   var capEquipe=0;
   months.forEach(function(x){
     var full=capMonth(x.yr,x.m,true); var ratio=full>0?x.capRef/full:1;
-    // ENTREE DE MESURE 2/4 — capacite de la saison. mbrs vient de
+    // ENTREE DE MESURE 2/5 — capacite de la saison. mbrs vient de
     // _mvEnContratSurPeriode (tous contrats) : sans le mode large, une fiche
     // reembauchee etait DANS la liste et pesait 0 h de capacite.
     _planCtxYear=x.yr; _planWide(function(){ mbrs.forEach(function(mb){ capEquipe+=(((_planSummary(mb,x.m)||{}).ref)||0)*ratio*_mbPoids(mb); }); }); _planCtxYear=null;
@@ -989,7 +1038,7 @@ function _chargeSaisonData(s){
   });
   months.forEach(function(x){
     var full=capMonth(x.yr,x.m,true); var ratio=full>0?x.capRef/full:1;
-    // ENTREE DE MESURE 3/4 — capacite reellement presente.
+    // ENTREE DE MESURE 3/5 — capacite reellement presente.
     var cp=0; _planCtxYear=x.yr; _planWide(function(){ mbrs.forEach(function(mb){ cp+=(_planPresentRef(mb,x.m)||0)*ratio*_mbPoids(mb); }); }); _planCtxYear=null;
     x.capPresent=cp;
     x.etpReq=x.capRef>0?x.chargeOrd/x.capRef:0;
@@ -1274,13 +1323,17 @@ window._planSeasonHours=_planSeasonHours;
 // ── Cadence équipe sur une fenêtre [from,to] (Date), hors salariés « bureau » ──
 // Pilotage : jours ouvrés réels + Σ heures planning de l'équipe → cadence (h/jour ouvré).
 // NB : le calcul suit l'année RÉELLE de chaque jour de la fenêtre (accesseurs année-aware).
-// ENTREE DE MESURE 4/4 — cadence reelle de l'equipe sur une fenetre.
+// ENTREE DE MESURE 4/5 — cadence reelle de l'equipe sur une fenetre.
 function _planTeamCadence(from, to){
   return _planWide(function(){ return _planTeamCadence_(from, to); });
 }
 function _planTeamCadence_(from, to){
   _planMigrateYears();
-  var mbrs = _planMbrs().filter(function(m){ return !m.bureau; });
+  // ★ L'equipe DE LA FENETRE, pas celle d'aujourd'hui : une cadence de juin
+  //   recalculee en aout perdait sinon tous les contrats termines entre-temps,
+  //   et la cadence remontait mecaniquement (moins de monde pour les memes heures).
+  var _isoD=function(x){return x.getFullYear()+'-'+String(x.getMonth()+1).padStart(2,'0')+'-'+String(x.getDate()).padStart(2,'0');};
+  var mbrs = _planMbrsPer(_isoD(from),_isoD(to)).filter(function(m){ return !m.bureau; });
   var totalH = 0, jours = {}, guard = 0;
   var cur = new Date(from.getFullYear(), from.getMonth(), from.getDate());
   var end = new Date(to.getFullYear(), to.getMonth(), to.getDate());
@@ -1683,12 +1736,11 @@ function renderPlanning(){
 function _planRenderHeader(){
   var sb=document.getElementById('plan-stats-band');
   if(!sb)return;
-  var mbrs=_planMbrs();
   // La bande de chiffres suit l'onglet. « Le cadre » n'en porte aucun : ce sont des
   // réglages, pas une mesure — y afficher une charge du mois serait un décor.
   if(planTab==='cadre'){sb.innerHTML='';}
   else if(planTab==='gens'&&isAdmin()){
-    var _act=mbrs.filter(function(m){return _planHasContractThisMonth(m,planMonth);});
+    var _act=_pl2Actifs();
     var _hT=_act.reduce(function(s,m){return s+_planCalcMonth(m,planMonth);},0);
     var _hR=_act.reduce(function(s,m){return s+((_planSummary(m,planMonth)||{}).ref||0);},0);
     var _ec=_hT-_hR;
@@ -1705,10 +1757,13 @@ function _planRenderHeader(){
       _dated=true;
       _cd.months.forEach(function(_x){ if(_x.m===planMonth)_cm+=_x.charge; });
     });
-    var _cap=mbrs.filter(function(m){return !m.bureau;}).reduce(function(s,m){return s+((_planSummary(m,planMonth)||{}).ref||0);},0);
+    // ★ Capacite = l'equipe DU MOIS affiche, hors bureau. Partir de _planMbrs
+    //   amputait la capacite d'un mois passe de tous ceux dont le contrat s'est
+    //   termine depuis — la tension et l'ETP requis sortaient trop hauts.
+    var _cap=_pl2Actifs().filter(function(m){return !m.bureau;}).reduce(function(s,m){return s+((_planSummary(m,planMonth)||{}).ref||0);},0);
     var _cap1=_planGetRefH('standard',planMonth);
     var _etpM=_cap1>0?_cm/_cap1:0;
-    var _actifs=mbrs.filter(function(m){return _planHasContractThisMonth(m,planMonth);});
+    var _actifs=_pl2Actifs();
     var _brc=_actifs.reduce(function(s,m){return s+_planLegalBreaches(m,planMonth);},0);
     var _alertHtml=_brc>0?'<button class="mvu-kpi pl2-kpi-alert" onclick="planKpiAlert()"><span class="mvu-kpi-v" style="display:block;color:#F0A9A0;font-size:14px">\u26a0 '+_brc+'</span><span class="mvu-kpi-l" style="display:block">sem. &gt; max</span></button>':'';
     if(!_dated){
@@ -1732,7 +1787,7 @@ function _planRenderHeader(){
   }
   var _bdg=document.getElementById('plan-header-badge');
   if(_bdg){
-    var _na=mbrs.filter(function(m){return _planHasContractThisMonth(m,planMonth);}).length;
+    var _na=_pl2Actifs().length;
     _bdg.textContent=_na+' salari\u00e9'+(_na>1?'s':'');
   }
   var tabs=document.querySelectorAll('#plan-tabs .mvu-tab');
@@ -1762,7 +1817,10 @@ var _pl2Wi=null;          // index de la semaine affichée (null = recalculer)
 var _pl2Sel={};           // {'Nom|jour':true} — cochage, jamais un mode
 var _pl2PulseNom=null;    // salarié à surligner (alerte cadre légal)
 
-function _pl2Actifs(){return _planMbrs().filter(function(m){return _planHasContractThisMonth(m,planMonth);});}
+// ★ L'equipe DU MOIS AFFICHE, anciens salaries compris : en juin, une saisonniere
+//   dont le CDD s'est termine le 17 juillet fait partie de l'equipe de juin. Le
+//   statut d'aujourd'hui n'a rien a dire sur un mois passe.
+function _pl2Actifs(){return _planMbrsMois(planMonth);}
 function _pl2WiDefault(){
   var ws=_planMonthWeeks(planMonth),t=new Date();
   if(t.getFullYear()===planYear&&t.getMonth()===planMonth){
@@ -1956,23 +2014,49 @@ function _pl2SynthColl(mbr,nomA){
     +'<span class="pl2-chev">\u203a</span>'
   +'</button>';
 }
-function _pl2Annual(){
+// ENTREE DE MESURE 5/5 — le recap annuel de l'equipe sur douze mois.
+// C'est une MESURE DE FENETRE (question 2 des deux portails), pas un compteur de
+// contrat : un CDD archive au printemps doit peser dans les barres du printemps.
+// D'ou le mode large — sans lui, la meme fiche rendait 0 h sur mars->juillet le
+// jour ou son contrat suivant demarrait (mesure du 13/08, cf. _planJourCouvert).
+function _pl2Annual(){ return _planWide(_pl2Annual_); }
+function _pl2Annual_(){
   // Recap annuel = heures des SALARIES face a leur modele de semaine. Une equipe
   // collective n'a pas de modele : l'y inclure ecraserait la barre de tous les mois.
-  var mbrs=_planMbrs().filter(function(m){return !(window._mvEstCollectif&&window._mvEstCollectif(m));});
+  // ⚠️ Le statut ne filtre plus (cf. _planCouvre) : c'est ce filtre qui ramenait
+  //   janvier->juillet a zero le jour ou sept fiches sont passees Inactif.
+  var mbrs=_planMbrsAn(planYear).filter(function(m){return !(window._mvEstCollectif&&window._mvEstCollectif(m));});
+  var _nAnc=mbrs.filter(function(m){return m.statut==='Inactif';}).length;
   var h='<div class="plan-card" style="margin-top:14px"><div class="plan-card-lbl">R\u00e9cap annuel \u2014 \u00e9quipe</div>';
   h+='<div class="plan-annual-bars">';
+  var totW=0,totR=0;
   for(var mi=0;mi<12;mi++){
-    var mw=mbrs.reduce(function(s,m){return s+_planCalcMonth(m,mi);},0);
-    var mr=mbrs.reduce(function(s,m){return s+_planGetRefH(_planPlId(m),mi);},0);
+    // ⚠️ La REFERENCE se lit contrat par contrat, pas sur le modele nu. _planGetRefH
+    //   rendait les heures du modele meme sur un mois ou la personne n'etait pas sous
+    //   contrat : un permanent embauche en aout portait sept mois de « prevu » face a
+    //   zero heure faite, et la barre tombait au plancher. _planSummary borne les deux
+    //   cotes au contrat — un mois hors contrat pese 0/0 au lieu de 0/128 — et rend en
+    //   plus la meme reference que la carte du salarie juste au-dessus (recup, CP,
+    //   remplacements). Deux chiffres qui repondent a la meme question ne doivent pas
+    //   se calculer de deux facons.
+    var mw=0,mr=0;
+    mbrs.forEach(function(m){var s=_planSummary(m,mi)||{};mw+=(s.worked||0);mr+=(s.ref||0);});
+    totW+=mw;totR+=mr;
     var pct=mr>0?Math.min(100,mw/mr*100):0;
     var act=mi===planMonth;
-    h+='<button class="plan-bar-btn" onclick="planGoMonth('+mi+')">'
+    h+='<button class="plan-bar-btn" onclick="planGoMonth('+mi+')" aria-label="'+_escAttr(PLAN_MOIS[mi]+'\u00a0: '+_planFmt(mw)+' faites sur '+_planFmt(mr)+' pr\u00e9vues')+'">'
       +'<span class="plan-bar-fill" style="display:block;height:'+Math.max(4,pct*0.38)+'px;background:'+(act?PLAN_ACC2:'var(--gris-clair)')+'"></span>'
       +'<span class="plan-bar-lbl" style="display:block;color:'+(act?PLAN_ACC2:'var(--texte-doux)')+';font-weight:'+(act?700:400)+'">'+PLAN_MOIS_C[mi].charAt(0)+'</span>'
     +'</button>';
   }
-  h+='</div></div>';
+  h+='</div>';
+  // Ce qui CADRE le chiffre reste a l'ecran, en une ligne (regle des trois familles,
+  // §42) : une hauteur sans legende se lit comme un volume d'heures — c'est exactement
+  // la lecture qu'en a faite Nico le 19/08, et elle etait legitime.
+  h+='<div style="font-size:11px;color:var(--texte-doux);margin-top:8px;line-height:1.35">'
+    +'Hauteur\u00a0: part du pr\u00e9vu r\u00e9alis\u00e9e. Sur '+planYear+'\u00a0: '+_planFmt(totW)+' faites sur '+_planFmt(totR)+' pr\u00e9vues'
+    +(_nAnc>0?(', '+_nAnc+' ancien'+(_nAnc>1?'s':'')+' salari\u00e9'+(_nAnc>1?'s':'')+' compris'):'')+'.</div>';
+  h+='</div>';
   return h;
 }
 // ── ONGLET « LE MOIS » — la grille, et rien d'autre ──
@@ -2009,7 +2093,11 @@ function _planPeriodeBar(){
 // Hors contrat : l'information vivait sous les cartes de synthèse. Elle appartient
 // à la grille — c'est elle qui montre des lignes absentes.
 function _pl2HorsContrat(){
-  var hors=_planMbrs().filter(function(m){return !_planHasContractThisMonth(m,planMonth);});
+  // ★ Le complement EXACT de la grille, sinon les deux se contredisent : un membre
+  //   couvert par un contrat archive est desormais DANS la grille, il ne peut pas
+  //   etre annonce « hors contrat » trois lignes plus bas.
+  var _duMois=_pl2Actifs();
+  var hors=_planMbrs().filter(function(m){return _duMois.indexOf(m)<0;});
   if(!hors.length)return '';
   return '<div class="pl2-hors">Hors contrat ce mois \u2014 '+hors.map(function(m){
     var info='';
@@ -2048,10 +2136,14 @@ function _planGensMois(){
 // séparée qu'il fallait aller chercher dans « Outils ». Ce sont des gens : ils sont
 // dans « Les gens ».
 function _planGensArchives(){
-  var inactifs=(window.MEMBRES||[]).filter(function(m){return m.statut==='Inactif';});
+  // ★ Ceux qui etaient sous contrat le mois affiche sont DEJA dans la liste
+  //   ci-dessus, depuis que _pl2Actifs suit le mois et non le statut. Les
+  //   reprendre ici les afficherait deux fois sur le meme ecran.
+  var _duMois=_pl2Actifs();
+  var inactifs=(window.MEMBRES||[]).filter(function(m){return m.statut==='Inactif'&&_duMois.indexOf(m)<0;});
   if(!inactifs.length)return '';
   var h='<div class="plan-sec-lbl" style="margin-top:18px">Anciens salari\u00e9s \u2014 '+inactifs.length+'</div>'
-    +'<div class="pl2-note" style="margin-bottom:10px">Sans acc\u00e8s \u00e0 l\u2019application \u2014 heures et PDF restent consultables. Contrat modifiable dans R\u00e9glages \u203a Membres.</div>';
+    +'<div class="pl2-note" style="margin-bottom:10px">Hors contrat en '+PLAN_MOIS[planMonth].toLowerCase()+'\u00a0: sans acc\u00e8s \u00e0 l\u2019application, heures et PDF restent consultables. Celui qui \u00e9tait sous contrat le mois affich\u00e9 remonte dans la liste ci-dessus, avec ses heures. Contrat modifiable dans R\u00e9glages \u203a Membres.</div>';
   inactifs.forEach(function(mbr){
     var s=_planSummary(mbr,planMonth),nomA=_escAttr(mbr.nom);
     var tc=mbr.type_contrat||'CDI',cinfo='';
@@ -4803,13 +4895,13 @@ function _paDuree(min){
 
 // Les membres regroupés par modèle. Un membre dont le contrat ne couvre aucun
 // jour de l'année cible n'a pas à figurer : _planInContract lit _pY() en dur,
-// donc on refait la comparaison ici avec l'année demandée.
+// donc _planMbrsAn refait la comparaison avec l'année demandée.
+// ★ Le statut ne filtre plus : le planning de 2025 doit montrer l'équipe de 2025,
+//   ceux qui sont partis depuis compris. Et le test de dates est monté d'un cran —
+//   _planMbrsAn lit TOUS les contrats de la fiche, pas le seul couple en cours.
 function _paGroupes(yr){
-  var out={}, mbrs=(typeof _planMbrs==='function')?_planMbrs():[];
+  var out={}, mbrs=_planMbrsAn(yr);
   mbrs.forEach(function(mb){
-    var d0=mb.debut_contrat||'', f0=mb.fin_contrat||'';
-    if(d0 && d0>String(yr)+'-12-31') return;
-    if(f0 && f0<String(yr)+'-01-01') return;
     var id=_planPlId(mb);
     if(!out[id]) out[id]={id:id,noms:[]};
     out[id].noms.push(mb.nom||mb.prenom||'—');
@@ -5541,8 +5633,9 @@ window._planGetRefH             = _planGetRefH;
 window._planPlId                = _planPlId;
 window._planFmt                 = _planFmt;
 window._planInContract          = _planInContract;
-window._planHasContractThisMonth= _planHasContractThisMonth;
 window._planMbrs                = _planMbrs;
+window._planMbrsMois            = _planMbrsMois;
+window._planMbrsAn              = _planMbrsAn;
 window._planSummary             = _planSummary;
 window._planDays                = _planDays;
 window._planDow                 = _planDow;
@@ -5723,8 +5816,15 @@ window._planReleveIndiv = function(nom, mois){
 /* La liste des salaries offerte au choix, et le mois par defaut : ceux que
    l'ecran Planning montre deja. */
 window._planReleveMbrs = function(){
-  return _planMbrs().map(function(m){
-    return { nom: m.nom, coll: (typeof window._mvEstCollectif === 'function') && window._mvEstCollectif(m) };
+  // ★ Les anciens salaries y figurent aussi, marques comme tels. Un releve d'heures
+  //   et un planning d'annee sont des documents d'HISTOIRE : les refuser le jour ou
+  //   la fiche passe Inactif, c'est refuser le document au moment precis ou le
+  //   salarie le demande — son depart.
+  var _act=_planMbrs();
+  var _anc=(window.MEMBRES||[]).filter(function(m){return m&&m.statut==='Inactif';});
+  return _act.concat(_anc).map(function(m){
+    return { nom: m.nom, anc: m.statut==='Inactif',
+             coll: (typeof window._mvEstCollectif === 'function') && window._mvEstCollectif(m) };
   });
 };
 window._planReleveMois = function(){ return planMonth; };
