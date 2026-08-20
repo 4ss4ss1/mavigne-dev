@@ -354,6 +354,10 @@ window._mvGraphRepeindre = function(){
 };
 
 export const WHATS_NEW = [
+  { v:'6.41', items:[
+    { emoji: 'carte', titre: "La carte des parcelles se bloquait sur \u00ab\u00a0Toutes t\u00e2ches\u00a0\u00bb",
+      desc: "Sur l\u2019onglet <b>Parcelles</b>, filtre \u00ab\u00a0Toutes t\u00e2ches\u00a0\u00bb, le bandeau qui propose les tourn\u00e9es du domaine s\u2019interrompait et faisait appara\u00eetre un message d\u2019erreur rouge en bas de l\u2019\u00e9cran. Le pictogramme du travail manquait \u00e0 l\u2019appel devant chaque bouton de tourn\u00e9e\u00a0; il est de retour et le bandeau s\u2019affiche normalement." }
+  ] },
   { v:'6.40', items:[
     { emoji: 'chrono', titre: "Le retard fonctionne sur un jour suppl\u00e9mentaire",
       desc: "Une journ\u00e9e <b>hors planning</b> dont vous aviez saisi les horaires \u2014 un renfort, une reprise, un jour \u00e9chang\u00e9 \u2014 refusait le retard avec \u00ab\u00a0aucune heure pr\u00e9vue ce jour-l\u00e0\u00a0\u00bb, et le d\u00e9tail affichait \u00ab\u00a0arriv\u00e9e \u00e0 07:30, pas apr\u00e8s 07:00\u00a0\u00bb alors que 07:30 est bien apr\u00e8s 07:00. Les heures de la journ\u00e9e \u00e9taient lues sur le planning, qui ne conna\u00eet pas ces jours-l\u00e0, au lieu de l\u2019horaire que vous aviez saisi. Le retard s\u2019y pose maintenant normalement, et <b>les horaires de la journ\u00e9e sont conserv\u00e9s</b>." }
