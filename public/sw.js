@@ -1,4 +1,13 @@
-// MA VIGNE — Service Worker v6.93
+// MA VIGNE — Service Worker v6.94
+// v6.94 (20/08/2026) — LE RETARD SUR UN JOUR SUPPLEMENTAIRE.
+//   Un jour de REPOS PREVU portant des heures saisies (07:00->16:30 = 8h30) a un
+//   _planPlanned de 0. Le retard y repondait « aucune heure prevue ce jour-la »
+//   et le verdict affichait « arrivee a 07:30, pas apres 07:00 ». QUATRE fonctions
+//   prenaient la reference du jour de quatre facons : _planDayH par _planPlanned,
+//   _planWorkH par _planDayH(null), _planAbsLostH par _planPlanned, _pl2Cell par
+//   son propre calcul. Une seule repond desormais : _planRefH, ou le timing saisi
+//   prime sur le planning. Le timing du jour survit aussi a l'enregistrement.
+//   Fichiers : planning.js, utils.js, index.html.
 // v6.93 (20/08/2026) — LE RETARD LIT L'HORAIRE DU JOUR, PAS CELUI DU PLANNING.
 //   Correctif de 6.92. _planRetardBornes n'interrogeait que _planDefTiming : sur un
 //   jour portant son propre horaire (ent.timing), l'ecran affichait un depart et le
@@ -2193,7 +2202,7 @@
 // v2.22 — Fix profils vides : guard vide dans loadData() pour MEMBRES/SAISONS/TACHES
 // v2.17 — Onboarding intégré + tenantId · v2.06 — Firebase Auth · v2.00–v2.05 — divers
 const DEBUG = self.location.hostname === 'localhost' || self.location.hostname === '127.0.0.1';
-const CACHE_NAME   = 'mavigne-v6.93';
+const CACHE_NAME   = 'mavigne-v6.94';
 const TENANT_CACHE = 'mavigne-tenant';   // Cache persistant — préservé à chaque mise à jour SW
 const SYNC_TAG     = 'mavigne-sync';
 
@@ -2209,7 +2218,7 @@ const CDN_URLS = [
 ];
 
 self.addEventListener('install', event => {
-  if(DEBUG) console.log('[SW] Ma Vigne v6.93 installé');
+  if(DEBUG) console.log('[SW] Ma Vigne v6.94 installé');
   event.waitUntil(
     caches.open(CACHE_NAME).then(async cache => {
       // ── Cœur applicatif : STRICT (mise à jour ATOMIQUE) ──
@@ -2225,7 +2234,7 @@ self.addEventListener('install', event => {
 });
 
 self.addEventListener('activate', event => {
-  if(DEBUG) console.log('[SW] Ma Vigne v6.93 activé');
+  if(DEBUG) console.log('[SW] Ma Vigne v6.94 activé');
   event.waitUntil(
     caches.keys().then(keys =>
       Promise.all(

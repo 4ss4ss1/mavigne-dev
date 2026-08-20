@@ -62,7 +62,7 @@ function extraire(nom) {
 const VOULUES = [
   '_planMinOf', '_planAbsT', '_planAbsH', '_planAbsDef', '_planAbsMotif',
   '_planTimingH', '_planRetardFaites', '_planRetardH', '_planRetardVide',
-  '_planDayH', '_planWorkH', '_planAbsLostH', '_planApplyAbs', '_pl2Cell',
+  '_planDayH', '_planWorkH', '_planAbsLostH', '_planApplyAbs', '_pl2Cell', '_planRefH',
   '_planDefTiming', '_planRetardBornes', '_planPlanned', '_planFmt', '_planDays'
 ];
 
@@ -135,6 +135,7 @@ const CODE = PRELUDE + '\n' + tableDefT + '\n' + tableMotifs + '\n' + morceaux.j
   _planRetardVide:_planRetardVide, _planRetardBornes:_planRetardBornes,
   _planTimingH:_planTimingH, _planDayH:_planDayH, _planWorkH:_planWorkH,
   _planAbsLostH:_planAbsLostH, _planApplyAbs:_planApplyAbs, _pl2Cell:_pl2Cell,
+  _planRefH:_planRefH,
   _planAbsMotif:_planAbsMotif, _planDefTiming:_planDefTiming,
   set:function(o){
     if(o.tpl){ TPL=o.tpl; PLANNING_TEMPLATES[planYear]={A:TPL}; }
@@ -347,6 +348,52 @@ poser();
 rH = M._planApplyAbs(['Jean|12'], 'retard', '', null, '08:00');
 eq('H6 · vraiment à l\'heure : le bon compteur', rH.alheure, 1);
 eq('H7 · vraiment à l\'heure : sansplan reste vide', rH.sansplan, 0);
+
+/* ══ J · LE JOUR SUPPLÉMENTAIRE (repos prévu + heures saisies) ═══════════
+   ★ LE CAS VÉCU (captures du 20/08, Victor le 19) : la journée n'est pas au
+     planning — _planPlanned vaut 0 — mais elle porte un horaire saisi
+     07:00 → 16:30, soit 8 h 30 bien réelles. Le retard y répondait « aucune
+     heure prévue ce jour-là, pas de retard possible », et le verdict affichait
+     « arrivée à 07:30, pas après 07:00 » : 07:30 EST pourtant après 07:00.
+     La cause : trois fonctions prenaient la référence du jour de trois façons. */
+const supp = { timing: { debut: '07:00', fin: '16:30' } };   // 8h30, jour non planifié
+M.set({ tpl: { 7: {} }, debut: '', ent: { Jean: { 7: { 12: supp } } }, dues: '', mois: 7, contrat: true });
+
+eq('J1 · le jour n\'est PAS au planning', M._planDayH('A', 7, 12, null), 0);
+eq('J2 · ★ mais sa référence vaut 8h30', M._planRefH('A', 7, 12, supp), 8.5);
+eq('J3 · ★ le retard y est possible',
+   (function () { const b = M._planRetardBornes(mbr, 7, 12); return b.pl; })(), 8.5);
+eq('J4 · bornes lues sur le timing saisi',
+   (function () { const b = M._planRetardBornes(mbr, 7, 12); return b.t0 + '→' + b.t1; })(),
+   '07:00→16:30');
+eq('J5 · ★ arrivée 07:30 = 30 min dues, PAS « à l\'heure »',
+   M._planRetardH('07:00', '16:30', '07:30', 8.5, false), 0.5);
+
+let rJ = M._planApplyAbs(['Jean|12'], 'retard', '', null, '07:30');
+let eJ = M.ent().Jean[7][12];
+eq('J6 · ★ le retard est enregistré', rJ.n, 1);
+eq('J7 · pas classé « sans planning »', rJ.sansplan, 0);
+eq('J8 · pas classé « à l\'heure »', rJ.alheure, 0);
+eq('J9 · 0,5 h due', eJ.motif_h, 0.5);
+eq('J10 · ★ le timing du jour survit à l\'enregistrement',
+   eJ.timing && eJ.timing.debut + '→' + eJ.timing.fin, '07:00→16:30');
+eq('J11 · ★ la journée compte 8 h, pas 0', M._planDayH('A', 7, 12, eJ), 8);
+eq('J12 · travail effectif 8 h', M._planWorkH('A', 7, 12, eJ), 8);
+M.set({ ent: { Jean: { 7: { 12: eJ } } } });
+eq('J13 · ★ 0,5 h due au compteur', M._planAbsLostH(mbr, 7, true), 0.5);
+eq('J14 · 0,5 h neutralisée dans la référence', M._planAbsLostH(mbr, 7, false), 0.5);
+eq('J15 · la case porte 8 h, pas une croix', M._pl2Cell(mbr, 'A', 12, { maxJour: 12 }).cls, 'pl2c-late');
+
+// Une absence NON-retard efface bien la journée : le timing ne doit pas survivre.
+M.set({ ent: { Jean: { 7: { 12: supp } } } });
+M._planApplyAbs(['Jean|12'], 'injustifie', '', null, null);
+eq('J16 · une injustifiée n\'hérite PAS du timing',
+   M.ent().Jean[7][12].timing, undefined);
+
+// Un jour vraiment vide reste sans retard possible.
+M.set({ tpl: { 7: {} }, debut: '', ent: { Jean: { 7: {} } } });
+eq('J17 · jour réellement vide : toujours refusé',
+   M._planApplyAbs(['Jean|12'], 'retard', '', null, '09:30').sansplan, 1);
 
 /* ══ F · ENTRÉES ANTÉRIEURES AU LOT ══════════════════════════════════════ */
 poser('');

@@ -319,6 +319,21 @@ function _planAbsH(e){var v=parseFloat(e&&e.motif_h);return(isNaN(v)||v<0)?0:v;}
 // a l'affichage, au releve, et a re-remplir la feuille quand on rouvre le jour.
 // ⚠️ Les retards saisis AVANT ce lot n'ont pas de `motif_t` : ils gardent leur
 //    `motif_h`, se relisent, se reaffichent, et ne perdent rien.
+// ★★★ LES HEURES DE REFERENCE D'UN JOUR — ce qui etait attendu ce jour-la.
+// LE TIMING SAISI PRIME SUR LE PLANNING. Un jour de REPOS PREVU peut porter des
+// heures saisies (jour supplementaire) : _planPlanned y vaut 0 alors que la journee
+// fait bien 8 h 30, de 07:00 a 16:30. Trois fonctions repondaient a cette question
+// de trois facons — _planDayH par _planPlanned, _planWorkH par _planDayH(null),
+// _planAbsLostH par _planPlanned — et le retard tombait dans le trou : sur un jour
+// supplementaire il annoncait « aucune heure prevue, pas de retard possible » devant
+// une journee de 8 h 30 bien reelle. Une seule fonction repond, desormais.
+function _planRefH(plId,m,d,e,yr){
+  if(e&&e.timing){
+    var t=_planTimingH(e.timing.debut,e.timing.fin,e.timing.continu);
+    if(t>0)return t;
+  }
+  return _planDayH(plId,m,d,null,yr);   // e=null : aucune recursion possible
+}
 function _planMinOf(s){
   var m=/^([01]?\d|2[0-3]):([0-5]\d)$/.exec(String(s||''));
   return m?(parseInt(m[1],10)*60+parseInt(m[2],10)):-1;
@@ -367,6 +382,7 @@ function _planRetardBornes(mbr,m,d){
   var plId=_planPlId(mbr),pl=_planPlanned(plId,m,d);
   var e=_pEntDay(mbr.nom,m,d);
   var t=_planDefTiming(pl,plId,m,d)||{};
+  pl=_planRefH(plId,m,d,e);              // ★ pas _planPlanned : voir _planRefH
   var t0=(e&&e.timing&&e.timing.debut)||t.d||t.debut||'';
   var t1=(e&&e.timing&&e.timing.fin)  ||t.f||t.fin||'';
   var co=(e&&e.timing&&e.timing.continu!=null)?!!e.timing.continu:!!t.continu;
@@ -700,7 +716,9 @@ function _planDayH(plId,m,d,e,yr){
       //   le motif « retard » est ne EN MEME TEMPS que les motifs, la fenetre des dues
       //   est venue apres, il n'y a aucun historique de retard a proteger. C'etait
       //   simplement un chiffre faux. Le salarie est paye de ce qu'il a fait.
-      if(_mo.heures)return Math.max(0,pl-_planAbsH(e));    // retard : seules SES heures sont perdues
+      // ★ La reference passe par _planRefH : sur un jour supplementaire, `pl` vaut 0
+      //   et la journee entiere disparaissait au lieu d'etre amputee du seul retard.
+      if(_mo.heures)return Math.max(0,_planRefH(plId,m,d,e,yr)-_planAbsH(e));
       // Toute autre absence : 0 h, dans la fenetre comme en dehors.
       return 0;
     }
@@ -727,7 +745,7 @@ function _planWorkH(plId,m,d,e,yr){
   if(e.type==='recup')return 0;
   if(e.absent){
     var mo=_planAbsMotif(e);
-    var prevu=_planDayH(plId,m,d,null,yr);
+    var prevu=_planRefH(plId,m,d,e,yr);                    // ★ meme reference que _planDayH
     if(mo.assim)return prevu;                              // formation / evenement familial
     if(mo.heures)return Math.max(0,prevu-_planAbsH(e));    // retard : journee amputee
     return 0;
@@ -837,7 +855,7 @@ function _planAbsLostH(mbr,m,duesOnly){
     //   dette comptee deux fois, ou pas du tout.
     if(!actif&&!mo.heures)continue;
     if(duesOnly&&mo.id!=='injustifie'&&!mo.heures)continue;
-    h+=Math.max(0,_planPlanned(plId,m,d)-_planDayH(plId,m,d,e));
+    h+=Math.max(0,_planRefH(plId,m,d,e)-_planDayH(plId,m,d,e));
   }
   return h;
 }
@@ -1754,6 +1772,13 @@ function planRetardSync(){
   var dues=_planRetardH(t0,t1,arr,pl,cont);
   var faites=Math.max(0,pl-dues);
   if(hd)hd.value=Math.round(dues*100)/100;
+  if(pl<=0){
+    vd.style.background='var(--bg-app)';vd.style.border='1px solid var(--gris-clair)';
+    vd.style.color='var(--texte-doux)';
+    vd.innerHTML='Aucune heure pr\u00e9vue ni saisie ce jour-l\u00e0 \u2014 il n\u2019y a rien dont '
+      +'on puisse \u00eatre en retard. Saisissez d\u2019abord les horaires de la journ\u00e9e.';
+    return;
+  }
   if(_planMinOf(arr)<0){
     vd.style.background='var(--bg-app)';vd.style.border='1px solid var(--gris-clair)';
     vd.style.color='var(--texte-doux)';
@@ -1970,7 +1995,10 @@ function _pl2Cell(mbr,plId,d,L){
     //   La case porte les heures FAITES, en orange, avec une pastille.
     var _mc=_planAbsMotif(e);
     if(_mc.heures){
-      var _fa=Math.max(0,pl-_planAbsH(e));
+      // ★ _planDayH, pas `pl` : elle sait deja repondre, y compris sur un jour
+      //   supplementaire ou _planPlanned vaut 0. Recalculer ici avec une autre
+      //   source, c'etait le QUATRIEME endroit a repondre differemment.
+      var _fa=_planDayH(plId,planMonth,d,e);
       if(_fa>0.0001)return{txt:_planFmt(_fa),cls:'pl2c-late'};
     }
     return{txt:'\u2715',cls:'pl2c-abs'};
@@ -2494,6 +2522,12 @@ function _planApplyAbs(keys,motifId,com,heuresVal,arrivee){
     var mbr=(window.MEMBRES||[]).find(function(m){return m.nom===p.nom;});
     if(!mbr||isNaN(p.d)||!_planInContract(mbr,planMonth,p.d)){skip++;return;}
     var e={absent:true,motif:mo.id,comment:(com||'').trim()};
+    // ★ LE TIMING DU JOUR SURVIT AU RETARD. Sans lui, un jour supplementaire perdait
+    //   sa seule source d'heures a l'enregistrement : l'entree devenait {absent:true}
+    //   sur un jour ou _planPlanned vaut 0, et les 8 h 30 disparaissaient. On ne le
+    //   garde QUE pour le retard : les autres motifs effacent bien la journee.
+    var _prev=_pEntDay(p.nom,planMonth,p.d);
+    if(mo.heures&&_prev&&_prev.timing)e.timing=_prev.timing;
     if(mo.heures){
       if(_planMinOf(arrivee)>=0){
         var b=_planRetardBornes(mbr,planMonth,p.d);
@@ -4392,7 +4426,7 @@ function _planSheetOneHtml(mode){
     // ★ _planEdT0/_planEdT1, PAS defT : ce sont les heures que la feuille affiche et
     //   que le moteur relira. Passer defT ici rouvrait l'ecart entre l'ecran et le calcul.
     +_planSheetAbsSection(_planAbsH(ent),(ent&&ent.absent)?initComment:'',false,'h sur '+_planFmt(plDisplay)+' pr\u00e9vues',
-       {t0:_planEdT0,t1:_planEdT1,pl:pl,continu:initCont,arr:_planAbsT(ent)})
+       {t0:_planEdT0,t1:_planEdT1,pl:_planRefH(plId,planMonth,day,ent),continu:initCont,arr:_planAbsT(ent)})
     +'<div id="plan-cp-section" style="display:none">'
       +'<div class="plan-modal-lbl">Heures d\u00e9compt\u00e9es</div>'
       +'<div style="display:flex;gap:12px;align-items:center;margin-bottom:12px">'

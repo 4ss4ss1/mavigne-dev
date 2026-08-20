@@ -25,8 +25,8 @@ const CAS = [
     nom: 'le retard repasse SOUS le garde-fou des heures dues',
     detail: 'le défaut d\'origine : journée à 0 h tant que le réglage est Inactif',
     f: s => s.replace(
-      "      if(_mo.heures)return Math.max(0,pl-_planAbsH(e));    // retard : seules SES heures sont perdues\n      // Toute autre absence : 0 h, dans la fenetre comme en dehors.\n      return 0;",
-      "      if(!_planDuesActive(m))return 0;\n      if(_mo.heures)return Math.max(0,pl-_planAbsH(e));\n      return 0;")
+      "      if(_mo.heures)return Math.max(0,_planRefH(plId,m,d,e,yr)-_planAbsH(e));\n      // Toute autre absence : 0 h, dans la fenetre comme en dehors.\n      return 0;",
+      "      if(!_planDuesActive(m))return 0;\n      if(_mo.heures)return Math.max(0,_planRefH(plId,m,d,e,yr)-_planAbsH(e));\n      return 0;")
   },
   {
     nom: '_planAbsLostH redevient muet hors fenêtre',
@@ -37,8 +37,7 @@ const CAS = [
   {
     nom: 'la case du retard redevient une croix',
     detail: 'un retard d\'une heure indiscernable d\'une journée entière',
-    f: s => s.replace("    if(_mc.heures){\n      var _fa=Math.max(0,pl-_planAbsH(e));\n      if(_fa>0.0001)return{txt:_planFmt(_fa),cls:'pl2c-late'};\n    }",
-                      "    if(false){}")
+    f: s => s.replace("      if(_fa>0.0001)return{txt:_planFmt(_fa),cls:'pl2c-late'};", "")
   },
   {
     nom: 'la coupure déjeuner n\'est plus déduite',
@@ -94,6 +93,34 @@ const CAS = [
     nom: '★ les trois causes de non-écriture se remélangent',
     detail: 'un jour hors contrat ressort « arrivée à l\'heure »',
     f: s => s.replace('          if(dh<=0.0001){alheure++;return;}', '          if(dh<=0.0001){skip++;return;}')
+  },
+  {
+    nom: '★ la référence du jour redevient _planPlanned dans _planDayH',
+    detail: 'LE CAS VÉCU : sur un jour supplémentaire, le retard efface les 8h30',
+    f: s => s.replace('      if(_mo.heures)return Math.max(0,_planRefH(plId,m,d,e,yr)-_planAbsH(e));',
+                      '      if(_mo.heures)return Math.max(0,pl-_planAbsH(e));')
+  },
+  {
+    nom: '★ _planRefH ignore le timing saisi',
+    detail: 'le jour supplémentaire redevient invisible',
+    f: s => s.replace("  if(e&&e.timing){\n    var t=_planTimingH(e.timing.debut,e.timing.fin,e.timing.continu);\n    if(t>0)return t;\n  }\n", '')
+  },
+  {
+    nom: '★ le timing ne survit plus à l\'enregistrement du retard',
+    detail: 'les heures du jour supplémentaire disparaissent en base',
+    f: s => s.replace('    if(mo.heures&&_prev&&_prev.timing)e.timing=_prev.timing;\n', '')
+  },
+  {
+    nom: '★ _planAbsLostH reprend _planPlanned comme référence',
+    detail: 'aucune heure due sur un jour supplémentaire',
+    f: s => s.replace('    h+=Math.max(0,_planRefH(plId,m,d,e)-_planDayH(plId,m,d,e));',
+                      '    h+=Math.max(0,_planPlanned(plId,m,d)-_planDayH(plId,m,d,e));')
+  },
+  {
+    nom: '★ _pl2Cell recalcule la case au lieu de lire _planDayH',
+    detail: 'la case retombe sur une croix quand _planPlanned vaut 0',
+    f: s => s.replace('      var _fa=_planDayH(plId,planMonth,d,e);',
+                      '      var _fa=Math.max(0,pl-_planAbsH(e));')
   },
   {
     nom: 'une absence injustifiée sort du garde-fou avec le retard',

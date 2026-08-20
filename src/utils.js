@@ -23,7 +23,7 @@ export const GT_ADMIN_EMAIL = 'ngdevpro@gmail.com';
 // WHATS_NEW   : tableau vide = modal desactive pour cette version.
 // Format item : { emoji:'📅', titre:'Titre court', desc:'Phrase utilisateur.' }
 // Regle : seulement les changements visibles par les utilisateurs.
-export const APP_VERSION = '6.39';
+export const APP_VERSION = '6.40';
 // ════ Journal des nouveautés (récap cumulatif) ════
 // Une entrée par version, la PLUS RÉCENTE EN HAUT : { v:'5.10', items:[ {emoji,titre,desc}, … ] }
 // À chaque release visible → AJOUTER un bloc en tête (ne pas remplacer). items:[] = release technique (rien à afficher).
@@ -354,6 +354,10 @@ window._mvGraphRepeindre = function(){
 };
 
 export const WHATS_NEW = [
+  { v:'6.40', items:[
+    { emoji: 'chrono', titre: "Le retard fonctionne sur un jour suppl\u00e9mentaire",
+      desc: "Une journ\u00e9e <b>hors planning</b> dont vous aviez saisi les horaires \u2014 un renfort, une reprise, un jour \u00e9chang\u00e9 \u2014 refusait le retard avec \u00ab\u00a0aucune heure pr\u00e9vue ce jour-l\u00e0\u00a0\u00bb, et le d\u00e9tail affichait \u00ab\u00a0arriv\u00e9e \u00e0 07:30, pas apr\u00e8s 07:00\u00a0\u00bb alors que 07:30 est bien apr\u00e8s 07:00. Les heures de la journ\u00e9e \u00e9taient lues sur le planning, qui ne conna\u00eet pas ces jours-l\u00e0, au lieu de l\u2019horaire que vous aviez saisi. Le retard s\u2019y pose maintenant normalement, et <b>les horaires de la journ\u00e9e sont conserv\u00e9s</b>." }
+  ] },
   { v:'6.39', items:[
     { emoji: 'chrono', titre: "Un retard sur un jour \u00e0 horaire d\u00e9cal\u00e9 n\u2019\u00e9tait pas enregistr\u00e9",
       desc: "Sur une journ\u00e9e dont l\u2019horaire avait \u00e9t\u00e9 saisi \u00e0 la main \u2014 une prise de poste avanc\u00e9e, un jour de vendange \u2014 la feuille affichait bien l\u2019heure de d\u00e9but du jour, mais le calcul, lui, se basait sur l\u2019horaire <b>par d\u00e9faut du planning</b>. R\u00e9sultat\u00a0: une arriv\u00e9e r\u00e9ellement en retard ressortait \u00ab\u00a0arriv\u00e9e \u00e0 l\u2019heure, aucune absence enregistr\u00e9e\u00a0\u00bb, et <b>rien n\u2019\u00e9tait \u00e9crit</b>. Le calcul lit maintenant l\u2019horaire du jour, celui-l\u00e0 m\u00eame qui est affich\u00e9." },
