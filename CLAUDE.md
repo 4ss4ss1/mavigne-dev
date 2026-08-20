@@ -10,6 +10,12 @@
 > désormais la base AVANT d'écrire et sépare deux gestes qui n'ont rien à voir.
 > ⚠️ **Et deux de mes cinq premières contre-épreuves étaient fausses** — elles cherchaient un
 > motif de texte que la même phrase, écrite ailleurs dans le fichier, satisfaisait déjà.
+> ⚠️⚠️⚠️ **Le harnais livré vert a planté chez Nico au premier lancement** : `new URL(…).pathname`
+> rend `/C:/Users/…` sous Windows, que Node repart en `C:\C:\Users\…`. **Le bac à sable est
+> Linux, la machine de Nico est Windows** — aucun de mes essais ne pouvait l'attraper. ★★★ **Et
+> la même faute d'assertion s'est reproduite une TROISIÈME fois dans l'heure** : l'`assert` du
+> script de correction cherchait `.pathname` dans le fichier et tombait sur le mot écrit dans
+> **le commentaire que je venais d'ajouter**.
 >
 > ★ Précédente : **17 août 2026 (nuit)** — ★★★ **TROIS PANNES CAUSÉES PAR MA PROPRE
 > ASSERTION (§51)**. **APP 6.31 · SW 6.85.** « Aucun symbole sans emploi » m'a fait supprimer
@@ -8608,6 +8614,13 @@ pas le code. Même famille que §42f, une fois de plus :
   `agtKmlSave`. **La même phrase existe dans `_agtKmlEtatHtml`** : la contre-épreuve disait vert
   sur du code dont la garde avait disparu.
 
+★★★ **ET LA MÊME FAUTE S'EST REPRODUITE UNE TROISIÈME FOIS**, dans le script qui corrigeait le
+chemin Windows : `assert '.pathname' not in s` — le mot était dans **le commentaire d'explication
+que le patch venait d'insérer**. Le script s'est arrêté sur un fichier pourtant juste. ⚠️ Le seul
+point positif : *l'assert est tombé AVANT l'écriture*, le fichier est resté intact, et le `sed`
+de contrôle a montré la version non patchée — la garde de §27 a joué son rôle. La vérification
+porte désormais sur **les lignes de code, commentaires exclus**.
+
 ★★★ **La règle** : *une contre-épreuve qui lit du texte ne prouve rien sur du comportement.*
 Les six sont maintenant **fonctionnelles** — elles exécutent le code muté et regardent ce qui
 est écrit. ★ Et une mutation qui **casse la syntaxe** fait rougir sans rien prouver : le harnais
@@ -8620,8 +8633,24 @@ Méthode C20 : les vraies fonctions sont extraites du fichier livré et **exécu
 stubs de `fbAdminRead`/`fbAdminWrite`.
 
 ⚠️ **Aucun chemin de bac à sable en dur** (§44 : six harnais du dépôt en portaient un et se
-lisaient comme des succès sans jamais démarrer). Le défaut est
-`new URL('../src/admin-gt.js', import.meta.url)` — vérifié en le lançant depuis `/tmp`.
+lisaient comme des succès sans jamais démarrer).
+
+⚠️⚠️⚠️ **ET LA PREMIÈRE VERSION A PLANTÉ CHEZ NICO, LIVRÉE VERTE.** Pour éviter le chemin en dur
+j'avais écrit `new URL('../src/admin-gt.js', import.meta.url).pathname`. Sous Windows, cette
+propriété rend `/C:/Users/p4n0m/…` — un chemin absolu POSIX que Node repart ensuite en
+**`C:\C:\Users\p4n0m\…`**, d'où un `ENOENT` en plein `prebuild`. Corrigé par `fileURLToPath`,
+**la convention que `preflight.mjs` et `mv-harnais-carte-parcelle.mjs` suivaient déjà** : je ne
+les avais pas regardés avant d'écrire.
+
+★★★ **La leçon est sur le banc d'essai, pas sur le code.** Le bac à sable est Linux, la machine
+de Nico est Windows. J'avais bien testé « depuis un autre répertoire » — le test ne pouvait pas
+échouer là où je le lançais. **Un harnais vert dans un environnement ne dit rien du seul
+environnement qui compte.** Quand une convention existe dans le dépôt, la copier vaut mieux que
+de retrouver la bonne réponse seul : elle porte déjà les pannes des autres.
+
+★ Vérification faite après coup sur les 26 scripts : **aucun autre `.pathname`**. Neuf harnais
+dépendent en revanche de `process.cwd()` et ne démarrent pas depuis un autre répertoire — sans
+effet tant que `npm` fixe le répertoire à la racine, donc **signalé, pas corrigé**.
 
 ⚠️ **L'extracteur perdait le mot-clé `async`** en cherchant `lastIndexOf('function')` : les
 fonctions asynchrones remontaient sans lui et le harnais **plantait** au lieu de tester. Un

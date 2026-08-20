@@ -12,11 +12,19 @@
 //    l'assertion visee y soit pour quelque chose. D'ou le controle de syntaxe.
 
 import fs from 'fs';
+import path from 'path';
+import { fileURLToPath } from 'url';
 import { execFileSync } from 'child_process';
 
 // ⚠️ AUCUN chemin de bac a sable en dur : six harnais du depot en portaient un et
 //    se lisaient comme des succes alors qu'ils ne demarraient pas (§44).
-const FILE = process.argv[2] || new URL('../src/admin-gt.js', import.meta.url).pathname;
+// ⚠️⚠️ ET AUCUNE URL convertie a la main : sous Windows, la propriete `pathname`
+//    d'une URL de fichier rend « /C:/Users/... », que Node repartait ensuite en
+//    « C:\C:\Users\... ». Le harnais plantait chez Nico alors qu'il passait en bac
+//    a sable Linux. `fileURLToPath` est la convention deja suivie par preflight.mjs
+//    et mv-harnais-carte-parcelle.mjs.
+const RACINE = path.resolve(path.dirname(fileURLToPath(import.meta.url)), '..');
+const FILE   = process.argv[2] || path.join(RACINE, 'src', 'admin-gt.js');
 const src = fs.readFileSync(FILE, 'utf8');
 
 // ── Extraction d'une fonction par balance d'accolades ────────────────────────
