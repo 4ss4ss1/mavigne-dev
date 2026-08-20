@@ -2211,7 +2211,7 @@ const SYNC_TAG     = 'mavigne-sync';
 const SHELL_STATIC = ['./icon-192.png', './icon-512.png', './logo-gt.png', './boot.js'];
 // Liste des assets Vite hashés du build courant — injectée dans dist/sw.js par
 // scripts/inject-precache.mjs (npm run build). Vide en dev (placeholder).
-const PRECACHE_ASSETS = [/*__MV_PRECACHE__*/];
+const PRECACHE_ASSETS = ["/assets/main-DOy-j4Rt.js","/assets/main-JtkWMEby.css"];
 const CDN_URLS = [
   'https://unpkg.com/leaflet@1.9.4/dist/leaflet.css',
   'https://unpkg.com/leaflet@1.9.4/dist/leaflet.js',
