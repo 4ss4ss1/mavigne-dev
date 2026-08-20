@@ -59,7 +59,7 @@ const CAS = [
   {
     nom: 'une arrivée à l\'heure écrit quand même une absence',
     detail: 'garde-fou du zéro retiré',
-    f: s => s.replace('          if(dh<=0.0001){skip++;return;}          // a l\'heure : aucune absence posee\n', '')
+    f: s => s.replace('          if(dh<=0.0001){alheure++;return;}       // a l\'heure : aucune absence posee\n', '')
   },
   {
     nom: 'motif_h n\'est plus borné à la journée',
@@ -78,6 +78,22 @@ const CAS = [
     detail: 'un retard sans motif_t doit garder son motif_h',
     f: s => s.replace('function _planAbsH(e){var v=parseFloat(e&&e.motif_h);return(isNaN(v)||v<0)?0:v;}',
                       'function _planAbsH(e){var v=parseFloat(e&&e.motif_h);return(isNaN(v)||v<0||!(e&&e.motif_t))?0:v;}')
+  },
+  {
+    nom: '★ le moteur reprend le défaut du planning au lieu de l\'horaire du jour',
+    detail: 'LE BUG VÉCU : l\'écran affiche un départ, le moteur en compare un autre',
+    f: s => s.replace("  var t0=(e&&e.timing&&e.timing.debut)||t.d||t.debut||'';\n  var t1=(e&&e.timing&&e.timing.fin)  ||t.f||t.fin||'';",
+                      "  var t0=t.d||t.debut||'';\n  var t1=t.f||t.fin||'';")
+  },
+  {
+    nom: '★ « à l\'heure » recouvre à nouveau les jours non planifiés',
+    detail: 'le message annonce une cause fausse',
+    f: s => s.replace('        if(b.pl<=0){sansplan++;return;}\n', '')
+  },
+  {
+    nom: '★ les trois causes de non-écriture se remélangent',
+    detail: 'un jour hors contrat ressort « arrivée à l\'heure »',
+    f: s => s.replace('          if(dh<=0.0001){alheure++;return;}', '          if(dh<=0.0001){skip++;return;}')
   },
   {
     nom: 'une absence injustifiée sort du garde-fou avec le retard',

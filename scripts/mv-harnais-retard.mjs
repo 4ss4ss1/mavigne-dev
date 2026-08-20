@@ -111,7 +111,7 @@ function _planDuesActive(m){
   if(!CONFIG_DUES) return false;
   return (_pY()+'-'+String(m+1).padStart(2,'0')) >= CONFIG_DUES;
 }
-function _planPlId(){ return 'A'; }
+function _planPlId(m){ return (m&&m.planning_id)||'A'; }   // même forme que le module
 function _planGetTpl(){ return TPL; }
 function _pEntDay(nom,m,d){ return ((ENT[nom]||{})[m]||{})[d]; }
 function _pEntMonth(nom,m){ return (ENT[nom]||{})[m] || {}; }
@@ -300,6 +300,53 @@ eq('E5 · une vraie absence garde sa classe', cA.cls, 'pl2c-abs');
 poser('');
 M.set({ ent: { Jean: { 7: { 12: { absent: true, motif: 'retard', motif_h: 7 } } } } });
 eq('E6 · retard couvrant la journée → croix', M._pl2Cell(mbr, 'A', 12, { maxJour: 10 }).cls, 'pl2c-abs');
+
+/* ══ G · L'ÉCRAN ET LE MOTEUR LISENT LA MÊME HEURE ═══════════════════════
+   ★ LE DÉFAUT VÉCU (20/08) : _planRetardBornes n'interrogeait que _planDefTiming.
+     Quand le jour portait son propre horaire (ent.timing), l'écran affichait un
+     départ et le moteur en comparait un autre — une arrivée réellement en retard
+     ressortait « à l'heure, aucune absence enregistrée ». Le harnais ne pouvait
+     pas le voir : son stub _planPlId ignorait le membre et aucun cas ne posait
+     d'horaire de jour. */
+poser();
+// Jour démarré à 06:00, 7 h nettes (06:00→14:00 avec la coupure) — alors que le
+// DÉFAUT du planning dit 08:00→16:00. C'est le cas exact du bug : l'écran montrait
+// 06:00, le moteur comparait à 08:00, et 07:00 ressortait « à l'heure ».
+M.set({ ent: { Jean: { 7: { 12: { timing: { debut: '06:00', fin: '14:00' } } } } } });
+eq('G1 · les bornes suivent l\'horaire DU JOUR, pas le défaut',
+   (function () { const b = M._planRetardBornes(mbr, 7, 12); return b.t0 + '→' + b.t1; })(),
+   '06:00→14:00');
+eq('G1b · le défaut du planning dit autre chose (sinon le cas ne prouve rien)',
+   (function () { const t = M._planDefTiming(7, 'A', 7, 12); return (t.d) + '→' + (t.f); })(),
+   '08:00→16:00');
+eq('G2 · ★ arrivée 07:00 sur un jour qui démarre à 06:00 = un retard, pas « à l\'heure »',
+   (function () { const r2 = M._planApplyAbs(['Jean|12'], 'retard', '', null, '07:00'); return r2.n; })(), 1);
+
+poser();
+M.set({ ent: { Jean: { 7: { 12: { timing: { debut: '10:00', fin: '18:00' } } } } } });
+eq('G3 · arrivée 09:00 sur un jour qui démarre à 10:00 : en avance',
+   (function () { const r3 = M._planApplyAbs(['Jean|12'], 'retard', '', null, '09:00'); return r3.alheure; })(), 1);
+
+/* ══ H · LE MESSAGE NE MENT PAS SUR LA CAUSE ═════════════════════════════
+   Trois raisons de n'écrire aucun jour, trois compteurs. Les confondre faisait
+   annoncer « arrivée à l'heure » sur un jour hors contrat ou non planifié. */
+poser();
+M.set({ tpl: { 7: {} }, ent: { Jean: { 7: {} } } });     // aucune heure prévue
+let rH = M._planApplyAbs(['Jean|12'], 'retard', '', null, '09:30');
+eq('H1 · jour sans planning : compté à part', rH.sansplan, 1);
+eq('H2 · jour sans planning : pas compté « à l\'heure »', rH.alheure, 0);
+eq('H3 · jour sans planning : rien écrit', rH.n, 0);
+
+poser();
+M.set({ contrat: false });
+rH = M._planApplyAbs(['Jean|12'], 'retard', '', null, '09:30');
+eq('H4 · hors contrat : compté dans skip', rH.skip, 1);
+eq('H5 · hors contrat : pas compté « à l\'heure »', rH.alheure, 0);
+
+poser();
+rH = M._planApplyAbs(['Jean|12'], 'retard', '', null, '08:00');
+eq('H6 · vraiment à l\'heure : le bon compteur', rH.alheure, 1);
+eq('H7 · vraiment à l\'heure : sansplan reste vide', rH.sansplan, 0);
 
 /* ══ F · ENTRÉES ANTÉRIEURES AU LOT ══════════════════════════════════════ */
 poser('');

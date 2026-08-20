@@ -23,7 +23,7 @@ export const GT_ADMIN_EMAIL = 'ngdevpro@gmail.com';
 // WHATS_NEW   : tableau vide = modal desactive pour cette version.
 // Format item : { emoji:'📅', titre:'Titre court', desc:'Phrase utilisateur.' }
 // Regle : seulement les changements visibles par les utilisateurs.
-export const APP_VERSION = '6.38';
+export const APP_VERSION = '6.39';
 // ════ Journal des nouveautés (récap cumulatif) ════
 // Une entrée par version, la PLUS RÉCENTE EN HAUT : { v:'5.10', items:[ {emoji,titre,desc}, … ] }
 // À chaque release visible → AJOUTER un bloc en tête (ne pas remplacer). items:[] = release technique (rien à afficher).
@@ -354,6 +354,12 @@ window._mvGraphRepeindre = function(){
 };
 
 export const WHATS_NEW = [
+  { v:'6.39', items:[
+    { emoji: 'chrono', titre: "Un retard sur un jour \u00e0 horaire d\u00e9cal\u00e9 n\u2019\u00e9tait pas enregistr\u00e9",
+      desc: "Sur une journ\u00e9e dont l\u2019horaire avait \u00e9t\u00e9 saisi \u00e0 la main \u2014 une prise de poste avanc\u00e9e, un jour de vendange \u2014 la feuille affichait bien l\u2019heure de d\u00e9but du jour, mais le calcul, lui, se basait sur l\u2019horaire <b>par d\u00e9faut du planning</b>. R\u00e9sultat\u00a0: une arriv\u00e9e r\u00e9ellement en retard ressortait \u00ab\u00a0arriv\u00e9e \u00e0 l\u2019heure, aucune absence enregistr\u00e9e\u00a0\u00bb, et <b>rien n\u2019\u00e9tait \u00e9crit</b>. Le calcul lit maintenant l\u2019horaire du jour, celui-l\u00e0 m\u00eame qui est affich\u00e9." },
+    { emoji: 'info', titre: "Le message dit d\u00e9sormais pourquoi rien n\u2019a \u00e9t\u00e9 enregistr\u00e9",
+      desc: "Un jour <b>hors contrat</b> ou <b>sans heures pr\u00e9vues</b> affichait lui aussi \u00ab\u00a0arriv\u00e9e \u00e0 l\u2019heure\u00a0\u00bb, ce qui envoyait chercher l\u2019erreur au mauvais endroit. Chaque cas a maintenant son message." }
+  ] },
   { v:'6.38', items:[
     { emoji: 'chrono', titre: "Un retard se note par l\u2019heure d\u2019arriv\u00e9e",
       desc: "Il fallait convertir soi-m\u00eame le retard en heures avant de le saisir. Vous indiquez d\u00e9sormais <b>l\u2019heure \u00e0 laquelle la personne est arriv\u00e9e</b>, et l\u2019\u00e9cran vous dit, avant d\u2019enregistrer, ce qui a \u00e9t\u00e9 travaill\u00e9 et ce qui est d\u00fb. La coupure d\u00e9jeuner est prise en compte : arriver \u00e0 14 h ne doit pas l\u2019heure du repas." },

@@ -354,12 +354,23 @@ function _planRetardVide(fin,arrivee){
   var a=_planMinOf(arrivee),f=_planMinOf(fin);
   return a>=0&&f>=0&&a>=f;
 }
-// Le couple depart/fin PREVU d'un jour, tel que la feuille l'affiche. Un seul point
-// de verite pour la feuille, le moteur d'ecriture et le harnais.
+// Le couple depart/fin PREVU d'un jour, tel que la feuille l'affiche.
+// ★★★ L'HORAIRE SAISI POUR LE JOUR PRIME SUR LE DEFAUT DU PLANNING — c'est l'ordre
+//   qu'applique _planSheetOneHtml pour _planEdT0/_planEdT1, et le moteur doit lire
+//   la MEME heure que l'ecran. Premiere version : cette fonction n'interrogeait que
+//   _planDefTiming. L'ecran annoncait « depart prevu 07:00 » pendant que le moteur
+//   comparait a 09:00 (code jour M, ecrit en dur dans _planDefTiming), et une arrivee
+//   a 08:30 ressortait « a l'heure, aucune absence enregistree ». Deux sources
+//   d'horaire pour une meme journee : le defaut que ces fonctions pretendaient
+//   justement eviter. Une seule, et c'est celle-ci.
 function _planRetardBornes(mbr,m,d){
   var plId=_planPlId(mbr),pl=_planPlanned(plId,m,d);
+  var e=_pEntDay(mbr.nom,m,d);
   var t=_planDefTiming(pl,plId,m,d)||{};
-  return {pl:pl,t0:(t.d||t.debut||''),t1:(t.f||t.fin||''),continu:!!t.continu};
+  var t0=(e&&e.timing&&e.timing.debut)||t.d||t.debut||'';
+  var t1=(e&&e.timing&&e.timing.fin)  ||t.f||t.fin||'';
+  var co=(e&&e.timing&&e.timing.continu!=null)?!!e.timing.continu:!!t.continu;
+  return {pl:pl,t0:t0,t1:t1,continu:co};
 }
 function _planLegInput(id,label,val,step){
   return '<div style="background:var(--bg-app);border:1px solid var(--gris-clair);border-radius:11px;padding:9px 10px">'
@@ -2472,8 +2483,12 @@ function _planApplyHeures(keys,o){
 //   lot, et tout appelant qui n'a pas ete mis a jour, continuent de fonctionner.
 // ★ `basc` compte les jours ou l'arrivee tombait apres la fin prevue : ce ne sont plus
 //   des retards, ils sont ecrits en absence injustifiee. L'appelant le dit dans le toast.
+// ★ `alheure` et `sansplan` sont COMPTES A PART de `skip` : sans cela, un jour
+//   ignore parce qu'il est hors contrat, ou parce qu'aucune heure n'y est prevue,
+//   ressortait avec le message « arrivee a l'heure ». Un compteur qui melange trois
+//   causes fait dire au message une chose fausse avec l'aplomb d'une mesure.
 function _planApplyAbs(keys,motifId,com,heuresVal,arrivee){
-  var mo=_planAbsDef(motifId),n=0,skip=0,basc=0;
+  var mo=_planAbsDef(motifId),n=0,skip=0,basc=0,alheure=0,sansplan=0;
   keys.forEach(function(k){
     var p=_planSelParse(k);
     var mbr=(window.MEMBRES||[]).find(function(m){return m.nom===p.nom;});
@@ -2482,6 +2497,8 @@ function _planApplyAbs(keys,motifId,com,heuresVal,arrivee){
     if(mo.heures){
       if(_planMinOf(arrivee)>=0){
         var b=_planRetardBornes(mbr,planMonth,p.d);
+        // Aucune heure prevue ce jour-la : il n'y a rien dont on puisse etre en retard.
+        if(b.pl<=0){sansplan++;return;}
         if(_planRetardVide(b.t1,arrivee)){
           // Arrive apres la fin prevue : rien n'a ete travaille. Ce n'est plus un
           // retard, et l'ecrire comme tel mentirait sur le releve.
@@ -2489,7 +2506,7 @@ function _planApplyAbs(keys,motifId,com,heuresVal,arrivee){
           basc++;
         } else {
           var dh=_planRetardH(b.t0,b.t1,arrivee,b.pl,b.continu);
-          if(dh<=0.0001){skip++;return;}          // a l'heure : aucune absence posee
+          if(dh<=0.0001){alheure++;return;}       // a l'heure : aucune absence posee
           e.motif_t=arrivee;
           e.motif_h=Math.round(dh*100)/100;
         }
@@ -2500,7 +2517,7 @@ function _planApplyAbs(keys,motifId,com,heuresVal,arrivee){
     _pEntEnsure(p.nom,planMonth)[p.d]=e;
     n++;
   });
-  return {n:n,skip:skip,basc:basc};
+  return {n:n,skip:skip,basc:basc,alheure:alheure,sansplan:sansplan};
 }
 
 // Recup / chaleur / effacement : aucun parametre metier a qualifier, donc aucune
@@ -2712,6 +2729,7 @@ function _planBuildMonHtml(mbr,canEdit){
     if(e&&e.absent&&_planAbsMotif(e).heures){
       var _rt=_planAbsT(e);
       if(_rt){var _rb=_planRetardBornes(mbr,planMonth,d);tStr=_rt+' \u2192 '+(_rb.t1||'\u2014');}
+      else if(_planAbsH(e)>0){var _rb2=_planRetardBornes(mbr,planMonth,d);tStr=(_rb2.t0||'\u2014')+' \u2192 '+(_rb2.t1||'\u2014')+' \u00b7 retard';}
     }
     var tModified=!!(e&&e.timing);
     var tColor=tModified?(st.t==='continu'?'var(--plan-acc)':st.t==='supp'?'var(--vert-med)':st.t==='reduit'?'var(--orange)':'var(--texte-doux)'):'var(--texte-doux)';
@@ -4371,8 +4389,10 @@ function _planSheetOneHtml(mode){
   +'<div id="plan-modal-body" style="overflow-y:auto;flex:1;padding:18px 24px 8px">'
     +_planSheetModes(true)
     +_planSheetTiming(isNP?'Heures travaill\u00e9es':'Horaires de la journ\u00e9e',initCont,_planEdHeat,rempHtml)
+    // ★ _planEdT0/_planEdT1, PAS defT : ce sont les heures que la feuille affiche et
+    //   que le moteur relira. Passer defT ici rouvrait l'ecart entre l'ecran et le calcul.
     +_planSheetAbsSection(_planAbsH(ent),(ent&&ent.absent)?initComment:'',false,'h sur '+_planFmt(plDisplay)+' pr\u00e9vues',
-       {t0:defT.d||defT.debut||'',t1:defT.f||defT.fin||'',pl:pl,continu:!!defT.continu,arr:_planAbsT(ent)})
+       {t0:_planEdT0,t1:_planEdT1,pl:pl,continu:initCont,arr:_planAbsT(ent)})
     +'<div id="plan-cp-section" style="display:none">'
       +'<div class="plan-modal-lbl">Heures d\u00e9compt\u00e9es</div>'
       +'<div style="display:flex;gap:12px;align-items:center;margin-bottom:12px">'
@@ -4621,7 +4641,9 @@ function savePlanDay(next){
         ?('Absence injustifi\u00e9e \u00b7 '+r.basc+'\u00a0j \u2014 arriv\u00e9e apr\u00e8s la fin pr\u00e9vue'
           +(r.n>r.basc?(' \u00b7 '+(r.n-r.basc)+' retard'+((r.n-r.basc)>1?'s':'')):''))
         :(mo.ico+' '+mo.nom+' \u00b7 '+r.n+'\u00a0j'+(r.skip>0?' \u00b7 '+r.skip+' ignor\u00e9'+(r.skip>1?'s':''):''))))
-      :(mo.heures?'Arriv\u00e9e \u00e0 l\u2019heure \u2014 aucune absence enregistr\u00e9e':'Aucun jour applicable');
+      :(r.sansplan>0?'Aucune heure pr\u00e9vue ce jour-l\u00e0 \u2014 pas de retard possible'
+       :(r.alheure>0?'Arriv\u00e9e \u00e0 l\u2019heure \u2014 aucune absence enregistr\u00e9e'
+       :'Aucun jour applicable'));
   } else {
     var debut=(document.getElementById('plan-t-debut')||{}).value||'08:00';
     var fin=(document.getElementById('plan-t-fin')||{}).value||'16:00';
