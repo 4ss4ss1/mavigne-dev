@@ -6595,7 +6595,7 @@ function _pvRenderOrdreBar(){
       +'<div style="font-size:11.5px;color:var(--texte-doux);margin-bottom:6px">Tournée définie pour :</div>'
       +'<div style="display:flex;flex-wrap:wrap;gap:6px">'
       +dispo.map(function(nm){
-          return '<button onclick="setPTacheFilter(\''+_escAttr(nm)+'\')" style="border:1px solid var(--or);background:rgba(201,168,76,.12);color:var(--or);border-radius:20px;min-height:34px;padding:0 12px;font-size:12.5px;font-weight:700;cursor:pointer;font-family:inherit">'+em+' '+_escHtml(nm)+'</button>';
+          return '<button onclick="setPTacheFilter(\''+_escAttr(nm)+'\')" style="border:1px solid var(--or);background:rgba(201,168,76,.12);color:var(--or);border-radius:20px;min-height:34px;padding:0 12px;font-size:12.5px;font-weight:700;cursor:pointer;font-family:inherit">'+_mvIconTache(nm,16)+' '+_escHtml(nm)+'</button>';
         }).join('')
       +'</div></div>';
     return;

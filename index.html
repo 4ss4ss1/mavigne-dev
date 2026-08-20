@@ -54,8 +54,6 @@
 <!-- CSS applicatif : src/styles.css (importé par app.js, asset Vite précaché — lot optimisation vSW 4.95) -->
 <!-- Leaflet 1.9.4 : charge A LA DEMANDE (Parcelles/Pilotage) via _ensureLeaflet() + SRI - plus rien de bloquant au demarrage (PERF-2) -->
 
-  <script type="module" crossorigin src="/assets/main-DOy-j4Rt.js"></script>
-  <link rel="stylesheet" crossorigin href="/assets/main-JtkWMEby.css">
 </head>
 <body ontouchstart="">
 <!-- ════════════════════════════════════════════════════════════════════════
@@ -3259,6 +3257,7 @@
   </div>
 </div>
 <script src="/boot.js"></script>
+<script type="module" src="/src/app.js"></script>
 
 <!-- ── Overlay erreur critique Ma Vigne (v2.68) ── -->
 <div id="mv-critical-overlay" style="display:none;position:fixed;inset:0;background:rgba(0,0,0,0.88);z-index:99999;align-items:center;justify-content:center;padding:20px;font-family:Outfit,sans-serif">
