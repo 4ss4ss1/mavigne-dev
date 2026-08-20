@@ -2483,6 +2483,11 @@ body.mv-trial-on #app-root{padding-top:calc(env(safe-area-inset-top,0px) + 44px)
 .pl2c-dn{background:var(--orange-pale);color:var(--orange);border-color:rgba(184,90,26,0.30);}
 .pl2c-cp{background:var(--orange);color:#fff;}
 .pl2c-abs{background:var(--rouge-pale);color:var(--rouge);border-color:rgba(160,41,30,0.35);}
+/* Le RETARD : la journee a ete travaillee, en partie. Elle porte ses heures faites,
+   pas une croix — et une pastille la distingue d'un horaire reduit choisi. */
+.pl2c-late{background:var(--orange-pale);color:var(--orange);border-color:rgba(184,90,26,0.45);}
+.pl2c-late::after{content:'';position:absolute;top:2px;right:2px;width:5px;height:5px;border-radius:99px;background:var(--orange);}
+.pl2-legend i.pl2c-late::after{display:none;}
 .pl2c-rec{background:var(--plan-acc-pale);color:var(--plan-acc);border-color:rgba(123,109,184,0.35);font-size:14px;}
 .pl2c-heat{background:var(--plan-acc-pale);color:var(--plan-acc);border-color:rgba(123,109,184,0.45);}
 .pl2c-heat::after{content:'🌡';font-size:8px;position:absolute;top:-3px;right:-2px;}

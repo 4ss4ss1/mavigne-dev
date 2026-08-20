@@ -23,7 +23,7 @@ export const GT_ADMIN_EMAIL = 'ngdevpro@gmail.com';
 // WHATS_NEW   : tableau vide = modal desactive pour cette version.
 // Format item : { emoji:'📅', titre:'Titre court', desc:'Phrase utilisateur.' }
 // Regle : seulement les changements visibles par les utilisateurs.
-export const APP_VERSION = '6.37';
+export const APP_VERSION = '6.38';
 // ════ Journal des nouveautés (récap cumulatif) ════
 // Une entrée par version, la PLUS RÉCENTE EN HAUT : { v:'5.10', items:[ {emoji,titre,desc}, … ] }
 // À chaque release visible → AJOUTER un bloc en tête (ne pas remplacer). items:[] = release technique (rien à afficher).
@@ -354,6 +354,16 @@ window._mvGraphRepeindre = function(){
 };
 
 export const WHATS_NEW = [
+  { v:'6.38', items:[
+    { emoji: 'chrono', titre: "Un retard se note par l\u2019heure d\u2019arriv\u00e9e",
+      desc: "Il fallait convertir soi-m\u00eame le retard en heures avant de le saisir. Vous indiquez d\u00e9sormais <b>l\u2019heure \u00e0 laquelle la personne est arriv\u00e9e</b>, et l\u2019\u00e9cran vous dit, avant d\u2019enregistrer, ce qui a \u00e9t\u00e9 travaill\u00e9 et ce qui est d\u00fb. La coupure d\u00e9jeuner est prise en compte : arriver \u00e0 14 h ne doit pas l\u2019heure du repas." },
+    { emoji: 'alerte', titre: "Un retard d\u2019une heure effa\u00e7ait la journ\u00e9e enti\u00e8re",
+      desc: "C\u2019est le d\u00e9faut le plus co\u00fbteux de ce lot. Noter un retard mettait la journ\u00e9e \u00e0 <b>z\u00e9ro heure</b> et ne comptait <b>aucune heure due</b> \u2014 sauf si le r\u00e9glage \u00ab\u00a0Absences qui doivent des heures\u00a0\u00bb avait \u00e9t\u00e9 pos\u00e9, ce qu\u2019il n\u2019est pas par d\u00e9faut. Une heure de retard co\u00fbtait donc sept heures au salari\u00e9. Le retard ne d\u00e9pend plus de ce r\u00e9glage : il retire ses propres heures, toujours, et la journ\u00e9e est pay\u00e9e \u00e0 hauteur de ce qui a \u00e9t\u00e9 fait. <b>Vos retards d\u00e9j\u00e0 saisis reprennent leurs vraies heures</b>, et les heures manqu\u00e9es apparaissent au compteur." },
+    { emoji: 'calendrier', titre: "Le retard ne se confond plus avec une absence dans la grille",
+      desc: "Une croix rouge marquait aussi bien un retard d\u2019une heure qu\u2019une journ\u00e9e enti\u00e8re manqu\u00e9e. La case du retard porte maintenant <b>les heures r\u00e9ellement faites</b>, en orange, avec une pastille. La fiche du jour affiche l\u2019horaire\u00a0: arriv\u00e9e \u2192 fin pr\u00e9vue." },
+    { emoji: 'check', titre: "Arriver apr\u00e8s la fin de la journ\u00e9e n\u2019est plus un retard",
+      desc: "Une arriv\u00e9e post\u00e9rieure \u00e0 l\u2019heure de d\u00e9bauche voulait dire que rien n\u2019avait \u00e9t\u00e9 travaill\u00e9. L\u2019enregistrement bascule seul en <b>absence injustifi\u00e9e</b>, qui dit la m\u00eame chose plus juste sur le relev\u00e9, et le message vous le signale." }
+  ] },
   { v:'6.37', items:[
     { emoji: 'equipe', titre: "Les heures d\u2019un salari\u00e9 parti disparaissaient de tout l\u2019historique",
       desc: "Le jour o\u00f9 vous passez une fiche en <b>Inactif</b>, ses heures d\u00e9j\u00e0 faites s\u2019effa\u00e7aient de partout\u00a0: le r\u00e9cap annuel, la grille des mois pass\u00e9s, les totaux du mois, la cadence du Pilotage et le planning de l\u2019ann\u00e9e imprim\u00e9. Sur un domaine r\u00e9el, sept fiches rang\u00e9es en fin de saison ont ramen\u00e9 <b>janvier \u00e0 juillet \u00e0 z\u00e9ro</b>. Un contrat termin\u00e9 n\u2019efface plus le travail qui a \u00e9t\u00e9 fait\u00a0: chaque \u00e9cran regarde d\u00e9sormais <b>qui \u00e9tait l\u00e0 \u00e0 ce moment-l\u00e0</b>, pas qui est l\u00e0 aujourd\u2019hui." },
@@ -1925,6 +1935,7 @@ var MV_AIDE = {
       ['La barre du bas', "dit qui est coché et à quelles dates, puis propose ce qui s’applique vraiment à cette sélection — heures, congé, absence, récup, chaleur, effacer. Une case ou trente, c’est le même geste et la même fiche."],
       ['Sur une période plus longue', "que la vue affichée, deux boutons au-dessus de la grille posent des congés ou des horaires chaleur du jour au jour, pour plusieurs salariés."],
       ['Les heures dues', "se décomptent sur une absence injustifiée ou un retard. Un arrêt de travail est neutre, une formation compte comme du travail."],
+      ['Un retard se note par l’heure d’arrivée', ": indiquez l’heure à laquelle la personne est arrivée, l’écran calcule ce qui manque. La journée est payée à hauteur de ce qui a été fait, et les heures manquées tirent sur le compteur d’heures sup, comme une récupération — sans qu’aucun réglage soit nécessaire. Arriver après la fin prévue n’est plus un retard : la saisie bascule seule en absence injustifiée."],
       ['Présence, coupure, heures dues', "trois nombres qui se ressemblent et ne disent pas la même chose. La ‹‹ présence ›› va de l’arrivée au départ. La ‹‹ coupure ›› est le temps non travaillé au milieu : sa durée et son heure sont fixées par le domaine, dans l’onglet Le cadre, ce n’est pas un moment que chacun choisit. Les ‹‹ heures dues ›› sont ce qui part en paie et alimente le compteur des 1 607 h. Une journée de 09:00 à 16:00 avec une heure de coupure fait 7 h de présence et 6 h dues."],
       ['Le planning de l’année', "s’imprime depuis le même endroit : le rythme sur douze mois, avec les heures de prise et de fin de service et la coupure déjeuner. Une page par modèle de semaine — c’est le document qu’on remet à l’équipe pour l’année à venir. Une variante nominative sort la même grille pour une seule personne, bornée à ses contrats, avec ses jours de formation et ses congés déjà posés."],
       ['Le relevé mensuel', "s’imprime depuis Réglages, onglet App, « Documents & impressions ». C’est un relevé d’heures, pas un bulletin de paie."],

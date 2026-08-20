@@ -1,4 +1,12 @@
-// MA VIGNE — Service Worker v6.91
+// MA VIGNE — Service Worker v6.92
+// v6.92 (20/08/2026) — LE RETARD SE SAISIT PAR L'HEURE D'ARRIVEE.
+//   Noter un retard mettait la journee entiere a ZERO heure et ne comptait aucune
+//   heure due, sauf si le reglage « Absences qui doivent des heures » avait ete pose
+//   — ce qu'il n'est pas par defaut. Une heure de retard coutait sept heures.
+//   Le retard sort de cette fenetre : il retire ses propres heures, toujours.
+//   Saisie par l'heure d'arrivee, case orange portant les heures faites, bascule
+//   automatique en absence injustifiee si l'arrivee depasse la fin prevue.
+//   Fichiers : planning.js, styles.css, utils.js, index.html.
 // v6.91 (20/08/2026) — « INACTIF » N'EFFACE PLUS LE PASSE.
 //   ⚠️⚠️ SEPT FICHES RANGEES EN FIN DE SAISON, ET JANVIER->JUILLET TOMBE A ZERO.
 //     Sept ecrans du Planning partaient de _planMbrs(), qui filtre statut !==
@@ -2176,7 +2184,7 @@
 // v2.22 — Fix profils vides : guard vide dans loadData() pour MEMBRES/SAISONS/TACHES
 // v2.17 — Onboarding intégré + tenantId · v2.06 — Firebase Auth · v2.00–v2.05 — divers
 const DEBUG = self.location.hostname === 'localhost' || self.location.hostname === '127.0.0.1';
-const CACHE_NAME   = 'mavigne-v6.91';
+const CACHE_NAME   = 'mavigne-v6.92';
 const TENANT_CACHE = 'mavigne-tenant';   // Cache persistant — préservé à chaque mise à jour SW
 const SYNC_TAG     = 'mavigne-sync';
 
@@ -2192,7 +2200,7 @@ const CDN_URLS = [
 ];
 
 self.addEventListener('install', event => {
-  if(DEBUG) console.log('[SW] Ma Vigne v6.91 installé');
+  if(DEBUG) console.log('[SW] Ma Vigne v6.92 installé');
   event.waitUntil(
     caches.open(CACHE_NAME).then(async cache => {
       // ── Cœur applicatif : STRICT (mise à jour ATOMIQUE) ──
@@ -2208,7 +2216,7 @@ self.addEventListener('install', event => {
 });
 
 self.addEventListener('activate', event => {
-  if(DEBUG) console.log('[SW] Ma Vigne v6.91 activé');
+  if(DEBUG) console.log('[SW] Ma Vigne v6.92 activé');
   event.waitUntil(
     caches.keys().then(keys =>
       Promise.all(

@@ -1315,7 +1315,7 @@ mark{background:rgba(200,176,32,.32);color:var(--cream);border-radius:3px;paddin
     des <b>jours de CFA d'un apprenti</b> : le code du travail (art. L6222-24) les compte comme du
     temps de travail.</td></tr>
     <tr><td>✕ <b>Absence injustifiée</b></td><td>Heures dues, journée non payée.</td></tr>
-    <tr><td>⏰ <b>Retard</b></td><td>Se saisit <b>en heures</b>, heures dues.</td></tr>
+    <tr><td>⏰ <b>Retard</b></td><td>Se saisit par l'<b>heure d'arrivée</b>. Heures manquées dues.</td></tr>
     <tr><td>— <b>Absence non précisée</b></td><td>Sans effet sur le plafond annuel.</td></tr>
   </table></div>
   <div class="note"><span class="ni" aria-hidden="true">🎨</span><div>La couleur du jour suit le
@@ -1325,6 +1325,27 @@ mark{background:rgba(200,176,32,.32);color:var(--cream);border-radius:3px;paddin
   le compteur du mois et dans l'annualisation. En revanche il ne compte pas comme <b>jour
   travaillé</b> au domaine — la personne n'y était pas, et la déclaration MSA ne doit pas
   l'y compter.</div></div>
+
+  <h3>⏰ Noter un retard</h3>
+  <p>Ouvrez le jour, choisissez <b>Absence</b> puis <b>Retard</b>, et indiquez l'<b>heure à laquelle
+  la personne est arrivée</b>. Rien d'autre : l'écran calcule ce qui manque et vous l'affiche avant
+  que vous enregistriez.</p>
+  <ul class="dot">
+    <li>La journée est <b>payée à hauteur de ce qui a été fait</b>. Arriver à 9 h 30 sur une journée
+    de 8 h à 16 h, c'est 5 h 30 travaillées.</li>
+    <li>Les <b>heures manquées sont dues</b> : elles tirent sur le compteur d'heures supplémentaires,
+    exactement comme une récupération. Aucun réglage n'est nécessaire.</li>
+    <li>La <b>coupure déjeuner est prise en compte</b> : arriver à 14 h ne fait pas devoir l'heure du
+    repas.</li>
+    <li>Dans la grille, la case porte les <b>heures faites</b> en orange, avec une pastille — et non
+    une croix rouge, qui la confondrait avec une journée entière d'absence.</li>
+    <li>Arriver <b>après l'heure de fin</b> n'est plus un retard : rien n'a été travaillé. La saisie
+    bascule seule en <b>absence injustifiée</b>, et le message vous le dit.</li>
+    <li>Arriver <b>à l'heure ou en avance</b> n'enregistre rien : aucune absence n'est posée.</li>
+  </ul>
+  <div class="note"><span class="ni" aria-hidden="true">📌</span><div>Un retard se saisit
+  <b>jour par jour</b>. Sur une sélection de plusieurs jours, le motif Retard ne propose pas d'heure
+  d'arrivée : les heures prévues ne sont pas les mêmes d'un jour à l'autre.</div></div>
 
   <h3>💶 Compteur d'heures &amp; acomptes</h3>
   <ul class="dot">

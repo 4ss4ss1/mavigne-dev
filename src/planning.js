@@ -302,7 +302,7 @@ var PLAN_ABS_MOTIFS=[
   {id:'famille',   ico:'\ud83d\udc65', nom:'\u00c9v\u00e9nement familial',   sub:'Mariage, naissance, d\u00e9c\u00e8s',                   suspend:false, assim:true,  paye:true,  heures:false},
   {id:'formation', ico:'\ud83c\udf93', nom:'Formation',                      sub:'Journ\u00e9e de formation professionnelle',        suspend:false, assim:true,  paye:true,  heures:false},
   {id:'injustifie',ico:'\u2715',       nom:'Absence injustifi\u00e9e',       sub:'Heures dues \u00b7 journ\u00e9e non pay\u00e9e',         suspend:false, assim:false, paye:false, heures:false},
-  {id:'retard',    ico:'\u23f0',       nom:'Retard',                         sub:'Se saisit en heures \u00b7 heures dues',           suspend:false, assim:false, paye:false, heures:true},
+  {id:'retard',    ico:'\u23f0',       nom:'Retard',                         sub:'Heure d\u2019arriv\u00e9e \u00b7 heures dues',            suspend:false, assim:false, paye:false, heures:true},
   {id:'autre',     ico:'\u2014',       nom:'Absence non pr\u00e9cis\u00e9e',  sub:'Sans effet sur le plafond annuel',                suspend:false, assim:false, paye:false, heures:false}
 ];
 function _planAbsDef(id){
@@ -311,6 +311,56 @@ function _planAbsDef(id){
 }
 function _planAbsMotif(e){return _planAbsDef((e&&e.motif)||'autre');}
 function _planAbsH(e){var v=parseFloat(e&&e.motif_h);return(isNaN(v)||v<0)?0:v;}
+// ★★★ LE RETARD SE SAISIT PAR L'HEURE D'ARRIVEE (lot du 20/08/2026).
+// `motif_t` = heure d'arrivee reelle ('HH:MM'). `motif_h` = heures MANQUEES, calculees
+// a la saisie et FIGEES : c'est elle, et elle seule, qui reste la source du decompte.
+// Recalculer les manquees a chaque lecture les rendrait retroactives — un modele de
+// planning modifie en novembre ferait bouger une paie de mars. L'heure d'arrivee sert
+// a l'affichage, au releve, et a re-remplir la feuille quand on rouvre le jour.
+// ⚠️ Les retards saisis AVANT ce lot n'ont pas de `motif_t` : ils gardent leur
+//    `motif_h`, se relisent, se reaffichent, et ne perdent rien.
+function _planMinOf(s){
+  var m=/^([01]?\d|2[0-3]):([0-5]\d)$/.exec(String(s||''));
+  return m?(parseInt(m[1],10)*60+parseInt(m[2],10)):-1;
+}
+function _planAbsT(e){
+  var v=(e&&e.motif_t)||'';
+  return _planMinOf(v)>=0?v:'';
+}
+// Heures FAITES quand on arrive en retard : de l'arrivee a la fin prevue.
+// ★ UNE SEULE ARITHMETIQUE, celle de _planTimingH — la coupure se deduit du bon cote.
+//   « arrivee moins depart » donnerait un autre chiffre des que la journee enjambe
+//   midi, et c'est exactement la que deux ecrans se mettent a se contredire.
+function _planRetardFaites(fin,arrivee,prevu,continu){
+  var pl=parseFloat(prevu)||0;
+  if(pl<=0)return 0;
+  if(_planMinOf(arrivee)<0||_planMinOf(fin)<0)return pl;
+  return Math.max(0,Math.min(pl,_planTimingH(arrivee,fin,continu)));
+}
+// Heures MANQUEES = le reste de la journee prevue, bornees a la journee : un retard
+// ne peut pas devoir plus que ce qui etait prevu.
+function _planRetardH(debut,fin,arrivee,prevu,continu){
+  var pl=parseFloat(prevu)||0;
+  if(pl<=0)return 0;
+  var a=_planMinOf(arrivee);
+  if(a<0)return 0;
+  if(a<=_planMinOf(debut))return 0;                    // a l'heure, ou en avance
+  return Math.max(0,Math.min(pl,pl-_planRetardFaites(fin,arrivee,pl,continu)));
+}
+// ★ Arriver A la fin prevue, ou apres, n'est plus un retard : rien n'a ete travaille.
+//   La saisie bascule alors seule en « absence injustifiee », qui dit la meme chose
+//   plus juste sur le releve et devant la paie.
+function _planRetardVide(fin,arrivee){
+  var a=_planMinOf(arrivee),f=_planMinOf(fin);
+  return a>=0&&f>=0&&a>=f;
+}
+// Le couple depart/fin PREVU d'un jour, tel que la feuille l'affiche. Un seul point
+// de verite pour la feuille, le moteur d'ecriture et le harnais.
+function _planRetardBornes(mbr,m,d){
+  var plId=_planPlId(mbr),pl=_planPlanned(plId,m,d);
+  var t=_planDefTiming(pl,plId,m,d)||{};
+  return {pl:pl,t0:(t.d||t.debut||''),t1:(t.f||t.fin||''),continu:!!t.continu};
+}
 function _planLegInput(id,label,val,step){
   return '<div style="background:var(--bg-app);border:1px solid var(--gris-clair);border-radius:11px;padding:9px 10px">'
     +'<div style="font-size:10.5px;color:var(--texte-doux);font-weight:600;line-height:1.25;margin-bottom:5px;min-height:26px">'+label+'</div>'
@@ -631,9 +681,16 @@ function _planDayH(plId,m,d,e,yr){
       //   ces heures. Deux fonctions qui repondent differemment sur le meme
       //   jour : c'est ce desaccord que ce lot ferme.
       if(_mo.assim)return pl;
-      // Hors fenetre : comportement historique strict (toute absence = 0 h).
-      if(!_planDuesActive(m))return 0;
+      // ★★★ LE RETARD PASSE AVANT LE GARDE-FOU, pour la meme raison que les motifs
+      //   assimiles juste au-dessus : ce n'est pas une politique du domaine, c'est de
+      //   l'arithmetique. Tant que « Absences qui doivent des heures » restait sur
+      //   Inactif — son etat PAR DEFAUT — un retard d'une heure valait ZERO heure sur
+      //   la journee entiere. Ce n'etait pas un comportement historique a preserver :
+      //   le motif « retard » est ne EN MEME TEMPS que les motifs, la fenetre des dues
+      //   est venue apres, il n'y a aucun historique de retard a proteger. C'etait
+      //   simplement un chiffre faux. Le salarie est paye de ce qu'il a fait.
       if(_mo.heures)return Math.max(0,pl-_planAbsH(e));    // retard : seules SES heures sont perdues
+      // Toute autre absence : 0 h, dans la fenetre comme en dehors.
       return 0;
     }
     if(e.type==='cp')return e.heures||pl;
@@ -754,13 +811,20 @@ function _planCalcMonth(mbr,m){
 //   Les deux mesures partagent la meme arithmetique (prevu - compte) : impossible qu'elles
 //   divergent, et un retard superieur a la journee ne peut pas depasser la journee.
 function _planAbsLostH(mbr,m,duesOnly){
-  if(!_planDuesActive(m))return 0;
+  var actif=_planDuesActive(m);
   var plId=_planPlId(mbr),ent=_pEntMonth(mbr.nom,m),h=0;
   for(var d=1;d<=_planDays(m);d++){
     var e=ent[d];
     if(!e||!e.absent)continue;
     if(!_planInContractRead(mbr,m,d))continue;
     var mo=_planAbsMotif(e);
+    // ★ LE RETARD VIT HORS DE LA FENETRE, exactement comme dans _planDayH : ses heures
+    //   sont dues, reglage pose ou non. Les autres motifs restent sous le garde-fou,
+    //   et une paie deja editee ne bouge pas. Le retard entre dans les DEUX mesures :
+    //   neutralise dans la reference du mois (duesOnly=false), puis retire du compteur
+    //   comme une recup (duesOnly=true). Le faire entrer dans une seule creerait une
+    //   dette comptee deux fois, ou pas du tout.
+    if(!actif&&!mo.heures)continue;
     if(duesOnly&&mo.id!=='injustifie'&&!mo.heures)continue;
     h+=Math.max(0,_planPlanned(plId,m,d)-_planDayH(plId,m,d,e));
   }
@@ -1661,6 +1725,50 @@ function planSetAbsMotif(id){
   }
   var w=document.getElementById('plan-abs-h-wrap');
   if(w)w.style.display=def.heures?'block':'none';
+  if(def.heures)planRetardSync();
+}
+
+// ★ LE VERDICT VIVANT. Il dit, avant d'enregistrer, ce qui sera ecrit : heures faites,
+//   heures dues, et le cas ou ce n'est plus un retard. C'est le seul endroit de la
+//   feuille qui lit le DOM — les moteurs d'ecriture, eux, recoivent tout en parametre.
+function planRetardSync(){
+  var el=document.getElementById('plan-abs-t');
+  var vd=document.getElementById('plan-abs-verdict');
+  var hd=document.getElementById('plan-abs-h');
+  if(!el||!vd)return;
+  var t0=el.getAttribute('data-t0')||'',t1=el.getAttribute('data-t1')||'';
+  var pl=parseFloat(el.getAttribute('data-pl'))||0;
+  var cont=!!el.getAttribute('data-continu');
+  var arr=el.value||'';
+  var dues=_planRetardH(t0,t1,arr,pl,cont);
+  var faites=Math.max(0,pl-dues);
+  if(hd)hd.value=Math.round(dues*100)/100;
+  if(_planMinOf(arr)<0){
+    vd.style.background='var(--bg-app)';vd.style.border='1px solid var(--gris-clair)';
+    vd.style.color='var(--texte-doux)';
+    vd.innerHTML='Indiquez l\u2019heure \u00e0 laquelle la personne est arriv\u00e9e.';
+    return;
+  }
+  if(_planRetardVide(t1,arr)){
+    vd.style.background='var(--rouge-pale)';vd.style.border='1px solid rgba(160,41,30,0.4)';
+    vd.style.color='var(--rouge)';
+    vd.innerHTML='<b>Ce n\u2019est plus un retard.</b> Arriv\u00e9e \u00e0 '+_escHtml(arr)
+      +', apr\u00e8s la fin pr\u00e9vue ('+_escHtml(t1||'\u2014')+')\u00a0: rien n\u2019a \u00e9t\u00e9 travaill\u00e9. '
+      +'L\u2019enregistrement basculera seul en <b>absence injustifi\u00e9e</b>.';
+    return;
+  }
+  if(dues<=0.0001){
+    vd.style.background='var(--vert-pale)';vd.style.border='1px solid rgba(61,107,39,0.35)';
+    vd.style.color='var(--vert)';
+    vd.innerHTML='<b>\u00c0 l\u2019heure.</b> Arriv\u00e9e \u00e0 '+_escHtml(arr)+', pas apr\u00e8s '
+      +_escHtml(t0||'\u2014')+'\u00a0: aucune heure due, et <b>aucune absence</b> ne sera pos\u00e9e.';
+    return;
+  }
+  vd.style.background='var(--orange-pale)';vd.style.border='1px solid rgba(184,90,26,0.4)';
+  vd.style.color='var(--orange)';
+  vd.innerHTML='<b>'+_planFmt(dues)+' dues</b> \u00b7 '+_planFmt(faites)+' travaill\u00e9es. '
+    +'La journ\u00e9e est pay\u00e9e '+_planFmt(faites)+'\u00a0; les heures manqu\u00e9es tirent sur le '
+    +'compteur d\u2019heures sup, comme une r\u00e9cup\u00e9ration.';
 }
 
 function _planDayStatus(plId,m,d,e){
@@ -1678,6 +1786,15 @@ function _planDayStatus(plId,m,d,e){
     var _ms=_planAbsMotif(e);
     if(_ms.assim)return{t:'absent',assim:true,paye:true,l:_ms.nom,c:'var(--bleu)',bg:'var(--bleu-pale)',bd:'rgba(26,74,122,0.35)'};
     if(_ms.paye) return{t:'absent',assim:false,paye:true,l:_ms.nom,c:'var(--orange)',bg:'var(--orange-pale)',bd:'rgba(217,119,6,0.35)'};
+    // ★ Le retard porte son heure d'arrivee dans le libelle, et l'orange plutot que le
+    //   rouge : la journee a ete travaillee, en partie. `t` reste 'absent' — c'est la
+    //   cle de _PLAN_ST_OFFDAY et des tables de couleur du PDF, on ne la touche pas.
+    if(_ms.heures){
+      var _at=_planAbsT(e);
+      return{t:'absent',assim:false,paye:false,retard:true,
+             l:'Retard'+(_at?' \u00b7 arriv\u00e9 '+_at:''),
+             c:'var(--orange)',bg:'var(--orange-pale)',bd:'rgba(184,90,26,0.4)'};
+    }
     return{t:'absent',assim:false,paye:false,l:(_ms.id==='autre'?'Absent':_ms.nom),c:'var(--rouge)',bg:'var(--rouge-pale)',bd:'rgba(220,38,38,0.4)'};
   }
   if(e&&e.canicule)return{t:'canicule',l:'\u2600\ufe0f Chaleur',c:'var(--orange)',bg:'var(--orange-pale)',bd:'rgba(217,119,6,0.5)'};
@@ -1835,7 +1952,18 @@ function _pl2Cell(mbr,plId,d,L){
   var pl=_planPlanned(plId,planMonth,d);
   if(e&&e.type==='cp')return{txt:'CP',cls:'pl2c-cp'};
   if(e&&e.type==='recup')return{txt:'\u21ba',cls:'pl2c-rec'};
-  if(e&&e.absent)return{txt:'\u2715',cls:'pl2c-abs'};
+  if(e&&e.absent){
+    // ★ UN RETARD N'EST PAS UNE ABSENCE : c'est une journee ECOURTEE. La croix rouge
+    //   rendait un retard d'une heure indiscernable d'une journee entiere manquee —
+    //   deux realites tres differentes pour la paie comme pour le chef d'equipe.
+    //   La case porte les heures FAITES, en orange, avec une pastille.
+    var _mc=_planAbsMotif(e);
+    if(_mc.heures){
+      var _fa=Math.max(0,pl-_planAbsH(e));
+      if(_fa>0.0001)return{txt:_planFmt(_fa),cls:'pl2c-late'};
+    }
+    return{txt:'\u2715',cls:'pl2c-abs'};
+  }
   var eff=_planEffective(plId,planMonth,d,e);
   var brk=eff>L.maxJour+0.0001;
   if(e&&e.timing){
@@ -2336,18 +2464,43 @@ function _planApplyHeures(keys,o){
   return {n:n,skip:skip,cp:nCp};
 }
 
-function _planApplyAbs(keys,motifId,com,heuresVal){
-  var mo=_planAbsDef(motifId),n=0,skip=0;
+// ★ `arrivee` ('HH:MM') est la saisie du retard. Les heures manquees se calculent ICI,
+//   jour par jour, parce que les heures PREVUES ne sont pas les memes d'un jour a
+//   l'autre : la meme arrivee a 09:30 doit 1 h 30 sur un jour a 7 h et 1 h 30 aussi sur
+//   un jour a 4 h, mais bornee a la journee — c'est _planRetardH qui le sait, pas
+//   l'ecran. Sans `arrivee`, on retombe sur `heuresVal` : les entrees anterieures au
+//   lot, et tout appelant qui n'a pas ete mis a jour, continuent de fonctionner.
+// ★ `basc` compte les jours ou l'arrivee tombait apres la fin prevue : ce ne sont plus
+//   des retards, ils sont ecrits en absence injustifiee. L'appelant le dit dans le toast.
+function _planApplyAbs(keys,motifId,com,heuresVal,arrivee){
+  var mo=_planAbsDef(motifId),n=0,skip=0,basc=0;
   keys.forEach(function(k){
     var p=_planSelParse(k);
     var mbr=(window.MEMBRES||[]).find(function(m){return m.nom===p.nom;});
     if(!mbr||isNaN(p.d)||!_planInContract(mbr,planMonth,p.d)){skip++;return;}
     var e={absent:true,motif:mo.id,comment:(com||'').trim()};
-    if(mo.heures){var v=parseFloat(heuresVal);e.motif_h=(isNaN(v)||v<0)?0:v;}
+    if(mo.heures){
+      if(_planMinOf(arrivee)>=0){
+        var b=_planRetardBornes(mbr,planMonth,p.d);
+        if(_planRetardVide(b.t1,arrivee)){
+          // Arrive apres la fin prevue : rien n'a ete travaille. Ce n'est plus un
+          // retard, et l'ecrire comme tel mentirait sur le releve.
+          e={absent:true,motif:'injustifie',comment:(com||'').trim()};
+          basc++;
+        } else {
+          var dh=_planRetardH(b.t0,b.t1,arrivee,b.pl,b.continu);
+          if(dh<=0.0001){skip++;return;}          // a l'heure : aucune absence posee
+          e.motif_t=arrivee;
+          e.motif_h=Math.round(dh*100)/100;
+        }
+      } else {
+        var v=parseFloat(heuresVal);e.motif_h=(isNaN(v)||v<0)?0:v;
+      }
+    }
     _pEntEnsure(p.nom,planMonth)[p.d]=e;
     n++;
   });
-  return {n:n,skip:skip};
+  return {n:n,skip:skip,basc:basc};
 }
 
 // Recup / chaleur / effacement : aucun parametre metier a qualifier, donc aucune
@@ -2554,6 +2707,12 @@ function _planBuildMonHtml(mbr,canEdit){
     var isRecup=!!(e&&e.type==='recup');
     var tData=(!isCp&&e&&e.timing)||(pl>0&&!isCp&&!(e&&e.absent)?_planDefTiming(pl,plId,planMonth,d):null);
     var tStr=tData?(tData.d||tData.debut)+' \u2192 '+(tData.f||tData.fin)+(tData.continu?' \u00b7 continu':''):'';
+    // ★ Un retard n'avait AUCUN horaire affiche : la ligne ne montrait ni l'arrivee ni
+    //   la fin, alors que c'est precisement ce qu'on vient verifier en ouvrant le jour.
+    if(e&&e.absent&&_planAbsMotif(e).heures){
+      var _rt=_planAbsT(e);
+      if(_rt){var _rb=_planRetardBornes(mbr,planMonth,d);tStr=_rt+' \u2192 '+(_rb.t1||'\u2014');}
+    }
     var tModified=!!(e&&e.timing);
     var tColor=tModified?(st.t==='continu'?'var(--plan-acc)':st.t==='supp'?'var(--vert-med)':st.t==='reduit'?'var(--orange)':'var(--texte-doux)'):'var(--texte-doux)';
     // Couleurs verte/orange uniquement quand une entree est reellement sauvegardee
@@ -4119,16 +4278,28 @@ function _planSheetComment(val){
       +'<input type="text" id="plan-comment" value="'+_escAttr(val||'')+'" placeholder="Ex\u00a0: chaleur, vendanges\u2026" style="width:100%;border:2px solid var(--gris-clair);border-radius:10px;padding:11px;font-size:14px;outline:none;font-family:inherit;box-sizing:border-box">'
     +'</div>';
 }
-function _planSheetAbsSection(valH,initComment,manyOnly,prevuTxt){
+function _planSheetAbsSection(valH,initComment,manyOnly,prevuTxt,ret){
+  ret=ret||{};
+  var _t0=ret.t0||'',_t1=ret.t1||'',_rpl=parseFloat(ret.pl)||0;
+  var _arr=ret.arr||_t0;
   return '<div id="plan-absent-section" style="display:none">'
       +'<div class="plan-modal-lbl">Motif de l\'absence <span style="color:var(--rouge)">*</span></div>'
       +_planAbsMotifsHtml(_planAbsSel,manyOnly)
       +'<div id="plan-abs-h-wrap" style="display:'+((!manyOnly&&_planAbsDef(_planAbsSel).heures)?'block':'none')+';margin-top:4px">'
-        +'<div class="plan-modal-lbl">Heures non travaill\u00e9es</div>'
-        +'<div style="display:flex;gap:12px;align-items:center;margin-bottom:4px">'
-          +'<input type="number" id="plan-abs-h" step="0.25" min="0" max="24" value="'+(valH==null?0:Math.round(valH*100)/100)+'" style="width:90px;border:2px solid var(--gris-clair);border-radius:10px;padding:10px;font-size:18px;text-align:center;outline:none;background:var(--bg-card);color:var(--texte);box-sizing:border-box">'
-          +'<span style="font-size:13px;color:var(--texte-doux)">'+(prevuTxt||'h non travaill\u00e9es')+'</span>'
+        +'<div class="plan-modal-lbl">Heure d\u2019arriv\u00e9e</div>'
+        +'<div style="display:flex;gap:12px;align-items:center;flex-wrap:wrap;margin-bottom:4px">'
+          +'<input type="time" id="plan-abs-t" step="300" value="'+_escAttr(_arr)+'"'
+            +' data-t0="'+_escAttr(_t0)+'" data-t1="'+_escAttr(_t1)+'" data-pl="'+_rpl+'"'
+            +' data-continu="'+(ret.continu?'1':'')+'"'
+            +' oninput="planRetardSync()" onchange="planRetardSync()"'
+            +' style="width:124px;border:2px solid var(--gris-clair);border-radius:10px;padding:10px;font-size:18px;font-weight:700;text-align:center;outline:none;background:var(--bg-card);color:var(--texte);box-sizing:border-box;font-family:inherit">'
+          +'<span style="font-size:12px;color:var(--texte-doux);line-height:1.4">d\u00e9part pr\u00e9vu <b>'+(_t0||'\u2014')+'</b><br>fin pr\u00e9vue <b>'+(_t1||'\u2014')+'</b></span>'
         +'</div>'
+        // ★ Les heures MANQUEES sont ce qui part en base. Le champ reste, cache : il
+        //   garde son identifiant historique (#plan-abs-h) pour les entrees anterieures
+        //   au lot et pour tout appelant qui le lirait encore.
+        +'<input type="hidden" id="plan-abs-h" value="'+(valH==null?0:Math.round(valH*100)/100)+'">'
+        +'<div id="plan-abs-verdict" style="border-radius:12px;padding:11px 13px;font-size:12.5px;line-height:1.5;margin-bottom:4px"></div>'
       +'</div>'
       +'<div class="plan-modal-lbl" style="margin-top:10px">Pr\u00e9cision (facultatif)</div>'
       +'<input type="text" id="plan-absent-reason" value="'+_escAttr(initComment||'')+'" placeholder="Ex\u00a0: reprise le 24" style="width:100%;border:2px solid var(--gris-clair);border-radius:10px;padding:11px;font-size:14px;outline:none;font-family:inherit;box-sizing:border-box;background:var(--bg-card)">'
@@ -4200,7 +4371,8 @@ function _planSheetOneHtml(mode){
   +'<div id="plan-modal-body" style="overflow-y:auto;flex:1;padding:18px 24px 8px">'
     +_planSheetModes(true)
     +_planSheetTiming(isNP?'Heures travaill\u00e9es':'Horaires de la journ\u00e9e',initCont,_planEdHeat,rempHtml)
-    +_planSheetAbsSection(_planAbsH(ent),(ent&&ent.absent)?initComment:'',false,'h sur '+_planFmt(plDisplay)+' pr\u00e9vues')
+    +_planSheetAbsSection(_planAbsH(ent),(ent&&ent.absent)?initComment:'',false,'h sur '+_planFmt(plDisplay)+' pr\u00e9vues',
+       {t0:defT.d||defT.debut||'',t1:defT.f||defT.fin||'',pl:pl,continu:!!defT.continu,arr:_planAbsT(ent)})
     +'<div id="plan-cp-section" style="display:none">'
       +'<div class="plan-modal-lbl">Heures d\u00e9compt\u00e9es</div>'
       +'<div style="display:flex;gap:12px;align-items:center;margin-bottom:12px">'
@@ -4435,9 +4607,21 @@ function savePlanDay(next){
   } else if(_planModalMode==='absent'){
     var reason=((document.getElementById('plan-absent-reason')||{}).value||'').trim();
     var hv=(document.getElementById('plan-abs-h')||{}).value;
-    r=_planApplyAbs(keys,_planAbsSel,reason,hv);
+    var av=((document.getElementById('plan-abs-t')||{}).value||'');
+    r=_planApplyAbs(keys,_planAbsSel,reason,hv,av);
     var mo=_planAbsDef(_planAbsSel);
-    msg=r.n>0?('\u2705 '+mo.ico+' '+mo.nom+' \u00b7 '+r.n+'\u00a0j'+(r.skip>0?' \u00b7 '+r.skip+' ignor\u00e9'+(r.skip>1?'s':''):'')):'Aucun jour applicable';
+    // ★ Le toast dit ce qui a REELLEMENT ete ecrit, pas ce qui a ete demande : une
+    //   bascule silencieuse en absence injustifiee serait une surprise a la paie.
+    // ⚠️ UN SEUL pictogramme dans ce message, et il est mis en facteur : le cliquet
+    //    DS-1 interdit au compte d'emojis de remonter, module par module. Deux
+    //    branches qui portent chacune le leur, c'est +2 au compteur — et un rouge.
+    var _pOk='\u2705 ';
+    msg=r.n>0
+      ?(_pOk+((r.basc>0)
+        ?('Absence injustifi\u00e9e \u00b7 '+r.basc+'\u00a0j \u2014 arriv\u00e9e apr\u00e8s la fin pr\u00e9vue'
+          +(r.n>r.basc?(' \u00b7 '+(r.n-r.basc)+' retard'+((r.n-r.basc)>1?'s':'')):''))
+        :(mo.ico+' '+mo.nom+' \u00b7 '+r.n+'\u00a0j'+(r.skip>0?' \u00b7 '+r.skip+' ignor\u00e9'+(r.skip>1?'s':''):''))))
+      :(mo.heures?'Arriv\u00e9e \u00e0 l\u2019heure \u2014 aucune absence enregistr\u00e9e':'Aucun jour applicable');
   } else {
     var debut=(document.getElementById('plan-t-debut')||{}).value||'08:00';
     var fin=(document.getElementById('plan-t-fin')||{}).value||'16:00';
@@ -5529,6 +5713,7 @@ window.savePlanDay          = savePlanDay;
 window.planClearDay         = planClearDay;
 window.planSetMode          = planSetMode;
 window.planSetAbsMotif      = planSetAbsMotif;
+window.planRetardSync       = planRetardSync;
 window.planToggleContinu    = planToggleContinu;
 window.planToggleRemp       = planToggleRemp;
 window.planSetDuesDebut     = planSetDuesDebut;
