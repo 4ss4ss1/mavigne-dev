@@ -2879,6 +2879,13 @@ var MV_DOCS = [
   { f:'oblig', act:'releve',    mod:'planning', ico:'\u{1F464}', bg:'var(--phyto-pale)', fm:'pdf',
     t:'Relev\u00e9 individuel d\u2019un salari\u00e9', ask:'Salari\u00e9 puis mois',
     s:'Le mois jour par jour d\u2019une seule personne, ses contrats, ses cong\u00e9s, son compteur d\u2019heures et son annualisation. \u00c0 signer des deux c\u00f4t\u00e9s.' },
+  // \u2605 Le releve dit ce qui a ETE FAIT le mois dernier ; celui-ci dit ce qui EST
+  //   PREVU sur douze mois. C'est le document qu'un salarie demande quand il dit
+  //   « mon planning » \u2014 et le seul qui ait un sens a donner a un apprenti, dont
+  //   les semaines de CFA doivent apparaitre a cote des semaines au domaine.
+  { f:'oblig', act:'annuelNom', mod:'planning', ico:_mvIcon('calendrier',20), bg:'var(--phyto-pale)', fm:'pdf',
+    t:'Planning de l\u2019ann\u00e9e d\u2019un salari\u00e9', ask:'Salari\u00e9 puis ann\u00e9e',
+    s:'Les douze mois d\u2019une seule personne, born\u00e9s \u00e0 ses contrats, avec ses jours de formation et ses cong\u00e9s d\u00e9j\u00e0 pos\u00e9s. La feuille qu\u2019elle emporte.' },
 
   // --- Suivi du domaine : des etats internes, jamais des declarations ---
   { f:'suivi', act:'vignoble',  mod:'',         ico:'\u{1F5FA}\u{FE0F}', bg:'var(--vert-pale)', fm:'pdf',
@@ -3037,6 +3044,7 @@ window.docsGo=function(i){
     return;
   }
   if(d.act==='releve'){ _docsReleveOpen(); return; }
+  if(d.act==='annuelNom'){ _docsPlanNomOpen(); return; }
   if(d.act==='etp'){ _docsPane('docs-pane-etp'); return; }
   if(d.act==='restore'){
     var inp=document.getElementById('import-json-input');
@@ -5390,3 +5398,69 @@ window._docsReleveGo = function(){
 };
 
 window._docsReleveOpen = _docsReleveOpen;
+
+/* Le planning de l'annee d'UNE personne. Meme ossature que le releve : on relit
+   les deux champs dans le DOM au moment du clic, jamais une valeur memorisee a
+   l'ouverture (§30i). */
+function _docsPlanNomOpen(){
+  var pane = document.getElementById('docs-pane');
+  if(!pane){ if(window.showToast) window.showToast('\u00c9cran indisponible', '#B85A1A'); return; }
+  var mbrs = (typeof window._planReleveMbrs === 'function') ? (window._planReleveMbrs() || []) : [];
+  if(!mbrs.length){
+    if(window.showToast) window.showToast('Aucun salari\u00e9 actif', '#B85A1A');
+    return;
+  }
+  var host = document.getElementById('docs-pane-plannom');
+  if(!host){
+    host = document.createElement('div');
+    host.id = 'docs-pane-plannom';
+    host.style.display = 'none';
+    pane.appendChild(host);
+  }
+  // Les annees offertes sont celles que le Planning connait : proposer une annee
+  // sans modele sortirait une grille calee sur un autre calendrier.
+  var ans = (typeof window._planYearList === 'function') ? (window._planYearList() || []) : [];
+  if(!ans.length) ans = [ (typeof window._planReleveAn === 'function') ? window._planReleveAn() : new Date().getFullYear() ];
+  var anDef = (typeof window._planReleveAn === 'function') ? window._planReleveAn() : ans[ans.length - 1];
+  if(ans.indexOf(anDef) < 0) anDef = ans[ans.length - 1];
+
+  host.innerHTML = '<div style="background:var(--phyto-pale);border-radius:14px;padding:14px 16px">'
+    + '<div style="font-size:13px;font-weight:700;color:var(--phyto-med,#7B6DB8);margin-bottom:12px">'
+      + _mvIcon('calendrier',18) + ' Planning de l\u2019ann\u00e9e d\u2019un salari\u00e9</div>'
+    + '<div class="fl" style="margin-top:0">Salari\u00e9</div>'
+    + '<select class="fi" id="docs-pn-nom" style="width:100%;margin-bottom:10px">'
+      + mbrs.map(function(m){
+          return '<option value="' + _docsEsc(m.nom) + '">' + _docsEsc(m.nom)
+            + (m.coll ? ' \u2014 \u00e9quipe' : '') + '</option>';
+        }).join('')
+    + '</select>'
+    + '<div class="fl" style="margin-top:0">Ann\u00e9e</div>'
+    + '<select class="fi" id="docs-pn-an" style="width:100%;margin-bottom:12px">'
+      + ans.map(function(a){
+          return '<option value="' + a + '"' + (a === anDef ? ' selected' : '') + '>' + a + '</option>';
+        }).join('')
+    + '</select>'
+    + '<div style="font-size:10px;color:var(--texte-doux);background:var(--fond-module);border-radius:8px;'
+      + 'padding:6px 10px;margin-bottom:10px;line-height:1.45">'
+      + 'Les douze mois jour par jour, born\u00e9s aux dates de ses contrats. Les jours de formation, '
+      + 'les cong\u00e9s et les r\u00e9cup\u00e9rations d\u00e9j\u00e0 pos\u00e9s au calendrier y figurent, et le total '
+      + 'distingue les heures faites au domaine de celles faites en formation.</div>'
+    + '<button onclick="_docsPlanNomGo()" style="background:var(--phyto-med,#7B6DB8);color:white;border:none;'
+      + 'border-radius:10px;padding:11px 18px;font-size:13px;font-weight:600;font-family:\'Outfit\',sans-serif;'
+      + 'width:100%;cursor:pointer">\u00c9diter le planning</button>'
+    + '</div>';
+  _docsPane('docs-pane-plannom');
+}
+
+window._docsPlanNomGo = function(){
+  var n = document.getElementById('docs-pn-nom');
+  var a = document.getElementById('docs-pn-an');
+  if(!n || !a){ if(window.showToast) window.showToast('\u00c9cran indisponible', '#B85A1A'); return; }
+  if(typeof window.planAnnuelNomPdf !== 'function'){
+    if(window.showToast) window.showToast('Mise \u00e0 jour incompl\u00e8te \u2014 rechargez l\u2019application', '#B85A1A');
+    return;
+  }
+  window.planAnnuelNomPdf(n.value, parseInt(a.value, 10));
+};
+
+window._docsPlanNomOpen = _docsPlanNomOpen;

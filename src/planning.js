@@ -571,10 +571,19 @@ function _planDayH(plId,m,d,e,yr){
   var pl=_planPlanned(plId,m,d,yr);
   if(e){
     if(e.absent){
+      var _mo=_planAbsMotif(e);
+      // ★★★ ASSIMILE = TRAVAIL EFFECTIF (art. L6222-24 pour le CFA, L3142 pour
+      //   l'evenement familial). Ces heures sont dues par la LOI, pas par la
+      //   politique du domaine : elles passent AVANT la fenetre « heures dues »,
+      //   qui ne concerne que les absences qui, elles, DOIVENT des heures
+      //   (injustifiee, retard). Avant ce lot le garde-fou etait teste en
+      //   premier et rendait 0 pour une journee de formation tant que le
+      //   reglage n'etait pas pose — alors que _planWorkH, lui, comptait deja
+      //   ces heures. Deux fonctions qui repondent differemment sur le meme
+      //   jour : c'est ce desaccord que ce lot ferme.
+      if(_mo.assim)return pl;
       // Hors fenetre : comportement historique strict (toute absence = 0 h).
       if(!_planDuesActive(m))return 0;
-      var _mo=_planAbsMotif(e);
-      if(_mo.assim)return pl;                              // formation / evenement familial : paye
       if(_mo.heures)return Math.max(0,pl-_planAbsH(e));    // retard : seules SES heures sont perdues
       return 0;
     }
@@ -1607,7 +1616,17 @@ function _planDayStatus(plId,m,d,e){
   var pl=_planPlanned(plId,m,d);
   if(e&&e.type==='cp')return{t:'cp',l:'Cong\u00e9 pay\u00e9',c:'var(--orange)',bg:'var(--orange-pale)',bd:'rgba(217,119,6,0.35)'};
   if(e&&e.type==='recup')return{t:'recup',l:'R\u00e9cup',c:'var(--plan-acc)',bg:'var(--plan-acc-pale)',bd:'rgba(123,109,184,0.4)'};
-  if(e&&e.absent)return{t:'absent',l:'Absent',c:'var(--rouge)',bg:'var(--rouge-pale)',bd:'rgba(220,38,38,0.4)'};
+  if(e&&e.absent){
+    // ⚠️ Le TYPE reste 'absent' : _PLAN_ST_OFFDAY et les tables de couleurs du
+    //   PDF s'en servent comme cle, et un jour de CFA n'est PAS un jour travaille
+    //   au domaine (il doit rester hors du compte MSA / TESA). Seuls le LIBELLE,
+    //   la COULEUR et le nouveau drapeau `assim` changent — aucun consommateur
+    //   existant ne voit son comportement modifie par surprise.
+    var _ms=_planAbsMotif(e);
+    if(_ms.assim)return{t:'absent',assim:true,paye:true,l:_ms.nom,c:'var(--bleu)',bg:'var(--bleu-pale)',bd:'rgba(26,74,122,0.35)'};
+    if(_ms.paye) return{t:'absent',assim:false,paye:true,l:_ms.nom,c:'var(--orange)',bg:'var(--orange-pale)',bd:'rgba(217,119,6,0.35)'};
+    return{t:'absent',assim:false,paye:false,l:(_ms.id==='autre'?'Absent':_ms.nom),c:'var(--rouge)',bg:'var(--rouge-pale)',bd:'rgba(220,38,38,0.4)'};
+  }
   if(e&&e.canicule)return{t:'canicule',l:'\u2600\ufe0f Chaleur',c:'var(--orange)',bg:'var(--orange-pale)',bd:'rgba(217,119,6,0.5)'};
   if(e&&e.timing){
     var th=_planTimingH(e.timing.debut,e.timing.fin,e.timing.continu);
@@ -2446,7 +2465,9 @@ function _planBuildMonHtml(mbr,canEdit){
     var tModified=!!(e&&e.timing);
     var tColor=tModified?(st.t==='continu'?'var(--plan-acc)':st.t==='supp'?'var(--vert-med)':st.t==='reduit'?'var(--orange)':'var(--texte-doux)'):'var(--texte-doux)';
     // Couleurs verte/orange uniquement quand une entree est reellement sauvegardee
-    var effColor=isRecup?'var(--plan-acc)':e&&e.absent?'var(--rouge)':isCp?'var(--orange)':e&&eff>pl&&pl>0?'var(--vert-med)':e&&eff<pl&&pl>0?'var(--orange)':st.c;
+    // Une absence n'est plus rouge par principe : st.c porte deja la couleur du
+    // motif (bleu = assimilee travail, orange = payee, rouge = non payee).
+    var effColor=isRecup?'var(--plan-acc)':e&&e.absent?st.c:isCp?'var(--orange)':e&&eff>pl&&pl>0?'var(--vert-med)':e&&eff<pl&&pl>0?'var(--orange)':st.c;
     var cpBadge=isCp?'<span style="font-size:10px;font-weight:600;background:rgba(217,119,6,0.35);color:var(--orange);padding:1px 7px;border-radius:20px;margin-left:6px">CP</span>':'';
     daysHtml+='<div class="plan-day-row" style="border-color:'+st.bd+';background:'+st.bg+';cursor:'+(canEdit?'pointer':'default')+'"'+(canEdit?' onclick="openPlanDayModal(\''+_escAttr(mbr.nom)+'\','+d+')"':'')+'>'
       +'<div class="plan-day-num" style="color:'+st.c+'"><div class="plan-day-n">'+d+'</div><div class="plan-day-dow">'+PLAN_JOURS[dow]+'</div></div>'
@@ -2948,7 +2969,10 @@ function _planFicheRender(){
           +(e&&e.comment&&!e.absent?'<span class="pl2-drow-t">\ud83d\udcac '+_escHtml(e.comment)+'</span>':'')
           +(e&&e.absent&&e.comment?'<span class="pl2-drow-t">'+_escHtml(e.comment)+'</span>':'')
         +'</span>'
-        +'<span class="pl2-drow-h" style="color:'+st.c+'">'+(e&&e.absent?'0h':(e&&e.type==='recup'?'\u21ba':_planFmt(eff)))+'</span>'
+        // ⚠️ Ne JAMAIS reecrire un chiffre que _planEffective sait deja rendre :
+        //   « 0h » etait pose en dur ici et contredisait le compteur du mois des
+        //   qu'une absence etait assimilee a du travail effectif.
+        +'<span class="pl2-drow-h" style="color:'+st.c+'">'+(e&&e.type==='recup'?'\u21ba':_planFmt(eff))+'</span>'
       +'</button>';
     });
     h+='<div class="pl2-note" style="margin-top:8px">\u270f\ufe0f Toucher un jour l\u2019ouvre dans la feuille \u2014 la grille compl\u00e8te est dans l\u2019onglet <b>Le mois</b>.</div>';
@@ -4608,7 +4632,9 @@ function _planExportPDF_(nom,mbr,_ctr){
     var tStr=tData?((tData.d||tData.debut)+'\u2192'+(tData.f||tData.fin)):'';
     var eff;
     if(st.t==='recup')eff=_planFmt(pl);
-    else if(st.t==='absent')eff='\u2014';
+    // Une absence assimilee ou payee porte des heures : les masquer par un tiret
+    // faisait mentir le total de la feuille, qui, lui, les comptait.
+    else if(st.t==='absent'){ var _av=_planEffective(plId,planMonth,d,e); eff=_av>0?_planFmt(_av):'\u2014'; }
     else if(st.t==='cp')eff=_planFmt((e&&e.heures)||pl);
     else { var ev=_planEffective(plId,planMonth,d,e); eff=ev>0?_planFmt(ev):'\u2014'; }
     return '<tr style="background:'+bg+'">'
@@ -4792,12 +4818,41 @@ function _paGroupes(yr){
 }
 
 // La grille de l'année : heures prévues par jour, fériés remis à zéro.
-function _paGrille(plId,yr){
-  var g={};
+// \u2605 3e argument OPTIONNEL : sans lui, comportement d'origine mot pour mot
+//   (le document par modele de semaine ne change pas d'une virgule). Avec lui,
+//   les jours hors contrat tombent a 0 : un planning nominatif qui montrerait
+//   janvier a une apprentie embauchee en septembre serait faux des la 1re ligne.
+// \u26a0\ufe0f _planInContract lit _pY() en dur — on refait donc la comparaison ici
+//   avec l'annee DEMANDEE, comme _paGroupes le fait deja pour la meme raison.
+function _paPeriodes(mbr){
+  if(!mbr) return null;
+  if(typeof window!=='undefined' && typeof window._mvPeriodes==='function'){
+    var P=window._mvPeriodes(mbr)||[];
+    if(P.length) return P;
+  }
+  var d0=mbr.debut_contrat||'', f0=mbr.fin_contrat||'';
+  return (d0||f0) ? [{debut:d0,fin:f0}] : null;
+}
+function _paSousContrat(per,iso){
+  if(!per) return true;                       // aucun contrat connu : on ne masque rien
+  for(var i=0;i<per.length;i++){
+    var a=per[i].debut||'', b=per[i].fin||'';
+    if(a && iso<a) continue;
+    if(b && iso>b) continue;
+    return true;
+  }
+  return false;
+}
+function _paGrille(plId,yr,mbr){
+  var g={}, per=_paPeriodes(mbr);
   for(var m=0;m<12;m++){
     var n=new Date(yr,m+1,0).getDate();
     g[m]={};
     for(var d=1;d<=n;d++){
+      if(per){
+        var _iso=yr+'-'+String(m+1).padStart(2,'0')+'-'+String(d).padStart(2,'0');
+        if(!_paSousContrat(per,_iso)){ g[m][d]=0; continue; }
+      }
       // Le modele fait foi. Un ferie ou un dimanche sur lequel le planning porte
       // des heures est un jour TRAVAILLE : ecraser sa valeur par 0 remplacerait
       // une donnee reelle par une regle supposee, et l'equipe decouvrirait le
@@ -4806,6 +4861,43 @@ function _paGrille(plId,yr){
     }
   }
   return g;
+}
+
+// \u2605\u2605 CE QUI EST DEJA POSE SUR LE CALENDRIER DE LA PERSONNE.
+// Le planning previsionnel sort du MODELE ; les jours d'ecole, eux, sont saisis
+// comme entrees. Sans cette lecture, le planning d'une alternante afficherait
+// ses semaines de CFA comme des semaines au domaine — le document serait juste
+// pour le modele et faux pour elle.
+// \u26a0\ufe0f Lecture DIRECTE du store a l'annee demandee : _pEntMonth passe par _pY(),
+//   qui rend l'annee AFFICHEE et non celle du document.
+var _PA_MK={ecole:'CFA',cp:'CP',rec:'R\u00e9c',abs:'Abs'};
+function _paMarques(nom,yr){
+  var MK={};
+  try{
+    var base=(PLANNING_ENTRIES||{})[nom];
+    var an=base&&base[yr];
+    if(!an) return MK;
+    for(var m=0;m<12;m++){
+      var mo=an[m]; if(!mo) continue;
+      for(var d in mo){
+        var e=mo[d]; if(!e) continue;
+        var k=null;
+        if(e.type==='cp')          k='cp';
+        else if(e.type==='recup')  k='rec';
+        else if(e.absent){
+          var mo2=_planAbsMotif(e);
+          k=mo2.assim?'ecole':'abs';   // assimile travail effectif = formation / evenement familial
+        }
+        if(!k) continue;
+        if(!MK[m]) MK[m]={};
+        MK[m][parseInt(d,10)]=k;
+      }
+    }
+  }catch(err){
+    if(typeof window!=='undefined' && window.logError)
+      window.logError({level:'warning',cat:'planning',msg:'_paMarques : '+(err&&err.message)});
+  }
+  return MK;
 }
 
 // Un modèle est RÉGULIER si, dans chaque mois, la durée dominante de chaque jour
@@ -5011,9 +5103,11 @@ function _paBandeau(g,plId,yr,reg){
        + '<div class="pa-hk">'+cles+'</div></div></div>';
 }
 
-function _paGrilleHtml(g,yr,reg,plId){
+// \u2605 5e argument OPTIONNEL (MK). Omis \u2192 grille d'origine inchangee.
+function _paGrilleHtml(g,yr,reg,plId,MK){
   var F=(typeof _feriesY==='function')?_feriesY(yr):{};
   var CO=plId?_paCodes(plId,yr):{};
+  MK=MK||{};
   var cols='';
   for(var m=0;m<12;m++){
     var n=new Date(yr,m+1,0).getDate(), vals=[], k;
@@ -5032,11 +5126,17 @@ function _paGrilleHtml(g,yr,reg,plId){
       else if(!h)     cl+=' pa-clos';
       else if(reg && h===mn && mn<mx) cl+=' pa-court';
       if(w===0) cl+=' pa-wk';
+      var _mk=(MK[m]&&MK[m][d])||null;
+      if(_mk) cl+=' pa-mk pa-mk-'+_mk;
       if(h>0){ tot+=h; nj++; }
+      // \u26a0\ufe0f Le code du modele (matin/apres-midi) cede la place a la marque : deux
+      //   pastilles dans une case de 9 px ne se lisent ni l'une ni l'autre.
+      var _pa=_mk?('<span class="pa-cd pa-cdmk">'+_PA_MK[_mk]+'</span>')
+                 :((h&&CO[m]&&CO[m][d])?('<span class="pa-cd">'+CO[m][d]+'</span>'):'');
       cells+='<div class="'+cl+'"><span class="pa-d">'+(d<10?'0':'')+d+'</span>'
            + '<span class="pa-j">'+_PA_JA[w]+'</span>'
            + '<span class="pa-h">'+(h?_paFmt(h):(fe?'\u2022':''))+'</span>'
-           + ((h&&CO[m]&&CO[m][d])?('<span class="pa-cd">'+CO[m][d]+'</span>'):'')+'</div>';
+           + _pa+'</div>';
     }
     cols+='<div class="pa-col"><div class="pa-mh">'+_PA_MA[m]+'</div>'+cells
         + '<div class="pa-mt"><b>'+(_paFmt(Math.round(tot*10)/10)||'0')+'</b><span>'+nj+' j</span></div></div>';
@@ -5048,7 +5148,23 @@ function _paGrilleHtml(g,yr,reg,plId){
 // le pied viennent de la charte MV_DOC. Un onzième document avec sa propre mise
 // en page rouvrirait exactement ce que la charte a refermé.
 var _PA_CSS =
-  '.pa-grp{page-break-after:always;break-after:page}'
+  // \u2605 Marques du document NOMINATIF. Fonds pales : la case doit rester lisible
+  //   en noir et blanc, une feuille de planning se photocopie.
+  '.pa-mk-ecole{background:#DCE9F7!important}'
++ '.pa-mk-cp{background:#FBE08A!important}'
++ '.pa-mk-rec{background:#E5DFF5!important}'
++ '.pa-mk-abs{background:#F2D5CE!important}'
++ '.pa-cdmk{background:#2B2118;color:#fff;font-weight:700}'
++ '.pa-nom{display:flex;align-items:baseline;gap:8px;padding:4px 9px;background:#2B2118;'
+  +'margin-bottom:5px;border-radius:4px}'
++ '.pa-nom b{font-family:\'Cormorant Garamond\',Georgia,serif;font-size:14px;color:#F5EFE3;font-weight:700}'
++ '.pa-nom span{font-size:7.5px;color:#C2A14D;text-transform:uppercase;letter-spacing:1px;margin-left:auto}'
++ '.pa-vent{display:flex;gap:0;border:1px solid #C2A14D;margin-top:5px;page-break-inside:avoid}'
++ '.pa-vent div{flex:1;padding:4px 8px;border-right:1px solid #E0CFA6}'
++ '.pa-vent div:last-child{border-right:0}'
++ '.pa-vent b{display:block;font-family:\'Cormorant Garamond\',Georgia,serif;font-size:13px;color:#2B2118}'
++ '.pa-vent span{font-size:6.5px;color:#8A7A62;text-transform:uppercase;letter-spacing:.6px}'
++ '.pa-grp{page-break-after:always;break-after:page}'
 + '.pa-grp:last-child{page-break-after:auto;break-after:auto}'
 + '.pa-who{display:flex;align-items:baseline;gap:8px;padding:3px 9px;background:#FAF3E0;'
   +'border-left:3px solid #C2A14D;margin-bottom:5px;border-radius:0 4px 4px 0}'
@@ -5122,8 +5238,12 @@ var _PA_CSS =
 
 // Le document. Une page par modèle ; le nom du domaine et l'année sont répétés
 // sur chaque page, parce qu'une feuille arrachée du lot doit rester identifiable.
-function _paDoc(yr){
+// \u2605 2e argument OPTIONNEL : un nom. Sans lui, le document par modele de semaine
+//   sort exactement comme avant. Avec lui, UNE page pour cette personne, bornee
+//   a ses contrats, ses jours de CFA marques, et la ventilation domaine / formation.
+function _paDoc(yr,nom){
   var e=window._escHtml||function(x){return String(x==null?'':x);};
+  if(nom) return _paDocNom(yr,nom,e);
   var grps=_paGroupes(yr);
   if(!grps.length){ if(window.showToast) window.showToast('Aucun salari\u00e9 sur '+yr,'#B85A1A'); return false; }
   var lim='<div class="mvdoc-lim"><b>Planning pr\u00e9visionnel.</b> Les dur\u00e9es sont des heures '
@@ -5176,6 +5296,90 @@ function _paDoc(yr){
   });
 }
 
+// \u2550\u2550 LE PLANNING DE L'ANNEE, AU NOM D'UNE PERSONNE \u2550\u2550
+// Ce qu'un salarie demande quand il dit « mon planning » : ses jours a lui, sur
+// douze mois, sur une feuille qui porte son nom et qu'il peut emporter.
+function _paDocNom(yr,nom,e){
+  var mbr=(window.MEMBRES||[]).find(function(m){ return m.nom===nom; });
+  if(!mbr){ if(window.showToast) window.showToast('Salari\u00e9 introuvable','#E07060'); return false; }
+  var plId=_planPlId(mbr);
+  var g=_paGrille(plId,yr,mbr), reg=_paRegulier(g,yr), MK=_paMarques(nom,yr);
+
+  // Le total se ventile : ce qui est fait AU DOMAINE et ce qui est fait AILLEURS
+  // mais compte quand meme (CFA, evenement familial). Un apprenti dont on
+  // additionnerait les deux sans le dire croirait devoir 1 607 h de vigne.
+  var tot=0,nj=0,hEcole=0,jEcole=0,hCp=0,jCp=0;
+  for(var m=0;m<12;m++) for(var d in g[m]){
+    var h=g[m][d]; if(!(h>0)) continue;
+    var k=(MK[m]&&MK[m][parseInt(d,10)])||null;
+    if(k==='ecole'){ hEcole+=h; jEcole++; tot+=h; continue; }
+    if(k==='cp'){ hCp+=h; jCp++; continue; }
+    if(k==='rec'||k==='abs') continue;
+    tot+=h; nj++;
+  }
+  var r1=function(x){ return Math.round(x*10)/10; };
+  tot=r1(tot); hEcole=r1(hEcole); hCp=r1(hCp);
+  var hDom=r1(tot-hEcole);
+
+  var per=_paPeriodes(mbr)||[];
+  var ctr=per.length
+    ? per.map(function(p){
+        return (p.type?e(p.type)+' ':'')+'du '+e(_planFmtJour(p.debut||''))
+             +(p.fin?(' au '+e(_planFmtJour(p.fin))):' \u2014 en cours');
+      }).join(' \u00b7 ')
+    : 'Aucun contrat enregistr\u00e9';
+
+  var vent='<div class="pa-vent">'
+    +'<div><b>'+_paFmt(hDom)+' h</b><span>au domaine \u00b7 '+nj+' jours</span></div>'
+    +(jEcole?('<div><b>'+_paFmt(hEcole)+' h</b><span>en formation \u00b7 '+jEcole+' jours</span></div>'):'')
+    +(jCp?('<div><b>'+_paFmt(hCp)+' h</b><span>cong\u00e9s pos\u00e9s \u00b7 '+jCp+' jours</span></div>'):'')
+    +'<div><b>'+_paFmt(tot)+' h</b><span>total comptabilis\u00e9</span></div>'
+    +'</div>';
+
+  var lg='<span><i style="background:#fff"></i>Journ\u00e9e compl\u00e8te</span>'
+       + (reg?'<span><i style="background:#C7E3F5"></i>Journ\u00e9e courte</span>':'')
+       + '<span><i style="background:#DDD8CF"></i>Week-end</span>'
+       + '<span><i style="background:#F0AF9B"></i>Jour f\u00e9ri\u00e9</span>'
+       + (jEcole?'<span><i style="background:#DCE9F7"></i>Formation (CFA)</span>':'')
+       + (jCp?'<span><i style="background:#FBE08A"></i>Cong\u00e9 pos\u00e9</span>':'');
+
+  var lim='<div class="mvdoc-lim"><b>Planning pr\u00e9visionnel.</b> Les dur\u00e9es sont des heures '
+    +'<b>travaill\u00e9es</b>, coupure d\u00e9duite. Les jours d\u00e9j\u00e0 pos\u00e9s au calendrier '
+    +'(formation, cong\u00e9s, r\u00e9cup\u00e9rations) sont report\u00e9s ; ce qui sera saisi plus tard ne '
+    +'peut pas y figurer. Ni un contrat de travail, ni un bulletin de paie.</div>';
+  if(jEcole){
+    lim+='<div class="mvdoc-lim">Les heures de <b>formation</b> comptent comme du temps de '
+      +'travail effectif et sont r\u00e9mun\u00e9r\u00e9es (art. L6222-24 du code du travail). Elles sont '
+      +'compt\u00e9es dans le total mais distingu\u00e9es des heures faites au domaine.</div>';
+  }
+
+  var corps='<div class="pa-grp">'
+    +'<div class="pa-nom"><b>'+e(nom)+'</b><span>Planning '+yr+'</span></div>'
+    +'<div class="pa-who"><b>Contrat</b><p>'+ctr+'</p></div>'
+    +_paBandeau(g,plId,yr,reg)
+    +_paGrilleHtml(g,yr,reg,plId,MK)
+    +'<div class="pa-ft"><div class="pa-lg">'+lg+'</div>'
+    +'<div class="pa-tot"><div class="pa-v">'+_paFmt(tot)+' <em>h</em></div>'
+    +'<div class="pa-s">'+(nj+jEcole)+' jours \u00b7 total comptabilis\u00e9</div></div></div>'
+    +vent
+    +lim
+    +'</div>';
+
+  return window._mvDocOpen({
+    titre:'Planning '+yr+' \u2014 '+nom,
+    metas:[String(yr), nom, '\u00c9dit\u00e9 le '+new Date().toLocaleDateString('fr-FR')],
+    orient:'paysage', cat:'planning', css:_PA_CSS, corps:corps
+  });
+}
+
+// Point d'entree du hub pour la version nominative.
+function planAnnuelNomPdf(nom,an){
+  if(!nom){ if(window.showToast) window.showToast('Choisissez un salari\u00e9','#B85A1A'); return false; }
+  var yr=parseInt(an,10);
+  if(!isFinite(yr)||yr<2000) yr=_pY();
+  return _paDocNom(yr,nom,(window._escHtml||function(x){return String(x==null?'':x);}));
+}
+
 // Ne jamais poser une question dont la réponse est unique : s'il n'y a qu'une
 // année possible, le document sort directement.
 function planAnnuelPdf(){
@@ -5195,8 +5399,15 @@ function planAnnuelPdf(){
     }
   });
 }
-window.planAnnuelPdf = planAnnuelPdf;
-window._paDoc        = _paDoc;
+// ⚠️ Expose parce que le hub Documents (reglages.js) doit proposer les MEMES
+//   annees que les onglets du Planning. Sans cette ligne, window._planYearList
+//   est undefined, le panneau tombe sur son repli et n'offre qu'une annee —
+//   sans qu'aucune erreur ne s'affiche. C'est exactement le silence que C23 vise.
+window._planYearList    = _planYearList;
+window.planAnnuelPdf    = planAnnuelPdf;
+window.planAnnuelNomPdf = planAnnuelNomPdf;
+window._paDoc           = _paDoc;
+window._paDocNom        = _paDocNom;
 
 // ════════════════════════════════════════════════════════════════════
 // EXPORTS WINDOW — fonctions appelées depuis HTML (onclick) ou app.js

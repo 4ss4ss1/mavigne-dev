@@ -1311,11 +1311,20 @@ mark{background:rgba(200,176,32,.32);color:var(--cream);border-radius:3px;paddin
     <tr><td>🩹 <b>Arrêt de travail</b></td><td>Suspend le contrat : <b>abaisse le plafond annuel</b>. Journée rémunérée.</td></tr>
     <tr><td>✈️ <b>Congé sans solde</b></td><td>Suspend le contrat. Non rémunéré.</td></tr>
     <tr><td>👥 <b>Événement familial</b></td><td>Assimilé à du travail effectif. Rémunéré.</td></tr>
-    <tr><td>🎓 <b>Formation</b></td><td>Assimilée à du travail effectif. Rémunérée.</td></tr>
+    <tr><td>🎓 <b>Formation</b></td><td>Assimilée à du travail effectif. Rémunérée. C'est le motif
+    des <b>jours de CFA d'un apprenti</b> : le code du travail (art. L6222-24) les compte comme du
+    temps de travail.</td></tr>
     <tr><td>✕ <b>Absence injustifiée</b></td><td>Heures dues, journée non payée.</td></tr>
     <tr><td>⏰ <b>Retard</b></td><td>Se saisit <b>en heures</b>, heures dues.</td></tr>
     <tr><td>— <b>Absence non précisée</b></td><td>Sans effet sur le plafond annuel.</td></tr>
   </table></div>
+  <div class="note"><span class="ni" aria-hidden="true">🎨</span><div>La couleur du jour suit le
+  motif : <b>bleu</b> pour une absence assimilée à du travail (formation, événement familial),
+  <b>orange</b> pour une absence payée mais non travaillée (arrêt de travail), <b>rouge</b> pour une
+  absence qui ne compte pas. Un jour bleu affiche <b>ses heures</b>, pas un zéro : elles entrent dans
+  le compteur du mois et dans l'annualisation. En revanche il ne compte pas comme <b>jour
+  travaillé</b> au domaine — la personne n'y était pas, et la déclaration MSA ne doit pas
+  l'y compter.</div></div>
 
   <h3>💶 Compteur d'heures &amp; acomptes</h3>
   <ul class="dot">
@@ -1405,6 +1414,26 @@ mark{background:rgba(200,176,32,.32);color:var(--cream);border-radius:3px;paddin
     <li>Les congés, absences et récupérations n'y figurent pas : c'est un prévisionnel, pas un
     relevé. Ils apparaissent sur le relevé mensuel d'heures.</li>
   </ul>
+
+  <h3>👤 Le planning de l'année d'un salarié</h3>
+  <p>Au même endroit, <b>Planning de l'année d'un salarié</b> sort la même grille pour <b>une seule
+  personne</b>, sur une feuille qui porte son nom. C'est le document à donner quand quelqu'un
+  demande « mon planning ».</p>
+  <ul class="dot">
+    <li><b>Borné à ses contrats</b> : un salarié embauché en septembre n'a pas de janvier sur sa
+    feuille. Ses périodes sont rappelées sous son nom.</li>
+    <li><b>Les jours déjà posés au calendrier y figurent</b>, contrairement au document par
+    modèle : formation en <b>bleu</b>, congés en <b>jaune</b>, récupérations en <b>violet</b>,
+    autres absences en <b>rose</b>. Une pastille nomme la marque (CFA, CP, Réc, Abs).</li>
+    <li>Le total est <b>ventilé</b> : les heures faites au domaine d'un côté, les heures de
+    formation de l'autre. Additionner les deux sans le dire ferait croire à un apprenti qu'il doit
+    1 607 h de vigne.</li>
+  </ul>
+  <div class="note"><span class="ni" aria-hidden="true">🎓</span><div><b>Pour un apprenti en
+  alternance</b> : saisissez ses semaines de CFA au Planning avec le motif <b>Formation</b>, puis
+  éditez ce document. Les semaines en centre et les semaines au domaine apparaissent côte à côte sur
+  les douze mois, et le total distingue les deux. Ce qui sera saisi <b>après</b> l'édition ne peut
+  évidemment pas y figurer.</div></div>
   <div class="note warn"><span class="ni" aria-hidden="true">⚠️</span><div>Pour imprimer l'année
   <b>à venir</b>, importez d'abord son planning au format CSV depuis l'onglet Modèles. Sans modèle
   enregistré pour cette année-là, le document se rabat sur le modèle intégré, dont les jours sont
