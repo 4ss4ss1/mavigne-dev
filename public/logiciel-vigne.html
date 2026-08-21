@@ -4,25 +4,25 @@
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
 <title>Ma Vigne — Logiciel de gestion viticole pour les domaines</title>
-<meta name="description" content="Logiciel de gestion viticole complet : parcelles, travaux a la tache, journal, registre phyto 2027, materiel, cave, planning et pilotage. Ecrit par un chef de culture de la Cote de Nuits. Demo libre, essai 15 jours.">
+<meta name="description" content="Logiciel de gestion viticole : parcelles, travaux à la tâche, journal, registre phyto 2027, matériel, cave, planning et pilotage. Écrit par un chef de culture de la Côte de Nuits. De 29 € à 79 € par mois et par domaine, mise en route de 490 à 990 €. Démo libre, essai 15 jours.">
 <meta name="robots" content="index, follow, max-image-preview:large">
 <link rel="canonical" href="https://mavigneapp.fr/logiciel-vigne.html">
 <link rel="icon" href="/icon-192.png">
 <meta name="theme-color" content="#14110D">
-<meta name="author" content="Nicolas Gueret — GUERETTECH">
+<meta name="author" content="Nicolas Guéret — GUERETTECH">
 <meta property="og:type" content="website">
 <meta property="og:site_name" content="Ma Vigne">
 <meta property="og:locale" content="fr_FR">
 <meta property="og:url" content="https://mavigneapp.fr/logiciel-vigne.html">
-<meta property="og:title" content="Ma Vigne — le logiciel de gestion viticole ecrit par un chef de culture">
-<meta property="og:description" content="Une seule saisie, faite dans le rang, alimente le journal, le registre phyto, les heures et le pilotage. Demo libre de quatre minutes, sans inscription.">
+<meta property="og:title" content="Ma Vigne — le logiciel de gestion viticole écrit par un chef de culture">
+<meta property="og:description" content="Une seule saisie, faite dans le rang, alimente le journal, le registre phyto, les heures et le pilotage. Démo libre de quatre minutes, sans inscription ni carte bancaire.">
 <meta property="og:image" content="https://mavigneapp.fr/og-mavigne.png">
 <meta property="og:image:width" content="1200">
 <meta property="og:image:height" content="630">
 <meta property="og:image:alt" content="Ma Vigne — application de gestion viticole">
 <meta name="twitter:card" content="summary_large_image">
 <meta name="twitter:title" content="Ma Vigne — logiciel de gestion viticole conçu par un chef de culture">
-<meta name="twitter:description" content="Parcelles, registre phyto pret pour 2027, materiel, cave, planning et pilotage : tout le domaine dans une seule application.">
+<meta name="twitter:description" content="Parcelles, registre phyto prêt pour 2027, matériel, cave, planning et pilotage : tout le domaine dans une seule application. Prix par domaine, pas par utilisateur.">
 <meta name="twitter:image" content="https://mavigneapp.fr/og-mavigne.png">
 <link rel="preload" href="/fonts/cormorant-garamond-latin-600-normal.woff2" as="font" type="font/woff2" crossorigin>
 <link rel="preload" href="/fonts/outfit-latin-400-normal.woff2" as="font" type="font/woff2" crossorigin>
@@ -41,11 +41,128 @@
       "inLanguage": "fr",
       "description": "Application de gestion viticole pour domaines : suivi des parcelles et des travaux à la tâche, journal des interventions, traitements phytosanitaires et registre électronique conforme à l'échéance du 1er janvier 2027, matériel et carburant, cave et élevage, réserve et bilan matière, planning RH et annualisation, pilotage et météo par parcelle. Écrite par un chef de culture de la Côte de Nuits.",
       "offers": [
-        { "@type": "Offer", "name": "Essentiel", "price": "29", "priceCurrency": "EUR", "description": "Jusqu'à 3 utilisateurs, prix mensuel pour l'ensemble du domaine" },
-        { "@type": "Offer", "name": "Vigneron", "price": "49", "priceCurrency": "EUR", "description": "Jusqu'à 10 utilisateurs, prix mensuel pour l'ensemble du domaine" },
-        { "@type": "Offer", "name": "Domaine", "price": "79", "priceCurrency": "EUR", "description": "Utilisateurs illimités, prix mensuel pour l'ensemble du domaine" }
+        {
+          "@type": "Offer",
+          "name": "Essai de 15 jours",
+          "price": "0",
+          "priceCurrency": "EUR",
+          "availability": "https://schema.org/InStock",
+          "url": "https://mavigneapp.fr/essai.html",
+          "description": "Essai gratuit de 15 jours sur vos propres parcelles, sans carte bancaire. À l'échéance, l'espace passe en lecture seule et les données sont conservées.",
+          "eligibleDuration": { "@type": "QuantitativeValue", "value": 15, "unitCode": "DAY" }
+        },
+        {
+          "@type": "Offer",
+          "name": "Essentiel",
+          "price": "29",
+          "priceCurrency": "EUR",
+          "availability": "https://schema.org/InStock",
+          "url": "https://mavigneapp.fr/logiciel-vigne.html#formules",
+          "description": "Jusqu'à 3 utilisateurs. Prix mensuel pour l'ensemble du domaine, quel que soit le nombre de comptes créés.",
+          "priceSpecification": {
+            "@type": "UnitPriceSpecification",
+            "price": "29",
+            "priceCurrency": "EUR",
+            "unitText": "MONTH",
+            "billingIncrement": 1,
+            "referenceQuantity": { "@type": "QuantitativeValue", "value": 1, "unitCode": "MON" }
+          },
+          "addOn": {
+            "@type": "Offer",
+            "name": "Forfait de mise en route — Essentiel",
+            "price": "490",
+            "priceCurrency": "EUR",
+            "description": "Payé une seule fois, au démarrage : import du parcellaire (export PAC / Telepac ou fichier KML), création des comptes, paramétrage du barème et des périodes, formation de l'équipe. 10 heures d'accompagnement comprises, puis 60 € de l'heure annoncés à l'avance.",
+            "priceSpecification": {
+              "@type": "UnitPriceSpecification",
+              "price": "490",
+              "priceCurrency": "EUR",
+              "unitText": "ONE-TIME"
+            }
+          }
+        },
+        {
+          "@type": "Offer",
+          "name": "Vigneron",
+          "price": "49",
+          "priceCurrency": "EUR",
+          "availability": "https://schema.org/InStock",
+          "url": "https://mavigneapp.fr/logiciel-vigne.html#formules",
+          "description": "Jusqu'à 10 utilisateurs. Prix mensuel pour l'ensemble du domaine, quel que soit le nombre de comptes créés.",
+          "priceSpecification": {
+            "@type": "UnitPriceSpecification",
+            "price": "49",
+            "priceCurrency": "EUR",
+            "unitText": "MONTH",
+            "billingIncrement": 1,
+            "referenceQuantity": { "@type": "QuantitativeValue", "value": 1, "unitCode": "MON" }
+          },
+          "addOn": {
+            "@type": "Offer",
+            "name": "Forfait de mise en route — Vigneron",
+            "price": "690",
+            "priceCurrency": "EUR",
+            "description": "Payé une seule fois, au démarrage : import du parcellaire (export PAC / Telepac ou fichier KML), création des comptes, paramétrage du barème et des périodes, formation de l'équipe. 15 heures d'accompagnement comprises, puis 60 € de l'heure annoncés à l'avance.",
+            "priceSpecification": {
+              "@type": "UnitPriceSpecification",
+              "price": "690",
+              "priceCurrency": "EUR",
+              "unitText": "ONE-TIME"
+            }
+          }
+        },
+        {
+          "@type": "Offer",
+          "name": "Domaine",
+          "price": "79",
+          "priceCurrency": "EUR",
+          "availability": "https://schema.org/InStock",
+          "url": "https://mavigneapp.fr/logiciel-vigne.html#formules",
+          "description": "Utilisateurs illimités. Prix mensuel pour l'ensemble du domaine, quel que soit le nombre de comptes créés.",
+          "priceSpecification": {
+            "@type": "UnitPriceSpecification",
+            "price": "79",
+            "priceCurrency": "EUR",
+            "unitText": "MONTH",
+            "billingIncrement": 1,
+            "referenceQuantity": { "@type": "QuantitativeValue", "value": 1, "unitCode": "MON" }
+          },
+          "addOn": {
+            "@type": "Offer",
+            "name": "Forfait de mise en route — Domaine",
+            "price": "990",
+            "priceCurrency": "EUR",
+            "description": "Payé une seule fois, au démarrage : import du parcellaire (export PAC / Telepac ou fichier KML), création des comptes, paramétrage du barème et des périodes, formation de l'équipe. 20 heures d'accompagnement comprises, puis 60 € de l'heure annoncés à l'avance.",
+            "priceSpecification": {
+              "@type": "UnitPriceSpecification",
+              "price": "990",
+              "priceCurrency": "EUR",
+              "unitText": "ONE-TIME"
+            }
+          }
+        }
       ],
-      "publisher": { "@type": "Organization", "name": "GUERETTECH", "url": "https://mavigneapp.fr/", "email": "ngdevpro@gmail.com" }
+      "featureList": [
+        "Parcelles et travaux à la tâche, avancement en surface réelle",
+        "Journal des interventions daté et attribué",
+        "Registre phytosanitaire et export électronique structuré (échéance 2027)",
+        "Météo par parcelle (modèle AROME)",
+        "Matériel, carburant et carnet d'entretien",
+        "Cuvier, Chai et Réserve",
+        "Planning, heures et annualisation",
+        "Pilotage et coûts par parcelle"
+      ],
+      "screenshot": "https://mavigneapp.fr/mv-shot-pilotage.png",
+      "softwareHelp": { "@type": "CreativeWork", "url": "https://mavigneapp.fr/guide.html" },
+      "publisher": {
+        "@type": "Organization",
+        "name": "GUERETTECH",
+        "url": "https://mavigneapp.fr/",
+        "email": "ngdevpro@gmail.com",
+        "telephone": "+33699424859",
+        "areaServed": "FR",
+        "founder": { "@type": "Person", "name": "Nicolas Guéret" }
+      }
     },
     {
       "@type": "FAQPage",
@@ -61,7 +178,11 @@
         { "@type": "Question", "name": "Où sont hébergées mes données ?",
           "acceptedAnswer": { "@type": "Answer", "text": "Sur l'infrastructure Google Cloud, en Europe. Chaque domaine dispose d'un espace isolé. Le contrat de sous-traitance RGPD est signé avant la création des comptes de vos salariés." } },
         { "@type": "Question", "name": "Combien de temps pour démarrer ?",
-          "acceptedAnswer": { "@type": "Answer", "text": "L'installation fait l'objet d'un forfait qui comprend 10 à 20 heures d'accompagnement selon la formule : reprise du parcellaire, création des comptes, paramétrage du barème et formation de l'équipe." } }
+          "acceptedAnswer": { "@type": "Answer", "text": "L'installation fait l'objet d'un forfait qui comprend 10 à 20 heures d'accompagnement selon la formule : reprise du parcellaire, création des comptes, paramétrage du barème et formation de l'équipe." } },
+        { "@type": "Question", "name": "Combien coûte la mise en route ?",
+          "acceptedAnswer": { "@type": "Answer", "text": "490 € pour Essentiel, 690 € pour Vigneron, 990 € pour Domaine, payés une seule fois. L'import de votre parcellaire depuis un export PAC / Telepac ou un fichier KML est compris, comme la création des comptes, le paramétrage du barème et la formation. Au-delà des 10, 15 ou 20 heures comprises : 60 € de l'heure, annoncés avant d'être engagés. Il n'y a pas d'autre frais : ni frais de dossier, ni coût par utilisateur." } },
+        { "@type": "Question", "name": "L'essai de 15 jours est-il payant ?",
+          "acceptedAnswer": { "@type": "Answer", "text": "Non. L'essai est gratuit, sans carte bancaire et sans engagement, sur vos propres parcelles. À l'échéance, l'espace passe en lecture seule et vos données restent téléchargeables." } }
       ]
     }
   ]
@@ -75,21 +196,68 @@
    la couleur du trait de la grappe). Deux familles, zéro dépendance.
    ══════════════════════════════════════════════════════════════════════ */
 :root{
+  /* Contrastes mesures sur les fonds REELS de la page (WCAG 2.1, texte normal).
+     Trois valeurs tombaient sous 4,5 sur du texte de 10 a 13 px, donc illisibles
+     en plein soleil : #8C8271 rendait 3,29 sur la craie, #6F6656 rendait 3,15
+     dans le pied, #A8842E rendait 3,35 sur la pastille du verdict.
+     Nouvelles mesures : --doux 6,01 · --tres-doux 4,82 · --or-fonce 4,96
+     · --creme-3 8,29 sur la nuit et 7,85 sur le pied. */
   --nuit:#14110D; --nuit-2:#1B1712; --nuit-3:#241E17;
   --craie:#F2EFE7; --papier:#FBFAF6;
-  --encre:#14110D; --doux:#6E6456; --tres-doux:#8C8271;
-  --or:#C9A84C; --or-clair:#E3C77A; --or-fonce:#A8842E;
-  --terre:#8A5A38; --vigne:#3D6B27; --lie:#8A3058; --pluie:#7FA6C8;
-  --creme:#F0E2C8; --creme-2:#CBBFA6; --creme-3:#9C9280;
+  --encre:#14110D; --doux:#625948; --tres-doux:#6F6857;
+  --or:#C9A84C; --or-clair:#E3C77A; --or-fonce:#82631A;
+  --terre:#8A5A38; --vigne:#3D6B27; --pluie:#7FA6C8;
+  /* Le lie-de-vin est la couleur du trait de la grappe du logo. Il revient
+     ici sur ce qui signale un ETAT : la ligne hors total, le jalon 2027,
+     le filet qui separe l'abonnement du forfait de mise en route. */
+  --lie:#8A3058; --lie-clair:#D98CAE; --lie-pale:#F0C9DA;
+  --creme:#F0E2C8; --creme-2:#CBBFA6; --creme-3:#B5AB99;
   --trait:rgba(20,17,13,.13); --trait-inv:rgba(240,226,200,.14);
-  --horizon:linear-gradient(90deg,#8A5A38,#C2871E,#3D6B27);
+  --horizon:linear-gradient(90deg,#8A3058,#C2871E,#3D6B27);
   --ombre:0 1px 2px rgba(20,17,13,.04),0 12px 34px rgba(20,17,13,.07);
+  /* Ombre a cinq plans : le contact, la proximite, la portee, la piece.
+     Une seule ombre large aplatit ; cinq passes donnent la profondeur. */
+  --ombre-cadre:0 1px 1px rgba(20,17,13,.05),0 2px 5px rgba(20,17,13,.05),
+    0 9px 18px rgba(20,17,13,.06),0 26px 48px rgba(20,17,13,.10),
+    0 48px 96px rgba(20,17,13,.09);
+
+  /* ── LE RIDEAU · un seul réglage ──────────────────────────────────
+     --r est la durée du rideau ; toute la chorégraphie en dérive en
+     proportions, pour que la forme du geste ne change pas avec sa durée.
+     ⚠️ CHAQUE MILLISECONDE AJOUTÉE ICI EST AJOUTÉE AU LCP. Mesuré au banc
+        d'essai, machine sans latence réseau : rideau 0,95 s = titre lisible
+        à 1 150 ms. Sans rideau : 383 ms. La différence s'ajoute telle quelle
+        au temps de chargement réel du visiteur. 0,95 s est le plafond
+        qu'on s'est fixé — au-delà (1,6 s testé : 1 900 ms), on sort du
+        raisonnable sur une 4G de vigne. */
+  --r:.95s;
+  --rTrace:calc(var(--r) * .55);    /* durée du tracé d'un chemin        */
+  --rPas:calc(var(--r) * .045);     /* décalage entre deux quadrilatères */
+  --rRang0:calc(var(--r) * .50);    /* départ des rangs                  */
+  --rRangPas:calc(var(--r) * .030);
+  --rRangD:calc(var(--r) * .30);
+  --rParc:calc(var(--r) * .40);
+  --rEtiq:calc(var(--r) * .88);
+  --rVies:var(--r);                 /* les animations qui ne s'arrêtent plus */
+  --rTexte:calc(var(--r) * 1.02);   /* et enfin le texte                 */
+  --rTextePas:calc(var(--r) * .06);
+  --rTexteD:calc(var(--r) * .42);
+
+  /* ── LA PRÉSENCE DU CADASTRE ──────────────────────────────────────
+     Les opacités du parcellaire, sorties du dégradé pour être réglables.
+     Mesure faite sur la version précédente : entre le cadastre pas encore
+     tracé et le cadastre fini, 9 500 pixels changeaient sur 319 600 — 3 %
+     de l'image. Ce n'était pas la courbe d'animation qui manquait, c'était
+     l'encre. Ces valeurs sont le cran « appuyé » du banc d'essai. */
+  --wCad:1.2;  --oCad:.78;
+  --wParc:1.5; --oParc:.72; --fParc:.10;
+  --wRang:1.1; --oRang:.44;
   --e:cubic-bezier(.22,.61,.36,1);
   --serif:'Cormorant Garamond',Georgia,serif;
   --sans:'Outfit',system-ui,-apple-system,sans-serif;
 }
 *{box-sizing:border-box}
-html{-webkit-text-size-adjust:100%; scroll-behavior:smooth}
+html{-webkit-text-size-adjust:100%; scroll-behavior:smooth; interpolate-size:allow-keywords}
 body{margin:0; background:var(--craie); color:var(--encre); font-family:var(--sans);
   font-weight:400; line-height:1.6; -webkit-font-smoothing:antialiased; overflow-x:hidden}
 img{max-width:100%; display:block}
@@ -115,7 +283,16 @@ h2{font-family:var(--serif); font-weight:600; font-size:clamp(31px,5.1vw,50px);
   line-height:1.05; letter-spacing:.1px; margin:14px 0 0; max-width:22ch}
 h2 em{font-style:italic; color:var(--terre)}
 .nuit h2 em{color:var(--or)}
-h3{font-family:var(--serif); font-weight:600; font-size:22px; line-height:1.18; margin:0}
+/* ── Regle typographique (DS) ───────────────────────────────────────
+   Cormorant Garamond est reserve a DEUX emplois : les titres dont la
+   taille MINIMALE atteint 24 px, et les totems numeriques (tabulaires,
+   toujours grands). Tout le reste — h3, etiquettes, sommaires de FAQ,
+   noms de modules, signature — passe en Outfit semi-gras : un serif de
+   18 px se delave sur un ecran de telephone en plein champ.
+   Seule exception assumee : les deux blocs de marque (barre haute et
+   pied), qui sont un logotype et non du texte courant. */
+h3{font-family:var(--sans); font-weight:600; font-size:19px; line-height:1.32;
+  letter-spacing:-.006em; margin:0}
 .lede{color:var(--doux); font-size:clamp(16px,1.7vw,17.5px); font-weight:300;
   line-height:1.68; margin:18px 0 0; max-width:60ch}
 .tete{margin:0 0 clamp(38px,4.5vw,58px)}
@@ -172,7 +349,7 @@ h3{font-family:var(--serif); font-weight:600; font-size:22px; line-height:1.18; 
     var(--nuit);
   color:var(--creme); padding:calc(env(safe-area-inset-top,0px) + clamp(104px,15vh,158px)) 0 0}
 .hero::after{content:""; position:absolute; left:0; right:0; bottom:0; height:2px; background:var(--horizon); z-index:4}
-.hero-grille{position:absolute; inset:0; z-index:0; pointer-events:none; opacity:.9}
+.hero-grille{position:absolute; inset:0; z-index:0; pointer-events:none; opacity:.97}
 @media(max-width:960px){ .hero-grille{opacity:.42} .hero-grille .etiq{display:none} }
 .hero-in{position:relative; z-index:2; display:grid; gap:clamp(38px,5vw,60px);
   grid-template-columns:minmax(0,1.02fr) minmax(0,.98fr); align-items:center;
@@ -194,7 +371,7 @@ h3{font-family:var(--serif); font-weight:600; font-size:22px; line-height:1.18; 
   border-radius:20px; padding:20px 20px 16px; box-shadow:0 26px 70px rgba(0,0,0,.42);
   border:1px solid rgba(240,226,200,.16); position:relative}
 .verdict-top{display:flex; align-items:center; gap:10px; padding-bottom:13px; border-bottom:1px solid var(--trait)}
-.verdict-top .t{font-family:var(--serif); font-size:21px; font-weight:600}
+.verdict-top .t{font-family:var(--sans); font-size:16.5px; font-weight:600; letter-spacing:-.006em}
 .verdict-top .pill{margin-left:auto; font-size:10px; letter-spacing:.16em; text-transform:uppercase;
   font-weight:600; color:var(--or-fonce); border:1px solid rgba(168,132,46,.4); border-radius:99px; padding:4px 10px}
 .verdict-corps{display:flex; gap:18px; align-items:center; padding:18px 0 16px}
@@ -213,7 +390,7 @@ h3{font-family:var(--serif); font-weight:600; font-size:22px; line-height:1.18; 
 .verdict-stats div{padding:13px 9px 4px; border-right:1px solid var(--trait)}
 .verdict-stats div:last-child{border-right:0}
 .verdict-stats .k{font-size:9px; letter-spacing:.11em; text-transform:uppercase; color:var(--doux); font-weight:600; line-height:1.3}
-.verdict-stats .v{font-family:var(--serif); font-size:23px; font-weight:700; margin-top:4px; line-height:1}
+.verdict-stats .v{font-family:var(--serif); font-size:24px; font-weight:700; margin-top:4px; line-height:1}
 .verdict-stats .v small{font-family:var(--sans); font-size:11px; font-weight:500; color:var(--doux)}
 .verdict-pied{font-size:10.5px; color:var(--tres-doux); text-align:right; padding-top:9px; letter-spacing:.2px}
 @media(max-width:560px){
@@ -225,15 +402,173 @@ h3{font-family:var(--serif); font-weight:600; font-size:22px; line-height:1.18; 
   .verdict-stats div:nth-child(n+3){border-top:1px solid var(--trait)}
 }
 
-/* Entrée du hero */
-.lever > *{opacity:0; transform:translateY(22px); animation:lever .8s var(--e) forwards}
-.lever > *:nth-child(1){animation-delay:.06s}
-.lever > *:nth-child(2){animation-delay:.15s}
-.lever > *:nth-child(3){animation-delay:.24s}
-.lever > *:nth-child(4){animation-delay:.34s}
-.lever > *:nth-child(5){animation-delay:.44s}
-.hero-vue{opacity:0; transform:translateY(26px) scale(.985); animation:lever .95s var(--e) .3s forwards}
+/* ══════════════════════════════════════════════════════════════════
+   LE RIDEAU
+   À l'ouverture : le cadastre seul, dans le noir. Il se dessine, il se
+   pose en plein, les animations permanentes démarrent, puis le texte
+   arrive. Tout est en CSS — sans JavaScript, le texte arrive quand même.
+   Ce qui l'annule, c'est la préférence système de mouvement réduit : une
+   media query, pas un test dans le code.
+
+   Chaque tracé porte pathLength="1" dans le SVG : un seul couple
+   dasharray/dashoffset suffit alors, quelle que soit la longueur réelle
+   du chemin. Sans lui il faudrait mesurer 39 longueurs en JavaScript.
+   ══════════════════════════════════════════════════════════════════ */
+@keyframes tracer{to{stroke-dashoffset:0}}
+@keyframes fondu{to{opacity:1}}
+/* La ligne sort VIVE et retombe à sa valeur de fond : le geste d'un trait
+   qu'on vient de poser et qui sèche. */
+@keyframes encre{0%{stroke-opacity:1} 60%{stroke-opacity:calc(var(--o) + .25)}
+  100%{stroke-opacity:var(--o)}}
+
+.hero-grille path{stroke-dasharray:1; stroke-dashoffset:1}
+
+.hero-grille .cad path{stroke-width:var(--wCad); stroke-opacity:var(--oCad); --o:var(--oCad);
+  animation:tracer var(--rTrace) var(--e) forwards, encre var(--rTrace) var(--e) forwards}
+.hero-grille .cad path:nth-of-type(1){animation-delay:calc(var(--rPas)*0),calc(var(--rPas)*0)}
+.hero-grille .cad path:nth-of-type(2){animation-delay:calc(var(--rPas)*1),calc(var(--rPas)*1)}
+.hero-grille .cad path:nth-of-type(3){animation-delay:calc(var(--rPas)*2),calc(var(--rPas)*2)}
+.hero-grille .cad path:nth-of-type(4){animation-delay:calc(var(--rPas)*3),calc(var(--rPas)*3)}
+.hero-grille .cad path:nth-of-type(5){animation-delay:calc(var(--rPas)*4),calc(var(--rPas)*4)}
+.hero-grille .cad path:nth-of-type(6){animation-delay:calc(var(--rPas)*5),calc(var(--rPas)*5)}
+.hero-grille .cad path:nth-of-type(7){animation-delay:calc(var(--rPas)*6),calc(var(--rPas)*6)}
+.hero-grille .cad path:nth-of-type(8){animation-delay:calc(var(--rPas)*7),calc(var(--rPas)*7)}
+
+.hero-grille .parc{opacity:0; animation:fondu calc(var(--r)*.35) var(--e) var(--rParc) forwards}
+.hero-grille .parc path{stroke-width:var(--wParc); stroke-opacity:var(--oParc);
+  fill-opacity:var(--fParc); --o:var(--oParc);
+  animation:tracer calc(var(--r)*.45) var(--e) var(--rParc) forwards,
+            encre calc(var(--r)*.60) var(--e) var(--rParc) forwards}
+
+.hero-grille .rangs path{stroke-width:var(--wRang); stroke-opacity:var(--oRang); --o:var(--oRang);
+  animation:tracer var(--rRangD) var(--e) forwards,
+            encre calc(var(--r)*.45) var(--e) forwards}
+.hero-grille .rangs path:nth-of-type(1){animation-delay:calc(var(--rRang0) + var(--rRangPas)*0),calc(var(--rRang0) + var(--rRangPas)*0)}
+.hero-grille .rangs path:nth-of-type(2){animation-delay:calc(var(--rRang0) + var(--rRangPas)*1),calc(var(--rRang0) + var(--rRangPas)*1)}
+.hero-grille .rangs path:nth-of-type(3){animation-delay:calc(var(--rRang0) + var(--rRangPas)*2),calc(var(--rRang0) + var(--rRangPas)*2)}
+.hero-grille .rangs path:nth-of-type(4){animation-delay:calc(var(--rRang0) + var(--rRangPas)*3),calc(var(--rRang0) + var(--rRangPas)*3)}
+.hero-grille .rangs path:nth-of-type(5){animation-delay:calc(var(--rRang0) + var(--rRangPas)*4),calc(var(--rRang0) + var(--rRangPas)*4)}
+.hero-grille .rangs path:nth-of-type(6){animation-delay:calc(var(--rRang0) + var(--rRangPas)*5),calc(var(--rRang0) + var(--rRangPas)*5)}
+.hero-grille .rangs path:nth-of-type(7){animation-delay:calc(var(--rRang0) + var(--rRangPas)*6),calc(var(--rRang0) + var(--rRangPas)*6)}
+.hero-grille .rangs path:nth-of-type(8){animation-delay:calc(var(--rRang0) + var(--rRangPas)*7),calc(var(--rRang0) + var(--rRangPas)*7)}
+
+.hero-grille .etiq{opacity:0; animation:fondu calc(var(--r)*.28) var(--e) var(--rEtiq) forwards}
+
+/* ── La plume : un point lumineux court en tête du trait ──────────────
+   C'est lui qui accroche l'œil ; sans lui, on ne regarde pas un trait qui
+   s'allonge. Sur les cinq grandes formes ET sur les huit rangs.
+   ⚠️ Le flou SVG ne tourne qu'une fois, au chargement, et il est coupé
+      sous 960 px : à 42 % d'opacité il ne se verrait pas et coûterait. */
+@keyframes comete{to{stroke-dashoffset:0}}
+@keyframes souffle{0%{opacity:0}14%{opacity:1}82%{opacity:1}100%{opacity:0}}
+.hero-grille .tete path,.hero-grille .tete-r path{stroke-dashoffset:1;
+  animation:comete var(--rTrace) linear forwards, souffle var(--rTrace) linear forwards}
+.hero-grille .tete path{stroke-dasharray:.07 .93}
+.hero-grille .tete path:nth-of-type(1){animation-delay:calc(var(--rPas)*0),calc(var(--rPas)*0)}
+.hero-grille .tete path:nth-of-type(2){animation-delay:calc(var(--rPas)*1),calc(var(--rPas)*1)}
+.hero-grille .tete path:nth-of-type(3){animation-delay:calc(var(--rPas)*2),calc(var(--rPas)*2)}
+.hero-grille .tete path:nth-of-type(4){animation-delay:calc(var(--rPas)*3),calc(var(--rPas)*3)}
+.hero-grille .tete path.p{animation-duration:calc(var(--r)*.45),calc(var(--r)*.45);
+  animation-delay:var(--rParc),var(--rParc)}
+.hero-grille .tete-r path{stroke-dasharray:.02 .98;
+  animation-duration:var(--rRangD),var(--rRangD)}
+.hero-grille .tete-r path:nth-of-type(1){animation-delay:calc(var(--rRang0) + var(--rRangPas)*0),calc(var(--rRang0) + var(--rRangPas)*0)}
+.hero-grille .tete-r path:nth-of-type(2){animation-delay:calc(var(--rRang0) + var(--rRangPas)*1),calc(var(--rRang0) + var(--rRangPas)*1)}
+.hero-grille .tete-r path:nth-of-type(3){animation-delay:calc(var(--rRang0) + var(--rRangPas)*2),calc(var(--rRang0) + var(--rRangPas)*2)}
+.hero-grille .tete-r path:nth-of-type(4){animation-delay:calc(var(--rRang0) + var(--rRangPas)*3),calc(var(--rRang0) + var(--rRangPas)*3)}
+.hero-grille .tete-r path:nth-of-type(5){animation-delay:calc(var(--rRang0) + var(--rRangPas)*4),calc(var(--rRang0) + var(--rRangPas)*4)}
+.hero-grille .tete-r path:nth-of-type(6){animation-delay:calc(var(--rRang0) + var(--rRangPas)*5),calc(var(--rRang0) + var(--rRangPas)*5)}
+.hero-grille .tete-r path:nth-of-type(7){animation-delay:calc(var(--rRang0) + var(--rRangPas)*6),calc(var(--rRang0) + var(--rRangPas)*6)}
+.hero-grille .tete-r path:nth-of-type(8){animation-delay:calc(var(--rRang0) + var(--rRangPas)*7),calc(var(--rRang0) + var(--rRangPas)*7)}
+
+/* ── La vie qui reste ────────────────────────────────────────────────
+   Elle démarre à la fin du tracé et ne s'arrête plus. Une animation jouée
+   une seule fois n'est vue que par qui arrive au bon moment ; c'est elle
+   qui fait « vivant », pas le tracé. Coût mesuré, processeur bridé au
+   sixième pour simuler un téléphone : 60 images par seconde. */
+/* ⚠️ Le liseré respire, il ne tourne pas en continu — et ce n'est pas un
+   choix esthétique. Mesuré, processeur bridé au sixième : en boucle
+   permanente il faisait tomber la page de 61 à 47 images par seconde, à lui
+   seul. Un tracé large qui se repeint à chaque image coûte, même sans flou.
+   Sur le même cycle de 7 s que les points, il passe puis se tait : le coût
+   n'existe plus que pendant le passage, et les deux couches lisent comme un
+   seul geste au lieu de deux boucles décalées. */
+.hero-grille .lisere path{stroke-dasharray:.16 .84;
+  animation:lisere 7s linear var(--rVies) infinite}
+@keyframes lisere{
+  0%  {stroke-dashoffset:1; opacity:0}
+  5%  {                     opacity:1}
+  40% {                     opacity:1}
+  48% {stroke-dashoffset:0; opacity:0}
+  100%{stroke-dashoffset:0; opacity:0}
+}
+
+/* Les points qui remontent les rangs. Un front de huit points traverse la
+   parcelle en trois secondes, puis plus rien pendant quatre : une boucle
+   qui ne s'arrête jamais ressemble à un indicateur de chargement.
+   ⚠️ Ils MONTENT, et ce n'est pas un goût. Vu image par image, en
+      descendant ils passaient les trois quarts de leur trajet derrière la
+      carte du verdict, qui couvre le bas de la parcelle. En montant, ils
+      sortent de derrière la carte et finissent dans la zone qu'on voit. */
+.hero-grille .pointeurs path{stroke-dasharray:.012 .988; stroke-dashoffset:0;
+  animation:monte 7s linear var(--rVies) infinite}
+.hero-grille .pointeurs path:nth-of-type(1){animation-delay:calc(var(--rVies) + 0.00s)}
+.hero-grille .pointeurs path:nth-of-type(2){animation-delay:calc(var(--rVies) + 0.13s)}
+.hero-grille .pointeurs path:nth-of-type(3){animation-delay:calc(var(--rVies) + 0.26s)}
+.hero-grille .pointeurs path:nth-of-type(4){animation-delay:calc(var(--rVies) + 0.39s)}
+.hero-grille .pointeurs path:nth-of-type(5){animation-delay:calc(var(--rVies) + 0.52s)}
+.hero-grille .pointeurs path:nth-of-type(6){animation-delay:calc(var(--rVies) + 0.65s)}
+.hero-grille .pointeurs path:nth-of-type(7){animation-delay:calc(var(--rVies) + 0.78s)}
+.hero-grille .pointeurs path:nth-of-type(8){animation-delay:calc(var(--rVies) + 0.91s)}
+@keyframes monte{
+  0%  {stroke-dashoffset:.988; opacity:0}
+  6%  {                        opacity:.95}
+  34% {                        opacity:.95}
+  42% {stroke-dashoffset:0;    opacity:0}
+  100%{stroke-dashoffset:0;    opacity:0}
+}
+
+/* La pastille respire : le point « en direct » du langage de l'application. */
+.hero-grille .etiq .pt{transform-box:fill-box; transform-origin:center;
+  animation:respire 3.4s ease-in-out var(--rVies) infinite}
+.hero-grille .etiq .halo{transform-box:fill-box; transform-origin:center;
+  animation:onde 3.4s ease-out var(--rVies) infinite}
+@keyframes respire{0%,100%{opacity:1; transform:scale(1)}50%{opacity:.55; transform:scale(.86)}}
+@keyframes onde{0%{opacity:.8; transform:scale(1)}70%,100%{opacity:0; transform:scale(1.45)}}
+
+/* ── Et enfin le texte ───────────────────────────────────────────────── */
+.lever > *{opacity:0; transform:translateY(22px);
+  animation:lever var(--rTexteD) var(--e) var(--rTexte) forwards}
+.lever > *:nth-child(1){animation-delay:calc(var(--rTexte) + var(--rTextePas)*0)}
+.lever > *:nth-child(2){animation-delay:calc(var(--rTexte) + var(--rTextePas)*1)}
+.lever > *:nth-child(3){animation-delay:calc(var(--rTexte) + var(--rTextePas)*2)}
+.lever > *:nth-child(4){animation-delay:calc(var(--rTexte) + var(--rTextePas)*3)}
+.lever > *:nth-child(5){animation-delay:calc(var(--rTexte) + var(--rTextePas)*4)}
+.hero-vue{opacity:0; transform:translateY(26px) scale(.985);
+  animation:lever calc(var(--r)*.5) var(--e) calc(var(--rTexte) + var(--r)*.08) forwards}
 @keyframes lever{to{opacity:1; transform:none}}
+/* ⚠️ La barre est en position:fixed : PAS de transform dessus, même un
+   transform:none en fin d'animation. Elle a sa propre image-clé, opacité
+   seule — c'est la leçon du fondu qui cassait tous les position:sticky. */
+.barre{opacity:0; animation:paraitre calc(var(--r)*.4) var(--e) calc(var(--rTexte) + var(--r)*.10) forwards}
+@keyframes paraitre{to{opacity:1}}
+
+/* ── Le rideau est coupé sur téléphone ───────────────────────────────
+   Sous 960 px le cadastre tombe à 42 % d'opacité et l'étiquette disparaît :
+   le rideau y montrerait une seconde d'écran noir pour rien — et c'est
+   sur téléphone que le LCP compte le plus. On y retombe sur l'entrée
+   d'avant, et le flou SVG des têtes est débranché. */
+@media(max-width:960px){
+  .lever > *{animation:lever .8s var(--e) forwards}
+  .lever > *:nth-child(1){animation-delay:.06s}
+  .lever > *:nth-child(2){animation-delay:.15s}
+  .lever > *:nth-child(3){animation-delay:.24s}
+  .lever > *:nth-child(4){animation-delay:.34s}
+  .lever > *:nth-child(5){animation-delay:.44s}
+  .hero-vue{animation:lever .95s var(--e) .3s forwards}
+  .barre{opacity:1; animation:none}
+  .hero-grille .tete,.hero-grille .tete-r{display:none}
+}
 
 /* ── Bandeau des modules ───────────────────────────────────────────── */
 .bande{background:var(--nuit-2); border-top:1px solid var(--trait-inv); border-bottom:1px solid var(--trait-inv);
@@ -259,13 +594,13 @@ h3{font-family:var(--serif); font-weight:600; font-size:22px; line-height:1.18; 
 .endroits{margin:0; padding:0; list-style:none; border-top:1px solid var(--trait)}
 .endroits li{display:grid; grid-template-columns:minmax(0,1fr) auto; gap:14px; align-items:baseline;
   padding:17px 2px; border-bottom:1px solid var(--trait)}
-.endroits .quoi{font-family:var(--serif); font-size:clamp(20px,2.5vw,25px); font-weight:600; line-height:1.2}
+.endroits .quoi{font-family:var(--serif); font-size:clamp(24px,2.5vw,26px); font-weight:600; line-height:1.18}
 .endroits .ou{font-size:14px; color:var(--doux); font-weight:300; text-align:right; max-width:34ch}
 @media(max-width:620px){
   .endroits li{grid-template-columns:1fr; gap:4px}
   .endroits .ou{text-align:left}
 }
-.chute{margin:34px 0 0; font-family:var(--serif); font-size:clamp(22px,3.1vw,30px);
+.chute{margin:34px 0 0; font-family:var(--serif); font-size:clamp(24px,3.1vw,30px);
   line-height:1.28; font-weight:600; max-width:26ch}
 .chute em{font-style:italic; color:var(--terre)}
 
@@ -284,8 +619,8 @@ h3{font-family:var(--serif); font-weight:600; font-size:22px; line-height:1.18; 
   font-variant-numeric:tabular-nums}
 .moment .heure::after{content:""; position:absolute; right:calc(-1 * var(--gj)/2 - 4px); top:6px;
   width:9px; height:9px; border-radius:50%; background:var(--or); box-shadow:0 0 0 4px var(--nuit)}
-.moment .dit{font-family:var(--serif); font-style:italic; font-size:clamp(20px,2.7vw,27px);
-  font-weight:500; line-height:1.3; color:#F6ECD2; margin:0}
+.moment .dit{font-family:var(--serif); font-style:italic; font-size:clamp(24px,2.7vw,27px);
+  font-weight:500; line-height:1.28; color:#F6ECD2; margin:0}
 .moment .fait{margin:11px 0 0; color:var(--creme-2); font-weight:300; font-size:16px; line-height:1.65; max-width:56ch}
 .moment .fait b{color:var(--creme); font-weight:500}
 .moment .note{margin:12px 0 0; display:inline-flex; align-items:flex-start; gap:9px;
@@ -312,23 +647,45 @@ h3{font-family:var(--serif); font-weight:600; font-size:22px; line-height:1.18; 
   font:inherit; color:inherit; text-align:left; cursor:pointer; border-radius:8px;
   transition:background .16s}
 .ligne .bouton:hover{background:rgba(138,90,56,.05)}
-.coche{width:20px; height:20px; border-radius:6px; border:1.5px solid rgba(20,17,13,.28);
-  display:flex; align-items:center; justify-content:center; transition:background .18s, border-color .18s}
+.coche{position:relative; width:20px; height:20px; border-radius:6px;
+  border:1.5px solid rgba(20,17,13,.28); display:flex; align-items:center;
+  justify-content:center; transition:background .18s, border-color .18s}
+/* Une onde part de la case au moment du clic : la confirmation du geste doit
+   se voir a l'endroit du doigt, pas seulement dans le total, a droite. */
+.ligne.bat .coche::after{content:""; position:absolute; inset:-5px; border-radius:11px;
+  border:1.5px solid var(--vigne); animation:onde .5s var(--e) forwards; pointer-events:none}
+.hors.bat .coche::after{border-color:var(--lie)}
+@keyframes onde{from{opacity:.7; transform:scale(.7)}to{opacity:0; transform:scale(1.4)}}
 .coche svg{width:12px; height:12px; opacity:0; transform:scale(.6); transition:opacity .18s var(--e), transform .18s var(--e)}
 .ligne[data-on="1"] .coche{background:var(--vigne); border-color:var(--vigne)}
 .ligne[data-on="1"] .coche svg{opacity:1; transform:none}
 .ligne .quoi2{min-width:0}
-.ligne .nom{font-size:16px; font-weight:500; line-height:1.35}
-.ligne .hyp{font-size:12.5px; color:var(--tres-doux); font-weight:300; line-height:1.45; margin-top:3px}
+/* ⚠️ Defaut trouve en REGARDANT la page, pas en la lisant : .nom et .hyp sont
+   deux <span>, donc deux boites en ligne — l'hypothese se collait a la fin du
+   nom (« Registre phyto25 minutes de classeur… ») sur les neuf lignes, et le
+   margin-top n'avait aucun effet sur une boite en ligne. L'argument de toute
+   la section est « chaque ligne porte son hypothese » : elle doit se lire. */
+.ligne .nom{display:block; font-size:16px; font-weight:500; line-height:1.35}
+.ligne .hyp{display:block; font-size:12.5px; color:var(--tres-doux); font-weight:300;
+  line-height:1.45; margin-top:3px}
 .ligne .h{font-family:var(--serif); font-size:25px; font-weight:700; white-space:nowrap;
   font-variant-numeric:tabular-nums; transition:color .18s, opacity .18s}
 .ligne[data-on="0"] .nom{color:var(--tres-doux)}
 .ligne[data-on="0"] .h{color:var(--tres-doux); opacity:.5; text-decoration:line-through; text-decoration-thickness:1px}
 .ligne .h small{font-family:var(--sans); font-size:12px; font-weight:500; color:var(--doux); margin-left:2px}
 
-.hors{margin-top:18px; border:1px dashed rgba(138,90,56,.4); border-radius:14px; background:rgba(138,90,56,.045)}
+/* La ligne hors total n'est pas une ligne comme les autres : elle a donc sa
+   couleur a elle. Le badge est un ::after — aucune ligne de script en plus. */
+.hors{margin-top:18px; border:1px dashed rgba(138,48,88,.42); border-radius:14px;
+  background:rgba(138,48,88,.05)}
 .hors .bouton{padding:15px 16px}
-.hors .nom{color:var(--terre)}
+.hors .bouton:hover{background:rgba(138,48,88,.055)}
+.hors .nom{color:var(--lie)}
+.hors[data-on="1"] .coche{background:var(--lie); border-color:var(--lie)}
+.hors .nom::after{content:"hors total"; display:inline-block; margin-left:9px; vertical-align:2px;
+  font-family:var(--sans); font-size:9.5px; font-weight:600; letter-spacing:.14em;
+  text-transform:uppercase; color:var(--lie); border:1px solid rgba(138,48,88,.38);
+  border-radius:99px; padding:2px 8px; background:rgba(138,48,88,.08)}
 
 .totem{position:sticky; top:88px; background:var(--nuit); color:var(--creme);
   border-radius:20px; padding:28px 26px; box-shadow:var(--ombre); overflow:hidden}
@@ -338,6 +695,12 @@ h3{font-family:var(--serif); font-weight:600; font-size:22px; line-height:1.18; 
   line-height:.92; margin:12px 0 0; color:#F7EED6; font-variant-numeric:tabular-nums; display:flex;
   align-items:baseline; gap:8px}
 .totem .gros .u{font-size:.32em; font-family:var(--sans); font-weight:500; color:var(--creme-2); letter-spacing:.02em}
+/* Le chiffre ne saute pas d'une valeur a l'autre : il y va, et le cliquet
+   donne la secousse d'un compteur mecanique qui vient de tomber. */
+.totem .gros #tot{display:inline-block}
+.totem .gros.bat #tot{animation:cliquet .4s var(--e)}
+@keyframes cliquet{0%{transform:translateY(0)}30%{transform:translateY(-.055em)}
+  62%{transform:translateY(.018em)}100%{transform:translateY(0)}}
 .totem .jrs{margin:8px 0 0; font-size:15px; color:var(--creme-2); font-weight:300}
 .totem .jrs b{color:var(--or-clair); font-weight:500}
 .totem .msg{margin:20px 0 0; padding-top:18px; border-top:1px solid var(--trait-inv);
@@ -359,8 +722,14 @@ h3{font-family:var(--serif); font-weight:600; font-size:22px; line-height:1.18; 
 .deuxsept{background:
     radial-gradient(680px 420px at 88% 8%, rgba(138,48,88,.2), transparent 60%),
     var(--nuit)}
-.deuxsept .eyebrow{color:#D98CAE}
-.deuxsept h2 em{color:#D98CAE}
+.deuxsept .eyebrow{color:var(--lie-clair)}
+.deuxsept h2 em{color:var(--lie-clair)}
+.jalon{display:inline-flex; align-items:center; gap:8px; margin:0 0 15px;
+  font-size:10.5px; font-weight:600; letter-spacing:.16em; text-transform:uppercase;
+  color:var(--lie-pale); background:rgba(138,48,88,.22);
+  border:1px solid rgba(217,140,174,.4); border-radius:99px; padding:6px 13px}
+.jalon::before{content:""; width:6px; height:6px; border-radius:50%; background:var(--lie-clair);
+  flex:0 0 auto; box-shadow:0 0 0 3px rgba(217,140,174,.18)}
 .echeance{display:grid; grid-template-columns:minmax(0,1fr) minmax(0,.85fr);
   gap:clamp(28px,4vw,54px); align-items:start; margin-top:clamp(30px,4vw,44px)}
 @media(max-width:900px){ .echeance{grid-template-columns:1fr} }
@@ -378,19 +747,35 @@ h3{font-family:var(--serif); font-weight:600; font-size:22px; line-height:1.18; 
 .honnete{margin:24px 0 0; padding:18px 20px; border:1px solid rgba(217,140,174,.3);
   border-radius:14px; background:rgba(138,48,88,.1); font-size:14px; line-height:1.62;
   color:var(--creme-2); font-weight:300}
-.honnete b{color:#F0C9DA; font-weight:500; display:block; margin-bottom:5px;
-  font-size:11px; letter-spacing:.16em; text-transform:uppercase}
+.honnete b{color:var(--lie-pale); font-weight:600; display:block; margin-bottom:5px;
+  font-family:var(--sans); font-size:11px; letter-spacing:.16em; text-transform:uppercase}
 
 /* ══════════════════════════════════════════════════════════════════════
    LES ÉCRANS
    ══════════════════════════════════════════════════════════════════════ */
 .ecrans{display:grid; gap:clamp(22px,3vw,34px); grid-template-columns:repeat(12,1fr); align-items:start}
-.cadre{background:var(--papier); border:1px solid var(--trait); border-radius:16px;
-  box-shadow:var(--ombre); overflow:hidden; display:flex; flex-direction:column; margin:0}
-.cadre .chrome{display:flex; align-items:center; gap:6px; padding:10px 14px;
-  border-bottom:1px solid var(--trait); background:rgba(20,17,13,.025)}
-.cadre .chrome i{width:8px; height:8px; border-radius:50%; background:rgba(20,17,13,.14); display:block}
-.cadre .chrome span{margin-left:8px; font-size:11px; color:var(--tres-doux); letter-spacing:.04em}
+.cadre{background:var(--papier); border:1px solid var(--trait); border-radius:18px;
+  box-shadow:var(--ombre-cadre); overflow:hidden; display:flex; flex-direction:column; margin:0}
+/* La barre de titre : un degrade court, trois pastilles teintees de la palette
+   (lie, or, vigne) et une barre d'adresse en pastille avec son cadenas dessine
+   en CSS. Aucun fichier, aucune requete — le cadenas est un SVG en ligne. */
+.cadre .chrome{display:flex; align-items:center; gap:6px; padding:9px 14px; position:relative;
+  border-bottom:1px solid var(--trait);
+  background:linear-gradient(180deg,rgba(251,250,246,.95),rgba(20,17,13,.05))}
+.cadre .chrome::after{content:""; position:absolute; left:0; right:0; bottom:0; height:1px;
+  background:rgba(255,255,255,.75); pointer-events:none}
+.cadre .chrome i{width:9px; height:9px; border-radius:50%; display:block; flex:0 0 auto;
+  background:rgba(20,17,13,.13);
+  box-shadow:inset 0 1px 0 rgba(255,255,255,.8), 0 0 0 .5px rgba(20,17,13,.07)}
+.cadre .chrome i:nth-of-type(1){background:rgba(138,48,88,.32)}
+.cadre .chrome i:nth-of-type(2){background:rgba(201,168,76,.45)}
+.cadre .chrome i:nth-of-type(3){background:rgba(61,107,39,.32)}
+.cadre .chrome span{margin-left:9px; display:inline-flex; align-items:center; gap:7px; min-width:0;
+  font-size:11px; color:var(--tres-doux); letter-spacing:.04em; white-space:nowrap;
+  overflow:hidden; text-overflow:ellipsis; background:var(--craie);
+  border:1px solid var(--trait); border-radius:99px; padding:3px 13px}
+.cadre .chrome span::before{content:""; flex:0 0 auto; width:9px; height:11px;
+  background:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 9 11'%3E%3Cpath d='M2.1 4.7V3.2a2.4 2.4 0 0 1 4.8 0v1.5' fill='none' stroke='%236F6857' stroke-width='1.1'/%3E%3Crect x='.9' y='4.6' width='7.2' height='5.7' rx='1.5' fill='%236F6857'/%3E%3C/svg%3E") center/9px 11px no-repeat}
 .cadre img{width:100%; height:auto}
 /* ★ La legende courait sur toute la largeur du cadre — 1076 px, ~140 signes
    par ligne sur un ecran de bureau. Une legende se lit d'un coup d'oeil ou
@@ -414,20 +799,39 @@ h3{font-family:var(--serif); font-weight:600; font-size:22px; line-height:1.18; 
 @media(max-width:760px){ .e-demi{grid-column:span 12} }
 /* Un telephone reste large comme un telephone : 332 px, pas la moitie de
    la page. Au-dela, la capture cesse de se lire comme un appareil. */
-.tel{background:var(--nuit); border-radius:26px; padding:8px; box-shadow:0 22px 54px rgba(20,17,13,.24);
-  max-width:332px; margin:0 auto}
-.tel img{border-radius:19px; width:100%; display:block}
+/* Double contour NET : un trait clair a l'interieur (border) et un trait
+   sombre d'un pixel colle a l'exterieur (premiere passe de box-shadow).
+   C'est ce qui fait lire un bord d'appareil plutot qu'un rectangle flou. */
+.tel{position:relative; max-width:332px; margin:0 auto; padding:9px 8px; border-radius:30px;
+  border:1px solid rgba(240,226,200,.16);
+  background:linear-gradient(152deg,#38312A 0%,#1B1712 34%,#14110D 70%,#241E17 100%);
+  box-shadow:0 0 0 1px rgba(20,17,13,.55),
+    0 1px 2px rgba(20,17,13,.14),
+    0 10px 22px rgba(20,17,13,.16),
+    0 30px 62px rgba(20,17,13,.26),
+    inset 0 1px 0 rgba(255,255,255,.10),
+    inset 0 -1px 0 rgba(255,255,255,.05)}
+.tel img{border-radius:22px; width:100%; display:block; position:relative; z-index:1}
+/* Le reflet : une seule bande diagonale, 14 % de blanc au plus fort, posee
+   AU-DESSUS de la capture. Au-dela, elle delave l'ecran qu'elle est censee
+   mettre en valeur — c'est le defaut classique du cadre de telephone. */
+.tel::after{content:""; position:absolute; inset:0; border-radius:30px; z-index:2;
+  pointer-events:none;
+  background:linear-gradient(118deg,
+    rgba(255,255,255,.14) 0%,rgba(255,255,255,.055) 13%,
+    rgba(255,255,255,0) 31%,rgba(255,255,255,0) 71%,
+    rgba(255,255,255,.04) 88%,rgba(255,255,255,.10) 100%)}
 
 /* ══════════════════════════════════════════════════════════════════════
    L'INDEX — les modules rangés par lieu
    ══════════════════════════════════════════════════════════════════════ */
 .lieux{display:grid; grid-template-columns:repeat(3,minmax(0,1fr)); gap:clamp(24px,3.4vw,42px)}
 @media(max-width:860px){ .lieux{grid-template-columns:1fr; gap:34px} }
-.lieu > .t{font-family:var(--serif); font-size:13px; font-weight:600; letter-spacing:.2em;
+.lieu > .t{font-family:var(--sans); font-size:11.5px; font-weight:600; letter-spacing:.2em;
   text-transform:uppercase; color:var(--terre); padding-bottom:11px; border-bottom:2px solid var(--terre)}
 .lieu ul{list-style:none; margin:0; padding:0}
 .lieu li{padding:15px 0; border-bottom:1px solid var(--trait)}
-.lieu .n{font-family:var(--serif); font-size:20px; font-weight:600; line-height:1.2}
+.lieu .n{font-family:var(--sans); font-size:16.5px; font-weight:600; line-height:1.34; letter-spacing:-.006em}
 .lieu .x{font-size:13.5px; color:var(--doux); font-weight:300; line-height:1.55; margin-top:4px}
 
 /* ══════════════════════════════════════════════════════════════════════
@@ -443,7 +847,7 @@ h3{font-family:var(--serif); font-weight:600; font-size:22px; line-height:1.18; 
 .auteur p b{color:var(--creme); font-weight:500}
 .auteur .sign{margin-top:22px; padding-top:18px; border-top:1px solid var(--trait-inv);
   font-size:13px; color:var(--creme-3); letter-spacing:.2px}
-.auteur .sign b{display:block; font-family:var(--serif); font-size:19px; color:var(--creme); font-weight:600; letter-spacing:0}
+.auteur .sign b{display:block; font-family:var(--sans); font-size:16px; color:var(--creme); font-weight:600; letter-spacing:-.004em; margin-bottom:3px}
 
 /* ══════════════════════════════════════════════════════════════════════
    LES QUESTIONS
@@ -451,8 +855,8 @@ h3{font-family:var(--serif); font-weight:600; font-size:22px; line-height:1.18; 
 .questions{border-top:1px solid var(--trait)}
 .q{border-bottom:1px solid var(--trait)}
 .q summary{list-style:none; cursor:pointer; padding:19px 44px 19px 2px; position:relative;
-  font-family:var(--serif); font-size:clamp(19px,2.2vw,22px); font-weight:600; line-height:1.3;
-  transition:color .18s}
+  font-family:var(--sans); font-size:clamp(16px,1.9vw,18px); font-weight:600; line-height:1.42;
+  letter-spacing:-.006em; transition:color .18s}
 .q summary::-webkit-details-marker{display:none}
 .q summary:hover{color:var(--terre)}
 .q summary::after{content:""; position:absolute; right:8px; top:50%; width:11px; height:11px;
@@ -461,6 +865,14 @@ h3{font-family:var(--serif); font-weight:600; font-size:22px; line-height:1.18; 
 .q[open] summary::after{transform:translateY(-25%) rotate(-135deg)}
 .q .rep{padding:0 44px 22px 2px; color:var(--doux); font-weight:300; font-size:15.5px; line-height:1.7; max-width:70ch}
 .q .rep b{color:var(--encre); font-weight:500}
+/* interpolate-size:allow-keywords (pose sur <html>) rend `auto` animable ;
+   ::details-content donne la boite a animer. Un navigateur qui ne connait ni
+   l'un ni l'autre ouvre d'un coup : le contenu reste la, c'est le mouvement
+   qui manque. Aucune hauteur mesuree en JavaScript, aucun reflow force. */
+.q::details-content{block-size:0; overflow:clip; opacity:0; content-visibility:hidden;
+  transition:block-size .34s var(--e), opacity .26s var(--e),
+    content-visibility .34s allow-discrete}
+.q[open]::details-content{block-size:auto; opacity:1; content-visibility:visible}
 
 /* ══════════════════════════════════════════════════════════════════════
    LES FORMULES
@@ -488,10 +900,24 @@ h3{font-family:var(--serif); font-weight:600; font-size:22px; line-height:1.18; 
   background-image:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 12 12'%3E%3Cpath d='M2.5 6.3l2.2 2.2 4.8-5' fill='none' stroke='%233D6B27' stroke-width='1.8' stroke-linecap='round' stroke-linejoin='round'/%3E%3C/svg%3E");
   background-size:12px; background-position:center; background-repeat:no-repeat}
 .plan li.herite{color:var(--doux); font-weight:500}
-.plan .accomp{margin-top:20px; padding-top:16px; border-top:1px solid var(--trait);
-  display:flex; align-items:baseline; gap:9px}
-.plan .accomp b{font-family:var(--serif); font-size:26px; font-weight:700; color:var(--terre)}
-.plan .accomp span{font-size:12.5px; color:var(--doux); line-height:1.4}
+.plan .accomp{margin-top:20px; padding-top:15px; border-top:1px solid rgba(138,48,88,.24);
+  display:grid; grid-template-columns:auto minmax(0,1fr); gap:3px 11px; align-items:baseline}
+.plan .accomp .et{grid-column:1/-1; font-size:10px; font-weight:600; letter-spacing:.16em;
+  text-transform:uppercase; color:var(--lie)}
+.plan .accomp b{font-family:var(--serif); font-size:27px; font-weight:700; color:var(--encre);
+  line-height:1; font-variant-numeric:tabular-nums}
+.plan .accomp span{font-size:12.5px; color:var(--doux); line-height:1.42}
+.plan .accomp span b{font-family:var(--sans); font-size:12.5px; font-weight:600; color:var(--encre)}
+/* Ce que vous payez, en trois cases : l'abonnement, la mise en route, le reste
+   (qui est vide). C'est l'objection du cout cache, traitee de face. */
+.clair{margin:28px auto 0; max-width:900px; display:grid;
+  grid-template-columns:repeat(3,minmax(0,1fr)); gap:1px; background:var(--trait);
+  border:1px solid var(--trait); border-radius:16px; overflow:hidden}
+@media(max-width:760px){ .clair{grid-template-columns:1fr; max-width:520px} }
+.clair > div{background:var(--papier); padding:18px 20px}
+.clair .k{font-size:10px; font-weight:600; letter-spacing:.16em; text-transform:uppercase; color:var(--lie)}
+.clair .v{font-size:15.5px; font-weight:600; line-height:1.32; margin-top:8px; letter-spacing:-.006em}
+.clair .x{font-size:12.5px; color:var(--doux); font-weight:300; line-height:1.5; margin-top:5px}
 .forfait{margin:26px auto 0; max-width:760px; text-align:center; font-size:14px;
   color:var(--doux); font-weight:300; line-height:1.7}
 .forfait b{color:var(--encre); font-weight:500}
@@ -505,7 +931,7 @@ h3{font-family:var(--serif); font-weight:600; font-size:22px; line-height:1.18; 
 .cloture h2{margin-left:auto; margin-right:auto; max-width:17ch}
 .cloture .lede{margin-left:auto; margin-right:auto}
 .cloture .quinze{margin:30px auto 0; font-family:var(--serif); font-style:italic;
-  font-size:clamp(19px,2.4vw,24px); color:var(--or-clair); max-width:36ch; line-height:1.4}
+  font-size:clamp(24px,2.6vw,28px); color:var(--or-clair); max-width:34ch; line-height:1.32}
 
 .pied{background:var(--nuit-2); color:var(--creme-3); padding:44px 0 calc(34px + env(safe-area-inset-bottom,0px));
   border-top:1px solid var(--trait-inv); font-size:13.5px}
@@ -520,7 +946,8 @@ h3{font-family:var(--serif); font-weight:600; font-size:22px; line-height:1.18; 
 .pied nav a{color:var(--creme-3); text-decoration:none}
 .pied nav a:hover{color:var(--or-clair)}
 .pied-b{margin-top:28px; padding-top:20px; border-top:1px solid var(--trait-inv);
-  display:flex; flex-wrap:wrap; gap:10px 22px; justify-content:space-between; font-size:12px; color:#6F6656}
+  display:flex; flex-wrap:wrap; gap:10px 22px; justify-content:space-between;
+  font-size:12px; color:var(--creme-3)}
 
 /* ══════════════════════════════════════════════════════════════════════
    COMPOSITION — mesure, equilibre, justification (§21)
@@ -559,7 +986,18 @@ p,.lede,.lieu .x,.ligne .hyp,.q .rep,.honnete,.aveu,.calendrier .q,.cadre figcap
   *,*::before,*::after{animation-duration:.001ms !important; animation-iteration-count:1 !important;
     transition-duration:.001ms !important}
   .mont{opacity:1; transform:none}
-  .lever > *,.hero-vue{opacity:1; transform:none}
+  /* ⚠️ Un délai n'est pas une durée : la règle globale raccourcit les
+     animations mais ne supprime pas leur attente. Sans « animation:none »,
+     le rideau tiendrait le titre invisible une seconde avant de le poser
+     d'un bloc — exactement ce que la préférence demande d'éviter. */
+  .lever > *,.hero-vue{opacity:1; transform:none; animation:none}
+  .barre{opacity:1; animation:none}
+  .hero-grille path{animation:none; stroke-dashoffset:0}
+  .hero-grille .parc,.hero-grille .etiq{animation:none; opacity:1}
+  .hero-grille .tete,.hero-grille .tete-r,
+  .hero-grille .pointeurs,.hero-grille .lisere{display:none}
+  .ligne.bat .coche::after{display:none}
+  .q::details-content{transition:none}
 }
 @media print{ .barre,#fil,.bande,.cloture{display:none} body{background:#fff} }
 </style>
@@ -589,36 +1027,75 @@ p,.lede,.lieu .x,.ligne .hyp,.q .rep,.honnete,.aveu,.calendrier .q,.cadre figcap
 <section class="hero">
   <svg class="hero-grille" viewBox="0 0 1440 900" preserveAspectRatio="xMaxYMid slice" aria-hidden="true" focusable="false">
     <defs>
+      <!-- Les opacités sont sorties du dégradé : c'est stroke-opacity qui les
+           porte, pour que la présence du cadastre soit réglable en un endroit. -->
       <linearGradient id="gFil" x1="0" y1="0" x2="1" y2="1">
-        <stop offset="0%" stop-color="#C9A84C" stop-opacity=".55"/>
-        <stop offset="100%" stop-color="#3D6B27" stop-opacity=".22"/>
+        <stop offset="0%" stop-color="#C9A84C" stop-opacity="1"/>
+        <stop offset="100%" stop-color="#3D6B27" stop-opacity=".4"/>
       </linearGradient>
+      <filter id="lueur" x="-40%" y="-40%" width="180%" height="180%">
+        <feGaussianBlur stdDeviation="3" result="f"/>
+        <feMerge><feMergeNode in="f"/><feMergeNode in="f"/><feMergeNode in="SourceGraphic"/></feMerge>
+      </filter>
       <linearGradient id="gJour" x1="0" y1="0" x2="0" y2="1">
         <stop offset="0%" stop-color="#C9A84C" stop-opacity=".16"/>
         <stop offset="100%" stop-color="#C9A84C" stop-opacity="0"/>
       </linearGradient>
     </defs>
-    <g class="cad" stroke="url(#gFil)" fill="none" stroke-width="1">
-      <path d="M905 92 L1402 44 L1438 372 L944 428 Z"/>
-      <path d="M944 428 L1438 372 L1462 664 L972 716 Z"/>
-      <path d="M745 118 L905 92 L944 428 L778 452 Z"/>
-      <path d="M778 452 L944 428 L972 716 L802 740 Z"/>
-      <path d="M1074 74 L1102 404"/>
-      <path d="M1238 60 L1268 388"/>
-      <path d="M1000 442 L1026 730"/>
-      <path d="M1180 420 L1208 706"/>
+    <g class="cad" stroke="url(#gFil)" fill="none">
+      <path pathLength="1" d="M905 92 L1402 44 L1438 372 L944 428 Z"/>
+      <path pathLength="1" d="M944 428 L1438 372 L1462 664 L972 716 Z"/>
+      <path pathLength="1" d="M745 118 L905 92 L944 428 L778 452 Z"/>
+      <path pathLength="1" d="M778 452 L944 428 L972 716 L802 740 Z"/>
+      <path pathLength="1" d="M1074 74 L1102 404"/>
+      <path pathLength="1" d="M1238 60 L1268 388"/>
+      <path pathLength="1" d="M1000 442 L1026 730"/>
+      <path pathLength="1" d="M1180 420 L1208 706"/>
     </g>
-    <g class="parc" fill="#C9A84C" fill-opacity=".07" stroke="#C9A84C" stroke-opacity=".5" stroke-width="1.2">
-      <path d="M1074 74 L1238 60 L1268 388 L1102 404 Z"/>
+    <g class="parc" fill="#C9A84C" stroke="#C9A84C">
+      <path pathLength="1" d="M1074 74 L1238 60 L1268 388 L1102 404 Z"/>
     </g>
-    <g class="rangs" stroke="#C9A84C" stroke-opacity=".3" stroke-width="1">
-      <path d="M1090 78 L1118 400"/><path d="M1108 77 L1136 398"/><path d="M1126 75 L1154 397"/>
-      <path d="M1144 74 L1172 395"/><path d="M1162 72 L1190 394"/><path d="M1180 71 L1208 392"/>
-      <path d="M1198 69 L1226 391"/><path d="M1216 68 L1244 389"/>
+    <g class="rangs" stroke="#C9A84C">
+      <path pathLength="1" d="M1090 78 L1118 400"/><path pathLength="1" d="M1108 77 L1136 398"/><path pathLength="1" d="M1126 75 L1154 397"/>
+      <path pathLength="1" d="M1144 74 L1172 395"/><path pathLength="1" d="M1162 72 L1190 394"/><path pathLength="1" d="M1180 71 L1208 392"/>
+      <path pathLength="1" d="M1198 69 L1226 391"/><path pathLength="1" d="M1216 68 L1244 389"/>
     </g>
+    <!-- La plume : les têtes lumineuses qui courent en tête du trait,
+         pendant le tracé seulement. -->
+    <g class="tete" fill="none" stroke="#F3DFA2" stroke-width="2.2" stroke-linecap="round" filter="url(#lueur)">
+      <path pathLength="1" d="M905 92 L1402 44 L1438 372 L944 428 Z"/>
+      <path pathLength="1" d="M944 428 L1438 372 L1462 664 L972 716 Z"/>
+      <path pathLength="1" d="M745 118 L905 92 L944 428 L778 452 Z"/>
+      <path pathLength="1" d="M778 452 L944 428 L972 716 L802 740 Z"/>
+      <path pathLength="1" class="p" d="M1074 74 L1238 60 L1268 388 L1102 404 Z"/>
+    </g>
+    <g class="tete-r" fill="none" stroke="#F6E7B8" stroke-width="2.1" stroke-linecap="round" filter="url(#lueur)">
+      <path pathLength="1" d="M1090 78 L1118 400"/><path pathLength="1" d="M1108 77 L1136 398"/>
+      <path pathLength="1" d="M1126 75 L1154 397"/><path pathLength="1" d="M1144 74 L1172 395"/>
+      <path pathLength="1" d="M1162 72 L1190 394"/><path pathLength="1" d="M1180 71 L1208 392"/>
+      <path pathLength="1" d="M1198 69 L1226 391"/><path pathLength="1" d="M1216 68 L1244 389"/>
+    </g>
+
+    <!-- Les points qui remontent les rangs, en boucle. Un tiret très court
+         plus un bout arrondi font un point ; pathLength="1" le fait avancer
+         sans le moindre calcul de longueur. Pas de filtre ici : celui-là
+         tourne en permanence, un flou sur huit chemins coûterait cher. -->
+    <g class="pointeurs" fill="none" stroke="#F3DFA2" stroke-width="3" stroke-linecap="round">
+      <path pathLength="1" d="M1090 78 L1118 400"/><path pathLength="1" d="M1108 77 L1136 398"/>
+      <path pathLength="1" d="M1126 75 L1154 397"/><path pathLength="1" d="M1144 74 L1172 395"/>
+      <path pathLength="1" d="M1162 72 L1190 394"/><path pathLength="1" d="M1180 71 L1208 392"/>
+      <path pathLength="1" d="M1198 69 L1226 391"/><path pathLength="1" d="M1216 68 L1244 389"/>
+    </g>
+
+    <!-- Le liseré : un segment fait le tour de la parcelle retenue toutes
+         les sept secondes, comme la sélection dans l'application. -->
+    <g class="lisere" fill="none" stroke="#E3C77A" stroke-opacity=".65" stroke-width="1.6" stroke-linecap="round">
+      <path pathLength="1" d="M1074 74 L1238 60 L1268 388 L1102 404 Z"/>
+    </g>
+
     <g class="etiq">
-      <circle cx="1172" cy="228" r="17" fill="none" stroke="#C9A84C" stroke-opacity=".8" stroke-width="1.2"/>
-      <circle cx="1172" cy="228" r="5" fill="#C9A84C"/>
+      <circle class="halo" cx="1172" cy="228" r="17" fill="none" stroke="#C9A84C" stroke-opacity=".8" stroke-width="1.2"/>
+      <circle class="pt" cx="1172" cy="228" r="5" fill="#C9A84C"/>
       <text x="1202" y="234" fill="#CBBFA6" font-family="Outfit, sans-serif" font-size="19">Les Grandes Vignes &#183; 0,42 ha</text>
     </g>
     <rect x="880" y="0" width="600" height="900" fill="url(#gJour)"/>
@@ -788,6 +1265,7 @@ p,.lede,.lieu .x,.ligne .hyp,.q .rep,.honnete,.aveu,.calendrier .q,.cadre figcap
 <section class="sect nuit deuxsept" id="conformite">
   <div class="wrap">
     <div class="tete mont">
+      <p class="jalon">Échéance réglementaire</p>
       <p class="eyebrow">Conformité</p>
       <h2>Au 1<sup>er</sup> janvier 2027, votre registre phyto devra être <em>lisible par une machine</em>.</h2>
       <p class="lede">Le règlement européen 2023/564, transposé en France par l&rsquo;arrêté du 24&nbsp;décembre 2025, impose d&rsquo;enregistrer chaque utilisation de produit dans un format électronique structuré. Le papier et le PDF scanné ne comptent plus.</p>
@@ -807,7 +1285,7 @@ p,.lede,.lieu .x,.ligne .hyp,.q .rep,.honnete,.aveu,.calendrier .q,.cadre figcap
       </div>
 
       <div class="mont">
-        <h3 style="font-size:24px">Ma Vigne l&rsquo;écrit pendant que vous traitez.</h3>
+        <h3 style="font-size:21px">Ma Vigne l&rsquo;écrit pendant que vous traitez.</h3>
         <p class="lede" style="margin-top:14px">L&rsquo;export produit un fichier structuré, <b style="color:var(--creme);font-weight:500">une ligne par produit et par parcelle</b>, dans l&rsquo;ordre des colonnes prévues par l&rsquo;annexe de l&rsquo;arrêté. Vous choisissez la fenêtre&nbsp;: l&rsquo;exercice en cours, la campagne consultée, ou tout le registre.</p>
         <div class="colonnes">
           <span>SIRET détenteur</span><span>SIRET bénéficiaire</span><span>Produit</span><span>N° AMM</span>
@@ -966,6 +1444,10 @@ p,.lede,.lieu .x,.ligne .hyp,.q .rep,.honnete,.aveu,.calendrier .q,.cadre figcap
         <div class="rep">L&rsquo;installation est un <b>forfait</b>, pas une facturation à l&rsquo;heure&nbsp;: reprise du parcellaire, création des comptes de l&rsquo;équipe, paramétrage du barème et des périodes, formation. Selon la formule, il comprend <b>10, 15 ou 20 heures d&rsquo;accompagnement</b>. Un domaine d&rsquo;une vingtaine d&rsquo;hectares est en fonctionnement en quelques jours.</div>
       </details>
       <details class="q">
+        <summary>«&nbsp;Le forfait de mise en route, c&rsquo;est combien&nbsp;?&nbsp;»</summary>
+        <div class="rep"><b>490&nbsp;€ pour Essentiel, 690&nbsp;€ pour Vigneron, 990&nbsp;€ pour Domaine</b>, payés une seule fois au démarrage. Sont compris&nbsp;: l&rsquo;import de votre parcellaire depuis un export <b>PAC / Telepac</b> ou un fichier <b>KML</b>, la création des comptes de l&rsquo;équipe, le paramétrage du barème et des périodes, et la formation. Au-delà du volant d&rsquo;heures compris dans la formule, l&rsquo;heure supplémentaire est à <b>60&nbsp;€</b>, annoncée et acceptée avant d&rsquo;être engagée. Il n&rsquo;y a pas d&rsquo;autre ligne&nbsp;: ni frais de dossier, ni coût par utilisateur, ni option obligatoire.</div>
+      </details>
+      <details class="q">
         <summary>«&nbsp;C&rsquo;est encore un abonnement par utilisateur&nbsp;?&nbsp;»</summary>
         <div class="rep">Non. <b>Le prix est celui du domaine, pas celui d&rsquo;un siège.</b> Que vous soyez trois ou quinze à saisir, la facture ne bouge pas&nbsp;: c&rsquo;est la formule qui détermine les modules ouverts, et le nombre d&rsquo;utilisateurs qu&rsquo;elle autorise.</div>
       </details>
@@ -979,7 +1461,7 @@ p,.lede,.lieu .x,.ligne .hyp,.q .rep,.honnete,.aveu,.calendrier .q,.cadre figcap
     <div class="tete mid mont">
       <p class="eyebrow mid">Formules</p>
       <h2>Un prix par domaine. Pas par utilisateur.</h2>
-      <p class="lede">La formule détermine les modules ouverts. L&rsquo;installation et la reprise de vos données font l&rsquo;objet d&rsquo;un forfait séparé, chiffré après un premier échange.</p>
+      <p class="lede">La formule détermine les modules ouverts et le nombre de comptes. À côté de l&rsquo;abonnement, un <b style="color:var(--encre);font-weight:500">forfait de mise en route payé une seule fois</b>&nbsp;— son montant est écrit sur chaque carte, pas réservé au devis.</p>
     </div>
 
     <div class="plans mont">
@@ -994,7 +1476,11 @@ p,.lede,.lieu .x,.ligne .hyp,.q .rep,.honnete,.aveu,.calendrier .q,.cadre figcap
           <li>Météo par parcelle</li>
           <li>Réglages du domaine</li>
         </ul>
-        <div class="accomp"><b>10&nbsp;h</b><span>d&rsquo;accompagnement comprises<br>à l&rsquo;installation</span></div>
+        <div class="accomp">
+          <span class="et">Mise en route</span>
+          <b>490&nbsp;€</b>
+          <span>une seule fois, au démarrage &#183; <b>10&nbsp;h</b> d&rsquo;accompagnement comprises</span>
+        </div>
       </div>
 
       <div class="plan">
@@ -1007,7 +1493,11 @@ p,.lede,.lieu .x,.ligne .hyp,.q .rep,.honnete,.aveu,.calendrier .q,.cadre figcap
           <li>Matériel &amp; carburant</li>
           <li>Traitements &amp; registre réglementaire</li>
         </ul>
-        <div class="accomp"><b>15&nbsp;h</b><span>d&rsquo;accompagnement comprises<br>à l&rsquo;installation</span></div>
+        <div class="accomp">
+          <span class="et">Mise en route</span>
+          <b>690&nbsp;€</b>
+          <span>une seule fois, au démarrage &#183; <b>15&nbsp;h</b> d&rsquo;accompagnement comprises</span>
+        </div>
       </div>
 
       <div class="plan phare">
@@ -1022,12 +1512,34 @@ p,.lede,.lieu .x,.ligne .hyp,.q .rep,.honnete,.aveu,.calendrier .q,.cadre figcap
           <li>Cuvier &amp; Chai</li>
           <li>La Réserve</li>
         </ul>
-        <div class="accomp"><b>20&nbsp;h</b><span>d&rsquo;accompagnement comprises<br>à l&rsquo;installation</span></div>
+        <div class="accomp">
+          <span class="et">Mise en route</span>
+          <b>990&nbsp;€</b>
+          <span>une seule fois, au démarrage &#183; <b>20&nbsp;h</b> d&rsquo;accompagnement comprises</span>
+        </div>
       </div>
     </div>
 
-    <p class="forfait">Le <b>forfait de mise en route</b> est établi sur devis après un premier échange. Il comprend l&rsquo;accompagnement indiqué ci-dessus&nbsp;: reprise de votre parcellaire, création des comptes, paramétrage du barème et des périodes, et formation de l&rsquo;équipe.</p>
-    <p class="legal">TVA non applicable, article 293&nbsp;B du CGI. Aucun paiement en ligne&nbsp;: tout démarre par un échange.</p>
+    <div class="clair mont">
+      <div>
+        <div class="k">Tous les mois</div>
+        <div class="v">29, 49 ou 79&nbsp;€ selon la formule</div>
+        <div class="x">Pour l&rsquo;ensemble du domaine, quel que soit le nombre de comptes créés. Pas de durée d&rsquo;engagement&nbsp;: résiliable par écrit avec trente jours de préavis.</div>
+      </div>
+      <div>
+        <div class="k">Une seule fois</div>
+        <div class="v">490, 690 ou 990&nbsp;€ de mise en route</div>
+        <div class="x">Import de votre parcellaire (export PAC / Telepac ou fichier KML) compris, comptes créés, barème et périodes paramétrés, équipe formée sur ses propres parcelles.</div>
+      </div>
+      <div>
+        <div class="k">Et c&rsquo;est tout</div>
+        <div class="v">Aucun autre frais</div>
+        <div class="x">Ni frais de dossier, ni coût par utilisateur, ni option obligatoire, ni commission. Mises à jour et support par e-mail compris dans l&rsquo;abonnement.</div>
+      </div>
+    </div>
+
+    <p class="forfait">Le forfait couvre <b>10, 15 ou 20 heures</b> d&rsquo;accompagnement selon la formule&nbsp;— un domaine d&rsquo;une vingtaine d&rsquo;hectares tient dans le volant inclus. Au-delà, l&rsquo;heure supplémentaire est à <b>60&nbsp;€</b>, annoncée et acceptée avant d&rsquo;être engagée&nbsp;: jamais découverte sur la facture. Le devis reprend cette grille telle quelle.</p>
+    <p class="legal">TVA non applicable, article 293&nbsp;B du CGI&nbsp;— les montants affichés sont ceux que vous payez. Aucun paiement en ligne&nbsp;: tout démarre par un échange.</p>
 
     <div class="actes mid" style="margin-top:34px">
       <a class="bt bt-or" href="https://mavigneapp.fr/essai.html">Demander un essai de 15&nbsp;jours</a>
@@ -1217,12 +1729,36 @@ p,.lede,.lieu .x,.ligne .hyp,.q .rep,.honnete,.aveu,.calendrier .q,.cadre figcap
     if (btHors) btHors.setAttribute("aria-checked", "false");
     var horsOn = false;
 
+    /* ── Odomètre ──────────────────────────────────────────
+       Le chiffre écrit dans le HTML est déjà le bon : l'animation ne fait que
+       rejouer le trajet, elle ne conditionne JAMAIS la valeur finale. Script
+       en panne ou coupé, le totem affiche quand même le total. */
+    var tween = null;
+    function poseTotal(v) {
+      var gros = totEl.parentNode;
+      if (tween) { window.cancelAnimationFrame(tween); tween = null; }
+      var de = parseInt(totEl.textContent, 10);
+      if (isNaN(de)) de = v;
+      if (reduit || de === v) { totEl.textContent = String(v); return; }
+      if (gros) { gros.classList.remove("bat"); void gros.offsetWidth; gros.classList.add("bat"); }
+      var duree = Math.min(120 + Math.abs(v - de) * 4, 620);
+      var t0 = null;
+      function pas(t) {
+        if (t0 === null) t0 = t;
+        var p = Math.min((t - t0) / duree, 1);
+        var e = 1 - Math.pow(1 - p, 3);
+        totEl.textContent = String(Math.round(de + (v - de) * e));
+        tween = p < 1 ? window.requestAnimationFrame(pas) : null;
+      }
+      tween = window.requestAnimationFrame(pas);
+    }
+
     function recalcule() {
       var t = 0;
       for (var i = 0; i < CREDITS.length; i++) if (etats[i]) t += heures(CREDITS[i]);
       var base = t;
       if (horsOn) t += heures(HORS);
-      totEl.textContent = String(t);
+      poseTotal(t);
       var j = Math.round(t / 8);
       jrsEl.textContent = t === 0 ? "aucune journée" : "≈ " + j + (j > 1 ? " journées" : " journée");
 
@@ -1244,7 +1780,7 @@ p,.lede,.lieu .x,.ligne .hyp,.q .rep,.honnete,.aveu,.calendrier .q,.cadre figcap
       msgEl.innerHTML = m;
     }
 
-    function bascule(li, forcer) {
+    function bascule(li, forcer, muet) {
       var idx = li.getAttribute("data-i");
       var on;
       if (idx === null) { horsOn = (typeof forcer === "boolean") ? forcer : !horsOn; on = horsOn; }
@@ -1252,6 +1788,9 @@ p,.lede,.lieu .x,.ligne .hyp,.q .rep,.honnete,.aveu,.calendrier .q,.cadre figcap
       li.setAttribute("data-on", on ? "1" : "0");
       var b = li.querySelector(".bouton");
       if (b) b.setAttribute("aria-checked", on ? "true" : "false");
+      /* L'onde ne part que sur un geste direct : la remise à zéro rebascule
+         neuf lignes d'un coup, et neuf ondes simultanées seraient du bruit. */
+      if (!reduit && !muet) { li.classList.remove("bat"); void li.offsetWidth; li.classList.add("bat"); }
       recalcule();
     }
 
@@ -1263,12 +1802,30 @@ p,.lede,.lieu .x,.ligne .hyp,.q .rep,.honnete,.aveu,.calendrier .q,.cadre figcap
 
     if (rzEl) rzEl.addEventListener("click", function () {
       var lis = hote.querySelectorAll(".ligne");
-      for (var i = 0; i < lis.length; i++) bascule(lis[i], true);
-      if (horsOn) bascule(horsHote, false);
+      for (var i = 0; i < lis.length; i++) bascule(lis[i], true, true);
+      if (horsOn) bascule(horsHote, false, true);
       recalcule();
     });
 
     recalcule();
+
+    /* Le compteur ne part qu'au moment où le totem entre dans l'écran, une
+       seule fois. Lancé au chargement, il aurait fini de tourner bien avant
+       que le lecteur n'arrive dessus — une animation que personne ne voit. */
+    if (!reduit && "IntersectionObserver" in window && totEl.parentNode) {
+      var vu = false;
+      var oeilTot = new IntersectionObserver(function (es) {
+        for (var q = 0; q < es.length; q++) {
+          if (es[q].isIntersecting && !vu) {
+            vu = true;
+            oeilTot.disconnect();
+            var cible = parseInt(totEl.textContent, 10);
+            if (!isNaN(cible)) { totEl.textContent = "0"; poseTotal(cible); }
+          }
+        }
+      }, { threshold: 0.5 });
+      oeilTot.observe(totEl.parentNode);
+    }
   }
 })();
 </script>
