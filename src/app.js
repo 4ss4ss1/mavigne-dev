@@ -1207,6 +1207,123 @@ function _normalizeTaches(fbTaches) {
 
 
 
+// ── UX-LOGIN : l'appareil se souvient du dernier profil connecté ───────────
+// ⚠ CE N'EST PAS UNE MESURE DE SÉCURITÉ, et le confondre avec SEC-3 serait une
+// faute. La liste complète reste à un clic, et le serveur envoie toujours tous
+// les noms : ils sont écrits sur les tuiles, ils n'ont jamais été secrets.
+// Ce qui est protégé, ce sont les ADRESSES, et ça c'est SEC-3.
+// Ici on ne fait qu'éviter à quelqu'un de chercher son nom parmi douze, deux fois
+// par jour, sur un téléphone, avec des gants.
+//
+// Mémoire par DOMAINE : un même appareil peut servir à deux tenants (Nico chez MG
+// et en console GT). Une clé unique ferait afficher la tuile d'un domaine dans
+// l'autre — elle ne s'y trouverait pas, on retomberait sur la liste, mais le
+// souvenir du premier domaine serait écrasé à chaque bascule.
+var _loginVoirTous = false;   // « Ce n'est pas moi » : vrai pour la session d'onglet
+var _loginMemAlerte = false;  // localStorage refusé (navigation privée) : on le dit UNE fois
+
+function _loginMemKey(){
+  return 'mavigne_profil_' + (localStorage.getItem('mavigne_tenant') || '');
+}
+// ⚠ Un catch muet ici serait invisible ET répété à chaque ouverture (C14). On
+// journalise, mais une seule fois : en navigation privée l'échec est permanent et
+// noierait le signalement.
+function _loginMemSignale(e, quoi){
+  if(_loginMemAlerte) return;
+  _loginMemAlerte = true;
+  if(window.logError) window.logError({ level:'info', cat:'storage',
+    msg:'memoire du profil de connexion indisponible — ' + quoi,
+    detail:(e && e.name) ? e.name : String(e) });
+}
+function _loginMemLire(){
+  try { return localStorage.getItem(_loginMemKey()) || ''; }
+  catch(e){ _loginMemSignale(e, 'lecture'); return ''; }
+}
+function _loginMemEcrire(nom){
+  try { localStorage.setItem(_loginMemKey(), String(nom || '')); }
+  catch(e){ _loginMemSignale(e, 'ecriture'); }
+}
+function _loginMemOublier(){
+  try { localStorage.removeItem(_loginMemKey()); }
+  catch(e){ _loginMemSignale(e, 'effacement'); }
+}
+window._loginMemOublier = _loginMemOublier;
+
+// « Ce n'est pas moi » — rouvre la liste complète pour cette session d'onglet.
+// On n'efface PAS le souvenir : quelqu'un qui regarde qui d'autre existe, puis
+// referme, ne doit pas avoir perdu sa propre tuile.
+function _loginVoirTousProfils(){
+  _loginVoirTous = true;
+  _loginRenderTuiles();
+}
+window._loginVoirTousProfils = _loginVoirTousProfils;
+
+// Rendu des tuiles. Extrait d'initLogin pour être rappelable seul : logout() doit
+// rouvrir la liste sans rejouer les gardes d'initLogin (démo, visite guidée,
+// retry Firebase) — un logout depuis la visite guidée la relâncerait.
+function _loginRenderTuiles(){
+  var profiles = document.getElementById('login-profiles');
+  if(!profiles) return;
+  profiles.innerHTML = '';
+  profiles.style.display = '';
+
+  // Membres affichables — règle inchangée : un Inactif n'a pas de tuile.
+  // ⚠ On garde l'INDEX D'ORIGINE dans MEMBRES : selectProfile(idx) et la couleur
+  // LP_COLORS[idx % …] en dépendent. Réindexer un tableau filtré ferait ouvrir la
+  // fiche de quelqu'un d'autre — c'est le piège de ce lot.
+  var visibles = [];
+  for(var i=0; i<MEMBRES.length; i++){
+    var mv = MEMBRES[i];
+    if(mv && mv.nom && mv.statut !== 'Inactif') visibles.push(i);
+  }
+
+  // Une seule tuile ? Trois conditions, toutes nécessaires.
+  var seul = -1;
+  if(!_loginVoirTous && visibles.length > 1){
+    var memo = _loginMemLire().trim().toLowerCase();
+    if(memo){
+      for(var k=0; k<visibles.length; k++){
+        var mk = MEMBRES[visibles[k]];
+        if(mk && String(mk.nom).trim().toLowerCase() === memo){ seul = visibles[k]; break; }
+      }
+    }
+  }
+  // Souvenir orphelin (membre supprimé ou passé Inactif) : seul reste à -1 et la
+  // liste complète revient d'elle-même. Rien à nettoyer, rien à expliquer.
+  var aAfficher = (seul >= 0) ? [seul] : visibles;
+
+  aAfficher.forEach(function(idx){
+    var m = MEMBRES[idx];
+    var col = LP_COLORS[idx % LP_COLORS.length];
+    var btn = document.createElement('div');
+    btn.className = 'lp-btn';
+    var avaDiv = document.createElement('div');
+    avaDiv.className = 'lp-avatar';
+    avaDiv.style.background = col;
+    avaDiv.textContent = m.nom.charAt(0).toUpperCase();
+    var nameDiv = document.createElement('div');
+    nameDiv.className = 'lp-name';
+    nameDiv.textContent = m.nom;
+    var roleDiv = document.createElement('div');
+    roleDiv.className = 'lp-role';
+    roleDiv.textContent = getRoleLabel(m.roles);
+    btn.appendChild(avaDiv);
+    btn.appendChild(nameDiv);
+    btn.appendChild(roleDiv);
+    btn.addEventListener('click', function(){ selectProfile(idx); });
+    profiles.appendChild(btn);
+  });
+
+  // Le lien de sortie. Il doit rester VISIBLE et large : sur une tablette de hangar
+  // ou un téléphone de service, la tuile unique gêne au lieu d'aider, et c'est ce
+  // lien qui rattrape tout. Le cacher pour faire propre casserait l'appareil partagé.
+  var lien = document.getElementById('login-autres');
+  if(lien) lien.style.display = (seul >= 0) ? 'block' : 'none';
+  var sous = document.getElementById('login-sub-txt');
+  if(sous) sous.textContent = (seul >= 0) ? 'Bon retour' : 'Choisissez votre profil';
+}
+window._loginRenderTuiles = _loginRenderTuiles;
+
 function initLogin(){
   if(window.initGTLoginTap) window.initGTLoginTap();
 
@@ -1245,31 +1362,7 @@ function initLogin(){
   }
   window._loginRetryCount = 0;
 
-  profiles.style.display = '';
-  for(var i=0; i<MEMBRES.length; i++){
-    (function(idx){
-      var m = MEMBRES[idx];
-      if(m && m.statut==='Inactif') return; // ancien salarie : pas d'acces appli, masque du choix de profil
-      var col = LP_COLORS[idx % LP_COLORS.length];
-      var btn = document.createElement('div');
-      btn.className = 'lp-btn';
-      var avaDiv = document.createElement('div');
-      avaDiv.className = 'lp-avatar';
-      avaDiv.style.background = col;
-      avaDiv.textContent = m.nom.charAt(0).toUpperCase();
-      var nameDiv = document.createElement('div');
-      nameDiv.className = 'lp-name';
-      nameDiv.textContent = m.nom;
-      var roleDiv = document.createElement('div');
-      roleDiv.className = 'lp-role';
-      roleDiv.textContent = getRoleLabel(m.roles);
-      btn.appendChild(avaDiv);
-      btn.appendChild(nameDiv);
-      btn.appendChild(roleDiv);
-      btn.addEventListener('click', function(){ selectProfile(idx); });
-      profiles.appendChild(btn);
-    })(i);
-  }
+  _loginRenderTuiles();
 }
 
 // ════ FONCTIONS TENANT DÉMO ═══════════════════════════════════════════
@@ -2688,9 +2781,64 @@ window._mvtChapter=_mvtChapter;
 window.initLogin = initLogin;
 window.confirmDemoCode      = confirmDemoCode;
 
+// ── SEC-3 : l'adresse d'un membre ne sort plus en bloc ────────────────────
+// AVANT : getLoginRoster renvoyait l'email de TOUS les membres, avant toute
+// authentification. Deux fuites, dont une SANS LE MOINDRE OUTIL :
+//   1. l'onglet Réseau du navigateur montrait toutes les adresses d'un coup ;
+//   2. « Mot de passe oublié » PRÉ-REMPLISSAIT le champ avec l'adresse du membre
+//      choisi — trois clics pour lire celle d'un collègue (corrigé dans reglages.js).
+// MAINTENANT : le roster ne porte plus d'email ; on demande celle d'UN SEUL membre.
+//
+// ★ LA DEMANDE PART AU CLIC SUR LA TUILE, PAS À LA VALIDATION. Saisir un mot de passe
+// prend plusieurs secondes : la réponse est déjà là quand on appuie sur « Se connecter ».
+// Zéro attente ajoutée dans le cas courant.
+var _loginPendingEmail = '';
+window._loginPendingEmail = _loginPendingEmail;
+var _loginEmailPromise = null;
+
+function _loginResolveEmail(m){
+  _loginPendingEmail = '';
+  _loginEmailPromise = null;
+  if(!m || !m.nom) return;
+  // Repli posé D'ABORD : MEMBRES porte déjà l'email quand la liste vient d'une lecture
+  // Firestore directe (session présente sur l'appareil), du démarrage hors ligne, ou du
+  // harnais e2e qui injecte ses membres à la main.
+  if(m.email) _loginPendingEmail = m.email;
+  if(!navigator.onLine || !window.fbGetLoginEmail) return;
+  // ⚠ On appelle MÊME avec un repli en main. C'est délibéré : c'est ce qui fait tourner
+  // le chemin neuf en production PENDANT la période de transition. Sans ça, le jour où
+  // l'email disparaît du roster serait son premier essai réel.
+  _loginEmailPromise = window.fbGetLoginEmail(m.nom).then(function(em){
+    if(em) _loginPendingEmail = em;
+    return em;
+  }).catch(function(e){
+    if(window.logError) window.logError({ level:'info', cat:'auth',
+      msg:'adresse du profil non resolue', detail:(e && (e.code || e.message)) || String(e) });
+    return '';
+  });
+}
+window._loginResolveEmail = _loginResolveEmail;
+
+// Attente BORNÉE. Sans borne, un réseau qui tombe entre le clic et la validation fige
+// le bouton « Connexion… » sans fin ni message.
+// Deux bornes, et l'écart est le sujet : avec un repli en main, faire patienter huit
+// secondes pour un login qu'on peut déjà servir serait absurde.
+async function _loginAwaitEmail(){
+  if(_loginEmailPromise){
+    var _ms = _loginPendingEmail ? 2500 : 8000;
+    await Promise.race([
+      _loginEmailPromise,
+      new Promise(function(r){ setTimeout(r, _ms); })
+    ]);
+  }
+  return _loginPendingEmail;
+}
+window._mvLoginAwaitEmail = _loginAwaitEmail;
+
 function selectProfile(idx){
   loginPendingIdx = idx;
   var m = MEMBRES[idx];
+  _loginResolveEmail(m);   // SEC-3 : demande l'adresse de CE profil, en tâche de fond
   document.getElementById('login-profiles').style.display = 'none';
   document.getElementById('login-sub-txt').style.display = 'none';
   document.getElementById('login-pwd-panel').style.display = 'block';
@@ -2703,6 +2851,7 @@ function selectProfile(idx){
 
 function backToProfiles(){
   loginPendingIdx = -1;
+  _loginResolveEmail(null);   // SEC-3 : on oublie l'adresse en quittant le profil
   document.getElementById('login-profiles').style.display = 'grid';
   document.getElementById('login-sub-txt').style.display = 'block';
   document.getElementById('login-pwd-panel').style.display = 'none';
@@ -2773,16 +2922,25 @@ async function confirmLogin(){
   if(loginPendingIdx < 0) return;
   var m = MEMBRES[loginPendingIdx];
   var saisi = document.getElementById('login-pwd-input').value;
-  if(!m.email) {
-    document.getElementById('login-pwd-error').textContent = 'Aucun email associé à ce compte.';
-    document.getElementById('login-pwd-error').style.display = 'block';
-    return;
-  }
   const btn = document.getElementById('login-pwd-btn');
   btn.disabled = true;
   btn.textContent = 'Connexion…';
+  // SEC-3 : l'adresse ne vient plus du roster, elle a été demandée au clic sur la tuile.
+  // Dans le cas courant elle est déjà là et cet await ne coûte rien.
+  // ⚠ Le message d'échec a changé de cause : ce n'est plus seulement « pas d'email »
+  // (fiche incomplète), c'est aussi « le serveur n'a pas répondu ». Il doit couvrir les
+  // deux sans mentir sur l'une : dire « compte sans adresse » à quelqu'un qui a juste
+  // perdu le réseau l'enverrait déranger son responsable pour rien.
+  var _mail = await _loginAwaitEmail();
+  if(!_mail) {
+    btn.disabled = false;
+    btn.textContent = 'Se connecter';
+    document.getElementById('login-pwd-error').textContent = 'Compte inaccessible — vérifiez votre connexion, puis réessayez. Si cela persiste, contactez votre responsable.';
+    document.getElementById('login-pwd-error').style.display = 'block';
+    return;
+  }
   try {
-    const cred = await firebase.auth().signInWithEmailAndPassword(m.email, saisi);
+    const cred = await firebase.auth().signInWithEmailAndPassword(_mail, saisi);
 
     // ── SEC-2 : premier login → changement de mot de passe obligatoire ──
     // Placé ICI, avant toute entrée : le compte est authentifié (la session existe) mais
@@ -2803,6 +2961,12 @@ async function confirmLogin(){
     m._firebaseUser = cred.user;
     currentUser = m;
     window.currentUser = currentUser;
+    // UX-LOGIN — on retient le profil SEULEMENT ici, au succes definitif.
+    // Pas au clic sur la tuile : on garderait le nom de quelqu'un qui s'est trompe
+    // de profil et n'a jamais pu entrer. Pas non plus sur le chemin SEC-2 du premier
+    // mot de passe, qui sort par un `return` plus haut : ce login-la n'est pas fini.
+    _loginMemEcrire(m.nom);
+    _loginVoirTous = false;
     try{ _mvSessArm(cred.user && cred.user.uid); }catch(e){}
     if(DEBUG) console.log('Login Firebase OK:', m.nom, 'roles:', m.roles);
     loginPendingIdx = -1;
@@ -2859,7 +3023,7 @@ async function confirmLogin(){
     } else if (!e.code) {
       _loginErr = 'Connexion bloquée (extension navigateur ou VPN). Désactivez uBlock / MetaMask et réessayez.';
     }
-    console.warn('[Login] Erreur Firebase:', e.code, m.email);
+    console.warn('[Login] Erreur Firebase:', e.code, _mail);
     document.getElementById('login-pwd-error').textContent = _loginErr;
     document.getElementById('login-pwd-error').style.display = 'block';
     document.getElementById('login-pwd-input').value = '';
@@ -2897,8 +3061,18 @@ function logout(){
   } catch(e) { if(window.logError) window.logError({level:'info', cat:'storage',
     msg:'Purge locale de déconnexion incomplète', detail:(e && e.name) ? e.name : ''}); }
   loginPendingIdx=-1;
+  // UX-LOGIN + doctrine SEC-5 — une déconnexion VOLONTAIRE efface le souvenir.
+  // Arbitrage assumé, et j'ai changé d'avis en écrivant : logout() purge déjà LS_KEY
+  // et les sauvegardes locales « poste partagé ». Garder la tuile d'Alexandre affichée
+  // sur la tablette du hangar après avoir effacé toutes ses données serait incohérent.
+  // ⚠ Aucune déconnexion AUTOMATIQUE n'existe (vérifié : logout() n'a que deux
+  // appelants, l'avatar et Réglages). Personne ne perd donc son souvenir tout seul.
+  _loginMemOublier();
+  _loginVoirTous = false;
   document.querySelectorAll('.page').forEach(p=>p.classList.remove('active'));
   document.getElementById('login-profiles').style.display = 'grid';
+  // Rendu direct, PAS initLogin() : celui-ci relancerait la visite guidée si on en sort.
+  _loginRenderTuiles();
   document.getElementById('login-pwd-panel').style.display = 'none';
   document.getElementById('login-screen').style.display='flex';
 }

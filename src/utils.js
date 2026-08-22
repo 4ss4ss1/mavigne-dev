@@ -23,7 +23,7 @@ export const GT_ADMIN_EMAIL = 'ngdevpro@gmail.com';
 // WHATS_NEW   : tableau vide = modal desactive pour cette version.
 // Format item : { emoji:'📅', titre:'Titre court', desc:'Phrase utilisateur.' }
 // Regle : seulement les changements visibles par les utilisateurs.
-export const APP_VERSION = '6.44';
+export const APP_VERSION = '6.45';
 // ════ Journal des nouveautés (récap cumulatif) ════
 // Une entrée par version, la PLUS RÉCENTE EN HAUT : { v:'5.10', items:[ {emoji,titre,desc}, … ] }
 // À chaque release visible → AJOUTER un bloc en tête (ne pas remplacer). items:[] = release technique (rien à afficher).
@@ -354,6 +354,9 @@ window._mvGraphRepeindre = function(){
 };
 
 export const WHATS_NEW = [
+  { v: '6.45', items: [
+    { emoji: 'personne', titre: 'Votre profil vous attend d\u00e9j\u00e0 \u00e0 l\u2019ouverture', desc: "Sur un domaine de dix ou quinze personnes, il fallait retrouver son nom dans la liste \u00e0 chaque ouverture \u2014 t\u00e9l\u00e9phone en main, souvent avec des gants. D\u00e9sormais l\u2019appareil se souvient du dernier profil qui s\u2019y est connect\u00e9 et n\u2019affiche que celui-l\u00e0. <b>La liste compl\u00e8te reste \u00e0 un seul geste</b> : \u00ab Ce n\u2019est pas moi \u00bb, juste en dessous. C\u2019est un confort, pas une protection : les noms n\u2019ont jamais \u00e9t\u00e9 secrets, ils sont \u00e9crits sur les tuiles. Sur une tablette partag\u00e9e, rien ne change vraiment \u2014 et une d\u00e9connexion volontaire efface le souvenir, comme elle efface d\u00e9j\u00e0 les donn\u00e9es du domaine sur l\u2019appareil." }
+  ] },
   { v: '6.44', items: [
     { emoji: '\u{1F52C}', titre: 'Le Cuvier conna\u00eet vos cuves', desc: "En cr\u00e9ant une cuve de vinification, choisissez-la dans votre parc : son nom et sa contenance se remplissent tout seuls, et elle est marqu\u00e9e occup\u00e9e jusqu\u2019au d\u00e9cuvage. Plus besoin de retaper \u00ab Cuve 3 \u2014 inox 40 hL \u00bb \u00e0 chaque mill\u00e9sime. Surtout, <b>le parc \u00e0 cuves dit enfin la v\u00e9rit\u00e9</b> : jusqu\u2019ici il ne regardait que Le Chai et pouvait annoncer une cuve libre alors qu\u2019elle fermentait. Rien n\u2019est obligatoire \u2014 une cuve saisie \u00e0 la main fonctionne comme avant, et les champs que vous avez d\u00e9j\u00e0 remplis ne sont jamais \u00e9cras\u00e9s." }
   ] },

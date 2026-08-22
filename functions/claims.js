@@ -1643,8 +1643,32 @@ exports.gtDeleteTenant = onCall({ region: REGION, enforceAppCheck: true, timeout
 // règles) et ne renvoie QUE les champs nécessaires à la tuile : nom, email, rôles, statut,
 // couleur. Aucune autre donnée tenant. App Check obligatoire (garde principal contre l'usage
 // hors application) ; aucune authentification utilisateur requise (sinon œuf-et-poule).
+//
+// ★★★ SEC-3 (22/08/2026) — L'EMAIL NE SORT PLUS DANS LA LISTE.
+// Cette projection portait l'email de TOUS les membres, avant toute authentification.
+// L'onglet Réseau du navigateur donnait donc la liste complète des adresses du domaine
+// à quiconque ouvrait l'application. Or chez certains domaines ce sont les adresses
+// PERSONNELLES des salariés. Le client obtient désormais l'adresse d'un SEUL membre,
+// sur demande nominative, via getLoginEmail (§12b).
+//
+// ⚠⚠ COMPATIBILITÉ — LE PARAMÈTRE `v`, ET POURQUOI IL EXISTE.
+// Un client d'AVANT SEC-3 ne sait pas demander une adresse : il attend celle du roster.
+// Lui retirer l'email d'un coup, c'est l'empêcher de se connecter — et un téléphone garde
+// l'ancien bundle jusqu'à sa DEUXIÈME ouverture après déploiement (le service worker
+// n'a pas de bascule immédiate). Sans ce paramètre, déployer le backend avant que tout
+// le monde ait rouvert l'app deux fois verrouille dehors un domaine entier.
+// Le client SEC-3 envoie `v:2` → aucune adresse. Le client ancien n'envoie rien → il les
+// reçoit encore, comme avant. La fuite se referme domaine par domaine, à mesure des
+// mises à jour, sans jamais bloquer personne.
+// ⚠⚠⚠ CETTE BRANCHE EST TEMPORAIRE ET DOIT MOURIR. Quelqu'un qui forge un appel sans
+// `v` récupère encore la liste : ce n'est plus à portée de regard, mais ce n'est pas fermé.
+// À SUPPRIMER (ces 4 lignes + ce bloc) une fois les trois domaines passés en SW ≥ 6.98 —
+// vérifiable par gtLastConnections. Entrée de backlog posée le 22/08/2026.
 exports.getLoginRoster = onCall({ region: REGION, enforceAppCheck: true, timeoutSeconds: 30 }, async (request) => {
   const slug = String((request.data && request.data.tenant) || '').trim().toLowerCase();
+  // v>=2 : client SEC-3, il sait demander l'adresse une par une. Voir le bloc ci-dessus.
+  const vClient = Number((request.data && request.data.v) || 1);
+  const avecEmail = !(vClient >= 2);
   if (!/^[a-z0-9][a-z0-9-]*$/.test(slug) || slug.length > 50) {
     throw new HttpsError('invalid-argument', 'tenant invalide.');
   }
@@ -1666,12 +1690,55 @@ exports.getLoginRoster = onCall({ region: REGION, enforceAppCheck: true, timeout
     .filter((m) => m && typeof m === 'object' && m.nom)
     .map((m) => ({
       nom:     String(m.nom),
-      email:   m.email ? String(m.email) : '',
+      email:   (avecEmail && m.email) ? String(m.email) : '',
       roles:   Array.isArray(m.roles) ? m.roles : [],
       statut:  m.statut || 'Actif',
       couleur: m.couleur ? String(m.couleur) : '',
     }));
   return { roster: roster };
+});
+
+// ── 12b. getLoginEmail — l'adresse d'UN SEUL membre (appelable SANS auth) ──────
+// SEC-3. Le client a besoin d'une adresse pour appeler signInWithEmailAndPassword :
+// on la lui donne, une par une, sur demande nominative, au moment où il touche une
+// tuile — au lieu de les lui envoyer toutes au chargement de l'écran.
+//
+// ⚠ CE N'EST PAS UN SECRET PARFAIT, ET CE N'EST PAS LE BUT. Le nom est écrit sur la
+// tuile : une adresse reste donc demandable, nom par nom. Ce qui disparaît, c'est la
+// moisson en un seul appel — et chaque demande laisse une trace ici.
+// ⚠ Un membre 'Inactif' n'a pas de tuile (initLogin le saute) : il n'a aucune raison
+// d'être résoluble. On renvoie une chaîne vide, comme pour un nom inconnu.
+// ⚠ L'ADRESSE N'EST JAMAIS ÉCRITE DANS LES JOURNAUX. Le nom, si : il est déjà public,
+// et c'est lui qui permettra de repérer une moisson nom par nom.
+// App Check obligatoire ; aucune authentification (sinon œuf-et-poule, comme le roster).
+exports.getLoginEmail = onCall({ region: REGION, enforceAppCheck: true, timeoutSeconds: 30 }, async (request) => {
+  const slug = String((request.data && request.data.tenant) || '').trim().toLowerCase();
+  const nom  = String((request.data && request.data.nom) || '').trim();
+  if (!/^[a-z0-9][a-z0-9-]*$/.test(slug) || slug.length > 50) {
+    throw new HttpsError('invalid-argument', 'tenant invalide.');
+  }
+  if (!nom || nom.length > 80) {
+    throw new HttpsError('invalid-argument', 'nom invalide.');
+  }
+  const db = admin.firestore();
+  let arr = [];
+  try {
+    const snap = await db.doc('mavigne_' + slug + '/membres').get();
+    if (snap.exists) {
+      const mv = snap.data();
+      arr = (mv && mv.value !== undefined && Array.isArray(mv.value)) ? mv.value
+          : (Array.isArray(mv) ? mv : []);
+    }
+  } catch (e) {
+    console.error('[getLoginEmail]', e);
+    throw new HttpsError('internal', 'getLoginEmail: ' + (e.message || String(e)));
+  }
+  const cible = nom.toLowerCase();
+  const m = arr.find((x) => x && typeof x === 'object' && x.nom
+    && String(x.nom).trim().toLowerCase() === cible
+    && (x.statut || 'Actif') !== 'Inactif');
+  console.log('[getLoginEmail]', slug, '\u00b7', nom, '\u00b7', m ? 'trouve' : 'inconnu');
+  return { email: (m && m.email) ? String(m.email) : '' };
 });
 
 // ── 13. gtLastConnections — dernières connexions clients par domaine (GT-only, lecture) ──

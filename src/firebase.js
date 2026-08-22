@@ -1123,6 +1123,21 @@ async function _mvRecoverTenantFromClaim() {
   }
 }
 
+// ── SEC-3 : fbGetLoginEmail — l'adresse d'UN membre, à la demande ───────────
+// getLoginRoster ne renvoie plus d'email au client SEC-3 (il les renvoyait TOUS,
+// avant toute authentification — l'onglet Réseau du navigateur montrait la liste
+// complète des adresses du domaine). L'écran de connexion demande ici l'adresse du
+// SEUL profil touché, au moment où on le touche.
+// ⚠ Peut échouer (réseau, App Check) : l'appelant (_loginResolveEmail, app.js) porte
+// le repli. On ne rattrape RIEN ici — avaler l'erreur empêcherait de la journaliser.
+window.fbGetLoginEmail = async function (nom) {
+  var r = await window.fbCallFn('getLoginEmail', {
+    tenant: localStorage.getItem('mavigne_tenant'),
+    nom: String(nom || ''),
+  }, { timeout: 15000 });
+  return (r && r.email) ? String(r.email) : '';
+};
+
 // ── _fbLoad (point d'entrée pré-auth) ──
 window._fbLoad = async function () {
   _loadQueue();
@@ -1176,7 +1191,11 @@ window._fbLoad = async function () {
   // (qui fonctionne quand une session est déjà active sur l'appareil).
   try {
     if(DEBUG) console.log('[Login] Roster via getLoginRoster (pre-auth)');
-    var _rr = await window.fbCallFn('getLoginRoster', { tenant: localStorage.getItem('mavigne_tenant') }, { timeout: 15000 });
+    // SEC-3 : `v:2` dit au serveur que ce client sait demander une adresse tout seul
+    // (fbGetLoginEmail). Il n'en renvoie donc AUCUNE. Un client d'avant SEC-3 n'envoie
+    // pas ce champ et continue de les recevoir : sans quoi il ne pourrait plus se
+    // connecter du tout tant qu'il n'a pas rechargé son bundle. Voir claims.js §12.
+    var _rr = await window.fbCallFn('getLoginRoster', { tenant: localStorage.getItem('mavigne_tenant'), v: 2 }, { timeout: 15000 });
     var _roster = (_rr && Array.isArray(_rr.roster)) ? _rr.roster : null;
     if (_roster) {
       if (_roster.length > 0) {

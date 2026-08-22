@@ -387,7 +387,9 @@ mark{background:rgba(200,176,32,.32);color:var(--cream);border-radius:3px;paddin
   <h3>🔑 Première connexion</h3>
   <ol class="steps">
     <li><b>Choisir son profil</b>Un écran affiche les personnes du domaine. Touchez votre nom : inutile
-    de taper une adresse e-mail.</li>
+    de taper une adresse e-mail. À partir de la deuxième connexion, l’appareil se souvient de vous
+    et n’affiche plus que votre tuile ; le lien <em>Ce n’est pas moi</em> ramène la liste entière,
+    ce qui est le cas courant sur une tablette partagée.</li>
     <li><b>Saisir le mot de passe</b>Il vous est communiqué par l'administrateur du domaine. Il est
     <b>personnel</b> : deux mots et des chiffres, du type <kbd>cave-rouge-42</kbd>.</li>
     <li><b>Choisir son propre mot de passe</b>À la toute première connexion, l'app demande de le
@@ -486,7 +488,7 @@ mark{background:rgba(200,176,32,.32);color:var(--cream);border-radius:3px;paddin
   <h3>👤 Un membre qui n'a pas d'adresse e-mail</h3>
   <p>C'est le cas courant des saisonniers. À la création du membre, l'application fabrique une adresse
   interne à partir du prénom : elle sert uniquement d'identifiant technique, personne n'a besoin de
-  la connaître ni de la consulter. La connexion se fait en touchant son nom dans la liste des profils.</p>
+  la connaître ni de la consulter. La connexion se fait en touchant son nom sur l’écran d’accueil.</p>
 
   <details><summary>Je suis ouvrier et je ne vois pas le module Tracteur</summary>
     <div class="dbody">Deux causes possibles : votre domaine n'a pas la formule qui inclut le Tracteur,
@@ -2174,10 +2176,16 @@ mark{background:rgba(200,176,32,.32);color:var(--cream);border-radius:3px;paddin
     <span class="path">Réglages › Équipe</span>. Il obtient un nouveau mot de passe provisoire, affiché
     une seule fois, que vous remplacerez à la connexion suivante. Personne — pas même GUERETTECH — ne
     peut lire un mot de passe existant.</div></details>
-  <details><summary>Mon nom n'apparaît pas dans la liste des profils</summary>
-    <div class="dbody">Soit le compte n'a pas encore été créé, soit il a été passé en <b>inactif</b>.
-    Dans les deux cas, l'administrateur règle cela en une minute depuis
-    <span class="path">Réglages › Équipe</span>.</div></details>
+  <details><summary>Mon nom n'apparaît pas à l'ouverture</summary>
+    <div class="dbody">Premier réflexe : l'appareil affiche peut-être la tuile de la dernière personne
+    qui s'y est connectée. Touchez <em>Ce n'est pas moi — voir tous les profils</em>, juste sous la tuile,
+    pour retrouver la liste entière. Si votre nom n'y est toujours pas, soit le compte n'a pas encore
+    été créé, soit il a été passé en <b>inactif</b>. Dans les deux cas, l'administrateur règle cela
+    en une minute depuis <span class="path">Réglages › Équipe</span>.</div></details>
+  <details><summary>L'application affiche le nom d'un collègue à l'ouverture</summary>
+    <div class="dbody">C'est normal sur un appareil partagé : la tuile montrée est celle de la dernière
+    personne connectée ici. <em>Ce n'est pas moi</em> ramène la liste. Rien n'est accessible pour autant —
+    le mot de passe reste demandé, et une déconnexion volontaire efface ce souvenir.</div></details>
   <details><summary>L'application refuse ma connexion alors que le mot de passe est bon</summary>
     <div class="dbody">Vérifiez que vous êtes bien sur <span class="path">mavigneapp.fr</span> et non sur
     une ancienne adresse mise en favori. Si vous naviguez en <b>navigation privée</b>, sachez que ce mode

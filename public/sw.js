@@ -1,4 +1,49 @@
-// MA VIGNE — Service Worker v6.97
+// MA VIGNE — Service Worker v6.99
+// v6.99 (22/08/2026) — UNE SEULE TUILE A L'OUVERTURE (UX-LOGIN). APP 6.45.
+//   Sur un domaine de douze personnes, il fallait retrouver son nom dans la
+//   liste a chaque ouverture, telephone en main, souvent avec des gants.
+//   L'appareil retient le dernier profil connecte (localStorage, cle PAR
+//   DOMAINE : un meme appareil sert a deux tenants) et n'affiche que lui.
+//   ⚠ CE N'EST PAS UNE MESURE DE SECURITE. Les noms n'ont jamais ete secrets,
+//   ils sont ecrits sur les tuiles ; le serveur les envoie toujours tous. Ce
+//   qui est protege, ce sont les ADRESSES, et c'est SEC-3 (6.98). Confondre
+//   les deux ferait croire a une etancheite qui n'existe pas.
+//   ★ Le lien « Ce n'est pas moi » reste large et visible : sur une tablette de
+//   hangar ou un telephone de service, la tuile unique gene au lieu d'aider,
+//   et c'est ce lien qui rattrape tout. Le cacher pour faire propre casserait
+//   l'appareil partage.
+//   Le souvenir n'est ecrit qu'au succes DEFINITIF (pas au clic sur la tuile,
+//   pas sur le chemin SEC-2 du premier mot de passe) et efface par une
+//   deconnexion volontaire — coherent avec la doctrine SEC-5 de logout(), qui
+//   purge deja LS_KEY et les sauvegardes locales pour le poste partage.
+//   Aucune deconnexion AUTOMATIQUE n'existe : personne ne perd son souvenir
+//   tout seul (verifie, logout() n'a que deux appelants).
+//   Le rendu des tuiles sort d'initLogin (_loginRenderTuiles) pour que logout()
+//   rouvre la liste SANS rejouer les gardes demo/visite — sinon un logout
+//   depuis la visite guidee la relancait.
+//   Guide : 3 passages decrivaient « toucher son nom dans la liste » (C22,
+//   texte perime qu'aucun controle automatique ne voit).
+//   Fichiers : app.js, index.html, utils.js, guide/01, guide/02, guide/14.
+// v6.98 (22/08/2026) — LES ADRESSES MAIL NE SORTENT PLUS EN BLOC (SEC-3).
+//   getLoginRoster renvoyait l'email de TOUS les membres AVANT toute
+//   authentification : l'onglet Reseau du navigateur affichait la liste
+//   complete des adresses du domaine a quiconque ouvrait l'application.
+//   ⚠ Pire, et sans le moindre outil : « Mot de passe oublie » PRE-REMPLISSAIT
+//   le champ avec l'adresse du membre choisi. Trois clics pour lire celle
+//   d'un collegue : sa tuile, le lien, regarder.
+//   Le roster ne porte plus d'email pour un client SEC-3. Une function neuve,
+//   getLoginEmail, rend l'adresse d'UN SEUL membre, sur demande nominative,
+//   tracee cote serveur. L'adresse n'est jamais journalisee.
+//   ★ La demande part au CLIC sur la tuile, pas a la validation : saisir un
+//   mot de passe prend plusieurs secondes, la reponse est deja la. Zero
+//   attente ajoutee dans le cas courant ; bornee a 2,5 s / 8 s sinon.
+//   ⚠⚠ COMPATIBILITE : le client envoie v:2, un client d'AVANT SEC-3 n'envoie
+//   rien et recoit encore les adresses. Sans cette branche, deployer le
+//   backend avant que tout le monde ait rouvert l'app DEUX fois verrouille
+//   dehors un domaine entier. Branche TEMPORAIRE, a supprimer (4 lignes de
+//   claims.js) une fois les trois domaines passes en SW >= 6.98.
+//   ⚠ Ce lot ne change PAS l'affichage des tuiles — c'est UX-LOGIN, un autre lot.
+//   Fichiers : app.js, reglages.js, firebase.js, functions/claims.js.
 // v6.97 (22/08/2026) — LE CUVIER RATTACHE SES CUVES AU PARC.
 //   Fin de la serie 6.95-6.97. cuves_vinif[] recoit un cuve_ref FACULTATIF
 //   pointant vers CONFIG.cave.cuves[]. Aucune migration : volume_hl reste le
@@ -2245,7 +2290,7 @@
 // v2.22 — Fix profils vides : guard vide dans loadData() pour MEMBRES/SAISONS/TACHES
 // v2.17 — Onboarding intégré + tenantId · v2.06 — Firebase Auth · v2.00–v2.05 — divers
 const DEBUG = self.location.hostname === 'localhost' || self.location.hostname === '127.0.0.1';
-const CACHE_NAME   = 'mavigne-v6.97';
+const CACHE_NAME   = 'mavigne-v6.99';
 const TENANT_CACHE = 'mavigne-tenant';   // Cache persistant — préservé à chaque mise à jour SW
 const SYNC_TAG     = 'mavigne-sync';
 
@@ -2261,7 +2306,7 @@ const CDN_URLS = [
 ];
 
 self.addEventListener('install', event => {
-  if(DEBUG) console.log('[SW] Ma Vigne v6.97 installé');
+  if(DEBUG) console.log('[SW] Ma Vigne v6.99 installé');
   event.waitUntil(
     caches.open(CACHE_NAME).then(async cache => {
       // ── Cœur applicatif : STRICT (mise à jour ATOMIQUE) ──
@@ -2277,7 +2322,7 @@ self.addEventListener('install', event => {
 });
 
 self.addEventListener('activate', event => {
-  if(DEBUG) console.log('[SW] Ma Vigne v6.97 activé');
+  if(DEBUG) console.log('[SW] Ma Vigne v6.99 activé');
   event.waitUntil(
     caches.keys().then(keys =>
       Promise.all(

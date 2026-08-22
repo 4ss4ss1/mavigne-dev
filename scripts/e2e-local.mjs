@@ -81,7 +81,7 @@ const INJECT_ORDER = ['config', 'saisons', 'parcelles', 'tracteurs_list', 'activ
 const BENIGN = [
   /firestore/i, /client is offline/i, /unavailable/i, /INTERNAL ASSERTION/i,
   /fbPullStatic/i, /Firebase/i, /identitytoolkit/i, /googleapis/i, /gstatic/i,
-  /recaptcha|grecaptcha|appcheck|app-check/i, /cloudfunctions|getLoginRoster/i,
+  /recaptcha|grecaptcha|appcheck|app-check/i, /cloudfunctions|getLoginRoster|getLoginEmail/i,
   /net::ERR/i, /ERR_ABORTED|ERR_FAILED|ERR_CONNECTION/i, /Failed to load resource/i,
   /Access to (fetch|XMLHttpRequest)|CORS/i, /Quota/i, /permission-denied/i,
   /Service Worker non enregistr/i, /reading 'scope'/i, /ServiceWorker/i,

@@ -2197,15 +2197,23 @@ async function confirmChangePwd() {
 const _MV_FAKE_MAIL = /@(mavigne\.app|mavigneapp\.fr)$/i;
 function _mvIsFakeMail(e){ return _MV_FAKE_MAIL.test(String(e||'').trim()); }
 
-function showForgotPanel() {
+async function showForgotPanel() {
   if(loginPendingIdx < 0) return;
   const m = window.MEMBRES[loginPendingIdx];
   document.getElementById('login-forgot-for').textContent = m.nom;
-  document.getElementById('login-forgot-email').value = m.email || '';
+  // ★★★ SEC-3 — PLUS DE PRÉ-REMPLISSAGE, ET C'ÉTAIT LA PIRE DES DEUX FUITES.
+  // Ce champ portait l'adresse du membre choisi. N'importe qui pouvait donc lire
+  // l'adresse d'un collègue en trois clics : sa tuile, « mot de passe oublié », regarder.
+  // Aucun outil, aucune compétence. La personne écrit désormais la sienne, et
+  // submitForgotLogin la compare à celle du compte — comparaison qui existait déjà.
+  document.getElementById('login-forgot-email').value = '';
   document.getElementById('login-forgot-error').style.display = 'none';
   document.getElementById('login-forgot-ok').style.display = 'none';
 
-  const fake   = !m.email || _mvIsFakeMail(m.email);
+  // L'adresse résolue au clic sur la tuile ne sert QU'À savoir si le compte porte une
+  // vraie adresse ou une fictive (@mavigne.app / @mavigneapp.fr). Elle n'est PAS affichée.
+  const mail   = window._mvLoginAwaitEmail ? await window._mvLoginAwaitEmail() : (m.email || '');
+  const fake   = !mail || _mvIsFakeMail(mail);
   const form   = document.getElementById('login-forgot-form');
   const noMail = document.getElementById('login-forgot-nomail');
   if(form)   form.style.display   = fake ? 'none'  : 'block';
@@ -2240,7 +2248,9 @@ async function submitForgotLogin() {
   if(loginPendingIdx < 0) return;
   const m = window.MEMBRES[loginPendingIdx];
 
-  if(!m.email || m.email.trim().toLowerCase() !== emailSaisi) {
+  // SEC-3 : l'adresse vient du serveur (résolue au clic sur la tuile), plus du roster.
+  const mail = window._mvLoginAwaitEmail ? await window._mvLoginAwaitEmail() : (m.email || '');
+  if(!mail || mail.trim().toLowerCase() !== emailSaisi) {
     errEl.textContent = 'Cet email ne correspond pas au compte.';
     errEl.style.display = 'block'; return;
   }
@@ -2248,14 +2258,14 @@ async function submitForgotLogin() {
   btn.disabled = true;
   btn.textContent = 'Envoi en cours…';
 
-  if(_mvIsFakeMail(m.email)){
+  if(_mvIsFakeMail(mail)){
     errEl.textContent = 'Ce compte n\'a pas d\'adresse réelle — demandez à votre responsable de réinitialiser votre mot de passe.';
     errEl.style.display = 'block'; return;
   }
 
   try {
-    await window.firebase.auth().sendPasswordResetEmail(m.email);
-    okEl.textContent = 'Lien de réinitialisation envoyé à ' + m.email + ' — pensez aux indésirables.';
+    await window.firebase.auth().sendPasswordResetEmail(mail);
+    okEl.textContent = 'Lien de réinitialisation envoyé à ' + mail + ' — pensez aux indésirables.';
     okEl.style.display = 'block';
     btn.textContent = 'Lien envoyé';
   } catch(e) {
@@ -2277,7 +2287,11 @@ async function sendForgotPwd() {
   if(loginPendingIdx < 0) return;
   const m = window.MEMBRES[loginPendingIdx];
 
-  if(!m.email || m.email.trim().toLowerCase() !== emailSaisi) {
+  // SEC-3 : même source d'adresse que submitForgotLogin. ⚠ Cet écran (ovForgotPwd) n'a
+  // AUCUN ouvreur dans le code — il est aligné par cohérence, pas parce qu'il sert.
+  // Non supprimé : un contrôle dont l'action corrective est « supprimer » est suspect (§51).
+  const mail = window._mvLoginAwaitEmail ? await window._mvLoginAwaitEmail() : (m.email || '');
+  if(!mail || mail.trim().toLowerCase() !== emailSaisi) {
     errEl.textContent = 'Cet email ne correspond pas au compte sélectionné.';
     errEl.style.display = 'block'; return;
   }
@@ -2285,14 +2299,14 @@ async function sendForgotPwd() {
   btn.disabled = true;
   btn.textContent = 'Envoi en cours…';
 
-  if(_mvIsFakeMail(m.email)){
+  if(_mvIsFakeMail(mail)){
     errEl.textContent = 'Ce compte n\'a pas d\'adresse réelle — demandez à votre responsable.';
     errEl.style.display = 'block'; return;
   }
 
   try {
-    await window.firebase.auth().sendPasswordResetEmail(m.email);
-    okEl.textContent = 'Lien de réinitialisation envoyé à ' + m.email;
+    await window.firebase.auth().sendPasswordResetEmail(mail);
+    okEl.textContent = 'Lien de réinitialisation envoyé à ' + mail;
     okEl.style.display = 'block';
     btn.textContent = 'Lien envoyé';
   } catch(e) {
