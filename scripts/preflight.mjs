@@ -12,6 +12,12 @@
 //      --quiet     n'affiche que les ERREURS
 //      --baseline  regrave scripts/preflight-baseline.json sur l'état courant
 //                  (à faire APRÈS avoir nettoyé, jamais pour faire taire une erreur)
+//      --only=C24  ne fait tourner que les contrôles nommés (liste séparée par
+//                  des virgules). Pour une contre-épreuve qui relance le
+//                  preflight en boucle : sans lui, chaque passage paie les 26 s
+//                  de C1 (un `node --check` par fichier) et de C20.
+//                  ⚠️ Les autres contrôles ne tournent PAS : la ligne de version
+//                  affiche « ? » et --baseline est refusé dans ce mode.
 //
 //  Exit 0 si aucune ERREUR (ou aucune en mode normal), 1 sinon.
 //  Branchable en automatique : "prebuild": "node scripts/preflight.mjs"
@@ -422,7 +428,7 @@ function checkPageDisplay() {
 }
 
 // ============================================================================
-//  BASELINE — cliquet anti-régression (C11, C14, C15, C16, C18, C19, C23)
+//  BASELINE — cliquet anti-régression (C11, C14, C15, C16, C18, C19, C23, C24, C25)
 // ----------------------------------------------------------------------------
 //  Ces sept règles décrivent une dette qui EXISTE DÉJÀ : les passer en erreur
 //  sèche casserait le build dès le premier jour. Le cliquet règle ça : la
@@ -1066,40 +1072,619 @@ function checkHandlerScope() {
   }
 }
 
-checkSyntax();
-checkSurrogates();
-checkDivBalance();
-checkDivInButton();
-checkDivInButtonJs();
-checkVersions();
-checkOnclickWindow();
-checkDebug();
-checkTDZ();
-checkBuild();
-checkPageDisplay();
-checkDeadIds();          // C11
-checkSyncCoverage();     // C12
-checkGuardCoverage();    // C13
-checkEmptyCatch();       // C14
-checkDeadFunctions();    // C15
-checkNativeDialogs();    // C16
-checkDebugDeclared();    // C17
-checkDuplicateIds();     // C18
-checkUnescaped();        // C19
-checkGuardBehaviour();   // C20
-checkPaiePrivacy();      // C21
-checkAideEtVisite();     // C22
-checkHelpersOrphelins(); // C23
-checkHandlerScope();     // C23
+// ============================================================================
+//  C24 — LE HTML CONSTRUIT A LA MAIN (cliquet XSS, lot SEC-7)
+// ----------------------------------------------------------------------------
+//  C19 surveille DIX-HUIT noms de champs (nom, modele, anomalie...). C24 ne
+//  part pas d'une liste de noms : il part du HTML. Toute valeur posee dans un
+//  fragment de balisage est examinee, quel que soit son nom.
+//
+//  ⚠️ CE QUE LA MESURE A CHANGE DANS LA REGLE. Le lot demandait « toute
+//  interpolation ${…} dans un litteral affecte a .innerHTML ». Compte fait sur
+//  le depot : 461 puits HTML, dont SEULEMENT 32 recoivent directement un
+//  gabarit a substitution (7 %). 209 recoivent une concatenation, 73 une
+//  variable nue construite plus haut, et huit modules sur douze n'utilisent
+//  AUCUN gabarit (admin-gt, cave, pilotage, planning, reserve, utils,
+//  firebase, onboarding : 0 substitution). Un controle ancre sur le point
+//  d'affectation aurait donc regarde 7 % du risque en se lisant comme un
+//  succes. L'ancre est donc le FRAGMENT HTML, pas le puits : partout ou une
+//  chaine contient du balisage, on regarde ce qu'on y insere.
+//
+//  Trois volets, du plus grave au plus diffus :
+//    a) le MAUVAIS echappeur dans un slot JS  — liste nominative (defaut)
+//    b) un slot JS sans aucun echappement     — compteur (dette)
+//    c) une substitution ${…} non couverte    — compteur (dette)
+//
+//  ★★★ POURQUOI (a) EST UN DEFAUT ET PAS DE LA DETTE. Dans
+//  onclick="fn('VALEUR')", le navigateur DECODE les entites HTML AVANT de
+//  compiler le JavaScript. _escHtml rend l'apostrophe en &#39; ; l'attribut la
+//  redonne telle quelle au moteur JS, qui y voit une apostrophe fermante.
+//  L'echappement n'est pas insuffisant, il est DEFAIT. C'est precisement pour
+//  ce cas que _escAttr existe (double l'antislash AVANT de traiter le HTML).
+// ============================================================================
+
+// --- lexeur minimal : rend un MASQUE de meme longueur ou commentaires,
+//     contenus de chaines, de gabarits et de regex sont blanchis (positions et
+//     lignes intactes), plus la liste des substitutions ${…}.
+//     Verifie : les 12 masques repassent `node --check --input-type=module`.
+const RE_PREV_REGEX = /[({[,;:=!&|?+\-*%~^<>]$/;
+const RE_KW_REGEX = /\b(return|typeof|instanceof|in|of|new|delete|void|case|do|else|yield|await)$/;
+function lexJs(src) {
+  const n = src.length, mask = src.split(''), subs = [];
+  const blank = (i) => { if (i < n && src[i] !== '\n') mask[i] = ' '; };
+  let i = 0, prev = '';
+  const tplStack = [], subStack = [];
+  const pushPrev = (ch) => { prev = (prev + ch).slice(-12); };
+  function eatTplText() {
+    while (i < n) {
+      if (src[i] === '\\') { blank(i); blank(i + 1); i += 2; continue; }
+      if (src[i] === '`') { i++; return 'close'; }
+      if (src[i] === '$' && src[i + 1] === '{') { subStack.push({ start: i + 2, braces: 0 }); i += 2; return 'sub'; }
+      blank(i); i++;
+    }
+    return 'eof';
+  }
+  while (i < n) {
+    const c = src[i], c2 = src[i + 1];
+    if (c === '/' && c2 === '/') { while (i < n && src[i] !== '\n') { blank(i); i++; } continue; }
+    if (c === '/' && c2 === '*') {
+      blank(i); blank(i + 1); i += 2;
+      while (i < n && !(src[i] === '*' && src[i + 1] === '/')) { blank(i); i++; }
+      if (i < n) { blank(i); blank(i + 1); i += 2; }
+      continue;
+    }
+    if (c === '"' || c === "'") {
+      const q = c; i++;
+      while (i < n && src[i] !== q) {
+        if (src[i] === '\\') { blank(i); blank(i + 1); i += 2; continue; }
+        if (src[i] === '\n') break;
+        blank(i); i++;
+      }
+      if (i < n) i++;
+      pushPrev(q); continue;
+    }
+    if (c === '`') { tplStack.push(i); i++; if (eatTplText() === 'close') tplStack.pop(); pushPrev('`'); continue; }
+    if (c === '{') { if (subStack.length) subStack[subStack.length - 1].braces++; pushPrev(c); i++; continue; }
+    if (c === '}') {
+      const cur = subStack[subStack.length - 1];
+      if (cur && cur.braces === 0) {
+        subs.push({ start: cur.start, end: i });
+        subStack.pop(); i++;
+        if (eatTplText() === 'close') tplStack.pop();
+        pushPrev('}'); continue;
+      }
+      if (cur) cur.braces--;
+      pushPrev(c); i++; continue;
+    }
+    if (c === '/' && (prev === '' || RE_PREV_REGEX.test(prev) || RE_KW_REGEX.test(prev))) {
+      i++;
+      let inClass = false;
+      while (i < n) {
+        if (src[i] === '\\') { blank(i); blank(i + 1); i += 2; continue; }
+        if (src[i] === '[') { inClass = true; blank(i); i++; continue; }
+        if (src[i] === ']') { inClass = false; blank(i); i++; continue; }
+        if (src[i] === '/' && !inClass) { i++; break; }
+        if (src[i] === '\n') break;
+        blank(i); i++;
+      }
+      while (i < n && /[a-z]/.test(src[i])) i++;
+      pushPrev('/'); continue;
+    }
+    if (!/\s/.test(c)) pushPrev(c);
+    i++;
+  }
+  return { mask: mask.join(''), subs };
+}
+
+// --- ou atterrit la valeur ? On rejoue le balisage deja ecrit AVANT elle.
+//     'text' | 'attr' (entre guillemets) | 'attr-nu' | 'js' (chaine JS dans un
+//     on*) | 'onattr' | 'tag'.
+function htmlCtx(t) {
+  let st = 'text', quote = '', attr = '', jsq = '';
+  for (let i = 0; i < t.length; i++) {
+    const c = t[i];
+    if (st === 'text') { if (c === '<') { st = 'tag'; attr = ''; } continue; }
+    if (st === 'tag') {
+      if (c === '>') { st = 'text'; continue; }
+      if (c === '=') {
+        const mm = /([A-Za-z_:][\w:.-]*)\s*$/.exec(t.slice(0, i));
+        attr = mm ? mm[1].toLowerCase() : '';
+        let j = i + 1; while (j < t.length && /\s/.test(t[j])) j++;
+        if (t[j] === '"' || t[j] === "'") { quote = t[j]; st = 'attr'; i = j; }
+        else { quote = ''; st = 'attr'; i = j - 1; }
+      }
+      continue;
+    }
+    if (st === 'attr') {
+      if (quote && c === quote) { st = 'tag'; jsq = ''; continue; }
+      if (!quote && /[\s>]/.test(c)) { st = c === '>' ? 'text' : 'tag'; continue; }
+      if (/^on[a-z]+$/.test(attr)) {
+        if (jsq) { if (c === jsq && t[i - 1] !== '\\') jsq = ''; }
+        else if (c === "'" || c === '"') jsq = c;
+      }
+    }
+  }
+  if (st === 'attr' && /^on[a-z]+$/.test(attr)) return { kind: jsq ? 'js' : 'onattr', attr };
+  if (st === 'attr') return { kind: quote ? 'attr' : 'attr-nu', attr };
+  return { kind: st === 'tag' ? 'tag' : 'text', attr };
+}
+
+// --- classificateur d'expression -------------------------------------------
+//  Recursif, JAMAIS de regex sur une structure imbriquee : `[^)]*` s'arreterait
+//  a la premiere parenthese fermante de f(g(x)) ou de (typeof x==='function'?…)
+//  (piege n°3 du lot). Le decoupage se fait sur le MASQUE, a profondeur zero.
+const C24_ESC = new Set(['_escHtml', '_escAttr', '_pilEsc', '_docsEsc']);
+const C24_NUM_FNS = new Set(['Number', 'parseInt', 'parseFloat', 'Math.round', 'Math.max', 'Math.min',
+  'Math.abs', 'Math.floor', 'Math.ceil', 'Math.sqrt', 'Math.pow']);
+const C24_NUM_METH = new Set(['toFixed', 'length', 'indexOf', 'lastIndexOf', 'charCodeAt',
+  'getTime', 'getFullYear', 'getMonth', 'getDate', 'getDay', 'getHours', 'getMinutes', 'size']);
+const C24_PASS_RECV = new Set(['join', 'filter', 'slice', 'sort', 'reverse', 'concat', 'flat']);
+const C24_PASS_CB = new Set(['map', 'flatMap']);
+const C24_NUMERIC_ONLY = /^[\s\d.+\-*/%()<>=!&|?:]*$/;
+
+function c24SplitTop(m, from, to, sep) {
+  const parts = []; let p = 0, b = 0, a = 0, st = from;
+  for (let i = from; i < to; i++) {
+    const c = m[i];
+    if (c === '(') p++; else if (c === ')') p--;
+    else if (c === '[') b++; else if (c === ']') b--;
+    else if (c === '{') a++; else if (c === '}') a--;
+    else if (p === 0 && b === 0 && a === 0) {
+      const w = sep(m, i);
+      if (w) { parts.push([st, i]); st = i + w; i += w - 1; }
+    }
+  }
+  parts.push([st, to]);
+  return parts;
+}
+function c24Trim(m, s, e) {
+  while (s < e && /\s/.test(m[s])) s++;
+  while (e > s && /\s/.test(m[e - 1])) e--;
+  return [s, e];
+}
+function c24StripParens(m, s, e) {
+  for (;;) {
+    [s, e] = c24Trim(m, s, e);
+    if (m[s] !== '(' || m[e - 1] !== ')') return [s, e];
+    let d = 0, ok = true;
+    for (let i = s; i < e; i++) {
+      if (m[i] === '(') d++;
+      else if (m[i] === ')') { d--; if (d === 0 && i < e - 1) { ok = false; break; } }
+    }
+    if (!ok) return [s, e];
+    s++; e--;
+  }
+}
+// Le ? de premier niveau et le : qui lui repond (en sautant les ternaires imbriques).
+function c24Ternary(m, s, e) {
+  let p = 0, b = 0, a = 0, q = -1;
+  for (let i = s; i < e; i++) {
+    const c = m[i];
+    if (c === '(') p++; else if (c === ')') p--;
+    else if (c === '[') b++; else if (c === ']') b--;
+    else if (c === '{') a++; else if (c === '}') a--;
+    else if (p === 0 && b === 0 && a === 0 && c === '?' && m[i + 1] !== '.' && m[i + 1] !== '?') { q = i; break; }
+  }
+  if (q < 0) return null;
+  let lvl = 0; p = b = a = 0;
+  for (let i = q + 1; i < e; i++) {
+    const c = m[i];
+    if (c === '(') p++; else if (c === ')') p--;
+    else if (c === '[') b++; else if (c === ']') b--;
+    else if (c === '{') a++; else if (c === '}') a--;
+    else if (p === 0 && b === 0 && a === 0) {
+      if (c === '?' && m[i + 1] !== '.' && m[i + 1] !== '?') lvl++;
+      else if (c === ':') { if (lvl === 0) return [q, i]; lvl--; }
+    }
+  }
+  return null;
+}
+const c24IsOr = (m, i) => ((m[i] === '|' && m[i + 1] === '|') || (m[i] === '?' && m[i + 1] === '?')) ? 2 : 0;
+const c24IsAnd = (m, i) => (m[i] === '&' && m[i + 1] === '&') ? 2 : 0;
+const c24IsPlus = (m, i) => (m[i] === '+' && m[i + 1] !== '+' && !'+=!<>'.includes(m[i - 1] || '')) ? 1 : 0;
+const c24IsComma = (m, i) => m[i] === ',' ? 1 : 0;
+
+// Corps d'une callback `x => EXPR` (bornes de EXPR).
+function c24ArrowBody(m, s, e) {
+  const ar = m.slice(s, e).indexOf('=>');
+  return ar < 0 ? [s, e] : c24Trim(m, s + ar + 2, e);
+}
+
+/**
+ * @returns {null|string} null si la valeur est sûre, sinon le motif fautif.
+ * `safeFns` : noms d'aides dont le rendu est deja prouve sûr (voir c24SafeFns).
+ */
+function c24Unsafe(raw, m, s, e, safeFns, depth) {
+  depth = depth || 0;
+  if (depth > 10) return null;                       // garde-fou : on ne crie pas sur un cas tordu
+  [s, e] = c24StripParens(m, s, e);
+  if (s >= e) return null;
+  const txt = raw.slice(s, e).trim();
+  const mm = m.slice(s, e).trim();
+  if (!txt) return null;
+
+  // 1. litteral seul, du debut a la fin
+  if (/^['"`]/.test(mm)) {
+    const q = mm[0]; let d = 0, single = true;
+    for (let i = s; i < e; i++) if (m[i] === q) { d++; if (d === 2 && i < e - 1) { single = false; break; } }
+    if (single && d === 2 && !(q === '`' && raw.slice(s, e).includes('${'))) return null;
+  }
+  if (/^(true|false|null|undefined)$/.test(txt)) return null;
+  if (C24_NUMERIC_ONLY.test(mm)) return null;        // arithmetique pure : aucun identifiant
+
+  // 2. ternaire : seules les DEUX BRANCHES portent la valeur (piege n°2 du lot).
+  //    La condition ne s'affiche pas — la juger produirait un faux positif sur
+  //    ${x ? _escHtml(a) : ''}, ou `x` n'atteint jamais l'ecran.
+  const t = c24Ternary(m, s, e);
+  if (t) return c24Unsafe(raw, m, t[0] + 1, t[1], safeFns, depth + 1)
+           || c24Unsafe(raw, m, t[1] + 1, e, safeFns, depth + 1);
+
+  // 3. || et ?? : les deux cotes peuvent etre rendus
+  let parts = c24SplitTop(m, s, e, c24IsOr);
+  if (parts.length > 1) {
+    for (const [ps, pe] of parts) { const r = c24Unsafe(raw, m, ps, pe, safeFns, depth + 1); if (r) return r; }
+    return null;
+  }
+  // 4. && : seule la partie DROITE est rendue
+  parts = c24SplitTop(m, s, e, c24IsAnd);
+  if (parts.length > 1) {
+    const last = parts[parts.length - 1];
+    return c24Unsafe(raw, m, last[0], last[1], safeFns, depth + 1);
+  }
+  // 5. concatenation : tous les morceaux
+  parts = c24SplitTop(m, s, e, c24IsPlus);
+  if (parts.length > 1) {
+    for (const [ps, pe] of parts) { const r = c24Unsafe(raw, m, ps, pe, safeFns, depth + 1); if (r) return r; }
+    return null;
+  }
+  // 6. appel
+  if (mm.endsWith(')')) {
+    let d = 0, open = -1;
+    for (let i = e - 1; i >= s; i--) {
+      if (m[i] === ')') d++;
+      else if (m[i] === '(') { d--; if (d === 0) { open = i; break; } }
+    }
+    if (open > s) {
+      const callee = raw.slice(s, open).trim();
+      const base = callee.replace(/^.*?([A-Za-z_$][\w$]*)$/, '$1');
+      if (C24_ESC.has(base) || C24_NUM_FNS.has(callee) || C24_NUM_FNS.has(base)
+          || safeFns.has(base) || safeFns.has(callee)) return null;
+      const dot = callee.lastIndexOf('.');
+      if (dot > 0) {
+        const meth = callee.slice(dot + 1).trim();
+        if (C24_NUM_METH.has(meth)) return null;
+        if (C24_PASS_RECV.has(meth)) return c24Unsafe(raw, m, s, s + dot, safeFns, depth + 1);
+        if (C24_PASS_CB.has(meth)) {
+          const args = c24SplitTop(m, open + 1, e - 1, c24IsComma);
+          if (!args.length) return null;
+          const [bs, be] = c24ArrowBody(m, args[0][0], args[0][1]);
+          return c24Unsafe(raw, m, bs, be, safeFns, depth + 1);
+        }
+      }
+      return 'appel non prouve : ' + callee.replace(/\s+/g, '') + '()';
+    }
+  }
+  // 7. indexation : on juge le receveur
+  if (mm.endsWith(']')) {
+    let d = 0, open = -1;
+    for (let i = e - 1; i >= s; i--) { if (m[i] === ']') d++; else if (m[i] === '[') { d--; if (d === 0) { open = i; break; } } }
+    if (open > s) return c24Unsafe(raw, m, s, open, safeFns, depth + 1);
+  }
+  // 8. identifiant / acces membre
+  const last = txt.split('.').pop().trim();
+  if (C24_NUM_METH.has(last)) return null;
+  if (safeFns.has(txt) || safeFns.has(txt.split('.')[0])) return null;
+  if (/^[A-Za-z_$][\w$.]*$/.test(txt)) return 'valeur nue : ' + txt;
+  return 'non reconnu : ' + txt.replace(/\s+/g, ' ').slice(0, 50);
+}
+
+// --- LES AIDES DEJA PROUVEES SÛRES, DEDUITES — PAS ECRITES A LA MAIN --------
+//  Piege n°1 du lot : « une variable deja echappee en amont et reutilisee →
+//  faux positif, a declarer ». Une liste ecrite a la main derive : elle vieillit
+//  sans que personne s'en apercoive, et elle est exactement l'endroit ou l'on
+//  glisse un nom pour faire taire une alerte. Elle est donc CALCULEE : une aide
+//  dont TOUS les `return` sont sûrs est elle-meme sûre, et on recommence
+//  jusqu'a ce que l'ensemble ne bouge plus (point fixe, 6 tours au plus).
+//  Consequence voulue : une aide qui cesse d'echapper sort de l'ensemble toute
+//  seule, et tous ses appels redeviennent rouges.
+function c24SafeFns(corpus) {
+  const bodies = new Map();
+  for (const { rel, src, mask } of corpus) {
+    const re = /(?:^|\n)\s*(?:export\s+)?function\s+([A-Za-z_$][\w$]*)\s*\(/g;
+    for (const mt of mask.matchAll(re)) {
+      const name = mt[1];
+      let i = mask.indexOf('{', mt.index + mt[0].length);
+      if (i < 0) continue;
+      let d = 0, j = i;
+      for (; j < mask.length; j++) { if (mask[j] === '{') d++; else if (mask[j] === '}') { d--; if (!d) break; } }
+      if (bodies.has(name)) { bodies.set(name, null); continue; }   // homonyme : on ne tranche pas
+      bodies.set(name, { rel, src, mask, s: i, e: j });
+    }
+  }
+  const safe = new Set();
+  for (let tour = 0; tour < 6; tour++) {
+    let grew = false;
+    for (const [name, b] of bodies) {
+      if (!b || safe.has(name)) continue;
+      let ok = true, seen = 0;
+      for (const rt of b.mask.slice(b.s, b.e).matchAll(/\breturn\b/g)) {
+        const s0 = b.s + rt.index + 6;
+        let p = 0, k = s0;
+        for (; k < b.e; k++) {
+          const c = b.mask[k];
+          if (c === '(') p++; else if (c === ')') { if (!p) break; p--; }
+          else if (c === '[') p++; else if (c === ']') { if (!p) break; p--; }
+          else if (c === '{') p++; else if (c === '}') { if (!p) break; p--; }
+          else if (c === ';' && !p) break;
+        }
+        if (k <= s0) continue;                       // `return;` nu
+        seen++;
+        if (c24Unsafe(b.src, b.mask, s0, k, safe, 0)) { ok = false; break; }
+      }
+      if (ok && seen) { safe.add(name); grew = true; }
+    }
+    if (!grew) break;
+  }
+  return safe;
+}
+
+// --- les fragments HTML d'un fichier et les valeurs qu'on y insere ----------
+const C24_HTML = /<\s*\/?[a-zA-Z][\w-]*(?:[\s/>]|$)/;
+function c24Points(src, mask, subs) {
+  const pts = [];
+  const litSpans = [];
+  let i = 0;
+  while (i < mask.length) {
+    const c = mask[i];
+    if (c === "'" || c === '"') {
+      let j = i + 1; while (j < mask.length && mask[j] !== c) j++;
+      litSpans.push({ q: c, s: i, e: j }); i = j + 1; continue;
+    }
+    if (c === '`') {
+      let j = i + 1, d = 0;
+      while (j < mask.length) {
+        if (mask[j] === '$' && mask[j + 1] === '{') { d++; j += 2; continue; }
+        if (mask[j] === '}' && d > 0) { d--; j++; continue; }
+        if (mask[j] === '`' && d === 0) break;
+        j++;
+      }
+      litSpans.push({ q: '`', s: i, e: j }); i = j + 1; continue;
+    }
+    i++;
+  }
+  // ---- gabarits
+  for (const L of litSpans) {
+    if (L.q !== '`') continue;
+    const mine = subs.filter(x => x.start > L.s && x.end < L.e).sort((a, b) => a.start - b.start);
+    let stat = '', p = L.s + 1;
+    for (const x of mine) { stat += src.slice(p, x.start - 2); p = x.end + 1; }
+    stat += src.slice(p, L.e);
+    if (!C24_HTML.test(stat)) continue;
+    let before = ''; p = L.s + 1;
+    for (const x of mine) {
+      before += src.slice(p, x.start - 2);
+      const k = htmlCtx(before);
+      // un gabarit imbrique est juge par SES propres substitutions, pas en bloc
+      if (!mask.slice(x.start, x.end).includes('`'))
+        pts.push({ s: x.start, e: x.end, kind: k.kind, attr: k.attr, via: 'gabarit' });
+      before += '\u0001'; p = x.end + 1;
+    }
+  }
+  // ---- concatenations : le fragment est la chaine, les valeurs sont les
+  //      operandes non litteraux du + de premier niveau qui l'entoure.
+  const done = new Set();
+  for (const L of litSpans) {
+    if (L.q === '`' || !C24_HTML.test(src.slice(L.s + 1, L.e))) continue;
+    const [bs, be] = c24Bounds(mask, L.s);
+    const key = bs + ':' + be;
+    if (done.has(key)) continue;
+    done.add(key);
+    let before = '';
+    for (const [os, oe] of c24SplitTop(mask, bs, be, c24IsPlus)) {
+      const mt = mask.slice(os, oe).trim();
+      if (!mt) continue;
+      if (/^['"]/.test(mt) && mt.slice(-1) === mt[0] && mt.length > 1) {
+        before += src.slice(os, oe).trim().slice(1, -1); continue;
+      }
+      const k = htmlCtx(before);
+      pts.push({ s: os, e: oe, kind: k.kind, attr: k.attr, via: 'concat' });
+      before += '\u0001';
+    }
+  }
+  return pts;
+}
+// Bornes de la chaine de + qui entoure l'index i (sur le masque).
+function c24Bounds(mask, i) {
+  let s = i, p = 0, b = 0, a = 0;
+  for (; s > 0; s--) {
+    const c = mask[s - 1];
+    if (c === ')') p++; else if (c === '(') { if (!p) break; p--; }
+    else if (c === ']') b++; else if (c === '[') { if (!b) break; b--; }
+    else if (c === '}') a++; else if (c === '{') { if (!a) break; a--; }
+    else if (';,:?'.includes(c) && !p && !b && !a) break;
+    else if (c === '=' && !p && !b && !a && !/[=!<>]/.test(mask[s - 2] || '')) break;
+    else if (/[A-Za-z]/.test(c) && !p && !b && !a && /\b(return|case|typeof|new|do|else)$/.test(mask.slice(Math.max(0, s - 9), s))) break;
+  }
+  let e = i; p = b = a = 0;
+  for (; e < mask.length; e++) {
+    const c = mask[e];
+    if (c === '(') p++; else if (c === ')') { if (!p) break; p--; }
+    else if (c === '[') b++; else if (c === ']') { if (!b) break; b--; }
+    else if (c === '{') a++; else if (c === '}') { if (!a) break; a--; }
+    else if (';,:'.includes(c) && !p && !b && !a) break;
+  }
+  return [s, e];
+}
+
+function checkXssRatchet() {
+  const rels = listDir('src', '.js');
+  const corpus = [];
+  for (const rel of rels) {
+    const src = read(rel);
+    if (src == null) continue;
+    corpus.push({ rel, src, ...lexJs(src) });
+  }
+  if (!corpus.length) { add('WARN', 'src', null, 'C24 : aucun module lu — le cliquet XSS n\'a pas pu tourner.'); return; }
+  const safeFns = c24SafeFns(corpus);
+
+  for (const { rel, src, mask, subs } of corpus) {
+    const pts = c24Points(src, mask, subs);
+    const mauvais = [], nus = [];
+    let sub = 0;
+    for (const pt of pts) {
+      const raw = src.slice(pt.s, pt.e).trim();
+      if (!raw) continue;
+      const ligne = lineOf(src, pt.s);
+      if (pt.kind === 'js') {
+        // (a) le mauvais echappeur : _escHtml rend &#39;, que l'attribut redonne
+        //     au moteur JS en apostrophe. Seul _escAttr tient dans ce slot.
+        if (/\b(_escHtml|_pilEsc|_docsEsc)\s*\(/.test(raw) && !/\b_escAttr\s*\(/.test(raw)) {
+          const nom = raw.replace(/\s+/g, '').slice(0, 46);
+          if (!mauvais.includes(nom)) mauvais.push(nom);
+          continue;
+        }
+        // (b) aucun echappement du tout
+        if (!/\b_escAttr\s*\(/.test(raw) && c24Unsafe(src, mask, pt.s, pt.e, safeFns, 0)) nus.push(ligne);
+        continue;
+      }
+      if (pt.kind === 'attr-nu') { nus.push(ligne); continue; }   // attribut sans guillemets
+      if (pt.kind !== 'text' && pt.kind !== 'attr') continue;
+      if (pt.via !== 'gabarit') continue;                          // (c) : les gabarits
+      if (c24Unsafe(src, mask, pt.s, pt.e, safeFns, 0)) sub++;
+    }
+    ratchetList('C24a_mauvais_escapeur', rel, mauvais,
+      'C24a — _escHtml dans un slot JS de gestionnaire (onclick="f(\'…\')") : l\'attribut DECODE &#39; avant que le JS ne soit compile, l\'echappement est DEFAIT',
+      'Remplacer par _escAttr. C\'est un defaut, pas de la dette.');
+    ratchetCount('C24b_slot_js_nu', rel, nus.length,
+      'C24b — valeur posee dans un slot JS de gestionnaire sans _escAttr',
+      'Passer par _escAttr A L\'INTERPOLATION, ou poser un data-* et lire la valeur dans le gestionnaire.');
+    ratchetCount('C24c_interpolation_nue', rel, sub,
+      'C24c — substitution ${…} dans un gabarit HTML sans _escHtml / _escAttr / Number() ni constante locale',
+      'Envelopper l\'interpolation. Une aide qui echappe deja est reconnue toute seule (point fixe).');
+  }
+}
+
+
+// ============================================================================
+//  C25 — LE JETON APP CHECK NE DOIT PAS SE PERDRE EN CHEMIN (lot SEC-7)
+// ----------------------------------------------------------------------------
+//  ★★★ POURQUOI CE CONTROLE EXISTE, ET CE QU'IL NE FAIT PAS.
+//  Le lot demandait de « basculer App Check en enforce ». Mesure faite en
+//  console le 22/08 : c'etait DEJA fait, et sans casse — Cloud Firestore
+//  100 % de requetes validees / 0 % non validees, Authentication idem,
+//  Storage applique. Il n'y avait rien a basculer.
+//
+//  ⚠️ ET SURTOUT : Cloud Functions n'a PAS d'interrupteur dans cette console.
+//  La console renvoie a la documentation, parce que l'exigence se declare
+//  fonction par fonction, dans le code : `onCall({ enforceAppCheck: true })`.
+//  Un toggle qu'on croit avoir bascule et qui n'existe pas est pire que pas de
+//  toggle du tout. Inventaire du 22/08 : 27 fonctions appelables sur 27 le
+//  portent.
+//
+//  Le risque restant n'est donc pas l'etat du jour, c'est la VINGT-HUITIEME.
+//  Rien, aujourd'hui, n'empeche d'ecrire une `onCall` sans le jeton : ni
+//  node --check, ni ESLint, ni le deploiement. C25 est ce filet.
+//
+//  ⚠️ Cliquet a ZERO tolere, contrairement a C24 : il n'y a aucune dette a
+//  absorber. La reference est vide, et elle doit le rester.
+//
+//  ⚠️⚠️ CE QU'IL NE SAIT PAS FAIRE. Il ne lit que des options ecrites en OBJET
+//  LITTERAL sur place. Si un jour les options passent par une constante
+//  partagee (`onCall(OPTS_GT, …)`), il ne peut plus trancher — il le DIT en
+//  avertissement au lieu de se taire. Une absence non confirmee se lit comme un
+//  succes, et c'est deux fois que ca coute cher dans ce projet.
+// ============================================================================
+function checkAppCheckFns() {
+  const fichiers = [...listDir('functions', '.js'), ...listDir('functions', '.cjs')]
+    .filter(f => !/package(-lock)?\.json$/.test(f));
+  if (!fichiers.length) {
+    add('WARN', 'functions', null, 'C25 : aucun fichier de fonction lu — l\'exigence App Check n\'a pas pu etre verifiee.');
+    return;
+  }
+  for (const rel of fichiers) {
+    const src = read(rel);
+    if (src == null) continue;
+    const { mask } = lexJs(src);                 // le meme lexeur que C24
+    const sansJeton = [], surfaceHttp = [];
+
+    for (const m of mask.matchAll(/exports\.([A-Za-z_$][\w$]*)\s*=\s*(onCall|onRequest)\s*\(/g)) {
+      const nom = m[1], type = m[2];
+      let i = m.index + m[0].length;
+      while (i < mask.length && /\s/.test(mask[i])) i++;
+
+      if (type === 'onRequest') {
+        // Une surface HTTP publique ne se protege pas par une option : elle se
+        // DECIDE. On la nomme, pour qu'une troisieme porte soit un acte conscient
+        // et non un effet de bord. Les deux existantes (formulaires publics) ont
+        // liste blanche CORS + pot de miel + debit par IP (SEC-6).
+        surfaceHttp.push(nom);
+        continue;
+      }
+      if (mask[i] !== '{') {
+        // pas d'objet d'options du tout : la callback est le 1er argument, ou
+        // les options viennent d'ailleurs. Dans les deux cas, on ne peut pas
+        // affirmer que le jeton est exige.
+        const suite = src.slice(i, i + 40).replace(/\s+/g, ' ').trim();
+        if (/^(async\b|function\b|\()/.test(suite)) sansJeton.push(nom);
+        else add('WARN', rel, lineOf(src, m.index),
+          `C25 : les options de « ${nom} » ne sont pas un objet litteral (« ${suite.slice(0, 24)}… ») — l'exigence App Check n'a PAS pu etre verifiee ici. La verifier a la main, ou remettre les options sur place.`);
+        continue;
+      }
+      // bornes de l'objet d'options
+      let d = 0, j = i;
+      for (; j < mask.length; j++) { if (mask[j] === '{') d++; else if (mask[j] === '}') { d--; if (!d) break; } }
+      const opts = src.slice(i, j + 1);
+      if (!/enforceAppCheck\s*:\s*true\b/.test(opts)) sansJeton.push(nom);
+    }
+
+    ratchetList('C25_oncall_sans_appcheck', rel, sansJeton,
+      'C25 — fonction appelable depuis le client SANS enforceAppCheck:true (la console Firebase ne peut pas l\'imposer : ca se declare ici)',
+      'Ajouter enforceAppCheck: true aux options du onCall. Zero tolere : il n\'y a aucune dette a absorber sur ce point.');
+    ratchetList('C25_surface_http', rel, surfaceHttp,
+      'C25 — nouvelle surface HTTP publique (onRequest) : elle est joignable sans authentification NI App Check',
+      'Si elle est voulue, la graver dans la reference. Verifier d\'abord liste blanche CORS, pot de miel et debit par IP (SEC-6).');
+  }
+}
+
+// ---- sequence d'execution -------------------------------------------------
+//  Nommee, pour que --only=C24 ne fasse tourner QUE ce controle. Sans ce
+//  selecteur, une contre-epreuve qui relance le preflight treize fois paie
+//  treize fois les 26 s des vingt-trois autres regles — dont C1, qui lance un
+//  `node --check` par fichier. Le filtre ne sert PAS a masquer un rouge : il
+//  n'existe qu'en ligne de commande et le mode par defaut reste complet.
+const SEQUENCE = [
+  ['C1',  checkSyntax],        ['C2',  checkSurrogates],   ['C3',  checkDivBalance],
+  ['C4',  checkDivInButton],   ['C4b', checkDivInButtonJs],['C5',  checkVersions],
+  ['C6',  checkOnclickWindow], ['C7',  checkDebug],        ['C8',  checkTDZ],
+  ['C9',  checkBuild],         ['C10', checkPageDisplay],  ['C11', checkDeadIds],
+  ['C12', checkSyncCoverage],  ['C13', checkGuardCoverage],['C14', checkEmptyCatch],
+  ['C15', checkDeadFunctions], ['C16', checkNativeDialogs],['C17', checkDebugDeclared],
+  ['C18', checkDuplicateIds],  ['C19', checkUnescaped],    ['C20', checkGuardBehaviour],
+  ['C21', checkPaiePrivacy],   ['C22', checkAideEtVisite], ['C23', checkHelpersOrphelins],
+  ['C23b', checkHandlerScope], ['C24', checkXssRatchet], ['C25', checkAppCheckFns],
+];
+const onlyArg = args.find(a => a.startsWith('--only='));
+const onlySet = onlyArg ? new Set(onlyArg.slice(7).split(',').map(x => x.trim()).filter(Boolean)) : null;
+// ⚠️ Le cliquet compare a la reference : si on ne fait tourner qu'une partie
+//   des regles, les autres cles ne sont PAS recalculees. Regraver la reference
+//   dans ce mode l'amputerait. On l'interdit plutot que de la laisser mentir.
+if (onlySet && rebase) {
+  console.error('  --only et --baseline sont incompatibles : regraver la reference exige un passage COMPLET.');
+  process.exit(2);
+}
+for (const [nom, fn] of SEQUENCE) {
+  if (onlySet && !onlySet.has(nom) && !onlySet.has(nom.replace(/b$/, ''))) continue;
+  fn();
+}
 
 // ---- baseline : regravure explicite, ou signalement si absente ---------------
 if (rebase) {
-  const out = { _note: 'Reference du cliquet anti-regression du preflight (C11/C14/C15/C16/C18/C19/C23). Regraver : node scripts/preflight.mjs --baseline. Elle ne doit que DESCENDRE.', generated: new Date().toISOString().slice(0, 10), ...nextBaseline };
+  const out = { _note: 'Reference du cliquet anti-regression du preflight (C11/C14/C15/C16/C18/C19/C23/C24/C25). Regraver : node scripts/preflight.mjs --baseline. Elle ne doit que DESCENDRE.', generated: new Date().toISOString().slice(0, 10), ...nextBaseline };
   fs.writeFileSync(path.join(root, BASELINE_REL), JSON.stringify(out, null, 2) + '\n', 'utf8');
   console.log('');
   console.log('  ' + green('✓ Référence regravée : ' + BASELINE_REL));
 } else if (baselineMissing) {
-  add('WARN', BASELINE_REL, null, 'Référence du cliquet absente → C11/C14/C15/C16/C18/C19/C23 ne bloquent rien pour l\'instant. La créer une fois : node scripts/preflight.mjs --baseline');
+  add('WARN', BASELINE_REL, null, 'Référence du cliquet absente → C11/C14/C15/C16/C18/C19/C23/C24/C25 ne bloquent rien pour l\'instant. La créer une fois : node scripts/preflight.mjs --baseline');
 }
 
 console.log('');

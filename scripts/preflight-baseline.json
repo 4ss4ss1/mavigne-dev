@@ -1,6 +1,6 @@
 {
-  "_note": "Reference du cliquet anti-regression du preflight (C11/C14/C15/C16/C18/C19/C23). Regraver : node scripts/preflight.mjs --baseline. Elle ne doit que DESCENDRE.",
-  "generated": "2026-08-16",
+  "_note": "Reference du cliquet anti-regression du preflight (C11/C14/C15/C16/C18/C19/C23/C24/C25). Regraver : node scripts/preflight.mjs --baseline. Elle ne doit que DESCENDRE.",
+  "generated": "2026-08-22",
   "C11_dead_ids": {
     "src/admin-gt.js": [],
     "src/app.js": [],
@@ -92,5 +92,82 @@
     "src/reserve.js": [],
     "src/tracteur.js": [],
     "src/utils.js": []
+  },
+  "C24a_mauvais_escapeur": {
+    "src/admin-gt.js": [
+      "_escHtml(t.code)",
+      "_escHtml(t.id)"
+    ],
+    "src/app.js": [],
+    "src/cave.js": [
+      "_escHtml(String(x&&x.ref||''))",
+      "_escHtml(cuv.id)",
+      "_escHtml(it.ref)",
+      "_escHtml(l.id)",
+      "_escHtml(m)",
+      "_escHtml(op.data.pdf_url)",
+      "_escHtml(op.data.url)",
+      "_escHtml(p.id)",
+      "_escHtml(r.parcelle.nom)"
+    ],
+    "src/firebase.js": [],
+    "src/onboarding.js": [],
+    "src/phyto.js": [],
+    "src/pilotage.js": [
+      "_pilEsc(String(ref||''))"
+    ],
+    "src/planning.js": [],
+    "src/reglages.js": [],
+    "src/reserve.js": [],
+    "src/tracteur.js": [
+      "_escHtml(p.amm)",
+      "_escHtml(p.nom).replace(/'/g,\"\\\\'\")"
+    ],
+    "src/utils.js": []
+  },
+  "C24b_slot_js_nu": {
+    "src/admin-gt.js": 57,
+    "src/app.js": 9,
+    "src/cave.js": 33,
+    "src/firebase.js": 0,
+    "src/onboarding.js": 1,
+    "src/phyto.js": 9,
+    "src/pilotage.js": 3,
+    "src/planning.js": 24,
+    "src/reglages.js": 17,
+    "src/reserve.js": 1,
+    "src/tracteur.js": 14,
+    "src/utils.js": 0
+  },
+  "C24c_interpolation_nue": {
+    "src/admin-gt.js": 0,
+    "src/app.js": 139,
+    "src/cave.js": 0,
+    "src/firebase.js": 0,
+    "src/onboarding.js": 0,
+    "src/phyto.js": 20,
+    "src/pilotage.js": 0,
+    "src/planning.js": 0,
+    "src/reglages.js": 149,
+    "src/reserve.js": 0,
+    "src/tracteur.js": 24,
+    "src/utils.js": 0
+  },
+  "C25_oncall_sans_appcheck": {
+    "functions/claims.js": [],
+    "functions/ephy.js": [],
+    "functions/index.js": [],
+    "functions/leads.js": [],
+    "functions/diag-ephy.cjs": []
+  },
+  "C25_surface_http": {
+    "functions/claims.js": [],
+    "functions/ephy.js": [],
+    "functions/index.js": [],
+    "functions/leads.js": [
+      "submitLead",
+      "submitMiseEnRoute"
+    ],
+    "functions/diag-ephy.cjs": []
   }
 }
