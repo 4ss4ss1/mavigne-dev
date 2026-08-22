@@ -16,7 +16,6 @@ const DEBUG = location.hostname === 'localhost' || location.hostname === '127.0.
 if(window.fCond===undefined)window.fCond='tous';
 if(window.fAct===undefined)window.fAct='toutes';
 if(window.tracSessionId===undefined)window.tracSessionId=null; // session ouverte dans le panneau détail (lu par app.js)
-const _SVG_EMPTY_ENT='<svg width="56" height="56" viewBox="0 0 56 56" fill="none" xmlns="http://www.w3.org/2000/svg"><circle cx="28" cy="28" r="20" fill="none" stroke="var(--texte-doux)" stroke-width="1.8"/><path d="M28 16 L30 24 L38 24 L32 30 L34 38 L28 33 L22 38 L24 30 L18 24 L26 24 Z" fill="none" stroke="var(--texte-doux)" stroke-width="1.5" opacity="0.5"/><circle cx="28" cy="28" r="4" fill="var(--texte-doux)" opacity="0.3"/></svg>'; // SVG empty-state fiches entretien (factorisé v4.30)
 if(window.selEmoji===undefined)window.selEmoji='\uD83D\uDE9C';
 
 // ── Raccourcis globals app.js (définis après chargement) ──
@@ -973,7 +972,7 @@ function renderEntretiens(){
   var hasAnoActive=anomActives.length>0;
 
   if(!fiches.length){
-    el.innerHTML=(_gnrCardHtml()+_revCardHtml(t))+'<div class="empty-state" style="padding:32px 20px"><div class="ei">'+_SVG_EMPTY_ENT+'</div><div class="et">Aucune fiche d\'entretien</div><div class="ed">Ajoutez une fiche avec le bouton ＋ pour commencer le suivi.</div></div>';
+    el.innerHTML=(_gnrCardHtml()+_revCardHtml(t))+'<div class="empty-state" style="padding:32px 20px"><div class="ei">'+_mvIcon('outil',40)+'</div><div class="et">Aucune fiche d\'entretien</div><div class="ed">Ajoutez une fiche avec le bouton ＋ pour commencer le suivi.</div></div>';
     return;
   }
 
@@ -1036,7 +1035,7 @@ function renderListeFiches(){
   var admin=isAdmin();
 
   if(!fiches.length){
-    el.innerHTML='<div class="empty-state" style="padding:32px 20px"><div class="ei">'+_SVG_EMPTY_ENT+'</div><div class="et">Aucune fiche</div><div class="ed">Aucun entretien enregistré pour ce tracteur.</div></div>';
+    el.innerHTML='<div class="empty-state" style="padding:32px 20px"><div class="ei">'+_mvIcon('outil',40)+'</div><div class="et">Aucune fiche</div><div class="ed">Aucun entretien enregistré pour ce tracteur.</div></div>';
     return;
   }
 
@@ -1486,7 +1485,7 @@ function renderTracteur(){
   if(!sl)return;
   if(!window._dataReady){ sl.innerHTML=window._mvSk('tracteur'); return; }
   if(!data.length){
-    sl.innerHTML=`<div class="empty-state"><div class="ei"><svg width="56" height="56" viewBox="0 0 56 56" fill="none" xmlns="http://www.w3.org/2000/svg"><rect x="4" y="26" width="32" height="16" rx="4" fill="none" stroke="var(--texte-doux)" stroke-width="1.8"/><rect x="36" y="32" width="14" height="10" rx="3" fill="none" stroke="var(--texte-doux)" stroke-width="1.5"/><circle cx="13" cy="44" r="6" fill="none" stroke="var(--texte-doux)" stroke-width="2"/><circle cx="44" cy="44" r="5" fill="none" stroke="var(--texte-doux)" stroke-width="2"/><rect x="20" y="14" width="13" height="13" rx="2" fill="none" stroke="var(--texte-doux)" stroke-width="1.5" opacity="0.5"/><line x1="26.5" y1="9" x2="26.5" y2="14" stroke="var(--texte-doux)" stroke-width="1.5" stroke-linecap="round" opacity="0.5"/></svg></div><div class="et">Aucune session</div><div class="ed">Aucun passage tracteur enregistré pour cette saison.</div>${isTractoriste()?'<button class="empty-cta-ac" onclick="openNewSession()">＋ Démarrer une session</button>':''}</div>`;
+    sl.innerHTML=`<div class="empty-state"><div class="ei">${_mvIcon('tracteur',40)}</div><div class="et">Aucune session</div><div class="ed">Aucun passage tracteur enregistré pour cette saison.</div>${isTractoriste()?'<button class="empty-cta-ac" onclick="openNewSession()">＋ Démarrer une session</button>':''}</div>`;
     // Peupler quand même les selects du form nouvelle session
     _fillNewSessionForm();
     return;
