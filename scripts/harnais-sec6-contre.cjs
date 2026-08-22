@@ -13,7 +13,23 @@
 const { spawnSync } = require('node:child_process');
 const path = require('node:path');
 
+const fs = require('node:fs');
+
 const HARNAIS = path.join(__dirname, 'harnais-sec6.cjs');
+
+// ⚠️ Les contre-épreuves HSTS ne sont pas les mêmes selon l'état du drapeau, et se
+// tromper de jeu ne se voit PAS : les cas inadaptés partiraient au vert sans rien
+// prouver. On lit donc le drapeau à la source plutôt que de le supposer.
+// Le jour où Nico bascule HSTS_RENFORCE, ce fichier suit tout seul — il n'a qu'une
+// ligne à changer, dans un seul fichier.
+const RENFORCE = (() => {
+  const src = fs.readFileSync(HARNAIS, 'utf8');
+  const m = /const\s+HSTS_RENFORCE\s*=\s*([^;]+);/.exec(src);
+  if (!m) { console.error('drapeau HSTS_RENFORCE introuvable dans le harnais'); process.exit(2); }
+  return !!Function('process', 'return (' + m[1] + ')')({ env: {} });
+})();
+console.log(require('node:util').format('  \x1b[2m[état HSTS lu dans le harnais : %s]\x1b[0m',
+  RENFORCE ? 'RENFORCÉ' : 'en attente'));
 const c = { g:(s)=>`\x1b[32m${s}\x1b[0m`, r:(s)=>`\x1b[31m${s}\x1b[0m`, d:(s)=>`\x1b[2m${s}\x1b[0m` };
 
 // attendu : fragment que la LIGNE ROUGE doit contenir.
@@ -48,11 +64,18 @@ const CAS = [
   { nom: 'HSTS à six mois',
     env: { MV_SEC6_HSTS_FLAG: '1', MV_SEC6_HSTS: 'max-age=15768000; includeSubDomains; preload' },
     attendu: 'max-age ≥ 31536000' },
-  // Et le sens inverse : renfort parti alors que le drapeau dit « en attente ».
-  // C'est le déploiement accidentel — celui qui grille www pour un an sans le vouloir.
-  { nom: 'renfort déployé alors que le drapeau dit attente',
-    env: { MV_SEC6_HSTS: 'max-age=31536000; includeSubDomains; preload' },
-    attendu: 'renfort absent, conforme au drapeau' },
+  // Le dernier cas dépend de l'état du drapeau, et teste le sens INVERSE de l'état
+  // courant — c'est-à-dire l'incohérence entre la décision prise et le fichier livré.
+  ...(RENFORCE
+    // Drapeau renforcé : le danger est qu'on RETIRE le renfort sans le décider.
+    ? [{ nom: 'renfort retiré alors que le drapeau dit renforcé',
+         env: { MV_SEC6_HSTS: 'max-age=31536000' },
+         attendu: 'includeSubDomains présent' }]
+    // Drapeau en attente : le danger est que le renfort parte par distraction —
+    // celui qui grille www pour un an sans que personne l'ait voulu.
+    : [{ nom: 'renfort déployé alors que le drapeau dit attente',
+         env: { MV_SEC6_HSTS: 'max-age=31536000; includeSubDomains; preload' },
+         attendu: 'renfort absent, conforme au drapeau' }]),
 ];
 
 let ok = 0, ko = 0;

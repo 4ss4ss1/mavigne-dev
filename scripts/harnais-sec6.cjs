@@ -166,18 +166,33 @@ if (nomMut) console.log(c.d('  [mutation active : ' + nomMut + ']'));
 const SRC_LEADS  = nomMut ? MUTATIONS[nomMut](lire('functions/leads.js')) : lire('functions/leads.js');
 const SRC_CLAIMS = lire('functions/claims.js');
 
-// ⚠️⚠️ ÉTAT HSTS — DÉCISION EN SUSPENS, POSÉE LE 22/08/2026 ⚠️⚠️
-// Vérification faite ce jour-là : https://www.mavigneapp.fr rend « le certificat de
-// sécurité ne correspond pas ». Le CNAME www existe chez OVH et pointe sur l'apex,
-// mais www n'est PAS déclaré comme domaine personnalisé dans Firebase Hosting —
-// aucun certificat ne le couvre, le serveur répond avec celui de l'apex.
-// Déployer includeSubDomains dans cet état rendrait www injoignable UN AN pour tout
-// visiteur ayant vu l'apex, et HSTS retire le lien « je comprends les risques » :
-// aucune échappatoire, ni pour un prospect, ni pour toi.
-// ⇒ Passer à true UNIQUEMENT après que https://www.mavigneapp.fr s'ouvre avec le
-//   cadenas en navigation privée, ET livrer firebase.json en version renforcée
-//   dans le même geste. Le harnais refuse les deux moitiés du changement isolées.
-const HSTS_RENFORCE = process.env.MV_SEC6_HSTS_FLAG === '1' ? true : false;
+// ★★★ ÉTAT HSTS — RÉSOLU LE 22/08/2026. LIRE AVANT DE TOUCHER À CETTE LIGNE. ★★★
+// Ce qui s'est passé : au moment de livrer SEC-6, https://www.mavigneapp.fr rendait
+// « le certificat de sécurité ne correspond pas ». Le CNAME www existait chez OVH et
+// pointait sur l'apex, mais www n'était PAS déclaré comme domaine personnalisé dans
+// Firebase Hosting — aucun certificat ne le couvrait, le serveur répondait avec celui
+// de l'apex. Déployer includeSubDomains dans cet état aurait rendu www injoignable UN
+// AN pour tout visiteur ayant vu l'apex, sans échappatoire : HSTS retire le lien
+// « je comprends les risques » du navigateur.
+// Correction appliquée le 22/08/2026, dans cet ordre :
+//   1. Firebase Hosting → ajout du domaine personnalisé www.mavigneapp.fr
+//   2. OVH → CNAME www remplacé : mavigneapp.fr  →  mavigne-a0fd5.web.app
+//   3. certificat émis, vérifié en navigation privée : « la connexion est sécurisée »
+//   4. renfort livré dans firebase.json ET drapeau passé à true, même geste.
+//
+// ⚠️ CONSÉQUENCE PERMANENTE : tout futur sous-nom en .mavigneapp.fr devra avoir son
+//    certificat AVANT d'être branché. Sur Firebase c'est automatique ; ailleurs (un
+//    serveur de test, un outil tiers), il sera injoignable et non contournable.
+//
+// ⚠️ « preload » est encore INERTE : le mot-clé seul ne fait rien tant que le domaine
+//    n'est pas soumis sur hstspreload.org. C'est cette soumission — et elle seule —
+//    qui coûte ~6 mois pour revenir en arrière. Geste séparé, jamais fait à ce jour.
+//    Ne pas le confondre avec includeSubDomains, qui lui est actif depuis ce jour.
+//
+// Revenir à false n'a de sens que si le renfort est retiré de firebase.json dans le
+// même geste : le harnais refuse les deux moitiés du changement isolées, dans les
+// deux sens. harnais-sec6-contre.cjs lit ce drapeau et adapte ses cas tout seul.
+const HSTS_RENFORCE = true;
 
 // ═══ 1. HSTS ═════════════════════════════════════════════════════════════════
 console.log('\n1. firebase.json — HSTS' + (HSTS_RENFORCE ? ' complet' : ' (renfort EN ATTENTE)'));
