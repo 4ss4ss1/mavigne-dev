@@ -26,6 +26,8 @@ var _vendEditId = null;
 var _vendVendu = false;
 var _vendEraflage = 'total';
 var _vcuvEditId = null;
+// Cuve du parc rattachee a la cuve de vinification en cours d'edition.
+var _vcuvRef = null;
 var _vcuvMpfActive = false;
 var _vmesureCuveId = null;
 var _vmRem = 2;
@@ -2458,6 +2460,61 @@ function _vndToggleMpf() {
   if(kn){kn.style.left=_vcuvMpfActive?'23px':'3px';kn.style.background='#FFFFFF';}
   var p=document.getElementById('vcuv-mpf-params'); if(p) p.style.display=_vcuvMpfActive?'block':'none';
 }
+// ══ LE CUVIER PIOCHE DANS LE PARC ═════════════════════════════════════════
+// ⚠️⚠️ C'est ce rattachement qui rend l'occupation du parc HONNETE. Sans lui,
+//   « Le parc a cuves » annonce « Cuve 3 libre » pendant qu'elle fermente :
+//   il ne voit que Le Chai, la moitie de la verite.
+// Rien n'est obligatoire : une cuve saisie a la main, sans reference au parc,
+// continue de marcher exactement comme avant. On ajoute un raccourci, pas une
+// contrainte.
+function _vcuvParcRender(){
+  var host=document.getElementById('vcuv-parc'); if(!host) return;
+  var parc=_caveParc();
+  if(!parc.length){
+    host.innerHTML='<div class="mvc-pk-vide">Aucune cuve d\u00e9clar\u00e9e. '
+      +'Le parc se remplit dans R\u00e9glages du Chai.</div>';
+    return;
+  }
+  // La cuve deja rattachee a CETTE cuve de vinification reste proposee : sinon
+  // rouvrir la fiche pour corriger un volume ferait perdre le rattachement.
+  var dispo=parc.filter(function(p){ return !_caveCuveOcc(p.id, _vcuvEditId) || p.id===_vcuvRef; });
+  if(!dispo.length){
+    host.innerHTML='<div class="mvc-pk-vide">Toutes les cuves du parc sont occup\u00e9es.<br>'
+      +'Vous pouvez saisir une cuve \u00e0 la main ci-dessous.</div>';
+    return;
+  }
+  var h='';
+  dispo.forEach(function(p){
+    var sel=(_vcuvRef===p.id), m=_caveMat(p.matiere);
+    h+='<button type="button" class="mvc-pk mvc-aff-c'+(sel?' sel':'')+'" onclick="_vcuvPick(\'' + _escHtml(p.id) + '\')">'
+      +'<span class="mvc-aff-rad"></span>'
+      +'<span class="mvc-pk-ic '+_caveMatKey(p.matiere)+'">'+_mvIcon('cuve',18)+'</span>'
+      +'<span class="mvc-pk-b"><span class="mvc-pk-n">'+_escHtml(p.nom||'Cuve')+'</span>'
+      +'<span class="mvc-pk-m">'+_escHtml(m.lbl)+' \u00b7 '+_mvF1((parseFloat(p.litres)||0)/100)+' hL de contenance</span></span>'
+      +'<span class="mvc-pk-r"><span class="mvc-pk-occ libre">Libre</span></span></button>';
+  });
+  h+='<div class="mvc-pk-tot" id="vcuv-parc-note">'+_vcuvParcNote()+'</div>';
+  host.innerHTML=h;
+}
+function _vcuvParcNote(){
+  var p=_caveCuve(_vcuvRef);
+  if(!p) return 'Sans cuve du parc, la saisie fonctionne comme avant \u2014 le parc ne saura simplement pas que cette cuve est prise.';
+  return _escHtml(p.nom||'Cuve')+' sera marqu\u00e9e occup\u00e9e dans le parc jusqu\u2019au d\u00e9cuvage.';
+}
+// ⚠️ On ne remplit QUE les champs vides. Ecraser un nom ou un volume deja
+//   saisis \u2014 par la main, ou par le groupement de recoltes \u2014 detruirait une
+//   donnee reelle au profit d'une valeur par defaut.
+function _vcuvPick(ref){
+  if(_vcuvRef===ref){ _vcuvRef=null; _vcuvParcRender(); return; }
+  var p=_caveCuve(ref); if(!p) return;
+  _vcuvRef=ref;
+  var el=document.getElementById('vcuv-nom');
+  if(el && !String(el.value||'').trim()) el.value=p.nom||'';
+  el=document.getElementById('vcuv-volume');
+  if(el && !String(el.value||'').trim()) el.value=_mvF1((parseFloat(p.litres)||0)/100).replace(',','.');
+  _vcuvParcRender();
+}
+
 function openOvVendCuve(id) {
   if(!canWrite()) return;
   _vcuvEditId=id||null;
@@ -2465,6 +2522,8 @@ function openOvVendCuve(id) {
   var titleEl=document.getElementById('ov-vend-cuv-title');
   if(titleEl) titleEl.textContent=c?'\u270f\ufe0f Modifier la cuve':'\uD83E\uDEA3 Nouvelle cuve';
   var el;
+  _vcuvRef=(c&&c.cuve_ref)?c.cuve_ref:null;
+  _caveV2InjectCss();
   el=document.getElementById('vcuv-nom'); if(el) el.value=c?c.nom:'';
   el=document.getElementById('vcuv-volume'); if(el) el.value=c?c.volume_hl:'';
   el=document.getElementById('vcuv-date'); if(el) el.value=c?c.date_entree:new Date().toISOString().slice(0,10);
@@ -2481,6 +2540,7 @@ function openOvVendCuve(id) {
   el=document.getElementById('vcuv-mpf-temp'); if(el) el.value=c&&c.mpf?(c.mpf.temp_c||12):12;
   el=document.getElementById('vcuv-mpf-duree'); if(el) el.value=c&&c.mpf?(c.mpf.duree_j||4):4;
   var p=document.getElementById('vcuv-mpf-params'); if(p) p.style.display=_vcuvMpfActive?'block':'none';
+  _vcuvParcRender();
   el=document.getElementById('vcuv-id'); if(el) el.value=id||'';
   el=document.getElementById('vcuv-del-btn'); if(el) el.style.display=c?'block':'none';
   _vendInjectCuveFrom(!c);
@@ -2501,7 +2561,12 @@ function saveVendCuve() {
   var mpfD=parseInt((document.getElementById('vcuv-mpf-duree')||{}).value)||4;
   var id=((document.getElementById('vcuv-id')||{}).value||'');
   var existing=id?(CAVE_VENDANGE.cuves_vinif||[]).find(function(c){return c.id===id;}):null;
-  var obj={id:id||'vcuv_'+Date.now(),nom:nom,volume_hl:vol,statut:statut,parcelles:parcelles,date_entree:date,erasflage:erasflage,so2_g_hl:so2,levures:levures,mpf:{active:_vcuvMpfActive,temp_c:mpfT,duree_j:mpfD},mesures_fa:existing?(existing.mesures_fa||[]):[],decuvage:existing?(existing.decuvage||null):null};
+  // ⚠️ Dernier filet : la cuve a pu etre prise depuis l'ouverture de la fiche.
+  if(_vcuvRef && _caveCuveOcc(_vcuvRef, id||null)){
+    var _pk=_caveCuve(_vcuvRef);
+    showToast(((_pk&&_pk.nom)||'Cette cuve')+' vient d\u2019\u00eatre prise','#B85A1A'); return;
+  }
+  var obj={id:id||'vcuv_'+Date.now(),nom:nom,volume_hl:vol,statut:statut,cuve_ref:_vcuvRef||null,parcelles:parcelles,date_entree:date,erasflage:erasflage,so2_g_hl:so2,levures:levures,mpf:{active:_vcuvMpfActive,temp_c:mpfT,duree_j:mpfD},mesures_fa:existing?(existing.mesures_fa||[]):[],decuvage:existing?(existing.decuvage||null):null};
   if(!id && _vcuvFromGrp){
     var _d=_vcuvFromGrp;
     obj.cuvee_src=_d.cuvee; obj.vcuvee_id=_d.id||null; obj.recolte_ids=_d.ids.slice(); obj.nb_caisses=_d.caisses;
@@ -4793,6 +4858,7 @@ window.saveVendRec          = saveVendRec;
 window.deleteVendRec        = deleteVendRec;
 window.openOvVendCuve       = openOvVendCuve;
 window.saveVendCuve         = saveVendCuve;
+window._vcuvPick            = _vcuvPick;
 window.deleteVendCuve       = deleteVendCuve;
 window.openOvVendMesure     = openOvVendMesure;
 window.saveVendMesure       = saveVendMesure;

@@ -23,7 +23,7 @@ export const GT_ADMIN_EMAIL = 'ngdevpro@gmail.com';
 // WHATS_NEW   : tableau vide = modal desactive pour cette version.
 // Format item : { emoji:'📅', titre:'Titre court', desc:'Phrase utilisateur.' }
 // Regle : seulement les changements visibles par les utilisateurs.
-export const APP_VERSION = '6.43';
+export const APP_VERSION = '6.44';
 // ════ Journal des nouveautés (récap cumulatif) ════
 // Une entrée par version, la PLUS RÉCENTE EN HAUT : { v:'5.10', items:[ {emoji,titre,desc}, … ] }
 // À chaque release visible → AJOUTER un bloc en tête (ne pas remplacer). items:[] = release technique (rien à afficher).
@@ -354,6 +354,9 @@ window._mvGraphRepeindre = function(){
 };
 
 export const WHATS_NEW = [
+  { v: '6.44', items: [
+    { emoji: '\u{1F52C}', titre: 'Le Cuvier conna\u00eet vos cuves', desc: "En cr\u00e9ant une cuve de vinification, choisissez-la dans votre parc : son nom et sa contenance se remplissent tout seuls, et elle est marqu\u00e9e occup\u00e9e jusqu\u2019au d\u00e9cuvage. Plus besoin de retaper \u00ab Cuve 3 \u2014 inox 40 hL \u00bb \u00e0 chaque mill\u00e9sime. Surtout, <b>le parc \u00e0 cuves dit enfin la v\u00e9rit\u00e9</b> : jusqu\u2019ici il ne regardait que Le Chai et pouvait annoncer une cuve libre alors qu\u2019elle fermentait. Rien n\u2019est obligatoire \u2014 une cuve saisie \u00e0 la main fonctionne comme avant, et les champs que vous avez d\u00e9j\u00e0 remplis ne sont jamais \u00e9cras\u00e9s." }
+  ] },
   { v: '6.43', items: [
     { emoji: '\u{1F347}', titre: 'D\u00e9cuver dans une cuve, pas seulement en barriques', desc: "Au Cuvier, le bouton \u00ab D\u00e9cuver \u00bb demande maintenant o\u00f9 part le vin : <b>en barriques</b> (comme avant, et c\u2019est le choix par d\u00e9faut), <b>en cuve</b>, ou <b>les deux</b>. En mode mixte, ce qui ne tient pas dans la cuve est automatiquement converti en barriques, et un compteur montre en permanence combien d\u2019hectolitres sont log\u00e9s sur le volume d\u00e9cuv\u00e9. La cuve que vous \u00eates en train de vider reste propos\u00e9e \u2014 on \u00e9l\u00e8ve tr\u00e8s bien sur lies dans la cuve o\u00f9 l\u2019on a ferment\u00e9. Si votre parc \u00e0 cuves est vide, l\u2019\u00e9cran ne change pas d\u2019un pixel." }
   ] },
@@ -1975,6 +1978,7 @@ var MV_AIDE = {
       ['Un millésime à la fois', "une opération porte sur une seule année. Changer de millésime en haut du formulaire vide la sélection : on ne mélange pas deux vins dans un même geste."],
       ['Le délai d’ouillage', "se règle pour tout le domaine, et se resserre millésime par millésime — un vin jeune se surveille de plus près."],
       ['Le parc à cuves', "se déclare une fois dans les Réglages du Chai : un nom, une contenance en litres, une matière. La même cuve sert à vinifier au Cuvier puis à élever au Chai, et l’application sait laquelle est prise — dans les deux cas."],
+      ['Au Cuvier', "une cuve de vinification peut être rattachée à une cuve du parc. C’est ce rattachement qui rend l’occupation juste : sans lui, le parc ne voit que Le Chai et annonce libre une cuve qui fermente. Facultatif — la saisie libre reste possible."],
       ['Au décuvage', "vous choisissez où part le vin : barriques, cuve, ou les deux. Le répartiteur met la cuve d’abord et convertit le reste en barriques. La cuve que vous videz reste choisissable — élever sur lies dans la cuve de fermentation est un usage courant, pas une erreur de saisie."],
       ['Une cuve n’est pas un fût', "elle ne sort pas de La Réserve, elle n’a pas d’âge, et elle a sa contenance propre. Ajouter une cuve à une cuvée ne change aucun compte de fûts. Le volume que vous inscrivez est celui qui est réellement dedans, pas la contenance de la cuve."],
       ['L’ouillage suit le bois, pas le contenant', "inox et béton ne s’évaporent pas : une cuvée logée seulement là n’a pas de jauge de part des anges et ne déclenche aucune alerte. Un foudre bois, si. Une cuvée mixte garde sa jauge, cadrée sur sa seule part en fût."],
