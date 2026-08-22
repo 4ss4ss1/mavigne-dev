@@ -23,7 +23,7 @@ export const GT_ADMIN_EMAIL = 'ngdevpro@gmail.com';
 // WHATS_NEW   : tableau vide = modal desactive pour cette version.
 // Format item : { emoji:'📅', titre:'Titre court', desc:'Phrase utilisateur.' }
 // Regle : seulement les changements visibles par les utilisateurs.
-export const APP_VERSION = '6.41';
+export const APP_VERSION = '6.42';
 // ════ Journal des nouveautés (récap cumulatif) ════
 // Une entrée par version, la PLUS RÉCENTE EN HAUT : { v:'5.10', items:[ {emoji,titre,desc}, … ] }
 // À chaque release visible → AJOUTER un bloc en tête (ne pas remplacer). items:[] = release technique (rien à afficher).
@@ -354,6 +354,10 @@ window._mvGraphRepeindre = function(){
 };
 
 export const WHATS_NEW = [
+  { v: '6.42', items: [
+    { emoji: '\u{1F6E2}\uFE0F', titre: '\u00c9lever en cuve, pas seulement en f\u00fbt', desc: "Un vin peut vieillir en cuve inox, en b\u00e9ton ou en foudre bois \u2014 Le Chai ne connaissait que la barrique. D\u00e9clarez vos cuves une bonne fois dans <b>Cave \u203a Le Chai \u203a R\u00e9glages \u203a Le parc \u00e0 cuves</b> (un nom, une contenance en litres, la mati\u00e8re), puis logez-y une cuv\u00e9e depuis sa fiche, avec le volume r\u00e9ellement dedans \u2014 on remplit rarement \u00e0 ras. Une cuv\u00e9e peut tenir \u00e0 la fois des f\u00fbts et une cuve : les hectolitres du Chai, la mise en bouteille et le bilan du mill\u00e9sime comptent d\u00e9sormais les deux. Une cuve n\u2019est jamais compt\u00e9e comme un f\u00fbt : votre parc \u00e0 f\u00fbts de La R\u00e9serve ne bouge pas d\u2019une unit\u00e9." },
+    { emoji: '\u23f3', titre: 'Plus de rappel d\u2019ouillage sur ce qui ne s\u2019\u00e9vapore pas', desc: "L\u2019inox et le b\u00e9ton ne respirent pas : une cuv\u00e9e log\u00e9e uniquement dans ce type de cuve n\u2019a plus de jauge \u00ab part des anges \u00bb, ne passe plus au rouge, et ne compte plus dans les alertes du Chai. Sa fiche l\u2019\u00e9crit noir sur blanc plut\u00f4t que de laisser un blanc. Un foudre en bois, lui, garde son suivi. Et une cuv\u00e9e dont tous les f\u00fbts avaient \u00e9t\u00e9 retir\u00e9s affichait un \u00ab \u00e0 ouiller \u00bb rouge qui ne partait jamais : elle demande maintenant simplement qu\u2019on lui renseigne un contenant." }
+  ] },
   { v:'6.41', items:[
     { emoji: 'carte', titre: "La carte des parcelles se bloquait sur \u00ab\u00a0Toutes t\u00e2ches\u00a0\u00bb",
       desc: "Sur l\u2019onglet <b>Parcelles</b>, filtre \u00ab\u00a0Toutes t\u00e2ches\u00a0\u00bb, le bandeau qui propose les tourn\u00e9es du domaine s\u2019interrompait et faisait appara\u00eetre un message d\u2019erreur rouge en bas de l\u2019\u00e9cran. Le pictogramme du travail manquait \u00e0 l\u2019appel devant chaque bouton de tourn\u00e9e\u00a0; il est de retour et le bandeau s\u2019affiche normalement." }
@@ -1967,6 +1971,9 @@ var MV_AIDE = {
       },
       ['Un millésime à la fois', "une opération porte sur une seule année. Changer de millésime en haut du formulaire vide la sélection : on ne mélange pas deux vins dans un même geste."],
       ['Le délai d’ouillage', "se règle pour tout le domaine, et se resserre millésime par millésime — un vin jeune se surveille de plus près."],
+      ['Le parc à cuves', "se déclare une fois dans les Réglages du Chai : un nom, une contenance en litres, une matière. La même cuve sert à vinifier au Cuvier puis à élever au Chai, et l’application sait laquelle est prise — dans les deux cas."],
+      ['Une cuve n’est pas un fût', "elle ne sort pas de La Réserve, elle n’a pas d’âge, et elle a sa contenance propre. Ajouter une cuve à une cuvée ne change aucun compte de fûts. Le volume que vous inscrivez est celui qui est réellement dedans, pas la contenance de la cuve."],
+      ['L’ouillage suit le bois, pas le contenant', "inox et béton ne s’évaporent pas : une cuvée logée seulement là n’a pas de jauge de part des anges et ne déclenche aucune alerte. Un foudre bois, si. Une cuvée mixte garde sa jauge, cadrée sur sa seule part en fût."],
       ['La fin de fermentation et la fin de malo', "sont estimées à partir de vos propres relevés : la densité pour l’une, l’acide malique pour l’autre. Sans trois mesures, l’écran dit « démarrage » plutôt qu’une date inventée."],
       ['Le millésime', "annonce ce qui vient dans les quatre prochaines semaines, puis retrace le parcours du vin, de la benne à la bouteille."],
       ['Votre rendement au pressoir', "se règle au Cuvier, onglet Réglages, en kilos de raisin par hectolitre. Tous les écrans qui transforment des raisins en volume s’en servent — la chaîne de la récolte à la bouteille comme le bilan de campagne."],

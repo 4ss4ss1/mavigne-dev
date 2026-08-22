@@ -1020,7 +1020,8 @@ mark{background:rgba(200,176,32,.32);color:var(--cream);border-radius:3px;paddin
 
   <h3>🛢️ Le Chai — élevage</h3>
   <ul class="dot">
-    <li><b>Cuvées</b> : liste des vins en élevage, avec leur statut et leur millésime, filtrables.</li>
+    <li><b>Cuvées</b> : liste des vins en élevage, avec leur statut et leur millésime, filtrables.
+    Une cuvée peut tenir des <b>fûts</b>, une <b>cuve</b>, ou les deux à la fois.</li>
     <li><b>Journal</b> : chaque opération datée — soutirage, ouillage, débourbage, filtration, sulfitage…</li>
     <li><b>Analyses SO₂</b> avec un <b>convertisseur intégré</b> : grammes, pastilles, dilution.
     Il évite l'erreur de calcul classique entre liquide et pastille.</li>
@@ -1030,6 +1031,31 @@ mark{background:rgba(200,176,32,.32);color:var(--cream);border-radius:3px;paddin
     Le délai peut être <b>resserré millésime par millésime</b> : un vin jeune se surveille de plus près.
     Sans réglage propre, un millésime suit le délai général du domaine — rien ne change tant que vous n'y touchez pas.</li>
   </ul>
+
+  <h4>Le parc à cuves</h4>
+  <p>Tout ne vieillit pas en barrique. Déclarez vos cuves une bonne fois dans
+  <span class="path">Cave › Le Chai › Réglages › Le parc à cuves</span> : un nom, une contenance
+  <b>en litres</b>, et une matière. C'est réservé à l'administrateur.</p>
+  <ul class="dot">
+    <li><b>La matière décide de l'ouillage</b>, pas le type de contenant. <b>Inox</b> et <b>béton</b>
+    ne respirent pas : aucune part des anges à suivre. <b>Bois</b> (un foudre, une cuve tronconique)
+    s'évapore comme une barrique et garde son suivi.</li>
+    <li><b>Une cuve sert deux fois</b> : au Cuvier pour vinifier, au Chai pour élever. C'est le même
+    contenant, on ne le saisit qu'une fois — et l'application sait toujours laquelle est prise,
+    qu'elle fermente ou qu'elle élève.</li>
+    <li><b>Une cuve n'est pas un fût.</b> Elle ne sort pas de La Réserve, elle n'a pas d'âge, et on ne
+    la compte pas à l'unité. Ajouter une cuve à une cuvée ne change <b>aucun</b> compte de fûts.</li>
+  </ul>
+  <p>Pour y loger du vin : ouvrez la fiche de la cuvée, section <b>Contenants</b>, puis
+  <b>Ajouter une cuve</b>. Seules les cuves libres sont proposées. Indiquez le volume
+  <b>réellement dedans</b> — pas la contenance de la cuve : on remplit rarement à ras.</p>
+  <div class="note"><span class="ni" aria-hidden="true">⏳</span><div><b>Une cuvée en inox n'a plus de
+  jauge d'ouillage</b>, ne passe jamais au rouge, et ne compte pas dans les alertes du Chai. Ce n'est
+  pas un oubli d'affichage : sa fiche l'écrit. Une cuvée <b>mixte</b> — des fûts et une cuve — garde
+  sa jauge, mais celle-ci ne porte que sur la part logée en bois, et le dit.</div></div>
+  <div class="note tip"><span class="ni" aria-hidden="true">💡</span><div>Le volume que vous inscrivez
+  est un <b>fait daté</b>. Corriger plus tard la contenance de la cuve dans les réglages ne réécrit
+  aucun volume déjà logé. À la mise en bouteille, fûts et cuves retournent au parc, disponibles.</div></div>
   <div class="note tip"><span class="ni" aria-hidden="true">💡</span><div>Les récoltes saisies au Cuvier alimentent
   l'<b>historique des rendements</b> visible dans la fiche de chaque parcelle, et le coût par hectare
   calculé dans le Pilotage. Une saisie, plusieurs usages.</div></div>

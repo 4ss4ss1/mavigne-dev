@@ -2553,7 +2553,7 @@ var _MVT_CHAPS=[
   {f:'vigne', id:'parcelles',ic:'\u2705', t:'Parcelles & avancement', x:'La liste filtr\u00e9e par t\u00e2che, l\u2019avancement par passage et la validation en un tap.'},
   {f:'vigne', id:'journal',  ic:'\uD83D\uDCD3', t:'Le journal des travaux', x:'Qui a fait quoi, o\u00f9, quand \u2014 en \u00e9quipe ou seul. La m\u00e9moire du domaine.'},
 
-  {f:'cave',  id:'cave',     ic:'\uD83D\uDEE2\uFE0F', t:'Le Chai \u2014 \u00e9levage', x:'Cuv\u00e9es en f\u00fbt, rappels d\u2019ouillage, analyses labo, part des anges.'},
+  {f:'cave',  id:'cave',     ic:'\uD83D\uDEE2\uFE0F', t:'Le Chai \u2014 \u00e9levage', x:'Cuv\u00e9es en f\u00fbt ou en cuve, rappels d\u2019ouillage, analyses labo, part des anges.'},
   {f:'cave',  id:'cuvier',   ic:'\uD83C\uDF47', t:'Le Cuvier \u2014 la vendange', x:'Du raisin \u00e0 la cuve : caisses, \u00e9tat du raisin, \u00e9raflage, densit\u00e9s jour par jour.'},
   {f:'cave',  id:'maturite', ic:'\uD83D\uDD2C', t:'Contr\u00f4le de maturit\u00e9', x:'Vos relev\u00e9s au r\u00e9fractom\u00e8tre : qui monte, qui stagne, dans quel ordre r\u00e9colter.'},
   {f:'cave',  id:'millesime',ic:'\uD83D\uDD70\uFE0F', t:'Le mill\u00e9sime \u2014 ce qui vient', x:'La semaine \u00e0 venir en cave, et le fil complet d\u2019un mill\u00e9sime, de la parcelle \u00e0 la bouteille.'},
