@@ -1,4 +1,18 @@
-// MA VIGNE — Service Worker v6.95
+// MA VIGNE — Service Worker v6.96
+// v6.96 (22/08/2026) — LE DECUVAGE AIGUILLE VERS UNE CUVE.
+//   Suite de 6.95. « Decuver » ne savait que compter des barriques : nb =
+//   volume_hl / fut_l, point. Trois modes desormais — futs (DEFAUT, ecran
+//   inchange), cuve, les deux — et la bascule n'apparait meme pas si le parc
+//   a cuves est vide.
+//   ⚠️ DEUX PIEGES fermes a l'enregistrement : `nb = total>0 ? total : (_vendDecNb||1)`
+//   aurait cree, en mode cuve seule, des BARRIQUES FANTOMES — comptees au parc
+//   a futs, comptees dans le volume, porteuses d'un ouillage inexistant. Et
+//   tonneaux:[{annee,nb:0}] aurait laisse une entree a zero fut dans la
+//   repartition et dans la pyramide des ages.
+//   _caveCuveOcc prend un 2e argument `hors` : la cuve qu'on est en train de
+//   vider doit rester choisissable, on eleve sur lies dans la cuve de
+//   fermentation. Sans lui, l'ecran refusait la seule cuve voulue.
+//   Fichiers : cave.js, utils.js, index.html.
 // v6.95 (22/08/2026) — ELEVER EN CUVE, PAS SEULEMENT EN FUT.
 //   Le Chai ne connaissait que la barrique : le volume d'une cuvee valait
 //   nb_tonneaux x fut_l, et rien d'autre. Un parc a cuves vit desormais dans
@@ -2217,7 +2231,7 @@
 // v2.22 — Fix profils vides : guard vide dans loadData() pour MEMBRES/SAISONS/TACHES
 // v2.17 — Onboarding intégré + tenantId · v2.06 — Firebase Auth · v2.00–v2.05 — divers
 const DEBUG = self.location.hostname === 'localhost' || self.location.hostname === '127.0.0.1';
-const CACHE_NAME   = 'mavigne-v6.95';
+const CACHE_NAME   = 'mavigne-v6.96';
 const TENANT_CACHE = 'mavigne-tenant';   // Cache persistant — préservé à chaque mise à jour SW
 const SYNC_TAG     = 'mavigne-sync';
 
@@ -2233,7 +2247,7 @@ const CDN_URLS = [
 ];
 
 self.addEventListener('install', event => {
-  if(DEBUG) console.log('[SW] Ma Vigne v6.95 installé');
+  if(DEBUG) console.log('[SW] Ma Vigne v6.96 installé');
   event.waitUntil(
     caches.open(CACHE_NAME).then(async cache => {
       // ── Cœur applicatif : STRICT (mise à jour ATOMIQUE) ──
@@ -2249,7 +2263,7 @@ self.addEventListener('install', event => {
 });
 
 self.addEventListener('activate', event => {
-  if(DEBUG) console.log('[SW] Ma Vigne v6.95 activé');
+  if(DEBUG) console.log('[SW] Ma Vigne v6.96 activé');
   event.waitUntil(
     caches.keys().then(keys =>
       Promise.all(

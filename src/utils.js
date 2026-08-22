@@ -23,7 +23,7 @@ export const GT_ADMIN_EMAIL = 'ngdevpro@gmail.com';
 // WHATS_NEW   : tableau vide = modal desactive pour cette version.
 // Format item : { emoji:'📅', titre:'Titre court', desc:'Phrase utilisateur.' }
 // Regle : seulement les changements visibles par les utilisateurs.
-export const APP_VERSION = '6.42';
+export const APP_VERSION = '6.43';
 // ════ Journal des nouveautés (récap cumulatif) ════
 // Une entrée par version, la PLUS RÉCENTE EN HAUT : { v:'5.10', items:[ {emoji,titre,desc}, … ] }
 // À chaque release visible → AJOUTER un bloc en tête (ne pas remplacer). items:[] = release technique (rien à afficher).
@@ -354,6 +354,9 @@ window._mvGraphRepeindre = function(){
 };
 
 export const WHATS_NEW = [
+  { v: '6.43', items: [
+    { emoji: '\u{1F347}', titre: 'D\u00e9cuver dans une cuve, pas seulement en barriques', desc: "Au Cuvier, le bouton \u00ab D\u00e9cuver \u00bb demande maintenant o\u00f9 part le vin : <b>en barriques</b> (comme avant, et c\u2019est le choix par d\u00e9faut), <b>en cuve</b>, ou <b>les deux</b>. En mode mixte, ce qui ne tient pas dans la cuve est automatiquement converti en barriques, et un compteur montre en permanence combien d\u2019hectolitres sont log\u00e9s sur le volume d\u00e9cuv\u00e9. La cuve que vous \u00eates en train de vider reste propos\u00e9e \u2014 on \u00e9l\u00e8ve tr\u00e8s bien sur lies dans la cuve o\u00f9 l\u2019on a ferment\u00e9. Si votre parc \u00e0 cuves est vide, l\u2019\u00e9cran ne change pas d\u2019un pixel." }
+  ] },
   { v: '6.42', items: [
     { emoji: '\u{1F6E2}\uFE0F', titre: '\u00c9lever en cuve, pas seulement en f\u00fbt', desc: "Un vin peut vieillir en cuve inox, en b\u00e9ton ou en foudre bois \u2014 Le Chai ne connaissait que la barrique. D\u00e9clarez vos cuves une bonne fois dans <b>Cave \u203a Le Chai \u203a R\u00e9glages \u203a Le parc \u00e0 cuves</b> (un nom, une contenance en litres, la mati\u00e8re), puis logez-y une cuv\u00e9e depuis sa fiche, avec le volume r\u00e9ellement dedans \u2014 on remplit rarement \u00e0 ras. Une cuv\u00e9e peut tenir \u00e0 la fois des f\u00fbts et une cuve : les hectolitres du Chai, la mise en bouteille et le bilan du mill\u00e9sime comptent d\u00e9sormais les deux. Une cuve n\u2019est jamais compt\u00e9e comme un f\u00fbt : votre parc \u00e0 f\u00fbts de La R\u00e9serve ne bouge pas d\u2019une unit\u00e9." },
     { emoji: '\u23f3', titre: 'Plus de rappel d\u2019ouillage sur ce qui ne s\u2019\u00e9vapore pas', desc: "L\u2019inox et le b\u00e9ton ne respirent pas : une cuv\u00e9e log\u00e9e uniquement dans ce type de cuve n\u2019a plus de jauge \u00ab part des anges \u00bb, ne passe plus au rouge, et ne compte plus dans les alertes du Chai. Sa fiche l\u2019\u00e9crit noir sur blanc plut\u00f4t que de laisser un blanc. Un foudre en bois, lui, garde son suivi. Et une cuv\u00e9e dont tous les f\u00fbts avaient \u00e9t\u00e9 retir\u00e9s affichait un \u00ab \u00e0 ouiller \u00bb rouge qui ne partait jamais : elle demande maintenant simplement qu\u2019on lui renseigne un contenant." }
@@ -1972,6 +1975,7 @@ var MV_AIDE = {
       ['Un millésime à la fois', "une opération porte sur une seule année. Changer de millésime en haut du formulaire vide la sélection : on ne mélange pas deux vins dans un même geste."],
       ['Le délai d’ouillage', "se règle pour tout le domaine, et se resserre millésime par millésime — un vin jeune se surveille de plus près."],
       ['Le parc à cuves', "se déclare une fois dans les Réglages du Chai : un nom, une contenance en litres, une matière. La même cuve sert à vinifier au Cuvier puis à élever au Chai, et l’application sait laquelle est prise — dans les deux cas."],
+      ['Au décuvage', "vous choisissez où part le vin : barriques, cuve, ou les deux. Le répartiteur met la cuve d’abord et convertit le reste en barriques. La cuve que vous videz reste choisissable — élever sur lies dans la cuve de fermentation est un usage courant, pas une erreur de saisie."],
       ['Une cuve n’est pas un fût', "elle ne sort pas de La Réserve, elle n’a pas d’âge, et elle a sa contenance propre. Ajouter une cuve à une cuvée ne change aucun compte de fûts. Le volume que vous inscrivez est celui qui est réellement dedans, pas la contenance de la cuve."],
       ['L’ouillage suit le bois, pas le contenant', "inox et béton ne s’évaporent pas : une cuvée logée seulement là n’a pas de jauge de part des anges et ne déclenche aucune alerte. Un foudre bois, si. Une cuvée mixte garde sa jauge, cadrée sur sa seule part en fût."],
       ['La fin de fermentation et la fin de malo', "sont estimées à partir de vos propres relevés : la densité pour l’une, l’acide malique pour l’autre. Sans trois mesures, l’écran dit « démarrage » plutôt qu’une date inventée."],

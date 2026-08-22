@@ -171,12 +171,16 @@ function _caveParcSave(list){
 //   de vinification en cours est occupee, meme si aucune cuvee du Chai ne la
 //   porte : ne regarder que le Chai ferait annoncer « libre » une cuve qui
 //   fermente. C'est ce que le champ cuves_vinif[].cuve_ref rend possible.
-function _caveCuveOcc(id){
+// `hors` : id d'une cuve de vinification a ignorer. Sert au decuvage — la cuve
+// qu'on est en train de vider sera libre dans la seconde, et on eleve tres bien
+// sur lies dans la cuve ou l'on a fermente. Sans ce parametre, l'ecran refuserait
+// la seule cuve que le vigneron veut choisir.
+function _caveCuveOcc(id, hors){
   if(!id) return null;
   var V=(window.CAVE_VENDANGE&&window.CAVE_VENDANGE.cuves_vinif)||[];
   for(var i=0;i<V.length;i++){
     var v=V[i];
-    if(v&&v.cuve_ref===id&&v.statut!=='termine')
+    if(v&&v.cuve_ref===id&&v.statut!=='termine'&&!(hors&&v.id===hors))
       return {type:'vinif', nom:v.nom||'Cuve en vinification', hl:(parseFloat(v.volume_hl)||0)};
   }
   var E=(window.CAVE_ELEVAGE&&window.CAVE_ELEVAGE.cuvees)||[];
@@ -1988,6 +1992,13 @@ function _vendInjectCss(){
 .mvv-dlnote{font-size:12px;color:var(--texte-doux,#5F5F5F);font-style:italic;line-height:1.5;margin:4px 0 2px}
 .mvv-dneuf{font-size:12px;color:var(--texte-med,#4A4A3A);line-height:1.5;margin-top:7px;padding:8px 11px;background:var(--or-pale,#FAF3E0);border:1px solid rgba(194,161,77,.3);border-radius:10px}
 .mvv-dneuf b{color:var(--terre,#8A5A38)}
+.mvv-dseg{display:flex;gap:6px;background:var(--bg-app,#F2EFE7);border:1px solid rgba(138,90,56,.14);border-radius:13px;padding:4px;margin-top:6px}
+.mvv-dseg button{flex:1;padding:9px 4px;border:0;border-radius:10px;background:transparent;font-family:inherit;font-size:12.5px;font-weight:600;color:var(--texte-doux,#5F5F5F);cursor:pointer;min-height:44px;display:flex;flex-direction:column;align-items:center;gap:3px;line-height:1.2}
+.mvv-dseg button.on{background:var(--bg-card,#FBFAF6);color:var(--terre,#8A5A38);box-shadow:0 1px 5px rgba(20,17,13,.05)}
+.mvv-dseg button .sm{font-size:9px;font-weight:500;opacity:.8}
+.mvc-dfit{font-size:10px;font-weight:600;border-radius:7px;padding:3px 8px;white-space:nowrap;display:inline-block}
+.mvc-dfit.good{background:rgba(61,107,39,.10);color:var(--vert-med,#3D6B27)}
+.mvc-dfit.tight{background:rgba(184,145,58,.14);color:#8A6A12}
 `;
   document.head.appendChild(s);
 }
@@ -2697,6 +2708,10 @@ function _vendInjectClientField(sel){
 
 // —— Décuvage → élevage (Le Chai) ——
 var _vendDecNb=2, _vendDecCuveId=null;
+// Ou part le vin : 'fut' (comme avant) | 'cuve' | 'mixte'.
+// ⚠️ 'fut' est le DEFAUT et le reste : un domaine sans cuve ne doit voir aucune
+//   difference. La bascule n'apparait meme pas si le parc a cuves est vide.
+var _vendDecMode='fut', _vendDecCuveRef=null, _vendDecCuveL=0;
 // Choix des futs a l'entonnage : {lot_id: nb}. Vide = on retombe sur le simple
 // compte de barriques, comme avant ce lot.
 var _vendDecChoix={};
@@ -2708,6 +2723,10 @@ function openVendDecuvage(cuveId){
   var yr=new Date().getFullYear();
   var _futHl=_caveFutHl(), _futTxt=String(_futHl).replace('.',',');
   _vendDecNb=Math.max(1,Math.round((c.volume_hl||0)/_futHl));
+  _vendDecMode='fut'; _vendDecCuveRef=null; _vendDecCuveL=0;
+  // ⚠️ Le CSS du parc vit dans _caveV2InjectCss : sans cet appel, le selecteur
+  //   de cuve sortirait SANS STYLE quand on decuve sans etre passe par Le Chai.
+  _caveV2InjectCss();
   // Proposition : du plus VIEUX au plus neuf. Un fut age doit tourner ; le neuf
   // se garde pour les cuvees qui le meritent. Proposition, jamais contrainte.
   _vendDecChoix={};
@@ -2722,19 +2741,160 @@ function openVendDecuvage(cuveId){
     +'<input id="vdec-nom" class="mvv-tin" type="text" value="'+_escHtml(c.nom||'')+'">'
     +'<label class="mvv-flbl">Millésime</label>'
     +'<input id="vdec-mil" class="mvv-tin" type="number" value="'+yr+'" min="2000" max="'+(yr+1)+'">'
-    +(_vendDecParcVide()
-      ? ('<label class="mvv-flbl">Nombre de barriques <span class="mvv-fhint">(≈ '+(c.volume_hl||0)+' hL ÷ '+_futTxt+' hL)</span></label>'
-        +'<div class="mvv-step2"><button class="mvv-step2-b" onclick="_vendDecAdj(-1)">−</button>'
+    +_vendDecSegHtml()
+    +'<div id="vdec-zone"></div>'
+    +'<button class="mvv-save" style="margin-top:18px" onclick="saveVendDecuvage()" id="vdec-go">D\u00e9cuver et cr\u00e9er la cuv\u00e9e</button>';
+  _vendSheet(html);
+  _vendDecZone();
+}
+
+// La bascule n'existe que s'il y a des cuves : sinon, l'ecran d'avant, a l'identique.
+function _vendDecSegHtml(){
+  if(!_caveParc().length) return '';
+  var o=[['fut','En barriques','comme avant'],['cuve','En cuve','du parc'],['mixte','Les deux','cuve + f\u00fbts']];
+  return '<label class="mvv-flbl">O\u00f9 part le vin ?</label><div class="mvv-dseg" id="vdec-seg">'
+    +o.map(function(x){
+      return '<button type="button" data-m="'+x[0]+'"'+(x[0]===_vendDecMode?' class="on"':'')
+        +' onclick="_vendDecMode2(\'' + x[0] + '\')">'+x[1]+'<span class="sm">'+x[2]+'</span></button>';
+    }).join('')+'</div>';
+}
+function _vendDecCuveObj(){
+  return (CAVE_VENDANGE.cuves_vinif||[]).find(function(x){return x.id===_vendDecCuveId;})||null;
+}
+function _vendDecVolHl(){ var c=_vendDecCuveObj(); return c?(parseFloat(c.volume_hl)||0):0; }
+
+// ⚠️ On ne re-rend QUE la zone : reconstruire la feuille effacerait le nom et le
+//   millesime deja saisis. Meme piege que _vendDecRender.
+function _vendDecMode2(m){
+  _vendDecMode=m;
+  var volHl=_vendDecVolHl(), futHl=_caveFutHl();
+  if(m==='fut'){ _vendDecCuveRef=null; _vendDecCuveL=0; _vendDecNb=Math.max(1,Math.round(volHl/futHl)); }
+  if(m==='cuve'){ _vendDecNb=0; _vendDecChoix={}; }
+  if(m==='mixte'){ _vendDecReste(); }
+  if(m!=='cuve') _vendDecReprop();
+  var seg=document.getElementById('vdec-seg');
+  if(seg) Array.prototype.forEach.call(seg.querySelectorAll('button'),function(b){
+    b.classList.toggle('on', b.getAttribute('data-m')===m);
+  });
+  _vendDecZone();
+}
+// Ce qui ne tient pas dans la cuve part en barriques.
+function _vendDecReste(){
+  var reste=_vendDecVolHl()-(_vendDecCuveL/100);
+  _vendDecNb=Math.max(0,Math.round(reste/_caveFutHl()));
+}
+function _vendDecReprop(){
+  _vendDecChoix={};
+  if(_vendDecNb>0 && !_vendDecParcVide() && typeof window._mvFutProposer==='function')
+    _vendDecChoix=window._mvFutProposer(window._mvFutStock(window.INTRANTS), _vendDecNb);
+}
+function _vendDecPickHtml(){
+  var libres=_caveParc().filter(function(p){ return !_caveCuveOcc(p.id, _vendDecCuveId); });
+  if(!libres.length)
+    return '<div class="mvv-dlnote">Aucune cuve libre dans le parc. Lib\u00e9rez-en une, '
+      +'ou d\u00e9clarez-en une nouvelle dans R\u00e9glages du Chai.</div>';
+  var volHl=_vendDecVolHl();
+  var h='<label class="mvv-flbl">Quelle cuve</label>';
+  libres.forEach(function(p){
+    var cap=(parseFloat(p.litres)||0)/100, sel=(_vendDecCuveRef===p.id), m=_caveMat(p.matiere);
+    var ok=cap>=volHl;
+    h+='<button type="button" class="mvc-pk mvc-aff-c'+(sel?' sel':'')+'" onclick="_vendDecPick(\'' + _escHtml(p.id) + '\')">'
+      +'<span class="mvc-aff-rad"></span>'
+      +'<span class="mvc-pk-ic '+_caveMatKey(p.matiere)+'">'+_mvIcon('cuve',18)+'</span>'
+      +'<span class="mvc-pk-b"><span class="mvc-pk-n">'+_escHtml(p.nom||'Cuve')+'</span>'
+      +'<span class="mvc-pk-m">'+_escHtml(m.lbl)+' \u00b7 '+_mvF1(cap)+' hL de contenance</span></span>'
+      +'<span class="mvc-pk-r"><span class="mvc-dfit '+(ok?'good':'tight')+'">'
+      +(ok?'tout tient':('reste '+_mvF1(volHl-cap)+' hL'))+'</span></span></button>';
+  });
+  if(_vendDecCuveRef){
+    var p2=_caveCuve(_vendDecCuveRef), cap2=(parseFloat(p2&&p2.litres)||0)/100;
+    h+='<label class="mvv-flbl" for="vdec-cl">Volume log\u00e9 '
+      +'<span class="mvv-fhint">(contenance '+_mvF1(cap2)+' hL)</span></label>'
+      +'<input id="vdec-cl" class="mvv-tin" type="number" step="0.1" inputmode="decimal" '
+      +'value="'+_mvF1(_vendDecCuveL/100).replace(',','.')+'" oninput="_vendDecCuveVol(this.value)">';
+    if(!_caveMat(p2&&p2.matiere).ouille && _vendDecMode==='cuve')
+      h+='<div class="mvv-dneuf">'+_escHtml((p2&&p2.nom)||'Cette cuve')+' ne respire pas : cette cuv\u00e9e '
+        +'arrivera au Chai <b>sans suivi d\u2019ouillage</b>. C\u2019est voulu, pas un oubli.</div>';
+  }
+  return h;
+}
+function _vendDecPick(ref){
+  var p=_caveCuve(ref); if(!p) return;
+  _vendDecCuveRef=ref;
+  _vendDecCuveL=Math.min(parseFloat(p.litres)||0, Math.round(_vendDecVolHl()*100));
+  if(_vendDecMode==='mixte'){ _vendDecReste(); _vendDecReprop(); }
+  _vendDecZone();
+}
+function _vendDecCuveVol(v){
+  var p=_caveCuve(_vendDecCuveRef); if(!p) return;
+  var x=parseFloat(String(v||'').replace(',','.'));
+  _vendDecCuveL = isFinite(x)&&x>0 ? Math.round(x*100) : 0;
+  // ⚠️ On ne re-rend PAS la zone ici : le champ perdrait le focus a chaque
+  //   frappe. Seuls le recap et, en mixte, le reste en barriques se mettent
+  //   a jour — et le nombre de barriques n'est recalcule qu'a la sortie du champ.
+  _vendDecRecap();
+}
+function _vendDecCuveVolFin(){
+  if(_vendDecMode==='mixte'){ _vendDecReste(); _vendDecReprop(); _vendDecZone(); }
+}
+function _vendDecLogeHl(){
+  return (_vendDecMode==='cuve'?0:(_vendDecTotal()>0?_vendDecTotal():_vendDecNb)*_caveFutHl())
+       + (_vendDecMode==='fut'?0:_vendDecCuveL/100);
+}
+function _vendDecRecapHtml(){
+  var loge=_vendDecLogeHl(), vol=_vendDecVolHl(), ec=vol-loge;
+  return '<div class="mvv-dtot"><span class="mvv-dtot-n'+(Math.abs(ec)>0.6?' ko':'')+'">'+_mvF1(loge)+'</span>'
+    +'<span class="mvv-dtot-l">hL log\u00e9s sur '+_mvF1(vol)+' hL d\u00e9cuv\u00e9s'
+    +(Math.abs(ec)>0.6
+      ? (ec>0 ? ' \u2014 il reste '+_mvF1(ec)+' hL sans contenant'
+              : ' \u2014 '+_mvF1(-ec)+' hL de trop')
+      : ' \u2014 le compte est bon')+'</span></div>';
+}
+function _vendDecRecap(){ var e=document.getElementById('vdec-recap'); if(e) e.innerHTML=_vendDecRecapHtml(); }
+
+function _vendDecZone(){
+  var z=document.getElementById('vdec-zone'); if(!z) return;
+  var c=_vendDecCuveObj(); if(!c) return;
+  var _futHl=_caveFutHl(), _futTxt=String(_futHl).replace('.',',');
+  var h='';
+  if(_vendDecMode!=='fut') h+=_vendDecPickHtml();
+  if(_vendDecMode!=='cuve'){
+    h+=(_vendDecParcVide()
+      ? ('<label class="mvv-flbl">Nombre de barriques <span class="mvv-fhint">('
+        +(_vendDecMode==='mixte'?'pour le reste':'\u2248 '+(c.volume_hl||0)+' hL')+' \u00f7 '+_futTxt+' hL)</span></label>'
+        +'<div class="mvv-step2"><button class="mvv-step2-b" onclick="_vendDecAdj(-1)">\u2212</button>'
         +'<span id="vdec-nb" class="mvv-step2-v">'+_vendDecNb+'</span>'
-        +'<button class="mvv-step2-b" onclick="_vendDecAdj(1)">＋</button>'
+        +'<button class="mvv-step2-b" onclick="_vendDecAdj(1)">\uff0b</button>'
         +'<span class="mvv-step2-u">barriques ('+_futTxt+' hL)</span></div>')
       : '')
-    +_vendDecLotsHtml(_futTxt)
-    +'<button class="mvv-save" style="margin-top:18px" onclick="saveVendDecuvage()" id="vdec-go">Décuver et créer la cuvée</button>';
-  _vendSheet(html);
+      +_vendDecLotsHtml(_futTxt);
+  }
+  h+='<div id="vdec-recap">'+_vendDecRecapHtml()+'</div>';
+  z.innerHTML=h;
+  var cl=document.getElementById('vdec-cl');
+  if(cl) cl.addEventListener('change', _vendDecCuveVolFin);
+  if(_vendDecMode!=='cuve' && !_vendDecParcVide()) _vendDecRender();
+  else _vendDecGoLbl(0);
+}
+function _vendDecGoLbl(tot){
+  var go=document.getElementById('vdec-go'); if(!go) return;
+  if(_vendDecMode==='cuve'){
+    var p=_caveCuve(_vendDecCuveRef);
+    go.textContent = p ? ('D\u00e9cuver dans '+p.nom) : 'Choisissez une cuve';
+    return;
+  }
+  go.textContent = tot>0 ? ('D\u00e9cuver dans '+tot+' barrique'+(tot>1?'s':'')
+    +(_vendDecCuveRef?' et une cuve':'')) : 'D\u00e9cuver et cr\u00e9er la cuv\u00e9e';
+}
+
+// ⚠️ Plancher a 0, pas a 1 : en mixte la cuve peut tout prendre, et « au moins
+//   une barrique » forcerait un fut fantome dans la cuvee.
+function _vendDecAdj(d){
+  _vendDecNb=Math.max(_vendDecMode==='fut'?1:0,_vendDecNb+d);
+  var el=document.getElementById('vdec-nb'); if(el) el.textContent=_vendDecNb;
+  _vendDecReprop(); _vendDecRecap();
   if(!_vendDecParcVide()) _vendDecRender();
 }
-function _vendDecAdj(d){ _vendDecNb=Math.max(1,_vendDecNb+d); var el=document.getElementById('vdec-nb'); if(el) el.textContent=_vendDecNb; }
 
 // ── ENTONNAGE : piocher les futs dans le parc ─────────────────────────────
 // Le parc vit dans La Reserve (INTRANTS.futs) ; le moteur dans utils.js. Si l'un
@@ -2763,6 +2923,7 @@ function _vendDecRender(){
   var host=document.getElementById('vdec-lots'); if(!host) return;
   var st=window._mvFutStock(window.INTRANTS);
   var tot=_vendDecTotal(), manque=_vendDecNb-tot;
+  if(_vendDecMode==='cuve'){ host.innerHTML=''; _vendDecGoLbl(0); return; }
   var h='<div class="mvv-dlots">';
   st.lots.forEach(function(l){
     var n=parseInt(_vendDecChoix[l.id],10)||0;
@@ -2791,10 +2952,8 @@ function _vendDecRender(){
       +'Compl\u00e9tez votre parc dans La R\u00e9serve, ou d\u00e9cuvez quand m\u00eame \u2014 rien n\u2019est bloqu\u00e9.</div>';
   }
   host.innerHTML=h;
-  var go=document.getElementById('vdec-go');
-  if(go) go.textContent=tot>0
-    ? ('D\u00e9cuver dans '+tot+' barrique'+(tot>1?'s':''))
-    : 'D\u00e9cuver et cr\u00e9er la cuv\u00e9e';
+  _vendDecGoLbl(tot);
+  _vendDecRecap();
 }
 function _vendDecAdjLot(id,d){
   var lot=window._mvFutStock(window.INTRANTS).lots.find(function(l){ return l.id===id; });
@@ -2807,12 +2966,17 @@ function _vendDecAdjLot(id,d){
 }
 window._vendDecAdjLot = _vendDecAdjLot;
 window._vendDecRender = _vendDecRender;
+window._vendDecMode2   = _vendDecMode2;
+window._vendDecPick    = _vendDecPick;
+window._vendDecCuveVol = _vendDecCuveVol;
 function saveVendDecuvage(){
   var c=(CAVE_VENDANGE.cuves_vinif||[]).find(function(x){return x.id===_vendDecCuveId;});
   if(!c) return;
   var nom=((document.getElementById('vdec-nom')||{}).value||'').trim()||c.nom||'Cuvée';
   var mil=parseInt((document.getElementById('vdec-mil')||{}).value)||new Date().getFullYear();
-  var nb=(_vendDecTotal()>0?_vendDecTotal():(_vendDecNb||1));
+  var nb;
+  if(_vendDecMode==='cuve') nb=0;
+  else nb=(_vendDecTotal()>0?_vendDecTotal():(_vendDecNb||1));
   // Les futs choisis SORTENT du parc et emportent leur identite : tonnelier,
   // reference, annee d'achat, lot d'origine.
   // ⚠️ L'ancien chemin ecrivait {annee: millesime de la cuvee} : tout fut cree au
@@ -2824,9 +2988,23 @@ function saveVendDecuvage(){
     if(_ton && _ton.length && typeof window.saveIntrants==='function') window.saveIntrants();
   }
   if(_ton && _ton.length) nb=_ton.reduce(function(s,t){ return s+(t.nb||0); },0);
+  // ⚠️ nb=0 ne doit PAS produire [{annee:mil,nb:0}] : une entree a zero fut
+  //   traine ensuite dans la repartition et dans la pyramide des ages.
+  var _tonf=(_ton&&_ton.length)?_ton:(nb>0?[{annee:mil,nb:nb}]:[]);
   var cuvee={id:'cuv_'+Date.now(),nom:nom,millesime:mil,
-    tonneaux:(_ton&&_ton.length)?_ton:[{annee:mil,nb:nb}],
+    tonneaux:_tonf,
     statut:'elevage',fml_terminee:false,last_ouillage:null,last_analyse:null};
+  // La cuve part avec la cuvee. Le volume ecrit est celui qu'on a saisi : un
+  // FAIT DATE, pas la contenance du parc.
+  var _cv=null;
+  if(_vendDecMode!=='fut' && _vendDecCuveRef && _vendDecCuveL>0){
+    _cv=_caveCuve(_vendDecCuveRef);
+    // ⚠️ Dernier filet : la cuve a pu etre prise entre l'affichage et le clic.
+    if(_cv && _caveCuveOcc(_cv.id, _vendDecCuveId)){
+      showToast(_cv.nom+' vient d\u2019\u00eatre prise','#B85A1A'); return;
+    }
+    if(_cv) cuvee.cuves=[{ref:_cv.id, litres:_vendDecCuveL}];
+  }
   if(!CAVE_ELEVAGE.cuvees) CAVE_ELEVAGE.cuvees=[];
   CAVE_ELEVAGE.cuvees.push(cuvee);
   c.decuvage={date:new Date().toISOString().slice(0,10),cuvee_id:cuvee.id};
@@ -2835,8 +3013,11 @@ function saveVendDecuvage(){
   window.CAVE_ELEVAGE=CAVE_ELEVAGE;
   if(window.fbSave){ window.fbSave('cave_vendange',CAVE_VENDANGE); window.fbSave('cave_elevage',CAVE_ELEVAGE); }
   _vendSheetClose();
-  showToast(nom+' → Le Chai ('+nb+' barrique'+(nb>1?'s':'')+')'
-    +((_ton&&_ton.length)?' · sorties du parc':''),'#3D6B27');
+  var _ou=[];
+  if(nb>0) _ou.push(nb+' barrique'+(nb>1?'s':''));
+  if(_cv) _ou.push(_cv.nom);
+  showToast(nom+' \u2192 Le Chai ('+(_ou.length?_ou.join(' + '):'sans contenant')+')'
+    +((_ton&&_ton.length)?' \u00b7 f\u00fbts sortis du parc':''),'#3D6B27');
   renderVendCuves();
 }
 
