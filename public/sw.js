@@ -1,4 +1,19 @@
-// MA VIGNE — Service Worker v6.99
+// MA VIGNE — Service Worker v7.00
+// v7.00 (22/08/2026) — LA TUILE SEULE EST CENTREE. APP 6.45 inchange.
+//   .login-profiles est une grille a DEUX colonnes (styles.css:192) : la tuile
+//   unique de 6.99 se collait en haut a gauche, sur une demi-largeur, avec un
+//   grand vide a droite. Une colonne bornee a 240px, centree.
+//   ⚠ Les DEUX branches ecrivent gridTemplateColumns et justifyContent. Ne
+//   remettre a '' que dans un sens laisserait la colonne unique en place apres
+//   « Ce n'est pas moi » : la liste entiere sortirait en UNE colonne etroite.
+//   Fait en ligne dans _loginRenderTuiles, pas dans styles.css, pour ne pas
+//   elargir la surface du lot.
+//   ⚠ Numero saute par REGLE DU DOUTE : 6.99 vient d'etre livre et je ne sais
+//   pas s'il est deploye. Reutiliser un numero deja en ligne figerait
+//   l'index.html des clients passes en 6.99, pour toujours. Sauter un numero
+//   ne coute rien. APP_VERSION reste 6.45 (utils.js non touche) et WHATS_NEW
+//   est intact : le client ne voit qu'un placement corrige.
+//   Fichier : app.js.
 // v6.99 (22/08/2026) — UNE SEULE TUILE A L'OUVERTURE (UX-LOGIN). APP 6.45.
 //   Sur un domaine de douze personnes, il fallait retrouver son nom dans la
 //   liste a chaque ouverture, telephone en main, souvent avec des gants.
@@ -2290,7 +2305,7 @@
 // v2.22 — Fix profils vides : guard vide dans loadData() pour MEMBRES/SAISONS/TACHES
 // v2.17 — Onboarding intégré + tenantId · v2.06 — Firebase Auth · v2.00–v2.05 — divers
 const DEBUG = self.location.hostname === 'localhost' || self.location.hostname === '127.0.0.1';
-const CACHE_NAME   = 'mavigne-v6.99';
+const CACHE_NAME   = 'mavigne-v7.00';
 const TENANT_CACHE = 'mavigne-tenant';   // Cache persistant — préservé à chaque mise à jour SW
 const SYNC_TAG     = 'mavigne-sync';
 
@@ -2306,7 +2321,7 @@ const CDN_URLS = [
 ];
 
 self.addEventListener('install', event => {
-  if(DEBUG) console.log('[SW] Ma Vigne v6.99 installé');
+  if(DEBUG) console.log('[SW] Ma Vigne v7.00 installé');
   event.waitUntil(
     caches.open(CACHE_NAME).then(async cache => {
       // ── Cœur applicatif : STRICT (mise à jour ATOMIQUE) ──
@@ -2322,7 +2337,7 @@ self.addEventListener('install', event => {
 });
 
 self.addEventListener('activate', event => {
-  if(DEBUG) console.log('[SW] Ma Vigne v6.99 activé');
+  if(DEBUG) console.log('[SW] Ma Vigne v7.00 activé');
   event.waitUntil(
     caches.keys().then(keys =>
       Promise.all(

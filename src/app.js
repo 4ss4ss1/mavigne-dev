@@ -1317,6 +1317,16 @@ function _loginRenderTuiles(){
   // Le lien de sortie. Il doit rester VISIBLE et large : sur une tablette de hangar
   // ou un téléphone de service, la tuile unique gêne au lieu d'aider, et c'est ce
   // lien qui rattrape tout. Le cacher pour faire propre casserait l'appareil partagé.
+  // Tuile seule : on la centre. .login-profiles est une grille à DEUX colonnes
+  // (styles.css:192) — une tuile unique se collait donc en haut à gauche, sur une
+  // demi-largeur, avec un grand vide à droite. On passe à une colonne bornée, centrée.
+  // ⚠ LES DEUX BRANCHES ÉCRIVENT. Ne remettre à '' que dans un sens laisserait la
+  // colonne unique en place après « Ce n'est pas moi » : la liste entière s'afficherait
+  // alors en UNE colonne étroite. C'est fait en ligne plutôt qu'en CSS pour ne pas
+  // toucher styles.css, qui coûterait un bump de plus.
+  profiles.style.gridTemplateColumns = (seul >= 0) ? 'minmax(0, 240px)' : '';
+  profiles.style.justifyContent      = (seul >= 0) ? 'center' : '';
+
   var lien = document.getElementById('login-autres');
   if(lien) lien.style.display = (seul >= 0) ? 'block' : 'none';
   var sous = document.getElementById('login-sub-txt');

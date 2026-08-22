@@ -121,6 +121,10 @@ console.log('\n1. La tuile unique');
   verifie('c\'est bien la bonne personne', nomAffiche(tuiles(document)[0]) === 'Nico');
   verifie('le lien de sortie est VISIBLE', document.noeuds['login-autres'].style.display === 'block');
   verifie('le sous-titre change', document.noeuds['login-sub-txt'].textContent === 'Bon retour');
+  const grille = document.noeuds['login-profiles'].style;
+  verifie('la tuile seule est centree', grille.justifyContent === 'center', grille.justifyContent);
+  verifie('la grille passe a une colonne bornee',
+    grille.gridTemplateColumns === 'minmax(0, 240px)', grille.gridTemplateColumns);
 }
 
 console.log('\n2. ⚠️ L\'index d\'origine — le piège du lot');
@@ -145,6 +149,9 @@ console.log('\n3. Les garde-fous');
   verifie('le lien de sortie est masque', document.noeuds['login-autres'].style.display === 'none');
   verifie('le sous-titre reste celui d\'origine',
     document.noeuds['login-sub-txt'].textContent === 'Choisissez votre profil');
+  const g3 = document.noeuds['login-profiles'].style;
+  verifie('liste entiere : grille a deux colonnes, non centree',
+    g3.justifyContent === '' && g3.gridTemplateColumns === '');
 }
 {
   const { api, document } = monte({ membres: EQUIPE, memoire: 'Quelqun-Dautre' });
@@ -177,6 +184,11 @@ console.log('\n4. « Ce n\'est pas moi »');
   verifie('le lien rouvre la liste entiere', tuiles(document).length === 3);
   verifie('le lien se masque une fois la liste ouverte',
     document.noeuds['login-autres'].style.display === 'none');
+  // ⚠ Sans remise a zero, la liste entiere s'afficherait en UNE colonne etroite.
+  const g2 = document.noeuds['login-profiles'].style;
+  verifie('le centrage est ANNULE au retour a la liste',
+    g2.justifyContent === '' && g2.gridTemplateColumns === '',
+    JSON.stringify([g2.justifyContent, g2.gridTemplateColumns]));
   verifie('le souvenir n\'est PAS efface (on regarde, on ne renonce pas)',
     api.lire() === 'Nico', api.lire());
 }

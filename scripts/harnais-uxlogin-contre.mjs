@@ -59,6 +59,14 @@ const DEFAUTS = [
     de: '  _loginMemOublier();\n  _loginVoirTous = false;',
     a:  '  _loginVoirTous = false;' },
 
+  { nom: 'la tuile seule n\'est plus centree',
+    de: "  profiles.style.justifyContent      = (seul >= 0) ? 'center' : '';",
+    a:  "  profiles.style.justifyContent      = '';" },
+
+  { nom: '\u26a0 le centrage n\'est pas annule : la liste sort en une colonne etroite',
+    de: "  profiles.style.gridTemplateColumns = (seul >= 0) ? 'minmax(0, 240px)' : '';",
+    a:  "  if(seul >= 0) profiles.style.gridTemplateColumns = 'minmax(0, 240px)';" },
+
   { nom: 'le sous-titre ne signale plus la tuile unique',
     de: "  if(sous) sous.textContent = (seul >= 0) ? 'Bon retour' : 'Choisissez votre profil';",
     a:  "  if(sous) sous.textContent = 'Choisissez votre profil';" },
