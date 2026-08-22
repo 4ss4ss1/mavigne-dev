@@ -33,12 +33,92 @@ const ALLOWED_ORIGINS = [
   'http://localhost:5173',
 ];
 
+// ── Anti-abus : le DÉBIT (SEC-6) ──────────────────────────────────
+// Les deux endpoints publics avaient honeypot + CORS + clip() : ces filtres bornent
+// le CONTENU d'une requête, jamais son NOMBRE. Un script qui poste dix mille fois les
+// passe tous — dix mille fiches `leads`, et surtout vingt mille messages dans la file
+// `mail`, dont le quota d'envoi est PARTAGÉ avec les codes GT et les identifiants
+// clients. C'est ce plafond-là que le débit protège en premier.
+//
+// ⚠️⚠️ MÊME COMPTEUR QUE claims.js, ET LA FENÊTRE EST UNE CONTRAINTE, PAS UN CHOIX.
+// Même document, même format {value:{hash:{count,ts}}}. checkAndBumpThrottle() purge le
+// document ENTIER avec SA fenêtre à chaque passage — `if (now - map[k].ts > 15 min)
+// delete map[k]` ne regarde pas à qui appartient la clé. Une fenêtre plus longue ici
+// serait donc silencieusement ramenée à 15 min au premier checkTrialToken venu.
+// Assouplir la FENÊTRE exige de toucher claims.js ; tant qu'on ne l'a pas fait, les
+// deux doivent être égales. La LIMITE, elle, est libre : c'est le seul curseur ici.
+//
+// ⚠️ Clés PRÉFIXÉES : même document, compteurs distincts. Sans le préfixe, un prospect
+// qui envoie le formulaire d'essai puis sa mise en route consommerait le quota de son
+// propre activateTrial (plafonné à 15, lui) et se verrait refuser l'ouverture de son
+// essai — le formulaire fermerait la porte qu'il sert à ouvrir.
+const THROTTLE_DOC        = '_guerettech/trial_throttle';
+const THROTTLE_WINDOW_MS  = 15 * 60 * 1000;   // ⚠️ DOIT rester égal à claims.js
+const PUBLIC_THROTTLE_MAX = 30;               // tentatives / IP / fenêtre, les DEUX endpoints réunis
+const THROTTLE_PREFIX     = 'pub:';
+
 // ── Helpers ───────────────────────────────────────────────────────
 const clip    = (s, n) => String(s == null ? '' : s).trim().slice(0, n);
 const emailOk = (v) => /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(v);
 const esc     = (s) => String(s == null ? '' : s)
   .replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;')
   .replace(/"/g, '&quot;');
+
+// Hash court et non réversible de l'IP appelante (aucune IP en clair stockée — RGPD).
+// ⚠️ Ce n'est PAS ipHash() de claims.js, et la différence n'est pas cosmétique : là-bas
+//    l'objet est un onCall, dont l'IP se trouve sous request.rawRequest. Ici on est en
+//    onRequest — `req` EST la requête Express, et `req.rawRequest` n'existe pas. Recopier
+//    l'autre version rendrait 'unknown' pour TOUT LE MONDE : un compteur unique pour la
+//    planète entière, saturé par le premier bot venu, et plus un seul formulaire ne passe.
+function ipHashReq(req) {
+  let raw = 'unknown';
+  try {
+    const h = (req && req.headers) || {};
+    const xff = h['x-forwarded-for'] || h['X-Forwarded-For'];
+    raw = (xff ? String(xff).split(',')[0] : (req && req.ip)) || 'unknown';
+  } catch (e) { /* fail-open */ }
+  return THROTTLE_PREFIX + crypto.createHash('sha256').update(String(raw).trim()).digest('hex').slice(0, 24);
+}
+
+// true = tentative autorisée · false = fenêtre saturée. Transaction et purge identiques
+// à claims.js. ⚠️ `tx.set` SANS merge : avec merge, les clés que la purge vient de
+// supprimer seraient réécrites par la fusion et le document grossirait sans fin.
+async function bumpPublicThrottle(db, key) {
+  const ref = db.doc(THROTTLE_DOC);
+  const now = Date.now();
+  return db.runTransaction(async (tx) => {
+    const snap = await tx.get(ref);
+    const map = (snap.exists && snap.data() && typeof snap.data().value === 'object' && snap.data().value) ? snap.data().value : {};
+    for (const k of Object.keys(map)) {
+      if (!map[k] || (now - map[k].ts) > THROTTLE_WINDOW_MS) delete map[k];
+    }
+    const e = map[key];
+    if (e && (now - e.ts) <= THROTTLE_WINDOW_MS) {
+      if (e.count >= PUBLIC_THROTTLE_MAX) { tx.set(ref, { value: map }); return false; }
+      e.count += 1; e.ts = now;
+    } else {
+      map[key] = { count: 1, ts: now };
+    }
+    tx.set(ref, { value: map });
+    return true;
+  });
+}
+
+// Rend true si la requête peut continuer. Ne lève JAMAIS : un compteur en panne ne doit
+// pas fermer le formulaire (fail-open, comme les quatre appels de claims.js).
+// ⚠️ Trace en WARNING, jamais en ERROR : les alertes log-based partent à ERROR. Un bot
+//    qui martèle enverrait alors un mail par requête — à l'adresse même dont ce garde-fou
+//    protège le quota d'envoi. Le remède deviendrait le symptôme.
+async function debitOk(db, req, quoi) {
+  const key = ipHashReq(req);
+  const passe = await bumpPublicThrottle(db, key).catch(() => true);
+  if (!passe) {
+    logger.warn('[Débit] Seuil atteint — ' + quoi + ' · clé ' + key
+                + ' · max ' + PUBLIC_THROTTLE_MAX + ' / ' + (THROTTLE_WINDOW_MS / 60000) + ' min'
+                + ' · réponse 200 rendue au client');
+  }
+  return passe;
+}
 
 function buildLead(b, req) {
   const modules = Array.isArray(b.modules)
@@ -263,6 +343,17 @@ exports.submitMiseEnRoute = onRequest(
     const b = (req.body && typeof req.body === 'object') ? req.body : {};
     if (clip(b.hp, 200)) { res.status(200).json({ status: 'saved' }); return; }
 
+    // ⚠️ APRÈS le honeypot, et l'ordre compte dans ce sens-là seulement : un bot qui
+    //    remplit le champ piège sort à la ligne du dessus SANS consommer le quota de
+    //    son IP — donc sans fermer le formulaire au prospect qui partagerait cette IP
+    //    (4G en CGNAT, wifi de salon, coopérative).
+    // ⚠️ Réponse 200 et même corps que le honeypot : rien ne doit pousser un vrai
+    //    prospect à ressaisir dix-sept réponses. Le refus ne se lit que dans les logs.
+    if (!(await debitOk(admin.firestore(), req, 'mise-en-route'))) {
+      res.status(200).json({ status: 'saved' });
+      return;
+    }
+
     const domaine = clip(b.dom, 120);
     const email   = clip(b.ctMail, 160).toLowerCase();
     if (!domaine)        { res.status(400).json({ error: 'missing_domaine' }); return; }
@@ -376,6 +467,14 @@ exports.submitLead = onRequest(
 
     // Honeypot : rempli uniquement par les bots → on simule un succès.
     if (clip(b.hp, 200)) { res.status(200).json({ status: 'created' }); return; }
+
+    // Débit par IP — APRÈS le honeypot (voir submitMiseEnRoute pour le pourquoi de
+    // l'ordre) et AVANT la validation : un envoi malformé en rafale doit compter lui
+    // aussi, sans quoi il suffirait d'omettre le domaine pour poster sans limite.
+    if (!(await debitOk(admin.firestore(), req, 'lead'))) {
+      res.status(200).json({ status: 'created' });
+      return;
+    }
 
     const lead = buildLead(b, req);
     if (!lead.domaine)        { res.status(400).json({ error: 'missing_domaine' }); return; }
