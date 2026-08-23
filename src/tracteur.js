@@ -396,6 +396,7 @@ function openReparateur(){
   document.getElementById('ov-rep-sub').textContent=t.nom+(t.modele?' — '+t.modele:'');
   var d=document.getElementById('rep-depuis');if(d)d.value=todayStr();
   var m=document.getElementById('rep-motif');if(m)m.value='';
+  var g=document.getElementById('rep-four');if(g)g.value='';
   var r=document.getElementById('rep-retour');if(r)r.value='';
   _openOv('ovReparateur');
 }
@@ -406,8 +407,15 @@ function saveReparateur(){
   var depuis=document.getElementById('rep-depuis').value;
   var motif=document.getElementById('rep-motif').value.trim();
   var retour=document.getElementById('rep-retour').value;
+  // Chez qui : on le sait au moment ou on emmene la machine, pas au retour.
+  // ⚠️ Le MONTANT, lui, ne se demande NI ici NI au retour : il arrive avec la
+  //   facture, des semaines plus tard, et se saisit dans Economie > Achats.
+  //   Le demander a un tractoriste qui rend les cles serait lui demander une
+  //   information qu'il n'a pas.
+  var _g=document.getElementById('rep-four');
+  var four=_g?_g.value.trim():'';
   if(!depuis||!motif){showToast('Date et motif requis','#C0392B');return;}
-  REPARATEUR[t.id]={depuis:depuis,motif:motif,prevu_retour:retour};
+  REPARATEUR[t.id]={depuis:depuis,motif:motif,prevu_retour:retour,four:four};
   window.REPARATEUR=REPARATEUR;
   localStorage.removeItem('mavigne_notif_rep_'+t.id);
   _saveData('reparateur');
@@ -426,7 +434,14 @@ function retourReparateur(){
     if(_rep&&_rep.depuis){
       if(!window.REPARATEUR_HIST)window.REPARATEUR_HIST={};
       if(!window.REPARATEUR_HIST[t.id])window.REPARATEUR_HIST[t.id]=[];
-      window.REPARATEUR_HIST[t.id].unshift({depuis:_rep.depuis,retour:todayStr(),motif:_rep.motif||''});
+      // ★ L'entree d'historique EST la ligne d'achat : c'est ce fait-la, et lui
+      //   seul, qui remonte dans Economie > Achats. Une fiche d'entretien
+      //   quotidienne (plein, huile, pression) n'est pas un achat et n'y monte
+      //   jamais. `eur` reste ABSENT tant que la facture n'est pas arrivee :
+      //   absent (a chiffrer) et 0 (sans frais) sont deux etats distincts.
+      window.REPARATEUR_HIST[t.id].unshift({
+        depuis:_rep.depuis, retour:todayStr(), motif:_rep.motif||'', four:_rep.four||''
+      });
       _saveData('reparateur_hist');
     }
     delete REPARATEUR[t.id];

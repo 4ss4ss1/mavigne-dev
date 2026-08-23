@@ -26,31 +26,19 @@ var INTRANTS = {
   produits: [],       // [{id,nom,cat,unite,contenance,contLbl,prixU,conso_src,conso_manuel}]
   achats: [],         // [{id,prodId,date,four,q,unites,lot,fact,prix}]
   inventaires: [],    // [{prodId,date,q}]  (dernière valeur = point zéro courant)
-  futs: [],           // [{id,four,ref,annee,qte,date}]
+  // `prix` : total HT du lot, ABSENT a la livraison et rempli plus tard depuis
+  // Pilotage > Economie > Achats. Absent (a chiffrer) et 0 (offert) sont deux
+  // etats distincts — d'ou `!=null` partout et jamais `||`.
+  futs: [],           // [{id,four,ref,annee,qte,date,prix}]
   fut_mouv: [],       // [{id,date,sens,motif,four,ref,annee,nb,note}] — registre du parc
   fut_four: [],       // fournisseurs mémorisés (fûts)
   fut_ref: [],        // références mémorisées (fûts)
   achat_four: [],     // fournisseurs mémorisés (achats intrants)
-  // ── LES DEPENSES : un consommable qui n'a pas de stock ────────────────────
-  // Une revision, une reparation, un loyer de futs se rachetent chaque annee —
-  // ce sont des consommables au sens ou l'entend ce module — mais ils n'ont NI
-  // quantite NI unite NI stock.
-  // ⚠️⚠️ Les forcer dans `produits[]` creerait un produit fantome dont le stock
-  //   ne bougerait jamais, ou partirait en negatif : l'alerte de coherence des
-  //   stocks negatifs se declencherait a tort, et on aurait casse un filet qui
-  //   marche pour loger une donnee qui n'a rien a y faire.
-  // La frontiere avec un intrant tient en une question : on recoit de la
-  // MARCHANDISE (bidon d'huile -> intrant stocke) ou une INTERVENTION (revision
-  // au garage -> depense) ?
-  // ★ Ce qui n'entre PAS ici : une charrue, du materiel, un fut ACHETE. On ne
-  //   les rachete pas l'an prochain. Le fut a deja sa duree de vie dans
-  //   l'application (CONFIG.cave.futs_vie) et son propre ecran de renouvellement.
-  //   Un fut LOUE, lui, entre : c'est un loyer annuel, pas un fut.
-  depenses: []        // [{id,date,ate,lib,four,fact,eur}]
+
 };
 window.INTRANTS = INTRANTS;
 
-var _rsvTab = 'futs'; // 'futs' | 'intrants' | 'depenses' | 'audit'
+var _rsvTab = 'futs'; // 'futs' | 'intrants' | 'audit'
 var _rsvEditFut = null;
 var _rsvFutYear = '__all__'; // filtre millesime (section futs)
 var _rsvFutOpen = {};        // fournisseur -> bool (deplie/replie explicite)
@@ -97,6 +85,12 @@ function _achatsQ(p){ return INTRANTS.achats.filter(function(a){return a.prodId=
 // ★ Les lignes SANS prix ou SANS quantite sont ECARTEES du quotient au lieu
 //   d'etre comptees a zero : une facture non saisie tirerait la moyenne vers le
 //   bas et le cout par parcelle serait faux SANS avoir l'air de l'etre.
+// Format euros du module. ⚠️ Vivait dans le bloc Dépenses, parti avec lui alors
+// que le prix moyen l'utilise encore : l'écran Intrants entier aurait plante au
+// premier rendu — pas une ligne fausse, un écran blanc. Une fonction utilitaire
+// n'appartient pas à la fonctionnalité qui l'a introduite en premier.
+function _eur2(n){ return (Math.round((Number(n)||0)*100)/100).toLocaleString('fr-FR',{minimumFractionDigits:0,maximumFractionDigits:2}); }
+
 function _rsvPrixU(pid){
   var id=(pid&&pid.id)?pid.id:pid;
   var Q=0, E=0;
@@ -213,7 +207,6 @@ function renderReserve(){
       +'<div class="mvu-tabs mvr-tabs">'
         +'<button class="mvu-tab'+(_rsvTab==='futs'?' on':'')+'" onclick="_rsvTabTo(\'futs\')"><span class="mvu-tab-em">'+_mvIcon('barrique',18)+'</span>Fûts</button>'
         +'<button class="mvu-tab'+(_rsvTab==='intrants'?' on':'')+'" onclick="_rsvTabTo(\'intrants\')"><span class="mvu-tab-em">'+_mvIcon('fiole',18)+'</span>Intrants</button>'
-        +'<button class="mvu-tab'+(_rsvTab==='depenses'?' on':'')+'" onclick="_rsvTabTo(\'depenses\')"><span class="mvu-tab-em">'+_mvIcon('euro',18)+'</span>Dépenses</button>'
         +'<button class="mvu-tab'+(_rsvTab==='audit'?' on':'')+'" onclick="_rsvTabTo(\'audit\')"><span class="mvu-tab-em">'+_mvIcon('liste',18)+'</span>Bilan matière</button>'
       +'</div>'
     +'</div>';
@@ -267,7 +260,6 @@ function _rsvRenderBody(){
   if(!window._dataReady){ b.innerHTML=window._mvSk('reserve'); return; }
   if(_rsvTab==='futs') b.innerHTML=_rsvFutsHtml()+(window._rsvMouvHtml?_rsvMouvHtml():'');
   else if(_rsvTab==='intrants') b.innerHTML=_rsvIntrantsHtml();
-  else if(_rsvTab==='depenses') b.innerHTML=_rsvDepHtml();
   else b.innerHTML=_rsvAuditHtml();
 }
 
@@ -901,180 +893,6 @@ function _rsvSaveInv(){
 }
 window._rsvSaveInv=_rsvSaveInv;
 
-// ═══════════════════════════ SECTION DEPENSES ═══════════════════════════════
-// Un consommable SANS STOCK : revision, reparation, loyer de futs, prestation.
-// Sept champs, aucune quantite. La liste est triee par date decroissante.
-function _depList(){
-  return (INTRANTS.depenses||[]).slice().sort(function(a,b){
-    var x=String(a&&a.date||''), y=String(b&&b.date||'');
-    return x<y?1:(x>y?-1:0);
-  });
-}
-// ⚠️ Les dates sont comparees en CHAINES ISO, jamais converties en Date.
-//   `new Date('2026-03-12')` est lu en UTC, `new Date('2026-03-12T00:00:00')` en
-//   heure locale : a Paris, minuit local tombe la VEILLE en UTC. C'est le defaut
-//   qui a fausse les contrats pendant des mois (SW v7.02). Une comparaison de
-//   chaines ISO n'a pas de fuseau, donc pas de piege.
-function _depTotal(list){
-  var t=0; (list||_depList()).forEach(function(d){ t+=Number(d&&d.eur)||0; });
-  return t;
-}
-function _depSansPrix(list){
-  var n=0; (list||_depList()).forEach(function(d){ if(!(Number(d&&d.eur)>0)) n++; });
-  return n;
-}
-function _depHtmlRow(d, adm){
-  var k=(d.ate&&_ATELBL[d.ate])?d.ate:'gen';
-  var e=Number(d.eur)||0;
-  return '<div class="mvr-dep-r">'
-    +'<div class="mvr-dep-d">'+_escHtml(_frDate(d.date))+'</div>'
-    +'<div class="mvr-dep-m"><b>'+_escHtml(d.lib||'\u2014')+'</b><span>'
-      +_escHtml(d.four||'Sans fournisseur')+(d.fact?(' \u00b7 '+_escHtml(d.fact)):'')+'</span></div>'
-    +'<span class="mvr-dep-b" style="background:color-mix(in srgb,'+_ATECOL[k]+' 14%,transparent);color:'
-      +(k==='gen'?'var(--texte-doux)':_ATECOL[k])+'">'+_escHtml(_ATELBL[k])+'</span>'
-    +(e>0?('<div class="mvr-dep-e">'+_escHtml(_eur2(e))+'\u00a0\u20AC</div>')
-         :'<div class="mvr-dep-e no">sans prix</div>')
-    +(adm?('<button class="mvr-mini mvr-mini-d" onclick="_rsvDelDep(\''+_escAttr(d.id)+'\')" aria-label="Supprimer">'+_mvIcon('corbeille',16)+'</button>'):'')
-    +'</div>';
-}
-function _rsvDepHtml(){
-  var adm=isAdmin(), L=_depList();
-  var h='';
-  // L est lue par la barre de boutons juste en dessous : elle doit etre affectee
-  // avant, pas apres.
-  h+='<div class="mvr-btnrow">'
-    +(adm?'<button class="mvr-btn mvr-btn-p" onclick="_rsvOpenDep()">\uFF0B D\u00e9pense</button>':'')
-    +(L.length?'<button class="mvr-btn mvr-btn-o" onclick="_rsvExportDepPdf()">'+_mvIcon('journal',18)+' Export PDF</button>':'')
-    +'</div>';
-  if(!L.length){
-    return h+'<div class="mvr-empty">'+_mvIcon('euro',24)+'<div>Aucune d\u00e9pense enregistr\u00e9e.</div>'
-      +'<div class="mvr-empty-h">On note ici ce qui se rach\u00e8te chaque ann\u00e9e sans avoir de stock\u00a0: '
-      +'r\u00e9visions, r\u00e9parations, locations de f\u00fbts. '
-      +'Ni le mat\u00e9riel, ni les f\u00fbts achet\u00e9s\u00a0\u2014 on ne les rach\u00e8te pas l\u2019an prochain.</div></div>';
-  }
-  // Sommes par atelier — l'ordre est celui de la table, jamais celui des donnees.
-  var by={}; _ATEORD.forEach(function(k){ by[k]=0; });
-  L.forEach(function(d){ var k=(d.ate&&_ATELBL[d.ate])?d.ate:'gen'; by[k]+=Number(d.eur)||0; });
-  h+='<div class="mvr-dep-sum">';
-  _ATEORD.forEach(function(k){
-    if(!(by[k]>0)) return;
-    h+='<div class="mvr-dep-k"><div class="l"><em style="background:'+_ATECOL[k]+'"></em>'
-      +_escHtml(_ATELBL[k])+'</div><div class="v">'+_escHtml(_eur0(by[k]))+'\u00a0\u20AC</div></div>';
-  });
-  h+='</div>';
-  var nsp=_depSansPrix(L);
-  h+='<div class="mvr-pcard"><div class="mvr-pin">'
-    +'<div class="mvr-ptop"><div class="mvr-pw"><div class="mvr-pnom">D\u00e9penses enregistr\u00e9es</div>'
-    +'<div class="mvr-psub2">'+L.length+' ligne'+(L.length>1?'s':'')
-    +(nsp?(' \u00b7 '+nsp+' sans prix'):'')+'</div></div>'
-    +'<div class="mvr-pcat">'+_escHtml(_eur0(_depTotal(L)))+'\u00a0\u20AC</div></div>'
-    +L.map(function(d){ return _depHtmlRow(d, adm); }).join('')
-    +'</div>';
-  h+='<div class="mvr-hint" style="margin-top:14px">Ces lignes alimentent <b>Pilotage \u203A \u00c9conomie \u203A Exercice</b>, '
-    +'r\u00e9parties par atelier. Une ligne sans prix est compt\u00e9e et signal\u00e9e\u00a0\u2014 jamais arrondie \u00e0 z\u00e9ro en silence.</div>';
-  return h;
-}
-// Formats locaux : le module n'en avait pas pour des euros.
-function _eur0(n){ return (Math.round(Number(n)||0)).toLocaleString('fr-FR'); }
-function _eur2(n){ return (Math.round((Number(n)||0)*100)/100).toLocaleString('fr-FR',{minimumFractionDigits:0,maximumFractionDigits:2}); }
-
-function _rsvOpenDep(){
-  if(!isAdmin()){ showToast('R\u00e9serv\u00e9 \u00e0 l\'administrateur','#C0392B'); return; }
-  document.getElementById('mvr-d-date').value=_today();
-  ['mvr-d-lib','mvr-d-four','mvr-d-fact','mvr-d-eur'].forEach(function(id){
-    var el=document.getElementById(id); if(el) el.value='';
-  });
-  var a=document.getElementById('mvr-d-ate'); if(a) a.value='trac';
-  var dl=document.getElementById('mvr-d-four-list');
-  if(dl) dl.innerHTML=(INTRANTS.achat_four||[]).map(function(v){return '<option value="'+_escAttr(v)+'">';}).join('');
-  if(window.openOv) window.openOv('ovRsvDep');
-}
-window._rsvOpenDep=_rsvOpenDep;
-
-function _rsvSaveDep(){
-  if(!isAdmin()){ showToast('R\u00e9serv\u00e9 \u00e0 l\'administrateur','#C0392B'); return; }
-  var lib=document.getElementById('mvr-d-lib').value.trim();
-  if(!lib){ showToast('Donne un libell\u00e9 \u00e0 la d\u00e9pense','#B85A1A'); return; }
-  var ate=document.getElementById('mvr-d-ate').value;
-  if(!_ATELBL[ate]) ate='gen';   // un atelier inconnu retombe sur le seau, jamais sur rien
-  var four=document.getElementById('mvr-d-four').value.trim();
-  _uniqPush(INTRANTS.achat_four, four);
-  // ⚠️ La virgule decimale : un clavier francais en produit une, parseFloat s'arrete
-  //   dessus et rend 12 pour « 12,50 ». Le montant serait faux de moitie, en silence.
-  var brut=String(document.getElementById('mvr-d-eur').value||'').replace(',','.');
-  var eur=parseFloat(brut); if(!(isFinite(eur)&&eur>0)) eur=0;
-  if(!Array.isArray(INTRANTS.depenses)) INTRANTS.depenses=[];
-  INTRANTS.depenses.push({ id:_rid(), date:document.getElementById('mvr-d-date').value||_today(),
-    ate:ate, lib:lib, four:four,
-    fact:document.getElementById('mvr-d-fact').value.trim(), eur:eur });
-  saveIntrants();
-  if(window.closeOv) window.closeOv(null,'ovRsvDep');
-  _rsvRenderBody();
-  showToast('D\u00e9pense enregistr\u00e9e'+(eur>0?'':' \u00b7 sans prix'), eur>0?'#3D6B27':'#B85A1A');
-}
-window._rsvSaveDep=_rsvSaveDep;
-
-function _rsvDelDep(id){
-  if(!isAdmin()) return;
-  var d=(INTRANTS.depenses||[]).find(function(x){return x&&x.id===id;});
-  if(!d) return;
-  var label=(d.lib||'')+' \u00b7 '+_frDate(d.date);
-  function go(){
-    INTRANTS.depenses=(INTRANTS.depenses||[]).filter(function(x){return x&&x.id!==id;});
-    saveIntrants(); _rsvRenderBody();
-    showToast('D\u00e9pense supprim\u00e9e','#B85A1A');
-  }
-  if(window.openConfirmDel) window.openConfirmDel('Supprimer cette d\u00e9pense\u00a0?', label, go);
-  else go();
-}
-window._rsvDelDep=_rsvDelDep;
-
-// ═══════════════════════════ EXPORT PDF — DEPENSES ══════════════════════════
-function _rsvExportDepPdf(){
-  var L=_depList();
-  if(!L.length){ showToast('Aucune d\u00e9pense \u00e0 exporter','#B85A1A'); return; }
-  if(typeof window._mvDocOpen!=='function'){ showToast('Mise \u00e0 jour incompl\u00e8te \u2014 rechargez l\u2019application','#B85A1A'); return; }
-  var by={}; _ATEORD.forEach(function(k){ by[k]=0; });
-  var rows='';
-  L.forEach(function(d){
-    var k=(d.ate&&_ATELBL[d.ate])?d.ate:'gen';
-    var e=Number(d.eur)||0; by[k]+=e;
-    rows+='<tr><td class="l">'+_escHtml(_frDate(d.date))+'</td>'
-      +'<td class="l">'+_escHtml(d.lib||'\u2014')+'</td>'
-      +'<td class="l">'+_escHtml(_ATELBL[k])+'</td>'
-      +'<td class="l">'+_escHtml(d.four||'\u2014')+'</td>'
-      +'<td class="l">'+_escHtml(d.fact||'\u2014')+'</td>'
-      +'<td>'+(e>0?(_eur2(e)+'\u00a0\u20AC'):'sans prix')+'</td></tr>';
-  });
-  var recap=_ATEORD.filter(function(k){ return by[k]>0; }).map(function(k){
-    return '<tr><td class="l">'+_escHtml(_ATELBL[k])+'</td><td>'+_eur0(by[k])+'\u00a0\u20AC</td></tr>'; }).join('');
-  var nsp=_depSansPrix(L);
-  var css='h2{font-size:12px;font-weight:700;text-transform:uppercase;letter-spacing:1.1px;color:#8A5A38;'
-    +'border-bottom:1px solid #E4DCCB;padding-bottom:4px;margin:18px 0 8px}h2:first-child{margin-top:0}'
-    +'table{width:100%;border-collapse:collapse;font-size:9.5px;margin-top:6px}'
-    +'th{background:#F6F2E8;text-align:right;padding:6px 8px;border-bottom:1px solid #E4DCCB;color:#6B6355;'
-    +'font-size:8.5px;font-weight:700;text-transform:uppercase;letter-spacing:.4px}'
-    +'th:first-child,td.l{text-align:left}'
-    +'td{padding:6px 8px;text-align:right;border-bottom:1px solid #F0EBE0;color:#2A2A22}';
-  var corps='<h2>R\u00e9partition par atelier</h2>'
-    +'<table><thead><tr><th>Atelier</th><th>Montant HT</th></tr></thead><tbody>'+recap
-    +'<tr><td class="l"><b>Total</b></td><td><b>'+_eur0(_depTotal(L))+'\u00a0\u20AC</b></td></tr></tbody></table>'
-    +'<h2>Le d\u00e9tail, ligne par ligne</h2>'
-    +'<table><thead><tr><th>Date</th><th>Libell\u00e9</th><th>Atelier</th><th>Fournisseur</th><th>Facture</th><th>Montant HT</th></tr></thead>'
-    +'<tbody>'+rows+'</tbody></table>'
-    +'<div class="mvdoc-lim">D\u00e9penses r\u00e9currentes sans stock : r\u00e9visions, r\u00e9parations, locations. '
-    +'Le mat\u00e9riel et les f\u00fbts achet\u00e9s n\u2019y figurent pas \u2014 ils ne se rach\u00e8tent pas chaque ann\u00e9e. '
-    +(nsp?(nsp+' ligne'+(nsp>1?'s':'')+' sans prix : le total est sous-\u00e9valu\u00e9 d\u2019autant. '):'')
-    +'\u00c9tat interne \u2014 ce n\u2019est pas une d\u00e9claration officielle.</div>';
-  window._mvDocOpen({
-    titre:'D\u00e9penses par atelier', domaine:_escHtml(window.DOMAINE_NOM||'Domaine'),
-    orient:'portrait', cat:'reserve',
-    metas:['Arr\u00eat\u00e9 au '+_frDate(_today())],
-    corps:corps, css:css
-  });
-}
-window._rsvExportDepPdf=_rsvExportDepPdf;
-
 // ═══════════════════════════ SECTION BILAN / AUDIT ═══════════════════════════
 function _rsvAuditHtml(){
   var h='<div class="mvr-exp-head"><div class="mvr-exp-t">Bilan matière — Intrants</div>'
@@ -1313,25 +1131,6 @@ function _rsvEnsureOverlays(){
       +'<div class="mvr-f2"><div><div class="mvr-fl">N° de lot</div><input class="mvr-fi" id="mvr-a-lot" placeholder="optionnel"></div>'
       +'<div><div class="mvr-fl">Prix HT (€)</div><input type="number" class="mvr-fi" id="mvr-a-prix" placeholder="optionnel"></div></div>'
       +'<div class="mvr-btnrow" style="margin-top:18px"><button class="mvr-btn mvr-btn-o" onclick="closeOv(null,\'ovRsvAchat\')">Annuler</button><button class="mvr-btn mvr-btn-p" onclick="_rsvSaveAchat()">\u2713 Enregistrer l\'achat</button></div>'
-    +'</div></div></div>'
-  // ── Dépense ──
-  // ⚠️ AUCUNE quantite, AUCUNE unite : c'est ce qui distingue cette saisie de
-  //   celle d'un achat. Le jour ou on ajoute un champ « quantite » ici, la ligne
-  //   devrait vivre dans `produits` et non dans `depenses`.
-  +'<div class="overlay" id="ovRsvDep" onclick="closeOv(event,\'ovRsvDep\')"><div class="modal" onclick="event.stopPropagation()">'
-    +'<div class="modal-handle"></div><div class="modal-hd"><div class="modal-title">Enregistrer une dépense</div>'
-    +'<div class="modal-sub">Ce qui se rachète chaque année sans avoir de stock</div></div>'
-    +'<div class="modal-body">'
-      +'<div class="mvr-f2"><div><div class="mvr-fl">Date</div><input type="date" class="mvr-fi" id="mvr-d-date"></div>'
-      +'<div><div class="mvr-fl">Montant HT (€)</div><input type="number" step="0.01" class="mvr-fi" id="mvr-d-eur" placeholder="optionnel"></div></div>'
-      +'<div class="mvr-fl">Atelier</div><select class="mvr-fi" id="mvr-d-ate">'
-        +'<option value="vigne">Vigne</option><option value="cave">Cave</option>'
-        +'<option value="trac" selected>Tracteur</option><option value="gen">Non affect\u00e9</option></select>'
-      +'<div class="mvr-fl">Libell\u00e9</div><input class="mvr-fi" id="mvr-d-lib" placeholder="ex. R\u00e9vision 1000\u00a0h, location de f\u00fbts, r\u00e9paration">'
-      +'<div class="mvr-f2"><div><div class="mvr-fl">Fournisseur</div><input class="mvr-fi" id="mvr-d-four" list="mvr-d-four-list" placeholder="ex. Garage Vitteaut" autocomplete="off"><datalist id="mvr-d-four-list"></datalist></div>'
-      +'<div><div class="mvr-fl">N° facture</div><input class="mvr-fi" id="mvr-d-fact" placeholder="FA-2026-…"></div></div>'
-      +'<div class="mvr-note">Le montant est <b>facultatif</b>. Une ligne sans prix est compt\u00e9e et signal\u00e9e dans le Pilotage, jamais arrondie \u00e0 z\u00e9ro en silence.</div>'
-      +'<div class="mvr-btnrow" style="margin-top:18px"><button class="mvr-btn mvr-btn-o" onclick="closeOv(null,\'ovRsvDep\')">Annuler</button><button class="mvr-btn mvr-btn-p" onclick="_rsvSaveDep()">Enregistrer</button></div>'
     +'</div></div></div>'
   // ── Inventaire ──
   +'<div class="overlay" id="ovRsvInv" onclick="closeOv(event,\'ovRsvInv\')"><div class="modal" onclick="event.stopPropagation()">'

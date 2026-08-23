@@ -778,19 +778,14 @@ function _mvParcProgCount(arr) {
 // "taille significative" d'une collection : parcelles -> progression ; tableau -> longueur ;
 // objet -> nb de cles.
 // `intrants` et `paie` sont des CONTENEURS a clefs fixes : Object.keys() y renvoie
-// une constante (8 et 3) que le document soit plein ou vide -> le garde generique
+// une constante (7 et 3) que le document soit plein ou vide -> le garde generique
 // serait inoperant. On mesure donc le CONTENU, comme _mvParcProgCount le fait pour
 // les parcelles. Les listes de memorisation (fut_four / fut_ref / achat_four) sont
 // exclues : purement cosmetiques, elles ne doivent pas peser dans la decision.
 function _mvIntrantsCount(v) {
   if (!v || typeof v !== 'object') return 0;
   var n = 0;
-  // ⚠️ `depenses` AJOUTE ICI AVEC LA CLE : sans elle, un ecrasement qui viderait
-  //   les depenses ne ferait PAS bouger la taille mesuree, et le garde laisserait
-  //   passer. Une collection non comptee est une collection non gardee.
-  //   ★ Les scenarios de C20 n'ont pas la cle : Array.isArray(undefined) rend
-  //     false, donc VIDE reste a 0 et PLEIN a 13. Le controle reste vert.
-  ['produits','achats','inventaires','futs','depenses'].forEach(function (k) {
+  ['produits','achats','inventaires','futs'].forEach(function (k) {
     if (Array.isArray(v[k])) n += v[k].length;
   });
   return n;

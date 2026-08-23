@@ -6426,7 +6426,7 @@ function _pecLoadSt(){
   try{
     var raw=localStorage.getItem(_pecStKey()); if(!raw) return;
     var o=JSON.parse(raw); if(!o||typeof o!=='object') return;
-    if(o.sub==='syn'||o.sub==='pos'||o.sub==='par'||o.sub==='exe') _PEC_SUB=o.sub;
+    if(o.sub==='syn'||o.sub==='pos'||o.sub==='par'||o.sub==='ach'||o.sub==='exe') _PEC_SUB=o.sub;
     if(o.axe==='nat'||o.axe==='ate') _PEC_AXE=o.axe;
     // Exercice consulte : une annee d'OUVERTURE, ou null = celui d'aujourd'hui.
     _PEX_AN=(typeof o.exan==='number'&&isFinite(o.exan))?o.exan:null;
@@ -6520,6 +6520,11 @@ function _pecCss(){
   +'.pec-acts{display:flex;gap:9px;flex-wrap:wrap;margin-top:14px}'
   +'.pec-tbl tr.pex-ag td{background:var(--bg-app);font-weight:700;color:var(--texte);font-size:var(--pt-micro,11px);text-transform:uppercase;letter-spacing:.06em;padding:7px 10px}'
   +'.pec-tbl tr.pex-ag td em{width:9px;height:9px;border-radius:3px;display:inline-block;font-style:normal;margin-right:7px}'
+  +'.pach-p{border:1px dashed var(--gris);background:transparent;color:var(--texte);border-radius:8px;padding:5px 10px;font:inherit;font-size:var(--pt-txt,12.5px);font-weight:700;cursor:pointer;white-space:nowrap}'
+  +'.pach-p:hover{border-style:solid;border-color:var(--or);background:var(--or-pale)}'
+  +'.pach-p.vide{color:var(--orange);border-style:dotted}'
+  +'.pach-p.ok{color:var(--vert-med)}'
+  +'.pec-btn.on{background:var(--bg-app);color:var(--texte);border-color:var(--gris)}'
   +'.pex-apill{display:inline-block;font-size:var(--pt-lbl,10.5px);font-weight:600;border-radius:7px;padding:3px 8px;line-height:1.4;white-space:nowrap}'
   +'.pex-ctrl{margin-top:14px;border:1px dashed var(--gris);border-radius:13px;padding:12px 15px;background:var(--bg-app);font-size:var(--pt-micro,11px);color:var(--texte-doux);line-height:1.7}'
   +'.pex-ctrl .l{font-size:var(--pt-lbl,10.5px);letter-spacing:.14em;text-transform:uppercase;font-weight:700;color:var(--texte-med);margin-bottom:2px}'
@@ -7703,10 +7708,11 @@ function _pecExport(kind,E){
 }
 
 // ── Barre de sous-vues ───────────────────────────────────────────────
-var _PEC_SUBS=[['syn','\uD83D\uDCC8','Synth\u00e8se'],['pos','\uD83E\uDDED','Postes & travaux'],['par','\uD83C\uDF47','Parcelles'],['exe','\uD83D\uDCC6','Exercice']];
+var _PEC_SUBS=[['syn','graphique','Synth\u00e8se'],['pos','cible','Postes & travaux'],['par','raisin','Parcelles'],['ach','euro','Achats'],['exe','calendrier','Exercice']];
 function _pecSubNav(E){
   var b=_PEC_SUBS.map(function(s){
-    return '<button data-pec="sub" data-v="'+s[0]+'"'+(s[0]===_PEC_SUB?' class="on"':'')+'><span style="margin-right:6px">'+s[1]+'</span>'+s[2]+'</button>';
+    var ic=(typeof _mvIcon==='function')?_mvIcon(s[1],16):'';
+    return '<button data-pec="sub" data-v="'+s[0]+'"'+(s[0]===_PEC_SUB?' class="on"':'')+'><span style="margin-right:6px;display:inline-flex;vertical-align:-3px">'+ic+'</span>'+s[2]+'</button>';
   }).join('');
   var ctx='<div class="pec-cs" style="text-align:right;min-width:0">'+_pilEsc(_pilSaisonNom()||'\u2014')+' \u00b7 '
     +_pilHa(E.tot.surf)+' ha \u00b7 taux moyen '+_pilEsc(_ecoEur2(E.rate))+' \u20AC/h</div>';
@@ -7931,30 +7937,38 @@ function _pexData(ex, noCmp){
   });
   achRows.sort(function(a,b){ return a.date<b.date?1:-1; });
 
-  // ── 4) DEPENSES (La Reserve) : le consommable SANS STOCK ───────────
-  // Revisions, reparations, loyers de futs. Meme regle que les achats : le prix
-  // est facultatif, on compte les lignes muettes et on le DIT.
-  var dps=(window.INTRANTS&&Array.isArray(window.INTRANTS.depenses))?window.INTRANTS.depenses:[];
-  var depT=0, nDep=0, nDepSansPrix=0, depRows=[];
-  dps.forEach(function(d){
-    if(!d||!d.date) return;
-    var iso=String(d.date).slice(0,10);
-    if(iso<ex.d0||iso>ex.d1) return;
-    nDep++;
-    var eur=Number(d.eur)||0;
-    if(!(eur>0)) nDepSansPrix++;
-    depT+=eur;
-    var k=parseInt(iso.slice(0,4),10)+'-'+(parseInt(iso.slice(5,7),10)-1);
-    if(byM[k]) byM[k].dep+=eur;
-    depRows.push({ date:iso, lib:d.lib||'\u2014', four:d.four||'',
-                   ate:(d.ate||'gen'), eur:eur });
+  // ── 4) REPARATIONS : ce qui est passe chez le reparateur ───────────
+  // ⚠️ La source est REPARATEUR_HIST, pas les fiches d'entretien. Le cycle
+  //   « emmene chez le reparateur -> rentre » EST le signal d'une intervention
+  //   payante, et il existait deja : date de depart, date de retour, motif. Une
+  //   fiche d'entretien, elle, est une checklist quotidienne — plein, huile,
+  //   pression — qui n'a rien d'un achat.
+  // ⚠️⚠️ `eur != null` et NON `eur > 0` : un montant a ZERO est une VALEUR
+  //   (garantie, geste commercial), pas une absence. Le confondre avec un vide
+  //   ferait repasser une reparation sous garantie en « a chiffrer » a vie.
+  var RH=(window.REPARATEUR_HIST&&typeof window.REPARATEUR_HIST==='object')?window.REPARATEUR_HIST:{};
+  var repT=0, nRep=0, nRepSansPrix=0, repRows=[];
+  Object.keys(RH).forEach(function(tid){
+    var arr=RH[tid]; if(!Array.isArray(arr)) return;
+    arr.forEach(function(r){
+      if(!r||!r.retour) return;               // ventile a la date de RETOUR
+      var iso=String(r.retour).slice(0,10);
+      if(iso<ex.d0||iso>ex.d1) return;
+      nRep++;
+      var e=(r.eur!=null&&isFinite(Number(r.eur)))?Number(r.eur):null;
+      if(e==null) nRepSansPrix++; else repT+=e;
+      var k=parseInt(iso.slice(0,4),10)+'-'+(parseInt(iso.slice(5,7),10)-1);
+      if(byM[k]&&e!=null) byM[k].dep+=e;
+      repRows.push({ date:iso, depuis:r.depuis||'', lib:r.motif||'Intervention',
+                     four:r.four||'', eur:e, tid:tid });
+    });
   });
-  depRows.sort(function(a,b){ return a.date<b.date?1:-1; });
+  repRows.sort(function(a,b){ return a.date<b.date?1:-1; });
 
   // ── 5) LA REPARTITION PAR ATELIER ──────────────────────────────────
   // ★★★ ELLE NE RECALCULE RIEN. Elle REVENTILE des euros deja comptes plus haut,
   //   ce qui donne l'invariant : la somme des ateliers vaut exactement
-  //   achT + gnrT + depT. Un second calcul aurait donne un second chiffre — la
+  //   achT + gnrT + repT. Un second calcul aurait donne un second chiffre — la
   //   faute que ce module passe son temps a corriger.
   // ⚠️ LES SALAIRES N'Y SONT PAS, et ce n'est pas un oubli : une entree de
   //   planning porte des heures, un type de conge, un motif d'absence — JAMAIS
@@ -7989,19 +8003,18 @@ function _pexData(ex, noCmp){
     _ateAdd(_pexAteDe(cat), (_CATNOM[cat]||cat),
             'La R\u00e9serve \u00b7 '+n+' achat'+(n>1?'s':''), achByCat[cat]);
   });
-  // c) les depenses portent leur atelier : c'est le SEUL cas ou il est demande,
-  //    parce qu'une prestation n'a pas de categorie de produit d'ou le deduire.
-  var depByFam={};
-  depRows.forEach(function(d){
-    var fam=/r\u00e9vision|revision|entretien/i.test(d.lib)?'R\u00e9visions'
-           :(/location|leasing|loyer/i.test(d.lib)?'Locations':'R\u00e9parations et prestations');
-    var key=(d.ate||'gen')+'|'+fam;
-    if(!depByFam[key]) depByFam[key]={eur:0,n:0};
-    depByFam[key].eur+=d.eur; depByFam[key].n++;
+  // c) les reparations partent au tracteur : une machine chez le reparateur,
+  //    c'est le tracteur qui coute, jamais la vigne ni la cave. L'atelier ne se
+  //    demande donc pas ici non plus.
+  var repFam={};
+  repRows.forEach(function(r){
+    if(r.eur==null) return;
+    var fam=/r\u00e9vision|revision|entretien/i.test(r.lib)?'R\u00e9visions':'R\u00e9parations';
+    if(!repFam[fam]) repFam[fam]={eur:0,n:0};
+    repFam[fam].eur+=r.eur; repFam[fam].n++;
   });
-  Object.keys(depByFam).forEach(function(key){
-    var p=key.split('|'), o=depByFam[key];
-    _ateAdd(p[0], p[1], 'D\u00e9penses \u00b7 '+o.n+' ligne'+(o.n>1?'s':''), o.eur);
+  Object.keys(repFam).forEach(function(f){
+    _ateAdd('trac', f, 'R\u00e9parateur \u00b7 '+repFam[f].n+' passage'+(repFam[f].n>1?'s':''), repFam[f].eur);
   });
   var ateT=0; _pexAteOrd().forEach(function(k){ ateT+=ateEur[k]; });
   _pexAteOrd().forEach(function(k){ ateSrc[k].sort(function(a,b){ return b.eur-a.eur; }); });
@@ -8011,7 +8024,7 @@ function _pexData(ex, noCmp){
   var phyConso=0; Object.keys(phy.cost||{}).forEach(function(k){ phyConso+=phy.cost[k]||0; });
 
   // ── Totaux ─────────────────────────────────────────────────────────
-  var total=salT+gnrT+achT+depT;
+  var total=salT+gnrT+achT+repT;
   var surf=0;
   (window.PARCELLES||[]).forEach(function(p){ if(p&&p.statut!=='Arrachee') surf+=parseFloat(p.surface)||0; });
   var postes=[
@@ -8020,8 +8033,8 @@ function _pexData(ex, noCmp){
           +' \u00b7 co\u00fbt employeur (taux charg\u00e9 des fiches)' },
     { k:'gnr', lab:'Carburant GNR',         col:_PEC_COL.gnr, eur:gnrT, det:_pecGnrDet(gnrSrc,litres,gnrR.n,gnrR.nSansLitres,'',cfg.gnrL) },
     { k:'ach', lab:'Achats d\u2019intrants', col:_PEC_COL.phy, eur:achT, det:nAch+' achat'+(nAch>1?'s':'')+' de La R\u00e9serve' },
-    { k:'dep', lab:'D\u00e9penses',           col:_PEC_COL.dep, eur:depT,
-      det:nDep+' ligne'+(nDep>1?'s':'')+' de La R\u00e9serve \u00b7 r\u00e9visions, r\u00e9parations, locations' }
+    { k:'dep', lab:'R\u00e9parations',        col:_PEC_COL.dep, eur:repT,
+      det:nRep+' passage'+(nRep>1?'s':'')+' chez le r\u00e9parateur' }
   ];
   postes.forEach(function(p){ p.part = total>0 ? (p.eur/total*100) : 0; });
 
@@ -8031,8 +8044,8 @@ function _pexData(ex, noCmp){
     if(prev && prev.total>0) cmp=prev;
   }
   return { ex:ex, mois:mois, byM:byM, gens:gens, postes:postes, achRows:achRows,
-           salT:salT, gnrT:gnrT, achT:achT, depT:depT, total:total,
-           depRows:depRows, nDep:nDep, nDepSansPrix:nDepSansPrix,
+           salT:salT, gnrT:gnrT, achT:achT, repT:repT, total:total,
+           repRows:repRows, nRep:nRep, nRepSansPrix:nRepSansPrix,
            ateEur:ateEur, ateSrc:ateSrc, ateT:ateT,
            gnrSrc:gnrSrc, gnrN:gnrR.n, gnrNSansLitres:gnrR.nSansLitres,
            hPaid:hPaid, hWork:hWork, tracH:tracH, litres:litres, phyConso:phyConso,
@@ -8287,26 +8300,40 @@ function _pexTableAch(E){
 // facon de dire l'absence de prix. Rendu seulement s'il y a quelque chose a
 // montrer — un tableau vide sur un domaine qui n'en saisit pas serait du bruit.
 function _pexTableDep(E){
-  if(!E.depRows||!E.depRows.length) return '';
-  var rows=E.depRows.slice(0,60).map(function(d){
-    var a=(d.ate||'gen');
-    return '<tr><td class="n">'+_pilEsc(_pecDfrMs(_pexD(d.date).getTime()))+'</td>'
-      +'<td>'+_pilEsc(d.lib)+'</td>'
-      +'<td><span class="pex-apill" style="background:color-mix(in srgb,'+_pexAteCol(a)+' 14%,transparent);color:'
-        +(a==='gen'?'var(--texte-doux)':_pexAteCol(a))+'">'+_pilEsc(_pexAteLbl(a))+'</span></td>'
-      +'<td>'+_pilEsc(d.four||'\u2014')+'</td>'
-      +'<td class="r">'+(d.eur>0?_pilEsc(_ecoEur(d.eur)):'<span style="color:'+_PEC_COL.ret+'">sans prix</span>')+'</td></tr>';
+  if(!E.repRows||!E.repRows.length) return '';
+  var rows=E.repRows.slice(0,60).map(function(r){
+    // ⚠️ Trois etats, pas deux : un montant SAISI a zero veut dire « sans frais »
+    //   (garantie, geste commercial). Le confondre avec l'absence de montant
+    //   ferait figurer une reparation deja reglee dans la liste des choses a
+    //   chiffrer, indefiniment.
+    var val = (r.eur==null) ? '<span style="color:'+_PEC_COL.ret+'">\u00e0 chiffrer</span>'
+            : (r.eur>0 ? _pilEsc(_ecoEur(r.eur))
+                       : '<span style="color:'+_PEC_COL.mo+'">sans frais</span>');
+    var jours='';
+    if(r.depuis&&r.date){
+      var d0=_pexD(r.depuis).getTime(), d1=_pexD(r.date).getTime();
+      var nj=Math.round((d1-d0)/86400000);
+      if(nj>=0) jours=(nj+1)+'\u00a0j';
+    }
+    return '<tr><td class="n">'+_pilEsc(_pecDfrMs(_pexD(r.date).getTime()))+'</td>'
+      +'<td>'+_pilEsc(r.lib)+'</td>'
+      +'<td>'+_pilEsc(jours||'\u2014')+'</td>'
+      +'<td>'+_pilEsc(r.four||'\u2014')+'</td>'
+      +'<td class="r">'+val+'</td></tr>';
   }).join('');
-  return '<div class="pec-card"><div class="pec-ch"><div class="pec-ct">Les d\u00e9penses</div>'
-    +'<div class="pec-cs">Ce qui se rach\u00e8te chaque ann\u00e9e sans avoir de stock : r\u00e9visions, '
-    +'r\u00e9parations, locations. \u00c0 la date de la prestation.'
-    +(E.depRows.length>60?(' Les 60 plus r\u00e9centes sont affich\u00e9es\u00a0; le total porte sur les '+E.depRows.length+'.'):'')
+  return '<div class="pec-card"><div class="pec-ch"><div class="pec-ct">Les passages chez le r\u00e9parateur</div>'
+    +'<div class="pec-cs">Chaque immobilisation, \u00e0 sa date de <b>retour</b> \u2014 c\u2019est le moment o\u00f9 la '
+    +'facture se d\u00e9clenche. Les fiches d\u2019entretien quotidiennes n\u2019y figurent pas.'
+    +(E.repRows.length>60?(' Les 60 plus r\u00e9centes sont affich\u00e9es\u00a0; le total porte sur les '+E.repRows.length+'.'):'')
     +'</div></div>'
-    +'<div class="pec-cb"><div class="pec-scroll"><table class="pec-tbl" style="min-width:560px">'
-    +'<thead><tr><th>Date</th><th>Libell\u00e9</th><th>Atelier</th><th>Fournisseur</th><th class="r">Montant HT</th></tr></thead>'
+    +'<div class="pec-cb"><div class="pec-scroll"><table class="pec-tbl" style="min-width:520px">'
+    +'<thead><tr><th>Retour</th><th>Motif</th><th>Immobilis\u00e9</th><th>R\u00e9parateur</th><th class="r">Montant HT</th></tr></thead>'
     +'<tbody>'+rows+'</tbody>'
-    +'<tfoot><tr><td>Total</td><td></td><td></td><td></td><td class="r">'+_pilEsc(_ecoEur(E.depT))+'</td></tr></tfoot>'
-    +'</table></div></div></div>';
+    +'<tfoot><tr><td>Total chiffr\u00e9</td><td></td><td></td><td></td><td class="r">'+_pilEsc(_ecoEur(E.repT))+'</td></tr></tfoot>'
+    +'</table></div>'
+    +(E.nRepSansPrix>0?('<div class="pec-note"><b>'+E.nRepSansPrix+' passage'+(E.nRepSansPrix>1?'s':'')
+      +' sans montant</b> : \u00e0 chiffrer dans <b>\u00c9conomie \u203a Achats</b> quand la facture arrive.</div>'):'')
+    +'</div></div>';
 }
 
 // ══ LA CARTE DES CONSOMMABLES — DEUX AXES, UN SEUL TOTAL ═══════════════════
@@ -8315,7 +8342,7 @@ function _pexTableDep(E){
 // ⚠️ Aucune font-size ecrite en dur dans ce fichier : le harnais d'echelle en
 //   refuse une seule. Tout passe par var(--pt-X,valeur), repli exact.
 function _pexConso(E){
-  var T=E.achT+E.gnrT+E.depT;
+  var T=E.achT+E.gnrT+E.repT;
   var ate=(_PEC_AXE==='ate');
   var head='<div class="pec-ch"><div class="pec-ct">Les consommables</div>'
     +'<div class="pec-cs">Ce qui se rach\u00e8te chaque ann\u00e9e, r\u00e9parti '
@@ -8333,7 +8360,7 @@ function _pexConso(E){
       +'Le carburant vient tout seul des appoints de cuve.</div>'
       +'<div class="pec-acts"><button class="pec-btn" data-pec="rsv" data-v="intrants">'
       +'<span>\uFF0B</span> Saisir un achat</button>'
-      +'<button class="pec-btn" data-pec="rsv" data-v="depenses"><span>\uFF0B</span> Saisir une d\u00e9pense</button></div>'
+      +'<button class="pec-btn" data-pec="pachgo">Chiffrer dans Achats</button></div>'
       +'</div></div>';
   }
   var body;
@@ -8365,7 +8392,7 @@ function _pexHorsPerim(){
 function _pexAxeNature(E,T){
   var L=[['ach',E.achT,'Achats d\u2019intrants',_PEC_COL.phy, E.nAch+' achat'+(E.nAch>1?'s':'')+' de La R\u00e9serve'],
          ['gnr',E.gnrT,'Carburant GNR',_PEC_COL.gnr, _ecoH1(E.litres)+' L \u00b7 '+E.gnrN+' appoint'+(E.gnrN>1?'s':'')],
-         ['dep',E.depT,'D\u00e9penses',_PEC_COL.dep, E.nDep+' ligne'+(E.nDep>1?'s':'')+' \u00b7 r\u00e9visions, r\u00e9parations, locations']];
+         ['dep',E.repT,'R\u00e9parations',_PEC_COL.dep, E.nRep+' passage'+(E.nRep>1?'s':'')+' chez le r\u00e9parateur']];
   var k='<div class="pec-kpis">';
   L.forEach(function(x){
     if(!(x[1]>0)) return;
@@ -8424,20 +8451,20 @@ function _pexAxeAtelier(E,T){
   // ★★★ LE CONTROLE EST AFFICHE, PAS SEULEMENT TESTE. Un lecteur qui voit
   //   l'egalite tomber juste n'a pas besoin qu'on lui promette qu'elle l'est.
   //   Un ecart signifie qu'un euro a ete compte deux fois, ou pas du tout.
-  var somme=E.achT+E.gnrT+E.depT, ok=Math.abs(E.ateT-somme)<0.005;
+  var somme=E.achT+E.gnrT+E.repT, ok=Math.abs(E.ateT-somme)<0.005;
   var ctrl='<div class="pex-ctrl'+(ok?'':' bad')+'">'
     +'<div class="l">Contr\u00f4le</div><div>'
     +ORD.filter(function(a){return (A[a]||0)>0;}).map(function(a){ return _pilEsc(_ecoEur(A[a]).replace(' \u20AC','')); }).join(' + ')
     +' = <b>'+_pilEsc(_ecoEur(E.ateT))+'</b> &nbsp;=&nbsp; achats '+_pilEsc(_ecoEur(E.achT))
-    +' + GNR '+_pilEsc(_ecoEur(E.gnrT))+' + d\u00e9penses '+_pilEsc(_ecoEur(E.depT))
+    +' + GNR '+_pilEsc(_ecoEur(E.gnrT))+' + r\u00e9parations '+_pilEsc(_ecoEur(E.repT))
     +' &nbsp;'+(ok?'<b class="ok">l\u2019\u00e9galit\u00e9 tombe juste</b>':'<b class="ko">\u00c9CART \u2014 un euro est compt\u00e9 deux fois, ou pas du tout</b>')
     +'<br>Les salaires ('+_pilEsc(_ecoEur(E.salT))+') restent hors de ce d\u00e9compte.</div></div>';
 
   var nsp='';
-  if(E.nAchSansPrix>0||E.nDepSansPrix>0){
+  if(E.nAchSansPrix>0||E.nRepSansPrix>0){
     var b=[];
     if(E.nAchSansPrix>0) b.push('<b>'+E.nAchSansPrix+' achat'+(E.nAchSansPrix>1?'s':'')+'</b>');
-    if(E.nDepSansPrix>0) b.push('<b>'+E.nDepSansPrix+' d\u00e9pense'+(E.nDepSansPrix>1?'s':'')+'</b>');
+    if(E.nRepSansPrix>0) b.push('<b>'+E.nRepSansPrix+' r\u00e9paration'+(E.nRepSansPrix>1?'s':'')+'</b>');
     nsp=b.join(' et ')+' sans prix : le total est <b>sous-\u00e9valu\u00e9 de ce que valent ces lignes</b>, '
        +'jamais arrondi en silence.<br>';
   }
@@ -8457,12 +8484,272 @@ function _pexAxeAtelier(E,T){
     +(nsp?('<div class="pec-note">'+nsp+'</div>'):'')
     +'<div class="pec-acts">'
     +'<button class="pec-btn" data-pec="rsv" data-v="intrants"><span>\uFF0B</span> Saisir un achat</button>'
-    +'<button class="pec-btn" data-pec="rsv" data-v="depenses"><span>\uFF0B</span> Saisir une d\u00e9pense</button>'
-    +'<button class="pec-btn" data-pec="rsv" data-v="depenses">Voir les d\u00e9penses</button>'
+    +'<button class="pec-btn" data-pec="pachgo">Chiffrer dans Achats</button>'
     +'</div>'
     +'<div class="pec-note">Ces boutons <b>ouvrent La R\u00e9serve</b> \u2014 rien ne se saisit ici. '
     +'Le Pilotage lit, il n\u2019\u00e9crit aucun fait d\u2019exploitation.</div>'
     +'</div>';
+}
+
+// ══════════════════════ ACHATS — LE SEUL ENDROIT OU L'ON MET LES PRIX ═══════
+// ★★★ CE N'EST PAS UN SECOND FORMULAIRE DE SAISIE, c'est un ecran de
+//   VALORISATION. Le FAIT reste dans son module — le fut au parc, la reparation
+//   au tracteur, l'intrant a La Reserve — et cet ecran ne fait que deux choses :
+//   les lister toutes, et porter le PRIX.
+// ⚠️ La raison d'etre : le prix arrive PLUS TARD, souvent en lot (les factures
+//   du mois), et il n'interesse pas celui qui fait le geste sur le terrain.
+//   Le fait et le prix sont deux gestes, a deux moments, souvent par deux
+//   personnes. Les demander ensemble, c'est demander a un tractoriste qui rend
+//   les cles un chiffre qu'il n'a pas.
+// ⚠️⚠️ TROIS ETATS, JAMAIS DEUX :
+//     prix == null  -> a chiffrer (on ne sait pas encore)
+//     prix === 0    -> sans frais (garantie, geste commercial) — une VALEUR
+//     prix > 0      -> chiffre
+//   Un test `if(prix)` confondrait les deux premiers et laisserait une
+//   reparation sous garantie « a chiffrer » a vie, en faisant mentir le
+//   compteur d'en-tete tous les mois.
+// ⚠️ Le prix retourne DANS L'OBJET, pas dans une table de prix a part : un fut
+//   coute X, ce n'est pas une ligne comptable separee. Une table liee par
+//   identifiant laisserait des orphelins le jour ou l'objet est supprime.
+var _PACH_FILT='tout';   // 'tout' | 'sans'
+var _PACH_SRC={
+  rsv:  { lbl:'La R\u00e9serve',  col:'#5B2D8E', ecr:'La R\u00e9serve \u203a Intrants' },
+  fut:  { lbl:'Parc \u00e0 f\u00fbts', col:'#8A5A38', ecr:'La R\u00e9serve \u203a F\u00fbts' },
+  trac: { lbl:'R\u00e9parateur',  col:'#2C3E50', ecr:'Tracteur \u203a Retour du r\u00e9parateur' }
+};
+
+// Rassemble les trois sources. AUCUNE ne se recalcule : on lit les objets la ou
+// ils vivent, et l'identifiant sert a y reecrire le prix.
+function _pachLignes(){
+  var out=[];
+  var I=(window.INTRANTS&&typeof window.INTRANTS==='object')?window.INTRANTS:{};
+  var prodBy={}; (I.produits||[]).forEach(function(p){ if(p&&p.id) prodBy[p.id]=p; });
+
+  (I.achats||[]).forEach(function(a){
+    if(!a||!a.id) return;
+    var pr=prodBy[a.prodId]||null;
+    out.push({ src:'rsv', id:a.id, date:String(a.date||'').slice(0,10),
+      quoi:((pr&&pr.nom)||'Intrant')+(a.q?(' \u00b7 '+_pilHa(a.q)+' '+((pr&&pr.unite)||'')):''),
+      four:a.four||'', ate:_pexAteDe((pr&&pr.cat)||'gen'),
+      prix:(a.prix!=null&&isFinite(Number(a.prix)))?Number(a.prix):null, fact:a.fact||'' });
+  });
+
+  (I.futs||[]).forEach(function(f){
+    if(!f||!f.id) return;
+    out.push({ src:'fut', id:f.id, date:String(f.date||'').slice(0,10),
+      quoi:(f.qte||0)+' f\u00fbt'+((f.qte||0)>1?'s':'')+(f.ref?(' '+f.ref):'')+(f.annee?(' \u00b7 mill\u00e9sime '+f.annee):''),
+      four:f.four||'', ate:'cave',
+      prix:(f.prix!=null&&isFinite(Number(f.prix)))?Number(f.prix):null, fact:f.fact||'' });
+  });
+
+  var RH=(window.REPARATEUR_HIST&&typeof window.REPARATEUR_HIST==='object')?window.REPARATEUR_HIST:{};
+  Object.keys(RH).forEach(function(tid){
+    var arr=RH[tid]; if(!Array.isArray(arr)) return;
+    arr.forEach(function(r,i){
+      if(!r||!r.retour) return;
+      var j='';
+      if(r.depuis){
+        var nj=Math.round((_pexD(r.retour).getTime()-_pexD(r.depuis).getTime())/86400000);
+        if(nj>=0) j=' \u00b7 '+(nj+1)+'\u00a0j chez le r\u00e9parateur';
+      }
+      out.push({ src:'trac', id:tid+'|'+i, date:String(r.retour).slice(0,10),
+        quoi:(r.motif||'Intervention')+j, four:r.four||'', ate:'trac',
+        prix:(r.eur!=null&&isFinite(Number(r.eur)))?Number(r.eur):null, fact:r.fact||'' });
+    });
+  });
+
+  out.sort(function(a,b){ return a.date<b.date?1:(a.date>b.date?-1:0); });
+  return out;
+}
+
+// ★ Ecrit le prix DANS L'OBJET D'ORIGINE, puis sauvegarde le document qui le
+//   porte — jamais une copie locale. Rend le nom du document sauve, ou null.
+function _pachEcrit(src,id,prix,fact){
+  var I=window.INTRANTS||{};
+  if(src==='rsv'){
+    var a=(I.achats||[]).find(function(x){ return x&&x.id===id; });
+    if(!a) return null;
+    a.prix=prix; if(fact!=null) a.fact=fact;
+    return 'intrants';
+  }
+  if(src==='fut'){
+    var f=(I.futs||[]).find(function(x){ return x&&x.id===id; });
+    if(!f) return null;
+    f.prix=prix; if(fact!=null) f.fact=fact;
+    return 'intrants';
+  }
+  if(src==='trac'){
+    var p=String(id).split('|'), tid=p[0], k=parseInt(p[1],10);
+    var arr=(window.REPARATEUR_HIST||{})[tid];
+    if(!Array.isArray(arr)||!arr[k]) return null;
+    arr[k].eur=prix; if(fact!=null) arr[k].fact=fact;
+    return 'reparateur_hist';
+  }
+  return null;
+}
+
+function _pachView(){
+  var L=_pachLignes();
+  var chif=L.filter(function(x){ return x.prix!=null; });   // 0 EUR compte comme chiffre
+  var sans=L.filter(function(x){ return x.prix==null; });
+  var tot=chif.reduce(function(a,x){ return a+x.prix; },0);
+  var adm=(typeof isAdmin==='function')?isAdmin():false;
+
+  var h='';   // la sous-nav est posee par l'appelant
+
+  h+='<div class="pec-card"><div class="pec-ch"><div class="pec-ct">Tout ce qui a \u00e9t\u00e9 acquis</div>'
+   +'<div class="pec-cs">Chaque module y d\u00e9pose ses lignes. C\u2019est <b>le seul endroit o\u00f9 l\u2019on met '
+   +'les prix</b>.</div></div>'
+   +'<div class="pec-kpis">'
+   +'<div class="pec-k"><div class="l">Chiffr\u00e9</div><div class="v">'
+     +_pilEsc(_ecoEur(tot).replace(' \u20AC',''))+' <small>\u20AC</small></div>'
+     +'<div class="s">'+chif.length+' ligne'+(chif.length>1?'s':'')+' sur '+L.length+'</div></div>'
+   +'<div class="pec-k"><div class="l">\u00c0 chiffrer</div><div class="v"'
+     +(sans.length?(' style="color:'+_PEC_COL.ret+'"'):'')+'>'+sans.length+'</div>'
+     +'<div class="s">'+(sans.length?'le total est un plancher':'rien en attente')+'</div></div>'
+   +'<div class="pec-k"><div class="l">Sources</div><div class="v">'
+     +Object.keys(_PACH_SRC).filter(function(k){ return L.some(function(x){return x.src===k;}); }).length
+     +' <small>/ 3</small></div><div class="s">R\u00e9serve, f\u00fbts, r\u00e9parateur</div></div>'
+   +'</div></div>';
+
+  if(!L.length){
+    return h+'<div class="pec-card"><div class="pec-cb" style="padding-top:16px">'
+      +'<div class="pec-empty">Rien d\u2019acquis pour l\u2019instant.</div>'
+      +'<div class="pec-note">Les lignes arrivent d\u2019elles-m\u00eames\u00a0: un achat saisi dans La R\u00e9serve, '
+      +'un lot de f\u00fbts, une machine rentr\u00e9e du r\u00e9parateur. <b>Rien ne se cr\u00e9e ici.</b></div>'
+      +'</div></div>';
+  }
+
+  var V=(_PACH_FILT==='sans')?sans:L;
+  var rows=V.slice(0,120).map(function(x){
+    var S=_PACH_SRC[x.src]||_PACH_SRC.rsv;
+    // ⚠️ Trois etats. `x.prix>0` seul confondrait « sans frais » et « a chiffrer ».
+    var cell;
+    if(x.prix==null){
+      cell=adm?('<button class="pach-p vide" data-pec="pach" data-v="'+_escAttr(x.src+'::'+x.id)+'">\u00e0 chiffrer</button>')
+              :('<span style="color:'+_PEC_COL.ret+'">\u00e0 chiffrer</span>');
+    } else if(x.prix>0){
+      cell=adm?('<button class="pach-p" data-pec="pach" data-v="'+_escAttr(x.src+'::'+x.id)+'">'+_pilEsc(_ecoEur(x.prix))+'</button>')
+              :_pilEsc(_ecoEur(x.prix));
+    } else {
+      cell=adm?('<button class="pach-p ok" data-pec="pach" data-v="'+_escAttr(x.src+'::'+x.id)+'">sans frais</button>')
+              :'<span style="color:'+_PEC_COL.mo+'">sans frais</span>';
+    }
+    var A=_pexAteLbl(x.ate), AC=_pexAteCol(x.ate);
+    return '<tr><td>'+_pilEsc(x.date?_pecDfrMs(_pexD(x.date).getTime()):'\u2014')+'</td>'
+      +'<td class="n">'+_pilEsc(x.quoi)+'</td>'
+      +'<td><span class="pex-apill" style="background:color-mix(in srgb,'+S.col+' 13%,transparent);color:'+S.col+'">'
+        +_pilEsc(S.lbl)+'</span></td>'
+      +'<td><span class="pex-apill" style="background:color-mix(in srgb,'+AC+' 14%,transparent);color:'
+        +(x.ate==='gen'?'var(--texte-doux)':AC)+'">'+_pilEsc(A)+'</span></td>'
+      +'<td>'+_pilEsc(x.four||'\u2014')+'</td>'
+      +'<td class="r">'+cell+'</td></tr>';
+  }).join('');
+
+  h+='<div class="pec-card"><div class="pec-cb" style="padding-top:16px">'
+   +'<div class="pec-acts" style="margin-top:0;margin-bottom:14px">'
+     +(adm?'<button class="pec-btn pec-btn-p" data-pec="pachadd"><span>\uFF0B</span> Achat</button>':'')
+     +'<button class="pec-btn'+(_PACH_FILT==='tout'?' on':'')+'" data-pec="pachf" data-v="tout">Tout</button>'
+     +'<button class="pec-btn'+(_PACH_FILT==='sans'?' on':'')+'" data-pec="pachf" data-v="sans">\u00c0 chiffrer</button>'
+   +'</div>'
+   +'<div class="pec-scroll"><table class="pec-tbl" style="min-width:640px">'
+   +'<thead><tr><th>Date</th><th>Ce qui a \u00e9t\u00e9 acquis</th><th>Cr\u00e9\u00e9 dans</th><th>Atelier</th>'
+   +'<th>Fournisseur</th><th class="r">Prix HT</th></tr></thead><tbody>'
+   +(rows||'<tr><td colspan="6" style="text-align:center;padding:24px;color:var(--texte-doux)">Rien dans ce filtre.</td></tr>')
+   +'</tbody><tfoot><tr><td colspan="5">Total chiffr\u00e9</td><td class="r">'+_pilEsc(_ecoEur(tot))+'</td></tr></tfoot>'
+   +'</table></div>'
+   +'<div class="pec-vcadre"><span><b>Le prix retourne dans l\u2019objet</b>, pas dans une table \u00e0 part. '
+   +'Un f\u00fbt co\u00fbte X\u00a0\u2014 ce n\u2019est pas une ligne comptable s\u00e9par\u00e9e, et une table li\u00e9e par identifiant '
+   +'laisserait des orphelins le jour o\u00f9 l\u2019objet est supprim\u00e9.</span></div>'
+   +'<div class="pec-note">'
+   +(sans.length?('<b>'+sans.length+' ligne'+(sans.length>1?'s':'')+' sans prix</b>\u00a0: le total ci-dessus est '
+      +'<b>un plancher, pas une mesure</b>.<br>'):'')
+   +'<b>Rien ne se cr\u00e9e ici</b>\u00a0: chaque ligne existe parce qu\u2019un module l\u2019a enregistr\u00e9e. '
+   +'\u00ab\u00a0Achat\u00a0\u00bb ouvre le formulaire du module concern\u00e9, il n\u2019en fabrique pas un second.'
+   +(V.length>120?('<br>Les 120 lignes les plus r\u00e9centes sont affich\u00e9es\u00a0; le total porte sur les '+V.length+'.'):'')
+   +'</div></div></div>';
+
+  h+='<div class="pec-card"><div class="pec-ch"><div class="pec-ct">Ce que cet \u00e9cran ne fait pas</div></div>'
+   +'<div class="pec-cb">'
+   +'<div class="pec-a info"><span class="e">'+(typeof _mvIcon==='function'?_mvIcon('info',16):'')+'</span><div>'
+   +'<b>Il ne cr\u00e9e aucun formulaire.</b> Un intrant phyto demande la cat\u00e9gorie, l\u2019unit\u00e9, la contenance, '
+   +'la source de consommation et le catalogue E-Phy\u00a0: le refaire ici, ce serait deux formulaires \u00e0 tenir, '
+   +'qui divergeraient au premier lot.</div></div>'
+   +'<div class="pec-a info" style="margin-top:9px"><span class="e">'+(typeof _mvIcon==='function'?_mvIcon('cle',16):'')+'</span><div>'
+   +'<b>Les fiches d\u2019entretien n\u2019y montent pas.</b> Une checklist quotidienne \u2014 plein, huile, pression \u2014 '
+   +'n\u2019est pas un achat. Le signal d\u2019une intervention payante existe d\u00e9j\u00e0 et il est net\u00a0: '
+   +'<b>la machine est partie chez le r\u00e9parateur</b>.</div></div>'
+   +'</div></div>';
+  return h;
+}
+
+// Saisie du prix. ⚠️ Le prompt natif est volontaire ici : la valeur est UN
+// nombre, et un overlay maison pour un champ unique serait plus de code a tenir
+// que de service rendu. Le detail de la ligne est rappele dans l'invite, sinon
+// on chiffre a l'aveugle.
+function _pachOpen(ref){
+  if(typeof isAdmin!=='function'||!isAdmin()){ if(window.showToast) window.showToast('R\u00e9serv\u00e9 \u00e0 l\u2019administrateur','#C0392B'); return; }
+  var p=String(ref).split('::'); if(p.length<2) return;
+  var src=p[0], id=p.slice(1).join('::');
+  var L=_pachLignes();
+  var x=L.find(function(o){ return o.src===src && o.id===id; });
+  if(!x){ if(window.showToast) window.showToast('Ligne introuvable \u2014 rechargez l\u2019\u00e9cran','#B85A1A'); return; }
+  var S=_PACH_SRC[src]||_PACH_SRC.rsv;
+  var act=(x.prix!=null)?String(x.prix).replace('.',','):'';
+  var v=window.prompt(x.quoi+'\n'+(x.four||'sans fournisseur')+' \u00b7 '+S.ecr
+    +'\n\nMontant HT en euros. Laissez vide pour « \u00e0 chiffrer », 0 pour « sans frais ».', act);
+  if(v===null) return;                       // annule : on ne touche a rien
+  var t=String(v).trim().replace(',','.');
+  var prix;
+  if(t===''){ prix=null; }
+  else {
+    var n=parseFloat(t);
+    // ⚠️ `n>=0` et non `n>0` : saisir 0 est un ACTE (garantie), pas un vide.
+    if(!isFinite(n)||n<0){ if(window.showToast) window.showToast('Montant illisible','#B85A1A'); return; }
+    prix=n;
+  }
+  var doc=_pachEcrit(src,id,prix,null);
+  if(!doc){ if(window.showToast) window.showToast('Ligne introuvable \u2014 rien enregistr\u00e9','#B85A1A'); return; }
+  if(typeof window.saveData==='function') window.saveData(doc);
+  _pilFillContent(_pilData());
+  if(window.showToast) window.showToast(
+    prix==null ? 'Laiss\u00e9 \u00e0 chiffrer' : (prix>0 ? ('Enregistr\u00e9 dans '+S.ecr) : 'Not\u00e9 sans frais'),
+    prix==null ? '#B85A1A' : '#3D6B27');
+}
+
+// ★ « Achat » n'ouvre PAS un formulaire maison : il ouvre celui du module qui
+//   possede la donnee. C'est ce qui distingue cet ecran d'un second point de
+//   saisie — un intrant phyto demande le catalogue E-Phy, le refaire ici serait
+//   deux formulaires qui divergent.
+function _pachAdd(){
+  if(typeof isAdmin!=='function'||!isAdmin()){ if(window.showToast) window.showToast('R\u00e9serv\u00e9 \u00e0 l\u2019administrateur','#C0392B'); return; }
+  var q='Qu\u2019est-ce qui a \u00e9t\u00e9 acquis ?\n\n'
+    +'1 \u2014 un intrant (SO\u2082, levures, phyto, piquets, pi\u00e8ces\u2026)\n'
+    +'2 \u2014 des f\u00fbts\n'
+    +'3 \u2014 une machine partie chez le r\u00e9parateur\n\n'
+    +'Le formulaire du module concern\u00e9 s\u2019ouvrira.';
+  var c=window.prompt(q,'1');
+  if(c===null) return;
+  c=String(c).trim();
+  if(c==='3'){
+    if(!window.goTo){ if(window.showToast) window.showToast('Module Tracteur indisponible','#B85A1A'); return; }
+    window.goTo('tracteur');
+    if(window.showToast) window.showToast('Tracteur \u203a « Chez le r\u00e9parateur » \u2014 la ligne na\u00eetra au retour','#C2871E');
+    return;
+  }
+  if(c!=='1'&&c!=='2'){ if(window.showToast) window.showToast('Choix non reconnu','#B85A1A'); return; }
+  if(!window.goTo){ if(window.showToast) window.showToast('La R\u00e9serve est indisponible','#B85A1A'); return; }
+  var onglet=(c==='2')?'futs':'intrants';
+  window.goTo('reserve');
+  // Le delai : goTo declenche renderReserve, qui reconstruit la page. Ouvrir
+  // l'overlay dans la meme pile le ferait fermer aussitot.
+  setTimeout(function(){
+    try{
+      if(window._rsvTabTo) window._rsvTabTo(onglet);
+      var f=(c==='2')?window._rsvOpenFut:window._rsvOpenAchat;
+      if(typeof f==='function') setTimeout(f,180);
+    }catch(e){ if(window.logError) window.logError({level:'info',cat:'pilotage',msg:'pachAdd '+onglet}); }
+  },240);
 }
 
 // Assemblage de la sous-vue.
@@ -8504,6 +8791,7 @@ function _pilTabEco(d){
   var body;
   if(_PEC_SUB==='pos') body=_pecViewPostes(E);
   else if(_PEC_SUB==='par') body=_pecViewParcelles(E);
+  else if(_PEC_SUB==='ach') body=_pachView();
   else if(_PEC_SUB==='exe') body=_pexView();
   else body=_pecViewSynthese(E,TL);
   return '<div class="pec-wrap">'+_pilCadreAvert(_pilAvertEco())+_pecSubNav(E)+body+'</div>';
@@ -9330,8 +9618,7 @@ var _PIL_DIAG_CIBLES = {
   entretien: ['tracteur','entretiens',null,'switchTracOnglet'],
   // La Reserve utilise son propre commutateur, _rsvTabTo, qui prend la CLE de
   // l'onglet ('futs' | 'intrants' | 'depenses' | 'audit').
-  reserve:   ['reserve','intrants',null,'_rsvTabTo'],
-  depenses:  ['reserve','depenses',null,'_rsvTabTo']
+  reserve:   ['reserve','intrants',null,'_rsvTabTo']
 };
 
 // Defile jusqu'au bloc et le fait clignoter une seconde. Sans le clignotement, on
@@ -9507,7 +9794,7 @@ function _pilDiag(){
     // 2) Les lignes muettes. Elles ne faussent pas la repartition : elles la
     //    RETRECISSENT. Un poste peut sembler petit parce que ses factures ne
     //    sont pas chiffrees, pas parce qu'il coute peu.
-    var _mu=(X.nAchSansPrix||0)+(X.nDepSansPrix||0);
+    var _mu=(X.nAchSansPrix||0)+(X.nRepSansPrix||0);
     if(_mu>0) out.push({ g:'o', cible:'reserve', touche:['budget'],
       k:_mu+' ligne'+(_mu>1?'s':'')+' d\u2019achat sans prix',
       f:'Elles comptent pour <b>z\u00e9ro euro</b> dans la r\u00e9partition. Un atelier peut donc para\u00eetre '
@@ -9518,7 +9805,7 @@ function _pilDiag(){
     // 3) L'invariant. Il ne doit JAMAIS casser — et s'il casse, il doit se voir
     //    a l'ecran plutot que de se taire, comme la pastille « i » sans fiche.
     //    Un ecart signifie qu'un euro est compte deux fois, ou pas du tout.
-    var _sm=(X.achT||0)+(X.gnrT||0)+(X.depT||0);
+    var _sm=(X.achT||0)+(X.gnrT||0)+(X.repT||0);
     if(Math.abs(X.ateT-_sm)>=0.005) out.push({ g:'r', cible:'exercice', touche:['budget'],
       k:'La r\u00e9partition par atelier ne tombe pas juste',
       f:'La somme des ateliers (<b>'+_pilEsc(_ecoEur(X.ateT))+'</b>) devrait valoir exactement '
@@ -10008,6 +10295,11 @@ function _pilBindContent(content){
         return;
       }
       if(_pa==='exy'){ var _xv=parseInt(_pe.getAttribute('data-v'),10); if(!isNaN(_xv)){ _PEX_AN=_xv; _pecSaveSt(); _pilFillContent(_pilData()); } return; }
+      if(_pa==='pachgo'){ if(_PEC_SUB!=='ach'){ _PEC_SUB='ach'; _pecSaveSt(); _pilFillContent(_pilData()); } return; }
+      if(_pa==='pachf'){ var _fv=_pe.getAttribute('data-v');
+        if((_fv==='tout'||_fv==='sans')&&_fv!==_PACH_FILT){ _PACH_FILT=_fv; _pilFillContent(_pilData()); } return; }
+      if(_pa==='pach'){ _pachOpen(_pe.getAttribute('data-v')||''); return; }
+      if(_pa==='pachadd'){ _pachAdd(); return; }
       if(_pa==='axe'){ var _av=_pe.getAttribute('data-v'); if((_av==='nat'||_av==='ate')&&_av!==_PEC_AXE){ _PEC_AXE=_av; _pecSaveSt(); _pilFillContent(_pilData()); } return; }
       // Raccourci vers La Reserve : Pilotage LIT, il n'ecrit aucun fait
       // d'exploitation. Un second formulaire de saisie ici serait une deuxieme
