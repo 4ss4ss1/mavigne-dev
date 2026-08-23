@@ -993,9 +993,24 @@ function _planSummary(mbr,m){
     return s+(parseFloat(mo[k])||0);
   },0);
   ref+=_planRempH(mbr,m);   // ★ jours d'echange : entrent dans la reference a hauteur de ce qui en etait ATTENDU
-  ref-=_planAbsNeutH(mbr,m);// ★ absences : sortent de la reference → ecart neutre, dette comptee a part
+  // ★★★ DEUX REFERENCES, ET C'EST VOULU — elles repondent a deux questions differentes.
+  //   `refBrute` = CE QUE LE PLANNING DEMANDAIT, absences comprises. C'est la seule
+  //     reponse juste a « a-t-il fait ses heures ? ». C'est elle qu'on AFFICHE.
+  //   `ref` = la meme, moins les heures neutralisees par une absence. Elle ne sert qu'au
+  //     COMPTEUR (_planSupMonth), pour qu'une absence deja portee au debit des « heures
+  //     dues » ne soit pas retranchee une seconde fois des heures supplementaires.
+  //   ⚠️⚠️ CE QUI ETAIT ECRIT N'EN AVAIT QU'UNE, la nette, et l'affichait. Sur la feuille
+  //   d'aout 2026 de Victor — une journee d'absence injustifiee et un retard — l'ecart
+  //   sortait a « = » : le document affirmait qu'il avait fait ses heures alors qu'il en
+  //   manquait 8 h 30. Neutraliser est juste POUR LE COMPTEUR ; l'afficher est un mensonge.
+  //   ★ Sans absence, neut vaut 0 et les deux chiffres sont EGAUX : le changement ne se
+  //   voit que sur les mois qui portent une absence, ce qui est exactement son objet.
+  var refBrute=ref;
+  ref-=_planAbsNeutH(mbr,m);
   var worked=_planCalcMonth(mbr,m);
-  return{ref:ref,worked:worked,ecart:worked-ref,etp:ref>0?worked/ref:0};
+  return{ref:ref,refBrute:refBrute,worked:worked,
+         ecart:worked-ref,ecartBrut:worked-refBrute,
+         etp:refBrute>0?worked/refBrute:0};
 }
 // Heures reellement presentes au champ (mois m) : prevues sur jours sous contrat, hors recup/CP/absence.
 function _planPresentRef(mbr,m){
@@ -2038,7 +2053,7 @@ function _planRenderHeader(){
       var ms=_planSummary(me,planMonth);
       sb.innerHTML='<div class="mvu-kpi"><div class="mvu-kpi-v">'+_planFmt(ms.worked)+'</div><div class="mvu-kpi-l">Mes heures</div></div>'
         +'<div class="mvu-kpi"><div class="mvu-kpi-v">'+_planFmt(ms.ref)+'</div><div class="mvu-kpi-l">R\u00e9f\u00e9rence</div></div>'
-        +'<div class="mvu-kpi"><div class="mvu-kpi-v" style="color:'+(ms.ecart>=0?'var(--vert-med)':'var(--rouge)')+'">'+_planFmtE(ms.ecart)+'</div><div class="mvu-kpi-l">\u00c9cart</div></div>';
+        +'<div class="mvu-kpi"><div class="mvu-kpi-v" style="color:'+(ms.ecartBrut>=0?'var(--vert-med)':'var(--rouge)')+'">'+_planFmtE(ms.ecart)+'</div><div class="mvu-kpi-l">\u00c9cart</div></div>';
     }
   }
   var _bdg=document.getElementById('plan-header-badge');
@@ -2241,7 +2256,7 @@ function _pl2Synth(){
   mbrs.forEach(function(mbr){
     var s=_planSummary(mbr,planMonth),nomA=_escAttr(mbr.nom);
     if(window._mvEstCollectif&&window._mvEstCollectif(mbr)){h+=_pl2SynthColl(mbr,nomA);return;}
-    var col=s.ecart>=0?'var(--vert-med)':'var(--orange)';
+    var col=s.ecartBrut>=0?'var(--vert-med)':'var(--orange)';
     var abs=0,cpj=0;
     var _mo=_pEntMonth(mbr.nom,planMonth);
     Object.values(_mo).forEach(function(e){if(e.absent)abs++;else if(e.type==='cp')cpj++;});
@@ -2258,7 +2273,7 @@ function _pl2Synth(){
         +'<span class="pl2-mc-s">'+_planFmt(s.worked)+' travaill\u00e9es \u00b7 '+_planFmt(s.ref)+' pr\u00e9vues</span>'
         +'<span class="pl2-mc-track" aria-hidden="true"><span class="pl2-mc-fill" style="width:'+Math.min(100,s.etp*100)+'%;background:'+col+'"></span></span>'
       +'</span>'
-      +'<span class="pl2-mc-right"><span class="pl2-mc-e" style="color:'+col+'">'+_planFmtE(s.ecart)+'</span><span class="pl2-mc-etp">ETP '+_planFmtEtp(s.etp)+'</span></span>'
+      +'<span class="pl2-mc-right"><span class="pl2-mc-e" style="color:'+col+'">'+_planFmtE(s.ecartBrut)+'</span><span class="pl2-mc-etp">ETP '+_planFmtEtp(s.etp)+'</span></span>'
       +'<span class="pl2-chev">\u203a</span>'
     +'</button>';
   });
@@ -2847,7 +2862,7 @@ function _planBuildMonHtml(mbr,canEdit){
     +'<div class="plan-sum-top">'
       +'<div class="plan-emp-ava" style="background:'+((mbr.couleur||'#3D6B27')+'22')+';color:'+(mbr.couleur||'#3D6B27')+'">'+_escHtml(mbr.nom.charAt(0))+'</div>'
       +'<div><div class="plan-emp-name">'+_escHtml(mbr.nom)+'</div><div class="plan-emp-sub">'+PLAN_MOIS[planMonth]+' '+planYear+' \u00b7 planning '+_escHtml(plId)+(mbr.planning_note?' \u00b7 \u26a0 '+_escHtml(mbr.planning_note):'')+'</div></div>'
-      +'<div style="margin-left:auto;text-align:right"><div class="plan-sum-ecart" style="color:'+(s.ecart>=0?'var(--vert-med)':'var(--rouge)')+'">'+_planFmtE(s.ecart)+'</div><div class="plan-sub-lbl">\u00e9cart '+PLAN_MOIS_C[planMonth]+'</div></div>'
+      +'<div style="margin-left:auto;text-align:right"><div class="plan-sum-ecart" style="color:'+(s.ecartBrut>=0?'var(--vert-med)':'var(--rouge)')+'">'+_planFmtE(s.ecart)+'</div><div class="plan-sub-lbl">\u00e9cart '+PLAN_MOIS_C[planMonth]+'</div></div>'
     +'</div>'
     +'<div class="plan-stat-grid3">'
       +'<div class="plan-sg-item" style="background:var(--plan-acc-pale)"><div class="plan-sg-v">'+_planFmt(s.ref)+'</div><div class="plan-sg-l">Pr\u00e9vu</div></div>'
@@ -3378,7 +3393,7 @@ function _planFicheRender(){
       +'<div class="pl2-fstat">'
       +'<div class="pl2-fs"><span class="pl2-fs-v">'+_planFmt(s.ref)+'</span><span class="pl2-fs-l">Pr\u00e9vu (h)</span></div>'
       +'<div class="pl2-fs"><span class="pl2-fs-v">'+_planFmt(s.worked)+'</span><span class="pl2-fs-l">Travaill\u00e9 (h)</span></div>'
-      +'<div class="pl2-fs"><span class="pl2-fs-v" style="color:'+(s.ecart>=0?'var(--vert-med)':'var(--orange)')+'">'+_planFmtE(s.ecart)+'</span><span class="pl2-fs-l">\u00c9cart \u00b7 ETP '+_planFmtEtp(s.etp)+'</span></div>'
+      +'<div class="pl2-fs"><span class="pl2-fs-v" style="color:'+(s.ecartBrut>=0?'var(--vert-med)':'var(--orange)')+'">'+_planFmtE(s.ecart)+'</span><span class="pl2-fs-l">\u00c9cart \u00b7 ETP '+_planFmtEtp(s.etp)+'</span></div>'
     +'</div>';
     var ent=_pEntMonth(mbr.nom,planMonth);
     var ks=Object.keys(ent).map(function(x){return parseInt(x,10);}).filter(function(x){return !isNaN(x);}).sort(function(a,b){return a-b;});
@@ -5244,11 +5259,17 @@ function _planExportPDF_(nom,mbr,_ctr){
     // \u2605 Nombre de JOURS PREVUS derriere la reference : sans lui, « R\u00e9f\u00e9rence 69h » est
   //   un chiffre a croire. Avec lui, il est verifiable \u2014 et le lecteur comprend seul
   //   qu'un mois d'aout a 69 h porte la fermeture du domaine, pas une erreur.
+  // ⚠️⚠️ IL COMPTAIT LE MODELE SEUL. Sur la feuille d'aout de Victor, cinq jours d'echange
+  //   pesaient 38 h dans la reference et n'etaient PAS comptes : « Référence 85h30 · 6 jours
+  //   prévus » annonce 14 h par jour. Un chiffre de contrôle qui ne contrôle pas la meme chose
+  //   que le chiffre qu'il accompagne est pire qu'absent.
+  //   _planRefPart est la definition UNIQUE de « ce jour pese-t-il dans la reference » :
+  //   modele, jour d'echange, ou rien. On compte exactement ce qu'elle compte.
   var _refJ=0;
-  (function(){ var _tm=(_planGetTpl(plId)||{})[planMonth]||{};
-    for(var _k in _tm){ if(!/^\d+$/.test(_k))continue;
-      if((parseFloat(_tm[_k])||0)<=0)continue;
-      if(!_planInContractCtr(mbr,planMonth,parseInt(_k,10)))continue; _refJ++; } })();
+  for(var _kj=1;_kj<=total;_kj++){
+    if(!_planInContractCtr(mbr,planMonth,_kj))continue;
+    if(_planRefPart(plId,planMonth,_kj,ent[_kj])>0.0001)_refJ++;
+  }
   // Idem : la date d'edition imprimee sur le document doit etre celle du domaine.
   var _edite=_planFmtJour((typeof window._mvAujIso==='function')?window._mvAujIso()
                           :new Date().toISOString().slice(0,10));
@@ -5341,7 +5362,7 @@ function _planExportPDF_(nom,mbr,_ctr){
     //   REALISATION, pas un equivalent temps plein. Un salarie a 1,12 ETP n'existe pas ;
     //   un salarie a 112 % de son prevu, si. Le libelle dit desormais ce que le chiffre est.
     +'<div><div class="mo">'+PLAN_MOIS[planMonth]+' '+planYear+'</div>'
-      +(s.ref>0.0001?('<div class="etp">R\u00e9alisation '+Math.round(s.etp*100)+'\u202f% du pr\u00e9vu</div>'):'')
+      +(s.refBrute>0.0001?('<div class="etp">R\u00e9alisation '+Math.round(s.etp*100)+'\u202f% du pr\u00e9vu</div>'):'')
     +'</div></div>'
     // \u2605 Le chiffre le plus gros de la page est celui qu'on vient chercher : les
     //   heures du mois. Le bandeau « heures supplementaires a payer » a disparu —
@@ -5351,7 +5372,7 @@ function _planExportPDF_(nom,mbr,_ctr){
     +'<div class="tete">'
       +'<div class="tmain"><div class="lab">Heures compt\u00e9es ce mois</div>'
         +'<div class="big">'+_planFmt(s.worked)+'</div>'
-        +'<div class="tsub">R\u00e9f\u00e9rence <b>'+_planFmt(s.ref)+'</b>'+(_refJ?(' \u00b7 '+_refJ+' jour'+(_refJ>1?'s':'')+' pr\u00e9vu'+(_refJ>1?'s':'')):'')+'</div></div>'
+        +'<div class="tsub">R\u00e9f\u00e9rence <b>'+_planFmt(s.refBrute)+'</b>'+(_refJ?(' \u00b7 '+_refJ+' jour'+(_refJ>1?'s':'')+' pr\u00e9vu'+(_refJ>1?'s':'')):'')+'</div></div>'
       +'<div class="tsplit">'
         // \u2605 « 77h30 compt\u00e9es » a cote de « 77h30 au domaine » : le meme nombre deux fois,
         //   a 4 cm d'intervalle, onze mois sur douze. Les deux ne different QUE s'il y a
@@ -5366,7 +5387,7 @@ function _planExportPDF_(nom,mbr,_ctr){
         +(_fa.j?('<div class="tc fa"><div class="n">'+_planFmt(_fa.h)+'</div>'
           +'<div class="l">\u00e9v\u00e9nement familial<br>'+_fa.j+' jour'+(_fa.j>1?'s':'')+'</div></div>'):'')
         +'<div class="tc"><div class="n" style="color:'
-          +(s.ecart>0?'#b45309':(s.ecart<0?'#dc2626':'#15803d'))+'">'+_planFmtE(s.ecart)+'</div>'
+          +(s.ecartBrut>0?'#b45309':(s.ecartBrut<0?'#dc2626':'#15803d'))+'">'+_planFmtE(s.ecartBrut)+'</div>'
           +'<div class="l">\u00e9cart au<br>pr\u00e9vu</div></div>'
       +'</div>'
     +'</div>'

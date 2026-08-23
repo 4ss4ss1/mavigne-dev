@@ -354,15 +354,20 @@ const tuile = (h, l) => {
 
 T('les heures faites du mois : 77h30', HL.indexOf('<div class="big">77h30</div>') !== -1,
   (HL.match(/class="big">[^<]*/) || [''])[0]);
-/* La semaine d'échange entre EN ENTIER dans la référence (39 h), puis les 9 h non
-   tenues en ressortent — 8 h 30 d'absence injustifiée + 0 h 30 de retard — pour être
-   inscrites AU COMPTEUR. 47,5 + 39 − 9 = 77 h 30, soit exactement les heures faites.
-   ★★★ L'écart est donc à zéro, ET C'EST LE BON RÉSULTAT : la dette n'est pas dans
-   l'écart, elle est dans « heures dues ». L'écart, lui, est écrasé par
-   `Math.max(0, ecart)` dès qu'il est négatif — il ne peut RIEN porter. */
-T('★★ la référence vaut 77h30 — 39 h d’échange, moins les 9 h non tenues',
-  HL.indexOf('R\u00e9f\u00e9rence <b>77h30</b>') !== -1,
+/* ★★★ DEUX RÉFÉRENCES, DEUX QUESTIONS. Ce qui est AFFICHÉ est le planning brut :
+   47,5 (modèle) + 39 (la semaine d'échange, en entier) = 86 h 30 attendues, 77 h 30
+   faites, donc −9 h. La référence NETTE (77 h 30, absences neutralisées) ne sert qu'au
+   COMPTEUR, pour qu'une absence déjà portée aux « heures dues » ne soit pas retranchée
+   une seconde fois des heures supplémentaires.
+   ⚠️ Avant le 23/08, seule la nette existait et c'est elle qu'on affichait : la feuille
+   sortait « écart = » sur un mois où il manquait 9 h. Le document affirmait le contraire
+   de ce qu'il montrait trois lignes plus bas. */
+T('★★ la référence AFFICHÉE est le planning brut : 86h30',
+  HL.indexOf('R\u00e9f\u00e9rence <b>86h30</b>') !== -1,
   (HL.match(/R\u00e9f\u00e9rence <b>[^<]*/) || [''])[0]);
+T('★★ … sur 11 jours prévus — les 5 jours d’échange en font partie',
+  /R\u00e9f\u00e9rence <b>86h30<\/b> \u00b7 11 jours pr\u00e9vus/.test(HL),
+  (HL.match(/R\u00e9f\u00e9rence[^<]*<b>[^<]*<\/b>[^<]*/) || [''])[0]);
 T('★ le retard compte comme jour travaillé : 10 jours, pas 9',
   tuile(HL, 'jours?<br>au domaine') === '10', 'jours = ' + tuile(HL, 'jours?<br>au domaine'));
 T('★★★ les 8h30 de l’absence injustifiée SONT dues, pas seulement le retard',
@@ -377,8 +382,48 @@ T('la note nomme LES DEUX motifs, puisque les deux comptent',
   HL.indexOf('heures dues (absence injustifi\u00e9e ou retard)') !== -1);
 T('le signe moins est typographique (\u2212), pas un trait d’union',
   HL.indexOf('-9h<') === -1 && HL.indexOf('\u22129h') !== -1);
-T('l’écart est à zéro, et c’est voulu : la dette vit dans « heures dues »',
-  tuile(HL, '\u00e9cart au') === '=', 'écart = ' + tuile(HL, '\u00e9cart au'));
+T('★★★ l’écart au prévu vaut \u22129h — il compte l’absence ET le retard',
+  tuile(HL, '\u00e9cart au') === '\u22129h', 'écart = ' + tuile(HL, '\u00e9cart au'));
+T('★ l’écart et les heures dues disent LE MÊME chiffre',
+  tuile(HL, '\u00e9cart au') === '\u22129h' && /heures dues <b>\u22129h<\/b>/.test(HL));
+T('la réalisation suit la référence brute (90 %, pas 100 %)',
+  /R\u00e9alisation 90/.test(HL), (HL.match(/class="etp">[^<]*/) || [''])[0]);
+
+/* 8a bis. ⚠️⚠️ LE CAS POUR LEQUEL LA NEUTRALISATION EXISTE — un mois qui porte À LA FOIS
+   des heures supplémentaires ET une absence. Il ne doit PAS être pénalisé deux fois :
+   l'absence est déjà au débit des « heures dues », elle ne doit pas en plus rogner les
+   heures sup. C'est ce que la référence NETTE protège, et c'est pour ça qu'on la garde
+   même si on ne l'affiche plus. */
+window.MEMBRES.push({
+  nom:'Victor5', statut:'Actif', type_contrat:'CDI', planning_id:'ferme', cp_initial_j:0,
+  contrats:[{ debut:A + '-01-02', fin:A + '-06-30', type:'CDD' }],
+  debut_contrat:A + '-08-17'
+});
+window.PLANNING_ENTRIES['Victor5'] = { [AN]: { 7: {
+  17:{ timing:T7, remplacement:true },
+  18:{ timing:T7, remplacement:true },
+  19:{ absent:true, motif:'retard', motif_t:'07:30', motif_h:0.5, timing:T7, remplacement:true },
+  20:{ absent:true, motif:'injustifie', timing:T7, remplacement:true },
+  21:{ timing:T5, remplacement:true },
+  22:{ timing:T7 }, 29:{ timing:T7 }          // deux samedis travaillés : heures sup
+} } };
+pages.length = 0;
+window._planReleveIndiv('Victor5', 7);
+const HP = pages[0] ? pages[0].html : '';
+T('mois à écart POSITIF : 94h30 faites pour 86h30 prévues',
+  HP.indexOf('<div class="big">94h30</div>') !== -1
+  && HP.indexOf('R\u00e9f\u00e9rence <b>86h30</b>') !== -1,
+  (HP.match(/class="big">[^<]*/) || [''])[0]);
+T('★ l’écart affiché est +8h', tuile(HP, '\u00e9cart au') === '+8h',
+  'écart = ' + tuile(HP, '\u00e9cart au'));
+T('★★ heures sup 17h — l’absence n’en a PAS rogné 9 de plus',
+  /heures suppl\u00e9mentaires <b>17h<\/b>/.test(HP),
+  (HP.match(/heures suppl\u00e9mentaires <b>[^<]*/) || [''])[0]);
+T('★★★ pas de double peine : 17h \u2212 9h = +8h de reste à prendre',
+  /reste \u00e0 prendre <b>\+8h<\/b>/.test(HP),
+  (HP.match(/reste \u00e0 prendre <b>[^<]*/) || [''])[0]);
+T('★ et l’écart affiché ÉGALE le reste à prendre',
+  tuile(HP, '\u00e9cart au') === '+8h' && /reste \u00e0 prendre <b>\+8h<\/b>/.test(HP));
 
 /* 8b. LA PREUVE DÉTRUITE — ce que l'enregistrement effaçait avant ce lot.
    Victor3 porte EXACTEMENT les entrées telles qu'elles sont enregistrées
@@ -412,6 +457,16 @@ T('★ mais la référence ne descend plus SOUS ZÉRO (+8h et non +8h30)',
   tuile(HD, '\u00e9cart au') !== '+8h30');
 T('le retard y compte quand même comme jour travaillé',
   tuile(HD, 'jours?<br>au domaine') === '10');
+/* ⚠️ CETTE ASSERTION EXISTE POUR TENIR LA BORNE de _planAbsLostH, et rien d'autre.
+   Le 19 est ici un JOUR SUPPLÉMENTAIRE (drapeau perdu) : il ne pèse rien dans la
+   référence, donc ses 8 h faites sont de l'extra pur (+8 h d'écart) et le retard lui
+   coûte ses 30 min → +7 h 30 au compteur. Sans la borne, la neutralisation retirerait
+   0 h 30 d'une référence où ce jour n'a rien mis : les heures sup passeraient à 8 h 30
+   pour 8 h faites, et le retard ne coûterait plus rien (+8 h). L'écart affiché, lui, ne
+   bouge pas — c'est pourquoi seule CETTE ligne fait rougir la contre-épreuve nº14. */
+T('★ borne de neutralisation : reste à prendre +7h30, pas +8h',
+  /reste \u00e0 prendre <b>\+7h30<\/b>/.test(HD),
+  (HD.match(/reste \u00e0 prendre <b>[^<]*/) || [''])[0]);
 
 /* 8c. Le moteur, interrogé directement */
 T('_planRefPart est exposé', typeof window._planRefPart === 'function');
@@ -505,6 +560,15 @@ if (CONTRE && !ko) {
       '    var _du=(mo.heures||mo.id===\'injustifie\');', '    var _du=mo.heures;'],
     ['les heures dues disparaissent de la ligne « Ce mois »',
       "      +(_duesM>0.0001?(' \\u00b7 heures dues <b>\\u2212'+_planFmt(_duesM)+'</b>'):'')", "      +''"],
+    ['★★ l’écart affiché repasse sur la référence NETTE (il redit « = »)',
+      "          +(s.ecartBrut>0?'#b45309':(s.ecartBrut<0?'#dc2626':'#15803d'))+'\">'+_planFmtE(s.ecartBrut)+'</div>'",
+      "          +(s.ecart>0?'#b45309':(s.ecart<0?'#dc2626':'#15803d'))+'\">'+_planFmtE(s.ecart)+'</div>'"],
+    ['★ la référence affichée repasse sur la nette',
+      "        +'<div class=\"tsub\">R\\u00e9f\\u00e9rence <b>'+_planFmt(s.refBrute)+'</b>'",
+      "        +'<div class=\"tsub\">R\\u00e9f\\u00e9rence <b>'+_planFmt(s.ref)+'</b>'"],
+    ['« jours prévus » recompte le modèle seul',
+      '    if(_planRefPart(plId,planMonth,_kj,ent[_kj])>0.0001)_refJ++;',
+      '    if(_planPlanned(plId,planMonth,_kj)>0.0001)_refJ++;'],
     ['★ le retard ressort du compte des jours travaillés',
       '    if(_PLAN_ST_OFFDAY[st.t]&&!st.retard)continue;',
       '    if(_PLAN_ST_OFFDAY[st.t])continue;'],

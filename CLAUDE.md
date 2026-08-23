@@ -26,6 +26,15 @@
 > ★ Polices : **Outfit ne monte qu'à 700**, huit `font-weight:800` étaient des faux gras ·
 > `about:blank` empêchait `/fonts` de se résoudre **sous iOS seulement** · `@page{margin:10mm}`
 > laissait le navigateur imprimer **« about:blank 1/2 » en pied d'un document de paie**.
+> ⚠️⚠️⚠️ **ET J'AI CORRIGÉ LE TROU EN EN CREUSANT UN AUTRE (§55p).** En portant la dette dans
+> « heures dues », j'ai laissé l'écart s'afficher sur la référence **NETTE** — celle dont on
+> venait justement de retirer les absences. La feuille sortait **« écart = »** sur un mois où il
+> manquait 8 h 30, trois lignes au-dessus d'un « heures dues −8h30 ». *Le document se contredisait
+> lui-même.* Il y a désormais **deux références** : la **brute** (ce que le planning demandait)
+> qu'on AFFICHE, la **nette** qui ne sert qu'au compteur. Et **« 6 jours prévus »** en face de
+> 85 h 30 — les 5 jours d'échange n'étaient pas comptés.
+> ★★ **Trois allers-retours sur le même écran pour un lot que j'avais déclaré vert à chaque fois.**
+> La règle qui en sort : **produire l'artefact et le LIRE** avant de livrer — pas raisonner dessus.
 > ★★★ **ET IL RESTAIT UN TROU, TROUVÉ PAR NICO SUR LA FEUILLE CORRIGÉE (§55m)** : la feuille
 > montrait les 30 min de retard en « heures dues » et **pas les 8 h de l'absence injustifiée**.
 > ⚠️⚠️⚠️ **Elles n'étaient nulle part.** Hors de la fenêtre `hsup_dues_debut`, elles ne passaient
@@ -4352,7 +4361,7 @@ lignes qu'il faut regarder en premier** — pas le diff, qui noie le signal dans
    plantages Windows en trois lots livrés verts (§53, §55n) — **et un défaut de production que
    seul son fuseau révélait** (§55o). ★ Côté Claude, désormais : lancer aussi
    **`TZ=Europe/Paris npm run check`**, qui est le fuseau réel de tous les clients.
-4. ⚠️ **Sortir un vrai PDF de la feuille d'heures et LE REGARDER.** 83 assertions tiennent les
+4. ⚠️⚠️ **Sortir un vrai PDF de la feuille d'heures et LE REGARDER.** 83 assertions tiennent les
    tailles, les graisses, les marges et les bornes — **aucune ne lit une mise en page** (§42h).
    C'est le point faible du paquet, avant tout envoi client.
 4. ✅ **TRANCHÉ le 23/08 (§55m)** — `CONFIG.hsup_dues_debut` ne commande plus l'absence
@@ -9478,6 +9487,73 @@ le décalage s'annule, ils sont immunisés. **Zéro occurrence** de `new Date(y,
 **`_mvAujIso()`, existe déjà dans `utils.js`** et n'est utilisée qu'à 7 endroits. Les deux sites
 du relevé sont corrigés ici (badge « en cours », date d'édition) ; **les 62 autres sont au
 backlog** — c'est un lot à part, avec sa mesure.
+
+### 55p. ⚠️⚠️⚠️ « ÉCART = » SUR UN MOIS OÙ IL MANQUAIT 8 H 30
+
+> *« Les heures sont bien comptées en bas dans les heures dues du mois, sauf qu'elles ne sont pas
+> comptées dans écart au prévu. Il faut les mettre aussi dans écart au prévu. »*
+
+**Troisième aller-retour sur la même feuille, et le troisième était de ma main.**
+
+En portant la dette dans « heures dues » (55m), j'ai gardé la **neutralisation** — l'absence sort
+de la référence pour ne pas être comptée deux fois. C'est juste **pour le compteur**. Mais j'ai
+laissé l'écart *s'afficher* sur cette référence nette. Résultat sur la feuille de Victor :
+
+| ligne | ce qu'elle disait |
+|---|---|
+| Référence | **77 h** (nette) |
+| Écart au prévu | **=** |
+| Heures dues | **−8 h 30** |
+
+★★★ **Le document affirmait qu'il avait fait ses heures, trois lignes au-dessus d'un débit de
+8 h 30.** Et « Référence 77 h » est faux tout court : le planning en demandait **85 h 30**.
+
+**Correctif : deux références, deux questions.**
+
+```js
+var refBrute = ref;            // ce que le PLANNING demandait, absences comprises → AFFICHÉ
+ref -= _planAbsNeutH(mbr, m);  // la même, moins les absences déjà portées au débit → COMPTEUR
+return { ref, refBrute, worked,
+         ecart: worked - ref, ecartBrut: worked - refBrute,
+         etp: refBrute > 0 ? worked / refBrute : 0 };
+```
+
+`_planSupMonth` continue de lire `ecart` (nette) : **le compteur ne bouge pas**. Les cinq
+affichages — écran ET document, pour qu'ils ne se contredisent pas — lisent `ecartBrut`.
+★ **Sans absence, `neut` vaut 0 et les deux chiffres sont égaux** : le changement ne se voit que
+sur les mois qui portent une absence, ce qui est exactement son objet.
+
+**Et « 6 jours prévus » en face de 85 h 30** — soit 14 h par jour. `_refJ` ne comptait que le
+modèle et ignorait les **5 jours d'échange**, qui pèsent pourtant 38 h dans la référence. Il compte
+maintenant ce que compte `_planRefPart`, la définition unique : **11 jours prévus**.
+
+**La feuille, produite et relue** (et non plus raisonnée) :
+
+| | avant 55p | après |
+|---|---|---|
+| Réalisation | 100 % | **90 %** |
+| Référence | 77 h · 6 jours | **85 h 30 · 11 jours** |
+| Heures faites | 77 h | 77 h |
+| **Écart au prévu** | **=** | **−8 h 30** |
+| Heures dues | −8 h 30 | −8 h 30 |
+| Reste à prendre | −8 h 30 | −8 h 30 |
+
+**L'écart, les heures dues et le reste à prendre disent enfin le même chiffre.**
+
+⚠️ **Le cas inverse a été vérifié en le produisant, pas en le calculant de tête** — c'est pour lui
+que la neutralisation existe. Un mois à **94 h 30 faites pour 86 h 30 prévues, avec la même absence** :
+écart **+8 h**, heures sup **17 h**, heures dues **−9 h**, reste à prendre **+8 h**. *L'absence n'a
+pas rogné les heures sup en plus de son débit* — pas de double peine. Assertions 8a bis du harnais.
+
+★★★ **LA LEÇON, ET ELLE COÛTE TROIS ALLERS-RETOURS.** J'ai raisonné sur ce que la feuille
+*devrait* afficher au lieu de **la produire et de la lire**. Le script qui l'a enfin produite
+tenait en trente lignes — et il a trouvé les deux défauts en une exécution. ⚠️ Sa **première
+version était fausse elle aussi** : elle posait `window.PLANNING_ENTRIES` **avant** l'import, alors
+que `planning.js` écrase cet objet au chargement (l. 35). Les cinq jours sortaient « Repos ».
+*Même un décor de vérification se vérifie.*
+★ **Consigne** : pour tout lot qui touche un document imprimé, **produire le document et lire ses
+chiffres** avant de le déclarer vert. Aucun preflight ne lit une mise en page (§42h) — et aucune
+assertion ne lit une incohérence entre deux lignes qu'elle ne compare pas.
 
 ### 55l. Ce qui reste ouvert
 
