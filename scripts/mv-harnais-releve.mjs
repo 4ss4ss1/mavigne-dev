@@ -348,18 +348,31 @@ const tuile = (h, l) => {
 
 T('les heures faites du mois : 77h30', HL.indexOf('<div class="big">77h30</div>') !== -1,
   (HL.match(/class="big">[^<]*/) || [''])[0]);
-T('★★ la référence vaut 86h — la semaine d’échange y entre EN ENTIER',
-  HL.indexOf('R\u00e9f\u00e9rence <b>86h</b>') !== -1,
+/* La semaine d'échange entre EN ENTIER dans la référence (39 h), puis les 9 h non
+   tenues en ressortent — 8 h 30 d'absence injustifiée + 0 h 30 de retard — pour être
+   inscrites AU COMPTEUR. 47,5 + 39 − 9 = 77 h 30, soit exactement les heures faites.
+   ★★★ L'écart est donc à zéro, ET C'EST LE BON RÉSULTAT : la dette n'est pas dans
+   l'écart, elle est dans « heures dues ». L'écart, lui, est écrasé par
+   `Math.max(0, ecart)` dès qu'il est négatif — il ne peut RIEN porter. */
+T('★★ la référence vaut 77h30 — 39 h d’échange, moins les 9 h non tenues',
+  HL.indexOf('R\u00e9f\u00e9rence <b>77h30</b>') !== -1,
   (HL.match(/R\u00e9f\u00e9rence <b>[^<]*/) || [''])[0]);
-T('★★★ l’écart est NÉGATIF : \u22128h30',
-  tuile(HL, '\u00e9cart au') === '\u22128h30', 'écart = ' + tuile(HL, '\u00e9cart au'));
 T('★ le retard compte comme jour travaillé : 10 jours, pas 9',
   tuile(HL, 'jours?<br>au domaine') === '10', 'jours = ' + tuile(HL, 'jours?<br>au domaine'));
+T('★★★ les 8h30 de l’absence injustifiée SONT dues, pas seulement le retard',
+  /Heures dues/.test(HL) && HL.indexOf('\u22129h') !== -1,
+  (HL.match(/heures dues <b>[^<]*/) || ['(colonne absente)'])[0]);
+T('★★★ … et elles descendent le compteur : reste à prendre \u22129h',
+  /reste \u00e0 prendre <b>\u22129h<\/b>/.test(HL),
+  (HL.match(/reste \u00e0 prendre <b>[^<]*/) || [''])[0]);
+T('★ la ligne « Ce mois » explique le \u22129h au lieu de le laisser tomber du ciel',
+  /Ce mois[^<]*heures suppl[\s\S]{0,200}heures dues <b>\u22129h<\/b>/.test(HL));
+T('la note nomme LES DEUX motifs, puisque les deux comptent',
+  HL.indexOf('heures dues (absence injustifi\u00e9e ou retard)') !== -1);
 T('le signe moins est typographique (\u2212), pas un trait d’union',
-  HL.indexOf('-8h30') === -1 && HL.indexOf('\u22128h30') !== -1);
-T('la demi-heure de retard reste due au compteur',
-  /Heures dues/.test(HL) && HL.indexOf('\u22120h30') !== -1,
-  'colonne Heures dues absente');
+  HL.indexOf('-9h<') === -1 && HL.indexOf('\u22129h') !== -1);
+T('l’écart est à zéro, et c’est voulu : la dette vit dans « heures dues »',
+  tuile(HL, '\u00e9cart au') === '=', 'écart = ' + tuile(HL, '\u00e9cart au'));
 
 /* 8b. LA PREUVE DÉTRUITE — ce que l'enregistrement effaçait avant ce lot.
    Victor3 porte EXACTEMENT les entrées telles qu'elles sont enregistrées
@@ -386,6 +399,9 @@ T('drapeaux perdus : la référence retombe à 69h30',
   (HD.match(/R\u00e9f\u00e9rence <b>[^<]*/) || [''])[0]);
 T('⚠️ … et l’écart redevient positif — il FAUT reposer les deux jours',
   tuile(HD, '\u00e9cart au') === '+8h', 'écart = ' + tuile(HD, '\u00e9cart au'));
+T('⚠️⚠️ drapeaux perdus : l’absence du 20 ne doit RIEN — sa référence a disparu',
+  HD.indexOf('\u22129h') === -1 && HD.indexOf('\u22120h30') !== -1,
+  'seul le retard reste dû, ce qui est la preuve que la donnée est perdue');
 T('★ mais la référence ne descend plus SOUS ZÉRO (+8h et non +8h30)',
   tuile(HD, '\u00e9cart au') !== '+8h30');
 T('le retard y compte quand même comme jour travaillé',
@@ -479,6 +495,10 @@ if (CONTRE && !ko) {
     ['★ la neutralisation n’est plus bornée (référence négative)',
       '    h+=duesOnly?_perdu:Math.min(_perdu,_planRefPart(plId,m,d,e));',
       '    h+=_perdu;'],
+    ['★★ l’absence injustifiée redevient gratuite hors fenêtre',
+      '    var _du=(mo.heures||mo.id===\'injustifie\');', '    var _du=mo.heures;'],
+    ['les heures dues disparaissent de la ligne « Ce mois »',
+      "      +(_duesM>0.0001?(' \\u00b7 heures dues <b>\\u2212'+_planFmt(_duesM)+'</b>'):'')", "      +''"],
     ['★ le retard ressort du compte des jours travaillés',
       '    if(_PLAN_ST_OFFDAY[st.t]&&!st.retard)continue;',
       '    if(_PLAN_ST_OFFDAY[st.t])continue;'],

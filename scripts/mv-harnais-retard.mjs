@@ -237,12 +237,50 @@ eq('C1 · ★ réglage ABSENT : 1,5 h dues', M._planAbsLostH(mbr, 7, true), 1.5)
 eq('C2 · ★ réglage ABSENT : 1,5 h neutralisées dans la référence',
    M._planAbsLostH(mbr, 7, false), 1.5);
 
+/* ⚠️⚠️⚠️ C3 ET C4 ONT ÉTÉ INVERSÉES LE 23/08/2026. Elles gardaient le comportement
+   historique : hors fenêtre, une absence injustifiée ne devait RIEN. Ce n'était pas
+   une politique, c'était un TROU — et il se voit sur la feuille d'août de Victor.
+     · Ses heures ne passaient que par l'écart du mois ;
+     · `_planSupMonth` vaut `Math.max(0, ecart)` → TOUT ÉCART NÉGATIF EST ÉCRASÉ À ZÉRO ;
+     · elles n'alimentaient donc ni « reste à prendre », ni le compteur, ni aucun cumul.
+   Huit heures affichées en gros dans une tuile, et qui ne coûtaient rien. Le mois
+   suivant, plus aucune trace.
+   ★★ Et l'écran qui pose le motif PROMET l'inverse : `sub: 'Heures dues · journée non
+   payée'`, et `_planAbsEffet` affiche « Plafond inchangé · heures dues ». Le moteur ne
+   tenait pas la promesse de son interface — c'est §53 en plus discret.
+   Le retard était déjà sorti de la fenêtre pour exactement cette raison (20/08). Les
+   deux moitiés d'une même règle y sont désormais ensemble. */
 poser('');
 M.set({ ent: { Jean: { 7: { 12: { absent: true, motif: 'injustifie' } } } } });
-eq('C3 · injustifiée hors fenêtre : toujours 0 h due (non-régression)',
-   M._planAbsLostH(mbr, 7, true), 0);
-eq('C4 · injustifiée hors fenêtre : toujours 0 h neutralisée',
+eq('C3 · ★★★ injustifiée hors fenêtre : 7 h DUES (elle doit ses heures, réglage ou pas)',
+   M._planAbsLostH(mbr, 7, true), 7);
+eq('C4 · ★ … et 7 h neutralisées, pour ne pas les compter deux fois',
+   M._planAbsLostH(mbr, 7, false), 7);
+// ⚠️ `poser()` REMET ENT À VIDE : mesurer juste après sans reposer l'entrée donnait 0,
+//    et l'assertion accusait le code de ce que le décor faisait. Quatrième fois.
+eq('C4b · dans la fenêtre, le résultat est le MÊME (plus de bascule)',
+   (function () {
+     poser('2026-01');
+     M.set({ ent: { Jean: { 7: { 12: { absent: true, motif: 'injustifie' } } } } });
+     return M._planAbsLostH(mbr, 7, true);
+   })(), 7);
+
+/* ⚠️ NON-RÉGRESSION CAPITALE : la vanne n'est ouverte que pour les DEUX motifs qui
+   doivent des heures. Les autres restent sous garde-fou hors fenêtre — sinon un arrêt
+   de travail se mettrait à créer une dette, ce que la loi interdit. */
+poser('');
+M.set({ ent: { Jean: { 7: { 12: { absent: true, motif: 'arret' } } } } });
+eq('C3b · ⚠️ un arrêt hors fenêtre ne doit toujours RIEN', M._planAbsLostH(mbr, 7, true), 0);
+eq('C3c · … et ne sort toujours PAS de la référence hors fenêtre',
    M._planAbsLostH(mbr, 7, false), 0);
+poser('');
+M.set({ ent: { Jean: { 7: { 12: { absent: true, motif: 'sansolde' } } } } });
+eq('C3d · un congé sans solde hors fenêtre ne doit rien non plus',
+   M._planAbsLostH(mbr, 7, true), 0);
+poser('');
+M.set({ ent: { Jean: { 7: { 12: { absent: true, motif: 'autre' } } } } });
+eq('C3e · une absence non précisée garde son comportement historique',
+   M._planAbsLostH(mbr, 7, true), 0);
 
 poser('2026-01');
 M.set({ ent: { Jean: { 7: { 12: { absent: true, motif: 'injustifie' } } } } });

@@ -2,38 +2,42 @@
 
 > Document de référence du projet **Ma Vigne** (GUERETTECH). Il est le **porteur de vérité** :
 > la mémoire Claude est plafonnée, ce fichier ne l'est pas.
-> Dernière consolidation : **23 août 2026** — ★★★ **LE SOCLE DE LA CHARTE, LOT DS-0 (§55)**.
-> **APP 6.45 → 6.46 · SW 7.00 → 7.01.** ★★★ **CINQUIÈME FOIS QU'UNE ENTRÉE DÉCRIT DU TRAVAIL
-> DÉJÀ FAIT** : le cadrage demandait `--sp-1..--sp-8`, l'échelle d'espacement **existe depuis
-> DS-3** sous le nom `--e-*`, et **six des huit pas y sont au pixel exact**. Deux pas ajoutés dans
-> la famille existante, aucune seconde famille créée. ★ *Et le vrai défaut n'est pas l'absence
-> d'échelle : c'est qu'elle ne sert pas — **19 appels contre 1 682 valeurs en dur**.*
-> ★★★ **LA MESURE DES OMBRES DU 16/08 ÉTAIT FAUSSE, DEUX FOIS** : dans `0 2px 8px` le premier `0`
-> **n'a pas d'unité**, donc une regex `\d+px` n'y voit que deux longueurs et conclut « pas de
-> flou » ; et **65 des 177 couches sont des ANNEAUX** (`0 0 0 2px`), pas des élévations — la même
-> confusion que `50%` pour un rayon. Refaite : **57 / 41 / 14**. Le troisième pas ne manquait pas de
-> justification, **il manquait tout court**. *Un résultat trop uniforme accuse l'instrument, pas la
-> population.*
-> ★★★ **`#app-root` N'EST PAS L'APPLICATION** : les overlays sont ses **frères** (`index.html`
-> l.3197) et les modales dynamiques passent par `document.body.appendChild`. `tabular-nums` y aurait
-> laissé **la moitié des chiffres proportionnels**. ⚠️ **Le même mur vaut pour le thème sombre** —
-> les modales héritent des valeurs claires : déduction statique, **à vérifier à l'écran**.
-> ⚠⚠ **Deux piluliers silencieux fermés** : `--ligne` posé dans `:root` seul se **figerait en
-> clair** (un `var()` dans une custom property se résout sur l'élément qui la déclare) ; et la règle
-> de focus, placée ailleurs qu'en **fin de feuille**, serait **morte sur tous les champs de saisie**
-> (17 `outline:none` en spécificité **égale**, l'ordre de source tranche).
-> ⚠⚠ **Et trois de mes propres contrôles étaient faux** : l'ancre de focus visait le premier des
-> **neuf** `:focus-visible{`, le contrôle du repli accusait un document A4, et **la 11ᵉ
-> contre-épreuve frappait le commentaire que je venais d'écrire** — le `.pathname` de §53 à
-> l'identique, **troisième fois**. Le correctif ferme la **famille** : une mutation qui ne bouge que
-> des commentaires est déclarée rouge.
-> ★★ **`harnais-claude-md.mjs` était débranché ET incapable de tourner sous Windows** (chemin de bac
-> à sable en dur). Son unique rouge « préexistant » était **un numéro de ligne figé**, pas une faute
-> du document. Corrigé, rendu portable (`fileURLToPath`), branché dans `npm run check` : **23 vertes,
-> 0 rouge**, pour la première fois.
-> ★ **DEUX RÈGLES D'OR NEUVES, demandées par Nico** : **n°6** — ce document part **avec le dernier
-> lot de chaque conversation** ; et la **note de livraison** (règle n°5) — dire ce que chaque fichier
-> change, **en langage simple, fichier par fichier**.
+> Dernière consolidation : **23 août 2026** — ★★★ **LA FEUILLE D'HEURES DISAIT +8H30 LÀ OÙ ELLE
+> DEVAIT DIRE −9H (§55)**. `planning.js` seul, **APP 6.46 · SW 7.01, aucun bump**.
+> ★★★ **UNE RÉFÉRENCE CALCULÉE SUR LE RÉSULTAT NE MESURE PLUS RIEN** : `_planRempH` définissait la
+> référence d'un jour de remplacement par les heures **FAITES**, ce qui force l'écart à zéro
+> *dans les deux sens* — arriver à 10 h ne devait rien, faire douze heures ne créditait rien.
+> ⚠️⚠️⚠️ **Mais la cause racine n'était pas dans le calcul : `_planApplyAbs` DÉTRUISAIT LA PREUVE.**
+> Il reconstruit l'entrée à neuf et n'en gardait que l'horaire, seulement pour le retard : poser une
+> absence sur un jour d'échange effaçait le drapeau ET l'horaire, c'est-à-dire la seule trace de ce
+> qui était attendu. **L'absence devenait gratuite, et aucun calcul ne peut la rattraper après
+> coup** — les 19 et 20 août de Victor **doivent être reposés à la main** (55c, 55l).
+> ★★ Et la référence descendait **SOUS ZÉRO** : 0 h 30 retirées d'un jour qui n'y avait rien mis.
+> **Un seul jour fabriquait +8 h 30 à partir de rien.**
+> ★ **Avant de corriger, tout a été refait** : plafond annuel retrouvé au centième (1607 × 587/1589),
+> référence 69 h reconstituée exactement. **Huit chiffres sur neuf étaient justes** — sans ce calcul,
+> j'aurais « corrigé » un prorata parfaitement bon.
+> ★★ **Trois rouges au harnais du retard, et j'avais tort deux fois sur trois** ; le troisième
+> (**J14**) était une **assertion qui gravait le défaut**, verte depuis le 20/08. *Une assertion
+> verte n'est pas une preuve de justesse, c'est une preuve de stabilité.*
+> ⚠️⚠️ **Et une contre-épreuve est restée verte** — le harnais du relevé écrivait les entrées à la
+> main et ne traversait jamais la fonction qu'il prétendait couvrir. **Troisième lot de suite.**
+> ★ Polices : **Outfit ne monte qu'à 700**, huit `font-weight:800` étaient des faux gras ·
+> `about:blank` empêchait `/fonts` de se résoudre **sous iOS seulement** · `@page{margin:10mm}`
+> laissait le navigateur imprimer **« about:blank 1/2 » en pied d'un document de paie**.
+> ★★★ **ET IL RESTAIT UN TROU, TROUVÉ PAR NICO SUR LA FEUILLE CORRIGÉE (§55m)** : la feuille
+> montrait les 30 min de retard en « heures dues » et **pas les 8 h de l'absence injustifiée**.
+> ⚠️⚠️⚠️ **Elles n'étaient nulle part.** Hors de la fenêtre `hsup_dues_debut`, elles ne passaient
+> que par l'écart du mois — et **`_planSupMonth` vaut `Math.max(0, ecart)`, donc tout écart
+> négatif est écrasé à zéro.** Elles n'alimentaient ni « reste à prendre », ni le compteur, ni
+> aucun cumul : **le mois suivant, plus aucune trace.** Huit heures affichées en gros dans une
+> tuile, et qui ne coûtaient rien. ★★ **Et l'écran qui pose le motif promet l'inverse** —
+> `sub: 'Heures dues · journée non payée'`. *Le moteur ne tenait pas la promesse de son
+> interface* : c'est §53 en plus discret. L'injustifiée sort de la fenêtre, comme le retard.
+> ⚠️ **C3/C4 du harnais du retard gardaient ce trou sous le nom « non-régression »** — deuxième
+> assertion du lot qui gravait un défaut au lieu de le tenir.
+> ★ `mv-harnais-releve.mjs` **ne tournait dans aucune chaîne depuis le 13/08** — ajouté à `check`.
+> Détail en **§55**.
 >
 > ★ Précédente : **22 août 2026** — ★★★ **LE CLIQUET XSS, ET UN INTERRUPTEUR DÉJÀ
 > BASCULÉ (§54)**. Lot **SEC-7**, **APP 6.45 · SW 7.00, aucun bump**. Le lot demandait de
@@ -269,7 +273,7 @@
 
 ---
 
-## ⚖️ Les six règles d'or
+## ⚖️ Les cinq règles d'or
 
 **Règle d'or n°1 — la vérité est dans les fichiers réels.**
 `/mnt/project` **bouge en cours de session**, peut être **incomplet**, et surtout **peut être en
@@ -570,82 +574,6 @@ mot est exact.
 
 ★ **Le test** : est-ce que Nico pourrait exécuter cette réponse sur son téléphone, entre deux
 rangs, sans rien rechercher ? Si non, la réécrire.
-
-### ★★★ LA NOTE DE LIVRAISON — dire ce qui change, FICHIER PAR FICHIER (23/08)
-
-> **Demandé explicitement par Nico le 23/08** : *« dire ce qui est fait sur les fichiers livrés
-> en langage simple ».*
-
-**Le problème à résoudre.** Nico reçoit cinq ou six fichiers complets et les recopie à la main
-dans `mavigne-dev\` avant de commiter. Au moment où il colle `utils.js`, il doit savoir **ce qu'il
-écrase** — sinon il ne peut ni vérifier, ni revenir en arrière, ni répondre à un client qui
-demande ce qui a changé. Un lot livré sans note est un lot qu'il doit relire pour comprendre.
-
-**La note accompagne TOUJOURS un `present_files`.** Un tableau, une ligne par fichier :
-
-| fichier | où le poser | ce qui change, en une phrase que Nico peut relire dans six mois |
-|---|---|---|
-
-**Ce qu'une ligne doit contenir :**
-- **Le chemin complet** (`src\`, `public\`, la RACINE pour `index.html`) — jamais « au bon
-  endroit ». Un fichier posé dans `src/` au lieu de la racine se déploie **sans erreur et sans
-  effet** : c'est le piège n°1 du projet.
-- **L'effet AVANT la cause**, comme partout ailleurs : « les chiffres s'alignent en colonne »
-  d'abord, « jeton `font-variant-numeric` sur `:root` » ensuite — et seulement si ça aide.
-- **Ce qui est VISIBLE du client** distingué de ce qui ne l'est pas. Un fichier de `scripts/` ne
-  part jamais en ligne ; un `styles.css` se voit sur tous les écrans. Nico n'a pas à le déduire.
-- **Ce qui a été mesuré, avec le chiffre.** « 4 affichages de version », « 13 déclarations
-  ajoutées, 1 remplacée ». Un chiffre se vérifie ; « quelques ajustements » ne se vérifie pas.
-- **Ce qui N'A PAS été fait, et pourquoi.** Toujours. Un reste connu vaut mieux qu'une surprise.
-
-⚠️ **Ça ne remplace pas le diagnostic** — le raisonnement complet reste dans la réponse. La note
-est ce que Nico lit **la main sur le clavier**, pas ce qu'il lit pour comprendre.
-
-★ **Le test** : Nico peut-il recopier les fichiers sans relire une seule ligne de la réponse ?
-Si non, la note est incomplète.
-
-**Règle d'or n°6 — CE DOCUMENT SE MET À JOUR AU DERNIER LOT DE LA CONVERSATION.**
-
-> ★★★ **Demandé explicitement par Nico le 23/08** : *« bien penser à faire le CLAUDE.md à chaque
-> livraison du dernier lot d'une conversation, pour que le fichier soit toujours à jour ».*
-
-**Le geste.** À la **dernière livraison d'une conversation**, `CLAUDE.md` part **avec les autres
-fichiers**, dans le même `present_files`. Ce n'est pas une option de fin de session : c'est un
-livrable du lot, au même titre que `styles.css`.
-
-**Pourquoi cette règle existe, et elle est chère.** Le bac à sable repart à zéro à chaque
-conversation : **tout ce qui n'est pas dans ce fichier est perdu**. Un chantier non consigné n'a
-pas « moins de trace », il n'en a **aucune** — et la conversation suivante recommence à zéro,
-ou pire, refait du travail déjà fait. **Cinq entrées de backlog décrivaient du travail déjà fait**
-(§44, §47, §53, §54, §55) : à chaque fois, la cause était un lot livré sans consignation.
-
-**Ce qui part dans la mise à jour, dans cet ordre :**
-1. **Le bloc d'en-tête** — la nouvelle consolidation en tête, l'ancienne poussée en « précédente ».
-   On **prépend**, on ne remplace jamais : c'est un journal, comme `WHATS_NEW`.
-2. **Une section neuve** pour le chantier, numérotée à la suite, avec ce qui a été **mesuré**
-   (les chiffres), ce qui a été **tranché** (et contre quoi), et ce qui **reste ouvert**.
-3. **Les règles et sections existantes que le lot dément.** C'est la partie qu'on oublie et c'est
-   la plus utile : une phrase devenue fausse est pire qu'une phrase absente.
-4. **Le backlog (§28)** — rayer ce qui est fait, corriger les chiffres qui ont bougé.
-
-⚠️ **Consigner ce qui a échoué, pas seulement ce qui a marché.** Les assertions fausses, les
-contre-épreuves qui ne mordaient pas, les mesures à refaire : c'est ce qui évite de repayer la
-même leçon. Quatre des cinq dernières sections doivent leur existence à une faute consignée.
-
-⚠️ **La mise à jour se fait sur le fichier RÉEL, clôné en tête de session** — jamais de mémoire.
-Une régénération faite sans l'avoir sous les yeux s'est révélée **en retard d'un chantier
-entier** (10/08). `CLAUDE.md` est à la racine du dépôt : il se patche comme n'importe quel fichier,
-avec la même discipline d'ancre (`assert` + `count==1`).
-
-★ **Le contrôle** : `node scripts/harnais-claude-md.mjs` — il relève les affirmations vérifiables
-du document contre le code réel. Il tourne dans `npm run check`. ⚠️ Il est **volontairement absent
-de `prebuild`** : une phrase périmée ne doit pas empêcher un déploiement urgent. C'est la seule
-divergence entre `check` et `prebuild`, et elle est délibérée.
-
-⚠️ **Ce que le harnais NE fait PAS : juger si le document est À JOUR.** Il vérifie que ce qui est
-écrit est vrai, pas que ce qui manque soit écrit. **Un document parfaitement vert peut être en
-retard de trois chantiers.** C'est exactement ce qui s'est produit au §44. La mise à jour reste un
-geste humain, et cette règle est le rappel de le faire.
 
 ---
 
@@ -1816,7 +1744,7 @@ domaines chaque nuit. Les deux s'écrivent dans le même geste (`_fcSaveAbo`, `a
 `gtRenewTrial`). **Si un jour l'un part sans l'autre, la veille se trompera de date en silence.**
 
 **⚠️ LA LECTURE SEULE EST CÔTÉ NAVIGATEUR.** `_mvCheckExpired()` pose `window._MV_LOCKED`,
-`saveData()` refuse **en tête** (garde `window._MV_LOCKED` dans `src/app.js`). **Aucune règle de `firestore.rules` ne lit
+`saveData()` refuse en tête (`app.js:703`). **Aucune règle de `firestore.rules` ne lit
 `trial_until`** — la base accepte toujours les écritures d'un domaine expiré. (Le mot « trial » y
 apparaît deux fois, dans des commentaires sur `checkTrialToken` : mécanisme sans rapport.) C'est un
 frein commercial, pas une serrure. Écrit ici pour que personne ne le découvre autrement.
@@ -2242,9 +2170,34 @@ blocs, la liste « à finir » périmée). **Rédiger le mode d'emploi d'un écr
 - **Solde de départ** d'heures sup + tableau annuel + bloc PDF. **Jours travaillés** sur le relevé
   PDF (exigence MSA).
 - **CP multi-périodes / multi-employés.**
-- ★ **« Jour de remplacement »** — `Math.max(0, ecart)` empêchait les deux moitiés d'un échange de
-  s'annuler → badge bleu, `_planRempH`.
-- ★ **« Heures dues »** — `CONFIG.hsup_dues_debut`. **Jamais rétroactif.**
+- ★★★ **« Jour de remplacement » — IL COMPTE COMME UN JOUR PRÉVU.** Règle métier redite plusieurs
+  fois par Nico : *« comme si le planning était déjà prévu comme ça, puisque ça ira en remplacement
+  d'un autre moment »*. `Math.max(0, ecart)` empêchait les deux moitiés d'un échange de s'annuler →
+  badge bleu, `_planRempH`.
+  ⚠️⚠️ **Corrigé le 23/08 (§55b)** : la référence valait `_planDayH` — les heures **FAITES** — donc
+  l'écart d'un jour d'échange était **forcé à zéro dans les deux sens**. Elle vaut désormais
+  `_planRefH`, l'**ATTENDU**. Sur un jour tenu normalement, attendu == fait : rien ne change. Sur un
+  jour manqué ou pris en retard, **l'écart devient négatif**, et c'est le but.
+  ⚠️ **`_planRempH(mbr, m, fait)`** : le 3ᵉ argument rend la mesure de **présence** (heures faites),
+  pour `_planPresentRef` seulement. Deux questions, deux mesures.
+  ★ **`_planRefPart(plId,m,d,e)`** (§55d) est la définition **unique** de ce qu'un jour pèse dans la
+  référence : modèle si `pl>0`, horaire posé si jour d'échange, **0** sinon (repos, jour
+  supplémentaire, récup). Elle borne la neutralisation d'absence — jamais la dette.
+- ★★★ **« Heures dues » — DEUX MOTIFS LES DOIVENT, ET ILS SONT HORS DE LA FENÊTRE.**
+  `CONFIG.hsup_dues_debut` borne les motifs **neutres** (arrêt, congé sans solde, absence non
+  précisée) : eux sortent seulement de la référence, **jamais rétroactivement**.
+  ⚠️⚠️ **Le retard (20/08) puis l'absence injustifiée (23/08, §55m) en ont été SORTIS** : ces deux-là
+  doivent leurs heures, réglage posé ou non. Raison identique dans les deux cas — *ce n'est pas une
+  politique du domaine, c'est de l'arithmétique*, et **l'écran qui pose le motif l'annonce déjà**
+  (`sub: 'Heures dues · journée non payée'`, `_planAbsEffet` → « heures dues »).
+  ⚠️⚠️⚠️ **Pourquoi c'était grave, et pas cosmétique** : hors fenêtre, les heures d'une injustifiée
+  ne passaient QUE par l'écart du mois, et **`_planSupMonth = Math.max(0, ecart)` écrase tout écart
+  négatif à zéro**. Elles n'atteignaient donc ni « reste à prendre », ni le compteur, ni aucun cumul.
+  **Elles disparaissaient au changement de mois.**
+  ★ Conséquence d'affichage à connaître : les heures dues sont **neutralisées dans la référence**
+  avant d'être inscrites au compteur (sinon double peine). **L'écart d'un mois à absence tombe donc
+  à zéro** — la dette n'est pas dans l'écart, elle est dans « heures dues » et dans « reste à
+  prendre ». C'est voulu : l'écart, écrasé à zéro dès qu'il est négatif, **ne peut rien porter**.
 - ★ **`planClearDay()`** — sans confirmation, **au niveau jour seulement**.
 - ★ **Multi-sélection corrigée** — `planMultiApply()` écrivait des entrées nues sans la logique
   métier du chemin « Outils ». Correctif : `_planCpDayType` + `_planCpCount` appelés par **les deux**.
@@ -4289,28 +4242,6 @@ radios/cases, section « pièces à joindre » explicite.
 
 ## 28. État courant & backlog
 
-### ⚠️ CE QUE LE LOT DS-0 LAISSE OUVERT (23/08 — §55)
-
-1. ⚠️⚠️⚠️ **REGARDER LES TROIS ÉCRANS.** L'accueil, **Pilotage › Décider**, **Planning › Équipe**.
-   `tabular-nums` touche **tous** les chiffres de l'application, et aucun harnais ne lit une mise en
-   page. **Trois défauts du §42 n'ont été trouvés qu'à l'œil.** Les captures n'ont pas été fournies
-   au lot : **c'est le seul contrôle qui manque.**
-2. ⚠️⚠️ **LES MODALES EN MODE SOMBRE** (§55c). `--bg-card`, `--gris-clair` et les ombres ne sont
-   redéfinis que sur `#app-root[…]` ; les overlays sont **dehors** et héritent donc du clair.
-   **Déduction statique, jamais vérifiée à l'écran.** Un téléphone en sombre tranche en dix
-   secondes. Si une modale sort claire, c'est un lot à part.
-3. ★ **`font-weight:800`, 78 fois** — quatrième pas de fait, ou résidu à résorber ? **Au cliquet en
-   attendant.** Se tranche sur une capture, pas au `grep`.
-4. ★ **DÉPENSER L'ÉCHELLE, C'EST TOUT LE TRAVAIL QUI RESTE.** Le socle est posé ; **19 appels
-   `var(--e-*)` contre 1 682 valeurs en dur**, et cinq pas sur onze sans aucun appelant. Un socle
-   qu'on ne dépense pas est un socle qui ne sert à rien. → **DS-1/DS-2, écran par écran.**
-5. `.mvr-fi:focus{outline:none}` en **(0,2,0)** — ce champ reste sans anneau au clavier. Constaté,
-   non corrigé.
-6. **99 px (10 fois) contre 999 px** : même pilule sous 198 px de haut, pas au-delà. Arbitrage à
-   l'œil, jamais une substitution mécanique.
-7. `npm run build` **non joué** (`vite` absent du bac à sable). Le `prebuild` complet est vert et le
-   CSS a été validé par `css-tree` à la place — **0 erreur de parsing**.
-
 ### ⚠️ À FAIRE AVANT DE DÉPLOYER LE CHANTIER §43 (la visite guidée)
 
 1. ⚠️⚠️⚠️ **ALIGNER LES TROIS CHIFFRES DU ROI.** La démo dit **127 h (+37 hors total)**.
@@ -4339,7 +4270,7 @@ en dur et se lisent donc comme des succès.
 
 1. ⚠️⚠️ **`_pl2Cell`** — un retard d'une heure et une journée d'absence s'affichent pareil chez MG
    et Chapelle, tous les jours. **Le défaut le plus visible côté client de tout le backlog.**
-2. ⚠️⚠️ **Les harnais à chemin absolu** (§44c — ✅ `harnais-claude-md` réglé le 23/08, §55j) — une ligne chacun, et neuf filets se remettent
+2. ⚠️⚠️ **Les six harnais à chemin absolu** (§44c) — une ligne chacun, et neuf filets se remettent
    à protéger quelque chose.
 3. ⚠️ **0a-quater** — la masse salariale exclut les bureaux pendant que son commentaire dit
    l'inverse. **`avecBureau` : 0 occurrence.**
@@ -4374,6 +4305,30 @@ lignes qu'il faut regarder en premier** — pas le diff, qui noie le signal dans
 4. ★ **La migration `_PIL_ST_V` remet la disposition à neuf UNE fois chez MG et Chapelle** : les
    cartes qu'ils avaient ouvertes ou fermées repartent repliées. C'est annoncé dans le journal des
    nouveautés — vérifier que le message est bien passé avant qu'ils s'en étonnent.
+
+### ⚠️⚠️ NOUVEAU AU BACKLOG (issu de §55 — 23/08)
+
+1. ⚠️⚠️⚠️ **REPOSER LE 19 ET LE 20 AOÛT chez Marchand-Grillot.** Leurs entrées ont été enregistrées
+   avant le correctif : plus d'horaire, plus de drapeau d'échange, **et aucun calcul ne peut les
+   retrouver**. Tant que ce n'est pas fait, la feuille de Victor sort à **+8h** au lieu de −8h30.
+   Geste : *Annuler l'absence → sélection → mode Remplacement 07:00→16:30 → reposer le retard (19) /
+   l'absence injustifiée (20)*. **Seule action bloquante du lot.**
+2. ⚠️⚠️ **Le même patron de destruction, ailleurs.** Les trois écrivains de congés payés
+   (`planning.js` l. 3610, 3788, 4761) et `_planApplySimple` (récup, chaleur) reconstruisent aussi
+   l'entrée à neuf : un jour d'échange y perd drapeau et horaire. Effet moins grave (l'écart y reste
+   neutre au lieu de devenir faux), **mais c'est le même défaut**. Remède propre : **un point de
+   passage unique** « conserver la nature du jour », avec son harnais. Lot à part, pas un ajout.
+3. ⚠️ **Sortir un vrai PDF de la feuille d'heures et LE REGARDER.** 83 assertions tiennent les
+   tailles, les graisses, les marges et les bornes — **aucune ne lit une mise en page** (§42h).
+   C'est le point faible du paquet, avant tout envoi client.
+4. ✅ **TRANCHÉ le 23/08 (§55m)** — `CONFIG.hsup_dues_debut` ne commande plus l'absence
+   injustifiée : elle doit ses heures comme le retard, réglage ou pas. Le réglage ne borne plus que
+   les motifs neutres. ⚠️ **À vérifier après déploiement** : sur les mois passés de MG et Chapelle,
+   une injustifiée déjà enregistrée descend maintenant « reste à prendre ». C'est une correction,
+   pas une régression — mais **regarder les compteurs avant de sortir une paie**.
+5. **« ETP » subsiste à l'écran** (`pl2-mc-etp`) alors que le document imprimé dit désormais
+   « Réalisation N % du prévu ». `s.etp` vaut `worked/ref` : un taux, pas un équivalent temps plein.
+   Renommer partout = décision de vocabulaire.
 
 ### NOUVEAU AU BACKLOG (issu de §42)
 
@@ -7524,7 +7479,7 @@ surveillé par personne.** Le banc attrape ce qui a dérapé cette fois-ci, pas 
 
 **Côté code, c'est bon** — vérifié le 15/08 :
 
-- `saveData` (`src/app.js`) construit bien `planning_templates`, `planning_entries`,
+- `saveData` (`src/app.js:702`) construit bien `planning_templates`, `planning_entries`,
   `planning_acomptes`, `planning_hsup`, `travaux`, `config`, `membres` complets.
 - `COLLECTIONS` (`src/firebase.js:232`) les lit toutes au démarrage.
 - `FB_REALTIME` (`:272`) inclut les quatre clés de planning.
@@ -7845,7 +7800,7 @@ de portée depuis le bac à sable :
   — **pendant que le commentaire trois lignes au-dessus dit l'inverse**, mot pour mot :
   *« Le "bureau" N'EST PAS exclu : c'est un salaire »*. **`avecBureau` : 0 occurrence dans tout
   `src/`.** À faire au même lot que 0a-ter.
-- ⚠️ **Les harnais à chemin absolu** (§44c — ✅ `harnais-claude-md` réglé le 23/08, §55j) — **n°1 outillage**, une ligne par script.
+- ⚠️ **Les six harnais à chemin absolu** (§44c) — **n°1 outillage**, une ligne par script.
 - **1** installation à blanc sur slug jetable · **6** `demarrage.html` (938 lignes) · **11** import
   KML en merge (`admin-gt.js:2326`) · **12** rattachement des anciens fûts (0 trace dans
   `reserve.js`) · **14** le Cuvier sans intervenant (`cave.js:6713`) · **16** `_pl2Annual` vs
@@ -9021,249 +8976,380 @@ de correction manquée.
 - ⚠️ **`_mvBadge` non plus** : son `ton` va cru dans un `class="…"`. Même situation, même raison.
 - `npm run lint` **non joué** (ESLint ne s'installe pas dans le bac à sable) · `smoke` et `e2e`
   non joués (Playwright, idem).
-- ~~Le harnais `harnais-claude-md.mjs` sort **1 rouge préexistant**~~ → ✅ **INSTRUIT ET CORRIGÉ LE
-  23/08 (§55j)**. ★★ **Ce n'était pas une faute du document : c'était le CONTRÔLE qui était
-  périmé** — il figeait `app.js:703`, la garde a glissé en 704 au premier ajout de ligne plus haut.
-  Même famille que le cliquet à l'envers `A8`. Et le harnais **portait un chemin de bac à sable en
-  dur** et **n'était branché nulle part** — d'où un rouge qui survit des jours sans que personne le
-  voie. Rendu portable, branché dans `npm run check`.
 
-## 55. ★★★ LE SOCLE DE LA CHARTE — LOT DS-0 (23/08 · APP 6.46 · SW 7.01)
+## 55. ★★★ LA FEUILLE D'HEURES DISAIT +8H30 LÀ OÙ ELLE DEVAIT DIRE −9H (23/08 — `planning.js` seul, aucun bump)
 
-> **Point de départ** : le cadrage écrit par Nico — huit pas d'espacement, quatre rayons, trois
-> ombres, trois graisses, un filet neutre, deux règles globales. Avec, en toutes lettres, l'ordre
-> de **re-mesurer avant de commencer**.
+> **Point de départ**, en deux temps. D'abord le PDF « Heures — Victor — Août 2026 » :
+> *« encore des erreurs dans planning, il faut corriger ça. Corrige aussi les polices et les
+> textes et alignements en bas de pages. Le relevé doit être pro : il y a des erreurs de calcul,
+> de typo, de police et de taille de police. »*
+> Puis, après la première passe : *« on avait dit que les remplacements — et ce n'est pas la
+> première fois que je le répète — comptent comme les heures normales, c'est-à-dire comme si le
+> planning était déjà prévu comme ça (puisque ça ira en remplacement d'un autre moment), donc
+> Victor doit logiquement être en heure négative sur ce planning ! »*
 
-### 55a. ⚠️⚠️⚠️ CINQUIÈME FOIS QU'UNE ENTRÉE DÉCRIT DU TRAVAIL DÉJÀ FAIT
+**Livré** : `src/planning.js`, `scripts/mv-harnais-releve.mjs`, `scripts/mv-harnais-retard.mjs`,
+`package.json` (une ligne). **APP 6.46 · SW 7.01 inchangés** — module JS seul, cf. §25.
 
-Le cadrage demandait `--sp-1..--sp-8` (4/8/12/16/24/32/48/64). **L'échelle d'espacement existe
-depuis DS-3** sous le nom `--e-0..--e-8`, déclarée dans `:root`, avec son harnais et son cliquet.
-**Six des huit pas demandés y sont au pixel exact** :
+---
 
-| demandé | existe déjà | | demandé | existe déjà |
-|---|---|---|---|---|
-| `--sp-1:4px` | `--e-1:4px` | | `--sp-5:24px` | `--e-6:24px` |
-| `--sp-2:8px` | `--e-2:8px` | | `--sp-6:32px` | `--e-7:32px` |
-| `--sp-3:12px` | `--e-3:12px` | | `--sp-7:48px` | **absent** → `--e-9` |
-| `--sp-4:16px` | `--e-4:16px` | | `--sp-8:64px` | **absent** → `--e-10` |
+### 55a. D'abord refaire les chiffres. La plupart étaient JUSTES.
 
-Déclarer `--sp-*` aurait fait **deux vérités pour un même pixel** — la faute exacte de §47a
-(*« une échelle qu'on ignore n'en est plus une, et j'ai failli en créer une seconde en croyant en
-réconcilier deux »*). Seuls les deux pas réellement manquants sont ajoutés, **dans la famille
-existante**.
+Avant de corriger quoi que ce soit, la feuille a été **recalculée à la main** contre le modèle
+réel — `PLAN_DEF.standard[7] = {24:8.5, 25:8.5, 26:8.5, 27:8.5, 28:5, 31:8.5}`, c'est-à-dire la
+**fermeture d'été du domaine : août n'ouvre qu'au 24**.
 
-★★★ **Et le vrai défaut de l'espacement n'est pas l'absence d'échelle : c'est qu'elle ne sert
-pas.** **19 appels `var(--e-*)` contre 1 682 valeurs** de `padding`/`margin`/`gap` écrites à la
-main, dont 1 003 hors échelle. Cinq pas sur neuf (`--e-5`, `--e-7`, `--e-8`, plus les deux neufs)
-n'ont **aucun appelant**. Le cadrage cherchait à poser une échelle qui existait ; ce qu'il fallait,
-c'est la dépenser. → **DS-1/DS-2 écran par écran, tenu par le cliquet de `mv-harnais-echelle`.**
-
-### 55b. ★★★ LA MESURE DES OMBRES DU 16/08 ÉTAIT FAUSSE — deux fautes superposées
-
-Le cadrage le disait lui-même : *« au 16/08 les 230 usages tombaient TOUS dans le seuil faible, ce
-qui veut dire soit que trois pas sont de trop, soit que ma mesure était mauvaise »*. **La mesure
-était mauvaise**, et pour deux raisons distinctes :
-
-1. ⚠️ **`0 2px 8px` — le premier `0` n'a pas d'unité.** Une expression qui cherche `\d+px` n'y
-   trouve que **deux** longueurs, en déduit qu'il n'y a pas de troisième valeur, et range la
-   couche en « flou nul ». **Toute la population passait pour plate.** Il faut **tokeniser** et
-   traiter `0` nu comme `0px`.
-2. ⚠️ **Les anneaux ne sont pas des ombres.** Sur 177 couches mesurables, **65 ont un flou
-   réellement nul** : ce sont des `0 0 0 2px` (anneaux de focus, halos d'état) et des
-   `inset 0 1px 0` (filets de brillance). Les compter parmi les élévations est la seconde moitié
-   de l'erreur — **exactement la même confusion que `border-radius:50%` pour un rayon**.
-
-**Mesure refaite**, tous fichiers : 239 déclarations `box-shadow`, dont **65 via jeton** et 174
-écrites à la main. Les **112 vraies élévations** se répartissent en trois populations nettes :
-
-| flou | nombre | pas |
+| Chiffre imprimé | Reconstitution | Verdict |
 |---|---|---|
-| < 10 px | **57** | `--shadow-sm` (existait, flou max 8) |
-| 10 → 39 px | **41** | `--shadow-md` (existait, flou max 28) |
-| ≥ 40 px | **14** | `--shadow-lg` — **il manquait** |
+| Faites **77h30** | 8,5+8,5+8+0+5 (17→21) + 34 + 5 + 8,5 | ✓ |
+| Référence **69h** | 47,5 (modèle) + 22 (remplacements) − 0,5 (retard neutralisé) | ✓ **arithmétiquement** |
+| Écart **+8h30** | 77,5 − 69 | ✓ arithmétiquement |
+| Plafond **593h39** | 1607 × 587 / 1589 | ✓ **au centième** |
+| Reste **516h09** | 593,65 − 77,5 | ✓ |
+| Modulation **4h** | seule la semaine 24→30 dépasse 35 h (39 h) | ✓ |
+| Coupure **16 jours** | 31/07 → 17/08 | ✓ |
+| CDD **577 jours** | 01/01/2025 → 31/07/2026 | ✓ |
+| **9 JOURS** | dix jours portent des heures | ✗ |
 
-Le troisième pas n'était pas de trop : il n'existait pas, et **ses clients sont nommables** —
-`.ent-confirm-modal`, `.saison-menu`, `.ov-plan-sheet`, `#mv-dock-sheet`, `.pil-drawer`,
-`.pl2-mbar`, `.mvt-card`, `.pil-outils-menu`, `.mvds-sheet`. La famille des surfaces qui flottent
-au-dessus de la page.
+★★ **Le plafond annuel a été retrouvé à la minute près en resommant les douze mois du
+template** : **1 589 h** planifiées sur l'année, **587 h** sous contrat du 17/08 au 31/12. Sans ce
+calcul, j'aurais « corrigé » un prorata parfaitement juste. *Un chiffre qu'on ne sait pas refaire
+n'est pas un chiffre faux : c'est un chiffre qu'on n'a pas compris.*
 
-★ **La leçon, au-delà des ombres** : quand une mesure rend un résultat parfaitement uniforme sur
-une population de 230, **ce n'est pas la population qui est uniforme, c'est l'instrument qui est
-aveugle**. Un résultat trop propre est un signal, pas une conclusion.
+⚠️ Et c'est ce même recalcul qui a rendu la seconde phrase de Nico exploitable : **l'écart de
++8 h 30 venait ENTIÈREMENT du 19**, un jour de fermeture travaillé en retard. Les 17, 18, 21, 24
+à 28 et 31 pesaient tous exactement zéro. Sans la décomposition jour par jour, on cherche le
+défaut partout.
 
-### 55c. ★★★ `#app-root` N'EST PAS L'APPLICATION — et ça change deux décisions
+---
 
-Le cadrage plaçait `font-variant-numeric` sur `#app-root`. **Mesuré sur `index.html` :** le
-conteneur est fermé ligne 3197, et `#ovChampValidation`, `#ovMode`, `#ovConfirmDel`, `#ovPrompt`,
-`#mv-critical-overlay` sont ses **frères**, pas ses enfants. Les overlays construits en JS sont
-posés par `document.body.appendChild` (une douzaine dans `admin-gt.js` seul).
+### 55b. ★★★ LA RÈGLE : une référence calculée sur le résultat ne mesure plus rien
 
-Ancrée sur `#app-root`, la règle laissait **toutes les modales en chiffres proportionnels** :
-moitié aligné, moitié pas — **pire que rien**. → posée sur `:root`, comme `--pt-*`, et pour la
-raison déjà écrite dans le commentaire de l'échelle : *« les bulles Leaflet et les couches
-d'overlay sortent du conteneur de la page »*.
+```js
+// AVANT
+h += _planDayH(plId, m, d, e);   // les heures FAITES
+```
 
-⚠️⚠️ **LE MÊME MUR VAUT POUR LE THÈME SOMBRE, ET CE N'EST PAS TRAITÉ ICI.** `--bg-card`,
-`--gris-clair`, `--shadow-*` sont redéfinis **uniquement** dans `#app-root[data-theme="dark"]` et
-dans `#app-root:not([data-theme="light"])`. Une modale, qui est dehors, hérite donc des valeurs
-**claires**. Déduction statique, **non vérifiée à l'écran** : à regarder sur un téléphone en mode
-sombre. Si une modale sort claire, c'est un lot à part. → **backlog.**
+`_planRempH` définissait la référence d'un jour d'échange par **ce qui y avait été fait**. La
+conséquence est mécanique et ne dépend d'aucune donnée : `référence == fait` ⇒ **écart ≡ 0, dans
+les deux sens**. Arriver à 10 h sur un jour de remplacement ne devait rien. Y faire douze heures
+ne créditait rien. Le commentaire d'origine l'annonçait même comme une intention — *« entrent
+dans la référence → écart nul »* — sans voir que la nullité était un **artefact de la formule**,
+et non le résultat d'une mesure.
 
-### 55d. Ce que `tabular-nums` déplace vraiment — mesuré sur les polices, pas supposé
+```js
+// APRÈS
+h += fait ? _planDayH(plId, m, d, e) : _planRefH(plId, m, d, e);   // l'ATTENDU
+```
 
-Le cadrage posait un seuil : *« si c'est imperceptible (<0,5 px), on le garde partout »*.
-Playwright ne s'installe pas ici ; la mesure a été faite **sur les `.woff2` réellement servis**
-(`public/fonts/`, lus avec `fontTools`) :
+`_planRefH` rend l'horaire posé à la saisie, ou le modèle. Sur un jour d'échange **normal**,
+attendu == fait : **zéro régression**. L'écart n'apparaît que quand la journée n'a pas été tenue —
+ce qui est précisément ce qu'on lui demande.
 
-- ★ **Outfit ET Cormorant portent la fonction OpenType `tnum`.** La règle n'est donc pas un coup
-  d'épée dans l'eau — **et les 67 `tabular-nums` déjà écrits dans le code font bien quelque chose**.
-  C'était la première question à trancher : une police sans `tnum` aurait rendu tout le lot vain.
-- Outfit, chiffres proportionnels : le « 1 » fait **367**/1000 em, le « 0 » **660**. En tabulaire,
-  **590 pour tous**.
-- **Écart moyen par chiffre** : `+0,44 px` à 11 px · `+0,50 px` à 12,5 px · `+1,23 px` à 31 px.
-  Le seuil de 0,5 px est **tenu au corps de texte, dépassé aux grandes tailles**.
-- **Ce qui tranche est l'autre plateau** : le **désalignement supprimé** atteint `3,7 px` par
-  chiffre à 12,5 px et `9,1 px` à 31 px. On ajoute un demi-pixel de largeur pour retirer sept
-  pixels d'écart entre deux lignes d'un même tableau.
+★ Le second argument `fait` existe pour `_planPresentRef` (« qui était au champ »), qui est une
+mesure de **présence** et non de référence : elle continue de lire les heures faites. *Deux
+questions différentes, deux mesures — les fondre aurait recréé §34.*
 
-⚠️ **Ce raisonnement reste un proxy.** Aucune capture n'a pu être prise, et **les trois captures
-demandées dans le cadrage n'ont pas été fournies** (les images jointes étaient les logos, la
-bannière et le QR code). L'accueil, Pilotage › Décider et Planning › Équipe **restent à regarder à
-l'œil** — trois défauts du §42 n'ont été trouvés que comme ça.
+---
 
-### 55e. ⚠️⚠️ LE PIÈGE DE LA VARIABLE QUI SE FIGE EN CLAIR
+### 55c. ⚠️⚠️⚠️ MAIS LA RÈGLE NE SUFFISAIT PAS : L'ENREGISTREMENT DÉTRUISAIT LA PREUVE
 
-`--ligne` déclaré **uniquement** dans `:root` serait resté **clair en mode sombre**, sans erreur et
-sans avertissement.
+C'est la **cause racine**, et elle n'est pas dans le calcul.
 
-**La mécanique** : la substitution d'un `var()` écrit **dans** une custom property se résout **sur
-l'élément qui la déclare**. `:root{--ligne:var(--gris-clair)}` calcule `--ligne` sur `html`, où
-`--gris-clair` vaut la valeur claire, puis **hérite ce littéral** à toute la page. Redéfinir
-`--gris-clair` plus bas, sur `#app-root[data-theme="dark"]`, **ne rétroagit pas**.
+`_planApplyAbs` **reconstruit l'entrée à neuf** — `var e = {absent:true, motif:…}` — et n'en
+reprenait que le `timing`, **et seulement pour le retard**. Poser une absence sur un jour
+d'échange effaçait donc **l'horaire ET le drapeau `remplacement`** : la seule trace de ce qui
+était attendu ce jour-là. L'absence devenait **gratuite**.
 
-→ `--ligne` **et** `--shadow-lg` sont redits dans **les deux** blocs sombres, exactement comme
-`--shadow-sm` et `--shadow-md` le sont déjà. Vérifié **avec un vrai parseur CSS** (`css-tree`), pas
-au `grep` : trois déclarations chacun, une par bloc de thème, zéro erreur de parsing sur les
-4 725 lignes.
+Le commentaire en place justifiait pourtant exactement le bon raisonnement, puis s'arrêtait un
+cran trop tôt :
 
-★ **L'assertion qui en découle vaut mieux que le correctif** : un jeton redit dans **un seul** des
-deux blocs sombres fait diverger la bascule manuelle du mode auto de l'OS. Le défaut ne se voit que
-chez un client en sombre, qui a basculé d'une certaine façon. Le harnais l'interdit.
+> *« Sans lui, un jour supplémentaire perdait sa seule source d'heures. On ne le garde QUE pour
+> le retard : les autres motifs effacent bien la journée. »*
 
-### 55f. ⚠️⚠️⚠️ LA RÈGLE DE FOCUS EST MORTE SI ELLE N'EST PAS LA DERNIÈRE
+C'est vrai d'un jour **au modèle** : le modèle reste et porte la référence. C'est **faux** d'un
+jour d'échange, où l'horaire posé *est* la référence.
 
-`styles.css` contient **17 `outline:none`**, la plupart sur la règle **de base** d'un champ de
-saisie : `.fi`, `.fsel`, `.login-input`, `.ephy-search input`, `.emh-in`, `.j-date-input`,
-`.ob-input`, `.plan-ge-input`, `.vend-param-fi`, `.pl2-chal-f input`, `#chat-ta`, `.sbox input`,
-`.danger-conf-input`, `.mvt-fi`.
+```js
+var _remp = !!(_prev && _prev.remplacement && _plJ <= 0);
+if (_prev && _prev.timing && (mo.heures || _remp)) e.timing = _prev.timing;
+if (_remp) e.remplacement = true;
+```
 
-Leur spécificité est **(0,1,0)** — **exactement celle de `:focus-visible`**. À égalité, c'est
-l'**ordre de source** qui tranche. Placé n'importe où avant, l'anneau de focus serait **mort sur
-tous les champs de saisie de l'application**, sans une erreur et sans un avertissement.
+⚠️ **La condition est le drapeau d'échange, PAS « tout jour à 0 h ».** Un **jour supplémentaire**
+(horaire posé, sans échange) ne doit rien : personne ne l'attendait. Lui laisser son horaire ferait
+naître une référence de 8 h 30 sur une journée où il n'était pas convoqué, et le réglage « heures
+dues » lui réclamerait la journée entière. C'est le harnais du retard, **J16**, qui a tenu cette
+distinction quand ma première version l'avait perdue.
 
-→ Le bloc est en **fin de feuille**, et **c'est une assertion du harnais**, pas une convention :
-après la règle de focus, un seul `outline:none` est toléré (celui du couple `*:focus:not(...)`).
-Un futur `outline:none` ajouté en queue rougit.
+★★★ **Conséquence pratique, à ne pas oublier : les entrées des 19 et 20 août chez
+Marchand-Grillot ont été enregistrées AVANT ce correctif. Elles ne portent plus ni horaire ni
+drapeau, et AUCUN calcul ne peut les retrouver.** Le moteur est juste, la donnée est perdue :
+**il faut reposer ces deux jours à la main** (Annuler l'absence → mode Remplacement 07:00→16:30 →
+reposer le retard / l'absence). Tant que ce n'est pas fait, la feuille sort à **+8h**.
+Le harnais teste ce cas exprès, sous le nom **`Victor3`**.
 
-⚠️ **Un survivant assumé** : `.mvr-fi:focus{outline:none}` est en **(0,2,0)** et gagne quand même.
-Ce champ garde sa couleur de bordure pour seul signal, y compris au clavier. **Constaté, pas
-corrigé** — ça se tranche sur une capture, pas au `grep`.
+---
 
-### 55g. Les autres arbitrages, chacun tranché par un chiffre
+### 55d. La référence descendait SOUS ZÉRO
 
-- **Rayons.** 674 `border-radius`, **45 valeurs distinctes**. Les quatre pas couvrent les quatre
-  plus gros usages : 12 px (95), 8 px (50), 16 px (27), 999 px (8).
-- ⚠️ **`border-radius:50%` (130 occurrences) est un CERCLE**, jamais un jeton : une pastille de
-  44 px et une de 22 px n'ont aucune valeur en pixels en commun. Le harnais pose un **PLANCHER**
-  dessus — le compte ne peut pas **descendre**. C'est le seul cliquet du lot orienté à l'envers,
-  et c'est voulu.
-- ⚠️ **99 px (10 occurrences) n'est pas fusionné avec 999 px** : même pilule sur un élément bas,
-  **pas au-delà de 198 px de haut**. Arbitrage à l'œil, pas substitution mécanique.
-- ★ **`--radius-card` était un SECOND nom pour 16 px**, avec ses 10 appels. Il devient
-  `var(--r-lg,16px)` : un renvoi, plus une valeur jumelle.
-- **Graisses.** 1 971 `font-weight` : 600 (**976**), 700 (**686**), 500 (**156**) = **92 %**.
-  ⚠️ **800 existe 78 fois** : ni un pas ni un accident, un **quatrième pas de fait**, jamais
-  déclaré. **Pas ajouté en douce** — il part au cliquet. Le trancher demande une capture.
-- **Filet neutre.** `1px solid var(--gris-clair)` = **172** (+14 avec repli) contre
-  `var(--gris)` = **71**. `--gris-clair` mène de plus du double : il gagne. Le perdant part au
-  cliquet, il ne peut plus regagner de terrain.
-- ⚠️ **Le nom `--ligne` était déjà pris** dans `_rsCss()` (`app.js`) — mais c'est le `:root` d'un
-  **document A4 imprimé**, ouvert dans sa propre fenêtre, qui ne charge jamais `styles.css`. Deux
-  documents, aucun conflit. **Exemption écrite avec sa raison** dans le harnais, comme
-  `GUARD_EXEMPT`.
-- **Le repli partout.** Le socle n'introduit que trois appels, tous avec repli. ⚠️ Mais la base
-  compte **4 376 `var()` sans repli** au total, dont **89** dans les familles d'échelle. Les solder
-  n'est pas ce lot : ils partent au cliquet.
+`_planAbsLostH` retranchait `_planRefH − _planDayH` **sans jamais regarder si le jour était dans
+la référence**. Le 19 : 0 h au modèle, aucun drapeau (détruit, cf. 55c) — donc rien dans la
+référence — et pourtant **0 h 30 lui étaient retirées**. Référence à **−0 h 30** pour cette
+journée, plus 8 h faites comptées en heures supplémentaires : **un seul jour fabriquait +8 h 30 à
+partir de rien.**
 
-### 55h. Le harnais — `mv-harnais-jetons.mjs`, 32 assertions, 12 contre-épreuves
+Primitive neuve, définition unique :
 
-Branché dans `npm run check` **et** `prebuild`. Cliquet dans `scripts/mv-jetons-baseline.json` :
-`{cercles:80, sansRepli:89, radDur:194, fwHors:152, filetPerdant:74}`.
+```js
+function _planRefPart(plId, m, d, e){
+  if (e && e.type === 'recup') return 0;
+  var pl = _planPlanned(plId, m, d);
+  if (pl > 0) return pl;                                  // le modèle fait foi
+  if (e && e.remplacement) return _planRefH(plId, m, d, e); // l'horaire posé fait foi
+  return 0;                                               // repos, jour supplémentaire, extra
+}
+```
 
-★ **Le point de conception qui compte** : `controles()` est une **fonction pure du texte de la
-feuille**. C'est ce qui rend les contre-épreuves réelles — on mute une copie **en mémoire** et on
-rejoue le même jeu d'assertions. Un harnais dont on ne peut pas rejouer les assertions sur une
-source abîmée ne prouve rien.
+★★ **Et la borne ne vaut QUE pour la neutralisation.** Les deux mesures de `_planAbsLostH` ne
+tiennent pas le même registre : `duesOnly=false` **retire de la référence**, `duesOnly=true`
+**inscrit une dette au compteur d'heures**. Les borner toutes les deux effaçait la demi-heure due
+d'un jour supplémentaire (harnais du retard, **J13**) ; n'en borner aucune gardait le défaut.
 
-### 55i. ⚠️⚠️ TROIS DE MES CONTRÔLES ÉTAIENT FAUX AU PREMIER LANCEMENT
+```js
+var _perdu = Math.max(0, _planRefH(…) - _planDayH(…));
+h += duesOnly ? _perdu : Math.min(_perdu, _planRefPart(…));
+```
 
-**Deux rouges au premier tir, et les deux accusaient du code parfaitement sain :**
+⚠️ La borne corrige aussi un défaut latent jamais vu : un jour à 7 h portant un horaire saisi de
+9 h en retirait **9** de la référence.
 
-1. ⚠️ **L'ancre de position cherchait le PREMIER `:focus-visible{` de la feuille.** Il y en a
-   **neuf** (`.emh-x`, `.emh-add`, `.emh-rap-b`, `.emh-opt`, `.mv-syncdot`, `.mvt-cta`, `.mv-i`,
-   `.rf-f select`, plus la mienne). Le contrôle mesurait « 15 `outline:none` après » et rougissait.
-   **L'assertion satisfaite par une autre phrase du fichier — la faute exacte de §53.**
-2. ⚠️ **Le contrôle du repli comptait `var(--ligne)` de `_rsCss()`**, le document A4 — qui déclare
-   son propre `--ligne` deux lignes plus haut, où un repli est sans objet. Et le préfixe `--ligne`
-   attrapait `--ligne-2`, qui n'est pas un jeton du socle. **Corrigé en profondeur** : `sansRepli`
-   prend désormais des **paires `[fichier, source]`** (sans le nom du fichier, aucune exemption
-   n'est applicable) et un **prédicat**, jamais un préfixe nu.
+---
 
-**Et la onzième contre-épreuve ne mordait pas — troisième fois pour cette famille de faute :**
+### 55e. Le retard n'était pas compté comme jour travaillé
 
-3. ⚠️⚠️⚠️ La mutation `border-radius:50%` **sans point-virgule** frappait la **première occurrence
-   du fichier**, qui est **le commentaire que je venais d'écrire** dix lignes plus haut pour
-   expliquer qu'un cercle n'est pas un rayon. `sansCom()` le retirait ensuite : le compte ne
-   bougeait pas, la contre-épreuve ne mordait rien, **et elle se lisait comme une mutation
-   légitime**. C'est le `.pathname` de §53 à l'identique — *un `assert` qui tombe sur le mot écrit
-   dans le commentaire qu'on vient d'ajouter*.
+`_planDayStatus` garde `t:'absent'` pour un retard — c'est la clé des tables de couleur et de
+`_PLAN_ST_OFFDAY`. `_planDaysWorked` l'excluait donc : la feuille écrivait **« 77h30 au domaine ·
+9 jours »** alors que **dix** jours portaient des heures, dont les 8 h du 19. Le drapeau `retard`,
+posé par `_planDayStatus` et lui seul, rouvre la porte ; formation (`assim`) et absence payée
+restent hors du compte MSA / TESA, ce qui est leur place.
 
-★★★ **Le correctif ferme la FAMILLE, pas le cas** : les contre-épreuves exigent maintenant que la
-mutation bouge **le code**, pas seulement le texte. `if (sansCom(muté) === sansCom(origine))` →
-rouge nommé. Une mutation qui ne touche que des commentaires ne teste rien, quel que soit le motif.
-★ **Le second filet, déjà là, reste indispensable** : il ne suffit pas que « ça rougisse », il faut
-que ce soit **l'assertion visée** qui rougisse. Une mutation qui casse autre chose passerait.
+⚠️ **Le défaut ne touchait pas que le PDF** : `_planDaysWorked` sert aussi le décompte annuel de
+jours travaillés (l. 2839).
 
-### 55j. ★★ LE HARNAIS DU DOCUMENT ÉTAIT DÉBRANCHÉ, ET INCAPABLE DE TOURNER CHEZ NICO
+---
 
-`harnais-claude-md.mjs` sortait **1 rouge depuis des jours**, noté au §54 comme « préexistant ».
-Instruit : **c'était le contrôle qui était périmé**, pas le document. L'assertion figeait
-`app.js:703` ; la garde `_MV_LOCKED` a glissé en **704** au premier ajout de ligne plus haut.
-**Même famille que le cliquet à l'envers `A8`.** → on cherche le **motif** dans la tête de
-`saveData`, plus le **rang**. Et les deux numéros de ligne recopiés dans le document (§14b, §28)
-sont retirés : c'est la règle d'or n°2 appliquée aux lignes, pas seulement aux versions.
+### 55f. Le tableau d'année affirmait sept mois à zéro
 
-⚠️⚠️ **Plus grave : il portait `/home/claude/mavigne-dev/` EN DUR** — un des six harnais de §44 qui
-ne peuvent démarrer que dans le bac à sable. **Il n'était branché nulle part** : ni dans `check`,
-ni dans `prebuild`, ni en CI. C'est pour ça qu'un rouge a pu survivre sans que personne le voie.
-→ Chemin rendu portable avec **`fileURLToPath`** — ⚠️ **pas** `new URL(...).pathname`, qui rend
-`/C:/Users/…` sous Windows et que Node repart en `C:\C:\Users\…` (§53, le harnais livré vert qui a
-planté chez Nico au premier lancement). **Le bac à sable est Linux, la machine de Nico est
-Windows.**
-→ Branché dans **`npm run check`** seulement. ⚠️ **Volontairement absent de `prebuild`** : une
-phrase périmée ne doit pas bloquer un déploiement urgent. **C'est la seule divergence entre `check`
-et `prebuild`, et elle est délibérée.**
-✅ **23 vertes, 0 rouge** — pour la première fois.
+Le document est construit **sous `_planSurContrat`** : hors de la période du contrat courant,
+`_planSupMonth` / `_planRecupH` / `_planYearBalance` rendent 0. La boucle partait de janvier — elle
+imprimait donc **« Janvier 0h · Février 0h · … »** pour **sept mois où Victor a travaillé à temps
+plein**, sous le CDD précédent. Et **trois lignes au-dessus**, le même document affirmait *« deux
+périodes séparées par une coupure comptent séparément »*.
 
-### 55k. Ce que le lot ne fait pas, et pourquoi
+★★ *Un zéro qui veut dire « pas sous ce contrat » et un zéro qui veut dire « rien fait » ne
+peuvent pas partager la même case.* Le tableau démarre au mois du contrat, et une phrase dit
+pourquoi : *« Le compteur de ce contrat s'ouvre le 17/08/2026 : les mois antérieurs relèvent du
+contrat précédent et sont soldés à part. »*
 
-- **La feuille n'est pas remappée.** Le socle **déclare** ; il ne réécrit pas 674 `border-radius`
-  ni 1 682 espacements sans pouvoir regarder une seule capture. Ce serait un pari, pas un lot
-  (§47b). La dette part au cliquet et se résorbe écran par écran.
-- **Les trois captures n'ont pas été regardées** (non fournies). C'est le seul contrôle qui manque,
-  et c'est celui qui a trouvé trois défauts au §42.
-- **`font-weight:800` (78 fois)** : quatrième pas ou résidu, non tranché.
-- **Les modales en mode sombre** (§55c) : déduction statique, à vérifier à l'écran.
-- **`npm run build` non joué** — `vite` n'est pas installé dans le bac à sable. Le `prebuild`
-  (tous les harnais) est passé vert ; le CSS a été validé par `css-tree` à la place, **0 erreur de
-  parsing**. `smoke` et `e2e` non joués (Playwright, comme toujours).
+---
+
+### 55g. ★★ Les polices : Outfit ne monte qu'à 700
+
+`public/fonts/fonts.css` charge Outfit en **300, 400, 500, 600, 700**. La feuille demandait
+**`font-weight:800` en huit endroits** — tous les gros chiffres. Chacun était un **faux gras
+synthétisé** par le moteur d'impression, épaissi géométriquement, qui bave à l'impression laser.
+Plus aucun 800 dans le document.
+
+Deux autres causes, plus sournoises, à « la police n'est pas la bonne » :
+
+1. ⚠️ **Le document naît dans une fenêtre `about:blank`** (`window.open('') + document.write`).
+   `/fonts/fonts.css` s'y résout par héritage de l'ouvrant sous Chrome desktop — **pas sous iOS
+   Safari**, où la feuille retombait en Times. `<base href="…">` absolue posée.
+   *Le défaut se voyait sur l'iPad d'un client et jamais sur le poste de Nico.*
+2. ⚠️ **`setTimeout(print, 400)`** partait souvent **avant** l'arrivée d'Outfit : l'aperçu se
+   composait en police système. Remplacé par `document.fonts.ready`, avec un filet à 2,5 s.
+
+★ Et le `font-family:monospace` des horaires « 07:00→16:30 » : c'est le monospace **du
+navigateur** — Courier sur beaucoup de postes — au milieu d'une page en Outfit. Supprimé au profit
+de `font-variant-numeric:tabular-nums`, posé une fois sur `body`.
+
+---
+
+### 55h. ⚠️⚠️ « about:blank 1/2 » en pied d'un document de paie
+
+`@page { size:A4; margin:10mm }` **laissait au navigateur la place d'écrire ses propres en-têtes
+et pieds** : l'horodatage, le titre, le numéro de page — et l'URL, c'est-à-dire **`about:blank`**.
+C'est ce que Nico voyait en bas de sa feuille de salaire.
+
+`@page { margin:0 }` : il n'y a plus de boîte où les écrire. La marge utile est portée par
+`.sheet` (11 mm / 10 mm / 9 mm), au-delà de la zone non imprimable des laser A4 (≈ 5 mm).
+
+★ Et il **n'y avait nulle part où signer** : un filet, puis le mot « Signature salarié »
+*dessous* — la ligne passait donc au-dessus du libellé, dans le blanc du bloc précédent. Libellé,
+puis **cadre de 21 mm**, précédés de « Fait le … à … ». Le pied porte désormais l'identité du
+document (nom · mois · édité le), puisque le navigateur ne la donne plus.
+
+---
+
+### 55i. Le reste, en vrac — et pourquoi ce n'est pas du détail
+
+- **Colonne de gauche vide.** La grille coupait à jour fixe (1-15 / 16-31). Un contrat ouvert le
+  **17** laissait la colonne de gauche réduite à son bandeau d'en-tête, et tassait quinze lignes à
+  droite sur une demi-page. On coupe sur le **nombre de lignes réellement rendues**.
+- **`PLAN_MOIS_C` était à moitié anglais** : `'Jun'`, `'Jul'`. Le bloc congés imprimait
+  **« JUN 2026 → MAI 2027 »**. Passé aux abréviations AFNOR NF Z44-001, quatre caractères maximum
+  (aucune largeur fixe côté CSS — vérifié sur `.plan-bar-lbl`, `.plan-mo-tab`, `.plan-ref-mo-n`).
+- **« du 1 janvier 2025 »** — le premier du mois est un ordinal.
+- **« ETP 1.12 »** disait **deux faussetés en huit caractères** : le point décimal sur un document
+  français, et le mot. `s.etp` vaut `worked/ref` — un **taux de réalisation**, pas un équivalent
+  temps plein. Un salarié à 1,12 ETP n'existe pas ; à 112 % de son prévu, si.
+  ⚠️ **Le libellé « ETP » subsiste à l'écran** (`pl2-mc-etp`) : le renommer partout est une décision
+  de vocabulaire, pas une correction.
+- **« Compteur au Aoû »**, **« (AU AOÛ) »**, **« il y a 0 mois »** pour le mois courant.
+- **`-8 j`** au trait d'union à côté de colonnes en `−` (U+2212). `_planFmtE` rend maintenant le
+  vrai signe moins ; `_planFmt` est laissé tel quel (200 appelants, gain nul).
+- **Un jour de formation s'imprimait en ROUGE SANG.** `LBG`/`LFG` sont indexées sur `t`, et
+  `'absent'` recouvre **quatre** choses : injustifiée (rouge, c'est juste), absence **payée**,
+  jour **assimilé** (formation, événement familial) et **retard**. L'écran, lui, les montre en
+  orange et en bleu. *Un salarié lisait « formation » écrit comme une faute.*
+- **Le même total écrit deux fois** : « 77h30 comptées » à 4 cm de « 77h30 au domaine ». Ils ne
+  diffèrent que s'il y a formation ou événement familial. La cellule d'heures n'apparaît donc plus
+  que dans ce cas, et la place rendue sert au **compte de jours**, qui manquait.
+- **Plancher de police à 8,5 px**, corps de tableau à 10 px, notes à 9 px. En dessous, un relevé
+  se lit à la loupe.
+- **Émojis retirés des titres de section** (⏱ 📅 📄 🌴 💶). Le raisin de l'en-tête reste : c'est la
+  marque. ⚠️ §45 avait posé l'emoji comme **réponse structurelle** pour le document imprimé, qui
+  n'a pas le sprite — la bonne réponse était en fait **de ne rien mettre du tout**.
+- **La référence annonce sur combien de jours elle porte** (« Référence 86h · 5 jours prévus »).
+  Ce n'est pas de la décoration : c'est ce qui rend le chiffre **vérifiable** par le lecteur, et ce
+  qui aurait évité, en amont, la question « d'où sortent ces 69 h ? ».
+
+---
+
+### 55j. ★★ CE QUE LES HARNAIS ONT TROUVÉ — trois rouges, et j'avais tort une fois sur trois
+
+Le harnais du retard a rougi **trois fois** après le correctif du moteur. La règle de §20 (*« quand
+une assertion échoue, demander d'abord quel côté a tort »*) a donné trois réponses différentes :
+
+| Rouge | Qui avait tort | Décision |
+|---|---|---|
+| **J13** — 0,5 h due au compteur | **moi** : j'avais borné les deux registres | borne retirée sur la dette |
+| **J14** — 0,5 h neutralisée dans la référence | **l'assertion** : elle gravait le défaut | assertion inversée, avec sa preuve écrite |
+| **J16** — une injustifiée n'hérite pas du timing | **moi** : j'avais généralisé à « tout jour à 0 h » | condition ramenée au drapeau d'échange |
+
+★★★ **J14 mérite d'être relu** : l'assertion exigeait qu'on retire 0,5 h **d'une référence qui ne
+contenait pas ce jour**. Elle était verte depuis le lot du 20/08 et **elle décrivait le bug**. Un
+harnais écrit après coup grave le comportement observé, pas le comportement voulu — *une assertion
+verte n'est pas une preuve de justesse, c'est une preuve de stabilité.*
+
+⚠️⚠️ **Et une contre-épreuve est restée verte** : « l'enregistrement d'une absence reperd le drapeau
+d'échange ». Cause : le harnais du relevé **écrit `PLANNING_ENTRIES` à la main** et ne traversait
+donc **jamais** `_planApplyAbs` — la fonction dont il prétendait couvrir le défaut. Corrigé par une
+section **8d** qui appelle réellement `window._planApplyAbs`. *C'est la même famille que §42f et
+§53 : trois lots de suite avec une contre-épreuve sans effet.*
+
+**État final** : préflight C11→C25 vert · harnais du retard **91 assertions** · harnais du relevé
+**83 assertions** et **22 contre-épreuves, toutes rouges quand on réinjecte le défaut**.
+
+★ **`mv-harnais-releve.mjs` a été ajouté à `npm run check` et `prebuild`** : il existait depuis le
+13/08 (§38) et **ne tournait dans aucune chaîne**. C'est la douzième entrée de la chaîne.
+
+---
+
+### 55k. Le compte final
+
+| | avant | après (jours reposés + 55m) |
+|---|---|---|
+| Référence | 69h | **77h30** (39 h d'échange, moins les 9 h non tenues) |
+| Heures faites | 77h30 | 77h30 |
+| Écart au prévu | +8h30 | **=** *(la dette n'est pas là — voir 55m)* |
+| **Heures dues** | 0h30 | **−9h** |
+| Jours au domaine | 9 | **10** |
+| **Reste à prendre** | +8h | **−9h** |
+
+−8 h 30 pour la journée injustifiée, −0 h 30 pour le retard : **chaque faute pénalise une seule
+fois**, et les deux dans le **même registre** — celui qui se cumule. C'est le « logiquement
+négatif » de Nico, sur la seule ligne qui survit au changement de mois.
+
+---
+
+### 55m. ★★★ ET IL EN MANQUAIT HUIT — le trou que Nico a vu sur la feuille corrigée
+
+> *« Sur la feuille c'est marqué qu'il y a les trente minutes de retard, mais elles sont passées
+> où, les huit heures de l'absence injustifiée ? Elles sont dues, donc il faut les compter aussi. »*
+
+**Il avait raison, et c'était pire que ce qu'il décrivait : elles n'étaient nulle part.**
+
+`_planAbsLostH` laissait l'absence injustifiée sous le garde-fou `CONFIG.hsup_dues_debut`, non posé
+chez Marchand-Grillot. Hors fenêtre, ses heures ne passaient donc **que par l'écart du mois**. Or :
+
+```js
+function _planSupMonth(mbr,m){ … return Math.max(0, _planSummary(mbr,m).ecart); }
+```
+
+★★★ **`Math.max(0, ecart)` écrase tout écart négatif à zéro.** Un écart négatif n'entre jamais dans
+`_planYearBalance.plus`, ni dans `_planBank`, ni dans « reste à prendre ». **Il ne porte rien.**
+Les huit heures étaient affichées en gros dans une tuile, et **le mois suivant il n'en restait
+aucune trace**. Les trente minutes de retard, elles, survivaient — parce que le retard était sorti
+de la fenêtre le 20/08.
+
+★★ **Et l'écran qui pose le motif promettait l'inverse, noir sur blanc.**
+`PLAN_ABS_MOTIFS` : `{id:'injustifie', sub:'Heures dues · journée non payée'}`, et `_planAbsEffet`
+affiche sous le bouton « Plafond inchangé · **heures dues** ». *Le moteur ne tenait pas la promesse
+de son interface tant qu'un réglage caché n'était pas posé* — **c'est §53 en plus discret** : un
+écran qui annonce un effet que le code ne produit pas.
+
+**Correctif** — l'injustifiée rejoint le retard hors de la fenêtre :
+
+```js
+var _du = (mo.heures || mo.id === 'injustifie');   // les deux motifs qui DOIVENT des heures
+if (!actif && !_du) continue;
+if (duesOnly && !_du) continue;
+```
+
+⚠️ **La vanne n'est ouverte que pour ces deux-là.** Arrêt de travail, congé sans solde et absence
+non précisée restent sous garde-fou hors fenêtre — sinon un arrêt maladie créerait une dette, ce
+que la loi interdit. **C3b, C3c, C3d, C3e** le tiennent, et sont neuves pour ça.
+
+★ **Conséquence d'affichage, à connaître avant de s'en étonner** : les heures dues sont
+**neutralisées dans la référence** avant d'être inscrites au compteur — sinon la même heure serait
+comptée deux fois. **L'écart d'un mois à absence tombe donc à zéro.** Ce n'est pas une perte
+d'information : l'écart ne pouvait de toute façon rien porter (il est écrasé dès qu'il est négatif).
+La dette vit désormais dans « heures dues » et dans « reste à prendre », **qui, eux, se cumulent**.
+La ligne « Ce mois » affiche maintenant les heures dues, pour qu'un « reste à prendre −9h » ne
+tombe plus du ciel.
+
+⚠️⚠️ **C3 et C4 du harnais du retard gardaient ce trou sous le nom « non-régression ».** Deuxième
+assertion de ce lot à graver un défaut au lieu de le tenir (la première était J14, 55j). Toutes
+deux étaient vertes depuis le 20/08. *Une assertion écrite après coup décrit le comportement
+observé ; seule une assertion écrite depuis la règle décrit le comportement voulu.*
+
+⚠️ **Et une quatrième assertion fausse de ma main**, dans le même quart d'heure : `C4b` appelait
+`poser()` — qui **remet `ENT` à vide** — puis mesurait, et accusait le code de ce que le décor
+faisait. *Le décor d'un harnais est du code comme un autre.*
+
+★ **Rétroactivité assumée.** `hsup_dues_debut` existait pour que rien ne bouge sur une paie déjà
+éditée. Sortir l'injustifiée de la fenêtre **change les mois passés** de MG et Chapelle s'ils
+portent des absences injustifiées. C'est un arbitrage, pas un oubli : le comportement d'avant
+n'était pas une politique choisie, c'était un trou — et l'interface promettait déjà l'autre
+comportement à chaque saisie. **À vérifier après déploiement (backlog n°4).**
+
+### 55l. Ce qui reste ouvert
+
+- ⚠️⚠️ **REPOSER LE 19 ET LE 20 AOÛT chez Marchand-Grillot.** Sans ça, la feuille sort à +8h. Voir
+  55c. **C'est la seule action bloquante du lot.**
+- ⚠️ **Le même patron de destruction existe ailleurs, non corrigé.** Les trois écrivains de congés
+  payés (l. 3610, 3788, 4761) et `_planApplySimple` (récup, chaleur) reconstruisent eux aussi
+  l'entrée à neuf : un jour d'échange y perd drapeau et horaire. **L'effet est moins grave** —
+  l'écart y reste neutre au lieu de devenir faux — mais c'est le même défaut. Le remède propre est
+  **un point de passage unique** « conserver la nature du jour », avec son harnais : un lot à part.
+- ⚠️ **Regarder les compteurs de MG et Chapelle après déploiement** (cf. 55m) : une absence
+  injustifiée enregistrée avant ce lot descend maintenant « reste à prendre ». C'est la correction
+  voulue, mais **il ne faut pas la découvrir en sortant une paie**.
+- ⚠️ **Personne n'a regardé la feuille imprimée.** Les 83 assertions tiennent des tailles, des
+  graisses, des marges, des bornes. **Aucune ne lit une mise en page** (§42h). Sortir un PDF réel
+  avant de l'envoyer à un client — c'est le point faible du paquet.
+- **« ETP » à l'écran** (cf. 55i).
+- `npm run lint` non joué (ESLint ne s'installe pas dans le bac à sable) · `smoke` et `e2e` non
+  joués (Playwright, idem).

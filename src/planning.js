@@ -862,8 +862,26 @@ function _planAbsLostH(mbr,m,duesOnly){
     //   neutralise dans la reference du mois (duesOnly=false), puis retire du compteur
     //   comme une recup (duesOnly=true). Le faire entrer dans une seule creerait une
     //   dette comptee deux fois, ou pas du tout.
-    if(!actif&&!mo.heures)continue;
-    if(duesOnly&&mo.id!=='injustifie'&&!mo.heures)continue;
+    // ★★★ DEUX MOTIFS DOIVENT DES HEURES, ET ILS VIVENT TOUS LES DEUX HORS DE LA FENETRE.
+    //   Le retard en etait deja sorti (20/08) : « ce n'est pas une politique du domaine,
+    //   c'est de l'arithmetique ». L'absence injustifiee, elle, restait sous le garde-fou —
+    //   et la feuille d'aout 2026 de Victor a montre ce que ca coute :
+    //   ⚠⚠⚠ HORS FENETRE, SES HEURES NE SONT NULLE PART. Elles ne passaient que par
+    //   l'ecart du mois, et `_planSupMonth` vaut `Math.max(0, ecart)` : TOUT ECART NEGATIF
+    //   EST ECRASE A ZERO. Elles n'alimentaient donc ni « reste a prendre », ni le compteur,
+    //   ni aucun cumul. Le mois suivant, il n'en restait AUCUNE trace. Huit heures perdues,
+    //   affichees en gros dans une tuile, et qui ne coutaient rien.
+    //   ★★ Et l'ecran qui pose le motif PROMET le contraire, noir sur blanc : le libelle dit
+    //   « Heures dues · journee non payee » et _planAbsEffet affiche « Plafond inchange ·
+    //   heures dues ». Le moteur ne tenait pas la promesse de son interface tant qu'un
+    //   reglage cache n'etait pas pose — c'est la faute de §53, un ecran qui annonce un
+    //   effet que le code ne produit pas.
+    //   ⚠ La fenetre garde tout son sens pour les AUTRES motifs (arret, conge sans solde,
+    //   absence non precisee) : eux ne doivent rien, ils sortent seulement de la reference,
+    //   et ce comportement-la reste sous garde-fou. C3b et C6 le tiennent.
+    var _du=(mo.heures||mo.id==='injustifie');
+    if(!actif&&!_du)continue;
+    if(duesOnly&&!_du)continue;
     // ★★ BORNE, ET SEULEMENT SUR LA NEUTRALISATION. Les deux mesures ne tiennent pas
     //   le meme registre : `duesOnly=false` RETIRE DE LA REFERENCE, `duesOnly=true`
     //   inscrit une DETTE au compteur d'heures. On ne peut pas retirer d'une reference
@@ -5049,6 +5067,7 @@ function _planExportPDF_(nom,mbr,_ctr){
   var s=_planSummary(mbr,planMonth);
     var sup=_planSupMonth(mbr,planMonth);
   var recupH=_planRecupH(mbr,planMonth);
+  var _duesM=_planDuesMonth(mbr,planMonth);   // heures dues du mois : absence injustifiee + retard
   var joursTrav=_planDaysWorked(mbr,planMonth);
   // Ventilation des heures du mois : ce qui a ete fait AU DOMAINE et ce qui compte
   // sans y avoir ete. La soustraction se fait sur s.worked, jamais sur un second
@@ -5151,7 +5170,7 @@ function _planExportPDF_(nom,mbr,_ctr){
     if(parseInt(_cfA[0],10)===planYear)_anLast=Math.min(_anLast,Math.max(0,parseInt(_cfA[1],10)-1)); }
   if(_anM0>_anLast)_anM0=_anLast;
   var _anRows='',_anSup=0,_anRec=0,_anPm=0,_anPb=0,_anDue=0,_anOv=false;
-  var _anDueA=[],_anAnyDue=false,_anDuesRegl=false;
+  var _anDueA=[],_anAnyDue=false;
   for(var _dq=_anM0;_dq<=_anLast;_dq++){
     _anDueA[_dq]=_planDuesMonth(mbr,_dq);
     if(_anDueA[_dq]>0.0001)_anAnyDue=true;
@@ -5160,7 +5179,6 @@ function _planExportPDF_(nom,mbr,_ctr){
     //   sort par l'ecart du mois. La note de bas de tableau promettait pourtant
     //   « absence injustifiee ou retard » dans les deux cas : elle disait faux la
     //   moitie du temps, sur la seule ligne du document qui explique un calcul.
-    if(typeof window._planDuesActive==='function'&&window._planDuesActive(_dq))_anDuesRegl=true;
   }
   for(var _i=_anM0;_i<=_anLast;_i++){
     var _sp=_planSupMonth(mbr,_i),_rc=_planRecupH(mbr,_i);
@@ -5219,7 +5237,7 @@ function _planExportPDF_(nom,mbr,_ctr){
     +'</tr></tfoot></table>'
     +'<div class="note">'+(_anOv?'<b>*</b> valeur ajust\u00e9e manuellement (hors calcul du planning). ':'')
       +'Reste \u00e0 prendre = report de d\u00e9part + heures sup cumul\u00e9es \u2212 r\u00e9cup\u00e9rations \u2212 heures pay\u00e9es'
-      +(_anAnyDue?(' \u2212 heures dues ('+(_anDuesRegl?'absence injustifi\u00e9e ou retard':'retard')+').'):'.')
+      +(_anAnyDue?' \u2212 heures dues (absence injustifi\u00e9e ou retard).':'.')
       +(_anTrTxt?('<br>Compteur \u00e0 fin '+_moisLbl+'\u00a0: <b>'+_planFmt(bank.solde)+'</b> \u2014 '+_anTrTxt+'. Le solde se r\u00e8gle \u00e0 la cl\u00f4ture du 31 d\u00e9cembre.'):'')
       +_anPortee
     +'</div></div>';
@@ -5359,8 +5377,11 @@ function _planExportPDF_(nom,mbr,_ctr){
     // Ce que le mois a produit, en une ligne : le detail est juste en dessous,
     // dans le tableau. Conserve meme a zero — l'absence d'heures sup est une
     // information, elle ne merite simplement pas 26 px.
+    // ★ LES HEURES DUES MANQUAIENT A CETTE LIGNE. « reste a prendre −0h30 » sans rien qui
+    //   l'explique oblige a descendre chercher dans le tableau d'annee ce que le mois a fait.
     +'<div class="cemois">Ce mois \u00b7 heures suppl\u00e9mentaires <b>'+_planFmt(sup)+'</b>'
       +' \u00b7 r\u00e9cup\u00e9ration prise <b>'+_planFmt(recupH)+'</b>'
+      +(_duesM>0.0001?(' \u00b7 heures dues <b>\u2212'+_planFmt(_duesM)+'</b>'):'')
       +_apDet
       +' \u00b7 reste \u00e0 prendre <b>'+_planFmtE(yb.net)+'</b></div>'
     +annuHtml
