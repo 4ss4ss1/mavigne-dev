@@ -17,7 +17,7 @@ import { GT_ADMIN_EMAIL, _mvIcon } from './utils.js';
 const GT_BASE_URL    = 'https://mavigneapp.fr';
 // ════════════════════════════════════════════════════════════════
 
-import { showToast, _escHtml, _ERR_KEY } from './utils.js';
+import { showToast, _escHtml, _escAttr, _ERR_KEY } from './utils.js';
 
 const DEBUG = location.hostname === 'localhost' || location.hostname === '127.0.0.1';
 if(DEBUG) console.log('[Ma Vigne] admin-gt.js chargé');
@@ -2247,8 +2247,8 @@ function _agtBuildEssais(){
       h+='<div style="font-size:11px;color:rgba(255,255,255,0.3)">'+(t.telephone?'&#128222; '+_escHtml(t.telephone)+' &middot; ':'')+' '+t.usage_count+' acc\u00e8s'+(t.last_access?' &middot; dernier : '+_agtRelTime(t.last_access):'')+'</div>';
       h+='</div>';
       h+='<div style="display:flex;gap:6px;flex-shrink:0">';
-      h+='<button onclick="agtCopyEssaiCode(\''+_escHtml(t.code)+'\')" style="background:rgba(255,255,255,0.07);border:1px solid rgba(255,255,255,0.12);border-radius:8px;padding:6px 10px;color:rgba(255,255,255,0.6);font-size:12px;cursor:pointer" title="Copier le code">&#128203;</button>';
-      h+='<button onclick="agtRevokeEssai(\''+_escHtml(t.id)+'\')" style="background:rgba(239,68,68,0.08);border:1px solid rgba(239,68,68,0.2);border-radius:8px;padding:6px 10px;color:#FCA5A5;font-size:12px;cursor:pointer" title="R\u00e9voquer">&#128465;</button>';
+      h+='<button onclick="agtCopyEssaiCode(\''+_escAttr(t.code)+'\')" style="background:rgba(255,255,255,0.07);border:1px solid rgba(255,255,255,0.12);border-radius:8px;padding:6px 10px;color:rgba(255,255,255,0.6);font-size:12px;cursor:pointer" title="Copier le code">&#128203;</button>';
+      h+='<button onclick="agtRevokeEssai(\''+_escAttr(t.id)+'\')" style="background:rgba(239,68,68,0.08);border:1px solid rgba(239,68,68,0.2);border-radius:8px;padding:6px 10px;color:#FCA5A5;font-size:12px;cursor:pointer" title="R\u00e9voquer">&#128465;</button>';
       h+='</div>';
       h+='</div></div>';
     });
@@ -2262,7 +2262,7 @@ function _agtBuildEssais(){
       h+='<span style="font-family:monospace;font-size:12px;color:rgba(255,255,255,0.3)">'+_escHtml(t.code)+'</span>';
       h+='<span style="flex:1;font-size:12px;color:rgba(255,255,255,0.3)">'+_escHtml(t.prospect||'')+'</span>';
       h+='<span style="font-size:11px;color:rgba(239,68,68,0.6)">expir\u00e9</span>';
-      h+='<button onclick="agtRevokeEssai(\''+_escHtml(t.id)+'\')" style="background:none;border:none;color:rgba(255,255,255,0.2);font-size:12px;cursor:pointer">&#128465;</button>';
+      h+='<button onclick="agtRevokeEssai(\''+_escAttr(t.id)+'\')" style="background:none;border:none;color:rgba(255,255,255,0.2);font-size:12px;cursor:pointer">&#128465;</button>';
       h+='</div>';
     });
   }

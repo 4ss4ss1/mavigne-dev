@@ -13,7 +13,7 @@
 //
 // \u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550
 
-import { isAdmin, isSaisonnier, canWrite, showToast, showSyncBadge, _escHtml,
+import { isAdmin, isSaisonnier, canWrite, showToast, showSyncBadge, _escHtml, _escAttr,
          _mvBadge, _mvIcon, _mvSetIcon } from './utils.js';
 
 const DEBUG = location.hostname === 'localhost' || location.hostname === '127.0.0.1';
@@ -557,7 +557,7 @@ function _copRenderMils(){
       return ((c.millesime==null||c.millesime==='')?'?':String(c.millesime))===m;
     }).length;
     var on=(m===_copMil);
-    return '<button class="cave-cuvee-chip" id="cop-mil-'+_escHtml(m)+'" onclick="selCopMil(\''+_escHtml(m)+'\')"'
+    return '<button class="cave-cuvee-chip" id="cop-mil-'+_escHtml(m)+'" onclick="selCopMil(\''+_escAttr(m)+'\')"'
       +(on?' style="background:'+a+';color:#fff;border:none;"':'')
       +'>'+(m==='?'?'Sans millésime':_escHtml(m))+' \u00b7 '+nb+'</button>';
   }).join('');
@@ -841,14 +841,14 @@ function _caveJDet(op){
     if(op.data.fml){var fc=op.data.fml==='ok'?'mvc-tag-fmlok':op.data.fml==='cours'?'mvc-tag-fmlc':'mvc-tag-fmlno';chips+='<span class="mvc-tag '+fc+'">'+_caveFmlLabel(op.data.fml)+'</span>';}
     if(chips) h+='<div class="mvc-jtags">'+chips+'</div>';
     if(op.data.pdf_url){
-      h+='<div class="mvc-jpdf">\ud83d\udcc4 <span class="mvc-jpdf-nm">'+_escHtml(op.data.pdf_nom||'analyse.pdf')+'</span><button onclick="window.open(\''+_escHtml(op.data.pdf_url)+'\',\'_blank\')" class="mvc-jpdf-btn">Ouvrir</button></div>';
+      h+='<div class="mvc-jpdf">\ud83d\udcc4 <span class="mvc-jpdf-nm">'+_escHtml(op.data.pdf_nom||'analyse.pdf')+'</span><button onclick="window.open(\''+_escAttr(op.data.pdf_url)+'\',\'_blank\')" class="mvc-jpdf-btn">Ouvrir</button></div>';
     } else if(typeof isAdmin==='function'&&isAdmin()){
       h+='<div style="margin-top:6px"><label class="mvc-attach">\ud83d\udcce Joindre un PDF<input type="file" accept="application/pdf" style="display:none" data-op-id="'+op.id+'" onchange="window._attachPdfToOp(this)"></label></div>';
     }
   }
   if(op.type==='analyse'&&op._src==='ana'&&op.data){
     if(op.data.fichier) h+='<div class="mvc-jdet">\ud83d\udcc4 '+_escHtml(op.data.fichier||'')+(op.data.taille?' \u00b7 '+_caveAnaFmtSize(op.data.taille):'')+'</div>';
-    if(op.data.url) h+='<div class="mvc-jpdf"><button onclick="window.open(\''+_escHtml(op.data.url)+'\',\'_blank\')" class="mvc-jpdf-btn">Ouvrir</button></div>';
+    if(op.data.url) h+='<div class="mvc-jpdf"><button onclick="window.open(\''+_escAttr(op.data.url)+'\',\'_blank\')" class="mvc-jpdf-btn">Ouvrir</button></div>';
   }
   return h;
 }
@@ -875,10 +875,10 @@ function renderCaveReglages(){
         var par=(CAVE_ELEVAGE.config&&CAVE_ELEVAGE.config.ouillage_par_mil)||{};
         var propre=(parseInt(par[m],10)>0);
         html+='<div class="mvc-milrow"><span class="mvc-milrow-a">'+(m==='?'?'Sans mill\u00e9sime':_escHtml(m))+'</span>'
-          +'<button class="mvc-step-btn sm" onclick="_caveSeuilMilStep(\''+_escHtml(m)+'\',-1)" aria-label="Diminuer">\u2212</button>'
+          +'<button class="mvc-step-btn sm" onclick="_caveSeuilMilStep(\''+_escAttr(m)+'\',-1)" aria-label="Diminuer">\u2212</button>'
           +'<span class="mvc-milrow-v'+(propre?' own':'')+'">'+_caveSeuilOu(m)+' j</span>'
-          +'<button class="mvc-step-btn sm" onclick="_caveSeuilMilStep(\''+_escHtml(m)+'\',1)" aria-label="Augmenter">\uff0b</button>'
-          +(propre?'<button class="mvc-milrow-x" onclick="_caveSeuilMilReset(\''+_escHtml(m)+'\')" title="Revenir au seuil g\u00e9n\u00e9ral">\u21a9</button>':'<span class="mvc-milrow-x" style="visibility:hidden">\u21a9</span>')
+          +'<button class="mvc-step-btn sm" onclick="_caveSeuilMilStep(\''+_escAttr(m)+'\',1)" aria-label="Augmenter">\uff0b</button>'
+          +(propre?'<button class="mvc-milrow-x" onclick="_caveSeuilMilReset(\''+_escAttr(m)+'\')" title="Revenir au seuil g\u00e9n\u00e9ral">\u21a9</button>':'<span class="mvc-milrow-x" style="visibility:hidden">\u21a9</span>')
           +'</div>';
       });
     }
@@ -908,7 +908,7 @@ function _cavePkOccHtml(o){
 }
 function _cavePkRowHtml(p){
   var o=_caveCuveOcc(p.id), m=_caveMat(p.matiere), L=parseFloat(p.litres)||0;
-  return '<button type="button" class="mvc-pk" onclick="_cavePkOpen(\'' + _escHtml(p.id) + '\')">'
+  return '<button type="button" class="mvc-pk" onclick="_cavePkOpen(\'' + _escAttr(p.id) + '\')">'
     +'<span class="mvc-pk-ic '+_caveMatKey(p.matiere)+'">'+_mvIcon('cuve',18)+'</span>'
     +'<span class="mvc-pk-b"><span class="mvc-pk-n">'+_escHtml(p.nom||'Cuve')+'</span>'
     +'<span class="mvc-pk-m">'+_escHtml(m.lbl)+(m.ouille?' \u00b7 suit l\u2019ouillage':'')
@@ -2486,7 +2486,7 @@ function _vcuvParcRender(){
   var h='';
   dispo.forEach(function(p){
     var sel=(_vcuvRef===p.id), m=_caveMat(p.matiere);
-    h+='<button type="button" class="mvc-pk mvc-aff-c'+(sel?' sel':'')+'" onclick="_vcuvPick(\'' + _escHtml(p.id) + '\')">'
+    h+='<button type="button" class="mvc-pk mvc-aff-c'+(sel?' sel':'')+'" onclick="_vcuvPick(\'' + _escAttr(p.id) + '\')">'
       +'<span class="mvc-aff-rad"></span>'
       +'<span class="mvc-pk-ic '+_caveMatKey(p.matiere)+'">'+_mvIcon('cuve',18)+'</span>'
       +'<span class="mvc-pk-b"><span class="mvc-pk-n">'+_escHtml(p.nom||'Cuve')+'</span>'
@@ -2863,7 +2863,7 @@ function _vendDecPickHtml(){
   libres.forEach(function(p){
     var cap=(parseFloat(p.litres)||0)/100, sel=(_vendDecCuveRef===p.id), m=_caveMat(p.matiere);
     var ok=cap>=volHl;
-    h+='<button type="button" class="mvc-pk mvc-aff-c'+(sel?' sel':'')+'" onclick="_vendDecPick(\'' + _escHtml(p.id) + '\')">'
+    h+='<button type="button" class="mvc-pk mvc-aff-c'+(sel?' sel':'')+'" onclick="_vendDecPick(\'' + _escAttr(p.id) + '\')">'
       +'<span class="mvc-aff-rad"></span>'
       +'<span class="mvc-pk-ic '+_caveMatKey(p.matiere)+'">'+_mvIcon('cuve',18)+'</span>'
       +'<span class="mvc-pk-b"><span class="mvc-pk-n">'+_escHtml(p.nom||'Cuve')+'</span>'
@@ -2997,10 +2997,10 @@ function _vendDecRender(){
       +'<span class="mvv-dlot-m">'+(l.annee||'ann\u00e9e inconnue')+' \u00b7 '
       +window._mvFutAge(l.vins)+' \u00b7 '+l.qte+' libre'+(l.qte>1?'s':'')+'</span></span>'
       +'<span class="mvv-dstp">'
-      +'<button type="button" onclick="_vendDecAdjLot(\''+_escHtml(l.id)+'\',-1)"'
+      +'<button type="button" onclick="_vendDecAdjLot(\''+_escAttr(l.id)+'\',-1)"'
       +(n<=0?' disabled':'')+'>\u2212</button>'
       +'<span>'+n+'</span>'
-      +'<button type="button" onclick="_vendDecAdjLot(\''+_escHtml(l.id)+'\',1)"'
+      +'<button type="button" onclick="_vendDecAdjLot(\''+_escAttr(l.id)+'\',1)"'
       +(n>=l.qte?' disabled':'')+'>\uff0b</button></span></div>';
   });
   var neuf=0;
@@ -4513,12 +4513,12 @@ function _caveContenantsSectionHtml(cuv){
       +(p?'<span class="mvc-pk-fill"><i class="'+(_caveMatKey(p.matiere)==='bois'?'bois':'')+'" style="width:'+pct+'%"></i></span>':'')
       +'</span>'
       +'<span class="mvc-pk-r"><span class="mvc-pk-cap">'+_mvF1(L/100)+'<span class="u">hL</span></span>'
-      +(w?'<button type="button" class="mvc-aff-x" onclick="_caveAffRetirer(\'' + _escHtml(cuv.id) + '\',\'' + _escHtml(String(x&&x.ref||'')) + '\')">Retirer</button>':'')
+      +(w?'<button type="button" class="mvc-aff-x" onclick="_caveAffRetirer(\'' + _escAttr(cuv.id) + '\',\'' + _escAttr(String(x&&x.ref||'')) + '\')">Retirer</button>':'')
       +'</span></div>';
   });
   if(!n && !((cuv&&cuv.cuves)||[]).length)
     h+='<div class="mvc-pk-vide">Aucun contenant. Ajoutez des f\u00fbts ou une cuve.</div>';
-  if(w) h+='<button type="button" class="mvc-aff-add" onclick="_caveAffOpen(\'' + _escHtml(cuv.id) + '\')">\uff0b Ajouter une cuve</button>';
+  if(w) h+='<button type="button" class="mvc-aff-add" onclick="_caveAffOpen(\'' + _escAttr(cuv.id) + '\')">\uff0b Ajouter une cuve</button>';
   return h;
 }
 
@@ -4563,7 +4563,7 @@ function _caveAffRender(){
   } else {
     libres.forEach(function(p){
       var sel=(_caveAffRef===p.id), m=_caveMat(p.matiere);
-      h+='<button type="button" class="mvc-pk mvc-aff-c'+(sel?' sel':'')+'" onclick="_caveAffSel(\'' + _escHtml(p.id) + '\')">'
+      h+='<button type="button" class="mvc-pk mvc-aff-c'+(sel?' sel':'')+'" onclick="_caveAffSel(\'' + _escAttr(p.id) + '\')">'
         +'<span class="mvc-aff-rad"></span>'
         +'<span class="mvc-pk-ic '+_caveMatKey(p.matiere)+'">'+_mvIcon('cuve',18)+'</span>'
         +'<span class="mvc-pk-b"><span class="mvc-pk-n">'+_escHtml(p.nom||'Cuve')+'</span>'
@@ -6789,7 +6789,7 @@ function _mlEvHtml(it){
   var right = (it.kind==='ouillage')
     ? '<span class="mlx-j"><b>'+it.futs+'</b>f\u00fbts</span>'
     : '<span class="mlx-j">'+_mlFrJ(it.date).replace(' ','<b>')+'</b></span>';
-  return '<button class="mlx-ev '+(it.urgence||'')+'" onclick="_mlGo(\''+it.kind+'\',\''+_escHtml(it.ref)+'\')">'
+  return '<button class="mlx-ev '+(it.urgence||'')+'" onclick="_mlGo(\''+_escAttr(it.kind)+'\',\''+_escAttr(it.ref)+'\')">'
     +'<span class="mlx-p '+it.kind+'"></span><span class="mlx-b">'
     +'<span class="mlx-t">'+_escHtml(it.titre)+'</span>'
     +'<span class="mlx-d">'+_ML_LBL[it.kind]+' \u00b7 '+_escHtml(it.detail)+'</span>'
@@ -7015,7 +7015,7 @@ function _mlRenderVie(){
     rd.forEach(function(r){
       var ech=(r.max||0)*1.15;
       var wFill=r.max?Math.min(100,Math.round((r.hlHa/ech)*100)):0;
-      h+='<button class="mlx-rd'+(r.depasse?' over':'')+'" onclick="_mlSetRdtMax(\''+_escHtml(r.parcelle.nom)+'\')">'
+      h+='<button class="mlx-rd'+(r.depasse?' over':'')+'" onclick="_mlSetRdtMax(\''+_escAttr(r.parcelle.nom)+'\')">'
         +'<span class="mlx-rdh"><span class="mlx-rdn">'+_escHtml(r.parcelle.nom)+'</span>'
         +(r.depasse?'<span class="mlx-tag">au-dessus</span>':'')
         +(r.vendu?'<span class="mlx-tag sold">vendu</span>':'')

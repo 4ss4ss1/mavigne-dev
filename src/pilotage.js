@@ -12,7 +12,7 @@
 //   marche par ordre de chargement n'est pas un appel correct ». La palette
 //   semantique arrive par un VRAI import, resolu au build : elle ne peut plus
 //   etre absente au moment ou un graphe la lit.
-import { _PIL_SEM, _mvInfoBtn, _mvIcon, _mvBadge } from './utils.js';
+import { _PIL_SEM, _mvInfoBtn, _mvIcon, _mvBadge, _escAttr } from './utils.js';
 
 const DEBUG = location.hostname === 'localhost' || location.hostname === '127.0.0.1';
 if (DEBUG) console.log('[Ma Vigne] pilotage.js chargé');
@@ -5048,7 +5048,7 @@ function _pcavMilKey(m){ return (m==null||m==='')?'?':String(m); }
 // ── Briques de rendu ────────────────────────────────────────────────
 function _pcavRow(pt,html,when,act,kind,ref){
   var b='';
-  if(act) b='<button class="pcav-act" onclick="_pcavGo(\''+kind+'\',\''+_pilEsc(String(ref||''))+'\')">'+_pilEsc(act)+'</button>';
+  if(act) b='<button class="pcav-act" onclick="_pcavGo(\''+_escAttr(kind)+'\',\''+_escAttr(String(ref||''))+'\')">'+_pilEsc(act)+'</button>';
   return '<div class="pcav-row"><span class="pcav-pt '+pt+'"></span><div class="pcav-rm">'+html+'</div>'
     +(when?'<span class="pcav-when">'+_pilEsc(when)+'</span>':'')+b+'</div>';
 }

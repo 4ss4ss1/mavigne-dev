@@ -94,45 +94,27 @@
     "src/utils.js": []
   },
   "C24a_mauvais_escapeur": {
-    "src/admin-gt.js": [
-      "_escHtml(t.code)",
-      "_escHtml(t.id)"
-    ],
+    "src/admin-gt.js": [],
     "src/app.js": [],
-    "src/cave.js": [
-      "_escHtml(String(x&&x.ref||''))",
-      "_escHtml(cuv.id)",
-      "_escHtml(it.ref)",
-      "_escHtml(l.id)",
-      "_escHtml(m)",
-      "_escHtml(op.data.pdf_url)",
-      "_escHtml(op.data.url)",
-      "_escHtml(p.id)",
-      "_escHtml(r.parcelle.nom)"
-    ],
+    "src/cave.js": [],
     "src/firebase.js": [],
     "src/onboarding.js": [],
     "src/phyto.js": [],
-    "src/pilotage.js": [
-      "_pilEsc(String(ref||''))"
-    ],
+    "src/pilotage.js": [],
     "src/planning.js": [],
     "src/reglages.js": [],
     "src/reserve.js": [],
-    "src/tracteur.js": [
-      "_escHtml(p.amm)",
-      "_escHtml(p.nom).replace(/'/g,\"\\\\'\")"
-    ],
+    "src/tracteur.js": [],
     "src/utils.js": []
   },
   "C24b_slot_js_nu": {
     "src/admin-gt.js": 57,
     "src/app.js": 9,
-    "src/cave.js": 33,
+    "src/cave.js": 32,
     "src/firebase.js": 0,
     "src/onboarding.js": 1,
     "src/phyto.js": 9,
-    "src/pilotage.js": 3,
+    "src/pilotage.js": 2,
     "src/planning.js": 24,
     "src/reglages.js": 17,
     "src/reserve.js": 1,

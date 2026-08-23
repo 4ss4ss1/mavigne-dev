@@ -2,7 +2,26 @@
 
 > Document de référence du projet **Ma Vigne** (GUERETTECH). Il est le **porteur de vérité** :
 > la mémoire Claude est plafonnée, ce fichier ne l'est pas.
-> Dernière consolidation : **20 août 2026** — ★★★ **L'IMPORT KML EFFAÇAIT LE PARCELLAIRE (§53)**.
+> Dernière consolidation : **22 août 2026** — ★★★ **LE CLIQUET XSS, ET UN INTERRUPTEUR DÉJÀ
+> BASCULÉ (§54)**. Lot **SEC-7**, **APP 6.45 · SW 7.00, aucun bump**. Le lot demandait de
+> basculer App Check en enforce : ★★★ **c'était déjà fait — Firestore 100 % de requêtes validées,
+> 0 % non validées — et Cloud Functions n'a PAS de bascule dans cette console**, l'exigence se
+> déclare fonction par fonction dans le code (`enforceAppCheck: true`, **27 sur 27**). *Une
+> consigne qui dit « toggle ON » pour une surface sans toggle est pire qu'une consigne absente.*
+> **Quatrième fois qu'une entrée de backlog décrit du travail déjà fait.**
+> ★★★ **Et la règle C24, telle qu'écrite, aurait couvert 7 % du risque** : sur 461 puits HTML,
+> **32 seulement** reçoivent un gabarit à substitution, et **huit modules sur douze n'utilisent
+> aucun `${…}`**. Ancrer le contrôle sur `.innerHTML =` n'aurait jamais regardé `cave.js` ni
+> `pilotage.js` — **en se lisant comme un succès**. L'ancre est devenue le **fragment HTML**.
+> ★★★ **Le vrai défaut trouvé : `_escHtml` dans un slot `onclick` n'est pas insuffisant, il est
+> DÉFAIT** — l'attribut décode `&#39;` *avant* que le JS ne soit compilé. **23 emplacements,
+> tous corrigés** ; le plus exposé posait un **nom de parcelle**, saisi par n'importe quel compte
+> du domaine. ⚠️ **Et deux de mes contre-épreuves étaient encore fausses**, deux lots de suite.
+> ★ Trois contrôles neufs : **C24** (cliquet XSS, 3 volets), **C25** (App Check sur les fonctions
+> appelables, zéro toléré), **`harnais-escattr.mjs`** qui *rejoue le décodage du navigateur* au
+> lieu de compter. Détail en **§54**.
+>
+> ★ Précédente : **20 août 2026** — ★★★ **L'IMPORT KML EFFAÇAIT LE PARCELLAIRE (§53)**.
 > **APP 6.36 · SW 6.90, aucun bump** (`admin-gt.js` seul). Alexandre envoie un KML d'**une**
 > parcelle ; l'onglet aurait écrit ce fichier tel quel et **fait disparaître les autres de la
 > carte** — sans avertissement, sans retour possible. ★★★ **Le défaut n'était pas dans le code,
@@ -893,7 +912,7 @@ npm run build && firebase deploy
 
 | Palier | Commande | Couvre |
 |---|---|---|
-| **0 — preflight** | `npm run check` (auto `prebuild`) | **C1 → C22** : statique + invariants anti-perte **exécutés** |
+| **0 — preflight** | `npm run check` (auto `prebuild`) | **C1 → C25** : statique + invariants anti-perte **exécutés** + cliquet XSS (C24) + App Check (C25) |
 | **1 — smoke** | `npm run test:smoke` | l'app **boote** sans exception + 23 globals |
 | **2 — E2E local (DÉFAUT)** | `npm run test:e2e` | **login DOM réel + 10 pages + interactions** |
 | **2bis — E2E émulateurs** | `npm run test:e2e:emu` | + couche Firestore réelle — **BLOQUÉ SDK** |
@@ -1302,6 +1321,8 @@ qu'**une seule fois** dans tout `claims.js`, dans `_mergeInto`.
 **Lots livrés** : **SEC-1** (verrou d'écriture serveur, `adm:true`) · **SEC-2** (mots de passe
 individuels, claim `mustpwd`) · **SEC-3** ✅ (CSP en enforce) · **SEC-4** (`storage.rules`) ·
 **SEC-5** (logout : purge `LS_KEY` + `mavigne_backup_*`, **file offline préservée**) · ★ **HSTS** ·
+**SEC-7** ✅ (cliquet XSS C24 + App Check C25 ; ⚠️ **le volet « basculer App Check » était déjà
+fait avant le lot** — voir §54a) ·
 ⚠️ **SEC-GT/2** (code à usage unique par e-mail, 06/08) — repéré au changelog, **non documenté ici**.
 
 ⚠️ **SEC-1 — RÈGLE DE LECTURE : NE JAMAIS RESTREINDRE LES LECTURES.**
@@ -3377,7 +3398,7 @@ Python normale interprète les premières. **`r"""…"""` par défaut**, et extr
     ★★ **Reconstituer l'arborescence** (`src/`, `scripts/`, `public/`, `guide/`, `functions/`,
     `index.html` à la racine — désormais directement depuis `/home/claude/mavigne-dev/` après
     `git clone`, sans reconstitution manuelle) et lancer `node scripts/preflight.mjs`. C'est le
-    seul juge de C11→C22.
+    seul juge de C11→C25.
     ⚠️ **Si l'arborescence est reconstituée à la main plutôt que clonée** : retirer le
     `package.json` de la racine reconstituée, celui de `/mnt/project` étant celui de `functions/`
     et produisant un faux avertissement.
@@ -8669,3 +8690,203 @@ sort en 1 ; `_agtKmlPlan` supprimée → le harnais sort en 1. Vérifié, pas d�
   la surface du cadastre et celle du contour dessiné ne sont pas la même chose.
 - Le mode « Tout remplacer » ne supprime **aucune fiche** — seul le contour part.
 - `smoke` et `e2e` **non joués** (Playwright ne s'installe pas dans le bac à sable).
+
+## 54. ★★★ LE CLIQUET XSS, ET UN INTERRUPTEUR DÉJÀ BASCULÉ (22/08 — lot SEC-7, aucun bump)
+
+> **Point de départ** : le backlog SEC-7, en deux volets — « App Check en enforce » et
+> « nouveau contrôle C24, cliquet XSS ».
+
+### 54a. ⚠️⚠️⚠️ Le volet App Check était DÉJÀ FAIT — et il n'a pas d'interrupteur
+
+Le lot affirmait : *« Côté serveur, personne n'exige le jeton. Il faut le faire. »* **Faux.**
+Console App Check du 22/08 :
+
+| API | requêtes validées | non validées | état |
+|---|---|---|---|
+| Cloud Firestore | **100 %** | **0 %** | Appliqué |
+| Authentication | 100 % | 0 % | Appliqué |
+| Storage | — (aucune requête) | — | Appliqué |
+| **Cloud Functions** | — | — | **aucun état : renvoi à la documentation** |
+
+Il n'y avait **rien à basculer et personne à couper** : la mesure d'entrée demandée par le lot
+(« s'il y a 5-10 % de requêtes sans jeton, pose-moi la question ») donne **0 %**.
+
+★★★ **Et surtout : Cloud Functions n'a PAS de bascule dans cette console.** L'exigence se
+déclare **fonction par fonction, dans le code** — `onCall({ enforceAppCheck: true })`. Une
+consigne qui dit « toggle ON » pour une surface qui n'a pas de toggle est pire qu'une consigne
+absente : on la coche, on croit avoir agi, et rien n'a bougé.
+
+**C'est la quatrième fois qu'une entrée de backlog décrit du travail déjà accompli** (SEC-3 en
+§44, où onze entrées étaient dans ce cas). La règle de §44 se confirme : *un backlog non
+re-mesuré fait travailler dans le vide.* **Mesurer AVANT d'agir a été, ici, tout le travail
+utile du volet 1.**
+
+### 54b. L'inventaire des surfaces appelables (mesure d'entrée du lot)
+
+**34 fonctions exportées · 29 appelables depuis le client · 27 `onCall` sur 27 portent
+`enforceAppCheck: true`.** Les deux restantes sont des `onRequest` (`submitLead`,
+`submitMiseEnRoute`, formulaires publics) : App Check ne s'y pose pas par option, et elles sont
+déjà tenues par liste blanche CORS + pot de miel + débit par IP (SEC-6).
+
+Chemins Firestore : une **seule** lecture ouverte, `/_guerettech/tenants` avec `allow read: if
+true` — la résolution de slug avant authentification. Tout le reste est `isMyTenant` /
+`isGtAdmin` / `if false`. C'est justement cette lecture publique que l'enforce Firestore borne.
+
+### 54c. ★★★ CE QUE LA MESURE A CHANGÉ DANS LA RÈGLE C24
+
+Le lot demandait : *« toute interpolation `${…}` dans un littéral affecté à `.innerHTML` »*.
+Compté sur le dépôt : **461 puits HTML, dont 32 seulement reçoivent directement un gabarit à
+substitution — 7 %.**
+
+| membre droit du puits | nombre | part |
+|---|---|---|
+| concaténation | 209 | 45 % |
+| variable nue construite plus haut | 73 | 16 % |
+| autre | 72 | 16 % |
+| constante ou vide | 75 | 16 % |
+| **gabarit `${}`** | **32** | **7 %** |
+
+★★★ **Et huit modules sur douze n'utilisent AUCUN gabarit** : `admin-gt`, `cave`, `pilotage`,
+`planning`, `reserve`, `utils`, `firebase`, `onboarding` ont **zéro** `${…}` (vérifié deux fois,
+lexeur et `grep`). Un contrôle ancré sur le point d'affectation n'aurait donc jamais regardé
+`cave.js` (74 puits) ni `pilotage.js` (27) — **et se serait lu comme un succès.** C'est
+exactement le décor que le lot interdisait.
+
+**L'ancre est donc le FRAGMENT HTML, pas le puits** : partout où une chaîne contient du
+balisage, on regarde ce qu'on y insère. 20 453 points d'insertion recensés.
+
+⚠️ **Chiffres du 16/08 tous périmés** : 425 `.innerHTML =` → **448** · 577 `_escHtml` → **668** ·
+529 `textContent` → **535**.
+
+### 54d. ★★★ LE VRAI DÉFAUT : `_escHtml` DANS UN SLOT JS EST DÉFAIT, PAS INSUFFISANT
+
+Dans `onclick="f('VALEUR')"`, la chaîne traverse **deux analyseurs à la suite** :
+1. l'analyseur HTML lit l'attribut et **décode les entités** ;
+2. le moteur JS compile ce qui en sort.
+
+`_escHtml` rend `'` en `&#39;` — protection de l'étape 1, **annulée par l'étape 1 elle-même** :
+l'entité ressort en apostrophe nue, qui ferme la chaîne JS. **23 emplacements** (14 motifs
+distincts) étaient dans ce cas.
+
+Le plus exposé : `cave.js:7018`, `_escHtml(r.parcelle.nom)`. **Un nom de parcelle est saisi par
+n'importe quel compte du domaine.** Une parcelle nommée `'+alert(1)+'` s'exécutait chez qui
+ouvrait l'écran de rendement.
+
+⚠️ **Et quelqu'un avait senti le problème sans le comprendre** : `tracteur.js:36` portait
+`_escHtml(p.nom)` suivi d'un `.replace` des apostrophes. Ce `.replace` ne trouvait **plus aucune
+apostrophe** — `_escHtml` l'avait déjà rendue en `&#39;` avant lui. **L'ordre est tout** :
+`_escAttr` double l'antislash et l'apostrophe **d'abord**, traite le HTML **ensuite**.
+
+**Les 23 sont corrigés** (`cave.js` 17 · `admin-gt.js` 3 · `tracteur.js` 2 · `pilotage.js` 1).
+`_escAttr` ajouté aux imports de `cave.js`, `admin-gt.js`, `pilotage.js` (il y était déjà dans
+`tracteur.js`). ⚠️ **Correction site par site, jamais globale** : à `cave.js:560`, la **même**
+valeur alimente un `id="…"` (contexte attribut → `_escHtml` reste juste) **et** un slot JS
+(→ `_escAttr`). Un remplacement global aurait cassé l'identifiant.
+
+### 54e. C24 — trois volets, et pourquoi trois
+
+| volet | ce qu'il voit | référence gravée |
+|---|---|---|
+| **C24a** liste nominative | mauvais échappeur dans un slot JS | **0** (était 14 motifs / 23 sites) |
+| **C24b** compteur | slot JS sans `_escAttr` | **166** |
+| **C24c** compteur | substitution `${}` non couverte | **332** |
+
+C24a est en **liste nominative** parce que c'est un **défaut**, pas de la dette : chaque cas
+porte un nom et aucun nouveau ne peut apparaître. C24b et C24c sont des **compteurs** : la dette
+existe, on interdit qu'elle monte.
+
+⚠️ **Ce que C24 ne sait pas voir**, et c'est le revers du piège n°1 : une valeur échappée **en
+amont** puis passée par variable lui est invisible. Il ne lit que l'interpolation — règle héritée
+de C19. Une contre-épreuve qui teste l'amont est **fausse**, pas le code (ça m'est arrivé, 54g).
+
+### 54f. La liste des aides sûres est DÉDUITE, pas écrite
+
+Une liste écrite à la main vieillit sans que personne s'en aperçoive, et c'est exactement
+l'endroit où l'on glisse un nom pour faire taire une alerte. Elle est donc **calculée par point
+fixe** : une aide dont *tous* les `return` sont sûrs est elle-même sûre, on recommence jusqu'à
+stabilité (6 tours au plus). **139 aides** en sortent. Conséquence voulue : une aide qui cesse
+d'échapper sort de l'ensemble toute seule et tous ses appels redeviennent rouges.
+
+⚠️⚠️ **À DIRE FRANCHEMENT : sur le dépôt d'aujourd'hui, le point fixe ne retire AUCUN constat.**
+Mesuré dans les deux sens : **332 et 166 avec comme sans**. Les 139 aides vivent toutes dans les
+modules écrits en concaténation, aucune n'est appelée depuis une substitution. Il est gardé pour
+que la **première** personne qui écrira `${_mvInfoBtn(…)}` dans un gabarit n'ait pas un faux
+positif au visage — et deux contre-épreuves croisant `utils.js` et `app.js` prouvent le
+mécanisme, faute de pouvoir le prouver sur un site de production.
+
+### 54g. ⚠️ DEUX DE MES CONTRE-ÉPREUVES ÉTAIENT FAUSSES — ENCORE
+
+Même famille qu'en §53, deux lots de suite :
+
+- **Celle de `reglages.js`** modifiait une affectation **en amont** de l'interpolation. C24 ne
+  lit que l'interpolation : elle ne *pouvait pas* rougir. L'épreuve testait quelque chose que le
+  contrôle ne prétend pas voir.
+- **Celle du point fixe** transformait la **définition** d'une aide en gabarit : elle prouvait
+  qu'un gabarit neuf est vu, **pas** que l'ensemble se recalcule. Remplacée par une paire
+  croisant deux fichiers (`utils.js` cassé → l'appel rougit dans `app.js`).
+
+★★★ **Et une leçon neuve, sur la façon de LIRE un rouge.** Le preflight porte vingt-cinq
+contrôles : un rouge de C11 ou de C15 fait sortir `1` tout aussi bien. **Lire le seul code de
+sortie aurait rendu vertes des contre-épreuves qui ne prouvent rien** — la faute de §48, une
+assertion incapable d'échouer. Le harnais exige donc, **sur la sortie** : le volet attendu, sur
+le fichier attendu, au niveau attendu. Et il commence par un **témoin** : la copie intacte doit
+sortir verte, sinon tout rouge obtenu ensuite est ininterprétable.
+
+★ **Quatre épreuves sont INVERSES** : elles injectent un motif qui *ressemble* à une faute et
+exigent le vert. Un cliquet qui crie au loup est un cliquet qu'on débranche — les faux positifs
+se testent aussi.
+
+### 54h. C25 — le jeton App Check ne doit pas se perdre en chemin
+
+Puisque Firebase ne peut pas imposer App Check aux Functions, **rien** n'empêchait d'écrire la
+28ᵉ `onCall` sans le jeton : ni `node --check`, ni ESLint, ni le déploiement. C25 est ce filet.
+
+- **`C25_oncall_sans_appcheck`** — liste nominative, **zéro toléré** (aucune dette à absorber,
+  contrairement à C24). Référence vide.
+- **`C25_surface_http`** — les deux `onRequest` gravées : une troisième porte publique devra
+  être un acte conscient.
+
+⚠️ Il ne lit que des options en **objet littéral sur place**. Si elles passent un jour par une
+constante partagée, il **le dit en avertissement** au lieu de se taire — une absence non
+confirmée se lit comme un succès, et ça a coûté cher deux fois ici.
+
+### 54i. `harnais-escattr.mjs` — on ne compte pas, on rejoue
+
+Un compteur ne prouve pas un comportement. Ce harnais **extrait les vraies `_escHtml` et
+`_escAttr` de `src/utils.js`** (aucune recopie), les applique à huit valeurs hostiles, **rejoue
+le décodage d'entités du navigateur**, puis vérifie que la chaîne JS reste fermée au bon endroit
+et que la fonction appelée reçoit la valeur d'origine intacte.
+
+★★★ **Et il exige que `_escHtml` ÉCHOUE le même test.** Un harnais que les deux échappeurs
+passent ne prouverait rien. 15 assertions vertes. Branché sur `npm run check` **et** `prebuild`.
+
+### 54j. `--only=` dans le preflight
+
+Le preflight coûte **26 s** (coût préexistant : C1 lance un `node --check` par fichier, C20
+exécute des fonctions). Une contre-épreuve qui le relance dix-neuf fois payait dix-neuf fois ce
+prix. `--only=C24,C25` le ramène à 4 s. ⚠️ **Refusé avec `--baseline`** : regraver sur un
+passage partiel amputerait la référence des clés non recalculées.
+
+### 54k. Aucun bump — vérifié, pas cru
+
+`cave.js`, `admin-gt.js`, `pilotage.js`, `tracteur.js` : tous dans la liste « zéro bump ». Mais
+la règle a été **relue dans le code** plutôt que crue sur parole, parce qu'un correctif de
+sécurité qui n'atteint jamais les clients serait un faux succès :
+
+`public/sw.js` sert `index.html` en **NETWORK-FIRST**. Au premier chargement en ligne, le client
+reçoit l'`index.html` frais, qui référence les nouveaux fragments hachés ; ceux-ci ne sont pas en
+cache, donc téléchargés. **Le correctif arrive sans toucher au service worker.** Seul reliquat :
+les anciens fragments restent en cache tant que `CACHE_NAME` ne change pas — coût de disque, pas
+de correction manquée.
+
+### 54l. Ce qui reste ouvert
+
+- **C24b = 166 · C24c = 332.** Dette réelle, gravée, qui ne peut plus monter. C24c est dominée
+  par des locaux non résolvables (`pct`, `col`, `moisNom`) et par des formateurs non prouvés.
+- ⚠️ **`_mvIcon` n'échappe pas son nom d'icône** : le paramètre part cru dans `href="#ic-…"`.
+  C'est pour ça que le point fixe le refuse — **le contrôle a raison**. Risque faible (les
+  appelants passent des littéraux), mais le correctif tient en un `_escAttr`. **Non fait :
+  `utils.js` est hors du périmètre « aucun bump » de ce lot.**
+- ⚠️ **`_mvBadge` non plus** : son `ton` va cru dans un `class="…"`. Même situation, même raison.
+- `npm run lint` **non joué** (ESLint ne s'installe pas dans le bac à sable) · `smoke` et `e2e`
+  non joués (Playwright, idem).

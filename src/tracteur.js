@@ -33,7 +33,7 @@ var _tracOnglet = 'sessions'; // 'sessions' | 'entretiens'
 
 function renderCatalogueTrac(){
   const el=document.getElementById('catalogue-list-trac');if(!el)return;
-  el.innerHTML=CATALOGUE.map(p=>`<div class="catitem" onclick="openCatDetail('${_escHtml(p.nom).replace(/'/g,"\\'")}')"><div class="cat-l"><div class="cat-nom">${TEMJ[p.type]} ${_escHtml(p.nom)}</div><div class="cat-det">AMM ${_escHtml(p.amm)} · ${_escHtml(p.dose)}${p.cible?' · '+_escHtml(p.cible):''}</div>${p.usage?`<div style="font-size:9px;color:var(--texte-doux);margin-top:2px">ℹ️ ${_escHtml(p.usage)}</div>`:''}</div><div class="cat-r"><span class="cat-db ${TCLS[p.type]||'tfc'}">${_escHtml(p.type)}</span><span style="font-size:10px;color:var(--texte-doux);display:block">DAR ${p.dar}j</span>${p.drae>0?`<span style="font-size:9px;color:var(--tag-amber-tx,#856404);font-weight:600;display:block">DRAE ${p.drae}h</span>`:''}${p.znt?`<span style="font-size:9px;color:var(--rouge);font-weight:600;display:block">ZNT ${p.znt}m</span>`:''}</div></div>`).join('');
+  el.innerHTML=CATALOGUE.map(p=>`<div class="catitem" onclick="openCatDetail('${_escAttr(p.nom)}')"><div class="cat-l"><div class="cat-nom">${TEMJ[p.type]} ${_escHtml(p.nom)}</div><div class="cat-det">AMM ${_escHtml(p.amm)} · ${_escHtml(p.dose)}${p.cible?' · '+_escHtml(p.cible):''}</div>${p.usage?`<div style="font-size:9px;color:var(--texte-doux);margin-top:2px">ℹ️ ${_escHtml(p.usage)}</div>`:''}</div><div class="cat-r"><span class="cat-db ${TCLS[p.type]||'tfc'}">${_escHtml(p.type)}</span><span style="font-size:10px;color:var(--texte-doux);display:block">DAR ${p.dar}j</span>${p.drae>0?`<span style="font-size:9px;color:var(--tag-amber-tx,#856404);font-weight:600;display:block">DRAE ${p.drae}h</span>`:''}${p.znt?`<span style="font-size:9px;color:var(--rouge);font-weight:600;display:block">ZNT ${p.znt}m</span>`:''}</div></div>`).join('');
 }
 // ════ Catalogue E-Phy (ANSES) — référentiel officiel vigne, lecture seule ════
 var _catSub = 'ephy';
@@ -103,7 +103,7 @@ function ephyRender(){
     if(_dl.h>0 && !_dl.defaut) minis.push(_ephyMini('Réentrée '+_dl.h+'h','m-drae'));
     if((p.ment||[]).indexOf('AB')>=0) minis.push(_ephyMini('AB','m-ab'));
     var stat = p.statut==='ok' ? '<span class="ephy-stat s-ok">\u2713 Autorisé</span>' : '<span class="ephy-stat s-ko">\u26d4 Retiré</span>';
-    return '<div class="catitem'+(p.statut==='ko'?' is-ko':'')+'" onclick="openEphyDetail(\'' + _escHtml(p.amm) + '\')">'
+    return '<div class="catitem'+(p.statut==='ko'?' is-ko':'')+'" onclick="openEphyDetail(\'' + _escAttr(p.amm) + '\')">'
       + '<div class="cat-l"><div class="cat-nom">'+(TEMJ[p.type]||'\ud83e\uddea')+' '+_escHtml(p.nom)+'</div>'
       + '<div class="cat-det"><span style="font-family:monospace">AMM '+_escHtml(p.amm)+'</span> · '+_escHtml(p.sub||'—')+'</div>'
       + (minis.length?'<div class="ephy-minis">'+minis.join('')+'</div>':'')+'</div>'
