@@ -42,7 +42,24 @@ export const MAP = {
      (Le Chai) : deux glyphes qui disaient autre chose que ce qu'on compte.
      `parcours` remplace une HELICE D'ADN sur « La ligne de vie » — le flux
      benne -> cuve -> fut -> bouteille est une suite d'etapes, pas un genome. */
-  barrique:'barrel', parcours:'waypoints'
+  barrique:'barrel', parcours:'waypoints',
+  /* ── DS-M1 : les formes que reclamait index.html, jamais migre jusqu'ici.
+     ⚠️ index.html est la surface la PLUS VISIBLE (tous les modales, les
+       titres de section, les puces de filtre) et la seule qui n'etait sous
+       AUCUN cliquet : 256 pictogrammes que le harnais ne comptait pas.
+     ★ Regle de nommage tenue : un nom = une forme. Deux noms maison qui
+       pointent la meme forme Lucide seraient deux facons de dire la meme
+       chose, et l'ecran finirait par les melanger. */
+  ancre:'anchor', bulle:'message-square', cable:'cable', cadenas:'lock',
+  calculatrice:'calculator', carre:'square', cloche:'bell', contraste:'contrast',
+  deconnexion:'log-out', diplome:'graduation-cap', document:'file-text',
+  doigt:'pointer', drapeau:'flag', engrenage:'cog', enveloppe:'mail',
+  envoyer:'send', etincelles:'sparkles', etiquette:'tag', etoile:'star',
+  gauche:'arrow-left', hautbas:'arrow-up-down', horsligne:'wifi-off',
+  imprimante:'printer', loupe:'search', lune:'moon', microscope:'microscope',
+  nombre:'hash', oeil:'eye', pause:'pause', recu:'receipt', refus:'circle-x',
+  seau:'paint-bucket', sortie:'external-link', ticket:'ticket',
+  valide:'circle-check-big'
 };
 
 export function corps(lucide) {

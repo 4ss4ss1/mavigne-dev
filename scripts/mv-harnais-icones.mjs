@@ -50,13 +50,34 @@ function decodeEchappements(c) {
 /* La classe des PICTOGRAMMES. ⚠️ Elle exclut volontairement le selecteur de
    variante U+FE0F : « ⚠️ » est UN glyphe a l'ecran, pas deux. Un comptage qui
    le compte a part annonce 1 067 la ou l'oeil en voit 920. */
-const PICTO = /[\u2190-\u21FF\u2300-\u23FF\u25A0-\u25FF\u2600-\u27BF\u2B00-\u2BFF\u{1F000}-\u{1FAFF}]/gu;
+/* ⚠️⚠️⚠️ LA CLASSE AVAIT UN TROU, ET C'EST LA TROISIEME FOIS QUE LE COMPTEUR
+   MENT (apres §50). `\u2139\uFE0F` (U+2139) tombait entre `\u2300-\u23FF` et `\u25A0-\u25FF` :
+   treize occurrences rendues a l'ecran, invisibles au cliquet, dans SEPT
+   fichiers. Le hasard des bornes n'est pas une definition.
+   ★ La reponse n'est PAS d'ajouter 2139 a la liste — ce serait le journal des
+     incidents passes, pas un filet. On prend l'UNION de deux definitions :
+       · les plages historiques, qui attrapent \u2713 \u2190 \u25CF \u25AD (que la propriete
+         Unicode ne considere PAS comme pictographiques) ;
+       · `\p{Extended_Pictographic}`, qui attrape \u2139 \u00a9 et tout ce que la norme
+         reconnait comme emoji.
+   ⚠️ Prendre `\p{Extended_Pictographic}` SEUL aurait fait tomber le compte de
+     1341 a ~700 en silence : \u2713, a 113 occurrences le glyphe le plus frequent
+     de l'application, n'en fait pas partie. Un cliquet qui degringole tout
+     seul n'est pas un progres, c'est une mesure qui a change de sujet. */
+const PICTO = /[\u2190-\u21FF\u2300-\u23FF\u25A0-\u25FF\u2600-\u27BF\u2B00-\u2BFF\u{1F000}-\u{1FAFF}]|\p{Extended_Pictographic}/gu;
 
 /* ⚠️ CE QUI N'EST PAS UN EMOJI, ET RESTE.
    Une fleche dans une phrase est de la PONCTUATION ; un triangle colle a un
    pourcentage est un SIGNE DE DELTA. Les remplacer par une icone serait une
    faute de typographie, pas un progres. La liste est nommee, pas devinee. */
-const TYPO = new Set(['\u2192', '\u25B2', '\u25BC', '\uFF0B']);
+/* ★ Trois de plus depuis que la classe s'elargit, chacun avec sa raison —
+   jamais « ca fait du bruit », toujours « ce n'est pas une icone » :
+     \u00a9  signe legal, dans les mentions et le pied de page ;
+     \u25fc \u25ad  les deux TAILLES de carte dans le bandeau d'edition de l'accueil
+          (« \u25fc/\u25ad taille ») : ils DESSINENT le grand carre et le rectangle
+          large, ils ne les representent pas. Une icone a leur place dirait
+          moins que le glyphe. */
+const TYPO = new Set(['\u2192', '\u25B2', '\u25BC', '\uFF0B', '\u00A9', '\u25FC', '\u25AD']);
 
 /* ⚠️ LE SEUL RESIDU TOLERE DANS reglages.js, ET POURQUOI.
    `_ACT_EMOJIS` est la VALEUR enregistree dans `a.emoji`. tracteur.js la rend
@@ -365,7 +386,24 @@ for (const mod of MODULES) {
   const g = (rendus[mod].match(PICTO) || []).filter(c => !TYPO.has(c));
   compte[mod] = g.length; total += g.length;
 }
-/* deja lu plus haut */
+
+/* ══ D2. ★★★ index.html AUSSI, ET C'EST LE TROU QUI A LAISSE PASSER LE PLUS
+   ═══════════════════════════════════════════════════════════════════════════
+   Le cliquet ne lisait QUE `src/*.js`. index.html — les modales, les titres de
+   section, les puces de filtre, la barre de reglages : la surface que le client
+   voit le plus — portait 256 pictogrammes que RIEN ne comptait. Le harnais est
+   reste vert du premier jour de DS-1 au dernier, en toute bonne foi.
+   ★ La lecon n'est pas « ajouter index.html » : c'est qu'un cliquet ne protege
+     que ce qu'il LIT, et qu'il faut donc dire ce qu'il ne lit pas. Ce qui reste
+     hors de sa portee aujourd'hui, ecrit noir sur blanc : `guide/` (251, surface
+     publique, lot a part) et `public/demarrage.html` (71).
+   ⚠️ On lit le fichier COMMENTAIRES BLANCHIS et SPRITE RETIRE : le commentaire
+     d'en-tete du sprite est plein de « ⚠️ », et le sprite lui-meme ne contient
+     aucun texte rendu.                                                       */
+const HTML_RENDU = (bloc ? HTML.replace(bloc[0], '') : HTML).replace(/<!--[\s\S]*?-->/g, ' ');
+const gHtml = (HTML_RENDU.match(PICTO) || []).filter(c => !TYPO.has(c));
+compte['index.html'] = gHtml.length;
+total += gHtml.length;
 
 if (rebase) {
   fs.writeFileSync(path.join(root, REF),
@@ -374,9 +412,12 @@ if (rebase) {
 } else if (!ref) {
   t('Le cliquet existe', false, 'lancer : node scripts/mv-harnais-icones.mjs --baseline');
 } else {
-  const hausses = MODULES.filter(m => compte[m] > (ref.modules[m] ?? 0))
+  /* ⚠️ On itere sur les cles de `compte`, PAS sur MODULES : c'est exactement
+     l'erreur qui a laissé index.html dehors. Une surface ajoutée au comptage
+     et oubliée ici serait comptée sans être surveillée — pire que rien. */
+  const hausses = Object.keys(compte).filter(m => compte[m] > (ref.modules[m] ?? 0))
     .map(m => m + ' ' + (ref.modules[m] ?? 0) + '\u2192' + compte[m]);
-  t('Le compte d\u2019emojis ne remonte dans aucun module', hausses.length === 0, hausses.join(' \u00b7 '));
+  t('Le compte d\u2019emojis ne remonte dans aucune surface', hausses.length === 0, hausses.join(' \u00b7 '));
   t('Le compte global ne remonte pas (' + total + ' \u2264 ' + ref.total + ')', total <= ref.total);
   if (total < ref.total)
     console.log('    \x1b[33m\u2193\x1b[0m ' + (ref.total - total) + ' de moins qu\u2019en reference'

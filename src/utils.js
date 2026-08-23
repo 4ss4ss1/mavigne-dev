@@ -355,21 +355,15 @@ window._mvGraphRepeindre = function(){
 
 export const WHATS_NEW = [
   { v: '6.50', items: [
-    { emoji: 'carton', titre: 'L\u2019onglet D\u00e9penses d\u00e9m\u00e9nage', desc: "Il avait \u00e9t\u00e9 ajout\u00e9 \u00e0 La R\u00e9serve\u00a0; il n\u2019y \u00e9tait pas \u00e0 sa place. Une r\u00e9vision de tracteur se note l\u00e0 o\u00f9 le tracteur se suit\u00a0: elle appara\u00eet d\u00e9sormais toute seule quand la machine <b>rentre du r\u00e9parateur</b>, et se chiffre dans le nouvel \u00e9cran Achats. <b>Si vous aviez commenc\u00e9 \u00e0 saisir des d\u00e9penses, reprenez-les</b> depuis le cycle du r\u00e9parateur\u00a0: l\u2019ancien onglet n\u2019existe plus." },
+    { emoji: 'curseurs', titre: 'Les fen\u00eatres et les titres passent aux m\u00eames ic\u00f4nes que le reste', desc: "Depuis le passage aux vraies ic\u00f4nes, une moiti\u00e9 de l\u2019application avait chang\u00e9 et l\u2019autre non\u00a0: les listes \u00e9taient nettes, mais d\u00e8s qu\u2019une fen\u00eatre s\u2019ouvrait par-dessus \u2014 une confirmation, un choix de c\u00e9page, un export, tout l\u2019\u00e9cran R\u00e9glages \u2014 les vieux pictogrammes revenaient. <b>Deux cent cinquante-deux</b> d\u2019entre eux viennent d\u2019y passer. Un pictogramme ne se dessine pas pareil sur un iPhone, un Android et un PC\u00a0; une ic\u00f4ne, si. <b>Rien n\u2019a boug\u00e9 dans vos donn\u00e9es</b>, et aucun bouton n\u2019a chang\u00e9 de place." },
+    { emoji: 'oeil', titre: 'Les ic\u00f4nes suivent enfin le mode sombre partout', desc: "Un pictogramme garde sa couleur quoi qu\u2019on fasse\u00a0: en th\u00e8me sombre, les fen\u00eatres gardaient des taches vives sans rapport avec le reste. Les ic\u00f4nes, elles, prennent la couleur du texte \u00e0 c\u00f4t\u00e9 d\u2019elles \u2014 elles s\u2019\u00e9claircissent la nuit et se foncent au soleil, comme tout le reste de la page." }
+  ] },
+  { v: '6.48', items: [
     { emoji: 'euro', titre: 'Un \u00e9cran Achats\u00a0: le seul endroit o\u00f9 l\u2019on met les prix', desc: "Chaque module y d\u00e9pose ses lignes tout seul\u00a0: un achat saisi dans La R\u00e9serve, un lot de f\u00fbts, une machine rentr\u00e9e du r\u00e9parateur. Vous les chiffrez quand les factures arrivent, en une fois, dans <b>Pilotage \u203a \u00c9conomie \u203a Achats</b>. Le prix retourne dans la fiche d\u2019origine\u00a0: <b>rien \u00e0 ressaisir nulle part</b>. Un filtre montre ce qui reste \u00e0 chiffrer." },
     { emoji: 'cle', titre: 'Vous notez d\u00e9sormais chez qui part la machine', desc: "Quand un tracteur est signal\u00e9 chez le r\u00e9parateur, un champ demande le garage. Au retour, l\u2019intervention appara\u00eet dans Achats avec sa dur\u00e9e d\u2019immobilisation, en attente de son montant. <b>Aucun montant n\u2019est demand\u00e9 sur le terrain</b> \u2014 la facture arrive des semaines plus tard, et celui qui rend les cl\u00e9s ne l\u2019a pas. Les fiches d\u2019entretien quotidiennes, elles, ne remontent pas\u00a0: un plein de gazole n\u2019est pas un achat." },
     { emoji: 'graphique', titre: 'Ce que co\u00fbtent la vigne, la cave et le tracteur', desc: "L\u2019Exercice r\u00e9partit vos consommables par <b>atelier</b>, en plus de leur nature. Un bouton bascule entre les deux lectures. <b>Rien de plus \u00e0 saisir</b>\u00a0: l\u2019atelier se d\u00e9duit du type d\u2019intrant, et le carburant part au tracteur tout seul. Les salaires ne sont pas r\u00e9partis, et l\u2019\u00e9cran le dit\u00a0: le planning enregistre des heures, jamais l\u2019activit\u00e9 qui va avec." },
     { emoji: 'alerte', titre: 'L\u2019application pr\u00e9vient quand la r\u00e9partition devient bancale', desc: "Si un cinqui\u00e8me de vos consommables n\u2019est rattach\u00e9 \u00e0 aucun atelier, ou si des lignes restent sans montant, le bouton \u00ab\u00a0\u00e0 compl\u00e9ter\u00a0\u00bb du Pilotage le dit et vous emm\u00e8ne au bon endroit. Le total reste juste \u2014 mais <b>comparer les ateliers ne veut plus dire grand-chose</b> tant qu\u2019une part pareille reste de c\u00f4t\u00e9." },
     { emoji: 'balance', titre: 'Le co\u00fbt phyto par parcelle s\u2019affichait \u00e0 z\u00e9ro', desc: "Le Pilotage attendait un prix au kilo que <b>rien ne permettait de saisir</b>\u00a0: le co\u00fbt des traitements par parcelle restait donc vide depuis le d\u00e9but, sans que rien ne le signale. Il se calcule maintenant sur <b>vos factures d\u2019achat</b>, euros divis\u00e9s par quantit\u00e9, et s\u2019affiche sur chaque fiche d\u2019intrant. Les lignes sans prix sont \u00e9cart\u00e9es du calcul plut\u00f4t que compt\u00e9es \u00e0 z\u00e9ro \u2014 sinon la moyenne serait tir\u00e9e vers le bas sans en avoir l\u2019air. <b>Aucune saisie \u00e0 refaire</b>." }
-  ] },
-  { v: '6.49', items: [
-    { emoji: 'soleil', titre: 'Le mode sombre ne s\u2019arr\u00eate plus \u00e0 la porte des fen\u00eatres', desc: "En th\u00e8me sombre, chaque fen\u00eatre qui s\u2019ouvre par-dessus l\u2019\u00e9cran \u2014 une confirmation, un choix de parcelle, un export, les conditions d\u2019utilisation \u2014 sortait <b>en blanc</b>, en pleine nuit. Le soir au bureau ou t\u00f4t le matin dans la cuve, \u00e7a \u00e9blouissait \u00e0 chaque clic. <b>Trente-sept fen\u00eatres</b> \u00e9taient concern\u00e9es. Elles suivent d\u00e9sormais le th\u00e8me comme le reste de l\u2019application. <b>Rien ne change en th\u00e8me clair</b>, et aucune donn\u00e9e n\u2019est touch\u00e9e." }
-  ] },
-  { v: '6.48', items: [
-    { emoji: 'euro', titre: 'Ce que co\u00fbtent la vigne, la cave et le tracteur', desc: "L\u2019Exercice de l\u2019\u00c9conomie sait maintenant r\u00e9partir vos consommables par <b>atelier</b> : ce qui part \u00e0 la vigne, ce qui part \u00e0 la cave, ce qui part au tracteur. Un bouton bascule entre les deux lectures \u2014 par nature de d\u00e9pense, comme avant, ou par destination. <b>Rien de plus \u00e0 saisir</b> : l\u2019atelier se d\u00e9duit du type d\u2019intrant, et le carburant part au tracteur tout seul. Les salaires ne sont pas r\u00e9partis, et l\u2019\u00e9cran le dit : le planning enregistre des heures, jamais l\u2019activit\u00e9 qui va avec." },
-    { emoji: 'carton', titre: 'Un onglet D\u00e9penses dans La R\u00e9serve', desc: "Les r\u00e9visions, les r\u00e9parations et les locations de f\u00fbts se notent d\u00e9sormais dans La R\u00e9serve, sur leur propre onglet. Ce sont des d\u00e9penses qui reviennent chaque ann\u00e9e mais n\u2019ont pas de stock \u2014 elles n\u2019avaient nulle part o\u00f9 aller. Le mat\u00e9riel et les f\u00fbts achet\u00e9s n\u2019y entrent pas : on ne les rach\u00e8te pas l\u2019an prochain, et un f\u00fbt a d\u00e9j\u00e0 son propre plan de renouvellement." },
-    { emoji: 'alerte', titre: 'L\u2019application pr\u00e9vient quand la r\u00e9partition devient bancale', desc: "Si un cinqui\u00e8me de vos consommables n\u2019est rattach\u00e9 \u00e0 aucun atelier, ou si des factures sont saisies sans montant, le bouton \u00ab \u00e0 compl\u00e9ter \u00bb du Pilotage le dit et vous emm\u00e8ne au bon endroit. Le total reste juste dans les deux cas \u2014 mais <b>comparer la vigne, la cave et le tracteur ne veut plus dire grand-chose</b> tant qu\u2019une part pareille reste de c\u00f4t\u00e9." },
-    { emoji: 'balance', titre: 'Le co\u00fbt phyto par parcelle s\u2019affichait \u00e0 z\u00e9ro', desc: "Le Pilotage attendait un prix au kilo que <b>rien ne permettait de saisir</b> : le co\u00fbt des traitements par parcelle restait donc vide depuis le d\u00e9but, sans que rien ne le signale. Il se calcule maintenant sur <b>vos factures d\u2019achat</b>, euros divis\u00e9s par quantit\u00e9, et s\u2019affiche aussi sur chaque fiche d\u2019intrant. Les lignes d\u2019achat saisies sans prix sont \u00e9cart\u00e9es du calcul plut\u00f4t que compt\u00e9es \u00e0 z\u00e9ro \u2014 sinon la moyenne serait tir\u00e9e vers le bas sans en avoir l\u2019air. <b>Aucune saisie \u00e0 refaire</b>." }
   ] },
   { v: '6.47', items: [
     { emoji: 'calendrier', titre: 'Deux contrats qui se suivent n\u2019en font bien qu\u2019un', desc: "Quand un contrat se termine un 30 juin et que le suivant commence le 1er juillet, l\u2019application doit les traiter comme <b>une seule p\u00e9riode</b> \u2014 un seul compteur d\u2019heures, un seul plafond annuel. Elle ne le faisait plus : une comparaison de dates se trompait d\u2019un jour, et les deux contrats repartaient chacun de z\u00e9ro. Sur une feuille d\u2019heures, le compteur pouvait alors m\u00e9langer les deux. <b>Aucune saisie n\u2019est \u00e0 refaire</b> : le calcul se corrige tout seul \u00e0 la prochaine ouverture." }
@@ -1419,27 +1413,13 @@ export function showToast(msg, color) {
 export function applyTheme(mode) {
   var root = document.getElementById('app-root');
   if(!root) return;
-  // ⚠⚠⚠ LE THÈME SE POSE SUR DEUX ÉLÉMENTS, PAS UN (§59).
-  // #app-root est fermé ligne 3197 d'index.html : les 13 overlays statiques, les
-  // 37 .modal qu'ils contiennent et tous ceux posés en JS par
-  // document.body.appendChild sont ses FRÈRES. Posé sur #app-root seul,
-  // l'attribut ne les atteignait pas et une modale sortait BLANCHE en plein
-  // mode sombre. Le poser aussi sur <html> met les 63 variables de thème à la
-  // racine du document, d'où elles s'héritent partout.
-  // ⚠ Les deux doivent rester D'ACCORD : <html> en sombre et #app-root en clair
-  // ferait passer toute l'application en sombre, car aucun bloc ne remet les
-  // variables claires sous #app-root[data-theme="light"].
-  var html = document.documentElement;
   if(mode === 'dark') {
     root.setAttribute('data-theme', 'dark');
-    if(html) html.setAttribute('data-theme', 'dark');
   } else if(mode === 'light') {
     root.setAttribute('data-theme', 'light');
-    if(html) html.setAttribute('data-theme', 'light');
   } else {
     // Auto : retirer l'attribut → la media query OS prend le relais
     root.removeAttribute('data-theme');
-    if(html) html.removeAttribute('data-theme');
   }
   // Mettre à jour les boutons du toggle
   ['light','auto','dark'].forEach(function(m) {

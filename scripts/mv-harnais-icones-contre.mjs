@@ -115,11 +115,16 @@ epreuve('un trou creuse avec du blanc en dur',
                  '<symbol id="ic-liste" viewBox="0 0 24 24" data-src="clipboard-list"><rect fill="#fff" x="9" y="9" width="6" height="2"/>')),
   /couleur de fond en dur[\s\S]*liste/);
 
-/* 5. Le compte global qui remonte : un emoji ajoute AILLEURS que dans le temoin. */
+/* 5. Le compte global qui remonte : un emoji ajoute AILLEURS que dans le temoin.
+   ⚠️ Le motif portait une alternative large (`/ne remonte pas/`) qui se laissait
+     satisfaire par le rouge du cliquet GLOBAL — donc par n'importe quelle hausse,
+     y compris dans un autre fichier. C'est §42f, et il a suffi de renommer une
+     assertion pour que ca se voie. Le motif exige desormais que le rouge NOMME
+     `utils`. */
 epreuve('le compte global qui remonte',
   () => ecrire('src/utils.js', lire('src/utils.js')
         .replace('export const APP_VERSION', 'export const _MV_FAUX = \'\u{1F600}\u{1F600}\u{1F600}\';\nexport const APP_VERSION')),
-  /ne remonte dans aucun module[\s\S]*utils|ne remonte pas/);
+  /ne remonte dans aucune surface[\s\S]*utils/);
 
 /* 5bis. Une taille hors echelle : invisible dans le fichier, visible a l'ecran
       quand deux icones voisines ne font pas la meme taille. */
@@ -190,6 +195,30 @@ epreuve('_mvIcon dans un document imprime',
   () => ecrire('src/reglages.js', lire('src/reglages.js')
         .replace("${_mvIconInline('eprouvette',40)}", "${_mvIcon('eprouvette',40)}")),
   /Aucun document imprime/);
+
+/* 7. ★★★ index.html SOUS CLIQUET — LE TROU DU LOT DS-M1.
+      Le cliquet ne lisait que `src/*.js`. La surface la PLUS VISIBLE de
+      l'application (modales, titres de section, puces de filtre, tout l'ecran
+      Reglages) portait 257 pictogrammes que rien ne comptait, et le harnais
+      sortait 27 verts. Cette epreuve existe pour que ca ne puisse plus arriver
+      en silence : un emoji repose dans index.html doit rougir, et NOMMER
+      index.html — pas seulement faire remonter un total anonyme. */
+epreuve('un emoji repose dans index.html',
+  () => ecrire('index.html', lire('index.html')
+        .replace('<div class="modal-title">', '<div class="modal-title">\u{1F347}')),
+  /ne remonte dans aucune surface[\s\S]*index\.html/);
+
+/* 8. ★★★ LA CLASSE DE CARACTERES AVAIT UN TROU — troisieme fois que le
+      compteur ment, apres §50 (les echappements) et l'ecart U+FE0F de §45a.
+      `\u2139\uFE0F` tombait entre les plages `\u2300-\u23FF` et `\u25A0-\u25FF` : treize
+      occurrences rendues, invisibles, dans sept fichiers. Le hasard des bornes
+      n'est pas une definition.
+      ⚠️ L'epreuve pose un `\u2139\uFE0F`, PAS un emoji ordinaire : elle doit echouer si
+        quelqu'un retrecit un jour la classe a ses seules plages historiques. */
+epreuve('un glyphe hors des plages historiques (\u2139)',
+  () => ecrire('index.html', lire('index.html')
+        .replace('<div class="modal-title">', '<div class="modal-title">\u2139\uFE0F')),
+  /ne remonte dans aucune surface[\s\S]*index\.html/);
 
 fs.rmSync(bac, { recursive: true, force: true });
 console.log('\n' + (ko ? '\x1b[31m' + ko + ' CONTRE-EPREUVE(S) EN ECHEC\x1b[0m'
