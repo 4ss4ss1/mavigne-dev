@@ -1,6 +1,6 @@
 // CLAUDE.md doit décrire le code RÉEL. Chaque affirmation vérifiable est vérifiée
 // contre les fichiers — un document de continuité qui ment est pire qu'absent.
-import { readFileSync as R } from 'node:fs';
+import { readFileSync as R, readdirSync } from 'node:fs';
 import { fileURLToPath } from 'node:url';
 import { dirname, join } from 'node:path';
 /* ⚠⚠⚠ CHEMIN PORTABLE, ET C'EST UNE LEÇON PAYÉE DEUX FOIS.
@@ -114,10 +114,68 @@ t('★ la note de livraison est écrite, fichier par fichier',
    un défaut. → CLIQUET : le compte ne peut plus MONTER, et se résorbe quand une
    section est réécrite. Transformer une dette en cliquet vaut mieux que la
    solder à l'aveugle (§47b). */
-const RANGS = 36;   /* mesuré le 23/08, après retrait des deux de §14b et §28 */
+const RANGS = 37;   /* 23/08 : +1, la citation d'« app.js:703 » en §58c, qui explique
+                       précisément pourquoi figer un rang est une mauvaise idée */
 const rangs = (MD.match(/`?(?:src\/)?(?:app|utils|cave|pilotage|planning|reglages)\.js:\d+/g) || []).length;
 t(`les numéros de ligne recopiés ne remontent pas (${rangs} ≤ ${RANGS})`, rangs <= RANGS);
 if (rangs < RANGS) console.log(`    ↓ ${RANGS - rangs} de moins — abaisser RANGS dans ce fichier`);
 
+
+console.log('\n── le document a-t-il PERDU un chantier ? ──');
+/* ★★★ LE FILET QUI MANQUAIT LE 23/08 (§58). Le contrôle « aucun numéro de
+   section en doublon » ne voyait rien : la §55 sur DS-0 n'a pas été DUPLIQUÉE,
+   elle a été REMPLACÉE par une autre conversation qui avait pris le même
+   numéro. Le code est resté, le document a tout oublié — zéro occurrence de
+   « DS-0 » dans neuf mille lignes. Un contrôle qui cherche la collision ne dit
+   rien de la disparition. */
+
+/* 1) LA MEILLEURE SONDE : un lot livre presque toujours un script. Un script
+      que le document ignore signale un chantier que le document ignore.
+      ⚠️ CLIQUET, pas interdiction : 11 des 45 scripts étaient déjà invisibles
+      au moment de poser le filet. Les décrire sans les avoir instruits
+      produirait des phrases fausses — exactement ce que la règle d'or n°3
+      combat.
+      ⚠️ LES CONTRE-ÉPREUVES SONT HORS SONDE, et c'est une exclusion RAISONNÉE,
+      pas un arrangement : un « -contre.mjs » n'est pas un chantier, c'est le
+      compagnon d'un harnais qui, lui, doit être documenté. Les six restants
+      sont exactement dans ce cas. Une fois écartés, le seuil tombe à ZÉRO :
+      plus un cliquet, une INTERDICTION. Bien plus tranchant.
+      ⚠⚠ CE QUE CETTE SONDE NE PROUVE PAS : que le script soit EXPLIQUÉ. Elle
+      vérifie que son nom APPARAÎT. Quatre scripts passent au vert uniquement
+      parce que §58f les cite dans la liste de ce qui reste à documenter — le
+      dire vaut mieux que faire semblant. C'est déjà beaucoup : le 23/08,
+      « mv-harnais-jetons » n'apparaissait NULLE PART. */
+const scripts = readdirSync(join(B, 'scripts'))
+  .filter(f => f.endsWith('.mjs') && !f.endsWith('-contre.mjs'));
+const muets = scripts.filter(f => !MD.includes(f.slice(0, -4)));
+t(`tout script de scripts/ est nommé dans le document (${muets.length} muet(s))`,
+  muets.length === 0, muets.join(' · '));
+
+/* 2) Une section ne disparaît pas, même si son numéro est réutilisé. */
+const SECTIONS = 91;   /* +§59, le lot du thème */   /* mesuré le 23/08, §57 restaurée + §58 posée */
+const sections = new Set([...MD.matchAll(/^## (\d+[a-z]?)\. /gm)].map(m => m[1])).size;
+t(`aucune section n'a disparu (${sections} ≥ ${SECTIONS})`, sections >= SECTIONS);
+if (sections > SECTIONS)
+  console.log(`    ↑ ${sections - SECTIONS} de plus — relever SECTIONS dans ce fichier`);
+
+/* 3) Les chantiers récents, nommés. Un garde-fou explicite vaut mieux qu'un
+      compte quand on sait ce qu'on protège — et c'est celui-ci qui aurait
+      rougi le 23/08 à 15h37. */
+/* ⚠⚠⚠ ÉCRITE D'ABORD EN `MD.includes(motif)`, ELLE NE MORDAIT PAS — et c'est
+   la QUATRIÈME fois que cette faute revient (§53, §57i, §58). En effaçant le
+   TITRE de §57, la contre-épreuve laissait intactes les deux phrases de §58a
+   qui CITENT « LE SOCLE DE LA CHARTE » pour raconter sa disparition. Le
+   contrôle était satisfait PAR LE TEXTE QUI DOCUMENTE LE PROBLÈME, exactement
+   comme le `.pathname` de §53. Un chantier vit dans un TITRE DE SECTION : c'est
+   ça qu'on cherche, pas une occurrence n'importe où. */
+for (const [sujet, titre] of [
+  ['DS-0, le socle de la charte',  'LE SOCLE DE LA CHARTE'],
+  ['la feuille d\'heures',         'LA FEUILLE D\'HEURES DISAIT'],
+  ['les consommables par atelier', 'LES CONSOMMABLES PAR ATELIER'],
+  ['le th\u00e8me hors #app-root',      "S'ARR\u00caTAIT \u00c0 LA PORTE DES FEN\u00caTRES"]
+]) t(`★ ça reste un TITRE de section : ${sujet}`,
+     new RegExp('^## \\d+[a-z]?\\. .*' + titre.replace(/'/g, "'"), 'm').test(MD));
+/* Celui-ci n'est pas un titre : un harnais se nomme dans le corps du texte. */
+t('★ le document connaît toujours le harnais des jetons', MD.includes('mv-harnais-jetons'));
 console.log('\n'+(ko?`\x1b[31m✗ ${ko} rouge(s) sur ${ok+ko}\x1b[0m`:`\x1b[32m✓ ${ok} vertes, 0 rouge\x1b[0m`));
 process.exit(ko?1:0);

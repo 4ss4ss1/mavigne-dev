@@ -23,7 +23,7 @@ export const GT_ADMIN_EMAIL = 'ngdevpro@gmail.com';
 // WHATS_NEW   : tableau vide = modal desactive pour cette version.
 // Format item : { emoji:'📅', titre:'Titre court', desc:'Phrase utilisateur.' }
 // Regle : seulement les changements visibles par les utilisateurs.
-export const APP_VERSION = '6.48';
+export const APP_VERSION = '6.49';
 // ════ Journal des nouveautés (récap cumulatif) ════
 // Une entrée par version, la PLUS RÉCENTE EN HAUT : { v:'5.10', items:[ {emoji,titre,desc}, … ] }
 // À chaque release visible → AJOUTER un bloc en tête (ne pas remplacer). items:[] = release technique (rien à afficher).
@@ -354,6 +354,9 @@ window._mvGraphRepeindre = function(){
 };
 
 export const WHATS_NEW = [
+  { v: '6.49', items: [
+    { emoji: 'soleil', titre: 'Le mode sombre ne s\u2019arr\u00eate plus \u00e0 la porte des fen\u00eatres', desc: "En th\u00e8me sombre, chaque fen\u00eatre qui s\u2019ouvre par-dessus l\u2019\u00e9cran \u2014 une confirmation, un choix de parcelle, un export, les conditions d\u2019utilisation \u2014 sortait <b>en blanc</b>, en pleine nuit. Le soir au bureau ou t\u00f4t le matin dans la cuve, \u00e7a \u00e9blouissait \u00e0 chaque clic. <b>Trente-sept fen\u00eatres</b> \u00e9taient concern\u00e9es. Elles suivent d\u00e9sormais le th\u00e8me comme le reste de l\u2019application. <b>Rien ne change en th\u00e8me clair</b>, et aucune donn\u00e9e n\u2019est touch\u00e9e." }
+  ] },
   { v: '6.48', items: [
     { emoji: 'euro', titre: 'Ce que co\u00fbtent la vigne, la cave et le tracteur', desc: "L\u2019Exercice de l\u2019\u00c9conomie sait maintenant r\u00e9partir vos consommables par <b>atelier</b> : ce qui part \u00e0 la vigne, ce qui part \u00e0 la cave, ce qui part au tracteur. Un bouton bascule entre les deux lectures \u2014 par nature de d\u00e9pense, comme avant, ou par destination. <b>Rien de plus \u00e0 saisir</b> : l\u2019atelier se d\u00e9duit du type d\u2019intrant, et le carburant part au tracteur tout seul. Les salaires ne sont pas r\u00e9partis, et l\u2019\u00e9cran le dit : le planning enregistre des heures, jamais l\u2019activit\u00e9 qui va avec." },
     { emoji: 'carton', titre: 'Un onglet D\u00e9penses dans La R\u00e9serve', desc: "Les r\u00e9visions, les r\u00e9parations et les locations de f\u00fbts se notent d\u00e9sormais dans La R\u00e9serve, sur leur propre onglet. Ce sont des d\u00e9penses qui reviennent chaque ann\u00e9e mais n\u2019ont pas de stock \u2014 elles n\u2019avaient nulle part o\u00f9 aller. Le mat\u00e9riel et les f\u00fbts achet\u00e9s n\u2019y entrent pas : on ne les rach\u00e8te pas l\u2019an prochain, et un f\u00fbt a d\u00e9j\u00e0 son propre plan de renouvellement." },
@@ -1408,13 +1411,27 @@ export function showToast(msg, color) {
 export function applyTheme(mode) {
   var root = document.getElementById('app-root');
   if(!root) return;
+  // ⚠⚠⚠ LE THÈME SE POSE SUR DEUX ÉLÉMENTS, PAS UN (§59).
+  // #app-root est fermé ligne 3197 d'index.html : les 13 overlays statiques, les
+  // 37 .modal qu'ils contiennent et tous ceux posés en JS par
+  // document.body.appendChild sont ses FRÈRES. Posé sur #app-root seul,
+  // l'attribut ne les atteignait pas et une modale sortait BLANCHE en plein
+  // mode sombre. Le poser aussi sur <html> met les 63 variables de thème à la
+  // racine du document, d'où elles s'héritent partout.
+  // ⚠ Les deux doivent rester D'ACCORD : <html> en sombre et #app-root en clair
+  // ferait passer toute l'application en sombre, car aucun bloc ne remet les
+  // variables claires sous #app-root[data-theme="light"].
+  var html = document.documentElement;
   if(mode === 'dark') {
     root.setAttribute('data-theme', 'dark');
+    if(html) html.setAttribute('data-theme', 'dark');
   } else if(mode === 'light') {
     root.setAttribute('data-theme', 'light');
+    if(html) html.setAttribute('data-theme', 'light');
   } else {
     // Auto : retirer l'attribut → la media query OS prend le relais
     root.removeAttribute('data-theme');
+    if(html) html.removeAttribute('data-theme');
   }
   // Mettre à jour les boutons du toggle
   ['light','auto','dark'].forEach(function(m) {

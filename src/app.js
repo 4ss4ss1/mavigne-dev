@@ -1532,7 +1532,10 @@ async function _startDemoVisite(){
   // qu'elle trouve en entrant.
   try{ localStorage.removeItem('mavigne_meteocom_cache'); localStorage.removeItem('mavigne_meteo5_cache'); localStorage.removeItem('mavigne_meteohr_cache'); }catch(e){}
   // Démo en thème clair (pas sombre / pas auto) — c'est la 1re impression
+  // ⚠ Les DEUX, comme applyTheme : <html> non marqué laisserait la media query
+  // de l'OS repasser les overlays en sombre pendant une démo censée être claire.
   var _ar=document.getElementById('app-root'); if(_ar) _ar.setAttribute('data-theme','light');
+  document.documentElement.setAttribute('data-theme','light');
   // Compteur GT admin : connexions + visiteurs uniques (id anonyme localStorage, best-effort)
   try {
     var _vid = localStorage.getItem('mavigne_visite_id');
@@ -1550,6 +1553,7 @@ async function _startDemoVisite(){
     window.DOMAINE_NOM = 'Domaine des Grandes Vignes';
     if(typeof applyDomNom==='function'){ try{ applyDomNom(); }catch(e){} }
     var _ar2=document.getElementById('app-root'); if(_ar2) _ar2.setAttribute('data-theme','light');
+    document.documentElement.setAttribute('data-theme','light');  // ⚠ les deux (§59c)
     try{ _visiteScenario(); }catch(e){ if(DEBUG)console.error('[Visite scénario]',e); }
     goTo('home');
     setTimeout(function(){ try{ _mvtWelcome(); }catch(e){ if(DEBUG)console.error('[Visite]',e); } }, 550);

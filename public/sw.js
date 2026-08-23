@@ -1,4 +1,19 @@
-// MA VIGNE — Service Worker v7.03
+// MA VIGNE — Service Worker v7.04
+// v7.04 (23/08/2026) — LE THEME S'ARRETAIT A LA PORTE DES OVERLAYS. APP 6.48 → 6.49.
+//   #app-root est ferme ligne 3197 d'index.html : les 13 overlays statiques, les
+//   37 .modal qu'ils contiennent et tous ceux poses en JS par
+//   document.body.appendChild sont ses FRERES, pas ses enfants. Les 63 variables
+//   de theme etaient redefinies sous #app-root seul : une modale sortait BLANCHE
+//   en plein mode sombre. Deduction du lot DS-0, verifiee et corrigee ici.
+//   Correctif : les 5 blocs sombres portent AUSSI :root (meme bloc, deux
+//   selecteurs — aucune declaration dupliquee), et applyTheme pose l'attribut
+//   sur <html> en plus de #app-root. Idem aux 2 endroits ou la visite guidee
+//   force le clair : <html> non marque aurait laisse l'OS repasser les overlays
+//   en sombre pendant une demo censee etre claire.
+//   Harnais neuf mv-harnais-theme (7 assertions, 6 contre-epreuves) : aucune
+//   variable de theme ne peut plus rester enfermee sous #app-root.
+//   ⚠ 3 harnais dormants branches dans check : sec3, uxlogin, entretien.
+//   Fichiers : styles.css, utils.js, app.js, index.html + scripts/ (hors build).
 // v7.03 (23/08/2026) — LES CONSOMMABLES PAR ATELIER. APP 6.47 -> 6.48.
 //   Economie > Exercice repartit desormais les consommables par ATELIER (vigne,
 //   cave, tracteur, non affecte) en plus de leur nature. C'est un SECOND AXE sur
@@ -2373,7 +2388,7 @@
 // v2.22 — Fix profils vides : guard vide dans loadData() pour MEMBRES/SAISONS/TACHES
 // v2.17 — Onboarding intégré + tenantId · v2.06 — Firebase Auth · v2.00–v2.05 — divers
 const DEBUG = self.location.hostname === 'localhost' || self.location.hostname === '127.0.0.1';
-const CACHE_NAME   = 'mavigne-v7.03';
+const CACHE_NAME   = 'mavigne-v7.04';
 const TENANT_CACHE = 'mavigne-tenant';   // Cache persistant — préservé à chaque mise à jour SW
 const SYNC_TAG     = 'mavigne-sync';
 
@@ -2389,7 +2404,7 @@ const CDN_URLS = [
 ];
 
 self.addEventListener('install', event => {
-  if(DEBUG) console.log('[SW] Ma Vigne v7.03 installé');
+  if(DEBUG) console.log('[SW] Ma Vigne v7.04 installé');
   event.waitUntil(
     caches.open(CACHE_NAME).then(async cache => {
       // ── Cœur applicatif : STRICT (mise à jour ATOMIQUE) ──
@@ -2405,7 +2420,7 @@ self.addEventListener('install', event => {
 });
 
 self.addEventListener('activate', event => {
-  if(DEBUG) console.log('[SW] Ma Vigne v7.03 activé');
+  if(DEBUG) console.log('[SW] Ma Vigne v7.04 activé');
   event.waitUntil(
     caches.keys().then(keys =>
       Promise.all(

@@ -108,12 +108,28 @@ function controles(CSS, ref) {
   const t = (nom, ok, detail) => R.push({ nom, ok: !!ok, detail: detail || '' });
   const NU = sansCom(CSS);
 
-  const MK_CLAIR  = ':root{\n  color-scheme:light dark;';
-  const MK_SOMBRE = '#app-root[data-theme="dark"]{\n  color-scheme:dark;';
-  const MK_MEDIA  = '#app-root:not([data-theme="light"]){\n    color-scheme:dark;';
-  const clair  = blocDe(NU, MK_CLAIR);
-  const sombre = blocDe(NU, MK_SOMBRE);
-  const media  = blocDe(NU, MK_MEDIA);
+  /* ⚠️⚠️ CES TROIS BLOCS SE REPÈRENT PAR LEUR CONTENU, PLUS PAR LEUR SÉLECTEUR.
+     Première version : trois chaînes exactes du type
+     '#app-root[data-theme="dark"]{\n  color-scheme:dark;'. Le jour où le lot du
+     thème (§59) a ajouté ':root[data-theme="dark"]' au même bloc — pour que les
+     overlays, qui sont HORS de #app-root, reçoivent enfin les couleurs sombres —
+     les trois marqueurs sont tombés d'un coup et le harnais a accusé du code
+     parfaitement sain. Figer un sélecteur revient à figer un numéro de ligne :
+     ça se décale au premier changement légitime. On cherche donc la déclaration
+     `color-scheme`, qui est ce qui IDENTIFIE vraiment ces blocs, et on remonte
+     à l'accolade ouvrante. */
+  const blocAutourDe = (src, aiguille, rang) => {
+    let i = -1;
+    for (let k = 0; k <= rang; k++) { i = src.indexOf(aiguille, i + 1); if (i < 0) return ''; }
+    const o = src.lastIndexOf('{', i);
+    if (o < 0) return '';
+    let p = 1, j = o + 1;
+    for (; j < src.length && p; j++) { if (src[j] === '{') p++; else if (src[j] === '}') p--; }
+    return src.slice(o, j);
+  };
+  const clair  = blocAutourDe(NU, 'color-scheme:light dark;', 0);
+  const sombre = blocAutourDe(NU, 'color-scheme:dark;', 0);
+  const media  = blocAutourDe(NU, 'color-scheme:dark;', 1);
   t('les trois blocs de thème sont repérables', clair && sombre && media,
     `clair=${!!clair} sombre=${!!sombre} media=${!!media}`);
 

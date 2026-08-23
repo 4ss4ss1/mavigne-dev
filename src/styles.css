@@ -155,7 +155,17 @@ input::placeholder,textarea::placeholder{color:var(--texte-doux);opacity:1;}
 .hv2-meteo-cache-banner{display:flex;align-items:center;justify-content:space-between;padding:6px 0 2px;border-top:1px solid var(--gris-clair);}
 /* ══ DARK MODE ══ */
 /* 1) Toggle manuel : #app-root[data-theme=dark] */
-#app-root[data-theme="dark"]{
+/* ⚠⚠⚠ LES DEUX SÉLECTEURS SONT INDISPENSABLES, ET C'EST MESURÉ (§59).
+   #app-root est fermé ligne 3197 d'index.html : les 13 overlays statiques,
+   les 37 .modal qui les habitent et tous les overlays posés en JS par
+   document.body.appendChild sont ses FRÈRES, pas ses enfants. Les 63
+   variables de thème redéfinies ici ne les atteignaient pas : une modale
+   sortait BLANCHE au milieu d'une application sombre.
+   Ajouter :root suffit — les variables sont posées sur <html> et héritées par
+   tout le document. AUCUNE déclaration n'est dupliquée : c'est le même bloc,
+   avec deux sélecteurs. Les règles #app-root[data-theme="dark"] .xxx qui
+   existent ailleurs continuent de fonctionner sans changement. */
+#app-root[data-theme="dark"],:root[data-theme="dark"]{
   color-scheme:dark;
   --vert:#5A9E3A;--vert-med:#6AB845;--vert-clair:#8DC868;--vert-pale:rgba(90,158,58,0.22);
   --or:#D8BC72;--or-clair:#E8D294;--or-pale:rgba(216,188,114,0.20);
@@ -186,7 +196,12 @@ input::placeholder,textarea::placeholder{color:var(--texte-doux);opacity:1;}
 }
 /* 2) Mode OS auto : prefers-color-scheme:dark, sauf si mode clair forcé */
 @media(prefers-color-scheme:dark){
-  #app-root:not([data-theme="light"]){
+  /* Même raison qu'au bloc précédent : en mode AUTO, aucun attribut n'est
+     posé, et :root:not([data-theme="light"]) est vrai — le thème de l'OS
+     atteint alors les overlays. En mode clair FORCÉ, l'attribut "light" est
+     posé sur <html> aussi, ce qui éteint cette règle : c'est pour ça que la
+     visite guidée doit poser l'attribut aux DEUX endroits (§59c). */
+  #app-root:not([data-theme="light"]),:root:not([data-theme="light"]){
     color-scheme:dark;
     --vert:#5A9E3A;--vert-med:#6AB845;--vert-clair:#8DC868;--vert-pale:rgba(90,158,58,0.22);
     --or:#D8BC72;--or-clair:#E8D294;--or-pale:rgba(216,188,114,0.20);
@@ -3222,8 +3237,8 @@ body.mv-trial-on #app-root{padding-top:calc(env(safe-area-inset-top,0px) + 44px)
    se retrouvaient SANS ombre. Défini ici pour les 3 chemins de thème.
    ═══════════════════════════════════════════════════════════════════════ */
 :root{ --sheen:rgba(255,255,255,0.55); }
-#app-root[data-theme="dark"]{ --sheen:rgba(255,255,255,0.05); }
-@media(prefers-color-scheme:dark){ #app-root:not([data-theme="light"]){ --sheen:rgba(255,255,255,0.05); } }
+#app-root[data-theme="dark"],:root[data-theme="dark"]{ --sheen:rgba(255,255,255,0.05); }
+@media(prefers-color-scheme:dark){ #app-root:not([data-theme="light"]),:root:not([data-theme="light"]){ --sheen:rgba(255,255,255,0.05); } }
 
 
 /* ═══════════════════════════════════════════════════════════════════════
@@ -3719,9 +3734,9 @@ body.mv-trial-on #app-root{padding-top:calc(env(safe-area-inset-top,0px) + 44px)
 /* Primitive .mv-sk : shimmer OPT-IN (reduce-first), 100% tokens. Coupé d'office
    si l'OS réduit les animations. Réutilise les vraies coques de cartes → aucun
    décalage quand le contenu réel arrive. */
-#app-root{ --mv-sk-base:var(--gris-clair); --mv-sk-glow:var(--sheen); --mv-sk-neutral:var(--gris); }
-#app-root[data-theme="dark"]{ --mv-sk-glow:rgba(240,239,233,0.055); }
-@media (prefers-color-scheme:dark){ #app-root:not([data-theme="light"]){ --mv-sk-glow:rgba(240,239,233,0.055); } }
+#app-root,:root{ --mv-sk-base:var(--gris-clair); --mv-sk-glow:var(--sheen); --mv-sk-neutral:var(--gris); }
+#app-root[data-theme="dark"],:root[data-theme="dark"]{ --mv-sk-glow:rgba(240,239,233,0.055); }
+@media (prefers-color-scheme:dark){ #app-root:not([data-theme="light"]),:root:not([data-theme="light"]){ --mv-sk-glow:rgba(240,239,233,0.055); } }
 .mv-sk{ position:relative; overflow:hidden; background:var(--mv-sk-base); border-radius:6px; display:block; }
 .mv-sk::after{ content:""; position:absolute; inset:0; transform:translateX(-100%);
   background:linear-gradient(90deg,transparent 0%,var(--mv-sk-glow) 50%,transparent 100%); }
@@ -3859,8 +3874,8 @@ body.mv-trial-on #app-root{padding-top:calc(env(safe-area-inset-top,0px) + 44px)
    ══════════════════════════════════════════════════════════════════════ */
 
 :root{--or-tx:#7A5E12;--vert-tx:#31601C;--orange-tx:#9C4E14;}
-#app-root[data-theme="dark"]{--or-tx:#E8D294;--vert-tx:#A5D88C;--orange-tx:#E8A45A;}
-@media(prefers-color-scheme:dark){#app-root:not([data-theme="light"]){--or-tx:#E8D294;--vert-tx:#A5D88C;--orange-tx:#E8A45A;}}
+#app-root[data-theme="dark"],:root[data-theme="dark"]{--or-tx:#E8D294;--vert-tx:#A5D88C;--orange-tx:#E8A45A;}
+@media(prefers-color-scheme:dark){#app-root:not([data-theme="light"]),:root:not([data-theme="light"]){--or-tx:#E8D294;--vert-tx:#A5D88C;--orange-tx:#E8A45A;}}
 
 /* 1 — Onglets de module : Accueil, Parcelles, Journal, Tracteur, Phyto,
        Planning, Cave, Reglages, Reserve.  1,09:1 -> 7,84:1 */
@@ -3918,8 +3933,8 @@ body.mv-trial-on #app-root{padding-top:calc(env(safe-area-inset-top,0px) + 44px)
        bouton « Enregistrer les heures » de l'export se retrouvait sans
        fond, texte blanc sur carte blanche (1,04:1). — */
 :root{--vin-tx:#8A4A26;--acier-tx:#1F5E80;--ardoise:#2C3E50;}
-#app-root[data-theme="dark"]{--vin-tx:#E8A882;--acier-tx:#8FC7E0;}
-@media(prefers-color-scheme:dark){#app-root:not([data-theme="light"]){--vin-tx:#E8A882;--acier-tx:#8FC7E0;}}
+#app-root[data-theme="dark"],:root[data-theme="dark"]{--vin-tx:#E8A882;--acier-tx:#8FC7E0;}
+@media(prefers-color-scheme:dark){#app-root:not([data-theme="light"]),:root:not([data-theme="light"]){--vin-tx:#E8A882;--acier-tx:#8FC7E0;}}
 
 /* — 2. LA CAUSE : barres d'onglets .mvu-tabs rendues sur le papier.
        1,09:1 -> 6,68:1 (inactif) et 14,7:1 (actif). — */
