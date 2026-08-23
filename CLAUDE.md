@@ -305,7 +305,7 @@
 
 ---
 
-## ⚖️ Les cinq règles d'or
+## ⚖️ Les six règles d'or
 
 **Règle d'or n°1 — la vérité est dans les fichiers réels.**
 `/mnt/project` **bouge en cours de session**, peut être **incomplet**, et surtout **peut être en
@@ -606,6 +606,46 @@ mot est exact.
 
 ★ **Le test** : est-ce que Nico pourrait exécuter cette réponse sur son téléphone, entre deux
 rangs, sans rien rechercher ? Si non, la réécrire.
+
+**Règle d'or n°6 — CE DOCUMENT SE MET À JOUR AU DERNIER LOT.**
+
+> ★★★ **Demandé explicitement par Nico le 23/08.**
+
+Ce fichier n'est pas un compte rendu qu'on rédige après coup : c'est **un livrable du lot**, au
+même titre que `pilotage.js`. Il part **avec le dernier lot de la conversation**, jamais dans une
+session suivante — une session suivante commence par le lire, et lit alors un document qui ignore
+ce que la précédente a fait.
+
+- **Le dernier lot d'une conversation inclut ce fichier.** S'il n'y figure pas, le lot n'est pas fini.
+- **Ce qui s'y écrit** : ce que le lot a changé, ce qu'on a mesuré, et surtout **ce qui a été
+  découvert en route** — un défaut trouvé, une assertion fausse, un no-op silencieux. Le code
+  raconte ce qu'il fait ; ce document raconte **pourquoi il le fait comme ça**, et c'est la seule
+  chose qu'une relecture du code ne redonnera jamais.
+- ⚠️ **Ce n'est pas un journal exhaustif.** Une section qui recopie le changelog du service worker
+  ne sert à rien : le changelog est déjà dans `sw.js`. Ici on écrit **l'arbitrage** — ce qu'on a
+  envisagé et écarté, et pour quelle raison.
+- ⚠️⚠️ **Un document faux est pire qu'un document absent** : une session suivante le croit. C'est
+  la Règle d'or n°3 appliquée à ce fichier lui-même. Ce qui n'a pas été vérifié s'écrit
+  « à confirmer », pas au présent de l'indicatif.
+
+**LA NOTE DE LIVRAISON — dire ce qui change, FICHIER PAR FICHIER.**
+
+Une livraison n'est pas une liste de fichiers joints. Nico doit pouvoir décider **quoi remplacer**
+sans ouvrir un seul fichier. Chaque lot se termine donc par un tableau :
+
+| Fichier | Ce qui change | Bump ? |
+|---|---|---|
+| `src/pilotage.js` | ce que ça change **pour l'utilisateur**, en une ligne | — |
+| `src/utils.js` | idem | ★ APP |
+
+- **Une ligne par fichier**, écrite du point de vue de l'effet, pas de la mécanique.
+- **La colonne bump est obligatoire** — c'est l'erreur la plus coûteuse du projet, et la seule
+  qu'on ne rattrape pas : réutiliser un numéro déjà en ligne fige l'ancien `index.html` **pour
+  toujours** chez les clients qui l'ont déjà pris.
+- **Ce qui a été mesuré** se dit avec son chiffre, jamais « tout est vert » : le code retour de
+  `npm run check`, les cliquets avant → après, le nombre d'assertions.
+- **Ce qui n'a PAS été vérifié se dit aussi.** Aucun harnais ne lit une mise en page : ce qui
+  s'inspecte à l'œil doit être nommé, pour que Nico sache ce qu'il lui reste à regarder.
 
 ---
 
@@ -9573,3 +9613,175 @@ assertion ne lit une incohérence entre deux lignes qu'elle ne compare pas.
 - **« ETP » à l'écran** (cf. 55i).
 - `npm run lint` non joué (ESLint ne s'installe pas dans le bac à sable) · `smoke` et `e2e` non
   joués (Playwright, idem).
+
+---
+
+## 56. ★★★ LES CONSOMMABLES PAR ATELIER, ET UN PRIX QUI VALAIT ZÉRO DEPUIS TOUJOURS (23/08 — APP 6.47 → 6.48 · SW 7.02 → 7.03)
+
+**La demande de Nico** : savoir ce que coûtent la cave (SO₂, levures), la vigne (piquet, fil,
+agrafe) et le tracteur (carburant, révisions). Trois questions posées d'emblée : *comment trier ?
+comment ne pas compter deux fois ? sans rajouter de temps de saisie ?*
+
+### 56a. Le défaut trouvé en cherchant autre chose
+
+`produits[].prixU` n'avait **aucune interface d'écriture**. Six occurrences dans tout le dépôt,
+dont **trois dans les données de démonstration** et deux qui le lisent. Conséquence mesurée :
+`_ecoPhytoByParc` rangeait chaque produit dans `unpriced`, et **le coût phyto par parcelle était à
+zéro chez MG comme chez Chapelle, depuis le premier jour, sans que rien ne le dise.**
+
+Le prix ÉTAIT saisi — `achats[].prix`, un total HT par ligne — mais jamais ramené à l'unité. Le
+patron existait déjà à côté : `_mvPaieGnrPMP` fait exactement ça pour le carburant.
+
+★ **Les lignes sans prix sont ÉCARTÉES du quotient, pas comptées à zéro.** Sur un cas à trois
+factures, les compter aurait donné un prix **11,8 % trop bas** — une moyenne tirée vers le bas
+sans en avoir l'air. *Une donnée absente n'est pas une donnée nulle : c'est la même faute que
+« source absente ⇒ tiret, jamais zéro », commise dans un quotient.*
+
+### 56b. L'arbitrage : ce qui entre, ce qui n'entre pas
+
+Nico a tranché lui-même, et son critère vaut mieux que le critère comptable parce qu'il ne demande
+aucun arbitrage devant une facture : **« est-ce que je le rachète l'an prochain ? »**
+
+| Entre | N'entre pas |
+|---|---|
+| SO₂, levures, phyto · piquets, fil, agrafes | une charrue, du matériel, un outil porté |
+| une révision, une réparation | un fût **acheté** |
+| une **location** de fûts (c'est un loyer) | |
+
+⚠️ **Les fûts sont hors périmètre, et le code le disait déjà** : `CONFIG.cave.futs_vie` les traite
+comme durables (5 vins) et le plan de renouvellement a son propre écran. Les mettre aussi dans les
+consommables aurait créé **deux endroits répondant à la même question avec deux durées
+différentes**. → La formule qui tranche tout, y compris leasing / location / achat :
+**on chiffre ce qu'on paie cette année, pas ce qu'on possède.**
+
+### 56c. Comment ne pas compter deux fois — quatre pièges
+
+1. **Achat ≠ consommation.** Déjà désamorcé, et ça doit le rester : `phyConso` est **hors total**.
+   Un achat est un décaissement, une conso une valorisation de stock. La vue atelier se construit
+   sur les **décaissements**.
+2. **La conduite du tracteur est déjà dans le planning.** L'atelier Tracteur porte GNR + pièces +
+   prestations, **jamais des heures** — sinon la même heure serait payée deux fois.
+3. **Le fût compté deux fois** (parc + ligne d'achat) : réglé par 56b, il est hors périmètre.
+4. **L'invariant, affiché et non promis** : `Σ ateliers === achats + GNR + dépenses`, salaires
+   dehors. ★ Il est **à l'écran**, pas seulement au harnais : *un lecteur qui voit l'égalité tomber
+   juste n'a pas besoin qu'on lui promette qu'elle l'est.*
+
+### 56d. Le trou nommé plutôt que masqué
+
+**Les salaires ne sont pas répartissables.** Une entrée de planning porte des heures, un type de
+congé, un motif d'absence — **jamais une activité**. Rien ne dit si une journée est partie à la
+vigne ou à la cuverie.
+
+Deux sorties possibles : mentir par omission, ou **le dire dans le titre**. L'écran s'appelle
+« Les consommables » et le cadre doré l'écrit. *Un indicateur qui ne peut pas tout couvrir doit
+nommer ce qu'il laisse dehors — sinon il ment avec l'autorité d'une mesure* (§20b, l'écart de
+cadence faux d'un facteur 5).
+
+### 56e. Deux réponses qui étaient « non »
+
+- **Un onglet Achat dans Pilotage** (proposé par Nico) : non. `_rsvSaveAchat` écrit déjà les
+  achats, et le stock est **dérivé**, jamais stocké — il n'y a rien à « alimenter ». Surtout,
+  **Pilotage n'écrit aucun fait d'exploitation** : mesuré, 6 écritures dans ~9 800 lignes, toutes
+  sur `config` et `saisons`. Le jour où il enregistre un achat, il devient une seconde source. →
+  **Un bouton, pas un onglet.**
+- **Une révision dans `produits[]`** : non. Elle n'a pas de stock ; le produit fantôme ferait
+  crier à tort l'alerte de stock négatif. → clé `INTRANTS.depenses[]`, sept champs, aucune
+  quantité. *La frontière tient en une question : on reçoit de la marchandise, ou une
+  intervention ?*
+
+### 56f. Ce que les filets ont attrapé, et que je n'aurais pas vu
+
+- **`window.showPage` n'existe pas** — c'est `goTo`. Mon `typeof … === 'function'` était faux à
+  tous les coups : **le bouton n'aurait rien fait, sans erreur en console.**
+- **`_pilGo` fait `if(!C) return;`** sur une cible inconnue. Mes trois constats visaient des cibles
+  absentes de `_PIL_DIAG_CIBLES` : **mêmes boutons muets.** ★ Deux no-op silencieux dans un seul
+  lot, de la même famille. C'est désormais une assertion du harnais.
+- **`.mvr-empty-t` / `.mvr-empty-s` n'existent pas** dans la feuille : deux blocs nus, en silence.
+- **C15 a attrapé une fonction morte** que j'avais écrite « pour plus tard ». La supprimer était le
+  geste facile ; **la brancher était l'intention** — le prix moyen s'affiche maintenant sur la fiche
+  produit, avec le nombre d'achats sans prix. *Un contrôle qui dit « inutilisée » demande d'abord
+  pourquoi elle a été écrite.*
+- **Le cliquet d'émojis a mordu** (+2 · +5). Effet de bord utile : le symbole `euro`, **sans
+  appelant depuis DS-2b**, revit sur l'onglet Dépenses.
+
+### 56g. ⚠️⚠️ UNE ASSERTION FAUSSE PEUT CACHER UN CODE JUSTE
+
+Le harnais a sorti deux rouges sur l'atelier Tracteur et sur le total des dépenses. **Réflexe
+appliqué : réarbitrer À LA MAIN, hors du harnais, avant de toucher au code.**
+
+```
+prestations tracteur dans la fenêtre : 2173,5   (mon assertion disait 1773,5)
+total dépenses                       : 3373,5   (mon assertion disait 2953,5)
+```
+
+**Le code avait raison ; mes deux valeurs attendues étaient mal calculées.** Corrigées — puis j'ai
+**remis la valeur fausse** pour vérifier que le harnais rougissait toujours.
+★ *Quand une assertion tombe, la première question n'est pas « où est le bug » mais
+« laquelle des deux a tort ».* Corriger le code sur la foi d'une assertion fausse, c'est
+introduire un défaut en croyant en réparer un.
+
+### 56h. ★★★ UNE MAQUETTE VALIDÉE EST UNE DÉCISION PRISE
+
+> ★★★ **Dit par Nico le 23/08** : « si je dis oui pour la maquette, c'est oui pour la maquette,
+> il n'y a pas de modification à faire ».
+
+J'avais dévié sur **quatre points** en intégrant, sans le signaler :
+
+| | Maquette | Ce que j'avais livré |
+|---|---|---|
+| couleur du seau « non affecté » | `#DED7C9` | `#B7AE9C` — « pour que ça se voie mieux » |
+| boutons d'action du Pilotage | 3 | 2 |
+| « ce qui n'entre pas » | une **carte** | une note en bas de page |
+| export PDF des dépenses | présent | absent |
+
+Chacun avait sa petite justification, et c'est exactement le problème : **rouvrir un choix validé
+au moment de l'intégration, c'est décider à la place de Nico en silence.** Les quatre sont revenus
+à la maquette, et la fidélité est passée au harnais (5 assertions).
+
+⚠️ **La seule exception, et elle se dit** : la maquette montre deux émojis, le cliquet des icônes
+en interdit l'ajout. On garde **la mise en page et le texte** validés, on rend les pictos par le
+sprite. *Qu'un picto soit un caractère Unicode ou un SVG est une contrainte du code, pas un choix
+de design* — la distinction est ce qui rend l'exception acceptable plutôt qu'arbitraire.
+
+### 56i. Les trois alertes, et pourquoi le seuil est à 20 %
+
+Nico : *« oui, s'il faut signaler quand les calculs paraissent un peu aberrants »*.
+
+| Gravité | Constat | Ce qu'il dit de faire |
+|---|---|---|
+| `o` | seau « non affecté » **≥ 20 %** | changer la catégorie, sans rien resaisir |
+| `o` | lignes d'achat sans prix | le total est un plancher, pas une mesure |
+| `r` | l'invariant ne tombe pas juste | « défaut de l'application, pas de vos données » |
+
+⚠️ **Seuil à 20 %, pas à 10.** Les achats d'un domaine qui démarre portent tous les catégories
+historiques et tombent d'eux-mêmes dans un atelier : **une alerte bavarde apprend à ignorer la
+liste** — le pire défaut qu'un diagnostic puisse avoir.
+
+⚠️⚠️ **Leçon du constat supprimé le 12/08** (« N périodes se chevauchent »), appliquée ici : il
+accusait le calendrier d'une faute que le calcul ne commettait pas, et poussait à défaire des
+périodes justes pour faire taire une alerte. Ces trois constats décrivent **des faits mesurés** et
+disent **quoi faire** — jamais « votre chiffre est bizarre ».
+
+### 56j. Deux filets qui existaient et ne tournaient jamais
+
+`mv-harnais-info.mjs` (**128 assertions**) et `harnais-claude-md.mjs` (**27**) n'étaient **dans
+aucun `check`**. Ajoutés à `check` et `prebuild` avec `mv-harnais-ateliers.mjs`.
+
+★ Le second était **rouge sur trois assertions, avant ce lot** : la règle d'or n°6 et la note de
+livraison avaient été codées dans le harnais mais **jamais écrites dans le document**. *Un filet
+qu'on n'exécute pas n'est pas un filet — il ne fait que donner l'illusion d'un.*
+
+### 56k. Ce qui reste ouvert
+
+- ⚠️ **Personne n'a regardé l'écran.** Les 36 assertions tiennent des euros, des cibles, des
+  couleurs en hexadécimal. **Aucune ne lit une mise en page** (§42h) : la bascule à deux axes, la
+  barre à quatre parts et la ligne de contrôle sont à voir à l'œil, en fenêtre privée `ngdevpro`.
+- ⚠️ **Le total de l'exercice change** : les dépenses y entrent, donc coût/ha et comparaison N−1
+  bougent. Les **trois** sommes `sal+gnr+ach` ont été corrigées ensemble — en oublier une aurait
+  sous-compté le graphe en silence. Une assertion dédiée les tient.
+- **Le doublon de facture n'est pas détecté.** `achats[].fact` et `depenses[].fact` existent ;
+  un avertissement sur numéro déjà vu coûterait trois lignes. Non fait.
+- **Chiffrer le plan de renouvellement des fûts** reste ouvert (`CONFIG.cave.fut_prix` sans
+  interface) : c'est le pendant « durable » de ce lot, hors de son périmètre par décision.
+- `npm run lint`, `smoke` et `e2e` non joués (ESLint et Playwright ne s'installent pas dans le bac
+  à sable).

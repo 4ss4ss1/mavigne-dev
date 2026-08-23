@@ -10,11 +10,36 @@
 
   <h3>🧪 Intrants</h3>
   <ul class="dot">
-    <li>Deux familles : les intrants <b>phytosanitaires</b> et les intrants <b>œnologiques</b>.</li>
+    <li>Six familles : <b>phyto</b> et <b>œno</b> pour la comptabilité bio, plus les
+    <b>fournitures de vigne</b> (piquet, fil, agrafe), les <b>fournitures de cave</b> (bouchon,
+    capsule, nettoyage), les <b>pièces de tracteur</b> (filtre, huile, courroie) et un
+    <b>général</b> pour tout le reste.</li>
+    <li>La famille choisie <b>range l'achat dans un atelier</b> — vigne, cave ou tracteur — et
+    l'écran vous le montre au moment de la saisie. Vous ne remplissez rien de plus : c'est le même
+    champ qu'avant, avec quatre choix supplémentaires.</li>
     <li>Pour chaque produit : inventaire d'ouverture, achats datés, contenance, fournisseur.</li>
     <li>Les produits phyto se déclarent depuis <b>E-Phy</b> (AMM et substance enregistrées), avec un
     repli manuel si nécessaire. L'œnologie reste en texte libre — E-Phy ne couvre ni le SO₂ ni les levures.</li>
   </ul>
+
+  <h3>🧾 Dépenses</h3>
+  <p>Certaines dépenses reviennent tous les ans <b>sans jamais avoir de stock</b> : une révision,
+  une réparation, une location de fûts. Elles n'avaient nulle part où aller — elles ont maintenant
+  leur onglet.</p>
+  <ul class="dot">
+    <li>Six champs : date, atelier, libellé, fournisseur, numéro de facture, montant.
+    <b>Aucune quantité</b> — c'est ce qui distingue une dépense d'un achat d'intrant.</li>
+    <li><b>Le montant est facultatif.</b> Une ligne sans prix est comptée et signalée dans le
+    Pilotage, jamais arrondie à zéro en silence.</li>
+    <li>Un export PDF reprend le détail ligne par ligne, avec le récapitulatif par atelier.</li>
+  </ul>
+  <div class="note info"><span class="ni" aria-hidden="true">🎯</span><div><b>Ce qui entre, et ce
+  qui n'entre pas.</b> La question qui tranche : <b>est-ce que je le rachète l'an prochain ?</b>
+  Une révision, oui. Une charrue, non. Un fût acheté, non plus — il a sa propre durée de vie et son
+  écran de renouvellement dans le Pilotage. Une <b>location</b> de fûts, en revanche, oui : c'est un
+  loyer, pas un fût. <b>On note ce qu'on paie cette année, pas ce qu'on possède.</b></div></div>
+  <p>Ces lignes alimentent <b>Pilotage › Économie › Exercice</b>, où elles se répartissent par
+  atelier à côté des achats et du carburant.</p>
 
   <h3>📋 Le bilan matière</h3>
   <p>C'est le cœur du module. Le stock théorique se calcule sans aucune saisie supplémentaire :</p>
@@ -29,6 +54,12 @@
     <li>Un écart visible entre stock théorique et stock réel est une information utile, pas une faute :
     il pointe une saisie oubliée.</li>
   </ul>
+
+  <div class="note info"><span class="ni" aria-hidden="true">💶</span><div><b>Le prix moyen d'un
+  intrant ne se saisit pas.</b> Il se calcule sur vos factures — les euros divisés par les
+  quantités — et s'affiche sur la fiche du produit. Les lignes d'achat saisies sans prix sont
+  <b>écartées du calcul</b> plutôt que comptées à zéro : sinon la moyenne serait tirée vers le bas
+  sans en avoir l'air. La fiche dit sur combien d'achats elle porte.</div></div>
 
   <h3>🛒 Le parc à fûts</h3>
   <p>L'onglet s'ouvre sur le <b>parc entier</b> : les fûts vides du magasin <b>et</b> ceux qui sont

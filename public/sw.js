@@ -1,4 +1,46 @@
-// MA VIGNE — Service Worker v7.02
+// MA VIGNE — Service Worker v7.03
+// v7.03 (23/08/2026) — LES CONSOMMABLES PAR ATELIER. APP 6.47 -> 6.48.
+//   Economie > Exercice repartit desormais les consommables par ATELIER (vigne,
+//   cave, tracteur, non affecte) en plus de leur nature. C'est un SECOND AXE sur
+//   les MEMES euros : la somme des ateliers vaut exactement achats + GNR +
+//   depenses, et la ligne de controle l'AFFICHE au lieu de le promettre.
+//   ★ L'atelier ne se saisit jamais : il se DEDUIT de la categorie de l'intrant
+//   (4 categories ajoutees au selecteur existant, aucun champ neuf). Seule une
+//   depense le porte, faute de categorie d'ou le tirer.
+//   ⚠ LES SALAIRES N'Y SONT PAS, et l'ecran le dit : une entree de planning porte
+//   des heures, jamais une activite. La conduite du tracteur reste dans la masse
+//   salariale — seul son carburant compte ici, sinon la meme heure serait payee
+//   deux fois.
+//   ★ 4e onglet « Depenses » dans La Reserve : revisions, reparations, locations
+//   de futs. Un consommable SANS STOCK — le forcer dans produits[] aurait cree un
+//   produit fantome et fait crier a tort l'alerte de stock negatif. Cle
+//   INTRANTS.depenses[], ajoutee au garde anti-ecrasement (_mvIntrantsCount).
+//   ⚠⚠ DEFAUT CORRIGE, ACTIF DEPUIS LE PREMIER JOUR : produits[].prixU n'avait
+//   AUCUNE interface d'ecriture (6 occurrences, dont 3 en donnees de demo). Le
+//   cout phyto par parcelle etait donc a ZERO chez tous les domaines reels, sans
+//   que rien ne le signale. Il derive maintenant d'un PMP sur achats[].prix, sur
+//   le patron de _mvPaieGnrPMP. Les lignes sans prix sont ECARTEES du quotient,
+//   pas comptees a zero : sur un cas a trois factures, l'ecart etait de 11,8 %.
+//   ★ Filet neuf : scripts/mv-harnais-ateliers.mjs (25 assertions, 4
+//   contre-epreuves) + mv-harnais-info.mjs AJOUTE A LA CHAINE — il existait,
+//   128 assertions, et ne tournait dans aucun check.
+//   ★ Trois constats au diagnostic : seau « non affecte » >= 20 % (la
+//   repartition reste juste mais comparer les ateliers ne veut plus dire
+//   grand-chose), lignes d'achat sans prix (un atelier peut sembler bon marche
+//   parce que ses factures ne sont pas chiffrees), et l'invariant casse en
+//   gravite 'r'. Deux cibles ajoutees a _PIL_DIAG_CIBLES + une cible interne
+//   'exercice' : sans elles, _pilGo fait un `return` MUET et le bouton ne fait
+//   rien — le meme no-op silencieux qu'un window.showPage inexistant.
+//   ★ Retour a la maquette validee sur trois ecarts que j'avais introduits sans
+//   le dire : couleur du seau (#DED7C9, pas #B7AE9C), 3e bouton « Voir les
+//   depenses », hors-perimetre en CARTE et non en note. Une maquette validee est
+//   une decision prise ; la rouvrir a l'integration, c'est decider a la place de
+//   Nico en silence. Ajout de l'export PDF des depenses, oublie.
+//   ⚠ Conflit assume : la maquette montre deux emojis, le cliquet des icones en
+//   interdit l'ajout. On garde la mise en page et le texte valides, on rend les
+//   pictos par le sprite (outil, check) — c'est une contrainte du code, pas un
+//   choix de design.
+//   Fichiers : pilotage.js, reserve.js, firebase.js, utils.js, index.html, scripts/.
 // v7.02 (23/08/2026) — LE JOUR D'APRES TOMBAIT SUR LE MEME JOUR. APP 6.46 -> 6.47.
 //   _mvJourApres (utils.js) lisait 'YYYY-MM-DDT00:00:00' en heure LOCALE puis
 //   reserialisait en UTC : a Paris minuit local vaut 22 h ou 23 h la VEILLE en UTC,
@@ -2331,7 +2373,7 @@
 // v2.22 — Fix profils vides : guard vide dans loadData() pour MEMBRES/SAISONS/TACHES
 // v2.17 — Onboarding intégré + tenantId · v2.06 — Firebase Auth · v2.00–v2.05 — divers
 const DEBUG = self.location.hostname === 'localhost' || self.location.hostname === '127.0.0.1';
-const CACHE_NAME   = 'mavigne-v7.02';
+const CACHE_NAME   = 'mavigne-v7.03';
 const TENANT_CACHE = 'mavigne-tenant';   // Cache persistant — préservé à chaque mise à jour SW
 const SYNC_TAG     = 'mavigne-sync';
 
@@ -2347,7 +2389,7 @@ const CDN_URLS = [
 ];
 
 self.addEventListener('install', event => {
-  if(DEBUG) console.log('[SW] Ma Vigne v7.02 installé');
+  if(DEBUG) console.log('[SW] Ma Vigne v7.03 installé');
   event.waitUntil(
     caches.open(CACHE_NAME).then(async cache => {
       // ── Cœur applicatif : STRICT (mise à jour ATOMIQUE) ──
@@ -2363,7 +2405,7 @@ self.addEventListener('install', event => {
 });
 
 self.addEventListener('activate', event => {
-  if(DEBUG) console.log('[SW] Ma Vigne v7.02 activé');
+  if(DEBUG) console.log('[SW] Ma Vigne v7.03 activé');
   event.waitUntil(
     caches.keys().then(keys =>
       Promise.all(
