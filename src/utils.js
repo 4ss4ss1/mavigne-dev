@@ -23,7 +23,7 @@ export const GT_ADMIN_EMAIL = 'ngdevpro@gmail.com';
 // WHATS_NEW   : tableau vide = modal desactive pour cette version.
 // Format item : { emoji:'📅', titre:'Titre court', desc:'Phrase utilisateur.' }
 // Regle : seulement les changements visibles par les utilisateurs.
-export const APP_VERSION = '6.46';
+export const APP_VERSION = '6.47';
 // ════ Journal des nouveautés (récap cumulatif) ════
 // Une entrée par version, la PLUS RÉCENTE EN HAUT : { v:'5.10', items:[ {emoji,titre,desc}, … ] }
 // À chaque release visible → AJOUTER un bloc en tête (ne pas remplacer). items:[] = release technique (rien à afficher).
@@ -354,6 +354,9 @@ window._mvGraphRepeindre = function(){
 };
 
 export const WHATS_NEW = [
+  { v: '6.47', items: [
+    { emoji: 'calendrier', titre: 'Deux contrats qui se suivent n\u2019en font bien qu\u2019un', desc: "Quand un contrat se termine un 30 juin et que le suivant commence le 1er juillet, l\u2019application doit les traiter comme <b>une seule p\u00e9riode</b> \u2014 un seul compteur d\u2019heures, un seul plafond annuel. Elle ne le faisait plus : une comparaison de dates se trompait d\u2019un jour, et les deux contrats repartaient chacun de z\u00e9ro. Sur une feuille d\u2019heures, le compteur pouvait alors m\u00e9langer les deux. <b>Aucune saisie n\u2019est \u00e0 refaire</b> : le calcul se corrige tout seul \u00e0 la prochaine ouverture." }
+  ] },
   { v: '6.46', items: [
     { emoji: 'balance', titre: 'Les chiffres s\u2019alignent enfin en colonne', desc: "Dans un tableau, un \u00ab 1 \u00bb est bien plus \u00e9troit qu\u2019un \u00ab 0 \u00bb : deux lignes l\u2019une sous l\u2019autre ne tombaient jamais en face. Sur les \u00e9crans du Pilotage et du Planning, l\u2019\u0153il devait relire chaque ligne au lieu de balayer la colonne. Tous les chiffres de l\u2019application ont d\u00e9sormais <b>la m\u00eame largeur</b>, d\u2019un bout \u00e0 l\u2019autre \u2014 les tableaux, les totaux et les heures se lisent en descendant. <b>Aucun chiffre n\u2019a chang\u00e9 de valeur</b> : c\u2019est leur alignement qui bouge, pas leur calcul." },
     { emoji: 'cible', titre: 'On voit o\u00f9 l\u2019on est quand on navigue au clavier', desc: "Sur ordinateur, en passant d\u2019un champ \u00e0 l\u2019autre avec la touche Tab, rien ne disait o\u00f9 l\u2019on \u00e9tait : il fallait cliquer pour en \u00eatre s\u00fbr. Un <b>liser\u00e9 dor\u00e9</b> entoure maintenant l\u2019\u00e9l\u00e9ment actif. Il n\u2019appara\u00eet qu\u2019au clavier \u2014 \u00e0 la souris et au doigt, rien ne change, et sur le t\u00e9l\u00e9phone au vignoble l\u2019\u00e9cran est strictement identique." }
@@ -3274,11 +3277,27 @@ window._mvContrats = function(m){
 // Le lendemain d'une date ISO. Sert la regle de contiguite ci-dessus : passer par
 // Date evite le piege du 31 -> 01 et des fins de mois (un simple +1 sur la chaine
 // donnerait '2026-07-32').
+// ★★★ LE JOUR SUIVANT, ET RIEN QUE LUI. Tout est en UTC, de bout en bout.
+//   ⚠⚠⚠ CE QUI ETAIT ECRIT MELANGEAIT DEUX HORLOGES : `Date.parse('2026-06-30T00:00:00')`
+//   — sans suffixe de fuseau — lit MINUIT LOCAL, puis `toISOString()` reserialise en UTC.
+//   A Paris (UTC+1 l'hiver, UTC+2 l'ete) minuit local vaut 22 h ou 23 h la VEILLE en UTC :
+//   +24 h retombe donc sur le MEME JOUR. _mvJourApres('2026-06-30') rendait '2026-06-30'.
+//   ★★ Consequence en production, pour TOUS les clients, TOUTE l'annee : _mvContrats ne
+//   fusionnait plus jamais deux contrats contigus (fin 30/06 → debut 01/07). Le releve
+//   d'heures perdait alors son contexte de contrat — _planCtrDuMois exige UNE seule
+//   periode — et melangeait les compteurs des deux contrats.
+//   ⚠ Le bac a sable de Claude tourne en UTC : c'est le SEUL endroit au monde ou ce code
+//   etait juste. Trouve le 23/08/2026 par un harnais lance sur la machine de Nico.
+//   Voir le harnais mv-harnais-fuseau.mjs, qui rejoue les fonctions de dates sous cinq
+//   fuseaux et exige un resultat IDENTIQUE.
 window._mvJourApres = function(iso){
   if(!iso) return '';
-  var t = Date.parse(iso + 'T00:00:00');
-  if(isNaN(t)) return iso;
-  return new Date(t + 86400000).toISOString().split('T')[0];
+  var m = /^(\d{4})-(\d{2})-(\d{2})/.exec(String(iso));
+  if(!m) return iso;
+  var d = new Date(Date.UTC(+m[1], +m[2] - 1, +m[3]));
+  if(isNaN(d.getTime())) return iso;
+  d.setUTCDate(d.getUTCDate() + 1);
+  return d.toISOString().slice(0, 10);
 };
 
 window._mvEnContratSurPeriode = function(m, d0, d1){

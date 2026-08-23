@@ -1,4 +1,13 @@
-// MA VIGNE — Service Worker v7.01
+// MA VIGNE — Service Worker v7.02
+// v7.02 (23/08/2026) — LE JOUR D'APRES TOMBAIT SUR LE MEME JOUR. APP 6.46 -> 6.47.
+//   _mvJourApres (utils.js) lisait 'YYYY-MM-DDT00:00:00' en heure LOCALE puis
+//   reserialisait en UTC : a Paris minuit local vaut 22 h ou 23 h la VEILLE en UTC,
+//   donc +24 h retombait sur le MEME JOUR. _mvContrats ne fusionnait plus jamais
+//   deux contrats contigus (fin 30/06 -> debut 01/07), et le releve d'heures perdait
+//   son contexte de contrat. Defaut ACTIF chez tous les clients, toute l'annee.
+//   Le bac a sable de Claude tourne en UTC : seul endroit ou le code etait juste.
+//   ★ Filet neuf : scripts/mv-harnais-fuseau.mjs rejoue les dates sous cinq fuseaux
+//   et exige un resultat identique. Ajoute a npm run check et a prebuild.
 // v7.01 (23/08/2026) — DS-0, LE SOCLE DE LA CHARTE. APP 6.45 → 6.46.
 //   Jetons poses dans :root de styles.css : rayons (--r-sm/md/lg/full),
 //   graisses (--fw-med/semi/bold), --shadow-lg (3e pas d'elevation),
@@ -2322,7 +2331,7 @@
 // v2.22 — Fix profils vides : guard vide dans loadData() pour MEMBRES/SAISONS/TACHES
 // v2.17 — Onboarding intégré + tenantId · v2.06 — Firebase Auth · v2.00–v2.05 — divers
 const DEBUG = self.location.hostname === 'localhost' || self.location.hostname === '127.0.0.1';
-const CACHE_NAME   = 'mavigne-v7.01';
+const CACHE_NAME   = 'mavigne-v7.02';
 const TENANT_CACHE = 'mavigne-tenant';   // Cache persistant — préservé à chaque mise à jour SW
 const SYNC_TAG     = 'mavigne-sync';
 
@@ -2338,7 +2347,7 @@ const CDN_URLS = [
 ];
 
 self.addEventListener('install', event => {
-  if(DEBUG) console.log('[SW] Ma Vigne v7.01 installé');
+  if(DEBUG) console.log('[SW] Ma Vigne v7.02 installé');
   event.waitUntil(
     caches.open(CACHE_NAME).then(async cache => {
       // ── Cœur applicatif : STRICT (mise à jour ATOMIQUE) ──
@@ -2354,7 +2363,7 @@ self.addEventListener('install', event => {
 });
 
 self.addEventListener('activate', event => {
-  if(DEBUG) console.log('[SW] Ma Vigne v7.01 activé');
+  if(DEBUG) console.log('[SW] Ma Vigne v7.02 activé');
   event.waitUntil(
     caches.keys().then(keys =>
       Promise.all(

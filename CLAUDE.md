@@ -3,7 +3,8 @@
 > Document de référence du projet **Ma Vigne** (GUERETTECH). Il est le **porteur de vérité** :
 > la mémoire Claude est plafonnée, ce fichier ne l'est pas.
 > Dernière consolidation : **23 août 2026** — ★★★ **LA FEUILLE D'HEURES DISAIT +8H30 LÀ OÙ ELLE
-> DEVAIT DIRE −9H (§55)**. `planning.js` seul, **APP 6.46 · SW 7.01, aucun bump**.
+> DEVAIT DIRE −9H (§55)**. **APP 6.46 → 6.47 · SW 7.01 → 7.02** — le lot a commencé à « aucun
+> bump » et a fini dans `utils.js` : voir **§55o**, le défaut le plus grave des trois.
 > ★★★ **UNE RÉFÉRENCE CALCULÉE SUR LE RÉSULTAT NE MESURE PLUS RIEN** : `_planRempH` définissait la
 > référence d'un jour de remplacement par les heures **FAITES**, ce qui force l'écart à zéro
 > *dans les deux sens* — arriver à 10 h ne devait rien, faire douze heures ne créditait rien.
@@ -36,6 +37,18 @@
 > interface* : c'est §53 en plus discret. L'injustifiée sort de la fenêtre, comme le retard.
 > ⚠️ **C3/C4 du harnais du retard gardaient ce trou sous le nom « non-régression »** — deuxième
 > assertion du lot qui gravait un défaut au lieu de le tenir.
+> ★★★ **ET LE HARNAIS, UNE FOIS RÉPARÉ, A TROUVÉ UN DÉFAUT DE PRODUCTION QUE JE NE POUVAIS PAS
+> VOIR (§55o).** `_mvJourApres` (`utils.js`) lisait `'…T00:00:00'` en **heure LOCALE** puis
+> resérialisait en **UTC** : à Paris, minuit local vaut 22 h ou 23 h **la veille** en UTC, donc
+> **+24 h retombait sur le MÊME JOUR**. `_mvContrats` **ne fusionnait plus jamais deux contrats
+> contigus** (fin 30/06 → début 01/07), et le relevé d'heures perdait alors son contexte de
+> contrat — `_planCtrDuMois` exige UNE période — et **mélangeait les compteurs des deux contrats**.
+> ⚠️⚠️⚠️ **Actif chez TOUS les clients, TOUTE l'année.** Le bac à sable de Claude tourne en **UTC** :
+> *le seul fuseau au monde où ce code était juste.* Deuxième défaut de suite que seule la machine
+> de Nico révèle, après Windows.
+> ★★ **Filet neuf : `mv-harnais-fuseau.mjs`** rejoue les fonctions de dates sous **cinq fuseaux**
+> et exige un résultat **identique**. La règle est générale : *une fonction de dates dont le
+> résultat bouge avec le fuseau mélange deux horloges.* Ajouté à `check` et `prebuild`.
 > ★ `mv-harnais-releve.mjs` **ne tournait dans aucune chaîne depuis le 13/08** — ajouté à `check`.
 > ⚠️⚠️⚠️ **ET IL A PLANTÉ CHEZ NICO AU PREMIER LANCEMENT, EN BLOQUANT LE DÉPLOIEMENT (§55n).**
 > `await import(CIBLE)` : sous Windows `path.resolve()` rend « C:\… » et Node lit « c: » comme un
@@ -4328,10 +4341,17 @@ lignes qu'il faut regarder en premier** — pas le diff, qui noie le signal dans
    l'entrée à neuf : un jour d'échange y perd drapeau et horaire. Effet moins grave (l'écart y reste
    neutre au lieu de devenir faux), **mais c'est le même défaut**. Remède propre : **un point de
    passage unique** « conserver la nature du jour », avec son harnais. Lot à part, pas un ajout.
-3. ⚠️⚠️ **Les harnais ne tournent JAMAIS sur Windows côté Claude.** C26 couvre désormais le piège
+3. ⚠️⚠️ **`new Date().toISOString().slice(0,10)` — 64 occurrences, « aujourd'hui » en UTC.**
+   Entre minuit et 2 h du matin à Paris, elles rendent **la veille** : date de journal, date
+   d'édition, comparaison « en cours », échéances. `_mvAujIso()` (la forme juste) existe dans
+   `utils.js` depuis toujours et **n'est appelée qu'à 7 endroits**. Lot à part : mesurer d'abord
+   lesquelles sont visibles du client, puis convertir — pas un chercher-remplacer.
+4. ⚠️⚠️ **Les harnais ne tournent JAMAIS sur Windows côté Claude.** C26 couvre désormais le piège
    `import()`, mais pas les autres (séparateurs de chemin, CRLF, casse des noms de fichiers). ★ La
    seule parade réelle : **Nico lance `npm run check` avant que je déclare un lot vert**. Trois
-   plantages Windows en trois lots livrés verts (§53, §55n).
+   plantages Windows en trois lots livrés verts (§53, §55n) — **et un défaut de production que
+   seul son fuseau révélait** (§55o). ★ Côté Claude, désormais : lancer aussi
+   **`TZ=Europe/Paris npm run check`**, qui est le fuseau réel de tous les clients.
 4. ⚠️ **Sortir un vrai PDF de la feuille d'heures et LE REGARDER.** 83 assertions tiennent les
    tailles, les graisses, les marges et les bornes — **aucune ne lit une mise en page** (§42h).
    C'est le point faible du paquet, avant tout envoi client.
@@ -8991,7 +9011,7 @@ de correction manquée.
 - `npm run lint` **non joué** (ESLint ne s'installe pas dans le bac à sable) · `smoke` et `e2e`
   non joués (Playwright, idem).
 
-## 55. ★★★ LA FEUILLE D'HEURES DISAIT +8H30 LÀ OÙ ELLE DEVAIT DIRE −9H (23/08 — `planning.js` seul, aucun bump)
+## 55. ★★★ LA FEUILLE D'HEURES DISAIT +8H30 LÀ OÙ ELLE DEVAIT DIRE −9H (23/08 — APP 6.46 → 6.47 · SW 7.01 → 7.02)
 
 > **Point de départ**, en deux temps. D'abord le PDF « Heures — Victor — Août 2026 » :
 > *« encore des erreurs dans planning, il faut corriger ça. Corrige aussi les polices et les
@@ -9002,8 +9022,13 @@ de correction manquée.
 > planning était déjà prévu comme ça (puisque ça ira en remplacement d'un autre moment), donc
 > Victor doit logiquement être en heure négative sur ce planning ! »*
 
-**Livré** : `src/planning.js`, `scripts/mv-harnais-releve.mjs`, `scripts/mv-harnais-retard.mjs`,
-`package.json` (une ligne). **APP 6.46 · SW 7.01 inchangés** — module JS seul, cf. §25.
+**Livré** : `src/planning.js`, `src/utils.js`, `index.html`, `public/sw.js`, `package.json`,
+`scripts/preflight.mjs` (C26), `scripts/mv-harnais-releve.mjs`, `scripts/mv-harnais-retard.mjs`,
+`scripts/mv-harnais-fuseau.mjs` (neuf), `scripts/mv-harnais-vignoble.mjs`,
+`scripts/mv-harnais-cuvdoc.mjs`.
+⚠️ **APP 6.46 → 6.47 · SW 7.01 → 7.02.** Le lot a démarré à « aucun bump » (`planning.js` seul) et
+**a fini dans `utils.js`** : la règle de §25 impose alors le double bump. *Un lot qui change de
+périmètre change de règle de version — le relire à la fin, pas au début.*
 
 ---
 
@@ -9388,6 +9413,71 @@ fois** qu'un contrôle tombe sur les mots que je viens d'écrire (§53, §54). C
 
 **Contre-épreuves** : `import(CIBLE)` → 1 erreur · `import(path.resolve(x))` → 1 erreur ·
 forme corrigée → 0. Vérifiées en réinjectant chaque défaut.
+
+### 55o. ★★★ LE JOUR D'APRÈS TOMBAIT SUR LE MÊME JOUR — actif chez tous les clients
+
+Le harnais du relevé, une fois réparé (55n), a tourné **chez Nico**. Un rouge, en **section 0** —
+donc sur du code que ce lot n'avait pas touché :
+
+```
+ROUGE  Chloé n'en a qu'UNE (contrats contigus fusionnés)
+       → [{"debut":"2026-01-06","fin":"2026-06-30"},{"debut":"2026-07-01","fin":"2026-12-31"}]
+```
+
+**Vert chez moi. Rouge chez lui.** La cause, dans `utils.js` :
+
+```js
+var t = Date.parse(iso + 'T00:00:00');            // ← lu en heure LOCALE
+return new Date(t + 86400000).toISOString()…      // ← resérialisé en UTC
+```
+
+★★★ **`'2026-06-30T00:00:00'` sans suffixe de fuseau est lu comme minuit LOCAL.** À Paris, minuit
+local vaut **22 h (été) ou 23 h (hiver) la VEILLE en UTC**. Ajouter 24 h donne 22 h le 30 juin →
+`toISOString()` rend **`'2026-06-30'`**. **Le jour d'après tombait sur le même jour.**
+
+| fuseau | `_mvJourApres('2026-06-30')` |
+|---|---|
+| UTC (le bac à sable) | `2026-07-01` ✓ |
+| **Europe/Paris** | **`2026-06-30`** ✗ |
+
+**Ce que ça cassait en production** : `_mvContrats` teste la contiguïté par
+`c.debut <= _mvJourApres(p.fin)`. Avec un jour de retard, `'2026-07-01' <= '2026-06-30'` est faux :
+**deux contrats qui se touchent n'ont plus jamais fusionné.** Et `_planCtrDuMois` n'accepte le
+contexte de contrat que s'il trouve **UNE seule** période sur le mois — avec deux, il rend `null`,
+et le relevé d'heures est produit **hors de tout contrat**, compteurs des deux contrats mélangés.
+
+⚠️⚠️⚠️ **Actif chez MG, Chapelle et Garraud, toute l'année** — la France est à UTC+1 ou +2, jamais
+à 0. **Le bac à sable de Claude tourne en UTC : c'est le seul fuseau au monde où ce code était
+juste.** Aucun essai de mon côté ne pouvait l'attraper.
+
+**Correctif** — tout en UTC, de bout en bout, sans jamais toucher l'horloge locale :
+
+```js
+var d = new Date(Date.UTC(+m[1], +m[2] - 1, +m[3]));
+d.setUTCDate(d.getUTCDate() + 1);
+return d.toISOString().slice(0, 10);
+```
+
+★★ **Le filet : `scripts/mv-harnais-fuseau.mjs`.** Il se relance en fils, **un par fuseau** —
+UTC, Europe/Paris, Pacific/Auckland (+13), America/Los_Angeles (−8), Asia/Kolkata (+5:30) — et
+compare. La règle qu'il tient est générale et vaut pour tout le code à venir :
+
+> ★ *Une fonction qui manipule des dates-calendrier doit rendre EXACTEMENT le même résultat sous
+> n'importe quel fuseau. Si le résultat bouge, la fonction mélange deux horloges.*
+
+Dates d'épreuve choisies sur les charnières : bascules d'heure d'été (28-29 mars, 24-25 octobre),
+fins de mois, 28 et 29 février d'une année bissextile, 31 décembre. **17 assertions**, 3
+contre-épreuves. **Ajouté à `check` et `prebuild`.**
+
+**Audit de la même famille, mené sur tout le dépôt** : `toISOString()` apparaît **126 fois** dans
+`src/` et `functions/`. Un seul site mélangeait les deux horloges — celui-ci. Les autres
+`Date.parse(x+'T00:00:00')` calculent des **différences** entre deux dates lues de la même façon :
+le décalage s'annule, ils sont immunisés. **Zéro occurrence** de `new Date(y,m,d).toISOString()`.
+⚠️ **Mais 64 occurrences de `new Date().toISOString().slice(0,10)`** = « aujourd'hui » en UTC :
+**entre minuit et 2 h du matin à Paris, elles désignent la veille.** La forme juste,
+**`_mvAujIso()`, existe déjà dans `utils.js`** et n'est utilisée qu'à 7 endroits. Les deux sites
+du relevé sont corrigés ici (badge « en cours », date d'édition) ; **les 62 autres sont au
+backlog** — c'est un lot à part, avec sa mesure.
 
 ### 55l. Ce qui reste ouvert
 

@@ -5249,7 +5249,9 @@ function _planExportPDF_(nom,mbr,_ctr){
     for(var _k in _tm){ if(!/^\d+$/.test(_k))continue;
       if((parseFloat(_tm[_k])||0)<=0)continue;
       if(!_planInContractCtr(mbr,planMonth,parseInt(_k,10)))continue; _refJ++; } })();
-  var _edite=_planFmtJour(new Date().toISOString().slice(0,10));
+  // Idem : la date d'edition imprimee sur le document doit etre celle du domaine.
+  var _edite=_planFmtJour((typeof window._mvAujIso==='function')?window._mvAujIso()
+                          :new Date().toISOString().slice(0,10));
   // \u2605 BASE ABSOLUE. Le document naît dans une fenetre about:blank : sous iOS Safari,
   //   « /fonts/fonts.css » ne s'y resout pas et la feuille tombait en Times \u2014 la
   //   « mauvaise police » se voyait sur iPad, jamais sur le poste de bureau.
@@ -6271,7 +6273,12 @@ function _plRvJ(n){
 }
 
 function _plRvContratsHtml(mbr){
-  var _plRvAuj = new Date().toISOString().slice(0, 10);
+  // ⚠ `toISOString()` rend la date UTC : entre minuit et 2 h du matin a Paris, elle
+  //   designe LA VEILLE, et le badge « en cours » se pose sur le mauvais contrat.
+  //   _mvAujIso() (utils.js) lit l'horloge locale, ce qui est la seule bonne reponse
+  //   a « quel jour sommes-nous ». Meme famille que le defaut de _mvJourApres (§55o).
+  var _plRvAuj = (typeof window._mvAujIso === 'function') ? window._mvAujIso()
+               : new Date().toISOString().slice(0, 10);
   var P = (typeof window._mvPeriodes === 'function') ? (window._mvPeriodes(mbr) || [])
         : ((typeof window._mvContrats === 'function') ? (window._mvContrats(mbr) || []) : []);
   var annu = (typeof window._mvAnnualise === 'function') ? !!window._mvAnnualise(mbr) : true;
