@@ -62,7 +62,7 @@ function extraire(nom) {
 const VOULUES = [
   '_planMinOf', '_planAbsT', '_planAbsH', '_planAbsDef', '_planAbsMotif',
   '_planTimingH', '_planRetardFaites', '_planRetardH', '_planRetardVide',
-  '_planDayH', '_planWorkH', '_planAbsLostH', '_planApplyAbs', '_pl2Cell', '_planRefH',
+  '_planDayH', '_planWorkH', '_planRefPart', '_planAbsLostH', '_planApplyAbs', '_pl2Cell', '_planRefH',
   '_planDefTiming', '_planRetardBornes', '_planPlanned', '_planFmt', '_planDays'
 ];
 
@@ -135,6 +135,7 @@ const CODE = PRELUDE + '\n' + tableDefT + '\n' + tableMotifs + '\n' + morceaux.j
   _planRetardVide:_planRetardVide, _planRetardBornes:_planRetardBornes,
   _planTimingH:_planTimingH, _planDayH:_planDayH, _planWorkH:_planWorkH,
   _planAbsLostH:_planAbsLostH, _planApplyAbs:_planApplyAbs, _pl2Cell:_pl2Cell,
+  _planRefPart:_planRefPart,
   _planRefH:_planRefH,
   _planAbsMotif:_planAbsMotif, _planDefTiming:_planDefTiming,
   set:function(o){
@@ -381,14 +382,62 @@ eq('J11 · ★ la journée compte 8 h, pas 0', M._planDayH('A', 7, 12, eJ), 8);
 eq('J12 · travail effectif 8 h', M._planWorkH('A', 7, 12, eJ), 8);
 M.set({ ent: { Jean: { 7: { 12: eJ } } } });
 eq('J13 · ★ 0,5 h due au compteur', M._planAbsLostH(mbr, 7, true), 0.5);
-eq('J14 · 0,5 h neutralisée dans la référence', M._planAbsLostH(mbr, 7, false), 0.5);
+/* ⚠️⚠️ CETTE ASSERTION A ÉTÉ INVERSÉE LE 23/08/2026, ET C'EST LE POINT DU LOT.
+   Elle exigeait 0,5 h RETIRÉE DE LA RÉFÉRENCE sur un jour que la référence ne
+   contient pas : _planPlanned y vaut 0 et rien ne l'y fait entrer. Retirer d'un
+   compte vide le rend NÉGATIF — et l'écart du mois gagnait alors les 30 minutes
+   au lieu de les perdre. Sur la feuille d'août 2026 de Victor, ce seul jour
+   fabriquait +8 h 30 : 8 h faites comptées en heures supplémentaires, plus une
+   référence à −0 h 30. La dette, elle, reste due (J13) : ce sont deux registres.
+   Le jour d'échange, lui, EST dans la référence — J14b le montre juste en dessous. */
+eq('J14 · ★ rien à neutraliser : le jour n\'est pas dans la référence',
+   M._planAbsLostH(mbr, 7, false), 0);
 eq('J15 · la case porte 8 h, pas une croix', M._pl2Cell(mbr, 'A', 12, { maxJour: 12 }).cls, 'pl2c-late');
 
+/* ══ Jb · LE MÊME JOUR, MAIS EN ÉCHANGE ══════════════════════════════════
+   ★★ RÈGLE MÉTIER (Nico, redite plusieurs fois) : un jour de remplacement compte
+      comme un jour prévu — « comme si le planning était déjà prévu comme ça »,
+      puisque la contrepartie sera prise ailleurs. Il entre donc dans la référence
+      à hauteur de ce qui en était ATTENDU, et non de ce qui a été FAIT : une
+      référence calculée sur le résultat force l'écart à zéro dans les deux sens. */
+const eJr = Object.assign({}, eJ, { remplacement: true });
+M.set({ ent: { Jean: { 7: { 12: eJr } } } });
+eq('J14b · ★ jour d\'échange : la part de référence vaut 8h30',
+   M._planRefPart('A', 7, 12, eJr), 8.5);
+eq('J14c · … donc les 30 min SONT neutralisées', M._planAbsLostH(mbr, 7, false), 0.5);
+eq('J14d · … et toujours dues au compteur', M._planAbsLostH(mbr, 7, true), 0.5);
+eq('J14e · un jour supplémentaire, lui, ne pèse rien dans la référence',
+   M._planRefPart('A', 7, 12, eJ), 0);
+eq('J14f · ★ la référence d\'un jour d\'échange est l\'ATTENDU, pas le FAIT',
+   M._planRefH('A', 7, 12, eJr) !== M._planDayH('A', 7, 12, eJr), true);
+M.set({ ent: { Jean: { 7: { 12: eJ } } } });
+
 // Une absence NON-retard efface bien la journée : le timing ne doit pas survivre.
+// ⚠️ Vaut pour un jour SUPPLÉMENTAIRE (horaire posé, sans échange) : personne ne
+//    l'attendait, lui laisser une référence le rendrait redevable d'une journée.
 M.set({ ent: { Jean: { 7: { 12: supp } } } });
 M._planApplyAbs(['Jean|12'], 'injustifie', '', null, null);
 eq('J16 · une injustifiée n\'hérite PAS du timing',
    M.ent().Jean[7][12].timing, undefined);
+eq('J16b · … ni d\'un drapeau d\'échange', !!M.ent().Jean[7][12].remplacement, false);
+
+/* ══ Jc · CE QUE L'ENREGISTREMENT NE DOIT PLUS DÉTRUIRE ═══════════════════
+   ★★★ LA CAUSE RACINE du chiffre faux d'août 2026. _planApplyAbs reconstruisait
+       l'entrée à neuf et n'en gardait que le timing, et seulement pour le retard.
+       Poser une absence injustifiée sur un jour d'échange effaçait donc À LA FOIS
+       l'horaire et le drapeau — c'est-à-dire la seule trace de ce qui était attendu.
+       L'absence devenait GRATUITE, et aucun calcul ne pouvait la retrouver après coup. */
+const echg = { timing: { debut: '07:00', fin: '16:30' }, remplacement: true };
+M.set({ ent: { Jean: { 7: { 12: echg } } } });
+M._planApplyAbs(['Jean|12'], 'injustifie', '', null, null);
+const eE = M.ent().Jean[7][12];
+eq('J18 · ★ sur un jour d\'échange, l\'horaire SURVIT à l\'injustifiée',
+   eE.timing && eE.timing.debut + '→' + eE.timing.fin, '07:00→16:30');
+eq('J19 · ★ … et le drapeau d\'échange aussi', !!eE.remplacement, true);
+eq('J20 · l\'absence reste une absence', !!eE.absent && eE.motif, 'injustifie');
+eq('J21 · la journée vaut 0 h faite', M._planDayH('A', 7, 12, eE), 0);
+eq('J22 · ★★ mais elle PÈSE 8h30 dans la référence \u2192 déficit',
+   M._planRefPart('A', 7, 12, eE), 8.5);
 
 // Un jour vraiment vide reste sans retard possible.
 M.set({ tpl: { 7: {} }, debut: '', ent: { Jean: { 7: {} } } });

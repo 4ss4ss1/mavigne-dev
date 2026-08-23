@@ -227,7 +227,12 @@ var PLAN_DEF_T = {
 };
 var PLAN_FERIES={0:{1:"Jour de l'An"},3:{6:'Lundi de P\u00e2ques'},4:{1:'F\u00eate du Travail',8:'Victoire 1945',14:'Ascension',25:'Lundi de Pentec\u00f4te'},6:{14:'F\u00eate Nationale'},7:{15:'Assomption'},10:{1:'Toussaint',11:'Armistice'},11:{25:'No\u00ebl'}};
 var PLAN_MOIS=['Janvier','F\u00e9vrier','Mars','Avril','Mai','Juin','Juillet','Ao\u00fbt','Septembre','Octobre','Novembre','D\u00e9cembre'];
-var PLAN_MOIS_C=['Jan','F\u00e9v','Mar','Avr','Mai','Jun','Jul','Ao\u00fb','Sep','Oct','Nov','D\u00e9c'];
+// \u2605 Abreviations FRANCAISES (AFNOR NF Z44-001). « Jun » et « Jul » etaient
+//   anglaises, et se lisaient telles quelles sur un document signe : le bloc
+//   des conges payes affichait « JUN 2026 \u2192 MAI 2027 ». « Ao\u00fb » n'existe pas
+//   davantage : aout s'abrege « ao\u00fbt ». Quatre caracteres au maximum, aucune
+//   largeur fixe cote CSS (verifie : .plan-bar-lbl, .plan-mo-tab, .plan-ref-mo-n).
+var PLAN_MOIS_C=['Janv','F\u00e9vr','Mars','Avr','Mai','Juin','Juil','Ao\u00fbt','Sept','Oct','Nov','D\u00e9c'];
 var PLAN_JOURS=['Di','Lu','Ma','Me','Je','Ve','Sa'];
 var PLAN_JOURS_L=['Dimanche','Lundi','Mardi','Mercredi','Jeudi','Vendredi','Samedi'];
 var PLAN_PAUSE_MIN=60; // Duree de la COUPURE dejeuner, en minutes (reglable par domaine).
@@ -506,8 +511,12 @@ function _planFmt(h){
   var neg=h<0,abs=Math.abs(h),hh=Math.floor(abs),mm=Math.round((abs-hh)*60);
   return (neg?'-':'')+(mm===0?(hh+'h'):(hh+'h'+(mm<10?'0':'')+mm));
 }
-function _planFmtE(h){return h===0?'=':(h>0?'+':'')+_planFmt(h);}
-function _planFmtEtp(r){return (r||0).toFixed(2);}
+// − (U+2212) et non le trait d'union : c'est le signe que le reste du document
+// utilise deja (colonnes Recup et Heures dues). Deux moins differents sur la meme
+// ligne d'un tableau, c'est une faute de composition, pas un detail.
+function _planFmtE(h){return h===0?'=':(h>0?'+':'\u2212')+_planFmt(Math.abs(h));}
+// Virgule decimale : le document est francais, « 1.12 » y est une faute.
+function _planFmtEtp(r){return (r||0).toFixed(2).replace('.',',');}
 function _planMbrs(){return (window.MEMBRES||[]).filter(function(m){return m.statut!=='Inactif';});}
 // ★★★ QUI EST LA AUJOURD'HUI ≠ QUI ETAIT LA A CE MOMENT-LA
 // _planMbrs ci-dessus repond a la premiere question, et c'est la bonne pour
@@ -855,10 +864,39 @@ function _planAbsLostH(mbr,m,duesOnly){
     //   dette comptee deux fois, ou pas du tout.
     if(!actif&&!mo.heures)continue;
     if(duesOnly&&mo.id!=='injustifie'&&!mo.heures)continue;
-    h+=Math.max(0,_planRefH(plId,m,d,e)-_planDayH(plId,m,d,e));
+    // ★★ BORNE, ET SEULEMENT SUR LA NEUTRALISATION. Les deux mesures ne tiennent pas
+    //   le meme registre : `duesOnly=false` RETIRE DE LA REFERENCE, `duesOnly=true`
+    //   inscrit une DETTE au compteur d'heures. On ne peut pas retirer d'une reference
+    //   plus que ce que le jour y a mis — un jour a 0 h au modele la faisait descendre
+    //   SOUS ZERO (le 19 aout : 8 h faites, reference −0 h 30, donc +8 h 30 d'ecart tires
+    //   de rien), et un jour a 7 h portant un horaire saisi de 9 h en retirait 9.
+    //   La dette, elle, n'a pas a etre bornee : elle se regle sur le compteur, pas sur
+    //   la reference, et l'engagement d'une journee vaut meme quand le modele ne prevoyait
+    //   rien (harnais du retard, J13 — un jour supplementaire tenu en retard doit ses
+    //   30 minutes). ⚠ Les borner toutes les deux effacait J13 ; n'en borner aucune
+    //   gardait le defaut. Ce sont deux registres, il fallait deux reponses.
+    var _perdu=Math.max(0,_planRefH(plId,m,d,e)-_planDayH(plId,m,d,e));
+    h+=duesOnly?_perdu:Math.min(_perdu,_planRefPart(plId,m,d,e));
   }
   return h;
 }
+// ★★★ CE QUE CE JOUR PESE DANS LA REFERENCE DU MOIS. Definition unique, parce que
+//   TROIS endroits la calculaient de trois facons : la boucle de _planSummary (le
+//   modele), _planRempH (les jours d'echange) et _planAbsLostH (qui retranchait sans
+//   jamais regarder si le jour etait seulement DANS la reference).
+//   ⚠ Une neutralisation d'absence non bornee rendait la reference NEGATIVE : le 19
+//   aout 2026, jour de fermeture (0 h au modele) travaille en retard, la feuille de
+//   Victor retirait 0 h 30 d'une reference ou ce jour n'avait jamais rien mis, puis
+//   comptait ses 8 h faites en heures supplementaires. Un seul jour fabriquait
+//   +8 h 30 d'ecart a partir de rien.
+function _planRefPart(plId,m,d,e){
+  if(e&&e.type==='recup')return 0;               // une recup sort de la reference, comme dans _planSummary
+  var pl=_planPlanned(plId,m,d);
+  if(pl>0)return pl;                              // jour au modele : c'est le modele qui fait foi
+  if(e&&e.remplacement)return _planRefH(plId,m,d,e); // jour d'echange : l'horaire pose fait foi
+  return 0;                                       // repos, jour supplementaire, extra : rien d'attendu
+}
+window._planRefPart=_planRefPart;
 function _planAbsNeutH(mbr,m){return _planAbsLostH(mbr,m,false);}
 function _planDuesMonth(mbr,m){return _planAbsLostH(mbr,m,true);}
 window._planDuesMonth=_planDuesMonth;
@@ -871,14 +909,33 @@ window._planDuesMonth=_planDuesMonth;
 //   GARDE : le drapeau n'agit que si le jour est bien a 0 h au planning. Si le template
 //   evolue et redonne des heures a ce jour, le drapeau devient inoperant plutot que de
 //   compter la journee deux fois (dans la grille ET en remplacement).
-function _planRempH(mbr,m){
+// ★★★ UN JOUR DE REMPLACEMENT COMPTE COMME UN JOUR PREVU \u2014 y compris quand il
+//   tourne mal. C'est la regle metier, redite plusieurs fois : l'echange pose le
+//   planning de ce jour-la, exactement comme si le modele l'avait prevu, puisque la
+//   contrepartie sera prise ailleurs.
+//   ⚠⚠ CE QUI ETAIT ECRIT DISAIT AUTRE CHOSE. La reference valait `_planDayH` \u2014 les
+//   heures FAITES. Une reference calculee sur le resultat ne peut plus mesurer
+//   d'ecart : elle le force a zero, dans LES DEUX SENS. Arriver a 10 h sur un jour
+//   d'echange ne devait rien ; y faire douze heures ne creditait rien. Sur la feuille
+//   d'aout 2026 de Victor, la semaine de fermeture travaillee en remplacement rendait
+//   un ecart de +8 h 30 la ou une absence injustifiee et un retard le veulent NEGATIF.
+//   La reference est desormais `_planRefH` : ce qui etait ATTENDU du jour \u2014 l'horaire
+//   pose a la saisie. Sur un jour d'echange normal, faites == attendues : aucun
+//   changement. L'ecart n'apparait que quand la journee n'a pas ete tenue, et c'est
+//   precisement ce qu'on lui demande.
+//   GARDE inchangee : le drapeau n'agit que si le jour est bien a 0 h au planning. Si
+//   le modele evolue et redonne des heures a ce jour, le drapeau devient inoperant
+//   plutot que de compter la journee deux fois (dans la grille ET en remplacement).
+//   `fait` = mesure de PRESENCE et non de reference (cf. _planPresentRef) : elle
+//   continue de lire les heures faites, parce qu'elle repond a « qui etait au champ ».
+function _planRempH(mbr,m,fait){
   var plId=_planPlId(mbr),ent=_pEntMonth(mbr.nom,m),h=0;
   for(var d=1;d<=_planDays(m);d++){
     var e=ent[d];
     if(!e||!e.remplacement)continue;
     if(!_planInContractRead(mbr,m,d))continue;
     if(_planPlanned(plId,m,d)>0)continue;
-    h+=_planDayH(plId,m,d,e);
+    h+=fait?_planDayH(plId,m,d,e):_planRefH(plId,m,d,e);
   }
   return h;
 }
@@ -917,7 +974,7 @@ function _planSummary(mbr,m){
     if(ent[dd]&&ent[dd].type==='recup')return s;
     return s+(parseFloat(mo[k])||0);
   },0);
-  ref+=_planRempH(mbr,m);   // ★ jours de remplacement : entrent dans la reference → ecart nul
+  ref+=_planRempH(mbr,m);   // ★ jours d'echange : entrent dans la reference a hauteur de ce qui en etait ATTENDU
   ref-=_planAbsNeutH(mbr,m);// ★ absences : sortent de la reference → ecart neutre, dette comptee a part
   var worked=_planCalcMonth(mbr,m);
   return{ref:ref,worked:worked,ecart:worked-ref,etp:ref>0?worked/ref:0};
@@ -935,7 +992,7 @@ function _planPresentRef(mbr,m){
     var e=ent[dd];
     if(e&&(e.absent||e.type==='cp'||e.type==='recup'))return s;
     return s+(parseFloat(mo[k])||0);
-  },0)+_planRempH(mbr,m);   // ★ un jour de remplacement est une presence reelle au champ
+  },0)+_planRempH(mbr,m,true);   // ★ presence REELLE : les heures faites, pas les attendues
 }
 window._planPresentRef=_planPresentRef;
 // Statuts payes mais NON travailles : _planEffective y renvoie quand meme les heures
@@ -950,7 +1007,14 @@ function _planDaysWorked(mbr,m){
   for(var d=1;d<=_planDays(m);d++){
     if(!_planInContractCtr(mbr,m,d))continue;
     var e=ent[d],st=_planDayStatus(plId,m,d,e);
-    if(_PLAN_ST_OFFDAY[st.t])continue;
+    // \u2605\u2605 UN RETARD EST UN JOUR TRAVAILLE. Son type reste 'absent' \u2014 c'est la cle
+    //   des tables de couleur et de _PLAN_ST_OFFDAY \u2014 mais la personne A ETE AU
+    //   DOMAINE, en partie. L'exclure faisait ecrire, sur la feuille d'aout 2026 de
+    //   Victor, « 77h30 au domaine \u00b7 9 jours » alors que dix jours portaient des
+    //   heures, dont les 8 h du 19. Le drapeau `retard` \u2014 pose par _planDayStatus,
+    //   et lui seul \u2014 rouvre la porte : un jour de formation (assim) ou une absence
+    //   payee restent hors du compte MSA / TESA, ce qui est leur place.
+    if(_PLAN_ST_OFFDAY[st.t]&&!st.retard)continue;
     if(_planEffective(plId,m,d,e)>0.0001)n++;
   }
   return n;
@@ -2545,10 +2609,29 @@ function _planApplyAbs(keys,motifId,com,heuresVal,arrivee){
     var e={absent:true,motif:mo.id,comment:(com||'').trim()};
     // ★ LE TIMING DU JOUR SURVIT AU RETARD. Sans lui, un jour supplementaire perdait
     //   sa seule source d'heures a l'enregistrement : l'entree devenait {absent:true}
-    //   sur un jour ou _planPlanned vaut 0, et les 8 h 30 disparaissaient. On ne le
-    //   garde QUE pour le retard : les autres motifs effacent bien la journee.
+    //   sur un jour ou _planPlanned vaut 0, et les 8 h 30 disparaissaient.
+    // ★★★ ET LA MEME RAISON VAUT POUR TOUS LES MOTIFS SUR UN JOUR A 0 H. Le raisonnement
+    //   ci-dessus avait ete arrete au retard \u2014 « les autres motifs effacent bien la
+    //   journee ». C'est vrai d'un jour au modele : le modele, lui, reste et porte la
+    //   reference. C'est FAUX d'un jour a 0 h, ou l'horaire pose est la seule chose qui
+    //   dise ce qui etait attendu. En l'effacant, poser une absence injustifiee sur un
+    //   jour d'echange le rendait GRATUIT : plus de reference, donc plus de manque.
+    //   ⚠⚠ Le drapeau `remplacement` disparaissait de la meme facon, et avec lui la
+    //   nature de la journee. C'est ce qui s'est produit les 19 et 20 aout 2026 sur la
+    //   feuille de Victor \u2014 les entrees enregistrees ne portent plus ni horaire ni
+    //   drapeau, et AUCUN calcul ne peut les retrouver : il faut les reposer.
+    //   Sur un jour AU MODELE, rien ne change : le comportement historique est intact.
     var _prev=_pEntDay(p.nom,planMonth,p.d);
-    if(mo.heures&&_prev&&_prev.timing)e.timing=_prev.timing;
+    var _plJ=_planPlanned(_planPlId(mbr),planMonth,p.d);
+    //   ⚠ PAS « tout jour a 0 h » — un JOUR SUPPLEMENTAIRE (horaire pose, sans echange)
+    //   ne doit rien : personne ne l'attendait. Lui laisser son horaire ferait naitre
+    //   une reference de 8 h 30 sur une journee ou il n'etait pas convoque, et le
+    //   reglage « heures dues » lui reclamerait la journee entiere (harnais du retard,
+    //   J16). Le drapeau d'echange est ce qui distingue « je devais etre la » de
+    //   « je pouvais venir » : c'est lui, et lui seul, qui fait survivre l'horaire.
+    var _remp=!!(_prev&&_prev.remplacement&&_plJ<=0);
+    if(_prev&&_prev.timing&&(mo.heures||_remp))e.timing=_prev.timing;
+    if(_remp)e.remplacement=true;
     if(mo.heures){
       if(_planMinOf(arrivee)>=0){
         var b=_planRetardBornes(mbr,planMonth,p.d);
@@ -3057,7 +3140,9 @@ function _planHsupCard(mbr){
   }
   h+='<div style="display:flex;align-items:center;justify-content:space-between;padding-top:10px;border-top:1px solid rgba(123,109,184,0.3)"><div style="font-size:13px;font-weight:600;color:var(--texte)">Compteur</div><div style="font-size:22px;font-weight:800;color:'+(bank.solde>0.0001?'var(--plan-acc)':'var(--texte-doux)')+'">'+_planFmt(bank.solde)+'</div></div>';
   bank.tr.forEach(function(t){
-    var _trLbl=t.dep?'Report \u00b7 avant Ma Vigne':('Acquis '+PLAN_MOIS_C[t.mois]+' \u00b7 il y a '+(dm-t.mois)+' mois');
+    var _trAge=dm-t.mois;   // « il y a 0 mois » ne veut rien dire : c'est le mois courant
+    var _trLbl=t.dep?'Report \u00b7 avant Ma Vigne'
+      :('Acquis '+PLAN_MOIS_C[t.mois]+(_trAge<=0?' \u00b7 ce mois-ci':(' \u00b7 il y a '+_trAge+' mois')));
     h+='<div style="display:flex;align-items:center;justify-content:space-between;padding:6px 0;font-size:12px"><span style="color:var(--texte-doux)">'+_trLbl+'</span><span style="font-weight:700;color:var(--plan-acc)">'+_planFmt(t.h)+'</span></div>';
   });
   if(bank.overdraw>0.0001){
@@ -4987,6 +5072,16 @@ function _planExportPDF_(nom,mbr,_ctr){
     var dow=_planDow(planMonth,d);
     var st=_planDayStatus(plId,planMonth,d,e);
     var bg=LBG[st.t]||'#fff', fg=LFG[st.t]||'#1c1917';
+    // \u2605 LES TABLES LBG/LFG SONT INDEXEES SUR `t`, ET 'absent' RECOUVRE QUATRE CHOSES :
+    //   une absence injustifiee (rouge, c'est juste), une absence PAYEE, un jour ASSIMILE
+    //   a du travail (formation, evenement familial) et un RETARD. Les trois derniers
+    //   sortaient en rouge sang sur le document imprime alors que l'ecran, lui, les montre
+    //   en orange ou en bleu \u2014 un salarie lisait « formation » ecrit comme une faute.
+    if(st.t==='absent'){
+      if(st.assim){ bg='#eff6ff'; fg='#1A4A7A'; }
+      else if(st.paye){ bg='#fffbeb'; fg='#b45309'; }
+      else if(st.retard){ bg='#fff7ed'; fg='#c2410c'; }
+    }
     var tData=(st.t==='work'||st.t==='supp'||st.t==='continu'||st.t==='reduit'||st.t==='extra'||st.t==='canicule')?((e&&e.timing)||_planDefTiming(pl,plId,planMonth,d)):null;
     var tStr=tData?((tData.d||tData.debut)+'\u2192'+(tData.f||tData.fin)):'';
     var eff;
@@ -4997,20 +5092,28 @@ function _planExportPDF_(nom,mbr,_ctr){
     else if(st.t==='cp')eff=_planFmt((e&&e.heures)||pl);
     else { var ev=_planEffective(plId,planMonth,d,e); eff=ev>0?_planFmt(ev):'\u2014'; }
     return '<tr style="background:'+bg+'">'
-      +'<td class="c"><b style="color:var(--texte-med,#57534e)">'+d+'</b> <span style="color:#a8a29e;font-size:8.5px">'+PLAN_JOURS[dow]+'</span></td>'
-      +'<td><span style="color:'+fg+';font-weight:'+(st.t==='work'||st.t==='wknd'||st.t==='off'?'500':'700')+'">'+st.l+'</span>'+(tStr?' <span style="color:#a8a29e;font-family:monospace;font-size:8.5px">'+tStr+'</span>':'')+'</td>'
+      +'<td class="c"><b>'+d+'</b> <span class="dow">'+PLAN_JOURS[dow]+'</span></td>'
+      +'<td><span style="color:'+fg+';font-weight:'+(st.t==='work'||st.t==='wknd'||st.t==='off'?'500':'700')+'">'+st.l+'</span>'+(tStr?' <span class="tim">'+tStr+'</span>':'')+'</td>'
       +'<td class="r2" style="font-weight:700;color:'+fg+'">'+eff+'</td>'
     +'</tr>';
   }
-  var c1='',c2='';
-  for(var d=1;d<=total;d++){ var r=rowFor(d); if(!r)continue; if(d<=15)c1+=r; else c2+=r; }
-  var yr=planYear, mk=yr+'-'+String(planMonth+1).padStart(2,'0');
+  // \u2605\u2605 DEUX COLONNES EQUILIBREES, ET NON « 1-15 \u00a0/\u00a0 16-31 ». Le contrat de Victor
+  //   ouvre le 17 aout : la coupure a jour fixe laissait la colonne de GAUCHE vide,
+  //   reduite a son bandeau d'en-tete, et tassait quinze lignes a droite \u2014 sur la
+  //   moitie d'une page A4. On coupe donc sur le nombre de lignes REELLEMENT rendues.
+  //   Une seule colonne quand il y a trois lignes ou moins : deux colonnes de deux
+  //   lignes ne rangent rien, elles decoupent.
+  var _rows=[];
+  for(var d=1;d<=total;d++){ var r=rowFor(d); if(r)_rows.push(r); }
+  var _cut=(_rows.length<=3)?_rows.length:Math.ceil(_rows.length/2);
+  var c1=_rows.slice(0,_cut).join(''), c2=_rows.slice(_cut).join('');
+    var yr=planYear, mk=yr+'-'+String(planMonth+1).padStart(2,'0');
   var aco=((PLANNING_ACOMPTES[nom]||{})[mk]||[]).slice().sort(function(a,b){return a.date<b.date?-1:1;});
   var acoTot=aco.reduce(function(x,a){return x+a.montant;},0);
   var acoHtml='';
   if(aco.length){
     var acoItems=aco.map(function(a){var dp=(a.date||'').split('-');return a.montant.toLocaleString('fr-FR')+'\u202f\u20ac le '+(dp.length>=3?parseInt(dp[2],10)+'/'+parseInt(dp[1],10):'');}).join(' \u00b7 ');
-    acoHtml='<div class="acomptes">\uD83D\uDCB6 Acomptes vers\u00e9s \u2014 '+acoItems+' \u2014 Total <b>'+acoTot.toLocaleString('fr-FR')+'\u202f\u20ac</b></div>';
+    acoHtml='<div class="acomptes">Acomptes vers\u00e9s \u2014 '+acoItems+' \u2014 Total <b>'+acoTot.toLocaleString('fr-FR')+'\u202f\u20ac</b></div>';
   }
   // \u2605 HISTOIRE DE CE BLOC \u2014 a lire avant de le reintroduire.
   //   Il a d'abord ete rendu TOUJOURS visible, en tete de feuille : son absence
@@ -5029,13 +5132,37 @@ function _planExportPDF_(nom,mbr,_ctr){
       +(payBankP>0.0001?(' <span class="nb">dont '+_planFmt(payBankP)+' pris sur le compteur</span>'):'');
   }
   var dom=(window.DOMAINE_NOM||'');
-  // Janvier -> mois affiche, jamais au-dela. Un releve mensuel ne montre pas des
-  // mois a venir : ils reposent sur du planning previsionnel, pas sur du travail fait.
-  var _anLast=planMonth;
+  var _moisLbl=PLAN_MOIS[planMonth].toLowerCase();
+  // \u2605\u2605 UN CONTRAT, UN COMPTEUR \u2014 ET LE TABLEAU DOIT S'Y TENIR.
+  //   Le document est construit SOUS _planSurContrat : hors de la periode du contrat
+  //   courant, _planSupMonth / _planRecupH / _planYearBalance rendent 0. Boucler depuis
+  //   janvier ecrivait donc « Janvier 0h \u00b7 Fevrier 0h \u00b7 \u2026 » sur la feuille de Victor
+  //   pour SEPT MOIS OU IL A TRAVAILLE A TEMPS PLEIN, sous le CDD precedent. Le document
+  //   affirmait deux choses contradictoires a douze lignes d'intervalle : « deux periodes
+  //   comptent separement » juste au-dessus, et sept zeros juste en dessous.
+  //   \u26a0 Un zero qui veut dire « pas sous ce contrat » et un zero qui veut dire « rien
+  //   fait » ne peuvent pas partager la meme case.
+  //   Borne haute inchangee : janvier -> mois affiche, jamais au-dela. Un releve mensuel
+  //   ne montre pas des mois a venir, ils reposent sur du previsionnel, pas sur du fait.
+  var _anM0=0,_anLast=planMonth;
+  if(_ctr&&_ctr.debut){ var _cdA=String(_ctr.debut).split('-');
+    if(parseInt(_cdA[0],10)===planYear)_anM0=Math.min(11,Math.max(0,parseInt(_cdA[1],10)-1)); }
+  if(_ctr&&_ctr.fin){ var _cfA=String(_ctr.fin).split('-');
+    if(parseInt(_cfA[0],10)===planYear)_anLast=Math.min(_anLast,Math.max(0,parseInt(_cfA[1],10)-1)); }
+  if(_anM0>_anLast)_anM0=_anLast;
   var _anRows='',_anSup=0,_anRec=0,_anPm=0,_anPb=0,_anDue=0,_anOv=false;
-  var _anDueA=[],_anAnyDue=false;
-  for(var _dq=0;_dq<=_anLast;_dq++){_anDueA[_dq]=_planDuesMonth(mbr,_dq);if(_anDueA[_dq]>0.0001)_anAnyDue=true;}
-  for(var _i=0;_i<=_anLast;_i++){
+  var _anDueA=[],_anAnyDue=false,_anDuesRegl=false;
+  for(var _dq=_anM0;_dq<=_anLast;_dq++){
+    _anDueA[_dq]=_planDuesMonth(mbr,_dq);
+    if(_anDueA[_dq]>0.0001)_anAnyDue=true;
+    // \u2605 CE QUI EST REELLEMENT DU DEPEND DU REGLAGE (CONFIG.hsup_dues_debut). Hors
+    //   fenetre, SEUL le retard tire sur le compteur \u2014 une absence injustifiee, elle,
+    //   sort par l'ecart du mois. La note de bas de tableau promettait pourtant
+    //   « absence injustifiee ou retard » dans les deux cas : elle disait faux la
+    //   moitie du temps, sur la seule ligne du document qui explique un calcul.
+    if(typeof window._planDuesActive==='function'&&window._planDuesActive(_dq))_anDuesRegl=true;
+  }
+  for(var _i=_anM0;_i<=_anLast;_i++){
     var _sp=_planSupMonth(mbr,_i),_rc=_planRecupH(mbr,_i);
     var _pm=Math.min(Math.max(0,_planHsupPaye(nom,_i)),_sp);
     var _pb=Math.max(0,_planHsupPayeBank(nom,_i));
@@ -5043,37 +5170,45 @@ function _planExportPDF_(nom,mbr,_ctr){
     if(_isOv)_anOv=true;
     _anSup+=_sp;_anRec+=_rc;_anPm+=_pm;_anPb+=_pb;_anDue+=(_anDueA[_i]||0);
     var _cum=_planYearBalance(mbr,_i).net;
-    _anRows+='<tr'+(_i===planMonth?' style="background:#f8f6fd"':'')+'>'
+    _anRows+='<tr'+(_i===planMonth?' class="cur"':'')+'>'
       +'<td'+(_i===planMonth?' style="font-weight:700"':'')+'>'+PLAN_MOIS[_i]+(_isOv?' *':'')+'</td>'
-      +'<td class="r2" style="color:'+(_sp>0.0001?'#16a34a':'#d6d3d1')+'">'+(_sp>0.0001?'+':'')+_planFmt(_sp)+'</td>'
-      +'<td class="r2" style="color:'+(_rc>0.0001?'#dc2626':'#d6d3d1')+'">'+(_rc>0.0001?'\u2212':'')+_planFmt(_rc)+'</td>'
-      +(_anAnyDue?('<td class="r2" style="color:'+(_anDueA[_i]>0.0001?'#dc2626':'#d6d3d1')+'">'+(_anDueA[_i]>0.0001?'\u2212':'')+_planFmt(_anDueA[_i])+'</td>'):'')
-      +'<td class="r2" style="color:'+((_pm+_pb)>0.0001?'#1c1917':'#d6d3d1')+'">'+_planFmt(_pm+_pb)+'</td>'
+      +'<td class="r2" style="color:'+(_sp>0.0001?'#16a34a':'#c9c5c1')+'">'+(_sp>0.0001?'+':'')+_planFmt(_sp)+'</td>'
+      +'<td class="r2" style="color:'+(_rc>0.0001?'#dc2626':'#c9c5c1')+'">'+(_rc>0.0001?'\u2212':'')+_planFmt(_rc)+'</td>'
+      +(_anAnyDue?('<td class="r2" style="color:'+(_anDueA[_i]>0.0001?'#dc2626':'#c9c5c1')+'">'+(_anDueA[_i]>0.0001?'\u2212':'')+_planFmt(_anDueA[_i])+'</td>'):'')
+      +'<td class="r2" style="color:'+((_pm+_pb)>0.0001?'#1c1917':'#c9c5c1')+'">'+_planFmt(_pm+_pb)+'</td>'
       +'<td class="r2 hi" style="font-weight:700;color:'+(_cum>=-0.0001?'#16a34a':'#dc2626')+'">'+_planFmtE(_cum)+'</td>'
     +'</tr>';
   }
   var _anNet=_planYearBalance(mbr,_anLast).net;
-  var _anTrTxt=bank.tr.map(function(t){return t.dep?('Report '+_planFmt(t.h)):(PLAN_MOIS_C[t.mois]+' '+_planFmt(t.h)+' (il y a '+(planMonth-t.mois)+' mois)');}).join(' \u00b7 ');
+  var _anTrTxt=bank.tr.map(function(t){
+    var _ag=planMonth-t.mois;   // « il y a 0 mois » ne veut rien dire : c'est le mois courant
+    return t.dep?('report '+_planFmt(t.h))
+      :(PLAN_MOIS_C[t.mois].toLowerCase()+' '+_planFmt(t.h)+(_ag<=0?' (ce mois-ci)':' (il y a '+_ag+' mois)'));
+  }).join(' \u00b7 ');
   // Compteur d'annualisation — le chiffre qui a valeur legale, a cote du releve mensuel
   var _an=_planAnnu(mbr,planMonth);
   var _anOver=(_an.cumul>_an.plafond+0.0001);
   var _anMod=(_an.modul>_an.modulMax+0.0001);
   var annuCptHtml=_an.annualise
-  ? ('<div class="soldean"><div class="t">\u23f1 Compteur d\u2019heures \u2014 ann\u00e9e '+planYear+' (au '+PLAN_MOIS_C[planMonth]+')</div>'
+  ? ('<div class="soldean"><div class="t">Compteur d\u2019heures \u2014 ann\u00e9e '+planYear+', arr\u00eat\u00e9 \u00e0 fin '+_moisLbl+'</div>'
     +'<span class="it">Plafond annuel <b>'+_planFmt(_an.plafond)+'</b></span>'
     +'<span class="it">Travail effectif <b>'+_planFmt(_an.cumul)+'</b></span>'
-    +'<span class="it">'+(_an.reste<0?'Au-dessus':'Reste \u00e0 faire')+' <b style="color:'+(_anOver?'#d97706':'#16a34a')+'">'+_planFmt(Math.abs(_an.reste))+'</b></span>'
-    +'<span class="it">Modulation <b style="color:'+(_anMod?'#dc2626':'#7B6DB8')+'">'+_planFmt(_an.modul)+' / '+_planFmt(_an.modulMax)+'</b></span>'
+    +'<span class="it">'+(_an.reste<0?'Au-dessus':'Reste \u00e0 faire')+' <b style="color:'+(_anOver?'#b45309':'#15803d')+'">'+_planFmt(Math.abs(_an.reste))+'</b></span>'
+    +'<span class="it">Modulation <b style="color:'+(_anMod?'#dc2626':'#6a5ba8')+'">'+_planFmt(_an.modul)+' / '+_planFmt(_an.modulMax)+'</b></span>'
     +(_an.susp>0.0001?'<span class="it">Dont suspension <b style="color:#dc2626">\u2212'+_planFmt(_an.susp)+'</b></span>':'')
-    +'<div style="font-size:9.5px;color:#78716c;margin-top:5px;line-height:1.4">Travail effectif\u00a0: hors cong\u00e9s pay\u00e9s, arr\u00eats et r\u00e9cup\u00e9rations. Le solde se r\u00e8gle \u00e0 la cl\u00f4ture du 31 d\u00e9cembre.</div>'
+    +'<div class="nt">Travail effectif\u00a0: hors cong\u00e9s pay\u00e9s, arr\u00eats et r\u00e9cup\u00e9rations. Le solde se r\u00e8gle \u00e0 la cl\u00f4ture du 31 d\u00e9cembre.</div>'
   +'</div>')
-  : ('<div class="soldean"><div class="t">\u23f1 Heures faites \u2014 ann\u00e9e '+planYear+' (au '+PLAN_MOIS_C[planMonth]+')</div>'
+  : ('<div class="soldean"><div class="t">Heures faites \u2014 ann\u00e9e '+planYear+', arr\u00eat\u00e9 \u00e0 fin '+_moisLbl+'</div>'
     +'<span class="it">Travail effectif <b>'+_planFmt(_an.cumul)+'</b></span>'
     +'<span class="it">Type de contrat <b>'+_escHtml(tc)+'</b></span>'
-    +'<div style="font-size:9.5px;color:#78716c;margin-top:5px;line-height:1.4">Pay\u00e9 \u00e0 l\u2019heure\u00a0: pas d\u2019annualisation, donc ni plafond annuel, ni modulation, ni solde \u00e0 la cl\u00f4ture. Travail effectif\u00a0: hors cong\u00e9s pay\u00e9s, arr\u00eats et r\u00e9cup\u00e9rations.</div>'
+    +'<div class="nt">Pay\u00e9 \u00e0 l\u2019heure\u00a0: pas d\u2019annualisation, donc ni plafond annuel, ni modulation, ni solde \u00e0 la cl\u00f4ture. Travail effectif\u00a0: hors cong\u00e9s pay\u00e9s, arr\u00eats et r\u00e9cup\u00e9rations.</div>'
   +'</div>');
-  var annuHtml='<div class="annu"><div class="t">\ud83d\udcc5 D\u00e9tail mois par mois \u2014 ann\u00e9e '+planYear+'</div>'
-    +'<table><thead><tr><th>Mois</th><th class="r2" style="width:52px">Sup.</th><th class="r2" style="width:52px">R\u00e9cup</th>'+(_anAnyDue?'<th class="r2" style="width:56px">Heures dues</th>':'')+'<th class="r2" style="width:62px">Pay\u00e9</th><th class="r2 hi" style="width:72px">Reste \u00e0 prendre</th></tr></thead>'
+  var _anPortee=(_anM0>0&&_ctr&&_ctr.debut)
+    ? ('<br>Le compteur de ce contrat s\u2019ouvre le '+_escHtml(_planFmtJour(_ctr.debut))
+       +'\u00a0: les mois ant\u00e9rieurs rel\u00e8vent du contrat pr\u00e9c\u00e9dent et sont sold\u00e9s \u00e0 part.')
+    : '';
+  var annuHtml='<div class="annu"><div class="t">D\u00e9tail mois par mois \u2014 ann\u00e9e '+planYear+'</div>'
+    +'<table><thead><tr><th>Mois</th><th class="r2" style="width:54px">Sup.</th><th class="r2" style="width:54px">R\u00e9cup</th>'+(_anAnyDue?'<th class="r2" style="width:60px">Heures dues</th>':'')+'<th class="r2" style="width:64px">Pay\u00e9</th><th class="r2 hi" style="width:76px">Reste \u00e0 prendre</th></tr></thead>'
     +'<tbody>'+_anRows+'</tbody>'
     +'<tfoot><tr><td>Total</td>'
       +'<td class="r2" style="color:#16a34a">'+(_anSup>0.0001?'+':'')+_planFmt(_anSup)+'</td>'
@@ -5083,39 +5218,111 @@ function _planExportPDF_(nom,mbr,_ctr){
       +'<td class="r2 hi" style="color:'+(_anNet>=-0.0001?'#16a34a':'#dc2626')+'">'+_planFmtE(_anNet)+'</td>'
     +'</tr></tfoot></table>'
     +'<div class="note">'+(_anOv?'<b>*</b> valeur ajust\u00e9e manuellement (hors calcul du planning). ':'')
-      +'Reste \u00e0 prendre = report de d\u00e9part + heures sup cumul\u00e9es \u2212 r\u00e9cup\u00e9rations \u2212 heures pay\u00e9es'+(_anAnyDue?' \u2212 heures dues (absence injustifi\u00e9e ou retard).':'.')
-      +(_anTrTxt?'<br>Compteur au '+PLAN_MOIS_C[planMonth]+' : <b>'+_planFmt(bank.solde)+'</b> \u2014 '+_anTrTxt+'. Le solde se r\u00e8gle \u00e0 la cl\u00f4ture du 31 d\u00e9cembre.':'')
+      +'Reste \u00e0 prendre = report de d\u00e9part + heures sup cumul\u00e9es \u2212 r\u00e9cup\u00e9rations \u2212 heures pay\u00e9es'
+      +(_anAnyDue?(' \u2212 heures dues ('+(_anDuesRegl?'absence injustifi\u00e9e ou retard':'retard')+').'):'.')
+      +(_anTrTxt?('<br>Compteur \u00e0 fin '+_moisLbl+'\u00a0: <b>'+_planFmt(bank.solde)+'</b> \u2014 '+_anTrTxt+'. Le solde se r\u00e8gle \u00e0 la cl\u00f4ture du 31 d\u00e9cembre.'):'')
+      +_anPortee
     +'</div></div>';
+    // \u2605 Nombre de JOURS PREVUS derriere la reference : sans lui, « R\u00e9f\u00e9rence 69h » est
+  //   un chiffre a croire. Avec lui, il est verifiable \u2014 et le lecteur comprend seul
+  //   qu'un mois d'aout a 69 h porte la fermeture du domaine, pas une erreur.
+  var _refJ=0;
+  (function(){ var _tm=(_planGetTpl(plId)||{})[planMonth]||{};
+    for(var _k in _tm){ if(!/^\d+$/.test(_k))continue;
+      if((parseFloat(_tm[_k])||0)<=0)continue;
+      if(!_planInContractCtr(mbr,planMonth,parseInt(_k,10)))continue; _refJ++; } })();
+  var _edite=_planFmtJour(new Date().toISOString().slice(0,10));
+  // \u2605 BASE ABSOLUE. Le document naît dans une fenetre about:blank : sous iOS Safari,
+  //   « /fonts/fonts.css » ne s'y resout pas et la feuille tombait en Times \u2014 la
+  //   « mauvaise police » se voyait sur iPad, jamais sur le poste de bureau.
+  var _base=(window.location&&window.location.origin&&window.location.origin!=='null')?(window.location.origin+'/'):'';
   var html='<!DOCTYPE html><html lang="fr"><head><meta charset="UTF-8">'
-    +'<title>Heures \u2014 '+nom+' \u2014 '+PLAN_MOIS[planMonth]+' '+planYear+'</title>'
+    +(_base?('<base href="'+_escAttr(_base)+'">'):'')
+    +'<title>Heures \u2014 '+_escHtml(nom)+' \u2014 '+PLAN_MOIS[planMonth]+' '+planYear+'</title>'
     +'<link rel="stylesheet" href="/fonts/fonts.css">'
-    +'<style>*{box-sizing:border-box;margin:0;padding:0}body{font-family:\'Outfit\',system-ui,-apple-system,sans-serif;color:#1c1917;background:#fff}'
-    +'.sheet{padding:6px}.hdr{display:flex;justify-content:space-between;align-items:flex-start;border-bottom:2px solid #e7e5e4;padding-bottom:9px;margin-bottom:10px}'
-    +'.hdr h1{font-size:19px;font-weight:800}.hdr .sub{font-size:11px;color:#78716c;margin-top:3px}.badge{display:inline-block;background:#f1eefa;color:#7B6DB8;font-weight:700;font-size:9px;padding:1px 7px;border-radius:6px;margin-right:6px}'
-    +'.mo{font-size:17px;font-weight:700;color:#7B6DB8;text-align:right}.etp{font-size:10px;color:#a8a29e;text-align:right;margin-top:3px}'
-    +'.tete{display:flex;border:1.5px solid #d8c3a3;border-radius:8px;overflow:hidden;margin-bottom:9px}'
-    +'.tmain{padding:9px 14px;background:#faf6ef;min-width:186px}'
-    +'.tmain .lab{font-size:8px;font-weight:700;text-transform:uppercase;letter-spacing:.6px;color:#8A5A38}'
-    +'.tmain .big{font-size:30px;font-weight:800;line-height:1.03;letter-spacing:-.9px;margin-top:1px}'
-    +'.tmain .tsub{font-size:9.5px;color:#78716c;margin-top:2px}.tmain .tsub b{color:#44403c}'
+    // \u2605\u2605 GRAISSES : Outfit n'est charge QUE de 300 a 700 (public/fonts/fonts.css).
+    //   Chaque font-weight:800 de cette feuille etait donc SYNTHETISE par le moteur
+    //   d'impression \u2014 un faux gras, epaissi geometriquement, qui bavait sur les gros
+    //   chiffres. Plus aucun 800 ici : 700 est le maximum reellement disponible.
+    // \u2605 TAILLES : plancher a 8,5 px (\u2248 6,4 pt). Le corps du tableau passe de 9,5 a
+    //   10 px, les notes de 8 a 9 px. En dessous, un releve se lit a la loupe.
+    +'<style>*{box-sizing:border-box;margin:0;padding:0}'
+    +'html,body{background:#fff}'
+    +'body{font-family:\'Outfit\',system-ui,-apple-system,"Segoe UI",sans-serif;font-size:10px;line-height:1.35;color:#1c1917;'
+      +'font-variant-numeric:tabular-nums;-webkit-print-color-adjust:exact;print-color-adjust:exact}'
+    +'.sheet{padding:11mm 10mm 9mm}'
+    +'.hdr{display:flex;justify-content:space-between;align-items:flex-start;gap:18px;border-bottom:2px solid #d8c3a3;padding-bottom:9px;margin-bottom:11px}'
+    +'.hdr h1{font-size:19px;font-weight:700;letter-spacing:-.2px}.hdr .sub{font-size:11px;color:#57534e;margin-top:3px}'
+    +'.badge{display:inline-block;background:#f1eefa;color:#6a5ba8;font-weight:700;font-size:9px;letter-spacing:.3px;padding:1.5px 7px;border-radius:6px;margin-right:6px}'
+    +'.mo{font-size:17px;font-weight:700;color:#6a5ba8;text-align:right;white-space:nowrap}'
+    +'.etp{font-size:9.5px;color:#78716c;text-align:right;margin-top:3px;white-space:nowrap}'
+    +'.tete{display:flex;border:1.5px solid #d8c3a3;border-radius:8px;overflow:hidden;margin-bottom:10px}'
+    +'.tmain{padding:9px 14px;background:#faf6ef;min-width:196px}'
+    +'.tmain .lab{font-size:8.5px;font-weight:700;text-transform:uppercase;letter-spacing:.6px;color:#8A5A38}'
+    +'.tmain .big{font-size:30px;font-weight:700;line-height:1.05;letter-spacing:-1px;margin-top:1px}'
+    +'.tmain .tsub{font-size:9.5px;color:#57534e;margin-top:3px}.tmain .tsub b{color:#292524;font-weight:600}'
     +'.tsplit{flex:1;display:flex;border-left:1.5px solid #e7ddc9}'
     +'.tc{flex:1;padding:9px 11px;border-right:1px solid #efe7da}.tc:last-child{border-right:0}'
-    +'.tc .n{font-size:18px;font-weight:800;line-height:1.05}'
-    +'.tc .l{font-size:8px;color:#8b8580;text-transform:uppercase;letter-spacing:.5px;margin-top:2px;line-height:1.3}'
+    +'.tc .n{font-size:18px;font-weight:700;line-height:1.1}'
+    +'.tc .l{font-size:8.5px;color:#78716c;text-transform:uppercase;letter-spacing:.5px;margin-top:3px;line-height:1.35}'
     +'.tc.fo{background:#f4f7fb}.tc.fo .n{color:#2c5f8f}.tc.fa{background:#f7f4fa}.tc.fa .n{color:#6b5a8a}'
-    +'.cemois{font-size:9px;color:#8b8580;border:1px solid #eeebe7;border-radius:6px;padding:5px 11px;margin-top:9px}'
-    +'.cemois b{color:#57534e;font-weight:700}.cemois .nb{color:#a8a29e}'
-    +'.apay{display:flex;align-items:center;justify-content:space-between;border:2px solid #b45309;background:#fffbeb;border-radius:8px;padding:8px 13px;margin-bottom:9px}.apay .t{font-size:9.5px;font-weight:700;text-transform:uppercase;letter-spacing:.5px;color:#b45309}.apay .s{font-size:10px;color:#78716c;margin-top:2px}.apay .v{font-size:26px;font-weight:800;color:#b45309;line-height:1}.apay.off{border:1.5px solid #e7e5e4;background:#fafaf9}.apay.off .t{color:#78716c}.apay.off .v{color:#a8a29e}'
-    +'.soldean{border:1.5px solid #d8c3a3;background:#faf6ef;border-radius:8px;padding:7px 12px;margin-bottom:9px;display:flex;flex-wrap:wrap;gap:4px 16px;align-items:center}.soldean .t{font-size:9px;font-weight:700;text-transform:uppercase;letter-spacing:.5px;color:#8A5A38;width:100%;margin-bottom:1px}.soldean .it{font-size:11px;color:#57534e}.soldean .it b{font-size:12px}.soldean .net{margin-left:auto;font-size:14px;font-weight:800}'
-    +'.days{display:flex;gap:14px}.col{flex:1}table{width:100%;border-collapse:collapse}thead tr{background:#1C1A2E;color:#fff}th{padding:4px 6px;text-align:left;font-size:8px;text-transform:uppercase;letter-spacing:.4px;font-weight:700}th.c,td.c{text-align:center}th.r2,td.r2{text-align:right}td{padding:2px 6px;border-bottom:1px solid #f0ece8;font-size:9.5px;line-height:1.2}'
-    +'.annu th.hi,.annu td.hi{background:#f7f3ec}.annu thead th.hi{background:#2c2942}.ctr{border:1.5px solid #d8c3a3;background:#faf6ef;border-radius:8px;padding:7px 12px;margin-bottom:9px;page-break-inside:avoid}.ctr .t{font-size:9px;font-weight:700;text-transform:uppercase;letter-spacing:.5px;color:#8A5A38;margin-bottom:4px}.crow{display:flex;justify-content:space-between;gap:12px;font-size:10px;color:#44403c;padding:2px 0;border-bottom:1px solid #efe7da}.crow:last-of-type{border-bottom:none}.crow .cv{white-space:nowrap;color:#78716c}.cgap .cl,.cgap .cv{color:#a8a29e;font-style:italic}.cbreak{background:repeating-linear-gradient(135deg,#fff,#fff 4px,#faf3ea 4px,#faf3ea 8px)}.cbreak .cl,.cbreak .cv{color:#b45309;font-style:normal}.cnow{font-size:8px;text-transform:uppercase;letter-spacing:.4px;color:#16a34a;background:#f0fdf4;border-radius:8px;padding:1px 5px;margin-left:4px}.annu{margin-top:10px;page-break-inside:avoid}.annu .t{font-size:9px;font-weight:700;text-transform:uppercase;letter-spacing:.5px;color:#8A5A38;margin-bottom:5px}.annu tfoot td{border-top:1.5px solid #d4d0cc;border-bottom:none;font-weight:800;background:#fafaf9}.annu .note{font-size:8.5px;color:#a8a29e;margin-top:5px;line-height:1.45}.annu .note b{color:#78716c}'
-    +'.acomptes{margin-top:8px;font-size:10px;color:#92400e;background:#fffbeb;border:1px solid #fcd34d;border-radius:8px;padding:7px 12px}.acomptes b{color:#b45309}'
-    +'.foot{margin-top:16px;display:flex;gap:40px}.sig{flex:1;border-top:1px solid #d4d0cc;padding-top:6px;font-size:10px;color:#a8a29e;text-align:center}.credit{margin-top:14px;font-size:8px;color:#cbc7c2;text-align:center}'
-    +'@media print{@page{size:A4;margin:10mm}}</style></head><body><div class="sheet">'
-    +'<div class="hdr"><div><h1>\uD83C\uDF47 Feuille d\'heures</h1><div class="sub"><span class="badge">'+tc+'</span>'+nom+' \u00b7 Planning '+plId+'</div>'
+    +'.cemois{font-size:9.5px;color:#57534e;border:1px solid #e7e5e4;border-radius:6px;padding:6px 11px;margin-top:9px}'
+    +'.cemois b{color:#1c1917;font-weight:700}.cemois .nb{color:#78716c}'
+    +'.soldean{border:1.5px solid #d8c3a3;background:#faf6ef;border-radius:8px;padding:8px 12px;margin-bottom:9px;display:flex;flex-wrap:wrap;gap:4px 18px;align-items:baseline;page-break-inside:avoid}'
+    +'.soldean .t{font-size:9px;font-weight:700;text-transform:uppercase;letter-spacing:.5px;color:#8A5A38;width:100%;margin-bottom:2px}'
+    +'.soldean .it{font-size:10.5px;color:#57534e}.soldean .it b{font-size:12px;color:#1c1917}'
+    +'.soldean .nt{width:100%;font-size:9px;color:#78716c;margin-top:5px;line-height:1.45}'
+    +'.days{display:flex;gap:14px;align-items:flex-start}.col{flex:1;min-width:0}'
+    +'table{width:100%;border-collapse:collapse}thead tr{background:#1C1A2E;color:#fff}'
+    +'th{padding:4px 6px;text-align:left;font-size:8.5px;text-transform:uppercase;letter-spacing:.4px;font-weight:700}'
+    +'th.c,td.c{text-align:center}th.r2,td.r2{text-align:right}'
+    +'td{padding:2.5px 6px;border-bottom:1px solid #f0ece8;font-size:10px;line-height:1.25}'
+    +'td.c{white-space:nowrap}td.c b{color:#57534e;font-weight:700}'
+    +'.dow{color:#a8a29e;font-size:9px}.tim{color:#8b8580;font-size:9px;letter-spacing:-.1px}'
+    +'.ctr{border:1.5px solid #d8c3a3;background:#faf6ef;border-radius:8px;padding:8px 12px;margin-bottom:9px;page-break-inside:avoid}'
+    +'.ctr .t{font-size:9px;font-weight:700;text-transform:uppercase;letter-spacing:.5px;color:#8A5A38;margin-bottom:5px}'
+    +'.crow{display:flex;justify-content:space-between;gap:12px;font-size:10px;color:#44403c;padding:2.5px 0;border-bottom:1px solid #efe7da}'
+    +'.crow:last-of-type{border-bottom:none}.crow .cv{white-space:nowrap;color:#57534e}'
+    +'.cgap .cl,.cgap .cv{color:#a8a29e;font-style:italic}'
+    +'.cbreak{background:repeating-linear-gradient(135deg,#fff,#fff 4px,#faf3ea 4px,#faf3ea 8px)}'
+    +'.cbreak .cl,.cbreak .cv{color:#b45309;font-style:normal}'
+    +'.cnow{font-size:8.5px;text-transform:uppercase;letter-spacing:.4px;color:#15803d;background:#f0fdf4;border-radius:8px;padding:1px 5px;margin-left:4px}'
+    +'.ctr .note{font-size:9px;color:#8b8580;margin-top:5px;line-height:1.45}.ctr .note b{color:#57534e}'
+    +'.annu{margin-top:11px;page-break-inside:avoid}'
+    +'.annu .t{font-size:9px;font-weight:700;text-transform:uppercase;letter-spacing:.5px;color:#8A5A38;margin-bottom:5px}'
+    +'.annu th.hi,.annu td.hi{background:#f7f3ec}.annu thead th.hi{background:#2c2942}'
+    +'.annu tbody tr.cur{background:#f8f6fd}'
+    +'.annu tfoot td{border-top:1.5px solid #cfcac4;border-bottom:none;font-weight:700;background:#fafaf9}'
+    +'.annu .note{font-size:9px;color:#8b8580;margin-top:5px;line-height:1.45}.annu .note b{color:#57534e}'
+    +'.acomptes{margin-top:9px;font-size:10px;color:#92400e;background:#fffbeb;border:1px solid #fcd34d;border-radius:8px;padding:7px 12px}.acomptes b{color:#b45309}'
+    // \u2605\u2605 LE PIED DE PAGE. Il n'y avait NULLE PART OU SIGNER : un filet, puis le mot
+    //   « Signature salari\u00e9 » dessous \u2014 la ligne passait donc AU-DESSUS du libelle, dans
+    //   le blanc du bloc precedent. Le libelle coiffe desormais un cadre de 21 mm, et le
+    //   couple date + lieu, qu'un document signe exige, precede les deux cadres.
+    +'.lieu{margin-top:15px;font-size:10px;color:#44403c;page-break-inside:avoid}'
+    +'.lieu b{font-weight:600}'
+    +'.foot{margin-top:7px;display:flex;gap:34px;page-break-inside:avoid}'
+    +'.sig{flex:1}.sig .sl{font-size:9px;font-weight:700;text-transform:uppercase;letter-spacing:.5px;color:#57534e}'
+    +'.sig .sb{height:21mm;margin-top:4px;border:1px solid #cfcac4;border-radius:6px;background:#fdfcfb}'
+    +'.credit{margin-top:12px;padding-top:6px;border-top:1px solid #ece9e5;display:flex;justify-content:space-between;gap:14px;font-size:8.5px;color:#a8a29e}'
+    // \u2605\u2605 MARGE ZERO, ET C'EST VOULU. Le navigateur dessine SES en-tetes et pieds \u2014
+    //   l'horodatage, le titre, le numero de page et surtout « about:blank » \u2014 DANS la
+    //   marge de @page. Une marge de 10 mm lui laissait la place : « about:blank 1/2 »
+    //   s'imprimait en bas d'un document de paie. Marge nulle = plus de boite ou les
+    //   ecrire ; la marge utile est portee par .sheet, qui reste au-dela de la zone
+    //   non imprimable des laser A4 (\u2248 5 mm).
+    +'@page{size:A4;margin:0}'
+    +'</style></head><body><div class="sheet">'
+    +'<div class="hdr"><div><h1>\uD83C\uDF47 Feuille d\u2019heures</h1><div class="sub"><span class="badge">'+_escHtml(tc)+'</span>'+_escHtml(nom)+' \u00b7 Planning '+_escHtml(plId)+'</div>'
       +(_ctrTxt?('<div class="sub" style="margin-top:2px;font-weight:600;color:#8A5A38">'+_escHtml(_ctrTxt)+'</div>'):'')
     +'</div>'
-    +'<div><div class="mo">'+PLAN_MOIS[planMonth]+' '+planYear+'</div><div class="etp">ETP '+_planFmtEtp(s.etp)+'</div></div></div>'
+    // \u2605 « ETP 1.12 » disait DEUX faussetes en huit caracteres : le point decimal (le
+    //   document est francais) et le mot lui-meme. s.etp vaut worked/ref \u2014 un TAUX DE
+    //   REALISATION, pas un equivalent temps plein. Un salarie a 1,12 ETP n'existe pas ;
+    //   un salarie a 112 % de son prevu, si. Le libelle dit desormais ce que le chiffre est.
+    +'<div><div class="mo">'+PLAN_MOIS[planMonth]+' '+planYear+'</div>'
+      +(s.ref>0.0001?('<div class="etp">R\u00e9alisation '+Math.round(s.etp*100)+'\u202f% du pr\u00e9vu</div>'):'')
+    +'</div></div>'
     // \u2605 Le chiffre le plus gros de la page est celui qu'on vient chercher : les
     //   heures du mois. Le bandeau « heures supplementaires a payer » a disparu —
     //   il donnait 26 px a un zero onze mois sur douze, et il presumait du choix
@@ -5124,21 +5331,28 @@ function _planExportPDF_(nom,mbr,_ctr){
     +'<div class="tete">'
       +'<div class="tmain"><div class="lab">Heures compt\u00e9es ce mois</div>'
         +'<div class="big">'+_planFmt(s.worked)+'</div>'
-        +'<div class="tsub">R\u00e9f\u00e9rence <b>'+_planFmt(s.ref)+'</b></div></div>'
+        +'<div class="tsub">R\u00e9f\u00e9rence <b>'+_planFmt(s.ref)+'</b>'+(_refJ?(' \u00b7 '+_refJ+' jour'+(_refJ>1?'s':'')+' pr\u00e9vu'+(_refJ>1?'s':'')):'')+'</div></div>'
       +'<div class="tsplit">'
-        +'<div class="tc"><div class="n">'+_planFmt(_hDom)+'</div>'
-          +'<div class="l">au domaine<br>'+joursTrav+' jour'+(joursTrav>1?'s':'')+'</div></div>'
+        // \u2605 « 77h30 compt\u00e9es » a cote de « 77h30 au domaine » : le meme nombre deux fois,
+        //   a 4 cm d'intervalle, onze mois sur douze. Les deux ne different QUE s'il y a
+        //   de la formation ou un evenement familial \u2014 la cellule d'heures n'apparait donc
+        //   que dans ce cas, et la place rendue sert au compte de JOURS, qui, lui, manquait.
+        +((_fo.j||_fa.j)?('<div class="tc"><div class="n">'+_planFmt(_hDom)+'</div>'
+          +'<div class="l">dont au<br>domaine</div></div>'):'')
+        +'<div class="tc"><div class="n">'+joursTrav+'</div>'
+          +'<div class="l">jour'+(joursTrav>1?'s':'')+'<br>au domaine</div></div>'
         +(_fo.j?('<div class="tc fo"><div class="n">'+_planFmt(_fo.h)+'</div>'
           +'<div class="l">en formation<br>'+_fo.j+' jour'+(_fo.j>1?'s':'')+'</div></div>'):'')
         +(_fa.j?('<div class="tc fa"><div class="n">'+_planFmt(_fa.h)+'</div>'
           +'<div class="l">\u00e9v\u00e9nement familial<br>'+_fa.j+' jour'+(_fa.j>1?'s':'')+'</div></div>'):'')
-        +'<div class="tc'+(s.ecart===0?' eq':'')+'"><div class="n" style="color:'
-          +(s.ecart>0?'#b45309':(s.ecart<0?'#dc2626':'#16a34a'))+'">'+_planFmtE(s.ecart)+'</div>'
+        +'<div class="tc"><div class="n" style="color:'
+          +(s.ecart>0?'#b45309':(s.ecart<0?'#dc2626':'#15803d'))+'">'+_planFmtE(s.ecart)+'</div>'
           +'<div class="l">\u00e9cart au<br>pr\u00e9vu</div></div>'
       +'</div>'
     +'</div>'
-    +'<div class="days"><div class="col"><table><thead><tr><th class="c" style="width:34px">Jr</th><th>Statut</th><th class="r2" style="width:42px">Eff.</th></tr></thead><tbody>'+c1+'</tbody></table></div>'
-    +'<div class="col"><table><thead><tr><th class="c" style="width:34px">Jr</th><th>Statut</th><th class="r2" style="width:42px">Eff.</th></tr></thead><tbody>'+c2+'</tbody></table></div></div>'
+    +'<div class="days"><div class="col"><table><thead><tr><th class="c" style="width:42px">Jr</th><th>Statut</th><th class="r2" style="width:46px">Eff.</th></tr></thead><tbody>'+c1+'</tbody></table></div>'
+    +(c2?('<div class="col"><table><thead><tr><th class="c" style="width:42px">Jr</th><th>Statut</th><th class="r2" style="width:46px">Eff.</th></tr></thead><tbody>'+c2+'</tbody></table></div>'):'')
+    +'</div>'
     +_plRvContratsHtml(mbr)
     +_plRvCpHtml(mbr)
     +annuCptHtml
@@ -5151,10 +5365,18 @@ function _planExportPDF_(nom,mbr,_ctr){
       +' \u00b7 reste \u00e0 prendre <b>'+_planFmtE(yb.net)+'</b></div>'
     +annuHtml
     +acoHtml
-    +'<div class="foot"><div class="sig">Signature salari\u00e9</div><div class="sig">Signature employeur</div></div>'
-    +'<div class="credit">'+(dom?dom+' \u00b7 ':'')+'Ma Vigne \u00b7 GUERETTECH</div>'
-    +'</div><script>setTimeout(function(){window.print();},400);<\/script></body></html>';
-  var w=window.open('','_blank');
+    +'<div class="lieu">Fait le <b>'+_edite+'</b>, \u00e0 <span style="color:#a8a29e">\u2026\u2026\u2026\u2026\u2026\u2026\u2026\u2026\u2026</span></div>'
+    +'<div class="foot"><div class="sig"><div class="sl">Signature salari\u00e9</div><div class="sb"></div></div>'
+      +'<div class="sig"><div class="sl">Signature employeur</div><div class="sb"></div></div></div>'
+    +'<div class="credit"><span>'+_escHtml(nom)+' \u00b7 '+PLAN_MOIS[planMonth]+' '+planYear+'</span>'
+      +'<span>'+(dom?_escHtml(dom)+' \u00b7 ':'')+'Ma Vigne \u00b7 GUERETTECH \u00b7 \u00e9dit\u00e9 le '+_edite+'</span></div>'
+    // \u2605 On n'imprime QU'UNE FOIS LA POLICE ARRIVEE. Le delai fixe de 400 ms partait
+    //   souvent avant Outfit : l'apercu se composait en police systeme, et ce que Nico
+    //   voyait n'etait pas ce que la feuille declare. document.fonts.ready le sait, lui.
+    +'</div><script>(function(){function p(){setTimeout(function(){window.print();},120);}'
+    +'if(document.fonts&&document.fonts.ready){document.fonts.ready.then(p);setTimeout(p,2500);}else{setTimeout(p,500);}'
+    +'var d=0;window.addEventListener("beforeprint",function(){d++;});})();<\/script></body></html>';
+    var w=window.open('','_blank');
   if(w){w.document.write(html);w.document.close();}
   else showToast('Autorisez les popups pour le PDF','#E07060');
 }
@@ -6002,8 +6224,9 @@ function _plRvDateLg(iso){
   if(!iso) return '';
   var p = String(iso).slice(0, 10).split('-');
   if(p.length !== 3) return String(iso);
-  var mi = parseInt(p[1], 10) - 1;
-  return parseInt(p[2], 10) + ' ' + (PLAN_MOIS[mi] || '').toLowerCase() + ' ' + p[0];
+  var mi = parseInt(p[1], 10) - 1, jj = parseInt(p[2], 10);
+  // « du 1 janvier 2025 » n'existe pas : le premier du mois est un ordinal.
+  return (jj === 1 ? '1er' : String(jj)) + ' ' + (PLAN_MOIS[mi] || '').toLowerCase() + ' ' + p[0];
 }
 function _plRvJours(a, b){
   if(!a || !b) return null;
@@ -6021,7 +6244,9 @@ function _plRvTrou(finPrec, debutSuiv){
    document imprime porte pendant des mois. Formateur separe, donc. */
 function _plRvJ(n){
   var v = Math.round((parseFloat(n) || 0) * 10) / 10;
-  return String(v).replace('.', ',') + ' j';
+  // \u2212 (U+2212) et non le trait d'union : « -8 j » et « \u22128 j » ne se composent pas
+  //   pareil, et tout le reste du document utilise deja le vrai signe moins.
+  return String(v).replace('-', '\u2212').replace('.', ',') + ' j';
 }
 
 function _plRvContratsHtml(mbr){
@@ -6035,7 +6260,7 @@ function _plRvContratsHtml(mbr){
       + 'annuel, et chaque contrat solde son compte \u00e0 sa fin.';
 
   if(!P.length){
-    return '<div class="ctr"><div class="t">\u{1F4C4} Contrat</div>'
+    return '<div class="ctr"><div class="t">Contrat</div>'
       + '<div class="crow"><span class="cl">' + _escHtml(mbr.type_contrat || 'CDI') + '</span>'
       + '<span class="cv">aucune date enregistr\u00e9e</span></div>'
       + '<div class="note">Sans date de d\u00e9but ni de fin, l\u2019application consid\u00e8re le salari\u00e9 '
@@ -6071,7 +6296,7 @@ function _plRvContratsHtml(mbr){
       + '</div>';
   });
 
-  return '<div class="ctr"><div class="t">\u{1F4C4} Les contrats \u2014 ' + P.length
+  return '<div class="ctr"><div class="t">Les contrats \u2014 ' + P.length
     + ' p\u00e9riode' + (P.length > 1 ? 's' : '') + '</div>'
     + rows
     + '<div class="note">' + pied
@@ -6093,7 +6318,7 @@ function _plRvCpHtml(mbr){
   var ini = mbr.cp_initial_j || 0;
   var pris = _planCpPris(mbr.nom), solde = _planCpSolde(mbr);
   var mode = ((window.CONFIG && window.CONFIG.cp_mode) === 'ouvres') ? 'ouvr\u00e9s' : 'ouvrables';
-  return '<div class="ctr"><div class="t">\u{1F334} Cong\u00e9s pay\u00e9s \u2014 ' + _planCpPeriodeLbl() + '</div>'
+  return '<div class="ctr"><div class="t">Cong\u00e9s pay\u00e9s \u2014 ' + _planCpPeriodeLbl() + '</div>'
     + '<div class="crow"><span class="cl">Solde initial</span><span class="cv">' + _plRvJ(ini) + '</span></div>'
     + '<div class="crow"><span class="cl">Pris sur la p\u00e9riode</span><span class="cv">' + _plRvJ(pris) + '</span></div>'
     + '<div class="crow"><span class="cl"><b>Reste</b></span>'
