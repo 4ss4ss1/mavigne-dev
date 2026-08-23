@@ -2,7 +2,40 @@
 
 > Document de référence du projet **Ma Vigne** (GUERETTECH). Il est le **porteur de vérité** :
 > la mémoire Claude est plafonnée, ce fichier ne l'est pas.
-> Dernière consolidation : **22 août 2026** — ★★★ **LE CLIQUET XSS, ET UN INTERRUPTEUR DÉJÀ
+> Dernière consolidation : **23 août 2026** — ★★★ **LE SOCLE DE LA CHARTE, LOT DS-0 (§55)**.
+> **APP 6.45 → 6.46 · SW 7.00 → 7.01.** ★★★ **CINQUIÈME FOIS QU'UNE ENTRÉE DÉCRIT DU TRAVAIL
+> DÉJÀ FAIT** : le cadrage demandait `--sp-1..--sp-8`, l'échelle d'espacement **existe depuis
+> DS-3** sous le nom `--e-*`, et **six des huit pas y sont au pixel exact**. Deux pas ajoutés dans
+> la famille existante, aucune seconde famille créée. ★ *Et le vrai défaut n'est pas l'absence
+> d'échelle : c'est qu'elle ne sert pas — **19 appels contre 1 682 valeurs en dur**.*
+> ★★★ **LA MESURE DES OMBRES DU 16/08 ÉTAIT FAUSSE, DEUX FOIS** : dans `0 2px 8px` le premier `0`
+> **n'a pas d'unité**, donc une regex `\d+px` n'y voit que deux longueurs et conclut « pas de
+> flou » ; et **65 des 177 couches sont des ANNEAUX** (`0 0 0 2px`), pas des élévations — la même
+> confusion que `50%` pour un rayon. Refaite : **57 / 41 / 14**. Le troisième pas ne manquait pas de
+> justification, **il manquait tout court**. *Un résultat trop uniforme accuse l'instrument, pas la
+> population.*
+> ★★★ **`#app-root` N'EST PAS L'APPLICATION** : les overlays sont ses **frères** (`index.html`
+> l.3197) et les modales dynamiques passent par `document.body.appendChild`. `tabular-nums` y aurait
+> laissé **la moitié des chiffres proportionnels**. ⚠️ **Le même mur vaut pour le thème sombre** —
+> les modales héritent des valeurs claires : déduction statique, **à vérifier à l'écran**.
+> ⚠⚠ **Deux piluliers silencieux fermés** : `--ligne` posé dans `:root` seul se **figerait en
+> clair** (un `var()` dans une custom property se résout sur l'élément qui la déclare) ; et la règle
+> de focus, placée ailleurs qu'en **fin de feuille**, serait **morte sur tous les champs de saisie**
+> (17 `outline:none` en spécificité **égale**, l'ordre de source tranche).
+> ⚠⚠ **Et trois de mes propres contrôles étaient faux** : l'ancre de focus visait le premier des
+> **neuf** `:focus-visible{`, le contrôle du repli accusait un document A4, et **la 11ᵉ
+> contre-épreuve frappait le commentaire que je venais d'écrire** — le `.pathname` de §53 à
+> l'identique, **troisième fois**. Le correctif ferme la **famille** : une mutation qui ne bouge que
+> des commentaires est déclarée rouge.
+> ★★ **`harnais-claude-md.mjs` était débranché ET incapable de tourner sous Windows** (chemin de bac
+> à sable en dur). Son unique rouge « préexistant » était **un numéro de ligne figé**, pas une faute
+> du document. Corrigé, rendu portable (`fileURLToPath`), branché dans `npm run check` : **23 vertes,
+> 0 rouge**, pour la première fois.
+> ★ **DEUX RÈGLES D'OR NEUVES, demandées par Nico** : **n°6** — ce document part **avec le dernier
+> lot de chaque conversation** ; et la **note de livraison** (règle n°5) — dire ce que chaque fichier
+> change, **en langage simple, fichier par fichier**.
+>
+> ★ Précédente : **22 août 2026** — ★★★ **LE CLIQUET XSS, ET UN INTERRUPTEUR DÉJÀ
 > BASCULÉ (§54)**. Lot **SEC-7**, **APP 6.45 · SW 7.00, aucun bump**. Le lot demandait de
 > basculer App Check en enforce : ★★★ **c'était déjà fait — Firestore 100 % de requêtes validées,
 > 0 % non validées — et Cloud Functions n'a PAS de bascule dans cette console**, l'exigence se
@@ -236,7 +269,7 @@
 
 ---
 
-## ⚖️ Les cinq règles d'or
+## ⚖️ Les six règles d'or
 
 **Règle d'or n°1 — la vérité est dans les fichiers réels.**
 `/mnt/project` **bouge en cours de session**, peut être **incomplet**, et surtout **peut être en
@@ -537,6 +570,82 @@ mot est exact.
 
 ★ **Le test** : est-ce que Nico pourrait exécuter cette réponse sur son téléphone, entre deux
 rangs, sans rien rechercher ? Si non, la réécrire.
+
+### ★★★ LA NOTE DE LIVRAISON — dire ce qui change, FICHIER PAR FICHIER (23/08)
+
+> **Demandé explicitement par Nico le 23/08** : *« dire ce qui est fait sur les fichiers livrés
+> en langage simple ».*
+
+**Le problème à résoudre.** Nico reçoit cinq ou six fichiers complets et les recopie à la main
+dans `mavigne-dev\` avant de commiter. Au moment où il colle `utils.js`, il doit savoir **ce qu'il
+écrase** — sinon il ne peut ni vérifier, ni revenir en arrière, ni répondre à un client qui
+demande ce qui a changé. Un lot livré sans note est un lot qu'il doit relire pour comprendre.
+
+**La note accompagne TOUJOURS un `present_files`.** Un tableau, une ligne par fichier :
+
+| fichier | où le poser | ce qui change, en une phrase que Nico peut relire dans six mois |
+|---|---|---|
+
+**Ce qu'une ligne doit contenir :**
+- **Le chemin complet** (`src\`, `public\`, la RACINE pour `index.html`) — jamais « au bon
+  endroit ». Un fichier posé dans `src/` au lieu de la racine se déploie **sans erreur et sans
+  effet** : c'est le piège n°1 du projet.
+- **L'effet AVANT la cause**, comme partout ailleurs : « les chiffres s'alignent en colonne »
+  d'abord, « jeton `font-variant-numeric` sur `:root` » ensuite — et seulement si ça aide.
+- **Ce qui est VISIBLE du client** distingué de ce qui ne l'est pas. Un fichier de `scripts/` ne
+  part jamais en ligne ; un `styles.css` se voit sur tous les écrans. Nico n'a pas à le déduire.
+- **Ce qui a été mesuré, avec le chiffre.** « 4 affichages de version », « 13 déclarations
+  ajoutées, 1 remplacée ». Un chiffre se vérifie ; « quelques ajustements » ne se vérifie pas.
+- **Ce qui N'A PAS été fait, et pourquoi.** Toujours. Un reste connu vaut mieux qu'une surprise.
+
+⚠️ **Ça ne remplace pas le diagnostic** — le raisonnement complet reste dans la réponse. La note
+est ce que Nico lit **la main sur le clavier**, pas ce qu'il lit pour comprendre.
+
+★ **Le test** : Nico peut-il recopier les fichiers sans relire une seule ligne de la réponse ?
+Si non, la note est incomplète.
+
+**Règle d'or n°6 — CE DOCUMENT SE MET À JOUR AU DERNIER LOT DE LA CONVERSATION.**
+
+> ★★★ **Demandé explicitement par Nico le 23/08** : *« bien penser à faire le CLAUDE.md à chaque
+> livraison du dernier lot d'une conversation, pour que le fichier soit toujours à jour ».*
+
+**Le geste.** À la **dernière livraison d'une conversation**, `CLAUDE.md` part **avec les autres
+fichiers**, dans le même `present_files`. Ce n'est pas une option de fin de session : c'est un
+livrable du lot, au même titre que `styles.css`.
+
+**Pourquoi cette règle existe, et elle est chère.** Le bac à sable repart à zéro à chaque
+conversation : **tout ce qui n'est pas dans ce fichier est perdu**. Un chantier non consigné n'a
+pas « moins de trace », il n'en a **aucune** — et la conversation suivante recommence à zéro,
+ou pire, refait du travail déjà fait. **Cinq entrées de backlog décrivaient du travail déjà fait**
+(§44, §47, §53, §54, §55) : à chaque fois, la cause était un lot livré sans consignation.
+
+**Ce qui part dans la mise à jour, dans cet ordre :**
+1. **Le bloc d'en-tête** — la nouvelle consolidation en tête, l'ancienne poussée en « précédente ».
+   On **prépend**, on ne remplace jamais : c'est un journal, comme `WHATS_NEW`.
+2. **Une section neuve** pour le chantier, numérotée à la suite, avec ce qui a été **mesuré**
+   (les chiffres), ce qui a été **tranché** (et contre quoi), et ce qui **reste ouvert**.
+3. **Les règles et sections existantes que le lot dément.** C'est la partie qu'on oublie et c'est
+   la plus utile : une phrase devenue fausse est pire qu'une phrase absente.
+4. **Le backlog (§28)** — rayer ce qui est fait, corriger les chiffres qui ont bougé.
+
+⚠️ **Consigner ce qui a échoué, pas seulement ce qui a marché.** Les assertions fausses, les
+contre-épreuves qui ne mordaient pas, les mesures à refaire : c'est ce qui évite de repayer la
+même leçon. Quatre des cinq dernières sections doivent leur existence à une faute consignée.
+
+⚠️ **La mise à jour se fait sur le fichier RÉEL, clôné en tête de session** — jamais de mémoire.
+Une régénération faite sans l'avoir sous les yeux s'est révélée **en retard d'un chantier
+entier** (10/08). `CLAUDE.md` est à la racine du dépôt : il se patche comme n'importe quel fichier,
+avec la même discipline d'ancre (`assert` + `count==1`).
+
+★ **Le contrôle** : `node scripts/harnais-claude-md.mjs` — il relève les affirmations vérifiables
+du document contre le code réel. Il tourne dans `npm run check`. ⚠️ Il est **volontairement absent
+de `prebuild`** : une phrase périmée ne doit pas empêcher un déploiement urgent. C'est la seule
+divergence entre `check` et `prebuild`, et elle est délibérée.
+
+⚠️ **Ce que le harnais NE fait PAS : juger si le document est À JOUR.** Il vérifie que ce qui est
+écrit est vrai, pas que ce qui manque soit écrit. **Un document parfaitement vert peut être en
+retard de trois chantiers.** C'est exactement ce qui s'est produit au §44. La mise à jour reste un
+geste humain, et cette règle est le rappel de le faire.
 
 ---
 
@@ -1707,7 +1816,7 @@ domaines chaque nuit. Les deux s'écrivent dans le même geste (`_fcSaveAbo`, `a
 `gtRenewTrial`). **Si un jour l'un part sans l'autre, la veille se trompera de date en silence.**
 
 **⚠️ LA LECTURE SEULE EST CÔTÉ NAVIGATEUR.** `_mvCheckExpired()` pose `window._MV_LOCKED`,
-`saveData()` refuse en tête (`app.js:703`). **Aucune règle de `firestore.rules` ne lit
+`saveData()` refuse **en tête** (garde `window._MV_LOCKED` dans `src/app.js`). **Aucune règle de `firestore.rules` ne lit
 `trial_until`** — la base accepte toujours les écritures d'un domaine expiré. (Le mot « trial » y
 apparaît deux fois, dans des commentaires sur `checkTrialToken` : mécanisme sans rapport.) C'est un
 frein commercial, pas une serrure. Écrit ici pour que personne ne le découvre autrement.
@@ -4180,6 +4289,28 @@ radios/cases, section « pièces à joindre » explicite.
 
 ## 28. État courant & backlog
 
+### ⚠️ CE QUE LE LOT DS-0 LAISSE OUVERT (23/08 — §55)
+
+1. ⚠️⚠️⚠️ **REGARDER LES TROIS ÉCRANS.** L'accueil, **Pilotage › Décider**, **Planning › Équipe**.
+   `tabular-nums` touche **tous** les chiffres de l'application, et aucun harnais ne lit une mise en
+   page. **Trois défauts du §42 n'ont été trouvés qu'à l'œil.** Les captures n'ont pas été fournies
+   au lot : **c'est le seul contrôle qui manque.**
+2. ⚠️⚠️ **LES MODALES EN MODE SOMBRE** (§55c). `--bg-card`, `--gris-clair` et les ombres ne sont
+   redéfinis que sur `#app-root[…]` ; les overlays sont **dehors** et héritent donc du clair.
+   **Déduction statique, jamais vérifiée à l'écran.** Un téléphone en sombre tranche en dix
+   secondes. Si une modale sort claire, c'est un lot à part.
+3. ★ **`font-weight:800`, 78 fois** — quatrième pas de fait, ou résidu à résorber ? **Au cliquet en
+   attendant.** Se tranche sur une capture, pas au `grep`.
+4. ★ **DÉPENSER L'ÉCHELLE, C'EST TOUT LE TRAVAIL QUI RESTE.** Le socle est posé ; **19 appels
+   `var(--e-*)` contre 1 682 valeurs en dur**, et cinq pas sur onze sans aucun appelant. Un socle
+   qu'on ne dépense pas est un socle qui ne sert à rien. → **DS-1/DS-2, écran par écran.**
+5. `.mvr-fi:focus{outline:none}` en **(0,2,0)** — ce champ reste sans anneau au clavier. Constaté,
+   non corrigé.
+6. **99 px (10 fois) contre 999 px** : même pilule sous 198 px de haut, pas au-delà. Arbitrage à
+   l'œil, jamais une substitution mécanique.
+7. `npm run build` **non joué** (`vite` absent du bac à sable). Le `prebuild` complet est vert et le
+   CSS a été validé par `css-tree` à la place — **0 erreur de parsing**.
+
 ### ⚠️ À FAIRE AVANT DE DÉPLOYER LE CHANTIER §43 (la visite guidée)
 
 1. ⚠️⚠️⚠️ **ALIGNER LES TROIS CHIFFRES DU ROI.** La démo dit **127 h (+37 hors total)**.
@@ -4208,7 +4339,7 @@ en dur et se lisent donc comme des succès.
 
 1. ⚠️⚠️ **`_pl2Cell`** — un retard d'une heure et une journée d'absence s'affichent pareil chez MG
    et Chapelle, tous les jours. **Le défaut le plus visible côté client de tout le backlog.**
-2. ⚠️⚠️ **Les six harnais à chemin absolu** (§44c) — une ligne chacun, et neuf filets se remettent
+2. ⚠️⚠️ **Les harnais à chemin absolu** (§44c — ✅ `harnais-claude-md` réglé le 23/08, §55j) — une ligne chacun, et neuf filets se remettent
    à protéger quelque chose.
 3. ⚠️ **0a-quater** — la masse salariale exclut les bureaux pendant que son commentaire dit
    l'inverse. **`avecBureau` : 0 occurrence.**
@@ -7393,7 +7524,7 @@ surveillé par personne.** Le banc attrape ce qui a dérapé cette fois-ci, pas 
 
 **Côté code, c'est bon** — vérifié le 15/08 :
 
-- `saveData` (`src/app.js:702`) construit bien `planning_templates`, `planning_entries`,
+- `saveData` (`src/app.js`) construit bien `planning_templates`, `planning_entries`,
   `planning_acomptes`, `planning_hsup`, `travaux`, `config`, `membres` complets.
 - `COLLECTIONS` (`src/firebase.js:232`) les lit toutes au démarrage.
 - `FB_REALTIME` (`:272`) inclut les quatre clés de planning.
@@ -7714,7 +7845,7 @@ de portée depuis le bac à sable :
   — **pendant que le commentaire trois lignes au-dessus dit l'inverse**, mot pour mot :
   *« Le "bureau" N'EST PAS exclu : c'est un salaire »*. **`avecBureau` : 0 occurrence dans tout
   `src/`.** À faire au même lot que 0a-ter.
-- ⚠️ **Les six harnais à chemin absolu** (§44c) — **n°1 outillage**, une ligne par script.
+- ⚠️ **Les harnais à chemin absolu** (§44c — ✅ `harnais-claude-md` réglé le 23/08, §55j) — **n°1 outillage**, une ligne par script.
 - **1** installation à blanc sur slug jetable · **6** `demarrage.html` (938 lignes) · **11** import
   KML en merge (`admin-gt.js:2326`) · **12** rattachement des anciens fûts (0 trace dans
   `reserve.js`) · **14** le Cuvier sans intervenant (`cave.js:6713`) · **16** `_pl2Annual` vs
@@ -8890,3 +9021,249 @@ de correction manquée.
 - ⚠️ **`_mvBadge` non plus** : son `ton` va cru dans un `class="…"`. Même situation, même raison.
 - `npm run lint` **non joué** (ESLint ne s'installe pas dans le bac à sable) · `smoke` et `e2e`
   non joués (Playwright, idem).
+- ~~Le harnais `harnais-claude-md.mjs` sort **1 rouge préexistant**~~ → ✅ **INSTRUIT ET CORRIGÉ LE
+  23/08 (§55j)**. ★★ **Ce n'était pas une faute du document : c'était le CONTRÔLE qui était
+  périmé** — il figeait `app.js:703`, la garde a glissé en 704 au premier ajout de ligne plus haut.
+  Même famille que le cliquet à l'envers `A8`. Et le harnais **portait un chemin de bac à sable en
+  dur** et **n'était branché nulle part** — d'où un rouge qui survit des jours sans que personne le
+  voie. Rendu portable, branché dans `npm run check`.
+
+## 55. ★★★ LE SOCLE DE LA CHARTE — LOT DS-0 (23/08 · APP 6.46 · SW 7.01)
+
+> **Point de départ** : le cadrage écrit par Nico — huit pas d'espacement, quatre rayons, trois
+> ombres, trois graisses, un filet neutre, deux règles globales. Avec, en toutes lettres, l'ordre
+> de **re-mesurer avant de commencer**.
+
+### 55a. ⚠️⚠️⚠️ CINQUIÈME FOIS QU'UNE ENTRÉE DÉCRIT DU TRAVAIL DÉJÀ FAIT
+
+Le cadrage demandait `--sp-1..--sp-8` (4/8/12/16/24/32/48/64). **L'échelle d'espacement existe
+depuis DS-3** sous le nom `--e-0..--e-8`, déclarée dans `:root`, avec son harnais et son cliquet.
+**Six des huit pas demandés y sont au pixel exact** :
+
+| demandé | existe déjà | | demandé | existe déjà |
+|---|---|---|---|---|
+| `--sp-1:4px` | `--e-1:4px` | | `--sp-5:24px` | `--e-6:24px` |
+| `--sp-2:8px` | `--e-2:8px` | | `--sp-6:32px` | `--e-7:32px` |
+| `--sp-3:12px` | `--e-3:12px` | | `--sp-7:48px` | **absent** → `--e-9` |
+| `--sp-4:16px` | `--e-4:16px` | | `--sp-8:64px` | **absent** → `--e-10` |
+
+Déclarer `--sp-*` aurait fait **deux vérités pour un même pixel** — la faute exacte de §47a
+(*« une échelle qu'on ignore n'en est plus une, et j'ai failli en créer une seconde en croyant en
+réconcilier deux »*). Seuls les deux pas réellement manquants sont ajoutés, **dans la famille
+existante**.
+
+★★★ **Et le vrai défaut de l'espacement n'est pas l'absence d'échelle : c'est qu'elle ne sert
+pas.** **19 appels `var(--e-*)` contre 1 682 valeurs** de `padding`/`margin`/`gap` écrites à la
+main, dont 1 003 hors échelle. Cinq pas sur neuf (`--e-5`, `--e-7`, `--e-8`, plus les deux neufs)
+n'ont **aucun appelant**. Le cadrage cherchait à poser une échelle qui existait ; ce qu'il fallait,
+c'est la dépenser. → **DS-1/DS-2 écran par écran, tenu par le cliquet de `mv-harnais-echelle`.**
+
+### 55b. ★★★ LA MESURE DES OMBRES DU 16/08 ÉTAIT FAUSSE — deux fautes superposées
+
+Le cadrage le disait lui-même : *« au 16/08 les 230 usages tombaient TOUS dans le seuil faible, ce
+qui veut dire soit que trois pas sont de trop, soit que ma mesure était mauvaise »*. **La mesure
+était mauvaise**, et pour deux raisons distinctes :
+
+1. ⚠️ **`0 2px 8px` — le premier `0` n'a pas d'unité.** Une expression qui cherche `\d+px` n'y
+   trouve que **deux** longueurs, en déduit qu'il n'y a pas de troisième valeur, et range la
+   couche en « flou nul ». **Toute la population passait pour plate.** Il faut **tokeniser** et
+   traiter `0` nu comme `0px`.
+2. ⚠️ **Les anneaux ne sont pas des ombres.** Sur 177 couches mesurables, **65 ont un flou
+   réellement nul** : ce sont des `0 0 0 2px` (anneaux de focus, halos d'état) et des
+   `inset 0 1px 0` (filets de brillance). Les compter parmi les élévations est la seconde moitié
+   de l'erreur — **exactement la même confusion que `border-radius:50%` pour un rayon**.
+
+**Mesure refaite**, tous fichiers : 239 déclarations `box-shadow`, dont **65 via jeton** et 174
+écrites à la main. Les **112 vraies élévations** se répartissent en trois populations nettes :
+
+| flou | nombre | pas |
+|---|---|---|
+| < 10 px | **57** | `--shadow-sm` (existait, flou max 8) |
+| 10 → 39 px | **41** | `--shadow-md` (existait, flou max 28) |
+| ≥ 40 px | **14** | `--shadow-lg` — **il manquait** |
+
+Le troisième pas n'était pas de trop : il n'existait pas, et **ses clients sont nommables** —
+`.ent-confirm-modal`, `.saison-menu`, `.ov-plan-sheet`, `#mv-dock-sheet`, `.pil-drawer`,
+`.pl2-mbar`, `.mvt-card`, `.pil-outils-menu`, `.mvds-sheet`. La famille des surfaces qui flottent
+au-dessus de la page.
+
+★ **La leçon, au-delà des ombres** : quand une mesure rend un résultat parfaitement uniforme sur
+une population de 230, **ce n'est pas la population qui est uniforme, c'est l'instrument qui est
+aveugle**. Un résultat trop propre est un signal, pas une conclusion.
+
+### 55c. ★★★ `#app-root` N'EST PAS L'APPLICATION — et ça change deux décisions
+
+Le cadrage plaçait `font-variant-numeric` sur `#app-root`. **Mesuré sur `index.html` :** le
+conteneur est fermé ligne 3197, et `#ovChampValidation`, `#ovMode`, `#ovConfirmDel`, `#ovPrompt`,
+`#mv-critical-overlay` sont ses **frères**, pas ses enfants. Les overlays construits en JS sont
+posés par `document.body.appendChild` (une douzaine dans `admin-gt.js` seul).
+
+Ancrée sur `#app-root`, la règle laissait **toutes les modales en chiffres proportionnels** :
+moitié aligné, moitié pas — **pire que rien**. → posée sur `:root`, comme `--pt-*`, et pour la
+raison déjà écrite dans le commentaire de l'échelle : *« les bulles Leaflet et les couches
+d'overlay sortent du conteneur de la page »*.
+
+⚠️⚠️ **LE MÊME MUR VAUT POUR LE THÈME SOMBRE, ET CE N'EST PAS TRAITÉ ICI.** `--bg-card`,
+`--gris-clair`, `--shadow-*` sont redéfinis **uniquement** dans `#app-root[data-theme="dark"]` et
+dans `#app-root:not([data-theme="light"])`. Une modale, qui est dehors, hérite donc des valeurs
+**claires**. Déduction statique, **non vérifiée à l'écran** : à regarder sur un téléphone en mode
+sombre. Si une modale sort claire, c'est un lot à part. → **backlog.**
+
+### 55d. Ce que `tabular-nums` déplace vraiment — mesuré sur les polices, pas supposé
+
+Le cadrage posait un seuil : *« si c'est imperceptible (<0,5 px), on le garde partout »*.
+Playwright ne s'installe pas ici ; la mesure a été faite **sur les `.woff2` réellement servis**
+(`public/fonts/`, lus avec `fontTools`) :
+
+- ★ **Outfit ET Cormorant portent la fonction OpenType `tnum`.** La règle n'est donc pas un coup
+  d'épée dans l'eau — **et les 67 `tabular-nums` déjà écrits dans le code font bien quelque chose**.
+  C'était la première question à trancher : une police sans `tnum` aurait rendu tout le lot vain.
+- Outfit, chiffres proportionnels : le « 1 » fait **367**/1000 em, le « 0 » **660**. En tabulaire,
+  **590 pour tous**.
+- **Écart moyen par chiffre** : `+0,44 px` à 11 px · `+0,50 px` à 12,5 px · `+1,23 px` à 31 px.
+  Le seuil de 0,5 px est **tenu au corps de texte, dépassé aux grandes tailles**.
+- **Ce qui tranche est l'autre plateau** : le **désalignement supprimé** atteint `3,7 px` par
+  chiffre à 12,5 px et `9,1 px` à 31 px. On ajoute un demi-pixel de largeur pour retirer sept
+  pixels d'écart entre deux lignes d'un même tableau.
+
+⚠️ **Ce raisonnement reste un proxy.** Aucune capture n'a pu être prise, et **les trois captures
+demandées dans le cadrage n'ont pas été fournies** (les images jointes étaient les logos, la
+bannière et le QR code). L'accueil, Pilotage › Décider et Planning › Équipe **restent à regarder à
+l'œil** — trois défauts du §42 n'ont été trouvés que comme ça.
+
+### 55e. ⚠️⚠️ LE PIÈGE DE LA VARIABLE QUI SE FIGE EN CLAIR
+
+`--ligne` déclaré **uniquement** dans `:root` serait resté **clair en mode sombre**, sans erreur et
+sans avertissement.
+
+**La mécanique** : la substitution d'un `var()` écrit **dans** une custom property se résout **sur
+l'élément qui la déclare**. `:root{--ligne:var(--gris-clair)}` calcule `--ligne` sur `html`, où
+`--gris-clair` vaut la valeur claire, puis **hérite ce littéral** à toute la page. Redéfinir
+`--gris-clair` plus bas, sur `#app-root[data-theme="dark"]`, **ne rétroagit pas**.
+
+→ `--ligne` **et** `--shadow-lg` sont redits dans **les deux** blocs sombres, exactement comme
+`--shadow-sm` et `--shadow-md` le sont déjà. Vérifié **avec un vrai parseur CSS** (`css-tree`), pas
+au `grep` : trois déclarations chacun, une par bloc de thème, zéro erreur de parsing sur les
+4 725 lignes.
+
+★ **L'assertion qui en découle vaut mieux que le correctif** : un jeton redit dans **un seul** des
+deux blocs sombres fait diverger la bascule manuelle du mode auto de l'OS. Le défaut ne se voit que
+chez un client en sombre, qui a basculé d'une certaine façon. Le harnais l'interdit.
+
+### 55f. ⚠️⚠️⚠️ LA RÈGLE DE FOCUS EST MORTE SI ELLE N'EST PAS LA DERNIÈRE
+
+`styles.css` contient **17 `outline:none`**, la plupart sur la règle **de base** d'un champ de
+saisie : `.fi`, `.fsel`, `.login-input`, `.ephy-search input`, `.emh-in`, `.j-date-input`,
+`.ob-input`, `.plan-ge-input`, `.vend-param-fi`, `.pl2-chal-f input`, `#chat-ta`, `.sbox input`,
+`.danger-conf-input`, `.mvt-fi`.
+
+Leur spécificité est **(0,1,0)** — **exactement celle de `:focus-visible`**. À égalité, c'est
+l'**ordre de source** qui tranche. Placé n'importe où avant, l'anneau de focus serait **mort sur
+tous les champs de saisie de l'application**, sans une erreur et sans un avertissement.
+
+→ Le bloc est en **fin de feuille**, et **c'est une assertion du harnais**, pas une convention :
+après la règle de focus, un seul `outline:none` est toléré (celui du couple `*:focus:not(...)`).
+Un futur `outline:none` ajouté en queue rougit.
+
+⚠️ **Un survivant assumé** : `.mvr-fi:focus{outline:none}` est en **(0,2,0)** et gagne quand même.
+Ce champ garde sa couleur de bordure pour seul signal, y compris au clavier. **Constaté, pas
+corrigé** — ça se tranche sur une capture, pas au `grep`.
+
+### 55g. Les autres arbitrages, chacun tranché par un chiffre
+
+- **Rayons.** 674 `border-radius`, **45 valeurs distinctes**. Les quatre pas couvrent les quatre
+  plus gros usages : 12 px (95), 8 px (50), 16 px (27), 999 px (8).
+- ⚠️ **`border-radius:50%` (130 occurrences) est un CERCLE**, jamais un jeton : une pastille de
+  44 px et une de 22 px n'ont aucune valeur en pixels en commun. Le harnais pose un **PLANCHER**
+  dessus — le compte ne peut pas **descendre**. C'est le seul cliquet du lot orienté à l'envers,
+  et c'est voulu.
+- ⚠️ **99 px (10 occurrences) n'est pas fusionné avec 999 px** : même pilule sur un élément bas,
+  **pas au-delà de 198 px de haut**. Arbitrage à l'œil, pas substitution mécanique.
+- ★ **`--radius-card` était un SECOND nom pour 16 px**, avec ses 10 appels. Il devient
+  `var(--r-lg,16px)` : un renvoi, plus une valeur jumelle.
+- **Graisses.** 1 971 `font-weight` : 600 (**976**), 700 (**686**), 500 (**156**) = **92 %**.
+  ⚠️ **800 existe 78 fois** : ni un pas ni un accident, un **quatrième pas de fait**, jamais
+  déclaré. **Pas ajouté en douce** — il part au cliquet. Le trancher demande une capture.
+- **Filet neutre.** `1px solid var(--gris-clair)` = **172** (+14 avec repli) contre
+  `var(--gris)` = **71**. `--gris-clair` mène de plus du double : il gagne. Le perdant part au
+  cliquet, il ne peut plus regagner de terrain.
+- ⚠️ **Le nom `--ligne` était déjà pris** dans `_rsCss()` (`app.js`) — mais c'est le `:root` d'un
+  **document A4 imprimé**, ouvert dans sa propre fenêtre, qui ne charge jamais `styles.css`. Deux
+  documents, aucun conflit. **Exemption écrite avec sa raison** dans le harnais, comme
+  `GUARD_EXEMPT`.
+- **Le repli partout.** Le socle n'introduit que trois appels, tous avec repli. ⚠️ Mais la base
+  compte **4 376 `var()` sans repli** au total, dont **89** dans les familles d'échelle. Les solder
+  n'est pas ce lot : ils partent au cliquet.
+
+### 55h. Le harnais — `mv-harnais-jetons.mjs`, 32 assertions, 12 contre-épreuves
+
+Branché dans `npm run check` **et** `prebuild`. Cliquet dans `scripts/mv-jetons-baseline.json` :
+`{cercles:80, sansRepli:89, radDur:194, fwHors:152, filetPerdant:74}`.
+
+★ **Le point de conception qui compte** : `controles()` est une **fonction pure du texte de la
+feuille**. C'est ce qui rend les contre-épreuves réelles — on mute une copie **en mémoire** et on
+rejoue le même jeu d'assertions. Un harnais dont on ne peut pas rejouer les assertions sur une
+source abîmée ne prouve rien.
+
+### 55i. ⚠️⚠️ TROIS DE MES CONTRÔLES ÉTAIENT FAUX AU PREMIER LANCEMENT
+
+**Deux rouges au premier tir, et les deux accusaient du code parfaitement sain :**
+
+1. ⚠️ **L'ancre de position cherchait le PREMIER `:focus-visible{` de la feuille.** Il y en a
+   **neuf** (`.emh-x`, `.emh-add`, `.emh-rap-b`, `.emh-opt`, `.mv-syncdot`, `.mvt-cta`, `.mv-i`,
+   `.rf-f select`, plus la mienne). Le contrôle mesurait « 15 `outline:none` après » et rougissait.
+   **L'assertion satisfaite par une autre phrase du fichier — la faute exacte de §53.**
+2. ⚠️ **Le contrôle du repli comptait `var(--ligne)` de `_rsCss()`**, le document A4 — qui déclare
+   son propre `--ligne` deux lignes plus haut, où un repli est sans objet. Et le préfixe `--ligne`
+   attrapait `--ligne-2`, qui n'est pas un jeton du socle. **Corrigé en profondeur** : `sansRepli`
+   prend désormais des **paires `[fichier, source]`** (sans le nom du fichier, aucune exemption
+   n'est applicable) et un **prédicat**, jamais un préfixe nu.
+
+**Et la onzième contre-épreuve ne mordait pas — troisième fois pour cette famille de faute :**
+
+3. ⚠️⚠️⚠️ La mutation `border-radius:50%` **sans point-virgule** frappait la **première occurrence
+   du fichier**, qui est **le commentaire que je venais d'écrire** dix lignes plus haut pour
+   expliquer qu'un cercle n'est pas un rayon. `sansCom()` le retirait ensuite : le compte ne
+   bougeait pas, la contre-épreuve ne mordait rien, **et elle se lisait comme une mutation
+   légitime**. C'est le `.pathname` de §53 à l'identique — *un `assert` qui tombe sur le mot écrit
+   dans le commentaire qu'on vient d'ajouter*.
+
+★★★ **Le correctif ferme la FAMILLE, pas le cas** : les contre-épreuves exigent maintenant que la
+mutation bouge **le code**, pas seulement le texte. `if (sansCom(muté) === sansCom(origine))` →
+rouge nommé. Une mutation qui ne touche que des commentaires ne teste rien, quel que soit le motif.
+★ **Le second filet, déjà là, reste indispensable** : il ne suffit pas que « ça rougisse », il faut
+que ce soit **l'assertion visée** qui rougisse. Une mutation qui casse autre chose passerait.
+
+### 55j. ★★ LE HARNAIS DU DOCUMENT ÉTAIT DÉBRANCHÉ, ET INCAPABLE DE TOURNER CHEZ NICO
+
+`harnais-claude-md.mjs` sortait **1 rouge depuis des jours**, noté au §54 comme « préexistant ».
+Instruit : **c'était le contrôle qui était périmé**, pas le document. L'assertion figeait
+`app.js:703` ; la garde `_MV_LOCKED` a glissé en **704** au premier ajout de ligne plus haut.
+**Même famille que le cliquet à l'envers `A8`.** → on cherche le **motif** dans la tête de
+`saveData`, plus le **rang**. Et les deux numéros de ligne recopiés dans le document (§14b, §28)
+sont retirés : c'est la règle d'or n°2 appliquée aux lignes, pas seulement aux versions.
+
+⚠️⚠️ **Plus grave : il portait `/home/claude/mavigne-dev/` EN DUR** — un des six harnais de §44 qui
+ne peuvent démarrer que dans le bac à sable. **Il n'était branché nulle part** : ni dans `check`,
+ni dans `prebuild`, ni en CI. C'est pour ça qu'un rouge a pu survivre sans que personne le voie.
+→ Chemin rendu portable avec **`fileURLToPath`** — ⚠️ **pas** `new URL(...).pathname`, qui rend
+`/C:/Users/…` sous Windows et que Node repart en `C:\C:\Users\…` (§53, le harnais livré vert qui a
+planté chez Nico au premier lancement). **Le bac à sable est Linux, la machine de Nico est
+Windows.**
+→ Branché dans **`npm run check`** seulement. ⚠️ **Volontairement absent de `prebuild`** : une
+phrase périmée ne doit pas bloquer un déploiement urgent. **C'est la seule divergence entre `check`
+et `prebuild`, et elle est délibérée.**
+✅ **23 vertes, 0 rouge** — pour la première fois.
+
+### 55k. Ce que le lot ne fait pas, et pourquoi
+
+- **La feuille n'est pas remappée.** Le socle **déclare** ; il ne réécrit pas 674 `border-radius`
+  ni 1 682 espacements sans pouvoir regarder une seule capture. Ce serait un pari, pas un lot
+  (§47b). La dette part au cliquet et se résorbe écran par écran.
+- **Les trois captures n'ont pas été regardées** (non fournies). C'est le seul contrôle qui manque,
+  et c'est celui qui a trouvé trois défauts au §42.
+- **`font-weight:800` (78 fois)** : quatrième pas ou résidu, non tranché.
+- **Les modales en mode sombre** (§55c) : déduction statique, à vérifier à l'écran.
+- **`npm run build` non joué** — `vite` n'est pas installé dans le bac à sable. Le `prebuild`
+  (tous les harnais) est passé vert ; le CSS a été validé par `css-tree` à la place, **0 erreur de
+  parsing**. `smoke` et `e2e` non joués (Playwright, comme toujours).

@@ -1,7 +1,17 @@
 // CLAUDE.md doit décrire le code RÉEL. Chaque affirmation vérifiable est vérifiée
 // contre les fichiers — un document de continuité qui ment est pire qu'absent.
-import { readFileSync as R } from 'fs';
-const B='/home/claude/mavigne-dev/';
+import { readFileSync as R } from 'node:fs';
+import { fileURLToPath } from 'node:url';
+import { dirname, join } from 'node:path';
+/* ⚠⚠⚠ CHEMIN PORTABLE, ET C'EST UNE LEÇON PAYÉE DEUX FOIS.
+   1) Ce harnais portait « /home/claude/mavigne-dev/ » en dur : il ne pouvait
+      démarrer que dans le bac à sable, et se lisait comme un succès ailleurs
+      (§44 — six harnais dans ce cas).
+   2) Le remède naïf, `new URL(import.meta.url).pathname`, rend « /C:/Users/… »
+      sous Windows, que Node repart en « C:\\C:\\Users\\… » : le harnais livré
+      vert a planté chez Nico au premier lancement (§53). `fileURLToPath` est la
+      seule forme juste sur les deux systèmes. */
+const B = join(dirname(fileURLToPath(import.meta.url)), '..') + '/';
 const MD=R(B+'CLAUDE.md','utf8'), C=R(B+'functions/claims.js','utf8'),
       A=R(B+'src/admin-gt.js','utf8'), AP=R(B+'src/app.js','utf8'),
       SW=R(B+'public/sw.js','utf8'), U=R(B+'src/utils.js','utf8'),
@@ -14,8 +24,14 @@ t('§14b enrichi de l\'essai borné', /## 14b[\s\S]{0,4000}L\u2019ESSAI EST BORN
 /* ⚠️ NE PAS FIGER LE NUMERO DU CHANTIER. Cette assertion cherchait « §40 » : elle
    a rougi au chantier suivant, dont la checklist s'est posee AVANT en tete de §28
    — ce qui est le bon ordre. On verifie qu'il Y A une checklist, pas laquelle. */
-t('§28 ouvre sur une checklist de déploiement',
-  /## 28[\s\S]{0,600}AVANT DE D\u00c9PLOYER LE CHANTIER \u00a7\d+/.test(MD));
+/* ⚠⚠ CETTE ASSERTION A ÉTÉ CORRIGÉE DEUX FOIS, POUR LA MÊME RAISON À CHAQUE COUP.
+   Elle cherchait d'abord un numéro de chantier figé, puis un motif dans une
+   FENÊTRE DE 600 CARACTÈRES — qui a rougi dès qu'une checklist plus longue s'est
+   posée devant, ce qui est pourtant le bon ordre. Ni le numéro ni la longueur ne
+   sont l'intention : l'intention est que LE BACKLOG S'OUVRE SUR UN BLOC
+   D'ALERTE, jamais sur un paragraphe d'introduction tiède. */
+t('§28 s\'ouvre directement sur un bloc d\'alerte',
+  /## 28\. [^\n]*\n\s*\n### \u26a0/.test(MD));
 t('aucun numéro de section en doublon',
   (()=>{const s=[...MD.matchAll(/^## (\d+[a-z]?)\. /gm)].map(m=>m[1]);return new Set(s).size===s.length;})());
 
@@ -43,8 +59,19 @@ t('les versions ne sont PAS recopiées dans le document (règle d\'or n°2)',
 
 console.log('\n── les affirmations vérifiables ──');
 t('★ « rules ignore trial » — c\'est vrai', !/trial_until/.test(RU) && /Aucune r\u00e8gle de `firestore.rules` ne lit/.test(MD));
-t('★ « app.js:703 » — saveData refuse bien là',
-  AP.split('\n')[702].includes('_MV_LOCKED'));
+/* ⚠⚠ CETTE ASSERTION FIGEAIT UN NUMÉRO DE LIGNE (703) et rougissait dès qu'une
+   ligne était ajoutée plus haut — la garde a glissé en 704. Elle accusait le
+   document alors que c'était LE CONTRÔLE qui était périmé : même famille que le
+   cliquet à l'envers A8 et que le `.pathname` de §53. On cherche le MOTIF, pas
+   le rang — et on vérifie qu'il est bien EN TÊTE de saveData, ce qui est
+   l'affirmation réelle du document. */
+t("★ saveData refuse en tête quand l'essai est terminé",
+  (() => {
+    const i = AP.indexOf('function saveData(');
+    if (i < 0) return false;
+    const tete = AP.slice(i, i + 600);
+    return /_MV_LOCKED/.test(tete);
+  })());
 t('★ les rewrites annoncés existent', /"\/api\/lead"/.test(FJ) && /"\/api\/mise-en-route"/.test(FJ));
 t('gtRenewTrial et trialWatch nommés dans le doc ET exportés',
   /gtRenewTrial/.test(MD) && /trialWatch/.test(MD)
@@ -66,6 +93,31 @@ t('les 4 harnais sont nommés',
   ['harnais-parcours-prospect','harnais-essai-borne','harnais-reconduction','harnais-bandeau-essai']
     .every(h=>MD.includes(h)));
 t('le total d\'assertions annoncé = 58+15+20+15', /108 assertions/.test(MD) && 58+15+20+15===108);
+
+console.log('\n── les règles d\'or que Nico a demandées ──');
+/* ★ Ces deux règles ont été demandées explicitement (23/08). Sans assertion,
+   elles se dilueraient à la première grosse réécriture du document — et c'est
+   précisément la règle n°6 qui empêche le document de dériver. */
+t('le document annonce SIX règles d\'or, et les six existent',
+  /## ⚖️ Les six règles d'or/.test(MD)
+  && [1,2,3,4,5,6].every(n => new RegExp("\\*\\*Règle d'or n°" + n + " —").test(MD)));
+t('★ règle n°6 — ce document part avec le dernier lot de la conversation',
+  /Règle d'or n°6 — CE DOCUMENT SE MET À JOUR AU DERNIER LOT/.test(MD));
+t('★ la note de livraison est écrite, fichier par fichier',
+  /LA NOTE DE LIVRAISON — dire ce qui change, FICHIER PAR FICHIER/.test(MD));
+/* ⚠⚠ RÈGLE D'OR N°2, ÉTENDUE AUX NUMÉROS DE LIGNE. « app.js:703 » a survécu des
+   jours dans ce document et dans ce harnais : la garde avait glissé en 704. Un
+   rang se décale au premier ajout, un motif non. */
+/* ⚠⚠ ÉCRITE D'ABORD EN INTERDICTION, ELLE ÉTAIT INTENABLE : le document en
+   contient 36, dont trois qui CITENT « app.js:703 » précisément pour raconter
+   pourquoi figer un rang est une mauvaise idée. Un document doit pouvoir citer
+   un défaut. → CLIQUET : le compte ne peut plus MONTER, et se résorbe quand une
+   section est réécrite. Transformer une dette en cliquet vaut mieux que la
+   solder à l'aveugle (§47b). */
+const RANGS = 36;   /* mesuré le 23/08, après retrait des deux de §14b et §28 */
+const rangs = (MD.match(/`?(?:src\/)?(?:app|utils|cave|pilotage|planning|reglages)\.js:\d+/g) || []).length;
+t(`les numéros de ligne recopiés ne remontent pas (${rangs} ≤ ${RANGS})`, rangs <= RANGS);
+if (rangs < RANGS) console.log(`    ↓ ${RANGS - rangs} de moins — abaisser RANGS dans ce fichier`);
 
 console.log('\n'+(ko?`\x1b[31m✗ ${ko} rouge(s) sur ${ok+ko}\x1b[0m`:`\x1b[32m✓ ${ok} vertes, 0 rouge\x1b[0m`));
 process.exit(ko?1:0);
