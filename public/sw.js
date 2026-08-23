@@ -1,4 +1,28 @@
-// MA VIGNE — Service Worker v7.11
+// MA VIGNE — Service Worker v7.12
+// v7.12 (23/08/2026) — LA CONSOLE GUERETTECH. APP 6.56 -> 6.57.
+//   ★ admin-gt.js : 111 -> 67. La console operateur — fiche client, journal
+//   d'acces, erreurs, leads, installation depuis un dossier.
+//   ★ 28 bandeaux et libelles de bouton perdent leur glyphe. Ancres
+//   PRELEVEES : on cherche l'APPEL (`showToast(`, `_err(`, `textContent =`)
+//   et on retire le pictogramme en tete ou en fin de la chaine, quelle que
+//   soit son ecriture. 23 motifs distincts pour 28 occurrences — taper ces
+//   28 ancres a la main aurait rate les variantes de CASSE des echappements
+//   (majuscules contre minuscules dans le meme fichier), qui coexistent ici
+//   comme ailleurs.
+//   ⚠⚠ ET LE PREFLIGHT M'A ARRETE SUR CE COMMENTAIRE-CI : j'y citais deux
+//   demi-surrogates en exemple, et C7 les interdit — a raison, ils tronquent
+//   le fichier. QUATRIEME fois qu'un controle lit les mots que je viens
+//   d'ecrire (§53). La regle tient : on DECRIT le piege, on ne le CITE pas.
+//   ⚠ CE QUI RESTE (67), ET CE N'EST PAS DU RETARD :
+//   · `LVL_ICON` (critical / error / warning / info) est un CODE COULEUR de
+//     gravite, comme le feu tricolore du Pilotage ;
+//   · le 3e argument d'`agtLogAccess` est ECRIT EN BASE dans le journal
+//     d'acces — c'est une donnee historique, pas un rendu. La changer
+//     reecrirait le passe pour rien ;
+//   · les cartes de module de la fiche client portent un `emoji:` qui sert
+//     aussi de cle d'affichage cote client.
+//   ★ Cette console n'est vue que par GUERETTECH : elle passe APRES les
+//   ecrans clients dans l'ordre du chantier, et c'est volontaire.
 // v7.11 (23/08/2026) — LE PLANNING, ET LE HARNAIS QUI M'A ATTRAPE. APP 6.55 -> 6.56.
 //   ★ planning.js : 124 -> 78. Les six motifs d'absence (arret de travail,
 //   conge sans solde, evenement familial, formation, absence injustifiee,
@@ -2568,7 +2592,7 @@
 // v2.22 — Fix profils vides : guard vide dans loadData() pour MEMBRES/SAISONS/TACHES
 // v2.17 — Onboarding intégré + tenantId · v2.06 — Firebase Auth · v2.00–v2.05 — divers
 const DEBUG = self.location.hostname === 'localhost' || self.location.hostname === '127.0.0.1';
-const CACHE_NAME   = 'mavigne-v7.11';
+const CACHE_NAME   = 'mavigne-v7.12';
 const TENANT_CACHE = 'mavigne-tenant';   // Cache persistant — préservé à chaque mise à jour SW
 const SYNC_TAG     = 'mavigne-sync';
 
@@ -2584,7 +2608,7 @@ const CDN_URLS = [
 ];
 
 self.addEventListener('install', event => {
-  if(DEBUG) console.log('[SW] Ma Vigne v7.11 installé');
+  if(DEBUG) console.log('[SW] Ma Vigne v7.12 installé');
   event.waitUntil(
     caches.open(CACHE_NAME).then(async cache => {
       // ── Cœur applicatif : STRICT (mise à jour ATOMIQUE) ──
@@ -2600,7 +2624,7 @@ self.addEventListener('install', event => {
 });
 
 self.addEventListener('activate', event => {
-  if(DEBUG) console.log('[SW] Ma Vigne v7.11 activé');
+  if(DEBUG) console.log('[SW] Ma Vigne v7.12 activé');
   event.waitUntil(
     caches.keys().then(keys =>
       Promise.all(

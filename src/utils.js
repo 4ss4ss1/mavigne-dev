@@ -23,7 +23,7 @@ export const GT_ADMIN_EMAIL = 'ngdevpro@gmail.com';
 // WHATS_NEW   : tableau vide = modal desactive pour cette version.
 // Format item : { emoji:'📅', titre:'Titre court', desc:'Phrase utilisateur.' }
 // Regle : seulement les changements visibles par les utilisateurs.
-export const APP_VERSION = '6.56';
+export const APP_VERSION = '6.57';
 // ════ Journal des nouveautés (récap cumulatif) ════
 // Une entrée par version, la PLUS RÉCENTE EN HAUT : { v:'5.10', items:[ {emoji,titre,desc}, … ] }
 // À chaque release visible → AJOUTER un bloc en tête (ne pas remplacer). items:[] = release technique (rien à afficher).
@@ -354,6 +354,9 @@ window._mvGraphRepeindre = function(){
 };
 
 export const WHATS_NEW = [
+  { v: '6.57', items: [
+    { emoji: 'check', titre: 'Les messages de confirmation s\u2019all\u00e8gent encore', desc: "Vingt-huit bandeaux de plus perdent le petit signe qu\u2019ils affichaient devant leur texte. Le bandeau porte <b>d\u00e9j\u00e0 une pastille de couleur</b> \u2014 verte quand \u00e7a a march\u00e9, rouge sinon \u2014 et le signe disait la m\u00eame chose une deuxi\u00e8me fois. Les boutons qui passent en « V\u00e9rification\u2026 » ou « Cr\u00e9ation\u2026 » aussi." }
+  ] },
   { v: '6.56', items: [
     { emoji: 'calendrier', titre: 'Le Planning passe aux vraies ic\u00f4nes', desc: "Les motifs d\u2019absence \u2014 arr\u00eat de travail, cong\u00e9 sans solde, \u00e9v\u00e9nement familial, formation, retard \u2014 avaient chacun leur pictogramme, et ils ne se dessinaient pas pareil d\u2019un t\u00e9l\u00e9phone \u00e0 l\u2019autre. Sur un \u00e9cran o\u00f9 on les compare en colonne, \u00e7a compte. La barre d\u2019actions et les cartes de compteur suivent aussi. <b>Aucune heure, aucun cong\u00e9 pos\u00e9 n\u2019est touch\u00e9.</b>" },
     { emoji: 'chrono', titre: 'La feuille d\u2019heures imprim\u00e9e reste lisible', desc: "Un jour en horaires chaleur s\u2019affichait avec un petit soleil. Le m\u00eame libell\u00e9 sert \u00e0 l\u2019\u00e9cran <b>et</b> \u00e0 la feuille d\u2019heures imprim\u00e9e, o\u00f9 ce genre de dessin peut sortir en carr\u00e9 vide selon l\u2019imprimante. Le jour est d\u00e9sormais \u00e9crit <b>Chaleur</b>, tout simplement \u2014 comme les six autres statuts, qui n\u2019ont jamais eu de dessin." }

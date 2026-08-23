@@ -137,7 +137,7 @@ async function _agtGuard(force){
     _agtWipe();
     var _why = !cl ? 'aucun jeton' : (cl.tenant ? ('compte client ' + cl.tenant) : 'claim gtAdmin absent');
     if(window.logError) window.logError({level:'warning',cat:'auth',msg:'Acces GT refuse',detail:_why});
-    if(window.showToast) showToast('\u274C Acc\u00e8s r\u00e9serv\u00e9 \u00e0 GUERETTECH','#C0392B');
+    if(window.showToast) showToast('Acc\u00e8s r\u00e9serv\u00e9 \u00e0 GUERETTECH','#C0392B');
     try{ if(window.goHub) window.goHub(); }
     catch(e){ if(window.logError) window.logError({level:'info',cat:'nav',msg:'goHub apres refus GT',detail:(e&&e.message)||String(e)}); }
     return false;
@@ -245,7 +245,7 @@ async function agtUnlock(){
     if(err){ err.textContent='Mot de passe requis.'; err.style.display='block'; }
     return;
   }
-  if(btn){ btn.disabled=true; btn.textContent='\u23F3 V\u00e9rification\u2026'; }
+  if(btn){ btn.disabled=true; btn.textContent='V\u00e9rification\u2026'; }
   try{
     await firebase.auth().signInWithEmailAndPassword(GT_ADMIN_EMAIL, v);
     var cl=await _agtClaims(true);
@@ -906,7 +906,7 @@ function _agtBuildClients(){
   // AVEC ses parcelles dedans. « Nouveau client » ci-dessus reste le chemin manuel — il
   // se contente de r\u00e9server un slug et de laisser le client d\u00e9rouler l'assistant lui-m\u00eame.
   h+='<button style="width:100%;background:rgba(201,168,76,0.1);border:1px solid rgba(201,168,76,0.32);border-radius:16px;color:#C9A84C;font-size:13px;font-weight:600;padding:14px;cursor:pointer;font-family:Outfit,sans-serif;display:flex;align-items:center;justify-content:center;gap:8px;margin-top:8px" onclick="agtOpenInstall()">';
-  h+='<span style="font-size:15px">\uD83C\uDF31</span> Installer un domaine depuis un dossier</button>';
+  h+='<span>'+_mvIcon('pousse',16)+'</span> Installer un domaine depuis un dossier</button>';
   return h;
 }
 
@@ -1137,7 +1137,7 @@ function _agtBuildErrors(){
   h+='</div>';
 
   h+=_agtErrSante();
-  h+='<div class="agt-infobox">\u2139\uFE0F Niveaux <b>critical \u00b7 error \u00b7 warning</b> remont\u00e9s dans le domaine. Le niveau <i>info</i> reste local, il n\u2019appara\u00eet ici que sous \u00ab Mon poste \u00bb.</div>';
+  h+='<div class="agt-infobox">'+_mvIcon('info',16)+' Niveaux <b>critical \u00b7 error \u00b7 warning</b> remont\u00e9s dans le domaine. Le niveau <i>info</i> reste local, il n\u2019appara\u00eet ici que sous \u00ab Mon poste \u00bb.</div>';
   h+=_agtErrFiltres(base, tenantCnt);
 
   if(!groupes.length){
@@ -1260,7 +1260,7 @@ async function agtResolveGroup(gid){
     if(!ok) showToast('\u00c9criture refus\u00e9e sur '+touches[i].slug,'#C0392B');
   }
   var n=Object.keys(ids).length;
-  showToast('\u2705 '+n+' occurrence'+(n>1?'s':'')+' trait\u00e9e'+(n>1?'s':''),'#3D6B27');
+  showToast(''+n+' occurrence'+(n>1?'s':'')+' trait\u00e9e'+(n>1?'s':''),'#3D6B27');
 }
 
 // Copie un rapport lisible : de quoi chercher dans le code sans retourner a l'ecran.
@@ -1340,7 +1340,7 @@ async function saveAddTenant() {
     if(window.closeOv) window.closeOv(null,'ovAddTenant');
     inp.value='';
     var ess=trialDays>0?(' \u00b7 essai '+trialDays+' j'):'';
-    showToast('\u2705 Client ajout\u00e9 ('+plan+ess+') \u2014 lien copi\u00e9','#3D6B27');
+    showToast('Client ajout\u00e9 ('+plan+ess+') \u2014 lien copi\u00e9','#3D6B27');
     renderAdminGT();
   } catch(e) {
     showToast('Erreur : '+(e.message||'inconnue'),'#C0392B');
@@ -1411,7 +1411,7 @@ async function agtPurgeErrors() {
     _agtErrRecount(t);
     if (window.fbAdminWrite) await window.fbAdminWrite(t.slug, 'error_log', t.errors);
   }
-  showToast('Erreurs resolues supprimees \u2713', '#3D6B27');
+  showToast('Erreurs resolues supprimees', '#3D6B27');
   agtRenderBody();
 }
 
@@ -1474,7 +1474,7 @@ async function agtRefreshMembres(slug) {
       // \u26a0\ufe0f L'adresse passe par data-mail, jamais par une interpolation dans onclick.
       +'<button data-mail="'+_escHtml(m.email||'')+'" onclick="agtResetPwd(\''+slug+'\', this.dataset.mail, this)" '
       +'style="flex:none;font-size:11px;background:rgba(201,168,76,0.1);border:1px solid rgba(201,168,76,0.28);color:#C9A84C;border-radius:6px;padding:6px 10px;cursor:pointer;font-family:Outfit,sans-serif;white-space:nowrap;min-height:32px">'
-      +'\uD83D\uDD11 Nouveau mot de passe</button>'
+      +_mvIcon('cle',16)+' Nouveau mot de passe</button>'
       +'</div>';
   }
   var h = '<div style="font-size:11px;color:rgba(196,181,253,0.4);letter-spacing:.08em;text-transform:uppercase;font-weight:600;margin-bottom:10px">'+actifs.length+' actif'+(actifs.length>1?'s':'')+'</div>';
@@ -1524,7 +1524,7 @@ async function agtSaveAddMembre(slug) {
   if(pwd && pwd.length < 8)     { _err('Mot de passe trop court (8 car. min.) \\u2014 ou laissez vide'); return; }
   if(!roles.length)             { _err('S\u00e9lectionnez au moins un r\u00f4le'); return; }
   if(errEl) errEl.style.display = 'none';
-  if(btn){ btn.disabled=true; btn.textContent='\u23F3 Cr\u00e9ation\u2026'; }
+  if(btn){ btn.disabled=true; btn.textContent='Cr\u00e9ation\u2026'; }
   try {
     if(!window.createAuthAccount) throw new Error('createAuthAccount non disponible');
     // ⚠️ `tenant: slug` OBLIGATOIRE ici : sans lui le compte partait sur le tenant de
@@ -1536,7 +1536,7 @@ async function agtSaveAddMembre(slug) {
     mbr.push({ nom:nom, email:email, roles:roles, couleur:couleur, statut:'actif' });
     var ok = await window.fbAdminWrite(slug, 'membres', mbr);
     if(!ok) throw new Error('\u00c9chec \u00e9criture Firestore');
-    showToast('\u2705 Membre cr\u00e9\u00e9\u00a0: '+nom, '#3D6B27');
+    showToast('Membre cr\u00e9\u00e9\u00a0: '+nom, '#3D6B27');
     // Mot de passe genere = il n'existe nulle part ailleurs. Meme remise que
     // l'installation et que « Nouveau mot de passe » : un ecran, une fois.
     if (cred && cred.generated && cred.password) {
@@ -1549,8 +1549,8 @@ async function agtSaveAddMembre(slug) {
     var msg = e.message||'Erreur inconnue';
     if(e.code==='auth/email-already-in-use') msg = 'Cet email est d\u00e9j\u00e0 utilis\u00e9';
     if(e.code==='auth/weak-password')        msg = 'Mot de passe trop faible';
-    _err('\u274C '+msg);
-    if(btn){ btn.disabled=false; btn.textContent='\u2713 Cr\u00e9er le compte'; }
+    _err(''+msg);
+    if(btn){ btn.disabled=false; btn.textContent='Cr\u00e9er le compte'; }
   }
 }
 
@@ -1769,7 +1769,7 @@ function _agtLotModsLigne(roles) {
   if (!ks.length) return '<div style="font-size:11px;color:rgba(255,255,255,0.28);margin-top:3px">Tous les modules visibles</div>';
   var noms = ks.map(function (k) { return _AGT_MOD_LBL[k] || k; }).join(', ');
   return '<div style="font-size:11px;color:rgba(255,255,255,0.32);margin-top:3px">'
-    + '\uD83D\uDC41\uFE0F Masqu\u00e9s\u00a0: ' + noms + ' \u00b7 <span style="opacity:.7">modifiable dans R\u00e9glages</span></div>';
+    + _mvIcon('oeil',16)+' Masqu\u00e9s\u00a0: ' + noms + ' \u00b7 <span style="opacity:.7">modifiable dans R\u00e9glages</span></div>';
 }
 
 // Creation. Une par une — createMemberAccount cree UN compte. Ce qui echoue est
@@ -1871,7 +1871,7 @@ function agtLotCopy() {
   var v = _agtLotTexte();
   try {
     if (navigator.clipboard && navigator.clipboard.writeText) {
-      navigator.clipboard.writeText(v).then(function () { showToast('\u2705 Identifiants copi\u00e9s', '#3D6B27'); },
+      navigator.clipboard.writeText(v).then(function () { showToast('Identifiants copi\u00e9s', '#3D6B27'); },
         function () { _fallbackCopyGT(v); });
     } else { _fallbackCopyGT(v); }
   } catch (e) { _fallbackCopyGT(v); }
@@ -2009,7 +2009,7 @@ function agtExportParcJson(slug, jsonParc){
 }
 
 async function agtShowConfig(slug) {
-  _agtOverlay(slug, '\u2699\uFE0F', 'Config', '<div style="text-align:center;padding:40px;color:rgba(255,255,255,0.3);font-size:13px">Chargement\u2026</div>',
+  _agtOverlay(slug, _mvIcon('engrenage',20), 'Config', '<div style="text-align:center;padding:40px;color:rgba(255,255,255,0.3);font-size:13px">Chargement\u2026</div>',
     '<button onclick="agtSaveConfig(\''+slug+'\')" style="width:100%;background:rgba(139,92,246,0.15);border:1px solid rgba(139,92,246,0.35);border-radius:12px;color:#C4B5FD;font-size:13px;font-weight:600;padding:12px;cursor:pointer;font-family:Outfit,sans-serif">\u2713 Sauvegarder</button>');
   var cfg = await window.fbAdminRead(slug, 'config') || {};
   var body = document.getElementById('agt-panel-body');
@@ -2038,13 +2038,13 @@ async function agtSaveConfig(slug) {
   var cfg = await window.fbAdminRead(slug, 'config') || {};
   cfg.domaine_nom = nom; cfg.lat = lat; cfg.lon = lon;
   var ok = await window.fbAdminWrite(slug, 'config', cfg);
-  if(ok) { showToast('\u2705 Config sauvegard\u00e9e', '#3D6B27'); document.getElementById('agt-panel-overlay').remove(); }
-  else   { if(errEl){errEl.textContent='\u274C Erreur Firestore';errEl.style.display='block';} }
+  if(ok) { showToast('Config sauvegard\u00e9e', '#3D6B27'); document.getElementById('agt-panel-overlay').remove(); }
+  else   { if(errEl){errEl.textContent='Erreur Firestore';errEl.style.display='block';} }
 }
 
 // ─── Journal ─────────────────────────────────────────────────────────────────
 async function agtShowJournal(slug) {
-  _agtOverlay(slug, '\uD83D\uDCCB', 'Journal', '<div style="text-align:center;padding:40px;color:rgba(255,255,255,0.3);font-size:13px">Chargement\u2026</div>', null);
+  _agtOverlay(slug, _mvIcon('liste',20), 'Journal', '<div style="text-align:center;padding:40px;color:rgba(255,255,255,0.3);font-size:13px">Chargement\u2026</div>', null);
   var journal = await window.fbAdminRead(slug, 'journal') || [];
   var body = document.getElementById('agt-panel-body');
   if(!body) return;
@@ -2072,7 +2072,7 @@ async function agtShowJournal(slug) {
 
 // ─── Erreurs ─────────────────────────────────────────────────────────────────
 async function agtShowErreurs(slug) {
-  _agtOverlay(slug, '\uD83D\uDC1B', 'Erreurs', '<div style="text-align:center;padding:40px;color:rgba(255,255,255,0.3);font-size:13px">Chargement\u2026</div>', null);
+  _agtOverlay(slug, _mvIcon('bogue',20), 'Erreurs', '<div style="text-align:center;padding:40px;color:rgba(255,255,255,0.3);font-size:13px">Chargement\u2026</div>', null);
   // 'erreurs' n'a jamais ete ecrit par personne : la collection reelle est error_log,
   // celle que lit deja le tableau de bord (_agtTenants[].errors).
   var errLog = await window.fbAdminRead(slug, 'error_log') || [];
@@ -2099,9 +2099,9 @@ async function agtShowErreurs(slug) {
       +'<div style="flex:1;min-width:0">'
       +'<div style="font-size:12px;font-weight:600;color:#E8E8E0;white-space:nowrap;overflow:hidden;text-overflow:ellipsis">'+_escHtml(e.msg||'Erreur inconnue')+'</div>'
       +'<div style="display:flex;gap:6px;margin-top:4px;flex-wrap:wrap">'
-      +(e.page ? '<span style="font-size:10px;color:rgba(255,255,255,0.35)">\uD83D\uDCC4 '+_escHtml(e.page)+'</span>' : '')
+      +(e.page ? '<span style="font-size:10px;color:rgba(255,255,255,0.35)">'+_mvIcon('document',16)+' '+_escHtml(e.page)+'</span>' : '')
       +(e.user ? '<span style="font-size:10px;color:rgba(255,255,255,0.35)">\uD83D\uDC64 '+_escHtml(e.user)+'</span>' : '')
-      +(when   ? '<span style="font-size:10px;color:rgba(255,255,255,0.25)">\uD83D\uDD50 '+when+'</span>' : '')
+      +(when   ? '<span style="font-size:10px;color:rgba(255,255,255,0.25)">'+_mvIcon('chrono',16)+' '+when+'</span>' : '')
       +'</div>'
       +(e.detail ? '<details style="margin-top:5px"><summary style="font-size:10px;color:rgba(255,255,255,0.3);cursor:pointer">D\u00e9tail</summary><pre style="font-size:10px;color:rgba(255,255,255,0.4);background:rgba(0,0,0,0.3);border-radius:6px;padding:8px;margin-top:4px;overflow-x:auto;white-space:pre-wrap;word-break:break-all">'+_escHtml(e.detail)+'</pre></details>' : '')
       +'</div></div></div>';
@@ -2298,7 +2298,7 @@ async function agtCreateEssai(){
     if(window.fbAdminWriteGT) await window.fbAdminWriteGT('demo_tokens',{value:_agtEssais});
     // Copier le code dans le presse-papier
     if(navigator.clipboard) navigator.clipboard.writeText(code).catch(function(){});
-    showToast('\u2705 Code g\u00e9n\u00e9r\u00e9 et copi\u00e9 : '+code,'#3D6B27');
+    showToast('Code g\u00e9n\u00e9r\u00e9 et copi\u00e9 : '+code,'#3D6B27');
     agtRenderBody();
   } catch(e) {
     _agtEssais.pop();
@@ -3048,7 +3048,7 @@ window._fcRenewTrial=async function(){
     var z3=document.getElementById('agt-fc-renew');        if(z3) z3.outerHTML=_fcRenewHtml();
     _fcSyncSum();
     if(typeof agtLogAccess==='function') agtLogAccess(_FC_SLUG,'Essai reconduit '+_FC_TRIAL_DAYS+' j','\u23F3');
-    showToast('\u2705 Essai reconduit '+_FC_TRIAL_DAYS+' j \u00b7 un rappel d\u2019appel part vers vous','#3D6B27');
+    showToast('Essai reconduit '+_FC_TRIAL_DAYS+' j \u00b7 un rappel d\u2019appel part vers vous','#3D6B27');
   }catch(e){
     var code=String((e&&(e.code||''))||''), msg=String((e&&e.message)||'');
     showToast(/failed-precondition/.test(code)||/reconduit/i.test(msg)
@@ -3258,7 +3258,7 @@ window._fcSave=async function(coll){
     if(ok===false) throw new Error('\u00e9criture refus\u00e9e par Firestore');
     _FC_BASE[coll]=_fcClone(_FC[coll]);
     if(typeof agtLogAccess==='function') agtLogAccess(_FC_SLUG,'Fiche \u00b7 '+_fcCollLabel(coll)+' enregistr\u00e9','\uD83D\uDCBE');
-    showToast('\u2705 '+_fcSecTitle(coll)+' enregistr\u00e9 \u2192 '+_FC_SLUG,'#3D6B27');
+    showToast(''+_fcSecTitle(coll)+' enregistr\u00e9 \u2192 '+_FC_SLUG,'#3D6B27');
   }catch(e){ showToast('Erreur : '+((e&&(e.message||e.code))||'inconnue'),'#E07060'); }
 };
 window._fcSaveDom=async function(){
@@ -3275,7 +3275,7 @@ window._fcSaveDom=async function(){
     if(ok===false) throw new Error('\u00e9criture refus\u00e9e');
     _FC.config=cfg;
     if(typeof agtLogAccess==='function') agtLogAccess(_FC_SLUG,'Fiche \u00b7 domaine enregistr\u00e9','\uD83D\uDCBE');
-    showToast('\u2705 Domaine enregistr\u00e9 \u2192 '+_FC_SLUG,'#3D6B27');
+    showToast('Domaine enregistr\u00e9 \u2192 '+_FC_SLUG,'#3D6B27');
   }catch(e){ showToast('Erreur : '+((e&&(e.message||e.code))||'inconnue'),'#E07060'); }
 };
 window._fcSaveAbo=async function(){
@@ -3308,7 +3308,7 @@ window._fcSaveAbo=async function(){
     if(_FC_TAB==='abo'){ var _tsEl=document.getElementById('agt-fc-trial-status'); if(_tsEl) _tsEl.outerHTML=_fcTrialStatusHtml(_FC); var _tiEl=document.getElementById('agt-fc-trial'); if(_tiEl) _tiEl.value=_fcTrialLeft(_FC); }
     _fcSyncSum();
     if(typeof agtLogAccess==='function') agtLogAccess(_FC_SLUG,'Fiche \u00b7 abonnement '+plan,'\uD83D\uDCB3');
-    showToast('\u2705 Abonnement : '+plan+(td>0?' \u00b7 essai '+td+'j':'')+' \u2192 tous les membres','#3D6B27');
+    showToast('Abonnement : '+plan+(td>0?' \u00b7 essai '+td+'j':'')+' \u2192 tous les membres','#3D6B27');
   }catch(e){ showToast('Erreur : '+((e&&(e.message||e.code))||'inconnue'),'#E07060'); }
 };
 window._fcSaveCurrent=function(){
@@ -3619,7 +3619,7 @@ function agtInsKml(input) {
     });
     _agtIns.kmlName = file.name;
     _agtInsRender();
-    showToast('\u2705 ' + _agtIns.parc.length + ' parcelles lues', '#3D6B27');
+    showToast('' + _agtIns.parc.length + ' parcelles lues', '#3D6B27');
   };
   reader.onerror = function () { showToast('Fichier illisible', '#B85A1A'); };
   reader.readAsText(file, 'utf-8');
@@ -4079,7 +4079,7 @@ function _agtInsRender() {
 
   h += '<div class="agi-hd"><div><h3>Installer un domaine</h3>';
   h += '<p>Le dossier du client remplit l\u2019installation. Il ne verra jamais cet \u00e9cran.</p></div>';
-  h += '<button class="agi-x" onclick="agtInsClose()">\u2715</button></div>';
+  h += '<button class="agi-x" onclick="agtInsClose()">'+_mvIcon('croix',16)+'</button></div>';
 
   // ── Les dossiers reçus ──
   h += '<div class="agi-ch">Dossiers re\u00e7us</div>';
@@ -4166,7 +4166,7 @@ function _agtInsRender() {
       h += '<div class="agi-pw"><div class="agi-pr">';
       h += '<div><input type="text" class="agi-nm" data-nom="' + i + '" onchange="agtInsNomSet(' + i + ',this)" onblur="agtInsNomSet(' + i + ',this)"></div>';
       h += '<div><input type="number" step="0.01" min="0" data-surf="' + i + '" onchange="agtInsParcSurf(' + i + ',this)"></div>';
-      h += '<button class="agi-pd" onclick="agtInsParcDel(' + i + ')" title="Retirer">\u2715</button></div>';
+      h += '<button class="agi-pd" onclick="agtInsParcDel(' + i + ')" title="Retirer">'+_mvIcon('croix',16)+'</button></div>';
       h += '<div class="agi-p2">';
       if (libres.length) {
         h += '<select data-sel="' + i + '" onchange="agtInsPickNom(' + i + ',this)"><option value="">\u2190 nom du domaine\u2026</option>';
@@ -4213,7 +4213,7 @@ function _agtInsRender() {
       h += '<div><input type="text" class="agi-nm" data-pnom="' + i + '" onchange="agtInsPerNom(' + i + ',this)" onblur="agtInsPerNom(' + i + ',this)"></div>';
       h += '<div style="font-size:12px;color:' + (nt ? 'rgba(240,226,200,.5)' : '#E0A46A') + ';text-align:right;cursor:pointer" onclick="agtInsPerTog(' + i + ')">'
         + nt + ' t\u00e2che' + (nt > 1 ? 's' : '') + '</div>';
-      h += '<button class="agi-pd" onclick="agtInsPerDel(' + i + ')" title="Retirer">\u2715</button></div>';
+      h += '<button class="agi-pd" onclick="agtInsPerDel(' + i + ')" title="Retirer">'+_mvIcon('croix',16)+'</button></div>';
       h += '<div class="agi-p2">'
         + '<input type="date" data-pd1="' + i + '" onblur="agtInsPerDate(' + i + ',\'d\',this)" style="flex:1 1 130px">'
         + '<input type="date" data-pd2="' + i + '" onblur="agtInsPerDate(' + i + ',\'f\',this)" style="flex:1 1 130px">'
@@ -4532,7 +4532,7 @@ function _agtInsCreds() {
     : ' \u00b7 essai de ' + c.trial + ' jours, non d\u00e9marr\u00e9');
   var h = '<div class="agi-hd"><div><h3>' + E(c.nom) + ' est ouvert</h3>';
   h += '<p>' + c.parc + ' parcelles \u00b7 ' + c.ha.toFixed(2) + ' ha' + _ess + '</p></div>';
-  h += '<button class="agi-x" onclick="agtInsClose()">\u2715</button></div>';
+  h += '<button class="agi-x" onclick="agtInsClose()">'+_mvIcon('croix',16)+'</button></div>';
   h += '<div class="agi-cr"><div class="k">Adresse</div><div class="v">mavigneapp.fr/?tenant=' + E(c.slug) + '</div></div>';
   h += '<div class="agi-cr"><div class="k">Identifiant</div><div class="v">' + E(c.mail) + '</div></div>';
   h += '<div class="agi-cr"><div class="k">Mot de passe</div><div class="v">' + E(c.pwd || '\u2014') + '</div></div>';
@@ -4569,7 +4569,7 @@ function agtInsCopy() {
     'Ce mot de passe est provisoire : l\u2019application vous demandera d\u2019en choisir un autre \u00e0 la premi\u00e8re connexion.'
   ].join('\n');
   if (navigator.clipboard && navigator.clipboard.writeText) {
-    navigator.clipboard.writeText(txt).then(function () { showToast('Identifiants copi\u00e9s \u2713', '#3D6B27'); })
+    navigator.clipboard.writeText(txt).then(function () { showToast('Identifiants copi\u00e9s', '#3D6B27'); })
       .catch(function () { showToast(txt, '#1A4A7A'); });
   } else { showToast(txt, '#1A4A7A'); }
 }
@@ -4600,7 +4600,7 @@ async function agtInsTrialGo() {
     }
     c.trialArme = true;
     if (typeof agtLogAccess === 'function') agtLogAccess(c.slug, 'Essai de ' + c.trial + ' j d\u00e9marr\u00e9', '\u23F3');
-    showToast('\u2705 Essai de ' + c.trial + ' jours d\u00e9marr\u00e9', '#3D6B27');
+    showToast('Essai de ' + c.trial + ' jours d\u00e9marr\u00e9', '#3D6B27');
     _agtInsRender();
     if (window.renderAdminGT) renderAdminGT();
   } catch (e) {
@@ -4624,7 +4624,7 @@ async function agtResetPwd(slug, email, btn) {
   } catch (e) {
     showToast('\u00c9chec : ' + (e.message || e.code || 'erreur'), '#C0392B');
   }
-  if (btn) { btn.disabled = false; btn.textContent = '\uD83D\uDD11 Nouveau mot de passe'; }
+  if (btn) { btn.disabled = false; btn.textContent = 'Nouveau mot de passe'; }
 }
 
 
@@ -4712,7 +4712,7 @@ async function _agtSaveBilling(){
     return true;
   }catch(e){
     if(window.logError) window.logError({level:'error',cat:'firebase',msg:'billing non enregistre',detail:(e&&e.code)||String(e)});
-    showToast('\u274C Enregistrement refus\u00e9','#C0392B');
+    showToast('Enregistrement refus\u00e9','#C0392B');
     return false;
   }
 }
@@ -5102,7 +5102,7 @@ function agtBizAbo(i){
           if(!_agtBilling[t.slug]) _agtBilling[t.slug]={};
           _agtBilling[t.slug].abo={ prix:p, motif:String(mo||'').trim()||'Tarif remis\u00e9', fin:'' };
           _agtSaveBilling().then(function(ok){
-            if(ok){ showToast('\u2705 Abonnement \u00e0 '+_agtEur(p)+'/mois','#3D6B27'); agtRenderBody(); _agtBizFill(); }
+            if(ok){ showToast('Abonnement \u00e0 '+_agtEur(p)+'/mois','#3D6B27'); agtRenderBody(); _agtBizFill(); }
           });
         }
       });
@@ -5170,7 +5170,7 @@ async function agtBizRattache(i,k,val){
   if(!g || !cible) return;
   g.ref=cible.ref||'';
   if(await _agtSaveBilling()){
-    showToast('\u2705 Geste rattach\u00e9 \u00e0 '+g.ref,'#3D6B27');
+    showToast('Geste rattach\u00e9 \u00e0 '+g.ref,'#3D6B27');
     agtRenderBody(); _agtBizFill();
   }
 }
@@ -5485,7 +5485,7 @@ async function agtFactAdd(i){
     ts:new Date().toISOString()
   });
   if(await _agtSaveBilling()){
-    showToast('\u2705 '+_AGT_TY[ty].lbl+' '+r+' enregistr\u00e9'+(ty==='heures'?'es':''),'#3D6B27');
+    showToast(''+_AGT_TY[ty].lbl+' '+r+' enregistr\u00e9'+(ty==='heures'?'es':''),'#3D6B27');
     agtLogAccess(t.slug, _AGT_TY[ty].lbl+' '+r+' \u00b7 '+_agtEur(m), '\uD83E\uDDFE');
     agtRenderBody(); _agtBizFill();
   }
@@ -5647,7 +5647,7 @@ function agtBizCsv(){
   if(lignes.length===1){ showToast('Aucune ligne \u00e0 exporter','#B85A1A'); return; }
   var jour=_agtIso(new Date());
   window.dlFile('\uFEFF'+lignes.join('\r\n'), 'guerettech_facturation_'+jour+'.csv', 'text/csv;charset=utf-8');
-  showToast('\u2705 '+(lignes.length-1)+' ligne'+(lignes.length>2?'s':'')+' export\u00e9e'+(lignes.length>2?'s':'')+' \u00b7 '+_agtEur(tot)+' hors interne','#3D6B27');
+  showToast(''+(lignes.length-1)+' ligne'+(lignes.length>2?'s':'')+' export\u00e9e'+(lignes.length>2?'s':'')+' \u00b7 '+_agtEur(tot)+' hors interne','#3D6B27');
 }
 
 
@@ -5665,7 +5665,7 @@ async function _agtSaveLeadSt(){
     return true;
   }catch(e){
     if(window.logError) window.logError({level:'error',cat:'firebase',msg:'leads_status non enregistre',detail:(e&&e.code)||String(e)});
-    showToast('\u274C Enregistrement refus\u00e9','#C0392B');
+    showToast('Enregistrement refus\u00e9','#C0392B');
     return false;
   }
 }
@@ -5735,7 +5735,7 @@ function _agtBuildLeads(){
     h+='</div></div>';
 
     h+='<div style="font-size:11.5px;color:rgba(255,255,255,0.45);margin-top:8px;word-break:break-word">'
-      +'\u2709 '+_escHtml(l.email||'')+(l.tel?' \u00b7 \u260E '+_escHtml(l.tel):'')+'</div>';
+      +_mvIcon('enveloppe',16)+' '+_escHtml(l.email||'')+(l.tel?' \u00b7 '+_escHtml(l.tel):'')+'</div>';
 
     // ★ Le chemin se dedouble apres la mise en route : les REPONSES arrivent par la
     //   fonction, les FICHIERS arrivent par mail. Rien ne disait ou en etait le second,
@@ -5766,7 +5766,7 @@ function _agtBuildLeads(){
         h+='<div style="margin-top:9px;background:rgba(255,255,255,0.04);border-radius:8px;padding:10px;font-size:12px;color:rgba(255,255,255,0.55);line-height:1.6;white-space:pre-wrap">'+_escHtml(l.message)+'</div>';
       }
       if(note){
-        h+='<div style="margin-top:8px;font-size:11.5px;color:#C4B5FD">\u270E '+_escHtml(note)+'</div>';
+        h+='<div style="margin-top:8px;font-size:11.5px;color:#C4B5FD">'+_mvIcon('crayon',16)+' '+_escHtml(note)+'</div>';
       }
       h+='<div style="margin-top:10px;display:flex;gap:6px;flex-wrap:wrap">';
       Object.keys(_AGT_LEADST).forEach(function(k){
@@ -5851,7 +5851,7 @@ function agtLeadCopy(id){
   var v=l.email||'';
   try{
     if(navigator.clipboard&&navigator.clipboard.writeText){
-      navigator.clipboard.writeText(v).then(function(){ showToast('\u2705 E-mail copi\u00e9','#3D6B27'); },
+      navigator.clipboard.writeText(v).then(function(){ showToast('E-mail copi\u00e9','#3D6B27'); },
         function(){ _fallbackCopyGT(v); });
     } else { _fallbackCopyGT(v); }
   }catch(e){ _fallbackCopyGT(v); }
