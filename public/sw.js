@@ -1,4 +1,28 @@
-// MA VIGNE — Service Worker v7.14
+// MA VIGNE — Service Worker v7.15
+// v7.15 (23/08/2026) — LE JOURNAL DES NOUVEAUTES. APP 6.59 -> 6.60.
+//   ★★ LE PLUS GROS BLOC DU CHANTIER, ET LE PLUS VU. `WHATS_NEW` porte 346
+//   items et 299 d'entre eux affichaient encore un pictogramme. C'est l'ecran
+//   que TOUS les clients voient apres chaque mise a jour — le dernier endroit
+//   ou laisser des dessins qui changent d'un appareil a l'autre.
+//   Compte global : 938 -> 639, d'un seul lot.
+//   ★ La migration est une TRADUCTION PAR POINT DE CODE, pas par chaine :
+//   les 299 valeurs s'ecrivaient de 119 facons differentes pour 96 glyphes
+//   reels — avec ou sans selecteur de variante, en `\u{...}` ou en paire de
+//   substituts, en majuscules ou en minuscules, et 25 en CLAIR. Chercher des
+//   chaines aurait rate les trois quarts. On decode, on normalise, on traduit.
+//   ★★ TROIS CONTROLES AVANT LA PREMIERE ECRITURE, et c'est ce qui rend le
+//   lot sur : le nombre de champs `emoji:` est conserve, celui de `titre:` et
+//   `desc:` aussi, et surtout LES MOTS DU JOURNAL SONT IDENTIQUES hors du
+//   champ traduit. Un journal date qui perdrait une phrase en passant aux
+//   icones serait une reecriture du passe — exactement ce qu'il ne doit pas
+//   arriver a un log versionne.
+//   ★ Gain cache : le harnais LIT deja les `emoji:` du journal (il verifie
+//   qu'un nom a son symbole). En les migrant, 346 items entrent d'un coup
+//   sous ce controle — avant, il ne voyait que les quelques blocs recents.
+//   Contre-epreuve : un nom faux dans un bloc de 2026 rougit et le NOMME.
+//   ⚠ Ce qui reste (639) est majoritairement du CODE COULEUR ou de la
+//   typographie deja nommee. Le chantier n'est plus une file d'attente, c'est
+//   une liste de decisions.
 // v7.14 (23/08/2026) — LES PASTILLES : AUCUNE DES TROIS FORMES. APP 6.58 -> 6.59.
 //   ★★★ J'AI PROPOSE TROIS FORMES ET LA BONNE REPONSE ETAIT « AUCUNE ».
 //   45 pictogrammes attendaient un lot de pastilles CSS. En allant verifier ou
@@ -2652,7 +2676,7 @@
 // v2.22 — Fix profils vides : guard vide dans loadData() pour MEMBRES/SAISONS/TACHES
 // v2.17 — Onboarding intégré + tenantId · v2.06 — Firebase Auth · v2.00–v2.05 — divers
 const DEBUG = self.location.hostname === 'localhost' || self.location.hostname === '127.0.0.1';
-const CACHE_NAME   = 'mavigne-v7.14';
+const CACHE_NAME   = 'mavigne-v7.15';
 const TENANT_CACHE = 'mavigne-tenant';   // Cache persistant — préservé à chaque mise à jour SW
 const SYNC_TAG     = 'mavigne-sync';
 
@@ -2668,7 +2692,7 @@ const CDN_URLS = [
 ];
 
 self.addEventListener('install', event => {
-  if(DEBUG) console.log('[SW] Ma Vigne v7.14 installé');
+  if(DEBUG) console.log('[SW] Ma Vigne v7.15 installé');
   event.waitUntil(
     caches.open(CACHE_NAME).then(async cache => {
       // ── Cœur applicatif : STRICT (mise à jour ATOMIQUE) ──
@@ -2684,7 +2708,7 @@ self.addEventListener('install', event => {
 });
 
 self.addEventListener('activate', event => {
-  if(DEBUG) console.log('[SW] Ma Vigne v7.14 activé');
+  if(DEBUG) console.log('[SW] Ma Vigne v7.15 activé');
   event.waitUntil(
     caches.keys().then(keys =>
       Promise.all(
