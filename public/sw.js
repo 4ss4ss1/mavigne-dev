@@ -1,4 +1,21 @@
-// MA VIGNE — Service Worker v7.00
+// MA VIGNE — Service Worker v7.01
+// v7.01 (23/08/2026) — DS-0, LE SOCLE DE LA CHARTE. APP 6.45 → 6.46.
+//   Jetons poses dans :root de styles.css : rayons (--r-sm/md/lg/full),
+//   graisses (--fw-med/semi/bold), --shadow-lg (3e pas d'elevation),
+//   --ligne (filet neutre unique), --e-9/--e-10 (48 et 64 px).
+//   ⚠ PAS de --sp-* : l'echelle d'espacement EXISTE deja (--e-0..--e-8,
+//   lot DS-3) et six des huit pas demandes y sont au pixel exact. En creer
+//   une seconde aurait fait deux verites pour un meme pixel (§47a).
+//   ⚠ --shadow-lg et --ligne sont redits dans LES DEUX blocs sombres : un
+//   var() ecrit dans une custom property se resout SUR L'ELEMENT QUI LA
+//   DECLARE. Poses dans :root seul, ils resteraient CLAIRS en mode sombre.
+//   Deux regles globales, en FIN de feuille : font-variant-numeric sur
+//   :root (pas #app-root — les overlays sont ses FRERES, la moitie des
+//   chiffres serait restee proportionnelle), et l'anneau de focus.
+//   ⚠ La position de l'anneau n'est pas cosmetique : 17 outline:none dans
+//   la feuille, en specificite EGALE a :focus-visible. Place avant, il est
+//   mort sur tous les champs, en silence. Le harnais verifie la position.
+//   Fichiers : styles.css, utils.js, index.html + scripts/ (hors build).
 // v7.00 (22/08/2026) — LA TUILE SEULE EST CENTREE. APP 6.45 inchange.
 //   .login-profiles est une grille a DEUX colonnes (styles.css:192) : la tuile
 //   unique de 6.99 se collait en haut a gauche, sur une demi-largeur, avec un
@@ -2305,7 +2322,7 @@
 // v2.22 — Fix profils vides : guard vide dans loadData() pour MEMBRES/SAISONS/TACHES
 // v2.17 — Onboarding intégré + tenantId · v2.06 — Firebase Auth · v2.00–v2.05 — divers
 const DEBUG = self.location.hostname === 'localhost' || self.location.hostname === '127.0.0.1';
-const CACHE_NAME   = 'mavigne-v7.00';
+const CACHE_NAME   = 'mavigne-v7.01';
 const TENANT_CACHE = 'mavigne-tenant';   // Cache persistant — préservé à chaque mise à jour SW
 const SYNC_TAG     = 'mavigne-sync';
 
@@ -2321,7 +2338,7 @@ const CDN_URLS = [
 ];
 
 self.addEventListener('install', event => {
-  if(DEBUG) console.log('[SW] Ma Vigne v7.00 installé');
+  if(DEBUG) console.log('[SW] Ma Vigne v7.01 installé');
   event.waitUntil(
     caches.open(CACHE_NAME).then(async cache => {
       // ── Cœur applicatif : STRICT (mise à jour ATOMIQUE) ──
@@ -2337,7 +2354,7 @@ self.addEventListener('install', event => {
 });
 
 self.addEventListener('activate', event => {
-  if(DEBUG) console.log('[SW] Ma Vigne v7.00 activé');
+  if(DEBUG) console.log('[SW] Ma Vigne v7.01 activé');
   event.waitUntil(
     caches.keys().then(keys =>
       Promise.all(

@@ -47,6 +47,73 @@
   --pt-micro:11px;  /* la ligne de cadre, legendes, mentions     */
   --pt-lbl:10.5px;  /* etiquette : capitales, interlettrage      */
   --pt-nano:9.5px;  /* sur-etiquette, en-tete de tableau         */
+
+  /* ═══ DS-0 — LE SOCLE : RAYONS, OMBRES, GRAISSES, FILET ═══
+     ⚠️ L'ESPACEMENT N'EST PAS ICI — il existe DEJA, trente lignes plus haut :
+       --e-0..--e-8 (lot DS-3). Le cadrage de DS-0 demandait --sp-1..--sp-8 ;
+       SIX des huit pas y sont deja, au meme pixel exact (4/8/12/16/24/32 =
+       e-1/e-2/e-3/e-4/e-6/e-7). Declarer une seconde famille aurait fait DEUX
+       VERITES pour un meme pixel : la faute exacte de §47a. Seuls les deux pas
+       reellement manquants sont ajoutes, DANS la famille existante.
+     ★ Et le vrai defaut de l'espacement n'est pas l'absence d'echelle, c'est
+       qu'elle ne sert pas : 19 appels var(--e-*) contre 1682 valeurs de padding,
+       margin et gap ecrites a la main. Une echelle qu'on ignore n'en est plus
+       une — c'est le cliquet de mv-harnais-echelle qui la resorbe, pas ce lot. */
+  --e-9:48px; --e-10:64px;
+
+  /* RAYONS — quatre pas. 674 border-radius dans cette feuille, 45 valeurs
+     distinctes ; les quatre pas couvrent les quatre plus gros usages reels :
+     12px (95 fois), 8px (50), 16px (27), 999px (8).
+     ⚠️ border-radius:50% — 130 occurrences, tous fichiers — est un CERCLE, pas
+       un rayon : une pastille de 44px et une de 22px n'ont aucune valeur en
+       pixels en commun. Il n'est JAMAIS remplace par un jeton, et le harnais
+       pose un PLANCHER dessus pour interdire la conversion.
+     ⚠️ 99px (10 occurrences) rend la meme pilule que 999px sur un element bas,
+       mais PAS au-dela de 198px de haut. Laisse tel quel : c'est un arbitrage a
+       l'oeil, pas une substitution mecanique. */
+  --r-sm:8px; --r-md:12px; --r-lg:16px; --r-full:999px;
+
+  /* OMBRES — trois pas. sm et md existaient deja (plus bas dans ce meme bloc),
+     lg est neuf.
+     ★★★ LA MESURE DU 16/08 ETAIT FAUSSE, et voici exactement pourquoi : dans
+       « 0 2px 8px », le premier 0 N'A PAS D'UNITE. Une expression qui cherche
+       \d+px n'y trouve que DEUX longueurs, en deduit « pas de flou », et range
+       tout dans le seuil faible. D'ou le « les 230 usages tombent tous dans
+       faible » qui laissait croire que trois pas etaient de trop.
+     Mesure refaite en TOKENISANT (0 sans unite = 0px) : 239 declarations dont 65
+     via jeton, 177 couches mesurables. 65 de ces couches ont un flou de ZERO —
+     ce sont des ANNEAUX (0 0 0 2px) et des filets (inset 0 1px 0), pas des
+     elevations ; les compter comme des ombres est la seconde moitie de l'erreur,
+     la meme confusion que 50% pour un rayon.
+     Restent 112 vraies elevations : 57 sous 10px de flou, 41 entre 10 et 39,
+     14 a 40px et plus. Trois populations, trois pas — le troisieme ne manquait
+     pas de justification, il manquait tout court. Ses clients sont nommes :
+     .ent-confirm-modal, .saison-menu, .ov-plan-sheet, #mv-dock-sheet,
+     .pil-drawer, .pl2-mbar, .mvt-card, .pil-outils-menu, .mvds-sheet. */
+  --shadow-lg:0 4px 8px rgba(40,30,15,0.08),0 24px 56px rgba(40,30,15,0.18);
+
+  /* GRAISSES — trois pas. 1971 font-weight mesures, tous fichiers :
+     600 (976 fois), 700 (686), 500 (156) — 92 % a eux trois.
+     ⚠️ 800 existe 78 fois. Ce n'est ni un pas ni un accident : c'est un
+       QUATRIEME PAS DE FAIT, jamais declare. Il n'est pas ajoute en douce ici —
+       il part au cliquet du harnais, ou il ne peut plus que descendre. Le
+       trancher (quatrieme pas, ou residu a resorber) demande une capture. */
+  --fw-med:500; --fw-semi:600; --fw-bold:700;
+
+  /* LE FILET NEUTRE — une seule source, arbitree par le nombre :
+     « 1px solid var(--gris-clair) » = 172 occurrences (+14 avec repli),
+     « var(--gris) » = 71. --gris-clair mene de plus du double : il gagne.
+     ⚠⚠ POURQUOI --ligne EST AUSSI DECLARE DANS LES DEUX BLOCS SOMBRES : la
+       substitution d'un var() ecrit DANS une custom property se resout SUR
+       L'ELEMENT QUI LA DECLARE. Declare ici seulement, --ligne se figerait a la
+       valeur CLAIRE et resterait clair en mode sombre — sans erreur, sans
+       avertissement. Il ne suit le theme que parce qu'il est redit la ou
+       --gris-clair est redit. Le harnais verifie les DEUX blocs sombres : n'en
+       traiter qu'un ferait diverger la bascule manuelle du mode auto de l'OS.
+     ⚠️ Le nom --ligne existe deja dans _rsCss() (app.js) : c'est le :root d'un
+       DOCUMENT A4 imprime, ouvert dans sa propre fenetre, qui ne charge jamais
+       cette feuille. Deux documents distincts, aucun conflit. */
+  --ligne:var(--gris-clair,#ECE6DA);
   --vert:#1E3A12;--vert-med:#3D6B27;--vert-clair:#6BA34A;--vert-pale:#EAF3E2;
   --or:#C2A14D;--or-clair:#D8BC72;--or-pale:#FAF3E0;
   --terre:#8A5A38;--terre-pale:#F3EADF;
@@ -55,7 +122,9 @@
   --bleu:#1A4A7A;--bleu-pale:#E8F0FA;
   --blanc:#FBFAF6;--gris-clair:#ECE6DA;--gris:#DED7C9;
   --texte:#1A1A14;--texte-med:#4A4A3A;--texte-doux:#5F5F5F;
-  --radius-card:16px;
+  /* Alias historique : --radius-card etait un SECOND nom pour 16px, avec ses
+     10 appels. Il devient un renvoi vers --r-lg au lieu d'une valeur jumelle. */
+  --radius-card:var(--r-lg,16px);
   --rouge:#A0291E;--rouge-pale:#FAEAE8;
   --orange:#B85A1A;--orange-pale:#FBF0E6;
   --plan-acc:#7B6DB8;--plan-acc-pale:rgba(123,109,184,0.12);
@@ -101,6 +170,8 @@ input::placeholder,textarea::placeholder{color:var(--texte-doux);opacity:1;}
   --plan-acc:#A394E8;--plan-acc-pale:rgba(163,148,232,0.16);
   --shadow-sm:0 2px 8px rgba(0,0,0,0.35);
   --shadow-md:0 6px 24px rgba(0,0,0,0.55);
+  --shadow-lg:0 14px 56px rgba(0,0,0,0.70);
+  --ligne:var(--gris-clair,#2D2924);
   --bg-app:#131210;--bg-card:#1C1A16;--cave:#100D0A;--cave-2:#171410;--horizon:linear-gradient(90deg,#A06A42 0%,#D8A642 50%,#6AB845 100%);
   --tag-green-bg:rgba(106,184,69,0.18);--tag-green-tx:#A5D88C;
   --tag-amber-bg:rgba(216,170,66,0.18);--tag-amber-tx:#E8C46A;
@@ -130,6 +201,8 @@ input::placeholder,textarea::placeholder{color:var(--texte-doux);opacity:1;}
     --plan-acc:#A394E8;--plan-acc-pale:rgba(163,148,232,0.16);
     --shadow-sm:0 2px 8px rgba(0,0,0,0.35);
     --shadow-md:0 6px 24px rgba(0,0,0,0.55);
+    --shadow-lg:0 14px 56px rgba(0,0,0,0.70);
+    --ligne:var(--gris-clair,#2D2924);
     --bg-app:#131210;--bg-card:#1C1A16;--cave:#100D0A;--cave-2:#171410;--horizon:linear-gradient(90deg,#A06A42 0%,#D8A642 50%,#6AB845 100%);
     --tag-green-bg:rgba(106,184,69,0.18);--tag-green-tx:#A5D88C;
     --tag-amber-bg:rgba(216,170,66,0.18);--tag-amber-tx:#E8C46A;
@@ -4599,3 +4672,50 @@ body,#app-root,.page{min-height:100dvh;}
 .mvmode-n{font-size:12.5px;color:var(--texte-doux);line-height:1.5;text-align:center;
   margin-top:4px;}
 .mv-sg.mv-sg-mode{border-top:1px solid var(--gris-clair);margin-top:6px;padding-top:12px;}
+
+/* ════════════════════════════════════════════════════════════════════════
+   DS-0 — LES DEUX REGLES GLOBALES DU SOCLE
+   ⚠⚠⚠ CE BLOC DOIT RESTER LE DERNIER DE LA FEUILLE, et ce n'est pas une
+     coquetterie. Il y a 17 « outline:none » dans ce fichier, la plupart sur la
+     regle de BASE d'un champ de saisie : .fi, .fsel, .login-input,
+     .ephy-search input, .emh-in, .j-date-input, .ob-input, .plan-ge-input,
+     .vend-param-fi, .pl2-chal-f input, #chat-ta, .sbox input,
+     .danger-conf-input, .mvt-fi. Leur specificite est (0,1,0) — EXACTEMENT
+     celle de :focus-visible. A egalite de specificite, c'est l'ORDRE DE SOURCE
+     qui tranche. Place plus haut dans la feuille, l'anneau de focus serait mort
+     sur TOUS les champs de saisie, sans une erreur et sans un avertissement.
+     Le harnais mv-harnais-jetons.mjs verifie cette position.
+   ═══════════════════════════════════════════════════════════════════════ */
+
+/* 1) LES CHIFFRES S'ALIGNENT EN COLONNE.
+   ⚠⚠ SUR :root, PAS SUR #app-root — et c'est mesure, pas suppose. index.html
+     ferme #app-root a la ligne 3197 ; #ovChampValidation, #ovMode, #ovConfirmDel,
+     #ovPrompt et #mv-critical-overlay sont ses FRERES, pas ses enfants, et les
+     overlays construits en JS sont poses par document.body.appendChild. Ancree
+     sur #app-root, la regle laisserait toutes les modales en chiffres
+     proportionnels : moitie aligne, moitie pas — pire que rien. C'est la meme
+     raison qui a mis --pt-* dans :root plutot que dans un conteneur (§47a).
+   CE QUE CA DEPLACE, mesure sur les woff2 reellement servis (fontTools) :
+   ★ Outfit ET Cormorant portent la fonction OpenType `tnum`. La regle n'est
+     donc pas un coup d'epee dans l'eau — et les 67 `tabular-nums` deja ecrits
+     dans le code font bien quelque chose.
+   ★ Outfit proportionnel : le « 1 » fait 367/1000 em, le « 0 » 660. En
+     tabulaire, tous font 590. Ecart MOYEN par chiffre : +0,44 px a 11 px,
+     +0,50 px a 12,5 px, +1,23 px a 31 px. Le seuil du cadrage etait 0,5 px :
+     tenu au corps de texte, depasse aux grandes tailles.
+   ★ Ce qui tranche est l'autre plateau de la balance : le DESALIGNEMENT
+     SUPPRIME atteint 3,7 px par chiffre a 12,5 px et 9,1 px a 31 px. On ajoute
+     un demi-pixel de largeur pour retirer sept pixels d'ecart entre deux lignes
+     d'un meme tableau. C'est le rapport, pas la valeur absolue, qui decide.
+   ⚠️ Ce raisonnement reste un PROXY : aucune capture n'a pu etre prise ici.
+     L'accueil, Pilotage › Decider et Planning › Equipe restent a regarder a
+     l'oeil — aucun harnais ne lit une mise en page (§42). */
+:root{ font-variant-numeric:tabular-nums; }
+
+/* 2) ON VOIT OU ON EST AU CLAVIER — et seulement au clavier.
+   Le repli redit la valeur claire de --or, comme tout appel du socle.
+   ⚠️ `.mvr-fi:focus{outline:none}` (specificite 0,2,0) gagne malgre tout : ce
+     champ-la garde sa couleur de bordure pour seul signal, y compris au clavier.
+     Constate, pas corrige — ca se tranche sur une capture, pas au grep. */
+:focus-visible{ outline:2px solid var(--or,#C2A14D); outline-offset:2px; }
+*:focus:not(:focus-visible){ outline:none; }

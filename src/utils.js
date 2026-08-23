@@ -23,7 +23,7 @@ export const GT_ADMIN_EMAIL = 'ngdevpro@gmail.com';
 // WHATS_NEW   : tableau vide = modal desactive pour cette version.
 // Format item : { emoji:'📅', titre:'Titre court', desc:'Phrase utilisateur.' }
 // Regle : seulement les changements visibles par les utilisateurs.
-export const APP_VERSION = '6.45';
+export const APP_VERSION = '6.46';
 // ════ Journal des nouveautés (récap cumulatif) ════
 // Une entrée par version, la PLUS RÉCENTE EN HAUT : { v:'5.10', items:[ {emoji,titre,desc}, … ] }
 // À chaque release visible → AJOUTER un bloc en tête (ne pas remplacer). items:[] = release technique (rien à afficher).
@@ -354,6 +354,10 @@ window._mvGraphRepeindre = function(){
 };
 
 export const WHATS_NEW = [
+  { v: '6.46', items: [
+    { emoji: 'balance', titre: 'Les chiffres s\u2019alignent enfin en colonne', desc: "Dans un tableau, un \u00ab 1 \u00bb est bien plus \u00e9troit qu\u2019un \u00ab 0 \u00bb : deux lignes l\u2019une sous l\u2019autre ne tombaient jamais en face. Sur les \u00e9crans du Pilotage et du Planning, l\u2019\u0153il devait relire chaque ligne au lieu de balayer la colonne. Tous les chiffres de l\u2019application ont d\u00e9sormais <b>la m\u00eame largeur</b>, d\u2019un bout \u00e0 l\u2019autre \u2014 les tableaux, les totaux et les heures se lisent en descendant. <b>Aucun chiffre n\u2019a chang\u00e9 de valeur</b> : c\u2019est leur alignement qui bouge, pas leur calcul." },
+    { emoji: 'cible', titre: 'On voit o\u00f9 l\u2019on est quand on navigue au clavier', desc: "Sur ordinateur, en passant d\u2019un champ \u00e0 l\u2019autre avec la touche Tab, rien ne disait o\u00f9 l\u2019on \u00e9tait : il fallait cliquer pour en \u00eatre s\u00fbr. Un <b>liser\u00e9 dor\u00e9</b> entoure maintenant l\u2019\u00e9l\u00e9ment actif. Il n\u2019appara\u00eet qu\u2019au clavier \u2014 \u00e0 la souris et au doigt, rien ne change, et sur le t\u00e9l\u00e9phone au vignoble l\u2019\u00e9cran est strictement identique." }
+  ] },
   { v: '6.45', items: [
     { emoji: 'personne', titre: 'Votre profil vous attend d\u00e9j\u00e0 \u00e0 l\u2019ouverture', desc: "Sur un domaine de dix ou quinze personnes, il fallait retrouver son nom dans la liste \u00e0 chaque ouverture \u2014 t\u00e9l\u00e9phone en main, souvent avec des gants. D\u00e9sormais l\u2019appareil se souvient du dernier profil qui s\u2019y est connect\u00e9 et n\u2019affiche que celui-l\u00e0. <b>La liste compl\u00e8te reste \u00e0 un seul geste</b> : \u00ab Ce n\u2019est pas moi \u00bb, juste en dessous. C\u2019est un confort, pas une protection : les noms n\u2019ont jamais \u00e9t\u00e9 secrets, ils sont \u00e9crits sur les tuiles. Sur une tablette partag\u00e9e, rien ne change vraiment \u2014 et une d\u00e9connexion volontaire efface le souvenir, comme elle efface d\u00e9j\u00e0 les donn\u00e9es du domaine sur l\u2019appareil." }
   ] },
