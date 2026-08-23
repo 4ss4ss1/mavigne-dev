@@ -23,7 +23,7 @@ export const GT_ADMIN_EMAIL = 'ngdevpro@gmail.com';
 // WHATS_NEW   : tableau vide = modal desactive pour cette version.
 // Format item : { emoji:'📅', titre:'Titre court', desc:'Phrase utilisateur.' }
 // Regle : seulement les changements visibles par les utilisateurs.
-export const APP_VERSION = '6.50';
+export const APP_VERSION = '6.51';
 // ════ Journal des nouveautés (récap cumulatif) ════
 // Une entrée par version, la PLUS RÉCENTE EN HAUT : { v:'5.10', items:[ {emoji,titre,desc}, … ] }
 // À chaque release visible → AJOUTER un bloc en tête (ne pas remplacer). items:[] = release technique (rien à afficher).
@@ -354,6 +354,9 @@ window._mvGraphRepeindre = function(){
 };
 
 export const WHATS_NEW = [
+  { v: '6.51', items: [
+{ emoji: 'soleil', titre: 'Le mode sombre ne s\u2019arr\u00eate plus \u00e0 la porte des fen\u00eatres', desc: "En th\u00e8me sombre, chaque fen\u00eatre qui s\u2019ouvre par-dessus l\u2019\u00e9cran \u2014 une confirmation, un choix de parcelle, un export, les conditions d\u2019utilisation \u2014 sortait <b>en blanc</b>, en pleine nuit. Le soir au bureau ou t\u00f4t le matin dans la cuve, \u00e7a \u00e9blouissait \u00e0 chaque clic. <b>Trente-sept fen\u00eatres</b> \u00e9taient concern\u00e9es. Elles suivent d\u00e9sormais le th\u00e8me comme le reste de l\u2019application. <b>Rien ne change en th\u00e8me clair</b>, et aucune donn\u00e9e n\u2019est touch\u00e9e." }
+  ] },
   { v: '6.50', items: [
     { emoji: 'curseurs', titre: 'Les fen\u00eatres et les titres passent aux m\u00eames ic\u00f4nes que le reste', desc: "Depuis le passage aux vraies ic\u00f4nes, une moiti\u00e9 de l\u2019application avait chang\u00e9 et l\u2019autre non\u00a0: les listes \u00e9taient nettes, mais d\u00e8s qu\u2019une fen\u00eatre s\u2019ouvrait par-dessus \u2014 une confirmation, un choix de c\u00e9page, un export, tout l\u2019\u00e9cran R\u00e9glages \u2014 les vieux pictogrammes revenaient. <b>Deux cent cinquante-deux</b> d\u2019entre eux viennent d\u2019y passer. Un pictogramme ne se dessine pas pareil sur un iPhone, un Android et un PC\u00a0; une ic\u00f4ne, si. <b>Rien n\u2019a boug\u00e9 dans vos donn\u00e9es</b>, et aucun bouton n\u2019a chang\u00e9 de place." },
     { emoji: 'oeil', titre: 'Les ic\u00f4nes suivent enfin le mode sombre partout', desc: "Un pictogramme garde sa couleur quoi qu\u2019on fasse\u00a0: en th\u00e8me sombre, les fen\u00eatres gardaient des taches vives sans rapport avec le reste. Les ic\u00f4nes, elles, prennent la couleur du texte \u00e0 c\u00f4t\u00e9 d\u2019elles \u2014 elles s\u2019\u00e9claircissent la nuit et se foncent au soleil, comme tout le reste de la page." }
@@ -1413,13 +1416,31 @@ export function showToast(msg, color) {
 export function applyTheme(mode) {
   var root = document.getElementById('app-root');
   if(!root) return;
+  // ⚠⚠⚠ LE THÈME SE POSE SUR DEUX ÉLÉMENTS, PAS UN (§59).
+  // #app-root est fermé avant la fin d'index.html : les overlays statiques, les
+  // 37 .modal qu'ils contiennent et tous ceux posés en JS par
+  // document.body.appendChild sont ses FRÈRES. Posé sur #app-root seul,
+  // l'attribut ne les atteignait pas et une modale sortait BLANCHE en plein
+  // mode sombre. Le poser aussi sur <html> met les 63 variables de thème à la
+  // racine du document, d'où elles s'héritent partout.
+  // ⚠ Les deux doivent rester D'ACCORD : <html> en sombre et #app-root en clair
+  // ferait passer toute l'application en sombre, car aucun bloc ne remet les
+  // variables claires sous #app-root[data-theme="light"].
+  // ⚠⚠⚠ PERDU DEUX FOIS (§58, §60), et la seconde fois le document a annoncé
+  // la restauration sans qu'elle ait eu lieu : app.js avait ses deux poses,
+  // utils.js n'en avait qu'une, et `mv-harnais-theme` le disait. Une section
+  // qui décrit un correctif n'est pas une preuve que le correctif est là.
+  var html = document.documentElement;
   if(mode === 'dark') {
     root.setAttribute('data-theme', 'dark');
+    if(html) html.setAttribute('data-theme', 'dark');
   } else if(mode === 'light') {
     root.setAttribute('data-theme', 'light');
+    if(html) html.setAttribute('data-theme', 'light');
   } else {
     // Auto : retirer l'attribut → la media query OS prend le relais
     root.removeAttribute('data-theme');
+    if(html) html.removeAttribute('data-theme');
   }
   // Mettre à jour les boutons du toggle
   ['light','auto','dark'].forEach(function(m) {

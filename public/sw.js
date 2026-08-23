@@ -1,4 +1,21 @@
-// MA VIGNE — Service Worker v7.05
+// MA VIGNE — Service Worker v7.06
+// v7.06 (23/08/2026) — LE THEME, REMIS POUR DE BON. APP 6.50 -> 6.51.
+//   ⚠⚠⚠ TROISIEME DISPARITION DU MEME CORRECTIF, et cette fois le document
+//   ANNONCAIT sa restauration : §60d ecrit « la pose du theme sur <html> remise
+//   dans applyTheme ». Elle ne l'etait pas. app.js avait bien ses deux poses,
+//   utils.js n'en avait qu'une — et `mv-harnais-theme` le disait, en rouge, sur
+//   deux assertions. En mode sombre les 37 fenetres ressortaient BLANCHES.
+//   ★★★ UNE SECTION QUI DECRIT UN CORRECTIF N'EST PAS UNE PREUVE QUE LE
+//   CORRECTIF EST LA. Le document et le code sont deux artefacts differents ;
+//   seul le harnais lit le second.
+//   ⚠ Deux autres promesses de §60d etaient fausses au meme titre : le bloc
+//   WHATS_NEW 6.49 et l'entree de changelog 7.04 n'ont jamais ete reinseres.
+//   L'annonce du theme n'avait donc atteint AUCUN client. Elle repart ici,
+//   mot pour mot, sous 6.51 — pas sous 6.49 : ce numero a pu etre servi, et
+//   un bloc deja vu ne se reaffiche pas.
+//   ★ On ne reprend pas 7.05 non plus. Regle du doute : en cas d'incertitude
+//   sur ce qui est en ligne, on bumpe. Reutiliser un numero deja servi figerait
+//   l'index.html correspondant pour toujours chez qui l'a pris.
 // v7.05 (23/08/2026) — LES ICONES ENTRENT DANS index.html, ET LE CLIQUET AUSSI. APP 6.48 -> 6.50.
 //   ⚠️⚠️⚠️ ON SAUTE 6.49 / 7.04 VOLONTAIREMENT. Le commit 'jeton' (ff1fdc0) a
 //   livre un APP 6.49 / SW 7.04 que le commit suivant a fait DISPARAITRE du
@@ -2411,7 +2428,7 @@
 // v2.22 — Fix profils vides : guard vide dans loadData() pour MEMBRES/SAISONS/TACHES
 // v2.17 — Onboarding intégré + tenantId · v2.06 — Firebase Auth · v2.00–v2.05 — divers
 const DEBUG = self.location.hostname === 'localhost' || self.location.hostname === '127.0.0.1';
-const CACHE_NAME   = 'mavigne-v7.05';
+const CACHE_NAME   = 'mavigne-v7.06';
 const TENANT_CACHE = 'mavigne-tenant';   // Cache persistant — préservé à chaque mise à jour SW
 const SYNC_TAG     = 'mavigne-sync';
 
@@ -2427,7 +2444,7 @@ const CDN_URLS = [
 ];
 
 self.addEventListener('install', event => {
-  if(DEBUG) console.log('[SW] Ma Vigne v7.05 installé');
+  if(DEBUG) console.log('[SW] Ma Vigne v7.06 installé');
   event.waitUntil(
     caches.open(CACHE_NAME).then(async cache => {
       // ── Cœur applicatif : STRICT (mise à jour ATOMIQUE) ──
@@ -2443,7 +2460,7 @@ self.addEventListener('install', event => {
 });
 
 self.addEventListener('activate', event => {
-  if(DEBUG) console.log('[SW] Ma Vigne v7.05 activé');
+  if(DEBUG) console.log('[SW] Ma Vigne v7.06 activé');
   event.waitUntil(
     caches.keys().then(keys =>
       Promise.all(
