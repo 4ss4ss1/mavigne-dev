@@ -73,7 +73,13 @@ export const MAP = {
      C'est le premier ecran qu'un prospect voit — le lien « Voir la demo » du
      site. Il tournait encore entierement au pictogramme. */
   antenne:'satellite-dish', bouclier:'shield', bouteille:'bottle-wine',
-  boussole:'compass', ouvrier:'hard-hat'
+  boussole:'compass', ouvrier:'hard-hat',
+  /* ── DS-M6 : les motifs d'absence du Planning. Chacun est un MOTIF
+     administratif distinct — un arret de travail n'est pas un conge sans
+     solde — et l'ecran les liste cote a cote : ils doivent se distinguer
+     au premier coup d'oeil, pas seulement se lire. */
+  avion:'plane-takeoff', pansement:'bandage', reveil:'alarm-clock',
+  thermometre:'thermometer'
 };
 
 export function corps(lucide) {

@@ -302,12 +302,12 @@ window._planDuesActive=_planDuesActive;
 // 'autre' = absence non precisee : comportement historique strict, plafond inchange.
 //           C'est le motif par defaut de toute entree anterieure a ce lot -> zero regression.
 var PLAN_ABS_MOTIFS=[
-  {id:'arret',     ico:'\ud83e\ude79', nom:'Arr\u00eat de travail',          sub:'Maladie, accident du travail ou de trajet', suspend:true,  assim:false, paye:true,  heures:false},
-  {id:'sansolde',  ico:'\u2708\ufe0f', nom:'Cong\u00e9 sans solde',          sub:'Absence autoris\u00e9e, non r\u00e9mun\u00e9r\u00e9e',       suspend:true,  assim:false, paye:false, heures:false},
-  {id:'famille',   ico:'\ud83d\udc65', nom:'\u00c9v\u00e9nement familial',   sub:'Mariage, naissance, d\u00e9c\u00e8s',                   suspend:false, assim:true,  paye:true,  heures:false},
-  {id:'formation', ico:'\ud83c\udf93', nom:'Formation',                      sub:'Journ\u00e9e de formation professionnelle',        suspend:false, assim:true,  paye:true,  heures:false},
-  {id:'injustifie',ico:'\u2715',       nom:'Absence injustifi\u00e9e',       sub:'Heures dues \u00b7 journ\u00e9e non pay\u00e9e',         suspend:false, assim:false, paye:false, heures:false},
-  {id:'retard',    ico:'\u23f0',       nom:'Retard',                         sub:'Heure d\u2019arriv\u00e9e \u00b7 heures dues',            suspend:false, assim:false, paye:false, heures:true},
+  {id:'arret',     ico:'pansement', nom:'Arr\u00eat de travail',          sub:'Maladie, accident du travail ou de trajet', suspend:true,  assim:false, paye:true,  heures:false},
+  {id:'sansolde',  ico:'avion', nom:'Cong\u00e9 sans solde',          sub:'Absence autoris\u00e9e, non r\u00e9mun\u00e9r\u00e9e',       suspend:true,  assim:false, paye:false, heures:false},
+  {id:'famille',   ico:'equipe', nom:'\u00c9v\u00e9nement familial',   sub:'Mariage, naissance, d\u00e9c\u00e8s',                   suspend:false, assim:true,  paye:true,  heures:false},
+  {id:'formation', ico:'diplome', nom:'Formation',                      sub:'Journ\u00e9e de formation professionnelle',        suspend:false, assim:true,  paye:true,  heures:false},
+  {id:'injustifie',ico:'croix',       nom:'Absence injustifi\u00e9e',       sub:'Heures dues \u00b7 journ\u00e9e non pay\u00e9e',         suspend:false, assim:false, paye:false, heures:false},
+  {id:'retard',    ico:'reveil',       nom:'Retard',                         sub:'Heure d\u2019arriv\u00e9e \u00b7 heures dues',            suspend:false, assim:false, paye:false, heures:true},
   {id:'autre',     ico:'\u2014',       nom:'Absence non pr\u00e9cis\u00e9e',  sub:'Sans effet sur le plafond annuel',                suspend:false, assim:false, paye:false, heures:false}
 ];
 function _planAbsDef(id){
@@ -1663,7 +1663,7 @@ function planSetCpPeriode(v){
   window.CONFIG.cp_periode_debut=md;
   if(window.saveData)window.saveData('config');
   else if(window.fbSave)window.fbSave('config',window.CONFIG);
-  showToast('\u2705 P\u00e9riode des cong\u00e9s\u00a0: '+_planCpPeriodeLbl(),PLAN_BG);
+  showToast('P\u00e9riode des cong\u00e9s\u00a0: '+_planCpPeriodeLbl(),PLAN_BG);
   if(typeof _planFicheRender==='function')_planFicheRender();
 }
 
@@ -1851,7 +1851,7 @@ function _planAbsMotifsHtml(sel,sansHeures){
       +'<span class="plan-abs-r" style="width:15px;height:15px;border-radius:50%;flex-shrink:0;margin-top:2px;'
       +'border:2px solid '+(on?'var(--terre)':'var(--gris)')+';background:'+(on?'var(--terre)':'transparent')+';box-shadow:inset 0 0 0 2px var(--bg-card)"></span>'
       +'<span style="flex:1">'
-        +'<span style="display:block;font-size:13px;font-weight:600;color:var(--texte)">'+_escHtml(mo.ico)+' '+_escHtml(mo.nom)+'</span>'
+        +'<span style="display:block;font-size:13px;font-weight:600;color:var(--texte)">'+_mvIcon(mo.ico,16)+' '+_escHtml(mo.nom)+'</span>'
         +'<span style="display:block;font-size:11px;color:var(--texte-doux);margin-top:1px;line-height:1.3">'+_escHtml(mo.sub)+'</span>'
         +'<span style="display:block;font-size:11px;font-weight:600;margin-top:3px;line-height:1.3;color:'+ef.c+'">'+ef.t+'</span>'
       +'</span>'
@@ -1951,7 +1951,7 @@ function _planDayStatus(plId,m,d,e){
     }
     return{t:'absent',assim:false,paye:false,l:(_ms.id==='autre'?'Absent':_ms.nom),c:'var(--rouge)',bg:'var(--rouge-pale)',bd:'rgba(220,38,38,0.4)'};
   }
-  if(e&&e.canicule)return{t:'canicule',l:'\u2600\ufe0f Chaleur',c:'var(--orange)',bg:'var(--orange-pale)',bd:'rgba(217,119,6,0.5)'};
+  if(e&&e.canicule)return{t:'canicule',l:'Chaleur',c:'var(--orange)',bg:'var(--orange-pale)',bd:'rgba(217,119,6,0.5)'};
   if(e&&e.timing){
     var th=_planTimingH(e.timing.debut,e.timing.fin,e.timing.continu);
     if(e.remplacement)return{t:'extra',l:'Remplacement',c:'var(--bleu)',bg:'var(--bleu-pale)',bd:'rgba(26,74,122,0.35)'};
@@ -2201,7 +2201,7 @@ function _pl2Board(){
     var s=_planSummary(mbr,planMonth),plId=_planPlId(mbr),nomA=_escAttr(mbr.nom);
     var _coll=!!(window._mvEstCollectif&&window._mvEstCollectif(mbr));
     var _sub=_coll
-      ?('\u{1F465} '+_planEffMax(mbr,planMonth)+' pers. \u00b7 '+_planFmt(_planCollH(mbr,planMonth)))
+      ?(_mvIcon('equipe',16)+' '+_planEffMax(mbr,planMonth)+' pers. \u00b7 '+_planFmt(_planCollH(mbr,planMonth)))
       :(_planFmt(s.worked)+' / '+_planFmt(s.ref));
     var pulse=_pl2PulseNom===mbr.nom?' pl2-pulse':'';
     // Le nom coche la LIGNE : cette personne, sur toute la vue. Sa fiche s'ouvre
@@ -2261,10 +2261,10 @@ function _pl2Synth(){
     var _mo=_pEntMonth(mbr.nom,planMonth);
     Object.values(_mo).forEach(function(e){if(e.absent)abs++;else if(e.type==='cp')cpj++;});
     var brc=_planLegalBreaches(mbr,planMonth);
-    var badges=(brc>0?'<span class="plan-badge plan-badge-abs">\u26a0 '+brc+' sem. &gt; max</span>':'')
+    var badges=(brc>0?'<span class="plan-badge plan-badge-abs">'+_mvIcon('alerte',16)+' '+brc+' sem. &gt; max</span>':'')
       +(abs>0?'<span class="plan-badge plan-badge-abs">'+abs+' abs.</span>':'')
       +(cpj>0?'<span class="plan-badge" style="background:var(--orange-pale);color:var(--orange)">CP '+cpj+' j</span>':'')
-      +(mbr.planning_note?'<span class="plan-badge plan-badge-warn">\u26a0 '+_escHtml(mbr.planning_note)+'</span>':'');
+      +(mbr.planning_note?'<span class="plan-badge plan-badge-warn">'+_mvIcon('alerte',16)+' '+_escHtml(mbr.planning_note)+'</span>':'');
     var pulse=_pl2PulseNom===mbr.nom?' pl2-pulse':'';
     h+='<button class="pl2-mcard'+pulse+'" data-plcard="'+nomA+'" onclick="openPlanFiche(\''+nomA+'\')">'
       +'<span class="pl2-ava pl2-ava-lg" style="background:'+(mbr.couleur||'#3D6B27')+'">'+_escHtml(mbr.nom.charAt(0))+'</span>'
@@ -2290,7 +2290,7 @@ function _pl2SynthColl(mbr,nomA){
     if(_planEffective(_planPlId(mbr),planMonth,d,_pEntDay(mbr.nom,planMonth,d))>0.0001)jours++;
   }
   return '<button class="pl2-mcard" data-plcard="'+nomA+'" onclick="openPlanFiche(\''+nomA+'\')">'
-    +'<span class="pl2-ava pl2-ava-lg" style="background:'+(mbr.couleur||'#8A5A38')+'">\u{1F465}</span>'
+    +'<span class="pl2-ava pl2-ava-lg" style="background:'+(mbr.couleur||'#8A5A38')+'">'+_mvIcon('equipe',18)+'</span>'
     +'<span class="pl2-mc-mid">'
       +'<span class="pl2-mc-n">'+_escHtml(mbr.nom)+'<span class="plan-badge" style="background:var(--tag-amber-bg,#fffbeb);color:var(--tag-amber-tx,#92400e)">\u00e9quipe</span></span>'
       +'<span class="pl2-mc-s">'+n+' personne'+(n>1?'s':'')+' au plus fort \u00b7 '+jours+' jour'+(jours>1?'s':'')+' travaill\u00e9'+(jours>1?'s':'')+'</span>'
@@ -2370,8 +2370,8 @@ function _pl2RenderEquipe(){
 //   au lieu d'un menu « Outils » qui cachait quatre entrées derrière un engrenage.
 function _planPeriodeBar(){
   return '<div class="pl2-perbar">'
-    +'<button onclick="openPlanCP()"><span>\u2600\uFE0F</span> Cong\u00e9s sur une p\u00e9riode</button>'
-    +'<button onclick="openPlanChaleur()"><span>\ud83c\udf21\uFE0F</span> Chaleur sur une p\u00e9riode</button>'
+    +'<button onclick="openPlanCP()"><span>'+_mvIcon('soleil',16)+'</span> Cong\u00e9s sur une p\u00e9riode</button>'
+    +'<button onclick="openPlanChaleur()"><span>'+_mvIcon('thermometre',16)+'</span> Chaleur sur une p\u00e9riode</button>'
   +'</div>';
 }
 
@@ -2569,13 +2569,13 @@ function _pl2MbarSync(){
   if(!acts)return;
   if(!n){acts.innerHTML='';return;}
   var st=_planSelStats();
-  var h='<button class="pl2-mbar-heures" onclick="planSelSheet(\'travail\')"><span>\u{1F550}</span><span>Heures</span></button>'
-    +'<button onclick="openPlanCP(true)"><span>\u2600\uFE0F</span><span>Cong\u00e9</span></button>'
-    +'<button onclick="planSelSheet(\'absent\')"><span>\u2715</span><span>Absence</span></button>';
-  if(st.trav>0)h+='<button onclick="planSelAction(\'rec\')"><span>\u21BA</span><span>R\u00e9cup</span></button>'
-    +'<button onclick="planSelAction(\'heat\')"><span>\u{1F321}\uFE0F</span><span>Chaleur</span></button>';
-  if(st.coll>0)h+='<button onclick="planSelEffectif()"><span>\u{1F465}</span><span>Effectif</span></button>';
-  if(st.saisis>0)h+='<button onclick="planSelAction(\'clr\')"><span>\u232B</span><span>Effacer</span></button>';
+  var h='<button class="pl2-mbar-heures" onclick="planSelSheet(\'travail\')"><span>'+_mvIcon('chrono',16)+'</span><span>Heures</span></button>'
+    +'<button onclick="openPlanCP(true)"><span>'+_mvIcon('soleil',16)+'</span><span>Cong\u00e9</span></button>'
+    +'<button onclick="planSelSheet(\'absent\')"><span>'+_mvIcon('croix',16)+'</span><span>Absence</span></button>';
+  if(st.trav>0)h+='<button onclick="planSelAction(\'rec\')"><span>'+_mvIcon('rotation',16)+'</span><span>R\u00e9cup</span></button>'
+    +'<button onclick="planSelAction(\'heat\')"><span>'+_mvIcon('thermometre',16)+'</span><span>Chaleur</span></button>';
+  if(st.coll>0)h+='<button onclick="planSelEffectif()"><span>'+_mvIcon('equipe',16)+'</span><span>Effectif</span></button>';
+  if(st.saisis>0)h+='<button onclick="planSelAction(\'clr\')"><span>'+_mvIcon('retour',16)+'</span><span>Effacer</span></button>';
   acts.innerHTML=h;
 }
 // ══════════════════════════════════════════════════════════════════════
@@ -2732,8 +2732,8 @@ function planSelAction(kind){
   var r=_planApplySimple(keys,kind,keys.length===1);
   window.PLANNING_ENTRIES=PLANNING_ENTRIES;
   if(r.n>0&&window.fbSave)window.fbSave('planning_entries',PLANNING_ENTRIES);
-  var lbl={rec:'\u21ba R\u00e9cup pos\u00e9es',heat:'\ud83c\udf21 Horaires chaleur 06:00 \u2192 14:00',clr:'Saisies effac\u00e9es'}[kind]||'Fait';
-  showToast(r.n>0?('\u2705 '+lbl+' \u00b7 '+r.n+' j'+(r.skip>0?' \u00b7 '+r.skip+' pr\u00e9serv\u00e9'+(r.skip>1?'s':''):'')):'Aucun jour applicable dans la s\u00e9lection',r.n>0?'#3D6B27':'#E07060');
+  var lbl={rec:'R\u00e9cup pos\u00e9es',heat:'Horaires chaleur 06:00 \u2192 14:00',clr:'Saisies effac\u00e9es'}[kind]||'Fait';
+  showToast(r.n>0?(lbl+' \u00b7 '+r.n+' j'+(r.skip>0?' \u00b7 '+r.skip+' pr\u00e9serv\u00e9'+(r.skip>1?'s':''):'')):'Aucun jour applicable dans la s\u00e9lection',r.n>0?'#3D6B27':'#E07060');
   planSelClear();
   _pl2Refresh();
 }
@@ -2757,7 +2757,7 @@ function planSelEffectif(){
   if(typeof window.openPrompt!=='function'){showToast('Saisie indisponible','#C0392B');return;}
   var m0=(window.MEMBRES||[]).find(function(x){return x.nom===colls[0];});
   window.openPrompt({
-    icone:'\u{1F465}',
+    icone:'equipe',
     titre:'Combien de personnes\u00a0?',
     sub:colls.join(', ')+' \u00b7 '+keys.length+' jour'+(keys.length>1?'s':'')+' coch\u00e9'+(keys.length>1?'s':''),
     valeur:window._mvEffDef(m0),
@@ -2792,9 +2792,9 @@ function _planEffApply(v){
   window.PLANNING_ENTRIES=PLANNING_ENTRIES;
   if(ok>0&&window.fbSave)window.fbSave('planning_entries',PLANNING_ENTRIES);
   var msg=ok>0
-    ?('\u2705 '+n+' personne'+(n>1?'s':'')+' \u00b7 '+ok+' jour'+(ok>1?'s':'')
+    ?(n+' personne'+(n>1?'s':'')+' \u00b7 '+ok+' jour'+(ok>1?'s':'')
        +(skip>0?(' \u00b7 '+skip+' ignor\u00e9'+(skip>1?'s':'')):'')
-       +(noH>0?(' \u00b7 \u26a0 '+noH+' sans heures pos\u00e9es'):''))
+       +(noH>0?(' \u00b7 '+noH+' sans heures pos\u00e9es'):''))
     :'Aucune case d\u2019\u00e9quipe collective dans la s\u00e9lection';
   showToast(msg,ok>0?(noH>0?'#B85A1A':'#3D6B27'):'#E07060');
   planSelClear();
@@ -2825,7 +2825,7 @@ function planKpiAlert(){
   if(planTab!=='mois'){planTab='mois';_planRenderHeader();_planRenderBody();}
   _pl2PulseNom=hit.nom;
   _pl2RenderEquipe();
-  showToast('\u26a0 '+hit.nom+' \u00b7 semaine au-dessus du maximum \u2014 d\u00e9tail dans sa fiche','#B85A1A');
+  showToast(hit.nom+' \u00b7 semaine au-dessus du maximum \u2014 d\u00e9tail dans sa fiche','#B85A1A');
 }
 // La barre flottante « Outils » a disparu avec le menu du meme nom. Reste la garde :
 // une selection ne doit pas survivre a un changement d'onglet, sinon la barre du bas
@@ -2913,8 +2913,8 @@ function _planBuildMonHtml(mbr,canEdit){
       +'<div class="plan-day-num" style="color:'+st.c+'"><div class="plan-day-n">'+d+'</div><div class="plan-day-dow">'+PLAN_JOURS[dow]+'</div></div>'
       +'<div class="plan-day-info">'
         +'<div class="plan-day-label" style="color:'+st.c+'">'+st.l+cpBadge+'</div>'
-        +(tStr?'<div class="plan-day-timing" style="color:'+tColor+'">\ud83d\udd50 '+tStr+'</div>':'')
-        +(e&&e.comment&&!e.absent&&!isCp&&!e.canicule?'<div class="plan-day-comment">\ud83d\udcac '+e.comment+'</div>':'')
+        +(tStr?'<div class="plan-day-timing" style="color:'+tColor+'">'+_mvIcon('chrono',16)+' '+tStr+'</div>':'')
+        +(e&&e.comment&&!e.absent&&!isCp&&!e.canicule?'<div class="plan-day-comment">'+_mvIcon('bulle',16)+' '+e.comment+'</div>':'')
       +'</div>'
       +'<div class="plan-day-hours">'
         +(e&&pl>0?'<div class="plan-day-pl">'+_planFmt(pl)+'</div>':'')
@@ -2924,7 +2924,7 @@ function _planBuildMonHtml(mbr,canEdit){
     +'</div>';
   }
   daysHtml+='</div>';
-  if(canEdit)daysHtml+='<div class="plan-edit-hint">\u270f\ufe0f Appuyez sur un jour pour le modifier \u2014 toute l\u2019\u00e9quipe se g\u00e8re depuis l\u2019onglet <b>Le mois</b>.</div>';
+  if(canEdit)daysHtml+='<div class="plan-edit-hint">'+_mvIcon('crayon',16)+' Appuyez sur un jour pour le modifier \u2014 toute l\u2019\u00e9quipe se g\u00e8re depuis l\u2019onglet <b>Le mois</b>.</div>';
 
   return sumHtml+daysHtml+_planLegalCard(mbr);
 }
@@ -3000,7 +3000,7 @@ function _planAnnuCard(mbr,uptoMonth){
       prevH+='<div class="plan-card" style="background:var(--bg-card);border:1.5px solid var(--gris-clair);margin-bottom:10px;flex-direction:column;align-items:stretch">'
         +'<div style="display:flex;align-items:center;gap:6px;margin-bottom:8px">'
         +'<span style="font-size:10px;font-weight:700;text-transform:uppercase;letter-spacing:1px;color:var(--texte-doux)">'
-        +'\u23f1 Compteur sold\u00e9 \u00b7 '+_pShort(ctr.debut)+' \u2192 '+_pShort(ctr.fin)+'</span>'
+        +''+_mvIcon('chrono',16)+' Compteur sold\u00e9 \u00b7 '+_pShort(ctr.debut)+' \u2192 '+_pShort(ctr.fin)+'</span>'
         +'<span style="margin-left:auto;font-size:10px;font-weight:700;color:'+(over2?'var(--orange)':'var(--vert-med)')+'">'+(over2?'surplus\u00a0\u26a0\ufe0f':'sold\u00e9\u00a0\u2713')+'</span>'
         +'</div>'
         +'<div style="display:flex;align-items:center;gap:9px">'
@@ -3179,7 +3179,7 @@ function _planHsupCard(mbr){
     h+='<div style="display:flex;align-items:center;justify-content:space-between;padding:6px 0;font-size:12px"><span style="color:var(--texte-doux)">'+_trLbl+'</span><span style="font-weight:700;color:var(--plan-acc)">'+_planFmt(t.h)+'</span></div>';
   });
   if(bank.overdraw>0.0001){
-    h+='<div style="font-size:12px;color:var(--orange);margin-top:8px">\u26a0 '+_planFmt(bank.overdraw)+' de r\u00e9cup non couverte par le compteur.</div>';
+    h+='<div style="font-size:12px;color:var(--orange);margin-top:8px">'+_mvIcon('alerte',16)+' '+_planFmt(bank.overdraw)+' de r\u00e9cup non couverte par le compteur.</div>';
   }
   if(aPayer>0.0001){
     var alerte=false;   // annualisation : aucune heure ne perime en cours d'annee
@@ -3240,9 +3240,9 @@ function _planLegalCard(mbr){
   h+='<div style="font-size:10px;color:var(--gris);margin-bottom:8px">Rep\u00e8res : trait = dur\u00e9e l\u00e9gale, trait rouge = maximum.</div>';
   weeks.forEach(function(w){
     var tot=_planWeekTotal(mbr,planMonth,w),cls,sc,ic,txt;
-    if(!w.partial&&tot>L.maxHebdo+0.0001){cls='r';sc='var(--rouge)';ic='\u26a0\ufe0f';txt='D\u00e9passe le maximum ('+_planFmt(L.maxHebdo)+') de '+_planFmt(tot-L.maxHebdo);}
-    else if(!w.partial&&tot>L.maxMoy+0.0001){cls='o';sc='var(--orange)';ic='\u25b3';txt='Au-del\u00e0 de la moyenne '+_planFmt(L.maxMoy)+' \u2014 \u00e0 surveiller sur 12 sem.';}
-    else if(tot>L.hebdoLeg+0.0001){cls='';sc='var(--vert-med)';ic='\u2713';txt='+'+_planFmt(tot-L.hebdoLeg)+' au-dessus de la dur\u00e9e l\u00e9gale';}
+    if(!w.partial&&tot>L.maxHebdo+0.0001){cls='r';sc='var(--rouge)';ic=_mvIcon('alerte',16);txt='D\u00e9passe le maximum ('+_planFmt(L.maxHebdo)+') de '+_planFmt(tot-L.maxHebdo);}
+    else if(!w.partial&&tot>L.maxMoy+0.0001){cls='o';sc='var(--orange)';ic=_mvIcon('alerte',16);txt='Au-del\u00e0 de la moyenne '+_planFmt(L.maxMoy)+' \u2014 \u00e0 surveiller sur 12 sem.';}
+    else if(tot>L.hebdoLeg+0.0001){cls='';sc='var(--vert-med)';ic=_mvIcon('check',16);txt='+'+_planFmt(tot-L.hebdoLeg)+' au-dessus de la dur\u00e9e l\u00e9gale';}
     else{cls='';sc='var(--texte-doux)';ic='\u00b7';txt='Sous la dur\u00e9e l\u00e9gale';}
     var rowBg=cls==='r'?'var(--rouge-pale)':cls==='o'?'var(--orange-pale)':'transparent';
     var rowBd=cls==='r'?'1px solid rgba(220,38,38,0.4)':cls==='o'?'1px solid rgba(217,119,6,0.4)':'1px solid var(--gris-clair)';
@@ -3407,8 +3407,8 @@ function _planFicheRender(){
       h+='<button class="pl2-drow" onclick="planFicheOpenDay('+d+')">'
         +'<span class="pl2-drow-d"><span class="pl2-drow-n">'+d+'</span><span class="pl2-drow-w">'+PLAN_JOURS[_planDow(planMonth,d)]+'</span></span>'
         +'<span class="pl2-drow-mid"><span class="pl2-drow-l" style="color:'+st.c+'">'+st.l+'</span>'
-          +(tim?'<span class="pl2-drow-t">\ud83d\udd50 '+tim+'</span>':'')
-          +(e&&e.comment&&!e.absent?'<span class="pl2-drow-t">\ud83d\udcac '+_escHtml(e.comment)+'</span>':'')
+          +(tim?'<span class="pl2-drow-t">'+_mvIcon('chrono',16)+' '+tim+'</span>':'')
+          +(e&&e.comment&&!e.absent?'<span class="pl2-drow-t">'+_mvIcon('bulle',16)+' '+_escHtml(e.comment)+'</span>':'')
           +(e&&e.absent&&e.comment?'<span class="pl2-drow-t">'+_escHtml(e.comment)+'</span>':'')
         +'</span>'
         // ⚠️ Ne JAMAIS reecrire un chiffre que _planEffective sait deja rendre :
@@ -3417,7 +3417,7 @@ function _planFicheRender(){
         +'<span class="pl2-drow-h" style="color:'+st.c+'">'+(e&&e.type==='recup'?'\u21ba':_planFmt(eff))+'</span>'
       +'</button>';
     });
-    h+='<div class="pl2-note" style="margin-top:8px">\u270f\ufe0f Toucher un jour l\u2019ouvre dans la feuille \u2014 la grille compl\u00e8te est dans l\u2019onglet <b>Le mois</b>.</div>';
+    h+='<div class="pl2-note" style="margin-top:8px">'+_mvIcon('crayon',16)+' Toucher un jour l\u2019ouvre dans la feuille \u2014 la grille compl\u00e8te est dans l\u2019onglet <b>Le mois</b>.</div>';
     h+=_coll?_planCollNote(mbr):_planLegalCard(mbr);
   }
   if(t==='cp'){
@@ -3482,7 +3482,7 @@ function _planChaleurRender(){
     h+='<button class="pl2-ms'+(on?' on':'')+'" onclick="planChalMb(\''+_escAttr(m.nom)+'\')"><span class="pl2-ava" style="background:'+(m.couleur||'#3D6B27')+'">'+_escHtml(m.nom.charAt(0))+'</span>'+_escHtml(m.nom)+(_planHasCanicule(m.nom)?' \ud83c\udf21':'')+'</button>';
   });
   h+='</div>'
-  +'<div class="pl2-note" style="border-color:rgba(217,119,6,0.4);color:var(--orange)">\u2139\ufe0f Appliqu\u00e9 du lundi au vendredi, uniquement sur les jours travaill\u00e9s. Cong\u00e9s, r\u00e9cup et absences sont conserv\u00e9s. \u00ab\u00a0Retirer\u00a0\u00bb ne touche que les jours marqu\u00e9s chaleur.</div>';
+  +'<div class="pl2-note" style="border-color:rgba(217,119,6,0.4);color:var(--orange)">'+_mvIcon('info',16)+'\ufe0f Appliqu\u00e9 du lundi au vendredi, uniquement sur les jours travaill\u00e9s. Cong\u00e9s, r\u00e9cup et absences sont conserv\u00e9s. \u00ab\u00a0Retirer\u00a0\u00bb ne touche que les jours marqu\u00e9s chaleur.</div>';
   body.innerHTML=h;
 }
 function _planChalNoms(){return Object.keys(_pl2ChalSel).filter(function(n){return _pl2ChalSel[n];});}
@@ -3491,7 +3491,7 @@ function planChalApply(){
   if(!noms.length){showToast('S\u00e9lectionnez au moins un salari\u00e9','#E07060');return;}
   planCaniculeReadInputs();
   noms.forEach(function(n){planCaniculeApply(n);});
-  if(noms.length>1)showToast('\ud83c\udf21 Horaires chaleur appliqu\u00e9s \u00b7 '+noms.length+' salari\u00e9s','#D97706');
+  if(noms.length>1)showToast('Horaires chaleur appliqu\u00e9s \u00b7 '+noms.length+' salari\u00e9s','#D97706');
   closePlanChaleur();
   _pl2Refresh();
 }
@@ -3621,12 +3621,12 @@ function _planCPRenderSel(){
     h+='<div style="font-size:12.5px;color:var(--texte-doux);text-align:center;padding:12px">Aucun salari\u00e9 reconnu dans la s\u00e9lection.</div>';
   } else {
     h+='<div style="background:var(--bg-app);border:1px solid var(--gris-clair);border-radius:12px;padding:10px 11px">'+head+rows+'</div>';
-    if(ign>0)h+='<div class="pl2-note" style="margin-top:8px">\u2139\ufe0f '+ign+' case'+(ign>1?'s':'')+' de la s\u00e9lection ne '+(ign>1?'seront':'sera')+' pas pos\u00e9e'+(ign>1?'s':'')+' (dimanche, f\u00e9ri\u00e9, samedi de repos ou hors contrat). Survolez une case grise pour la raison.</div>';
+    if(ign>0)h+='<div class="pl2-note" style="margin-top:8px">'+_mvIcon('info',16)+' '+ign+' case'+(ign>1?'s':'')+' de la s\u00e9lection ne '+(ign>1?'seront':'sera')+' pas pos\u00e9e'+(ign>1?'s':'')+' (dimanche, f\u00e9ri\u00e9, samedi de repos ou hors contrat). Survolez une case grise pour la raison.</div>';
     if(mode!=='ouvres')h+='<div class="pl2-note" style="margin-top:8px">Un vendredi pos\u00e9 entra\u00eene automatiquement le samedi de repos suivant dans le d\u00e9compte, sans occuper la case.</div>';
     h+='<div class="pl2-note" style="margin-top:8px">Les jours d\u00e9j\u00e0 en r\u00e9cup\u00e9ration ou en absence sont pr\u00e9serv\u00e9s.</div>';
   }
   body.innerHTML=h;
-  _planCpHdr('\ud83c\udfd6\ufe0f Poser des cong\u00e9s','Depuis la s\u00e9lection \u00b7 '+PLAN_MOIS[planMonth]+' '+planYear,'\ud83c\udfd6\ufe0f Poser '+total+'\u00a0j');
+  _planCpHdr('Poser des cong\u00e9s','Depuis la s\u00e9lection \u00b7 '+PLAN_MOIS[planMonth]+' '+planYear,'\ud83c\udfd6\ufe0f Poser '+total+'\u00a0j');
 }
 
 // Pose depuis la sélection — écrit UNIQUEMENT les jours classés 'cp'.
@@ -3651,7 +3651,7 @@ function _planCpApplySel(){
   if(nMbr>0&&window.fbSave)window.fbSave('planning_entries',PLANNING_ENTRIES);
   closePlanCP();
   planSelClear();
-  showToast(nMbr>0?('\u2705 Cong\u00e9s pos\u00e9s \u00b7 '+nMbr+' salari\u00e9'+(nMbr>1?'s':'')+' \u00b7 '+totJ+'\u00a0j d\u00e9compt\u00e9'+(totJ>1?'s':'')+(prot>0?' \u00b7 '+prot+' pr\u00e9serv\u00e9'+(prot>1?'s':''):'')):'Aucun jour d\u00e9comptable dans la s\u00e9lection',nMbr>0?'#3D6B27':'#E07060');
+  showToast(nMbr>0?('Cong\u00e9s pos\u00e9s \u00b7 '+nMbr+' salari\u00e9'+(nMbr>1?'s':'')+' \u00b7 '+totJ+'\u00a0j d\u00e9compt\u00e9'+(totJ>1?'s':'')+(prot>0?' \u00b7 '+prot+' pr\u00e9serv\u00e9'+(prot>1?'s':''):'')):'Aucun jour d\u00e9comptable dans la s\u00e9lection',nMbr>0?'#3D6B27':'#E07060');
   _pl2Refresh();
 }
 
@@ -3799,7 +3799,7 @@ function _planCpPreview(){
   var head='<div style="display:flex;align-items:baseline;justify-content:space-between;margin-bottom:6px">'
     +'<span style="font-size:20px;font-weight:800;color:var(--orange)">'+total+'<span style="font-size:11px;font-weight:700;color:var(--texte-doux)">\u00a0j au total</span></span>'
     +'<span style="font-size:11px;color:var(--texte-doux);text-align:right">'+noms.length+' salari\u00e9'+(noms.length>1?'s':'')+'</span></div>';
-  var note=fer>0?'<div class="pl2-note" style="margin-top:8px">\u2139\ufe0f Jour(s) f\u00e9ri\u00e9(s) dans la plage \u2014 non d\u00e9compt\u00e9(s) (jour ch\u00f4m\u00e9 pay\u00e9).</div>':'';
+  var note=fer>0?'<div class="pl2-note" style="margin-top:8px">'+_mvIcon('info',16)+' Jour(s) f\u00e9ri\u00e9(s) dans la plage \u2014 non d\u00e9compt\u00e9(s) (jour ch\u00f4m\u00e9 pay\u00e9).</div>':'';
   box.innerHTML='<div style="background:var(--bg-app);border:1px solid var(--gris-clair);border-radius:12px;padding:10px 11px">'+head+rows+'</div>'+note;
 }
 function planCpApply(){
@@ -3828,7 +3828,7 @@ function planCpApply(){
   window.PLANNING_ENTRIES=PLANNING_ENTRIES;
   if(nMbr>0&&window.fbSave)window.fbSave('planning_entries',PLANNING_ENTRIES);
   closePlanCP();
-  showToast(nMbr>0?('\u2705 Cong\u00e9s pos\u00e9s \u00b7 '+nMbr+' salari\u00e9'+(nMbr>1?'s':'')+' \u00b7 '+totJ+' j'):'Aucun jour applicable dans la plage',nMbr>0?'#3D6B27':'#E07060');
+  showToast(nMbr>0?('Cong\u00e9s pos\u00e9s \u00b7 '+nMbr+' salari\u00e9'+(nMbr>1?'s':'')+' \u00b7 '+totJ+' j'):'Aucun jour applicable dans la plage',nMbr>0?'#3D6B27':'#E07060');
   _pl2Refresh();
 }
 function planCpRemove(){
@@ -4813,7 +4813,7 @@ function savePlanDay(next){
       ?(_pOk+((r.basc>0)
         ?('Absence injustifi\u00e9e \u00b7 '+r.basc+'\u00a0j \u2014 arriv\u00e9e apr\u00e8s la fin pr\u00e9vue'
           +(r.n>r.basc?(' \u00b7 '+(r.n-r.basc)+' retard'+((r.n-r.basc)>1?'s':'')):''))
-        :(mo.ico+' '+mo.nom+' \u00b7 '+r.n+'\u00a0j'+(r.skip>0?' \u00b7 '+r.skip+' ignor\u00e9'+(r.skip>1?'s':''):''))))
+        :(mo.nom+' \u00b7 '+r.n+'\u00a0j'+(r.skip>0?' \u00b7 '+r.skip+' ignor\u00e9'+(r.skip>1?'s':''):''))))
       :(r.sansplan>0?'Aucune heure pr\u00e9vue ce jour-l\u00e0 \u2014 pas de retard possible'
        :(r.alheure>0?'Arriv\u00e9e \u00e0 l\u2019heure \u2014 aucune absence enregistr\u00e9e'
        :'Aucun jour applicable'));

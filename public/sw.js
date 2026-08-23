@@ -1,4 +1,27 @@
-// MA VIGNE — Service Worker v7.10
+// MA VIGNE — Service Worker v7.11
+// v7.11 (23/08/2026) — LE PLANNING, ET LE HARNAIS QUI M'A ATTRAPE. APP 6.55 -> 6.56.
+//   ★ planning.js : 124 -> 78. Les six motifs d'absence (arret de travail,
+//   conge sans solde, evenement familial, formation, absence injustifiee,
+//   retard), la barre d'actions de selection, les cartes de compteur.
+//   Sprite 104 -> 108 : `pansement`, `avion`, `reveil`, `thermometre`.
+//   ★★★ ET LE CONTROLE DES DOCUMENTS IMPRIMES A ROUGI SUR MOI, DEUX LOTS
+//   APRES QUE JE L'AI REPARE. J'avais pose `_mvIcon('soleil')` dans le libelle
+//   d'un jour en horaires chaleur — sauf que `_planDayStatus` est PARTAGE :
+//   son `l` finit dans `rowFor`, la ligne de la FEUILLE D'HEURES IMPRIMEE.
+//   L'icone y serait sortie en cadre vide, sur un document de paie.
+//   ⚠⚠ C'est exactement le defaut que le harnais existe pour attraper, et
+//   c'est MOI qui l'ai pose. Le rouge a nomme `planning.js : _planDayStatus`
+//   en une ligne. Sans les trois corrections du lot v7.09, il serait passe.
+//   ★ Correctif : le libelle redevient « Chaleur », texte pur. Et le vrai
+//   signal etait deja la — c'etait le SEUL des sept statuts a porter un
+//   glyphe. « Conge paye », « Recup », « Extra » n'en ont jamais eu.
+//   ★★ LA REGLE QUI EN SORT : avant de poser une icone dans une VALEUR DE
+//   RETOUR (et non dans du HTML sur place), demander qui d'autre la lit.
+//   Une fonction partagee entre l'ecran et l'impression ne peut pas porter
+//   de balise — elle porte du texte, et l'appelant decore.
+//   ⚠ Reste dans planning.js (78) : les compteurs legaux et les cartes de
+//   contrat, plus les pastilles d'etat — meme famille que le feu tricolore
+//   du Pilotage, en attente du lot des pastilles CSS.
 // v7.10 (23/08/2026) — LE PILOTAGE. APP 6.54 -> 6.55.
 //   ★ pilotage.js : 165 -> 114. Les seize cartes de la Cave (`_pcavCard`), la
 //   photo de campagne (`_pilPhotoHtml`), la tournee des parcelles, l'Exercice
@@ -2545,7 +2568,7 @@
 // v2.22 — Fix profils vides : guard vide dans loadData() pour MEMBRES/SAISONS/TACHES
 // v2.17 — Onboarding intégré + tenantId · v2.06 — Firebase Auth · v2.00–v2.05 — divers
 const DEBUG = self.location.hostname === 'localhost' || self.location.hostname === '127.0.0.1';
-const CACHE_NAME   = 'mavigne-v7.10';
+const CACHE_NAME   = 'mavigne-v7.11';
 const TENANT_CACHE = 'mavigne-tenant';   // Cache persistant — préservé à chaque mise à jour SW
 const SYNC_TAG     = 'mavigne-sync';
 
@@ -2561,7 +2584,7 @@ const CDN_URLS = [
 ];
 
 self.addEventListener('install', event => {
-  if(DEBUG) console.log('[SW] Ma Vigne v7.10 installé');
+  if(DEBUG) console.log('[SW] Ma Vigne v7.11 installé');
   event.waitUntil(
     caches.open(CACHE_NAME).then(async cache => {
       // ── Cœur applicatif : STRICT (mise à jour ATOMIQUE) ──
@@ -2577,7 +2600,7 @@ self.addEventListener('install', event => {
 });
 
 self.addEventListener('activate', event => {
-  if(DEBUG) console.log('[SW] Ma Vigne v7.10 activé');
+  if(DEBUG) console.log('[SW] Ma Vigne v7.11 activé');
   event.waitUntil(
     caches.keys().then(keys =>
       Promise.all(

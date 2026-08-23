@@ -1,10 +1,10 @@
 {
-  "total": 1069,
+  "total": 1023,
   "modules": {
     "app": 123,
     "utils": 376,
     "pilotage": 114,
-    "planning": 124,
+    "planning": 78,
     "reglages": 116,
     "cave": 26,
     "tracteur": 5,
