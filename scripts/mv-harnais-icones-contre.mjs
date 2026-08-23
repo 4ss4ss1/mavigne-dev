@@ -220,6 +220,20 @@ epreuve('un glyphe hors des plages historiques (\u2139)',
         .replace('<div class="modal-title">', '<div class="modal-title">\u2139\uFE0F')),
   /ne remonte dans aucune surface[\s\S]*index\.html/);
 
+/* 9. ★★★ UN DOCUMENT IMPRIME QUI APPELLE `_mvIcon` — MAIS VIA UN HELPER.
+      L'epreuve n°6 pose la faute DANS la fonction du document ; celle-ci la
+      pose trois crans plus loin (`_bcExport` → `_bcDoc` → `_bcSec`), qui est
+      la forme reelle du code. Elle a rougi TROIS versions de l'assertion :
+        · la 1re ne lisait que reglages.js ;
+        · la 2e lisait les 12 modules mais decoupait la fonction au premier
+          `\n}` — c'est-a-dire a la fin du gabarit <style>, un tiers du corps ;
+        · la 3e suivait UN niveau d'appel, la chaine en a trois.
+      ⚠ Elle existe pour que ce controle ne redevienne jamais decoratif. */
+epreuve('_mvIcon dans un document imprime, via un helper',
+  () => ecrire('src/cave.js', lire('src/cave.js')
+        .replace('_mvIconInline(ico,16)', '_mvIcon(ico,16)')),
+  /Aucun document imprime[\s\S]*cave\.js : _bcSec/);
+
 fs.rmSync(bac, { recursive: true, force: true });
 console.log('\n' + (ko ? '\x1b[31m' + ko + ' CONTRE-EPREUVE(S) EN ECHEC\x1b[0m'
                        : '\x1b[32mLes ' + ok + ' contre-epreuves rougissent\x1b[0m') + '\n');

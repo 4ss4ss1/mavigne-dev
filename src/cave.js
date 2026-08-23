@@ -14,7 +14,7 @@
 // \u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550
 
 import { isAdmin, isSaisonnier, canWrite, showToast, showSyncBadge, _escHtml, _escAttr,
-         _mvBadge, _mvIcon, _mvSetIcon } from './utils.js';
+         _mvBadge, _mvIcon, _mvSetIcon, _mvIconInline } from './utils.js';
 
 const DEBUG = location.hostname === 'localhost' || location.hostname === '127.0.0.1';
 
@@ -94,7 +94,7 @@ async function _attachPdfToOp(input) {
   if(file.size>10*1024*1024){showToast('PDF trop lourd \u2014 max 10\u00a0Mo','#E07060');return;}
   var op=(CAVE_ELEVAGE.operations||[]).find(function(o){return o.id===opId;});
   if(!op){showToast('Op\u00e9ration introuvable','#E07060');return;}
-  showSyncBadge('\u23f3 Upload PDF\u2026','#B8913A');
+  showSyncBadge('Upload PDF\u2026','#B8913A');
   try {
     var res=await window.fbUploadAnalyse(file,function(){});
     if(!op.data)op.data={};
@@ -102,12 +102,12 @@ async function _attachPdfToOp(input) {
     op.data.pdf_nom=file.name;op.data.pdf_taille=file.size;
     window.CAVE_ELEVAGE=CAVE_ELEVAGE;
     if(window.fbSave)window.fbSave('cave_elevage',CAVE_ELEVAGE);
-    showToast('\u2705 PDF rattach\u00e9','#3D6B27');
-    showSyncBadge('\u2705 Synchronis\u00e9','#3D6B27');
+    showToast('PDF rattach\u00e9','#3D6B27');
+    showSyncBadge('Synchronis\u00e9','#3D6B27');
     renderCave();
   } catch(e) {
     showToast('Erreur upload PDF','#E07060');
-    showSyncBadge('\u26a0 Erreur upload','#B85A1A');
+    showSyncBadge('Erreur upload','#B85A1A');
   }
 }
 
@@ -337,7 +337,7 @@ function _copRenderIntChips(){
     var nj=String(n).replace(/\\/g,'\\\\').replace(/'/g,"\\'");
     return '<button class="cop-int-chip'+(sel?' sel':'')+'" onclick="toggleCopInt(\''+nj+'\')">'
       +'<span class="cic-av" style="background:'+col+';">'+_escHtml(String(n).charAt(0).toUpperCase())+'</span>'
-      +'<span class="cic-nm">'+_escHtml(n)+(sel?' \u2713':'')+'</span></button>';
+      +'<span class="cic-nm">'+_escHtml(n)+(sel?' '+_mvIcon('check',16):'')+'</span></button>';
   }).join('');
 }
 function toggleCopInt(n){
@@ -446,7 +446,7 @@ function _caveDateFr(iso) {
 
 
 function _caveFmlLabel(v) {
-  return {none:'Non d\u00e9clench\u00e9e',cours:'En cours',ok:'Termin\u00e9e \u2713'}[v]||v;
+  return {none:'Non d\u00e9clench\u00e9e',cours:'En cours',ok:'Termin\u00e9e'}[v]||v;
 }
 
 function _caveTypeLabel(type) {
@@ -476,7 +476,7 @@ function _caveCuvPillsHtml(op){
     +cuvs.map(function(c){
       return '<span style="font-size:11px;font-weight:500;background:rgba(74,159,200,0.12);color:#4A9FC8;'
             +'border:1px solid rgba(74,159,200,0.22);border-radius:7px;padding:2px 8px;white-space:nowrap;">'
-            +'\uD83C\uDF77\u00a0'+_escHtml(c.nom)+(c.millesime?'\u00a0\u2019'+String(c.millesime).slice(2):'')+'</span>';
+            +_mvIcon('verre',16)+'\u00a0'+_escHtml(c.nom)+(c.millesime?'\u00a0\u2019'+String(c.millesime).slice(2):'')+'</span>';
     }).join('')
     +'</div>';
 }
@@ -625,7 +625,7 @@ function _copUpdateSo2Cal(){
   var cal=document.getElementById('cop-so2-cal');if(!cal)return;
   var dv=(document.getElementById('cop-date')||{}).value;if(!dv){cal.style.display='none';return;}
   var base=new Date(dv);
-  var html='<div class="cave-so2-cal-title">\uD83D\uDCC5 Calendrier SO\u2082 pr\u00e9vu</div>';
+  var html='<div class="cave-so2-cal-title">'+_mvIcon('calendrier',16)+' Calendrier SO\u2082 pr\u00e9vu</div>';
   for(var i=0;i<_copSo2Nb;i++){
     var d=new Date(base);d.setDate(d.getDate()+i*_copSo2Freq);
     var ds=d.getDate()+' '+_COP_MOIS_C[d.getMonth()]+' '+d.getFullYear();
@@ -646,7 +646,7 @@ function _copUpdateOpDate(){
 function _caveSaisBanner() {
   if(!isSaisonnier()) return '';
   return '<div style="margin:0 0 10px;padding:8px 12px;border-radius:10px;background:rgba(184,90,26,.08);border:1px solid rgba(184,90,26,.2);display:flex;align-items:center;gap:8px;font-size:11.5px;color:#B85A1A">'
-    +'\uD83D\uDD12 Lecture seule \u2014 votre r\u00f4le ne permet pas de modifier les donn\u00e9es.</div>';
+    +_mvIcon('cadenas',16)+' Lecture seule \u2014 votre r\u00f4le ne permet pas de modifier les donn\u00e9es.</div>';
 }
 
 // ══════ REFONTE ÉLEVAGE (mvc) ══════
@@ -721,7 +721,7 @@ function _caveGaugeHtml(c){
   // ⚠️ Cuvee MIXTE : sans ce complement la jauge a l'air de porter sur tout le
   //   volume, alors qu'elle ne mesure que la part logee en bois.
   if(_caveEstMixte(c)) sub+=' \u00b7 sur les '+_mvF1(_caveNbTonneaux(c)*_caveFutHl())+' hL en f\u00fbt';
-  return '<div class="mvc-gauge"><div class="mvc-gauge-top"><span class="mvc-gauge-lbl">\u23f3 Part des anges</span><span class="mvc-gauge-state" style="color:'+stateCol+'">'+stateLbl+'</span></div>'
+  return '<div class="mvc-gauge"><div class="mvc-gauge-top"><span class="mvc-gauge-lbl">'+_mvIcon('sablier',16)+' Part des anges</span><span class="mvc-gauge-state" style="color:'+stateCol+'">'+stateLbl+'</span></div>'
     +'<div class="mvc-gauge-track"><div class="mvc-gauge-fill '+cls+'" style="width:'+pct+'%"></div></div>'
     +'<div class="mvc-gauge-sub">'+sub+'</div></div>';
 }
@@ -750,9 +750,9 @@ function _caveAnaLineHtml(c){
   var fml=(lao&&lao.data)?lao.data.fml:(c.fml_terminee?'ok':null);
   var tags='';
   if(so2) tags+='<span class="mvc-tag mvc-tag-so2">SO\u2082 '+so2+' mg/L</span>';
-  if(fml==='ok') tags+='<span class="mvc-tag mvc-tag-fmlok">FML \u2713</span>';
+  if(fml==='ok') tags+='<span class="mvc-tag mvc-tag-fmlok">FML '+_mvIcon('check',16)+'</span>';
   else if(fml==='cours') tags+='<span class="mvc-tag mvc-tag-fmlc">FML en cours</span>';
-  var pdf=(la.data&&la.data.pdf_url)?'<span class="mvc-tag-pdf">\ud83d\udcc4</span>':'';
+  var pdf=(la.data&&la.data.pdf_url)?'<span class="mvc-tag-pdf">'+_mvIcon('document',16)+'</span>':'';
   if(!tags&&!pdf) tags='<span class="mvc-tag-none">Analyse le '+_caveDateFr(la.date_analyse)+'</span>';
   return '<div class="mvc-cuv-ana">'+tags+pdf+'<span class="mvc-ana-date">'+_caveDateFr(la.date_analyse)+'</span></div>';
 }
@@ -763,7 +763,7 @@ function _caveSoutLineHtml(c){
   var d=_caveLastSout(c.id);
   if(!d) return '';
   var n=_caveSoutOps(c.id).length;
-  return '<div class="mvc-cuv-sout"><span class="mvc-tag mvc-tag-sout">\u21d5 Soutir\u00e9e le '+_caveDateFr(d)+'</span>'
+  return '<div class="mvc-cuv-sout"><span class="mvc-tag mvc-tag-sout">'+_mvIcon('hautbas',16)+' Soutir\u00e9e le '+_caveDateFr(d)+'</span>'
     +(n>1?'<span class="mvc-sout-note">'+n+' soutirages</span>':'')+'</div>';
 }
 function _caveCuvCardHtml(c,w){
@@ -781,7 +781,7 @@ function _caveCuvCardHtml(c,w){
       +'<button'+(_ou
         ? ' class="mvc-act primary'+(urgent?' urgent':'')+'" onclick="_caveQuickOp(event,\'ouillage\',\''+c.id+'\')"'
         : ' class="mvc-act primary" disabled aria-disabled="true" title="Pas de contenant en bois \u00e0 ouiller"')
-      +'>\ud83e\udea3 Ouiller</button>'
+      +'>'+_mvIcon('seau',16)+' Ouiller</button>'
       +'<button class="mvc-act icon" onclick="_caveQuickOp(event,\'soutirage\',\''+c.id+'\')" aria-label="Soutirer">\u21d5</button>'
       +'<button class="mvc-act icon" onclick="_caveQuickOp(event,\'analyse\',\''+c.id+'\')" aria-label="Analyser">\ud83d\udd2c</button>'
     +'</div>';
@@ -798,7 +798,7 @@ function _caveCuvCardHtml(c,w){
 }
 function _caveQuickOp(ev,type,cuvId){
   if(ev) ev.stopPropagation();
-  if(isSaisonnier()){showToast('Acc\u00e8s lecture seule \ud83d\udd12','#B85A1A');return;}
+  if(isSaisonnier()){showToast('Acc\u00e8s lecture seule','#B85A1A');return;}
   openOvCaveOp();
   selCaveOpType(type);
   _copAllCuv=false;
@@ -807,7 +807,7 @@ function _caveQuickOp(ev,type,cuvId){
   if(typeof _copUpdateFutsSummary==='function') _copUpdateFutsSummary();
 }
 function _caveOuillerTous(){
-  if(isSaisonnier()){showToast('Acc\u00e8s lecture seule \ud83d\udd12','#B85A1A');return;}
+  if(isSaisonnier()){showToast('Acc\u00e8s lecture seule','#B85A1A');return;}
   var due=_caveAlerts();
   if(!due.length) return;
   openOvCaveOp();
@@ -841,13 +841,13 @@ function _caveJDet(op){
     if(op.data.fml){var fc=op.data.fml==='ok'?'mvc-tag-fmlok':op.data.fml==='cours'?'mvc-tag-fmlc':'mvc-tag-fmlno';chips+='<span class="mvc-tag '+fc+'">'+_caveFmlLabel(op.data.fml)+'</span>';}
     if(chips) h+='<div class="mvc-jtags">'+chips+'</div>';
     if(op.data.pdf_url){
-      h+='<div class="mvc-jpdf">\ud83d\udcc4 <span class="mvc-jpdf-nm">'+_escHtml(op.data.pdf_nom||'analyse.pdf')+'</span><button onclick="window.open(\''+_escAttr(op.data.pdf_url)+'\',\'_blank\')" class="mvc-jpdf-btn">Ouvrir</button></div>';
+      h+='<div class="mvc-jpdf">'+_mvIcon('document',16)+' <span class="mvc-jpdf-nm">'+_escHtml(op.data.pdf_nom||'analyse.pdf')+'</span><button onclick="window.open(\''+_escAttr(op.data.pdf_url)+'\',\'_blank\')" class="mvc-jpdf-btn">Ouvrir</button></div>';
     } else if(typeof isAdmin==='function'&&isAdmin()){
-      h+='<div style="margin-top:6px"><label class="mvc-attach">\ud83d\udcce Joindre un PDF<input type="file" accept="application/pdf" style="display:none" data-op-id="'+op.id+'" onchange="window._attachPdfToOp(this)"></label></div>';
+      h+='<div style="margin-top:6px"><label class="mvc-attach">'+_mvIcon('lien',16)+' Joindre un PDF<input type="file" accept="application/pdf" style="display:none" data-op-id="'+op.id+'" onchange="window._attachPdfToOp(this)"></label></div>';
     }
   }
   if(op.type==='analyse'&&op._src==='ana'&&op.data){
-    if(op.data.fichier) h+='<div class="mvc-jdet">\ud83d\udcc4 '+_escHtml(op.data.fichier||'')+(op.data.taille?' \u00b7 '+_caveAnaFmtSize(op.data.taille):'')+'</div>';
+    if(op.data.fichier) h+='<div class="mvc-jdet">'+_mvIcon('document',16)+' '+_escHtml(op.data.fichier||'')+(op.data.taille?' \u00b7 '+_caveAnaFmtSize(op.data.taille):'')+'</div>';
     if(op.data.url) h+='<div class="mvc-jpdf"><button onclick="window.open(\''+_escAttr(op.data.url)+'\',\'_blank\')" class="mvc-jpdf-btn">Ouvrir</button></div>';
   }
   return h;
@@ -864,7 +864,7 @@ function renderCaveReglages(){
   if(adm){
     // Un seuil par millesime : un vin jeune s'ouille plus souvent qu'un vin
     // d'un an. Le stepper global reste la reference des millesimes non regles.
-    html+='<div class="mvc-set-card"><div class="mvc-set-t">\u23f3 Alerte d\u2019ouillage</div>'
+    html+='<div class="mvc-set-card"><div class="mvc-set-t">'+_mvIcon('sablier',16)+' Alerte d\u2019ouillage</div>'
       +'<div class="mvc-set-d">Nombre de jours sans ouillage avant qu\u2019une cuv\u00e9e passe au rouge. La jauge \u00ab part des anges \u00bb se cale sur ce seuil.</div>'
       +'<div class="mvc-stepper"><button class="mvc-step-btn" onclick="_caveSeuilStep(-1)" aria-label="Diminuer">\u2212</button>'
       +'<div class="mvc-step-val"><div class="mvc-step-num" id="mvc-seuil-num">'+seuil+'</div><div class="mvc-step-unit">JOURS</div></div>'
@@ -883,12 +883,12 @@ function renderCaveReglages(){
       });
     }
     html+='</div>';
-    html+='<div class="mvc-set-card"><div class="mvc-set-t">\ud83d\udee2\ufe0f Contenance d\u2019un f\u00fbt</div>'
+    html+='<div class="mvc-set-card"><div class="mvc-set-t">'+_mvIcon('barrique',16)+' Contenance d\u2019un f\u00fbt</div>'
       +'<div class="mvc-set-d">Volume d\u2019une barrique. Sert \u00e0 convertir les f\u00fbts en hL partout dans Le Chai. 228 L en Bourgogne, 225 L \u00e0 Bordeaux, 500 \u00e0 600 L pour un demi-muid.</div>'
       +'<button class="mvc-set-btn" onclick="_caveFutPrompt()">'+_caveFutL()+' L \u00b7 Modifier</button></div>';
     html+=_caveParcCardHtml();
   }
-  html+='<div class="mvc-set-card"><div class="mvc-set-t">\ud83e\uddea Convertisseur SO\u2082</div>'
+  html+='<div class="mvc-set-card"><div class="mvc-set-t">'+_mvIcon('eprouvette',16)+' Convertisseur SO\u2082</div>'
     +'<div class="mvc-set-d">Dose, dilution, pastilles \u2014 pour pr\u00e9parer vos sulfitages.</div>'
     +'<button class="mvc-set-btn" onclick="openOvCaveConvert()">Ouvrir le convertisseur</button></div>';
   el.innerHTML=html;
@@ -1037,16 +1037,16 @@ function _caveSeuilStep(delta){
   var n=document.getElementById('mvc-seuil-num'); if(n) n.textContent=v;
   _mvcRenderHeader();
   renderCaveCuvees();
-  showToast('Seuil r\u00e9gl\u00e9 \u00e0 '+v+' jours \u23f3','#3D6B27');
+  showToast('Seuil r\u00e9gl\u00e9 \u00e0 '+v+' jours','#3D6B27');
 }
 // Reglage de la contenance d'un fut. openPrompt (jamais prompt() natif : il ne
 // rend RIEN en PWA iOS). Ecrit CONFIG.cave.fut_l en PRESERVANT le reste de
 // CONFIG.cave, puis re-rend l'affichage. Ne recalcule AUCUN volume deja stocke.
 function _caveFutPrompt(){
-  if(!(typeof isAdmin==='function'&&isAdmin())){ showToast('R\u00e9serv\u00e9 \u00e0 l\u2019administrateur \ud83d\udd12','#C0392B'); return; }
+  if(!(typeof isAdmin==='function'&&isAdmin())){ showToast('R\u00e9serv\u00e9 \u00e0 l\u2019administrateur','#C0392B'); return; }
   if(typeof window.openPrompt!=='function'){ showToast('Saisie indisponible','#C0392B'); return; }
   window.openPrompt({
-    icone:'\ud83d\udee2\ufe0f',
+    icone:'barrique',
     titre:'Contenance d\u2019un f\u00fbt',
     sub:'228 L en Bourgogne, 225 L \u00e0 Bordeaux, 500 \u00e0 600 L pour un demi-muid.',
     valeur:_caveFutL(),
@@ -1062,7 +1062,7 @@ function _caveFutPrompt(){
       _mvcRenderHeader();
       renderCaveCuvees();
       renderCaveReglages();
-      showToast('\u2705 F\u00fbt r\u00e9gl\u00e9 \u00e0 '+n+' L','#3D6B27');
+      showToast('F\u00fbt r\u00e9gl\u00e9 \u00e0 '+n+' L','#3D6B27');
     }
   });
 }
@@ -1141,7 +1141,7 @@ function renderCaveCuvees() {
   if(!window._dataReady){ el.innerHTML=window._mvSk('chai'); return; }
   var cuvs=CAVE_ELEVAGE.cuvees||[];
   if(!cuvs.length) {
-    el.innerHTML='<div class="cave-empty"><div class="cave-empty-ico">\ud83e\udea3</div>'
+    el.innerHTML='<div class="cave-empty"><div class="cave-empty-ico">'+_mvIcon('seau',40)+'</div>'
       +'<div class="cave-empty-txt">Aucune cuv\u00e9e.</div>'
       +((typeof isAdmin==='function'&&isAdmin())?'<button class="cave-empty-btn" onclick="openOvCavee()">\uff0b Nouvelle cuv\u00e9e</button>':'')
       +'</div>';
@@ -1161,10 +1161,10 @@ function renderCaveCuvees() {
   var html=_caveMillChipsHtml(cuvs);
   due=due.filter(function(a){ return _caveDansFiltre(a.cuv); });
   if(due.length){
-    html+='<div class="mvc-alert"><div class="mvc-alert-ico">\ud83e\udea3</div><div class="mvc-alert-txt">'
+    html+='<div class="mvc-alert"><div class="mvc-alert-ico">'+_mvIcon('seau',24)+'</div><div class="mvc-alert-txt">'
       +'<div class="mvc-alert-t">'+due.length+' cuv\u00e9e'+(due.length>1?'s':'')+' \u00e0 ouiller</div>'
       +'<div class="mvc-alert-s">L\u2019\u00e9vaporation menace \u2014 remplissez les f\u00fbts pour \u00e9viter l\u2019oxydation.</div></div></div>';
-    if(w) html+='<button class="mvc-batch" onclick="_caveOuillerTous()">\ud83e\udea3 Ouiller les '+due.length+' aujourd\u2019hui</button>';
+    if(w) html+='<button class="mvc-batch" onclick="_caveOuillerTous()">'+_mvIcon('seau',16)+' Ouiller les '+due.length+' aujourd\u2019hui</button>';
   }
   sorted.filter(_caveDansFiltre).forEach(function(c){ html+=_caveCuvCardHtml(c,w); });
   if(typeof isAdmin==='function'&&isAdmin()){
@@ -1175,7 +1175,7 @@ function renderCaveCuvees() {
 
 
 function openOvCaveOp(opId) {
-  if(isSaisonnier()){showToast('Acc\u00E8s lecture seule \uD83D\uDD12','#B85A1A');return;}
+  if(isSaisonnier()){showToast('Acc\u00E8s lecture seule','#B85A1A');return;}
   var actives=CAVE_ELEVAGE.cuvees.filter(function(c){return c.statut!=='embouteille';});
   if(!actives.length) {
     if(typeof isAdmin==='function'&&isAdmin()){showToast('Cr\u00e9ez d\'abord une cuv\u00e9e','#C0845A');openOvCavee();}
@@ -1217,7 +1217,7 @@ function openOvCaveOp(opId) {
   var nEl=document.getElementById('cop-notes');if(nEl)nEl.value='';
   var idEl=document.getElementById('cop-op-id');if(idEl)idEl.value=opId||'';
   var titleEl=document.getElementById('ov-cave-title');
-  if(titleEl)titleEl.textContent=opId?'\u270F\uFE0F Modifier op\u00e9ration':'\uD83E\uDEA3 Nouvelle op\u00e9ration';
+  if(titleEl)titleEl.textContent=opId?'Modifier op\u00e9ration':'Nouvelle op\u00e9ration';
   if(opId){
     var op=CAVE_ELEVAGE.operations.find(function(o){return o.id===opId;});
     if(op){
@@ -1406,7 +1406,7 @@ async function saveCaveOp() {
     if(_copPdfFile&&typeof _copPdfFile==='object'){
       var _sb=document.querySelector('#ovCaveOp .mbtn');
       if(_sb){_sb.disabled=true;_sb.textContent='Upload PDF\u2026';}
-      showSyncBadge('\u23F3 Upload PDF\u2026','#B8913A');
+      showSyncBadge('Upload PDF\u2026','#B8913A');
       try{
         var _pr=await window.fbUploadAnalyse(_copPdfFile,function(p){if(_sb)_sb.textContent='Upload '+p+'%';});
         opData.pdf_url=_pr.url;opData.pdf_path=_pr.storage_path;
@@ -1447,14 +1447,14 @@ async function saveCaveOp() {
   if(window.fbSave)window.fbSave('cave_elevage',CAVE_ELEVAGE);
   window.closeOv(null,'ovCaveOp');
   _copResetPdfZone();
-  showToast('\u2705 Op\u00e9ration enregistr\u00e9e','#C0845A');
+  showToast('Op\u00e9ration enregistr\u00e9e','#C0845A');
   renderCave();
 }
 
 function openOvCavee(cuvId) {
   var cuv=cuvId?CAVE_ELEVAGE.cuvees.find(function(c){return c.id===cuvId;}):null;
   var titleEl=document.getElementById('ov-cuv-title');
-  if(titleEl) titleEl.textContent=cuv?'\u270F\uFE0F Modifier la cuv\u00e9e':'\uD83C\uDF77 Nouvelle cuv\u00e9e';
+  if(titleEl) titleEl.textContent=cuv?'Modifier la cuv\u00e9e':'Nouvelle cuv\u00e9e';
   var el;
   el=document.getElementById('cuv-nom'); if(el) el.value=cuv?cuv.nom:'';
   el=document.getElementById('cuv-millesime'); if(el) el.value=cuv?cuv.millesime:new Date().getFullYear();
@@ -1499,7 +1499,7 @@ function saveCuvee() {
   window.CAVE_ELEVAGE=CAVE_ELEVAGE;
   if(window.fbSave) window.fbSave('cave_elevage',CAVE_ELEVAGE);
   window.closeOv(null,'ovCuveeMgmt');
-  showToast(existId?'\u2705 Cuv\u00e9e mise \u00e0 jour':'\u2705 Cuv\u00e9e cr\u00e9\u00e9e','#C0845A');
+  showToast(existId?'Cuv\u00e9e mise \u00e0 jour':'Cuv\u00e9e cr\u00e9\u00e9e','#C0845A');
   renderCave();
 }
 
@@ -1511,7 +1511,7 @@ function deleteCuvee() {
   window.CAVE_ELEVAGE=CAVE_ELEVAGE;
   if(window.fbSave) window.fbSave('cave_elevage',CAVE_ELEVAGE);
   window.closeOv(null,'ovCuveeMgmt');
-  showToast('\uD83D\uDDD1 Cuv\u00e9e supprim\u00e9e','#B85A1A');
+  showToast('Cuv\u00e9e supprim\u00e9e','#B85A1A');
   renderCave();
 }
 
@@ -1715,7 +1715,7 @@ function renderCaveJournal() {
     el.innerHTML='<div class="cave-empty"><div class="cave-empty-ico">'+(_jFilter==='analyse'?'\ud83d\udd2c':'\ud83d\udccb')+'</div><div class="cave-empty-txt">Aucune op\u00e9ration.</div></div>';
     return;
   }
-  var opMeta={ouillage:{ico:'\ud83e\udea3',col:'#C0845A'},soutirage:{ico:'\u21d5',col:'#5CB87A'},soufre:{ico:'\ud83e\uddea',col:'#4A9C50'},analyse:{ico:'\ud83d\udd2c',col:'#4A9FC8'},autre:{ico:'\ud83d\udcdd',col:'#A0A8B8'}};
+  var opMeta={ouillage:{ico:'seau',col:'#C0845A'},soutirage:{ico:'hautbas',col:'#5CB87A'},soufre:{ico:'eprouvette',col:'#4A9C50'},analyse:{ico:'microscope',col:'#4A9FC8'},autre:{ico:'crayon',col:'#A0A8B8'}};
   var monthNames=['Janvier','F\u00e9vrier','Mars','Avril','Mai','Juin','Juillet','Ao\u00fbt','Septembre','Octobre','Novembre','D\u00e9cembre'];
   var byMonth={}, order=[];
   filtered.forEach(function(o){
@@ -1733,7 +1733,7 @@ function renderCaveJournal() {
     byMonth[k].sort(function(a,b){return b.date>a.date?1:-1;}).forEach(function(op){
       var m=opMeta[op.type]||opMeta.autre;
       html+='<div class="mvc-jitem"><div class="mvc-jdot" style="background:'+m.col+'"></div><div class="mvc-jcard">';
-      html+='<div class="mvc-jhead"><span class="mvc-jico">'+m.ico+'</span><span class="mvc-jtype">'+_caveTypeLabel(op.type)+'</span>'+_caveWhoHtml(op)+'</div>';
+      html+='<div class="mvc-jhead"><span class="mvc-jico">'+_mvIcon(m.ico,18)+'</span><span class="mvc-jtype">'+_caveTypeLabel(op.type)+'</span>'+_caveWhoHtml(op)+'</div>';
       html+=_caveCuvPillsHtml(op);
       var det=_caveJDet(op); if(det) html+=det;
       if(op.notes&&op.type!=='analyse') html+='<div class="mvc-jnote">'+_escHtml(op.notes)+'</div>';
@@ -2334,7 +2334,7 @@ function _renderVendVenduWrap() {
   var swBg=_vendVendu?'rgba(205,148,38,.5)':'rgba(192,132,90,.15)';
   var knobLeft=_vendVendu?'23':'3';
   var knobBg='#FFFFFF';
-  var lbl=_vendVendu?'\uD83E\uDD1D Vendu en raisin':'\uD83E\uDEA3 Vinifi\u00e9 au domaine';
+  var lbl=_vendVendu?(_mvIcon('lien',16)+' Vendu en raisin'):(_mvIcon('seau',16)+' Vinifi\u00e9 au domaine');
   var sub=_vendVendu?'Pes\u00e9e conserv\u00e9e \u2014 pas de cuve cr\u00e9\u00e9e':'Mise en cuve apr\u00e8s r\u00e9colte';
   wrap.innerHTML='<div onclick="_vndToggleVendu()" style="display:flex;align-items:center;justify-content:space-between;border-radius:12px;padding:11px 13px;margin-bottom:10px;cursor:pointer;border:1px solid '+bd+';background:'+bg+'"><div><div style="font-size:13px;font-weight:600;color:'+col+'">'+lbl+'</div><div style="font-size:10.5px;color:var(--texte-doux,#5F5F5F);margin-top:2px">'+sub+'</div></div><div style="width:46px;height:26px;background:'+swBg+';border-radius:13px;position:relative;flex-shrink:0;"><div style="position:absolute;top:3px;left:'+knobLeft+'px;width:20px;height:20px;border-radius:10px;background:'+knobBg+'"></div></div></div>';
 }
@@ -2354,7 +2354,7 @@ function openOvVendRec(id) {
   _vendEditId=id||null;
   var r=id?(CAVE_VENDANGE.recoltes||[]).find(function(x){return x.id===id;}):null;
   var titleEl=document.getElementById('ov-vend-rec-title');
-  if(titleEl) titleEl.textContent=r?'\u270f\ufe0f Modifier la r\u00e9colte':'\uD83C\uDF47 Nouvelle r\u00e9colte';
+  if(titleEl) titleEl.textContent=r?'Modifier la r\u00e9colte':'Nouvelle r\u00e9colte';
   var el;
   _vendInjectParcelleSelect(r?r.parcelle:'');
   el=document.getElementById('vrec-date'); if(el) el.value=r?r.date:new Date().toISOString().slice(0,10);
@@ -2431,7 +2431,7 @@ function saveVendRec() {
   if(window.fbSave) window.fbSave('cave_vendange',CAVE_VENDANGE);
   _vendRecordRendement(obj,prev);
   if(window.closeOv) window.closeOv(null,'ovVendRec');
-  showToast(id?'\u2705 R\u00e9colte mise \u00e0 jour':'\u2705 R\u00e9colte enregistr\u00e9e','#3D6B27');
+  showToast(id?'R\u00e9colte mise \u00e0 jour':'R\u00e9colte enregistr\u00e9e','#3D6B27');
   renderVendRec();
 }
 function deleteVendRec() {
@@ -2448,7 +2448,7 @@ function deleteVendRec() {
     if(window.fbSave) window.fbSave('cave_vendange',CAVE_VENDANGE);
     _vendUnrecordRendement(id,pnom);
     if(window.closeOv) window.closeOv(null,'ovVendRec');
-    showToast('\uD83D\uDDD1 R\u00e9colte supprim\u00e9e','#B85A1A');
+    showToast('R\u00e9colte supprim\u00e9e','#B85A1A');
     renderVendRec();
   });
 }
@@ -2520,7 +2520,7 @@ function openOvVendCuve(id) {
   _vcuvEditId=id||null;
   var c=id?(CAVE_VENDANGE.cuves_vinif||[]).find(function(x){return x.id===id;}):null;
   var titleEl=document.getElementById('ov-vend-cuv-title');
-  if(titleEl) titleEl.textContent=c?'\u270f\ufe0f Modifier la cuve':'\uD83E\uDEA3 Nouvelle cuve';
+  if(titleEl) titleEl.textContent=c?'Modifier la cuve':'Nouvelle cuve';
   var el;
   _vcuvRef=(c&&c.cuve_ref)?c.cuve_ref:null;
   _caveV2InjectCss();
@@ -2582,7 +2582,7 @@ function saveVendCuve() {
   window.CAVE_VENDANGE=CAVE_VENDANGE;
   if(window.fbSave) window.fbSave('cave_vendange',CAVE_VENDANGE);
   if(window.closeOv) window.closeOv(null,'ovVendCuve');
-  showToast(id?'\u2705 Cuve mise \u00e0 jour':'\u2705 Cuve cr\u00e9\u00e9e','#3D6B27');
+  showToast(id?'Cuve mise \u00e0 jour':'Cuve cr\u00e9\u00e9e','#3D6B27');
   renderVendCuves();
 }
 function deleteVendCuve() {
@@ -2595,7 +2595,7 @@ function deleteVendCuve() {
     window.CAVE_VENDANGE=CAVE_VENDANGE;
     if(window.fbSave) window.fbSave('cave_vendange',CAVE_VENDANGE);
     if(window.closeOv) window.closeOv(null,'ovVendCuve');
-    showToast('\uD83D\uDDD1 Cuve supprim\u00e9e','#B85A1A');
+    showToast('Cuve supprim\u00e9e','#B85A1A');
     renderVendCuves();
   });
 }
@@ -2606,7 +2606,7 @@ function openOvVendMesure(cuveId) {
   _vmesureCuveId=cuveId;
   var c=(CAVE_VENDANGE.cuves_vinif||[]).find(function(x){return x.id===cuveId;});
   var titleEl=document.getElementById('ov-vend-mes-title');
-  if(titleEl) titleEl.textContent='\uD83D\uDCCA Mesure FA \u2014 '+(c?_escHtml(c.nom):'');
+  if(titleEl) titleEl.textContent='Mesure FA \u2014 '+(c?_escHtml(c.nom):'');
   _vmRem=2; _vmPig=1;
   var el;
   el=document.getElementById('vm-date'); if(el) el.value=new Date().toISOString().slice(0,10);
@@ -2632,7 +2632,7 @@ function saveVendMesure() {
   window.CAVE_VENDANGE=CAVE_VENDANGE;
   if(window.fbSave) window.fbSave('cave_vendange',CAVE_VENDANGE);
   if(window.closeOv) window.closeOv(null,'ovVendMesure');
-  showToast('\u2705 Mesure enregistr\u00e9e','#3D6B27');
+  showToast('Mesure enregistr\u00e9e','#3D6B27');
   renderVendCuves();
 }
 function _vendSaveParam() {
@@ -2648,7 +2648,7 @@ function _vendSaveParam() {
   CAVE_VENDANGE.config.sucre_par_degre=spd;
   window.CAVE_VENDANGE=CAVE_VENDANGE;
   if(window.fbSave) window.fbSave('cave_vendange',CAVE_VENDANGE);
-  showToast('\u2705 Param\u00e8tres enregistr\u00e9s','#3D6B27');
+  showToast('Param\u00e8tres enregistr\u00e9s','#3D6B27');
   renderVendParam();
 }
 
@@ -3009,7 +3009,7 @@ function _vendDecRender(){
     +'<span class="mvv-dtot-l">barrique'+(tot>1?'s':'')+' choisie'+(tot>1?'s':'')
     +' sur '+_vendDecNb+' pour ce volume</span></div>';
   if(neuf>0){
-    h+='<div class="mvv-dneuf">\u2728 dont <b>'+neuf+' barrique'+(neuf>1?'s':'')+' neuve'
+    h+='<div class="mvv-dneuf">'+_mvIcon('etincelles',16)+' dont <b>'+neuf+' barrique'+(neuf>1?'s':'')+' neuve'
       +(neuf>1?'s':'')+'</b> \u2014 v\u00e9rifiez que cette cuv\u00e9e les m\u00e9rite.</div>';
   }
   if(manque>0){
@@ -3606,7 +3606,7 @@ function _vendCuvAtt(caisses){
   if(caisses==null) caisses=parseInt((document.getElementById('vrec-caisses')||{}).value)||0;
   var add=_vendCuvHl(caisses);
   var idx=_vcuvSel.cuveIdx; if(idx>=st.cuves.length) idx=st.cuves.length-1;
-  var h='<div class="mvcs-att"><div class="mvcs-att-h"><span>\u2697\uFE0F</span><span>Cette cuv\u00e9e a d\u00e9j\u00e0 '
+  var h='<div class="mvcs-att"><div class="mvcs-att-h"><span>'+_mvIcon('fiole',16)+'</span><span>Cette cuv\u00e9e a d\u00e9j\u00e0 '
     +(st.cuves.length>1?'des cuves':'une cuve')+'</span></div><div class="mvcs-att-b">';
   st.cuves.forEach(function(cv,i){
     var on=idx===i;
@@ -3684,7 +3684,7 @@ function _vendCuvKeep(){
   var box=document.getElementById('vrec-cuv-box');
   if(box){
     box.innerHTML='<div class="mvcs-list"><button type="button" class="mvcs-row on" onclick="_vendCuvNew()">'
-      +'<span class="mvcs-ico">\uD83E\uDED9</span><span class="mvcs-mid">'
+      +'<span class="mvcs-ico">'+_mvIcon('cuve',18)+'</span><span class="mvcs-mid">'
       +'<span class="mvcs-nom">'+_escHtml(nom)+'</span>'
       +'<span class="mvcs-sub">Nouvelle cuv\u00e9e \u2014 cr\u00e9\u00e9e \u00e0 l\u2019enregistrement</span></span>'
       +'<span class="mvcs-tag wait">nouvelle</span></button></div>';
@@ -3771,7 +3771,7 @@ function _vendInjectCuveFrom(isNew){
   var nomEl=document.getElementById('vcuv-nom'); if(!nomEl) return;
   var host=nomEl.closest('div')||nomEl;
   var row=document.createElement('div'); row.id='vcuv-from-row'; row.style.marginBottom='14px';
-  row.innerHTML='<div class="fl" style="margin-top:0">\uD83C\uDF47 Depuis une r\u00e9colte enregistr\u00e9e</div>'
+  row.innerHTML='<div class="fl" style="margin-top:0">'+_mvIcon('raisin',16)+' Depuis une r\u00e9colte enregistr\u00e9e</div>'
     +'<select id="vcuv-from" class="fi" style="width:100%" onchange="_vendCuveFromRecolte(this.value)">'
     +'<option value="">\u2014 Saisie manuelle \u2014</option>'
     +dispo.map(function(d,i){return '<option value="'+i+'">'+_escHtml(d.cuvee)+' \u00b7 '+d.caisses+' caisses'+(d.parcelles.length?' \u00b7 '+d.parcelles.length+' parcelle'+(d.parcelles.length>1?'s':''):'')+'</option>';}).join('')
@@ -4142,10 +4142,10 @@ function openCuveeDetail(cuvId){
   // Journal
   if(allIt.length){
     html+='<div style="font-size:10px;color:var(--texte-doux);text-transform:uppercase;letter-spacing:.5px;margin-bottom:8px;">Journal</div>';
-    var tI={ouillage:'\uD83E\uDEA3',soutirage:'\uD83D\uDD04',soufre:'\uD83E\uDDEA',analyse:'\uD83D\uDD2C',retrait_fut:'\uD83D\uDEAA',autre:'\uD83D\uDCDD'};
+    var tI={ouillage:'seau',soutirage:'rotation',soufre:'eprouvette',analyse:'microscope',retrait_fut:'\uD83D\uDEAA',autre:'crayon'};
     var tL={ouillage:'Ouillage',soutirage:'Soutirage',soufre:'Soufre',analyse:'Analyse',retrait_fut:'Retrait f\u00FBt',autre:'Autre'};
     allIt.forEach(function(op){
-      var ico=tI[op.type]||'\uD83D\uDCDD',lbl=tL[op.type]||op.type;
+      var ico=_mvIcon(tI[op.type]||'crayon',16),lbl=tL[op.type]||op.type;
       html+='<div style="background:var(--bg-card);border:1px solid rgba(255,255,255,0.06);border-radius:12px;padding:11px;margin-bottom:7px;">';
       html+='<div style="display:flex;align-items:flex-start;gap:8px;">';
       html+='<span style="font-size:16px;margin-top:1px;">'+ico+'</span>';
@@ -4200,7 +4200,7 @@ function deleteCuveeById(cuvId) {
     CAVE_ELEVAGE.operations=CAVE_ELEVAGE.operations.filter(function(o){return o.cuvee_id!==existId;});
     window.CAVE_ELEVAGE=CAVE_ELEVAGE;
     if(window.fbSave) window.fbSave('cave_elevage',CAVE_ELEVAGE);
-    showToast('\uD83D\uDDD1 Cuv\u00E9e supprim\u00E9e','#B85A1A');
+    showToast('Cuv\u00E9e supprim\u00E9e','#B85A1A');
     renderCave();
   });
 }
@@ -4242,7 +4242,7 @@ function saveCaveAnaEdit() {
   window.CAVE_ELEVAGE=CAVE_ELEVAGE;
   if(window.fbSave) window.fbSave('cave_elevage',CAVE_ELEVAGE);
   window.closeOv(null,'ovCaveAnaEdit');
-  showToast('\u2705 Analyse mise \u00E0 jour','#3D6B27');
+  showToast('Analyse mise \u00E0 jour','#3D6B27');
   renderCave();
 }
 
@@ -4295,7 +4295,7 @@ function deleteCaveOp(opId) {
     CAVE_ELEVAGE.operations=CAVE_ELEVAGE.operations.filter(function(o){return o.id!==opId;});
     window.CAVE_ELEVAGE=CAVE_ELEVAGE;
     if(window.fbSave)window.fbSave('cave_elevage',CAVE_ELEVAGE);
-    showToast('\u2705 Op\u00E9ration supprim\u00E9e','#3D6B27');
+    showToast('Op\u00E9ration supprim\u00E9e','#3D6B27');
     renderCave();
   });
 }
@@ -4397,18 +4397,18 @@ function generateCaveExport() {
       if(op.data.av)parts.push('Alcool: '+op.data.av+'% vol.');
       if(op.data.fml&&op.data.fml!=='none'){var fl={cours:'FML en cours',ok:'FML termin\u00E9e',non:'Pas de FML'}[op.data.fml]||'';if(fl)parts.push(fl);}
       if(parts.length)lines.push(parts.join(' \u00B7 '));
-      if(op.data.pdf_nom)lines.push('\uD83D\uDCC4 '+op.data.pdf_nom);
+      if(op.data.pdf_nom)lines.push(op.data.pdf_nom);
     }
     if(op.type==='analyse'&&op._src==='ana'&&op.data){
       if(op.data.label)lines.push(op.data.label);
-      if(op.data.fichier)lines.push('\uD83D\uDCC4 '+op.data.fichier);
+      if(op.data.fichier)lines.push(op.data.fichier);
     }
     if(op.notes)lines.push('<em>'+_escHtml(op.notes)+'</em>');
     return lines.map(function(l){return _escHtml(l.replace(/<em>|<\/em>/g,''));}).join('<br>');
   }
 
   var typeColors={ouillage:'#7B4A1A',soutirage:'#1A5E36',soufre:'#1A5E1A',analyse:'#1D4E89',autre:'#444'};
-  var typeIcos={ouillage:'\uD83E\uDEA3',soutirage:'\uD83D\uDD04',soufre:'\uD83E\uDDEA',analyse:'\uD83D\uDD2C',autre:'\uD83D\uDCDD'};
+  var typeIcos={ouillage:'seau',soutirage:'rotation',soufre:'eprouvette',analyse:'microscope',autre:'crayon'};
   var typeLabels={ouillage:'Ouillage',soutirage:'Soutirage',soufre:'Soufre',analyse:'Analyse',autre:'Autre'};
 
   function _opRow(op){
@@ -4729,7 +4729,7 @@ async function saveRetraitFut(){
   window.CAVE_ELEVAGE=CAVE_ELEVAGE;
   if(window.fbSave)window.fbSave('cave_elevage',CAVE_ELEVAGE);
   window.closeOv(null,'ovRetraitFut');
-  showToast('\u2705 '+_retraitFutNb+' f\u00FBt'+(+_retraitFutNb>1?'s':'')+' retir\u00E9'+(+_retraitFutNb>1?'s':'')+' ('+lbl+')','#3D6B27');
+  showToast(''+_retraitFutNb+' f\u00FBt'+(+_retraitFutNb>1?'s':'')+' retir\u00E9'+(+_retraitFutNb>1?'s':'')+' ('+lbl+')','#3D6B27');
   renderCave();
 }
 
@@ -4756,7 +4756,7 @@ async function saveCaveAna() {
     if(!linkOps.length){showToast('Op\u00E9rations introuvables','#E07060');return;}
     var btn=document.getElementById('cana-save-btn');
     if(btn){btn.disabled=true;btn.textContent='Envoi\u2026';}
-    showSyncBadge('\u23F3 Upload PDF\u2026','#B8913A');
+    showSyncBadge('Upload PDF\u2026','#B8913A');
     try{
       var res=await window.fbUploadAnalyse(_caveAnaPendingFile,function(p){if(btn)btn.textContent='Envoi\u2026 '+p+'%';});
       linkOps.forEach(function(op){
@@ -4769,12 +4769,12 @@ async function saveCaveAna() {
       window.closeOv(null,'ovCaveAna');
       _caveAnaPendingFile=null;_caveAnaSelIds=[];_caveAnaLinkedOpIds=[];
       var nb=linkOps.length;
-      showToast('\u2705 PDF rattach\u00E9 \u00E0 '+nb+' op\u00E9ration'+(nb>1?'s':''),'#3D6B27');
-      showSyncBadge('\u2705 Synchronis\u00E9','#3D6B27');
+      showToast('PDF rattach\u00E9 \u00E0 '+nb+' op\u00E9ration'+(nb>1?'s':''),'#3D6B27');
+      showSyncBadge('Synchronis\u00E9','#3D6B27');
       renderCave();
     }catch(e){
       showToast('Erreur upload PDF','#E07060');
-      showSyncBadge('\u26A0 Erreur','#B85A1A');
+      showSyncBadge('Erreur','#B85A1A');
       if(btn){btn.disabled=false;btn.textContent='Enregistrer';}
     }
     return;
@@ -4786,7 +4786,7 @@ async function saveCaveAna() {
   var commentaire=((document.getElementById('cana-commentaire')||{}).value||'').trim();
   var btn2=document.getElementById('cana-save-btn');
   if(btn2){btn2.disabled=true;btn2.textContent='Envoi\u2026';}
-  showSyncBadge('\u23F3 Upload PDF\u2026','#B8913A');
+  showSyncBadge('Upload PDF\u2026','#B8913A');
   try{
     var res2=await window.fbUploadAnalyse(_caveAnaPendingFile,function(p){if(btn2)btn2.textContent='Envoi\u2026 '+p+'%';});
     var ana={
@@ -4803,12 +4803,12 @@ async function saveCaveAna() {
     if(window.fbSave)window.fbSave('cave_elevage',CAVE_ELEVAGE);
     window.closeOv(null,'ovCaveAna');
     _caveAnaPendingFile=null;_caveAnaSelIds=[];
-    showToast('\u2705 Analyse enregistr\u00E9e','#3D6B27');
-    showSyncBadge('\u2705 Synchronis\u00E9','#3D6B27');
+    showToast('Analyse enregistr\u00E9e','#3D6B27');
+    showSyncBadge('Synchronis\u00E9','#3D6B27');
     renderCave();
   }catch(e){
     showToast('Erreur upload PDF','#E07060');
-    showSyncBadge('\u26A0 Erreur','#B85A1A');
+    showSyncBadge('Erreur','#B85A1A');
     if(btn2){btn2.disabled=false;btn2.textContent='Enregistrer';}
   }
 }
@@ -6057,7 +6057,7 @@ function _caveEnsureBtlTab(){
     b.id='mvc-tbtn-bouteille';
     b.className=ref.className; b.classList.remove('active');
     b.setAttribute('onclick',"switchCaveOng('bouteille')");
-    b.innerHTML='\uD83C\uDF7E Bouteilles';
+    b.innerHTML=_mvIcon('bouteille',16)+' Bouteilles';
     if(ref.nextSibling) ref.parentNode.insertBefore(b,ref.nextSibling); else ref.parentNode.appendChild(b);
   }
   var vref=document.getElementById('mvc-view-cuv');
@@ -6800,25 +6800,25 @@ function _mlEvHtml(it){
 // Chaque ligne renvoie vers l'ecran qui existe deja : rien de neuf a apprendre.
 function _mlGo(kind,ref){
   if(kind==='ouillage'){
-    if(isSaisonnier()){ showToast('Acc\u00e8s lecture seule \ud83d\udd12','#B85A1A'); return; }
+    if(isSaisonnier()){ showToast('Acc\u00e8s lecture seule','#B85A1A'); return; }
     caveSection='elevage'; renderCave();
     _caveQuickOp(null,'ouillage',ref);
     return;
   }
   if(kind==='decuvage'){
-    if(isSaisonnier()){ showToast('Acc\u00e8s lecture seule \ud83d\udd12','#B85A1A'); return; }
+    if(isSaisonnier()){ showToast('Acc\u00e8s lecture seule','#B85A1A'); return; }
     caveSection='vendange'; _vendTab='cuves'; renderCave();
     if(typeof openVendDecuvage==='function') openVendDecuvage(ref);
     return;
   }
   if(kind==='mesure'){
-    if(isSaisonnier()){ showToast('Acc\u00e8s lecture seule \ud83d\udd12','#B85A1A'); return; }
+    if(isSaisonnier()){ showToast('Acc\u00e8s lecture seule','#B85A1A'); return; }
     caveSection='vendange'; _vendTab='cuves'; renderCave();
     openOvVendMesure(ref);
     return;
   }
   if(kind==='soutirage'){
-    if(isSaisonnier()){ showToast('Acc\u00e8s lecture seule \ud83d\udd12','#B85A1A'); return; }
+    if(isSaisonnier()){ showToast('Acc\u00e8s lecture seule','#B85A1A'); return; }
     caveSection='elevage'; renderCave();
     _caveQuickOp(null,'soutirage',ref);
     return;
@@ -7001,7 +7001,7 @@ function _mlRenderVie(){
   var reste=_mlResteARentrer(mil);
   if(reste.length&&reste.length<=12){
     var haR=reste.reduce(function(s,p){ return s+(parseFloat(p.surface)||0); },0);
-    h+='<div class="mlx-reste">\ud83c\udf47 Encore sur pied : <b>'
+    h+='<div class="mlx-reste">'+_mvIcon('raisin',16)+' Encore sur pied : <b>'
       +reste.map(function(p){ return _escHtml(p.nom); }).join(', ')+'</b> \u2014 '+_mvF1(haR)+' ha.</div>';
   }
 
@@ -7062,21 +7062,21 @@ function _mlRenderVie(){
 // par parcelle, par un administrateur. Ecrite dans PARCELLES, pas ailleurs.
 function _mlSetRdtMax(nom){
   if(typeof isAdmin!=='function'||!isAdmin()){
-    showToast('R\u00e9serv\u00e9 \u00e0 l\u2019administrateur \ud83d\udd12','#B85A1A'); return;
+    showToast('R\u00e9serv\u00e9 \u00e0 l\u2019administrateur','#B85A1A'); return;
   }
   var p=_vendParcByName(nom);
   if(!p){ showToast('Parcelle introuvable','#B85A1A'); return; }
   if(typeof window.openPrompt!=='function'){ showToast('Saisie indisponible','#B85A1A'); return; }
   window.openPrompt({
     titre:'Rendement maximum', sub:nom+' \u2014 le plafond de l\u2019appellation, en hL/ha.',
-    valeur:(p.rdt_max!=null?String(p.rdt_max):''), unite:'hL/ha', icone:'\u{1F347}',
+    valeur:(p.rdt_max!=null?String(p.rdt_max):''), unite:'hL/ha', icone:'raisin',
     type:'nombre', placeholder:'45', btnLabel:'Enregistrer',
     cb:function(v){
       var n=parseFloat(String(v).replace(',','.'));
       if(!isFinite(n)||n<=0){ showToast('Valeur non comprise','#B85A1A'); return; }
       p.rdt_max=Math.round(n*10)/10;
       _vendSaveParcelles();
-      showToast('\u2705 '+nom+' \u00b7 max '+_mvF1(p.rdt_max)+' hL/ha','#3D6B27');
+      showToast(''+nom+' \u00b7 max '+_mvF1(p.rdt_max)+' hL/ha','#3D6B27');
       renderCaveMillesime();
     }
   });
@@ -7157,9 +7157,9 @@ function _rfutRenderGarder(){
     +'color:var(--texte-doux);margin-bottom:6px">Et le f\u00fbt ?</div>'
     +'<div style="display:flex;gap:7px">'
     +'<button type="button" class="rfut-reason-btn'+(_retraitFutGarder?' sel':'')+'" style="flex:1"'
-    +' onclick="window._rfutSetGarder(true)">\u{1F513} Revient au parc</button>'
+    +' onclick="window._rfutSetGarder(true)">'+_mvIcon('cadenas',16)+' Revient au parc</button>'
     +'<button type="button" class="rfut-reason-btn'+(!_retraitFutGarder?' sel':'')+'" style="flex:1"'
-    +' onclick="window._rfutSetGarder(false)">\u{1F5D1}\u{FE0F} Je le jette</button>'
+    +' onclick="window._rfutSetGarder(false)">'+_mvIcon('corbeille',16)+' Je le jette</button>'
     +'</div>';
 }
 function _rfutSetGarder(v){ _retraitFutGarder=!!v; _rfutRenderGarder(); }
@@ -7184,10 +7184,10 @@ window._rfutSetGarder = _rfutSetGarder;
 /* Familles de manipulations. L'ordre compte : l'enrichissement et le
    sulfitage sont les deux postes qu'un controle regarde en premier. */
 var RM_FAMILLES = [
-  {k:'enrichissement', lbl:'Enrichissement',      ico:'\u{1F36C}'},
-  {k:'sulfitage',      lbl:'Sulfitage',           ico:'\u{1F9EA}'},
-  {k:'intrant',        lbl:'Adjonctions',         ico:'\u{1F9EB}'},
-  {k:'pratique',       lbl:'Pratiques de cave',   ico:'\u{1F504}'}
+  {k:'enrichissement', lbl:'Enrichissement',      ico:'goutte'},
+  {k:'sulfitage',      lbl:'Sulfitage',           ico:'eprouvette'},
+  {k:'intrant',        lbl:'Adjonctions',         ico:'fiole'},
+  {k:'pratique',       lbl:'Pratiques de cave',   ico:'rotation'}
 ];
 /* Correspondance type saisi -> famille. Un type absent de cette table
    n'entre PAS au registre : c'est du suivi, pas une manipulation. */
@@ -7458,7 +7458,7 @@ function _rmDoc(CAVE_VENDANGE, CAVE_ELEVAGE, DOM, campagne, millesime){
   RM_FAMILLES.forEach(function(F){
     var L = r.lignes.filter(function(l){ return l.fam === F.k; });
     if(!L.length) return;
-    h += '<div class="rm-sec"><span class="rm-sec-i">' + F.ico + '</span>' + F.lbl
+    h += '<div class="rm-sec"><span class="rm-sec-i">' + _mvIconInline(F.ico,16) + '</span>' + F.lbl
       + '<span class="rm-sec-n">' + L.length + '</span></div>';
     h += '<table class="rm-t"><thead><tr>'
       + '<th class="d">Date</th><th>Contenant</th><th>Nature</th>'
@@ -7484,7 +7484,7 @@ function _rmDoc(CAVE_VENDANGE, CAVE_ELEVAGE, DOM, campagne, millesime){
   });
 
   /* ── chronologie ── */
-  h += '<div class="rm-sec rm-brk"><span class="rm-sec-i">\u{1F4C5}</span>Chronologie'
+  h += '<div class="rm-sec rm-brk"><span class="rm-sec-i">' + _mvIconInline("calendrier",16) + '</span>Chronologie'
     + '<span class="rm-sec-n">' + r.lignes.length + '</span></div>';
   h += '<table class="rm-t rm-chr"><thead><tr><th class="d">Date</th><th>Nature</th>'
     + '<th>Contenant</th><th class="w">D\u00e9tail</th></tr></thead><tbody>';
@@ -7607,7 +7607,7 @@ function _rmExport(campagne, millesime){
     var url = URL.createObjectURL(blob);
     var w = window.open(url, '_blank');
     if(!w) showToast('Autorise les pop-ups pour imprimer', '#B85A1A');
-    else showToast('\u{1F4CB} Registre' + (millesime!=null?' '+millesime:'') + ' \u00b7 '
+    else showToast('Registre' + (millesime!=null?' '+millesime:'') + ' \u00b7 '
       + nb + ' manipulation' + (nb>1?'s':''), '#3D6B27');
   }catch(err){ showToast('Export impossible', '#C0392B'); }
 }
@@ -7625,7 +7625,7 @@ window._rmExportChoix = function(){
   if(ms.length === 1){ _rmExport(null, ms[0]); return; }
   if(ms.length > 1 && typeof window.openPrompt === 'function'){
     window.openPrompt({
-      titre:'Quel mill\u00e9sime ?', unite:'', icone:'\u{1F4CB}', type:'nombre',
+      titre:'Quel mill\u00e9sime ?', unite:'', icone:'liste', type:'nombre',
       sub:'Chaque mill\u00e9sime a son registre \u2014 on ne m\u00e9lange pas les vins. '
          + 'Disponibles : ' + ms.join(', ') + '.',
       valeur:String(ms[0]), placeholder:String(ms[0]), btnLabel:'\u00c9diter le registre',
@@ -7642,7 +7642,7 @@ window._rmExportChoix = function(){
   if(!cs.length){ showToast('Aucune manipulation enregistr\u00e9e', '#B85A1A'); return; }
   if(cs.length === 1 || typeof window.openPrompt !== 'function'){ _rmExport(cs[0]); return; }
   window.openPrompt({
-    titre:'Quelle campagne ?', unite:'', icone:'\u{1F4CB}', type:'nombre',
+    titre:'Quelle campagne ?', unite:'', icone:'liste', type:'nombre',
     sub:'Campagnes disponibles : ' + cs.map(function(c){ return c + '\u2013' + (c+1); }).join(', ')
        + '. Indiquez l\u2019ann\u00e9e de d\u00e9but.',
     valeur:String(cs[0]), placeholder:String(cs[0]), btnLabel:'\u00c9diter le registre',
@@ -7883,7 +7883,7 @@ function _bcDoc(ctx, DOM, c, mil){
   }).join('') + '</div>';
 
   /* ── la vigne ── */
-  h += _bcSec('\u{1F33F}', 'Les travaux de la vigne',
+  h += _bcSec('feuille', 'Les travaux de la vigne',
         d.vigne.lignes.length ? (d.vigne.validations + ' validations') : '');
   if(!d.vigne.lignes.length){
     h += '<div class="bc-vide">Aucun travail valid\u00e9 sur cette campagne.</div>';
@@ -7909,7 +7909,7 @@ function _bcDoc(ctx, DOM, c, mil){
   }
 
   /* ── la récolte ── */
-  h += _bcSec('\u{1F347}', 'La r\u00e9colte', ch && ch.kg ? _bcInt(ch.kg) + ' kg' : '');
+  h += _bcSec('raisin', 'La r\u00e9colte', ch && ch.kg ? _bcInt(ch.kg) + ' kg' : '');
   // _mlChaine donne des TOTAUX, pas le detail par parcelle : le bilan lit donc la
   // source, filtree sur le millesime. Projection differente de la meme donnee,
   // pas une copie du calcul.
@@ -7964,7 +7964,7 @@ function _bcDoc(ctx, DOM, c, mil){
 
   /* ── de la benne à la bouteille ── */
   h += '<div class="bc-brk"></div>';
-  h += _bcSec('\u{1F377}', 'De la benne \u00e0 la bouteille', '');
+  h += _bcSec('verre', 'De la benne \u00e0 la bouteille', '');
   if(!ch || !ch.kg){
     h += '<div class="bc-vide">Pas de suivi de cuverie sur cette campagne.</div>';
   } else {
@@ -7996,7 +7996,7 @@ function _bcDoc(ctx, DOM, c, mil){
   }
 
   /* ── le chai ── */
-  h += _bcSec('\u{1F6E2}\u{FE0F}', 'Le chai \u2014 mill\u00e9sime ' + d.millesime,
+  h += _bcSec('barrique', 'Le chai \u2014 mill\u00e9sime ' + d.millesime,
         d.chaiFuts ? (d.chaiFuts + ' f\u00fbts') : '');
   if(d.chaiTous > d.chai.length){
     h += '<div class="bc-note">Ce tableau ne montre que le <b>' + d.millesime + '</b>. '
@@ -8029,7 +8029,7 @@ function _bcDoc(ctx, DOM, c, mil){
   /* ── le parc à fûts ── */
   if(d.parc){
     var mv = d.parc.mouv || {entrees:0, sorties:0};
-    h += _bcSec('\u{1F6D2}', 'Le parc \u00e0 f\u00fbts', d.parc.parc + ' f\u00fbts');
+    h += _bcSec('barrique', 'Le parc \u00e0 f\u00fbts', d.parc.parc + ' f\u00fbts');
     h += '<div class="bc-kv">'
       + '<span><b>' + d.parc.parc + '</b> f\u00fbts au domaine</span>'
       + '<span><b>' + d.parc.occupes + '</b> en vin</span>'
@@ -8044,7 +8044,7 @@ function _bcDoc(ctx, DOM, c, mil){
   }
 
   /* ── la protection ── */
-  h += _bcSec('\u{1F9EA}', 'La protection du vignoble',
+  h += _bcSec('eprouvette', 'La protection du vignoble',
         d.phyto.n ? (d.phyto.n + ' interventions') : '');
   if(!d.phyto.n){
     h += '<div class="bc-vide">Aucun traitement enregistr\u00e9 sur cette campagne.</div>';
@@ -8064,7 +8064,7 @@ function _bcDoc(ctx, DOM, c, mil){
 
   /* ── les manipulations ── */
   if(d.manip && d.manip.lignes.length){
-    h += '<div class="bc-note bc-lien">\u{1F4CB} <b>' + d.manip.lignes.length
+    h += '<div class="bc-note bc-lien">' + _mvIconInline('liste',16) + ' <b>' + d.manip.lignes.length
       + ' manipulations \u0153nologiques</b> sur le mill\u00e9sime ' + d.millesime
       + '. Le registre d\u00e9taill\u00e9 s\u2019\u00e9dite depuis Le Cuvier \u203a R\u00e9glages.</div>';
   }
@@ -8083,7 +8083,7 @@ function _bcDoc(ctx, DOM, c, mil){
 }
 
 function _bcSec(ico, titre, droite){
-  return '<div class="bc-sec"><span class="bc-sec-i">' + ico + '</span>' + titre
+  return '<div class="bc-sec"><span class="bc-sec-i">' + _mvIconInline(ico,16) + '</span>' + titre
     + (droite ? '<span class="bc-sec-n">' + droite + '</span>' : '') + '</div>';
 }
 
@@ -8205,7 +8205,7 @@ function _bcExport(c, mil){
     var blob = new Blob([html], {type:'text/html'});
     var w = window.open(URL.createObjectURL(blob), '_blank');
     if(!w) showToast('Autorise les pop-ups pour imprimer', '#B85A1A');
-    else showToast('\u{1F4D6} Bilan ' + an + '\u2013' + (an+1), '#3D6B27');
+    else showToast('Bilan ' + an + '\u2013' + (an+1), '#3D6B27');
   }catch(err){ showToast('Export impossible', '#C0392B'); }
 }
 function _bcEsc(s){ return String(s==null?'':s)
@@ -8220,7 +8220,7 @@ window._bcExportChoix = function(){
   if(!cs.length){ showToast('Aucune campagne \u00e0 r\u00e9sumer', '#B85A1A'); return; }
   if(cs.length === 1 || typeof window.openPrompt !== 'function'){ _bcChoixMil(cs[0]); return; }
   window.openPrompt({
-    titre:'Quelle campagne ?', unite:'', icone:'\u{1F4D6}', type:'nombre',
+    titre:'Quelle campagne ?', unite:'', icone:'livre', type:'nombre',
     sub:'Campagnes disponibles : ' + cs.map(function(x){ return x + '\u2013' + (x+1); }).join(', ')
        + '. Indiquez l\u2019ann\u00e9e de d\u00e9but.',
     valeur:String(cs[0]), placeholder:String(cs[0]), btnLabel:'\u00c9diter le bilan',
@@ -8239,7 +8239,7 @@ function _bcChoixMil(c){
     ? window._caveMilsEnCave().filter(function(m){ return m !== '?'; }) : [];
   if(ms.length < 2 || typeof window.openPrompt !== 'function'){ _bcExport(c, c); return; }
   window.openPrompt({
-    titre:'Quel mill\u00e9sime ?', unite:'', icone:'\u{1F377}', type:'nombre',
+    titre:'Quel mill\u00e9sime ?', unite:'', icone:'verre', type:'nombre',
     sub:'La vigne, la protection et le parc porteront sur la campagne ' + c + '\u2013' + (c+1)
        + '. La r\u00e9colte, le flux et le chai porteront sur le mill\u00e9sime choisi. '
        + 'En cave : ' + ms.join(', ') + '.',
@@ -8472,7 +8472,7 @@ function _matDoc(an){
             'du ' + _vendFrDate(d1) + ' au ' + _vendFrDate(d2),
             'Édité le ' + new Date().toLocaleDateString('fr-FR')]
   });
-  showToast('\u{1F347} Contrôle de maturité ' + an, '#3D6B27');
+  showToast('Contrôle de maturité ' + an, '#3D6B27');
 }
 
 /* Ne jamais poser une question dont la reponse est unique. */
@@ -8481,7 +8481,7 @@ window._matExportChoix = function(){
   if(!ans.length){ showToast('Aucun relevé de maturité enregistré', '#B85A1A'); return; }
   if(ans.length === 1 || typeof window.openPrompt !== 'function'){ _matDoc(ans[0]); return; }
   window.openPrompt({
-    titre:'Quelle année ?', unite:'', icone:'\u{1F347}', type:'nombre',
+    titre:'Quelle année ?', unite:'', icone:'raisin', type:'nombre',
     sub:'Le contrôle de maturité se lit vendange par vendange. Disponibles : ' + ans.join(', ') + '.',
     valeur:String(ans[0]), placeholder:String(ans[0]), btnLabel:'Éditer le relevé',
     cb:function(v){
@@ -8640,7 +8640,7 @@ function _cuvDoc(an){
             totMes + ' relevé' + (totMes > 1 ? 's' : '') + ' de fermentation',
             'Édité le ' + new Date().toLocaleDateString('fr-FR')]
   });
-  showToast('\u{1FAA3} Cahier de cuverie ' + an, '#3D6B27');
+  showToast('Cahier de cuverie ' + an, '#3D6B27');
 }
 
 window._cuvExportChoix = function(){
@@ -8648,7 +8648,7 @@ window._cuvExportChoix = function(){
   if(!ans.length){ showToast('Aucune cuve de vinification enregistrée', '#B85A1A'); return; }
   if(ans.length === 1 || typeof window.openPrompt !== 'function'){ _cuvDoc(ans[0]); return; }
   window.openPrompt({
-    titre:'Quelle vendange ?', unite:'', icone:'\u{1FAA3}', type:'nombre',
+    titre:'Quelle vendange ?', unite:'', icone:'seau', type:'nombre',
     sub:'Une cuve appartient à l’année où elle est entrée. Disponibles : ' + ans.join(', ') + '.',
     valeur:String(ans[0]), placeholder:String(ans[0]), btnLabel:'Éditer le cahier',
     cb:function(v){

@@ -68,6 +68,12 @@ export const MAP = {
        finira par melanger. La regle « un nom = une forme » passe avant
        l'illustration litterale. */
   abeille:'hexagon', interdit:'ban', lecture:'play', repas:'utensils', route:'route'
+,
+  /* ── DS-M3 : la visite guidee et la demo publique ──
+     C'est le premier ecran qu'un prospect voit — le lien « Voir la demo » du
+     site. Il tournait encore entierement au pictogramme. */
+  antenne:'satellite-dish', bouclier:'shield', bouteille:'bottle-wine',
+  boussole:'compass', ouvrier:'hard-hat'
 };
 
 export function corps(lucide) {

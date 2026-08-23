@@ -286,25 +286,90 @@ if (morts.length) {
    Les fonctions qui fabriquent un document autonome (elles portent toutes un
    <style> et une balise <head>) doivent utiliser `_mvIconInline`. Un `_mvIcon`
    y rendrait un cadre vide, sans la moindre erreur.                        */
+/* ⚠⚠⚠ CE DECOUPAGE ETAIT FAUX DEPUIS LE PREMIER JOUR, ET C'EST CE QUI A
+   RENDU L'ASSERTION INOFFENSIVE. `src.indexOf('\n}', m.index)` s'arrete au
+   PREMIER `}` en debut de ligne apres le marqueur — dans `_bcExport`, c'est
+   la fin du gabarit `<style>`, a 1 451 caracteres, bien avant la fin de la
+   fonction. Le controle lisait donc un tiers de son sujet et se declarait vert.
+   ★ On compte les accolades depuis l'ouverture de la fonction. C'est plus
+     bavard, mais un decoupage approximatif dans un filet, c'est un filet
+     approximatif — et on ne sait jamais lequel des deux tiers manque. */
+function corpsFonction(src, deb) {
+  const o = src.indexOf('{', deb);
+  if (o < 0) return src.slice(deb, deb + 200);
+  let n = 0;
+  for (let i = o; i < src.length; i++) {
+    const c = src[i];
+    if (c === '{') n++;
+    else if (c === '}') { n--; if (n === 0) return src.slice(deb, i + 1); }
+  }
+  return src.slice(deb);
+}
 function trancheDocs(src) {
-  const out = [];
+  const out = [], vus = new Set();
   const re = /<\/head><body>|<\/style><\/head>/g;
   let m; while ((m = re.exec(src))) {
     // La fonction qui contient ce marqueur : on remonte au `function ` precedent.
     const deb = src.lastIndexOf('function ', m.index);
-    const fin = src.indexOf('\n}', m.index);
-    if (deb >= 0 && fin > deb) out.push(src.slice(deb, fin));
+    if (deb < 0 || vus.has(deb)) continue;
+    vus.add(deb);
+    out.push(corpsFonction(src, deb));
   }
   return out;
 }
+/* ⚠⚠⚠ CETTE ASSERTION NE LISAIT QUE reglages.js, ET C'ETAIT UN TROU.
+   `cave.js` fabrique DEUX documents autonomes — le registre de cave et le
+   bilan de campagne — et `app.js` le rapport de saison. Un `_mvIcon` dans
+   l'un des trois serait sorti en cadres VIDES, sans erreur, et le harnais
+   aurait dit vert. Trouve en migrant cave.js : le controle ne couvrait pas
+   le fichier qu'on etait en train de rendre conforme.
+   ★ On lit donc TOUS les modules, et le rouge NOMME le fichier ET la
+     fonction — « un document imprime » tout court ne dit pas ou chercher. */
+/* ⚠⚠⚠ ET ELARGIR AUX MODULES NE SUFFISAIT PAS : LA CONTRE-EPREUVE EST
+   RESTEE VERTE. Le modele etait faux — il supposait que le document entier
+   se fabrique DANS UNE SEULE fonction. `cave.js` ne fait pas ca : `_bcExport`
+   assemble le bilan de campagne en appelant `_bcSec`, et un `_mvIcon` pose
+   dans le HELPER n'etait vu par personne.
+   ★ On suit donc UN NIVEAU D'APPEL : les fonctions citees par un document,
+     definies dans le meme module, sont lues comme si elles en faisaient
+     partie. C'est le cas reel (`_bcSec`, `_rmLigne`…) et ca s'arrete la :
+     deux niveaux ramasseraient la moitie du module.
+   ★★ La lecon vaut au-dela : une assertion qui passe une contre-epreuve
+     REELLE n'a pas ete verifiee, elle a ete supposee. */
 const fautifs = [];
-for (const bloc2 of trancheDocs(sources.reglages)) {
-  if (/[^e]_mvIcon\(/.test(bloc2)) {
-    const nom = (bloc2.match(/function\s+([A-Za-z_$][\w$]*)/) || [, '?'])[1];
-    fautifs.push(nom);
+for (const mod of MODULES) {
+  const src = sources[mod];
+  const blocs = trancheDocs(src);
+  /* ⚠⚠ UN NIVEAU NE SUFFISAIT PAS NON PLUS. La chaine reelle est
+     `_bcExport` → `_bcDoc` → `_bcSec` : trois crans. J'ai reecrit ce controle
+     TROIS fois en croyant a chaque fois avoir fini, parce que je n'ai
+     contre-eprouve qu'a la fin. ★ On prend la FERMETURE TRANSITIVE, bornee :
+     tout ce qu'un document peut atteindre en appelant, dans son module. */
+  const aVoir = [...blocs];
+  const vus = new Set();
+  const file = [];
+  const citer = (b) => { for (const m of b.matchAll(/\b(_[A-Za-z][\w$]*)\s*\(/g)) file.push(m[1]); };
+  blocs.forEach(citer);
+  let garde = 0;
+  while (file.length && garde++ < 500) {
+    const nom = file.shift();
+    if (vus.has(nom) || /^_mvIcon/.test(nom)) continue;
+    vus.add(nom);
+    const i = src.indexOf('function ' + nom + '(');
+    if (i < 0) continue;
+    const corps = corpsFonction(src, i);
+    aVoir.push(corps);
+    citer(corps);
+  }
+  for (const bloc2 of aVoir) {
+    if (/[^e]_mvIcon\(/.test(bloc2)) {
+      const nom = (bloc2.match(/function\s+([A-Za-z_$][\w$]*)/) || [, '?'])[1];
+      fautifs.push(mod + '.js : ' + nom);
+    }
   }
 }
-t('Aucun document imprime n\u2019appelle _mvIcon', fautifs.length === 0,
+t('Aucun document imprime n\u2019appelle _mvIcon (' + MODULES.length + ' modules lus)',
+  fautifs.length === 0,
   [...new Set(fautifs)].join(' \u00b7 ') + ' \u2014 utiliser _mvIconInline');
 
 /* ══ G. UNE SEULE ECHELLE DE TAILLES ═══════════════════════════════════════

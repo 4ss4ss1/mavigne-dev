@@ -23,7 +23,7 @@ export const GT_ADMIN_EMAIL = 'ngdevpro@gmail.com';
 // WHATS_NEW   : tableau vide = modal desactive pour cette version.
 // Format item : { emoji:'📅', titre:'Titre court', desc:'Phrase utilisateur.' }
 // Regle : seulement les changements visibles par les utilisateurs.
-export const APP_VERSION = '6.52';
+export const APP_VERSION = '6.54';
 // ════ Journal des nouveautés (récap cumulatif) ════
 // Une entrée par version, la PLUS RÉCENTE EN HAUT : { v:'5.10', items:[ {emoji,titre,desc}, … ] }
 // À chaque release visible → AJOUTER un bloc en tête (ne pas remplacer). items:[] = release technique (rien à afficher).
@@ -354,6 +354,13 @@ window._mvGraphRepeindre = function(){
 };
 
 export const WHATS_NEW = [
+  { v: '6.54', items: [
+    { emoji: 'verre', titre: 'La Cave passe aux vraies ic\u00f4nes, y compris \u00e0 l\u2019impression', desc: "Le Chai, le Cuvier, le journal des op\u00e9rations et les r\u00e9glages de cave gardaient leurs anciens pictogrammes. Surtout, <b>le registre de cave et le bilan de campagne</b> en imprimaient aussi \u2014 et un pictogramme ne se dessine pas pareil selon la machine qui imprime. Ils sortent maintenant avec les m\u00eames ic\u00f4nes que l\u2019\u00e9cran, identiques partout. <b>Aucun chiffre n\u2019a chang\u00e9</b>, et vos op\u00e9rations non plus." }
+  ] },
+  { v: '6.53', items: [
+    { emoji: 'boussole', titre: 'La visite guid\u00e9e et la d\u00e9mo passent aux vraies ic\u00f4nes', desc: "C\u2019est le premier \u00e9cran qu\u2019un visiteur voit en cliquant « Voir la d\u00e9mo » sur le site, et le seul qui tournait encore enti\u00e8rement au pictogramme : le menu des chapitres, les six familles, le bandeau du haut. Il ressemble maintenant au reste de l\u2019application. <b>Rien ne change pour vous</b> si vous ne repassez pas par la visite." },
+    { emoji: 'check', titre: 'Les messages de confirmation ne r\u00e9p\u00e8tent plus leur pastille', desc: "« Ordre enregistr\u00e9 », « Commune enregistr\u00e9e » : le bandeau qui appara\u00eet en bas de l\u2019\u00e9cran porte <b>d\u00e9j\u00e0 une pastille verte</b>, et le petit signe en plus disait la m\u00eame chose une deuxi\u00e8me fois. Les boutons « Enregistrement\u2026 » aussi. Un peu moins de bruit \u00e0 chaque geste." }
+  ] },
   { v: '6.52', items: [
     { emoji: 'tracteur', titre: 'Les \u00e9crans du Tracteur passent aux vraies ic\u00f4nes', desc: "Le chrono, la cuve GNR, la prochaine r\u00e9vision et le catalogue des produits gardaient leurs anciens pictogrammes. Ils suivent maintenant le reste de l\u2019application \u2014 et, comme partout ailleurs, ils prennent la couleur du texte \u00e0 c\u00f4t\u00e9 d\u2019eux au lieu de rester des taches vives en mode sombre. <b>Aucun bouton n\u2019a chang\u00e9 de place.</b>" },
     { emoji: 'liste', titre: 'La liste des activit\u00e9s n\u2019affiche plus que leur nom', desc: "Dans le menu d\u00e9roulant d\u2019une session tracteur, chaque activit\u00e9 \u00e9tait pr\u00e9c\u00e9d\u00e9e de son pictogramme. Un menu d\u00e9roulant est le seul endroit de l\u2019application o\u00f9 une vraie ic\u00f4ne ne peut pas entrer \u2014 c\u2019est le navigateur qui le dessine, pas nous. Le pictogramme a donc <b>rejoint les puces de filtre</b>, juste au-dessus, o\u00f9 il est lisible partout. <b>Vos activit\u00e9s et vos sessions ne changent pas</b>, et celles d\u00e9j\u00e0 enregistr\u00e9es non plus." }

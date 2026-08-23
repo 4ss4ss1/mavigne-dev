@@ -1,4 +1,67 @@
-// MA VIGNE — Service Worker v7.07
+// MA VIGNE — Service Worker v7.09
+// v7.09 (23/08/2026) — LA CAVE, ET UN CONTROLE QUI NE CONTROLAIT RIEN. APP 6.53 -> 6.54.
+//   ★ cave.js : 147 -> 26 pictogrammes. Le Chai, le Cuvier, le journal des
+//   operations, les reglages de cave — et les DEUX DOCUMENTS IMPRIMES (registre
+//   de cave, bilan de campagne), qui passent a `_mvIconInline`.
+//   ⚠⚠⚠ ET C'EST EN LES MIGRANT QUE J'AI TROUVE LE PIRE DEFAUT DU LOT : le
+//   controle « aucun document imprime n'appelle _mvIcon » etait DECORATIF.
+//   Trois fautes empilees, chacune decouverte par la contre-epreuve suivante :
+//     1. il ne lisait que `reglages.js` — cave.js et app.js fabriquent aussi
+//        des documents autonomes, personne ne les regardait ;
+//     2. elargi aux 12 modules, il decoupait la fonction au premier `\n}` :
+//        dans `_bcExport` c'est la fin du gabarit <style>, a 1 451 caracteres.
+//        Il lisait UN TIERS de son sujet et se declarait vert ;
+//     3. corrige en comptant les accolades, il ne suivait qu'UN niveau
+//        d'appel — la chaine reelle est `_bcExport` → `_bcDoc` → `_bcSec`.
+//   ★★★ UNE ASSERTION QUI PASSE UNE CONTRE-EPREUVE REELLE N'A PAS ETE
+//   VERIFIEE, ELLE A ETE SUPPOSEE. J'ai reecrit ce controle TROIS fois en
+//   croyant chaque fois avoir fini, parce que je n'ai contre-eprouve qu'a la
+//   fin. La contre-epreuve n'est pas la derniere etape, c'est la premiere.
+//   ★ Il prend desormais la FERMETURE TRANSITIVE bornee des appels d'un
+//   document, dans son module, et le rouge NOMME le fichier ET la fonction :
+//   « cave.js : _bcSec ». 18e contre-epreuve gravee pour qu'il le reste.
+//   ⚠ Rappel de la raison d'etre : dans l'onglet ou s'ouvre un document, le
+//   sprite N'EXISTE PAS. Un `<use href="#ic-x">` n'y rend RIEN — pas une
+//   erreur, pas un cadre : rien. Un registre de cave sort blanc et personne
+//   ne le sait avant qu'un client l'imprime.
+//   ★ 38 bandeaux de confirmation perdent leur glyphe : la pastille de
+//   couleur le disait deja. Ancres PRELEVEES dans le fichier, jamais tapees.
+//   ⚠ Ce qui reste dans cave.js (26) : les etats de fermentation et les
+//   pastilles de couleur des cuves — meme famille que TEMJ, la couleur porte
+//   le sens et une icone la detruirait.
+// v7.08 (23/08/2026) — LA VISITE GUIDEE ET LA DEMO PASSENT AUX ICONES. APP 6.52 -> 6.53.
+//   ★ C'est le PREMIER ecran qu'un prospect voit (le lien « Voir la demo » du
+//   site) et le dernier qui tournait entierement au pictogramme : menu des
+//   chapitres, six familles, bandeau du haut, capacites de l'accueil.
+//   app.js : 191 -> 123 pictogrammes. Sprite 99 -> 104.
+//   ★ Les tables `ic:` portent desormais des NOMS D'ICONE, donc le harnais les
+//   verifie : jusqu'ici il les sautait (son motif n'accepte que des minuscules),
+//   et une valeur fausse serait passee jusqu'a l'ecran du prospect.
+//   ★ Les bandeaux de confirmation perdent leur glyphe : ils portent DEJA une
+//   pastille de couleur, le signe disait la meme chose deux fois (§45b).
+//   Les `textContent` qui portaient vraiment une icone passent a `_mvSetIcon`.
+//   ⚠⚠⚠ QUATRE ECHECS D'ANCRE DE SUITE, ET LA LECON A CHANGE. Ce bloc vit dans
+//   une CHAINE IMBRIQUEE : le fichier porte des `\'` echappes, la ou le meme
+//   fichier ecrit des quotes nues ailleurs. Mes ancres, tapees de memoire,
+//   n'ont jamais matche. La reponse n'est pas « mieux echapper » :
+//   ★★★ ON NE TAPE PLUS UNE ANCRE, ON LA PRELEVE DANS LE FICHIER. Un marqueur
+//   court et stable (`mvt-ch-ic">`), puis on decoupe la suite et on remplace la
+//   VARIABLE a l'interieur. Le dry-run complet reste avant la 1re ecriture.
+//   ⚠ Et un marqueur peut etre en double : `mvt-fam-ic">` sert aussi a un
+//   libelle statique. On retient l'occurrence QUI CONTIENT la variable, et on
+//   exige qu'il n'y en ait qu'une — sinon rouge, jamais « la premiere ».
+//   ⚠ `cercle` a ete ajoute au sprite puis RETIRE dans le meme lot : je l'avais
+//   pose en prevision de l'alphabet d'etat, qui n'est pas dans ce lot. Un
+//   symbole sans emploi est du poids mort, et le harnais l'a dit tout de suite.
+//   ⚠⚠ CE QUI RESTE DANS app.js, ET POURQUOI CE N'EST PAS MECANIQUE :
+//   · l'alphabet d'etat des taches (✓ ~ ▶ ○, 4 ecrans) : quatre etats dans un
+//     cercle de 14 px, dont un « ~ » qui n'est pas un pictogramme. Il faut
+//     decider du jeu avant de le poser.
+//   · les pastilles de couleur (tracteur mecanique / hydrostatique, meteo,
+//     synchronisation) : meme famille que TEMJ — la COULEUR porte le sens.
+//   · les graines de `ACTIVITES` : ce sont des DONNEES, plus rendues nulle part
+//     depuis DS-M2. Les convertir ne changerait rien a l'ecran, seulement au
+//     compteur. Le compteur est un indicateur, pas l'objectif.
 // v7.07 (23/08/2026) — LE VERROU DES <option> SAUTE, ET tracteur.js SUIT. APP 6.51 -> 6.52.
 //   ★★★ LE PREALABLE DE DS-M, ANNONCE EN §45j, EST LEVE. Une balise <option> ne
 //   peut contenir AUCUN element : tant que `a.emoji` y etait rendu, la donnee
@@ -2462,7 +2525,7 @@
 // v2.22 — Fix profils vides : guard vide dans loadData() pour MEMBRES/SAISONS/TACHES
 // v2.17 — Onboarding intégré + tenantId · v2.06 — Firebase Auth · v2.00–v2.05 — divers
 const DEBUG = self.location.hostname === 'localhost' || self.location.hostname === '127.0.0.1';
-const CACHE_NAME   = 'mavigne-v7.07';
+const CACHE_NAME   = 'mavigne-v7.09';
 const TENANT_CACHE = 'mavigne-tenant';   // Cache persistant — préservé à chaque mise à jour SW
 const SYNC_TAG     = 'mavigne-sync';
 
@@ -2478,7 +2541,7 @@ const CDN_URLS = [
 ];
 
 self.addEventListener('install', event => {
-  if(DEBUG) console.log('[SW] Ma Vigne v7.07 installé');
+  if(DEBUG) console.log('[SW] Ma Vigne v7.09 installé');
   event.waitUntil(
     caches.open(CACHE_NAME).then(async cache => {
       // ── Cœur applicatif : STRICT (mise à jour ATOMIQUE) ──
@@ -2494,7 +2557,7 @@ self.addEventListener('install', event => {
 });
 
 self.addEventListener('activate', event => {
-  if(DEBUG) console.log('[SW] Ma Vigne v7.07 activé');
+  if(DEBUG) console.log('[SW] Ma Vigne v7.09 activé');
   event.waitUntil(
     caches.keys().then(keys =>
       Promise.all(
