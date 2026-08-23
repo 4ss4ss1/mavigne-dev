@@ -1,16 +1,16 @@
 {
-  "total": 979,
+  "total": 938,
   "modules": {
     "app": 123,
     "utils": 376,
-    "pilotage": 114,
+    "pilotage": 106,
     "planning": 78,
-    "reglages": 116,
+    "reglages": 90,
     "cave": 26,
-    "tracteur": 5,
+    "tracteur": 3,
     "phyto": 10,
     "reserve": 34,
-    "admin-gt": 67,
+    "admin-gt": 62,
     "firebase": 14,
     "onboarding": 15,
     "index.html": 1

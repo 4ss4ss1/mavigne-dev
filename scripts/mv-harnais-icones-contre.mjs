@@ -234,6 +234,16 @@ epreuve('_mvIcon dans un document imprime, via un helper',
         .replace('_mvIconInline(ico,16)', '_mvIcon(ico,16)')),
   /Aucun document imprime[\s\S]*cave\.js : _bcSec/);
 
+/* 10. UNE TUILE D'UN TON INEXISTANT. L'assertion des tons ne lisait que
+      `_mvBadge` : j'ai fait porter des tons a `_mvIconTuile` dans le meme lot,
+      et le harnais est reste vert sur une classe CSS qui n'existe pas — une
+      tuile sans fond, sans erreur, sans trace. Trouve par contre-epreuve,
+      pas par relecture. */
+epreuve('une tuile d\u2019un ton inexistant',
+  () => ecrire('src/pilotage.js', lire('src/pilotage.js')
+        .replace('_mvIconTuile(em[0],em[1])', "_mvIconTuile('alerte','orange')")),
+  /tuile ne demande un ton inexistant[\s\S]*orange/);
+
 fs.rmSync(bac, { recursive: true, force: true });
 console.log('\n' + (ko ? '\x1b[31m' + ko + ' CONTRE-EPREUVE(S) EN ECHEC\x1b[0m'
                        : '\x1b[32mLes ' + ok + ' contre-epreuves rougissent\x1b[0m') + '\n');

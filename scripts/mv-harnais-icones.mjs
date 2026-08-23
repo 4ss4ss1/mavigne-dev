@@ -587,6 +587,27 @@ if (rebase) {
   const inconnus = [...utilises].filter(x => !TONS.includes(x));
   t('Aucun badge ne demande un ton inexistant', inconnus.length === 0, inconnus.join(' \u00b7 '));
 
+/* ★★ LA TUILE PORTE DES TONS AUSSI, ET L'ASSERTION NE LA LISAIT PAS.
+   Trouve par contre-epreuve : j'ai injecte `_mvIconTuile(x,'orange')` — une
+   classe CSS qui n'existe pas — et le harnais est reste VERT, parce qu'il ne
+   regardait que `_mvBadge`. Un ton inconnu rend une tuile SANS FOND : ni
+   erreur, ni trace, juste une icone qui flotte.
+   ⚠ Les deux ensembles sont DIFFERENTS et c'est voulu : le badge dit un ETAT
+     (vert/ambre/rouge/neutre), la tuile dit une FAMILLE (terre/vert/or/rouge).
+     On verifie donc chacun contre SA liste, jamais contre l'autre.
+   ⚠ Un ton passe par une VARIABLE (`_mvIconTuile(em[0], em[1])`) echappe a
+     cette lecture, comme les tables d'icones y echappaient. Le filet la, c'est
+     le repli journalise dans la primitive — verifie en l'EXECUTANT plus bas. */
+const TUILE_TONS = (CSS.match(/\.mv-ict-([a-z]+)\s*\{/g) || [])
+  .map(x => x.replace(/^\.mv-ict-/, '').replace(/\s*\{$/, ''));
+const tuilesKo = [];
+for (const mod of MODULES) {
+  for (const m of sources[mod].matchAll(/_mvIconTuile\([^,)]+,\s*'([a-z]+)'/g)) {
+    if (!TUILE_TONS.includes(m[1])) tuilesKo.push(mod + " : '" + m[1] + "'");
+  }
+}
+t('Aucune tuile ne demande un ton inexistant (' + TUILE_TONS.length + ' declares)',
+  tuilesKo.length === 0, tuilesKo.join(' \u00b7 '));
   /* Les briques de la charte doivent exister avant qu'un module les appelle :
      une classe absente ne casse rien, elle rend juste un bloc nu — en silence. */
   /* ⚠️ VECU LE 16/08, ET PERSONNE NE L'AURAIT VU. En refaisant #home-stat-content,

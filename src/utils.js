@@ -23,7 +23,7 @@ export const GT_ADMIN_EMAIL = 'ngdevpro@gmail.com';
 // WHATS_NEW   : tableau vide = modal desactive pour cette version.
 // Format item : { emoji:'📅', titre:'Titre court', desc:'Phrase utilisateur.' }
 // Regle : seulement les changements visibles par les utilisateurs.
-export const APP_VERSION = '6.57';
+export const APP_VERSION = '6.59';
 // ════ Journal des nouveautés (récap cumulatif) ════
 // Une entrée par version, la PLUS RÉCENTE EN HAUT : { v:'5.10', items:[ {emoji,titre,desc}, … ] }
 // À chaque release visible → AJOUTER un bloc en tête (ne pas remplacer). items:[] = release technique (rien à afficher).
@@ -354,6 +354,13 @@ window._mvGraphRepeindre = function(){
 };
 
 export const WHATS_NEW = [
+  { v: '6.59', items: [
+    { emoji: 'eprouvette', titre: 'Le catalogue phyto ne dit plus deux fois la m\u00eame chose', desc: "Chaque produit portait une pastille de couleur devant son nom \u2014 bleu pour le cuivre, jaune pour le soufre, vert pour un fongicide. Sauf que <b>le type est d\u00e9j\u00e0 \u00e9crit en toutes lettres au bout de la m\u00eame ligne</b>, dans une \u00e9tiquette de la m\u00eame couleur. La pastille r\u00e9p\u00e9tait l\u2019information \u00e0 six pixels d\u2019elle. Elle dispara\u00eet, l\u2019\u00e9tiquette reste\u00a0: <b>ni la couleur ni le mot ne sont perdus.</b>" },
+    { emoji: 'graphique', titre: 'Le verdict de cadence a une vraie tuile', desc: "Sur l\u2019Exercice, le grand pictogramme en t\u00eate du verdict devient une <b>ic\u00f4ne dans un carr\u00e9 teint\u00e9</b>\u00a0: vert quand la cadence colle au bar\u00e8me, ambre en cas de d\u00e9rive, rouge quand le travail d\u00e9passe. La couleur dit toujours la m\u00eame chose, et le dessin ne change plus d\u2019un t\u00e9l\u00e9phone \u00e0 l\u2019autre." }
+  ] },
+  { v: '6.58', items: [
+    { emoji: 'curseurs', titre: 'Les R\u00e9glages finissent leur passage aux ic\u00f4nes', desc: "Le choix des modules visibles par salari\u00e9, l\u2019historique d\u2019emploi (embauche, renouvellement, changement de taux) et les alertes de campagne gardaient leurs anciens pictogrammes. C\u2019est le dernier \u00e9cran de r\u00e9glage \u00e0 y passer. <b>Aucun param\u00e8tre n\u2019a chang\u00e9 de valeur.</b>" }
+  ] },
   { v: '6.57', items: [
     { emoji: 'check', titre: 'Les messages de confirmation s\u2019all\u00e8gent encore', desc: "Vingt-huit bandeaux de plus perdent le petit signe qu\u2019ils affichaient devant leur texte. Le bandeau porte <b>d\u00e9j\u00e0 une pastille de couleur</b> \u2014 verte quand \u00e7a a march\u00e9, rouge sinon \u2014 et le signe disait la m\u00eame chose une deuxi\u00e8me fois. Les boutons qui passent en « V\u00e9rification\u2026 » ou « Cr\u00e9ation\u2026 » aussi." }
   ] },
@@ -2597,8 +2604,22 @@ export function _mvBadge(texte, ton) {
 // L'icone dans son CARRE TEINTE. A reserver aux LIGNES et aux RUBRIQUES : dans
 // une pastille en ligne, un carre de 34 px ecraserait le texte a cote.
 // `ton` : '' (neutre) | 'terre' | 'vert' | 'or' | 'rouge'.
+// ⚠⚠ L'ENSEMBLE DES TONS EST FERME, ET IL EST DIFFERENT DE MV_TONS.
+//   `_mvBadge` parle d'ETAT (vert/ambre/rouge/neutre) ; la tuile parle de
+//   FAMILLE (terre/vert/or/rouge) et n'a pas d'ambre. Deux ensembles, deux
+//   sens — les confondre ferait dire a une tuile ce qu'elle ne dit pas.
+// ★ Un ton inconnu retombe sur la tuile neutre ET part au journal, comme
+//   `_mvBadge` et `_mvIcon`. Vecu le jour ou la tuile s'est mise a porter des
+//   tons : elle prenait n'importe quelle chaine et rendait une classe CSS
+//   inexistante — fond transparent, aucune erreur, aucune trace.
+export var MV_TUILE_TONS = ['terre', 'vert', 'or', 'rouge'];
 export function _mvIconTuile(nom, ton) {
-  return '<span class="mv-ict' + (ton ? ' mv-ict-' + ton : '') + '">' + _mvIcon(nom, 18) + '</span>';
+  var t = ton ? ton : '';
+  if (t && MV_TUILE_TONS.indexOf(t) < 0) {
+    if (window.logError) window.logError({ level: 'info', cat: 'tuile', msg: 'ton inconnu : ' + t });
+    t = '';
+  }
+  return '<span class="mv-ict' + (t ? ' mv-ict-' + t : '') + '">' + _mvIcon(nom, 18) + '</span>';
 }
 
 // La meme icone, autonome, pour un document qui part dans un autre onglet.

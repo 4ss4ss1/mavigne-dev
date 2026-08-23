@@ -33,7 +33,7 @@ var _tracOnglet = 'sessions'; // 'sessions' | 'entretiens'
 
 function renderCatalogueTrac(){
   const el=document.getElementById('catalogue-list-trac');if(!el)return;
-  el.innerHTML=CATALOGUE.map(p=>`<div class="catitem" onclick="openCatDetail('${_escAttr(p.nom)}')"><div class="cat-l"><div class="cat-nom">${TEMJ[p.type]} ${_escHtml(p.nom)}</div><div class="cat-det">AMM ${_escHtml(p.amm)} · ${_escHtml(p.dose)}${p.cible?' · '+_escHtml(p.cible):''}</div>${p.usage?`<div style="font-size:9px;color:var(--texte-doux);margin-top:2px">ℹ️ ${_escHtml(p.usage)}</div>`:''}</div><div class="cat-r"><span class="cat-db ${TCLS[p.type]||'tfc'}">${_escHtml(p.type)}</span><span style="font-size:10px;color:var(--texte-doux);display:block">DAR ${p.dar}j</span>${p.drae>0?`<span style="font-size:9px;color:var(--tag-amber-tx,#856404);font-weight:600;display:block">DRAE ${p.drae}h</span>`:''}${p.znt?`<span style="font-size:9px;color:var(--rouge);font-weight:600;display:block">ZNT ${p.znt}m</span>`:''}</div></div>`).join('');
+  el.innerHTML=CATALOGUE.map(p=>`<div class="catitem" onclick="openCatDetail('${_escAttr(p.nom)}')"><div class="cat-l"><div class="cat-nom">${_escHtml(p.nom)}</div><div class="cat-det">AMM ${_escHtml(p.amm)} · ${_escHtml(p.dose)}${p.cible?' · '+_escHtml(p.cible):''}</div>${p.usage?`<div style="font-size:9px;color:var(--texte-doux);margin-top:2px">ℹ️ ${_escHtml(p.usage)}</div>`:''}</div><div class="cat-r"><span class="cat-db ${TCLS[p.type]||'tfc'}">${_escHtml(p.type)}</span><span style="font-size:10px;color:var(--texte-doux);display:block">DAR ${p.dar}j</span>${p.drae>0?`<span style="font-size:9px;color:var(--tag-amber-tx,#856404);font-weight:600;display:block">DRAE ${p.drae}h</span>`:''}${p.znt?`<span style="font-size:9px;color:var(--rouge);font-weight:600;display:block">ZNT ${p.znt}m</span>`:''}</div></div>`).join('');
 }
 // ════ Catalogue E-Phy (ANSES) — référentiel officiel vigne, lecture seule ════
 var _catSub = 'ephy';
@@ -104,7 +104,7 @@ function ephyRender(){
     if((p.ment||[]).indexOf('AB')>=0) minis.push(_ephyMini('AB','m-ab'));
     var stat = p.statut==='ok' ? '<span class="ephy-stat s-ok">'+_mvIcon('check',16)+' Autorisé</span>' : '<span class="ephy-stat s-ko">'+_mvIcon('interdit',16)+' Retiré</span>';
     return '<div class="catitem'+(p.statut==='ko'?' is-ko':'')+'" onclick="openEphyDetail(\'' + _escAttr(p.amm) + '\')">'
-      + '<div class="cat-l"><div class="cat-nom">'+(TEMJ[p.type]||'\ud83e\uddea')+' '+_escHtml(p.nom)+'</div>'
+      + '<div class="cat-l"><div class="cat-nom">'+_escHtml(p.nom)+'</div>'
       + '<div class="cat-det"><span style="font-family:monospace">AMM '+_escHtml(p.amm)+'</span> · '+_escHtml(p.sub||'—')+'</div>'
       + (minis.length?'<div class="ephy-minis">'+minis.join('')+'</div>':'')+'</div>'
       + '<div class="cat-r"><span class="cat-db '+(TCLS[p.type]||'tfc')+'">'+_escHtml(p.type)+'</span>'+stat+'</div></div>';
@@ -126,7 +126,7 @@ function openEphyDetail(amm){
         :(m==='AB'?(_mvIcon('check',16)+' Utilisable en bio'):_escHtml(m));
     return '<span class="ephy-mini '+cls+'">'+lbl+'</span>';
   }).join('');
-  document.getElementById('oed-title').textContent = (TEMJ[p.type]||'\ud83e\uddea')+' '+p.nom;
+  document.getElementById('oed-title').textContent = p.nom;
   document.getElementById('oed-sub').textContent = 'N° AMM '+p.amm+' · '+p.type;
   var noms2Html = (p.noms2&&p.noms2.length)
     ? '<div class="oed-box" style="grid-column:1/-1"><div class="oed-l">Aussi commercialisé sous</div><div class="oed-v" style="font-size:12px;line-height:1.5">'+p.noms2.map(function(n){return _escHtml(n);}).join(' · ')+'</div></div>'
@@ -183,7 +183,7 @@ function renderPhytoTrac(){
       if(draeR>0) draeBadge='<span style="background:var(--tag-amber-bg,#FFF3CD);color:var(--tag-amber-tx,#856404);font-size:10px;font-weight:700;padding:2px 8px;border-radius:8px">Réentrée '+draeR+'h</span>';
     }
     const tc=TC[m.type]||'var(--texte-doux)', tb=TB[m.type]||'var(--gris-clair)';
-    const emj=(typeof TEMJ!=='undefined'&&TEMJ[m.type])?TEMJ[m.type]+' ':'';
+    const emj='';
     const parc=_phParcTxt(t);
     const cond=t.conducteur||t.operateur||'';
     const meta3=(parc||cond);
@@ -1571,7 +1571,7 @@ function renderTracteur(){
     var chips=g.produits.map(function(nom){
       var ty=_prodType[nom]||'';
       var col=_TC[ty]||'var(--texte-doux)',bg=_TB[ty]||'var(--gris-clair)';
-      var emj=(typeof TEMJ!=='undefined'&&TEMJ[ty])?TEMJ[ty]+' ':'';
+      var emj='';
       return '<span style="font-size:11px;font-weight:600;padding:3px 9px;border-radius:8px;white-space:nowrap;background:'+bg+';color:'+col+'">'+emj+_escHtml(nom)+'</span>';
     }).join('');
     return '<div class="scard scard-traitement">'

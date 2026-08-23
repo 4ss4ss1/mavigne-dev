@@ -2086,16 +2086,19 @@ async function agtShowErreurs(slug) {
   }
   var sorted = errLog.slice().sort(function(a,b){ return (b.ts||'').localeCompare(a.ts||''); });
   var LVL_COLOR = { critical:'#EF4444', error:'#F97316', warning:'#EAB308', info:'#4A9FC8' };
-  var LVL_ICON  = { critical:'\uD83D\uDEA8', error:'\uD83D\uDD34', warning:'\u26A0\uFE0F', info:'\u2139\uFE0F' };
+    /* ⚠ `LVL_ICON` a ete RETIREE, pas migree. La gravite est deja portee par
+     `border-left:3px solid LVL_COLOR[e.level]` sur la meme carte : le glyphe
+     la disait une seconde fois. Une pastille de couleur l'aurait dite une
+     TROISIEME. Meme raisonnement que le bandeau de confirmation (§45b). */
   var h = '<div style="font-size:11px;color:rgba(196,181,253,0.4);letter-spacing:.08em;text-transform:uppercase;font-weight:600;margin-bottom:12px">'+sorted.length+' erreur'+(sorted.length>1?'s':'')+'</div>';
   sorted.slice(0,30).forEach(function(e){
     var lc = LVL_COLOR[e.level]||'#F97316';
-    var li = LVL_ICON[e.level]||'\uD83D\uDD34';
+    
     var diff = e.ts ? Math.floor((Date.now()-new Date(e.ts))/60000) : null;
     var when = diff===null ? '' : diff<60 ? 'il y a '+diff+'min' : 'il y a '+Math.floor(diff/60)+'h';
     h += '<div style="background:rgba(255,255,255,0.04);border:1px solid rgba(255,255,255,0.07);border-left:3px solid '+lc+';border-radius:10px;padding:10px 12px;margin-bottom:8px">'
       +'<div style="display:flex;align-items:flex-start;gap:8px">'
-      +'<span style="font-size:14px;flex-shrink:0">'+li+'</span>'
+      
       +'<div style="flex:1;min-width:0">'
       +'<div style="font-size:12px;font-weight:600;color:#E8E8E0;white-space:nowrap;overflow:hidden;text-overflow:ellipsis">'+_escHtml(e.msg||'Erreur inconnue')+'</div>'
       +'<div style="display:flex;gap:6px;margin-top:4px;flex-wrap:wrap">'

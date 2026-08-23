@@ -1,4 +1,64 @@
-// MA VIGNE — Service Worker v7.12
+// MA VIGNE — Service Worker v7.14
+// v7.14 (23/08/2026) — LES PASTILLES : AUCUNE DES TROIS FORMES. APP 6.58 -> 6.59.
+//   ★★★ J'AI PROPOSE TROIS FORMES ET LA BONNE REPONSE ETAIT « AUCUNE ».
+//   45 pictogrammes attendaient un lot de pastilles CSS. En allant verifier ou
+//   chaque famille s'affiche AVANT de dessiner : dans TROIS cas sur quatre,
+//   LA COULEUR EST DEJA A L'ECRAN, a quelques pixels.
+//     · `TEMJ` : le type du produit est ecrit EN TOUTES LETTRES au bout de la
+//       meme ligne, dans une etiquette `TCLS` de la meme couleur. La pastille
+//       aurait ete une TROISIEME facon de dire « fongicide ».
+//     · `LVL_ICON` : la carte porte deja `border-left:3px solid LVL_COLOR`.
+//     · la synchronisation : `showSyncBadge(msg, color)` — la couleur EST le
+//       fond du bandeau, elle est passee en argument.
+//   ★ Sept rendus de TEMJ et la table `LVL_ICON` RETIRES, pas migres. C'est
+//   §45b applique a la lettre : « le bandeau porte deja une pastille ».
+//   ★ Le quatrieme cas — le verdict de cadence — est le seul ou la couleur
+//   n'est portee nulle part ailleurs. Il passe a `_mvIconTuile(nom, ton)`, une
+//   primitive qui EXISTE DEPUIS DS-1 et qui est deja sous harnais. Aucune
+//   primitive neuve, aucune classe CSS neuve, aucune table neuve.
+//   ⚠⚠ ET FAIRE PORTER DES TONS A LA TUILE A OUVERT UN TROU LE JOUR MEME :
+//   l'assertion « aucun ton inexistant » ne lisait que `_mvBadge`. Contre-
+//   epreuve : une tuile d'un ton qui n'existe pas — VERT. Fond transparent,
+//   aucune erreur, aucune trace.
+//   ★ Corrige en deux temps, comme `_mvBadge` avant elle : la primitive
+//   retombe sur la tuile neutre ET journalise, et le harnais lit les tons
+//   litteraux contre les classes REELLEMENT declarees dans styles.css — pas
+//   contre une liste en dur qui derive. 28 verts, 19 contre-epreuves.
+//   ⚠ Les deux ensembles de tons restent DIFFERENTS et c'est voulu : le badge
+//   dit un ETAT (vert/ambre/rouge/neutre), la tuile dit une FAMILLE
+//   (terre/vert/or/rouge). Les confondre ferait dire a une tuile autre chose.
+//   ★ La maquette a servi — pas a choisir une forme, a montrer qu'il ne
+//   fallait pas en choisir. C'est ce que §45h demande : regarder avant de
+//   dessiner. Trois jeux d'icones refuses avaient deja paye cette lecon.
+//   ⚠⚠⚠ ET J'AI FAILLI PERDRE LE LOT PRECEDENT : un `git reset --hard` de trop
+//   a efface la migration de reglages.js (6.58), non encore poussee. Recuperee
+//   depuis les fichiers deja livres, et le durcissement rejoue par-dessus.
+//   ★ La regle : un `reset --hard` n'est jamais anodin quand l'arbre porte du
+//   travail que le depot n'a pas encore. Verifier `git status` AVANT, pas apres.
+// v7.13 (23/08/2026) — LES REGLAGES, ET LA MAQUETTE DES PASTILLES. APP 6.57 -> 6.58.
+//   ★ reglages.js : 116 -> 90. La table des modules visibles par salarie,
+//   l'historique d'emploi (embauche / renouvellement / taux), les alertes de
+//   campagne. Les deux tables passent au NOM et leurs trois points de rendu
+//   a `_mvIcon` — un nom faux rendrait un carre pointille, plus un glyphe.
+//   ★★ ET UNE MAQUETTE, PAS DU CODE : `maquette-pastilles.html`.
+//   45 pictogrammes ont ete LAISSES DE COTE au fil des sept derniers lots,
+//   toujours pour la meme raison : ce sont des CODES COULEUR. `TEMJ` (dix
+//   intrants), le feu tricolore du Pilotage, `LVL_ICON` (gravite d'une
+//   erreur), les trois etats de synchronisation. La couleur y porte le sens ;
+//   dix icones de meme forme l'effaceraient.
+//   ⚠ §45h l'a coute cher une fois : quatre jeux d'icones livres, TROIS
+//   refuses, parce que j'ai dessine contre un adjectif au lieu d'une
+//   reference. La regle qui en est sortie s'applique ici mot pour mot — on
+//   REND UNE PLANCHE AUX TAILLES REELLES D'EMPLOI avant d'integrer.
+//   ★ La maquette montre TROIS formes (point 9 px, anneau 11 px, barre 4x15)
+//   sur les quatre familles reelles, en clair et en sombre, dans une ligne de
+//   liste — pas sur une planche a 48 px. Elle montre aussi une pastille et
+//   une icone COTE A COTE : si elles ne se distinguent pas d'un coup d'oeil,
+//   on aura deux vocabulaires pour une seule grammaire.
+//   ★ Ce que la maquette etablit deja : `TCLS` porte DEJA les dix couleurs
+//   des intrants (styles.css). La pastille ne cree aucune table — elle
+//   reutilise celle qui existe. Et quatre entrees sur dix (MFSC, Adjuvant,
+//   Mixte, Melange) ne sont PAS des couleurs : elles gardent une icone.
 // v7.12 (23/08/2026) — LA CONSOLE GUERETTECH. APP 6.56 -> 6.57.
 //   ★ admin-gt.js : 111 -> 67. La console operateur — fiche client, journal
 //   d'acces, erreurs, leads, installation depuis un dossier.
@@ -2592,7 +2652,7 @@
 // v2.22 — Fix profils vides : guard vide dans loadData() pour MEMBRES/SAISONS/TACHES
 // v2.17 — Onboarding intégré + tenantId · v2.06 — Firebase Auth · v2.00–v2.05 — divers
 const DEBUG = self.location.hostname === 'localhost' || self.location.hostname === '127.0.0.1';
-const CACHE_NAME   = 'mavigne-v7.12';
+const CACHE_NAME   = 'mavigne-v7.14';
 const TENANT_CACHE = 'mavigne-tenant';   // Cache persistant — préservé à chaque mise à jour SW
 const SYNC_TAG     = 'mavigne-sync';
 
@@ -2608,7 +2668,7 @@ const CDN_URLS = [
 ];
 
 self.addEventListener('install', event => {
-  if(DEBUG) console.log('[SW] Ma Vigne v7.12 installé');
+  if(DEBUG) console.log('[SW] Ma Vigne v7.14 installé');
   event.waitUntil(
     caches.open(CACHE_NAME).then(async cache => {
       // ── Cœur applicatif : STRICT (mise à jour ATOMIQUE) ──
@@ -2624,7 +2684,7 @@ self.addEventListener('install', event => {
 });
 
 self.addEventListener('activate', event => {
-  if(DEBUG) console.log('[SW] Ma Vigne v7.12 activé');
+  if(DEBUG) console.log('[SW] Ma Vigne v7.14 activé');
   event.waitUntil(
     caches.keys().then(keys =>
       Promise.all(

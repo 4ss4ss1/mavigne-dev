@@ -284,8 +284,8 @@ function renderReglages(){
             +'<div class="per-meta">'+_escHtml(meta)+'</div>'
           +'</div>'
           +'<div class="per-act">'
-            +'<button class="sc-edit-saison" data-idx="'+i+'" title="Modifier">\u270f\ufe0f</button>'
-            +'<button class="sc-del-saison dgr" data-idx="'+i+'" title="Supprimer">\ud83d\uddd1</button>'
+            +'<button class="sc-edit-saison" data-idx="'+i+'" title="Modifier">'+_mvIcon('crayon',16)+'</button>'
+            +'<button class="sc-del-saison dgr" data-idx="'+i+'" title="Supprimer">'+_mvIcon('corbeille',16)+'</button>'
           +'</div>'
         +'</div>';
       }).join('')+_cmpLienArchives()+'<button onclick="window._repairSessSaisons&&window._repairSessSaisons()" style="width:100%;margin-top:10px;padding:11px;border:1.5px solid var(--gris-clair);border-radius:11px;background:var(--bg-app);color:var(--texte-doux);font-family:inherit;font-size:13px;font-weight:600;cursor:pointer">'+_mvIcon('outil',16)+' Recaler les sessions tracteur sur leur saison</button>'+'<button onclick="window._mvRepairSaisonProg&&window._mvRepairSaisonProg()" style="width:100%;margin-top:8px;padding:11px;border:1.5px solid var(--gris-clair);border-radius:11px;background:var(--bg-app);color:var(--texte-doux);font-family:inherit;font-size:13px;font-weight:600;cursor:pointer">'+_mvIcon('rotation',16)+' Reconstruire l’avancement d’après le journal</button>';
@@ -801,8 +801,8 @@ function _emhCommit(m,H,msg){
   window._mvHistMirror(m);
   window.saveData('membres',msg||'\u{1F4C7} Historique mis \u00e0 jour');
 }
-var _EMH_LBL={ embauche:{i:'\u{1F4C4}',n:'Embauche'}, renouvellement:{i:'\u{1F504}',n:'Renouvellement'},
-               fin:{i:'\u23F9',n:'Fin de contrat'}, taux:{i:'\u{1F4B6}',n:'Changement de taux'} };
+var _EMH_LBL={ embauche:{i:'document',n:'Embauche'}, renouvellement:{i:'rotation',n:'Renouvellement'},
+               fin:{i:'\u23F9',n:'Fin de contrat'}, taux:{i:'euro',n:'Changement de taux'} };
 
 // Le bloc complet : rappel + contrat en cours + historique + bouton.
 function _emhRender(nom){
@@ -824,7 +824,7 @@ function _emhRapHtml(m,last,auj){
   if(j<0||j>30) return '';
   var urg=(j<=7), nomA=_escAttr(m.nom);
   return '<div class="emh-rap'+(urg?' urg':'')+'">'
-    +'<div class="emh-rap-t">\u26A0\uFE0F Contrat \u00e0 renouveler</div>'
+    +'<div class="emh-rap-t">'+_mvIcon('alerte',16)+' Contrat \u00e0 renouveler</div>'
     +'<div class="emh-rap-s">Le '+_escHtml(last.type||'contrat')+' se termine le <b>'+_emhFmt(last.fin)+'</b>\u00a0\u2014 '
     +(j===0?'aujourd\u2019hui':j===1?'demain':'dans '+j+' jours')+'.</div>'
     +'<button type="button" class="emh-rap-b" onclick="_emhForm(\''+nomA+'\',\'renouvellement\')">\u{1F504} Renouveler</button>'
@@ -876,7 +876,7 @@ function _emhHistHtml(m,P,adm){
     var pi=inP(e.d);
     if(prev!==null&&pi>=0&&prev>=0&&pi<prev){
       var n=_emhJours(P[pi].fin,P[prev].debut)-1;
-      h+='<div class="emh-gap"><div class="emh-gap-t">\u2702\uFE0F Coupure de '+n+' jour'+(n>1?'s':'')
+      h+='<div class="emh-gap"><div class="emh-gap-t">'+_mvIcon('secateur',16)+' Coupure de '+n+' jour'+(n>1?'s':'')
         +'\u00a0\u2014 du '+_emhFmt(P[pi].fin)+' au '+_emhFmt(P[prev].debut)+'</div>'
         +'<div class="emh-gap-s">Le compteur du contrat pr\u00e9c\u00e9dent est <b>sold\u00e9</b>\u00a0: pay\u00e9, donc \u00e0 z\u00e9ro. '
         +'Le nouveau repart de sa date de d\u00e9but, sans d\u00fb ni indu.</div></div>';
@@ -893,7 +893,7 @@ function _emhHistHtml(m,P,adm){
     h+='<div class="'+cls+'"><span class="emh-dot"></span>'
       +'<span class="emh-d">'+String(e.d).slice(8,10)+'/'+String(e.d).slice(5,7)+'<br>'
         +'<span style="font-weight:500;opacity:.7">'+String(e.d).slice(0,4)+'</span></span>'
-      +'<span class="emh-m"><span class="emh-t">'+_EMH_LBL[e.t].i+' '+_EMH_LBL[e.t].n+'</span>'
+      +'<span class="emh-m"><span class="emh-t">'+_mvIcon(_EMH_LBL[e.t].i,16)+' '+_EMH_LBL[e.t].n+'</span>'
         +'<span class="emh-s">'+sub+'</span></span>'
       +'<button type="button" class="emh-x" aria-label="Retirer cet \u00e9v\u00e9nement" '
         +'onclick="_emhDel(\''+nomA+'\',\''+_escAttr(e.t)+'\',\''+_escAttr(e.d)+'\')">\u00d7</button></div>';
@@ -948,13 +948,13 @@ function _cmpFrise(){
   if(curN<=b) trous.push({a:curN,b:b});
   var couv=Math.round((b-a+1-trous.reduce(function(n,g){return n+(g.b-g.a+1);},0))/(b-a+1)*100);
   var al='';
-  if(ovl.length) al+='<div class="cmp-alert bad"><span class="ic">\u26A0</span><div><b>Chevauchement</b> sur '
+  if(ovl.length) al+='<div class="cmp-alert bad"><span class="ic">'+_mvIcon('alerte',16)+'</span><div><b>Chevauchement</b> sur '
     +_escHtml(ovl.join(', '))+'. Une date couverte deux fois est rattach\u00e9e \u00e0 la p\u00e9riode ouverte '
     +'le plus r\u00e9cemment \u2014 l\u2019autre ne verra jamais ces heures.</div></div>';
-  if(trous.length) al+='<div class="cmp-alert warn"><span class="ic">\u26A0</span><div><b>Trou dans la campagne</b> : '
+  if(trous.length) al+='<div class="cmp-alert warn"><span class="ic">'+_mvIcon('alerte',16)+'</span><div><b>Trou dans la campagne</b> : '
     +_escHtml(trous.map(function(g){return _cmpFr(_cmpISO(g.a))+' \u2192 '+_cmpFr(_cmpISO(g.b));}).join(' \u00b7 '))
     +'. Une saisie dat\u00e9e l\u00e0 ne se rattache \u00e0 aucune p\u00e9riode.</div></div>';
-  if(!ovl.length&&!trous.length) al+='<div class="cmp-alert ok"><span class="ic">\u2713</span><div>'
+  if(!ovl.length&&!trous.length) al+='<div class="cmp-alert ok"><span class="ic">'+_mvIcon('check',16)+'</span><div>'
     +'La campagne est couverte sans trou ni chevauchement.</div></div>';
   return '<div class="cmp-head"><span class="t">Campagne '+_escHtml(_cmpFr(W.a)+' \u2192 '+_cmpFr(W.b))+'</span>'
     +'<span class="n">'+couv+'% couvert</span></div>'
@@ -1134,7 +1134,7 @@ function _cmpEchelle(a,b){
 function _cmpLienArchives(){
   var n=_cmpArchivees(); if(!n) return '';
   return '<div class="cmp-arc-lien" onclick="window._pilOpenArchives&&window._pilOpenArchives()">'
-    +'<span class="ic">\uD83D\uDDC3\uFE0F</span><div><b>'+n+' p\u00e9riode'+(n>1?'s':'')+' archiv\u00e9e'+(n>1?'s':'')+'</b><br>'
+    +'<span class="ic">'+_mvIcon('dossier',16)+'</span><div><b>'+n+' p\u00e9riode'+(n>1?'s':'')+' archiv\u00e9e'+(n>1?'s':'')+'</b><br>'
     +'Pilotage \u203A Archives \u2014 frises, heures et co\u00fbts des campagnes pass\u00e9es.</div>'
     +'<span class="ch">\u203A</span></div>';
 }
@@ -1648,13 +1648,13 @@ async function saveMembre(){
 // qui est reellement protege l'est cote rules (SEC-1 : `paie`, `planning_*`).
 // Ne jamais repondre a un client que ca « interdit l'acces » a une donnee.
 var _EM_MODS=[
-  {k:'vigne',    ic:'\uD83C\uDF3F', l:'Vigne',    d:'Accueil, parcelles, avancement, journal'},
-  {k:'tracteur', ic:'\uD83D\uDE9C', l:'Tracteur', d:'Sessions, entretien, carburant'},
-  {k:'phyto',    ic:'\uD83E\uDDEA', l:'Phyto',    d:'Registre des traitements, catalogue E-Phy'},
-  {k:'cave',     ic:'\uD83C\uDF77', l:'Cave',     d:'Le Cuvier, Le Chai, Le mill\u00e9sime'},
-  {k:'reserve',  ic:'\uD83D\uDCE6', l:'R\u00e9serve',  d:'Intrants, f\u00fbts, bilan mati\u00e8re'},
-  {k:'planning', ic:'\uD83D\uDCC5', l:'Planning', d:'Heures, cong\u00e9s, compteur'},
-  {k:'pilotage', ic:'\uD83D\uDCCA', l:'Pilotage', d:'Tableau de bord'}
+  {k:'vigne',    ic:'feuille', l:'Vigne',    d:'Accueil, parcelles, avancement, journal'},
+  {k:'tracteur', ic:'tracteur', l:'Tracteur', d:'Sessions, entretien, carburant'},
+  {k:'phyto',    ic:'eprouvette', l:'Phyto',    d:'Registre des traitements, catalogue E-Phy'},
+  {k:'cave',     ic:'verre', l:'Cave',     d:'Le Cuvier, Le Chai, Le mill\u00e9sime'},
+  {k:'reserve',  ic:'carton', l:'R\u00e9serve',  d:'Intrants, f\u00fbts, bilan mati\u00e8re'},
+  {k:'planning', ic:'calendrier', l:'Planning', d:'Heures, cong\u00e9s, compteur'},
+  {k:'pilotage', ic:'graphique', l:'Pilotage', d:'Tableau de bord'}
 ];
 // Profils rapides : un domaine de 4 permanents + 7 saisonniers, c'est 7 cases a
 // cocher par personne. Ces boutons posent une combinaison d'un geste, qu'on
@@ -1682,24 +1682,24 @@ function _emModsHtml(m){
   var list=_emModsFor(m.roles);
   if(!list.length) return '';
   var off=list.filter(function(x){return mods[x.k]===false;}).length;
-  return '<div class="fl" style="margin-top:14px">\uD83D\uDC41\uFE0F Modules visibles '
+  return '<div class="fl" style="margin-top:14px">'+_mvIcon('oeil',16)+' Modules visibles '
       +'<span style="font-size:11px;color:var(--texte-doux,#6b7280);font-weight:400">('
       +(off?(off+' masqu\u00e9'+(off>1?'s':'')):'tous visibles')+')</span></div>'
     +'<div style="font-size:11px;color:var(--texte-doux,#6b7280);margin:-2px 2px 8px;line-height:1.5">'
       +'All\u00e8ge la barre du bas de cette personne. \u00c0 d\u00e9cocher pour un poste sp\u00e9cialis\u00e9 \u2014 un caviste n\u2019a pas besoin de l\u2019avancement des vignes. '
       +'Ce n\u2019est pas une s\u00e9curit\u00e9\u202f: les droits d\u2019\u00e9criture restent ceux des r\u00f4les, et R\u00e9glages reste toujours accessible.</div>'
     +'<div class="emod-presets">'
-      +'<button type="button" class="emod-preset" onclick="_emModPreset(\'tout\')">\u2728 Tout</button>'
-      +'<button type="button" class="emod-preset" onclick="_emModPreset(\'vigne\')">\uD83C\uDF3F Vigne</button>'
-      +'<button type="button" class="emod-preset" onclick="_emModPreset(\'tracteur\')">\uD83D\uDE9C Tracteur</button>'
-      +'<button type="button" class="emod-preset" onclick="_emModPreset(\'cave\')">\uD83C\uDF77 Cave</button>'
-      +'<button type="button" class="emod-preset" onclick="_emModPresetRole()">\uD83C\uDFAF Selon le r\u00f4le</button>'
+      +'<button type="button" class="emod-preset" onclick="_emModPreset(\'tout\')">'+_mvIcon('etincelles',16)+' Tout</button>'
+      +'<button type="button" class="emod-preset" onclick="_emModPreset(\'vigne\')">'+_mvIcon('feuille',16)+' Vigne</button>'
+      +'<button type="button" class="emod-preset" onclick="_emModPreset(\'tracteur\')">'+_mvIcon('tracteur',16)+' Tracteur</button>'
+      +'<button type="button" class="emod-preset" onclick="_emModPreset(\'cave\')">'+_mvIcon('verre',16)+' Cave</button>'
+      +'<button type="button" class="emod-preset" onclick="_emModPresetRole()">'+_mvIcon('cible',16)+' Selon le r\u00f4le</button>'
     +'</div>'
     +'<div id="em-mods-list">'
       +list.map(function(x){
         var on=(mods[x.k]!==false);
         return '<div class="emod-row">'
-          +'<span class="emod-ic" aria-hidden="true">'+x.ic+'</span>'
+          +'<span class="emod-ic" aria-hidden="true">'+_mvIcon(x.ic,18)+'</span>'
           +'<span class="emod-txt"><b>'+_escHtml(x.l)+'</b><span>'+_escHtml(x.d)+'</span></span>'
           +'<div class="role-chk emod-chk'+(on?' on':'')+'" data-mod="'+x.k+'" role="checkbox" aria-checked="'+(on?'true':'false')+'" aria-label="'+_escAttr(x.l)+'" onclick="_emModToggle(this)">'+(on?'\u2713':'')+'</div>'
           +'</div>';
@@ -1739,7 +1739,7 @@ function _emModPresetRole(){
     el.textContent=on?'\u2713':'';
     el.setAttribute('aria-checked',on?'true':'false');
   });
-  if(window.showToast) showToast(off.length?('\u2713 '+off.length+' module'+(off.length>1?'s':'')+' masqu\u00e9'+(off.length>1?'s':'')):'\u2713 Tous les modules visibles','#3D6B27');
+  if(window.showToast) showToast(off.length?(''+off.length+' module'+(off.length>1?'s':'')+' masqu\u00e9'+(off.length>1?'s':'')):'\u2713 Tous les modules visibles','#3D6B27');
 }
 
 function _emModPreset(key){
@@ -1788,7 +1788,7 @@ function editMembre(nom){
     // nombre par defaut vit ICI ; il se change jour par jour dans le Planning.
     // Volontairement SOUS le rattachement : c'est le meme genre de drapeau, il
     // dit ce que cette fiche EST, pas ce qu'elle fait.
-    +'<div class="fl" style="margin-top:14px">\u{1F465} \u00c9quipe collective</div>'
+    +'<div class="fl" style="margin-top:14px">'+_mvIcon('equipe',16)+' \u00c9quipe collective</div>'
     +'<div style="display:flex;align-items:center;justify-content:space-between;gap:12px;background:#f8fafc;border:1.5px solid #e5e7eb;border-radius:10px;padding:11px 12px">'
     +'<div style="font-size:13px;color:var(--texte,#374151);font-weight:600">Une ligne, plusieurs personnes<div style="font-size:11px;color:var(--texte-doux,#6b7280);font-weight:400;margin-top:1px;max-width:300px">Pour la vendange ou un prestataire. Ni compteur des 1607\u00a0h, ni cong\u00e9s, ni heures sup, ni compte de connexion\u00a0: ce n\u2019est pas un salari\u00e9, c\u2019est une \u00e9quipe.</div></div>'
     +'<div class="role-chk '+(m.collectif?'on':'')+'" id="em-collectif" onclick="toggleEmCollectif(this)">'+(m.collectif?'\u2713':'')+'</div>'
@@ -1907,7 +1907,7 @@ function _emhForm(nom,t){
         grille:(last&&last.grille)||'standard',
         v:((typeof window._mvPaieTauxEffAt==='function')?(window._mvPaieTauxEffAt(m,auj)||0):0)};
   if(t==='embauche'){ window._EMH.d=''; window._EMH.type='CDD'; }
-  var h='<div class="modal-hd"><div class="modal-title">'+_EMH_LBL[t].i+' '+_EMH_LBL[t].n+'</div></div><div class="modal-body">';
+  var h='<div class="modal-hd"><div class="modal-title">'+_mvIcon(_EMH_LBL[t].i,18)+' '+_EMH_LBL[t].n+'</div></div><div class="modal-body">';
   if(t==='embauche'){
     h+='<div class="emh-s" style="margin-bottom:6px">Un nouveau contrat. Le pr\u00e9c\u00e9dent, s\u2019il existe, sera archiv\u00e9\u00a0\u2014 il reste lisible et imprimable.</div>'
      +'<div class="fl">Date de d\u00e9but</div><input type="date" class="emh-in" id="emh-d" oninput="window._EMH.d=this.value;_emhEff()">'

@@ -12,7 +12,7 @@
 //   marche par ordre de chargement n'est pas un appel correct ». La palette
 //   semantique arrive par un VRAI import, resolu au build : elle ne peut plus
 //   etre absente au moment ou un graphe la lit.
-import { _PIL_SEM, _mvInfoBtn, _mvIcon, _mvBadge, _escAttr } from './utils.js';
+import { _PIL_SEM, _mvInfoBtn, _mvIcon, _mvIconTuile, _mvBadge, _escAttr } from './utils.js';
 
 const DEBUG = location.hostname === 'localhost' || location.hostname === '127.0.0.1';
 if (DEBUG) console.log('[Ma Vigne] pilotage.js chargé');
@@ -6535,7 +6535,7 @@ function _pecCss(){
   +'.pec-note{font-size:var(--pt-micro,11px);color:var(--texte-doux);line-height:1.6;margin-top:12px}'
   +'.pec-note b{color:var(--texte-med)}'
   +'.pec-verdict{display:flex;gap:15px;align-items:flex-start;padding:17px 20px}'
-  +'.pec-verdict .em{font-size:var(--pt-xl,27px);line-height:1;flex:none}'
+  +'.pec-verdict .em{line-height:1;flex:none}'
   +'.pec-verdict .t{font-family:\'Cormorant Garamond\',serif;font-size:var(--pt-lg,23px);font-weight:600;color:var(--texte);line-height:1.22}'
   +'.pec-verdict .d{font-size:var(--pt-txt,12.5px);color:var(--texte-doux);margin-top:5px;line-height:1.6}'
   +'.pec-verdict .d b{color:var(--texte-med)}'
@@ -7265,37 +7265,37 @@ function _pecEcartSvg(E,w){
 // ⚠️ La pastille est celle de `pil.cadence` — on n'ecrit pas une deuxieme fiche
 //   qui dirait la meme chose sous un autre nom.
 function _pecVerdict(E,TL){
-  var em='\uD83D\uDCCA', t='', d='', act=[];
+  var em=['graphique',''], t='', d='', act=[];
   var ec=E.cad.ok?E.cad.ecart:null;
   var sup=(ec!=null)?Math.max(0,E.projFin-E.budget):0;
   if(!E.hasRate){
-    em='\uD83D\uDD0C'; t='Le chiffrage n\u2019est pas branch\u00e9';
+    em=['eclair','']; t='Le chiffrage n\u2019est pas branch\u00e9';
     d='Sans <b>taux horaire</b> dans les fiches salari\u00e9s, la main-d\u2019\u0153uvre \u2014 le premier poste du domaine \u2014 compte pour z\u00e9ro.';
     act.push(['diag','equipe','R\u00e9glages \u203a \u00c9quipe']);
   } else if(E.avc<3){
-    em='\uD83C\uDF31'; t='La p\u00e9riode d\u00e9marre';
+    em=['pousse','']; t='La p\u00e9riode d\u00e9marre';
     d='Budget de r\u00e9f\u00e9rence : <b>'+_pilEsc(_ecoEur(E.budget))+'</b>, soit <b>'+_pilEsc(_ecoEur(E.coutHaB))+' \u00e0 l\u2019hectare</b> sur '+_pilHa(E.tot.surf)+' ha.';
   } else if(ec===null){
-    em='\uD83D\uDCD3'; t='Le budget tient, la cadence reste \u00e0 mesurer';
+    em=['journal','']; t='Le budget tient, la cadence reste \u00e0 mesurer';
     d='<b>'+_pilEsc(_ecoEur(E.engage))+'</b> engag\u00e9s sur <b>'+_pilEsc(_ecoEur(E.budget))+'</b> ('+_pilEsc(_pecPct(E.cons))+'), pour '+_pilEsc(_pecPct(E.avc))+' du travail fait. '
       +(E.cad.src
          ? ('L\u2019\u00e9cart de cadence appara\u00eetra seul, d\u00e8s <b>'+Math.round(E.cad.seuil)+' %</b> d\u2019avancement.')
          : 'L\u2019\u00e9cart de cadence est indisponible : aucune heure de planning sur cette p\u00e9riode.');
   } else if(ec>15){
-    em='\uD83D\uDD34'; t='Le travail prend plus de temps que le bar\u00e8me';
+    em=['alerte','rouge']; t='Le travail prend plus de temps que le bar\u00e8me';
     d='Sur ce qui est fait, l\u2019\u00e9quipe a pass\u00e9 <b>'+_pilEsc(_pecPct(ec))+' de temps en plus</b> que le bar\u00e8me h/ha \u2014 '+_ecoH1(E.cad.hReel)+' h de pr\u00e9sence contre '+_ecoH1(E.cad.hBar)+' h pr\u00e9vues. \u00c0 cette cadence, la p\u00e9riode irait vers <b>'+_pilEsc(_pecEurK(E.projFin))+'</b>, soit <b>'+_pilEsc(_pecEurK(sup))+'</b> au-dessus du budget.';
     act.push(['sub','pos','Voir quel travail d\u00e9rape']);
     act.push(['diag','taches','R\u00e9glages \u203a T\u00e2ches']);
   } else if(ec>5){
-    em='\uD83D\uDFE0'; t='L\u00e9g\u00e8re d\u00e9rive de cadence';
+    em=['alerte','or']; t='L\u00e9g\u00e8re d\u00e9rive de cadence';
     d='<b>'+_pilEsc(_pecPct(ec))+'</b> de temps en plus que le bar\u00e8me sur le travail fait. Rien d\u2019alarmant \u2014 mais si cela tient jusqu\u2019au bout, la p\u00e9riode co\u00fbtera <b>'+_pilEsc(_pecEurK(E.projFin))+'</b> au lieu de '+_pilEsc(_pecEurK(E.budget))+'.';
     act.push(['sub','pos','Voir travail par travail']);
   } else if(ec<-8){
-    em='\uD83D\uDFE2'; t='L\u2019\u00e9quipe va plus vite que le bar\u00e8me';
+    em=['graphique','vert']; t='L\u2019\u00e9quipe va plus vite que le bar\u00e8me';
     d='<b>'+_pilEsc(_pecPct(Math.abs(ec)))+' de temps en moins</b> que pr\u00e9vu sur le travail fait. Deux lectures, qui ne s\u2019excluent pas : le bar\u00e8me h/ha est large, ou l\u2019\u00e9quipe est rod\u00e9e.';
     act.push(['diag','taches','R\u00e9glages \u203a T\u00e2ches']);
   } else {
-    em='\uD83D\uDFE2'; t='La cadence colle au bar\u00e8me';
+    em=['graphique','vert']; t='La cadence colle au bar\u00e8me';
     d='\u00c9cart de <b>'+_pilEsc(_pecPct(Math.abs(ec)))+'</b> entre le temps pass\u00e9 et le bar\u00e8me : le budget de <b>'+_pilEsc(_ecoEur(E.budget))+'</b> est cr\u00e9dible. Engag\u00e9 \u00e0 ce jour <b>'+_pilEsc(_ecoEur(E.engage))+'</b>, reste \u00e0 engager <b>'+_pilEsc(_ecoEur(E.resteE))+'</b>.';
   }
   if(TL && TL.ok && TL.pace>0 && TL.projMs && TL.objMs && TL.projMs>TL.objMs){
@@ -7319,7 +7319,7 @@ function _pecVerdict(E,TL){
       ? '<button class="pil-diag-go ghost" data-diag="'+_pilEsc(a[1])+'">'+_pilEsc(a[2])+' \u203a</button>'
       : '<button class="pil-diag-go ghost" data-pec="sub" data-v="'+_pilEsc(a[1])+'">'+_pilEsc(a[2])+' \u203a</button>';
   }).join('');
-  return '<div class="pec-card"><div class="pec-verdict"><div class="em">'+em+'</div><div>'
+  return '<div class="pec-card"><div class="pec-verdict"><div class="em">'+_mvIconTuile(em[0],em[1])+'</div><div>'
     +'<div class="t">'+t+(typeof _mvInfoBtn==='function'?(' '+_mvInfoBtn('pil.cadence')):'')+'</div>'
     +'<div class="d">'+d+'</div>'
     +(cadre?('<div class="pec-vcadre"><span>'+cadre+'</span></div>'):'')

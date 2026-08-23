@@ -85,7 +85,7 @@ function openCatDetail(nom){
     document.body.appendChild(ov);
   }
   const title=document.getElementById('ocd-title');
-  title.textContent=(TEMJ[p.type]||'')+' '+p.nom;
+  title.textContent=p.nom;
   title.dataset.nom=p.nom;
   document.getElementById('ocd-body').innerHTML=`
     <div style="display:grid;grid-template-columns:1fr 1fr;gap:10px;margin-bottom:12px">
@@ -724,7 +724,7 @@ function openTraitDetail(idx){
   const draeH=_dre.h;
   const draeR=draeH>0?Math.max(0,draeH-Math.floor((today-new Date(t.date))/3600000)):0;
   const _canEd=isAdmin()||isTractoriste();
-  document.getElementById('otd-title').textContent=(TEMJ[m.type]||'')+' '+t.produit;
+  document.getElementById('otd-title').textContent=t.produit;
   document.getElementById('otd-sub').textContent=fmtDate(t.date)+((t.conducteur||t.operateur)?' · '+(t.conducteur||t.operateur):'');
   document.getElementById('otd-body').innerHTML=`
     <div style="display:grid;grid-template-columns:1fr 1fr;gap:10px;margin-bottom:14px">
