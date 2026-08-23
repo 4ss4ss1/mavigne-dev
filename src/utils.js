@@ -23,7 +23,7 @@ export const GT_ADMIN_EMAIL = 'ngdevpro@gmail.com';
 // WHATS_NEW   : tableau vide = modal desactive pour cette version.
 // Format item : { emoji:'📅', titre:'Titre court', desc:'Phrase utilisateur.' }
 // Regle : seulement les changements visibles par les utilisateurs.
-export const APP_VERSION = '6.51';
+export const APP_VERSION = '6.52';
 // ════ Journal des nouveautés (récap cumulatif) ════
 // Une entrée par version, la PLUS RÉCENTE EN HAUT : { v:'5.10', items:[ {emoji,titre,desc}, … ] }
 // À chaque release visible → AJOUTER un bloc en tête (ne pas remplacer). items:[] = release technique (rien à afficher).
@@ -354,6 +354,10 @@ window._mvGraphRepeindre = function(){
 };
 
 export const WHATS_NEW = [
+  { v: '6.52', items: [
+    { emoji: 'tracteur', titre: 'Les \u00e9crans du Tracteur passent aux vraies ic\u00f4nes', desc: "Le chrono, la cuve GNR, la prochaine r\u00e9vision et le catalogue des produits gardaient leurs anciens pictogrammes. Ils suivent maintenant le reste de l\u2019application \u2014 et, comme partout ailleurs, ils prennent la couleur du texte \u00e0 c\u00f4t\u00e9 d\u2019eux au lieu de rester des taches vives en mode sombre. <b>Aucun bouton n\u2019a chang\u00e9 de place.</b>" },
+    { emoji: 'liste', titre: 'La liste des activit\u00e9s n\u2019affiche plus que leur nom', desc: "Dans le menu d\u00e9roulant d\u2019une session tracteur, chaque activit\u00e9 \u00e9tait pr\u00e9c\u00e9d\u00e9e de son pictogramme. Un menu d\u00e9roulant est le seul endroit de l\u2019application o\u00f9 une vraie ic\u00f4ne ne peut pas entrer \u2014 c\u2019est le navigateur qui le dessine, pas nous. Le pictogramme a donc <b>rejoint les puces de filtre</b>, juste au-dessus, o\u00f9 il est lisible partout. <b>Vos activit\u00e9s et vos sessions ne changent pas</b>, et celles d\u00e9j\u00e0 enregistr\u00e9es non plus." }
+  ] },
   { v: '6.51', items: [
 { emoji: 'soleil', titre: 'Le mode sombre ne s\u2019arr\u00eate plus \u00e0 la porte des fen\u00eatres', desc: "En th\u00e8me sombre, chaque fen\u00eatre qui s\u2019ouvre par-dessus l\u2019\u00e9cran \u2014 une confirmation, un choix de parcelle, un export, les conditions d\u2019utilisation \u2014 sortait <b>en blanc</b>, en pleine nuit. Le soir au bureau ou t\u00f4t le matin dans la cuve, \u00e7a \u00e9blouissait \u00e0 chaque clic. <b>Trente-sept fen\u00eatres</b> \u00e9taient concern\u00e9es. Elles suivent d\u00e9sormais le th\u00e8me comme le reste de l\u2019application. <b>Rien ne change en th\u00e8me clair</b>, et aucune donn\u00e9e n\u2019est touch\u00e9e." }
   ] },

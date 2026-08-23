@@ -1,13 +1,13 @@
 {
-  "total": 1352,
+  "total": 1309,
   "modules": {
-    "app": 193,
+    "app": 191,
     "utils": 376,
     "pilotage": 165,
     "planning": 124,
     "reglages": 116,
     "cave": 147,
-    "tracteur": 46,
+    "tracteur": 5,
     "phyto": 10,
     "reserve": 34,
     "admin-gt": 111,

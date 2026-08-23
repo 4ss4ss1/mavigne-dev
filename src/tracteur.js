@@ -7,7 +7,7 @@
 
 import { isAdmin, isTractoriste, isSaisonnier, canWrite,
          showToast, _escHtml, _escAttr, tNom, logError, _swNotify, dreEffectif
-, _mvBadge, _mvIcon } from './utils.js';
+, _mvBadge, _mvIcon, _actIcone, _mvSetIcon } from './utils.js';
 
 // ── Flag debug (console.log silencieux en prod — manquait après extraction du module) ──
 const DEBUG = location.hostname === 'localhost' || location.hostname === '127.0.0.1';
@@ -102,7 +102,7 @@ function ephyRender(){
     var _dl=dreEffectif(p.drae,p.type,p.dreH,p.dreHc);
     if(_dl.h>0 && !_dl.defaut) minis.push(_ephyMini('Réentrée '+_dl.h+'h','m-drae'));
     if((p.ment||[]).indexOf('AB')>=0) minis.push(_ephyMini('AB','m-ab'));
-    var stat = p.statut==='ok' ? '<span class="ephy-stat s-ok">\u2713 Autorisé</span>' : '<span class="ephy-stat s-ko">\u26d4 Retiré</span>';
+    var stat = p.statut==='ok' ? '<span class="ephy-stat s-ok">'+_mvIcon('check',16)+' Autorisé</span>' : '<span class="ephy-stat s-ko">'+_mvIcon('interdit',16)+' Retiré</span>';
     return '<div class="catitem'+(p.statut==='ko'?' is-ko':'')+'" onclick="openEphyDetail(\'' + _escAttr(p.amm) + '\')">'
       + '<div class="cat-l"><div class="cat-nom">'+(TEMJ[p.type]||'\ud83e\uddea')+' '+_escHtml(p.nom)+'</div>'
       + '<div class="cat-det"><span style="font-family:monospace">AMM '+_escHtml(p.amm)+'</span> · '+_escHtml(p.sub||'—')+'</div>'
@@ -114,15 +114,16 @@ function ephyRender(){
 function openEphyDetail(amm){
   var p = _ephyList().find(function(x){return x.amm===amm;}); if(!p) return;
   var statBox = p.statut==='ok'
-    ? '<div class="oed-box" style="background:var(--vert-pale);grid-column:1/-1"><div class="oed-l">Statut</div><div class="oed-v" style="color:var(--vert)">\u2713 Autorisé à la vente et à l\'usage</div></div>'
-    : '<div class="oed-box" style="background:var(--tag-red-bg,#FEE8E8);grid-column:1/-1"><div class="oed-l">Statut</div><div class="oed-v" style="color:var(--rouge)">\u26d4 Retiré — usage interdit</div>'+((p.retraitDate||p.ecoulement)?'<div style="font-size:11px;color:var(--texte-doux);margin-top:5px">'+(p.retraitDate?'Retrait : <b>'+_escHtml(p.retraitDate)+'</b>':'')+(p.ecoulement?' · Fin d\'écoulement : <b>'+_escHtml(p.ecoulement)+'</b>':'')+'</div>':'')+'</div>';
+    ? '<div class="oed-box" style="background:var(--vert-pale);grid-column:1/-1"><div class="oed-l">Statut</div><div class="oed-v" style="color:var(--vert)">'+_mvIcon('check',16)+' Autorisé à la vente et à l\'usage</div></div>'
+    : '<div class="oed-box" style="background:var(--tag-red-bg,#FEE8E8);grid-column:1/-1"><div class="oed-l">Statut</div><div class="oed-v" style="color:var(--rouge)">'+_mvIcon('interdit',16)+' Retiré — usage interdit</div>'+((p.retraitDate||p.ecoulement)?'<div style="font-size:11px;color:var(--texte-doux);margin-top:5px">'+(p.retraitDate?'Retrait : <b>'+_escHtml(p.retraitDate)+'</b>':'')+(p.ecoulement?' · Fin d\'écoulement : <b>'+_escHtml(p.ecoulement)+'</b>':'')+'</div>':'')+'</div>';
   var usages = (p.usages||[]).map(function(u){
     return '<div class="oed-usage"><div class="oed-uh"><span class="oed-uc">'+_escHtml(u.cible)+'</span><span class="oed-ud">'+_escHtml(u.dose)+'</span></div>'
       + '<div class="oed-ur"><span>DAR : <b>'+(u.dar==='—'?'—':u.dar+' j')+'</b></span><span>ZNT : <b>'+(u.znt==='—'?'—':u.znt+' m')+'</b></span><span>Réentrée : <b>'+dreEffectif(p.drae,p.type,p.dreH,p.dreHc).txt+'</b></span></div></div>';
   }).join('') || '<div style="font-size:12px;color:var(--texte-doux)">Aucun usage vigne listé.</div>';
   var ments = (p.ment||[]).map(function(m){
     var cls = m==='AB'?'m-ab':(m==='Abeilles'?'m-dar':'m-znt');
-    var lbl = m==='Abeilles'?'\ud83d\udc1d Toxique abeilles':(m==='AB'?'\u2713 Utilisable en bio':m);
+    var lbl = m==='Abeilles'?(_mvIcon('abeille',16)+' Toxique abeilles')
+        :(m==='AB'?(_mvIcon('check',16)+' Utilisable en bio'):_escHtml(m));
     return '<span class="ephy-mini '+cls+'">'+lbl+'</span>';
   }).join('');
   document.getElementById('oed-title').textContent = (TEMJ[p.type]||'\ud83e\uddea')+' '+p.nom;
@@ -142,7 +143,7 @@ function openEphyDetail(amm){
       '<div class="oed-grid">'+statBox+dreBox+'<div class="oed-box" style="grid-column:1/-1"><div class="oed-l">Substance active</div><div class="oed-v">'+_escHtml(p.sub||'—')+'</div></div>'+noms2Html+'</div>'
     + (ments?'<div class="ephy-minis" style="margin:0 0 12px">'+ments+'</div>':'')
     + '<div class="oed-sec">Usages homologués · Vigne</div>'+usages
-    + '<div class="oed-disc"><b>\u26a0\ufe0f Donnée indicative.</b> Les informations E-Phy ne sont pas opposables : seul le registre officiel fait foi. Vérifiez avant tout traitement sur <a href="https://ephy.anses.fr" target="_blank" rel="noopener">ephy.anses.fr</a>.</div>';
+    + '<div class="oed-disc"><b>'+_mvIcon('alerte',16)+' Donnée indicative.</b> Les informations E-Phy ne sont pas opposables : seul le registre officiel fait foi. Vérifiez avant tout traitement sur <a href="https://ephy.anses.fr" target="_blank" rel="noopener">ephy.anses.fr</a>.</div>';
   if(window.openOv) window.openOv('ovEphyDetail');
 }
 
@@ -751,7 +752,7 @@ function _gnrCardHtml(){
   if(_gnrEdit && canEdit){
     var gg=g||{};
     return '<div class="ent-resume-card" style="margin-bottom:12px">'
-      +'<div style="font-size:13px;font-weight:600;color:var(--texte);margin-bottom:10px">\u26FD Cuve GNR \u2014 modifier</div>'
+      +'<div style="font-size:13px;font-weight:600;color:var(--texte);margin-bottom:10px">'+_mvIcon('carburant',16)+' Cuve GNR \u2014 modifier</div>'
       +_gnrField('gnr-cap','Capacit\u00e9 de la cuve (L)',gg.capacite)
       +_gnrField('gnr-lvl','Litrage restant (L)',gg.niveau)
       +_gnrField('gnr-seuil','Seuil d\u2019alerte (L)',gg.seuil)
@@ -790,7 +791,7 @@ function _gnrCardHtml(){
   }
   if(!g||!g.capacite){
     return '<div class="ent-resume-card" style="margin-bottom:12px;display:flex;align-items:center;justify-content:space-between;gap:10px">'
-      +'<div><div style="font-size:13px;font-weight:600;color:var(--texte)">\u26FD Cuve GNR</div><div style="font-size:11px;color:var(--texte-doux);margin-top:2px">Non renseign\u00e9e</div></div>'
+      +'<div><div style="font-size:13px;font-weight:600;color:var(--texte)">'+_mvIcon('carburant',16)+' Cuve GNR</div><div style="font-size:11px;color:var(--texte-doux);margin-top:2px">Non renseign\u00e9e</div></div>'
       +(canEdit?'<button onclick="window.openGnrEdit()" style="padding:8px 14px;border:1px solid var(--acier);border-radius:8px;background:transparent;color:var(--acier);font-family:\'Outfit\',sans-serif;font-size:12px;font-weight:600;cursor:pointer;min-height:44px">Renseigner</button>':'')
       +'</div>';
   }
@@ -798,9 +799,9 @@ function _gnrCardHtml(){
   var col=low?'var(--rouge)':pc<40?'var(--orange)':'var(--vert-med)';
   return '<div class="ent-resume-card" style="margin-bottom:12px">'
     +'<div style="display:flex;align-items:center;justify-content:space-between;gap:10px">'
-      +'<div><div style="font-size:13px;font-weight:600;color:var(--texte)">\u26FD Cuve GNR'+(low?' <span style="color:var(--rouge);font-weight:700">\u26A0 bas</span>':'')+'</div>'
+      +'<div><div style="font-size:13px;font-weight:600;color:var(--texte)">'+_mvIcon('carburant',16)+' Cuve GNR'+(low?' <span style="color:var(--rouge);font-weight:700">'+_mvIcon('alerte',16)+' bas</span>':'')+'</div>'
       +'<div style="font-size:11px;color:var(--texte-doux);margin-top:2px">'+_gnrNum(g.niveau)+' / '+_gnrNum(g.capacite)+' L \u00b7 '+pc+' %'+(g.maj?(' \u00b7 maj '+_fmtDate(g.maj)):'')+'</div></div>'
-      +(canEdit?'<button onclick="window.openGnrEdit()" style="padding:8px 12px;border:1px solid var(--gris);border-radius:8px;background:transparent;color:var(--texte-doux);font-family:\'Outfit\',sans-serif;font-size:13px;cursor:pointer;min-width:44px;min-height:44px">\u270f\ufe0f</button>':'')
+      +(canEdit?'<button onclick="window.openGnrEdit()" style="padding:8px 12px;border:1px solid var(--gris);border-radius:8px;background:transparent;color:var(--texte-doux);font-family:\'Outfit\',sans-serif;font-size:13px;cursor:pointer;min-width:44px;min-height:44px">'+_mvIcon('crayon',18)+'</button>':'')
     +'</div>'
     +'<div style="height:8px;border-radius:5px;background:var(--gris-clair);overflow:hidden;margin-top:9px"><i style="display:block;height:100%;width:'+Math.min(pc,100)+'%;background:'+col+'"></i></div>'
     +(isAdmin()?_gnrPrixLigne():'')
@@ -815,7 +816,7 @@ function _revCardHtml(t){
   var canEdit=isAdmin()||isTractoriste(), comp=t.compteur_h, rev=t.revision_h;
   if(_revEdit && canEdit){
     return '<div class="ent-resume-card" style="margin-bottom:12px">'
-      +'<div style="font-size:13px;font-weight:600;color:var(--texte);margin-bottom:10px">\u2699\ufe0f '+_escHtml(t.nom)+' \u2014 prochaine r\u00e9vision</div>'
+      +'<div style="font-size:13px;font-weight:600;color:var(--texte);margin-bottom:10px">'+_mvIcon('engrenage',16)+' '+_escHtml(t.nom)+' \u2014 prochaine r\u00e9vision</div>'
       +_gnrField('rev-comp','Compteur actuel (h)',comp)
       +_gnrField('rev-target','Prochaine r\u00e9vision \u00e0 (h)',rev)
       +'<div style="display:flex;gap:8px;margin-top:6px">'
@@ -828,9 +829,9 @@ function _revCardHtml(t){
   if(hasComp){ var reste=Number(rev)-Number(comp); col=reste<=50?'var(--rouge)':reste<=120?'var(--orange)':'var(--vert-med)'; fw='600'; sub='R\u00e9vision dans '+_gnrNum(reste)+' h \u00b7 '+_gnrNum(comp)+'/'+_gnrNum(rev)+' h'; }
   else { sub='\u00c0 renseigner'; }
   return '<div class="ent-resume-card" style="margin-bottom:12px;display:flex;align-items:center;justify-content:space-between;gap:10px">'
-    +'<div><div style="font-size:13px;font-weight:600;color:var(--texte)">\u2699\ufe0f Prochaine r\u00e9vision</div>'
+    +'<div><div style="font-size:13px;font-weight:600;color:var(--texte)">'+_mvIcon('engrenage',16)+' Prochaine r\u00e9vision</div>'
     +'<div style="font-size:11px;color:'+col+';font-weight:'+fw+';margin-top:2px">'+sub+'</div></div>'
-    +(canEdit?'<button onclick="window.openRevEdit()" style="padding:8px 12px;border:1px solid var(--gris);border-radius:8px;background:transparent;color:var(--texte-doux);font-family:\'Outfit\',sans-serif;font-size:13px;cursor:pointer;min-width:44px;min-height:44px">\u270f\ufe0f</button>':'')
+    +(canEdit?'<button onclick="window.openRevEdit()" style="padding:8px 12px;border:1px solid var(--gris);border-radius:8px;background:transparent;color:var(--texte-doux);font-family:\'Outfit\',sans-serif;font-size:13px;cursor:pointer;min-width:44px;min-height:44px">'+_mvIcon('crayon',18)+'</button>':'')
   +'</div>';
 }
 // ════ APPOINT DE CUVE (admin uniquement) ════
@@ -879,7 +880,7 @@ function saveGnrAppoint(){
   window.PAIE=P; if(window.fbSave) window.fbSave('paie',P);
   _saveData('config');
   _gnrAct=''; renderEntretiens();
-  showToast('Appoint not\u00e9 \u00b7 +'+_gnrNum(l)+' L \u00b7 cuve \u00e0 '+_gnrNum(nv)+' L'+(deb?' \u00b7 \u26A0 plafonn\u00e9e':'')+(pu>0?'':' \u00b7 sans prix'), deb?'#B85A1A':'#3D6B27');
+  showToast('Appoint not\u00e9 \u00b7 +'+_gnrNum(l)+' L \u00b7 cuve \u00e0 '+_gnrNum(nv)+' L'+(deb?' \u00b7 plafonn\u00e9e':'')+(pu>0?'':' \u00b7 sans prix'), deb?'#B85A1A':'#3D6B27');
 }
 function openGnrEdit(){ if(!isAdmin()&&!isTractoriste()){showToast('R\u00e9serv\u00e9 aux tractoristes et \u00e0 l\u2019admin','#C0392B');return;} _gnrEdit=true; _revEdit=false; _gnrAct=''; renderEntretiens(); }
 function cancelGnrEdit(){ _gnrEdit=false; renderEntretiens(); }
@@ -892,7 +893,7 @@ function saveGnr(){
   var cfg=window.CONFIG||{}; cfg.gnr={capacite:cap,niveau:lvl,seuil:seuil,maj:_gnrTodayISO()}; window.CONFIG=cfg;
   _saveData('config');
   _gnrEdit=false; renderEntretiens();
-  showToast('Cuve GNR mise \u00e0 jour \u2713','#3D6B27');
+  showToast('Cuve GNR mise \u00e0 jour','#3D6B27');
 }
 function openRevEdit(){ if(!isAdmin()&&!isTractoriste()){showToast('R\u00e9serv\u00e9 aux tractoristes et \u00e0 l\u2019admin','#C0392B');return;} _revEdit=true; _gnrEdit=false; _gnrAct=''; renderEntretiens(); }
 function cancelRevEdit(){ _revEdit=false; renderEntretiens(); }
@@ -906,7 +907,7 @@ function saveRev(){
   window.TRACTEURS_LIST=TRACTEURS_LIST;
   _saveData('tracteurs_list');
   _revEdit=false; renderEntretiens();
-  showToast('Prochaine r\u00e9vision mise \u00e0 jour \u2713','#3D6B27');
+  showToast('Prochaine r\u00e9vision mise \u00e0 jour','#3D6B27');
 }
 
 function openPlein(){
@@ -1462,7 +1463,7 @@ function renderTracteur(){
   // Filtres activités
   const ac=document.getElementById('act-chips');
   if(ac)ac.innerHTML=`<div class="chip ${window.fAct==='toutes'?'active ac':''}" onclick="window.fAct='toutes';renderTracteur()">Toutes</div>`
-    +ACTIVITES.map(a=>`<div class="chip ${window.fAct===a.nom?'active ac':''}" onclick="window.fAct='${_escAttr(a.nom)}';renderTracteur()">${a.emoji} ${_escHtml(a.nom)}</div>`).join('');
+    +ACTIVITES.map(a=>`<div class="chip ${window.fAct===a.nom?'active ac':''}" onclick="window.fAct='${_escAttr(a.nom)}';renderTracteur()">${_mvIcon(_actIcone(a.emoji),16)} ${_escHtml(a.nom)}</div>`).join('');
 
   // Données filtrées + triées (en cours en premier)
   let data=_SS.filter(s=>{if(window.fCond!=='tous'&&s.conducteur!==window.fCond)return false;if(window.fAct!=='toutes'&&s.activite!==window.fAct)return false;return true;});
@@ -1594,9 +1595,33 @@ function renderTracteur(){
   _fillNewSessionForm();
 }
 
+/* ★★★ LE NOM D'UNE ACTIVITE EST UNE VALEUR, PLUS UNE DEDUCTION (lot DS-M2).
+   Avant : le <option> portait « <pictogramme> <nom> » et cinq endroits
+   retrouvaient le nom par `rawAct.replace(/^\\S+ /,'')` — on jetait le premier
+   mot en esperant que ce soit le pictogramme.
+   ⚠⚠ Ca marchait TANT QU'IL Y EN AVAIT UN. Sur une activite sans pictogramme,
+     « Reparation ponctuelle » devenait « ponctuelle », et la session partait
+     avec un nom d'activite qui n'existe dans aucune table — en silence.
+   ★ C'etait aussi LE VERROU de DS-M (§45j) : une balise <option> ne peut
+     contenir aucun element, donc `a.emoji` ne pouvait pas devenir un nom
+     d'icone tant qu'il etait RENDU la. Il ne l'est plus : le libelle est le nom
+     seul, et le pictogramme a migre vers les puces (`act-chips`), ou une icone
+     tient. La donnee en base n'est PAS touchee — migration a zero ecriture.
+   ⚠ Le repli ne devine pas non plus : il ne retient l'ancienne deduction que si
+     elle tombe sur une activite CONNUE. Un onglet reste ouvert sur l'ancien
+     HTML pendant une mise a jour continue de fonctionner. */
+function _actNomDuSelect(id){
+  var el=document.getElementById(id);
+  if(!el) return '';
+  var v=String(el.value||'').trim();
+  if(ACTIVITES.some(function(a){return a.nom===v;})) return v;
+  var d=v.replace(/^\S+\s/,'').trim();
+  return ACTIVITES.some(function(a){return a.nom===d;}) ? d : v;
+}
+
 function _fillNewSessionForm(){
   var sa=document.getElementById('s-act');
-  if(sa)sa.innerHTML=ACTIVITES.map(a=>`<option>${a.emoji} ${_escHtml(a.nom)}</option>`).join('');
+  if(sa)sa.innerHTML=ACTIVITES.map(a=>`<option value="${_escAttr(a.nom)}">${_escHtml(a.nom)}</option>`).join('');
   var sc=document.getElementById('s-cond-pick');
   if(sc)sc.innerHTML=_condList().map((c,i)=>`<div class="pchk ${i===0?'sel acre':''}" onclick="pickCond(this)">${_escHtml(c.nom)}</div>`).join('');
 }
@@ -1898,12 +1923,12 @@ function _renderChronoBar(){
   if(!s||!_chronoEnabledForSession(s)){host.innerHTML='';return;}
   var h='';
   if(_chrono.pause){
-    h='<div class="chr-pz"><div class="chr-pz-e">\uD83C\uDF7D</div>'
+    h='<div class="chr-pz"><div class="chr-pz-e">'+_mvIcon('repas',24)+'</div>'
       +'<div class="chr-pz-t">Pause d\u00e9jeuner</div>'
       +'<div class="chr-pz-c" id="chr-pzc">'+_chrFmtTimer(_chrPause())+'</div>'
       +(_chrono.pauseOuvert&&_chrono.pauseOuvert.length
         ?'<div class="chr-pz-x">'+_escHtml(_chrono.pauseOuvert.join(' + '))+' reprendra au retour</div>':'')
-      +'<button class="chr-pz-b" onclick="_chrReprendre()">\u25B6&nbsp; REPRENDRE</button></div>';
+      +'<button class="chr-pz-b" onclick="_chrReprendre()">'+_mvIcon('lecture',18)+'&nbsp; REPRENDRE</button></div>';
   } else if(_chrono.bloc.length){
     var bar=_chrBareme(s,_chrono.bloc), ms=_chrCourant();
     var al=bar>0&&(ms/60000)>_CHR_HAUT*bar;
@@ -1914,26 +1939,26 @@ function _renderChronoBar(){
       +'<div class="chr-run-p">'+_escHtml(_chrono.bloc.join(' + '))+'</div>'
       +'<div class="chr-run-x">'+sf.toFixed(2)+' ha'
       +(_chrono.bloc.length>1?' \u00b7 bloc de '+_chrono.bloc.length:'')+'</div></div>'
-      +'<button class="chr-mini" onclick="_chrInterrompre()">\u23F8</button></div>'
+      +'<button class="chr-mini" onclick="_chrInterrompre()">'+_mvIcon('pause',18)+'</button></div>'
       +'<div class="chr-run-t" id="chr-time">'+_chrFmtTimer(ms)+'</div>'
       +'<div class="chr-run-b" id="chr-bar">'
       +(bar>0?(al?'largement au-del\u00e0 du bar\u00e8me ('+_chrFmtDur(bar)+')':'bar\u00e8me '+_chrFmtDur(bar)):'pas de bar\u00e8me pour cette activit\u00e9')
       +'</div>'
-      +'<button class="chr-fini" onclick="_chrFini()">\u2713&nbsp; J\'AI FINI</button></div>';
+      +'<button class="chr-fini" onclick="_chrFini()">'+_mvIcon('check',18)+'&nbsp; J\'AI FINI</button></div>';
   } else {
     h='<div class="chr-idle"><b>Touchez la parcelle o\u00f9 vous commencez.</b><br>'
       +'La mesure d\u00e9marre toute seule \u2014 rien d\'autre \u00e0 appuyer.</div>';
   }
   // Trois seaux + le cadrage : ce chrono ne fait pas la journee de travail.
   h+='<div class="chr-strip">'
-    +'<div class="chr-st chr-st-m"><div class="chr-st-k">\u23F1 Mesur\u00e9<br>dans les parcelles</div>'
+    +'<div class="chr-st chr-st-m"><div class="chr-st-k">'+_mvIcon('chrono',16)+' Mesur\u00e9<br>dans les parcelles</div>'
       +'<div class="chr-st-v" id="chr-c-m">'+_chrFmtDur(_chrMesure()/60000)+'</div></div>'
-    +'<div class="chr-st chr-st-h"><div class="chr-st-k">\uD83D\uDEE3 Hors<br>parcelle</div>'
+    +'<div class="chr-st chr-st-h"><div class="chr-st-k">'+_mvIcon('route',16)+' Hors<br>parcelle</div>'
       +'<div class="chr-st-v" id="chr-c-h">'+_chrFmtDur(_chrHors()/60000)+'</div></div>'
-    +'<div class="chr-st chr-st-p"><div class="chr-st-k">\uD83C\uDF7D Pause<br>d\u00e9jeuner</div>'
+    +'<div class="chr-st chr-st-p"><div class="chr-st-k">'+_mvIcon('repas',16)+' Pause<br>d\u00e9jeuner</div>'
       +'<div class="chr-st-v" id="chr-c-p">'+_chrFmtDur(_chrPause()/60000)+'</div></div>'
     +'</div>'
-    +'<div class="chr-cadre">\u23F1 Ce chrono mesure <b>le temps pass\u00e9 dans les parcelles</b>, '
+    +'<div class="chr-cadre">'+_mvIcon('chrono',16)+' Ce chrono mesure <b>le temps pass\u00e9 dans les parcelles</b>, '
     +'pour budg\u00e9ter les travaux. <b>Ce n\'est pas la journ\u00e9e de travail</b>\u00a0: le lavage, '
     +'les niveaux et le plein n\'y sont pas.'
     +(_chrono.ecarte?'<br><span class="chr-cadre-w">'+_chrono.ecarte+' mesure'+(_chrono.ecarte>1?'s':'')
@@ -1960,13 +1985,13 @@ function _chronoTick(){
 /* Etiquette portee par la ligne de parcelle. */
 function _chrTag(s,p,fait,entry){
   if(!fait)return '';
-  if(_chrono.bloc.indexOf(p.nom)>=0)return '<div class="sdp-tag pend">\u23F1 en cours\u2026</div>';
+  if(_chrono.bloc.indexOf(p.nom)>=0)return '<div class="sdp-tag pend">'+_mvIcon('chrono',16)+' en cours\u2026</div>';
   var ec=_chrEcart(entry);
-  if(ec)return '<div class="sdp-tag ecart">\u26A0 bar\u00e8me<small>'+_escHtml(_CHR_MOTIFS[ec]||'mesure \u00e9cart\u00e9e')+'</small></div>';
+  if(ec)return '<div class="sdp-tag ecart">'+_mvIcon('alerte',16)+' bar\u00e8me<small>'+_escHtml(_CHR_MOTIFS[ec]||'mesure \u00e9cart\u00e9e')+'</small></div>';
   var d=_chrDur(entry);
   if(d!=null){
     var sf=parseFloat(p.surface)||0,rate=sf>0?(d/sf):0,grp=_chrGrp(entry);
-    return '<div class="sdp-tag mes">\u23F1 '+_chrFmtRate(rate)+'<small>'+(grp>1?('groupe de '+grp):_chrFmtDur(d))+'</small></div>';
+    return '<div class="sdp-tag mes">'+_mvIcon('chrono',16)+' '+_chrFmtRate(rate)+'<small>'+(grp>1?('groupe de '+grp):_chrFmtDur(d))+'</small></div>';
   }
   return '';
 }
@@ -1984,8 +2009,8 @@ function _renderChronoJour(){
   var s=SESSIONS.find(function(x){return x.id===window.tracSessionId;});
   if(!s||!_chronoEnabledForSession(s)||_chrono.bloc.length||_chrono.pause){host.innerHTML='';return;}
   host.innerHTML='<div class="chr-acts">'
-    +'<button class="chr-act" onclick="_chrDejeuner()">\uD83C\uDF7D Pause d\u00e9jeuner</button>'
-    +'<button class="chr-act chr-act-fin" onclick="_chrFinJournee()">\uD83C\uDF19 Fin de journ\u00e9e</button></div>';
+    +'<button class="chr-act" onclick="_chrDejeuner()">'+_mvIcon('repas',18)+' Pause d\u00e9jeuner</button>'
+    +'<button class="chr-act chr-act-fin" onclick="_chrFinJournee()">'+_mvIcon('lune',18)+' Fin de journ\u00e9e</button></div>';
 }
 
 function openSessionDetail(id){
@@ -2061,7 +2086,7 @@ function renderSDParcelles(){
       const sep=(_tri.coupe!=null&&idxRow===_tri.coupe)?'<div class="sdp-sep">Sans polygone \u2014 position inconnue</div>':'';
       const dist=(!fait&&typeof p._chrD==='number'&&p._chrD>0)?'<div class="sdp-dist">'+_chrFmtM(p._chrD)+'</div>':'';
       return sep+'<div class="sdp-row '+(enCours?'sdp-live':(fait?(ecart?'sdp-done sdp-bar':'sdp-done'):''))+'" data-action="coche" data-nom="'+p.nom.replace(/"/g,'&quot;')+'" style="cursor:pointer">'
-        +'<div class="sdp-check '+(enCours?'live':(fait?'on':''))+'">'+(enCours?'\u23F1':(fait?'\u2713':''))+'</div>'
+        +'<div class="sdp-check '+(enCours?'live':(fait?'on':''))+'">'+(enCours?_mvIcon('chrono',16):(fait?_mvIcon('check',16):''))+'</div>'
         +'<div style="flex:1;min-width:0"><div class="sdp-nom">'+_escHtml(p.nom)+'</div>'+dataHtml+'</div>'
         +'<div class="sdp-surf">'+p.surface+' ha'+dist+'</div>'
         +(chronoUi?_chrTag(s,p,fait,entryFaite):'')
@@ -2106,7 +2131,7 @@ function toggleSessionParcelle(nom,row){
   var _sTracRep=REPARATEUR[_sTracId]||REPARATEUR[_stid]||null;
   if(!estDecoche&&_sTracRep){
     if(navigator.vibrate)navigator.vibrate([80,60,80]);
-    showToast('\uD83D\uDD27 Tracteur en répar. — Change le tracteur d\'abord','#C0392B');
+    showToast('Tracteur en répar. — Change le tracteur d\'abord','#C0392B');
     var encart=document.getElementById('sd-trac-encart');
     if(encart){
       var t=0;
@@ -2134,7 +2159,9 @@ function toggleSessionParcelle(nom,row){
     // Ouvrir overlay de saisie
     _ocvNomParcelle=nom;
     document.getElementById('ocv-titre').textContent='Valider — '+nom;
-    document.getElementById('ocv-sub').textContent=(act.emoji||'')+' '+s.activite;
+    var _ocvS=document.getElementById('ocv-sub');
+    _ocvS.textContent=s.activite;
+    _ocvS.insertAdjacentHTML('afterbegin', _mvIcon(_actIcone(act.emoji),16)+' ');
     document.getElementById('ocv-label').textContent=act.champCustom.label+' *';
     var ocvVal=document.getElementById('ocv-val');
     ocvVal.type=act.champCustom.type==='nombre'?'number':'text';
@@ -2237,7 +2264,7 @@ function openEditSession(id){
   var s=SESSIONS.find(function(x){return x.id===id;});if(!s)return;
   document.getElementById('es-id').value=id;
   var actHtml='';
-  ACTIVITES.forEach(function(a){actHtml+='<option'+(a.nom===s.activite?' selected':'')+'>'+a.emoji+' '+_escHtml(a.nom)+'</option>';});
+  ACTIVITES.forEach(function(a){actHtml+='<option value="'+_escAttr(a.nom)+'"'+(a.nom===s.activite?' selected':'')+'>'+_escHtml(a.nom)+'</option>';});
   document.getElementById('es-act').innerHTML=actHtml;
   document.getElementById('es-date').value=s.date;
   var _efEl=document.getElementById('es-datefin'); if(_efEl)_efEl.value=s.dateFin||'';
@@ -2266,8 +2293,7 @@ function openEditSession(id){
 function saveEditSession(){
   const id=document.getElementById('es-id').value;
   const s=SESSIONS.find(x=>x.id===id);if(!s)return;
-  const rawAct=document.getElementById('es-act').value;
-  s.activite=rawAct.replace(/^\S+ /,'').trim()||rawAct;
+  s.activite=_actNomDuSelect('es-act');
   s.date=document.getElementById('es-date').value;
   var _efEl=document.getElementById('es-datefin'); var _ef=_efEl?_efEl.value:'';
   const condVal=document.getElementById('es-cond').value;
@@ -2324,7 +2350,7 @@ function openNewSession(){
   if(DEBUG) console.log('openNewSession appelé, currentUser=', currentUser, 'isTractoriste=', isTractoriste());
   if(!isTractoriste()){showToast('Réservé aux tractoristes','#C0392B');return;}
   var actHtml='';
-  ACTIVITES.forEach(function(a){actHtml+='<option>'+a.emoji+' '+_escHtml(a.nom)+'</option>';});
+  ACTIVITES.forEach(function(a){actHtml+='<option value="'+_escAttr(a.nom)+'">'+_escHtml(a.nom)+'</option>';});
   document.getElementById('s-act').innerHTML=actHtml;
   var condHtml='';
   _condList().forEach(function(c,i){condHtml+='<div class="pchk'+(i===0?' sel acre':'')+'" onclick="pickCond(this)">'+_escHtml(c.nom)+'</div>';});
@@ -2338,8 +2364,7 @@ function openNewSession(){
   _openOv('ovSession');
 }
 function onSessionActChange(){
-  var rawAct=document.getElementById('s-act').value;
-  var actNom=rawAct.replace(/^\S+ /,'').trim()||rawAct;
+  var actNom=_actNomDuSelect('s-act');
   if(document.getElementById('s-trac-id'))document.getElementById('s-trac-id').value='';
   _fillTracPick('s', actNom);
   // Vérifier si le tracteur défaut est en répar → bloquer avec modal
@@ -2414,8 +2439,7 @@ function saveRepBlockChoice(){
   // Appliquer le tracteur choisi dans l'overlay de session
   var hidId=document.getElementById('s-trac-id');
   var hidOv=document.getElementById('s-trac-override');
-  var rawAct=document.getElementById('s-act').value;
-  var actNom=rawAct.replace(/^\S+ /,'').trim()||rawAct;
+  var actNom=_actNomDuSelect('s-act');
   var act=ACTIVITES.find(function(a){return a.nom===actNom;});
   if(hidId)hidId.value=_rbSelTracId;
   if(hidOv)hidOv.value=(act&&_rbSelTracId!==act.tracteurDefautId)?'1':'0';
@@ -2436,8 +2460,7 @@ function closeRepBlock(){
   if(navigator.vibrate)navigator.vibrate(40);
   document.getElementById('ovRepBlock').classList.remove('open');
   // Remettre la sélection sur le premier tracteur dispo
-  var rawAct=document.getElementById('s-act').value;
-  var actNom=rawAct.replace(/^\S+ /,'').trim()||rawAct;
+  var actNom=_actNomDuSelect('s-act');
   _fillTracPick('s',actNom);
 }
 
@@ -2634,8 +2657,7 @@ function _pickTrac(pfx, id, defId){
     ovLbl.style.display=(id!==defId)?'inline':'none';
     ovLbl.textContent='✱ Modifié — défaut : '+(defTrac?defTrac.nom:'—');
   }
-  var rawAct=document.getElementById(pfx+'-act')?document.getElementById(pfx+'-act').value:'';
-  var actNom=rawAct.replace(/^\S+ /,'').trim()||rawAct;
+  var actNom=_actNomDuSelect(pfx+'-act');
   _fillTracPickWithId(pfx, actNom, id, defId);
   _updateTracRepAlert(pfx, id);
 }
@@ -2654,8 +2676,7 @@ function _updateTracRepAlert(pfx, id){
 function pickEmoji(el){document.querySelectorAll('#emoji-pick .pchk').forEach(x=>{x.classList.remove('sel','acre');});el.classList.add('sel','acre');window.selEmoji=el.dataset.val;}
 function saveSession(){
   if(!isTractoriste()){showToast('Réservé aux tractoristes','#C0392B');return;}
-  var rawAct=document.getElementById('s-act').value;
-  var a=rawAct.replace(/^\S+ /,'').trim()||rawAct;
+  var a=_actNomDuSelect('s-act');
   const date=document.getElementById('s-date').value;
   if(!date){showToast('Date obligatoire','#B85A1A');var _dEl=document.getElementById('s-date');if(_dEl&&_dEl.focus)_dEl.focus();return;}
   const condEl=document.querySelector('#s-cond-pick .pchk.sel');

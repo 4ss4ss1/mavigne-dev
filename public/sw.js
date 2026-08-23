@@ -1,4 +1,38 @@
-// MA VIGNE — Service Worker v7.06
+// MA VIGNE — Service Worker v7.07
+// v7.07 (23/08/2026) — LE VERROU DES <option> SAUTE, ET tracteur.js SUIT. APP 6.51 -> 6.52.
+//   ★★★ LE PREALABLE DE DS-M, ANNONCE EN §45j, EST LEVE. Une balise <option> ne
+//   peut contenir AUCUN element : tant que `a.emoji` y etait rendu, la donnee
+//   ne pouvait pas devenir un nom d'icone. Le libelle est desormais le NOM
+//   SEUL, le nom passe en `value`, et le pictogramme a migre vers les puces
+//   `act-chips` juste au-dessus, ou une icone tient. Zero ecriture en base.
+//   ⚠⚠ ET CA A DECOUVERT UN VRAI DEFAUT, LATENT. Six endroits retrouvaient le
+//   nom de l'activite par `rawAct.replace(/^\S+ /,'')` — on jetait le premier
+//   mot en esperant que ce soit le pictogramme. Sur une activite SANS
+//   pictogramme, « Reparation ponctuelle » devenait « ponctuelle », et la
+//   session partait avec un nom qui n'existe dans aucune table, en silence.
+//   Remplaces par `_actNomDuSelect`, qui LIT la valeur au lieu de deviner, et
+//   dont le repli n'accepte l'ancienne deduction que si elle tombe sur une
+//   activite CONNUE : un onglet reste ouvert sur l'ancien HTML marche encore.
+//   ⚠ Le sixieme site avait echappe au premier inventaire : son `id` est
+//   CONSTRUIT (`pfx+'-act'`), invisible a une recherche sur la chaine 's-act'.
+//   Chercher le MOTIF D'USAGE, pas la chaine litterale.
+//   ★ tracteur.js : 46 -> 5 pictogrammes. Chrono, cuve GNR, prochaine revision,
+//   catalogue E-Phy, statuts autorise / retire. Sprite 94 -> 99 symboles.
+//   `abeille` prend l'ALVEOLE (hexagon) et non `bug` : cette forme sert deja a
+//   `bogue`, et un nom = une forme. La regle passe avant l'illustration.
+//   ⚠⚠ CE QUI RESTE DANS CE MODULE, ET POURQUOI. `TEMJ` (Cuivre, Soufre,
+//   Fongicide, Insecticide…) n'est PAS un jeu d'icones : c'est un CODE
+//   COULEUR. La couleur porte le sens ; dix icones de meme forme le
+//   detruiraient. Il lui faut une pastille CSS adossee a `TCLS`, qui porte
+//   deja exactement ces couleurs — lot a part, partage avec phyto.js, et qui
+//   merite une maquette avant d'etre ecrit (§45h).
+//   ★ `\u2731` rejoint la liste nommee de la typographie : « Modifie — defaut :
+//   Fendt 313 » precede d'un asterisque, c'est la note de bas de page, pas un
+//   objet. Meme famille que le triangle colle a un pourcentage.
+//   ⚠ Trois ancres de patch etaient fausses au premier essai : accents ecrits
+//   en echappement la ou le fichier les porte EN CLAIR — dans le meme fichier,
+//   les deux ecritures coexistent. Le dry-run de TOUS les motifs avant la
+//   premiere ecriture les a arretees : zero remplacement a l'aveugle (§45e).
 // v7.06 (23/08/2026) — LE THEME, REMIS POUR DE BON. APP 6.50 -> 6.51.
 //   ⚠⚠⚠ TROISIEME DISPARITION DU MEME CORRECTIF, et cette fois le document
 //   ANNONCAIT sa restauration : §60d ecrit « la pose du theme sur <html> remise
@@ -2428,7 +2462,7 @@
 // v2.22 — Fix profils vides : guard vide dans loadData() pour MEMBRES/SAISONS/TACHES
 // v2.17 — Onboarding intégré + tenantId · v2.06 — Firebase Auth · v2.00–v2.05 — divers
 const DEBUG = self.location.hostname === 'localhost' || self.location.hostname === '127.0.0.1';
-const CACHE_NAME   = 'mavigne-v7.06';
+const CACHE_NAME   = 'mavigne-v7.07';
 const TENANT_CACHE = 'mavigne-tenant';   // Cache persistant — préservé à chaque mise à jour SW
 const SYNC_TAG     = 'mavigne-sync';
 
@@ -2444,7 +2478,7 @@ const CDN_URLS = [
 ];
 
 self.addEventListener('install', event => {
-  if(DEBUG) console.log('[SW] Ma Vigne v7.06 installé');
+  if(DEBUG) console.log('[SW] Ma Vigne v7.07 installé');
   event.waitUntil(
     caches.open(CACHE_NAME).then(async cache => {
       // ── Cœur applicatif : STRICT (mise à jour ATOMIQUE) ──
@@ -2460,7 +2494,7 @@ self.addEventListener('install', event => {
 });
 
 self.addEventListener('activate', event => {
-  if(DEBUG) console.log('[SW] Ma Vigne v7.06 activé');
+  if(DEBUG) console.log('[SW] Ma Vigne v7.07 activé');
   event.waitUntil(
     caches.keys().then(keys =>
       Promise.all(

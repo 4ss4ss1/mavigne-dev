@@ -11,7 +11,7 @@ import { isAdmin, isTractoriste, isSaisonnier, canWrite,
          getRoleLabel, showToast, showSyncBadge, wmoDesc, wmoIcone, TABREV, tNom,
          applyTheme, setThemeMode, initTheme, logError, _closeCriticalOverlay, _escHtml, _escAttr,
          GT_ADMIN_EMAIL, DEMO_TENANT, DEMO_FIREBASE_EMAIL, DEMO_FIREBASE_PWD, dreEffectif,
-         _mvBadge, _mvIcon, _mvIconTache,
+         _mvBadge, _mvIcon, _mvIconTache, _mvIconInline, _actIcone,
 } from './utils.js';
 // Exposer constantes démo sur window pour accès cross-module
 import './firebase.js';
@@ -11048,7 +11048,9 @@ function exportRapportSaison(seasonNom){
     var srows=sess.map(function(s){
       var st=s.statut||'',done=((s.avancement||0)>=100||st==='Valid\u00e9'||st==='Termin\u00e9');
       var tn=s.tracteurId?tracNom(s.tracteurId):'';
-      return '<tr><td class="pnom">'+esc((s.emoji||'\uD83D\uDE9C')+' '+(s.activite||''))+'</td>'
+      /* ⚠ DOCUMENT IMPRIME : il s'ouvre dans un AUTRE onglet, qui n'a pas le
+         sprite. `_mvIcon` y rendrait un cadre vide, sans erreur (§45b). */
+      return '<tr><td class="pnom">'+_mvIconInline(_actIcone(s.emoji),16)+' '+esc(s.activite||'')+'</td>'
         +'<td class="muted">'+esc(tn)+'</td><td>'+esc(s.conducteur||'')+'</td>'
         +'<td class="r muted">'+((s.surface!=null)?(parseFloat(s.surface)||0).toFixed(2)+' ha':'\u2014')+'</td>'
         +'<td class="c"><span class="tag '+(done?'ok':'warn')+'">'+esc(st||((s.avancement||0)+'%'))+'</span></td>'

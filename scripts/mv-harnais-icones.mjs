@@ -77,7 +77,14 @@ const PICTO = /[\u2190-\u21FF\u2300-\u23FF\u25A0-\u25FF\u2600-\u27BF\u2B00-\u2BF
           (« \u25fc/\u25ad taille ») : ils DESSINENT le grand carre et le rectangle
           large, ils ne les representent pas. Une icone a leur place dirait
           moins que le glyphe. */
-const TYPO = new Set(['\u2192', '\u25B2', '\u25BC', '\uFF0B', '\u00A9', '\u25FC', '\u25AD']);
+/* ★ Un quatrieme depuis DS-M2 :
+     \u2731  l'asterisque de DEROGATION dans `tracteur.js` (« \u2731 Modifie — defaut :
+        Fendt 313 »). C'est la convention de la note de bas de page : un
+        asterisque colle a une valeur dit « celle-ci s'ecarte de la regle ».
+        Meme famille que le \u25B2 colle a un pourcentage — un SIGNE, pas un objet.
+     ⚠ Sept occurrences, toutes le meme geste. Si l'une devient autre chose
+       qu'une marque d'ecart, elle sort de cette liste. */
+const TYPO = new Set(['\u2192', '\u25B2', '\u25BC', '\uFF0B', '\u00A9', '\u25FC', '\u25AD', '\u2731']);
 
 /* ⚠️ LE SEUL RESIDU TOLERE DANS reglages.js, ET POURQUOI.
    `_ACT_EMOJIS` est la VALEUR enregistree dans `a.emoji`. tracteur.js la rend

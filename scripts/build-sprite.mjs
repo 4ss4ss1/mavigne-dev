@@ -59,7 +59,15 @@ export const MAP = {
   imprimante:'printer', loupe:'search', lune:'moon', microscope:'microscope',
   nombre:'hash', oeil:'eye', pause:'pause', recu:'receipt', refus:'circle-x',
   seau:'paint-bucket', sortie:'external-link', ticket:'ticket',
-  valide:'circle-check-big'
+  valide:'circle-check-big',
+  /* ── DS-M2 : les formes de `tracteur.js`, le module debloque par la levee du
+     verrou des <option>.
+     ⚠️ `abeille` prend `hexagon` — l'alveole — et non `bug` : `bogue` porte deja
+       cette forme pour « Signaler un probleme », et deux noms maison sur une
+       meme forme Lucide, c'est deux facons de dire la meme chose que l'ecran
+       finira par melanger. La regle « un nom = une forme » passe avant
+       l'illustration litterale. */
+  abeille:'hexagon', interdit:'ban', lecture:'play', repas:'utensils', route:'route'
 };
 
 export function corps(lucide) {
