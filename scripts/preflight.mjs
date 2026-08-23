@@ -1652,6 +1652,55 @@ function checkAppCheckFns() {
 //  treize fois les 26 s des vingt-trois autres regles — dont C1, qui lance un
 //  `node --check` par fichier. Le filtre ne sert PAS a masquer un rouge : il
 //  n'existe qu'en ligne de commande et le mode par defaut reste complet.
+
+// ═══════════════════════════════════════════════════════════════════════════
+//  C26 — UN CHEMIN N'EST PAS UNE URL (le piège Windows, troisième occurrence)
+// ═══════════════════════════════════════════════════════════════════════════
+//  `await import(x)` attend une URL. Sous Linux, un chemin absolu « /home/… »
+//  passe par chance ; sous Windows, `path.resolve()` rend « C:\… » et Node lit
+//  « c: » comme un SCHÉMA — ERR_UNSUPPORTED_ESM_URL_SCHEME. Le harnais plante
+//  AVANT sa première assertion, et il ne plante que chez Nico.
+//  ★★★ Le bac à sable est Linux, la machine de Nico est Windows : AUCUN essai
+//  côté Claude ne peut attraper ça. C'est arrivé le 20/08 (§53, `new URL().pathname`)
+//  puis le 23/08 (§55n, `await import(CIBLE)`) — et la seconde fois, le harnais
+//  fautif venait d'être ajouté à `prebuild`, donc il bloquait le DÉPLOIEMENT.
+//  Une leçon qui se répète a besoin d'une règle, pas d'un rappel.
+//  Formes acceptées : pathToFileURL(...), une chaîne 'data:…' / 'file:…', un nom
+//  de module nu ('playwright'), ou une variable dont le nom dit l'URL (url, href).
+function checkImportUrl() {
+  const fichiers = [...listDir('scripts', '.mjs'), ...listDir('scripts', '.cjs'),
+                    ...listDir('scripts/banc', '.mjs')];
+  let n = 0;
+  for (const rel of fichiers) {
+    const brut = read(rel);
+    if (!brut) continue;
+    // ⚠️⚠️ COMMENTAIRES BLANCHIS D'ABORD. Sans ça, la règle se déclenche sur le
+    //   commentaire qui l'explique — c'est exactement la faute de §53, quatrième
+    //   occurrence : un contrôle qui lit ses propres mots se croit efficace.
+    //   blankJsComments préserve longueurs et sauts de ligne : les numéros tiennent.
+    const src = blankJsComments(brut);
+    const re = /(^|[^.\w$])import\s*\(\s*([^)]{0,90})/g;
+    let m;
+    while ((m = re.exec(src)) !== null) {
+      const arg = m[2].trim();
+      if (!arg) continue;
+      // Un littéral de chaîne est toujours accepté : 'playwright', 'data:…', 'node:fs'.
+      // Personne n'écrit un chemin Windows en dur dans un import().
+      if (/^['"`]/.test(arg)) continue;
+      // pathToFileURL(…) est la forme correcte ; toute variable qui se nomme url/href
+      // porte déjà une URL (mv-harnais-icones fabrique une data: dans `url`).
+      if (/pathToFileURL|url|href/i.test(arg)) continue;
+      n++;
+      add('ERROR', rel, lineOf(src, m.index + m[1].length),
+        'C26 : import(' + arg.slice(0, 34) + '…) recoit un CHEMIN, pas une URL. Sous Windows '
+        + 'path.resolve() rend « C:\\… » et Node lit « c: » comme un schema : '
+        + 'ERR_UNSUPPORTED_ESM_URL_SCHEME, le script meurt avant sa premiere assertion. '
+        + 'Ecrire : import(pathToFileURL(chemin).href).');
+    }
+  }
+  if (n === 0) add('INFO', 'scripts', null, 'C26 : aucun import() de chemin brut.');
+}
+
 const SEQUENCE = [
   ['C1',  checkSyntax],        ['C2',  checkSurrogates],   ['C3',  checkDivBalance],
   ['C4',  checkDivInButton],   ['C4b', checkDivInButtonJs],['C5',  checkVersions],
@@ -1662,6 +1711,7 @@ const SEQUENCE = [
   ['C18', checkDuplicateIds],  ['C19', checkUnescaped],    ['C20', checkGuardBehaviour],
   ['C21', checkPaiePrivacy],   ['C22', checkAideEtVisite], ['C23', checkHelpersOrphelins],
   ['C23b', checkHandlerScope], ['C24', checkXssRatchet], ['C25', checkAppCheckFns],
+  ['C26', checkImportUrl],
 ];
 const onlyArg = args.find(a => a.startsWith('--only='));
 const onlySet = onlyArg ? new Set(onlyArg.slice(7).split(',').map(x => x.trim()).filter(Boolean)) : null;

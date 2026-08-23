@@ -37,6 +37,16 @@
 > ⚠️ **C3/C4 du harnais du retard gardaient ce trou sous le nom « non-régression »** — deuxième
 > assertion du lot qui gravait un défaut au lieu de le tenir.
 > ★ `mv-harnais-releve.mjs` **ne tournait dans aucune chaîne depuis le 13/08** — ajouté à `check`.
+> ⚠️⚠️⚠️ **ET IL A PLANTÉ CHEZ NICO AU PREMIER LANCEMENT, EN BLOQUANT LE DÉPLOIEMENT (§55n).**
+> `await import(CIBLE)` : sous Windows `path.resolve()` rend « C:\… » et Node lit « c: » comme un
+> **schéma d'URL** — `ERR_UNSUPPORTED_ESM_URL_SCHEME`, mort avant la première assertion. Et comme
+> je venais de l'ajouter à **`prebuild`**, `npm run build` ne passait plus. **Troisième occurrence
+> du même piège Windows** (§53 : `new URL().pathname`). *Le bac à sable est Linux, la machine de
+> Nico est Windows — aucun essai de mon côté ne peut l'attraper.*
+> ★★ **Une leçon qui se répète a besoin d'une règle : C26** interdit `import()` d'un chemin brut
+> dans `scripts/`. Elle a trouvé **deux autres harnais** avec le même défaut, dormants.
+> ⚠️ **Et sa première version se déclenchait sur ses propres commentaires** — quatrième fois qu'un
+> contrôle lit les mots que je viens d'écrire (§53). Commentaires blanchis avant lecture.
 > Détail en **§55**.
 >
 > ★ Précédente : **22 août 2026** — ★★★ **LE CLIQUET XSS, ET UN INTERRUPTEUR DÉJÀ
@@ -4318,7 +4328,11 @@ lignes qu'il faut regarder en premier** — pas le diff, qui noie le signal dans
    l'entrée à neuf : un jour d'échange y perd drapeau et horaire. Effet moins grave (l'écart y reste
    neutre au lieu de devenir faux), **mais c'est le même défaut**. Remède propre : **un point de
    passage unique** « conserver la nature du jour », avec son harnais. Lot à part, pas un ajout.
-3. ⚠️ **Sortir un vrai PDF de la feuille d'heures et LE REGARDER.** 83 assertions tiennent les
+3. ⚠️⚠️ **Les harnais ne tournent JAMAIS sur Windows côté Claude.** C26 couvre désormais le piège
+   `import()`, mais pas les autres (séparateurs de chemin, CRLF, casse des noms de fichiers). ★ La
+   seule parade réelle : **Nico lance `npm run check` avant que je déclare un lot vert**. Trois
+   plantages Windows en trois lots livrés verts (§53, §55n).
+4. ⚠️ **Sortir un vrai PDF de la feuille d'heures et LE REGARDER.** 83 assertions tiennent les
    tailles, les graisses, les marges et les bornes — **aucune ne lit une mise en page** (§42h).
    C'est le point faible du paquet, avant tout envoi client.
 4. ✅ **TRANCHÉ le 23/08 (§55m)** — `CONFIG.hsup_dues_debut` ne commande plus l'absence
@@ -9334,6 +9348,46 @@ faisait. *Le décor d'un harnais est du code comme un autre.*
 portent des absences injustifiées. C'est un arbitrage, pas un oubli : le comportement d'avant
 n'était pas une politique choisie, c'était un trou — et l'interface promettait déjà l'autre
 comportement à chaque saisie. **À vérifier après déploiement (backlog n°4).**
+
+### 55n. ⚠️⚠️⚠️ LE HARNAIS LIVRÉ VERT A BLOQUÉ LE DÉPLOIEMENT — troisième piège Windows
+
+```
+Error [ERR_UNSUPPORTED_ESM_URL_SCHEME]: … Received protocol 'c:'
+C:\Users\p4n0m\Documents\GitHub\mavigne-dev>
+```
+
+`mv-harnais-releve.mjs` faisait `await import(CIBLE)` où `CIBLE = path.resolve(…)`. Sous Linux,
+`/home/claude/…` passe **par chance** — `import()` tolère un chemin qui ressemble à un chemin
+absolu POSIX. Sous Windows, `path.resolve()` rend `C:\Users\…`, et Node lit **« c: » comme un
+schéma d'URL**. Le script meurt **avant sa première assertion**.
+
+★★★ **Et je venais de l'ajouter à `prebuild`.** Donc `npm run build && firebase deploy` ne passait
+plus du tout. *Un filet de sécurité posé dans le chemin critique doit être éprouvé sur la machine
+qui l'exécutera, pas sur celle qui l'écrit.*
+
+**Troisième occurrence du même piège** — §53 : `new URL(…).pathname` rendait `/C:/Users/…`. Le bac
+à sable est Linux, la machine de Nico est Windows : **aucun de mes essais ne peut l'attraper**.
+La seule forme juste des deux côtés :
+
+```js
+import { pathToFileURL } from 'node:url';
+await import(pathToFileURL(CIBLE).href);
+```
+
+★★ **Une leçon qui se répète trois fois n'a pas besoin d'un rappel, elle a besoin d'une règle.**
+**C26** (neuve) interdit `import()` d'un chemin brut dans `scripts/`. Elle accepte : un littéral
+de chaîne (`'playwright'`, `'data:…'`), `pathToFileURL(…)`, et toute variable dont le nom contient
+`url`/`href`. Elle a trouvé **deux autres harnais dormants** avec le même défaut :
+`mv-harnais-vignoble.mjs` et `mv-harnais-cuvdoc.mjs` — ce dernier testait même
+`CIBLE.startsWith('/')`, **une hypothèse Unix écrite noir sur blanc**.
+
+⚠️ **Et la première version de C26 rougissait sur ses propres commentaires** : le texte qui
+explique la règle contient `await import(CIBLE)`, donc la règle se trouvait elle-même. **Quatrième
+fois** qu'un contrôle tombe sur les mots que je viens d'écrire (§53, §54). Corrigé par
+`blankJsComments()` — qui existait déjà dans `preflight.mjs`, et que je n'avais pas cherché.
+
+**Contre-épreuves** : `import(CIBLE)` → 1 erreur · `import(path.resolve(x))` → 1 erreur ·
+forme corrigée → 0. Vérifiées en réinjectant chaque défaut.
 
 ### 55l. Ce qui reste ouvert
 

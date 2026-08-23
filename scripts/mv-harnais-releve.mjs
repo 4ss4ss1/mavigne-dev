@@ -21,7 +21,7 @@
 // ═══════════════════════════════════════════════════════════════════════════
 import fs from 'node:fs';
 import path from 'node:path';
-import { fileURLToPath } from 'node:url';
+import { fileURLToPath, pathToFileURL } from 'node:url';
 import { execFileSync } from 'node:child_process';
 
 const ICI    = path.dirname(fileURLToPath(import.meta.url));
@@ -102,7 +102,13 @@ window.DOMAINE_NOM = 'Domaine de test';
 window.currentUser = { nom:'Nico', roles:['admin'] };
 window.isAdmin = () => true;
 
-await import(CIBLE);
+/* ⚠️⚠️⚠️ WINDOWS. `import()` attend une URL, pas un chemin : sous Windows,
+   path.resolve() rend « C:\… » et Node lit « c: » comme un SCHÉMA d'URL —
+   ERR_UNSUPPORTED_ESM_URL_SCHEME, et le harnais plante avant sa première
+   assertion. Le bac à sable est Linux, la machine de Nico est Windows : aucun
+   essai côté Claude ne peut attraper ça. C'est la TROISIÈME fois (§53).
+   pathToFileURL() est la seule forme correcte des deux côtés. */
+await import(pathToFileURL(CIBLE).href);
 
 let ok = 0, ko = 0;
 const useColor = process.stdout.isTTY && !process.env.NO_COLOR;

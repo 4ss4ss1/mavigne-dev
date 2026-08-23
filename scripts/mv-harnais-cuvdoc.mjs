@@ -23,7 +23,7 @@
 // ═══════════════════════════════════════════════════════════════════════════
 import fs from 'node:fs';
 import path from 'node:path';
-import { fileURLToPath } from 'node:url';
+import { fileURLToPath, pathToFileURL } from 'node:url';
 import { execFileSync } from 'node:child_process';
 
 const ICI    = path.dirname(fileURLToPath(import.meta.url));
@@ -86,7 +86,9 @@ const Y0 = +TODAY.slice(0, 4), Y1 = Y0 - 1, Y2 = Y0 - 2;
 const d = (y, md) => y + '-' + md;
 const A = (p, dt, val, mode) => ({ id:'a_' + p + dt, parcelle:p, date:dt, val, mode:mode || 'sucre', spd:16.83 });
 
-await import(CIBLE.startsWith('/') ? CIBLE : path.resolve(CIBLE));
+// ⚠ `startsWith('/')` etait DEJA une hypothese Unix : sous Windows un chemin absolu
+//   commence par « C:\\ ». pathToFileURL(path.resolve(...)) est juste des deux cotes.
+await import(pathToFileURL(path.resolve(CIBLE)).href);
 
 window.PARCELLES = [
   { nom:'Ergot',         surface:0.37, statut:'Active',   cepages:['Pinot noir'] },

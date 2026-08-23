@@ -19,7 +19,7 @@
 // ═══════════════════════════════════════════════════════════════════════════
 import fs from 'node:fs';
 import path from 'node:path';
-import { fileURLToPath } from 'node:url';
+import { fileURLToPath, pathToFileURL } from 'node:url';
 import { execFileSync } from 'node:child_process';
 
 const ICI    = path.dirname(fileURLToPath(import.meta.url));
@@ -133,7 +133,8 @@ T('getPCls(Bollery) = 100 % (3/3, Relevage hors sujet)',
 T('_dpRendHistRows agrege 2025 : 2000 kg / 0,37 ha',
   window._dpRendHistRows(window.PARCELLES[0])[0].kg_ha === Math.round(2000 / 0.37));
 
-await import(CIBLE);
+// ⚠ Windows : import() veut une URL, pas « C:\\… » (§53, §55n).
+await import(pathToFileURL(CIBLE).href);
 const docs = [];
 window._mvDocOpen = o => { docs.push(o); return true; };
 
