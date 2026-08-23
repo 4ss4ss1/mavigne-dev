@@ -1,4 +1,24 @@
-// MA VIGNE — Service Worker v7.09
+// MA VIGNE — Service Worker v7.10
+// v7.10 (23/08/2026) — LE PILOTAGE. APP 6.54 -> 6.55.
+//   ★ pilotage.js : 165 -> 114. Les seize cartes de la Cave (`_pcavCard`), la
+//   photo de campagne (`_pilPhotoHtml`), la tournee des parcelles, l'Exercice
+//   et les bandeaux d'avertissement.
+//   ★ Les deux HELPERS rendent desormais l'icone eux-memes : les 22 appels ne
+//   passent plus qu'un NOM. Un pictogramme oublie dans un appel deviendrait un
+//   carre pointille visible, plus un glyphe qui se fond dans le decor.
+//   ⚠⚠ CE QUI RESTE, ET CE N'EST PAS UN RESTE : `em` (le verdict de cadence)
+//   vaut \uD83D\uDD34 / \uD83D\uDFE0 / \uD83D\uDFE2 selon la derive — c'est un FEU TRICOLORE.
+//   J'ai commence par le migrer avec les autres, et c'etait une faute : trois
+//   icones de meme forme auraient efface la seule information que le glyphe
+//   portait. Meme famille que TEMJ (cave) et que les pastilles de sync.
+//   ★ Elles attendent une PASTILLE CSS, pas une icone. `TCLS` porte deja les
+//   couleurs cote phyto ; le lot est partage entre cave, pilotage et app, et
+//   il merite une maquette (§45h : deux references valent dix adjectifs).
+//   ⚠ `\u21B3` (le decrochement d'une etape de tournee) et `\u25B8` (le chevron
+//   d'un depliant) restent : c'est de la ponctuation, comme le \u2192.
+//   ★ Toutes les ancres PRELEVEES dans le fichier. Trois comptes attendus
+//   etaient faux (1 au lieu de 2, 0 au lieu de 1) : le dry-run les a dits
+//   avant la premiere ecriture, personne n'a ete remplace a l'aveugle.
 // v7.09 (23/08/2026) — LA CAVE, ET UN CONTROLE QUI NE CONTROLAIT RIEN. APP 6.53 -> 6.54.
 //   ★ cave.js : 147 -> 26 pictogrammes. Le Chai, le Cuvier, le journal des
 //   operations, les reglages de cave — et les DEUX DOCUMENTS IMPRIMES (registre
@@ -2525,7 +2545,7 @@
 // v2.22 — Fix profils vides : guard vide dans loadData() pour MEMBRES/SAISONS/TACHES
 // v2.17 — Onboarding intégré + tenantId · v2.06 — Firebase Auth · v2.00–v2.05 — divers
 const DEBUG = self.location.hostname === 'localhost' || self.location.hostname === '127.0.0.1';
-const CACHE_NAME   = 'mavigne-v7.09';
+const CACHE_NAME   = 'mavigne-v7.10';
 const TENANT_CACHE = 'mavigne-tenant';   // Cache persistant — préservé à chaque mise à jour SW
 const SYNC_TAG     = 'mavigne-sync';
 
@@ -2541,7 +2561,7 @@ const CDN_URLS = [
 ];
 
 self.addEventListener('install', event => {
-  if(DEBUG) console.log('[SW] Ma Vigne v7.09 installé');
+  if(DEBUG) console.log('[SW] Ma Vigne v7.10 installé');
   event.waitUntil(
     caches.open(CACHE_NAME).then(async cache => {
       // ── Cœur applicatif : STRICT (mise à jour ATOMIQUE) ──
@@ -2557,7 +2577,7 @@ self.addEventListener('install', event => {
 });
 
 self.addEventListener('activate', event => {
-  if(DEBUG) console.log('[SW] Ma Vigne v7.09 activé');
+  if(DEBUG) console.log('[SW] Ma Vigne v7.10 activé');
   event.waitUntil(
     caches.keys().then(keys =>
       Promise.all(

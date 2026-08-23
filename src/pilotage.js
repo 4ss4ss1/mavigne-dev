@@ -725,7 +725,7 @@ function _pilPanelCarte(d){
   var body='<div class="pil-map" id="pil-map"></div>'
     + '<div class="pil-map-leg"><span>0 %</span><span class="pil-map-bar"></span><span>100 %</span>'
     + '<span style="display:flex;align-items:center;gap:6px"><span class="pil-map-sw" style="background:rgba(192,57,43,.5);border-color:#C0392B"></span>Arrachée</span>'
-    + '<button type="button" class="pil-names-btn">'+(_pilNamesOn?'\uD83C\uDFF7 Noms \u2713':'\uD83C\uDFF7 Noms')+'</button></div>';
+    + '<button type="button" class="pil-names-btn">'+(_pilNamesOn?(_mvIcon('etiquette',16)+' Noms '+_mvIcon('check',16)):(_mvIcon('etiquette',16)+' Noms'))+'</button></div>';
   return _pilTile('carte','#7FA83A','Carte du domaine', _pilStat(d.gaugePct,' %',null), d.nActives+' parcelles · '+ha+' ha', d.gaugePct, body);
 }
 // Detruire une carte Leaflet pendant qu'une animation de zoom est en vol leve
@@ -1504,7 +1504,7 @@ function _pilAnneeVigneHtml(ann){
     var bouton=(admin&&A.moisIdeal!=null)
       ? (' <button data-exm="'+A.moisIdeal+'" style="border:1px solid currentColor;background:transparent;color:inherit;border-radius:16px;padding:3px 11px;font-size:var(--pt-micro,11px);font-weight:700;cursor:pointer;margin-left:4px">D\u00e9caler au 1\u1D49\u02B3 '+MLB[A.moisIdeal]+'</button>')
       : '';
-    out+=box('#FBF0DC','#8A5A38','\u2139\ufe0f <b>Votre vendange est \u00e0 cheval sur deux exercices.</b> Elle court du '
+    out+=box('#FBF0DC','#8A5A38',''+_mvIcon('info',16)+' <b>Votre vendange est \u00e0 cheval sur deux exercices.</b> Elle court du '
       +fr(ann.vend.debut)+' au '+fr(ann.vend.fin)+' : sur ses <b>'+J.total+' jours</b>, '
       +'<b>'+J.dedans+'</b> tombent dans cet exercice et <b>'+J.dehors+'</b> dans le suivant. '
       +'Le co\u00fbt de la r\u00e9colte se lit donc sur <b>deux bilans</b>, dans \u00e0 peu pr\u00e8s cette proportion. '
@@ -1513,7 +1513,7 @@ function _pilAnneeVigneHtml(ann){
       +(bouton?('<br><span style="font-size:var(--pt-micro,11px);opacity:.85">Si votre comptable accepte de changer la date de cl\u00f4ture, la r\u00e9colte tiendrait dans un seul exercice\u00a0:</span>'+bouton):''));
   }
   if(ann.hors&&ann.hors.length){
-    out+=box('#FBF0DC','#8A5A38','\u2139\ufe0f <b>'+ann.hors.length+' p\u00e9riode'+(ann.hors.length>1?'s':'')+' hors de cet exercice</b> \u2014 '
+    out+=box('#FBF0DC','#8A5A38',''+_mvIcon('info',16)+' <b>'+ann.hors.length+' p\u00e9riode'+(ann.hors.length>1?'s':'')+' hors de cet exercice</b> \u2014 '
       +_pilEsc(ann.hors.join(', '))+'. Leur travail et leur co\u00fbt tombent dans une autre ann\u00e9e comptable.');
   }
   return out;
@@ -1621,11 +1621,11 @@ function _pilDeuxCadresHtml(ann){
     +'Un domaine en a <b>deux</b>, et elles ne r\u00e9pondent pas \u00e0 la m\u00eame question. '
     +'Elles ne donnent pas le m\u00eame total\u00a0: c\u2019est normal, ce n\u2019est pas une erreur.</div>'
     +'<div style="display:flex;gap:11px;flex-wrap:wrap">'
-    +cell('\uD83D\uDCD8 Exercice comptable',
+    +cell(''+_mvIcon('livre',16)+' Exercice comptable',
           'Ce que voit votre comptable, d\u2019un bilan \u00e0 l\u2019autre. Fix\u00e9 par lui\u00a0: ce n\u2019est pas un r\u00e9glage d\u2019affichage.',
           (eur!=null?_pilNb(Math.round(eur/1000)):'\u2014'), (eur!=null?' k\u20ac':''),
           'du '+fr(ann.ex.d0)+' au '+fr(ann.ex.d1)+(det?('<br>'+det):''))
-    +cell('\uD83C\uDF47 Ann\u00e9e vigne',
+    +cell(''+_mvIcon('raisin',16)+' Ann\u00e9e vigne',
           'Un cycle de production\u00a0: d\u2019apr\u00e8s une vendange jusqu\u2019\u00e0 la fin de la suivante. C\u2019est le cadre qui dit si une campagne a co\u00fbt\u00e9 cher.',
           (nCycle>0?_pilNb(hTot):'\u2014'), (nCycle>0?' h de bar\u00e8me':''),
           (ann.vend
@@ -2098,10 +2098,10 @@ function _pilTreatRows(days){
       var risk=x.leach||(x.ppMax!=null && x.ppMax>=PIL_TREAT_PP_ALERT);
       var bg=risk?'var(--orange-pale)':'var(--vert-pale)', bd=risk?'var(--orange)':'var(--vert-med)';
       var bdgs='';
-      if(x.leach) bdgs+=_pilTBdg('var(--orange-pale)','var(--orange)','\u26a0\ufe0f pluie '+_pilMm(x.leachMm)+' dans '+x.leachH+' h \u2192 lessivage');
-      else bdgs+=_pilTBdg('var(--vert-pale)','var(--vert-med)','\u2713 '+PIL_TREAT_DRY_H+' h au sec ensuite');
+      if(x.leach) bdgs+=_pilTBdg('var(--orange-pale)','var(--orange)',''+_mvIcon('alerte',16)+' pluie '+_pilMm(x.leachMm)+' dans '+x.leachH+' h \u2192 lessivage');
+      else bdgs+=_pilTBdg('var(--vert-pale)','var(--vert-med)',''+_mvIcon('check',16)+' '+PIL_TREAT_DRY_H+' h au sec ensuite');
       if(x.ppMax!=null){
-        if(x.ppMax>=PIL_TREAT_PP_ALERT) bdgs+=_pilTBdg('var(--orange-pale)','var(--orange)','\u2614 '+x.ppMax+' % de pluie');
+        if(x.ppMax>=PIL_TREAT_PP_ALERT) bdgs+=_pilTBdg('var(--orange-pale)','var(--orange)',''+_mvIcon('pluie',16)+' '+x.ppMax+' % de pluie');
         else bdgs+=_pilTBdg('rgba(127,127,127,.12)','var(--texte-doux)',x.ppMax+' % de pluie');
       }
       return '<div style="padding:8px 11px;border-radius:10px;background:'+bg+';border-left:3px solid '+bd+'">'
@@ -2487,7 +2487,7 @@ function _opDiffusHtml(){
   var ks=Object.keys(m).filter(function(k){ var e=m[k]; return e&&Array.isArray(e.ordre)&&e.ordre.length; });
   var box='font-size:var(--pt-micro,11px);color:var(--texte-doux);border:1px solid var(--gris-clair);border-radius:9px;padding:7px 11px;margin-bottom:8px;';
   if(!ks.length) return '<div style="'+box+'background:rgba(127,127,127,.05)">Aucune tourn\u00e9e diffus\u00e9e pour l\u2019instant \u2014 l\u2019\u00e9quipe voit ses parcelles dans l\u2019ordre habituel.</div>';
-  return '<div style="'+box+'background:rgba(201,168,76,.07)">\uD83E\uDDED Diffus\u00e9 \u00e0 l\u2019\u00e9quipe pour : <b style="color:var(--texte)">'
+  return '<div style="'+box+'background:rgba(201,168,76,.07)">'+_mvIcon('boussole',16)+' Diffus\u00e9 \u00e0 l\u2019\u00e9quipe pour : <b style="color:var(--texte)">'
     +ks.map(function(k){ var e=m[k], dd=_opDateFr(e.date); return _pilEsc(_opTNom(k))+(dd?(' \u00b7 '+dd):''); }).join(' &nbsp;|&nbsp; ')
     +'</b><div style="margin-top:3px">Chacun voit la tourn\u00e9e du travail qu\u2019il a \u00e0 l\u2019\u00e9cran, \u00e0 sa prochaine ouverture de l\u2019application.</div></div>';
 }
@@ -2548,8 +2548,8 @@ function _opFenetreHtml(rows,OP){
   var multi=(L.length>1);
   var h1='';
   if(multi){
-    h1='<b>'+(nKo?('\u26A0 '+nKo+' t\u00e2che'+(nKo>1?'s':'')+' sur '+L.length+(nKo>1?' ne tiennent pas dans leur fen\u00eatre.':' ne tient pas dans sa fen\u00eatre.'))
-                : ('\u2713 Chaque t\u00e2che tient dans sa fen\u00eatre.'))+'</b>';
+    h1='<b>'+(nKo?(''+_mvIcon('alerte',16)+' '+nKo+' t\u00e2che'+(nKo>1?'s':'')+' sur '+L.length+(nKo>1?' ne tiennent pas dans leur fen\u00eatre.':' ne tient pas dans sa fen\u00eatre.'))
+                : (''+_mvIcon('check',16)+' Chaque t\u00e2che tient dans sa fen\u00eatre.'))+'</b>';
   }
   var corps=L.map(function(x){
     var f=x.f, pr=x.pr, verdict, besoin='';
@@ -2564,7 +2564,7 @@ function _opFenetreHtml(rows,OP){
       verdict='tient \u2014 '+pr.jours+' j n\u00e9cessaires pour <b>'+f.joursRestants+' j</b> restants';
     }
     return '<div style="margin-top:'+(multi?'6':'0')+'px">'
-      + (multi?('<b>'+(x.ko?'\u26A0':'\u2713')+' '+_pilEsc(_opTNom(x.def.nom))+'</b> \u00b7 '):(x.ko?'\u26A0 ':'\u2713 '))
+      + (multi?('<b>'+(x.ko?_mvIcon('alerte',16):_mvIcon('check',16))+' '+_pilEsc(_opTNom(x.def.nom))+'</b> \u00b7 '):(x.ko?'\u26A0 ':'\u2713 '))
       + verdict + besoin
       + '<br><span style="color:var(--texte-doux)">'+_pilFmtD(f.debut)+' \u2192 '+_pilFmtD(f.fin)
       + (f.joursRestants<=0 ? ' \u00b7 fen\u00eatre pass\u00e9e'
@@ -2748,9 +2748,9 @@ function _opBody(){
     var kmnn=startPt?_opFmtM(_opRouteLen(_opNNNames(_opActTodo()).map(_opParcByNom).filter(Boolean),startPt)):'';
     var _opChip=function(mode,lab,gold){ return '<button data-op="sort" data-mode="'+mode+'" style="border:1px solid '+(gold?'var(--or)':'var(--gris-clair)')+';background:'+(gold?'rgba(201,168,76,.14)':'transparent')+';color:'+(gold?'var(--or)':'var(--texte-doux)')+';border-radius:20px;padding:0 12px;height:34px;font-size:var(--pt-micro,11px);font-weight:'+(gold?'700':'600')+';cursor:pointer;font-family:inherit">'+lab+'</button>'; };
     h+='<div style="display:flex;flex-wrap:wrap;gap:6px;margin-bottom:10px"><div style="width:100%;font-size:var(--pt-micro,11px);color:var(--texte-doux);margin-bottom:1px">Pr\u00e9-tri (puis ajuste au \u21C5) :</div>'
-      +_opChip('nn','\uD83E\uDDED Au plus proche'+(kmnn?'<span style="opacity:.7"> \u00b7 '+kmnn+'</span>':''),true);
+      +_opChip('nn',_mvIcon('boussole',16)+' Au plus proche'+(kmnn?'<span style="opacity:.7"> \u00b7 '+kmnn+'</span>':''),true);
     if(_opHasCom()){ var kmc=startPt?_opFmtM(_opRouteLen(_opComNames(_opActTodo()).map(_opParcByNom).filter(Boolean),startPt)):'';
-      h+=_opChip('com','\uD83C\uDFD8 Par commune'+(kmc?'<span style="opacity:.7"> \u00b7 '+kmc+'</span>':''),true); }
+      h+=_opChip('com',_mvIcon('bureau',16)+' Par commune'+(kmc?'<span style="opacity:.7"> \u00b7 '+kmc+'</span>':''),true); }
     h+=_opChip('dom','Ordre du domaine')+_opChip('surfD','Grandes d\'abord')+_opChip('avc','Moins avanc\u00e9es')+_opChip('rev','\u21C5 Inverser')+'</div>';
     var dirty=_opDirty();
     var pill=(dirty==='saved')?'<span style="color:var(--vert-med);font-size:var(--pt-micro,11px);font-weight:700">\u2713 Ordre enregistr\u00e9</span>':(dirty==='empty')?'<span style="color:var(--texte-doux);font-size:var(--pt-micro,11px)">rien \u00e0 ordonner</span>':'<span style="color:var(--orange);font-size:var(--pt-micro,11px);font-weight:700">\u25CF '+(dirty==='unsaved'?'non enregistr\u00e9':'modifi\u00e9')+'</span>';
@@ -2769,7 +2769,7 @@ function _opBody(){
   var _OP_DASH='background:repeating-linear-gradient(90deg,var(--or) 0 7px,transparent 7px 13px)';
   function _opRowHtml(x,ri,prevP,badge){
     var hop=(prevP&&x.geo)?('<span style="color:#4A9FC8;font-weight:700">\u21B3 '+_opFmtM(_opHav(prevP,x.p))+'</span> \u00b7 '):(x.geo?'':'<span style="color:var(--texte-doux)">\u25CB sans GPS</span> \u00b7 ');
-    var com=(hasCom&&_opCom(x.p))?('\uD83D\uDCCD '+_pilEsc(_opCom(x.p))+' \u00b7 '):'';
+    var com=(hasCom&&_opCom(x.p))?(_mvIcon('epingle',16)+' '+_pilEsc(_opCom(x.p))+' \u00b7 '):'';
     return '<div style="'+_OP_BOX+(pk?'opacity:.45;border-style:dashed;':'')+'">'
       +'<span style="flex:0 0 auto;width:24px;height:24px;border-radius:7px;background:var(--gris-clair);color:var(--texte-doux);font-size:var(--pt-txt,12.5px);font-weight:800;display:flex;align-items:center;justify-content:center">'+(ri+1)+'</span>'
       +'<div style="flex:1;min-width:0"><div style="font-weight:600;font-size:var(--pt-base,14px);color:var(--texte);white-space:nowrap;overflow:hidden;text-overflow:ellipsis">'+_pilEsc(x.nom)+(multi&&x.emos>1?' <span style="font-size:var(--pt-txt,12.5px);color:var(--texte-doux);font-weight:500">'+x.emos+' travaux</span>':'')+(badge||'')+'</div>'
@@ -2815,7 +2815,7 @@ function _opBody(){
   // pose reste possible sans jamais remonter en haut de la liste.
   if(pk){
     h+='<div style="position:fixed;left:50%;transform:translateX(-50%);width:calc(100% - 24px);max-width:600px;bottom:calc(74px + env(safe-area-inset-bottom,0px));z-index:95;display:flex;align-items:center;gap:9px;background:var(--cave);color:#F2EFE7;border-radius:12px;padding:10px 11px;box-shadow:0 10px 24px rgba(0,0,0,.28)">'
-      +'<span style="flex:0 0 auto;font-size:var(--pt-sm,17px)">\uD83D\uDD90</span>'
+      +'<span style="flex:0 0 auto">'+_mvIcon('doigt',18)+'</span>'
       +'<div style="flex:1;min-width:0;font-size:var(--pt-txt,12.5px);line-height:1.3"><b style="color:var(--or-clair)">'+_pilEsc(pk.label)+'</b><div style="font-size:var(--pt-lbl,10.5px);color:#B9B2A4;margin-top:2px">Touchez une fente dor\u00e9e pour poser</div></div>'
       +'<button data-op="last" style="flex:0 0 auto;border:1px solid var(--or);background:rgba(201,168,76,.22);color:var(--or-clair);border-radius:9px;padding:0 11px;height:44px;font-size:var(--pt-micro,11px);font-weight:700;cursor:pointer;font-family:inherit;white-space:nowrap">En dernier</button>'
       +'<button data-op="cancel" style="flex:0 0 auto;border:1px solid rgba(255,255,255,.25);background:transparent;color:#F2EFE7;border-radius:9px;padding:0 11px;height:44px;font-size:var(--pt-micro,11px);font-weight:700;cursor:pointer;font-family:inherit">Annuler</button></div>';
@@ -3698,11 +3698,11 @@ function _rfCoutSvg(ctx,res,meilleur,w){
   var msg, col=c.col.fait;
   if(res.deborde){
     msg=(res.horsDelai>0)
-      ? ('\u26a0 '+res.horsDelai+' t\u00e2che'+(res.horsDelai>1?'s':'')+' ne tiendra'+(res.horsDelai>1?'ront':'')+' pas son d\u00e9lai \u2014 jusqu\u2019\u00e0 '+res.depMax+' semaine'+(res.depMax>1?'s':'')+' de retard, et chaque semaine ajoute '+_pilNum(ctx.c.k*100)+' % de temps.')
-      : ('\u26a0 Le travail finit '+(res.finSem-ctx.W.length+1)+' semaines apr\u00e8s la campagne, et mord sur la suivante.');
+      ? (''+_mvIcon('alerte',16)+' '+res.horsDelai+' t\u00e2che'+(res.horsDelai>1?'s':'')+' ne tiendra'+(res.horsDelai>1?'ront':'')+' pas son d\u00e9lai \u2014 jusqu\u2019\u00e0 '+res.depMax+' semaine'+(res.depMax>1?'s':'')+' de retard, et chaque semaine ajoute '+_pilNum(ctx.c.k*100)+' % de temps.')
+      : (''+_mvIcon('alerte',16)+' Le travail finit '+(res.finSem-ctx.W.length+1)+' semaines apr\u00e8s la campagne, et mord sur la suivante.');
     col=c.col.alerte; }
   else if(meilleur && meilleur.decide < res.decide-1) msg='En d\u00e9pla\u00e7ant ce renfort, la m\u00eame campagne se boucle pour '+_ecoEur(meilleur.decide)+' \u2014 soit '+_ecoEur(res.decide-meilleur.decide)+' de moins.';
-  else msg='\u2713 Aucune des strat\u00e9gies test\u00e9es ne boucle la campagne pour moins cher.';
+  else msg=''+_mvIcon('check',16)+' Aucune des strat\u00e9gies test\u00e9es ne boucle la campagne pour moins cher.';
   g+='<text x="'+pad+'" y="'+(barY+barH+22)+'" font-size="'+c.txt.axe+'" font-weight="600" fill="'+col+'">'+_pilEsc(msg)+'</text>';
   return window._mvGraphSvg(c, 'Ce que co\u00fbte la strat\u00e9gie de renfort : '+_ecoEur(dec)+' d\u00e9cid\u00e9s sur un total de campagne de '+_ecoEur(res.cout)+'.', g);
 }
@@ -3996,7 +3996,7 @@ function _rfBody(d){
       corps='Rien n\u2019est abandonn\u00e9 : ce qui d\u00e9borde mord sur la campagne suivante.';
     }
     verdict='<div style="background:var(--tag-red-bg,#FBEDEA);border-radius:12px;padding:13px 15px;margin:10px 0 4px">'
-      +'<div style="font-size:var(--pt-base,14px);font-weight:600;color:#9B2D1F">\u26a0 '+tete+'</div>'
+      +'<div style="font-size:var(--pt-base,14px);font-weight:600;color:#9B2D1F">'+_mvIcon('alerte',16)+' '+tete+'</div>'
       +'<div style="font-size:var(--pt-txt,12.5px);color:#9B2D1F;margin-top:4px;line-height:1.5">'+corps+'</div></div>'
       +_rfRetardHtml(ctx,res);
   }
@@ -5675,7 +5675,7 @@ function _pcavVueMillesime(c){
   try{ h+=_pcavRdt(c,mil)||''; }catch(e){ _pcavLog('rdt',e); }
   try{ h+=_pcavN1(c,mil)||''; }catch(e){ _pcavLog('n1',e); }
   if(!h) h='<div class="pcav-vide">Aucune donnée de millésime pour la campagne '+c.mil+'-'+(c.mil+1)+'.<br>Le Cuvier alimente cet écran dès la première récolte saisie.</div>';
-  else if(l.length===1&&l[0].mil!==c.mil) h+='<div class="pcav-note"><span>\uD83D\uDD52</span><div>Le millésime <b>'+c.mil+'</b> n’est pas encore rentré. Cet écran montre le <b>'+l[0].mil+'</b>, celui qui est en cave.</div></div>';
+  else if(l.length===1&&l[0].mil!==c.mil) h+='<div class="pcav-note"><span>'+_mvIcon('chrono',16)+'</span><div>Le millésime <b>'+c.mil+'</b> n’est pas encore rentré. Cet écran montre le <b>'+l[0].mil+'</b>, celui qui est en cave.</div></div>';
   return h;
 }
 
@@ -5772,7 +5772,7 @@ function _pcavVueParc(c){
   try{ h+=_pcavPyramide(c)||''; }catch(e){ _pcavLog('pyramide',e); }
   try{ h+=_pcavAngesCard(c)||''; }catch(e){ _pcavLog('angescard',e); }
   try{ h+=_pcavMouv(c)||''; }catch(e){ _pcavLog('mouv',e); }
-  h+='<div class="pcav-note"><span>\uD83D\uDCB6</span><div><b>Aucun euro n’est affiché.</b> Le prix moyen d’une barrique n’est pas renseigné dans vos réglages Cave. Renseignez-le et cet écran chiffrera le renouvellement ; sinon le plan reste exprimé en nombre de fûts.</div></div>';
+  h+='<div class="pcav-note"><span>'+_mvIcon('euro',16)+'</span><div><b>Aucun euro n’est affiché.</b> Le prix moyen d’une barrique n’est pas renseigné dans vos réglages Cave. Renseignez-le et cet écran chiffrera le renouvellement ; sinon le plan reste exprimé en nombre de fûts.</div></div>';
   return h;
 }
 
@@ -5901,7 +5901,7 @@ function _pcavInjectCss(){
 // ── L'onglet ─────────────────────────────────────────────────────────
 // Millesime ouvert dans l'onglet. null = celui que le contexte a retenu.
 var _PCAV_MIL=null;
-var _PCAV_SUBS=[['urg','\u23F1\uFE0F','Ce qui presse'],['mil','\uD83C\uDF47','Le millésime'],['parc','\uD83D\uDEE2\uFE0F','Le parc']];
+var _PCAV_SUBS=[['urg','chrono','Ce qui presse'],['mil','raisin','Le millésime'],['parc','barrique','Le parc']];
 function _pilTabCav(d){
   _pcavInjectCss();
   var sub=_PIL_CAVSUB;
@@ -7433,7 +7433,7 @@ function _pecFiabCard(Z, R, cleFia, cleRem, okTxt, okSous){
        }).join('')
       +'</div></div>';
   } else {
-    H+='<div class="pec-fia ok"><div class="pec-fia-h"><span class="pec-fia-n">\u2713</span>'
+    H+='<div class="pec-fia ok"><div class="pec-fia-h"><span class="pec-fia-n">'+_mvIcon('check',16)+'</span>'
       +'<div><div class="pec-fia-t">'+_pilEsc(okTxt)+'</div>'
       +'<div class="pec-fia-s">'+_pilEsc(okSous)+'</div></div>'
       +(typeof _mvInfoBtn==='function'?_mvInfoBtn(cleFia):'')+'</div></div>';
@@ -7532,7 +7532,7 @@ function _pecViewSynthese(E,TL){
     +(typeof _mvInfoBtn==='function'?(' '+_mvInfoBtn('pil.eco.revient')):'')+'</div></div>'
     +'<div class="pec-cb"><div class="pec-mini">'+mini+'</div>'
     +'<div class="pec-acts"><button class="pec-btn" data-pec="param"><span>\u2699\uFE0F</span> R\u00e9gler les hypoth\u00e8ses</button>'
-    +'<button class="pec-btn" data-pec="sub" data-v="pos"><span>\uD83E\uDDED</span> Voir o\u00f9 part l\u2019argent</button></div></div></div>';
+    +'<button class="pec-btn" data-pec="sub" data-v="pos"><span>'+_mvIcon('boussole',16)+'</span> Voir o\u00f9 part l\u2019argent</button></div></div></div>';
 
   H+='<div class="pec-card"><div class="pec-ch"><div class="pec-ct">Ce qu\u2019il faut regarder</div></div><div class="pec-cb">'+_pecAlertes(E,TL)+'</div></div>';
   return H;
@@ -7651,8 +7651,8 @@ function _pecViewParcelles(E){
     +'<div class="pec-cs"><b>Budget</b> de la p\u00e9riode, parcelle par parcelle'
     +(typeof _mvInfoBtn==='function'?(' '+_mvInfoBtn('pil.eco.parcelles')):'')+'</div></div>'
     +'<div class="pec-cb"><div class="pec-scroll"><table class="pec-tbl" style="min-width:900px"><thead><tr>'+head+'</tr></thead><tbody>'+body+'</tbody><tfoot>'+foot+'</tfoot></table></div>'
-    +'<div class="pec-acts"><button class="pec-btn" data-pec="csv"><span>\u2B07\uFE0F</span> T\u00e9l\u00e9charger le tableau (CSV)</button>'
-    +'<button class="pec-btn" data-pec="copy"><span>\uD83D\uDCCB</span> Copier pour un tableur</button></div>'
+    +'<div class="pec-acts"><button class="pec-btn" data-pec="csv"><span>'+_mvIcon('chevron',16)+'</span> T\u00e9l\u00e9charger le tableau (CSV)</button>'
+    +'<button class="pec-btn" data-pec="copy"><span>'+_mvIcon('liste',16)+'</span> Copier pour un tableur</button></div>'
     +'<div class="pec-note">Le co\u00fbt d\u2019une parcelle est un <b>co\u00fbt de culture</b> : ni vinification, ni foncier, ni amortissement du mat\u00e9riel. Les heures viennent du bar\u00e8me h/ha du domaine, le taux de la fiche de paie de chaque salari\u00e9, et le tracteur du taux de son conducteur.</div>'
     +'</div></div>';
   window._mvGraphSuivre('#pec-g-ecart', function(w){ return _pecEcartSvg(E,w); });
@@ -8077,7 +8077,7 @@ function _pexSetMois(v){
   }
   _PEX_AN=null;
   _pecSaveSt();
-  if(window.showToast) window.showToast('\u2705 Exercice comptable mis \u00e0 jour','#3D6B27');
+  if(window.showToast) window.showToast('Exercice comptable mis \u00e0 jour','#3D6B27');
   _pilFillContent(_pilData());
 }
 window._pexSetMois=_pexSetMois;
@@ -8097,10 +8097,10 @@ function _pexMoisChoix(){
   var admin=!!(typeof window.isAdmin==='function' && window.isAdmin());
   var opts=lbl.map(function(nm,i){ return '<option value="'+i+'"'+(i===cur?' selected':'')+'>1er '+nm+'</option>'; }).join('');
   return '<div class="pec-card"><div class="pec-cb">'
-    +'<div class="pex-set"><div><div class="pex-setl">\u2699\uFE0F Ouverture de l\u2019exercice</div>'
+    +'<div class="pex-set"><div><div class="pex-setl">'+_mvIcon('engrenage',16)+' Ouverture de l\u2019exercice</div>'
     +'<div class="pex-sets">'+(admin
       ? 'Le mois o\u00f9 votre exercice s\u2019ouvre. Par d\u00e9faut le 1<sup>er</sup> ao\u00fbt, l\u2019usage viticole\u00a0: on cl\u00f4ture apr\u00e8s la r\u00e9colte, pas au milieu. Ce choix vaut pour tout le domaine et ne touche ni aux campagnes, ni aux cong\u00e9s, ni \u00e0 aucun chiffre existant.'
-      : '\uD83D\uDD12 Lecture seule \u2014 seul un administrateur peut changer la date de bilan.')+'</div></div>'
+      : ''+_mvIcon('cadenas',16)+' Lecture seule \u2014 seul un administrateur peut changer la date de bilan.')+'</div></div>'
     +'<select class="pex-selm"'+(admin?'':' disabled')+' onchange="window._pexSetMois&&window._pexSetMois(this.value)">'+opts+'</select>'
     +'</div></div></div>';
 }
@@ -8208,7 +8208,7 @@ function _pexEntete(E){
   //   cotisations d'exploitant, embouteillage, frais generaux — se lit une fois :
   //   il passe dans MV_INFO['pil.exo.garde'].
   var garde='<div class="pec-card"><div class="pec-cb"><div class="pex-warn">'
-    +'<div class="t">\uD83E\uDDFE Ce total n\u2019est pas un compte de r\u00e9sultat'
+    +'<div class="t">'+_mvIcon('recu',16)+' Ce total n\u2019est pas un compte de r\u00e9sultat'
     +(typeof _mvInfoBtn==='function'?(' '+_mvInfoBtn('pil.exo.garde')):'')+'</div>'
     +'<div class="d">Il chiffre vos <b>charges d\u2019exploitation</b>, d\u2019un bilan \u00e0 l\u2019autre \u2014 pas tout ce que co\u00fbte le domaine.</div>'
     +'</div></div></div>';
@@ -8240,7 +8240,7 @@ function _pexEntete(E){
 // chaque personne. Meme regle que partout ailleurs (paie est admin-only en LECTURE).
 function _pexTableSal(E){
   if(!(typeof window.isAdmin==='function' && window.isAdmin()))
-    return '<div class="pec-card"><div class="pec-cb"><div class="pec-empty">\uD83D\uDD12 Le d\u00e9tail par personne est r\u00e9serv\u00e9 aux administrateurs.</div></div></div>';
+    return '<div class="pec-card"><div class="pec-cb"><div class="pec-empty">'+_mvIcon('cadenas',16)+' Le d\u00e9tail par personne est r\u00e9serv\u00e9 aux administrateurs.</div></div></div>';
   if(!E.gens.length)
     return '<div class="pec-card"><div class="pec-cb"><div class="pec-empty">Aucune heure pos\u00e9e au planning sur cet exercice.</div></div></div>';
   var rows=E.gens.map(function(g){
@@ -8778,13 +8778,13 @@ function _pilTabEco(d){
   _pecCss();
   var E=_pecData();
   if(!E.configured){
-    return '<div class="pec-card"><div class="pec-verdict"><div class="em">\uD83D\uDCB6</div><div>'
+    return '<div class="pec-card"><div class="pec-verdict"><div class="em">'+_mvIcon('euro',24)+'</div><div>'
       +'<div class="t">Le pilotage \u00e9conomique n\u2019est pas encore branch\u00e9</div>'
       +'<div class="d">Deux donn\u00e9es suffisent \u00e0 tout d\u00e9clencher :<br>'
       +'\u2022 un <b>taux horaire</b> dans la fiche de chaque salari\u00e9 (<b>R\u00e9glages \u203A \u00c9quipe</b>) ;<br>'
       +'\u2022 le <b>prix du GNR</b>, saisi au prochain <b>appoint de cuve</b> (<b>Tracteur \u203A Entretien</b>).<br>'
       +'Le budget, le rythme de d\u00e9pense, le co\u00fbt par travail et le prix de revient en d\u00e9coulent tout seuls \u2014 rien d\u2019autre \u00e0 saisir. Ces deux donn\u00e9es sont r\u00e9serv\u00e9es aux administrateurs.</div>'
-      +'<div class="pec-acts"><button class="pec-btn" data-pec="param"><span>\u2699\uFE0F</span> Param\u00e9trage du module</button></div>'
+      +'<div class="pec-acts"><button class="pec-btn" data-pec="param"><span>'+_mvIcon('engrenage',16)+'</span> Param\u00e9trage du module</button></div>'
       +'</div></div></div>';
   }
   var TL=_pecTimeline(E);
@@ -8897,7 +8897,7 @@ function _pilTabCfm(d){
       }).join('');
       var body='<div class="pil-ip-list">'+crows+'</div>'
         +'<div class="pil-li-s" style="margin-top:10px;line-height:1.5"><b>Cuivre m\u00e9tal</b> sur 7 ans glissants \u00b7 plafond UE <b>28 kg/ha</b>'+(typeof _mvInfoBtn==='function'?(' '+_mvInfoBtn('pil.cfm.cuivre')):'')+'</div>';
-      var sw=cu.over?('\u26A0 '+cu.over):(cu.warn?('\u2191 '+cu.warn):null);
+      var sw=cu.over?(_mvIcon('alerte',16)+' '+cu.over):(cu.warn?('\u2191 '+cu.warn):null);
       H+=_pilTile('cuivre','#5B8DBF','Cuivre \u00b7 bio (7 ans)', _pilStat(cu.rows.length,' parcelle'+(cu.rows.length>1?'s':''), sw), null, null, body);
     }
   }
@@ -9044,11 +9044,11 @@ function _pilTabArc(d){
     +'<div><div class="v">'+(hTot>0?_pilHa(hTot):'—')+'</div><div class="l">heures archivées</div></div>'
     +'</div>';
   h+='<button class="arc-cmp" onclick="window._arcOpenCmp&&window._arcOpenCmp()">'
-    +'\uD83D\uDCCA Comparer deux saisons</button>';
+    +_mvIcon('graphique',16)+' Comparer deux saisons</button>';
   // Le bilan de campagne vit dans cave.js (importe AVANT pilotage.js) : on ne
   // duplique pas le moteur, on ouvre la porte depuis l'ecran de fin d'annee.
   h+='<button class="arc-cmp" onclick="window._bcExportChoix&&window._bcExportChoix()">'
-    +'\uD83D\uDCD6 \u00c9diter le bilan de campagne</button>';
+    +_mvIcon('livre',16)+' \u00c9diter le bilan de campagne</button>';
   h+='<div class="arc-note">Les heures viennent des instantanés pris à la clôture de chaque '
     +'campagne : parcelles, journal, sessions et avancement y sont figés.</div>';
   return h;
@@ -9321,7 +9321,7 @@ function _pilCadreAvert(txt){
   if(!txt) return '';
   return '<div style="margin:0 0 12px;padding:9px 12px;border-radius:9px;background:var(--bg-card);'
     +'border:1px solid var(--gris-clair);border-left:3px solid var(--or);color:var(--texte-doux);'
-    +'font-size:var(--pt-txt,12.5px);line-height:1.5">\u2139\uFE0F '+txt+'</div>';
+    +'font-size:var(--pt-txt,12.5px);line-height:1.5">'+_mvIcon('info',16)+' '+txt+'</div>';
 }
 // L'Economie chiffre la periode CONSULTEE : _ecoAllDefs lit getTachesSaison(),
 // et les sessions sont filtrees PAR NOM DE SAISON. Elle ne sait cadrer ni sur
@@ -9362,7 +9362,7 @@ function _pilCrumbHtml(){
   }
   var h='<button class="pil-cr root" id="pil-cr-root" title="Revenir \u00e0 l\u2019ann\u00e9e enti\u00e8re">\u2302 '+_pilEsc(ex)+'</button>';
   if(_PIL_SCOPE.camp){
-    h+='<span class="pil-cr-sep">\u203A</span><span class="pil-cr sel">\uD83C\uDF47 '+_pilEsc(_PIL_SCOPE.camp)
+    h+='<span class="pil-cr-sep">\u203A</span><span class="pil-cr sel">'+_mvIcon('raisin',16)+' '+_pilEsc(_PIL_SCOPE.camp)
       +'<button class="x" id="pil-cr-x" title="Revenir \u00e0 l\u2019ann\u00e9e">\u00d7</button></span>';
   } else {
     // ★ « cliquez une campagne dans la frise pour zoomer » est une INSTRUCTION :
@@ -9480,7 +9480,7 @@ function _pilPhotoHtml(k,ico,val,unite,sous,cible,drapeau,quest){
   //    mais §24 l'interdit \u2014 et un balisage invalide se paie plus tard, pas
   //    tout de suite.
   return '<button class="pil-photo" data-pgo="'+cible+'" data-pq="'+quest+'">'
-    +'<span class="k">'+ico+' '+k+(drapeau||'')+'</span>'
+    +'<span class="k">'+_mvIcon(ico,16)+' '+k+(drapeau||'')+'</span>'
     +'<span class="v">'+val+'<span class="u">'+unite+'</span></span>'
     +'<span class="s">'+sous+'</span>'
     +'<span class="go">voir le d\u00e9tail \u203A</span></button>';
@@ -9512,14 +9512,14 @@ function _pilPhotosHtml(){
   else if(D.pct!=null) sT=D.pct+' % fait '+cadre;
   else if(camp) sT='de bar\u00e8me '+cadre;
   else sT='de bar\u00e8me \u00b7 '+D.nPer+' campagne'+(D.nPer>1?'s':'')+' dans l\u2019exercice';
-  var pTrav=_pilPhotoHtml('Travaux','\uD83C\uDF3F',_pilNb(D.hTot),' h', sT, camp?'avc':'an', fT, 'travaux');
+  var pTrav=_pilPhotoHtml('Travaux','feuille',_pilNb(D.hTot),' h', sT, camp?'avc':'an', fT, 'travaux');
 
   // EFFECTIF — le pic, et le manque en clair s'il y en a un.
   var sE = D.pic>0
     ? ('au pic'+(D.picW?(' \u00b7 '+_pilNb(D.head)+' pr\u00e9sents cette semaine-l\u00e0'):''))
     : 'aucune semaine mesur\u00e9e '+cadre;
   var fE = drap('effectif') || ((D.manque>0.05) ? _pilFlag('o','Il manque '+_pilUn(D.manque)+' personne(s) au pic') : '');
-  var pEff=_pilPhotoHtml('Effectif','\uD83D\uDC65',D.pic>0?_pilUn(D.pic):'\u2014',D.pic>0?' pers.':'', sE,'equ',fE,'effectif');
+  var pEff=_pilPhotoHtml('Effectif','equipe',D.pic>0?_pilUn(D.pic):'\u2014',D.pic>0?' pers.':'', sE,'equ',fE,'effectif');
 
   // BUDGET — le cadre du chiffre est ECRIT SOUS LE CHIFFRE, toujours.
   var fB=drap('budget'), pBud;
@@ -9531,14 +9531,14 @@ function _pilPhotosHtml(){
       ? 'sur l\u2019<b>exercice comptable</b> \u2014 le co\u00fbt ne se recadre pas sur '+_pilEsc(camp)
       : 'sur l\u2019<b>exercice comptable</b> \u00b7 salaires charg\u00e9s, GNR, achats';
     pBud = (_X && _X.total>0)
-      ? _pilPhotoHtml('Budget','\uD83D\uDCB6',_pilNb(Math.round(_X.total/1000)),' k\u20ac', _note,'eco',fB,'budget')
-      : _pilPhotoHtml('Budget','\uD83D\uDCB6','\u2014','','le co\u00fbt de l\u2019exercice n\u2019a pas abouti','eco',
+      ? _pilPhotoHtml('Budget','euro',_pilNb(Math.round(_X.total/1000)),' k\u20ac', _note,'eco',fB,'budget')
+      : _pilPhotoHtml('Budget','euro','\u2014','','le co\u00fbt de l\u2019exercice n\u2019a pas abouti','eco',
           _pilFlag('r','Ouvrez \u00c9conomie \u203a Exercice pour voir ce qui bloque'),'budget');
   } else {
     pBud = D.ecoOk
-      ? _pilPhotoHtml('Budget','\uD83D\uDCB6',_pilNb(Math.round(D.eur/1000)),' k\u20ac',
+      ? _pilPhotoHtml('Budget','euro',_pilNb(Math.round(D.eur/1000)),' k\u20ac',
           'sur '+_pilEsc(camp)+' \u00b7 main-d\u2019\u0153uvre, carburant et phyto','eco',fB,'budget')
-      : _pilPhotoHtml('Budget','\uD83D\uDCB6','\u2014','','le calcul du co\u00fbt n\u2019a pas abouti','eco',
+      : _pilPhotoHtml('Budget','euro','\u2014','','le calcul du co\u00fbt n\u2019a pas abouti','eco',
           _pilFlag('r','Ouvrez \u00c9conomie pour voir ce qui bloque'),'budget');
   }
 
@@ -9980,7 +9980,7 @@ function _pilSimEcoCard(admin){
   }
   var note = admin
     ? 'Ces valeurs chiffrent le <b style="color:var(--texte)">surco\u00fbt de retard</b> par parcelle (onglet \u00c9co &amp; conformit\u00e9) et la courbe <b style="color:var(--texte)">\u00ab Renfort : combien, et quand \u00bb</b> (onglet D\u00e9cider). Elles ne touchent \u00e0 aucune paie : le retard est <b style="color:var(--texte)">mod\u00e9lis\u00e9, jamais pay\u00e9</b>. Vide = valeur par d\u00e9faut.'
-    : '\uD83D\uDD12 Lecture seule \u2014 seul un administrateur peut modifier ces valeurs. Elles chiffrent le surco\u00fbt de retard par parcelle et le simulateur de renfort. Elles ne touchent \u00e0 aucune paie.';
+    : ''+_mvIcon('cadenas',16)+' Lecture seule \u2014 seul un administrateur peut modifier ces valeurs. Elles chiffrent le surco\u00fbt de retard par parcelle et le simulateur de renfort. Elles ne touchent \u00e0 aucune paie.';
   return '<div style="'+cardCss+'">'
     +'<div style="'+ttlCss+';margin-bottom:4px">\uD83C\uDF9B\uFE0F Simulation \u00e9conomique</div>'
     +'<div style="font-size:var(--pt-txt,12.5px);color:var(--texte-doux);margin-bottom:10px;line-height:1.55">'+note+'</div>'

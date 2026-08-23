@@ -1,9 +1,9 @@
 {
-  "total": 1120,
+  "total": 1069,
   "modules": {
     "app": 123,
     "utils": 376,
-    "pilotage": 165,
+    "pilotage": 114,
     "planning": 124,
     "reglages": 116,
     "cave": 26,

@@ -23,7 +23,7 @@ export const GT_ADMIN_EMAIL = 'ngdevpro@gmail.com';
 // WHATS_NEW   : tableau vide = modal desactive pour cette version.
 // Format item : { emoji:'📅', titre:'Titre court', desc:'Phrase utilisateur.' }
 // Regle : seulement les changements visibles par les utilisateurs.
-export const APP_VERSION = '6.54';
+export const APP_VERSION = '6.55';
 // ════ Journal des nouveautés (récap cumulatif) ════
 // Une entrée par version, la PLUS RÉCENTE EN HAUT : { v:'5.10', items:[ {emoji,titre,desc}, … ] }
 // À chaque release visible → AJOUTER un bloc en tête (ne pas remplacer). items:[] = release technique (rien à afficher).
@@ -354,6 +354,9 @@ window._mvGraphRepeindre = function(){
 };
 
 export const WHATS_NEW = [
+  { v: '6.55', items: [
+    { emoji: 'graphique', titre: 'Le Pilotage passe aux vraies ic\u00f4nes', desc: "Les cartes de la Cave, l\u2019Exercice, la tourn\u00e9e des parcelles et les bandeaux d\u2019avertissement gardaient leurs anciens pictogrammes. Ils suivent maintenant le reste de l\u2019application, et prennent la couleur du texte au lieu de rester des taches vives en mode sombre. <b>Les pastilles de couleur restent des pastilles</b> \u2014 vert, orange, rouge disent quelque chose qu\u2019un dessin ne dirait pas. <b>Aucun chiffre n\u2019a boug\u00e9.</b>" }
+  ] },
   { v: '6.54', items: [
     { emoji: 'verre', titre: 'La Cave passe aux vraies ic\u00f4nes, y compris \u00e0 l\u2019impression', desc: "Le Chai, le Cuvier, le journal des op\u00e9rations et les r\u00e9glages de cave gardaient leurs anciens pictogrammes. Surtout, <b>le registre de cave et le bilan de campagne</b> en imprimaient aussi \u2014 et un pictogramme ne se dessine pas pareil selon la machine qui imprime. Ils sortent maintenant avec les m\u00eames ic\u00f4nes que l\u2019\u00e9cran, identiques partout. <b>Aucun chiffre n\u2019a chang\u00e9</b>, et vos op\u00e9rations non plus." }
   ] },
