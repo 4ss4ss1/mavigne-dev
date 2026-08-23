@@ -1,6 +1,7 @@
 // CLAUDE.md doit décrire le code RÉEL. Chaque affirmation vérifiable est vérifiée
 // contre les fichiers — un document de continuité qui ment est pire qu'absent.
 import { readFileSync as R, readdirSync } from 'node:fs';
+import { execSync } from 'node:child_process';
 import { fileURLToPath } from 'node:url';
 import { dirname, join } from 'node:path';
 /* ⚠⚠⚠ CHEMIN PORTABLE, ET C'EST UNE LEÇON PAYÉE DEUX FOIS.
@@ -151,8 +152,52 @@ const muets = scripts.filter(f => !MD.includes(f.slice(0, -4)));
 t(`tout script de scripts/ est nommé dans le document (${muets.length} muet(s))`,
   muets.length === 0, muets.join(' · '));
 
+/* 1bis) ⚠️⚠️ LE NUMÉRO DE VERSION NE RECULE JAMAIS.
+   Le 23/08, un lot construit sur un clone du matin a livré APP 6.48 / SW 7.03
+   alors que le dépôt était à 6.49 / 7.04 : les numéros ont RECULÉ, et avec eux
+   le bloc WHATS_NEW 6.49, l'entrée de changelog 7.04 et le correctif §59.
+   AUCUN filet ne l'a vu — c'est le seul dégât de la journée qui soit passé.
+   ★ La sonde compare au dernier commit : elle exige que APP et SW soient
+   STRICTEMENT SUPÉRIEURS, ou inchangés. Jamais inférieurs. */
+{
+  const num = v => { const p = String(v).split('.').map(Number); return p[0] * 1000 + p[1]; };
+  const lire = (txt, re) => { const m = re.exec(txt); return m ? m[1] : null; };
+  const RE_APP = /APP_VERSION = '([\d.]+)'/;
+  const RE_SW  = /Service Worker v([\d.]+)/;
+  let avU = null, avS = null;
+  try {
+    /* ⚠️ ON PREND LE MAXIMUM SUR LES 12 DERNIERS COMMITS, PAS SEULEMENT HEAD.
+       Comparer au dernier commit ne voit RIEN si la régression y est déjà :
+       c'est exactement ce qui s'est passé le 23/08 — le lot fautif avait été
+       intégré, HEAD portait donc 6.48, et 6.48 >= 6.48 sortait vert. */
+    const revs = execSync('git rev-list -n 12 HEAD', { cwd: B, encoding: 'utf8' }).trim().split('\n');
+    const maxi = (chemin, re) => {
+      let best = null, bestN = -1;
+      for (const r of revs) {
+        let txt; try { txt = execSync(`git show ${r}:${chemin}`, { cwd: B, encoding: 'utf8' }); } catch { continue; }
+        const m = re.exec(txt); if (!m) continue;
+        const p = m[1].split('.').map(Number), n = p[0] * 1000 + p[1];
+        if (n > bestN) { bestN = n; best = m[1]; }
+      }
+      return best;
+    };
+    avU = maxi('src/utils.js', RE_APP);
+    avS = maxi('public/sw.js', RE_SW);
+  } catch { avU = null; }
+  if (!avU || !avS) {
+    t('la comparaison de version est possible (dépôt git)', true, 'hors git — sonde inactive');
+  } else {
+    const appAv = avU, appAp = lire(R(join(B, 'src/utils.js'), 'utf8'), RE_APP);
+    const swAv  = avS, swAp  = lire(R(join(B, 'public/sw.js'), 'utf8'), RE_SW);
+    t(`APP ne recule pas (${appAv} → ${appAp})`, num(appAp) >= num(appAv),
+      'un numéro qui recule écrase le lot précédent en silence');
+    t(`SW ne recule pas (${swAv} → ${swAp})`, num(swAp) >= num(swAv),
+      'réutiliser un numéro déjà servi fige l\'index.html correspondant pour toujours');
+  }
+}
+
 /* 2) Une section ne disparaît pas, même si son numéro est réutilisé. */
-const SECTIONS = 91;   /* +§59, le lot du thème */   /* mesuré le 23/08, §57 restaurée + §58 posée */
+const SECTIONS = 92;   /* +§60. ⚠️ MESURÉ, pas supposé : le cliquet compte les sections NUMÉROTÉES (## N.), pas tous les ## — à 91 il ne mordait plus. */
 const sections = new Set([...MD.matchAll(/^## (\d+[a-z]?)\. /gm)].map(m => m[1])).size;
 t(`aucune section n'a disparu (${sections} ≥ ${SECTIONS})`, sections >= SECTIONS);
 if (sections > SECTIONS)

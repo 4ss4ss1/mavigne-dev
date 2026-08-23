@@ -1,5 +1,5 @@
-// MA VIGNE — Service Worker v7.03
-// v7.03 (23/08/2026) — ACHATS : LE SEUL ENDROIT OU L'ON MET LES PRIX. APP 6.47 -> 6.48.
+// MA VIGNE — Service Worker v7.05
+// v7.05 (23/08/2026) — ACHATS : LE SEUL ENDROIT OU L'ON MET LES PRIX. APP 6.49 -> 6.50.
 //   Sous-vue Economie > Achats : les trois sources (achats d'intrants, lots de
 //   futs, passages chez le reparateur) y deposent leurs lignes SANS PRIX, et on
 //   les chiffre la, en une fois, quand les factures arrivent.
@@ -43,6 +43,70 @@
 //   — ils existaient et ne tournaient dans aucun check.
 //   Fichiers : pilotage.js, reserve.js, tracteur.js, utils.js, firebase.js,
 //   index.html, guide/, scripts/.
+//   ⚠⚠⚠ CE LOT REPARE UN ECRASEMENT QU'IL A LUI-MEME CAUSE. Sa premiere
+//   livraison portait APP 6.48 / SW 7.03 alors que le lot « theme » avait deja
+//   pousse 6.49 / 7.04 : les numeros ont RECULE, le bloc WHATS_NEW 6.49 et
+//   l'entree de changelog 7.04 ont disparu, et CLAUDE.md a perdu trois sections
+//   (57, 58, 59) — dont la 58, qui raconte exactement cet incident.
+//   ⚠ On ne reutilise NI 6.49 NI 7.04 : on monte a 6.50 / 7.05, parce qu'un
+//   numero deja servi fige l'index.html correspondant pour toujours.
+// v7.04 (23/08/2026) — LE THEME S'ARRETAIT A LA PORTE DES OVERLAYS. APP 6.48 → 6.49.
+//   #app-root est ferme ligne 3197 d'index.html : les 13 overlays statiques, les
+//   37 .modal qu'ils contiennent et tous ceux poses en JS par
+//   document.body.appendChild sont ses FRERES, pas ses enfants. Les 63 variables
+//   de theme etaient redefinies sous #app-root seul : une modale sortait BLANCHE
+//   en plein mode sombre. Deduction du lot DS-0, verifiee et corrigee ici.
+//   Correctif : les 5 blocs sombres portent AUSSI :root (meme bloc, deux
+//   selecteurs — aucune declaration dupliquee), et applyTheme pose l'attribut
+//   sur <html> en plus de #app-root. Idem aux 2 endroits ou la visite guidee
+//   force le clair : <html> non marque aurait laisse l'OS repasser les overlays
+//   en sombre pendant une demo censee etre claire.
+//   Harnais neuf mv-harnais-theme (7 assertions, 6 contre-epreuves) : aucune
+//   variable de theme ne peut plus rester enfermee sous #app-root.
+//   ⚠ 3 harnais dormants branches dans check : sec3, uxlogin, entretien.
+//   Fichiers : styles.css, utils.js, app.js, index.html + scripts/ (hors build).
+// v7.03 (23/08/2026) — LES CONSOMMABLES PAR ATELIER. APP 6.47 -> 6.48.
+//   Economie > Exercice repartit desormais les consommables par ATELIER (vigne,
+//   cave, tracteur, non affecte) en plus de leur nature. C'est un SECOND AXE sur
+//   les MEMES euros : la somme des ateliers vaut exactement achats + GNR +
+//   depenses, et la ligne de controle l'AFFICHE au lieu de le promettre.
+//   ★ L'atelier ne se saisit jamais : il se DEDUIT de la categorie de l'intrant
+//   (4 categories ajoutees au selecteur existant, aucun champ neuf). Seule une
+//   depense le porte, faute de categorie d'ou le tirer.
+//   ⚠ LES SALAIRES N'Y SONT PAS, et l'ecran le dit : une entree de planning porte
+//   des heures, jamais une activite. La conduite du tracteur reste dans la masse
+//   salariale — seul son carburant compte ici, sinon la meme heure serait payee
+//   deux fois.
+//   ★ 4e onglet « Depenses » dans La Reserve : revisions, reparations, locations
+//   de futs. Un consommable SANS STOCK — le forcer dans produits[] aurait cree un
+//   produit fantome et fait crier a tort l'alerte de stock negatif. Cle
+//   INTRANTS.depenses[], ajoutee au garde anti-ecrasement (_mvIntrantsCount).
+//   ⚠⚠ DEFAUT CORRIGE, ACTIF DEPUIS LE PREMIER JOUR : produits[].prixU n'avait
+//   AUCUNE interface d'ecriture (6 occurrences, dont 3 en donnees de demo). Le
+//   cout phyto par parcelle etait donc a ZERO chez tous les domaines reels, sans
+//   que rien ne le signale. Il derive maintenant d'un PMP sur achats[].prix, sur
+//   le patron de _mvPaieGnrPMP. Les lignes sans prix sont ECARTEES du quotient,
+//   pas comptees a zero : sur un cas a trois factures, l'ecart etait de 11,8 %.
+//   ★ Filet neuf : scripts/mv-harnais-ateliers.mjs (25 assertions, 4
+//   contre-epreuves) + mv-harnais-info.mjs AJOUTE A LA CHAINE — il existait,
+//   128 assertions, et ne tournait dans aucun check.
+//   ★ Trois constats au diagnostic : seau « non affecte » >= 20 % (la
+//   repartition reste juste mais comparer les ateliers ne veut plus dire
+//   grand-chose), lignes d'achat sans prix (un atelier peut sembler bon marche
+//   parce que ses factures ne sont pas chiffrees), et l'invariant casse en
+//   gravite 'r'. Deux cibles ajoutees a _PIL_DIAG_CIBLES + une cible interne
+//   'exercice' : sans elles, _pilGo fait un `return` MUET et le bouton ne fait
+//   rien — le meme no-op silencieux qu'un window.showPage inexistant.
+//   ★ Retour a la maquette validee sur trois ecarts que j'avais introduits sans
+//   le dire : couleur du seau (#DED7C9, pas #B7AE9C), 3e bouton « Voir les
+//   depenses », hors-perimetre en CARTE et non en note. Une maquette validee est
+//   une decision prise ; la rouvrir a l'integration, c'est decider a la place de
+//   Nico en silence. Ajout de l'export PDF des depenses, oublie.
+//   ⚠ Conflit assume : la maquette montre deux emojis, le cliquet des icones en
+//   interdit l'ajout. On garde la mise en page et le texte valides, on rend les
+//   pictos par le sprite (outil, check) — c'est une contrainte du code, pas un
+//   choix de design.
+//   Fichiers : pilotage.js, reserve.js, firebase.js, utils.js, index.html, scripts/.
 // v7.02 (23/08/2026) — LE JOUR D'APRES TOMBAIT SUR LE MEME JOUR. APP 6.46 -> 6.47.
 //   _mvJourApres (utils.js) lisait 'YYYY-MM-DDT00:00:00' en heure LOCALE puis
 //   reserialisait en UTC : a Paris minuit local vaut 22 h ou 23 h la VEILLE en UTC,
@@ -2375,7 +2439,7 @@
 // v2.22 — Fix profils vides : guard vide dans loadData() pour MEMBRES/SAISONS/TACHES
 // v2.17 — Onboarding intégré + tenantId · v2.06 — Firebase Auth · v2.00–v2.05 — divers
 const DEBUG = self.location.hostname === 'localhost' || self.location.hostname === '127.0.0.1';
-const CACHE_NAME   = 'mavigne-v7.03';
+const CACHE_NAME   = 'mavigne-v7.05';
 const TENANT_CACHE = 'mavigne-tenant';   // Cache persistant — préservé à chaque mise à jour SW
 const SYNC_TAG     = 'mavigne-sync';
 
@@ -2391,7 +2455,7 @@ const CDN_URLS = [
 ];
 
 self.addEventListener('install', event => {
-  if(DEBUG) console.log('[SW] Ma Vigne v7.03 installé');
+  if(DEBUG) console.log('[SW] Ma Vigne v7.05 installé');
   event.waitUntil(
     caches.open(CACHE_NAME).then(async cache => {
       // ── Cœur applicatif : STRICT (mise à jour ATOMIQUE) ──
@@ -2407,7 +2471,7 @@ self.addEventListener('install', event => {
 });
 
 self.addEventListener('activate', event => {
-  if(DEBUG) console.log('[SW] Ma Vigne v7.03 activé');
+  if(DEBUG) console.log('[SW] Ma Vigne v7.05 activé');
   event.waitUntil(
     caches.keys().then(keys =>
       Promise.all(
