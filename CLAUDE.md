@@ -10345,3 +10345,111 @@ filet ne couvre.
 testait « il existe **au moins une** lecture correcte » là où il y en a deux, et une autre testait
 **l'absence d'un motif textuel** — qui passe dès que le défaut s'écrit autrement. *Compter ce qui
 doit exister vaut mieux qu'interdire une forme d'écriture.*
+
+---
+
+## 61. ★★★ UNE RÉCOLTE, PLUSIEURS DESTINATAIRES — LOT VD-1 (24/08 — `cave.js` seul, aucun bump)
+
+Point de départ, une phrase de Nico : *« parfois pour les ventes en vrac, plusieurs clients sont sur
+la même parcelle »*. En Côte de Nuits une parcelle se partage, et sa vendange se répartit entre le
+domaine et un ou plusieurs négoces **le même jour**.
+
+**Le modèle ne portait qu'UN destinataire** : `vendu` (booléen) + `client` (un nom) + `nb_caisses`.
+Deux acheteurs obligeaient à saisir **deux récoltes** sur la même parcelle à la même date — et
+faisaient compter la parcelle deux fois partout où on la compte une fois.
+
+Une récolte porte désormais **`parts[]`**, une ligne par destinataire :
+
+```
+part = { dom:true,  caisses, pck }                        → vinifié au domaine
+part = { dom:false, client:'…', caisses, pck, surface? }  → vendu en vrac
+```
+
+### 61a. ★★★ LE POIDS PAR CAISSE ÉTAIT UN CHIFFRE VIVANT, IL DEVIENT UNE TRACE
+
+`_vendRecPck(r)` **relisait la fiche client à chaque affichage**. Corriger un client de 24 à 26 kg
+déplaçait **rétroactivement tous les kilos qu'il avait déjà reçus** — y compris ceux d'un bon déjà
+signé, y compris l'historique de rendement de la parcelle. Personne ne l'avait vu parce que
+personne n'avait encore changé un poids en cours de campagne.
+
+Nico : *« le poids d'une caisse peut changer d'un jour à l'autre »*. La question devenait
+structurelle. **`pck` est désormais FIGÉ dans la part**, écrit à la saisie ; la fiche client ne fait
+plus que le **proposer**. ⚠️ La règle générale : *une valeur de référence qu'on relit à l'affichage
+n'est pas une donnée, c'est une opinion du moment* — dès qu'elle sert à établir un document, elle
+doit être copiée dans l'enregistrement.
+
+### 61b. ⚠️⚠️⚠️ LE VRAI DANGER DU LOT : ENVOYER EN CUVE DES KILOS VENDUS
+
+`_recKg(r)` rend maintenant le **total** de la récolte, parts clients comprises. Or **onze
+emplacements** l'utilisaient en pensant « ce qui entre au cuvier ». Sans distinction, une cuve de
+21 hL en aurait affiché 30, le rendement de la cuvée aurait été faux, et la part des anges avec.
+
+Cinq lectures sont passées à la **part domaine** (`_recKgDom` / `_recCsDom` / `_recHasDom`) :
+`_vendCuvSync`, `_vendCuvStats`, `_vendRecoltesDispo`, `_cuveCouches`, `_caveBilanChaine`. Les
+totaux de campagne, eux, sont devenus des **sommes fines** : `kgCuve` additionne les parts domaine,
+`kgVendu` les parts clients — là où le code classait la récolte entière d'un côté ou de l'autre.
+
+⚠️ **Le filtre `!r.vendu` ne veut plus rien dire** : une récolte peut être vinifiée **et** vendue.
+Tout `r.vendu` restant dans `cave.js` est à relire avec cette question en tête.
+
+### 61c. ★ AUCUN BUMP : le compteur d'origine reste, masqué, et sert de pont
+
+`index.html` n'est pas touché. Le compteur `#vrec-caisses` n'est pas supprimé : il est **masqué et
+tenu à jour avec les caisses du domaine**. Tout le code de cuverie qui le lit (`_vendCuvAtt`,
+`_vendCuvKeep`, proposition de volume) continue de fonctionner **et lit exactement ce qu'il doit
+lire**. Même chose pour l'ancien select client, masqué plutôt que retiré. C'est ce qui permet un lot
+de cette taille **sans bump APP ni SW** — `cave.js` seul.
+
+### 61d. La surface, quand un client achète une PARTIE de parcelle
+
+Chaque part peut porter sa `surface` (ha). Vide = **tout le reste** de la parcelle. Plusieurs parts
+sans surface se partagent le reste **au prorata des kilos**, et l'écran le dit.
+⚠️ **La surface ne s'additionne pas d'un passage à l'autre** : deux récoltes sur la même parcelle le
+même millésime, c'est deux fois la même vigne. (Le calcul par parcelle arrive avec VD-3.)
+
+### 61e. Rétrocompatibilité, dans les deux sens
+
+`_vendParts(r)` fabrique la part unique d'une récolte d'avant le lot — **lecture seule, rien n'est
+réécrit** tant que la récolte n'est pas rouverte. Et `saveVendRec` continue d'écrire `nb_caisses`
+(somme), `vendu` (aucune part domaine) et `client` (rempli **seulement** s'il y a un client unique) :
+Pilotage, les documents et les écrans non repris par ce lot les lisent encore.
+⚠️ **`client` est vide quand il y a plusieurs acheteurs** — tout lecteur de `r.client` doit être
+converti à `_recKgPour(r, nom)` avant de servir de source de vérité.
+
+### 61f. Le filet : `mv-harnais-vendange-parts.mjs`
+
+**44 assertions**, ajouté à `check` et `prebuild`. Il **extrait les fonctions par comptage
+d'accolades et les EXÉCUTE** — un contrôle qui lit du texte aurait dit vert sur les deux défauts
+ci-dessus. Deux volets :
+
+- **le socle** (25) : récoltes d'avant le lot, récoltes mixtes, poids figé, et les cas limites qui
+  font des divisions par zéro ailleurs (récolte vide, part à 0 caisse, `pck` absent) ;
+- **l'écran** (19) : l'injection est rejouée sur un **DOM minimal** et le résultat est LU. Trois
+  assertions ★ tiennent le pont `#vrec-caisses` — le point le plus risqué du lot.
+
+`--contre` réintroduit les deux défauts du socle : **6 assertions rougissent**. Une contre-épreuve
+muette sort en erreur, pas silencieusement verte. Le pont a sa propre contre-épreuve : faire porter
+au compteur le **total** au lieu de la part domaine fait rougir les trois ★.
+
+⚠️ **Deux assertions de ce harnais ont été écrites fausses**, et c'est noté dans le fichier plutôt
+que corrigé en silence : un `input[type=number]` porte sa valeur avec un **point** (spec HTML, la
+locale ne joue qu'à l'affichage), et le reste d'une parcelle **se partage** entre toutes les parts
+sans surface — 0,11 ha chacune, pas 0,22. *Quand une assertion tombe, la première question reste :
+laquelle des deux a tort ?*
+
+### 61g. Ce que VD-1 ne fait PAS encore
+
+Écrit ici pour que le document ne laisse pas croire le chantier terminé — la maquette validée par
+Nico va plus loin que le code livré :
+
+- **VD-2** — les livraisons : regroupement par client + date, **bon de livraison** et **récap de
+  campagne** imprimables via `MV_DOC`, strictement en kilos (aucun prix, décision de Nico), et la
+  saisie du **retour du client** : litres de jus, litres de lie, rendement réel kg/hL.
+- **VD-3** — le rendement de la parcelle : escalier des sources (client / décuvage / estimé), un
+  hL/ha qui ne s'affiche comme **mesure** que si 100 % des kilos ont un volume connu, la répartition
+  des surfaces avec ses trois écarts (dépassement, hectares orphelins, surfaces divergentes), et
+  l'entrée `rendement_hist` enrichie — `kg_ha` **reste rapporté à la parcelle entière** (décision de
+  Nico : le domaine travaille toute la vigne même quand il en vend une part), avec `kg_ha_base`
+  écrit dans l'entrée plutôt que laissé à deviner.
+- Maquettes de référence, validées : `mq-vendange-multiclients-v6.html` (5 écrans, 4 versions
+  d'itération).

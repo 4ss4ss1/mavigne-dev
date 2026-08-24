@@ -2061,9 +2061,11 @@ function _vendErLbl(r){ return r.erasflage==='total'?'Éraflage total':r.erasfla
 
 function _vendKpiData(){
   var cfg=_vendCfg(); var recs=CAVE_VENDANGE.recoltes||[]; var cuves=CAVE_VENDANGE.cuves_vinif||[];
-  var caisses=recs.reduce(function(s,r){return s+(r.nb_caisses||0);},0);
+  var caisses=recs.reduce(function(s,r){return s+_recCaisses(r);},0);
   var kg=recs.reduce(function(s,r){return s+_recKg(r);},0);
-  var kgCuve=recs.filter(function(r){return !_recSold(r);}).reduce(function(s,r){return s+_recKg(r);},0);
+  // Le volume cuve ne compte QUE la part domaine : une recolte peut etre a la
+  // fois vinifiee et vendue depuis ce lot.
+  var kgCuve=recs.reduce(function(s,r){return s+_recKgDom(r);},0);
   var hl=(kgCuve/cfg.ratio_max).toFixed(0)+'–'+(kgCuve/cfg.ratio_min).toFixed(0);
   var active=cuves.filter(_vendIsActive);
   var due=active.filter(function(c){return _vendStale(c)>=1;}).length;
@@ -2136,10 +2138,10 @@ function renderVendRec() {
   var cfg=_vendCfg();
   var recoltes=CAVE_VENDANGE.recoltes||[];
   var canEdit=canWrite();
-  var caisses=recoltes.reduce(function(s,r){return s+(r.nb_caisses||0);},0);
+  var caisses=recoltes.reduce(function(s,r){return s+_recCaisses(r);},0);
   var kg=recoltes.reduce(function(s,r){return s+_recKg(r);},0);
-  var kgCuve=recoltes.filter(function(r){return !_recSold(r);}).reduce(function(s,r){return s+_recKg(r);},0);
-  var kgVendu=recoltes.filter(function(r){return _recSold(r);}).reduce(function(s,r){return s+_recKg(r);},0);
+  var kgCuve=recoltes.reduce(function(s,r){return s+_recKgDom(r);},0);
+  var kgVendu=recoltes.reduce(function(s,r){return s+_recKgCli(r);},0);
   var html=_caveSaisBanner();
   if(recoltes.length){
     html+='<div class="mvv-camp"><div class="mvv-camp-lbl">Campagne '+(new Date().getFullYear())+' · '+recoltes.length+' récolte'+(recoltes.length>1?'s':'')+'</div><div class="mvv-camp-grid">'
@@ -2159,13 +2161,17 @@ function renderVendRec() {
       var surf_=_vendParcSurf(r.parcelle);
       html+='<div class="mvv-rec" onclick="openOvVendRec(\''+r.id+'\')"><div class="mvv-rec-l">'
         +'<div class="mvv-rec-nm">'+_escHtml(r.parcelle)+'</div>'
-        +'<div class="mvv-rec-mt">'+_vendFrDate(r.date)+' · '+(r.nb_caisses||0)+' caisses</div>'
+        +'<div class="mvv-rec-mt">'+_vendFrDate(r.date)+' · '+_recCaisses(r)+' caisses'
+        +(_recDests(r).length>1?(' · '+_recDests(r).length+' destinataires'):'')+'</div>'
         +'<div class="mvv-rec-badges">'+_vendEtatBadge(r.etat_pct||0)
         +'<span class="mvv-b er">'+_vendErLbl(r)+'</span>'
-        +(r.client?_mvBadge(r.client,'neutre'):(r.vendu?_mvBadge('Vendu raisin','neutre'):''))
+        +_recDests(r).map(function(pt){
+            return pt.dom?_mvBadge('Domaine '+_vpCs(pt)+' c.','vert')
+                         :_mvBadge(_vpNom(pt)+' '+_vpCs(pt)+' c.','neutre'); }).join('')
         +'</div></div>'
         +'<div class="mvv-rec-r">'
-        +(_recSold(r)?'<div class="mvv-rec-hl sold">vendu</div>':'<div class="mvv-rec-hl">'+_vendHlRange(kg_)+'<span class="su">hL est.</span></div>')
+        +(_recKgDom(r)>0?('<div class="mvv-rec-hl">'+_vendHlRange(_recKgDom(r))+'<span class="su">hL est.</span></div>')
+                        :'<div class="mvv-rec-hl sold">vendu</div>')
         +'<div class="mvv-rec-kg">'+kg_.toLocaleString('fr-FR')+' kg</div>'
         +(surf_>0?'<div class="mvv-rec-kg">'+Math.round(kg_/surf_).toLocaleString('fr-FR')+' kg/ha</div>':'')
         +'</div></div>';
@@ -2358,7 +2364,7 @@ function openOvVendRec(id) {
   var el;
   _vendInjectParcelleSelect(r?r.parcelle:'');
   el=document.getElementById('vrec-date'); if(el) el.value=r?r.date:new Date().toISOString().slice(0,10);
-  el=document.getElementById('vrec-caisses'); if(el) el.value=r?r.nb_caisses:0;
+  el=document.getElementById('vrec-caisses'); if(el) el.value=r?_recCsDom(r):0;
   el=document.getElementById('vrec-temp'); if(el) el.value=r&&r.temp_c?r.temp_c:'';
   var etatPct=r?(r.etat_pct||0):0;
   el=document.getElementById('vrec-etat-range'); if(el) el.value=etatPct;
@@ -2374,21 +2380,26 @@ function openOvVendRec(id) {
   el=document.getElementById('vrec-note'); if(el) el.value=r?(r.note||''):'';
   el=document.getElementById('vrec-id'); if(el) el.value=id||'';
   el=document.getElementById('vrec-del-btn'); if(el) el.style.display=r?'block':'none';
+  _vendRepInject(r);
   _vndUpdateCalc();
   var ov=document.getElementById('ovVendRec'); if(ov) ov.classList.add('open');
 }
 function saveVendRec() {
   var parcelle=((document.getElementById('vrec-parcelle')||{}).value||'').trim();
   if(!parcelle){showToast('Saisissez le nom de la parcelle','#E07060');return;}
-  var nb=parseInt((document.getElementById('vrec-caisses')||{}).value)||0;
+  var _parts=_vendRepParts();
+  if(!_parts.length){showToast('Saisissez au moins une caisse','#E07060');return;}
+  // Champs derives, conserves pour tout ce qui lit encore l'ancien modele.
+  var nb=_parts.reduce(function(a,pt){return a+_vpCs(pt);},0);
+  var _cliParts=_parts.filter(function(pt){return !pt.dom;});
   var date=(document.getElementById('vrec-date')||{}).value||'';
   var temp=parseFloat((document.getElementById('vrec-temp')||{}).value)||null;
   var etatPct=parseInt((document.getElementById('vrec-etat-range')||{}).value)||0;
   var erPct=parseInt((document.getElementById('vrec-er-pct')||{}).value)||30;
   var note=((document.getElementById('vrec-note')||{}).value||'');
   var id=((document.getElementById('vrec-id')||{}).value||'');
-  var vendu=_vendVendu;
-  var client=vendu?((document.getElementById('vrec-client')||{}).value||''):'';
+  var vendu=!_parts.some(function(pt){return pt.dom;});
+  var client=(_cliParts.length===1)?(_cliParts[0].client||''):'';
   var prev=id?(CAVE_VENDANGE.recoltes||[]).find(function(r){return r.id===id;}):null;
   // ── cuvee de destination : registre + rattachement de cuve ──
   var _mill=_vendMillOfDate(date), _cuv=null;
@@ -2408,7 +2419,7 @@ function saveVendRec() {
       if(_vcuvSel.cuveIdx>=0&&_cvs[_vcuvSel.cuveIdx]) _cuveId=_cvs[_vcuvSel.cuveIdx].id;
     } else if(_prevCuve){ _cuveId=_prevCuve; }
   }
-  var obj={id:id||'vrec_'+Date.now(),parcelle:parcelle,date:date,nb_caisses:nb,temp_c:temp,etat_pct:etatPct,erasflage:_vendEraflage,er_pct:erPct,vendu:vendu,client:client,cuvee:cuvee,vcuvee_id:_vcid,note:note,cuve_id:_cuveId};
+  var obj={id:id||'vrec_'+Date.now(),parcelle:parcelle,date:date,parts:_parts,nb_caisses:nb,temp_c:temp,etat_pct:etatPct,erasflage:_vendEraflage,er_pct:erPct,vendu:vendu,client:client,cuvee:cuvee,vcuvee_id:_vcid,note:note,cuve_id:_cuveId};
   if(!CAVE_VENDANGE.recoltes) CAVE_VENDANGE.recoltes=[];
   // la recolte quitte son ancienne cuve
   if(_prevCuve&&_prevCuve!==_cuveId){
@@ -2731,9 +2742,301 @@ function _vendDegrePot(d20){ return _vendSucre(d20)/16.83; }
 // —— Clients vrac + poids récolte ——
 function _vendClients(){ if(!CAVE_VENDANGE.clients) CAVE_VENDANGE.clients=[]; return CAVE_VENDANGE.clients; }
 function _vendClient(nom){ if(!nom) return null; return _vendClients().find(function(c){return c.nom===nom;})||null; }
-function _vendRecPck(r){ var cl=_vendClient(r&&r.client); return (cl&&cl.poids_caisse_kg)||_vendCfg().poids_caisse_kg||25; }
-function _recKg(r){ return (r&&r.nb_caisses||0)*_vendRecPck(r); }
-function _recSold(r){ return !!(r&&(r.vendu||r.client)); }
+
+// ═══════════════════════════════════════════════════════════════════════════
+// VD-1 — UNE RÉCOLTE, PLUSIEURS DESTINATAIRES
+// ═══════════════════════════════════════════════════════════════════════════
+// Une parcelle de Côte de Nuits se vend souvent à plusieurs négoces à la fois.
+// Le modèle ne portait qu'UN destinataire (`vendu` + `client`), ce qui obligeait
+// à saisir deux récoltes le même jour sur la même parcelle — et faisait compter
+// la parcelle deux fois partout où on la compte une fois.
+//
+// Une récolte porte désormais `parts[]` : une ligne par destinataire.
+//   part = { dom:true }                                    → vinifié au domaine
+//   part = { dom:false, client:'Maison Bouchard' }          → vendu en vrac
+//   + caisses, pck (kg par caisse), surface (ha, optionnel)
+//
+// ⚠️ `pck` EST FIGÉ DANS LA PART. Avant ce lot, `_vendRecPck` relisait la fiche
+// client à chaque affichage : corriger un client de 24 à 26 kg déplaçait
+// rétroactivement TOUS les kilos qu'il avait déjà reçus, y compris ceux d'un
+// bon déjà signé. Le poids change d'un jour à l'autre — la fiche client ne fait
+// plus que le PROPOSER à la saisie.
+//
+// ⚠️ RÉTROCOMPATIBILITÉ DANS LES DEUX SENS. `_vendParts()` fabrique la part
+// unique d'une récolte d'avant le lot (lecture seule, rien n'est réécrit tant
+// que la récolte n'est pas rouverte), et `saveVendRec` continue d'écrire
+// `nb_caisses`, `vendu` et `client` — Pilotage, les documents et les écrans non
+// repris par ce lot les lisent encore.
+// ═══════════════════════════════════════════════════════════════════════════
+
+// Poids par caisse d'une récolte de l'ANCIEN modèle : la fiche client, comme
+// avant. Sert uniquement à fabriquer la part de migration.
+function _vendPckLegacy(r){
+  var cl=_vendClient(r&&r.client);
+  return (cl&&cl.poids_caisse_kg)||_vendCfg().poids_caisse_kg||25;
+}
+function _vendParts(r){
+  if(!r) return [];
+  if(Array.isArray(r.parts)&&r.parts.length) return r.parts;
+  var vendu=!!(r.vendu||r.client);
+  return [{dom:!vendu, client:vendu?(r.client||''):'', caisses:(r.nb_caisses||0),
+           pck:_vendPckLegacy(r), _mig:true}];
+}
+function _vpPck(p){ var v=Number(p&&p.pck); return v>0?v:(_vendCfg().poids_caisse_kg||25); }
+function _vpCs(p){ return Math.max(0,parseInt(p&&p.caisses,10)||0); }
+function _vpKg(p){ return _vpCs(p)*_vpPck(p); }
+function _vpNom(p){ return (p&&p.dom)?'Domaine':((p&&p.client)||'Vrac sans client'); }
+function _vpSurf(p){ var v=parseFloat(p&&p.surface); return v>0?v:0; }
+
+function _recKg(r){ return _vendParts(r).reduce(function(s,p){ return s+_vpKg(p); },0); }
+function _recCaisses(r){ return _vendParts(r).reduce(function(s,p){ return s+_vpCs(p); },0); }
+function _recKgDom(r){ return _vendParts(r).reduce(function(s,p){ return s+(p.dom?_vpKg(p):0); },0); }
+function _recCsDom(r){ return _vendParts(r).reduce(function(s,p){ return s+(p.dom?_vpCs(p):0); },0); }
+function _recKgCli(r){ return _vendParts(r).reduce(function(s,p){ return s+(p.dom?0:_vpKg(p)); },0); }
+// Une récolte alimente le cuvier si une part domaine porte des caisses.
+function _recHasDom(r){ return _vendParts(r).some(function(p){ return p.dom&&_vpCs(p)>0; }); }
+// ...et elle est vendue, au moins en partie, si une part client en porte.
+function _recSold(r){ return _vendParts(r).some(function(p){ return !p.dom&&_vpCs(p)>0; }); }
+// Kilos livrés à UN client nommé, sur une récolte.
+function _recKgPour(r,nom){
+  return _vendParts(r).reduce(function(s,p){ return s+((!p.dom&&(p.client||'')===nom)?_vpKg(p):0); },0);
+}
+// Les destinataires d'une récolte, dans l'ordre de saisie.
+function _recDests(r){ return _vendParts(r).filter(function(p){ return _vpCs(p)>0; }); }
+
+// ── La répartition à la saisie (cave.js seul : rien à changer dans index.html) ──
+// Le compteur d'origine `#vrec-caisses` n'est pas supprimé : il est masqué et
+// tenu à jour avec les caisses DU DOMAINE. Tout le code de cuverie qui le lit
+// (proposition de volume, rattachement à une cuve) continue donc de marcher, et
+// lit exactement ce qu'il doit lire : ce qui entre au cuvier, pas ce qui part.
+var _vrep=[];
+function _vendRepCss(){
+  if(document.getElementById('mvv-rep-css')) return;
+  var st=document.createElement('style'); st.id='mvv-rep-css';
+  st.textContent=''
+  +'.vrp{border:1px solid rgba(138,90,56,.16);border-radius:14px;overflow:hidden;background:var(--bg-card,#FBFAF6)}'
+  +'.vrp-l{padding:11px 12px;border-bottom:1px solid rgba(138,90,56,.10)}'
+  +'.vrp-l:last-child{border-bottom:none}'
+  +'.vrp-l.dom{background:rgba(61,107,39,.045)}'
+  +'.vrp-h{display:flex;align-items:center;gap:8px}'
+  +'.vrp-d{width:9px;height:9px;border-radius:50%;flex-shrink:0;background:var(--or,#C2A14D)}'
+  +'.vrp-l.dom .vrp-d{background:var(--vert-med,#3D6B27)}'
+  +'.vrp-h select{flex:1;min-width:0;padding:7px 9px;font-size:13px;font-weight:600;border-radius:8px;'
+    +'border:1px solid rgba(138,90,56,.18);background:var(--bg-app,#F2EFE7);font-family:Outfit,sans-serif;color:var(--texte,#1A1A14)}'
+  +'.vrp-x{width:30px;height:30px;flex-shrink:0;border:none;background:rgba(160,41,30,.07);color:var(--rouge,#A0291E);'
+    +'border-radius:8px;cursor:pointer;display:flex;align-items:center;justify-content:center}'
+  +'.vrp-r{display:flex;align-items:center;gap:7px;margin-top:9px;flex-wrap:wrap}'
+  +'.vrp-st{display:flex;align-items:center;gap:5px}'
+  +'.vrp-st button{width:34px;height:34px;border-radius:9px;background:rgba(192,132,90,.12);'
+    +'border:1px solid rgba(192,132,90,.22);color:var(--terre,#8A5A38);font-size:17px;cursor:pointer;font-weight:600}'
+  +'.vrp-st input{width:58px;height:34px;text-align:center;border-radius:9px;border:1px solid var(--gris,#DED7C9);'
+    +'background:var(--bg-card,#FBFAF6);font-family:Outfit,sans-serif;font-size:15px;font-weight:600;color:var(--texte,#1A1A14)}'
+  +'.vrp-u{font-size:10.5px;color:var(--texte-doux,#5F5F5F)}'
+  +'.vrp-p{display:flex;align-items:center;gap:5px;margin-left:auto}'
+  +'.vrp-p input{width:52px;height:30px;text-align:center;border-radius:8px;border:1px solid var(--gris,#DED7C9);'
+    +'background:var(--bg-card,#FBFAF6);font-family:Outfit,sans-serif;font-size:13px;font-weight:600;color:var(--texte,#1A1A14)}'
+  +'.vrp-s{display:flex;align-items:center;gap:6px;margin-top:9px;padding-top:9px;'
+    +'border-top:1px dashed rgba(138,90,56,.16);flex-wrap:wrap}'
+  +'.vrp-s input{width:80px;height:30px;text-align:center;border-radius:8px;border:1px solid var(--gris,#DED7C9);'
+    +'background:var(--bg-card,#FBFAF6);font-family:Outfit,sans-serif;font-size:12.5px;font-weight:600;color:var(--texte,#1A1A14)}'
+  +'.vrp-s .rs{flex:1;text-align:right;font-size:10.5px;color:var(--texte-doux,#5F5F5F);min-width:100px}'
+  +'.vrp-s .rs b{color:var(--terre,#8A5A38);font-weight:600}'
+  +'.vrp-kg{display:flex;align-items:baseline;justify-content:space-between;margin-top:8px;gap:8px}'
+  +'.vrp-kg .v{font-family:"Cormorant Garamond",Georgia,serif;font-weight:700;font-size:19px;color:var(--terre,#8A5A38)}'
+  +'.vrp-kg .v small{font-size:10px;font-family:Outfit,sans-serif;font-weight:600;color:var(--texte-doux,#5F5F5F);margin-left:3px}'
+  +'.vrp-tag{font-size:9.5px;font-weight:600;border-radius:7px;padding:3px 7px;display:inline-block}'
+  +'.vrp-tag.d{background:rgba(61,107,39,.10);border:1px solid rgba(61,107,39,.24);color:var(--vert-med,#3D6B27)}'
+  +'.vrp-tag.r{background:var(--bg-app,#F2EFE7);border:1px solid rgba(138,90,56,.16);color:var(--texte-med,#4A4A3A)}'
+  +'.vrp-tag.p{background:rgba(184,90,26,.10);border:1px solid rgba(184,90,26,.28);color:var(--orange,#B85A1A)}'
+  +'.vrp-add{width:100%;padding:11px;border:1px dashed rgba(138,90,56,.35);background:rgba(194,161,77,.05);'
+    +'color:var(--terre,#8A5A38);border-radius:12px;font-family:Outfit,sans-serif;font-size:12.5px;font-weight:600;'
+    +'cursor:pointer;margin-top:10px}'
+  +'.vrp-add:disabled{opacity:.45;cursor:default}'
+  +'.vrp-tot{background:var(--cave,#14110D);border-radius:12px;padding:11px 13px;margin-top:10px;color:#F0E8DC}'
+  +'.vrp-tot-g{display:grid;grid-template-columns:1fr 1fr 1fr;gap:8px}'
+  +'.vrp-tot-n{font-family:"Cormorant Garamond",Georgia,serif;font-weight:700;font-size:21px;line-height:1;color:#F5EFE3}'
+  +'.vrp-tot-n small{font-size:9.5px;font-family:Outfit,sans-serif;font-weight:600;color:rgba(240,232,220,.5);margin-left:3px}'
+  +'.vrp-tot-l{font-size:8.5px;letter-spacing:.09em;text-transform:uppercase;color:rgba(240,232,220,.45);margin-top:4px}'
+  +'.vrp-tot-d{margin-top:9px;padding-top:8px;border-top:1px solid rgba(240,232,220,.13);'
+    +'font-size:10.5px;line-height:1.6;color:rgba(240,232,220,.75)}'
+  +'.vrp-tot-d b{color:var(--or-clair,#D8BC72);font-weight:600}';
+  document.head.appendChild(st);
+}
+// Masque un élément d'index.html sans le supprimer : le code qui le lit reste bon.
+function _vendRepHide(el){ if(el) el.style.display='none'; }
+function _vendRepInject(rec){
+  _vendRepCss();
+  var elC=document.getElementById('vrec-caisses'); if(!elC) return;
+  var rowCs=elC.parentNode;                     // le rang [−][input][+]
+  var lblCs=rowCs?rowCs.previousElementSibling:null;   // le libellé « Nombre de caisses »
+  _vendRepHide(rowCs); _vendRepHide(lblCs);
+  var vw=document.getElementById('vrec-vendu-wrap');
+  var lblDest=vw?vw.previousElementSibling:null;       // le libellé « Destination »
+  _vendRepHide(vw); _vendRepHide(lblDest);
+  var box=document.getElementById('vrec-rep');
+  if(!box){
+    box=document.createElement('div'); box.id='vrec-rep'; box.style.marginBottom='12px';
+    if(rowCs&&rowCs.parentNode) rowCs.parentNode.insertBefore(box,rowCs);
+  }
+  _vrep=(_vendParts(rec)||[]).map(function(p){
+    return {dom:!!p.dom, client:p.client||'', caisses:_vpCs(p), pck:_vpPck(p),
+            surface:_vpSurf(p)||null, retour:p.retour||null};
+  });
+  if(!_vrep.length) _vrep=[{dom:true,client:'',caisses:0,pck:_vendCfg().poids_caisse_kg||25,surface:null,retour:null}];
+  _vendRepRender();
+}
+// Les clients encore disponibles : un même client ne prend pas deux lignes.
+function _vendRepLibres(cur){
+  var pris={}; _vrep.forEach(function(p){ if(!p.dom&&p.client) pris[p.client]=1; });
+  return _vendClients().filter(function(c){ return c.nom===cur || !pris[c.nom]; });
+}
+function _vendRepRender(){
+  var box=document.getElementById('vrec-rep'); if(!box) return;
+  var h='<div class="fl" style="margin-top:0">R\u00e9partition des caisses</div><div class="vrp">';
+  _vrep.forEach(function(p,i){ h+=_vendRepLigne(p,i); });
+  h+='</div>';
+  var reste=_vendRepLibres(null).length;
+  h+='<button type="button" class="vrp-add" onclick="_vendRepAdd()"'+(reste?'':' disabled')+'>'
+    +(reste?'\uFF0B Ajouter un destinataire':'Tous les clients sont d\u00e9j\u00e0 sur cette r\u00e9colte')+'</button>';
+  h+='<div id="vrec-rep-tot">'+_vendRepTotHtml()+'</div>';
+  box.innerHTML=h;
+  _vendRepPush();
+}
+function _vendRepLigne(p,i){
+  var cfg=_vendCfg();
+  var def=p.dom?(cfg.poids_caisse_kg||25):((_vendClient(p.client)||{}).poids_caisse_kg||cfg.poids_caisse_kg||25);
+  var ecart=_vpPck(p)!==def;
+  var h='<div class="vrp-l'+(p.dom?' dom':'')+'">';
+  h+='<div class="vrp-h"><span class="vrp-d"></span><select onchange="_vendRepDest('+i+',this.value)">'
+   +'<option value="D"'+(p.dom?' selected':'')+'>Domaine \u2014 vinifi\u00e9 ici</option>'
+   +_vendRepLibres(p.dom?null:p.client).map(function(c){
+       return '<option value="C:'+_escHtml(c.nom)+'"'+((!p.dom&&p.client===c.nom)?' selected':'')+'>'
+         +_escHtml(c.nom)+'</option>'; }).join('')
+   +'<option value="C:"'+((!p.dom&&!p.client)?' selected':'')+'>Vrac sans client</option>'
+   +'</select>'
+   +(_vrep.length>1?'<button type="button" class="vrp-x" onclick="_vendRepDel('+i+')" title="Retirer" aria-label="Retirer">'+_mvIcon('croix',16)+'</button>':'')
+   +'</div>';
+  h+='<div class="vrp-r"><div class="vrp-st">'
+   +'<button type="button" onclick="_vendRepAdj('+i+',-1)">\u2212</button>'
+   +'<input type="number" min="0" inputmode="numeric" value="'+_vpCs(p)+'" oninput="_vendRepCs('+i+',this.value)">'
+   +'<button type="button" onclick="_vendRepAdj('+i+',1)">\uFF0B</button>'
+   +'<span class="vrp-u">caisses</span></div>'
+   +'<div class="vrp-p"><input type="number" min="1" max="80" step="0.5" value="'+_vpPck(p)+'" oninput="_vendRepPck('+i+',this.value)">'
+   +'<span class="vrp-u">kg/caisse</span></div></div>';
+  h+='<div class="vrp-kg" id="vrp-kg-'+i+'">'+_vendRepKgHtml(i)+'</div>';
+  h+='<div class="vrp-s" id="vrp-s-'+i+'">'+_vendRepSurfHtml(i)+'</div>';
+  h+='</div>';
+  return h;
+}
+function _vendRepKgHtml(i){
+  var p=_vrep[i]; if(!p) return '';
+  var cfg=_vendCfg();
+  var def=p.dom?(cfg.poids_caisse_kg||25):((_vendClient(p.client)||{}).poids_caisse_kg||cfg.poids_caisse_kg||25);
+  var ecart=_vpPck(p)!==def;
+  return '<div><span class="vrp-tag '+(p.dom?'d':(ecart?'p':'r'))+'">poids du jour \u00b7 '+_vpPck(p)+' kg</span>'
+   +(ecart&&!p.dom?' <span class="vrp-tag r">habituel '+def+' kg</span>':'')
+   +'</div><div class="v">'+_vpKg(p).toLocaleString('fr-FR')+'<small>kg</small></div>';
+}
+// Surface récoltée pour ce destinataire. Vide = tout le reste de la parcelle.
+function _vendRepSurfHtml(i){
+  var p=_vrep[i]; if(!p) return '';
+  var nomP=((document.getElementById('vrec-parcelle')||{}).value||'').trim();
+  var sp=_vendParcSurf(nomP);
+  var autres=_vrep.reduce(function(s,x,j){ return s+((j!==i&&_vpSurf(x)>0)?_vpSurf(x):0); },0);
+  var reste=Math.round((sp-autres)*10000)/10000;
+  var sans=_vrep.filter(function(x,j){ return j!==i && !(_vpSurf(x)>0); }).length;
+  var val=_vpSurf(p);
+  var eff=val>0?val:(reste>0?(sans?reste/(sans+1):reste):0);
+  var kgha=eff>0?Math.round(_vpKg(p)/eff):0;
+  var trop=val>0&&reste<0;
+  var rs;
+  if(sp<=0) rs='surface de la parcelle inconnue';
+  else if(val>0) rs=trop?('<b style="color:var(--rouge,#A0291E)">d\u00e9passe la parcelle de '+_vendHa(-reste)+' ha</b>')
+                       :(kgha>0?(kgha.toLocaleString('fr-FR')+' kg/ha'):'');
+  else if(reste>0) rs='le reste : <b>'+_vendHa(eff)+' ha</b>'+(sans?' (au prorata)':'')+(kgha>0?(' \u00b7 '+kgha.toLocaleString('fr-FR')+' kg/ha'):'');
+  else rs='<b style="color:var(--rouge,#A0291E)">plus rien \u00e0 r\u00e9partir</b>';
+  return '<span class="vrp-u">Surface r\u00e9colt\u00e9e</span>'
+   +'<input type="number" min="0" max="99" step="0.001" placeholder="tout le reste" value="'+(val>0?val:'')+'" '
+   +'oninput="_vendRepSurf('+i+',this.value)"><span class="vrp-u">ha</span><span class="rs">'+rs+'</span>';
+}
+function _vendHa(x){ return (Math.round(x*10000)/10000).toLocaleString('fr-FR',{minimumFractionDigits:2,maximumFractionDigits:4}); }
+function _vendRepTotHtml(){
+  var cfg=_vendCfg();
+  var cs=_vrep.reduce(function(s,p){return s+_vpCs(p);},0);
+  var kg=_vrep.reduce(function(s,p){return s+_vpKg(p);},0);
+  var kd=_vrep.reduce(function(s,p){return s+(p.dom?_vpKg(p):0);},0);
+  var kv=kg-kd;
+  var h='<div class="vrp-tot"><div class="vrp-tot-g">'
+   +'<div><div class="vrp-tot-n">'+cs+'</div><div class="vrp-tot-l">Caisses</div></div>'
+   +'<div><div class="vrp-tot-n">'+(kg/1000).toFixed(2).replace('.',',')+'<small>t</small></div><div class="vrp-tot-l">R\u00e9colt\u00e9s</div></div>'
+   +'<div><div class="vrp-tot-n">'+(kd>0?((kd/cfg.ratio_max).toFixed(0)+'\u2013'+(kd/cfg.ratio_min).toFixed(0)):'\u2014')
+   +'<small>hL</small></div><div class="vrp-tot-l">Estim\u00e9s cuv\u00e9s</div></div></div>';
+  h+='<div class="vrp-tot-d">';
+  _vrep.forEach(function(p){
+    if(_vpCs(p)<=0) return;
+    h+=_escHtml(_vpNom(p))+' \u2014 '+_vpCs(p)+' \u00d7 '+_vpPck(p)+' kg = <b>'+_vpKg(p).toLocaleString('fr-FR')+' kg</b><br>';
+  });
+  h+='<span style="color:rgba(240,232,220,.5)">Total '+kg.toLocaleString('fr-FR')+' kg \u00b7 dont '
+   +kd.toLocaleString('fr-FR')+' kg au domaine et '+kv.toLocaleString('fr-FR')+' kg vendus en raisin</span></div></div>';
+  return h;
+}
+// Le pont vers le code de cuverie : #vrec-caisses porte les caisses DU DOMAINE.
+function _vendRepPush(){
+  var elC=document.getElementById('vrec-caisses');
+  if(elC){
+    var cd=_vrep.reduce(function(s,p){return s+(p.dom?_vpCs(p):0);},0);
+    if(String(elC.value)!==String(cd)) elC.value=cd;
+  }
+  _vendVendu=!_vrep.some(function(p){ return p.dom&&_vpCs(p)>0; });
+  _vendSyncDest();
+  if(!_vcuvSel.volTouched){ _vcuvSel.vol=null; if(document.getElementById('vrec-cuv-att')) _vendCuvAtt(); }
+}
+function _vendRepMaj(i){
+  var k=document.getElementById('vrp-kg-'+i); if(k) k.innerHTML=_vendRepKgHtml(i);
+  _vrep.forEach(function(_,j){ var s=document.getElementById('vrp-s-'+j); if(s) s.innerHTML=_vendRepSurfHtml(j); });
+  var t=document.getElementById('vrec-rep-tot'); if(t) t.innerHTML=_vendRepTotHtml();
+  _vendRepPush();
+}
+function _vendRepDest(i,v){
+  var p=_vrep[i]; if(!p) return;
+  var cfg=_vendCfg();
+  var avant=p.dom?(cfg.poids_caisse_kg||25):((_vendClient(p.client)||{}).poids_caisse_kg||cfg.poids_caisse_kg||25);
+  var touche=_vpPck(p)!==avant;
+  if(v==='D'){ p.dom=true; p.client=''; }
+  else { p.dom=false; p.client=v.slice(2); }
+  if(!touche){
+    p.pck=p.dom?(cfg.poids_caisse_kg||25):((_vendClient(p.client)||{}).poids_caisse_kg||cfg.poids_caisse_kg||25);
+  }
+  _vendRepRender();
+}
+function _vendRepCs(i,v){ if(!_vrep[i]) return; _vrep[i].caisses=Math.max(0,parseInt(v,10)||0); _vendRepMaj(i); }
+function _vendRepAdj(i,d){ if(!_vrep[i]) return; _vrep[i].caisses=Math.max(0,_vpCs(_vrep[i])+d); _vendRepRender(); }
+function _vendRepPck(i,v){ if(!_vrep[i]) return; _vrep[i].pck=Math.max(0,parseFloat(String(v).replace(',','.'))||0); _vendRepMaj(i); }
+function _vendRepSurf(i,v){
+  if(!_vrep[i]) return;
+  var x=parseFloat(String(v).replace(',','.'));
+  _vrep[i].surface=(x>0)?x:null;
+  _vrep.forEach(function(_,j){ var s=document.getElementById('vrp-s-'+j); if(s) s.innerHTML=_vendRepSurfHtml(j); });
+}
+function _vendRepAdd(){
+  var libre=_vendRepLibres(null)[0];
+  var cfg=_vendCfg();
+  _vrep.push({dom:false, client:libre?libre.nom:'',
+              caisses:0, pck:(libre&&libre.poids_caisse_kg)||cfg.poids_caisse_kg||25, surface:null, retour:null});
+  _vendRepRender();
+}
+function _vendRepDel(i){ if(_vrep.length<=1) return; _vrep.splice(i,1); _vendRepRender(); }
+// Ce qui part en base : les parts nettoyées, sans ligne vide ni champ inutile.
+function _vendRepParts(){
+  return _vrep.filter(function(p){ return _vpCs(p)>0; }).map(function(p){
+    var o={dom:!!p.dom, caisses:_vpCs(p), pck:_vpPck(p)};
+    if(!p.dom) o.client=p.client||'';
+    if(_vpSurf(p)>0) o.surface=_vpSurf(p);
+    if(p.retour) o.retour=p.retour;
+    return o;
+  });
+}
+
 function _vendParcSurf(nom){
   if(!nom) return 0;
   var ps=window.PARCELLES||[]; var k=String(nom).trim().toLowerCase();
@@ -3234,7 +3537,11 @@ function _vendDecuveesSection(list){
 var _vendClientEdit=null;
 function openVendClients(){
   var cls=_vendClients();
-  var totBy={}; (CAVE_VENDANGE.recoltes||[]).forEach(function(r){ if(r.client){ totBy[r.client]=(totBy[r.client]||0)+_recKg(r); } });
+  var totBy={};
+  cls.forEach(function(c){ totBy[c.nom]=0; });
+  (CAVE_VENDANGE.recoltes||[]).forEach(function(r){
+    cls.forEach(function(c){ totBy[c.nom]+=_recKgPour(r,c.nom); });
+  });
   var rows=cls.length?cls.map(function(c,i){
     var tot=totBy[c.nom]||0;
     return '<div class="mvv-clrow"><div style="flex:1;min-width:0"><div class="mvv-clrow-nm">'+_escHtml(c.nom)+'</div>'
@@ -3383,7 +3690,7 @@ function _vendCuvSync(){
   var byKey={};
   reg.forEach(function(c){ if(c&&c.id) byKey[_cuvKey(c.nom)+'|'+c.millesime]=c; });
   recs.forEach(function(r){
-    if(!r||r.vendu) return;
+    if(!r||!_recHasDom(r)) return;
     var nom=(r.cuvee||'').trim(); if(!nom) return;
     var mil=_vendMillOfDate(r.date), k=_cuvKey(nom)+'|'+mil;
     var c=r.vcuvee_id?_vendCuvById(r.vcuvee_id):null;
@@ -3446,13 +3753,13 @@ function _vendCuvEnsure(nom,mill){
   return c;
 }
 function _vendCuvStats(id){
-  var rs=(CAVE_VENDANGE.recoltes||[]).filter(function(r){return r&&!r.vendu&&r.vcuvee_id===id;});
+  var rs=(CAVE_VENDANGE.recoltes||[]).filter(function(r){return r&&_recHasDom(r)&&r.vcuvee_id===id;});
   var parc=[];
   rs.forEach(function(r){ var n=(r.parcelle||'').trim(); if(n&&parc.indexOf(n)===-1) parc.push(n); });
   var cids={};
   rs.forEach(function(r){ if(r.cuve_id) cids[r.cuve_id]=1; });
   var cuves=(CAVE_VENDANGE.cuves_vinif||[]).filter(function(c){return c&&(c.vcuvee_id===id||cids[c.id]);});
-  return {n:rs.length,caisses:rs.reduce(function(s,r){return s+(r.nb_caisses||0);},0),parcelles:parc,cuves:cuves};
+  return {n:rs.length,caisses:rs.reduce(function(s,r){return s+_recCsDom(r);},0),parcelles:parc,cuves:cuves};
 }
 function _vendCuvHl(caisses){
   var cfg=_vendCfg();
@@ -3737,21 +4044,27 @@ function _vendInjectDestFields(rec){
 function _vendSyncDest(){
   var crow=document.getElementById('vrec-cuvee-row');
   var clrow=document.getElementById('vrec-client-row');
+  // La cuvee ne concerne que la part domaine : elle disparait quand tout part
+  // chez des clients. Le select client d'avant VD-1 ne sert plus a rien : la
+  // repartition le remplace. Il reste dans le DOM, masque, pour ne pas casser
+  // le code qui le lit encore.
   if(crow) crow.style.display=_vendVendu?'none':'block';
-  if(clrow) clrow.style.display=_vendVendu?'block':'none';
+  if(clrow) clrow.style.display='none';
+  var vs=document.getElementById('vrec-vinif-section');
+  if(vs){ vs.style.opacity=_vendVendu?'0.35':'1'; vs.style.pointerEvents=_vendVendu?'none':''; }
 }
 
 // —— Récoltes vinifiées disponibles (non affectées à une cuve), agrégées par cuvée ——
 function _vendRecoltesDispo(){
   _vendCuvSync();
-  var recs=(CAVE_VENDANGE.recoltes||[]).filter(function(r){return !r.vendu && (r.cuvee||'').trim() && !r.cuve_id;});
+  var recs=(CAVE_VENDANGE.recoltes||[]).filter(function(r){return _recHasDom(r) && (r.cuvee||'').trim() && !r.cuve_id;});
   var by={},ord=[];
   recs.forEach(function(r){
     var c=r.vcuvee_id?_vendCuvById(r.vcuvee_id):null;
     var k=c?c.id:('nom:'+_cuvKey(r.cuvee)+'|'+_vendMillOfDate(r.date));
     if(!by[k]){ by[k]={id:c?c.id:null,cuvee:c?c.nom:(r.cuvee||'').trim(),millesime:c?c.millesime:_vendMillOfDate(r.date),
                        ids:[],caisses:0,kg:0,parcelles:[],erasflage:r.erasflage||'total'}; ord.push(k); }
-    by[k].ids.push(r.id); by[k].caisses+=(r.nb_caisses||0); by[k].kg+=_recKg(r);
+    by[k].ids.push(r.id); by[k].caisses+=_recCsDom(r); by[k].kg+=_recKgDom(r);
     var pn=(r.parcelle||'').trim(); if(pn&&by[k].parcelles.indexOf(pn)===-1) by[k].parcelles.push(pn);
   });
   return ord.map(function(k){return by[k];});
@@ -4863,6 +5176,13 @@ window.deleteVendCuve       = deleteVendCuve;
 window.openOvVendMesure     = openOvVendMesure;
 window.saveVendMesure       = saveVendMesure;
 window._vndAdjCaisses       = _vndAdjCaisses;
+window._vendRepAdd          = _vendRepAdd;
+window._vendRepDel          = _vendRepDel;
+window._vendRepDest         = _vendRepDest;
+window._vendRepCs           = _vendRepCs;
+window._vendRepAdj          = _vendRepAdj;
+window._vendRepPck          = _vendRepPck;
+window._vendRepSurf         = _vendRepSurf;
 window._vndSyncCaisses      = _vndSyncCaisses;
 window._vndSetEtat          = _vndSetEtat;
 window._vndToggleVendu      = _vndToggleVendu;
@@ -5356,7 +5676,7 @@ function _cuveCouches(cu, recs){
   var byP = {};
   mine.forEach(function(r){
     var o = byP[r.parcelle] || (byP[r.parcelle] = { nom:r.parcelle, caisses:0 });
-    o.caisses += (r.nb_caisses || 0);
+    o.caisses += _recCsDom(r);
   });
   var cs = Object.keys(byP).map(function(n){
     var o = byP[n]; o.hl = _vendCuvHl(o.caisses); return o;
@@ -6074,7 +6394,7 @@ function _caveBilanChaine(c){
   if(cv){
     cuveHl=parseFloat(cv.volume_hl)||null;
     var rk=0, any=false;
-    (CAVE_VENDANGE.recoltes||[]).forEach(function(r){ if(r.cuve_id===cv.id){ rk+=_recKg(r); any=true; } });
+    (CAVE_VENDANGE.recoltes||[]).forEach(function(r){ if(r.cuve_id===cv.id){ rk+=_recKgDom(r); any=true; } });
     if(any) recolteKg=rk;
   }
   return { recolteKg:recolteKg, cuveHl:cuveHl, eleveHl:eleveHl, nbBtl:(c.nb_bouteilles!=null?c.nb_bouteilles:null) };
