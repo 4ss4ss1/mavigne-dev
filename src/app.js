@@ -2022,7 +2022,7 @@ function _mvtWelcome(){
     +_mvtCap('graphique','Pilotage : décider d\'un coup d\'œil')
     +'</div>'
     +'<div class="mvtwc-foot"><div class="mvtwc-note">Suivez une journée type au domaine — quatre minutes, montre en main. Puis '+_MVT_CHAPS.length+' écrans à explorer librement.</div>'
-    +'<button class="mvtwc-go" id="mvtwc-go">Commencer la visite&nbsp;&nbsp;\u25B6</button>'
+    +'<button class="mvtwc-go" id="mvtwc-go">Commencer la visite&nbsp;&nbsp;'+_mvIcon('lecture',18)+'</button>'
     +'<button class="mvtwc-skip" id="mvtwc-skip">Explorer par moi-même</button></div>'
     +'</div>';
   document.body.appendChild(w);
@@ -2466,7 +2466,7 @@ function _mvtPlace(s){
   }
   var mid;
   if(isAct){
-    mid='<span class="mvt-miss"><span class="mvt-hand">\u{1F446}</span><span>'+s.mission+'</span></span>';
+    mid='<span class="mvt-miss"><span class="mvt-hand">'+_mvIcon('doigt',18)+'</span><span>'+s.mission+'</span></span>';
   } else {
     mid='<button class="mvt-bnext on" id="mvt-next" type="button"><span>Continuer \u203a</span></button>';
   }
@@ -2609,11 +2609,11 @@ function _mvtAddition(){
     +'<div class="mvt-add-rows">'+rows+'</div>'
     +'<div class="mvt-add-hyp">Hypoth\u00e8ses sur ces douze mois : 16 traitements \u00b7 \u2248 400 t\u00e2ches valid\u00e9es (compt\u00e9 chez moi : 250 de janvier \u00e0 juillet) \u00b7 220 pointages du soir \u00b7 12 fins de mois \u00b7 24 op\u00e9rations de cave \u00b7 60 passages tracteur. Des estimations franches, arrondies sans exc\u00e8s. <b>Chaque ligne correspond \u00e0 un \u00e9cran que vous venez de voir.</b> Le v\u00f4tre donnera ses propres chiffres.</div>'
     +'<div class="mvt-add-plus"><div class="ph">Et ce qu\u2019on ne sait pas compter au chronom\u00e8tre</div>'
-    +'<div class="mvt-add-pr"><span class="pi">\u{1F50E}</span><span>'+DEMO2_HORS.lab+' : \u2248 '+DEMO2_HORS.min+' min par jour ouvr\u00e9. Si vous les comptez, ajoutez <b>'+horsH+' h</b>. <b>Hors total</b> \u2014 je pr\u00e9f\u00e8re le dire que le compter.</span></div></div>'
+    +'<div class="mvt-add-pr"><span class="pi">'+_mvIcon('loupe',18)+'</span><span>'+DEMO2_HORS.lab+' : \u2248 '+DEMO2_HORS.min+' min par jour ouvr\u00e9. Si vous les comptez, ajoutez <b>'+horsH+' h</b>. <b>Hors total</b> \u2014 je pr\u00e9f\u00e8re le dire que le compter.</span></div></div>'
     +'<div class="mvt-add-plus"><div class="ph">Et ce qui ne se compte pas en heures</div>'
-    +'<div class="mvt-add-pr"><span class="pi">\u{1F9FE}</span><span><b>La tra\u00e7abilit\u00e9, sans y penser.</b> Du traitement au stock : registre phyto, d\u00e9lais de rentr\u00e9e, bilan mati\u00e8re \u2014 pr\u00eats le jour du contr\u00f4le.</span></div>'
-    +'<div class="mvt-add-pr"><span class="pi">\u{1F4C5}</span><span><b>La m\u00e9moire du domaine.</b> Rendements par parcelle, co\u00fbts, avancement : chaque mill\u00e9sime se garde et se compare au suivant.</span></div>'
-    +'<div class="mvt-add-pr"><span class="pi">\u{1F9ED}</span><span><b>Et d\u00e9cider.</b> La date qui ne rentre pas, le renfort qui boucle : \u00e7a, \u00e7a ne se compte pas en minutes.</span></div></div>'
+    +'<div class="mvt-add-pr"><span class="pi">'+_mvIcon('recu',18)+'</span><span><b>La tra\u00e7abilit\u00e9, sans y penser.</b> Du traitement au stock : registre phyto, d\u00e9lais de rentr\u00e9e, bilan mati\u00e8re \u2014 pr\u00eats le jour du contr\u00f4le.</span></div>'
+    +'<div class="mvt-add-pr"><span class="pi">'+_mvIcon('calendrier',18)+'</span><span><b>La m\u00e9moire du domaine.</b> Rendements par parcelle, co\u00fbts, avancement : chaque mill\u00e9sime se garde et se compare au suivant.</span></div>'
+    +'<div class="mvt-add-pr"><span class="pi">'+_mvIcon('boussole',18)+'</span><span><b>Et d\u00e9cider.</b> La date qui ne rentre pas, le renfort qui boucle : \u00e7a, \u00e7a ne se compte pas en minutes.</span></div></div>'
     +'<div class="mvt-add-inst">Quinze jours sur <b>vos</b> parcelles, vos surfaces, votre bar\u00e8me. Vous compterez vous-m\u00eame.</div>'
     +'<a class="mvt-add-cta" href="/essai.html" target="_blank" rel="noopener">Essayer 15 jours sur mes parcelles</a>'
     +'<button class="mvt-add-ghost" id="mvt-add-ch" type="button"><span>Voir les '+_MVT_CHAPS.length+' \u00e9crans \u203a</span></button>'
@@ -2709,7 +2709,7 @@ function _mvtMenu(){
     +'<div class="mvt-menu-h">Vous avez suivi une journ\u00e9e.<br>Voici tout le reste.</div>'
     +'<div class="mvt-menu-sub">'+_MVT_CHAPS.length+' \u00e9crans, group\u00e9s par m\u00e9tier. Chacun est r\u00e9el \u2014 rien n\u2019est enregistr\u00e9.</div>'
     +'<div class="mvt-ch-grid">'+grid+'</div>'
-    +'<div class="mvt-menu-note">\u2699\uFE0F Et tout se r\u00e8gle : t\u00e2ches, heures/ha, \u00e9quipe, communes, mat\u00e9riel, produits, bar\u00e8me\u2026</div>'
+    +'<div class="mvt-menu-note">'+_mvIcon('engrenage',16)+' Et tout se r\u00e8gle : t\u00e2ches, heures/ha, \u00e9quipe, communes, mat\u00e9riel, produits, bar\u00e8me\u2026</div>'
     +'<a class="mvt-eb p" href="/essai.html" target="_blank" rel="noopener">Demander un acc\u00e8s d\u2019essai</a>'
     +'<button class="mvt-eb" id="mvt-menu-free">Explorer l\u2019appli librement</button>'
     +'</div>';
@@ -3568,7 +3568,7 @@ function openCommuneEdit(nom){
 }
 function _commRenderPick(){
   var box=document.getElementById('comm-picked'); if(!box) return;
-  if(window._commPick&&window._commPick.nom){ box.style.display='block'; box.innerHTML='\u2705 Commune retenue : <b>'+_escHtml(window._commPick.nom)+'</b>'; }
+  if(window._commPick&&window._commPick.nom){ box.style.display='block'; box.innerHTML=_mvIcon('valide',16)+' Commune retenue : <b>'+_escHtml(window._commPick.nom)+'</b>'; }
   else { box.style.display='none'; box.innerHTML=''; }
 }
 var _commTimer=null;
@@ -3581,7 +3581,7 @@ function _commOnInput(){
     var res=await _geocodeCommuneBAN(q);
     if(!res.length){ box.innerHTML='<div class="cm-ac-empty">Aucune commune</div>'; box.style.display='block'; return; }
     window._commRes=res;
-    box.innerHTML=res.map(function(r,i){ return '<div class="cm-ac-item" data-i="'+i+'">\uD83D\uDCCD '+_escHtml(r.nom)+(r.cp?(' <small>'+_escHtml(r.cp)+'</small>'):'')+'</div>'; }).join('');
+    box.innerHTML=res.map(function(r,i){ return '<div class="cm-ac-item" data-i="'+i+'">'+_mvIcon('epingle',16)+' '+_escHtml(r.nom)+(r.cp?(' <small>'+_escHtml(r.cp)+'</small>'):'')+'</div>'; }).join('');
     box.style.display='block';
     box.querySelectorAll('.cm-ac-item').forEach(function(el){ el.onclick=function(){ var r=window._commRes[+el.dataset.i]; window._commPick={nom:r.nom,lat:r.lat,lng:r.lng}; inp.value=r.nom; box.style.display='none'; _commRenderPick(); }; });
   },280);
@@ -3643,8 +3643,8 @@ function renderCommunesBulk(){
   var _adm=isAdmin();
   var listHtml=parcs.map(function(p){
     var has=p.commune&&p.commune.nom;
-    var tag=has?('<span class="cmb-tag set">\uD83D\uDCCD '+_escHtml(p.commune.nom)+'</span>')
-               :('<span class="cmb-tag inherit">\u21B3 '+_escHtml(domNom)+'</span>');
+    var tag=has?('<span class="cmb-tag set">'+_mvIcon('epingle',16)+' '+_escHtml(p.commune.nom)+'</span>')
+               :('<span class="cmb-tag inherit">'+_mvIcon('retour',16)+' '+_escHtml(domNom)+'</span>');
     var gps=_geoPlausible(parseFloat(p.lat),parseFloat(p.lng))
       ? '<span class="cmb-gps" title="Parcelle g\u00e9olocalis\u00e9e \u2014 m\u00e9t\u00e9o = centro\u00efde">\uD83D\uDEF0\uFE0F</span>' : '';
     var clk=_adm?(' onclick="openCommuneEdit(\''+_escAttr(p.nom)+'\')" style="cursor:pointer"'):' style="cursor:default"';
@@ -4585,7 +4585,7 @@ function _mvTrialBanner(){
     ? 'Tout reste consultable \u00e0 l\u2019\u00e9ch\u00e9ance \u00b7 Nicolas est pr\u00e9venu automatiquement'
     : '';
   bar.innerHTML='<div class="mvtb-in" style="color:'+col.fg+'">'
-    +'<span class="mvtb-ic" aria-hidden="true">\u23F3</span>'
+    +'<span class="mvtb-ic" aria-hidden="true">'+_mvIcon('sablier',18)+'</span>'
     +'<span class="mvtb-txt"><b>'+label+'</b>'
       +(sous?('<span style="display:block;font-size:11px;font-weight:500;opacity:.85;line-height:1.3;margin-top:1px">'+sous+'</span>'):'')
     +'</span>'
@@ -5534,7 +5534,7 @@ function renderHomeMeteo5(){
     var t0=(md.tmax[0]!=null)?Math.round(md.tmax[0])+'\u00b0':'\u2014';
     var rainTxt='';
     for(var i=1;i<md.time.length;i++){
-      if((md.pp[i]||0)>=50){rainTxt=' \u00b7 \uD83C\uDF27\uFE0F '+jn[new Date(md.time[i]+'T12:00:00').getDay()]+'. '+md.pp[i]+'%';break;}
+      if((md.pp[i]||0)>=50){rainTxt=' \u00b7 '+_mvIcon('pluie',16)+' '+jn[new Date(md.time[i]+'T12:00:00').getDay()]+'. '+md.pp[i]+'%';break;}
     }
     c.innerHTML='<div class="hm5-mini">'+_mvIcon(wmoIcone(md.code[0]),16)+' <b>'+t0+'</b> aujourd\u2019hui'+rainTxt+'</div>';
     return;
@@ -5548,7 +5548,7 @@ function renderHomeMeteo5(){
       +'<div class="hm5-i">'+_mvIcon(wmoIcone(md.code[i]),20)+'</div>'
       +'<div class="hm5-tx">'+(md.tmax[i]!=null?Math.round(md.tmax[i])+'\u00b0':'\u2014')+'</div>'
       +'<div class="hm5-tn">'+(md.tmin[i]!=null?Math.round(md.tmin[i])+'\u00b0':'')+'</div>'
-      +'<div class="hm5-p">'+((md.pp[i]||0)>=30?('\uD83D\uDCA7'+md.pp[i]+'%'):'')+'</div>'
+      +'<div class="hm5-p">'+((md.pp[i]||0)>=30?(_mvIcon('goutte',16)+md.pp[i]+'%'):'')+'</div>'
       +'</div>';
   });
   c.innerHTML=html+'</div>';
@@ -6417,7 +6417,7 @@ function _relNivBadgesHtml(p) {
     var bg = d ? 'rgba(90,156,74,0.15)' : a ? 'rgba(74,159,200,0.13)' : c ? 'rgba(220,140,30,0.12)' : 'rgba(255,255,255,0.05)';
     var col = d ? '#6AB855' : a ? '#4A9FC8' : c ? '#DCA030' : '#5A5248';
     var brd = d ? 'rgba(90,156,74,0.4)' : a ? 'rgba(74,159,200,0.35)' : c ? 'rgba(220,140,30,0.35)' : 'rgba(255,255,255,0.08)';
-    var lbl = d ? '✓' : a ? '~' : c ? '▶' : '○';
+    var lbl = _mvIcon(d ? 'check' : a ? 'cercle-pointille' : c ? 'lecture' : 'cercle', 16);
     return '<span style="display:inline-flex;align-items:center;padding:2px 7px;border-radius:5px;font-size:11px;font-weight:700;background:'+bg+';color:'+col+';border:1px solid '+brd+'">'+lbl+' N'+l+'</span>';
   }).join('');
   if(st.ov != null && st.ov < planGlobal) {
@@ -6439,7 +6439,7 @@ function _passBadgesHtml(p, nomTache) {
     html += '<span style="display:inline-flex;align-items:center;padding:2px 7px;border-radius:5px;font-size:11px;font-weight:700;'
           + 'background:'+(d?'rgba(90,156,74,0.15)':c?'rgba(220,140,30,0.12)':'rgba(255,255,255,0.05)')
           + ';color:'+(d?'#6AB855':c?'#DCA030':'#5A5248')
-          + ';border:1px solid '+(d?'rgba(90,156,74,0.4)':c?'rgba(220,140,30,0.35)':'rgba(255,255,255,0.08)')+'">'+( d?'✓':c?'▶':'○')+' P'+i+'</span>';
+          + ';border:1px solid '+(d?'rgba(90,156,74,0.4)':c?'rgba(220,140,30,0.35)':'rgba(255,255,255,0.08)')+'">'+_mvIcon(d?'check':c?'lecture':'cercle',16)+' P'+i+'</span>';
   }
   // Icône ⚙ seulement si ov < global (parcelle avec moins de passages que le standard)
   if (s && typeof s === 'object' && s.ov != null && s.ov < globalNb) {
@@ -7470,7 +7470,7 @@ function _prioEditRender(){
         var sel=it.equipe.indexOf(n)>=0;
         var lockBy=(!sel&&taken[n]&&taken[n]!==t)?taken[n]:null;
         return '<span class="pe-chip'+(sel?' on':'')+(lockBy?' lock':'')+'" onclick="_prioEditMbr('+ti+','+mi+')">'
-          +_escHtml(n)+(sel?' \u2713':'')+(lockBy?' <small>\u2192 '+_escHtml(lockBy)+'</small>':'')+'</span>';
+          +_escHtml(n)+(sel?' '+_mvIcon('check',16):'')+(lockBy?' <small>\u2192 '+_escHtml(lockBy)+'</small>':'')+'</span>';
       }).join('')+'</div>';
     }
     h+='</div>';
@@ -8246,7 +8246,7 @@ function _renderNiveauxModal(){
     var bg=isSel?'rgba(90,156,74,0.14)':isAuto?'rgba(74,159,200,0.13)':isComm?'rgba(220,140,30,0.13)':'rgba(255,255,255,0.03)';
     var brd=isSel?'rgba(90,156,74,0.38)':isAuto?'rgba(74,159,200,0.3)':isComm?'rgba(220,140,30,0.4)':'rgba(255,255,255,0.08)';
     var col=isSel?'#6AB855':isAuto?'#4A9FC8':isComm?'#DCA030':'var(--texte-doux)';
-    var ico=isSel?'✓':isAuto?'~':isComm?'▶':'○';
+    var ico=_mvIcon(isSel?'check':isAuto?'cercle-pointille':isComm?'lecture':'cercle',16);
     var canCancel=(isSel||isComm)&&!isAuto;
     html+='<div style="flex:1;display:flex;flex-direction:column;gap:5px;">';
     html+='<button onclick="_toggleNiv('+l+')" style="width:100%;padding:14px 0;border-radius:10px;font-family:inherit;cursor:'+(locked?'default':'pointer')+';border:1.5px solid '+brd+';background:'+bg+';color:'+col+';font-weight:700;font-size:16px;transition:all 0.15s;display:flex;flex-direction:column;align-items:center;gap:3px">'
@@ -8407,7 +8407,7 @@ function _renderPassagesModal(){
     var bg=va?'rgba(90,156,74,0.14)':co?'rgba(220,140,30,0.13)':'rgba(255,255,255,0.03)';
     var brd=va?'rgba(90,156,74,0.38)':co?'rgba(220,140,30,0.4)':'rgba(255,255,255,0.08)';
     var col=va?'#6AB855':co?'#DCA030':'var(--texte-doux)';
-    var ico=va?'✓':co?'▶':'○';
+    var ico=_mvIcon(va?'check':co?'lecture':'cercle',16);
     var cur=va?'default':'pointer';
     html+='<div style="flex:1;display:flex;flex-direction:column;gap:5px;">';
     html+='<button onclick="_togglePass('+i+')" style="width:100%;padding:14px 0;border-radius:10px;font-family:inherit;cursor:'+cur+';border:1.5px solid '+brd+';background:'+bg+';color:'+col+';font-weight:700;font-size:16px;transition:all 0.15s;display:flex;flex-direction:column;align-items:center;gap:3px"><span>'+ico+'</span><span style="font-size:9px;font-weight:700;letter-spacing:.06em;opacity:.75">P'+i+'</span></button>';
@@ -9567,7 +9567,7 @@ function lancerExportEntretienPDF(){
   if(!selIds.length){showToast('Sélectionnez au moins un tracteur','#C0392B');return;}
   var tracteursSelectionnes=TRACTEURS_LIST.filter(function(t){return selIds.includes(t.id);});
   var fmtD=function(iso){if(!iso)return'—';var p=iso.split('-');var mois=['jan','fév','mar','avr','mai','jun','jul','aoû','sep','oct','nov','déc'];return parseInt(p[2])+' '+mois[parseInt(p[1])-1]+' '+p[0];};
-  var champs=[{key:'plein',label:'Plein fait',icon:'⛽'},{key:'huile',label:'Niveau huile',icon:'🛢️'},{key:'filtre_air',label:'Filtre à air',icon:'💨'},{key:'radiateur',label:'Radiateur',icon:'🌀'},{key:'pression_pneu',label:'Pression pneus',icon:'🔵'},{key:'lavage',label:'Lavage',icon:'🪣'}];
+  var champs=[{key:'plein',label:'Plein fait',icon:'carburant'},{key:'huile',label:'Niveau huile',icon:'barrique'},{key:'filtre_air',label:'Filtre à air',icon:'vent'},{key:'radiateur',label:'Radiateur',icon:'ventilateur'},{key:'pression_pneu',label:'Pression pneus',icon:'pneu'},{key:'lavage',label:'Lavage',icon:'seau'}];
   var sectionsHTML=tracteursSelectionnes.map(function(t){
     var fiches=ENTRETIENS.filter(function(e){return e.tracteurId===t.id&&e.date&&e.date.startsWith(annee);}).sort(function(a,b){return b.date.localeCompare(a.date);});
     var rep=REPARATEUR[t.id];
@@ -9578,7 +9578,7 @@ function lancerExportEntretienPDF(){
     var resumeHTML='<div class="resume-bar" aria-hidden="true"><div class="resume-item"><span class="resume-val">'+fiches.length+'</span><span class="resume-lbl">Fiches</span></div><div class="resume-item"><span class="resume-val '+(nbAno>0?'val-warn':'')+'">'+nbAno+'</span><span class="resume-lbl">Anomalies</span></div><div class="resume-item"><span class="resume-val">'+repsAll.length+'</span><span class="resume-lbl">Répar.</span></div><div class="resume-item"><span class="resume-val">'+moyScore+'%</span><span class="resume-lbl">Moy. contrôle</span></div></div>';
     var fichesHTML=!fiches.length?'<p class="empty">Aucune fiche pour '+annee+'.</p>':fiches.map(function(f){
       var nb=champs.filter(function(c){return f[c.key];}).length;
-      var checkHtml=champs.map(function(c){return '<div class="check-item '+(f[c.key]?'ok':'ko')+'">'+c.icon+' '+c.label+' <span>'+(f[c.key]?'✓':'✗')+'</span></div>';}).join('');
+      var checkHtml=champs.map(function(c){return '<div class="check-item '+(f[c.key]?'ok':'ko')+'">'+_mvIcon(c.icon,16)+' '+c.label+' <span>'+_mvIcon(f[c.key]?'check':'croix',16)+'</span></div>';}).join('');
       var actDef=ACTIVITES.find(function(a){return a.nom===f.activite;});
       var defTracNom=actDef?((TRACTEURS_LIST.find(function(x){return x.id===actDef.tracteurDefautId;}))||{}).nom||'—':'—';
       var tracNom=((TRACTEURS_LIST.find(function(x){return x.id===f.tracteurId;}))||{}).nom||'';
@@ -10301,7 +10301,7 @@ function _pvStepChips(p,nom){
     if(i>eff){h+='<span class="pdot na">— '+lab+i+'</span>';continue;}
     var st=_pvStepState(p,nom,i);
     var cls=(st==='Validé'||st==='Auto')?'done':st==='Commencé'?'comm':'todo';
-    var ico=(st==='Validé')?'✓':st==='Auto'?'~':st==='Commencé'?'▶':'○';
+    var ico=_mvIcon((st==='Validé')?'check':st==='Auto'?'cercle-pointille':st==='Commencé'?'lecture':'cercle',16);
     h+='<span class="pdot '+cls+(i===pCurStep?' cur':'')+'">'+ico+' '+lab+i+'</span>';
   }
   return h;
@@ -11036,7 +11036,7 @@ function exportRapportSaison(seasonNom){
         +'<td class="r muted">'+(parseFloat(p.surface)||0).toFixed(2)+' ha</td>'
         +'<td class="c"><span class="tag '+(tot>0&&ok>=tot?'ok':ok>=tot*0.5?'warn':'neu')+'">'+ok+'/'+tot+' \u2713</span></td>'
         +'<td class="c">'+(dd.d1?'<span class="chip-d">'+fDs(dd.d1)+'</span><span class="arrow">\u2192</span><span class="chip-d">'+fDs(dd.dN)+'</span>':'\u2014')+'</td>'
-        +(anyTrous?'<td class="r">'+((p.plantation_trous||0)>0?'\uD83E\uDE9B '+p.plantation_trous:'\u2014')+'</td>':'')
+        +(anyTrous?'<td class="r">'+((p.plantation_trous||0)>0?'\'+_mvIcon(\'pousse\',16)+\' '+p.plantation_trous:'\u2014')+'</td>':'')
         +(anyCu?'<td class="r" style="font-weight:700;color:'+cuCol(cuR)+'">'+(cu>0?cu.toFixed(1)+' <span class="muted" style="font-weight:400;font-size:9px">/28</span>':'\u2014')+'</td>':'')
         +'</tr>';
     }).join('');
@@ -11064,11 +11064,11 @@ function exportRapportSaison(seasonNom){
       var isMeca=(t.type==='m\u00e9canique'), rep=REP[t.id];
       var comp=t.compteur_h, rev=t.revision_h;
       var pill;
-      if(rep){ pill='<div class="tc-pill gar">\uD83D\uDD27 Au garage'+(rep.prevu_retour?' \u00b7 retour '+frD(rep.prevu_retour):'')+'</div>'; }
+      if(rep){ pill='<div class="tc-pill gar">'+_mvIcon('outil',16)+' Au garage'+(rep.prevu_retour?' \u00b7 retour '+frD(rep.prevu_retour):'')+'</div>'; }
       else if(comp!=null&&rev!=null&&comp!==''&&rev!==''){ var reste=(parseFloat(rev)||0)-(parseFloat(comp)||0); var cc=reste<=50?'bad':reste<=120?'warn':'ok'; pill='<div class="tc-pill '+cc+'">'+(reste<=50?'\u26a0\ufe0f ':'')+'r\u00e9vision dans '+reste+' h</div>'; }
       else { pill='<div class="tc-pill warn">R\u00e9vision \u00e0 renseigner</div>'; }
       return '<div class="tcard '+(rep?'rep':(isMeca?'meca':'hydro'))+'">'
-        +'<div class="tc-nom">'+(isMeca?'\uD83D\uDFE2':'\uD83D\uDD35')+' '+esc(t.nom)+'</div>'
+        +'<div class="tc-nom">'+esc(t.nom)+'</div>'
         +'<div class="tc-mod">'+esc(t.modele||t.type||'')+'</div>'
         +'<div class="tc-line"><span class="muted">Compteur</span><b>'+((comp!=null&&comp!=='')?comp+' h':'\u2014')+'</b></div>'
         +'<div class="tc-line"><span class="muted">R\u00e9vision \u00e0</span><b>'+((rev!=null&&rev!=='')?rev+' h':'\u2014')+'</b></div>'
@@ -11079,7 +11079,7 @@ function exportRapportSaison(seasonNom){
     if(cfgG&&cfgG.capacite){
       var cap=parseFloat(cfgG.capacite)||0, niv=parseFloat(cfgG.niveau)||0, seuil=parseFloat(cfgG.seuil)||0;
       var fill=cap>0?Math.min(100,Math.round(niv/cap*100)):0, low=niv<=seuil;
-      gnrHtml='<div class="gnr"><div class="ic">\u26FD</div><div class="g-body">'
+      gnrHtml='<div class="gnr"><div class="ic">'+_mvIcon('carburant',18)+'</div><div class="g-body">'
         +'<div class="g-top"><span class="g-lbl">Cuve GNR du domaine</span><span class="g-val">'+f0(niv)+' <small>/ '+f0(cap)+' L</small></span></div>'
         +'<div class="g-track"><div class="g-fill" style="width:'+fill+'%;'+(low?'background:linear-gradient(90deg,#B4432E,#C08328)':'')+'"></div>'+(cap>0?'<div class="g-seuil" style="left:'+Math.round(seuil/cap*100)+'%"></div>':'')+'</div>'
         +'<div class="g-note">Seuil d\u2019alerte '+f0(seuil)+' L'+(cfgG.maj?' \u00b7 mise \u00e0 jour '+esc(cfgG.maj):'')+(low?' \u00b7 \u26a0\ufe0f sous le seuil':'')+'</div>'
@@ -11303,7 +11303,7 @@ function exportRapportSaison(seasonNom){
     H.push('<div class="section brk"><div class="sec-head"><div class="sec-titles"><div class="sec-eyebrow">Terroir</div><div class="sec-title">Bilan par parcelle</div></div><div class="sec-count">'+parcActives.length+' parcelles \u00b7 '+surfTot.toFixed(2).replace('.',',')+' ha</div></div>'
       +'<table><thead><tr><th>Parcelle</th><th class="r">Surface</th><th class="c">T\u00e2ches</th><th class="c">1\u02b3\u1d49 \u2192 derni\u00e8re validation</th>'+(anyTrous?'<th class="r">Trous plant.</th>':'')+(anyCu?'<th class="r">Cu 7 ans</th>':'')+'</tr></thead><tbody>'
       +(prows||'<tr class="emptyrow"><td colspan="4">Aucune parcelle active.</td></tr>')
-      +(anyTrous?'<tr class="tot"><td>Total</td><td class="r">'+surfTot.toFixed(2)+' ha</td><td class="c">\u2014</td><td class="c">\u2014</td><td class="r">\uD83E\uDE9B '+trousTot+'</td>'+(anyCu?'<td class="r">\u2014</td>':'')+'</tr>':'')
+      +(anyTrous?'<tr class="tot"><td>Total</td><td class="r">'+surfTot.toFixed(2)+' ha</td><td class="c">\u2014</td><td class="c">\u2014</td><td class="r">\'+_mvIcon(\'pousse\',16)+\' '+trousTot+'</td>'+(anyCu?'<td class="r">\u2014</td>':'')+'</tr>':'')
       +'</tbody></table><div class="sec-note">'+(anyCu?'Colonne Cu = cuivre m\u00e9tal cumul\u00e9 sur 7 ans glissants (kg/ha) vs plafond 28 kg/ha \u2014 voir Conformit\u00e9 cuivre. ':'')+(parcArr.length?parcArr.length+' parcelle(s) arrach\u00e9e(s) non incluse(s). ':'')+'Dates = 1\u02b3\u1d49 et derni\u00e8re validation toutes t\u00e2ches confondues.</div></div>');
     // §4 Sessions
     H.push('<div class="section"><div class="sec-head"><div class="sec-titles"><div class="sec-eyebrow">M\u00e9canisation</div><div class="sec-title"><span class="acc">Travaux tracteur</span> \u2014 sessions</div></div><div class="sec-count">'+sess.length+' sessions</div></div>'

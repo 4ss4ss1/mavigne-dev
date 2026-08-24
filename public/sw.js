@@ -1,4 +1,36 @@
-// MA VIGNE — Service Worker v7.16
+// MA VIGNE — Service Worker v7.17
+// v7.17 (23/08/2026) — L'ALPHABET D'ETAT DES TACHES. APP 6.61 -> 6.62.
+//   ★★ LE LOT REMIS TROIS FOIS, ET LA RAISON ETAIT BONNE. Quatre etats dans
+//   un rond de 22 px : fait, en cours, pas commence — et AUTO, ecrit `~`.
+//   Un tilde au milieu de trois ronds : pas un pictogramme, pas une forme, pas
+//   traduisible glyphe a glyphe. Il fallait choisir un JEU, pas substituer.
+//   ★ Jeu retenu, une famille de ronds lisible en colonne : `check` (fait),
+//   `lecture` (en cours), `cercle` (vide), `cercle-pointille` (AUTO — le
+//   pointille dit « deduit, pas encore confirme », ce que le tilde disait mal).
+//   ⚠ `cercle` avait ete ajoute puis RETIRE en DS-M3 faute d'emploi. Il en a
+//   un maintenant : un symbole pose « en prevision » reste du poids mort tant
+//   que le lot qui l'emploie n'existe pas.
+//   ★ Aussi : la fiche d'entretien du tracteur (six points), la meteo de la
+//   semaine, la fiche parcelle, la carte tracteur. app.js : 123 -> 80.
+//   ⚠⚠⚠ ET LE MOTIF D'EXTRACTION DU HARNAIS NE VOYAIT PAS LES TERNAIRES.
+//   `_mvIcon(d ? 'check' : a ? 'cercle-pointille' : ...)` : il ne lisait que le
+//   PREMIER argument litteral. Trois noms sur quatre invisibles. Deux degats,
+//   et le second est le vrai :
+//     · les deux symboles etaient signales « sans emploi » — un avertissement
+//       qui invitait a supprimer un symbole VIVANT, l'erreur exacte de §51 ;
+//     · un nom faux dans une branche de ternaire n'etait verifie par PERSONNE.
+//   ★ Corrige : on lit tous les litteraux du PREMIER argument. Le ternaire est
+//   la forme naturelle d'un jeu d'etats — le filet doit suivre la facon dont le
+//   code s'ecrit, pas l'inverse.
+//   ⚠ En elargissant, DEUX FAUX ROUGES sont apparus : le ton de
+//   `_mvIconTuile(nom, 'terre')` etait lu comme un nom d'icone. Coupe au
+//   premier argument. Un faux rouge use un filet aussi surement qu'un trou :
+//   on apprend a l'ignorer, et le jour ou il dit vrai on ne le croit plus.
+//   ★ 22 contre-epreuves. La 12e pose un nom faux dans une branche de ternaire.
+//   ⚠ EFFET DE BORD A CONNAITRE : depuis v7.16, `build-guide.mjs` injecte le
+//   sprite d'index.html dans le guide. Toucher au sprite DESYNCHRONISE donc
+//   `public/guide.html`, et `--check` le dit. C'est voulu — mais il faut
+//   relancer `node scripts/build-guide.mjs` apres chaque ajout de symbole.
 // v7.16 (23/08/2026) — LE GUIDE PUBLIC, ET LA DERNIERE SURFACE HORS FILET. APP 6.60 -> 6.61.
 //   ★ 234 pictogrammes du guide passent aux icones de l'application. C'est la
 //   page qu'un PROSPECT lit avant d'appeler, et la seule qui restait entiere.
@@ -2711,7 +2743,7 @@
 // v2.22 — Fix profils vides : guard vide dans loadData() pour MEMBRES/SAISONS/TACHES
 // v2.17 — Onboarding intégré + tenantId · v2.06 — Firebase Auth · v2.00–v2.05 — divers
 const DEBUG = self.location.hostname === 'localhost' || self.location.hostname === '127.0.0.1';
-const CACHE_NAME   = 'mavigne-v7.16';
+const CACHE_NAME   = 'mavigne-v7.17';
 const TENANT_CACHE = 'mavigne-tenant';   // Cache persistant — préservé à chaque mise à jour SW
 const SYNC_TAG     = 'mavigne-sync';
 
@@ -2727,7 +2759,7 @@ const CDN_URLS = [
 ];
 
 self.addEventListener('install', event => {
-  if(DEBUG) console.log('[SW] Ma Vigne v7.16 installé');
+  if(DEBUG) console.log('[SW] Ma Vigne v7.17 installé');
   event.waitUntil(
     caches.open(CACHE_NAME).then(async cache => {
       // ── Cœur applicatif : STRICT (mise à jour ATOMIQUE) ──
@@ -2743,7 +2775,7 @@ self.addEventListener('install', event => {
 });
 
 self.addEventListener('activate', event => {
-  if(DEBUG) console.log('[SW] Ma Vigne v7.16 activé');
+  if(DEBUG) console.log('[SW] Ma Vigne v7.17 activé');
   event.waitUntil(
     caches.keys().then(keys =>
       Promise.all(

@@ -1,7 +1,7 @@
 {
-  "total": 734,
+  "total": 690,
   "modules": {
-    "app": 123,
+    "app": 79,
     "utils": 77,
     "pilotage": 106,
     "planning": 78,

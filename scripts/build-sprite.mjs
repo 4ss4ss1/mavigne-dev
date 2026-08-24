@@ -79,7 +79,20 @@ export const MAP = {
      solde — et l'ecran les liste cote a cote : ils doivent se distinguer
      au premier coup d'oeil, pas seulement se lire. */
   avion:'plane-takeoff', pansement:'bandage', reveil:'alarm-clock',
-  thermometre:'thermometer'
+  thermometre:'thermometer',
+  /* ── DS-M12 : L'ALPHABET D'ETAT DES TACHES ──
+     Quatre etats dans un rond de 22 px : fait, en cours, AUTO, pas commence.
+     Ils s'ecrivaient ✓ ▶ ~ ○ — dont un TILDE, qui n'est pas un pictogramme
+     et ne ressemble a rien de rond. C'est ce melange qui a fait remettre ce
+     lot trois fois : il fallait choisir le JEU, pas traduire glyphe a glyphe.
+     ★ Le jeu retenu est une FAMILLE DE RONDS, lisible d'un coup d'oeil dans
+       une colonne : `check` (fait) · `lecture` (en cours) · `cercle-pointille`
+       (auto — le pointille dit « deduit, pas saisi ») · `cercle` (vide).
+     ⚠ `cercle` avait deja ete ajoute puis RETIRE en DS-M3, faute d'emploi.
+       Il en a un maintenant. */
+  cercle:'circle', 'cercle-pointille':'circle-dashed',
+  /* la fiche d'entretien du tracteur : six points a cocher, six objets reels */
+  vent:'wind', ventilateur:'fan', pneu:'disc-3'
 };
 
 export function corps(lucide) {

@@ -149,7 +149,21 @@ t('Aucun trou creuse avec une couleur de fond en dur', enDur.length === 0,
 
 /* ══ A. TOUT APPEL VISE UN SYMBOLE EXISTANT ════════════════════════════════ */
 const appels = new Map();     // nom -> [fichiers]
-const RE_APPEL = /_mvIcon(?:Inline|Tuile)?\(\s*'([a-z0-9-]+)'/g;
+/* ⚠⚠ CE MOTIF NE LISAIT QUE LE PREMIER ARGUMENT LITTERAL, et l'alphabet
+   d'etat des taches s'ecrit en TERNAIRE :
+     _mvIcon(d ? 'check' : a ? 'cercle-pointille' : c ? 'lecture' : 'cercle', 16)
+   Trois noms sur quatre etaient invisibles. Deux consequences, et la seconde
+   est la vraie :
+     · `cercle` et `cercle-pointille` etaient signales « sans emploi » alors
+       qu'ils servent — un avertissement qui invite a SUPPRIMER un symbole
+       vivant, exactement l'erreur de §51 ;
+     · surtout, un nom faux dans une branche de ternaire n'etait verifie par
+       PERSONNE : `_mvIcon(x ? 'nexistepas' : 'check')` passait vert.
+   ★ On lit donc TOUS les litteraux de l'appel, pas seulement le premier. Le
+     ternaire est la forme naturelle d'un jeu d'etats ; le filet doit suivre la
+     facon dont le code s'ecrit, pas l'inverse. */
+const RE_APPEL = /_mvIcon(?:Inline|Tuile)?\(([^)]{0,220})\)/g;
+const RE_LITT  = /'([a-z][a-z0-9-]*)'/g;
 const RE_NOMME = /_mvSetIcon\([^,]+,\s*'([a-z0-9-]+)'/g;
 /* ⚠️ Les noms passes par une TABLE (`{p:'cave', ic:'verre', l:'Cave'}` dans la
    barre de navigation) ne passent jamais par un appel litteral : sans cette
@@ -167,12 +181,34 @@ const rendus = {};
 for (const mod of MODULES) rendus[mod] = decodeEchappements(sources[mod]);
 
 for (const mod of MODULES) {
-  for (const re of [RE_APPEL, RE_NOMME, RE_TABLE]) {
-    re.lastIndex = 0;
-    let m; while ((m = re.exec(sources[mod]))) {
-      if (!appels.has(m[1])) appels.set(m[1], []);
-      if (!appels.get(m[1]).includes(mod)) appels.get(m[1]).push(mod);
+  const noter = (nom) => {
+    if (!appels.has(nom)) appels.set(nom, []);
+    if (!appels.get(nom).includes(mod)) appels.get(nom).push(mod);
+  };
+  /* ⚠ SEULEMENT LE PREMIER ARGUMENT. Lire tous les litteraux de l'appel
+     ramassait aussi le TON de `_mvIconTuile(nom, 'terre')` — « terre » et
+     « or » sont sortis en icones manquantes, deux faux rouges. Un faux rouge
+     use un filet aussi surement qu'un trou : on apprend a l'ignorer.
+     On coupe donc a la premiere virgule de niveau zero, hors chaine. */
+  const premierArg = (txt) => {
+    let q = null;
+    for (let i = 0; i < txt.length; i++) {
+      const c = txt[i];
+      if (q) { if (c === q && txt[i - 1] !== '\\') q = null; continue; }
+      if (c === "'" || c === '"' || c === '`') { q = c; continue; }
+      if (c === ',') return txt.slice(0, i);
     }
+    return txt;
+  };
+  RE_APPEL.lastIndex = 0;
+  let a; while ((a = RE_APPEL.exec(sources[mod]))) {
+    const arg = premierArg(a[1]);
+    RE_LITT.lastIndex = 0;
+    let l; while ((l = RE_LITT.exec(arg))) noter(l[1]);
+  }
+  for (const re of [RE_NOMME, RE_TABLE]) {
+    re.lastIndex = 0;
+    let m; while ((m = re.exec(sources[mod]))) noter(m[1]);
   }
 }
 /* ⚠️⚠️⚠️ QUATRIEME FOIS QUE CE MEME ANGLE MORT MORD, ET LA LISTE EN DUR N'EST

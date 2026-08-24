@@ -23,7 +23,7 @@ export const GT_ADMIN_EMAIL = 'ngdevpro@gmail.com';
 // WHATS_NEW   : tableau vide = modal desactive pour cette version.
 // Format item : { emoji:'📅', titre:'Titre court', desc:'Phrase utilisateur.' }
 // Regle : seulement les changements visibles par les utilisateurs.
-export const APP_VERSION = '6.61';
+export const APP_VERSION = '6.62';
 // ════ Journal des nouveautés (récap cumulatif) ════
 // Une entrée par version, la PLUS RÉCENTE EN HAUT : { v:'5.10', items:[ {emoji,titre,desc}, … ] }
 // À chaque release visible → AJOUTER un bloc en tête (ne pas remplacer). items:[] = release technique (rien à afficher).
@@ -354,6 +354,10 @@ window._mvGraphRepeindre = function(){
 };
 
 export const WHATS_NEW = [
+  { v: '6.62', items: [
+    { emoji: 'cercle-pointille', titre: 'Les quatre \u00e9tats d\u2019une t\u00e2che se distinguent enfin', desc: "Dans les ronds de niveau, une t\u00e2che pouvait \u00eatre <b>faite</b>, <b>en cours</b>, <b>pas commenc\u00e9e</b>, ou <b>d\u00e9duite automatiquement</b>. Ce dernier cas s\u2019affichait avec un tilde \u2014 un signe de ponctuation, au milieu de trois ronds. Les quatre sont maintenant une famille\u00a0: coche, lecture, rond vide, et <b>rond en pointill\u00e9</b> pour ce que l\u2019application a d\u00e9duit sans que vous l\u2019ayez saisi. Le pointill\u00e9 dit exactement \u00e7a\u00a0: pas encore confirm\u00e9." },
+    { emoji: 'outil', titre: 'La fiche d\u2019entretien du tracteur passe aux ic\u00f4nes', desc: "Plein, huile, filtre \u00e0 air, radiateur, pression des pneus, lavage\u00a0: les six points \u00e0 cocher, plus la m\u00e9t\u00e9o de la semaine et la fiche parcelle. <b>Rien de coch\u00e9 n\u2019a \u00e9t\u00e9 d\u00e9coch\u00e9.</b>" }
+  ] },
   { v: '6.61', items: [
     { emoji: 'livre', titre: 'Le guide en ligne passe aux m\u00eames ic\u00f4nes que l\u2019application', desc: "Les <b>234 pictogrammes</b> du guide \u2014 titres de section, puces de conseil, sommaire \u2014 sont devenus les ic\u00f4nes de l\u2019application. C\u2019est la page que vous ouvrez depuis <b>R\u00e9glages \u203a Aide</b>, et celle qu\u2019un visiteur lit avant de vous appeler\u00a0: elle ne pouvait pas rester le dernier endroit avec des dessins d\u2019une autre \u00e9poque. <b>Pas un mot du guide n\u2019a chang\u00e9.</b>" }
   ] },

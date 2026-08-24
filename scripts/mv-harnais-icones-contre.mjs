@@ -270,6 +270,20 @@ epreuve('un emoji repose dans une source du guide',
         lire('guide/02-roles.html').replace('<section', '<p>\u{1F347}</p>\n<section')),
   /ne remonte dans aucune surface[\s\S]*guide\/02-roles\.html/);
 
+/* 12. UN NOM FAUX DANS UNE BRANCHE DE TERNAIRE. Le motif d'extraction ne
+      lisait que le premier argument LITTERAL : `_mvIcon(d ? 'check' : ...)`
+      lui echappait entierement. Trois noms sur quatre de l'alphabet d'etat
+      des taches n'etaient verifies par personne, et les deux symboles qu'ils
+      utilisent etaient signales « sans emploi » — un avertissement qui
+      invitait a supprimer un symbole VIVANT (§51).
+      ⚠ En elargissant, deux FAUX rouges sont apparus : le ton de
+        `_mvIconTuile(nom, 'terre')`. Corrige en coupant au premier argument.
+        Un faux rouge use un filet aussi surement qu'un trou. */
+epreuve('un nom faux dans une branche de ternaire',
+  () => ecrire('src/app.js', lire('src/app.js')
+        .replace("a ? 'cercle-pointille' : c ? 'lecture'", "a ? 'nexistepas' : c ? 'lecture'")),
+  /Toute icone appelee a son symbole[\s\S]*nexistepas/);
+
 fs.rmSync(bac, { recursive: true, force: true });
 console.log('\n' + (ko ? '\x1b[31m' + ko + ' CONTRE-EPREUVE(S) EN ECHEC\x1b[0m'
                        : '\x1b[32mLes ' + ok + ' contre-epreuves rougissent\x1b[0m') + '\n');
