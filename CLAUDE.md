@@ -10437,19 +10437,26 @@ locale ne joue qu'à l'affichage), et le reste d'une parcelle **se partage** ent
 sans surface — 0,11 ha chacune, pas 0,22. *Quand une assertion tombe, la première question reste :
 laquelle des deux a tort ?*
 
-### 61g. Ce que VD-1 ne fait PAS encore
+### 61g. La suite du chantier
 
-Écrit ici pour que le document ne laisse pas croire le chantier terminé — la maquette validée par
-Nico va plus loin que le code livré :
+VD-1 n'est que le socle. **VD-2** (§62) apporte les livraisons, les bons imprimables et le retour du
+client ; **VD-3** (§63) le rendement de la parcelle. Les trois lots sont livrés le même jour, dans
+`cave.js` seul, sans bump.
 
-- **VD-3** — le rendement de la parcelle : escalier des sources (client / décuvage / estimé), un
-  hL/ha qui ne s'affiche comme **mesure** que si 100 % des kilos ont un volume connu, la répartition
-  des surfaces avec ses trois écarts (dépassement, hectares orphelins, surfaces divergentes), et
-  l'entrée `rendement_hist` enrichie — `kg_ha` **reste rapporté à la parcelle entière** (décision de
-  Nico : le domaine travaille toute la vigne même quand il en vend une part), avec `kg_ha_base`
-  écrit dans l'entrée plutôt que laissé à deviner.
-- Maquettes de référence, validées : `mq-vendange-multiclients-v6.html` (5 écrans, 4 versions
-  d'itération).
+Maquettes de référence, validées par Nico avant écriture d'une ligne de code :
+`mq-vendange-multiclients-v6.html` — 5 écrans, 6 versions d'itération.
+
+⚠️ **Ce que les trois lots ne font PAS**, et qu'il faut relire avant de croire le chantier fini :
+
+- **`r.vendu` et `r.client` survivent** comme champs dérivés. Ils restent lus par des écrans que ces
+  lots n'ont pas repris — notamment le bilan de campagne (`cave.js` ~8590) et l'export CSV. Un
+  lecteur de `r.client` voit **vide** quand une récolte a deux acheteurs : `_recKgPour(r, nom)` est
+  la bonne porte.
+- **`_apportsRangs`** (graphe des apports par parcelle) compte le TOTAL, part vendue comprise, et
+  en tire un volume au ratio. C'est juste comme « ce que la parcelle a donné », douteux comme
+  volume. À trancher sur capture.
+- La **saisie du volume décuvé** n'existe pas en propre : le volume domaine vient de la cuve
+  rattachée. Une part domaine sans `cuve_id` reste estimée, sans moyen de la fermer à la main.
 
 ---
 
@@ -10522,3 +10529,82 @@ motifs avant la première écriture n'est pas une précaution de style.*
 rendement réel kg/hL, le corps des deux documents (produit **et lu**, pas raisonné), et la fonction
 de prorata rejouée telle qu'elle est écrite. Trois contre-épreuves : prorata sans reprise du reste
 (1 rouge), section retour toujours affichée (2 rouges), prix glissé dans le bon (1 rouge).
+
+---
+
+## 63. ★★★ « 42 hL/HA » QUAND DEUX VOLUMES SUR TROIS MANQUENT — LOT VD-3 (24/08 — `cave.js` seul, aucun bump)
+
+Nico, à la question de savoir si les litres rendus par les clients devaient remonter dans le
+rendement : *« bien sûr que les volumes remontent dans le rendement de la parcelle »*. La suite du
+lot n'était pas de brancher un tuyau, c'était de décider **ce qu'un rendement a le droit d'affirmer**.
+
+### 63a. ★★★ L'ESCALIER DES SOURCES
+
+Une parcelle partagée reçoit son volume de trois endroits, et ils ne se valent pas :
+
+| marche | d'où | ce que ça vaut |
+|---|---|---|
+| **client** | litres rendus après pressurage | mesuré, mais chez lui |
+| **cuve** | volume logé au domaine (`cuves_vinif[].volume_hl`) | mesuré, au domaine |
+| **estimé** | kilos ÷ ratio 130–140 | une fourchette, jamais un chiffre |
+
+⚠️ **Un volume de cuve qui rassemble plusieurs parcelles est réparti au prorata des kilos** : il est
+alors **déduit**, pas mesuré par parcelle, et sort marqué `prorata`.
+
+### 63b. ⚠️⚠️⚠️ CE QUE `_mlRendements` AFFICHAIT
+
+`hlHa = kg / surface / kgHl` — une **estimation au ratio moyen**, présentée comme un chiffre net,
+comparée au maximum d'appellation, avec un **« 104 % du maximum »** en dessous. Un dépassement
+d'appellation annoncé sur une estimation.
+
+La règle posée : **un hL/ha ne s'affiche comme mesure que si 100 % des kilos de la parcelle ont un
+volume connu.** Sinon c'est une **fourchette**, avec un badge `77 % mesuré`, et le pourcentage du
+maximum s'écrit **« ≈ 104 % »**. Sur Le Clos du jeu d'essai — cuve connue, un retour reçu, un
+attendu — l'écran passe de « 42,9 » à « 42,6–43,4 · 77 % mesuré », et le détail dit lequel des trois
+destinataires manque encore. *C'est §33 à l'identique : un indicateur bâti sur un signal partiel
+ment avec l'autorité d'une mesure.*
+
+### 63c. Les surfaces, et leurs trois écarts
+
+`_vendSurfParc(nom, millésime)` : chaque destinataire prend sa surface déclarée ; ceux qui n'en ont
+pas se partagent **le reste** — au prorata des kilos s'ils sont plusieurs. Trois écarts, aucun
+absorbé en silence : **dépassement** de la parcelle, **hectares que personne ne réclame**,
+**deux surfaces divergentes** pour un même destinataire (la plus grande est retenue).
+
+⚠️ **La surface ne s'additionne pas d'un passage à l'autre.** Deux récoltes sur la même parcelle le
+même millésime, c'est deux fois la même vigne. Une somme naïve diviserait par deux le rendement de
+la portion.
+
+### 63d. ★ DEUX DÉNOMINATEURS, ET CHACUN PORTE SON ÉTIQUETTE
+
+Décision de Nico : **`kg_ha` reste rapporté à la parcelle entière** — le domaine travaille toute la
+vigne même quand il en vend une part, et c'est ce rapport que `_pecRecolte` lit pour le prix de
+revient. Le rendement d'une **portion** vit à côté. Les deux sont justes ; ce qui serait faux, c'est
+de ne pas dire lequel on lit : l'écran écrit *« sur la parcelle entière »* et *« sur sa portion »*,
+et l'entrée versée porte `kg_ha_base` / `hl_ha_base` **plutôt que de laisser deviner** le prochain
+lecteur.
+
+L'entrée `rendement_hist[]` garde tous ses champs actuels et gagne `surface_parcelle_ha`,
+`surface_attribuee_ha`, `vol{hl, hl_ha, base, src, kg_couverts, kg_manquants, complet, prorata}` et
+`parts[]` par destinataire. **Rien de ce que Pilotage lit ne change de sens.**
+
+### 63e. Un réglage plutôt qu'une devinette
+
+Le client rend **deux** chiffres, jus et lie. Lequel compte pour la déclaration ? Je ne le sais pas,
+et le deviner aurait été le pire choix : `config.rdt_base` (`jus` par défaut, ou `total`) se règle
+dans le Cuvier. En base « jus + lies », l'écran prévient que **le volume du domaine est un volume
+logé, ses lies ne sont comptées nulle part** — la comparaison penche alors contre le domaine.
+
+### 63f. ⚠️ UNE CONTRE-ÉPREUVE EST SORTIE MUETTE, ET C'EST ELLE QUI A APPRIS LE PLUS
+
+Casser le prorata de cuve (`vol × kd/tot` → `vol`) n'a fait rougir **aucune** assertion : le jeu
+d'essai n'avait qu'une récolte par cuve, cas où les deux expressions rendent le même nombre. Un
+harnais qui **ne peut pas** rougir ne prouve rien. Cinq assertions ajoutées avec une cuve qui
+rassemble deux parcelles — la contre-épreuve en fait rougir quatre.
+
+`mv-harnais-vendange-parts.mjs` passe à **110 assertions**. Quatre contre-épreuves : statut toujours
+« mesuré » (1 rouge), fourchette ignorant les kilos sans volume (2), surfaces additionnées entre
+passages (2), volume de cuve non réparti (4).
+
+⚠️ Et un glyphe `⚠` écrit dans un texte d'interface a fait remonter le compteur d'emojis de
+`cave.js` à 27 — deuxième fois dans la journée. Remplacé par l'icône `alerte` du sprite.

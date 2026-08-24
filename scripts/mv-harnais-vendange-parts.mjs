@@ -1,6 +1,6 @@
 #!/usr/bin/env node
 // ═══════════════════════════════════════════════════════════════════════════
-//  MA VIGNE — Harnais : LA VENDANGE À PLUSIEURS (lots VD-1 et VD-2)
+//  MA VIGNE — Harnais : LA VENDANGE À PLUSIEURS (lots VD-1, VD-2 et VD-3)
 // ═══════════════════════════════════════════════════════════════════════════
 //  ★★★ POURQUOI CE HARNAIS EXISTE.
 //  Avant VD-1, une récolte n'avait qu'UN destinataire. Le lot introduit
@@ -301,6 +301,115 @@ const r = prorata(555, 50);
 T('★ prorata : la somme retombe sur le total annoncé', r[0].jus + r[1].jus, 555);
 T('prorata : le quart sur 200 des 800 kg', r[0].jus, 138.8);
 T('prorata : la lie aussi', r[0].lie + r[1].lie, 50);
+
+// ── 7. VD-3 : LE RENDEMENT, ET CE QU'IL VAUT ──────────────────────────────
+/*  ⚠️⚠️⚠️ LE DÉFAUT QUE CE VOLET INTERDIT : afficher un hL/ha net — et un
+    « % du maximum d'appellation » calculé dessus — alors que deux volumes sur
+    trois manquent encore. C'est §33 à l'identique : un indicateur bâti sur un
+    signal partiel ment avec l'autorité d'une mesure.
+    ⚠️ Et la surface ne s'additionne pas d'un passage à l'autre. */
+const NOMS_RDT = ['_vendRdtBase','_vendLitresRetour','_vendVolCuve','_vendVolPart','_vendSrcLbl',
+                  '_vendSurfParc','_vendSurfLbl','_vendHaTxt','_vendVolParc','_vendRdtParc'];
+const absentsRdt = NOMS_RDT.filter(x => !corps(x));
+if (absentsRdt.length){ console.error('ROUGE — VD-3 introuvable : ' + absentsRdt.join(', ')); process.exit(1); }
+
+/* Le Clos, 0,34 ha : le domaine garde le reste, deux négoces ont acheté leur
+   portion. Une cuve de 6,6 hL porte la part domaine ; Bouchard a rendu ses
+   litres ; Négoce n'a pas encore répondu. */
+const R3 = [
+  { id:'x', parcelle:'Le Clos', date:'2026-09-13', cuve_id:'cv1',
+    parts:[ { dom:true, caisses:36, pck:25 },
+            { dom:false, client:'Maison Bouchard', caisses:28, pck:24, surface:0.12,
+              retour:{ jus:460, lie:45, le:'2026-09-19', src:'saisi' } },
+            { dom:false, client:'Négoce de Nuits', caisses:22, pck:21, surface:0.08 } ] }
+];
+const CUVES = [ { id:'cv1', volume_hl:6.6 } ];
+let codeRdt = 'var CAVE_VENDANGE={config:CFG,clients:CLIENTS,recoltes:RECS,cuves_vinif:CUVES};\n'
+  + 'function _vendParcSurf(nom){ return nom==="Le Clos"?0.34:0; }\n'
+  + 'function _vendMillOfDate(d){ return parseInt(String(d).slice(0,4),10); }\n'
+  + PRELUDE + NOMS.map(corps).join('\n') + '\n' + NOMS_RDT.map(corps).join('\n')
+  + '\nreturn {' + NOMS_RDT.join(',') + ', CFG:CFG};';
+// eslint-disable-next-line no-new-func
+const V = new Function('CLIENTS','CFG','RECS','CUVES', codeRdt)(CLIENTS, CFG, R3, CUVES);
+
+const d = V._vendRdtParc('Le Clos', 2026);
+T('★ statut PARTIEL, pas « mesuré »', d.vol.statut, 'partiel');
+T('volume connu : 6,6 hL de cuve + 4,60 hL rendus', Math.round(d.vol.hl*100)/100, 11.2);
+T('kilos couverts : 900 + 672', d.vol.kgOk, 1572);
+T('kilos sans volume : les 462 de Négoce', d.vol.kgKo, 462);
+T('★ part mesurée annoncée', d.vol.pctOk, 77);
+T('fourchette basse (140 kg/hL sur le reste)', Math.round(d.vol.hlMin*100)/100, Math.round((11.2+462/140)*100)/100);
+T('fourchette haute (130 kg/hL)', Math.round(d.vol.hlMax*100)/100, Math.round((11.2+462/130)*100)/100);
+T('sources mêlées', d.vol.src, 'mixte');
+
+T('surface : Bouchard a acheté 0,12 ha', d.parts.find(x => x.nom === 'Maison Bouchard').ha, 0.12);
+T('surface : le domaine prend le reste', Math.round(d.parts.find(x => x.dom).ha * 10000) / 10000, 0.14);
+T('surface : origine du reste', d.parts.find(x => x.dom).haSrc, 'reste');
+T('somme = surface cadastrale', Math.round(d.surf.attribuee * 10000) / 10000, 0.34);
+T('kg/ha de la portion domaine (900 / 0,14)', Math.round(d.parts.find(x => x.dom).kgHa), 6429);
+T('hL/ha de la portion Bouchard (4,60 / 0,12)', Math.round(d.parts.find(x => x.nom === 'Maison Bouchard').hlHa * 10) / 10, 38.3);
+T('Négoce : pas de hL/ha sans volume', d.parts.find(x => x.nom === 'Négoce de Nuits').hlHa, 'null');
+T('la part domaine vient de la cuve', d.parts.find(x => x.dom).src, 'cuve');
+T('la part Bouchard vient du client', d.parts.find(x => x.nom === 'Maison Bouchard').src, 'client');
+T('Négoce : retour attendu', d.parts.find(x => x.nom === 'Négoce de Nuits').src, 'attente');
+
+/* La base du rendement : le réglage change le volume, jamais les kilos. */
+const kgAvant = d.vol.kg;
+CFG.rdt_base = 'total';
+const d2 = V._vendRdtParc('Le Clos', 2026);
+T('base jus + lies : 45 L de plus', Math.round((d2.vol.hl - d.vol.hl) * 100) / 100, 0.45);
+T('les kilos ne bougent pas avec la base', d2.vol.kg, kgAvant);
+CFG.rdt_base = 'jus';
+
+/* ⚠️ DEUX PASSAGES SUR LA MÊME VIGNE NE FONT PAS DEUX SURFACES. */
+R3.push({ id:'y', parcelle:'Le Clos', date:'2026-09-16',
+  parts:[ { dom:false, client:'Maison Bouchard', caisses:10, pck:24, surface:0.12 } ] });
+let s3 = V._vendSurfParc('Le Clos', 2026);
+T('★ 2e passage : la surface n\'est PAS additionnée', s3.lignes.find(x => x.nom === 'Maison Bouchard').ha, 0.12);
+T('2e passage : les kilos, eux, s\'additionnent', s3.lignes.find(x => x.nom === 'Maison Bouchard').kg, 672 + 240);
+T('total toujours 0,34 ha', Math.round(s3.attribuee * 10000) / 10000, 0.34);
+R3[1].parts[0].surface = 0.15;
+s3 = V._vendSurfParc('Le Clos', 2026);
+T('deux surfaces divergentes : signalées', s3.conflit.length, 1);
+T('...et la plus grande est retenue', s3.lignes.find(x => x.nom === 'Maison Bouchard').ha, 0.15);
+R3.pop();
+
+/* Les deux écarts de bornes. */
+R3[0].parts[1].surface = 0.30; R3[0].parts[2].surface = 0.20;   // 0,50 déclarés sur 0,34
+s3 = V._vendSurfParc('Le Clos', 2026);
+T('dépassement mesuré', Math.round(s3.depasse * 10000) / 10000, 0.16);
+T('pas d\'orphelin quand ça déborde', s3.orphelin, 0);
+R3[0].parts[0].surface = 0.10; R3[0].parts[1].surface = 0.12; R3[0].parts[2].surface = 0.08;  // 0,30 sur 0,34
+s3 = V._vendSurfParc('Le Clos', 2026);
+T('hectares que personne ne réclame', Math.round(s3.orphelin * 10000) / 10000, 0.04);
+delete R3[0].parts[0].surface; R3[0].parts[1].surface = 0.12; R3[0].parts[2].surface = 0.08;
+
+/* ⚠️ UNE CUVE QUI RASSEMBLE DEUX PARCELLES : son volume se PARTAGE.
+   Sans ce cas, la contre-épreuve du prorata de cuve reste MUETTE — le jeu
+   d'essai à une seule récolte par cuve rend `vol × kd/tot` et `vol` identiques,
+   et un harnais qui ne peut pas rougir ne prouve rien. */
+R3.push({ id:'z', parcelle:'Aux Combottes', date:'2026-09-13', cuve_id:'cv1',
+  parts:[ { dom:true, caisses:24, pck:25 } ] });
+const cl2 = V._vendRdtParc('Le Clos', 2026), cb2 = V._vendRdtParc('Aux Combottes', 2026);
+T('★ cuve partagée : Le Clos prend 900/1500 des 6,6 hL',
+  Math.round(cl2.parts.find(x => x.dom).hl * 100) / 100, 3.96);
+T('★ cuve partagée : Combottes prend 600/1500', Math.round(cb2.parts.find(x => x.dom).hl * 100) / 100, 2.64);
+T('la somme fait bien le volume de la cuve',
+  Math.round((cl2.parts.find(x => x.dom).hl + cb2.parts.find(x => x.dom).hl) * 100) / 100, 6.6);
+T('★ un volume de cuve réparti est DÉDUIT, pas mesuré par parcelle',
+  cl2.parts.find(x => x.dom).prorata, true);
+R3.pop();
+T('cuve à une seule récolte : rien à déduire',
+  V._vendRdtParc('Le Clos', 2026).parts.find(x => x.dom).prorata, false);
+
+/* Une parcelle entièrement mesurée : le chiffre devient une mesure. */
+R3[0].parts[2].retour = { jus:340, lie:30, le:'2026-09-25', src:'saisi' };
+const d3 = V._vendRdtParc('Le Clos', 2026);
+T('★ tous les volumes connus → statut MESURE', d3.vol.statut, 'mesure');
+T('100 % mesuré', d3.vol.pctOk, 100);
+T('volume total 14,6 hL', Math.round(d3.vol.hl * 100) / 100, 14.6);
+T('rendement réel 2 034 kg / 14,6 hL', Math.round(V._vendRdtBase() === 'jus' ? 2034 / 14.6 : 0), 139);
+delete R3[0].parts[2].retour;
 
 console.log('\n' + (ko ? ko + ' ASSERTION(S) ROUGE(S) sur ' + n : 'TOUT VERT — ' + n + ' assertions'));
 if (CONTRE){

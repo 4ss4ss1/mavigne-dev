@@ -2296,6 +2296,22 @@ function renderVendParam() {
     +'<div class="mvv-prow"><div class="mvv-prow-l">Ratio minimum</div><div style="display:flex;align-items:center;gap:7px"><input class="mvv-fi" id="vpfi-rmin" type="number" min="80" max="200" value="'+rMin+'"><span style="font-size:11px;color:var(--texte-doux,#5F5F5F)">kg/hL</span></div></div>'
     +'<div class="mvv-prow"><div class="mvv-prow-l">Ratio maximum</div><div style="display:flex;align-items:center;gap:7px"><input class="mvv-fi" id="vpfi-rmax" type="number" min="80" max="200" value="'+rMax+'"><span style="font-size:11px;color:var(--texte-doux,#5F5F5F)">kg/hL</span></div></div>'
     +'<div class="mvv-preview">100 caisses de '+pck+' kg → <b>'+(ex/rMax).toFixed(1)+'–'+(ex/rMin).toFixed(1)+' hL</b></div></div>';
+  var _rb=_vendRdtBase();
+  html+='<div class="mvv-set"><div class="mvv-set-t">Base du rendement</div>'
+    +'<div class="mvv-set-d">Le client rend deux chiffres apr\u00e8s pressurage : les litres de jus et les litres '
+    +'de lie. Celui qui compte pour votre d\u00e9claration se r\u00e8gle ici \u2014 l\u2019application ne le devine pas.</div>'
+    +'<div class="mvv-prow"><div class="mvv-prow-l">Volume retenu</div>'
+    +'<div style="display:flex;gap:6px">'
+    +'<button class="mvv-save ghost2" style="width:auto;padding:8px 12px;margin:0;'
+      +(_rb==='jus'?'background:rgba(138,90,56,.16);border-color:rgba(138,90,56,.4)':'')
+      +'" onclick="_vendSetRdtBase(\'jus\')">Jus clair</button>'
+    +'<button class="mvv-save ghost2" style="width:auto;padding:8px 12px;margin:0;'
+      +(_rb==='total'?'background:rgba(138,90,56,.16);border-color:rgba(138,90,56,.4)':'')
+      +'" onclick="_vendSetRdtBase(\'total\')">Jus + lies</button></div></div>'
+    +'<div class="mvv-preview">'+(_rb==='jus'
+        ?'Seul le jus clair entre dans le rendement.'
+        :_mvIcon('alerte',16)+' Jus et lies comptent. Le volume du domaine est un volume log\u00e9 : ses lies ne sont compt\u00e9es nulle part.')
+    +'</div></div>';
   html+='<div class="mvv-set"><div class="mvv-set-t">Chaptalisation</div>'
     +'<div class="mvv-set-d">Sucre pour enrichir de 1° d’alcool potentiel. Standard : 16,83 g/L (≈ 17 g/L). Utilisé par l’assistant d’opération sur cuve.</div>'
     +'<div class="mvv-prow"><div class="mvv-prow-l">Sucre par degré</div><div style="display:flex;align-items:center;gap:7px"><input class="mvv-fi" id="vpfi-spd" type="number" min="15" max="20" step="0.01" value="'+cfg.sucre_par_degre+'"><span style="font-size:11px;color:var(--texte-doux,#5F5F5F)">g/L</span></div></div></div>';
@@ -3057,6 +3073,179 @@ function _vendRepDel(i){ if(_vrep.length<=1) return; _vrep.splice(i,1); _vendRep
 // ═══════════════════════════════════════════════════════════════════════════
 
 // Toutes les livraisons d'un client, de la plus récente à la plus ancienne.
+
+// ═══════════════════════════════════════════════════════════════════════════
+// VD-3 — LE RENDEMENT DE LA PARCELLE, ET CE QU'IL VAUT VRAIMENT
+// ═══════════════════════════════════════════════════════════════════════════
+// Une parcelle partagée reçoit son volume de trois endroits, et ils ne se valent
+// pas. L'ESCALIER DES SOURCES, du mesuré au deviné :
+//
+//   1. CLIENT   — litres rendus par l'acheteur après pressurage : mesuré, chez lui
+//   2. CUVE     — volume logé au domaine après décuvage : mesuré, au domaine
+//   3. ESTIMÉ   — kilos ÷ ratio (130–140) : une fourchette, jamais un chiffre
+//
+// ⚠️⚠️⚠️ LA RÈGLE QUI TIENT TOUT L'ÉCRAN : un hL/ha ne s'affiche comme MESURE que
+// si 100 % des kilos de la parcelle ont un volume connu. Sinon c'est une
+// fourchette, et elle dit quelle part elle a mesurée.
+//
+// Sans cette règle, une parcelle dont deux volumes sur trois manquent afficherait
+// un rendement effondré — et, pire, un « % du maximum d'appellation » calculé
+// dessus. C'est §33 à l'identique : un indicateur bâti sur un signal partiel ment
+// avec l'autorité d'une mesure.
+//
+// ⚠️ `kg_ha` RESTE RAPPORTÉ À LA PARCELLE ENTIÈRE (décision de Nico) : le domaine
+// travaille toute la vigne même quand il en vend une part, et c'est ce rapport
+// que Pilotage lit pour son prix de revient. Le rendement d'une PORTION vit à
+// côté, dans `parts[]`, avec sa propre base — et chacun porte son étiquette.
+// ═══════════════════════════════════════════════════════════════════════════
+
+// La base du rendement : le jus clair seul, ou jus + lies. Le client rend deux
+// chiffres ; celui qui compte pour la déclaration se règle, il ne se devine pas.
+function _vendRdtBase(){ return (_vendCfg().rdt_base==='total')?'total':'jus'; }
+function _vendSetRdtBase(b){
+  if(!canWrite()) return;
+  if(!CAVE_VENDANGE.config) CAVE_VENDANGE.config=_vendCfg();
+  CAVE_VENDANGE.config.rdt_base=(b==='total')?'total':'jus';
+  window.CAVE_VENDANGE=CAVE_VENDANGE;
+  if(window.fbSave) window.fbSave('cave_vendange',CAVE_VENDANGE);
+  showToast(b==='total'?'Rendement sur jus + lies':'Rendement sur le jus clair','#3D6B27');
+  renderVendParam();
+}
+function _vendLitresRetour(p){
+  var r=p&&p.retour; if(!r) return 0;
+  var j=Number(r.jus)||0, l=Number(r.lie)||0;
+  return (_vendRdtBase()==='total')?(j+l):j;
+}
+// Volume réellement logé au domaine pour une récolte : celui de sa cuve, au
+// prorata des kilos quand la cuve rassemble plusieurs récoltes.
+// ⚠️ Un volume de cuve réparti entre parcelles est DÉDUIT, pas mesuré par
+// parcelle : il sort marqué `prorata`.
+function _vendVolCuve(r){
+  if(!r||!r.cuve_id) return null;
+  var cv=(CAVE_VENDANGE.cuves_vinif||[]).find(function(c){ return c&&c.id===r.cuve_id; });
+  var vol=cv?(parseFloat(cv.volume_hl)||0):0;
+  if(!(vol>0)) return null;
+  var mine=(CAVE_VENDANGE.recoltes||[]).filter(function(x){ return x&&x.cuve_id===cv.id; });
+  var tot=mine.reduce(function(s,x){ return s+_recKgDom(x); },0);
+  var kd=_recKgDom(r);
+  if(!(tot>0)||!(kd>0)) return null;
+  return {hl:vol*kd/tot, src:'cuve', prorata:mine.length>1};
+}
+// Le volume d'UNE part, avec la marche d'escalier d'où il vient.
+function _vendVolPart(r,p){
+  if(p.dom){
+    var c=_vendVolCuve(r);
+    if(c){
+      var kd=_recKgDom(r);
+      return {hl:(kd>0?c.hl*_vpKg(p)/kd:0), src:'cuve', prorata:c.prorata};
+    }
+    return {hl:null, src:'estime'};
+  }
+  if(p.retour) return {hl:_vendLitresRetour(p)/100, src:'client',
+                       prorata:p.retour.src==='prorata'};
+  return {hl:null, src:'attente'};
+}
+function _vendSrcLbl(t){
+  return t==='client'?'rendu par le client'
+       :(t==='cuve'?'log\u00e9 au domaine'
+       :(t==='attente'?'retour attendu':'pas encore de volume'));
+}
+
+// ── Les surfaces d'une parcelle sur un millésime ───────────────────────────
+// ⚠️ LA SURFACE NE S'ADDITIONNE PAS D'UN PASSAGE À L'AUTRE. Deux récoltes sur la
+// même parcelle le même millésime, c'est deux fois la même vigne : on retient la
+// surface DÉCLARÉE par destinataire, jamais leur somme.
+function _vendSurfParc(nom,mil){
+  var sp=_vendParcSurf(nom), dest={}, ord=[], conflit=[];
+  (CAVE_VENDANGE.recoltes||[]).forEach(function(r){
+    if(!r||r.parcelle!==nom) return;
+    if(_vendMillOfDate(r.date)!==mil) return;
+    _vendParts(r).forEach(function(p){
+      if(_vpCs(p)<=0) return;
+      var k=p.dom?'\u2014domaine':(p.client||'\u2014vrac');
+      if(!dest[k]){ dest[k]={cle:k, dom:!!p.dom, nom:_vpNom(p), kg:0, decl:0, vals:{}}; ord.push(k); }
+      var d=dest[k]; d.kg+=_vpKg(p);
+      var sv=_vpSurf(p);
+      if(sv>0){ d.vals[sv]=1; if(sv>d.decl) d.decl=sv; }
+    });
+  });
+  var lst=ord.map(function(k){ return dest[k]; });
+  lst.forEach(function(d){
+    var v=Object.keys(d.vals);
+    if(v.length>1) conflit.push(d.nom+' : '+v.join(' et ')+' ha');
+  });
+  var declaree=lst.reduce(function(a,d){ return a+d.decl; },0);
+  var sans=lst.filter(function(d){ return d.decl<=0; });
+  var reste=Math.round((sp-declaree)*10000)/10000;
+  var kgSans=sans.reduce(function(a,d){ return a+d.kg; },0);
+  lst.forEach(function(d){
+    if(d.decl>0){ d.ha=d.decl; d.src='declaree'; }
+    else if(reste>0){ d.ha=(sans.length===1)?reste:(kgSans>0?reste*d.kg/kgSans:0);
+                      d.src=(sans.length===1)?'reste':'reste-prorata'; }
+    else { d.ha=0; d.src='aucune'; }
+    d.kgHa=d.ha>0?d.kg/d.ha:0;
+  });
+  return {surface:sp, lignes:lst, declaree:declaree,
+          attribuee:lst.reduce(function(a,d){ return a+d.ha; },0),
+          conflit:conflit,
+          depasse:(reste<-0.0005)?Math.abs(reste):0,
+          orphelin:(sans.length===0&&reste>0.0005)?reste:0};
+}
+function _vendSurfLbl(t){
+  return t==='declaree'?'surface achet\u00e9e'
+       :(t==='reste'?'le reste':(t==='reste-prorata'?'reste au prorata':'sans surface'));
+}
+function _vendHaTxt(x){
+  return (Math.round(x*10000)/10000).toLocaleString('fr-FR',{minimumFractionDigits:2,maximumFractionDigits:4});
+}
+
+// ── Le volume d'une parcelle sur un millésime, source par source ───────────
+function _vendVolParc(nom,mil){
+  var hl=0,kgOk=0,kgKo=0,kg=0,srcs={},prorata=false,lignes=[];
+  (CAVE_VENDANGE.recoltes||[]).forEach(function(r){
+    if(!r||r.parcelle!==nom) return;
+    if(_vendMillOfDate(r.date)!==mil) return;
+    _vendParts(r).forEach(function(p){
+      if(_vpCs(p)<=0) return;
+      var k=_vpKg(p), v=_vendVolPart(r,p);
+      kg+=k;
+      if(v.hl!=null){ hl+=v.hl; kgOk+=k; srcs[v.src]=1; if(v.prorata) prorata=true; }
+      else kgKo+=k;
+      lignes.push({cle:p.dom?'\u2014domaine':(p.client||'\u2014vrac'), dom:!!p.dom, nom:_vpNom(p),
+                   kg:k, hl:v.hl, src:v.src, prorata:!!v.prorata, date:r.date});
+    });
+  });
+  var types=Object.keys(srcs);
+  var cfg=_vendCfg();
+  return {kg:kg, hl:hl, kgOk:kgOk, kgKo:kgKo, lignes:lignes,
+          src:types.length>1?'mixte':(types[0]||'aucune'), prorata:prorata,
+          statut:kgKo<=0?(kgOk>0?'mesure':'aucune'):(kgOk>0?'partiel':'estime'),
+          hlMin:hl+kgKo/(cfg.ratio_max||140), hlMax:hl+kgKo/(cfg.ratio_min||130),
+          pctOk:kg>0?Math.round(kgOk/kg*100):0};
+}
+// Le détail d'une parcelle : volume ET surfaces, regroupés par destinataire.
+function _vendRdtParc(nom,mil){
+  var v=_vendVolParc(nom,mil), s=_vendSurfParc(nom,mil);
+  var par={};
+  v.lignes.forEach(function(l){
+    if(!par[l.cle]) par[l.cle]={cle:l.cle,dom:l.dom,nom:l.nom,kg:0,hl:0,connu:0,src:l.src,prorata:false};
+    var o=par[l.cle]; o.kg+=l.kg;
+    if(l.hl!=null){ o.hl+=l.hl; o.connu+=l.kg; o.src=l.src; if(l.prorata) o.prorata=true; }
+    else if(o.connu<=0) o.src=l.src;
+  });
+  s.lignes.forEach(function(d){
+    var o=par[d.cle]; if(!o) return;
+    o.ha=d.ha; o.haSrc=d.src;
+    o.kgHa=d.ha>0?o.kg/d.ha:0;
+    o.hlHa=(d.ha>0&&o.connu>0)?o.hl/d.ha:null;
+  });
+  // ⚠️ Le dénominateur du chiffre global est la PARCELLE ENTIÈRE, pas la somme
+  // des portions : le domaine travaille toute la vigne. Les portions ont leur
+  // propre rapport, et chacun porte son étiquette à l'écran.
+  return {nom:nom, millesime:mil, surface:s.surface, surf:s, vol:v,
+          parts:Object.keys(par).map(function(k){ return par[k]; })};
+}
+
 function _vendLivs(nom){
   var by={},ord=[];
   (CAVE_VENDANGE.recoltes||[]).forEach(function(r){
@@ -4088,6 +4277,7 @@ window._vendOpCalc          = _vendOpCalc;
 window.saveVendOp           = saveVendOp;
 window.openVendClients      = openVendClients;
 window.openVendVrac         = openVendVrac;
+window._vendSetRdtBase      = _vendSetRdtBase;
 window.openVendLivs         = openVendLivs;
 window.openVendRetour       = openVendRetour;
 window._vendRetSet          = _vendRetSet;
@@ -4709,8 +4899,45 @@ function _vendRecordRendement(rec, prev){
       var surf=parseFloat(p.surface)||0;
       var kg=_recKg(rec);
       var mil=parseInt(String(rec.date||'').slice(0,4),10)||new Date().getFullYear();
-      var entry={recolte_id:rec.id,millesime:mil,kg:kg,caisses:rec.nb_caisses||0,
-        kg_ha:surf>0?Math.round(kg/surf):null,date:rec.date||''};
+      /* ★ VD-3 — kg_ha RESTE rapporte a la parcelle entiere (decision de Nico :
+         le domaine travaille toute la vigne meme quand il en vend une part, et
+         c'est ce rapport que Pilotage lit pour son prix de revient).
+         ⚠️ Ce qui change, c'est que l'entree DIT sur quoi elle est calculee au
+         lieu de le laisser deviner au prochain lecteur : `kg_ha_base`. Le
+         rendement d'une PORTION vit dans `parts[]`, avec sa propre base. */
+      var _sf=_vendSurfParc(rec.parcelle,mil);
+      var _vl=0,_ok=0,_ko=0,_ty={},_pro=false;
+      _vendParts(rec).forEach(function(pt){
+        if(_vpCs(pt)<=0) return;
+        var k=_vpKg(pt), v=_vendVolPart(rec,pt);
+        if(v.hl!=null){ _vl+=v.hl; _ok+=k; _ty[v.src]=1; if(v.prorata) _pro=true; }
+        else _ko+=k;
+      });
+      var _tys=Object.keys(_ty);
+      var entry={recolte_id:rec.id,millesime:mil,kg:kg,caisses:_recCaisses(rec),
+        kg_ha:surf>0?Math.round(kg/surf):null, kg_ha_base:'parcelle_entiere',
+        surface_parcelle_ha:surf||null,
+        surface_attribuee_ha:_sf.attribuee?Math.round(_sf.attribuee*10000)/10000:null,
+        vol:{ hl:Math.round(_vl*100)/100,
+              hl_ha:(surf>0&&_vl>0)?Math.round(_vl/surf*100)/100:null,
+              hl_ha_base:'parcelle_entiere',
+              base:_vendRdtBase(), src:_tys.length>1?'mixte':(_tys[0]||'aucune'),
+              kg_couverts:Math.round(_ok), kg_manquants:Math.round(_ko),
+              complet:_ko<=0&&_ok>0, prorata:_pro },
+        parts:_vendParts(rec).filter(function(pt){ return _vpCs(pt)>0; }).map(function(pt){
+          var v=_vendVolPart(rec,pt);
+          var d=_sf.lignes.find(function(x){ return x.cle===(pt.dom?'\u2014domaine':(pt.client||'\u2014vrac')); });
+          var ha=d?d.ha:0;
+          return {dest:pt.dom?'domaine':(pt.client||''), kg:Math.round(_vpKg(pt)),
+                  caisses:_vpCs(pt), pck:_vpPck(pt),
+                  surface_ha:ha?Math.round(ha*10000)/10000:null,
+                  surface_src:d?d.src:'aucune',
+                  kg_ha:ha>0?Math.round(_vpKg(pt)/ha):null, kg_ha_base:'portion',
+                  hl:v.hl!=null?Math.round(v.hl*100)/100:null,
+                  hl_ha:(v.hl!=null&&ha>0)?Math.round(v.hl/ha*100)/100:null,
+                  vol_src:v.hl!=null?v.src:null};
+        }),
+        date:rec.date||''};
       var i=p.rendement_hist.findIndex(function(e){return e&&e.recolte_id===rec.id;});
       if(i!==-1) p.rendement_hist[i]=entry; else p.rendement_hist.push(entry);
       _vendSaveParcelles();
@@ -7468,17 +7695,91 @@ function _mlMillesimes(){
   return Object.keys(set).map(Number).sort(function(a,b){ return b-a; }).slice(0,6);
 }
 
+
+// ── Le détail sous chaque parcelle : d'où vient le volume, et sur quoi ──────
+function _mlRdtDetail(r){
+  var d=r.rdt; if(!d) return '';
+  var h='<span class="mlx-rdsrc">';
+  d.parts.forEach(function(o){
+    var cls=(o.src==='client'||o.src==='cuve')?(o.prorata?'ded':'mes'):(o.src==='attente'?'att':'est');
+    h+='<span class="mlx-src '+cls+'"><span class="d"></span><span class="t"><b>'
+     +_escHtml(o.nom)+'</b> \u00b7 '+Math.round(o.kg)+' kg \u00b7 '+_vendSrcLbl(o.src)
+     +(o.prorata?' <i>(prorata)</i>':'')
+     +'<br>'+_vendHaTxt(o.ha||0)+' ha \u00b7 '+_vendSurfLbl(o.haSrc||'aucune')
+     +(o.kgHa>0?(' \u00b7 '+Math.round(o.kgHa)+' kg/ha'):'')
+     +(o.hlHa!=null?(' \u00b7 <b>'+_mvF1(o.hlHa)+' hL/ha</b> sur sa portion'):'')
+     +'</span>'+(o.hl>0?('<span class="q">'+_mvF1(o.hl)+' hL</span>'):'')+'</span>';
+  });
+  if(d.vol.statut==='mesure'){
+    h+='<span class="mlx-note ok">Volume complet : '+_mvF1(d.vol.hl)+' hL pour '+Math.round(d.vol.kg)
+     +' kg, soit <b>'+Math.round(_vendRendKgHl(d.vol.kg,d.vol.hl*100))+' kg/hL</b>. Le rendement est une mesure.</span>';
+  } else if(d.vol.kgKo>0){
+    h+='<span class="mlx-note"><b>'+d.vol.pctOk+' % des kilos ont un volume connu.</b> Les '
+     +Math.round(d.vol.kgKo)+' kg restants sont estim\u00e9s \u00e0 '+_mvF1(d.vol.kgKo/(_vendCfg().ratio_max||140))
+     +'\u2013'+_mvF1(d.vol.kgKo/(_vendCfg().ratio_min||130))+' hL, d\u2019o\u00f9 la fourchette. '
+     +(d.vol.lignes.some(function(l){ return l.src==='attente'; })
+        ?'Le chiffre se figera au retour du client.':'Il se figera au d\u00e9cuvage.')+'</span>';
+  }
+  // Les trois écarts de surface. Aucun n'est absorbé en silence.
+  if(d.surf.depasse>0)
+    h+='<span class="mlx-note bad"><b>Les surfaces d\u00e9clar\u00e9es d\u00e9passent la parcelle de '
+     +_vendHaTxt(d.surf.depasse)+' ha.</b> '+_vendHaTxt(d.surf.declaree)+' ha annonc\u00e9s pour une parcelle de '
+     +_vendHaTxt(d.surface)+' ha : un des achats est trop grand, ou la fiche parcelle est \u00e0 corriger.</span>';
+  if(d.surf.orphelin>0)
+    h+='<span class="mlx-note"><b>'+_vendHaTxt(d.surf.orphelin)+' ha ne sont r\u00e9clam\u00e9s par personne.</b> '
+     +'Le rendement reste rapport\u00e9 \u00e0 la parcelle enti\u00e8re, donc il descend. Juste si ce coin n\u2019a pas '
+     +'\u00e9t\u00e9 vendang\u00e9 ; un apport manque sinon.</span>';
+  if(d.surf.conflit.length)
+    h+='<span class="mlx-note"><b>Deux surfaces pour un m\u00eame destinataire</b> \u2014 '
+     +_escHtml(d.surf.conflit.join(' ; '))+'. La plus grande est retenue : deux passages sur la m\u00eame vigne, '
+     +'ce n\u2019est pas deux fois la surface.</span>';
+  if(_vendRdtBase()==='total'&&d.parts.some(function(o){ return o.src==='cuve'; }))
+    h+='<span class="mlx-note">Base \u00ab jus + lies \u00bb : le volume du domaine est un volume <b>log\u00e9</b>, '
+     +'ses lies ne sont compt\u00e9es nulle part. Compar\u00e9e au client, la part domaine est sous-\u00e9valu\u00e9e.</span>';
+  return h+'</span>';
+}
+function _mlRdtCss(){
+  if(document.getElementById('mvv-rdt-css')) return;
+  var st=document.createElement('style'); st.id='mvv-rdt-css';
+  st.textContent=''
+  +'.mlx-rdsrc{display:block;margin-top:9px;padding-top:9px;border-top:1px solid rgba(138,90,56,.12);text-align:left}'
+  +'.mlx-src{display:flex;align-items:flex-start;gap:8px;padding:4px 0;font-size:11px;line-height:1.5;color:var(--texte-med,#4A4A3A)}'
+  +'.mlx-src .d{width:8px;height:8px;border-radius:50%;flex-shrink:0;margin-top:5px}'
+  +'.mlx-src.mes .d{background:var(--vert-med,#3D6B27)}'
+  +'.mlx-src.ded .d{background:var(--or,#C2A14D)}'
+  +'.mlx-src.est .d{background:var(--gris,#DED7C9)}'
+  +'.mlx-src.att .d{background:var(--orange,#B85A1A)}'
+  +'.mlx-src .t{flex:1;min-width:0}'
+  +'.mlx-src .t i{font-style:normal;color:var(--orange,#B85A1A)}'
+  +'.mlx-src .q{font-weight:600;color:var(--terre,#8A5A38);white-space:nowrap}'
+  +'.mlx-note{display:block;margin-top:8px;font-size:10.5px;line-height:1.55;padding:8px 10px;border-radius:9px;'
+    +'background:rgba(184,90,26,.07);border:1px solid rgba(184,90,26,.20);color:#8A4A14;text-align:left}'
+  +'.mlx-note.ok{background:rgba(61,107,39,.06);border-color:rgba(61,107,39,.18);color:var(--vert,#1E3A12)}'
+  +'.mlx-note.bad{background:rgba(160,41,30,.07);border-color:rgba(160,41,30,.25);color:#8A2318}'
+  +'.mlx-tag.ok{background:rgba(61,107,39,.10);border:1px solid rgba(61,107,39,.24);color:var(--vert-med,#3D6B27)}';
+  document.head.appendChild(st);
+}
+
 function _mlRendements(mil){
   var kgHl=_mlKgHl(), out={};
   _mlRecoltesDe(mil).forEach(function(r){
     var p=_vendParcByName(r.parcelle); if(!p) return;
     if(!out[p.nom]) out[p.nom]={parcelle:p, kg:0, caisses:0, vendu:false};
-    out[p.nom].kg+=_recKg(r); out[p.nom].caisses+=(r.nb_caisses||0);
+    out[p.nom].kg+=_recKg(r); out[p.nom].caisses+=_recCaisses(r);
     if(_recSold(r)) out[p.nom].vendu=true;
   });
   return Object.keys(out).map(function(k){
     var o=out[k], s=parseFloat(o.parcelle.surface)||0;
-    o.hlHa = s>0?Math.round(o.kg/s/kgHl*10)/10:null;
+    /* ★★★ VD-3 — L'ESCALIER DES SOURCES. Le volume vient d'abord de ce qui a ete
+       MESURE : les litres rendus par le client, le volume loge au domaine. Ce
+       qui n'a pas de volume connu reste estime au ratio, et l'ecran le DIT. */
+    var d=_vendRdtParc(o.parcelle.nom,mil);
+    o.rdt=d; o.statut=d.vol.statut; o.pctOk=d.vol.pctOk;
+    o.hlMin=s>0?Math.round(d.vol.hlMin/s*10)/10:null;
+    o.hlMax=s>0?Math.round(d.vol.hlMax/s*10)/10:null;
+    /* La meilleure valeur disponible : le volume connu, plus une estimation du
+       reste. Sans aucun volume connu, elle vaut exactement le calcul d'avant. */
+    o.hlHa = s>0?Math.round((d.vol.hl+d.vol.kgKo/kgHl)/s*10)/10:null;
     o.max  = parseFloat(o.parcelle.rdt_max)||null;
     o.depasse = (o.max&&o.hlHa)?(o.hlHa>o.max):false;
     o.pct = (o.max&&o.hlHa)?Math.round(o.hlHa/o.max*100):null;
@@ -7811,6 +8112,7 @@ function _mlRenderVie(){
   var rd=_mlRendements(mil);
   if(rd.length){
     var adm=(typeof isAdmin==='function'&&isAdmin());
+    _mlRdtCss();
     h+='<div class="mlx-sec">Rendement par parcelle</div>';
     h+='<div class="mlx-hint">'+(rd.some(function(r){return r.max;})
         ? 'Le trait vertical est le maximum de l\u2019appellation. Un d\u00e9passement ne bloque rien : il se voit.'
@@ -7822,13 +8124,23 @@ function _mlRenderVie(){
         +'<span class="mlx-rdh"><span class="mlx-rdn">'+_escHtml(r.parcelle.nom)+'</span>'
         +(r.depasse?'<span class="mlx-tag">au-dessus</span>':'')
         +(r.vendu?'<span class="mlx-tag sold">vendu</span>':'')
-        +'<span class="mlx-rdv">'+_mvF1(r.hlHa)+'<small>hL/ha</small></span></span>'
+        +'<span class="mlx-tag'+(r.statut==='mesure'?' ok':'')+'">'
+          +(r.statut==='mesure'?'mesur\u00e9':(r.statut==='partiel'?(r.pctOk+' % mesur\u00e9'):'estim\u00e9'))+'</span>'
+        /* ⚠️ Un chiffre net ne sort que s'il est mesure de bout en bout. Sinon
+           c'est une fourchette : il manque des litres, pas des raisins. */
+        +'<span class="mlx-rdv">'+(r.statut==='mesure'?_mvF1(r.hlHa)
+            :(_mvF1(r.hlMin)+'\u2013'+_mvF1(r.hlMax)))+'<small>hL/ha</small></span></span>'
         +'<span class="mlx-rda">'+_mvF1(parseFloat(r.parcelle.surface)||0)+' ha \u00b7 '
-        +Math.round(r.kg)+' kg \u00b7 '+r.caisses+' caisses</span>';
+        +Math.round(r.kg)+' kg \u00b7 '+r.caisses+' caisses \u00b7 sur la parcelle enti\u00e8re</span>'
+        +_mlRdtDetail(r);
       if(r.max){
         h+='<span class="mlx-tr" style="display:block"><span class="mlx-fi" style="display:block;width:'+wFill+'%"></span>'
           +'<span class="mlx-mk" style="left:87%"></span></span>'
-          +'<span class="mlx-rdf"><span>'+r.pct+' % du maximum</span><span>max '+r.max+' hL/ha</span></span>';
+          /* ⚠️ « 104 % du maximum » sur une estimation ferait croire a un
+             depassement d'appellation constate. Tant que le volume n'est pas
+             mesure, le pourcentage est annonce comme approche. */
+          +'<span class="mlx-rdf"><span>'+(r.statut==='mesure'?'':'\u2248 ')+r.pct+' % du maximum</span>'
+          +'<span>max '+r.max+' hL/ha</span></span>';
       } else {
         h+='<span class="mlx-rdf"><span>'+(adm?'Toucher pour poser le maximum de l\u2019appellation'
           :'Maximum de l\u2019appellation non renseign\u00e9')+'</span></span>';
