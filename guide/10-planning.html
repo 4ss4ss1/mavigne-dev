@@ -1,14 +1,14 @@
-<!-- @nav emoji="📅" titre="Planning RH" sous="Heures, congés, compteur" -->
+<!-- @nav emoji="{ic:calendrier}" titre="Planning RH" sous="Heures, congés, compteur" -->
 <section id="planning">
   <div class="sec-h">
-    <div class="sec-ic" aria-hidden="true">📅</div>
+    <div class="sec-ic" aria-hidden="true">{ic:calendrier}</div>
     <div><h2>Planning RH</h2><div class="sub">Le mois · Les gens · Le cadre</div></div>
   </div>
   <p class="lead">Le Planning gère les horaires réels de l'équipe, les congés, le compteur d'heures et
   les acomptes. C'est un module <b>réservé à l'administrateur</b> ; chaque salarié y voit son propre
   mois, et rien d'autre.</p>
 
-  <h3>📐 Trois onglets, un verbe chacun</h3>
+  <h3>{ic:balance} Trois onglets, un verbe chacun</h3>
   <ul class="dot">
     <li><b>Le mois</b> — la grille de toute l'équipe. C'est là qu'on tient le planning au jour le jour.</li>
     <li><b>Les gens</b> — une ligne par salarié <b>du mois affiché</b>, sa fiche (mois, congés,
@@ -19,7 +19,7 @@
   <p>Un salarié qui n'est pas administrateur ne voit <b>aucun onglet</b> : il arrive directement sur
   son mois.</p>
 
-  <h3>👆 Cocher, puis agir</h3>
+  <h3>{ic:doigt} Cocher, puis agir</h3>
   <p>Dans <b>Le mois</b>, toucher une case la <b>coche</b>. Il n'y a pas de mode à activer avant.</p>
   <ul class="dot">
     <li>Le <b>numéro du jour</b>, en haut de la grille, coche toute l'équipe ce jour-là.</li>
@@ -34,11 +34,11 @@
   <p>Pour une période plus longue que la vue affichée — trois semaines de congés, deux mois de
   canicule — deux boutons au-dessus de la grille posent <b>Congés sur une période</b> et
   <b>Chaleur sur une période</b>, du jour au jour et pour plusieurs salariés.</p>
-  <div class="note warn"><span class="ni" aria-hidden="true">⚠️</span><div><b>Sur un geste groupé, on ne détruit pas ce qu'on n'a pas relu.</b>
+  <div class="note warn"><span class="ni" aria-hidden="true">{ic:alerte}</span><div><b>Sur un geste groupé, on ne détruit pas ce qu'on n'a pas relu.</b>
   Les congés, absences et récupérations déjà posés sont <b>préservés</b>, et le message de
   confirmation dit combien. Sur une case unique, choisie à la main, la saisie est remplacée.</div></div>
 
-  <h3>👥 La grille d'équipe</h3>
+  <h3>{ic:equipe} La grille d'équipe</h3>
   <p>Un seul écran : les salariés en lignes, les jours en colonnes, en vue <b>semaine</b> ou
   <b>mois</b>. Tout se fait depuis là.</p>
   <ul class="dot">
@@ -53,7 +53,7 @@
     <li>Une <b>synthèse du mois</b> et un <b>récapitulatif annuel</b> cliquable se trouvent sous la grille.</li>
   </ul>
 
-  <h3>👥 Une ligne pour toute une équipe</h3>
+  <h3>{ic:equipe} Une ligne pour toute une équipe</h3>
   <p>Une vendange, c'est trente personnes pendant dix jours. Créer trente fiches n'aurait aucun
   sens : aucune ne se connectera, aucune n'a de compteur d'annualisation à tenir, et la grille
   deviendrait illisible le seul mois où elle sert vraiment. Un membre peut donc être déclaré comme
@@ -63,17 +63,17 @@
     <em aria-hidden="true">Équipe collective — une ligne, plusieurs personnes</em>, avec un
     <b>nombre par défaut</b>.</li>
     <li>Ce nombre se change <b>jour par jour</b> depuis la grille : cocher les jours, puis
-    <b>👥 Effectif</b> dans la barre du bas. Un jour à six, le lendemain à quatre.</li>
+    <b>{ic:equipe} Effectif</b> dans la barre du bas. Un jour à six, le lendemain à quatre.</li>
     <li>L'effectif <b>multiplie ce qui est collectif</b> : les heures du chantier, la capacité de
     l'équipe, le coût, la part de l'avancement.</li>
     <li>Il n'entre <b>jamais</b> dans ce qui est individuel : plafond des 1&nbsp;607&nbsp;h, congés
     payés, heures supplémentaires, maxima légaux hebdomadaires, relevé d'heures, compte de connexion.</li>
   </ul>
-  <div class="note info"><span class="ni" aria-hidden="true">ℹ️</span><div><b>Ce n'est pas un salarié,
+  <div class="note info"><span class="ni" aria-hidden="true">{ic:info}</span><div><b>Ce n'est pas un salarié,
   c'est une équipe.</b> Renseignez les <b>dates de contrat</b> de la ligne pour qu'elle n'apparaisse
   que pendant le chantier : sans elles, une équipe de vendange reste affichée toute l'année.</div></div>
 
-  <h3>⏱️ Heures travaillées et heures prévues</h3>
+  <h3>{ic:chrono} Heures travaillées et heures prévues</h3>
   <p>Le module ne se contente pas d'additionner : il compare en permanence le <b>réalisé</b> à la
   <b>référence</b> — c'est-à-dire aux heures prévues sur les jours réellement sous contrat.</p>
   <div class="tw"><table>
@@ -85,7 +85,7 @@
     <tr><td><b>Écart</b></td><td>Différence entre les deux, en positif ou en négatif, avec sa couleur.</td></tr>
     <tr><td><b>ETP</b></td><td>Équivalent temps plein du salarié sur le mois.</td></tr>
   </table></div>
-  <div class="note"><span class="ni" aria-hidden="true">📄</span><div>Sur la <b>feuille d'heures</b>,
+  <div class="note"><span class="ni" aria-hidden="true">{ic:document}</span><div>Sur la <b>feuille d'heures</b>,
   le total du mois est ventilé : les heures faites <b>au domaine</b> d'un côté, celles faites
   <b>en formation</b> ou en <b>événement familial</b> de l'autre. Sans cette séparation, la feuille
   affichait un total incluant les journées de centre à côté d'un nombre de jours qui, lui, les
@@ -97,7 +97,7 @@
   <p>Ces chiffres se retrouvent partout : bandeau d'en-tête, synthèse du mois, récapitulatif annuel,
   vue personnelle du salarié, fiche salarié et relevé d'heures PDF.</p>
 
-  <h3>⚖️ Le cadre légal, affiché en permanence</h3>
+  <h3>{ic:balance} Le cadre légal, affiché en permanence</h3>
   <p>Les valeurs par défaut suivent la convention nationale <b>Production agricole et CUMA
   (IDCC 7024)</b>. Elles sont <b>paramétrables</b> pour s'adapter à une autre convention&nbsp;:
   <span class="path">Planning › Le cadre</span>.</p>
@@ -115,7 +115,7 @@
   <p>Les dépassements sont <b>signalés</b> sur la grille et dans la synthèse, au moment où ils
   apparaissent — pas trois mois plus tard.</p>
 
-  <h3>📈 Le compteur annuel (annualisation)</h3>
+  <h3>{ic:graphique} Le compteur annuel (annualisation)</h3>
   <p>En haut de la fiche d'un salarié, le compteur d'heures suit l'année civile.</p>
   <p><b>Il ne concerne pas tout le monde.</b> Les <b>TESA</b>, <b>saisonniers</b> et <b>extras</b>
   sont payés à l'heure : pas de plafond annuel, pas de modulation, pas de solde à la clôture.
@@ -134,7 +134,7 @@
     d'un côté ni de l'autre. Deux contrats qui se suivent sans un jour de coupure ne font qu'un.</li>
   </ul>
 
-  <h3>🏖️ Congés payés</h3>
+  <h3>{ic:soleil} Congés payés</h3>
   <ul class="dot">
     <li>Deux modes de décompte, au choix du domaine :
       <b>jours ouvrables</b> (6 par semaine, référence 30 j/an — c'est le défaut légal) ou
@@ -146,21 +146,21 @@
     <b>plusieurs salariés à la fois</b>.</li>
   </ul>
 
-  <h3>🚫 Motifs d'absence</h3>
+  <h3>{ic:interdit} Motifs d'absence</h3>
   <p>Le motif n'est pas décoratif : il détermine l'effet sur le compteur annuel et sur la paie.</p>
   <div class="tw"><table>
     <tr><th>Motif</th><th>Effet</th></tr>
-    <tr><td>🩹 <b>Arrêt de travail</b></td><td>Suspend le contrat : <b>abaisse le plafond annuel</b>. Journée rémunérée.</td></tr>
-    <tr><td>✈️ <b>Congé sans solde</b></td><td>Suspend le contrat. Non rémunéré.</td></tr>
-    <tr><td>👥 <b>Événement familial</b></td><td>Assimilé à du travail effectif. Rémunéré.</td></tr>
-    <tr><td>🎓 <b>Formation</b></td><td>Assimilée à du travail effectif. Rémunérée. C'est le motif
+    <tr><td>{ic:pansement} <b>Arrêt de travail</b></td><td>Suspend le contrat : <b>abaisse le plafond annuel</b>. Journée rémunérée.</td></tr>
+    <tr><td>{ic:avion} <b>Congé sans solde</b></td><td>Suspend le contrat. Non rémunéré.</td></tr>
+    <tr><td>{ic:equipe} <b>Événement familial</b></td><td>Assimilé à du travail effectif. Rémunéré.</td></tr>
+    <tr><td>{ic:diplome} <b>Formation</b></td><td>Assimilée à du travail effectif. Rémunérée. C'est le motif
     des <b>jours de CFA d'un apprenti</b> : le code du travail (art. L6222-24) les compte comme du
     temps de travail.</td></tr>
-    <tr><td>✕ <b>Absence injustifiée</b></td><td>Heures dues, journée non payée.</td></tr>
-    <tr><td>⏰ <b>Retard</b></td><td>Se saisit par l'<b>heure d'arrivée</b>. Heures manquées dues.</td></tr>
+    <tr><td>{ic:croix} <b>Absence injustifiée</b></td><td>Heures dues, journée non payée.</td></tr>
+    <tr><td>{ic:reveil} <b>Retard</b></td><td>Se saisit par l'<b>heure d'arrivée</b>. Heures manquées dues.</td></tr>
     <tr><td>— <b>Absence non précisée</b></td><td>Sans effet sur le plafond annuel.</td></tr>
   </table></div>
-  <div class="note"><span class="ni" aria-hidden="true">🎨</span><div>La couleur du jour suit le
+  <div class="note"><span class="ni" aria-hidden="true">{ic:etincelles}</span><div>La couleur du jour suit le
   motif : <b>bleu</b> pour une absence assimilée à du travail (formation, événement familial),
   <b>orange</b> pour une absence payée mais non travaillée (arrêt de travail), <b>rouge</b> pour une
   absence qui ne compte pas. Un jour bleu affiche <b>ses heures</b>, pas un zéro : elles entrent dans
@@ -168,7 +168,7 @@
   travaillé</b> au domaine — la personne n'y était pas, et la déclaration MSA ne doit pas
   l'y compter.</div></div>
 
-  <h3>⏰ Noter un retard</h3>
+  <h3>{ic:reveil} Noter un retard</h3>
   <p>Ouvrez le jour, choisissez <b>Absence</b> puis <b>Retard</b>, et indiquez l'<b>heure à laquelle
   la personne est arrivée</b>. Rien d'autre : l'écran calcule ce qui manque et vous l'affiche avant
   que vous enregistriez.</p>
@@ -185,11 +185,11 @@
     bascule seule en <b>absence injustifiée</b>, et le message vous le dit.</li>
     <li>Arriver <b>à l'heure ou en avance</b> n'enregistre rien : aucune absence n'est posée.</li>
   </ul>
-  <div class="note"><span class="ni" aria-hidden="true">📌</span><div>Un retard se saisit
+  <div class="note"><span class="ni" aria-hidden="true">{ic:epingle}</span><div>Un retard se saisit
   <b>jour par jour</b>. Sur une sélection de plusieurs jours, le motif Retard ne propose pas d'heure
   d'arrivée : les heures prévues ne sont pas les mêmes d'un jour à l'autre.</div></div>
 
-  <h3>💶 Compteur d'heures &amp; acomptes</h3>
+  <h3>{ic:euro} Compteur d'heures &amp; acomptes</h3>
   <ul class="dot">
     <li><b>Solde de départ</b> : les heures reportées <em aria-hidden="true">avant</em> l'installation de l'application se
     saisissent une fois, sinon le compteur repart de zéro à vie.</li>
@@ -204,12 +204,12 @@
     depuis les Documents.</li>
   </ul>
 
-  <h3>🌡️ Horaires de chaleur</h3>
+  <h3>{ic:thermometre} Horaires de chaleur</h3>
   <p>En période de canicule, un panneau dédié bascule un salarié sur des horaires décalés
   (06:00–14:00 par défaut, en continu ou avec pause). Les week-ends, congés et jours de récupération
   sont automatiquement sautés, et le retrait ne touche que les jours marqués canicule.</p>
 
-  <h3>⚖️ Présence, coupure, heures dues</h3>
+  <h3>{ic:balance} Présence, coupure, heures dues</h3>
   <p>Trois nombres se ressemblent dans le planning et ne veulent pas dire la même chose. Les
   confondre est la première source de malentendu entre un ouvrier, un chef d'exploitation et
   un service paie :</p>
@@ -221,7 +221,7 @@
   </table>
   <p>Une journée de <b>09:00 à 16:00</b> avec une heure de coupure, c'est <b>7 h de présence</b> et
   <b>6 h dues</b>. C'est le chiffre de droite qui compte pour le bulletin.</p>
-  <div class="note"><span class="ni" aria-hidden="true">ℹ️</span><div>Le mot « pause » est
+  <div class="note"><span class="ni" aria-hidden="true">{ic:info}</span><div>Le mot « pause » est
   volontairement réservé à la <b>pause légale</b> : vingt minutes minimum au-delà de six heures de
   travail effectif, que le salarié prend dans la plage prévue. La <b>coupure déjeuner</b> est autre
   chose : c'est une organisation décidée par le domaine. Dire « une heure de pause » là où il faut
@@ -235,7 +235,7 @@
   l'application n'affiche que la durée, sans prétendre savoir quand elle tombe. Un domaine dont la
   coupure change avec la saison peut la préciser mois par mois dans la sixième colonne du CSV.</p>
 
-  <h3>👤 Le relevé d'un seul salarié</h3>
+  <h3>{ic:personne} Le relevé d'un seul salarié</h3>
   <p>C'est le document qu'on vous demande en premier lors d'un contrôle. Il s'édite depuis
   <span class="path">Réglages › App › Documents &amp; impressions</span> en choisissant
   <b>la personne et le mois</b>, ou depuis le bouton <b>PDF</b> de sa fiche — c'est le même
@@ -256,12 +256,12 @@
     ni de modulation, qui n'auraient aucun sens.</li>
     <li><b>Deux lignes de signature</b>, salarié et employeur.</li>
   </ul>
-  <div class="note info"><span class="ni" aria-hidden="true">ℹ️</span><div>L'année du compteur
+  <div class="note info"><span class="ni" aria-hidden="true">{ic:info}</span><div>L'année du compteur
   est celle que vous consultez au Planning ; le mois se choisit dans le panneau. Éditer un relevé
   depuis les Documents <b>ne déplace pas</b> le mois affiché au Planning. Ce relevé est un
   décompte d'heures, <b>pas un bulletin de paie</b> : aucun montant n'y figure.</div></div>
 
-  <h3>🗓️ Le planning de l'année</h3>
+  <h3>{ic:calendrier} Le planning de l'année</h3>
   <p>Depuis Réglages, onglet App, « Documents &amp; impressions », le document
   <b>Planning de l'année</b> sort le rythme de travail sur douze mois : jours travaillés,
   heures de <b>prise et de fin de service</b>, coupure déjeuner, fermetures du domaine et jours
@@ -278,7 +278,7 @@
     relevé. Ils apparaissent sur le relevé mensuel d'heures.</li>
   </ul>
 
-  <h3>👤 Le planning de l'année d'un salarié</h3>
+  <h3>{ic:personne} Le planning de l'année d'un salarié</h3>
   <p>Au même endroit, <b>Planning de l'année d'un salarié</b> sort la même grille pour <b>une seule
   personne</b>, sur une feuille qui porte son nom. C'est le document à donner quand quelqu'un
   demande « mon planning ».</p>
@@ -292,18 +292,18 @@
     formation de l'autre. Additionner les deux sans le dire ferait croire à un apprenti qu'il doit
     1 607 h de vigne.</li>
   </ul>
-  <div class="note"><span class="ni" aria-hidden="true">🎓</span><div><b>Pour un apprenti en
+  <div class="note"><span class="ni" aria-hidden="true">{ic:diplome}</span><div><b>Pour un apprenti en
   alternance</b> : saisissez ses semaines de CFA au Planning avec le motif <b>Formation</b>, puis
   éditez ce document. Les semaines en centre et les semaines au domaine apparaissent côte à côte sur
   les douze mois, et le total distingue les deux. Ce qui sera saisi <b>après</b> l'édition ne peut
   évidemment pas y figurer.</div></div>
-  <div class="note warn"><span class="ni" aria-hidden="true">⚠️</span><div>Pour imprimer l'année
+  <div class="note warn"><span class="ni" aria-hidden="true">{ic:alerte}</span><div>Pour imprimer l'année
   <b>à venir</b>, importez d'abord son planning au format CSV depuis l'onglet Modèles. Sans modèle
   enregistré pour cette année-là, le document se rabat sur le modèle intégré, dont les jours sont
   calés sur un autre calendrier : les jours de semaine ne tombent pas aux mêmes dates. Le document
   vous le signale en clair, mais ne le diffusez pas à l'équipe en l'état.</div></div>
 
-  <h3>📊 Charge &amp; ETP</h3>
+  <h3>{ic:graphique} Charge &amp; ETP</h3>
   <p>Un bandeau compare, pour le mois en cours, la <b>charge de travail</b> qu'exige la saison à la
   <b>capacité réelle de l'équipe</b>.</p>
   <ul class="dot">
@@ -314,7 +314,7 @@
     <li>L'effectif présent est <b>lissé au prorata des jours</b> de contrat de chacun.</li>
     <li>Pour l'Entreplantation, la charge s'appuie sur les <b>trous</b> dès qu'ils sont renseignés.</li>
   </ul>
-  <div class="note warn"><span class="ni" aria-hidden="true">⚠️</span><div>Les modèles de semaine livrés par défaut couvrent
+  <div class="note warn"><span class="ni" aria-hidden="true">{ic:alerte}</span><div>Les modèles de semaine livrés par défaut couvrent
   <b>lundi à vendredi</b>. Si votre équipe travaille régulièrement le samedi, vérifiez la structure de
   semaine avant de vous fier aux calculs de dépassement hebdomadaire.</div></div>
 

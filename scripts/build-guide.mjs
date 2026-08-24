@@ -63,9 +63,44 @@ for (const f of fichiers) {
     + '<br><span style="font-size:11.5px;color:var(--muted)">' + m[3] + '</span></span></a>');
 }
 
-const html = layout
+/* ═══════════════════════════════════════════════════════════════════════════
+   LES ICONES DU GUIDE — UN JETON DANS LA SOURCE, UN SVG DANS LA SORTIE
+   ⚠️⚠️ LE GUIDE N'A PAS LE SPRITE DE L'APPLICATION. C'est une page autonome de
+     `public/` : un `<use href="#ic-x">` n'y trouverait RIEN, en silence — le
+     defaut de §45b, sur la surface que voient les prospects.
+   ★ On INJECTE donc le sprite d'index.html dans la page. Une seule source de
+     formes pour l'app et pour le guide ; pas de seconde table qui derive.
+   ★ Et les sources restent LISIBLES : on y ecrit `{ic:feuille}`, pas 96
+     caracteres de SVG. Nico ecrit ces fichiers a la main — un guide qu'on ne
+     relit plus est un guide qui ment (c'est la raison d'etre de ce script).
+   ⚠️ Un nom inconnu est un ROUGE, pas un carre pointille : ici on peut
+     s'arreter avant de publier, alors que l'application, elle, doit continuer
+     de tourner. Le repli visible est bon a l'ecran, mauvais dans une fabrique.
+   ═══════════════════════════════════════════════════════════════════════════ */
+const IDX = lire(path.join(RACINE, 'index.html'));
+const mSprite = IDX.match(/<svg id="mv-sprite"[\s\S]*?<\/svg>/);
+if (!mSprite) { console.error('index.html : sprite introuvable.'); process.exit(1); }
+const SPRITE = mSprite[0];
+const NOMS = new Set([...SPRITE.matchAll(/<symbol id="ic-([a-z0-9-]+)"/g)].map(m => m[1]));
+
+let icoKo = [];
+function poseIcones(txt, ou) {
+  return txt.replace(/\{ic:([a-z0-9-]+)(?::(\d+))?\}/g, (_, nom, t) => {
+    if (!NOMS.has(nom)) { icoKo.push(ou + ' : ' + nom); return ''; }
+    const taille = t || 18;
+    return '<svg class="g-ic" width="' + taille + '" height="' + taille + '" viewBox="0 0 24 24"'
+         + ' aria-hidden="true" focusable="false"><use href="#ic-' + nom + '"></use></svg>';
+  });
+}
+
+const html = poseIcones(layout
   .replace('<!--@nav-->\n', nav.join('\n') + '\n')
-  .replace('<!--@sections-->', sections.join(inter));
+  .replace('<!--@sections-->', sections.join(inter))
+  .replace('<!--@sprite-->', SPRITE), 'guide');
+if (icoKo.length) {
+  console.error('Icone inconnue dans le guide : ' + [...new Set(icoKo)].join(' \u00b7 '));
+  process.exit(1);
+}
 
 if (CHECK) {
   const actuel = fs.existsSync(OUT) ? lire(OUT) : '';

@@ -477,6 +477,33 @@ const gHtml = (HTML_RENDU.match(PICTO) || []).filter(c => !TYPO.has(c));
 compte['index.html'] = gHtml.length;
 total += gHtml.length;
 
+/* ══ D3. ★★★ LES SURFACES PUBLIQUES — LE DERNIER ANGLE MORT DU CHANTIER
+   ═══════════════════════════════════════════════════════════════════════════
+   Le cliquet couvrait `src/*.js` (depuis DS-1) puis `index.html` (depuis
+   DS-M1). Restaient DEHORS, sans que rien ne le dise : les 15 sources du
+   guide public (236 pictogrammes) et `public/demarrage.html` (72). Ce sont
+   les pages qu'un PROSPECT lit avant de devenir client.
+   ★ La lecon est celle de DS-M1, mot pour mot : un cliquet ne protege que ce
+     qu'il LIT, et il faut donc ecrire ce qu'il ne lit pas. Ce qui reste hors
+     de portee aujourd'hui : rien. Toutes les surfaces rendues sont comptees.
+   ⚠️ On lit les SOURCES de `guide/`, pas `public/guide.html` : le genere se
+     refabrique, et compter les deux ferait remonter le total au double a la
+     premiere regeneration. On ne compte jamais un fichier et sa fabrique.
+   ⚠️ Les jetons `{ic:nom}` ne sont pas des pictogrammes — ils n'en
+     contiennent aucun caractere. Rien de special a faire pour les exclure,
+     et c'est precisement pourquoi le jeton vaut mieux qu'un SVG en clair. */
+const PUBLICS = [];
+for (const f of fs.readdirSync(path.join(root, 'guide')))
+  if (/^[\w-]+\.html$/.test(f)) PUBLICS.push('guide/' + f);
+for (const f of ['public/demarrage.html', 'public/logiciel-vigne.html',
+                 'public/essai.html', 'public/mise-en-route.html'])
+  if (fs.existsSync(path.join(root, f))) PUBLICS.push(f);
+for (const f of PUBLICS) {
+  const g = (R(f).replace(/<!--[\s\S]*?-->/g, ' ').match(PICTO) || []).filter(c => !TYPO.has(c));
+  compte[f] = g.length;
+  total += g.length;
+}
+
 if (rebase) {
   fs.writeFileSync(path.join(root, REF),
     JSON.stringify({ total, modules: compte }, null, 2) + '\n');

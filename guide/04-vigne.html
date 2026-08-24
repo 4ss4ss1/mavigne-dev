@@ -1,46 +1,46 @@
-<!-- @nav emoji="🌿" titre="Vigne" sous="Accueil · Parcelles · Journal" -->
+<!-- @nav emoji="{ic:feuille}" titre="Vigne" sous="Accueil · Parcelles · Journal" -->
 <section id="vigne">
   <div class="sec-h">
-    <div class="sec-ic" aria-hidden="true">🌿</div>
-    <div><h2>Vigne</h2><div class="sub">Accueil 🏠 · Parcelles 🗺️ · Journal 📓</div></div>
+    <div class="sec-ic" aria-hidden="true">{ic:feuille}</div>
+    <div><h2>Vigne</h2><div class="sub">Accueil {ic:maison} · Parcelles {ic:carte} · Journal {ic:journal}</div></div>
   </div>
   <p class="lead">C'est le module du travail quotidien : l'état du domaine, les parcelles à faire et la
   trace de ce qui a été fait. Trois onglets en haut de l'écran, jamais plus loin qu'un geste.</p>
 
-  <h3>🏠 Accueil — l'état du domaine d'un coup d'œil</h3>
+  <h3>{ic:maison} Accueil — l'état du domaine d'un coup d'œil</h3>
   <div class="cards">
-    <div class="card"><h4>📊 Avancement</h4><ul class="dot">
+    <div class="card"><h4>{ic:graphique} Avancement</h4><ul class="dot">
       <li>Pourcentage d'avancement de la saison en cours</li>
       <li>Nombre de parcelles actives et surface totale</li>
       <li>Avancement détaillé par tâche, avec accès au détail</li>
       <li>Plusieurs affichages successifs : touchez les points sous la carte pour changer</li>
     </ul></div>
-    <div class="card"><h4>⚡ Tâche prioritaire</h4><ul class="dot">
+    <div class="card"><h4>{ic:eclair} Tâche prioritaire</h4><ul class="dot">
       <li>Le bandeau indique la tâche du moment décidée par l'administrateur</li>
       <li>Une équipe peut être rattachée à chaque priorité</li>
       <li>Un ouvrier concerné arrive directement sur ses parcelles, filtre posé</li>
       <li>Plusieurs priorités peuvent coexister : chacun voit la sienne</li>
     </ul></div>
-    <div class="card"><h4>🌦️ Météo du vignoble</h4><ul class="dot">
+    <div class="card"><h4>{ic:nuage} Météo du vignoble</h4><ul class="dot">
       <li>Prévision à 5 jours, calée sur le centre de vos parcelles</li>
       <li>Résolution fine, adaptée au relief de la Côte</li>
       <li>Si le domaine s'étend sur plusieurs communes, une météo <b>par secteur</b> s'affiche</li>
       <li>Une parcelle ouverte utilise d'abord ses propres coordonnées</li>
     </ul></div>
-    <div class="card"><h4>🚨 Alertes</h4><ul class="dot">
+    <div class="card"><h4>{ic:alerte} Alertes</h4><ul class="dot">
       <li><b>Gel</b> annoncé dans les prochaines heures</li>
       <li><b>Délai de rentrée</b> : parcelles encore interdites d'accès après un traitement</li>
       <li>Matériel en réparation, alertes de cave</li>
       <li>Travaux mécaniques en cours et derniers travaux réalisés</li>
     </ul></div>
   </div>
-  <div class="note tip"><span class="ni" aria-hidden="true">💡</span><div>Le bloc <b>« Ma semaine »</b> résume vos propres
+  <div class="note tip"><span class="ni" aria-hidden="true">{ic:eclair}</span><div>Le bloc <b>« Ma semaine »</b> résume vos propres
   heures et renvoie au journal. Les raccourcis en bas d'écran mènent directement aux gestes du jour.</div></div>
 
-  <h3>🗺️ Parcelles — suivre et valider le travail</h3>
+  <h3>{ic:carte} Parcelles — suivre et valider le travail</h3>
   <h4>Trouver la bonne parcelle</h4>
   <ul class="dot">
-    <li><b>Filtres d'état</b> : Toutes · ✅ Finies · 🟡 En cours · Arrachées.</li>
+    <li><b>Filtres d'état</b> : Toutes · {ic:valide} Finies · {ic:sablier} En cours · Arrachées.</li>
     <li><b>Filtre par tâche</b> : n'afficher que les parcelles concernées par la Taille, le Relevage…</li>
     <li><b>Recherche</b> par nom de parcelle, avec une croix pour tout effacer.</li>
     <li>Bascule <b>Liste</b> / <b>Carte</b>.</li>
@@ -62,7 +62,7 @@
   <ul class="dot">
     <li>Chaque parcelle est un polygone <b>coloré selon son avancement réel</b>, en dégradé continu du
     rouge au vert.</li>
-    <li>Toucher un polygone sélectionne la parcelle ; les noms peuvent être masqués (<kbd>🏷 Noms</kbd>).</li>
+    <li>Toucher un polygone sélectionne la parcelle ; les noms peuvent être masqués (<kbd>{ic:etiquette} Noms</kbd>).</li>
     <li>La carte se recentre automatiquement sur le domaine à l'ouverture.</li>
   </ul>
   <h4>La fiche d'une parcelle</h4>
@@ -78,10 +78,10 @@
     <li><b>Réparation ponctuelle</b> : piquet, amarre ou fil remplacé, avec quantité et date.
     Accessible à toute l'équipe — c'est du travail de terrain.</li>
   </ul>
-  <div class="note info"><span class="ni" aria-hidden="true">ℹ️</span><div>Une tâche <b>sans surface concernée</b> s'affiche
+  <div class="note info"><span class="ni" aria-hidden="true">{ic:info}</span><div>Une tâche <b>sans surface concernée</b> s'affiche
   à 100&nbsp;%. Ce n'est pas un bug : s'il n'y a rien à faire, il n'y a rien à finir.</div></div>
 
-  <h4 style="margin-top:22px">🖨 Le vignoble sur une page</h4>
+  <h4 style="margin-top:22px">{ic:imprimante} Le vignoble sur une page</h4>
   <p><b>L'état du vignoble</b> s'édite depuis
   <span class="path">Réglages › App › Documents &amp; impressions</span>. Une ligne par parcelle :
   commune, surface, cépage(s), avancement de la période consultée, dernière intervention du journal,
@@ -104,7 +104,7 @@
       Pilotage et dans le rapport de saison.</li>
   </ul>
 
-  <h3>📓 Journal — la trace de ce qui a été fait</h3>
+  <h3>{ic:journal} Journal — la trace de ce qui a été fait</h3>
   <ul class="dot">
     <li>Bouton <b>＋ Ajouter</b> : date, parcelle(s), tâche, intervenants, durée, commentaire.</li>
     <li>La <b>météo du moment est enregistrée automatiquement</b> avec l'entrée (par secteur si le
@@ -113,7 +113,7 @@
     <li>Filtres par intervenant, tâche, parcelle et <b>plage de dates</b>, avec un bouton pour tout effacer.</li>
     <li>Affichage par pages, pour rester fluide même après plusieurs saisons.</li>
   </ul>
-  <div class="note tip"><span class="ni" aria-hidden="true">💡</span><div><b>Règle d'équipe :</b> quand plusieurs personnes
+  <div class="note tip"><span class="ni" aria-hidden="true">{ic:eclair}</span><div><b>Règle d'équipe :</b> quand plusieurs personnes
   travaillent ensemble, faites <b>une seule entrée</b> avec tous les noms — pas une entrée chacun. Les
   heures et l'avancement se répartissent correctement. Plusieurs équipes peuvent travailler en parallèle
   dans la même journée sur des tâches différentes.</div></div>

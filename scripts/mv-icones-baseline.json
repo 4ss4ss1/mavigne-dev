@@ -1,5 +1,5 @@
 {
-  "total": 639,
+  "total": 734,
   "modules": {
     "app": 123,
     "utils": 77,
@@ -13,6 +13,26 @@
     "admin-gt": 62,
     "firebase": 14,
     "onboarding": 15,
-    "index.html": 1
+    "index.html": 1,
+    "guide/01-demarrer.html": 0,
+    "guide/02-roles.html": 0,
+    "guide/03-formules.html": 0,
+    "guide/04-vigne.html": 0,
+    "guide/05-saisons.html": 0,
+    "guide/06-tracteur.html": 0,
+    "guide/07-phyto.html": 0,
+    "guide/08-cave.html": 0,
+    "guide/09-reserve.html": 0,
+    "guide/10-planning.html": 0,
+    "guide/11-pilotage.html": 0,
+    "guide/12-reglages.html": 0,
+    "guide/13-donnees.html": 0,
+    "guide/14-depannage.html": 0,
+    "guide/15-glossaire.html": 0,
+    "guide/_layout.html": 0,
+    "public/demarrage.html": 71,
+    "public/logiciel-vigne.html": 10,
+    "public/essai.html": 12,
+    "public/mise-en-route.html": 2
   }
 }

@@ -23,7 +23,7 @@ export const GT_ADMIN_EMAIL = 'ngdevpro@gmail.com';
 // WHATS_NEW   : tableau vide = modal desactive pour cette version.
 // Format item : { emoji:'📅', titre:'Titre court', desc:'Phrase utilisateur.' }
 // Regle : seulement les changements visibles par les utilisateurs.
-export const APP_VERSION = '6.60';
+export const APP_VERSION = '6.61';
 // ════ Journal des nouveautés (récap cumulatif) ════
 // Une entrée par version, la PLUS RÉCENTE EN HAUT : { v:'5.10', items:[ {emoji,titre,desc}, … ] }
 // À chaque release visible → AJOUTER un bloc en tête (ne pas remplacer). items:[] = release technique (rien à afficher).
@@ -354,6 +354,9 @@ window._mvGraphRepeindre = function(){
 };
 
 export const WHATS_NEW = [
+  { v: '6.61', items: [
+    { emoji: 'livre', titre: 'Le guide en ligne passe aux m\u00eames ic\u00f4nes que l\u2019application', desc: "Les <b>234 pictogrammes</b> du guide \u2014 titres de section, puces de conseil, sommaire \u2014 sont devenus les ic\u00f4nes de l\u2019application. C\u2019est la page que vous ouvrez depuis <b>R\u00e9glages \u203a Aide</b>, et celle qu\u2019un visiteur lit avant de vous appeler\u00a0: elle ne pouvait pas rester le dernier endroit avec des dessins d\u2019une autre \u00e9poque. <b>Pas un mot du guide n\u2019a chang\u00e9.</b>" }
+  ] },
   { v: '6.60', items: [
     { emoji: 'etincelles', titre: 'L\u2019\u00e9cran des nouveaut\u00e9s passe aux vraies ic\u00f4nes', desc: "Celui que vous \u00eates en train de lire. Chacune des <b>346 nouveaut\u00e9s</b> \u00e9crites depuis le d\u00e9but portait un pictogramme, et c\u2019est l\u2019\u00e9cran que <b>tout le monde voit apr\u00e8s chaque mise \u00e0 jour</b> \u2014 donc le dernier endroit o\u00f9 il aurait fallu laisser des dessins qui changent d\u2019un appareil \u00e0 l\u2019autre. <b>Aucun texte n\u2019a \u00e9t\u00e9 touch\u00e9</b>\u00a0: les titres et les explications sont mot pour mot les m\u00eames qu\u2019\u00e0 leur publication." }
   ] },

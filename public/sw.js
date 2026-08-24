@@ -1,4 +1,39 @@
-// MA VIGNE — Service Worker v7.15
+// MA VIGNE — Service Worker v7.16
+// v7.16 (23/08/2026) — LE GUIDE PUBLIC, ET LA DERNIERE SURFACE HORS FILET. APP 6.60 -> 6.61.
+//   ★ 234 pictogrammes du guide passent aux icones de l'application. C'est la
+//   page qu'un PROSPECT lit avant d'appeler, et la seule qui restait entiere.
+//   ⚠⚠ LE GUIDE N'A PAS LE SPRITE : c'est une page autonome de `public/`. Un
+//   `<use href="#ic-x">` n'y aurait rien rendu, en silence — le defaut de
+//   §45b, sur la surface la plus exposee commercialement.
+//   ★ `build-guide.mjs` INJECTE le sprite d'index.html dans la page produite.
+//   Une seule source de formes pour l'app et pour le guide ; pas de seconde
+//   table qui derive.
+//   ★ Et les sources restent LISIBLES : on y ecrit `{ic:feuille}`, pas 96
+//   caracteres de SVG. Nico ecrit ces quinze fichiers a la main, et un guide
+//   qu'on ne relit plus est un guide qui ment — c'est la raison d'etre meme
+//   de ce script (§27d). Un nom inconnu ARRETE la fabrique : ici on peut
+//   s'arreter avant de publier, alors que l'application doit continuer de
+//   tourner. Le repli pointille est bon a l'ecran, mauvais dans une fabrique.
+//   ★★ LE CLIQUET COUVRE ENFIN TOUT CE QUI S'AFFICHE. Il lisait `src/*.js`
+//   depuis DS-1, `index.html` depuis DS-M1 ; les 15 sources du guide (236) et
+//   les quatre pages de `public/` (95) restaient dehors sans que rien ne le
+//   dise. Total sous cliquet : 734, et plus une seule surface hors portee.
+//   ⚠ On compte les SOURCES de `guide/`, jamais `public/guide.html` : compter
+//   un fichier ET sa fabrique doublerait le total a la premiere regeneration.
+//   ⚠⚠⚠ DEUX FAUTES DE MA PART, LES DEUX ATTRAPEES PAR LES FILETS :
+//     1. mon script de migration lisait une classe de caracteres PLUS ETROITE
+//        que le compteur — `\u2139` tombait sous sa borne basse. Neuf restes
+//        invisibles a moi, comptes par le cliquet. C'est exactement le trou de
+//        DS-M1, retourne : deux definitions du meme mot, un reste silencieux.
+//     2. etendre le cliquet sans etendre le BAC A SABLE des contre-epreuves :
+//        `readdirSync('guide')` sur un dossier absent, et les onze epreuves
+//        sont mortes d'un coup — pas rouges, MORTES. Une contre-epreuve qui
+//        plante ne prouve rien, et elle ressemble a un succes dans un log.
+//   ★ La regle : etendre un controle, c'est etendre son bac. 20 contre-epreuves.
+//   ⚠ Restent 95 pictogrammes dans les pages de `public/` (demarrage 71,
+//   essai 12, logiciel-vigne 10, mise-en-route 2). Elles n'ont pas de fabrique
+//   qui pourrait injecter le sprite : chacune demande son propre traitement.
+//   Elles sont GELEES sous cliquet en attendant — elles ne peuvent plus croitre.
 // v7.15 (23/08/2026) — LE JOURNAL DES NOUVEAUTES. APP 6.59 -> 6.60.
 //   ★★ LE PLUS GROS BLOC DU CHANTIER, ET LE PLUS VU. `WHATS_NEW` porte 346
 //   items et 299 d'entre eux affichaient encore un pictogramme. C'est l'ecran
@@ -2676,7 +2711,7 @@
 // v2.22 — Fix profils vides : guard vide dans loadData() pour MEMBRES/SAISONS/TACHES
 // v2.17 — Onboarding intégré + tenantId · v2.06 — Firebase Auth · v2.00–v2.05 — divers
 const DEBUG = self.location.hostname === 'localhost' || self.location.hostname === '127.0.0.1';
-const CACHE_NAME   = 'mavigne-v7.15';
+const CACHE_NAME   = 'mavigne-v7.16';
 const TENANT_CACHE = 'mavigne-tenant';   // Cache persistant — préservé à chaque mise à jour SW
 const SYNC_TAG     = 'mavigne-sync';
 
@@ -2692,7 +2727,7 @@ const CDN_URLS = [
 ];
 
 self.addEventListener('install', event => {
-  if(DEBUG) console.log('[SW] Ma Vigne v7.15 installé');
+  if(DEBUG) console.log('[SW] Ma Vigne v7.16 installé');
   event.waitUntil(
     caches.open(CACHE_NAME).then(async cache => {
       // ── Cœur applicatif : STRICT (mise à jour ATOMIQUE) ──
@@ -2708,7 +2743,7 @@ self.addEventListener('install', event => {
 });
 
 self.addEventListener('activate', event => {
-  if(DEBUG) console.log('[SW] Ma Vigne v7.15 activé');
+  if(DEBUG) console.log('[SW] Ma Vigne v7.16 activé');
   event.waitUntil(
     caches.keys().then(keys =>
       Promise.all(

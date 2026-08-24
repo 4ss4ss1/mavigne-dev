@@ -282,9 +282,128 @@ mark{background:rgba(200,176,32,.32);color:var(--cream);border-radius:3px;paddin
   .card,.note,.tw{border:1px solid #ccc;background:#fff}
   th{background:#eee;color:#000}
 }
+
+/* ── Les icones du guide ────────────────────────────────────────────────────
+   Memes formes que l'application (sprite injecte par build-guide.mjs), meme
+   graisse. La taille est un ATTRIBUT, jamais une largeur CSS : une regle de
+   largeur ici ecraserait l'attribut et l'argument de taille ne servirait plus
+   a rien (§45c). */
+.g-ic{stroke:currentColor;stroke-width:1.75;fill:none;stroke-linecap:round;
+  stroke-linejoin:round;vertical-align:-0.16em;flex:0 0 auto}
 </style>
 </head>
 <body>
+<svg id="mv-sprite" data-lucide="1.31.0" aria-hidden="true" focusable="false" style="display:none" xmlns="http://www.w3.org/2000/svg">
+  <symbol id="ic-abeille" viewBox="0 0 24 24" data-src="hexagon"><path d="M21 16V8a2 2 0 0 0-1-1.73l-7-4a2 2 0 0 0-2 0l-7 4A2 2 0 0 0 3 8v8a2 2 0 0 0 1 1.73l7 4a2 2 0 0 0 2 0l7-4A2 2 0 0 0 21 16z" /></symbol>
+  <symbol id="ic-alerte" viewBox="0 0 24 24" data-src="triangle-alert"><path d="m21.73 18-8-14a2 2 0 0 0-3.48 0l-8 14A2 2 0 0 0 4 21h16a2 2 0 0 0 1.73-3" /> <path d="M12 9v4" /> <path d="M12 17h.01" /></symbol>
+  <symbol id="ic-ancre" viewBox="0 0 24 24" data-src="anchor"><path d="M12 6v16" /> <path d="m19 13 2-1a9 9 0 0 1-18 0l2 1" /> <path d="M9 11h6" /> <circle cx="12" cy="4" r="2" /></symbol>
+  <symbol id="ic-antenne" viewBox="0 0 24 24" data-src="satellite-dish"><path d="M4 10a7.31 7.31 0 0 0 10 10Z" /> <path d="m9 15 3-3" /> <path d="M17 13a6 6 0 0 0-6-6" /> <path d="M21 13A10 10 0 0 0 11 3" /></symbol>
+  <symbol id="ic-avion" viewBox="0 0 24 24" data-src="plane-takeoff"><path d="M2 22h20" /> <path d="M6.36 17.4 4 17l-2-4 1.1-.55a2 2 0 0 1 1.8 0l.17.1a2 2 0 0 0 1.8 0L8 12 5 6l.9-.45a2 2 0 0 1 2.09.2l4.02 3a2 2 0 0 0 2.1.2l4.19-2.06a2.41 2.41 0 0 1 1.73-.17L21 7a1.4 1.4 0 0 1 .87 1.99l-.38.76c-.23.46-.6.84-1.07 1.08L7.58 17.2a2 2 0 0 1-1.22.18Z" /></symbol>
+  <symbol id="ic-balance" viewBox="0 0 24 24" data-src="scale"><path d="M12 3v18" /> <path d="m19 8 3 8a5 5 0 0 1-6 0zV7" /> <path d="M3 7h1a17 17 0 0 0 8-2 17 17 0 0 0 8 2h1" /> <path d="m5 8 3 8a5 5 0 0 1-6 0zV7" /> <path d="M7 21h10" /></symbol>
+  <symbol id="ic-barrique" viewBox="0 0 24 24" data-src="barrel"><path d="M10 3a41 41 0 000 18" /> <path d="M14 3a41 41 0 010 18" /> <path d="M16.997 21a2 2 0 001.68-.92 15.25 15.25 0 000-16.16 2 2 0 00-1.68-.92h-10a2 2 0 00-1.681.92 15.25 15.25 0 000 16.16 2 2 0 001.681.92z" /> <path d="M3.54 16h16.914" /> <path d="M3.54 8h16.914" /></symbol>
+  <symbol id="ic-beche" viewBox="0 0 24 24" data-src="shovel"><path d="M21.56 4.56a1.5 1.5 0 0 1 0 2.122l-.47.47a3 3 0 0 1-4.212-.03 3 3 0 0 1 0-4.243l.44-.44a1.5 1.5 0 0 1 2.121 0z" /> <path d="M3 22a1 1 0 0 1-1-1v-3.586a1 1 0 0 1 .293-.707l3.355-3.355a1.205 1.205 0 0 1 1.704 0l3.296 3.296a1.205 1.205 0 0 1 0 1.704l-3.355 3.355a1 1 0 0 1-.707.293z" /> <path d="m9 15 7.879-7.878" /></symbol>
+  <symbol id="ic-bogue" viewBox="0 0 24 24" data-src="bug"><path d="M12 20v-9" /> <path d="M14 7a4 4 0 0 1 4 4v3a6 6 0 0 1-12 0v-3a4 4 0 0 1 4-4z" /> <path d="M14.12 3.88 16 2" /> <path d="M21 21a4 4 0 0 0-3.81-4" /> <path d="M21 5a4 4 0 0 1-3.55 3.97" /> <path d="M22 13h-4" /> <path d="M3 21a4 4 0 0 1 3.81-4" /> <path d="M3 5a4 4 0 0 0 3.55 3.97" /> <path d="M6 13H2" /> <path d="m8 2 1.88 1.88" /> <path d="M9 7.13V6a3 3 0 1 1 6 0v1.13" /></symbol>
+  <symbol id="ic-bouclier" viewBox="0 0 24 24" data-src="shield"><path d="M20 13c0 5-3.5 7.5-7.66 8.95a1 1 0 0 1-.67-.01C7.5 20.5 4 18 4 13V6a1 1 0 0 1 1-1c2 0 4.5-1.2 6.24-2.72a1.17 1.17 0 0 1 1.52 0C14.51 3.81 17 5 19 5a1 1 0 0 1 1 1z" /></symbol>
+  <symbol id="ic-boussole" viewBox="0 0 24 24" data-src="compass"><circle cx="12" cy="12" r="10" /> <path d="m16.24 7.76-1.804 5.411a2 2 0 0 1-1.265 1.265L7.76 16.24l1.804-5.411a2 2 0 0 1 1.265-1.265z" /></symbol>
+  <symbol id="ic-bouteille" viewBox="0 0 24 24" data-src="bottle-wine"><path d="M10 3a1 1 0 0 1 1-1h2a1 1 0 0 1 1 1v2a6 6 0 0 0 1.2 3.6l.6.8A6 6 0 0 1 17 13v8a1 1 0 0 1-1 1H8a1 1 0 0 1-1-1v-8a6 6 0 0 1 1.2-3.6l.6-.8A6 6 0 0 0 10 5z" /> <path d="M17 13h-4a1 1 0 0 0-1 1v3a1 1 0 0 0 1 1h4" /></symbol>
+  <symbol id="ic-brouillard" viewBox="0 0 24 24" data-src="cloud-fog"><path d="M4 14.899A7 7 0 1 1 15.71 8h1.79a4.5 4.5 0 0 1 2.5 8.242" /> <path d="M16 17H7" /> <path d="M17 21H9" /></symbol>
+  <symbol id="ic-bruine" viewBox="0 0 24 24" data-src="cloud-drizzle"><path d="M4 14.899A7 7 0 1 1 15.71 8h1.79a4.5 4.5 0 0 1 2.5 8.242" /> <path d="M8 19v1" /> <path d="M8 14v1" /> <path d="M16 19v1" /> <path d="M16 14v1" /> <path d="M12 21v1" /> <path d="M12 16v1" /></symbol>
+  <symbol id="ic-bulle" viewBox="0 0 24 24" data-src="message-square"><path d="M22 17a2 2 0 0 1-2 2H6.828a2 2 0 0 0-1.414.586l-2.202 2.202A.71.71 0 0 1 2 21.286V5a2 2 0 0 1 2-2h16a2 2 0 0 1 2 2z" /></symbol>
+  <symbol id="ic-bureau" viewBox="0 0 24 24" data-src="building-2"><path d="M10 12h4" /> <path d="M10 8h4" /> <path d="M14 21v-3a2 2 0 0 0-4 0v3" /> <path d="M6 10H4a2 2 0 0 0-2 2v7a2 2 0 0 0 2 2h16a2 2 0 0 0 2-2V9a2 2 0 0 0-2-2h-2" /> <path d="M6 21V5a2 2 0 0 1 2-2h8a2 2 0 0 1 2 2v16" /></symbol>
+  <symbol id="ic-cable" viewBox="0 0 24 24" data-src="cable"><path d="M17 19a1 1 0 0 1-1-1v-2a2 2 0 0 1 2-2h2a2 2 0 0 1 2 2v2a1 1 0 0 1-1 1z" /> <path d="M17 21v-2" /> <path d="M19 14V6.5a1 1 0 0 0-7 0v11a1 1 0 0 1-7 0V10" /> <path d="M21 21v-2" /> <path d="M3 5V3" /> <path d="M4 10a2 2 0 0 1-2-2V6a1 1 0 0 1 1-1h4a1 1 0 0 1 1 1v2a2 2 0 0 1-2 2z" /> <path d="M7 5V3" /></symbol>
+  <symbol id="ic-cadenas" viewBox="0 0 24 24" data-src="lock"><rect width="18" height="11" x="3" y="11" rx="2" ry="2" /> <path d="M7 11V7a5 5 0 0 1 10 0v4" /></symbol>
+  <symbol id="ic-calculatrice" viewBox="0 0 24 24" data-src="calculator"><rect width="16" height="20" x="4" y="2" rx="2" /> <line x1="8" x2="16" y1="6" y2="6" /> <line x1="16" x2="16" y1="14" y2="18" /> <path d="M16 10h.01" /> <path d="M12 10h.01" /> <path d="M8 10h.01" /> <path d="M12 14h.01" /> <path d="M8 14h.01" /> <path d="M12 18h.01" /> <path d="M8 18h.01" /></symbol>
+  <symbol id="ic-calendrier" viewBox="0 0 24 24" data-src="calendar"><path d="M8 2v3" /> <path d="M16 2v3" /> <rect x="3" y="3" width="18" height="18" rx="2" /> <path d="M3 9h18" /></symbol>
+  <symbol id="ic-carburant" viewBox="0 0 24 24" data-src="fuel"><path d="M14 13h2a2 2 0 0 1 2 2v2a2 2 0 0 0 4 0v-6.998a2 2 0 0 0-.59-1.42L18 5" /> <path d="M14 21V5a2 2 0 0 0-2-2H5a2 2 0 0 0-2 2v16" /> <path d="M2 21h13" /> <path d="M3 9h11" /></symbol>
+  <symbol id="ic-carre" viewBox="0 0 24 24" data-src="square"><rect width="18" height="18" x="3" y="3" rx="2" /></symbol>
+  <symbol id="ic-carte" viewBox="0 0 24 24" data-src="map"><path d="M14.106 5.553a2 2 0 0 0 1.788 0l3.659-1.83A1 1 0 0 1 21 4.619v12.764a1 1 0 0 1-.553.894l-4.553 2.277a2 2 0 0 1-1.788 0l-4.212-2.106a2 2 0 0 0-1.788 0l-3.659 1.83A1 1 0 0 1 3 19.381V6.618a1 1 0 0 1 .553-.894l4.553-2.277a2 2 0 0 1 1.788 0z" /> <path d="M15 5.764v15" /> <path d="M9 3.236v15" /></symbol>
+  <symbol id="ic-carton" viewBox="0 0 24 24" data-src="archive"><rect width="20" height="5" x="2" y="3" rx="1" /> <path d="M4 8v11a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8" /> <path d="M10 12h4" /></symbol>
+  <symbol id="ic-check" viewBox="0 0 24 24" data-src="check"><path d="M20 6 9 17l-5-5" /></symbol>
+  <symbol id="ic-chevron" viewBox="0 0 24 24" data-src="chevron-down"><path d="m6 9 6 6 6-6" /></symbol>
+  <symbol id="ic-chrono" viewBox="0 0 24 24" data-src="timer"><line x1="10" x2="14" y1="2" y2="2" /> <line x1="12" x2="15" y1="14" y2="11" /> <circle cx="12" cy="14" r="8" /></symbol>
+  <symbol id="ic-cible" viewBox="0 0 24 24" data-src="target"><circle cx="12" cy="12" r="10" /> <circle cx="12" cy="12" r="6" /> <circle cx="12" cy="12" r="2" /></symbol>
+  <symbol id="ic-cle" viewBox="0 0 24 24" data-src="key-round"><path d="M2.586 17.414A2 2 0 0 0 2 18.828V21a1 1 0 0 0 1 1h3a1 1 0 0 0 1-1v-1a1 1 0 0 1 1-1h1a1 1 0 0 0 1-1v-1a1 1 0 0 1 1-1h.172a2 2 0 0 0 1.414-.586l.814-.814a6.5 6.5 0 1 0-4-4z" /> <circle cx="16.5" cy="7.5" r=".5" fill="currentColor" /></symbol>
+  <symbol id="ic-cloche" viewBox="0 0 24 24" data-src="bell"><path d="M10.268 21a2 2 0 0 0 3.464 0" /> <path d="M3.262 15.326A1 1 0 0 0 4 17h16a1 1 0 0 0 .74-1.673C19.41 13.956 18 12.499 18 8A6 6 0 0 0 6 8c0 4.499-1.411 5.956-2.738 7.326" /></symbol>
+  <symbol id="ic-contraste" viewBox="0 0 24 24" data-src="contrast"><circle cx="12" cy="12" r="10" /> <path d="M12 18a6 6 0 0 0 0-12v12z" /></symbol>
+  <symbol id="ic-corbeille" viewBox="0 0 24 24" data-src="trash-2"><path d="M10 11v6" /> <path d="M14 11v6" /> <path d="M19 6v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6" /> <path d="M3 6h18" /> <path d="M8 6V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2" /></symbol>
+  <symbol id="ic-crayon" viewBox="0 0 24 24" data-src="pencil"><path d="M21.174 6.812a1 1 0 0 0-3.986-3.987L3.842 16.174a2 2 0 0 0-.5.83l-1.321 4.352a.5.5 0 0 0 .623.622l4.353-1.32a2 2 0 0 0 .83-.497z" /> <path d="m15 5 4 4" /></symbol>
+  <symbol id="ic-croix" viewBox="0 0 24 24" data-src="x"><path d="M18 6 6 18" /> <path d="m6 6 12 12" /></symbol>
+  <symbol id="ic-curseurs" viewBox="0 0 24 24" data-src="sliders-horizontal"><path d="M10 5H3" /> <path d="M12 19H3" /> <path d="M14 3v4" /> <path d="M16 17v4" /> <path d="M21 12h-9" /> <path d="M21 19h-5" /> <path d="M21 5h-7" /> <path d="M8 10v4" /> <path d="M8 12H3" /></symbol>
+  <symbol id="ic-cuve" viewBox="0 0 24 24" data-src="warehouse"><path d="M18 21V10a1 1 0 0 0-1-1H7a1 1 0 0 0-1 1v11" /> <path d="M22 19a2 2 0 0 1-2 2H4a2 2 0 0 1-2-2V8a2 2 0 0 1 1.132-1.803l7.95-3.974a2 2 0 0 1 1.837 0l7.948 3.974A2 2 0 0 1 22 8z" /> <path d="M6 13h12" /> <path d="M6 17h12" /></symbol>
+  <symbol id="ic-deconnexion" viewBox="0 0 24 24" data-src="log-out"><path d="m16 17 5-5-5-5" /> <path d="M21 12H9" /> <path d="M9 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h4" /></symbol>
+  <symbol id="ic-diplome" viewBox="0 0 24 24" data-src="graduation-cap"><path d="M21.42 10.922a1 1 0 0 0-.019-1.838L12.83 5.18a2 2 0 0 0-1.66 0L2.6 9.08a1 1 0 0 0 0 1.832l8.57 3.908a2 2 0 0 0 1.66 0z" /> <path d="M22 10v6" /> <path d="M6 12.5V16a6 3 0 0 0 12 0v-3.5" /></symbol>
+  <symbol id="ic-document" viewBox="0 0 24 24" data-src="file-text"><path d="M6 22a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2h8a2.4 2.4 0 0 1 1.704.706l3.588 3.588A2.4 2.4 0 0 1 20 8v12a2 2 0 0 1-2 2z" /> <path d="M14 2v5a1 1 0 0 0 1 1h5" /> <path d="M10 9H8" /> <path d="M16 13H8" /> <path d="M16 17H8" /></symbol>
+  <symbol id="ic-doigt" viewBox="0 0 24 24" data-src="pointer"><path d="M22 14a8 8 0 0 1-8 8" /> <path d="M18 11v-1a2 2 0 0 0-2-2a2 2 0 0 0-2 2" /> <path d="M14 10V9a2 2 0 0 0-2-2a2 2 0 0 0-2 2v1" /> <path d="M10 9.5V4a2 2 0 0 0-2-2a2 2 0 0 0-2 2v10" /> <path d="M18 11a2 2 0 1 1 4 0v3a8 8 0 0 1-8 8h-2c-2.8 0-4.5-.86-5.99-2.34l-3.6-3.6a2 2 0 0 1 2.83-2.82L7 15" /></symbol>
+  <symbol id="ic-dossier" viewBox="0 0 24 24" data-src="folder"><path d="M20 20a2 2 0 0 0 2-2V8a2 2 0 0 0-2-2h-7.9a2 2 0 0 1-1.69-.9L9.6 3.9A2 2 0 0 0 7.93 3H4a2 2 0 0 0-2 2v13a2 2 0 0 0 2 2Z" /></symbol>
+  <symbol id="ic-drapeau" viewBox="0 0 24 24" data-src="flag"><path d="M4 22V4a1 1 0 0 1 .4-.8A6 6 0 0 1 8 2c3 0 5 2 7.333 2q2 0 3.067-.8A1 1 0 0 1 20 4v10a1 1 0 0 1-.4.8A6 6 0 0 1 16 16c-3 0-5-2-8-2a6 6 0 0 0-4 1.528" /></symbol>
+  <symbol id="ic-eclair" viewBox="0 0 24 24" data-src="zap"><path d="M15.914 4a1.5 1.5 0 00-2.474-1.561l-9 9A1.5 1.5 0 005.5 14h4.002a.5.5 0 01.471.666L8.086 20a1.5 1.5 0 002.475 1.56l9-9A1.5 1.5 0 0018.5 10h-3.997a.5.5 0 01-.472-.667z" /></symbol>
+  <symbol id="ic-engrenage" viewBox="0 0 24 24" data-src="cog"><path d="M11 10.27 7 3.34" /> <path d="m11 13.73-4 6.93" /> <path d="M12 22v-2" /> <path d="M12 2v2" /> <path d="M14 12h8" /> <path d="m17 20.66-1-1.73" /> <path d="m17 3.34-1 1.73" /> <path d="M2 12h2" /> <path d="m20.66 17-1.73-1" /> <path d="m20.66 7-1.73 1" /> <path d="m3.34 17 1.73-1" /> <path d="m3.34 7 1.73 1" /> <circle cx="12" cy="12" r="2" /> <circle cx="12" cy="12" r="8" /></symbol>
+  <symbol id="ic-enveloppe" viewBox="0 0 24 24" data-src="mail"><path d="m22 7-8.991 5.727a2 2 0 0 1-2.009 0L2 7" /> <rect x="2" y="4" width="20" height="16" rx="2" /></symbol>
+  <symbol id="ic-envoyer" viewBox="0 0 24 24" data-src="send"><path d="M14.536 21.686a.5.5 0 0 0 .937-.024l6.5-19a.496.496 0 0 0-.635-.635l-19 6.5a.5.5 0 0 0-.024.937l7.93 3.18a2 2 0 0 1 1.112 1.11z" /> <path d="m21.854 2.147-10.94 10.939" /></symbol>
+  <symbol id="ic-epingle" viewBox="0 0 24 24" data-src="map-pin"><path d="M20 10c0 4.993-5.539 10.193-7.399 11.799a1 1 0 0 1-1.202 0C9.539 20.193 4 14.993 4 10a8 8 0 0 1 16 0" /> <circle cx="12" cy="10" r="3" /></symbol>
+  <symbol id="ic-eprouvette" viewBox="0 0 24 24" data-src="test-tube"><path d="M14.5 2v17.5c0 1.4-1.1 2.5-2.5 2.5c-1.4 0-2.5-1.1-2.5-2.5V2" /> <path d="M8.5 2h7" /> <path d="M14.5 16h-5" /></symbol>
+  <symbol id="ic-equipe" viewBox="0 0 24 24" data-src="users"><path d="M16 21v-2a4 4 0 0 0-4-4H6a4 4 0 0 0-4 4v2" /> <path d="M16 3.128a4 4 0 0 1 0 7.744" /> <path d="M22 21v-2a4 4 0 0 0-3-3.87" /> <circle cx="9" cy="7" r="4" /></symbol>
+  <symbol id="ic-etincelles" viewBox="0 0 24 24" data-src="sparkles"><path d="M11.017 2.814a1 1 0 0 1 1.966 0l1.051 5.558a2 2 0 0 0 1.594 1.594l5.558 1.051a1 1 0 0 1 0 1.966l-5.558 1.051a2 2 0 0 0-1.594 1.594l-1.051 5.558a1 1 0 0 1-1.966 0l-1.051-5.558a2 2 0 0 0-1.594-1.594l-5.558-1.051a1 1 0 0 1 0-1.966l5.558-1.051a2 2 0 0 0 1.594-1.594z" /> <path d="M20 2v4" /> <path d="M22 4h-4" /> <circle cx="4" cy="20" r="2" /></symbol>
+  <symbol id="ic-etiquette" viewBox="0 0 24 24" data-src="tag"><path d="M12.586 2.586A2 2 0 0 0 11.172 2H4a2 2 0 0 0-2 2v7.172a2 2 0 0 0 .586 1.414l8.704 8.704a2.426 2.426 0 0 0 3.42 0l6.58-6.58a2.426 2.426 0 0 0 0-3.42z" /> <circle cx="7.5" cy="7.5" r=".5" fill="currentColor" /></symbol>
+  <symbol id="ic-etoile" viewBox="0 0 24 24" data-src="star"><path d="M11.525 2.295a.53.53 0 0 1 .95 0l2.31 4.679a2.123 2.123 0 0 0 1.595 1.16l5.166.756a.53.53 0 0 1 .294.904l-3.736 3.638a2.123 2.123 0 0 0-.611 1.878l.882 5.14a.53.53 0 0 1-.771.56l-4.618-2.428a2.122 2.122 0 0 0-1.973 0L6.396 21.01a.53.53 0 0 1-.77-.56l.881-5.139a2.122 2.122 0 0 0-.611-1.879L2.16 9.795a.53.53 0 0 1 .294-.906l5.165-.755a2.122 2.122 0 0 0 1.597-1.16z" /></symbol>
+  <symbol id="ic-euro" viewBox="0 0 24 24" data-src="euro"><path d="M4 10h12" /> <path d="M4 14h9" /> <path d="M19 6a7.7 7.7 0 0 0-5.2-2A7.9 7.9 0 0 0 6 12c0 4.4 3.5 8 7.8 8 2 0 3.8-.8 5.2-2" /></symbol>
+  <symbol id="ic-feuille" viewBox="0 0 24 24" data-src="leaf"><path d="M11 20A7 7 0 0 1 9.8 6.1C15.5 5 17 4.48 19 2c1 2 2 4.18 2 8 0 5.5-4.78 10-10 10Z" /> <path d="M2 21c0-3 1.85-5.36 5.08-6C9.5 14.52 12 13 13 12" /></symbol>
+  <symbol id="ic-fiole" viewBox="0 0 24 24" data-src="flask-conical"><path d="M14 2v6a2 2 0 0 0 .245.96l5.51 10.08A2 2 0 0 1 18 22H6a2 2 0 0 1-1.755-2.96l5.51-10.08A2 2 0 0 0 10 8V2" /> <path d="M6.453 15h11.094" /> <path d="M8.5 2h7" /></symbol>
+  <symbol id="ic-flamme" viewBox="0 0 24 24" data-src="flame"><path d="M12 3q1 4 4 6.5t3 5.5a1 1 0 0 1-14 0 5 5 0 0 1 1-3 1 1 0 0 0 5 0c0-2-1.5-3-1.5-5q0-2 2.5-4" /></symbol>
+  <symbol id="ic-gauche" viewBox="0 0 24 24" data-src="arrow-left"><path d="m12 19-7-7 7-7" /> <path d="M19 12H5" /></symbol>
+  <symbol id="ic-goutte" viewBox="0 0 24 24" data-src="droplet"><path d="M12 22a7 7 0 0 0 7-7c0-2-1-3.9-3-5.5s-3.5-4-4-6.5c-.5 2.5-2 4.9-4 6.5C6 11.1 5 13 5 15a7 7 0 0 0 7 7z" /></symbol>
+  <symbol id="ic-graphique" viewBox="0 0 24 24" data-src="chart-column"><path d="M3 3v16a2 2 0 0 0 2 2h16" /> <path d="M18 17V9" /> <path d="M13 17V5" /> <path d="M8 17v-3" /></symbol>
+  <symbol id="ic-hautbas" viewBox="0 0 24 24" data-src="arrow-up-down"><path d="m21 16-4 4-4-4" /> <path d="M17 20V4" /> <path d="m3 8 4-4 4 4" /> <path d="M7 4v16" /></symbol>
+  <symbol id="ic-horsligne" viewBox="0 0 24 24" data-src="wifi-off"><path d="M12 20h.01" /> <path d="M8.5 16.429a5 5 0 0 1 7 0" /> <path d="M5 12.859a10 10 0 0 1 5.17-2.69" /> <path d="M19 12.859a10 10 0 0 0-2.007-1.523" /> <path d="M2 8.82a15 15 0 0 1 4.177-2.643" /> <path d="M22 8.82a15 15 0 0 0-11.288-3.764" /> <path d="m2 2 20 20" /></symbol>
+  <symbol id="ic-imprimante" viewBox="0 0 24 24" data-src="printer"><path d="M6 18H4a2 2 0 0 1-2-2v-5a2 2 0 0 1 2-2h16a2 2 0 0 1 2 2v5a2 2 0 0 1-2 2h-2" /> <path d="M6 9V3a1 1 0 0 1 1-1h10a1 1 0 0 1 1 1v6" /> <rect x="6" y="14" width="12" height="8" rx="1" /></symbol>
+  <symbol id="ic-info" viewBox="0 0 24 24" data-src="info"><circle cx="12" cy="12" r="10" /> <path d="M12 16v-4" /> <path d="M12 8h.01" /></symbol>
+  <symbol id="ic-interdit" viewBox="0 0 24 24" data-src="ban"><circle cx="12" cy="12" r="10" /> <path d="M4.929 4.929 19.07 19.071" /></symbol>
+  <symbol id="ic-journal" viewBox="0 0 24 24" data-src="notebook-pen"><path d="M13.4 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2v-7.4" /> <path d="M2 6h4" /> <path d="M2 10h4" /> <path d="M2 14h4" /> <path d="M2 18h4" /> <path d="M21.378 5.626a1 1 0 1 0-3.004-3.004l-5.01 5.012a2 2 0 0 0-.506.854l-.837 2.87a.5.5 0 0 0 .62.62l2.87-.837a2 2 0 0 0 .854-.506z" /></symbol>
+  <symbol id="ic-lecture" viewBox="0 0 24 24" data-src="play"><path d="M5 5a2 2 0 0 1 3.008-1.728l11.997 6.998a2 2 0 0 1 .003 3.458l-12 7A2 2 0 0 1 5 19z" /></symbol>
+  <symbol id="ic-lien" viewBox="0 0 24 24" data-src="link"><path d="M10 13a5 5 0 0 0 7.54.54l3-3a5 5 0 0 0-7.07-7.07l-1.72 1.71" /> <path d="M14 11a5 5 0 0 0-7.54-.54l-3 3a5 5 0 0 0 7.07 7.07l1.71-1.71" /></symbol>
+  <symbol id="ic-liste" viewBox="0 0 24 24" data-src="clipboard-list"><rect width="8" height="4" x="8" y="2" rx="1" ry="1" /> <path d="M16 4h2a2 2 0 0 1 2 2v14a2 2 0 0 1-2 2H6a2 2 0 0 1-2-2V6a2 2 0 0 1 2-2h2" /> <path d="M12 11h4" /> <path d="M12 16h4" /> <path d="M8 11h.01" /> <path d="M8 16h.01" /></symbol>
+  <symbol id="ic-livre" viewBox="0 0 24 24" data-src="book-open"><path d="M12 5v16" /> <path d="M20.001 19A2 2 0 0022 17V5a2 2 0 00-1.999-2L16 3.002A5 5 0 0012 5a5 5 0 00-4-2H4a2 2 0 00-2 2v12a2 2 0 001.999 2H8a5 5 0 014 2 5 5 0 014-2z" /></symbol>
+  <symbol id="ic-loupe" viewBox="0 0 24 24" data-src="search"><path d="m21 21-4.34-4.34" /> <circle cx="11" cy="11" r="8" /></symbol>
+  <symbol id="ic-lune" viewBox="0 0 24 24" data-src="moon"><path d="M20.985 12.486a9 9 0 1 1-9.473-9.472c.405-.022.617.46.402.803a6 6 0 0 0 8.268 8.268c.344-.215.825-.004.803.401" /></symbol>
+  <symbol id="ic-maison" viewBox="0 0 24 24" data-src="house"><path d="M15 21v-8a1 1 0 0 0-1-1h-4a1 1 0 0 0-1 1v8" /> <path d="M3 10a2 2 0 0 1 .709-1.528l7-6a2 2 0 0 1 2.582 0l7 6A2 2 0 0 1 21 10v9a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z" /></symbol>
+  <symbol id="ic-microscope" viewBox="0 0 24 24" data-src="microscope"><path d="M6 18h8" /> <path d="M3 22h18" /> <path d="M14 22a7 7 0 1 0 0-14h-1" /> <path d="M9 14h2" /> <path d="M9 12a2 2 0 0 1-2-2V6h6v4a2 2 0 0 1-2 2Z" /> <path d="M12 6V3a1 1 0 0 0-1-1H9a1 1 0 0 0-1 1v3" /></symbol>
+  <symbol id="ic-neige" viewBox="0 0 24 24" data-src="cloud-snow"><path d="M4 14.899A7 7 0 1 1 15.71 8h1.79a4.5 4.5 0 0 1 2.5 8.242" /> <path d="M8 15h.01" /> <path d="M8 19h.01" /> <path d="M12 17h.01" /> <path d="M12 21h.01" /> <path d="M16 15h.01" /> <path d="M16 19h.01" /></symbol>
+  <symbol id="ic-nombre" viewBox="0 0 24 24" data-src="hash"><line x1="4" x2="20" y1="9" y2="9" /> <line x1="4" x2="20" y1="15" y2="15" /> <line x1="10" x2="8" y1="3" y2="21" /> <line x1="16" x2="14" y1="3" y2="21" /></symbol>
+  <symbol id="ic-nuage" viewBox="0 0 24 24" data-src="cloud"><path d="M17.5 19H9a7 7 0 1 1 6.71-9h1.79a4.5 4.5 0 1 1 0 9Z" /></symbol>
+  <symbol id="ic-oeil" viewBox="0 0 24 24" data-src="eye"><path d="M2.062 12.348a1 1 0 0 1 0-.696 10.75 10.75 0 0 1 19.876 0 1 1 0 0 1 0 .696 10.75 10.75 0 0 1-19.876 0" /> <circle cx="12" cy="12" r="3" /></symbol>
+  <symbol id="ic-orage" viewBox="0 0 24 24" data-src="cloud-lightning"><path d="M6 16.326A7 7 0 1 1 15.71 8h1.79a4.5 4.5 0 0 1 .5 8.973" /> <path d="m13 12-3 5h4l-3 5" /></symbol>
+  <symbol id="ic-outil" viewBox="0 0 24 24" data-src="wrench"><path d="M14.7 6.3a1 1 0 0 0 0 1.4l1.6 1.6a1 1 0 0 0 1.4 0l3.106-3.105c.32-.322.863-.22.983.218a6 6 0 0 1-8.259 7.057l-7.91 7.91a1 1 0 0 1-2.999-3l7.91-7.91a6 6 0 0 1 7.057-8.259c.438.12.54.662.219.984z" /></symbol>
+  <symbol id="ic-ouvrier" viewBox="0 0 24 24" data-src="hard-hat"><path d="M10 10V5a1 1 0 0 1 1-1h2a1 1 0 0 1 1 1v5" /> <path d="M14 6a6 6 0 0 1 6 6v3" /> <path d="M4 15v-3a6 6 0 0 1 6-6" /> <rect x="2" y="15" width="20" height="4" rx="1" /></symbol>
+  <symbol id="ic-pansement" viewBox="0 0 24 24" data-src="bandage"><path d="M10 10.01h.01" /> <path d="M10 14.01h.01" /> <path d="M14 10.01h.01" /> <path d="M14 14.01h.01" /> <path d="M18 6v12" /> <path d="M6 6v12" /> <rect x="2" y="6" width="20" height="12" rx="2" /></symbol>
+  <symbol id="ic-parcours" viewBox="0 0 24 24" data-src="waypoints"><path d="m10.586 5.414-5.172 5.172" /> <path d="m18.586 13.414-5.172 5.172" /> <path d="M6 12h12" /> <circle cx="12" cy="20" r="2" /> <circle cx="12" cy="4" r="2" /> <circle cx="20" cy="12" r="2" /> <circle cx="4" cy="12" r="2" /></symbol>
+  <symbol id="ic-pause" viewBox="0 0 24 24" data-src="pause"><rect x="14" y="3" width="5" height="18" rx="1" /> <rect x="5" y="3" width="5" height="18" rx="1" /></symbol>
+  <symbol id="ic-personne" viewBox="0 0 24 24" data-src="user"><path d="M19 21v-2a4 4 0 0 0-4-4H9a4 4 0 0 0-4 4v2" /> <circle cx="12" cy="7" r="4" /></symbol>
+  <symbol id="ic-pluie" viewBox="0 0 24 24" data-src="cloud-rain"><path d="M4 14.899A7 7 0 1 1 15.71 8h1.79a4.5 4.5 0 0 1 2.5 8.242" /> <path d="M16 14v6" /> <path d="M8 14v6" /> <path d="M12 16v6" /></symbol>
+  <symbol id="ic-plus" viewBox="0 0 24 24" data-src="ellipsis"><circle cx="12" cy="12" r="1" /> <circle cx="19" cy="12" r="1" /> <circle cx="5" cy="12" r="1" /></symbol>
+  <symbol id="ic-pousse" viewBox="0 0 24 24" data-src="sprout"><path d="M14 9.536V7a4 4 0 0 1 4-4h1.5a.5.5 0 0 1 .5.5V5a4 4 0 0 1-4 4 4 4 0 0 0-4 4c0 2 1 3 1 5a5 5 0 0 1-1 3" /> <path d="M4 9a5 5 0 0 1 8 4 5 5 0 0 1-8-4" /> <path d="M5 21h14" /></symbol>
+  <symbol id="ic-pulverisateur" viewBox="0 0 24 24" data-src="spray-can"><path d="M3 3h.01" /> <path d="M7 5h.01" /> <path d="M11 7h.01" /> <path d="M3 7h.01" /> <path d="M7 9h.01" /> <path d="M3 11h.01" /> <rect width="4" height="4" x="15" y="5" /> <path d="m19 9 2 2v10c0 .6-.4 1-1 1h-6c-.6 0-1-.4-1-1V11l2-2" /> <path d="m13 14 8-2" /> <path d="m13 19 8-2" /></symbol>
+  <symbol id="ic-raisin" viewBox="0 0 24 24" data-src="grape"><path d="M22 5V2l-5.89 5.89" /> <circle cx="16.6" cy="15.89" r="3" /> <circle cx="8.11" cy="7.4" r="3" /> <circle cx="12.35" cy="11.65" r="3" /> <circle cx="13.91" cy="5.85" r="3" /> <circle cx="18.15" cy="10.09" r="3" /> <circle cx="6.56" cy="13.2" r="3" /> <circle cx="10.8" cy="17.44" r="3" /> <circle cx="5" cy="19" r="3" /></symbol>
+  <symbol id="ic-rang" viewBox="0 0 24 24" data-src="fence"><path d="M4 3 2 5v15c0 .6.4 1 1 1h2c.6 0 1-.4 1-1V5Z" /> <path d="M6 8h4" /> <path d="M6 18h4" /> <path d="m12 3-2 2v15c0 .6.4 1 1 1h2c.6 0 1-.4 1-1V5Z" /> <path d="M14 8h4" /> <path d="M14 18h4" /> <path d="m20 3-2 2v15c0 .6.4 1 1 1h2c.6 0 1-.4 1-1V5Z" /></symbol>
+  <symbol id="ic-recu" viewBox="0 0 24 24" data-src="receipt"><path d="M12 17V7" /> <path d="M16 8h-6a2 2 0 0 0 0 4h4a2 2 0 0 1 0 4H8" /> <path d="M4 3a1 1 0 0 1 1-1 1.3 1.3 0 0 1 .7.2l.933.6a1.3 1.3 0 0 0 1.4 0l.934-.6a1.3 1.3 0 0 1 1.4 0l.933.6a1.3 1.3 0 0 0 1.4 0l.933-.6a1.3 1.3 0 0 1 1.4 0l.934.6a1.3 1.3 0 0 0 1.4 0l.933-.6A1.3 1.3 0 0 1 19 2a1 1 0 0 1 1 1v18a1 1 0 0 1-1 1 1.3 1.3 0 0 1-.7-.2l-.933-.6a1.3 1.3 0 0 0-1.4 0l-.934.6a1.3 1.3 0 0 1-1.4 0l-.933-.6a1.3 1.3 0 0 0-1.4 0l-.933.6a1.3 1.3 0 0 1-1.4 0l-.934-.6a1.3 1.3 0 0 0-1.4 0l-.933.6a1.3 1.3 0 0 1-.7.2 1 1 0 0 1-1-1z" /></symbol>
+  <symbol id="ic-refus" viewBox="0 0 24 24" data-src="circle-x"><circle cx="12" cy="12" r="10" /> <path d="m15 9-6 6" /> <path d="m9 9 6 6" /></symbol>
+  <symbol id="ic-repas" viewBox="0 0 24 24" data-src="utensils"><path d="M3 2v7c0 1.1.9 2 2 2h4a2 2 0 0 0 2-2V2" /> <path d="M7 2v20" /> <path d="M21 15V2a5 5 0 0 0-5 5v6c0 1.1.9 2 2 2h3Zm0 0v7" /></symbol>
+  <symbol id="ic-retour" viewBox="0 0 24 24" data-src="undo-2"><path d="M9 14 4 9l5-5" /> <path d="M4 9h10.5a5.5 5.5 0 0 1 5.5 5.5a5.5 5.5 0 0 1-5.5 5.5H11" /></symbol>
+  <symbol id="ic-reveil" viewBox="0 0 24 24" data-src="alarm-clock"><circle cx="12" cy="13" r="8" /> <path d="M12 9v4l2 2" /> <path d="M5 3 2 6" /> <path d="m22 6-3-3" /> <path d="M6.38 18.7 4 21" /> <path d="M17.64 18.67 20 21" /></symbol>
+  <symbol id="ic-rotation" viewBox="0 0 24 24" data-src="refresh-cw"><path d="M3 12a9 9 0 0 1 9-9 9.75 9.75 0 0 1 6.74 2.74L21 8" /> <path d="M21 3v5h-5" /> <path d="M21 12a9 9 0 0 1-9 9 9.75 9.75 0 0 1-6.74-2.74L3 16" /> <path d="M8 16H3v5" /></symbol>
+  <symbol id="ic-route" viewBox="0 0 24 24" data-src="route"><circle cx="6" cy="19" r="3" /> <path d="M9 19h8.5a3.5 3.5 0 0 0 0-7h-11a3.5 3.5 0 0 1 0-7H15" /> <circle cx="18" cy="5" r="3" /></symbol>
+  <symbol id="ic-sablier" viewBox="0 0 24 24" data-src="hourglass"><path d="M5 22h14" /> <path d="M5 2h14" /> <path d="M17 22v-4.172a2 2 0 0 0-.586-1.414L12 12l-4.414 4.414A2 2 0 0 0 7 17.828V22" /> <path d="M7 2v4.172a2 2 0 0 0 .586 1.414L12 12l4.414-4.414A2 2 0 0 0 17 6.172V2" /></symbol>
+  <symbol id="ic-seau" viewBox="0 0 24 24" data-src="paint-bucket"><path d="M11 7 6 2" /> <path d="M18.992 12H2.041" /> <path d="M21.145 18.38A3.34 3.34 0 0 1 20 16.5a3.3 3.3 0 0 1-1.145 1.88c-.575.46-.855 1.02-.855 1.595A2 2 0 0 0 20 22a2 2 0 0 0 2-2.025c0-.58-.285-1.13-.855-1.595" /> <path d="m8.5 4.5 2.148-2.148a1.205 1.205 0 0 1 1.704 0l7.296 7.296a1.205 1.205 0 0 1 0 1.704l-7.592 7.592a3.615 3.615 0 0 1-5.112 0l-3.888-3.888a3.615 3.615 0 0 1 0-5.112L5.67 7.33" /></symbol>
+  <symbol id="ic-secateur" viewBox="0 0 24 24" data-src="scissors"><circle cx="6" cy="6" r="3" /> <path d="M8.12 8.12 12 12" /> <path d="M20 4 8.12 15.88" /> <circle cx="6" cy="18" r="3" /> <path d="M14.8 14.8 20 20" /></symbol>
+  <symbol id="ic-soleil" viewBox="0 0 24 24" data-src="sun"><circle cx="12" cy="12" r="4" /> <path d="M12 2v2" /> <path d="M12 20v2" /> <path d="m4.93 4.93 1.41 1.41" /> <path d="m17.66 17.66 1.41 1.41" /> <path d="M2 12h2" /> <path d="M20 12h2" /> <path d="m6.34 17.66-1.41 1.41" /> <path d="m19.07 4.93-1.41 1.41" /></symbol>
+  <symbol id="ic-sortie" viewBox="0 0 24 24" data-src="external-link"><path d="M15 3h6v6" /> <path d="M10 14 21 3" /> <path d="M18 13v6a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V8a2 2 0 0 1 2-2h6" /></symbol>
+  <symbol id="ic-tariere" viewBox="0 0 24 24" data-src="drill"><path d="M10 18a1 1 0 0 1 1 1v2a1 1 0 0 1-1 1H5a3 3 0 0 1-3-3 1 1 0 0 1 1-1z" /> <path d="M13 10H4a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2h9a1 1 0 0 1 1 1v6a1 1 0 0 1-1 1l-.81 3.242a1 1 0 0 1-.97.758H8" /> <path d="M14 4h3a1 1 0 0 1 1 1v2a1 1 0 0 1-1 1h-3" /> <path d="M18 6h4" /> <path d="m5 10-2 8" /> <path d="m7 18 2-8" /></symbol>
+  <symbol id="ic-thermometre" viewBox="0 0 24 24" data-src="thermometer"><path d="M14 4v10.54a4 4 0 1 1-4 0V4a2 2 0 0 1 4 0Z" /></symbol>
+  <symbol id="ic-ticket" viewBox="0 0 24 24" data-src="ticket"><path d="M2 9a3 3 0 0 1 0 6v2a2 2 0 0 0 2 2h16a2 2 0 0 0 2-2v-2a3 3 0 0 1 0-6V7a2 2 0 0 0-2-2H4a2 2 0 0 0-2 2Z" /> <path d="M13 5v2" /> <path d="M13 17v2" /> <path d="M13 11v2" /></symbol>
+  <symbol id="ic-tracteur" viewBox="0 0 24 24" data-src="tractor"><path d="m10 11 11 .9a1 1 0 0 1 .8 1.1l-.665 4.158a1 1 0 0 1-.988.842H20" /> <path d="M16 18h-5" /> <path d="M18 5a1 1 0 0 0-1 1v5.573" /> <path d="M3 4h8.129a1 1 0 0 1 .99.863L13 11.246" /> <path d="M4 11V4" /> <path d="M7 15h.01" /> <path d="M8 10.1V4" /> <circle cx="18" cy="18" r="2" /> <circle cx="7" cy="15" r="5" /></symbol>
+  <symbol id="ic-valide" viewBox="0 0 24 24" data-src="circle-check-big"><path d="M21.801 10A10 10 0 1 1 17 3.335" /> <path d="m9 11 3 3L22 4" /></symbol>
+  <symbol id="ic-verre" viewBox="0 0 24 24" data-src="wine"><path d="M8 22h8" /> <path d="M7 10h10" /> <path d="M12 15v7" /> <path d="M12 15a5 5 0 0 0 5-5c0-2-.5-4-2-8H9c-1.5 4-2 6-2 8a5 5 0 0 0 5 5Z" /></symbol>
+</svg>
+
 
 <a class="skip" href="#contenu">Aller au contenu</a>
 <header class="top">
@@ -307,24 +426,24 @@ mark{background:rgba(200,176,32,.32);color:var(--cream);border-radius:3px;paddin
 <div class="layout">
 <nav class="side" id="side" aria-label="Sommaire du guide">
 <div class="side-t">Sommaire</div>
-<a href="#demarrer"><em aria-hidden="true">🧭</em><span>Premiers pas<br><span style="font-size:11.5px;color:var(--muted)">Connexion, dock, synchro</span></span></a>
-<a href="#roles"><em aria-hidden="true">🔐</em><span>Rôles &amp; accès<br><span style="font-size:11.5px;color:var(--muted)">Qui peut faire quoi</span></span></a>
-<a href="#formules"><em aria-hidden="true">💳</em><span>Formules &amp; essai<br><span style="font-size:11.5px;color:var(--muted)">Modules selon l'offre</span></span></a>
-<a href="#vigne"><em aria-hidden="true">🌿</em><span>Vigne<br><span style="font-size:11.5px;color:var(--muted)">Accueil · Parcelles · Journal</span></span></a>
-<a href="#saisons"><em aria-hidden="true">📅</em><span>Saisons &amp; tâches<br><span style="font-size:11.5px;color:var(--muted)">Cycle, heures/ha, trous</span></span></a>
-<a href="#tracteur"><em aria-hidden="true">🚜</em><span>Tracteur<br><span style="font-size:11.5px;color:var(--muted)">Sessions, entretien, GNR</span></span></a>
-<a href="#phyto"><em aria-hidden="true">🧪</em><span>Phyto<br><span style="font-size:11.5px;color:var(--muted)">Registre &amp; catalogue E-Phy</span></span></a>
-<a href="#cave"><em aria-hidden="true">🍷</em><span>Cave<br><span style="font-size:11.5px;color:var(--muted)">Le Cuvier, Le Chai, Le millésime</span></span></a>
-<a href="#reserve"><em aria-hidden="true">📦</em><span>La Réserve<br><span style="font-size:11.5px;color:var(--muted)">Intrants, parc à fûts, bilan matière</span></span></a>
-<a href="#planning"><em aria-hidden="true">📅</em><span>Planning RH<br><span style="font-size:11.5px;color:var(--muted)">Heures, congés, compteur</span></span></a>
-<a href="#pilotage"><em aria-hidden="true">📊</em><span>Pilotage<br><span style="font-size:11.5px;color:var(--muted)">Tableau de bord décisionnel</span></span></a>
-<a href="#reglages"><em aria-hidden="true">⚙️</em><span>Réglages<br><span style="font-size:11.5px;color:var(--muted)">Administrer le domaine</span></span></a>
-<a href="#donnees"><em aria-hidden="true">🛡️</em><span>Données &amp; sécurité<br><span style="font-size:11.5px;color:var(--muted)">Sauvegardes, hors-ligne, RGPD</span></span></a>
-<a href="#depannage"><em aria-hidden="true">🩺</em><span>Ça ne marche pas<br><span style="font-size:11.5px;color:var(--muted)">Réponses aux vrais blocages</span></span></a>
-<a href="#glossaire"><em aria-hidden="true">📖</em><span>Glossaire<br><span style="font-size:11.5px;color:var(--muted)">Le vocabulaire de l'app</span></span></a>
+<a href="#demarrer"><em aria-hidden="true"><svg class="g-ic" width="18" height="18" viewBox="0 0 24 24" aria-hidden="true" focusable="false"><use href="#ic-boussole"></use></svg></em><span>Premiers pas<br><span style="font-size:11.5px;color:var(--muted)">Connexion, dock, synchro</span></span></a>
+<a href="#roles"><em aria-hidden="true"><svg class="g-ic" width="18" height="18" viewBox="0 0 24 24" aria-hidden="true" focusable="false"><use href="#ic-cadenas"></use></svg></em><span>Rôles &amp; accès<br><span style="font-size:11.5px;color:var(--muted)">Qui peut faire quoi</span></span></a>
+<a href="#formules"><em aria-hidden="true"><svg class="g-ic" width="18" height="18" viewBox="0 0 24 24" aria-hidden="true" focusable="false"><use href="#ic-euro"></use></svg></em><span>Formules &amp; essai<br><span style="font-size:11.5px;color:var(--muted)">Modules selon l'offre</span></span></a>
+<a href="#vigne"><em aria-hidden="true"><svg class="g-ic" width="18" height="18" viewBox="0 0 24 24" aria-hidden="true" focusable="false"><use href="#ic-feuille"></use></svg></em><span>Vigne<br><span style="font-size:11.5px;color:var(--muted)">Accueil · Parcelles · Journal</span></span></a>
+<a href="#saisons"><em aria-hidden="true"><svg class="g-ic" width="18" height="18" viewBox="0 0 24 24" aria-hidden="true" focusable="false"><use href="#ic-calendrier"></use></svg></em><span>Saisons &amp; tâches<br><span style="font-size:11.5px;color:var(--muted)">Cycle, heures/ha, trous</span></span></a>
+<a href="#tracteur"><em aria-hidden="true"><svg class="g-ic" width="18" height="18" viewBox="0 0 24 24" aria-hidden="true" focusable="false"><use href="#ic-tracteur"></use></svg></em><span>Tracteur<br><span style="font-size:11.5px;color:var(--muted)">Sessions, entretien, GNR</span></span></a>
+<a href="#phyto"><em aria-hidden="true"><svg class="g-ic" width="18" height="18" viewBox="0 0 24 24" aria-hidden="true" focusable="false"><use href="#ic-eprouvette"></use></svg></em><span>Phyto<br><span style="font-size:11.5px;color:var(--muted)">Registre &amp; catalogue E-Phy</span></span></a>
+<a href="#cave"><em aria-hidden="true"><svg class="g-ic" width="18" height="18" viewBox="0 0 24 24" aria-hidden="true" focusable="false"><use href="#ic-verre"></use></svg></em><span>Cave<br><span style="font-size:11.5px;color:var(--muted)">Le Cuvier, Le Chai, Le millésime</span></span></a>
+<a href="#reserve"><em aria-hidden="true"><svg class="g-ic" width="18" height="18" viewBox="0 0 24 24" aria-hidden="true" focusable="false"><use href="#ic-carton"></use></svg></em><span>La Réserve<br><span style="font-size:11.5px;color:var(--muted)">Intrants, parc à fûts, bilan matière</span></span></a>
+<a href="#planning"><em aria-hidden="true"><svg class="g-ic" width="18" height="18" viewBox="0 0 24 24" aria-hidden="true" focusable="false"><use href="#ic-calendrier"></use></svg></em><span>Planning RH<br><span style="font-size:11.5px;color:var(--muted)">Heures, congés, compteur</span></span></a>
+<a href="#pilotage"><em aria-hidden="true"><svg class="g-ic" width="18" height="18" viewBox="0 0 24 24" aria-hidden="true" focusable="false"><use href="#ic-graphique"></use></svg></em><span>Pilotage<br><span style="font-size:11.5px;color:var(--muted)">Tableau de bord décisionnel</span></span></a>
+<a href="#reglages"><em aria-hidden="true"><svg class="g-ic" width="18" height="18" viewBox="0 0 24 24" aria-hidden="true" focusable="false"><use href="#ic-engrenage"></use></svg></em><span>Réglages<br><span style="font-size:11.5px;color:var(--muted)">Administrer le domaine</span></span></a>
+<a href="#donnees"><em aria-hidden="true"><svg class="g-ic" width="18" height="18" viewBox="0 0 24 24" aria-hidden="true" focusable="false"><use href="#ic-bouclier"></use></svg></em><span>Données &amp; sécurité<br><span style="font-size:11.5px;color:var(--muted)">Sauvegardes, hors-ligne, RGPD</span></span></a>
+<a href="#depannage"><em aria-hidden="true"><svg class="g-ic" width="18" height="18" viewBox="0 0 24 24" aria-hidden="true" focusable="false"><use href="#ic-pansement"></use></svg></em><span>Ça ne marche pas<br><span style="font-size:11.5px;color:var(--muted)">Réponses aux vrais blocages</span></span></a>
+<a href="#glossaire"><em aria-hidden="true"><svg class="g-ic" width="18" height="18" viewBox="0 0 24 24" aria-hidden="true" focusable="false"><use href="#ic-livre"></use></svg></em><span>Glossaire<br><span style="font-size:11.5px;color:var(--muted)">Le vocabulaire de l'app</span></span></a>
 <div class="side-t" style="margin-top:14px">Ailleurs</div>
-<a href="https://mavigneapp.fr/demarrage.html"><em aria-hidden="true">🚀</em><span>Démarrage rapide<br><span style="font-size:11.5px;color:var(--muted)">Les gestes essentiels</span></span></a>
-<a href="https://mavigneapp.fr/"><em aria-hidden="true">🍇</em><span>Ouvrir Ma Vigne<br><span style="font-size:11.5px;color:var(--muted)">mavigneapp.fr</span></span></a>
+<a href="https://mavigneapp.fr/demarrage.html"><em aria-hidden="true"><svg class="g-ic" width="18" height="18" viewBox="0 0 24 24" aria-hidden="true" focusable="false"><use href="#ic-etincelles"></use></svg></em><span>Démarrage rapide<br><span style="font-size:11.5px;color:var(--muted)">Les gestes essentiels</span></span></a>
+<a href="https://mavigneapp.fr/"><em aria-hidden="true"><svg class="g-ic" width="18" height="18" viewBox="0 0 24 24" aria-hidden="true" focusable="false"><use href="#ic-raisin"></use></svg></em><span>Ouvrir Ma Vigne<br><span style="font-size:11.5px;color:var(--muted)">mavigneapp.fr</span></span></a>
 </nav>
 <main class="main" id="contenu" tabindex="-1">
 
@@ -335,29 +454,29 @@ mark{background:rgba(200,176,32,.32);color:var(--cream);border-radius:3px;paddin
       qu'on y trouve seul ce qu'on cherche — utilisez la <b>recherche</b> en haut, elle filtre tout le
       guide en direct.</p>
       <div class="hero-meta">
-        <span class="pill">🔎 Recherche instantanée — touche <kbd>/</kbd></span>
-        <span class="pill">🖨️ Imprimable / PDF</span>
-        <span class="pill">📶 Consultable hors connexion une fois ouverte</span>
-        <span class="pill">🚀 Pressé&nbsp;? <a href="https://mavigneapp.fr/demarrage.html">Démarrage rapide</a></span>
+        <span class="pill"><svg class="g-ic" width="18" height="18" viewBox="0 0 24 24" aria-hidden="true" focusable="false"><use href="#ic-loupe"></use></svg> Recherche instantanée — touche <kbd>/</kbd></span>
+        <span class="pill"><svg class="g-ic" width="18" height="18" viewBox="0 0 24 24" aria-hidden="true" focusable="false"><use href="#ic-imprimante"></use></svg> Imprimable / PDF</span>
+        <span class="pill"><svg class="g-ic" width="18" height="18" viewBox="0 0 24 24" aria-hidden="true" focusable="false"><use href="#ic-antenne"></use></svg> Consultable hors connexion une fois ouverte</span>
+        <span class="pill"><svg class="g-ic" width="18" height="18" viewBox="0 0 24 24" aria-hidden="true" focusable="false"><use href="#ic-etincelles"></use></svg> Pressé&nbsp;? <a href="https://mavigneapp.fr/demarrage.html">Démarrage rapide</a></span>
       </div>
     </div>
 
 
 <section id="demarrer">
   <div class="sec-h">
-    <div class="sec-ic" aria-hidden="true">🧭</div>
+    <div class="sec-ic" aria-hidden="true"><svg class="g-ic" width="18" height="18" viewBox="0 0 24 24" aria-hidden="true" focusable="false"><use href="#ic-boussole"></use></svg></div>
     <div><h2>Premiers pas</h2><div class="sub">Se connecter · circuler · synchroniser</div></div>
   </div>
   <p class="lead">Ma Vigne s'ouvre dans un navigateur, sur téléphone comme sur ordinateur, et s'installe
   comme une application. Une fois chargée, elle fonctionne <b>même sans réseau</b> : c'est le premier
   réflexe à comprendre quand on travaille au fond d'une combe.</p>
 
-  <h3>📲 Installer l'application (2 minutes, à faire une fois)</h3>
+  <h3><svg class="g-ic" width="18" height="18" viewBox="0 0 24 24" aria-hidden="true" focusable="false"><use href="#ic-doigt"></use></svg> Installer l'application (2 minutes, à faire une fois)</h3>
   <p>Rien à télécharger sur un magasin d'applications. L'installation crée simplement une icône sur
   l'écran d'accueil et supprime la barre du navigateur.</p>
   <div class="cards">
     <div class="card">
-      <h4>🤖 Android — Chrome</h4>
+      <h4><svg class="g-ic" width="18" height="18" viewBox="0 0 24 24" aria-hidden="true" focusable="false"><use href="#ic-doigt"></use></svg> Android — Chrome</h4>
       <ol class="steps">
         <li>Ouvrir <span class="path">mavigneapp.fr</span></li>
         <li>Menu <kbd>⋮</kbd> en haut à droite</li>
@@ -365,7 +484,7 @@ mark{background:rgba(200,176,32,.32);color:var(--cream);border-radius:3px;paddin
       </ol>
     </div>
     <div class="card">
-      <h4>🍎 iPhone / iPad — Safari</h4>
+      <h4><svg class="g-ic" width="18" height="18" viewBox="0 0 24 24" aria-hidden="true" focusable="false"><use href="#ic-doigt"></use></svg> iPhone / iPad — Safari</h4>
       <ol class="steps">
         <li>Ouvrir <span class="path">mavigneapp.fr</span> <b>dans Safari</b></li>
         <li>Bouton <kbd>Partager</kbd> (carré avec flèche)</li>
@@ -373,7 +492,7 @@ mark{background:rgba(200,176,32,.32);color:var(--cream);border-radius:3px;paddin
       </ol>
     </div>
     <div class="card">
-      <h4>💻 Ordinateur</h4>
+      <h4><svg class="g-ic" width="18" height="18" viewBox="0 0 24 24" aria-hidden="true" focusable="false"><use href="#ic-bureau"></use></svg> Ordinateur</h4>
       <ol class="steps">
         <li>Ouvrir <span class="path">mavigneapp.fr</span></li>
         <li>Icône d'installation dans la barre d'adresse</li>
@@ -381,10 +500,10 @@ mark{background:rgba(200,176,32,.32);color:var(--cream);border-radius:3px;paddin
       </ol>
     </div>
   </div>
-  <div class="note tip"><span class="ni" aria-hidden="true">💡</span><div>Sur iPhone, l'installation <b>n'est possible que
+  <div class="note tip"><span class="ni" aria-hidden="true"><svg class="g-ic" width="18" height="18" viewBox="0 0 24 24" aria-hidden="true" focusable="false"><use href="#ic-eclair"></use></svg></span><div>Sur iPhone, l'installation <b>n'est possible que
   depuis Safari</b>. Depuis Chrome iOS, l'option n'apparaît pas : c'est une limite d'Apple, pas de l'app.</div></div>
 
-  <h3>🔑 Première connexion</h3>
+  <h3><svg class="g-ic" width="18" height="18" viewBox="0 0 24 24" aria-hidden="true" focusable="false"><use href="#ic-cle"></use></svg> Première connexion</h3>
   <ol class="steps">
     <li><b>Choisir son profil</b>Un écran affiche les personnes du domaine. Touchez votre nom : inutile
     de taper une adresse e-mail. À partir de la deuxième connexion, l’appareil se souvient de vous
@@ -397,17 +516,17 @@ mark{background:rgba(200,176,32,.32);color:var(--cream);border-radius:3px;paddin
     <li><b>Accepter les conditions</b>Une seule fois, à la première ouverture du domaine. Un accusé de
     réception est envoyé par e-mail à l'administrateur.</li>
   </ol>
-  <div class="note warn"><span class="ni" aria-hidden="true">⚠️</span><div>Le mot de passe fourni par l'administrateur ne
+  <div class="note warn"><span class="ni" aria-hidden="true"><svg class="g-ic" width="18" height="18" viewBox="0 0 24 24" aria-hidden="true" focusable="false"><use href="#ic-alerte"></use></svg></span><div>Le mot de passe fourni par l'administrateur ne
   s'affiche <b>qu'une fois</b>, au moment où il crée le compte. S'il est perdu, il n'est pas récupérable :
   l'administrateur en génère un nouveau depuis <span class="path">Réglages › Équipe</span>.</div></div>
 
-  <h3>🧭 Circuler dans l'application</h3>
+  <h3><svg class="g-ic" width="18" height="18" viewBox="0 0 24 24" aria-hidden="true" focusable="false"><use href="#ic-boussole"></use></svg> Circuler dans l'application</h3>
   <p>Toute la navigation tient dans une <b>barre fixe en bas d'écran</b>. Un module = un bouton.
   Ce que vous y voyez dépend de votre rôle et de la formule du domaine.</p>
   <div class="tags">
-    <span class="tag gold">📊 Pilotage</span><span class="tag">🌿 Vigne</span><span class="tag">🚜 Tracteur</span>
-    <span class="tag">🧪 Phyto</span><span class="tag">🍷 Cave</span><span class="tag">📦 Réserve</span>
-    <span class="tag">📅 Planning</span><span class="tag">⚙️ Réglages</span>
+    <span class="tag gold"><svg class="g-ic" width="18" height="18" viewBox="0 0 24 24" aria-hidden="true" focusable="false"><use href="#ic-graphique"></use></svg> Pilotage</span><span class="tag"><svg class="g-ic" width="18" height="18" viewBox="0 0 24 24" aria-hidden="true" focusable="false"><use href="#ic-feuille"></use></svg> Vigne</span><span class="tag"><svg class="g-ic" width="18" height="18" viewBox="0 0 24 24" aria-hidden="true" focusable="false"><use href="#ic-tracteur"></use></svg> Tracteur</span>
+    <span class="tag"><svg class="g-ic" width="18" height="18" viewBox="0 0 24 24" aria-hidden="true" focusable="false"><use href="#ic-eprouvette"></use></svg> Phyto</span><span class="tag"><svg class="g-ic" width="18" height="18" viewBox="0 0 24 24" aria-hidden="true" focusable="false"><use href="#ic-verre"></use></svg> Cave</span><span class="tag"><svg class="g-ic" width="18" height="18" viewBox="0 0 24 24" aria-hidden="true" focusable="false"><use href="#ic-carton"></use></svg> Réserve</span>
+    <span class="tag"><svg class="g-ic" width="18" height="18" viewBox="0 0 24 24" aria-hidden="true" focusable="false"><use href="#ic-calendrier"></use></svg> Planning</span><span class="tag"><svg class="g-ic" width="18" height="18" viewBox="0 0 24 24" aria-hidden="true" focusable="false"><use href="#ic-engrenage"></use></svg> Réglages</span>
   </div>
   <ul class="dot">
     <li>Sur <b>ordinateur</b>, tous les modules autorisés sont affichés côte à côte.</li>
@@ -420,14 +539,14 @@ mark{background:rgba(200,176,32,.32);color:var(--cream);border-radius:3px;paddin
     à la page d'accueil de votre rôle. Il ne ferme jamais l'application par surprise.</li>
   </ul>
 
-  <h3>🔄 Synchronisation &amp; travail hors réseau</h3>
+  <h3><svg class="g-ic" width="18" height="18" viewBox="0 0 24 24" aria-hidden="true" focusable="false"><use href="#ic-rotation"></use></svg> Synchronisation &amp; travail hors réseau</h3>
   <p>Chaque saisie part vers le serveur et redescend sur les autres appareils du domaine, en quelques
   secondes. Un indicateur en haut de l'écran donne l'état à tout moment.</p>
   <div class="tw"><table>
     <tr><th>Indicateur</th><th>Ce que ça veut dire</th><th>Que faire</th></tr>
-    <tr><td><b>🟢 À jour</b></td><td>Tout est enregistré sur le serveur.</td><td>Rien.</td></tr>
-    <tr><td><b>🔵 Envoi en cours</b></td><td>Une saisie part en ce moment.</td><td>Attendre 2&nbsp;secondes.</td></tr>
-    <tr><td><b>🟠 En attente</b></td><td>Pas de réseau : les saisies sont en file.</td><td>Continuer à travailler,
+    <tr><td><b><svg class="g-ic" width="18" height="18" viewBox="0 0 24 24" aria-hidden="true" focusable="false"><use href="#ic-valide"></use></svg> À jour</b></td><td>Tout est enregistré sur le serveur.</td><td>Rien.</td></tr>
+    <tr><td><b><svg class="g-ic" width="18" height="18" viewBox="0 0 24 24" aria-hidden="true" focusable="false"><use href="#ic-info"></use></svg> Envoi en cours</b></td><td>Une saisie part en ce moment.</td><td>Attendre 2&nbsp;secondes.</td></tr>
+    <tr><td><b><svg class="g-ic" width="18" height="18" viewBox="0 0 24 24" aria-hidden="true" focusable="false"><use href="#ic-alerte"></use></svg> En attente</b></td><td>Pas de réseau : les saisies sont en file.</td><td>Continuer à travailler,
     l'envoi repart tout seul dès que le réseau revient.</td></tr>
   </table></div>
   <ul class="dot">
@@ -438,7 +557,7 @@ mark{background:rgba(200,176,32,.32);color:var(--cream);border-radius:3px;paddin
     par appareil, à la connexion suivante.</li>
   </ul>
 
-  <h3>👀 Confort de lecture</h3>
+  <h3><svg class="g-ic" width="18" height="18" viewBox="0 0 24 24" aria-hidden="true" focusable="false"><use href="#ic-oeil"></use></svg> Confort de lecture</h3>
   <ul class="dot">
     <li><b>Thème</b> clair, sombre ou automatique — <span class="path">Réglages › App › Thème</span>.</li>
     <li><b>Mode plein soleil</b> : contraste renforcé pour lire l'écran dehors, en plein midi —
@@ -450,7 +569,7 @@ mark{background:rgba(200,176,32,.32);color:var(--cream);border-radius:3px;paddin
 
 <section id="roles">
   <div class="sec-h">
-    <div class="sec-ic" aria-hidden="true">🔐</div>
+    <div class="sec-ic" aria-hidden="true"><svg class="g-ic" width="18" height="18" viewBox="0 0 24 24" aria-hidden="true" focusable="false"><use href="#ic-cadenas"></use></svg></div>
     <div><h2>Rôles &amp; accès</h2><div class="sub">Qui voit quoi · qui peut modifier quoi</div></div>
   </div>
   <p class="lead">Un membre porte un ou plusieurs rôles, <b>cumulables</b> : on peut être ouvrier
@@ -472,7 +591,7 @@ mark{background:rgba(200,176,32,.32);color:var(--cream);border-radius:3px;paddin
       <td class="ro">Lecture seule — accès au tableau de bord Pilotage.</td></tr>
   </table></div>
 
-  <h3>🔒 Ce qui est réservé à l'administrateur</h3>
+  <h3><svg class="g-ic" width="18" height="18" viewBox="0 0 24 24" aria-hidden="true" focusable="false"><use href="#ic-cadenas"></use></svg> Ce qui est réservé à l'administrateur</h3>
   <ul class="dot">
     <li>Créer, modifier et archiver les <b>membres</b> de l'équipe, et fixer leurs rôles.</li>
     <li>Le <b>Planning RH</b> dans son ensemble : heures, congés, acomptes, compteur annuel.</li>
@@ -480,12 +599,12 @@ mark{background:rgba(200,176,32,.32);color:var(--cream);border-radius:3px;paddin
     <li>Créer et activer les <b>saisons</b>, régler les <b>tâches</b> et leurs heures par hectare.</li>
     <li>La <b>Réserve</b> en écriture, les <b>exports</b>, la suppression d'un tracteur, l'<b>ordre de passage</b>.</li>
   </ul>
-  <div class="note info"><span class="ni" aria-hidden="true">🔐</span><div><b>Les rémunérations sont à part.</b> Les taux
+  <div class="note info"><span class="ni" aria-hidden="true"><svg class="g-ic" width="18" height="18" viewBox="0 0 24 24" aria-hidden="true" focusable="false"><use href="#ic-cadenas"></use></svg></span><div><b>Les rémunérations sont à part.</b> Les taux
   horaires et les prix d'achat du carburant ne vivent pas avec la fiche des membres : ils sont rangés
   dans un espace séparé, <b>lisible par les seuls administrateurs</b>, et ne sont jamais enregistrés sur
   le téléphone ou l'ordinateur. Un collègue curieux ne peut pas y accéder, même en cherchant.</div></div>
 
-  <h3>👤 Un membre qui n'a pas d'adresse e-mail</h3>
+  <h3><svg class="g-ic" width="18" height="18" viewBox="0 0 24 24" aria-hidden="true" focusable="false"><use href="#ic-personne"></use></svg> Un membre qui n'a pas d'adresse e-mail</h3>
   <p>C'est le cas courant des saisonniers. À la création du membre, l'application fabrique une adresse
   interne à partir du prénom : elle sert uniquement d'identifiant technique, personne n'a besoin de
   la connaître ni de la consulter. La connexion se fait en touchant son nom sur l’écran d’accueil.</p>
@@ -507,7 +626,7 @@ mark{background:rgba(200,176,32,.32);color:var(--cream);border-radius:3px;paddin
 
 <section id="formules">
   <div class="sec-h">
-    <div class="sec-ic" aria-hidden="true">💳</div>
+    <div class="sec-ic" aria-hidden="true"><svg class="g-ic" width="18" height="18" viewBox="0 0 24 24" aria-hidden="true" focusable="false"><use href="#ic-euro"></use></svg></div>
     <div><h2>Formules &amp; essai</h2><div class="sub">Quels modules selon l'offre du domaine</div></div>
   </div>
   <p class="lead">Les rôles disent <em aria-hidden="true">qui</em> peut faire quoi ; la formule dit <em aria-hidden="true">quels modules</em>
@@ -515,15 +634,15 @@ mark{background:rgba(200,176,32,.32);color:var(--cream);border-radius:3px;paddin
 
   <div class="tw"><table>
     <tr><th>Formule</th><th>Modules inclus</th></tr>
-    <tr><td><b>Essentiel</b></td><td>🌿 Vigne (Accueil, Parcelles, Journal) · météo · ⚙️ Réglages</td></tr>
-    <tr><td><b>Vigneron</b></td><td>Essentiel <b>+</b> 🚜 Tracteur <b>+</b> 🧪 Phyto</td></tr>
-    <tr><td><b>Domaine</b></td><td>Vigneron <b>+</b> 📅 Planning RH <b>+</b> 📊 Pilotage <b>+</b>
-      🍷 Cave <b>+</b> 📦 Réserve</td></tr>
+    <tr><td><b>Essentiel</b></td><td><svg class="g-ic" width="18" height="18" viewBox="0 0 24 24" aria-hidden="true" focusable="false"><use href="#ic-feuille"></use></svg> Vigne (Accueil, Parcelles, Journal) · météo · <svg class="g-ic" width="18" height="18" viewBox="0 0 24 24" aria-hidden="true" focusable="false"><use href="#ic-engrenage"></use></svg> Réglages</td></tr>
+    <tr><td><b>Vigneron</b></td><td>Essentiel <b>+</b> <svg class="g-ic" width="18" height="18" viewBox="0 0 24 24" aria-hidden="true" focusable="false"><use href="#ic-tracteur"></use></svg> Tracteur <b>+</b> <svg class="g-ic" width="18" height="18" viewBox="0 0 24 24" aria-hidden="true" focusable="false"><use href="#ic-eprouvette"></use></svg> Phyto</td></tr>
+    <tr><td><b>Domaine</b></td><td>Vigneron <b>+</b> <svg class="g-ic" width="18" height="18" viewBox="0 0 24 24" aria-hidden="true" focusable="false"><use href="#ic-calendrier"></use></svg> Planning RH <b>+</b> <svg class="g-ic" width="18" height="18" viewBox="0 0 24 24" aria-hidden="true" focusable="false"><use href="#ic-graphique"></use></svg> Pilotage <b>+</b>
+      <svg class="g-ic" width="18" height="18" viewBox="0 0 24 24" aria-hidden="true" focusable="false"><use href="#ic-verre"></use></svg> Cave <b>+</b> <svg class="g-ic" width="18" height="18" viewBox="0 0 24 24" aria-hidden="true" focusable="false"><use href="#ic-carton"></use></svg> Réserve</td></tr>
   </table></div>
   <p>Un module peut aussi être <b>activé à la carte</b> pour un domaine, indépendamment de la formule :
   c'est un réglage côté GUERETTECH, à demander simplement par e-mail.</p>
 
-  <h3>⏳ Période d'essai</h3>
+  <h3><svg class="g-ic" width="18" height="18" viewBox="0 0 24 24" aria-hidden="true" focusable="false"><use href="#ic-sablier"></use></svg> Période d'essai</h3>
   <ul class="dot">
     <li>Pendant l'essai, un bandeau <b>« J-X »</b> affiche le nombre de jours restants. Il passe du doré
     à l'orange puis au rouge à l'approche de l'échéance.</li>
@@ -532,53 +651,53 @@ mark{background:rgba(200,176,32,.32);color:var(--cream);border-radius:3px;paddin
     <li>La conversion se fait par simple e-mail : un bouton de contact pré-rempli est proposé dans
     l'application.</li>
   </ul>
-  <div class="note tip"><span class="ni" aria-hidden="true">💡</span><div>Vous pouvez continuer à <b>consulter</b> tout ce
+  <div class="note tip"><span class="ni" aria-hidden="true"><svg class="g-ic" width="18" height="18" viewBox="0 0 24 24" aria-hidden="true" focusable="false"><use href="#ic-eclair"></use></svg></span><div>Vous pouvez continuer à <b>consulter</b> tout ce
   qui a été saisi pendant l'essai, y compris les exports PDF, même après l'échéance.</div></div>
 </section>
 
 
 <section id="vigne">
   <div class="sec-h">
-    <div class="sec-ic" aria-hidden="true">🌿</div>
-    <div><h2>Vigne</h2><div class="sub">Accueil 🏠 · Parcelles 🗺️ · Journal 📓</div></div>
+    <div class="sec-ic" aria-hidden="true"><svg class="g-ic" width="18" height="18" viewBox="0 0 24 24" aria-hidden="true" focusable="false"><use href="#ic-feuille"></use></svg></div>
+    <div><h2>Vigne</h2><div class="sub">Accueil <svg class="g-ic" width="18" height="18" viewBox="0 0 24 24" aria-hidden="true" focusable="false"><use href="#ic-maison"></use></svg> · Parcelles <svg class="g-ic" width="18" height="18" viewBox="0 0 24 24" aria-hidden="true" focusable="false"><use href="#ic-carte"></use></svg> · Journal <svg class="g-ic" width="18" height="18" viewBox="0 0 24 24" aria-hidden="true" focusable="false"><use href="#ic-journal"></use></svg></div></div>
   </div>
   <p class="lead">C'est le module du travail quotidien : l'état du domaine, les parcelles à faire et la
   trace de ce qui a été fait. Trois onglets en haut de l'écran, jamais plus loin qu'un geste.</p>
 
-  <h3>🏠 Accueil — l'état du domaine d'un coup d'œil</h3>
+  <h3><svg class="g-ic" width="18" height="18" viewBox="0 0 24 24" aria-hidden="true" focusable="false"><use href="#ic-maison"></use></svg> Accueil — l'état du domaine d'un coup d'œil</h3>
   <div class="cards">
-    <div class="card"><h4>📊 Avancement</h4><ul class="dot">
+    <div class="card"><h4><svg class="g-ic" width="18" height="18" viewBox="0 0 24 24" aria-hidden="true" focusable="false"><use href="#ic-graphique"></use></svg> Avancement</h4><ul class="dot">
       <li>Pourcentage d'avancement de la saison en cours</li>
       <li>Nombre de parcelles actives et surface totale</li>
       <li>Avancement détaillé par tâche, avec accès au détail</li>
       <li>Plusieurs affichages successifs : touchez les points sous la carte pour changer</li>
     </ul></div>
-    <div class="card"><h4>⚡ Tâche prioritaire</h4><ul class="dot">
+    <div class="card"><h4><svg class="g-ic" width="18" height="18" viewBox="0 0 24 24" aria-hidden="true" focusable="false"><use href="#ic-eclair"></use></svg> Tâche prioritaire</h4><ul class="dot">
       <li>Le bandeau indique la tâche du moment décidée par l'administrateur</li>
       <li>Une équipe peut être rattachée à chaque priorité</li>
       <li>Un ouvrier concerné arrive directement sur ses parcelles, filtre posé</li>
       <li>Plusieurs priorités peuvent coexister : chacun voit la sienne</li>
     </ul></div>
-    <div class="card"><h4>🌦️ Météo du vignoble</h4><ul class="dot">
+    <div class="card"><h4><svg class="g-ic" width="18" height="18" viewBox="0 0 24 24" aria-hidden="true" focusable="false"><use href="#ic-nuage"></use></svg> Météo du vignoble</h4><ul class="dot">
       <li>Prévision à 5 jours, calée sur le centre de vos parcelles</li>
       <li>Résolution fine, adaptée au relief de la Côte</li>
       <li>Si le domaine s'étend sur plusieurs communes, une météo <b>par secteur</b> s'affiche</li>
       <li>Une parcelle ouverte utilise d'abord ses propres coordonnées</li>
     </ul></div>
-    <div class="card"><h4>🚨 Alertes</h4><ul class="dot">
+    <div class="card"><h4><svg class="g-ic" width="18" height="18" viewBox="0 0 24 24" aria-hidden="true" focusable="false"><use href="#ic-alerte"></use></svg> Alertes</h4><ul class="dot">
       <li><b>Gel</b> annoncé dans les prochaines heures</li>
       <li><b>Délai de rentrée</b> : parcelles encore interdites d'accès après un traitement</li>
       <li>Matériel en réparation, alertes de cave</li>
       <li>Travaux mécaniques en cours et derniers travaux réalisés</li>
     </ul></div>
   </div>
-  <div class="note tip"><span class="ni" aria-hidden="true">💡</span><div>Le bloc <b>« Ma semaine »</b> résume vos propres
+  <div class="note tip"><span class="ni" aria-hidden="true"><svg class="g-ic" width="18" height="18" viewBox="0 0 24 24" aria-hidden="true" focusable="false"><use href="#ic-eclair"></use></svg></span><div>Le bloc <b>« Ma semaine »</b> résume vos propres
   heures et renvoie au journal. Les raccourcis en bas d'écran mènent directement aux gestes du jour.</div></div>
 
-  <h3>🗺️ Parcelles — suivre et valider le travail</h3>
+  <h3><svg class="g-ic" width="18" height="18" viewBox="0 0 24 24" aria-hidden="true" focusable="false"><use href="#ic-carte"></use></svg> Parcelles — suivre et valider le travail</h3>
   <h4>Trouver la bonne parcelle</h4>
   <ul class="dot">
-    <li><b>Filtres d'état</b> : Toutes · ✅ Finies · 🟡 En cours · Arrachées.</li>
+    <li><b>Filtres d'état</b> : Toutes · <svg class="g-ic" width="18" height="18" viewBox="0 0 24 24" aria-hidden="true" focusable="false"><use href="#ic-valide"></use></svg> Finies · <svg class="g-ic" width="18" height="18" viewBox="0 0 24 24" aria-hidden="true" focusable="false"><use href="#ic-sablier"></use></svg> En cours · Arrachées.</li>
     <li><b>Filtre par tâche</b> : n'afficher que les parcelles concernées par la Taille, le Relevage…</li>
     <li><b>Recherche</b> par nom de parcelle, avec une croix pour tout effacer.</li>
     <li>Bascule <b>Liste</b> / <b>Carte</b>.</li>
@@ -600,7 +719,7 @@ mark{background:rgba(200,176,32,.32);color:var(--cream);border-radius:3px;paddin
   <ul class="dot">
     <li>Chaque parcelle est un polygone <b>coloré selon son avancement réel</b>, en dégradé continu du
     rouge au vert.</li>
-    <li>Toucher un polygone sélectionne la parcelle ; les noms peuvent être masqués (<kbd>🏷 Noms</kbd>).</li>
+    <li>Toucher un polygone sélectionne la parcelle ; les noms peuvent être masqués (<kbd><svg class="g-ic" width="18" height="18" viewBox="0 0 24 24" aria-hidden="true" focusable="false"><use href="#ic-etiquette"></use></svg> Noms</kbd>).</li>
     <li>La carte se recentre automatiquement sur le domaine à l'ouverture.</li>
   </ul>
   <h4>La fiche d'une parcelle</h4>
@@ -616,10 +735,10 @@ mark{background:rgba(200,176,32,.32);color:var(--cream);border-radius:3px;paddin
     <li><b>Réparation ponctuelle</b> : piquet, amarre ou fil remplacé, avec quantité et date.
     Accessible à toute l'équipe — c'est du travail de terrain.</li>
   </ul>
-  <div class="note info"><span class="ni" aria-hidden="true">ℹ️</span><div>Une tâche <b>sans surface concernée</b> s'affiche
+  <div class="note info"><span class="ni" aria-hidden="true"><svg class="g-ic" width="18" height="18" viewBox="0 0 24 24" aria-hidden="true" focusable="false"><use href="#ic-info"></use></svg></span><div>Une tâche <b>sans surface concernée</b> s'affiche
   à 100&nbsp;%. Ce n'est pas un bug : s'il n'y a rien à faire, il n'y a rien à finir.</div></div>
 
-  <h4 style="margin-top:22px">🖨 Le vignoble sur une page</h4>
+  <h4 style="margin-top:22px"><svg class="g-ic" width="18" height="18" viewBox="0 0 24 24" aria-hidden="true" focusable="false"><use href="#ic-imprimante"></use></svg> Le vignoble sur une page</h4>
   <p><b>L'état du vignoble</b> s'édite depuis
   <span class="path">Réglages › App › Documents &amp; impressions</span>. Une ligne par parcelle :
   commune, surface, cépage(s), avancement de la période consultée, dernière intervention du journal,
@@ -642,7 +761,7 @@ mark{background:rgba(200,176,32,.32);color:var(--cream);border-radius:3px;paddin
       Pilotage et dans le rapport de saison.</li>
   </ul>
 
-  <h3>📓 Journal — la trace de ce qui a été fait</h3>
+  <h3><svg class="g-ic" width="18" height="18" viewBox="0 0 24 24" aria-hidden="true" focusable="false"><use href="#ic-journal"></use></svg> Journal — la trace de ce qui a été fait</h3>
   <ul class="dot">
     <li>Bouton <b>＋ Ajouter</b> : date, parcelle(s), tâche, intervenants, durée, commentaire.</li>
     <li>La <b>météo du moment est enregistrée automatiquement</b> avec l'entrée (par secteur si le
@@ -651,7 +770,7 @@ mark{background:rgba(200,176,32,.32);color:var(--cream);border-radius:3px;paddin
     <li>Filtres par intervenant, tâche, parcelle et <b>plage de dates</b>, avec un bouton pour tout effacer.</li>
     <li>Affichage par pages, pour rester fluide même après plusieurs saisons.</li>
   </ul>
-  <div class="note tip"><span class="ni" aria-hidden="true">💡</span><div><b>Règle d'équipe :</b> quand plusieurs personnes
+  <div class="note tip"><span class="ni" aria-hidden="true"><svg class="g-ic" width="18" height="18" viewBox="0 0 24 24" aria-hidden="true" focusable="false"><use href="#ic-eclair"></use></svg></span><div><b>Règle d'équipe :</b> quand plusieurs personnes
   travaillent ensemble, faites <b>une seule entrée</b> avec tous les noms — pas une entrée chacun. Les
   heures et l'avancement se répartissent correctement. Plusieurs équipes peuvent travailler en parallèle
   dans la même journée sur des tâches différentes.</div></div>
@@ -672,13 +791,13 @@ mark{background:rgba(200,176,32,.32);color:var(--cream);border-radius:3px;paddin
 
 <section id="saisons">
   <div class="sec-h">
-    <div class="sec-ic" aria-hidden="true">📅</div>
+    <div class="sec-ic" aria-hidden="true"><svg class="g-ic" width="18" height="18" viewBox="0 0 24 24" aria-hidden="true" focusable="false"><use href="#ic-calendrier"></use></svg></div>
     <div><h2>Saisons &amp; tâches</h2><div class="sub">Le cycle, les heures par hectare, l'entreplantation</div></div>
   </div>
   <p class="lead">Toute l'activité du domaine s'inscrit dans une saison. C'est elle qui détermine les
   tâches à faire, la charge de travail à venir et la façon dont l'avancement est mémorisé.</p>
 
-  <h3>📅 Saison active et saison consultée</h3>
+  <h3><svg class="g-ic" width="18" height="18" viewBox="0 0 24 24" aria-hidden="true" focusable="false"><use href="#ic-calendrier"></use></svg> Saison active et saison consultée</h3>
   <ul class="dot">
     <li>La <b>saison active</b> est celle en cours sur le terrain. Elle est unique et vaut pour tout le
     domaine : c'est l'administrateur qui la bascule.</li>
@@ -688,7 +807,7 @@ mark{background:rgba(200,176,32,.32);color:var(--cream);border-radius:3px;paddin
     <li>Les sessions tracteur et les traitements se rangent tout seuls dans la saison correspondant à
     <b>leur date</b>, jamais dans la saison active du moment de la saisie.</li>
   </ul>
-  <h3>➕ Créer une saison</h3>
+  <h3><svg class="g-ic" width="18" height="18" viewBox="0 0 24 24" aria-hidden="true" focusable="false"><use href="#ic-plus"></use></svg> Créer une saison</h3>
   <p><span class="path">Réglages › Domaine › Saisons › ＋ Nouvelle saison</span></p>
   <ol class="steps">
     <li><b>Type et nom</b>Hiver, Printemps, Été, Automne — le nom reste libre.</li>
@@ -698,24 +817,24 @@ mark{background:rgba(200,176,32,.32);color:var(--cream);border-radius:3px;paddin
     hectare sont affichées à côté.</li>
     <li><b>Activer</b>La saison devient celle de tout le domaine.</li>
   </ol>
-  <div class="note info"><span class="ni" aria-hidden="true">ℹ️</span><div>Ce sont les <b>dates</b> de la saison qui rendent
+  <div class="note info"><span class="ni" aria-hidden="true"><svg class="g-ic" width="18" height="18" viewBox="0 0 24 24" aria-hidden="true" focusable="false"><use href="#ic-info"></use></svg></span><div>Ce sont les <b>dates</b> de la saison qui rendent
   possibles le calcul de charge, l'ETP requis et les échéances par tâche du Pilotage. Une saison sans
   dates fonctionne, mais ces indicateurs restent muets.</div></div>
 
-  <h3>⏱️ Les tâches et leurs heures par hectare</h3>
+  <h3><svg class="g-ic" width="18" height="18" viewBox="0 0 24 24" aria-hidden="true" focusable="false"><use href="#ic-chrono"></use></svg> Les tâches et leurs heures par hectare</h3>
   <p>Les valeurs livrées par défaut suivent un <b>barème conventionnel régional</b>, choisi à
   l'installation dans <span class="path">Réglages › Vigne › Barème de la convention</span>. Chaque
   barème affiche <b>son texte source et sa date</b> ; celui de la Côte de Nuits, en vigne basse, est
   celui d'origine. Elles sont un point de départ, <b>ajustables tâche par tâche</b> dans
   <span class="path">Réglages › Vigne › Tâches</span>.</p>
-  <div class="note tip"><span class="ni" aria-hidden="true">💡</span><div><b>La densité fait le
+  <div class="note tip"><span class="ni" aria-hidden="true"><svg class="g-ic" width="18" height="18" viewBox="0 0 24 24" aria-hidden="true" focusable="false"><use href="#ic-eclair"></use></svg></span><div><b>La densité fait le
   gros de l'écart entre régions.</b> Les barèmes sont tous exprimés à 10 000 pieds/hectare ; vos
   écartements de plantation ramènent ensuite les heures à votre densité réelle, comme le prescrit
   l'accord lui-même. Sans écartements renseignés, rien ne bouge — le coefficient vaut 1. Ils se
   saisissent dans <span class="path">Réglages › Vigne › Vos plantations</span> : la distance d'un
   rang au suivant, puis celle d'un pied au suivant, en mètres. L'application en déduit vos
   pieds/hectare.</div></div>
-  <div class="note"><span class="ni" aria-hidden="true">✎</span><div>Quand vous modifiez une valeur,
+  <div class="note"><span class="ni" aria-hidden="true"><svg class="g-ic" width="18" height="18" viewBox="0 0 24 24" aria-hidden="true" focusable="false"><use href="#ic-crayon"></use></svg></span><div>Quand vous modifiez une valeur,
   l'application affiche <b>les deux chiffres côte à côte</b> — « convention : 70 h/ha · chez vous :
   100 ». Elle ne corrige jamais la vôtre : c'est une <b>référence datée et sourcée</b>, pas une
   règle qui s'impose.</div></div>
@@ -740,7 +859,7 @@ mark{background:rgba(200,176,32,.32);color:var(--cream);border-radius:3px;paddin
     <li>Vous pouvez créer vos <b>propres tâches</b> avec leurs heures.</li>
   </ul>
 
-  <h3>🕳️ Entreplantation — le travail compté en trous</h3>
+  <h3><svg class="g-ic" width="18" height="18" viewBox="0 0 24 24" aria-hidden="true" focusable="false"><use href="#ic-tariere"></use></svg> Entreplantation — le travail compté en trous</h3>
   <p>L'entreplantation remplace les pieds manquants. La mesurer à l'hectare n'a aucun sens : ce qui
   compte est le nombre de trous.</p>
   <ul class="dot">
@@ -751,12 +870,12 @@ mark{background:rgba(200,176,32,.32);color:var(--cream);border-radius:3px;paddin
     <li>Tant qu'aucun trou n'est saisi, le calcul revient au forfait à la surface.</li>
     <li>La mise à jour est <b>immédiate</b> : cocher, décocher ou supprimer une session recalcule tout.</li>
   </ul>
-  <div class="note warn"><span class="ni" aria-hidden="true">⚠️</span><div>Ne confondez pas <b>Entreplantation</b> (remplacer
+  <div class="note warn"><span class="ni" aria-hidden="true"><svg class="g-ic" width="18" height="18" viewBox="0 0 24 24" aria-hidden="true" focusable="false"><use href="#ic-alerte"></use></svg></span><div>Ne confondez pas <b>Entreplantation</b> (remplacer
   les pieds manquants, tâche du cycle) et <b>Complantation</b> (une parcelle plantée en plusieurs
   cépages, information de la fiche parcelle). Les deux mots existent dans l'application et ne désignent
   pas la même chose.</div></div>
 
-  <h3>🏁 Clôturer la campagne</h3>
+  <h3><svg class="g-ic" width="18" height="18" viewBox="0 0 24 24" aria-hidden="true" focusable="false"><use href="#ic-drapeau"></use></svg> Clôturer la campagne</h3>
   <p><span class="path">Réglages › Domaine › Saisons › Clôturer la campagne</span> — l'opération solde
   la campagne en cours et prépare la suivante. L'historique reste intégralement consultable, et les
   comparaisons d'une année sur l'autre s'appuient dessus dans le Pilotage.</p>
@@ -765,14 +884,14 @@ mark{background:rgba(200,176,32,.32);color:var(--cream);border-radius:3px;paddin
 
 <section id="tracteur">
   <div class="sec-h">
-    <div class="sec-ic" aria-hidden="true">🚜</div>
-    <div><h2>Tracteur</h2><div class="sub">Sessions 🚜 · Entretien 🔧</div></div>
+    <div class="sec-ic" aria-hidden="true"><svg class="g-ic" width="18" height="18" viewBox="0 0 24 24" aria-hidden="true" focusable="false"><use href="#ic-tracteur"></use></svg></div>
+    <div><h2>Tracteur</h2><div class="sub">Sessions <svg class="g-ic" width="18" height="18" viewBox="0 0 24 24" aria-hidden="true" focusable="false"><use href="#ic-tracteur"></use></svg> · Entretien <svg class="g-ic" width="18" height="18" viewBox="0 0 24 24" aria-hidden="true" focusable="false"><use href="#ic-outil"></use></svg></div></div>
   </div>
   <p class="lead">Une <b>session</b> = un passage du domaine pour une activité donnée. Elle avance
   parcelle par parcelle, se date toute seule et alimente au passage le carburant, les heures machine et
   l'historique du domaine.</p>
 
-  <h3>🚜 Conduire une session</h3>
+  <h3><svg class="g-ic" width="18" height="18" viewBox="0 0 24 24" aria-hidden="true" focusable="false"><use href="#ic-tracteur"></use></svg> Conduire une session</h3>
   <ol class="steps">
     <li><b>Ouvrir Tracteur, bouton ＋</b>Sur téléphone, le bouton rond en bas à droite propose
     <em aria-hidden="true">Session tracteur</em> ou <em aria-hidden="true">Traitement phyto</em>.</li>
@@ -793,7 +912,7 @@ mark{background:rgba(200,176,32,.32);color:var(--cream);border-radius:3px;paddin
     de la position du conducteur.</li>
   </ul>
 
-  <h3>⏱ Le chrono : la coche est la mesure</h3>
+  <h3><svg class="g-ic" width="18" height="18" viewBox="0 0 24 24" aria-hidden="true" focusable="false"><use href="#ic-chrono"></use></svg> Le chrono : la coche est la mesure</h3>
   <p>Facultatif, activé par le domaine dans <span class="path">Réglages › Tracteur</span>, en tête des
   activités. Sans lui, le barème h/ha prend le relais et rien n'est mesuré. Il n'enregistre
   <b>aucun trajet GPS</b>.</p>
@@ -812,11 +931,11 @@ mark{background:rgba(200,176,32,.32);color:var(--cream);border-radius:3px;paddin
     cochée au barème, sans temps constaté, et l'écran dit lequel. Si cela se produit tous les jours,
     c'est le barème h/ha de l'activité qui est à revoir.</li>
   </ul>
-  <div class="note warn"><span class="ni" aria-hidden="true">⚠️</span><div><b>Ce chrono ne justifie pas
+  <div class="note warn"><span class="ni" aria-hidden="true"><svg class="g-ic" width="18" height="18" viewBox="0 0 24 24" aria-hidden="true" focusable="false"><use href="#ic-alerte"></use></svg></span><div><b>Ce chrono ne justifie pas
   la journée de travail.</b> Il mesure le temps passé dans les parcelles, pour budgéter les travaux.
   Le lavage, les niveaux et le plein n'y sont pas.</div></div>
 
-  <h3>🔁 « Tu prends le tracteur aujourd'hui ? »</h3>
+  <h3><svg class="g-ic" width="18" height="18" viewBox="0 0 24 24" aria-hidden="true" focusable="false"><use href="#ic-rotation"></use></svg> « Tu prends le tracteur aujourd'hui ? »</h3>
   <p>Le tracteur se prend pour la journée entière — on attelle le matin, on dételle le soir — mais le
   lendemain la même personne peut repartir au terrain. À la <b>première ouverture du jour</b>, les
   membres qui cumulent les rôles <b>ouvrier</b> et <b>tractoriste</b> reçoivent la question, et
@@ -829,7 +948,7 @@ mark{background:rgba(200,176,32,.32);color:var(--cream);border-radius:3px;paddin
     moment revenir au Tracteur.</li>
   </ul>
 
-  <h3>🔧 Entretien</h3>
+  <h3><svg class="g-ic" width="18" height="18" viewBox="0 0 24 24" aria-hidden="true" focusable="false"><use href="#ic-outil"></use></svg> Entretien</h3>
   <div class="cards">
     <div class="card"><h4>Cuve GNR</h4><ul class="dot">
       <li>La cuve est celle <b>du domaine</b>, pas d'un tracteur en particulier</li>
@@ -842,14 +961,14 @@ mark{background:rgba(200,176,32,.32);color:var(--cream);border-radius:3px;paddin
       <li><b>Appoint de cuve</b> : litres livrés et prix au litre — réservé à l'administrateur, c'est un
       prix d'achat. Le coût moyen se met à jour tout seul</li>
     </ul></div>
-    <div class="card"><h4>🛠️ Révisions</h4><ul class="dot">
+    <div class="card"><h4><svg class="g-ic" width="18" height="18" viewBox="0 0 24 24" aria-hidden="true" focusable="false"><use href="#ic-outil"></use></svg> Révisions</h4><ul class="dot">
       <li>Compteur d'heures et seuil de révision, machine par machine</li>
       <li>Pastille de couleur selon les heures restantes : vert, orange, rouge</li>
       <li>Fiches d'entretien libres, avec pièces et observations</li>
     </ul></div>
-    <div class="card"><h4>🔩 Réparations</h4><ul class="dot">
+    <div class="card"><h4><svg class="g-ic" width="18" height="18" viewBox="0 0 24 24" aria-hidden="true" focusable="false"><use href="#ic-outil"></use></svg> Réparations</h4><ul class="dot">
       <li>Signaler un tracteur parti chez le réparateur, avec le motif</li>
-      <li>Retour par <b>✅ Rentré</b> : la période est archivée automatiquement</li>
+      <li>Retour par <b><svg class="g-ic" width="18" height="18" viewBox="0 0 24 24" aria-hidden="true" focusable="false"><use href="#ic-valide"></use></svg> Rentré</b> : la période est archivée automatiquement</li>
       <li>Historique consultable par machine ou toutes machines confondues</li>
       <li>Une machine au garage est signalée sur l'Accueil et le Pilotage</li>
     </ul></div>
@@ -880,14 +999,14 @@ mark{background:rgba(200,176,32,.32);color:var(--cream);border-radius:3px;paddin
 
 <section id="phyto">
   <div class="sec-h">
-    <div class="sec-ic" aria-hidden="true">🧪</div>
-    <div><h2>Phyto</h2><div class="sub">Registre 📋 · Catalogue E-Phy 📦</div></div>
+    <div class="sec-ic" aria-hidden="true"><svg class="g-ic" width="18" height="18" viewBox="0 0 24 24" aria-hidden="true" focusable="false"><use href="#ic-eprouvette"></use></svg></div>
+    <div><h2>Phyto</h2><div class="sub">Registre <svg class="g-ic" width="18" height="18" viewBox="0 0 24 24" aria-hidden="true" focusable="false"><use href="#ic-liste"></use></svg> · Catalogue E-Phy <svg class="g-ic" width="18" height="18" viewBox="0 0 24 24" aria-hidden="true" focusable="false"><use href="#ic-carton"></use></svg></div></div>
   </div>
   <p class="lead">Le module Phyto tient le <b>registre réglementaire</b> des traitements et s'appuie sur
   le catalogue officiel <b>E-Phy de l'ANSES</b>, mis à jour chaque semaine. C'est un module à part
   entière, avec sa propre entrée dans la barre du bas.</p>
 
-  <h3>🧪 Enregistrer un traitement</h3>
+  <h3><svg class="g-ic" width="18" height="18" viewBox="0 0 24 24" aria-hidden="true" focusable="false"><use href="#ic-eprouvette"></use></svg> Enregistrer un traitement</h3>
   <p>L'assistant se déroule en trois étapes, dans l'ordre du travail réel.</p>
   <ol class="steps">
     <li><b>Le produit</b>Recherche dans E-Phy par nom commercial, par substance active ou par nom de
@@ -900,7 +1019,7 @@ mark{background:rgba(200,176,32,.32);color:var(--cream);border-radius:3px;paddin
     rentrée retenu, observations. Validation : une session est créée et le registre est complété.</li>
   </ol>
 
-  <h3>📋 Le registre</h3>
+  <h3><svg class="g-ic" width="18" height="18" viewBox="0 0 24 24" aria-hidden="true" focusable="false"><use href="#ic-liste"></use></svg> Le registre</h3>
   <ul class="dot">
     <li>Pour chaque traitement : produit, <b>substance</b>, <b>numéro AMM</b>, dose, parcelles, surface,
     stade, conducteur, DAR et DRE.</li>
@@ -912,13 +1031,13 @@ mark{background:rgba(200,176,32,.32);color:var(--cream);border-radius:3px;paddin
     <li>Le registre s'exporte sous <b>deux formes</b> : le <b>PDF</b> à présenter, et un
     <b>fichier tableur</b> avec une ligne par produit et par parcelle, coordonnées GPS comprises.</li>
   </ul>
-  <div class="note"><span class="ni" aria-hidden="true">📅</span><div>Le format électronique
+  <div class="note"><span class="ni" aria-hidden="true"><svg class="g-ic" width="18" height="18" viewBox="0 0 24 24" aria-hidden="true" focusable="false"><use href="#ic-calendrier"></use></svg></span><div>Le format électronique
   <b>lisible par machine</b> devient le format attendu en contrôle au <b>1<sup>er</sup> janvier
   2027</b> (règlement d'exécution UE 2023/564). Un registre imprimé n'en est pas un. Le fichier porte
   le <b>SIRET de l'exploitation</b> sur chaque ligne : renseignez-le dans
   <span class="path">Réglages › Domaine</span>, sinon le fichier sort incomplet.</div></div>
 
-  <h3>📦 Le catalogue E-Phy</h3>
+  <h3><svg class="g-ic" width="18" height="18" viewBox="0 0 24 24" aria-hidden="true" focusable="false"><use href="#ic-carton"></use></svg> Le catalogue E-Phy</h3>
   <ul class="dot">
     <li>Périmètre large : produits phytopharmaceutiques, <b>adjuvants</b>, <b>matières fertilisantes et
     supports de culture</b>, produits mixtes.</li>
@@ -928,16 +1047,16 @@ mark{background:rgba(200,176,32,.32);color:var(--cream);border-radius:3px;paddin
     <li>La saisie manuelle de produits « maison » a été retirée : la référence est E-Phy, ce qui garantit
     que les doses et les délais sont ceux de l'homologation.</li>
   </ul>
-  <div class="note legal"><span class="ni" aria-hidden="true">⚖️</span><div>Les données du catalogue sont fournies à titre
+  <div class="note legal"><span class="ni" aria-hidden="true"><svg class="g-ic" width="18" height="18" viewBox="0 0 24 24" aria-hidden="true" focusable="false"><use href="#ic-balance"></use></svg></span><div>Les données du catalogue sont fournies à titre
   <b>indicatif et ne sont pas opposables</b>. En cas de doute, l'étiquette du bidon et la décision
   d'autorisation de mise sur le marché font foi. Le registre que vous constituez, lui, est bien votre
   document de traçabilité.</div></div>
 
-  <h3>🟢 Budget cuivre (domaines bio)</h3>
+  <h3><svg class="g-ic" width="18" height="18" viewBox="0 0 24 24" aria-hidden="true" focusable="false"><use href="#ic-valide"></use></svg> Budget cuivre (domaines bio)</h3>
   <p>À la dernière étape de l'assistant, l'application affiche pour chaque parcelle traitée le
   <b>cumul de cuivre métal sur 7 ans</b>, apport en cours inclus, face au plafond de
   <b>28&nbsp;kg/ha</b>. La couleur passe au doré puis au rouge à l'approche du plafond.</p>
-  <div class="note info"><span class="ni" aria-hidden="true">ℹ️</span><div>C'est un <b>avertissement, jamais un blocage</b> :
+  <div class="note info"><span class="ni" aria-hidden="true"><svg class="g-ic" width="18" height="18" viewBox="0 0 24 24" aria-hidden="true" focusable="false"><use href="#ic-info"></use></svg></span><div>C'est un <b>avertissement, jamais un blocage</b> :
   l'enregistrement reste possible en toutes circonstances, pour que le registre reflète ce qui a
   réellement été fait. La décision reste la vôtre.</div></div>
 
@@ -957,7 +1076,7 @@ mark{background:rgba(200,176,32,.32);color:var(--cream);border-radius:3px;paddin
 
 <section id="cave">
   <div class="sec-h">
-    <div class="sec-ic" aria-hidden="true">🍷</div>
+    <div class="sec-ic" aria-hidden="true"><svg class="g-ic" width="18" height="18" viewBox="0 0 24 24" aria-hidden="true" focusable="false"><use href="#ic-verre"></use></svg></div>
     <div><h2>Cave</h2><div class="sub">Le Cuvier · Le Chai · Le millésime</div></div>
   </div>
   <p class="lead">La Cave suit le chemin du raisin, à travers deux espaces qui existent vraiment dans le
@@ -966,15 +1085,15 @@ mark{background:rgba(200,176,32,.32);color:var(--cream);border-radius:3px;paddin
   troisième section, <b>Le millésime</b>, ne se saisit pas : elle relit ce que les deux premières
   ont enregistré.</p>
 
-  <h3>🍇 Le Cuvier — vendange et fermentations</h3>
+  <h3><svg class="g-ic" width="18" height="18" viewBox="0 0 24 24" aria-hidden="true" focusable="false"><use href="#ic-raisin"></use></svg> Le Cuvier — vendange et fermentations</h3>
   <div class="cards">
-    <div class="card"><h4>🍇 Récoltes</h4><ul class="dot">
+    <div class="card"><h4><svg class="g-ic" width="18" height="18" viewBox="0 0 24 24" aria-hidden="true" focusable="false"><use href="#ic-raisin"></use></svg> Récoltes</h4><ul class="dot">
       <li>Saisie des apports par parcelle : poids, date, destination</li>
       <li>Le <b>rendement en kg/ha</b> se calcule tout seul et remonte dans la fiche de la parcelle</li>
       <li>Le millésime est l'<b>année civile de la date</b> de récolte</li>
       <li>Comparaison d'un millésime à l'autre, parcelle par parcelle</li>
     </ul></div>
-    <div class="card"><h4>🫗 Cuvier</h4><ul class="dot">
+    <div class="card"><h4><svg class="g-ic" width="18" height="18" viewBox="0 0 24 24" aria-hidden="true" focusable="false"><use href="#ic-hautbas"></use></svg> Cuvier</h4><ul class="dot">
       <li>État de chaque cuve : volume, contenu, stade</li>
       <li>Suivi des opérations de vinification</li>
       <li>Indicateur de santé de l'ensemble du cuvier, en un coup d'œil</li>
@@ -983,19 +1102,19 @@ mark{background:rgba(200,176,32,.32);color:var(--cream);border-radius:3px;paddin
     logée en bois. En mixte, ce qui ne tient pas dans la cuve passe en barriques. La cuve que vous videz
     reste proposée : élever sur lies là où l'on a fermenté est un usage courant.</li>
     </ul></div>
-    <div class="card"><h4>🔬 Analyses</h4><ul class="dot">
+    <div class="card"><h4><svg class="g-ic" width="18" height="18" viewBox="0 0 24 24" aria-hidden="true" focusable="false"><use href="#ic-microscope"></use></svg> Analyses</h4><ul class="dot">
       <li>Densités, températures, analyses de laboratoire</li>
       <li>Courbes de suivi de fermentation</li>
       <li>Pièce jointe PDF possible sur une analyse</li>
       <li><b>Maturité avant vendange</b> : sucre ou degré au réfractomètre, parcelle par parcelle</li>
     </ul></div>
-    <div class="card"><h4>⚙️ Réglages du Cuvier</h4><ul class="dot">
+    <div class="card"><h4><svg class="g-ic" width="18" height="18" viewBox="0 0 24 24" aria-hidden="true" focusable="false"><use href="#ic-engrenage"></use></svg> Réglages du Cuvier</h4><ul class="dot">
       <li>Déclaration des cuves et de leurs volumes</li>
       <li>Paramètres de suivi propres au domaine</li>
     </ul></div>
   </div>
 
-  <h4 style="margin-top:22px">🍇 Maturité : « où en est-on » quand on n'a pas tout mesuré</h4>
+  <h4 style="margin-top:22px"><svg class="g-ic" width="18" height="18" viewBox="0 0 24 24" aria-hidden="true" focusable="false"><use href="#ic-raisin"></use></svg> Maturité : « où en est-on » quand on n'a pas tout mesuré</h4>
   <p>Au-dessus des courbes, l'onglet <b>Analyses</b> affiche une synthèse à date : la moyenne du
   <b>domaine</b>, celle des <b>rouges</b> et celle des <b>blancs</b>, puis le classement de toutes les
   parcelles, de la plus avancée à la plus en retard. Tapez sur « Rouges » ou « Blancs » pour ne garder
@@ -1019,11 +1138,11 @@ mark{background:rgba(200,176,32,.32);color:var(--cream);border-radius:3px;paddin
       que vous employez le plus. Les valeurs converties depuis l'autre unité sont <b>soulignées en
       pointillé</b> : ce sont des conversions, pas des mesures.</li>
   </ul>
-  <div class="note tip"><span class="ni" aria-hidden="true">💡</span><div>Le coefficient de conversion
+  <div class="note tip"><span class="ni" aria-hidden="true"><svg class="g-ic" width="18" height="18" viewBox="0 0 24 24" aria-hidden="true" focusable="false"><use href="#ic-eclair"></use></svg></span><div>Le coefficient de conversion
   (Réglages du Cuvier, <b>sucre par degré</b>) est <b>enregistré avec chaque analyse</b>. Le modifier
   plus tard ne change donc pas les mesures déjà saisies — seulement les suivantes.</div></div>
 
-  <h3>🛢️ Le Chai — élevage</h3>
+  <h3><svg class="g-ic" width="18" height="18" viewBox="0 0 24 24" aria-hidden="true" focusable="false"><use href="#ic-barrique"></use></svg> Le Chai — élevage</h3>
   <ul class="dot">
     <li><b>Cuvées</b> : liste des vins en élevage, avec leur statut et leur millésime, filtrables.
     Une cuvée peut tenir des <b>fûts</b>, une <b>cuve</b>, ou les deux à la fois.</li>
@@ -1058,18 +1177,18 @@ mark{background:rgba(200,176,32,.32);color:var(--cream);border-radius:3px;paddin
   <p>Pour y loger du vin : ouvrez la fiche de la cuvée, section <b>Contenants</b>, puis
   <b>Ajouter une cuve</b>. Seules les cuves libres sont proposées. Indiquez le volume
   <b>réellement dedans</b> — pas la contenance de la cuve : on remplit rarement à ras.</p>
-  <div class="note"><span class="ni" aria-hidden="true">⏳</span><div><b>Une cuvée en inox n'a plus de
+  <div class="note"><span class="ni" aria-hidden="true"><svg class="g-ic" width="18" height="18" viewBox="0 0 24 24" aria-hidden="true" focusable="false"><use href="#ic-sablier"></use></svg></span><div><b>Une cuvée en inox n'a plus de
   jauge d'ouillage</b>, ne passe jamais au rouge, et ne compte pas dans les alertes du Chai. Ce n'est
   pas un oubli d'affichage : sa fiche l'écrit. Une cuvée <b>mixte</b> — des fûts et une cuve — garde
   sa jauge, mais celle-ci ne porte que sur la part logée en bois, et le dit.</div></div>
-  <div class="note tip"><span class="ni" aria-hidden="true">💡</span><div>Le volume que vous inscrivez
+  <div class="note tip"><span class="ni" aria-hidden="true"><svg class="g-ic" width="18" height="18" viewBox="0 0 24 24" aria-hidden="true" focusable="false"><use href="#ic-eclair"></use></svg></span><div>Le volume que vous inscrivez
   est un <b>fait daté</b>. Corriger plus tard la contenance de la cuve dans les réglages ne réécrit
   aucun volume déjà logé. À la mise en bouteille, fûts et cuves retournent au parc, disponibles.</div></div>
-  <div class="note tip"><span class="ni" aria-hidden="true">💡</span><div>Les récoltes saisies au Cuvier alimentent
+  <div class="note tip"><span class="ni" aria-hidden="true"><svg class="g-ic" width="18" height="18" viewBox="0 0 24 24" aria-hidden="true" focusable="false"><use href="#ic-eclair"></use></svg></span><div>Les récoltes saisies au Cuvier alimentent
   l'<b>historique des rendements</b> visible dans la fiche de chaque parcelle, et le coût par hectare
   calculé dans le Pilotage. Une saisie, plusieurs usages.</div></div>
 
-  <h3>🕰️ Le millésime</h3>
+  <h3><svg class="g-ic" width="18" height="18" viewBox="0 0 24 24" aria-hidden="true" focusable="false"><use href="#ic-chrono"></use></svg> Le millésime</h3>
   <p>Cette troisième section ne demande <b>aucune saisie</b> : tout s'y déduit de ce qui est déjà
   enregistré au Cuvier et au Chai.</p>
   <ul class="dot">
@@ -1079,23 +1198,23 @@ mark{background:rgba(200,176,32,.32);color:var(--cream);border-radius:3px;paddin
     chiffrées entre chaque étape, puis le rendement de chaque parcelle face au maximum de
     l'appellation.</li>
   </ul>
-  <div class="note tip"><span class="ni" aria-hidden="true">💡</span><div><b>Deux pentes valent mieux
+  <div class="note tip"><span class="ni" aria-hidden="true"><svg class="g-ic" width="18" height="18" viewBox="0 0 24 24" aria-hidden="true" focusable="false"><use href="#ic-eclair"></use></svg></span><div><b>Deux pentes valent mieux
   qu'une.</b> La fin de fermentation est projetée sur la moyenne des trois derniers relevés, mais un
   ralentissement est détecté sur les <b>deux</b> derniers : une moyenne lisse un décrochage récent et
   annoncerait « tout va bien » sur une cuve arrêtée depuis deux jours. Le même principe sert à la
   malo, à partir de l'acide malique de vos analyses.</div></div>
-  <div class="note"><span class="ni" aria-hidden="true">🍷</span><div><b>Un millésime est une entité à
+  <div class="note"><span class="ni" aria-hidden="true"><svg class="g-ic" width="18" height="18" viewBox="0 0 24 24" aria-hidden="true" focusable="false"><use href="#ic-verre"></use></svg></span><div><b>Un millésime est une entité à
   part.</b> Une opération porte sur une seule année : on n'ouille pas les fûts de 2025 avec le vin de
   2026. Changer de millésime en tête du formulaire vide donc la sélection de cuvées. Si un seul
   millésime est en cave, ce choix n'apparaît pas et l'écran est exactement celui d'avant.</div></div>
-  <div class="note"><span class="ni" aria-hidden="true">📋</span><div><b>Quatre documents
+  <div class="note"><span class="ni" aria-hidden="true"><svg class="g-ic" width="18" height="18" viewBox="0 0 24 24" aria-hidden="true" focusable="false"><use href="#ic-liste"></use></svg></span><div><b>Quatre documents
   s'impriment</b> depuis <span class="path">Réglages › App › Documents &amp; impressions</span> :
   le <b>contrôle de maturité</b> (avant vendange), le <b>cahier de cuverie</b> (pendant la
   fermentation), le <b>registre des manipulations</b> (enrichissement, sulfitage, adjonctions,
   pratiques de cave, millésime par millésime) et le <b>bilan de campagne</b>. Ce sont des
   <b>états internes</b> : Ma Vigne prépare, l'exploitant déclare.</div></div>
 
-  <h4 style="margin-top:22px">🖨 Sortir la vendange sur papier</h4>
+  <h4 style="margin-top:22px"><svg class="g-ic" width="18" height="18" viewBox="0 0 24 24" aria-hidden="true" focusable="false"><use href="#ic-imprimante"></use></svg> Sortir la vendange sur papier</h4>
   <p>Les deux écrans du Cuvier ont chacun leur document. On les édite depuis
   <span class="path">Réglages › App › Documents &amp; impressions</span>, jamais depuis le Cuvier
   lui-même : tout ce que Ma Vigne sait imprimer se trouve au même endroit.</p>
@@ -1129,14 +1248,14 @@ mark{background:rgba(200,176,32,.32);color:var(--cream);border-radius:3px;paddin
 
 <section id="reserve">
   <div class="sec-h">
-    <div class="sec-ic" aria-hidden="true">📦</div>
+    <div class="sec-ic" aria-hidden="true"><svg class="g-ic" width="18" height="18" viewBox="0 0 24 24" aria-hidden="true" focusable="false"><use href="#ic-carton"></use></svg></div>
     <div><h2>La Réserve</h2><div class="sub">Fûts · Intrants · Bilan matière</div></div>
   </div>
   <p class="lead">La Réserve est la <b>comptabilité matière</b> du domaine : ce qui entre, ce qui sort,
   ce qui reste. Elle a été conçue pour l'exercice qui fait transpirer tout le monde — le contrôle
   documentaire d'un organisme certificateur bio.</p>
 
-  <h3>🧪 Intrants</h3>
+  <h3><svg class="g-ic" width="18" height="18" viewBox="0 0 24 24" aria-hidden="true" focusable="false"><use href="#ic-eprouvette"></use></svg> Intrants</h3>
   <ul class="dot">
     <li>Six familles : <b>phyto</b> et <b>œno</b> pour la comptabilité bio, plus les
     <b>fournitures de vigne</b> (piquet, fil, agrafe), les <b>fournitures de cave</b> (bouchon,
@@ -1150,9 +1269,9 @@ mark{background:rgba(200,176,32,.32);color:var(--cream);border-radius:3px;paddin
     repli manuel si nécessaire. L'œnologie reste en texte libre — E-Phy ne couvre ni le SO₂ ni les levures.</li>
   </ul>
 
-  <h3>📋 Le bilan matière</h3>
+  <h3><svg class="g-ic" width="18" height="18" viewBox="0 0 24 24" aria-hidden="true" focusable="false"><use href="#ic-liste"></use></svg> Le bilan matière</h3>
   <p>C'est le cœur du module. Le stock théorique se calcule sans aucune saisie supplémentaire :</p>
-  <div class="note info"><span class="ni" aria-hidden="true">🧮</span><div><b>Stock = inventaire d'ouverture + achats
+  <div class="note info"><span class="ni" aria-hidden="true"><svg class="g-ic" width="18" height="18" viewBox="0 0 24 24" aria-hidden="true" focusable="false"><use href="#ic-calculatrice"></use></svg></span><div><b>Stock = inventaire d'ouverture + achats
   − consommation.</b> Les <b>sorties sont dérivées automatiquement</b> : les opérations de cave pour
   l'œnologie, le registre phyto (dose × surface traitée) pour les traitements. Rien à ressaisir : ce que
   vous avez déjà noté ailleurs suffit.</div></div>
@@ -1164,7 +1283,7 @@ mark{background:rgba(200,176,32,.32);color:var(--cream);border-radius:3px;paddin
     il pointe une saisie oubliée.</li>
   </ul>
 
-  <div class="note info"><span class="ni" aria-hidden="true">💶</span><div><b>Les prix ne se
+  <div class="note info"><span class="ni" aria-hidden="true"><svg class="g-ic" width="18" height="18" viewBox="0 0 24 24" aria-hidden="true" focusable="false"><use href="#ic-euro"></use></svg></span><div><b>Les prix ne se
   saisissent pas ici.</b> Un achat enregistré dans La Réserve part sans montant et apparaît dans
   <b>Pilotage › Économie › Achats</b>, où vous le chiffrez quand la facture arrive — en une fois,
   avec les fûts et les passages chez le réparateur. C'est voulu : le prix arrive des semaines après
@@ -1173,11 +1292,11 @@ mark{background:rgba(200,176,32,.32);color:var(--cream);border-radius:3px;paddin
   divisés par les quantités. Les lignes sans prix sont <b>écartées du calcul</b> plutôt que comptées
   à zéro : sinon la moyenne serait tirée vers le bas sans en avoir l'air.</div></div>
 
-  <h3>🛒 Le parc à fûts</h3>
+  <h3><svg class="g-ic" width="18" height="18" viewBox="0 0 24 24" aria-hidden="true" focusable="false"><use href="#ic-carton"></use></svg> Le parc à fûts</h3>
   <p>L'onglet s'ouvre sur le <b>parc entier</b> : les fûts vides du magasin <b>et</b> ceux qui sont
   en vin au chai, additionnés. Ce ne sont pas deux comptabilités à réconcilier — ce sont deux états
   du même fût.</p>
-  <div class="note tip"><span class="ni" aria-hidden="true">💡</span><div><b>Entonner, embouteiller
+  <div class="note tip"><span class="ni" aria-hidden="true"><svg class="g-ic" width="18" height="18" viewBox="0 0 24 24" aria-hidden="true" focusable="false"><use href="#ic-eclair"></use></svg></span><div><b>Entonner, embouteiller
   ou retirer une cuvée ne change pas le nombre de fûts du domaine.</b> Seuls <b>acheter</b> et
   <b>se séparer</b> le font. C'est la règle qui permet de faire confiance au total.</div></div>
   <ul class="dot">
@@ -1192,7 +1311,7 @@ mark{background:rgba(200,176,32,.32);color:var(--cream);border-radius:3px;paddin
     elle entame des barriques neuves.</li>
   </ul>
 
-  <h3>📦 L'inventaire, lot par lot</h3>
+  <h3><svg class="g-ic" width="18" height="18" viewBox="0 0 24 24" aria-hidden="true" focusable="false"><use href="#ic-carton"></use></svg> L'inventaire, lot par lot</h3>
   <ul class="dot">
     <li>Les lots sont regroupés <b>par tonnelier</b>, en accordéon, avec un bouton pour tout déplier.</li>
     <li>Filtre par <b>millésime d'achat</b> d'un geste. Le parc, lui, reste volontairement toutes
@@ -1200,11 +1319,11 @@ mark{background:rgba(200,176,32,.32);color:var(--cream);border-radius:3px;paddin
     <li>Les références proposées sont celles <b>du tonnelier sélectionné</b>, pas de mélange.</li>
     <li>Boutons <b>+ / −</b> sur chaque lot pour ajuster les quantités sans rouvrir de formulaire.</li>
     <li>Saisir un lot déjà présent <b>ajoute à l'existant</b> au lieu de créer un doublon.</li>
-    <li><b>📄 Inventaire PDF</b> : totaux par tonnelier, répartition par millésime, total général.
+    <li><b><svg class="g-ic" width="18" height="18" viewBox="0 0 24 24" aria-hidden="true" focusable="false"><use href="#ic-document"></use></svg> Inventaire PDF</b> : totaux par tonnelier, répartition par millésime, total général.
     Consultable par toute l'équipe ; l'ajout reste réservé à l'administrateur.</li>
   </ul>
 
-  <div class="note warn"><span class="ni" aria-hidden="true">⚠️</span><div>L'<b>écriture</b> dans la Réserve est réservée aux
+  <div class="note warn"><span class="ni" aria-hidden="true"><svg class="g-ic" width="18" height="18" viewBox="0 0 24 24" aria-hidden="true" focusable="false"><use href="#ic-alerte"></use></svg></span><div>L'<b>écriture</b> dans la Réserve est réservée aux
   administrateurs. C'est un choix assumé : un bilan matière n'a de valeur au contrôle que si une seule
   main l'alimente.</div></div>
 
@@ -1220,14 +1339,14 @@ mark{background:rgba(200,176,32,.32);color:var(--cream);border-radius:3px;paddin
 
 <section id="planning">
   <div class="sec-h">
-    <div class="sec-ic" aria-hidden="true">📅</div>
+    <div class="sec-ic" aria-hidden="true"><svg class="g-ic" width="18" height="18" viewBox="0 0 24 24" aria-hidden="true" focusable="false"><use href="#ic-calendrier"></use></svg></div>
     <div><h2>Planning RH</h2><div class="sub">Le mois · Les gens · Le cadre</div></div>
   </div>
   <p class="lead">Le Planning gère les horaires réels de l'équipe, les congés, le compteur d'heures et
   les acomptes. C'est un module <b>réservé à l'administrateur</b> ; chaque salarié y voit son propre
   mois, et rien d'autre.</p>
 
-  <h3>📐 Trois onglets, un verbe chacun</h3>
+  <h3><svg class="g-ic" width="18" height="18" viewBox="0 0 24 24" aria-hidden="true" focusable="false"><use href="#ic-balance"></use></svg> Trois onglets, un verbe chacun</h3>
   <ul class="dot">
     <li><b>Le mois</b> — la grille de toute l'équipe. C'est là qu'on tient le planning au jour le jour.</li>
     <li><b>Les gens</b> — une ligne par salarié <b>du mois affiché</b>, sa fiche (mois, congés,
@@ -1238,7 +1357,7 @@ mark{background:rgba(200,176,32,.32);color:var(--cream);border-radius:3px;paddin
   <p>Un salarié qui n'est pas administrateur ne voit <b>aucun onglet</b> : il arrive directement sur
   son mois.</p>
 
-  <h3>👆 Cocher, puis agir</h3>
+  <h3><svg class="g-ic" width="18" height="18" viewBox="0 0 24 24" aria-hidden="true" focusable="false"><use href="#ic-doigt"></use></svg> Cocher, puis agir</h3>
   <p>Dans <b>Le mois</b>, toucher une case la <b>coche</b>. Il n'y a pas de mode à activer avant.</p>
   <ul class="dot">
     <li>Le <b>numéro du jour</b>, en haut de la grille, coche toute l'équipe ce jour-là.</li>
@@ -1253,11 +1372,11 @@ mark{background:rgba(200,176,32,.32);color:var(--cream);border-radius:3px;paddin
   <p>Pour une période plus longue que la vue affichée — trois semaines de congés, deux mois de
   canicule — deux boutons au-dessus de la grille posent <b>Congés sur une période</b> et
   <b>Chaleur sur une période</b>, du jour au jour et pour plusieurs salariés.</p>
-  <div class="note warn"><span class="ni" aria-hidden="true">⚠️</span><div><b>Sur un geste groupé, on ne détruit pas ce qu'on n'a pas relu.</b>
+  <div class="note warn"><span class="ni" aria-hidden="true"><svg class="g-ic" width="18" height="18" viewBox="0 0 24 24" aria-hidden="true" focusable="false"><use href="#ic-alerte"></use></svg></span><div><b>Sur un geste groupé, on ne détruit pas ce qu'on n'a pas relu.</b>
   Les congés, absences et récupérations déjà posés sont <b>préservés</b>, et le message de
   confirmation dit combien. Sur une case unique, choisie à la main, la saisie est remplacée.</div></div>
 
-  <h3>👥 La grille d'équipe</h3>
+  <h3><svg class="g-ic" width="18" height="18" viewBox="0 0 24 24" aria-hidden="true" focusable="false"><use href="#ic-equipe"></use></svg> La grille d'équipe</h3>
   <p>Un seul écran : les salariés en lignes, les jours en colonnes, en vue <b>semaine</b> ou
   <b>mois</b>. Tout se fait depuis là.</p>
   <ul class="dot">
@@ -1272,7 +1391,7 @@ mark{background:rgba(200,176,32,.32);color:var(--cream);border-radius:3px;paddin
     <li>Une <b>synthèse du mois</b> et un <b>récapitulatif annuel</b> cliquable se trouvent sous la grille.</li>
   </ul>
 
-  <h3>👥 Une ligne pour toute une équipe</h3>
+  <h3><svg class="g-ic" width="18" height="18" viewBox="0 0 24 24" aria-hidden="true" focusable="false"><use href="#ic-equipe"></use></svg> Une ligne pour toute une équipe</h3>
   <p>Une vendange, c'est trente personnes pendant dix jours. Créer trente fiches n'aurait aucun
   sens : aucune ne se connectera, aucune n'a de compteur d'annualisation à tenir, et la grille
   deviendrait illisible le seul mois où elle sert vraiment. Un membre peut donc être déclaré comme
@@ -1282,17 +1401,17 @@ mark{background:rgba(200,176,32,.32);color:var(--cream);border-radius:3px;paddin
     <em aria-hidden="true">Équipe collective — une ligne, plusieurs personnes</em>, avec un
     <b>nombre par défaut</b>.</li>
     <li>Ce nombre se change <b>jour par jour</b> depuis la grille : cocher les jours, puis
-    <b>👥 Effectif</b> dans la barre du bas. Un jour à six, le lendemain à quatre.</li>
+    <b><svg class="g-ic" width="18" height="18" viewBox="0 0 24 24" aria-hidden="true" focusable="false"><use href="#ic-equipe"></use></svg> Effectif</b> dans la barre du bas. Un jour à six, le lendemain à quatre.</li>
     <li>L'effectif <b>multiplie ce qui est collectif</b> : les heures du chantier, la capacité de
     l'équipe, le coût, la part de l'avancement.</li>
     <li>Il n'entre <b>jamais</b> dans ce qui est individuel : plafond des 1&nbsp;607&nbsp;h, congés
     payés, heures supplémentaires, maxima légaux hebdomadaires, relevé d'heures, compte de connexion.</li>
   </ul>
-  <div class="note info"><span class="ni" aria-hidden="true">ℹ️</span><div><b>Ce n'est pas un salarié,
+  <div class="note info"><span class="ni" aria-hidden="true"><svg class="g-ic" width="18" height="18" viewBox="0 0 24 24" aria-hidden="true" focusable="false"><use href="#ic-info"></use></svg></span><div><b>Ce n'est pas un salarié,
   c'est une équipe.</b> Renseignez les <b>dates de contrat</b> de la ligne pour qu'elle n'apparaisse
   que pendant le chantier : sans elles, une équipe de vendange reste affichée toute l'année.</div></div>
 
-  <h3>⏱️ Heures travaillées et heures prévues</h3>
+  <h3><svg class="g-ic" width="18" height="18" viewBox="0 0 24 24" aria-hidden="true" focusable="false"><use href="#ic-chrono"></use></svg> Heures travaillées et heures prévues</h3>
   <p>Le module ne se contente pas d'additionner : il compare en permanence le <b>réalisé</b> à la
   <b>référence</b> — c'est-à-dire aux heures prévues sur les jours réellement sous contrat.</p>
   <div class="tw"><table>
@@ -1304,7 +1423,7 @@ mark{background:rgba(200,176,32,.32);color:var(--cream);border-radius:3px;paddin
     <tr><td><b>Écart</b></td><td>Différence entre les deux, en positif ou en négatif, avec sa couleur.</td></tr>
     <tr><td><b>ETP</b></td><td>Équivalent temps plein du salarié sur le mois.</td></tr>
   </table></div>
-  <div class="note"><span class="ni" aria-hidden="true">📄</span><div>Sur la <b>feuille d'heures</b>,
+  <div class="note"><span class="ni" aria-hidden="true"><svg class="g-ic" width="18" height="18" viewBox="0 0 24 24" aria-hidden="true" focusable="false"><use href="#ic-document"></use></svg></span><div>Sur la <b>feuille d'heures</b>,
   le total du mois est ventilé : les heures faites <b>au domaine</b> d'un côté, celles faites
   <b>en formation</b> ou en <b>événement familial</b> de l'autre. Sans cette séparation, la feuille
   affichait un total incluant les journées de centre à côté d'un nombre de jours qui, lui, les
@@ -1316,7 +1435,7 @@ mark{background:rgba(200,176,32,.32);color:var(--cream);border-radius:3px;paddin
   <p>Ces chiffres se retrouvent partout : bandeau d'en-tête, synthèse du mois, récapitulatif annuel,
   vue personnelle du salarié, fiche salarié et relevé d'heures PDF.</p>
 
-  <h3>⚖️ Le cadre légal, affiché en permanence</h3>
+  <h3><svg class="g-ic" width="18" height="18" viewBox="0 0 24 24" aria-hidden="true" focusable="false"><use href="#ic-balance"></use></svg> Le cadre légal, affiché en permanence</h3>
   <p>Les valeurs par défaut suivent la convention nationale <b>Production agricole et CUMA
   (IDCC 7024)</b>. Elles sont <b>paramétrables</b> pour s'adapter à une autre convention&nbsp;:
   <span class="path">Planning › Le cadre</span>.</p>
@@ -1334,7 +1453,7 @@ mark{background:rgba(200,176,32,.32);color:var(--cream);border-radius:3px;paddin
   <p>Les dépassements sont <b>signalés</b> sur la grille et dans la synthèse, au moment où ils
   apparaissent — pas trois mois plus tard.</p>
 
-  <h3>📈 Le compteur annuel (annualisation)</h3>
+  <h3><svg class="g-ic" width="18" height="18" viewBox="0 0 24 24" aria-hidden="true" focusable="false"><use href="#ic-graphique"></use></svg> Le compteur annuel (annualisation)</h3>
   <p>En haut de la fiche d'un salarié, le compteur d'heures suit l'année civile.</p>
   <p><b>Il ne concerne pas tout le monde.</b> Les <b>TESA</b>, <b>saisonniers</b> et <b>extras</b>
   sont payés à l'heure : pas de plafond annuel, pas de modulation, pas de solde à la clôture.
@@ -1353,7 +1472,7 @@ mark{background:rgba(200,176,32,.32);color:var(--cream);border-radius:3px;paddin
     d'un côté ni de l'autre. Deux contrats qui se suivent sans un jour de coupure ne font qu'un.</li>
   </ul>
 
-  <h3>🏖️ Congés payés</h3>
+  <h3><svg class="g-ic" width="18" height="18" viewBox="0 0 24 24" aria-hidden="true" focusable="false"><use href="#ic-soleil"></use></svg> Congés payés</h3>
   <ul class="dot">
     <li>Deux modes de décompte, au choix du domaine :
       <b>jours ouvrables</b> (6 par semaine, référence 30 j/an — c'est le défaut légal) ou
@@ -1365,21 +1484,21 @@ mark{background:rgba(200,176,32,.32);color:var(--cream);border-radius:3px;paddin
     <b>plusieurs salariés à la fois</b>.</li>
   </ul>
 
-  <h3>🚫 Motifs d'absence</h3>
+  <h3><svg class="g-ic" width="18" height="18" viewBox="0 0 24 24" aria-hidden="true" focusable="false"><use href="#ic-interdit"></use></svg> Motifs d'absence</h3>
   <p>Le motif n'est pas décoratif : il détermine l'effet sur le compteur annuel et sur la paie.</p>
   <div class="tw"><table>
     <tr><th>Motif</th><th>Effet</th></tr>
-    <tr><td>🩹 <b>Arrêt de travail</b></td><td>Suspend le contrat : <b>abaisse le plafond annuel</b>. Journée rémunérée.</td></tr>
-    <tr><td>✈️ <b>Congé sans solde</b></td><td>Suspend le contrat. Non rémunéré.</td></tr>
-    <tr><td>👥 <b>Événement familial</b></td><td>Assimilé à du travail effectif. Rémunéré.</td></tr>
-    <tr><td>🎓 <b>Formation</b></td><td>Assimilée à du travail effectif. Rémunérée. C'est le motif
+    <tr><td><svg class="g-ic" width="18" height="18" viewBox="0 0 24 24" aria-hidden="true" focusable="false"><use href="#ic-pansement"></use></svg> <b>Arrêt de travail</b></td><td>Suspend le contrat : <b>abaisse le plafond annuel</b>. Journée rémunérée.</td></tr>
+    <tr><td><svg class="g-ic" width="18" height="18" viewBox="0 0 24 24" aria-hidden="true" focusable="false"><use href="#ic-avion"></use></svg> <b>Congé sans solde</b></td><td>Suspend le contrat. Non rémunéré.</td></tr>
+    <tr><td><svg class="g-ic" width="18" height="18" viewBox="0 0 24 24" aria-hidden="true" focusable="false"><use href="#ic-equipe"></use></svg> <b>Événement familial</b></td><td>Assimilé à du travail effectif. Rémunéré.</td></tr>
+    <tr><td><svg class="g-ic" width="18" height="18" viewBox="0 0 24 24" aria-hidden="true" focusable="false"><use href="#ic-diplome"></use></svg> <b>Formation</b></td><td>Assimilée à du travail effectif. Rémunérée. C'est le motif
     des <b>jours de CFA d'un apprenti</b> : le code du travail (art. L6222-24) les compte comme du
     temps de travail.</td></tr>
-    <tr><td>✕ <b>Absence injustifiée</b></td><td>Heures dues, journée non payée.</td></tr>
-    <tr><td>⏰ <b>Retard</b></td><td>Se saisit par l'<b>heure d'arrivée</b>. Heures manquées dues.</td></tr>
+    <tr><td><svg class="g-ic" width="18" height="18" viewBox="0 0 24 24" aria-hidden="true" focusable="false"><use href="#ic-croix"></use></svg> <b>Absence injustifiée</b></td><td>Heures dues, journée non payée.</td></tr>
+    <tr><td><svg class="g-ic" width="18" height="18" viewBox="0 0 24 24" aria-hidden="true" focusable="false"><use href="#ic-reveil"></use></svg> <b>Retard</b></td><td>Se saisit par l'<b>heure d'arrivée</b>. Heures manquées dues.</td></tr>
     <tr><td>— <b>Absence non précisée</b></td><td>Sans effet sur le plafond annuel.</td></tr>
   </table></div>
-  <div class="note"><span class="ni" aria-hidden="true">🎨</span><div>La couleur du jour suit le
+  <div class="note"><span class="ni" aria-hidden="true"><svg class="g-ic" width="18" height="18" viewBox="0 0 24 24" aria-hidden="true" focusable="false"><use href="#ic-etincelles"></use></svg></span><div>La couleur du jour suit le
   motif : <b>bleu</b> pour une absence assimilée à du travail (formation, événement familial),
   <b>orange</b> pour une absence payée mais non travaillée (arrêt de travail), <b>rouge</b> pour une
   absence qui ne compte pas. Un jour bleu affiche <b>ses heures</b>, pas un zéro : elles entrent dans
@@ -1387,7 +1506,7 @@ mark{background:rgba(200,176,32,.32);color:var(--cream);border-radius:3px;paddin
   travaillé</b> au domaine — la personne n'y était pas, et la déclaration MSA ne doit pas
   l'y compter.</div></div>
 
-  <h3>⏰ Noter un retard</h3>
+  <h3><svg class="g-ic" width="18" height="18" viewBox="0 0 24 24" aria-hidden="true" focusable="false"><use href="#ic-reveil"></use></svg> Noter un retard</h3>
   <p>Ouvrez le jour, choisissez <b>Absence</b> puis <b>Retard</b>, et indiquez l'<b>heure à laquelle
   la personne est arrivée</b>. Rien d'autre : l'écran calcule ce qui manque et vous l'affiche avant
   que vous enregistriez.</p>
@@ -1404,11 +1523,11 @@ mark{background:rgba(200,176,32,.32);color:var(--cream);border-radius:3px;paddin
     bascule seule en <b>absence injustifiée</b>, et le message vous le dit.</li>
     <li>Arriver <b>à l'heure ou en avance</b> n'enregistre rien : aucune absence n'est posée.</li>
   </ul>
-  <div class="note"><span class="ni" aria-hidden="true">📌</span><div>Un retard se saisit
+  <div class="note"><span class="ni" aria-hidden="true"><svg class="g-ic" width="18" height="18" viewBox="0 0 24 24" aria-hidden="true" focusable="false"><use href="#ic-epingle"></use></svg></span><div>Un retard se saisit
   <b>jour par jour</b>. Sur une sélection de plusieurs jours, le motif Retard ne propose pas d'heure
   d'arrivée : les heures prévues ne sont pas les mêmes d'un jour à l'autre.</div></div>
 
-  <h3>💶 Compteur d'heures &amp; acomptes</h3>
+  <h3><svg class="g-ic" width="18" height="18" viewBox="0 0 24 24" aria-hidden="true" focusable="false"><use href="#ic-euro"></use></svg> Compteur d'heures &amp; acomptes</h3>
   <ul class="dot">
     <li><b>Solde de départ</b> : les heures reportées <em aria-hidden="true">avant</em> l'installation de l'application se
     saisissent une fois, sinon le compteur repart de zéro à vie.</li>
@@ -1423,12 +1542,12 @@ mark{background:rgba(200,176,32,.32);color:var(--cream);border-radius:3px;paddin
     depuis les Documents.</li>
   </ul>
 
-  <h3>🌡️ Horaires de chaleur</h3>
+  <h3><svg class="g-ic" width="18" height="18" viewBox="0 0 24 24" aria-hidden="true" focusable="false"><use href="#ic-thermometre"></use></svg> Horaires de chaleur</h3>
   <p>En période de canicule, un panneau dédié bascule un salarié sur des horaires décalés
   (06:00–14:00 par défaut, en continu ou avec pause). Les week-ends, congés et jours de récupération
   sont automatiquement sautés, et le retrait ne touche que les jours marqués canicule.</p>
 
-  <h3>⚖️ Présence, coupure, heures dues</h3>
+  <h3><svg class="g-ic" width="18" height="18" viewBox="0 0 24 24" aria-hidden="true" focusable="false"><use href="#ic-balance"></use></svg> Présence, coupure, heures dues</h3>
   <p>Trois nombres se ressemblent dans le planning et ne veulent pas dire la même chose. Les
   confondre est la première source de malentendu entre un ouvrier, un chef d'exploitation et
   un service paie :</p>
@@ -1440,7 +1559,7 @@ mark{background:rgba(200,176,32,.32);color:var(--cream);border-radius:3px;paddin
   </table>
   <p>Une journée de <b>09:00 à 16:00</b> avec une heure de coupure, c'est <b>7 h de présence</b> et
   <b>6 h dues</b>. C'est le chiffre de droite qui compte pour le bulletin.</p>
-  <div class="note"><span class="ni" aria-hidden="true">ℹ️</span><div>Le mot « pause » est
+  <div class="note"><span class="ni" aria-hidden="true"><svg class="g-ic" width="18" height="18" viewBox="0 0 24 24" aria-hidden="true" focusable="false"><use href="#ic-info"></use></svg></span><div>Le mot « pause » est
   volontairement réservé à la <b>pause légale</b> : vingt minutes minimum au-delà de six heures de
   travail effectif, que le salarié prend dans la plage prévue. La <b>coupure déjeuner</b> est autre
   chose : c'est une organisation décidée par le domaine. Dire « une heure de pause » là où il faut
@@ -1454,7 +1573,7 @@ mark{background:rgba(200,176,32,.32);color:var(--cream);border-radius:3px;paddin
   l'application n'affiche que la durée, sans prétendre savoir quand elle tombe. Un domaine dont la
   coupure change avec la saison peut la préciser mois par mois dans la sixième colonne du CSV.</p>
 
-  <h3>👤 Le relevé d'un seul salarié</h3>
+  <h3><svg class="g-ic" width="18" height="18" viewBox="0 0 24 24" aria-hidden="true" focusable="false"><use href="#ic-personne"></use></svg> Le relevé d'un seul salarié</h3>
   <p>C'est le document qu'on vous demande en premier lors d'un contrôle. Il s'édite depuis
   <span class="path">Réglages › App › Documents &amp; impressions</span> en choisissant
   <b>la personne et le mois</b>, ou depuis le bouton <b>PDF</b> de sa fiche — c'est le même
@@ -1475,12 +1594,12 @@ mark{background:rgba(200,176,32,.32);color:var(--cream);border-radius:3px;paddin
     ni de modulation, qui n'auraient aucun sens.</li>
     <li><b>Deux lignes de signature</b>, salarié et employeur.</li>
   </ul>
-  <div class="note info"><span class="ni" aria-hidden="true">ℹ️</span><div>L'année du compteur
+  <div class="note info"><span class="ni" aria-hidden="true"><svg class="g-ic" width="18" height="18" viewBox="0 0 24 24" aria-hidden="true" focusable="false"><use href="#ic-info"></use></svg></span><div>L'année du compteur
   est celle que vous consultez au Planning ; le mois se choisit dans le panneau. Éditer un relevé
   depuis les Documents <b>ne déplace pas</b> le mois affiché au Planning. Ce relevé est un
   décompte d'heures, <b>pas un bulletin de paie</b> : aucun montant n'y figure.</div></div>
 
-  <h3>🗓️ Le planning de l'année</h3>
+  <h3><svg class="g-ic" width="18" height="18" viewBox="0 0 24 24" aria-hidden="true" focusable="false"><use href="#ic-calendrier"></use></svg> Le planning de l'année</h3>
   <p>Depuis Réglages, onglet App, « Documents &amp; impressions », le document
   <b>Planning de l'année</b> sort le rythme de travail sur douze mois : jours travaillés,
   heures de <b>prise et de fin de service</b>, coupure déjeuner, fermetures du domaine et jours
@@ -1497,7 +1616,7 @@ mark{background:rgba(200,176,32,.32);color:var(--cream);border-radius:3px;paddin
     relevé. Ils apparaissent sur le relevé mensuel d'heures.</li>
   </ul>
 
-  <h3>👤 Le planning de l'année d'un salarié</h3>
+  <h3><svg class="g-ic" width="18" height="18" viewBox="0 0 24 24" aria-hidden="true" focusable="false"><use href="#ic-personne"></use></svg> Le planning de l'année d'un salarié</h3>
   <p>Au même endroit, <b>Planning de l'année d'un salarié</b> sort la même grille pour <b>une seule
   personne</b>, sur une feuille qui porte son nom. C'est le document à donner quand quelqu'un
   demande « mon planning ».</p>
@@ -1511,18 +1630,18 @@ mark{background:rgba(200,176,32,.32);color:var(--cream);border-radius:3px;paddin
     formation de l'autre. Additionner les deux sans le dire ferait croire à un apprenti qu'il doit
     1 607 h de vigne.</li>
   </ul>
-  <div class="note"><span class="ni" aria-hidden="true">🎓</span><div><b>Pour un apprenti en
+  <div class="note"><span class="ni" aria-hidden="true"><svg class="g-ic" width="18" height="18" viewBox="0 0 24 24" aria-hidden="true" focusable="false"><use href="#ic-diplome"></use></svg></span><div><b>Pour un apprenti en
   alternance</b> : saisissez ses semaines de CFA au Planning avec le motif <b>Formation</b>, puis
   éditez ce document. Les semaines en centre et les semaines au domaine apparaissent côte à côte sur
   les douze mois, et le total distingue les deux. Ce qui sera saisi <b>après</b> l'édition ne peut
   évidemment pas y figurer.</div></div>
-  <div class="note warn"><span class="ni" aria-hidden="true">⚠️</span><div>Pour imprimer l'année
+  <div class="note warn"><span class="ni" aria-hidden="true"><svg class="g-ic" width="18" height="18" viewBox="0 0 24 24" aria-hidden="true" focusable="false"><use href="#ic-alerte"></use></svg></span><div>Pour imprimer l'année
   <b>à venir</b>, importez d'abord son planning au format CSV depuis l'onglet Modèles. Sans modèle
   enregistré pour cette année-là, le document se rabat sur le modèle intégré, dont les jours sont
   calés sur un autre calendrier : les jours de semaine ne tombent pas aux mêmes dates. Le document
   vous le signale en clair, mais ne le diffusez pas à l'équipe en l'état.</div></div>
 
-  <h3>📊 Charge &amp; ETP</h3>
+  <h3><svg class="g-ic" width="18" height="18" viewBox="0 0 24 24" aria-hidden="true" focusable="false"><use href="#ic-graphique"></use></svg> Charge &amp; ETP</h3>
   <p>Un bandeau compare, pour le mois en cours, la <b>charge de travail</b> qu'exige la saison à la
   <b>capacité réelle de l'équipe</b>.</p>
   <ul class="dot">
@@ -1533,7 +1652,7 @@ mark{background:rgba(200,176,32,.32);color:var(--cream);border-radius:3px;paddin
     <li>L'effectif présent est <b>lissé au prorata des jours</b> de contrat de chacun.</li>
     <li>Pour l'Entreplantation, la charge s'appuie sur les <b>trous</b> dès qu'ils sont renseignés.</li>
   </ul>
-  <div class="note warn"><span class="ni" aria-hidden="true">⚠️</span><div>Les modèles de semaine livrés par défaut couvrent
+  <div class="note warn"><span class="ni" aria-hidden="true"><svg class="g-ic" width="18" height="18" viewBox="0 0 24 24" aria-hidden="true" focusable="false"><use href="#ic-alerte"></use></svg></span><div>Les modèles de semaine livrés par défaut couvrent
   <b>lundi à vendredi</b>. Si votre équipe travaille régulièrement le samedi, vérifiez la structure de
   semaine avant de vous fier aux calculs de dépassement hebdomadaire.</div></div>
 
@@ -1567,19 +1686,19 @@ mark{background:rgba(200,176,32,.32);color:var(--cream);border-radius:3px;paddin
 
 <section id="pilotage">
   <div class="sec-h">
-    <div class="sec-ic" aria-hidden="true">📊</div>
+    <div class="sec-ic" aria-hidden="true"><svg class="g-ic" width="18" height="18" viewBox="0 0 24 24" aria-hidden="true" focusable="false"><use href="#ic-graphique"></use></svg></div>
     <div><h2>Pilotage</h2><div class="sub">Aujourd'hui · L'année · La campagne · L'équipe &amp; le matériel · Décider · Cave · Économie · Conformité</div></div>
   </div>
   <p class="lead">Le Pilotage est un tableau de bord <b>en lecture seule</b>, pensé pour décider :
   où en est-on, tiendra-t-on les délais, peut-on traiter demain, combien coûte cet hectare. Il ne
   modifie jamais rien — c'est ce qui permet de l'ouvrir sans crainte.</p>
-  <div class="note tip"><span class="ni" aria-hidden="true">📱</span><div>Le <b>grand écran</b> reste le plus
+  <div class="note tip"><span class="ni" aria-hidden="true"><svg class="g-ic" width="18" height="18" viewBox="0 0 24 24" aria-hidden="true" focusable="false"><use href="#ic-doigt"></use></svg></span><div>Le <b>grand écran</b> reste le plus
   confortable pour les tableaux et les graphiques. Mais le Pilotage se lit désormais aussi sur
   <b>téléphone</b> : les chiffres du haut se rangent en une ligne qui défile, le titre de
   l'onglet ne prend plus de place — la barre d'onglets le dit déjà — et le nom du domaine se fait
   discret. Vous n'avez plus à faire défiler un écran entier avant d'atteindre un chiffre.</div></div>
 
-  <h3>🗂️ Des cartes, pas des pavés</h3>
+  <h3><svg class="g-ic" width="18" height="18" viewBox="0 0 24 24" aria-hidden="true" focusable="false"><use href="#ic-dossier"></use></svg> Des cartes, pas des pavés</h3>
   <p>Chaque indicateur est une <b>carte compacte</b>. Elle affiche son <b>chiffre</b> en grand et,
   juste dessous, la ligne qui dit <b>sur quoi il a été calculé</b> : la date, la source, le périmètre
   — « semaine du 12 mai », « heures de barème », « autre date que le pic ». Ces deux choses restent
@@ -1587,24 +1706,24 @@ mark{background:rgba(200,176,32,.32);color:var(--cream);border-radius:3px;paddin
   <p>Les cartes se rangent <b>côte à côte</b>, deux à quatre par ligne selon la largeur de l'écran.
   Touchez-en une pour voir son détail : elle s'ouvre sur toute la largeur, et <b>la précédente se
   referme</b> — c'est ce qui garde le reste de l'onglet lisible d'un coup d'œil.</p>
-  <div class="note"><span class="ni" aria-hidden="true">📐</span><div>À la première ouverture après
+  <div class="note"><span class="ni" aria-hidden="true"><svg class="g-ic" width="18" height="18" viewBox="0 0 24 24" aria-hidden="true" focusable="false"><use href="#ic-balance"></use></svg></span><div>À la première ouverture après
   la mise à jour, toutes les cartes repartent repliées, <b>y compris celles que vous aviez ouvertes
   ou fermées vous-même</b> : la disposition ne veut plus dire la même chose qu'avant. Vos autres
   choix — indicateurs cochés, onglet du graphe, vue du camembert — ne bougent pas.</div></div>
 
-  <h3>ℹ️ Le petit rond « i »</h3>
+  <h3><svg class="g-ic" width="18" height="18" viewBox="0 0 24 24" aria-hidden="true" focusable="false"><use href="#ic-info"></use></svg> Le petit rond « i »</h3>
   <p>Le Pilotage explique beaucoup de choses : d'où vient chaque chiffre, sur quelle fenêtre il est
   calculé, ce qu'il ne dit pas. C'est utile la première fois, encombrant les cent suivantes — on
   finissait par lire la méthode pour atteindre le nombre.</p>
   <p>Ces explications sont désormais rangées derrière un <b>petit rond « i »</b>, posé à côté du
   chiffre concerné. Touchez-le et la fiche s'ouvre. <b>Rien n'est perdu</b> : le texte est intégral,
   simplement plié.</p>
-  <div class="note tip"><span class="ni" aria-hidden="true">💡</span><div>Ce qui <b>cadre</b> un
+  <div class="note tip"><span class="ni" aria-hidden="true"><svg class="g-ic" width="18" height="18" viewBox="0 0 24 24" aria-hidden="true" focusable="false"><use href="#ic-eclair"></use></svg></span><div>Ce qui <b>cadre</b> un
   chiffre reste toujours à l'écran, en une ligne, juste sous lui : sa date, sa source, son périmètre
   — « semaine du 12 mai », « heures de barème », « autre date que le pic ». C'est ce qui empêche de
   lire un chiffre pour un autre, donc ça ne se replie jamais. Seule la <b>méthode</b> se range.</div></div>
 
-  <h3>🧾 Achats — le seul endroit où l'on met les prix</h3>
+  <h3><svg class="g-ic" width="18" height="18" viewBox="0 0 24 24" aria-hidden="true" focusable="false"><use href="#ic-recu"></use></svg> Achats — le seul endroit où l'on met les prix</h3>
   <p>Chaque module dépose ses lignes ici tout seul : un achat saisi dans La Réserve, un lot de
   fûts, une machine rentrée du réparateur. Elles arrivent <b>sans montant</b> — c'est normal,
   la facture n'est pas encore là.</p>
@@ -1615,23 +1734,23 @@ mark{background:rgba(200,176,32,.32);color:var(--cream);border-radius:3px;paddin
     <li><b>Trois états, pas deux</b> : à chiffrer (on ne sait pas encore), <b>sans frais</b>
     (garantie, geste commercial — un zéro saisi exprès), et le montant.</li>
   </ul>
-  <div class="note info"><span class="ni" aria-hidden="true">🎯</span><div><b>Rien ne se crée
+  <div class="note info"><span class="ni" aria-hidden="true"><svg class="g-ic" width="18" height="18" viewBox="0 0 24 24" aria-hidden="true" focusable="false"><use href="#ic-cible"></use></svg></span><div><b>Rien ne se crée
   ici.</b> Le bouton « Achat » ouvre le formulaire du module concerné — celui de La Réserve, du
   parc à fûts ou du tracteur. Il n'en fabrique pas un second : un intrant phyto demande le
   catalogue E-Phy, et deux formulaires pour la même chose finissent toujours par se
   contredire.</div></div>
 
-  <h3>📊 Le verdict, en tête d'Économie</h3>
+  <h3><svg class="g-ic" width="18" height="18" viewBox="0 0 24 24" aria-hidden="true" focusable="false"><use href="#ic-graphique"></use></svg> Le verdict, en tête d'Économie</h3>
   <p>La première carte de l'onglet répond à une seule question : <b>où en êtes-vous</b>. Elle tient en
   une ou deux phrases — l'écart, la projection, l'engagé — et pose les <b>boutons</b> qui vont avec :
   voir quel travail dérape, ouvrir le barème. Le détail du calcul est derrière son petit « i ».</p>
-  <div class="note"><span class="ni" aria-hidden="true">↩</span><div>Quand la cadence affichée vient
+  <div class="note"><span class="ni" aria-hidden="true"><svg class="g-ic" width="18" height="18" viewBox="0 0 24 24" aria-hidden="true" focusable="false"><use href="#ic-retour"></use></svg></span><div>Quand la cadence affichée vient
   de la <b>campagne précédente</b> — parce que celle en cours n'est pas encore assez avancée pour se
-  mesurer elle-même — le titre porte une flèche <b>↩</b> et une ligne sous le texte nomme la campagne
+  mesurer elle-même — le titre porte une flèche <b><svg class="g-ic" width="18" height="18" viewBox="0 0 24 24" aria-hidden="true" focusable="false"><use href="#ic-retour"></use></svg></b> et une ligne sous le texte nomme la campagne
   d'où vient le chiffre. C'est une <b>hypothèse de projection</b>, pas une mesure du moment : elle sera
   remplacée par la vraie dès le seuil atteint.</div></div>
 
-  <h3>🧱 Économie : ce qui est faux, et ce qui se lit de travers</h3>
+  <h3><svg class="g-ic" width="18" height="18" viewBox="0 0 24 24" aria-hidden="true" focusable="false"><use href="#ic-carre"></use></svg> Économie : ce qui est faux, et ce qui se lit de travers</h3>
   <p>L'onglet Économie distingue deux choses qu'il mélangeait auparavant dans une même pile
   d'avertissements.</p>
   <ul class="dot">
@@ -1644,27 +1763,27 @@ mark{background:rgba(200,176,32,.32);color:var(--cream);border-radius:3px;paddin
     les parcelles au-dessus du coût moyen, le surcoût de retard modélisé… Ces remarques sont repliées
     derrière une puce : touchez-la pour les lire toutes.</li>
   </ul>
-  <div class="note"><span class="ni" aria-hidden="true">🧮</span><div>Le <b>surcoût de retard</b> est
+  <div class="note"><span class="ni" aria-hidden="true"><svg class="g-ic" width="18" height="18" viewBox="0 0 24 24" aria-hidden="true" focusable="false"><use href="#ic-calculatrice"></use></svg></span><div>Le <b>surcoût de retard</b> est
   <b>modélisé, jamais payé</b> : il n'entre dans aucun total. Il chiffre ce que coûterait de laisser
   filer, pas ce que vous avez dépensé.</div></div>
   <p>La sous-vue <b>Exercice</b> — le coût d'un bilan à l'autre — suit exactement la même règle :
   la même carte, les mêmes boutons, la même puce. Elle a seulement ses propres postes, parce qu'un
   exercice entier compte aussi les <b>achats d'intrants</b> et demande que le <b>Planning</b> ait été
   ouvert au moins une fois pour connaître vos heures payées.</p>
-  <div class="note warn"><span class="ni" aria-hidden="true">🧾</span><div><b>Ce total n'est pas un
+  <div class="note warn"><span class="ni" aria-hidden="true"><svg class="g-ic" width="18" height="18" viewBox="0 0 24 24" aria-hidden="true" focusable="false"><use href="#ic-recu"></use></svg></span><div><b>Ce total n'est pas un
   compte de résultat.</b> Ma Vigne connaît ce qui passe par elle : les heures payées, le carburant,
   les achats d'intrants. Elle ne connaît <b>ni le fermage, ni les amortissements, ni les assurances,
   ni vos cotisations d'exploitant, ni l'embouteillage, ni les frais généraux</b>. Ce chiffre sert à
   piloter vos charges d'exploitation d'un bilan à l'autre — il ne remplace pas votre comptable et ne
   se compare pas ligne à ligne à son bilan.</div></div>
 
-  <div class="note tip"><span class="ni" aria-hidden="true">📎</span><div>Toutes les cartes
+  <div class="note tip"><span class="ni" aria-hidden="true"><svg class="g-ic" width="18" height="18" viewBox="0 0 24 24" aria-hidden="true" focusable="false"><use href="#ic-lien"></use></svg></span><div>Toutes les cartes
   d'Économie suivent maintenant la même règle : sous le titre, <b>une ligne</b> qui dit sur quoi porte
   le chiffre — « budget de la période », « main-d'œuvre vigne uniquement », « à surface égale ». Le
   <b>comment</b> est derrière le « i » de la carte : l'hypothèse de conversion du prix de revient, le
   détail des colonnes, la différence entre heures payées et heures au champ.</div></div>
 
-  <h3>🔗 Ce qui manque devient un bouton</h3>
+  <h3><svg class="g-ic" width="18" height="18" viewBox="0 0 24 24" aria-hidden="true" focusable="false"><use href="#ic-lien"></use></svg> Ce qui manque devient un bouton</h3>
   <p>Quand un chiffre ne peut pas être juste faute d'une donnée, le Pilotage ne se contente plus de
   vous dire où aller la saisir : il vous y emmène. « Cuve GNR à renseigner », « fiches à passer en
   Inactif », « aucun taux horaire » — ce sont des <b>boutons</b>. Ils ouvrent l'écran concerné, se
@@ -1672,13 +1791,13 @@ mark{background:rgba(200,176,32,.32);color:var(--cream);border-radius:3px;paddin
   <p>C'est la troisième règle du module, après la ligne de cadre et le petit « i » :
   <b>ce qui dit quoi faire est un bouton, jamais une phrase à exécuter de mémoire.</b></p>
 
-  <div class="note tip"><span class="ni" aria-hidden="true">✅</span><div>Les <b>huit onglets</b>
+  <div class="note tip"><span class="ni" aria-hidden="true"><svg class="g-ic" width="18" height="18" viewBox="0 0 24 24" aria-hidden="true" focusable="false"><use href="#ic-valide"></use></svg></span><div>Les <b>huit onglets</b>
   suivent désormais cette règle, y compris <b>Décider</b>, <b>Cave</b> et <b>Conformité</b>. Dans le
   simulateur, chaque étape porte son « i » — il remplace le pavé « comment lire » qui s'intercalait
   entre le titre et le graphique. La <b>légende des couleurs</b>, elle, reste affichée sous le graphe :
   celle-là ne se lit pas, elle se consulte du regard.</div></div>
 
-  <h3>🧭 Comment il se lit</h3>
+  <h3><svg class="g-ic" width="18" height="18" viewBox="0 0 24 24" aria-hidden="true" focusable="false"><use href="#ic-boussole"></use></svg> Comment il se lit</h3>
   <p>Les onglets vont du <b>large au fin</b> : l'année, puis la campagne, puis l'équipe et le matériel,
   puis la décision. Ils portent leur numéro. Après le trait, la Cave, l'Économie et la Conformité
   sont des <b>écrans de détail</b> — pas des niveaux de zoom.</p>
@@ -1706,7 +1825,7 @@ mark{background:rgba(200,176,32,.32);color:var(--cream);border-radius:3px;paddin
     seconde. Un rond rouge sur un chiffre : il ne se calcule pas. Un rond orange : il sort, mais faux.</li>
   </ul>
 
-  <h3>🗓️ L'année</h3>
+  <h3><svg class="g-ic" width="18" height="18" viewBox="0 0 24 24" aria-hidden="true" focusable="false"><use href="#ic-calendrier"></use></svg> L'année</h3>
   <ul class="dot">
     <li><b>Le budget de l'année, mois par mois</b> : deux courbes cumulées. En tireté, le
     <b>prévu</b> — vos heures de barème étalées sur les mois par la fenêtre de chaque travail,
@@ -1714,7 +1833,7 @@ mark{background:rgba(200,176,32,.32);color:var(--cream);border-radius:3px;paddin
     et achats, posés à leur date. Le carburant se pose à la date du <b>plein</b>, pas à celle des
     sessions : ce sont deux évènements datés, et ce ne sont pas les mêmes dates. Les deux totaux étaient déjà sur la carte juste au-dessus ; ce que
     la courbe ajoute, c'est <b>à quel moment</b> l'écart se creuse.
-    <div class="note" style="margin:8px 0 0"><span class="ni" aria-hidden="true">⚠️</span><div><b>L'écart
+    <div class="note" style="margin:8px 0 0"><span class="ni" aria-hidden="true"><svg class="g-ic" width="18" height="18" viewBox="0 0 24 24" aria-hidden="true" focusable="false"><use href="#ic-alerte"></use></svg></span><div><b>L'écart
     entre les deux courbes n'est pas un dépassement.</b> Elles ne couvrent pas le même périmètre : le
     prévu ne chiffre que <b>le travail de vigne</b>, la dépense réelle porte <b>tout le domaine</b> —
     la cave, l'atelier et le bureau compris. Pendant la vendange, la cave tourne à plein : la courbe
@@ -1751,7 +1870,7 @@ mark{background:rgba(200,176,32,.32);color:var(--cream);border-radius:3px;paddin
     Il faut seulement le savoir en lisant le bilan.</li>
   </ul>
 
-  <h3>🧭 Aujourd'hui</h3>
+  <h3><svg class="g-ic" width="18" height="18" viewBox="0 0 24 24" aria-hidden="true" focusable="false"><use href="#ic-boussole"></use></svg> Aujourd'hui</h3>
   <ul class="dot">
     <li><b>Marge sur objectif</b> : en avance ou en retard sur la date de fin visée, d'après la cadence
     réellement constatée.</li>
@@ -1765,7 +1884,7 @@ mark{background:rgba(200,176,32,.32);color:var(--cream);border-radius:3px;paddin
     <li><b>Tâche prioritaire</b> en cours et <b>alertes</b> matériel &amp; cave.</li>
   </ul>
 
-  <h3>🍇 La campagne</h3>
+  <h3><svg class="g-ic" width="18" height="18" viewBox="0 0 24 24" aria-hidden="true" focusable="false"><use href="#ic-raisin"></use></svg> La campagne</h3>
   <ul class="dot">
     <li><b>Jauge de saison</b> et <b>avancement par tâche</b>, avec comparatif de l'année précédente.</li>
     <li><b>Donut de charge</b> : quelle tâche pèse le plus dans ce qui reste.</li>
@@ -1786,10 +1905,10 @@ mark{background:rgba(200,176,32,.32);color:var(--cream);border-radius:3px;paddin
     <li><b>Carte du domaine</b> colorée par avancement, libellés masquables.</li>
   </ul>
 
-  <h3>🎛️ Décider</h3>
+  <h3><svg class="g-ic" width="18" height="18" viewBox="0 0 24 24" aria-hidden="true" focusable="false"><use href="#ic-curseurs"></use></svg> Décider</h3>
   <p>C'est l'onglet qui répond à <b>« qu'est-ce que je fais&nbsp;? »</b>, et il pose deux questions
   bien distinctes.</p>
-  <div class="note tip"><span class="ni" aria-hidden="true">✏️</span><div>Cet onglet s'appelait
+  <div class="note tip"><span class="ni" aria-hidden="true"><svg class="g-ic" width="18" height="18" viewBox="0 0 24 24" aria-hidden="true" focusable="false"><use href="#ic-crayon"></use></svg></span><div>Cet onglet s'appelait
   <b>Simuler</b>. Deux de ses trois cartes sont bien des simulations — rien n'y est enregistré. Mais
   la troisième, <b>l'ordre de passage</b>, s'enregistre et <b>part sur l'écran de toute l'équipe</b> :
   c'est le seul endroit du Pilotage où vous changez ce que les autres voient. Un onglet nommé
@@ -1817,8 +1936,8 @@ mark{background:rgba(200,176,32,.32);color:var(--cream);border-radius:3px;paddin
     Ces propositions-là ne vous sont plus présentées : ce qui reste est comparable.</li>
   </ul>
 
-  <h3>👥 Sur quel effectif Décider compte</h3>
-  <div class="note tip"><span class="ni" aria-hidden="true">💡</span><div><b>L'effectif se lit sur la
+  <h3><svg class="g-ic" width="18" height="18" viewBox="0 0 24 24" aria-hidden="true" focusable="false"><use href="#ic-equipe"></use></svg> Sur quel effectif Décider compte</h3>
+  <div class="note tip"><span class="ni" aria-hidden="true"><svg class="g-ic" width="18" height="18" viewBox="0 0 24 24" aria-hidden="true" focusable="false"><use href="#ic-eclair"></use></svg></span><div><b>L'effectif se lit sur la
   fenêtre du travail, pas sur le calendrier d'aujourd'hui.</b> Si vos quarante vendangeurs sont
   engagés du 26 août au 4 septembre, ils comptent dès aujourd'hui pour l'ordre de passage et la
   répartition de la vendange — même si vous êtes seul dans les rangs ce matin, et même si tout le
@@ -1839,12 +1958,12 @@ mark{background:rgba(200,176,32,.32);color:var(--cream);border-radius:3px;paddin
     Une tournée calculée pour une personne quand quarante seront dans les rangs ne se voit pas à
     l'écran : elle se voit en bout de rang.</li>
   </ul>
-  <div class="note tip"><span class="ni" aria-hidden="true">💡</span><div><b>La date compte autant que
+  <div class="note tip"><span class="ni" aria-hidden="true"><svg class="g-ic" width="18" height="18" viewBox="0 0 24 24" aria-hidden="true" focusable="false"><use href="#ic-eclair"></use></svg></span><div><b>La date compte autant que
   le nombre.</b> Certains travaux ont une fenêtre qu'on ne rattrape pas : la vendange se fait quand
   le raisin est mûr, ou elle ne se fait pas. Poser du renfort trop tôt coûte plein tarif sans rien
   sauver — l'écran distingue donc les propositions qui bouclent de celles qui ne bouclent pas, avant
   de parler d'euros.</div></div>
-  <h3>👥 Équipe</h3>
+  <h3><svg class="g-ic" width="18" height="18" viewBox="0 0 24 24" aria-hidden="true" focusable="false"><use href="#ic-equipe"></use></svg> Équipe</h3>
   <ul class="dot">
     <li>Composition de l'équipe et <b>présences du jour</b>. « 3 présents sur 4 » compte des
     <b>fiches</b> ; le nombre de <b>personnes</b> apparaît en dessous quand une équipe collective
@@ -1859,7 +1978,7 @@ mark{background:rgba(200,176,32,.32);color:var(--cream);border-radius:3px;paddin
     une décision du jour — ni l'un ni l'autre ne se lit à l'échelle d'un parc de machines.</li>
   </ul>
 
-  <h3>🌦️ La fenêtre de traitement</h3>
+  <h3><svg class="g-ic" width="18" height="18" viewBox="0 0 24 24" aria-hidden="true" focusable="false"><use href="#ic-nuage"></use></svg> La fenêtre de traitement</h3>
   <p>C'est l'indicateur qu'on regarde le soir en se demandant s'il faut sortir le pulvérisateur.
   Il vit donc dans <b>Aujourd'hui</b>, sur la carte <b>« Traiter&nbsp;? »</b> : le verdict du jour en
   grand, et les cinq jours à venir sous « les 5 prochains jours », qu'on déplie d'un doigt.
@@ -1874,19 +1993,19 @@ mark{background:rgba(200,176,32,.32);color:var(--cream);border-radius:3px;paddin
     <li>Probabilité de pluie affichée par créneau.</li>
   </ul>
 
-  <h3>🍷 Cave</h3>
+  <h3><svg class="g-ic" width="18" height="18" viewBox="0 0 24 24" aria-hidden="true" focusable="false"><use href="#ic-verre"></use></svg> Cave</h3>
   <p>Trois questions, dans cet ordre : <b>ce qui presse</b> aujourd'hui — ouillages en retard, cuves
   à mesurer, fermentation qui ralentit, cuvées à soutirer ; <b>où en est le millésime</b> — de la
   benne à la bouteille, rendement face au maximum de l'appellation, comparaison avec l'année
   précédente ; et <b>ce que coûte le parc à fûts</b> — pyramide des âges, part des anges,
   renouvellement à prévoir.</p>
-  <div class="note"><span class="ni" aria-hidden="true">🕰️</span><div>Une campagne contient
+  <div class="note"><span class="ni" aria-hidden="true"><svg class="g-ic" width="18" height="18" viewBox="0 0 24 24" aria-hidden="true" focusable="false"><use href="#ic-chrono"></use></svg></span><div>Une campagne contient
   <b>deux millésimes</b> : celui qui rentre en septembre et celui qui finit son élevage. En début de
   campagne, l'écran montre donc le millésime <b>qui est en cave</b>, et le dit explicitement plutôt
   que d'afficher des colonnes vides.</div></div>
-  <h3>💶 Économie · ⚖️ Conformité</h3>
+  <h3><svg class="g-ic" width="18" height="18" viewBox="0 0 24 24" aria-hidden="true" focusable="false"><use href="#ic-euro"></use></svg> Économie · <svg class="g-ic" width="18" height="18" viewBox="0 0 24 24" aria-hidden="true" focusable="false"><use href="#ic-balance"></use></svg> Conformité</h3>
   <div class="cards">
-    <div class="card"><h4>💶 Économie</h4><ul class="dot">
+    <div class="card"><h4><svg class="g-ic" width="18" height="18" viewBox="0 0 24 24" aria-hidden="true" focusable="false"><use href="#ic-euro"></use></svg> Économie</h4><ul class="dot">
       <li>Synthèse des coûts de la saison</li>
       <li><b>Coût par hectare et par parcelle</b> : main-d'œuvre, tracteur, carburant, phyto</li>
       <li>S'appuie sur les taux horaires et le prix réel du GNR</li>
@@ -1895,14 +2014,14 @@ mark{background:rgba(200,176,32,.32);color:var(--cream);border-radius:3px;paddin
       litre près ; c'est sa ventilation par parcelle qui reste proportionnelle, faute d'une donnée
       qui dirait quels litres ont brûlé sur quelle parcelle</li>
     </ul></div>
-    <div class="card"><h4>⚖️ Conformité</h4><ul class="dot">
+    <div class="card"><h4><svg class="g-ic" width="18" height="18" viewBox="0 0 24 24" aria-hidden="true" focusable="false"><use href="#ic-balance"></use></svg> Conformité</h4><ul class="dot">
       <li><b>Cuivre</b> : cumul sur 7 ans face au plafond de 28 kg/ha</li>
       <li><b>Passages phyto / IFT</b> par parcelle</li>
       <li><b>Registre phyto</b> : les derniers passages, en détail de l'agrégat ci-dessus</li>
       <li><b>Délai de rentrée</b> : parcelles encore interdites d'accès</li>
     </ul></div>
   </div>
-  <div class="note info"><span class="ni" aria-hidden="true">🔐</span><div>Les coûts s'appuient sur des données
+  <div class="note info"><span class="ni" aria-hidden="true"><svg class="g-ic" width="18" height="18" viewBox="0 0 24 24" aria-hidden="true" focusable="false"><use href="#ic-cadenas"></use></svg></span><div>Les coûts s'appuient sur des données
   <b>réservées aux administrateurs</b>. Un profil Pilotage sans droits d'administration verra ces
   montants à zéro : ce n'est pas une panne, c'est la protection des salaires.</div></div>
 
@@ -1917,7 +2036,7 @@ mark{background:rgba(200,176,32,.32);color:var(--cream);border-radius:3px;paddin
       dessous, le travail déjà fait ne ressemble pas assez à celui de toute la période&nbsp;: la
       taille et le relevage n'ont pas la même cadence, et janvier ne prédit pas juin.</li>
       <li><b>La même période de la campagne précédente</b>, si elle est archivée. La ligne est alors
-      précédée d'un <b>↩</b> et nomme la campagne d'origine. C'est une <b>hypothèse de
+      précédée d'un <b><svg class="g-ic" width="18" height="18" viewBox="0 0 24 24" aria-hidden="true" focusable="false"><use href="#ic-retour"></use></svg></b> et nomme la campagne d'origine. C'est une <b>hypothèse de
       projection</b>, pas une mesure du moment&nbsp;— elle est remplacée par la vraie dès le seuil
       atteint.</li>
       <li><b>Rien</b>, et l'écran l'écrit plutôt que d'afficher un chiffre inventé.</li>
@@ -1932,26 +2051,26 @@ mark{background:rgba(200,176,32,.32);color:var(--cream);border-radius:3px;paddin
   exactement sur ce qui est déjà engagé. Une projection ne peut pas contredire une dépense
   déjà faite, sur la même carte.</div>
 
-  <h3>🗃️ Archives des campagnes</h3>
+  <h3><svg class="g-ic" width="18" height="18" viewBox="0 0 24 24" aria-hidden="true" focusable="false"><use href="#ic-dossier"></use></svg> Archives des campagnes</h3>
   <p>Toutes les campagnes sur un <b>même axe, du 1<sup>er</sup> août au 31 juillet</b> : de récolte à récolte, l'hiver n'est pas coupé en deux par le 31 décembre. Empilées, elles répondent à la question qui compte l'année suivante : <b>est-ce qu'on s'y est pris plus tôt ?</b></p>
   <p>Les heures affichées viennent des instantanés pris à la clôture de chaque campagne — une période jamais clôturée apparaît sur la frise sans compter d'heures. C'est aussi ici que se compare l'avancement de deux saisons.</p>
   <div class="note"><b>Pourquoi les vieilles périodes ont disparu des Réglages.</b> <span class="path">Réglages › Campagne</span> n'affiche que les dix-huit derniers mois, plus ce qui est en cours ou à venir : au-delà, la liste devenait illisible. Rien n'est supprimé — tout est ici.</div>
 
-  <h3>🧰 Outils du pilotage</h3>
+  <h3><svg class="g-ic" width="18" height="18" viewBox="0 0 24 24" aria-hidden="true" focusable="false"><use href="#ic-outil"></use></svg> Outils du pilotage</h3>
   <p>Le bouton <b>Outils</b>, en bout de barre d'onglets, ouvre ce qu'on ne consulte pas tous les
   jours : les <b>Archives</b> décrites ci-dessus, et le <b>Paramétrage</b> — objectifs de fin,
   fenêtres des tâches et hypothèses de calcul.</p>
   <p>Dans le tableau des <b>fenêtres des tâches</b>, chaque ligne porte son origine : <b>auto</b>
   (l'enchaînement par défaut), <b>• perso</b> (les dates que vous avez saisies), et
-  <b>⚠ hors période</b>.</p>
-  <div class="note"><span class="ni" aria-hidden="true">⚠️</span><div><b>« Hors période » veut dire
+  <b><svg class="g-ic" width="18" height="18" viewBox="0 0 24 24" aria-hidden="true" focusable="false"><use href="#ic-alerte"></use></svg> hors période</b>.</p>
+  <div class="note"><span class="ni" aria-hidden="true"><svg class="g-ic" width="18" height="18" viewBox="0 0 24 24" aria-hidden="true" focusable="false"><use href="#ic-alerte"></use></svg></span><div><b>« Hors période » veut dire
   que la consigne enregistrée ne s'applique pas ici.</b> Une fenêtre fixée sur mai n'existe pas dans
   une période d'hiver. L'application retombe alors sur la fenêtre par défaut et vous le signale, au
   lieu d'écraser tout le travail sur un seul jour — ce qui faisait apparaître des pics de plusieurs
   dizaines de personnes sur une barre large d'un pixel. Si vous voyez ce marqueur, ouvrez la période
   concernée et corrigez les dates, ou laissez-la en auto.</div></div>
 
-  <h3>🎛️ Chacun son cockpit</h3>
+  <h3><svg class="g-ic" width="18" height="18" viewBox="0 0 24 24" aria-hidden="true" focusable="false"><use href="#ic-curseurs"></use></svg> Chacun son cockpit</h3>
   <p>Chaque tuile peut être affichée ou masquée, <b>onglet par onglet</b>, via
   <b>« Choisir les indicateurs »</b>. Le réglage est <b>personnel</b> : il n'affecte que votre écran et
   vous suit d'une session à l'autre.</p>
@@ -1975,14 +2094,14 @@ mark{background:rgba(200,176,32,.32);color:var(--cream);border-radius:3px;paddin
 
 <section id="reglages">
   <div class="sec-h">
-    <div class="sec-ic" aria-hidden="true">⚙️</div>
+    <div class="sec-ic" aria-hidden="true"><svg class="g-ic" width="18" height="18" viewBox="0 0 24 24" aria-hidden="true" focusable="false"><use href="#ic-engrenage"></use></svg></div>
     <div><h2>Réglages</h2><div class="sub">Domaine · Vigne · Équipe · Tracteur · App</div></div>
   </div>
   <p class="lead">Cinq onglets pour l'administrateur ; les autres membres n'y trouvent que
   l'onglet <b>App</b>, avec leur mot de passe, l'affichage et l'aide. C'est aussi d'ici que s'ouvre
   cette documentation.</p>
 
-  <h3>🏡 Domaine</h3>
+  <h3><svg class="g-ic" width="18" height="18" viewBox="0 0 24 24" aria-hidden="true" focusable="false"><use href="#ic-maison"></use></svg> Domaine</h3>
   <ul class="dot">
     <li><b>Nom du domaine</b> — repris sur l'accueil et en tête de tous les exports PDF.</li>
     <li><b>Localisation</b> pour la météo, avec un bouton <b>Centrer sur mes parcelles</b>.</li>
@@ -1990,7 +2109,7 @@ mark{background:rgba(200,176,32,.32);color:var(--cream);border-radius:3px;paddin
     <li><b>Saisons</b> : créer, dater, activer, consulter l'<b>historique</b>, <b>clôturer la campagne</b>.</li>
   </ul>
 
-  <h3>🌿 Vigne</h3>
+  <h3><svg class="g-ic" width="18" height="18" viewBox="0 0 24 24" aria-hidden="true" focusable="false"><use href="#ic-feuille"></use></svg> Vigne</h3>
   <ul class="dot">
     <li><b>Tâches</b> : heures par hectare, passages prévus par saison, temps par trou de
     l'entreplantation, création de tâches propres au domaine.</li>
@@ -2005,7 +2124,7 @@ mark{background:rgba(200,176,32,.32);color:var(--cream);border-radius:3px;paddin
     communes sont actives, une météo par secteur apparaît sur l'Accueil.</li>
   </ul>
 
-  <h3>👥 Équipe</h3>
+  <h3><svg class="g-ic" width="18" height="18" viewBox="0 0 24 24" aria-hidden="true" focusable="false"><use href="#ic-equipe"></use></svg> Équipe</h3>
   <ul class="dot">
     <li><b>Ajouter un membre</b> : nom, adresse e-mail (facultative pour un saisonnier), rôles cumulables.</li>
     <li>Le <b>mot de passe initial</b> s'affiche une seule fois : notez-le avant de fermer.</li>
@@ -2036,7 +2155,7 @@ mark{background:rgba(200,176,32,.32);color:var(--cream);border-radius:3px;paddin
   <p>Quand un contrat arrive à terme, un <b>rappel</b> apparaît en tête de la fiche et dans la liste des
   membres, trente jours avant, avec de quoi renouveler ou acter l'arrêt en un geste.</p>
 
-  <h3>🚜 Tracteur</h3>
+  <h3><svg class="g-ic" width="18" height="18" viewBox="0 0 24 24" aria-hidden="true" focusable="false"><use href="#ic-tracteur"></use></svg> Tracteur</h3>
   <ul class="dot">
     <li><b>Parc</b> : machines, compteurs d'heures, seuils de révision.</li>
     <li><b>Activités</b> : la liste proposée aux tractoristes, le barème h/ha de chacune, et le champ
@@ -2046,7 +2165,7 @@ mark{background:rgba(200,176,32,.32);color:var(--cream);border-radius:3px;paddin
     <li>Conducteurs autorisés, <b>prix du litre de GNR</b> (saisi à chaque appoint de cuve).</li>
   </ul>
 
-  <h3>⚙️ App — accessible à tous</h3>
+  <h3><svg class="g-ic" width="18" height="18" viewBox="0 0 24 24" aria-hidden="true" focusable="false"><use href="#ic-engrenage"></use></svg> App — accessible à tous</h3>
   <ul class="dot">
     <li><b>Changer mon mot de passe.</b></li>
     <li><b>Thème</b> clair / sombre / automatique, <b>mode plein soleil</b>, <b>notifications</b>.</li>
@@ -2071,11 +2190,11 @@ mark{background:rgba(200,176,32,.32);color:var(--cream);border-radius:3px;paddin
     <li><b>Données brutes</b> — pour votre tableur ou votre comptable : journal des travaux,
     avancement par parcelle, sauvegarde complète, restauration.</li>
   </ul>
-  <div class="note tip"><span class="ni" aria-hidden="true">💡</span><div>Un document dont le module
+  <div class="note tip"><span class="ni" aria-hidden="true"><svg class="g-ic" width="18" height="18" viewBox="0 0 24 24" aria-hidden="true" focusable="false"><use href="#ic-eclair"></use></svg></span><div>Un document dont le module
   est masqué pour vous n'apparaît pas dans la liste : inutile de proposer un registre de cave à un
   domaine qui ne vinifie pas.</div></div>
 
-  <div class="note warn"><span class="ni" aria-hidden="true">⚠️</span><div>La <b>zone dangereuse</b> en bas de l'onglet App
+  <div class="note warn"><span class="ni" aria-hidden="true"><svg class="g-ic" width="18" height="18" viewBox="0 0 24 24" aria-hidden="true" focusable="false"><use href="#ic-alerte"></use></svg></span><div>La <b>zone dangereuse</b> en bas de l'onglet App
   réinitialise l'application sur <em aria-hidden="true">cet appareil</em>. Les données du domaine restent intactes sur le
   serveur, mais l'appareil devra tout retélécharger. À n'utiliser qu'en dernier recours.</div></div>
 
@@ -2091,14 +2210,14 @@ mark{background:rgba(200,176,32,.32);color:var(--cream);border-radius:3px;paddin
 
 <section id="donnees">
   <div class="sec-h">
-    <div class="sec-ic" aria-hidden="true">🛡️</div>
+    <div class="sec-ic" aria-hidden="true"><svg class="g-ic" width="18" height="18" viewBox="0 0 24 24" aria-hidden="true" focusable="false"><use href="#ic-bouclier"></use></svg></div>
     <div><h2>Données &amp; sécurité</h2><div class="sub">Sauvegardes · hors-ligne · confidentialité</div></div>
   </div>
   <p class="lead">Une saison de saisies, c'est un an de travail. Plusieurs protections indépendantes
   se superposent pour qu'aucune fausse manœuvre, aucune coupure réseau et aucun appareil perdu ne puisse
   emporter votre historique.</p>
 
-  <h3>🛡️ Ce qui protège vos saisies</h3>
+  <h3><svg class="g-ic" width="18" height="18" viewBox="0 0 24 24" aria-hidden="true" focusable="false"><use href="#ic-bouclier"></use></svg> Ce qui protège vos saisies</h3>
   <ul class="dot">
     <li><b>Aucun écrasement par du vide.</b> Si un appareil tente d'envoyer une liste vide ou brutalement
     amputée par-dessus des données existantes, l'envoi est refusé. Une suppression faite à la main passe
@@ -2112,7 +2231,7 @@ mark{background:rgba(200,176,32,.32);color:var(--cream);border-radius:3px;paddin
     toutes les saisons.</li>
   </ul>
 
-  <h3>🖨️ Où sortir un document</h3>
+  <h3><svg class="g-ic" width="18" height="18" viewBox="0 0 24 24" aria-hidden="true" focusable="false"><use href="#ic-imprimante"></use></svg> Où sortir un document</h3>
   <p>Les documents se déclenchaient autrefois depuis quatre points d'entrée répartis sur six écrans :
   un bouton dans le Cuvier, un autre dans les outils du Tracteur, deux dans La Réserve, une section
   dans les Réglages. Il fallait savoir où chacun avait été rangé. Ils sont maintenant réunis dans
@@ -2120,22 +2239,22 @@ mark{background:rgba(200,176,32,.32);color:var(--cream);border-radius:3px;paddin
   <b>par usage et non par module</b>.</p>
   <div class="tw"><table>
     <tr><th>Famille</th><th>Ce qu'on y trouve</th></tr>
-    <tr><td>📋 <b>Obligatoire</b></td><td>Ce que vous devez pouvoir sortir en contrôle : registre
+    <tr><td><svg class="g-ic" width="18" height="18" viewBox="0 0 24 24" aria-hidden="true" focusable="false"><use href="#ic-liste"></use></svg> <b>Obligatoire</b></td><td>Ce que vous devez pouvoir sortir en contrôle : registre
     phyto en PDF et en fichier, synthèse cuivre, relevé mensuel d'heures.</td></tr>
-    <tr><td>📊 <b>Suivi du domaine</b></td><td>Vos états internes : rapport de saison, planning de
+    <tr><td><svg class="g-ic" width="18" height="18" viewBox="0 0 24 24" aria-hidden="true" focusable="false"><use href="#ic-graphique"></use></svg> <b>Suivi du domaine</b></td><td>Vos états internes : rapport de saison, planning de
     l'année, bilan de campagne, registre des manipulations, inventaires, carnet d'entretien.</td></tr>
-    <tr><td>💾 <b>Données brutes</b></td><td>Vos données telles quelles, pour votre tableur ou votre
+    <tr><td><svg class="g-ic" width="18" height="18" viewBox="0 0 24 24" aria-hidden="true" focusable="false"><use href="#ic-carton"></use></svg> <b>Données brutes</b></td><td>Vos données telles quelles, pour votre tableur ou votre
     comptable : journal des travaux, avancement par parcelle, sauvegarde complète.</td></tr>
   </table></div>
   <p>Chaque ligne annonce son <b>format</b> et ce qu'elle va vous demander <em aria-hidden="true">avant</em>
   de générer. Un document dont le module est masqué pour vous reste visible mais grisé : le cacher
   laisserait croire qu'il n'existe pas.</p>
-  <div class="note info"><span class="ni" aria-hidden="true">ℹ️</span><div><b>Trois documents restent
+  <div class="note info"><span class="ni" aria-hidden="true"><svg class="g-ic" width="18" height="18" viewBox="0 0 24 24" aria-hidden="true" focusable="false"><use href="#ic-info"></use></svg></span><div><b>Trois documents restent
   volontairement dans leur écran</b> : la fiche salarié et l'export CSV du planning dépendent du mois
   affiché, le CSV des coûts du Pilotage suit la période consultée. Sortis de leur contexte, ils
   produiraient le document d'un autre mois — en silence.</div></div>
 
-  <h3>💾 Sauvegardes automatiques</h3>
+  <h3><svg class="g-ic" width="18" height="18" viewBox="0 0 24 24" aria-hidden="true" focusable="false"><use href="#ic-carton"></use></svg> Sauvegardes automatiques</h3>
   <div class="tw"><table>
     <tr><th>Sauvegarde</th><th>Fréquence</th><th>Conservation</th></tr>
     <tr><td>Copie complète de la base</td><td>Chaque nuit</td><td>7 jours</td></tr>
@@ -2144,12 +2263,12 @@ mark{background:rgba(200,176,32,.32);color:var(--cream);border-radius:3px;paddin
   </table></div>
   <p>Au pire des cas, une perte est donc bornée à moins de 24&nbsp;heures — et une donnée précise peut
   être restaurée sans tout réécrire.</p>
-  <div class="note tip"><span class="ni" aria-hidden="true">💡</span><div>Prenez l'habitude d'un <b>export JSON avant chaque
+  <div class="note tip"><span class="ni" aria-hidden="true"><svg class="g-ic" width="18" height="18" viewBox="0 0 24 24" aria-hidden="true" focusable="false"><use href="#ic-eclair"></use></svg></span><div>Prenez l'habitude d'un <b>export JSON avant chaque
   opération sensible</b> (import de parcellaire, clôture de campagne, gros nettoyage) :
   <span class="path">Réglages › App › Documents &amp; impressions › Données brutes</span>, ligne
   <b>Sauvegarde complète</b>. Trente secondes, et vous dormez mieux.</div></div>
 
-  <h3>📶 Hors connexion</h3>
+  <h3><svg class="g-ic" width="18" height="18" viewBox="0 0 24 24" aria-hidden="true" focusable="false"><use href="#ic-antenne"></use></svg> Hors connexion</h3>
   <ul class="dot">
     <li>L'application démarre et fonctionne <b>sans réseau</b> une fois chargée.</li>
     <li>Les saisies sont mises en file et <b>repartent seules</b> au retour du signal, même après un
@@ -2158,7 +2277,7 @@ mark{background:rgba(200,176,32,.32);color:var(--cream);border-radius:3px;paddin
     <li>Installée sur l'écran d'accueil, l'app s'ouvre comme une application classique.</li>
   </ul>
 
-  <h3>🔐 Confidentialité</h3>
+  <h3><svg class="g-ic" width="18" height="18" viewBox="0 0 24 24" aria-hidden="true" focusable="false"><use href="#ic-cadenas"></use></svg> Confidentialité</h3>
   <ul class="dot">
     <li><b>Chaque domaine est hermétiquement isolé.</b> L'isolation est vérifiée sur le serveur, pas
     seulement dans l'affichage : aucun domaine ne peut lire les données d'un autre, même en cherchant.</li>
@@ -2174,12 +2293,12 @@ mark{background:rgba(200,176,32,.32);color:var(--cream);border-radius:3px;paddin
     <a href="https://mavigneapp.fr/confidentialite.html">politique de confidentialité</a> et
     <a href="https://mavigneapp.fr/dpa.html">accord de sous-traitance RGPD</a>.</li>
   </ul>
-  <div class="note legal"><span class="ni" aria-hidden="true">⚖️</span><div>Les données de vos salariés (heures, congés,
+  <div class="note legal"><span class="ni" aria-hidden="true"><svg class="g-ic" width="18" height="18" viewBox="0 0 24 24" aria-hidden="true" focusable="false"><use href="#ic-balance"></use></svg></span><div>Les données de vos salariés (heures, congés,
   absences, rémunérations) font de votre domaine le <b>responsable de traitement</b> et de GUERETTECH un
   <b>sous-traitant</b> au sens du RGPD. L'accord de sous-traitance (article&nbsp;28) encadre cette
   relation ; son acceptation se fait dans l'application, avec accusé de réception horodaté.</div></div>
 
-  <h3>🔎 Un problème&nbsp;? Il se signale depuis l'app</h3>
+  <h3><svg class="g-ic" width="18" height="18" viewBox="0 0 24 24" aria-hidden="true" focusable="false"><use href="#ic-loupe"></use></svg> Un problème&nbsp;? Il se signale depuis l'app</h3>
   <p>La pastille <span class="path">? Aide</span>, en haut de chaque écran, ouvre également <span class="path">Signaler un problème</span> — pré-rempli avec l'écran d'où vous partez. Le chemin complet reste <span class="path">Réglages › App</span>. Le message transmet
   <b>accompagné du contexte technique</b> : version, module concerné, dernières erreurs rencontrées.
   C'est infiniment plus efficace qu'un « ça bugue » par SMS, et ça évite deux jours d'aller-retour.</p>
@@ -2188,7 +2307,7 @@ mark{background:rgba(200,176,32,.32);color:var(--cream);border-radius:3px;paddin
   c'est cette trace qui est lue quand vous appelez. Vous n'avez <b>pas à reproduire le problème</b>
   pour qu'il soit compris. Les avertissements sans conséquence, eux, restent sur l'appareil et ne
   remontent nulle part.</p>
-  <div class="note info"><span class="ni" aria-hidden="true">ℹ️</span><div>Cette trace ne contient
+  <div class="note info"><span class="ni" aria-hidden="true"><svg class="g-ic" width="18" height="18" viewBox="0 0 24 24" aria-hidden="true" focusable="false"><use href="#ic-info"></use></svg></span><div>Cette trace ne contient
   <b>aucune donnée de votre exploitation</b> : ni parcelle, ni salarié, ni chiffre. Uniquement de quoi
   situer la panne dans le code.</div></div>
 </section>
@@ -2196,13 +2315,13 @@ mark{background:rgba(200,176,32,.32);color:var(--cream);border-radius:3px;paddin
 
 <section id="depannage">
   <div class="sec-h">
-    <div class="sec-ic" aria-hidden="true">🩺</div>
+    <div class="sec-ic" aria-hidden="true"><svg class="g-ic" width="18" height="18" viewBox="0 0 24 24" aria-hidden="true" focusable="false"><use href="#ic-pansement"></use></svg></div>
     <div><h2>Ça ne marche pas</h2><div class="sub">Les blocages réels, et quoi faire</div></div>
   </div>
   <p class="lead">Les questions ci-dessous couvrent la quasi-totalité des appels reçus. Cherchez par
   mot-clé en haut de la page&nbsp;: la recherche filtre toute la documentation.</p>
 
-  <h3>🔑 Connexion</h3>
+  <h3><svg class="g-ic" width="18" height="18" viewBox="0 0 24 24" aria-hidden="true" focusable="false"><use href="#ic-cle"></use></svg> Connexion</h3>
   <details><summary>J'ai perdu mon mot de passe</summary>
     <div class="dbody">Demandez à l'administrateur du domaine de le <b>réinitialiser</b> depuis
     <span class="path">Réglages › Équipe</span>. Il obtient un nouveau mot de passe provisoire, affiché
@@ -2226,9 +2345,9 @@ mark{background:rgba(200,176,32,.32);color:var(--cream);border-radius:3px;paddin
     <div class="dbody">Rechargez complètement l'application (fermez-la et rouvrez-la). Les droits sont
     rafraîchis au démarrage ; tant que l'ancienne page est ouverte, elle garde l'ancien état.</div></details>
 
-  <h3>🔄 Synchronisation</h3>
+  <h3><svg class="g-ic" width="18" height="18" viewBox="0 0 24 24" aria-hidden="true" focusable="false"><use href="#ic-rotation"></use></svg> Synchronisation</h3>
   <details><summary>Ma saisie n'apparaît pas sur l'autre téléphone</summary>
-    <div class="dbody">Regardez l'indicateur en haut : s'il est <b>🟠 orange</b>, la saisie attend le
+    <div class="dbody">Regardez l'indicateur en haut : s'il est <b><svg class="g-ic" width="18" height="18" viewBox="0 0 24 24" aria-hidden="true" focusable="false"><use href="#ic-alerte"></use></svg> orange</b>, la saisie attend le
     réseau et partira toute seule. S'il est vert, <b>tirez la page vers le bas</b> sur l'autre appareil
     pour forcer l'actualisation.</div></details>
   <details><summary>Deux personnes ont saisi en même temps, ai-je perdu quelque chose&nbsp;?</summary>
@@ -2241,7 +2360,7 @@ mark{background:rgba(200,176,32,.32);color:var(--cream);border-radius:3px;paddin
     navigateur et a pris la place de votre session. Fermez l'onglet de démo, puis reconnectez-vous —
     l'application propose d'ailleurs un bouton de récupération quand elle détecte ce conflit.</div></details>
 
-  <h3>📱 Application &amp; affichage</h3>
+  <h3><svg class="g-ic" width="18" height="18" viewBox="0 0 24 24" aria-hidden="true" focusable="false"><use href="#ic-doigt"></use></svg> Application &amp; affichage</h3>
   <details><summary>Je ne vois pas la dernière version / une fonction annoncée</summary>
     <div class="dbody">Fermez complètement l'application et rouvrez-la : la mise à jour s'installe au
     démarrage suivant. Le numéro de version est affiché en bas de
@@ -2261,10 +2380,10 @@ mark{background:rgba(200,176,32,.32);color:var(--cream);border-radius:3px;paddin
     <a href="#roles">Rôles &amp; accès</a> et <a href="#formules">Formules</a>.</div></details>
   <details><summary>Le GPS ne me localise pas</summary>
     <div class="dbody">Autorisez la localisation pour le site dans les réglages du navigateur.
-    La position n'est demandée <b>qu'au moment où vous touchez 📍 Ma position</b> — aucun suivi
+    La position n'est demandée <b>qu'au moment où vous touchez <svg class="g-ic" width="18" height="18" viewBox="0 0 24 24" aria-hidden="true" focusable="false"><use href="#ic-epingle"></use></svg> Ma position</b> — aucun suivi
     permanent, aucun trajet enregistré.</div></details>
 
-  <h3>📊 Chiffres qui surprennent</h3>
+  <h3><svg class="g-ic" width="18" height="18" viewBox="0 0 24 24" aria-hidden="true" focusable="false"><use href="#ic-graphique"></use></svg> Chiffres qui surprennent</h3>
   <details><summary>Une tâche est à 100 % alors que rien n'a été fait</summary>
     <div class="dbody">Aucune parcelle n'est concernée par cette tâche cette saison : il n'y a rien à
     faire, donc rien à finir. Vérifiez aussi la <b>saison consultée</b> en haut d'écran.</div></details>
@@ -2281,8 +2400,8 @@ mark{background:rgba(200,176,32,.32);color:var(--cream);border-radius:3px;paddin
     semaine de pluie la repousse, une semaine à plein effectif la ramène. Elle sert à décider, pas à
     graver un objectif.</div></details>
 
-  <h3>🆘 Rien de tout cela</h3>
-  <p>Utilisez la pastille <span class="path">? Aide</span> de l'écran concerné, ou <span class="path">Réglages › App › 🐛 Signaler un problème</span> — le contexte technique
+  <h3><svg class="g-ic" width="18" height="18" viewBox="0 0 24 24" aria-hidden="true" focusable="false"><use href="#ic-alerte"></use></svg> Rien de tout cela</h3>
+  <p>Utilisez la pastille <span class="path">? Aide</span> de l'écran concerné, ou <span class="path">Réglages › App › <svg class="g-ic" width="18" height="18" viewBox="0 0 24 24" aria-hidden="true" focusable="false"><use href="#ic-bogue"></use></svg> Signaler un problème</span> — le contexte technique
   part avec votre message. Ou écrivez à <a href="mailto:ngdevpro@gmail.com">ngdevpro@gmail.com</a> en
   précisant&nbsp;: <b>ce que vous faisiez</b>, <b>ce que vous attendiez</b>, <b>ce qui s'est passé</b>,
   et le module concerné.</p>
@@ -2291,7 +2410,7 @@ mark{background:rgba(200,176,32,.32);color:var(--cream);border-radius:3px;paddin
 
 <section id="glossaire">
   <div class="sec-h">
-    <div class="sec-ic" aria-hidden="true">📖</div>
+    <div class="sec-ic" aria-hidden="true"><svg class="g-ic" width="18" height="18" viewBox="0 0 24 24" aria-hidden="true" focusable="false"><use href="#ic-livre"></use></svg></div>
     <div><h2>Glossaire</h2><div class="sub">Les mots employés dans l'application</div></div>
   </div>
   <div class="tw"><table>

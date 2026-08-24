@@ -33,6 +33,21 @@ for (const f of ['mv-harnais-icones.mjs', 'mv-icones-baseline.json', 'preflight.
 fs.copyFileSync(path.join(root, 'index.html'), path.join(bac, 'index.html'));
 fs.copyFileSync(path.join(root, 'src', 'styles.css'), path.join(bac, 'src', 'styles.css'));
 
+/* ⚠️⚠️ LE BAC DOIT CONTENIR TOUT CE QUE LE HARNAIS LIT, SINON IL PLANTE AVANT
+   LA PREMIERE EPREUVE. Vecu a la minute ou le cliquet s'est etendu aux
+   surfaces publiques : `readdirSync('guide')` sur un dossier absent, et les
+   onze contre-epreuves sont mortes d'un coup — pas rouges, MORTES.
+   ★ On copie donc `guide/` et les pages de `public/` en meme temps qu'on les
+     ajoute au comptage. La regle : etendre un controle, c'est etendre son bac. */
+fs.mkdirSync(path.join(bac, 'guide'), { recursive: true });
+for (const f of fs.readdirSync(path.join(root, 'guide')))
+  if (/\.(html|txt)$/.test(f))
+    fs.copyFileSync(path.join(root, 'guide', f), path.join(bac, 'guide', f));
+fs.mkdirSync(path.join(bac, 'public'), { recursive: true });
+for (const f of ['demarrage.html', 'logiciel-vigne.html', 'essai.html', 'mise-en-route.html'])
+  if (fs.existsSync(path.join(root, 'public', f)))
+    fs.copyFileSync(path.join(root, 'public', f), path.join(bac, 'public', f));
+
 /* ⚠️ LE CLIQUET DU BAC EST REGRAVE AVANT TOUTE INJECTION. Sans ca, l'epreuve
    « le compte remonte » depend de QUAND on lance : si la reference du depot
    date d'avant une baisse, ajouter trois emojis ne la depasse pas et l'epreuve
@@ -243,6 +258,17 @@ epreuve('une tuile d\u2019un ton inexistant',
   () => ecrire('src/pilotage.js', lire('src/pilotage.js')
         .replace('_mvIconTuile(em[0],em[1])', "_mvIconTuile('alerte','orange')")),
   /tuile ne demande un ton inexistant[\s\S]*orange/);
+
+/* 11. UN EMOJI REPOSE DANS UNE SOURCE DU GUIDE PUBLIC. Le cliquet couvrait
+      `src/*.js`, puis `index.html` — mais les 15 sources du guide et les
+      quatre pages de `public/` restaient dehors, sans que rien ne le dise.
+      Ce sont les pages qu'un PROSPECT lit avant de devenir client.
+      ⚠ Meme forme que l'epreuve n°7, sur la derniere surface non couverte :
+        desormais TOUT ce qui s'affiche est compte. */
+epreuve('un emoji repose dans une source du guide',
+  () => ecrire('guide/02-roles.html',
+        lire('guide/02-roles.html').replace('<section', '<p>\u{1F347}</p>\n<section')),
+  /ne remonte dans aucune surface[\s\S]*guide\/02-roles\.html/);
 
 fs.rmSync(bac, { recursive: true, force: true });
 console.log('\n' + (ko ? '\x1b[31m' + ko + ' CONTRE-EPREUVE(S) EN ECHEC\x1b[0m'
