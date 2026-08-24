@@ -571,6 +571,32 @@ les anciens. **C'est la dette que cette règle existe pour empêcher, écrite le
 **Si le temps manque vraiment**, le lot ne se livre pas en deux morceaux : il se **réduit**. Mieux
 vaut un lot plus petit dont l'aide est juste qu'un gros lot dont l'aide ment.
 
+> ### ⚠️⚠️⚠️ LA CLÔTURE DE LOT — À FAIRE AVANT D'ÉCRIRE « LIVRÉ », SANS EXCEPTION
+>
+> **Demandé explicitement par Nico le 24/08**, après trois lots d'affilée livrés sans guide ni
+> journal. Un lot n'est pas « fini » quand le code marche : il est fini quand **six** choses sont
+> faites. À dérouler dans l'ordre, et à **dire dans la réponse**, ligne par ligne — « fait » ou
+> « relu, rien à changer ». Un silence sur une ligne vaut oubli.
+>
+> | # | Livrable | Fichier | Le geste |
+> |---|---|---|---|
+> | 1 | **Le code** | le module | preflight + harnais + contre-épreuve verts |
+> | 2 | **Le guide public** | `guide/NN-*.html` puis `node scripts/build-guide.mjs` | relire la section contre l'écran neuf |
+> | 3 | **La fiche `MV_AIDE`** du module | `src/utils.js` | idem, à voix haute |
+> | 4 | **`MV_INFO`** du chiffre touché | `src/utils.js` | seulement si une méthode de calcul change |
+> | 5 | **`WHATS_NEW`** | `src/utils.js` | un bloc en tête, du point de vue de l'utilisateur |
+> | 6 | **`CLAUDE.md`** | ici | la section du lot, et **ce qui reste ouvert** |
+>
+> ★★★ **ET LA CONSÉQUENCE QU'ON OUBLIE : ANNONCER, C'EST BUMPER.** `WHATS_NEW` vit dans `utils.js`
+> et le récap agrège **jusqu'à `APP_VERSION`**. Donc **tout lot visible par le client force un bump
+> APP + SW**, même si le code tenait dans un seul module. « Module seul = aucun bump » est vrai pour
+> le cache, **faux pour le client** — c'est une règle de déploiement, pas une dispense d'annonce.
+>
+> ⚠️ **Une règle écrite ne se déclenche pas toute seule** : elle a été enfreinte trois fois le jour
+> même où elle était en tête de ce document. D'où **C27** au preflight — `WHATS_NEW` doit s'ouvrir
+> sur `APP_VERSION`, sinon ERREUR. Le contrôle n'impose pas d'annoncer : il impose de **décider**.
+> Une version purement technique déclare `items: []`, et c'est un choix, plus un oubli.
+
 Détail des trois supports et de leur mécanique : **§27a** (la règle longue), **§27b** (`MV_AIDE`),
 **§27d** (le guide découpé).
 
@@ -10348,7 +10374,7 @@ doit exister vaut mieux qu'interdire une forme d'écriture.*
 
 ---
 
-## 61. ★★★ UNE RÉCOLTE, PLUSIEURS DESTINATAIRES — LOT VD-1 (24/08 — `cave.js` seul, aucun bump)
+## 61. ★★★ UNE RÉCOLTE, PLUSIEURS DESTINATAIRES — LOT VD-1 (24/08 — `cave.js` seul · APP 6.63 → 6.64 · SW 7.18 → 7.19 en clôture, cf. §64)
 
 Point de départ, une phrase de Nico : *« parfois pour les ventes en vrac, plusieurs clients sont sur
 la même parcelle »*. En Côte de Nuits une parcelle se partage, et sa vendange se répartit entre le
@@ -10460,7 +10486,7 @@ Maquettes de référence, validées par Nico avant écriture d'une ligne de code
 
 ---
 
-## 62. ★★★ LE BON DE LIVRAISON, ET LE RETOUR QUI ARRIVE TROIS SEMAINES PLUS TARD — LOT VD-2 (24/08 — `cave.js` seul, aucun bump)
+## 62. ★★★ LE BON DE LIVRAISON, ET LE RETOUR QUI ARRIVE TROIS SEMAINES PLUS TARD — LOT VD-2 (24/08 — `cave.js` seul · bump en clôture, cf. §64)
 
 Suite immédiate de VD-1. Nico : *« il faut pouvoir l'éditer car après les clients nous donnent le
 nombre de litres de jus et le nombre de litres de lie qu'ils ont eu »*.
@@ -10532,7 +10558,7 @@ de prorata rejouée telle qu'elle est écrite. Trois contre-épreuves : prorata 
 
 ---
 
-## 63. ★★★ « 42 hL/HA » QUAND DEUX VOLUMES SUR TROIS MANQUENT — LOT VD-3 (24/08 — `cave.js` seul, aucun bump)
+## 63. ★★★ « 42 hL/HA » QUAND DEUX VOLUMES SUR TROIS MANQUENT — LOT VD-3 (24/08 — `cave.js` seul · bump en clôture, cf. §64)
 
 Nico, à la question de savoir si les litres rendus par les clients devaient remonter dans le
 rendement : *« bien sûr que les volumes remontent dans le rendement de la parcelle »*. La suite du
@@ -10608,3 +10634,179 @@ passages (2), volume de cuve non réparti (4).
 
 ⚠️ Et un glyphe `⚠` écrit dans un texte d'interface a fait remonter le compteur d'emojis de
 `cave.js` à 27 — deuxième fois dans la journée. Remplacé par l'icône `alerte` du sprite.
+
+---
+
+## 64. ★★★ TROIS LOTS LIVRÉS SANS GUIDE NI JOURNAL — ET LA RÈGLE ÉTAIT DÉJÀ ÉCRITE (24/08 — clôture VD · APP 6.63 → 6.64 · SW 7.18 → 7.19)
+
+Nico, après la livraison de VD-3 : *« j'imagine que tu as tout prévu dans le guide et dans le
+claude.md comme stipulé dans les règles ? »*. **Non.** CLAUDE.md était à jour ; le guide, la fiche
+d'aide et le journal des nouveautés ne l'étaient pas. Trois lots d'affilée.
+
+### 64a. ⚠️⚠️⚠️ CE QUE LA RÈGLE DISAIT DÉJÀ, MOT POUR MOT
+
+La **règle d'or n°4** est en tête de ce document depuis le 09/08 : *« un lot n'est pas fini tant que
+l'aide ne dit pas la vérité — OBLIGATOIRE, AUCUNE EXCEPTION, AUCUN "PLUS TARD" »*, avec le tableau
+qui nomme `MV_AIDE`, le guide public et `WHATS_NEW`. Elle porte même la phrase qui décrit exactement
+ce qui vient de se passer : *« ce qui rend cette règle nécessaire, c'est qu'elle est facile à
+contourner sans mentir »*.
+
+★★★ **Une règle qu'on lit n'est pas une règle qui se déclenche.** Elle avait déjà été enfreinte deux
+fois le 11/08 ; elle vient de l'être trois fois de suite. La leçon n'est pas « mieux lire » — c'est
+qu'une consigne sans filet mécanique se contourne par simple inattention, surtout en fin de chantier
+quand le code est vert et que tout paraît fini.
+
+### 64b. ★★★ ET LE MANQUE EN CACHAIT UN PLUS GRAVE : « AUCUN BUMP » RENDAIT LE LOT INVISIBLE
+
+Les trois lots tenaient dans `cave.js` seul, donc « aucun bump » — vrai pour le cache. **Faux pour
+le client.** `WHATS_NEW` vit dans `utils.js` et le récap agrège **jusqu'à `APP_VERSION`** : sans
+bump, un chantier entier — la vente à plusieurs, les bons, le rendement mesuré — n'a **aucune
+existence** pour l'utilisateur. Il l'aurait découvert en tombant dessus.
+
+**Annoncer, c'est bumper.** La règle « module seul = aucun bump » est une règle de déploiement, pas
+une dispense d'annonce. **APP 6.63 → 6.64, SW 7.18 → 7.19**, avec les quatre affichages d'
+`index.html` et les quatre points du SW.
+
+### 64c. Le filet : C27
+
+`WHATS_NEW` doit s'ouvrir sur `APP_VERSION`, sinon **ERREUR** au preflight. Le contrôle n'impose pas
+d'annoncer quelque chose : il impose de **décider**. Une version purement technique déclare
+`{ v:'x.xx', items: [] }` — et c'est alors un choix conscient, pas un oubli. Contre-épreuve : passer
+`APP_VERSION` à 6.65 sans toucher au journal fait sortir C27 en rouge.
+
+⚠️ **Ce que C27 ne fait pas** : vérifier que le guide et `MV_AIDE` sont **vrais**. Aucun contrôle ne
+sait lire une phrase. Le filet ne couvre que la porte la plus mécanique des six ; les cinq autres
+restent tenues par la **liste de clôture** de la règle d'or n°4, à dérouler ligne par ligne dans la
+réponse de livraison.
+
+### 64d. Ce qui a été écrit en clôture
+
+- **Guide** — `guide/08-cave.html` : trois sous-sections neuves (vendre en vrac, le bon et le retour
+  du client, ce que le rendement affirme), les cartes Récoltes et Réglages du Cuvier reprises, et le
+  bon ajouté à la liste des documents. `public/guide.html` régénéré, `--check` vert.
+- **`MV_AIDE` cave** — cinq points neufs (répartition, poids du jour, bon, retour, escalier des
+  sources) et un sixième sur les deux documents.
+- **`WHATS_NEW` v6.64** — cinq entrées, écrites du **symptôme vécu** : « deux négoces obligeaient à
+  saisir deux récoltes le même jour », « corriger la fiche déplaçait tous les kilos déjà livrés ».
+  Le bloc est **exécuté** par le harnais, pas relu des yeux : cinq items, zéro mot technique.
+- **`MV_INFO`** — relu, rien à changer : aucun chiffre de cette famille n'y est décrit.
+
+---
+
+## 65. ★★★ LE BLOC SE MASQUAIT LUI-MÊME À LA DEUXIÈME OUVERTURE (24/08 — `cave.js` · APP 6.64 → 6.65 · SW 7.19 → 7.20)
+
+Nico, capture à l'appui, une heure après la mise en ligne : *« après avoir créé un client pour le
+vrac, l'ajout d'une récolte ne me présente plus ce qui avait été mis en place. Nombre de caisse,
+client, vente en vrac… »*. L'écran **Nouvelle récolte** n'affichait plus ni la répartition, ni les
+caisses, ni la destination : parcelle, date, température, puis plus rien.
+
+### 65a. ★★★ LA CAUSE : LE BLOC ÉTAIT DEVENU SON PROPRE VOISIN
+
+`_vendRepInject` retrouvait le libellé « Nombre de caisses » par
+`rowCs.previousElementSibling` — le frère qui précède la ligne des caisses. Et le bloc de
+répartition s'insère **juste avant cette même ligne**. Dès la première ouverture, il **devient** ce
+frère précédent.
+
+À la **deuxième** ouverture, `_vendRepHide(rowCs.previousElementSibling)` ne visait donc plus le
+libellé : il visait **le bloc lui-même**. `display:none`, sans la moindre erreur en console. Le
+premier essai marchait — c'est ce qui rend le défaut si facile à livrer.
+
+★★★ **La leçon, générale : une position relative dans le DOM n'est valable qu'AVANT d'avoir inséré
+quoi que ce soit dedans.** Un code qui masque par voisinage et qui insère au même endroit se tire
+dessus au deuxième passage. La parade n'est pas de mieux viser, c'est de **ne plus re-viser** : ce
+qui doit être caché est marqué **une fois** (`data-vd-off`), quand le voisinage est intact ; ensuite
+on relit la marque. Et le bloc **réaffirme son affichage** à chaque ouverture — ce qui répare un
+écran déjà éteint, sans rien recharger.
+
+### 65b. ⚠️⚠️⚠️ LE HARNAIS AVAIT UN FAUX DOM COMPLAISANT
+
+Le volet « écran » du harnais rejouait l'injection sur un DOM simulé dont `getElementById`
+**fabriquait le nœud demandé** s'il ne le trouvait pas — `#vrec-rep` existait donc toujours, quoi
+qu'il arrive. Ce faux DOM ne pouvait voir ni un échec d'insertion, ni un bloc masqué. Il ne
+connaissait pas non plus les frères : `previousElementSibling` était **posé à la main** par le
+harnais, donc toujours juste. **Le défaut était structurellement invisible pour lui.**
+
+Le faux DOM rend maintenant un vrai petit arbre : `getElementById` **parcourt**, le voisinage
+**découle** de l'ordre des enfants, `setAttribute` et `querySelectorAll('[data-vd-off]')` existent.
+Et le harnais **rouvre l'écran trois fois** — 5 assertions neuves, dont trois ★.
+
+⚠️ Le diagnostic, lui, a été fait sur **jsdom et le vrai `index.html`** (hors dépôt, installé dans
+le bac à sable). *Quand un écran ment en production, on ne raisonne pas sur le code : on rejoue le
+DOM réel.* C'est ce qui a montré, en trois lignes, « ouverture n°1 VISIBLE / n°2 INVISIBLE ».
+
+### 65c. ⚠️ ET LA PREMIÈRE CONTRE-ÉPREUVE EST SORTIE MUETTE
+
+Réintroduire la visée par voisinage n'a fait rougir **aucune** assertion : la ligne de réparation
+`box.style.display=''` rattrapait le défaut derrière. **Trois protections avaient été ajoutées d'un
+coup** — la marque, la garde `id!=='vrec-rep'`, la réaffirmation — et il fallait les retirer
+**toutes les trois** pour retrouver le code fautif. Une fois fait, 2 assertions rouges, et le
+diagnostic jsdom repasse à « n°2 INVISIBLE ».
+
+*Une contre-épreuve qui n'enlève qu'une protection sur trois ne prouve rien : elle mesure la
+redondance, pas le filet.*
+
+### 65d. Le bump, et pourquoi
+
+6.64 était **déjà en ligne** : la règle du doute impose de bumper. **APP 6.65 · SW 7.20**, avec un
+bloc `WHATS_NEW` **`items: []`** — le correctif ne fait que rendre vrai ce que 6.64 annonçait ; il
+n'y a rien de neuf à raconter à l'utilisateur. C27 exige une **décision**, pas une annonce : c'en
+est une, et elle est écrite en commentaire au-dessus du bloc.
+
+---
+
+## 66. ★★★ LA VIRGULE ÉTAIT REFUSÉE, ET LE CURSEUR SAUTAIT (24/08 — `cave.js` · APP 6.65 → 6.66 · SW 7.20 → 7.21)
+
+Nico : *« rajoute aussi la possibilité d'écrire la surface en précision 0,00 »*. Derrière cette
+phrase, **deux défauts cumulés** qui rendaient le champ inutilisable — et la demande dit
+poliment ce que le code faisait mal.
+
+### 66a. ⚠️⚠️⚠️ UN `input type="number"` REFUSE LA VIRGULE, ET LE FAIT EN SILENCE
+
+Sur un clavier français on tape « 0,12 ». Le navigateur juge la valeur invalide et rend
+`this.value === ''` — **une chaîne vide, pas la saisie**. Le code recevait donc « rien » et
+**effaçait** la surface. Aucun message, aucune trace. Rejoué sur jsdom et le vrai `index.html` :
+`après avoir tapé « 0,12 » → this.value vaut ""`.
+
+★ La règle : *un champ décimal destiné à un francophone ne peut pas être un `type="number"`.*
+`text` + `inputmode="decimal"` (le pavé numérique sort quand même sur téléphone), et une seule
+fonction lit ce qui a été écrit — `_vendLireNb`, virgule ou point, espaces et insécables compris.
+Ce qu'on **remet** dans un champ passe par `_vendNbTxt` : virgule française, jamais un point.
+
+### 66b. ★★★ ET LE CHAMP ÉTAIT RECRÉÉ À CHAQUE FRAPPE
+
+`_vendRepSurf` redessinait **toutes** les lignes, y compris celle en cours de saisie : l'`<input>`
+était remplacé, donc le curseur perdu **dès le premier caractère**. Même avec un point, taper une
+deuxième décimale était impossible.
+
+Désormais, la ligne qu'on remplit ne voit rafraîchir que son **texte de droite** (`#vrp-rs-i`) ; les
+**autres** lignes, dont le « reste » vient de changer, se redessinent entièrement.
+⚠️ Vécu deux fois dans ce lot : c'est le même défaut de nature que §65 — *du code qui réécrit
+l'endroit où il se trouve*.
+
+⚠️ **Ce piège ne se voit qu'en tapant PLUSIEURS caractères.** Une assertion qui n'en tape qu'un
+serait verte pour rien. Le harnais tape maintenant `'0'`, `'0,'`, `'0,1'`, `'0,12'`, et vérifie
+qu'une **sentinelle** posée dans la ligne éditée survit.
+
+### 66c. Le même piège ailleurs, corrigé dans la foulée
+
+Poids par caisse de la répartition (24,5 kg était refusé), litres de jus et de lie du retour client,
+et poids de la **fiche client** — qui portait en plus `min="10" max="60"`, donc interdisait
+silencieusement un client à 24,5 kg. Tous en saisie libre, tous relus par `_vendLireNb`.
+
+### 66d. ⚠️ ET C27, MON PROPRE CONTRÔLE, S'ÉTAIT TU
+
+Le commentaire écrit au-dessus du bloc `WHATS_NEW` de la 6.65 — celui qui justifie un `items: []` —
+a suffi à faire échouer le motif de C27, qui exigeait le premier bloc **immédiatement** après le
+crochet. Résultat : *« WHATS_NEW introuvable ou forme inattendue »*, en simple **avertissement**.
+Le contrôle ne surveillait plus rien **tout en se lisant comme un succès**. Il saute maintenant
+blancs et commentaires. *Quatrième fois qu'un contrôle est mis en échec par le texte que je viens
+d'écrire à côté (§53, §55n).*
+
+### 66e. Trois contre-épreuves, et une assertion à moi qui a rougi à juste titre
+
+Remettre `type="number"` (1 rouge), redessiner la ligne éditée (1 rouge), ignorer la virgule à la
+lecture (4 rouges). ⚠️ Et le test d'effacement **mutait l'état partagé** : il vidait la surface
+qu'une assertion vérifiait trente lignes plus bas. L'état est désormais rendu comme il a été
+trouvé. *Un test qui laisse le terrain sale fait rougir le suivant, pour rien.*
+
+**127 assertions.** Guide, `WHATS_NEW` et bump faits dans le même lot — clôture de la règle d'or n°4.

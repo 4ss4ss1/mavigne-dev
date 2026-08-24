@@ -13,7 +13,9 @@
   <h3>{ic:raisin} Le Cuvier — vendange et fermentations</h3>
   <div class="cards">
     <div class="card"><h4>{ic:raisin} Récoltes</h4><ul class="dot">
-      <li>Saisie des apports par parcelle : poids, date, destination</li>
+      <li>Saisie des apports par parcelle : caisses, date, état sanitaire</li>
+      <li><b>Une récolte peut avoir plusieurs destinataires</b> : le domaine et un ou plusieurs
+        acheteurs de raisin, sur la même parcelle et le même jour</li>
       <li>Le <b>rendement en kg/ha</b> se calcule tout seul et remonte dans la fiche de la parcelle</li>
       <li>Le millésime est l'<b>année civile de la date</b> de récolte</li>
       <li>Comparaison d'un millésime à l'autre, parcelle par parcelle</li>
@@ -35,9 +37,76 @@
     </ul></div>
     <div class="card"><h4>{ic:engrenage} Réglages du Cuvier</h4><ul class="dot">
       <li>Déclaration des cuves et de leurs volumes</li>
-      <li>Paramètres de suivi propres au domaine</li>
+      <li>Poids d'une caisse, rendement en jus, sucre par degré</li>
+      <li><b>Clients vrac</b> : leur nom, leur adresse, le poids habituel de leurs caisses</li>
+      <li><b>Base du rendement</b> : jus clair seul, ou jus et lies</li>
+      <li>Accès direct aux <b>livraisons et aux bons</b></li>
     </ul></div>
   </div>
+
+  <h4 style="margin-top:22px">{ic:carton} Vendre du raisin en vrac : plusieurs acheteurs sur une parcelle</h4>
+  <p>En Côte de Nuits une parcelle se partage, et sa vendange part rarement au même endroit. Une
+  récolte n'a donc pas <i>un</i> destinataire mais une <b>répartition</b> : une ligne par
+  destinataire — le domaine et chacun de vos acheteurs — avec son nombre de caisses.</p>
+  <ul class="dot">
+    <li><b>Le poids d'une caisse est un poids du jour.</b> Chaque ligne porte le sien : les caisses
+      d'un négociant ne pèsent pas celles d'un autre, et le même client peut changer de caisse d'un
+      jour à l'autre. La fiche du client <b>propose</b> son poids habituel, elle ne l'impose pas.
+      Corriger cette fiche plus tard ne déplace <b>aucun</b> kilo déjà livré.</li>
+    <li><b>La surface récoltée</b> se saisit quand un client achète une partie de la parcelle.
+      Laissée vide, la ligne prend <b>tout le reste</b> : si l'acheteur a pris 12 ares sur 34, le
+      domaine se voit attribuer les 22 restants sans que vous ayez rien à taper. La surface s'écrit
+      <b>à la virgule</b> et au centième d'hectare — <b>0,12</b> — comme le poids par caisse et les
+      litres de jus et de lie.</li>
+    <li><b>Les hectolitres estimés ne comptent que la part du domaine.</b> Ce qui part chez un
+      acheteur n'entre dans aucune cuve et dans aucun volume.</li>
+  </ul>
+
+  <h4 style="margin-top:22px">{ic:document} Le bon de livraison, et ce que le client renvoie</h4>
+  <p>Depuis l'écran <b>Récoltes</b>, la ligne « kg vendus en raisin » ouvre les <b>ventes en
+  vrac</b> : un client, ses livraisons, ses documents. Même chemin depuis les Réglages du Cuvier.</p>
+  <ul class="dot">
+    <li><b>Une livraison, c'est un chargement</b> : un client, une date. Deux parcelles livrées le
+      même jour au même acheteur ne font qu'un seul bon — c'est ce qu'il a reçu.</li>
+    <li><b>Le bon ne dit que des kilos.</b> Date, parcelle, surface s'il y a lieu, nombre de
+      caisses, poids par caisse, poids total, et deux cases de signature. Aucun prix : la
+      facturation ne se fait pas ici.</li>
+    <li><b>Le retour du client</b> arrive des semaines plus tard, après pressurage : les litres de
+      jus et les litres de lie. On les saisit sur la livraison ; le rendement réel en kg/hL
+      s'affiche pendant la frappe. Tant qu'un retour manque, la livraison est marquée
+      <b>« retour attendu »</b> et le compte s'affiche sur l'écran Récoltes.</li>
+    <li><b>Corriger les caisses ne touche pas aux litres, et l'inverse non plus.</b> Ce sont deux
+      mesures, faites par deux personnes, à deux moments : le bon dit qui a mesuré quoi.</li>
+    <li>Si le client ne donne qu'un chiffre pour une livraison à plusieurs parcelles, les litres
+      sont <b>répartis au prorata des kilos</b>, et le document l'écrit : ce détail par parcelle est
+      une répartition, pas une mesure. Une case permet de saisir parcelle par parcelle quand le
+      client, lui, a détaillé.</li>
+  </ul>
+  <div class="note"><span class="ni" aria-hidden="true">{ic:balance}</span><div>Le poids d'un bon
+  vient du <b>nombre de caisses multiplié par le poids déclaré</b>. Ce n'est pas une pesée, et le
+  document le dit : en cas d'écart, le pont-bascule du réceptionnaire fait foi. De même, les volumes
+  sont ceux <b>annoncés par le client</b> : ils n'engagent pas le domaine.</div></div>
+
+  <h4 style="margin-top:22px">{ic:graphique} Le rendement : ce qu'il affirme, et ce qu'il ne sait pas encore</h4>
+  <p>Dans <b>Le millésime</b>, le rendement par parcelle ne se contente plus d'une estimation. Il va
+  chercher le volume là où il a été <b>mesuré</b>, dans cet ordre : les litres rendus par l'acheteur,
+  puis le volume logé dans la cuve du domaine, et seulement à défaut une estimation d'après les
+  kilos.</p>
+  <ul class="dot">
+    <li><b>Un chiffre net veut dire « mesuré de bout en bout ».</b> Tant qu'un volume manque, la
+      parcelle affiche une <b>fourchette</b> et une étiquette du genre « 77 % mesuré » — il manque
+      des litres, pas des raisins. Le pourcentage du maximum d'appellation est alors écrit
+      « ≈ », pour ne pas annoncer un dépassement qu'on n'a pas constaté.</li>
+    <li><b>Le détail sous chaque parcelle</b> dit, destinataire par destinataire, d'où vient son
+      volume, sa surface, ses kg/ha et ses hL/ha.</li>
+    <li><b>Le kg/ha reste rapporté à la parcelle entière</b> : vous travaillez toute la vigne même
+      quand vous en vendez une part. Le rendement d'une portion s'affiche à côté, et chaque chiffre
+      dit sur quelle surface il est calculé.</li>
+    <li>Trois écarts sont signalés sans jamais être absorbés en silence : des surfaces qui
+      <b>dépassent</b> la parcelle, des <b>hectares que personne ne réclame</b>, et deux surfaces
+      différentes déclarées pour un même acheteur. Une parcelle vendangée en deux passages n'est
+      jamais comptée deux fois en surface.</li>
+  </ul>
 
   <h4 style="margin-top:22px">{ic:raisin} Maturité : « où en est-on » quand on n'a pas tout mesuré</h4>
   <p>Au-dessus des courbes, l'onglet <b>Analyses</b> affiche une synthèse à date : la moyenne du
@@ -156,6 +225,9 @@
       puis la fermentation jour par jour — densité brute, <b>densité corrigée à 20&nbsp;°C</b>,
       température, sucre restant estimé, avancement, remontages et pigeages — les opérations datées,
       et la cuvée dans laquelle le vin est parti au décuvage.</li>
+    <li><b>Le bon de livraison</b> et le <b>récapitulatif de campagne</b> d'un acheteur s'éditent
+      depuis les ventes en vrac, au plus près de la livraison — ils portent le nom du domaine, la
+      liste des apports en kilos, et la section des volumes rendus dès que le client a répondu.</li>
     <li><b>Ce n'est pas le registre des manipulations</b>, et ça ne le remplace pas. Le registre
       répond à un contrôle : il ne retient que l'enrichissement, le sulfitage et les pratiques de
       cave, et il écarte volontairement densités et analyses, qui le noieraient. Le cahier de

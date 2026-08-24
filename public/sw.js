@@ -1,4 +1,29 @@
-// MA VIGNE — Service Worker v7.18
+// MA VIGNE — Service Worker v7.21
+// v7.21 (24/08/2026) — LA VIRGULE ETAIT REFUSEE, ET LE CURSEUR SAUTAIT. APP 6.65 -> 6.66.
+//   Deux pieges cumules sur la surface d'une portion de parcelle :
+//   1. un `input type="number"` REFUSE la virgule — sur clavier francais,
+//      « 0,12 » rend une chaine VIDE, donc la surface s'effacait en silence ;
+//   2. la ligne se redessinait a chaque frappe, l'`<input>` etait recree et le
+//      curseur perdu : impossible de taper la deuxieme decimale.
+//   Champs en `text` + `inputmode="decimal"`, lecture par `_vendLireNb` (virgule
+//   ou point), et seule la ligne VOISINE se redessine. Vaut aussi pour le poids
+//   par caisse, les litres de jus et de lie, et la fiche client.
+// v7.20 (24/08/2026) — L'ECRAN DE RECOLTE SE VIDAIT A LA DEUXIEME OUVERTURE. APP 6.64 -> 6.65.
+//   Le bloc de repartition s'insere juste avant la ligne des caisses : il DEVIENT
+//   donc le voisin precedent. Le code qui masquait le libelle « Nombre de caisses »
+//   masquait, des la 2e ouverture, LE BLOC LUI-MEME. Ecran vide, aucune erreur.
+//   Ce qui est cache se decide maintenant UNE FOIS et se MARQUE (data-vd-off) ;
+//   le bloc reaffirme son affichage a chaque ouverture, ce qui repare aussi un
+//   ecran deja eteint sans rien recharger.
+// v7.19 (24/08/2026) — LA VENDANGE A PLUSIEURS : REPARTITION, BONS, RENDEMENT. APP 6.63 -> 6.64.
+//   Une recolte peut desormais partir chez plusieurs acheteurs le meme jour, avec
+//   pour chacun ses caisses, son poids du jour et sa surface. Bon de livraison et
+//   recap de campagne imprimables, en kilos seuls. Le retour du client (litres de
+//   jus et de lie) remonte dans le rendement de la parcelle, qui n'affiche un
+//   chiffre net que s'il est mesure de bout en bout.
+//   ⚠ Les trois lots VD-1/2/3 vivaient dans cave.js seul et ne demandaient AUCUN
+//   bump. C'est le journal des nouveautes qui l'impose : il est indexe par
+//   version APP. Sans bump, un lot entier reste invisible pour le client.
 // v7.18 (23/08/2026) — LE CONTROLE NE VOYAIT PLUS QUE LE TIERS DES DOCUMENTS. APP 6.62 -> 6.63.
 //   ⚠⚠⚠ LA CI A ROUGI SUR UN DEFAUT QUE CE HARNAIS DISAIT VERT. Le carnet
 //   d'entretien du tracteur est parti en v7.17 avec un `_mvIcon` dedans — or
@@ -2768,7 +2793,7 @@
 // v2.22 — Fix profils vides : guard vide dans loadData() pour MEMBRES/SAISONS/TACHES
 // v2.17 — Onboarding intégré + tenantId · v2.06 — Firebase Auth · v2.00–v2.05 — divers
 const DEBUG = self.location.hostname === 'localhost' || self.location.hostname === '127.0.0.1';
-const CACHE_NAME   = 'mavigne-v7.18';
+const CACHE_NAME   = 'mavigne-v7.21';
 const TENANT_CACHE = 'mavigne-tenant';   // Cache persistant — préservé à chaque mise à jour SW
 const SYNC_TAG     = 'mavigne-sync';
 
@@ -2784,7 +2809,7 @@ const CDN_URLS = [
 ];
 
 self.addEventListener('install', event => {
-  if(DEBUG) console.log('[SW] Ma Vigne v7.18 installé');
+  if(DEBUG) console.log('[SW] Ma Vigne v7.21 installé');
   event.waitUntil(
     caches.open(CACHE_NAME).then(async cache => {
       // ── Cœur applicatif : STRICT (mise à jour ATOMIQUE) ──
@@ -2800,7 +2825,7 @@ self.addEventListener('install', event => {
 });
 
 self.addEventListener('activate', event => {
-  if(DEBUG) console.log('[SW] Ma Vigne v7.18 activé');
+  if(DEBUG) console.log('[SW] Ma Vigne v7.21 activé');
   event.waitUntil(
     caches.keys().then(keys =>
       Promise.all(

@@ -23,7 +23,7 @@ export const GT_ADMIN_EMAIL = 'ngdevpro@gmail.com';
 // WHATS_NEW   : tableau vide = modal desactive pour cette version.
 // Format item : { emoji:'📅', titre:'Titre court', desc:'Phrase utilisateur.' }
 // Regle : seulement les changements visibles par les utilisateurs.
-export const APP_VERSION = '6.63';
+export const APP_VERSION = '6.66';
 // ════ Journal des nouveautés (récap cumulatif) ════
 // Une entrée par version, la PLUS RÉCENTE EN HAUT : { v:'5.10', items:[ {emoji,titre,desc}, … ] }
 // À chaque release visible → AJOUTER un bloc en tête (ne pas remplacer). items:[] = release technique (rien à afficher).
@@ -354,6 +354,20 @@ window._mvGraphRepeindre = function(){
 };
 
 export const WHATS_NEW = [
+  // 6.65 : correctif de l'ecran de recolte livre en 6.64 (le bloc de repartition
+  // disparaissait a la deuxieme ouverture). Rien de NEUF pour l'utilisateur :
+  // ce que 6.64 annonce est simplement redevenu vrai.
+  { v: '6.66', items: [
+    { emoji: 'carte', titre: 'La surface et le poids s\u2019\u00e9crivent \u00e0 la virgule, comme on les dit', desc: "Sur la r\u00e9partition d\u2019une r\u00e9colte, taper <b>0,12</b> ha ne marchait pas\u00a0: le champ n\u2019acceptait que le point, et il effa\u00e7ait la saisie <b>sans rien dire</b>. Pire, la ligne se redessinait \u00e0 chaque frappe et le curseur sautait d\u00e8s le premier chiffre. Surface, poids par caisse, litres de jus et de lie\u00a0: tous ces champs acceptent maintenant la <b>virgule</b> ou le point, et vous laissent taper tranquillement. La surface se lit et se r\u00e9\u00e9crit au <b>centi\u00e8me d\u2019hectare</b>." }
+  ] },
+  { v: '6.65', items: [] },
+  { v: '6.64', items: [
+    { emoji: 'carton', titre: 'Une r\u00e9colte peut partir chez plusieurs acheteurs \u00e0 la fois', desc: "Jusqu\u2019ici une r\u00e9colte n\u2019avait qu\u2019un destinataire\u00a0: deux n\u00e9goces sur la m\u00eame parcelle obligeaient \u00e0 saisir <b>deux r\u00e9coltes le m\u00eame jour</b>, et la parcelle \u00e9tait compt\u00e9e deux fois partout o\u00f9 on la compte une. La r\u00e9colte porte maintenant une <b>r\u00e9partition</b>\u00a0: une ligne par destinataire \u2014 le domaine et chaque acheteur \u2014 avec ses caisses. <b>Les hectolitres estim\u00e9s ne comptent que la part du domaine.</b>" },
+    { emoji: 'balance', titre: 'Le poids d\u2019une caisse est celui du jour, et il ne bouge plus apr\u00e8s coup', desc: "Chaque ligne porte son propre poids par caisse\u00a0: les caisses d\u2019un n\u00e9goce ne p\u00e8sent pas celles d\u2019un autre, et le m\u00eame client peut changer de caisse d\u2019un jour \u00e0 l\u2019autre. La fiche du client <b>propose</b> son poids habituel, elle ne l\u2019impose plus. Avant, corriger cette fiche d\u00e9pla\u00e7ait <b>tous les kilos d\u00e9j\u00e0 livr\u00e9s</b>, y compris ceux d\u2019un bon d\u00e9j\u00e0 sign\u00e9. Ce n\u2019est plus le cas." },
+    { emoji: 'document', titre: 'Le bon de livraison, et les litres que le client renvoie', desc: "Sur l\u2019\u00e9cran R\u00e9coltes, la ligne \u00ab\u00a0kg vendus en raisin\u00a0\u00bb ouvre les <b>ventes en vrac</b>\u00a0: un client, ses livraisons, son <b>bon de livraison</b> et son <b>r\u00e9cap de campagne</b> \u00e0 imprimer. Le bon ne dit que des kilos. Quand l\u2019acheteur renvoie ses <b>litres de jus et de lie</b>, on les saisit sur la livraison\u00a0: le rendement r\u00e9el en kg/hL appara\u00eet. Tant qu\u2019un retour manque, la livraison est marqu\u00e9e \u00ab\u00a0retour attendu\u00a0\u00bb." },
+    { emoji: 'graphique', titre: 'Le rendement dit d\u00e9sormais ce qu\u2019il sait et ce qu\u2019il devine', desc: "Le rendement par parcelle \u00e9tait une <b>estimation</b> d\u2019apr\u00e8s les kilos, affich\u00e9e comme un chiffre net et compar\u00e9e au maximum de l\u2019appellation. Il va maintenant chercher le volume l\u00e0 o\u00f9 il a \u00e9t\u00e9 mesur\u00e9\u00a0: les litres rendus par l\u2019acheteur, puis le volume log\u00e9 en cuve. <b>Tant qu\u2019un volume manque, la parcelle affiche une fourchette</b> et la part r\u00e9ellement mesur\u00e9e \u2014 il manque des litres, pas des raisins. Le pourcentage du maximum s\u2019\u00e9crit alors \u00ab\u00a0\u2248\u00a0\u00bb." },
+    { emoji: 'carte', titre: 'La surface, quand un acheteur prend une partie de la parcelle', desc: "Chaque destinataire peut porter sa <b>surface r\u00e9colt\u00e9e</b>. Laiss\u00e9e vide, la ligne prend tout le reste\u00a0: 12 ares vendus sur 34, et le domaine se voit attribuer les 22 restants sans rien taper. Le bon porte la surface \u2014 l\u2019acheteur en a besoin pour sa propre d\u00e9claration. <b>Une parcelle vendang\u00e9e en deux passages n\u2019est jamais compt\u00e9e deux fois.</b>" }
+  ] },
   { v: '6.63', items: [
     { emoji: 'imprimante', titre: 'Le carnet d\u2019entretien imprim\u00e9 revient \u00e0 la normale', desc: "La derni\u00e8re mise \u00e0 jour avait mis des ic\u00f4nes dans la fiche d\u2019entretien du tracteur \u2014 sauf que ce carnet <b>s\u2019ouvre dans un autre onglet pour \u00eatre imprim\u00e9</b>, et l\u00e0 les ic\u00f4nes sortaient vides. C\u2019est corrig\u00e9\u00a0: le carnet a d\u00e9sormais ses propres dessins, ind\u00e9pendants de l\u2019application. <b>Aucune fiche, aucune case coch\u00e9e n\u2019est touch\u00e9e.</b>" }
   ] },
@@ -2063,13 +2077,19 @@ var MV_AIDE = {
       ['Le parc à cuves', "se déclare une fois dans les Réglages du Chai : un nom, une contenance en litres, une matière. La même cuve sert à vinifier au Cuvier puis à élever au Chai, et l’application sait laquelle est prise — dans les deux cas."],
       ['Au Cuvier', "une cuve de vinification peut être rattachée à une cuve du parc. C’est ce rattachement qui rend l’occupation juste : sans lui, le parc ne voit que Le Chai et annonce libre une cuve qui fermente. Facultatif — la saisie libre reste possible."],
       ['Au décuvage', "vous choisissez où part le vin : barriques, cuve, ou les deux. Le répartiteur met la cuve d’abord et convertit le reste en barriques. La cuve que vous videz reste choisissable — élever sur lies dans la cuve de fermentation est un usage courant, pas une erreur de saisie."],
+      ['Une récolte peut avoir plusieurs destinataires', "sur la même parcelle et le même jour : le domaine, et un ou plusieurs acheteurs de raisin. Une ligne chacun, avec ses caisses, son poids par caisse et, si l’acheteur a pris une partie de la parcelle, sa surface. Laissée vide, la surface prend tout le reste."],
+      ['Le poids d’une caisse est un poids du jour', "il est figé sur l’apport au moment où vous le saisissez. La fiche du client ne fait que le proposer : la corriger plus tard ne déplace aucun kilo déjà livré, ni sur un bon déjà signé."],
+      ['Le bon de livraison', "s’ouvre depuis la ligne « kg vendus en raisin » de l’écran Récoltes. Une livraison, c’est un chargement : un client, une date, même s’il emporte deux parcelles. Le bon ne dit que des kilos — aucun prix."],
+      ['Le retour du client', "les litres de jus et de lie qu’il a obtenus, saisis des semaines plus tard sur la livraison. Corriger les caisses ne touche pas aux litres, et l’inverse non plus : deux mesures, deux personnes, deux moments."],
+      ['Le rendement va chercher le mesuré d’abord', "les litres rendus par l’acheteur, puis le volume logé en cuve, et seulement à défaut une estimation d’après les kilos. Tant qu’un volume manque, la parcelle affiche une fourchette et le pourcentage mesuré : il manque des litres, pas des raisins."],
       ['Une cuve n’est pas un fût', "elle ne sort pas de La Réserve, elle n’a pas d’âge, et elle a sa contenance propre. Ajouter une cuve à une cuvée ne change aucun compte de fûts. Le volume que vous inscrivez est celui qui est réellement dedans, pas la contenance de la cuve."],
       ['L’ouillage suit le bois, pas le contenant', "inox et béton ne s’évaporent pas : une cuvée logée seulement là n’a pas de jauge de part des anges et ne déclenche aucune alerte. Un foudre bois, si. Une cuvée mixte garde sa jauge, cadrée sur sa seule part en fût."],
       ['La fin de fermentation et la fin de malo', "sont estimées à partir de vos propres relevés : la densité pour l’une, l’acide malique pour l’autre. Sans trois mesures, l’écran dit « démarrage » plutôt qu’une date inventée."],
       ['Le millésime', "annonce ce qui vient dans les quatre prochaines semaines, puis retrace le parcours du vin, de la benne à la bouteille."],
       ['Votre rendement au pressoir', "se règle au Cuvier, onglet Réglages, en kilos de raisin par hectolitre. Tous les écrans qui transforment des raisins en volume s’en servent — la chaîne de la récolte à la bouteille comme le bilan de campagne."],
       ['Les analyses labo', "s’attachent en PDF à la cuvée. Les supprimer est réservé à l’administrateur."],
-      ['Quatre documents sortent de la Cave', "depuis Réglages, onglet App, « Documents & impressions » : le contrôle de maturité avant vendange, le cahier de cuverie pendant la fermentation, le registre des manipulations et le bilan de campagne. Ce sont des états internes : Ma Vigne prépare, vous déclarez."]
+      ['Quatre documents sortent de la Cave', "depuis Réglages, onglet App, « Documents & impressions » : le contrôle de maturité avant vendange, le cahier de cuverie pendant la fermentation, le registre des manipulations et le bilan de campagne. Ce sont des états internes : Ma Vigne prépare, vous déclarez."],
+      ['Deux autres s’éditent au plus près de la livraison', "le bon de livraison d’un chargement et le récapitulatif de campagne d’un acheteur, depuis les ventes en vrac. Ils portent le nom du domaine, les kilos livrés, et les volumes rendus dès que le client a répondu."]
     ]
   },
   reserve: {

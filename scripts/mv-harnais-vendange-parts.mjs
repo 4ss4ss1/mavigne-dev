@@ -137,35 +137,70 @@ T('pck absent : repli sur la config', M._vpKg({ dom:true, caisses:10 }), 250);
     ce qui part chez les clients — sans le moindre message. On rejoue donc
     l'injection sur un DOM minimal et on LIT ce qui en sort. */
 const NOMS_UI = ['_vendRepHide','_vendRepInject','_vendRepRender','_vendRepLigne','_vendRepKgHtml',
-                 '_vendRepSurfHtml','_vendHa','_vendRepTotHtml','_vendRepPush','_vendRepLibres','_vendRepMaj',
+                 '_vendRepSurfHtml','_vendRepSurfRs','_vendLireNb','_vendNbTxt','_vendHa','_vendRepTotHtml',
+                 '_vendRepPush','_vendRepLibres','_vendRepMaj',
                  '_vendRepDest','_vendRepCs','_vendRepAdj','_vendRepPck','_vendRepSurf',
                  '_vendRepAdd','_vendRepDel','_vendRepParts','_vendRepCss'];
 const absentsUI = NOMS_UI.filter(x => !corps(x));
 if (absentsUI.length){ console.error('ROUGE — UI introuvable : ' + absentsUI.join(', ')); process.exit(1); }
 
-function noeud(id){
-  return { id, value:'', innerHTML:'', style:{}, children:[], parentNode:null, previousElementSibling:null,
+/* ⚠️⚠️ CE FAUX DOM A DÉJÀ MENTI UNE FOIS. Sa première version FABRIQUAIT le
+   nœud `#vrec-rep` dès qu'on le demandait : elle ne pouvait donc voir ni un
+   échec d'insertion, ni un bloc masqué. Le défaut du 24/08 — l'écran vide à la
+   DEUXIÈME ouverture — est passé sous ce filet-là. Il rend maintenant un vrai
+   petit arbre : `getElementById` PARCOURT, il n'invente pas. */
+function noeud(id, tag){
+  return { id:id||'', tagName:(tag||'div'), value:'', innerHTML:'', style:{}, attrs:{},
+           children:[], parentNode:null,
+           get previousElementSibling(){
+             if(!this.parentNode) return null;
+             const i=this.parentNode.children.indexOf(this);
+             return i>0 ? this.parentNode.children[i-1] : null;
+           },
+           setAttribute(k,v){ this.attrs[k]=String(v); },
+           getAttribute(k){ return Object.prototype.hasOwnProperty.call(this.attrs,k)?this.attrs[k]:null; },
            appendChild(c){ c.parentNode=this; this.children.push(c); return c; },
-           insertBefore(c,ref){ c.parentNode=this; this.children.splice(Math.max(0,this.children.indexOf(ref)),0,c); return c; } };
+           insertBefore(c,ref){ c.parentNode=this;
+             const i=this.children.indexOf(ref);
+             this.children.splice(i<0?this.children.length:i,0,c); return c; } };
+}
+function chercher(n,id){
+  if(!n) return null;
+  if(n.id===id) return n;
+  for(const c of n.children){ const t=chercher(c,id); if(t) return t; }
+  return null;
+}
+function marques(n,out){
+  out=out||[];
+  if(n.getAttribute && n.getAttribute('data-vd-off')!=null) out.push(n);
+  n.children.forEach(c => marques(c,out));
+  return out;
 }
 const REG = {};
 const parentCs = noeud('parent');
 const lblCs = noeud('lbl-caisses'), rowCs = noeud('row-caisses'), elCs = noeud('vrec-caisses');
 parentCs.appendChild(lblCs); parentCs.appendChild(rowCs); rowCs.appendChild(elCs);
-elCs.parentNode = rowCs; rowCs.previousElementSibling = lblCs;
 const lblDest = noeud('lbl-dest'), vw = noeud('vrec-vendu-wrap');
-parentCs.appendChild(lblDest); parentCs.appendChild(vw); vw.previousElementSibling = lblDest;
-['vrec-caisses','vrec-vendu-wrap','vrec-cuvee-row','vrec-client-row','vrec-vinif-section','vrec-parcelle',
- 'vrec-cuv-att'].forEach(k => { REG[k] = REG[k] || (k==='vrec-caisses'?elCs:(k==='vrec-vendu-wrap'?vw:noeud(k))); });
+parentCs.appendChild(lblDest); parentCs.appendChild(vw);
+['vrec-cuvee-row','vrec-client-row','vrec-vinif-section','vrec-parcelle','vrec-cuv-att']
+  .forEach(k => { REG[k] = noeud(k); });
+/* Les nœuds que le vrai navigateur crée en analysant le HTML des lignes. Ce
+   faux DOM ne parse pas : on les déclare pour pouvoir observer QUI est réécrit
+   pendant la frappe. ⚠️ Ce n'est PAS la complaisance d'avant — là, on ne
+   fabrique pas un nœud à la demande pour faire disparaître un échec : on pose
+   des cibles nommées, et le test vérifie laquelle est touchée. */
+['vrp-s-0','vrp-s-1','vrp-s-2','vrp-rs-0','vrp-rs-1','vrp-rs-2','vrp-kg-0','vrp-kg-1','vrp-kg-2','vrec-rep-tot']
+  .forEach(k => { REG[k] = noeud(k); });
 REG['vrec-parcelle'].value = 'Le Clos';
 
 const docFaux = {
   getElementById(id){
-    if (REG[id]) return REG[id];
-    if (id.indexOf('vrp-') === 0 || id === 'vrec-rep' || id === 'vrec-rep-tot') return (REG[id] = noeud(id));
-    return null;
+    const t = chercher(parentCs, id);      // on PARCOURT l'arbre
+    if (t) return t;
+    return REG[id] || null;                // les nœuds hors modal (cuvée, etc.)
   },
-  createElement(){ return noeud('neuf'); },
+  querySelectorAll(sel){ return sel === '[data-vd-off]' ? marques(parentCs) : []; },
+  createElement(){ return noeud('', 'div'); },
   head:{ appendChild(){} }
 };
 const winFaux = {};
@@ -181,6 +216,7 @@ let codeUI = 'var CAVE_VENDANGE={config:CFG,clients:CLIENTS,recoltes:[]};\n'
   + PRELUDE + NOMS.map(corps).join('\n') + '\n' + NOMS_UI.map(corps).join('\n')
   + '\nreturn { inject:_vendRepInject, parts:_vendRepParts, add:_vendRepAdd, dest:_vendRepDest,'
   + ' cs:_vendRepCs, pck:_vendRepPck, surf:_vendRepSurf, del:_vendRepDel, etat:function(){return _vrep;},'
+  + ' lire:_vendLireNb, txt:_vendNbTxt,'
   + ' vendu:function(){return _vendVendu;} };';
 // eslint-disable-next-line no-new-func
 const U = new Function('CLIENTS','CFG','document','window', codeUI)(CLIENTS, CFG, docFaux, winFaux);
@@ -190,16 +226,65 @@ T('écran : le libellé « Nombre de caisses » est masqué', lblCs.style.displa
 T('écran : le compteur d\'origine est masqué', rowCs.style.display, 'none');
 T('écran : le toggle vendu/vinifié est masqué', vw.style.display, 'none');
 T('★ PONT : #vrec-caisses porte les caisses DU DOMAINE', elCs.value, 36);
-T('écran : trois lignes de répartition', (REG['vrec-rep'].innerHTML.match(/class="vrp-l/g)||[]).length, 3);
+T('écran : trois lignes de répartition', (docFaux.getElementById('vrec-rep').innerHTML.match(/class="vrp-l/g)||[]).length, 3);
 /* ⚠️ Deux assertions ont été écrites fausses ici, et c'est instructif :
    1. un input[type=number] porte sa valeur avec un POINT — c'est la spec HTML,
       le navigateur l'affiche ensuite selon la locale ;
    2. le reste (0,34 − 0,12 = 0,22 ha) se PARTAGE entre les DEUX parts sans
       surface : 0,11 chacune, pas 0,22. */
-T('écran : la surface achetée est dans le champ', /value="0.12"/.test(REG['vrec-rep'].innerHTML), true);
-T('écran : le reste 0,22 ha partagé entre les deux parts sans surface', /0,11/.test(REG['vrec-rep'].innerHTML), true);
-T('écran : le total dit les kilos vendus', /1\u202f134 kg vendus|1 134 kg vendus/.test(REG['vrec-rep'].innerHTML), true);
+T('écran : la surface achetée est dans le champ', /value="0.12"/.test(docFaux.getElementById('vrec-rep').innerHTML), true);
+T('écran : le reste 0,22 ha partagé entre les deux parts sans surface', /0,11/.test(docFaux.getElementById('vrec-rep').innerHTML), true);
+T('écran : le total dit les kilos vendus', /1\u202f134 kg vendus|1 134 kg vendus/.test(docFaux.getElementById('vrec-rep').innerHTML), true);
 T('écran : la cuve est prévenue du changement', winFaux.__attRejoue > 0, true);
+
+/* ★★★ LA DEUXIÈME OUVERTURE — le défaut du 24/08, vu en production.
+   Le bloc s'insère juste avant la ligne des caisses : il DEVIENT le voisin
+   précédent. Rouvrir l'écran faisait donc masquer le bloc par le code qui
+   croyait viser le libellé « Nombre de caisses ». Écran vide, sans erreur. */
+U.inject(mixte);
+const box2 = docFaux.getElementById('vrec-rep');
+T('★ 2e ouverture : le bloc est toujours là', !!box2, true);
+T('★ 2e ouverture : il ne s\'est pas masqué lui-même', box2 && box2.style.display !== 'none', true);
+T('★ 2e ouverture : il a bien du contenu', (box2.innerHTML.match(/class="vrp-l/g) || []).length, 3);
+T('2e ouverture : l\'ancien compteur reste masqué', rowCs.style.display, 'none');
+U.inject(mixte);
+T('★ 3e ouverture : toujours visible', docFaux.getElementById('vrec-rep').style.display !== 'none', true);
+
+/* ★★★ LA SAISIE DÉCIMALE — deux pièges cumulés, vus le 24/08.
+   1. un `input type="number"` REFUSE la virgule : sur un clavier français,
+      taper « 0,12 » rend une chaîne VIDE, et la surface s'effaçait en silence ;
+   2. la ligne se redessinait à CHAQUE frappe, donc l'`<input>` était recréé et
+      le curseur perdu — impossible de taper la deuxième décimale.
+   ⚠️ Le second piège n'est visible que si l'on tape PLUSIEURS caractères : une
+   assertion qui n'en tape qu'un serait verte pour rien. */
+T('lecture : la virgule française', U.lire('0,12'), 0.12);
+T('lecture : le point aussi', U.lire('0.12'), 0.12);
+T('lecture : espaces et insécables', U.lire(' 1\u202f234,5 '), 1234.5);
+T('lecture : un champ vide n\'est pas zéro', String(U.lire('')), 'NaN');
+T('lecture : du texte n\'est pas un nombre', String(U.lire('abc')), 'NaN');
+T('écriture : on remet une virgule, jamais un point', U.txt(0.12, 2), '0,12');
+T('écriture : zéro reste vide (le champ dit « tout le reste »)', U.txt(0, 2), '');
+
+const ligne1 = docFaux.getElementById('vrp-s-1') || null;
+T('le champ surface accepte la frappe libre', /type="text"[^>]*inputmode="decimal"/.test(
+    (docFaux.getElementById('vrec-rep').innerHTML.match(/<input[^>]*_vendRepSurf[^>]*>/) || [''])[0]
+    || (docFaux.getElementById('vrec-rep').innerHTML.match(/<input[^>]*placeholder="tout le reste"[^>]*>/) || [''])[0]), true);
+if (ligne1){
+  ligne1.innerHTML = 'SENTINELLE';                       // ce que la frappe ne doit PAS effacer
+  const ligne0 = docFaux.getElementById('vrp-s-0');
+  if (ligne0) ligne0.innerHTML = 'VOISINE';
+  ['0','0,','0,1','0,12'].forEach(t => U.surf(1, t));    // on tape vraiment, caractère par caractère
+  T('★ la ligne qu\'on remplit n\'est PAS redessinée', ligne1.innerHTML, 'SENTINELLE');
+  T('★ la ligne voisine, elle, se recalcule', ligne0 && ligne0.innerHTML !== 'VOISINE', true);
+  T('★ « 0,12 » est bien arrivé dans la répartition', U.etat()[1].surface, 0.12);
+  U.surf(1, '');
+  T('effacer le champ rend la surface au « reste »', U.etat()[1].surface, 'null');
+  U.surf(1, '0,12');   // on remet l'état : les assertions suivantes s'appuient dessus
+}
+/*  ⚠️ CE QUE CE FAUX DOM NE PEUT PAS PROUVER : il ne parse pas le HTML, donc
+    `#vrp-rs-i` n'existe pas comme nœud et le rafraîchissement du texte de
+    droite n'est pas observable ici. Il l'a été sur jsdom + le vrai index.html,
+    hors CI (§66). Le dire vaut mieux que laisser croire à une couverture. */
 
 U.cs(0, 50);
 T('★ PONT : le compteur suit la part domaine', elCs.value, 50);

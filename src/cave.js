@@ -2886,21 +2886,44 @@ function _vendRepCss(){
   document.head.appendChild(st);
 }
 // Masque un élément d'index.html sans le supprimer : le code qui le lit reste bon.
-function _vendRepHide(el){ if(el) el.style.display='none'; }
+// ⚠️⚠️⚠️ CE QUI EST MASQUÉ SE DÉCIDE UNE SEULE FOIS, ET SE MARQUE.
+//   Version d'origine : on retrouvait le libellé « Nombre de caisses » par
+//   `rowCs.previousElementSibling`. Or le bloc de répartition s'insère JUSTE
+//   AVANT cette même ligne — il DEVIENT donc le voisin précédent. À la
+//   deuxième ouverture de l'écran, ce « libellé » n'était plus le libellé :
+//   c'était le bloc lui-même, et il se masquait tout seul. L'écran se vidait
+//   de sa répartition, de sa destination et de ses caisses à la fois.
+//   ★ Vécu en production le 24/08, invisible à la première ouverture.
+//   La parade n'est pas de mieux viser : c'est de ne plus RE-viser. Les
+//   éléments à cacher sont marqués au premier passage, quand le voisinage est
+//   encore intact, et c'est la marque qu'on relit ensuite.
+function _vendRepHide(el){
+  if(!el||el.id==='vrec-rep') return;
+  el.setAttribute('data-vd-off','1'); el.style.display='none';
+}
 function _vendRepInject(rec){
   _vendRepCss();
   var elC=document.getElementById('vrec-caisses'); if(!elC) return;
   var rowCs=elC.parentNode;                     // le rang [−][input][+]
-  var lblCs=rowCs?rowCs.previousElementSibling:null;   // le libellé « Nombre de caisses »
-  _vendRepHide(rowCs); _vendRepHide(lblCs);
-  var vw=document.getElementById('vrec-vendu-wrap');
-  var lblDest=vw?vw.previousElementSibling:null;       // le libellé « Destination »
-  _vendRepHide(vw); _vendRepHide(lblDest);
   var box=document.getElementById('vrec-rep');
   if(!box){
+    // Premier passage : le voisinage d'origine est intact, c'est le SEUL
+    // moment où l'on peut désigner sans se tromper.
+    _vendRepHide(rowCs);
+    _vendRepHide(rowCs?rowCs.previousElementSibling:null);   // « Nombre de caisses »
+    var vw0=document.getElementById('vrec-vendu-wrap');
+    _vendRepHide(vw0);
+    _vendRepHide(vw0?vw0.previousElementSibling:null);       // « Destination »
     box=document.createElement('div'); box.id='vrec-rep'; box.style.marginBottom='12px';
     if(rowCs&&rowCs.parentNode) rowCs.parentNode.insertBefore(box,rowCs);
+  } else {
+    // Passages suivants : on relit la marque, on ne redésigne rien.
+    var off=document.querySelectorAll('[data-vd-off]');
+    for(var z=0;z<off.length;z++) off[z].style.display='none';
   }
+  // ⚠️ Et on réaffirme que NOTRE bloc, lui, se voit : cela répare aussi un
+  //   écran déjà éteint par la version fautive, sans rien avoir à recharger.
+  box.style.display='';
   _vrep=(_vendParts(rec)||[]).map(function(p){
     return {dom:!!p.dom, client:p.client||'', caisses:_vpCs(p), pck:_vpPck(p),
             surface:_vpSurf(p)||null, retour:p.retour||null};
@@ -2944,7 +2967,7 @@ function _vendRepLigne(p,i){
    +'<input type="number" min="0" inputmode="numeric" value="'+_vpCs(p)+'" oninput="_vendRepCs('+i+',this.value)">'
    +'<button type="button" onclick="_vendRepAdj('+i+',1)">\uFF0B</button>'
    +'<span class="vrp-u">caisses</span></div>'
-   +'<div class="vrp-p"><input type="number" min="1" max="80" step="0.5" value="'+_vpPck(p)+'" oninput="_vendRepPck('+i+',this.value)">'
+   +'<div class="vrp-p"><input type="text" inputmode="decimal" value="'+_vendNbTxt(_vpPck(p),0)+'" oninput="_vendRepPck('+i+',this.value)">'
    +'<span class="vrp-u">kg/caisse</span></div></div>';
   h+='<div class="vrp-kg" id="vrp-kg-'+i+'">'+_vendRepKgHtml(i)+'</div>';
   h+='<div class="vrp-s" id="vrp-s-'+i+'">'+_vendRepSurfHtml(i)+'</div>';
@@ -2961,7 +2984,10 @@ function _vendRepKgHtml(i){
    +'</div><div class="v">'+_vpKg(p).toLocaleString('fr-FR')+'<small>kg</small></div>';
 }
 // Surface récoltée pour ce destinataire. Vide = tout le reste de la parcelle.
-function _vendRepSurfHtml(i){
+/* Le texte à droite du champ — « le reste : 0,22 ha », « 5 600 kg/ha », un
+   dépassement. Isolé parce qu'il se rafraîchit à chaque frappe, alors que le
+   champ, lui, ne doit SURTOUT pas être recréé : il a le curseur. */
+function _vendRepSurfRs(i){
   var p=_vrep[i]; if(!p) return '';
   var nomP=((document.getElementById('vrec-parcelle')||{}).value||'').trim();
   var sp=_vendParcSurf(nomP);
@@ -2978,11 +3004,36 @@ function _vendRepSurfHtml(i){
                        :(kgha>0?(kgha.toLocaleString('fr-FR')+' kg/ha'):'');
   else if(reste>0) rs='le reste : <b>'+_vendHa(eff)+' ha</b>'+(sans?' (au prorata)':'')+(kgha>0?(' \u00b7 '+kgha.toLocaleString('fr-FR')+' kg/ha'):'');
   else rs='<b style="color:var(--rouge,#A0291E)">plus rien \u00e0 r\u00e9partir</b>';
+  return rs;
+}
+function _vendRepSurfHtml(i){
+  var p=_vrep[i]; if(!p) return '';
   return '<span class="vrp-u">Surface r\u00e9colt\u00e9e</span>'
-   +'<input type="number" min="0" max="99" step="0.001" placeholder="tout le reste" value="'+(val>0?val:'')+'" '
-   +'oninput="_vendRepSurf('+i+',this.value)"><span class="vrp-u">ha</span><span class="rs">'+rs+'</span>';
+   +'<input type="text" inputmode="decimal" placeholder="tout le reste" value="'+_vendNbTxt(_vpSurf(p),2)+'" '
+   +'oninput="_vendRepSurf('+i+',this.value)"><span class="vrp-u">ha</span>'
+   +'<span class="rs" id="vrp-rs-'+i+'">'+_vendRepSurfRs(i)+'</span>';
 }
 function _vendHa(x){ return (Math.round(x*10000)/10000).toLocaleString('fr-FR',{minimumFractionDigits:2,maximumFractionDigits:4}); }
+/* ⚠️⚠️ UN `input type="number"` REFUSE LA VIRGULE, ET LE FAIT EN SILENCE.
+   Sur un clavier français on tape « 0,12 » : le navigateur juge la valeur
+   invalide et rend une chaîne VIDE. Le code recevait donc « rien » et effaçait
+   la surface — sans message, sans trace. Les champs décimaux de la vendange
+   sont désormais en `text` + `inputmode="decimal"` (le pavé numérique sort
+   quand même sur téléphone), et c'est cette fonction qui lit ce que le vigneron
+   a écrit : virgule ou point, avec ou sans espaces. */
+function _vendLireNb(v){
+  if(v==null) return NaN;
+  var t=String(v).replace(/[\s\u00a0\u202f]/g,'').replace(',','.');
+  if(t==='') return NaN;
+  var n=parseFloat(t);
+  return isFinite(n)?n:NaN;
+}
+/* Ce qu'on REMET dans un champ : la virgule française, jamais le point. */
+function _vendNbTxt(x,dec){
+  if(!(x>0)) return '';
+  return (Math.round(x*10000)/10000).toLocaleString('fr-FR',
+    {minimumFractionDigits:(dec==null?0:dec),maximumFractionDigits:4});
+}
 function _vendRepTotHtml(){
   var cfg=_vendCfg();
   var cs=_vrep.reduce(function(s,p){return s+_vpCs(p);},0);
@@ -3016,7 +3067,9 @@ function _vendRepPush(){
 }
 function _vendRepMaj(i){
   var k=document.getElementById('vrp-kg-'+i); if(k) k.innerHTML=_vendRepKgHtml(i);
-  _vrep.forEach(function(_,j){ var s=document.getElementById('vrp-s-'+j); if(s) s.innerHTML=_vendRepSurfHtml(j); });
+  /* Les kg/ha bougent quand les caisses bougent : on rafraîchit le TEXTE des
+     surfaces, jamais les champs — l'un d'eux peut avoir le curseur. */
+  _vrep.forEach(function(_,j){ var rs=document.getElementById('vrp-rs-'+j); if(rs) rs.innerHTML=_vendRepSurfRs(j); });
   var t=document.getElementById('vrec-rep-tot'); if(t) t.innerHTML=_vendRepTotHtml();
   _vendRepPush();
 }
@@ -3034,12 +3087,20 @@ function _vendRepDest(i,v){
 }
 function _vendRepCs(i,v){ if(!_vrep[i]) return; _vrep[i].caisses=Math.max(0,parseInt(v,10)||0); _vendRepMaj(i); }
 function _vendRepAdj(i,d){ if(!_vrep[i]) return; _vrep[i].caisses=Math.max(0,_vpCs(_vrep[i])+d); _vendRepRender(); }
-function _vendRepPck(i,v){ if(!_vrep[i]) return; _vrep[i].pck=Math.max(0,parseFloat(String(v).replace(',','.'))||0); _vendRepMaj(i); }
+function _vendRepPck(i,v){ if(!_vrep[i]) return; var n=_vendLireNb(v); _vrep[i].pck=isNaN(n)?0:Math.max(0,n); _vendRepMaj(i); }
 function _vendRepSurf(i,v){
   if(!_vrep[i]) return;
-  var x=parseFloat(String(v).replace(',','.'));
+  var x=_vendLireNb(v);
   _vrep[i].surface=(x>0)?x:null;
-  _vrep.forEach(function(_,j){ var s=document.getElementById('vrp-s-'+j); if(s) s.innerHTML=_vendRepSurfHtml(j); });
+  /* ⚠️ ON NE RÉÉCRIT PAS LA LIGNE QU'ON EST EN TRAIN DE REMPLIR. Réécrire le
+     bloc recrée l'`<input>`, donc perd le curseur : impossible de taper une
+     deuxième décimale. Seul le texte de droite est rafraîchi ici ; les AUTRES
+     lignes, dont le « reste » vient de changer, se redessinent entièrement. */
+  var rs=document.getElementById('vrp-rs-'+i); if(rs) rs.innerHTML=_vendRepSurfRs(i);
+  _vrep.forEach(function(_,j){
+    if(j===i) return;
+    var s=document.getElementById('vrp-s-'+j); if(s) s.innerHTML=_vendRepSurfHtml(j);
+  });
 }
 function _vendRepAdd(){
   var libre=_vendRepLibres(null)[0];
@@ -3435,14 +3496,14 @@ function _vendRetourRender(){
   if(_vliv.detail){
     _vliv.lignes.forEach(function(x,i){
       h+='<div class="mvl-row"><span class="nm">'+_escHtml(x.parcelle)+'</span>'
-       +'<input type="number" min="0" value="'+x.jus+'" oninput="_vendRetSet('+i+',\'jus\',this.value)"><span class="u">L jus</span>'
-       +'<input type="number" min="0" value="'+x.lie+'" oninput="_vendRetSet('+i+',\'lie\',this.value)"><span class="u">L lie</span></div>';
+       +'<input type="text" inputmode="decimal" value="'+_vendNbTxt(x.jus,0)+'" oninput="_vendRetSet('+i+',\'jus\',this.value)"><span class="u">L jus</span>'
+       +'<input type="text" inputmode="decimal" value="'+_vendNbTxt(x.lie,0)+'" oninput="_vendRetSet('+i+',\'lie\',this.value)"><span class="u">L lie</span></div>';
     });
   } else {
     h+='<div class="mvl-duo"><div><label class="mvv-flbl" style="margin-top:8px">Litres de jus</label>'
-     +'<input class="mvv-tin" type="number" min="0" value="'+(_vliv.jus||'')+'" placeholder="0" oninput="_vendRetGlob(\'jus\',this.value)"></div>'
+     +'<input class="mvv-tin" type="text" inputmode="decimal" value="'+_vendNbTxt(_vliv.jus,0)+'" placeholder="0" oninput="_vendRetGlob(\'jus\',this.value)"></div>'
      +'<div><label class="mvv-flbl" style="margin-top:8px">Litres de lie</label>'
-     +'<input class="mvv-tin" type="number" min="0" value="'+(_vliv.lie||'')+'" placeholder="0" oninput="_vendRetGlob(\'lie\',this.value)"></div></div>';
+     +'<input class="mvv-tin" type="text" inputmode="decimal" value="'+_vendNbTxt(_vliv.lie,0)+'" placeholder="0" oninput="_vendRetGlob(\'lie\',this.value)"></div></div>';
   }
   h+='<label class="mvv-flbl">Re\u00e7u le</label><input class="mvv-tin" type="date" value="'+_vliv.le+'" onchange="_vendRetDate(this.value)">';
   h+='<div id="mvl-calc">'+_vendRetCalcHtml()+'</div>';
@@ -3474,11 +3535,11 @@ function _vendRetCalc(){ var el=document.getElementById('mvl-calc'); if(el) el.i
 function _vendRetSet(i,champ,v){
   var x=_vliv.lignes[i]; if(!x) return;
   if(champ==='caisses') x.caisses=Math.max(0,parseInt(v,10)||0);
-  else x[champ]=Math.max(0,parseFloat(String(v).replace(',','.'))||0);
+  else { var n=_vendLireNb(v); x[champ]=isNaN(n)?0:Math.max(0,n); }
   var k=document.getElementById('mvl-kg-'+i); if(k) k.textContent=_vendKgTxt(x.caisses*x.pck)+' kg';
   _vendRetCalc();
 }
-function _vendRetGlob(champ,v){ _vliv[champ]=Math.max(0,parseFloat(String(v).replace(',','.'))||0); _vendRetCalc(); }
+function _vendRetGlob(champ,v){ var n=_vendLireNb(v); _vliv[champ]=isNaN(n)?0:Math.max(0,n); _vendRetCalc(); }
 function _vendRetDate(v){ if(_vliv) _vliv.le=v||_vendAujId(); }
 function _vendRetDetail(){
   if(!_vliv.detail){
@@ -4221,7 +4282,7 @@ function openVendClient(i){
     +'<div class="mvv-sheet-hd"><div class="mvv-sheet-t">'+(c?'Modifier le client':'Nouveau client')+'</div>'
     +'<button class="mv-gh mvv-sheet-x" onclick="openVendClients()" title="Fermer" aria-label="Fermer">'+_mvIcon('croix',18)+'</button></div>'
     +'<label class="mvv-flbl">Nom du client</label><input id="vcl-nom" class="mvv-tin" type="text" value="'+_escHtml(c?c.nom:'')+'" placeholder="ex. Maison Bouchard">'
-    +'<label class="mvv-flbl">Poids par caisse (kg)</label><input id="vcl-pck" class="mvv-tin" type="number" value="'+(c?(c.poids_caisse_kg||25):25)+'" min="10" max="60">'
+    +'<label class="mvv-flbl">Poids par caisse (kg)</label><input id="vcl-pck" class="mvv-tin" type="text" inputmode="decimal" value="'+_vendNbTxt(c?(c.poids_caisse_kg||25):25,0)+'">'
     // Poids PROPOSE, et non impose : depuis VD-1 chaque apport fige le sien.
     +'<div class="mvv-fnote" style="color:var(--texte-doux,#5F5F5F)">Poids proposé à la saisie. Le modifier ne change aucun apport déjà enregistré.</div>'
     +'<label class="mvv-flbl">Adresse (pour le bon de livraison)</label><input id="vcl-adr" class="mvv-tin" type="text" value="'+_escHtml(c?(c.adresse||''):'')+'" placeholder="ex. 12 rue du Chapitre, 21200 Beaune">'
@@ -4232,7 +4293,8 @@ function openVendClient(i){
 function saveVendClient(){
   var nom=((document.getElementById('vcl-nom')||{}).value||'').trim();
   if(!nom){ showToast('Saisissez un nom','#E07060'); return; }
-  var pck=parseFloat((document.getElementById('vcl-pck')||{}).value)||25;
+  var pck=_vendLireNb((document.getElementById('vcl-pck')||{}).value);
+  pck=(isNaN(pck)||pck<=0)?25:Math.min(80,pck);
   var adr=(((document.getElementById('vcl-adr')||{}).value)||'').trim();
   var cls=_vendClients();
   if(_vendClientEdit!=null&&_vendClientEdit>=0&&cls[_vendClientEdit]){

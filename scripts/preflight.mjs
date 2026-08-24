@@ -304,6 +304,26 @@ function checkVersions() {
     }
   }
 
+  /* ── C27 — LE JOURNAL DES NOUVEAUTÉS SUIT LA VERSION ──────────────────────
+     ★★★ POURQUOI CE CONTRÔLE EXISTE (24/08). Trois lots fonctionnels d'affilée
+     (VD-1/2/3) ont été livrés « aucun bump » : juste du point de vue du cache,
+     FAUX du point de vue du client. `WHATS_NEW` est indexé par version APP et le
+     récap agrège jusqu'à APP_VERSION — sans bump, un chantier entier n'a AUCUNE
+     existence pour l'utilisateur. La règle d'or n°4 le disait déjà ; elle n'a
+     pas suffi, parce qu'une règle écrite ne se déclenche pas toute seule.
+     ⚠️ Ce contrôle n'impose pas d'annoncer quelque chose : il impose de DÉCIDER.
+     Une version purement technique déclare son bloc avec `items: []`, et c'est
+     un choix conscient au lieu d'un oubli. */
+  if (utils && appVersion) {
+    const wn = utils.match(/export const WHATS_NEW\s*=\s*\[(?:\s|\/\/[^\n]*)*\{\s*v:\s*['"]([^'"]+)['"]/);
+    if (!wn) add('WARN', 'src/utils.js', null, 'WHATS_NEW introuvable ou forme inattendue.');
+    else if (wn[1] !== appVersion)
+      add('ERROR', 'src/utils.js', lineOf(utils, wn.index),
+        `C27 — WHATS_NEW s'ouvre sur v${wn[1]} alors qu'APP_VERSION vaut v${appVersion} : `
+        + `le lot ne s'annonce nulle part. Ajouter un bloc { v:'${appVersion}', items:[…] } EN TÊTE `
+        + `— ou { v:'${appVersion}', items:[] } si vraiment rien n'est visible pour le client. Cf. règle d'or n°4.`);
+  }
+
   if (sw) {
     const header = sw.match(/Service Worker\s+v([0-9][0-9.]*)/);
     const cache = sw.match(/CACHE_NAME\s*=\s*['"]mavigne-v([0-9][0-9.]*)['"]/);
