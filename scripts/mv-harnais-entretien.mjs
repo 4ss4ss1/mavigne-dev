@@ -31,6 +31,15 @@ const CONTRE = args.includes('--contre');
 const CIBLE  = path.resolve(args.find(a => !a.startsWith('--')) || path.join(RACINE, 'src', 'app.js'));
 
 const APP = fs.readFileSync(CIBLE, 'utf8');
+const UTILS = fs.readFileSync(path.join(RACINE, 'src', 'utils.js'), 'utf8');
+function extraireDe(src, nom){
+  const m = src.match(new RegExp('\\nexport function ' + nom + '\\s*\\('));
+  if (!m) throw new Error('primitive introuvable dans utils.js : ' + nom);
+  let i = m.index + 1, k = src.indexOf('{', i), d = 0;
+  for (;; k++) { const c = src[k]; if (c === '{') d++; else if (c === '}') { d--; if (!d) break; } }
+  return src.slice(i, k + 1).replace(/^export /, '');
+}
+const UTILS_ICON = 'function _mvIconInconnue(){}\n' + extraireDe(UTILS, '_mvIconInline');
 function extraire(nom){
   const m = APP.match(new RegExp('\\nfunction ' + nom + '\\s*\\('));
   if (!m) throw new Error('fonction introuvable dans app.js : ' + nom);
@@ -93,6 +102,14 @@ const src = 'export function build(CTX, showToast, win){\n'
   + 'var window = win, document = win.document;\n'
   + 'function _escHtml(s){ return String(s==null?"":s).replace(/&/g,"&amp;").replace(/</g,"&lt;").replace(/>/g,"&gt;"); }\n'
   + 'function _escAttr(s){ return _escHtml(s); }\n'
+  /* ⚠⚠ LE BAC DOIT FOURNIR CE QUE LA FONCTION APPELLE, SINON IL PLANTE au
+     lieu de rougir — et un plantage dans un journal de CI ressemble a une
+     erreur d'outillage, pas a un defaut du code. Vecu le jour ou le carnet
+     d'entretien est passe aux icones : `_mvIcon is not defined`, pile de 200
+     lignes, aucune assertion executee.
+     ★ On injecte `_mvIconInline` — la VRAIE, extraite d'utils.js — et non un
+       leurre : un leurre validerait un appel que la primitive refuserait. */
+  + UTILS_ICON + '\n'
   + extraire('lancerExportEntretienPDF') + '\n'
   + 'return lancerExportEntretienPDF;\n}\n';
 const { build } = await import('data:text/javascript;base64,' + Buffer.from(src, 'utf8').toString('base64'));

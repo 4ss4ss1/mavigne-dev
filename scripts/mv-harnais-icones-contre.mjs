@@ -284,6 +284,21 @@ epreuve('un nom faux dans une branche de ternaire',
         .replace("a ? 'cercle-pointille' : c ? 'lecture'", "a ? 'nexistepas' : c ? 'lecture'")),
   /Toute icone appelee a son symbole[\s\S]*nexistepas/);
 
+/* 13. ★★★ UN `_mvIcon` DANS UN DOCUMENT BATI PAR LA PRIMITIVE MV_DOC.
+      La faute exacte que la CI a attrapee, et que CE harnais laissait passer :
+      depuis la charte, un document imprime n'ecrit plus `</head><body>` — il
+      appelle `_mvDocOpen({corps, css})`. Le marqueur ne voyait donc que
+      QUATRE documents sur treize ; les neuf autres n'etaient surveilles par
+      personne. Le carnet d'entretien est parti avec un `_mvIcon` dedans, et
+      c'est un harnais d'EXECUTION qui l'a dit, pas celui-ci.
+      ⚠ Quatrieme defaut sur ce controle. Il en a eu : la portee (un seul
+        module), le decoupage (au premier `\n}`), la profondeur d'appel (un
+        cran), et maintenant la DETECTION elle-meme. */
+epreuve('_mvIcon dans un document bati par _mvDocOpen',
+  () => ecrire('src/app.js', lire('src/app.js')
+        .replace("+_mvIconInline(c.icon,16)+' '+c.label", "+_mvIcon(c.icon,16)+' '+c.label")),
+  /Aucun document imprime[\s\S]*app\.js/);
+
 fs.rmSync(bac, { recursive: true, force: true });
 console.log('\n' + (ko ? '\x1b[31m' + ko + ' CONTRE-EPREUVE(S) EN ECHEC\x1b[0m'
                        : '\x1b[32mLes ' + ok + ' contre-epreuves rougissent\x1b[0m') + '\n');

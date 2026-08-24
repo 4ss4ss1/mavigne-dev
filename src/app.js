@@ -9578,7 +9578,7 @@ function lancerExportEntretienPDF(){
     var resumeHTML='<div class="resume-bar" aria-hidden="true"><div class="resume-item"><span class="resume-val">'+fiches.length+'</span><span class="resume-lbl">Fiches</span></div><div class="resume-item"><span class="resume-val '+(nbAno>0?'val-warn':'')+'">'+nbAno+'</span><span class="resume-lbl">Anomalies</span></div><div class="resume-item"><span class="resume-val">'+repsAll.length+'</span><span class="resume-lbl">Répar.</span></div><div class="resume-item"><span class="resume-val">'+moyScore+'%</span><span class="resume-lbl">Moy. contrôle</span></div></div>';
     var fichesHTML=!fiches.length?'<p class="empty">Aucune fiche pour '+annee+'.</p>':fiches.map(function(f){
       var nb=champs.filter(function(c){return f[c.key];}).length;
-      var checkHtml=champs.map(function(c){return '<div class="check-item '+(f[c.key]?'ok':'ko')+'">'+_mvIcon(c.icon,16)+' '+c.label+' <span>'+_mvIcon(f[c.key]?'check':'croix',16)+'</span></div>';}).join('');
+      var checkHtml=champs.map(function(c){return '<div class="check-item '+(f[c.key]?'ok':'ko')+'">'+_mvIconInline(c.icon,16)+' '+c.label+' <span>'+_mvIconInline(f[c.key]?'check':'croix',16)+'</span></div>';}).join('');
       var actDef=ACTIVITES.find(function(a){return a.nom===f.activite;});
       var defTracNom=actDef?((TRACTEURS_LIST.find(function(x){return x.id===actDef.tracteurDefautId;}))||{}).nom||'—':'—';
       var tracNom=((TRACTEURS_LIST.find(function(x){return x.id===f.tracteurId;}))||{}).nom||'';

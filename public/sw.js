@@ -1,4 +1,29 @@
-// MA VIGNE — Service Worker v7.17
+// MA VIGNE — Service Worker v7.18
+// v7.18 (23/08/2026) — LE CONTROLE NE VOYAIT PLUS QUE LE TIERS DES DOCUMENTS. APP 6.62 -> 6.63.
+//   ⚠⚠⚠ LA CI A ROUGI SUR UN DEFAUT QUE CE HARNAIS DISAIT VERT. Le carnet
+//   d'entretien du tracteur est parti en v7.17 avec un `_mvIcon` dedans — or
+//   c'est un DOCUMENT IMPRIME : il s'ouvre dans un autre onglet, sans sprite.
+//   `mv-harnais-entretien`, qui EXECUTE vraiment la fonction, a sorti
+//   « _mvIcon is not defined ». Le controle statique, lui, n'a rien vu.
+//   ★★★ LA CAUSE : depuis la charte MV_DOC, un document imprime n'ecrit
+//   PLUS son propre `</head><body>`. Il passe son corps et son CSS a
+//   `window._mvDocOpen({...})`, et c'est la PRIMITIVE qui possede le gabarit.
+//   Le marqueur cherchait la balise de tete : il voyait QUATRE documents sur
+//   treize. Les neuf autres n'etaient surveilles par personne depuis la charte.
+//   ★★ LA LECON, ET ELLE DEPASSE LES ICONES : quand une charte deplace un
+//   motif dans une primitive, tout controle qui cherchait ce motif devient
+//   aveugle SANS ROUGIR. Migrer le code ne suffit pas — il faut relire ce qui
+//   le surveillait. Un filet ne signale jamais qu'il a cesse de servir.
+//   ★ Corrige : la detection accepte les deux formes, marqueur historique ET
+//   appel a la primitive. 23e contre-epreuve, qui rejoue la faute exacte de la
+//   CI et exige que le rouge NOMME `app.js : lancerExportEntretienPDF`.
+//   ★ Quatrieme defaut sur ce meme controle, et il les cumule tous : la
+//   portee (un seul module, v7.09), le decoupage (au premier `\n}`, v7.09), la
+//   profondeur d'appel (un cran, v7.09), et maintenant la DETECTION.
+//   ★ `mv-harnais-entretien` recoit la VRAIE `_mvIconInline`, extraite
+//   d'utils.js — pas un leurre : un leurre validerait un appel que la
+//   primitive refuserait. Son bac plantait au lieu de rougir, et un plantage
+//   dans un journal de CI ressemble a une panne d'outillage, pas a un defaut.
 // v7.17 (23/08/2026) — L'ALPHABET D'ETAT DES TACHES. APP 6.61 -> 6.62.
 //   ★★ LE LOT REMIS TROIS FOIS, ET LA RAISON ETAIT BONNE. Quatre etats dans
 //   un rond de 22 px : fait, en cours, pas commence — et AUTO, ecrit `~`.
@@ -2743,7 +2768,7 @@
 // v2.22 — Fix profils vides : guard vide dans loadData() pour MEMBRES/SAISONS/TACHES
 // v2.17 — Onboarding intégré + tenantId · v2.06 — Firebase Auth · v2.00–v2.05 — divers
 const DEBUG = self.location.hostname === 'localhost' || self.location.hostname === '127.0.0.1';
-const CACHE_NAME   = 'mavigne-v7.17';
+const CACHE_NAME   = 'mavigne-v7.18';
 const TENANT_CACHE = 'mavigne-tenant';   // Cache persistant — préservé à chaque mise à jour SW
 const SYNC_TAG     = 'mavigne-sync';
 
@@ -2759,7 +2784,7 @@ const CDN_URLS = [
 ];
 
 self.addEventListener('install', event => {
-  if(DEBUG) console.log('[SW] Ma Vigne v7.17 installé');
+  if(DEBUG) console.log('[SW] Ma Vigne v7.18 installé');
   event.waitUntil(
     caches.open(CACHE_NAME).then(async cache => {
       // ── Cœur applicatif : STRICT (mise à jour ATOMIQUE) ──
@@ -2775,7 +2800,7 @@ self.addEventListener('install', event => {
 });
 
 self.addEventListener('activate', event => {
-  if(DEBUG) console.log('[SW] Ma Vigne v7.17 activé');
+  if(DEBUG) console.log('[SW] Ma Vigne v7.18 activé');
   event.waitUntil(
     caches.keys().then(keys =>
       Promise.all(

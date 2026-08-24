@@ -341,9 +341,21 @@ function corpsFonction(src, deb) {
   }
   return src.slice(deb);
 }
+/* ⚠⚠⚠ QUATRIEME DEFAUT SUR LE MEME CONTROLE, ET DE LOIN LE PLUS GRAVE :
+   IL NE VOYAIT PLUS QUE LE TIERS DES DOCUMENTS. Depuis la charte MV_DOC, un
+   document imprime n'ecrit plus son propre `</head><body>` — il passe son
+   corps et son CSS a `window._mvDocOpen({...})`, et c'est la PRIMITIVE qui
+   possede le gabarit. Neuf documents sur treize etaient donc invisibles a un
+   marqueur qui cherche une balise de tete.
+   ★ On detecte les deux formes : le marqueur historique ET l'appel a la
+     primitive. La CI l'a trouve en executant reellement le carnet d'entretien
+     — `_mvIcon is not defined` — la ou ce harnais, lui, disait vert.
+   ★★ LA LECON : quand une CHARTE deplace un motif dans une primitive, tout
+     controle qui cherchait ce motif devient aveugle SANS ROUGIR. Il ne suffit
+     pas de migrer le code : il faut relire ce qui le surveillait. */
 function trancheDocs(src) {
   const out = [], vus = new Set();
-  const re = /<\/head><body>|<\/style><\/head>/g;
+  const re = /<\/head><body>|<\/style><\/head>|_mvDocOpen\s*\(/g;
   let m; while ((m = re.exec(src))) {
     // La fonction qui contient ce marqueur : on remonte au `function ` precedent.
     const deb = src.lastIndexOf('function ', m.index);
