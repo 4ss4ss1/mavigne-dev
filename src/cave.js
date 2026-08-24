@@ -2149,7 +2149,12 @@ function renderVendRec() {
       +'<div><div class="mvv-camp-n">'+(kg/1000).toFixed(1)+'<span class="u">t</span></div><div class="mvv-camp-cl">Récoltés</div></div>'
       +'<div><div class="mvv-camp-n">'+(kgCuve/cfg.ratio_max).toFixed(0)+'<span class="u">hL</span></div><div class="mvv-camp-cl">Estimés cuvés</div></div>'
       +'</div>'
-      +(kgVendu>0?'<div class="mvv-camp-sold">'+kgVendu.toLocaleString('fr-FR')+' kg vendus en raisin (non vinifiés)</div>':'')
+      +(kgVendu>0?('<div class="mvv-camp-sold" onclick="openVendVrac()" style="cursor:pointer">'
+          +_mvIcon('carton',16)+' <span>'+kgVendu.toLocaleString('fr-FR')+' kg vendus en raisin · '
+          +(function(){var d=_vendRetoursDus();
+              return d?('<b style="color:var(--orange,#B85A1A)">'+d+' retour'+(d>1?'s':'')+' client attendu'+(d>1?'s':'')+'</b>')
+                      :'tous les retours reçus';})()
+          +'</span> '+_mvIcon('chevron',16)+'</div>'):'')
       +'</div>';
     window._mvGraphOublier('#mvg-ap-');
     html+='<div class="mvmat-card"><div class="mvmat-ttl">Apports par parcelle</div>'
@@ -2296,7 +2301,9 @@ function renderVendParam() {
     +'<div class="mvv-prow"><div class="mvv-prow-l">Sucre par degré</div><div style="display:flex;align-items:center;gap:7px"><input class="mvv-fi" id="vpfi-spd" type="number" min="15" max="20" step="0.01" value="'+cfg.sucre_par_degre+'"><span style="font-size:11px;color:var(--texte-doux,#5F5F5F)">g/L</span></div></div></div>';
   html+='<div class="mvv-set"><div class="mvv-set-t">Clients vrac</div>'
     +'<div class="mvv-set-d">Acheteurs de raisin en vrac, avec leur poids par caisse. Sert à convertir les caisses vendues et suivre les volumes livrés.</div>'
-    +(canWrite()?'<button class="mvv-save ghost2" style="margin-top:12px" onclick="openVendClients()">Gérer les clients ('+_vendClients().length+')</button>':'')+'</div>';
+    +(canWrite()?'<button class="mvv-save ghost2" style="margin-top:12px" onclick="openVendClients()">Gérer les clients ('+_vendClients().length+')</button>':'')
+    +'<button class="mvv-save ghost2" style="margin-top:8px" onclick="openVendVrac()">Livraisons et bons</button>'
+    +'</div>';
   if(admin) html+='<button class="mvv-save" onclick="_vendSaveParam()">Enregistrer les paramètres</button>';
   el.innerHTML=html;
   _vendRefreshCockpit();
@@ -3027,6 +3034,467 @@ function _vendRepAdd(){
 }
 function _vendRepDel(i){ if(_vrep.length<=1) return; _vrep.splice(i,1); _vendRepRender(); }
 // Ce qui part en base : les parts nettoyées, sans ligne vide ni champ inutile.
+
+// ═══════════════════════════════════════════════════════════════════════════
+// VD-2 — LES LIVRAISONS, LEURS BONS, ET LE RETOUR DU CLIENT
+// ═══════════════════════════════════════════════════════════════════════════
+// L'unité du bon n'est pas l'apport, c'est LA LIVRAISON : un client qui reçoit
+// deux parcelles le même jour ne connaît qu'un chargement. Une livraison, c'est
+// donc un client + une date, et les parts de toutes les récoltes de ce jour-là.
+//
+// ⚠️ DEUX MESURES QUI NE SE MÉLANGENT PAS. Les kilos sont mesurés par le domaine
+// le jour de la vendange. Les litres — jus et lie — sont mesurés par le client,
+// des semaines plus tard, après pressurage. Corriger les uns ne touche jamais
+// aux autres, et le document dit qui a mesuré quoi.
+//
+// ⚠️ LE BON NE PORTE QUE DES KILOS ET DES LITRES. Aucun prix, aucun montant :
+// décision de Nico. La facturation vit ailleurs.
+//
+//   retour = { jus:L, lie:L, le:'AAAA-MM-JJ', src:'saisi'|'prorata' }
+// posé sur CHAQUE part de la livraison. Quand le client ne donne qu'un chiffre
+// global pour plusieurs parcelles, il est réparti au prorata des kilos et
+// marqué `prorata` — un chiffre déduit ne se présente jamais comme une mesure.
+// ═══════════════════════════════════════════════════════════════════════════
+
+// Toutes les livraisons d'un client, de la plus récente à la plus ancienne.
+function _vendLivs(nom){
+  var by={},ord=[];
+  (CAVE_VENDANGE.recoltes||[]).forEach(function(r){
+    _vendParts(r).forEach(function(p){
+      if(p.dom||(p.client||'')!==nom||_vpCs(p)<=0) return;
+      var d=r.date||'';
+      if(!by[d]){ by[d]={client:nom,date:d,lignes:[]}; ord.push(d); }
+      by[d].lignes.push({parcelle:r.parcelle||'',rec:r,part:p});
+    });
+  });
+  ord.sort(); ord.reverse();
+  return ord.map(function(d){ return by[d]; });
+}
+function _livKg(l){ return l.lignes.reduce(function(s,x){ return s+_vpKg(x.part); },0); }
+function _livCs(l){ return l.lignes.reduce(function(s,x){ return s+_vpCs(x.part); },0); }
+function _livJus(l){ return l.lignes.reduce(function(s,x){ return s+((x.part.retour&&Number(x.part.retour.jus))||0); },0); }
+function _livLie(l){ return l.lignes.reduce(function(s,x){ return s+((x.part.retour&&Number(x.part.retour.lie))||0); },0); }
+function _livVol(l){ return _livJus(l)+_livLie(l); }
+function _livRetour(l){ return l.lignes.some(function(x){ return !!x.part.retour; }); }
+function _livProrata(l){ return l.lignes.some(function(x){ return x.part.retour&&x.part.retour.src==='prorata'; }); }
+function _livDateRet(l){ var d=''; l.lignes.forEach(function(x){ if(x.part.retour&&x.part.retour.le>d) d=x.part.retour.le; }); return d; }
+// Kilos pour faire un hectolitre. C'est le rendement réel, celui que seul le
+// client peut donner ; tout le reste du Cuvier travaille sur une estimation.
+function _vendRendKgHl(kg,litres){ return litres>0?(kg/(litres/100)):0; }
+function _vendL1(x){ return (Math.round(x*10)/10).toLocaleString('fr-FR',{minimumFractionDigits:1,maximumFractionDigits:1}); }
+function _vendKgTxt(x){ return Math.round(x||0).toLocaleString('fr-FR'); }
+function _vendAujId(){ var d=new Date(),p=function(x){return (x<10?'0':'')+x;};
+  return d.getFullYear()+'-'+p(d.getMonth()+1)+'-'+p(d.getDate()); }
+// Initiales d'un client, pour le repère du bon.
+function _vendInit(nom){
+  return String(nom||'').split(/[^A-Za-z\u00C0-\u00FF]+/).filter(Boolean).slice(0,2)
+    .map(function(m){ return m.charAt(0).toUpperCase(); }).join('')||'CL';
+}
+
+// ── L'écran : la sheet « Ventes en vrac » ──────────────────────────────────
+var _vlivNom='', _vliv=null;
+function _vendVracCss(){
+  if(document.getElementById('mvv-liv-css')) return;
+  var st=document.createElement('style'); st.id='mvv-liv-css';
+  st.textContent=''
+  +'.mvl-liv{border:1px solid rgba(138,90,56,.14);border-radius:12px;padding:11px 12px;margin-bottom:9px;background:#fff}'
+  +'.mvl-h{display:flex;align-items:center;gap:8px}'
+  +'.mvl-d{font-size:13px;font-weight:600;flex:1;color:var(--texte,#1A1A14)}'
+  +'.mvl-k{font-size:13px;font-weight:600;color:var(--terre,#8A5A38);white-space:nowrap}'
+  +'.mvl-p{font-size:10.5px;color:var(--texte-doux,#5F5F5F);margin-top:4px;line-height:1.55}'
+  +'.mvl-b{font-size:9.5px;font-weight:600;border-radius:7px;padding:3px 7px}'
+  +'.mvl-b.att{background:rgba(184,90,26,.10);border:1px solid rgba(184,90,26,.28);color:var(--orange,#B85A1A)}'
+  +'.mvl-b.ok{background:rgba(61,107,39,.10);border:1px solid rgba(61,107,39,.24);color:var(--vert-med,#3D6B27)}'
+  +'.mvl-ret{font-size:10.5px;color:var(--vert,#1E3A12);margin-top:7px;background:rgba(61,107,39,.06);'
+    +'border:1px solid rgba(61,107,39,.16);border-radius:9px;padding:7px 9px;line-height:1.55}'
+  +'.mvl-ret b{font-weight:600}'
+  +'.mvl-a{display:flex;gap:6px;margin-top:9px}'
+  +'.mvl-a button{flex:1;border:1px solid rgba(138,90,56,.20);background:rgba(138,90,56,.06);color:var(--terre,#8A5A38);'
+    +'border-radius:9px;padding:9px;font-family:inherit;font-size:11.5px;font-weight:600;cursor:pointer;min-height:40px}'
+  +'.mvl-a button.w{background:rgba(184,90,26,.09);border-color:rgba(184,90,26,.28);color:var(--orange,#B85A1A)}'
+  +'.mvl-row{display:flex;align-items:center;gap:7px;padding:9px 0;border-bottom:1px solid rgba(138,90,56,.10)}'
+  +'.mvl-row:last-child{border-bottom:none}'
+  +'.mvl-row .nm{flex:1;min-width:0;font-size:12.5px;font-weight:600;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}'
+  +'.mvl-row input{width:56px;height:36px;text-align:center;border-radius:9px;border:1px solid rgba(138,90,56,.3);'
+    +'background:#fff;font-family:inherit;font-size:13.5px;font-weight:600;color:var(--texte,#1A1A14)}'
+  +'.mvl-row .u{font-size:10.5px;color:var(--texte-doux,#5F5F5F)}'
+  +'.mvl-row .kg{font-size:12.5px;font-weight:600;color:var(--terre,#8A5A38);min-width:64px;text-align:right;white-space:nowrap}'
+  +'.mvl-duo{display:flex;gap:9px}.mvl-duo>div{flex:1}'
+  +'.mvl-calc{background:var(--cave,#14110D);border-radius:12px;padding:11px 13px;margin-top:12px;color:#F0E8DC}'
+  +'.mvl-calc-g{display:grid;grid-template-columns:1fr 1fr 1fr;gap:8px}'
+  +'.mvl-calc-n{font-family:"Cormorant Garamond",Georgia,serif;font-weight:700;font-size:21px;line-height:1;color:#F5EFE3}'
+  +'.mvl-calc-n small{font-size:9.5px;font-family:inherit;font-weight:600;color:rgba(240,232,220,.5);margin-left:3px}'
+  +'.mvl-calc-l{font-size:8.5px;letter-spacing:.09em;text-transform:uppercase;color:rgba(240,232,220,.45);margin-top:4px}'
+  +'.mvl-calc-w{margin-top:10px;padding-top:8px;border-top:1px solid rgba(240,232,220,.13);font-size:10.5px;'
+    +'line-height:1.55;color:rgba(240,232,220,.75)}'
+  +'.mvl-calc-w b{color:var(--or-clair,#D8BC72);font-weight:600}'
+  +'.mvl-chk{display:flex;align-items:center;gap:9px;padding:10px 11px;border:1px solid rgba(138,90,56,.18);'
+    +'border-radius:11px;background:#fff;margin-top:11px;cursor:pointer}'
+  +'.mvl-chk .bx{width:20px;height:20px;border-radius:6px;border:1.5px solid rgba(138,90,56,.35);flex-shrink:0;'
+    +'display:flex;align-items:center;justify-content:center;color:#fff;font-size:12px}'
+  +'.mvl-chk.on .bx{background:var(--vert-med,#3D6B27);border-color:var(--vert-med,#3D6B27)}'
+  +'.mvl-chk .tx{font-size:12px;font-weight:500}'
+  +'.mvl-chk .sb{font-size:10.5px;color:var(--texte-doux,#5F5F5F);margin-top:2px}';
+  document.head.appendChild(st);
+}
+// Combien de retours manquent, tous clients confondus.
+function _vendRetoursDus(){
+  var n=0;
+  _vendClients().forEach(function(c){ _vendLivs(c.nom).forEach(function(l){ if(!_livRetour(l)) n++; }); });
+  return n;
+}
+function openVendVrac(){
+  _vendVracCss();
+  var cls=_vendClients();
+  var rows=cls.map(function(c,i){
+    var ls=_vendLivs(c.nom); if(!ls.length) return '';
+    var kg=ls.reduce(function(s,l){ return s+_livKg(l); },0);
+    var vol=ls.reduce(function(s,l){ return s+_livVol(l); },0);
+    var att=ls.filter(function(l){ return !_livRetour(l); }).length;
+    return '<div class="mvv-clrow"><div style="flex:1;min-width:0">'
+      +'<div class="mvv-clrow-nm">'+_escHtml(c.nom)+'</div>'
+      +'<div class="mvv-clrow-mt">'+ls.length+' livraison'+(ls.length>1?'s':'')+' \u00b7 '+_vendKgTxt(kg)+' kg'
+      +(vol>0?(' \u00b7 '+_vendL1(vol/100)+' hL rendus'):'')
+      +(att?(' \u00b7 <span style="color:var(--orange,#B85A1A)">'+att+' retour'+(att>1?'s':'')+' attendu'+(att>1?'s':'')+'</span>'):'')
+      +'</div></div>'
+      +'<div class="mvv-clrow-r"><button class="mv-gh mvv-icbtn" onclick="openVendLivs('+i+')" '
+      +'title="Livraisons" aria-label="Livraisons">'+_mvIcon('chevron',18)+'</button></div></div>';
+  }).join('');
+  var html='<div class="mvv-sheet-hd"><div class="mvv-sheet-t">Ventes en vrac</div>'
+    +'<button class="mv-gh mvv-sheet-x" onclick="_vendSheetClose()" title="Fermer" aria-label="Fermer">'+_mvIcon('croix',18)+'</button></div>'
+    +'<div class="mvv-sheet-sub">Un client, ses livraisons, ses bons. Le bon part avec la remorque et ne dit '
+    +'que des kilos ; le retour \u2014 litres de jus et de lie \u2014 arrive apr\u00e8s pressurage.</div>'
+    +'<div class="mvv-cllist">'+(rows||'<div class="mvv-fnote">Aucune vente en vrac saisie pour l\u2019instant.</div>')+'</div>';
+  _vendSheet(html);
+}
+function openVendLivs(ci){
+  _vendVracCss();
+  var c=_vendClients()[ci]; if(!c) return;
+  _vlivNom=c.nom;
+  var ls=_vendLivs(c.nom);
+  var kg=ls.reduce(function(s,l){ return s+_livKg(l); },0);
+  var vol=ls.reduce(function(s,l){ return s+_livVol(l); },0);
+  var kgRet=ls.filter(_livRetour).reduce(function(s,l){ return s+_livKg(l); },0);
+  var h='<div class="mvv-sheet-hd"><div class="mvv-sheet-t">'+_escHtml(c.nom)+'</div>'
+   +'<button class="mv-gh mvv-sheet-x" onclick="openVendVrac()" title="Retour" aria-label="Retour">'+_mvIcon('croix',18)+'</button></div>'
+   +'<div class="mvv-sheet-sub">'+_vendKgTxt(kg)+' kg livr\u00e9s'
+   +(vol>0?(' \u00b7 '+_vendL1(vol/100)+' hL rendus \u00b7 <b>'+_vendKgTxt(_vendRendKgHl(kgRet,vol))+' kg/hL</b> r\u00e9el'):'')
+   +'</div>';
+  ls.forEach(function(l,li){
+    var ret=_livRetour(l);
+    h+='<div class="mvl-liv"><div class="mvl-h"><span class="mvl-d">'+_vendFrDate(l.date)+'</span>'
+     +'<span class="mvl-b '+(ret?'ok':'att')+'">'+(ret?'retour re\u00e7u':'retour attendu')+'</span>'
+     +'<span class="mvl-k">'+_livCs(l)+' c. \u00b7 '+_vendKgTxt(_livKg(l))+' kg</span></div>'
+     +'<div class="mvl-p">'+l.lignes.map(function(x){
+         return _escHtml(x.parcelle)+' \u2014 '+_vpCs(x.part)+' \u00d7 '+_vpPck(x.part)+' kg'; }).join('<br>')+'</div>';
+    if(ret){
+      var v=_livVol(l);
+      h+='<div class="mvl-ret"><b>'+_vendKgTxt(_livJus(l))+' L de jus</b> \u00b7 '+_vendKgTxt(_livLie(l))+' L de lie \u00b7 '
+       +_vendL1(v/100)+' hL \u2192 <b>'+_vendKgTxt(_vendRendKgHl(_livKg(l),v))+' kg/hL</b>'
+       +(_livProrata(l)?'<br><span style="color:var(--orange,#B85A1A)">r\u00e9parti au prorata entre les parcelles</span>':'')
+       +'<br><span style="color:var(--texte-doux,#5F5F5F)">re\u00e7u le '+_vendFrDate(_livDateRet(l))+'</span></div>';
+    }
+    h+='<div class="mvl-a">'
+     +(canWrite()?('<button onclick="openVendRetour('+ci+','+li+')" class="'+(ret?'':'w')+'">'
+        +(ret?'Modifier':'Saisir le retour')+'</button>'):'')
+     +'<button onclick="_vendDocBon('+ci+','+li+')">Bon de livraison</button></div></div>';
+  });
+  if(!ls.length) h+='<div class="mvv-fnote">Aucune livraison pour ce client.</div>';
+  else h+='<button class="mvv-save ghost2" style="margin-top:12px" onclick="_vendDocRecap('+ci+')">R\u00e9cap de campagne</button>';
+  _vendSheet(h);
+}
+
+// ── La saisie du retour ────────────────────────────────────────────────────
+function openVendRetour(ci,li){
+  if(!canWrite()) return;
+  var c=_vendClients()[ci]; if(!c) return;
+  var l=_vendLivs(c.nom)[li]; if(!l) return;
+  var detail=l.lignes.length>1 && l.lignes.every(function(x){ return x.part.retour&&x.part.retour.src==='saisi'; });
+  _vliv={ci:ci,li:li,nom:c.nom,date:l.date,detail:detail,le:_livDateRet(l)||_vendAujId(),
+    lignes:l.lignes.map(function(x){
+      var r=x.part.retour||null;
+      return {parcelle:x.parcelle,part:x.part,rec:x.rec,caisses:_vpCs(x.part),pck:_vpPck(x.part),
+              jus:r?(Number(r.jus)||0):0, lie:r?(Number(r.lie)||0):0};
+    })};
+  _vliv.jus=_vliv.lignes.reduce(function(s,x){ return s+x.jus; },0);
+  _vliv.lie=_vliv.lignes.reduce(function(s,x){ return s+x.lie; },0);
+  _vendRetourRender();
+}
+function _vlKg(){ return _vliv.lignes.reduce(function(s,x){ return s+x.caisses*x.pck; },0); }
+function _vlJus(){ return _vliv.detail?_vliv.lignes.reduce(function(s,x){ return s+x.jus; },0):(Number(_vliv.jus)||0); }
+function _vlLie(){ return _vliv.detail?_vliv.lignes.reduce(function(s,x){ return s+x.lie; },0):(Number(_vliv.lie)||0); }
+function _vendRetourRender(){
+  var h='<div class="mvv-sheet-hd"><div class="mvv-sheet-t">Livraison du '+_vendFrDate(_vliv.date)+'</div>'
+   +'<button class="mv-gh mvv-sheet-x" onclick="openVendLivs('+_vliv.ci+')" title="Retour" aria-label="Retour">'+_mvIcon('croix',18)+'</button></div>'
+   +'<div class="mvv-sheet-sub">'+_escHtml(_vliv.nom)+'</div>';
+  h+='<label class="mvv-flbl">Ce qui est parti</label>';
+  _vliv.lignes.forEach(function(x,i){
+    h+='<div class="mvl-row"><span class="nm">'+_escHtml(x.parcelle)+'</span>'
+     +'<input type="number" min="0" inputmode="numeric" value="'+x.caisses+'" oninput="_vendRetSet('+i+',\'caisses\',this.value)">'
+     +'<span class="u">\u00d7</span>'
+     +'<input type="number" min="1" max="80" step="0.5" value="'+x.pck+'" oninput="_vendRetSet('+i+',\'pck\',this.value)">'
+     +'<span class="u">kg</span><span class="kg" id="mvl-kg-'+i+'">'+_vendKgTxt(x.caisses*x.pck)+' kg</span></div>';
+  });
+  h+='<div class="mvv-fnote" style="color:var(--texte-doux,#5F5F5F)">Corriger ici change le bon de livraison. '
+   +'Le retour du client, lui, reste ce qu\u2019il a annonc\u00e9.</div>';
+  h+='<label class="mvv-flbl">Ce que le client a rendu</label>';
+  if(_vliv.lignes.length>1){
+    h+='<div class="mvl-chk'+(_vliv.detail?' on':'')+'" onclick="_vendRetDetail()"><div class="bx">'+(_vliv.detail?_mvIcon('check',16):'')+'</div>'
+     +'<div><div class="tx">Le client a d\u00e9taill\u00e9 par parcelle</div>'
+     +'<div class="sb">Sinon les litres sont r\u00e9partis au prorata des kilos, et le document le dit.</div></div></div>';
+  }
+  if(_vliv.detail){
+    _vliv.lignes.forEach(function(x,i){
+      h+='<div class="mvl-row"><span class="nm">'+_escHtml(x.parcelle)+'</span>'
+       +'<input type="number" min="0" value="'+x.jus+'" oninput="_vendRetSet('+i+',\'jus\',this.value)"><span class="u">L jus</span>'
+       +'<input type="number" min="0" value="'+x.lie+'" oninput="_vendRetSet('+i+',\'lie\',this.value)"><span class="u">L lie</span></div>';
+    });
+  } else {
+    h+='<div class="mvl-duo"><div><label class="mvv-flbl" style="margin-top:8px">Litres de jus</label>'
+     +'<input class="mvv-tin" type="number" min="0" value="'+(_vliv.jus||'')+'" placeholder="0" oninput="_vendRetGlob(\'jus\',this.value)"></div>'
+     +'<div><label class="mvv-flbl" style="margin-top:8px">Litres de lie</label>'
+     +'<input class="mvv-tin" type="number" min="0" value="'+(_vliv.lie||'')+'" placeholder="0" oninput="_vendRetGlob(\'lie\',this.value)"></div></div>';
+  }
+  h+='<label class="mvv-flbl">Re\u00e7u le</label><input class="mvv-tin" type="date" value="'+_vliv.le+'" onchange="_vendRetDate(this.value)">';
+  h+='<div id="mvl-calc">'+_vendRetCalcHtml()+'</div>';
+  h+='<button class="mvv-save" style="margin-top:14px" onclick="_vendRetSave()">Enregistrer</button>';
+  if(_vliv.lignes.some(function(x){ return !!x.part.retour; }))
+    h+='<button class="mvv-del" onclick="_vendRetClear()">Effacer le retour du client</button>';
+  _vendSheet(h);
+}
+function _vendRetCalcHtml(){
+  var kg=_vlKg(), jus=_vlJus(), lie=_vlLie(), vol=jus+lie, cfg=_vendCfg();
+  var h='<div class="mvl-calc"><div class="mvl-calc-g">'
+   +'<div><div class="mvl-calc-n">'+_vendKgTxt(kg)+'<small>kg</small></div><div class="mvl-calc-l">Livr\u00e9s</div></div>'
+   +'<div><div class="mvl-calc-n">'+(vol>0?_vendL1(vol/100):'\u2014')+'<small>hL</small></div><div class="mvl-calc-l">Rendus</div></div>'
+   +'<div><div class="mvl-calc-n">'+(vol>0?_vendKgTxt(_vendRendKgHl(kg,vol)):'\u2014')+'<small>kg/hL</small></div>'
+   +'<div class="mvl-calc-l">Rendement</div></div></div>';
+  if(vol>0){
+    h+='<div class="mvl-calc-w"><b>'+_vendKgTxt(jus)+' L de jus</b> et '+_vendKgTxt(lie)+' L de lie \u2014 la lie fait '
+     +_vendL1(lie/vol*100)+' % du volume rendu.<br>Sur le seul jus clair : <b>'+_vendKgTxt(_vendRendKgHl(kg,jus))
+     +' kg/hL</b>. Sur le volume total : <b>'+_vendKgTxt(_vendRendKgHl(kg,vol))+' kg/hL</b>.'
+     +(_vendRendKgHl(kg,vol)>cfg.ratio_max+15
+        ? '<br><span style="color:#E0A060">Rendement inhabituel \u2014 v\u00e9rifier l\u2019unit\u00e9 annonc\u00e9e par le client : des litres, pas des hectolitres.</span>':'')
+     +'</div>';
+  } else {
+    h+='<div class="mvl-calc-w">Aucun retour saisi : cette livraison n\u2019entre dans aucun volume.</div>';
+  }
+  return h+'</div>';
+}
+function _vendRetCalc(){ var el=document.getElementById('mvl-calc'); if(el) el.innerHTML=_vendRetCalcHtml(); }
+function _vendRetSet(i,champ,v){
+  var x=_vliv.lignes[i]; if(!x) return;
+  if(champ==='caisses') x.caisses=Math.max(0,parseInt(v,10)||0);
+  else x[champ]=Math.max(0,parseFloat(String(v).replace(',','.'))||0);
+  var k=document.getElementById('mvl-kg-'+i); if(k) k.textContent=_vendKgTxt(x.caisses*x.pck)+' kg';
+  _vendRetCalc();
+}
+function _vendRetGlob(champ,v){ _vliv[champ]=Math.max(0,parseFloat(String(v).replace(',','.'))||0); _vendRetCalc(); }
+function _vendRetDate(v){ if(_vliv) _vliv.le=v||_vendAujId(); }
+function _vendRetDetail(){
+  if(!_vliv.detail){
+    var r=_vendRetProrata(_vlJus(),_vlLie());
+    _vliv.lignes.forEach(function(x,i){ x.jus=r[i].jus; x.lie=r[i].lie; });
+    _vliv.detail=true;
+  } else { _vliv.jus=_vlJus(); _vliv.lie=_vlLie(); _vliv.detail=false; }
+  _vendRetourRender();
+}
+// Répartition au prorata des kilos. ⚠️ La DERNIÈRE ligne reçoit le reste, pour
+// que la somme des lignes retombe EXACTEMENT sur le total annoncé par le client.
+// Un arrondi ligne à ligne fabriquerait un litre qui n'existe pas.
+function _vendRetProrata(jus,lie){
+  var kg=_vlKg(), out=[], cj=0, cl=0, n=_vliv.lignes.length;
+  _vliv.lignes.forEach(function(x,i){
+    if(i===n-1){ out.push({jus:Math.round((jus-cj)*10)/10, lie:Math.round((lie-cl)*10)/10}); return; }
+    var q=kg>0?(x.caisses*x.pck)/kg:0;
+    var j=Math.round(jus*q*10)/10, w=Math.round(lie*q*10)/10;
+    cj+=j; cl+=w; out.push({jus:j,lie:w});
+  });
+  return out;
+}
+function _vendRetSave(){
+  var jus=_vlJus(), lie=_vlLie(), vol=jus+lie, kg=_vlKg();
+  var rep=_vliv.detail?_vliv.lignes.map(function(x){ return {jus:x.jus,lie:x.lie}; }):_vendRetProrata(jus,lie);
+  var seule=(_vliv.lignes.length===1);
+  _vliv.lignes.forEach(function(x,i){
+    x.part.caisses=x.caisses; x.part.pck=x.pck;
+    // ⚠️ La part n'est peut-être encore qu'une part de migration : l'écrire dans
+    // la récolte, sinon la correction serait perdue au prochain chargement.
+    if(!Array.isArray(x.rec.parts)||!x.rec.parts.length) x.rec.parts=_vendParts(x.rec);
+    if(vol>0) x.part.retour={jus:rep[i].jus,lie:rep[i].lie,le:_vliv.le,
+                             src:(_vliv.detail||seule)?'saisi':'prorata'};
+    else if(x.part.retour) delete x.part.retour;
+    x.rec.nb_caisses=_recCaisses(x.rec);
+  });
+  window.CAVE_VENDANGE=CAVE_VENDANGE;
+  if(window.fbSave) window.fbSave('cave_vendange',CAVE_VENDANGE);
+  showToast(vol>0?('Retour enregistr\u00e9 \u00b7 '+_vendKgTxt(_vendRendKgHl(kg,vol))+' kg/hL'):'Livraison mise \u00e0 jour','#3D6B27');
+  openVendLivs(_vliv.ci);
+  if(_vendTab==='rec') renderVendRec();
+}
+function _vendRetClear(){
+  var ci=_vliv.ci;
+  _vliv.lignes.forEach(function(x){ if(x.part.retour) delete x.part.retour; });
+  window.CAVE_VENDANGE=CAVE_VENDANGE;
+  if(window.fbSave) window.fbSave('cave_vendange',CAVE_VENDANGE);
+  showToast('Retour effac\u00e9','#B85A1A');
+  openVendLivs(ci);
+}
+
+// ── Les documents : bon de livraison et récap de campagne ──────────────────
+// Ils passent par MV_DOC (`_mvDocOpen`, utils.js) : mêmes marges, même bandeau
+// à filet d'or, même pied, comme les treize autres documents de l'application.
+// ⚠️ Le document porte le nom du DOMAINE, jamais celui de GUERETTECH.
+var VD_BL_CSS=''
++'.bl-part{display:flex;gap:14px;margin-bottom:14px}'
++'.bl-box{flex:1;border:1px solid #E4DAC8;border-radius:8px;padding:9px 11px;background:#FBFAF6}'
++'.bl-box .k{font-size:8px;letter-spacing:.13em;text-transform:uppercase;color:#8B8175;font-weight:700}'
++'.bl-box .v{font-family:"Cormorant Garamond",Georgia,serif;font-size:15px;font-weight:600;color:#2A241C;margin-top:3px;line-height:1.2}'
++'.bl-box .s{font-size:9.5px;color:#6F675C;margin-top:3px;line-height:1.4}'
++'.bl-sec{font-size:9px;letter-spacing:.14em;text-transform:uppercase;color:#8A5A38;font-weight:700;'
+ +'margin:18px 0 7px;padding-bottom:4px;border-bottom:1.5px solid rgba(194,161,77,.35)}'
++'.bl-t{width:100%;border-collapse:collapse;font-size:10.5px}'
++'.bl-t th{text-align:left;font-size:9px;letter-spacing:.07em;text-transform:uppercase;color:#8B8175;'
+ +'font-weight:600;padding:5px 7px;border-bottom:1px solid #E4DAC8}'
++'.bl-t th.n,.bl-t td.n{text-align:right;white-space:nowrap}'
++'.bl-t td{padding:6px 7px;border-bottom:1px solid #F0EAE0}'
++'.bl-t td.b{font-weight:600}.bl-t td.g{color:#A09684}'
++'.bl-t tfoot td{border-top:1.5px solid #C2A14D;border-bottom:0;font-weight:700;color:#8A5A38;padding-top:7px;font-size:11.5px}'
++'.bl-tiles{display:flex;gap:9px;margin-top:12px}'
++'.bl-tile{flex:1;border:1px solid #E4DAC8;border-radius:9px;padding:10px 11px;background:#FBFAF6}'
++'.bl-tile .v{font-family:"Cormorant Garamond",Georgia,serif;font-size:23px;font-weight:700;color:#8A5A38;line-height:1}'
++'.bl-tile .v small{font-size:11px;margin-left:3px;color:#8B8175;font-weight:500}'
++'.bl-tile .l{font-size:9px;letter-spacing:.05em;text-transform:uppercase;color:#8B8175;margin-top:4px}'
++'.bl-att{border:1px dashed #D8C9AE;border-radius:9px;padding:10px 12px;background:#FDFBF6;'
+ +'font-size:9.5px;color:#8B8175;margin-top:10px}'
++'.bl-sig{display:flex;gap:14px;margin-top:16px}'
++'.bl-sig div{flex:1;border:1px solid #E4DAC8;border-radius:8px;padding:9px 11px 34px}'
++'.bl-sig .k{font-size:8.5px;letter-spacing:.1em;text-transform:uppercase;color:#8B8175;font-weight:700}'
++'.bl-sig .s{font-size:8.5px;color:#A09684;margin-top:2px}';
+
+// Les lignes d'un document : une par part livrée.
+function _vendBlLignes(livs){
+  var out=[];
+  livs.forEach(function(l){
+    l.lignes.forEach(function(x){
+      out.push({date:l.date,parcelle:x.parcelle,caisses:_vpCs(x.part),pck:_vpPck(x.part),
+                kg:_vpKg(x.part),ha:_vpSurf(x.part),retour:x.part.retour||null});
+    });
+  });
+  out.sort(function(a,b){ return String(a.date).localeCompare(String(b.date)); });
+  return out;
+}
+function _vendBlCorps(client,lignes,mode){
+  var kg=0,cs=0,jus=0,lie=0,kgRet=0,pk={},parc={},prorata=false,sansRet=0;
+  lignes.forEach(function(x){
+    kg+=x.kg; cs+=x.caisses; pk[x.pck]=1; parc[x.parcelle]=1;
+    if(x.retour){ jus+=(Number(x.retour.jus)||0); lie+=(Number(x.retour.lie)||0); kgRet+=x.kg;
+                  if(x.retour.src==='prorata') prorata=true; }
+    else sansRet++;
+  });
+  var vol=jus+lie;
+  var poids=Object.keys(pk).map(Number).sort(function(a,b){return a-b;});
+  var nbP=Object.keys(parc).length;
+  // ⚠️ Les surfaces ne s'additionnent pas d'un passage à l'autre : deux
+  // vendanges sur la même vigne ne font pas deux fois la surface.
+  var haU={}; lignes.forEach(function(x){ if(x.ha>0) haU[x.parcelle]=Math.max(haU[x.parcelle]||0,x.ha); });
+  var haNoms=Object.keys(haU), haTot=haNoms.reduce(function(a,k){ return a+haU[k]; },0);
+  var avecHa=haNoms.length>0;
+
+  var h='<div class="bl-part">'
+   +'<div class="bl-box"><div class="k">Livr\u00e9 par</div><div class="v">'+_escHtml(window.DOMAINE_NOM||'Mon domaine')+'</div>'
+   +'<div class="s">R\u00e9colte manuelle en caisses</div></div>'
+   +'<div class="bl-box"><div class="k">Livr\u00e9 \u00e0</div><div class="v">'+_escHtml(client.nom)+'</div>'
+   +'<div class="s">'+_escHtml(client.adresse||'')+'</div></div></div>';
+
+  h+='<div class="bl-sec">Raisin livr\u00e9</div>'
+   +'<table class="bl-t"><thead><tr><th>Date</th><th>Parcelle</th>'
+   +(avecHa?'<th class="n">Surface</th>':'')
+   +'<th class="n">Caisses</th><th class="n">kg/caisse</th><th class="n">Poids</th></tr></thead><tbody>';
+  lignes.forEach(function(x){
+    h+='<tr><td>'+_vendFrDate(x.date)+'</td><td class="b">'+_escHtml(x.parcelle)+'</td>'
+     +(avecHa?('<td class="n">'+(x.ha>0?(_vendHa(x.ha)+' ha'):'\u2014')+'</td>'):'')
+     +'<td class="n">'+x.caisses+'</td><td class="n">'+x.pck+' kg</td>'
+     +'<td class="n b">'+_vendKgTxt(x.kg)+' kg</td></tr>';
+  });
+  h+='</tbody><tfoot><tr><td colspan="2">Total '+(mode==='jour'?'de la livraison':'de la campagne')+'</td>'
+   +(avecHa?('<td class="n">'+_vendHa(haTot)+' ha</td>'):'')
+   +'<td class="n">'+cs+'</td><td class="n"></td><td class="n">'+_vendKgTxt(kg)+' kg</td></tr></tfoot></table>';
+  h+='<div class="bl-tiles">'
+   +'<div class="bl-tile"><div class="v">'+_vendKgTxt(kg)+'<small>kg</small></div><div class="l">Poids livr\u00e9</div></div>'
+   +'<div class="bl-tile"><div class="v">'+cs+'</div><div class="l">Caisses</div></div>'
+   +'<div class="bl-tile"><div class="v">'+nbP+'</div><div class="l">Parcelle'+(nbP>1?'s':'')+'</div></div></div>';
+
+  // Le retour du client n'apparaît que s'il existe : un tableau vide dirait
+  // « rien n'a été pressé » là où il faut lire « on attend encore ».
+  if(vol>0){
+    h+='<div class="bl-sec">Retour du client \u2014 volumes obtenus</div>'
+     +'<table class="bl-t"><thead><tr><th>Date</th><th>Parcelle</th><th class="n">Poids</th>'
+     +'<th class="n">Jus</th><th class="n">Lie</th><th class="n">kg/hL</th></tr></thead><tbody>';
+    lignes.forEach(function(x){
+      var r=x.retour, v=r?((Number(r.jus)||0)+(Number(r.lie)||0)):0;
+      h+='<tr><td>'+_vendFrDate(x.date)+'</td><td class="b">'+_escHtml(x.parcelle)+'</td>'
+       +'<td class="n">'+_vendKgTxt(x.kg)+' kg</td>'
+       +(r?('<td class="n">'+_vendKgTxt(r.jus||0)+' L</td><td class="n">'+_vendKgTxt(r.lie||0)+' L</td>'
+            +'<td class="n b">'+_vendKgTxt(_vendRendKgHl(x.kg,v))+'</td>')
+          :'<td class="n g" colspan="3">en attente</td>')+'</tr>';
+    });
+    h+='</tbody><tfoot><tr><td colspan="2">Total</td><td class="n">'+_vendKgTxt(kgRet)+' kg</td>'
+     +'<td class="n">'+_vendKgTxt(jus)+' L</td><td class="n">'+_vendKgTxt(lie)+' L</td>'
+     +'<td class="n">'+_vendKgTxt(_vendRendKgHl(kgRet,vol))+'</td></tr></tfoot></table>'
+     +'<div class="bl-tiles">'
+     +'<div class="bl-tile"><div class="v">'+_vendL1(vol/100)+'<small>hL</small></div><div class="l">Volume rendu</div></div>'
+     +'<div class="bl-tile"><div class="v">'+_vendL1(lie/vol*100)+'<small>%</small></div><div class="l">Part de lie</div></div>'
+     +'<div class="bl-tile"><div class="v">'+_vendKgTxt(_vendRendKgHl(kgRet,vol))+'<small>kg/hL</small></div>'
+     +'<div class="l">Rendement</div></div></div>';
+    if(sansRet>0)
+      h+='<div class="bl-att">'+sansRet+' livraison'+(sansRet>1?'s':'')+' encore sans retour : les totaux de cette '
+       +'section ne portent que sur '+_vendKgTxt(kgRet)+' kg des '+_vendKgTxt(kg)+' kg livr\u00e9s.</div>';
+  } else {
+    h+='<div class="bl-att">Volumes obtenus : en attente du retour du client (litres de jus et de lie).</div>';
+  }
+
+  h+='<div class="mvdoc-lim"><b>Comment ce poids est \u00e9tabli.</b> Nombre de caisses multipli\u00e9 par le poids '
+   +'d\u00e9clar\u00e9 par caisse le jour de la r\u00e9colte'
+   +(poids.length>1?(' \u2014 '+poids.join(' kg, ')+' kg selon les jours'):(' \u2014 '+(poids[0]||0)+' kg'))
+   +'. Ce n\u2019est pas une pes\u00e9e : en cas d\u2019\u00e9cart, le pont-bascule du r\u00e9ceptionnaire fait foi.'
+   +(avecHa?' <b>Les surfaces sont celles achet\u00e9es sur chaque parcelle</b>, telles que convenues avec le domaine ; '
+            +'une parcelle vendang\u00e9e en deux passages n\u2019est compt\u00e9e qu\u2019une fois.':'')
+   +(vol>0?(' <b>Les volumes sont ceux annonc\u00e9s par le client</b>, ils n\u2019engagent pas le domaine.'
+            +(prorata?' Le d\u00e9tail par parcelle est une r\u00e9partition au prorata des kilos, pas une mesure.':'')):'')
+   +' Document produit par Ma Vigne \u00e0 partir du journal de vendange du domaine.</div>';
+  h+='<div class="bl-sig"><div><div class="k">Le livreur</div><div class="s">Date et signature</div></div>'
+   +'<div><div class="k">Le r\u00e9ceptionnaire</div><div class="s">Date, signature et cachet</div></div></div>';
+  return h;
+}
+function _vendDocBon(ci,li){
+  var c=_vendClients()[ci]; if(!c) return;
+  var l=_vendLivs(c.nom)[li]; if(!l){ showToast('Livraison introuvable','#E07060'); return; }
+  if(typeof window._mvDocOpen!=='function'){ showToast('Mise \u00e0 jour incompl\u00e8te \u2014 rechargez l\u2019application','#B85A1A'); return; }
+  var an=String(l.date).slice(0,4);
+  var num='BL '+an+'-'+String(l.date).slice(5,7)+String(l.date).slice(8,10)+'-'+_vendInit(c.nom);
+  var maj=_livRetour(l)?('Compl\u00e9t\u00e9 du retour client le '+_vendFrDate(_livDateRet(l))):'';
+  window._mvDocOpen({
+    titre:'Bon de livraison \u2014 raisin en vrac', domaine:(window.DOMAINE_NOM||'Mon domaine'), cat:'cave',
+    metas:[num,'Mill\u00e9sime '+an,'Livraison du '+_vendFrDate(l.date),maj],
+    corps:_vendBlCorps(c,_vendBlLignes([l]),'jour'), css:VD_BL_CSS
+  });
+}
+function _vendDocRecap(ci){
+  var c=_vendClients()[ci]; if(!c) return;
+  var ls=_vendLivs(c.nom); if(!ls.length){ showToast('Aucune livraison','#E07060'); return; }
+  if(typeof window._mvDocOpen!=='function'){ showToast('Mise \u00e0 jour incompl\u00e8te \u2014 rechargez l\u2019application','#B85A1A'); return; }
+  var lignes=_vendBlLignes(ls);
+  var an=String(lignes[0].date).slice(0,4);
+  window._mvDocOpen({
+    titre:'R\u00e9capitulatif de campagne \u2014 raisin en vrac', domaine:(window.DOMAINE_NOM||'Mon domaine'), cat:'cave',
+    metas:['RC '+an+'-'+_vendInit(c.nom),'Mill\u00e9sime '+an,
+           ls.length+' livraison'+(ls.length>1?'s':'')+' du '+_vendFrDate(lignes[0].date)
+           +' au '+_vendFrDate(lignes[lignes.length-1].date)],
+    corps:_vendBlCorps(c,lignes,'campagne'), css:VD_BL_CSS
+  });
+}
+
 function _vendRepParts(){
   return _vrep.filter(function(p){ return _vpCs(p)>0; }).map(function(p){
     var o={dom:!!p.dom, caisses:_vpCs(p), pck:_vpPck(p)};
@@ -3565,6 +4033,9 @@ function openVendClient(i){
     +'<button class="mv-gh mvv-sheet-x" onclick="openVendClients()" title="Fermer" aria-label="Fermer">'+_mvIcon('croix',18)+'</button></div>'
     +'<label class="mvv-flbl">Nom du client</label><input id="vcl-nom" class="mvv-tin" type="text" value="'+_escHtml(c?c.nom:'')+'" placeholder="ex. Maison Bouchard">'
     +'<label class="mvv-flbl">Poids par caisse (kg)</label><input id="vcl-pck" class="mvv-tin" type="number" value="'+(c?(c.poids_caisse_kg||25):25)+'" min="10" max="60">'
+    // Poids PROPOSE, et non impose : depuis VD-1 chaque apport fige le sien.
+    +'<div class="mvv-fnote" style="color:var(--texte-doux,#5F5F5F)">Poids proposé à la saisie. Le modifier ne change aucun apport déjà enregistré.</div>'
+    +'<label class="mvv-flbl">Adresse (pour le bon de livraison)</label><input id="vcl-adr" class="mvv-tin" type="text" value="'+_escHtml(c?(c.adresse||''):'')+'" placeholder="ex. 12 rue du Chapitre, 21200 Beaune">'
     +'<button class="mvv-save" style="margin-top:18px" onclick="saveVendClient()">Enregistrer</button>'
     +(c?'<button class="mvv-del" onclick="deleteVendClient('+i+')">Supprimer ce client</button>':'');
   _vendSheet(html);
@@ -3573,15 +4044,16 @@ function saveVendClient(){
   var nom=((document.getElementById('vcl-nom')||{}).value||'').trim();
   if(!nom){ showToast('Saisissez un nom','#E07060'); return; }
   var pck=parseFloat((document.getElementById('vcl-pck')||{}).value)||25;
+  var adr=(((document.getElementById('vcl-adr')||{}).value)||'').trim();
   var cls=_vendClients();
   if(_vendClientEdit!=null&&_vendClientEdit>=0&&cls[_vendClientEdit]){
     var old=cls[_vendClientEdit].nom;
     if(old!==nom&&cls.some(function(x,j){return j!==_vendClientEdit&&x.nom===nom;})){ showToast('Ce client existe déjà','#E07060'); return; }
-    cls[_vendClientEdit]={nom:nom,poids_caisse_kg:pck};
+    cls[_vendClientEdit]={nom:nom,poids_caisse_kg:pck,adresse:adr};
     if(old&&old!==nom){ (CAVE_VENDANGE.recoltes||[]).forEach(function(r){ if(r.client===old) r.client=nom; }); }
   } else {
     if(cls.some(function(x){return x.nom===nom;})){ showToast('Ce client existe déjà','#E07060'); return; }
-    cls.push({nom:nom,poids_caisse_kg:pck});
+    cls.push({nom:nom,poids_caisse_kg:pck,adresse:adr});
   }
   window.CAVE_VENDANGE=CAVE_VENDANGE;
   if(window.fbSave) window.fbSave('cave_vendange',CAVE_VENDANGE);
@@ -3615,6 +4087,17 @@ window._vendOpSet           = _vendOpSet;
 window._vendOpCalc          = _vendOpCalc;
 window.saveVendOp           = saveVendOp;
 window.openVendClients      = openVendClients;
+window.openVendVrac         = openVendVrac;
+window.openVendLivs         = openVendLivs;
+window.openVendRetour       = openVendRetour;
+window._vendRetSet          = _vendRetSet;
+window._vendRetGlob         = _vendRetGlob;
+window._vendRetDate         = _vendRetDate;
+window._vendRetDetail       = _vendRetDetail;
+window._vendRetSave         = _vendRetSave;
+window._vendRetClear        = _vendRetClear;
+window._vendDocBon          = _vendDocBon;
+window._vendDocRecap        = _vendDocRecap;
 window.openVendClient       = openVendClient;
 window.saveVendClient       = saveVendClient;
 window.deleteVendClient     = deleteVendClient;

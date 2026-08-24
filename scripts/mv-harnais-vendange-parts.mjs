@@ -1,6 +1,6 @@
 #!/usr/bin/env node
 // ═══════════════════════════════════════════════════════════════════════════
-//  MA VIGNE — Harnais : UNE RÉCOLTE, PLUSIEURS DESTINATAIRES (lot VD-1)
+//  MA VIGNE — Harnais : LA VENDANGE À PLUSIEURS (lots VD-1 et VD-2)
 // ═══════════════════════════════════════════════════════════════════════════
 //  ★★★ POURQUOI CE HARNAIS EXISTE.
 //  Avant VD-1, une récolte n'avait qu'UN destinataire. Le lot introduit
@@ -217,6 +217,90 @@ T('sortie : la surface est conservée', sortie[1].surface, 0.12);
 T('sortie : pas de surface inventée', 'surface' in sortie[2], false);
 U.cs(2, 0);
 T('sortie : une ligne à 0 caisse ne part pas en base', U.parts().length, 2);
+
+// ── 6. VD-2 : LA LIVRAISON, SON BON, ET LE RETOUR DU CLIENT ───────────────
+/*  L'unité du bon est le CHARGEMENT : un client + une date, quelles que soient
+    les parcelles. Et deux mesures cohabitent sans se mélanger — les kilos, du
+    domaine ; les litres, du client, des semaines plus tard.
+    ⚠️ Le piège du prorata : arrondir ligne à ligne fabrique un litre qui
+    n'existe pas. La somme des lignes doit retomber EXACTEMENT sur le total
+    annoncé par le client. */
+const NOMS_LIV = ['_vendLivs','_livKg','_livCs','_livJus','_livLie','_livVol','_livRetour',
+                  '_livProrata','_livDateRet','_vendRendKgHl','_vendInit','_vendBlLignes','_vendBlCorps'];
+const absentsLiv = NOMS_LIV.filter(x => !corps(x));
+if (absentsLiv.length){ console.error('ROUGE — VD-2 introuvable : ' + absentsLiv.join(', ')); process.exit(1); }
+
+const RECS = [
+  { id:'a', parcelle:'Le Clos', date:'2026-09-13',
+    parts:[ { dom:true, caisses:36, pck:25 },
+            { dom:false, client:'Maison Bouchard', caisses:28, pck:24, surface:0.12,
+              retour:{ jus:460, lie:45, le:'2026-09-19', src:'saisi' } } ] },
+  { id:'b', parcelle:'En Champs', date:'2026-09-13',
+    parts:[ { dom:false, client:'Maison Bouchard', caisses:10, pck:24 } ] },
+  { id:'c', parcelle:'Aux Combottes', date:'2026-09-11',
+    parts:[ { dom:false, client:'Maison Bouchard', caisses:20, pck:23,
+              retour:{ jus:300, lie:30, le:'2026-09-18', src:'prorata' } } ] }
+];
+let codeLiv = 'var CAVE_VENDANGE={config:CFG,clients:CLIENTS,recoltes:RECS};\n'
+  + 'var window={DOMAINE_NOM:"Domaine des Perrières"};\n'
+  + 'function _escHtml(x){ var m={}; m["&"]="&amp;"; m["<"]="&lt;"; m[">"]="&gt;"; m[String.fromCharCode(34)]="&quot;"; m[String.fromCharCode(39)]="&#39;";\n'
+  + '  return String(x==null?"":x).replace(/[&<>"\u0027]/g,function(c){return m[c];}); }\n'
+  + 'function _vendFrDate(s){ if(!s) return ""; var p=String(s).split("-"); return p.length===3?(p[2]+"/"+p[1]):s; }\n'
+  + 'function _vendHa(x){ return (Math.round(x*10000)/10000).toLocaleString("fr-FR",{minimumFractionDigits:2,maximumFractionDigits:4}); }\n'
+  + 'function _vendL1(x){ return (Math.round(x*10)/10).toLocaleString("fr-FR",{minimumFractionDigits:1,maximumFractionDigits:1}); }\n'
+  + 'function _vendKgTxt(x){ return Math.round(x||0).toLocaleString("fr-FR"); }\n'
+  + PRELUDE + NOMS.map(corps).join('\n') + '\n' + NOMS_LIV.map(corps).join('\n')
+  + '\nreturn {' + NOMS_LIV.join(',') + '};';
+// eslint-disable-next-line no-new-func
+const L = new Function('CLIENTS','CFG','RECS', codeLiv)(CLIENTS, CFG, RECS);
+
+const livs = L._vendLivs('Maison Bouchard');
+T('★ le bon regroupe par CHARGEMENT, pas par apport', livs.length, 2);
+T('livraison du 13/09 : deux parcelles', livs[0].lignes.length, 2);
+T('la plus récente en tête', livs[0].date, '2026-09-13');
+T('kg du chargement (28×24 + 10×24)', L._livKg(livs[0]), 912);
+T('caisses du chargement', L._livCs(livs[0]), 38);
+T('retour partiel : la livraison compte comme reçue', L._livRetour(livs[0]), true);
+T('jus du chargement', L._livJus(livs[0]), 460);
+T('rendement réel 672 kg / 5,05 hL', Math.round(L._vendRendKgHl(672, 505)), 133);
+T('prorata signalé sur le 11/09', L._livProrata(livs[1]), true);
+T('date de réception retenue', L._livDateRet(livs[0]), '2026-09-19');
+T('repère du bon', L._vendInit('Maison Bouchard'), 'MB');
+T('repère : un seul mot', L._vendInit('Bouchard'), 'B');
+
+const client = { nom:'Maison Bouchard', poids_caisse_kg:24, adresse:'12 rue du Chapitre, 21200 Beaune' };
+const bon = L._vendBlCorps(client, L._vendBlLignes([livs[0]]), 'jour');
+T('bon : le domaine émetteur', /Domaine des Perri/.test(bon), true);
+T('★ bon : AUCUN prix, aucun montant', /€|euro|prix|montant/i.test(bon), false);
+T('bon : la surface achetée', /0,12 ha/.test(bon), true);
+T('bon : le pont-bascule fait foi', /pont-bascule/.test(bon), true);
+T('bon : deux poids par caisse annoncés', /24 kg/.test(bon), true);
+T('bon : la section retour existe', /Retour du client/.test(bon), true);
+T('bon : la ligne sans retour est « en attente »', /en attente<\/td>/.test(bon), true);
+T('★ bon : les totaux disent sur combien de kilos ils portent', /672 kg des 912 kg/.test(bon), true);
+
+const sansRetour = L._vendBlCorps(client, L._vendBlLignes([{ client:'x', date:'2026-09-20',
+  lignes:[{ parcelle:'Le Clos', part:{ dom:false, client:'Maison Bouchard', caisses:5, pck:24 } }] }]), 'jour');
+T('bon sans retour : pas de tableau vide', /Retour du client \u2014 volumes/.test(sansRetour), false);
+T('bon sans retour : le dit en clair', /en attente du retour du client/.test(sansRetour), true);
+T('bon sans surface : pas de colonne fantôme', /<th class="n">Surface<\/th>/.test(sansRetour), false);
+
+const recap = L._vendBlCorps(client, L._vendBlLignes(livs), 'campagne');
+T('récap : les 3 apports', (recap.match(/<tr><td>\d\d\/\d\d<\/td>/g)||[]).length, 6);
+T('récap : trié du plus ancien', recap.indexOf('11/09') < recap.indexOf('13/09'), true);
+T('récap : mention du prorata', /prorata des kilos, pas une mesure/.test(recap), true);
+
+/* ⚠️ LE PIÈGE DU PRORATA, rejoué sur la fonction réelle de répartition. */
+const codeProrata = 'var _vliv={lignes:LIGNES,detail:false};\n'
+  + 'function _vlKg(){ return _vliv.lignes.reduce(function(s,x){ return s+x.caisses*x.pck; },0); }\n'
+  + corps('_vendRetProrata') + '\nreturn _vendRetProrata;';
+const LIGNES = [ { caisses:10, pck:20 }, { caisses:30, pck:20 } ];   // 200 kg et 600 kg
+// eslint-disable-next-line no-new-func
+const prorata = new Function('LIGNES', codeProrata)(LIGNES);
+const r = prorata(555, 50);
+T('★ prorata : la somme retombe sur le total annoncé', r[0].jus + r[1].jus, 555);
+T('prorata : le quart sur 200 des 800 kg', r[0].jus, 138.8);
+T('prorata : la lie aussi', r[0].lie + r[1].lie, 50);
 
 console.log('\n' + (ko ? ko + ' ASSERTION(S) ROUGE(S) sur ' + n : 'TOUT VERT — ' + n + ' assertions'));
 if (CONTRE){

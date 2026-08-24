@@ -10442,9 +10442,6 @@ laquelle des deux a tort ?*
 Écrit ici pour que le document ne laisse pas croire le chantier terminé — la maquette validée par
 Nico va plus loin que le code livré :
 
-- **VD-2** — les livraisons : regroupement par client + date, **bon de livraison** et **récap de
-  campagne** imprimables via `MV_DOC`, strictement en kilos (aucun prix, décision de Nico), et la
-  saisie du **retour du client** : litres de jus, litres de lie, rendement réel kg/hL.
 - **VD-3** — le rendement de la parcelle : escalier des sources (client / décuvage / estimé), un
   hL/ha qui ne s'affiche comme **mesure** que si 100 % des kilos ont un volume connu, la répartition
   des surfaces avec ses trois écarts (dépassement, hectares orphelins, surfaces divergentes), et
@@ -10453,3 +10450,75 @@ Nico va plus loin que le code livré :
   écrit dans l'entrée plutôt que laissé à deviner.
 - Maquettes de référence, validées : `mq-vendange-multiclients-v6.html` (5 écrans, 4 versions
   d'itération).
+
+---
+
+## 62. ★★★ LE BON DE LIVRAISON, ET LE RETOUR QUI ARRIVE TROIS SEMAINES PLUS TARD — LOT VD-2 (24/08 — `cave.js` seul, aucun bump)
+
+Suite immédiate de VD-1. Nico : *« il faut pouvoir l'éditer car après les clients nous donnent le
+nombre de litres de jus et le nombre de litres de lie qu'ils ont eu »*.
+
+### 62a. ★ L'UNITÉ DU BON N'EST PAS L'APPORT, C'EST LE CHARGEMENT
+
+Un client qui reçoit deux parcelles le même jour ne connaît **qu'une livraison**. `_vendLivs(nom)`
+regroupe donc les parts par **client + date**, toutes récoltes confondues. C'est cette livraison
+qu'on édite et qu'on imprime — pas la part, pas la récolte.
+
+### 62b. ★★★ DEUX MESURES QUI NE SE MÉLANGENT PAS
+
+Les **kilos** sont mesurés par le domaine, le jour de la vendange. Les **litres** sont mesurés par
+le client, après pressurage, des semaines plus tard. La feuille de saisie a donc deux blocs
+séparés — *ce qui est parti* / *ce que le client a rendu* — et corriger l'un ne touche jamais
+l'autre. Le document dit **qui a mesuré quoi** : *« les volumes sont ceux annoncés par le client,
+ils n'engagent pas le domaine »*, en face de *« en cas d'écart, le pont-bascule fait foi »*.
+
+⚠️ **Un bon qui laisserait croire à une pesée serait une promesse que le domaine ne peut pas tenir.**
+
+### 62c. ⚠️⚠️ LE PIÈGE DU PRORATA : UN LITRE QUI N'EXISTE PAS
+
+Quand le client donne **un seul chiffre** pour une livraison à plusieurs parcelles, les litres sont
+répartis au prorata des kilos. Un arrondi ligne à ligne fabrique du volume : 555 L sur 200/600 kg
+donnent 138,8 + 416,3 = **555,1**. La **dernière ligne reçoit le reste**, pour que la somme retombe
+exactement sur ce que le client a annoncé. La répartition est marquée `src:'prorata'`, affichée en
+orange, et le document écrit que *le détail par parcelle est une répartition, pas une mesure*.
+Une case permet la saisie détaillée quand le client, lui, a détaillé.
+
+### 62d. Ce que le bon ne dit pas
+
+**Aucun prix, aucun montant** — décision de Nico, tenue par une assertion : le corps du document est
+scanné pour `€`, `euro`, `prix`, `montant`. La contre-épreuve glisse « 12,50 €/kg » dans une tuile :
+l'assertion rougit.
+
+Et **la section « Retour du client » n'existe que s'il y a un retour**. Un tableau vide dirait
+« rien n'a été pressé » là où il faut lire « on attend encore » — à la place, un cadre d'attente.
+Quand une partie seulement des livraisons a son retour, les totaux disent sur combien de kilos ils
+portent : *« ne portent que sur 672 kg des 912 kg livrés »*.
+
+### 62e. Là où ça vit, sans toucher à la barre d'onglets
+
+Le Cuvier a déjà quatre onglets ; un cinquième les aurait écrasés sur 430 px. L'entrée est
+**la ligne « kg vendus en raisin » de l'écran Récoltes**, devenue cliquable et qui porte le compte
+des **retours attendus** — puis Ventes en vrac → un client → ses livraisons → son bon. Second accès
+depuis Réglages du Cuvier. La fiche client gagne une **adresse** (le bon la porte) et une note :
+le poids par caisse y est **proposé**, plus imposé, depuis VD-1.
+
+### 62f. Ce que le preflight a attrapé, et qu'aucun essai n'aurait vu
+
+- **`_vliv` nommé dans un `onchange` inline** : l'état n'existe pas sur `window`, la date de
+  réception serait partie en `ReferenceError` **silencieux**. Remplacé par `_vendRetDate(v)`.
+  *Exporter les fonctions ne suffit pas : l'état aussi doit traverser.*
+- **Un glyphe `✓` en dur** — 27ᵉ emoji de `cave.js` là où le cliquet en tolère 26. Remplacé par
+  l'icône `check` du sprite.
+- **Deux `_mvIcon(...,14)`** : l'échelle est 16/18/20/24/40.
+- **`font-weight:400`** dans le CSS du document : les trois pas de la charte sont 500/600/700.
+
+⚠️ Et un **patch Python qui échoue au troisième motif n'écrit rien** — les deux corrections de
+taille déjà « faites » avaient été perdues, et le harnais les redisait. *Le dry-run de TOUS les
+motifs avant la première écriture n'est pas une précaution de style.*
+
+### 62g. Le filet
+
+`mv-harnais-vendange-parts.mjs` passe de 44 à **73 assertions** : le regroupement par chargement, le
+rendement réel kg/hL, le corps des deux documents (produit **et lu**, pas raisonné), et la fonction
+de prorata rejouée telle qu'elle est écrite. Trois contre-épreuves : prorata sans reprise du reste
+(1 rouge), section retour toujours affichée (2 rouges), prix glissé dans le bon (1 rouge).
