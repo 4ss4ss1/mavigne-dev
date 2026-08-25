@@ -2,7 +2,47 @@
 
 > Document de référence du projet **Ma Vigne** (GUERETTECH). Il est le **porteur de vérité** :
 > la mémoire Claude est plafonnée, ce fichier ne l'est pas.
-> Dernière consolidation : **23 août 2026** — ★★★ **LA FEUILLE D'HEURES DISAIT +8H30 LÀ OÙ ELLE
+> Dernière consolidation : **25 août 2026** — ★★★ **DOUZE PIXELS DE TROP, ET TOUT L'ÉCRAN
+> DÉCROCHE (§67)**. **APP 6.67 → 6.68 · SW 7.22 → 7.23.** Deux retours de Nico dans la même
+> phrase : « l'écran d'accueil est mal calibré » et « beaucoup de noir écrit sur du sombre dans
+> les 3 rectangles en haut de chaque module ».
+> ★★★ **LE CHIFFRE DES TROIS CASES ÉTAIT PEINT AVEC UNE COULEUR DE FOND.** `.mvu-kpi-v` portait
+> `color:var(--cave)`. **`--cave` est le brun-noir des FONDS, pas une encre.** En mode clair il
+> vaut `#14110D`, indiscernable à l'œil de `--texte` `#1A1A14` : *personne ne pouvait voir le
+> défaut*. En mode sombre il s'assombrit encore (`#100D0A`) pendant que la carte s'éclaircit
+> (`#1C1A16`) — **mesuré 1,12:1**, invisible, sur **sept écrans**. Le libellé juste en dessous
+> sortait à 7,82:1, d'où l'effet « une case à moitié vide ». **C'est §21c à l'identique, sur un
+> autre composant : le mode clair camoufle toujours ce détournement.**
+> ★★ Trois autres du même bloc, non signalées : l'**onglet actif de second niveau** (Chai,
+> Millésime, Documents) — 1,12:1 aussi ; et **deux fautes SYMÉTRIQUES**, illisibles en mode
+> *clair* cette fois (alerte « sem. > max » du Planning à 1,46:1, case « en cours » du Chai à
+> 2,23:1). *Chercher un défaut de contraste dans UN seul thème n'en trouve que la moitié.*
+> ⚠️⚠️⚠️ **ET LE CADRAGE : `overflow-x:hidden` BLOQUE LE DÉFILEMENT MAIS N'EMPÊCHE PAS
+> L'AGRANDISSEMENT DU VIEWPORT.** Reproduit en machine : **un** élément qui dépasse de **12 px**
+> à droite de l'accueil, et le viewport de mise en page grandit **dans les deux sens** —
+> `scrollWidth` 360 → **373**, et `#mv-dock` (`position:fixed;bottom:0`) se recale dessus et
+> descend de 800 à **827 px**, soit **27 px sous le bord de l'écran**. Les libellés des modules
+> sont coupés, la page devient baladable dans les quatre sens. **Un défaut, cinq symptômes** —
+> exactement ce que Nico appelait « écran pas fixe ».
+> ★★★ **LA RÈGLE QUI DEVAIT PROTÉGER ÉTAIT DÉJÀ LÀ, ET NE PROTÉGEAIT PAS.** `body{overflow-x:hidden}`
+> existe depuis toujours. C'est pour ça qu'aucune lecture du CSS ne pouvait trouver : on voit la
+> garde, on la coche, on passe. **Correctif : `overflow-x:clip` sur `html` ET `body`** — `clip`
+> coupe réellement et, à la différence de `hidden`, **ne crée aucun conteneur de défilement**,
+> donc le `sticky` de `.mod-header` et le `fixed` du dock survivent. `hidden` reste en repli.
+> ⚠️⚠️ **CE QUI RESTE OUVERT : l'élément qui déborde n'est PAS identifié.** Le HTML statique de
+> l'accueil ne dépasse à **aucune** des quatre largeurs testées (360/390/412/430), overflow
+> neutralisé. La sonde passée par Nico en console rend `[]` — **mais elle ne prouve rien** : elle
+> ne regardait que le **côté droit**, que `#page-home`, **après** le correctif, et très
+> probablement en largeur **bureau** (≥768 px, où le layout n'est pas celui du téléphone).
+> **La garde neutralise l'effet, pas la cause.** Voir la sonde complète en **§67c**.
+> ⚠️ **Et mon harnais de contraste s'est trompé DEUX fois dans la même session** : 71 « défauts »
+> dont **42 sur des éléments non rendus** (`getComputedStyle` d'un enfant d'un parent
+> `display:none` rend sa propre valeur, pas `none`), puis deux ratios faux parce qu'il **ne
+> rechargeait pas la page entre les deux thèmes**. Les chiffres retenus viennent de la lecture
+> directe des couleurs calculées. *Troisième session de suite où une assertion ment.*
+> Détail en **§67**.
+>
+> ★ Précédente : **23 août 2026** — ★★★ **LA FEUILLE D'HEURES DISAIT +8H30 LÀ OÙ ELLE
 > DEVAIT DIRE −9H (§55)**. **APP 6.46 → 6.47 · SW 7.01 → 7.02** — le lot a commencé à « aucun
 > bump » et a fini dans `utils.js` : voir **§55o**, le défaut le plus grave des trois.
 > ★★★ **UNE RÉFÉRENCE CALCULÉE SUR LE RÉSULTAT NE MESURE PLUS RIEN** : `_planRempH` définissait la
@@ -3199,6 +3239,17 @@ donnée**. Test placé **avant** celui du blocage.
 **UI-4** a rendu `.mod-header` clair pendant que le garde-fou continuait de cibler
 `.mod-header .mvu-tab` comme un **contexte sombre** → **crème sur papier, 1,09:1, sur 8 modules**.
 
+★★★ **DEUXIÈME OCCURRENCE, 25/08 — LA MÊME CAUSE, UN AUTRE COMPOSANT (§67).** `.mvu-kpi-v` (le
+chiffre des trois cases, sept écrans) et `.mvu-tabs.mvu-sub .mvu-tab.active` (l'onglet actif de
+second niveau) portaient `color:var(--cave)`. **`--cave` est une couleur de FOND.** En mode clair
+elle est indiscernable de `--texte` ; en mode sombre elle part dans l'autre sens que le fond de
+carte → **1,12:1**. **La règle générale, à appliquer avant d'écrire une couleur de texte : si le
+nom de la variable désigne une SURFACE (`--cave`, `--bg-*`, `--*-pale`), elle ne peut pas être une
+encre.** Les encres du projet sont `--texte`, `--texte-med`, `--texte-doux`, et les trois jetons
+faits pour ça : `--or-tx`, `--vert-tx`, `--orange-tx` (§ bloc « badges de statut »).
+⚠️ **Et l'inverse existe** : une encre CLAIRE écrite en dur (`#F0A9A0`, `#E8D294`) est invisible en
+mode **clair**. *Un audit de contraste qui ne joue qu'un seul thème n'en trouve que la moitié.*
+
 **Outil d'audit** : `mv-audit-contraste.js`, à coller dans la console **authentifiée**.
 ⚠️ **`.mod-header` est CLAIR**, le sombre vit sur `.mod-header-top`. Greffer `.mod-header` sur un
 en-tête maison sombre le repeindra en clair → utiliser un **hôte dédié** (modèle `.pil-metahost`).
@@ -4356,6 +4407,23 @@ radios/cases, section « pièces à joindre » explicite.
 4. **`lint-cliquet` / ESLint** : jamais joué côté Claude (`node_modules` absent) — **l'échec est
    identique sur la base d'origine**, vérifié.
 5. **`test:smoke` / `test:e2e`** : jamais joués côté Claude (Chromium injoignable).
+
+### ⚠️ OUVERT DEPUIS LE 25/08 — L'ÉLÉMENT QUI DÉBORDE SUR L'ACCUEIL (§67c)
+
+**La garde `overflow-x:clip` neutralise l'effet ; la cause n'est pas nommée.** Tant qu'elle ne l'est
+pas, elle peut réapparaître ailleurs (une page qui n'aurait pas la garde, un document imprimé, un
+écran futur). **Le geste** : la sonde complète de §67c, **en simulation mobile (~390 px)**, connecté,
+sur l'accueil — pas en largeur bureau, où le layout n'est pas celui du téléphone.
+★ Piste à mesurer, **pas un constat** : les items flex de l'accueil sans `min-width:0`
+(`.hdre-tit`, `.hmsem-l`, `.hdre-bad`) ne peuvent pas rétrécir sous leur mot le plus long.
+
+### ★ À ÉCRIRE — `mv-harnais-contraste.mjs` (§67d)
+
+Aucun harnais du projet ne lit une couleur. Celui-ci rendrait `index.html` sous Chromium, jouerait
+les **deux** thèmes et exigerait ≥ 4,5:1 sur tout élément à texte direct **réellement rendu**.
+⚠️ Deux pièges déjà payés : filtrer sur `getBoundingClientRect()` non nul (et **jamais** sur
+`getComputedStyle().display`, qui ne voit pas un ancêtre caché), et **recharger la page entre les
+deux thèmes**.
 
 ### ⚠️⚠️⚠️ AUDIT DU 16/08 — LIRE §44 AVANT DE TRAVAILLER DANS CE BACKLOG
 
@@ -10810,3 +10878,177 @@ qu'une assertion vérifiait trente lignes plus bas. L'état est désormais rendu
 trouvé. *Un test qui laisse le terrain sale fait rougir le suivant, pour rien.*
 
 **127 assertions.** Guide, `WHATS_NEW` et bump faits dans le même lot — clôture de la règle d'or n°4.
+
+
+---
+
+## 67. ★★★ DOUZE PIXELS DE TROP, ET TOUT L'ÉCRAN DÉCROCHE (25/08 — APP 6.67 → 6.68 · SW 7.22 → 7.23)
+
+> ⚠️ **Le lot APP 6.67 / SW 7.22 (La Réserve, jeu d'icônes) n'a PAS de section dans ce document.**
+> Constat, pas reproche : la session qui l'a produit ne l'a pas écrite. Son changelog SW est
+> détaillé, lui. Ce trou est signalé ici pour qu'une prochaine session ne cherche pas §67 = 6.67.
+
+**Le point de départ, en une phrase de Nico :** *« l'écran d'accueil du module vigne est mal
+calibré il peut bouger à droite et a gauche et en bas et en haut. de plus il y a encore beaucoup de
+noir ecrit sur du sombre dans les 3 rectangles en haut de chaque module quand on met l'appli en
+mode sombre »*. Deux défauts sans rapport apparent — et deux méthodes de diagnostic opposées.
+
+### 67a. Le noir sur sombre — une couleur de fond utilisée comme encre
+
+`.mvu-kpi` est le composant des **trois cases de chiffres** sous l'en-tête. Il vit sur **sept
+écrans** : Accueil, Parcelles, Journal, Tracteur, Réglages (statiques dans `index.html`), Planning
+et Cave (injectés en JS).
+
+| Sélecteur | Ce qu'il portait | Clair | **Sombre** |
+|---|---|---|---|
+| `.mvu-kpi-v` (le chiffre) | `color:var(--cave)` | 18,02:1 | **1,12:1** |
+| `.mvu-kpi-l` (le libellé) | `color:var(--texte-doux)` | ✅ | 7,82:1 |
+| `.mvu-kpi.due .mvu-kpi-v` | `color:#B0304A` | 5,97:1 | **2,79:1** |
+| `.mvu-kpi.pl2-kpi-alert .mvu-kpi-l` | `color:#A0291E` | 5,63:1 | **2,18:1** |
+| `.mvu-tabs.mvu-sub .mvu-tab.active` | `color:var(--cave)` | 18,02:1 | **1,12:1** |
+
+★★★ **La cause tient en une phrase : `--cave` est le brun-noir des FONDS, pas une encre.** En mode
+clair il vaut `#14110D`, **indiscernable à l'œil** de `--texte` (`#1A1A14`) — le défaut ne pouvait
+pas être vu, ni par relecture, ni par capture. En mode sombre les deux partent **en sens
+contraires** : `--cave` descend à `#100D0A` pendant que `--bg-card` monte à `#1C1A16`. 1,12:1.
+C'est **§21c à l'identique**, six jours plus tard, sur un autre composant.
+
+★★ **Le libellé, lui, se lisait très bien** (7,82:1) : c'est ce qui donnait au client l'impression
+d'une case « à moitié vide » plutôt que d'une case cassée — et c'est pourquoi le défaut a survécu.
+
+★★★ **Deux fautes SYMÉTRIQUES trouvées en jouant l'AUTRE thème** : la valeur de l'alerte
+« sem. > max » du Planning (`#F0A9A0` en dur dans `planning.js`) sort à **1,46:1 en mode CLAIR**, et
+la case « en cours » du Chai (`var(--or)` sur `var(--or-pale)`, dans le CSS injecté par `cave.js`) à
+**2,23:1 en mode CLAIR**. *Un audit de contraste qui ne joue qu'un seul thème n'en trouve que la
+moitié.*
+
+**Correctifs** — encres du projet plutôt que couleurs de surface :
+`var(--cave)` → `var(--texte)` (×2) · `#B0304A` et `#A0291E` → `var(--rouge)` · `#F0A9A0` →
+`var(--rouge)` · `var(--or)` → **`var(--or-tx)`**, le jeton fait exactement pour ça.
+**Après :** pire ratio **6,11:1** en clair et **7,82:1** en sombre sur les 15 cases mesurées.
+
+### 67b. Le cadrage — la garde était là, et ne gardait rien
+
+Symptôme précisé par Nico au deuxième tour : *« de quelques mm mais suffisamment pour cacher le
+titre des modules en bas lorsqu'on scroll vers le haut, ça fait donc écran pas fixe. idem sur les
+côtés alors que tous les autres modules sont ok »*.
+
+**Reproduit en machine** (Chromium mobile 360×800, `#page-home` active, dock rendu) en injectant
+**un** élément à `width:calc(100% + 12px)` :
+
+| | sans l'intrus | **avec 12 px de trop** |
+|---|---|---|
+| `documentElement.scrollWidth` | 360 | **373** |
+| bas de `#mv-dock` | 800 | **827** |
+| en-tête collé après 250 px | oui | oui |
+
+★★★ **Le mécanisme.** Un débordement horizontal fait grandir le **viewport de mise en page**, et il
+le fait **dans les deux sens**. `#mv-dock` est `position:fixed;bottom:0` : il se cale sur le bas de
+ce viewport agrandi, donc **27 px sous le bord réel de l'écran** — les libellés des modules sont
+coupés. Et la page, plus grande que l'écran, devient baladable à droite, à gauche, en haut et en
+bas. **Un seul défaut produit les cinq symptômes décrits, y compris ceux qui semblaient verticaux.**
+
+⚠️⚠️⚠️ **`body{overflow-x:hidden}` était déjà posé (ligne ~255) — et le dock descendait quand
+même.** La propriété bloque le **défilement** ; elle n'empêche pas l'**agrandissement du viewport**.
+C'est ce qui rendait le défaut introuvable à la lecture : *on voit la garde, on la coche, on passe
+à autre chose*. **Une garde qui existe n'est pas une garde qui garde** — corollaire direct de la
+règle d'or n°3, et cousin du cas `lint-vocabulaire` (contrôle écrit, jamais branché).
+
+**Correctif**, dans le bloc CADRAGE en fin de `styles.css`, point **5b** :
+
+```css
+html,body{overflow-x:hidden;}
+@supports (overflow:clip){ html,body{overflow-x:clip;} }
+```
+
+★★ **Pourquoi `clip` et pas `hidden` sur `html`.** `hidden` sur `html` créerait un **conteneur de
+défilement**, ce qui **casserait le `position:sticky` de `.mod-header`** (point 1 du même bloc,
+péniblement obtenu en §21b) et pourrait déloger le `fixed` du dock. **`overflow:clip` ne crée aucun
+conteneur de défilement** : il coupe, point. La ligne `hidden` reste au-dessus comme repli pour les
+navigateurs antérieurs à Chrome 90 / Safari 16 / Firefox 81.
+
+**Contre-épreuve jouée sur les fichiers patchés** : intrus +12 px **réintroduit** → `scrollWidth`
+360, dock à 800, en-tête toujours collé à 0. Sans la règle, le même intrus rendait 373 et 827.
+*Le harnais rougit quand on remet le défaut.*
+
+### 67c. Ce qui reste ouvert — l'élément qui déborde n'est pas nommé
+
+⚠️⚠️ **La garde neutralise l'effet, elle ne supprime pas la cause.** Mesures faites :
+
+- HTML statique de l'accueil, **quatre largeurs** (360 / 390 / 412 / 430 px), `overflow-x` neutralisé
+  pour révéler ce qui serait masqué : **zéro élément déborde**, dans les deux sens.
+- Idem avec les onze widgets `home-w` **tous dépliés** et du contenu factice recopié du générateur
+  (frise météo 5 jours, raccourcis) : **zéro**.
+- Sonde passée par Nico dans la console, retour `[]`.
+
+★★★ **Et pourtant on ne peut pas conclure — la sonde était partielle sur quatre points**, ce qui en
+fait un cas d'école du corollaire « varier le motif de recherche avant de conclure à l'absence » :
+
+1. elle ne testait que le **bord droit** (`rect.right`), pas le gauche ;
+2. elle ne parcourait que `#page-home *` — ni le dock, ni `#mv-trial-bar`, ni les overlays ;
+3. elle a tourné **après** le correctif ;
+4. et très probablement en largeur **bureau** : au-delà de 768 px le `body` n'est plus plafonné à
+   430 px et la mise en page n'est pas celle du téléphone. **Le défaut est mobile ; le mesurer sur
+   un écran large ne peut pas le trouver.**
+
+**La sonde complète, à coller une fois, en simulation mobile (~390 px) et connecté :**
+
+```js
+(()=>{const h=document.documentElement,b=document.body,
+ ox=[h.style.overflowX,b.style.overflowX];h.style.overflowX=b.style.overflowX='visible';
+ const bb=b.getBoundingClientRect(),out=[];
+ document.querySelectorAll('body *').forEach(e=>{const r=e.getBoundingClientRect();
+  if(!r.width&&!r.height)return;const d=Math.max(r.right-bb.right,bb.left-r.left);
+  if(d>0.5)out.push([+d.toFixed(1),e.tagName,e.id||e.className]);});
+ const res={largeur:h.scrollWidth+' / '+h.clientWidth,coupables:out.sort((x,y)=>y[0]-x[0]).slice(0,10)};
+ h.style.overflowX=ox[0];b.style.overflowX=ox[1];return res;})()
+```
+
+**Piste non vérifiée à garder** : plusieurs blocs de l'accueil sont des items flex **sans
+`min-width:0`** (`.hdre-tit`, `.hmsem-l`, `.hdre-bad`) — un mot long sans espace (nom de parcelle,
+nom de membre) ne peut alors pas être rétréci et pousse son conteneur. **Hypothèse, pas constat :
+ne pas l'écrire au présent tant qu'elle n'est pas mesurée.**
+
+### 67d. Ce que l'outillage a coûté, encore
+
+⚠️ **Mon harnais de contraste s'est trompé deux fois dans la même session.**
+
+1. **71 « défauts » annoncés, 42 faux.** Le filtre `getComputedStyle(el).display!=='none'` ne
+   protège de rien : sur un élément dont un **ancêtre** est `display:none`, `getComputedStyle` rend
+   la valeur **propre** de l'élément (`block`), pas `none`. Toutes les modales cachées passaient. Le
+   bon filtre est un `getBoundingClientRect()` non nul. **De 71 à 29.**
+2. **Deux ratios faux** parce que la boucle sur les deux thèmes **ne rechargeait pas la page** entre
+   les deux. Les chiffres retenus dans cette section viennent de la **lecture directe des couleurs
+   calculées** par le navigateur, pas du harnais.
+
+★★ La leçon du 23/08 se confirme une fois de plus : **quand une assertion tombe, se demander
+d'abord laquelle des deux a tort.** Ici c'était l'assertion, les deux fois — et une seule des deux
+erreurs a été trouvée en la relisant ; l'autre l'a été **en mesurant autrement**.
+
+★ **Contrôle possible, non écrit** : aucun harnais du projet ne lit une **couleur** ni une **mise en
+page**. Un `mv-harnais-contraste.mjs` qui rend `index.html` sous Chromium, joue les **deux** thèmes
+et exige ≥ 4,5:1 sur tout élément à texte direct rendu, attraperait toute cette famille. Il ne
+verrait que le statique — ce qui aurait suffi pour **cinq des sept écrans** de ce lot.
+
+### 67e. Livraison
+
+| Fichier | Ce qui change | Bump |
+|---|---|---|
+| `src/styles.css` | 4 corrections de contraste + garde de cadrage (point 5b) | — |
+| `src/planning.js` | valeur d'alerte lisible en mode clair | — |
+| `src/cave.js` | case « en cours » du Chai lisible en mode clair | — |
+| `src/utils.js` | `APP_VERSION` + bloc `WHATS_NEW` | ★ APP |
+| `index.html` | les 4 affichages de version | ★ APP |
+| `public/sw.js` | en-tête, `CACHE_NAME`, 2 `console.log`, changelog | ★ SW |
+
+**Pourquoi un bump alors que le lot est presque tout en CSS** : le CSS est un asset Vite **hashé**,
+référencé par `index.html`. Sans bump SW, un client dont le service worker sert l'ancien
+`index.html` **ne prendra jamais** le nouveau CSS. « Module seul = aucun bump » ne s'applique pas
+dès qu'`index.html` ou `utils.js` bougent.
+
+**Mesuré** : 15 cases sur 5 écrans, pire ratio 6,11:1 (clair) / 7,82:1 (sombre) · syntaxe des trois
+JS validée (`node --check`) · 3102 accolades CSS équilibrées · **C27 vert** (`WHATS_NEW` ouvre sur
+`APP_VERSION`) · les 2 noms d'icônes du journal existent dans le sprite (vérifié contre `index.html`).
+**Non vérifié** : le rendu à l'œil sur l'appareil de Nico — *aucun harnais ne lit une mise en page*.
+Guide public et fiches `MV_AIDE` relus : ils ne mentionnent le thème que pour dire qu'il existe,
+**rien à changer**. `MV_INFO` : aucune méthode de calcul touchée.
