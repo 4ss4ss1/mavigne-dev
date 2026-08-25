@@ -23,7 +23,7 @@ export const GT_ADMIN_EMAIL = 'ngdevpro@gmail.com';
 // WHATS_NEW   : tableau vide = modal desactive pour cette version.
 // Format item : { emoji:'📅', titre:'Titre court', desc:'Phrase utilisateur.' }
 // Regle : seulement les changements visibles par les utilisateurs.
-export const APP_VERSION = '6.66';
+export const APP_VERSION = '6.67';
 // ════ Journal des nouveautés (récap cumulatif) ════
 // Une entrée par version, la PLUS RÉCENTE EN HAUT : { v:'5.10', items:[ {emoji,titre,desc}, … ] }
 // À chaque release visible → AJOUTER un bloc en tête (ne pas remplacer). items:[] = release technique (rien à afficher).
@@ -354,6 +354,9 @@ window._mvGraphRepeindre = function(){
 };
 
 export const WHATS_NEW = [
+  { v: '6.67', items: [
+    { emoji: 'carton', titre: 'La R\u00e9serve passe aux vraies ic\u00f4nes', desc: "Les f\u00fbts, les intrants, l\u2019inventaire d\u2019ouverture et les \u00e9crans vides gardaient leurs anciens pictogrammes. <b>Le document de restitution</b> \u2014 celui que vous \u00e9ditez quand un salari\u00e9 rend son mat\u00e9riel \u2014 en avait aussi, et comme il s\u2019imprime, ils pouvaient sortir en carr\u00e9s vides. Tout est repris. <b>Aucun stock, aucun f\u00fbt n\u2019a boug\u00e9.</b>" }
+  ] },
   // 6.65 : correctif de l'ecran de recolte livre en 6.64 (le bloc de repartition
   // disparaissait a la deuxieme ouverture). Rien de NEUF pour l'utilisateur :
   // ce que 6.64 annonce est simplement redevenu vrai.

@@ -1,4 +1,31 @@
-// MA VIGNE — Service Worker v7.21
+// MA VIGNE — Service Worker v7.22
+// v7.22 (23/08/2026) — LA RESERVE, ET CE QUE LE CONTROLE REPARE A TROUVE. APP 6.66 -> 6.67.
+//   ★ Premier lot depuis que le harnais voit les TREIZE documents imprimes et
+//   non plus quatre. Verification immediate : sur les treize, un seul portait
+//   encore des pictogrammes — le document de RESTITUTION de la Reserve, celui
+//   qu'on edite quand un salarie rend son materiel. Les douze autres etaient
+//   propres. L'angle mort de v7.18 n'avait donc rien laisse passer d'autre.
+//   ★ reserve.js : 34 -> 14. Futs, intrants, inventaire d'ouverture, ecrans
+//   vides, et les deux glyphes du document.
+//   ⚠⚠ LE HARNAIS M'A REPRIS DEUX FOIS DANS LE MEME LOT, ET LES DEUX FOIS
+//   J'AVAIS MAL LU LE CONTEXTE :
+//     1. le bloc « rien a restituer » vit DANS le document, pas a l'ecran. Je
+//        l'avais pris pour de l'ecran parce qu'il porte une classe `mvr-empty`
+//        comme trois autres blocs de la meme page. ★ UNE CLASSE CSS PARTAGEE
+//        N'EST PAS UNE PREUVE DE CONTEXTE : c'est la CHAINE D'APPEL qui decide.
+//     2. le 4e argument d'`openConfirmDel` part dans `_mvSetIcon`, qui attend
+//        un NOM. J'y avais mis du HTML d'icone : la modale aurait affiche la
+//        balise en toutes lettres. ★ Preleve l'ancre ne suffit pas — il faut
+//        savoir OU VA la valeur.
+//   ⚠⚠⚠ ET UNE LECON D'OUTILLAGE, PAYEE TROIS ESSAIS : un patch ecrit en
+//   Python qui produit du JavaScript traverse DEUX niveaux d'echappement, et
+//   finit par patcher l'echappement au lieu du code. Les ancres a antislash
+//   s'ecrivent desormais dans un `.mjs` ecrit DIRECTEMENT, avec `String.raw`.
+//   Meme famille que le piege d'ancre de §45e, une couche plus haut.
+//   ⚠ L'ancre du journal des nouveautes a change : un commentaire s'est
+//   glisse sous `WHATS_NEW = [`. On prepend apres la ligne d'ouverture, quoi
+//   qu'elle contienne ensuite — une ancre qui inclut la ligne suivante casse
+//   des qu'un humain annote le fichier.
 // v7.21 (24/08/2026) — LA VIRGULE ETAIT REFUSEE, ET LE CURSEUR SAUTAIT. APP 6.65 -> 6.66.
 //   Deux pieges cumules sur la surface d'une portion de parcelle :
 //   1. un `input type="number"` REFUSE la virgule — sur clavier francais,
@@ -2793,7 +2820,7 @@
 // v2.22 — Fix profils vides : guard vide dans loadData() pour MEMBRES/SAISONS/TACHES
 // v2.17 — Onboarding intégré + tenantId · v2.06 — Firebase Auth · v2.00–v2.05 — divers
 const DEBUG = self.location.hostname === 'localhost' || self.location.hostname === '127.0.0.1';
-const CACHE_NAME   = 'mavigne-v7.21';
+const CACHE_NAME   = 'mavigne-v7.22';
 const TENANT_CACHE = 'mavigne-tenant';   // Cache persistant — préservé à chaque mise à jour SW
 const SYNC_TAG     = 'mavigne-sync';
 
@@ -2809,7 +2836,7 @@ const CDN_URLS = [
 ];
 
 self.addEventListener('install', event => {
-  if(DEBUG) console.log('[SW] Ma Vigne v7.21 installé');
+  if(DEBUG) console.log('[SW] Ma Vigne v7.22 installé');
   event.waitUntil(
     caches.open(CACHE_NAME).then(async cache => {
       // ── Cœur applicatif : STRICT (mise à jour ATOMIQUE) ──
@@ -2825,7 +2852,7 @@ self.addEventListener('install', event => {
 });
 
 self.addEventListener('activate', event => {
-  if(DEBUG) console.log('[SW] Ma Vigne v7.21 activé');
+  if(DEBUG) console.log('[SW] Ma Vigne v7.22 activé');
   event.waitUntil(
     caches.keys().then(keys =>
       Promise.all(

@@ -1,5 +1,5 @@
 {
-  "total": 690,
+  "total": 670,
   "modules": {
     "app": 79,
     "utils": 77,
@@ -9,7 +9,7 @@
     "cave": 26,
     "tracteur": 3,
     "phyto": 10,
-    "reserve": 34,
+    "reserve": 14,
     "admin-gt": 62,
     "firebase": 14,
     "onboarding": 15,

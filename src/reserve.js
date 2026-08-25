@@ -17,7 +17,7 @@
 //   œno    → opérations Cave (op.data.so2_total_g) — actif dès aujourd'hui.
 // ═══════════════════════════════════════════════════════════════════════════
 
-import { isAdmin, showToast, _escHtml, _escAttr, _mvIcon } from './utils.js';
+import { isAdmin, showToast, _escHtml, _escAttr, _mvIcon, _mvIconInline } from './utils.js';
 
 const DEBUG = location.hostname === 'localhost' || location.hostname === '127.0.0.1';
 
@@ -197,7 +197,7 @@ function renderReserve(){
           +'<div class="mod-header-title">La Réserve</div>'
           +'<div class="mod-header-sub">Intrants, stock &amp; fûts</div>'
         +'</div>'
-        +'<button class="mod-home-btn" onclick="goHub()">\u2302</button>'
+        +'<button class="mod-home-btn" onclick="goHub()">'+_mvIcon('maison',18)+'</button>'
       +'</div>'
       +'<div class="mod-meta-row mvu-meta">'
         +'<div class="hv2-saison-pill" data-mv-pill><span class="hv2-dot"></span>&nbsp;<span data-mv-saison></span></div>'
@@ -336,12 +336,12 @@ function _rsvFutsHtml(){
   if(adm || INTRANTS.futs.length){
     h+='<div class="mvr-btnrow">';
     if(adm) h+='<button class="mvr-btn mvr-btn-p" onclick="_rsvOpenFut()">\uFF0B Ajouter des fûts</button>';
-    if(INTRANTS.futs.length) h+='<button class="mvr-btn mvr-btn-o" onclick="_rsvExportFutsPdf()">\uD83D\uDCC4 Inventaire PDF</button>';
+    if(INTRANTS.futs.length) h+='<button class="mvr-btn mvr-btn-o" onclick="_rsvExportFutsPdf()">'+_mvIcon('document',16)+' Inventaire PDF</button>';
     if(adm && INTRANTS.futs.length) h+='<button class="mvr-btn mvr-btn-o" onclick="_rsvOpenSep()">\uD83D\uDCE4 Se séparer de fûts</button>';
     h+='</div>';
   }
   if(!INTRANTS.futs.length){
-    h+='<div class="mvr-empty">\uD83D\uDED2<div>Aucun fût enregistré.</div>'+(adm?'<div class="mvr-empty-h">Ajoute ton premier lot pour suivre ton parc de contenants.</div>':'')+'</div>';
+    h+='<div class="mvr-empty">'+_mvIcon('carton',40)+'<div>Aucun fût enregistré.</div>'+(adm?'<div class="mvr-empty-h">Ajoute ton premier lot pour suivre ton parc de contenants.</div>':'')+'</div>';
     return h;
   }
   h+='<div class="mvr-flabel">Millésime</div><div class="mvr-fbar">';
@@ -356,7 +356,7 @@ function _rsvFutsHtml(){
   if(groups.length>1) h+='<button class="mvr-flink" onclick="_rsvToggleAllGrp()">'+(_futAllOpen(groups)?'Tout replier':'Tout déplier')+'</button>';
   h+='</div>';
   if(!groups.length){
-    h+='<div class="mvr-empty">\uD83D\uDDD3\uFE0F<div>Aucun fût pour ce millésime.</div></div>';
+    h+='<div class="mvr-empty">'+_mvIcon('calendrier',40)+'<div>Aucun fût pour ce millésime.</div></div>';
     return h;
   }
   groups.forEach(function(g, gi){
@@ -366,11 +366,11 @@ function _rsvFutsHtml(){
     var nRef=Object.keys(refset).length;
     h+='<div class="mvr-sgrp'+(open?' open':'')+'">'
       +'<div class="mvr-sghd" onclick="_rsvToggleGrp('+gi+')">'
-        +'<div class="mvr-sgico">\uD83C\uDFE2</div>'
+        +'<div class="mvr-sgico">'+_mvIcon('bureau',18)+'</div>'
         +'<div class="mvr-sgtx"><div class="mvr-sgname">'+_escHtml(name)+'</div>'
           +'<div class="mvr-sgline">'+g.lots.length+' lot'+(g.lots.length>1?'s':'')+' \u00b7 '+nRef+' référence'+(nRef>1?'s':'')+'</div></div>'
         +'<div class="mvr-sgbadge">'+g.n+'<span class="mvr-u">fûts</span></div>'
-        +'<div class="mvr-sgchev">\u25B6</div>'
+        +'<div class="mvr-sgchev">'+_mvIcon('lecture',16)+'</div>'
       +'</div>'
       +'<div class="mvr-sgbody"><div class="mvr-sgbody-in"><div class="mvr-sgpad">';
     g.lots.forEach(function(f){
@@ -379,7 +379,7 @@ function _rsvFutsHtml(){
         +'<div class="mvr-fin">'
           +'<div class="mvr-ftop"><div class="mvr-fref">'+_escHtml(f.ref||'Réf. non précisée')+'</div>'
           +_rsvFutQteHtml(f, adm)+'</div>'
-          +'<div class="mvr-fmeta"><span>\uD83D\uDCC5 '+_escHtml(f.annee||'—')+'</span></div>'
+          +'<div class="mvr-fmeta"><span>'+_mvIcon('calendrier',16)+' '+_escHtml(f.annee||'—')+'</span></div>'
           +(adm?'<div class="mvr-frow"><button class="mvr-mini" onclick="_rsvOpenFut(\''+_escAttr(f.id)+'\')">\u270F\uFE0F Modifier</button><button class="mvr-mini mvr-mini-d" onclick="_rsvDelFut(\''+_escAttr(f.id)+'\')">\uD83D\uDDD1\uFE0F</button></div>':'')
         +'</div>'
       +'</div>';
@@ -437,7 +437,7 @@ function _rsvSaveFut(){
   saveIntrants();
   if(window.closeOv) window.closeOv(null,'ovRsvFut');
   _rsvRenderBody();
-  showToast(merged?'\u2713 Fûts ajoutés au lot existant':'\u2713 Fûts enregistrés','#3D6B27');
+  showToast(merged?'Fûts ajoutés au lot existant':'Fûts enregistrés','#3D6B27');
 }
 window._rsvSaveFut=_rsvSaveFut;
 
@@ -450,7 +450,7 @@ function _rsvDelFut(id){
     window.openConfirmDel('Supprimer ce lot de fûts ?', label, function(){
       INTRANTS.futs=INTRANTS.futs.filter(function(x){return x.id!==id;});
       saveIntrants(); _rsvRenderBody(); showToast('Lot supprimé','#C0392B');
-    }, '\uD83D\uDED2');
+    }, 'carton');
   }
 }
 window._rsvDelFut=_rsvDelFut;
@@ -623,17 +623,17 @@ function _rsvIntrantsHtml(){
   if(adm){
     h+='<div class="mvr-btnrow">'
       +'<button class="mvr-btn mvr-btn-p" onclick="_rsvOpenAchat()">\uFF0B Achat</button>'
-      +'<button class="mvr-btn mvr-btn-o" onclick="_rsvOpenInv()">\uD83D\uDCE5 Inventaire d\'ouverture</button>'
+      +'<button class="mvr-btn mvr-btn-o" onclick="_rsvOpenInv()">'+_mvIcon('envoyer',16)+' Inventaire d\'ouverture</button>'
       +'</div>';
   }
   // Alerte cohérence
   var neg=INTRANTS.produits.filter(function(p){var s=_stock(p);return s.known&&s.q<0;});
   neg.forEach(function(p){
     var s=_stock(p);
-    h+='<div class="mvr-alert"><span class="mvr-ai">\u26A0\uFE0F</span><span class="mvr-at"><b>'+_escHtml(p.nom)+' : stock négatif ('+_fmt(s.q)+' '+p.unite+').</b> Le consommé dépasse les entrées — une facture d\'achat manque ou le consommé est surestimé. Le bilan ne peut pas fermer tant que l\'écart n\'est pas corrigé.</span></div>';
+    h+='<div class="mvr-alert"><span class="mvr-ai">'+_mvIcon('alerte',18)+'</span><span class="mvr-at"><b>'+_escHtml(p.nom)+' : stock négatif ('+_fmt(s.q)+' '+p.unite+').</b> Le consommé dépasse les entrées — une facture d\'achat manque ou le consommé est surestimé. Le bilan ne peut pas fermer tant que l\'écart n\'est pas corrigé.</span></div>';
   });
   if(!INTRANTS.produits.length){
-    h+='<div class="mvr-empty">\uD83E\uDDEA<div>Aucun intrant suivi.</div>'+(adm?'<div class="mvr-empty-h">Enregistre un achat pour créer ton premier intrant et démarrer le bilan matière.</div>':'')+'</div>';
+    h+='<div class="mvr-empty">'+_mvIcon('eprouvette',40)+'<div>Aucun intrant suivi.</div>'+(adm?'<div class="mvr-empty-h">Enregistre un achat pour créer ton premier intrant et démarrer le bilan matière.</div>':'')+'</div>';
     return h;
   }
   INTRANTS.produits.forEach(function(p){
@@ -644,7 +644,7 @@ function _rsvIntrantsHtml(){
     h+='<div class="mvr-pcard"><div class="mvr-pband '+(_CATCLS[p.cat]||'')+'"></div><div class="mvr-pin">'
       +'<div class="mvr-ptop"><div class="mvr-pw"><div class="mvr-pnom">'+_escHtml(p.nom)+'</div>'+((p.sub||p.amm)?'<div class="mvr-psub2">'+(p.sub?_escHtml(p.sub):'')+((p.sub&&p.amm)?' \u00b7 ':'')+(p.amm?'AMM '+_escHtml(p.amm):'')+'</div>':'')+'</div><div class="mvr-pcat '+(_CATCLS[p.cat]||'')+'">'+(_CATLBL[p.cat]||p.cat)+'</div></div>';
     if(pending){
-      h+='<div class="mvr-pending">\uD83D\uDD04 <b>Consommé à activer.</b> Entrées : '+_fmt(s.ouv+s.achats)+' '+p.unite+'. Le consommé se calculera depuis le registre une fois les doses structurées (lot suivant), ou passe l\'intrant en saisie manuelle.</div>';
+      h+='<div class="mvr-pending">'+_mvIcon('rotation',16)+' <b>Consommé à activer.</b> Entrées : '+_fmt(s.ouv+s.achats)+' '+p.unite+'. Le consommé se calculera depuis le registre une fois les doses structurées (lot suivant), ou passe l\'intrant en saisie manuelle.</div>';
     } else {
       h+='<div class="mvr-pstock"><span class="mvr-psv" style="color:'+stCol+'">'+_fmt(s.q)+'</span><span class="mvr-psu">'+p.unite+' en stock</span></div>'
         +(nu!=null&&s.q>=0?'<div class="mvr-punits">\u2248 '+_fmt(nu)+' '+(p.contLbl||'unité')+(nu>1?'s':'')+'</div>':'');
@@ -898,7 +898,7 @@ function _rsvAuditHtml(){
   var h='<div class="mvr-exp-head"><div class="mvr-exp-t">Bilan matière — Intrants</div>'
     +'<div class="mvr-exp-s">'+_escHtml(window.DOMAINE_NOM||'Domaine')+' \u00B7 arrêté au '+_frDate(_today())+'</div></div>';
   if(!INTRANTS.produits.length){
-    h+='<div class="mvr-empty" style="border-radius:0 0 14px 14px">\uD83D\uDCCB<div>Rien à restituer pour l\'instant.</div><div class="mvr-empty-h">Le bilan se remplit dès qu\'un intrant est suivi.</div></div>';
+    h+='<div class="mvr-empty" style="border-radius:0 0 14px 14px">'+_mvIconInline('liste',16)+'<div>Rien à restituer pour l\'instant.</div><div class="mvr-empty-h">Le bilan se remplit dès qu\'un intrant est suivi.</div></div>';
   } else {
     h+='<div class="mvr-exp-tbl"><table><thead><tr><th>Intrant</th><th>Ouv.</th><th>Achats</th><th>Conso.</th><th>Stock</th><th>Coh.</th></tr></thead><tbody>';
     INTRANTS.produits.forEach(function(p){
@@ -907,7 +907,7 @@ function _rsvAuditHtml(){
         +'<td>'+_fmt(s.ouv)+'</td><td>+'+_fmt(s.achats)+'</td>'
         +'<td>'+(pending?'<span class="mvr-td-pend">à activer</span>':'\u2212'+_fmt(s.conso))+'</td>'
         +'<td class="'+((s.known&&s.q<0)?'mvr-neg':'')+'">'+(pending?'\u2014':_fmt(s.q)+' '+p.unite)+'</td>'
-        +'<td>'+(pending?'\u2014':((s.known&&s.q<0)?'\u26A0':'\u2713'))+'</td></tr>';
+        +'<td>'+(pending?'\u2014':((s.known&&s.q<0)?_mvIconInline('alerte',16):_mvIconInline('check',16)))+'</td></tr>';
     });
     h+='</tbody></table></div>';
   }
@@ -1136,15 +1136,15 @@ function _rsvEnsureOverlays(){
   +'<div class="overlay" id="ovRsvInv" onclick="closeOv(event,\'ovRsvInv\')"><div class="modal" onclick="event.stopPropagation()">'
     +'<div class="modal-handle"></div><div class="modal-hd"><div class="modal-title">Inventaire d\'ouverture</div><div class="modal-sub">Le point zéro du bilan</div></div>'
     +'<div class="modal-body">'
-      +'<div class="mvr-note">\uD83D\uDCE5 Ce que tu avais en stock au démarrage du suivi. Saisi une fois, à une date de référence — ensuite tout est calculé.</div>'
+      +'<div class="mvr-note">'+_mvIcon('envoyer',16)+' Ce que tu avais en stock au démarrage du suivi. Saisi une fois, à une date de référence — ensuite tout est calculé.</div>'
       +'<div class="mvr-fl">Date de l\'inventaire</div><input type="date" class="mvr-fi" id="mvr-i-date">'
       +'<div id="mvr-i-list" style="margin-top:8px"></div>'
       +'<div class="mvr-btnrow" style="margin-top:18px"><button class="mvr-btn mvr-btn-o" onclick="closeOv(null,\'ovRsvInv\')">Annuler</button><button class="mvr-btn mvr-btn-p" onclick="_rsvSaveInv()">\u2713 Valider l\'inventaire</button></div>'
     +'</div></div></div>'
   // ── Se séparer de fûts ──
   +'<div class="overlay" id="ovRsvSep" onclick="closeOv(event,\'ovRsvSep\')"><div class="modal" onclick="event.stopPropagation()">'
-    +'<div class="mvr-ovh"><div class="mvr-ovt">\uD83D\uDCE4 Se séparer de fûts</div>'
-    +'<button class="mvr-ovx" onclick="closeOv(null,\'ovRsvSep\')">\u2715</button></div>'
+    +'<div class="mvr-ovh"><div class="mvr-ovt">'+_mvIcon('envoyer',18)+' Se séparer de fûts</div>'
+    +'<button class="mvr-ovx" onclick="closeOv(null,\'ovRsvSep\')">'+_mvIcon('croix',16)+'</button></div>'
     +'<div class="mvr-ovs">Sortie définitive du parc. Ne concerne que les fûts <b>libres</b> : '
     +'un fût en vin se retire d\'abord de sa cuvée, depuis Le Chai.</div>'
     +'<div id="mvr-sep-body"></div>'
