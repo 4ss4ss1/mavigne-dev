@@ -2036,7 +2036,7 @@ function _planRenderHeader(){
     var _etpM=_cap1>0?_cm/_cap1:0;
     var _actifs=_pl2Actifs();
     var _brc=_actifs.reduce(function(s,m){return s+_planLegalBreaches(m,planMonth);},0);
-    var _alertHtml=_brc>0?'<button class="mvu-kpi pl2-kpi-alert" onclick="planKpiAlert()"><span class="mvu-kpi-v" style="display:block;color:#F0A9A0;font-size:14px">\u26a0 '+_brc+'</span><span class="mvu-kpi-l" style="display:block">sem. &gt; max</span></button>':'';
+    var _alertHtml=_brc>0?'<button class="mvu-kpi pl2-kpi-alert" onclick="planKpiAlert()"><span class="mvu-kpi-v" style="display:block;color:var(--rouge);font-size:14px">\u26a0 '+_brc+'</span><span class="mvu-kpi-l" style="display:block">sem. &gt; max</span></button>':'';
     if(!_dated){
       sb.innerHTML='<div class="mvu-kpi" style="flex:1"><div class="mvu-kpi-v" style="font-size:13px;color:var(--texte-doux)">Datez vos saisons</div><div class="mvu-kpi-l">pour charge &amp; ETP</div></div>'+_alertHtml;
     } else {

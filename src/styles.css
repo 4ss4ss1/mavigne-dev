@@ -3773,7 +3773,7 @@ body.mv-trial-on #app-root{padding-top:calc(env(safe-area-inset-top,0px) + 44px)
 /* Bande de stats descendue dans le corps — cartes papier (suit le dark mode via les vars) */
 .mvu-kpis{display:flex;gap:8px;padding:14px 16px 2px;}
 .mvu-kpi{flex:1;background:var(--bg-card);border:1px solid var(--gris-clair);border-radius:13px;padding:10px 6px;text-align:center;box-shadow:0 2px 8px rgba(20,17,13,0.04);}
-.mvu-kpi-v{font-family:'Cormorant Garamond',serif;font-size:21px;font-weight:600;color:var(--cave);line-height:1;}
+.mvu-kpi-v{font-family:'Cormorant Garamond',serif;font-size:21px;font-weight:600;color:var(--texte);line-height:1;}
 .mvu-kpi-l{font-size:9.5px;color:var(--texte-doux);text-transform:uppercase;letter-spacing:0.4px;margin-top:4px;}
 
 
@@ -3783,7 +3783,7 @@ body.mv-trial-on #app-root{padding-top:calc(env(safe-area-inset-top,0px) + 44px)
 .mvu-tabs.mvu-sub{position:sticky;top:0;z-index:4;margin-top:0;gap:5px;padding:10px 14px 8px;background:var(--bg-app);}
 .mvu-tabs.mvu-sub .mvu-tab{min-height:38px;font-size:12px;background:var(--gris-clair);color:var(--texte-doux);}
 .mvu-tabs.mvu-sub .mvu-tab:hover{background:var(--gris);}
-.mvu-tabs.mvu-sub .mvu-tab.active,.mvu-tabs.mvu-sub .mvu-tab.on{background:var(--bg-card);color:var(--cave);box-shadow:0 1px 4px rgba(20,17,13,0.14);}
+.mvu-tabs.mvu-sub .mvu-tab.active,.mvu-tabs.mvu-sub .mvu-tab.on{background:var(--bg-card);color:var(--texte);box-shadow:0 1px 4px rgba(20,17,13,0.14);}
 .mvu-tabs.mvu-sub.on-dark{background:#1A120C;}
 .mvu-tabs.mvu-sub.on-dark .mvu-tab{background:rgba(255,255,255,0.05);color:rgba(242,232,218,0.62);}
 .mvu-tabs.mvu-sub.on-dark .mvu-tab.active,.mvu-tabs.mvu-sub.on-dark .mvu-tab.on{background:linear-gradient(150deg,#33202A,#241419);color:#F6EDE0;box-shadow:inset 0 0 0 1px rgba(176,48,74,0.4);}
@@ -3797,7 +3797,7 @@ body.mv-trial-on #app-root{padding-top:calc(env(safe-area-inset-top,0px) + 44px)
 
 /* Bande de chiffres : masquée quand vide (Le Cuvier a son propre cockpit) */
 .mvu-kpis:empty{display:none;}
-.mvu-kpi.due .mvu-kpi-v{color:#B0304A;}
+.mvu-kpi.due .mvu-kpi-v{color:var(--rouge);}
 
 
 /* ═══ NAV UNIFIÉE — étape 3 : Phyto autonome + Tracteur ═══
@@ -3817,7 +3817,7 @@ body.mv-trial-on #app-root{padding-top:calc(env(safe-area-inset-top,0px) + 44px)
 #page-planning .mvu-kpis{flex-shrink:0;padding:12px 16px 0;}
 /* Alerte cadre légal : même gabarit qu'une carte de chiffre, teinte d'alerte */
 .mvu-kpi.pl2-kpi-alert{background:rgba(160,41,30,0.14);border-color:rgba(160,41,30,0.30);cursor:pointer;font-family:inherit;text-align:center;}
-.mvu-kpi.pl2-kpi-alert .mvu-kpi-l{color:#A0291E;}
+.mvu-kpi.pl2-kpi-alert .mvu-kpi-l{color:var(--rouge);}
 /* Onglets de la fiche salarié : la primitive unifiée prend le pas sur .pl2-ftab */
 .mvu-tabs.mvu-sub.pl2-ftabs{position:static;margin-top:12px;padding:3px;border-radius:12px;}
 
@@ -4334,6 +4334,29 @@ body.mv-trial-on .mod-header{top:calc(env(safe-area-inset-top,0px) + 44px);}
 
 /* 5. Plus aucun rebond horizontal ne peut decaler l'ecran. */
 html,body{overscroll-behavior-x:none;}
+
+/* 5b. LA GARDE DE CADRAGE — pourquoi `hidden` ne suffisait pas.
+      MESURE (Chromium mobile 360x800, page d'accueil) : un seul element qui
+      depasse de 12 px sur la droite, et
+        · document.scrollWidth passe de 360 a 373 ;
+        · le viewport de MISE EN PAGE s'agrandit dans les DEUX sens ;
+        · #mv-dock (position:fixed;bottom:0) se recale sur ce viewport
+          agrandi et descend a 827 px — soit 27 px SOUS le bas de l'ecran :
+          les libelles des modules sont coupes ;
+        · l'ecran devient baladable a droite, a gauche, en haut et en bas.
+      `body{overflow-x:hidden}` (ligne ~255) bloque bien le defilement, mais
+      il n'empeche PAS l'agrandissement du viewport : le dock descend quand
+      meme. C'est ce qui rendait le symptome invisible a la lecture du CSS.
+      `clip` clippe reellement ET, contrairement a `hidden`, ne cree AUCUN
+      conteneur de defilement : le position:sticky de .mod-header (point 1
+      ci-dessus) et le position:fixed du dock continuent de fonctionner.
+      Verifie par contre-epreuve : intrus +12 px REINTRODUIT -> scrollWidth
+      373 et dock a 827 ; avec cette regle -> scrollWidth 360, dock a 800,
+      en-tete toujours colle a 0 apres 250 px de defilement.
+      La ligne `hidden` reste : elle sert de repli aux navigateurs qui
+      ignorent `clip` (avant Chrome 90 / Safari 16 / Firefox 81). */
+html,body{overflow-x:hidden;}
+@supports (overflow:clip){ html,body{overflow-x:clip;} }
 
 /* 6. LA HAUTEUR DE REFERENCE : 100vh -> 100dvh.
       Sur Chrome Android, 100vh vaut la hauteur BARRE MASQUEE, superieure de

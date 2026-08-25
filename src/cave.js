@@ -1865,7 +1865,7 @@ function _vendInjectCss(){
 /* Bande de chiffres commune (#cave-kpis) : « en fermentation » est un etat vivant,
    pas un retard — il prend l'or, pas le rouge de .mvu-kpi.due du Chai. */
 .mvu-kpi.live{background:var(--or-pale,#FAF3E0);border-color:rgba(194,161,77,.32)}
-.mvu-kpi.live .mvu-kpi-v{color:var(--or,#C2A14D)}
+.mvu-kpi.live .mvu-kpi-v{color:var(--or-tx,#7A5E12)}
 .mvv-body{padding:2px 14px 0}
 .mvv-alert{border-radius:14px;padding:12px 13px;margin:8px 0 12px;position:relative;overflow:hidden;
   background:linear-gradient(135deg,rgba(232,131,111,.12),rgba(232,131,111,.05));border:1px solid rgba(232,131,111,.28)}

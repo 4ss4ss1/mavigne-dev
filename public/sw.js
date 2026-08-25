@@ -1,4 +1,46 @@
-// MA VIGNE — Service Worker v7.22
+// MA VIGNE — Service Worker v7.23
+// v7.23 (25/08/2026) — LE NOIR SUR SOMBRE, ET LES 12 PIXELS QUI DECADRENT
+//   TOUT L'ECRAN. APP 6.67 -> 6.68.
+//   ★★ LE CHIFFRE DES TROIS CASES ETAIT PEINT AVEC UNE COULEUR DE FOND.
+//   .mvu-kpi-v portait color:var(--cave). --cave est le brun-noir des fonds,
+//   pas une encre. En mode CLAIR il vaut #14110D, indiscernable a l'oeil du
+//   texte normal #1A1A14 : personne n'a jamais rien vu. En mode SOMBRE il
+//   s'assombrit encore (#100D0A) pendant que la carte s'eclaircit (#1C1A16).
+//   MESURE : 1,12:1. Le chiffre est invisible. Le libelle sous lui, qui
+//   utilise --texte-doux, sortait a 7,82:1 — d'ou l'effet « une case a
+//   moitie vide ». Sept ecrans touches : Accueil, Parcelles, Journal,
+//   Tracteur, Reglages, Planning, Cave.
+//   ★ C'est le §21c a l'identique, sur un autre composant : une variable de
+//   FOND detournee en couleur de TEXTE. Le mode clair la camoufle toujours.
+//   ★ Meme faute trouvee dans le meme bloc CSS, non signalee : l'onglet
+//   ACTIF de second niveau (Chai, Millesime, Documents) — 1,12:1 aussi.
+//   ★ Et deux fautes SYMETRIQUES, illisibles en mode CLAIR cette fois :
+//   la valeur de l'alerte « sem. > max » du Planning (#F0A9A0, 1,46:1) et
+//   la case « en cours » du Chai (or sur or pale, 2,23:1).
+//   Apres correctif : 15,1:1 et 16,7:1 pour les chiffres ; >= 4,3:1 partout.
+//   ⚠⚠⚠ ET LE CADRAGE : `overflow-x:hidden` BLOQUE LE DEFILEMENT MAIS
+//   N'EMPECHE PAS L'AGRANDISSEMENT DU VIEWPORT.
+//   Reproduit en machine : UN element qui depasse de 12 px sur la droite de
+//   l'accueil, et le viewport de mise en page grandit DANS LES DEUX SENS.
+//   #mv-dock (position:fixed;bottom:0) se recale dessus et descend de 800 a
+//   827 px — 27 px sous le bord de l'ecran : les libelles des modules sont
+//   coupes, et la page devient baladable dans les quatre sens. Un seul
+//   defaut, cinq symptomes. C'est ce que Nico decrivait par « ecran pas
+//   fixe » sur le seul module Accueil.
+//   ★ Le body portait deja overflow-x:hidden depuis toujours — et le dock
+//   descendait quand meme. C'est pour ca que la lecture du CSS ne pouvait
+//   pas trouver : la regle qui devait proteger EST LA, elle ne protege
+//   simplement pas de ce phenomene-la.
+//   ★ Correctif : overflow-x:clip sur html ET body (hidden conserve en
+//   repli). `clip` clippe reellement et, a la difference de `hidden`, ne
+//   cree AUCUN conteneur de defilement : le sticky de .mod-header et le
+//   fixed du dock survivent. Contre-epreuve jouee : intrus reintroduit ->
+//   373 px et dock a 827 ; regle posee -> 360 px et dock a 800.
+//   ⚠ CE QUI RESTE OUVERT : l'element qui deborde chez Nico n'est pas
+//   identifie. Le HTML statique de l'accueil ne deborde a AUCUNE des quatre
+//   largeurs testees (360/390/412/430), meme overflow neutralise : le
+//   coupable est dans du contenu injecte en JS, donc dependant de ses
+//   donnees. La garde neutralise l'effet, pas la cause.
 // v7.22 (23/08/2026) — LA RESERVE, ET CE QUE LE CONTROLE REPARE A TROUVE. APP 6.66 -> 6.67.
 //   ★ Premier lot depuis que le harnais voit les TREIZE documents imprimes et
 //   non plus quatre. Verification immediate : sur les treize, un seul portait
@@ -2820,7 +2862,7 @@
 // v2.22 — Fix profils vides : guard vide dans loadData() pour MEMBRES/SAISONS/TACHES
 // v2.17 — Onboarding intégré + tenantId · v2.06 — Firebase Auth · v2.00–v2.05 — divers
 const DEBUG = self.location.hostname === 'localhost' || self.location.hostname === '127.0.0.1';
-const CACHE_NAME   = 'mavigne-v7.22';
+const CACHE_NAME   = 'mavigne-v7.23';
 const TENANT_CACHE = 'mavigne-tenant';   // Cache persistant — préservé à chaque mise à jour SW
 const SYNC_TAG     = 'mavigne-sync';
 
@@ -2836,7 +2878,7 @@ const CDN_URLS = [
 ];
 
 self.addEventListener('install', event => {
-  if(DEBUG) console.log('[SW] Ma Vigne v7.22 installé');
+  if(DEBUG) console.log('[SW] Ma Vigne v7.23 installé');
   event.waitUntil(
     caches.open(CACHE_NAME).then(async cache => {
       // ── Cœur applicatif : STRICT (mise à jour ATOMIQUE) ──
@@ -2852,7 +2894,7 @@ self.addEventListener('install', event => {
 });
 
 self.addEventListener('activate', event => {
-  if(DEBUG) console.log('[SW] Ma Vigne v7.22 activé');
+  if(DEBUG) console.log('[SW] Ma Vigne v7.23 activé');
   event.waitUntil(
     caches.keys().then(keys =>
       Promise.all(

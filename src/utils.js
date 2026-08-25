@@ -23,7 +23,7 @@ export const GT_ADMIN_EMAIL = 'ngdevpro@gmail.com';
 // WHATS_NEW   : tableau vide = modal desactive pour cette version.
 // Format item : { emoji:'📅', titre:'Titre court', desc:'Phrase utilisateur.' }
 // Regle : seulement les changements visibles par les utilisateurs.
-export const APP_VERSION = '6.67';
+export const APP_VERSION = '6.68';
 // ════ Journal des nouveautés (récap cumulatif) ════
 // Une entrée par version, la PLUS RÉCENTE EN HAUT : { v:'5.10', items:[ {emoji,titre,desc}, … ] }
 // À chaque release visible → AJOUTER un bloc en tête (ne pas remplacer). items:[] = release technique (rien à afficher).
@@ -354,6 +354,10 @@ window._mvGraphRepeindre = function(){
 };
 
 export const WHATS_NEW = [
+  { v: '6.68', items: [
+    { emoji: 'contraste', titre: 'Les chiffres du haut d\u2019\u00e9cran redeviennent lisibles en mode sombre', desc: "Les <b>trois cases de chiffres</b> sous l\u2019en-t\u00eate \u2014 sur l\u2019Accueil, les Parcelles, le Journal, le Tracteur, les R\u00e9glages, le Planning et la Cave \u2014 \u00e9crivaient le chiffre en <b>presque noir sur fond sombre</b>\u00a0: il \u00e9tait quasiment invisible. Le libell\u00e9 dessous, lui, se lisait tr\u00e8s bien, ce qui rendait le d\u00e9faut d\u2019autant plus \u00e9trange. C\u2019est corrig\u00e9 partout, ainsi que <b>l\u2019onglet actif du Chai et du Mill\u00e9sime</b>, qui avait le m\u00eame probl\u00e8me. Deux chiffres souffraient de l\u2019inverse \u2014 trop p\u00e2les en mode clair\u00a0: l\u2019alerte \u00ab\u00a0semaines au-dessus du maximum\u00a0\u00bb du Planning et la case \u00ab\u00a0en cours\u00a0\u00bb du Chai." },
+    { emoji: 'ancre', titre: 'L\u2019\u00e9cran d\u2019accueil ne se balade plus', desc: "Sur l\u2019Accueil, l\u2019\u00e9cran avait <b>du jeu dans les quatre sens</b>\u00a0: quelques millim\u00e8tres \u00e0 droite, \u00e0 gauche, en haut et en bas. Assez peu pour passer inaper\u00e7u, assez pour <b>couper les noms des modules dans la barre du bas</b> et donner l\u2019impression que rien n\u2019est fix\u00e9. Il suffisait qu\u2019un seul \u00e9l\u00e9ment d\u00e9passe de quelques pixels sur la droite\u00a0: le t\u00e9l\u00e9phone agrandit alors toute la page, et la barre du bas descend sous le bord de l\u2019\u00e9cran. L\u2019application se recadre maintenant d\u2019elle-m\u00eame, <b>quelle que soit la cause du d\u00e9passement</b>." }
+  ] },
   { v: '6.67', items: [
     { emoji: 'carton', titre: 'La R\u00e9serve passe aux vraies ic\u00f4nes', desc: "Les f\u00fbts, les intrants, l\u2019inventaire d\u2019ouverture et les \u00e9crans vides gardaient leurs anciens pictogrammes. <b>Le document de restitution</b> \u2014 celui que vous \u00e9ditez quand un salari\u00e9 rend son mat\u00e9riel \u2014 en avait aussi, et comme il s\u2019imprime, ils pouvaient sortir en carr\u00e9s vides. Tout est repris. <b>Aucun stock, aucun f\u00fbt n\u2019a boug\u00e9.</b>" }
   ] },
