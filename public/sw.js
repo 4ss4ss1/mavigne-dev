@@ -1,4 +1,34 @@
-// MA VIGNE — Service Worker v7.23
+// MA VIGNE — Service Worker v7.24
+// v7.24 (25/08/2026) — UN INCIDENT RESEAU N'EST PAS UNE PANNE. APP 6.68 -> 6.69.
+//   Signale par Nico depuis la cave : « Promesse rejetee : Firebase: Error
+//   (auth/network-request-failed) » en travers de l'ecran pendant la saisie
+//   d'une analyse avec PDF, sur 4G.
+//   ★★★ LE MESSAGE ETAIT FAUX SUR LE FOND. La 4G a lache pendant que le SDK
+//   rafraichissait le jeton d'authentification ; fbSave a fait exactement son
+//   travail — 3 tentatives, puis mise en file d'attente locale, envoi au retour
+//   du reseau. AUCUNE donnee perdue. Mais elle relancait ensuite l'erreur
+//   (`throw e`), et ses 71 sites d'appel l'invoquent tous SANS await et SANS
+//   catch (`if(window.fbSave) window.fbSave('cave_elevage', CAVE_ELEVAGE);`).
+//   Le rejet remontait donc au gestionnaire global unhandledrejection, qui
+//   repeignait l'ecran d'un code d'erreur anglais. Un logiciel de registre qui
+//   annonce une panne sur une ecriture reussie apprend a son utilisateur a ne
+//   plus le croire.
+//   ★ CONTRAT CHANGE : fbSave ne rejette PLUS JAMAIS, elle rend un etat —
+//   {ok:true} · {ok:false,queued:true} · {denied:true} · {blocked:true}.
+//   Un seul appelant lisait son retour (saveData, app.js:775) : il lit
+//   desormais l'etat, sinon un .then() nu afficherait « Enregistre ✓ » en vert
+//   sur une ecriture partie en file — le faux positif que le throw evitait.
+//   ★ Le toast 'warning' « fbSave échoué (3 tentatives): cave_elevage » passe en
+//   'info' : jargon de developpeur, ecran silencieux, trace conservee au journal
+//   et dans « Signaler un probleme ».
+//   ★ ET LE BADGE MENTAIT AUSSI : _showOfflineQueueBadge annoncait « Hors ligne »
+//   a quelqu'un qui voyait ses quatre barres. Il distingue desormais coupe
+//   (navigator.onLine false) et instable, et dit dans les deux cas que l'envoi
+//   est automatique.
+//   ★ Filet de second niveau dans unhandledrejection : tout message reseau
+//   (network-request-failed, Failed to fetch, Load failed, client is offline...)
+//   est journalise en 'info' et rendu a l'ecran par le badge de synchro, jamais
+//   par un code d'erreur. Meme patron que l'exemption INTERNAL ASSERTION FAILED.
 // v7.23 (25/08/2026) — LE NOIR SUR SOMBRE, ET LES 12 PIXELS QUI DECADRENT
 //   TOUT L'ECRAN. APP 6.67 -> 6.68.
 //   ★★ LE CHIFFRE DES TROIS CASES ETAIT PEINT AVEC UNE COULEUR DE FOND.
@@ -2862,7 +2892,7 @@
 // v2.22 — Fix profils vides : guard vide dans loadData() pour MEMBRES/SAISONS/TACHES
 // v2.17 — Onboarding intégré + tenantId · v2.06 — Firebase Auth · v2.00–v2.05 — divers
 const DEBUG = self.location.hostname === 'localhost' || self.location.hostname === '127.0.0.1';
-const CACHE_NAME   = 'mavigne-v7.23';
+const CACHE_NAME   = 'mavigne-v7.24';
 const TENANT_CACHE = 'mavigne-tenant';   // Cache persistant — préservé à chaque mise à jour SW
 const SYNC_TAG     = 'mavigne-sync';
 
@@ -2878,7 +2908,7 @@ const CDN_URLS = [
 ];
 
 self.addEventListener('install', event => {
-  if(DEBUG) console.log('[SW] Ma Vigne v7.23 installé');
+  if(DEBUG) console.log('[SW] Ma Vigne v7.24 installé');
   event.waitUntil(
     caches.open(CACHE_NAME).then(async cache => {
       // ── Cœur applicatif : STRICT (mise à jour ATOMIQUE) ──
@@ -2894,7 +2924,7 @@ self.addEventListener('install', event => {
 });
 
 self.addEventListener('activate', event => {
-  if(DEBUG) console.log('[SW] Ma Vigne v7.23 activé');
+  if(DEBUG) console.log('[SW] Ma Vigne v7.24 activé');
   event.waitUntil(
     caches.keys().then(keys =>
       Promise.all(

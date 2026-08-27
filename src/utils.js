@@ -23,7 +23,7 @@ export const GT_ADMIN_EMAIL = 'ngdevpro@gmail.com';
 // WHATS_NEW   : tableau vide = modal desactive pour cette version.
 // Format item : { emoji:'📅', titre:'Titre court', desc:'Phrase utilisateur.' }
 // Regle : seulement les changements visibles par les utilisateurs.
-export const APP_VERSION = '6.68';
+export const APP_VERSION = '6.69';
 // ════ Journal des nouveautés (récap cumulatif) ════
 // Une entrée par version, la PLUS RÉCENTE EN HAUT : { v:'5.10', items:[ {emoji,titre,desc}, … ] }
 // À chaque release visible → AJOUTER un bloc en tête (ne pas remplacer). items:[] = release technique (rien à afficher).
@@ -354,6 +354,10 @@ window._mvGraphRepeindre = function(){
 };
 
 export const WHATS_NEW = [
+  { v: '6.69', items: [
+    { emoji: 'antenne', titre: 'Un r\u00e9seau qui faiblit ne ressemble plus \u00e0 une panne', desc: "Au fond d\u2019une cave ou d\u2019un cuvier, la 4G d\u00e9croche. Quand cela arrivait pendant un enregistrement \u2014 une analyse, un ouillage, une pes\u00e9e \u2014 l\u2019application affichait <b>un message d\u2019erreur en anglais</b> en travers de l\u2019\u00e9cran\u00a0: <i>Promesse rejet\u00e9e\u00a0: Firebase\u00a0Error (auth/network-request-failed)</i>. De quoi croire que la saisie \u00e9tait perdue. <b>Elle ne l\u2019\u00e9tait pas</b>\u00a0: elle attendait sagement dans l\u2019appareil et repartait d\u00e8s le retour du r\u00e9seau. Ce message dispara\u00eet. \u00c0 la place, le bandeau de synchro annonce <b>\u00ab\u00a0R\u00e9seau instable \u2014 1 modification en attente, envoi automatique\u00a0\u00bb</b>, et le compteur retombe \u00e0 z\u00e9ro tout seul." },
+    { emoji: 'antenne', titre: 'Le bandeau ne dit plus \u00ab\u00a0hors ligne\u00a0\u00bb quand vous avez du r\u00e9seau', desc: "Une modification pouvait \u00eatre mise en attente alors que le t\u00e9l\u00e9phone affichait quatre barres\u00a0: le bandeau annon\u00e7ait quand m\u00eame <b>\u00ab\u00a0hors ligne\u00a0\u00bb</b>. Il distingue maintenant les deux cas \u2014 <b>coup\u00e9</b> ou <b>instable</b> \u2014 et pr\u00e9cise dans les deux que l\u2019envoi se fera tout seul." }
+  ] },
   { v: '6.68', items: [
     { emoji: 'contraste', titre: 'Les chiffres du haut d\u2019\u00e9cran redeviennent lisibles en mode sombre', desc: "Les <b>trois cases de chiffres</b> sous l\u2019en-t\u00eate \u2014 sur l\u2019Accueil, les Parcelles, le Journal, le Tracteur, les R\u00e9glages, le Planning et la Cave \u2014 \u00e9crivaient le chiffre en <b>presque noir sur fond sombre</b>\u00a0: il \u00e9tait quasiment invisible. Le libell\u00e9 dessous, lui, se lisait tr\u00e8s bien, ce qui rendait le d\u00e9faut d\u2019autant plus \u00e9trange. C\u2019est corrig\u00e9 partout, ainsi que <b>l\u2019onglet actif du Chai et du Mill\u00e9sime</b>, qui avait le m\u00eame probl\u00e8me. Deux chiffres souffraient de l\u2019inverse \u2014 trop p\u00e2les en mode clair\u00a0: l\u2019alerte \u00ab\u00a0semaines au-dessus du maximum\u00a0\u00bb du Planning et la case \u00ab\u00a0en cours\u00a0\u00bb du Chai." },
     { emoji: 'ancre', titre: 'L\u2019\u00e9cran d\u2019accueil ne se balade plus', desc: "Sur l\u2019Accueil, l\u2019\u00e9cran avait <b>du jeu dans les quatre sens</b>\u00a0: quelques millim\u00e8tres \u00e0 droite, \u00e0 gauche, en haut et en bas. Assez peu pour passer inaper\u00e7u, assez pour <b>couper les noms des modules dans la barre du bas</b> et donner l\u2019impression que rien n\u2019est fix\u00e9. Il suffisait qu\u2019un seul \u00e9l\u00e9ment d\u00e9passe de quelques pixels sur la droite\u00a0: le t\u00e9l\u00e9phone agrandit alors toute la page, et la barre du bas descend sous le bord de l\u2019\u00e9cran. L\u2019application se recadre maintenant d\u2019elle-m\u00eame, <b>quelle que soit la cause du d\u00e9passement</b>." }

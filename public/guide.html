@@ -551,13 +551,18 @@ mark{background:rgba(200,176,32,.32);color:var(--cream);border-radius:3px;paddin
     <tr><th>Indicateur</th><th>Ce que ça veut dire</th><th>Que faire</th></tr>
     <tr><td><b><svg class="g-ic" width="18" height="18" viewBox="0 0 24 24" aria-hidden="true" focusable="false"><use href="#ic-valide"></use></svg> À jour</b></td><td>Tout est enregistré sur le serveur.</td><td>Rien.</td></tr>
     <tr><td><b><svg class="g-ic" width="18" height="18" viewBox="0 0 24 24" aria-hidden="true" focusable="false"><use href="#ic-info"></use></svg> Envoi en cours</b></td><td>Une saisie part en ce moment.</td><td>Attendre 2&nbsp;secondes.</td></tr>
-    <tr><td><b><svg class="g-ic" width="18" height="18" viewBox="0 0 24 24" aria-hidden="true" focusable="false"><use href="#ic-alerte"></use></svg> En attente</b></td><td>Pas de réseau : les saisies sont en file.</td><td>Continuer à travailler,
+    <tr><td><b><svg class="g-ic" width="18" height="18" viewBox="0 0 24 24" aria-hidden="true" focusable="false"><use href="#ic-alerte"></use></svg> En attente</b></td><td>Le réseau manque ou faiblit : les saisies sont en file.</td><td>Continuer à travailler,
     l'envoi repart tout seul dès que le réseau revient.</td></tr>
   </table></div>
   <ul class="dot">
     <li><b>Tirer la page vers le bas</b> force une actualisation immédiate des données et de la météo.</li>
     <li>Rien n'est jamais perdu hors réseau : la file d'attente est conservée, y compris si vous fermez
     l'application ou éteignez le téléphone.</li>
+    <li>L'indicateur distingue deux situations. <b>« Hors ligne »</b> : le téléphone n'a plus de réseau
+    du tout. <b>« Réseau instable »</b> : il affiche des barres, mais l'envoi n'aboutit pas — au fond
+    d'une cave, dans un hangar, sous un couvert. Dans les deux cas la saisie est conservée dans
+    l'appareil et repart seule ; le compteur de modifications en attente retombe à zéro quand tout
+    est passé.</li>
     <li>Après une mise à jour de l'application, un récapitulatif <b>« Nouveautés »</b> s'affiche une fois
     par appareil, à la connexion suivante.</li>
   </ul>
@@ -2427,6 +2432,11 @@ mark{background:rgba(200,176,32,.32);color:var(--cream);border-radius:3px;paddin
     <div class="dbody">Regardez l'indicateur en haut : s'il est <b><svg class="g-ic" width="18" height="18" viewBox="0 0 24 24" aria-hidden="true" focusable="false"><use href="#ic-alerte"></use></svg> orange</b>, la saisie attend le
     réseau et partira toute seule. S'il est vert, <b>tirez la page vers le bas</b> sur l'autre appareil
     pour forcer l'actualisation.</div></details>
+  <details><summary>L'indicateur dit «&nbsp;Réseau instable&nbsp;» alors que j'ai des barres</summary>
+    <div class="dbody">Avoir du signal ne suffit pas toujours : au fond d'une cave, dans un hangar ou
+    sous un couvert, la connexion peut être trop faible pour que l'envoi aboutisse. Vos saisies sont
+    conservées dans l'appareil et repartent seules — le compteur de modifications en attente retombe à
+    zéro quand tout est passé. <b>Rien à faire, et rien n'est perdu.</b></div></details>
   <details><summary>Deux personnes ont saisi en même temps, ai-je perdu quelque chose&nbsp;?</summary>
     <div class="dbody">Non pour les parcelles : les validations concurrentes sont fusionnées. Pour les
     autres écrans, la dernière écriture l'emporte — d'où l'intérêt de la règle d'équipe : une seule

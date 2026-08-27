@@ -83,13 +83,18 @@
     <tr><th>Indicateur</th><th>Ce que ça veut dire</th><th>Que faire</th></tr>
     <tr><td><b>{ic:valide} À jour</b></td><td>Tout est enregistré sur le serveur.</td><td>Rien.</td></tr>
     <tr><td><b>{ic:info} Envoi en cours</b></td><td>Une saisie part en ce moment.</td><td>Attendre 2&nbsp;secondes.</td></tr>
-    <tr><td><b>{ic:alerte} En attente</b></td><td>Pas de réseau : les saisies sont en file.</td><td>Continuer à travailler,
+    <tr><td><b>{ic:alerte} En attente</b></td><td>Le réseau manque ou faiblit : les saisies sont en file.</td><td>Continuer à travailler,
     l'envoi repart tout seul dès que le réseau revient.</td></tr>
   </table></div>
   <ul class="dot">
     <li><b>Tirer la page vers le bas</b> force une actualisation immédiate des données et de la météo.</li>
     <li>Rien n'est jamais perdu hors réseau : la file d'attente est conservée, y compris si vous fermez
     l'application ou éteignez le téléphone.</li>
+    <li>L'indicateur distingue deux situations. <b>« Hors ligne »</b> : le téléphone n'a plus de réseau
+    du tout. <b>« Réseau instable »</b> : il affiche des barres, mais l'envoi n'aboutit pas — au fond
+    d'une cave, dans un hangar, sous un couvert. Dans les deux cas la saisie est conservée dans
+    l'appareil et repart seule ; le compteur de modifications en attente retombe à zéro quand tout
+    est passé.</li>
     <li>Après une mise à jour de l'application, un récapitulatif <b>« Nouveautés »</b> s'affiche une fois
     par appareil, à la connexion suivante.</li>
   </ul>

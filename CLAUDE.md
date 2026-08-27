@@ -2,7 +2,42 @@
 
 > Document de référence du projet **Ma Vigne** (GUERETTECH). Il est le **porteur de vérité** :
 > la mémoire Claude est plafonnée, ce fichier ne l'est pas.
-> Dernière consolidation : **25 août 2026** — ★★★ **DOUZE PIXELS DE TROP, ET TOUT L'ÉCRAN
+> Dernière consolidation : **25 août 2026 (soir)** — ★★★ **UN INCIDENT RÉSEAU N'EST PAS UNE
+> PANNE (§68)**. **APP 6.68 → 6.69 · SW 7.23 → 7.24.** Signalé par Nico depuis la cave, capture à
+> l'appui : **« Promesse rejetée : Firebase: Error (auth/network-request-failed) »** en travers de
+> l'écran pendant la saisie d'une analyse avec PDF, sur 4G.
+> ★★★ **LE MESSAGE ÉTAIT FAUX SUR LE FOND, ET RIEN N'AVAIT ÉTÉ PERDU.** La 4G a lâché pendant que
+> le SDK rafraîchissait le jeton ; `fbSave` a fait **exactement son travail** — 3 tentatives, mise
+> en file locale, envoi programmé au retour du réseau — **puis a relancé l'erreur** (`throw e`).
+> ⚠️⚠️⚠️ **Et ses 71 sites d'appel l'invoquent TOUS sans `await` et sans `catch`** :
+> `if(window.fbSave) window.fbSave('cave_elevage', CAVE_ELEVAGE);`. Le rejet remontait donc au
+> gestionnaire global `unhandledrejection`, qui repeignait l'écran d'un code d'erreur **anglais**
+> sur une écriture qui n'avait rien perdu. *Un logiciel de registre qui annonce une panne sur une
+> écriture réussie apprend à son utilisateur à ne plus le croire.*
+> ★★ **Contrat changé : `fbSave` NE REJETTE PLUS JAMAIS, elle rend un état** — `{ok:true}` ·
+> `{ok:false,queued:true}` · `{denied:true}` · `{blocked:true}`. **Un seul appelant lisait son
+> retour** (`_doFbSave`, dans `saveData`) : il lit désormais l'état, sinon un `.then()` nu afficherait
+> **« Enregistré ✓ » en vert sur une écriture partie en file** — le faux positif exact que le
+> `throw` servait à éviter. *Supprimer un `throw` déplace une responsabilité, il faut la reposer
+> quelque part.*
+> ★★ **Deux mensonges de plus, trouvés en chemin.** Le badge annonçait **« Hors ligne »** à
+> quelqu'un qui voyait ses **quatre barres** (`_showOfflineQueueBadge` ne consultait jamais
+> `navigator.onLine`) ; et le niveau `warning` sortait un toast **« fbSave échoué (3 tentatives):
+> cave_elevage »** — du jargon de développeur en travers de l'écran d'un chef de cave. Passé en
+> `info` : trace au journal, écran silencieux, **c'est le badge qui parle, en français**.
+> ★ **Le guide disait « Pas de réseau : les saisies sont en file »** — devenu faux, puisqu'une
+> saisie part aussi en file **avec** du réseau. Corrigé dans `01-demarrer` et `14-depannage` (§27a
+> appliquée dans le même lot, pas après).
+> ⚠️⚠️ **ET LE HARNAIS NEUF S'EST TROMPÉ DÈS SA PREMIÈRE EXÉCUTION — cinquième occurrence du
+> piège §53.** `mv-harnais-reseau.mjs` cherchait `network-request-failed` dans la zone du
+> gestionnaire… et le trouvait **dans le commentaire que je venais d'écrire juste au-dessus du
+> code**. La contre-épreuve restait **verte sur un fichier saboté** : elle ne prouvait rien.
+> Corrigé par un blanchiment des commentaires avant lecture. *Un contrôle qui lit du code ne doit
+> jamais lire la prose qui l'accompagne, sinon il valide le commentaire au lieu de l'instruction.*
+> **C'est le harnais qui a trouvé sa propre faiblesse — parce qu'il portait sa contre-épreuve.**
+> Détail en **§68**.
+>
+> ★ Précédente : **25 août 2026** — ★★★ **DOUZE PIXELS DE TROP, ET TOUT L'ÉCRAN
 > DÉCROCHE (§67)**. **APP 6.67 → 6.68 · SW 7.22 → 7.23.** Deux retours de Nico dans la même
 > phrase : « l'écran d'accueil est mal calibré » et « beaucoup de noir écrit sur du sombre dans
 > les 3 rectangles en haut de chaque module ».
@@ -1204,6 +1239,14 @@ que le harnais rougit.
 | `mv-harnais-echelle.mjs` | qu'une **taille de texte** soit réinventée hors des onze pas ; qu'un appel perde son **repli** ; qu'un pas soit déclaré sans emploi ou invoqué sans déclaration |
 | `mv-harnais-info.mjs` | qu'une **pastille ouvre une fiche vide** ou qu'une fiche reste **orpheline** ; que l'écouteur perde son `stopPropagation` ; qu'une **fiche vivante** échappe à sa déclaration ; qu'un **sous-titre de carte** dépasse la ligne de cadre |
 | `mv-harnais-carte.mjs` | que le **chiffre ou son cadre** sortent de l'en-tête (vérifié **en exécutant `_pilTile`**) ; que la **migration d'état** cesse d'atteindre les clients (vérifiée **en l'exécutant** sur un état mémorisé réaliste) ; que le **chrome** regonfle |
+| `mv-harnais-reseau.mjs` (25/08, §68) | que `fbSave` **relance une erreur** (le contrat : elle rend un état, jamais un rejet) ou qu'une de ses sorties redevienne un `return;` nu ; que `saveData` cesse de **lire l'état** et reparte sur un `.then()` nu ; que le gestionnaire global perde son **filtre réseau**, ou que ce filtre passe **après** le bandeau rouge ; que le badge cesse de distinguer *coupé* de *instable* ; que l'échec réseau **remonte à l'écran** en `warning` |
+
+⚠️ **`mv-harnais-reseau.mjs` est STATIQUE — et c'est assumé.** `fbSave` ne peut pas être importée
+dans un harnais (elle tire tout le SDK Firebase). Mais « ne jamais rejeter » est précisément
+l'invariant qu'un lot futur casse **sans le voir**, en ajoutant un `throw` dans un nouveau chemin
+d'erreur : une lecture du fichier réel suffit à le tenir. Chacune de ses 7 règles est doublée d'une
+**contre-épreuve** qui réinjecte le défaut dans une copie en mémoire et exige que la règle rougisse
+— c'est cette contre-épreuve qui a révélé que la règle du filtre réseau **lisait un commentaire**.
 
 ⚠️ **Un harnais qui déménage doit rougir.** Quand l'échelle de texte est passée de `_pilCssV2()` à
 `styles.css`, `mv-harnais-echelle` est monté à **13 rouges** : c'est exactement son travail. Le
@@ -11052,3 +11095,161 @@ JS validée (`node --check`) · 3102 accolades CSS équilibrées · **C27 vert**
 **Non vérifié** : le rendu à l'œil sur l'appareil de Nico — *aucun harnais ne lit une mise en page*.
 Guide public et fiches `MV_AIDE` relus : ils ne mentionnent le thème que pour dire qu'il existe,
 **rien à changer**. `MV_INFO` : aucune méthode de calcul touchée.
+
+---
+
+## 68. ★★★ UN INCIDENT RÉSEAU N'EST PAS UNE PANNE (25/08 soir — APP 6.68 → 6.69 · SW 7.23 → 7.24)
+
+> *Nico, capture à l'appui, depuis la cave : « Problème lors de la saisie d'une analyse et des
+> informations et de l'upload du fichier pdf ».*
+> Sur la capture : l'écran « Nouvelle opération » du Chai, type **Analyse**, Chambolle 2025 ·
+> 6 fûts — et par-dessus, en travers du récapitulatif, un bandeau gris :
+> **« Promesse rejetée : Firebase: Error (auth/network-request-failed) »**. En **4G**.
+
+### 68a. Le message était faux sur le fond
+
+`auth/network-request-failed` vient du module **Auth**, pas de Storage ni de Firestore : le SDK
+n'a pas pu joindre `securetoken.googleapis.com` pour **rafraîchir le jeton** (il expire à ~1 h).
+Firestore et Storage demandent ce jeton avant chaque écriture, donc **l'erreur d'Auth remonte
+telle quelle** à travers eux. Au fond d'une cave, sur 4G, c'est un événement **normal** —
+et `navigator.onLine` reste `true`, ce qui est précisément ce qui rend le cas piégeux.
+
+**`fbSave` avait fait exactement son travail** : `_retryAsync` 3 tentatives à 1 s, échec,
+`_queueSave(key, value)` — la modification est en file dans `localStorage`, elle repartira au
+retour du réseau ou au prochain `_flushQueue` (30 s). **Rien n'était perdu.**
+**Puis elle relançait l'erreur.**
+
+### 68b. ★★★ Le vrai défaut : 71 appels nus derrière un `throw`
+
+```js
+if(window.fbSave) window.fbSave('cave_elevage', CAVE_ELEVAGE);   // × 71
+```
+
+**Zéro `await`, zéro `.catch()`, sur les 71 sites** (`cave.js`, `planning.js`, `pilotage.js`,
+`reglages.js`, `tracteur.js`, `phyto.js`, `reserve.js`…). Chaque `throw` de `fbSave` devenait donc
+une **promesse rejetée non gérée**, captée par le gestionnaire global d'`app.js`, qui la sort en
+`logError({level:'error'})` → **toast** `⚠️ Promesse rejetée : …`.
+
+⚠️ **Le `throw` n'était pas une négligence : il était délibéré.** Le commentaire d'origine le dit —
+*« On relance quand même l'erreur pour que `saveData` n'affiche pas un faux "enregistré ✓" »*.
+Il protégeait contre un mensonge **vert** (« c'est enregistré ») au prix d'un mensonge **rouge**
+(« c'est en panne »), sur **71 sites au lieu d'un seul**. *Une garde posée au mauvais étage
+protège un appelant et en punit soixante-dix.*
+
+**Reproduit en Node avant de toucher au code** : appelant nu + `throw` → 1 `unhandledRejection`,
+et la file contient bien la donnée. Correctif → 0. **Le banc rougissait avant de verdir.**
+
+### 68c. Le contrat, reposé un étage plus bas
+
+`fbSave` **ne rejette plus jamais**. Elle rend un **état** :
+
+| retour | situation |
+|---|---|
+| `{ ok:true }` | écrit dans Firestore |
+| `{ ok:true, local:true }` | démo (`domaine-dupont`) — rien n'est écrit, c'est voulu |
+| `{ ok:false, queued:true }` | réseau : mis en file, renvoyé automatiquement |
+| `{ ok:false, denied:true }` | refusé par les règles (SEC-1 — **jamais mis en file**, poison pill) |
+| `{ ok:false, blocked:true }` | refusé par la garde anti-écrasement (#wipe) |
+
+★★ **Supprimer un `throw` déplace une responsabilité — il faut la reposer quelque part.**
+`_doFbSave` (dans `saveData`, `app.js`) était **le seul appelant qui lisait le retour**. Laissé tel quel, son
+`.then(function(){ showToast(toastMsg) })` aurait affiché **« Enregistré ✓ » en vert sur une
+écriture partie en file** : exactement le faux positif que le `throw` évitait. Il lit désormais
+`r.ok` / `r.queued`, et rend *« Enregistré sur l'appareil — envoi dès le retour du réseau »*.
+Sur `denied` / `blocked`, il **se tait** : `fbSave` a déjà posé son propre message, deux toastsse contredisant valent moins qu'un seul.
+
+★ **Ceinture et bretelles** : `_fbSaveMuet()` dans `app.js` pour les appels dont on ne lit pas le
+résultat, et **filtre réseau dans `unhandledrejection`** — tout message
+(`network-request-failed`, `Failed to fetch`, `Load failed`, `the client is offline`…) part en
+`info` au journal et s'affiche **par le badge de synchro**, jamais en code d'erreur. Même patron
+que l'exemption `INTERNAL ASSERTION FAILED` déjà en place, et **placé avant elle dans l'ordre de
+lecture** — un filtre qui passe après le bandeau rouge ne filtre rien.
+
+### 68d. ★★ Deux mensonges de plus, trouvés en chemin
+
+1. **Le badge disait « Hors ligne » à quelqu'un qui voyait ses quatre barres.**
+   `_showOfflineQueueBadge` ne consultait **jamais** `navigator.onLine` : il déduisait « hors
+   ligne » de la seule présence d'une file. Or une écriture échoue très bien **en ligne**.
+   Il distingue désormais **« Hors ligne »** (coupé) et **« Réseau instable »** (du signal, mais
+   l'envoi n'aboutit pas), et dit dans les deux cas que **l'envoi est automatique**.
+2. **`level:'warning'` sortait `⚠️ fbSave échoué (3 tentatives): cave_elevage`** — un nom de clé
+   Firestore et un compteur de tentatives, en travers de l'écran d'un chef de cave. Passé en
+   `info` : **trace conservée** au journal local et dans « Signaler un problème », écran
+   silencieux. *Le journal est pour moi, le badge est pour lui.*
+
+⚠️ **Vérifié, pas supposé** : `showSyncBadge` décide de la **persistance** du badge sur des
+sous-chaînes (`'Hors ligne'`, `'attente'`). Le nouveau message porte « en attente » → il **reste
+affiché** tant que la file n'est pas vide, et le message sans file s'efface à 2,5 s.
+**Comportement inchangé, par chance et non par construction** — noter la fragilité.
+
+★ **Le login traduisait déjà ce code depuis toujours** — le `catch` de `confirmLogin` rend
+*« Pas de connexion réseau. »*. Le projet savait le dire en français **à un seul endroit** : ce lot étend la
+traduction au reste de l'application.
+
+### 68e. ⚠️⚠️ Le harnais s'est trompé dès sa première exécution — piège §53, cinquième fois
+
+`mv-harnais-reseau.mjs` (7 règles, chacune doublée d'une contre-épreuve) est sorti **13 vertes,
+1 rouge** au premier lancement. Le rouge n'était pas dans le code livré : **c'était la
+contre-épreuve du filtre réseau qui restait verte sur un fichier saboté.**
+
+La règle cherchait `network-request-failed` dans la zone du gestionnaire. Elle le trouvait —
+**dans le commentaire que je venais d'écrire trois lignes au-dessus du code** :
+
+```js
+//    Le SDK Firebase remonte « Firebase: Error (auth/network-request-failed) » quand le
+```
+
+Corrigé par `sansCommentaires()` avant lecture, et par une recherche sur la **forme réelle de
+l'instruction** (`if (/…/i.test(_rmsg))`) plutôt que sur une sous-chaîne isolée.
+★★★ **C'est le harnais qui a trouvé sa propre faiblesse, parce qu'il portait sa contre-épreuve.**
+Sans elle, il aurait été livré vert, inutile, et personne ne l'aurait su.
+**Règle générale : un contrôle qui lit du code ne doit jamais lire la prose qui l'accompagne,
+sinon il valide le commentaire au lieu de l'instruction.**
+
+### 68f. Le compteur C14, tenu sans regraver la référence
+
+La première version ajoutait **4 `catch {}` vides** dans `app.js` (159 contre 155) : le preflight
+a rougi. **La tentation était de regraver la base** — c'est exactement ce que le cliquet interdit.
+Réécrit à la place : `_fbSaveMuet` sans `try/catch` (une fonction `async` **ne peut pas lever de
+façon synchrone**, il suffit de tester l'existence de `window.fbSave`) et `p.catch(_mvIgnoreRejet)`
+au lieu de `p.catch(function(){})` — *le motif C14 attrape aussi les `catch` passés en argument*.
+Puis un helper **unique** `_mvHushRejet(e)` pour le `preventDefault`, **partagé avec le bloc
+`INTERNAL ASSERTION FAILED` déjà présent** : +1 ici, −1 là-bas, **compteur net inchangé à 155**.
+
+### 68g. Le lot
+
+| Fichier | Ce qui change | Bump |
+|---|---|---|
+| `src/firebase.js` | contrat de `fbSave` (7 sorties, 0 `throw`) · badge honnête · échec réseau en `info` | — |
+| `src/app.js` | `saveData` lit l'état · `_fbSaveMuet` · filtre réseau global · `_mvHushRejet` | ★ SW |
+| `src/utils.js` | `APP_VERSION` + 2 entrées `WHATS_NEW` | ★ APP |
+| `index.html` | les 4 affichages de version | ★ APP |
+| `public/sw.js` | en-tête, `CACHE_NAME`, 2 `console.log`, changelog prépendé | ★ SW |
+| `guide/01-demarrer.html` · `guide/14-depannage.html` · `public/guide.html` | §27a — « Pas de réseau » devenait faux | — |
+| `scripts/mv-harnais-reseau.mjs` (neuf) · `package.json` | 7 règles + 7 contre-épreuves, dans `check` et `prebuild` | — |
+
+**Vérifié** : `npm run check` **EXIT=0** · preflight **0 erreur**, C14 à sa référence exacte (155)
+**sans regravage** · `node --check` sur les 4 JS · `WHATS_NEW` **exécuté en Node** (tête =
+`APP_VERSION`, ordre décroissant, zéro doublon, zéro backslash visible, zéro demi-surrogate isolé,
+**les 2 noms d'icônes existent dans le sprite**) · `v7.23` subsiste **exactement une fois** dans
+`sw.js` (le changelog du lot précédent — piège §7) · guide régénéré, `build-guide.mjs --check` vert
+· harnais neuf **14 vertes / 0 rouge**, contre-épreuves comprises.
+**`MV_AIDE` / `MV_INFO`** : relus, aucune fiche ne décrit la synchro ni une méthode de calcul
+touchée — **rien à changer**, et c'est vérifié, pas supposé.
+
+### 68h. ⚠️ Ce qui reste ouvert
+
+- **`showSyncBadge` décide de la persistance sur des sous-chaînes de message.** Ça tient
+  aujourd'hui, mais un futur libellé sans le mot « attente » ferait **disparaître un badge qui
+  doit rester**. À convertir en paramètre explicite.
+- **Les 71 appels nus subsistent** dans les modules. Ils sont désormais inoffensifs *parce que
+  `fbSave` ne rejette plus* — c'est-à-dire que la sûreté repose entièrement sur le contrat. C'est
+  ce que `mv-harnais-reseau.mjs` garde.
+- **`_attachPdfToOp` et `saveCaveOp` ne remettent pas l'upload PDF en file.** Si c'est
+  **l'upload Storage** qui échoue (et non l'écriture Firestore), l'opération n'est pas enregistrée
+  du tout et l'overlay reste ouvert — comportement correct, mais le PDF, lui, n'a **aucun filet
+  hors ligne**. Un PDF choisi hors réseau est perdu au rechargement.
+- **C24c `tracteur.js` : 22 contre 23 en référence** — une amélioration non gravée, antérieure à
+  ce lot. À regraver lors d'un lot qui touche `tracteur.js`.
+- **« Pas de connexion réseau. »** dans le `catch` de `confirmLogin` souffre du même flou que l'ancien
+  badge : on peut avoir du réseau et ne pas passer.

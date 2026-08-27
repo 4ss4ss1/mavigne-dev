@@ -700,6 +700,17 @@ window.addEventListener('pagehide', function(){ if(_mvSnapT) _mvSnapWrite(); });
 
 // Appelé à chaque modification : écrit dans Firebase ET localStorage
 // toastMsg (optionnel) : si fourni, affiche un toast après confirmation Firebase
+// Ceinture et bretelles. fbSave ne rejette plus (cf. contrat, firebase.js), mais un appel
+// nu resterait une promesse sans .catch() — et il en suffit d'UNE pour repeindre l'ecran
+// d'un message technique en anglais. Tout appel dont on ne lit pas le resultat passe par ici.
+function _mvIgnoreRejet(){ /* rejet deja traite en amont par fbSave : rien a faire ici */ }
+function _fbSaveMuet(key, value) {
+  if(!window.fbSave) return;
+  var p = window.fbSave(key, value);
+  if(p && typeof p.catch === 'function') p.catch(_mvIgnoreRejet);
+}
+window._fbSaveMuet = _fbSaveMuet;
+
 function saveData(keyHint, toastMsg) {
   if(window._MV_LOCKED){ if(window.showToast)showToast('Essai terminé · lecture seule','#7A1020'); return; }
   // #wipe : VERROU DE CHARGEMENT (Couche 2 anti-perte) -- ne jamais persister l'etat memoire
@@ -763,19 +774,24 @@ function saveData(keyHint, toastMsg) {
   if(window.fbSave) {
     // Helper interne : lance la sauvegarde Firebase et gère le toast de retour
     var _doFbSave = function(key, value) {
-      if(!toastMsg) { window.fbSave(key, value); return; }
+      if(!toastMsg) { _fbSaveMuet(key, value); return; }
       // Avec toast : comportement selon état réseau
       if(!navigator.onLine) {
         // Hors ligne : sauvegarde locale OK, toast orange
-        window.fbSave(key, value);
+        _fbSaveMuet(key, value);
         showToast('Sauvegardé localement', '#B85A1A');
         return;
       }
       // En ligne : attendre la promesse Firebase
       var p = window.fbSave(key, value);
       if(p && typeof p.then === 'function') {
-        p.then(function() {
-          showToast(toastMsg, '#3D6B27');
+        p.then(function(r) {
+          // ⚠️ fbSave ne REJETTE PLUS : elle rend un etat (cf. contrat en fin de fbSave).
+          //    Un .then() nu afficherait « Enregistré ✓ » en vert sur une ecriture qui
+          //    n'est jamais partie — le faux positif exact que le throw servait a eviter.
+          if(r && r.ok)     { showToast(toastMsg, '#3D6B27'); return; }
+          if(r && r.queued) { showToast('Enregistré sur l\u2019appareil \u2014 envoi d\u00e8s le retour du r\u00e9seau', '#B85A1A'); return; }
+          // denied / blocked : fbSave a deja pose son propre message, ne pas en empiler un second.
         }).catch(function() {
           showToast('Sauvegardé localement', '#B85A1A');
         });
@@ -793,7 +809,7 @@ function saveData(keyHint, toastMsg) {
       Object.entries(W).forEach(function(entry) {
         var k = entry[0], v = entry[1];
         if(_first) { _first = false; _doFbSave(k, v); }
-        else { window.fbSave(k, v); }
+        else { _fbSaveMuet(k, v); }
       });
     }
   }
@@ -9816,6 +9832,9 @@ window.addEventListener('load', function(){
       detail: (e.filename ? e.filename + ':' + e.lineno : '') + (e.error && e.error.stack ? '\n' + e.error.stack : '')
     });
   });
+  // Etouffer un rejet deja pris en charge. Helper unique : deux blocs en ont besoin,
+  // et un try/catch de plus par site ferait grimper le compteur C14 sans rien apporter.
+  var _mvHushRejet = function(ev){ try { ev.preventDefault(); } catch(_e){} };
   window.addEventListener('unhandledrejection', function(e) {
     var reason = e.reason;
     var _rmsg = (reason && reason.message ? reason.message : String(reason)) || '';
@@ -9825,13 +9844,32 @@ window.addEventListener('load', function(){
     // données (le pull getDoc réussit). On NE l'affiche PAS au client : trace silencieuse (une
     // seule entrée error_log par session + compteur console) au lieu du bandeau d'erreur rouge.
     if (/INTERNAL ASSERTION FAILED/i.test(_rmsg)) {
-      try { e.preventDefault(); } catch(_e){}
+      _mvHushRejet(e);
       window._mvFsAssertCount = (window._mvFsAssertCount || 0) + 1;
       try { console.warn('[Firestore] assertion interne SDK ignorée (bug connu, non bloquant) x' + window._mvFsAssertCount + ' : ' + _rmsg); } catch(_e){}
       if (!window._mvFsAssertLogged) {
         window._mvFsAssertLogged = true;
         try { if (window.fbAppendError) window.fbAppendError({ id:'fa'+Date.now(), ts:new Date().toISOString(), level:'info', cat:'firebase', msg:'Assertion interne SDK Firestore (bug connu, masquée a l’ecran)', detail:_rmsg }); } catch(_e){}
       }
+      return;
+    }
+    // ⚠️⚠️ UN INCIDENT RESEAU N'EST PAS UNE PANNE DU LOGICIEL.
+    //    Le SDK Firebase remonte « Firebase: Error (auth/network-request-failed) » quand le
+    //    jeton d'authentification n'a pas pu etre rafraichi : 4G faible au fond d'une cave,
+    //    tunnel, wifi qui decroche. La file d'attente a deja pris la modification et la
+    //    renverra seule. Afficher un code d'erreur anglais en travers de l'ecran fait croire
+    //    a une perte de donnees qui n'a PAS eu lieu — et c'est le pire mensonge qu'un
+    //    logiciel de registre puisse raconter a celui qui le remplit.
+    //    Trace conservee (journal local + « Signaler un probleme »), ecran silencieux, et
+    //    c'est le badge de synchro qui dit la verite, en francais.
+    if (/network-request-failed|Failed to fetch|NetworkError|the client is offline|ERR_NETWORK|ERR_INTERNET_DISCONNECTED|Load failed/i.test(_rmsg)) {
+      _mvHushRejet(e);
+      if(typeof logError === 'function') logError({
+        level: 'info', cat: 'network',
+        msg: 'Incident réseau (promesse) : ' + _rmsg,
+        detail: reason && reason.stack ? reason.stack : ''
+      });
+      if(window.showSyncBadge) window.showSyncBadge('Réseau instable — nouvel essai automatique', '#7A4F2E');
       return;
     }
     if(typeof logError !== 'function') return;

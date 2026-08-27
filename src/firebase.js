@@ -287,9 +287,15 @@ function _queueSave(key, value) {
 
 // ── Badge persistant : nombre de modifications en attente de synchro ──
 function _showOfflineQueueBadge() {
+  // ⚠️ « Hors ligne » n'est vrai que si le telephone est reellement coupe. Une ecriture
+  //    echoue tres bien EN LIGNE : 4G faible au fond d'une cave, jeton d'authentification
+  //    qui n'arrive pas a se rafraichir (auth/network-request-failed). Annoncer « hors
+  //    ligne » a quelqu'un qui voit ses quatre barres de reseau, c'est lui apprendre a ne
+  //    plus croire ce que le logiciel affiche.
   var n = Object.keys(_offlineQueue).length;
-  if (n === 0) { showSyncBadge('Hors ligne', '#7A4F2E'); return; }
-  showSyncBadge('Hors ligne — ' + n + ' modification' + (n > 1 ? 's' : '') + ' en attente', '#7A4F2E');
+  var tete = navigator.onLine ? 'Réseau instable' : 'Hors ligne';
+  if (n === 0) { showSyncBadge(tete, '#7A4F2E'); return; }
+  showSyncBadge(tete + ' — ' + n + ' modification' + (n > 1 ? 's' : '') + ' en attente, envoi automatique', '#7A4F2E');
 }
 window._offlineQueueCount = function () { return Object.keys(_offlineQueue).length; };
 
@@ -884,6 +890,22 @@ async function _saveParcellesMerged(localValue) {
 }
 
 // ── fbSave ──
+// ⚠️⚠️ CONTRAT : fbSave NE REJETTE JAMAIS. Elle rend un ETAT —
+//    { ok:true }                    ecrit dans Firestore
+//    { ok:true, local:true }        demo (bac a sable), rien n'est ecrit
+//    { ok:false, queued:true }      reseau : mis en file, renvoye automatiquement
+//    { ok:false, denied:true }      refuse par les regles (droits)
+//    { ok:false, blocked:true }     refuse par la garde anti-ecrasement
+//    Raison : 71 sites l'appellent SANS await et SANS catch, sous la forme
+//    `if(window.fbSave) window.fbSave('cave_elevage', CAVE_ELEVAGE);`. Tant qu'elle
+//    relancait l'erreur, chaque hoquet de reseau remontait au gestionnaire global
+//    unhandledrejection, qui repeignait l'ecran d'un
+//    « Promesse rejetee : Firebase: Error (auth/network-request-failed) » :
+//    un message anglais, illisible, et FAUX sur le fond, puisque la modification
+//    etait bien en file et repartait toute seule.
+//    ⚠️ Un appelant qui veut savoir doit LIRE LE RETOUR. Un `.then()` nu annoncerait
+//    « Enregistre ✓ » sur une ecriture qui n'est jamais partie — c'est le faux positif
+//    que le `throw` servait a eviter, et il incombe desormais a l'appelant (saveData).
 window.fbSave = async function (key, value) {
   // Demo (bac a sable local) : on n'ecrit JAMAIS dans Firestore. L'etat en memoire + le
   // localStorage (deja ecrits par saveData) donnent l'experience interactive ; au rechargement
@@ -891,13 +913,13 @@ window.fbSave = async function (key, value) {
   // aucune collision entre prospects, aucune surface d'ecriture exposee.
   if (TENANT_ID === 'domaine-dupont') {
     if (typeof showSyncBadge === 'function') showSyncBadge('Sauvegardé', '#3D6B27');
-    return;
+    return { ok: true, local: true };
   }
   _ignoreNext[key]   = true;
   _ignoreBefore[key] = Date.now() + 4000;
   if (!navigator.onLine) {
     _queueSave(key, value);
-    return;
+    return { ok: false, queued: true, offline: true };
   }
   try {
     if (key === 'parcelles') {
@@ -909,7 +931,7 @@ window.fbSave = async function (key, value) {
         try { var _sH = await getDoc(fbDocRef('parcelles')); if (_sH.exists()) applyFbData('parcelles', _sH.data().value); } catch (e) {}
         if (typeof showSyncBadge === 'function') showSyncBadge('\ud83d\udee1\ufe0f Sauvegarde ignoree (protection)', '#B5621A');
         if (window.showToast) window.showToast('Ecriture ignoree : protection anti-perte de donnees', '#7A1020');
-        return;
+        return { ok: false, blocked: true };
       }
     } else {
       // #wipe : garde generique anti-ecrasement (lecture-avant-ecriture)
@@ -917,7 +939,7 @@ window.fbSave = async function (key, value) {
         try { var _sH2 = await getDoc(fbDocRef(key)); if (_sH2.exists()) applyFbData(key, _sH2.data().value); } catch (e) {}
         if (typeof showSyncBadge === 'function') showSyncBadge('\ud83d\udee1\ufe0f Sauvegarde ignoree (protection)', '#B5621A');
         if (window.showToast) window.showToast('Ecriture ignoree : protection anti-perte de donnees', '#7A1020');
-        return;
+        return { ok: false, blocked: true };
       }
       await _retryAsync(function(){ return setDoc(fbDocRef(key), { value: _fbClone(key, value) }); }, 3, 1000);
     }
@@ -928,6 +950,7 @@ window.fbSave = async function (key, value) {
     if (key !== 'parcelles' && Object.keys(_offlineQueue).length > 0) {
       setTimeout(function(){ _flushQueue().catch(function(){}); }, 300);
     }
+    return { ok: true };
   } catch (e) {
     // SEC-1 — REFUS DE DROITS : ne JAMAIS mettre en file. Une écriture refusée par les
     // règles le sera à chaque tentative : la remettre en file crée un poison pill retenté
@@ -938,13 +961,19 @@ window.fbSave = async function (key, value) {
     if (_isDenied(e)) {
       if (window.logError) window.logError({ level:'error', cat:'firebase', msg:'Écriture refusée (droits) : ' + key, detail:String(e) });
       showSyncBadge('🔒 Écriture refusée — ' + key + ' (droits insuffisants)', '#7A1020');
-      throw e;
+      return { ok: false, denied: true, code: (e && e.code) || '' };
     }
-    if(window.logError) window.logError({level:'warning',cat:'firebase',msg:'fbSave échoué (3 tentatives): '+key,detail:String(e)});
+    // ⚠️ NIVEAU 'info' ET NON 'warning' : le niveau warning declenche un toast
+    //    « ⚠️ fbSave échoué (3 tentatives): cave_elevage » — du jargon de developpeur
+    //    en travers de l'ecran d'un chef de cave, pour un incident dont la file
+    //    d'attente vient deja de s'occuper. La trace reste dans le journal local et
+    //    part avec « Signaler un probleme » ; c'est le badge de synchro qui parle a
+    //    l'utilisateur, en francais et en disant la verite.
+    if(window.logError) window.logError({level:'info',cat:'firebase',msg:'fbSave échoué (3 tentatives): '+key,detail:String(e)});
     _queueSave(key, value);
     // Retenter bientôt même si on reste EN LIGNE (sinon la file ne se vide qu'au reload)
     if (navigator.onLine) { clearTimeout(_onlineRetryTO); _onlineRetryTO = setTimeout(function(){ _flushQueue().catch(function(){}); }, 5000); }
-    throw e;
+    return { ok: false, queued: true, code: (e && e.code) || '' };
   }
 };
 
