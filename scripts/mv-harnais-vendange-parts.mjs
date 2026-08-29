@@ -393,7 +393,8 @@ T('prorata : la lie aussi', r[0].lie + r[1].lie, 50);
     trois manquent encore. C'est §33 à l'identique : un indicateur bâti sur un
     signal partiel ment avec l'autorité d'une mesure.
     ⚠️ Et la surface ne s'additionne pas d'un passage à l'autre. */
-const NOMS_RDT = ['_vendRdtBase','_vendLitresRetour','_vendVolCuve','_vendVolPart','_vendSrcLbl',
+const NOMS_RDT = ['_vendRdtBase','_vendLitresRetour','_caveFutL','_caveVolCuvesL','_caveNbTonneaux',
+                  '_caveVolL','_vendVolLoge','_vendCuvCsDom','_vendVolCuve','_vendVolPart','_vendSrcLbl',
                   '_vendSurfParc','_vendSurfLbl','_vendHaTxt','_vendVolParc','_vendRdtParc'];
 const absentsRdt = NOMS_RDT.filter(x => !corps(x));
 if (absentsRdt.length){ console.error('ROUGE — VD-3 introuvable : ' + absentsRdt.join(', ')); process.exit(1); }
@@ -408,14 +409,24 @@ const R3 = [
               retour:{ jus:460, lie:45, le:'2026-09-19', src:'saisi' } },
             { dom:false, client:'Négoce de Nuits', caisses:22, pck:21, surface:0.08 } ] }
 ];
-const CUVES = [ { id:'cv1', volume_hl:6.6 } ];
+/*  ★★★ RDT-1 (28/08) — LA CUVE EST DÉCUVÉE, ET C'EST TOUT LE PROPOS.
+    `volume_hl` est la CONTENANCE de la cuve : 12 hL de cuverie pour 6,6 hL de
+    vin. Tant que la cuve macère, il n'y a RIEN à mesurer — le volume mesuré
+    naît au décuvage, dans `vol_decuve_hl`. Ce jeu portait avant
+    `{id:'cv1', volume_hl:6.6}` sans décuvage : il codait dans le harnais la
+    confusion même qui a produit 117,1 hL/ha sur 20 Rangs (§69). */
+const CUVES = [ { id:'cv1', volume_hl:12, statut:'termine',
+                  decuvage:{ date:'2026-09-20', cuvee_id:'cuv_x' }, vol_decuve_hl:6.6 } ];
 let codeRdt = 'var CAVE_VENDANGE={config:CFG,clients:CLIENTS,recoltes:RECS,cuves_vinif:CUVES};\n'
+  + 'var CAVE_ELEVAGE={cuvees:CUVEES};\n'
   + 'function _vendParcSurf(nom){ return nom==="Le Clos"?0.34:0; }\n'
   + 'function _vendMillOfDate(d){ return parseInt(String(d).slice(0,4),10); }\n'
   + PRELUDE + NOMS.map(corps).join('\n') + '\n' + NOMS_RDT.map(corps).join('\n')
   + '\nreturn {' + NOMS_RDT.join(',') + ', CFG:CFG};';
+const CUVEES = [];
+const WIN = { CONFIG:{ cave:{ fut_l:228 } } };
 // eslint-disable-next-line no-new-func
-const V = new Function('CLIENTS','CFG','RECS','CUVES', codeRdt)(CLIENTS, CFG, R3, CUVES);
+const V = new Function('CLIENTS','CFG','RECS','CUVES','CUVEES','window', codeRdt)(CLIENTS, CFG, R3, CUVES, CUVEES, WIN);
 
 const d = V._vendRdtParc('Le Clos', 2026);
 T('★ statut PARTIEL, pas « mesuré »', d.vol.statut, 'partiel');
@@ -437,6 +448,31 @@ T('Négoce : pas de hL/ha sans volume', d.parts.find(x => x.nom === 'Négoce de 
 T('la part domaine vient de la cuve', d.parts.find(x => x.dom).src, 'cuve');
 T('la part Bouchard vient du client', d.parts.find(x => x.nom === 'Maison Bouchard').src, 'client');
 T('Négoce : retour attendu', d.parts.find(x => x.nom === 'Négoce de Nuits').src, 'attente');
+
+/*  ★★★ RDT-1 — UN VOLUME DE VIN N'EXISTE QU'APRÈS LE DÉCUVAGE (§69).
+    On retire le décuvage de la cuve : la part domaine doit BASCULER en
+    estimation, et la contenance de 12 hL ne doit surtout pas devenir 12 hL de
+    vin. Puis on remet tout en place — les volets suivants comptent dessus. */
+T('la contenance ne vaut pas un volume', V._vendVolLoge({ volume_hl:12 }), 0);
+T('ni sur une cuve absente', V._vendVolLoge(null), 0);
+const _dec = CUVES[0].decuvage, _vd = CUVES[0].vol_decuve_hl;
+delete CUVES[0].decuvage; delete CUVES[0].vol_decuve_hl;
+const dSans = V._vendRdtParc('Le Clos', 2026);
+T('★ sans décuvage : la part domaine passe en estimation',
+  dSans.parts.find(x => x.dom).src, 'estime');
+T('★ sans décuvage : les 900 kg du domaine rejoignent les kilos sans volume',
+  dSans.vol.kgKo, 1362);
+T('★ sans décuvage : la contenance n\u2019entre PAS dans le volume connu',
+  Math.round(dSans.vol.hl * 100) / 100, 4.6);
+/*  Rattrapage des cuves décuvées avant le lot : sans `vol_decuve_hl`, le volume
+    se relit sur la cuvée d'élevage — 2 fûts de 228 L + 200 L = 6,56 hL. */
+CUVES[0].decuvage = { date:'2026-09-20', cuvee_id:'cuv_x' };
+CUVEES.push({ id:'cuv_x', tonneaux:[{ annee:2025, nb:2 }], cuves:[{ ref:'a', litres:200 }] });
+T('★ rattrapage : le volume se relit sur la cuvée du Chai',
+  V._vendVolLoge(CUVES[0]), 6.56);
+CUVEES.length = 0;
+CUVES[0].decuvage = _dec; CUVES[0].vol_decuve_hl = _vd;
+T('remise en état du jeu de données', V._vendRdtParc('Le Clos', 2026).vol.statut, 'partiel');
 
 /* La base du rendement : le réglage change le volume, jamais les kilos. */
 const kgAvant = d.vol.kg;

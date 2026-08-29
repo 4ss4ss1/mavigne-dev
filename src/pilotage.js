@@ -5582,8 +5582,18 @@ function _pcavBandeau(l, sel){
 }
 
 // ── Rendement face au plafond de l'appellation ───────────────────────
-// _mlRendements renvoie {parcelle, kg, hlHa, max, depasse, pct, vendu}.
-// max vient de p.rdt_max, saisi par parcelle : sans lui, pas de comparaison.
+// _mlRendements renvoie {parcelle, kg, hlHa, hlMin, hlMax, statut, max,
+// depasse, pct, vendu}. max vient de p.rdt_max, saisi par parcelle : sans lui,
+// pas de comparaison.
+// ★★★ RDT-1 — CETTE CARTE AFFICHAIT UN CHIFFRE NET LA OU LE MILLESIME AFFICHE
+// UNE FOURCHETTE. Meme donnee, deux ecrans, deux niveaux de certitude : celui
+// qui montre le chiffre net gagne la confiance, et c'est le mauvais. Un volume
+// n'est mesure qu'apres le decuvage ; avant, on annonce l'encadrement.
+function _pcavRdtTxt(r){
+  if(r.statut==='mesure'||r.hlMin==null||r.hlMax==null||r.hlMin===r.hlMax)
+    return _pcavF1(r.hlHa)+' hL/ha';
+  return _pcavF1(r.hlMin)+'\u2013'+_pcavF1(r.hlMax)+' hL/ha';
+}
 function _pcavRdt(c,mil){
   // Les rendements ne valent que pour le millesime ouvert : c.rdt est monte
   // pour le millesime du contexte, on le recalcule si l'on en ouvre un autre.
@@ -5594,31 +5604,39 @@ function _pcavRdt(c,mil){
   var l=src.filter(function(r){ return r&&r.hlHa!=null; });
   if(!l.length) return '';
   var avecMax=l.filter(function(r){ return r.pct!=null; });
-  var over=avecMax.filter(function(r){ return r.depasse; }).length;
+  // Un depassement ne se CONSTATE que sur un volume mesure. Sur une estimation,
+  // il se soupconne — et l'en-tete ne doit pas confondre les deux.
+  var over=avecMax.filter(function(r){ return r.depasse&&r.statut==='mesure'; }).length;
+  var overEst=avecMax.filter(function(r){ return r.depasse&&r.statut!=='mesure'; }).length;
+  var nEst=l.filter(function(r){ return r.statut!=='mesure'; }).length;
   var rows=l.slice(0,10).map(function(r){
     var nom=(r.parcelle&&r.parcelle.nom)||'—';
     if(r.pct==null){
       return '<div class="pcav-pl"><div class="pcav-py">'+_pilEsc(nom)+'<small>plafond non renseigné</small></div>'
         +'<div class="pcav-pt2"><div class="pcav-ps" style="width:0"></div></div>'
-        +'<div class="pcav-pn">'+_pcavF1(r.hlHa)+' hL/ha</div></div>';
+        +'<div class="pcav-pn">'+_pcavRdtTxt(r)+'</div></div>';
     }
     var norm=Math.max(0,Math.min(100,r.pct/115*100));
     var col=r.depasse?'var(--rouge)':(r.pct>92?'var(--orange)':'var(--vert-med)');
     return '<div class="pcav-pl"><div class="pcav-py">'+_pilEsc(nom)+'<small>max '+_pcavF1(r.max)+'</small></div>'
       +'<div class="pcav-pt2"><div class="pcav-ps" style="width:'+norm+'%;background:'+col+'"></div>'
       +'<span class="pcav-pmax"></span></div>'
-      +'<div class="pcav-pn" style="color:'+col+'">'+_pcavF1(r.hlHa)+' hL/ha</div></div>';
+      +'<div class="pcav-pn" style="color:'+col+'">'+_pcavRdtTxt(r)+'</div></div>';
   }).join('');
   var leg='<div class="pcav-leg"><span><i style="background:var(--vert-med)"></i>sous 92 %</span>'
     +'<span><i style="background:var(--orange)"></i>92 à 100 %</span>'
     +'<span><i style="background:var(--rouge)"></i>au-dessus du plafond</span>'
     +'<span><i style="background:var(--texte)"></i>le plafond</span></div>';
   return _pcavCard('\uD83D\uDCD0','#A0291E','Rendement face au plafond de l’appellation',
-    over?('<b>'+over+'</b> au-dessus'):(avecMax.length?'dans les clous':'plafonds non renseignés'),
+    over?('<b>'+over+'</b> au-dessus')
+      :(overEst?('<b>'+overEst+'</b> \u00e0 confirmer')
+      :(avecMax.length?'dans les clous':'plafonds non renseignés')),
     '<div class="pcav-pyr">'+rows+leg+'</div>',
-    avecMax.length
-      ? 'trait vertical : votre plafond par parcelle'
-      : 'Aucun plafond n’est renseigné. Posez-le une fois par parcelle depuis Le millésime pour obtenir la comparaison.', 'pil.cav.rdt');
+    (l.length>10?('Les 10 plus forts rendements sur '+l.length+' parcelles vendang\u00e9es. '):'')
+    +(nEst?('Une fourchette signifie que le volume n\u2019est pas encore mesur\u00e9 : il le sera au d\u00e9cuvage. '):'')
+    +(avecMax.length
+      ? 'Trait vertical : votre plafond par parcelle.'
+      : 'Aucun plafond n’est renseigné. Posez-le une fois par parcelle depuis Le millésime pour obtenir la comparaison.'), 'pil.cav.rdt');
 }
 
 // ── Face a l'an dernier ──────────────────────────────────────────────

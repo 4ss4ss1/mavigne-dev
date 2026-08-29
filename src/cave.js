@@ -2230,7 +2230,8 @@ function renderVendCuves() {
         +'<div class="mvv-cuve-meta">Entrée le '+_vendFrDate(c.date_entree)+(c.parcelles&&c.parcelles.length?' · '+c.parcelles.length+' parcelle'+(c.parcelles.length>1?'s':''):'')+'</div>'
         +(c.parcelles&&c.parcelles.length?'<div class="mvv-cuve-par">'+c.parcelles.map(function(p){return _escHtml(p);}).join(' · ')+'</div>':'')
         +'</div>'
-        +'<div class="mvv-vol"><div class="mvv-vol-n">'+(c.volume_hl||0)+'</div><div class="mvv-vol-u">hL</div>'
+        +'<div class="mvv-vol"><div class="mvv-vol-n">'+(_vendVolLoge(c)>0?_vendCuvF1(_vendVolLoge(c)):(c.volume_hl||0))+'</div>'
+        +'<div class="mvv-vol-u">'+(_vendVolLoge(c)>0?'hL log\u00e9s':'hL de cuve')+'</div>'
         +(canEdit?'<button class="mv-gh mvv-edit" onclick="event.stopPropagation();openOvVendCuve(\''+c.id+'\')" title="Modifier" aria-label="Modifier">'+_mvIcon('crayon',18)+'</button>':'')
         +'</div></div>';
       h+=_vendStepper(c.statut);
@@ -2600,7 +2601,9 @@ function saveVendCuve() {
     var _pk=_caveCuve(_vcuvRef);
     showToast(((_pk&&_pk.nom)||'Cette cuve')+' vient d\u2019\u00eatre prise','#B85A1A'); return;
   }
-  var obj={id:id||'vcuv_'+Date.now(),nom:nom,volume_hl:vol,statut:statut,cuve_ref:_vcuvRef||null,parcelles:parcelles,date_entree:date,erasflage:erasflage,so2_g_hl:so2,levures:levures,mpf:{active:_vcuvMpfActive,temp_c:mpfT,duree_j:mpfD},mesures_fa:existing?(existing.mesures_fa||[]):[],decuvage:existing?(existing.decuvage||null):null};
+  var obj={id:id||'vcuv_'+Date.now(),nom:nom,volume_hl:vol,statut:statut,cuve_ref:_vcuvRef||null,parcelles:parcelles,date_entree:date,erasflage:erasflage,so2_g_hl:so2,levures:levures,mpf:{active:_vcuvMpfActive,temp_c:mpfT,duree_j:mpfD},mesures_fa:existing?(existing.mesures_fa||[]):[],decuvage:existing?(existing.decuvage||null):null,
+    vol_decuve_hl:existing?(existing.vol_decuve_hl!=null?existing.vol_decuve_hl:null):null,
+    recolte_ids:existing&&Array.isArray(existing.recolte_ids)?existing.recolte_ids.slice():undefined};
   if(!id && _vcuvFromGrp){
     var _d=_vcuvFromGrp;
     obj.cuvee_src=_d.cuvee; obj.vcuvee_id=_d.id||null; obj.recolte_ids=_d.ids.slice(); obj.nb_caisses=_d.caisses;
@@ -3181,10 +3184,37 @@ function _vendLitresRetour(p){
 // prorata des kilos quand la cuve rassemble plusieurs récoltes.
 // ⚠️ Un volume de cuve réparti entre parcelles est DÉDUIT, pas mesuré par
 // parcelle : il sort marqué `prorata`.
+// ★★★ RDT-1 — LE VOLUME MESURE D'UNE CUVE N'EXISTE QU'APRES LE DECUVAGE.
+// Tant que la cuve macere ou fermente, elle contient du RAISIN : aucun volume de
+// vin n'a ete compte, et il n'y a rien a mesurer. `volume_hl` est la CONTENANCE
+// de la cuve — elle se pre-remplit depuis le parc (_vcuvPick) et la jauge de
+// remplissage la lit comme telle (_cuveCouches, champ `cap`). La prendre pour un
+// volume produit multipliait le rendement par l'inverse du taux de remplissage :
+// une cuve de 60 hL a moitie pleine rendait 60 hL de vin.
+// La mesure, c'est ce qui a ete LOGE au Chai : `vol_decuve_hl`, ecrit une fois,
+// au decuvage, par saveVendDecuvage.
+function _vendVolLoge(cv){
+  if(!cv||!cv.decuvage) return 0;
+  var v=parseFloat(cv.vol_decuve_hl);
+  if(isFinite(v)&&v>0) return v;
+  // Cuves decuvees AVANT ce lot : le volume se relit sur la cuvee d'elevage nee
+  // du decuvage — futs entonnes + cuves logees. Lecture seule, aucune reecriture.
+  var cu=((typeof CAVE_ELEVAGE!=='undefined'&&CAVE_ELEVAGE.cuvees)||[]).find(function(x){
+    return x&&x.id===cv.decuvage.cuvee_id; });
+  var l=cu?_caveVolL(cu):0;
+  return l>0?Math.round(l/100*100)/100:0;
+}
+// Les caisses DOMAINE rattachees a une cuve. Recalculees depuis les recoltes a
+// chaque appel : rien ne s'accumule dans un champ, donc rien ne peut doubler.
+function _vendCuvCsDom(cuveId, exclId){
+  if(!cuveId) return 0;
+  return (CAVE_VENDANGE.recoltes||[]).reduce(function(s,x){
+    return s+((x&&x.cuve_id===cuveId&&x.id!==exclId)?_recCsDom(x):0); },0);
+}
 function _vendVolCuve(r){
   if(!r||!r.cuve_id) return null;
   var cv=(CAVE_VENDANGE.cuves_vinif||[]).find(function(c){ return c&&c.id===r.cuve_id; });
-  var vol=cv?(parseFloat(cv.volume_hl)||0):0;
+  var vol=_vendVolLoge(cv);
   if(!(vol>0)) return null;
   var mine=(CAVE_VENDANGE.recoltes||[]).filter(function(x){ return x&&x.cuve_id===cv.id; });
   var tot=mine.reduce(function(s,x){ return s+_recKgDom(x); },0);
@@ -3808,7 +3838,7 @@ function openVendDecuvage(cuveId){
   _vendDecCuveId=cuveId;
   var yr=new Date().getFullYear();
   var _futHl=_caveFutHl(), _futTxt=String(_futHl).replace('.',',');
-  _vendDecNb=Math.max(1,Math.round((c.volume_hl||0)/_futHl));
+  _vendDecNb=Math.max(1,Math.round(_vendDecVolHl()/_futHl));
   _vendDecMode='fut'; _vendDecCuveRef=null; _vendDecCuveL=0;
   // ⚠️ Le CSS du parc vit dans _caveV2InjectCss : sans cet appel, le selecteur
   //   de cuve sortirait SANS STYLE quand on decuve sans etre passe par Le Chai.
@@ -3847,7 +3877,14 @@ function _vendDecSegHtml(){
 function _vendDecCuveObj(){
   return (CAVE_VENDANGE.cuves_vinif||[]).find(function(x){return x.id===_vendDecCuveId;})||null;
 }
-function _vendDecVolHl(){ var c=_vendDecCuveObj(); return c?(parseFloat(c.volume_hl)||0):0; }
+// ★ RDT-3 — le nombre de barriques se propose sur le volume ATTENDU dans la
+// cuve (les caisses du domaine au ratio kg/hL), plus sur `volume_hl` qui est la
+// contenance : une cuve a moitie pleine proposait deux fois trop de futs.
+function _vendDecVolHl(){
+  var c=_vendDecCuveObj(); if(!c) return 0;
+  var est=_vendCuvHl(_vendCuvCsDom(c.id));
+  return est>0?est:(parseFloat(c.volume_hl)||0);
+}
 
 // ⚠️ On ne re-rend QUE la zone : reconstruire la feuille effacerait le nom et le
 //   millesime deja saisis. Meme piege que _vendDecRender.
@@ -3947,7 +3984,7 @@ function _vendDecZone(){
   if(_vendDecMode!=='cuve'){
     h+=(_vendDecParcVide()
       ? ('<label class="mvv-flbl">Nombre de barriques <span class="mvv-fhint">('
-        +(_vendDecMode==='mixte'?'pour le reste':'\u2248 '+(c.volume_hl||0)+' hL')+' \u00f7 '+_futTxt+' hL)</span></label>'
+        +(_vendDecMode==='mixte'?'pour le reste':'\u2248 '+_vendCuvF1(_vendDecVolHl())+' hL')+' \u00f7 '+_futTxt+' hL)</span></label>'
         +'<div class="mvv-step2"><button class="mvv-step2-b" onclick="_vendDecAdj(-1)">\u2212</button>'
         +'<span id="vdec-nb" class="mvv-step2-v">'+_vendDecNb+'</span>'
         +'<button class="mvv-step2-b" onclick="_vendDecAdj(1)">\uff0b</button>'
@@ -4094,6 +4131,12 @@ function saveVendDecuvage(){
   if(!CAVE_ELEVAGE.cuvees) CAVE_ELEVAGE.cuvees=[];
   CAVE_ELEVAGE.cuvees.push(cuvee);
   c.decuvage={date:new Date().toISOString().slice(0,10),cuvee_id:cuvee.id};
+  /* ★★★ RDT-2 — LE VOLUME MESURE, ECRIT UNE FOIS, AU SEUL MOMENT OU IL EXISTE.
+     C'est ce qui vient d'etre loge au Chai : futs entonnes + cuves remplies. Il
+     ne touche PAS `volume_hl`, qui reste la contenance de la cuve — la jauge de
+     remplissage du Cuvier en a besoin. Deux nombres, deux sens, deux champs. */
+  var _vdec=_caveVolL(cuvee)/100;
+  c.vol_decuve_hl=(_vdec>0)?Math.round(_vdec*100)/100:null;
   c.statut='termine';
   window.CAVE_VENDANGE=CAVE_VENDANGE;
   window.CAVE_ELEVAGE=CAVE_ELEVAGE;
@@ -4663,13 +4706,24 @@ function _vendCuvAtt(caisses){
     +'<span class="mvcs-opt-s">M\u00eame cuv\u00e9e, cuve s\u00e9par\u00e9e \u2014 le nom reste unique</span></span></label>';
   if(idx>=0){
     var cv=st.cuves[idx];
-    var prop=Math.round(((cv.volume_hl||0)+add)*10)/10;
-    if(_vcuvSel.vol==null) _vcuvSel.vol=prop;
-    h+='<div class="mvcs-vol"><label for="vrec-cuv-vol">Volume de la cuve</label>'
+    /* ★★★ RDT-3 — CE CHAMP EST UNE CONTENANCE, PAS UN CUMUL. L'ancien panneau
+       proposait `contenance + estime` et saveVendRec l'ecrivait sans condition :
+       rouvrir une recolte pour corriger une faute de frappe ajoutait une seconde
+       fois son volume, et le prorata repartissait l'erreur sur toutes les
+       parcelles de la cuve. Ce qui est deja dedans se RECALCULE depuis les
+       recoltes a chaque affichage — rien ne s'accumule, donc rien ne double. */
+    var _rid=((document.getElementById('vrec-id')||{}).value||'');
+    var deja=_vendCuvHl(_vendCuvCsDom(cv.id,_rid));
+    var cap=Math.round((parseFloat(cv.volume_hl)||0)*10)/10;
+    if(_vcuvSel.vol==null) _vcuvSel.vol=cap;
+    var apres=deja+add;
+    h+='<div class="mvcs-vol"><label for="vrec-cuv-vol">Contenance de la cuve</label>'
       +'<input id="vrec-cuv-vol" type="number" step="0.1" min="0" value="'+(_vcuvSel.vol)+'" onchange="_vendCuvVol(this.value)">'
       +'<span>hL</span></div>'
-      +'<div class="mvcs-hint">Propos\u00e9 : '+_vendCuvF1(cv.volume_hl||0)+' + '+_vendCuvF1(add)+' estim\u00e9s = '+_vendCuvF1(prop)
-      +' hL. Modifiable \u2014 c\u2019est le volume r\u00e9el de la cuve qui fait foi.</div>';
+      +'<div class="mvcs-hint">D\u00e9j\u00e0 dedans : <b>'+_vendCuvF1(deja)+' hL</b> estim\u00e9s. Avec cet apport : <b>'
+      +_vendCuvF1(apres)+' hL</b>'+(cap>0?(' sur '+_vendCuvF1(cap)+' hL de contenance ('+Math.round(apres/cap*100)+'\u00a0%)'):'')
+      +(cap>0&&apres>cap?' \u2014 <b>cet apport d\u00e9passe la contenance.</b>':'')
+      +' Le rendement, lui, se lira au d\u00e9cuvage, sur le volume r\u00e9ellement log\u00e9.</div>';
   }
   h+='</div></div>';
   z.innerHTML=h;
@@ -4831,10 +4885,11 @@ function _vendCuveFromRecolte(idx){
   var i=parseInt(idx,10);
   _vcuvFromGrp=(idx===''||isNaN(i))?null:(_vcuvFromList[i]||null);
   var d=_vcuvFromGrp; if(!d) return;
-  var cfg=_vendCfg();
   var el=document.getElementById('vcuv-nom'); if(el) el.value=d.cuvee;
   el=document.getElementById('vcuv-parcelles'); if(el) el.value=d.parcelles.join(', ');
-  el=document.getElementById('vcuv-volume'); if(el&&!el.value) el.value=Math.max(1,Math.round(d.kg/(cfg.ratio_max||140)));
+  /* ★ RDT-3 — la contenance ne se deduit PAS des kilos rentres. Elle vient du
+     parc a cuves (_vcuvPick) ou de la main. Pre-remplir ce champ avec un volume
+     de vin estime melangeait les deux sens du meme nombre. */
   el=document.getElementById('vcuv-erasflage'); if(el&&['total','partiel','entiere'].indexOf(d.erasflage)!==-1) el.value=d.erasflage;
 }
 
@@ -7721,10 +7776,13 @@ function _mlChaine(mil){
   });
   var ids={}; recs.forEach(function(r){ if(r.cuve_id) ids[r.cuve_id]=1; });
   var cuves=(CAVE_VENDANGE.cuves_vinif||[]).filter(function(c){ return c&&ids[c.id]; });
+  /* ★ RDT-1 — les deux etages du parcours annonçaient la CONTENANCE des cuves.
+     En cuve : l'estimation d'apres les caisses du domaine, comme la jauge de
+     remplissage. Decuve : le volume reellement loge. */
   var hlCuve=cuves.filter(function(c){ return c.statut!=='termine'; })
-                  .reduce(function(s,c){ return s+(parseFloat(c.volume_hl)||0); },0);
+                  .reduce(function(s,c){ return s+_vendCuvHl(_vendCuvCsDom(c.id)); },0);
   var hlDecuve=cuves.filter(function(c){ return c.statut==='termine'; })
-                    .reduce(function(s,c){ return s+(parseFloat(c.volume_hl)||0); },0);
+                    .reduce(function(s,c){ return s+_vendVolLoge(c); },0);
   var cuvees=(CAVE_ELEVAGE.cuvees||[]).filter(function(c){ return String(c.millesime)===String(mil); });
   var enFut=cuvees.filter(function(c){ return c.statut!=='embouteille'; });
   var hlFut=enFut.reduce(function(s,c){ return s+_mlHlCuvee(c); },0);

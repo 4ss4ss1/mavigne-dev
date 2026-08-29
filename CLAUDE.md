@@ -11253,3 +11253,190 @@ touchée — **rien à changer**, et c'est vérifié, pas supposé.
   ce lot. À regraver lors d'un lot qui touche `tracteur.js`.
 - **« Pas de connexion réseau. »** dans le `catch` de `confirmLogin` souffre du même flou que l'ancien
   badge : on peut avoir du réseau et ne pas passer.
+
+---
+
+## 69. ★★★ LA CONTENANCE DE LA CUVE LUE COMME UN VOLUME DE VIN — LOTS RDT-1/2/3 (28/08 — APP 6.69 → 6.70 · SW 7.24 → 7.25)
+
+> *Nico, capture à l'appui : « faut revoir où sont fait et comment sont faits les calculs, les
+> rendements sont beaucoup trop eleve !! »*
+> Sur la capture, **Pilotage › Cave › Rendement face au plafond**, millésime 2026 :
+> 20 Rangs **117,1 hL/ha** · Au Velle **93,6** · Bollery Blanc **89** · Perrières Jeune **74,5**.
+> En Côte de Nuits, 117 hL/ha n'existe pas.
+
+### 69a. La première hypothèse était fausse, et c'est l'audit qui l'a dit
+
+J'ai d'abord accusé la **non-idempotence** du volume de cuve (`_vendCuvAtt` proposait
+`volume_hl + add`, `saveVendRec` l'écrivait sans condition → rouvrir une récolte rajoutait son
+volume). Le harnais reproduisait bien 118,5 hL/ha à la deuxième sauvegarde. **C'était vrai, mais
+ce n'était pas la cause.** Livré `scripts/`… non : livré `mv-audit-rendement.js`, un script de
+console en lecture seule, avec une colonne **`ratio saisi/attendu`**. Attendu : 2, 3, 4 — le
+nombre de sauvegardes. Obtenu : **2,63 · 2,79 · 2,89 · 1,13**. Pas des entiers.
+
+Les volumes saisis, eux, étaient **60 · 30 · 15 · 5 hL**. Des nombres ronds. Les contenances des
+cuves du parc : 6000, 3000, 1500, 500 L.
+
+**★★★ RÈGLE : un ratio non entier tue une hypothèse de comptage double.** Un défaut de
+répétition produit des multiples entiers ; un défaut d'unité produit un facteur quelconque. Le
+chiffre lui-même dit de quelle famille est la panne — encore faut-il le regarder avant de patcher.
+
+### 69b. La cause : un champ, trois lecteurs, trois définitions
+
+`_vcuvPick` (`cave.js`) — on pique une cuve dans le parc :
+
+```js
+el=document.getElementById('vcuv-volume');
+if(el && !String(el.value||'').trim()) el.value=_mvF1((parseFloat(p.litres)||0)/100)...
+```
+
+`p.litres` est étiqueté **« Contenance (en litres) »** dans le formulaire du parc à cuves, et
+affiché sur la fiche de cuvée comme « *X hL de contenance — on remplit rarement à ras* ». Le champ se pré-remplit
+donc avec la **capacité**, et personne n'a de raison de le corriger : le nombre est juste.
+
+Ensuite, trois lecteurs :
+
+| lecteur | ce qu'il croit lire | conséquence |
+|---|---|---|
+| `_cuveCouches` (`cap`) — jauge de remplissage | la **contenance** | correct |
+| `_vendCuvAtt` — panneau de rattachement | un **cumul de vin estimé** | écrivait `contenance + add` |
+| `_vendVolCuve` → `_mlRendements` | le **volume de vin produit** | ★ le rendement |
+
+Reconstruction exacte de la capture, à la décimale :
+
+```
+Au vellé (60 hL) : 20 Rangs 45/123 → 22,0   Au Velle 71/123 → 34,6   7 Rangs 7/123 → 3,4
+Bollery (30 hL)  : Bollery Blanc 40/58 → 20,7   Comble 18/58 → 9,3
+Perrières (15 hL): P. Jeune 15/28 → 8,0   P. Vieille 13/28 → 7,0
+```
+
+Les cuves étaient remplies à ~38 %. Le rendement était donc multiplié par **l'inverse du taux de
+remplissage**, et le prorata étalait l'erreur sur **toutes les parcelles de la cuve** — une
+parcelle correctement saisie était fausse à cause d'une autre.
+
+**Et les quatre cuves étaient en `mpf`.** Il n'y avait pas une goutte de vin. L'escalier de
+sources VD-3 acceptait comme *mesure* le volume d'une cuve **en macération**.
+
+### 69c. ★★★ RDT-1 — un volume de vin n'existe qu'après le décuvage
+
+```js
+function _vendVolLoge(cv){
+  if(!cv||!cv.decuvage) return 0;
+  var v=parseFloat(cv.vol_decuve_hl);
+  if(isFinite(v)&&v>0) return v;
+  var cu=((typeof CAVE_ELEVAGE!=='undefined'&&CAVE_ELEVAGE.cuvees)||[]).find(...);
+  return cu?Math.round(_caveVolL(cu)/100*100)/100:0;
+}
+```
+
+`_vendVolCuve` lit `_vendVolLoge(cv)` au lieu de `cv.volume_hl`. Sans décuvage, `0` → l'escalier
+retombe sur l'estimation au ratio, `statut='estime'`, **fourchette**. `_mlChaine` cesse aussi
+d'annoncer la contenance sur ses deux étages (« en cuve » = estimation d'après les caisses,
+« décuvé » = volume logé).
+
+**Aucune donnée n'est réécrite.** Les chiffres se corrigent à l'affichage.
+
+### 69d. RDT-2 — le volume mesuré, écrit une fois, au seul moment où il existe
+
+`saveVendDecuvage` écrit `c.vol_decuve_hl = _caveVolL(cuvee)/100` — fûts entonnés + cuves
+remplies. **Un champ neuf**, jamais `volume_hl` : la jauge de remplissage en a besoin.
+
+Rattrapage en lecture pour les cuves décuvées avant ce lot (le volume se relit sur la cuvée
+d'élevage) — donc rien à ressaisir.
+
+⚠️ **Piège n° 9 du document, rencontré à nouveau** : `saveVendCuve` rebâtit `obj` de zéro.
+Sans `vol_decuve_hl:existing?...` , modifier une cuve décuvée l'aurait effacé. `recolte_ids`
+était déjà perdu de la même façon — préservé au passage.
+
+### 69e. RDT-3 — le champ devient une contenance, et le cumul meurt
+
+`_vendCuvAtt` ne propose plus `contenance + add`. Ce qui est **déjà dedans** se recalcule depuis
+les récoltes à chaque affichage (`_vendCuvCsDom(cuveId, exclId)`) — rien ne s'accumule dans un
+champ, **donc rien ne peut doubler**. L'exclusion par `exclId` évite de compter la récolte en
+cours d'édition.
+
+Au passage : `_vendDecVolHl()` proposait le nombre de barriques d'après la **contenance** — une
+cuve à moitié pleine réclamait deux fois trop de fûts. Elle suit maintenant le volume attendu.
+Et `_vendCuveFromRecolte` ne pré-remplit plus la contenance avec `kg/140` : une contenance ne se
+déduit pas des kilos rentrés.
+
+### 69f. Pilotage disait net là où Le millésime disait une fourchette
+
+Même donnée, deux écrans, **deux niveaux de certitude**. Celui qui affiche le chiffre net gagne
+la confiance, et c'est le mauvais. `_pcavRdtTxt` aligne Pilotage sur Le millésime. Au passage :
+un **dépassement ne se constate que sur une mesure** (`over` ne compte plus les estimations,
+`overEst` les signale « à confirmer »), et la carte dit enfin qu'elle ne montre que les **dix plus
+forts** rendements — un tri décroissant tronqué à 10 sans le dire est une sélection déguisée en
+panorama.
+
+### 69g. Le harnais, et ce qu'il prouve
+
+`scripts/mv-harnais-rendement.mjs` — **20 assertions vertes**, `--contre` **2 vertes**.
+Les deux contre-épreuves (remettre `volume_hl` comme volume de vin ; retirer la garde de
+décuvage) ramènent **exactement 117,1 hL/ha** sur 20 Rangs. La capture de Nico est reproduite au
+dixième par le harnais : c'est la meilleure preuve qu'on a compris la panne.
+
+### 69h. Ce que valent vraiment les rendements 2026 de Marchand-Grillot
+
+| parcelle | affiché avant | après |
+|---|---|---|
+| 20 Rangs | 117,1 | **44,4** |
+| Au Velle | 93,6 | **35,5** |
+| Bollery Blanc | 89,0 | **31,9** |
+| Perrières Jeune | 74,5 | **25,7** |
+| Perrières Vieille | 64,1 | **22,2** |
+| 7 Rangs | 51,2 | **19,4** |
+| Comble | 31,4 | **11,3** |
+
+Ergot, Champitenois et Combe du Bas étaient déjà justes : aucune cuve rattachée, donc estimation
+pure. **Le défaut ne touchait que les parcelles bien renseignées** — plus la saisie était
+complète, plus le chiffre était faux. Perversité à retenir.
+
+### 69i. Clôture
+
+| fichier | ce qui change | bump |
+|---|---|---|
+| `src/cave.js` | RDT-1/2/3 — 10 motifs, 15 hunks, zéro ligne collatérale | — |
+| `src/pilotage.js` | `_pcavRdtTxt`, `over`/`overEst`, note de bas de carte | — |
+| `src/utils.js` | `APP_VERSION`, `WHATS_NEW` (3 entrées), `MV_AIDE.cave` (1 révisé + 1 neuf), `MV_INFO.pil.cav.rdt` (2 paragraphes) | ★ APP |
+| `index.html` | les 4 affichages de version · libellé « Volume (hl) » → « Contenance (hL) » | ★ APP |
+| `public/sw.js` | en-tête, `CACHE_NAME`, **les 2 `console.log`**, changelog prépendé | ★ SW |
+| `guide/08-cave.html` · `public/guide.html` | l'escalier des sources + la contenance | — |
+| `scripts/mv-harnais-rendement.mjs` (neuf) | 20 règles + 2 contre-épreuves | — |
+
+**Vérifié** : `node --check` sur les 4 JS · équilibre `{}` `()` `[]` à zéro · aucun demi-surrogate ·
+**compte de `catch(` inchangé** (cave 13, pilotage 91) · diff ciblé — **aucune ligne modifiée hors
+motif** · `WHATS_NEW` **exécuté en Node** (tête = `APP_VERSION`, 160 blocs, 3 items, zéro backslash
+visible, les 2 noms d'icônes — `balance`, `cuve` — existent dans le sprite) · guide régénéré,
+`build-guide.mjs --check` vert · harnais **20/20** puis **2/2** en contre-épreuve.
+
+### 69i-bis. ★ Le SW porte sa version à QUATRE endroits, pas deux
+
+En-tête, `CACHE_NAME`, **et les deux `console.log`** (`[SW] Ma Vigne vX.XX installé` / `activé`).
+J'ai livré les deux premiers et oublié les deux autres ; **c'est le preflight qui l'a dit**, pas
+moi. Un numéro de version écrit à quatre endroits est un numéro qu'on désynchronise — le filet
+existe précisément parce que la règle ne tient pas dans une tête.
+
+⚠️ **`v7.24` doit subsister exactement UNE fois** après bump : la ligne de changelog du lot
+précédent. Zéro occurrence signifierait qu'on a écrasé l'historique ; deux, qu'un porteur de
+version a été oublié.
+
+### 69j. ⚠️ Ce qui reste ouvert
+
+- **Ruchottes** : 600 kg annoncés dans une cuve de 5 hL — ça ne rentre pas. Soit le rattachement
+  est faux, soit les 24 caisses ne sont pas toutes là. **Aucun correctif de code ne répare une
+  saisie fausse** : à vérifier avec Nico.
+- **Combe du Bas** : 84 caisses pour 1008 kg, soit **12 kg la caisse** au lieu de 25 — un `pck`
+  client, à confirmer.
+- **`volume_hl` reste modifiable depuis le panneau de rattachement.** Le champ est maintenant
+  correctement étiqueté, mais rien n'empêche d'y écrire autre chose qu'une contenance. Un jour :
+  le rendre lecture seule quand la cuve vient du parc.
+- **`_vendVolCuve` ne filtre pas `mine` par millésime.** Sans effet aujourd'hui (les cuves de
+  vinification sont créées par millésime), dangereux si une cuve venait à être réutilisée d'une
+  année sur l'autre avec le même `id`.
+- ⚠️ **Un `cat >> CLAUDE.md <<'EOF'` a mangé un caractère accentué** : le `ê` de « Même » est
+  sorti en octet brut `0xAA`, le fichier n'était plus valide en UTF-8, et
+  `harnais-claude-md.mjs` rougissait **sans dire pourquoi** (l'exception tombait à la lecture).
+  **Toujours relire un fichier en Python après un heredoc** : `open(f,'rb').read().decode('utf-8')`.
+  Une exception vaut mieux qu'un octet pourri au milieu du document.
+- **`mv-audit-rendement.js` n'est pas dans le dépôt** — script de console, livré hors build. À y
+  mettre s'il resert.

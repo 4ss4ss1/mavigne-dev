@@ -1,4 +1,36 @@
-// MA VIGNE — Service Worker v7.24
+// MA VIGNE — Service Worker v7.25
+// v7.25 (28/08/2026) — LES RENDEMENTS ETAIENT FAUX (lots RDT-1/2/3). APP 6.69 -> 6.70.
+//   Signale par Nico : Pilotage > Cave annoncait 117,1 hL/ha sur 20 Rangs, 93,6
+//   sur Au Velle, 89 sur Bollery Blanc. Impossible en Cote de Nuits.
+//   ★★★ CAUSE : `cuves_vinif[].volume_hl` porte la CONTENANCE de la cuve. Elle se
+//   pre-remplit depuis le parc (_vcuvPick, cave.js : `p.litres/100`, champ
+//   etiquete « Contenance (en litres) »), et la jauge de remplissage la lit comme
+//   telle (_cuveCouches, champ `cap`). Mais _vendVolCuve la prenait pour le volume
+//   de vin produit et la repartissait au prorata des kilos. Une cuve de 60 hL
+//   remplie a 38 % rendait 60 hL de vin. Trois cuves sur quatre etaient touchees,
+//   et l'erreur s'etalait sur toutes les parcelles de chaque cuve.
+//   Un meme champ, trois lecteurs, trois definitions : celui qui ecrivait en
+//   dernier gagnait.
+//   ★ RDT-1 : `_vendVolLoge(cv)` — un volume MESURE n'existe qu'apres le decuvage.
+//   Avant, la cuve contient du raisin. L'escalier de sources retombe sur
+//   l'estimation au ratio kg/hL, et l'ecran affiche une FOURCHETTE (Pilotage
+//   s'aligne enfin sur Le millesime, qui la donnait deja). _mlChaine cesse aussi
+//   d'annoncer la contenance sur les deux etages « en cuve » et « decuve ».
+//   ★ RDT-2 : `vol_decuve_hl` ecrit une fois, au decuvage, avec le volume
+//   reellement loge (futs entonnes + cuves remplies). Ne touche PAS `volume_hl`.
+//   Rattrapage en lecture pour les cuves decuvees avant ce lot : le volume se
+//   relit sur la cuvee d'elevage. saveVendCuve le preserve a l'edition (piege du
+//   `obj` rebati de zero).
+//   ★ RDT-3 : le panneau de rattachement demandait « Volume de la cuve » et
+//   proposait `contenance + estime`, que saveVendRec ecrivait sans condition —
+//   rouvrir une recolte ajoutait une SECONDE fois son volume. Le champ devient
+//   « Contenance », ce qui est deja dedans se recalcule depuis les recoltes
+//   (_vendCuvCsDom), et le nombre de barriques propose au decuvage suit le volume
+//   attendu, plus la contenance.
+//   ★ AUCUNE DONNEE N'EST REECRITE. Les chiffres se corrigent a l'affichage.
+//   Harnais : scripts/mv-harnais-rendement.mjs (20 assertions + 2 contre-epreuves
+//   qui ramenent exactement le 117,1 de la capture).
+//   BUMP : utils.js + index.html modifies. APP 6.69 -> 6.70, SW 7.24 -> 7.25.
 // v7.24 (25/08/2026) — UN INCIDENT RESEAU N'EST PAS UNE PANNE. APP 6.68 -> 6.69.
 //   Signale par Nico depuis la cave : « Promesse rejetee : Firebase: Error
 //   (auth/network-request-failed) » en travers de l'ecran pendant la saisie
@@ -2892,7 +2924,7 @@
 // v2.22 — Fix profils vides : guard vide dans loadData() pour MEMBRES/SAISONS/TACHES
 // v2.17 — Onboarding intégré + tenantId · v2.06 — Firebase Auth · v2.00–v2.05 — divers
 const DEBUG = self.location.hostname === 'localhost' || self.location.hostname === '127.0.0.1';
-const CACHE_NAME   = 'mavigne-v7.24';
+const CACHE_NAME   = 'mavigne-v7.25';
 const TENANT_CACHE = 'mavigne-tenant';   // Cache persistant — préservé à chaque mise à jour SW
 const SYNC_TAG     = 'mavigne-sync';
 
@@ -2908,7 +2940,7 @@ const CDN_URLS = [
 ];
 
 self.addEventListener('install', event => {
-  if(DEBUG) console.log('[SW] Ma Vigne v7.24 installé');
+  if(DEBUG) console.log('[SW] Ma Vigne v7.25 installé');
   event.waitUntil(
     caches.open(CACHE_NAME).then(async cache => {
       // ── Cœur applicatif : STRICT (mise à jour ATOMIQUE) ──
@@ -2924,7 +2956,7 @@ self.addEventListener('install', event => {
 });
 
 self.addEventListener('activate', event => {
-  if(DEBUG) console.log('[SW] Ma Vigne v7.24 activé');
+  if(DEBUG) console.log('[SW] Ma Vigne v7.25 activé');
   event.waitUntil(
     caches.keys().then(keys =>
       Promise.all(
