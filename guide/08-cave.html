@@ -24,6 +24,12 @@
       <li>État de chaque cuve : volume, contenu, stade</li>
       <li>Suivi des opérations de vinification</li>
       <li>Indicateur de santé de l'ensemble du cuvier, en un coup d'œil</li>
+      <li><b>Corriger un relevé</b> : la liste des relevés d'une cuve s'ouvre sous la courbe, un crayon
+    par ligne — date, densité, température, remontages, pigeages, note. Un relevé peut aussi être
+    supprimé. La liste reste accessible sur une cuve <b>déjà décuvée</b>.</li>
+      <li>Les <b>opérations</b> se corrigent de la même façon, et sont <b>toutes</b> listées.
+    Corriger ou supprimer une saignée <b>rend d'abord les hectolitres</b> à la cuve avant d'appliquer
+    la nouvelle valeur.</li>
       <li><b>Décuver → Le Chai</b> : la cuve devient une cuvée en élevage. Vous choisissez où part le vin —
     <b>en barriques</b>, <b>en cuve</b>, ou <b>les deux</b> — et le suivi d'ouillage démarre pour la part
     logée en bois. En mixte, ce qui ne tient pas dans la cuve passe en barriques. La cuve que vous videz
@@ -198,11 +204,26 @@
     chiffrées entre chaque étape, puis le rendement de chaque parcelle face au maximum de
     l'appellation.</li>
   </ul>
+  <div class="note"><span class="ni" aria-hidden="true">{ic:calendrier}</span><div><b>Les relevés se rangent
+  par date, pas par ordre de saisie.</b> Un carnet resté au cuvier et rattrapé le lendemain se plaçait en
+  bout de liste, et tout ce qui lit « le dernier relevé » le croyait le plus récent : la jauge d'avancement,
+  la courbe, la <b>fin de fermentation estimée</b>, l'alerte de température, le compteur « X jours sans
+  relevé ». Ils se remettent dans l'ordre du temps d'eux-mêmes, <b>y compris sur les saisies passées</b>,
+  dès l'ouverture du Cuvier — rien à ressaisir.</div></div>
   <div class="note tip"><span class="ni" aria-hidden="true">{ic:eclair}</span><div><b>Deux pentes valent mieux
   qu'une.</b> La fin de fermentation est projetée sur la moyenne des trois derniers relevés, mais un
   ralentissement est détecté sur les <b>deux</b> derniers : une moyenne lisse un décrochage récent et
   annoncerait « tout va bien » sur une cuve arrêtée depuis deux jours. Le même principe sert à la
   malo, à partir de l'acide malique de vos analyses.</div></div>
+  <div class="note"><span class="ni" aria-hidden="true">{ic:thermometre}</span><div><b>Un refroidissement dit
+  par quel moyen.</b> Groupe de froid, échangeur, <b>glace carbonique</b>, <b>azote liquide</b>,
+  <b>CO<sub>2</sub> liquide</b>, eau froide. Les trois qui se pèsent demandent une quantité en kilos ; la
+  carboglace affiche en plus l'abaissement approximatif obtenu — environ <b>1,4 °C par kilo et par
+  hectolitre</b>, un ordre de grandeur et rien de plus : la cuve n'est pas isolée, et le résultat dépend de
+  la répartition de la glace. Pour l'azote et le CO<sub>2</sub> liquide, aucun chiffre n'est avancé : le
+  rendement dépend trop du matériel. Le réchauffement a sa propre liste — ceinture, échangeur,
+  thermoplongeur, remontage à chaud. <b>Le moyen et la quantité partent au registre des
+  manipulations</b>, où c'est exactement ce qui est attendu.</div></div>
   <div class="note"><span class="ni" aria-hidden="true">{ic:verre}</span><div><b>Un millésime est une entité à
   part.</b> Une opération porte sur une seule année : on n'ouille pas les fûts de 2025 avec le vin de
   2026. Changer de millésime en tête du formulaire vide donc la sélection de cuvées. Si un seul

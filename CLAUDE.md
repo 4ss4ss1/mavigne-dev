@@ -11440,3 +11440,190 @@ version a été oublié.
   Une exception vaut mieux qu'un octet pourri au milieu du document.
 - **`mv-audit-rendement.js` n'est pas dans le dépôt** — script de console, livré hors build. À y
   mettre s'il resert.
+
+---
+
+## 70. ★★ CUV-1 — CORRIGER UN RELEVÉ, ET DIRE COMMENT LE FROID A ÉTÉ FAIT (30/08)
+
+**La demande de Nico**, en deux morceaux : pouvoir corriger une mesure déjà validée (la date, la
+densité), et pouvoir noter **par quel moyen** un refroidissement a été fait — glace carbonique,
+groupe de froid, azote liquide.
+
+### 70a. Ce que le code disait avant d'écrire une ligne
+
+- `saveVendMesure` faisait **toujours** un `push`. `openOvVendMesure(cuveId)` ne connaissait aucun
+  id de mesure et **vidait** le formulaire à chaque ouverture. Ni correction, ni suppression.
+- ⚠️ **Et surtout : aucune liste des relevés à l'écran.** Seulement le graphe, le dernier chiffre en
+  bandeau, et le tableau du document imprimable (`_cuvDoc`). **Le lot ne commençait donc pas par
+  poser un crayon, il commençait par ouvrir une porte qui n'existait pas.**
+- `saveVendOp` : même chose. `_vendOpsSummary` affichait la dernière opération et « +N autres »,
+  **sans aucun moyen d'atteindre ces N autres**.
+- `refroidissement` / `rechauffement` existaient dans `_VEND_OPS` mais ne stockaient que `temp_c`,
+  la **cible**. Aucun moyen, aucune quantité — donc rien à donner au registre.
+
+### 70b. ★★★ LE VRAI DANGER DU LOT : L'ORDRE DU TABLEAU PRIS POUR L'ORDRE DU TEMPS
+
+`mesures_fa` était lu **partout** comme s'il était rangé : `_vendLastMes` et `_vendStale`
+(`m[m.length-1]`), `_vendSparkline` (l'axe des x est l'**index**, pas la date), `_mlProjFA`
+(`m.slice(-3)` pour la pente et la projection de fin de FA), `_mlAMesurer`, `_mlAgenda` (l'alerte
+température). **Rien ne le rangeait jamais**, et la saisie a toujours accepté n'importe quelle date.
+
+⚠️ **Ce n'est donc pas un défaut introduit par la correction : il était déjà là.** Un seul relevé de
+rattrapage — le carnet resté au cuvier, saisi le lendemain — suffisait à faire mentir la jauge, la
+courbe, la date de fin estimée et les alertes. **Autoriser la correction d'une date sans trier
+aurait transformé un piège rare en piège quotidien.**
+
+Le tri (`_vendTriDate` / `_vendTriMes` / `_vendTriOps`) est appliqué **à l'enregistrement ET à la
+lecture**. La lecture n'est pas du zèle : c'est ce qui **répare les tableaux déjà désordonnés** chez
+les clients, sans migration ni backfill. `_vendTriMes` pose au passage un `id` aux relevés qui n'en
+ont pas — sans id, une ligne n'est pas corrigeable.
+
+★ **Leçon générale, à ressortir avant tout lot d'édition : rendre une donnée MODIFIABLE, c'est
+d'abord vérifier que tout ce qui la LIT supporte qu'elle change.** Le travail n'est pas dans le
+formulaire, il est chez les lecteurs.
+
+### 70c. ★★ La saignée est la seule opération qui MUTE la cuve
+
+`saveVendOp` retranchait le volume saigné à `c.volume_hl` **à la création**. Corriger une saignée de
+6 à 10 hL sans rien faire d'autre aurait donné 34 − 10 = **24 hL** au lieu de 40 − 10 = 30.
+Supprimer une saignée aurait laissé les hL dans le trou pour toujours.
+
+**Règle gravée : on REND l'ancien volume avant d'appliquer le nouveau** — à la correction, à la
+suppression, **et quand le type change** (une saignée requalifiée en délestage doit rendre ses hL).
+★ **Même famille que RDT-1/2/3** : un volume faux dans une cuve, c'est un rendement faux à l'hectare.
+
+### 70d. Le froid, et ce qu'on refuse de chiffrer
+
+Deux tables, parce que réchauffer et refroidir n'ont pas les mêmes moyens :
+
+| `_VEND_FROID` | `_VEND_CHAUD` |
+|---|---|
+| groupe de froid · échangeur · **glace carbonique** · **azote liquide** · **CO₂ liquide** · eau froide · autre | ceinture chauffante · échangeur · thermoplongeur · remontage à chaud · autre |
+
+`_vendMoyKg` dit lesquels **se pèsent** : les trois en gras, et eux seuls, ouvrent un champ en kg.
+
+★★ **Ce qui n'est PAS chiffré, et pourquoi.** Pour la **carboglace** seule, l'abaissement est
+annoncé : ~571 kJ/kg de sublimation contre ~407 kJ par degré et par hL de moût, soit **~1,4 °C par
+kg et par hL** — un ordre de grandeur stable, connu du métier, et **présenté comme tel** (« la cuve
+n'est pas isolée, le résultat dépend de la répartition »). Pour l'**azote** et le **CO₂ liquide**,
+le rendement dépend trop du matériel : **aucun chiffre n'est inventé**, la quantité est simplement
+enregistrée. *Un chiffre juste mais mal compris vaut un chiffre faux ; un chiffre douteux, pire.*
+
+**Le moyen et la quantité remontent seuls au registre des manipulations** via `_rmDetail` —
+`RM_TYPES` classait déjà `refroidissement` en `pratique`. C'est précisément ce qu'un contrôle
+cherche : pas la température visée, mais l'**intrant**.
+
+### 70e. Le harnais
+
+`scripts/mv-harnais-cuvier-correction.mjs` — **38 assertions vertes**, `--contre` **4 vertes**.
+Méthode C20 : fonctions extraites de `src/cave.js` et **exécutées**, bouchons minimaux, aucune
+formule recopiée. `document.getElementById` rend des nœuds **persistants** — sans cela, la fonction
+qui écrit et le test qui relit ne parlent pas du même objet, et le test passe sur du vide.
+
+⚠️ **Deux pièges d'écriture du harnais, tous deux vécus dans la même heure :**
+1. `^var NOM\s*=[\s\S]*?;$` **avale tout** quand le point-virgule n'est pas en fin de ligne
+   (`var _ML_D20_SEC = 996;  // commentaire`). **Équilibrer les crochets et s'arrêter au premier
+   `;` de niveau zéro**, jamais une regex gourmande.
+2. Une assertion a rougi sur la densité corrigée : **c'était l'assertion qui était fausse**
+   (1010 brut à 26 °C fait 1012 à 20 °C, pas 1013). ★ **Réflexe : demander d'abord si c'est
+   l'attente qui se trompe, pas le code.**
+
+Les quatre contre-épreuves (tri retiré · restitution du volume saigné retirée · moyen retiré du
+registre · correction repassée en `push`) **rougissent toutes** — dont C2 qui ramène exactement les
+24 hL.
+
+### 70f. Clôture
+
+| fichier | ce qui change | bump |
+|---|---|---|
+| `src/cave.js` | tri chronologique · historique des relevés · correction/suppression de relevé et d'opération · moyens de froid · restitution du volume saigné · `_rmDetail` | — |
+| `scripts/mv-harnais-cuvier-correction.mjs` (neuf) | 38 règles + 4 contre-épreuves | — |
+
+★★ **AUCUN BUMP — et c'est la règle, pas un oubli.** `cave.js` seul ne bumpe rien. **Mais le lot est
+très visible du client** : le prochain bump devra l'annoncer dans son `WHATS_NEW` (§7, « quand un lot
+visible part sans bump, le prochain bump l'annonce »).
+
+⚠️ **Le bouton « Supprimer ce relevé » est injecté en JS** dans `#ovVendMesure .modal-body`
+(`_vmInjectActions`), sur le patron de `_vendInjectClientField`. **C'est ce qui garde `index.html`
+intact, donc le SW aussi.** Le conteneur est retrouvé par `getElementById('vm-actions')` et créé une
+seule fois — pas de sélecteur dépendant d'un texte de bouton.
+
+**Vérifié** : `node --check --input-type=module` · `catch(){}` vides **3 → 3** · balance `<div>`
+**−2 → −2** (le déséquilibre préexistant de `cave.js` est **préservé**, §20) · handlers
+`onclick/onchange/oninput` non exposés : **`closeOv` seul**, la globale d'`app.js` ·
+`node scripts/preflight.mjs` **0 erreur**, identique à la base · `npm run check` **36/36** ·
+harnais `cuvdoc` 46, `rendement` 20/20, `releve` 96, `vendange-parts` 134, `icones` 28 — tous verts.
+
+⚠️ **Deux cliquets ont mordu pendant le lot, et ils avaient raison :**
+- **C24b** : les nouveaux `onclick="openOvVendMesure('…','…')"` posaient des ids dans un slot JS
+  **sans `_escAttr`** → 36 contre 32. Corrigé à l'interpolation.
+- **Cliquet des graisses** (`mv-harnais-jetons`, 147 → 148) : ma règle CSS **redéclarait** un
+  `font-weight:400` déjà présent. ★ **Fusionner le sélecteur dans la règle existante**
+  (`.mvv-opslist .u,.mvv-histwrap>summary .u`) plutôt qu'ajouter un pas de plus à l'échelle.
+
+### 70g. ⚠️ Ce qui reste ouvert
+
+- ~~Le guide n'est pas à jour de ce lot.~~ **Fait en 70h**, dans la foulée.
+- **`_cuvDoc` n'affiche pas encore le moyen dans le tableau des opérations** — il passe par
+  `_rmDetail`, donc il l'a **déjà** ; à vérifier sur un vrai document imprimé avant de conclure.
+- **La note de dégustation reste une ligne de texte libre.** Correcte, mais elle ne se cherche pas.
+- **`_vendSparkline` indexe toujours par position**, pas par date : deux relevés à trois jours
+  d'écart sont dessinés à la même distance que deux relevés du même jour. Sans effet sur la
+  justesse depuis le tri, mais la courbe reste **déformée dans le temps**. `_vendFermSvg` (≥ 3
+  relevés) est correct, lui.
+
+### 70h. ★★ L'ACCOMPAGNEMENT, ET LE BUMP QU'IL ENTRAÎNE (30/08, même journée)
+
+**Règle n°1 du chapitre accompagnement : un lot qui change un écran met à jour `MV_AIDE`, la source
+du guide et `_mvtSteps` DANS LE MÊME LOT.** CUV-1 est parti sans — `cave.js` seul, aucun bump. Le
+lot n'était donc **pas fini**, et §70g le disait. Voici la fermeture.
+
+★★ **La conséquence mécanique, qu'il faut voir venir : `MV_AIDE` vit dans `utils.js`.** Toucher
+l'accompagnement d'un lot « sans bump » **déclenche le bump** — APP **6.70 → 6.71**, SW
+**7.25 → 7.26**. Ce n'est pas un effet de bord regrettable, **c'est l'occasion prévue par §7** :
+« quand un lot visible part sans bump, le prochain bump l'annonce ». CUV-1 est donc annoncé dans le
+`WHATS_NEW` **6.71**, en quatre entrées, du point de vue du vigneron.
+
+⚠️ **`utils.js` mélange DEUX conventions d'écriture, et l'ancre échoue si on se trompe :**
+`WHATS_NEW` est en **échappements** (`\u00e9`), `MV_AIDE` en **caractères littéraux** (`é`).
+Mon ancre `MV_AIDE` écrite en `\u…` a rendu **zéro occurrence**. ★ **Extraire l'ancre du fichier
+réel avec `repr()`** — la règle existait déjà, elle vient de resservir.
+
+**`_mvtSteps` : rien à changer, et c'est VÉRIFIÉ, pas supposé.** La visite guidée passe par
+`#mvc-elevage` (Le Chai) et `#ml-body` / `#cave-view-mil` (Le millésime). **Aucune étape ne cible
+l'écran des cuves** — `#mvv-body` n'apparaît dans `app.js` que dans les **squelettes de
+chargement**, pas dans la visite. (Le « 15ᵉ moment, Cave » reste au backlog ; ce n'est pas ce lot.)
+
+**Guide** : `guide/08-cave.html` prend deux puces dans la carte Cuvier (corriger un relevé ·
+corriger une opération, saignée comprise) et **deux notes** — l'une sur les moyens de refroidissement,
+l'autre sur le rangement par date. Puis `node scripts/build-guide.mjs`, **qui n'est pas dans le
+pipeline** : sans lui, `public/guide.html` part périmé. `--check` vert, 15 sections.
+
+### 70i. Clôture du lot complet
+
+| fichier | ce qui change | bump |
+|---|---|---|
+| `src/cave.js` | CUV-1 (§70a–70d) | — |
+| `scripts/mv-harnais-cuvier-correction.mjs` (neuf) | 38 règles + 4 contre-épreuves | — |
+| `src/utils.js` | `APP_VERSION` · `WHATS_NEW` (bloc 6.71, 4 items) · `MV_AIDE.cave` (3 points neufs) | ★ APP |
+| `index.html` | les **4** affichages de version | ★ APP |
+| `public/sw.js` | en-tête · `CACHE_NAME` · les **2** `console.log` · changelog prépendé | ★ SW |
+| `guide/08-cave.html` · `public/guide.html` | 2 puces + 2 notes, guide régénéré | — |
+
+**Vérifié** : `node --check` sur `cave.js` et `utils.js` · `v7.25` subsiste **exactement 1 fois**
+(la ligne de changelog d'avant), `v7.26` **exactement 5** · aucun `6.70` résiduel dans `index.html` ·
+`WHATS_NEW` **exécuté en Node** — 161 blocs, tête = `APP_VERSION`, ordre strictement décroissant,
+zéro doublon, zéro backslash visible, zéro demi-surrogate isolé, les 3 icônes (`crayon`,
+`thermometre`, `cuve`) existent au sprite · `_whatsNewSince` joué sur les **quatre** cas
+(précédente → 1 bloc · ancienne → 4 · courante → 0 · future → 0) · `npm run check` **code de sortie
+0** · **`npm run build` vert** (37 modules, précache 2 assets) · harnais CUV-1 **38/38** puis
+**4/4**.
+
+⚠️ **`npm run test:smoke` et `test:e2e` N'ONT PAS PU TOURNER ICI** : Playwright télécharge son
+navigateur depuis `cdn.playwright.dev`, **hors liste blanche du bac à sable** (403 « Host not in
+allowlist »). Ce n'est pas un vert, ce n'est pas un rouge — **c'est un contrôle non joué**, à faire
+côté Nico. ★ **Le dire vaut mieux que le passer sous silence** : un harnais qu'on n'a pas lancé ne
+prouve rien, exactement comme un harnais qui ne peut pas rougir.
+
+★ **Deux dépendances de bac à sable, notées une fois pour toutes** : `npm ci --ignore-scripts` passe
+(registry.npmjs.org est autorisé), `vite build` passe, **Playwright non**.

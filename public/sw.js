@@ -1,4 +1,19 @@
-// MA VIGNE — Service Worker v7.25
+// MA VIGNE — Service Worker v7.26
+// v7.26 (30/08/2026) — CUV-1 : corriger un releve et dire COMMENT le froid a
+//   ete fait. APP 6.70 -> 6.71.
+//   Le Cuvier n'avait AUCUNE liste des releves a l'ecran : ni correction, ni
+//   suppression, et les operations s'arretaient a « +N autres » sans porte.
+//   ★★ Le vrai danger n'etait pas l'edition, c'etait l'ORDRE : mesures_fa etait
+//   lu partout comme range (m[m.length-1], m.slice(-3)) alors que rien ne le
+//   rangeait. Un releve rattrape suffisait deja a fausser jauge, courbe, fin de
+//   FA estimee et alertes. Tri applique a l'ecriture ET a la lecture : repare
+//   les tableaux deja desordonnes, sans backfill.
+//   ★ La saignee est la seule operation qui mute la cuve : on REND l'ancien
+//   volume avant d'appliquer le nouveau (correction, suppression, changement de
+//   type). Sinon les hL sont retranches deux fois et le rendement part avec.
+//   Refroidissement/rechauffement portent un MOYEN et une quantite en kg, repris
+//   au registre des manipulations. Carboglace seule : abaissement estime.
+//   Lot precedent (cave.js seul, sans bump) annonce dans WHATS_NEW 6.71.
 // v7.25 (28/08/2026) — LES RENDEMENTS ETAIENT FAUX (lots RDT-1/2/3). APP 6.69 -> 6.70.
 //   Signale par Nico : Pilotage > Cave annoncait 117,1 hL/ha sur 20 Rangs, 93,6
 //   sur Au Velle, 89 sur Bollery Blanc. Impossible en Cote de Nuits.
@@ -2924,7 +2939,7 @@
 // v2.22 — Fix profils vides : guard vide dans loadData() pour MEMBRES/SAISONS/TACHES
 // v2.17 — Onboarding intégré + tenantId · v2.06 — Firebase Auth · v2.00–v2.05 — divers
 const DEBUG = self.location.hostname === 'localhost' || self.location.hostname === '127.0.0.1';
-const CACHE_NAME   = 'mavigne-v7.25';
+const CACHE_NAME   = 'mavigne-v7.26';
 const TENANT_CACHE = 'mavigne-tenant';   // Cache persistant — préservé à chaque mise à jour SW
 const SYNC_TAG     = 'mavigne-sync';
 
@@ -2940,7 +2955,7 @@ const CDN_URLS = [
 ];
 
 self.addEventListener('install', event => {
-  if(DEBUG) console.log('[SW] Ma Vigne v7.25 installé');
+  if(DEBUG) console.log('[SW] Ma Vigne v7.26 installé');
   event.waitUntil(
     caches.open(CACHE_NAME).then(async cache => {
       // ── Cœur applicatif : STRICT (mise à jour ATOMIQUE) ──
@@ -2956,7 +2971,7 @@ self.addEventListener('install', event => {
 });
 
 self.addEventListener('activate', event => {
-  if(DEBUG) console.log('[SW] Ma Vigne v7.25 activé');
+  if(DEBUG) console.log('[SW] Ma Vigne v7.26 activé');
   event.waitUntil(
     caches.keys().then(keys =>
       Promise.all(
