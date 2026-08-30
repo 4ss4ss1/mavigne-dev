@@ -123,9 +123,46 @@ window._rsvPrixUSansPrix=_rsvPrixUSansPrix;
 // ── Bilan matière : sorties (DÉRIVÉES, jamais stockées) ──
 // Retourne {q, known} : known=false quand la source n'est pas encore exploitable
 // (phyto avant structuration des doses) → on n'affiche alors PAS de stock trompeur.
+// ── Consomme depuis LE CUVIER : les adjonctions posees sur les cuves ──
+// ⚠️⚠️ Cette source est filtree PAR PRODUIT (`o.prod_id===pid`), contrairement
+//   a `cave_so2` qui additionne TOUT le SO2 de la cave sans regarder de quel
+//   produit il s'agit. Tant qu'un seul produit oeno portait `cave_so2` le
+//   raccourci tenait ; avec tanins, enzymes et bentonite au catalogue, il
+//   attribuerait a CHACUN la totalite du soufre. C'est pour ca que les
+//   nouveaux produits oeno partent en `cuvier` et non en `cave_so2` — les
+//   produits deja crees, eux, ne bougent pas : aucune migration.
+function _consoCuvier(pid, exclId){
+  var CV=window.CAVE_VENDANGE;
+  if(!pid||!CV||!CV.cuves_vinif) return 0;
+  var t=0;
+  CV.cuves_vinif.forEach(function(c){
+    ((c&&c.operations)||[]).forEach(function(o){
+      if(!o||o.prod_id!==pid) return;
+      if(exclId&&o.id===exclId) return;
+      var q=parseFloat(o.qte);
+      if(isFinite(q)&&q>0) t+=q;
+    });
+  });
+  return t;
+}
+// Combien de ces adjonctions reposent sur un volume ESTIME. Le chiffre qui
+// permet de DIRE qu'un ecart peut venir du volume plutot que d'une facture
+// manquante — sans lui, on cherche une facture qui n'existe pas.
+function _consoCuvierEstime(pid){
+  var CV=window.CAVE_VENDANGE;
+  if(!pid||!CV||!CV.cuves_vinif) return 0;
+  var n=0;
+  CV.cuves_vinif.forEach(function(c){
+    ((c&&c.operations)||[]).forEach(function(o){
+      if(o&&o.prod_id===pid&&o.vol_src==='estime'&&parseFloat(o.qte)>0) n++;
+    });
+  });
+  return n;
+}
 function _conso(p){
   var src=p.conso_src||'registre';
   if(src==='manual'){ return {q:(p.conso_manuel||0), known:true}; }
+  if(src==='cuvier'){ return {q:_consoCuvier(p.id,null), known:true}; }
   if(src==='cave_so2'){
     var CE=window.CAVE_ELEVAGE;
     if(!CE||!CE.operations) return {q:0, known:true};
@@ -164,6 +201,17 @@ function _stock(p){
   return { q:_invOuv(p)+_achatsQ(p)-c.q, known:c.known, conso:c.q, ouv:_invOuv(p), achats:_achatsQ(p) };
 }
 function _nbUnites(p,q){ return p.contenance?Math.round(q/p.contenance*10)/10:null; }
+
+// Le stock d'un produit vu depuis un AUTRE module (le Cuvier). `suit` dit si
+// ce produit se consomme bien depuis les cuves : sinon l'ecran de saisie
+// annoncerait une deduction qui n'aura jamais lieu.
+window._rsvStockPour=function(pid, exclOpId){
+  var p=(INTRANTS.produits||[]).find(function(x){ return x&&x.id===pid; });
+  if(!p) return null;
+  var suit=(p.conso_src==='cuvier');
+  var q=suit ? (_invOuv(p)+_achatsQ(p)-_consoCuvier(p.id,exclOpId)) : _stock(p).q;
+  return { nom:p.nom, unite:p.unite||'kg', q:q, suit:suit, srcLbl:_consoSrcLbl(p) };
+};
 
 window.INTRANTS = INTRANTS;
 
@@ -630,7 +678,7 @@ function _rsvIntrantsHtml(){
   var neg=INTRANTS.produits.filter(function(p){var s=_stock(p);return s.known&&s.q<0;});
   neg.forEach(function(p){
     var s=_stock(p);
-    h+='<div class="mvr-alert"><span class="mvr-ai">'+_mvIcon('alerte',18)+'</span><span class="mvr-at"><b>'+_escHtml(p.nom)+' : stock négatif ('+_fmt(s.q)+' '+p.unite+').</b> Le consommé dépasse les entrées — une facture d\'achat manque ou le consommé est surestimé. Le bilan ne peut pas fermer tant que l\'écart n\'est pas corrigé.</span></div>';
+    h+='<div class="mvr-alert"><span class="mvr-ai">'+_mvIcon('alerte',18)+'</span><span class="mvr-at"><b>'+_escHtml(p.nom)+' : stock négatif ('+_fmt(s.q)+' '+p.unite+').</b> Le consommé dépasse les entrées — une facture d\'achat manque ou le consommé est surestimé. Le bilan ne peut pas fermer tant que l\'écart n\'est pas corrigé.'+_rsvNegEstime(p)+'</span></div>';
   });
   if(!INTRANTS.produits.length){
     h+='<div class="mvr-empty">'+_mvIcon('eprouvette',40)+'<div>Aucun intrant suivi.</div>'+(adm?'<div class="mvr-empty-h">Enregistre un achat pour créer ton premier intrant et démarrer le bilan matière.</div>':'')+'</div>';
@@ -666,7 +714,17 @@ function _rsvIntrantsHtml(){
   });
   return h;
 }
+// La TROISIEME cause d'un ecart, et la seule qui soit nouvelle : la dose etait
+// juste, mais le volume sur lequel elle a ete appliquee etait estime.
+function _rsvNegEstime(p){
+  if(!p||p.conso_src!=='cuvier') return '';
+  var n=_consoCuvierEstime(p.id);
+  if(!n) return '';
+  return ' <b>'+n+' adjonction'+(n>1?'s':'')+' du Cuvier repose'+(n>1?'nt':'')
+    +' sur un volume estim\u00e9</b> \u2014 l\u2019\u00e9cart peut venir de l\u00e0 avant de venir d\u2019une facture.';
+}
 function _consoSrcLbl(p){
+  if(p.conso_src==='cuvier') return 'Consomm\u00e9 : adjonctions du Cuvier';
   if(p.conso_src==='cave_so2') return 'Consommé : opérations Cave (SO\u2082)';
   if(p.conso_src==='manual') return 'Consommé : saisie manuelle';
   return 'Consommé : registre phyto';
@@ -739,7 +797,7 @@ function _rsvNpCatChange(){
   //   et le stock resterait « inconnu » a vie (_conso rend known:false). Les
   //   quatre categories nouvelles partent donc en saisie manuelle.
   var src=document.getElementById('mvr-np-src');
-  if(src) src.value=(cat==='oeno')?'cave_so2':((cat==='phyto')?'registre':'manual');
+  if(src) src.value=(cat==='oeno')?'cuvier':((cat==='phyto')?'registre':'manual');
   // L'atelier deduit s'affiche : une deduction qu'on ne peut pas verifier est
   // indistinguable d'une invention.
   var ded=document.getElementById('mvr-np-ate');
@@ -1118,7 +1176,7 @@ function _rsvEnsureOverlays(){
         +'<div id="mvr-np-man" style="display:none"><div class="mvr-fl">Nom de l\'intrant</div><input class="mvr-fi" id="mvr-np-nom" placeholder="ex. Bouillie Bordelaise RSR"></div>'
         +'<div class="mvr-f2"><div><div class="mvr-fl">Unité</div><select class="mvr-fi" id="mvr-np-unite" onchange="_rsvUpdContHint()"><option value="kg">kg</option><option value="L">L</option></select></div>'
         +'<div><div class="mvr-fl">Contenance / unité</div><input type="number" class="mvr-fi" id="mvr-np-cont" placeholder="ex. 25" oninput="_rsvUpdContHint()"></div></div>'
-        +'<div class="mvr-fl">Consommé calculé via</div><select class="mvr-fi" id="mvr-np-src"><option value="registre">Registre phyto</option><option value="cave_so2">Opérations Cave (SO\u2082)</option><option value="manual">Saisie manuelle</option></select>'
+        +'<div class="mvr-fl">Consommé calculé via</div><select class="mvr-fi" id="mvr-np-src"><option value="registre">Registre phyto</option><option value="cuvier">Adjonctions du Cuvier</option><option value="cave_so2">Opérations Cave (SO\u2082)</option><option value="manual">Saisie manuelle</option></select>'
         +'<div class="mvr-ded" id="mvr-np-ate"></div>'
         +'</div>'
       +'</div>'

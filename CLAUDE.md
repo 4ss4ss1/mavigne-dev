@@ -11627,3 +11627,169 @@ prouve rien, exactement comme un harnais qui ne peut pas rougir.
 
 ★ **Deux dépendances de bac à sable, notées une fois pour toutes** : `npm ci --ignore-scripts` passe
 (registry.npmjs.org est autorisé), `vite build` passe, **Playwright non**.
+
+---
+
+## 71. ★★★ INTR-1 — LES ADJONCTIONS DE CUVERIE, ET LE GARDE-FOU QU'IL NE FALLAIT PAS ÉCRIRE (30/08 — APP 6.71 → 6.72 · SW 7.26 → 7.27)
+
+**La demande**, transmise par Nico depuis un client : pouvoir enregistrer des opérations de cuverie
+pendant les vinifications — **bentonite, tanins, enzymes** — parce que ce n'était pas présent.
+
+### 71a. La première lecture était fausse, et c'est la leçon d'ouverture
+
+Le premier diagnostic a visé `CAVE_ELEVAGE.operations` et ses cinq types (ouillage, soutirage,
+soufre, analyse, autre), en concluant qu'il fallait un tableau `intrants[]` neuf sur la cuve. **Les
+deux conclusions étaient fausses**, pour une seule raison : le dépôt cloné datait d'avant le lot
+CUV-1. `_VEND_OPS` existait déjà avec huit types, dont `levurage` et `nutriment`.
+
+★★ **Une analyse d'architecture sur un fichier périmé produit une architecture périmée** — et elle
+est d'autant plus dangereuse qu'elle est cohérente. Rien dans le raisonnement ne sonnait faux ; seul
+le `git pull` l'a arrêté. **Relire les fichiers n'est pas une politesse de début de session, c'est la
+condition de validité de tout ce qui suit.**
+
+### 71b. Ce que le code disait avant d'écrire une ligne
+
+- `_VEND_OPS` portait 8 types. Trois entrées à ajouter, pas un tableau.
+- `levurage` et `nutriment` portent un **texte libre** (`souche`, `ntype`). C'est précisément
+  pourquoi ils ne sortent d'aucun stock : un nom tapé à la main ne se rapproche d'une fiche produit
+  qu'à l'orthographe près. Les trois nouveaux prennent donc un `prod_id` de La Réserve.
+- `_conso(p)` (reserve.js) dérive les sorties, **ne les stocke jamais** : `registre` (phyto),
+  `manual`, `cave_so2`. Un intrant qui « sort du stock » n'écrit donc rien — il se laisse compter.
+- La catégorie `oeno` existait déjà, et `_CAT2ATE` la range dans l'atelier Cave. La boucle achat →
+  stock → usage → coût d'atelier était **déjà câblée** : il manquait le maillon du milieu.
+
+### 71c. ★★★ LE CŒUR DU LOT : LE GARDE-FOU QU'IL NE FALLAIT PAS ÉCRIRE
+
+Le réflexe, en branchant une sortie sur un stock, est d'écrire :
+
+```js
+if(dose > stock){ showToast('Stock insuffisant'); return; }
+```
+
+Ce garde-fou refuserait d'enregistrer un tanin **déjà dans la cuve** parce qu'une facture n'est pas
+saisie. Il **ferait mentir le suivi pour protéger la comptabilité** — l'inverse exact de la règle
+maison « source absente ⇒ tiret, jamais zéro ».
+
+★★ **Vérifié avant de décider** : La Réserve savait déjà accueillir le négatif. `_rsvIntrantsHtml`
+filtre `s.known && s.q < 0`, sort un bandeau, passe le chiffre en `--rouge`, colle un badge
+**⚠ écart** au lieu de **✓ cohérent**, et le bilan matière imprimé écrit `ecart`. Aucun
+`Math.max(0, …)` sur la quantité. **Le geste du lot n'était donc pas d'ajouter quelque chose, c'était
+de ne pas écrire une ligne.** La contre-épreuve C10 réintroduit ce garde-fou et vérifie qu'il serait
+détecté — un défaut d'omission se garde par une sonde de texte, pas par un test fonctionnel.
+
+### 71d. Le volume porte sa source — RDT-1 rejoué à l'identique
+
+La quantité d'un intrant se calcule sur un volume, et `c.volume_hl` est la **contenance** de la
+cuve, pas son contenu. C'est mot pour mot la faute §69. Une dose juste sur un volume faux donne une
+quantité fausse, **affichée avec l'aplomb d'un calcul**.
+
+`_vendIntrVol(c)` rend `{hl, src}` : `mesure` si `_vendVolLoge` renvoie un volume décuvé, `estime`
+sinon. Un troisième état `saisi` **se déduit** en comparant la case au repère — jamais demandé.
+⚠️ **Une source qu'on demande peut être contredite par le chiffre d'à côté ; une source qui se
+déduit ne le peut pas.** L'écran écrit « volume estimé », `_rmDetail` imprime « (estimé) ».
+
+### 71e. ⚠️ LE DÉFAUT LATENT QUE CE LOT RÉVEILLE : `cave_so2` NE FILTRE PAS
+
+`_conso` avec `cave_so2` additionne **tout** le SO₂ du chai sans regarder de quel produit il s'agit.
+Tant qu'un seul produit œno portait cette source, le raccourci tenait. Avec quatre produits au
+catalogue, il aurait attribué **la totalité du soufre à chacun**.
+
+Traité par **contournement, pas par migration** : la nouvelle source `cuvier` filtre sur
+`o.prod_id === pid`, et `_rsvNpCatChange` fait partir les nouveaux produits `oeno` en `cuvier` au
+lieu de `cave_so2`. Les fiches déjà créées ne bougent pas. ★ **Changer un défaut par le défaut est
+un lot à part entière ; changer le défaut par défaut ne coûte rien et n'ouvre aucun backfill.**
+
+### 71f. La troisième cause d'un écart
+
+Un écart sur un produit œno a maintenant **trois** causes, pas deux : facture manquante, consommé
+surestimé, **ou volume estimé trop haut**. Sans la troisième nommée, on cherche une facture qui
+n'existe pas. `_consoCuvierEstime(pid)` compte les adjonctions concernées et l'alerte les annonce.
+
+### 71g. Livré
+
+| Fichier | Ce qui change |
+| --- | --- |
+| `src/cave.js` | `_VEND_OPS` +3 · bloc `_vendIntr*` · branche de saisie, d'écriture et de détail · `RM_TYPES` +3 · `_rmDetail` |
+| `src/reserve.js` | source `cuvier` · `_consoCuvier` · `_consoCuvierEstime` · `_rsvStockPour` · `_rsvNegEstime` · défaut `oeno` · option du `<select>` |
+| `src/utils.js` | APP 6.72 · `WHATS_NEW` préfixé (3 items) · `MV_AIDE` Cave +3 points · `MV_AIDE` Réserve reformulé |
+| `index.html` | les 4 emplacements de version |
+| `public/sw.js` | v7.27 — entête, `CACHE_NAME`, 2 `console.log` |
+| `guide/08-cave.html`, `guide/09-reserve.html` | 5 encadrés · `public/guide.html` régénéré |
+| `scripts/mv-harnais-intrants.mjs` | **neuf** — 60 assertions, 10 contre-épreuves. Branché dans `check` et `prebuild`. |
+| `scripts/mv-harnais-agenda.mjs` | **neuf** — 31 assertions, 6 contre-épreuves. Couvre `_mlOuillages`, `_mlVolParFut`, `_mlAgenda`. |
+| `package.json` | les deux harnais dans `check` et `prebuild` |
+
+`_mvtSteps` **n'a pas bougé, et c'est un choix vérifié** : sa scène Cave parle du Chai et du
+millésime, elle n'énumère aucune opération de cuverie. La règle d'accompagnement dit « dire vrai »,
+pas « toucher les trois fichiers à chaque fois ».
+
+⚠️ **Non joué de mon côté** : `npm run test:smoke` et `npm run test:e2e` (Playwright indisponible en
+bac à sable). `npm run check` passe.
+
+### 71g-bis. ⚠️⚠️ LE LOT A DÛ ÊTRE REBÂTI : UN PUSH A ANNULÉ CUV-1
+
+Entre la livraison et l'intégration, Nico a poussé `dfb88c4 « Update cave.js »` : **56 insertions,
+299 suppressions**. Vérifié, pas supposé — le `cave.js` poussé est **identique à une ligne près** au
+`cave.js` d'avant CUV-1 (`git show 6732441:src/cave.js`). Tout le lot 70 avait disparu :
+`_vendTriDate`, `_vendTriMes`, `_vendTriOps`, `_vendMesHist`, `_vendMesDel`, `_vendOpDel`,
+`_VEND_FROID`, `_VEND_CHAUD`, `_vendMoyKg`, `_vmesureEditId`, `_vendOpEditId` — zéro occurrence.
+
+**La cause n'est pas une décision, c'est une copie locale périmée** : la vraie modification tenait en
+une ligne, et elle a été faite sur un fichier antérieur au lot précédent.
+
+★★★ **LA RÈGLE QUI EN SORT.** Le dépôt n'est pas une sauvegarde, c'est une **source unique**.
+Modifier un fichier livré la veille impose de repartir du fichier du dépôt, jamais d'un exemplaire
+gardé sur le poste. Le symptôme est silencieux : le push réussit, rien ne rougit, et ce sont
+`WHATS_NEW`, `MV_AIDE` et le guide qui se mettent à **promettre des écrans qui n'existent plus**.
+⚠️ Le contrôle qui l'a attrapé n'est aucun harnais : c'est le `git pull` avant réintégration, et la
+comparaison du fichier reçu avec les commits antérieurs.
+
+**Ce qui a été fait** : `cave.js` rebâti sur la base CUV-1 (`73a5e47`), le correctif de Nico reporté
+dessus, puis les huit motifs INTR-1 réappliqués — leurs blocs **extraits du fichier v1 déjà livré**,
+jamais retapés. Le fichier final ne diffère de la v1 que par le correctif ci-dessous.
+
+### 71g-ter. ★★ LE CORRECTIF DE NICO : `futs` N'ÉTAIT DÉCLARÉ NULLE PART
+
+Dans `_mlOuillages`, la boucle poussait `{futs:futs, litres:Math.round(futs*…)}` alors que **`futs`
+n'existe pas dans la portée**. Le seul `var futs` du fichier (ligne ~680) est le local d'une autre
+fonction.
+
+**Prouvé par exécution**, pas par lecture : la fonction extraite et appelée avec une cuvée ouillable
+lève `ReferenceError: futs is not defined`. Elle emportait donc **tout l'agenda du millésime** dès la
+première cuvée. ⚠️ **Le défaut est antérieur à CUV-1** — il était déjà dans le `cave.js` de 6.70,
+donc **en production chez les deux clients** depuis au moins ce lot.
+
+Le correctif est `var garde=0, futs=_caveNbTonneaux(c);`. Il part avec INTR-1.
+
+⚠️ **Aucun harnais ne couvrait `_mlOuillages`** — vérifié : `grep -l _mlOuillages scripts/*.mjs`
+sortait vide. Un `ReferenceError` sur une variable jamais déclarée est exactement ce qu'un harnais
+fonctionnel attrape en une assertion, et ce qu'aucune relecture n'attrape : **le code se lit très
+bien**. C'est le seul défaut de la série §69–§71 qu'aucune sonde n'aurait pu voir.
+
+★ **Le trou est bouché dans le même lot** : `scripts/mv-harnais-agenda.mjs`, **31 assertions,
+6 contre-épreuves**, branché dans `check` et `prebuild`. La C1 réintroduit exactement le défaut du
+30/08. Il grave quatre règles de la chaîne d'ouillage :
+
+1. **`futs` et `seuil` se calculent DANS la boucle**, par cuvée. Sortis de la boucle, toute la cave
+   prend le compte de fûts et la cadence de la première — et rien ne le signale.
+2. Une cuvée qui ne s'ouille pas (inox, béton) n'entre pas à l'agenda ; **un foudre bois, si**. Le
+   filtre est `_caveOuille`, jamais `_caveNbTonneaux` — qui n'est juste sur l'inox que par accident.
+3. **Jamais ouillée = due aujourd'hui**, marquée `jamais:true`, et **sans retard inventé** : il n'y a
+   pas de précédent à comparer.
+4. L'ordre d'affichage ne s'écrit **jamais** `(ordre[k]||9)` : `alerte` vaut `0`, et `0||9` rend `9`.
+   L'alerte de température passerait sous les ouillages. C'est la règle « `(table[k] || défaut)` est
+   interdit quand `table[k]` peut valoir 0 », appliquée à un tri.
+
+### 71h. Ce qui reste ouvert
+
+- **Levurage et nutriment gardent leur texte libre.** Les basculer sur La Réserve fermerait
+  entièrement la boucle œno, mais c'est une migration de données : hors périmètre de ce lot.
+- **La lecture des rapports d'analyse labo.** Tranché en conversation : route **déterministe**,
+  `pdf.js` côté navigateur sur la couche texte du PDF, un gabarit par laboratoire, testable au
+  harnais. Pas d'IA, donc pas de sous-traitant à déclarer en Annexe 3 du DPA, pas de transfert hors
+  UE, aucun coût, et ça marche hors ligne. Ce qui n'a pas de couche texte retombe sur la saisie
+  manuelle — le comportement d'aujourd'hui, donc aucune régression.
+  ⚠️⚠️ **Piège de build vérifié** : `inject-precache.mjs` ratisse *tout* `dist/assets` et le précache
+  est **atomique**. Un chunk `pdf.js` (~350 ko) partirait dans le précache de chaque client à chaque
+  bump, sur la 4G de la cave (§68). **Il faudra l'exclure par motif** et le laisser se mettre en
+  cache au premier usage.

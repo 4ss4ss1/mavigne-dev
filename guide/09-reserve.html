@@ -25,9 +25,15 @@
   <h3>{ic:liste} Le bilan matière</h3>
   <p>C'est le cœur du module. Le stock théorique se calcule sans aucune saisie supplémentaire :</p>
   <div class="note info"><span class="ni" aria-hidden="true">{ic:calculatrice}</span><div><b>Stock = inventaire d'ouverture + achats
-  − consommation.</b> Les <b>sorties sont dérivées automatiquement</b> : les opérations de cave pour
+  − consommation.</b> Les <b>sorties sont dérivées automatiquement</b> : les <b>adjonctions du Cuvier</b>
+  (tanins, enzymes, bentonite posés sur une cuve de vinification) et les opérations de cave pour
   l'œnologie, le registre phyto (dose × surface traitée) pour les traitements. Rien à ressaisir : ce que
-  vous avez déjà noté ailleurs suffit.</div></div>
+  vous avez déjà noté ailleurs suffit.<br><br>
+  Chaque intrant porte sa <b>source de consommé</b>, visible en pied de fiche. Un nouvel intrant œno part
+  en <b>« Adjonctions du Cuvier »</b>, qui compte <b>produit par produit</b>. L'ancienne source
+  « Opérations Cave (SO<sub>2</sub>) » additionne tout le soufre du chai sans distinguer les produits :
+  elle reste juste tant qu'un seul intrant la porte, et les fiches qui l'utilisent déjà n'ont pas
+  bougé.</div></div>
   <ul class="dot">
     <li>Tableau d'équilibre entrées / sorties, produit par produit.</li>
     <li><b>Export PDF</b> citant le règlement délégué <b>(UE) 2021/771, article 1</b> — celui qui exige
@@ -35,6 +41,12 @@
     <li>Un écart visible entre stock théorique et stock réel est une information utile, pas une faute :
     il pointe une saisie oubliée.</li>
   </ul>
+  <div class="note tip"><span class="ni" aria-hidden="true">{ic:alerte}</span><div><b>Un stock négatif a
+  trois causes, pas deux.</b> Une facture d'achat manque ; le consommé est surestimé ; ou — pour un
+  intrant œno — les adjonctions du Cuvier reposent sur un <b>volume estimé</b>. La dose était juste,
+  mais le volume sur lequel elle a été appliquée était la contenance de la cuve, pas son contenu.
+  L'alerte <b>compte ces adjonctions-là</b> : sans ce chiffre, on cherche une facture qui n'existe
+  pas.</div></div>
 
   <div class="note info"><span class="ni" aria-hidden="true">{ic:euro}</span><div><b>Les prix ne se
   saisissent pas ici.</b> Un achat enregistré dans La Réserve part sans montant et apparaît dans

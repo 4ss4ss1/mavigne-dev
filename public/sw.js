@@ -1,4 +1,22 @@
-// MA VIGNE — Service Worker v7.26
+// MA VIGNE — Service Worker v7.27
+// v7.27 (30/08/2026) — INTR-1 : les adjonctions de cuverie sortent du stock.
+//   Tanins, enzymes, bentonite s'ajoutent aux operations d'une cuve de
+//   vinification. Le produit vient de La Reserve (categorie oeno) : c'est ce
+//   qui permet de deduire la quantite du bilan matiere sans ressaisie.
+//   ★★ AUCUN GARDE-FOU DE STOCK, ET C'EST LE COEUR DU LOT. Refuser un tanin
+//   deja dans la cuve parce que la facture n'est pas saisie, ce serait faire
+//   mentir le suivi pour proteger la comptabilite. Le negatif circule, et La
+//   Reserve sait deja le nommer « ecart ».
+//   ★ Le volume porte sa source : `c.volume_hl` est la CONTENANCE (faute
+//   RDT-1), donc tant que la cuve n'est pas decuvee la saisie ecrit « volume
+//   estime » et le registre imprime « (estime) ». L'alerte de negatif compte
+//   les adjonctions estimees — sinon on cherche une facture qui n'existe pas.
+//   ⚠️ Nouvelle source de consommation `cuvier`, filtree PAR PRODUIT. Les
+//   nouveaux intrants oeno y partent par defaut au lieu de `cave_so2`, qui
+//   additionne tout le soufre sans regarder le produit : avec quatre produits
+//   au catalogue il en aurait attribue la totalite a chacun. Aucune migration,
+//   les produits deja crees gardent leur source.
+//   APP 6.71 -> 6.72.
 // v7.26 (30/08/2026) — CUV-1 : corriger un releve et dire COMMENT le froid a
 //   ete fait. APP 6.70 -> 6.71.
 //   Le Cuvier n'avait AUCUNE liste des releves a l'ecran : ni correction, ni
@@ -2939,7 +2957,7 @@
 // v2.22 — Fix profils vides : guard vide dans loadData() pour MEMBRES/SAISONS/TACHES
 // v2.17 — Onboarding intégré + tenantId · v2.06 — Firebase Auth · v2.00–v2.05 — divers
 const DEBUG = self.location.hostname === 'localhost' || self.location.hostname === '127.0.0.1';
-const CACHE_NAME   = 'mavigne-v7.26';
+const CACHE_NAME   = 'mavigne-v7.27';
 const TENANT_CACHE = 'mavigne-tenant';   // Cache persistant — préservé à chaque mise à jour SW
 const SYNC_TAG     = 'mavigne-sync';
 
@@ -2955,7 +2973,7 @@ const CDN_URLS = [
 ];
 
 self.addEventListener('install', event => {
-  if(DEBUG) console.log('[SW] Ma Vigne v7.26 installé');
+  if(DEBUG) console.log('[SW] Ma Vigne v7.27 installé');
   event.waitUntil(
     caches.open(CACHE_NAME).then(async cache => {
       // ── Cœur applicatif : STRICT (mise à jour ATOMIQUE) ──
@@ -2971,7 +2989,7 @@ self.addEventListener('install', event => {
 });
 
 self.addEventListener('activate', event => {
-  if(DEBUG) console.log('[SW] Ma Vigne v7.26 activé');
+  if(DEBUG) console.log('[SW] Ma Vigne v7.27 activé');
   event.waitUntil(
     caches.keys().then(keys =>
       Promise.all(

@@ -23,7 +23,7 @@ export const GT_ADMIN_EMAIL = 'ngdevpro@gmail.com';
 // WHATS_NEW   : tableau vide = modal desactive pour cette version.
 // Format item : { emoji:'📅', titre:'Titre court', desc:'Phrase utilisateur.' }
 // Regle : seulement les changements visibles par les utilisateurs.
-export const APP_VERSION = '6.71';
+export const APP_VERSION = '6.72';
 // ════ Journal des nouveautés (récap cumulatif) ════
 // Une entrée par version, la PLUS RÉCENTE EN HAUT : { v:'5.10', items:[ {emoji,titre,desc}, … ] }
 // À chaque release visible → AJOUTER un bloc en tête (ne pas remplacer). items:[] = release technique (rien à afficher).
@@ -354,6 +354,11 @@ window._mvGraphRepeindre = function(){
 };
 
 export const WHATS_NEW = [
+  { v: '6.72', items: [
+    { emoji: 'fiole', titre: 'Tanins, enzymes et bentonite s\u2019enregistrent au Cuvier', desc: "Trois op\u00e9rations de plus sur une cuve de vinification, \u00e0 c\u00f4t\u00e9 du levurage et du nutriment. On choisit le <b>produit dans La R\u00e9serve</b>, une <b>dose</b>, un <b>volume</b>\u00a0\u2014 et la quantit\u00e9 r\u00e9elle s\u2019affiche pendant la saisie. L\u2019unit\u00e9 de dose suit le produit\u00a0: g/hL pour un sac, mL/hL pour un bidon. Les trois partent au <b>registre des manipulations</b>, famille Adjonctions, o\u00f9 le contr\u00f4le bio les attend." },
+    { emoji: 'carton', titre: 'Ce qui part dans la cuve sort du stock', desc: "Un intrant \u0153no pos\u00e9 sur une cuve est <b>d\u00e9compt\u00e9 tout seul</b> du bilan mati\u00e8re de La R\u00e9serve\u00a0: rien \u00e0 ressaisir. Pendant la saisie, l\u2019\u00e9cran montre le stock avant et apr\u00e8s. <b>Un stock qui passe en n\u00e9gatif n\u2019emp\u00eache jamais d\u2019enregistrer</b>\u00a0\u2014 le tanin est d\u00e9j\u00e0 dans la cuve, c\u2019est la facture qui manque. L\u2019\u00e9cart se r\u00e9gularise plus tard, La R\u00e9serve le signale en attendant." },
+    { emoji: 'balance', titre: 'Le volume dit toujours d\u2019o\u00f9 il vient', desc: "La quantit\u00e9 d\u2019un intrant se calcule sur un volume, et <b>la contenance d\u2019une cuve n\u2019est pas son contenu</b>. Tant que la cuve n\u2019est pas d\u00e9cuv\u00e9e, l\u2019\u00e9cran \u00e9crit <b>volume estim\u00e9</b>, le registre imprime <i>(estim\u00e9)</i>, et l\u2019alerte de stock n\u00e9gatif rappelle combien d\u2019adjonctions reposent sur une estimation\u00a0\u2014 pour ne pas chercher une facture qui n\u2019existe pas." }
+  ] },
   { v: '6.71', items: [
     { emoji: 'crayon', titre: 'Corriger un relev\u00e9 de fermentation d\u00e9j\u00e0 enregistr\u00e9', desc: "Une densit\u00e9 not\u00e9e de travers, une date saisie la veille pour le lendemain\u00a0: il fallait vivre avec. Chaque cuve affiche maintenant <b>la liste de ses relev\u00e9s</b>, et un crayon sur chacun d\u2019eux \u2014 date, densit\u00e9, temp\u00e9rature, remontages, pigeages, note. Un relev\u00e9 peut aussi \u00eatre <b>supprim\u00e9</b>. La liste reste accessible sur une <b>cuve d\u00e9j\u00e0 d\u00e9cuv\u00e9e</b>\u00a0: c\u2019est souvent apr\u00e8s coup qu\u2019on s\u2019aper\u00e7oit d\u2019une erreur. Les <b>op\u00e9rations</b> de la cuve sont corrigeables de la m\u00eame fa\u00e7on, et toutes visibles \u2014 la liste ne s\u2019arr\u00eate plus \u00e0 la derni\u00e8re." },
     { emoji: 'thermometre', titre: 'Dire <i>comment</i> le froid a \u00e9t\u00e9 fait', desc: "Un refroidissement n\u2019enregistrait que la <b>temp\u00e9rature vis\u00e9e</b>. Il demande maintenant le <b>moyen</b>\u00a0: groupe de froid, \u00e9changeur, glace carbonique, azote liquide, CO\u2082 liquide, eau froide. Pour les trois qui se p\u00e8sent, une <b>quantit\u00e9 en kilos</b> \u2014 et pour la glace carbonique, l\u2019abaissement approximatif s\u2019affiche pendant la saisie (environ 1,4\u00a0\u00b0C par kilo et par hectolitre, un ordre de grandeur, pas une promesse). Le r\u00e9chauffement a sa propre liste\u00a0: ceinture, \u00e9changeur, thermoplongeur, remontage \u00e0 chaud. <b>Tout cela remonte au registre des manipulations</b>, o\u00f9 c\u2019est justement ce qui est attendu." },
@@ -2111,6 +2116,9 @@ var MV_AIDE = {
       ['Un relevé se corrige', "la liste des relevés d’une cuve s’ouvre sous la courbe ; le crayon rouvre celui que vous désignez, date comprise. Les relevés se rangent par date, pas par ordre de saisie : un carnet rattrapé le lendemain se remet tout seul à sa place, et la fin de fermentation estimée suit. La liste reste ouverte sur une cuve déjà décuvée."],
       ['Une opération se corrige aussi', "toutes sont listées, plus seulement la dernière. Corriger ou supprimer une saignée rend d’abord les hectolitres à la cuve avant d’appliquer la nouvelle valeur : le volume ne se retranche jamais deux fois."],
       ['Un refroidissement dit par quel moyen', "groupe de froid, échangeur, glace carbonique, azote liquide, CO₂ liquide, eau froide. Les trois qui se pèsent demandent une quantité en kilos, et la carboglace annonce l’abaissement approximatif — un ordre de grandeur, la cuve n’étant pas isolée. Le moyen et la quantité partent au registre des manipulations : c’est là qu’on les cherche."],
+      ['Tanins, enzymes et bentonite', "se posent sur une cuve comme les autres opérations, mais le produit se choisit dans La Réserve : c’est ce qui permet de sortir la quantité du stock toute seule. L’unité de dose suit le produit — g/hL pour ce qui se pèse, mL/hL pour ce qui se verse. Sans produit choisi, l’opération s’enregistre quand même, hors bilan matière, et l’écran le dit."],
+      ['La quantité se calcule sur un volume, et ce volume dit d’où il vient', "tant que la cuve n’est pas décuvée, c’est sa <b>contenance</b> qui sert de repère, pas son contenu : la saisie affiche « volume estimé », et le registre imprime « (estimé) ». Corriger le volume à la main reste possible, et se voit."],
+      ['Un stock négatif n’empêche jamais d’enregistrer', "le tanin est déjà dans la cuve : refuser la saisie parce qu’une facture manque ferait mentir le suivi pour protéger la comptabilité. L’écart part dans La Réserve, qui le nomme et le garde jusqu’à régularisation."],
       ['Le millésime', "annonce ce qui vient dans les quatre prochaines semaines, puis retrace le parcours du vin, de la benne à la bouteille."],
       ['Votre rendement au pressoir', "se règle au Cuvier, onglet Réglages, en kilos de raisin par hectolitre. Tous les écrans qui transforment des raisins en volume s’en servent — la chaîne de la récolte à la bouteille comme le bilan de campagne."],
       ['Les analyses labo', "s’attachent en PDF à la cuvée. Les supprimer est réservé à l’administrateur."],
@@ -2132,7 +2140,7 @@ var MV_AIDE = {
       ['Les prix se mettent ailleurs', "dans <b>Pilotage › Économie › Achats</b>, qui rassemble tout ce qui a été acquis — intrants, fûts, passages chez le réparateur. C’est voulu : le prix arrive avec la facture, des semaines après le geste, et on le saisit en une fois plutôt qu’écran par écran."],
       ['Le bilan se calcule seul', ": inventaire d’ouverture + achats − consommation. Aucun stock à tenir à la main."],
       ['L’inventaire d’ouverture', "est le point zéro. Sans lui, l’écart constaté ne veut rien dire."],
-      ['Un stock négatif', "n’est pas un défaut d’affichage : il manque une facture d’achat, ou le consommé est surestimé."],
+      ['Un stock négatif', "n’est pas un défaut d’affichage : il manque une facture d’achat, le consommé est surestimé, ou — pour un intrant œno — les adjonctions du Cuvier reposent sur un <b>volume estimé</b>. L’alerte compte ces dernières, pour éviter de chercher une facture qui n’existe pas."],
       ['Créer et modifier', "est réservé à l’administrateur du domaine ; tout le monde peut consulter."]
     ]
   },

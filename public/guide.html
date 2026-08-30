@@ -1309,6 +1309,25 @@ mark{background:rgba(200,176,32,.32);color:var(--cream);border-radius:3px;paddin
   rendement dépend trop du matériel. Le réchauffement a sa propre liste — ceinture, échangeur,
   thermoplongeur, remontage à chaud. <b>Le moyen et la quantité partent au registre des
   manipulations</b>, où c'est exactement ce qui est attendu.</div></div>
+  <div class="note"><span class="ni" aria-hidden="true"><svg class="g-ic" width="18" height="18" viewBox="0 0 24 24" aria-hidden="true" focusable="false"><use href="#ic-fiole"></use></svg></span><div><b>Tanins, enzymes et
+  bentonite se posent comme les autres opérations</b>, avec une différence : le <b>produit se choisit
+  dans La Réserve</b>, catégorie Œno. C'est ce rattachement qui permet de sortir la quantité du stock
+  toute seule — un nom tapé à la main ne se rapproche d'une fiche produit qu'à l'orthographe près, et
+  un bilan matière qui se trompe de produit ment sans le dire. L'<b>unité de dose suit le produit</b> :
+  g/hL pour ce qui se pèse, mL/hL pour ce qui se verse. Sans produit choisi, l'opération s'enregistre
+  quand même : elle ne bouge simplement aucun stock, et l'écran l'écrit. Les trois partent au
+  <b>registre des manipulations</b>, famille <b>Adjonctions</b>.</div></div>
+  <div class="note warn"><span class="ni" aria-hidden="true"><svg class="g-ic" width="18" height="18" viewBox="0 0 24 24" aria-hidden="true" focusable="false"><use href="#ic-balance"></use></svg></span><div><b>La contenance
+  d'une cuve n'est pas son contenu — et la quantité d'un intrant se calcule sur un volume.</b> Tant que
+  la cuve n'est pas décuvée, il n'y a rien de mesuré : le repère proposé est la contenance, la saisie
+  affiche <b>« volume estimé »</b> et le registre imprime <b>« (estimé) »</b>. Corriger ce volume à la
+  main reste possible, et se voit. Une dose juste sur un volume faux donnerait une quantité fausse,
+  affichée avec l'aplomb d'un calcul : l'écran préfère dire d'où vient son chiffre.</div></div>
+  <div class="note tip"><span class="ni" aria-hidden="true"><svg class="g-ic" width="18" height="18" viewBox="0 0 24 24" aria-hidden="true" focusable="false"><use href="#ic-carton"></use></svg></span><div><b>Un stock négatif
+  n'empêche jamais d'enregistrer.</b> Le tanin est déjà dans la cuve : refuser la saisie parce qu'une
+  facture n'est pas encore rentrée ferait mentir le suivi pour protéger la comptabilité. La quantité
+  part quand même, le stock passe en négatif, et <b>La Réserve le nomme « écart »</b> jusqu'à
+  régularisation. Pendant la saisie, l'écran montre le stock avant et après.</div></div>
   <div class="note"><span class="ni" aria-hidden="true"><svg class="g-ic" width="18" height="18" viewBox="0 0 24 24" aria-hidden="true" focusable="false"><use href="#ic-verre"></use></svg></span><div><b>Un millésime est une entité à
   part.</b> Une opération porte sur une seule année : on n'ouille pas les fûts de 2025 avec le vin de
   2026. Changer de millésime en tête du formulaire vide donc la sélection de cuvées. Si un seul
@@ -1381,9 +1400,15 @@ mark{background:rgba(200,176,32,.32);color:var(--cream);border-radius:3px;paddin
   <h3><svg class="g-ic" width="18" height="18" viewBox="0 0 24 24" aria-hidden="true" focusable="false"><use href="#ic-liste"></use></svg> Le bilan matière</h3>
   <p>C'est le cœur du module. Le stock théorique se calcule sans aucune saisie supplémentaire :</p>
   <div class="note info"><span class="ni" aria-hidden="true"><svg class="g-ic" width="18" height="18" viewBox="0 0 24 24" aria-hidden="true" focusable="false"><use href="#ic-calculatrice"></use></svg></span><div><b>Stock = inventaire d'ouverture + achats
-  − consommation.</b> Les <b>sorties sont dérivées automatiquement</b> : les opérations de cave pour
+  − consommation.</b> Les <b>sorties sont dérivées automatiquement</b> : les <b>adjonctions du Cuvier</b>
+  (tanins, enzymes, bentonite posés sur une cuve de vinification) et les opérations de cave pour
   l'œnologie, le registre phyto (dose × surface traitée) pour les traitements. Rien à ressaisir : ce que
-  vous avez déjà noté ailleurs suffit.</div></div>
+  vous avez déjà noté ailleurs suffit.<br><br>
+  Chaque intrant porte sa <b>source de consommé</b>, visible en pied de fiche. Un nouvel intrant œno part
+  en <b>« Adjonctions du Cuvier »</b>, qui compte <b>produit par produit</b>. L'ancienne source
+  « Opérations Cave (SO<sub>2</sub>) » additionne tout le soufre du chai sans distinguer les produits :
+  elle reste juste tant qu'un seul intrant la porte, et les fiches qui l'utilisent déjà n'ont pas
+  bougé.</div></div>
   <ul class="dot">
     <li>Tableau d'équilibre entrées / sorties, produit par produit.</li>
     <li><b>Export PDF</b> citant le règlement délégué <b>(UE) 2021/771, article 1</b> — celui qui exige
@@ -1391,6 +1416,12 @@ mark{background:rgba(200,176,32,.32);color:var(--cream);border-radius:3px;paddin
     <li>Un écart visible entre stock théorique et stock réel est une information utile, pas une faute :
     il pointe une saisie oubliée.</li>
   </ul>
+  <div class="note tip"><span class="ni" aria-hidden="true"><svg class="g-ic" width="18" height="18" viewBox="0 0 24 24" aria-hidden="true" focusable="false"><use href="#ic-alerte"></use></svg></span><div><b>Un stock négatif a
+  trois causes, pas deux.</b> Une facture d'achat manque ; le consommé est surestimé ; ou — pour un
+  intrant œno — les adjonctions du Cuvier reposent sur un <b>volume estimé</b>. La dose était juste,
+  mais le volume sur lequel elle a été appliquée était la contenance de la cuve, pas son contenu.
+  L'alerte <b>compte ces adjonctions-là</b> : sans ce chiffre, on cherche une facture qui n'existe
+  pas.</div></div>
 
   <div class="note info"><span class="ni" aria-hidden="true"><svg class="g-ic" width="18" height="18" viewBox="0 0 24 24" aria-hidden="true" focusable="false"><use href="#ic-euro"></use></svg></span><div><b>Les prix ne se
   saisissent pas ici.</b> Un achat enregistré dans La Réserve part sans montant et apparaît dans
