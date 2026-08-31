@@ -1,4 +1,44 @@
-// MA VIGNE — Service Worker v7.27
+// MA VIGNE — Service Worker v7.28
+// v7.28 (31/08/2026) — LE CUVIER SE LIT D'UN COUP D'OEIL (CUV-2) + FUSION DE
+//   CUVES (FUS-1). APP 6.72 -> 6.73.
+//   ★★★ L'ECRAN : une cuve en fermentation occupait ~726 px (le graphe
+//   densite/temperature en fait 232 a lui seul, des le 3e releve) pour une
+//   zone de liste de ~520 px : UNE cuve n'y tenait pas, et 12 cuves
+//   demandaient 17 hauteurs d'ecran. Tout arrivait ouvert — meme defaut que
+//   les 18 tuiles du Pilotage (§34). La ligne fermee fait ~68 px, le detail
+//   n'est CONSTRUIT que pour la cuve ouverte.
+//   ⚠️⚠️⚠️ ET L'ORDRE N'ETAIT PAS STABLE : le tri se faisait sur _vendStale,
+//   donc MESURER UNE CUVE LA FAISAIT CHANGER DE PLACE. Le tri par defaut est
+//   desormais le repere de cuverie (CONFIG.cave.cuves[].nom, jamais une
+//   numerotation inventee), avec numeric:true — sans quoi « Cuve 10 » se
+//   range entre « Cuve 1 » et « Cuve 2 ». L'urgence passe dans le bandeau et
+//   la pastille, ou elle etait deja.
+//   ★ Recherche des 6 cuves, 5 filtres comptes, 3 tris, vue liste ou plan de
+//   cuverie. Le graphe de remplissage par parcelle passe REPLIE : il repond a
+//   « la recolte de demain peut-elle partir ? », pas a « ou est ma cuve ? ».
+//   ★★★ LA FUSION : le contenu d'une cuve n'est pas range dans la cuve, il se
+//   deduit de recoltes[].cuve_id. Fusionner = rebrancher les recoltes. Kilos,
+//   caisses, hL, prorata, rendements et bilan suivent SANS UN CALCUL DE PLUS,
+//   et rien ne peut compter double (_vendCuvCsDom recalcule a chaque appel).
+//   Les cuves absorbees passent 'termine' + champ `fusion`, LACHENT leur
+//   cuve_ref (c'est ce qui libere la cuve du parc) et n'ont PAS de `decuvage`
+//   — donc _vendVolLoge rend 0. AUCUN des 6 filtres de statut n'a ete touche.
+//   ⚠️ saveVendCuve rebatit son objet de zero : `fusion` et `fusion_src` y ont
+//   ete re-inclus explicitement, sinon rouvrir la fiche les effacait.
+//   ⚠️ J'AI APPELE UNE FONCTION QUI N'EXISTE PAS (_recKgHl0) dans un calcul
+//   mort. `node --check` ne voit pas un identifiant inconnu : c'est le grep
+//   des appels qui l'a trouve. Troisieme occurrence de ce piege.
+//   ⚠️ ET UNE ASSERTION NE TRAVERSAIT PAS SA GARDE : Z1 pretendait tester
+//   `!_vendEstFusionnee(c)` alors que `statut!=='termine'` suffisait deja a
+//   exclure la cuve. La contre-epreuve restait VERTE sur un fichier sabote.
+//   Z2 pose le cas reel : une donnee abimee, fusionnee mais restee en FA.
+//   Harnais : mv-harnais-fusion.mjs (37 assertions, 8 contre-epreuves) et
+//   mv-harnais-alignement.mjs (43 assertions, 7 contre-epreuves), branches
+//   dans check ET prebuild.
+//   ⚠️ L'ALIGNEMENT N'EST PAS MESURE : pas de navigateur dans le bac a sable.
+//   Le harnais verifie les 4 regles CSS dont l'absence CAUSE un chevauchement
+//   (min-width:0, le trio nowrap/hidden/ellipsis, flex-shrink:0, zero hauteur
+//   figee sur du texte). La relecture a l'oeil reste a faire.
 // v7.27 (30/08/2026) — INTR-1 : les adjonctions de cuverie sortent du stock.
 //   Tanins, enzymes, bentonite s'ajoutent aux operations d'une cuve de
 //   vinification. Le produit vient de La Reserve (categorie oeno) : c'est ce
@@ -2957,7 +2997,7 @@
 // v2.22 — Fix profils vides : guard vide dans loadData() pour MEMBRES/SAISONS/TACHES
 // v2.17 — Onboarding intégré + tenantId · v2.06 — Firebase Auth · v2.00–v2.05 — divers
 const DEBUG = self.location.hostname === 'localhost' || self.location.hostname === '127.0.0.1';
-const CACHE_NAME   = 'mavigne-v7.27';
+const CACHE_NAME   = 'mavigne-v7.28';
 const TENANT_CACHE = 'mavigne-tenant';   // Cache persistant — préservé à chaque mise à jour SW
 const SYNC_TAG     = 'mavigne-sync';
 
@@ -2973,7 +3013,7 @@ const CDN_URLS = [
 ];
 
 self.addEventListener('install', event => {
-  if(DEBUG) console.log('[SW] Ma Vigne v7.27 installé');
+  if(DEBUG) console.log('[SW] Ma Vigne v7.28 installé');
   event.waitUntil(
     caches.open(CACHE_NAME).then(async cache => {
       // ── Cœur applicatif : STRICT (mise à jour ATOMIQUE) ──
@@ -2989,7 +3029,7 @@ self.addEventListener('install', event => {
 });
 
 self.addEventListener('activate', event => {
-  if(DEBUG) console.log('[SW] Ma Vigne v7.27 activé');
+  if(DEBUG) console.log('[SW] Ma Vigne v7.28 activé');
   event.waitUntil(
     caches.keys().then(keys =>
       Promise.all(

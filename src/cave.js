@@ -2002,6 +2002,142 @@ function _vendInjectCss(){
 .mvc-dfit{font-size:10px;font-weight:600;border-radius:7px;padding:3px 8px;white-space:nowrap;display:inline-block}
 .mvc-dfit.good{background:rgba(61,107,39,.10);color:var(--vert-med,#3D6B27)}
 .mvc-dfit.tight{background:rgba(184,145,58,.14);color:#8A6A12}
+
+/* ═══════════ LE CUVIER — liste dense, plan de cuverie, fusion ═══════════
+   ⚠️ ALIGNEMENT : min-width:0 sur tout conteneur flex portant du texte,
+   nowrap+ellipsis sur les lignes simples, flex-shrink:0 a droite, et
+   AUCUNE hauteur fixe sur du texte. Voir §69 de CLAUDE.md. */
+.mvv-tools{padding:2px 0 0}
+.mvv-srch{position:relative;margin-bottom:8px}
+.mvv-srch input{width:100%;background:var(--bg-card,#FBFAF6);border:1px solid rgba(138,90,56,.2);
+  border-radius:11px;padding:11px 34px 11px 36px;font-family:inherit;font-size:14px;font-weight:500;
+  color:var(--texte,#1A1A14);min-height:44px}
+.mvv-srch input:focus{border-color:var(--terre,#8A5A38);outline:none;box-shadow:0 0 0 3px rgba(138,90,56,.11)}
+.mvv-srch-ic{position:absolute;left:12px;top:50%;transform:translateY(-50%);opacity:.45;pointer-events:none;
+  display:flex;line-height:0}
+.mvv-srch-x{position:absolute;right:6px;top:50%;transform:translateY(-50%);background:none;border:0;
+  color:var(--texte-doux,#5F5F5F);cursor:pointer;padding:6px;line-height:0;border-radius:8px}
+.mvv-fils{display:flex;gap:6px;overflow-x:auto;padding-bottom:9px;scrollbar-width:none;-webkit-overflow-scrolling:touch}
+.mvv-fils::-webkit-scrollbar{display:none}
+.mvv-fil{flex:0 0 auto;background:var(--bg-card,#FBFAF6);border:1px solid rgba(138,90,56,.18);
+  color:var(--texte-med,#4A4A3A);border-radius:20px;padding:8px 13px;font-family:inherit;font-size:11.5px;
+  font-weight:600;cursor:pointer;white-space:nowrap;min-height:36px}
+.mvv-fil.on{background:var(--terre,#8A5A38);border-color:var(--terre,#8A5A38);color:#FFFFFF}
+.mvv-fil .n{opacity:.62;font-weight:500;margin-left:5px}
+.mvv-fil.on .n{opacity:.8}
+.mvv-sortrow{display:flex;align-items:center;justify-content:space-between;gap:8px;padding-bottom:10px}
+.mvv-seg{display:flex;gap:4px;background:var(--gris-clair,#ECE6DA);border-radius:10px;padding:3px;min-width:0}
+.mvv-seg button{background:transparent;border:0;border-radius:8px;padding:7px 10px;font-family:inherit;
+  font-size:11px;font-weight:600;color:var(--texte-doux,#5F5F5F);cursor:pointer;white-space:nowrap;min-height:36px}
+.mvv-seg button.on{background:var(--bg-card,#FBFAF6);color:var(--terre,#8A5A38);box-shadow:0 1px 3px rgba(20,17,13,.10)}
+.mvv-seg.vues button{padding:7px 9px;display:flex;align-items:center;line-height:0}
+
+/* ── la ligne de cuve ── */
+.mvv-row{background:var(--bg-card,#FBFAF6);border:1px solid rgba(138,90,56,.10);border-radius:13px;
+  margin-bottom:7px;overflow:hidden;position:relative}
+.mvv-row::before{content:"";position:absolute;left:0;top:0;bottom:0;width:4px;background:#9A93A8}
+.mvv-row.fa::before{background:linear-gradient(180deg,#5B8C3E,#3D6B27)}
+.mvv-row.due::before{background:linear-gradient(180deg,#C86A4E,#B0412C)}
+.mvv-row.fini::before{background:#C0BAAE}
+.mvv-row.open{border-color:rgba(138,90,56,.30);box-shadow:0 3px 14px rgba(20,17,13,.09)}
+.mvv-hd{display:flex;align-items:center;gap:11px;width:100%;min-width:0;background:none;border:0;
+  padding:11px 12px 11px 15px;cursor:pointer;text-align:left;font-family:inherit;color:inherit}
+.mvv-ref{flex:0 0 auto;min-width:40px;max-width:66px;padding:5px 4px;border-radius:10px;
+  background:var(--bg-app,#F2EFE7);border:1px solid rgba(138,90,56,.16);text-align:center;overflow:hidden}
+.mvv-ref-n{font-size:12.5px;font-weight:700;color:var(--terre,#8A5A38);line-height:1.15;
+  white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.mvv-ref-u{font-size:7.5px;color:var(--texte-doux,#5F5F5F);letter-spacing:.4px;margin-top:2px;line-height:1}
+.mvv-mid{flex:1 1 auto;min-width:0}
+.mvv-nom{font-family:'Cormorant Garamond',Georgia,serif;font-weight:600;font-size:17.5px;line-height:1.18;
+  color:var(--texte,#1A1A14);white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.mvv-sub{font-size:11px;color:var(--texte-doux,#5F5F5F);margin-top:2px;
+  white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.mvv-sub .sp{opacity:.4;padding:0 4px}
+.mvv-mini{height:4px;background:var(--gris-clair,#ECE6DA);border-radius:3px;margin-top:6px;overflow:hidden}
+.mvv-mini-f{height:100%;background:linear-gradient(90deg,#8A5A38,#C2A14D);border-radius:3px}
+.mvv-rt{flex:0 0 auto;display:flex;align-items:center;gap:8px}
+.mvv-pct{text-align:right;line-height:1}
+.mvv-pct-n{font-family:'Cormorant Garamond',Georgia,serif;font-weight:700;font-size:21px;
+  color:var(--terre,#8A5A38);line-height:1}
+.mvv-pct-u{display:block;font-size:8.5px;color:var(--texte-doux,#5F5F5F);letter-spacing:.4px;margin-top:2px}
+.mvv-etat{font-size:9.5px;font-weight:700;padding:4px 7px;border-radius:6px;white-space:nowrap;
+  background:var(--gris-clair,#ECE6DA);color:var(--texte-doux,#5F5F5F)}
+.mvv-etat.ok{background:rgba(61,107,39,.12);color:var(--vert-med,#3D6B27)}
+.mvv-etat.due{background:rgba(176,65,44,.12);color:#B0412C}
+.mvv-chev{flex:0 0 auto;opacity:.35;transition:transform .2s;line-height:0}
+.mvv-row.open .mvv-chev{transform:rotate(90deg);opacity:.7}
+@media(prefers-reduced-motion:reduce){.mvv-chev{transition:none}}
+.mvv-det{padding:0 12px 12px 15px;border-top:1px solid var(--gris-clair,#ECE6DA)}
+.mvv-det-g{margin-top:11px}
+.mvv-3{display:flex;gap:6px;margin-top:10px}
+.mvv-3 .c{flex:1 1 0;min-width:0;background:var(--bg-app,#F2EFE7);border:1px solid rgba(138,90,56,.10);
+  border-radius:9px;padding:8px 6px;text-align:center;overflow:hidden}
+.mvv-3 .v{font-size:14px;font-weight:700;color:var(--texte,#1A1A14);line-height:1.2;
+  white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.mvv-3 .l{font-size:9px;color:var(--texte-doux,#5F5F5F);margin-top:3px;line-height:1.25}
+.mvv-detnote{font-size:11px;color:var(--texte-doux,#5F5F5F);margin-top:10px;line-height:1.55;
+  overflow-wrap:anywhere}
+
+/* ── le plan de cuverie ── */
+.mvv-plan{display:grid;grid-template-columns:repeat(auto-fill,minmax(96px,1fr));gap:9px}
+.mvv-cell{background:var(--bg-card,#FBFAF6);border:1px solid rgba(138,90,56,.12);border-radius:13px;
+  padding:10px 7px 9px;cursor:pointer;text-align:center;font-family:inherit;color:inherit;min-width:0;overflow:hidden}
+.mvv-cell.due{border-color:rgba(176,65,44,.35);background:rgba(224,112,96,.06)}
+.mvv-cell.open{border-color:var(--terre,#8A5A38);box-shadow:0 0 0 2px rgba(138,90,56,.14)}
+.mvv-cell-r{font-size:10px;font-weight:700;color:var(--texte-doux,#5F5F5F);letter-spacing:.4px;
+  white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+/* ⚠️ line-clamp, PAS de height fixe : un nom long se coupe proprement a deux
+   lignes au lieu d'etre tranche au milieu d'une lettre. */
+.mvv-cell-n{font-family:'Cormorant Garamond',Georgia,serif;font-weight:600;font-size:13px;line-height:1.2;
+  margin-top:5px;color:var(--texte,#1A1A14);display:-webkit-box;-webkit-line-clamp:2;line-clamp:2;
+  -webkit-box-orient:vertical;overflow:hidden;overflow-wrap:anywhere}
+.mvv-cell-s{font-size:9.5px;color:var(--texte-doux,#5F5F5F);margin-top:4px;line-height:1.3;
+  white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.mvv-cell-s.due{color:#B0412C;font-weight:600}
+.mvv-cell-sv{display:flex;justify-content:center;margin:5px 0 1px;line-height:0}
+
+/* ── le bandeau « a mesurer », inchange dans l'esprit ── */
+.mvv-fusrow{display:flex;align-items:center;justify-content:space-between;gap:10px;min-width:0;
+  background:var(--bg-app,#F2EFE7);border:1px dashed rgba(138,90,56,.28);border-radius:11px;
+  padding:10px 13px;margin-bottom:7px}
+.mvv-fusrow .l{flex:1 1 auto;min-width:0}
+.mvv-fusrow .n{font-size:13px;font-weight:600;color:var(--texte,#1A1A14);
+  white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.mvv-fusrow .u{font-size:11px;color:var(--texte-doux,#5F5F5F);margin-top:2px;
+  white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.mvv-fusrow .r{flex:0 0 auto;font-size:10px;font-weight:600;color:var(--terre,#8A5A38);white-space:nowrap}
+
+/* ── la feuille de fusion ── */
+.mvv-pick{display:flex;align-items:center;gap:11px;width:100%;min-width:0;text-align:left;
+  background:var(--bg-app,#F2EFE7);border:1px solid rgba(138,90,56,.14);border-radius:13px;
+  padding:11px 13px;margin-bottom:7px;cursor:pointer;font-family:inherit;color:inherit;min-height:56px}
+.mvv-pick.sel{border-color:var(--terre,#8A5A38);background:var(--terre-pale,#F3EADF);
+  box-shadow:0 0 0 2px rgba(138,90,56,.10)}
+.mvv-pick[disabled]{opacity:.5;cursor:not-allowed}
+.mvv-box{flex:0 0 auto;width:21px;height:21px;border-radius:6px;border:2px solid rgba(138,90,56,.4);
+  position:relative;background:#FFFFFF}
+.mvv-pick.sel .mvv-box{background:var(--terre,#8A5A38);border-color:var(--terre,#8A5A38)}
+.mvv-pick.sel .mvv-box::after{content:"";position:absolute;left:6px;top:2px;width:5px;height:10px;
+  border:solid #FFFFFF;border-width:0 2px 2px 0;transform:rotate(42deg)}
+.mvv-rad{flex:0 0 auto;width:21px;height:21px;border-radius:50%;border:2px solid rgba(138,90,56,.4);
+  position:relative;background:#FFFFFF}
+.mvv-pick.sel .mvv-rad{border-color:var(--terre,#8A5A38)}
+.mvv-pick.sel .mvv-rad::after{content:"";position:absolute;left:3px;top:3px;right:3px;bottom:3px;
+  border-radius:50%;background:var(--terre,#8A5A38)}
+.mvv-pick-b{flex:1 1 auto;min-width:0}
+.mvv-pick-n{display:block;font-size:14px;font-weight:600;line-height:1.2;color:var(--texte,#1A1A14);
+  white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.mvv-pick-m{display:block;font-size:11px;color:var(--texte-doux,#5F5F5F);margin-top:2px;
+  white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.mvv-pick-r{flex:0 0 auto}
+.mvv-ftot{margin-top:16px;background:var(--terre-pale,#F3EADF);border:1px solid rgba(138,90,56,.18);
+  border-radius:14px;padding:15px;text-align:center}
+.mvv-ftot-n{display:block;font-family:'Cormorant Garamond',Georgia,serif;font-weight:700;font-size:38px;
+  line-height:1;color:var(--terre,#8A5A38)}
+.mvv-ftot-n.ko{color:#B0412C}
+.mvv-ftot-l{display:block;font-size:11.5px;color:var(--texte-doux,#5F5F5F);margin-top:7px;line-height:1.5}
+.mvv-ftot-s{display:block;font-size:11.5px;color:var(--texte-med,#4A4A3A);margin-top:9px;padding-top:9px;
+  border-top:1px solid rgba(138,90,56,.16);line-height:1.55;overflow-wrap:anywhere}
 `;
   document.head.appendChild(s);
 }
@@ -2019,6 +2155,99 @@ var _VEND_STEPS=[['setup','Setup'],['mpf','MPF'],['fa','FA'],['decuvage','Décuv
 function _vendStatLbl(st){ return (_VEND_STAT[st]||{lbl:st||'—'}).lbl; }
 function _vendTempCls(t){ return t>=30?'hot':t>=26?'warm':'cool'; }
 function _vendIsActive(c){ return c.statut==='fa'||c.statut==='mpf'; }
+
+/* ═══════════ L'ECRAN DU CUVIER — CUV-2 ═══════════
+   ⚠️⚠️ CE QUI A CHANGE, ET POURQUOI. Une cuve en fermentation occupait
+   ~726 px : le graphe densite/temperature en fait 232 a lui seul, et il
+   s'affiche des le 3e releve. La zone de liste d'un telephone fait ~520 px
+   — UNE cuve n'y tenait pas en entier, et 12 cuves demandaient 17 hauteurs
+   d'ecran. C'est le defaut du Pilotage de §34, sur un autre ecran : tout
+   arrivait ouvert.
+   ⚠️⚠️⚠️ ET L'ORDRE N'ETAIT PAS STABLE. Le tri se faisait sur _vendStale,
+   donc MESURER UNE CUVE LA FAISAIT CHANGER DE PLACE. Aucune memoire
+   spatiale possible. Le tri par defaut est desormais le REPERAGE DE
+   CUVERIE — celui ecrit sur la cuve, dans l'ordre ou l'on marche dans la
+   cave. L'urgence ne decide plus de la place : elle passe dans le bandeau
+   et dans la pastille de l'onglet, ou elle etait deja. */
+var _vendVue='liste', _vendFiltre='toutes', _vendTri='cuve', _vendOuvert=null, _vendQ='';
+
+/* Le repere ecrit sur la cuve. Il vient du PARC (CONFIG.cave.cuves[].nom),
+   jamais d'une numerotation inventee : c'est ce que Nico lit en passant
+   devant. Une cuve de vinification sans cuve physique declaree n'en a pas,
+   et la colonne se replie plutot que d'afficher un faux numero. */
+function _vendRepere(c){
+  if(!c||!c.cuve_ref) return '';
+  var p=_caveCuve(c.cuve_ref);
+  return (p&&p.nom)?String(p.nom):'';
+}
+/* Un cuvon sans repere ne doit pas remonter en tete : il part a la fin. */
+function _vendTriRepere(a,b){
+  var ra=_vendRepere(a), rb=_vendRepere(b);
+  if(!ra && !rb) return String(a.nom||'').localeCompare(String(b.nom||''),'fr');
+  if(!ra) return 1;
+  if(!rb) return -1;
+  /* numeric:true, sinon « Cuve 10 » se range entre « Cuve 1 » et « Cuve 2 ». */
+  return ra.localeCompare(rb,'fr',{numeric:true,sensitivity:'base'});
+}
+function _vendADecuver(c){ 
+  if(c.statut!=='fa') return false;
+  var l=_vendLastMes(c);
+  return !!l && _vendFaPct(_vendMesD20(l))>=90;
+}
+function _vendADue(c){ return _vendIsActive(c) && _vendStale(c)>=1; }
+function _vendEstFusionnee(c){ return !!(c && c.fusion && c.fusion.vers); }
+
+var _VEND_FILS=[['toutes','Toutes'],['fa','En fermentation'],['due','\u00c0 mesurer'],
+                ['dec','\u00c0 d\u00e9cuver'],['setup','En attente']];
+var _VEND_TRIS=[['cuve','Cuverie'],['urg','Urgence'],['fa','Avancement']];
+
+function _vendPasseFiltre(c,k){
+  if(k==='fa')    return _vendIsActive(c);
+  if(k==='due')   return _vendADue(c);
+  if(k==='dec')   return _vendADecuver(c);
+  if(k==='setup') return c.statut==='setup';
+  return true;
+}
+/* La recherche lit ce que Nico a sous les yeux : le nom de la cuvee, le
+   repere de cuverie, et les parcelles. Rien d'autre — chercher dans un id
+   technique ferait remonter des lignes sans raison visible. */
+function _vendCherche(c,q){
+  if(!q) return true;
+  var t=[c.nom||'', _vendRepere(c)].concat(c.parcelles||[]).join(' ');
+  return t.toLowerCase().indexOf(q)!==-1;
+}
+function _vendListe(cuves){
+  var q=String(_vendQ||'').trim().toLowerCase();
+  var l=cuves.filter(function(c){ return _vendPasseFiltre(c,_vendFiltre) && _vendCherche(c,q); });
+  if(_vendTri==='urg')     l.sort(function(a,b){ return (_vendStale(b)-_vendStale(a)) || _vendTriRepere(a,b); });
+  else if(_vendTri==='fa') l.sort(function(a,b){
+    var pa=_vendLastMes(a), pb=_vendLastMes(b);
+    var va=pa?_vendFaPct(_vendMesD20(pa)):-1, vb=pb?_vendFaPct(_vendMesD20(pb)):-1;
+    return (vb-va) || _vendTriRepere(a,b);
+  });
+  else l.sort(_vendTriRepere);
+  return l;
+}
+function _vendSetVue(v){ _vendVue=(v==='plan'?'plan':'liste'); renderVendCuves(); }
+function _vendSetFiltre(k){ _vendFiltre=k; _vendOuvert=null; renderVendCuves(); }
+function _vendSetTri(k){ _vendTri=k; renderVendCuves(); }
+function _vendBascOuv(id){ _vendOuvert=(_vendOuvert===id?null:id); renderVendCuves(); }
+/* ⚠️ On ne repeint PAS a chaque frappe : le champ perdrait le focus, meme
+   piege que _vendDecCuveVol. On repeint la liste seule, et on remet le
+   curseur ou il etait. */
+function _vendSetQ(v){
+  _vendQ=v||'';
+  var host=document.getElementById('mvv-corps');
+  if(!host){ renderVendCuves(); return; }
+  host.innerHTML=_vendCorpsHtml();
+  _vendPeindreGraphes();
+  _vendMajFils();
+}
+function _vendVideQ(){
+  _vendQ='';
+  var i=document.getElementById('mvv-q'); if(i) i.value='';
+  _vendSetQ('');
+}
 // ⚠️⚠️ L'ORDRE DU TABLEAU N'EST PLUS SUPPOSE ACQUIS (CUV-1).
 // Une mesure peut etre saisie en rattrapage a une date passee, ou sa date
 // corrigee apres coup. Or TOUT ce qui suit lit m[m.length-1] ou m.slice(-3)
@@ -2220,97 +2449,271 @@ function renderVendRec() {
 }
 
 function _mvgId(x){ return String(x==null?'':x).replace(/[^A-Za-z0-9_-]/g,''); }
+function _vendOutilsHtml(cuves){
+  var h='<div class="mvv-tools">';
+  /* La recherche n'apparait qu'a partir de 6 cuves : sur trois cuves, un
+     champ de recherche est du bruit. */
+  if(cuves.length>=6){
+    h+='<div class="mvv-srch"><span class="mvv-srch-ic">'+_mvIcon('loupe',16)+'</span>'
+      +'<input id="mvv-q" type="search" inputmode="search" autocomplete="off" '
+      +'placeholder="Chercher une cuve ou une parcelle" aria-label="Chercher une cuve" '
+      +'value="'+_escAttr(_vendQ||'')+'" oninput="_vendSetQ(this.value)">'
+      +(_vendQ?'<button type="button" class="mvv-srch-x" onclick="_vendVideQ()" aria-label="Effacer la recherche">'
+        +_mvIcon('croix',16)+'</button>':'')
+      +'</div>';
+  }
+  h+='<div class="mvv-fils" id="mvv-fils">'+_vendFilsHtml(cuves)+'</div>';
+  h+='<div class="mvv-sortrow"><div class="mvv-seg" role="group" aria-label="Trier les cuves">'
+    +_VEND_TRIS.map(function(t){
+      return '<button type="button" class="'+(_vendTri===t[0]?'on':'')+'" '
+        +'aria-pressed="'+(_vendTri===t[0])+'" onclick="_vendSetTri(\''+_escAttr(t[0])+'\')">'+t[1]+'</button>';
+    }).join('')
+    +'</div><div class="mvv-seg vues" role="group" aria-label="Affichage">'
+    +'<button type="button" class="'+(_vendVue==='liste'?'on':'')+'" aria-pressed="'+(_vendVue==='liste')
+    +'" onclick="_vendSetVue(\'liste\')" aria-label="Vue liste" title="Liste">'+_mvIcon('liste',16)+'</button>'
+    +'<button type="button" class="'+(_vendVue==='plan'?'on':'')+'" aria-pressed="'+(_vendVue==='plan')
+    +'" onclick="_vendSetVue(\'plan\')" aria-label="Plan de cuverie" title="Plan de cuverie">'+_mvIcon('carre',16)+'</button>'
+    +'</div></div></div>';
+  return h;
+}
+function _vendFilsHtml(cuves){
+  return _VEND_FILS.map(function(f){
+    var n=cuves.filter(function(c){ return _vendPasseFiltre(c,f[0]); }).length;
+    /* Un filtre vide reste affiche : sa disparition ferait bouger la barre
+       d'un jour a l'autre, et c'est exactement ce qu'on vient de corriger. */
+    return '<button type="button" class="mvv-fil'+(_vendFiltre===f[0]?' on':'')+'" '
+      +'aria-pressed="'+(_vendFiltre===f[0])+'" onclick="_vendSetFiltre(\''+_escAttr(f[0])+'\')">'
+      +f[1]+'<span class="n">'+n+'</span></button>';
+  }).join('');
+}
+function _vendMajFils(){
+  var el=document.getElementById('mvv-fils');
+  if(el) el.innerHTML=_vendFilsHtml((CAVE_VENDANGE.cuves_vinif||[]).filter(function(c){
+    return c && !_vendEstFusionnee(c); }));
+}
+
+/* Une ligne. ~68 px fermee, contre ~726 px avant. */
+function _vendLigneHtml(c,canEdit){
+  var ouv=(_vendOuvert===c.id), last=_vendLastMes(c), act=_vendIsActive(c);
+  var pct=last?_vendFaPct(_vendMesD20(last)):0;
+  var stale=_vendStale(c);
+  var cls=c.statut==='termine'?'fini':(_vendADue(c)?'due':(act?'fa':''));
+  var rep=_vendRepere(c);
+  var etat = c.statut==='termine' ? '<span class="mvv-etat">D\u00e9cuv\u00e9e</span>'
+    : c.statut==='setup'          ? '<span class="mvv-etat">Encuvage</span>'
+    : _vendADue(c)                ? '<span class="mvv-etat due">'+stale+' j</span>'
+    : act                         ? '<span class="mvv-etat ok">\u00e0 jour</span>'
+    : '<span class="mvv-etat">'+_escHtml(_vendStatLbl(c.statut))+'</span>';
+  var bits=[];
+  if(c.parcelles&&c.parcelles.length) bits.push(_escHtml(c.parcelles.join(', ')));
+  if(last&&last.densite!=null) bits.push(Math.round(_vendMesD20(last)));
+  if(last&&last.temp_c!=null)  bits.push(_vendCuvF1(last.temp_c)+'\u00a0\u00b0C');
+  var h='<div class="mvv-row '+cls+(ouv?' open':'')+'">'
+    +'<button type="button" class="mvv-hd" aria-expanded="'+ouv+'" onclick="_vendBascOuv(\''+_escAttr(c.id)+'\')">'
+    +(rep?'<span class="mvv-ref"><span class="mvv-ref-n">'+_escHtml(rep)+'</span>'
+          +'<span class="mvv-ref-u">CUVE</span></span>':'')
+    +'<span class="mvv-mid"><span class="mvv-nom">'+_escHtml(c.nom||'Cuve')+'</span>'
+    +(bits.length?'<span class="mvv-sub">'+bits.join('<span class="sp">\u00b7</span>')+'</span>':'')
+    +(act&&pct?'<span class="mvv-mini"><span class="mvv-mini-f" style="width:'+pct+'%"></span></span>':'')
+    +'</span>'
+    +'<span class="mvv-rt">'
+    +(act&&pct?'<span class="mvv-pct"><span class="mvv-pct-n">'+pct+'</span>'
+              +'<span class="mvv-pct-u">% FA</span></span>':'')
+    +etat
+    +'<span class="mvv-chev">'+_mvIcon('chevron',16)+'</span>'
+    +'</span></button>';
+  h+='<div class="mvv-det"'+(ouv?'':' hidden')+'>'+(ouv?_vendDetailHtml(c,canEdit):'')+'</div>';
+  return h+'</div>';
+}
+
+/* Le detail. Il n'est construit QUE pour la cuve ouverte : c'est ce qui fait
+   passer la page de ~8700 px a ~900 px sur douze cuves. */
+function _vendDetailHtml(c,canEdit){
+  var h='', last=_vendLastMes(c), act=_vendIsActive(c);
+  var mes=_vendTriMes(c);
+  /* La frise des etapes : elle dit OU EN EST la cuve dans son parcours.
+     La ligne fermee n'en montre que l'aboutissement (le badge d'etat) ;
+     ici on remet le parcours entier. */
+  h+=_vendStepper(c.statut);
+  if(mes.length>=3){
+    h+='<div class="mvv-det-g" id="mvg-fm-'+_mvgId(c.id)+'"></div>';
+  } else if(mes.length>=2){
+    h+='<div class="mvv-det-g" id="mvg-fa-'+_mvgId(c.id)+'"></div>';
+  }
+  if(last){
+    h+='<div class="mvv-3">'
+      +'<div class="c"><div class="v">'+Math.round(_vendMesD20(last))+'</div><div class="l">densit\u00e9 \u00e0 20\u00a0\u00b0C</div></div>'
+      +'<div class="c"><div class="v">'+(last.temp_c!=null?_vendCuvF1(last.temp_c)+'\u00a0\u00b0C':'\u2014')+'</div><div class="l">temp\u00e9rature</div></div>'
+      +'<div class="c"><div class="v">'+(_vendStale(c)===0?'aujourd\u2019hui':'il y a '+_vendStale(c)+'\u00a0j')+'</div><div class="l">dernier relev\u00e9</div></div>'
+      +'</div>';
+    /* ★ Ce que la ligne fermee ne peut pas dire : le degre potentiel qui
+       reste a faire, et la temperature COLOREE — une cuve a 31 °C doit se
+       voir, pas seulement s'ecrire. */
+    var chips=[];
+    if(last.temp_c!=null)
+      chips.push('<span class="mvv-chip '+_vendTempCls(last.temp_c)+'">'+_vendCuvF1(last.temp_c)
+        +'<span class="u">\u00b0C</span></span>');
+    if(act && last.densite!=null)
+      chips.push('<span class="mvv-chip">reste ~'+_vendCuvF1(_vendDegrePot(_vendMesD20(last)))
+        +'<span class="u">\u00b0 potentiels</span></span>');
+    if(last.remontages>0) chips.push('<span class="mvv-chip">'+last.remontages+'<span class="u">remont.</span></span>');
+    if(last.pigeages>0)   chips.push('<span class="mvv-chip">'+last.pigeages+'<span class="u">pigeage'+(last.pigeages>1?'s':'')+'</span></span>');
+    if(chips.length) h+='<div class="mvv-chips">'+chips.join('')+'</div>';
+  }
+  var det=[];
+  var cs=_vendCuvCsDom(c.id);
+  if(cs>0) det.push(cs+' caisse'+(cs>1?'s':'')+' du domaine');
+  if(_vendVolLoge(c)>0) det.push(_vendCuvF1(_vendVolLoge(c))+'\u00a0hL log\u00e9s');
+  else if(cs>0)         det.push('~'+_vendCuvF1(_vendCuvHl(cs))+'\u00a0hL estim\u00e9s');
+  if(c.volume_hl)       det.push('contenance '+_vendCuvF1(c.volume_hl)+'\u00a0hL');
+  if(c.date_entree)     det.push('entr\u00e9e le '+_vendFrDate(c.date_entree));
+  if(det.length) h+='<div class="mvv-detnote">'+_escHtml(det.join(' \u00b7 '))+'</div>';
+  /* ★ Une cuve qui a absorbe d'autres cuves le dit : les releves d'AVANT la
+     date d'assemblage portent sur un autre volume. Le taire ferait lire la
+     courbe comme si rien n'avait change. */
+  if(c.fusion_src&&c.fusion_src.length){
+    var d=c.fusion_src[c.fusion_src.length-1];
+    h+='<div class="mvv-detnote"><b>Assemblage le '+_vendFrDate(d.date)+'</b> \u2014 '
+      +_escHtml(c.fusion_src.map(function(x){return x.nom;}).join(', '))
+      +' rejoint'+(c.fusion_src.length>1?'s':'')+' cette cuve. Les relev\u00e9s ant\u00e9rieurs portent sur un autre volume.</div>';
+  }
+  if(_vendEstFusionnee(c)){
+    h+='<div class="mvv-detnote">Fusionn\u00e9e le '+_vendFrDate(c.fusion.date)+' dans <b>'
+      +_escHtml(c.fusion.vers_nom||'une autre cuve')+'</b>. Ses relev\u00e9s et ses op\u00e9rations restent au registre.</div>';
+  }
+  if(canEdit && !_vendEstFusionnee(c)){
+    h+='<div class="mvv-actrow" style="flex-wrap:wrap">';
+    if(act) h+='<button class="mvv-act2 dec" onclick="openOvVendMesure(\''+_escAttr(c.id)+'\')">Saisir une mesure</button>';
+    if(c.statut==='setup') h+='<button class="mvv-act2 dec" onclick="openOvVendCuve(\''+_escAttr(c.id)+'\')">D\u00e9marrer la fermentation</button>';
+    h+='<button class="mvv-act2" onclick="openVendOp(\''+_escAttr(c.id)+'\')">Op\u00e9ration</button>';
+    if(c.statut!=='termine'&&c.statut!=='setup')
+      h+='<button class="mvv-act2" onclick="openVendDecuvage(\''+_escAttr(c.id)+'\')">D\u00e9cuver</button>';
+    h+='<button class="mvv-act2" onclick="openOvVendCuve(\''+_escAttr(c.id)+'\')">Modifier</button>';
+    h+='</div>';
+  }
+  h+=_vendMesHist(c,canEdit&&!_vendEstFusionnee(c));
+  h+=_vendOpsSummary(c,canEdit&&!_vendEstFusionnee(c));
+  return h;
+}
+
+/* Le plan de cuverie : la cave vue d'un coup d'oeil, chaque cuve avec son
+   niveau et sa couleur d'etat. */
+function _vendCellHtml(c){
+  var ouv=(_vendOuvert===c.id), last=_vendLastMes(c);
+  var pct=last?_vendFaPct(_vendMesD20(last)):0;
+  var cap=parseFloat(c.volume_hl)||0;
+  var dedans=_vendVolLoge(c)>0?_vendVolLoge(c):_vendCuvHl(_vendCuvCsDom(c.id));
+  var niv = (c.statut==='setup'||!(cap>0)) ? 0 : Math.max(8,Math.min(100,Math.round(dedans/cap*100)));
+  var col = c.statut==='termine' ? '#C0BAAE' : _vendADue(c) ? '#C86A4E'
+          : _vendIsActive(c) ? '#8A5A38' : '#9A93A8';
+  var H=52, y=6+(H)*(1-niv/100);
+  var sous = c.statut==='termine' ? 'd\u00e9cuv\u00e9e' : c.statut==='setup' ? 'en attente'
+    : _vendADue(c) ? _vendStale(c)+' j sans relev\u00e9' : (pct?pct+'\u00a0% FA':'suivie');
+  var rep=_vendRepere(c);
+  var uid=_mvgId(c.id);
+  return '<button type="button" class="mvv-cell'+(_vendADue(c)?' due':'')+(ouv?' open':'')+'" '
+    +'aria-pressed="'+ouv+'" onclick="_vendBascOuv(\''+_escAttr(c.id)+'\')">'
+    +'<span class="mvv-cell-r">'+_escHtml(rep||'\u2014')+'</span>'
+    +'<span class="mvv-cell-sv"><svg width="46" height="'+(H+12)+'" viewBox="0 0 46 '+(H+12)+'" '
+    +'aria-hidden="true" focusable="false">'
+    +'<clipPath id="vcp'+uid+'"><rect x="7" y="6" width="32" height="'+H+'" rx="5"/></clipPath>'
+    +'<rect x="7" y="6" width="32" height="'+H+'" rx="5" fill="var(--bg-card,#FBFAF6)" '
+    +'stroke="rgba(138,90,56,.32)" stroke-width="1.4"/>'
+    +(niv?'<rect x="7" y="'+y.toFixed(1)+'" width="32" height="'+(H+6-y).toFixed(1)+'" fill="'+col
+      +'" opacity=".82" clip-path="url(#vcp'+uid+')"/>':'')
+    +'<rect x="13" y="2" width="20" height="5" rx="2" fill="rgba(138,90,56,.3)"/>'
+    +'</svg></span>'
+    +'<span class="mvv-cell-n">'+_escHtml(c.nom||'Cuve')+'</span>'
+    +'<span class="mvv-cell-s'+(_vendADue(c)?' due':'')+'">'+sous+'</span>'
+    +'</button>';
+}
+
+/* Le corps seul — extrait pour que la recherche le repeigne sans reconstruire
+   la barre d'outils (le champ perdrait le focus a chaque frappe). */
+function _vendCorpsHtml(){
+  var cuves=(CAVE_VENDANGE.cuves_vinif||[]).filter(function(c){ return c && !_vendEstFusionnee(c); });
+  var canEdit=canWrite();
+  var l=_vendListe(cuves);
+  if(!l.length){
+    return '<div class="mvv-empty"><div class="mvv-empty-tx">'
+      +(cuves.length?'Aucune cuve ne correspond.<br>Change le filtre ou efface la recherche.'
+                    :'Aucune cuve de vinification.<br>Cr\u00e9ez votre premi\u00e8re cuve pour suivre la fermentation.')
+      +'</div></div>';
+  }
+  if(_vendVue==='plan'){
+    var h='<div class="mvv-plan">'+l.map(_vendCellHtml).join('')+'</div>';
+    var o=l.filter(function(c){ return c.id===_vendOuvert; })[0];
+    if(o) h+='<div class="mvv-row '+(o.statut==='termine'?'fini':(_vendADue(o)?'due':'fa'))+' open" style="margin-top:10px">'
+      +'<div class="mvv-hd" style="cursor:default"><span class="mvv-mid">'
+      +'<span class="mvv-nom">'+_escHtml(o.nom||'Cuve')+'</span></span></div>'
+      +'<div class="mvv-det">'+_vendDetailHtml(o,canEdit)+'</div></div>';
+    return h;
+  }
+  return l.map(function(c){ return _vendLigneHtml(c,canEdit); }).join('');
+}
+
+/* Les graphes se posent APRES l'ecriture du HTML : _mvGraphSuivre mesure la
+   largeur du conteneur, qui n'existe pas encore pendant la construction. */
+function _vendPeindreGraphes(){
+  window._mvGraphOublier('#mvg-fa-');
+  window._mvGraphOublier('#mvg-fm-');
+  var c=(CAVE_VENDANGE.cuves_vinif||[]).filter(function(x){ return x && x.id===_vendOuvert; })[0];
+  if(c){
+    var mes=_vendTriMes(c);
+    if(mes.length>=3){
+      (function(cu){ window._mvGraphSuivre('#mvg-fm-'+_mvgId(cu.id), function(lg){ return _vendFermSvg(cu,lg); }); })(c);
+    } else if(mes.length>=2){
+      (function(cu){ window._mvGraphSuivre('#mvg-fa-'+_mvgId(cu.id), function(lg){ return _vendSparkline(cu.mesures_fa,cu.id,lg); }); })(c);
+    }
+  }
+  if(window._mvGraphRepeindre) window._mvGraphRepeindre();
+}
+
 function renderVendCuves() {
   var el=document.getElementById('mvv-body'); if(!el) return;
   window._mvGraphOublier('#mvg-fa-');
   window._mvGraphOublier('#mvg-fm-');
   window._mvGraphOublier('#mvg-cv-');
-  var cuves=CAVE_VENDANGE.cuves_vinif||[];
+  var toutes=CAVE_VENDANGE.cuves_vinif||[];
+  var cuves=toutes.filter(function(c){ return c && !_vendEstFusionnee(c); });
   var canEdit=canWrite();
-  var actives=cuves.filter(function(c){return c.statut!=='termine';});
-  var decuvees=cuves.filter(function(c){return c.statut==='termine';});
-  var sorted=actives.slice().sort(function(a,b){
-    var sa=_vendIsActive(a)?_vendStale(a):-1, sb=_vendIsActive(b)?_vendStale(b):-1;
-    return sb-sa;
-  });
-  var due=actives.filter(function(c){return _vendIsActive(c)&&_vendStale(c)>=1;});
+  var actives=cuves.filter(function(c){ return c.statut!=='termine'; });
+  var due=cuves.filter(_vendADue);
+
   var h=_caveSaisBanner();
   if(due.length){
-    h+='<div class="mvv-alert"><div class="mvv-alert-t">'+due.length+' cuve'+(due.length>1?'s':'')+' à mesurer</div>'
-      +'<div class="mvv-alert-d">En fermentation active, un relevé de densité par jour suit la cinétique et anticipe un arrêt.</div>'
+    h+='<div class="mvv-alert"><div class="mvv-alert-t">'+due.length+' cuve'+(due.length>1?'s':'')+' \u00e0 mesurer</div>'
+      +'<div class="mvv-alert-d">En fermentation active, un relev\u00e9 de densit\u00e9 par jour suit la cin\u00e9tique et anticipe un arr\u00eat.</div>'
       +'<div class="mvv-alert-chips">'+due.map(function(c){
-        return '<button class="mvv-alert-chip" onclick="openOvVendMesure(\''+c.id+'\')">'+_escHtml(c.nom)+' <small>· '+_vendStale(c)+' j</small></button>';
+        return '<button class="mvv-alert-chip" onclick="_vendBascOuv(\''+_escAttr(c.id)+'\')">'
+          +_escHtml(c.nom)+' <small>\u00b7 '+_vendStale(c)+' j</small></button>';
       }).join('')+'</div></div>';
   }
+  /* ★ Le remplissage parcelle par parcelle reste, mais REPLIE : il repond a
+     « la journee de recolte de demain peut-elle partir ? », pas a « ou est ma
+     cuve ? ». Deplie, il repoussait la liste d'un ecran entier. */
   if(actives.length){
-    // Le remplissage, parcelle par parcelle, AVANT la liste des cuves : c'est
-    // lui qui dit si la journee de recolte de demain peut etre lancee.
-    h+='<div class="mvmat-card"><div class="mvmat-ttl">Remplissage des cuves \u00b7 parcelle par parcelle</div>'
-      +'<div id="mvg-cv-all"></div></div>';
+    h+='<details class="mvv-histwrap" style="margin-bottom:10px"><summary>Remplissage des cuves '
+      +'<span class="u">\u00b7 parcelle par parcelle</span></summary>'
+      +'<div id="mvg-cv-all"></div></details>';
     (function(cc,rr){ window._mvGraphSuivre('#mvg-cv-all', function(lg){ return _vendRemplirSvg(cc,rr,lg); }); })(actives, CAVE_VENDANGE.recoltes||[]);
-    h+='<div class="mvv-seclbl">'+actives.length+' cuve'+(actives.length>1?'s':'')+' de vinification</div>';
-    sorted.forEach(function(c){
-      var last=_vendLastMes(c), active=_vendIsActive(c), stale=_vendStale(c);
-      var pct=last?_vendFaPct(_vendMesD20(last)):0;
-      var dueCls=active&&stale>=1?' due':'';
-      h+='<div class="mvv-cuve'+(active?' act':'')+dueCls+'">';
-      h+='<div class="mvv-cuve-head"><div style="flex:1;min-width:0">'
-        +'<div class="mvv-cuve-name">'+_escHtml(c.nom)+'</div>'
-        +'<div class="mvv-cuve-meta">Entrée le '+_vendFrDate(c.date_entree)+(c.parcelles&&c.parcelles.length?' · '+c.parcelles.length+' parcelle'+(c.parcelles.length>1?'s':''):'')+'</div>'
-        +(c.parcelles&&c.parcelles.length?'<div class="mvv-cuve-par">'+c.parcelles.map(function(p){return _escHtml(p);}).join(' · ')+'</div>':'')
-        +'</div>'
-        +'<div class="mvv-vol"><div class="mvv-vol-n">'+(_vendVolLoge(c)>0?_vendCuvF1(_vendVolLoge(c)):(c.volume_hl||0))+'</div>'
-        +'<div class="mvv-vol-u">'+(_vendVolLoge(c)>0?'hL log\u00e9s':'hL de cuve')+'</div>'
-        +(canEdit?'<button class="mv-gh mvv-edit" onclick="event.stopPropagation();openOvVendCuve(\''+c.id+'\')" title="Modifier" aria-label="Modifier">'+_mvIcon('crayon',18)+'</button>':'')
-        +'</div></div>';
-      h+=_vendStepper(c.statut);
-      if(last && active){
-        h+='<div class="mvv-ferm"><div class="mvv-ferm-top"><span class="mvv-ferm-lbl">Fermentation alcoolique</span>'
-          +'<span class="mvv-ferm-pct">'+pct+'<small>% FA</small></span></div>'
-          +'<div class="mvv-gauge"><div class="mvv-gauge-fill" style="width:'+pct+'%"></div><div class="mvv-gauge-mk" style="left:calc('+pct+'% - 1.5px)"></div></div>'
-          +'<div class="mvv-ferm-scale"><span>Densité '+Math.round(_vendMesD20(last))+' (20°C)'+(last.temp_c!=null?' · '+last.temp_c+'°C brut':'')+'</span><span>reste ~'+_vendDegrePot(_vendMesD20(last)).toFixed(1)+'°</span></div></div>';
-        // La cinetique compacte cede la place au graphe complet des qu'il y a
-        // trois releves : densite, temperature et les operations sur le meme axe.
-        if((c.mesures_fa||[]).length>=3){
-          (function(cu){ window._mvGraphSuivre('#mvg-fm-'+_mvgId(cu.id), function(lg){ return _vendFermSvg(cu,lg); }); })(c);
-          h+='<div id="mvg-fm-'+_mvgId(c.id)+'"></div>';
-        } else {
-          (function(cu){ window._mvGraphSuivre('#mvg-fa-'+_mvgId(cu.id), function(lg){ return _vendSparkline(cu.mesures_fa,cu.id,lg); }); })(c);
-          h+='<div id="mvg-fa-'+_mvgId(c.id)+'"></div>';
-        }
-        h+='<div class="mvv-chips">'
-          +(last.temp_c!=null?'<span class="mvv-chip '+_vendTempCls(last.temp_c)+'">'+last.temp_c+'<span class="u">°C</span></span>':'')
-          +(last.remontages>0?'<span class="mvv-chip">'+last.remontages+'<span class="u">remont.</span></span>':'')
-          +(last.pigeages>0?'<span class="mvv-chip">'+last.pigeages+'<span class="u">pigeage</span></span>':'')
-          +'</div>';
-        var rc=stale===0?'ok':stale===1?'watch':'late';
-        var rt=stale===0?'Mesuré aujourd\'hui':stale===1?'Dernier relevé hier':'<span class="pulse"></span> '+stale+' j sans relevé — à contrôler';
-        h+='<div class="mvv-recency '+rc+'">'+rt+'</div>';
-        if(canEdit) h+='<button class="mvv-act-btn measure" onclick="openOvVendMesure(\''+c.id+'\')">Saisir une mesure</button>';
-        h+=_vendMesHist(c,canEdit);
-        h+=_vendOpsSummary(c,canEdit);
-        if(canEdit) h+=_vendActRow(c);
-      } else if(c.statut==='setup'){
-        h+='<div class="mvv-recency watch" style="margin-top:12px">Cuve prête — en attente d\'encuvage</div>';
-        if(canEdit) h+='<button class="mvv-act-btn ghost" onclick="openOvVendCuve(\''+c.id+'\')">Démarrer la fermentation</button>';
-        h+=_vendOpsSummary(c,canEdit);
-      } else {
-        h+='<div class="mvv-done-tag">'+_mvBadge(_vendStatLbl(c.statut)+' — cuvaison terminée','vert')+'</div>';
-        // Une cuve decuvee reste corrigeable : c'est souvent apres coup qu'on
-        // s'apercoit qu'une densite a ete notee de travers.
-        h+=_vendMesHist(c,canEdit);
-        h+=_vendOpsSummary(c,canEdit);
-        if(canEdit) h+=_vendActRow(c);
-      }
-      h+='</div>';
-    });
-  } else if(!decuvees.length){
-    h+='<div class="mvv-empty"><div class="mvv-empty-ic">'+_mvIcon('verre',40)+'</div><div class="mvv-empty-tx">Aucune cuve de vinification.<br>Créez votre première cuve pour suivre la fermentation.</div></div>';
   }
-  h+=_vendDecuveesSection(decuvees);
-  if(canEdit) h+='<div class="mvv-fab"><button class="mvv-fab-btn" onclick="openOvVendCuve(null)">＋ Nouvelle cuve</button></div>';
+  if(cuves.length) h+=_vendOutilsHtml(cuves);
+  h+='<div id="mvv-corps">'+_vendCorpsHtml()+'</div>';
+
+  /* Les cuves absorbees par une fusion : hors de la liste, jamais perdues. */
+  h+=_vendFusionneesSection(toutes.filter(_vendEstFusionnee));
+  h+=_vendDecuveesSection(cuves.filter(function(c){ return c.statut==='termine'; }));
+
+  if(canEdit){
+    h+='<div class="mvv-fab">';
+    if(actives.length>=2)
+      h+='<button class="mvv-fab-btn" style="background:var(--bg-card,#FBFAF6);color:var(--terre,#8A5A38);'
+        +'border:1px solid rgba(138,90,56,.3);margin-bottom:8px" onclick="openVendFusion()">Fusionner des cuves</button>';
+    h+='<button class="mvv-fab-btn" onclick="openOvVendCuve(null)">\uff0b Nouvelle cuve</button></div>';
+  }
   el.innerHTML=h;
-  if(window._mvGraphRepeindre) window._mvGraphRepeindre();
+  _vendPeindreGraphes();
   _vendRefreshCockpit();
 }
 
@@ -2636,7 +3039,11 @@ function saveVendCuve() {
   }
   var obj={id:id||'vcuv_'+Date.now(),nom:nom,volume_hl:vol,statut:statut,cuve_ref:_vcuvRef||null,parcelles:parcelles,date_entree:date,erasflage:erasflage,so2_g_hl:so2,levures:levures,mpf:{active:_vcuvMpfActive,temp_c:mpfT,duree_j:mpfD},mesures_fa:existing?(existing.mesures_fa||[]):[],decuvage:existing?(existing.decuvage||null):null,
     vol_decuve_hl:existing?(existing.vol_decuve_hl!=null?existing.vol_decuve_hl:null):null,
-    recolte_ids:existing&&Array.isArray(existing.recolte_ids)?existing.recolte_ids.slice():undefined};
+    recolte_ids:existing&&Array.isArray(existing.recolte_ids)?existing.recolte_ids.slice():undefined,
+    // ⚠️ `obj` est rebati de zero : sans ces deux lignes, rouvrir la fiche
+    //   d'une cuve fusionnee effacerait la fusion. Piege recurrent du projet.
+    fusion:existing?(existing.fusion||null):null,
+    fusion_src:existing&&Array.isArray(existing.fusion_src)?existing.fusion_src.slice():undefined};
   if(!id && _vcuvFromGrp){
     var _d=_vcuvFromGrp;
     obj.cuvee_src=_d.cuvee; obj.vcuvee_id=_d.id||null; obj.recolte_ids=_d.ids.slice(); obj.nb_caisses=_d.caisses;
@@ -4683,10 +5090,283 @@ function _vendOpsSummary(c,canEdit){
     +(ops.length>1?' <span class="u">· '+ops.length+' au total</span>':'')
     +'</summary>'+rows+'</details>';
 }
-function _vendActRow(c){
-  return '<div class="mvv-actrow">'
-    +'<button class="mvv-act2" onclick="openVendOp(\''+c.id+'\')">Opération</button>'
-    +'<button class="mvv-act2 dec" onclick="openVendDecuvage(\''+c.id+'\')">Décuver</button></div>';
+/* ═══════════ FUSIONNER DES CUVES (FUS-1) ═══════════ */
+var _vendFusSel={}, _vendFusDest=null, _vendFusNom='', _vendFusNomTouche=false;
+
+function _vendFusCuves(){
+  return (CAVE_VENDANGE.cuves_vinif||[]).filter(function(c){
+    return c && c.statut!=='termine' && !_vendEstFusionnee(c);
+  });
+}
+function _vendFusPris(){
+  return _vendFusCuves().filter(function(c){ return _vendFusSel[c.id]; });
+}
+/* Le volume attendu d'une cuve : les caisses du domaine au ratio kg/hL.
+   ⚠️ JAMAIS `volume_hl`, qui est la CONTENANCE — c'est la faute RDT-1, et
+   elle se rejouerait ici a l'identique. */
+function _vendFusHl(c){ return _vendCuvHl(_vendCuvCsDom(c.id)); }
+function _vendFusTotHl(){
+  return _vendFusPris().reduce(function(s,c){ return s+_vendFusHl(c); },0);
+}
+function _vendFusNomAuto(){
+  var p=_vendFusPris();
+  return p.length<2 ? '' : p.map(function(c){ return c.nom||'Cuve'; }).join(' + ');
+}
+/* La cuve d'arrivee : soit une des cuves choisies (elle garde sa cuverie),
+   soit une cuve LIBRE du parc — la premiere cuve choisie devient alors la
+   porteuse et son cuve_ref bascule. On ne cree jamais d'objet cuve neuf :
+   il faudrait recopier mesures et operations, et une copie se desynchronise. */
+function _vendFusParcLibre(){
+  var pris=_vendFusPris().map(function(c){ return c.id; });
+  return _caveParc().filter(function(p){
+    var occ=_caveCuveOcc(p.id,null);
+    if(!occ) return true;
+    /* Une cuve tenue par une cuve qu'on est en train d'absorber se libere. */
+    return _vendFusPris().some(function(c){ return c.cuve_ref===p.id; });
+  });
+}
+function _vendFusDestObj(){
+  if(!_vendFusDest) return null;
+  var c=_vendFusPris().filter(function(x){ return x.id===_vendFusDest; })[0];
+  if(c) return {kind:'cuve', id:c.id, nom:c.nom||'Cuve', cap:parseFloat(c.volume_hl)||0,
+                lbl:_vendRepere(c)||c.nom||'Cuve'};
+  var p=_caveCuve(_vendFusDest);
+  if(p) return {kind:'parc', id:p.id, nom:p.nom||'Cuve', cap:(parseFloat(p.litres)||0)/100,
+                lbl:p.nom||'Cuve'};
+  return null;
+}
+function openVendFusion(){
+  if(!canWrite()) return;
+  _vendFusSel={}; _vendFusDest=null; _vendFusNom=''; _vendFusNomTouche=false;
+  _caveV2InjectCss();          // le selecteur de cuve du parc vit la
+  _vendFusPeindre(true);
+}
+function _vendFusBasc(id){
+  if(_vendFusSel[id]) delete _vendFusSel[id]; else _vendFusSel[id]=1;
+  /* Une destination qui n'est plus selectionnee cesse d'etre une destination. */
+  if(_vendFusDest && !_vendFusSel[_vendFusDest] && !_caveCuve(_vendFusDest)) _vendFusDest=null;
+  if(!_vendFusNomTouche) _vendFusNom='';
+  _vendFusPeindre(false);
+}
+function _vendFusPick(id){ _vendFusDest=id; _vendFusPeindre(false); }
+function _vendFusSetNom(v){ _vendFusNom=v; _vendFusNomTouche=true; _vendFusRecap(); }
+
+function _vendFusHtml(){
+  var all=_vendFusCuves(), p=_vendFusPris(), n=p.length;
+  var hl=_vendFusTotHl();
+  /* ⚠️ Les totaux (caisses, parcelles) sont calcules par _vendFusRecapHtml,
+     pas ici : les dupliquer laisserait deux sources pour le meme chiffre. */
+
+  var h='<div class="mvv-sheet-hd"><div class="mvv-sheet-t">Fusionner des cuves</div>'
+    +'<button class="mv-gh mvv-sheet-x" onclick="_vendSheetClose()" title="Fermer" aria-label="Fermer">'
+    +_mvIcon('croix',18)+'</button></div>'
+    +'<div class="mvv-sheet-sub">Plusieurs cuves n\u2019en font plus qu\u2019une. Les raisins, les kilos et les '
+    +'parcelles suivent. Les relev\u00e9s et les op\u00e9rations de chaque cuve de d\u00e9part restent au registre '
+    +'sous leur nom d\u2019origine.</div>';
+
+  h+='<label class="mvv-flbl">Quelles cuves <span class="mvv-fhint">(au moins deux)</span></label>';
+  all.forEach(function(c){
+    var sel=!!_vendFusSel[c.id], rep=_vendRepere(c), last=_vendLastMes(c);
+    var pct=last?_vendFaPct(_vendMesD20(last)):0;
+    var m=[]; if(rep) m.push(rep);
+    m.push(_vendCuvF1(_vendFusHl(c))+'\u00a0hL');
+    if(c.parcelles&&c.parcelles.length) m.push(c.parcelles.join(', '));
+    h+='<button type="button" class="mvv-pick'+(sel?' sel':'')+'" onclick="_vendFusBasc(\''+_escAttr(c.id)+'\')">'
+      +'<span class="mvv-box"></span><span class="mvv-pick-b">'
+      +'<span class="mvv-pick-n">'+_escHtml(c.nom||'Cuve')+'</span>'
+      +'<span class="mvv-pick-m">'+_escHtml(m.join(' \u00b7 '))+'</span></span>'
+      +'<span class="mvv-pick-r"><span class="mvc-dfit '+(pct?'good':'tight')+'">'
+      +(pct?pct+'\u00a0% FA':_escHtml(_vendStatLbl(c.statut)))+'</span></span></button>';
+  });
+
+  if(n<2){
+    h+='<div class="mvv-ftot"><span class="mvv-ftot-n">'+n+'</span>'
+      +'<span class="mvv-ftot-l">cuve s\u00e9lectionn\u00e9e \u2014 il en faut au moins deux</span></div>'
+      +'<button class="mvv-save" disabled>Choisissez les cuves \u00e0 fusionner</button>';
+    return h;
+  }
+
+  h+='<label class="mvv-flbl">O\u00f9 va le vin</label>';
+  p.forEach(function(c){
+    var cap=parseFloat(c.volume_hl)||0, ok=cap>=hl, rep=_vendRepere(c);
+    h+='<button type="button" class="mvv-pick'+(_vendFusDest===c.id?' sel':'')+'" '
+      +'onclick="_vendFusPick(\''+_escAttr(c.id)+'\')">'
+      +'<span class="mvv-rad"></span><span class="mvv-pick-b">'
+      +'<span class="mvv-pick-n">'+_escHtml(rep||c.nom||'Cuve')+'</span>'
+      +'<span class="mvv-pick-m">d\u00e9j\u00e0 occup\u00e9e par '+_escHtml(c.nom||'cette cuve')
+      +(cap?' \u00b7 '+_vendCuvF1(cap)+'\u00a0hL':'')+'</span></span>'
+      +'<span class="mvv-pick-r"><span class="mvc-dfit '+(ok?'good':'tight')+'">'
+      +(ok?'tout tient':'reste '+_vendCuvF1(hl-cap)+'\u00a0hL')+'</span></span></button>';
+  });
+  _vendFusParcLibre().forEach(function(q){
+    if(p.some(function(c){ return c.cuve_ref===q.id; })) return;   // deja propose ci-dessus
+    var cap=(parseFloat(q.litres)||0)/100, ok=cap>=hl, mt=_caveMat(q.matiere);
+    h+='<button type="button" class="mvv-pick'+(_vendFusDest===q.id?' sel':'')+'" '
+      +'onclick="_vendFusPick(\''+_escAttr(q.id)+'\')">'
+      +'<span class="mvv-rad"></span><span class="mvv-pick-b">'
+      +'<span class="mvv-pick-n">'+_escHtml(q.nom||'Cuve')+'</span>'
+      +'<span class="mvv-pick-m">'+_escHtml(mt.lbl)+' \u00b7 '+_vendCuvF1(cap)
+      +'\u00a0hL \u00b7 libre dans le parc</span></span>'
+      +'<span class="mvv-pick-r"><span class="mvc-dfit '+(ok?'good':'tight')+'">'
+      +(ok?'tout tient':'reste '+_vendCuvF1(hl-cap)+'\u00a0hL')+'</span></span></button>';
+  });
+
+  h+='<label class="mvv-flbl">Nom de la cuve apr\u00e8s fusion</label>'
+    +'<input id="vfus-nom" class="mvv-tin" type="text" '
+    +'value="'+_escAttr(_vendFusNom||_vendFusNomAuto())+'" oninput="_vendFusSetNom(this.value)">'
+    +'<label class="mvv-flbl">Date</label>'
+    +'<input id="vfus-date" class="mvv-tin" type="date" value="'+new Date().toISOString().slice(0,10)+'">';
+
+  h+='<div id="vfus-recap">'+_vendFusRecapHtml()+'</div>'
+    +'<button class="mvv-save" id="vfus-go" onclick="saveVendFusion()">'+_vendFusGoLbl()+'</button>';
+  return h;
+}
+function _vendFusRecapHtml(){
+  var p=_vendFusPris(), n=p.length, hl=_vendFusTotHl();
+  var d=_vendFusDestObj(), trop=!!(d && d.cap>0 && d.cap<hl);
+  var cs=p.reduce(function(s,c){ return s+_vendCuvCsDom(c.id); },0);
+  var parc={}; p.forEach(function(c){ (c.parcelles||[]).forEach(function(x){ if(x) parc[x]=1; }); });
+  var nbP=Object.keys(parc).length;
+  var h='<div class="mvv-ftot"><span class="mvv-ftot-n'+(trop?' ko':'')+'">'+_vendCuvF1(hl)+'</span>'
+    +'<span class="mvv-ftot-l">hL r\u00e9unis'
+    +(d&&d.cap>0 ? ' sur '+_vendCuvF1(d.cap)+'\u00a0hL de contenance \u2014 '
+        +(trop?'il manque '+_vendCuvF1(hl-d.cap)+'\u00a0hL':'le compte est bon') : '')
+    +'</span><span class="mvv-ftot-s">'+cs+' caisse'+(cs>1?'s':'')+' \u00b7 '
+    +nbP+' parcelle'+(nbP>1?'s':'')+'<br>'
+    +_escHtml(p.map(function(c){ return c.nom||'Cuve'; }).join(' \u00b7 '))+'</span></div>';
+  h+='<div class="mvv-dneuf">Les '+n+' cuves de d\u00e9part quittent la liste des cuves en cours et lib\u00e8rent '
+    +'leur cuve dans le parc. Leurs relev\u00e9s et leurs op\u00e9rations restent consultables.</div>';
+  /* ⚠️ Le volume est ESTIME tant que rien n'est decuve (RDT-1). L'ecrire
+     evite de faire lire une estimation comme une mesure. */
+  h+='<div class="mvv-dlnote">Volume estim\u00e9 d\u2019apr\u00e8s les caisses du domaine : rien n\u2019a encore '
+    +'\u00e9t\u00e9 mesur\u00e9 en cuve.</div>';
+  if(trop) h+='<div class="mvv-dwarn">Le volume d\u00e9passe la contenance. Prends une cuve plus grande, ou '
+    +'fusionne moins de cuves \u2014 rien n\u2019est bloqu\u00e9, mais la jauge de remplissage sortira au-dessus de 100\u00a0%.</div>';
+  return h;
+}
+function _vendFusGoLbl(){
+  var d=_vendFusDestObj(), n=_vendFusPris().length;
+  if(!d) return 'Choisissez la cuve d\u2019arriv\u00e9e';
+  return 'Fusionner '+n+' cuves dans '+d.lbl;
+}
+/* Recap seul : reconstruire la feuille effacerait le nom deja saisi et
+   ferait perdre le focus au champ. Meme piege que _vendDecCuveVol. */
+function _vendFusRecap(){
+  var e=document.getElementById('vfus-recap'); if(e) e.innerHTML=_vendFusRecapHtml();
+  var g=document.getElementById('vfus-go');
+  if(g){ g.textContent=_vendFusGoLbl(); g.disabled=!_vendFusDestObj(); }
+}
+function _vendFusPeindre(neuf){
+  if(neuf){ _vendSheet(_vendFusHtml()); return; }
+  var sh=document.querySelector('#mvv-sheet-host .mvv-sheet');
+  var nom=(document.getElementById('vfus-nom')||{}).value;
+  var dat=(document.getElementById('vfus-date')||{}).value;
+  _vendSheet(_vendFusHtml());
+  if(nom!=null){ var i=document.getElementById('vfus-nom'); if(i&&_vendFusNomTouche) i.value=nom; }
+  if(dat){ var j=document.getElementById('vfus-date'); if(j) j.value=dat; }
+}
+
+function saveVendFusion(){
+  var p=_vendFusPris();
+  if(p.length<2){ showToast('Choisissez au moins deux cuves','#E07060'); return; }
+  var d=_vendFusDestObj();
+  if(!d){ showToast('Choisissez la cuve d\u2019arriv\u00e9e','#E07060'); return; }
+  var nom=((document.getElementById('vfus-nom')||{}).value||'').trim() || _vendFusNomAuto();
+  var date=(document.getElementById('vfus-date')||{}).value || new Date().toISOString().slice(0,10);
+  var hl=_vendFusTotHl();
+
+  /* La porteuse : la cuve d'arrivee si c'en est une, sinon la premiere
+     choisie, dont le cuve_ref bascule vers la cuve libre du parc. */
+  var porteuse = (d.kind==='cuve')
+    ? p.filter(function(c){ return c.id===d.id; })[0]
+    : p[0];
+  if(!porteuse){ showToast('Cuve d\u2019arriv\u00e9e introuvable','#E07060'); return; }
+
+  if(d.kind==='parc'){
+    /* ⚠️ Dernier filet : la cuve du parc a pu etre prise depuis l'affichage. */
+    var occ=_caveCuveOcc(d.id, porteuse.id);
+    if(occ && !p.some(function(c){ return c.cuve_ref===d.id; })){
+      showToast((d.nom||'Cette cuve')+' vient d\u2019\u00eatre prise','#B85A1A'); return;
+    }
+    porteuse.cuve_ref=d.id;
+    if(!(parseFloat(porteuse.volume_hl)>0)) porteuse.volume_hl=d.cap;
+  }
+
+  var absorbees=p.filter(function(c){ return c.id!==porteuse.id; });
+  var noms=absorbees.map(function(c){ return c.nom||'Cuve'; });
+
+  /* ★★★ LE GESTE CENTRAL, ET LE SEUL : les recoltes changent de cuve.
+     Tout le reste — kilos, caisses, hL, prorata, rendements, bilan — se
+     recalcule depuis elles, donc rien ne peut compter double. */
+  var ids={}; absorbees.forEach(function(c){ ids[c.id]=1; });
+  (CAVE_VENDANGE.recoltes||[]).forEach(function(r){
+    if(r && ids[r.cuve_id]) r.cuve_id=porteuse.id;
+  });
+
+  /* Les parcelles se reunissent, sans doublon et sans perdre l'ordre. */
+  var vues={}, pl=[];
+  [porteuse].concat(absorbees).forEach(function(c){
+    (c.parcelles||[]).forEach(function(x){ if(x && !vues[x]){ vues[x]=1; pl.push(x); } });
+  });
+  porteuse.parcelles=pl;
+  porteuse.nom=nom;
+  if(!Array.isArray(porteuse.fusion_src)) porteuse.fusion_src=[];
+  absorbees.forEach(function(c){
+    porteuse.fusion_src.push({id:c.id, nom:c.nom||'Cuve', date:date});
+  });
+  /* Les identifiants de recolte suivent, quand la porteuse en tient une liste. */
+  if(Array.isArray(porteuse.recolte_ids)){
+    absorbees.forEach(function(c){
+      if(Array.isArray(c.recolte_ids)) c.recolte_ids.forEach(function(x){
+        if(porteuse.recolte_ids.indexOf(x)===-1) porteuse.recolte_ids.push(x);
+      });
+    });
+  }
+
+  /* Les absorbees : 'termine' + `fusion`. Pas de `decuvage`, donc
+     _vendVolLoge rend 0 et aucun volume n'est compte deux fois. Leur
+     cuve_ref est LACHE : c'est ce qui libere la cuve dans le parc. */
+  absorbees.forEach(function(c){
+    c.statut='termine';
+    c.fusion={vers:porteuse.id, vers_nom:nom, date:date};
+    c.cuve_ref=null;
+  });
+
+  /* Une ligne au registre des manipulations, posee sur la porteuse. */
+  if(!Array.isArray(porteuse.operations)) porteuse.operations=[];
+  porteuse.operations.push({id:'vop_fus_'+Date.now(), type:'assemblage', date:date,
+    sources:noms, volume_hl:Math.round(hl*10)/10, estime:true,
+    note:'Assemblage de '+(absorbees.length+1)+' cuves'});
+  _vendTriOps(porteuse);
+
+  window.CAVE_VENDANGE=CAVE_VENDANGE;
+  if(window.fbSave) window.fbSave('cave_vendange',CAVE_VENDANGE);
+  _vendSheetClose();
+  _vendOuvert=porteuse.id;
+  showToast(noms.join(' + ')+' \u2192 '+nom,'#3D6B27');
+  renderVendCuves();
+}
+
+window.openVendFusion  = openVendFusion;
+window._vendFusBasc    = _vendFusBasc;
+window._vendFusPick    = _vendFusPick;
+window._vendFusSetNom  = _vendFusSetNom;
+window.saveVendFusion  = saveVendFusion;
+
+function _vendFusionneesSection(list){
+  if(!list.length) return '';
+  var rows=list.slice().sort(function(a,b){
+    var da=(a.fusion||{}).date||'', db=(b.fusion||{}).date||''; return da>db?-1:1;
+  }).map(function(c){
+    return '<div class="mvv-fusrow"><span class="l"><span class="n">'+_escHtml(c.nom||'Cuve')+'</span>'
+      +'<span class="u">'+_vendFrDate((c.fusion||{}).date)+' \u00b7 dans '
+      +_escHtml((c.fusion||{}).vers_nom||'une autre cuve')+'</span></span>'
+      +'<button class="mv-gh mvv-icbtn r" onclick="_vendBascOuv(\''+_escAttr(c.id)+'\')" '
+      +'title="Voir ses relev\u00e9s" aria-label="Voir ses relev\u00e9s">'+_mvIcon('oeil',16)+'</button></div>';
+  }).join('');
+  return '<details class="mvv-decwrap"><summary class="mvv-decsum">Fusionn\u00e9es ('+list.length+')</summary>'
+    +'<div class="mvv-dlnote">Ces cuves ont rejoint une autre cuve. Leurs relev\u00e9s et leurs op\u00e9rations '
+    +'restent au registre sous leur nom d\u2019origine.</div>'+rows+'</details>';
 }
 function _vendDecuveesSection(list){
   if(!list.length) return '';
@@ -4775,6 +5455,12 @@ function deleteVendClient(i){
 }
 
 // —— Exports fenêtre (Vendange v2) ——
+window._vendSetVue          = _vendSetVue;
+window._vendSetFiltre       = _vendSetFiltre;
+window._vendSetTri          = _vendSetTri;
+window._vendBascOuv         = _vendBascOuv;
+window._vendSetQ            = _vendSetQ;
+window._vendVideQ           = _vendVideQ;
 window._vendSheetClose      = _vendSheetClose;
 window.openVendDecuvage     = openVendDecuvage;
 window._vendDecAdj          = _vendDecAdj;
@@ -8849,6 +9535,7 @@ var RM_TYPES = {
   refroidissement: {fam:'pratique',       lbl:'Refroidissement'},
   rechauffement:   {fam:'pratique',       lbl:'R\u00e9chauffement'},
   delestage:       {fam:'pratique',       lbl:'D\u00e9lestage'},
+  assemblage:      {fam:'pratique',       lbl:'Assemblage'},
   // Chai
   soufre:          {fam:'sulfitage',      lbl:'M\u00e8che / pastille de soufre'},
   soutirage:       {fam:'pratique',       lbl:'Soutirage'}
@@ -8926,6 +9613,11 @@ function _rmDetail(o){
       break;
     case 'delestage':
       if(o.nb) d.push(o.nb + ' d\u00e9lestage' + (o.nb>1?'s':''));
+      break;
+    case 'assemblage':
+      if(o.sources && o.sources.length) d.push('depuis ' + o.sources.join(', '));
+      if(o.volume_hl != null) d.push(_rmF(o.volume_hl) + ' hL r\u00e9unis');
+      if(o.estime) d.push('volume estim\u00e9');
       break;
     case 'soutirage':
       if(o.so2_dose != null) d.push('SO\u2082 ' + _rmF(o.so2_dose) + ' ' + (o.so2_unite||'cL'));

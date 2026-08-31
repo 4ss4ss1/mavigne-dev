@@ -11793,3 +11793,141 @@ bien**. C'est le seul défaut de la série §69–§71 qu'aucune sonde n'aurait 
   est **atomique**. Un chunk `pdf.js` (~350 ko) partirait dans le précache de chaque client à chaque
   bump, sur la 4G de la cave (§68). **Il faudra l'exclure par motif** et le laisser se mettre en
   cache au premier usage.
+
+## 72. ★★★ CUV-2 + FUS-1 — RETROUVER UNE CUVE, ET EN FUSIONNER PLUSIEURS (31/08 — APP 6.72 → 6.73 · SW 7.27 → 7.28)
+
+Demande de Nico, en deux temps : d'abord « dans le cuvier, j'ai besoin de pouvoir fusionner
+plusieurs vins qui sont dans plusieurs cuves différentes », puis, la maquette validée, « peux-tu
+aussi améliorer l'affichage du cuvier ? je trouve qu'il est difficile de trouver les cuves ».
+
+Les deux touchent `renderVendCuves`. **Un seul lot** : les séparer aurait imposé de repatcher la
+même fonction deux fois.
+
+### 72a. ★★★ LE DIAGNOSTIC, MESURÉ AVANT D'ÊTRE EXPLIQUÉ
+
+Deux causes indépendantes, et la seconde est la pire.
+
+**Tout arrivait ouvert.** Une cuve en fermentation occupait **~726 px** : le graphe
+densité/température en fait **232 à lui seul**, et il s'affiche dès le 3ᵉ relevé — donc sur toutes
+les cuves au bout de trois jours. La zone de liste d'un téléphone fait **~520 px** : *une* cuve n'y
+tenait pas en entier, et douze cuves demandaient **17 hauteurs d'écran**. C'est le défaut du
+Pilotage de §34, rejoué sur un autre écran.
+
+⚠️⚠️⚠️ **ET L'ORDRE N'ÉTAIT PAS STABLE.** Le tri se faisait sur `_vendStale`, donc **mesurer une
+cuve la renvoyait en bas de la liste**. L'ordre changeait tous les jours : aucune mémoire spatiale
+possible. C'est ça, « difficile de trouver les cuves » — pas la longueur, l'instabilité.
+
+**Le tri par défaut devient le repère de cuverie**, lu dans `CONFIG.cave.cuves[].nom` — jamais une
+numérotation inventée. C'est ce qui est écrit sur la cuve, dans l'ordre où l'on marche dans la cave.
+⚠️ `localeCompare(…, {numeric:true})` est **obligatoire** : sans lui, « Cuve 10 » se range entre
+« Cuve 1 » et « Cuve 2 ». Contre-épreuve dans le harnais.
+L'urgence ne décide plus de la place : elle est dans le bandeau et la pastille de l'onglet, où elle
+était déjà — et où elle se voit mieux.
+
+Le reste : ligne fermée **~68 px**, détail **construit uniquement pour la cuve ouverte**, recherche
+dès 6 cuves, 5 filtres comptés, 3 tris, vue liste ou **plan de cuverie** (vignettes avec niveau et
+couleur d'état). Le graphe de remplissage par parcelle passe **replié** : il répond à « la récolte de
+demain peut-elle partir ? », pas à « où est ma cuve ? ».
+
+### 72b. ★★★ LA FUSION EST PRESQUE GRATUITE, ET VOICI POURQUOI
+
+**Le contenu d'une cuve n'est pas rangé dans la cuve.** Il se déduit des récoltes, via
+`recoltes[].cuve_id` — `_vendCuvCsDom` recalcule à chaque appel. **Fusionner, c'est rebrancher les
+récoltes.** Kilos, caisses, hL estimés, prorata par parcelle, rendements, parcours du millésime et
+bilan de campagne suivent **sans une ligne de calcul en plus**, et rien ne peut compter double.
+
+Les cuves absorbées passent `statut:'termine'` + champ `fusion:{vers,vers_nom,date}`. Ce choix évite
+d'inventer un statut neuf, et **les 6 filtres de statut du Cuvier font alors exactement ce qu'il
+faut sans être touchés** :
+
+| Filtre | Effet obtenu |
+|---|---|
+| `_caveCuveOcc` (l. ~186) | `'termine'` → la cuve physique **se libère** |
+| `renderVendCuves` | elle sort des actives |
+| `_mlChaine` (l. ~8192/94) | plus aucune récolte → **elle n'est même plus dans la liste** |
+| `_vendVolLoge` | pas de `decuvage` → rend **0**, zéro double compte |
+
+⚠️ Les absorbées **lâchent leur `cuve_ref`** (`c.cuve_ref=null`) : c'est ce geste, et lui seul, qui
+libère la cuve dans le parc.
+⚠️ La destination peut être une cuve **libre du parc** : la première cuve choisie devient alors la
+porteuse et son `cuve_ref` bascule. **On ne crée jamais d'objet cuve neuf** — il faudrait recopier
+mesures et opérations, et une copie se désynchronise.
+⚠️ Une cuve qui a absorbé les autres **le dit** dans son détail : les relevés antérieurs à la date
+d'assemblage portent sur un autre volume. Le taire ferait lire la courbe comme si rien n'avait changé.
+⚠️ Le volume affiché vient des **caisses**, jamais de `volume_hl` (la contenance) — c'est §69 qui se
+rejouerait à l'identique. Contre-épreuve dédiée.
+
+**Le registre** reçoit un type `assemblage` (famille *pratique*), posé sur la porteuse, avec les noms
+d'origine et le volume marqué `estime`.
+
+⚠️⚠️ **`saveVendCuve` rebâtit son objet de zéro** : `fusion` et `fusion_src` y ont été **re-inclus
+explicitement**, sinon rouvrir la fiche d'une cuve fusionnée les effacerait en silence. Piège
+récurrent du projet (§53, §71).
+
+### 72c. ⚠️⚠️ TROIS DÉFAUTS QUE LE TRAVAIL A TROUVÉS — ET CE QUI LES A TROUVÉS
+
+**1. Une fonction qui n'existe pas.** `_recKgHl0`, appelée dans un calcul par ailleurs **mort**
+(variable `kg` jamais lue). `node --check` **ne voit pas un identifiant inconnu** : seule
+l'exécution l'aurait levé, en pleine cave. Trouvée par le **grep systématique des fonctions
+appelées** contre celles qui existent. Troisième occurrence de ce piège — le grep doit être un
+réflexe après chaque patch, pas une idée.
+
+**2. Une assertion qui ne traversait pas sa garde.** `Z1` prétendait tester
+`!_vendEstFusionnee(c)` dans `_vendFusCuves`, alors que `statut!=='termine'` suffisait déjà à
+exclure la cuve. **La contre-épreuve est restée VERTE sur un fichier saboté.** C'est la
+contre-épreuve, pas le harnais, qui l'a révélé. `Z2` pose le cas que la garde existe réellement pour
+attraper : une donnée abîmée, fusionnée mais restée en FA.
+★ **La leçon** : un harnais tout vert du premier coup n'est pas une bonne nouvelle, c'est un signal.
+
+**3. Le nouvel écran avait perdu trois informations, en silence.** Le contrôle de joignabilité du
+preflight a signalé quatre fonctions sans appelant. Trois portaient une information supprimée sans
+que rien ne rougisse ni ne plante : `_vendStepper` (la frise du parcours), `_vendTempCls` (la
+couleur de la température — une cuve à 31 °C doit **se voir**, pas seulement s'écrire),
+`_vendDegrePot` (le degré potentiel restant). **Rebranchées dans le détail déplié.** Seule
+`_vendActRow` était réellement remplacée : supprimée.
+★ **La leçon** : refondre un écran, c'est risquer de perdre ce qu'il disait. C15 n'est pas un
+contrôle de propreté, c'est un **détecteur de perte de fonctionnalité**.
+
+### 72d. ★★ « RIEN NE DOIT SE CHEVAUCHER » — CE QUI EST TENU, ET CE QUI NE L'EST PAS
+
+Consigne explicite de Nico. `scripts/mv-harnais-alignement.mjs` (43 assertions, 7 contre-épreuves)
+vérifie les **quatre règles CSS dont l'absence *cause* un chevauchement** :
+
+1. **`min-width:0`** sur *chaque* conteneur flex portant du texte variable. Sans lui, un flex-item
+   refuse de descendre sous la largeur de son contenu : un nom long **pousse ses voisins hors de la
+   carte**. Cause n°1 des débordements en flex, et invisible tant qu'on teste avec des noms courts.
+2. **Le trio `nowrap` + `overflow:hidden` + `text-overflow:ellipsis`**, les trois ou aucun.
+3. **`flex-shrink:0`** sur les colonnes de droite et les pastilles.
+4. **Aucune `height` fixe sur un bloc de texte.** Le plan de cuverie utilise `-webkit-line-clamp`,
+   pas une hauteur qui trancherait un nom au milieu d'une lettre.
+
+⚠️⚠️ **CE HARNAIS NE MESURE AUCUN PIXEL.** Il n'y a pas de navigateur dans le bac à sable : rien ici
+ne prouve qu'un texte tient à l'écran. Il empêche les causes connues, pas le symptôme. **La
+relecture à l'œil reste nécessaire et n'est pas remplacée** — le harnais l'écrit lui-même dans sa
+sortie.
+
+⚠️ Deux assertions du harnais étaient **fausses** au premier jet : la borne d'extraction coupait
+avant la dernière règle (deux sélecteurs déclarés « absents » à tort), et `/width:\d/` matchait
+`min-width:0`. **Un contrôle qui coupe sa propre zone de lecture invente des défauts.**
+
+### 72e. Ce qui a été livré
+
+`src/cave.js` · `src/utils.js` · `index.html` · `public/sw.js` · `guide/08-cave.html` (+
+`public/guide.html` régénéré) · `package.json` · `scripts/mv-harnais-fusion.mjs` (37 assertions,
+8 contre-épreuves) · `scripts/mv-harnais-alignement.mjs` (43 assertions, 7 contre-épreuves), les
+deux branchés dans `check` **et** `prebuild`.
+
+`WHATS_NEW` vérifié **en l'exécutant** : 4 entrées en 6.73, 163 blocs conservés, ouverture sur
+`APP_VERSION`. `MV_AIDE.cave` : 4 points neufs, et **une phrase devenue fausse corrigée** (« la
+liste des relevés s'ouvre sous la courbe » — il faut désormais déplier la cuve d'abord).
+`_mvtSteps` relu : la visite guidée ne vise aucun sélecteur `.mvv-*`, **rien à changer**.
+
+⚠️ **Ligne de base regravée**, deux clés, **deux baisses, aucune hausse** :
+`C24b_slot_js_nu/src/cave.js` 32 → 26, et `C24c_interpolation_nue/src/tracteur.js` 23 → 22.
+**Cette seconde baisse n'est pas de ce lot** : `tracteur.js` est identique au dépôt, elle vient du
+commit `bigmaj` qui n'avait pas regravé. Vérifié avant gravure que le cliquet **rougit bien au
+dépassement** (sabotage : 26 → 27), et que les deux slots restés nus dans le code neuf étaient des
+constantes littérales — **échappés quand même**, plutôt que graver une exception à expliquer.
+
+⚠️ Deux rouges rattrapés en fin de chaîne : quatre `_mvIcon(…, 15)` hors de l'échelle
+16/18/20/24/40, et un `font-weight:400` hors des trois pas autorisés (500/600/700).
