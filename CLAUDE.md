@@ -4477,8 +4477,9 @@ en dur et se lisent donc comme des succès.
 
 **Les trois priorités qui en sortent** :
 
-1. ⚠️⚠️ **`_pl2Cell`** — un retard d'une heure et une journée d'absence s'affichent pareil chez MG
-   et Chapelle, tous les jours. **Le défaut le plus visible côté client de tout le backlog.**
+1. ~~⚠️⚠️ **`_pl2Cell`**~~ — **FAIT** (constaté le 31/08, §74a). Le code rendait déjà le retard en
+   orange avec ses heures (`pl2c-late`) **avant** la croix rouge. **Douzième entrée périmée** de ce
+   backlog. Le reste réel — l'entrée de légende — a été livré le 31/08.
 2. ⚠️⚠️ **Les six harnais à chemin absolu** (§44c) — une ligne chacun, et neuf filets se remettent
    à protéger quelque chose.
 3. ⚠️ **0a-quater** — la masse salariale exclut les bureaux pendant que son commentaire dit
@@ -7919,6 +7920,11 @@ lui, est corrigé. **Ne jamais conclure à l'absence en lisant un commentaire : 
 **chez Nico et en CI, ils sortent en `ENOENT`**. Deux d'entre eux sont verts ici — ils ne le seront
 nulle part ailleurs.
 
+✅ **RÉGLÉ LE 31/08 (§74b).** Deux des six s'étaient corrigés entre-temps (`harnais-vitrine`,
+`contre-epreuves`, passés à `fileURLToPath(import.meta.url)`) et `harnais-claude-md` aussi : il n'en
+restait **quatre**, tous convertis à `new URL('../', import.meta.url)` et **lancés depuis `/tmp`**
+avant livraison, comme la règle l'exige.
+
 ★★★ **LA LEÇON, ET ELLE EST DÉJÀ ÉCRITE EN 0h POUR `lint-cliquet`** : *un filet qui ne démarre pas
 se lit comme un succès.* Ce qui est neuf, c'est **l'échelle** : ce n'était pas un accident isolé,
 c'est **un défaut d'origine de six harnais sur six**, tous écrits dans le bac à sable, tous livrés
@@ -8011,10 +8017,9 @@ de portée depuis le bac à sable :
 
 **Confirmés ouverts, vérifiés un par un dans le code** (numéros de l'entrée d'origine en §28) :
 
-- ⚠️⚠️ **`_pl2Cell` : un retard d'une heure et une absence d'une journée s'affichent pareil.**
-  `if(e&&e.absent) return {txt:'✕', cls:'pl2c-abs'}` tombe avant toute lecture de `motif_h`.
-  **C'est le défaut le plus visible côté client de toute cette liste**, et il touche MG et Chapelle
-  tous les jours. → **n°1 fonctionnel.**
+- ~~⚠️⚠️ **`_pl2Cell`**~~ — **FAIT**, vérifié dans le code le 31/08 (§74a). L'audit du 16/08 l'avait
+  confirmé ouvert « vérifié dans le code » : il ne l'était pas, ou plus. ★ **La leçon** : *un constat
+  d'absence a une durée de vie de quelques minutes* vaut aussi pour un constat de PRÉSENCE de défaut.
 - ⚠️⚠️ **0a-quater : la masse salariale perd tous les bureaux.** `_pexData` (`pilotage.js:7683`)
   filtre par `_mvEnContratSurPeriode`, dont la première ligne est `if(!m || m.bureau) return false;`
   — **pendant que le commentaire trois lignes au-dessus dit l'inverse**, mot pour mot :
@@ -11931,3 +11936,234 @@ constantes littérales — **échappés quand même**, plutôt que graver une ex
 
 ⚠️ Deux rouges rattrapés en fin de chaîne : quatre `_mvIcon(…, 15)` hors de l'échelle
 16/18/20/24/40, et un `font-weight:400` hors des trois pas autorisés (500/600/700).
+
+---
+
+## 73. ★★★ MAJ-1 — LE DIMANCHE ET LE FÉRIÉ TRAVAILLÉS SE MAJORENT (31/08 — APP 6.73 → 6.74 · SW 7.28 → 7.29)
+
+> *« Pour la section planning, il faudrait rajouter les cinquante pour cent du dimanche en calcul
+> automatique et les cent pour cent des jours fériés. »* — Nico, 31/08
+
+### 73a. L'état des lieux, mesuré avant d'écrire
+
+`_feriesY()` calculait déjà les fériés année par année (Butcher) et `dow===0` identifiait déjà le
+dimanche — mais **uniquement pour le décompte des congés et la couleur des cases**. Aucune
+majoration nulle part dans le planning. Le seul `maj_hsup` (25 %) vit dans `pilotage.js` et
+n'alimente que la **simulation de coût d'un renfort** : il ne touche ni la feuille d'heures, ni le
+compteur, ni la paie.
+
+### 73b. Les trois arbitrages tranchés par Nico AVANT toute ligne de code
+
+| Question | Réponse |
+|---|---|
+| La majoration compte comment ? | **Les deux, selon `hsup_mode`** |
+| Cumul avec les heures sup ? | **La plus forte seule** |
+| À partir de quand ? | **Janvier 2026** |
+
+★ Une maquette HTML interactive (taux modifiables, bascule de mode, cas d'août 2026) a précédé
+l'intégration — workflow prototype-first, comme pour tout lot qui change un écran.
+
+### 73c. Le modèle
+
+```
+CONFIG.majorations = {dim:50, ferie:100}      // reglable, Planning › Le cadre
+PLAN_MAJ_DEBUT     = '2026-01'                 // CONSTANTE, pas un reglage
+```
+
+**`_planMajMonth(mbr,m)`** rend `{hDim,hFer,majDim,majFer,maj,jours[]}`. Son critère d'inclusion est
+**exactement celui de `_planDaysWorked`** (jours MSA) : `_PLAN_ST_OFFDAY[st.t] && !st.retard`
+exclut CP, récup, absence et formation ; un **férié chômé** ne porte aucune heure donc s'exclut
+seul ; un **retard** majore ce qui reste de la journée. Réutiliser le critère plutôt que d'en
+écrire un second est ce qui garantit que « jour travaillé » veuille dire la même chose aux deux
+endroits.
+
+★★ **COLLISION FÉRIÉ + DIMANCHE — le taux le plus fort, jamais les deux.** Le **1er novembre 2026
+tombe un dimanche** : cas réel de l'année en cours, pas une hypothèse d'école. Le jour est rangé
+dans la ligne du **taux retenu** et non dans celle de sa nature, pour que chaque ligne du relevé
+reste **homogène en taux** — sans ça, un domaine qui majorerait le dimanche plus fort que le férié
+ferait cohabiter deux taux sous un même libellé.
+
+⚠️⚠️ **LES HEURES DE MAJORATION NE SONT PAS DU TRAVAIL EFFECTIF.** Ni plafond 1607 h, ni
+modulation, ni durées maximales, ni jours MSA : elles ne passent **jamais** par `_planWorkH` ni par
+`_planAnnu`. Gonfler l'annualisation avec des heures que personne n'a passées à la vigne aurait
+fait mentir le seul chiffre du module qui ait valeur légale. C'est la même séparation que
+`_planDayH` / `_planWorkH` (§19), un cran plus loin.
+
+⚠️ **Les heures listées sont DÉJÀ comptées** dans `s.worked`, dans l'écart du mois, donc dans les
+heures sup. Le bloc ne les ajoute pas — il dit à quel taux elles se paient. **Seule `maj`
+s'ajoute.** La note du relevé le redit noir sur blanc, sinon un comptable additionne deux fois.
+
+### 73d. Où va la majoration — une seule fonction lit la réponse
+
+**`_planMajBank(mbr,m)`** = `_planHsupPayable() ? 0 : _planMajMonth(mbr,m).maj`. Mode **payé** →
+ventilation sur la feuille d'heures, rien au compteur. Modes **récup / clôture** → tranche FIFO du
+compteur, ajoutée **au mois qui l'a produite** pour que l'invariant `bank.solde ===
+_planYearBalance().net` reste vrai. Sans cette fonction unique, `_planBank` et `_planYearBalance`
+auraient chacun leur version de la règle — et deux définitions du même chiffre finissent toujours
+par diverger.
+
+⚠️ `PLAN_MAJ_DEBUT` est une **constante et non un réglage** : il n'y a rien à arbitrer par domaine,
+et un réglage de plus est un réglage à découvrir. Idiome `'YYYY-MM'` de `_planDuesActive`, où le
+tri lexical **est** le tri chronologique.
+
+⚠️ **Un taux à ZÉRO est légitime** (domaine qui ne majore pas) : lecture par `isNaN`, **jamais par
+`||`**, qui écraserait 0 par le défaut. Règle générale du projet, appliquée ici parce qu'elle
+chiffre des euros.
+
+### 73e. Ce que le harnais a trouvé, et qui avait tort
+
+`scripts/mv-harnais-majoration.mjs` — **29 assertions, 4 contre-épreuves**, fonctions extraites du
+fichier réel par équilibrage d'accolades et exécutées dans un `vm`. Réels : le calendrier
+(`_mvEasterMD`, `_feriesY`), `_planDayStatus` et toute sa chaîne de motifs, les quatre fonctions
+neuves. Stubbés : les entrées du scénario.
+
+★★★ **TROIS ASSERTIONS SONT TOMBÉES ROUGES, ET C'ÉTAIT ELLES QUI AVAIENT TORT.** « CP un dimanche »
+sortait à 12 h au lieu de 0. Cause : le scénario posait `modele: () => 8`, donc **8 h planifiées sur
+les quatre dimanches de septembre** — le harnais mesurait le mois entier en croyant mesurer une
+case. Le code, lui, avait raison : *un dimanche sur lequel le planning porte des heures est un jour
+travaillé* (même principe que `_paGrille`). Scénarios corrigés, et un cas **8b** ajouté pour
+verrouiller ce comportement au lieu de le laisser implicite.
+
+**Contre-épreuve — quatre défauts réintroduits, quatre détectés** : taux 0 écrasé par `||`, férié et
+dimanche cumulés, fenêtre de janvier 2026 supprimée, majoration alimentant le compteur en mode payé.
+
+### 73f. Deux cliquets rattrapés en fin de chaîne
+
+- **DS-1, jeu d'icônes** : `planning 78 → 79`. Une coche verte dans le toast de `planSaveMaj`,
+  copiée sur `planSaveLegal`. **Retirée** — pas regravée. Un toast se lit très bien sans.
+- **DS-0, graisses** : `148 ≤ 147`. Un `font-weight:800` dans la tuile « Major. + cumul », copié sur
+  ses voisines. Ramené à `var(--fw-bold,700)`. La tuile est imperceptiblement moins grasse que les
+  trois d'à côté ; **le cliquet ne remonte pas**, et c'est ce qui compte.
+
+★ Les deux fautes ont la même origine : **copier le style du voisin sans vérifier qu'il est dans
+l'échelle**. Le voisin a été écrit avant le cliquet.
+
+### 73g. Fichiers, versions, état
+
+`src/planning.js` (4 fonctions neuves + `_planYearBalance` + `_planBank` + carte compteur + tuile
+annuelle + bloc PDF + bloc Cadre + `planSaveMaj` + `_planLegInput` doté d'une unité optionnelle) ·
+`src/utils.js` (`APP_VERSION` + 3 items `WHATS_NEW` + `MV_AIDE.planning`) · `index.html` (4
+emplacements) · `public/sw.js` · `guide/10-planning.html` + `public/guide.html` régénéré ·
+`scripts/mv-harnais-majoration.mjs`.
+
+**`utils.js` touché → BUMP : APP 6.73 → 6.74, SW 7.28 → 7.29.** Preflight **0 rouge sur 36**,
+harnais **29/0** + 4 contre-épreuves. `WHATS_NEW` vérifié **en l'exécutant** : 3 entrées en 6.74,
+164 blocs, aucun doublon de version.
+
+⚠️ **Base re-mesurée avant construction du paquet** : le clone de début de session portait APP 6.72
+/ SW 7.27, le `git pull` juste avant les patchs a ramené le commit `maj cave` (APP 6.73 / SW 7.28,
+§72). Les numéros annoncés en début de conversation étaient donc **caducs**. C'est exactement le
+piège du 13/08 (règle d'or n°1), attrapé cette fois.
+
+### 73h. Ce que ce lot n'a pas fait
+
+**La majoration des heures supplémentaires n'existe toujours pas dans le planning.** Les heures sup
+sortent en heures nues, sans taux ; `maj_hsup` (25 %) reste cantonné à la simulation de coût de
+Pilotage. « La plus forte seule » ne joue donc **qu'entre dimanche et férié**. Faire porter leur
+taux aux heures sup sur la feuille est un lot à part — **il change la paie de tout le monde**, et
+il demande d'abord de trancher si le taux est unique ou progressif (25 % puis 50 %).
+
+---
+
+## 74. ★★★ LE BACKLOG DISAIT DEUX CHOSES FAUSSES, ET LES FILETS NE DÉMARRAIENT PAS (31/08 — `planning.js` + `scripts/`, AUCUN BUMP)
+
+### 74a. La priorité n°1 du backlog était déjà faite — et le vrai reste tenait en une ligne
+
+`_pl2Cell` était classé **« le défaut le plus visible côté client de tout le backlog »**, confirmé
+ouvert par l'audit du 16/08 *« vérifié un par un dans le code »*. Il ne l'était plus : la lecture du
+fichier montre `if(_mc.heures){ … return {txt:_planFmt(_fa),cls:'pl2c-late'} }` **avant** la croix
+rouge, avec son commentaire « un retard n'est pas une absence ».
+
+★★ **Mais le reste de l'entrée, lui, était vrai** — et personne ne l'avait vu parce qu'on croyait
+l'entrée entièrement ouverte : *« et la légende qui suit »*. La légende du tableau d'équipe listait
+sept états, **jamais le retard**. Une case orange sans nom se lit comme un avertissement.
+
+⚠️⚠️ **`styles.css` PORTAIT LA PREUVE DEPUIS LE DÉBUT** : `.pl2-legend i.pl2c-late::after{display:none}`
+— une règle qui **ne pouvait jamais s'appliquer**, faute d'entrée de légende à décorer. Le CSS
+attendait une légende que personne n'avait écrite. **Une règle morte est un aveu**, au même titre
+qu'un `WHATS_NEW` qui promet ce qui n'existe pas (§36h) : chercher les sélecteurs sans cible est un
+geste d'audit à part entière, et il est bon marché.
+
+★ **La leçon, symétrique de la règle de détection d'absence** : *un constat d'absence a une durée de
+vie de quelques minutes* — **un constat de PRÉSENCE de défaut aussi.** Vérifier avant de corriger,
+même quand le document affirme avoir vérifié. Douzième entrée périmée trouvée dans ce backlog.
+
+### 74b. Quatre harnais ne pouvaient pas démarrer ailleurs que dans le bac à sable
+
+Sur les six annoncés en §44c, **deux s'étaient corrigés depuis** et un troisième aussi : il en
+restait **quatre** (`harnais-cadence-escalier`, `harnais-reconduction`, `harnais-bandeau-essai`,
+`harnais-parcours-prospect`). Tous convertis à `new URL('../', import.meta.url)`, tous **lancés
+depuis `/tmp`** avant livraison — le test que la règle prescrit et que personne n'avait joué.
+
+★★★ **ET C'EST CE TEST QUI A TOUT TROUVÉ.** `harnais-bandeau-essai` ne rougissait pas : **il
+crashait**, `ReferenceError: _mvIcon is not defined`, **avant sa première assertion**. Le lot DS-1
+du 16/08 avait ajouté `_mvIcon` dans `_mvTrialBanner` ; le harnais, écrit le 14/08, ne le stubbait
+pas. **Sept vérifications du bandeau d'essai — le parcours prospect — ne protégeaient plus rien
+depuis quinze jours**, et la sortie ressemblait à un rouge ordinaire.
+
+### 74c. Deux harnais testaient une photo du code, pas un comportement
+
+- **`harnais-bandeau-essai`, bloc « bump »** : il exigeait `v6.66` quatre fois, l'absence de `v6.65`,
+  et `APP_VERSION == '6.13'`. Trois assertions vraies **un seul jour**. Rebasées sur l'invariant
+  qu'elles voulaient protéger : *les quatre porteurs du SW disent le même numéro, quel qu'il soit, et
+  aucun numéro antérieur ne traîne hors du journal*. L'assertion sur `APP_VERSION` est **supprimée** :
+  « délibérément inchangé » n'a de sens que dans son lot d'origine.
+  ★ Le bloc valide désormais un vrai bump — il a servi sur le 7.29 du même jour. Contre-épreuve :
+  un `console.log` laissé en 7.28 → **deux rouges**, restauré → vert.
+- **`harnais-cadence-escalier`** : son unique rouge cherchait `push('warn'` — **une forme de code qui
+  n'a jamais été écrite**. Le comportement, lui, existait bien. Rebasé sur ce qui se lit à l'écran :
+  quand l'écart vient de l'historique, le conseil dit *« c'est un repère, pas une prévision »* et ne
+  cite pas la projection de fin. Contre-épreuve : garde neutralisée → rouge, restaurée → 28 vertes.
+
+★★ **La règle §44c se précise.** *« Se demander ce que le harnais assertait »* ne suffit pas : il faut
+distinguer **ce qu'il assertait** (un comportement) de **comment il l'assertait** (une forme de code).
+Les deux rouges d'aujourd'hui visaient la forme. Une assertion qui cite un identifiant de niveau
+d'alerte, un numéro de version ou une signature d'appel **teste l'écriture du code, pas ce qu'il
+fait** — et elle rougira au premier refactor honnête.
+
+### 74d. Fichiers, versions, état
+
+`src/planning.js` (une ligne de légende) · `scripts/harnais-cadence-escalier.mjs` ·
+`scripts/harnais-reconduction.mjs` · `scripts/harnais-bandeau-essai.mjs` ·
+`scripts/harnais-parcours-prospect.mjs` · `CLAUDE.md`.
+
+**AUCUN BUMP** : `planning.js` seul, et `scripts/` n'est jamais déployé. ⚠️ Le `planning.js` livré
+**contient aussi le lot MAJ-1 (§73)** — c'est le même fichier, il remplace celui livré plus tôt dans
+la même conversation.
+
+Résultats depuis `/tmp` : bandeau-essai **15/0** (crashait), cadence-escalier **28/0** (1 rouge),
+reconduction **20/0**, parcours-prospect **58/0**. Preflight **0 rouge sur 36**.
+
+### 74e. ⚠️⚠️⚠️ UN HARNAIS EST PASSÉ AU ROUGE TOUT SEUL, ET IL BLOQUAIT LE BUILD (02/09)
+
+Contrôle de fraîcheur avant poussée, le lendemain : `npm run check` **sort en 1**. Rouge unique,
+`mv-harnais-releve` — *« la période qui couvre aujourd'hui est marquée en cours »*.
+
+**Vérifié rouge sur la base d'origine avant de toucher quoi que ce soit** : `git stash`, relance,
+même rouge, `git stash pop`. **Ce n'était pas le lot.** L'assertion écrivait
+`(H.match(/cnow/g)||[]).length <= 1` : elle comptait la chaîne `cnow` sur **tout le document,
+feuille de style comprise** — or la règle `.cnow{…}` en fait déjà une à elle seule. Le plafond de 1
+voulait donc dire **« aucun badge rendu »**, ce qui est vrai onze mois sur douze et faux dès qu'une
+période du scénario couvre la date du jour. Les périodes du décor vont du 2 mars au 24 juillet et du
+1er septembre au 30 novembre : **le harnais a viré au rouge le 1er septembre 2026, sans qu'une seule
+ligne de code ne bouge.** Corrigé : on compte les **badges** `<b class="cnow">`, plafond 1 inchangé.
+Contre-épreuve : badge forcé sur les deux périodes → rouge à « 2 badge(s) rendu(s) », restauré → vert.
+
+⚠️⚠️ **`prebuild` joue la même chaîne que `check`** : tant que ce rouge était là, `npm run build`
+échouait et **aucun déploiement n'était possible**. Un harnais date-dépendant ne gêne pas seulement
+la CI, il ferme la porte.
+
+★★★ **ET J'AI FAILLI NE PAS LE VOIR.** La veille, j'avais conclu « 0 rouge » en filtrant la sortie
+sur `grep -cE "rouge\(s\)|✗"`. Ce harnais-ci écrit « 1 ROUGE », sans parenthèses et sans glyphe :
+**mon filtre l'a manqué**. C'est §74c retourné contre moi le jour même — *tester une forme au lieu
+du résultat*. → **RÈGLE POSÉE** : *un `npm run check` se juge sur son CODE DE SORTIE, jamais sur un
+grep de sa sortie.* `npm run check >/dev/null; echo $?`. Un filtre qui rate un rouge se lit comme un
+succès, exactement comme un harnais qui ne démarre pas.
+
+★ **Troisième harnais date-dépendant de la journée**, après les deux photos de version de §74c. La
+famille est la même : une assertion vraie le jour où on l'écrit. Ici le déclencheur n'est même pas
+un lot, c'est **le calendrier**.
+
+`scripts/mv-harnais-releve.mjs` s'ajoute donc au paquet. `npm run check` **exit 0**, `npm run
+prebuild` **exit 0**.
+

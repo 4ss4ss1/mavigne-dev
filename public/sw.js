@@ -1,4 +1,30 @@
-// MA VIGNE — Service Worker v7.28
+// MA VIGNE — Service Worker v7.29
+// v7.29 (31/08/2026) — MAJ-1 : le dimanche et le jour ferie travailles se
+//   majorent automatiquement. Deux taux dans Planning > Le cadre (50 / 100 par
+//   defaut), appliques aux heures REELLEMENT FAITES : un ferie chome reste paye
+//   sans majoration, un conge ou une recup ne majorent rien, un retard majore ce
+//   qui reste de la journee. Meme critere que les jours travailles MSA.
+//   ★★ LA MAJORATION N'EST PAS DU TRAVAIL EFFECTIF. Elle n'entre ni dans le
+//   plafond des 1607 h, ni dans la modulation, ni dans les durees maximales, ni
+//   dans le compte de jours MSA : elle ne passe jamais par _planWorkH ni par
+//   _planAnnu. Gonfler l'annualisation avec des heures que personne n'a passees
+//   a la vigne aurait fait mentir le seul chiffre du module qui ait valeur legale.
+//   ★ COLLISION FERIE + DIMANCHE : le taux le plus fort, jamais les deux. Le
+//   1er novembre 2026 tombe un dimanche — cas reel de l'annee en cours. Le jour
+//   est range dans la ligne du taux RETENU, pour que chaque ligne du releve reste
+//   homogene en taux.
+//   ★ OU VA LA MAJORATION : CONFIG.hsup_mode decide, et lui seul. Mode paye ->
+//   ventilation sur la feuille d'heures. Mode recup / cloture -> tranche FIFO du
+//   compteur, ajoutee au mois qui l'a produite pour que bank.solde reste egal a
+//   _planYearBalance().net. Une seule fonction lit la reponse (_planMajBank),
+//   sinon _planBank et _planYearBalance auraient chacun leur version de la regle.
+//   ⚠️ PLAN_MAJ_DEBUT = '2026-01', constante et non reglage : rien a arbitrer par
+//   domaine, et un reglage de plus est un reglage a decouvrir. Les paies
+//   anterieures ne bougent pas.
+//   ⚠️ Un taux a ZERO est legitime -> lecture par isNaN, jamais par `||`.
+//   ⚠️ Les heures listees sont DEJA dans le total du mois ; seule la majoration
+//   s'ajoute. La note du releve le redit, sinon un comptable additionne deux fois.
+//   APP 6.73 -> 6.74.
 // v7.28 (31/08/2026) — LE CUVIER SE LIT D'UN COUP D'OEIL (CUV-2) + FUSION DE
 //   CUVES (FUS-1). APP 6.72 -> 6.73.
 //   ★★★ L'ECRAN : une cuve en fermentation occupait ~726 px (le graphe
@@ -2997,7 +3023,7 @@
 // v2.22 — Fix profils vides : guard vide dans loadData() pour MEMBRES/SAISONS/TACHES
 // v2.17 — Onboarding intégré + tenantId · v2.06 — Firebase Auth · v2.00–v2.05 — divers
 const DEBUG = self.location.hostname === 'localhost' || self.location.hostname === '127.0.0.1';
-const CACHE_NAME   = 'mavigne-v7.28';
+const CACHE_NAME   = 'mavigne-v7.29';
 const TENANT_CACHE = 'mavigne-tenant';   // Cache persistant — préservé à chaque mise à jour SW
 const SYNC_TAG     = 'mavigne-sync';
 
@@ -3013,7 +3039,7 @@ const CDN_URLS = [
 ];
 
 self.addEventListener('install', event => {
-  if(DEBUG) console.log('[SW] Ma Vigne v7.28 installé');
+  if(DEBUG) console.log('[SW] Ma Vigne v7.29 installé');
   event.waitUntil(
     caches.open(CACHE_NAME).then(async cache => {
       // ── Cœur applicatif : STRICT (mise à jour ATOMIQUE) ──
@@ -3029,7 +3055,7 @@ self.addEventListener('install', event => {
 });
 
 self.addEventListener('activate', event => {
-  if(DEBUG) console.log('[SW] Ma Vigne v7.28 activé');
+  if(DEBUG) console.log('[SW] Ma Vigne v7.29 activé');
   event.waitUntil(
     caches.keys().then(keys =>
       Promise.all(

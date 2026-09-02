@@ -294,6 +294,32 @@ function _planDuesActive(m){
 }
 window._planDuesActive=_planDuesActive;
 
+// ── MAJORATION DU DIMANCHE ET DU JOUR FERIE TRAVAILLE ──
+// Deux taux, un seul principe : on majore ce qui a ete FAIT ces jours-la.
+// ⚠️ UN TAUX A ZERO EST LEGITIME — un domaine peut ne rien majorer. La lecture
+//    passe donc par isNaN et JAMAIS par `||`, qui ecraserait 0 par le defaut.
+// ⚠️⚠️ LES HEURES DE MAJORATION NE SONT PAS DU TRAVAIL EFFECTIF. Elles n'entrent
+//    ni dans le plafond des 1607 h, ni dans la modulation, ni dans les durees
+//    maximales (10 h/jour, 48 h/semaine), ni dans le compte de jours MSA. Elles
+//    ne passent donc jamais par _planWorkH ni par _planAnnu : gonfler
+//    l'annualisation avec des heures que personne n'a passees a la vigne ferait
+//    mentir le seul chiffre de ce module qui ait valeur legale.
+var PLAN_MAJ_DEF={dim:50,ferie:100};
+// Le calcul ne remonte pas avant janvier 2026 : une paie deja editee ne change
+// pas de valeur retroactivement. Meme idiome que _planDuesActive — 'YYYY-MM',
+// ou le tri lexical EST le tri chronologique. Constante et non reglage : il n'y
+// a rien a arbitrer par domaine, et un reglage de plus est un reglage a decouvrir.
+var PLAN_MAJ_DEBUT='2026-01';
+function _planMajTaux(){
+  var c=(window.CONFIG&&window.CONFIG.majorations)||{};
+  var d=parseFloat(c.dim),f=parseFloat(c.ferie);
+  return {dim:(isNaN(d)||d<0)?PLAN_MAJ_DEF.dim:d,
+          ferie:(isNaN(f)||f<0)?PLAN_MAJ_DEF.ferie:f};
+}
+function _planMajActive(m){
+  return (_pY()+'-'+String(m+1).padStart(2,'0'))>=PLAN_MAJ_DEBUT;
+}
+
 // ── Motifs d'absence — typage necessaire a l'annualisation ──
 // suspend : suspension du contrat -> ABAISSE le plafond annuel (les heures ne sont pas dues)
 // assim   : assimile a du travail effectif -> compte comme travaille
@@ -393,10 +419,12 @@ function _planRetardBornes(mbr,m,d){
   var co=(e&&e.timing&&e.timing.continu!=null)?!!e.timing.continu:!!t.continu;
   return {pl:pl,t0:t0,t1:t1,continu:co};
 }
-function _planLegInput(id,label,val,step){
+// ★ 5e argument OPTIONNEL. Sans lui, l'unite reste 'h' : les sept appels du cadre
+//   legal ne changent pas d'un caractere. Le bloc des majorations, lui, affiche '%'.
+function _planLegInput(id,label,val,step,unit){
   return '<div style="background:var(--bg-app);border:1px solid var(--gris-clair);border-radius:11px;padding:9px 10px">'
     +'<div style="font-size:10.5px;color:var(--texte-doux);font-weight:600;line-height:1.25;margin-bottom:5px;min-height:26px">'+label+'</div>'
-    +'<div style="display:flex;align-items:center;gap:5px"><input type="number" id="'+id+'" step="'+step+'" value="'+val+'" style="width:100%;font-family:inherit;font-size:16px;font-weight:700;padding:7px 8px;border:1.5px solid var(--gris-clair);border-radius:9px;outline:none;background:var(--bg-card);color:var(--texte);text-align:center"><span style="font-size:12px;color:var(--gris);font-weight:600">h</span></div>'
+    +'<div style="display:flex;align-items:center;gap:5px"><input type="number" id="'+id+'" step="'+step+'" value="'+val+'" style="width:100%;font-family:inherit;font-size:16px;font-weight:700;padding:7px 8px;border:1.5px solid var(--gris-clair);border-radius:9px;outline:none;background:var(--bg-card);color:var(--texte);text-align:center"><span style="font-size:12px;color:var(--gris);font-weight:600">'+(unit===undefined?'h':unit)+'</span></div>'
     +'</div>';
 }
 
@@ -1052,6 +1080,48 @@ function _planDaysWorked(mbr,m){
   }
   return n;
 }
+// ── HEURES FAITES UN DIMANCHE OU UN JOUR FERIE, ET LA MAJORATION QU'ELLES PORTENT ──
+// Le critere est EXACTEMENT celui des jours travailles MSA (_planDaysWorked juste
+// au-dessus) : ce qui compte, c'est d'avoir ete la. Un conge, une recup, un arret
+// ou une journee de formation ne majorent rien — et un ferie CHOME reste paye sans
+// majoration, puisqu'aucune heure n'y a ete faite. Un retard majore ce qui reste de
+// la journee : la personne etait bien au domaine, en partie.
+// ★★ COLLISION FERIE + DIMANCHE : LE TAUX LE PLUS FORT, JAMAIS LES DEUX. Le
+//   1er novembre 2026 tombe un dimanche — c'est un cas reel de l'annee en cours,
+//   pas une hypothese d'ecole. Le jour est range dans la ligne du taux RETENU (et
+//   non dans celle de sa nature) pour que chaque ligne du releve reste homogene en
+//   taux : sans ca, un domaine qui majorerait le dimanche plus fort que le ferie
+//   ferait cohabiter deux taux differents sous un meme libelle.
+// ⚠️ Les heures rendues ici sont DEJA comptees ailleurs (dans s.worked, dans
+//   l'ecart du mois, donc dans les heures sup). Ce calcul n'ajoute pas d'heures :
+//   il dit a quel taux celles-la se paient. Seule `maj` s'ajoute.
+function _planMajMonth(mbr,m){
+  var z={hDim:0,hFer:0,majDim:0,majFer:0,maj:0,jours:[]};
+  if(!_planMajActive(m))return z;
+  var T=_planMajTaux(),plId=_planPlId(mbr),ent=_pEntMonth(mbr.nom,m);
+  for(var d=1;d<=_planDays(m);d++){
+    if(!_planInContractCtr(mbr,m,d))continue;
+    var f=_planFerie(m,d),dow=_planDow(m,d);
+    if(!f&&dow!==0)continue;                        // ni ferie ni dimanche : rien a dire
+    var e=ent[d],st=_planDayStatus(plId,m,d,e);
+    if(_PLAN_ST_OFFDAY[st.t]&&!st.retard)continue;  // CP, recup, absence, formation
+    var h=_planWorkH(plId,m,d,e);
+    if(h<=0.0001)continue;
+    var enFerie=!!f&&!(dow===0&&T.dim>T.ferie);
+    var tx=enFerie?T.ferie:T.dim;
+    if(enFerie){z.hFer+=h;z.majFer+=h*tx/100;}
+    else       {z.hDim+=h;z.majDim+=h*tx/100;}
+    z.jours.push({d:d,h:h,nom:f||'',tx:tx,fer:enFerie});
+  }
+  z.maj=z.majDim+z.majFer;
+  return z;
+}
+// La majoration va au COMPTEUR quand les heures se recuperent, a la PAIE quand
+// elles se paient. Un seul reglage decide des deux (CONFIG.hsup_mode), parce que
+// c'est la meme question posee une seule fois : ce domaine rend-il du temps, ou
+// de l'argent ? Cette fonction est le SEUL endroit ou la reponse est lue — sans
+// elle, _planBank et _planYearBalance auraient chacun leur version de la regle.
+function _planMajBank(mbr,m){return _planHsupPayable()?0:_planMajMonth(mbr,m).maj;}
 // Ordre des travaux de printemps (valide terrain) -> fenetre relative [0..1] dans la saison datee.
 // Reparation/pliage/entreplantation (debut) -> ebourgeonnage/relevage/palissage (milieu) -> accolage (fin) ; pioche partout.
 // Bornes calees sur debut/fin de la saison. Tache inconnue -> pleine saison.
@@ -1707,7 +1777,10 @@ function _planBank(mbr,uptoMonth){
   for(var i=0;i<=uptoMonth;i++){
     var sup=_planSupMonth(mbr,i);
     var paye=Math.min(Math.max(0,_planHsupPaye(mbr.nom,i)),sup);
-    var reporte=sup-paye;
+    // ★ La majoration entre au compteur AVEC le mois qui l'a produite : elle est
+    //   une tranche FIFO comme les heures sup, sinon bank.solde et
+    //   _planYearBalance().net divergeraient — les deux mesures doivent coincider.
+    var reporte=sup-paye+_planMajBank(mbr,i);
     if(reporte>0.0001)tr.push({mois:i,h:reporte});
     var draw=_planRecupH(mbr,i)+_planDuesMonth(mbr,i);   // ★ une heure due se retire comme une recup
     for(var k=0;k<tr.length&&draw>0.0001;k++){var take=Math.min(tr[k].h,draw);tr[k].h-=take;draw-=take;}
@@ -1732,17 +1805,18 @@ function _planDepartDate(mbr){ return _planDepartRec(mbr.nom).date||''; }
 // Depuis le passage a l'annualisation, _planBank ne fait plus perimer les heures :
 // les deux mesures coincident, _planBank conservant le detail par mois d'acquisition.
 function _planYearBalance(mbr,uptoMonth){
-  var dep=_planDepartSolde(mbr),plus=0,minus=0,minusPay=0,dues=0;
+  var dep=_planDepartSolde(mbr),plus=0,minus=0,minusPay=0,dues=0,maj=0;
   for(var i=0;i<=uptoMonth;i++){
     var sup=_planSupMonth(mbr,i);
     var paye=Math.min(Math.max(0,_planHsupPaye(mbr.nom,i)),sup);
     plus+=sup-paye;
     minus+=_planRecupH(mbr,i);
     minusPay+=Math.max(0,_planHsupPayeBank(mbr.nom,i));
+    maj+=_planMajBank(mbr,i);      // ★ majoration dimanche/ferie, si elle se recupere
     dues+=_planDuesMonth(mbr,i);   // ★ absences injustifiees et retards
   }
-  return {dep:dep,plus:plus,minus:minus,minusPay:minusPay,dues:dues,
-          net:dep+plus-minus-minusPay-dues,upto:uptoMonth};
+  return {dep:dep,plus:plus,minus:minus,minusPay:minusPay,dues:dues,maj:maj,
+          net:dep+plus+maj-minus-minusPay-dues,upto:uptoMonth};
 }
 // ════════════════════════════════════════════════════════════════════
 // ANNUALISATION — compteur annuel (annee civile) + heures de modulation
@@ -2241,6 +2315,12 @@ function _pl2Board(){
     +'<span><i class="pl2c-dn"></i> Heures \u2212</span>'
     +'<span><i class="pl2c-cp"></i> CP</span>'
     +'<span><i class="pl2c-abs"></i> Absence</span>'
+    // ★ LE RETARD MANQUAIT A LA LEGENDE. _pl2Cell le rend depuis longtemps en orange
+    //   (pl2c-late), et styles.css va jusqu'a prevoir « .pl2-legend i.pl2c-late::after
+    //   {display:none} » — une regle qui ne pouvait JAMAIS s'appliquer, faute d'entree
+    //   a decorer. Le CSS attendait une legende que personne n'avait ecrite : une case
+    //   orange sans nom se lit comme un avertissement, pas comme une journee ecourtee.
+    +'<span><i class="pl2c-late"></i> Retard</span>'
     +'<span><i class="pl2c-rec"></i> R\u00e9cup</span>'
     +'<span><i class="pl2c-heat"></i> Chaleur</span>'
     +'<span><i style="background:var(--or)"></i> F\u00e9ri\u00e9</span>'
@@ -3139,6 +3219,7 @@ function _planHsupCard(mbr){
     +'<div style="display:flex;gap:8px">'
       +'<div style="flex:1;text-align:center;padding:8px 4px;background:var(--terre-pale,#F3EADF);border-radius:10px"><div style="font-size:15px;font-weight:800;color:var(--terre,#8A5A38)">'+_planFmt(_dep)+'</div><div style="font-size:9px;text-transform:uppercase;letter-spacing:.4px;color:var(--texte-doux);margin-top:2px">Départ</div></div>'
       +'<div style="flex:1;text-align:center;padding:8px 4px;background:var(--vert-pale);border-radius:10px"><div style="font-size:15px;font-weight:800;color:var(--vert-med)">'+_plusStr+'</div><div style="font-size:9px;text-transform:uppercase;letter-spacing:.4px;color:var(--texte-doux);margin-top:2px">Sup + cumul</div></div>'
+      +(_yb.maj>0.0001?'<div style="flex:1;text-align:center;padding:8px 4px;background:var(--orange-pale,#FDF0DE);border-radius:10px"><div style="font-size:15px;font-weight:var(--fw-bold,700);color:var(--orange)">+'+_planFmt(_yb.maj)+'</div><div style="font-size:9px;text-transform:uppercase;letter-spacing:.4px;color:var(--texte-doux);margin-top:2px">Major. + cumul</div></div>':'')
       +'<div style="flex:1;text-align:center;padding:8px 4px;background:var(--rouge-pale);border-radius:10px"><div style="font-size:15px;font-weight:800;color:var(--rouge)">'+_minusStr+'</div><div style="font-size:9px;text-transform:uppercase;letter-spacing:.4px;color:var(--texte-doux);margin-top:2px">Récup − cumul</div></div>'
       +(_yb.minusPay>0.0001?'<div style="flex:1;text-align:center;padding:8px 4px;background:var(--orange-pale,#FDF0DE);border-radius:10px"><div style="font-size:15px;font-weight:800;color:var(--orange)">−'+_planFmt(_yb.minusPay)+'</div><div style="font-size:9px;text-transform:uppercase;letter-spacing:.4px;color:var(--texte-doux);margin-top:2px">Payé − cumul</div></div>':'')
       +(_yb.dues>0.0001?'<div style="flex:1;text-align:center;padding:8px 4px;background:var(--rouge-pale);border-radius:10px"><div style="font-size:15px;font-weight:800;color:var(--rouge)">−'+_planFmt(_yb.dues)+'</div><div style="font-size:9px;text-transform:uppercase;letter-spacing:.4px;color:var(--texte-doux);margin-top:2px">Dues − cumul</div></div>':'')
@@ -3170,6 +3251,18 @@ function _planHsupCard(mbr){
   }
   if(payBank>0.0001){
     h+='<div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:10px"><div style="font-size:13px;color:var(--texte-doux)">Pay\u00e9 depuis le compteur</div><div style="font-size:15px;font-weight:700;color:var(--orange,#d97706)">\u2212'+_planFmt(payBank)+'</div></div>';
+  }
+  var _mj=_planMajMonth(mbr,dm);
+  if(_mj.maj>0.0001){
+    var _mjT=_planMajTaux(),_mjPay=_planHsupPayable(),_mjD=[];
+    if(_mj.hFer>0.0001)_mjD.push(_planFmt(_mj.hFer)+' \u00e0 +'+_mjT.ferie+'\u202f% (f\u00e9ri\u00e9)');
+    if(_mj.hDim>0.0001)_mjD.push(_planFmt(_mj.hDim)+' \u00e0 +'+_mjT.dim+'\u202f% (dimanche)');
+    h+='<div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:3px"><div style="font-size:13px;color:var(--texte)">'
+      +(_mjPay?'Majoration \u00e0 porter en paie':'Majoration \u2192 compteur')
+      +'</div><div style="font-size:16px;font-weight:700;color:'+(_mjPay?'var(--orange)':'var(--plan-acc)')+'">'
+      +(_mjPay?'':'+')+_planFmt(_mj.maj)+'</div></div>';
+    h+='<div style="font-size:11px;color:var(--texte-doux);margin-bottom:10px;line-height:1.4">'+_mjD.join(' \u00b7 ')
+      +(_mjPay?' \u2014 se paie, n\u2019entre pas au compteur.':' \u2014 en repos compensateur.')+'</div>';
   }
   h+='<div style="display:flex;align-items:center;justify-content:space-between;padding-top:10px;border-top:1px solid rgba(123,109,184,0.3)"><div style="font-size:13px;font-weight:600;color:var(--texte)">Compteur</div><div style="font-size:22px;font-weight:800;color:'+(bank.solde>0.0001?'var(--plan-acc)':'var(--texte-doux)')+'">'+_planFmt(bank.solde)+'</div></div>';
   bank.tr.forEach(function(t){
@@ -3972,6 +4065,19 @@ function _planRenderCadre(){
       +'</div>'
       +'<div style="font-size:11px;color:var(--texte-doux);line-height:1.5">'+_hmHint+'</div>'
     +'</div>';
+  // ── Majoration dimanche / jour ferie ──
+  // Sa place est ici, juste sous « Heures au-dela du planning du mois » : c'est ce
+  // reglage-la qui decide ou part la majoration, les deux se lisent ensemble.
+  var _mjc=_planMajTaux();
+  html+='<div class="plan-sec-lbl" style="margin-top:8px">Dimanches et jours f\u00e9ri\u00e9s travaill\u00e9s</div>'
+    +'<div class="plan-card" style="flex-direction:column;gap:10px;align-items:stretch">'
+      +'<div style="display:grid;grid-template-columns:1fr 1fr;gap:9px">'
+        +_planLegInput('plan-maj-dim','Dimanche travaill\u00e9',_mjc.dim,'5','%')
+        +_planLegInput('plan-maj-fer','Jour f\u00e9ri\u00e9 travaill\u00e9',_mjc.ferie,'5','%')
+      +'</div>'
+      +'<button class="plan-btn-saisir" style="width:100%" onclick="planSaveMaj()">Enregistrer les majorations</button>'
+      +'<div style="font-size:11px;color:var(--texte-doux);line-height:1.5">S\u2019applique aux heures <b>r\u00e9ellement faites</b> ces jours-l\u00e0. Un f\u00e9ri\u00e9 ch\u00f4m\u00e9 reste pay\u00e9 sans majoration\u00a0; un cong\u00e9, une r\u00e9cup ou une absence ne majorent rien. Un f\u00e9ri\u00e9 qui tombe un dimanche prend le <b>taux le plus fort</b>, jamais les deux. Le samedi n\u2019est pas concern\u00e9. Calcul actif \u00e0 partir de <b>janvier 2026</b>\u00a0: les mois ant\u00e9rieurs ne bougent pas.</div>'
+    +'</div>';
   html+='<div class="plan-sec-lbl">Templates de planning</div>';
   ids.forEach(function(id){
     var isDefault=!!PLAN_DEF[id];
@@ -4140,6 +4246,22 @@ function planSaveLegal(){
   window.CONFIG=window.CONFIG;
   if(window.fbSave)window.fbSave('config',window.CONFIG);
   showToast('\u2705 Cadre l\u00e9gal enregistr\u00e9','#3D6B27');
+  _planRenderCadre();
+}
+// Deux taux, un seul enregistrement.
+// ⚠️ ZERO EST UNE VALEUR VALIDE (domaine qui ne majore pas) : le repli sur le defaut
+//    ne se declenche que sur un champ vide ou une valeur negative, jamais sur 0.
+function planSaveMaj(){
+  if(!isAdmin())return;
+  var gv=function(id,def){var v=parseFloat((document.getElementById(id)||{}).value);return (isNaN(v)||v<0)?def:v;};
+  if(!window.CONFIG)window.CONFIG={};
+  window.CONFIG.majorations={dim:gv('plan-maj-dim',PLAN_MAJ_DEF.dim),ferie:gv('plan-maj-fer',PLAN_MAJ_DEF.ferie)};
+  window.CONFIG=window.CONFIG;
+  if(window.saveData)window.saveData('config');
+  else if(window.fbSave)window.fbSave('config',window.CONFIG);
+  // ⚠️ Pas de coche verte ici : le cliquet du jeu d'icones (DS-1) interdit
+  //    d'ajouter un pictogramme de plus, et un toast se lit tres bien sans.
+  showToast('Majorations enregistr\u00e9es','#3D6B27');
   _planRenderCadre();
 }
 // ── Éditeur de grille planning ──
@@ -5082,6 +5204,7 @@ function _planExportPDF_(nom,mbr,_ctr){
   var s=_planSummary(mbr,planMonth);
     var sup=_planSupMonth(mbr,planMonth);
   var recupH=_planRecupH(mbr,planMonth);
+  var _mj=_planMajMonth(mbr,planMonth);       // dimanches et feries travailles du mois
   var _duesM=_planDuesMonth(mbr,planMonth);   // heures dues du mois : absence injustifiee + retard
   var joursTrav=_planDaysWorked(mbr,planMonth);
   // Ventilation des heures du mois : ce qui a ete fait AU DOMAINE et ce qui compte
@@ -5270,6 +5393,39 @@ function _planExportPDF_(nom,mbr,_ctr){
     if(!_planInContractCtr(mbr,planMonth,_kj))continue;
     if(_planRefPart(plId,planMonth,_kj,ent[_kj])>0.0001)_refJ++;
   }
+  // ★★ LE BLOC QUE LA PAIE LIT. Il n'apparait QUE s'il y a quelque chose a dire :
+  //   onze mois sur douze il n'existe pas, et une ligne « majoration 0h » n'apprend
+  //   rien a personne — c'est la lecon du bandeau « heures sup a payer » supprime
+  //   plus haut, qui donnait 26 px a un zero.
+  // ⚠️ La note repete que les heures listees sont DEJA dans le total du mois. Sans
+  //   elle, un comptable qui additionne le bloc et le total paie deux fois.
+  var _mjT=_planMajTaux(),majHtml='';
+  if(_mj.maj>0.0001){
+    var _mjJ=_mj.jours.map(function(j){
+      return '<div class="crow"><span class="cl">'+PLAN_JOURS[_planDow(planMonth,j.d)]+'\u00a0'+j.d+' '+PLAN_MOIS[planMonth].toLowerCase()
+        +(j.nom?(' \u00b7 '+_escHtml(j.nom)):'')+'</span>'
+        +'<span class="cv">'+_planFmt(j.h)+' \u00b7 +'+j.tx+'\u202f%</span></div>';
+    }).join('');
+    var _mjRow=function(lbl,hh,tx,mm){
+      return hh>0.0001?('<tr><td>'+lbl+'</td><td class="r2">'+_planFmt(hh)+'</td><td class="r2">+'+tx+'\u202f%</td>'
+        +'<td class="r2" style="font-weight:700">'+_planFmt(mm)+'</td></tr>'):'';
+    };
+    majHtml='<div class="ctr"><div class="t">Dimanches et jours f\u00e9ri\u00e9s travaill\u00e9s</div>'
+      +_mjJ
+      +'<table style="margin-top:7px"><thead><tr><th>Nature</th><th class="r2" style="width:52px">Heures</th>'
+        +'<th class="r2" style="width:50px">Taux</th><th class="r2" style="width:66px">Majoration</th></tr></thead><tbody>'
+      +_mjRow('Jour f\u00e9ri\u00e9 travaill\u00e9',_mj.hFer,_mjT.ferie,_mj.majFer)
+      +_mjRow('Dimanche travaill\u00e9',_mj.hDim,_mjT.dim,_mj.majDim)
+      +'</tbody><tfoot><tr><td style="font-weight:700;border-top:1.5px solid #cfcac4;border-bottom:none">Total</td>'
+        +'<td class="r2" style="font-weight:700;border-top:1.5px solid #cfcac4;border-bottom:none">'+_planFmt(_mj.hFer+_mj.hDim)+'</td>'
+        +'<td style="border-top:1.5px solid #cfcac4;border-bottom:none"></td>'
+        +'<td class="r2" style="font-weight:700;border-top:1.5px solid #cfcac4;border-bottom:none">'+_planFmt(_mj.maj)+'</td></tr></tfoot></table>'
+      +'<div class="note">'+(_planHsupPayable()
+        ? ('Majoration \u00e0 porter en paie\u00a0: <b>'+_planFmt(_mj.maj)+'</b> au taux horaire du salari\u00e9.')
+        : ('Majoration convertie en repos\u00a0: <b>'+_planFmt(_mj.maj)+'</b> port\u00e9es au compteur.'))
+      +' Les heures ci-dessus sont <b>d\u00e9j\u00e0 comprises</b> dans le total du mois\u00a0; seule la majoration s\u2019ajoute.'
+      +' Un jour f\u00e9ri\u00e9 qui tombe un dimanche prend le taux le plus fort, jamais les deux.</div></div>';
+  }
   // Idem : la date d'edition imprimee sur le document doit etre celle du domaine.
   var _edite=_planFmtJour((typeof window._mvAujIso==='function')?window._mvAujIso()
                           :new Date().toISOString().slice(0,10));
@@ -5397,6 +5553,7 @@ function _planExportPDF_(nom,mbr,_ctr){
     +_plRvContratsHtml(mbr)
     +_plRvCpHtml(mbr)
     +annuCptHtml
+    +majHtml
     // Ce que le mois a produit, en une ligne : le detail est juste en dessous,
     // dans le tableau. Conserve meme a zero — l'absence d'heures sup est une
     // information, elle ne merite simplement pas 26 px.
@@ -6192,6 +6349,7 @@ window.planSaveCoupureH     = planSaveCoupureH;
 window._planCoupureH        = _planCoupureH;
 window._planCoupureTxt      = _planCoupureTxt;
 window.planSaveLegal        = planSaveLegal;
+window.planSaveMaj          = planSaveMaj;
 window.planSetHsupMode      = planSetHsupMode;
 window.planLegalPreset      = planLegalPreset;
 window.planOpenGridEditor   = planOpenGridEditor;

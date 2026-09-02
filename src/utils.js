@@ -23,7 +23,7 @@ export const GT_ADMIN_EMAIL = 'ngdevpro@gmail.com';
 // WHATS_NEW   : tableau vide = modal desactive pour cette version.
 // Format item : { emoji:'📅', titre:'Titre court', desc:'Phrase utilisateur.' }
 // Regle : seulement les changements visibles par les utilisateurs.
-export const APP_VERSION = '6.73';
+export const APP_VERSION = '6.74';
 // ════ Journal des nouveautés (récap cumulatif) ════
 // Une entrée par version, la PLUS RÉCENTE EN HAUT : { v:'5.10', items:[ {emoji,titre,desc}, … ] }
 // À chaque release visible → AJOUTER un bloc en tête (ne pas remplacer). items:[] = release technique (rien à afficher).
@@ -354,6 +354,11 @@ window._mvGraphRepeindre = function(){
 };
 
 export const WHATS_NEW = [
+  { v: '6.74', items: [
+    { emoji: 'chrono', titre: 'Les dimanches et les jours f\u00e9ri\u00e9s travaill\u00e9s se majorent tout seuls', desc: "Un dimanche de vendange ou un 1\u1d49\u02b3 mai pass\u00e9 \u00e0 la vigne se comptait comme n\u2019importe quel autre jour\u00a0: il fallait reprendre la feuille \u00e0 la main pour retrouver ce qui \u00e9tait major\u00e9. L\u2019application le fait maintenant \u00e0 votre place \u2014 <b>50\u202f% le dimanche, 100\u202f% un jour f\u00e9ri\u00e9</b>, et vous r\u00e9glez les deux taux dans <b>Planning \u203a Le cadre</b>. Seules les heures <b>r\u00e9ellement faites</b> comptent\u00a0: un f\u00e9ri\u00e9 ch\u00f4m\u00e9 reste pay\u00e9 sans majoration, un cong\u00e9 ou une r\u00e9cup ne majorent rien." },
+    { emoji: 'euro', titre: 'La majoration va l\u00e0 o\u00f9 vont vos heures sup', desc: "Si votre domaine <b>paie</b> les heures au-del\u00e0 du planning, la majoration s\u2019imprime sur la feuille d\u2019heures, pr\u00eate pour la paie. S\u2019il les fait <b>r\u00e9cup\u00e9rer en repos</b>, elle s\u2019ajoute au compteur d\u2019heures. C\u2019est le r\u00e9glage «\u00a0Heures au-del\u00e0 du planning du mois\u00a0» qui d\u00e9cide\u00a0: vous n\u2019avez rien de plus \u00e0 poser." },
+    { emoji: 'calendrier', titre: 'Un f\u00e9ri\u00e9 qui tombe un dimanche ne compte qu\u2019une fois', desc: "Le 1\u1d49\u02b3 novembre 2026 tombe un dimanche. Ce jour-l\u00e0 prend le <b>taux le plus fort des deux</b>, jamais les deux additionn\u00e9s. Le samedi n\u2019est pas concern\u00e9. Le calcul d\u00e9marre en <b>janvier 2026</b>\u00a0: les mois d\u00e9j\u00e0 pass\u00e9s en paie avant cette date ne bougent pas. Et les heures de majoration ne comptent pas dans les 1\u202f607\u202fh\u00a0\u2014 c\u2019est du temps pay\u00e9, pas du temps pass\u00e9 \u00e0 la vigne." }
+  ] },
   { v: '6.73', items: [
     { emoji: 'liste', titre: 'Le Cuvier se lit d\u2019un coup d\u2019\u0153il', desc: "Une cuve prenait un \u00e9cran entier\u00a0: il fallait faire d\u00e9filer dix-sept hauteurs de t\u00e9l\u00e9phone pour douze cuves. La liste ne montre plus que l\u2019essentiel \u2014 <b>rep\u00e8re de cuverie, nom, densit\u00e9, temp\u00e9rature, avancement</b> \u2014 et une cuve s\u2019ouvre au doigt quand vous en avez besoin. <b>Neuf cuves tiennent \u00e0 l\u2019\u00e9cran</b> au lieu d\u2019une." },
     { emoji: 'boussole', titre: 'Vos cuves ne bougent plus de place', desc: "La liste \u00e9tait class\u00e9e par retard\u00a0: <b>mesurer une cuve la renvoyait en bas</b>, et l\u2019ordre changeait tous les jours. Elle suit d\u00e9sormais <b>l\u2019ordre de votre cuverie</b>, celui \u00e9crit sur les cuves. L\u2019urgence n\u2019a pas disparu \u2014 elle est dans le bandeau du haut et la pastille rouge, o\u00f9 elle se voit mieux. Tri par urgence ou par avancement d\u2019un doigt, recherche par nom ou par parcelle, et cinq filtres avec leur compte." },
@@ -2095,7 +2100,8 @@ var MV_AIDE = {
       ['Le relevé mensuel', "s’imprime depuis Réglages, onglet App, « Documents & impressions ». C’est un relevé d’heures, pas un bulletin de paie."],
       ['Le relevé d’un seul salarié', "s’imprime au même endroit, en choisissant la personne et le mois : son mois jour par jour, ses contrats avec leurs coupures, ses congés payés, son compteur d’heures et son annualisation, avec deux lignes de signature. Le bouton PDF de sa fiche sort exactement le même document. Les anciens salariés y figurent aussi, marqués comme tels : un relevé est un document d’histoire."],
       ['Un ancien salarié', "reste compté dans les mois où il était sous contrat. Reculez d’un mois dans Les gens : il reprend sa ligne dans la liste, avec ses heures, et il disparaît de la section Anciens salariés ce mois-là. Passer une fiche en Inactif ferme son accès à l’application, cela n’efface aucune heure déjà faite."],
-      ['Taux horaires et acomptes', ": administrateurs seulement, et jamais enregistrés sur l’appareil."]
+      ['Dimanches et jours fériés travaillés', "se majorent tout seuls — 50 % le dimanche, 100 % un jour férié, taux modifiables dans Le cadre. Seules les heures réellement faites comptent : un férié chômé reste payé sans majoration, un congé ou une récup ne majorent rien, et un férié qui tombe un dimanche prend le taux le plus fort, jamais les deux. La majoration part en paie si vos heures sup se paient, au compteur si elles se récupèrent. Elle ne compte pas dans les 1 607 h."],
+    ['Taux horaires et acomptes', ": administrateurs seulement, et jamais enregistrés sur l’appareil."]
     ]
   },
   cave: {

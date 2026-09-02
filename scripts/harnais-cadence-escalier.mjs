@@ -4,7 +4,12 @@
 // harnais. Une garde rougit donc si l'extraction n'a rien trouve.
 import { readFileSync } from 'fs';
 
-const SRC = readFileSync('/home/claude/mavigne-dev/src/pilotage.js', 'utf8');
+// ★ RACINE DEDUITE DU FICHIER, JAMAIS DU REPERTOIRE COURANT NI D'UN CHEMIN ABSOLU.
+//   Regle posee en §44c : six harnais portaient « /home/claude/mavigne-dev/ » en dur —
+//   un chemin de bac a sable. Chez Nico et en CI ils sortaient en ENOENT, et deux
+//   d'entre eux etaient VERTS ici : un filet qui ne demarre pas se lit comme un succes.
+const R = new URL('../', import.meta.url).pathname;
+const SRC = readFileSync(R+'src/pilotage.js', 'utf8');
 
 let pass = 0, fail = 0;
 function ok(nom, cond, det) {
@@ -118,8 +123,13 @@ ok('la note du graphe distingue la source histo',
    /E\.cad\.src==='histo'\s*\n?\s*\?\s*\('\\u21a9/.test(SRC) || SRC.includes("Mesur\\u00e9 sur la campagne pr\\u00e9c\\u00e9dente"));
 ok('le KPI ecart de cadence annonce la source histo',
    /campagne pr\\u00e9c\\u00e9dente \\u00b7 fin projet/.test(SRC));
+// ★★ ASSERTION REBASEE (§44c). Elle cherchait « push('warn' » — une FORME de code
+//    supposee, jamais ecrite. Le comportement, lui, est bien la : quand l'ecart vient
+//    de l'historique, le conseil dit que c'est un REPERE et ne cite pas la projection
+//    de fin. C'est ca qu'il faut proteger, pas le nom d'un niveau d'alerte.
 ok('l\'alerte >15 % ne crie plus au derapage sur un chiffre d\'histoire',
-   /if\(E\.cad\.src==='histo'\)\s*\n?\s*push\('warn'/.test(SRC));
+   /if\(E\.cad\.src==='histo' \|\| !E\.cad\.applic\)/.test(SRC)
+   && /c\\u2019est un <b>rep\\u00e8re<\/b>, pas une pr\\u00e9vision/.test(SRC));
 ok('le message de marche 3 mentionne l\'absence d\'archive comparable',
    /aucune campagne comparable archiv/.test(SRC));
 

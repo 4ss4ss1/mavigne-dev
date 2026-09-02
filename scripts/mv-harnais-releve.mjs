@@ -164,8 +164,19 @@ T('la durée de chaque période est comptée', /145 jours/.test(H), 'du 2/03 au 
 T('⚠️ la COUPURE est nommée, et comptée en jours',
   H.indexOf('s\u00e9par\u00e9es par une coupure') !== -1 && /coupure de 38 jours/.test(H),
   (H.match(/coupure de \d+ jours?/)||['(absente)'])[0]);
+// ★★ ASSERTION CORRIGEE LE 02/09 — ELLE COMPTAIT LA MAUVAISE CHOSE.
+//    « /cnow/g <= 1 » comptait la chaine sur TOUT le document, feuille de style
+//    comprise : la regle « .cnow{...} » fait deja 1 a elle seule. Le plafond de 1
+//    voulait donc dire « AUCUN badge rendu » — vrai onze mois sur douze, faux des
+//    qu'une periode du scenario couvre la date du jour. Le harnais est passe au
+//    ROUGE tout seul le 1er septembre 2026, sans qu'aucune ligne de code ne bouge,
+//    et il BLOQUAIT `npm run build` (prebuild joue la meme chaine).
+//    ⚠️ Verifie rouge sur la base d'origine avant correction : ce n'etait pas un lot.
+//    On compte desormais les BADGES, pas les occurrences du mot. Le plafond reste 1 :
+//    selon la date, zero ou une periode du scenario couvre aujourd'hui, jamais deux.
 T('la période qui couvre aujourd\u2019hui est marquée « en cours »',
-  (H.match(/cnow/g) || []).length <= 1);
+  (H.match(/<b class="cnow">/g) || []).length <= 1,
+  (H.match(/<b class="cnow">/g) || []).length + ' badge(s) rendu(s)');
 T('le prorata du plafond est expliqué', H.indexOf('proratis\u00e9 aux jours sous contrat') !== -1);
 
 console.log('\n3. Le bloc CONGÉS');

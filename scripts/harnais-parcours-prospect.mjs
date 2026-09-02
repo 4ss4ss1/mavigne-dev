@@ -5,7 +5,11 @@
 // ════════════════════════════════════════════════════════════════════════════
 import { readFileSync } from 'fs';
 
-const R = '/home/claude/mavigne-dev/';
+// ★ RACINE DEDUITE DU FICHIER, JAMAIS DU REPERTOIRE COURANT NI D'UN CHEMIN ABSOLU.
+//   Regle posee en §44c : six harnais portaient « /home/claude/mavigne-dev/ » en dur —
+//   un chemin de bac a sable. Chez Nico et en CI ils sortaient en ENOENT, et deux
+//   d'entre eux etaient VERTS ici : un filet qui ne demarre pas se lit comme un succes.
+const R = new URL('../', import.meta.url).pathname;
 let ok = 0, ko = 0;
 function t(nom, cond) { if (cond) { ok++; console.log('  \x1b[32m✓\x1b[0m ' + nom); } else { ko++; console.log('  \x1b[31m✗ ' + nom + '\x1b[0m'); } }
 function bloc(n) { console.log('\n── ' + n + ' ──'); }

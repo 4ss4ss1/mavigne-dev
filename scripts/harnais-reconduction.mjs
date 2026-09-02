@@ -1,6 +1,11 @@
 // Le bloc de reconduction et son handler, extraits du code REEL et exécutés.
 import { readFileSync } from 'fs';
-const A = readFileSync('/home/claude/mavigne-dev/src/admin-gt.js','utf8');
+// ★ RACINE DEDUITE DU FICHIER, JAMAIS DU REPERTOIRE COURANT NI D'UN CHEMIN ABSOLU.
+//   Regle posee en §44c : six harnais portaient « /home/claude/mavigne-dev/ » en dur —
+//   un chemin de bac a sable. Chez Nico et en CI ils sortaient en ENOENT, et deux
+//   d'entre eux etaient VERTS ici : un filet qui ne demarre pas se lit comme un succes.
+const R = new URL('../', import.meta.url).pathname;
+const A = readFileSync(R+'src/admin-gt.js','utf8');
 let ok=0,ko=0; const t=(n,c)=>{c?(ok++,console.log('  \x1b[32m✓\x1b[0m '+n)):(ko++,console.log('  \x1b[31m✗ '+n+'\x1b[0m'));};
 const g=(re,q)=>{const m=A.match(re); if(!m) throw new Error('introuvable: '+q); return m[0];};
 const K   = g(/var _FC_TRIAL_DAYS = 15;\nvar _FC_TRIAL_MAX  = 1;/,'constantes');
@@ -62,7 +67,7 @@ r=await run(null,new Error('network'));
 t('panne réseau : compteur inchangé et bouton rendu', r.FC.trialRenewals===0 && /Reconduire/.test(r.el['agt-fc-renew'].outerHTML));
 
 console.log('\n── miroir client / serveur ──');
-const C=readFileSync('/home/claude/mavigne-dev/functions/claims.js','utf8');
+const C=readFileSync(R+'functions/claims.js','utf8');
 t('★ TRIAL_DAYS identique des deux côtés',
   /const TRIAL_DAYS      = 15;/.test(C) && /var _FC_TRIAL_DAYS = 15;/.test(A));
 t('★ MAX_RENEW identique des deux côtés',
