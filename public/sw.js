@@ -1,4 +1,27 @@
-// MA VIGNE — Service Worker v7.34
+// MA VIGNE — Service Worker v7.35
+// v7.35 (05/09/2026) — CONF-3 : les 46 contours parcellaires sortent du code.
+//   Dernier morceau de donnee d'exploitation encore servi dans le bundle. Le
+//   trace GPS des vignes du domaine de reference partait chez TOUS les domaines
+//   clients et vivait dans un depot public.
+//   ★★ POURQUOI IL N'EST PAS PARTI AVEC CONF-1. Pour ce domaine la cle Firestore
+//   `kml_polygons` etait VIDE : ses contours n'existaient QUE la. Les vider en
+//   meme temps que MEMBRES et PARCELLES aurait rendu la carte BLANCHE en
+//   production, en pleine vendange — plan des parcelles, Pilotage, tri par
+//   proximite. L'ordre a donc ete impose : fabriquer le KML depuis le code,
+//   verifier l'aller-retour (46 contours, 301 points, zero ecart, anneaux fermes,
+//   coordonnees remises en lng,lat), importer par la console GT, REGARDER LA
+//   CARTE, puis seulement vider le bloc. C'est fait dans cet ordre.
+//   ★ GARDE-FOU AJOUTE. La seule source de contours est desormais Firestore : un
+//   domaine qui a des parcelles et zero contour affichait une carte nue SANS UN
+//   MOT, indistinguable d'un domaine qui n'a jamais importe son KML. `initMap`
+//   le journalise en `info` : le rapport d'erreurs le remonte au lieu de laisser
+//   chercher. Un ecran vide n'est pas un message.
+//   ⚠️ APP_VERSION INCHANGE (6.77). `app.js` est touche, `utils.js` non, et rien
+//   n'est visible pour l'utilisateur — la carte est identique au pixel pres.
+//   Modele du correctif invisible : bump SW seul.
+//   ⚠️ RESTE `DOMAINE_NOM = 'Domaine …'`, meme famille : c'est un repli affiche
+//   avant que Firestore reponde. A vider seulement apres avoir verifie que
+//   `config.domaine_nom` est renseigne (Reglages > Domaine).
 // v7.34 (05/09/2026) — CONF-2 : les noms de clients quittent les commentaires.
 //   Suite de CONF-1. Une adresse e-mail a une forme, un nom propre non : le
 //   harnais ne pouvait pas les voir, il a fallu les lire. Retires de six modules,
@@ -3113,7 +3136,7 @@
 // v2.22 — Fix profils vides : guard vide dans loadData() pour MEMBRES/SAISONS/TACHES
 // v2.17 — Onboarding intégré + tenantId · v2.06 — Firebase Auth · v2.00–v2.05 — divers
 const DEBUG = self.location.hostname === 'localhost' || self.location.hostname === '127.0.0.1';
-const CACHE_NAME   = 'mavigne-v7.34';
+const CACHE_NAME   = 'mavigne-v7.35';
 const TENANT_CACHE = 'mavigne-tenant';   // Cache persistant — préservé à chaque mise à jour SW
 const SYNC_TAG     = 'mavigne-sync';
 
@@ -3129,7 +3152,7 @@ const CDN_URLS = [
 ];
 
 self.addEventListener('install', event => {
-  if(DEBUG) console.log('[SW] Ma Vigne v7.34 installé');
+  if(DEBUG) console.log('[SW] Ma Vigne v7.35 installé');
   event.waitUntil(
     caches.open(CACHE_NAME).then(async cache => {
       // ── Cœur applicatif : STRICT (mise à jour ATOMIQUE) ──
@@ -3145,7 +3168,7 @@ self.addEventListener('install', event => {
 });
 
 self.addEventListener('activate', event => {
-  if(DEBUG) console.log('[SW] Ma Vigne v7.34 activé');
+  if(DEBUG) console.log('[SW] Ma Vigne v7.35 activé');
   event.waitUntil(
     caches.keys().then(keys =>
       Promise.all(

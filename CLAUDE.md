@@ -3814,11 +3814,24 @@ Un lot n'est livrable que quand **les six** sont vraies. Les écrire dans la ré
    règles Firestore, dans le manifest et dans l'URL `?tenant=`. Le masquer dans la prose
    pendant qu'il est en clair partout ailleurs serait du théâtre. Un slug est un numéro de
    dossier, pas une donnée personnelle.
-   ⚠ **Deux valeurs en dur restent, volontairement, et attendent la même manœuvre que le KML :**
-   `KML_DATA` (46 contours GPS) et `DOMAINE_NOM = 'Domaine …'`. Toutes deux sont des **replis**
-   que Firestore devrait couvrir. Ordre imposé : vérifier que la clé existe en base
-   (`kml_polygons`, `config.domaine_nom`), regarder l'écran, **puis** vider le repli. Les vider
-   à l'aveugle en pleine vendange = carte blanche et domaine sans nom.
+   ★★★ **CONF-3 (05/09) — LES 46 CONTOURS SONT SORTIS, ET L'ORDRE ETAIT TOUT.** `KML_DATA`
+   portait le tracé GPS des vignes du domaine de référence. Il ne pouvait **pas** partir avec
+   CONF-1 : pour ce domaine la clé `kml_polygons` était **vide** — les contours n'existaient
+   QUE dans le code, et la console GT l'écrivait elle-même en rouge. Les vider au même moment
+   que `MEMBRES` et `PARCELLES` = **carte blanche en production, en pleine vendange**.
+   ★ **La manœuvre, dans cet ordre exact** : reconstruire un KML à partir du code → prouver
+   l'**aller-retour** en rejouant `_parseKML` (46 contours, 301 points, zéro écart, 46 anneaux
+   fermés, coordonnées remises en `lng,lat` — l'inversion met les vignes en mer du Nord)
+   → importer par la console GT → **regarder la carte** → puis seulement vider le bloc.
+   ★★ **Le motif général, à retenir** : une donnée en dur qui est aussi un **repli** ne se
+   retire jamais en même temps qu'on découvre qu'elle est en dur. On vérifie d'abord que la
+   source de rechange existe **et répond**, à l'écran, avant de couper le repli.
+   ★ **Garde-fou posé** : `initMap` journalise en `info` un domaine qui a des parcelles et
+   zéro contour. Avant, la carte nue était indiscernable d'un domaine sans KML — un écran
+   vide n'est pas un message.
+   ⚠ **Reste `DOMAINE_NOM = 'Domaine …'`**, même famille : repli affiché avant que Firestore
+   réponde. À vider **seulement** après avoir vérifié que `config.domaine_nom` est renseigné
+   (Réglages › Domaine). Sinon le domaine s'affiche « Mon domaine ».
    ⚠ **Reste à traiter** : les noms de domaines clients dans les **commentaires**
    de dix modules, les cas de facturation **nominatifs** d'`admin-gt.js` (montants, numéros de
    facture), et la ligne de `firestore.rules` qui détaille l'effectif d'un domaine. Le contrôle
