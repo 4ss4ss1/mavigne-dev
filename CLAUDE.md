@@ -4480,8 +4480,14 @@ en dur et se lisent donc comme des succès.
 1. ~~⚠️⚠️ **`_pl2Cell`**~~ — **FAIT** (constaté le 31/08, §74a). Le code rendait déjà le retard en
    orange avec ses heures (`pl2c-late`) **avant** la croix rouge. **Douzième entrée périmée** de ce
    backlog. Le reste réel — l'entrée de légende — a été livré le 31/08.
-2. ⚠️⚠️ **Les six harnais à chemin absolu** (§44c) — une ligne chacun, et neuf filets se remettent
-   à protéger quelque chose.
+2. ~~⚠️⚠️ **Les six harnais à chemin absolu** (§44c)~~ — **RAYÉ, vérifié le 01/09.** Les huit
+   harnais concernés (`bandeau-essai`, `cadence-escalier`, `claude-md`, `parcours-prospect`,
+   `reconduction`, `sec3`, `sec7-contre`, `vitrine`) **démarrent tous, code de sortie 0**. Les seules
+   occurrences de `/home/claude` qui subsistent sont dans des **commentaires qui documentent le
+   piège corrigé** — un `grep` sur le chemin les compte encore et fait mentir cette entrée.
+   **Treizième entrée périmée de ce backlog** (§44, §74). ★ *Une entrée de backlog vérifiée par
+   `grep` sur une chaîne se périme au moment où quelqu'un écrit un commentaire à son sujet : la
+   vérification utile est d'exécuter, pas de chercher.*
 3. ⚠️ **0a-quater** — la masse salariale exclut les bureaux pendant que son commentaire dit
    l'inverse. **`avecBureau` : 0 occurrence.**
 
@@ -12315,3 +12321,190 @@ une fonction rejouée par un harnais, c'est modifier ce harnais.*
   meilleure que la mienne** : il a gardé le plafond `<= 1`, là où j'avais écrit `=== 1` — qui aurait
   rougi du 1er décembre au 1er mars, quand aucune période du scénario ne couvre le jour. *En
   réparant une assertion date-dépendante, j'en avais fabriqué une autre.* Ma version est abandonnée.
+
+---
+
+## 76. ★★★ LE CONTRAT ÉTAIT ÉCRIT DEPUIS HUIT JOURS, ET PERSONNE NE LE LISAIT (01/09 — `planning.js` + `cave.js` + `app.js` + `tracteur.js` + `firebase.js`, AUCUN BUMP)
+
+### 76a. Le lot précédent n'avait corrigé qu'un écran sur six
+
+§75 a rendu le Cuvier honnête. L'audit qui a suivi a montré que **le même mensonge courait
+partout** : `fbSave` rend un état depuis le 25/08 (§68), `saveData(key,msg)` le lit — mais les
+appelants **directs** de `fbSave` le jetaient. **Trente-cinq endroits**, dont **vingt-deux dans le
+planning** : congés posés, congés retirés, acomptes, cadre légal, coupure déjeuner, heures au-delà du
+planning, import CSV, canicule. Et **dix dans Le Chai** (`cave_elevage`), voisin immédiat de
+l'écran corrigé la veille.
+
+> ★★★ **RÈGLE POSÉE : écrire un contrat et le brancher sont DEUX lots, pas un.** Le contrat de §68
+> était juste, testé, documenté, gardé par son propre harnais — et il n'a protégé personne pendant
+> huit jours partout où l'appelant ne le lisait pas. *Un contrat sans recensement de ses appelants
+> est une intention.* Le geste manquant tient en une commande : lister tous les appels, pas
+> seulement ceux du fichier qu'on est en train d'ouvrir.
+
+### 76b. ★★ MON PROPRE AUDIT ÉTAIT INCOMPLET — C'EST LE HARNAIS QUI A TROUVÉ LE RESTE
+
+Le premier passage avait recensé **24** sites, en cherchant un `showToast` dans les **quatre** lignes
+suivant l'appel. Le harnais, écrit ensuite, en cherche cinq et couvre **dix modules** au lieu de
+trois : il en a sorti **onze de plus** — quatre dans le planning (`planSelAction`,
+`planSaveCoupure`, `planSetHsupMode`, `planSetDuesDebut`, dont les messages tiennent sur deux lignes)
+et **tout Le Chai**, que je n'avais pas regardé en croyant `cave.js` terminé.
+
+> ★★ **RÈGLE POSÉE : un audit à la main fixe une fenêtre arbitraire ; un harnais la fixe aussi, mais
+> il la rejoue à chaque build.** Écrire la sonde AVANT de compter, pas après — sinon on corrige
+> exactement ce que la sonde ne vérifiera jamais.
+
+★ **Et un défaut a failli être introduit en corrigeant.** `planSetCpPeriode` fait
+`if(window.saveData)saveData('config'); else if(window.fbSave)fbSave(...)`. Mettre le message dans la
+branche `else` l'aurait **supprimé du cas normal** — `saveData` existe toujours. Le message va donc à
+`saveData`, qui lit déjà l'état. Trois fonctions étaient dans ce cas.
+⚠️ `saveData` imposait `#3D6B27` en dur : elle prend désormais une **couleur** en troisième argument,
+sinon un appelant qui tient à sa teinte (`PLAN_BG`) reprend un `showToast` nu et le défaut revient.
+
+### 76c. Ce qui a été posé
+
+Deux fonctions dans `firebase.js`, **seule implémentation du contrat** :
+
+- **`fbSaveToast(paires, msg, coul)`** — `paires` est un objet `{clé: valeur}`, plusieurs clés pour
+  les gestes qui touchent deux documents (décuvage : vendange + élevage). Le message de l'appelant
+  n'est affiché que sur `ok` ; sinon l'écran dit l'attente réseau ou le refus. ⚠️ `paires` à `null`
+  signifie **rien à écrire** (sélection vide) : le message sort tout de suite — il ne dit pas
+  « enregistré », il dit « aucun jour applicable ».
+- **`fbToastApres(état, msg, coul)`** — pour les appelants dont le message se **construit après**
+  l'écriture (import CSV : le compte des lignes n'est connu qu'ensuite).
+
+`_vendFbSave` (§75) **délègue** désormais à `fbSaveToast` et ne fait plus que choisir les clés :
+deux copies d'une règle de message auraient divergé au premier lot qui n'en touche qu'une.
+`mv-harnais-vendange-garde` charge donc `firebase.js` **et** `cave.js` et les joue ensemble.
+
+### 76d. Le harnais
+
+`scripts/mv-harnais-toast-honnete.mjs` — **14 assertions, 7 contre-épreuves**. Le contrat est
+vérifié **en exécutant** `fbSaveToast` et `fbToastApres` extraits du fichier livré. Mais l'assertion
+qui compte est la seconde : ★ **« aucun appel direct à `fbSave` suivi d'un message de succès », sur
+dix modules.** C'est elle qui empêche le prochain lot de recréer le défaut dans un écran neuf — le
+reste ne protégerait que les appelants déjà convertis.
+
+Les appels **muets** (aucun toast) restent autorisés : ils ne mentent pas, `fbSave` pose déjà son
+badge de synchronisation, et AUTH-1 (§75) garde la donnée.
+
+### 76e. Ce qui est parti
+
+| fichier | ce qui change | bump |
+|---|---|---|
+| `src/firebase.js` | `fbSaveToast` + `fbToastApres` | — |
+| `src/planning.js` | 22 sites (congés, acomptes, cadre légal, canicule, CSV, templates) | — |
+| `src/cave.js` | Le Chai : 12 sites · `_vendFbSave` délègue | — |
+| `src/app.js` | `saveData` prend une couleur · `saveSaisonPassages` | — |
+| `src/tracteur.js` | appoint GNR (`fbToastApres` : message construit après) | — |
+| `scripts/mv-harnais-toast-honnete.mjs` (neuf) | 14 assertions, 7 contre-épreuves | — |
+| `scripts/mv-harnais-vendange-garde.mjs` | joue les deux fichiers ensemble | — |
+| `package.json` | le harnais dans `check` et `prebuild` | — |
+
+**AUCUN BUMP** (règle §36). ⚠️ **Mais les messages changent pour le client dans le planning, la cave,
+les réglages et le tracteur** — c'est le plus gros lot visible parti sans annonce à ce jour : le
+prochain bump doit le dire dans `WHATS_NEW`, du point de vue de l'utilisateur (« un enregistrement
+annoncé est un enregistrement fait »), jamais du point de vue du jeton.
+
+`npm run check` **exit 0** — jugé sur le code de sortie, jamais sur un grep de la sortie (§74).
+
+### 76f. ⚠️⚠️ « AUCUN BUMP » ÉTAIT FAUX — ET JE L'AI ÉCRIT TROIS FOIS
+
+`src/app.js` est modifié par ce lot (`saveData` prend une couleur, `saveSaisonPassages`). §7 est
+explicite : **la séquence SW est bumpée à chaque modification de `index.html` / `app.js` /
+`utils.js` / `styles.css`.** La liste « ne bumpe RIEN » énumère les modules métier — `app.js` n'y
+figure pas, et pour cause : il porte `saveData`, que tout le reste appelle.
+
+J'ai annoncé « aucun bump » **trois messages de suite**, en récitant la règle du §36 sans la
+confronter à la liste des fichiers que je venais moi-même de toucher.
+
+> ★★★ **RÈGLE POSÉE : la décision de bump se lit sur la liste RÉELLE des fichiers livrés, jamais sur
+> la nature annoncée du lot.** « C'est un lot planning » et « ce lot touche `app.js` » sont deux
+> phrases différentes, et seule la seconde décide. Le geste : lister les fichiers modifiés
+> (`git diff --stat`) **avant** d'écrire la ligne de bump, pas après.
+
+### 76g. Le bump — APP 6.74 → 6.75 · SW 7.29 → 7.30
+
+Trois entrées `WHATS_NEW`, écrites du point de vue du vigneron : la saisie qui ne se perd plus, le
+message qui attend la réponse, le refus lisible. Rien sur les jetons — l'utilisateur n'a pas à
+connaître le mot.
+
+Ce bump **solde aussi §75**, parti sans annonce la veille : les deux lots sont visibles du client et
+tiennent dans les mêmes trois lignes.
+
+⚠️ **Pièges du bump, tous deux rencontrés :**
+- `index.html` contient `2.74` **dans un `<path>` du sprite** (`ic-rotation`). Un remplacement global
+  `6.74 → 6.75` ne le touche pas, mais un `.74 → .75` l'aurait cassé. Les quatre affichages ont été
+  visés **un par un**, avec leur contexte, `count == 1` chacun.
+- `sw.js` : procédure sûre appliquée — remplacement global, **restauration de la ligne de changelog
+  v7.29**, puis prépend de la ligne v7.30. Vérification de fermeture : **`7.29` subsiste exactement
+  une fois** dans le fichier, et `7.30` exactement cinq (en-tête, changelog, `CACHE_NAME`, deux
+  `console.log`).
+
+`WHATS_NEW` vérifié **en l'exécutant** (`import` du tableau extrait, pas relecture) : 3 items,
+emojis `nuage` / `check` / `cadenas` — les trois existent comme symboles dans le sprite — et aucune
+version en double dans le journal.
+
+### 76h. ★★★ LE COFFRE D'AUTH-1 N'AVAIT PAS DE PORTE — ET LE BADGE LE PROMETTAIT QUAND MÊME
+
+`_mvStashDenied` range la valeur refusée dans `localStorage['mavigne_denied_stash']`, et le badge
+annonçait **« votre saisie est conservée »**. Elle l'était — dans une clé que **rien, dans toute
+l'application, ne montre ni ne relit**. Pour un chef de cave, une donnée accessible seulement par la
+console du navigateur est perdue.
+
+> ★★★ **C'était donc un message qui ment — le défaut corrigé trente-cinq fois en §76, réintroduit
+> par le lot qui le corrigeait, et sur lequel le harnais AUTH-1 exigeait le mot « conservée ».** Ma
+> propre sonde gravait la promesse au lieu de la vérifier : elle testait la présence d'un mot, pas
+> l'existence de ce qu'il désigne. *Poser un mécanisme de sauvetage sans porte pour y entrer, c'est
+> déplacer la perte, pas l'empêcher.*
+
+**Correctif tenu dans ce lot, minimal et honnête** : le badge dit `Enregistrement refusé —
+Vendanges` et **ne promet plus rien**. La mise de côté part au **journal en `warning`**, donc
+embarquée dans « Signaler un problème » — le seul chemin de sortie qui existe déjà. Le harnais
+exige désormais **l'inverse** : *le badge ne promet pas ce qui n'est pas encore atteignable*, plus
+*la mise de côté part au journal, pas au silence*. Le jour où l'écran de reprise existera, c'est
+cette assertion qui le rappellera en rougissant.
+
+✅ **Fait dans le même déploiement** — voir §77.
+
+---
+
+## 77. ★★ STASH-1 — LA PORTE DU COFFRE (01/09 — `reglages.js` + `firebase.js` + `utils.js`, dans le bump 6.75)
+
+La ligne **« Saisies non enregistrées »** apparaît dans **Réglages › App**, au-dessus de
+« Documents & impressions ». Elle est **injectée par `reglages.js`**, pas écrite dans `index.html` :
+`index.html` est précaché par le SW, l'y poser imposerait un bump à chaque retouche d'un écran que
+la quasi-totalité des domaines ne verra jamais. Elle ne sort **que si le coffre contient quelque
+chose** et **que pour un admin** — le renvoi écrase un document entier, ce n'est pas un geste
+d'ouvrier.
+
+Côté données : `mvStashList` · `mvStashCount` · `mvStashDrop` (renoncer) · `mvStashResend`.
+
+> ★★★ **RÈGLE POSÉE : ce qui est rangé n'est pas « la saisie », c'est le DOCUMENT ENTIER au moment
+> du refus.** Le renvoyer trois jours plus tard écrase tout ce qui a été fait depuis, ici ou par
+> quelqu'un d'autre — le sinistre exact que le verrou de chargement (Couche 2) existe pour empêcher.
+> D'où trois règles tenues dans le code, pas seulement dans l'écran : **rien ne se renvoie tout
+> seul** ; le renvoi **repasse par `fbSave`**, donc par toutes les protections (règles, anti-perte,
+> AUTH-1) — un refus reste un refus ; l'entrée **n'est retirée que sur `{ok:true}`**, sinon la valeur
+> disparaîtrait deux fois. La confirmation **nomme l'écrasement** : *« les saisies faites depuis
+> seront perdues »*.
+
+### 77a. ★ L'assertion qui s'est inversée deux fois en un jour
+
+Le harnais AUTH-1 exigeait le mot « conservée » (§75) → §76h l'a inversé, faute de porte → §77 le
+remet. **C'est le mécanisme qui fonctionne, pas une hésitation.** Ce que la sonde verrouille n'est
+pas un libellé : c'est **l'accord entre ce que l'écran promet et ce que l'application permet**. Une
+sonde qui teste la présence d'un mot grave la promesse ; celle-ci teste aussi l'existence de ce que
+le mot désigne — d'où la section E, qui lit `firebase.js` **et** `reglages.js`.
+
+⚠️ **Un sabotage est passé au vert au premier essai** : « la ligne n'est jamais appelée au rendu »,
+parce que `/_reglStashRow\(\);/` trouvait l'appel que la fonction se fait à elle-même depuis
+`_reglStashFermer()`. L'assertion extrait désormais **le corps de `renderReglages`** et cherche
+dedans. *Une recherche à l'échelle du fichier ne prouve rien sur un appelant précis.* **27
+assertions, 6 contre-épreuves** — la sixième n'a rougi qu'après resserrage.
+
+### 77b. Provenance
+
+⚠️ Pendant la session du 01/09, du code portant ce nom est apparu dans l'espace de travail sans
+avoir été écrit dans la conversation, citant un « §77 » qui n'existait pas encore. Il a été
+**retiré** — on ne livre pas du code dont on ne répond pas — puis le besoin, qui était réel, a été
+traité à neuf et vérifié ici. `reglages.js` était resté strictement identique au dépôt entre-temps.
