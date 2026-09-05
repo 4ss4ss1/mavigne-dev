@@ -1731,9 +1731,9 @@ function planSetCpPeriode(v){
   var md=parseInt(v,10); if(isNaN(md)||md<0||md>11)md=5;
   window.CONFIG=window.CONFIG||{};
   window.CONFIG.cp_periode_debut=md;
-  if(window.saveData)window.saveData('config');
-  else if(window.fbSave)window.fbSave('config',window.CONFIG);
-  showToast('P\u00e9riode des cong\u00e9s\u00a0: '+_planCpPeriodeLbl(),PLAN_BG);
+  var _m='P\u00e9riode des cong\u00e9s\u00a0: '+_planCpPeriodeLbl();
+  if(window.saveData)window.saveData('config',_m,PLAN_BG);
+  else window.fbSaveToast({config:window.CONFIG},_m,PLAN_BG);
   if(typeof _planFicheRender==='function')_planFicheRender();
 }
 
@@ -2811,9 +2811,10 @@ function planSelAction(kind){
   if(!keys.length)return;
   var r=_planApplySimple(keys,kind,keys.length===1);
   window.PLANNING_ENTRIES=PLANNING_ENTRIES;
-  if(r.n>0&&window.fbSave)window.fbSave('planning_entries',PLANNING_ENTRIES);
   var lbl={rec:'R\u00e9cup pos\u00e9es',heat:'Horaires chaleur 06:00 \u2192 14:00',clr:'Saisies effac\u00e9es'}[kind]||'Fait';
-  showToast(r.n>0?(lbl+' \u00b7 '+r.n+' j'+(r.skip>0?' \u00b7 '+r.skip+' pr\u00e9serv\u00e9'+(r.skip>1?'s':''):'')):'Aucun jour applicable dans la s\u00e9lection',r.n>0?'#3D6B27':'#E07060');
+  window.fbSaveToast(r.n>0?{planning_entries:PLANNING_ENTRIES}:null,
+    r.n>0?(lbl+' \u00b7 '+r.n+' j'+(r.skip>0?' \u00b7 '+r.skip+' pr\u00e9serv\u00e9'+(r.skip>1?'s':''):'')):'Aucun jour applicable dans la s\u00e9lection',
+    r.n>0?'#3D6B27':'#E07060');
   planSelClear();
   _pl2Refresh();
 }
@@ -3741,10 +3742,11 @@ function _planCpApplySel(){
   });
   _planCtxYear=_sv;
   window.PLANNING_ENTRIES=PLANNING_ENTRIES;
-  if(nMbr>0&&window.fbSave)window.fbSave('planning_entries',PLANNING_ENTRIES);
+  var _sv=window.fbSaveToast(nMbr>0?{planning_entries:PLANNING_ENTRIES}:null,
+    nMbr>0?('Cong\u00e9s pos\u00e9s \u00b7 '+nMbr+' salari\u00e9'+(nMbr>1?'s':'')+' \u00b7 '+totJ+'\u00a0j d\u00e9compt\u00e9'+(totJ>1?'s':'')+(prot>0?' \u00b7 '+prot+' pr\u00e9serv\u00e9'+(prot>1?'s':''):'')):'Aucun jour d\u00e9comptable dans la s\u00e9lection',
+    nMbr>0?'#3D6B27':'#E07060');
   closePlanCP();
   planSelClear();
-  showToast(nMbr>0?('Cong\u00e9s pos\u00e9s \u00b7 '+nMbr+' salari\u00e9'+(nMbr>1?'s':'')+' \u00b7 '+totJ+'\u00a0j d\u00e9compt\u00e9'+(totJ>1?'s':'')+(prot>0?' \u00b7 '+prot+' pr\u00e9serv\u00e9'+(prot>1?'s':''):'')):'Aucun jour d\u00e9comptable dans la s\u00e9lection',nMbr>0?'#3D6B27':'#E07060');
   _pl2Refresh();
 }
 
@@ -3767,10 +3769,11 @@ function _planCpRemoveSel(){
     if(hit>0){nMbr++;nJ+=hit;}
   });
   window.PLANNING_ENTRIES=PLANNING_ENTRIES;
-  if(nJ>0&&window.fbSave)window.fbSave('planning_entries',PLANNING_ENTRIES);
+  window.fbSaveToast(nJ>0?{planning_entries:PLANNING_ENTRIES}:null,
+    nJ>0?('Cong\u00e9s retir\u00e9s \u00b7 '+nMbr+' salari\u00e9'+(nMbr>1?'s':'')+' \u00b7 '+nJ+'\u00a0j'):'Aucun cong\u00e9 dans la s\u00e9lection',
+    nJ>0?'#D97706':'#E07060');
   closePlanCP();
   planSelClear();
-  showToast(nJ>0?('Cong\u00e9s retir\u00e9s \u00b7 '+nMbr+' salari\u00e9'+(nMbr>1?'s':'')+' \u00b7 '+nJ+'\u00a0j'):'Aucun cong\u00e9 dans la s\u00e9lection',nJ>0?'#D97706':'#E07060');
   _pl2Refresh();
 }
 function planCpMb(nom){_pl2CpSel[nom]=!_pl2CpSel[nom];_planCPRender();}
@@ -3919,9 +3922,10 @@ function planCpApply(){
   });
   _planCtxYear=_sv;
   window.PLANNING_ENTRIES=PLANNING_ENTRIES;
-  if(nMbr>0&&window.fbSave)window.fbSave('planning_entries',PLANNING_ENTRIES);
+  window.fbSaveToast(nMbr>0?{planning_entries:PLANNING_ENTRIES}:null,
+    nMbr>0?('Cong\u00e9s pos\u00e9s \u00b7 '+nMbr+' salari\u00e9'+(nMbr>1?'s':'')+' \u00b7 '+totJ+' j'):'Aucun jour applicable dans la plage',
+    nMbr>0?'#3D6B27':'#E07060');
   closePlanCP();
-  showToast(nMbr>0?('Cong\u00e9s pos\u00e9s \u00b7 '+nMbr+' salari\u00e9'+(nMbr>1?'s':'')+' \u00b7 '+totJ+' j'):'Aucun jour applicable dans la plage',nMbr>0?'#3D6B27':'#E07060');
   _pl2Refresh();
 }
 function planCpRemove(){
@@ -3947,9 +3951,10 @@ function planCpRemove(){
   });
   _planCtxYear=_sv;
   window.PLANNING_ENTRIES=PLANNING_ENTRIES;
-  if(nJ>0&&window.fbSave)window.fbSave('planning_entries',PLANNING_ENTRIES);
+  window.fbSaveToast(nJ>0?{planning_entries:PLANNING_ENTRIES}:null,
+    nJ>0?('Cong\u00e9s retir\u00e9s \u00b7 '+nMbr+' salari\u00e9'+(nMbr>1?'s':'')+' \u00b7 '+nJ+' j'):'Aucun cong\u00e9 dans la plage',
+    nJ>0?'#D97706':'#E07060');
   closePlanCP();
-  showToast(nJ>0?('Cong\u00e9s retir\u00e9s \u00b7 '+nMbr+' salari\u00e9'+(nMbr>1?'s':'')+' \u00b7 '+nJ+' j'):'Aucun cong\u00e9 dans la plage',nJ>0?'#D97706':'#E07060');
   _pl2Refresh();
 }
 
@@ -4143,8 +4148,7 @@ function planCreateTemplate(){
   if(_pTplStore()[id]||PLAN_DEF[id]){showToast('Template "'+id+'" existe d\u00e9j\u00e0','var(--rouge)');return;}
   _pTplStore()[id]={};
   window.PLANNING_TEMPLATES=PLANNING_TEMPLATES;
-  if(window.fbSave)window.fbSave('planning_templates',PLANNING_TEMPLATES);
-  showToast('\u2705 Template "'+id+'" cr\u00e9\u00e9','#3D6B27');
+  window.fbSaveToast({planning_templates:PLANNING_TEMPLATES},'\u2705 Template "'+id+'" cr\u00e9\u00e9','#3D6B27');
   planOpenGridEditor(id);
 }
 
@@ -4153,8 +4157,7 @@ function planAssignTpl(nom,plId){
   if(!mbr)return;
   mbr.planning_id=plId;
   window.MEMBRES=window.MEMBRES;
-  if(window.fbSave)window.fbSave('membres',window.MEMBRES);
-  showToast('\u2705 '+nom+' \u2192 planning "'+plId+'"','#3D6B27');
+  window.fbSaveToast({membres:window.MEMBRES},'\u2705 '+nom+' \u2192 planning "'+plId+'"','#3D6B27');
 }
 
 // ── La coupure : combien, et quand ────────────────────────────────────────
@@ -4187,9 +4190,9 @@ function planSaveCoupure(v){
   if(!window.CONFIG)window.CONFIG={};
   window.CONFIG.coupure_heure=v;
   window.CONFIG=window.CONFIG;
-  if(window.fbSave)window.fbSave('config',window.CONFIG);
-  showToast(v==='libre'?'\u2705 Coupure prise selon le chantier'
-            :(v?'\u2705 Coupure \u00e0 '+v:'\u2705 Heure de coupure effac\u00e9e'),'#3D6B27');
+  window.fbSaveToast({config:window.CONFIG},
+    v==='libre'?'\u2705 Coupure prise selon le chantier'
+              :(v?'\u2705 Coupure \u00e0 '+v:'\u2705 Heure de coupure effac\u00e9e'),'#3D6B27');
   _planRenderCadre();
 }
 function planSaveCoupureH(){
@@ -4203,8 +4206,7 @@ function planSavePause(min){
   if(!window.CONFIG)window.CONFIG={};
   window.CONFIG.pause_dejeuner=min;
   window.CONFIG=window.CONFIG;
-  if(window.fbSave)window.fbSave('config',window.CONFIG);
-  showToast('\u2705 Coupure d\u00e9jeuner\u00a0: '+_planFmt(min/60),'#3D6B27');
+  window.fbSaveToast({config:window.CONFIG},'\u2705 Coupure d\u00e9jeuner\u00a0: '+_planFmt(min/60),'#3D6B27');
   _planRenderCadre();
 }
 
@@ -4221,9 +4223,9 @@ function planSetHsupMode(v){
   var mode=(v==='recup'||v==='cloture')?v:'paye';
   window.CONFIG=window.CONFIG||{};
   window.CONFIG.hsup_mode=mode;
-  if(window.saveData)window.saveData('config');
-  else if(window.fbSave)window.fbSave('config',window.CONFIG);
-  showToast('\u2705 Heures au-del\u00e0 du planning\u00a0: '+({paye:'pay\u00e9es en acompte',recup:'r\u00e9cup\u00e9r\u00e9es en repos',cloture:'report\u00e9es \u00e0 la cl\u00f4ture'}[mode]),PLAN_BG);
+  var _m='\u2705 Heures au-del\u00e0 du planning\u00a0: '+({paye:'pay\u00e9es en acompte',recup:'r\u00e9cup\u00e9r\u00e9es en repos',cloture:'report\u00e9es \u00e0 la cl\u00f4ture'}[mode]);
+  if(window.saveData)window.saveData('config',_m,PLAN_BG);
+  else window.fbSaveToast({config:window.CONFIG},_m,PLAN_BG);
   if(typeof renderPlanning==='function')renderPlanning();
 }
 
@@ -4232,10 +4234,10 @@ function planSetDuesDebut(v){
   var s=/^\d{4}-(0[1-9]|1[0-2])$/.test(v||'')?v:'';
   if(!window.CONFIG)window.CONFIG={};
   if(s)window.CONFIG.hsup_dues_debut=s; else delete window.CONFIG.hsup_dues_debut;
-  if(window.saveData)window.saveData('config');
-  else if(window.fbSave)window.fbSave('config',window.CONFIG);
-  showToast(s?('\u2705 Heures dues compt\u00e9es \u00e0 partir de '+PLAN_MOIS[parseInt(s.slice(5,7),10)-1]+' '+s.slice(0,4))
-             :'Heures dues\u00a0: inactif','#3D6B27');
+  var _m=s?('\u2705 Heures dues compt\u00e9es \u00e0 partir de '+PLAN_MOIS[parseInt(s.slice(5,7),10)-1]+' '+s.slice(0,4))
+          :'Heures dues\u00a0: inactif';
+  if(window.saveData)window.saveData('config',_m);
+  else window.fbSaveToast({config:window.CONFIG},_m,'#3D6B27');
   _planRenderCadre();
 }
 function planSaveLegal(){
@@ -4244,8 +4246,7 @@ function planSaveLegal(){
   if(!window.CONFIG)window.CONFIG={};
   window.CONFIG.cadre_legal=L;
   window.CONFIG=window.CONFIG;
-  if(window.fbSave)window.fbSave('config',window.CONFIG);
-  showToast('\u2705 Cadre l\u00e9gal enregistr\u00e9','#3D6B27');
+  window.fbSaveToast({config:window.CONFIG},'\u2705 Cadre l\u00e9gal enregistr\u00e9','#3D6B27');
   _planRenderCadre();
 }
 // Deux taux, un seul enregistrement.
@@ -4257,11 +4258,11 @@ function planSaveMaj(){
   if(!window.CONFIG)window.CONFIG={};
   window.CONFIG.majorations={dim:gv('plan-maj-dim',PLAN_MAJ_DEF.dim),ferie:gv('plan-maj-fer',PLAN_MAJ_DEF.ferie)};
   window.CONFIG=window.CONFIG;
-  if(window.saveData)window.saveData('config');
-  else if(window.fbSave)window.fbSave('config',window.CONFIG);
   // ⚠️ Pas de coche verte ici : le cliquet du jeu d'icones (DS-1) interdit
   //    d'ajouter un pictogramme de plus, et un toast se lit tres bien sans.
-  showToast('Majorations enregistr\u00e9es','#3D6B27');
+  var _m='Majorations enregistr\u00e9es';
+  if(window.saveData)window.saveData('config',_m);
+  else window.fbSaveToast({config:window.CONFIG},_m,'#3D6B27');
   _planRenderCadre();
 }
 // ── Éditeur de grille planning ──
@@ -4350,8 +4351,7 @@ function planUpdateDay(input){
 
 function planSaveTpl(id){
   window.PLANNING_TEMPLATES=PLANNING_TEMPLATES;
-  if(window.fbSave)window.fbSave('planning_templates',PLANNING_TEMPLATES);
-  showToast('\u2705 Template "'+id+'" enregistr\u00e9','#3D6B27');
+  window.fbSaveToast({planning_templates:PLANNING_TEMPLATES},'\u2705 Template "'+id+'" enregistr\u00e9','#3D6B27');
 }
 
 function planCloseGridEditor(){_planEditing=null;_planRenderCadre();}
@@ -4378,9 +4378,7 @@ function planDeleteTemplate(id){
   // Réassigner les membres sur "standard"
   (window.MEMBRES||[]).forEach(function(m){if(m.planning_id===id)m.planning_id='standard';});
   window.PLANNING_TEMPLATES=PLANNING_TEMPLATES;
-  if(window.fbSave)window.fbSave('planning_templates',PLANNING_TEMPLATES);
-  if(window.fbSave)window.fbSave('membres',window.MEMBRES);
-  showToast('\uD83D\uDDD1 Template "'+id+'" supprim\u00e9','#B85A1A');
+  window.fbSaveToast({planning_templates:PLANNING_TEMPLATES,membres:window.MEMBRES},'\uD83D\uDDD1 Template "'+id+'" supprim\u00e9','#B85A1A');
   _planRenderCadre();
 }
 
@@ -4482,11 +4480,11 @@ function planImportCSV(targetId){
       if(nJ>0)tplData._timings_jour=jouTimings;
       _pTplStore()[targetId]=tplData;
       window.PLANNING_TEMPLATES=PLANNING_TEMPLATES;
-      if(window.fbSave)window.fbSave('planning_templates',PLANNING_TEMPLATES);
+      var _sv=window.fbSaveToast({planning_templates:PLANNING_TEMPLATES});
       var msg='\u2705 CSV import\u00e9 \u2192 "'+targetId+'"';
       if(nT>0)msg+=' \u00b7 '+nT+' horaires mois';
       if(nJ>0)msg+=' \u00b7 '+(Object.values(jouTimings).reduce(function(s,m){return s+Object.keys(m).length;},0))+' jours \u00e0 horaire particulier';
-      showToast(msg,'#3D6B27');
+      window.fbToastApres(_sv,msg,'#3D6B27');
       _planRenderCadre();
     }catch(err){showToast('\u274c Erreur CSV\u00a0: '+err.message,'var(--rouge)');}
   };
@@ -4954,8 +4952,7 @@ function savePlanDay(next){
       :(_planEdRemp?'Aucun jour sans heures pr\u00e9vues dans la s\u00e9lection':'Aucun jour applicable');
   }
   window.PLANNING_ENTRIES=PLANNING_ENTRIES;
-  if(r.n>0&&window.fbSave)window.fbSave('planning_entries',PLANNING_ENTRIES);
-  showToast(msg,r.n>0?PLAN_BG:'#E07060');
+  window.fbSaveToast(r.n>0?{planning_entries:PLANNING_ENTRIES}:null,msg,r.n>0?PLAN_BG:'#E07060');
   if(!one)planSelClear();
   _pl2Refresh();
   if(one&&next===true&&day<_planDays(planMonth)){
@@ -4981,8 +4978,7 @@ function planClearDay(){
   if(!e){showToast('Rien \u00e0 annuler sur ce jour','#E07060');return;}
   delete yb[planMonth][day];
   window.PLANNING_ENTRIES=PLANNING_ENTRIES;
-  if(window.fbSave)window.fbSave('planning_entries',PLANNING_ENTRIES);
-  showToast('\u21a9 '+nom+' \u00b7 '+PLAN_JOURS[_planDow(planMonth,day)]+' '+day+' \u2014 saisie annul\u00e9e',PLAN_BG);
+  window.fbSaveToast({planning_entries:PLANNING_ENTRIES},'\u21a9 '+nom+' \u00b7 '+PLAN_JOURS[_planDow(planMonth,day)]+' '+day+' \u2014 saisie annul\u00e9e',PLAN_BG);
   _pl2Refresh();
   openPlanDayModal(nom,day);
 }
@@ -5056,8 +5052,7 @@ function planCaniculeApply(nom){
   }
   _planCtxYear=null;
   window.PLANNING_ENTRIES=PLANNING_ENTRIES; _planCanicSave();
-  if(n>0&&window.fbSave)window.fbSave('planning_entries',PLANNING_ENTRIES);
-  if(n>0)showToast('\u2600\ufe0f '+n+' jour'+(n>1?'s':'')+' aménagé'+(n>1?'s':'')+' \u00b7 '+nom,'#D97706');
+  if(n>0)window.fbSaveToast({planning_entries:PLANNING_ENTRIES},'\u2600\ufe0f '+n+' jour'+(n>1?'s':'')+' aménagé'+(n>1?'s':'')+' \u00b7 '+nom,'#D97706');
   else showToast('Aucun jour travaillé dans cette plage','#E07060');
   _pl2Refresh();
 }
@@ -5074,8 +5069,8 @@ function planCaniculeRemove(nom){
     });
   });
   window.PLANNING_ENTRIES=PLANNING_ENTRIES;
-  if(n>0&&window.fbSave)window.fbSave('planning_entries',PLANNING_ENTRIES);
-  showToast(n>0?('Horaires chaleur retirés \u00b7 '+n+' jour'+(n>1?'s':'')):'Aucun horaire chaleur',n>0?'#D97706':'#E07060');
+  window.fbSaveToast(n>0?{planning_entries:PLANNING_ENTRIES}:null,
+    n>0?('Horaires chaleur retirés \u00b7 '+n+' jour'+(n>1?'s':'')):'Aucun horaire chaleur',n>0?'#D97706':'#E07060');
   _pl2Refresh();
 }
 
@@ -5153,8 +5148,7 @@ function planSaveAcompte(nom,moisKey){
   if(!PLANNING_ACOMPTES[nom][moisKey])PLANNING_ACOMPTES[nom][moisKey]=[];
   PLANNING_ACOMPTES[nom][moisKey].push({date:date,montant:montant,note:note});
   window.PLANNING_ACOMPTES=PLANNING_ACOMPTES;
-  if(window.fbSave)window.fbSave('planning_acomptes',PLANNING_ACOMPTES);
-  showToast('\uD83D\uDCB6 Acompte enregistr\u00e9 \u2014 '+montant.toLocaleString('fr-FR')+'\u202f\u20ac','#2D7A27');
+  window.fbSaveToast({planning_acomptes:PLANNING_ACOMPTES},'\uD83D\uDCB6 Acompte enregistr\u00e9 \u2014 '+montant.toLocaleString('fr-FR')+'\u202f\u20ac','#2D7A27');
   _pl2Refresh();
 }
 
@@ -5164,8 +5158,7 @@ function planDeleteAcompte(nom,moisKey,idx){
   sorted.splice(idx,1);
   PLANNING_ACOMPTES[nom][moisKey]=sorted;
   window.PLANNING_ACOMPTES=PLANNING_ACOMPTES;
-  if(window.fbSave)window.fbSave('planning_acomptes',PLANNING_ACOMPTES);
-  showToast('Acompte supprim\u00e9','var(--rouge)');
+  window.fbSaveToast({planning_acomptes:PLANNING_ACOMPTES},'Acompte supprim\u00e9','var(--rouge)');
   _pl2Refresh();
 }
 

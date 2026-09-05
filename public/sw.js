@@ -1,4 +1,22 @@
-// MA VIGNE — Service Worker v7.29
+// MA VIGNE — Service Worker v7.30
+// v7.30 (01/09/2026) — AUTH-1 + VD-SAVE : une saisie n'est plus jamais jetee, et
+//   aucun message de succes ne part avant la reponse du serveur.
+//   ★★★ UN CODE D'ERREUR POUR TROIS CAUSES. Firestore rend `permission-denied`
+//   aussi bien pour un role insuffisant (definitif) que pour un jeton d'auth non
+//   rafraichi ou un jeton App Check absent (passagers, 4G de cave). La doctrine
+//   SEC-1 « un refus n'est pas une panne transitoire » ne valait que pour le
+//   premier cas : appliquee aux trois, elle JETAIT la saisie. Recolte annoncee
+//   enregistree en vert, disparue au rechargement, en pleine vendange, sur un
+//   compte ADMIN. `_mvTokenAlive()` va demander a la source laquelle des trois :
+//   jeton mort -> file d'attente ; jeton frais -> une retente ; refus qui survit
+//   a un jeton neuf -> coffre `mavigne_denied_stash`, jamais la poubelle.
+//   ★★ ET LE CONTRAT DE §68 N'ETAIT LU NULLE PART. `fbSave` rend un etat depuis
+//   le 25/08 ; trente-cinq appelants directs l'ignoraient et affichaient
+//   « enregistre » dans la milliseconde — vingt-deux dans le planning (conges,
+//   acomptes, cadre legal), dix dans Le Chai. `fbSaveToast` / `fbToastApres`
+//   (firebase.js) sont desormais la seule implementation, et un harnais interdit
+//   tout fbSave direct suivi d'un message de succes, sur dix modules.
+//   ⚠️ Bump impose par `app.js` (saveData prend une couleur) — pas par le lot.
 // v7.29 (31/08/2026) — MAJ-1 : le dimanche et le jour ferie travailles se
 //   majorent automatiquement. Deux taux dans Planning > Le cadre (50 / 100 par
 //   defaut), appliques aux heures REELLEMENT FAITES : un ferie chome reste paye
@@ -3023,7 +3041,7 @@
 // v2.22 — Fix profils vides : guard vide dans loadData() pour MEMBRES/SAISONS/TACHES
 // v2.17 — Onboarding intégré + tenantId · v2.06 — Firebase Auth · v2.00–v2.05 — divers
 const DEBUG = self.location.hostname === 'localhost' || self.location.hostname === '127.0.0.1';
-const CACHE_NAME   = 'mavigne-v7.29';
+const CACHE_NAME   = 'mavigne-v7.30';
 const TENANT_CACHE = 'mavigne-tenant';   // Cache persistant — préservé à chaque mise à jour SW
 const SYNC_TAG     = 'mavigne-sync';
 
@@ -3039,7 +3057,7 @@ const CDN_URLS = [
 ];
 
 self.addEventListener('install', event => {
-  if(DEBUG) console.log('[SW] Ma Vigne v7.29 installé');
+  if(DEBUG) console.log('[SW] Ma Vigne v7.30 installé');
   event.waitUntil(
     caches.open(CACHE_NAME).then(async cache => {
       // ── Cœur applicatif : STRICT (mise à jour ATOMIQUE) ──
@@ -3055,7 +3073,7 @@ self.addEventListener('install', event => {
 });
 
 self.addEventListener('activate', event => {
-  if(DEBUG) console.log('[SW] Ma Vigne v7.29 activé');
+  if(DEBUG) console.log('[SW] Ma Vigne v7.30 activé');
   event.waitUntil(
     caches.keys().then(keys =>
       Promise.all(

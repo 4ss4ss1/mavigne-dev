@@ -23,7 +23,7 @@ export const GT_ADMIN_EMAIL = 'ngdevpro@gmail.com';
 // WHATS_NEW   : tableau vide = modal desactive pour cette version.
 // Format item : { emoji:'📅', titre:'Titre court', desc:'Phrase utilisateur.' }
 // Regle : seulement les changements visibles par les utilisateurs.
-export const APP_VERSION = '6.74';
+export const APP_VERSION = '6.75';
 // ════ Journal des nouveautés (récap cumulatif) ════
 // Une entrée par version, la PLUS RÉCENTE EN HAUT : { v:'5.10', items:[ {emoji,titre,desc}, … ] }
 // À chaque release visible → AJOUTER un bloc en tête (ne pas remplacer). items:[] = release technique (rien à afficher).
@@ -354,6 +354,11 @@ window._mvGraphRepeindre = function(){
 };
 
 export const WHATS_NEW = [
+  { v: '6.75', items: [
+    { emoji: 'nuage', titre: 'Ce que vous saisissez ne se perd plus quand le r\u00e9seau l\u00e2che', desc: "Au fond de la cave ou dans les vignes, une saisie pouvait dispara\u00eetre\u00a0: l\u2019\u00e9cran disait \u00ab\u00a0enregistr\u00e9\u00a0\u00bb, et au red\u00e9marrage de l\u2019application elle n\u2019\u00e9tait plus l\u00e0. Quand le t\u00e9l\u00e9phone n\u2019arrivait pas \u00e0 renouveler votre connexion, l\u2019application croyait \u00e0 un refus et <b>jetait la saisie</b>. Elle est d\u00e9sormais <b>gard\u00e9e sur le t\u00e9l\u00e9phone et repart toute seule</b> d\u00e8s que le r\u00e9seau revient. R\u00e9colte, relev\u00e9, cong\u00e9, acompte\u00a0: rien ne dispara\u00eet." },
+    { emoji: 'check', titre: 'Un enregistrement annonc\u00e9 est un enregistrement fait', desc: "Le message vert partait <b>avant</b> la r\u00e9ponse du serveur\u00a0: vous pouviez lire \u00ab\u00a0R\u00e9colte enregistr\u00e9e\u00a0\u00bb sur une \u00e9criture qui n\u2019\u00e9tait jamais partie. Il attend maintenant la confirmation. Si le r\u00e9seau tra\u00eene, l\u2019\u00e9cran dit <b>\u00ab\u00a0en attente de r\u00e9seau, envoi automatique\u00a0\u00bb</b> au lieu de vous laisser croire que c\u2019est fait. Corrig\u00e9 partout\u00a0: <b>Planning, Cuvier, Chai, R\u00e9glages, Tracteur</b>." },
+    { emoji: 'cadenas', titre: 'Un refus se lit en fran\u00e7ais, et votre saisie est conserv\u00e9e', desc: "Quand une \u00e9criture est vraiment refus\u00e9e, le bandeau affichait un nom technique en travers de l\u2019\u00e9cran. Il dit maintenant <b>quel \u00e9cran est concern\u00e9</b>, et la saisie est gard\u00e9e sur l\u2019appareil\u00a0: vous la retrouvez dans <b>R\u00e9glages \u203a App \u203a Saisies non enregistr\u00e9es</b>, pour la <b>renvoyer</b> ou l\u2019<b>abandonner</b>. <b>Attention</b>\u00a0: renvoyer remplace tout l\u2019\u00e9cran concern\u00e9 par son \u00e9tat au moment du refus\u00a0\u2014 l\u2019application vous le rappelle avant. Et les \u00e9crans de vendange pr\u00e9viennent <b>avant</b> la saisie quand un compte est en lecture seule, au lieu de laisser tout taper pour rien." }
+  ] },
   { v: '6.74', items: [
     { emoji: 'chrono', titre: 'Les dimanches et les jours f\u00e9ri\u00e9s travaill\u00e9s se majorent tout seuls', desc: "Un dimanche de vendange ou un 1\u1d49\u02b3 mai pass\u00e9 \u00e0 la vigne se comptait comme n\u2019importe quel autre jour\u00a0: il fallait reprendre la feuille \u00e0 la main pour retrouver ce qui \u00e9tait major\u00e9. L\u2019application le fait maintenant \u00e0 votre place \u2014 <b>50\u202f% le dimanche, 100\u202f% un jour f\u00e9ri\u00e9</b>, et vous r\u00e9glez les deux taux dans <b>Planning \u203a Le cadre</b>. Seules les heures <b>r\u00e9ellement faites</b> comptent\u00a0: un f\u00e9ri\u00e9 ch\u00f4m\u00e9 reste pay\u00e9 sans majoration, un cong\u00e9 ou une r\u00e9cup ne majorent rien." },
     { emoji: 'euro', titre: 'La majoration va l\u00e0 o\u00f9 vont vos heures sup', desc: "Si votre domaine <b>paie</b> les heures au-del\u00e0 du planning, la majoration s\u2019imprime sur la feuille d\u2019heures, pr\u00eate pour la paie. S\u2019il les fait <b>r\u00e9cup\u00e9rer en repos</b>, elle s\u2019ajoute au compteur d\u2019heures. C\u2019est le r\u00e9glage «\u00a0Heures au-del\u00e0 du planning du mois\u00a0» qui d\u00e9cide\u00a0: vous n\u2019avez rien de plus \u00e0 poser." },

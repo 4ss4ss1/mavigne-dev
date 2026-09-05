@@ -64,6 +64,8 @@ var _vendOuvert = null;
 var TOASTS = [], CHAMPS = {};
 function showToast(m){ TOASTS.push(String(m)); }
 function canWrite(){ return true; }
+function _vendGarde(){ return true; }                          // VD-GARDE (cave.js)
+function _vendFbSave(m,c){ if(m) showToast(m,c); }             // VD-SAVE  (cave.js)
 function _vendSheetClose(){}
 function renderVendCuves(){}
 function _vendCuvHl(caisses){ return (caisses * 25) / 135; }   // 25 kg/caisse, 135 kg/hL

@@ -711,7 +711,7 @@ function _fbSaveMuet(key, value) {
 }
 window._fbSaveMuet = _fbSaveMuet;
 
-function saveData(keyHint, toastMsg) {
+function saveData(keyHint, toastMsg, toastCoul) {
   if(window._MV_LOCKED){ if(window.showToast)showToast('Essai terminé · lecture seule','#7A1020'); return; }
   // #wipe : VERROU DE CHARGEMENT (Couche 2 anti-perte) -- ne jamais persister l'etat memoire
   // d'une cle sensible avant que Firestore ait repondu au moins une fois dans la session.
@@ -789,7 +789,7 @@ function saveData(keyHint, toastMsg) {
           // ⚠️ fbSave ne REJETTE PLUS : elle rend un etat (cf. contrat en fin de fbSave).
           //    Un .then() nu afficherait « Enregistré ✓ » en vert sur une ecriture qui
           //    n'est jamais partie — le faux positif exact que le throw servait a eviter.
-          if(r && r.ok)     { showToast(toastMsg, '#3D6B27'); return; }
+          if(r && r.ok)     { showToast(toastMsg, toastCoul || '#3D6B27'); return; }
           if(r && r.queued) { showToast('Enregistré sur l\u2019appareil \u2014 envoi d\u00e8s le retour du r\u00e9seau', '#B85A1A'); return; }
           // denied / blocked : fbSave a deja pose son propre message, ne pas en empiler un second.
         }).catch(function() {
@@ -797,7 +797,7 @@ function saveData(keyHint, toastMsg) {
         });
       } else {
         // fbSave ne retourne pas de promesse (ex: queue offline) → toast immédiat
-        showToast(toastMsg, '#3D6B27');
+        showToast(toastMsg, toastCoul || '#3D6B27');
       }
     };
 
@@ -8516,10 +8516,9 @@ function saveSaisonPassages(nomTache, nb){
   if(!CONFIG)CONFIG={}; if(!window.CONFIG)window.CONFIG={};
   CONFIG.saison_passages=Object.assign({},SAISON_PASSAGES);
   window.CONFIG.saison_passages=CONFIG.saison_passages;
-  if(window.fbSave)window.fbSave('config',CONFIG);
   delete TRAVAUX[nomTache]; recalcTravaux(nomTache); window.TRAVAUX=TRAVAUX;
   var typeLabel=nomTache==='Relevage'?'niveau'+(nb>1?'x':''):'passage'+(nb>1?'s':'');
-  showToast(nomTache+' : '+nb+' '+typeLabel+' par saison','#3D6B27');
+  window.fbSaveToast({config:CONFIG},nomTache+' : '+nb+' '+typeLabel+' par saison','#3D6B27');
   window.renderReglages();
 }
 

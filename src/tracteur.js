@@ -877,10 +877,11 @@ function saveGnrAppoint(){
   // 2) Historique + prix : collection `paie`
   P.gnr_appoints.push({ id:'ap'+Date.now(), d:d, l:l, pu:(pu>0?pu:null), f:f||null, par:((window.currentUser&&window.currentUser.nom)||'') });
   if(P.gnr_appoints.length>400) P.gnr_appoints=P.gnr_appoints.slice(-400);
-  window.PAIE=P; if(window.fbSave) window.fbSave('paie',P);
+  window.PAIE=P;
+  var _sv=window.fbSaveToast({paie:P});
   _saveData('config');
   _gnrAct=''; renderEntretiens();
-  showToast('Appoint not\u00e9 \u00b7 +'+_gnrNum(l)+' L \u00b7 cuve \u00e0 '+_gnrNum(nv)+' L'+(deb?' \u00b7 plafonn\u00e9e':'')+(pu>0?'':' \u00b7 sans prix'), deb?'#B85A1A':'#3D6B27');
+  window.fbToastApres(_sv,'Appoint not\u00e9 \u00b7 +'+_gnrNum(l)+' L \u00b7 cuve \u00e0 '+_gnrNum(nv)+' L'+(deb?' \u00b7 plafonn\u00e9e':'')+(pu>0?'':' \u00b7 sans prix'), deb?'#B85A1A':'#3D6B27');
 }
 function openGnrEdit(){ if(!isAdmin()&&!isTractoriste()){showToast('R\u00e9serv\u00e9 aux tractoristes et \u00e0 l\u2019admin','#C0392B');return;} _gnrEdit=true; _revEdit=false; _gnrAct=''; renderEntretiens(); }
 function cancelGnrEdit(){ _gnrEdit=false; renderEntretiens(); }

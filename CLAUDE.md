@@ -12167,3 +12167,151 @@ un lot, c'est **le calendrier**.
 `scripts/mv-harnais-releve.mjs` s'ajoute donc au paquet. `npm run check` **exit 0**, `npm run
 prebuild` **exit 0**.
 
+
+---
+
+## 75. ★★★ UN CODE D'ERREUR POUR TROIS CAUSES — LA RÉCOLTE ANNONCÉE ENREGISTRÉE, PERDUE AU RECHARGEMENT (01/09 — `firebase.js` + `cave.js` + `scripts/`, AUCUN BUMP)
+
+### 75a. Le signalement
+
+En pleine vendange, sur le Cuvier de Marchand-Grillot : bandeau
+`🔒 Écriture refusée — cave_vendange (droits insuffisants)`, badge « Synchro partielle », et sur une
+quatrième capture, au même horodatage, « Synchronisation temps réel interrompue ». Nico :
+**« ce n'est pas la 1ère fois que ça arrive, à la réouverture de l'App les dernières saisies ne sont
+pas enregistrées »**. Compte **admin**, App Check sans anomalie côté console Firebase.
+
+### 75b. L'arithmétique des règles disait que c'était impossible
+
+`cave_vendange` passe par la troisième règle de `firestore.rules` :
+`isMyTenant(collection) && !isAdminOnlyDoc(docId) && docId != 'config' && canWrite() && shapeOk() && countOk(docId)`.
+Pour ce document, `isAdminOnlyDoc` est faux, `countOk` ne le borne pas, `shapeOk` est **toujours**
+vrai (`setDoc(ref,{value:…})` n'a qu'une clé). Pour un admin, `canWrite()` est vrai. **Il ne restait
+que `isMyTenant`** — donc `request.auth == null` ou un `tenant` absent du jeton. Un `tenant` absent
+serait permanent ; le symptôme est intermittent. **Le jeton n'était plus valide au moment de
+l'écriture.**
+
+★ **La capture qui tranche est celle des listeners.** Les lectures sont ouvertes à *tout* membre du
+domaine, `ro` compris : un refus de rôle ne peut pas les faire tomber. Qu'elles tombent **dans la
+même seconde** qu'une écriture refusée ne laisse qu'une explication : côté règles, il n'y a plus
+personne. C'est §68 vu par l'autre bout — la même 4G qui n'arrivait pas à rafraîchir le jeton depuis
+la cave, sauf qu'ici l'application ne se contentait plus d'afficher un faux message : **elle perdait
+le travail.**
+
+### 75c. ★★★ LA LEÇON — `permission-denied` RECOUVRE TROIS CAUSES, DONT DEUX PASSAGÈRES
+
+Firestore rend le **même** code pour :
+
+| cause | nature | ce qu'il faut faire de la saisie |
+|---|---|---|
+| le rôle ne permet pas cette écriture | **définitive** | ne pas remettre en file (poison pill), mais **garder** |
+| le jeton d'authentification n'a pas pu être rafraîchi | **passagère** | **mettre en file**, elle repartira seule |
+| le jeton App Check n'a pas été obtenu | **passagère** | **mettre en file** |
+
+La doctrine SEC-1 — *« un refus de droits n'est PAS une panne transitoire »* — ne vaut que pour la
+**première ligne**. Appliquée aux trois, elle **jetait** la saisie : `fbSave` retournait
+`{denied:true}` sans jamais appeler `_queueSave`, et `_flushQueue` faisait pire encore en
+**retirant** la clé de la file. Rien en base, rien sur le téléphone, rien en attente. Au
+rechargement, `applyFbData` réécrivait l'état depuis Firestore et la récolte n'avait jamais existé.
+
+> ★★★ **RÈGLE POSÉE : un code d'erreur qui recouvre plusieurs causes ne peut pas servir seul de
+> décision.** Il faut aller demander à la source laquelle des causes s'applique — ici,
+> `getIdToken(true)`. Une doctrine juste sur un cas devient destructrice appliquée aux trois.
+
+> ★★ **RÈGLE POSÉE : ne jamais jeter une saisie, même sur un refus réel.** Le poison pill interdit la
+> file, pas la conservation. `_mvStashDenied` range la valeur dans
+> `localStorage['mavigne_denied_stash']` ; rien ne la renvoie tout seul — c'est le but — mais elle
+> est là. `window._mvDeniedStash()` la relit, `window._mvDeniedStashClear()` la purge.
+
+### 75d. AUTH-1 — le correctif dans `fbSave` et `_flushQueue`
+
+`_mvTokenAlive()` : `auth.currentUser` absent → passager ; `getIdToken(true)` en échec ou au-delà de
+**8 s** → passager. Sinon le jeton est frais, et on **retente une fois** — sans quoi on classerait
+« définitif » une écriture que le rafraîchissement vient de rendre possible. `_mvDeniedRetried`
+borne la récursion à un tour, purgé après 60 s. Le refus qui survit à un jeton neuf est réel : coffre
++ badge **`Enregistrement refusé — Vendanges · saisie conservée`**. `_MV_KEYLBL` traduit les 25 clés :
+le badge ne dit plus `cave_vendange` à un chef de cave.
+
+⚠️ **Piège C14 rencontré** : `_flushQueue().catch(function(){})` est compté comme un `catch {}` vide
+par la sonde — le motif `catch\s*\([^)]*\)\s*\{\s*\}` ne distingue pas le `.catch` de promesse du
+`try/catch`. Et **blanchir les commentaires avant de compter** rend inutile le
+`/* rien à faire */` : il faut du vrai code. D'où `_mvSoonFlush(ms)`, helper avec un vrai
+`logError` dedans.
+
+`scripts/mv-harnais-auth1.mjs` — **18 assertions** sur quatre états de jeton (session perdue,
+rafraîchissement impossible, refus qui disparaît après rafraîchissement, refus réel), en **rejouant
+le corps réel de `fbSave`** extrait du fichier livré. Contre-épreuve : quatre sabotages, quatre
+rouges. ⚠️ **Le harnais s'est trompé avant le code** : l'ancre d'extraction oubliait
+`var _MV_STASH_KEY`, la constante devenait `undefined`, le coffre écrivait sous une mauvaise clé et
+la sonde criait au défaut. *Un harnais rouge accuse d'abord le code — vérifier l'accusateur.*
+
+### 75e. VD-SAVE — le vert partait avant la réponse du serveur
+
+`saveVendRec` mutait `CAVE_VENDANGE`, appelait `fbSave` **sans lire l'état rendu**, puis affichait
+« Récolte enregistrée » en vert. Le contrat de §68 existait depuis le 25/08 ; **le Cuvier ne le
+lisait nulle part**. Dix-neuf écrivains dans ce cas.
+
+> ★★★ **RÈGLE POSÉE : un message de succès qui ne dépend pas du succès n'est pas un message, c'est
+> une décoration.** Le contrat rendu par `fbSave` ne protège personne tant qu'un appelant ne le lit
+> pas — écrire le contrat et le brancher sont **deux lots**, pas un.
+
+`_vendFbSave(msg, coul, cles)` : le message de l'appelant n'est affiché que sur `ok`, sinon l'écran
+dit l'attente réseau ou le refus. ⚠️ Le toast « Enregistrement… » est **différé de 700 ms** : posé
+tout de suite il ferait clignoter deux toasts et vibrer deux fois sur un enregistrement normal ;
+absent, un réseau lent laisse l'écran muet ~7 s (trois tentatives) et l'utilisateur ressaisit.
+
+### 75f. VD-GARDE — et surtout : ★★ NE PAS UTILISER `canWrite()` ICI
+
+**Quatorze** écrivains sur dix-neuf ne vérifiaient aucun rôle. Le réflexe est d'y poser `canWrite()`.
+**Il aurait été faux** : côté client (`utils.js`) elle vaut `isAdmin() || (ouvrier && !saisonnier)`
+et rend **faux pour un tractoriste**, alors que le serveur (`deriveRo`, `functions/claims.js`)
+n'impose `ro` qu'aux comptes **sans aucun rôle d'écriture** portant `saisonnier` ou `pilotage`. Poser
+`canWrite()` sur la vendange aurait **privé les tractoristes d'un écran qu'ils utilisent**.
+
+> ★★ **RÈGLE POSÉE : une garde d'écran doit refléter la règle du SERVEUR, pas la fonction de rôle la
+> plus proche sous la main.** Les deux ne disent pas la même chose, et l'écart se paie en droits
+> retirés à quelqu'un qui les avait.
+
+`_vendLectureSeule()` est le miroir exact de `deriveRo`. ⚠️ **Dette assumée : deux copies d'une même
+règle, une par machine.** Le jour où `deriveRo` bouge, celle-ci doit bouger avec. C'est pourquoi
+`scripts/mv-harnais-vendange-garde.mjs` **lit et exécute les deux fichiers côte à côte** sur les
+**31 combinaisons de rôles** et exige le même verdict : une règle dupliquée ne se surveille que par
+comparaison des deux sources réelles, jamais par une table recopiée dans le harnais. **14 assertions,
+5 contre-épreuves.** Il tient aussi l'invariant statique *« plus aucun `fbSave('cave_vendange')` nu »*
+— zéro restant, et chaque appelant de `_vendFbSave` porte une garde de rôle avant l'appel.
+
+⚠️ **Les cinq écrivains déjà gardés le sont par `canWrite()` / `isSaisonnier()`, pas par
+`_vendGarde()`.** Deux règles cohabitent donc dans le même écran : les analyses de maturité et les
+réglages restent fermés aux tractoristes, les récoltes leur sont ouvertes. **Non harmonisé
+volontairement** — ce serait *ouvrir* des droits, pas corriger un défaut, et cela n'a pas été
+demandé. À trancher.
+
+### 75g. Ce qui est parti
+
+| fichier | contenu | bump |
+|---|---|---|
+| `src/firebase.js` | AUTH-1 : `_mvTokenAlive`, `_mvSoonFlush`, `_mvStashDenied`, `_MV_KEYLBL`, reprise de `fbSave` et `_flushQueue` | — |
+| `src/cave.js` | VD-SAVE + VD-GARDE : `_vendLectureSeule`, `_vendGarde`, `_vendFbSave`, 19 écrivains rebranchés, 14 gardes | — |
+| `scripts/mv-harnais-auth1.mjs` (neuf) | 18 assertions, 4 contre-épreuves | — |
+| `scripts/mv-harnais-vendange-garde.mjs` (neuf) | 14 assertions, 5 contre-épreuves | — |
+| `scripts/mv-harnais-fusion.mjs` | deux stubs (`_vendGarde`, `_vendFbSave`) — il rejoue `saveVendFusion` | — |
+| `package.json` | les deux harnais dans `check` et `prebuild` | — |
+
+**AUCUN BUMP** (règle §36 : `firebase.js` + `cave.js` + `scripts/`). ⚠️ **Mais les messages du Cuvier
+ont changé pour le client** — treizième lot visible parti sans annonce : **le prochain bump doit le
+dire dans `WHATS_NEW`**, du point de vue de l'utilisateur (« ce que vous saisissez pendant les
+vendanges n'est plus perdu quand le réseau lâche »), pas du point de vue du jeton.
+
+⚠️ **Le harnais de fusion a été cassé par ce lot et réparé dans le même lot** : il rejoue
+`saveVendFusion` par `new Function`, et la nouvelle garde n'existait pas dans ses stubs —
+`ReferenceError` **avant la première assertion**, exactement le motif de §74b. *Ajouter un appel dans
+une fonction rejouée par un harnais, c'est modifier ce harnais.*
+
+### 75h. Deux prises annexes
+
+- **`_vendRecordRendement` ne sauvegarde pas lui-même** : il passe par `_vendSaveParcelles()`, qui
+  appelle `saveData('parcelles')`. Vérifié — ce n'était pas une seconde fuite.
+- **`mv-harnais-releve` était déjà rouge sur le dépôt**, donc `npm run build` bloqué, avant tout lot.
+  Diagnostiqué ici le 01/09 et **corrigé indépendamment par Nico le 02/09** (§74). ⚠️ **Sa version est
+  meilleure que la mienne** : il a gardé le plafond `<= 1`, là où j'avais écrit `=== 1` — qui aurait
+  rougi du 1er décembre au 1er mars, quand aucune période du scénario ne couvre le jour. *En
+  réparant une assertion date-dépendante, j'en avais fabriqué une autre.* Ma version est abandonnée.

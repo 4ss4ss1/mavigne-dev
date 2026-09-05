@@ -102,9 +102,7 @@ async function _attachPdfToOp(input) {
     op.data.pdf_url=res.url;op.data.pdf_path=res.storage_path;
     op.data.pdf_nom=file.name;op.data.pdf_taille=file.size;
     window.CAVE_ELEVAGE=CAVE_ELEVAGE;
-    if(window.fbSave)window.fbSave('cave_elevage',CAVE_ELEVAGE);
-    showToast('PDF rattach\u00e9','#3D6B27');
-    showSyncBadge('Synchronis\u00e9','#3D6B27');
+    window.fbSaveToast({cave_elevage:CAVE_ELEVAGE},'PDF rattach\u00e9','#3D6B27');
     renderCave();
   } catch(e) {
     showToast('Erreur upload PDF','#E07060');
@@ -1034,11 +1032,10 @@ function _caveSeuilStep(delta){
   if(!CAVE_ELEVAGE.config) CAVE_ELEVAGE.config={};
   CAVE_ELEVAGE.config.ouillage_alerte_j=v;
   window.CAVE_ELEVAGE=CAVE_ELEVAGE;
-  if(window.fbSave) window.fbSave('cave_elevage',CAVE_ELEVAGE);
+  window.fbSaveToast({cave_elevage:CAVE_ELEVAGE},'Seuil r\u00e9gl\u00e9 \u00e0 '+v+' jours','#3D6B27');
   var n=document.getElementById('mvc-seuil-num'); if(n) n.textContent=v;
   _mvcRenderHeader();
   renderCaveCuvees();
-  showToast('Seuil r\u00e9gl\u00e9 \u00e0 '+v+' jours','#3D6B27');
 }
 // Reglage de la contenance d'un fut. openPrompt (jamais prompt() natif : il ne
 // rend RIEN en PWA iOS). Ecrit CONFIG.cave.fut_l en PRESERVANT le reste de
@@ -1445,10 +1442,9 @@ async function saveCaveOp() {
       cuvee_id:firstId,cuvees_ids:cuvIds,operateur:window.currentUser?.nom||'',intervenants:_copIntSel.slice(),notes:notes,data:opData});
   }
   window.CAVE_ELEVAGE=CAVE_ELEVAGE;
-  if(window.fbSave)window.fbSave('cave_elevage',CAVE_ELEVAGE);
+  window.fbSaveToast({cave_elevage:CAVE_ELEVAGE},'Op\u00e9ration enregistr\u00e9e','#C0845A');
   window.closeOv(null,'ovCaveOp');
   _copResetPdfZone();
-  showToast('Op\u00e9ration enregistr\u00e9e','#C0845A');
   renderCave();
 }
 
@@ -1498,9 +1494,8 @@ function saveCuvee() {
       tonneaux:tonneaux,statut:'elevage',fml_terminee:fmlTerminee,last_ouillage:null,last_analyse:null});
   }
   window.CAVE_ELEVAGE=CAVE_ELEVAGE;
-  if(window.fbSave) window.fbSave('cave_elevage',CAVE_ELEVAGE);
+  window.fbSaveToast({cave_elevage:CAVE_ELEVAGE},existId?'Cuv\u00e9e mise \u00e0 jour':'Cuv\u00e9e cr\u00e9\u00e9e','#C0845A');
   window.closeOv(null,'ovCuveeMgmt');
-  showToast(existId?'Cuv\u00e9e mise \u00e0 jour':'Cuv\u00e9e cr\u00e9\u00e9e','#C0845A');
   renderCave();
 }
 
@@ -1510,9 +1505,8 @@ function deleteCuvee() {
   CAVE_ELEVAGE.cuvees=CAVE_ELEVAGE.cuvees.filter(function(c){return c.id!==existId;});
   CAVE_ELEVAGE.operations=CAVE_ELEVAGE.operations.filter(function(o){return o.cuvee_id!==existId;});
   window.CAVE_ELEVAGE=CAVE_ELEVAGE;
-  if(window.fbSave) window.fbSave('cave_elevage',CAVE_ELEVAGE);
+  window.fbSaveToast({cave_elevage:CAVE_ELEVAGE},'Cuv\u00e9e supprim\u00e9e','#B85A1A');
   window.closeOv(null,'ovCuveeMgmt');
-  showToast('Cuv\u00e9e supprim\u00e9e','#B85A1A');
   renderCave();
 }
 
@@ -2844,7 +2838,64 @@ function openOvVendRec(id) {
   _vndUpdateCalc();
   var ov=document.getElementById('ovVendRec'); if(ov) ov.classList.add('open');
 }
+// ════════════════════════════════════════════════════════════════════════════
+// VD-GARDE / VD-SAVE — deux mensonges du Cuvier, corriges ensemble (01/09)
+// ════════════════════════════════════════════════════════════════════════════
+// 1. QUATORZE ecrivains de la vendange sur dix-neuf ne verifiaient AUCUN role.
+//    Un compte en lecture seule voyait « + Nouvelle recolte », saisissait, et
+//    recevait un refus du serveur en travers de l'ecran. L'ecran proposait un
+//    geste que le serveur refusait — ce n'est pas une erreur de l'utilisateur.
+//
+// ⚠️⚠️ NE PAS UTILISER canWrite() ICI. Cote client (utils.js) il vaut
+//    `isAdmin() || (ouvrier && !saisonnier)` : il rend FAUX pour un TRACTORISTE,
+//    alors que le serveur, lui, l'autorise (deriveRo, functions/claims.js:155,
+//    ne pose `ro` que sur saisonnier/pilotage SANS role d'ecriture). Poser
+//    canWrite() sur la vendange priverait les tractoristes d'un ecran qu'ils
+//    utilisent aujourd'hui. _vendLectureSeule() est le miroir EXACT de deriveRo.
+//    ⚠️ Dette assumee : deux copies d'une meme regle, une par machine. Le jour ou
+//    deriveRo bouge, celle-ci doit bouger avec — sinon l'ecran et le serveur ne
+//    diront plus la meme chose, et c'est l'utilisateur qui paiera l'ecart.
+function _vendLectureSeule(){
+  try{
+    var u=window.currentUser, r=(u&&u.roles)||[];
+    if(!u||!r.length) return false;
+    if(r.indexOf('admin')>=0||r.indexOf('ouvrier')>=0||r.indexOf('tractoriste')>=0) return false;
+    return r.indexOf('saisonnier')>=0||r.indexOf('pilotage')>=0;
+  }catch(e){
+    if(window.logError) window.logError({level:'info',cat:'cave',msg:'Role illisible (vendange)',detail:String(e)});
+    return false;   // en cas de doute on laisse faire : le serveur tranchera
+  }
+}
+function _vendGarde(){
+  if(!_vendLectureSeule()) return true;
+  showToast('Acc\u00e8s en lecture seule','#B85A1A');
+  return false;
+}
+
+// 2. LE VERT PARTAIT AVANT LA REPONSE DU SERVEUR. `fbSave` est asynchrone et rend
+//    un etat (contrat §68) ; personne ici ne le lisait. « R\u00e9colte enregistr\u00e9e »
+//    s'affichait en vert dans la milliseconde, l'ecriture pouvait echouer juste
+//    apres, et la recolte disparaissait au rechargement. C'est le signalement du
+//    01/09, en pleine vendange. *Un message de succes qui ne depend pas du succes
+//    n'est pas un message, c'est une decoration.*
+//    Le message de l'appelant n'est plus affiche que sur `ok`. Sinon l'ecran dit
+//    ce qui s'est reellement passe — et dans les deux cas la saisie est vivante :
+//    en file (reseau) ou au coffre (AUTH-1, firebase.js).
+//    ⚠️ Le toast d'attente est DIFFERE de 700 ms : sans lui, un reseau lent laisse
+//    l'ecran muet ~7 s (fbSave fait 3 tentatives) et l'utilisateur ressaisit ; avec
+//    lui pose tout de suite, un enregistrement normal ferait clignoter deux toasts
+//    et vibrer le telephone deux fois.
+function _vendFbSave(msg,coul,cles){
+  var K=(cles&&cles.length)?cles:['cave_vendange'];
+  var paires={};
+  K.forEach(function(k){ paires[k]=(k==='cave_elevage')?CAVE_ELEVAGE:CAVE_VENDANGE; });
+  // ⚠️ UNE SEULE implementation du contrat, dans firebase.js : deux copies d'une
+  // regle de message auraient diverge au premier lot qui n'en touche qu'une.
+  if(window.fbSaveToast) return window.fbSaveToast(paires,msg,coul);
+  if(msg) showToast(msg,coul||'#3D6B27');   // repli : firebase.js pas encore charge
+}
 function saveVendRec() {
+  if(!_vendGarde()) return;
   var parcelle=((document.getElementById('vrec-parcelle')||{}).value||'').trim();
   if(!parcelle){showToast('Saisissez le nom de la parcelle','#E07060');return;}
   var _parts=_vendRepParts();
@@ -2899,13 +2950,13 @@ function saveVendRec() {
   if(id){var idx=CAVE_VENDANGE.recoltes.findIndex(function(r){return r.id===id;});if(idx!==-1)CAVE_VENDANGE.recoltes[idx]=obj;else CAVE_VENDANGE.recoltes.push(obj);}
   else{CAVE_VENDANGE.recoltes.push(obj);}
   window.CAVE_VENDANGE=CAVE_VENDANGE;
-  if(window.fbSave) window.fbSave('cave_vendange',CAVE_VENDANGE);
+  _vendFbSave(id?'R\u00e9colte mise \u00e0 jour':'R\u00e9colte enregistr\u00e9e','#3D6B27');
   _vendRecordRendement(obj,prev);
   if(window.closeOv) window.closeOv(null,'ovVendRec');
-  showToast(id?'R\u00e9colte mise \u00e0 jour':'R\u00e9colte enregistr\u00e9e','#3D6B27');
   renderVendRec();
 }
 function deleteVendRec() {
+  if(!_vendGarde()) return;
   var id=((document.getElementById('vrec-id')||{}).value||'');
   if(!id) return;
   var rec=(CAVE_VENDANGE.recoltes||[]).find(function(r){return r.id===id;});
@@ -2916,10 +2967,9 @@ function deleteVendRec() {
     CAVE_VENDANGE.recoltes=(CAVE_VENDANGE.recoltes||[]).filter(function(r){return r.id!==id;});
     _vendCuvSync();
     window.CAVE_VENDANGE=CAVE_VENDANGE;
-    if(window.fbSave) window.fbSave('cave_vendange',CAVE_VENDANGE);
+    _vendFbSave('R\u00e9colte supprim\u00e9e','#B85A1A');
     _vendUnrecordRendement(id,pnom);
     if(window.closeOv) window.closeOv(null,'ovVendRec');
-    showToast('R\u00e9colte supprim\u00e9e','#B85A1A');
     renderVendRec();
   });
 }
@@ -3018,6 +3068,7 @@ function openOvVendCuve(id) {
   var ov=document.getElementById('ovVendCuve'); if(ov) ov.classList.add('open');
 }
 function saveVendCuve() {
+  if(!_vendGarde()) return;
   var nom=((document.getElementById('vcuv-nom')||{}).value||'').trim();
   if(!nom){showToast('Saisissez le nom de la cuve','#E07060');return;}
   var vol=parseFloat((document.getElementById('vcuv-volume')||{}).value)||0;
@@ -3057,12 +3108,12 @@ function saveVendCuve() {
   if(id){var idx=CAVE_VENDANGE.cuves_vinif.findIndex(function(c){return c.id===id;});if(idx!==-1)CAVE_VENDANGE.cuves_vinif[idx]=obj;else CAVE_VENDANGE.cuves_vinif.push(obj);}
   else{CAVE_VENDANGE.cuves_vinif.push(obj);}
   window.CAVE_VENDANGE=CAVE_VENDANGE;
-  if(window.fbSave) window.fbSave('cave_vendange',CAVE_VENDANGE);
+  _vendFbSave(id?'Cuve mise \u00e0 jour':'Cuve cr\u00e9\u00e9e','#3D6B27');
   if(window.closeOv) window.closeOv(null,'ovVendCuve');
-  showToast(id?'Cuve mise \u00e0 jour':'Cuve cr\u00e9\u00e9e','#3D6B27');
   renderVendCuves();
 }
 function deleteVendCuve() {
+  if(!_vendGarde()) return;
   var id=((document.getElementById('vcuv-id')||{}).value||'');
   if(!id) return;
   window.openConfirmDel('Supprimer cette cuve ?','Toutes ses mesures seront également supprimées.',function(){
@@ -3070,9 +3121,8 @@ function deleteVendCuve() {
     (CAVE_VENDANGE.recoltes||[]).forEach(function(r){ if(r.cuve_id===id) r.cuve_id=null; });
     _vendCuvSync();
     window.CAVE_VENDANGE=CAVE_VENDANGE;
-    if(window.fbSave) window.fbSave('cave_vendange',CAVE_VENDANGE);
+    _vendFbSave('Cuve supprim\u00e9e','#B85A1A');
     if(window.closeOv) window.closeOv(null,'ovVendCuve');
-    showToast('Cuve supprim\u00e9e','#B85A1A');
     renderVendCuves();
   });
 }
@@ -3135,6 +3185,7 @@ function openOvVendMesure(cuveId, mesureId) {
   var ov=document.getElementById('ovVendMesure'); if(ov) ov.classList.add('open');
 }
 function _vendMesDel(){
+  if(!_vendGarde()) return;
   var cuveId=_vmesureCuveId, mesId=_vmesureEditId;
   if(!cuveId||!mesId) return;
   window.openConfirmDel('Supprimer ce relevé ?','La courbe de fermentation et la fin estimée seront recalculées sans lui.',function(){
@@ -3143,13 +3194,13 @@ function _vendMesDel(){
     c.mesures_fa=(c.mesures_fa||[]).filter(function(x){return x.id!==mesId;});
     _vmesureEditId=null;
     window.CAVE_VENDANGE=CAVE_VENDANGE;
-    if(window.fbSave) window.fbSave('cave_vendange',CAVE_VENDANGE);
+    _vendFbSave('Relevé supprimé','#B85A1A');
     if(window.closeOv) window.closeOv(null,'ovVendMesure');
-    showToast('Relevé supprimé','#B85A1A');
     renderVendCuves();
   });
 }
 function saveVendMesure() {
+  if(!_vendGarde()) return;
   var cuveId=_vmesureCuveId; if(!cuveId) return;
   var densite=parseFloat((document.getElementById('vm-densite')||{}).value)||null;
   if(!densite){showToast('Saisissez la densit\u00e9','#E07060');return;}
@@ -3170,9 +3221,8 @@ function saveVendMesure() {
   _vendTriMes(cu);            // la date vient peut-etre de changer : on range
   _vmesureEditId=null;
   window.CAVE_VENDANGE=CAVE_VENDANGE;
-  if(window.fbSave) window.fbSave('cave_vendange',CAVE_VENDANGE);
+  _vendFbSave(pos!==-1?'Relev\u00e9 corrig\u00e9':'Mesure enregistr\u00e9e','#3D6B27');
   if(window.closeOv) window.closeOv(null,'ovVendMesure');
-  showToast(pos!==-1?'Relev\u00e9 corrig\u00e9':'Mesure enregistr\u00e9e','#3D6B27');
   renderVendCuves();
 }
 function _vendSaveParam() {
@@ -3187,8 +3237,7 @@ function _vendSaveParam() {
   CAVE_VENDANGE.config.ratio_max=rMax;
   CAVE_VENDANGE.config.sucre_par_degre=spd;
   window.CAVE_VENDANGE=CAVE_VENDANGE;
-  if(window.fbSave) window.fbSave('cave_vendange',CAVE_VENDANGE);
-  showToast('Param\u00e8tres enregistr\u00e9s','#3D6B27');
+  _vendFbSave('Param\u00e8tres enregistr\u00e9s','#3D6B27');
   renderVendParam();
 }
 
@@ -3681,8 +3730,7 @@ function _vendSetRdtBase(b){
   if(!CAVE_VENDANGE.config) CAVE_VENDANGE.config=_vendCfg();
   CAVE_VENDANGE.config.rdt_base=(b==='total')?'total':'jus';
   window.CAVE_VENDANGE=CAVE_VENDANGE;
-  if(window.fbSave) window.fbSave('cave_vendange',CAVE_VENDANGE);
-  showToast(b==='total'?'Rendement sur jus + lies':'Rendement sur le jus clair','#3D6B27');
+  _vendFbSave(b==='total'?'Rendement sur jus + lies':'Rendement sur le jus clair','#3D6B27');
   renderVendParam();
 }
 function _vendLitresRetour(p){
@@ -4103,6 +4151,7 @@ function _vendRetProrata(jus,lie){
   return out;
 }
 function _vendRetSave(){
+  if(!_vendGarde()) return;
   var jus=_vlJus(), lie=_vlLie(), vol=jus+lie, kg=_vlKg();
   var rep=_vliv.detail?_vliv.lignes.map(function(x){ return {jus:x.jus,lie:x.lie}; }):_vendRetProrata(jus,lie);
   var seule=(_vliv.lignes.length===1);
@@ -4117,17 +4166,16 @@ function _vendRetSave(){
     x.rec.nb_caisses=_recCaisses(x.rec);
   });
   window.CAVE_VENDANGE=CAVE_VENDANGE;
-  if(window.fbSave) window.fbSave('cave_vendange',CAVE_VENDANGE);
-  showToast(vol>0?('Retour enregistr\u00e9 \u00b7 '+_vendKgTxt(_vendRendKgHl(kg,vol))+' kg/hL'):'Livraison mise \u00e0 jour','#3D6B27');
+  _vendFbSave(vol>0?('Retour enregistr\u00e9 \u00b7 '+_vendKgTxt(_vendRendKgHl(kg,vol))+' kg/hL'):'Livraison mise \u00e0 jour','#3D6B27');
   openVendLivs(_vliv.ci);
   if(_vendTab==='rec') renderVendRec();
 }
 function _vendRetClear(){
+  if(!_vendGarde()) return;
   var ci=_vliv.ci;
   _vliv.lignes.forEach(function(x){ if(x.part.retour) delete x.part.retour; });
   window.CAVE_VENDANGE=CAVE_VENDANGE;
-  if(window.fbSave) window.fbSave('cave_vendange',CAVE_VENDANGE);
-  showToast('Retour effac\u00e9','#B85A1A');
+  _vendFbSave('Retour effac\u00e9','#B85A1A');
   openVendLivs(ci);
 }
 
@@ -4603,6 +4651,7 @@ window._vendDecMode2   = _vendDecMode2;
 window._vendDecPick    = _vendDecPick;
 window._vendDecCuveVol = _vendDecCuveVol;
 function saveVendDecuvage(){
+  if(!_vendGarde()) return;
   var c=(CAVE_VENDANGE.cuves_vinif||[]).find(function(x){return x.id===_vendDecCuveId;});
   if(!c) return;
   var nom=((document.getElementById('vdec-nom')||{}).value||'').trim()||c.nom||'Cuvée';
@@ -4650,13 +4699,12 @@ function saveVendDecuvage(){
   c.statut='termine';
   window.CAVE_VENDANGE=CAVE_VENDANGE;
   window.CAVE_ELEVAGE=CAVE_ELEVAGE;
-  if(window.fbSave){ window.fbSave('cave_vendange',CAVE_VENDANGE); window.fbSave('cave_elevage',CAVE_ELEVAGE); }
   _vendSheetClose();
   var _ou=[];
   if(nb>0) _ou.push(nb+' barrique'+(nb>1?'s':''));
   if(_cv) _ou.push(_cv.nom);
-  showToast(nom+' \u2192 Le Chai ('+(_ou.length?_ou.join(' + '):'sans contenant')+')'
-    +((_ton&&_ton.length)?' \u00b7 f\u00fbts sortis du parc':''),'#3D6B27');
+  _vendFbSave(nom+' \u2192 Le Chai ('+(_ou.length?_ou.join(' + '):'sans contenant')+')'
+    +((_ton&&_ton.length)?' \u00b7 f\u00fbts sortis du parc':''),'#3D6B27',['cave_vendange','cave_elevage']);
   renderVendCuves();
 }
 
@@ -4966,6 +5014,7 @@ function _vendOpCalc(){
   }
 }
 function saveVendOp(){
+  if(!_vendGarde()) return;
   var c=(CAVE_VENDANGE.cuves_vinif||[]).find(function(x){return x.id===_vendOpCuveId;});
   if(!c) return;
   var date=(document.getElementById('vop-date')||{}).value||new Date().toISOString().slice(0,10);
@@ -5023,12 +5072,12 @@ function saveVendOp(){
   _vendTriOps(c);
   _vendOpEditId=null; _vendOpEditOp=null;
   window.CAVE_VENDANGE=CAVE_VENDANGE;
-  if(window.fbSave) window.fbSave('cave_vendange',CAVE_VENDANGE);
+  _vendFbSave(_vendOpLbl(_vendOpType)+(pos!==-1?' corrigée':' enregistrée'),'#3D6B27');
   _vendSheetClose();
-  showToast(_vendOpLbl(_vendOpType)+(pos!==-1?' corrigée':' enregistrée'),'#3D6B27');
   renderVendCuves();
 }
 function _vendOpDel(){
+  if(!_vendGarde()) return;
   var c=(CAVE_VENDANGE.cuves_vinif||[]).find(function(x){return x.id===_vendOpCuveId;});
   var id=_vendOpEditId;
   if(!c||!id) return;
@@ -5042,9 +5091,8 @@ function _vendOpDel(){
     c.operations=(c.operations||[]).filter(function(o){return o.id!==id;});
     _vendOpEditId=null; _vendOpEditOp=null;
     window.CAVE_VENDANGE=CAVE_VENDANGE;
-    if(window.fbSave) window.fbSave('cave_vendange',CAVE_VENDANGE);
+    _vendFbSave('Opération supprimée','#B85A1A');
     _vendSheetClose();
-    showToast('Opération supprimée','#B85A1A');
     renderVendCuves();
   });
 }
@@ -5267,6 +5315,7 @@ function _vendFusPeindre(neuf){
 }
 
 function saveVendFusion(){
+  if(!_vendGarde()) return;
   var p=_vendFusPris();
   if(p.length<2){ showToast('Choisissez au moins deux cuves','#E07060'); return; }
   var d=_vendFusDestObj();
@@ -5340,10 +5389,9 @@ function saveVendFusion(){
   _vendTriOps(porteuse);
 
   window.CAVE_VENDANGE=CAVE_VENDANGE;
-  if(window.fbSave) window.fbSave('cave_vendange',CAVE_VENDANGE);
+  _vendFbSave(noms.join(' + ')+' \u2192 '+nom,'#3D6B27');
   _vendSheetClose();
   _vendOuvert=porteuse.id;
-  showToast(noms.join(' + ')+' \u2192 '+nom,'#3D6B27');
   renderVendCuves();
 }
 
@@ -5417,6 +5465,7 @@ function openVendClient(i){
   _vendSheet(html);
 }
 function saveVendClient(){
+  if(!_vendGarde()) return;
   var nom=((document.getElementById('vcl-nom')||{}).value||'').trim();
   if(!nom){ showToast('Saisissez un nom','#E07060'); return; }
   var pck=_vendLireNb((document.getElementById('vcl-pck')||{}).value);
@@ -5433,11 +5482,11 @@ function saveVendClient(){
     cls.push({nom:nom,poids_caisse_kg:pck,adresse:adr});
   }
   window.CAVE_VENDANGE=CAVE_VENDANGE;
-  if(window.fbSave) window.fbSave('cave_vendange',CAVE_VENDANGE);
-  showToast('Client enregistré','#3D6B27');
+  _vendFbSave('Client enregistré','#3D6B27');
   openVendClients();
 }
 function deleteVendClient(i){
+  if(!_vendGarde()) return;
   var cls=_vendClients(); var c=cls[i]; if(!c) return;
   var nm=c.nom;
   _vendSheetClose();
@@ -5448,8 +5497,7 @@ function deleteVendClient(i){
     (CAVE_VENDANGE.recoltes||[]).forEach(function(r){ if(r.client===nm) r.client=''; });
     arr.splice(idx,1);
     window.CAVE_VENDANGE=CAVE_VENDANGE;
-    if(window.fbSave) window.fbSave('cave_vendange',CAVE_VENDANGE);
-    showToast('Client supprimé','#B85A1A');
+    _vendFbSave('Client supprimé','#B85A1A');
     openVendClients();
   });
 }
@@ -6431,8 +6479,7 @@ function deleteCuveeById(cuvId) {
     CAVE_ELEVAGE.cuvees=CAVE_ELEVAGE.cuvees.filter(function(c){return c.id!==existId;});
     CAVE_ELEVAGE.operations=CAVE_ELEVAGE.operations.filter(function(o){return o.cuvee_id!==existId;});
     window.CAVE_ELEVAGE=CAVE_ELEVAGE;
-    if(window.fbSave) window.fbSave('cave_elevage',CAVE_ELEVAGE);
-    showToast('Cuv\u00E9e supprim\u00E9e','#B85A1A');
+    window.fbSaveToast({cave_elevage:CAVE_ELEVAGE},'Cuv\u00E9e supprim\u00E9e','#B85A1A');
     renderCave();
   });
 }
@@ -6472,9 +6519,8 @@ function saveCaveAnaEdit() {
   var commentaire=((document.getElementById('cana-edit-commentaire')||{}).value||'').trim();
   Object.assign(CAVE_ELEVAGE.analyses[idx],{date_analyse:date,type:type,cuvee_ids:_editAnaSelIds.slice(),commentaire:commentaire});
   window.CAVE_ELEVAGE=CAVE_ELEVAGE;
-  if(window.fbSave) window.fbSave('cave_elevage',CAVE_ELEVAGE);
+  window.fbSaveToast({cave_elevage:CAVE_ELEVAGE},'Analyse mise \u00E0 jour','#3D6B27');
   window.closeOv(null,'ovCaveAnaEdit');
-  showToast('Analyse mise \u00E0 jour','#3D6B27');
   renderCave();
 }
 
@@ -6490,9 +6536,8 @@ function setOuillageAlerte(n){
   if(!CAVE_ELEVAGE.config) CAVE_ELEVAGE.config={};
   CAVE_ELEVAGE.config.ouillage_alerte_j = n;
   window.CAVE_ELEVAGE = CAVE_ELEVAGE;
-  if(window.fbSave) window.fbSave('cave_elevage', CAVE_ELEVAGE);
+  window.fbSaveToast({cave_elevage:CAVE_ELEVAGE},'Alerte ouillage : '+n+' jours','#3D6B27');
   _caveOuillageRefresh();
-  if(window.showToast) window.showToast('Alerte ouillage : '+n+' jours', '#3D6B27');
 }
 function _caveOuillageRefresh(){
   var v=(CAVE_ELEVAGE.config && CAVE_ELEVAGE.config.ouillage_alerte_j) || 14;
@@ -6526,8 +6571,7 @@ function deleteCaveOp(opId) {
   window.openConfirmDel('Supprimer cette opération ?','',function(){
     CAVE_ELEVAGE.operations=CAVE_ELEVAGE.operations.filter(function(o){return o.id!==opId;});
     window.CAVE_ELEVAGE=CAVE_ELEVAGE;
-    if(window.fbSave)window.fbSave('cave_elevage',CAVE_ELEVAGE);
-    showToast('Op\u00E9ration supprim\u00E9e','#3D6B27');
+    window.fbSaveToast({cave_elevage:CAVE_ELEVAGE},'Op\u00E9ration supprim\u00E9e','#3D6B27');
     renderCave();
   });
 }
@@ -6849,11 +6893,10 @@ function _caveAffRetirer(cuvId, ref){
   var go=function(){
     cuv.cuves=((cuv.cuves)||[]).filter(function(x){ return !(x&&x.ref===ref); });
     window.CAVE_ELEVAGE=CAVE_ELEVAGE;
-    if(window.fbSave) window.fbSave('cave_elevage',CAVE_ELEVAGE);
+    window.fbSaveToast({cave_elevage:CAVE_ELEVAGE},'Cuve lib\u00e9r\u00e9e','#B85A1A');
     if(typeof _mvcRenderHeader==='function') _mvcRenderHeader();
     if(typeof renderCaveCuvees==='function') renderCaveCuvees();
     openCuveeDetail(cuvId);
-    showToast('Cuve lib\u00e9r\u00e9e','#B85A1A');
   };
   if(typeof window.openConfirmDel==='function')
     window.openConfirmDel('Retirer '+((p&&p.nom)||'cette cuve')+' de la cuv\u00e9e ?',
@@ -6959,9 +7002,8 @@ async function saveRetraitFut(){
   if(!CAVE_ELEVAGE.operations)CAVE_ELEVAGE.operations=[];
   CAVE_ELEVAGE.operations.push(op);
   window.CAVE_ELEVAGE=CAVE_ELEVAGE;
-  if(window.fbSave)window.fbSave('cave_elevage',CAVE_ELEVAGE);
+  window.fbSaveToast({cave_elevage:CAVE_ELEVAGE},''+_retraitFutNb+' f\u00FBt'+(+_retraitFutNb>1?'s':'')+' retir\u00E9'+(+_retraitFutNb>1?'s':'')+' ('+lbl+')','#3D6B27');
   window.closeOv(null,'ovRetraitFut');
-  showToast(''+_retraitFutNb+' f\u00FBt'+(+_retraitFutNb>1?'s':'')+' retir\u00E9'+(+_retraitFutNb>1?'s':'')+' ('+lbl+')','#3D6B27');
   renderCave();
 }
 
@@ -6997,12 +7039,11 @@ async function saveCaveAna() {
         op.data.pdf_nom=_caveAnaPendingFile.name;op.data.pdf_taille=_caveAnaPendingFile.size;
       });
       window.CAVE_ELEVAGE=CAVE_ELEVAGE;
-      if(window.fbSave)window.fbSave('cave_elevage',CAVE_ELEVAGE);
+      var _sv=window.fbSaveToast({cave_elevage:CAVE_ELEVAGE});
       window.closeOv(null,'ovCaveAna');
       _caveAnaPendingFile=null;_caveAnaSelIds=[];_caveAnaLinkedOpIds=[];
       var nb=linkOps.length;
-      showToast('PDF rattach\u00E9 \u00E0 '+nb+' op\u00E9ration'+(nb>1?'s':''),'#3D6B27');
-      showSyncBadge('Synchronis\u00E9','#3D6B27');
+      window.fbToastApres(_sv,'PDF rattach\u00E9 \u00E0 '+nb+' op\u00E9ration'+(nb>1?'s':''),'#3D6B27');
       renderCave();
     }catch(e){
       showToast('Erreur upload PDF','#E07060');
@@ -7032,10 +7073,9 @@ async function saveCaveAna() {
     if(!CAVE_ELEVAGE.analyses)CAVE_ELEVAGE.analyses=[];
     CAVE_ELEVAGE.analyses.push(ana);
     window.CAVE_ELEVAGE=CAVE_ELEVAGE;
-    if(window.fbSave)window.fbSave('cave_elevage',CAVE_ELEVAGE);
+    window.fbSaveToast({cave_elevage:CAVE_ELEVAGE},'Analyse enregistr\u00E9e','#3D6B27');
     window.closeOv(null,'ovCaveAna');
     _caveAnaPendingFile=null;_caveAnaSelIds=[];
-    showToast('Analyse enregistr\u00E9e','#3D6B27');
     showSyncBadge('Synchronis\u00E9','#3D6B27');
     renderCave();
   }catch(e){
@@ -7886,7 +7926,7 @@ function _vendSetCoul(nom, c){
   if(CAVE_VENDANGE.config.coul_parc[nom] === c) delete CAVE_VENDANGE.config.coul_parc[nom];
   else CAVE_VENDANGE.config.coul_parc[nom] = c;
   window.CAVE_VENDANGE = CAVE_VENDANGE;
-  if(window.fbSave) window.fbSave('cave_vendange', CAVE_VENDANGE);
+  _vendFbSave(null);
   renderVendAna();
 }
 
@@ -8255,15 +8295,14 @@ function _vendAnaAdd(){
   CAVE_VENDANGE.analyses.push({id:'vana_'+Date.now(),parcelle:p,date:d||new Date().toISOString().slice(0,10),
     mode:_vendAnaUnitMode,val:v,spd:(_vendCfg().sucre_par_degre)||16.83});
   window.CAVE_VENDANGE=CAVE_VENDANGE;
-  if(window.fbSave) window.fbSave('cave_vendange',CAVE_VENDANGE);
-  showToast('Analyse enregistrée','#C0845A');
+  _vendFbSave('Analyse enregistrée','#C0845A');
   renderVendAna();
 }
 function _vendAnaDel(id){
   if(!canWrite()){ showToast('Accès lecture seule','#B85A1A'); return; }
   CAVE_VENDANGE.analyses=(CAVE_VENDANGE.analyses||[]).filter(function(a){return a.id!==id;});
   window.CAVE_VENDANGE=CAVE_VENDANGE;
-  if(window.fbSave) window.fbSave('cave_vendange',CAVE_VENDANGE);
+  _vendFbSave(null);
   renderVendAna();
 }
 

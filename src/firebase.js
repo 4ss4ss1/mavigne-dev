@@ -329,7 +329,17 @@ async function _flushQueue() {
       // SEC-1 : idem fbSave — un refus de droits reste refusé. On l'abandonne (comme le
       // fait déjà la garde anti-écrasement) pour ne pas coincer la file à vie.
       if (_isDenied(e)) {
-        if (window.logError) window.logError({ level:'error', cat:'sync', msg:'Écriture refusée (droits) : ' + key + ' — retirée de la file', detail:String(e) });
+        // AUTH-1 : meme raisonnement qu'en ecriture directe. Un jeton mort refuse
+        // TOUT ; retirer la cle de la file dans ce cas-la, c'est perdre la saisie
+        // au moment precis ou elle allait pouvoir repartir.
+        var _aliveQ = await _mvTokenAlive();
+        if (!_aliveQ) {
+          if (window.logError) window.logError({ level:'info', cat:'sync', msg:'Jeton non rafraîchi — ' + key + ' reste en file', detail:String(e) });
+          success = false;
+          continue;
+        }
+        _mvStashDenied(key, _offlineQueue[key]);
+        if (window.logError) window.logError({ level:'error', cat:'sync', msg:'Écriture refusée (droits) : ' + key + ' — retirée de la file, saisie conservée', detail:String(e) });
         delete _offlineQueue[key];
         continue;
       }
@@ -664,6 +674,190 @@ function _isDenied(e) {
 }
 window._mvIsDenied = _isDenied;
 
+// ════════════════════════════════════════════════════════════════════════════
+// AUTH-1 — UN « permission-denied » NE VEUT PAS DIRE « TU N'AS PAS LE DROIT »
+// ════════════════════════════════════════════════════════════════════════════
+// Firestore renvoie le MEME code dans trois situations qui n'ont rien a voir :
+//   1. le role de l'utilisateur ne permet pas cette ecriture      -> DEFINITIF
+//   2. le jeton d'authentification n'a pas pu etre rafraichi       -> PASSAGER
+//      (4G morte au fond de la cave). Cote regles, request.auth vaut alors
+//      null : isMyTenant() est faux, et TOUT est refuse — lectures comprises,
+//      d'ou les listeners qui tombent dans la meme seconde.
+//   3. le jeton App Check n'a pas ete obtenu                       -> PASSAGER
+//
+// ⚠️⚠️⚠️ La doctrine SEC-1 (« un refus n'est pas une panne transitoire ») ne vaut
+// que pour le cas 1. Appliquee aux trois, elle JETTE la saisie : jamais mise en
+// file, jamais gardee sur le telephone, disparue au rechargement. C'est la perte
+// de donnees du 01/09, en pleine vendange, sur un compte ADMIN — un role auquel
+// les regles ne peuvent PAS refuser cave_vendange. C'est §68 vu par l'autre bout :
+// la meme 4G qui n'arrivait pas a rafraichir le jeton depuis la cave, sauf qu'ici
+// le logiciel ne se contentait plus d'afficher un faux message, il perdait le
+// travail. *Un code d'erreur qui recouvre trois causes ne peut pas servir seul de
+// decision : il faut aller demander a la source laquelle des trois.*
+//
+// _mvTokenAlive() tranche : si le jeton se rafraichit, le refus est REEL.
+async function _mvTokenAlive() {
+  try {
+    var u = auth.currentUser;
+    if (!u) return false;                       // plus de session -> passager
+    await Promise.race([
+      u.getIdToken(true),
+      new Promise(function (_, rej) { setTimeout(function () { rej(new Error('timeout')); }, 8000); })
+    ]);
+    return true;
+  } catch (e) { return false; }                 // rafraichissement impossible -> passager
+}
+
+// Reprise rapprochee de la file. Helper plutot qu'un `.catch(function(){})` de plus :
+// C14 compte ce motif comme un catch vide, et il en compte deja assez.
+function _mvSoonFlush(ms) {
+  clearTimeout(_onlineRetryTO);
+  _onlineRetryTO = setTimeout(function () {
+    _flushQueue().catch(function (e) {
+      if (window.logError) window.logError({ level:'info', cat:'sync', msg:'Reprise de file échouée', detail:String(e) });
+    });
+  }, ms || 5000);
+}
+
+// Un refus REEL ne part pas en file (poison pill retente toutes les 30 s a vie),
+// mais la saisie ne doit pas disparaitre pour autant : on la met de cote. Rien ne
+// la renvoie tout seul — c'est justement ce qu'on veut — elle est recuperable.
+var _MV_STASH_KEY = 'mavigne_denied_stash';
+function _mvStashDenied(key, value) {
+  try {
+    var raw = localStorage.getItem(_MV_STASH_KEY);
+    var st  = raw ? (JSON.parse(raw) || {}) : {};
+    st[key] = { at: Date.now(), value: value };
+    localStorage.setItem(_MV_STASH_KEY, JSON.stringify(st));
+  } catch (e) {
+    if (window.logError) window.logError({ level:'info', cat:'sync', msg:'Coffre des saisies refusées indisponible', detail:String(e) });
+  }
+}
+window._mvDeniedStash = function () {
+  try { return JSON.parse(localStorage.getItem(_MV_STASH_KEY) || '{}'); }
+  catch (e) { return {}; }
+};
+// ── STASH-1 (§77) — LA PORTE DU COFFRE, COTE DONNEES ────────────────────────
+// ★★ CE QUI EST RANGE N'EST PAS « LA SAISIE », C'EST LE DOCUMENT ENTIER au moment
+// du refus. Le renvoyer trois jours plus tard ECRASE tout ce qui a ete fait depuis :
+// c'est le sinistre exact que le verrou de chargement (Couche 2) existe pour
+// empecher. D'ou trois regles, tenues ici et pas seulement dans l'ecran :
+//   1. rien ne se renvoie tout seul — aucun appel automatique, jamais ;
+//   2. le renvoi passe par `fbSave`, donc repasse par TOUTES les protections
+//      (regles, anti-perte, AUTH-1) : un refus reste un refus ;
+//   3. l'entree n'est retiree du coffre que si l'ecriture a REELLEMENT abouti.
+window.mvStashList = function () {
+  var st = window._mvDeniedStash(), out = [];
+  Object.keys(st).forEach(function (k) {
+    var e = st[k] || {};
+    out.push({ cle: k, libelle: _mvKeyLbl(k), at: e.at || 0, value: e.value });
+  });
+  out.sort(function (a, b) { return (b.at || 0) - (a.at || 0); });
+  return out;
+};
+window.mvStashCount = function () { return window.mvStashList().length; };
+
+// Renoncer : on retire l'entree sans rien envoyer.
+window.mvStashDrop = function (cle) {
+  try {
+    var st = window._mvDeniedStash();
+    if (!(cle in st)) return false;
+    delete st[cle];
+    localStorage.setItem(_MV_STASH_KEY, JSON.stringify(st));
+    return true;
+  } catch (e) {
+    if (window.logError) window.logError({ level:'info', cat:'sync', msg:'Coffre : abandon impossible', detail:String(e) });
+    return false;
+  }
+};
+
+// Renvoyer. Rend l'etat de fbSave. ⚠️ Ne retire l'entree que sur { ok:true } : si le
+// refus persiste, la valeur reste au coffre plutot que de disparaitre deux fois.
+window.mvStashResend = function (cle) {
+  var st = window._mvDeniedStash();
+  var e = st[cle];
+  if (!e) return Promise.resolve({ ok: false, absent: true });
+  return window.fbSave(cle, e.value).then(function (r) {
+    if (r && r.ok) window.mvStashDrop(cle);
+    return r || { ok: false };
+  });
+};
+
+window._mvDeniedStashClear = function () {
+  try { localStorage.removeItem(_MV_STASH_KEY); }
+  catch (e) {
+    if (window.logError) window.logError({ level:'info', cat:'sync', msg:'Purge du coffre impossible', detail:String(e) });
+  }
+};
+
+// Le badge ne dit plus « cave_vendange » a un chef de cave.
+var _MV_KEYLBL = {
+  parcelles:'Parcelles', journal:'Journal', sessions:'Tracteur', travaux:'Travaux',
+  traitements:'Registre phyto', catalogue:'Catalogue phyto', conducteurs:'Conducteurs',
+  activites:'Activités', membres:'Équipe', saisons:'Campagnes', taches:'Tâches',
+  config:'Réglages', historique:'Historique', tracteurs_list:'Matériel',
+  entretiens:'Entretiens', reparateur:'Réparateur', reparateur_hist:'Réparateur',
+  cave_elevage:'Cave', cave_vendange:'Vendanges', kml_polygons:'Parcellaire',
+  intrants:'La Réserve', paie:'Paie',
+  planning_entries:'Planning', planning_templates:'Planning',
+  planning_acomptes:'Planning', planning_hsup:'Planning'
+};
+function _mvKeyLbl(k) { return _MV_KEYLBL[k] || k; }
+
+// ── VD-SAVE generalise : LE MESSAGE DE SUCCES ATTEND LE SUCCES ──────────────
+// `fbSave` rend un etat depuis le 25/08 (§68). `saveData(key,msg)` le lit. Mais les
+// modules qui appellent `fbSave` EN DIRECT le jetaient : vingt-quatre endroits hors
+// cave affichaient « enregistre » en vert dans la milliseconde, dont vingt-deux dans
+// le planning — conges, acomptes, cadre legal, heures sup. Ecrire un contrat et le
+// brancher sont deux lots, pas un : le contrat n'a protege personne pendant huit
+// jours partout ou l'appelant ne le lisait pas.
+// Prend un objet {cle: valeur, ...} — plusieurs cles pour les gestes qui touchent
+// deux documents (decuvage : vendange + elevage). Rend l'etat, pour l'appelant qui
+// veut enchainer.
+// ⚠️ Le toast d'attente est DIFFERE de 700 ms : pose tout de suite il ferait
+// clignoter deux toasts et vibrer deux fois sur un enregistrement normal ; absent, un
+// reseau lent laisse l'ecran muet ~7 s (trois tentatives) et l'utilisateur ressaisit.
+window.fbSaveToast = function (paires, msg, coul) {
+  var C = coul || '#3D6B27';
+  var cles = Object.keys(paires || {});
+  var dire = function (m, c) { if (m && window.showToast) window.showToast(m, c); };
+  if (!cles.length || !window.fbSave) { dire(msg, C); return Promise.resolve({ ok: true }); }
+  var ps = cles.map(function (k) {
+    var p = window.fbSave(k, paires[k]);
+    return (p && typeof p.then === 'function') ? p : Promise.resolve({ ok: true });
+  });
+  var lent = setTimeout(function () { dire('Enregistrement\u2026', '#7A4F2E'); }, 700);
+  return Promise.all(ps).then(function (rs) {
+    clearTimeout(lent);
+    var ko = null;
+    for (var i = 0; i < rs.length; i++) { if (rs[i] && rs[i].ok !== true) { ko = rs[i]; break; } }
+    if (!ko) { dire(msg, C); return { ok: true }; }
+    if (ko.blocked) return ko;                 // la protection anti-perte a deja parle
+    if (ko.denied) { dire('Enregistrement refus\u00e9 \u2014 votre saisie est conserv\u00e9e', '#7A1020'); return ko; }
+    dire('En attente de r\u00e9seau \u2014 envoi automatique', '#B85A1A');
+    return ko;
+  }).catch(function (e) {
+    clearTimeout(lent);
+    if (window.logError) window.logError({ level: 'info', cat: 'sync', msg: 'Retour fbSave illisible', detail: String(e) });
+    return { ok: false };
+  });
+};
+
+// Variante pour les appelants dont le message se CONSTRUIT apres l'ecriture (import
+// CSV : le compte des lignes n'est connu qu'apres). On lance `fbSaveToast(paires)`
+// sans message, on garde l'etat, on l'affiche quand il est pret.
+// ⚠️ `etat` vaut null quand rien n'a ete ecrit (selection vide) : le message est alors
+// legitime tout de suite — il ne dit pas « enregistre », il dit « rien a faire ».
+window.fbToastApres = function (etat, msg, coul) {
+  var C = coul || '#3D6B27';
+  var dire = function () { if (msg && window.showToast) window.showToast(msg, C); };
+  if (!etat || typeof etat.then !== 'function') { dire(); return; }
+  etat.then(function (r) { if (r && r.ok) dire(); });
+};
+
+// Garde de recursion : apres un jeton rafraichi on retente UNE fois, pas deux.
+var _mvDeniedRetried = {};
+
 async function _retryAsync(fn, retries, delayMs) {
   for (var i = 0; i <= retries; i++) {
     try { return await fn(); } catch(e) {
@@ -959,9 +1153,34 @@ window.fbSave = async function (key, value) {
     // « Signaler un problème » → e-mail) + console.error. On relance quand même l'erreur
     // pour que saveData n'affiche pas un faux « enregistré ✓ ».
     if (_isDenied(e)) {
-      if (window.logError) window.logError({ level:'error', cat:'firebase', msg:'Écriture refusée (droits) : ' + key, detail:String(e) });
-      showSyncBadge('🔒 Écriture refusée — ' + key + ' (droits insuffisants)', '#7A1020');
-      return { ok: false, denied: true, code: (e && e.code) || '' };
+      // AUTH-1 : avant de conclure au refus, aller demander a la source. Un jeton
+      // qui ne se rafraichit pas produit EXACTEMENT le meme code qu'un role
+      // insuffisant — et dans ce cas la saisie doit vivre, pas mourir.
+      var _alive = await _mvTokenAlive();
+      if (!_alive) {
+        if (window.logError) window.logError({ level:'info', cat:'firebase', msg:'Jeton non rafraîchi — écriture mise en file : ' + key, detail:String(e) });
+        _queueSave(key, value);
+        if (navigator.onLine) _mvSoonFlush(5000);
+        return { ok: false, queued: true, tokenStale: true, code: (e && e.code) || '' };
+      }
+      // Jeton frais a l'instant : la tentative precedente a pu partir avec un jeton
+      // perime. On retente UNE fois — sans quoi on classerait « refus definitif »
+      // une ecriture que le rafraichissement vient de rendre possible.
+      if (!_mvDeniedRetried[key]) {
+        _mvDeniedRetried[key] = true;
+        setTimeout(function () { delete _mvDeniedRetried[key]; }, 60000);
+        return await window.fbSave(key, value);
+      }
+      // Le refus survit a un jeton neuf : il est REEL. On ne met pas en file (poison
+      // pill), mais on ne jette pas non plus — la saisie part au coffre.
+      // La promesse n'est tenable que depuis STASH-1 (§77) : la ligne « Saisies non
+      // enregistrees » de Reglages ouvre le coffre. Sans elle, annoncer « conservee »
+      // etait un message qui ment. Le journal reste alimente en `warning` : c'est le
+      // second chemin, celui de « Signaler un probleme », et il ne coute rien.
+      _mvStashDenied(key, value);
+      if (window.logError) window.logError({ level:'warning', cat:'firebase', msg:'Écriture refusée (droits) : ' + key + ' — valeur mise de côté (' + _mvKeyLbl(key) + ')', detail:String(e) });
+      showSyncBadge('Enregistrement refusé — ' + _mvKeyLbl(key) + ' · saisie conservée', '#7A1020');
+      return { ok: false, denied: true, stashed: true, code: (e && e.code) || '' };
     }
     // ⚠️ NIVEAU 'info' ET NON 'warning' : le niveau warning declenche un toast
     //    « ⚠️ fbSave échoué (3 tentatives): cave_elevage » — du jargon de developpeur

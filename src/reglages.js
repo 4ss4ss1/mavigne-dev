@@ -179,6 +179,144 @@ function switchReglTab(tab){
   });
 }
 
+
+// ════════════════════════════════════════════════════════════════════════════
+// STASH-1 (§77) — LA PORTE DU COFFRE
+// ════════════════════════════════════════════════════════════════════════════
+// AUTH-1 range les saisies definitivement refusees dans localStorage, et le badge
+// annonce « saisie conservee ». Sans cet ecran la phrase etait FAUSSE : rien, nulle
+// part, ne montrait le coffre — et une donnee accessible seulement par la console du
+// navigateur est perdue pour un chef de cave. *Poser un mecanisme de sauvetage sans
+// porte pour y entrer, c'est deplacer la perte, pas l'empecher.*
+//
+// La ligne est INJECTEE ici plutot qu'ecrite dans index.html : index.html est
+// precache par le SW, l'y poser imposerait un bump a chaque retouche d'un ecran que
+// la quasi-totalite des domaines ne verra jamais.
+//
+// ⚠️ Elle n'apparait QUE si le coffre contient quelque chose, et QUE pour un admin :
+// le renvoi ecrase un document entier, ce n'est pas un geste d'ouvrier.
+function _reglStashRow(){
+  var hote=document.getElementById('regl-export-row');
+  var vieille=document.getElementById('regl-stash-row');
+  var n=(typeof window.mvStashCount==='function')?window.mvStashCount():0;
+  if(!hote||!n||!isAdmin()){
+    if(vieille&&vieille.parentNode) vieille.parentNode.removeChild(vieille);
+    return;
+  }
+  var row=vieille;
+  if(!row){
+    row=document.createElement('div');
+    row.id='regl-stash-row';
+    row.className='set-row';
+    row.onclick=_reglStashOuvrir;
+    row.innerHTML='<div class="sr-l"><div class="sr-ico" id="regl-stash-ico" style="background:var(--terre-pale)"></div>'
+      +'<div><div class="sr-lbl">Saisies non enregistr\u00e9es</div>'
+      +'<div class="sr-sub" id="regl-stash-sub"></div></div></div><div class="sr-arr">\u203a</div>';
+    hote.parentNode.insertBefore(row,hote);
+    if(window._mvSetIcon) window._mvSetIcon(document.getElementById('regl-stash-ico'),'alerte',18);
+  }
+  // textContent : aucune interpolation HTML (C19).
+  var sub=document.getElementById('regl-stash-sub');
+  if(sub) sub.textContent=n+' saisie'+(n>1?'s':'')+' refus\u00e9e'+(n>1?'s':'')+' \u00b7 \u00e0 renvoyer ou \u00e0 abandonner';
+}
+
+function _reglStashDate(ms){
+  if(!ms) return 'date inconnue';
+  try{
+    return new Date(ms).toLocaleString('fr-FR',{day:'numeric',month:'long',hour:'2-digit',minute:'2-digit'});
+  }catch(e){ return 'date inconnue'; }
+}
+
+// L'ecran se construit dans l'ecran : pas de conteneur en dur dans index.html, donc
+// pas de bump pour le faire evoluer.
+function _reglStashOuvrir(){
+  if(!isAdmin()) return;
+  var liste=(typeof window.mvStashList==='function')?window.mvStashList():[];
+  if(!liste.length){ _reglStashRow(); return; }
+  var vieux=document.getElementById('regl-stash-panneau');
+  if(vieux&&vieux.parentNode) vieux.parentNode.removeChild(vieux);
+  var p=document.createElement('div');
+  p.id='regl-stash-panneau';
+  p.className='set-card';
+  p.style.cssText='margin-top:10px;padding:12px;border:1px solid var(--terre-pale);border-radius:14px';
+  var h=document.createElement('div');
+  h.style.cssText='font-size:11px;color:var(--texte-doux);line-height:1.5;margin-bottom:10px';
+  // ★★ L'AVERTISSEMENT N'EST PAS DECORATIF. Ce qui est range est le document ENTIER
+  //    au moment du refus : le renvoyer ecrase tout ce qui a ete fait depuis.
+  h.textContent='Ces saisies ont \u00e9t\u00e9 refus\u00e9es par le serveur et gard\u00e9es sur cet appareil. '
+    +'Les renvoyer remplace tout l\u2019\u00e9cran concern\u00e9 par son \u00e9tat au moment du refus : '
+    +'ce qui a \u00e9t\u00e9 saisi depuis, ici ou par quelqu\u2019un d\u2019autre, sera perdu.';
+  p.appendChild(h);
+  liste.forEach(function(e){
+    var l=document.createElement('div');
+    l.style.cssText='display:flex;align-items:center;gap:8px;padding:8px 0;border-top:1px solid var(--fond-module)';
+    var t=document.createElement('div');
+    t.style.cssText='flex:1;min-width:0';
+    var t1=document.createElement('div');
+    t1.style.cssText='font-size:13px;font-weight:600';
+    t1.textContent=e.libelle;
+    var t2=document.createElement('div');
+    t2.style.cssText='font-size:10.5px;color:var(--texte-doux)';
+    t2.textContent=_reglStashDate(e.at);
+    t.appendChild(t1); t.appendChild(t2);
+    var bR=document.createElement('button');
+    bR.className='btn-sec'; bR.style.cssText='font-size:12px;padding:6px 10px';
+    bR.textContent='Renvoyer';
+    bR.onclick=function(){ _reglStashRenvoyer(e.cle,e.libelle); };
+    var bA=document.createElement('button');
+    bA.className='btn-sec'; bA.style.cssText='font-size:12px;padding:6px 10px;color:var(--rouge)';
+    bA.textContent='Abandonner';
+    bA.onclick=function(){ _reglStashAbandonner(e.cle,e.libelle); };
+    l.appendChild(t); l.appendChild(bR); l.appendChild(bA);
+    p.appendChild(l);
+  });
+  var hote=document.getElementById('regl-stash-row');
+  if(hote&&hote.parentNode) hote.parentNode.insertBefore(p,hote.nextSibling);
+}
+
+// ⚠️ Confirmation OBLIGATOIRE, et elle nomme l'ecrasement. Rien ne part sur un doigt
+//    pose par erreur sur un telephone dans une poche de vendangeur.
+function _reglStashRenvoyer(cle,libelle){
+  if(!isAdmin()) return;
+  var go=function(){
+    window.mvStashResend(cle).then(function(r){
+      if(r&&r.ok) showToast(libelle+' \u00b7 renvoy\u00e9','#3D6B27');
+      else if(r&&r.absent) showToast('Cette saisie n\u2019est plus au coffre','#B85A1A');
+      // refus / file : fbSave a deja pose son message, on n'en empile pas un second.
+      _reglStashFermer();
+    });
+  };
+  if(typeof window.openConfirmDel==='function')
+    window.openConfirmDel('Renvoyer '+libelle+' ?',
+      'Tout l\u2019\u00e9cran sera remplac\u00e9 par son \u00e9tat au moment du refus. Les saisies faites depuis seront perdues.',
+      go,'alerte','Renvoyer','#7A4F2E');
+  else go();
+}
+
+function _reglStashAbandonner(cle,libelle){
+  if(!isAdmin()) return;
+  var go=function(){
+    if(window.mvStashDrop(cle)) showToast(libelle+' \u00b7 saisie abandonn\u00e9e','#B85A1A');
+    _reglStashFermer();
+  };
+  if(typeof window.openConfirmDel==='function')
+    window.openConfirmDel('Abandonner '+libelle+' ?',
+      'Cette saisie sera effac\u00e9e de l\u2019appareil. Elle ne pourra plus \u00eatre renvoy\u00e9e.',
+      go,'alerte','Abandonner','#C0392B');
+  else go();
+}
+
+function _reglStashFermer(){
+  var p=document.getElementById('regl-stash-panneau');
+  if(p&&p.parentNode) p.parentNode.removeChild(p);
+  _reglStashRow();
+}
+
+window._reglStashRow        = _reglStashRow;
+window._reglStashOuvrir     = _reglStashOuvrir;
+window._reglStashRenvoyer   = _reglStashRenvoyer;
+window._reglStashAbandonner = _reglStashAbandonner;
+
 function renderReglages(){
   if(!window._dataReady){ var _rml=document.getElementById('membres-list'); if(_rml)_rml.innerHTML=window._mvSk('reglages'); return; }
   // Stats band en-tête
@@ -311,6 +449,7 @@ function renderReglages(){
         : 'Non renseign\u00e9s \u2014 le bar\u00e8me suppose 10 000 pieds/ha';
     }
     _ecoRenderConfigCard();
+    _reglStashRow();
     // Tâches
     // Source unique : la liste portée par la période consultée (et non plus le 1er mot de son nom).
     document.getElementById('taches-saison-label').textContent=(window._visuSaison?window._visuSaison():window.getSaisonActive().nom);
