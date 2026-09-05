@@ -4447,8 +4447,11 @@ radios/cases, section « pièces à joindre » explicite.
 3. ★ **Caler les trois estimations neuves** : pointage 10 min × 220, carnet tracteur 10 min × 60,
    papiers du contrôle 60 min × 6. Elles sont de moi, pas de Nico — lui seul peut les signer,
    comme il a signé les 250 tâches de janvier à juillet.
-4. **`lint-cliquet` / ESLint** : jamais joué côté Claude (`node_modules` absent) — **l'échec est
-   identique sur la base d'origine**, vérifié.
+4. ~~**`lint-cliquet` / ESLint** : jamais joué côté Claude~~ — **RAYÉ le 01/09.**
+   ★ **`npm install eslint@9 --no-save` fonctionne dans le bac à sable** (registry.npmjs.org est
+   ouvert) : 309 paquets en 12 s, puis `node scripts/lint-cliquet.mjs` tourne normalement.
+   L'entrée disait « impossible » là où personne n'avait essayé. **Ce filet est désormais jouable à
+   chaque lot, et il doit l'être** — voir §78.
 5. **`test:smoke` / `test:e2e`** : jamais joués côté Claude (Chromium injoignable).
 
 ### ⚠️ OUVERT DEPUIS LE 25/08 — L'ÉLÉMENT QUI DÉBORDE SUR L'ACCUEIL (§67c)
@@ -12508,3 +12511,63 @@ assertions, 6 contre-épreuves** — la sixième n'a rougi qu'après resserrage.
 avoir été écrit dans la conversation, citant un « §77 » qui n'existait pas encore. Il a été
 **retiré** — on ne livre pas du code dont on ne répond pas — puis le besoin, qui était réel, a été
 traité à neuf et vérifié ici. `reglages.js` était resté strictement identique au dépôt entre-temps.
+
+
+---
+
+## 78. ★★★ LE SEUL FILET QUE JE N'AVAIS JAMAIS JOUÉ EST CELUI QUI A ATTRAPÉ LE DÉFAUT (01/09 — `planning.js` + `cave.js` + `tracteur.js`, aucun bump)
+
+Le lot §76 est parti avec `npm run check` **exit 0**, `npm run prebuild` **exit 0**, 28 harnais
+verts, preflight vert. La CI GitHub l'a refusé en quatre secondes :
+
+```
+src/planning.js  '_sv' is already defined.  (no-redeclare)
+```
+⚠️ Le numéro de ligne rendu par la CI est volontairement retiré de cette citation : un numéro
+recopié dans ce document se périme au premier lot suivant, et le cliquet du harnais `claude-md` en
+plafonne le nombre — il a d'ailleurs refusé cette section tant que le numéro y figurait.
+
+### 78a. Le défaut
+
+`_planCpApplySel` ouvre par `var totJ=0, nMbr=0, prot=0, _sv=_planCtxYear;` — `_sv` y est la
+**sauvegarde de l'année de contexte**, un motif présent **quinze fois** dans `planning.js`. J'y ai
+ajouté `var _sv = window.fbSaveToast(...)`, écrasant la variable.
+
+⚠️ **À l'exécution, rien ne cassait** : par hoisting il n'existe qu'un seul `_sv` dans la fonction,
+et mon écrasement tombait **après** la dernière restauration `_planCtxYear=_sv`. *Le code était
+juste par accident de placement.* Trois lignes plus haut, il corrompait l'année de contexte de tout
+un calcul de congés. **Et la variable ne servait même à rien** : la valeur rendue n'était pas lue.
+
+> ★★★ **RÈGLE POSÉE : ne jamais introduire un nom de variable court dans un fichier qu'on ne
+> connaît pas par cœur sans vérifier qu'il est libre DANS LA FONCTION.** `_sv`, `_p`, `_r`, `_v`
+> sont des noms de convention locale : ils sont déjà pris quelque part. Les trois autres emplois que
+> j'avais introduits sont renommés **`_mvEtat`** — un préfixe qui n'entre en collision avec rien.
+
+### 78b. ★★★ CE QUI EST VRAIMENT EN CAUSE : UNE ENTRÉE DE BACKLOG QUI DISAIT « IMPOSSIBLE »
+
+Le backlog portait depuis des semaines : *« `lint-cliquet` / ESLint : jamais joué côté Claude
+(`node_modules` absent) »*. Je l'ai lue et acceptée à chaque lot.
+
+**Elle était fausse.** `npm install eslint@9 --no-save` installe 309 paquets en 12 secondes —
+`registry.npmjs.org` fait partie des domaines ouverts, et c'est écrit dans la configuration réseau.
+Personne n'avait essayé.
+
+> ★★★ **RÈGLE POSÉE : une entrée de backlog qui dit qu'une vérification est IMPOSSIBLE est la plus
+> dangereuse de toutes.** Une entrée périmée fait perdre du temps ; celle-ci **retire un filet du
+> champ de vision** et le fait passer pour une fatalité. Le geste : avant d'accepter un
+> « impossible », **essayer une fois** — le coût est de trente secondes, le gain est un filet qui
+> reprend du service. *C'est la treizième et la quatorzième entrée périmée de ce backlog, et la
+> seule dont la péremption cachait un outil.*
+
+★ **Et le contrôle qui manquait dans MA méthode** : j'ai vérifié ce lot par la syntaxe
+(`node --check`), par les harnais, par le preflight, par des contre-épreuves — **jamais par un
+analyseur statique de portées**. `node --check` valide la grammaire, pas la sémantique : une
+redéclaration est du JavaScript parfaitement valide. **Aucun des vingt-huit harnais ne pouvait voir
+ça**, et aucun ne le pourra jamais : ce n'est pas leur métier.
+
+### 78c. Désormais
+
+`npm run lint` est joué **à chaque lot**, au même titre que `npm run check`. Contre-épreuve faite :
+la redéclaration remise, le cliquet rougit sur la ligne exacte ; retirée, il repasse à 0.
+Vérifié aussi sur le dépôt **sans** mon lot — 0 erreur : le défaut venait bien de moi, pas d'un
+plafond hérité.

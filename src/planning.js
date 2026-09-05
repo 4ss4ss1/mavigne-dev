@@ -3742,7 +3742,7 @@ function _planCpApplySel(){
   });
   _planCtxYear=_sv;
   window.PLANNING_ENTRIES=PLANNING_ENTRIES;
-  var _sv=window.fbSaveToast(nMbr>0?{planning_entries:PLANNING_ENTRIES}:null,
+  window.fbSaveToast(nMbr>0?{planning_entries:PLANNING_ENTRIES}:null,
     nMbr>0?('Cong\u00e9s pos\u00e9s \u00b7 '+nMbr+' salari\u00e9'+(nMbr>1?'s':'')+' \u00b7 '+totJ+'\u00a0j d\u00e9compt\u00e9'+(totJ>1?'s':'')+(prot>0?' \u00b7 '+prot+' pr\u00e9serv\u00e9'+(prot>1?'s':''):'')):'Aucun jour d\u00e9comptable dans la s\u00e9lection',
     nMbr>0?'#3D6B27':'#E07060');
   closePlanCP();
@@ -4480,11 +4480,11 @@ function planImportCSV(targetId){
       if(nJ>0)tplData._timings_jour=jouTimings;
       _pTplStore()[targetId]=tplData;
       window.PLANNING_TEMPLATES=PLANNING_TEMPLATES;
-      var _sv=window.fbSaveToast({planning_templates:PLANNING_TEMPLATES});
+      var _mvEtat=window.fbSaveToast({planning_templates:PLANNING_TEMPLATES});
       var msg='\u2705 CSV import\u00e9 \u2192 "'+targetId+'"';
       if(nT>0)msg+=' \u00b7 '+nT+' horaires mois';
       if(nJ>0)msg+=' \u00b7 '+(Object.values(jouTimings).reduce(function(s,m){return s+Object.keys(m).length;},0))+' jours \u00e0 horaire particulier';
-      window.fbToastApres(_sv,msg,'#3D6B27');
+      window.fbToastApres(_mvEtat,msg,'#3D6B27');
       _planRenderCadre();
     }catch(err){showToast('\u274c Erreur CSV\u00a0: '+err.message,'var(--rouge)');}
   };
