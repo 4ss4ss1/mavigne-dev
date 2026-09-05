@@ -77,7 +77,7 @@ function _achatsQ(p){ return INTRANTS.achats.filter(function(a){return a.prodId=
 //   dont trois dans les donnees de demonstration d'app.js. Il valait donc
 //   toujours undefined chez un vrai domaine, et _ecoPhytoByParc rangeait CHAQUE
 //   produit dans `unpriced` : le cout phyto par parcelle du Pilotage etait a
-//   zero chez MG comme chez Chapelle, sans que rien ne le dise.
+//   zero sur les deux domaines en service, sans que rien ne le dise.
 // Le prix EST saisi — `achats[].prix`, un TOTAL HT par ligne. Il n'etait
 // simplement jamais ramene a l'unite. C'est exactement ce que _mvPaieGnrPMP
 // (reglages.js) fait deja pour le carburant : somme des euros / somme des

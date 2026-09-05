@@ -438,7 +438,7 @@ T('★ et l’écart affiché ÉGALE le reste à prendre',
 
 /* 8b. LA PREUVE DÉTRUITE — ce que l'enregistrement effaçait avant ce lot.
    Victor3 porte EXACTEMENT les entrées telles qu'elles sont enregistrées
-   aujourd'hui chez Marchand-Grillot : le 19 a gardé son horaire (le retard le
+   aujourd'hui chez le domaine de référence : le 19 a gardé son horaire (le retard le
    préservait déjà), le 20 n'a plus rien. Aucun calcul ne peut les rattraper —
    c'est pour ça que ces deux jours doivent être reposés à la main. */
 window.MEMBRES.push({

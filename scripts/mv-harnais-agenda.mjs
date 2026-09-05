@@ -79,7 +79,7 @@ function monter(ce, cv, mutation, seuilFn) {
   );
 }
 
-/* ══ LE CAS RÉEL — Marchand-Grillot, trois cuvées de contenants différents ══ */
+/* ══ LE CAS RÉEL — domaine de référence, trois cuvées de contenants différents ══ */
 const AUJ = '2026-09-07';                              // un lundi
 function cave() {
   return {

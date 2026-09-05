@@ -166,7 +166,7 @@
 > lieu de compter. Détail en **§54**.
 >
 > ★ Précédente : **20 août 2026** — ★★★ **L'IMPORT KML EFFAÇAIT LE PARCELLAIRE (§53)**.
-> **APP 6.36 · SW 6.90, aucun bump** (`admin-gt.js` seul). Alexandre envoie un KML d'**une**
+> **APP 6.36 · SW 6.90, aucun bump** (`admin-gt.js` seul). le contact technique envoie un KML d'**une**
 > parcelle ; l'onglet aurait écrit ce fichier tel quel et **fait disparaître les autres de la
 > carte** — sans avertissement, sans retour possible. ★★★ **Le défaut n'était pas dans le code,
 > il était dans l'écran** : un bouton qui remplace là où l'opérateur croit ajouter. L'écran lit
@@ -361,7 +361,7 @@
 >    comme un fait : `APP_VERSION` dans `utils.js` et l'en-tête de `sw.js` sont les seules sources.
 > 2. ⚠️ **Une installation à blanc** sur un slug jetable reste à faire — **c'est le seul critique
 >    encore ouvert.** Elle valide les cinq lots d'un coup et mesure les temps réels (§18b, §28).
-> 3. **Château Garraud : le devis reste à établir** — c'est le sujet commercial n°1 (§28), et il
+> 3. **le prospect Gironde : le devis reste à établir** — c'est le sujet commercial n°1 (§28), et il
 >    force à **borner l'offre de lancement** d'abord.
 > 4. ✅ **Le plafond ESLint est à 0 avec 0 erreur** — re-vérifié le 12/08 sur les six fichiers du
 >    jour. L'entrée « passer le plafond à 0 » est close depuis le 11/08 ; ne pas la rouvrir.
@@ -555,7 +555,7 @@ chose est faite ou en attente — dans les deux sens.
 | « les moteurs `_mvFut*` se lisent sans argument » | **`_mvFutParc(INTRANTS, CAVE_ELEVAGE, curY)`** |
 | « la baseline a été regravée le 07/08 » | **elle datait du 26/07** — l'affirmation était fausse |
 | ★★ **l'aide contextuelle décrit les écrans** | **elle décrivait ceux d'il y a plusieurs mois** |
-| ★★★ **« il n'y a pas d'assistant d'installation »** | **`_agtIns` EXISTAIT et avait servi pour Chapelle** (§18b) |
+| ★★★ **« il n'y a pas d'assistant d'installation »** | **`_agtIns` EXISTAIT et avait servi pour le second domaine** (§18b) |
 | ★★ **« l'import KML n'écrit QUE les polygones »** | vrai de l'**onglet KML**, FAUX de l'**assistant** |
 | ★★★ **la grille du Pilotage est réglée sur 1 colonne** | elle est réglée sur **2 à 4** — elle ne se remplissait jamais parce que **les 18 tuiles arrivaient ouvertes** |
 | ★★ **« il n'existe aucune infobulle dans l'app »** | **exact**, et c'était le problème : zéro `<details>`, zéro popover, dans tout le projet |
@@ -796,7 +796,7 @@ sans ouvrir un seul fichier. Chaque lot se termine donc par un tableau :
   `C:\Users\p4n0m\Desktop\Applications\mavigne-dev` (dépôt Git, celui qui fait foi désormais).
   Firebase CLI. `winget` absent (installer via `.msi`). **Java 17 (Temurin)** pour les émulateurs.
 - **Deux comptes Firebase** : `ngdevpro@gmail.com` = admin GT (`gtAdmin:true`) ·
-  `gueret.nicolas@gmail.com` = admin Marchand-Grillot (`adm:true`). Toute procédure GT (backfill,
+  `gueret.nicolas@gmail.com` = admin le domaine de référence (`adm:true`). Toute procédure GT (backfill,
   `fbAdminRead`, `_fbSetTenantPlan`, assistant d'installation) exige la **fenêtre privée ngdevpro**
   et une session OTP ouverte.
 
@@ -836,7 +836,7 @@ par « ce que tu fais une fois » puis « ce que tu fais à chaque fois », et n
 compris », « c'est moche », « c'est faux » sont des redirections de portée, pas des reproches.
 Les captures annotées sont son canal de retour préféré quand le problème est visuel.
 Quand il donne un chiffre du terrain (250 tâches validées de janvier à juillet, 11,76 ha, 485 h/ha,
-20 h pour installer Chapelle, 40 vendangeurs sur 10 jours, **14 h de clavier sur les 20**), c'est
+20 h pour installer le second domaine, 40 vendangeurs sur 10 jours, **14 h de clavier sur les 20**), c'est
 une **donnée de calage**.
 
 ★★ **Il corrige aussi les MODÈLES, et c'est là qu'il faut l'écouter le plus.** Le 06/08, sur le parc
@@ -882,21 +882,21 @@ seul tour**.
   ⚠️ Rappel de principe : **l'attribution d'un SIRET ne vaut jamais affiliation cotisant**.
 - **Produit** : **Ma Vigne** — PWA multi-tenant de gestion viticole, `mavigneapp.fr`.
 - **Clients en production** :
-  - **Domaine Marchand-Grillot** — 45 parcelles + Chazière « Arrachée », ~11,76 ha, tenant de
-    référence/dev. Adresses fictives en **`prenom.marchand-grillot@mavigne.app`**.
-  - **SCEA PH Chapelle & Fils** (slug `domaine-chapelle-et-fils`, réf. MV-2026-9024) —
-    Alexandre Chapelle (chef de culture, opérationnel), **Simon Chapelle** (gérant, signataire et
+  - **le domaine de référence** — 45 parcelles + Chazière « Arrachée », ~11,76 ha, tenant de
+    référence/dev. Adresses fictives en **`prenom.<slug>@mavigne.app`**.
+  - **SCEA PH le second domaine** (slug `domaine-chapelle-et-fils`, réf. MV-AAAA-NNNN) —
+    le contact technique le second domaine (chef de culture, opérationnel), **le signataire le second domaine** (gérant, signataire et
     destinataire des factures), ~18 ha, 100 % bio, multi-communes. CGU v1.1 + DPA v1.0 acceptés en
     app le 18/07/2026. ✅ **CONVERTI ET FACTURÉ** le 03/08/2026.
-    ⚠️ Adresses fictives en **`prenom.domainechapelle@mavigneapp.fr`** — **ni le slug, ni le même
+    ⚠️ Adresses fictives en **`prenom.<forme-contractee>@mavigneapp.fr`** — **ni le slug, ni le même
     domaine de messagerie que MG** (§18b).
-- ★★ **Prospect entrant : Château Garraud** (Lalande-de-Pomerol, Gironde) — **premier lead hors
+- ★★ **Prospect entrant : le prospect Gironde** (Lalande-de-Pomerol, Gironde) — **premier lead hors
   réseau personnel**, arrivé le 04/08 par le formulaire d'essai du site. 45 ha en conventionnel,
   40 parcelles multi-communes, 12 permanents + saisonniers, 6 machines, 4 cuvées.
   ⚠️ **Barrique bordelaise : 225 L**, pas 228 (§18b).
 - ⚠️ **Pas d'auto-onboarding client.** Nico installe lui-même chaque domaine. La série du 09/08
   réduit **son temps**, pas sa présence.
-- ⚠️ **Aucun tâcheron** aujourd'hui, ni chez MG ni chez Chapelle (§30f).
+- ⚠️ **Aucun tâcheron** aujourd'hui, ni chez MG ni chez le second domaine (§30f).
 - ★★ **Un seul millésime en cave aujourd'hui** — l'app n'est pas assez ancienne. **Conséquence
   majeure : la série MILLÉSIME a pu poser une garde stricte sans aucune migration de données.**
 
@@ -1946,7 +1946,7 @@ logiciel · démo guidée · champ « lien d'installation » acceptant **une URL
 Le logo reste **tapable 5 fois** → panneau GT, **sans avoir à taper `?tenant=`**.
 
 ⚠️ Le **vrai** chemin d'installation (`?tenant=slug` + statut `pending`) est **intégralement
-préservé**. ★ **Le formulaire d'essai du site fonctionne** : c'est par lui qu'est arrivé Garraud.
+préservé**. ★ **Le formulaire d'essai du site fonctionne** : c'est par lui qu'est arrivé le prospect Gironde.
 
 ---
 
@@ -2000,7 +2000,7 @@ nom de la saison**. Cassé net pour tout domaine nommant ses périodes autrement
 **Le modèle « saison par type » a été déclaré mort le 25/07. Il tournait encore le 03/08.**
 `_chargeSaisonData()` utilisait toujours l'ancien filtre. Or la **Vendange** porte `anytime:true`.
 Elle entrait donc dans **toutes** les périodes.
-Coût mesuré chez Marchand-Grillot : **≈ 941 heures fantômes**, soit **~28 % de la charge totale**.
+Coût mesuré chez le domaine de référence : **≈ 941 heures fantômes**, soit **~28 % de la charge totale**.
 
 **Correctif** : `window._saisonTaches(s.nom)` — ⚠️ **la période passée en ARGUMENT, pas la période
 consultée**.
@@ -2119,7 +2119,7 @@ Contenu obligatoire depuis le **01/01/2026** ; **format électronique lisible pa
 
 La note de mission affirmait qu'il fallait **écrire** un import KML créant les parcelles et un
 mécanisme de création de comptes. **Les deux existaient déjà**, au moins en partie :
-**l'assistant `_agtIns` était en place et avait servi pour l'installation de Chapelle.**
+**l'assistant `_agtIns` était en place et avait servi pour l'installation de le second domaine.**
 
 ★★★ **Leçon : le premier geste d'une mission est un inventaire, pas un plan.** Une note de mission
 vieillit exactement comme un document d'instructions.
@@ -2205,8 +2205,8 @@ le lot n°1.
 
   | Domaine | Slug | Convention réelle |
   |---|---|---|
-  | Marchand-Grillot | `marchand-grillot` | `prénom.marchand-grillot@`**`mavigne.app`** |
-  | Chapelle | `domaine-chapelle-et-fils` | `prénom.`**`domainechapelle`**`@mavigneapp.fr` |
+  | le domaine de référence | `marchand-grillot` | `prénom.marchand-grillot@`**`mavigne.app`** |
+  | le second domaine | `domaine-chapelle-et-fils` | `prénom.`**`domainechapelle`**`@mavigneapp.fr` |
 
   Elle se **déduit par majorité des adresses fictives déjà en place** ; sur un domaine neuf, le slug
   sert de départ ; le champ reste modifiable.
@@ -2268,7 +2268,7 @@ le lot n°1.
   pointer un tracteur inexistant, **en silence**.
 - **Volume d'un fût** : 225 L bordelaise · 228 L bourguignonne · 400 L demi-muid · 500 L.
   ⚠️ **Ne rien choisir RETIRE la clé** au lieu d'écrire 228 en dur.
-  ⚠️ **Garraud est en Gironde : 225 L.** Sinon toute sa cave — part des anges, volumes d'ouillage,
+  ⚠️ **le prospect Gironde est en Gironde : 225 L.** Sinon toute sa cave — part des anges, volumes d'ouillage,
   capacité — est calculée sur des pièces bourguignonnes.
 
 ### Ce que le chantier a appris sur l'outillage
@@ -3117,7 +3117,7 @@ Les six autres onglets ont chacun un **verbe**. **Cave était le seul sans verbe
 livrées depuis — dont une note de chantier *« Rien à construire — on réorganise »*, **visible du
 client**.
 ★★ **Leçon : un écran qui annonce « à venir » doit être re-vérifié à chaque livraison de son
-domaine.** Chapelle a vu cette note pendant des semaines.
+domaine.** le second domaine a vu cette note pendant des semaines.
 ★★★ **C'est le même défaut que l'aide contextuelle et le guide (§27), et que la liste « À finir chez
 ce client » de l'assistant d'installation (§18b) : ce que l'app raconte d'elle-même n'est jamais
 testé.**
@@ -3805,7 +3805,21 @@ Un lot n'est livrable que quand **les six** sont vraies. Les écrire dans la ré
    puis réécriture d'historique **ou** dépôt neuf en un seul commit propre, puis purge des objets
    inatteignables demandée au support GitHub. ⚠ Et le volet RGPD — information des personnes,
    évaluation d'une notification CNIL sous 72 h — n'est pas une question technique.
-   ⚠ **Reste à traiter (lot suivant)** : les noms de domaines clients dans les **commentaires**
+   ★★ **CONF-2 (05/09) — pseudonymisation.** Fait dans la foulée : les noms de domaines clients
+   ont quitté les **commentaires** de six modules, `firestore.rules` et **ce document**, au profit
+   d'étiquettes stables — « le domaine de référence », « le second domaine », « le prospect
+   Gironde », « le contact technique », « le signataire ». Les cas de facturation ont perdu leurs
+   **montants et numéros de facture** ; la leçon reste, le dossier client disparaît.
+   ★ **Le slug `marchand-grillot` RESTE**, et c'est raisonné : il vit dans le code, dans les
+   règles Firestore, dans le manifest et dans l'URL `?tenant=`. Le masquer dans la prose
+   pendant qu'il est en clair partout ailleurs serait du théâtre. Un slug est un numéro de
+   dossier, pas une donnée personnelle.
+   ⚠ **Deux valeurs en dur restent, volontairement, et attendent la même manœuvre que le KML :**
+   `KML_DATA` (46 contours GPS) et `DOMAINE_NOM = 'Domaine …'`. Toutes deux sont des **replis**
+   que Firestore devrait couvrir. Ordre imposé : vérifier que la clé existe en base
+   (`kml_polygons`, `config.domaine_nom`), regarder l'écran, **puis** vider le repli. Les vider
+   à l'aveugle en pleine vendange = carte blanche et domaine sans nom.
+   ⚠ **Reste à traiter** : les noms de domaines clients dans les **commentaires**
    de dix modules, les cas de facturation **nominatifs** d'`admin-gt.js` (montants, numéros de
    facture), et la ligne de `firestore.rules` qui détaille l'effectif d'un domaine. Le contrôle
    mécanique s'arrête où commence la relecture : une adresse a une forme, un nom propre non.
@@ -3839,7 +3853,7 @@ Options : `OPT-KML`, `OPT-FOR`, `OPT-MIG` (dès 200 €), `OPT-CUSTOM`. Codes ab
 
 - **Au-delà du volant inclus : 60 €/h.**
 - Nouveaux codes : **`INST-ESS` / `INST-VIG` / `INST-DOM`**.
-- ★ **Le raisonnement** (calage : installation Chapelle = **20 h**) : ce n'est pas la formule qui
+- ★ **Le raisonnement** (calage : installation le second domaine = **20 h**) : ce n'est pas la formule qui
   fait le coût, c'est la complexité du client. La grille tient parce qu'elle **BORNE le temps
   inclus**, pas parce qu'elle prédit le coût.
 - ★★ **Le widget « Mise en route » (§27c) travaille pour ce forfait** : il transforme une partie de
@@ -3849,7 +3863,7 @@ Options : `OPT-KML`, `OPT-FOR`, `OPT-MIG` (dès 200 €), `OPT-CUSTOM`. Codes ab
   ⚠️ Le chiffre reste **théorique** tant qu'une installation à blanc ne l'a pas mesuré.
 
 **Offre de lancement** : −50 % sur l'installation **+** plan Domaine au tarif Vigneron.
-⚠️ **Durée jamais bornée — à trancher**, au plus tard avec le devis Garraud.
+⚠️ **Durée jamais bornée — à trancher**, au plus tard avec le devis le prospect Gironde.
 
 **Argument ROI en public** : exprimé en **temps, pas en euros**.
 ⚠️⚠️⚠️ **TROIS CHIFFRES CONTRADICTOIRES CIRCULAIENT** — démo **111 h**, brochure **215 h/an pour
@@ -3910,7 +3924,7 @@ aperçu de modèle.
 4. **Ne jamais déposer ces archives dans `public/`.**
 5. **Ne pas incrémenter la version** pour une correction d'identité de l'éditeur.
 
-**Archive constituée le 31/07/2026** : CGU v1.1 et DPA v1.0 tels que signés par SCEA PH Chapelle &
+**Archive constituée le 31/07/2026** : CGU v1.1 et DPA v1.0 tels que signés par SCEA PH le second domaine &
 Fils le 18/07/2026.
 
 ## 26c. ★★ Changement d'identité légale — la carte des 10 fichiers
@@ -4493,7 +4507,7 @@ radios/cases, section « pièces à joindre » explicite.
 1. ⚠️⚠️⚠️ **ALIGNER LES TROIS CHIFFRES DU ROI.** La démo dit **127 h (+37 hors total)**.
    `mvprint.py` dit **215 h/an pour 10 ha** et l'argumentaire oral **3 à 5 h/mois**. Tant que les
    trois ne disent pas la même chose, la plaquette contredit la démo devant le même prospect.
-   **C'est le point n°1, avant le devis Garraud.**
+   **C'est le point n°1, avant le devis le prospect Gironde.**
 2. ⚠️⚠️ **REGARDER LES 19 MOMENTS EN VRAI.** Le harnais vérifie ce qu'on facture et ce qu'on vise ;
    **il ne voit pas un projecteur mal posé**. En particulier : le moment ouvrier (bascule + retour),
    le dépli des échéances, la sous-vue Parcelles d'Économie, et les deux moments qui enchaînent
@@ -4575,13 +4589,13 @@ lignes qu'il faut regarder en premier** — pas le diff, qui noie le signal dans
    simulateur**, dont la légende de couleurs a été remaniée.
 3. **`test:smoke` et `test:e2e`** — jamais joués côté Claude (CDN Playwright injoignable pour
    l'installation de Chromium ; les mesures de ce chantier passent par le Chromium déjà présent).
-4. ★ **La migration `_PIL_ST_V` remet la disposition à neuf UNE fois chez MG et Chapelle** : les
+4. ★ **La migration `_PIL_ST_V` remet la disposition à neuf UNE fois chez MG et le second domaine** : les
    cartes qu'ils avaient ouvertes ou fermées repartent repliées. C'est annoncé dans le journal des
    nouveautés — vérifier que le message est bien passé avant qu'ils s'en étonnent.
 
 ### ⚠️⚠️ NOUVEAU AU BACKLOG (issu de §55 — 23/08)
 
-1. ⚠️⚠️⚠️ **REPOSER LE 19 ET LE 20 AOÛT chez Marchand-Grillot.** Leurs entrées ont été enregistrées
+1. ⚠️⚠️⚠️ **REPOSER LE 19 ET LE 20 AOÛT chez le domaine de référence.** Leurs entrées ont été enregistrées
    avant le correctif : plus d'horaire, plus de drapeau d'échange, **et aucun calcul ne peut les
    retrouver**. Tant que ce n'est pas fait, la feuille de Victor sort à **+8h** au lieu de −8h30.
    Geste : *Annuler l'absence → sélection → mode Remplacement 07:00→16:30 → reposer le retard (19) /
@@ -4607,7 +4621,7 @@ lignes qu'il faut regarder en premier** — pas le diff, qui noie le signal dans
    C'est le point faible du paquet, avant tout envoi client.
 4. ✅ **TRANCHÉ le 23/08 (§55m)** — `CONFIG.hsup_dues_debut` ne commande plus l'absence
    injustifiée : elle doit ses heures comme le retard, réglage ou pas. Le réglage ne borne plus que
-   les motifs neutres. ⚠️ **À vérifier après déploiement** : sur les mois passés de MG et Chapelle,
+   les motifs neutres. ⚠️ **À vérifier après déploiement** : sur les mois passés de MG et le second domaine,
    une injustifiée déjà enregistrée descend maintenant « reste à prendre ». C'est une correction,
    pas une régression — mais **regarder les compteurs avant de sortir une paie**.
 5. **« ETP » subsiste à l'écran** (`pl2-mc-etp`) alors que le document imprimé dit désormais
@@ -4637,7 +4651,7 @@ lignes qu'il faut regarder en premier** — pas le diff, qui noie le signal dans
   `if(e&&e.absent) return {txt:'✕', cls:'pl2c-abs'}` — la croix rouge tombe **avant** toute lecture
   de `motif` et de `motif_h`. Or le motif `retard` porte `heures:true` : **la donnée est là,
   l'affichage l'écrase.** Trouvé à l'œil sur la démo, **mais c'est le produit** : chez MG et
-  Chapelle, un retard saisi ressemble à une journée perdue sur le tableau. Piste : un glyphe
+  le second domaine, un retard saisi ressemble à une journée perdue sur le tableau. Piste : un glyphe
   distinct (⏰ + les heures) quand `motif_h > 0`, et la légende qui suit.
 - **Le chrono tracteur n'est jamais visible en démo** (`CONFIG.chrono_mode` à 'off', aucune mesure
   ouverte). Soit on le sème pour en faire un moment — c'est l'argument de précision le plus fort
@@ -4669,14 +4683,14 @@ lignes qu'il faut regarder en premier** — pas le diff, qui noie le signal dans
    `firebase deploy --only functions:gtRenewTrial,functions:trialWatch` **puis**
    `npm run build && firebase deploy`. Pas de rules, pas de backfill.
 2. **`test:smoke` et `test:e2e` côté Nico** — jamais joués côté Claude (CDN Playwright injoignable).
-3. ✅ **`trialExp` de Marchand-Grillot et Chapelle vérifié** (14/08, Nico) — la première nuit,
+3. ✅ **`trialExp` de le domaine de référence et le second domaine vérifié** (14/08, Nico) — la première nuit,
    `trialWatch` traite ce qu'elle trouve ; un `trialExp` résiduel chez un converti aurait déclenché
    une relance chez lui.
 
 ### ✅ L'OFFRE DE LANCEMENT EST BORNÉE (14/08)
 
 **Réglé.** 15 jours, reconductibles une fois, puis lecture seule — cf. §14b et §40. C'était le point
-bloquant du devis Garraud depuis trois sessions. **Reste à trancher : ce qui se passe après J30.**
+bloquant du devis le prospect Gironde depuis trois sessions. **Reste à trancher : ce qui se passe après J30.**
 L'hypothèse en vigueur — la lecture seule dure — n'a jamais été confirmée explicitement.
 
 ### NOUVEAU AU BACKLOG (issu de §40)
@@ -4838,9 +4852,9 @@ Connus par le seul changelog de `sw.js`, **à consigner par Nico** :
 ### ✅ Le verrou administratif est levé
 
 **3 août 2026 — l'Urssaf a confirmé que Nico peut facturer.** La première facture définitive est
-partie à Simon Chapelle (réf. MV-2026-9024).
+partie à le signataire le second domaine (réf. MV-AAAA-NNNN).
 
-### ★★ Le fait commercial : Château Garraud
+### ★★ Le fait commercial : le prospect Gironde
 
 **Premier prospect arrivé hors réseau**, par le formulaire d'essai du site : **Lalande-de-Pomerol
 (Gironde)** — ~45 ha en conventionnel, ~40 parcelles multi-communes, **12 permanents** + saisonniers,
@@ -4873,7 +4887,7 @@ manipulations · bilan de campagne.
 **5 août** — `mvprint.py` retrouvé et archivé ; document d'instructions régénéré.
 **4 août** — niveaux sautés `_mvNivH` (−528 h chez MG) · plomberie `tcfgSave` + `_normalizeTaches` ·
 badge « votre valeur » · densité · barèmes régionaux · **DOCK rejoué** · MÉNAGE · **capacité
-réelle** · **grille d'installation tranchée** · Garraud + `mise-en-route.html` · **registre phyto
+réelle** · **grille d'installation tranchée** · le prospect Gironde + `mise-en-route.html` · **registre phyto
 CSV** · **vendange-couperet**.
 **1er au 3 août** — UX-1 · `firebase.json` · e2e +2 étapes · **écran d'accueil public** · téléphone
 corrigé · DEMO-3 · heures sup · **saisonniers dans l'historique** · **équipe collective** · refonte
@@ -4885,12 +4899,12 @@ corrigé · DEMO-3 · heures sup · **saisonniers dans l'historique** · **équi
 
 1. ★★★ **LE DEVIS GARRAUD** — la séquence complète est ci-dessus. ⚠️ **Il ne peut pas partir avant
    le point 2** : le devis chiffre une remise dont la durée n'est pas définie.
-2. ⚠️⚠️ **BORNER L'OFFRE DE LANCEMENT** (durée jamais définie) — **bloquant pour le devis Garraud.**
+2. ⚠️⚠️ **BORNER L'OFFRE DE LANCEMENT** (durée jamais définie) — **bloquant pour le devis le prospect Gironde.**
    Une remise « −50 % » sans date de fin sur un document contractuel engage sans limite.
 3. **Vérifier les empreintes de `_mv_signatures`** contre les archives du 31/07.
 4. **Vérifier l'indexation dans Search Console.**
 5. **LinkedIn posts #4 et suivants** — **douze angles prêts** (§27).
-6. ★ **Trois questions à poser à Alexandre** : ses écartements commune par commune · le recours
+6. ★ **Trois questions à poser à le contact technique** : ses écartements commune par commune · le recours
    éventuel à un prestataire · **pourquoi Pliage, Palissage et Entreplantation sont absents de son
    barème** (75 h/ha, soit 1 350 h sur 18 ha, §30d).
 
@@ -5167,7 +5181,7 @@ sont neuves, donc **non auditées** : les traiter comme des hypothèses jusqu'à
     Cave / Réserve / Planning décochées, un tractoriste avec Vigne / Tracteur / Phyto. **Vérifié :
     `_canModule` (`app.js:3860`, socle en `admin-gt.js:2664`) = formule ∧ masquage manuel, le rôle
     n'entre nulle part.**
-    ⚠️ **Gain direct sur Garraud : 12 personnes × 7 arbitrages.** À faire **avant** l'installation.
+    ⚠️ **Gain direct sur le prospect Gironde : 12 personnes × 7 arbitrages.** À faire **avant** l'installation.
 41. ✅ ~~**44 occurrences de `var(--texte-doux,#8B8175)`**~~ — **RAYÉ, vérifié le 16/08 :
     0 occurrence** dans `src/*.js`, `styles.css` et `index.html`. Le repli fautif à 3,66:1 a
     disparu — **par quel lot, on ne sait pas** : aucun `WHATS_NEW` ne le mentionne. ★ **C'est le
@@ -5186,7 +5200,7 @@ sont neuves, donc **non auditées** : les traiter comme des hypothèses jusqu'à
 
 ### ✅ Rayés du backlog
 
-~~Urssaf~~ · ~~facturer Chapelle~~ · ~~clé `"site"`~~ · ~~UX-1~~ · ~~SEC-3 CSP~~ · ~~e2e 10 pages~~
+~~Urssaf~~ · ~~facturer le second domaine~~ · ~~clé `"site"`~~ · ~~UX-1~~ · ~~SEC-3 CSP~~ · ~~e2e 10 pages~~
 · ~~`firestore.indexes.json`~~ · ~~niveaux `'Auto'`~~ · ~~plomberie des tâches~~ · ~~badge~~ ·
 ~~densité~~ · ~~barèmes régionaux~~ · ~~lot DOCK~~ · ~~lot 2 des heures prévues~~ · ~~CSS mort
 Réserve~~ · ~~gardes mortes~~ · ~~recâbler Plein soleil~~ · ~~grille d'installation~~ ·
@@ -5268,7 +5282,7 @@ chaque session)**~~ — remplacé par le dépôt GitHub le 10/08.
 ## 30. ★★ MULTI-TERROIR — rendre le barème vrai ailleurs qu'en Côte de Nuits
 
 **État : le socle est LIVRÉ, et son premier client d'essai est arrivé le jour même**
-(Château Garraud, Lalande-de-Pomerol). Cette section décrit ce qui existe, ce qui reste, et surtout
+(le prospect Gironde, Lalande-de-Pomerol). Cette section décrit ce qui existe, ce qui reste, et surtout
 **pourquoi** — les raisonnements valent plus que le code, ils resserviront.
 
 ### 30a. Barèmes régionaux — `MV_BAREMES` (livré)
@@ -5374,7 +5388,7 @@ catalogue, `_normalizeTaches` **reconstruisait l'objet champ par champ** à chaq
 **Corrigé** : la fonction part de `Object.assign({}, t)` et n'impose que ce qui vient du catalogue.
 
 **Second trou, même famille** : `tcfgSave` reconstruisait l'entrée de zéro sans réécrire
-`saisons`/`anytime`/`conv`. Ouvrir « Pioche » chez Chapelle et enregistrer **sans rien changer** la
+`saisons`/`anytime`/`conv`. Ouvrir « Pioche » chez le second domaine et enregistrer **sans rien changer** la
 faisait passer d'Automne à Printemps, en silence.
 ★★ **C'est la même famille que le bug du formulaire d'analyse du 07/08 et que la config de
 l'assistant d'installation du 09/08** : *une fonction qui reconstruit un objet de zéro perd tout ce
@@ -5387,10 +5401,10 @@ différents.**
 **brut** ; `window.TACHES` est déjà normalisé et ne montre rien) :
 
 - **`hha` explicite sur toutes les entrées** sauf Entreplantation. **Aucun repli ne se déclenche.**
-- **Marchand-Grillot** : 11 tâches, **565 h/ha = exactement le catalogue**.
-- **Chapelle** : 9 tâches, **495 h/ha**. **Pliage, Palissage et Entreplantation absents** — 75 h/ha,
+- **le domaine de référence** : 11 tâches, **565 h/ha = exactement le catalogue**.
+- **le second domaine** : 9 tâches, **495 h/ha**. **Pliage, Palissage et Entreplantation absents** — 75 h/ha,
   soit **1 350 heures non budgétées sur 18 ha**. Vendange à **180 h/ha**. **À vérifier avec
-  Alexandre.**
+  le contact technique.**
 - **Les deux** ont Relevage **100** (50/25/25) et Accolage **50** là où le catalogue dit 90 et 45.
 - ★ **Les 485 h/ha du commentaire = Ébourgeonnage ×2 + Pioche ×0 + Relevage ×3.** **Le total du
   barème n'est donc pas une constante** — l'invariant est le barème **par passage**.
@@ -5410,7 +5424,7 @@ mensonge d'écran pendant l'installation, pas une divergence de données**.
 lui reçoit exactement le même seed (§18b).
 
 ⚠️ Un nouveau tenant reçoit un document **sans `passagesHha`** — **ce domaine-là bougera si le
-catalogue change**, contrairement à MG et Chapelle.
+catalogue change**, contrairement à MG et le second domaine.
 
 ★ **Le seed porte aussi les ACTIVITÉS du tracteur**, toutes rattachées à `tracteurDefautId:'trac1'` —
 c'est pourquoi la première machine collée à l'installation **doit garder cet identifiant** (§18b).
@@ -5423,7 +5437,7 @@ barème qu'on ne peut pas vérifier au chronomètre ne peut être qu'une **conve
 
 La règle 1/N suppose **qu'une parcelle se fait dans la journée**. Le biais croît avec la taille des
 parcelles : faible chez MG (0,26 ha en moyenne), faux en permanence sur des blocs girondins de 2 à
-3 ha — ★ **Garraud est exactement ce profil.**
+3 ha — ★ **le prospect Gironde est exactement ce profil.**
 
 ★★★ **L'AXE CAD-1 EST FERMÉ, ET C'EST UN RÉSULTAT — PAS UN ABANDON.**
 Trois mesures en lecture seule l'ont tué :
@@ -5529,7 +5543,7 @@ mais *qui le LIT, et pour calculer quoi ?*** Un `grep` du nom de la clé répond
 - ★★★ **Pas d'auto-inscription, pas de tunnel, pas de paiement en ligne.** La série installation
   réduit **le temps de Nico**, jamais sa présence.
 
-### 30k. Ce que ça change pour Marchand-Grillot et Chapelle
+### 30k. Ce que ça change pour le domaine de référence et le second domaine
 
 **Rien**, tant qu'ils ne touchent à rien : sans écartements et sans changement de barème, le
 coefficient vaut 1 et le jeu actif est la Côte de Nuits. **20/20 tâches inchangées.**
@@ -5559,7 +5573,7 @@ Cette série rend un domaine girondin installable **sans que Nico connaisse la G
 forfait d'installation, **elle le justifie** : une heure de cadrage avec le client et son contrat de
 tâche, au lieu de deviner.
 
-★ La grille d'installation étant tranchée, le devis Garraud est **écrivable dès le retour de son
+★ La grille d'installation étant tranchée, le devis le prospect Gironde est **écrivable dès le retour de son
 formulaire** — seule la durée de l'offre de lancement reste à borner.
 ★★★ **Et depuis le 09/08, le forfait est SOUTENABLE** : 20 h incluses pour une installation qui en
 coûte 9 laisse de la marge pour l'imprévu, la formation et les allers-retours. ⚠️ **Chiffre à
@@ -7080,7 +7094,7 @@ tous les trous, il faut que tout soit parfait pour le prospect »*. Audit d'abor
   c'est `submitLead` qui l'envoie, et `submitLead` n'était jamais appelée. **`ackText`/`ackHtml`
   existaient depuis toujours dans `leads.js`.**
 
-**Château Garraud est passé par le repli mailto** — ce qui explique sa fiche sans affichage.
+**le prospect Gironde est passé par le repli mailto** — ce qui explique sa fiche sans affichage.
 
 **Correctif** : `essai.html` essaie **l'URL absolue d'abord**, `/api/lead` en repli — même ordre, et
 pour la même raison, que `mise-en-route.html`. Les deux `rewrites` sont posés en plus, mais la page
@@ -7099,7 +7113,7 @@ faute dans la même session : reconstituer de mémoire au lieu de lire.**
 
 | Lot | Fichiers | Ce qu'il ferme |
 |---|---|---|
-| **A** hosting | `firebase.json` · `essai.html` · `mise-en-route.html` | `/api/lead` · repli presse-papier · RGPD au point de collecte · effectifs de Garraud retirés |
+| **A** hosting | `firebase.json` · `essai.html` · `mise-en-route.html` | `/api/lead` · repli presse-papier · RGPD au point de collecte · effectifs de le prospect Gironde retirés |
 | **B** functions | `leads.js` | accusé de mise en route au client, **une seule fois** |
 | **C** panneau GT | `admin-gt.js` | essai à la remise · fiche honnête · pièces jointes suivies |
 | **D** functions | `claims.js` | `gtRenewTrial` + `trialWatch` — l'essai borné |
@@ -7108,7 +7122,7 @@ faute dans la même session : reconstituer de mémoire au lieu de lire.**
 
 ### CE QUE CHAQUE LOT A APPRIS
 
-**A — `mise-en-route.html` parlait de Garraud à tout le monde.** « vos 12 permanents », « vos
+**A — `mise-en-route.html` parlait de le prospect Gironde à tout le monde.** « vos 12 permanents », « vos
 6 engins », « vos 4 cuvées », en dur dans la page publique. Le deuxième prospect aurait lu les
 effectifs du premier. ★ **Une page publique écrite pour un client nommé devient un incident dès le
 deuxième.**
@@ -7417,7 +7431,7 @@ cherchant la balise fermante qui correspond vraiment — sa première version d�
 deux motifs et restait **verte** quand on sortait le chiffre de l'en-tête.
 
 ★★★ **`_PIL_ST_V` — LA MIGRATION SANS LAQUELLE LE LOT EST INVISIBLE.** `_pilSaveState` grave l'état
-**complet** dès qu'on touche une tuile, un onglet de graphe ou une case. MG et Chapelle avaient donc,
+**complet** dès qu'on touche une tuile, un onglet de graphe ou une case. MG et le second domaine avaient donc,
 depuis des mois, un `collapsed` tout à zéro dans leur navigateur — et **au chargement, le mémorisé
 gagne sur le défaut**. Changer le défaut sans marqueur ne leur aurait **strictement rien fait** :
 installer la mise à jour, voir le même écran. C'est le piège déjà vécu avec `avc_etp` / `an_frise`.
@@ -8950,7 +8964,7 @@ claim), assez court pour rester utilisable. À resserrer ou élargir si l'usage 
 
 **La question de Nico était la bonne, et la réponse était oui.** Le fichier reçu
 (`Projet_de_carte_sans_titre.kml`) porte **un seul** `Placemark` : « Vris Bas », 7 points,
-**0,66 ha** au calcul de `_agtGeoArea`, centroïde 47,0857 / 4,8791 — Chapelle, pas Garraud.
+**0,66 ha** au calcul de `_agtGeoArea`, centroïde 47,0857 / 4,8791 — le second domaine, pas le prospect Gironde.
 
 ### 53a. Le défaut
 
@@ -9056,7 +9070,7 @@ sort en 1 ; `_agtKmlPlan` supprimée → le harnais sort en 1. Vérifié, pas d�
 
 ### 53f. Ce qui reste ouvert
 
-- ⚠️ **La vraie liste des contours de Chapelle n'a pas été lue** — je n'ai pas accès à Firestore.
+- ⚠️ **La vraie liste des contours de le second domaine n'a pas été lue** — je n'ai pas accès à Firestore.
   Les 11 noms des captures sont des noms de test. L'écran affichera le vrai décompte.
 - ⚠️ Le harnais `harnais-claude-md.mjs` sort **1 rouge préexistant** (`app.js:703` — `saveData`
   ne refuse plus à cette ligne). Antérieur à ce lot, laissé tel quel.
@@ -9376,7 +9390,7 @@ dues » lui réclamerait la journée entière. C'est le harnais du retard, **J16
 distinction quand ma première version l'avait perdue.
 
 ★★★ **Conséquence pratique, à ne pas oublier : les entrées des 19 et 20 août chez
-Marchand-Grillot ont été enregistrées AVANT ce correctif. Elles ne portent plus ni horaire ni
+le domaine de référence ont été enregistrées AVANT ce correctif. Elles ne portent plus ni horaire ni
 drapeau, et AUCUN calcul ne peut les retrouver.** Le moteur est juste, la donnée est perdue :
 **il faut reposer ces deux jours à la main** (Annuler l'absence → mode Remplacement 07:00→16:30 →
 reposer le retard / l'absence). Tant que ce n'est pas fait, la feuille sort à **+8h**.
@@ -9575,7 +9589,7 @@ négatif » de Nico, sur la seule ligne qui survit au changement de mois.
 **Il avait raison, et c'était pire que ce qu'il décrivait : elles n'étaient nulle part.**
 
 `_planAbsLostH` laissait l'absence injustifiée sous le garde-fou `CONFIG.hsup_dues_debut`, non posé
-chez Marchand-Grillot. Hors fenêtre, ses heures ne passaient donc **que par l'écart du mois**. Or :
+chez le domaine de référence. Hors fenêtre, ses heures ne passaient donc **que par l'écart du mois**. Or :
 
 ```js
 function _planSupMonth(mbr,m){ … return Math.max(0, _planSummary(mbr,m).ecart); }
@@ -9623,7 +9637,7 @@ observé ; seule une assertion écrite depuis la règle décrit le comportement 
 faisait. *Le décor d'un harnais est du code comme un autre.*
 
 ★ **Rétroactivité assumée.** `hsup_dues_debut` existait pour que rien ne bouge sur une paie déjà
-éditée. Sortir l'injustifiée de la fenêtre **change les mois passés** de MG et Chapelle s'ils
+éditée. Sortir l'injustifiée de la fenêtre **change les mois passés** de MG et le second domaine s'ils
 portent des absences injustifiées. C'est un arbitrage, pas un oubli : le comportement d'avant
 n'était pas une politique choisie, c'était un trou — et l'interface promettait déjà l'autre
 comportement à chaque saisie. **À vérifier après déploiement (backlog n°4).**
@@ -9700,7 +9714,7 @@ local vaut **22 h (été) ou 23 h (hiver) la VEILLE en UTC**. Ajouter 24 h donne
 contexte de contrat que s'il trouve **UNE seule** période sur le mois — avec deux, il rend `null`,
 et le relevé d'heures est produit **hors de tout contrat**, compteurs des deux contrats mélangés.
 
-⚠️⚠️⚠️ **Actif chez MG, Chapelle et Garraud, toute l'année** — la France est à UTC+1 ou +2, jamais
+⚠️⚠️⚠️ **Actif chez MG, le second domaine et le prospect Gironde, toute l'année** — la France est à UTC+1 ou +2, jamais
 à 0. **Le bac à sable de Claude tourne en UTC : c'est le seul fuseau au monde où ce code était
 juste.** Aucun essai de mon côté ne pouvait l'attraper.
 
@@ -9802,14 +9816,14 @@ assertion ne lit une incohérence entre deux lignes qu'elle ne compare pas.
 
 ### 55l. Ce qui reste ouvert
 
-- ⚠️⚠️ **REPOSER LE 19 ET LE 20 AOÛT chez Marchand-Grillot.** Sans ça, la feuille sort à +8h. Voir
+- ⚠️⚠️ **REPOSER LE 19 ET LE 20 AOÛT chez le domaine de référence.** Sans ça, la feuille sort à +8h. Voir
   55c. **C'est la seule action bloquante du lot.**
 - ⚠️ **Le même patron de destruction existe ailleurs, non corrigé.** Les trois écrivains de congés
   payés (l. 3610, 3788, 4761) et `_planApplySimple` (récup, chaleur) reconstruisent eux aussi
   l'entrée à neuf : un jour d'échange y perd drapeau et horaire. **L'effet est moins grave** —
   l'écart y reste neutre au lieu de devenir faux — mais c'est le même défaut. Le remède propre est
   **un point de passage unique** « conserver la nature du jour », avec son harnais : un lot à part.
-- ⚠️ **Regarder les compteurs de MG et Chapelle après déploiement** (cf. 55m) : une absence
+- ⚠️ **Regarder les compteurs de MG et le second domaine après déploiement** (cf. 55m) : une absence
   injustifiée enregistrée avant ce lot descend maintenant « reste à prendre ». C'est la correction
   voulue, mais **il ne faut pas la découvrir en sortant une paie**.
 - ⚠️ **Personne n'a regardé la feuille imprimée.** Les 83 assertions tiennent des tailles, des
@@ -11443,7 +11457,7 @@ Les deux contre-épreuves (remettre `volume_hl` comme volume de vin ; retirer la
 décuvage) ramènent **exactement 117,1 hL/ha** sur 20 Rangs. La capture de Nico est reproduite au
 dixième par le harnais : c'est la meilleure preuve qu'on a compris la panne.
 
-### 69h. Ce que valent vraiment les rendements 2026 de Marchand-Grillot
+### 69h. Ce que valent vraiment les rendements 2026 de le domaine de référence
 
 | parcelle | affiché avant | après |
 |---|---|---|
@@ -12237,7 +12251,7 @@ prebuild` **exit 0**.
 
 ### 75a. Le signalement
 
-En pleine vendange, sur le Cuvier de Marchand-Grillot : bandeau
+En pleine vendange, sur le Cuvier de le domaine de référence : bandeau
 `🔒 Écriture refusée — cave_vendange (droits insuffisants)`, badge « Synchro partielle », et sur une
 quatrième capture, au même horodatage, « Synchronisation temps réel interrompue ». Nico :
 **« ce n'est pas la 1ère fois que ça arrive, à la réouverture de l'App les dernières saisies ne sont

@@ -93,7 +93,7 @@ const CTX = {
                { nom:'Intercep', emoji:'\u2702\ufe0f', tracteurDefautId:'t2' },
                { nom:'Buttage',  emoji:'\u{1F331}', tracteurDefautId:'t1' } ],
   SESSIONS: [],
-  DOMAINE_NOM: 'Domaine Marchand-Grillot'
+  DOMAINE_NOM: 'Domaine de démonstration'
 };
 
 const globs = Object.keys(CTX).map(k => 'var ' + k + ' = CTX.' + k + ';').join('\n');

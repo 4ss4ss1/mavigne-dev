@@ -132,7 +132,7 @@ if (_MV_EMU) {
         console.warn('[Tenant] Slug URL invalide ignoré :', urlTenant);
       }
     }
-    // 2. Fallback uniquement si migration Marchand-Grillot déjà effectuée
+    // 2. Fallback uniquement si la migration du domaine de référence est déjà faite
     //    (flag mavigne_migrated_v1 posé par _migrateTaskNames au premier lancement).
     //    Protège les membres actuels en cas de clear localStorage inattendu.
     //    Pour les nouveaux clients (localStorage vierge), _fbLoad() déclenche l'onboarding.
@@ -1319,7 +1319,7 @@ window._fbLoadAfterAuth = async function () {
     // #3 : ne seeder les defauts QUE pour le tenant historique marchand-grillot (ses docs
     // existent deja → no-op). Tout autre tenant repart d'une page blanche : l'onboarding a
     // cree parcelles/membres/saisons/taches/config ; les collections restantes (conducteurs,
-    // sessions, journal...) ne doivent PAS recevoir les defauts Marchand-Grillot.
+    // sessions, journal...) ne doivent PAS recevoir les defauts du domaine de reference.
     if (TENANT_ID === 'marchand-grillot' && _pulled.membres === 'ok') {
       // PERF-1 (#2) : chaque fbPushIfAbsent faisait SON getDoc (15 allers-retours en serie)
       // alors que les 15 cles viennent d'etre lues par le pull -> on lui passe l'etat connu.

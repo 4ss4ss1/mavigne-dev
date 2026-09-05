@@ -56,7 +56,7 @@ function monter(cv, ce, parc, mutation) {
     corps + '\nreturn {_mlRendements,_vendVolLoge,_vendCuvCsDom,_vendCuvHl};')(cv, ce, parc, w);
 }
 
-/* Le cas réel de Marchand-Grillot, millésime 2026 : la cuve « Au vellé » porte
+/* Le cas réel du domaine de référence, millésime 2026 : la cuve « Au vellé » porte
    une contenance de 60 hL et reçoit 123 caisses domaine de trois parcelles. */
 const PARC = [{ nom: '20 Rangs', surface: 0.1875 },
               { nom: 'Au Velle', surface: 0.3699 },

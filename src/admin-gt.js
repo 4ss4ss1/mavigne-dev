@@ -1585,15 +1585,15 @@ function _agtLotRoles(s) {
   return out;
 }
 // ⚠️ LA CONVENTION D'ADRESSE N'EST PAS LE SLUG. Vu en lisant les comptes reels :
-//    Chapelle est sur prenom.domainechapelle@mavigneapp.fr alors que son slug est
-//    domaine-chapelle-et-fils, et Marchand-Grillot sur prenom.marchand-grillot@
-//    mavigne.app — l'AUTRE domaine de messagerie. Fabriquer l'adresse a partir du slug
+//    un domaine peut etre sur prenom.<forme-contractee>@mavigneapp.fr quand son slug
+//    est <forme-longue-a-tirets>, et un autre sur @mavigne.app — l'AUTRE domaine de
+//    messagerie. Fabriquer l'adresse a partir du slug
 //    aurait donne, chez un domaine deja installe, des identifiants etrangers a ceux de
 //    ses collegues. On la DEDUIT donc de ce qui existe, par majorite ; a defaut
 //    seulement, le slug sert de depart.
 // ⚠️ PAS _agtLotKey ici : elle sert a comparer des PRENOMS et retire tout ce qui
 //    n'est pas lettre ou chiffre. Appliquee a la partie d'adresse, elle transformait
-//    « domaine-chapelle-et-fils » en « domainechapelleetfils » — une convention qui ne
+//    « un-slug-a-tirets » en « unslugatirets » — une convention qui ne
 //    ressemble ni au slug ni aux comptes existants. Le tiret et le point sont valides
 //    dans une adresse : on les garde.
 function _agtLotPart(v) {
@@ -1684,7 +1684,7 @@ function _agtLotRender() {
     + '<div style="font-size:12px;color:#E0A46A;background:rgba(184,90,26,.10);border-left:3px solid #B85A1A;'
     + 'border-radius:0 8px 8px 0;padding:9px 12px;margin-bottom:12px;line-height:1.55">'
     + 'Le DPA se signe <b>avant</b> la cr\u00e9ation des comptes des salari\u00e9s.</div>'
-    + '<textarea id="agt-lot-txt" rows="7" placeholder="Alexandre;admin&#10;Simon&#10;Marie;marie@domaine.fr;ouvrier tractoriste" '
+    + '<textarea id="agt-lot-txt" rows="7" placeholder="Paul;admin&#10;Lucie&#10;Marie;marie@domaine.fr;ouvrier tractoriste" '
     + 'style="width:100%;box-sizing:border-box;background:rgba(255,255,255,0.05);border:1px solid rgba(139,92,246,0.2);'
     + 'border-radius:10px;padding:11px 14px;font-size:16px;color:#fff;font-family:Outfit,sans-serif;line-height:1.5;resize:vertical"></textarea>'
     + '<div style="margin-top:12px;padding:10px 12px;background:rgba(255,255,255,0.03);border:1px solid rgba(255,255,255,0.07);border-radius:10px">'
@@ -2525,7 +2525,8 @@ function _agtKmlEtatHtml() {
 
   var nb = (_agtKmlBase || []).length, nf = (_agtKmlFiches || []).length;
 
-  // ⚠️ Le jeu de contours en dur (KML_DATA, app.js) n'existe QUE pour marchand-grillot,
+  // ⚠️ Le jeu de contours en dur (KML_DATA, app.js) n'existe QUE pour le domaine de
+  //    reference (slug marchand-grillot, teste ligne suivante),
   //    et _pProxKmlSrc() cesse de le lire dès que kml_polygons est non vide. Écrire ici
   //    un fichier partiel ferait donc disparaître les 46 contours du domaine de prod.
   if (!nb && _agtKmlSlug === 'marchand-grillot') {
@@ -4006,7 +4007,8 @@ window.agtInsRepr = function () {
 
 // ════════ Le parc de machines et le format des futs ══════════════════════════
 // Un domaine neuf demarre avec UN tracteur nomme « Tracteur » et des activites
-// generiques toutes rattachees a `trac1`. Garraud en a six : six fois le meme geste
+// generiques toutes rattachees a `trac1`. Un domaine de 45 ha en a six : six fois le
+// meme geste
 // dans Reglages. On colle la liste, comme pour les parcelles et pour l'equipe.
 //
 // ⚠️ LA PREMIERE MACHINE GARDE L'ID `trac1`. Les activites du seed y renvoient
@@ -4637,7 +4639,7 @@ async function agtResetPwd(slug, email, btn) {
 // Deux ecrans qui n'existaient pas : ou en est chaque client (formule, essai,
 // facturation) et qui a frappe a la porte (collection `leads`, ecrite depuis
 // des mois par submitLead et affichee NULLE PART — c'est par la qu'est arrive
-// Chateau Garraud).
+// le premier prospect entrant).
 //
 // OU VIT QUOI, et pourquoi :
 //   _guerettech/tenants        -> slugs + clients[slug] (plan, essai). LISIBLE
@@ -4770,7 +4772,7 @@ function _agtFRetard(f){
 }
 function _agtFAn(f){ var d=_agtD(f&&f.date); return d?d.getFullYear():0; }
 
-// Un tenant « interne » (Marchand-Grillot par defaut : c'est le domaine de
+// Un tenant « interne » (le domaine de reference par defaut : c'est le domaine de
 // developpement, jamais facture) sort du recurrent et des totaux, sinon les
 // indicateurs racontent une histoire fausse. Reversible d'un clic.
 function _agtInterne(slug){
@@ -5063,8 +5065,8 @@ function _agtBizLeg(col,txt){
 
 // ── Tarif reellement facture (lot D, 06/08/2026) ────────────────────────────
 // Un client peut payer moins que le tarif de sa formule, tous les mois, sans
-// que ce soit une remise a ressaisir : Chapelle est en Domaine (79 €) au tarif
-// Vigneron (49 €) au titre de l'offre de lancement. Le tarif remise vit dans
+// que ce soit une remise a ressaisir : un client peut etre en Domaine (79 €) au
+// tarif Vigneron (49 €) au titre de l'offre de lancement. Le tarif remise vit dans
 // _guerettech/billing.{slug}.abo = {prix, motif, fin} — aucune collection neuve.
 // TOUT ce qui parle d'argent recurrent passe par _agtAboPrix : le revenu, la
 // ligne « abonnement a emettre », le pre-remplissage et le releve de compte.
@@ -5116,8 +5118,8 @@ function agtBizAbo(i){
 // ── Un geste s'applique a UNE facture (lot D) ───────────────────────────────
 // Le geste portait une reference saisie a la main : s'il ne tombait pas sur une
 // vraie facture, il etait « orphelin » et ne venait pas en deduction du du.
-// Vecu chez Chapelle : remise de 195 € rattachee a MV-2026-0002 alors que
-// l'installation etait MV-2026-0003 — 439 € reclames au lieu de 244 €.
+// Vecu en clientele : une remise rattachee au mauvais numero de facture alors que
+// l'installation en portait un autre — le solde reclame etait presque du double.
 // Desormais la cible se CHOISIT dans une liste, la reference suit toute seule.
 function _agtBizCibles(slug){
   var out=[];
@@ -5166,7 +5168,7 @@ function _agtBizRatSel(i,k,slug){
   return h+'</select>';
 }
 
-// Rattachement d'un geste deja saisi mais tombe a cote (cas Chapelle).
+// Rattachement d'un geste deja saisi mais tombe a cote (cas vecu en clientele).
 async function agtBizRattache(i,k,val){
   var t=_agtTenants[i]; if(!t) return;
   var fs=_agtFacts(t.slug), g=fs[k], cible=fs[parseInt(val,10)];
@@ -5272,7 +5274,7 @@ function _agtBuildBusiness(){
       // qu'il corrige, en retrait, et une ligne « net a payer » dit ce que le
       // client doit reellement. Les gestes tombes a cote sont isoles en fin de
       // liste avec de quoi les rattacher : ils ne se voyaient pas et faussaient
-      // le solde (vecu chez Chapelle : 439 € reclames au lieu de 244 €).
+      // le solde (vecu en clientele : presque le double reclame).
       var refs=[], vus={}, orph=[];
       fs.forEach(function(f,k){
         if(_agtFType(f)==='geste') return;

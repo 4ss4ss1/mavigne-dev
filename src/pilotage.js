@@ -57,7 +57,7 @@ function _pilDomKey(){ return 'mavigne_pilote_dom_'+_pilTenant(); }
 // les comportements internes des panneaux réutilisés.
 // ★ VERSION DE L'ETAT MEMORISE CHEZ LE CLIENT.
 //   _pilSaveState ecrit l'etat COMPLET des qu'on touche une tuile, un onglet de
-//   graphe ou une case. MG et Chapelle ont donc, depuis des mois, un
+//   graphe ou une case. Les deux domaines en service ont donc, depuis des mois, un
 //   `collapsed:{...tout a 0}` grave dans leur navigateur — et au chargement,
 //   ce qui est memorise gagne sur le defaut. Changer le defaut sans marqueur
 //   ne leur aurait STRICTEMENT RIEN fait : ils auraient installe la mise a jour

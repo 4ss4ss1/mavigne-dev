@@ -47,7 +47,10 @@ ce('un lien pointe vers une page absente',
 ce('une balise n’est pas refermée',
    s => s.replace('</aside>\n    </div>', '</aside>\n    '));
 ce('un nom de client apparaît',
-   s => s.replace('des domaines bourguignons', 'les domaines Chapelle et Marchand-Grillot'));
+   /* ⚠ Le jeton injecte doit figurer dans le denylist de harnais-vitrine.mjs.
+   On utilise 'domaine-' — present dans la liste et qui n'est le nom de
+   personne : la contre-epreuve prouve le mecanisme sans nommer un client. */
+   s => s.replace('des domaines bourguignons', 'les domaines domaine-untel et domaine-autre'));
 ce('l’ancien chiffre contradictoire revient',
    s => s.replace('Cent vingt-sept heures par an.', '3 à 5 heures de bureau par mois.'));
 ce('la nuance honnête sur 2027 disparaît',

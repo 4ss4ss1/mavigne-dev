@@ -193,7 +193,7 @@ var PLAN_DEF = {
     11:{1:7,2:7,3:7,7:7,8:7,9:7,10:7,14:7,15:7,16:7,17:7,21:7,22:7,23:7,24:6.5}
   }
 };
-// Template historique du domaine de référence (Marchand-Grillot) — réservé à ce tenant.
+// Template historique du domaine de référence — réservé à ce tenant.
 if (_PLAN_IS_MG) {
   PLAN_DEF.nico = {
     0:{5:7.5,6:6.5,7:6,8:7,9:4,12:6.5,13:7,15:6.5,16:4,19:7.5,20:6.5,21:6,22:7,23:4,26:6.5,27:7,29:7,30:4},
@@ -262,8 +262,9 @@ function _planLegal(){
 }
 
 // ── Politique du domaine pour les heures au-dela du planning du mois ──
-// 'paye'    : payees le mois meme (Marchand-Grillot)
-// 'recup'   : recuperees en repos, aucun paiement mensuel (Chapelle & Fils)
+// 'paye'    : payees le mois meme
+// 'recup'   : recuperees en repos, aucun paiement mensuel
+//             (les deux regimes sont en service, un domaine chacun)
 // 'cloture' : tout reporte au solde de fin d'annee
 // Le CALCUL est identique dans les trois cas : seuls l'affichage et les colonnes changent.
 function _planHsupMode(){

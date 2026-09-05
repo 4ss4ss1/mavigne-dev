@@ -27,7 +27,7 @@ import './reserve.js';
 const DEBUG = location.hostname === 'localhost' || location.hostname === '127.0.0.1';
 if(DEBUG) console.log('[Ma Vigne] app.js ' + (window.APP_VERSION ? 'v' + window.APP_VERSION : '') + ' chargé — ' + new Date().toISOString());
 // Garde anti-fuite : les jeux de données en dur ci-dessous (membres, parcelles, KML,
-// nom de domaine, saison) appartiennent à Marchand-Grillot et ne servent QUE de seed/
+// nom de domaine, saison) appartiennent au domaine de référence et ne servent QUE de seed/
 // affichage immédiat pour CE tenant. Tout autre domaine (démo, nouveau client) part vide
 // et charge ses propres données depuis Firestore — plus aucune donnée MG ne transparaît.
 const _MV_IS_MG = (function(){try{return (localStorage.getItem('mavigne_tenant')||'')==='marchand-grillot';}catch(e){return false;}})();
@@ -387,7 +387,7 @@ let SAISON_PASSAGES = {Ebourgeonnage:2, Pioche:2, Relevage:3}; // Passages/nivea
    les domaines et vivaient dans un depot public. Un parcellaire est une donnee
    d'exploitation : il n'a rien a faire dans le code. Il arrive de Firestore
    comme pour tout autre domaine. */
-const PARCELLES= []; // taches chargées depuis Firebase (Marchand-Grillot uniquement ; autres tenants → Firestore)
+const PARCELLES= []; // rempli par applyFbData('parcelles') — mutation en place, jamais réassigné
 
 // Surface totale = somme des parcelles actives (jamais figee). MG : ~11.76 ha via PARCELLES statique.
 function _recalcSurfTotale(){
@@ -3131,7 +3131,7 @@ function logout(){
   window.loginPendingIdx=-1;
   // UX-LOGIN + doctrine SEC-5 — une déconnexion VOLONTAIRE efface le souvenir.
   // Arbitrage assumé, et j'ai changé d'avis en écrivant : logout() purge déjà LS_KEY
-  // et les sauvegardes locales « poste partagé ». Garder la tuile d'Alexandre affichée
+  // et les sauvegardes locales « poste partagé ». Garder la tuile du dernier connecté affichée
   // sur la tablette du hangar après avoir effacé toutes ses données serait incohérent.
   // ⚠ Aucune déconnexion AUTOMATIQUE n'existe (vérifié : logout() n'a que deux
   // appelants, l'avatar et Réglages). Personne ne perd donc son souvenir tout seul.

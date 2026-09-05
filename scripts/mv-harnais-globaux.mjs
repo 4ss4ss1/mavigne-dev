@@ -1,7 +1,7 @@
 #!/usr/bin/env node
 // ── HARNAIS : UN NOM LU DANS UN MODULE EXISTE-T-IL VRAIMENT APRES BUNDLING ? ──
 //
-//  ★★★ LA PANNE QUI A PAYE CE HARNAIS (21/08/2026, Chapelle & Fils).
+//  ★★★ LA PANNE QUI A PAYE CE HARNAIS (remontee du terrain, 21/08/2026).
 //  « ReferenceError: Can't find variable: loginPendingIdx » au clic sur
 //  « Mot de passe oublie ? ». La variable etait pourtant la, declaree dans
 //  app.js, lue dans reglages.js. En dev : parfait. En production : morte.
@@ -265,7 +265,7 @@ function edite(src, mod, f) { const t = src.get(mod); const n = f(t); src.set(mo
 const CAS = [
   {
     nom: 'loginPendingIdx',
-    quoi: 'la panne Chapelle du 21/08 — `let` de module + lecteurs nus',
+    quoi: 'la panne du 21/08 — `let` de module + lecteurs nus',
     casse(s) {
       let ok = true;
       for (const m of ['app.js', 'reglages.js']) ok = edite(s, m, (t) => t.replace(/window\.loginPendingIdx/g, 'loginPendingIdx')) && ok;

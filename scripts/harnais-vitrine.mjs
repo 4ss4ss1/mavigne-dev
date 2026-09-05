@@ -108,6 +108,14 @@ imgs.forEach(i => A(existsSync(join(PUB, i)), `image existante : ${i}`));
 A(imgs.length >= 4, `au moins quatre images (${imgs.length})`);
 
 // ── 7. Aucun nom de client, aucune donnée réelle ────────────────────
+/* ⚠ SEUL ENDROIT DU DEPOT OU DES NOMS DE CLIENTS RESTENT EN CLAIR, ET C'EST
+   ASSUME : c'est la LISTE NOIRE qui garde la page vitrine publique. Pour
+   verifier qu'un nom de client n'apparait pas sur la vitrine, il faut bien
+   savoir lequel chercher. Un fichier de scripts/ n'est pas servi aux clients
+   et n'entre pas dans le bundle — il n'est visible que dans le depot.
+   ★ Si le depot doit devenir totalement muet : remplacer par des empreintes
+   SHA-256 des noms, en gardant 'domaine-' en clair comme canari pour la
+   contre-epreuve. Non fait ici : un controle illisible ne se maintient pas. */
 for (const n of ['Marchand', 'Grillot', 'Chapelle', 'Garraud', 'Dupont', 'domaine-']) {
   A(!new RegExp(n, 'i').test(T), `aucune mention de « ${n} »`);
 }

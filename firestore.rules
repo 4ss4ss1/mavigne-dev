@@ -104,7 +104,7 @@ service cloud.firestore {
     // membres           : comptes, e-mails, rôles → self-service d'élévation sinon
     // saisons           : campagne active + échéances → pilote tout l'avancement
     // planning_*        : RH/paie (CP, absences, heures, heures sup, acomptes).
-    //                     Chapelle & Fils : 4 permanents + saisonniers, DPA Art. 28.
+    //                     un domaine bio type : 4 permanents + saisonniers, DPA Art. 28.
     // (`config` a son propre régime, voir cfgPrefsOnly ci-dessous.)
     // paie              : rémunérations nominatives (taux horaire par personne) +
     //                     prix d'achat du GNR. SEUL document du modèle dont la LECTURE
@@ -126,7 +126,7 @@ service cloud.firestore {
     // ⚠️ Les règles Firestore ne savent PAS mesurer des octets : size() sur une liste
     // = nombre d'éléments. La limite dure de 1 Mio par document est appliquée par
     // Firestore lui-même, pas ici. Ces bornes ne sont qu'un garde-fou de forme, très
-    // au-dessus du réel (Marchand-Grillot = 46 parcelles ≈ 64 ko).
+    // au-dessus du réel (un domaine de 46 parcelles ≈ 64 ko).
     function countOk(d) {
       return !(d in ['parcelles', 'membres', 'saisons'])
              || (request.resource.data.value is list

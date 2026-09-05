@@ -43,7 +43,7 @@ const CIBLE  = path.resolve(args.find(a => !a.startsWith('--')) || path.join(RAC
    justement celui qui rendait le defaut invisible. Il sert de temoin. */
 const FUSEAUX = [
   'UTC',                  //  0     temoin (le bac a sable)
-  'Europe/Paris',         // +1/+2  MG, Chapelle, Garraud — tous les clients
+  'Europe/Paris',         // +1/+2  tous les clients a ce jour
   'Pacific/Auckland',     // +12/13 le plus a l'est
   'America/Los_Angeles',  //  -7/-8 a l'ouest : le defaut symetrique
   'Asia/Kolkata'          // +5:30  decalage non entier

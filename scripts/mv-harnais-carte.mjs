@@ -75,7 +75,7 @@ t('sans chiffre ni cadre, aucun etage vide',
   !/pil-th-l2|pil-tsub/.test(_rendTuile({titre:'T', stat:'', sub:'', corps:''})));
 
 /* ══ 2. LE DEFAUT S'INVERSE — ET ATTEINT LES CLIENTS DEJA INSTALLES ══
-   Sans marqueur de version, MG et Chapelle installent la mise a jour et voient
+   Sans marqueur de version, les domaines en service installent la mise a jour et voient
    exactement le meme ecran : leur `collapsed` memorise gagne sur le defaut. */
 /* ⚠️ Le defaut se VERIFIE EN L'EVALUANT (§6 plus bas) : une expression
    reguliere sur `collapsed:{…}` restait verte quand une seule carte repassait
@@ -155,7 +155,7 @@ t('… mais reste sur grand ecran', /pil-cr-note">l\\u2019ann\\u00e9e enti\\u00e
 
 /* ══════════════════════════════════════════════════════════════════════════
    6. LA MIGRATION, EXECUTEE — pas relue.
-   Le point qui decide si le lot est visible chez MG et Chapelle ne se prouve
+   Le point qui decide si le lot est visible chez les clients ne se prouve
    pas par grep : on rejoue leur etat memorise reel et on regarde ce qui sort.
    ══════════════════════════════════════════════════════════════════════════ */
 console.log('');

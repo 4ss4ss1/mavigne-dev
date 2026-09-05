@@ -1,4 +1,17 @@
-// MA VIGNE — Service Worker v7.33
+// MA VIGNE — Service Worker v7.34
+// v7.34 (05/09/2026) — CONF-2 : les noms de clients quittent les commentaires.
+//   Suite de CONF-1. Une adresse e-mail a une forme, un nom propre non : le
+//   harnais ne pouvait pas les voir, il a fallu les lire. Retires de six modules,
+//   de firestore.rules et de CLAUDE.md au profit d'etiquettes stables — « le
+//   domaine de reference », « le second domaine », « le prospect Gironde ».
+//   ★ Les cas de facturation d'admin-gt.js perdent MONTANTS et NUMEROS DE FACTURE.
+//   La lecon technique reste entiere — un geste rattache a la mauvaise facture ne
+//   vient pas en deduction du du — le dossier client disparait.
+//   ⚠️ AUCUNE LIGNE DE CODE MODIFIEE. Uniquement des commentaires et un fichier de
+//   documentation. Le bundle est identique a l'octet pres, hors commentaires que
+//   le build supprime deja. Bump SW par la regle du doute, pas par le contenu.
+//   ★ Le slug `marchand-grillot` RESTE : il est dans le code, les regles, le
+//   manifest et l'URL ?tenant=. Le cacher dans la prose serait du theatre.
 // v7.33 (05/09/2026) — CONF-1 : des donnees personnelles de tiers etaient
 //   ecrites dans le code, donc servies a tous les domaines et publiees.
 //   ★★★ CE QUE PORTAIT `app.js` DEPUIS LE PREMIER COMMIT. Un roster en dur de
@@ -2681,7 +2694,7 @@
 //                       Au passage : t.count supprime (redondant avec passagesHha.length
 //                       et niveaux.length), et openTacheCfg derive ce nombre de l'entree
 //                       DU DOMAINE et non du catalogue. Round-trip prouve identique sur
-//                       les docs reels de Marchand-Grillot et de Chapelle.
+//                       les docs reels de le domaine de reference et de le second domaine.
 // v6.08 (04/08/2026) — HEURES SAUTEES : un niveau marque « Auto » (pose tout seul quand
 //                       on valide directement le dernier relevage) comptait comme un
 //                       passage reellement fait. Un relevage mene en UN passage pesait
@@ -2896,19 +2909,19 @@
 // v4.79 — Fenêtre de traitement : alerte lessivage (pluie après la fenêtre) + probabilité de pluie par créneau — v4.99
 // v4.78 — Correctif : changer de saison ne déclenche plus la fausse alerte « protection anti-perte de données » ; la saison consultée ne peut plus se désynchroniser de l'avancement (fin de la boucle « Erreur critique » au chargement) — v4.98
 // v4.77 — Avancement : une tâche sans surface concernée (0 h à faire) s'affiche désormais à 100 % au lieu de 0 % (rien à faire = terminé) — v4.98
-// v4.76 — Surface du domaine calculée depuis les parcelles réelles (plus de 11,76 ha figé) ; nom du domaine dynamique (cave, PDF, export) — Marchand-Grillot inchangé — v4.97
+// v4.76 — Surface du domaine calculée depuis les parcelles réelles (plus de 11,76 ha figé) ; nom du domaine dynamique (cave, PDF, export) — le domaine de reference inchangé — v4.97
 // v4.75 — Création de saison : choix des tâches du cycle (heures conseillées affichées) ; retrait d'une tâche d'une seule saison ; suppression d'une saison (confirmation) — v4.97
 // v4.74 — Correctif : la migration Plantation→Entreplantation attend que la config soit chargée avant de l'écrire (fin de l'alerte « fbSave config bloqué » au 1er chargement) — v4.96
 // v4.73 — Saisons agricoles (création par type, dates pouvant chevaucher l'année civile) ; tâches choisies dans la convention (heures conseillées, multi-saisons ou toute l'année) ; travaux complémentaires au temps réel ; entreplantation pilotée par la tarière, la plantation de parcelle neuve devient complémentaire — v4.96
 // v4.72 — Tarière → Plantation : le nombre de trous d'une session Tarière définit la tâche Plantation par parcelle (vignes concernées + temps = trous × temps/trou, réglable dans Réglages) ; rapport de saison enrichi — v4.95
-// v4.71 — Heures/ha des tâches calées sur le barème conventionnel Côte de Nuits (485 h/ha) — défauts des nouveaux domaines ; Marchand-Grillot inchangé — v4.94
+// v4.71 — Heures/ha des tâches calées sur le barème conventionnel Côte de Nuits (485 h/ha) — défauts des nouveaux domaines ; le domaine de reference inchangé — v4.94
 // v4.70 — Lisibilité : audit complet des couleurs — plus aucun texte invisible en thème clair ou sombre (étiquettes produits phyto, motifs d’absence, tableaux, badges, champs de saisie) — v4.94
 // v4.69 — Catalogue E-Phy : le délai de rentrée affiché est le délai réel du produit (6 h, 24 h ou 48 h) déduit de sa classification de danger, avec le motif — v4.93
-// v4.68 — Nettoyage multi-tenant : les données par défaut (tracteurs, activités, template de planning personnel) ne s'appliquent plus qu'au domaine de référence ; un nouveau domaine démarre neutre — aucun changement visible pour Marchand-Grillot — v4.92
+// v4.68 — Nettoyage multi-tenant : les données par défaut (tracteurs, activités, template de planning personnel) ne s'appliquent plus qu'au domaine de référence ; un nouveau domaine démarre neutre — aucun changement visible pour le domaine de reference — v4.92
 // v4.67 — Carte du domaine : la carte s'ouvre cadrée sur le vignoble du domaine (au lieu d'un point fixe en Bourgogne) ; chaque parcelle apparaît sur sa commune même sans contour KML importé — v4.91
 // v4.66 — Fenêtres : une fenêtre ouverte par-dessus une autre (ex. choix de la commune d’une parcelle) s’affiche désormais au premier plan — v4.90
 // v4.65 — Météo par secteur : chaque parcelle peut être affectée à sa commune (suggestion auto par GPS) ; sur l’accueil, météo détaillée par secteur pour les domaines aux parcelles dispersées, et chaque parcelle utilise son centroïde GPS — v4.89
-// v4.64 — Protection anti-perte de données : garde anti-écrasement global (aucun état vide ou squelette par défaut ne peut remplacer des données peuplées, toutes collections) + verrou de chargement Marchand-Grillot + sauvegardes JSON quotidiennes — v4.88
+// v4.64 — Protection anti-perte de données : garde anti-écrasement global (aucun état vide ou squelette par défaut ne peut remplacer des données peuplées, toutes collections) + verrou de chargement le domaine de reference + sauvegardes JSON quotidiennes — v4.88
 // v4.63 — Onboarding du 1er client externe : création serveur du domaine (compte admin + claim tenant) et écriture des données initiales, routage de l'assistant via le registre, garde anti-fuite des données du domaine de dev, formule & essai posés à la création — v4.87
 // v4.62 — Formules selon l'abonnement (modules) + essai 15 j (bandeau J-X évolutif, lecture seule à l'expiration) + changement d'e-mail d'un membre (admin payé) — v4.86
 // v4.61 — Navigation entre saisons : avancement stocké par saison + sélecteur (Lot 4) — v4.85
@@ -2952,7 +2965,7 @@
 // v4.23 — Demo interactive : le tenant de demonstration peut etre modifie librement (bac a sable local, aucune ecriture en base, remise a neuf a chaque rechargement) — v4.49
 // v4.22 — Activation App Check : clé reCAPTCHA v3 renseignée côté client (firebase.js) — v4.49
 // v4.21 — Hygiène/cohérence : boutons export/import en HTML valide (span dans button), manifeste PWA neutre (start_url + icônes), droits saisonnier alignés sur le serveur, message d'attente si trop de tentatives sur un code d'essai — v4.49
-// v4.20 — Fiabilité multi-utilisateur : sauvegarde des parcelles fusionnée 3-way (fin des écrasements lors de validations simultanées et à la reprise hors-ligne), cloisonnement des données pour un nouveau tenant (plus de défauts Marchand-Grillot recopiés), App Check côté client (dormant jusqu'à configuration de la clé) — v4.49
+// v4.20 — Fiabilité multi-utilisateur : sauvegarde des parcelles fusionnée 3-way (fin des écrasements lors de validations simultanées et à la reprise hors-ligne), cloisonnement des données pour un nouveau tenant (plus de défauts le domaine de reference recopiés), App Check côté client (dormant jusqu'à configuration de la clé) — v4.49
 // v4.19 — Correctif carte : parcelles « Fourneau Vieille » et « Fourneau Jeune » — nom du polygone aligné sur la parcelle (était « Fourneaux » avec x) → couleur d'avancement correcte + nom piloté par le toggle « Noms » ; durcissement : tout libellé de polygone est désormais suivi (plus de label orphelin si un nom diverge) — v4.49
 // v4.18 — Lot 5 : export PDF du rapport de saison (Réglages › Exporter) — synthèse, avancement par tâche, travaux tracteur, registre phyto, réparations ponctuelles par parcelle, trous de plantation par parcelle ; HTML imprimable A4 — v4.49
 // v4.17 — « Nouveautés » au démarrage réactivé : après une mise à jour, récap des changements visibles affiché une fois (APP_VERSION 4.48, WHATS_NEW à jour) ; pas de recap au tout premier install — v4.48
@@ -3044,7 +3057,7 @@
 // v3.05 — Fix } manquante renderReglages() L7572 (parseerror module ESLint) · Fix var mi redéclaré L3119
 // v3.03 — Manifest dynamique par tenant : SW intercepte manifest.json → start_url avec slug correct · copyTenantLink + agtSlugPreview + saveAddTenant Admin GT
 // v3.02 — Fix bug _emPickType undefined · Contrats CDD/TESA/Saisonnier/Extra : section renouvellement (date + nouvelle fin) · Alertes admin contrats dans les 30j · Badge 🔄 dans liste membres
-// v2.97 — Cave Élevage : accès étendu à gueret.nicolas@gmail.com (DEV_EMAILS) pour tests domaine
+// v2.97 — Cave Élevage : accès étendu à le compte admin du domaine de reference (DEV_EMAILS) pour tests domaine
 // v2.96 — 3 états tâches : Commencé/Validé/verrouillé + bouton ↩ annulation pour tous · cascade niveaux Relevage
 // v2.95 — ETP PDF mensuel : calcul absolu (ratio × nb salariés) · champ hidden pdf-nb-membres · label ETP équipe · exportPDFMois cohérent
 // v2.99 — Cave Élevage : multi-cuvées + ouillettes + SO2 soutirage unique/répété
@@ -3100,7 +3113,7 @@
 // v2.22 — Fix profils vides : guard vide dans loadData() pour MEMBRES/SAISONS/TACHES
 // v2.17 — Onboarding intégré + tenantId · v2.06 — Firebase Auth · v2.00–v2.05 — divers
 const DEBUG = self.location.hostname === 'localhost' || self.location.hostname === '127.0.0.1';
-const CACHE_NAME   = 'mavigne-v7.33';
+const CACHE_NAME   = 'mavigne-v7.34';
 const TENANT_CACHE = 'mavigne-tenant';   // Cache persistant — préservé à chaque mise à jour SW
 const SYNC_TAG     = 'mavigne-sync';
 
@@ -3116,7 +3129,7 @@ const CDN_URLS = [
 ];
 
 self.addEventListener('install', event => {
-  if(DEBUG) console.log('[SW] Ma Vigne v7.33 installé');
+  if(DEBUG) console.log('[SW] Ma Vigne v7.34 installé');
   event.waitUntil(
     caches.open(CACHE_NAME).then(async cache => {
       // ── Cœur applicatif : STRICT (mise à jour ATOMIQUE) ──
@@ -3132,7 +3145,7 @@ self.addEventListener('install', event => {
 });
 
 self.addEventListener('activate', event => {
-  if(DEBUG) console.log('[SW] Ma Vigne v7.33 activé');
+  if(DEBUG) console.log('[SW] Ma Vigne v7.34 activé');
   event.waitUntil(
     caches.keys().then(keys =>
       Promise.all(
