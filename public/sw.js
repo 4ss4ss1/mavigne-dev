@@ -3,9 +3,9 @@
 //   ecrites dans le code, donc servies a tous les domaines et publiees.
 //   ★★★ CE QUE PORTAIT `app.js` DEPUIS LE PREMIER COMMIT. Un roster en dur de
 //   SEPT personnes nommees avec leur adresse e-mail PERSONNELLE REELLE, et le
-//   parcellaire complet du domaine de reference : 46 parcelles avec surface,
-//   latitude et longitude. Les deux partaient dans le bundle minifie servi a
-//   CHAQUE domaine client, et vivaient dans un depot public.
+//   parcellaire du domaine de reference : 46 parcelles avec surface, latitude
+//   et longitude. Les deux partaient dans le bundle minifie servi a CHAQUE
+//   domaine client, et vivaient dans un depot public.
 //   ★★ RIEN NE LE JUSTIFIAIT. Le roster arrive de Firestore et ecrasait ce seed
 //   des le premier pull ; depuis SEC-3 l'adresse de connexion vient du serveur.
 //   Le seed ne servait qu'a eviter un loader d'une seconde au demarrage a froid
@@ -16,8 +16,13 @@
 //   deux adresses de l'editeur, nommees et justifiees une par une.
 //   ⚠️ CE QUE CE LOT NE FAIT PAS : l'historique git garde tout. Retirer d'un
 //   fichier ne retire pas d'un depot. Cf. CLAUDE.md — volet a traiter hors code.
-//   ⚠️ Restent aussi les noms de domaines clients dans les COMMENTAIRES de dix
-//   modules, et des cas de facturation nominatifs dans admin-gt.js : lot suivant.
+//   ⚠️⚠️ CE QUI RESTE, ET POURQUOI. `KML_DATA` (le trace GPS des 46 parcelles)
+//   N'EST PAS RETIRE : pour marchand-grillot la cle Firestore `kml_polygons` est
+//   vide, ses contours ne vivent QUE dans le code. Le vider rendrait la carte du
+//   domaine blanche en production, en pleine vendange. Ordre impose : importer
+//   les contours via la console GT, verifier la carte, puis vider le bloc dans un
+//   lot separe. Restent aussi les noms de clients dans les COMMENTAIRES de dix
+//   modules et les cas de facturation nominatifs d'admin-gt.js.
 // v7.32 (05/09/2026) — ON NE NOMME PAS UN CLIENT QUI SIGNALE UNE ERREUR.
 //   La note de version 6.76 remerciait nommement le domaine qui avait remonte la
 //   panne du 21/08. Elle s'affiche chez TOUS les domaines : ca revient a dire a
