@@ -1,4 +1,23 @@
-// MA VIGNE — Service Worker v7.32
+// MA VIGNE — Service Worker v7.33
+// v7.33 (05/09/2026) — CONF-1 : des donnees personnelles de tiers etaient
+//   ecrites dans le code, donc servies a tous les domaines et publiees.
+//   ★★★ CE QUE PORTAIT `app.js` DEPUIS LE PREMIER COMMIT. Un roster en dur de
+//   SEPT personnes nommees avec leur adresse e-mail PERSONNELLE REELLE, et le
+//   parcellaire complet du domaine de reference : 46 parcelles avec surface,
+//   latitude et longitude. Les deux partaient dans le bundle minifie servi a
+//   CHAQUE domaine client, et vivaient dans un depot public.
+//   ★★ RIEN NE LE JUSTIFIAIT. Le roster arrive de Firestore et ecrasait ce seed
+//   des le premier pull ; depuis SEC-3 l'adresse de connexion vient du serveur.
+//   Le seed ne servait qu'a eviter un loader d'une seconde au demarrage a froid
+//   d'UN domaine. Retires : MEMBRES, PARCELLES, COULEURS_MBR (prenoms de
+//   salaries), et deux prenoms reels glisses dans les taux de demonstration.
+//   ★ Le filet : `scripts/mv-harnais-confidentialite.mjs`, en CI. Toute adresse
+//   e-mail litterale dans src/ ou public/sw.js fait echouer le build, sauf les
+//   deux adresses de l'editeur, nommees et justifiees une par une.
+//   ⚠️ CE QUE CE LOT NE FAIT PAS : l'historique git garde tout. Retirer d'un
+//   fichier ne retire pas d'un depot. Cf. CLAUDE.md — volet a traiter hors code.
+//   ⚠️ Restent aussi les noms de domaines clients dans les COMMENTAIRES de dix
+//   modules, et des cas de facturation nominatifs dans admin-gt.js : lot suivant.
 // v7.32 (05/09/2026) — ON NE NOMME PAS UN CLIENT QUI SIGNALE UNE ERREUR.
 //   La note de version 6.76 remerciait nommement le domaine qui avait remonte la
 //   panne du 21/08. Elle s'affiche chez TOUS les domaines : ca revient a dire a
@@ -3076,7 +3095,7 @@
 // v2.22 — Fix profils vides : guard vide dans loadData() pour MEMBRES/SAISONS/TACHES
 // v2.17 — Onboarding intégré + tenantId · v2.06 — Firebase Auth · v2.00–v2.05 — divers
 const DEBUG = self.location.hostname === 'localhost' || self.location.hostname === '127.0.0.1';
-const CACHE_NAME   = 'mavigne-v7.32';
+const CACHE_NAME   = 'mavigne-v7.33';
 const TENANT_CACHE = 'mavigne-tenant';   // Cache persistant — préservé à chaque mise à jour SW
 const SYNC_TAG     = 'mavigne-sync';
 
@@ -3092,7 +3111,7 @@ const CDN_URLS = [
 ];
 
 self.addEventListener('install', event => {
-  if(DEBUG) console.log('[SW] Ma Vigne v7.32 installé');
+  if(DEBUG) console.log('[SW] Ma Vigne v7.33 installé');
   event.waitUntil(
     caches.open(CACHE_NAME).then(async cache => {
       // ── Cœur applicatif : STRICT (mise à jour ATOMIQUE) ──
@@ -3108,7 +3127,7 @@ self.addEventListener('install', event => {
 });
 
 self.addEventListener('activate', event => {
-  if(DEBUG) console.log('[SW] Ma Vigne v7.32 activé');
+  if(DEBUG) console.log('[SW] Ma Vigne v7.33 activé');
   event.waitUntil(
     caches.keys().then(keys =>
       Promise.all(

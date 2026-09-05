@@ -342,15 +342,19 @@ try{sessionStorage.removeItem('mv_boot_retry');}catch(e){}
 // DONNÉES
 // ════════════════════════════════════
 
-let MEMBRES = _MV_IS_MG ? [
-  {nom:'Nico',   email:'gueret.nicolas@gmail.com',       roles:['admin','ouvrier','tractoriste'], statut:'Actif', couleur:'#3D6B27'},
-  {nom:'Victor', email:'leravictor904@gmail.com',         roles:['ouvrier','tractoriste'],         statut:'Actif', couleur:'#1A4A7A'},
-  {nom:'Dessi',  email:'dessi.9332@yahoo.com',            roles:['ouvrier'],                       statut:'Actif', couleur:'#7A4F2E'},
-  {nom:'Etienne',email:'etienne.marchand.21@gmail.com',   roles:['ouvrier','tractoriste'],         statut:'Actif', couleur:'#5B2D8E'},
-  {nom:'Chloé',  email:'tonnelierchloe21@gmail.com',      roles:['ouvrier'],                       statut:'Actif', couleur:'#B8913A'},
-  {nom:'Shana',  email:'nana.badyka@gmail.com',            roles:['ouvrier'],                       statut:'Actif', couleur:'#C0392B'},
-  {nom:'Alicia', email:'alicia.dupont58@live.fr',          roles:['ouvrier','tractoriste'],         statut:'Actif', couleur:'#1A5276'},
-] : [];
+/* ★★★ PLUS AUCUN ROSTER EN DUR, ET C'ETAIT UNE FUITE DE DONNEES PERSONNELLES.
+   Ce tableau portait SEPT personnes nommees avec leur adresse e-mail personnelle
+   reelle. Il partait dans le bundle servi a TOUS les domaines, et il vivait dans
+   un depot public depuis le premier commit. Ce n'etaient pas les donnees de
+   l'editeur : celles de ses collegues.
+   ★ Rien ne le justifiait techniquement : le roster reel arrive de Firestore
+   (`applyFbData`, cle MEMBRES) et l'ecrasait des le premier pull ; depuis SEC-3
+   l'adresse de connexion vient du serveur (`getLoginEmail`), plus du roster.
+   Sans lui, le domaine de reference attend Firestore comme tous les autres :
+   `renderLoginProfiles` affiche le loader et retente (voir plus bas).
+   ⚠ Filet : scripts/mv-harnais-confidentialite.mjs interdit desormais toute
+   adresse litterale dans src/. */
+let MEMBRES = [];
 
 let SAISONS = _MV_IS_MG ? [
   {nom:'Hiver 2025–2026', periode:'Déc 2025 – Fév 2026', debut:'2025-11-01', fin:'2026-03-07', active:false},
@@ -378,7 +382,12 @@ let SURF_TOTALE = 11.76;   // recalcule dynamiquement depuis les parcelles activ
 let TRAVAUX = {}; // Données chargées depuis Firebase
 let SAISON_PASSAGES = {Ebourgeonnage:2, Pioche:2, Relevage:3}; // Passages/niveaux par saison — configurable 1-3 via Réglages
 
-const PARCELLES= _MV_IS_MG ? [{"nom":"Ruchottes","surface":0.077,"statut":"Active","lat":"47.220945445764066","lng":"4.965241122676378","taches":{}},{"nom":"Champitenois Grande","surface":0.3299,"statut":"Active","lat":"47.21695608571429","lng":"4.970948385714285","taches":{}},{"nom":"Champitenois Petite","surface":0.0732,"statut":"Active","lat":"47.21619832499999","lng":"4.971599275","taches":{}},{"nom":"Ergot","surface":0.3709,"statut":"Active","lat":"47.21576756666666","lng":"4.970841155555556","taches":{}},{"nom":"Perrieres Vieille","surface":0.1086,"statut":"Active","lat":"47.220130850000004","lng":"4.970564925","taches":{}},{"nom":"Perrieres Jeune","surface":0.1079,"statut":"Active","lat":"47.221010275000005","lng":"4.9709544999999995","taches":{}},{"nom":"7 Rangs","surface":0.0667,"statut":"Active","lat":"47.2321987","lng":"4.9669846","taches":{}},{"nom":"Champs","surface":0.1536,"statut":"Active","lat":"47.233109725000006","lng":"4.9675726749999995","taches":{}},{"nom":"Au Velle","surface":0.3699,"statut":"Active","lat":"47.23146115","lng":"4.966617233333333","taches":{}},{"nom":"20 Rangs","surface":0.1875,"statut":"Active","lat":"47.23192664999999","lng":"4.966694575","taches":{}},{"nom":"Songe du Haut","surface":0.2019,"statut":"Active","lat":"47.231575899999996","lng":"4.968590525","taches":{}},{"nom":"Chaziere","surface":0.087,"statut":"Arrachee","lat":"47.23062468333333","lng":"4.96851645","taches":{}},{"nom":"Entre 2 Routes","surface":0.0406,"statut":"Active","lat":"47.231785800000004","lng":"4.9676618","taches":{}},{"nom":"Songe du Bas","surface":0.1652,"statut":"Active","lat":"47.231314075","lng":"4.96999265","taches":{}},{"nom":"Combe du Dessus","surface":0.169,"statut":"Active","lat":"47.2285493875","lng":"4.9679725375","taches":{}},{"nom":"Carougeot","surface":0.1986,"statut":"Active","lat":"47.22154918333333","lng":"4.973382983333334","taches":{}},{"nom":"Jouise","surface":0.5151,"statut":"Active","lat":"47.222287725","lng":"4.9754784125","taches":{}},{"nom":"Créot","surface":0.3643,"statut":"Active","lat":"47.233935","lng":"4.972331225","taches":{}},{"nom":"Sylvie","surface":0.0457,"statut":"Active","lat":"47.23081858","lng":"4.97407412","taches":{}},{"nom":"Champerrier","surface":0.2968,"statut":"Active","lat":"47.23110025714286","lng":"4.971331928571429","taches":{}},{"nom":"Combe du Bas","surface":1.6753,"statut":"Active","lat":"47.228471828571436","lng":"4.973085071428571","taches":{}},{"nom":"Mansouze","surface":0.148,"statut":"Active","lat":"47.20969473333334","lng":"4.974225916666666","taches":{}},{"nom":"Charreux","surface":0.1139,"statut":"Active","lat":"47.22999388","lng":"4.9788474","taches":{}},{"nom":"Billard Petite","surface":0.2315,"statut":"Active","lat":"47.23032445","lng":"4.97894445","taches":{}},{"nom":"Billard Grande","surface":0.6484,"statut":"Active","lat":"47.230732","lng":"4.980187044444445","taches":{}},{"nom":"Crais","surface":0.554,"statut":"Active","lat":"47.227280549999996","lng":"4.985994825","taches":{}},{"nom":"Etelois","surface":0.2988,"statut":"Active","lat":"47.21371381428572","lng":"4.9710809","taches":{}},{"nom":"Fourneau Vieille","surface":0.1607,"statut":"Active","lat":"47.21490634999999","lng":"4.9775889","taches":{}},{"nom":"Fourneau Jeune","surface":0.1304,"statut":"Active","lat":"47.215599475","lng":"4.975778075","taches":{}},{"nom":"Marchais Petite","surface":0.0385,"statut":"Active","lat":"47.22525455","lng":"4.960455575","taches":{}},{"nom":"Marchais Grande","surface":0.405,"statut":"Active","lat":"47.22450284285714","lng":"4.961353242857143","taches":{}},{"nom":"Croix des Champs","surface":0.1259,"statut":"Active","lat":"47.221786175000005","lng":"4.978182125","taches":{}},{"nom":"Platieres","surface":0.3119,"statut":"Active","lat":"47.221922966666675","lng":"4.989312333333333","taches":{}},{"nom":"Reniard","surface":0.1871,"statut":"Active","lat":"47.21254178333333","lng":"4.978380283333333","taches":{}},{"nom":"Herbiottes","surface":0.2711,"statut":"Active","lat":"47.2012746","lng":"4.969528033333334","taches":{}},{"nom":"Cognées","surface":0.1385,"statut":"Active","lat":"47.197667925000005","lng":"4.971090125","taches":{}},{"nom":"Bras","surface":0.1144,"statut":"Active","lat":"47.203484849999995","lng":"4.97142495","taches":{}},{"nom":"Pouroux","surface":0.2021,"statut":"Active","lat":"47.192603725","lng":"4.965891900000001","taches":{}},{"nom":"Herbues","surface":0.335,"statut":"Active","lat":"47.189758899999994","lng":"4.9672456125","taches":{}},{"nom":"Pasquier des Chenes","surface":0.3325,"statut":"Active","lat":"47.20466566666666","lng":"4.979041383333334","taches":{}},{"nom":"Crotteaux","surface":0.2992,"statut":"Active","lat":"47.17761585","lng":"4.968223575000001","taches":{}},{"nom":"Gravieres","surface":0.165,"statut":"Active","lat":"47.1866447","lng":"4.976601574999999","taches":{}},{"nom":"Bollery Blanc","surface":0.2324,"statut":"Active","lat":"47.171483625","lng":"4.9644239875","taches":{}},{"nom":"Bollery","surface":0.3285,"statut":"Active","lat":"47.1714132125","lng":"4.964357925","taches":{}},{"nom":"Batailles","surface":0.1775,"statut":"Active","lat":"47.184826599999994","lng":"4.971313175","taches":{}},{"nom":"Comble","surface":0.2961,"statut":"Active","lat":"47.2381557875","lng":"4.981507875","taches":{}}] : []; // taches chargées depuis Firebase (Marchand-Grillot uniquement ; autres tenants → Firestore)
+/* ★★ PLUS DE PARCELLAIRE EN DUR. Les 46 parcelles du domaine de reference
+   — nom, surface, latitude, longitude — partaient dans le bundle servi a tous
+   les domaines et vivaient dans un depot public. Un parcellaire est une donnee
+   d'exploitation : il n'a rien a faire dans le code. Il arrive de Firestore
+   comme pour tout autre domaine. */
+const PARCELLES= []; // taches chargées depuis Firebase (Marchand-Grillot uniquement ; autres tenants → Firestore)
 
 // Surface totale = somme des parcelles actives (jamais figee). MG : ~11.76 ha via PARCELLES statique.
 function _recalcSurfTotale(){
@@ -960,54 +969,16 @@ let _jPage=0; // pagination journal (200 entrées/page)
 // Généré depuis Domaine.kml — coordonnées [lat, lng] au format Leaflet
 // ⚠️ Pour commercialisation : remplacer ce bloc par celui du client
 //    (script d'extraction automatique disponible chez GUERETTECH)
-const KML_DATA = _MV_IS_MG ? [
-  {name:"Comble",pts:[[47.239263,4.9820081],[47.2387167,4.9817721],[47.2379518,4.9814073],[47.2368009,4.9805973],[47.2367499,4.9807367],[47.2379373,4.9815414],[47.2385965,4.9818686],[47.2392302,4.9821315],[47.239263,4.9820081]]},
-  {name:"Créot",pts:[[47.2343293,4.9721301],[47.2337137,4.9719101],[47.2335425,4.9725324],[47.2341545,4.9727523],[47.2343293,4.9721301]]},
-  {name:"Champerrier",pts:[[47.2313776,4.970684],[47.2313048,4.9706411],[47.2312556,4.9708395],[47.2311445,4.9707135],[47.2307893,4.9720465],[47.2308549,4.9721646],[47.2309751,4.9722343],[47.2313776,4.970684]]},
-  {name:"Songe du Bas",pts:[[47.2312185,4.9706867],[47.2315317,4.9693804],[47.2314115,4.9693107],[47.2310946,4.9705928],[47.2312185,4.9706867]]},
-  {name:"Songe du Haut",pts:[[47.2315099,4.969308],[47.2317958,4.9679428],[47.2316465,4.9678972],[47.2313514,4.9692141],[47.2315099,4.969308]]},
-  {name:"Entre 2 routes",pts:[[47.2318286,4.9678167],[47.2318741,4.9675485],[47.2317485,4.9675002],[47.231692,4.9677818],[47.2318286,4.9678167]]},
-  {name:"Champs",pts:[[47.2330157,4.9682355],[47.2333208,4.9669467],[47.2331978,4.966936],[47.2329046,4.9681725],[47.2330157,4.9682355]]},
-  {name:"7 Rangs",pts:[[47.2323549,4.9664547],[47.2323184,4.9664031],[47.2320325,4.9675249],[47.232089,4.9675557],[47.2323549,4.9664547]]},
-  {name:"20 Rangs",pts:[[47.2318574,4.9672733],[47.2321479,4.9661923],[47.231995,4.9661226],[47.2317063,4.9671901],[47.2318574,4.9672733]]},
-  {name:"Au Velle",pts:[[47.2315169,4.9672156],[47.2318356,4.9660341],[47.2315405,4.9658436],[47.231301,4.9667636],[47.231322,4.9667784],[47.2312509,4.9670681],[47.2315169,4.9672156]]},
-  {name:"Chaziere",pts:[[47.2308754,4.9677031],[47.2308117,4.9676963],[47.2305494,4.9686834],[47.2305658,4.9686888],[47.2304438,4.9691716],[47.230502,4.9691555],[47.2308754,4.9677031]]},
-  {name:"Combe du Dessus",pts:[[47.2287941,4.9672309],[47.2285164,4.9679685],[47.2283625,4.9682931],[47.2282313,4.9686203],[47.228306,4.9686699],[47.2285947,4.9680141],[47.2287149,4.9677298],[47.2288752,4.9672537],[47.2287941,4.9672309]]},
-  {name:"Marchais Petite",pts:[[47.2253488,4.9603543],[47.2250847,4.9604026],[47.2252031,4.9605367],[47.2253816,4.9605287],[47.2253488,4.9603543]]},
-  {name:"Marchais Grande",pts:[[47.2246566,4.9609927],[47.2245237,4.96099],[47.2245018,4.9606708],[47.2243725,4.9606815],[47.2244089,4.9610168],[47.224387,4.9625162],[47.2246694,4.9626047],[47.2246566,4.9609927]]},
-  {name:"Ruchottes",pts:[[47.2207787,4.9647346],[47.2208735,4.9647413],[47.2208489,4.9635625],[47.2207487,4.9635598],[47.2207787,4.9647346]]},
-  {name:"Combe du Bas",pts:[[47.229127,4.9729724],[47.2286389,4.9726559],[47.2285624,4.9726559],[47.2283438,4.9725862],[47.2280597,4.9724199],[47.2277354,4.9738683],[47.2288356,4.9744369],[47.229127,4.9729724]]},
-  {name:"Jouise",pts:[[47.2221878,4.9768715],[47.2226231,4.9744897],[47.2225357,4.9744655],[47.2223499,4.9744709],[47.2222825,4.9745353],[47.2220147,4.976048],[47.2222242,4.9761151],[47.2220839,4.9768313],[47.2221878,4.9768715]]},
-  {name:"Carougeot",pts:[[47.2215012,4.9739793],[47.2215431,4.9737996],[47.2215613,4.9735287],[47.2217508,4.9725739],[47.2216014,4.9725631],[47.2213373,4.9738533],[47.2215012,4.9739793]]},
-  {name:"Perrieres Jeune",pts:[[47.2208873,4.9714527],[47.2209657,4.9714903],[47.2211387,4.9704442],[47.2210494,4.9704308],[47.2208873,4.9714527]]},
-  {name:"Perrieres Vieille",pts:[[47.2200257,4.9712328],[47.2203262,4.9698756],[47.2202315,4.9699078],[47.21994,4.9712435],[47.2200257,4.9712328]]},
-  {name:"Champitenois Petite",pts:[[47.2160571,4.9723067],[47.2161191,4.9722772],[47.2163304,4.97092],[47.2162867,4.9708932],[47.2160571,4.9723067]]},
-  {name:"Champitenois Grande",pts:[[47.2168788,4.9716925],[47.2170391,4.9709817],[47.2170573,4.9709308],[47.217163,4.9704158],[47.2170537,4.9703755],[47.216928,4.9703004],[47.2165727,4.971942],[47.2168788,4.9716925]]},
-  {name:"Ergot",pts:[[47.2154834,4.972443],[47.2158149,4.9708471],[47.2159097,4.9708793],[47.2160991,4.9697876],[47.2159498,4.9697957],[47.2158623,4.9698011],[47.2156801,4.9707962],[47.2157202,4.9708096],[47.2153886,4.9724108],[47.2154834,4.972443]]},
-  {name:"Etelois",pts:[[47.2134811,4.9725182],[47.2137216,4.9713353],[47.2138947,4.9704851],[47.2139913,4.9698494],[47.2138947,4.9698011],[47.2136506,4.9710912],[47.2133627,4.972486],[47.2134811,4.9725182]]},
-  {name:"Herbiottes",pts:[[47.2013961,4.9689429],[47.2013578,4.9689187],[47.2012795,4.9694793],[47.201243,4.9694686],[47.2011519,4.9701767],[47.2012193,4.970182],[47.2013961,4.9689429]]},
-  {name:"Pouroux",pts:[[47.1928457,4.9652824],[47.1926853,4.9651831],[47.1923718,4.9665162],[47.1925121,4.9665859],[47.1928457,4.9652824]]},
-  {name:"Herbues",pts:[[47.1897521,4.9680945],[47.1900729,4.9666381],[47.1899835,4.9665496],[47.1898651,4.9670431],[47.1897229,4.9669895],[47.1896427,4.967306],[47.1895862,4.9672952],[47.1894458,4.9680489],[47.1897521,4.9680945]]},
-  {name:"Bollery",pts:[[47.1716639,4.9628415],[47.1715965,4.9628442],[47.1715181,4.9635925],[47.1713977,4.9644132],[47.1710093,4.9665697],[47.1710804,4.9665939],[47.1714561,4.9644186],[47.1715837,4.9635898],[47.1716639,4.9628415]]},
-  {name:"Bollery Blanc",pts:[[47.1714615,4.9649953],[47.1718043,4.9628683],[47.1716858,4.9628281],[47.171642,4.9631928],[47.1715582,4.9638554],[47.1714597,4.9644401],[47.1710914,4.9665912],[47.1711661,4.9666207],[47.1714615,4.9649953]]},
-  {name:"Crotteaux",pts:[[47.1777236,4.9677461],[47.177359,4.9676094],[47.1772405,4.968237],[47.1774356,4.9683201],[47.177421,4.9683818],[47.1780773,4.9686474],[47.1781029,4.9685374],[47.1775669,4.9683094],[47.1777236,4.9677461]]},
-  {name:"Batailles",pts:[[47.1850171,4.9706882],[47.1848494,4.9706319],[47.1846106,4.9720776],[47.1848293,4.971855],[47.1850171,4.9706882]]},
-  {name:"Gravieres",pts:[[47.1873611,4.9769985],[47.1859757,4.9761027],[47.1859411,4.9762207],[47.1873009,4.9770844],[47.1873611,4.9769985]]},
-  {name:"Cognées",pts:[[47.1976032,4.9716943],[47.1978402,4.9704873],[47.1977253,4.9705034],[47.197503,4.9716755],[47.1976032,4.9716943]]},
-  {name:"Bras",pts:[[47.2034976,4.9719527],[47.2036233,4.9709281],[47.2034703,4.9709039],[47.2033482,4.9719151],[47.2034976,4.9719527]]},
-  {name:"Pasquier des Chenes",pts:[[47.2049624,4.9773198],[47.204853,4.9772689],[47.2046253,4.9790204],[47.2043647,4.9807745],[47.204454,4.9807987],[47.2047346,4.979066],[47.2049624,4.9773198]]},
-  {name:"Mansouze",pts:[[47.2101184,4.9733059],[47.2100455,4.973255],[47.2095936,4.9744029],[47.2095608,4.9744727],[47.2094096,4.9748831],[47.2094405,4.9750359],[47.2101184,4.9733059]]},
-  {name:"Reniard",pts:[[47.2120787,4.9795305],[47.2124832,4.9785113],[47.2125469,4.9785381],[47.2130972,4.9771433],[47.2130134,4.9770629],[47.2120313,4.9794956],[47.2120787,4.9795305]]},
-  {name:"Fourneau Vieille",pts:[[47.2141393,4.9770607],[47.2141184,4.9771475],[47.2156652,4.9781211],[47.2157025,4.9780263],[47.2141393,4.9770607]]},
-  {name:"Fourneau Jeune",pts:[[47.2163651,4.9762381],[47.2148566,4.9752376],[47.2148293,4.9753234],[47.2163469,4.9763132],[47.2163651,4.9762381]]},
-  {name:"Croix des Champs",pts:[[47.2225832,4.9784356],[47.2210238,4.9778187],[47.2209728,4.9779206],[47.2225649,4.9785536],[47.2225832,4.9784356]]},
-  {name:"Platieres",pts:[[47.2221534,4.988201],[47.2220496,4.9881688],[47.2219476,4.9890003],[47.2216142,4.9907089],[47.2217198,4.9907518],[47.2220532,4.9890432],[47.2221534,4.988201]]},
-  {name:"Crais",pts:[[47.2279117,4.9863127],[47.227919,4.9858942],[47.2267423,4.9857011],[47.2265492,4.9860713],[47.2279117,4.9863127]]},
-  {name:"Billard Grande",pts:[[47.2319612,4.9807712],[47.231892,4.9802562],[47.2301945,4.9798109],[47.2302091,4.9799772],[47.2302783,4.9799987],[47.2302564,4.9800845],[47.2303766,4.9801221],[47.2303511,4.9802616],[47.2310688,4.980401],[47.2319612,4.9807712]]},
-  {name:"Billard Petite",pts:[[47.2303217,4.9798269],[47.2304565,4.9781076],[47.2303254,4.9780486],[47.2301942,4.9797947],[47.2303217,4.9798269]]},
-  {name:"Charreux",pts:[[47.2299338,4.9796821],[47.2301323,4.9780486],[47.2300886,4.9780352],[47.2299848,4.9788292],[47.2298299,4.9796419],[47.2299338,4.9796821]]},
-  {name:"Sylvie",pts:[[47.2309191,4.9735962],[47.2308827,4.9735693],[47.230788,4.9740548],[47.2307224,4.9745859],[47.2307807,4.9745644],[47.2309191,4.9735962]]},
-] : [];
+/* ★★ PLUS DE GEOMETRIE PARCELLAIRE EN DUR (CONF-1). Ce tableau portait le
+   trace GPS complet des parcelles du domaine de reference — le contour de
+   chaque vigne, point par point. Servi dans le bundle a TOUS les domaines,
+   publie dans un depot ouvert. C'est le plan d'exploitation d'un vigneron.
+   ★ Les trois lecteurs (app.js, pilotage.js, utils.js) ecrivent deja
+   `KML_POLYGONS_DYNAMIC.length ? DYNAMIC : KML_DATA` : le trace reel vient de
+   Firestore (import KML par domaine) et ce seed n'etait qu'un repli. Vide, le
+   repli rend un tableau vide — exactement ce que voient tous les autres
+   domaines avant leur propre import. */
+const KML_DATA = [];
 var KML_POLYGONS_DYNAMIC = []; // polygones chargés depuis Firestore (remplace KML_DATA pour nouveaux clients)
 window.KML_POLYGONS_DYNAMIC = KML_POLYGONS_DYNAMIC;
 window.KML_DATA = KML_DATA;  // exposé pour le pilotage (carte du domaine)
@@ -1018,7 +989,10 @@ let priorityMessage=''; // Message priorité admin pour onglet Parcelles
 let priorityTask='';     // Tâche prioritaire admin (verrouille l'onglet Parcelles pour l'équipe)
 var _prioOverride=false; // l'utilisateur a déverrouillé la priorité (session)
 
-const COULEURS_MBR={Nico:'#3D6B27',Victor:'#1A4A7A',Dessi:'#7A4F2E',Etienne:'#5B2D8E',Chloé:'#B8913A',Chloe:'#B8913A',Shana:'#C0392B',Alicia:'#1A5276'};
+/* ★ Vide : cette table associait des PRENOMS DE SALARIES a une couleur.
+   La couleur d'un membre vit sur sa fiche (`m.couleur`), pas dans le code.
+   Les appelants ecrivent tous `COULEURS_MBR[nom] || <defaut>` : rien ne casse. */
+const COULEURS_MBR={};
 window.COULEURS_MBR=COULEURS_MBR;
 // TCLS / TEMJ / TEMOJI : source unique dans utils.js (exposés sur window, chargé avant app.js)
 
@@ -1865,7 +1839,7 @@ function _visiteScenario(){
   //   par type de contrat et le tractoriste perd son taux propre.
   try{
     window.PAIE = {
-      taux:{ 'Marie':15.80, 'Jean':14.60, 'Paul':13.20, 'Sophie':12.70, 'Alicia':12.10, 'Chlo\u00e9':12.10 },
+      taux:{ 'Marie':15.80, 'Jean':14.60, 'Paul':13.20, 'Sophie':12.70, 'Camille':12.10, 'Lucie':12.10 },
       taux_hist:{ 'Jean':[{de:13.90,a:14.60,d:'2026-03-01'}] },
       gnr_appoints:[
         {d:'2026-02-12',l:1200,pu:1.18},

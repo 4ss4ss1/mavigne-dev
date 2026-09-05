@@ -53,6 +53,22 @@ jobs:
       - name: Preflight (C1–C22)
         run: node scripts/preflight.mjs
 
+      # Confidentialite : aucune adresse e-mail de tiers dans ce qui est PUBLIE.
+      # Vecu le 05/09 : app.js portait sept personnes nommees avec leur adresse
+      # personnelle reelle, servies a tous les domaines, depuis le premier commit.
+      # ⚠ Ne dit rien de l'historique git, qui garde tout : cf. CLAUDE.md.
+      - name: Confidentialite — aucune donnee personnelle publiee
+        run: |
+          node scripts/mv-harnais-confidentialite.mjs
+          node scripts/mv-harnais-confidentialite.mjs --contre
+
+      # Portee des noms apres bundling : un nom lu dans un module et declare
+      # dans un autre sans window n'existe pas dans le bundle (Rollup renomme).
+      - name: Globaux — un nom lu existe-t-il apres bundling
+        run: |
+          node scripts/mv-harnais-globaux.mjs
+          node scripts/mv-harnais-globaux.mjs --contre
+
       # Cliquet : bloque toute erreur NOUVELLE, tolere le plafond documente
       # dans scripts/lint-cliquet.mjs.
       - name: ESLint — cliquet anti-regression

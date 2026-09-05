@@ -354,11 +354,10 @@ window._mvGraphRepeindre = function(){
 };
 
 export const WHATS_NEW = [
-  /* ★ 6.77 : release technique. Le seul changement est le RETRAIT d'un nom de
-     domaine client dans la note 6.76 ci-dessous — rien à annoncer, mais il faut
-     bien qu'un numéro neuf porte le fichier corrigé jusqu'aux téléphones. */
-  { v: '6.77', items: [] },
-  { v: '6.76', items: [
+  /* ⚠ 6.76 n'a jamais été déployé (CI rouge) : ses deux items remontent ici.
+     Un bloc de tête SANS item est refusé par mv-whatsnew-check — bumper
+     APP_VERSION, c'est s'engager à annoncer quelque chose. */
+  { v: '6.77', items: [
     { emoji: 'cadenas', titre: 'Le lien \u00ab\u00a0Mot de passe oubli\u00e9\u00a0?\u00a0\u00bb r\u00e9pond de nouveau', desc: "Sur l\u2019\u00e9cran de connexion, ce lien ne faisait <b>rien du tout</b>\u00a0: on cliquait, l\u2019\u00e9cran ne bougeait pas, et il fallait passer par l\u2019administrateur du domaine pour repartir. Il ouvre \u00e0 nouveau la demande de lien de r\u00e9initialisation." },
     { emoji: 'eprouvette', titre: 'Le bouton \u00ab\u00a0nouveau traitement\u00a0\u00bb ouvre enfin la saisie', desc: "Sur la page Phyto, le bouton <b>+</b> en bas \u00e0 droite n\u2019ouvrait aucune fen\u00eatre. La liste des <b>stades ph\u00e9nologiques</b> \u2014 d\u00e9bourrement, floraison, v\u00e9raison\u2026 \u2014 manquait \u00e0 l\u2019appel au moment d\u2019afficher le formulaire, et la saisie s\u2019arr\u00eatait l\u00e0, sans un mot. Le parcours complet est de retour, stade compris." }
   ] },
@@ -1397,11 +1396,9 @@ export const TEMJ = {
   Insecticide:'🟠',Herbicide:'🟤','Biocontrôle':'🟣',
   MFSC:'🌱',Adjuvant:'💧',Mixte:'⚗️','Mélange':'🧪'
 };
-export const COULEURS_MBR = {
-  Nico:'#3D6B27',Victor:'#1A4A7A',Dessi:'#7A4F2E',
-  Etienne:'#5B2D8E',Chloé:'#B8913A',Chloe:'#B8913A',
-  Shana:'#C0392B',Alicia:'#1A5276'
-};
+/* ★ Vide : prenoms de salaries retires du code (cf. src/app.js).
+   La couleur d'un membre vit sur sa fiche. */
+export const COULEURS_MBR = {};
 
 // ════ HELPERS TÂCHES ════
 export function tNom(nom) { return TABREV[nom] || nom; }

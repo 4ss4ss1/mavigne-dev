@@ -3783,6 +3783,32 @@ Un lot n'est livrable que quand **les six** sont vraies. Les écrire dans la ré
    parc entier qui a eu le problème : un signalement devient une exposition, et le prochain
    signalement n'arrive pas. Écrire « remonté du terrain ». ★ Vécu le 05/09 (GLOB-1) : corrigé
    avant publication, au prix d'un bump supplémentaire.
+   ★★★ **ET LA RÈGLE EST PLUS LARGE QUE ÇA : AUCUNE DONNÉE CLIENT DANS CE QUI EST PUBLIé.**
+   Le 05/09, en cherchant où un nom de domaine traînait, on a trouvé bien pire dans `app.js`,
+   depuis le **tout premier commit** : un roster en dur de **sept personnes nommées avec leur
+   adresse e-mail personnelle réelle**, et le **parcellaire complet du domaine de référence** —
+   46 parcelles, surface, latitude, longitude. Les deux partaient dans le bundle minifié servi à
+   **chaque** domaine client, et vivaient dans un dépôt **public**. Ce n'étaient pas les données
+   de l'éditeur : celles de ses collègues et de son employeur.
+   ★ **Rien ne le justifiait techniquement.** Le roster arrive de Firestore et écrasait ce seed
+   dès le premier pull ; depuis SEC-3 l'adresse de connexion vient du serveur. Le seed n'évitait
+   qu'un loader d'une seconde, sur **un** domaine. Retirés en **CONF-1** : `MEMBRES`, `PARCELLES`,
+   `COULEURS_MBR` (prénoms de salariés), et deux prénoms réels glissés dans les taux de démo.
+   ★★ **Le filet : `scripts/mv-harnais-confidentialite.mjs`**, en CI et dans `prebuild`. Toute
+   adresse e-mail littérale dans `src/` ou `public/sw.js` fait échouer le build. **Deux** adresses
+   tolérées, celles de l'éditeur, chacune avec sa raison écrite dans le fichier — une exception
+   se décide, elle ne se glisse pas. `npm run test:confidentialite` joue les contre-épreuves
+   (une adresse de tiers réinjectée dans **chacun** des 13 fichiers surveillés doit rougir).
+   ⚠⚠⚠ **CE QUE LE CODE NE PEUT PAS RÉPARER : L'HISTORIQUE GIT GARDE TOUT.** Retirer d'un fichier
+   ne retire pas d'un dépôt — `git log -p` rend les adresses. Le harnais protège les prochains
+   commits, pas les 176 précédents. Le passé se traite **hors code** : dépôt privé immédiatement,
+   puis réécriture d'historique **ou** dépôt neuf en un seul commit propre, puis purge des objets
+   inatteignables demandée au support GitHub. ⚠ Et le volet RGPD — information des personnes,
+   évaluation d'une notification CNIL sous 72 h — n'est pas une question technique.
+   ⚠ **Reste à traiter (lot suivant)** : les noms de domaines clients dans les **commentaires**
+   de dix modules, les cas de facturation **nominatifs** d'`admin-gt.js` (montants, numéros de
+   facture), et la ligne de `firestore.rules` qui détaille l'effectif d'un domaine. Le contrôle
+   mécanique s'arrête où commence la relecture : une adresse a une forme, un nom propre non.
 6. ⚠️⚠️⚠️ **L'AIDE** — **Règle d'or n°4**. Fiche `MV_AIDE` du module touché relue **contre l'écran
    neuf**, section du guide, `_mvtSteps`, et tout écran qui énumère ce qui reste à faire. Écrire
    « fiche relue, rien à changer » si c'est le cas — pour que ce soit un constat, pas un oubli.
