@@ -3474,6 +3474,28 @@ regarder**. Une assertion verte n'a jamais montré un texte coupé en trois.
    ★ Vaut aussi pour un `<textarea>` dont on colle le contenu, et pour un `<select>` dont on veut
    présélectionner une option (§18b).
 6. Pas de doublon `let`/`var` ; **TDZ** : `window.X = X` **juste après** `let X`.
+   ★★★ **ET CE N'EST PAS UNE QUESTION DE TDZ : UN NOM LU DANS UN AUTRE MODULE SANS `window`
+   N'EXISTE PAS APRÈS LE BUILD.** Rollup donne un scope à chaque module. Un nom nu dans le
+   module B n'est **pas** relié à la déclaration du module A : Rollup le classe *globale du
+   navigateur*, puis **RENOMME la déclaration de A** pour ne pas la masquer — `loginPendingIdx$1`.
+   Les lecteurs restent sur le nom nu. **ReferenceError en production.**
+   ⚠️ **Terser n'y est pour rien** : `minify:false` produit exactement le même bundle.
+   ⚠️ **Et si la déclaration renommée n'a plus aucun lecteur, le tree-shaking la supprime** :
+   `STADES_PHENO` avait purement disparu des 3 Mo livrés — zéro occurrence de « BBCH 07 ».
+   ★ **Trois manquements ont vécu depuis le commit initial**, invisibles à tous les filets
+   (build vert, `node --check` vert, preflight vert) : `loginPendingIdx` (le lien
+   « Mot de passe oublié ? » ne faisait rien — remonté du terrain le 21/08),
+   `STADES_PHENO` (le bouton « nouveau traitement » n'ouvrait pas), `db` (chat v8 sur SDK v10).
+   ★★ **Le filet : `scripts/mv-harnais-globaux.mjs`** (dans `prebuild` **et** `npm run check`).
+   Il rejoue le scope de Rollup **module par module** — ESLint `no-undef`, `sourceType: module` —
+   et exige que tout nom libre soit **une primitive du langage, une globale CDN déclarée
+   (`firebase`, `L`), ou posé sur `window`**. 6 s, pas de build. `npm run test:globaux` joue les
+   contre-épreuves, dont **un défaut inédit injecté dans un module étranger au lot** : un harnais
+   écrit après la panne attrape toujours la panne, ça ne prouve rien sur la suivante.
+   ⚠ **Ce qu'il ne prouve pas** : la **chronologie**. Un nom posé par un module tardif et lu au
+   chargement par un module précoce passe au vert et casse quand même.
+   ⚠ **Corollaire de méthode** : la règle existait déjà ici **sans contrôle**. Une règle écrite
+   et non instrumentée ne tient que par la vigilance — trois fois, la vigilance a manqué.
 7. **Émojis** : `\u{1F529}` avec **un seul** backslash ; `\u{FE0F}` derrière les pictogrammes à
    forme texte. Un **demi-surrogate isolé** **tronque le fichier**.
 8. **`const DEBUG` déclaré dans CHAQUE module.** ✅ 11/11.
@@ -3755,6 +3777,12 @@ Un lot n'est livrable que quand **les six** sont vraies. Les écrire dans la ré
    touche `index.html` / `app.js` / `utils.js` / `styles.css`. Un module JS seul = **aucun bump**.
 5. **`WHATS_NEW`** — prépendé, jamais remplacé, rédigé **du point de vue de l'utilisateur** (le
    symptôme vécu, pas la cause technique), **vérifié en l'exécutant en Node**.
+   ★★★ **ON NE NOMME JAMAIS UN CLIENT QUI SIGNALE UNE ERREUR.** Ni dans `WHATS_NEW`, ni dans le
+   changelog du SW, ni ici — la note s'affiche chez **tous** les domaines, `sw.js` est servi en
+   clair sur mavigneapp.fr, et ce dépôt est **public**. Remercier nommément revient à annoncer au
+   parc entier qui a eu le problème : un signalement devient une exposition, et le prochain
+   signalement n'arrive pas. Écrire « remonté du terrain ». ★ Vécu le 05/09 (GLOB-1) : corrigé
+   avant publication, au prix d'un bump supplémentaire.
 6. ⚠️⚠️⚠️ **L'AIDE** — **Règle d'or n°4**. Fiche `MV_AIDE` du module touché relue **contre l'écran
    neuf**, section du guide, `_mvtSteps`, et tout écran qui énumère ce qui reste à faire. Écrire
    « fiche relue, rien à changer » si c'est le cas — pour que ce soit un constat, pas un oubli.

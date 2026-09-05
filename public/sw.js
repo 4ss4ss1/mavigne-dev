@@ -1,4 +1,39 @@
-// MA VIGNE — Service Worker v7.30
+// MA VIGNE — Service Worker v7.32
+// v7.32 (05/09/2026) — ON NE NOMME PAS UN CLIENT QUI SIGNALE UNE ERREUR.
+//   La note de version 6.76 remerciait nommement le domaine qui avait remonte la
+//   panne du 21/08. Elle s'affiche chez TOUS les domaines : ca revient a dire a
+//   l'ensemble du parc qui a eu le probleme, et a transformer un signalement en
+//   exposition. Le nom est retire de la note, de ce changelog et de CLAUDE.md.
+//   ⚠️ Bump impose par la regle du doute, pas par le contenu : rien ne prouve que
+//   7.31 n'est pas deja parti, et reutiliser un numero fige l'index.html
+//   correspondant pour toujours — la note nominative resterait a l'ecran chez qui
+//   l'a deja recue. Sauter un numero ne coute rien. APP 6.77 / SW 7.32, aucun
+//   changement de code entre 6.76 et 6.77.
+// v7.31 (05/09/2026) — GLOB-1 : trois noms lus dans le code n'existaient pas
+//   dans le bundle livre.
+//   ★★★ CE QUE FAIT ROLLUP, ET QUE RIEN NE REGARDAIT. Un nom declare dans un
+//   module et lu dans un autre SANS passer par `window` n'est pas relie : Rollup
+//   le classe globale navigateur, RENOMME la declaration (loginPendingIdx$1) et
+//   laisse les lecteurs sur le nom nu. ReferenceError a l'execution — build vert,
+//   `node --check` vert, preflight vert, `minify:false` identique : Terser n'y est
+//   pour rien. Trois cas, tous depuis le commit initial :
+//     · `loginPendingIdx` — le lien « Mot de passe oublie ? » ne faisait rien.
+//       Remonte du terrain le 21/08 ; c'est ce signalement qui a ouvert le chantier.
+//     · `STADES_PHENO` — le bouton « nouveau traitement » n'ouvrait pas. Pire :
+//       prive de tout lecteur apres renommage, le tableau avait ete SUPPRIME du
+//       bundle par le tree-shaking. Aucune occurrence de « BBCH 07 » dans les 3 Mo.
+//     · `db` — chat en API Firestore v8 sur un SDK v10, sur une page sans appelant.
+//   ★★ ET LA REGLE EXISTAIT DEJA, SANS CONTROLE. « window.X = X juste apres let X »
+//   (§Build n°6) tenait sur la vigilance seule ; trois manquements ont traverse
+//   tous les filets. `scripts/mv-harnais-globaux.mjs` rejoue desormais le scope de
+//   Rollup module par module : tout nom libre qui n'est ni primitive du langage,
+//   ni globale CDN declaree, ni pose sur window sort ROUGE. Cinq contre-epreuves,
+//   dont un defaut INEDIT injecte dans un module etranger au lot — un harnais ecrit
+//   apres la panne attrape toujours la panne, ca ne prouve rien sur la suivante.
+//   ⚠️ Le chat n'est PAS repare : il est rendu honnete (erreur nommee au lieu d'une
+//   ReferenceError opaque). Exposer `window.db` aurait change le message sans
+//   changer la panne — `db.collection` n'existe pas en v10 — et aurait rouvert un
+//   acces direct a la poignee Firestore que firebase.js encapsule expres.
 // v7.30 (01/09/2026) — AUTH-1 + VD-SAVE : une saisie n'est plus jamais jetee, et
 //   aucun message de succes ne part avant la reponse du serveur.
 //   ★★★ UN CODE D'ERREUR POUR TROIS CAUSES. Firestore rend `permission-denied`
@@ -3041,7 +3076,7 @@
 // v2.22 — Fix profils vides : guard vide dans loadData() pour MEMBRES/SAISONS/TACHES
 // v2.17 — Onboarding intégré + tenantId · v2.06 — Firebase Auth · v2.00–v2.05 — divers
 const DEBUG = self.location.hostname === 'localhost' || self.location.hostname === '127.0.0.1';
-const CACHE_NAME   = 'mavigne-v7.30';
+const CACHE_NAME   = 'mavigne-v7.32';
 const TENANT_CACHE = 'mavigne-tenant';   // Cache persistant — préservé à chaque mise à jour SW
 const SYNC_TAG     = 'mavigne-sync';
 
@@ -3057,7 +3092,7 @@ const CDN_URLS = [
 ];
 
 self.addEventListener('install', event => {
-  if(DEBUG) console.log('[SW] Ma Vigne v7.30 installé');
+  if(DEBUG) console.log('[SW] Ma Vigne v7.32 installé');
   event.waitUntil(
     caches.open(CACHE_NAME).then(async cache => {
       // ── Cœur applicatif : STRICT (mise à jour ATOMIQUE) ──
@@ -3073,7 +3108,7 @@ self.addEventListener('install', event => {
 });
 
 self.addEventListener('activate', event => {
-  if(DEBUG) console.log('[SW] Ma Vigne v7.30 activé');
+  if(DEBUG) console.log('[SW] Ma Vigne v7.32 activé');
   event.waitUntil(
     caches.keys().then(keys =>
       Promise.all(

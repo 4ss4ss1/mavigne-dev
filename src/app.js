@@ -476,6 +476,12 @@ const STADES_PHENO=[
   'Fermeture de grappe (BBCH 79)','Véraison (BBCH 81)',
   'Maturité (BBCH 89)'
 ];
+/* ★ phyto.js lit cette liste. Sans le window ci-dessous, Rollup voit un nom nu
+   dans phyto.js, le classe globale navigateur, RENOMME la déclaration ci-dessus
+   — puis le tree-shaking la supprime, faute de lecteur. Résultat en production :
+   ReferenceError au clic sur « nouveau traitement », et le tableau absent des
+   3 Mo livrés. Filet : scripts/mv-harnais-globaux.mjs. */
+window.STADES_PHENO = STADES_PHENO;
 function getDraeParcelle(nomParcelle){
   if(window._visiteDrae){ var _vh=window._visiteDrae[nomParcelle]||0; return _vh>0?{heures:_vh,produit:'Bouillie bordelaise'}:null; }
   var now=new Date(),maxH=0,prodNom='';
@@ -1017,7 +1023,13 @@ window.COULEURS_MBR=COULEURS_MBR;
 // TCLS / TEMJ / TEMOJI : source unique dans utils.js (exposés sur window, chargé avant app.js)
 
 // LOGIN
-let loginPendingIdx = -1;
+/* ★★ PAS DE `let` ICI, ET C'EST LA PANNE DU 21/08 CHEZ CHAPELLE.
+   reglages.js lit ce compteur (mot de passe oublié). Un `let` de module lui est
+   INVISIBLE après bundling : Rollup renomme la déclaration en loginPendingIdx$1
+   et laisse les lecteurs sur le nom nu — ReferenceError, le lien « Mot de passe
+   oublié ? » ne faisait plus rien. Une variable miroir (`let` + window à chaque
+   écriture) rate dès qu'une écriture est oubliée : window est la SEULE source. */
+window.loginPendingIdx = -1;
 
 // Couleurs avatars login — palette ardoise/or sobre
 var LP_COLORS=['#2C4A3E','#3A3A5C','#4A3228','#1E3A4A','#3C2E4A','#2A4028','#4A3C1E'];
@@ -2866,7 +2878,7 @@ async function _loginAwaitEmail(){
 window._mvLoginAwaitEmail = _loginAwaitEmail;
 
 function selectProfile(idx){
-  loginPendingIdx = idx;
+  window.loginPendingIdx = idx;
   var m = MEMBRES[idx];
   _loginResolveEmail(m);   // SEC-3 : demande l'adresse de CE profil, en tâche de fond
   document.getElementById('login-profiles').style.display = 'none';
@@ -2880,7 +2892,7 @@ function selectProfile(idx){
 }
 
 function backToProfiles(){
-  loginPendingIdx = -1;
+  window.loginPendingIdx = -1;
   _loginResolveEmail(null);   // SEC-3 : on oublie l'adresse en quittant le profil
   document.getElementById('login-profiles').style.display = 'grid';
   document.getElementById('login-sub-txt').style.display = 'block';
@@ -2949,8 +2961,8 @@ async function _mvSubmitFirstPwd(){
 }
 
 async function confirmLogin(){
-  if(loginPendingIdx < 0) return;
-  var m = MEMBRES[loginPendingIdx];
+  if(window.loginPendingIdx < 0) return;
+  var m = MEMBRES[window.loginPendingIdx];
   var saisi = document.getElementById('login-pwd-input').value;
   const btn = document.getElementById('login-pwd-btn');
   btn.disabled = true;
@@ -2999,7 +3011,7 @@ async function confirmLogin(){
     _loginVoirTous = false;
     try{ _mvSessArm(cred.user && cred.user.uid); }catch(e){}
     if(DEBUG) console.log('Login Firebase OK:', m.nom, 'roles:', m.roles);
-    loginPendingIdx = -1;
+    window.loginPendingIdx = -1;
     document.getElementById('login-screen').style.display = 'none';
     document.getElementById('login-profiles').style.display = 'grid';
     document.getElementById('login-pwd-panel').style.display = 'none';
@@ -3090,7 +3102,7 @@ function logout(){
     _mvBkPurge(0);
   } catch(e) { if(window.logError) window.logError({level:'info', cat:'storage',
     msg:'Purge locale de déconnexion incomplète', detail:(e && e.name) ? e.name : ''}); }
-  loginPendingIdx=-1;
+  window.loginPendingIdx=-1;
   // UX-LOGIN + doctrine SEC-5 — une déconnexion VOLONTAIRE efface le souvenir.
   // Arbitrage assumé, et j'ai changé d'avis en écrivant : logout() purge déjà LS_KEY
   // et les sauvegardes locales « poste partagé ». Garder la tuile d'Alexandre affichée
@@ -9204,12 +9216,25 @@ var CHAT_CANAUX = {
   meteo:    {ico:'nuage', label:'Météo',    desc:'Alertes météo et gel'}
 };
 
+/* ⚠⚠ LE CHAT EST HORS SERVICE, ET IL L'ÉTAIT DÉJÀ EN SILENCE.
+   Ces deux fonctions parlent l'API Firestore v8 (`db.collection().doc()`), que
+   le SDK v10 modulaire ne connaît plus — et `db` est encapsulé dans firebase.js
+   derrière les `fb*`, volontairement : c'est là que vit le cloisonnement par
+   domaine. Le nom nu `db` produisait donc une ReferenceError opaque.
+   ★ La page #page-chat n'a AUCUN appelant : `goTo('chat')` n'est écrit nulle
+   part. Le code est inatteignable, on ne le supprime pas (§51) — on le rend
+   honnête. Exposer `window.db` aurait changé la ReferenceError en
+   « db.collection is not a function » : décoration, pas correctif.
+   Pour remettre le chat en service : réécrire en API modulaire via `fbSave` /
+   `fbDoc`, jamais en rouvrant un accès direct à la poignée Firestore. */
+function _chatHorsService(quoi){
+  throw new Error('Chat hors service (' + quoi + ') — à réécrire en API Firestore modulaire');
+}
 function _chatDoc(canal){
-  return db.collection('mavigne').doc('chat_canal_' + canal);
+  return _chatHorsService('canal ' + canal);
 }
 function _dmDoc(a, b){
-  var k = [a, b].sort().join('__');
-  return db.collection('mavigne').doc('chat_dm_' + k);
+  return _chatHorsService('DM ' + [a, b].sort().join('__'));
 }
 
 // ── Init : peupler la liste des membres DM ──

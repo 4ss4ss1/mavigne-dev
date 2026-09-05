@@ -484,7 +484,10 @@ function _tratRender(){
         var sel=_trat.conducteur===c.nom;
         return '<div onclick="window._tratSetConducteur(\''+c.nom.replace(/'/g,"\\'")+'\')" style="padding:10px 16px;border-radius:10px;cursor:pointer;background:'+(sel?'var(--acier)':'var(--bg-card)')+';border:1.5px solid '+(sel?'var(--acier-med)':'var(--gris)')+';color:'+(sel?'#fff':'var(--texte-doux)')+';font-size:13px;font-weight:600;min-height:44px;display:flex;align-items:center">'+_escHtml(c.nom)+'</div>';
       }).join('')+'</div></div>';
-    var stadeOpts=STADES_PHENO.map(function(s){
+    /* ★ window.STADES_PHENO : la liste est déclarée dans app.js. Lue au nom nu,
+       Rollup la renommait puis le tree-shaking la supprimait — ce bouton ouvrait
+       sur une ReferenceError, l'overlay ne s'affichait jamais. */
+    var stadeOpts=window.STADES_PHENO.map(function(s){
       return '<option value="'+_escHtml(s)+'"'+(s===_trat.stade?' selected':'')+'>'+_escHtml(s)+'</option>';
     }).join('');
     var reqStadeLabel='Stade ph&#xe9;nologique'+(needsStade?' <span style="color:var(--rouge)">*requis</span>':'');
@@ -805,7 +808,7 @@ function openTraitEdit(idx){
   var conds=(typeof _conducteursDispo==='function'?_conducteursDispo():(window.CONDUCTEURS||[])).filter(function(c){return c&&c.statut!=='Archivé';});
   if(curCond&&!conds.some(function(c){return c&&c.nom===curCond;})) conds=[{nom:curCond}].concat(conds);
   var condOpts='<option value="">— Aucun —</option>'+conds.map(function(c){return '<option value="'+_escHtml(c.nom)+'"'+(c.nom===curCond?' selected':'')+'>'+_escHtml(c.nom)+'</option>';}).join('');
-  var stadeOpts='<option value="">— Aucun —</option>'+(STADES_PHENO||[]).map(function(sd){return '<option value="'+_escHtml(sd)+'"'+(sd===(t.stade||'')?' selected':'')+'>'+_escHtml(sd)+'</option>';}).join('');
+  var stadeOpts='<option value="">— Aucun —</option>'+(window.STADES_PHENO||[]).map(function(sd){return '<option value="'+_escHtml(sd)+'"'+(sd===(t.stade||'')?' selected':'')+'>'+_escHtml(sd)+'</option>';}).join('');
   var abVal=(t.modeAb===true)?'1':((t.modeAb===false)?'0':'');
   var L='font-size:11px;color:var(--texte-doux);text-transform:uppercase;font-weight:600;margin-bottom:6px;display:block';
   var BM='padding:6px 12px;border-radius:8px;border:1.5px solid var(--gris);background:var(--bg-card);color:var(--texte-doux);font-size:12px;font-weight:600;cursor:pointer;font-family:Outfit,sans-serif;min-height:36px';

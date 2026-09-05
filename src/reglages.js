@@ -2337,8 +2337,10 @@ const _MV_FAKE_MAIL = /@(mavigne\.app|mavigneapp\.fr)$/i;
 function _mvIsFakeMail(e){ return _MV_FAKE_MAIL.test(String(e||'').trim()); }
 
 async function showForgotPanel() {
-  if(loginPendingIdx < 0) return;
-  const m = window.MEMBRES[loginPendingIdx];
+  /* ★ window.loginPendingIdx, jamais le nom nu : la variable vit dans app.js et
+     Rollup la renomme dès qu'un module la lit sans window (panne du 21/08). */
+  if(window.loginPendingIdx < 0) return;
+  const m = window.MEMBRES[window.loginPendingIdx];
   document.getElementById('login-forgot-for').textContent = m.nom;
   // ★★★ SEC-3 — PLUS DE PRÉ-REMPLISSAGE, ET C'ÉTAIT LA PIRE DES DEUX FUITES.
   // Ce champ portait l'adresse du membre choisi. N'importe qui pouvait donc lire
@@ -2384,8 +2386,8 @@ async function submitForgotLogin() {
   const btn   = document.getElementById('login-forgot-btn');
   errEl.style.display = 'none'; okEl.style.display = 'none';
 
-  if(loginPendingIdx < 0) return;
-  const m = window.MEMBRES[loginPendingIdx];
+  if(window.loginPendingIdx < 0) return;
+  const m = window.MEMBRES[window.loginPendingIdx];
 
   // SEC-3 : l'adresse vient du serveur (résolue au clic sur la tuile), plus du roster.
   const mail = window._mvLoginAwaitEmail ? await window._mvLoginAwaitEmail() : (m.email || '');
@@ -2423,8 +2425,8 @@ async function sendForgotPwd() {
   const btn   = document.getElementById('fpwd-send-btn');
   errEl.style.display = 'none'; okEl.style.display = 'none';
 
-  if(loginPendingIdx < 0) return;
-  const m = window.MEMBRES[loginPendingIdx];
+  if(window.loginPendingIdx < 0) return;
+  const m = window.MEMBRES[window.loginPendingIdx];
 
   // SEC-3 : même source d'adresse que submitForgotLogin. ⚠ Cet écran (ovForgotPwd) n'a
   // AUCUN ouvreur dans le code — il est aligné par cohérence, pas parce qu'il sert.

@@ -23,7 +23,7 @@ export const GT_ADMIN_EMAIL = 'ngdevpro@gmail.com';
 // WHATS_NEW   : tableau vide = modal desactive pour cette version.
 // Format item : { emoji:'📅', titre:'Titre court', desc:'Phrase utilisateur.' }
 // Regle : seulement les changements visibles par les utilisateurs.
-export const APP_VERSION = '6.75';
+export const APP_VERSION = '6.77';
 // ════ Journal des nouveautés (récap cumulatif) ════
 // Une entrée par version, la PLUS RÉCENTE EN HAUT : { v:'5.10', items:[ {emoji,titre,desc}, … ] }
 // À chaque release visible → AJOUTER un bloc en tête (ne pas remplacer). items:[] = release technique (rien à afficher).
@@ -354,6 +354,14 @@ window._mvGraphRepeindre = function(){
 };
 
 export const WHATS_NEW = [
+  /* ★ 6.77 : release technique. Le seul changement est le RETRAIT d'un nom de
+     domaine client dans la note 6.76 ci-dessous — rien à annoncer, mais il faut
+     bien qu'un numéro neuf porte le fichier corrigé jusqu'aux téléphones. */
+  { v: '6.77', items: [] },
+  { v: '6.76', items: [
+    { emoji: 'cadenas', titre: 'Le lien \u00ab\u00a0Mot de passe oubli\u00e9\u00a0?\u00a0\u00bb r\u00e9pond de nouveau', desc: "Sur l\u2019\u00e9cran de connexion, ce lien ne faisait <b>rien du tout</b>\u00a0: on cliquait, l\u2019\u00e9cran ne bougeait pas, et il fallait passer par l\u2019administrateur du domaine pour repartir. Il ouvre \u00e0 nouveau la demande de lien de r\u00e9initialisation." },
+    { emoji: 'eprouvette', titre: 'Le bouton \u00ab\u00a0nouveau traitement\u00a0\u00bb ouvre enfin la saisie', desc: "Sur la page Phyto, le bouton <b>+</b> en bas \u00e0 droite n\u2019ouvrait aucune fen\u00eatre. La liste des <b>stades ph\u00e9nologiques</b> \u2014 d\u00e9bourrement, floraison, v\u00e9raison\u2026 \u2014 manquait \u00e0 l\u2019appel au moment d\u2019afficher le formulaire, et la saisie s\u2019arr\u00eatait l\u00e0, sans un mot. Le parcours complet est de retour, stade compris." }
+  ] },
   { v: '6.75', items: [
     { emoji: 'nuage', titre: 'Ce que vous saisissez ne se perd plus quand le r\u00e9seau l\u00e2che', desc: "Au fond de la cave ou dans les vignes, une saisie pouvait dispara\u00eetre\u00a0: l\u2019\u00e9cran disait \u00ab\u00a0enregistr\u00e9\u00a0\u00bb, et au red\u00e9marrage de l\u2019application elle n\u2019\u00e9tait plus l\u00e0. Quand le t\u00e9l\u00e9phone n\u2019arrivait pas \u00e0 renouveler votre connexion, l\u2019application croyait \u00e0 un refus et <b>jetait la saisie</b>. Elle est d\u00e9sormais <b>gard\u00e9e sur le t\u00e9l\u00e9phone et repart toute seule</b> d\u00e8s que le r\u00e9seau revient. R\u00e9colte, relev\u00e9, cong\u00e9, acompte\u00a0: rien ne dispara\u00eet." },
     { emoji: 'check', titre: 'Un enregistrement annonc\u00e9 est un enregistrement fait', desc: "Le message vert partait <b>avant</b> la r\u00e9ponse du serveur\u00a0: vous pouviez lire \u00ab\u00a0R\u00e9colte enregistr\u00e9e\u00a0\u00bb sur une \u00e9criture qui n\u2019\u00e9tait jamais partie. Il attend maintenant la confirmation. Si le r\u00e9seau tra\u00eene, l\u2019\u00e9cran dit <b>\u00ab\u00a0en attente de r\u00e9seau, envoi automatique\u00a0\u00bb</b> au lieu de vous laisser croire que c\u2019est fait. Corrig\u00e9 partout\u00a0: <b>Planning, Cuvier, Chai, R\u00e9glages, Tracteur</b>." },
