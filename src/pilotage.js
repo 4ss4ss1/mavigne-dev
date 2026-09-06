@@ -1361,6 +1361,45 @@ function _pilVueEstConsultee(){
 // declare lui-meme hors exercice.
 // ⚠️ w.cap<=0 : semaine hors modele (feries, fermeture) — `need` n'y veut rien
 //    dire, elle ne peut pas porter un pic.
+// \u2605\u2605\u2605 CE QUI SE COMPARE A `need` N'EST PAS UN COMPTAGE DE TETES.
+//   `need` = heures de la semaine / capacite d'UN ETP la meme semaine. Son
+//   pendant EXACT est `capH / cap` : les heures reellement TRAVAILLABLES de
+//   l'equipe cette semaine-la (modele horaire de chacun, entrees du planning,
+//   conges, contrats, effectif collectif), ramenees au meme denominateur.
+//   planning.js la calcule deja (_capWeekReal) et _pilAnnuelData la transporte
+//   dans chaque semaine : on la LIT. Un second calcul donnerait un second
+//   chiffre, et c'est la faute que ce module repare depuis aout.
+//   \u26a0 POURQUOI PAS `head`. head est un prorata de jours de CALENDRIER. Une
+//   equipe sous contrat du samedi au mercredi y pese 5/7 \u2014 alors que la semaine
+//   n'offre du travail que du lundi au vendredi, dont elle ne couvre que trois.
+//   Mesure du 06/09/2026, capture de Nico a l'appui : semaine du 29 aout,
+//   40 saisonniers + le socle permanent, head = 34,4. Cet effectif n'a existe
+//   AUCUN jour de cette semaine-la. Il gonfle la capacite d'un cote et sert de
+//   base au manque de l'autre.
+//   \u26a0 POURQUOI PAS `headMax` NON PLUS \u2014 et c'est le piege inverse. headMax
+//   repond \u00ab combien de corps au plus fort de la semaine \u00bb : c'est le bon
+//   chiffre pour un ordre de passage, et un FAUX NEGATIF pour un manque. Une
+//   equipe de 40 sous contrat le jeudi et le vendredi seulement affiche
+//   headMax = 45 face a un besoin de 38,6 : \u00ab couvert \u00bb, alors qu'elle ne
+//   delivre que deux cinquiemes des heures de la semaine. Un manque qu'on
+//   eteint coute plus cher qu'un manque qu'on exagere.
+//   \u2605 headMax reste affiche, mais SOUS SON PROPRE NOM : les corps dans les
+//   rangs. Deux questions, deux mots, jamais une seule barre de fraction.
+function _pilDispoSem(x){
+  if(!x) return 0;
+  return (x.capH!=null && x.cap>0) ? (x.capH/x.cap) : (x.head||0);
+}
+// \u2605\u2605\u2605 LE PIC DE L'ANNEE ET LE PIC QUI RESTE A FAIRE SONT DEUX CHIFFRES.
+//   Sur l'exercice, le pic est presque toujours la vendange. Consulte le
+//   6 septembre, il designe une semaine DEJA FAITE \u2014 et l'ecran \u00ab Aujourd'hui \u00bb
+//   affichait dessus \u00ab il manque 4,1 personnes \u00bb en orange, sans un mot pour
+//   dire que c'est derriere. On ne demande pas un renfort pour une semaine
+//   terminee.
+//   Les deux se calculent ICI, en une seule passe, avec la meme balance : le pic
+//   de la FENETRE (passe compris \u2014 c'est lui que \u00ab L'annee \u00bb doit montrer) et le
+//   pic des semaines qui ne sont pas encore finies (`av`), le seul qui appelle
+//   une decision. Aucun ecran ne refait le tri de son cote : ce serait le
+//   sixieme selecteur non recense de §33, une deuxieme fois.
 function _pilPicPortee(){
   var ann=null; try{ ann=_pilAnnuelData(); }catch(e){ ann=null; }
   if(ann) _pilScopeVerif(ann);
@@ -1369,16 +1408,35 @@ function _pilPicPortee(){
     if(selP) return x.per===selP.idx;
     return x.o1>=ann.s && x.o0<=ann.e;
   }):[];
-  var pic=0, picW=null, som=0, n=0, court=false;
-  wk.forEach(function(x){
-    if(!(x.cap>0)) return;
-    som+=x.need; n++;
-    if(x.need>pic){ pic=x.need; picW=x; }
-    if(x.need>(x.head||0)+0.05) court=true;
-  });
-  var head=picW?(picW.head||0):0;
-  return { ok:(pic>0), pic:pic, picW:picW, head:head, manque:Math.max(0,pic-head),
-           moy:(n>0?som/n:0), court:court, nSem:n, annee:!selP,
+  function _bal(list){
+    var pic=0, picW=null, som=0, n=0, court=false;
+    list.forEach(function(x){
+      if(!(x.cap>0)) return;
+      som+=x.need; n++;
+      if(x.need>pic){ pic=x.need; picW=x; }
+      if(x.need>_pilDispoSem(x)+0.05) court=true;
+    });
+    var dispo=picW?_pilDispoSem(picW):0;
+    return { ok:(pic>0), pic:pic, picW:picW,
+             head:(picW?(picW.head||0):0),
+             corps:(picW?((picW.headMax!=null)?picW.headMax:(picW.head||0)):0),
+             dispo:dispo, manque:Math.max(0,pic-dispo),
+             moy:(n>0?som/n:0), court:court, nSem:n };
+  }
+  // \u26a0 La date du jour passe par _mvAujIso (heure LOCALE) comme partout
+  //    ailleurs dans le module : `new Date().toISOString()` decalerait d'un jour
+  //    a l'est de Greenwich, et un pic \u00ab passe \u00bb la veille de sa semaine est
+  //    exactement le genre d'ecart d'un jour qui fait douter de tout le reste.
+  var _aj=(typeof window._mvAujIso==='function')?window._mvAujIso():null;
+  var oAuj=_aj?_pilAnnOrd(_aj):null;
+  if(oAuj!=null && isNaN(oAuj)) oAuj=null;
+  var T=_bal(wk);
+  var av=(oAuj==null)?null:_bal(wk.filter(function(x){ return x.o1>=oAuj; }));
+  if(av && !av.ok) av=null;
+  var passe=!!(T.ok && oAuj!=null && T.picW && T.picW.o1<oAuj);
+  return { ok:T.ok, pic:T.pic, picW:T.picW, head:T.head, corps:T.corps,
+           dispo:T.dispo, manque:T.manque, moy:T.moy, court:T.court, nSem:T.nSem,
+           passe:passe, av:av, oAuj:oAuj, annee:!selP,
            nom:(selP?selP.nom:null), ann:ann, selP:selP };
 }
 // \u2605\u2605\u2605 CE QUI EST DEJA SIGNE, POUR LA SEMAINE EN COURS.
@@ -1462,11 +1520,16 @@ function _pilCadreLbl(PP){
 // La semaine d'un pic, en clair. Meme convention de date que la frise (UTC sur
 // l'axe ordinal), pas l'horloge locale : un decalage d'un jour sur une etiquette
 // de semaine se voit et fait douter de tout le reste.
+// \u2605 L'ANNEE FAIT PARTIE DE L'ETIQUETTE. Un exercice traverse deux annees
+//   civiles : \u00ab semaine du 29 aout \u00bb ne dit pas si c'est la vendange qu'on
+//   vient de faire ou celle de l'an prochain. Le meme mot sur deux ecrans, deux
+//   annees \u2014 c'est exactement ce qui a fait passer un pic passe pour une alerte
+//   du jour (06/09/2026).
 function _pilSemLabO(o0){
   if(o0==null) return '';
   var MOA=['janv.','f\u00e9vr.','mars','avr.','mai','juin','juil.','ao\u00fbt','sept.','oct.','nov.','d\u00e9c.'];
   var dd=_pilOrdD(o0);
-  return 'semaine du '+dd.getUTCDate()+' '+MOA[dd.getUTCMonth()];
+  return 'semaine du '+dd.getUTCDate()+' '+MOA[dd.getUTCMonth()]+' '+dd.getUTCFullYear();
 }
 // ── LES DEUX CADRES ─────────────────────────────────────────────────────────
 // ⚠️ CORRECTION DE FOND (12/08/2026, sur retour de Nico). Cet ecran disait
@@ -1831,7 +1894,11 @@ function _pilPanelEtp(d){
   // semaine-la (planning.js). Avant, deux moyennes mensuelles de grandeurs qui
   // varient d'un facteur 20 dans le mois se comparaient : « 27 ETP requis »
   // contre « 11,2 presents » — un chiffre qui n'existe AUCUN jour de l'annee.
-  var peak4=PP.pic||0, presAtPeak=PP.head||0;
+  // ★ `dispo`, pas `head` (voir _pilDispoSem). Ici le pic RESTE celui de la
+  //   fenetre, passe compris : « L'annee » raconte l'annee, y compris la
+  //   vendange qu'on vient de faire. Ce qui change, c'est qu'on dit quand elle
+  //   est derriere — l'onglet « Aujourd'hui », lui, lit PP.av.
+  var peak4=PP.pic||0, presAtPeak=PP.dispo||0;
   var anyShort=!!PP.court, pkw=PP.picW||null;
   // Nombre de zones ou deux periodes se recouvrent. Meme source que la frise
   // (_pilAnnPartage) : la legende ne peut pas annoncer autre chose que le dessin.
@@ -1839,12 +1906,12 @@ function _pilPanelEtp(d){
   var cadre=_pilCadreLbl(PP);
   function _semLab(wk){ return wk?_pilSemLabO(wk.o0):''; }
   var synth, sBg, sCol;
+  var _pass=PP.passe?' \u00b7 d\u00e9j\u00e0 pass\u00e9':'';
   if(anyShort){
-    var miss=Math.max(0,peak4-presAtPeak);
-    synth='Sur '+cadre+' \u2014 pic \u00e0 '+_e(peak4)+' personnes'+(pkw?(' \u00b7 '+_semLab(pkw)):'')+' pour '+_e(presAtPeak)+' pr\u00e9sentes \u2192 il en manque ~'+_e(miss);
+    synth='Sur '+cadre+' \u2014 pic \u00e0 '+_e(peak4)+' personnes'+(pkw?(' \u00b7 '+_semLab(pkw)+_pass):'')+' pour '+_e(presAtPeak)+' disponibles \u2192 il en manque ~'+_e(PP.manque||0);
     sBg='#F3D9D4'; sCol='var(--rouge)';
   } else {
-    synth='Sur '+cadre+' \u2014 aucune semaine en sous-effectif. Pic \u00e0 '+_e(peak4)+' personnes'+(pkw?(' \u00b7 '+_semLab(pkw)):'')+'.';
+    synth='Sur '+cadre+' \u2014 aucune semaine en sous-effectif. Pic \u00e0 '+_e(peak4)+' personnes'+(pkw?(' \u00b7 '+_semLab(pkw)+_pass):'')+'.';
     sBg='#DCEBD0'; sCol='var(--vert-med)';
   }
   var annLeg='<div style="display:flex;gap:14px;flex-wrap:wrap;font-size:var(--pt-micro,11px);color:var(--texte-doux);margin:8px 0 2px">'
@@ -1897,7 +1964,7 @@ function _pilPanelEtp(d){
   var body=annBlock || _pilEmptyGo('Renseignez au moins une p\u00e9riode dat\u00e9e pour dessiner les 52 semaines de l\u2019exercice.','saisons','R\u00e9glages \u203a Campagne');
   body+='<div style="margin-top:10px;padding:9px 11px;border-radius:9px;background:'+sBg+';color:'+sCol+';font-size:var(--pt-txt,12.5px);font-weight:600">'+synth+'</div>';
   var cov=peak4>0?Math.min(presAtPeak/peak4*100,100):100;
-  var _sub=_e(presAtPeak)+' pr\u00e9sents au pic'+(pkw?(' \u00b7 '+_semLab(pkw)):'');
+  var _sub=_e(presAtPeak)+' disponibles au pic'+(pkw?(' \u00b7 '+_semLab(pkw)):'');
   return _pilTile('etp','#C9A84C','Charge & ETP \u00b7 '+cadre, _pilStat(_e(peak4),' au pic'), _sub, cov, body);
 }
 
@@ -4415,15 +4482,31 @@ function _pilCkEtp(d){
   //   tuile compare desormais PP.head a PP.pic — meme semaine, meme unite —
   //   et la presence du jour reste ou elle a un sens : la tuile
   //   « A la vigne aujourd'hui », juste en dessous.
+  // \u2605\u2605\u2605 CET ECRAN S'APPELLE \u00ab AUJOURD'HUI \u00bb (06/09/2026, retour de Nico).
+  //   Il ne peut pas reclamer un renfort pour une semaine terminee. Le pic de
+  //   l'exercice est la vendange : consulte le 6 septembre, la tuile sortait
+  //   \u00ab manque 4,1 pers. au pic \u00b7 l'exercice \u00bb en orange sur un travail FAIT,
+  //   et rien a l'ecran ne disait que la semaine etait derriere. Une alerte sur
+  //   laquelle on ne peut rien n'est pas une alerte, c'est du bruit \u2014 et elle
+  //   use l'orange dont les vraies ont besoin.
+  //   On lit donc PP.av : meme moteur, memes semaines, filtrees sur celles qui
+  //   ne sont pas finies. Quand il n'en reste aucune (exercice epuise), on
+  //   montre le pic de la fenetre ET ON ECRIT qu'il est passe, au lieu de le
+  //   laisser passer pour une decision du jour.
   var PP=_pilPicPortee();
-  var req=PP.ok?PP.pic:null;
-  var low=(req!=null && (PP.manque||0)>0.05);
-  // val et req sont la MEME grandeur A LA MEME DATE : des personnes de la semaine
-  // du pic, equipes collectives ponderees des deux cotes.
-  var val=(req!=null)?(PP.head||0):(d.presentChamp!=null?d.presentChamp:0);
+  var A=PP.av||null, fini=(!A && !!PP.ok);
+  var S=A||(fini?PP:null);
+  var req=S?S.pic:null;
+  var low=(!!A && (A.manque||0)>0.05);
+  // val et req sont la MEME grandeur A LA MEME DATE et DANS LA MEME UNITE : des
+  // ETP de la semaine du pic. `dispo`, pas `head` : un comptage de tetes proratise
+  // sur des jours de calendrier ne se soustrait pas d'un besoin en heures.
+  var val=(req!=null)?(S.dispo||0):(d.presentChamp!=null?d.presentChamp:0);
   var reqTxt=(req!=null)?(' / '+_pilEtpFmt(req)+' pers.'):'';
+  var _sem=(S&&S.picW)?_pilSemLabO(S.picW.o0):'';
   var sous = (req==null) ? 'à la vigne aujourd\'hui'
-    : ((low?('manque '+_pilEtpFmt(PP.manque)+' pers.'):'couvert')+' au pic \u00b7 '+_pilCadreLbl(PP));
+    : (fini ? ('pic pass\u00e9 \u00b7 '+(_sem||_pilCadreLbl(PP)))
+            : ((low?('manque '+_pilEtpFmt(A.manque)+' pers.'):'couvert')+' au pic \u00b7 '+(_sem||_pilCadreLbl(PP))));
   return '<div class="pil-ck"><div class="kl">Effectif au pic</div><div class="kv">'+_pilEtpFmt(val)+'<span class="u">'+reqTxt+'</span></div>'
     +'<div class="ks"'+(low?' style="color:var(--orange);font-weight:600"':'')+'>'+_pilEsc(sous)+'</div></div>';
 }
@@ -4837,14 +4920,33 @@ function _pilPanelCapacite(d){
   //   Le manque se lit desormais SUR LA SEMAINE DU PIC, contre l'effectif prevu
   //   CETTE SEMAINE-LA (PP.manque, deja calcule par _pilPicPortee, source unique).
   //   La presence du jour reste affichee — sous son propre nom, sans unite ETP.
-  var req=PP.pic||0, prevu=PP.head||0, manque=PP.manque||0;
+  // ★★★ LA TUILE QUI PROPOSE « renfort saisonnier » DOIT REGARDER DEVANT.
+  //   Elle lisait le pic de la FENETRE, vendange d'aout comprise : le 6 septembre
+  //   elle conseillait d'embaucher pour une semaine faite. On dimensionne
+  //   desormais sur PP.av — le pic des semaines qui restent. Le pic de la
+  //   fenetre, quand il est derriere, descend en fin de carte comme ce qu'il
+  //   est : un fait d'histoire, pas un arbitrage.
+  var A=PP.av||null, fini=(!A && !!PP.ok);
+  var S=A||PP;
+  // ★ `dispo`, pas `head` : voir _pilDispoSem. `corps` (headMax) s'affiche a
+  //   cote, SOUS SON PROPRE NOM — personne ne travaille a 34,4 ; ce jour-la il y
+  //   a 45 personnes dans les rangs, ou il n'y en a aucune.
+  var req=S.pic||0, prevu=S.dispo||0, manque=fini?0:(S.manque||0), corps=S.corps||0;
   var pCouv=req>0?Math.min(prevu/req*100,100):100;
-  var cadre=_pilCadreLbl(PP), sem=PP.picW?_pilSemLabO(PP.picW.o0):'';
-  var body='<div style="display:flex;justify-content:space-between;font-size:var(--pt-txt,12.5px);margin-bottom:3px"><span>Prévu au planning '+(sem?_pilEsc(sem):'la semaine du pic')+'</span><b>'+_pilEtpFmt(prevu)+' pers.</b></div>'
+  var cadre=_pilCadreLbl(PP), sem=S.picW?_pilSemLabO(S.picW.o0):'';
+  var body='<div style="display:flex;justify-content:space-between;font-size:var(--pt-txt,12.5px);margin-bottom:3px"><span>Disponible '+(sem?_pilEsc(sem):'la semaine du pic')+'</span><b>'+_pilEtpFmt(prevu)+' pers.</b></div>'
     +'<div class="pil-gbar"><i style="width:'+pCouv.toFixed(0)+'%;background:var(--vert-med)"></i></div>'
+    +(corps>0.5?('<div class="pil-li-s" style="margin-top:4px;color:var(--texte-doux)">soit <b>'+_pilNb(corps)+'</b> personne'+(corps>1.5?'s':'')+' dans les rangs au plus fort de la semaine \u2014 le reste part en week-end, en congé ou en temps partiel.</div>'):'')
     +'<div style="display:flex;justify-content:space-between;font-size:var(--pt-txt,12.5px);margin:11px 0 3px"><span>Nécessaire cette semaine-là · pic sur '+_pilEsc(cadre)+'</span><b style="color:var(--orange)">'+_pilEtpFmt(req)+' pers.</b></div>'
     +'<div class="pil-gbar"><i style="width:100%;background:var(--orange)"></i></div>'
-    +'<div class="pil-li-s" style="margin-top:10px">'+(manque>0.1?('Il manque \u2248 <b style="color:var(--orange)">'+_pilEtpFmt(manque)+' personne'+(manque>1.05?'s':'')+'</b> cette semaine-là. Options : renfort saisonnier, décaler une tâche, ou repousser l\'objectif (voir Simulateur).'):'Effectif suffisant pour le pic de charge sur '+_pilEsc(cadre)+'.')+'</div>'
+    +'<div class="pil-li-s" style="margin-top:10px">'+(fini
+        ? ('Toutes les semaines de '+_pilEsc(cadre)+' sont derrière : il n\'y a plus de pic à armer. Le chiffre ci-dessus est celui du pic <b>déjà passé</b>.')
+        : (manque>0.1?('Il manque \u2248 <b style="color:var(--orange)">'+_pilEtpFmt(manque)+' personne'+(manque>1.05?'s':'')+'</b> cette semaine-là. Options : renfort saisonnier, décaler une tâche, ou repousser l\'objectif (voir Simulateur).'):'Effectif suffisant pour le pic de charge à venir sur '+_pilEsc(cadre)+'.'))+'</div>'
+    // ★ LE PIC DEJA PASSE NE DISPARAIT PAS, IL CHANGE DE STATUT. Le retirer
+    //   ferait mentir la frise de « L'annee », qui le montre toujours ; le
+    //   laisser en tete faisait croire a un arbitrage. Il est dit, date, et
+    //   nomme pour ce qu'il est.
+    +((PP.passe&&A&&PP.picW&&A.picW&&PP.picW.o0!==A.picW.o0)?('<div class="pil-li-s" style="margin-top:9px;color:var(--texte-doux)">Pic de '+_pilEsc(cadre)+' : <b>'+_pilEtpFmt(PP.pic||0)+'</b> pers., '+_pilEsc(_pilSemLabO(PP.picW.o0))+' \u2014 <b>déjà passé</b>.</div>'):'')
     // ★ AUJOURD'HUI EST UNE AUTRE QUESTION, ET ELLE A SON PROPRE ENCART. Le pic
     //   peut tomber dans onze mois : comparer la presence du jour a ce besoin-la
     //   n'apprend rien, et le faire en silence donne un chiffre faux.
@@ -4860,7 +4962,7 @@ function _pilPanelCapacite(d){
   //   sans deplier, comme le chiffre qu'elle explique. Et le cadre quitte le
   //   TITRE pour la ligne de cadre — un titre n'est pas l'endroit ou l'on ecrit
   //   sur quelle fenetre un chiffre a ete calcule.
-  var sub='pic sur '+cadre+(sem?(' \u00b7 '+sem):'');
+  var sub=(!PP.ok?'pic sur ':(fini?'pic passé sur ':'pic à venir sur '))+cadre+(sem?(' \u00b7 '+sem):'');
   return _pilTile('capacite','#C9A84C','Capacité vs charge', _pilStat(_pilEtpFmt(req),' pers. au pic'), sub, null, body, 'pil.capacite');
 }
 function _pilTabPrs(d){
@@ -9467,7 +9569,13 @@ function _pilPhotosData(){
   //   et la tuile Charge & ETP. La photo la recalculait pour elle seule — c'est
   //   exactement comme ça que deux ecrans finissent par se contredire.
   var _PP=_pilPicPortee();
-  var pic=_PP.pic, picW=_PP.picW, moy=_PP.moy, head=_PP.head, manque=_PP.manque;
+  // ★ `corps` = headMax, les personnes reellement dans les rangs au plus fort
+  //   de la semaine du pic. La photo affichait `head`, l'effectif LISSE sur les
+  //   sept jours : « 34,4 présents cette semaine-là » sur une equipe qui compte
+  //   45 têtes ces jours-là et 5 le reste du temps. Un nombre a virgule sur un
+  //   comptage de personnes se lit comme une erreur, et c'en etait une.
+  var pic=_PP.pic, picW=_PP.picW, moy=_PP.moy, head=_PP.head, corps=_PP.corps,
+      manque=_PP.manque, picPasse=_PP.passe;
 
   // BUDGET — DEUX SOURCES, PARCE QU'IL Y A DEUX QUESTIONS.
   //   · portee = l'exercice  -> _pexData : ce que coute le bilan (salaires
@@ -9485,7 +9593,8 @@ function _pilPhotosData(){
 
 
   return { ann:ann, selP:selP, hTot:hTot, hFait:hFait, pct:pct, nPer:nPer, pic:pic, picW:picW,
-           moy:moy, head:head, manque:manque, eur:eur, sansTaux:sansTaux, ecoOk:ecoOk,
+           moy:moy, head:head, corps:corps, picPasse:picPasse,
+           manque:manque, eur:eur, sansTaux:sansTaux, ecoOk:ecoOk,
            exo:exo, campEco:campEco,
            trous:(ann&&ann.trous)?ann.trous.length:0, ovl:(ann&&ann.ovl)?ann.ovl.length:0 };
 }
@@ -9534,9 +9643,12 @@ function _pilPhotosHtml(){
 
   // EFFECTIF — le pic, et le manque en clair s'il y en a un.
   var sE = D.pic>0
-    ? ('au pic'+(D.picW?(' \u00b7 '+_pilNb(D.head)+' pr\u00e9sents cette semaine-l\u00e0'):''))
+    ? ((D.picPasse?'au pic (pass\u00e9)':'au pic')+(D.picW?(' \u00b7 '+_pilNb(D.corps)+' dans les rangs cette semaine-l\u00e0'):''))
     : 'aucune semaine mesur\u00e9e '+cadre;
-  var fE = drap('effectif') || ((D.manque>0.05) ? _pilFlag('o','Il manque '+_pilUn(D.manque)+' personne(s) au pic') : '');
+  // ★ Le drapeau orange ne se leve plus sur une semaine terminee : un manque
+  //   qu'on ne peut plus combler n'appelle aucune action, il n'a rien a faire
+  //   dans la meme couleur que ceux qu'on peut encore traiter.
+  var fE = drap('effectif') || ((D.manque>0.05 && !D.picPasse) ? _pilFlag('o','Il manque '+_pilUn(D.manque)+' personne(s) au pic') : '');
   var pEff=_pilPhotoHtml('Effectif','equipe',D.pic>0?_pilUn(D.pic):'\u2014',D.pic>0?' pers.':'', sE,'equ',fE,'effectif');
 
   // BUDGET — le cadre du chiffre est ECRIT SOUS LE CHIFFRE, toujours.

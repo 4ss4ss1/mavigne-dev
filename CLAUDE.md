@@ -12667,3 +12667,133 @@ redéclaration est du JavaScript parfaitement valide. **Aucun des vingt-huit har
 la redéclaration remise, le cliquet rougit sur la ligne exacte ; retirée, il repasse à 0.
 Vérifié aussi sur le dépôt **sans** mon lot — 0 erreur : le défaut venait bien de moi, pas d'un
 plafond hérité.
+
+---
+
+## 79. ★★★ LE PIC RÉCLAMAIT DU RENFORT POUR UNE SEMAINE DÉJÀ FAITE (06/09 — `pilotage.js` + `utils.js` + `scripts/` · APP 6.77 → 6.78 · SW 7.36 → 7.37)
+
+Signalé par Nico, capture à l'appui, quatre jours après le départ de l'équipe de vendange :
+*« Faut m'expliquer l'effectif au pic dans le pilotage — les vendangeurs ne seront plus là,
+l'effectif est totalement faux. »*
+
+À l'écran, sur l'onglet **Aujourd'hui** :
+
+```
+EFFECTIF AU PIC     34,4 / 38,6 pers.
+manque 4,1 pers. au pic · l'exercice          ← en orange
+```
+
+### 79a. Ce qui n'était PAS faux : l'arithmétique
+
+L'exercice ouvre en août (défaut `exercice_mois = 7`), ancré sur la période active : **1er août 2026
+→ 31 juillet 2027**. Le pic est la semaine la plus chargée de cette fenêtre, `_pilPicPortee` la
+cherche sur **toutes** les semaines — passées comprises. C'est la vendange, semaine du 29 août.
+Le besoin y valait bien 38,6, et 34,4 était bien ce que `head` rendait ce jour-là.
+
+> ★★★ **Le défaut n'était pas dans le calcul, il était dans le fait d'afficher une DÉCISION sur une
+> semaine terminée, sur l'écran qui s'appelle « Aujourd'hui ».** Une alerte sur laquelle on ne peut
+> rien n'est pas une alerte : c'est du bruit, et elle **use l'orange dont les vraies ont besoin**.
+> Même famille que §33 — deux grandeurs justes, un rapprochement faux.
+
+### 79b. Le pic à venir n'est pas le pic de l'année
+
+`_pilPicPortee` calcule désormais **deux balances en une passe** : celle de la fenêtre (passé
+compris) et `av`, celle des semaines qui ne sont pas finies.
+
+- **« Aujourd'hui »** et **« Capacité vs charge »** lisent `av` — ce sont les écrans qui proposent
+  d'embaucher.
+- **« L'année »** garde le pic de la fenêtre : c'est son rôle de raconter l'année, vendange comprise.
+  Il porte maintenant la mention **« déjà passé »**.
+- Le pic passé ne disparaît pas de la carte Capacité : il descend en pied de carte, daté et nommé
+  pour ce qu'il est. *Le retirer ferait mentir la frise de « L'année », qui le montre toujours.*
+
+⚠️ **Une seule définition, comme depuis §33.** Aucun écran ne refait le tri de son côté — ce serait
+le sixième sélecteur non recensé, une deuxième fois.
+
+⚠️ La date du jour passe par `_mvAujIso` (heure **locale**), pas `toISOString()` : à l'est de
+Greenwich un pic serait déclaré passé la veille de sa semaine. Même piège que les étiquettes de
+semaine, §33.
+
+### 79c. ★★★ CE QUI SE COMPARE À `need` N'EST PAS UN COMPTAGE DE TÊTES
+
+`need` = heures de la semaine ÷ capacité d'**un** ETP la même semaine. Son pendant exact est
+`capH / cap` — les heures **réellement travaillables** de l'équipe (horaire propre à chacun, entrées
+du planning, congés, absences, contrats, effectif collectif). `planning.js` la calcule déjà
+(`_capWeekReal`), `_pilAnnuelData` la transporte dans chaque semaine : **on la lit**. Nouvelle
+fonction `_pilDispoSem`, seule définition.
+
+**Pourquoi pas `head`** — c'est un prorata de jours de **calendrier**. Une équipe sous contrat du
+samedi au mercredi y pèse 5/7, alors que la semaine n'offre du travail que du lundi au vendredi,
+dont elle ne couvre que trois. D'où **34,4**, un effectif qui n'a existé **aucun jour** de cette
+semaine-là. Un nombre à virgule sur un comptage de personnes se lit comme une erreur, et c'en était
+une.
+
+> ★★★ **Pourquoi pas `headMax` non plus — et c'est un REVIREMENT ASSUMÉ dans la journée.** Le plan
+> annoncé le matin à Nico proposait `headMax`, « les corps au plus fort de la semaine ». En
+> l'implémentant : **c'est un faux négatif**. Une équipe de 40 sous contrat le jeudi et le vendredi
+> seulement affiche `headMax = 45` face à un besoin de 38,6 → *« couvert »*, alors qu'elle ne
+> délivre que deux cinquièmes des heures. **Un manque qu'on éteint coûte plus cher qu'un manque
+> qu'on exagère.** `headMax` reste affiché, mais **sous son propre nom** : les corps dans les rangs,
+> le chiffre d'un ordre de passage. Deux questions, deux mots, jamais une seule barre de fraction.
+
+⚠️ **Repli obligatoire** : `capH` peut être `null` (planning.js n'a pas su mesurer la semaine). On
+retombe alors sur `head` — jamais sur zéro. Un zéro est une mesure.
+
+### 79d. La fiche « i » annonçait un calcul qui n'existe pas
+
+`MV_INFO['pil.capacite']` écrivait : *« le nécessaire vient du barème h/ha du domaine, appliqué aux
+surfaces qui restent à faire »*. Vérifié dans `planning.js` : `h = hha × passages × surface
+concernée`, la surface **totale** (parcelles non arrachées, non exclues). Il n'y a aucun filtre sur
+le restant. **Le besoin d'une semaine ne baisse donc jamais à mesure que le travail avance** — c'est
+écrit maintenant, avec la lecture ETP vs corps et la règle du pic à venir.
+
+> ★ **Une fiche d'accompagnement est du code aux yeux de la règle d'or n°3 : elle se vérifie contre
+> le fichier, pas contre le souvenir de ce qu'on a voulu faire.** Celle-ci a vécu un mois.
+
+### 79e. L'année dans l'étiquette
+
+`_pilSemLabO` rendait « semaine du 29 août ». Un exercice traverse **deux années civiles** : la
+phrase ne disait pas s'il s'agissait de la vendange qu'on vient de faire ou de celle de l'an
+prochain. L'année y est.
+
+### 79f. Le harnais — `mv-harnais-pic-avenir`
+
+Méthode C20 : les vraies fonctions sont extraites du fichier livré et **exécutées** sur un vignoble
+d'essai (aucun nom de client, aucune donnée réelle).
+
+★★★ **Le choix qui fait la valeur du harnais : sur la semaine du pic, `head` (34,4), `headMax` (45)
+et `capH/cap` (29) valent trois nombres DIFFÉRENTS.** Une assertion ne peut pas passer par hasard —
+c'est exactement ce qui manquait au premier contrôle de §53 et de §58.
+
+Quatre cadres joués : l'exercice de Nico, un pic tombant sur la semaine **qui contient** aujourd'hui
+(il distingue `o1 < oAuj` de `o0 < oAuj`), un exercice **entièrement derrière** (`av` doit valoir
+`null`, pas un objet à zéro), et une semaine **sans `capH`** (le repli).
+
+**18 assertions vertes · 9 contre-épreuves, 9 rouges**, rejouées une par une, chaque mutant passé au
+`node --check` avant qu'on regarde sa couleur. Parmi elles : le retour à `head`, le passage à
+`headMax`, la perte du filtre des semaines finies, le glissement `o1 → o0`, la disparition du repli.
+
+⚠️ **`mute()` lève si son ancre n'a pas exactement une occurrence**, et une sabotage dont l'ancre a
+disparu compte pour **rouge**. Vérifié en supprimant volontairement une ancre : sortie **1**, jamais
+un vert silencieux. C'est la faute de §48 et de §53, posée quatre fois — un contrôle satisfait par
+le texte qui documente le problème.
+
+Câblé dans `check`, dans `prebuild` et dans une étape **nommée** de la CI, contre-épreuve comprise.
+
+### 79g. Ce qui n'est PAS dans ce lot
+
+- **Le besoin reste calculé sur la surface totale.** Si la fenêtre de vendange paramétrée déborde du
+  contrat de l'équipe, l'écart apparaît en sous-effectif sur une semaine pourtant travaillée. C'est
+  un réglage de **fenêtre de tâche** (Outils › Paramétrage), pas un défaut d'affichage — mais c'est
+  un signal utile, et il ne faut pas le confondre avec celui qu'on vient de corriger.
+- **`mv-harnais-audit-pil.mjs` était déjà rouge AVANT ce lot** sur `B6 la cle equ` : il attend une
+  clé d'onglet en emoji qui est passée aux vraies icônes. Vérifié en remisant le lot — même rouge.
+  Il n'est ni dans `check` ni dans la CI ; **c'est un contrôle périmé qui dort**, à remettre à jour
+  ou à retirer. Une entrée de plus pour le backlog, de la famille de §78b.
+- **Rien n'a été regardé à l'œil.** La carte Capacité gagne deux lignes et le sous-titre change de
+  longueur : c'est un rendu, aucun harnais ne le lit.
+
+> ★★★ **RÈGLE POSÉE : un chiffre juste affiché sur la mauvaise fenêtre de temps est un chiffre
+> faux.** Le module savait déjà dire *sur quoi* il comptait (§33, la ligne de cadre). Il ne savait
+> pas dire **quand** — et « la semaine du pic » sans « elle est derrière » se lit comme une
+> consigne. Le cadre d'un chiffre, c'est sa fenêtre **et** son temps.

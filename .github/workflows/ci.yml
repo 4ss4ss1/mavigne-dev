@@ -167,6 +167,20 @@ jobs:
           node scripts/harnais-demo.mjs
           node scripts/harnais-demo-contre.mjs
 
+      # Le pic du Pilotage. Deux fautes reelles, toutes deux invisibles a la
+      # relecture : un pic de la FENETRE affiche sur l'ecran « Aujourd'hui »
+      # (donc un renfort reclame pour une semaine deja faite), et un manque
+      # calcule sur un comptage de tetes proratise sur des jours de CALENDRIER
+      # au lieu des heures reellement travaillables. Le harnais EXECUTE
+      # _pilPicPortee sur des semaines ou head, headMax et capH/cap valent trois
+      # nombres DIFFERENTS : aucune assertion ne peut passer par hasard.
+      # ⚠️ La contre-epreuve tourne AUSSI : neuf fautes reposees une par une,
+      #   dont le repli sur headMax — qui aurait ferme le manque en silence.
+      - name: Harnais — le pic a venir, et sa contre-epreuve
+        run: |
+          node scripts/mv-harnais-pic-avenir.mjs
+          node scripts/mv-harnais-pic-avenir.mjs --contre
+
       # Vite + inject-precache (postbuild, idempotent).
       - name: Build
         run: npm run build

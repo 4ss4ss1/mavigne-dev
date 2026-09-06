@@ -197,7 +197,12 @@ t(`tout script de scripts/ est nommé dans le document (${muets.length} muet(s))
 }
 
 /* 2) Une section ne disparaît pas, même si son numéro est réutilisé. */
-const SECTIONS = 92;   /* +§60. ⚠️ MESURÉ, pas supposé : le cliquet compte les sections NUMÉROTÉES (## N.), pas tous les ## — à 91 il ne mordait plus. */
+const SECTIONS = 111;  /* +§79. ⚠️ MESURÉ, pas supposé : le cliquet compte les sections NUMÉROTÉES (## N.), pas tous les ## — à 91 il ne mordait plus.
+                          ⚠️⚠️ RELEVÉ DE 92 À 111 LE 06/09 : le seuil traînait DIX-NEUF sections en
+                          arrière, et le script réclamait ce relèvement à chaque exécution depuis
+                          des semaines. Un cliquet qui a dix-neuf crans de jeu ne mord plus : la
+                          §57 (DS-0) aurait pu disparaître SANS que rien ne rougisse. Le message
+                          « ↑ N de plus — relever SECTIONS » est une CONSIGNE, pas une décoration. */
 const sections = new Set([...MD.matchAll(/^## (\d+[a-z]?)\. /gm)].map(m => m[1])).size;
 t(`aucune section n'a disparu (${sections} ≥ ${SECTIONS})`, sections >= SECTIONS);
 if (sections > SECTIONS)

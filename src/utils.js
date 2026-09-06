@@ -23,7 +23,7 @@ export const GT_ADMIN_EMAIL = 'ngdevpro@gmail.com';
 // WHATS_NEW   : tableau vide = modal desactive pour cette version.
 // Format item : { emoji:'📅', titre:'Titre court', desc:'Phrase utilisateur.' }
 // Regle : seulement les changements visibles par les utilisateurs.
-export const APP_VERSION = '6.77';
+export const APP_VERSION = '6.78';
 // ════ Journal des nouveautés (récap cumulatif) ════
 // Une entrée par version, la PLUS RÉCENTE EN HAUT : { v:'5.10', items:[ {emoji,titre,desc}, … ] }
 // À chaque release visible → AJOUTER un bloc en tête (ne pas remplacer). items:[] = release technique (rien à afficher).
@@ -354,6 +354,14 @@ window._mvGraphRepeindre = function(){
 };
 
 export const WHATS_NEW = [
+  { v: '6.78', items: [
+    { emoji: 'equipe', titre: 'L\u2019effectif au pic ne r\u00e9clame plus du renfort pour une semaine d\u00e9j\u00e0 faite',
+      desc: "Sur un exercice, la semaine la plus charg\u00e9e de l\u2019ann\u00e9e est presque toujours la <b>vendange</b>. Une fois qu\u2019elle \u00e9tait pass\u00e9e, le Pilotage continuait pourtant d\u2019afficher son manque en orange sur l\u2019\u00e9cran du jour\u00a0: \u00ab\u00a0il manque 4 personnes au pic\u00a0\u00bb, sur un travail termin\u00e9, sans un mot pour dire que c\u2019\u00e9tait derri\u00e8re. <b>Aujourd\u2019hui</b> et <b>Capacit\u00e9 vs charge</b> regardent maintenant le <b>pic \u00e0 venir</b> — la semaine la plus charg\u00e9e parmi celles qui restent. Le pic de l\u2019exercice n\u2019est pas perdu\u00a0: il est \u00e9crit en bas de la carte, dat\u00e9, et marqu\u00e9 <b>d\u00e9j\u00e0 pass\u00e9</b>. L\u2019onglet <b>L\u2019ann\u00e9e</b>, lui, continue de le montrer en grand — c\u2019est son r\u00f4le." },
+    { emoji: 'balance', titre: 'Le manque au pic se compte enfin sur les heures r\u00e9ellement disponibles',
+      desc: "Le chiffre en face du besoin \u00e9tait un comptage de t\u00eates \u00e9tal\u00e9 sur les <b>sept jours</b> de la semaine. Une \u00e9quipe engag\u00e9e du samedi au mercredi y pesait cinq septi\u00e8mes, alors que la semaine ne donne du travail que du lundi au vendredi\u00a0: on lisait \u00ab\u00a034,4 personnes\u00a0\u00bb, un effectif qui n\u2019a exist\u00e9 <b>aucun jour</b> de cette semaine-l\u00e0. La carte compare d\u00e9sormais le besoin aux <b>heures que l\u2019\u00e9quipe peut vraiment faire</b>\u00a0: horaire de chacun, cong\u00e9s, absences et contrats compris. Et elle donne l\u2019autre lecture juste en dessous, celle qui sert \u00e0 organiser une tourn\u00e9e\u00a0: le nombre de <b>personnes dans les rangs au plus fort de la semaine</b>." },
+    { emoji: 'calendrier', titre: 'La semaine du pic porte son ann\u00e9e',
+      desc: "\u00ab\u00a0Semaine du 29 ao\u00fbt\u00a0\u00bb ne disait pas s\u2019il s\u2019agissait de la vendange qu\u2019on venait de faire ou de celle de l\u2019an prochain — un exercice traverse deux ann\u00e9es civiles. L\u2019ann\u00e9e est maintenant \u00e9crite partout o\u00f9 une semaine est nomm\u00e9e." }
+  ] },
   /* ⚠ 6.76 n'a jamais été déployé (CI rouge) : ses deux items remontent ici.
      Un bloc de tête SANS item est refusé par mv-whatsnew-check — bumper
      APP_VERSION, c'est s'engager à annoncer quelque chose. */
@@ -2356,9 +2364,11 @@ export const _PIL_SEM = {
 export const MV_INFO = {
 
   'pil.capacite': { t: 'Capacité au pic', p: [
-    'Le pic est la <b>semaine la plus chargée</b> de la fenêtre affichée, jamais une moyenne. Une moyenne annuelle n\u2019existe aucun jour de l\u2019année ; c\u2019est le pic qui décide d\u2019un recrutement.',
-    'Le <b>nécessaire</b> vient du barème h/ha du domaine, appliqué aux surfaces qui restent à faire. Le <b>prévu</b> vient du planning de cette semaine-là, contrat par contrat : une personne compte si elle est sous contrat ce jour-là, pas si sa fiche est marquée active.',
-    'Les personnes comptées <b>aujourd\u2019hui</b> sont celles qui sont <b>au champ</b> : hors bureau, hors absents. Une <b>équipe collective</b> compte pour son effectif réel — une fiche « équipe de vendange » à 40 vaut 40 personnes, pas une ligne.',
+    'Le pic est la <b>semaine la plus chargée</b>, jamais une moyenne. Une moyenne annuelle n\u2019existe aucun jour de l\u2019année ; c\u2019est le pic qui décide d\u2019un recrutement.',
+    'Cette carte montre le <b>pic à venir</b> : la semaine la plus chargée parmi celles qui ne sont pas encore finies. Sur un exercice, le pic est presque toujours la <b>vendange</b> — consultée en septembre, elle est derrière, et on ne recrute pas pour une semaine faite. Le pic de l\u2019exercice reste écrit en bas de la carte, daté et marqué <b>déjà passé</b> ; l\u2019onglet <b>L\u2019année</b>, lui, le montre toujours en grand, c\u2019est son rôle.',
+    'Le <b>nécessaire</b> vient du barème h/ha du domaine appliqué à la <b>surface totale</b> concernée par la tâche — pas à ce qui reste à faire. Il ne baisse donc pas à mesure que le travail avance : c\u2019est un besoin de planification, pas un reste à faire.',
+    'Le <b>disponible</b> n\u2019est pas un comptage de têtes, c\u2019est le nombre d\u2019<b>équivalents temps plein</b> que l\u2019équipe délivre réellement cette semaine-là : horaire propre à chacun, congés, absences et contrats compris. Un mi-temps pèse un demi, un congé pèse zéro, une <b>équipe collective</b> pèse son effectif — une fiche « équipe de vendange » à 40 vaut 40 personnes, pas une ligne. La ligne juste en dessous donne l\u2019autre lecture, celle des <b>corps dans les rangs au plus fort de la semaine</b> : c\u2019est elle qui sert à faire un ordre de passage.',
+    'Les personnes comptées <b>aujourd\u2019hui</b> sont celles qui sont <b>au champ</b> : hors bureau, hors absents.',
     '<b>Deux autres chiffres de cet écran ne se comparent pas à celui-ci.</b> Les personnes présentes aujourd\u2019hui : c\u2019est une autre date, et le pic peut tomber dans onze mois. La moyenne sur la campagne : c\u2019est une autre fenêtre. Les soustraire donne un chiffre faux — c\u2019est le défaut corrigé en août 2026, où « 46,3 personnes au pic » moins « 2 présentes » affichait « il en manque 44,3 » sur un domaine de quatre.'
   ] },
 

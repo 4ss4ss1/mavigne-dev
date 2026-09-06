@@ -1,4 +1,47 @@
-// MA VIGNE — Service Worker v7.36
+// MA VIGNE — Service Worker v7.37
+// v7.37 (06/09/2026) — LE PIC QUI RECLAMAIT DU RENFORT POUR UNE SEMAINE FAITE.
+//   Signale par Nico, capture a l'appui, le 6 septembre : « Effectif au pic
+//   34,4 / 38,6 pers. — manque 4,1 pers. au pic · l'exercice », en orange, sur
+//   l'onglet AUJOURD'HUI. Les vendangeurs etaient partis depuis quatre jours.
+//   ★ CE QUI N'ETAIT PAS FAUX. Le calcul. Le pic de l'exercice (1er aout 2026 →
+//   31 juillet 2027) EST la semaine du 29 aout, et cette semaine-la le besoin
+//   valait bien 38,6. Le defaut n'est pas dans l'arithmetique, il est dans le
+//   fait d'afficher une decision sur une semaine terminee, sur l'ecran qui
+//   s'appelle « Aujourd'hui ». Une alerte sur laquelle on ne peut rien use
+//   l'orange dont les vraies ont besoin.
+//   ① LE PIC A VENIR. _pilPicPortee calcule desormais DEUX balances en une
+//   passe : celle de la fenetre (passe compris) et celle des semaines qui ne
+//   sont pas finies (`av`). « Aujourd'hui » et « Capacite vs charge » lisent
+//   `av` ; « L'annee » garde le pic de la fenetre, c'est son role, et le marque
+//   « deja passe ». UNE seule definition, comme depuis §33 : aucun ecran ne
+//   refait le tri de son cote.
+//   ② LE MANQUE NE SE COMPTE PLUS SUR DES TETES. `need` = heures de la semaine
+//   / capacite d'UN ETP. Son pendant exact n'est pas un comptage de tetes mais
+//   `capH / cap`, les heures REELLEMENT travaillables de l'equipe (horaire de
+//   chacun, conges, absences, contrats, effectif collectif) — planning.js la
+//   calcule deja, on la LIT. `head` etait un prorata de jours de CALENDRIER :
+//   une equipe sous contrat du samedi au mercredi y pesait 5/7 alors que la
+//   semaine ne donne du travail que du lundi au vendredi, dont elle ne couvrait
+//   que trois. D'ou « 34,4 personnes », un effectif qui n'a existe aucun jour.
+//   ⚠ ET PAS `headMax` NON PLUS, contrairement au plan annonce le matin : il
+//   repond « combien de corps au plus fort », ce qui est un FAUX NEGATIF pour
+//   un manque. Une equipe de 40 sous contrat jeudi et vendredi affiche 45 face
+//   a un besoin de 38,6 — « couvert » — alors qu'elle ne delivre que deux
+//   cinquiemes des heures. Un manque qu'on eteint coute plus cher qu'un manque
+//   qu'on exagere. headMax reste affiche, sous son propre nom : les corps dans
+//   les rangs, le chiffre d'un ordre de passage.
+//   ③ L'ANNEE DANS L'ETIQUETTE. « semaine du 29 aout » ne disait pas laquelle :
+//   un exercice traverse deux annees civiles.
+//   ④ LA FICHE « i » MENTAIT. Elle annonçait un bareme « applique aux surfaces
+//   qui restent a faire ». Verifie dans planning.js : `h = hha × passages ×
+//   surface concernee`, la surface TOTALE. Le besoin d'une semaine ne baisse
+//   donc jamais a mesure que le travail avance — c'est ecrit maintenant.
+//   ⚠️ APP_VERSION 6.77 → 6.78 : utils.js est touche (MV_INFO + journal).
+//   ⚠️ CE QUI N'EST PAS DANS CE LOT. Le besoin de la semaine du pic reste
+//   calcule sur la surface totale : si la fenetre de vendange parametree
+//   deborde du contrat de l'equipe, l'ecart apparait en sous-effectif sur une
+//   semaine pourtant travaillee. C'est un reglage de fenetre de tache, pas un
+//   defaut d'affichage — a regarder dans Outils › Parametrage.
 // v7.36 (05/09/2026) — CONF-4 : le dernier nom de client sort du code.
 //   `DOMAINE_NOM` portait en dur le nom du domaine de reference. Repli affiche a
 //   l'ecran de connexion avant que Firestore reponde — donc servi a TOUS les
@@ -3156,7 +3199,7 @@
 // v2.22 — Fix profils vides : guard vide dans loadData() pour MEMBRES/SAISONS/TACHES
 // v2.17 — Onboarding intégré + tenantId · v2.06 — Firebase Auth · v2.00–v2.05 — divers
 const DEBUG = self.location.hostname === 'localhost' || self.location.hostname === '127.0.0.1';
-const CACHE_NAME   = 'mavigne-v7.36';
+const CACHE_NAME   = 'mavigne-v7.37';
 const TENANT_CACHE = 'mavigne-tenant';   // Cache persistant — préservé à chaque mise à jour SW
 const SYNC_TAG     = 'mavigne-sync';
 
@@ -3172,7 +3215,7 @@ const CDN_URLS = [
 ];
 
 self.addEventListener('install', event => {
-  if(DEBUG) console.log('[SW] Ma Vigne v7.36 installé');
+  if(DEBUG) console.log('[SW] Ma Vigne v7.37 installé');
   event.waitUntil(
     caches.open(CACHE_NAME).then(async cache => {
       // ── Cœur applicatif : STRICT (mise à jour ATOMIQUE) ──
@@ -3188,7 +3231,7 @@ self.addEventListener('install', event => {
 });
 
 self.addEventListener('activate', event => {
-  if(DEBUG) console.log('[SW] Ma Vigne v7.36 activé');
+  if(DEBUG) console.log('[SW] Ma Vigne v7.37 activé');
   event.waitUntil(
     caches.keys().then(keys =>
       Promise.all(
