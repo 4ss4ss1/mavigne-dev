@@ -1888,7 +1888,7 @@ function _vendInjectCss(){
 .mvv-vol-u{font-size:9px;letter-spacing:1px;text-transform:uppercase;color:var(--texte-doux,#5F5F5F);margin-top:2px}
 .mvv-edit{background:none;border:none;color:var(--texte-doux,#5F5F5F);font-size:15px;padding:4px;margin:-4px -4px 0 0;line-height:1;cursor:pointer}
 .mvv-steps{display:flex;align-items:center;margin:12px 0 4px}
-.mvv-step{flex:1;min-width:0;display:flex;flex-direction:column;align-items:center;position:relative;gap:5px}
+.mvv-step{flex:1;display:flex;flex-direction:column;align-items:center;position:relative;gap:5px}
 .mvv-step .dot{width:9px;height:9px;border-radius:50%;background:var(--gris,#DED7C9);border:1.5px solid var(--gris-clair,#ECE6DA);z-index:2}
 .mvv-step.done .dot{background:var(--or,#C2A14D);border-color:var(--or,#C2A14D)}
 .mvv-step.cur .dot{background:var(--terre,#8A5A38);border-color:var(--terre,#8A5A38);box-shadow:0 0 0 4px rgba(138,90,56,.18)}
@@ -1898,13 +1898,6 @@ function _vendInjectCss(){
 .mvv-step::before{content:"";position:absolute;top:4px;left:-50%;width:100%;height:1.5px;background:var(--gris-clair,#ECE6DA);z-index:1}
 .mvv-step:first-child::before{display:none}
 .mvv-step.done::before,.mvv-step.cur::before{background:var(--or,#C2A14D)}
-/* PARC-1 : la date du passage, sous le libelle de l'etape. */
-.mvv-step .dt{font-size:8px;letter-spacing:.2px;line-height:1;color:var(--texte-doux,#5F5F5F);text-align:center;white-space:nowrap}
-.mvv-step.done .dt{color:var(--texte-med,#4A4A3A)}
-.mvv-step.cur .dt{color:var(--terre,#8A5A38);font-weight:600}
-.mvv-parc{margin:6px 0 2px;font-size:11.5px;line-height:1.5;text-align:center;color:var(--texte-med,#4A4A3A)}
-.mvv-parc b{color:var(--terre,#8A5A38);font-weight:700}
-.mvv-parc .nd{color:var(--texte-doux,#5F5F5F)}
 .mvv-ferm{margin-top:14px;background:var(--bg-app,#F2EFE7);border-radius:13px;padding:12px 13px 11px;border:1px solid rgba(138,90,56,.10)}
 .mvv-ferm-top{display:flex;justify-content:space-between;align-items:baseline;margin-bottom:9px}
 .mvv-ferm-lbl{font-size:11px;letter-spacing:.4px;text-transform:uppercase;color:var(--texte-doux,#5F5F5F);font-weight:500}
@@ -2188,54 +2181,6 @@ function _vendStatLbl(st){ return (_VEND_STAT[st]||{lbl:st||'—'}).lbl; }
 function _vendTempCls(t){ return t>=30?'hot':t>=26?'warm':'cool'; }
 function _vendIsActive(c){ return c.statut==='fa'||c.statut==='mpf'; }
 
-/* ═══════════ LE PARCOURS D'UNE CUVE — PARC-1 ═══════════
-   ⚠⚠⚠ `statut` EST UN SCALAIRE : il dit ou en est la cuve, jamais depuis
-   quand. Rien n'ecrivait la date d'un passage MPF -> FA. Tout ce qui compte
-   des jours partait donc de `date_entree`, et une cuve avait l'air d'etre
-   dans son etat courant DEPUIS L'ENCUVAGE. C'est le defaut signale par Nico.
-   ★ `statut_hist` est la liste des passages : [{id,statut,date}]. Elle
-   s'empile a chaque changement REEL, et elle se corrige ligne a ligne —
-   meme porte que les releves de CUV-1.
-   ⚠⚠ AUCUN RATTRAPAGE INVENTE sur les cuves d'avant ce lot : on ne connait
-   pas la date de leur etat courant, et `date_entree` ne la donne pas. La
-   frise ecrit « — » plutot qu'une fausse date. Un tiret se corrige, une
-   date fausse se croit. */
-function _vendHist(c){
-  var h=(c&&c.statut_hist)||[];
-  if(h.length>1) h.sort(_vendTriDate);
-  for(var i=0;i<h.length;i++) if(h[i]&&!h[i].id) h[i].id='vst_r'+i+'_'+String(h[i].date||'').replace(/-/g,'');
-  return h;
-}
-/* La DERNIERE occurrence d'une etape, pas la premiere. Un retour en arriere
-   (FA -> MPF pour rattraper une saisie) est possible : « depuis quand est-elle
-   en FA » doit lire le dernier passage. */
-function _vendStatIdx(c,st){
-  var h=_vendHist(c);
-  for(var i=h.length-1;i>=0;i--) if(h[i].statut===st) return i;
-  return -1;
-}
-function _vendStatDeb(c,st){ var i=_vendStatIdx(c,st); return i<0?null:_vendHist(c)[i].date; }
-function _vendStatFin(c,st){ var h=_vendHist(c),i=_vendStatIdx(c,st); return (i<0||i+1>=h.length)?null:h[i+1].date; }
-/* Jours passes dans une etape. null quand la date d'entree est inconnue —
-   JAMAIS zero : zero est un nombre, et un nombre se croit. */
-function _vendStatDuree(c,st,auj){
-  var d=_vendStatDeb(c,st); if(!d) return null;
-  var n=_mlEcartJ(d,_vendStatFin(c,st)||auj||_mlAuj());
-  return (n!=null&&isFinite(n)&&n>=0)?n:null;
-}
-/* Empile un passage. Rend l'entree ecrite, ou null si rien n'a change :
-   deux enregistrements de suite sur le meme statut ne doivent pas produire
-   deux lignes. */
-function _vendHistPose(c,st,date){
-  if(!c||!st) return null;
-  if(!Array.isArray(c.statut_hist)) c.statut_hist=[];
-  var h=_vendHist(c);
-  if(h.length && h[h.length-1].statut===st) return null;
-  var e={id:'vst_'+Date.now()+'_'+st, statut:st, date:date||_mlAuj()};
-  c.statut_hist.push(e); _vendHist(c);
-  return e;
-}
-
 /* ═══════════ L'ECRAN DU CUVIER — CUV-2 ═══════════
    ⚠️⚠️ CE QUI A CHANGE, ET POURQUOI. Une cuve en fermentation occupait
    ~726 px : le graphe densite/temperature en fait 232 a lui seul, et il
@@ -2388,48 +2333,12 @@ function _vendSparkline(mes,uid,w){
   return '<div class="mvv-spark"><div class="mvv-spark-lbl"><span>Cin\u00e9tique \u2014 densit\u00e9</span><span>'+mes.length+' relev\u00e9s</span></div>'
     +window._mvGraphSvg(c,aria,g)+'</div>';
 }
-/* ★ La frise prend la CUVE, plus son seul statut : elle porte desormais la
-   date de chaque passage. Une etape franchie dont la date est inconnue
-   affiche « — » — c'est une invitation a la poser, pas un trou. */
-function _vendStepper(c){
-  var st=(c&&c.statut)||'setup';
-  var cur=(_VEND_STAT[st]||{i:0}).i;
+function _vendStepper(statut){
+  var cur=(_VEND_STAT[statut]||{i:0}).i;
   return '<div class="mvv-steps">'+_VEND_STEPS.map(function(s,i){
     var cls=i<cur?'done':i===cur?'cur':'';
-    var d=(i<=cur)?_vendStatDeb(c,s[0]):null;
-    return '<div class="mvv-step '+cls+'"><div class="dot"></div><div class="lb">'+s[1]+'</div>'
-      +'<div class="dt">'+(d?_vendFrDate(d):(i<=cur?'\u2014':''))+'</div></div>';
+    return '<div class="mvv-step '+cls+'"><div class="dot"></div><div class="lb">'+s[1]+'</div></div>';
   }).join('')+'</div>';
-}
-/* La phrase que la frise ne peut pas dire : DEPUIS QUAND, et combien de
-   jours. Rien ne s'affiche tant qu'on ne le sait pas. */
-function _vendParcLigne(c){
-  var st=(c&&c.statut)||'', d=_vendStatDeb(c,st);
-  if(!d) return '';
-  var n=(st==='termine')?null:_vendStatDuree(c,st);
-  return '<div class="mvv-parc"><b>'+_escHtml(_vendStatLbl(st))+'</b> depuis le '+_vendFrDate(d)
-    +(n!=null?' <span class="nd">\u00b7 '+n+'\u00a0j</span>':'')+'</div>';
-}
-/* Le parcours complet, corrigeable ligne a ligne. Meme anatomie que
-   l'historique des releves : c'est la porte de la correction. */
-function _vendParcHist(c,canEdit){
-  var h=_vendHist(c);
-  if(!h.length) return '';
-  var auj=_mlAuj();
-  var rows=h.slice().reverse().map(function(e,k){
-    var i=h.length-1-k;
-    var fin=(i+1<h.length)?h[i+1].date:null;
-    var n=_mlEcartJ(e.date,fin||auj);
-    var det=fin?('jusqu\u2019au '+_vendFrDate(fin)):'en cours';
-    if(e.statut!=='termine'&&n!=null&&n>=0) det+=' \u00b7 '+n+' j';
-    return '<div class="mvv-hrow"><div class="mvv-hrow-l">'
-      +'<div class="mvv-hrow-d">'+_vendFrDate(e.date)+' \u00b7 <b>'+_escHtml(_vendStatLbl(e.statut))+'</b></div>'
-      +'<div class="mvv-hrow-u">'+_escHtml(det)+'</div></div>'
-      +(canEdit?'<button class="mv-gh mvv-icbtn" onclick="openVendStat(\''+_escAttr(c.id)+'\',\''+_escAttr(e.id)+'\')" title="Corriger cette \u00e9tape" aria-label="Corriger cette \u00e9tape">'+_mvIcon('crayon',16)+'</button>':'')
-      +'</div>';
-  }).join('');
-  return '<details class="mvv-histwrap"><summary>Parcours \u2014 '+h.length+' \u00e9tape'+(h.length>1?'s':'')
-    +' <span class="u">\u00b7 depuis le '+_vendFrDate(h[0].date)+'</span></summary>'+rows+'</details>';
 }
 function _vendErLbl(r){ return r.erasflage==='total'?'Éraflage total':r.erasflage==='partiel'?('Partiel '+(r.er_pct||30)+'%'):'Vendange entière'; }
 
@@ -2490,10 +2399,6 @@ function _vendRenderTab(){
 
 function renderCaveVendange() {
   _vendInjectCss();
-  /* ⚠ .mvv-histwrap / .mvv-hrow vivent dans _vendEnsureSheetCss, et le
-     detail deplie s'en sert AVANT qu'aucune feuille n'ait ete ouverte :
-     sans cet appel, l'historique sortait sans style au premier affichage. */
-  _vendEnsureSheetCss();
   var icoEl=document.getElementById('cave-hdr-ico'); _mvSetIcon(icoEl,'raisin',20);
   var titleEl=document.getElementById('cave-hdr-title'); if(titleEl) titleEl.textContent='Le Cuvier';
   var subEl=document.getElementById('cave-hdr-sub'); if(subEl) subEl.textContent=(window.DOMAINE_NOM||'Mon domaine');
@@ -2806,8 +2711,7 @@ function _vendDetailHtml(c,canEdit){
   /* La frise des etapes : elle dit OU EN EST la cuve dans son parcours.
      La ligne fermee n'en montre que l'aboutissement (le badge d'etat) ;
      ici on remet le parcours entier. */
-  h+=_vendStepper(c);
-  h+=_vendParcLigne(c);
+  h+=_vendStepper(c.statut);
   if(mes.length>=3){
     h+='<div class="mvv-det-g" id="mvg-fm-'+_mvgId(c.id)+'"></div>';
   } else if(mes.length>=2){
@@ -2858,15 +2762,12 @@ function _vendDetailHtml(c,canEdit){
     h+='<div class="mvv-actrow" style="flex-wrap:wrap">';
     if(act) h+='<button class="mvv-act2 dec" onclick="openOvVendMesure(\''+_escAttr(c.id)+'\')">Saisir une mesure</button>';
     if(c.statut==='setup') h+='<button class="mvv-act2 dec" onclick="openOvVendCuve(\''+_escAttr(c.id)+'\')">D\u00e9marrer la fermentation</button>';
-    if(c.statut!=='termine')
-      h+='<button class="mvv-act2" onclick="openVendStat(\''+_escAttr(c.id)+'\')">Changer l\u2019\u00e9tape</button>';
     h+='<button class="mvv-act2" onclick="openVendOp(\''+_escAttr(c.id)+'\')">Op\u00e9ration</button>';
     if(c.statut!=='termine'&&c.statut!=='setup')
       h+='<button class="mvv-act2" onclick="openVendDecuvage(\''+_escAttr(c.id)+'\')">D\u00e9cuver</button>';
     h+='<button class="mvv-act2" onclick="openOvVendCuve(\''+_escAttr(c.id)+'\')">Modifier</button>';
     h+='</div>';
   }
-  h+=_vendParcHist(c,canEdit&&!_vendEstFusionnee(c));
   h+=_vendMesHist(c,canEdit&&!_vendEstFusionnee(c));
   h+=_vendOpsSummary(c,canEdit&&!_vendEstFusionnee(c));
   return h;
@@ -3003,7 +2904,12 @@ function renderVendParam() {
   var html=_caveSaisBanner();
   html+='<div class="mvv-set"><div class="mvv-set-t">Pesée</div>'
     +'<div class="mvv-set-d">Poids moyen d\'une caisse de vendange, utilisé pour convertir les caisses en kilos.</div>'
-    +'<div class="mvv-prow"><div class="mvv-prow-l">Poids par caisse</div><div style="display:flex;align-items:center;gap:7px"><input class="mvv-fi" id="vpfi-pck" type="number" min="10" max="60" value="'+pck+'"><span style="font-size:11px;color:var(--texte-doux,#5F5F5F)">kg</span></div></div></div>';
+    +'<div class="mvv-prow"><div class="mvv-prow-l">Poids par caisse</div><div style="display:flex;align-items:center;gap:7px"><input class="mvv-fi" id="vpfi-pck" type="number" min="10" max="60" value="'+pck+'"><span style="font-size:11px;color:var(--texte-doux,#5F5F5F)">kg</span></div></div>'
+    // Le poids par défaut ne vaut QUE pour les saisies à venir : chaque apport
+    // fige le sien (VD-1). La correction des apports déjà saisis a sa porte.
+    +'<div class="mvv-fnote" style="color:var(--texte-doux,#5F5F5F)">Poids proposé aux prochaines saisies. Chaque apport garde celui du jour où il a été pesé.</div>'
+    +(canWrite()?'<button class="mvv-save ghost2" style="margin-top:10px" onclick="openVendPoids()">Corriger un poids déjà saisi</button>':'')
+    +'</div>';
   html+='<div class="mvv-set"><div class="mvv-set-t">Rendement jus</div>'
     +'<div class="mvv-set-d">Kilos de raisin pour produire 1 hL de jus. Standard Bourgogne rouge : 130–140 kg/hL.</div>'
     +'<div class="mvv-prow"><div class="mvv-prow-l">Ratio minimum</div><div style="display:flex;align-items:center;gap:7px"><input class="mvv-fi" id="vpfi-rmin" type="number" min="80" max="200" value="'+rMin+'"><span style="font-size:11px;color:var(--texte-doux,#5F5F5F)">kg/hL</span></div></div>'
@@ -3347,41 +3253,9 @@ function openOvVendCuve(id) {
   var p=document.getElementById('vcuv-mpf-params'); if(p) p.style.display=_vcuvMpfActive?'block':'none';
   _vcuvParcRender();
   el=document.getElementById('vcuv-id'); if(el) el.value=id||'';
-  _vcuvStat0=c?(c.statut||'setup'):null;
-  _vcuvInjectStatDate(c);
   el=document.getElementById('vcuv-del-btn'); if(el) el.style.display=c?'block':'none';
   _vendInjectCuveFrom(!c);
   var ov=document.getElementById('ovVendCuve'); if(ov) ov.classList.add('open');
-}
-/* ═════ LE CHAMP « DEPUIS LE » DE LA FICHE — PARC-1 ═════
-   Pose sous le select de statut, et VISIBLE SEULEMENT si le statut change :
-   corriger un nom n'a aucune date a demander. index.html n'est pas touche —
-   meme patron que le champ client de l'overlay recolte. */
-var _vcuvStat0=null;
-function _vcuvInjectStatDate(c){
-  var sel=document.getElementById('vcuv-statut'); if(!sel) return;
-  sel.onchange=_vcuvStatChange;
-  var row=document.getElementById('vcuv-stdate-row');
-  if(!row){
-    row=document.createElement('div'); row.id='vcuv-stdate-row';
-    row.innerHTML='<div class="fl">Depuis le <span style="font-weight:500;text-transform:none;letter-spacing:0;opacity:.8">\u2014 date du changement d\u2019\u00e9tape</span></div>'
-      +'<input type="date" class="fi ac" id="vcuv-stdate">'
-      +'<div id="vcuv-stdate-note" style="font-size:10.5px;color:var(--texte-doux);margin-top:5px;line-height:1.45"></div>';
-    if(sel.parentNode) sel.parentNode.insertBefore(row,sel.nextSibling);
-  }
-  var d=document.getElementById('vcuv-stdate'); if(d) d.value=_mlAuj();
-  row.style.display='none';
-  var n=document.getElementById('vcuv-stdate-note'); if(n) n.textContent='';
-}
-function _vcuvStatChange(){
-  var sel=document.getElementById('vcuv-statut'), row=document.getElementById('vcuv-stdate-row');
-  if(!sel||!row) return;
-  var chg=(_vcuvStat0!=null && sel.value!==_vcuvStat0);
-  row.style.display=chg?'block':'none';
-  var n=document.getElementById('vcuv-stdate-note');
-  if(n) n.textContent=chg
-    ? ('Le passage en \u00ab '+_vendStatLbl(sel.value)+' \u00bb sera dat\u00e9 de ce jour. Ce qui pr\u00e9c\u00e8de garde son \u00e9tape.')
-    : '';
 }
 function saveVendCuve() {
   if(!_vendGarde()) return;
@@ -3399,14 +3273,6 @@ function saveVendCuve() {
   var mpfD=parseInt((document.getElementById('vcuv-mpf-duree')||{}).value)||4;
   var id=((document.getElementById('vcuv-id')||{}).value||'');
   var existing=id?(CAVE_VENDANGE.cuves_vinif||[]).find(function(c){return c.id===id;}):null;
-  /* ★ PARC-1 — un changement d'etape se DATE. Le controle passe AVANT
-     toute ecriture : un refus doit laisser la fiche intacte. */
-  var _stChg=!!(existing && statut!==existing.statut);
-  var _stDate=_stChg?(String(((document.getElementById('vcuv-stdate')||{}).value)||'').slice(0,10)||_mlAuj()):'';
-  if(_stChg){
-    if(date && _stDate<date){ showToast('Le passage est ant\u00e9rieur \u00e0 l\u2019encuvage du '+_vendFrDate(date),'#B85A1A'); return; }
-    if(_stDate>_mlAuj()){ showToast('Un passage ne se pose pas dans le futur','#B85A1A'); return; }
-  }
   // ⚠️ Dernier filet : la cuve a pu etre prise depuis l'ouverture de la fiche.
   if(_vcuvRef && _caveCuveOcc(_vcuvRef, id||null)){
     var _pk=_caveCuve(_vcuvRef);
@@ -3428,13 +3294,6 @@ function saveVendCuve() {
   if(existing&&existing.cuvee_src&&!obj.cuvee_src) obj.cuvee_src=existing.cuvee_src;
   if(existing&&existing.recolte_ids&&!obj.recolte_ids) obj.recolte_ids=existing.recolte_ids.slice();
   if(existing&&existing.nb_caisses!=null&&obj.nb_caisses==null) obj.nb_caisses=existing.nb_caisses;
-  /* ⚠⚠ `obj` est rebati de zero : sans cette ligne, rouvrir la fiche
-     effacerait tout le parcours. Meme piege que `fusion` juste au-dessus. */
-  obj.statut_hist=(existing&&Array.isArray(existing.statut_hist))?existing.statut_hist.slice():[];
-  /* Une cuve NEUVE entre dans son etat le jour de l'encuvage : ce n'est pas
-     une date inventee, c'est la seule qu'on connaisse, et elle est juste. */
-  if(!existing) _vendHistPose(obj,statut,date||_mlAuj());
-  else if(_stChg) _vendHistPose(obj,statut,_stDate);
   if(!CAVE_VENDANGE.cuves_vinif) CAVE_VENDANGE.cuves_vinif=[];
   if(id){var idx=CAVE_VENDANGE.cuves_vinif.findIndex(function(c){return c.id===id;});if(idx!==-1)CAVE_VENDANGE.cuves_vinif[idx]=obj;else CAVE_VENDANGE.cuves_vinif.push(obj);}
   else{CAVE_VENDANGE.cuves_vinif.push(obj);}
@@ -4496,6 +4355,21 @@ function _vendRetSave(){
     else if(x.part.retour) delete x.part.retour;
     x.rec.nb_caisses=_recCaisses(x.rec);
   });
+  // ⚠️ DÉFAUT CUV-5 : cet écran corrige des CAISSES et des POIDS, donc des
+  //   kilos — et il ne prévenait pas la parcelle. `rendement_hist` gardait les
+  //   anciens kg/ha, et Pilotage lisait la vieille valeur pour son prix de
+  //   revient. Le Cuvier juste, le Pilotage faux, aucun des deux écrans ne
+  //   paraissant malade. `_vendRecordRendement` n'avait qu'UN appelant
+  //   (`saveVendRec`) alors que deux écrans écrivent des kilos.
+  //   Une récolte peut porter plusieurs lignes de la même livraison : on ne la
+  //   recalcule qu'une fois, et le lot ne fait qu'une écriture de parcelles.
+  _vendParcLot(function(){
+    var _vus={};
+    _vliv.lignes.forEach(function(x){
+      if(!x.rec||!x.rec.id||_vus[x.rec.id]) return;
+      _vus[x.rec.id]=1; _vendRecordRendement(x.rec,null);
+    });
+  });
   window.CAVE_VENDANGE=CAVE_VENDANGE;
   _vendFbSave(vol>0?('Retour enregistr\u00e9 \u00b7 '+_vendKgTxt(_vendRendKgHl(kg,vol))+' kg/hL'):'Livraison mise \u00e0 jour','#3D6B27');
   openVendLivs(_vliv.ci);
@@ -5028,7 +4902,6 @@ function saveVendDecuvage(){
   var _vdec=_caveVolL(cuvee)/100;
   c.vol_decuve_hl=(_vdec>0)?Math.round(_vdec*100)/100:null;
   c.statut='termine';
-  _vendHistPose(c,'termine',c.decuvage.date);   /* PARC-1 : le decuvage EST un passage */
   window.CAVE_VENDANGE=CAVE_VENDANGE;
   window.CAVE_ELEVAGE=CAVE_ELEVAGE;
   _vendSheetClose();
@@ -5709,7 +5582,6 @@ function saveVendFusion(){
      cuve_ref est LACHE : c'est ce qui libere la cuve dans le parc. */
   absorbees.forEach(function(c){
     c.statut='termine';
-    _vendHistPose(c,'termine',date);            /* PARC-1 : la fusion aussi */
     c.fusion={vers:porteuse.id, vers_nom:nom, date:date};
     c.cuve_ref=null;
   });
@@ -5835,97 +5707,6 @@ function deleteVendClient(i){
   });
 }
 
-/* ═════ CHANGER L'ETAPE, ET LA DATER — PARC-1 ═════
-   Deux entrees, un seul ecran : le bouton du detail pose un passage neuf,
-   le crayon du parcours corrige un passage deja pose. Une correction n'est
-   qu'un passage dont on rectifie la date — leur donner deux ecrans
-   differents aurait fabrique deux verites.
-   ⚠ Le statut de la cuve SUIT la derniere etape du parcours, sinon la frise
-   et le badge se contrediraient. Deux exceptions, et elles sont fermes :
-   une cuve FUSIONNEE ou DECUVEE reste 'termine'. Son parcours est clos ;
-   corriger une date ne doit pas la rouvrir alors que la cuvee existe deja
-   au Chai. */
-var _vstCuveId=null, _vstEditId=null, _vstSel='';
-function openVendStat(cuveId,histId){
-  if(!canWrite()) return;
-  var c=(CAVE_VENDANGE.cuves_vinif||[]).find(function(x){return x.id===cuveId;});
-  if(!c) return;
-  var e=histId?_vendHist(c).find(function(x){return x.id===histId;}):null;
-  _vstCuveId=cuveId; _vstEditId=e?histId:null;
-  _vstSel=e?e.statut:(c.statut||'setup');
-  var chips=_VEND_STEPS.map(function(s){
-    /* ⚠ C24b : `s[0]` est une constante litterale de _VEND_STEPS, mais on
-       l'echappe quand meme — graver une exception au cliquet coute plus cher
-       que trois caracteres (§72e). */
-    return '<button class="mvv-optab'+(s[0]===_vstSel?' on':'')+'" onclick="_vstSet(\''+_escAttr(s[0])+'\')">'
-      +_vendStatLbl(s[0])+'</button>';
-  }).join('');
-  var html=''
-    +'<div class="mvv-sheet-hd"><div class="mvv-sheet-t">'+(e?'Corriger l\u2019\u00e9tape':'Changer l\u2019\u00e9tape')
-      +' \u2014 '+_escHtml(c.nom||'Cuve')+'</div>'
-    +'<button class="mv-gh mvv-sheet-x" onclick="_vendSheetClose()" title="Fermer" aria-label="Fermer">'+_mvIcon('croix',18)+'</button></div>'
-    +'<div class="mvv-sheet-sub">La date est celle du <b>passage</b>, pas celle de l\u2019encuvage. '
-      +'Ce qui a \u00e9t\u00e9 fait avant garde son \u00e9tape.</div>'
-    +'<label class="mvv-flbl">\u00c9tape</label><div class="mvv-optabs">'+chips+'</div>'
-    +'<label class="mvv-flbl">Depuis le</label>'
-    +'<input id="vst-date" class="mvv-tin" type="date" value="'+_escAttr((e&&e.date)||_mlAuj())+'">'
-    +'<div class="mvv-fnote">'+(c.date_entree?('Encuvage le '+_vendFrDate(c.date_entree)+'. '):'')
-      +'Une date ant\u00e9rieure \u00e0 l\u2019encuvage, ou post\u00e9rieure \u00e0 aujourd\u2019hui, est refus\u00e9e.</div>'
-    +'<button class="mvv-save" style="margin-top:18px" onclick="saveVendStat()">'
-      +(e?'Enregistrer la correction':'Enregistrer le passage')+'</button>'
-    +(e?'<button class="mvv-del" onclick="_vendStatDel()">Supprimer cette \u00e9tape</button>':'');
-  _vendSheet(html);
-}
-function _vstSet(k){
-  _vstSel=k;
-  var tabs=document.querySelectorAll('#mvv-ov .mvv-optab');
-  tabs.forEach(function(b,i){ if(_VEND_STEPS[i]) b.classList.toggle('on',_VEND_STEPS[i][0]===k); });
-}
-function saveVendStat(){
-  if(!_vendGarde()) return;
-  var c=(CAVE_VENDANGE.cuves_vinif||[]).find(function(x){return x.id===_vstCuveId;});
-  if(!c) return;
-  var d=String(((document.getElementById('vst-date')||{}).value)||'').slice(0,10);
-  if(!d){ showToast('Choisissez la date du passage','#E07060'); return; }
-  if(c.date_entree && d<c.date_entree){
-    showToast('Ant\u00e9rieur \u00e0 l\u2019encuvage du '+_vendFrDate(c.date_entree),'#B85A1A'); return; }
-  if(d>_mlAuj()){ showToast('Un passage ne se pose pas dans le futur','#B85A1A'); return; }
-  if(!Array.isArray(c.statut_hist)) c.statut_hist=[];
-  if(_vstEditId){
-    var e=_vendHist(c).find(function(x){return x.id===_vstEditId;});
-    if(!e){ showToast('\u00c9tape introuvable','#B85A1A'); return; }
-    e.statut=_vstSel; e.date=d;
-  } else {
-    c.statut_hist.push({id:'vst_'+Date.now()+'_'+_vstSel, statut:_vstSel, date:d});
-  }
-  var h=_vendHist(c);
-  var clos=_vendEstFusionnee(c)||!!(c.decuvage&&c.decuvage.date);
-  if(h.length && !clos) c.statut=h[h.length-1].statut;
-  window.CAVE_VENDANGE=CAVE_VENDANGE;
-  /* ⚠ VD-SAVE : le vert ne part QUE sur ok. Passer par window.fbSave nu
-     afficherait « enregistré » sur une ecriture partie en file. */
-  _vendFbSave(_vendStatLbl(_vstSel)+' \u00b7 '+_vendFrDate(d),'#3D6B27');
-  _vendSheetClose();
-  renderVendCuves();
-}
-/* ⚠ Supprimer une etape ne RETROGRADE pas la cuve : on efface une date, pas
-   un fait. Retirer le dernier passage ferait repasser une cuve en FA parce
-   qu'on a corrige une faute de frappe — le statut reste ou il est. */
-function _vendStatDel(){
-  if(!_vendGarde()) return;
-  var c=(CAVE_VENDANGE.cuves_vinif||[]).find(function(x){return x.id===_vstCuveId;});
-  if(!c||!_vstEditId) return;
-  var _id=_vstEditId;
-  window.openConfirmDel('Supprimer cette \u00e9tape ?',
-    'Le parcours perdra cette date. Le statut de la cuve ne change pas.',function(){
-    c.statut_hist=(c.statut_hist||[]).filter(function(x){return x.id!==_id;});
-    window.CAVE_VENDANGE=CAVE_VENDANGE;
-    _vendFbSave('\u00c9tape supprim\u00e9e','#B85A1A');
-    _vendSheetClose();
-    renderVendCuves();
-  });
-}
-
 // —— Exports fenêtre (Vendange v2) ——
 window._vendSetVue          = _vendSetVue;
 window._vendSetFiltre       = _vendSetFiltre;
@@ -5934,10 +5715,6 @@ window._vendBascOuv         = _vendBascOuv;
 window._vendSetQ            = _vendSetQ;
 window._vendVideQ           = _vendVideQ;
 window._vendSheetClose      = _vendSheetClose;
-window.openVendStat         = openVendStat;
-window._vstSet              = _vstSet;
-window.saveVendStat         = saveVendStat;
-window._vendStatDel         = _vendStatDel;
 window.openVendDecuvage     = openVendDecuvage;
 window._vendDecAdj          = _vendDecAdj;
 window.saveVendDecuvage     = saveVendDecuvage;
@@ -5964,6 +5741,240 @@ window._vendDocRecap        = _vendDocRecap;
 window.openVendClient       = openVendClient;
 window.saveVendClient       = saveVendClient;
 window.deleteVendClient     = deleteVendClient;
+
+// ═══════════════════════════════════════════════════════════════════════════
+// CUV-5 — CORRIGER UN POIDS DE CAISSE APRÈS COUP (06/09/2026)
+// ═══════════════════════════════════════════════════════════════════════════
+// Signalé par Nico en pleine vendange : les caisses annoncées à 25 kg et à
+// 12 kg pesaient en réalité 20 kg et 10 kg. Quarante-sept récoltes déjà
+// saisies. Ce n'est pas la saisie qui s'est trompée — c'est la caisse.
+//
+// `pck` est FIGÉ dans chaque apport depuis VD-1, et la règle est bonne :
+// corriger une fiche client ne doit pas déplacer un bon déjà signé. Mais figé
+// ne veut pas dire sans issue, et il manquait la porte. Rouvrir 47 récoltes
+// une par une, c'est 47 occasions d'en oublier une — et RIEN ne dirait
+// laquelle : l'écran n'affiche que des kilos, jamais le poids qui les a faits.
+//
+// ⚠️⚠️ CE QUI FAIT LE PRIX DE CE LOT N'EST PAS LE CHAMP, C'EST LE RECALCUL.
+//   Les kilos ne vivent pas qu'au Cuvier. `rendement_hist` les dénormalise
+//   dans la PARCELLE, et c'est là que Pilotage lit son prix de revient. Un
+//   correcteur qui n'écrirait que `parts[].pck` laisserait le Cuvier juste et
+//   le Pilotage faux — l'écart le plus cher à trouver, parce que les deux
+//   écrans ont l'air sains chacun de son côté.
+//   La correction repasse donc par `_vendRecordRendement`, LA MÊME fonction
+//   que l'enregistrement d'une récolte. Pas une copie du calcul : la fonction.
+// ═══════════════════════════════════════════════════════════════════════════
+
+var _vpc = {mil:null, ancien:null, nouveau:null, defaut:true, clients:true};
+
+// Les millésimes qui portent au moins une récolte, du plus récent au plus ancien.
+function _vpcMillesimes(){
+  var s={};
+  (CAVE_VENDANGE.recoltes||[]).forEach(function(r){ if(r) s[_vendMillOfDate(r.date)]=1; });
+  return Object.keys(s).map(Number).sort(function(a,b){ return b-a; });
+}
+function _vpcRecs(mil){
+  return (CAVE_VENDANGE.recoltes||[]).filter(function(r){
+    return r && _vendMillOfDate(r.date)===mil;
+  });
+}
+// Les poids RÉELLEMENT posés sur les apports d'un millésime, et ce qu'ils pèsent.
+// ⚠️ On lit `_vpPck()`, jamais `part.pck` en direct : une récolte d'avant VD-1
+//    n'a pas de `parts[]` et son poids vient encore de la fiche client. Sans
+//    ça, la seule récolte que le correcteur ne verrait pas serait justement la
+//    plus ancienne — celle qu'on aurait le plus de mal à retrouver à la main.
+function _vpcPoids(mil){
+  var by={};
+  _vpcRecs(mil).forEach(function(r){
+    _vendParts(r).forEach(function(p){
+      var cs=_vpCs(p); if(cs<=0) return;
+      var k=_vpPck(p);
+      var o=by[k]||(by[k]={pck:k,recs:{},apports:0,caisses:0,kg:0,dests:{}});
+      o.recs[r.id]=1; o.apports++; o.caisses+=cs; o.kg+=cs*k;
+      var n=_vpNom(p); o.dests[n]=(o.dests[n]||0)+cs*k;
+    });
+  });
+  return Object.keys(by).map(Number).sort(function(a,b){ return b-a; })
+    .map(function(k){ var o=by[k]; o.recoltes=Object.keys(o.recs).length; return o; });
+}
+function _vpcLigne(mil,pck){
+  var l=_vpcPoids(mil).filter(function(o){ return o.pck===pck; });
+  return l.length?l[0]:null;
+}
+// Les fiches client qui annoncent encore l'ancien poids.
+function _vpcClientsVises(anc){
+  return _vendClients().filter(function(c){ return Number(c.poids_caisse_kg)===anc; });
+}
+
+function openVendPoids(){
+  if(!_vendGarde()) return;
+  var ms=_vpcMillesimes();
+  if(!ms.length){ showToast('Aucune récolte à corriger','#B85A1A'); return; }
+  if(ms.indexOf(_vpc.mil)===-1) _vpc.mil=ms[0];
+  var ps=_vpcPoids(_vpc.mil);
+  if(!ps.length) _vpc.ancien=null;
+  else if(!ps.some(function(o){ return o.pck===_vpc.ancien; })) _vpc.ancien=ps[0].pck;
+  _vpcRender();
+}
+function _vpcRender(){
+  var ms=_vpcMillesimes(), ps=_vpcPoids(_vpc.mil);
+  var h=''
+   +'<div class="mvv-sheet-hd"><div class="mvv-sheet-t">Corriger un poids de caisse</div>'
+   +'<button class="mv-gh mvv-sheet-x" onclick="_vendSheetClose()" title="Fermer" aria-label="Fermer">'+_mvIcon('croix',18)+'</button></div>'
+   +'<div class="mvv-sheet-sub">Le poids d’une caisse est figé au jour de la saisie, et c’est ce qui protège '
+   +'un bon déjà signé. Ici, et seulement ici, il se reprend en bloc — quand ce n’est pas la saisie qui '
+   +'s’est trompée, mais la caisse.</div>';
+
+  h+='<label class="mvv-flbl">Millésime</label>'
+   +'<select class="mvv-tin" id="vpc-mil" onchange="_vpcSetMil(this.value)">'
+   +ms.map(function(m){ return '<option value="'+m+'"'+(m===_vpc.mil?' selected':'')+'>'+m+'</option>'; }).join('')
+   +'</select>';
+
+  h+='<label class="mvv-flbl">Poids en place</label>';
+  if(!ps.length){
+    h+='<div class="mvv-fnote">Aucun apport saisi sur ce millésime.</div>';
+    _vendSheet(h); return;
+  }
+  h+='<div class="mvv-cllist">'+ps.map(function(o){
+    var on=(o.pck===_vpc.ancien);
+    return '<button type="button" class="mvv-clrow" style="width:100%;text-align:left;border:none;'
+     +'background:'+(on?'rgba(192,132,90,.12)':'transparent')+';cursor:pointer" onclick="_vpcSetAnc('+o.pck+')">'
+     +'<span class="vrp-d" style="background:'+(on?'var(--terre,#8A5A38)':'rgba(138,90,56,.22)')+'"></span>'
+     +'<span style="flex:1;min-width:0;margin-left:9px"><span class="mvv-clrow-nm">'+_vendNbTxt(o.pck,0)+' kg par caisse</span>'
+     +'<span class="mvv-clrow-mt" style="display:block">'+o.recoltes+' récolte'+(o.recoltes>1?'s':'')
+     +' · '+o.apports+' apport'+(o.apports>1?'s':'')+' · '+o.caisses+' caisses · '
+     +_vendL1(o.kg/1000)+' t</span></span></button>';
+  }).join('')+'</div>';
+
+  h+='<label class="mvv-flbl">Poids réel (kg)</label>'
+   +'<input id="vpc-nv" class="mvv-tin" type="text" inputmode="decimal" placeholder="ex. 20" '
+   +'value="'+_vendNbTxt(_vpc.nouveau,0)+'" oninput="_vpcSetNv(this.value)">';
+
+  h+='<div id="vpc-bas">'+_vpcBasHtml()+'</div>';
+  _vendSheet(h);
+}
+// Le bas de la feuille se rafraîchit à chaque frappe. Il est isolé pour la
+// raison habituelle de ce fichier : réécrire la feuille entière recrée
+// `#vpc-nv`, donc perd le curseur, et on ne peut plus taper le second chiffre.
+function _vpcBasHtml(){
+  var anc=_vpc.ancien, nv=_vpc.nouveau, o=_vpcLigne(_vpc.mil,anc);
+  if(!o) return '';
+  var pret=(nv>0&&nv!==anc);
+  var h='<div class="vrp-tot" style="margin-top:12px"><div class="vrp-tot-g">'
+   +'<div><div class="vrp-tot-n">'+o.recoltes+'</div><div class="vrp-tot-l">Récoltes</div></div>'
+   +'<div><div class="vrp-tot-n">'+_vendL1(o.kg/1000)+'<small>t</small></div><div class="vrp-tot-l">Aujourd’hui</div></div>'
+   +'<div><div class="vrp-tot-n">'+(pret?(_vendL1(o.kg/anc*nv/1000)+'<small>t</small>'):'—')
+   +'</div><div class="vrp-tot-l">Après</div></div></div>';
+  h+='<div class="vrp-tot-d">';
+  if(pret){
+    var d=o.kg/anc*nv-o.kg;
+    Object.keys(o.dests).sort().forEach(function(n){
+      h+=_escHtml(n)+' — '+_vendKgTxt(o.dests[n])+' kg → <b>'+_vendKgTxt(o.dests[n]/anc*nv)+' kg</b><br>';
+    });
+    h+='<span style="color:rgba(240,232,220,.5)">Écart total '+(d>0?'+':'−')+' '
+     +_vendKgTxt(Math.abs(d))+' kg sur le millésime '+_vpc.mil+'.</span>';
+  } else {
+    h+='<span style="color:rgba(240,232,220,.5)">Saisissez le poids réel d’une de ces caisses.</span>';
+  }
+  h+='</div></div>';
+
+  if(pret){
+    var majD=(_vendCfg().poids_caisse_kg===anc);
+    var majC=_vpcClientsVises(anc);
+    if(majD){
+      h+='<div class="mvl-chk'+(_vpc.defaut?' on':'')+'" onclick="_vpcTog(\'defaut\')"><div class="bx">'
+       +(_vpc.defaut?_mvIcon('check',16):'')+'</div><div><div class="tx">Corriger aussi le poids par défaut du Cuvier</div>'
+       +'<div class="sb">'+_vendNbTxt(anc,0)+' → '+_vendNbTxt(nv,0)+' kg. C’est lui qui sert aux prochaines saisies '
+       +'et aux hectolitres estimés d’une cuve non décuvée.</div></div></div>';
+    }
+    if(majC.length){
+      h+='<div class="mvl-chk'+(_vpc.clients?' on':'')+'" onclick="_vpcTog(\'clients\')"><div class="bx">'
+       +(_vpc.clients?_mvIcon('check',16):'')+'</div><div><div class="tx">Corriger aussi '+majC.length+' fiche'
+       +(majC.length>1?'s':'')+' client</div>'
+       +'<div class="sb">'+_escHtml(majC.map(function(c){ return c.nom; }).join(', '))
+       +' — poids habituel proposé à la saisie.</div></div></div>';
+    }
+    h+='<div class="mvv-fnote" style="color:var(--texte-doux,#5F5F5F)">'
+     +'<b>Ce que la correction déplace</b> : les kilos, les rendements kg/ha et hL/ha de chaque parcelle, '
+     +'les bons de livraison, le bilan de campagne.<br>'
+     +'<b>Ce qu’elle ne touche pas</b> : les litres de jus et de lie rendus par un client — c’est sa mesure, '
+     +'pas la vôtre —, la contenance des cuves, et un bon déjà imprimé et remis.</div>'
+     +'<button class="mvv-save" style="margin-top:14px" onclick="_vpcConfirmer()">Appliquer la correction</button>';
+  }
+  return h;
+}
+function _vpcMaj(){ var el=document.getElementById('vpc-bas'); if(el) el.innerHTML=_vpcBasHtml(); }
+function _vpcSetMil(v){ _vpc.mil=parseInt(v,10)||_vpc.mil; var ps=_vpcPoids(_vpc.mil);
+  _vpc.ancien=ps.length?ps[0].pck:null; _vpcRender(); }
+function _vpcSetAnc(v){ _vpc.ancien=Number(v); _vpcRender(); }
+function _vpcSetNv(v){ var n=_vendLireNb(v); _vpc.nouveau=(isNaN(n)||n<=0)?null:n; _vpcMaj(); }
+function _vpcTog(k){ _vpc[k]=!_vpc[k]; _vpcMaj(); }
+
+function _vpcConfirmer(){
+  var anc=_vpc.ancien, nv=_vpc.nouveau, o=_vpcLigne(_vpc.mil,anc);
+  if(!o||!(nv>0)||nv===anc) return;
+  window.openConfirmDel(
+    'Corriger ' + o.recoltes + ' récolte' + (o.recoltes>1?'s':'') + ' ?',
+    _vendNbTxt(anc,0)+' kg → '+_vendNbTxt(nv,0)+' kg par caisse sur le millésime '+_vpc.mil
+      +' · '+_vendL1(o.kg/1000)+' t deviennent '+_vendL1(o.kg/anc*nv/1000)+' t.',
+    _vpcAppliquer, 'balance', 'Corriger', '#8A5A38');
+}
+function _vpcAppliquer(){
+  if(!_vendGarde()) return;
+  var anc=_vpc.ancien, nv=_vpc.nouveau, mil=_vpc.mil;
+  if(!(anc>0)||!(nv>0)||nv===anc) return;
+  var nRec=0, nApp=0;
+  // ⚠️ Une rafale de 47 corrections, c'est 47 `saveData('parcelles')` si on ne
+  //    fait rien — 47 transactions sur la collection la plus protégée de
+  //    l'application. `_vendParcLot` les regroupe en une seule écriture.
+  _vendParcLot(function(){
+    _vpcRecs(mil).forEach(function(r){
+      var ps=_vendParts(r);
+      if(!ps.some(function(p){ return _vpCs(p)>0 && _vpPck(p)===anc; })) return;
+      // ⚠️ Une récolte d'avant VD-1 n'a pas encore de `parts[]` : `_vendParts`
+      //    lui en fabrique une EN LECTURE, qui n'est stockée nulle part. La
+      //    corriger sans l'écrire dans la récolte perdrait la correction au
+      //    prochain chargement, sans un mot. Même piège que `_vendRetSave`.
+      if(!Array.isArray(r.parts)||!r.parts.length) r.parts=ps;
+      r.parts.forEach(function(p){
+        if(_vpCs(p)>0 && _vpPck(p)===anc){ p.pck=nv; nApp++; }
+      });
+      r.nb_caisses=_recCaisses(r);
+      // `prev` reste nul : la parcelle ne bouge pas, il n'y a aucune entrée de
+      // rendement à retirer ailleurs. L'upsert par `recolte_id` fait le reste.
+      _vendRecordRendement(r,null);
+      nRec++;
+    });
+  });
+  var suite=[];
+  if(_vpc.defaut && _vendCfg().poids_caisse_kg===anc){
+    if(!CAVE_VENDANGE.config) CAVE_VENDANGE.config={};
+    CAVE_VENDANGE.config.poids_caisse_kg=nv;
+    suite.push('poids par défaut');
+  }
+  if(_vpc.clients){
+    var cl=_vpcClientsVises(anc);
+    cl.forEach(function(c){ c.poids_caisse_kg=nv; });
+    if(cl.length) suite.push(cl.length+' fiche'+(cl.length>1?'s':'')+' client');
+  }
+  window.CAVE_VENDANGE=CAVE_VENDANGE;
+  if(!nRec){ showToast('Aucun apport à ce poids','#B85A1A'); return; }
+  _vendFbSave(nRec+' récolte'+(nRec>1?'s':'')+' corrigée'+(nRec>1?'s':'')
+    +' · '+nApp+' apport'+(nApp>1?'s':'')+(suite.length?(' · '+suite.join(' et ')):''),'#3D6B27');
+  _vpc.nouveau=null;
+  _vendSheetClose();
+  if(_vendTab==='param') renderVendParam();
+  else if(_vendTab==='rec') renderVendRec();
+}
+
+window.openVendPoids  = openVendPoids;
+window._vpcSetMil     = _vpcSetMil;
+window._vpcSetAnc     = _vpcSetAnc;
+window._vpcSetNv      = _vpcSetNv;
+window._vpcTog        = _vpcTog;
+window._vpcConfirmer  = _vpcConfirmer;
+window._vpcAppliquer  = _vpcAppliquer;
+
 
 // ═══════════════════════════════════════════════════════════════════════════
 // VENDANGE v2.1 — parcelle en liste · cuvée · liaison Récolte→Cuve · PDF récoltes
@@ -6561,9 +6572,28 @@ function _vendParcByName(nom){
   var ps=window.PARCELLES||[]; var k=String(nom).trim().toLowerCase();
   return ps.find(function(x){return x&&String(x.nom||'').trim().toLowerCase()===k;})||null;
 }
+// ⚠️ UNE CORRECTION EN MASSE NE DOIT PAS FAIRE UNE ÉCRITURE PAR RÉCOLTE.
+//   `_vendRecordRendement` enregistre les parcelles à chaque appel : corriger
+//   47 récoltes déclencherait 47 transactions sur la collection la plus
+//   protégée de l'application. `_vendParcLot` regroupe la rafale.
+//   ⚠️⚠️ LA FORME EST UN ENCADREMENT, PAS UN COUPLE OUVRIR/FERMER. Il n'y a
+//   pas de « flush » à oublier, et une exception au milieu du lot ne peut pas
+//   laisser les écritures de parcelles muettes pour le reste de la session :
+//   c'est le `finally` qui rend la main, pas la bonne volonté de l'appelant.
+var _vendParcDiff=0, _vendParcSale=false;
 function _vendSaveParcelles(){
+  if(_vendParcDiff){ _vendParcSale=true; return; }
   var fn=window.saveData||window._saveData;
   if(typeof fn==='function') fn('parcelles');
+}
+function _vendParcLot(fn){
+  _vendParcDiff++;
+  try{ fn(); }
+  finally{
+    _vendParcDiff--;
+    if(_vendParcDiff<0) _vendParcDiff=0;
+    if(!_vendParcDiff && _vendParcSale){ _vendParcSale=false; _vendSaveParcelles(); }
+  }
 }
 // Upsert par recolte_id. Millésime = année civile de la date de récolte.
 function _vendRecordRendement(rec, prev){
@@ -9226,15 +9256,7 @@ function _mlProjFA(c,now){
   if(dl==null) return {etat:'attente'};
   if(dl<=_ML_D20_SEC) return {etat:'sec', d20:dl, dernier:dernier};
   var jCuve=c.date_entree?_mlEcartJ(c.date_entree,now):99;
-  /* ★ PARC-1 — le garde « demarrage » comptait depuis l'ENCUVAGE : cinq jours
-     de maceration a froid passaient pour cinq jours de fermentation, et la
-     projection s'ouvrait sur une cuve qui n'avait pas commence. Il compte
-     desormais depuis le debut de FA quand on le connait — a defaut,
-     l'ancien comportement, a l'identique. `jCuve` garde son sens (temps en
-     cuve), parce que l'agenda l'affiche sous ce nom. */
-  var _faD=_vendStatDeb(c,'fa');
-  var jFA=_faD?_mlEcartJ(_faD,now):jCuve;
-  if(m.length<3 || jFA<3) return {etat:'demarrage', d20:dl, dernier:dernier, jCuve:jCuve, jFA:jFA};
+  if(m.length<3 || jCuve<3) return {etat:'demarrage', d20:dl, dernier:dernier, jCuve:jCuve};
   var a=m[m.length-2], b=last;
   var penteRec=(_vendMesD20(a)-_vendMesD20(b))/(_mlEcartJ(a.date,b.date)||1);
   var p3=m.slice(-3);
@@ -10754,8 +10776,14 @@ function _bcDoc(ctx, DOM, c, mil){
     recs.forEach(function(r){
       var k = r.parcelle || '\u2014';
       if(!parP[k]) parP[k] = {nom:k, caisses:0, kg:0, vendu:false, d0:r.date, d1:r.date};
-      var kg = (r.nb_caisses||0) * 25;
-      if(typeof window !== 'undefined' && typeof window._recKg === 'function') kg = window._recKg(r);
+      // ⚠️ DÉFAUT CUV-5 : `window._recKg` n'a JAMAIS été exporté. Le garde
+      //   `typeof … === 'function'` était donc toujours faux, et le bilan de
+      //   campagne pesait toutes les caisses à 25 kg EN DUR — en ignorant
+      //   `parts[]`, donc les caisses de 12 kg d'un négociant comme toute
+      //   correction de poids. Un repli défensif qui ne se replie jamais ne
+      //   protège rien : il cache. `_recKg` est déclaré dans CE fichier, il
+      //   s'appelle directement.
+      var kg = _recKg(r);
       parP[k].caisses += (r.nb_caisses||0);
       parP[k].kg += kg;
       if(r.client) parP[k].vendu = true;
@@ -11423,17 +11451,8 @@ function _cuvDoc(an){
     id.push('<em><b>' + _cuvErLbl(c.erasflage) + '</b></em>');
     id.push('<em>Levures <b>' + (c.levures === 'selectionnees' ? 'sélectionnées' : 'indigènes') + '</b></em>');
     if(c.so2_g_hl)    id.push('<em>SO₂ à l’encuvage <b>' + _mvF1(c.so2_g_hl) + ' g/hL</b></em>');
-    if(c.mpf && c.mpf.active){
-      /* ★ PARC-1 — la duree REELLE quand le parcours la connait, la duree
-         PREVUE sinon, et alors annoncee comme telle. Un document qui imprime
-         une intention sans le dire la fait passer pour un fait. */
-      var _nMpf = _vendStatDuree(c, 'mpf');
-      id.push('<em>Macération préfermentaire <b>' + _mvF1(c.mpf.temp_c || 0) + ' °C · '
-        + (_nMpf != null ? (_nMpf + ' j') : ((c.mpf.duree_j || 0) + ' j prévus')) + '</b></em>');
-    }
-    var _parc = _vendHist(c);
-    if(_parc.length) id.push('<em>Parcours <b>' + _parc.map(function(e){
-      return _vendStatLbl(e.statut) + ' ' + _vendFrDate(e.date); }).join(' → ') + '</b></em>');
+    if(c.mpf && c.mpf.active) id.push('<em>Macération préfermentaire <b>' + _mvF1(c.mpf.temp_c || 0)
+                        + ' °C · ' + (c.mpf.duree_j || 0) + ' j</b></em>');
     if(nj != null)    id.push('<em>Cuvaison <b>' + nj + ' jour' + (nj > 1 ? 's' : '') + '</b></em>');
 
     var pied = '';

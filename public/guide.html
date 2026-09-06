@@ -1129,24 +1129,9 @@ mark{background:rgba(200,176,32,.32);color:var(--cream);border-radius:3px;paddin
     relevés et leurs opérations sous leur nom d'origine : c'est sous ce nom que le SO₂ a été ajouté.
     L'assemblage part au <b>registre des manipulations</b>. Tant que rien n'est décuvé, le volume affiché
     est une <b>estimation</b> d'après les caisses, et l'écran le dit.</li>
-      <li><b>Changer l'étape garde la date du changement</b> : une cuve qui passe de <b>macération
-    préfermentaire à froid</b> à <b>fermentation alcoolique</b> ne perd plus ce qui précède. Dans la
-    fiche de la cuve, dès que vous changez le statut, un champ <b>« Depuis le »</b> apparaît, réglé
-    sur aujourd'hui — changez-le si vous notez le passage le lendemain matin. La frise des étapes
-    porte les dates, et la cuve annonce <b>depuis quand</b> elle est dans l'étape où elle est.</li>
-      <li><b>Le parcours se corrige, étape par étape</b> : dépliez la cuve, <b>Parcours</b> liste tous
-    ses passages avec leur durée, un crayon par ligne. Le bouton <b>Changer l'étape</b> fait la même
-    chose depuis le détail. Une date <b>antérieure à l'encuvage</b> ou <b>dans le futur</b> est
-    refusée. Supprimer une étape efface une date, pas un fait : le statut de la cuve ne change pas.</li>
       <li><b>Corriger un relevé</b> : dépliez la cuve, la liste de ses relevés s'ouvre sous la courbe, un crayon
     par ligne — date, densité, température, remontages, pigeages, note. Un relevé peut aussi être
     supprimé. La liste reste accessible sur une cuve <b>déjà décuvée</b>.</li>
-      <li>Les cuves <b>créées avant cette mise à jour</b> n'ont pas de date de passage : on ne sait
-    pas quel jour elles sont entrées dans leur étape actuelle, et la date d'encuvage ne le dit pas.
-    La frise écrit un <b>tiret</b> plutôt qu'une date fausse. Posez-la à la main si vous la connaissez.</li>
-      <li>La <b>fin de fermentation estimée</b> ne compte que les jours de <b>FA</b> : cinq jours de
-    macération à froid ne sont pas cinq jours de fermentation. Le <b>cahier de cuverie</b> imprime la
-    durée de macération <b>réellement faite</b> ; à défaut, la durée <b>prévue</b>, et il le dit.</li>
       <li>Les <b>opérations</b> se corrigent de la même façon, et sont <b>toutes</b> listées.
     Corriger ou supprimer une saignée <b>rend d'abord les hectolitres</b> à la cuve avant d'appliquer
     la nouvelle valeur.</li>
@@ -1164,6 +1149,7 @@ mark{background:rgba(200,176,32,.32);color:var(--cream);border-radius:3px;paddin
     <div class="card"><h4><svg class="g-ic" width="18" height="18" viewBox="0 0 24 24" aria-hidden="true" focusable="false"><use href="#ic-engrenage"></use></svg> Réglages du Cuvier</h4><ul class="dot">
       <li>Déclaration des cuves et de leurs volumes</li>
       <li>Poids d'une caisse, rendement en jus, sucre par degré</li>
+      <li><b>Corriger un poids déjà saisi</b> : reprendre tout un millésime d'un coup</li>
       <li><b>Clients vrac</b> : leur nom, leur adresse, le poids habituel de leurs caisses</li>
       <li><b>Base du rendement</b> : jus clair seul, ou jus et lies</li>
       <li>Accès direct aux <b>livraisons et aux bons</b></li>
@@ -1179,6 +1165,18 @@ mark{background:rgba(200,176,32,.32);color:var(--cream);border-radius:3px;paddin
       d'un négociant ne pèsent pas celles d'un autre, et le même client peut changer de caisse d'un
       jour à l'autre. La fiche du client <b>propose</b> son poids habituel, elle ne l'impose pas.
       Corriger cette fiche plus tard ne déplace <b>aucun</b> kilo déjà livré.</li>
+    <li><b>Quand c'est la caisse qui s'est trompée, pas la saisie.</b> Des caisses annoncées à
+      25&nbsp;kg qui en pesaient 20, découvertes en fin de vendange : <b>Réglages du Cuvier &rsaquo;
+      « Corriger un poids déjà saisi »</b> reprend tout un millésime en une fois. L'écran liste les
+      poids <b>réellement en place</b> — c'est la seule vue de l'application qui les montre — avec
+      le nombre de récoltes, de caisses et de tonnes derrière chacun. Vous saisissez le poids réel,
+      vous voyez le résultat <b>destinataire par destinataire avant d'appliquer</b>, et le poids par
+      défaut comme les fiches client peuvent suivre, chacun sur une case.</li>
+    <li><b>Ce que la correction déplace</b> : les kilos, les rendements <b>kg/ha et hL/ha</b> de
+      chaque parcelle — donc le prix de revient au Pilotage —, les bons de livraison et le bilan de
+      campagne. <b>Ce qu'elle ne touche pas</b> : les litres de jus et de lie rendus par un
+      acheteur, qui sont sa mesure et pas la vôtre&nbsp;; la contenance des cuves&nbsp;; et un bon
+      déjà imprimé et remis, qui ne correspondra plus à ce qu'affiche l'application.</li>
     <li><b>La surface récoltée</b> se saisit quand un client achète une partie de la parcelle.
       Laissée vide, la ligne prend <b>tout le reste</b> : si l'acheteur a pris 12 ares sur 34, le
       domaine se voit attribuer les 22 restants sans que vous ayez rien à taper. La surface s'écrit
