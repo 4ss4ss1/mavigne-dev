@@ -1,4 +1,27 @@
-// MA VIGNE — Service Worker v7.40
+// MA VIGNE — Service Worker v7.41
+// v7.41 (06/09/2026) — CUV-6 : LES HECTOLITRES SUR DES KILOS, ET TROIS DEFAUTS
+//   DU CORRECTEUR DE POIDS. Diagnostic en lecture seule sur la vendange reelle
+//   de Nico : 1 378 caisses, 31 101 kg par les apports contre 27 560 annonces
+//   par les jauges. 3 541 kg d'ecart, onze cuves fausses.
+//   ★★★ LA CAUSE : _vendCuvHl(caisses) multipliait un NOMBRE DE CAISSES par UN
+//   poids, celui du reglage. Avec trois tailles de caisse (25, 20, 12), cette
+//   fonction ne pouvait STRUCTURELLEMENT jamais tomber juste. C'etait la
+//   seconde source de verite pour les memes kilos : _recKg en donnait une,
+//   le reglage global une autre, et corriger un poids ne bougeait que la
+//   premiere. Deux ecrans sains chacun de son cote, un total impossible.
+//   → _vendHlKg(kg) + _vendCuvKgDom(). Dix sites convertis, _vendCuvHl
+//   SUPPRIMEE (une fonction morte qui traine est une invitation).
+//   ★★ LE GARDE-FOU ETAIT SOUS LES MUTATIONS. Une correction qui ne trouvait
+//   aucun apport changeait quand meme le poids par defaut et les fiches client
+//   en memoire, puis repartait sans enregistrer — les changements orphelins
+//   partaient dans le premier enregistrement venu. Rien ne doit etre touche
+//   tant qu'on n'est pas sur d'aller au bout.
+//   ★★ LE POIDS REEL SURVIVAIT AU CHANGEMENT DE LIGNE. Un « 10 » tape pour les
+//   caisses de 12 restait en place sur celles de 25 : l'apercu annoncait
+//   16 215 kg d'ecart avec l'aplomb d'un chiffre juste. Il se vide avec la
+//   ligne, et au-dela de 40 % l'ecran le signale avant qu'on appuie.
+//   ★ Le catch de _vendRecordRendement, totalement muet, passe par logError.
+//   Il avale toujours — c'est le contrat — mais il le dit.
 // v7.40 (06/09/2026) — CUV-5 : un poids de caisse se corrige apres coup.
 //   Signale en pleine vendange : des caisses annoncees a 25 et 12 kg pesaient
 //   20 et 10. Quarante-sept recoltes deja saisies. `pck` est fige dans chaque
@@ -3310,7 +3333,7 @@
 // v2.22 — Fix profils vides : guard vide dans loadData() pour MEMBRES/SAISONS/TACHES
 // v2.17 — Onboarding intégré + tenantId · v2.06 — Firebase Auth · v2.00–v2.05 — divers
 const DEBUG = self.location.hostname === 'localhost' || self.location.hostname === '127.0.0.1';
-const CACHE_NAME   = 'mavigne-v7.40';
+const CACHE_NAME   = 'mavigne-v7.41';
 const TENANT_CACHE = 'mavigne-tenant';   // Cache persistant — préservé à chaque mise à jour SW
 const SYNC_TAG     = 'mavigne-sync';
 
@@ -3326,7 +3349,7 @@ const CDN_URLS = [
 ];
 
 self.addEventListener('install', event => {
-  if(DEBUG) console.log('[SW] Ma Vigne v7.40 installé');
+  if(DEBUG) console.log('[SW] Ma Vigne v7.41 installé');
   event.waitUntil(
     caches.open(CACHE_NAME).then(async cache => {
       // ── Cœur applicatif : STRICT (mise à jour ATOMIQUE) ──
@@ -3342,7 +3365,7 @@ self.addEventListener('install', event => {
 });
 
 self.addEventListener('activate', event => {
-  if(DEBUG) console.log('[SW] Ma Vigne v7.40 activé');
+  if(DEBUG) console.log('[SW] Ma Vigne v7.41 activé');
   event.waitUntil(
     caches.keys().then(keys =>
       Promise.all(

@@ -2837,7 +2837,7 @@ function _vendDetailHtml(c,canEdit){
   var cs=_vendCuvCsDom(c.id);
   if(cs>0) det.push(cs+' caisse'+(cs>1?'s':'')+' du domaine');
   if(_vendVolLoge(c)>0) det.push(_vendCuvF1(_vendVolLoge(c))+'\u00a0hL log\u00e9s');
-  else if(cs>0)         det.push('~'+_vendCuvF1(_vendCuvHl(cs))+'\u00a0hL estim\u00e9s');
+  else if(cs>0)         det.push('~'+_vendCuvF1(_vendHlKg(_vendCuvKgDom(c.id)))+'\u00a0hL estim\u00e9s');
   if(c.volume_hl)       det.push('contenance '+_vendCuvF1(c.volume_hl)+'\u00a0hL');
   if(c.date_entree)     det.push('entr\u00e9e le '+_vendFrDate(c.date_entree));
   if(det.length) h+='<div class="mvv-detnote">'+_escHtml(det.join(' \u00b7 '))+'</div>';
@@ -2878,7 +2878,7 @@ function _vendCellHtml(c){
   var ouv=(_vendOuvert===c.id), last=_vendLastMes(c);
   var pct=last?_vendFaPct(_vendMesD20(last)):0;
   var cap=parseFloat(c.volume_hl)||0;
-  var dedans=_vendVolLoge(c)>0?_vendVolLoge(c):_vendCuvHl(_vendCuvCsDom(c.id));
+  var dedans=_vendVolLoge(c)>0?_vendVolLoge(c):_vendHlKg(_vendCuvKgDom(c.id));
   var niv = (c.statut==='setup'||!(cap>0)) ? 0 : Math.max(8,Math.min(100,Math.round(dedans/cap*100)));
   var col = c.statut==='termine' ? '#C0BAAE' : _vendADue(c) ? '#C86A4E'
           : _vendIsActive(c) ? '#8A5A38' : '#9A93A8';
@@ -4791,7 +4791,7 @@ function _vendDecCuveObj(){
 // contenance : une cuve a moitie pleine proposait deux fois trop de futs.
 function _vendDecVolHl(){
   var c=_vendDecCuveObj(); if(!c) return 0;
-  var est=_vendCuvHl(_vendCuvCsDom(c.id));
+  var est=_vendHlKg(_vendCuvKgDom(c.id));
   return est>0?est:(parseFloat(c.volume_hl)||0);
 }
 
@@ -5504,7 +5504,7 @@ function _vendFusPris(){
 /* Le volume attendu d'une cuve : les caisses du domaine au ratio kg/hL.
    ⚠️ JAMAIS `volume_hl`, qui est la CONTENANCE — c'est la faute RDT-1, et
    elle se rejouerait ici a l'identique. */
-function _vendFusHl(c){ return _vendCuvHl(_vendCuvCsDom(c.id)); }
+function _vendFusHl(c){ return _vendHlKg(_vendCuvKgDom(c.id)); }
 function _vendFusTotHl(){
   return _vendFusPris().reduce(function(s,c){ return s+_vendFusHl(c); },0);
 }
@@ -6121,6 +6121,17 @@ function _vpcBasHtml(){
   }
   h+='</div></div>';
 
+  if(pret && _vpcEnorme(anc,nv)){
+    // ⚠️ CUV-6 — le 06/09, un « 10 » resté d'une autre ligne a affiché un écart
+    //   de 16 215 kg sur une campagne, avec l'aplomb d'un chiffre juste. Une
+    //   correction de plus de 40 % n'est pas impossible, mais elle n'est jamais
+    //   anodine : elle doit se voir AVANT qu'on appuie, pas après.
+    h+='<div class="mvv-fnote" style="border-left:3px solid var(--orange,#B85A1A);'
+     +'padding-left:9px;color:var(--orange,#B85A1A)"><b>Vérifiez ce poids.</b> Passer de '
+     +_vendNbTxt(anc,0)+' à '+_vendNbTxt(nv,0)+' kg, c\u2019est '
+     +Math.round(Math.abs(nv-anc)/anc*100)+'\u00a0% du poids d\u2019une caisse. '
+     +'C\u2019est possible, mais c\u2019est aussi ce que donne un poids tap\u00e9 pour une autre ligne.</div>';
+  }
   if(pret){
     var majD=(_vendCfg().poids_caisse_kg===anc);
     var majC=_vpcClientsVises(anc);
@@ -6146,21 +6157,33 @@ function _vpcBasHtml(){
   }
   return h;
 }
+function _vpcEnorme(anc,nv){ return anc>0 && nv>0 && Math.abs(nv-anc)/anc>0.4; }
 function _vpcMaj(){ var el=document.getElementById('vpc-bas'); if(el) el.innerHTML=_vpcBasHtml(); }
+// ⚠️ DÉFAUT CUV-6 — `_vpc.nouveau` SURVIVAIT AU CHANGEMENT DE LIGNE.
+//   Le correcteur sélectionne d'office le poids le plus lourd à l'ouverture.
+//   Un « 10 » tapé pour les caisses de 12 restait en place quand on revenait
+//   sur celles de 25, et l'aperçu annonçait tranquillement 27 025 → 10 810 kg,
+//   soit 16 215 kg d'écart sur une campagne. Le chiffre était juste au sens
+//   arithmétique : c'est la question qui n'était plus celle qu'on posait.
+//   Un poids réel ne veut rien dire hors du poids qu'il remplace : il se vide
+//   avec lui.
 function _vpcSetMil(v){ _vpc.mil=parseInt(v,10)||_vpc.mil; var ps=_vpcPoids(_vpc.mil);
-  _vpc.ancien=ps.length?ps[0].pck:null; _vpcRender(); }
-function _vpcSetAnc(v){ _vpc.ancien=Number(v); _vpcRender(); }
+  _vpc.ancien=ps.length?ps[0].pck:null; _vpc.nouveau=null; _vpcRender(); }
+function _vpcSetAnc(v){ var k=Number(v); if(k!==_vpc.ancien) _vpc.nouveau=null;
+  _vpc.ancien=k; _vpcRender(); }
 function _vpcSetNv(v){ var n=_vendLireNb(v); _vpc.nouveau=(isNaN(n)||n<=0)?null:n; _vpcMaj(); }
 function _vpcTog(k){ _vpc[k]=!_vpc[k]; _vpcMaj(); }
 
 function _vpcConfirmer(){
   var anc=_vpc.ancien, nv=_vpc.nouveau, o=_vpcLigne(_vpc.mil,anc);
   if(!o||!(nv>0)||nv===anc) return;
+  var sub=_vendNbTxt(anc,0)+' kg → '+_vendNbTxt(nv,0)+' kg par caisse sur le millésime '+_vpc.mil
+      +' · '+_vendL1(o.kg/1000)+' t deviennent '+_vendL1(o.kg/anc*nv/1000)+' t.';
+  if(_vpcEnorme(anc,nv)) sub='Attention, '+Math.round(Math.abs(nv-anc)/anc*100)
+    +' % du poids d\u2019une caisse. '+sub;
   window.openConfirmDel(
     'Corriger ' + o.recoltes + ' récolte' + (o.recoltes>1?'s':'') + ' ?',
-    _vendNbTxt(anc,0)+' kg → '+_vendNbTxt(nv,0)+' kg par caisse sur le millésime '+_vpc.mil
-      +' · '+_vendL1(o.kg/1000)+' t deviennent '+_vendL1(o.kg/anc*nv/1000)+' t.',
-    _vpcAppliquer, 'balance', 'Corriger', '#8A5A38');
+    sub, _vpcAppliquer, 'balance', 'Corriger', '#8A5A38');
 }
 function _vpcAppliquer(){
   if(!_vendGarde()) return;
@@ -6189,6 +6212,17 @@ function _vpcAppliquer(){
       nRec++;
     });
   });
+  // ⚠️⚠️ DÉFAUT CUV-6 — CE GARDE-FOU ÉTAIT EN DESSOUS DES DEUX MUTATIONS.
+  //   Une exécution qui ne corrigeait AUCUN apport changeait quand même le
+  //   poids par défaut et les fiches client EN MÉMOIRE, puis repartait sans
+  //   enregistrer. Ces modifications orphelines partaient ensuite dans le
+  //   premier enregistrement venu, depuis n'importe quel écran — un réglage
+  //   déplacé sans que personne ne l'ait demandé, et rien pour le dire.
+  //   ★★★ RIEN NE DOIT ÊTRE TOUCHÉ TANT QU'ON N'EST PAS SÛR D'ALLER AU BOUT.
+  //   Une sortie anticipée doit laisser l'état exactement comme elle l'a
+  //   trouvé — c'est la seule forme qui reste vraie quand on ajoutera une
+  //   troisième mutation en dessous.
+  if(!nRec){ showToast('Aucun apport à ce poids','#B85A1A'); return; }
   var suite=[];
   if(_vpc.defaut && _vendCfg().poids_caisse_kg===anc){
     if(!CAVE_VENDANGE.config) CAVE_VENDANGE.config={};
@@ -6201,7 +6235,6 @@ function _vpcAppliquer(){
     if(cl.length) suite.push(cl.length+' fiche'+(cl.length>1?'s':'')+' client');
   }
   window.CAVE_VENDANGE=CAVE_VENDANGE;
-  if(!nRec){ showToast('Aucun apport à ce poids','#B85A1A'); return; }
   _vendFbSave(nRec+' récolte'+(nRec>1?'s':'')+' corrigée'+(nRec>1?'s':'')
     +' · '+nApp+' apport'+(nApp>1?'s':'')+(suite.length?(' · '+suite.join(' et ')):''),'#3D6B27');
   _vpc.nouveau=null;
@@ -6359,12 +6392,33 @@ function _vendCuvStats(id){
   var cids={};
   rs.forEach(function(r){ if(r.cuve_id) cids[r.cuve_id]=1; });
   var cuves=(CAVE_VENDANGE.cuves_vinif||[]).filter(function(c){return c&&(c.vcuvee_id===id||cids[c.id]);});
-  return {n:rs.length,caisses:rs.reduce(function(s,r){return s+_recCsDom(r);},0),parcelles:parc,cuves:cuves};
+  return {n:rs.length,caisses:rs.reduce(function(s,r){return s+_recCsDom(r);},0),
+          kg:rs.reduce(function(s,r){return s+_recKgDom(r);},0),parcelles:parc,cuves:cuves};
 }
-function _vendCuvHl(caisses){
-  var cfg=_vendCfg();
-  var ratio=_mlKgHl();
-  return (caisses||0)*(cfg.poids_caisse_kg||25)/(ratio||135);
+// ═══════════════════════════════════════════════════════════════════════════
+// CUV-6 — DES HECTOLITRES CALCULÉS SUR DES KILOS, PLUS SUR DES CAISSES
+// ═══════════════════════════════════════════════════════════════════════════
+// ⚠️⚠️ `_vendCuvHl(caisses)` multipliait un NOMBRE DE CAISSES par UN poids —
+//   celui du réglage. Sur un domaine qui a trois tailles de caisse (25, 20 et
+//   12 kg chez Nico), cette fonction ne pouvait STRUCTURELLEMENT jamais tomber
+//   juste, quel que soit le réglage : diagnostic du 06/09, 1 378 caisses,
+//   31 101 kg réels contre 27 560 kg annoncés — 3 541 kg d'écart, et tous les
+//   hectolitres estimés des onze cuves faux avec.
+//   ★★★ C'ÉTAIT LA SECONDE SOURCE DE VÉRITÉ POUR LES MÊMES KILOS. `_recKg` en
+//   donnait une (les apports, avec leur poids figé), le réglage global en
+//   donnait une autre. Corriger un poids ne bougeait que la première. Deux
+//   écrans sains chacun de son côté, un total impossible.
+//   Il n'y a plus qu'une source : les kilos des apports.
+function _vendHlKg(kg){ var r=_mlKgHl(); return (kg||0)/(r||135); }
+// ⚠️ `_vendCuvHl(caisses)` est SUPPRIMÉE, pas dépréciée. Une fonction morte qui
+//   traîne est une invitation : le prochain lot pressé la rappellerait et
+//   réintroduirait la seconde source de vérité sans s'en apercevoir. Zéro
+//   appelant restant, vérifié par le harnais.
+// Le jumeau en kilos de `_vendCuvCsDom` — même filtre, même exclusion.
+function _vendCuvKgDom(cuveId, exclId){
+  if(!cuveId) return 0;
+  return (CAVE_VENDANGE.recoltes||[]).reduce(function(s,x){
+    return s+((x&&x.cuve_id===cuveId&&x.id!==exclId)?_recKgDom(x):0); },0);
 }
 function _vendCuvF1(n){ return (Math.round((n||0)*10)/10).toString().replace('.',','); }
 
@@ -6473,7 +6527,7 @@ function _vendCuvRender(){
     cur.forEach(function(c,i){
       var st=_vendCuvStats(c.id);
       var sub=(st.parcelles.length?st.parcelles.length+' parcelle'+(st.parcelles.length>1?'s':'')+' \u00b7 ':'')
-        +st.caisses+' caisses \u00b7 '+_vendCuvF1(_vendCuvHl(st.caisses))+' hL';
+        +st.caisses+' caisses \u00b7 '+_vendCuvF1(_vendHlKg(st.kg))+' hL';
       var tag,cls;
       if(st.cuves.length>1){ tag=st.cuves.length+' cuves'; cls='cuve'; }
       else if(st.cuves.length===1){ tag=st.cuves[0].nom||'en cuve'; cls='cuve'; }
@@ -6511,7 +6565,13 @@ function _vendCuvAtt(caisses){
   var st=_vendCuvStats(_vcuvSel.id); _vcuvIdx.cuves=st.cuves;
   if(!st.cuves.length) return;
   if(caisses==null) caisses=parseInt((document.getElementById('vrec-caisses')||{}).value)||0;
-  var add=_vendCuvHl(caisses);
+  // ⚠️ Ici la récolte n'est pas encore enregistrée : les kilos viennent de la
+  //   répartition en cours de saisie, qui porte déjà son poids par ligne. Le
+  //   repli sur le réglage ne sert qu'au tout premier instant, avant qu'une
+  //   seule caisse soit tapée — et il est alors sans conséquence.
+  var _rp=(typeof _vendRepParts==='function')?_vendRepParts():[];
+  var _rkg=_rp.reduce(function(s,x){ return s+_vpKg(x); },0);
+  var add=_vendHlKg(_rkg>0?_rkg:((caisses||0)*(_vendCfg().poids_caisse_kg||25)));
   var idx=_vcuvSel.cuveIdx; if(idx>=st.cuves.length) idx=st.cuves.length-1;
   var h='<div class="mvcs-att"><div class="mvcs-att-h"><span>'+_mvIcon('fiole',16)+'</span><span>Cette cuv\u00e9e a d\u00e9j\u00e0 '
     +(st.cuves.length>1?'des cuves':'une cuve')+'</span></div><div class="mvcs-att-b">';
@@ -6535,7 +6595,7 @@ function _vendCuvAtt(caisses){
        parcelles de la cuve. Ce qui est deja dedans se RECALCULE depuis les
        recoltes a chaque affichage — rien ne s'accumule, donc rien ne double. */
     var _rid=((document.getElementById('vrec-id')||{}).value||'');
-    var deja=_vendCuvHl(_vendCuvCsDom(cv.id,_rid));
+    var deja=_vendHlKg(_vendCuvKgDom(cv.id,_rid));
     var cap=Math.round((parseFloat(cv.volume_hl)||0)*10)/10;
     if(_vcuvSel.vol==null) _vcuvSel.vol=cap;
     var apres=deja+add;
@@ -6902,7 +6962,16 @@ function _vendRecordRendement(rec, prev){
     } else if(moved){
       _vendSaveParcelles();
     }
-  }catch(e){ /* ne jamais casser l'enregistrement de la récolte */ }
+  }catch(e){
+    // ⚠️ CUV-6 — CE CATCH ÉTAIT TOTALEMENT MUET. L'intention était bonne (ne
+    //   jamais faire échouer l'enregistrement d'une récolte pour un rendement),
+    //   le silence ne l'était pas : une correction en masse pouvait laisser
+    //   `rendement_hist` périmé sur toute une campagne sans qu'une seule ligne
+    //   n'apparaisse nulle part, et le Pilotage aurait lu les vieux kg/ha.
+    //   ★ On avale toujours — c'est le contrat — mais on le DIT.
+    if(window.logError) window.logError({level:'info',cat:'cuvier',
+      msg:'rendement non enregistré pour '+((rec&&rec.id)||'?')+' : '+(e&&e.message||e)});
+  }
 }
 function _vendUnrecordRendement(recId, parcelleNom){
   try{
@@ -8148,7 +8217,7 @@ function _apportsRangs(recs){
   return Object.keys(byP).map(function(n){
     var o = byP[n], p = _vendParcByName(n);
     o.ha = p ? (parseFloat(p.surface) || 0) : 0;
-    o.hl = _vendCuvHl(o.caisses);
+    o.hl = _vendHlKg(o.kg);
     o.hlHa = o.ha > 0 ? o.hl / o.ha : null;
     return o;
   }).sort(function(a,b){ return b.caisses - a.caisses; });
@@ -8338,11 +8407,11 @@ function _cuveCouches(cu, recs){
   var mine = (recs || []).filter(function(r){ return r && r.cuve_id === cu.id; });
   var byP = {};
   mine.forEach(function(r){
-    var o = byP[r.parcelle] || (byP[r.parcelle] = { nom:r.parcelle, caisses:0 });
-    o.caisses += _recCsDom(r);
+    var o = byP[r.parcelle] || (byP[r.parcelle] = { nom:r.parcelle, caisses:0, kg:0 });
+    o.caisses += _recCsDom(r); o.kg += _recKgDom(r);
   });
   var cs = Object.keys(byP).map(function(n){
-    var o = byP[n]; o.hl = _vendCuvHl(o.caisses); return o;
+    var o = byP[n]; o.hl = _vendHlKg(o.kg); return o;
   }).sort(function(a,b){ return b.hl - a.hl; });
   var plein = cs.reduce(function(s,o){ return s + o.hl; }, 0);
   return { couches: cs, plein: plein, cap: parseFloat(cu.volume_hl) || 0 };
@@ -9626,7 +9695,7 @@ function _mlChaine(mil){
      En cuve : l'estimation d'apres les caisses du domaine, comme la jauge de
      remplissage. Decuve : le volume reellement loge. */
   var hlCuve=cuves.filter(function(c){ return c.statut!=='termine'; })
-                  .reduce(function(s,c){ return s+_vendCuvHl(_vendCuvCsDom(c.id)); },0);
+                  .reduce(function(s,c){ return s+_vendHlKg(_vendCuvKgDom(c.id)); },0);
   var hlDecuve=cuves.filter(function(c){ return c.statut==='termine'; })
                     .reduce(function(s,c){ return s+_vendVolLoge(c); },0);
   var cuvees=(CAVE_ELEVAGE.cuvees||[]).filter(function(c){ return String(c.millesime)===String(mil); });

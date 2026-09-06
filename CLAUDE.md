@@ -13428,3 +13428,127 @@ dernier**.
 pas de `.mv-base`, hors dépôt git. `node scripts/mv-base.mjs --contre`, **5/5**.
 
 **Base : `ac6fbb4`.**
+
+---
+
+## 84. ★★★ CUV-6 — LES HECTOLITRES SUR DES KILOS, ET CE QUE LE DIAGNOSTIC A APPRIS (06/09 — APP 6.81 → 6.82 · SW 7.40 → 7.41 · base `b7c3351`)
+
+Nico, après CUV-5 : *« la correction ne corrige pas les saisies déjà faites, j'ai des résultats
+aberrants — un écart jusqu'à 16 215 kg sur 27 000 en changeant 5 kg sur 1 400 caisses. »*
+
+### 84a. ★★★ NE PAS DEVINER UNE TROISIÈME FOIS — le diagnostic en lecture seule
+
+Deux lots de suite avaient été construits sur une hypothèse. Au lieu d'un troisième, un script
+**lecture seule** collé dans la console : poids réellement en place, écart entre les deux sources de
+kilos, `nb_caisses` contre somme des apports, apports non figés, cuves, fiches client,
+`rendement_hist` périmé. Trente secondes, aucune écriture.
+
+> ★★★ **QUAND DEUX HYPOTHÈSES TIENNENT ET QU'ON N'A PAS LES DONNÉES, LE LIVRABLE N'EST PAS UN
+> CORRECTIF, C'EST UN INSTRUMENT DE MESURE.** Il a répondu en un passage à ce que trois lectures du
+> code n'avaient pas tranché — et il a démoli au passage la reconstruction que j'avais faite du
+> problème.
+
+Ce qu'il a rendu : 38 récoltes, 1 378 caisses. **25 kg : 1 081 caisses, 36 apports, tous figés.**
+20 kg : 64. 12 kg : 233. Zéro apport sans poids. Zéro `rendement_hist` périmé.
+
+### 84b. ★★ Le 16 215 se calcule : **1 081 × 15**
+
+Pas 5 kg d'écart : **15**. Soit 25 → **10**. Le correcteur retient d'office le poids **le plus
+lourd** à l'ouverture, et `_vpcSetAnc` **ne vidait pas `_vpc.nouveau`**. Un « 10 » tapé pour les
+caisses de 12 restait en place quand on revenait sur celles de 25, et l'aperçu annonçait
+27 025 → 10 810 kg.
+
+> ★★★ **LE CHIFFRE ÉTAIT JUSTE. C'EST LA QUESTION QUI N'ÉTAIT PLUS CELLE QU'ON POSAIT.** Une valeur
+> de remplacement ne veut rien dire hors de ce qu'elle remplace : elle doit être **détruite avec
+> son contexte**, jamais survivre à un changement de sélection. Un état partagé entre deux
+> sélections successives est un état faux qui a l'air sain.
+
+Corrigé : le poids réel se vide au changement de ligne **et** de millésime, et au-delà de **40 %**
+l'écran le signale avant l'appui — dans l'aperçu et dans la confirmation.
+
+### 84c. ★★★ LA VRAIE CAUSE : `_vendCuvHl(caisses)` NE POUVAIT PAS TOMBER JUSTE
+
+```
+A · parts[]        : 1 378 caisses → 31 101 kg     ← Cuvier, bons, rendements
+B · nb_caisses×20  : 1 378 caisses → 27 560 kg     ← hL des cuves, apports/parcelle, bilan
+ÉCART                                    −3 541 kg
+```
+
+`_vendCuvHl` multipliait un **nombre de caisses** par **un** poids, celui du réglage. Nico en a
+**trois** (25, 20, 12).
+
+> ★★★ **UNE FONCTION QUI PREND DES CAISSES ET REND DES HECTOLITRES SUPPOSE UN POIDS UNIQUE. CE
+> N'EST PAS UN BUG DE VALEUR, C'EST UN BUG DE SIGNATURE** : aucun réglage ne pouvait la rendre
+> juste. C'était la **seconde source de vérité pour les mêmes kilos** — `_recKg` en donnait une,
+> le réglage global une autre — et corriger un poids ne bougeait que la première. Deux écrans
+> sains chacun de son côté, un total impossible.
+
+`_vendHlKg(kg)` + `_vendCuvKgDom(id, exclId)` (le jumeau en kilos de `_vendCuvCsDom`). **Dix sites
+convertis**, dont deux qui portaient déjà leurs kilos sans les utiliser (`_apportsRangs`). Deux
+agrégats gagnent un `kg` à côté de leur `caisses` (`_vendCuvStats`, les couches d'une cuve).
+
+★ **`_vendCuvHl` est SUPPRIMÉE, pas dépréciée.** Une fonction morte qui traîne est une invitation :
+le prochain lot pressé la rappellerait. Le harnais exige **zéro déclaration et zéro appelant**.
+
+⚠️ La saisie en cours (`_vendCuvAtt`) n'a pas encore de récolte enregistrée : ses kilos viennent de
+la **répartition en train d'être tapée**, qui porte déjà son poids par ligne. Le repli sur le
+réglage ne sert qu'avant la première caisse saisie.
+
+### 84d. ★★ Le garde-fou était SOUS les mutations
+
+```js
+if(_vpc.defaut && …) CAVE_VENDANGE.config.poids_caisse_kg=nv;   // modifié
+if(_vpc.clients)     cl.forEach(c => c.poids_caisse_kg=nv);      // modifié
+if(!nRec){ showToast('Aucun apport à ce poids'); return; }       // puis on part sans enregistrer
+```
+
+Une exécution stérile salissait la mémoire et repartait ; les changements orphelins partaient dans
+le premier enregistrement venu, **depuis n'importe quel écran**.
+
+> ★★★ **UNE SORTIE ANTICIPÉE DOIT LAISSER L'ÉTAT EXACTEMENT COMME ELLE L'A TROUVÉ.** Le garde-fou
+> se place **au-dessus** de la première mutation, pas en dessous de la dernière — c'est la seule
+> position qui reste vraie le jour où on en ajoute une troisième.
+
+⚠️ Dans les données de Nico, ce défaut **n'a pas tiré** : il avait modifié le réglage à la main
+avant la conversation. Il a été trouvé en lisant, pas en observant. Un défaut réel qui n'a pas
+encore mordu reste un défaut.
+
+### 84e. Le catch muet
+
+`_vendRecordRendement` avalait tout dans un `catch(e){}` sans une ligne. Il avale toujours — c'est
+le contrat, un rendement ne doit jamais faire échouer une récolte — mais il passe par
+`window.logError({level:'info',cat:'cuvier'})`. Compte de `catch(` inchangé (14).
+
+### 84f. ★★ Le harnais, et un sabotage qui ne sabotait rien
+
+**71 assertions**, **8 contre-épreuves**, jouées **une par une**.
+
+★★★ **Le premier sabotage n°6 est passé INAPERÇU.** Il rendait `_vendHlKg` équivalente via
+`kg/25*poids_defaut` — or le jeu d'essai a justement **25** kg de poids par défaut : le sabotage
+était l'**identité**.
+
+> ★★★ **UN SABOTAGE QUI NE SABOTE RIEN FAIT CROIRE AU HARNAIS.** Il doit porter là où le mensonge
+> est réel, pas là où il est syntaxiquement visible. Remplacé : la somme des kilos d'une cuve
+> refaite en `caisses × 25`, sur une cuve qui **mélange 25 et 12 kg** — l'ancien `_vendCuvHl`, exact.
+> Sans la contre-épreuve, ce trou serait resté dans le filet, invisible et rassurant.
+
+### 84g. Ce que Nico doit vérifier après intégration
+
+Les **2 apports à 20 kg (64 caisses)**, saisis après que le réglage soit passé à 20 : peut-être des
+caisses de 25. Et **Maison Harbour** et **Lienardt**, restés à 12 en fiche quand Les Orées et
+Gautheron sont à 10.
+
+Après les deux passes (1 081 × 25→20, puis 233 × 12→10) : **31 101 → 25 230 kg**.
+
+### 84h. La note de livraison
+
+**Base : `b7c3351`.** Si `git rev-parse origin/main` ne rend pas ce SHA, **rejeu** (§83).
+
+| fichier | ce qui change | bump |
+|---|---|---|
+| `src/cave.js` | `_vendHlKg` + `_vendCuvKgDom`, 10 sites, `_vendCuvHl` supprimée · garde-fou remonté · poids réel vidé · seuil 40 % · catch bruyant | — |
+| `src/utils.js` | `APP_VERSION` 6.82, `WHATS_NEW` (3 items), `MV_AIDE.cave` (2 points) | ★ APP |
+| `index.html` · `public/sw.js` | les 4 porteurs · en-tête, `CACHE_NAME`, 2 `console.log`, changelog | ★ APP · ★ SW |
+| `guide/08-cave.html` · `public/guide.html` | la ligne sélectionnée, les hL sur les kilos | — |
+| `scripts/mv-harnais-poids-caisse.mjs` | 53 → **71** assertions, 5 → **8** sabotages | — |
+| `.mv-base` | `b7c3351` | — |

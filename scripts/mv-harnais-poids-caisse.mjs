@@ -66,8 +66,9 @@ const NOMS = [
   '_recKg','_recCaisses','_recKgDom','_recCsDom','_recKgCli','_recHasDom','_recSold',
   '_vendParcSurf','_vendParcByName','_vendSaveParcelles','_vendParcLot',
   '_vendSurfParc','_vendVolCuve','_vendVolPart','_vendLitresRetour','_vendRdtBase',
-  '_vendCuvCsDom','_vendVolLoge','_vendRecordRendement',
-  '_vpcMillesimes','_vpcRecs','_vpcPoids','_vpcLigne','_vpcClientsVises','_vpcAppliquer'
+  '_vendCuvCsDom','_vendCuvKgDom','_vendHlKg','_mlKgHl','_vendVolLoge','_vendRecordRendement',
+  '_vpcMillesimes','_vpcRecs','_vpcPoids','_vpcLigne','_vpcClientsVises','_vpcAppliquer',
+  '_vpcEnorme','_vpcSetAnc','_vpcSetMil'
 ];
 /* Les deux compteurs du lot d'écritures sont des `var` de module, pas des
    fonctions : on les extrait tels quels, pour que le harnais tombe si la
@@ -104,6 +105,8 @@ function showToast(m){ _journal.toasts.push(m); }
 function _vendSheetClose(){}
 function renderVendParam(){}
 function renderVendRec(){}
+function _vpcRender(){}
+function logError(){}
 `;
 
 let code = PRELUDE + DECL + '\n' + NOMS.map(corps).join('\n')
@@ -125,7 +128,23 @@ const SABOTAGES = (() => {
     ['      if(!Array.isArray(r.parts)||!r.parts.length) r.parts=ps;\n', '      /* saboté */\n'],
     // 3. le filtre de poids déborde sur tous les apports
     ['        if(_vpCs(p)>0 && _vpPck(p)===anc){ p.pck=nv; nApp++; }',
-     '        if(_vpCs(p)>0){ p.pck=nv; nApp++; }']
+     '        if(_vpCs(p)>0){ p.pck=nv; nApp++; }'],
+    // 4. ★ le garde-fou redescend sous les mutations — le defaut du 06/09
+    ["  if(!nRec){ showToast('Aucun apport \u00e0 ce poids','#B85A1A'); return; }\n  var suite=[];",
+     "  var suite=[];"],
+    // 5. ★ le poids reel survit au changement de ligne
+    ['function _vpcSetAnc(v){ var k=Number(v); if(k!==_vpc.ancien) _vpc.nouveau=null;',
+     'function _vpcSetAnc(v){ var k=Number(v);'],
+    /* 6. ★ le volume d'une cuve repasse par les CAISSES et un poids unique.
+          ⚠️ Premier sabotage écrit ici : `_vendHlKg` rendue équivalente via
+          `kg/25*poids_defaut`. Il est passé INAPERÇU — parce que le jeu d'essai
+          a justement 25 kg de poids par défaut, et que la sabotage était donc
+          l'identité. Un sabotage qui ne sabote rien fait croire au harnais.
+          Celui-ci porte là où le mensonge est réel : la somme des kilos d'une
+          cuve, refaite en caisses × un poids unique — exactement l'ancien
+          `_vendCuvHl`, sur une cuve qui mélange 25 et 12 kg. */
+    ['    return s+((x&&x.cuve_id===cuveId&&x.id!==exclId)?_recKgDom(x):0); },0);',
+     '    return s+((x&&x.cuve_id===cuveId&&x.id!==exclId)?_recCsDom(x)*25:0); },0);']
   ];
   return sabotages;
 })();
@@ -144,6 +163,9 @@ const SAB_TXT = [
 const LIB = ['la parcelle n\'est plus prévenue',
              'la part de migration n\'est plus posée dans la récolte',
              'le filtre de poids déborde sur tous les apports',
+             '★ le garde-fou redescend sous les mutations',
+             '★ le poids réel survit au changement de ligne',
+             '★ le volume d\'une cuve repasse par les caisses',
              'le retour de livraison ne prévient plus la parcelle',
              'le bilan de campagne repèse les caisses à 25 kg en dur'];
 
@@ -326,7 +348,58 @@ T('★★ ...et l\'écriture en attente est quand même partie', M._etat().j.sav
 M._vendSaveParcelles();
 T('★★ ...et les écritures suivantes ne sont PAS muettes', M._etat().j.saves, 2);
 
-// ── 9. Les deux autres écrans qui écrivent des kilos (contrôles mécaniques) ─
+// ── 9. ★★ CUV-6 — une exécution stérile ne doit RIEN laisser derrière elle ──
+poser();
+M._set('vpc', { mil:2026, ancien:99, nouveau:50, defaut:true, clients:true });
+const cfg0 = M._etat().CAVE_VENDANGE.config.poids_caisse_kg;
+M._vpcAppliquer();
+T('★★ poids absent : le réglage par défaut n\'a pas bougé',
+  M._etat().CAVE_VENDANGE.config.poids_caisse_kg, cfg0);
+M._set('vpc', { mil:2026, ancien:99, nouveau:12, defaut:true, clients:true });
+M._vpcAppliquer();
+T('★★ poids absent : la fiche client n\'a pas bougé',
+  M._etat().CAVE_VENDANGE.clients[0].poids_caisse_kg, 12);
+T('★ ...et rien n\'a été enregistré',              M._etat().j.saves, 0);
+
+// ── 10. ★ le poids réel se vide quand on change de ligne ───────────────────
+M._set('vpc', { mil:2026, ancien:25, nouveau:10, defaut:true, clients:true });
+M._vpcSetAnc(12);
+T('★★ changer de ligne vide le poids réel',        M._etat()._vpc.nouveau, null);
+M._set('vpc', { mil:2026, ancien:25, nouveau:10, defaut:true, clients:true });
+M._vpcSetAnc(25);
+T('★ revenir sur la MÊME ligne ne l\'efface pas',   M._etat()._vpc.nouveau, 10);
+M._set('vpc', { mil:2026, ancien:25, nouveau:10, defaut:true, clients:true });
+M._vpcSetMil('2025');
+T('★ changer de millésime le vide aussi',          M._etat()._vpc.nouveau, null);
+
+// ── 11. ★ la vraisemblance d'une correction ────────────────────────────────
+T('25 → 20 (20 %) passe sans avertir',             M._vpcEnorme(25,20), false);
+T('★★ 25 → 10 (60 %) est signalé',                  M._vpcEnorme(25,10), true);
+T('12 → 10 (17 %) passe',                          M._vpcEnorme(12,10), false);
+T('25 → 14 (44 %) est signalé',                    M._vpcEnorme(25,14), true);
+
+// ── 12. ★★ les hectolitres suivent les KILOS, plus les caisses ─────────────
+poser();
+M._set('parcelles', [{ nom:'Le Clos', surface:0.80, rendement_hist:[] }]);
+M._set('recoltes', [
+  { id:'k1', parcelle:'Le Clos', date:'2026-09-14', nb_caisses:100, cuve_id:'cv1',
+    parts:[ { dom:true, caisses:50, pck:25 }, { dom:true, caisses:50, pck:12 } ] }
+]);
+T('kg domaine de la cuve : 50×25 + 50×12',         M._vendCuvKgDom('cv1'), 1850);
+T('caisses domaine de la cuve',                    M._vendCuvCsDom('cv1'), 100);
+const hlVrai = M._vendHlKg(M._vendCuvKgDom('cv1'));
+T('★★ hL calculés sur les kilos réels (1850/135)', Math.round(hlVrai*100)/100, 13.7);
+T('★★ ...et PAS sur caisses × réglage (100×25/135 = 18,52)',
+  Math.round(hlVrai*100)/100 === 18.52, false);
+T('★ une cuve vide donne 0 hL, pas NaN',           M._vendHlKg(M._vendCuvKgDom('inconnue')), 0);
+
+// ── 13. Les deux autres écrans qui écrivent des kilos (contrôles mécaniques) ─
+T('★★ _vendCuvHl(caisses) a bien disparu du code',
+  /function\s+_vendCuvHl\s*\(/.test(TEXTE), false);
+T('★★ ...et plus aucun appelant',
+  /_vendCuvHl\s*\(/.test(sansCom(TEXTE)), false);
+T('★ le catch de _vendRecordRendement n\'est plus muet',
+  /logError/.test(corpsT('_vendRecordRendement')), true);
 T('★★ le retour de livraison prévient la parcelle',
   /_vendRecordRendement\(x\.rec\s*,/.test(corpsT('_vendRetSave')), true);
 const BC = sansCom(corpsT('_bcDoc'));

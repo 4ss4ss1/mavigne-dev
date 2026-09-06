@@ -23,7 +23,7 @@ export const GT_ADMIN_EMAIL = 'ngdevpro@gmail.com';
 // WHATS_NEW   : tableau vide = modal desactive pour cette version.
 // Format item : { emoji:'📅', titre:'Titre court', desc:'Phrase utilisateur.' }
 // Regle : seulement les changements visibles par les utilisateurs.
-export const APP_VERSION = '6.81';
+export const APP_VERSION = '6.82';
 // ════ Journal des nouveautés (récap cumulatif) ════
 // Une entrée par version, la PLUS RÉCENTE EN HAUT : { v:'5.10', items:[ {emoji,titre,desc}, … ] }
 // À chaque release visible → AJOUTER un bloc en tête (ne pas remplacer). items:[] = release technique (rien à afficher).
@@ -354,6 +354,14 @@ window._mvGraphRepeindre = function(){
 };
 
 export const WHATS_NEW = [
+  { v: '6.82', items: [
+    { emoji: 'fiole', titre: 'Les hectolitres d\u2019une cuve se calculent enfin sur vos kilos',
+      desc: "Le volume estim\u00e9 d\u2019une cuve venait de <b>ses caisses multipli\u00e9es par le poids du r\u00e9glage</b>. Sur un domaine qui a des caisses de 25, de 20 et de 12\u00a0kg, ce calcul ne pouvait pas tomber juste\u00a0: sur une vendange r\u00e9elle, <b>3\u00a0541\u00a0kg d\u2019\u00e9cart</b> entre ce que disait le Cuvier et ce que disaient les jauges. Tout ce qui affiche un hectolitre estim\u00e9 \u2014 la jauge de remplissage, les apports par parcelle, les couches d\u2019une cuve, la proposition de f\u00fbts au d\u00e9cuvage, le parcours de la r\u00e9colte \u2014 lit d\u00e9sormais <b>le poids r\u00e9el de chaque apport</b>." },
+    { emoji: 'balance', titre: 'Le correcteur de poids ne se trompe plus de ligne',
+      desc: "Un poids r\u00e9el tap\u00e9 pour les caisses de 12 restait affich\u00e9 quand on revenait sur celles de 25, et l\u2019aper\u00e7u annon\u00e7ait alors un \u00e9cart de plusieurs tonnes avec l\u2019aplomb d\u2019un chiffre juste. Il <b>se vide maintenant</b> d\u00e8s que vous changez de ligne ou de mill\u00e9sime. Et une correction qui d\u00e9passe <b>40\u00a0% du poids d\u2019une caisse</b> est signal\u00e9e avant que vous n\u2019appuyiez\u00a0: c\u2019est possible, mais \u00e7a m\u00e9rite un second regard." },
+    { emoji: 'bouclier', titre: 'Une correction qui ne trouve rien ne laisse plus rien derri\u00e8re elle',
+      desc: "Quand le correcteur ne trouvait <b>aucun apport</b> au poids demand\u00e9, il repartait sans rien enregistrer \u2014 mais il avait d\u00e9j\u00e0 modifi\u00e9 le <b>poids par d\u00e9faut</b> et les <b>fiches client</b> au passage. Ces changements orphelins partaient ensuite dans le premier enregistrement venu, depuis n\u2019importe quel \u00e9cran, sans que rien ne le dise. Une ex\u00e9cution qui n\u2019aboutit pas laisse maintenant tout exactement en place." }
+  ] },
   { v: '6.81', items: [
     { emoji: 'balance', titre: 'Corriger un poids de caisse sur toute une vendange',
       desc: "Quand ce n\u2019est pas la saisie qui s\u2019est tromp\u00e9e mais <b>la caisse</b> \u2014 des caisses annonc\u00e9es \u00e0 25\u00a0kg qui en pesaient 20 \u2014 il fallait rouvrir les r\u00e9coltes une par une, sans aucun moyen de voir laquelle avait \u00e9t\u00e9 oubli\u00e9e. <b>R\u00e9glages du Cuvier \u203a Corriger un poids d\u00e9j\u00e0 saisi</b> montre les poids r\u00e9ellement en place sur un mill\u00e9sime, ce qu\u2019ils p\u00e8sent, et applique la correction d\u2019un coup. Vous voyez <b>avant</b> ce que la campagne va devenir, destinataire par destinataire. Les <b>rendements kg/ha et hL/ha</b> de chaque parcelle sont recalcul\u00e9s dans la foul\u00e9e, et les fiches client comme le poids par d\u00e9faut peuvent suivre. Les litres rendus par un acheteur, eux, ne bougent pas\u00a0: c\u2019est sa mesure, pas la v\u00f4tre." },
@@ -2161,6 +2169,8 @@ var MV_AIDE = {
       ['Une récolte peut avoir plusieurs destinataires', "sur la même parcelle et le même jour : le domaine, et un ou plusieurs acheteurs de raisin. Une ligne chacun, avec ses caisses, son poids par caisse et, si l’acheteur a pris une partie de la parcelle, sa surface. Laissée vide, la surface prend tout le reste."],
       ['Le poids d’une caisse est un poids du jour', "il est figé sur l’apport au moment où vous le saisissez. La fiche du client ne fait que le proposer : la corriger plus tard ne déplace aucun kilo déjà livré, ni sur un bon déjà signé."],
       ['Corriger un poids après coup', "quand la caisse elle-même pesait autre chose que ce qui était annoncé, Réglages du Cuvier › « Corriger un poids déjà saisi » reprend tout un millésime d’un coup. L’écran liste les poids réellement en place, ce qu’ils pèsent, et montre le résultat destinataire par destinataire avant d’appliquer. Les rendements des parcelles suivent. Les litres rendus par un acheteur ne bougent pas : ce sont les siens."],
+      ['Le poids réel se vide quand vous changez de ligne', "c’est voulu : un poids de remplacement ne veut rien dire hors du poids qu’il remplace. Le correcteur sélectionne d’office la caisse la plus lourde à l’ouverture — vérifiez toujours quelle ligne est retenue avant de saisir. Au-delà de 40 % d’écart, l’écran vous le signale."],
+      ['Les hectolitres estimés viennent des kilos', "la jauge d’une cuve, les apports par parcelle et la proposition de fûts se calculent sur le poids réel de chaque apport, pas sur le nombre de caisses multiplié par le réglage. Avec plusieurs tailles de caisse, c’est la seule façon d’être juste. Le volume mesuré au décuvage, lui, prime toujours sur l’estimation."],
       ['Le bon de livraison', "s’ouvre depuis la ligne « kg vendus en raisin » de l’écran Récoltes. Une livraison, c’est un chargement : un client, une date, même s’il emporte deux parcelles. Le bon ne dit que des kilos — aucun prix."],
       ['Le retour du client', "les litres de jus et de lie qu’il a obtenus, saisis des semaines plus tard sur la livraison. Corriger les caisses ne touche pas aux litres, et l’inverse non plus : deux mesures, deux personnes, deux moments."],
       ['Le rendement va chercher le mesuré d’abord', "les litres rendus par l’acheteur, puis le volume logé au décuvage, et seulement à défaut une estimation d’après les kilos. Tant que la cuve n’est pas décuvée, il n’y a rien à mesurer : la parcelle affiche une fourchette et le pourcentage mesuré, et le chiffre net arrive avec le décuvage. Il manque des litres, pas des raisins."],

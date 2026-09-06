@@ -33,7 +33,7 @@ const NOMS = ['_vendCfg', '_vendClient', '_caveFutL', '_caveVolCuvesL', '_caveNb
   '_recKg', '_recCaisses', '_recKgDom', '_recCsDom', '_recKgCli', '_recHasDom', '_recSold',
   '_vendRdtBase', '_vendLitresRetour', '_vendVolLoge', '_vendCuvCsDom', '_vendVolCuve',
   '_vendVolPart', '_vendSurfParc', '_vendVolParc', '_vendRdtParc', '_vendParcSurf',
-  '_vendMillOfDate', '_vendCuvHl', '_vendParcByName', '_mlKgHl', '_mlRecoltesDe',
+  '_vendMillOfDate', '_vendHlKg', '_vendCuvKgDom', '_vendParcByName', '_mlKgHl', '_mlRecoltesDe',
   '_mlRendements'];
 
 function extraire(nom) {
@@ -53,7 +53,7 @@ function monter(cv, ce, parc, mutation) {
   const corps = mutation ? mutation(BLOC) : BLOC;
   const w = { PARCELLES: parc, CONFIG: { cave: { fut_l: 228 } } };
   return new Function('CAVE_VENDANGE', 'CAVE_ELEVAGE', 'PARCELLES', 'window',
-    corps + '\nreturn {_mlRendements,_vendVolLoge,_vendCuvCsDom,_vendCuvHl};')(cv, ce, parc, w);
+    corps + '\nreturn {_mlRendements,_vendVolLoge,_vendCuvCsDom,_vendCuvKgDom,_vendHlKg};')(cv, ce, parc, w);
 }
 
 /* Le cas réel du domaine de référence, millésime 2026 : la cuve « Au vellé » porte
@@ -146,7 +146,10 @@ if (!CONTRE) {
     pose(!/\+add\)\*10\)\/10/.test(SRC), '_vendCuvAtt ne propose plus « contenance + estimé »');
     pose(/vol_decuve_hl:existing/.test(SRC), 'saveVendCuve préserve vol_decuve_hl à l’édition');
     pose(!/el\.value=Math\.max\(1,Math\.round\(d\.kg/.test(SRC), 'la contenance ne se déduit plus des kilos');
-    pose(/_vendCuvHl\(_vendCuvCsDom\(c\.id\)\)/.test(SRC), '_mlChaine estime « en cuve » d’après les caisses');
+    // CUV-6 : l'estimation « en cuve » se fait sur les KILOS des apports, plus
+    // sur les caisses multipliees par le reglage — un poids unique ne peut pas
+    // decrire un domaine qui a trois tailles de caisse.
+    pose(/_vendHlKg\(_vendCuvKgDom\(c\.id\)\)/.test(SRC), '_mlChaine estime « en cuve » d’après les kilos');
   }
 } else {
   /* ══ CONTRE-ÉPREUVES ═════════════════════════════════════════════════════

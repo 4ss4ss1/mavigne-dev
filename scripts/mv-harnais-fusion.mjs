@@ -49,6 +49,8 @@ const MORCEAUX = [
   bloc(SRC, 'function _vendHist(c){', '\n}'),
   bloc(SRC, 'function _vendHistPose(c,st,date){', '\n}'),
   bloc(SRC, 'function _vendCuvCsDom(cuveId, exclId){', '\n}'),
+  bloc(SRC, 'function _vendCuvKgDom(cuveId, exclId){', '\n}'),
+  bloc(SRC, 'function _vendHlKg(kg)', '\n'),
   bloc(SRC, 'function _vendVolLoge(cv){', '\n}'),
   bloc(SRC, 'function _vendFusCuves(){', '\n}'),
   bloc(SRC, 'function _vendFusPris(){', '\n}'),
@@ -73,7 +75,15 @@ function _mlAuj(){ return new Date().toISOString().slice(0,10); }  // PARC-1  (c
 function _vendFbSave(m,c){ if(m) showToast(m,c); }             // VD-SAVE  (cave.js)
 function _vendSheetClose(){}
 function renderVendCuves(){}
-function _vendCuvHl(caisses){ return (caisses * 25) / 135; }   // 25 kg/caisse, 135 kg/hL
+// CUV-6 — les hectolitres se calculent sur des KILOS. _vendCuvHl(caisses) a
+// disparu de cave.js : la remplacer ici par un faux equivalent reintroduirait
+// dans le harnais exactement le mensonge que le lot vient de retirer du code.
+// (Pas de backtick dans ce commentaire : il vit dans un litteral gabarit.)
+function _mlKgHl(){ return 135; }
+// Le jeu d'essai decrit ses recoltes en caisses_dom : _recKgDom est stube a
+// cote de _recCsDom, avec la meme convention. Ce harnais eprouve la FUSION,
+// pas la pesee — extraire la vraie chaine des apports testerait le decor.
+function _recKgDom(r){ return ((r && r.caisses_dom) || 0) * 25; }
 function _recCsDom(r){ return (r && r.caisses_dom) || 0; }
 function _vendFusNomAutoStub(){}
 function _caveParc(){ return (window.CONFIG.cave.cuves || []); }
@@ -89,7 +99,7 @@ var window = { CONFIG: { cave: { cuves: [] } }, fbSave: null };
 
 const CODE = PRELUDE + MORCEAUX.join('\n') + `
 ;return { saveVendFusion, _vendFusTotHl, _vendFusHl, _vendFusDestObj, _vendFusParcLibre,
-          _vendTriRepere, _vendRepere, _vendCuvCsDom, _vendVolLoge, _vendFusNomAuto,
+          _vendTriRepere, _vendRepere, _vendCuvCsDom, _vendCuvKgDom, _vendHlKg, _vendVolLoge, _vendFusNomAuto,
           _caveCuveOcc, _vendFusCuves,
           etat: function(){ return { CAVE_VENDANGE: CAVE_VENDANGE, TOASTS: TOASTS, window: window }; },
           pose: function(cv, cfg, sel, dest, champs){
