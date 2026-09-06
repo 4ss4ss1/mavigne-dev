@@ -13552,3 +13552,103 @@ Après les deux passes (1 081 × 25→20, puis 233 × 12→10) : **31 101 → 25
 | `guide/08-cave.html` · `public/guide.html` | la ligne sélectionnée, les hL sur les kilos | — |
 | `scripts/mv-harnais-poids-caisse.mjs` | 53 → **71** assertions, 5 → **8** sabotages | — |
 | `.mv-base` | `b7c3351` | — |
+
+---
+
+## 85. ★★★ UI-Z — LE DIALOGUE S'OUVRAIT DERRIÈRE LA FEUILLE (06/09 — APP 6.82 → 6.83 · SW 7.41 → 7.42 · base `ab77457`)
+
+Nico, après CUV-6 : *« lors de la modification d'un poids déjà saisi, une fenêtre s'ouvre pour
+valider mais elle doit apparaître derrière la première, et ça n'enregistre pas car je dois cliquer
+à côté. »*
+
+### 85a. ★★★ La cause n'est pas un chiffre, c'est un angle mort
+
+```js
+function openOv(id){
+  var base=600,max=base-1;
+  document.querySelectorAll('.overlay.open').forEach(…);   // ← SA PROPRE FAMILLE
+  el.style.zIndex=(max+1);
+}
+```
+
+`openOv` empilait correctement **à l'intérieur de ce qu'il voyait** : les `.overlay`. La feuille du
+Cuvier vit dans une autre famille — `.mvv-ov`, z-index **9000**, déclarée dans une **CSS injectée
+par `cave.js`**, invisible à tout outil qui ne lit que `styles.css`. Le dialogue sortait à 600, sous
+9000 : invisible, injoignable, et le clic « à côté » annulait.
+
+**Onze `openConfirmDel` et quatre `openPrompt` du seul Cuvier** passaient dessous — supprimer une
+récolte, une cuve, un relevé, un client, une opération. Et le **tiroir du Pilotage**
+(`.pil-drawer`, 9999) portait le même défaut.
+
+> ★★★ **ÉLARGIR LE BALAYAGE À `.mvv-ov` N'AURAIT PAS SUFFI.** La prochaine famille créée
+> redeviendrait invisible et le défaut reviendrait sans bruit. Un dialogue modal interrompt **ce
+> qu'il y a à l'écran, quoi que ce soit** : il ne se compare pas à ses voisins, il se place
+> au-dessus **par construction**. D'où un plancher, pas un balayage.
+
+`MV_Z_MODAL_PLANCHER = 9200` (au-dessus de toute surface d'accueil) et `MV_Z_MODAL_PLAFOND = 9490`.
+
+> ★★ **LE PLAFOND N'EST PAS DÉCORATIF.** Sans lui, une centaine d'overlays empilés finirait par
+> passer au-dessus de la **porte CGU** (`.mvt-ov`, 9500), qui est en *fail-closed*. On préfère deux
+> dialogues à égalité — l'ordre DOM tranche, comme dans `_mvTopOverlay` — plutôt qu'un consentement
+> contournable.
+
+`.pil-scrim` et `.pil-drawer` redescendent à **8900 / 8910**.
+
+### 85b. ★★★ Le harnais, et quatre extracteurs qui mentaient
+
+`scripts/mv-harnais-couches.mjs` lit les z-index de `styles.css`, d'`index.html` **et des CSS
+injectées dans les modules**, et vérifie :
+
+```
+surface d'accueil  <  PLANCHER  ≤  PLAFOND  <  porte CGU
+```
+
+Une « surface d'accueil » est ce par-dessus quoi un dialogue s'ouvre : suffixe `-ov`, `-sheet`,
+`-drawer`, `-scrim`, `-modal`, `-panel`. Pas les toasts, pas les bandeaux, pas le splash — eux sont
+au-dessus **volontairement**.
+
+★★ **Le premier contrôle disait « toute couche au-dessus du plancher est fautive ». Il a sorti
+31 rouges, dont aucun n'était un défaut.**
+
+> ★★★ **UN CONTRÔLE QUI ROUGIT SUR TRENTE ET UN FAUX POSITIFS NE SERA PAS LU : IL SERA DÉSACTIVÉ.**
+> Il ne prouvait rien, il criait. La question n'est pas « qu'est-ce qui est haut », c'est
+> « qu'est-ce qu'un dialogue doit recouvrir ».
+
+★★★ **Et quatre extracteurs de sélecteur avant le bon**, chacun rendant un résultat **plausible mais
+faux** :
+
+1. remonter par voisinage → rendait `#fff` (une couleur) et ratait `.pil-drawer` ;
+2. découper en blocs sans retirer les commentaires → le commentaire que je venais d'écrire au-dessus
+   de `.pil-scrim` **devenait son sélecteur** ;
+3. découper en blocs, commentaires retirés → la regex **se désynchronise au premier `@media`** :
+   25 blocs trouvés sur des centaines, et justement pas les quatre qui comptent ;
+4. remontée par comptage d'accolades → correct en CSS, mais dans une CSS **injectée** ce qui précède
+   la première règle est du JavaScript : `.mvv-ov` sortait `undefined`. Coupe au dernier délimiteur
+   de chaîne.
+
+> ★★★ **UN EXTRACTEUR QUI SE TROMPE DE NOM EST PIRE QU'UN EXTRACTEUR ABSENT : IL N'ÉCHOUE PAS, IL
+> RÉPOND — et on le croit.** Les quatre versions rendaient une liste d'apparence saine. Seule
+> l'exigence de retrouver **nommément** `.mvv-ov`, `.pil-drawer`, `.pil-scrim` et `.mvt-ov` les a
+> démasquées : un harnais doit être forcé de nommer ce qu'il prétend surveiller.
+
+**11 assertions**, contre-épreuve : le plancher remis à **600** — sa valeur d'avant l'incident —
+fait rougir 4 assertions.
+
+### 85c. Connu, non traité
+
+`.mvtwc` (99999) et `.mvt-ring` / `.mvt-bar` / `.mvt-menu` (100002→100006) dans `app.js` restent
+au-dessus du plafond modal. Je ne sais pas si un dialogue s'ouvre jamais par-dessus cette barre
+flottante, et **baisser à l'aveugle une couche qu'on ne comprend pas est la façon exacte de casser
+un écran**. Le harnais ne les compte pas comme surfaces d'accueil : à trancher le jour où le cas se
+présente.
+
+### 85d. La note de livraison
+
+**Base : `ab77457`.** Si `git rev-parse origin/main` ne rend pas ce SHA, **rejeu** (§83).
+
+| fichier | ce qui change | bump |
+|---|---|---|
+| `src/app.js` | `openOv` : plancher 9200, plafond 9490 | ★ APP |
+| `src/styles.css` | `.pil-scrim` 9998 → 8900, `.pil-drawer` 9999 → 8910 | ★ APP |
+| `src/utils.js` · `index.html` · `public/sw.js` | 6.83, 1 item, 4 porteurs, changelog | ★ APP · ★ SW |
+| `scripts/mv-harnais-couches.mjs` (neuf) · `package.json` | 11 assertions, câblé dans `check` et `prebuild` | — |

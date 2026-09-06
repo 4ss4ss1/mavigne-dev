@@ -1,4 +1,25 @@
-// MA VIGNE — Service Worker v7.41
+// MA VIGNE — Service Worker v7.42
+// v7.42 (06/09/2026) — UI-Z : LES DIALOGUES MODAUX S'OUVRAIENT DERRIERE.
+//   Signale par Nico : la confirmation d'une correction de poids apparaissait
+//   DERRIERE la feuille du Cuvier. Invisible, injoignable, le clic « a cote »
+//   annulait — la correction ne partait jamais, et rien ne le disait.
+//   ★★★ LA CAUSE N'EST PAS UN CHIFFRE, C'EST UN ANGLE MORT. openOv empilait a
+//   partir de 600 en ne regardant QUE les `.overlay.open` — sa propre famille.
+//   La feuille du Cuvier vit dans une autre (.mvv-ov, 9000), declaree dans une
+//   CSS INJECTEE par cave.js, invisible a tout outil qui ne lit que styles.css.
+//   L'empilement etait juste a l'interieur de ce qu'il voyait, faux pour le
+//   reste. Onze openConfirmDel et quatre openPrompt du seul Cuvier passaient
+//   dessous, plus le tiroir du Pilotage (.pil-drawer, 9999).
+//   ★ Elargir le balayage n'aurait pas suffi : la prochaine famille creee
+//   redeviendrait invisible. Un dialogue modal interrompt CE QU'IL Y A A
+//   L'ECRAN, quoi que ce soit — il ne se compare pas, il se place au-dessus.
+//   → plancher 9200 (au-dessus de toute surface d'accueil), plafond 9490 (sous
+//   la porte CGU, qui doit dominer meme un dialogue). .pil-scrim et
+//   .pil-drawer redescendent a 8900 / 8910.
+//   ★★ scripts/mv-harnais-couches.mjs : il lit les z-index de styles.css ET
+//   des CSS injectees dans les modules, et rougit si une surface d'accueil
+//   repasse au-dessus du plancher. Quatre extracteurs rates avant le bon —
+//   chacun rendait un resultat PLAUSIBLE mais faux.
 // v7.41 (06/09/2026) — CUV-6 : LES HECTOLITRES SUR DES KILOS, ET TROIS DEFAUTS
 //   DU CORRECTEUR DE POIDS. Diagnostic en lecture seule sur la vendange reelle
 //   de Nico : 1 378 caisses, 31 101 kg par les apports contre 27 560 annonces
@@ -3333,7 +3354,7 @@
 // v2.22 — Fix profils vides : guard vide dans loadData() pour MEMBRES/SAISONS/TACHES
 // v2.17 — Onboarding intégré + tenantId · v2.06 — Firebase Auth · v2.00–v2.05 — divers
 const DEBUG = self.location.hostname === 'localhost' || self.location.hostname === '127.0.0.1';
-const CACHE_NAME   = 'mavigne-v7.41';
+const CACHE_NAME   = 'mavigne-v7.42';
 const TENANT_CACHE = 'mavigne-tenant';   // Cache persistant — préservé à chaque mise à jour SW
 const SYNC_TAG     = 'mavigne-sync';
 
@@ -3349,7 +3370,7 @@ const CDN_URLS = [
 ];
 
 self.addEventListener('install', event => {
-  if(DEBUG) console.log('[SW] Ma Vigne v7.41 installé');
+  if(DEBUG) console.log('[SW] Ma Vigne v7.42 installé');
   event.waitUntil(
     caches.open(CACHE_NAME).then(async cache => {
       // ── Cœur applicatif : STRICT (mise à jour ATOMIQUE) ──
@@ -3365,7 +3386,7 @@ self.addEventListener('install', event => {
 });
 
 self.addEventListener('activate', event => {
-  if(DEBUG) console.log('[SW] Ma Vigne v7.41 activé');
+  if(DEBUG) console.log('[SW] Ma Vigne v7.42 activé');
   event.waitUntil(
     caches.keys().then(keys =>
       Promise.all(

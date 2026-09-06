@@ -23,7 +23,7 @@ export const GT_ADMIN_EMAIL = 'ngdevpro@gmail.com';
 // WHATS_NEW   : tableau vide = modal desactive pour cette version.
 // Format item : { emoji:'📅', titre:'Titre court', desc:'Phrase utilisateur.' }
 // Regle : seulement les changements visibles par les utilisateurs.
-export const APP_VERSION = '6.82';
+export const APP_VERSION = '6.83';
 // ════ Journal des nouveautés (récap cumulatif) ════
 // Une entrée par version, la PLUS RÉCENTE EN HAUT : { v:'5.10', items:[ {emoji,titre,desc}, … ] }
 // À chaque release visible → AJOUTER un bloc en tête (ne pas remplacer). items:[] = release technique (rien à afficher).
@@ -354,6 +354,10 @@ window._mvGraphRepeindre = function(){
 };
 
 export const WHATS_NEW = [
+  { v: '6.83', items: [
+    { emoji: 'bouclier', titre: 'La fen\u00eatre de confirmation s\u2019ouvrait derri\u00e8re la feuille',
+      desc: "En corrigeant un poids de caisse, la fen\u00eatre \u00ab\u00a0Corriger 36 r\u00e9coltes\u00a0?\u00a0\u00bb s\u2019ouvrait <b>derri\u00e8re</b> l\u2019\u00e9cran du Cuvier\u00a0: invisible, impossible \u00e0 atteindre, et le clic \u00e0 c\u00f4t\u00e9 annulait tout sans rien enregistrer. <b>La correction ne partait jamais.</b> Le d\u00e9faut touchait toutes les confirmations et toutes les saisies de valeur ouvertes depuis un \u00e9cran du Cuvier \u2014 supprimer une r\u00e9colte, une cuve, un relev\u00e9, un client \u2014 ainsi que le tiroir du Pilotage. Tout dialogue passe maintenant <b>au-dessus</b> de ce qu\u2019il interrompt." }
+  ] },
   { v: '6.82', items: [
     { emoji: 'fiole', titre: 'Les hectolitres d\u2019une cuve se calculent enfin sur vos kilos',
       desc: "Le volume estim\u00e9 d\u2019une cuve venait de <b>ses caisses multipli\u00e9es par le poids du r\u00e9glage</b>. Sur un domaine qui a des caisses de 25, de 20 et de 12\u00a0kg, ce calcul ne pouvait pas tomber juste\u00a0: sur une vendange r\u00e9elle, <b>3\u00a0541\u00a0kg d\u2019\u00e9cart</b> entre ce que disait le Cuvier et ce que disaient les jauges. Tout ce qui affiche un hectolitre estim\u00e9 \u2014 la jauge de remplissage, les apports par parcelle, les couches d\u2019une cuve, la proposition de f\u00fbts au d\u00e9cuvage, le parcours de la r\u00e9colte \u2014 lit d\u00e9sormais <b>le poids r\u00e9el de chaque apport</b>." },

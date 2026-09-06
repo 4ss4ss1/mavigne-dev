@@ -9128,13 +9128,45 @@ function _mvOvSync(){
   } finally { _mvOvBusy=false; }
 }
 
+// ═══════════════════════════════════════════════════════════════════════════
+// UI-Z — LE PLANCHER DES DIALOGUES MODAUX (06/09/2026)
+// ═══════════════════════════════════════════════════════════════════════════
+// ⚠️⚠️ SIGNALÉ PAR NICO : la confirmation d'une correction de poids s'ouvrait
+//   DERRIÈRE la feuille du Cuvier. Invisible, injoignable, et le clic « à côté »
+//   annulait sans rien enregistrer. La correction ne partait jamais.
+//
+//   ★★★ LA CAUSE N'EST PAS UN CHIFFRE, C'EST UN ANGLE MORT. `openOv` empilait
+//   à partir de 600 en ne regardant QUE les `.overlay.open` — sa propre
+//   famille. La feuille du Cuvier vit dans une autre (`.mvv-ov`, z-index 9000),
+//   qu'il ne connaît pas. L'empilement était juste À L'INTÉRIEUR de ce qu'il
+//   voyait, et faux par rapport à tout le reste. Onze `openConfirmDel` et
+//   quatre `openPrompt` du seul Cuvier passaient dessous.
+//
+//   ★ ÉLARGIR LE BALAYAGE À `.mvv-ov` N'AURAIT PAS SUFFI : la prochaine famille
+//   créée redeviendrait invisible, et le défaut reviendrait sans bruit. Un
+//   dialogue modal interrompt CE QU'IL Y A À L'ÉCRAN, quoi que ce soit — il ne
+//   se compare pas, il se place au-dessus par construction.
+//
+//   Le plancher est au-dessus de toute couche de CONTENU, le plafond sous la
+//   porte CGU (`.mvt-ov`, 9500) qui doit tout dominer y compris un dialogue.
+//   ⚠️ Tenir cet ordre à jour : `scripts/mv-harnais-couches.mjs` lit les
+//   z-index réels de styles.css ET des CSS injectées, et rougit si une couche
+//   de contenu repasse au-dessus du plancher.
+var MV_Z_MODAL_PLANCHER = 9200;   // > .mvv-ov (9000), .pil-drawer (2415)
+var MV_Z_MODAL_PLAFOND  = 9490;   // < .mvt-ov (9500), bandeaux et toasts
+window.MV_Z_MODAL_PLANCHER = MV_Z_MODAL_PLANCHER;
+window.MV_Z_MODAL_PLAFOND  = MV_Z_MODAL_PLAFOND;
 function openOv(id){
   var el=document.getElementById(id);if(!el)return;
-  var base=600,max=base-1;
+  var base=MV_Z_MODAL_PLANCHER,max=base-1;
   document.querySelectorAll('.overlay.open').forEach(function(o){if(o===el)return;var z=parseInt(o.style.zIndex,10)||base;if(z>max)max=z;});
   var a=document.activeElement;
   _mvOvTrigPend=(a&&a!==document.body&&a!==document.documentElement)?a:null;
-  el.classList.add('open');el.style.zIndex=(max+1);
+  // ⚠️ Le plafond n'est pas décoratif : sans lui, une centaine d'overlays
+  //   empilés finiraient par passer AU-DESSUS de la porte CGU, qui est en
+  //   fail-closed. On préfère deux dialogues à égalité (l'ordre DOM tranche,
+  //   comme dans _mvTopOverlay) plutôt qu'un consentement contournable.
+  el.classList.add('open');el.style.zIndex=Math.min(max+1,MV_Z_MODAL_PLAFOND);
   _mvHistPush();
   _mvOvSync();
 }

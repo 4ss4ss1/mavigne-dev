@@ -2410,9 +2410,12 @@ body.mv-trial-on #app-root{padding-top:calc(env(safe-area-inset-top,0px) + 44px)
 .pil-note{background:var(--or-pale);border:1px solid rgba(201,168,76,.4);border-radius:12px;padding:11px 14px;font-size:12.5px;color:var(--texte-med);display:flex;gap:9px;align-items:flex-start;}
 .pil-note b{color:var(--texte);}
 /* — Tiroir de personnalisation (legacy) — */
-.pil-scrim{position:fixed;inset:0;background:rgba(0,0,0,.4);opacity:0;pointer-events:none;transition:opacity .2s;z-index:9998;}
+/* UI-Z — le tiroir du Pilotage portait le MEME defaut que la feuille du Cuvier :
+   a 9998/9999 il passait devant les dialogues modaux, qui s'ouvraient derriere
+   lui. Il redescend sous le plancher modal (9200). Voir CLAUDE.md UI-Z. */
+.pil-scrim{position:fixed;inset:0;background:rgba(0,0,0,.4);opacity:0;pointer-events:none;transition:opacity .2s;z-index:8900;}
 .pil-scrim.show{opacity:1;pointer-events:auto;}
-.pil-drawer{position:fixed;top:0;right:0;height:100%;width:340px;max-width:90vw;background:var(--bg-card);border-left:1px solid var(--gris);box-shadow:-12px 0 40px rgba(0,0,0,.18);transform:translateX(100%);transition:transform .24s cubic-bezier(.22,.61,.36,1);z-index:9999;display:flex;flex-direction:column;}
+.pil-drawer{position:fixed;top:0;right:0;height:100%;width:340px;max-width:90vw;background:var(--bg-card);border-left:1px solid var(--gris);box-shadow:-12px 0 40px rgba(0,0,0,.18);transform:translateX(100%);transition:transform .24s cubic-bezier(.22,.61,.36,1);z-index:8910;display:flex;flex-direction:column;}
 .pil-drawer.show{transform:translateX(0);}
 /* — Responsive — */
 @media(max-width:980px){
