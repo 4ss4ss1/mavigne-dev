@@ -1,4 +1,50 @@
-// MA VIGNE — Service Worker v7.37
+// MA VIGNE — Service Worker v7.38
+// v7.38 (06/09/2026) — CUV-4 : le Cuvier ne savait dire que ce qui EST rentre.
+//   La question du matin, en pleine vendange, est l'inverse : qu'est-ce qu'il
+//   reste ? Il fallait comparer de tete l'ecran Recoltes et le parcellaire.
+//   ★ Carte « Encore sur pied » en haut de Cuvier > Recoltes, et aussi sur
+//   l'ecran vide : parcelles ACTIVES sans aucune recolte saisie sur la
+//   campagne, surface, cepages, derniere analyse de maturite, LA PLUS MURE EN
+//   PREMIER. Un doigt ouvre la nouvelle recolte avec la parcelle deja choisie.
+//   Repliee au-dela de huit. Tout rentre, elle le dit.
+//   ★★ DEUX DEFAUTS TROUVES EN CHEMIN, dans la fonction qui repondait deja a
+//   cette question ailleurs. _mlResteARentrer (Le millesime) ne regardait PAS
+//   le statut : une parcelle ARRACHEE etait annoncee « encore sur pied ». Et
+//   elle exigeait surface > 0, ce qui EFFACAIT sans un mot une parcelle dont la
+//   surface n'est pas renseignee. Une liste qui se trompe dans les deux sens a
+//   la fois ne se remarque jamais : ce qu'elle ajoute masque ce qu'elle retire.
+//   Source unique desormais, lue par les deux ecrans.
+//   ★★ ET LA COMPARAISON PORTAIT SUR LE NOM BRUT. Le champ parcelle d'une
+//   recolte redevient LIBRE quand aucune parcelle n'est enregistree :
+//   « les grandes vignes » ne rejoignait pas « Les Grandes Vignes », et l'ecran
+//   envoyait quelqu'un vendanger une vigne deja vide. Nom normalise ; un nom
+//   HORS PARCELLAIRE est annonce sous la carte au lieu de fausser le compte.
+//   ⚠️⚠️ LE HARNAIS A REFUSE DE ROUGIR, ET IL AVAIT RAISON. La contre-epreuve
+//   du tri restait verte : retirer la ligne qui range les mesurees avant les
+//   autres ne changeait RIEN a l'ordre, dans AUCUN decor, ni a 5 ni a 12
+//   parcelles. J'ai accuse le decor deux fois avant de comprendre. La ligne
+//   n'y etait pour rien : `y.suc - x.suc` voyait un null, que JavaScript
+//   coerce en 0, et le bon ordre sortait PAR ACCIDENT D'ARITHMETIQUE — pendant
+//   que le couple symetrique, lui, repondait sur le NOM. Le comparateur se
+//   CONTREDISAIT, et un comparateur incoherent n'a AUCUN resultat garanti par
+//   la norme : c'est le moteur qui decide, et l'equipe est sous
+//   JavaScriptCore. Rang calcule AVANT toute soustraction (_vendResteCmp), et
+//   l'assertion porte desormais sur la COHERENCE du comparateur, pas sur
+//   l'ordre obtenu. Un ordre juste n'est pas une preuve de comparateur juste.
+//   ⚠️ HORS CODE APPLICATIF : C27 etait AVEUGLE depuis 6.77. Sa regex
+//   n'admettait que des commentaires `//` entre le crochet de WHATS_NEW et le
+//   premier bloc ; le commentaire /* … */ pose en tete l'a fait echouer, et le
+//   controle est retombe sur un simple avertissement « forme inattendue ». Un
+//   bump sans bloc WHATS_NEW serait passe. Regex elargie, illisibilite promue
+//   en ERREUR : « je ne sais pas lire » ne doit pas se lire « tout va bien ».
+//   ⚠️ CE LOT A ETE REFAIT. Sa premiere version portait 6.78 / 7.34, numeros
+//   pris entre-temps par le lot du pic a venir et par la reecriture du socle.
+//   Rejoue sur le socle propre, renumerote 6.79 / 7.38.
+//   ⚠️ CE QUE CE LOT NE FAIT PAS : l'onglet Recoltes n'est TOUJOURS pas borne
+//   a une campagne. La carte annonce « Campagne AAAA · N recoltes » et
+//   additionne caisses, tonnes et hL de TOUTES les annees saisies ; le PDF des
+//   recoltes fait pareil. « Encore sur pied », elle, est bornee a la campagne.
+//   Volet ouvert, pas pendant la vendange.
 // v7.37 (06/09/2026) — LE PIC QUI RECLAMAIT DU RENFORT POUR UNE SEMAINE FAITE.
 //   Signale par Nico, capture a l'appui, le 6 septembre : « Effectif au pic
 //   34,4 / 38,6 pers. — manque 4,1 pers. au pic · l'exercice », en orange, sur
@@ -3199,7 +3245,7 @@
 // v2.22 — Fix profils vides : guard vide dans loadData() pour MEMBRES/SAISONS/TACHES
 // v2.17 — Onboarding intégré + tenantId · v2.06 — Firebase Auth · v2.00–v2.05 — divers
 const DEBUG = self.location.hostname === 'localhost' || self.location.hostname === '127.0.0.1';
-const CACHE_NAME   = 'mavigne-v7.37';
+const CACHE_NAME   = 'mavigne-v7.38';
 const TENANT_CACHE = 'mavigne-tenant';   // Cache persistant — préservé à chaque mise à jour SW
 const SYNC_TAG     = 'mavigne-sync';
 
@@ -3215,7 +3261,7 @@ const CDN_URLS = [
 ];
 
 self.addEventListener('install', event => {
-  if(DEBUG) console.log('[SW] Ma Vigne v7.37 installé');
+  if(DEBUG) console.log('[SW] Ma Vigne v7.38 installé');
   event.waitUntil(
     caches.open(CACHE_NAME).then(async cache => {
       // ── Cœur applicatif : STRICT (mise à jour ATOMIQUE) ──
@@ -3231,7 +3277,7 @@ self.addEventListener('install', event => {
 });
 
 self.addEventListener('activate', event => {
-  if(DEBUG) console.log('[SW] Ma Vigne v7.37 activé');
+  if(DEBUG) console.log('[SW] Ma Vigne v7.38 activé');
   event.waitUntil(
     caches.keys().then(keys =>
       Promise.all(

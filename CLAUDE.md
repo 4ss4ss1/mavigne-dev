@@ -2,7 +2,41 @@
 
 > Document de référence du projet **Ma Vigne** (GUERETTECH). Il est le **porteur de vérité** :
 > la mémoire Claude est plafonnée, ce fichier ne l'est pas.
-> Dernière consolidation : **25 août 2026 (soir)** — ★★★ **UN INCIDENT RÉSEAU N'EST PAS UNE
+> Dernière consolidation : **6 septembre 2026** — ★★★ **LE HARNAIS A REFUSÉ DE ROUGIR, ET IL AVAIT
+> RAISON (§80)**. **APP 6.78 → 6.79 · SW 7.37 → 7.38.** Lot **CUV-4** : Nico demande à voir, au
+> Cuvier, *les parcelles qui n'ont pas eu de récoltes enregistrées*. L'écran Récoltes ne savait
+> montrer que ce qui **est** rentré ; la question du matin, en pleine vendange, est l'inverse.
+> ★★★ **DEUX DÉFAUTS TROUVÉS EN CHEMIN, DANS LA FONCTION QUI RÉPONDAIT DÉJÀ À CETTE QUESTION
+> AILLEURS.** `_mlResteARentrer` (Le millésime) ne regardait **pas le statut** : une parcelle
+> **ARRACHÉE** était annoncée « encore sur pied ». Et elle exigeait `surface > 0`, ce qui
+> **effaçait sans un mot** une parcelle dont la surface n'est pas renseignée. *Une liste qui se
+> trompe dans les deux sens à la fois ne se remarque jamais : ce qu'elle ajoute masque ce qu'elle
+> retire.* Source unique désormais, lue par les deux écrans.
+> ★★ **Et la comparaison portait sur le NOM BRUT.** Le champ parcelle d'une récolte redevient
+> **libre** quand aucune parcelle n'est enregistrée : « les grandes vignes » ne rejoignait pas
+> « Les Grandes Vignes », et l'écran envoyait quelqu'un vendanger une vigne déjà vide. Nom
+> normalisé ; un nom **hors parcellaire** est désormais **annoncé** au lieu de fausser le compte.
+> ⚠️⚠️⚠️ **LE POINT DUR EST AILLEURS : UNE CONTRE-ÉPREUVE EST RESTÉE VERTE, ET ELLE AVAIT RAISON.**
+> Retirer la ligne qui range les parcelles mesurées avant les autres ne changeait **rien** à
+> l'ordre obtenu — dans **aucun** décor, ni à 5 ni à 12 parcelles. Cause : `y.suc - x.suc` voyait un
+> `null`, que JavaScript coerce en `0`, et le bon ordre sortait **par accident d'arithmétique**
+> pendant que le couple symétrique, lui, répondait sur le **NOM**. ★★★ **Le comparateur se
+> contredisait — et un comparateur incohérent n'a AUCUN résultat garanti par la norme : c'est le
+> moteur qui décide, et l'équipe est sous JavaScriptCore.** Le rang est calculé **avant** toute
+> soustraction (`_vendResteCmp`), et l'assertion porte désormais sur la **cohérence** du
+> comparateur — antisymétrie et transitivité sur tous les couples — pas sur l'ordre obtenu.
+> *Un ordre juste n'est pas une preuve de comparateur juste.*
+> ⚠️⚠️ **ET C27 ÉTAIT AVEUGLE DEPUIS 6.77.** Sa regex n'admettait que des commentaires `//` entre le
+> crochet de `WHATS_NEW` et le premier bloc ; le commentaire `/* … */` posé en tête en 6.77 l'a fait
+> échouer, et le contrôle est retombé sur son **avertissement** « forme inattendue ». **Un bump sans
+> bloc WHATS_NEW serait passé.** Regex élargie, illisibilité promue en **ERREUR** : *« je ne sais pas
+> lire » ne doit jamais se lire « tout va bien ».*
+> ⚠️ **CE LOT A ÉTÉ LIVRÉ DEUX FOIS** — la première en 6.78 / 7.34, numéros pris entre-temps.
+> Voir **§80f**, sur ce qu'un clone du matin ne dit pas.
+> ★ **Ce que ce lot NE FAIT PAS, délibérément :** l'onglet Récoltes n'est toujours **pas borné à une
+> campagne** — détail en **§80e**. Détail complet en **§80**.
+>
+> ★ Précédente : **25 août 2026 (soir)** — ★★★ **UN INCIDENT RÉSEAU N'EST PAS UNE
 > PANNE (§68)**. **APP 6.68 → 6.69 · SW 7.23 → 7.24.** Signalé par Nico depuis la cave, capture à
 > l'appui : **« Promesse rejetée : Firebase: Error (auth/network-request-failed) »** en travers de
 > l'écran pendant la saisie d'une analyse avec PDF, sur 4G.
@@ -12797,3 +12831,167 @@ Câblé dans `check`, dans `prebuild` et dans une étape **nommée** de la CI, c
 > faux.** Le module savait déjà dire *sur quoi* il comptait (§33, la ligne de cadre). Il ne savait
 > pas dire **quand** — et « la semaine du pic » sans « elle est derrière » se lit comme une
 > consigne. Le cadre d'un chiffre, c'est sa fenêtre **et** son temps.
+
+## 80. ★★★ CUV-4 — « ENCORE SUR PIED », ET UN COMPARATEUR JUSTE PAR ACCIDENT (06/09 — APP 6.78 → 6.79 · SW 7.37 → 7.38)
+
+Demande de Nico, en une ligne : *« dans le cuvier j'aimerais voir les parcelles qui n'ont pas eu de
+recoltes enregistrées »*. Le Cuvier ne savait dire que ce qui **est** rentré — pour savoir ce qu'il
+restait, il fallait comparer de tête l'écran Récoltes et le parcellaire.
+
+### 80a. Ce qui est livré
+
+Une carte **« Encore sur pied »** en tête de **Cuvier › Récoltes**, présente aussi sur l'écran vide
+— c'est là qu'elle sert le plus. Elle liste les parcelles **actives** sans **aucune** récolte saisie
+sur la campagne : surface, cépages, **dernière analyse de maturité** et son âge, **la plus mûre en
+premier**, puis les jamais mesurées par ordre alphabétique. Un doigt sur une ligne ouvre la nouvelle
+récolte **avec la parcelle déjà choisie** (`openOvVendRec(id, presetParc)` — le pré-choix n'existe
+que pour une création : sur une modification, la parcelle de la récolte fait foi). Repliée au-delà
+de huit parcelles. Quand tout est rentré, elle le dit.
+
+⚠️ **L'unité affichée suit le MODE de la mesure** — %vol pour un degré, g/L pour un sucre — jamais un
+réglage d'affichage : *ce qui est montré doit être ce qui a été lu.*
+
+### 80b. ★★★ La fonction qui répondait déjà à cette question ailleurs se trompait dans les deux sens
+
+`_mlResteARentrer` (Le millésime, ligne « Encore sur pied ») filtrait :
+
+```
+p && p.nom && !faites[p.nom] && (parseFloat(p.surface)||0) > 0
+```
+
+**Aucun contrôle de statut** : une parcelle **arrachée** — une vigne qui n'existe plus — sortait en
+« encore sur pied ». Et `surface > 0` **effaçait silencieusement** toute parcelle dont la surface
+n'est pas renseignée.
+
+> ★★★ **Une liste qui se trompe dans les deux sens à la fois ne se remarque jamais : ce qu'elle
+> ajoute masque ce qu'elle retire.** Le compte paraît plausible, il est faux deux fois.
+
+Les deux écrans lisent désormais **`_vendResteARentrer`**, source unique.
+
+### 80c. ★★ Le nom brut, et le champ qui redevient libre
+
+`faites[r.parcelle] = 1` puis `!faites[p.nom]` : comparaison sur le **nom brut**. Or
+`_vendInjectParcelleSelect` **retombe en saisie libre** quand aucune parcelle n'est enregistrée, et
+préserve toute valeur hors liste. « les grandes vignes » ne rejoignait donc pas « Les Grandes
+Vignes » : **l'écran réclamait une parcelle déjà vendangée**, et envoyait quelqu'un dans une vigne
+vide. Comparaison normalisée par `_matNorm` (casse + accents), déjà en service dans le module.
+
+★ **Le miroir a été traité en même temps** : une récolte dont le nom de parcelle **n'existe pas** au
+parcellaire ne rentre aucune parcelle de la liste. Elle est **nommée sous la carte** au lieu de
+laisser un compte inexplicable. *Un écart qu'on ne peut pas expliquer se lit comme une panne.*
+
+### 80d. ⚠️⚠️⚠️ Le point dur : une contre-épreuve verte qui avait raison
+
+Le harnais porte six contre-épreuves, **une par défaut, jouées séparément** — réintroduire les six
+d'un coup et constater « c'est rouge » ne prouve rien. Cinq ont mordu du premier coup. **La sixième
+est restée verte**, celle qui retirait la ligne rangeant les parcelles mesurées avant les autres :
+
+```
+if((x.suc==null)!==(y.suc==null)) return x.suc==null?1:-1;
+```
+
+Premier réflexe : le décor est trop faible. J'ai ajouté une parcelle jamais analysée dont le nom
+passe **en tête de l'alphabet** — toujours vert. Décor à douze parcelles, mesurées et non mesurées
+entrelacées — **toujours vert**.
+
+★★★ **La ligne n'était pour rien dans l'ordre obtenu.** C'est `y.suc - x.suc` qui faisait le
+travail : avec `y.suc` à `null`, JavaScript coerce en `0` et rend `-x.suc`, **négatif**, donc la
+mesurée passe devant. Le bon ordre sortait **par accident d'arithmétique**. Mais dans l'autre sens,
+`x.suc` valant `null`, le test `x.suc != null` est faux et la fonction répondait sur le **NOM**.
+
+> ★★★ **UN COMPARATEUR QUI SE CONTREDIT N'A AUCUN RÉSULTAT GARANTI.** `Array.prototype.sort` ne
+> promet rien si `cmp(a,b)` et `cmp(b,a)` ne sont pas de signes opposés : le résultat dépend de
+> l'algorithme du moteur. V8 a déjà changé de tri une fois ; l'application tourne aussi sous
+> **JavaScriptCore** sur les iPhone de l'équipe. *Un ordre juste n'est pas une preuve de comparateur
+> juste.*
+
+Correctif : **`_vendResteCmp`**, où le rang (mesurée = 0, non mesurée = 1) est calculé **avant**
+toute soustraction — qui ne voit plus jamais qu'une paire de nombres. Et surtout, **l'assertion a
+changé de cible** : elle ne regarde plus l'ordre obtenu mais la **cohérence** du comparateur —
+antisymétrie et transitivité sur tous les couples d'un échantillon mixte. La contre-épreuve mord
+alors instantanément, et **elle mord sur A26 pendant que A6, l'ordre, reste verte** : c'est
+exactement la démonstration du défaut.
+
+> ★★ **RÈGLE POSÉE : quand une contre-épreuve reste muette, la première hypothèse n'est pas
+> « le décor est trop faible » mais « la ligne ne fait rien ».** Trois décors successifs pour
+> l'admettre. Une ligne dont on ne peut fabriquer aucune conséquence observable est soit morte, soit
+> le symptôme d'une mécanique qui travaille ailleurs — ici, une coercition silencieuse.
+
+★ **Contrôle voisin, réarmé.** `C27` (WHATS_NEW s'ouvre sur APP_VERSION) était **aveugle depuis
+6.77** : sa regex n'admettait que des commentaires `//` entre le crochet ouvrant et le premier
+`{ v: }`, et le commentaire `/* ⚠ 6.76 n'a jamais été déployé … */` posé en tête l'a fait échouer.
+Le contrôle retombait sur un **avertissement** « forme inattendue » — *un bump sans bloc serait
+passé*. Regex élargie aux deux formes ; l'illisibilité est désormais une **ERREUR**. **Sixième
+occurrence** du piège §53 : un contrôle qui lit du code ne doit jamais pouvoir être éteint par la
+prose écrite à côté.
+
+★ **Faux positif §24 supprimé à la source.** Le préflight lisait un `<div>` **dans** un `<button>`
+là où il n'y avait qu'un ternaire entre deux balises. Le nom de balise est devenu une **variable** :
+un seul élément, dont seul le type change. *Faire taire un contrôle juste en lui donnant raison,
+jamais en l'ignorant.*
+
+### 80e. ⚠️ Ce que ce lot ne fait pas — l'onglet Récoltes mélange les campagnes
+
+`CAVE_VENDANGE.recoltes` n'est **filtré nulle part** dans `renderVendRec` : la carte annonce
+« Campagne AAAA · N récoltes » et additionne **caisses, tonnes et hL de toutes les années saisies**.
+Le libellé prend l'année civile (`new Date().getFullYear()`), pas la campagne — les deux divergent
+de **janvier à juillet**. L'export PDF des récoltes a le même périmètre. **Rien n'archive ni ne
+purge les récoltes d'une campagne à l'autre.**
+
+La carte « Encore sur pied », elle, **est bornée** à la campagne (année de la date, la règle de
+`_mlRecoltesDe` — une seule règle par écran).
+
+⚠️ **Pourquoi ce n'est pas corrigé ici** : nous sommes le 6 septembre, cet écran sert tous les jours
+en ce moment. Borner la liste changerait ce que Nico voit en pleine vendange, sans qu'il l'ait
+demandé. *Un correctif juste, livré au mauvais moment, est un incident.* Le volet attend un « go » :
+liste bornée à la campagne, ligne « N récoltes des campagnes précédentes » avec bascule, et même
+périmètre pour le PDF.
+
+### 80f. ★★★ CE LOT A ÉTÉ LIVRÉ DEUX FOIS — un clone du matin ne dit pas qu'il a vieilli
+
+Première livraison : **APP 6.78 · SW 7.34**, lus dans un clone pris en début de session. Vérification
+demandée par Nico avant intégration — `git fetch` a répondu :
+
+```
++ 204832d...2bbbdf3  main -> origin/main  (forced update)
+```
+
+**Le commit de base n'existait plus.** Le dépôt avait été réécrit dans la matinée (purge
+d'historique CONF-1/2/3, nouveau socle propre), et **deux lots** y avaient été poussés depuis :
+le distant était à **APP 6.78 · SW 7.37**. Les deux numéros que j'avais posés étaient **pris**, dont
+un par un lot déjà déployé.
+
+⚠️ **Le piège le plus fin : `index.html` ressortait « identique au distant ».** Non parce qu'il avait
+été poussé, mais parce que le lot d'en face avait fait **exactement le même bump** 6.77 → 6.78. Une
+comparaison de contenu disait « à jour » sur un fichier qui n'avait jamais quitté ma machine.
+
+> ★★★ **RÈGLE POSÉE : relire les versions dans les fichiers ne suffit pas — il faut relire les
+> fichiers du DISTANT.** `APP_VERSION` lu dans un clone répond « quelle version avais-je ce
+> matin ? », pas « quelle version est déployée ? ». Sur un dépôt où quelqu'un pousse le même jour,
+> ce sont deux questions différentes. **Un `git fetch` avant le premier bump, pas seulement un clone
+> en début de session.**
+
+> ★★ **ET UN FORCE PUSH NE SE RATTRAPE PAS PAR UN `pull`.** Un clone antérieur à la réécriture est
+> sur une branche morte : le merge proposé recréerait l'historique purgé. C'est `Fetch` puis
+> **`Reset to origin/main`** (hard).
+
+Ce qui a été **rejoué** sur le socle propre : `utils.js`, `index.html`, `sw.js`, `package.json`,
+`CLAUDE.md`. Ce qui a été **reporté tel quel**, après vérification octet à octet que leur base
+n'avait pas bougé : `cave.js`, `preflight.mjs`, `guide/08-cave.html`. *Vérifier qu'une base est
+identique coûte une commande ; supposer qu'elle l'est coûte un lot.*
+
+### 80g. Le filet
+
+**`scripts/mv-harnais-reste-a-rentrer.mjs`** — 26 assertions, dans `check` **et** `prebuild`. Il
+**exécute** les fonctions extraites de `cave.js` et `utils.js` (`_escAttr` compris) : aucun motif de
+texte, un contrôle qui lit du texte aurait dit vert sur les deux défauts de §80b. Les deux variables
+de module (`_vendResteOuv`, seuil de repli) sont **relues dans la source**, pas recopiées : un
+harnais qui fige un seuil cesse de décrire l'écran dès qu'on le change. Toutes les dates du décor
+sont **relatives à aujourd'hui** — un harnais qui fige une année devient faux le 1er janvier. Un
+crash compte **rouge**, et un sabotage dont l'ancre a disparu **échoue bruyamment** au lieu de se
+taire.
+
+★ **Deux de mes propres assertions étaient fausses au premier lancement** : l'une cherchait `&#39;`
+dans **toute** la page — que le texte visible contient légitimement, `_escHtml` fait son travail —
+au lieu des seuls slots `onclick` ; l'autre attendait une surface calculée de tête, fausse de 0,5 ha.
+**Corrigées avant de conclure quoi que ce soit sur le code.**

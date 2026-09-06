@@ -197,7 +197,11 @@ t(`tout script de scripts/ est nommé dans le document (${muets.length} muet(s))
 }
 
 /* 2) Une section ne disparaît pas, même si son numéro est réutilisé. */
-const SECTIONS = 111;  /* +§79. ⚠️ MESURÉ, pas supposé : le cliquet compte les sections NUMÉROTÉES (## N.), pas tous les ## — à 91 il ne mordait plus.
+const SECTIONS = 112;  /* +§80 (CUV-4). Relevé DANS LE LOT qui ajoute la section : le message
+                          « ↑ N de plus » est une consigne, et un cran de jeu laissé aujourd'hui
+                          en vaut dix-neuf dans trois semaines — c'est exactement ce qui s'est
+                          produit le 06/09.
+                          +§79. ⚠️ MESURÉ, pas supposé : le cliquet compte les sections NUMÉROTÉES (## N.), pas tous les ## — à 91 il ne mordait plus.
                           ⚠️⚠️ RELEVÉ DE 92 À 111 LE 06/09 : le seuil traînait DIX-NEUF sections en
                           arrière, et le script réclamait ce relèvement à chaque exécution depuis
                           des semaines. Un cliquet qui a dix-neuf crans de jeu ne mord plus : la

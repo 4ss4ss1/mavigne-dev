@@ -315,8 +315,18 @@ function checkVersions() {
      Une version purement technique déclare son bloc avec `items: []`, et c'est
      un choix conscient au lieu d'un oubli. */
   if (utils && appVersion) {
-    const wn = utils.match(/export const WHATS_NEW\s*=\s*\[(?:\s|\/\/[^\n]*)*\{\s*v:\s*['"]([^'"]+)['"]/);
-    if (!wn) add('WARN', 'src/utils.js', null, 'WHATS_NEW introuvable ou forme inattendue.');
+    /* ⚠️⚠️ CETTE REGEX A DÉJÀ DÉSARMÉ C27 UNE FOIS. Elle n'admettait que des
+       commentaires `//` entre le crochet ouvrant et le premier `{ v:`. Le bloc
+       `/* … *\u002F` posé en tête de WHATS_NEW en 6.77 l'a donc fait échouer :
+       le contrôle est retombé sur son AVERTISSEMENT « forme inattendue » et n'a
+       plus rien vérifié du tout — un bump sans bloc serait passé. Un contrôle
+       que la prose d'à côté peut éteindre n'est pas un contrôle (§53). Les deux
+       formes de commentaire sont désormais admises, et l'absence de bloc est
+       une ERREUR : « je ne sais pas lire » ne doit pas se lire « tout va bien ». */
+    const wn = utils.match(/export const WHATS_NEW\s*=\s*\[(?:\s|\/\/[^\n]*|\/\*[\s\S]*?\*\/)*\{\s*v:\s*['"]([^'"]+)['"]/);
+    if (!wn) add('ERROR', 'src/utils.js', null,
+      'C27 — WHATS_NEW illisible : le premier bloc { v:\'…\' } est introuvable. '
+      + 'Tant qu\'il ne se lit pas, C27 ne vérifie RIEN.');
     else if (wn[1] !== appVersion)
       add('ERROR', 'src/utils.js', lineOf(utils, wn.index),
         `C27 — WHATS_NEW s'ouvre sur v${wn[1]} alors qu'APP_VERSION vaut v${appVersion} : `

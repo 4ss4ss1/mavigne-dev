@@ -1955,6 +1955,37 @@ function _vendInjectCss(){
 .mvv-empty{text-align:center;padding:46px 20px;color:var(--texte-doux,#5F5F5F)}
 .mvv-empty-ic{font-size:34px;opacity:.5}
 .mvv-empty-tx{font-size:13px;margin-top:10px;line-height:1.5}
+/* —— Encore sur pied : ce qui n'est PAS rentré ——
+   Encres uniquement : --texte / --texte-doux / --terre / --vert-tx / --orange-tx.
+   Aucune variable de SURFACE (--cave, --bg-*, --*-pale) en couleur de texte (§67). */
+.mvv-reste{background:var(--bg-card,#FBFAF6);border:1px solid rgba(138,90,56,.10);border-radius:16px;
+  margin:6px 0 14px;box-shadow:0 1px 7px rgba(20,17,13,.05);overflow:hidden}
+.mvv-reste-hd{display:flex;align-items:center;gap:9px;padding:13px 14px;width:100%;background:none;border:0;
+  font-family:inherit;text-align:left;color:var(--texte,#1A1A14);min-height:48px}
+button.mvv-reste-hd{cursor:pointer}
+.mvv-reste-ic{display:flex;align-items:center;color:var(--terre,#8A5A38);flex-shrink:0}
+.mvv-reste-t{font-family:'Cormorant Garamond',Georgia,serif;font-weight:600;font-size:17px;line-height:1.1}
+.mvv-reste-n{margin-left:auto;font-size:10px;letter-spacing:.4px;text-transform:uppercase;
+  color:var(--texte-doux,#5F5F5F);text-align:right;line-height:1.3}
+.mvv-reste-n b{display:block;font-family:'Cormorant Garamond',Georgia,serif;font-size:19px;
+  font-weight:700;letter-spacing:0;text-transform:none;color:var(--texte,#1A1A14)}
+.mvv-reste-ch{display:flex;align-items:center;color:var(--texte-doux,#5F5F5F);transition:transform .18s;flex-shrink:0}
+.mvv-reste.ouv .mvv-reste-ch{transform:rotate(90deg)}
+.mvv-reste-li{display:flex;align-items:center;gap:11px;width:100%;padding:10px 14px;background:none;border:0;
+  border-top:1px solid rgba(138,90,56,.10);font-family:inherit;text-align:left;color:var(--texte,#1A1A14);min-height:52px}
+button.mvv-reste-li{cursor:pointer}
+.mvv-reste-l{flex:1;min-width:0}
+.mvv-reste-nm{display:block;font-family:'Cormorant Garamond',Georgia,serif;font-weight:600;font-size:16px;line-height:1.15}
+.mvv-reste-sub{display:block;font-size:11px;color:var(--texte-doux,#5F5F5F);margin-top:3px;
+  overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+.mvv-reste-r{text-align:right;flex-shrink:0}
+.mvv-reste-v{font-family:'Cormorant Garamond',Georgia,serif;font-weight:700;font-size:17px;line-height:1;color:var(--terre,#8A5A38)}
+.mvv-reste-v .u{font-family:inherit;font-size:9px;font-weight:600;color:var(--texte-doux,#5F5F5F);margin-left:2px}
+.mvv-reste-a{font-size:10px;color:var(--texte-doux,#5F5F5F);margin-top:3px}
+.mvv-reste-ft{font-size:11px;color:var(--texte-doux,#5F5F5F);line-height:1.45;padding:10px 14px;
+  border-top:1px solid rgba(138,90,56,.10)}
+.mvv-reste-ft.warn{color:var(--orange-tx,#9C4E14)}
+.mvv-reste.tout .mvv-reste-ic{color:var(--vert-tx,#31601C)}
 .mvv-fab{margin:16px 0 0;padding:2px 0}
 .mvv-fab-btn{width:100%;padding:14px;border-radius:14px;border:none;font-size:14px;font-weight:600;display:flex;align-items:center;justify-content:center;gap:8px;font-family:inherit;cursor:pointer;background:linear-gradient(180deg,var(--or,#C2A14D),#B8952F);color:#241B08;box-shadow:0 3px 12px rgba(194,161,77,.25);min-height:44px}
 .mvv-fab-btn:active{transform:translateY(1px)}
@@ -2385,6 +2416,156 @@ function renderCaveVendange() {
   _vendRenderTab();
 }
 
+/* ══════ ENCORE SUR PIED — les parcelles SANS récolte enregistrée ══════
+   Le Cuvier ne savait dire que ce qui EST rentré. La question du matin pendant
+   la vendange est l'inverse : qu'est-ce qu'il reste ?
+
+   ⚠️ LA COMPARAISON SE FAIT SUR UN NOM NORMALISÉ. Le champ parcelle d'une
+   récolte redevient LIBRE quand aucune parcelle n'est enregistrée
+   (_vendInjectParcelleSelect) : « les grandes vignes » saisi à la main contre
+   « Les Grandes Vignes » au parcellaire aurait laissé la parcelle dans les
+   non-rentrées. Un écran qui réclame une récolte déjà saisie est pire que pas
+   d'écran du tout.
+
+   ⚠️ UNE PARCELLE ARRACHÉE N'EST PAS « ENCORE SUR PIED ». _mlResteARentrer ne
+   regardait pas le statut — Le millésime annonçait donc sur pied des parcelles
+   qui n'existent plus — et il exigeait une surface > 0, ce qui EFFAÇAIT sans un
+   mot une parcelle dont la surface n'est pas renseignée. Les deux écrans lisent
+   désormais la même fonction. */
+var _vendResteOuv = null;    // null = pas encore décidé : ouvert si la liste est courte
+var _VEND_RESTE_MAX = 8;     // au-delà, la carte s'ouvre au doigt
+
+function _vendResteCle(nom){ return _matNorm(nom); }
+function _vendResteActives(){
+  return (window.PARCELLES||[]).filter(function(p){
+    return p && String(p.nom||'').trim() && p.statut!=='Arrachee';
+  });
+}
+
+/* Les parcelles sans récolte enregistrée sur la campagne `mil`.
+   Le filtre de campagne est celui de _mlRecoltesDe — l'ANNÉE de la date — et
+   non la campagne août→juillet : deux règles pour un même écran en feraient
+   diverger les comptes. */
+function _vendResteARentrer(mil){
+  var an=String(mil), faites={}, connues={}, inconnues={}, der={};
+  var recs=(CAVE_VENDANGE.recoltes||[]).filter(function(r){
+    return r && r.parcelle && String(r.date||'').slice(0,4)===an;
+  });
+  recs.forEach(function(r){ faites[_vendResteCle(r.parcelle)]=1; });
+  var actives=_vendResteActives();
+  actives.forEach(function(p){ connues[_vendResteCle(p.nom)]=1; });
+  /* Une récolte qui porte un nom hors parcellaire ne rentre AUCUNE parcelle de
+     la liste : le dire, sinon le compte paraît faux sans qu'on sache pourquoi. */
+  recs.forEach(function(r){
+    if(!connues[_vendResteCle(r.parcelle)]) inconnues[String(r.parcelle).trim()]=1;
+  });
+  (CAVE_VENDANGE.analyses||[]).forEach(function(a){
+    if(!a||!a.parcelle||String(a.date||'').slice(0,4)!==an) return;
+    var k=_vendResteCle(a.parcelle);
+    if(!der[k]||a.date>der[k].date) der[k]=a;
+  });
+  var tj=Date.parse(new Date().toISOString().slice(0,10));
+  var lignes=[];
+  actives.forEach(function(p){
+    var nom=String(p.nom).trim(), k=_vendResteCle(nom);
+    if(faites[k]) return;
+    var a=der[k]||null;
+    var ceps=(p.cepages&&p.cepages.length)?p.cepages:(p.cepage?[p.cepage]:[]);
+    lignes.push({p:p, nom:nom, ha:parseFloat(p.surface)||0, cep:ceps.join(' · '),
+      ana:a, suc:a?_matSuc(a):null, jours:a?_matJours(a.date,tj):null});
+  });
+  lignes.sort(_vendResteCmp);
+  return {lignes:lignes, inconnues:Object.keys(inconnues).sort(function(a,b){
+    return a.localeCompare(b,'fr'); })};
+}
+
+/* La plus mûre d'abord, puis ce qui n'a jamais été mesuré, par ordre
+   alphabétique. Une ligne ne redescend jamais après un geste : saisir la
+   récolte la fait SORTIR de la liste — le piège de la liste des cuves (§6.73,
+   mesurer une cuve la renvoyait en bas) ne s'applique pas ici.
+
+   ⚠️⚠️ UN COMPARATEUR DOIT ÊTRE COHÉRENT, et la première version ne l'était
+   pas : elle laissait `y.suc - x.suc` voir un `null`. La coercition (null - 198
+   = -198) rendait l'ordre JUSTE — au point qu'aucun décor ne pouvait le prendre
+   en défaut — pendant que le couple symétrique, lui, répondait sur le NOM. Le
+   comparateur se contredisait donc, et la norme n'impose alors AUCUN résultat :
+   c'est le moteur qui décide, et il peut changer d'avis d'une version à
+   l'autre. Le rang est calculé AVANT toute soustraction, qui ne voit plus que
+   deux nombres. C'est le harnais qui l'a trouvé, en refusant de rougir. */
+function _vendResteCmp(x,y){
+  var mx=(x.suc==null)?1:0, my=(y.suc==null)?1:0;
+  if(mx!==my) return mx-my;                                 // mesurée avant non mesurée
+  if(mx===0 && x.suc!==y.suc) return y.suc-x.suc;            // la plus mûre d'abord
+  return x.nom.localeCompare(y.nom,'fr');                    // à défaut, l'alphabet
+}
+
+/* L'unité suit le MODE de la mesure, jamais un réglage d'affichage : ce qui est
+   montré est ce qui a été lu au réfractomètre ou au mustimètre. */
+function _vendResteVal(e){
+  if(e.suc==null) return '';
+  return (e.ana&&e.ana.mode==='alc')
+    ? (_mvF1(e.ana.val||0)+'<span class="u">%vol</span>')
+    : (Math.round(e.suc)+'<span class="u">g/L</span>');
+}
+
+function _vendResteHtml(){
+  var nAct=_vendResteActives().length;
+  if(!nAct) return '';                       // parcellaire vide : rien à comparer
+  var mil=_mlCampagne(), r=_vendResteARentrer(mil), l=r.lignes;
+  var pied=r.inconnues.length
+    ? ('<div class="mvv-reste-ft warn">Hors parcellaire : <b>'
+        +r.inconnues.map(function(n){return _escHtml(n);}).join(', ')
+        +'</b>. Ces récoltes ne rentrent aucune parcelle de la liste.</div>')
+    : '';
+  if(!l.length){
+    return '<div class="mvv-reste tout"><div class="mvv-reste-hd">'
+      +'<span class="mvv-reste-ic">'+_mvIcon('check',18)+'</span>'
+      +'<span class="mvv-reste-t">Tout est rentré</span>'
+      +'<span class="mvv-reste-n"><b>'+nAct+'</b>parcelle'+(nAct>1?'s':'')+'</span></div>'
+      +'<div class="mvv-reste-ft">Campagne '+mil+' : chaque parcelle active porte au moins une récolte.</div>'
+      +pied+'</div>';
+  }
+  var ha=l.reduce(function(s,e){return s+e.ha;},0);
+  var ouv=(_vendResteOuv==null)?(l.length<=_VEND_RESTE_MAX):!!_vendResteOuv;
+  _vendResteOuv=ouv;                         // l'état devient explicite : le bouton n'a plus à le recalculer
+  var canEdit=canWrite();
+  var h='<div class="mvv-reste'+(ouv?' ouv':'')+'">'
+    +'<button type="button" class="mvv-reste-hd" aria-expanded="'+ouv+'" onclick="_vendResteToggle()">'
+    +'<span class="mvv-reste-ic">'+_mvIcon('raisin',18)+'</span>'
+    +'<span class="mvv-reste-t">Encore sur pied</span>'
+    +'<span class="mvv-reste-n"><b>'+l.length+'</b>parcelle'+(l.length>1?'s':'')
+      +(ha>0?(' · '+_mvF1(ha)+' ha'):'')+'</span>'
+    +'<span class="mvv-reste-ch">'+_mvIcon('chevron',16)+'</span></button>';
+  if(ouv){
+    l.forEach(function(e){
+      var sub=(e.ha>0?(_mvF1(e.ha)+' ha'):'surface non renseignée')
+        +(e.cep?(' · '+_escHtml(e.cep)):'');
+      var droite=(e.suc!=null)
+        ? ('<span class="mvv-reste-v">'+_vendResteVal(e)+'</span>'
+           +'<span class="mvv-reste-a" style="display:block">'
+           +(e.jours<=0?'aujourd’hui':('il y a '+e.jours+' j'))+'</span>')
+        : '<span class="mvv-reste-a">jamais analysée</span>';
+      /* §54 : dans un slot onclick, _escHtml est DÉFAIT — l'attribut décode
+         &#39; AVANT que le JS ne soit compilé. C'est _escAttr, et lui seul.
+         ⚠️ Le nom de balise est une VARIABLE : écrire les deux branches en
+         clair (`<button…>` d'un côté, `<div>` de l'autre) fait lire au préflight
+         un <div> DANS un <button> — §24, un faux positif qui apprend à ignorer
+         un contrôle juste. Un seul élément, dont seul le type change. */
+      var tg=canEdit?'button':'div';
+      h+='<'+tg+' class="mvv-reste-li"'
+        +(canEdit?(' type="button" onclick="openOvVendRec(null,\''+_escAttr(e.nom)+'\')"'):'')+'>'
+        +'<span class="mvv-reste-l"><span class="mvv-reste-nm">'+_escHtml(e.nom)+'</span>'
+        +'<span class="mvv-reste-sub">'+sub+'</span></span>'
+        +'<span class="mvv-reste-r">'+droite+'</span>'
+        +'</'+tg+'>';
+    });
+    h+='<div class="mvv-reste-ft">Campagne '+mil+' · parcelles actives sans aucune récolte saisie, '
+      +'la plus mûre en premier'+(canEdit?'. Touchez-en une pour peser sa première benne.':'.')+'</div>';
+  }
+  return h+pied+'</div>';
+}
+function _vendResteToggle(){ _vendResteOuv=!_vendResteOuv; renderVendRec(); }
+
 function renderVendRec() {
   var el=document.getElementById('mvv-body'); if(!el) return;
   var cfg=_vendCfg();
@@ -2408,6 +2589,7 @@ function renderVendRec() {
                       :'tous les retours reçus';})()
           +'</span> '+_mvIcon('chevron',16)+'</div>'):'')
       +'</div>';
+    html+=_vendResteHtml();
     window._mvGraphOublier('#mvg-ap-');
     html+='<div class="mvmat-card"><div class="mvmat-ttl">Apports par parcelle</div>'
       +'<div id="mvg-ap-all"></div></div>';
@@ -2435,6 +2617,7 @@ function renderVendRec() {
     });
   } else {
     html+='<div class="mvv-empty"><div class="mvv-empty-ic">'+_mvIcon('raisin',40)+'</div><div class="mvv-empty-tx">Aucune récolte saisie.<br>Pesez votre première benne pour lancer la campagne.</div></div>';
+    html+=_vendResteHtml();
   }
   html+=_vendRendHistHtml();
   if(canEdit) html+='<div class="mvv-fab"><button class="mvv-fab-btn" onclick="openOvVendRec(null)">＋ Nouvelle récolte</button></div>';
@@ -2809,14 +2992,16 @@ function _vndSetEr(e) {
   });
   var pw=document.getElementById('vrec-er-pct-wrap'); if(pw) pw.style.display=e==='partiel'?'block':'none';
 }
-function openOvVendRec(id) {
+function openOvVendRec(id, presetParc) {
   if(!canWrite()) return;
   _vendEditId=id||null;
   var r=id?(CAVE_VENDANGE.recoltes||[]).find(function(x){return x.id===id;}):null;
   var titleEl=document.getElementById('ov-vend-rec-title');
   if(titleEl) titleEl.textContent=r?'Modifier la r\u00e9colte':'Nouvelle r\u00e9colte';
   var el;
-  _vendInjectParcelleSelect(r?r.parcelle:'');
+  /* presetParc n'existe QUE pour une création : sur une modification, la
+     parcelle de la récolte fait foi et rien ne doit la déplacer. */
+  _vendInjectParcelleSelect(r?r.parcelle:(presetParc||''));
   el=document.getElementById('vrec-date'); if(el) el.value=r?r.date:new Date().toISOString().slice(0,10);
   el=document.getElementById('vrec-caisses'); if(el) el.value=r?_recCsDom(r):0;
   el=document.getElementById('vrec-temp'); if(el) el.value=r&&r.temp_c?r.temp_c:'';
@@ -7126,6 +7311,8 @@ window.CAVE_VENDANGE        = CAVE_VENDANGE;
 window.renderCaveVendange   = renderCaveVendange;
 window.switchVendOng        = switchVendOng;
 window.openOvVendRec        = openOvVendRec;
+window._vendResteToggle     = _vendResteToggle;
+window._vendResteARentrer   = _vendResteARentrer;
 window.saveVendRec          = saveVendRec;
 window.deleteVendRec        = deleteVendRec;
 window.openOvVendCuve       = openOvVendCuve;
@@ -9047,13 +9234,13 @@ function _mlRendements(mil){
   });
 }
 
+/* ★ Source unique avec Le Cuvier (_vendResteARentrer). Cette fonction comparait
+   les noms BRUTS, ne regardait pas le statut — une parcelle ARRACHÉE sortait
+   donc en « encore sur pied » — et écartait sans un mot toute parcelle dont la
+   surface n'est pas renseignée. */
 function _mlResteARentrer(mil){
   if(String(mil)!==String(_mlCampagne())) return [];
-  var faites={};
-  _mlRecoltesDe(mil).forEach(function(r){ faites[r.parcelle]=1; });
-  return (window.PARCELLES||[]).filter(function(p){
-    return p && p.nom && !faites[p.nom] && (parseFloat(p.surface)||0)>0;
-  });
+  return _vendResteARentrer(mil).lignes.map(function(e){ return e.p; });
 }
 
 // D'ou vient ce vin : cuvee d'elevage -> cuve -> recoltes -> parcelles.

@@ -23,7 +23,7 @@ export const GT_ADMIN_EMAIL = 'ngdevpro@gmail.com';
 // WHATS_NEW   : tableau vide = modal desactive pour cette version.
 // Format item : { emoji:'📅', titre:'Titre court', desc:'Phrase utilisateur.' }
 // Regle : seulement les changements visibles par les utilisateurs.
-export const APP_VERSION = '6.78';
+export const APP_VERSION = '6.79';
 // ════ Journal des nouveautés (récap cumulatif) ════
 // Une entrée par version, la PLUS RÉCENTE EN HAUT : { v:'5.10', items:[ {emoji,titre,desc}, … ] }
 // À chaque release visible → AJOUTER un bloc en tête (ne pas remplacer). items:[] = release technique (rien à afficher).
@@ -354,6 +354,14 @@ window._mvGraphRepeindre = function(){
 };
 
 export const WHATS_NEW = [
+  { v: '6.79', items: [
+    { emoji: 'raisin', titre: 'Le Cuvier dit ce qu\u2019il reste \u00e0 rentrer',
+      desc: "L\u2019\u00e9cran <b>R\u00e9coltes</b> ne savait montrer que ce qui \u00e9tait <b>d\u00e9j\u00e0</b> vendang\u00e9\u00a0: pour savoir ce qu\u2019il restait, il fallait comparer de t\u00eate avec la liste des parcelles. Une carte <b>\u00ab\u00a0Encore sur pied\u00a0\u00bb</b> s\u2019affiche maintenant en haut de l\u2019\u00e9cran\u00a0: les parcelles <b>sans aucune r\u00e9colte saisie</b> cette campagne, avec leur surface, leur c\u00e9page et leur <b>derni\u00e8re analyse de maturit\u00e9</b>\u00a0\u2014 <b>la plus m\u00fbre en premier</b>. Touchez-en une\u00a0: la nouvelle r\u00e9colte s\u2019ouvre avec la parcelle d\u00e9j\u00e0 choisie. Quand tout est rentr\u00e9, la carte le dit." },
+    { emoji: 'carte', titre: 'Une parcelle arrach\u00e9e n\u2019est plus annonc\u00e9e \u00ab\u00a0encore sur pied\u00a0\u00bb',
+      desc: "Dans <b>Le mill\u00e9sime</b>, la ligne \u00ab\u00a0Encore sur pied\u00a0\u00bb comptait aussi les parcelles <b>arrach\u00e9es</b>\u00a0\u2014 des vignes qui n\u2019existent plus. \u00c0 l\u2019inverse, une parcelle dont la <b>surface n\u2019est pas renseign\u00e9e</b> en \u00e9tait retir\u00e9e sans un mot\u00a0: elle manquait \u00e0 l\u2019appel sans qu\u2019on puisse le deviner. Les deux \u00e9crans comptent d\u00e9sormais de la m\u00eame fa\u00e7on." },
+    { emoji: 'loupe', titre: 'Une parcelle rentr\u00e9e n\u2019est plus r\u00e9clam\u00e9e \u00e0 cause d\u2019une majuscule',
+      desc: "Le nom de parcelle d\u2019une r\u00e9colte peut avoir \u00e9t\u00e9 tap\u00e9 \u00e0 la main. \u00ab\u00a0les grandes vignes\u00a0\u00bb et \u00ab\u00a0Les Grandes Vignes\u00a0\u00bb sont maintenant reconnus comme la <b>m\u00eame parcelle</b>\u00a0: personne n\u2019est envoy\u00e9 vendanger une vigne d\u00e9j\u00e0 vide. Et si une r\u00e9colte porte un nom qui n\u2019existe pas au parcellaire, la carte le <b>signale</b> au lieu de laisser un compte inexplicable." }
+  ] },
   { v: '6.78', items: [
     { emoji: 'equipe', titre: 'L\u2019effectif au pic ne r\u00e9clame plus du renfort pour une semaine d\u00e9j\u00e0 faite',
       desc: "Sur un exercice, la semaine la plus charg\u00e9e de l\u2019ann\u00e9e est presque toujours la <b>vendange</b>. Une fois qu\u2019elle \u00e9tait pass\u00e9e, le Pilotage continuait pourtant d\u2019afficher son manque en orange sur l\u2019\u00e9cran du jour\u00a0: \u00ab\u00a0il manque 4 personnes au pic\u00a0\u00bb, sur un travail termin\u00e9, sans un mot pour dire que c\u2019\u00e9tait derri\u00e8re. <b>Aujourd\u2019hui</b> et <b>Capacit\u00e9 vs charge</b> regardent maintenant le <b>pic \u00e0 venir</b> — la semaine la plus charg\u00e9e parmi celles qui restent. Le pic de l\u2019exercice n\u2019est pas perdu\u00a0: il est \u00e9crit en bas de la carte, dat\u00e9, et marqu\u00e9 <b>d\u00e9j\u00e0 pass\u00e9</b>. L\u2019onglet <b>L\u2019ann\u00e9e</b>, lui, continue de le montrer en grand — c\u2019est son r\u00f4le." },
@@ -2153,6 +2161,7 @@ var MV_AIDE = {
       ['Tanins, enzymes et bentonite', "se posent sur une cuve comme les autres opérations, mais le produit se choisit dans La Réserve : c’est ce qui permet de sortir la quantité du stock toute seule. L’unité de dose suit le produit — g/hL pour ce qui se pèse, mL/hL pour ce qui se verse. Sans produit choisi, l’opération s’enregistre quand même, hors bilan matière, et l’écran le dit."],
       ['La quantité se calcule sur un volume, et ce volume dit d’où il vient', "tant que la cuve n’est pas décuvée, c’est sa <b>contenance</b> qui sert de repère, pas son contenu : la saisie affiche « volume estimé », et le registre imprime « (estimé) ». Corriger le volume à la main reste possible, et se voit."],
       ['Un stock négatif n’empêche jamais d’enregistrer', "le tanin est déjà dans la cuve : refuser la saisie parce qu’une facture manque ferait mentir le suivi pour protéger la comptabilité. L’écart part dans La Réserve, qui le nomme et le garde jusqu’à régularisation."],
+      ['Encore sur pied', "en haut de l\u2019écran Récoltes, les parcelles actives qui n\u2019ont aucune récolte saisie sur la campagne, la plus mûre en premier d\u2019après vos analyses. Une parcelle arrachée n\u2019y figure pas ; une parcelle sans surface renseignée, si. Toucher une ligne ouvre la nouvelle récolte avec la parcelle déjà choisie. Un nom de parcelle absent du parcellaire est signalé sous la carte : c\u2019est ce qui explique un compte qui semble faux."],
       ['Le millésime', "annonce ce qui vient dans les quatre prochaines semaines, puis retrace le parcours du vin, de la benne à la bouteille."],
       ['Votre rendement au pressoir', "se règle au Cuvier, onglet Réglages, en kilos de raisin par hectolitre. Tous les écrans qui transforment des raisins en volume s’en servent — la chaîne de la récolte à la bouteille comme le bilan de campagne."],
       ['Les analyses labo', "s’attachent en PDF à la cuvée. Les supprimer est réservé à l’administrateur."],
