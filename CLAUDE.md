@@ -13381,3 +13381,50 @@ intégrer** — redemander un rejeu.
 **compte de `catch(` inchangé** (cave 14 → 14) · `_vendHist` toujours présent · `v7.39` subsiste
 **exactement une fois** · `npm run check` et `npm run lint` **verts** · harnais **53/53** puis
 **5/5** en contre-épreuve · guide régénéré, `build-guide.mjs --check` vert.
+
+---
+
+## 83. ★★ LA GARDE DE BASE — SORTIR §82a DES BONNES INTENTIONS (06/09 — `scripts/` + `package.json`, AUCUN BUMP)
+
+§82a a coûté un lot effacé. La règle — *vérifier le distant avant d'intégrer* — était **déjà écrite
+deux fois** : dans CLAUDE.md §80f, et dans la note de livraison du lot lui-même.
+
+> ★★★ **UNE RÈGLE RAPPELÉE DEUX FOIS ET NON EXÉCUTÉE N'EST PAS UNE RÈGLE, C'EST UN VŒU.** Tant
+> qu'elle dépend de la vigilance de celui qui colle les fichiers, elle a déjà échoué une fois et
+> échouera encore. Il fallait la mettre dans **une commande qui rougit**.
+
+### 83a. Le mécanisme, en trois pièces
+
+1. **Chaque lot livré contient `.mv-base`** à la racine : le SHA du commit sur lequel il a été
+   construit, suivi d'un commentaire lisible (`ac6fbb4  # base : … APP 6.81 / SW 7.40`).
+2. **`scripts/mv-base.mjs`** exige que ce SHA soit le `HEAD` courant. Il passe **en tête** de
+   `check` et de `prebuild` : c'est le premier contrôle joué, avant même le preflight.
+3. **Rien à retenir côté intégration.** La séquence est : coller → `npm run check` → commiter.
+   Si la base ne correspond pas, `check` s'arrête sur un message qui dit quoi faire.
+
+### 83b. ★★ Il ne s'arme que quand `.mv-base` vient d'être collé
+
+Un contrôle qui comparerait toujours `.mv-base` au `HEAD` serait **rouge à jamais dès le premier
+commit** — le SHA de base devenant le parent du HEAD — et on finirait par le retirer.
+
+La condition d'armement est donc que **`.mv-base` lui-même apparaisse comme modifié ou non suivi**
+(`git status --porcelain -- .mv-base`). Présence d'un lot frais = contrôle armé ; commit =
+désarmement automatique.
+
+> ★★ **UN CONTRÔLE QU'ON DOIT DÉSACTIVER À LA MAIN EST UN CONTRÔLE QU'ON OUBLIE DE RÉACTIVER.**
+
+⚠️ Hors dépôt git, ou git illisible : le script **le dit** (`controle NON joue`) et laisse passer.
+Il ne prétend pas avoir vérifié — §82d, un repli qui ne se replie jamais ne protège rien.
+
+### 83c. Ce que la garde NE couvre pas
+
+Elle voit un lot posé sur le mauvais commit. Elle ne voit **pas** un lot dont on ne colle qu'une
+partie des fichiers. Ce filet-là existe déjà, et c'est lui qui a sauvé le 06/09 : **les harnais de
+`npm run check` réclament des fonctions par leur nom** (`mv-harnais-fusion` a hurlé sur
+`_vendHist`). D'où la séquence : la garde d'abord, les harnais juste après, **le commit en
+dernier**.
+
+**Contre-épreuves** : 5 dépôts fabriqués, 5 verdicts — bonne base, mauvaise base, déjà commité,
+pas de `.mv-base`, hors dépôt git. `node scripts/mv-base.mjs --contre`, **5/5**.
+
+**Base : `ac6fbb4`.**
