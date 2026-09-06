@@ -1,0 +1,66 @@
+rules_version = '2';
+service firebase.storage {
+  match /b/{bucket}/o {
+
+    // ════ Isolation inter-tenant par custom claims (durcissement juin 2026) ════
+    // Avant : tout utilisateur authentifié (hors démo) pouvait lire/supprimer les
+    // PDF d'analyses de N'IMPORTE QUEL tenant. Désormais l'accès est restreint au
+    // membre dont le claim `tenant` correspond au segment de chemin {tenant},
+    // ou à l'admin GUERETTECH. Aligné sur firestore.rules.
+    // ⚠️ Les claims doivent être posés (gtBackfillClaims) AVANT déploiement, sinon
+    //    l'upload d'analyses des membres existants est refusé.
+    //
+    // ════ SEC-4 (07/2026) — trois durcissements ════
+    //  1. isGtAdmin() exige email_verified sur la branche e-mail (aligné sur
+    //     firestore.rules, qui l'exige déjà en production sans incident).
+    //  2. Détection démo unifiée sur le CLAIM `demo` (posé par gtBackfillClaims), et
+    //     non plus sur une adresse e-mail codée en dur : le claim suit le compte, pas
+    //     son adresse. Filet supplémentaire : le compte démo n'a de toute façon pas de
+    //     claim `tenant` → isTenantMember() le refuse déjà.
+    //  3. delete réservé à l'administrateur du domaine (claim `adm`). Le commentaire
+    //     de la v précédente disait « rôle admin vérifié côté app » : cave.js/
+    //     deleteCaveAna a bien un `if(!isAdmin())return;` — la règle ne fait donc
+    //     qu'appliquer côté serveur ce que l'app impose déjà (zéro régression).
+    //
+    // ⚠️ Style d'accès aux claims : `request.auth.token.x` en accès DIRECT, sans .get().
+    // Contrairement à Firestore, les règles Storage tolèrent l'accès à un claim absent
+    // — c'est le comportement déjà en production dans ce fichier (les membres non-GT
+    // n'ont pas de claim gtAdmin et uploadent pourtant sans erreur). On ne change pas
+    // un pattern prouvé en prod pour un `.get()` non vérifiable ici.
+
+    function isDemoAccount() {
+      return request.auth != null && request.auth.token.demo == true;
+    }
+    function isGtAdmin() {
+      return request.auth != null
+             && (request.auth.token.gtAdmin == true
+                 || (request.auth.token.email == 'ngdevpro@gmail.com'
+                     && request.auth.token.email_verified == true));
+    }
+    // Membre du tenant ciblé : claim `tenant` == segment {tenant} du chemin.
+    function isTenantMember(tenant) {
+      return request.auth != null && request.auth.token.tenant == tenant;
+    }
+    // Administrateur du domaine ciblé (SEC-1 : claim `adm`, posé par le serveur).
+    function isTenantAdmin(tenant) {
+      return isTenantMember(tenant)
+             && request.auth.token.adm == true
+             && request.auth.token.ro != true;
+    }
+
+    // Analyses labo — par tenant : tenants/{slug}/analyses/{fichier}
+    match /tenants/{tenant}/analyses/{filename} {
+      // Lecture : membre du tenant (ou GT admin), jamais le compte démo.
+      allow read:   if !isDemoAccount() && (isTenantMember(tenant) || isGtAdmin());
+      // Création : idem + PDF uniquement + max 10 Mo. Les comptes en lecture seule
+      // (saisonnier, pilotage) n'ont rien à téléverser.
+      allow create: if !isDemoAccount()
+                    && request.auth.token.ro != true
+                    && (isTenantMember(tenant) || isGtAdmin())
+                    && request.resource.size <= 10 * 1024 * 1024
+                    && request.resource.contentType == 'application/pdf';
+      // Suppression : administrateur du domaine (ou GT admin) uniquement — SEC-4.
+      allow delete: if !isDemoAccount() && (isTenantAdmin(tenant) || isGtAdmin());
+    }
+  }
+}

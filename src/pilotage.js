@@ -1,0 +1,10472 @@
+// ════════════════════════════════════
+// MA VIGNE — pilotage.js
+// Écran de pilotage admin (ordinateur) : KPI, graphes natifs (barres + donut SVG),
+// panneaux, personnalisation par utilisateur. LECTURE SEULE des données
+// (via globals exposés par app.js). Aucune écriture en base.
+// Le thème (clair/sombre) suit l'app via les variables CSS (--texte, --or, …).
+// © 2026 Nicolas GUERET / GUERETTECH
+// ════════════════════════════════════
+
+// ⚠️ CE MODULE N'AVAIT AUCUN IMPORT : il lisait tout depuis `window`. Ca marche
+//   parce que l'ordre de chargement met utils.js en premier — et « un appel qui
+//   marche par ordre de chargement n'est pas un appel correct ». La palette
+//   semantique arrive par un VRAI import, resolu au build : elle ne peut plus
+//   etre absente au moment ou un graphe la lit.
+import { _PIL_SEM, _mvInfoBtn, _mvIcon, _mvIconTuile, _mvBadge, _escAttr } from './utils.js';
+
+const DEBUG = location.hostname === 'localhost' || location.hostname === '127.0.0.1';
+if (DEBUG) console.log('[Ma Vigne] pilotage.js chargé');
+
+// ── Helpers ──────────────────────────────────────────────
+function _pilEsc(s){ return String(s==null?'':s).replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;'); }
+function _pilNum(n){ return Math.round(Number(n)||0).toLocaleString('fr-FR'); }
+function _pilTnom(n){ return (typeof window.tNom==='function') ? window.tNom(n) : n; }
+// pctColor — dégradé terre → ambre → vert vigne (cohérent avec la carte parcelles)
+function _pilPctColor(p){ return p>=85?'#5B9B3A':p>=65?'#7FA83A':p>=45?'#D9A441':p>=25?'#C8853A':'#9A5A38'; }
+// ════════════════════════════════════════════════════════════════════════════
+// LA PALETTE SEMANTIQUE vit desormais dans utils.js (dette §34i soldee) : une
+// palette n'est pas la propriete d'un module. Chaque graphe tire ses couleurs
+// de _PIL_SEM, jamais d'un hex ecrit sur place. Elle est IMPORTEE en tete de
+// fichier, plus lue sur window : le build garantit sa presence.
+// ════════════════════════════════════════════════════════════════════════════
+// ── Une polyligne qui se COUPE sur un trou ─────────────────────────────────
+// pts = [{x0,x1,y,gap}] deja projetes. `gap:true` = pas de mesure ici.
+// Sans cette rupture, deux periodes separees par trois semaines vides sont
+// reliees par un segment droit : le trait AFFIRME un effectif sur une fenetre
+// ou personne n'a rien compte. Un trou n'est pas un zero, et ce n'est pas
+// davantage une interpolation.
+function _pilPolyBreak(pts){
+  var d='', ouvert=false, i;
+  for(i=0;i<pts.length;i++){
+    var q=pts[i];
+    if(q.gap){ ouvert=false; continue; }
+    d += (ouvert?' L':(d?' M':'M')) + q.x0.toFixed(1) + ' ' + q.y.toFixed(1)
+       + ' L' + q.x1.toFixed(1) + ' ' + q.y.toFixed(1);
+    ouvert=true;
+  }
+  return d;
+}
+var _PIL_PIE_COLORS = ['#7A1020','#C8853A','#5B2D8E','#5B9B3A','#C9A84C','#1A5276','#2E5220','#9A5A38','#B23A52','#3D6B27','#8A5A2E','#1A4A7A'];
+
+// ── État de personnalisation (localStorage par utilisateur) ──────────
+function _pilTenant(){ try{ return localStorage.getItem('mavigne_tenant')||'default'; }catch(e){ return 'default'; } }
+function _pilUserKey(){ var u=(window.currentUser&&window.currentUser.nom)||'anon'; return 'mavigne_pilote_'+_pilTenant()+'_'+u; }
+function _pilDomKey(){ return 'mavigne_pilote_dom_'+_pilTenant(); }
+// Refonte : navigation par onglets thématiques. La perso est désormais une visibilité
+// d'éléments PAR ONGLET (show), mémorisée par utilisateur. pie/bar/collapsed/sub pilotent
+// les comportements internes des panneaux réutilisés.
+// ★ VERSION DE L'ETAT MEMORISE CHEZ LE CLIENT.
+//   _pilSaveState ecrit l'etat COMPLET des qu'on touche une tuile, un onglet de
+//   graphe ou une case. Les deux domaines en service ont donc, depuis des mois, un
+//   `collapsed:{...tout a 0}` grave dans leur navigateur — et au chargement,
+//   ce qui est memorise gagne sur le defaut. Changer le defaut sans marqueur
+//   ne leur aurait STRICTEMENT RIEN fait : ils auraient installe la mise a jour
+//   et vu le meme ecran. C'est le piege deja vecu avec `avc_etp` / `an_frise`.
+//   A chaque fois qu'un defaut de disposition change, ce numero monte d'un cran
+//   et _pilMigrEtat repose la disposition neuve — UNE seule fois.
+var _PIL_ST_V = 3;
+var _PIL_DEFAULT = {
+  show: {
+    // Aujourd'hui (cockpit)
+    auj_marge:1, auj_charge:1, auj_cadence:1, auj_budget:1, auj_etp:1, auj_jours:1, auj_pres:1, auj_traiter:1, auj_prio:1, auj_alertes:1,
+    // Avancement
+    // L'annee (niveau ①)
+    // ⚠️⚠️ CES DEUX CLES MANQUAIENT AUX DEFAUTS. _pilNormalize ne garde que les
+    //   cles listees ici : `an_frise` et `an_cadres` etaient PURGEES a chaque
+    //   chargement, tandis qu'`avc_etp` — reste des defauts alors que l'indicateur
+    //   avait demenage — ressuscitait a 1, valeur que _pilMigrShow recopiait
+    //   aussitot dans `an_frise`. Une case decochee se recochait donc TOUTE SEULE a
+    //   la session suivante, et la migration du lot 3 rejouait indefiniment.
+    an_cadres:1, an_budget:1, an_frise:1,
+    // Avancement (`avc_etp` RETIRE : deplace vers `an_frise`, cf. _PIL_SHOW_MIGR)
+    avc_gauge:1, avc_bar:1, avc_pie:1, avc_temps:1, avc_echeances:1, avc_carte:1,
+    // Personnel
+    prs_equipe:1, prs_presences:1, prs_capacite:1,
+    // Matériel
+    mat_tracteur:1, mat_gnr:1,
+    // Simulation
+    sim_ordre:1, sim_etsi:1, sim_cout:1,
+    // Conformité (`mat_phyto` garde son NOM et change d'onglet — cf. _pilTabCfm)
+    cfm_cuivre:1, cfm_ift:1, cfm_dre:1, mat_phyto:1
+  },
+  pie:   'reste',
+  bar:   'saison',
+  // ★★★ LE DEFAUT S'INVERSE : LES CARTES ARRIVENT REPLIEES.
+  //   Avant, les dix-huit tuiles etaient ouvertes des l'arrivee. Or une tuile
+  //   ouverte prend TOUTE la ligne (.pil-tile.open{grid-column:1/-1}) : la
+  //   grille est reglee sur 2 a 4 colonnes et ne se remplissait JAMAIS. Sept
+  //   indicateurs, sept pleines largeurs empilees, ~4 500 px de defilement.
+  //   ⚠️ Replier NE CACHE AUCUN CHIFFRE : depuis ce lot le chiffre et sa ligne
+  //     de cadre vivent dans l'EN-TETE. On replie le detail, jamais le nombre.
+  collapsed:{echeances:1,carte:1,etp:1,anbudget:1,temps:1,equipe:1,tracteur:1,cave:1,presences:1,gnr:1,capacite:1,simulateur:1,phyto:1,cout:1,couteff:1,cuivre:1,ift:1,dre:1},
+  v: _PIL_ST_V,
+  sub:   {trac_revision:1,trac_controle:1,trac_repar:1,trac_intercep:1,cave_fml:1,cave_sout:1,cave_ouillage:1,pres_cp:1,pres_recup:1,pres_mal:1,etp_frise:1,etp_courbe:1,etp_ecart:1}
+};
+function _pilCloneDefault(){ return JSON.parse(JSON.stringify(_PIL_DEFAULT)); }
+function _pilNormalize(st){
+  if(!st || typeof st!=='object') return null;
+  var def=_pilCloneDefault();
+  function mergeObj(cur,d){ var o={}; Object.keys(d).forEach(function(k){ o[k]=(cur&&cur[k]!==undefined)?(cur[k]?1:0):d[k]; }); return o; }
+  // `v` traverse la normalisation : sans lui, _pilMigrEtat ne saurait jamais
+  // que la migration a deja eu lieu.
+  return { show:mergeObj(st.show,def.show), pie:st.pie||def.pie, bar:st.bar||def.bar, collapsed:mergeObj(st.collapsed,def.collapsed), sub:mergeObj(st.sub,def.sub), v:(st.v|0) };
+}
+function _pilShow(id){ var s=(_PIL_STATE&&_PIL_STATE.show)||{}; return s[id]!==0; }
+// Cles d'indicateurs deplacees d'un onglet a l'autre : le choix memorise suit.
+// Sans ca, « Charge & ETP » decoche dans Avancement laisserait le niveau
+// « L'annee » vide chez ce client, et la case pour le rallumer serait ailleurs.
+var _PIL_SHOW_MIGR = { avc_etp:'an_frise' };
+function _pilMigrShow(st){
+  if(!st||!st.show) return st;
+  for(var k in _PIL_SHOW_MIGR){
+    if(!Object.prototype.hasOwnProperty.call(_PIL_SHOW_MIGR,k)) continue;
+    if(st.show[k]!=null && st.show[_PIL_SHOW_MIGR[k]]==null) st.show[_PIL_SHOW_MIGR[k]]=st.show[k];
+    delete st.show[k];
+  }
+  return st;
+}
+// Les deux onglets composites portent un intertitre par moitie. Sans ce test,
+// masquer tous les indicateurs d'une moitie laisserait son titre orphelin.
+function _pilAnyShow(ids){ for(var i=0;i<ids.length;i++){ if(_pilShow(ids[i])) return true; } return false; }
+// ⚠️ ON NE REPOSE QUE LA DISPOSITION. `show` (les indicateurs choisis), `pie`,
+//   `bar` et `sub` sont des choix de CONTENU : ils survivent. Seul `collapsed`,
+//   dont la signification a change, repart du defaut.
+function _pilMigrEtat(st){
+  if(!st || typeof st!=='object') return st;
+  if((st.v|0) >= _PIL_ST_V) return st;
+  st.collapsed = _pilCloneDefault().collapsed;
+  st.v = _PIL_ST_V;
+  st._migre = true;                       // signal a _pilLoadState : a graver
+  return st;
+}
+function _pilLoadState(){
+  // ⚠️⚠️ L'ORDRE COMPTE : ON MIGRE AVANT DE NORMALISER.
+  //   _pilNormalize ne conserve que les cles connues des defauts. Place en premier,
+  //   il jetait `avc_etp` AVANT que _pilMigrShow ait pu en lire la valeur : le
+  //   choix du client etait perdu au lieu d'etre reporte sur le nouveau nom.
+  // ⚠️ La migration de disposition passe APRES _pilNormalize : celui-ci
+  //   reconstruit l'objet a partir des cles connues et emporterait `v` avec lui,
+  //   donc la migration se rejouerait a chaque chargement.
+  //   ★ On GRAVE tout de suite. Sans ca, tant que le client ne touche a rien,
+  //     rien n'est ecrit et la migration recommence a chaque ouverture — sans
+  //     consequence visible, mais c'est un travail qui ne se termine jamais.
+  try{ var raw=localStorage.getItem(_pilUserKey()); if(raw){ var n=_pilMigrEtat(_pilNormalize(_pilMigrShow(JSON.parse(raw)))); if(n){ if(n._migre){ delete n._migre; _pilSaveState(n); } return n; } } }catch(e){}
+  try{ var rawD=localStorage.getItem(_pilDomKey()); if(rawD){ var nd=_pilMigrEtat(_pilNormalize(_pilMigrShow(JSON.parse(rawD)))); if(nd){ if(nd._migre){ delete nd._migre; _pilSaveState(nd); } return nd; } } }catch(e){}
+  return _pilCloneDefault();
+}
+function _pilSaveState(st){ try{ localStorage.setItem(_pilUserKey(), JSON.stringify(st)); }catch(e){} }
+var _PIL_STATE = null;
+var _PIL_TAB = 'auj';
+var _PIL_CAVSUB = 'urg';
+// 5 onglets VISIBLES (regroupement : Personnel+Materiel -> Equipe ; Economie+Conformite -> Eco & conformite).
+// Les fonctions de rendu internes (_pilTabPrs/_pilTabMat/_pilTabEco/_pilTabCfm) restent inchangees.
+// La barre suit la progression d'une campagne : ou j'en suis -> ce qui vient ->
+// ce que je decide -> avec qui -> ce que ca coute. « Decider » etait enterre dans
+// le menu Outils au motif qu'il servait peu ; c'est la seule page ou l'on arbitre
+// quelque chose. « Archives » prend sa place dans les Outils : deux consultations
+// par an, contre un usage hebdomadaire en pleine campagne.
+// Libelles de barre COURTS (un mot), titres complets dans _PIL_LABELS.
+// L'ECONOMIE et la CONFORMITE partageaient un seul onglet. Deux metiers, deux
+// questions, deux rythmes : l'une se consulte le lundi matin, l'autre avant un
+// controle. Les melanger obligeait a masquer la moitie de l'ecran pour lire l'autre.
+// ════════════════════════════════════════════════════════════════════════════
+// LA BARRE EST UN AXE DE ZOOM, PLUS UNE LISTE DE SUJETS.
+// Sept onglets a plat, c'etaient sept SUJETS : on ne voyait donc jamais
+// l'annee, on tombait dans un sujet. L'ordre va desormais du large au fin —
+// l'annee, la campagne, les gens et les taches, la simulation — et les trois
+// derniers sont des ECRANS DE DETAIL, ou l'on arrive en cliquant une photo.
+// ⚠️ Les cles ne changent PAS (`avc`, `equ`, `sim`…) : elles sont memorisees
+//    chez les clients, citees par app.js et verifiees par C22. On renomme et
+//    on reordonne ; on ne renumerote rien en base.
+// ════════════════════════════════════════════════════════════════════════════
+var _PIL_TABS = [
+  ['auj','chrono','Aujourd\'hui'],
+  ['an', 'calendrier','L\'année'],
+  ['avc','raisin','La campagne'],
+  // ★★ « L'equipe & les taches » ne montrait AUCUNE tache : son contenu est
+  //   Personnel + Materiel. Les taches vivent au niveau ② (avancement par tache,
+  //   echeances) et dans Economie › Postes. Les descendre ici les DUPLIQUERAIT —
+  //   la faute que la refonte venait de corriger sur « Charge & ETP ». On corrige
+  //   donc le mot, pas la place : l'axe se lit « l'annee › la campagne et ses
+  //   taches › les gens et les machines › simuler ».
+  ['equ','equipe','L\'équipe & le matériel'],
+  // \u2605\u2605\u2605 \u00ab SIMULER \u00bb NOMMAIT MAL LE SEUL ONGLET QUI AGISSE.
+  //   Deux de ses trois cartes sont en lecture seule et le disent — \u00ab rien n'est
+  //   enregistre \u00bb. La troisieme, l'ordre de passage, ECRIT
+  //   CONFIG.ordre_passage_t, appelle saveData('config') et pilote l'ecran Vigne
+  //   de l'equipe. C'est la seule carte de tout le module qui touche une donnee
+  //   partagee — rangee sous un verbe qui promet qu'il ne se passe rien.
+  //   \u26a0\ufe0f RETOUR EN ARRIERE ASSUME : le lot 5 de \u00a734 avait declare \u00ab Decider \u00bb
+  //     mort. Il l'avait tue quand la barre etait une liste de SUJETS ; depuis,
+  //     c'est un axe de ZOOM, et un verbe d'action en bout d'axe se tient — on
+  //     descend du large au fin, puis on tranche.
+  //   \u26a0\ufe0f La cle reste `sim` : memorisee chez les clients, citee par app.js,
+  //     verifiee par C22. On renomme, on ne renumerote pas.
+  ['sim','curseurs','D\u00e9cider'],
+  ['cav','verre','Cave'],
+  ['eco','euro','Économie'],
+  ['cfm','alerte','Conformité']
+];
+// Ou s'arrete le zoom et ou commencent les ecrans de detail. La barre pose un
+// filet entre les deux : sans lui, « Cave » se lit comme un cinquieme niveau.
+var _PIL_ZOOM_FIN = 'sim';
+// Outils : accessibles par le bouton dedie, pas dans la barre.
+var _PIL_TOOLS = [['arc','carton','Archives'],['param','curseurs','Paramétrage']];
+// ★★ LA BARRE ET LE TITRE DISENT ENFIN LA MEME CHOSE. La refonte avait renomme
+// _PIL_TABS sans toucher a _PIL_LABELS : on cliquait « La campagne » et on
+// atterrissait sous « Avancement », « Simuler » sous « Decider » — le libelle que
+// le lot 5 declarait mort. Et `an` n'avait AUCUNE entree : le titre du niveau ①
+// sortait VIDE, la roue crantee flottant seule dans l'en-tete.
+// ⚠️ Les cles ne bougent pas ; seuls les mots changent.
+var _PIL_LABELS = {auj:'Aujourd\'hui',an:'L\'année — les douze mois, d\'un cadre à l\'autre',avc:'La campagne — avancement, temps et échéances',equ:'L\'équipe & le matériel',cav:'Cave',eco:'Économie — budget, rythme de dépense et prix de revient',cfm:'Conformité — cuivre, passages phyto et délai de rentrée',arc:'Archives des campagnes',sim:'Décider — ordre de passage, effectif et renfort',param:'Paramétrage'};
+var _PIL_VALID_TAB = {auj:1,an:1,avc:1,equ:1,cav:1,eco:1,cfm:1,arc:1,sim:1,param:1};
+// Migration des onglets memorises avant le regroupement.
+// Migration des cles memorisees : `ecf` (l'onglet composite) part sur l'economie.
+// `eco` et `cfm` etaient des cles historiques deja vues : elles redeviennent valides.
+var _PIL_TAB_MIGR = {prs:'equ',mat:'equ',ecf:'eco'};
+function _pilTabKey(){ return 'mavigne_pil_tab_'+_pilTenant(); }
+function _pilLoadTab(){ try{ var t=localStorage.getItem(_pilTabKey()); if(_PIL_TAB_MIGR[t]) t=_PIL_TAB_MIGR[t]; if(_PIL_VALID_TAB[t]) return t; }catch(e){} return 'auj'; }
+function _pilSaveTab(t){ try{ localStorage.setItem(_pilTabKey(), t); }catch(e){} }
+// ── LE seul chemin pour changer d'onglet. Le clic sur #pil-tabs le traverse,
+//   et un appelant exterieur aussi. Options :
+//     silencieux : ne remonte pas la page (rendre au visiteur l'onglet qu'il
+//                  avait avant une demo ne doit pas lui faire sauter l'ecran).
+//   Rend false quand rien n'a change — cle inconnue, ou onglet deja actif.
+function _pilSetTab(t, opts){
+  if(!t || !_PIL_VALID_TAB[t]){
+    if(window.logError) window.logError({level:'info',cat:'pilotage',msg:'_pilSetTab : cle inconnue '+t});
+    return false;
+  }
+  if(t===_PIL_TAB) return false;
+  _PIL_TAB=t; _pilSaveTab(t); renderPilotage();
+  if(!(opts&&opts.silencieux)){ try{ window.scrollTo({top:0,behavior:'smooth'}); }catch(e){} }
+  return true;
+}
+function _pilCavKey(){ return 'mavigne_pil_cav_'+_pilTenant(); }
+// Cles refondues (urg/mil/parc). Les anciennes (elv/vin/ven) sont MIGREES
+// plutot que rejetees : sans table, l'utilisateur retombait sans explication
+// sur le premier onglet. Meme principe que _PIL_TAB_MIGR.
+var _PIL_CAV_MIGR = {elv:'urg', vin:'urg', ven:'mil'};
+function _pilLoadCav(){ try{ var t=localStorage.getItem(_pilCavKey());
+  if(_PIL_CAV_MIGR[t]) t=_PIL_CAV_MIGR[t];
+  if(t==='urg'||t==='mil'||t==='parc') return t; }catch(e){} return 'urg'; }
+function _pilSaveCav(t){ try{ localStorage.setItem(_pilCavKey(), t); }catch(e){} }
+function _pilTabLabel(tab){ return _PIL_LABELS[tab]||''; }
+var _PIL_TASK_COL={reparation:'#8A5A38',pliage:'#C8B020',entreplantation:'#7A1020',plantation:'#7A1020',relevage:'#3D6B27',palissage:'#B89A4A',ebourgeonnage:'#5C8A3E',accolage:'#C2871E',pioche:'#A9744B'};
+function _taskColor(nom){ return _PIL_TASK_COL[_friseNorm(nom)]||'#8A5A38'; }
+
+// ── Icônes SVG trait fin (remplaçant les emojis des en-têtes) ──
+// ⚠️ DEUX TABLES POUR UNE SEULE IDEE, C'ETAIT UNE DE TROP. `_PIL_TILE_ICO`
+//   donnait une cle de `_PIL_IC`, qui donnait un nom du sprite : deux sauts
+//   pour rien. Et surtout, une table dont les VALEURS ne sont pas des noms
+//   d'icones est indistinguable, pour un controle automatique, d'une table
+//   dont elles le sont. Une seule table desormais, toutes valeurs = sprite.
+var _PIL_TILE_ICO={couteff:'balance',carte:'carte',temps:'balance',equipe:'equipe',
+  tracteur:'tracteur',cave:'verre',presences:'equipe',phyto:'feuille',echeances:'calendrier',
+  etp:'balance',capacite:'balance',simulateur:'curseurs',ordrepassage:'cible',gnr:'carburant',
+  traitement:'pulverisateur',meteo:'nuage',vinif:'fiole',cout:'balance',cuivre:'fiole',
+  ift:'pulverisateur',dre:'goutte'};
+function _pilIco(n){ return _mvIcon(n,16); }
+function _pilIcoFor(id){ return _pilIco(_PIL_TILE_ICO[id]||'graphique'); }
+function _pilHa(v){ return (Number(v)||0).toLocaleString('fr-FR',{minimumFractionDigits:0,maximumFractionDigits:2}).replace(/\u202f/g,' '); }
+
+// ── EFFECTIF : qui compte, et a quelle date ──────────────────────────
+// ⚠⚠ Ce module ne connaissait PAS la notion de contrat : `fin_contrat` n'y
+// apparaissait nulle part. Il ne filtrait que sur statut !== 'Inactif', or ce
+// statut se met a la main. Un saisonnier dont le CDD s'est termine restait donc
+// compte partout : carte Equipe, presences du jour, effectif au champ, cadence de
+// secours (7 h x nV), date de fin de saison, simulateur de journee, taux horaire
+// moyen. Seul cd.weeks[].head etait juste — il vient de planning.js, qui teste le
+// contrat jour par jour. DEUX definitions de « combien on est » dans le meme
+// module, c'est la garantie que deux ecrans se contredisent.
+// La regle vit desormais dans utils.js (window._mvEnContratLe), une seule fois.
+
+// Date de reference des effectifs = aujourd'hui si aujourd'hui tombe dans la
+// periode CONSULTEE, sinon une date interieure a cette periode. Consulter une
+// archive doit montrer l'equipe de l'epoque, pas celle d'aujourd'hui.
+function _pilRefDate(){
+  var t=new Date();
+  var ds=t.getFullYear()+'-'+String(t.getMonth()+1).padStart(2,'0')+'-'+String(t.getDate()).padStart(2,'0');
+  var s=(typeof window._pilSaison==='function')?window._pilSaison():null;
+  if(!s || !s.debut || !s.fin) return ds;
+  if(ds>=s.debut && ds<=s.fin) return ds;
+  return (ds>s.fin) ? s.fin : s.debut;
+}
+// Membres qui comptent dans l'effectif a la date ds : actifs ET sous contrat.
+// ARBITRAGE ASSUME (03/08/2026) — les EQUIPES COLLECTIVES ne sont PAS depliees ici.
+// Cette liste alimente la cadence de secours (7 h x nV), le simulateur d'ordre de
+// passage et le pool du simulateur de journee : trois ecrans qui raisonnent sur les
+// TRAVAUX DE LA VIGNE, faits par l'equipe permanente. Y injecter 30 vendangeurs
+// ferait passer « equipe au complet » de 2 a 32 pendant la fenetre de vendange et
+// rendrait ces simulateurs illisibles douze jours par an, pour un gain nul : on ne
+// planifie pas un relevage avec des vendangeurs.
+// Le poids joue la ou il y a une MESURE reelle : cout par parcelle
+// (_ecoEquipeByParc), effectif present hebdomadaire (cd.weeks[].head) et carte
+// Equipe. Le socle permanent reste lisible via cd.weeks[].headPerm.
+function _pilMembresActifs(ds){
+  var d=ds||_pilRefDate();
+  return (window.MEMBRES||[]).filter(function(m){
+    return m && m.statut!=='Inactif' && window._mvEnContratLe(m,d);
+  });
+}
+// Fiches restees « Actives » alors que le contrat est echu : ce sont elles qui
+// gonflaient les compteurs. On les affiche en clair plutot que de laisser un
+// effectif baisser sans explication.
+function _pilMbrFinis(ds){
+  var d=ds||_pilRefDate();
+  return (window.MEMBRES||[]).filter(function(m){
+    return m && m.statut!=='Inactif' && window._mvContratFini(m,d);
+  });
+}
+
+// ── Agrégation des données (lecture seule) ───────────────────────────
+function _pilData(){
+  var ch = (typeof window.calcHeures==='function') ? window.calcHeures() : { data:[], totalReste:0, totalTotal:0 };
+  var data = (ch && ch.data) || [];
+  var totalReste = Math.round((ch&&ch.totalReste)||0);
+  var totalTotal = Math.round((ch&&ch.totalTotal)||0);
+  var hDone = Math.max(0, totalTotal - totalReste);
+  var gaugePct = totalTotal>0 ? Math.round(hDone/totalTotal*100) : 100;
+
+  var active = data.filter(function(t){ return (t.pct||0) < 100; });
+  var done   = data.filter(function(t){ return (t.pct||0) >= 100; });
+
+  var saison = (typeof window._pilSaison==='function' && window._pilSaison()) ? (window._pilSaison().nom||'—') : '—';
+  var surfTot = (typeof window._recalcSurfTotale==='function') ? (Number(window._recalcSurfTotale())||0) : ((typeof window.SURF_TOTALE!=='undefined') ? (Number(window.SURF_TOTALE)||0) : 0);
+  var parc = (window.PARCELLES||[]);
+  var nActives = parc.filter(function(p){ return p && p.statut!=='Arrachee'; }).length;
+  // Effectif a la date de reference : actifs ET sous contrat (cf. bloc EFFECTIF ci-dessus).
+  var _refDs  = _pilRefDate();
+  var membres = _pilMembresActifs(_refDs);
+  var nFinis  = _pilMbrFinis(_refDs).length;
+
+  // Tâche prioritaire : tâche en cours avec le plus d'heures restantes
+  var prio=null;
+  active.forEach(function(t){ if(!prio || (t.h_reste||0) > (prio.h_reste||0)) prio=t; });
+
+  // Sessions tracteur : la plus récente + avancement (surface faite / surface totale)
+  var sessions = (window.SESSIONS||[]).slice().filter(window._sessInSaison||function(){return true;});
+  sessions.sort(function(a,b){ return String((b&&b.date)||'').localeCompare(String((a&&a.date)||'')); });
+  var lastSess = sessions[0]||null;
+  var sessAdv = 0, sessDone=0;
+  if(lastSess && lastSess.parcellesFaites){
+    (lastSess.parcellesFaites||[]).forEach(function(x){
+      var nom = typeof x==='string' ? x : (x&&x.nom);
+      var p = parc.find(function(pp){ return pp && pp.nom===nom; });
+      if(p) sessDone += (p.surface||0);
+    });
+    sessAdv = surfTot>0 ? Math.round(sessDone/surfTot*100) : 0;
+  }
+
+  // Cave — cuvées en élevage
+  var cuvees = (window.CAVE_ELEVAGE && window.CAVE_ELEVAGE.cuvees) || [];
+
+  // Phyto — interventions enregistrées (registre réglementaire)
+  var traits = (window.TRAITEMENTS||[]).slice();
+  traits.sort(function(a,b){ return String((b&&b.date)||'').localeCompare(String((a&&a.date)||'')); });
+
+  var meteo = window.meteoData || null;
+  // ── Tracteurs enrichis : révision, dernier contrôle, réparation, session en cours ──
+  var REP = window.REPARATEUR || {};
+  var ENTS = window.ENTRETIENS || [];
+  var tracs = (window.TRACTEURS_LIST || []).map(function(t){
+    var rep = REP[t.id] || null;
+    var ents = ENTS.filter(function(f){ return f && f.tracteurId===t.id; }).sort(function(a,b){ return String((b&&b.date)||'').localeCompare(String((a&&a.date)||'')); });
+    var lastCtrl = ents[0] ? ents[0].date : null;
+    var ts = sessions.filter(function(s){ return s && s.tracteurId===t.id; });
+    var sess=null, sAdv=0;
+    if(ts[0]){
+      var sd=0;
+      (ts[0].parcellesFaites||[]).forEach(function(x){ var nm=typeof x==='string'?x:(x&&x.nom); var p=parc.find(function(pp){ return pp&&pp.nom===nm; }); if(p) sd+=(p.surface||0); });
+      sAdv = surfTot>0 ? Math.round(sd/surfTot*100) : 0; sess=ts[0];
+    }
+    var hasComp = (t.compteur_h!=null && t.compteur_h!=='' && t.revision_h!=null && t.revision_h!=='');
+    var revReste = hasComp ? (Number(t.revision_h)-Number(t.compteur_h)) : null;
+    return { id:t.id, nom:t.nom, traitementOnly:t.traitementOnly, rep:rep, lastCtrl:lastCtrl, sess:sess, sAdv:sAdv, revReste:revReste };
+  });
+  var nRepar = tracs.filter(function(t){ return t.rep; }).length;
+
+  // ── Cuve GNR (lecture seule depuis CONFIG) + seuil d'alerte ouillage ──
+  var gnr = (window.CONFIG && window.CONFIG.gnr) || null;
+  var ouAlerte = (window.CAVE_ELEVAGE && window.CAVE_ELEVAGE.config && window.CAVE_ELEVAGE.config.ouillage_alerte_j) || 14;
+
+  // ── Présences du jour (CP / maladie / absence / récup) ──
+  var _now=new Date(), _yNum=_now.getFullYear(), _mIdx=_now.getMonth(), _dNum=_now.getDate();
+  var PE = window.PLANNING_ENTRIES || {};
+  var presences = membres.map(function(m){
+    var _by = (PE[m.nom] && PE[m.nom][_yNum]) || null;
+    var e = (_by && _by[_mIdx] && _by[_mIdx][_dNum]) || null;
+    var etat='present', motif='';
+    if(e){
+      if(e.type==='cp') etat='cp';
+      else if(e.type==='recup') etat='recup';
+      else if(e.absent){ motif=e.comment||''; etat=/malad/i.test(motif)?'maladie':'absent'; }
+    }
+    // \u2605\u2605\u2605 LE POIDS DE LA FICHE VOYAGE AVEC ELLE.
+    //   Une equipe COLLECTIVE (m.collectif, m.effectif = 26) est UNE fiche et
+    //   VINGT-SIX personnes. _headWeek et capEquipe le savent depuis le 11/08
+    //   (\u00a733), le simulateur de renfort depuis le 12/08 (\u00a735) — pas ces
+    //   presences-la. Sans ce poids, l'onglet D\u00e9cider propose de repartir
+    //   \u00ab 2 personnes \u00bb entre les taches un jour ou 28 sont sous contrat.
+    return { nom:m.nom, etat:etat, motif:motif, bureau:!!m.bureau,
+             eff:((typeof window._mvEffDef==='function')?window._mvEffDef(m):1),
+             coll:!!(typeof window._mvEstCollectif==='function'&&window._mvEstCollectif(m)) };
+  });
+  var nPresent = presences.filter(function(p){ return p.etat==='present'; }).length;
+  var nCp = presences.filter(function(p){ return p.etat==='cp'; }).length;
+  var nAbs = presences.filter(function(p){ return p.etat==='maladie'||p.etat==='absent'; }).length;
+  var nRecup = presences.filter(function(p){ return p.etat==='recup'; }).length;
+  // Effectif au champ aujourd'hui. DEUX nombres, volontairement distincts :
+  //   presentFiches = combien de FICHES sont la (\u00ab 3 pr\u00e9sents sur 4 \u00bb) ;
+  //   presentChamp  = combien de PERSONNES, equipes collectives a leur effectif.
+  // Les deux sont deja bornes aux gens SOUS CONTRAT ce jour-la : `membres` vient
+  // de _pilMembresActifs, qui filtre sur _mvEnContratLe. Confondre les deux, c'est
+  // soit annoncer \u00ab 28 pr\u00e9sents sur 4 \u00bb, soit repartir une equipe de 26 comme
+  // une seule paire de bras.
+  var nVchamp = presences.filter(function(p){ return !p.bureau; }).length;
+  var nIndispoChamp = presences.filter(function(p){ return !p.bureau && p.etat!=='present'; }).length;
+  var presentFiches = Math.max(0, nVchamp - nIndispoChamp);
+  var presentChamp = presences.reduce(function(a,p){
+    return a + ((!p.bureau && p.etat==='present') ? (p.eff||1) : 0);
+  },0);
+
+  var domaine = window.DOMAINE_NOM || 'Domaine';
+
+  return { data:data, active:active, done:done, totalReste:totalReste, totalTotal:totalTotal, hDone:hDone, gaugePct:gaugePct,
+           saison:saison, surfTot:surfTot, nActives:nActives, membres:membres, refDate:_refDs, nFinis:nFinis, prio:prio,
+           sessions:sessions, lastSess:lastSess, sessAdv:sessAdv, cuvees:cuvees, traits:traits, meteo:meteo, domaine:domaine,
+           tracs:tracs, nRepar:nRepar, gnr:gnr, ouAlerte:ouAlerte, presences:presences, nPresent:nPresent, nCp:nCp, nAbs:nAbs, nRecup:nRecup, nVchamp:nVchamp, presentChamp:presentChamp, presentFiches:presentFiches, nIndispoChamp:nIndispoChamp };
+}
+
+
+// ── Données du donut selon la métrique choisie ───────────────────────
+function _pilPieData(d){
+  var src=[], title='', unit='h';
+  if(_PIL_STATE.pie==='fait'){      title='Temps réalisé';     src=d.data.map(function(t){return {n:t.nom,v:Math.round(t.h_done||0)};}); }
+  else if(_PIL_STATE.pie==='plan'){ title='Charge planifiée';  src=d.data.map(function(t){return {n:t.nom,v:Math.round(t.h_total||0)};}); }
+  else {                            title='Charge restante';   src=d.data.map(function(t){return {n:t.nom,v:Math.round(t.h_reste||0)};}); }
+  src = src.filter(function(x){ return x.v>0; }).sort(function(a,b){ return b.v-a.v; });
+  src.forEach(function(x,i){ x.c=_PIL_PIE_COLORS[i%_PIL_PIE_COLORS.length]; });
+  return { title:title, unit:unit, items:src };
+}
+
+// ── Donut SVG ────────────────────────────────────────────────────────
+function _pilDonutSVG(items){
+  var tot = items.reduce(function(a,b){return a+b.v;},0);
+  if(tot<=0) return '<div class="pil-empty">Aucune donnée</div>';
+  var cx=92, cy=92, r=80, ri=57, ang=-Math.PI/2, paths='';
+  if(items.length===1){
+    // un seul segment : anneau complet (2 demi-arcs)
+    var c=items[0].c;
+    paths = '<circle cx="'+cx+'" cy="'+cy+'" r="'+((r+ri)/2)+'" fill="none" stroke="'+c+'" stroke-width="'+(r-ri)+'" class="pil-slice-ring"></circle>';
+  } else {
+    items.forEach(function(it){
+      var frac=it.v/tot, a2=ang+frac*Math.PI*2, large=frac>0.5?1:0;
+      var x1=cx+r*Math.cos(ang), y1=cy+r*Math.sin(ang);
+      var x2=cx+r*Math.cos(a2),  y2=cy+r*Math.sin(a2);
+      var xi2=cx+ri*Math.cos(a2),yi2=cy+ri*Math.sin(a2);
+      var xi1=cx+ri*Math.cos(ang),yi1=cy+ri*Math.sin(ang);
+      var dd='M'+x1.toFixed(2)+' '+y1.toFixed(2)+' A'+r+' '+r+' 0 '+large+' 1 '+x2.toFixed(2)+' '+y2.toFixed(2)
+           +' L'+xi2.toFixed(2)+' '+yi2.toFixed(2)+' A'+ri+' '+ri+' 0 '+large+' 0 '+xi1.toFixed(2)+' '+yi1.toFixed(2)+' Z';
+      paths += '<path d="'+dd+'" fill="'+it.c+'" class="pil-slice"></path>';
+      ang=a2;
+    });
+  }
+  return '<svg viewBox="0 0 184 184" class="pil-donut-svg" role="img" aria-label="Répartition">'
+       + paths
+       + '<text x="92" y="86" text-anchor="middle" class="pil-donut-c1">'+_pilNum(tot)+'</text>'
+       + '<text x="92" y="104" text-anchor="middle" class="pil-donut-c2">heures</text>'
+       + '</svg>';
+}
+
+function _pilRenderGauge(d){
+  var g=document.getElementById('pil-gauge'); if(!g) return;
+  g.innerHTML =
+    '<div class="pil-gauge-top">'
+    + '<div><div class="pil-gauge-lab">Avancement de la saison</div><div class="pil-gm" style="margin-top:5px">'+_pilEsc(d.saison)+' · '+d.data.length+' tâches</div></div>'
+    + '<div class="pil-gauge-pct">'+d.gaugePct+'<small>%</small></div>'
+    + '</div>'
+    + '<div class="pil-gauge-track"><div class="pil-gauge-fill" style="width:'+d.gaugePct+'%"></div></div>'
+    + '<div class="pil-gauge-meta">'
+    + '<span class="pil-gm"><b class="done">'+_pilNum(d.hDone)+' h</b> réalisées</span>'
+    + '<span class="pil-gm"><b>'+_pilNum(d.totalReste)+' h</b> restantes</span>'
+    + '<span class="pil-gm"><b>'+_pilNum(d.totalTotal)+' h</b> planifiées</span>'
+    + '<span class="pil-gm"><b class="done">'+d.done.length+'</b> terminées · <b>'+d.active.length+'</b> en cours</span>'
+    + '</div>';
+}
+function _pilRenderBar(d){
+  var host=document.getElementById('pil-bar'); if(!host) return;
+  var mode=_PIL_STATE.bar||'saison';
+  var seg=document.getElementById('pil-bar-seg');
+  if(seg) seg.querySelectorAll('button').forEach(function(b){ b.classList.toggle('on', b.getAttribute('data-b')===mode); });
+  if(mode==='cmp'){ host.innerHTML=_pilCmpHtml(d); return; }
+  var rows = d.data.slice().sort(function(a,b){ return (b.pct||0)-(a.pct||0); });
+  if(!rows.length){ host.innerHTML='<div class="pil-empty">Aucune tâche pour la saison active</div>'; return; }
+  host.innerHTML = rows.map(function(t){
+    var col=_pilPctColor(t.pct||0);
+    return '<div class="pil-brow">'
+      + '<div class="pil-blab">'+_pilEsc(_pilTnom(t.nom))+'</div>'
+      + '<div class="pil-btrack"><div class="pil-bfill" style="width:'+Math.min(t.pct||0,100)+'%;background:'+col+'"></div></div>'
+      + '<div class="pil-bpct" style="color:'+col+'">'+(t.pct||0)+'%</div>'
+      + '<div class="pil-bh">'+_pilNum(t.h_done)+'/'+_pilNum(t.h_total)+' h</div>'
+      + '</div>';
+  }).join('');
+}
+function _pilSaison(){
+  var v=(typeof window._visuSaison==='function')?window._visuSaison():'';
+  if(v && window.SAISONS){ var f=window.SAISONS.find(function(s){return s&&s.nom===v;}); if(f) return f; }
+  return (typeof window.getSaisonActive==='function')?window.getSaisonActive():null;
+}
+window._pilSaison=_pilSaison;
+function _pilCmpActiveNom(){ var sa=(typeof window.getSaisonActive==='function')?window.getSaisonActive():null; return sa?(sa.nom||'Saison active'):'Saison active'; }
+// Retrouve la periode (avec ses dates) derriere un nom archive. HISTORIQUE ne stocke que le nom
+// et une periode en toutes lettres ; les dates vivent dans SAISONS, qui conserve les periodes.
+function _pilCmpPeriode(nom){
+  return (window.SAISONS||[]).find(function(s){ return s&&s.nom===nom; })||null;
+}
+// Position d'une periode sur l'axe campagne : sa campagne, et son rang en jours depuis le 1er aout.
+function _pilCmpOffset(deb){
+  var an=_arcCampagneDe(deb);
+  return {an:an, off:_arcN(deb)-_arcN(an+'-08-01')};
+}
+// Ecart maximal tolere entre deux periodes homologues d'une campagne a l'autre. 75 jours laissent
+// passer un printemps ouvert le 1er mars une annee et le 5 avril la suivante, sans jamais confondre
+// un printemps avec un hiver (151 jours d'ecart sur l'axe).
+var _PIL_CMP_TOL = 75;
+// \u2605\u2605\u2605 LA TOLERANCE SEULE NE SUFFIT PAS (15/08/2026). Elle a ete calibree sur UNE
+// paire — printemps/hiver, 151 jours — et jamais verifiee sur les autres. Or la
+// campagne s'ouvre le 1er aout : une periode de vendange demarrant ce jour-la est
+// a l'offset 0, et un hiver ouvert le 1er octobre est a 61. 61 < 75 : le code
+// appariait donc UN HIVER A UNE VENDANGE, en silence, chez le domaine de reference.
+// Le ratio qui en sortait (x2,93) a fait afficher « -202 j de retard » a un domaine
+// qui avait un jour d'avance.
+// Deux periodes homologues SE RECOUVRENT sur l'axe. C'est le critere, pas la
+// distance entre leurs debuts. On garde la tolerance en premier filtre (elle ecarte
+// vite), le recouvrement tranche.
+var _PIL_CMP_RECOUV = 0.50;
+// Part minimale de la periode la plus courte qui doit tomber dans l'autre.
+function _pilCmpSegment(p){
+  if(!p||!p.debut||!p.fin) return null;
+  var o=_pilCmpOffset(p.debut), dur=_arcN(p.fin)-_arcN(p.debut);
+  if(!(dur>0)) return null;
+  return [o.off, o.off+dur];
+}
+function _pilCmpRecouvre(a,b){
+  var sa=_pilCmpSegment(a), sb=_pilCmpSegment(b);
+  if(!sa||!sb) return 1;            // dates manquantes : on ne bloque pas, le repli par nom tranchera
+  var inter=Math.max(0, Math.min(sa[1],sb[1])-Math.max(sa[0],sb[0]));
+  var court=Math.min(sa[1]-sa[0], sb[1]-sb[0]);
+  return court>0 ? (inter/court) : 0;
+}
+// \u26a0 UN INSTANTANE INCOMPLET N'EST PAS UNE REFERENCE. « Hiver 2025-2026 » a ete
+// archive a 32 % : son hFaites (787 h) ne couvre pas la periode, il couvre le tiers
+// qui a ete valide. Tout rapport bati dessus mesure un trou de saisie, pas une
+// cadence — c'est exactement ce que le commentaire de la borne annoncait, et la
+// borne [0,5 ; 3] l'a laisse passer a 0,07 pres.
+var _PIL_CMP_ACHEVE = 0.80;
+function _pilCmpAcheve(h){
+  var ts=(h&&h.stats&&h.stats.tachesStats)||[];
+  var hT=0,hD=0;
+  ts.forEach(function(t){ hT+=(t.h_total||0); hD+=(t.h_done||0); });
+  return hT>0 ? (hD/hT) : 0;
+}
+// Appariement de la saison active avec son homologue de la campagne precedente. L'ancienne version
+// lisait l'annee DANS LE NOM (regex \d{4} + radical) : un vestige du modele "saison par type", mort
+// depuis que les periodes portent un nom libre. Un domaine qui nomme ses periodes "Saison verte" ou
+// "Campagne" n'avait plus aucune comparaison, en silence. On apparie desormais par POSITION SUR
+// L'AXE CAMPAGNE (1er aout -> 31 juillet), la meme convention que l'onglet Archives : elle ne
+// depend d'aucune facon de nommer. Repli sur le nom quand les dates manquent (archives anciennes
+// dont la periode a ete supprimee de SAISONS).
+// Pas de distance circulaire : une periode de fin juillet et une de debut aout sont aux deux bouts
+// de l'axe et se suivent dans le calendrier — ce ne sont pas des homologues.
+function _pilCmpSnapshot(){
+  var H=window.HISTORIQUE||[]; if(!H.length) return null;
+  var sa=(typeof window.getSaisonActive==='function')?window.getSaisonActive():null; if(!sa) return null;
+  if(sa.debut){
+    var ref=_pilCmpOffset(sa.debut), bestP=null, bestAn=-1, bestEc=0;
+    H.forEach(function(h){
+      var pe=_pilCmpPeriode(h&&h.saisonNom); if(!pe||!pe.debut) return;
+      var o=_pilCmpOffset(pe.debut);
+      if(o.an>=ref.an) return;
+      var ec=Math.abs(o.off-ref.off);
+      if(ec>_PIL_CMP_TOL) return;
+      if(_pilCmpRecouvre(sa,pe)<_PIL_CMP_RECOUV) return;
+      if(_pilCmpAcheve(h)<_PIL_CMP_ACHEVE) return;
+      if(o.an>bestAn||(o.an===bestAn&&ec<bestEc)){ bestAn=o.an; bestEc=ec; bestP=h; }
+    });
+    if(bestP) return bestP;
+  }
+  var nom=String(sa.nom||'');
+  var base=nom.replace(/\s*\d{4}.*$/,'').trim();
+  var ym=nom.match(/\d{4}/); var year=ym?parseInt(ym[0],10):null;
+  var best=null, bestY=-1;
+  H.forEach(function(h){
+    var hn=String(h.saisonNom||''); var hb=hn.replace(/\s*\d{4}.*$/,'').trim();
+    var hy=hn.match(/\d{4}/); hy=hy?parseInt(hy[0],10):null;
+    if(hb && base && hb.toLowerCase()===base.toLowerCase() && hy!=null && (year==null||hy<year) && hy>bestY){ bestY=hy; best=h; }
+  });
+  return best;
+}
+function _pilCmpHtml(d){
+  var snap=_pilCmpSnapshot();
+  if(!snap){ return '<div class="pil-empty">Aucune saison comparable archivée. L\'historique s\'enrichit à chaque campagne clôturée (Pilotage › Archives).</div>'; }
+  var prevByName={}; ((snap.stats&&snap.stats.tachesStats)||[]).forEach(function(t){ prevByName[t.nom]=t; });
+  var rows=(d.data||[]).slice().sort(function(a,b){ return (b.pct||0)-(a.pct||0); });
+  if(!rows.length){ return '<div class="pil-empty">Aucune tâche pour la saison active</div>'; }
+  function rail(cls,pct,na){ return '<div class="pil-cmp-track"><span class="pil-cmp-rail">'+(na?'':'<i class="'+cls+'" style="width:'+Math.min(pct,100)+'%"></i>')+'</span><span class="pil-cmp-val"'+(na?' style="opacity:.5"':'')+'>'+(na?'n/a':(pct+' %'))+'</span></div>'; }
+  var body=rows.map(function(t){
+    var cur=t.pct||0, pv=prevByName[t.nom], prev=pv?(pv.pct||0):null, dHtml='';
+    if(prev!=null){ var dl=cur-prev; var dcol=dl>0?'var(--vert-med)':(dl<0?'var(--rouge)':'var(--texte-doux)'); dHtml=' <span class="d" style="color:'+dcol+'">'+(dl>0?('▲ +'+dl):(dl<0?('▼ '+dl):'='))+'</span>'; }
+    return '<div class="pil-cmp-row"><div class="pil-cmp-name">'+_pilEsc(_pilTnom(t.nom))+dHtml+'</div><div class="pil-cmp-bars">'+rail('pil-cmp-cur',cur,false)+rail('pil-cmp-prev',prev==null?0:prev,prev==null)+'</div></div>';
+  }).join('');
+  return body+'<div class="pil-cmp-leg"><span><i class="pil-cmp-cur"></i> '+_pilEsc(_pilCmpActiveNom())+'</span><span><i class="pil-cmp-prev"></i> '+_pilEsc(snap.saisonNom||'Saison précédente')+'</span></div>';
+}
+function _pilRenderPie(d){
+  var pd=_pilPieData(d);
+  var tEl=document.getElementById('pil-pie-title'); if(tEl) tEl.textContent=pd.title;
+  // segment actif
+  document.querySelectorAll('#pil-pie-seg button').forEach(function(b){ b.classList.toggle('on', b.getAttribute('data-m')===_PIL_STATE.pie); });
+  var svgEl=document.getElementById('pil-donut'); if(svgEl) svgEl.innerHTML=_pilDonutSVG(pd.items);
+  var tot=pd.items.reduce(function(a,b){return a+b.v;},0)||1;
+  var legEl=document.getElementById('pil-pie-legend');
+  if(legEl){
+    legEl.innerHTML = pd.items.map(function(it){
+      return '<div class="pil-leg"><span class="pil-leg-dot" style="background:'+it.c+'"></span>'
+        + '<span class="pil-leg-n">'+_pilEsc(_pilTnom(it.n))+'</span>'
+        + '<span class="pil-leg-v">'+_pilNum(it.v)+' '+pd.unit+'</span>'
+        + '<span class="pil-leg-p">'+Math.round(it.v/tot*100)+' %</span></div>';
+    }).join('') || '<div class="pil-empty">—</div>';
+  }
+}
+function _pilChip(txt,color){ return '<span style="display:inline-block;font-size:var(--pt-lbl,10.5px);font-weight:600;border:1px solid '+color+';color:'+color+';border-radius:10px;padding:2px 8px;margin:4px 4px 0 0">'+txt+'</span>'; }
+function _pilDfr(s){ if(!s) return '—'; var p=String(s).split('-'); if(p.length<3) return String(s); var M=['janv.','févr.','mars','avr.','mai','juin','juil.','août','sept.','oct.','nov.','déc.']; return parseInt(p[2],10)+' '+(M[parseInt(p[1],10)-1]||''); }
+function _pilDaysSince(s){ if(!s) return 0; var t=new Date(s).getTime(); if(isNaN(t)) return 0; return Math.floor((Date.now()-t)/86400000); }
+function _pilLi(av,bg,t,s,r,fg){
+  return '<div class="pil-li"><span class="pil-av" style="background:'+bg+(fg?';color:'+fg:'')+'">'+_pilEsc(av)+'</span>'
+    + '<div class="pil-li-main"><div class="pil-li-t">'+_pilEsc(t)+'</div>'+(s?'<div class="pil-li-s">'+_pilEsc(s)+'</div>':'')+'</div>'
+    + (r!=null?'<div class="pil-li-r">'+r+'</div>':'')+'</div>';
+}
+var _pilMap=null;
+var _pilNamesOn=true;
+var _pilMapLabels=[];
+function _pilApplyNames(){
+  _pilMapLabels.forEach(function(o){ if(!o||!o.mk||!o.tt) return; try{ if(_pilNamesOn){ o.mk.bindTooltip(o.tt); } else { o.mk.unbindTooltip(); } }catch(e){} });
+}
+function _pilStat(n,u,warn){ return '<span class="pil-th-stat"><b>'+n+'</b>'+(u||'')+(warn?' <b class="warn">'+warn+'</b>':'')+'</span>'; }
+// ── UNE IMPASSE QUI NE DIT PAS OU ALLER N'AIDE PERSONNE ─────────────────────
+// Les impasses `pil-empty` ecrivaient « Réglages › Saisons » en TEXTE MORT : il
+// fallait deviner l'ecran, le trouver, et se souvenir de ce qu'on venait y faire.
+// Le moteur de diagnostic a deja une porte — _pilGo, avec defilement et
+// clignotement. Ces messages passent par LA MEME, pas par une seconde.
+// ⚠️ Le libelle nomme la section telle qu'elle s'appelle A L'ECRAN : la carte
+//    s'intitule « Campagne » dans Réglages › Domaine, jamais « Saisons » — un nom
+//    de code interne que l'utilisateur n'a jamais vu affiche nulle part.
+function _pilEmptyGo(txt,cible,lib){
+  return '<div class="pil-empty">'+txt
+    +'<div style="margin-top:9px"><button class="pil-diag-go ghost" data-diag="'+_pilEsc(cible)
+    +'">'+_pilEsc(lib)+' \u203A</button></div></div>';
+}
+// ════════════════════════════════════════════════════════════════════════════
+// LA CARTE A TROIS ETAGES
+// ════════════════════════════════════════════════════════════════════════════
+// AVANT, la tuile mettait sur UNE ligne : la pastille de couleur, l'icone,
+// l'etiquette, le chiffre et le chevron. Le chiffre — la seule chose qu'on
+// vient chercher — tenait en 21 px au bout d'une ligne saturee, pendant que
+// trois paragraphes d'explication en occupaient dix dans le corps.
+//
+// DESORMAIS, trois etages, toujours dans le meme ordre :
+//   ① l'ETIQUETTE, en petites capitales, avec la pastille « i » et le chevron
+//   ② LE CHIFFRE, en gros, seul sur sa ligne — une seule taille, une seule place
+//   ③ LA LIGNE DE CADRE, un filet dore devant : la date, la source, le
+//     perimetre. « semaine du 12 mai », « cuve de 2 000 L ».
+//
+// ⚠️⚠️ LES TROIS ETAGES SONT DANS `.pil-th`, DONC TOUJOURS VISIBLES.
+//   C'est ce qui autorise a replier par defaut : on lit les sept chiffres d'un
+//   onglet sans rien deplier. Le chevron ne cache que le DETAIL.
+//   La ligne de cadre etait posee APRES l'en-tete : visible, mais decrochee du
+//   chiffre et indentee de 54 px — on ne la rattachait pas a lui.
+//
+// ⚠️ CE QUI NE BOUGE PAS, ET POURQUOI : `.pil-tile`, `data-pid`, `.pil-th`,
+//   `.pil-th-t`, `.pil-th-stat`, `.pil-tsub`, `.pil-tbody`, `#pil-body-<id>`.
+//   La visite guidee vise `.pil-tile[data-pid="traitement"]` et C22 le verifie.
+//   On change la GRAMMAIRE de l'en-tete, jamais les noms.
+//
+// ★ `infoCle` est un 9e argument OPTIONNEL : les 27 appels existants restent
+//   valides tels quels et posent leur pastille au fur et a mesure que leur
+//   fiche est ecrite.
+// ⚠️ Le 2e argument `ico` a ete RETIRE : il n'etait plus lu depuis que
+//   l'en-tete passe par `_pilIcoFor(id)`, et ne transportait que des emojis
+//   morts. Un parametre qu'on ne lit plus finit par mentir.
+function _pilTile(id,dot,title,statHtml,subHtml,gradPct,bodyHtml,infoCle){
+  // Garde defensive : _PIL_STATE n'est pose que par renderPilotage. _pilShow() se
+  // protegeait deja du cas null, _pilTile non — un appel hors sequence de rendu
+  // levait un TypeError qui vidait tout l'onglet. Meme famille que les gardes
+  // mortes du §25.15.e : celle-ci, elle, sert.
+  var _st=_PIL_STATE||{};
+  var open = !(_st.collapsed && _st.collapsed[id]);
+  // La pastille « i » arrete le clic (ecouteur d'utils.js) : sans ca, ouvrir la
+  // fiche replierait la carte qu'on cherche justement a comprendre.
+  var info = infoCle ? _mvInfoBtn(infoCle) : '';
+  return '<div class="pil-tile'+(open?' open':'')+'" data-pid="'+id+'">'
+    + '<div class="pil-th">'
+    +   '<div class="pil-th-l1"><span class="pil-dot" style="background:'+dot+'"></span>'
+    +     '<span class="pil-th-ico">'+_pilIcoFor(id)+'</span>'
+    +     '<span class="pil-th-t">'+_pilEsc(title)+'</span>'
+    +     info+'<span class="pil-th-chev">▸</span></div>'
+    +   (statHtml?('<div class="pil-th-l2">'+statHtml+'</div>'):'')
+    +   (subHtml?('<div class="pil-tsub">'+_pilEsc(subHtml)+'</div>'):'')
+    + '</div>'
+    + (gradPct!=null?'<div class="pil-tgrad"><i style="left:calc('+Math.min(Math.max(gradPct,0),100)+'% - 1px)"></i></div>':'')
+    + '<div class="pil-tbody" id="pil-body-'+id+'">'+(bodyHtml||'')+'</div>'
+    + '</div>';
+}
+function _pilPanelCarte(d){
+  var ha=_pilNum(d.surfTot).replace(/\u202f/g,' ');
+  var body='<div class="pil-map" id="pil-map"></div>'
+    + '<div class="pil-map-leg"><span>0 %</span><span class="pil-map-bar"></span><span>100 %</span>'
+    + '<span style="display:flex;align-items:center;gap:6px"><span class="pil-map-sw" style="background:rgba(192,57,43,.5);border-color:#C0392B"></span>Arrachée</span>'
+    + '<button type="button" class="pil-names-btn">'+(_pilNamesOn?(_mvIcon('etiquette',16)+' Noms '+_mvIcon('check',16)):(_mvIcon('etiquette',16)+' Noms'))+'</button></div>';
+  return _pilTile('carte','#7FA83A','Carte du domaine', _pilStat(d.gaugePct,' %',null), d.nActives+' parcelles · '+ha+' ha', d.gaugePct, body);
+}
+// Detruire une carte Leaflet pendant qu'une animation de zoom est en vol leve
+// « Cannot read properties of undefined (reading '_leaflet_pos') » 250 ms plus tard :
+// L.Map._animateZoom pose un setTimeout de secours que remove() n'annule PAS, et
+// remove() fait delete this._mapPane. _onZoomTransitionEnd sort en no-op si
+// _animatingZoom est faux (leaflet 1.9.4, 1re ligne) : on baisse le drapeau AVANT.
+function _pilMapKill(m){
+  if(!m) return null;
+  try{ m._animatingZoom=false; }catch(e){ if(DEBUG) console.warn('[pilotage] carte kill flag', e); }
+  try{ m.remove(); }catch(e){ if(DEBUG) console.warn('[pilotage] carte kill rm', e); }
+  return null;
+}
+function _pilBuildMap(d){
+  var el=document.getElementById('pil-map'); if(!el || typeof window.L==='undefined') return;
+  _pilMap=_pilMapKill(_pilMap);
+  _pilMapLabels=[];
+  var src=(window.KML_POLYGONS_DYNAMIC&&window.KML_POLYGONS_DYNAMIC.length)?window.KML_POLYGONS_DYNAMIC:(window.KML_DATA||[]);
+  var P=window.PARCELLES||[];
+  try{
+    _pilMap=window.L.map(el,{zoomControl:true,attributionControl:false,zoomSnap:0,zoomDelta:0.5}).setView([47.205,4.972],12);
+    window.L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png').addTo(_pilMap);
+    var bounds=[];
+    src.forEach(function(k){
+      if(!k||!k.pts||!k.pts.length) return;
+      var p=P.find(function(x){ return x.nom && k.name && x.nom.toLowerCase()===k.name.toLowerCase(); });
+      var arr = p && /arrach/i.test(p.statut||'');
+      var cl = (p && !arr && typeof window.getPCls==='function') ? window.getPCls(p) : null;
+      var col = arr ? '#C0392B' : (cl?cl.col:'#888888');
+      var op  = arr ? 0.5 : 0.62;
+      // remplissage clair + halo de contour coloré épais (visibilité à petit zoom)
+      window.L.polygon(k.pts,{color:'#fff',weight:0.5,fillColor:col,fillOpacity:op}).addTo(_pilMap);
+      window.L.polygon(k.pts,{color:col,weight:2.4,fill:false,opacity:0.95}).addTo(_pilMap);
+      // point + nom au barycentre (comme l'onglet carte de Parcelles)
+      var ctr=k.pts.reduce(function(a,b){ return [a[0]+b[0],a[1]+b[1]]; },[0,0]);
+      var lc=[ctr[0]/k.pts.length, ctr[1]/k.pts.length];
+      var mk=window.L.circleMarker(lc,{radius:3.5,fillColor:col,color:'#fff',weight:1.4,fillOpacity:1})
+        .addTo(_pilMap)
+        .bindPopup(p?('<b>'+_pilEsc(p.nom)+'</b><br>'+(p.surface||0)+' ha · '+(arr?'arrachée':((cl?cl.pct:0)+' %'))):('<b>'+_pilEsc(k.name)+'</b>'));
+      var tt=window.L.tooltip({permanent:true,direction:'right',offset:[5,0],className:'pil-plabel'}).setContent(p?p.nom:k.name).setLatLng(lc);
+      if(_pilNamesOn) mk.bindTooltip(tt);
+      _pilMapLabels.push({mk:mk,tt:tt});
+      k.pts.forEach(function(pt){ bounds.push(pt); });
+    });
+    // Parcelles non couvertes par un contour KML : epingle a leur centroide,
+    // sinon repere au centre de leur commune (regroupe). Couvre les domaines
+    // sans KML importe (parcelles dispersees affectees a une commune).
+    (function(){
+      function _ok(a,b){ return isFinite(a)&&isFinite(b)&&(a!==0||b!==0); }
+      var _kn={}; src.forEach(function(k){ if(k&&k.name) _kn[String(k.name).toLowerCase()]=1; });
+      var _cg={};
+      P.forEach(function(p){
+        if(!p||/arrach/i.test(p.statut||'')) return;
+        if(p.nom && _kn[String(p.nom).toLowerCase()]) return;
+        var la=parseFloat(p.lat), ln=parseFloat(p.lng);
+        var cl=(typeof window.getPCls==='function')?window.getPCls(p):null;
+        var col=cl?cl.col:'#888888';
+        if(_ok(la,ln)){
+          window.L.circleMarker([la,ln],{radius:3.5,fillColor:col,color:'#fff',weight:1.4,fillOpacity:1})
+            .addTo(_pilMap)
+            .bindPopup('<b>'+_pilEsc(p.nom)+'</b><br>'+(p.surface||0)+' ha · '+(cl?cl.pct:0)+' %');
+          bounds.push([la,ln]);
+        } else if(p.commune && _ok(parseFloat(p.commune.lat),parseFloat(p.commune.lng))){
+          var key=String(p.commune.nom||'').toLowerCase().trim();
+          if(!_cg[key]) _cg[key]={nom:p.commune.nom,lat:parseFloat(p.commune.lat),lng:parseFloat(p.commune.lng),parc:[]};
+          _cg[key].parc.push(p);
+        }
+      });
+      Object.keys(_cg).forEach(function(key){
+        var g=_cg[key], n=g.parc.length;
+        var liste=g.parc.map(function(pp){var c=(typeof window.getPCls==='function')?window.getPCls(pp):null;return '<b>'+_pilEsc(pp.nom)+'</b> · '+(pp.surface||0)+' ha · '+(c?c.pct:0)+' %';}).join('<br>');
+        var ic=window.L.divIcon({className:'',iconSize:[24,24],iconAnchor:[12,12],html:'<div style="width:24px;height:24px;border-radius:50%;background:#C9A84C;color:#1C1813;border:2px solid #fff;box-shadow:0 1px 3px rgba(0,0,0,.4);display:flex;align-items:center;justify-content:center;font:700 12px/1 system-ui,sans-serif;">'+n+'</div>'});
+        window.L.marker([g.lat,g.lng],{icon:ic}).addTo(_pilMap)
+          .bindPopup('<b>'+String.fromCodePoint(0x1F4CD)+' '+_pilEsc(g.nom)+'</b><br><span style="color:var(--texte-doux,#888);font-size:var(--pt-txt,12.5px);">'+n+' parcelle'+(n>1?'s':'')+' · commune</span><br>'+liste);
+        bounds.push([g.lat,g.lng]);
+      });
+    })();
+    // _mine : un rAF en retard d'un build cadrerait la carte SUIVANTE avec les bornes
+    // de la precedente, en relancant une animation — donc une 2e chance de course.
+    var _mine=_pilMap;
+    // animate:false : un cadrage d'ouverture n'a aucune raison d'etre anime, et c'est
+    // la fenetre de 250 ms pendant laquelle une reconstruction ferait planter Leaflet.
+    function _fit(){ if(!_pilMap || _pilMap!==_mine) return; try{ _pilMap.invalidateSize(); }catch(e){} if(bounds.length){ try{ _pilMap.fitBounds(bounds,{padding:[18,18],animate:false}); }catch(e){} } else if(typeof window.getDomaineGeo==='function'){ var _dg=window.getDomaineGeo(); try{ _pilMap.setView([_dg.lat,_dg.lng],13,{animate:false}); }catch(e){} } }
+    requestAnimationFrame(function(){ requestAnimationFrame(_fit); });
+  }catch(e){ if(DEBUG) console.warn('[pilotage] carte', e); }
+}
+function _pilPanelEquipe(d){
+  var rl = (typeof window.getRoleLabel==='function');
+  var nB = (d.membres||[]).filter(function(m){ return m && m.bureau; }).length;
+  // Une equipe collective est UNE fiche mais N personnes : compter les fiches
+  // afficherait « 2 actifs » en pleine vendange. On compte donc des PERSONNES des
+  // qu'une equipe existe, et le sous-titre dit d'ou vient l'ecart avec le nombre
+  // de lignes affichees — sinon le chiffre semblerait ne correspondre a rien.
+  var _mvEC=(typeof window._mvEstCollectif==='function')?window._mvEstCollectif:function(){return false;};
+  var _mvED=(typeof window._mvEffDef==='function')?window._mvEffDef:function(){return 1;};
+  var _nColl=(d.membres||[]).filter(_mvEC).length;
+  var _nPers=(d.membres||[]).reduce(function(a,m){ return a+_mvED(m); },0);
+  var rows = d.membres.map(function(m){
+    var c=(window.COULEURS_MBR&&(window.COULEURS_MBR[m.nom]))||'#3D6B27';
+    var role = rl ? window.getRoleLabel(m.roles) : (m.roles?m.roles.join(' · '):'');
+    if(m.bureau) role = (role?role+' · ':'')+'bureau';
+    if(_mvEC(m)){
+      var _n=_mvED(m);
+      role = 'équipe · '+_n+' personne'+(_n>1?'s':'');
+      return _pilLi('', '#8A5A38', m.nom||'—', role, null);
+    }
+    return _pilLi((m.nom||'?').charAt(0).toUpperCase(), c, m.nom||'—', role, null);
+  }).join('') || '<div class="pil-empty">Aucun membre actif</div>';
+  // ★ LE SOUS-TITRE PORTAIT TROIS CHOSES DE NATURES DIFFERENTES, a la file :
+  //   la composition (cadre), « hors capacite vigne » (methode), et « fiches a
+  //   passer en Inactif » (une action a executer de memoire). Chacune part ou
+  //   elle doit : la ligne de cadre, la fiche « i », un bouton.
+  var _sub=[];
+  if(_nColl>0) _sub.push(_nColl+' équipe'+(_nColl>1?'s':'')+' collective'+(_nColl>1?'s':'')+' de '+(_nPers-(d.membres.length-_nColl))+' pers.');
+  if(nB>0) _sub.push(nB+' au bureau');
+  var _nF=d.nFinis||0;
+  // ③ « a passer en Inactif » n'est plus une phrase a retenir : c'est un bouton.
+  if(_nF>0) rows+=_pilEmptyGo(_nF+' contrat'+(_nF>1?'s terminés':' terminé')+' : '+(_nF>1?'ces fiches restent':'cette fiche reste')+' à passer en Inactif.','equipe','Réglages \u203a Équipe');
+  return _pilTile('equipe','#5B9B3A','Équipe',
+    _pilStat(_nColl>0?_nPers:d.membres.length, _nColl>0?' personnes':' actifs', null),
+    'au '+_pilDfr(_pilRefDate())+(_sub.length?(' \u00b7 '+_sub.join(' \u00b7 ')):''),
+    null, '<div class="pil-ip-list">'+rows+'</div>', 'pil.equipe');
+}
+function _pilPanelTracteur(d){
+  var s=_PIL_STATE.sub||{};
+  var rows = (d.tracs||[]).map(function(t){
+    var sub='';
+    if(s.trac_revision){
+      if(t.revReste!=null){ var col=t.revReste<=50?'var(--rouge)':t.revReste<=120?'var(--orange)':'var(--vert-med)';
+        sub += '<div class="pil-li-s" style="color:'+col+';font-weight:600">Révision dans '+_pilNum(t.revReste)+' h</div>';
+      } else { sub += '<div class="pil-li-s" style="opacity:.6">Révision : à renseigner</div>'; }
+    }
+    if(s.trac_controle){ sub += '<div class="pil-li-s">Dernier contrôle : '+(t.lastCtrl?_pilDfr(t.lastCtrl):'jamais')+'</div>'; }
+    if(s.trac_intercep && t.sess && t.sAdv<100){ var isI=/intercep/i.test(t.sess.activite||''); sub += '<div class="pil-li-s" style="color:var(--acier-med)">'+(isI?'✂️':'🚜')+' '+_pilEsc(t.sess.activite||'Session')+' · '+t.sAdv+' %</div>'; }
+    var chips='';
+    if(s.trac_repar && t.rep){ chips += _pilChip(_pilEsc(t.rep.motif||'Réparation')+(t.rep.prevu_retour?' · retour '+_pilDfr(t.rep.prevu_retour):''),'var(--rouge)'); }
+    return '<div class="pil-li"><span class="pil-av" style="background:#16313F;color:#4A9FC8">'+_mvIcon('tracteur',16)+'</span><div class="pil-li-main"><div class="pil-li-t">'+_pilEsc(t.nom||'Tracteur')+(t.traitementOnly?' <span style="font-size:var(--pt-nano,9.5px);color:var(--orange)">· pulvé</span>':'')+'</div>'+sub+chips+'</div></div>';
+  }).join('') || '<div class="pil-empty">Aucun tracteur</div>';
+  var n=(d.tracs||[]).length;
+  // ① Le cadre remonte l'echeance la plus proche : c'est la seule chose qu'on
+  //   vient verifier sans deplier. Il fallait ouvrir la carte pour la voir.
+  var _pr=null;
+  (d.tracs||[]).forEach(function(t){ if(t.revReste!=null && (_pr===null || t.revReste<_pr.revReste)) _pr=t; });
+  var _cad = _pr ? ('prochaine révision dans '+_pilNum(_pr.revReste)+' h \u00b7 '+_pilEsc(_pilTnom(_pr.nom||'')))
+                 : 'aucune échéance de révision renseignée';
+  return _pilTile('tracteur','#4A9FC8','Parc tracteur', _pilStat(n,' tracteur'+(n>1?'s':''), d.nRepar?('🔧 '+d.nRepar):null), _cad, null, '<div class="pil-ip-list">'+rows+'</div>', 'pil.tracteur');
+}
+function _pilPanelPresences(d){
+  var s=_PIL_STATE.sub||{};
+  var list=(d.presences||[]).filter(function(p){ if(p.etat==='cp')return s.pres_cp; if(p.etat==='recup')return s.pres_recup; if(p.etat==='maladie'||p.etat==='absent')return s.pres_mal; return false; });
+  var rows=list.map(function(p){
+    var c=(window.COULEURS_MBR&&window.COULEURS_MBR[p.nom])||'#3D6B27', lab, col;
+    if(p.etat==='cp'){ lab='Congé payé'; col='var(--orange)'; }
+    else if(p.etat==='recup'){ lab='Récup'; col='#7B6DB8'; }
+    else if(p.etat==='maladie'){ lab='Maladie'; col='var(--rouge)'; }
+    else { lab=(p.motif||'Absent'); col='var(--rouge)'; }
+    return '<div class="pil-li"><span class="pil-av" style="background:'+c+'">'+_pilEsc((p.nom||'?').charAt(0).toUpperCase())+'</span><div class="pil-li-main"><div class="pil-li-t">'+_pilEsc(p.nom||'—')+'</div><div class="pil-li-s" style="color:'+col+';font-weight:600">'+_pilEsc(lab)+'</div></div></div>';
+  }).join('') || '<div class="pil-empty">Toute l\'équipe est présente aujourd\'hui</div>';
+  // ① Le cadre dit CE QUI EST COMPTE et QUAND — sans ca, « 6/12 » se compare a
+  //   tort au pic ou a la moyenne, qui portent sur d'autres fenetres.
+  var _abs=list.length;
+  return _pilTile('presences','#C9A84C','Présences du jour',
+    _pilStat((d.nPresent||0)+'/'+((d.membres||[]).length),' présents',null),
+    'au champ, aujourd\u2019hui'+(_abs?(' \u00b7 '+_abs+' absence'+(_abs>1?'s':'')+' déclarée'+(_abs>1?'s':'')):''),
+    null, '<div class="pil-ip-list">'+rows+'</div>', 'pil.presences');
+}
+function _pilPanelPhyto(d){
+  var rows = d.traits.slice(0,6).map(function(t){
+    var nom = t.produit || t.nom || t.produitNom || 'Intervention';
+    return _pilLi('','#142838', nom, t.date||'', null, '#5A9FD4');
+  }).join('');
+  // ★ LA DERNIERE LIGNE REDISAIT LE CHIFFRE DE L'EN-TETE. « 18 interventions
+  //   enregistrees » sous un en-tete qui affiche deja « 18 interv. » n'apprend
+  //   rien ; « Catalogue E-Phy a jour » n'est pas une donnee de cette carte.
+  //   Elles disparaissent, le cadre prend le relais.
+  var _der=(d.traits[0]&&d.traits[0].date)||null;
+  return _pilTile('phyto','#5A9FD4','Registre phyto', _pilStat(d.traits.length,' interv.',null),
+    _der?('dernière le '+_pilDfr(_der)+' \u00b7 catalogue E-Phy'):'aucune intervention enregistrée',
+    null, '<div class="pil-ip-list">'+rows+'</div>', 'pil.phyto');
+}
+
+// ── Échéances par tâche (jours ouvrés de travail + fin de saison) ─────
+// Lecture seule. Réutilise calcHeures (h_reste/tâche) + _planTeamCadence (cadence réelle équipe).
+function _pilEchCadence(d){
+  var cad=null;
+  if(typeof window._planTeamCadence==='function'){
+    try{ var _t=new Date(), _f=new Date(); _f.setDate(_f.getDate()-28); cad=window._planTeamCadence(_f,_t); }catch(e){ cad=null; }
+  }
+  var cadH=(cad && cad.cadence>0)?cad.cadence:0, estim=false;
+  if(!cadH){ var nV=(d.membres||[]).filter(function(m){ return m && !m.bureau; }).length; if(nV>0){ cadH=7*nV; estim=true; } }
+  return { cadH:cadH, estim:estim };
+}
+function _pilWorkdayDate(n){
+  if(n==null) return '—';
+  var dt=new Date(), added=0, guard=0;
+  while(added<n && guard<3000){ guard++; dt.setDate(dt.getDate()+1); var wd=dt.getDay(); if(wd!==0 && wd!==6) added++; }
+  var M=['janv.','févr.','mars','avr.','mai','juin','juil.','août','sept.','oct.','nov.','déc.'];
+  var J=['dim.','lun.','mar.','mer.','jeu.','ven.','sam.'];
+  return J[dt.getDay()]+' '+dt.getDate()+' '+M[dt.getMonth()];
+}
+function _friseNorm(s){ return String(s==null?'':s).normalize('NFD').replace(/[\u0300-\u036f]/g,'').toLowerCase().trim(); }
+// ⚠️ `memeSaison` : d.data (calcHeures) ne connait que la periode CONSULTEE. Sur
+//    une campagne zoomee qui n'est pas elle, un pourcentage emprunte declarerait
+//    « termine » une tache d'apres l'avancement d'une AUTRE campagne. Sans lui, on
+//    tranche sur ce que le journal sait vraiment : une campagne dont la fin est
+//    passee est close, une campagne en cours ne l'est pas.
+//    Appel sans 3e argument = comportement strictement inchange.
+function _pilTaskReal(cd,d,memeSaison){
+  var J=(window.JOURNAL||[]); var out={};
+  var dlo=cd.debut, dhi=cd.fin;
+  var _ok=(memeSaison===undefined)?true:!!memeSaison;
+  var _auj=(typeof window._mvAujIso==='function')?window._mvAujIso():'';
+  var _close=(!!_auj && dhi<_auj);
+  var pct={}; if(_ok) ((d&&d.data)||[]).forEach(function(t){ pct[_friseNorm(t.nom)]=(t.pct||0); });
+  (cd.taskWindows||[]).forEach(function(t){
+    var k=_friseNorm(t.nom), mn=null, mx=null;
+    for(var i=0;i<J.length;i++){ var j=J[i];
+      if(!j||j.meteo||j.statut!=='Valid\u00e9')continue;
+      if(_friseNorm(j.tache)!==k)continue;
+      var dt=j.date; if(!dt||dt<dlo||dt>dhi)continue;
+      if(mn==null||dt<mn)mn=dt; if(mx==null||dt>mx)mx=dt;
+    }
+    if(mn==null){ out[k]={state:'none'}; }
+    else { var done=_ok?((pct[k]||0)>=99.5):_close; out[k]={start:mn,end:done?mx:null,state:done?'done':'live'}; }
+  });
+  return out;
+}
+// ── ECHELLE HORIZONTALE PARTAGEE (frise etape 1 + profil etape 2) ────
+// Les deux graphiques se lisent l'un au-dessus de l'autre : ils doivent
+// porter le MEME axe. Avant, la frise couvrait cd.debut->cd.fin avec un
+// bord gauche de 132 px pendant que le profil dessinait des colonnes de
+// semaines a partir de 42 px : une meme date tombait a deux abscisses
+// differentes, et la fin d'une tache ne pointait pas la colonne ou le
+// travail deborde. Un seul repere, calcule une fois.
+// Bornes = UNION de la periode et des semaines : une semaine deborde
+// souvent de quelques jours de part et d'autre, et la tronquer ferait
+// mentir la derniere colonne.
+function _pilEchelle(cd,w){
+  function _o(y){ return Math.round((Date.parse(y+'T00:00:00')-Date.parse('2026-01-01T00:00:00'))/86400000); }
+  var wk=(cd&&cd.weeks)||[];
+  var s=_o(cd.debut), e=_o(cd.fin);
+  if(wk.length){ if(wk[0].o0<s) s=wk[0].o0; if(wk[wk.length-1].o1>e) e=wk[wk.length-1].o1; }
+  // La largeur de dessin est MESUREE. Un plancher garde le texte lisible :
+  // un calendrier de douze mois ne rentre pas dans un telephone, il defile —
+  // mais une unite vaut un pixel, donc les etiquettes font leur taille reelle.
+  var L=Math.max(1,e-s+1), W=(w>0)?Math.round(Math.max(620,w)):1000;
+  var padL=(W<760)?96:132, padR=22, plotW=W-padL-padR;
+  function moO0(mo){ if(mo.o0!=null)return mo.o0; var yr=mo.yr||2026; return _o(yr+'-'+String(mo.m+1).padStart(2,'0')+'-01'); }
+  function moO1(mo){ if(mo.o1!=null)return mo.o1; var yr=mo.yr||2026; var d2=new Date(Date.UTC(yr,mo.m+1,0)).getUTCDate(); return _o(yr+'-'+String(mo.m+1).padStart(2,'0')+'-'+String(d2).padStart(2,'0')); }
+  return { o:_o, s:s, e:e, L:L, W:W, padL:padL, padR:padR, plotW:plotW, moO0:moO0, moO1:moO1,
+           todayIso:((typeof window._mvAujIso==='function')?window._mvAujIso():new Date().toISOString().split('T')[0]),
+           X:function(ord){ return padL+(ord-s)/L*plotW; } };
+}
+function _pilFriseSvg(cd,real,w){
+  var tw=cd.taskWindows||[];
+  if(!tw.length) return window._mvGraphVide('Aucune fen\u00eatre de travail sur la p\u00e9riode',
+    'Les fen\u00eatres se posent dans Pilotage \u203a Outils \u203a Param\u00e9trage.');
+  var E=_pilEchelle(cd,w), _o=E.o, X=E.X;
+  var gc=window._mvGraphCadre(E.W,1);
+  var TODAY=E.todayIso;
+  var s=E.s, e=E.e, L=E.L;
+  var W=E.W,padL=E.padL,padR=E.padR,padT=34,rowH=46,plotW=E.plotW;
+  var H=padT+tw.length*rowH+24;
+  var MN=['JANV','F\u00c9VR','MARS','AVR','MAI','JUIN','JUIL','AO\u00dbT','SEPT','OCT','NOV','D\u00c9C'];
+  // Ordinaux du mois : annee-aware via cd.months (o0/o1), definis UNE fois dans
+  // _pilEchelle pour que la frise et le profil posent leurs traits au meme jour.
+  var _moO0=E.moO0, _moO1=E.moO1;
+  var months=(cd.months||[]);
+  var g='';
+  g+='<defs><pattern id="pilhatch" patternUnits="userSpaceOnUse" width="5" height="5" patternTransform="rotate(45)"><line x1="0" y1="0" x2="0" y2="5" stroke="var(--texte)" stroke-width="2"/></pattern></defs>';
+  months.forEach(function(mo,k){
+    var x0=X(Math.max(s,_moO0(mo))), x1=X(Math.min(e,_moO1(mo))+1);
+    if(k%2===1) g+='<rect x="'+x0.toFixed(1)+'" y="'+padT+'" width="'+(x1-x0).toFixed(1)+'" height="'+(tw.length*rowH)+'" fill="var(--texte)" opacity="0.04"/>';
+    g+='<text x="'+((x0+x1)/2).toFixed(1)+'" y="22" text-anchor="middle" font-size="'+gc.txt.mini+'" font-weight="600" fill="'+gc.col.texte+'" font-family="Outfit">'+MN[mo.m]+'</text>';
+    g+='<line x1="'+x0.toFixed(1)+'" y1="'+padT+'" x2="'+x0.toFixed(1)+'" y2="'+(padT+tw.length*rowH)+'" stroke="'+gc.col.grille+'" stroke-width="1"/>';
+  });
+  g+='<line x1="'+X(e+1).toFixed(1)+'" y1="'+padT+'" x2="'+X(e+1).toFixed(1)+'" y2="'+(padT+tw.length*rowH)+'" stroke="'+gc.col.grille+'"/>';
+  tw.forEach(function(t,i){
+    var yC=padT+i*rowH, yP=yC+8, hP=16, yR=yC+30, hR=11;
+    var px0=X(_o(t.start)), px1=X(_o(t.end)+1), c=_taskColor(t.nom);
+    g+='<text x="'+(padL-10)+'" y="'+(yC+rowH/2)+'" text-anchor="end" font-size="'+gc.txt.axe+'" font-weight="600" fill="var(--texte)" font-family="Outfit">'+_pilEsc(t.nom)+'</text>';
+    g+='<rect x="'+px0.toFixed(1)+'" y="'+yP+'" width="'+Math.max(2,px1-px0).toFixed(1)+'" height="'+hP+'" rx="5" fill="'+c+'" opacity="0.92"/>';
+    g+='<text x="'+(px0+6).toFixed(1)+'" y="'+(yP+12)+'" font-size="'+gc.txt.mini+'" fill="#fff" font-family="Outfit" font-weight="600">'+Math.round(t.h)+' h</text>';
+    var r=(real&&real[_friseNorm(t.nom)])||{state:'none'};
+    if(r.state==='none'||!r.start){ g+='<text x="'+px0.toFixed(1)+'" y="'+(yR+9)+'" font-size="'+gc.txt.mini+'" fill="'+gc.col.texte+'" font-family="Outfit" font-style="italic">non d\u00e9marr\u00e9</text>'; }
+    else {
+      var ro0=Math.max(s,Math.min(e,_o(r.start)));
+      var ro1=Math.max(s,Math.min(e,_o(r.state==='live'?TODAY:r.end)));
+      var rx0=X(ro0), rx1=X(ro1+1);
+      var fill=r.state==='live'?gc.col.attention:'url(#pilhatch)';
+      var stroke=r.state==='live'?gc.col.attention:'var(--texte)';
+      g+='<rect x="'+rx0.toFixed(1)+'" y="'+yR+'" width="'+Math.max(2,rx1-rx0).toFixed(1)+'" height="'+hR+'" rx="3" fill="'+fill+'" stroke="'+stroke+'" stroke-width="1"/>';
+      if(r.state==='live') g+='<text x="'+(rx1+4).toFixed(1)+'" y="'+(yR+9)+'" font-size="'+gc.txt.mini+'" fill="'+gc.col.attention+'" font-family="Outfit" font-weight="600">en cours</text>';
+    }
+  });
+  if(_o(TODAY)>=s&&_o(TODAY)<=e){ var tx=X(_o(TODAY)); g+='<line x1="'+tx.toFixed(1)+'" y1="'+padT+'" x2="'+tx.toFixed(1)+'" y2="'+(padT+tw.length*rowH)+'" stroke="'+gc.col.texte+'" stroke-width="1.5" stroke-dasharray="4 3"/>'; }
+  return window._mvGraphSvg(window._mvGraphCadre(W,H), 'Frise des travaux : '+tw.length+' t\u00e2ches, pr\u00e9vu contre r\u00e9el sur la campagne.', g);
+}
+function _pilDemandSvg(cd,w){
+  var wk=cd.weeks||[];
+  if(!wk.length) return window._mvGraphVide('Aucune semaine \u00e0 comparer sur la p\u00e9riode',
+    'La p\u00e9riode consult\u00e9e a besoin d\u2019une date de d\u00e9but et d\u2019une date de fin.');
+  // effectif present = cd.weeks[].head (tetes lissees, hebdo) — voir _chargeSaisonData
+  // Meme echelle que la frise posee juste au-dessus dans ce panneau.
+  var E=_pilEchelle(cd,w), _o=E.o, X=E.X;
+  var c=window._mvGraphCadre(E.W,1);
+  var s=E.s, e=E.e, L=E.L;
+  var W=E.W,padL=E.padL,padR=E.padR,padT=16,padB=46;
+  var H=(W<760)?300:(W<1000?330:370), plotW=E.plotW, plotH=H-padT-padB;
+  var maxNeed=4; wk.forEach(function(w){ if(w.need>maxNeed)maxNeed=w.need; if((w.head||0)>maxNeed)maxNeed=w.head; });
+  // ⚠️⚠️ L'AXE AVANÇAIT DE 1 EN 1, QUEL QUE SOIT LE PIC.
+  //   yTop=Math.ceil(maxNeed+0.5) puis une graduation par unite : sur une
+  //   vendange a 36,6 personnes, 38 lignes et 38 etiquettes dans 238 px de haut,
+  //   soit une etiquette tous les 6 px. L'axe devenait un pate noir et le
+  //   graphe illisible — le defaut etait deja regle sur la frise annuelle, qui
+  //   porte un pas adaptatif depuis la v6.00, mais pas ici.
+  //   Meme echelle de pas que la frise : un module, une façon de graduer.
+  var step=maxNeed>60?20:(maxNeed>30?10:(maxNeed>12?5:(maxNeed>5?2:1)));
+  var yTop=Math.ceil(maxNeed/step)*step;
+  if(yTop<=maxNeed+0.001) yTop+=step;          // le pic ne touche jamais le plafond
+  if(!(yTop>0)) yTop=step;
+  function Y(v){ return padT+plotH-(v/yTop)*plotH; }
+  var MN=['JANV','F\u00c9VR','MARS','AVR','MAI','JUIN','JUIL','AO\u00dbT','SEPT','OCT','NOV','D\u00c9C'];
+  var _moO0=E.moO0, _moO1=E.moO1;
+  var months=(cd.months||[]);
+  var g='';
+  for(var v=0;v<=yTop;v+=step){ g+='<line x1="'+padL+'" y1="'+Y(v).toFixed(1)+'" x2="'+(W-padR)+'" y2="'+Y(v).toFixed(1)+'" stroke="'+c.col.grille+'" stroke-width="1"/><text x="'+(padL-8)+'" y="'+(Y(v)+4).toFixed(1)+'" text-anchor="end" font-size="'+c.txt.mini+'" fill="'+c.col.texte+'" font-family="Outfit">'+v+'</text>'; }
+  months.forEach(function(mo){ var x0=X(Math.max(s,_moO0(mo))); g+='<line x1="'+x0.toFixed(1)+'" y1="'+padT+'" x2="'+x0.toFixed(1)+'" y2="'+(padT+plotH)+'" stroke="'+c.col.grille+'" stroke-width="1"/>'; var xc=(X(Math.max(s,_moO0(mo)))+X(Math.min(e,_moO1(mo))+1))/2; g+='<text x="'+xc.toFixed(1)+'" y="'+(H-22)+'" text-anchor="middle" font-size="'+c.txt.mini+'" font-weight="600" fill="'+c.col.texte+'" font-family="Outfit">'+MN[mo.m]+'</text>'; });
+  wk.forEach(function(w){ if(w.cap<=0)return; var bx=X(w.o0)+2, bw=X(w.o1+1)-X(w.o0)-4; var over=w.need>((w.head||0)+0.001); g+='<rect x="'+bx.toFixed(1)+'" y="'+Y(w.need).toFixed(1)+'" width="'+Math.max(1,bw).toFixed(1)+'" height="'+(padT+plotH-Y(w.need)).toFixed(1)+'" rx="2" fill="'+(over?_PIL_SEM.faute:_PIL_SEM.fait)+'" opacity="'+(over?0.95:0.8)+'"/>'; });
+  // ★ Meme regle que la frise annuelle : une semaine SANS capacite (hors
+  //   modele de semaine) n'a pas d'effectif mesure. La ligne s'y coupe. Avant,
+  //   elle y tombait a `head||0` — un zero dessine est une mesure, et celle-ci
+  //   n'existait pas.
+  var _pts=[]; wk.forEach(function(w){
+    if(!(w.cap>0)){ _pts.push({gap:true}); return; }
+    _pts.push({x0:X(w.o0),x1:X(w.o1+1),y:Y(w.head||0)});
+  });
+  var path=_pilPolyBreak(_pts);
+  g+='<path d="'+path+'" fill="none" stroke="var(--texte)" stroke-width="2.5" stroke-linejoin="round"/>';
+  var pk=0,pkw=null; wk.forEach(function(w){ if(w.cap>0&&w.need>pk){pk=w.need;pkw=w;} });
+  if(pkw && pkw.need>((pkw.head||0)+0.001)){ var px=(X(pkw.o0)+X(pkw.o1+1))/2; g+='<text x="'+px.toFixed(1)+'" y="'+(Y(pk)-7).toFixed(1)+'" text-anchor="middle" font-size="'+c.txt.mini+'" font-weight="700" fill="'+_PIL_SEM.faute+'" font-family="Outfit">pic '+(Math.round(pk*10)/10).toString().replace('.',',')+'</text>'; }
+  var _tj=E.o(E.todayIso);
+  if(_tj>=E.s && _tj<=E.e){ var _tx=X(_tj); g+='<line x1="'+_tx.toFixed(1)+'" y1="'+padT+'" x2="'+_tx.toFixed(1)+'" y2="'+(padT+plotH).toFixed(1)+'" stroke="'+c.col.texte+'" stroke-width="1.5" stroke-dasharray="4 3"/>'; }
+  return window._mvGraphSvg(window._mvGraphCadre(W,H), 'Personnes n\u00e9cessaires par semaine, face \u00e0 l\u2019effectif pr\u00e9sent.', g);
+}
+function _pilEcartHtml(cd, real){
+  function _o(y){ return Math.round((Date.parse(y+'T00:00:00')-Date.parse('2026-01-01T00:00:00'))/86400000); }
+  var MN=['janv.','f\u00e9vr.','mars','avr.','mai','juin','juil.','ao\u00fbt','sept.','oct.','nov.','d\u00e9c.'];
+  function fmt(y){ if(!y)return '\u2014'; var dd=new Date(y+'T00:00:00'); return dd.getDate()+' '+MN[dd.getMonth()]; }
+  var rows=(cd.taskWindows||[]).map(function(t){
+    var r=(real&&real[_friseNorm(t.nom)])||{state:'none'};
+    var seg, delta, dcls;
+    if(r.state==='none'||!r.start){ seg='r\u00e9el : <b>non d\u00e9marr\u00e9</b>'; delta='\u2014'; dcls='none'; }
+    else if(r.state==='live'){ var ds=_o(r.start)-_o(t.start); seg='r\u00e9el : <b>'+fmt(r.start)+'</b> \u2192 <b>en cours</b>'; delta=(ds>=0?'+':'')+ds+' j au d\u00e9part'; dcls='live'; }
+    else { var ds2=_o(r.start)-_o(t.start); var dp=_o(t.end)-_o(t.start)+1, dr=_o(r.end)-_o(r.start)+1, du=dr-dp; seg='r\u00e9el : <b>'+fmt(r.start)+'</b> \u2192 <b>'+fmt(r.end)+'</b>'; delta=(ds2>=0?'+':'')+ds2+' j d\u00e9part \u00b7 '+(du>=0?'+':'')+du+' j dur\u00e9e'; dcls=(ds2>1||du>2)?'late':((ds2<-1||du<-2)?'early':'none'); }
+    var dCol=dcls==='late'?'#9B2D1F':(dcls==='early'?'#3D6B27':(dcls==='live'?'#9A6A12':'#7C766B'));
+    var dBg=dcls==='late'?'#F3D9D4':(dcls==='early'?'#DCEBD0':(dcls==='live'?'#F6E7CC':'#EDE8DC'));
+    return '<div style="display:flex;align-items:center;gap:8px;padding:7px 0;border-bottom:1px solid #F0ECE1;flex-wrap:wrap">'
+      +'<span style="font-weight:600;min-width:128px;display:flex;align-items:center;gap:7px"><span style="display:inline-block;width:10px;height:10px;border-radius:3px;background:'+_taskColor(t.nom)+'"></span>'+_pilEsc(t.nom)+'</span>'
+      +'<span style="color:var(--texte-doux);font-size:var(--pt-txt,12.5px)">pr\u00e9vu : <b style="color:var(--texte)">'+fmt(t.start)+'</b> \u2192 <b style="color:var(--texte)">'+fmt(t.end)+'</b> &nbsp;\u00b7&nbsp; '+seg+'</span>'
+      +'<span style="margin-left:auto;font-weight:700;font-size:var(--pt-micro,11px);padding:2px 8px;border-radius:20px;white-space:nowrap;background:'+dBg+';color:'+dCol+'">'+delta+'</span>'
+      +'</div>';
+  }).join('');
+  return '<div style="font-size:var(--pt-txt,12.5px)">'+rows+'</div>';
+}
+// ══════════════════════════════════════════════════════════════════════════════
+// FRISE ANNUELLE — l'union des periodes, PAS une entite de plus
+// ══════════════════════════════════════════════════════════════════════════════
+// Une periode joue DEUX roles incompatibles : elle CONTIENT les taches (s.taches,
+// donc la charge) et elle sert de DENOMINATEUR a tout ce qui se lit en ETP.
+// Le premier role tolere une periode de cinq semaines, le second non : la charge
+// ne depend pas de la duree de la periode, capRefTotal si — donc plus la periode
+// est courte, plus l'ETP explose. Mesure du 11/08 : une vendange de cinq semaines
+// annonçait 10,5 ETP la ou la semaine du pic en demandait 42. D'ou l'annee comme
+// maille de LECTURE.
+//
+// ⚠️ AUCUN OBJET NOUVEAU N'EST CREE. On appelle _chargeSaisonData PERIODE PAR
+// PERIODE, chacune AVEC SON PROPRE SPAN, puis on recolle les semaines sur un axe
+// commun. C'est ce qui permet de lire l'annee SANS toucher aux fenetres de taches :
+// une fenetre par defaut est une FRACTION du span (planning.js, _mvTaskWin) —
+// etirer un span a douze mois etalerait la taille sur un tiers d'annee. Periode
+// par periode, chaque tache reste chez elle. Zero migration, zero prerequis de
+// saisie, et _VISU_SAISON (qui filtre le journal, le phyto, la cave) ne bouge pas.
+//
+// Le recollage est legitime parce que w.need = wh/wcap se calcule sur la MEME
+// semaine des deux cotes : deux periodes produisent des valeurs comparables.
+// ════════════════════════════════════════════════════════════════════════════
+// LA PORTEE — un seul etat, lu par tout le module.
+// Le module portait CINQ selecteurs qui s'ignoraient : _PIL_ETPSEL (frise),
+// _PEC_SUB (economie), _PEX_AN (exercice), _PCAV_MIL (millesime) et la periode
+// active. Cliquer une campagne ne bougeait qu'UN panneau ; les chiffres au-
+// dessus restaient sur une autre fenetre, sans le dire. D'ou deux reponses
+// justes a la meme question sur le meme ecran.
+// `camp` remplace _PIL_ETPSEL, qui n'en est plus qu'un alias de lecture.
+// ⚠️ Toute nouvelle vue lit _PIL_SCOPE. On n'ajoute pas un sixieme selecteur.
+// ════════════════════════════════════════════════════════════════════════════
+var _PIL_SCOPE = { camp:null };    // nom de la campagne zoomee ; null = l'annee
+
+// Meme patron de cle que _pilTabKey : un module, une facon de nommer.
+function _pilScopeKey(){ return 'mavigne_pil_scope_'+_pilTenant(); }
+function _pilScopeLoad(){
+  try{ var v=localStorage.getItem(_pilScopeKey()); if(v!=null) _PIL_SCOPE.camp=(v==='')?null:v; }
+  catch(e){ if(window.logError) window.logError({level:'info',cat:'pilotage',msg:'scope: lecture impossible'}); }
+}
+function _pilScopeSet(camp){
+  _PIL_SCOPE.camp = camp || null;
+  try{ localStorage.setItem(_pilScopeKey(), _PIL_SCOPE.camp||''); }
+  catch(e){ if(window.logError) window.logError({level:'info',cat:'pilotage',msg:'scope: ecriture impossible'}); }
+}
+// La campagne portee EXISTE-T-ELLE encore ? Une periode supprimee ou renommee
+// laisserait une portee fantome : l'ecran filtrerait sur un nom que plus
+// personne ne porte, et n'afficherait rien sans dire pourquoi.
+function _pilScopeVerif(ann){
+  if(!_PIL_SCOPE.camp || !ann || !ann.pers) return;
+  for(var i=0;i<ann.pers.length;i++) if(ann.pers[i].nom===_PIL_SCOPE.camp) return;
+  _pilScopeSet(null);
+}
+Object.defineProperty(window,'_PIL_ETPSEL',{ get:function(){ return _PIL_SCOPE.camp; },
+  set:function(v){ _pilScopeSet(v); }, configurable:true });
+var _PIL_ETPSEL=null;              // conserve pour la lecture interne ; voir _PIL_SCOPE
+var _PIL_ANN=null, _PIL_ANNK='';   // memo : N appels a _chargeSaisonData par rendu
+function _pilAnnOrd(y){ return Math.round((Date.parse(y+'T00:00:00')-Date.parse('2026-01-01T00:00:00'))/86400000); }
+// ★★★ L'INVERSE DE _pilAnnOrd — UNE SEULE FOIS, SUR L'EPOQUE UTC.
+//   Trois sites reconstruisaient une date depuis un ordinal en melangeant DEUX
+//   conventions dans la meme expression : une epoque LOCALE
+//   (Date.parse('2026-01-01T00:00:00')) relue avec des accesseurs UTC
+//   (getUTCDate / toISOString). A l'est de Greenwich, minuit local vaut 23:00 UTC
+//   la VEILLE : toutes les dates du Pilotage sortaient UN JOUR TROP TOT.
+//   Mesure du 12/08 sur l'ecran de Nico : une campagne 1 avr. -> 31 juil. 2027
+//   s'affichait « 31 mars -> 30 juil. », le pic « semaine du 31 mars » pour la
+//   semaine du 1er avril, et la fenetre d'accolage 18 juin -> 18 juil. devenait
+//   « 16 juin -> 20 juil. ». Aucun calcul n'etait faux : TOUTES les etiquettes
+//   l'etaient. Un chiffre juste sous une date fausse ne se verifie pas.
+//   Meme base et memes accesseurs que _ford (planning.js) : UTC des deux cotes.
+function _pilOrdD(o){ return new Date(Date.UTC(2026,0,1)+o*86400000); }
+function _pilOrdIso(o){ var d=_pilOrdD(o), m=d.getUTCMonth()+1, j=d.getUTCDate();
+  return d.getUTCFullYear()+'-'+(m<10?'0':'')+m+'-'+(j<10?'0':'')+j; }
+function _pilAnnuelData(){
+  if(typeof window._chargeSaisonData!=='function') return null;
+  var brut=(typeof window._cmpVisibles==='function')?window._cmpVisibles():(window.SAISONS||[]);
+  var pers=(brut||[]).filter(function(p){ return p&&p.debut&&p.fin&&p.fin>=p.debut; })
+    .sort(function(a,b){ return String(a.debut).localeCompare(String(b.debut)); });
+  if(!pers.length) return null;
+  // ★★★ LA CLE DOIT DERIVER DE CE QUI ENTRE DANS LE CALCUL, PAS DE SON COMPTAGE.
+  //   Elle ne portait que des LONGUEURS : MEMBRES.length, PARCELLES.length,
+  //   TACHES.length. Modifier une date de contrat, cocher Bureau, changer
+  //   l'effectif d'une equipe collective, corriger une surface ou des heures/ha
+  //   ne fait varier AUCUNE longueur : la frise servait l'ancien calcul jusqu'au
+  //   prochain F5, sans rien signaler. Un cache dont la cle ne derive pas de ses
+  //   entrees n'est pas un cache, c'est un GEL.
+  //   ⚠⚠ MESURE DU 13/08/2026, domaine reel, periode Hiver 01/10/2026 -> 31/03/2027.
+  //   Quatre fiches sous contrat en octobre, la quatrieme sortant le 17/11. La ligne
+  //   « effectif present » devait valoir 4, puis 3,857 la semaine du 12 nov., puis 3.
+  //   Elle etait PLATE A 3 sur les six mois. Les memes fonctions (_headWeek,
+  //   _inContractDay, _mvEnContratSurPeriode), rejouees sur les memes donnees,
+  //   rendent bien 4 / 3,857 / 3 : le calcul etait juste, le memo servait un
+  //   resultat perime. C'est le pire genre de faute — aucune erreur, aucun trou,
+  //   une courbe parfaitement lisible qui dit le contraire de la base.
+  //   ★ Tout ce que lit _chargeSaisonData entre desormais dans la cle : contrats
+  //   et drapeaux de chaque fiche, surface et statut de chaque parcelle, heures/ha
+  //   et fenetres de chaque tache, passages, overrides CONFIG, liste de taches de
+  //   chaque periode. Le cout est de quelques centaines de concatenations par
+  //   rendu — trois ordres de grandeur sous le calcul qu'il evite.
+  function _annSigM(m){
+    if(!m) return '';
+    var Q=(typeof window._mvContrats==='function')?window._mvContrats(m):[];
+    return (m.nom||'')+(m.bureau?'|B':'')+(m.collectif?('|C'+(m.effectif||1)):'')+'|'+(m.statut||'')
+      +'|'+Q.map(function(q){return (q.debut||'')+'>'+(q.fin||'');}).join(',');
+  }
+  function _annSigP(p){
+    if(!p) return '';
+    return (p.statut||'')+':'+(p.surface||0)+':'+((p.tachesExclues||[]).length);
+  }
+  function _annSigT(t){
+    if(!t) return '';
+    return (t.nom||'')+':'+(t.hha||0)+':'+(t.type||'')+(t.trous?'T':'')+(t.anytime?'A':'')
+      +':'+((t.saisons||[]).join('.')||(t.saison||''));
+  }
+  var _cfgTW=(window.CONFIG&&window.CONFIG.task_windows)||{};
+  var key=pers.map(function(p){return p.nom+'|'+p.debut+'|'+p.fin+'|'+((p.taches||[]).join('.'));}).join(';')
+    +'#'+(window.MEMBRES||[]).map(_annSigM).join(';')
+    +'#'+(window.PARCELLES||[]).map(_annSigP).join(';')
+    +'#'+(window.TACHES||[]).map(_annSigT).join(';')
+    +'#'+JSON.stringify(window.SAISON_PASSAGES||{})+'#'+JSON.stringify(_cfgTW)
+    // ⚠️ le mois d'exercice entre dans la cle : sans lui, changer l'ouverture
+    // laisserait la frise sur l'ancien cadre jusqu'au prochain rechargement.
+    +'#'+((typeof window._mvExerciceMois==='function')?window._mvExerciceMois():'-');
+  if(_PIL_ANN && _PIL_ANNK===key) return _PIL_ANN;
+  var out={pers:[],weeks:[],trous:[],ovl:[],s:0,e:0}, prevFin=null;
+  pers.forEach(function(p,i){
+    var cd=null; try{ cd=window._chargeSaisonData(p); }catch(err){ cd=null; }
+    out.pers.push({nom:p.nom,debut:p.debut,fin:p.fin,idx:i,cd:cd,
+      col:(typeof window._cmpCouleur==='function')?window._cmpCouleur(p):'#3D6B27'});
+    if(prevFin && p.debut<=prevFin) out.ovl.push(p.nom);
+    if(!prevFin || p.fin>prevFin) prevFin=p.fin;
+    if(!cd) return;
+    (cd.weeks||[]).forEach(function(w){
+      // ★ capH = heures REELLEMENT TRAVAILLABLES de l'equipe cette semaine-la
+      //   (_capWeekReal, planning.js) : modele horaire de CHACUN, entrees du
+      //   planning, contrats et effectif collectif compris. Elle etait calculee
+      //   puis JETEE ici. C'est pourtant la seule mesure qui sache qu'une
+      //   embauche commence le 26 aout — la projection de fin la lit desormais.
+      out.weeks.push({o0:w.o0,o1:w.o1,m:w.m,cap:w.cap||0,need:w.need||0,
+        head:w.head||0,headPerm:w.headPerm||0,headMax:(w.headMax!=null?w.headMax:(w.head||0)),
+        capH:(w.capH!=null?w.capH:null),per:i});
+    });
+  });
+  out.weeks.sort(function(a,b){ return a.o0-b.o0; });
+  // ══ L'ANNEE = L'EXERCICE COMPTABLE ════════════════════════════════════════
+  // Un cadre FIXE, regle par l'admin, et le meme que celui de l'ecran Economie :
+  // la charge et le cout d'une annee doivent se lire sur la meme fenetre, sinon
+  // on compare des heures d'une annee a des euros d'une autre.
+  // Repli sur les bornes des periodes si l'exercice n'est pas lisible.
+  out.ex=(typeof window._cmpAnneeExercice==='function')?window._cmpAnneeExercice():null;
+  if(out.ex){ out.s=_pilAnnOrd(out.ex.d0); out.e=_pilAnnOrd(out.ex.d1); }
+  else {
+    var F=(typeof window._cmpFenetre==='function')?window._cmpFenetre():null;
+    out.s=F?_pilAnnOrd(F.a):_pilAnnOrd(pers[0].debut);
+    out.e=F?_pilAnnOrd(F.b):_pilAnnOrd(pers[pers.length-1].fin);
+  }
+  // Periodes qui sortent du cadre : on ne les etire pas dans la frise (le cadre
+  // cesserait d'etre un cadre), on les COMPTE pour le dire a l'ecran. Une periode
+  // hors exercice, c'est du travail dont le cout tombe dans une autre annee
+  // comptable — ca se decide, ca ne se decouvre pas.
+  out.hors=[];
+  pers.forEach(function(p){
+    if(p.fin<(out.ex?out.ex.d0:'') || p.debut>(out.ex?out.ex.d1:'\uFFFF')) out.hors.push(p.nom);
+  });
+  // ══ ANNEE VIGNE : la vendange doit CLORE l'annee, pas l'ouvrir ════════════
+  // « De apres vendange N jusqu'a fin vendange N+1 » (Nico, 12/08/2026). Le cycle
+  // de la vigne commence a la taille, apres la recolte. Si l'exercice ouvre AVANT
+  // la vendange, celle-ci tombe au debut de l'annee : on ne lit plus un cycle, on
+  // lit deux moities de cycles. Et si une borne TRAVERSE la vendange, la recolte
+  // est coupee en deux exercices — la moitie des heures et du cout d'un cote, la
+  // moitie de l'autre, sans que rien ne le signale.
+  out.vend=null; out.align=null;
+  var vd=null, vf=null;
+  out.pers.forEach(function(p){
+    ((p.cd&&p.cd.taskWindows)||[]).forEach(function(t){
+      if(_friseNorm(t.nom).indexOf('vendang')<0) return;
+      if(!vd||t.start<vd) vd=t.start;
+      if(!vf||t.end>vf)   vf=t.end;
+    });
+  });
+  if(vd&&vf&&out.ex){
+    out.vend={debut:vd,fin:vf};
+    var coupe=(vd<out.ex.d0&&vf>=out.ex.d0)||(vd<=out.ex.d1&&vf>out.ex.d1);
+    var o0=_pilAnnOrd(vd), L=Math.max(1,out.e-out.s+1);
+    var pos=(o0-out.s)/L;                         // 0 = ouvre l'annee, 1 = la clot
+    // Mois ideal d'ouverture = celui qui SUIT la fin de la vendange.
+    // \u26a0 Meme piege que les etiquettes de semaine : minuit LOCAL relu en UTC.
+    //   Une vendange finissant un 1er octobre proposait \u00ab septembre \u00bb.
+    var fv=new Date(vf+'T00:00:00Z');
+    var moisIdeal=(fv.getUTCMonth()+1)%12;
+    out.align={coupe:coupe, pos:pos, ok:(!coupe&&pos>=0.72), moisIdeal:moisIdeal};
+  }
+  // Trous : intervalles que plus AUCUNE periode ne couvre. Un trou n'est pas une
+  // absence de travail, c'est une absence de periode — une saisie datee la ne se
+  // rattache a rien. Il se dessine hachure, JAMAIS a zero : un zero est une mesure.
+  var cur=out.s;
+  pers.forEach(function(p){
+    var d0=Math.max(_pilAnnOrd(p.debut),out.s), f0=Math.min(_pilAnnOrd(p.fin),out.e);
+    if(f0<d0) return;
+    if(d0>cur) out.trous.push([cur,d0-1]);
+    if(f0+1>cur) cur=f0+1;
+  });
+  if(cur<=out.e) out.trous.push([cur,out.e]);
+  _PIL_ANN=out; _PIL_ANNK=key;
+  return out;
+}
+function _pilAnnPer(nom){
+  var a=_PIL_ANN; if(!a||nom==null) return null;
+  for(var i=0;i<a.pers.length;i++){ if(a.pers[i].nom===nom) return a.pers[i]; }
+  return null;   // periode renommee ou supprimee -> on retombe sur l'annee entiere
+}
+function _pilAnnTaches(p){
+  var tw=(p&&p.cd&&p.cd.taskWindows)||[];
+  return tw.slice().sort(function(a,b){ return String(a.start).localeCompare(String(b.start)); }).slice(0,12);
+}
+
+// ══ LA PORTEE COMMANDE AUSSI LA CHARGE ET L'EFFECTIF ═══════════════════
+// ⚠️⚠️ LE SIXIEME SELECTEUR, NON RECENSE (trouve le 12/08).
+//   La v6.00 avait fondu cinq selecteurs dans _PIL_SCOPE en ecrivant « toute
+//   nouvelle vue lit _PIL_SCOPE ». Il en restait un, invisible parce qu'il ne
+//   ressemble pas a un selecteur : _pilSaison(), la periode CONSULTEE.
+//   Les quatre photos et la frise lisaient _PIL_SCOPE ; le KPI Effectif, la
+//   tuile Charge & ETP et Capacite vs charge lisaient _pilSaison(). Deux
+//   consequences, toutes deux vues a l'ecran le meme jour :
+//     · cliquer une campagne dans la frise ne bougeait PAS ces trois-la ;
+//     · sur l'annee entiere, la photo annonçait le pic de l'ANNEE et la tuile
+//       juste en dessous celui d'UNE campagne. Deux nombres, un seul mot.
+//
+// _pilPeriodeVue() rend la periode que la portee designe. Sur l'annee, elle
+// retombe sur la periode consultee : un panneau qui a besoin d'un `cd` complet
+// (frise des taches, courbe hebdo, ecart prevu/reel, repartition du temps) ne
+// peut pas travailler sur « l'annee », qui n'est pas une periode. Il NOMME
+// alors ce qu'il montre, au lieu de le laisser croire.
+function _pilPeriodeVue(){
+  var c=_PIL_SCOPE.camp;
+  if(c){
+    var l=(window.SAISONS||[]);
+    for(var i=0;i<l.length;i++) if(l[i]&&l[i].nom===c) return l[i];
+  }
+  return (typeof _pilSaison==='function')?_pilSaison():null;
+}
+// Memo par rendu. _chargeSaisonData est le calcul le plus cher du module
+// (capacite reelle jour par jour x effectif x contrats) et CINQ lecteurs
+// l'appellent. On l'oublie a chaque repeinte, comme le cout d'exercice : un
+// chiffre fige apres une saisie de planning serait le defaut qu'on corrige.
+var _PIL_CDV=null, _PIL_CDVK='';
+function _pilCdVueOublier(){ _PIL_CDV=null; _PIL_CDVK=''; }
+function _pilCdVue(){
+  if(typeof window._chargeSaisonData!=='function') return null;
+  var p=_pilPeriodeVue(); if(!p||!p.debut||!p.fin) return null;
+  var k=(p.nom||'')+'|'+p.debut+'|'+p.fin;
+  if(_PIL_CDV!==null && _PIL_CDVK===k) return _PIL_CDV||null;
+  var cd=null; try{ cd=window._chargeSaisonData(p); }catch(e){ cd=null; }
+  _PIL_CDV=cd||false; _PIL_CDVK=k;
+  return cd;
+}
+// La periode vue est-elle celle que le reste de l'application consulte ?
+// calcHeures(), CONFIG.objectifs_fin et d.data ne connaissent QUE celle-la :
+// les leur appliquer sur une autre campagne serait un chiffre sans assiette.
+function _pilVueEstConsultee(){
+  var p=_pilPeriodeVue(), n=_pilSaisonNom();
+  return !!(p && n && p.nom===n);
+}
+
+// ══ LE PIC DE LA PORTEE — UNE SEULE DEFINITION ══════════════════════
+// Lue par la photo Effectif, le KPI Effectif d'Aujourd'hui, la tuile Charge &
+// ETP et Capacite vs charge. Sur une campagne : ses semaines. Sur l'annee : les
+// semaines de l'EXERCICE, bornees — jamais celles d'une campagne que l'ecran
+// declare lui-meme hors exercice.
+// ⚠️ w.cap<=0 : semaine hors modele (feries, fermeture) — `need` n'y veut rien
+//    dire, elle ne peut pas porter un pic.
+function _pilPicPortee(){
+  var ann=null; try{ ann=_pilAnnuelData(); }catch(e){ ann=null; }
+  if(ann) _pilScopeVerif(ann);
+  var selP=ann?_pilAnnPer(_PIL_SCOPE.camp):null;
+  var wk=(ann&&ann.weeks)?ann.weeks.filter(function(x){
+    if(selP) return x.per===selP.idx;
+    return x.o1>=ann.s && x.o0<=ann.e;
+  }):[];
+  var pic=0, picW=null, som=0, n=0, court=false;
+  wk.forEach(function(x){
+    if(!(x.cap>0)) return;
+    som+=x.need; n++;
+    if(x.need>pic){ pic=x.need; picW=x; }
+    if(x.need>(x.head||0)+0.05) court=true;
+  });
+  var head=picW?(picW.head||0):0;
+  return { ok:(pic>0), pic:pic, picW:picW, head:head, manque:Math.max(0,pic-head),
+           moy:(n>0?som/n:0), court:court, nSem:n, annee:!selP,
+           nom:(selP?selP.nom:null), ann:ann, selP:selP };
+}
+// \u2605\u2605\u2605 CE QUI EST DEJA SIGNE, POUR LA SEMAINE EN COURS.
+//   Les simulateurs du jour repondent \u00ab avec qui est la CE MATIN \u00bb. C'est utile
+//   et incomplet : un CDD signe qui demarre lundi, une equipe d'accolage engagee
+//   pour trois semaines, ne se voient nulle part tant qu'ils ne sont pas devant
+//   la porte. On affiche donc, a cote de la presence du jour, l'effectif SOUS
+//   CONTRAT de la semaine — celui que la frise annuelle et le simulateur de
+//   renfort lisent deja (w.head, contrats lus par _mvContrats, collectifs
+//   ponderes par _mvEffDef). \u26a0 AUCUN NOUVEAU CALCUL : un second calcul donnerait
+//   un second chiffre, et c'est exactement la faute que ce module repare.
+//   null quand aujourd'hui ne tombe dans aucune periode : un trou n'est pas un
+//   zero, et un zero est une mesure.
+// \u2605\u2605\u2605 SUR QUELLE FENETRE ? CELLE DU TRAVAIL.
+//   \u26a0\u26a0 CORRECTION DE FOND (12/08/2026, retour de Nico, capture a l'appui).
+//   Le lot precedent ponderait bien les equipes collectives \u2014 et ne changeait
+//   RIEN a l'ecran, parce qu'il lisait AUJOURD'HUI. Or `d.membres` vient de
+//   _pilMembresActifs, qui filtre sur _mvEnContratLe(m, AUJOURD'HUI) : une
+//   equipe de 40 vendangeurs sous CONTRAT DE GROUPE du 26 aout au 4 septembre
+//   n'existe pas le 12 aout. La fiche n'arrivait meme pas jusqu'a la ponderation.
+//   Resultat a l'ecran : \u00ab EFFECTIF 1 \u00bb sur un ordre de passage de vendange que
+//   Nico envoie ensuite aux ouvriers, et une repartition qui partage 154 j-homme
+//   entre une seule paire de bras.
+//   \u2605 LA VRAIE QUESTION N'EST PAS \u00ab qui est la ce matin \u00bb MAIS \u00ab qui sera la
+//   QUAND LE TRAVAIL SE FERA \u00bb. Le jour de la vendange, personne n'est en conge
+//   et tous les contrats courent. Un ordre de passage calcule sur l'effectif du
+//   12 aout est faux le 26.
+//   Source : w.head des semaines couvertes \u2014 la MEME que la frise annuelle et le
+//   simulateur de renfort. _chargeSaisonData retient les fiches dont un contrat
+//   RECOUPE la periode (_mvEnContratSurPeriode), puis _headWeek compte jour par
+//   jour avec le poids _mvEffDef. Aucun calcul neuf : un second calcul donnerait
+//   un second chiffre.
+//   \u26a0 On retient le MAXIMUM des semaines couvertes, pas la moyenne : une
+//   vendange de 40 personnes sur deux semaines noyee dans un mois de calme
+//   rendrait 12, un chiffre qui n'existe aucun jour de l'annee (\u00a733).
+function _pilEffFenetre(iso0,iso1){
+  var ann=null; try{ ann=_pilAnnuelData(); }catch(e){ ann=null; }
+  if(!ann||!ann.weeks||!ann.weeks.length) return null;
+  var a=_pilAnnOrd(iso0), b=_pilAnnOrd(iso1||iso0);
+  if(isNaN(a)||isNaN(b)) return null;
+  if(b<a){ var t=a; a=b; b=t; }
+  var best=null;
+  ann.weeks.forEach(function(w){
+    if(w.o1<a||w.o0>b) return;
+    // ⚠ headMax, pas head. head est lisse sur la semaine : un contrat de groupe
+    //   qui demarre un mercredi y vaut 5/7 de son effectif. Personne ne travaille
+    //   a 28,6 — ce jour-la il y a 40 personnes dans les rangs, ou aucune.
+    var h=(w.headMax!=null?w.headMax:(w.head||0));
+    if(best===null||h>best) best=h;
+  });
+  return best;
+}
+// Fenetre COMMUNE d'une liste de taches, lue dans cd.taskWindows (les memes
+// dates que le tableau Outils \u203a Param\u00e9trage). null si aucune tache reconnue :
+// une fenetre inventee vaudrait moins que pas de fenetre.
+function _pilFenTaches(noms){
+  var cd=_pilCdVue(); if(!cd||!cd.taskWindows||!cd.taskWindows.length) return null;
+  var set={}; (noms||[]).forEach(function(n){ set[_friseNorm(n)]=1; });
+  var d0=null,d1=null;
+  cd.taskWindows.forEach(function(t){
+    if(!set[_friseNorm(t.nom)]) return;
+    if(!d0||t.start<d0) d0=t.start;
+    if(!d1||t.end>d1)   d1=t.end;
+  });
+  return (d0&&d1)?{d0:d0,d1:d1}:null;
+}
+// Effectif sous contrat PENDANT ces taches. Rend aussi la fenetre, pour que
+// l'ecran puisse dire SUR QUOI il a compte — un nombre sans ses dates est une
+// opinion.
+function _pilEffTaches(noms){
+  var f=_pilFenTaches(noms); if(!f) return null;
+  var e=_pilEffFenetre(f.d0,f.d1);
+  return (e==null)?null:{eff:e,d0:f.d0,d1:f.d1};
+}
+function _pilFenLbl(f){ return f?(_pilFmtD(f.d0)+' \u2192 '+_pilFmtD(f.d1)):''; }
+// Le libelle du cadre, ecrit SOUS le chiffre. Un pic sans cadre est une opinion.
+function _pilCadreLbl(PP){
+  if(!PP.annee) return PP.nom||'la campagne';
+  return 'l\u2019exercice';
+}
+// La semaine d'un pic, en clair. Meme convention de date que la frise (UTC sur
+// l'axe ordinal), pas l'horloge locale : un decalage d'un jour sur une etiquette
+// de semaine se voit et fait douter de tout le reste.
+function _pilSemLabO(o0){
+  if(o0==null) return '';
+  var MOA=['janv.','f\u00e9vr.','mars','avr.','mai','juin','juil.','ao\u00fbt','sept.','oct.','nov.','d\u00e9c.'];
+  var dd=_pilOrdD(o0);
+  return 'semaine du '+dd.getUTCDate()+' '+MOA[dd.getUTCMonth()];
+}
+// ── LES DEUX CADRES ─────────────────────────────────────────────────────────
+// ⚠️ CORRECTION DE FOND (12/08/2026, sur retour de Nico). Cet ecran disait
+//    « exercice mal aligne, corrigez-le » et allait jusqu'a « aucune lecture
+//    annuelle n'est fiable tant que c'est le cas ». C'etait un MAUVAIS CONSEIL :
+//    un exercice comptable est fixe par le comptable, parfois par le statut. On
+//    ne le deplace pas pour qu'un graphique tombe mieux.
+//
+//    La vraie panne etait ailleurs : UN SEUL cadre pour DEUX questions.
+//      · L'EXERCICE COMPTABLE (bilan a bilan) repond a « ce que m'a coute
+//        l'annee fiscale ». C'est une donnee, pas un reglage.
+//      · L'ANNEE VIGNE (apres vendange N -> fin vendange N+1) repond a « ce que
+//        m'a coute un cycle de production ». C'est un cycle biologique.
+//    Les deux sont justes. Ils ne donnent pas le meme nombre, et c'est NORMAL.
+//    L'ecran doit donc les NOMMER et dire ce que chacun repond — pas en
+//    declarer un cassé.
+//
+//    Ce qui reste utile a signaler : quand une borne d'exercice TRAVERSE la
+//    vendange, la recolte est repartie sur deux bilans. Ca ne se corrige pas,
+//    ca se SAIT — et on le chiffre en jours, exactement, sans fausse precision.
+function _pilAnneeVigneHtml(ann){
+  if(!ann||!ann.ex) return '';
+  var A=ann.align, out='';
+  var MLB=(window.MV_EX_MOIS_LBL)||['janvier','f\u00e9vrier','mars','avril','mai','juin','juillet','ao\u00fbt','septembre','octobre','novembre','d\u00e9cembre'];
+  var admin=!!(typeof window.isAdmin==='function' && window.isAdmin());
+  var fr=function(d){ if(!d)return'\u2014'; var p=String(d).split('-'); return p.length===3?(parseInt(p[2],10)+' '+MLB[parseInt(p[1],10)-1]):d; };
+  var box=function(bg,col,html){
+    return '<div style="margin:0 0 8px;padding:9px 12px;border-radius:9px;background:'+bg+';color:'+col+';font-size:var(--pt-txt,12.5px);line-height:1.55">'+html+'</div>';
+  };
+  // On ne signale QUE la coupure, parce qu'elle seule repartit une recolte sur
+  // deux bilans. Une vendange qui « ouvre » l'annee n'est pas un defaut : c'est
+  // le calendrier de votre comptable, et il n'y a rien a corriger.
+  if(A && A.coupe && ann.vend){
+    var J=_pilAnnSplitVend(ann);
+    var bouton=(admin&&A.moisIdeal!=null)
+      ? (' <button data-exm="'+A.moisIdeal+'" style="border:1px solid currentColor;background:transparent;color:inherit;border-radius:16px;padding:3px 11px;font-size:var(--pt-micro,11px);font-weight:700;cursor:pointer;margin-left:4px">D\u00e9caler au 1\u1D49\u02B3 '+MLB[A.moisIdeal]+'</button>')
+      : '';
+    out+=box('#FBF0DC','#8A5A38',''+_mvIcon('info',16)+' <b>Votre vendange est \u00e0 cheval sur deux exercices.</b> Elle court du '
+      +fr(ann.vend.debut)+' au '+fr(ann.vend.fin)+' : sur ses <b>'+J.total+' jours</b>, '
+      +'<b>'+J.dedans+'</b> tombent dans cet exercice et <b>'+J.dehors+'</b> dans le suivant. '
+      +'Le co\u00fbt de la r\u00e9colte se lit donc sur <b>deux bilans</b>, dans \u00e0 peu pr\u00e8s cette proportion. '
+      +'Ce n\u2019est pas une erreur \u2014 c\u2019est votre calendrier comptable. Il n\u2019y a rien \u00e0 corriger\u00a0; '
+      +'il faut seulement le savoir en lisant le bilan.'
+      +(bouton?('<br><span style="font-size:var(--pt-micro,11px);opacity:.85">Si votre comptable accepte de changer la date de cl\u00f4ture, la r\u00e9colte tiendrait dans un seul exercice\u00a0:</span>'+bouton):''));
+  }
+  if(ann.hors&&ann.hors.length){
+    out+=box('#FBF0DC','#8A5A38',''+_mvIcon('info',16)+' <b>'+ann.hors.length+' p\u00e9riode'+(ann.hors.length>1?'s':'')+' hors de cet exercice</b> \u2014 '
+      +_pilEsc(ann.hors.join(', '))+'. Leur travail et leur co\u00fbt tombent dans une autre ann\u00e9e comptable.');
+  }
+  return out;
+}
+
+// Combien de jours de vendange tombent de chaque cote de la borne. En JOURS,
+// pas en euros : les jours se comptent exactement, le cout se prorate — et une
+// fausse precision sur un chiffre comptable est pire qu'un ordre de grandeur
+// annonce comme tel.
+function _pilAnnSplitVend(ann){
+  var v=ann.vend, ex=ann.ex;
+  var a=_pilAnnOrd(v.debut), b=_pilAnnOrd(v.fin);
+  var d0=_pilAnnOrd(ex.d0), d1=_pilAnnOrd(ex.d1);
+  var tot=Math.max(1,b-a+1);
+  var dedans=Math.max(0, Math.min(b,d1)-Math.max(a,d0)+1);
+  return { total:tot, dedans:dedans, dehors:Math.max(0,tot-dedans) };
+}
+
+// ── « DEUX FACONS DE COMPTER » ──────────────────────────────────────────────
+// Le panneau qui manquait. Un domaine a DEUX annees, et elles ne repondent pas
+// a la meme question :
+//   · l'EXERCICE COMPTABLE, bilan a bilan, fixe par le comptable ;
+//   · l'ANNEE VIGNE, apres une vendange jusqu'a la fin de la suivante.
+// Sans ce panneau, l'utilisateur voit deux totaux differents pour « l'annee »
+// et croit a une erreur. Ce n'en est pas une : ce sont deux questions.
+function _pilDeuxCadresHtml(ann){
+  if(!ann||!ann.ex) return '';
+  var MLB=(window.MV_EX_MOIS_LBL)||['janvier','f\u00e9vrier','mars','avril','mai','juin','juillet','ao\u00fbt','septembre','octobre','novembre','d\u00e9cembre'];
+  var fr=function(d){ if(!d)return'\u2014'; var q=String(d).split('-'); return q.length===3?(parseInt(q[2],10)+' '+MLB[parseInt(q[1],10)-1]+' '+q[0]):d; };
+
+  // ⚠️⚠️ CORRECTION DU 12/08 : ce bloc lisait _pecData, qui cadre sur la
+  //   CAMPAGNE CONSULTEE. La cellule « Exercice comptable · du 1er aout 2026 au
+  //   31 juillet 2027 » affichait donc 45 k€ : le cout d'une vendange de dix
+  //   jours, sous l'etiquette d'une annee entiere. Le chiffre etait juste, son
+  //   etiquette fausse — et c'est pire, parce qu'on ne le verifie pas.
+  //   La source est desormais _pexData, le seul moteur cadre sur des DATES :
+  //   salaires charges (heures payees x taux charge des fiches, planning),
+  //   carburant GNR et achats d'intrants sur la fenetre du bilan.
+  var eur=null, det='', X=_pilExoData()||null;
+  if(X && X.total>0){
+    eur=X.total;
+    det=_ecoH1(X.hPaid)+' h pay\u00e9es \u00b7 '+X.gens.length+' personne'+(X.gens.length>1?'s':'')
+       +(X.gnrT>0?(' \u00b7 '+_pilNb(Math.round(X.litres))+' L de GNR'):'')
+       +(X.nAch>0?(' \u00b7 '+X.nAch+' achat'+(X.nAch>1?'s':'')):'');
+  }
+
+  var cell=function(titre,sous,val,unite,det){
+    return '<div style="flex:1;min-width:210px;background:var(--bg-card);border:1px solid var(--gris-clair);border-radius:13px;padding:12px 14px">'
+      +'<div style="font-size:var(--pt-nano,9.5px);letter-spacing:1.4px;text-transform:uppercase;color:var(--texte-doux);font-weight:700">'+titre+'</div>'
+      +'<div style="font-size:var(--pt-micro,11px);color:var(--texte-doux);margin:3px 0 7px;line-height:1.4">'+sous+'</div>'
+      +'<div style="font-family:\'Cormorant Garamond\',serif;font-size:var(--pt-xl,27px);font-weight:700;color:var(--cave);line-height:1.05">'+val
+      +'<span style="font-family:Outfit,sans-serif;font-size:var(--pt-txt,12.5px);font-weight:600;color:var(--texte-doux)">'+unite+'</span></div>'
+      +'<div style="font-size:var(--pt-micro,11px);color:var(--texte-doux);margin-top:3px;line-height:1.4">'+det+'</div></div>';
+  };
+
+  // ══ QUELLES CAMPAGNES FORMENT L'ANNEE VIGNE ═══════════════════════
+  //   « D'apres une vendange jusqu'a la fin de la suivante ». Sommer TOUTES les
+  //   campagnes datees donnerait un total a cheval sur deux cycles : un hiver
+  //   2025-2026 (qui cloture le cycle precedent) additionne a un hiver 2026-2027
+  //   (qui ouvre le suivant). Deux fois le meme hiver dans un chiffre annonce
+  //   comme un cycle.
+  //   On part donc de la campagne qui PORTE la fin de vendange, et on remonte
+  //   tant qu'on ne retombe pas sur une campagne qui porte, elle aussi, une
+  //   vendange. Sans vendange datee, on ne devine pas : le cycle vaut null et la
+  //   cellule le dit deja (« aucune vendange datee »).
+  var aVend=ann.pers.map(function(pe){
+    return ((pe.cd&&pe.cd.taskWindows)||[]).some(function(t){ return _friseNorm(t.nom).indexOf('vendang')>=0; });
+  });
+  var dansCycle=ann.pers.map(function(){ return false; });
+  if(ann.vend){
+    var iv=-1;
+    for(var q=0;q<ann.pers.length;q++){
+      if(ann.pers[q].debut<=ann.vend.fin && ann.pers[q].fin>=ann.vend.fin) iv=q;
+    }
+    if(iv<0) for(var q2=ann.pers.length-1;q2>=0;q2--){ if(aVend[q2]){ iv=q2; break; } }
+    if(iv>=0){
+      dansCycle[iv]=true;
+      for(var q3=iv-1;q3>=0;q3--){ if(aVend[q3]) break; dansCycle[q3]=true; }
+    }
+  }
+
+  // Les campagnes, en heures de bareme : exactes, elles.
+  var lignes='', hTot=0, nCycle=0;
+  ann.pers.forEach(function(pe,ip){
+    if(!pe.cd) return;
+    // ⚠️ `charge`, PAS `totalTotal` : cette derniere n'existe pas sur l'objet
+    //   rendu par _chargeSaisonData (elle vient de calcHeures, app.js). Les
+    //   quatre lignes du tableau sortaient toutes a 0 h.
+    var h=Math.round(pe.cd.charge||0);
+    if(dansCycle[ip]){ hTot+=h; nCycle++; }
+    var dedans = !(pe.fin<ann.ex.d0 || pe.debut>ann.ex.d1);
+    var chev = dedans && (pe.debut<ann.ex.d0 || pe.fin>ann.ex.d1);
+    lignes+='<tr><td style="padding:6px 8px;border-bottom:1px solid var(--gris-clair)"><b>'+_pilEsc(pe.nom)+'</b>'
+      +(chev?' <span style="font-size:var(--pt-lbl,10.5px);font-weight:700;color:var(--orange);background:var(--orange-pale);border-radius:20px;padding:1px 7px">\u00e0 cheval</span>':'')
+      +(!dedans?' <span style="font-size:var(--pt-lbl,10.5px);font-weight:700;color:var(--texte-doux);background:var(--gris-clair);border-radius:20px;padding:1px 7px">hors exercice</span>':'')
+      +(dansCycle[ip]?' <span style="font-size:var(--pt-lbl,10.5px);font-weight:700;color:var(--vert-med);background:var(--vert-pale);border-radius:20px;padding:1px 7px">ann\u00e9e vigne</span>':'')
+      +'</td><td style="padding:6px 8px;border-bottom:1px solid var(--gris-clair);text-align:right;font-variant-numeric:tabular-nums;font-weight:600'
+      +(dansCycle[ip]?'':';color:var(--texte-doux)')+'">'
+      +_pilNb(h)+' h</td></tr>';
+  });
+
+  return '<div id="pil-an-cadres" style="background:var(--bg-app);border:1px solid var(--gris-clair);border-radius:16px;padding:14px 16px;margin:0 0 16px">'
+    +'<div style="font-family:\'Cormorant Garamond\',serif;font-size:var(--pt-md,20px);font-weight:700;color:var(--cave)">Deux fa\u00e7ons de compter votre ann\u00e9e</div>'
+    +'<div style="font-size:var(--pt-txt,12.5px);color:var(--texte-doux);margin:3px 0 12px;line-height:1.5">'
+    +'Un domaine en a <b>deux</b>, et elles ne r\u00e9pondent pas \u00e0 la m\u00eame question. '
+    +'Elles ne donnent pas le m\u00eame total\u00a0: c\u2019est normal, ce n\u2019est pas une erreur.</div>'
+    +'<div style="display:flex;gap:11px;flex-wrap:wrap">'
+    +cell(''+_mvIcon('livre',16)+' Exercice comptable',
+          'Ce que voit votre comptable, d\u2019un bilan \u00e0 l\u2019autre. Fix\u00e9 par lui\u00a0: ce n\u2019est pas un r\u00e9glage d\u2019affichage.',
+          (eur!=null?_pilNb(Math.round(eur/1000)):'\u2014'), (eur!=null?' k\u20ac':''),
+          'du '+fr(ann.ex.d0)+' au '+fr(ann.ex.d1)+(det?('<br>'+det):''))
+    +cell(''+_mvIcon('raisin',16)+' Ann\u00e9e vigne',
+          'Un cycle de production\u00a0: d\u2019apr\u00e8s une vendange jusqu\u2019\u00e0 la fin de la suivante. C\u2019est le cadre qui dit si une campagne a co\u00fbt\u00e9 cher.',
+          (nCycle>0?_pilNb(hTot):'\u2014'), (nCycle>0?' h de bar\u00e8me':''),
+          (ann.vend
+            ? ('vendange du '+fr(ann.vend.debut)+' au '+fr(ann.vend.fin)
+               +'<br>'+nCycle+' campagne'+(nCycle>1?'s':'')+' dans ce cycle')
+            : 'aucune vendange dat\u00e9e \u2014 le cycle ne peut pas \u00eatre born\u00e9'))
+    +'</div>'
+    // ★ 530 CARACTERES D'EXPLICATION -> UNE LIGNE + LA PASTILLE.
+    //   Le lecteur a besoin de savoir QUE les deux totaux different et que ce
+    //   n'est pas une erreur ; POURQUOI se lit une fois.
+    +'<div style="font-size:var(--pt-txt,12.5px);color:var(--texte-doux);margin:11px 0 7px;line-height:1.5;display:flex;align-items:center;gap:8px;flex-wrap:wrap">'
+    +'<span><b style="color:var(--texte)">Le d\u00e9tail, campagne par campagne.</b> Seules les lignes marqu\u00e9es '
+    +'<b style="color:var(--vert-med)">ann\u00e9e vigne</b> entrent dans le total de droite.</span>'
+    +_mvInfoBtn('pil.cadres')+'</div>'
+    +'<table style="width:100%;border-collapse:collapse;font-size:var(--pt-txt,12.5px)">'+lignes+'</table>'
+    // ★ 440 CARACTERES EN ITALIQUE -> LE CADRE SEUL. « Heures de bareme » change
+    //   la lecture du tableau : ca reste. Le reste (d'ou vient le cout, ce qui
+    //   n'y est pas) explique le calcul : MV_INFO['pil.cadres'].
+    +'<div style="font-size:var(--pt-micro,11px);color:var(--texte-doux);margin-top:8px;font-style:italic">'
+      +'Heures de <b>bar\u00e8me</b>\u00a0: ce que le travail devrait prendre, pas ce qu\u2019il a pris.</div>'
+    +'</div>';
+}
+
+// \u2605\u2605\u2605 LES JOURS COUVERTS PAR PLUS D'UNE PERIODE.
+//   \u26a0 CE N'EST PAS UN DEFAUT DE COMPTAGE, et on ne le represente pas comme tel.
+//   Les heures suivent les TACHES, une tache n'appartient qu'a UNE periode : rien
+//   n'est compte deux fois (\u00a735c, verifie sur _chargeSaisonData \u2014 ne pas
+//   reintroduire l'alerte). C'est un defaut de DESSIN : sur un jour partage, la
+//   frise peint DEUX barres au meme endroit, l'une par-dessus l'autre. Le chiffre
+//   affiche reste juste (c'est un maximum, pas une somme) mais le lecteur voit une
+//   barre la ou il y en a deux, et rien ne lui dit de quelle periode est celle du
+//   dessus. On hachure le fond : la zone se lit, les barres restent lisibles.
+//   Balayage : +1 a chaque debut, -1 au lendemain de chaque fin. Partage = 2 et
+//   plus. Deux periodes bout a bout (fin le X, debut le X+1) ne partagent RIEN.
+function _pilAnnPartage(ann){
+  if(!ann||!ann.pers||ann.pers.length<2) return [];
+  var ev=[];
+  ann.pers.forEach(function(p){
+    var a=_pilAnnOrd(p.debut), b=_pilAnnOrd(p.fin);
+    if(isNaN(a)||isNaN(b)||b<a) return;
+    ev.push([a,1]); ev.push([b+1,-1]);
+  });
+  ev.sort(function(x,y){ return (x[0]-y[0])||(x[1]-y[1]); });
+  var n=0, deb=null, out=[];
+  ev.forEach(function(x){
+    var av=n; n+=x[1];
+    if(av<2 && n>=2) deb=x[0];
+    else if(av>=2 && n<2 && deb!=null){ if(x[0]>deb) out.push([deb,x[0]-1]); deb=null; }
+  });
+  return out;
+}
+function _pilFriseAnneeSvg(ann,w){
+  if(!ann||!ann.weeks.length) return window._mvGraphVide(
+    'Aucune p\u00e9riode dat\u00e9e sur la campagne',
+    'Renseignez les dates de d\u00e9but et de fin de vos p\u00e9riodes (R\u00e9glages \u203a Saisons).');
+  var selP=_pilAnnPer(_PIL_SCOPE.camp), s, e;
+  if(selP){ var d0=_pilAnnOrd(selP.debut), d1=_pilAnnOrd(selP.fin);
+    var mg=Math.max(2,Math.round((d1-d0)*0.04)); s=d0-mg; e=d1+mg; }
+  else { s=ann.s; e=ann.e; }
+  var L2=Math.max(1,e-s+1), W=(w>0)?Math.round(Math.max(620,w)):1000;
+  var padL=(W<760)?38:52, padR=16, plotW=W-padL-padR;
+  function X(o){ return padL+(o-s)/L2*plotW; }
+  var tks=selP?_pilAnnTaches(selP):[];
+  var bandH=selP?(tks.length*13+2):22;
+  // La hauteur suit la largeur : un graphe de 1 200 px de large et 206 px de
+  // haut ecrase ses barres et rend l'hiver illisible sous le pic de vendange.
+  var chH=(W<760)?170:(W<1000?206:Math.min(300,Math.round(150+W*0.09)));
+  var padT=bandH+16, scH=28, H=padT+chH+scH;
+  var c=window._mvGraphCadre(W,H);
+  var vis=ann.weeks.filter(function(x){
+    return x.o1>=s && x.o0<=e && (selP?(x.per===selP.idx):true);
+  });
+  // ★ L'ECHELLE VERTICALE SUIT LE ZOOM — c'est tout l'interet du clic. Sur l'annee
+  // l'axe monte au pic de vendange (~42) et l'hiver (~3) rampe en bas, illisible.
+  // Zoome sur l'hiver l'axe redescend a 5 et le detail apparait.
+  var yMax=1;
+  vis.forEach(function(x){ if(x.need>yMax)yMax=x.need; if(x.head>yMax)yMax=x.head; });
+  var step=yMax>60?20:(yMax>30?10:(yMax>12?5:(yMax>5?2:1)));
+  var yTop=Math.ceil(yMax/step)*step; if(!(yTop>0))yTop=step;
+  function Y(v){ return padT+chH-(v/yTop)*chH; }
+  var MN=['JANV','F\u00c9VR','MARS','AVR','MAI','JUIN','JUIL','AO\u00dbT','SEPT','OCT','NOV','D\u00c9C'];
+  // Deux motifs, deux SENS, deux inclinaisons opposees : un trou (aucune periode)
+  // ne doit pas ressembler a un partage (deux periodes). Meme trame = meme
+  // message pour l'oeil, quel que soit le texte de la legende.
+  var g='<defs><pattern id="pil-ann-h" width="6" height="6" patternTransform="rotate(45)" patternUnits="userSpaceOnUse">'
+    +'<line x1="0" y1="0" x2="0" y2="6" stroke="'+c.col.texte+'" stroke-width="1.4" opacity="0.28"/></pattern>'
+    +'<pattern id="pil-ann-p" width="7" height="7" patternTransform="rotate(-45)" patternUnits="userSpaceOnUse">'
+    +'<line x1="0" y1="0" x2="0" y2="7" stroke="#7A5CA8" stroke-width="2" opacity="0.20"/></pattern></defs>';
+  var _part=[];
+  if(!selP){
+    ann.trous.forEach(function(t){
+      var x0=X(Math.max(t[0],s)), x1=X(Math.min(t[1]+1,e+1));
+      if(x1>x0) g+='<rect x="'+x0.toFixed(1)+'" y="'+padT+'" width="'+(x1-x0).toFixed(1)+'" height="'+chH+'" fill="url(#pil-ann-h)"/>';
+    });
+    _part=_pilAnnPartage(ann);
+    _part.forEach(function(t){
+      var x0=X(Math.max(t[0],s)), x1=X(Math.min(t[1]+1,e+1));
+      if(x1>x0) g+='<rect x="'+x0.toFixed(1)+'" y="'+padT+'" width="'+(x1-x0).toFixed(1)+'" height="'+chH+'" fill="url(#pil-ann-p)"/>';
+    });
+  }
+  for(var v=0;v<=yTop;v+=step){
+    g+='<line x1="'+padL+'" y1="'+Y(v).toFixed(1)+'" x2="'+(W-padR)+'" y2="'+Y(v).toFixed(1)+'" stroke="'+c.col.grille+'" stroke-width="1"/>'
+      +'<text x="'+(padL-7)+'" y="'+(Y(v)+4).toFixed(1)+'" text-anchor="end" font-size="'+c.txt.mini+'" fill="'+c.col.texte+'" font-family="Outfit">'+v+'</text>';
+  }
+  // ★ BARRES EMPILEES : vert = ce que l'equipe absorbe, rouge = le renfort a
+  // trouver. L'ancienne barre etait coloriee EN ENTIER (vert OU rouge) : elle
+  // disait « ca deborde » sans dire de combien. Ici la hauteur de rouge EST le
+  // nombre de personnes a recruter, lisible sans calcul.
+  vis.forEach(function(x){
+    if(!(x.cap>0)||x.need<=0.01) return;
+    var bx=Math.max(padL,X(x.o0))+1, bx2=Math.min(W-padR,X(x.o1+1)), bw=Math.max(1.5,bx2-bx-1);
+    var base=Math.min(x.need,x.head), ov=Math.max(0,x.need-x.head);
+    g+='<rect x="'+bx.toFixed(1)+'" y="'+Y(base).toFixed(1)+'" width="'+bw.toFixed(1)+'" height="'+(padT+chH-Y(base)).toFixed(1)+'" rx="2" fill="'+_PIL_SEM.fait+'" opacity="0.85"/>';
+    if(ov>0.02) g+='<rect x="'+bx.toFixed(1)+'" y="'+Y(x.need).toFixed(1)+'" width="'+bw.toFixed(1)+'" height="'+(Y(base)-Y(x.need)).toFixed(1)+'" rx="2" fill="'+_PIL_SEM.faute+'" opacity="0.92"/>';
+  });
+  // Deux lignes : effectif PRESENT (plein) et SOCLE PERMANENT (pointille, equipes
+  // collectives exclues — c'est headPerm, deja calcule par planning.js). Le socle
+  // rend l'hiver lisible meme quand l'axe est cale sur le pic : on lit « au-dessus
+  // de cette ligne, c'est du renfort a trouver », et non un chiffre absolu perdu.
+  // ★ LA LIGNE SE COUPE SUR UN TROU. Elle enchainait en 'L' quelle que soit la
+  //   distance : entre deux periodes separees d'un mois, un segment droit
+  //   traversait une fenetre ou RIEN n'avait ete mesure. Le trait affirmait un
+  //   effectif la ou l'application n'en connait aucun. On insere un point
+  //   `gap` des que la semaine suivante ne colle pas a la precedente.
+  var ptsH=[], ptsP=[], prevFin=null;
+  vis.forEach(function(x){
+    if(prevFin!==null && x.o0>prevFin+1){ ptsH.push({gap:true}); ptsP.push({gap:true}); }
+    var x0=Math.max(padL,X(x.o0)), x1=Math.min(W-padR,X(x.o1+1));
+    ptsH.push({x0:x0,x1:x1,y:Y(x.head)});
+    ptsP.push({x0:x0,x1:x1,y:Y(x.headPerm)});
+    prevFin=x.o1;
+  });
+  var qq=_pilPolyBreak(ptsP), pp=_pilPolyBreak(ptsH);
+  if(qq) g+='<path d="'+qq+'" fill="none" stroke="'+_PIL_SEM.socle+'" stroke-width="1.8" stroke-dasharray="5 4"/>';
+  if(pp) g+='<path d="'+pp+'" fill="none" stroke="var(--texte)" stroke-width="2.4" stroke-linejoin="round"/>';
+  var tIso=(typeof window._mvAujIso==='function')?window._mvAujIso():new Date().toISOString().split('T')[0];
+  var tj=_pilAnnOrd(tIso);
+  // Le trait du jour est un REPERE, pas une alerte : il ne prend plus la
+  // couleur des barres de renfort, avec qui il partageait `col.alerte`.
+  if(tj>=s&&tj<=e) g+='<line x1="'+X(tj).toFixed(1)+'" y1="'+padT+'" x2="'+X(tj).toFixed(1)+'" y2="'+(padT+chH).toFixed(1)+'" stroke="'+_PIL_SEM.aujourdhui+'" stroke-width="1.5" stroke-dasharray="4 3" opacity="0.55"/>';
+  if(!selP){
+    ann.pers.forEach(function(p){
+      var x0=Math.max(padL,X(_pilAnnOrd(p.debut))), x1=Math.min(W-padR,X(_pilAnnOrd(p.fin)+1)), bw=x1-x0;
+      if(!(bw>0)) return;
+      g+='<g data-etpc="'+_pilEsc(p.nom)+'" style="cursor:pointer">'
+        +'<rect x="'+x0.toFixed(1)+'" y="'+(padT-bandH-8)+'" width="'+bw.toFixed(1)+'" height="'+bandH+'" rx="4" fill="'+p.col+'"/>';
+      if(bw>78) g+='<text x="'+(x0+bw/2).toFixed(1)+'" y="'+(padT-bandH+7)+'" text-anchor="middle" font-size="'+c.txt.axe+'" font-weight="600" fill="#fff" font-family="Outfit" pointer-events="none">'+_pilEsc(p.nom)+'</text>';
+      g+='</g>';
+    });
+  } else {
+    // Zoome : les bandes du haut deviennent les TACHES de la campagne. C'est la
+    // reponse a « laquelle fait le pic ? », impossible a lire sur l'annee entiere.
+    var r=0;
+    tks.forEach(function(t){
+      var x0=Math.max(padL,X(_pilAnnOrd(t.start))), x1=Math.min(W-padR,X(_pilAnnOrd(t.end)+1));
+      var yy=padT-bandH-8+r*13;
+      g+='<rect x="'+x0.toFixed(1)+'" y="'+yy+'" width="'+Math.max(3,x1-x0).toFixed(1)+'" height="11" rx="3" fill="'+_taskColor(t.nom)+'"/>'
+        +'<text x="'+(x0+5).toFixed(1)+'" y="'+(yy+8.5)+'" font-size="'+c.txt.mini+'" font-weight="600" fill="#fff" font-family="Outfit">'+_pilEsc(t.nom)+'</text>';
+      r++;
+    });
+  }
+  var dt=_pilOrdD(s);
+  var cy=dt.getUTCFullYear(), cm=dt.getUTCMonth();
+  for(var q=0;q<30;q++){
+    var mo0=_pilAnnOrd(cy+'-'+String(cm+1).padStart(2,'0')+'-01');
+    if(mo0>e) break;
+    var ny=(cm===11)?cy+1:cy, nm=(cm+1)%12;
+    var mo1=_pilAnnOrd(ny+'-'+String(nm+1).padStart(2,'0')+'-01');
+    if(mo1>=s){
+      if(mo0>=s) g+='<line x1="'+X(mo0).toFixed(1)+'" y1="'+padT+'" x2="'+X(mo0).toFixed(1)+'" y2="'+(padT+chH+4).toFixed(1)+'" stroke="'+c.col.grille+'" stroke-width="1"/>';
+      var cx=(X(Math.max(mo0,s))+X(Math.min(mo1,e+1)))/2;
+      if(cx>padL+14&&cx<W-padR-14) g+='<text x="'+cx.toFixed(1)+'" y="'+(padT+chH+19)+'" text-anchor="middle" font-size="'+c.txt.mini+'" font-weight="600" fill="'+c.col.texte+'" font-family="Outfit">'+MN[cm]+'</text>';
+    }
+    cy=ny; cm=nm;
+  }
+  return window._mvGraphSvg(window._mvGraphCadre(W,H),
+    (selP?('Personnes n\u00e9cessaires par semaine sur '+selP.nom):'Personnes n\u00e9cessaires par semaine sur la campagne')
+    +', face \u00e0 l\u2019effectif pr\u00e9sent.'
+    +(_part.length?(' '+_part.length+' zone'+(_part.length>1?'s':'')+' o\u00f9 deux p\u00e9riodes se recouvrent, hachur\u00e9e'+(_part.length>1?'s':'')+' : deux barres y sont dessin\u00e9es au m\u00eame endroit.'):''), g);
+}
+
+// ── NIVEAU ① — L'ANNEE : la frise des 52 semaines et le pic ─────────────────
+// ⚠️⚠️ CE QUI A QUITTE CETTE TUILE (12/08/2026, retour Nico). La repartition
+//   « Ou va le temps de l'equipe », la frise prevu/reel, la courbe par semaine
+//   et l'ecart prevu/reel parlent d'UNE campagne, pas de l'annee. Ils etaient
+//   ici, et la tuile s'en excusait par un bandeau : « les blocs ci-dessous
+//   detaillent la campagne X ».
+//   ★★ UN BANDEAU QUI EXPLIQUE POURQUOI UN BLOC EST AU MAUVAIS ENDROIT NE LE
+//   DEPLACE PAS : IL DOCUMENTE LA FAUTE. Les quatre blocs vivent desormais dans
+//   « La campagne » (_pilPanelTemps), au niveau de zoom qui repond a leur
+//   question. Le bandeau a disparu avec eux — il n'y a plus rien a excuser.
+function _pilPanelEtp(d){
+  var cd=_pilCdVue();
+  var PP=_pilPicPortee();
+  if(!cd||!cd.months.length){
+    return _pilTile('etp','#C9A84C','Charge & ETP \u00b7 saison', _pilStat('\u2014',''), 'datez la saison pour estimer la charge', null,
+      _pilEmptyGo('Renseignez les dates de d\u00e9but et de fin de la campagne active pour calculer la charge et l\'ETP n\u00e9cessaire.','saisons','R\u00e9glages \u203a Campagne'));
+  }
+  function _e(v){ return (Math.round((v||0)*10)/10).toString().replace('.',','); }
+  var ann=_pilAnnuelData();
+  // ══ LE PIC ET L'EFFECTIF SE LISENT A LA SEMAINE ═══════════════════════════
+  // cd.peakReq est le maximum HEBDOMADAIRE et cd.peakPres l'effectif de CETTE
+  // semaine-la (planning.js). Avant, deux moyennes mensuelles de grandeurs qui
+  // varient d'un facteur 20 dans le mois se comparaient : « 27 ETP requis »
+  // contre « 11,2 presents » — un chiffre qui n'existe AUCUN jour de l'annee.
+  var peak4=PP.pic||0, presAtPeak=PP.head||0;
+  var anyShort=!!PP.court, pkw=PP.picW||null;
+  // Nombre de zones ou deux periodes se recouvrent. Meme source que la frise
+  // (_pilAnnPartage) : la legende ne peut pas annoncer autre chose que le dessin.
+  var _partN=(ann&&!_pilAnnPer(_PIL_SCOPE.camp))?_pilAnnPartage(ann).length:0;
+  var cadre=_pilCadreLbl(PP);
+  function _semLab(wk){ return wk?_pilSemLabO(wk.o0):''; }
+  var synth, sBg, sCol;
+  if(anyShort){
+    var miss=Math.max(0,peak4-presAtPeak);
+    synth='Sur '+cadre+' \u2014 pic \u00e0 '+_e(peak4)+' personnes'+(pkw?(' \u00b7 '+_semLab(pkw)):'')+' pour '+_e(presAtPeak)+' pr\u00e9sentes \u2192 il en manque ~'+_e(miss);
+    sBg='#F3D9D4'; sCol='var(--rouge)';
+  } else {
+    synth='Sur '+cadre+' \u2014 aucune semaine en sous-effectif. Pic \u00e0 '+_e(peak4)+' personnes'+(pkw?(' \u00b7 '+_semLab(pkw)):'')+'.';
+    sBg='#DCEBD0'; sCol='var(--vert-med)';
+  }
+  var annLeg='<div style="display:flex;gap:14px;flex-wrap:wrap;font-size:var(--pt-micro,11px);color:var(--texte-doux);margin:8px 0 2px">'
+    +'<span style="display:inline-flex;align-items:center;gap:6px"><i style="width:14px;height:10px;border-radius:3px;background:var(--vert-med);display:inline-block"></i> couvert par l\u2019\u00e9quipe</span>'
+    +'<span style="display:inline-flex;align-items:center;gap:6px"><i style="width:14px;height:10px;border-radius:3px;background:var(--rouge);display:inline-block"></i> renfort \u00e0 trouver</span>'
+    +'<span style="display:inline-flex;align-items:center;gap:6px"><i style="width:16px;height:0;border-top:2px solid var(--texte);display:inline-block"></i> effectif pr\u00e9sent</span>'
+    +'<span style="display:inline-flex;align-items:center;gap:6px"><i style="width:16px;height:0;border-top:2px dashed #4A9FC8;display:inline-block"></i> socle permanent</span>'
+    // \u2605 La hachure violette n'apparait dans la legende QUE s'il y a une zone
+    //   partagee. Une legende qui nomme une trame absente du dessin fait chercher
+    //   ce qui n'existe pas \u2014 et fait douter du reste.
+    +(_partN?('<span style="display:inline-flex;align-items:center;gap:6px"><i style="width:14px;height:10px;border-radius:3px;background:repeating-linear-gradient(45deg,rgba(122,92,168,.30) 0 2px,transparent 2px 5px);display:inline-block"></i> deux p\u00e9riodes se recouvrent \u2014 deux barres au m\u00eame endroit</span>'):'')
+    +'</div>';
+  var secTtl='font-weight:600;font-size:var(--pt-txt,12.5px);color:var(--cave);margin:14px 0 2px';
+  // ── Frise annuelle : clic sur une campagne = ZOOM (axe X et axe Y) ───────────
+  // ★ Plus de chip « Annee » : la frise EST la tuile. Une case a cocher qui vide
+  //   son propre panneau n'est pas un reglage, c'est une trappe.
+  var annBlock='';
+  if(ann){
+    var _selP=_pilAnnPer(_PIL_SCOPE.camp);
+    annBlock='<div style="display:flex;align-items:baseline;justify-content:space-between;flex-wrap:wrap;gap:8px;margin:2px 0 2px">'
+      +'<div style="'+secTtl+';margin:0">'+(_selP?_pilEsc(_selP.nom):'Toute la campagne')+' \u2014 personnes n\u00e9cessaires / semaine</div>'
+      +(_selP?('<button data-etpc="'+_pilEsc(_selP.nom)+'" style="border:1px solid var(--gris);background:#fff;color:var(--texte-doux);border-radius:20px;padding:4px 11px;font-size:var(--pt-micro,11px);font-weight:600;cursor:pointer">\u2190 toute la campagne</button>'):'')
+      +'</div>'
+      +'<div style="font-size:var(--pt-lbl,10.5px);color:var(--texte-doux);margin:0 0 6px">'
+      +(_selP?'L\u2019\u00e9chelle verticale suit le zoom \u2014 les bandes du haut sont les t\u00e2ches de la campagne.'
+             :((ann.ex?('Ann\u00e9e = exercice comptable \u00b7 '+_pilEsc(ann.ex.lbl)+'. '):'')
+               +'Cliquez une campagne pour zoomer dessus. Les zones hachur\u00e9es ne sont couvertes par aucune p\u00e9riode.'))
+      +'</div>'
+      +(_selP?'':_pilAnneeVigneHtml(ann))
+      +'<div style="width:100%;overflow-x:auto" id="pil-g-ann"></div>'+annLeg;
+    // ══ LE CHEVAUCHEMENT DE PERIODES N'EST PAS UN DEFAUT ══════════════════════
+    // ⚠️⚠️ CE BLOC DISAIT EXACTEMENT L'INVERSE : « les heures y sont comptees
+    //   deux fois sur la frise », en rouge. C'etait FAUX, et verifiable en
+    //   deux lectures : _chargeSaisonData calcule la charge d'une periode sur
+    //   les taches de SA liste (s.taches, une tache par periode), jamais sur
+    //   ses jours. Deux periodes qui partagent des jours ne partagent pas des
+    //   heures. Le rouge accusait le calendrier du domaine d'une faute que le
+    //   calcul ne commet pas — et poussait a decouper des periodes justes.
+    //   ★ On compte les TACHES, pas les JOURS. Le fait reste dit, en gris.
+    if(ann.ovl.length) annBlock+='<div style="margin:6px 0 0;padding:8px 11px;border-radius:9px;background:rgba(74,159,200,.08);color:var(--texte-doux);font-size:var(--pt-micro,11px);line-height:1.5">'
+      +'<b>'+_pilEsc(ann.ovl.join(', '))+'</b> partage'+(ann.ovl.length>1?'nt':'')+' des jours avec la p\u00e9riode pr\u00e9c\u00e9dente. '
+      +'C\u2019est normal, et <b>rien n\u2019est compt\u00e9 deux fois</b> : les heures suivent les <b>t\u00e2ches</b>, et chaque t\u00e2che n\u2019appartient qu\u2019\u00e0 une seule p\u00e9riode. '
+      +'Sur les jours communs, les deux bandes se superposent \u2014 c\u2019est un recouvrement de <b>calendrier</b>, pas de charge.</div>';
+    // ★ La frise de l'annee est le graphe le plus large du module : douze mois,
+    //   cinquante-deux semaines, deux courbes et les bandes de campagnes. Elle
+    //   prend la largeur de la carte (plafond propre), au lieu des 760 px
+    //   generiques qui la laissaient a 60 % de la page.
+    window._mvGraphSuivre('#pil-g-ann', function(lg){ return _pilFriseAnneeSvg(ann,lg); }, {max:1800});
+  }
+  var body=annBlock || _pilEmptyGo('Renseignez au moins une p\u00e9riode dat\u00e9e pour dessiner les 52 semaines de l\u2019exercice.','saisons','R\u00e9glages \u203a Campagne');
+  body+='<div style="margin-top:10px;padding:9px 11px;border-radius:9px;background:'+sBg+';color:'+sCol+';font-size:var(--pt-txt,12.5px);font-weight:600">'+synth+'</div>';
+  var cov=peak4>0?Math.min(presAtPeak/peak4*100,100):100;
+  var _sub=_e(presAtPeak)+' pr\u00e9sents au pic'+(pkw?(' \u00b7 '+_semLab(pkw)):'');
+  return _pilTile('etp','#C9A84C','Charge & ETP \u00b7 '+cadre, _pilStat(_e(peak4),' au pic'), _sub, cov, body);
+}
+
+// ── NIVEAU ② — LA CAMPAGNE : ou part le temps de l'equipe ───────────────────
+// Les quatre blocs qui detaillent UNE campagne : la repartition de la presence,
+// la frise prevu/reel, la courbe par semaine et l'ecart. Ils repondent tous a
+// « comment se passe CE chantier », jamais a « ce que m'a coute l'annee ». Le
+// titre nomme la campagne : aucun bandeau n'est necessaire pour dire de quoi on
+// parle quand le titre le dit deja.
+function _pilPanelTemps(d){
+  var cd=_pilCdVue();
+  if(!cd||!cd.months.length){
+    return _pilTile('temps','#4A9FC8','Le temps de l\u2019\u00e9quipe', _pilStat('\u2014',''), 'datez la campagne pour r\u00e9partir le temps', null,
+      _pilEmptyGo('Renseignez les dates de d\u00e9but et de fin de la campagne : la r\u00e9partition du temps, la frise et la courbe en d\u00e9coulent.','saisons','R\u00e9glages \u203a Campagne'));
+  }
+  var s=_PIL_STATE.sub||{};
+  // ⚠ d.data porte les pourcentages de la periode CONSULTEE (calcHeures). Sur une
+  //   campagne zoomee qui n'est pas elle, les appliquer declarerait « termine » ou
+  //   « en cours » d'apres l'avancement d'une AUTRE campagne. On passe le drapeau.
+  var real=_pilTaskReal(cd,d,_pilVueEstConsultee());
+  function chip(k,lab){ var on=s[k]!==0; return '<button data-etp="'+k+'" style="border:1px solid '+(on?'#C9A84C':'var(--gris)')+';background:'+(on?'#C9A84C22':'#fff')+';color:'+(on?'#8A5A38':'var(--texte-doux)')+';border-radius:20px;padding:4px 11px;font-size:var(--pt-micro,11px);font-weight:600;cursor:pointer;margin:0 6px 6px 0">'+(on?'\u2713 ':'')+lab+'</button>'; }
+  var chips='<div style="margin:-2px 0 8px">'+chip('etp_frise','Frise pr\u00e9vu/r\u00e9el')+chip('etp_courbe','Courbe / sem.')+chip('etp_ecart','\u00c9cart pr\u00e9vu/r\u00e9el')+'</div>';
+  var friseLeg='<div style="display:flex;gap:14px;flex-wrap:wrap;font-size:var(--pt-micro,11px);color:var(--texte-doux);margin:8px 0 2px">'
+    +'<span style="display:inline-flex;align-items:center;gap:6px"><i style="width:14px;height:10px;border-radius:3px;background:var(--terre);display:inline-block"></i> pr\u00e9vu</span>'
+    +'<span style="display:inline-flex;align-items:center;gap:6px"><i style="width:14px;height:10px;border-radius:3px;border:1px solid #14110D;background:repeating-linear-gradient(45deg,#14110D,#14110D 2px,transparent 2px,transparent 5px);display:inline-block"></i> r\u00e9el (journal)</span>'
+    +'<span style="display:inline-flex;align-items:center;gap:6px"><i style="width:14px;height:10px;border-radius:3px;background:var(--orange);display:inline-block"></i> en cours</span>'
+    +'<span style="display:inline-flex;align-items:center;gap:6px"><i style="width:16px;height:0;border-top:2px dashed #9B2D1F;display:inline-block"></i> aujourd\'hui</span></div>';
+  var curveLeg='<div style="display:flex;gap:14px;flex-wrap:wrap;font-size:var(--pt-micro,11px);color:var(--texte-doux);margin:8px 0 2px">'
+    +'<span style="display:inline-flex;align-items:center;gap:6px"><i style="width:14px;height:10px;border-radius:3px;background:#5C8A3E;display:inline-block"></i> dans l\'effectif</span>'
+    +'<span style="display:inline-flex;align-items:center;gap:6px"><i style="width:14px;height:10px;border-radius:3px;background:#9B2D1F;display:inline-block"></i> pic \u2014 sous-effectif</span>'
+    +'<span style="display:inline-flex;align-items:center;gap:6px"><i style="width:16px;height:0;border-top:2px solid #14110D;display:inline-block"></i> effectif pr\u00e9sent</span></div>';
+  var secTtl='font-weight:600;font-size:var(--pt-txt,12.5px);color:var(--cave);margin:14px 0 2px';
+  // ── Bloc répartition « Où va le temps » (présence → vigne / tracteur / autres) ──
+  // ★ Meme periode que `cd` : additionner les heures de tracteur d'une campagne
+  //   a la charge d'une autre donnerait une repartition dont les deux parts ne
+  //   parlent pas de la meme fenetre.
+  var _tH=(window._tractHoursSeason)?Math.round(window._tractHoursSeason(_pilPeriodeVue())||0):0;
+  var _prez=Math.round(cd.capEquipe||0), _vig=Math.round(cd.charge||0), _cr=cd.capRefTotal||0;
+  var _etpF=function(h){return _cr>0?(h/_cr).toFixed(1).replace('.',','):'\u2014';};
+  // ══ UNE PART NE PEUT PAS DEPASSER 100 % ═══════════════════════════════════
+  // _pV=_vig/_prez*100 sortait a 392 % dans une barre qui se PRESENTE comme une
+  // repartition, pendant qu'« Autres » tombait a 0 h par le Math.max(0,...) : la
+  // barre mentait deux fois — une part impossible, et un reste invente a zero
+  // alors qu'il y a bien de la cave et des trajets. Desormais la surcharge se DIT.
+  var _tot=_vig+_tH, _surch=(_prez>0 && _tot>_prez+0.5), _ratio=(_prez>0)?(_tot/_prez):0;
+  var _aut=_surch?0:Math.max(0,_prez-_vig-_tH);
+  var _base=_surch?_tot:(_prez||1);
+  var _wV=_vig/_base*100, _wT=_tH/_base*100, _wA=_surch?0:Math.max(0,100-_wV-_wT);
+  var _pV=Math.round(_wV), _pT=Math.round(_wT), _pA=_surch?0:Math.max(0,100-_pV-_pT);
+  var _segR=function(wd,gr){return (wd>0.5)?('<div style="width:'+wd+'%;background:'+gr+';display:flex;align-items:center;justify-content:center;font-size:var(--pt-lbl,10.5px);font-weight:700;color:#fff">'+Math.round(wd)+'\u00a0%</div>'):'';};
+  var _rowR=function(col,nm,sub,val,pct,etp){return '<div style="display:flex;align-items:center;gap:9px;font-size:var(--pt-txt,12.5px);padding:5px 0;border-top:1px solid var(--gris)"><span style="width:10px;height:10px;border-radius:3px;background:'+col+';flex-shrink:0"></span><span style="flex:1">'+nm+' <span style="font-size:var(--pt-micro,11px);color:var(--texte-doux)">'+sub+'</span></span><span style="font-weight:700">'+_pilNum(val)+' h</span><span style="font-size:var(--pt-micro,11px);color:var(--texte-doux);margin-left:6px">'+pct+'\u00a0% \u00b7 '+etp+' ETP</span></div>';};
+  var _footR='Il faut <b style="color:#3D6B27">'+_etpF(_vig)+' ETP</b> pour la vigne'
+    +((_tH>0)?(' et <b style="color:#4A9FC8">'+_etpF(_tH)+' ETP</b> au tracteur'):'')
+    +' <b>en moyenne sur la p\u00e9riode</b>. ';
+  if(_surch){
+    _footR+='La pr\u00e9sence de l\u2019\u00e9quipe ('+_pilNum(_prez)+' h) ne couvre pas cette charge : <b style="color:var(--rouge)">surcharge \u00d7'
+      +(Math.round(_ratio*10)/10).toString().replace('.',',')+'</b>. Rien ne reste pour la cave, les trajets ou l\u2019entretien.';
+  } else {
+    _footR+='Le reste ('+_etpF(_aut)+' ETP) part sur cave, trajets, entretien\u2026'
+      +((_tH>0)?'':' Renseignez un bar\u00e8me h/ha par activit\u00e9 (R\u00e9glages \u203a Tracteur) pour d\u00e9tacher le tracteur d\u2019\u00ab Autres \u00bb.');
+  }
+  // ★ Une moyenne n'est pas un pic : le dire ICI, a cote du chiffre moyen, est le
+  //   seul endroit ou quelqu'un risque de le confondre avec un besoin reel.
+  _footR+=' <b>Une moyenne n\u2019est pas un pic.</b>'+(typeof _mvInfoBtn==='function'?(' '+_mvInfoBtn('pil.avc.temps')):'')+'';
+  var repartBlock='<div style="border:1px solid var(--gris);border-radius:11px;padding:12px 14px;margin-bottom:12px;background:#fff">'
+    +'<div style="font-size:var(--pt-micro,11px);font-weight:700;text-transform:uppercase;letter-spacing:.6px;color:var(--texte-doux)">O\u00f9 va le temps de l\u2019\u00e9quipe</div>'
+    +'<div style="display:flex;align-items:baseline;gap:7px;margin:8px 0 3px"><span style="font-family:\'Cormorant Garamond\',serif;font-size:var(--pt-xl,27px);font-weight:700;color:var(--cave)">'+_pilNum(_prez)+' h</span><span style="font-size:var(--pt-txt,12.5px);color:var(--texte-doux)">pr\u00e9sence \u00b7 '+_etpF(_prez)+' ETP \u00e9quipe</span></div>'
+    +'<div style="display:flex;height:24px;border-radius:7px;overflow:hidden;border:1px solid var(--gris);margin:9px 0">'+_segR(_wV,'linear-gradient(180deg,#5C8A3A,#3D6B27)')+_segR(_wT,'linear-gradient(180deg,#6FB6D6,#4A9FC8)')+_segR(_wA,'linear-gradient(180deg,#B98A5E,#8A5A38)')+'</div>'
+    +_rowR('#3D6B27','Travaux vigne','(bar\u00e8me)',_vig,_pV,_etpF(_vig))
+    +((_tH>0)?_rowR('#4A9FC8','Tracteur','(estim\u00e9 h/ha)',_tH,_pT,_etpF(_tH)):'')
+    +(_surch?'':_rowR('#8A5A38','Autres',((_tH>0)?'(cave, trajet, entretien\u2026)':'(tracteur, cave, trajet\u2026)'),_aut,_pA,_etpF(_aut)))
+    +'<div style="font-size:var(--pt-micro,11px);color:var(--texte-doux);margin-top:10px;background:rgba(74,159,200,.08);border-radius:8px;padding:8px 11px">'+_footR+'</div>'
+  +'</div>';
+  var body=chips+repartBlock;
+  if(s.etp_frise!==0){ body+='<div style="font-size:var(--pt-lbl,10.5px);color:var(--texte-doux);margin:14px 0 6px">Frise pr\u00e9vu / r\u00e9el \u2014 fen\u00eatres modifiables dans l\'onglet <b>Param\u00e9trage</b></div>'
+    +'<div style="width:100%;overflow-x:auto" id="pil-g-frise"></div>'+friseLeg;
+    window._mvGraphSuivre('#pil-g-frise', function(lg){ return _pilFriseSvg(cd,real,lg); }, {max:1800}); }
+  if(s.etp_courbe!==0){ body+='<div style="'+secTtl+'">'+_pilEsc(cd.saison)+' \u2014 personnes n\u00e9cessaires / semaine</div><div style="width:100%;overflow-x:auto" id="pil-g-dem"></div>'+curveLeg;
+    window._mvGraphSuivre('#pil-g-dem', function(lg){ return _pilDemandSvg(cd,lg); }, {max:1800}); }
+  if(s.etp_ecart!==0){ body+='<div style="'+secTtl+'">\u00c9cart pr\u00e9vu / r\u00e9el</div>'+_pilEcartHtml(cd,real); }
+  var _subT=_pilNum(_vig)+' h de bar\u00e8me \u00b7 '+_etpF(_vig)+' ETP vigne'+((_tH>0)?(' \u00b7 '+_etpF(_tH)+' ETP tracteur'):'');
+  return _pilTile('temps','#4A9FC8','Le temps de l\u2019\u00e9quipe \u00b7 '+cd.saison, _pilStat(_pilNum(_prez),' h de pr\u00e9sence'), _subT, Math.min(100,_pV), body);
+}
+
+function _pilFmtD(iso){ var pp=String(iso||'').split('-'); if(pp.length!==3)return String(iso||''); var mo=['janv.','févr.','mars','avr.','mai','juin','juil.','août','sept.','oct.','nov.','déc.']; var mi=parseInt(pp[1],10)-1; return parseInt(pp[2],10)+' '+(mo[mi]||''); }
+function _pilEchWin(e){ if(!e)return ''; var a=e.d1?_pilFmtD(e.d1):'', b=e.d2?_pilFmtD(e.d2):''; if(a&&b)return a+' → '+b; if(a)return 'dès '+a; if(b)return 'jusqu’au '+b; return ''; }
+function _pilPanelEcheances(d){
+  var c=_pilEchCadence(d), cadH=c.cadH;
+  var _echS=((window._pilSaison&&window._pilSaison())||{}).echeances||{};
+  var act=(d.active||[]).filter(function(t){ return (t.h_reste||0)>0; });
+  var rows=act.map(function(t){
+    return { nom:t.nom, pct:t.pct||0, hreste:t.h_reste||0, jours:(cadH>0?Math.ceil((t.h_reste||0)/cadH):null), ech:_echS[t.nom]||null };
+  });
+  rows.sort(function(a,b){ return (b.jours||0)-(a.jours||0); });
+  var maxJ=rows.length?(rows[0].jours||0):0;
+  var seasonJ=(cadH>0)?Math.ceil((d.totalReste||0)/cadH):null;
+  var statHtml=_pilStat(rows.length, ' tâche'+(rows.length>1?'s':''));
+  var subHtml=(cadH>0)
+    ? ('fin de saison ~'+_pilWorkdayDate(seasonJ)+' · '+(seasonJ!=null?seasonJ:'—')+' j ouvrés · ~'+Math.round(cadH)+' h/j'+(c.estim?' (estim.)':' (4 sem.)'))
+    : 'cadence indisponible — repose sur le planning';
+  var body;
+  if(!rows.length){ body='<div class="pil-empty">Aucune tâche en cours</div>'; }
+  else if(cadH<=0){ body='<div class="pil-empty">Cadence indisponible : les jours ouvrés se calculent sur le planning (4 dernières semaines).</div>'; }
+  else {
+    body='<div class="pil-ip-list">'+rows.map(function(r){
+      var col=_pilPctColor(r.pct);
+      var pole=(rows.length>1 && r.jours===maxJ);
+      return '<div class="pil-li">'
+        + '<span class="pil-av" style="background:'+col+'26;color:'+col+'"></span>'
+        + '<div class="pil-li-main">'
+        +   '<div class="pil-li-t">'+_pilEsc(_pilTnom(r.nom))+'</div>'
+        +   '<div class="pil-li-s">'+r.pct+'% fait · '+_pilNum(r.hreste)+' h restantes'+((r.ech&&(r.ech.d1||r.ech.d2))?' · '+_pilEchWin(r.ech):'')+(pole?' · <b style="color:var(--or)">pôle long</b>':'')+'</div>'
+        + '</div>'
+        + '<div class="pil-li-r"><b style="font-size:var(--pt-sm,17px);color:'+(pole?'var(--or)':'var(--texte)')+'">'+(r.jours!=null?r.jours+' j':'—')+'</b></div>'
+        + '</div>';
+    }).join('')+'</div>';
+  }
+  return _pilTile('echeances','#C9A84C','Échéances par tâche', statHtml, subHtml, null, body);
+}
+
+
+// ── Fenêtre de traitement sur 5 jours (sec · vent < 19 km/h · sous 25°, plage 0h–24h) ──
+// Réglages anti-lessivage / probabilité de pluie (défauts)
+// Horizon de la prevision affichee. Il etait en dur dans un slice(0,5) et cite
+// nulle part ailleurs : la ligne de cadre l'annonce desormais, donc il se nomme.
+var PIL_TREAT_DAYS = 5;
+var PIL_TREAT_DRY_H=6;     // heures de séchage surveillées APRÈS la fenêtre
+var PIL_TREAT_LEACH_MM=1;  // pluie cumulée (mm) déclenchant l'alerte lessivage
+var PIL_TREAT_PP_ALERT=40; // proba de pluie (%) sur la plage déclenchant l'alerte
+function _pilTreatDays(){
+  var mh=window.METEO_HOURLY||null;
+  if(!mh){ try{ mh=JSON.parse(localStorage.getItem('mavigne_meteohr_cache')||'null'); }catch(e){ mh=null; } }
+  if(!mh||!mh.time||!mh.time.length) return undefined;
+  var T=mh.time, TE=mh.temp||[], PR=mh.precip||[], PP=mh.pp||[], WD=mh.wind||[], now=Date.now();
+  var JJ=['dim.','lun.','mar.','mer.','jeu.','ven.','sam.'], today=new Date().toDateString();
+  function dry(i){ return (Number(PR[i])||0)<0.1; }
+  function calm(i){ return (Number(WD[i])||0)<19; }
+  function cool(i){ return (Number(TE[i])||99)<25; }
+  function ok(i){ return dry(i)&&calm(i)&&cool(i); }
+  // Regroupe les heures futures par jour (ordre conservé)
+  var order=[], map={};
+  for(var i=0;i<T.length;i++){
+    var dt=new Date(T[i]); if(dt.getTime()<now-3600000) continue;
+    var key=dt.getFullYear()+'-'+dt.getMonth()+'-'+dt.getDate();
+    if(!map[key]){ map[key]={ date:dt, idx:[] }; order.push(key); }
+    map[key].idx.push(i);
+  }
+  return order.slice(0,PIL_TREAT_DAYS).map(function(key){
+    var day=map[key], idx=day.idx, dt=day.date;
+    var lab=(dt.toDateString()===today)?'Aujourd\'hui':(JJ[dt.getDay()]+' '+dt.getDate());
+    // Meilleure (plus longue) plage continue >= 2 h
+    var best=null, st=-1;
+    for(var k=0;k<idx.length;k++){
+      var gi=idx[k], cont=(k>0 && idx[k]===idx[k-1]+1);
+      if(ok(gi)){
+        if(st<0||!cont) st=k;
+        if(k-st+1>=2 && (!best||(k-st+1)>(best.e-best.s+1))) best={ s:st, e:k };
+      } else { st=-1; }
+    }
+    if(best){
+      var wMax=0,tMax=0,ppMax=0;
+      for(var m=best.s;m<=best.e;m++){ var g=idx[m]; wMax=Math.max(wMax,Number(WD[g])||0); tMax=Math.max(tMax,Number(TE[g])||0); ppMax=Math.max(ppMax,Number(PP[g])||0); }
+      // Lessivage : pluie cumulée sur les heures suivant la fenêtre
+      var endG=idx[best.e], leachMm=0, leachH=0;
+      for(var lj=endG+1; lj<T.length && lj<=endG+PIL_TREAT_DRY_H; lj++){ leachMm+=Number(PR[lj])||0; leachH++; }
+      leachMm=Math.round(leachMm*10)/10;
+      var hasPP=PP.length>0;
+      return { label:lab, start:new Date(T[idx[best.s]]).getHours(), end:new Date(T[idx[best.e]]).getHours()+1,
+               wMax:Math.round(wMax), tMax:Math.round(tMax),
+               ppMax:hasPP?Math.round(ppMax):null,
+               leach:(PIL_TREAT_DRY_H>0 && leachMm>=PIL_TREAT_LEACH_MM), leachMm:leachMm, leachH:leachH };
+    }
+    // Aucune fenêtre : motif dominant
+    var rRain=0,rWind=0,rHeat=0;
+    for(var p=0;p<idx.length;p++){ var g2=idx[p]; if(!dry(g2)) rRain++; else if(!calm(g2)) rWind++; else if(!cool(g2)) rHeat++; }
+    var reason='conditions';
+    if(rRain>=rWind && rRain>=rHeat && rRain>0) reason='pluie';
+    else if(rWind>=rHeat && rWind>0) reason='vent ≥ 19 km/h';
+    else if(rHeat>0) reason='≥ 25°';
+    return { label:lab, reason:reason };
+  });
+}
+function _pilTBdg(bg,col,txt){ return '<span style="display:inline-flex;align-items:center;gap:4px;font-size:var(--pt-micro,11px);font-weight:700;padding:3px 8px;border-radius:7px;line-height:1.2;background:'+bg+';color:'+col+'">'+txt+'</span>'; }
+function _pilMm(v){ return (v%1===0?String(v):v.toFixed(1)).replace('.',',')+' mm'; }
+// \u2605\u2605\u2605 UNE SEULE FENETRE DE TRAITEMENT, ET ELLE EST DANS LA JOURNEE.
+//   Deux cartes lisaient le MEME _pilTreatDays() : \u00ab Traiter ? \u00bb sur Aujourd'hui
+//   et \u00ab Fen\u00eatre de traitement \u00bb dans L'\u00e9quipe & le mat\u00e9riel. Une source, deux
+//   ecrans, deux onglets — la faute de \u00a734, en plus petit et restee en place.
+//   Le guide tranchait deja la question de la place sans qu'on l'ecoute :
+//   \u00ab c'est l'indicateur qu'on regarde le soir en se demandant s'il faut sortir
+//   le pulverisateur \u00bb. C'est une decision DU JOUR. Elle ne se range pas a cote
+//   d'un parc de tracteurs, dont l'echelle est l'annee.
+//   \u26a0\ufe0f Le dessin des cinq jours n'est pas RECOPIE dans la carte survivante : il
+//     est EXTRAIT ici. Recopier, c'est garantir que les deux divergeront.
+function _pilTreatRows(days){
+  return (days||[]).map(function(x){
+    if(x.start!=null){
+      var risk=x.leach||(x.ppMax!=null && x.ppMax>=PIL_TREAT_PP_ALERT);
+      var bg=risk?'var(--orange-pale)':'var(--vert-pale)', bd=risk?'var(--orange)':'var(--vert-med)';
+      var bdgs='';
+      if(x.leach) bdgs+=_pilTBdg('var(--orange-pale)','var(--orange)',''+_mvIcon('alerte',16)+' pluie '+_pilMm(x.leachMm)+' dans '+x.leachH+' h \u2192 lessivage');
+      else bdgs+=_pilTBdg('var(--vert-pale)','var(--vert-med)',''+_mvIcon('check',16)+' '+PIL_TREAT_DRY_H+' h au sec ensuite');
+      if(x.ppMax!=null){
+        if(x.ppMax>=PIL_TREAT_PP_ALERT) bdgs+=_pilTBdg('var(--orange-pale)','var(--orange)',''+_mvIcon('pluie',16)+' '+x.ppMax+' % de pluie');
+        else bdgs+=_pilTBdg('rgba(127,127,127,.12)','var(--texte-doux)',x.ppMax+' % de pluie');
+      }
+      return '<div style="padding:8px 11px;border-radius:10px;background:'+bg+';border-left:3px solid '+bd+'">'
+        + '<div style="display:flex;align-items:center;gap:9px">'
+        + '<span style="width:70px;font-size:var(--pt-txt,12.5px);font-weight:700;color:var(--texte);flex:none">'+_pilEsc(x.label)+'</span>'
+        + '<span style="flex:1;font-size:var(--pt-base,14px);font-weight:800;color:'+bd+'">'+x.start+'h \u2192 '+x.end+'h</span>'
+        + '<span style="font-size:var(--pt-lbl,10.5px);color:var(--texte-doux);white-space:nowrap">'+x.wMax+' km/h \u00b7 '+x.tMax+'\u00b0</span>'
+        + '</div>'
+        + '<div style="display:flex;flex-wrap:wrap;gap:5px;margin-top:7px">'+bdgs+'</div>'
+        + '</div>';
+    }
+    return '<div style="display:flex;align-items:center;gap:9px;padding:8px 11px;border-radius:10px;border-left:3px solid var(--gris-clair)">'
+      + '<span style="width:70px;font-size:var(--pt-txt,12.5px);font-weight:700;color:var(--texte-doux);flex:none">'+_pilEsc(x.label)+'</span>'
+      + '<span style="flex:1;font-size:var(--pt-txt,12.5px);color:var(--texte-doux);font-style:italic">aucune fen\u00eatre \u00b7 '+x.reason+'</span>'
+      + '</div>';
+  }).join('');
+}
+
+// ── Simulateur « et si ? » (réallocation de l'équipe, recalcul des dates en direct) ──
+var _PIL_SIM=null, _PIL_SIM_DATA=null;
+function _pilIndispoNoms(d){
+  return (d.presences||[]).filter(function(p){ return !p.bureau && p.etat!=='present'; }).map(function(p){
+    var t=p.etat==='cp'?'CP':p.etat==='recup'?'récup':p.etat==='maladie'?'maladie':'absent';
+    return p.nom+' ('+t+')';
+  });
+}
+function _pilSimClamp(){
+  if(!_PIL_SIM) return;
+  var a=_PIL_SIM.alloc, pool=_PIL_SIM.pool, assigned=a.reduce(function(x,y){return x+y;},0), g=0;
+  while(assigned>pool && g<200){ g++; var mi=0; for(var i=1;i<a.length;i++){ if(a[i]>=a[mi]) mi=i; } if(a[mi]<=0) break; a[mi]--; assigned--; }
+}
+function _pilSimEven(nT, ppl){ var a=[]; for(var i=0;i<nT;i++)a.push(0); if(nT>0){ for(var k=0;k<ppl;k++)a[k%nT]++; } return a; }
+function _pilSimInitData(d){
+  // \u26a0 nV divise la cadence pour donner les heures PAR PERSONNE. Compte en
+  //   fiches, il fait d'une equipe de 26 une seule paire de bras : perH sortait
+  //   26 fois trop haut et TOUTES les durees du panneau avec lui.
+  var c=_pilEchCadence(d), cadH=c.cadH;
+  var nV=(d.membres||[]).reduce(function(a,m){
+    return a + ((m&&!m.bureau)?((typeof window._mvEffDef==='function')?window._mvEffDef(m):1):0);
+  },0);
+  // \u26a0 nMes est le DIVISEUR de la cadence mesuree : c'est l'equipe qui a PRODUIT
+  //   ces heures, pas celle qui viendra. Le remplacer par l'effectif futur
+  //   diviserait la cadence par 41 et rendrait chaque personne 41 fois plus lente.
+  var nMes=Math.max(1,nV);
+  var perH=(cadH>0)?(cadH/nMes):0;
+  var presentJour=(typeof d.presentChamp==='number')?d.presentChamp:nV;
+  var tasks=(d.active||[]).filter(function(t){ return (t.h_reste||0)>0; }).sort(function(a,b){ return (b.h_reste||0)-(a.h_reste||0); }).map(function(t){ return {nom:t.nom,hreste:Math.round(t.h_reste||0),pct:t.pct||0}; });
+  // \u2605 LE POINT DE DEPART EST L'EFFECTIF SOUS CONTRAT PENDANT CES TRAVAUX.
+  //   Les taches restantes se feront dans les semaines qui viennent ; c'est la
+  //   qu'il faut compter, pas ce matin.
+  // \u26a0\u26a0 CE BLOC DOIT RESTER APRES `var tasks`. Place avant, `tasks` vaut
+  //   undefined par hissage et `tasks.map` leve — l'onglet Decider rendait un
+  //   ecran BLANC avec \u00ab Cannot read properties of undefined (reading 'map') \u00bb.
+  //   Ni node --check ni le preflight ne voient ça : c'est une faute d'ORDRE, pas
+  //   de syntaxe. Seul un appel reel la revele (harnais fonctionnel, scenario 5).
+  var et=_pilEffTaches(tasks.map(function(t){ return t.nom; }));
+  var base=(et&&et.eff>0.5)?Math.round(et.eff):presentJour;
+  if(!(base>0)) base=Math.max(1,presentJour);
+  // nV nomme desormais l'equipe DE REFERENCE du panneau (celle qui fera le
+  // travail), pas le nombre de fiches presentes ce matin : c'est elle qui borne
+  // le curseur et qui sert de repere « equipe au complet ».
+  _PIL_SIM_DATA={ tasks:tasks, cadH:cadH, nV:base, nMes:nMes, present:base,
+                  presentJour:presentJour, perH:perH, indispo:(d.nIndispoChamp||0),
+                  indispoNoms:_pilIndispoNoms(d), fen:(et?{d0:et.d0,d1:et.d1}:null) };
+  if(!_PIL_SIM || _PIL_SIM.alloc.length!==tasks.length || _PIL_SIM._present!==base){
+    _PIL_SIM={ alloc:_pilSimEven(tasks.length,base).slice(), pool:base, _present:base };
+  }
+}
+function _pilSimReset(){ if(_PIL_SIM_DATA){ _PIL_SIM={ alloc:_pilSimEven(_PIL_SIM_DATA.tasks.length,_PIL_SIM_DATA.present).slice(), pool:_PIL_SIM_DATA.present, _present:_PIL_SIM_DATA.present }; } }
+function _pilSimStep(act, ti, sym, on){
+  var t=(ti!=null)?(' data-ti="'+ti+'"'):'';
+  return '<button data-sim="'+act+'"'+t+' style="width:30px;height:30px;border:1px solid var(--gris-clair);border-radius:7px;background:'+(on?'rgba(127,127,127,.08)':'transparent')+';color:'+(on?'var(--texte)':'var(--texte-doux)')+';font-size:var(--pt-sm,17px);font-weight:700;cursor:'+(on?'pointer':'default')+';line-height:1'+(on?'':';opacity:.4')+'">'+sym+'</button>';
+}
+function _pilSimStepper(kind, ti, val, canDec, canInc){
+  var dec=(kind==='pool')?'pool-dec':'dec', inc=(kind==='pool')?'pool-inc':'inc';
+  return '<span style="display:inline-flex;align-items:center;gap:7px">'+_pilSimStep(dec,ti,'−',canDec)+'<b style="min-width:22px;text-align:center;font-size:var(--pt-sm,17px);color:var(--texte);font-variant-numeric:tabular-nums">'+val+'</b>'+_pilSimStep(inc,ti,'+',canInc)+'</span>';
+}
+function _pilSimBody(){
+  var D=_PIL_SIM_DATA, S=_PIL_SIM;
+  if(!D || D.cadH<=0 || D.nV<=0 || !D.tasks.length){ return '<div class="pil-empty">Simulateur indisponible : il faut une cadence planning, au moins un membre au champ et une tâche en cours.</div>'; }
+  var perH=D.perH, pool=S.pool, assigned=S.alloc.reduce(function(a,b){return a+b;},0), free=pool-assigned;
+  function jr(h,pp){ return pp>0?Math.ceil(h/(pp*perH)):null; }
+  // réf. par tâche = ton effectif réparti également → isole l'effet de TA répartition
+  var evenNow=_pilSimEven(D.tasks.length,assigned);
+  var calc=D.tasks.map(function(t,i){ var j=jr(t.hreste,S.alloc[i]), bj=jr(t.hreste,evenNow[i]); return {j:j,delta:(j!=null&&bj!=null)?(j-bj):null}; });
+  var totH=D.tasks.reduce(function(a,t){return a+t.hreste;},0);
+  // ⚠⚠ LA FIN DE SAISON EST CELLE DE LA DERNIERE TACHE FINIE, pas le total
+  //   divise par l'effectif. L'ancien calcul divisait par le POOL : on pouvait
+  //   laisser deux taches « a l'arret » et lire quand meme la meme date de fin,
+  //   et le curseur de repartition — le seul geste du panneau — ne bougeait
+  //   jamais son propre indicateur. Une tache sans personne n'avance pas : la
+  //   saison ne finit pas, et l'ecran doit le dire.
+  function _finDe(al){ var mx=0; for(var q=0;q<D.tasks.length;q++){ var jq=jr(D.tasks[q].hreste,al[q]); if(jq==null) return null; if(jq>mx) mx=jq; } return D.tasks.length?mx:null; }
+  var nArret=0; D.tasks.forEach(function(t,i){ if(!(S.alloc[i]>0)) nArret++; });
+  var seasonJ=_finDe(S.alloc);                                 // fin a la repartition affichee
+  var fullSeasonJ=_finDe(_pilSimEven(D.tasks.length,D.nV));    // ref. = equipe au complet, repartie egalement
+  var sDelta=(seasonJ!=null&&fullSeasonJ!=null)?(seasonJ-fullSeasonJ):null;
+  var chargeJH=Math.round(totH/perH);
+  var sDate=seasonJ!=null?_pilWorkdayDate(seasonJ):null;
+  function stat(lab,val,col){ return '<div style="flex:1;min-width:118px"><div style="font-size:var(--pt-lbl,10.5px);font-weight:700;letter-spacing:1px;color:var(--texte-doux)">'+lab+'</div><div style="font-size:var(--pt-sm,17px);font-weight:800;color:'+(col||'var(--texte)')+'">'+val+'</div></div>'; }
+  var h='<div style="display:flex;flex-wrap:wrap;gap:10px;margin-bottom:12px">';
+  h+=stat('CHARGE', chargeJH+' <span style="font-size:var(--pt-txt,12.5px);color:var(--texte-doux)">j-homme</span>');
+  h+=stat('EFFECTIF', assigned+'<span style="font-size:var(--pt-txt,12.5px);color:var(--texte-doux)"> / '+pool+'</span>');
+  var fin=(sDate?'~ '+sDate:'à l\'arrêt')+(sDelta!=null&&sDelta!==0?' <span style="font-size:var(--pt-micro,11px);font-weight:700;color:'+(sDelta<0?'var(--vert-med)':'var(--rouge)')+'">('+(sDelta<0?(-sDelta+' j plus tôt'):('+'+sDelta+' j'))+')</span>':'');
+  h+=stat('FIN DE SAISON', fin, 'var(--or)');
+  h+='</div>';
+  h+='<div style="font-size:var(--pt-lbl,10.5px);color:var(--texte-doux);margin:-6px 0 12px">fin de saison \u00b7 r\u00e9f. '+(D.fen?'\u00e9quipe sous contrat':'\u00e9quipe au complet')+' ('+_pilEtpFmt(D.nV)+')'
+    + (nArret>0?(' \u00b7 <b style="color:var(--rouge)">'+nArret+' t\u00e2che'+(nArret>1?'s':'')+' sans personne : la saison ne se termine pas</b>'):'')
+    + (free>0?(' \u00b7 <b style="color:var(--orange)">'+free+' personne'+(free>1?'s':'')+' non affect\u00e9e'+(free>1?'s':'')+'</b>'):'')+'</div>';
+  // \u2605 LE NOMBRE, PUIS SUR QUOI IL A ETE COMPTE. Un effectif sans ses dates ne
+  //   se verifie pas — et c'est exactement ce qui a fait passer « 1 » pour une
+  //   mesure alors que quarante personnes etaient sous contrat pour la vendange.
+  var presLine;
+  if(D.fen){
+    presLine=_pilEtpFmt(D.present)+' sous contrat \u00b7 '+_pilEsc(_pilFenLbl(D.fen))
+      +' <span style="color:var(--texte-doux)">la fen\u00eatre de ces travaux</span>';
+    if(Math.abs((D.presentJour||0)-D.present)>0.5)
+      presLine+='<br><span style="color:var(--texte-doux)">aujourd\u2019hui : '+_pilEtpFmt(D.presentJour||0)
+        +' au champ \u2014 les cong\u00e9s et les contrats \u00e0 venir expliquent l\u2019\u00e9cart</span>';
+  } else {
+    presLine=_pilEtpFmt(D.present)+' pr\u00e9sent'+(D.present>1.05?'s':'')+' aujourd\'hui';
+  }
+  if(D.indispo>0){ presLine+=' <span style="color:var(--rouge)">\u00b7 \u2212'+D.indispo+' indispo'+((D.indispoNoms&&D.indispoNoms.length)?' ('+_pilEsc(D.indispoNoms.join(', '))+')':'')+'</span>'; }
+  var renfortDelta=pool-D.present;
+  var rdLab=renfortDelta>0?('+'+renfortDelta+' renfort'):(renfortDelta<0?(renfortDelta+' en moins'):(D.fen?'\u00e9quipe sous contrat':'\u00e9quipe du jour'));
+  var rdCol=renfortDelta>0?'var(--vert-med)':(renfortDelta<0?'var(--rouge)':'var(--texte-doux)');
+  h+='<div style="border:1px solid var(--gris-clair);border-radius:11px;padding:11px 13px;margin-bottom:10px;background:rgba(201,168,76,.05)">'
+    + '<div style="display:flex;align-items:center;justify-content:space-between;gap:10px">'
+    + '<div><div style="font-size:var(--pt-base,14px);font-weight:700;color:var(--texte)">Effectif au champ'+(free>0?' <span style="font-size:var(--pt-micro,11px);color:var(--orange);font-weight:700">· '+free+' libre'+(free>1?'s':'')+'</span>':'')+'</div>'
+    + '<div style="font-size:var(--pt-micro,11px);color:var(--texte-doux);margin-top:2px">'+presLine+'</div></div>'
+    + '<div style="text-align:center">'+_pilSimStepper('pool',null,pool,pool>0,pool<D.nV+6)
+    + '<div style="font-size:var(--pt-lbl,10.5px);font-weight:700;margin-top:3px;color:'+rdCol+'">'+rdLab+'</div></div>'
+    + '</div></div>';
+  var maxJ=0; calc.forEach(function(c){ if(c.j!=null&&c.j>maxJ)maxJ=c.j; });
+  h+='<div class="pil-ip-list">';
+  D.tasks.forEach(function(t,i){
+    var c=calc[i], pole=(D.tasks.length>1&&c.j!=null&&c.j===maxJ);
+    var dS=(c.delta==null||c.delta===0)?'':' <b style="color:'+(c.delta<0?'var(--vert-med)':'var(--rouge)')+'">'+(c.delta<0?c.delta:'+'+c.delta)+'j</b>';
+    h+='<div class="pil-li"><span class="pil-av" style="background:#16313F;color:#4A9FC8"></span>'
+      + '<div class="pil-li-main"><div class="pil-li-t">'+_pilEsc(_pilTnom(t.nom))+(pole?' <span style="font-size:var(--pt-nano,9.5px);color:var(--or)">· pôle long</span>':'')+'</div>'
+      + '<div class="pil-li-s">'+(c.j!=null?(c.j+' j à cet effectif'):'à l\'arrêt')+dS+'</div></div>'
+      + '<div class="pil-li-r">'+_pilSimStepper('task',i,S.alloc[i],S.alloc[i]>0,free>0)+'</div></div>';
+  });
+  h+='</div>';
+  h+='<div style="font-size:var(--pt-micro,11px);color:var(--texte-doux);line-height:1.5;margin-top:8px">L\'effectif part de ce qui est <b>sous contrat pendant ces travaux</b>, pas de qui est l\u00e0 ce matin : un contrat de groupe qui d\u00e9marre dans quinze jours compte, et un cong\u00e9 d\'aujourd\'hui ne retire personne du chantier. Une \u00e9quipe collective y p\u00e8se son <b>effectif inscrit au contrat</b>, pas une fiche. Monte pour un <b>renfort</b>, descends pour un <b>d\u00e9part</b> \u00b7 <b>r\u00e9partir</b> change quelle t\u00e2che finit en premier.</div>';
+  var even0=_pilSimEven(D.tasks.length,D.present);
+  var touched=(pool!==D.present)||D.tasks.some(function(t,i){return S.alloc[i]!==even0[i];});
+  h+='<div style="margin-top:10px;display:flex;align-items:center;gap:10px"><button data-sim="reset" style="border:1px solid var(--gris-clair);background:transparent;color:var(--texte);cursor:pointer;border-radius:8px;padding:7px 14px;font-size:var(--pt-txt,12.5px);font-weight:700'+(touched?'':';opacity:.55')+'">↺ Revenir à l\'équipe '+(D.fen?'sous contrat':'du jour')+'</button><span style="font-size:var(--pt-micro,11px);color:var(--texte-doux)">simulation — rien n\'est enregistré</span></div>';
+  return h;
+}
+function _pilSimRefresh(){ var el=document.getElementById('pil-sim-body'); if(el) el.innerHTML=_pilSimBody(); }
+function _pilSimAction(act, ti){
+  if(!_PIL_SIM||!_PIL_SIM_DATA) return;
+  var pool=_PIL_SIM.pool, assigned=_PIL_SIM.alloc.reduce(function(a,b){return a+b;},0), free=pool-assigned;
+  if(act==='inc'){ ti=+ti; if(free>0 && _PIL_SIM.alloc[ti]!=null) _PIL_SIM.alloc[ti]++; }
+  else if(act==='dec'){ ti=+ti; if(_PIL_SIM.alloc[ti]>0) _PIL_SIM.alloc[ti]--; }
+  else if(act==='pool-inc'){ if(_PIL_SIM.pool<_PIL_SIM_DATA.nV+6) _PIL_SIM.pool++; }
+  else if(act==='pool-dec'){ if(_PIL_SIM.pool>0){ _PIL_SIM.pool--; _pilSimClamp(); } }
+  else if(act==='reset'){ _pilSimReset(); }
+  _pilSimRefresh();
+}
+function _pilPanelSimulateur(d){
+  _pilSimInitData(d);
+  var statHtml=_pilStat(_PIL_SIM_DATA?_PIL_SIM_DATA.present:0,' présents');
+  return _pilTile('simulateur','#C9A84C','Simulateur — et si ?', statHtml, 'déplace l\'équipe entre les tâches · recalcul en direct', null, '<div id="pil-sim-body">'+_pilSimBody()+'</div>');
+}
+
+// ════════════════════════════════════════════════════════════════════
+// SIMULATEUR « Ordre de passage » — une tâche, l'effectif présent, dans
+// l'ordre choisi ; jusqu'à quelle parcelle l'équipe s'arrête par journée.
+// La simulation est locale ; l'ORDRE, lui, est ENREGISTRÉ et DIFFUSÉ à l'équipe :
+// il pilote le tri des parcelles et les numéros de la carte dans Vigne (app.js).
+// Il est rangé PAR TÂCHE — deux équipes sur deux travaux ont chacune sa tournée.
+// Reste par parcelle aligné sur recalcTravaux (passages/niveaux/trous/simple).
+// ════════════════════════════════════════════════════════════════════
+var _PIL_OP=null, _PIL_OP_DATA=null;
+
+// \u2605 D'OU VIENT LE NOMBRE, ECRIT SOUS LE NOMBRE. \u00ab pr\u00e9sents (auto) \u00bb ne disait
+//   pas si les contrats etaient lus ; quand la semaine engage plus de monde que
+//   ce matin, on l'annonce plutot que de laisser l'utilisateur monter le compteur
+//   a l'aveugle.
+function _opEffNote(OP){
+  if(!OP.effAuto) return 'r\u00e9gl\u00e9';
+  var D=_PIL_OP_DATA;
+  if(D&&D.fen&&D.effFen!=null&&D.effFen>0.5) return 'sous contrat \u00b7 '+_pilFenLbl(D.fen);
+  return 'pr\u00e9sents (auto)';
+}
+function _opCanEdit(){ return !!(typeof window.isAdmin==='function' && window.isAdmin()); }
+function _opTaskDef(nom){ var arr=(typeof window.getTachesSaison==='function')?window.getTachesSaison():(window.TACHES||[]); return arr.find(function(t){ return t && t.nom===nom; }) || null; }
+function _opDefs(){ return (_PIL_OP&&_PIL_OP.tasks||[]).map(_opTaskDef).filter(Boolean); }
+function _opParcActive(){ return (window.PARCELLES||[]).filter(function(p){ return p && p.statut!=='Arrachee'; }); }
+function _opApplic(p,def){ return !(p.tachesExclues && p.tachesExclues.indexOf(def.nom)>=0); }
+function _opTm(p){ return (typeof window._tachesFor==='function') ? window._tachesFor(p) : (p&&p.taches?p.taches:{}); }
+function _opPassHha(def,i){ return (def.passagesHha && def.passagesHha[i-1]!=null) ? def.passagesHha[i-1] : ((def.hha)||0); }
+function _opMinTrou(def){ return (typeof window._plantMinTrou==='function') ? window._plantMinTrou() : ((def&&def.minTrou)||3); }
+function _opParcByNom(nom){ return (window.PARCELLES||[]).find(function(p){ return p && p.nom===nom; }) || null; }
+function _opTNom(nom){ return (typeof window.tNom==='function')?window.tNom(nom):nom; }
+
+// ── Géo ──
+// ── GÉO RÉSOLUE ──────────────────────────────────────────────────────
+// Une parcelle sans p.lat/p.lng prend le CENTROÏDE de son contour KML (par
+// nom). C'est ce qui rend la tournée vivante chez un domaine dont les
+// parcelles ne portent pas de GPS propre (MG : KML intégré, jamais recopié
+// dans les parcelles). Sans p.lat/lng ET sans contour → « sans GPS », comme
+// avant. Cache invalidé par référence de source (un import KML en cours de
+// session est donc pris en compte).
+// Le résolveur (cache + centroïde) vit désormais dans utils.js : le registre phyto
+// réglementaire a besoin des MÊMES coordonnées, et deux copies du calcul = deux
+// réponses possibles à la même question. utils.js est importé avant pilotage.js,
+// window._mvParcGeo est donc toujours en place quand cet écran se rend.
+function _opGeo(o){ return (typeof window._mvParcGeo==='function') ? window._mvParcGeo(o) : null; }
+// ── FIN GÉO RÉSOLUE ──────────────────────────────────────────────────
+function _opGeoOK(p){ return !!_opGeo(p); }
+function _opHav(a,b){ var A=_opGeo(a),B=_opGeo(b); if(!A||!B) return 0; var R=6371000,rad=Math.PI/180; var dLa=(B.lat-A.lat)*rad,dLo=(B.lng-A.lng)*rad,la1=A.lat*rad,la2=B.lat*rad; var x=Math.sin(dLa/2)*Math.sin(dLa/2)+Math.cos(la1)*Math.cos(la2)*Math.sin(dLo/2)*Math.sin(dLo/2); return 2*R*Math.asin(Math.sqrt(x)); }
+function _opCentroid(list){ var la=0,lo=0,n=0; list.forEach(function(p){ var g=_opGeo(p); if(g){ la+=g.lat; lo+=g.lng; n++; } }); return n?{lat:la/n,lng:lo/n}:null; }
+function _opFmtM(m){ return m>=950?((Math.round(m/100)/10).toLocaleString('fr-FR')+' km'):(Math.round(m/10)*10+' m'); }
+
+// ── Communes / secteurs (p.commune = {nom,lat,lng}, facultatif) ──
+function _opNumG(v){ var n=parseFloat(v); return isFinite(n)?n:null; }
+function _opCom(p){ return (p && p.commune && p.commune.nom) ? String(p.commune.nom) : ''; }
+function _opComList(){ var seen={}, out=[]; _opParcActive().forEach(function(p){ var c=_opCom(p); if(c && !seen[c]){ seen[c]=1; out.push(c); } }); return out; }
+function _opHasCom(){ return _opComList().length>=2; }
+function _opComPt(c){
+  var l=_opParcActive().filter(function(p){ return _opCom(p)===c; });
+  var g=_opCentroid(l); if(g) return g;
+  var pt=null; l.forEach(function(p){ if(pt||!p.commune) return; var la=_opNumG(p.commune.lat), ln=_opNumG(p.commune.lng); if(la!==null&&ln!==null) pt={lat:la,lng:ln}; });
+  return pt;
+}
+
+// ── Reste / plein par tâche (mono) — aligné recalcTravaux (Validé/Auto=fait) ──
+function _opParcFull(p,def){
+  var surf=parseFloat(p.surface)||0, SP=window.SAISON_PASSAGES||{}, nom=def.nom, s=_opTm(p)[nom];
+  // Entreplantation : PILOTEE PAR LES TROUS (tariere). Aucun trou renseigne = 0 h,
+  // meme regle que calcHeures (app.js) : « rien a entreplanter ». L'ancien repli
+  // surf x 15 h/ha facturait une entreplantation fantome sur TOUTES les parcelles
+  // (~ +15 h/ha sur le cout de la saison) alors que l'avancement, lui, comptait 0.
+  if(def.trous){ var tr=parseInt(p.plantation_trous)||0; return tr>0 ? tr*_opMinTrou(def)/60 : 0; }
+  if(def.type==='niveaux'){ var rg=SP[nom]||((def.niveaux&&def.niveaux.length)||3); var pOv=(s&&typeof s==='object'&&s.ov!=null)?Math.min(s.ov,rg):rg; return surf*((def.niveaux||[]).filter(function(n){return n.num<=pOv;}).reduce(function(a,n){return a+n.hha;},0)); }
+  if(def.type==='passages'){ var pg=SP[nom]||((def.passagesHha&&def.passagesHha.length)||2); var planNb=(s&&typeof s==='object'&&s.ov!=null)?Math.min(s.ov,pg):pg; var h=0; for(var i=1;i<=planNb;i++) h+=_opPassHha(def,i); return surf*h; }
+  return surf*((def.hha)||0);
+}
+function _opParcReste(p,def){
+  var surf=parseFloat(p.surface)||0, SP=window.SAISON_PASSAGES||{}, nom=def.nom, s=_opTm(p)[nom];
+  if(def.trous){ if(typeof s==='string' && s==='Validé') return 0; var tr=parseInt(p.plantation_trous)||0; return tr>0 ? tr*_opMinTrou(def)/60 : 0; }
+  if(def.type==='niveaux'){ var rg=SP[nom]||((def.niveaux&&def.niveaux.length)||3); var allN=def.niveaux||[{num:1,hha:50},{num:2,hha:20},{num:3,hha:20}]; var pOv=(s&&typeof s==='object'&&s.ov!=null)?Math.min(s.ov,rg):rg; var nivsP=allN.filter(function(n){return n.num<=pOv;}), totP=nivsP.reduce(function(a,n){return a+n.hha;},0); if(typeof s==='string') return (s==='Validé')?0:surf*totP; var _rN=window._mvNivH(nivsP,s); return surf*Math.max(0,_rN.total-_rN.done); }
+  if(def.type==='passages'){ var pg=SP[nom]||((def.passagesHha&&def.passagesHha.length)||2); var planNb=(s&&typeof s==='object'&&s.ov!=null)?Math.min(s.ov,pg):pg; var htot=0; for(var i=1;i<=planNb;i++) htot+=_opPassHha(def,i); if(typeof s==='string') return (s==='Validé')?0:surf*htot; var doneH=0; for(var j=1;j<=planNb;j++){ if(s&&s['p'+j]==='Validé') doneH+=_opPassHha(def,j); } return surf*(htot-doneH); }
+  return (typeof s==='string' && s==='Validé') ? 0 : surf*((def.hha)||0);
+}
+
+// ── Multi-tâches : somme sur les tâches sélectionnées (uniquement celles applicables à la parcelle) ──
+function _opParcResteM(p){ var defs=_opDefs(), s=0; defs.forEach(function(d){ if(_opApplic(p,d)) s+=_opParcReste(p,d); }); return s; }
+function _opParcFullM(p){ var defs=_opDefs(), s=0; defs.forEach(function(d){ if(_opApplic(p,d)) s+=_opParcFull(p,d); }); return s; }
+function _opParcPctM(p){ var full=_opParcFullM(p), r=_opParcResteM(p); return full>0?Math.max(0,Math.min(100,Math.round((full-r)/full*100))):100; }
+function _opParcTaskNb(p){ return _opDefs().filter(function(d){ return _opApplic(p,d) && _opParcReste(p,d)>0.05; }).length; }
+function _opActTodo(){ return _opParcActive().filter(function(p){ return _opParcResteM(p)>0.05; }); }
+function _opDoneGeo(){ return _opParcActive().filter(function(p){ return _opParcResteM(p)<=0.05 && _opGeoOK(p); }); }
+
+// ── Départ : dernière parcelle FAITE (l'une des tâches sélectionnées) > centre du vignoble ──
+function _opJournalLast(){ var J=window.JOURNAL||[], tset={}; (_PIL_OP&&_PIL_OP.tasks||[]).forEach(function(t){tset[t]=1;}); var best=null,bestD=''; J.forEach(function(j){ if(j&&tset[j.tache]&&j.statut==='Validé'&&j.parcelle){ var p=_opParcByNom(j.parcelle); if(p&&_opGeoOK(p)){ var d=String(j.date||''); if(d>=bestD){bestD=d;best=p;} } }}); return best?{p:best,date:bestD}:null; }
+function _opStartResolve(geoTodo){
+  if(_PIL_OP && _PIL_OP._startNom){ var sp=_opParcByNom(_PIL_OP._startNom); if(sp && _opGeoOK(sp)) return {p:sp,auto:false}; }
+  var jl=_opJournalLast(); if(jl) return {p:jl.p,auto:true,src:'journal',date:jl.date};
+  var c=_opCentroid(geoTodo); if(c && geoTodo.length){ var best=null,bd=Infinity; geoTodo.forEach(function(p){ var d=_opHav(c,p); if(d<bd){bd=d;best=p;} }); return {p:best,auto:true,src:'centre'}; }
+  return null;
+}
+function _opNN(list,startPt){ var rem=list.slice(), seq=[], cur=startPt; while(rem.length){ var bi=0,bd=Infinity; rem.forEach(function(p,i){ var d=_opHav(cur,p); if(d<bd){bd=d;bi=i;} }); var nx=rem.splice(bi,1)[0]; seq.push(nx); cur=nx; } return seq; }
+function _opNNNames(actTodo){ var geo=actTodo.filter(_opGeoOK), noGeo=actTodo.filter(function(p){ return !_opGeoOK(p); }); if(!geo.length) return actTodo.map(function(p){return p.nom;}); var sp=_opStartResolve(geo), startPt=sp?sp.p:geo[0]; return _opNN(geo,startPt).map(function(p){return p.nom;}).concat(noGeo.map(function(p){return p.nom;})); }
+function _opRouteLen(seq,startPt){ if(!startPt) return 0; var tot=0,cur=startPt; seq.forEach(function(p){ if(_opGeoOK(p)){ tot+=_opHav(cur,p); cur=p; } }); return tot; }
+
+// Tri PAR COMMUNE : au plus proche ENTRE les communes, puis au plus proche DEDANS.
+// C'est la façon dont une journée s'organise réellement (« ce matin Ladoix ») et
+// le seul tri qui divise le rangement manuel par le nombre de communes.
+function _opComNames(actTodo){
+  var groups={}, seq=[], sans=[];
+  actTodo.forEach(function(p){ var c=_opCom(p); if(!c){ sans.push(p); return; } if(!groups[c]){ groups[c]=[]; seq.push(c); } groups[c].push(p); });
+  var pts=[]; seq.forEach(function(c){ var pt=_opComPt(c); if(pt) pts.push({c:c,lat:pt.lat,lng:pt.lng}); });
+  var ord=[];
+  if(pts.length){ var sp=_opStartResolve(actTodo.filter(_opGeoOK)); ord=_opNN(pts,(sp&&sp.p)?sp.p:pts[0]).map(function(x){ return x.c; }); }
+  seq.forEach(function(c){ if(ord.indexOf(c)<0) ord.push(c); });
+  var out=[];
+  ord.forEach(function(c){
+    var g=groups[c]||[], geo=g.filter(_opGeoOK), no=g.filter(function(p){ return !_opGeoOK(p); });
+    if(geo.length){ var prev=out.length?_opParcByNom(out[out.length-1]):null;
+      out=out.concat(_opNN(geo,(prev&&_opGeoOK(prev))?prev:geo[0]).map(function(p){ return p.nom; })); }
+    out=out.concat(no.map(function(p){ return p.nom; }));
+  });
+  return out.concat(sans.map(function(p){ return p.nom; }));
+}
+// Blocs de commune CONTIGUS dans l'ordre courant : seule granularité où « déplacer
+// le bloc » a un sens (un bloc éclaté ne se recolle pas tout seul).
+function _opRuns(rows){
+  var r=[], cur=null;
+  rows.forEach(function(x,i){ var c=_opCom(x.p);
+    if(!cur || cur.com!==c){ cur={com:c,i0:i,names:[x.nom]}; r.push(cur); } else cur.names.push(x.nom); });
+  return r;
+}
+
+// ── Ordre GLOBAL de parcelles (CONFIG.ordre_passage = tableau) ──
+// Une equipe tourne d'un travail a l'autre : « la » tournee du domaine ne veut
+// rien dire. C'est la tournee DU TRAVAIL diffuse qui doit piloter l'ecran de
+// l'ouvrier. D'ou le rangement par tache :
+//   CONFIG.ordre_passage_t = { '<tache>': { ordre:[noms], date:'AAAA-MM-JJ', par:'nom' } }
+// L'ancien CONFIG.ordre_passage (tableau global) n'est PLUS ECRIT ; il sert
+// encore de GRAINE ici, pour ne pas perdre un rangement deja fait a la main.
+function _opOrdMap(){ return (typeof window._mvOrdreMap==='function') ? window._mvOrdreMap() : {}; }
+function _opSavedTask(t){ var e=_opOrdMap()[t]; return (e&&Array.isArray(e.ordre)&&e.ordre.length)?e.ordre.slice():null; }
+function _opSavedLegacy(){ var a=(window.CONFIG||{}).ordre_passage; return (Array.isArray(a)&&a.length)?a.slice():null; }
+function _opSavedSeed(){ var ts=(_PIL_OP&&_PIL_OP.tasks)||[]; for(var i=0;i<ts.length;i++){ var s=_opSavedTask(ts[i]); if(s) return s; } return _opSavedLegacy(); }
+function _opDateFr(iso){ var m=/^(\d{4})-(\d{2})-(\d{2})$/.exec(String(iso||'')); return m?(m[3]+'/'+m[2]):''; }
+function _opEnsureOrder(actTodo){ if(_PIL_OP.order) return; var saved=_opSavedSeed(); _PIL_OP.order=(saved&&saved.length)?saved.slice():_opNNNames(actTodo); }
+function _opParcelles(){
+  var act=_opActTodo(), byName={}; act.forEach(function(p){ byName[p.nom]=p; });
+  _opEnsureOrder(act);
+  var ord=_PIL_OP.order||[], out=[];
+  ord.forEach(function(nm){ if(byName[nm]){ out.push(byName[nm]); delete byName[nm]; } });
+  act.forEach(function(p){ if(byName[p.nom]) out.push(p); });
+  _PIL_OP.order=out.map(function(p){return p.nom;});
+  return out.map(function(p){ return { p:p, nom:p.nom, s:parseFloat(p.surface)||0, reste:Math.round(_opParcResteM(p)*10)/10, pct:_opParcPctM(p), geo:_opGeoOK(p), emos:_opParcTaskNb(p) }; });
+}
+// « Enregistre » ne vaut que si CHAQUE tache cochee porte exactement cet ordre :
+// cocher deux travaux dont l'un seulement est a jour doit se voir.
+function _opDirty(){
+  var cur=(_PIL_OP&&_PIL_OP.order)||[], ts=(_PIL_OP&&_PIL_OP.tasks)||[];
+  var todo={}; _opActTodo().forEach(function(p){ todo[p.nom]=1; });
+  var cf=cur.filter(function(n){return todo[n];});
+  if(!cf.length) return 'empty';
+  if(!ts.length) return 'unsaved';
+  var tous=true, aucun=true;
+  ts.forEach(function(t){
+    var s=_opSavedTask(t);
+    if(!s){ tous=false; return; }
+    aucun=false;
+    if(s.filter(function(n){return todo[n];}).join('|')!==cf.join('|')) tous=false;
+  });
+  if(tous) return 'saved';
+  return aucun?'unsaved':'modified';
+}
+function _opSaveOrder(){
+  if(!_opCanEdit()) return;
+  if(!window.PARCELLES || !window.PARCELLES.length){ if(window.showToast) window.showToast('Donn\u00e9es non charg\u00e9es','#B85A1A'); return; }
+  var ts=(_PIL_OP&&_PIL_OP.tasks)||[];
+  if(!ts.length){ if(window.showToast) window.showToast('Choisissez au moins un travail','#B85A1A'); return; }
+  var ordre=_opParcelles().map(function(x){return x.nom;});
+  var d=new Date(), iso=d.getFullYear()+'-'+('0'+(d.getMonth()+1)).slice(-2)+'-'+('0'+d.getDate()).slice(-2);
+  var par=(window.currentUser&&window.currentUser.nom)||'';
+  // Object.assign : on repart de la carte existante au lieu de la reconstruire,
+  // sinon enregistrer une tache effacerait les tournees des autres.
+  var m=Object.assign({}, _opOrdMap());
+  ts.forEach(function(t){ m[t]={ordre:ordre.slice(), date:iso, par:par}; });
+  window.CONFIG=window.CONFIG||{};
+  window.CONFIG.ordre_passage_t=m;
+  if(typeof window.saveData==='function') window.saveData('config');
+  // Message HONNETE : config est lu au demarrage (FB_STATIC, pas de temps reel),
+  // la tournee arrive donc a la prochaine ouverture de l'app, pas dans la seconde.
+  if(window.showToast) window.showToast('Tourn\u00e9e enregistr\u00e9e \u00b7 '+ts.map(_opTNom).join(', ')+' \u2014 visible par l\u2019\u00e9quipe \u00e0 sa prochaine ouverture','#3D6B27');
+  _pilOpRefresh();
+}
+// Publier sans pouvoir depublier : une tournee d'aout piloterait encore l'ecran
+// en octobre. Retire la tournee des SEULES taches cochees.
+function _opClearOrder(){
+  if(!_opCanEdit()) return;
+  var ts=(_PIL_OP&&_PIL_OP.tasks)||[];
+  var m=Object.assign({}, _opOrdMap()), n=0;
+  ts.forEach(function(t){ if(m[t]){ delete m[t]; n++; } });
+  if(!n){ if(window.showToast) window.showToast('Aucune tourn\u00e9e diffus\u00e9e sur ce travail','#B85A1A'); return; }
+  window.CONFIG=window.CONFIG||{};
+  window.CONFIG.ordre_passage_t=m;
+  if(typeof window.saveData==='function') window.saveData('config');
+  if(window.showToast) window.showToast('Tourn\u00e9e retir\u00e9e \u00b7 '+ts.map(_opTNom).join(', ')+' \u2014 l\u2019\u00e9quipe revient au tri habituel','#B85A1A');
+  _pilOpRefresh();
+}
+// Bouton « Retirer » : visible seulement si l'une des taches cochees porte
+// bien une tournee, pour ne pas proposer d'effacer ce qui n'existe pas.
+function _opClearBtn(){
+  var ts=(_PIL_OP&&_PIL_OP.tasks)||[], n=0;
+  ts.forEach(function(t){ if(_opSavedTask(t)) n++; });
+  if(!n) return '';
+  return '<button data-op="clear" style="border:1px solid var(--gris-clair);background:transparent;color:var(--texte-doux);border-radius:9px;padding:8px 12px;font-size:var(--pt-txt,12.5px);font-weight:600;cursor:pointer;font-family:inherit;margin-left:auto">Retirer</button>';
+}
+// Ce qui est REELLEMENT diffuse, tout en bas de l'ecran de rangement.
+function _opDiffusHtml(){
+  var m=_opOrdMap();
+  var ks=Object.keys(m).filter(function(k){ var e=m[k]; return e&&Array.isArray(e.ordre)&&e.ordre.length; });
+  var box='font-size:var(--pt-micro,11px);color:var(--texte-doux);border:1px solid var(--gris-clair);border-radius:9px;padding:7px 11px;margin-bottom:8px;';
+  if(!ks.length) return '<div style="'+box+'background:rgba(127,127,127,.05)">Aucune tourn\u00e9e diffus\u00e9e pour l\u2019instant \u2014 l\u2019\u00e9quipe voit ses parcelles dans l\u2019ordre habituel.</div>';
+  return '<div style="'+box+'background:rgba(201,168,76,.07)">'+_mvIcon('boussole',16)+' Diffus\u00e9 \u00e0 l\u2019\u00e9quipe pour : <b style="color:var(--texte)">'
+    +ks.map(function(k){ var e=m[k], dd=_opDateFr(e.date); return _pilEsc(_opTNom(k))+(dd?(' \u00b7 '+dd):''); }).join(' &nbsp;|&nbsp; ')
+    +'</b><div style="margin-top:3px">Chacun voit la tourn\u00e9e du travail qu\u2019il a \u00e0 l\u2019\u00e9cran, \u00e0 sa prochaine ouverture de l\u2019application.</div></div>';
+}
+
+// ── Sim (frise journalière, ordre-indépendant sur le nb de jours) ──
+function _opSimulate(list,N,journeeH,pauseMin,trajetMin){
+  // La JOURNEE reglee est du travail EFFECTIF : la pause s'ajoute a l'amplitude
+  // de presence, elle ne se soustrait plus a l'ouvrage. Avant, 7 h moins 120 min
+  // de pause donnait 5 h x 5 personnes = 25 h-homme/jour au lieu de 35, soit 39
+  // jours annonces la ou il en faut 28. pauseMin ne sert plus qu'a l'amplitude.
+  var budget=Math.max(0.1,journeeH), trajetH=Math.max(0,trajetMin/60); N=Math.max(1,N||1);
+  var days=[{day:1,items:[],surf:0}], day=1, used=0, per=list.map(function(row){ return {row:row,work:row.reste/N,startDay:0,endDay:0}; }), lastIdxByDay={};
+  // ⚠⚠ SURFACE DECOUPEE COMME LES HEURES.
+  //   La surface entiere d'une parcelle etait portee au jour ou elle SE TERMINE :
+  //   une grande parcelle etalee sur quatre jours faisait afficher « 0,00 ha J1 »
+  //   apres une journee pleine de travail. Chaque tranche d'heures apporte
+  //   desormais sa part de surface au jour ou elle est faite.
+  function advance(len,idx){ var rem=len, sHa=(idx!=null && len>1e-9)?(per[idx].row.s/len):0;
+    if(rem<=1e-9 && idx!=null){ if(!per[idx].startDay)per[idx].startDay=day; per[idx].endDay=day; lastIdxByDay[day]=idx; days[day-1].surf+=per[idx].row.s; return; }
+    while(rem>1e-9){ var free=budget-used; if(free<=1e-9){ day++; used=0; free=budget; days.push({day:day,items:[],surf:0}); } var chunk=Math.min(rem,free); used+=chunk; rem-=chunk; if(idx!=null){ if(!per[idx].startDay)per[idx].startDay=day; per[idx].endDay=day; lastIdxByDay[day]=idx; days[day-1].surf+=chunk*sHa; } } }
+  list.forEach(function(row,li){ if(li>0) advance(trajetH,null); advance(per[li].work,li); });
+  days.forEach(function(d){ d.lastIdx=lastIdxByDay[d.day]; });
+  return {budget:budget,days:days,per:per};
+}
+// Confrontation a la FENETRE agronomique : c'est le seul chiffre qui dit s'il
+// faut renforcer. L'ecran annoncait « 39 j pour finir » sans jamais preciser que
+// la fenetre saisie n'en offre que 12.
+function _opFenetreHtml(rows,OP){
+  var sa=(typeof window._pilSaison==='function')?window._pilSaison():null;
+  if(!sa || typeof window._mvFenetre!=='function' || typeof window._mvProj!=='function') return '';
+  var fen=window._mvFenetre(sa,(OP.tasks||[]));
+  if(!fen) return '';
+  // ⚠⚠ UNE FENETRE PAR TACHE, JAMAIS L'ENVELOPPE.
+  //   Taille (janvier -> mars) et effeuillage (juillet) coches ensemble
+  //   donnaient une enveloppe de 141 jours quand les deux fenetres reelles n'en
+  //   totalisent que 64 : le test « ca tient » devenait vrai par construction.
+  //   Chaque tache est desormais confrontee A SA fenetre, avec SA charge et SES
+  //   parcelles — et aux jours qui RESTENT, pas a la fenetre entiere.
+  var defs=_opDefs(), parF={};
+  (fen.parTache||[]).forEach(function(t){ parF[t.nom]=t; });
+  var L=[], nKo=0;
+  defs.forEach(function(def){
+    var f=parF[def.nom]; if(!f) return;
+    var h=0, nP=0;
+    rows.forEach(function(r){
+      if(!_opApplic(r.p,def)) return;
+      var v=_opParcReste(r.p,def);
+      if(v>0.01){ h+=v; nP++; }
+    });
+    if(!(h>0.01)) return;
+    var pr=window._mvProj({resteH:h,eff:OP.eff,journee:OP.jour,pauseMin:OP.pause,sauts:Math.max(0,nP-1),trajetMin:OP.trajet,fen:f});
+    var ko=(f.joursRestants<=0)||(pr.tient===false);
+    if(ko) nKo++;
+    L.push({def:def,f:f,pr:pr,h:h,nP:nP,ko:ko});
+  });
+  if(!L.length) return '';
+  var col=nKo?'var(--rouge)':'var(--vert-med)', bg=nKo?'rgba(155,45,31,.09)':'rgba(111,191,90,.10)';
+  var multi=(L.length>1);
+  var h1='';
+  if(multi){
+    h1='<b>'+(nKo?(''+_mvIcon('alerte',16)+' '+nKo+' t\u00e2che'+(nKo>1?'s':'')+' sur '+L.length+(nKo>1?' ne tiennent pas dans leur fen\u00eatre.':' ne tient pas dans sa fen\u00eatre.'))
+                : (''+_mvIcon('check',16)+' Chaque t\u00e2che tient dans sa fen\u00eatre.'))+'</b>';
+  }
+  var corps=L.map(function(x){
+    var f=x.f, pr=x.pr, verdict, besoin='';
+    if(f.joursRestants<=0){
+      verdict='<b>fen\u00eatre termin\u00e9e</b> \u2014 il reste '+pr.jours+' j de travail \u00e0 caser ailleurs';
+    } else if(x.ko){
+      verdict='d\u00e9borde de <b>'+pr.depassement+' j</b> \u2014 '+pr.jours+' j n\u00e9cessaires pour <b>'+f.joursRestants+' j</b> restants';
+      besoin=pr.impossible
+        ? '<br><span style="color:var(--texte-doux)">aucun effectif ne tient : les d\u00e9placements consomment d\u00e9j\u00e0 la fen\u00eatre</span>'
+        : '<br><span style="color:var(--texte-doux)">il faudrait <b>'+(Math.ceil(pr.effPourFenetre*10)/10).toLocaleString('fr-FR')+' personnes</b> (trajets compris) au lieu de '+OP.eff+'</span>';
+    } else {
+      verdict='tient \u2014 '+pr.jours+' j n\u00e9cessaires pour <b>'+f.joursRestants+' j</b> restants';
+    }
+    return '<div style="margin-top:'+(multi?'6':'0')+'px">'
+      + (multi?('<b>'+(x.ko?_mvIcon('alerte',16):_mvIcon('check',16))+' '+_pilEsc(_opTNom(x.def.nom))+'</b> \u00b7 '):(x.ko?'\u26A0 ':'\u2713 '))
+      + verdict + besoin
+      + '<br><span style="color:var(--texte-doux)">'+_pilFmtD(f.debut)+' \u2192 '+_pilFmtD(f.fin)
+      + (f.joursRestants<=0 ? ' \u00b7 fen\u00eatre pass\u00e9e'
+          : (f.joursRestants<f.jours ? (' \u00b7 '+f.joursRestants+' j sur '+f.jours+' '+(f.chantier?'(7j/7)':'ouvr\u00e9s')+', fen\u00eatre entam\u00e9e')
+                                     : (' \u00b7 '+f.jours+' j '+(f.chantier?'(chantier, 7j/7)':'ouvr\u00e9s'))))
+      + ' \u00b7 '+_opFmtH(x.h)+' sur '+x.nP+' parc.</span></div>';
+  }).join('');
+  var pied='<div style="color:var(--texte-doux);margin-top:6px">Journ\u00e9e '+_ecoH1(OP.jour)+' h de travail \u00e0 '+OP.eff+''
+    + (OP.pause>0?(' \u00b7 amplitude '+_ecoH1(OP.jour+OP.pause/60)+' h'):'')+'</div>';
+  return '<div style="margin-top:8px;font-size:var(--pt-micro,11px);color:'+col+';background:'+bg+';border-radius:8px;padding:7px 10px;line-height:1.45">'
+    + h1 + corps + pied + '</div>';
+}
+
+function _opFmtH(h){ return (Math.round(h*10)/10).toLocaleString('fr-FR')+' h'; }
+function _opFmtHa(s){ return s.toLocaleString('fr-FR',{minimumFractionDigits:2,maximumFractionDigits:2}).replace(/\u202f/g,' ')+' ha'; }
+
+// ── Mini-carte SVG du trajet ──
+function _opMapSvg(seqRows,w){
+  var todoGeo=seqRows.filter(function(r){return r.geo;}).map(function(r){return r.p;});
+  var doneGeo=_opDoneGeo(), sp=_opStartResolve(todoGeo), startPt=sp?sp.p:null;
+  var pool=[]; if(startPt) pool.push(startPt); todoGeo.forEach(function(p){pool.push(p);}); doneGeo.forEach(function(p){pool.push(p);});
+  if(pool.length<2) return window._mvGraphVide('Pas assez de parcelles rep\u00e9r\u00e9es pour tracer une tourn\u00e9e',
+    'Il en faut au moins deux dont le contour est connu.');
+  var lats=pool.map(function(p){return (_opGeo(p)||p).lat;}), lngs=pool.map(function(p){return (_opGeo(p)||p).lng;});
+  var minLa=Math.min.apply(0,lats),maxLa=Math.max.apply(0,lats),minLo=Math.min.apply(0,lngs),maxLo=Math.max.apply(0,lngs);
+  // Fond sombre assume : ce repli imite la carte. Sa palette ne suit pas la
+  // charte des graphes sur papier, elle suit la carte — c'est la meme exception
+  // que les trois couleurs de toast.
+  var gc=window._mvGraphCadre((w>0?w:440),190,{padL:24,padR:24,padT:24,padB:24});
+  var W=gc.w,H=gc.h,pad=gc.padL;
+  function X(p){ var g=_opGeo(p)||p; return (maxLo===minLo)?W/2:pad+(g.lng-minLo)/(maxLo-minLo)*(W-2*pad); }
+  function Y(p){ var g=_opGeo(p)||p; return (maxLa===minLa)?H/2:pad+(maxLa-g.lat)/(maxLa-minLa)*(H-2*pad); }
+  var seqNom={}; todoGeo.forEach(function(p,i){ seqNom[p.nom]=i+1; });
+  var svg='';
+  if(startPt){ var path='M '+X(startPt).toFixed(1)+' '+Y(startPt).toFixed(1); todoGeo.forEach(function(p){ path+=' L '+X(p).toFixed(1)+' '+Y(p).toFixed(1); }); svg+='<path d="'+path+'" fill="none" stroke="#C9A84C" stroke-width="2" stroke-opacity=".5" stroke-linejoin="round"/>'; }
+  doneGeo.forEach(function(p){ if(startPt&&p.nom===startPt.nom) return; svg+='<circle cx="'+X(p).toFixed(1)+'" cy="'+Y(p).toFixed(1)+'" r="4.5" fill="#3a352c" stroke="#5a5248" stroke-width="1"/>'; });
+  todoGeo.forEach(function(p){ var x=X(p).toFixed(1),y=Y(p).toFixed(1); svg+='<circle cx="'+x+'" cy="'+y+'" r="9" fill="#14110D" stroke="#C9A84C" stroke-width="1.6"/><text x="'+x+'" y="'+(parseFloat(y)+3.5)+'" text-anchor="middle" font-size="'+gc.txt.mini+'" font-weight="800" fill="#C9A84C" font-family="Outfit,sans-serif">'+seqNom[p.nom]+'</text>'; });
+  if(startPt){ var sx=X(startPt).toFixed(1),sy=Y(startPt).toFixed(1); svg+='<circle cx="'+sx+'" cy="'+sy+'" r="6.5" fill="#6FBF5A"/><path d="M'+(parseFloat(sx)+0.5)+' '+(parseFloat(sy)-6.5)+' v-8 h6 l-2 2.5 2 2.5 h-6" fill="#6FBF5A" stroke="#0d1f0b" stroke-width=".5"/>'; }
+  var dist=_opRouteLen(todoGeo,startPt);
+  return '<div style="position:relative;background:radial-gradient(130% 100% at 30% 0%,#1f2a1c,#161d14);border:1px solid var(--gris-clair);border-radius:12px;overflow:hidden;margin-bottom:11px">'
+    +window._mvGraphSvg(gc,'Tourn\u00e9e hors ligne : '+todoGeo.length+' parcelles \u00e0 faire, trajet d\u2019environ '+_opFmtM(dist)+'.',svg)
+    +'<div style="position:absolute;right:9px;top:8px;font-size:var(--pt-micro,11px);font-weight:700;color:#C9A84C;background:rgba(20,17,13,.6);padding:3px 8px;border-radius:8px">trajet ~ '+_opFmtM(dist)+'</div>'
+    +'<div style="position:absolute;left:9px;bottom:7px;font-size:var(--pt-lbl,10.5px);color:#A79E8C;background:rgba(20,17,13,.55);padding:2px 7px;border-radius:8px">\uD83D\uDFE2 d\u00e9part \u00b7 \uD83D\uDFE1 \u00e0 faire \u00b7 \u26AB fait</div></div>';
+}
+
+// ── UI helpers ──
+var _OP_FLD='background:rgba(127,127,127,.08);color:var(--texte);border:1px solid var(--gris-clair);border-radius:10px;padding:10px 11px;font-size:var(--pt-txt,12.5px);font-weight:700;font-family:inherit';
+function _opStp(k,d,sym,on){ return '<button data-op="stp" data-k="'+k+'" data-d="'+d+'" style="width:26px;height:26px;border:1px solid var(--gris-clair);border-radius:7px;background:'+(on?'rgba(127,127,127,.10)':'transparent')+';color:'+(on?'var(--texte)':'var(--texte-doux)')+';font-size:var(--pt-sm,17px);font-weight:700;cursor:'+(on?'pointer':'default')+';line-height:1'+(on?'':';opacity:.4')+'">'+sym+'</button>'; }
+// ── CARTE ORDRE (Leaflet) — la tournée sur une vraie carte ──────────
+// Remplace le schéma SVG quand Leaflet est chargé (le SVG reste le repli hors
+// ligne). Les numéros sont ceux de la LISTE (index global, parcelles sans GPS
+// comprises) : une parcelle sans GPS fait sauter un numéro plutôt que de créer
+// deux numérotations concurrentes. Trait plein = journée 1, pointillé = la
+// suite. Anneau doré = la parcelle où la J1 s'arrête. Le zoom est conservé
+// entre deux rafraîchissements tant que le jeu de parcelles ne change pas.
+var _opMap=null, _OP_MAPDATA=null;
+function _opMapHtml(rows,sim,startPt){
+  if(typeof window.L==='undefined'){
+    _OP_MAPDATA=null;
+    window._mvGraphSuivre('#pil-g-opmap', function(lg){ return _opMapSvg(rows,lg); });
+    return '<div id="pil-g-opmap"></div>';
+  }
+  var todoGeo=rows.filter(function(r){return r.geo;}), doneGeo=_opDoneGeo();
+  if(((startPt?1:0)+todoGeo.length+doneGeo.length)<2){ _OP_MAPDATA=null; return ''; }
+  _OP_MAPDATA={rows:rows,sim:sim,startPt:startPt,doneGeo:doneGeo};
+  var dist=_opRouteLen(todoGeo.map(function(r){return r.p;}),startPt);
+  return '<div style="position:relative;border:1px solid var(--gris-clair);border-radius:12px;overflow:hidden;margin-bottom:11px">'
+    +'<div id="pil-op-map" style="height:230px;background:#E8E4D8"></div>'
+    +(todoGeo.length?'<div style="position:absolute;right:9px;top:8px;z-index:1000;pointer-events:none;font-size:var(--pt-micro,11px);font-weight:700;color:#C9A84C;background:rgba(20,17,13,.72);padding:3px 8px;border-radius:8px">trajet ~ '+_opFmtM(dist)+'</div>':'')
+    +'<div style="position:absolute;left:9px;bottom:7px;z-index:1000;pointer-events:none;font-size:var(--pt-lbl,10.5px);color:#EFE9DA;background:rgba(20,17,13,.68);padding:2px 7px;border-radius:8px">\u{1F7E2} d\u00e9part \u00b7 \u2460\u2461\u2462 \u00e0 faire \u00b7 \u26AB fait \u00b7 plein = J1 \u00b7 pointill\u00e9 = ensuite</div>'
+    +'</div>';
+}
+function _opBuildMap(){
+  var el=document.getElementById('pil-op-map');
+  if(!el || typeof window.L==='undefined' || !_OP_MAPDATA) return;
+  _opMap=_pilMapKill(_opMap);
+  var D=_OP_MAPDATA, rows=D.rows, sim=D.sim, startPt=D.startPt;
+  var SG=startPt?_opGeo(startPt):null;
+  try{
+    _opMap=window.L.map(el,{zoomControl:true,attributionControl:false,zoomSnap:0,zoomDelta:0.5});
+    window.L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png').addTo(_opMap);
+    var seq=[]; rows.forEach(function(r,i){ if(!r.geo) return; var g=_opGeo(r.p); if(g) seq.push({i:i,r:r,g:g}); });
+    // Contours KML des parcelles concernées : à faire = or, déjà fait = sombre.
+    var src=(window.KML_POLYGONS_DYNAMIC&&window.KML_POLYGONS_DYNAMIC.length)?window.KML_POLYGONS_DYNAMIC:(window.KML_DATA||[]);
+    var st={}; seq.forEach(function(o){ st[String(o.r.nom).toLowerCase()]='todo'; });
+    D.doneGeo.forEach(function(p){ var k=String(p.nom||'').toLowerCase(); if(!st[k]) st[k]='done'; });
+    src.forEach(function(k){
+      if(!k||!k.pts||!k.pts.length||!k.name) return;
+      var s=st[String(k.name).toLowerCase()]; if(!s) return;
+      if(s==='todo') window.L.polygon(k.pts,{color:'#C9A84C',weight:2,fillColor:'#C9A84C',fillOpacity:.13}).addTo(_opMap);
+      else window.L.polygon(k.pts,{color:'#5a5248',weight:1.2,fillColor:'#3a352c',fillOpacity:.28}).addTo(_opMap);
+    });
+    var bounds=[];
+    if(SG) bounds.push([SG.lat,SG.lng]);
+    D.doneGeo.forEach(function(p){ if(startPt&&p.nom===startPt.nom) return; var g=_opGeo(p); if(!g) return; window.L.circleMarker([g.lat,g.lng],{radius:4.5,fillColor:'#3a352c',color:'#5a5248',weight:1.2,fillOpacity:1}).addTo(_opMap).bindPopup('<b>'+_pilEsc(p.nom)+'</b><br>fait'); bounds.push([g.lat,g.lng]); });
+    // Trajet : plein tant que la parcelle appartient encore à la journée 1
+    // (index de LISTE, donc la coupure suit exactement le bandeau au-dessus).
+    var li=(sim&&sim.days&&sim.days[0]&&typeof sim.days[0].lastIdx==='number')?sim.days[0].lastIdx:-1;
+    var solid=SG?[[SG.lat,SG.lng]]:[], dash=[], sw=false;
+    seq.forEach(function(o){
+      var pt=[o.g.lat,o.g.lng]; bounds.push(pt);
+      if(!sw && o.i<=li){ solid.push(pt); return; }
+      if(!sw){ sw=true; if(solid.length) dash.push(solid[solid.length-1]); }
+      dash.push(pt);
+    });
+    if(solid.length>1) window.L.polyline(solid,{color:'#C9A84C',weight:3.5,opacity:.85,lineJoin:'round'}).addTo(_opMap);
+    if(dash.length>1) window.L.polyline(dash,{color:'#C9A84C',weight:2.5,opacity:.55,dashArray:'6 7',lineJoin:'round'}).addTo(_opMap);
+    if(SG) window.L.marker([SG.lat,SG.lng],{icon:window.L.divIcon({className:'',iconSize:[20,20],iconAnchor:[10,10],html:'<div style="width:20px;height:20px;border-radius:50%;background:#6FBF5A;border:2.5px solid #fff;box-shadow:0 1px 4px rgba(0,0,0,.45)"></div>'})}).addTo(_opMap).bindPopup('<b>\u{1F6A9} D\u00e9part</b><br>'+_pilEsc(startPt.nom));
+    seq.forEach(function(o){
+      var ring=(o.i===li), pr=(sim&&sim.per)?sim.per[o.i]:null;
+      var jour=pr?('Jour '+pr.startDay+(pr.endDay>pr.startDay?'\u2192'+pr.endDay:'')):'';
+      window.L.marker([o.g.lat,o.g.lng],{icon:window.L.divIcon({className:'',iconSize:[26,26],iconAnchor:[13,13],html:'<div style="width:26px;height:26px;border-radius:50%;background:#14110D;border:2px solid #C9A84C;color:#C9A84C;display:flex;align-items:center;justify-content:center;font:800 12px/1 Outfit,system-ui,sans-serif;box-shadow:'+(ring?'0 0 0 4px rgba(201,168,76,.45),':'')+'0 1px 4px rgba(0,0,0,.4)">'+(o.i+1)+'</div>'})})
+        .addTo(_opMap).bindPopup('<b>'+(o.i+1)+' \u00b7 '+_pilEsc(o.r.nom)+'</b><br>'+_opFmtH(o.r.reste)+' restantes'+(jour?' \u00b7 '+jour:'')+(ring?'<br>\u{1F536} fin de la journ\u00e9e 1':''));
+    });
+    var sig=seq.map(function(o){return o.r.nom;}).sort().join('|')+'\u00a7'+(startPt?startPt.nom:'');
+    var mv=(_PIL_OP&&_PIL_OP._mapView)||null;
+    var _mine=_opMap;
+    function _fit(){ if(!_opMap || _opMap!==_mine) return;
+      try{ _opMap.invalidateSize(); }catch(e){ if(DEBUG) console.warn('[pilotage] carte ordre inv', e); }
+      try{ if(mv&&mv.sig===sig) _opMap.setView(mv.c,mv.z,{animate:false}); else if(bounds.length) _opMap.fitBounds(bounds,{padding:[20,20],animate:false}); }catch(e){ if(DEBUG) console.warn('[pilotage] carte ordre fit', e); }
+    }
+    requestAnimationFrame(function(){ requestAnimationFrame(_fit); });
+    _opMap.on('moveend zoomend',function(){ if(_PIL_OP&&_opMap) _PIL_OP._mapView={sig:sig,c:_opMap.getCenter(),z:_opMap.getZoom()}; });
+  }catch(e){ if(DEBUG) console.warn('[pilotage] carte ordre', e); }
+}
+// ── FIN CARTE ORDRE ──────────────────────────────────────────────────
+
+function _opStepper(id,lab,dm,dp,val,unit,canDec,canInc){ return '<div style="background:rgba(127,127,127,.05);border:1px solid var(--gris-clair);border-radius:11px;padding:7px 4px;text-align:center"><div style="font-size:var(--pt-nano,9.5px);font-weight:700;letter-spacing:.3px;color:var(--texte-doux);text-transform:uppercase;min-height:18px;display:flex;align-items:center;justify-content:center">'+lab+'</div><div style="display:flex;align-items:center;justify-content:center;gap:3px;margin-top:1px">'+_opStp(id,dm,'\u2212',canDec)+'<b style="min-width:24px;font-size:var(--pt-base,14px);font-weight:800;color:var(--texte);font-variant-numeric:tabular-nums">'+val+'</b>'+_opStp(id,dp,'+',canInc)+'</div><div style="font-size:var(--pt-nano,9.5px);color:var(--texte-doux);margin-top:1px">'+unit+'</div></div>'; }
+
+function _opBody(){
+  var D=_PIL_OP_DATA, OP=_PIL_OP, edit=_opCanEdit();
+  if(!D || !D.tasks.length){ return '<div class="pil-empty">Aucune t\u00e2che de saison \u00e0 planifier.</div>'; }
+  if(!OP.tasks.length){ OP.tasks=[D.defaultTask].filter(Boolean); }
+  var rows=_opParcelles();
+  var sim=_opSimulate(rows, OP.eff, OP.jour, OP.pause, OP.trajet);
+  var geoTodo=rows.filter(function(r){return r.geo;}).map(function(r){return r.p;});
+  var sp=_opStartResolve(geoTodo), startPt=sp?sp.p:null;
+  var multi=OP.tasks.length>1;
+
+  var h='';
+  // ── Tâches : multi-sélection (chips) ──
+  h+='<div style="font-size:var(--pt-nano,9.5px);font-weight:700;letter-spacing:.4px;color:var(--texte-doux);text-transform:uppercase;margin:0 0 5px 2px">T\u00e2ches \u2014 plusieurs possibles</div>';
+  h+='<div style="display:flex;flex-wrap:wrap;gap:6px;margin-bottom:12px">'+D.tasks.map(function(x){
+    var on=OP.tasks.indexOf(x.nom)>=0;
+    return '<button'+(edit?' data-op="task" data-nom="'+_pilEsc(x.nom)+'"':'')+' style="border:1px solid '+(on?'var(--or)':'var(--gris-clair)')+';background:'+(on?'rgba(201,168,76,.14)':'transparent')+';color:'+(on?'var(--or)':'var(--texte-doux)')+';border-radius:20px;padding:6px 12px;font-size:var(--pt-txt,12.5px);font-weight:'+(on?'700':'600')+';cursor:'+(edit?'pointer':'default')+'">'+(on?_mvIcon('check',16)+' ':'')+_pilEsc(_opTNom(x.nom))+'</button>';
+  }).join('')+'</div>';
+
+  // ── Départ (admin) — cale le tri au plus proche ──
+  if(edit){
+    var startOpts='<option value="">'+(sp&&sp.auto?('Auto \u2014 '+(sp.src==='journal'?'derni\u00e8re faite : '+_pilEsc(startPt.nom):'centre du vignoble')):'Auto')+'</option>';
+    _opParcActive().filter(_opGeoOK).forEach(function(p){ startOpts+='<option value="'+_pilEsc(p.nom)+'"'+((OP._startNom===p.nom)?' selected':'')+'>d\u00e9part : '+_pilEsc(p.nom)+'</option>'; });
+    h+='<div style="margin-bottom:11px"><div style="font-size:var(--pt-nano,9.5px);font-weight:700;letter-spacing:.4px;color:var(--texte-doux);text-transform:uppercase;margin:0 0 4px 2px">D\u00e9part de la tourn\u00e9e</div><select id="pil-op-start" style="width:100%;'+_OP_FLD+'">'+startOpts+'</select></div>';
+  }
+
+  // ── Réglages sim ──
+  h+='<div style="display:grid;grid-template-columns:repeat(4,1fr);gap:7px;margin-bottom:11px">'
+    +_opStepper('eff','Effectif',-1,1,OP.eff,_opEffNote(OP),OP.eff>1,true)
+    +_opStepper('jour','Journ\u00e9e',-0.5,0.5,OP.jour,'h/jour',OP.jour>1,OP.jour<12)
+    +_opStepper('pause','Pause',-15,15,OP.pause,'min',OP.pause>0,OP.pause<180)
+    +_opStepper('trajet','Trajet',-5,5,OP.trajet,'min/saut',OP.trajet>0,OP.trajet<60)+'</div>';
+
+  h+=_opMapHtml(rows,sim,startPt);
+
+  // ── Bandeau ──
+  h+='<div style="background:rgba(201,168,76,.06);border:1px solid var(--gris-clair);border-left:3px solid var(--or);border-radius:11px;padding:13px 14px;margin:0 0 12px">';
+  if(!rows.length){ h+='<div style="font-size:var(--pt-micro,11px);font-weight:700;letter-spacing:.5px;color:var(--texte-doux);text-transform:uppercase">R\u00e9sultat</div><div style="font-size:var(--pt-sm,17px);font-weight:800;color:var(--vert-med);margin-top:3px">\u2705 Rien \u00e0 faire pour '+(multi?'ces t\u00e2ches':'cette t\u00e2che')+'.</div>'; }
+  else{ var d1=sim.days[0], stop=rows[d1.lastIdx], stopPer=sim.per[d1.lastIdx], partiel=stopPer.endDay>1, totR=rows.reduce(function(a,b){return a+b.reste;},0);
+    h+='<div style="font-size:var(--pt-micro,11px);font-weight:700;letter-spacing:.5px;color:var(--texte-doux);text-transform:uppercase">En fin de journ\u00e9e 1, l\'\u00e9quipe s\'arr\u00eate \u00e0</div>'
+      +'<div style="font-size:var(--pt-md,20px);font-weight:800;color:var(--texte);margin:2px 0 6px">\uD83D\uDCCD '+_pilEsc(stop.nom)+'</div>'
+      +'<div style="display:flex;flex-wrap:wrap;gap:5px 15px;font-size:var(--pt-txt,12.5px);color:var(--texte-doux)">'
+      +'<span><b style="color:var(--texte);font-size:var(--pt-base,14px)">'+(Math.round(d1.surf*100)/100).toLocaleString('fr-FR')+'</b> ha J1</span>'
+      +'<span><b style=\"color:var(--texte);font-size:var(--pt-base,14px)\">'+sim.days.length+'</b> j pour finir</span>'
+      +'<span><b style="color:var(--texte);font-size:var(--pt-base,14px)">'+_opFmtH(totR)+'</b> restantes ('+rows.length+' parc.'+(multi?' \u00d7 '+OP.tasks.length+' t\u00e2ches':'')+')</span></div>'
+      +(partiel?'<div style=\"margin-top:8px;font-size:var(--pt-micro,11px);color:var(--orange);background:rgba(224,165,86,.1);border-radius:8px;padding:6px 10px\">\u23F8 La J1 se termine <b>en cours</b> de \u00ab '+_pilEsc(stop.nom)+' \u00bb \u2014 cette parcelle demande <b>'+_opFmtH(stop.reste)+'</b> d\'\u00e9quipe, soit '+_opFmtH(stopPer.work)+' \u00e0 '+OP.eff+'.</div>':'')
+      +_opFenetreHtml(rows,OP);
+  }
+  h+='</div>';
+
+  // ── Tris + enregistrement (admin) ──
+  if(edit){
+    var kmnn=startPt?_opFmtM(_opRouteLen(_opNNNames(_opActTodo()).map(_opParcByNom).filter(Boolean),startPt)):'';
+    var _opChip=function(mode,lab,gold){ return '<button data-op="sort" data-mode="'+mode+'" style="border:1px solid '+(gold?'var(--or)':'var(--gris-clair)')+';background:'+(gold?'rgba(201,168,76,.14)':'transparent')+';color:'+(gold?'var(--or)':'var(--texte-doux)')+';border-radius:20px;padding:0 12px;height:34px;font-size:var(--pt-micro,11px);font-weight:'+(gold?'700':'600')+';cursor:pointer;font-family:inherit">'+lab+'</button>'; };
+    h+='<div style="display:flex;flex-wrap:wrap;gap:6px;margin-bottom:10px"><div style="width:100%;font-size:var(--pt-micro,11px);color:var(--texte-doux);margin-bottom:1px">Pr\u00e9-tri (puis ajuste au \u21C5) :</div>'
+      +_opChip('nn',_mvIcon('boussole',16)+' Au plus proche'+(kmnn?'<span style="opacity:.7"> \u00b7 '+kmnn+'</span>':''),true);
+    if(_opHasCom()){ var kmc=startPt?_opFmtM(_opRouteLen(_opComNames(_opActTodo()).map(_opParcByNom).filter(Boolean),startPt)):'';
+      h+=_opChip('com',_mvIcon('bureau',16)+' Par commune'+(kmc?'<span style="opacity:.7"> \u00b7 '+kmc+'</span>':''),true); }
+    h+=_opChip('dom','Ordre du domaine')+_opChip('surfD','Grandes d\'abord')+_opChip('avc','Moins avanc\u00e9es')+_opChip('rev','\u21C5 Inverser')+'</div>';
+    var dirty=_opDirty();
+    var pill=(dirty==='saved')?'<span style="color:var(--vert-med);font-size:var(--pt-micro,11px);font-weight:700">\u2713 Ordre enregistr\u00e9</span>':(dirty==='empty')?'<span style="color:var(--texte-doux);font-size:var(--pt-micro,11px)">rien \u00e0 ordonner</span>':'<span style="color:var(--orange);font-size:var(--pt-micro,11px);font-weight:700">\u25CF '+(dirty==='unsaved'?'non enregistr\u00e9':'modifi\u00e9')+'</span>';
+    var canSave=(dirty==='modified'||dirty==='unsaved');
+    h+='<div style="display:flex;align-items:center;gap:10px;margin-bottom:6px"><button data-op="save" style="border:1px solid '+(canSave?'var(--vert-med)':'var(--gris-clair)')+';background:'+(canSave?'rgba(111,191,90,.12)':'transparent')+';color:'+(canSave?'var(--vert-med)':'var(--texte-doux)')+';border-radius:9px;padding:8px 15px;font-size:var(--pt-txt,12.5px);font-weight:700;cursor:'+(canSave?'pointer':'default')+(canSave?'':';opacity:.6')+'">\uD83D\uDCBE Enregistrer la tourn\u00e9e</button>'+pill+_opClearBtn()+'</div>'+_opDiffusHtml();
+  } else { h+='<div style="font-size:var(--pt-micro,11px);color:var(--texte-doux);background:rgba(127,127,127,.05);border:1px solid var(--gris-clair);border-radius:9px;padding:7px 11px;margin-bottom:8px">\uD83D\uDD12 Tourn\u00e9e d\u00e9finie par l\'administrateur \u2014 lecture seule. Vos parcelles s\'affichent dans cet ordre, avec leur num\u00e9ro, dans Vigne.</div>'; }
+
+  // ── Liste ──
+  // Rangement SANS glisser : ⇅ prend en main (une parcelle ou un bloc de commune),
+  // puis une fente « insérer ici » la repose. Deux taps, aucun maintien du doigt,
+  // aucune lutte avec le défilement. Le glisser-déposer était inutilisable au-delà
+  // d'une dizaine de parcelles et les ▲▼ demandaient N appuis pour un seul écart.
+  var pk=(edit && OP._pick && OP._pick.names && OP._pick.names.length) ? OP._pick : null;
+  var hasCom=_opHasCom();
+  var _OP_BOX='display:flex;align-items:center;gap:8px;background:rgba(127,127,127,.05);border:1px solid var(--gris-clair);border-radius:11px;padding:9px 10px;';
+  var _OP_DASH='background:repeating-linear-gradient(90deg,var(--or) 0 7px,transparent 7px 13px)';
+  function _opRowHtml(x,ri,prevP,badge){
+    var hop=(prevP&&x.geo)?('<span style="color:#4A9FC8;font-weight:700">\u21B3 '+_opFmtM(_opHav(prevP,x.p))+'</span> \u00b7 '):(x.geo?'':'<span style="color:var(--texte-doux)">\u25CB sans GPS</span> \u00b7 ');
+    var com=(hasCom&&_opCom(x.p))?(_mvIcon('epingle',16)+' '+_pilEsc(_opCom(x.p))+' \u00b7 '):'';
+    return '<div style="'+_OP_BOX+(pk?'opacity:.45;border-style:dashed;':'')+'">'
+      +'<span style="flex:0 0 auto;width:24px;height:24px;border-radius:7px;background:var(--gris-clair);color:var(--texte-doux);font-size:var(--pt-txt,12.5px);font-weight:800;display:flex;align-items:center;justify-content:center">'+(ri+1)+'</span>'
+      +'<div style="flex:1;min-width:0"><div style="font-weight:600;font-size:var(--pt-base,14px);color:var(--texte);white-space:nowrap;overflow:hidden;text-overflow:ellipsis">'+_pilEsc(x.nom)+(multi&&x.emos>1?' <span style="font-size:var(--pt-txt,12.5px);color:var(--texte-doux);font-weight:500">'+x.emos+' travaux</span>':'')+(badge||'')+'</div>'
+      +'<div style="font-size:var(--pt-micro,11px);color:var(--texte-doux);margin-top:1px">'+hop+com+'<b>'+_opFmtHa(x.s)+'</b> \u00b7 '+x.pct+'% fait</div></div>'
+      +'<div style="text-align:right;flex:0 0 auto"><div style="font-weight:700;font-size:var(--pt-base,14px);color:var(--texte);font-variant-numeric:tabular-nums">'+_opFmtH(x.reste)+'</div><div style="font-size:var(--pt-nano,9.5px);color:var(--texte-doux)">restantes</div></div>'
+      +((edit&&!pk)?'<button data-op="pick" data-nom="'+_pilEsc(x.nom)+'" title="D\u00e9placer" style="flex:0 0 auto;width:38px;height:44px;border:1px solid var(--gris-clair);background:transparent;color:var(--texte-doux);border-radius:9px;cursor:pointer;font-size:var(--pt-base,14px);line-height:1;font-family:inherit">\u21C5</button>':'')
+      +'</div>';
+  }
+  function _opSlot(i){ return '<button data-op="drop" data-i="'+i+'" style="display:flex;align-items:center;gap:8px;width:100%;height:44px;border:0;background:transparent;padding:0;cursor:pointer;color:var(--or);font-family:inherit">'
+    +'<span style="flex:1;height:2px;border-radius:2px;'+_OP_DASH+'"></span>'
+    +'<span style="font-size:var(--pt-micro,11px);font-weight:800;letter-spacing:.3px;white-space:nowrap">\u21B3 INS\u00c9RER ICI</span>'
+    +'<span style="flex:1;height:2px;border-radius:2px;'+_OP_DASH+'"></span></button>'; }
+
+  h+='<div id="pil-op-rows" style="display:flex;flex-direction:column;gap:7px">';
+  if(!rows.length){ h+='<div class="pil-empty">Tout est \u00e0 jour.</div>'; }
+  if(pk){
+    // En placement : liste nue (ni badge de jour ni s\u00e9parateur). Les index des
+    // fentes sont ceux de la liste PRIV\u00c9E de la prise en main \u2014 m\u00e9langer les deux
+    // num\u00e9rotations rendrait la fente choisie impr\u00e9visible.
+    var rest=rows.filter(function(x){ return pk.names.indexOf(x.nom)<0; }), pv=startPt;
+    rest.forEach(function(x,ri){ h+=_opSlot(ri)+_opRowHtml(x,ri,pv,''); if(x.geo) pv=x.p; });
+    h+=_opSlot(rest.length);
+  } else {
+    var lastOfDay={}; sim.days.forEach(function(dd){ var li=dd.lastIdx, reprise=(sim.per[li]&&sim.per[li].endDay>dd.day); (lastOfDay[li]=lastOfDay[li]||[]).push({day:dd.day,reprise:reprise}); });
+    var prev=startPt, ri=0;
+    _opRuns(rows).forEach(function(run){
+      if(edit && hasCom && run.com && run.names.length>1){
+        h+='<div style="display:flex;align-items:center;gap:8px;margin:5px 2px 0"><span style="font-size:var(--pt-lbl,10.5px);font-weight:800;letter-spacing:.3px;text-transform:uppercase;color:var(--texte-doux);white-space:nowrap">\uD83D\uDCCD '+_pilEsc(run.com)+' \u00b7 '+run.names.length+'</span><span style="flex:1;height:1px;background:var(--gris-clair)"></span>'
+          +'<button data-op="pickr" data-i="'+run.i0+'" style="flex:0 0 auto;border:1px solid var(--gris-clair);background:var(--bg-card);color:var(--texte-doux);border-radius:9px;padding:0 11px;height:34px;font-size:var(--pt-micro,11px);font-weight:700;cursor:pointer;font-family:inherit">\u21C5 bloc</button></div>';
+      }
+      run.names.forEach(function(){
+        var x=rows[ri], pr=sim.per[ri];
+        var badge=(pr.startDay===pr.endDay)?'<span style="font-size:var(--pt-lbl,10.5px);font-weight:700;border-radius:6px;padding:1px 6px;margin-left:6px;background:rgba(201,168,76,.16);color:var(--or)">Jour '+pr.startDay+'</span>':'<span style="font-size:var(--pt-lbl,10.5px);font-weight:700;border-radius:6px;padding:1px 6px;margin-left:6px;background:rgba(74,159,200,.16);color:#4A9FC8">Jours '+pr.startDay+'\u2192'+pr.endDay+'</span>';
+        h+=_opRowHtml(x,ri,prev,badge);
+        if(x.geo) prev=x.p;
+        if(lastOfDay[ri]){ lastOfDay[ri].forEach(function(de){ var j1=(de.day===1); h+='<div style="display:flex;align-items:center;gap:9px;margin:3px 2px"><span style="flex:1;height:1px;background:'+(j1?'linear-gradient(90deg,transparent,var(--or))':'var(--gris-clair)')+'"></span><span style="font-size:var(--pt-lbl,10.5px);font-weight:700;white-space:nowrap;border-radius:20px;padding:3px 10px;'+(j1?'color:#14110D;background:var(--or)':'color:var(--texte-doux);background:rgba(127,127,127,.08);border:1px solid var(--gris-clair)')+'">'+(j1?'\u25D7 Fin de la journ\u00e9e 1':'Fin de la journ\u00e9e '+de.day)+(de.reprise?' \u00b7 reprise le lendemain':'')+'</span><span style="flex:1;height:1px;background:'+(j1?'linear-gradient(90deg,var(--or),transparent)':'var(--gris-clair)')+'"></span></div>'; }); }
+        ri++;
+      });
+    });
+  }
+  h+='</div>';
+  // Barre « en main » : flottante au-dessus du dock, à portée de pouce, pour que la
+  // pose reste possible sans jamais remonter en haut de la liste.
+  if(pk){
+    h+='<div style="position:fixed;left:50%;transform:translateX(-50%);width:calc(100% - 24px);max-width:600px;bottom:calc(74px + env(safe-area-inset-bottom,0px));z-index:95;display:flex;align-items:center;gap:9px;background:var(--cave);color:#F2EFE7;border-radius:12px;padding:10px 11px;box-shadow:0 10px 24px rgba(0,0,0,.28)">'
+      +'<span style="flex:0 0 auto">'+_mvIcon('doigt',18)+'</span>'
+      +'<div style="flex:1;min-width:0;font-size:var(--pt-txt,12.5px);line-height:1.3"><b style="color:var(--or-clair)">'+_pilEsc(pk.label)+'</b><div style="font-size:var(--pt-lbl,10.5px);color:#B9B2A4;margin-top:2px">Touchez une fente dor\u00e9e pour poser</div></div>'
+      +'<button data-op="last" style="flex:0 0 auto;border:1px solid var(--or);background:rgba(201,168,76,.22);color:var(--or-clair);border-radius:9px;padding:0 11px;height:44px;font-size:var(--pt-micro,11px);font-weight:700;cursor:pointer;font-family:inherit;white-space:nowrap">En dernier</button>'
+      +'<button data-op="cancel" style="flex:0 0 auto;border:1px solid rgba(255,255,255,.25);background:transparent;color:#F2EFE7;border-radius:9px;padding:0 11px;height:44px;font-size:var(--pt-micro,11px);font-weight:700;cursor:pointer;font-family:inherit">Annuler</button></div>';
+  }
+  if(edit){ h+='<div style="font-size:var(--pt-micro,11px);color:var(--texte-doux);line-height:1.5;margin-top:10px">Coche une ou plusieurs <b>t\u00e2ches</b> (faites sur chaque parcelle avant de passer \u00e0 la suivante). Pour ranger : <b>\u21C5</b> prend la parcelle en main, une <b>fente dor\u00e9e</b> la repose \u2014 <b>\u21C5 bloc</b> d\u00e9place toute une commune d\'un coup. <b>Enregistre</b> pour partager l\'ordre \u00e0 l\'\u00e9quipe.</div>'; }
+  return h;
+}
+
+function _pilOpRefresh(){ var el=document.getElementById('pil-op-body'); if(el){ el.innerHTML=_opBody(); _opBuildMap(); } }
+function _pilOpAction(el){
+  if(!_PIL_OP||!el) return;
+  var op=el.getAttribute('data-op');
+  if(op==='stp'){ var k=el.getAttribute('data-k'), d=parseFloat(el.getAttribute('data-d'));
+    if(k==='eff'){ _PIL_OP.eff=Math.max(1,_PIL_OP.eff+d); _PIL_OP.effAuto=false; }
+    else if(k==='jour') _PIL_OP.jour=Math.max(1,Math.min(12,Math.round((_PIL_OP.jour+d)*2)/2));
+    else if(k==='pause') _PIL_OP.pause=Math.max(0,Math.min(180,_PIL_OP.pause+d));
+    else if(k==='trajet') _PIL_OP.trajet=Math.max(0,Math.min(60,_PIL_OP.trajet+d));
+  }
+  else if(!_opCanEdit()){ return; }
+  else if(op==='task'){ var nm=el.getAttribute('data-nom'), i=_PIL_OP.tasks.indexOf(nm);
+    if(i>=0){ if(_PIL_OP.tasks.length>1) _PIL_OP.tasks.splice(i,1); } else _PIL_OP.tasks.push(nm);
+    _PIL_OP.order=null; _PIL_OP._pick=null;
+    // Changer de travail change la fenetre, donc l'effectif engage dessus.
+    _opEffAppliquer(); }
+  else if(op==='sort'){ var mode=el.getAttribute('data-mode'), act=_opActTodo();
+    _PIL_OP._pick=null;
+    if(mode==='nn') _PIL_OP.order=_opNNNames(act);
+    else if(mode==='com') _PIL_OP.order=_opComNames(act);
+    else if(mode==='rev') _PIL_OP.order=_opParcelles().map(function(x){return x.nom;}).reverse();
+    else if(mode==='dom') _PIL_OP.order=act.map(function(p){return p.nom;});
+    else if(mode==='surfD') _PIL_OP.order=act.slice().sort(function(a,b){return (parseFloat(b.surface)||0)-(parseFloat(a.surface)||0);}).map(function(p){return p.nom;});
+    else if(mode==='avc') _PIL_OP.order=act.slice().sort(function(a,b){return _opParcPctM(a)-_opParcPctM(b);}).map(function(p){return p.nom;}); }
+  // Prise en main / pose : remplace le glisser-d\u00e9poser (inutilisable au doigt sur
+  // une longue liste, et cass\u00e9 : la ligne saisie passait en display:none) ET les
+  // fl\u00e8ches \u25B2\u25BC (N appuis par \u00e9cart, cibles de 19 px).
+  else if(op==='pick'){ var pn=el.getAttribute('data-nom'); if(pn) _PIL_OP._pick={names:[pn],label:pn}; }
+  else if(op==='pickr'){ var i0=parseInt(el.getAttribute('data-i'),10); if(!isFinite(i0)) i0=-1;
+    var run=null; _opRuns(_opParcelles()).forEach(function(r){ if(r.i0===i0) run=r; });
+    if(run) _PIL_OP._pick={names:run.names.slice(),label:(run.com||'Sans commune')+' \u00b7 '+run.names.length+' parcelles'}; }
+  else if(op==='drop'||op==='last'){ var pk2=_PIL_OP._pick;
+    if(pk2){ var nms=_opParcelles().map(function(x){return x.nom;});
+      var rest2=nms.filter(function(n){ return pk2.names.indexOf(n)<0; });
+      var ii=(op==='last')?rest2.length:parseInt(el.getAttribute('data-i'),10);
+      if(!isFinite(ii)||ii<0) ii=0; if(ii>rest2.length) ii=rest2.length;
+      _PIL_OP.order=rest2.slice(0,ii).concat(pk2.names,rest2.slice(ii)); }
+    _PIL_OP._pick=null; }
+  else if(op==='cancel'){ _PIL_OP._pick=null; }
+  else if(op==='save'){ _PIL_OP._pick=null; _opSaveOrder(); return; }
+  else if(op==='clear'){ _PIL_OP._pick=null; _opClearOrder(); return; }
+  _pilOpRefresh();
+}
+
+function _opInit(d){
+  // Meme regle que partout : une equipe collective pese son effectif. Le repli
+  // (aucun presentChamp) applique le meme poids, sinon il contredit le chemin
+  // normal des qu'il sert.
+  var present=(typeof d.presentChamp==='number')?d.presentChamp:Math.max(1,
+    (d.membres||[]).reduce(function(a,m){
+      return a + ((m&&!m.bureau)?((typeof window._mvEffDef==='function')?window._mvEffDef(m):1):0);
+    },0));
+  present=Math.round(present);
+  var arr=(typeof window.getTachesSaison==='function')?window.getTachesSaison():(window.TACHES||[]);
+  var tasks=arr.map(function(def){ var tot=_opParcActive().filter(function(p){return _opApplic(p,def);}).reduce(function(a,p){return a+_opParcReste(p,def);},0); return { def:def, nom:def.nom, tot:tot }; });
+  var deflt=null; tasks.forEach(function(x){ if(!deflt||x.tot>deflt.tot) deflt=x; });
+  _PIL_OP_DATA={ present:present, tasks:tasks, defaultTask:deflt?deflt.nom:((tasks[0]&&tasks[0].nom)||'') };
+  if(!_PIL_OP){ _PIL_OP={ tasks:[_PIL_OP_DATA.defaultTask].filter(Boolean), eff:Math.max(1,present), effAuto:true, jour:7, pause:45, trajet:5, _startNom:null, order:null, _pick:null }; }
+  else { if(_PIL_OP.effAuto) _PIL_OP.eff=Math.max(1,present);
+    // Un rendu COMPLET de l'onglet (changement d'onglet, rafra\u00eechissement de
+    // donn\u00e9es) l\u00e2che ce qu'on tenait : sinon la barre flottante survit \u00e0 une
+    // navigation et propose de poser dans une liste qu'on ne voit plus.
+    _PIL_OP._pick=null;
+    var valid={}; tasks.forEach(function(x){valid[x.nom]=1;});
+    _PIL_OP.tasks=(_PIL_OP.tasks||[]).filter(function(n){return valid[n];});
+    if(!_PIL_OP.tasks.length) _PIL_OP.tasks=[_PIL_OP_DATA.defaultTask].filter(Boolean); }
+  _opEffAppliquer();
+}
+// \u2605\u2605\u2605 L'EFFECTIF DE LA TOURNEE EST CELUI DE LA FENETRE DU TRAVAIL.
+//   \u26a0 Cet ecran-la n'est pas qu'un indicateur : l'ordre de passage est
+//   ENREGISTRE et ENVOYE aux ouvriers. Une tournee decoupee pour UNE personne
+//   quand quarante seront dans les rangs ne se voit pas a l'ecran — elle se voit
+//   en bout de rang, le jour de la vendange.
+//   La fenetre suit LES TACHES COCHEES : cocher \u00ab Vendange \u00bb doit recompter sur
+//   le 26 aout, pas sur aujourd'hui. Appele a l'init ET a chaque changement de
+//   coche, tant que l'utilisateur n'a pas regle le compteur a la main (effAuto).
+function _opEffAppliquer(){
+  if(!_PIL_OP||!_PIL_OP_DATA) return;
+  var et=_pilEffTaches(_PIL_OP.tasks||[]);
+  _PIL_OP_DATA.fen=et?{d0:et.d0,d1:et.d1}:null;
+  _PIL_OP_DATA.effFen=et?et.eff:null;
+  if(!_PIL_OP.effAuto) return;
+  var v=(et&&et.eff>0.5)?Math.round(et.eff):_PIL_OP_DATA.present;
+  _PIL_OP.eff=Math.max(1,Math.round(v||1));
+}
+function _pilPanelOrdrePassage(d){
+  _opInit(d);
+  var statHtml=_pilStat(_PIL_OP_DATA?_PIL_OP_DATA.present:0,' pr\u00e9sents');
+  return _pilTile('ordrepassage', '#C9A84C', 'Ordre de passage \u2014 jusqu\'o\u00f9 aujourd\'hui ?', statHtml, 'tourn\u00e9e au plus court \u00b7 diffus\u00e9e \u00e0 l\'\u00e9quipe, par travail', null, '<div id="pil-op-body">'+_opBody()+'</div>');
+}
+
+// ── Onglet SIMULATION ──
+// ════════════════════════════════════════════════════════════════════
+// SIMULATEUR « Renfort : combien, et quand »
+// ────────────────────────────────────────────────────────────────────
+// REMPLACE « Coût selon l'effectif », dont le modèle était faux sur trois points :
+//   1. il facturait TOUTES les heures au taux horaire, alors que les permanents
+//      sont payés qu'il y ait du travail ou non — être 5 ou 16 coûtait presque
+//      pareil, la courbe était plate et le conseil ininterprétable ;
+//   2. il dimensionnait la charge ENTIÈRE de la période sur la fenêtre des
+//      seules tâches datées : avec un chantier daté sur 10 jours il conseillait
+//      15 personnes, avec plusieurs tâches il tombait à 1 ;
+//   3. il chiffrait le retard en pourcentage du coût de main-d'œuvre.
+// MODÈLE COURANT : le socle permanent est DONNÉ (il ne se décide pas). Ce qui se
+// décide, c'est le renfort — combien, et sur quelles semaines. Le travail est
+// posé semaine par semaine par la fenêtre de chaque tâche ; ce qui n'est pas
+// absorbé GLISSE, et une tâche en retard devient PLUS LONGUE (+k %/semaine,
+// linéaire). Rien n'est jamais abandonné : tout finit par se faire, plus tard et
+// plus cher. Lecture seule, rien n'est enregistré.
+// ════════════════════════════════════════════════════════════════════
+// Ordinal -> ISO. Meme base que planning.js/_pilFriseSvg : 2026-01-01.
+function _rfIso(o){ return _pilOrdIso(o); }
+// Sélection courante : nombre de renforts + fenêtre d'emploi (index de semaine).
+// ⚠ Remplace l'ancien profil libre édité au clic dans les colonnes : la zone
+// cliquable couvrait tout le graphique, on ne savait plus ce qu'on avait posé.
+// base = SUR QUOI la simulation s'appuie avant tout renfort :
+//   'eng'  = tout ce qui est DEJA SOUS CONTRAT cette semaine-la, equipes
+//            collectives comprises. C'est le defaut, et c'est ce que le domaine
+//            SAIT deja.
+//   'perm' = les permanents seuls. Repond a une autre question : « de quoi
+//            aurais-je besoin si je n'avais embauche personne ? »
+var _RF_SEL = { R:0, a:0, b:0, dP:0, base:'eng' };   // dP = effectif simule EN PLUS ou EN MOINS
+var _RF_D   = null;
+
+
+
+function _rfCfg(){
+  var e=(window.CONFIG&&window.CONFIG.eco)||{};
+  function _n(v,d,min){ var x=Number(v); return (isFinite(x)&&x>=(min==null?0:min))?x:d; }
+  var t=(e.taux_horaire&&typeof e.taux_horaire==='object')?e.taux_horaire:{};
+  var tr=Number(t['Saisonnier'])||Number(t['TESA'])||Number(t['Extra'])||0;
+  return { k:_n(e.k_retard,15,0)/100, rdt:_n(e.rdt_renfort,85,1)/100,
+           fixe:_n(e.cout_fixe_renfort,180,0), hs:_n(e.maj_hsup,25,0)/100,
+           tauxRenfort:tr, hJour:7, hMax:8 };
+}
+
+// ⚠⚠ PLAFOND DU RENFORT — SOURCE UNIQUE. _rfSelHtml et _rfBest en portaient
+//   CHACUN leur copie : « Math.min(24, Math.ceil(pic)+3) ». Deux defauts
+//   cumules. Le 24 en dur interdisait structurellement de simuler une vendange
+//   manuelle, qui demande 30 a 50 personnes sur deux semaines. Et le pic dont
+//   il partait etait un pic de campagne, dilue : un domaine qui avait besoin de
+//   40 vendangeurs voyait sa liste s'arreter a 20, sans rien pour lui dire
+//   pourquoi. Ici le plafond suit le VRAI besoin de pointe (ctx.renfortPic,
+//   mesure semaine par semaine), plancher 24 pour ne jamais retrecir la liste,
+//   plafond dur 150 pour rester utilisable.
+var _RF_RMAX_DUR = 150;
+function _rfRMax(ctx){
+  var m=Number(ctx&&ctx.renfortPic)||0;
+  if(!(m>0)) ((ctx&&ctx.W)||[]).forEach(function(w,i){
+    var b=(w.need||0)-(((ctx.dispo)||[])[i]||0); if(b>m) m=b;
+  });
+  var r=Math.ceil(m)+3;
+  return Math.min(_RF_RMAX_DUR, (r<24?24:r));
+}
+
+// ⚠⚠ TRAVAIL SANS RATTRAPAGE (« couperet »). Le modele general fait GLISSER ce
+//   qui n'est pas absorbe : le travail se fait plus tard, +15 %/semaine plus
+//   long, et rien n'est jamais abandonne. C'est juste pour la taille ou le
+//   relevage. C'est FAUX pour la vendange : passe la date, la recolte n'est pas
+//   en retard, elle est perdue. Le tableau affichait « Vendange +30 sem. »
+//   comme une option chiffree.
+//   Le drapeau se lit d'abord sur la tache (t.couperet), pour qu'un reglage
+//   futur le rende modifiable sans retoucher ce fichier ; le repli par nom
+//   normalise ne sert qu'a ne pas attendre ce reglage. Egalite STRICTE : un
+//   « prefixe vendange » attraperait « Vendanges vertes », qui est de
+//   l'eclaircissage et se rattrape tres bien.
+function _rfEstCouperet(nom){
+  var k=String(nom||'').normalize('NFD').replace(/[\u0300-\u036f]/g,'').toLowerCase().trim();
+  return k==='vendange' || k==='vendanges';
+}
+
+// Index de la semaine qui contient l'ordinal o. Extraite de _rfSim, qui la
+// portait en interne : _rfBesoin doit decouper les fenetres EXACTEMENT comme le
+// simulateur, sinon les deux ecrans se contredisent d'une semaine.
+function _rfWOf(W,o){
+  var n=W.length;
+  if(!n) return 0;
+  if(o<=W[0].o1) return 0;
+  for(var q=1;q<n;q++){ if(o<=W[q].o1) return q; }
+  return n-1;
+}
+
+// Une tache donnee finit-elle dans sa fenetre, sans rien perdre ?
+function _rfOkT(res,nom){
+  var ok=true;
+  (res.taches||[]).forEach(function(s){
+    if(s.nom!==nom) return;
+    if(s.dep>0 || s.perdu>0.01 || s.fin===null) ok=false;
+  });
+  return ok;
+}
+
+// ⚠⚠ PLUS PETIT RENFORT QUI SUFFIT, VERIFIE PAR SIMULATION — pas deduit d'une
+//   formule. R pose en rectangle sur [a,b]. Critere : la tache nommee tient sa
+//   fenetre, ou (nom null) tout tient. Recherche DICHOTOMIQUE : ~8 simulations
+//   au lieu de 150 en balayage lineaire, ce qui rend le deplafonnement gratuit.
+//   La monotonie est acquise — plus de capacite sur [a,b] ne peut pas faire
+//   finir un travail plus tard.
+function _rfMinR(ctx,a,b,rMax,nom){
+  function ok(R){
+    var r=_rfSim(ctx,_rfProf(ctx,{R:R,a:a,b:b}));
+    return nom?_rfOkT(r,nom):!r.deborde;
+  }
+  if(ok(0)) return 0;
+  if(!ok(rMax)) return null;
+  var lo=0, hi=rMax;
+  while(hi-lo>1){ var m=Math.floor((lo+hi)/2); if(ok(m)) hi=m; else lo=m; }
+  return hi;
+}
+
+// ⚠⚠ « DE COMBIEN DE MONDE CETTE FENETRE A BESOIN » — la question que l'ecran
+//   ne posait nulle part. Le seul chiffre affiche, renfortMini, repondait en
+//   MOYENNE DE CAMPAGNE : le manque total divise par la capacite totale. Pour
+//   une vendange concentree sur deux semaines, ce nombre n'a aucun sens — il
+//   annonce 2 personnes la ou il en faut 40, et toutes les strategies proposees
+//   en decoulaient. Ici chaque travail est mesure DANS SA FENETRE.
+//   brut  = personnes qu'il faudrait en continu sur la fenetre pour cette tache
+//           seule (heures / capacite d'une personne sur ces semaines).
+//   dispo = permanents presents en moyenne sur la fenetre — PARTAGES avec les
+//           autres travaux ouverts au meme moment, d'ou R != brut - dispo.
+//   R     = le renfort reellement necessaire, obtenu par simulation.
+function _rfBesoin(ctx){
+  var W=ctx.W, rMax=_RF_RMAX_DUR, out=[];
+  (ctx.tw||[]).forEach(function(t){
+    if(!(t.h>0.01)) return;
+    // t.we est la borne EXCLUSIVE : le dernier jour travaille est we-1. Viser
+    // wOf(t.we) designait la semaine du LENDEMAIN de l'echeance — une semaine de
+    // rab quand la fenetre se terminait un dimanche.
+    var a=_rfWOf(W,t.ws), b=_rfWOf(W,t.we-1);
+    if(b<a) b=a;
+    var cap1=0, dispoH=0, i;
+    for(i=a;i<=b;i++){ cap1+=(W[i].cap||0); dispoH+=((ctx.dispo[i]||0)*(W[i].cap||0)); }
+    out.push({ nom:t.nom, a:a, b:b, sem:(b-a+1), h:t.h, cpt:!!t.cpt,
+               brut:(cap1>0?t.h/cap1:0), dispo:(cap1>0?dispoH/cap1:0),
+               R:_rfMinR(ctx,a,b,rMax,t.nom),
+               d0:_rfIso(W[a].o0), d1:_rfIso(W[b].o1) });
+  });
+  // Le travail qui commande en premier : celui qui exige le plus de monde.
+  out.sort(function(x,y){
+    var rx=(x.R===null)?1e9:x.R, ry=(y.R===null)?1e9:y.R;
+    return (ry-rx)||(x.a-y.a);
+  });
+  return out;
+}
+// Cache par contexte : _rfBody, _rfStrategies et _rfAppliquer lisent le meme
+// tableau. ctx est reconstruit a chaque rendu -> aucun risque de peremption.
+function _rfBesoinC(ctx){
+  if(!ctx._bes) ctx._bes=_rfBesoin(ctx);
+  return ctx._bes;
+}
+
+// ETP tracteur : MESURE. Heures de sessions de la periode / capacite d'un ETP.
+// CONFIG.eco.trac_etp force une hypothese ; une valeur <=0 repasse en mesure.
+function _rfTracEtp(capT){
+  var e=(window.CONFIG&&window.CONFIG.eco)||{};
+  var forc=Number(e.trac_etp);
+  if(isFinite(forc)&&forc>0) return { etp:forc, mesure:false };
+  if(!(capT>0) || typeof _ecoTracHByParc!=='function') return { etp:0, mesure:true };
+  var t=_ecoTracHByParc(), h=0;
+  for(var k in t){ if(Object.prototype.hasOwnProperty.call(t,k)) h+=(t[k].h||0); }
+  return { etp:Math.min(h/capT,8), mesure:true };
+}
+
+// ⚠⚠ DEUX LECTURES DE LA MEME CAMPAGNE, VOLONTAIREMENT DISTINCTES.
+//   'plan'  = la campagne ENTIERE : charge theorique totale, depuis sa premiere
+//             semaine. Repond a « comment cette campagne etait dimensionnee ».
+//             C'est le comportement historique, conserve tel quel.
+//   'reste' = ce qu'il RESTE a faire, A PARTIR D'AUJOURD'HUI : semaines ecoulees
+//             retirees, semaine en cours proratisee aux jours restants, chaque
+//             tache ramenee a son avancement REEL (pct de calcHeures, la meme
+//             source que la frise et l'onglet Avancement).
+//   AVANT : un seul mode, 'plan'. En pleine campagne le modele rejouait la taille
+//   et l'ebourgeonnage DEJA FAITS -> du rouge « en retard » sur toutes les
+//   semaines passees, « ca ne boucle pas » en permanence, et un besoin de renfort
+//   surestime. C'est 'reste' qui pilote desormais la decision ; 'plan' reste
+//   affiche en dessous, comme repere de dimensionnement.
+function _rfCd(){
+  var sa=(typeof window._pilSaison==='function')?window._pilSaison():null;
+  return (window._chargeSaisonData&&window.getSaisonActive)?window._chargeSaisonData(sa):null;
+}
+// \u2605\u2605\u2605 UNE SEULE REGLE D'ETALEMENT DANS TOUT LE MODULE \u2014 LA REGLE A.
+//   Les heures d'une tache se repartissent au prorata des jours TRAVAILLABLES de
+//   sa fenetre, jamais des jours du calendrier. Une semaine amputee par le 1er mai
+//   et l'Ascension n'a que trois jours pour absorber du travail : elle en recoit
+//   trois cinquiemes, pas sept septiemes.
+//   AVANT : _taskHoursIn (planning.js) appliquait la regle A, _rfHIn appliquait
+//   un etalement a plat. Les deux lectures du simulateur \u2014 \u00ab le plan \u00bb et \u00ab ce
+//   qu'il reste \u00bb \u2014 se dessinaient donc sous DEUX regles, cote a cote, et
+//   _rfMemeImage les comparait l'une a l'autre.
+//   La capacite ne se recalcule pas ici : elle est LUE dans cd.capCum, le cumul
+//   jour par jour rendu par _chargeSaisonData. Un second calcul donnerait un
+//   second chiffre.
+//   \u26a0 Repli integral sur l'ancien etalement si capCum est absent (planning.js
+//   anterieur a ce lot) : jamais d'ecran vide pour une cle manquante.
+function _rfCapIn(cd,a,b){
+  var C=cd&&cd.capCum; if(!C||cd.spanS==null) return null;
+  var i=Math.round(a)-cd.spanS, j=Math.round(b)-cd.spanS, L=C.length-1;
+  if(i<0)i=0; if(i>L)i=L; if(j<0)j=0; if(j>L)j=L;
+  return (j>i)?(C[j]-C[i]):0;
+}
+function _rfHIn(cd,t,a,b){
+  var A=Math.max(t.ws,a), B=Math.min(t.we,b);
+  if(B<=A) return 0;
+  var den=_rfCapIn(cd,t.ws,t.we);
+  if(den!=null&&den>0){ var num=_rfCapIn(cd,A,B); return t.h*(num||0)/den; }
+  return t.h*(B-A)/Math.max(1,t.we-t.ws);
+}
+function _rfCtx(d,mode,cdIn){
+  var cd=cdIn||_rfCd();
+  if(!cd||!(cd.charge>0)||!(cd.weeks&&cd.weeks.length)) return null;
+  var rate=_ecoRate(); if(!(rate>0)) return { noRate:true };
+  var c=_rfCfg(), WA=cd.weeks, capTfull=0, i;
+  for(i=0;i<WA.length;i++) capTfull+=(WA[i].cap||0);
+  if(!(capTfull>0)) return null;
+  var reste=(mode==='reste');
+  var E=_pilEchelle(cd), oT=E.o(E.todayIso);
+  var W=WA, nSkip=0, oDep=WA[0].o0, charge=cd.charge;
+  var tw=(cd.taskWindows||[]).map(function(t){ return {nom:t.nom,h:t.h,ws:t.ws,we:t.we,cpt:(t.couperet===true)||_rfEstCouperet(t.nom)}; });
+  if(reste){
+    // 1) chaque tache ramenee a son reste reel. Une tache dont la fenetre est
+    //    deja passee reste OUVERTE : elle est en retard, pas disparue — sa
+    //    fenetre demarre aujourd'hui, sa limite ne bouge pas.
+    var pct={}; ((d&&d.data)||[]).forEach(function(t){ pct[_friseNorm(t.nom)]=(t.pct||0); });
+    tw=tw.map(function(t){
+      var p=Math.max(0,Math.min(100,pct[_friseNorm(t.nom)]||0));
+      return { nom:t.nom, h:t.h*(1-p/100), ws:Math.max(t.ws,oT), we:t.we, cpt:t.cpt };
+    }).filter(function(t){ return t.h>0.01; });
+    charge=tw.reduce(function(a,t){ return a+t.h; },0);
+    // 2) semaines ecoulees retirees, semaine en cours proratisee aux jours restants
+    var i0=-1;
+    for(i=0;i<WA.length;i++){ if(WA[i].o1>=oT){ i0=i; break; } }
+    if(i0<0) return { fini:true, cd:cd };
+    nSkip=i0; oDep=Math.max(WA[i0].o0,oT);
+    W=WA.slice(i0).map(function(w,k){
+      var o0=(k===0)?Math.max(w.o0,oT):w.o0;
+      var nd=Math.max(1,w.o1-w.o0+1), ndr=Math.max(0,w.o1-o0+1);
+      var fr=(k===0)?(ndr/nd):1;
+      // \u2605 LA SEMAINE EN COURS SE COUPE AU JOUR (12/08/2026). Le prorata
+      //   `fr` supposait les heures etalees a plat sur les sept jours : un
+      //   mercredi, il gardait 5/7 d'une semaine dont le week-end vaut 0 et dont
+      //   une equipe collective peut porter la totalite sur deux jours. Meme
+      //   defaut, meme correction que _pilCapaProj — et meme source : capCum via
+      //   _rfCapIn pour la capacite 1 ETP, capRCum via _mvCapReelIn pour les
+      //   heures reelles. `fr` ne sert plus que de repli quand la donnee manque.
+      var cpX=_rfCapIn(cd,o0,w.o1+1), cp=(cpX!=null)?cpX:(w.cap||0)*fr;
+      var CR=(typeof window._mvCapReelIn==='function')?window._mvCapReelIn(cd,o0,w.o1+1):null;
+      // need RECALCULE sur le reste : garder celui du plan ferait mentir la
+      // hauteur des colonnes du graphe.
+      var wh=0; tw.forEach(function(t){ wh+=_rfHIn(cd,t,o0,w.o1+1); });
+      return { o0:o0, o1:w.o1, m:w.m, hours:wh, cap:cp, need:(cp>0?wh/cp:0),
+               head:w.head, headPerm:w.headPerm,
+               capH:CR?CR.work:(w.capH!=null?w.capH*fr:null),
+               capPay:CR?CR.pay:(w.capPay!=null?w.capPay*fr:null),
+               capHPerm:CR?CR.workPerm:(w.capHPerm!=null?w.capHPerm*fr:null),
+               capPayPerm:CR?CR.payPerm:(w.capPayPerm!=null?w.capPayPerm*fr:null) };
+    });
+  }
+  // ★ `pic` (le besoin hebdomadaire maximal) etait calcule ici et renvoye dans le
+  //   contexte depuis toujours — AUCUN appelant ne l'a jamais lu. Retire le 11/08
+  //   apres verification (`grep '.pic'` = 0 consommateur). Le pic AFFICHE dans le
+  //   Pilotage est calcule ailleurs, sur l'echelle des semaines.
+  var capT=0;
+  W.forEach(function(w){ capT+=(w.cap||0); });
+  if(!(capT>0)) return null;
+  // ETP tracteur : MESURE sur la campagne ENTIERE dans les deux modes. Le
+  // rapporter aux seules semaines restantes ferait exploser le ratio.
+  var trac=_rfTracEtp(capTfull);
+  // ⚠⚠ EFFECTIF PERMANENT : cd.weeks[].headPerm, l'effectif LISSE au prorata des
+  // jours reellement sous contrat (_headWeek), equipes collectives exclues.
+  // L'ancienne version comptait les TETES — saisonniers enregistres et CDD hors
+  // periode compris — d'ou un « 5 permanents » affiche la ou l'onglet Avancement
+  // en montrait 2 a 3. Repli sur head si planning.js n'expose pas headPerm.
+  // Le curseur « Permanents » applique un DELTA a l'effectif mesure, il ne le
+  // remplace pas : l'escalier des contrats reste visible.
+  var dP=(_RF_SEL&&_RF_SEL.dP)||0;
+  // ★★★ LA SIMULATION PART DE CE QU'ON SAIT DEJA — LES CONTRATS SIGNES.
+  // ⚠⚠ AVANT : le socle lisait TOUJOURS headPerm, l'effectif permanent, equipes
+  //   collectives EXCLUES. L'intention etait bonne (« on ne raisonne pas un
+  //   recrutement sur des vendangeurs ») et le resultat faux des que l'embauche
+  //   est FAITE : 34 vendangeurs deja sous contrat du 17 aout au 3 septembre
+  //   n'existaient pas pour le simulateur, qui reclamait « 34 personnes de
+  //   renfort a poser » pour une equipe deja embauchee. Pendant ce temps la
+  //   frise annuelle, elle, lit `head` : elle montrait la vendange couverte.
+  //   LE MEME MODULE DISAIT DEUX CHOSES — la faute exacte de §33 et §34.
+  //   ★ Ce qui separe le socle du renfort n'est pas « permanent / saisonnier »,
+  //   c'est « DEJA ENGAGE / ENCORE A DECIDER ». Un contrat signe ne se decide
+  //   plus. Il se subit — et il se compte.
+  //   'perm' reste accessible au selecteur : il repond a l'autre question,
+  //   « de quoi aurais-je besoin si je n'avais embauche personne », utile pour
+  //   preparer la campagne suivante. Ce n'est simplement plus le defaut.
+  var eng=!(_RF_SEL && _RF_SEL.base==='perm');
+  function _hdW(w){ var v=eng?w.head:(w.headPerm!=null?w.headPerm:w.head); return (v!=null?v:(w.head||0))||0; }
+  function _chW(w){ var v=eng?w.capH:w.capHPerm; return (v!=null)?v:null; }
+  function _cpW(w){ var v=eng?w.capPay:w.capPayPerm; return (v!=null)?v:null; }
+  var head=W.map(function(w){ return Math.max(0, _hdW(w)+dP); });
+  var headMes=W.map(function(w){ return Math.max(0, _hdW(w)); });
+  // ⚠⚠ LA CAPACITE VIENT DU PLANNING, PLUS D'UN EFFECTIF x UN MODELE MOYEN.
+  //   AVANT : (tetes presentes) x (heures du modele « standard »). Deux erreurs
+  //   cumulees. Un salarie rattache a un AUTRE modele etait compte aux heures du
+  //   standard — son seuil de declenchement des heures sup etait faux toute
+  //   l'annee. Et aucun conge, aucune fermeture, aucune absence deja saisie
+  //   n'etait deduit : l'hiver, quand les soldes de CP s'ecoulent, le simulateur
+  //   comptait tout le monde present.
+  //   MAINTENANT : w.capHPerm = la somme, salarie par salarie et jour par jour,
+  //   des heures REELLEMENT travaillables (_planWorkH : un CP vaut 0), lue dans
+  //   les entrees du planning quand elles existent et dans le modele DE CHACUN
+  //   sinon. w.capPayPerm = les heures PAYEES (_planDayH : un CP vaut ses heures).
+  //   Payer et pouvoir travailler ne sont pas la meme chose : le socle suit la
+  //   paie, la capacite suit la presence. C'etait un seul nombre jusqu'ici.
+  //   dispo reste exprime en EQUIVALENT-PERSONNES (heures / cap) : _rfSim et le
+  //   graphe le lisent ainsi, et capNorm=(dispo+R*rdt)*cap redonne exactement les
+  //   heures reelles — aucune autre fonction n'a eu besoin de changer.
+  //   REPLI INTEGRAL sur l'ancien calcul si capHPerm est absent (planning.js
+  //   anterieur a ce lot) : jamais d'ecran vide pour une cle manquante.
+  var hDisp=W.map(function(w,j){
+    var cp=w.cap||0, ch=_chW(w);
+    var hp=(ch!=null)?(ch+dP*cp):(head[j]*cp);
+    return Math.max(0, hp-trac.etp*cp);
+  });
+  var dispo=W.map(function(w,j){ return ((w.cap||0)>0)?(hDisp[j]/w.cap):0; });
+  var socle=0, capDispo=0;
+  W.forEach(function(w,j){
+    var cp=w.cap||0;
+    var _cy=_cpW(w);
+    socle+=((_cy!=null)?(_cy+dP*cp):(head[j]*cp))*rate;
+    capDispo+=hDisp[j];
+  });
+  // ⚠ POINTE DE RENFORT, mesuree SEMAINE PAR SEMAINE. C'est le seul chiffre qui
+  //   dimensionne une vendange : renfortMini, lui, moyenne sur toute la
+  //   campagne et repond a une autre question (« combien en continu »).
+  var rPic=0; W.forEach(function(w,j){ var bs=(w.need||0)-(dispo[j]||0); if(bs>rPic) rPic=bs; });
+  var headMoy=capT>0?W.reduce(function(a,w,j){return a+head[j]*(w.cap||0);},0)/capT:0;
+  var headMesMoy=capT>0?W.reduce(function(a,w,j){return a+headMes[j]*(w.cap||0);},0)/capT:0;
+  return { cd:cd, W:W, tw:tw, capT:capT, c:c, rate:rate,
+           head:head, headMes:headMes, dispo:dispo, headMoy:headMoy,
+           headMesMoy:headMesMoy, dP:dP, trac:trac,
+           // ★ SOURCE UNIQUE DU MOT. Six ecrans nomment ce socle (ligne du
+           //   graphe, colonne du tableau, KPI, selecteur, verdict, note de
+           //   l'etape 5). Six libelles ecrits a la main auraient diverge des
+           //   la premiere retouche — c'est ainsi qu'un ecran finit par
+           //   contredire son voisin.
+           base:(eng?'eng':'perm'),
+           baseLbl:(eng?'d\u00e9j\u00e0 sous contrat':'permanents seuls'),
+           baseCourt:(eng?'sous contrat':'permanents'),
+           mode:(reste?'reste':'plan'), nSkip:nSkip, oDep:oDep, oToday:oT,
+           chargePlan:cd.charge, capDispo:capDispo,
+           socle:socle, charge:charge,
+           manque:Math.max(0, charge-capDispo), renfortPic:rPic,
+           renfortMini:(capT>0?Math.max(0,charge-capDispo)/(capT*c.rdt):0) };
+}
+// ★★★ « DEUX GRAPHES » N'EST PAS « DEUX SEMAINES DE MOINS ».
+// ⚠⚠ Le test qui decidait d'afficher le second graphe portait sur `nSkip>0` :
+//   des que la campagne avait commence, l'ecran dessinait DEUX FOIS le meme
+//   profil — memes colonnes, meme ligne d'effectif, meme hauteur. Seuls le
+//   voile gris et la legende de l'axe changeaient. Deux images identiques sous
+//   deux titres differents (« ce qu'il reste » / « le plan de depart ») ne se
+//   comparent pas : elles se contredisent en apparence, et le lecteur cherche
+//   une difference qui n'existe pas.
+// Ici on compare ce que l'œil verra, pas le compteur de semaines :
+//   1. du travail a-t-il ete fait ? (les volumes diffreraient)
+//   2. les semaines ecartees portaient-elles du travail ? (des colonnes
+//      auraient disparu du dessin)
+//   3. une fenetre de tache a-t-elle bouge ? (mode « reste » : la fenetre d'une
+//      tache non commencee demarre aujourd'hui, ce qui DECALE ses colonnes)
+// ⚠ HONNETETE SUR CE QUE MESURENT CES TROIS TESTS : sur les donnees d'AUJOURD'HUI,
+//   `charge` est la somme des `tw` et les heures d'une semaine viennent des memes
+//   fenetres — la comparaison (3) attraperait donc deja (1) et (2). Les deux
+//   premieres sont des SORTIES ANTICIPEES, gardees parce qu'elles disent la
+//   question en clair et coutent O(1). Elles sont eprouvees sur le contrat de la
+//   fonction, pas sur un cas de production : une garde qu'aucun test ne peut
+//   faire rougir rassure sans proteger (§34d).
+// Si les trois reponses sont non, les deux contextes dessinent la meme image :
+// on n'en garde qu'UN, et c'est le plan — son selecteur couvre toute la
+// campagne, donc il permet de poser du renfort la ou l'autre l'interdisait.
+function _rfMemeImage(P,R){
+  if(!P||!R||!P.W||!R.W) return false;
+  if(Math.abs((P.charge||0)-(R.charge||0))>0.5) return false;
+  var i, av=0;
+  for(i=0;i<(R.nSkip||0);i++) av+=((P.W[i]&&P.W[i].hours)||0);
+  if(av>0.5) return false;
+  var pw=P.tw||[], rw=R.tw||[];
+  if(pw.length!==rw.length) return false;
+  var map={};
+  pw.forEach(function(t){ map[t.nom]=t; });
+  for(i=0;i<rw.length;i++){
+    var r=rw[i], p=map[r.nom];
+    if(!p) return false;
+    if(Math.abs((p.h||0)-(r.h||0))>0.5 || p.ws!==r.ws || p.we!==r.we) return false;
+  }
+  return true;
+}
+// SOURCE UNIQUE des deux lectures. _rfBody, la tuile et _rfAppliquer doivent
+// raisonner sur EXACTEMENT le meme contexte decisionnel : les index « Du / Au »
+// du selecteur designent des semaines de ctx.W, ils n'ont aucun sens dans l'autre.
+function _rfPair(d){
+  var cd=_rfCd();
+  var p=_rfCtx(d,'plan',cd);
+  if(!p||p.noRate) return { plan:p, dec:p, fini:false };
+  var r=_rfCtx(d,'reste',cd);
+  if(r&&r.fini) return { plan:p, dec:p, fini:true };
+  var dec=(r&&!r.noRate&&!r.fini)?r:p;
+  // Meme image des deux cotes : un seul contexte, donc un seul graphe. `meme`
+  // dit a l'ecran POURQUOI il n'y en a qu'un, plutot que de le laisser croire
+  // que la campagne n'a pas commence.
+  if(dec!==p && _rfMemeImage(p,dec)) return { plan:p, dec:p, fini:false, meme:true };
+  return { plan:p, dec:dec, fini:false };
+}
+
+// Profil de renfort derive de la selection (R personnes des semaines a a b incluses).
+function _rfProf(ctx,sel){
+  var n=ctx.W.length, r=[], i;
+  for(i=0;i<n+200;i++) r[i]=0;
+  if(sel && sel.R>0){
+    var a=Math.max(0,Math.min(n-1,sel.a)), b=Math.max(a,Math.min(n-1,sel.b));
+    for(i=a;i<=b;i++) r[i]=sel.R;
+  }
+  return r;
+}
+
+function _rfSim(ctx,prof){
+  var W=ctx.W, nW=W.length, c=ctx.c;
+  // Bornes REELLES des semaines. Une division par 7 depuis W[0].o0 decale d'une
+  // semaine des que la premiere colonne est tronquee (mode « reste » : elle
+  // demarre aujourd'hui, pas forcement un lundi).
+  function wOf(o){ return _rfWOf(W,o); }
+  var st=ctx.tw.map(function(t){
+    return { nom:t.nom, rest:t.h, h0:t.h, ouv:wOf(t.ws), lim:wOf(t.we-1),
+             fin:null, dep:0, cpt:!!t.cpt, perdu:0 };
+  });
+  var hSup=0, induit=0, capRenf=0, pointe=0, inemploye=0, sem=0, fin0=null, parSem=[];
+  for(var w=0; w<nW+200; w++){
+    var iw=Math.min(w,nW-1), cap=W[iw].cap||0, R=(prof&&prof[w])||0;
+    if(R>pointe) pointe=R;
+    if(w<nW) capRenf+=R*cap;
+    var dispoP=ctx.dispo[iw]||0;
+    var capNorm=(dispoP+R*c.rdt)*cap, capMax=capNorm*(c.hMax/c.hJour);
+    // ⚠⚠ REPARTITION, PAS FILE D'ATTENTE. L'ancienne boucle servait la tache la
+    //   plus urgente JUSQU'A EPUISEMENT de la capacite avant de passer a la
+    //   suivante : une tache en retard gelait tout ce qui venait apres, et les
+    //   travaux suivants ne demarraient JAMAIS a leur date. Or on commence
+    //   l'ebourgeonnage a sa date meme si le relevage traine.
+    //   Chaque tache ouverte recoit une part au prorata de son BESOIN HEBDO
+    //   (ce qu'il lui faudrait pour finir dans sa fenetre) ; une tache deja
+    //   hors delai demande tout ce qui lui reste, elle est donc servie en
+    //   priorite sans pour autant affamer les autres. Le surplus des taches
+    //   rassasiees est redistribue en 2e passe.
+    var dispo=capMax, used=0;
+    // ⚠⚠ LE COUPERET TOMBE ICI, AVANT TOUTE REPARTITION. Passe sa date limite,
+    //   un travail sans rattrapage ne recoit plus rien et ce qui restait est
+    //   PERDU — pas reporte, pas rallonge de 15 %. Consequence voulue : la
+    //   capacite qu'il aurait consommee retourne aux autres travaux, ce qui est
+    //   exactement ce qui se passe dans les rangs, et le simulateur cesse de
+    //   proposer un renfort de septembre pour rattraper une vendange d'aout.
+    st.forEach(function(s){
+      if(s.cpt && w>s.lim && s.rest>0.01){ s.perdu+=s.rest; s.rest=0; }
+    });
+    var ouv=st.filter(function(s){ return s.rest>0 && w>=s.ouv; });
+    if(ouv.length){
+      var tot=0;
+      ouv.forEach(function(s){
+        s._f=1+c.k*Math.max(0,w-s.lim);
+        var semRest=Math.max(1,s.lim-w+1);
+        s._need=(w>s.lim)? s.rest : s.rest/semRest;   // heures NOMINALES/semaine
+        s._cout=s._need*s._f;                          // ce qu'elles coutent vraiment
+        tot+=s._cout;
+      });
+      // 1re passe : part proportionnelle, plafonnee au besoin reel de la tache
+      ouv.forEach(function(s){
+        if(dispo<=0) return;
+        var part=(tot>0)?(capMax*s._cout/tot):0;
+        var avNom=Math.min(s.rest, part/s._f, dispo/s._f);
+        if(avNom<=0) return;
+        var coutH=avNom*s._f;
+        s.rest-=avNom; dispo-=coutH; used+=coutH; induit+=coutH-avNom;
+      });
+      // 2e passe : le reliquat va aux taches non finies, les plus urgentes d'abord
+      ouv.slice().sort(function(a,b){ return a.lim-b.lim; }).forEach(function(s){
+        if(dispo<=0 || s.rest<=0.01) return;
+        var avNom=Math.min(s.rest, dispo/s._f), coutH=avNom*s._f;
+        s.rest-=avNom; dispo-=coutH; used+=coutH; induit+=coutH-avNom;
+      });
+      ouv.forEach(function(s){
+        if(w>s.lim) s.dep=Math.max(s.dep,w-s.lim);
+        if(s.rest<=0.01 && s.fin===null) s.fin=w;
+      });
+    }
+    if(used>capNorm) hSup+=used-capNorm;
+    var oisive=Math.max(0,Math.min(capNorm,capMax)-used);
+    if(w<nW) inemploye+=oisive;
+    // ⚠⚠ CE QUI EST « EN RETARD » N'EST PAS CE QUI RESTE A FAIRE.
+    //   resteTot pilote l'arret de la boucle. resteRet est le SEUL qui s'affiche :
+    //   une tache n'est en retard qu'AU-DELA de sa date de fin (w > s.lim), pas
+    //   parce qu'elle vient d'ouvrir et qu'il reste 90 % a faire.
+    //   Deux versions fausses avant celle-ci : (1) somme de TOUTES les taches
+    //   -> l'effeuillage de juillet apparaissait « en attente » des la 1re
+    //   semaine ; (2) somme des taches OUVERTES -> le rouge s'empilait sur les
+    //   premieres semaines de chaque tache et n'en partait jamais, meme avec du
+    //   renfort. Desormais le rouge coincide EXACTEMENT avec ce qui declenche
+    //   l'inflation des heures : il quitte le debut et s'accumule a la fin.
+    var resteTot=0, resteRet=0;
+    st.forEach(function(s){ resteTot+=s.rest; if(w>s.lim) resteRet+=s.rest; });
+    if(w<nW) parSem.push({w:w,R:R,cap:cap,capNorm:capNorm,used:used,reste:resteRet,dispo:dispoP});
+    sem=w;
+    // Le compteur « paye sans travail ouvert » doit courir JUSQU'A LA FIN DE LA
+    // CAMPAGNE : s'arreter des que le travail est boucle sous-comptait toutes les
+    // semaines de permanents oisifs qui suivent. fin0 retient la semaine ou le
+    // travail se termine — ce n'est plus l'arret de la boucle qui la definit.
+    if(resteTot<=0.01){ if(fin0===null) fin0=w; if(w>=nW-1) break; }
+  }
+  var tauxR=(c.tauxRenfort>0?c.tauxRenfort:ctx.rate);
+  // ⚠ Une heure supplementaire coute l'HEURE + sa majoration. Avant : seule la
+  // majoration etait facturee (rate*hs), soit un cinquieme du vrai surcout — le
+  // socle ne contient que les heures NORMALES, l'heure sup n'etait comptee nulle part.
+  var cRenf=capRenf*tauxR, cHS=hSup*ctx.rate*(1+c.hs), cFixe=pointe*c.fixe;
+  return { cSocle:ctx.socle, cRenf:cRenf, cHS:cHS, cFixe:cFixe,
+           decide:cRenf+cHS+cFixe, cout:ctx.socle+cRenf+cHS+cFixe,
+           induit:induit, hSup:hSup, capRenf:capRenf, pointe:pointe,
+           // ⚠⚠ « BOUCLER » = CHAQUE TACHE FINIE DANS SA FENETRE, pas « avant la
+           //   fin de campagne ». L'ancien critere (sem>=nW) laissait passer une
+           //   tache qui debordait de 2 semaines tant qu'il restait du calendrier
+           //   derriere : le modele repondait « aucun renfort necessaire » sur un
+           //   chantier manifestement sous-dimensionne. Une echeance agronomique
+           //   est une contrainte, pas une preference.
+           inemploye:inemploye, finSem:(fin0!=null?fin0:sem),
+           // ⚠ Une strategie qui laisse de la recolte au sol NE BOUCLE PAS,
+           //   quel que soit son cout et meme si tout le reste finit a l'heure.
+           perdu:st.reduce(function(a,s){return a+(s.perdu||0);},0),
+           nPerdu:st.filter(function(s){return s.perdu>0.01;}).length,
+           deborde:(fin0===null||fin0>=nW)||st.some(function(s){ return s.dep>0 || s.perdu>0.01; }),
+           depMax:st.reduce(function(a,s){return Math.max(a,s.dep);},0),
+           horsDelai:st.filter(function(s){return s.dep>0;}).length,
+           // Le DETAIL par tache, pas seulement le compteur. « Laquelle deborde,
+           // de combien, et sur quoi elle pousse » est la seule information qui
+           // dit OU mettre le renfort ; un agregat ne le dit pas. s.fin peut
+           // depasser nW-1 (la boucle court jusqu'a nW+200) : _rfWkEnd extrapole.
+           taches:st.map(function(s){ return {nom:s.nom, lim:s.lim, fin:(s.fin===null?null:s.fin),
+                                             dep:s.dep, cpt:!!s.cpt, perdu:(s.perdu||0), h0:s.h0}; }),
+           parSem:parSem };
+}
+
+// ⚠⚠ RECHERCHE BORNEE. L'ancienne version balayait TOUTES les combinaisons
+// nombre x debut x fin : sur une campagne de 40 semaines, ~10 000 simulations
+// completes A CHAQUE RENDU **et** a chaque clic — les boutons semblaient inertes
+// alors qu'ils mettaient plusieurs secondes. Ici : on cherche le plus petit
+// effectif qui boucle sur la campagne entiere, puis on RETRECIT la fenetre tant
+// que ca boucle encore, et on teste deux effectifs au-dessus. ~250 simulations.
+function _rfBest(ctx){
+  // ⚠ Le balayage lineaire de 0 a rMax n'etait tenable que parce que rMax etait
+  //   plafonne a 24 — c'est-a-dire au prix de ne jamais trouver la reponse quand
+  //   il faut 40 personnes. _rfMinR fait la meme chose par dichotomie, en 8
+  //   simulations quel que soit le plafond.
+  var n=ctx.W.length, rMax=_rfRMax(ctx);
+  var R0=_rfMinR(ctx,0,n-1,rMax,null);
+  if(R0===null) return null;                       // rien ne boucle : pas de conseil
+  var best=null;
+  for(var R=R0; R<=Math.min(rMax,R0+2); R++){
+    var a=0, b=n-1;
+    if(R>0){
+      while(a<b && !_rfSim(ctx,_rfProf(ctx,{R:R,a:a+1,b:b})).deborde) a++;
+      while(b>a && !_rfSim(ctx,_rfProf(ctx,{R:R,a:a,b:b-1})).deborde) b--;
+    } else { a=0; b=0; }
+    var s=_rfSim(ctx,_rfProf(ctx,{R:R,a:a,b:b}));
+    if(!s.deborde && (!best || s.decide<best.s.decide)) best={R:R,a:a,b:b,s:s};
+  }
+  return best;
+}
+
+// ⚠⚠ LES PROPOSITIONS PARTENT DES FENETRES, PLUS D'UNE MOYENNE. Les anciennes
+//   se calaient toutes sur renfortMini = manque total / capacite totale, puis
+//   « x2 sur une moitie de campagne ». Aucune ne pouvait tomber juste des qu'un
+//   travail court et lourd existait : on proposait 2 personnes toute l'annee et
+//   4 sur six mois pour une vendange qui en demande 40 sur deux semaines. Et
+//   comme aucune ne bouclait, l'ecran concluait « il faut plus de monde que ce
+//   que le simulateur a teste » sans jamais dire combien.
+function _rfStrategies(ctx){
+  var n=ctx.W.length, out=[], bes=_rfBesoinC(ctx);
+  out.push({nom:'Aucun renfort', sel:{R:0,a:0,b:0}});
+  // ★★★ LE GARDE-FOU : `tout` EST CALCULE D'ABORD, ET IL PLAFONNE LES AUTRES.
+  //   x.R n'est PAS « ce que cette tache demande » : c'est « combien de monde il
+  //   faut poser SUR LA SEULE FENETRE DE CETTE TACHE pour qu'elle tienne, alors
+  //   qu'on n'a rien fait avant ». Tout le retard accumule vient s'y ecraser, le
+  //   surcout de retard le multiplie, et le nombre s'envole.
+  //   Mesure du 12/08, sur le meme ecran, au meme instant :
+  //     · le tableau « Est-ce que ca tient dans les fenetres ? » : accolage,
+  //       il faudrait 3,2 personnes, il y en a deja 1,2 ;
+  //     · le bouton juste au-dessus : « Accolage — 26 pers. » ;
+  //     · et le bouton d'a cote : « 7 sur toute la periode », qui fait tenir
+  //       TOUTE la campagne, accolage compris.
+  //   Trois nombres, un seul ecran. Une proposition CIBLEE qui coute plus cher
+  //   que la solution GLOBALE n'est pas une proposition : c'est un piege.
+  //   On ne l'affiche plus. Ce qui reste est vrai et comparable.
+  var tout=_rfMinR(ctx,0,n-1,_RF_RMAX_DUR,null);
+  var plafond=(tout!=null&&tout>0)?tout:_RF_RMAX_DUR;
+  // Les deux travaux qui commandent, chacun avec le nombre exact que SA fenetre
+  // reclame. Au-dela de deux, la rangee de boutons devient illisible.
+  var k=0;
+  bes.forEach(function(x){
+    if(k>=2 || !(x.R>0) || x.R>plafond) return;
+    k++;
+    out.push({nom:_pilEsc(x.nom)+' \u2014 '+x.R+' pers.', sel:{R:x.R,a:x.a,b:x.b},
+      detail:x.R+' personne'+(x.R>1?'s':'')+' du '+_pilFmtD(x.d0)+' au '+_pilFmtD(x.d1)
+             +' \u00b7 '+x.sem+' semaine'+(x.sem>1?'s':'')+' \u2014 pos\u00e9s sur cette seule fen\u00eatre'});
+  });
+  if(tout!=null && tout>0) out.push({nom:tout+' sur toute la p\u00e9riode', sel:{R:tout,a:0,b:n-1},
+    detail:'le plus petit nombre qui tient sans jamais s\u2019arr\u00eater'});
+  var b=_rfBest(ctx);
+  if(b) out.push({nom:'Le meilleur placement trouv\u00e9', best:true, sel:{R:b.R,a:b.a,b:b.b},
+    detail:b.R+' renfort'+(b.R>1?'s':'')+' \u00b7 '+_pilFmtD(_rfIso(ctx.W[b.a].o0))+' \u2192 '+_pilFmtD(_rfIso(ctx.W[b.b].o1))});
+  return out;
+}
+
+// ── Étape 2 : le profil. Il dessine le RÉSULTAT de la simulation. Plus aucune
+//    zone cliquable : la sélection se fait au sélecteur, au-dessus. ──
+// Abscisse en DATES DE JOURS : chaque colonne porte le premier et le dernier
+// jour qu'elle couvre (« 23–29 aout »), pas un numero de semaine. On lit le
+// graphique avec le calendrier du domaine, pas avec un compteur interne.
+function _rfLabJ(W,i){
+  var MO=['janv.','f\u00e9vr.','mars','avr.','mai','juin','juil.','ao\u00fbt','sept.','oct.','nov.','d\u00e9c.'];
+  var a=String(_rfIso(W[i].o0)).split('-'), b=String(_rfIso(W[i].o1)).split('-');
+  var da=parseInt(a[2],10), db=parseInt(b[2],10);
+  var ma=MO[parseInt(a[1],10)-1]||'', mb=MO[parseInt(b[1],10)-1]||'';
+  return (ma===mb) ? (da+'\u2013'+db+' '+mb) : (da+' '+ma+'\u2013'+db+' '+mb);
+}
+function _rfProfilSvg(ctx,res,sel,opt,w){
+  opt=opt||{};
+  var W=ctx.W, n=W.length, PS=res.parSem;
+  var E=_pilEchelle(ctx.cd,w), X=E.X;
+  var c=window._mvGraphCadre(E.W,1);
+  var Wd=E.W,padL=E.padL,padR=E.padR,padT=22,padB=42,Ht=290,pw=E.plotW,ph=Ht-padT-padB;
+  // Une colonne n'occupe plus une fraction egale de la largeur : elle occupe
+  // les JOURS qu'elle couvre, exactement comme la barre correspondante de la
+  // frise. colW ne sert plus qu'a doser la densite des etiquettes.
+  function CX0(k){ return X(W[Math.max(0,Math.min(n-1,k))].o0); }
+  function CX1(k){ return X(W[Math.max(0,Math.min(n-1,k))].o1+1); }
+  // ★★★ LE ROUGE N'EST PLUS PLAFONNE A 4, ET IL EST EMPILE SUR LE MEME SOCLE
+  //   QUE LE RESTE DE LA COLONNE. Deux fautes, dans la meme image :
+  //   ① `Math.min(att,4)` : une semaine a qui il manque 40 personnes se dessinait
+  //      exactement comme une semaine a qui il en manque 4. Mesure du 12/08 :
+  //      SEPT colonnes consecutives a 6,0 pile — un PLATEAU PARFAIT, qui n'est pas
+  //      dans les donnees. C'etait 2 (effectif) + 4 (plafond). Un graphe qui rend
+  //      un manque de 40 identique a un manque de 4 empeche exactement la decision
+  //      qu'on vient le chercher.
+  //   ② Le rouge partait de `head+R` (des TETES) alors que le bas de la colonne
+  //      est empile en EQUIVALENTS-PERSONNES (b0 + dispo, soit capH/cap). Deux
+  //      unites dans une seule barre : le bloc rouge flottait au-dessus du vert.
+  //   Desormais : une seule unite du bas jusqu'au sommet, et le rouge dit sa
+  //   hauteur reelle. L'axe monte avec lui — c'est le but.
+  var colW=pw/n, top=2, i;
+  var b0=ctx.trac.etp;
+  for(i=0;i<n;i++){
+    var q=PS[i]||{}, R0=(sel&&sel.R&&i>=sel.a&&i<=sel.b)?sel.R:0;
+    var dt=b0+(ctx.dispo[i]||0)+R0;
+    var att=(q.cap>0)?q.reste/q.cap:0;
+    if(dt+att>top) top=dt+att;
+    if((W[i].need||0)>top) top=W[i].need;
+  }
+  top=Math.ceil(top)+1;
+  function Y(v){ return padT+ph-(v/top)*ph; }
+  var g='<defs><pattern id="rfoisif" patternUnits="userSpaceOnUse" width="6" height="6" patternTransform="rotate(45)">'
+   +'<rect width="6" height="6" fill="var(--bg-card)"/><line x1="0" y1="0" x2="0" y2="6" stroke="var(--gris)" stroke-width="2"/></pattern></defs>';
+  // Pas de graduation adaptatif : sans lui, un axe qui monte a 45 ecrit 23 nombres.
+  var _pas=(top>60?10:(top>26?5:(top>14?2:1)));
+  for(var v=0;v<=top;v+=_pas){
+    g+='<line x1="'+padL+'" y1="'+Y(v).toFixed(1)+'" x2="'+(Wd-padR)+'" y2="'+Y(v).toFixed(1)+'" stroke="'+c.col.grille+'"/>'
+      +'<text x="'+(padL-8)+'" y="'+(Y(v)+4).toFixed(1)+'" text-anchor="end" font-size="'+c.txt.mini+'" fill="'+c.col.texte+'">'+v+'</text>';
+  }
+  // Memes separations de mois que la frise du dessus : c'est ce qui permet de
+  // suivre une date d'un graphique a l'autre sans compter les colonnes.
+  ((ctx.cd&&ctx.cd.months)||[]).forEach(function(mo){
+    var mx=X(Math.max(E.s,E.moO0(mo)));
+    if(mx<padL-0.5||mx>Wd-padR+0.5) return;
+    g+='<line x1="'+mx.toFixed(1)+'" y1="'+padT+'" x2="'+mx.toFixed(1)+'" y2="'+(padT+ph).toFixed(1)+'" stroke="'+c.col.grille+'" stroke-width="1"/>';
+  });
+  g+='<line x1="'+X(E.e+1).toFixed(1)+'" y1="'+padT+'" x2="'+X(E.e+1).toFixed(1)+'" y2="'+(padT+ph).toFixed(1)+'" stroke="'+c.col.grille+'" stroke-width="1"/>';
+  // Voile sur la partie deja ecoulee (mode « reste ») : a gauche du trait rouge
+  // ce n'est pas vide, c'est derriere nous.
+  if(opt.grisJusqu!=null){
+    var _gx0=X(E.s), _gx1=X(opt.grisJusqu);
+    if(_gx1>_gx0+0.5){
+      g+='<rect x="'+_gx0.toFixed(1)+'" y="'+padT+'" width="'+(_gx1-_gx0).toFixed(1)+'" height="'+ph+'" fill="var(--texte)" opacity="0.05"/>'
+       +'<text x="'+((_gx0+_gx1)/2).toFixed(1)+'" y="'+(padT+ph/2).toFixed(1)+'" text-anchor="middle" font-size="'+c.txt.mini+'" fill="'+c.col.texte+'">d\u00e9j\u00e0 \u00e9coul\u00e9</text>';
+    }
+  }
+  // bande doree = semaines ou le renfort est employe
+  if(sel && sel.R>0){
+    var bx0=CX0(sel.a), bx1=CX1(sel.b);
+    g+='<rect x="'+bx0.toFixed(1)+'" y="'+padT+'" width="'+(bx1-bx0).toFixed(1)+'" height="'+ph+'" fill="'+c.col.prevu+'" opacity="0.12"/>';
+  }
+  for(i=0;i<n;i++){
+    var q2=PS[i]||{cap:W[i].cap,used:0,reste:0,capNorm:0};
+    var R=(sel&&sel.R&&i>=sel.a&&i<=sel.b)?sel.R:0;
+    // tT = SOMMET REEL de la pile (tracteur + capacite disponible + renfort pose).
+    // C'est de la que part le travail en attente, sinon le rouge flotte.
+    var dispoV=(ctx.dispo[i]||0)+R, tT=b0+dispoV;
+    var occ=(q2.capNorm>0)?Math.min(dispoV,(q2.used/q2.capNorm)*dispoV):0;
+    var att2=(q2.cap>0)?q2.reste/q2.cap:0;
+    var cx0=CX0(i), cx1=CX1(i), bx=cx0+2.5, bw=Math.max(1,cx1-cx0-5);
+    if(b0>0.01) g+='<rect x="'+bx.toFixed(1)+'" y="'+Y(b0).toFixed(1)+'" width="'+bw.toFixed(1)+'" height="'+(Y(0)-Y(b0)).toFixed(1)+'" rx="2" fill="var(--acier)" opacity="0.72"/>';
+    if(occ>0.01) g+='<rect x="'+bx.toFixed(1)+'" y="'+Y(b0+occ).toFixed(1)+'" width="'+bw.toFixed(1)+'" height="'+(Y(b0)-Y(b0+occ)).toFixed(1)+'" rx="2" fill="'+c.col.fait+'" opacity="0.85"/>';
+    if(dispoV-occ>0.04) g+='<rect x="'+bx.toFixed(1)+'" y="'+Y(b0+dispoV).toFixed(1)+'" width="'+bw.toFixed(1)+'" height="'+(Y(b0+occ)-Y(b0+dispoV)).toFixed(1)+'" rx="2" fill="url(#rfoisif)" stroke="var(--gris)" stroke-width="1"/>';
+    if(att2>0.04) g+='<rect x="'+bx.toFixed(1)+'" y="'+Y(tT+att2).toFixed(1)+'" width="'+bw.toFixed(1)+'" height="'+(Y(tT)-Y(tT+att2)).toFixed(1)+'" rx="2" fill="'+c.col.alerte+'" opacity="0.55"/>';
+  }
+  // ligne de l'effectif permanent : EN ESCALIER (elle varie avec les contrats)
+  // ★★ LA LIGNE EST DANS LA MEME UNITE QUE LES BARRES. Elle tracait `head`, un
+  //   comptage de TETES lisse, au-dessus de colonnes empilees en capacite reelle
+  //   (heures travaillables / capacite d'un ETP). Tant que tout le monde est a
+  //   temps plein les deux coincident et personne ne le voit ; un mi-temps, un
+  //   solde de CP ou une equipe collective les separent — et le lecteur conclut
+  //   que le graphe se contredit. On trace ce que la ligne PROMET : la capacite
+  //   dont on dispose reellement cette semaine-la, renfort pose compris.
+  var path='', _yEnd=0;
+  for(i=0;i<n;i++){
+    var _R=(sel&&sel.R&&i>=sel.a&&i<=sel.b)?sel.R:0;
+    var _v=b0+(ctx.dispo[i]||0)+_R;
+    var x0=CX0(i), x1=CX1(i), yy=Y(_v);
+    if(i===n-1) _yEnd=yy;
+    path+=(i===0?'M ':' L ')+x0.toFixed(1)+' '+yy.toFixed(1)+' L '+x1.toFixed(1)+' '+yy.toFixed(1);
+  }
+  g+='<path d="'+path+'" fill="none" stroke="var(--texte)" stroke-width="2.5" stroke-linejoin="round"/>'
+    +'<text x="'+(Wd-padR-4)+'" y="'+(_yEnd-6).toFixed(1)+'" text-anchor="end" font-size="'+c.txt.mini+'" font-weight="700" fill="var(--texte)">'+_pilEsc(ctx.baseCourt||'pr\u00e9sents')+'</text>';
+  if(opt.note)
+    g+='<text x="'+(padL+pw/2).toFixed(1)+'" y="'+(padT+14)+'" text-anchor="middle" font-size="'+c.txt.axe+'" font-weight="700" fill="'+c.col.texte+'">'+_pilEsc(opt.note)+'</text>';
+  else if(!sel || !sel.R)
+    g+='<text x="'+(padL+pw/2).toFixed(1)+'" y="'+(padT+14)+'" text-anchor="middle" font-size="'+c.txt.axe+'" font-weight="700" fill="'+c.col.texte+'">aucun renfort en plus \u2014 voici la campagne avec '+_pilEsc(ctx.baseLbl||'ton \u00e9quipe')+'</text>';
+  // Densite adaptative : une etiquette « 23–29 aout » demande ~64 px. On saute
+  // des colonnes tant qu'elles n'ont pas cette largeur (72 px de marge, un
+  // libelle a cheval sur deux mois est le plus large), plutot que de superposer.
+  var stepX=Math.max(1,Math.ceil(72/Math.max(1,colW)));
+  for(i=0;i<n;i+=stepX){
+    var lx=(CX0(i)+CX1(i))/2;
+    g+='<line x1="'+lx.toFixed(1)+'" y1="'+(padT+ph).toFixed(1)+'" x2="'+lx.toFixed(1)+'" y2="'+(padT+ph+4).toFixed(1)+'" stroke="var(--gris)"/>'
+      +'<text x="'+lx.toFixed(1)+'" y="'+(Ht-22)+'" text-anchor="middle" font-size="'+c.txt.mini+'" fill="'+c.col.texte+'">'+_rfLabJ(W,i)+'</text>';
+  }
+  g+='<text x="'+(padL+pw/2).toFixed(1)+'" y="'+(Ht-6)+'" text-anchor="middle" font-size="'+c.txt.mini+'" letter-spacing="1.3" fill="'+c.col.texte+'">'+_pilEsc(opt.axe||'CAMPAGNE')+' \u00b7 '
+    +_pilFmtD(_rfIso(W[0].o0))+' \u2192 '+_pilFmtD(_rfIso(W[n-1].o1))+'</text>';
+  // Trait « aujourd'hui » : meme date, meme abscisse que sur la frise.
+  var _tj=E.o(E.todayIso);
+  if(_tj>=E.s && _tj<=E.e){
+    var _tx=X(_tj);
+    g+='<line x1="'+_tx.toFixed(1)+'" y1="'+padT+'" x2="'+_tx.toFixed(1)+'" y2="'+(padT+ph).toFixed(1)+'" stroke="'+c.col.texte+'" stroke-width="1.5" stroke-dasharray="4 3"/>'
+      +'<text x="'+(_tx+4).toFixed(1)+'" y="'+(padT+10)+'" font-size="'+c.txt.mini+'" font-weight="700" fill="'+c.col.texte+'">aujourd\u2019hui</text>';
+  }
+  return window._mvGraphSvg(window._mvGraphCadre(Wd,Ht),
+    'Profil du renfort semaine par semaine : effectif pr\u00e9sent, travail absorb\u00e9 et travail en attente.', g);
+}
+
+function _rfCoutSvg(ctx,res,meilleur,w){
+  // Ce graphe tient sur un telephone : une barre et quatre lignes de texte.
+  var c=window._mvGraphCadre((w>0?Math.max(460,w):940),128,{padL:14,padR:14,padT:14,padB:14});
+  var W=c.w,H=c.h,pad=c.padL,barY=50,barH=34,pw=c.iw;
+  var parts=[{l:'Renfort',v:res.cRenf,c:'var(--or)'},{l:'Heures sup',v:res.cHS,c:'var(--orange)'},{l:'Recrutement',v:res.cFixe,c:'var(--terre)'}];
+  var dec=parts.reduce(function(a,p){return a+p.v;},0);
+  var g='<text x="'+pad+'" y="16" font-size="'+c.txt.mini+'" letter-spacing="1.5" fill="'+c.col.texte+'">CE QUE TU D\u00c9CIDES</text>'
+   +'<text x="'+pad+'" y="39" font-size="'+(c.etroit?19:23)+'" font-weight="700" fill="var(--texte)" font-family="Cormorant Garamond,serif">'+_ecoEur(dec)+'</text>'
+   +'<text x="'+(W-pad)+'" y="16" text-anchor="end" font-size="'+c.txt.mini+'" letter-spacing="1.5" fill="'+c.col.texte+'">TOTAL DE LA CAMPAGNE</text>'
+   +'<text x="'+(W-pad)+'" y="38" text-anchor="end" font-size="'+(c.etroit?14:16)+'" font-weight="600" fill="'+c.col.texte+'" font-family="Cormorant Garamond,serif">'+_ecoEur(res.cout)+'</text>'
+   +'<text x="'+(W-pad)+'" y="52" text-anchor="end" font-size="'+c.txt.mini+'" fill="'+c.col.texte+'">dont '+_ecoEur(res.cSocle)+' de socle permanent, identique partout</text>';
+  if(dec<=0){
+    g+='<rect x="'+pad+'" y="'+barY+'" width="'+pw+'" height="'+barH+'" rx="4" fill="var(--gris-clair)" stroke="var(--gris)"/>'
+      +'<text x="'+(pad+pw/2)+'" y="'+(barY+barH/2+4)+'" text-anchor="middle" font-size="'+c.txt.axe+'" fill="'+c.col.texte+'">aucun renfort \u2014 rien de plus \u00e0 payer, et le travail glisse</text>';
+  } else {
+    var x=pad;
+    parts.forEach(function(p){
+      if(p.v<=0) return;
+      var w=p.v/dec*pw;
+      g+='<rect x="'+x.toFixed(1)+'" y="'+barY+'" width="'+w.toFixed(1)+'" height="'+barH+'" fill="'+p.c+'" opacity="0.88"/>';
+      if(w>92) g+='<text x="'+(x+w/2).toFixed(1)+'" y="'+(barY+barH/2+4)+'" text-anchor="middle" font-size="'+c.txt.axe+'" font-weight="700" fill="#FFFFFF">'+p.l+' \u00b7 '+_ecoEur(p.v)+'</text>';
+      else if(w>34) g+='<text x="'+(x+w/2).toFixed(1)+'" y="'+(barY+barH/2+4)+'" text-anchor="middle" font-size="'+c.txt.mini+'" font-weight="700" fill="#FFFFFF">'+_ecoEur(p.v)+'</text>';
+      x+=w;
+    });
+  }
+  var msg, col=c.col.fait;
+  if(res.deborde){
+    msg=(res.horsDelai>0)
+      ? (''+_mvIcon('alerte',16)+' '+res.horsDelai+' t\u00e2che'+(res.horsDelai>1?'s':'')+' ne tiendra'+(res.horsDelai>1?'ront':'')+' pas son d\u00e9lai \u2014 jusqu\u2019\u00e0 '+res.depMax+' semaine'+(res.depMax>1?'s':'')+' de retard, et chaque semaine ajoute '+_pilNum(ctx.c.k*100)+' % de temps.')
+      : (''+_mvIcon('alerte',16)+' Le travail finit '+(res.finSem-ctx.W.length+1)+' semaines apr\u00e8s la campagne, et mord sur la suivante.');
+    col=c.col.alerte; }
+  else if(meilleur && meilleur.decide < res.decide-1) msg='En d\u00e9pla\u00e7ant ce renfort, la m\u00eame campagne se boucle pour '+_ecoEur(meilleur.decide)+' \u2014 soit '+_ecoEur(res.decide-meilleur.decide)+' de moins.';
+  else msg=''+_mvIcon('check',16)+' Aucune des strat\u00e9gies test\u00e9es ne boucle la campagne pour moins cher.';
+  g+='<text x="'+pad+'" y="'+(barY+barH+22)+'" font-size="'+c.txt.axe+'" font-weight="600" fill="'+col+'">'+_pilEsc(msg)+'</text>';
+  return window._mvGraphSvg(c, 'Ce que co\u00fbte la strat\u00e9gie de renfort : '+_ecoEur(dec)+' d\u00e9cid\u00e9s sur un total de campagne de '+_ecoEur(res.cout)+'.', g);
+}
+
+// Fin REELLE de la semaine w, meme au-dela de la campagne. La boucle de _rfSim
+// court jusqu'a nW+200 : une tache peut finir apres la derniere colonne connue.
+// On prolonge de 7 jours par semaine plutot que de rendre une date fausse.
+function _rfWkEnd(ctx,w){
+  var last=ctx.W.length-1;
+  if(w<0) w=0;
+  return (w<=last) ? ctx.W[w].o1 : (ctx.W[last].o1+(w-last)*7);
+}
+
+// « Laquelle deborde, et de combien. » Une ligne par travail hors delai, dans
+// l'ordre du calendrier : c'est cet ordre qui montre l'effet domino, le premier
+// qui deborde poussant celui d'apres.
+function _rfRetardHtml(ctx,res){
+  var h='';
+  // ⚠ CE QUI EST PERDU SE LIT AVANT CE QUI EST EN RETARD. Un retard se rattrape,
+  //   une recolte non rentree ne se rattrape pas : melanger les deux dans une
+  //   colonne « +N sem. » faisait lire une impossibilite comme un delai.
+  var P=(res.taches||[]).filter(function(s){ return s.perdu>0.01; });
+  if(P.length){
+    P.sort(function(a,b){ return (a.lim-b.lim)||(b.perdu-a.perdu); });
+    h+='<div style="overflow-x:auto"><table class="rf-cmp" style="margin-top:10px"><tr>'
+      +'<th>Non rentr\u00e9</th><th class="r">Date limite</th><th class="r">Pas fait</th><th class="r">Part du travail</th></tr>';
+    h+=P.map(function(s){
+      var pc=(s.h0>0)?(100*s.perdu/s.h0):0;
+      return '<tr><td>'+_pilEsc(s.nom)+'</td>'
+        +'<td class="r">'+_pilFmtD(_rfIso(_rfWkEnd(ctx,s.lim)))+'</td>'
+        +'<td class="r" style="color:#9B2D1F;font-weight:600">'+_pilNum(s.perdu)+' h</td>'
+        +'<td class="r" style="color:#9B2D1F;font-weight:600">'+_pilNum(pc)+' %</td></tr>';
+    }).join('')+'</table></div>';
+  }
+  var L=(res.taches||[]).filter(function(s){ return s.dep>0; });
+  if(!L.length) return h;
+  L.sort(function(a,b){ return (a.lim-b.lim)||(b.dep-a.dep); });
+  h+='<div style="overflow-x:auto"><table class="rf-cmp" style="margin-top:10px"><tr>'
+    +'<th>Travail</th><th class="r">Devrait finir le</th><th class="r">Finit le</th><th class="r">Retard</th></tr>';
+  h+=L.map(function(s){
+    var fin=(s.fin===null)?null:s.fin;
+    return '<tr><td>'+_pilEsc(s.nom)+'</td>'
+      +'<td class="r">'+_pilFmtD(_rfIso(_rfWkEnd(ctx,s.lim)))+'</td>'
+      +'<td class="r" style="color:#9B2D1F">'+(fin===null?'pas avant la fin':_pilFmtD(_rfIso(_rfWkEnd(ctx,fin))))+'</td>'
+      +'<td class="r" style="color:#9B2D1F;font-weight:600">+'+_pilNum(s.dep)+' sem.</td></tr>';
+  }).join('')+'</table></div>';
+  return h;
+}
+
+// ⚠⚠ CE QUE CHAQUE FENETRE DEMANDE. Le tableau que l'ecran n'avait pas, et qui
+//   repond seul a « 20 personnes a la fin ça passe, 20 au debut non » : du
+//   renfort pose hors de la fenetre d'un travail ne sert pas ce travail, il est
+//   paye et inemploye. Le nombre de la derniere colonne est VERIFIE par
+//   simulation, pas calcule en soustrayant deux moyennes.
+function _rfBesoinHtml(ctx){
+  var bes=_rfBesoinC(ctx).filter(function(x){ return x.R===null || x.R>0; });
+  if(!bes.length) return '';
+  var h='<div style="overflow-x:auto"><table class="rf-cmp" style="margin-top:10px"><tr>'
+    +'<th>Travail</th><th class="r">Sa fen\u00eatre</th><th class="r">Il faudrait</th>'
+    +'<th class="r">D\u00e9j\u00e0 l\u00e0</th><th class="r">Renfort \u00e0 poser</th></tr>';
+  h+=bes.map(function(x){
+    var rr=(x.R===null)
+      ? '<span style="color:#9B2D1F;font-weight:600">plus de '+_RF_RMAX_DUR+'</span>'
+      : '<b style="color:#B85A1A">'+_pilNum(x.R)+' pers.</b>';
+    return '<tr><td>'+_pilEsc(x.nom)
+        +(x.cpt?'<div class="rf-sub" style="color:#9B2D1F">sans rattrapage</div>':'')+'</td>'
+      +'<td class="r">'+_pilFmtD(x.d0)+' \u2192 '+_pilFmtD(x.d1)
+        +'<div class="rf-sub">'+_pilNum(x.sem)+' semaine'+(x.sem>1?'s':'')+'</div></td>'
+      +'<td class="r">'+_ecoH1(x.brut)+' pers.</td>'
+      +'<td class="r">'+_ecoH1(x.dispo)+' pers.</td>'
+      +'<td class="r">'+rr+'</td></tr>';
+  }).join('')+'</table></div>'
+   +'<div class="rf-how" style="margin-top:8px">La derni\u00e8re colonne est <b>v\u00e9rifi\u00e9e en simulant</b>, pas d\u00e9duite'
+   +(typeof _mvInfoBtn==='function'?(' '+_mvInfoBtn('pil.sim.fenetres')):'')+'</div>';
+  return h;
+}
+
+function _rfTable(ctx,res,strs){
+  var rows=[{nom:'Ta s\u00e9lection', moi:true, r:res}];
+  strs.forEach(function(s){ rows.push({nom:s.nom, detail:s.detail, r:_rfSim(ctx,_rfProf(ctx,s.sel))}); });
+  // DEUX GROUPES, PAS UN CLASSEMENT UNIQUE. Une strategie qui ne boucle pas ne
+  // se compare pas au montant : elle repond a une autre question. Melangees, la
+  // moins chere de l'ecran est presque toujours celle qui ne finit rien a temps.
+  var via=rows.filter(function(x){ return !x.r.deborde; });
+  var hors=rows.filter(function(x){ return x.r.deborde; });
+  var mn=via.length?via.reduce(function(a,x){ return x.r.decide<a.r.decide?x:a; }):null;
+  function tri(L){
+    return L.slice().sort(function(a,b){
+      if(a.moi!==b.moi) return a.moi?-1:1;
+      return a.r.decide-b.r.decide;
+    });
+  }
+  via=tri(via); hors=tri(hors);
+
+  function ligne(x,ok){
+    var fin, fc;
+    if(ok){ fin='dans les fen\u00eatres'; fc='#3D6B27'; }
+    else if(x.r.nPerdu>0){ fin=_pilNum(x.r.perdu)+' h non rentr\u00e9es'; fc='#9B2D1F'; }
+    else if(x.r.horsDelai>0){ fin=_pilNum(x.r.horsDelai)+' hors d\u00e9lai \u00b7 +'+_pilNum(x.r.depMax)+' sem.'; fc='#9B2D1F'; }
+    else { var dd=x.r.finSem-ctx.W.length+1; fin=(dd>52)?'ne finit jamais':('d\u00e9borde de '+_pilNum(dd)+' sem.'); fc='#9B2D1F'; }
+    var ec;
+    if(!ok) ec='<span style="color:#9B2D1F">ne boucle pas</span>';
+    else if(!mn||x===mn) ec='<span style="color:#3D6B27">le moins cher</span>';
+    else ec='<span style="color:#B85A1A">+'+_ecoEur(x.r.decide-mn.r.decide)+'</span>';
+    return '<tr'+(x.moi?' class="moi"':'')+'>'
+      +'<td'+(ok?'':' style="opacity:.62"')+'>'+(x.moi?'\u25b8 ':'')+_pilEsc(x.nom)
+        +(x.detail?('<div class="rf-sub">'+_pilEsc(x.detail)+'</div>'):'')+'</td>'
+      +'<td class="r" style="color:'+fc+(ok?'':';font-weight:600')+'">'+fin+'</td>'
+      +'<td class="r"'+(ok?'':' style="opacity:.62"')+'>'+_ecoEur(x.r.decide)+'</td>'
+      +'<td class="r">'+ec+'</td>'
+      +'<td class="r"'+(ok?'':' style="opacity:.62"')+'>'+_pilNum(x.r.capRenf)+' h</td>'
+      +'<td class="r"'+(x.r.inemploye>1?' style="color:#B85A1A"':'')+'>'+_pilNum(x.r.inemploye)+' h</td>'
+      +'<td class="r"'+(x.r.induit>1?' style="color:#9B2D1F;font-weight:600"':'')+'>'+_pilNum(x.r.induit)+' h</td></tr>';
+  }
+
+  var h='<div style="overflow-x:auto"><table class="rf-cmp"><tr>'
+    +'<th>Strat\u00e9gie</th><th class="r">\u00c9ch\u00e9ances</th><th class="r">\u00c0 d\u00e9cider</th><th class="r">\u00c9cart</th>'
+    +'<th class="r">Renfort</th><th class="r">Pay\u00e9 sans travail</th><th class="r">Ajout\u00e9 par le retard</th></tr>';
+  h+=via.map(function(x){ return ligne(x,true); }).join('');
+  if(hors.length){
+    h+='<tr><td colspan="7" style="padding:14px 8px 6px;border-top:2px solid rgba(155,45,31,.35);'
+      +'font-size:var(--pt-txt,12.5px);font-weight:600;color:#9B2D1F;letter-spacing:.02em">'
+      +'Ne finit pas dans les fen\u00eatres \u2014 le travail d\u00e9borde sur la suite</td></tr>';
+    h+=hors.map(function(x){ return ligne(x,false); }).join('');
+  }
+  h+='</table></div>';
+  // ⚠ « il faut plus de monde que ce que le simulateur a teste » etait un aveu,
+  //   pas une reponse. On cherche le nombre, jusqu'au plafond dur.
+  if(!via.length){
+    var t2=_rfMinR(ctx,0,ctx.W.length-1,_RF_RMAX_DUR,null);
+    h+='<div class="rf-how" style="border-color:rgba(155,45,31,.4)"><b>Aucune de ces strat\u00e9gies ne tient les fen\u00eatres.</b> '
+      +((t2!=null)
+        ? ('Il en faut <b>'+_pilNum(t2)+' de renfort sur toute la p\u00e9riode</b> pour y arriver. Le tableau de l\u2019\u00e9tape 3 dit dans quelle fen\u00eatre les placer \u2014 au bon moment, il en faut souvent bien moins.')
+        : ('M\u00eame <b>'+_RF_RMAX_DUR+' personnes</b> n\u2019y suffisent pas : les fen\u00eatres sont trop courtes pour la charge. Il faut d\u00e9caler des dates de fin dans R\u00e9glages \u203a Campagne, ou m\u00e9caniser une partie du travail.'))
+      +'</div>';
+  }
+  return { html:h, meilleur:mn?mn.r:null, mnRow:mn };
+}
+
+// Selecteur : nombre + fenetre. Remplace l'edition au clic dans les colonnes.
+// Options du champ « Renfort ». PAS VARIABLE : au-dela de 50, une liste de 150
+// entrees n'est plus manipulable au pouce — on passe par paliers, et la derniere
+// option ouvre la saisie libre pour tout nombre intermediaire.
+function _rfROpts(rMax,cur){
+  var vals=[], i;
+  for(i=0;i<=Math.min(rMax,50);i++) vals.push(i);
+  [60,75,100,125,150].forEach(function(v){ if(v<=rMax && vals.indexOf(v)<0) vals.push(v); });
+  if(cur>0 && vals.indexOf(cur)<0){ vals.push(cur); vals.sort(function(a,b){ return a-b; }); }
+  return vals.map(function(v){
+    return '<option value="'+v+'"'+(v===cur?' selected':'')+'>'+(v===0?'aucun':v)+'</option>';
+  }).join('')+'<option value="__autre">autre nombre\u2026</option>';
+}
+function _rfSelHtml(ctx){
+  var n=ctx.W.length, rMax=_rfRMax(ctx), i, o;
+  var s=_RF_SEL, dPv=(s&&isFinite(s.dP))?s.dP:0;   // dP undefined -> AUCUNE option cochee -> le navigateur affiche la 1re (-2)
+  o=_rfROpts(rMax,s.R||0);
+  var selR='<label class="rf-f"><span>Renfort</span><select onchange="window._rfSel(\'R\',this.value)">'+o+'</select></label>';
+  var oP='';
+  for(i=-4;i<=8;i++){
+    var v=i/2;                                    // pas de 0,5 : les temps partiels comptent
+    oP+='<option value="'+v+'"'+(Math.abs(v-dPv)<0.01?' selected':'')+'>'
+       +(v>0?('+'+_ecoH1(v)):(v<0?_ecoH1(v):'mesur\u00e9'))+'</option>';
+  }
+  var selP='<label class="rf-f"><span>Effectif simul\u00e9</span><select onchange="window._rfSel(\'dP\',this.value)">'+oP+'</select></label>';
+  // Le socle : ce qui est deja signe, ou les permanents seuls.
+  var bs=(ctx.base==='perm')?'perm':'eng';
+  var selB='<label class="rf-f"><span>On part de</span><select onchange="window._rfSel(\'base\',this.value)">'
+    +'<option value="eng"'+(bs==='eng'?' selected':'')+'>tout ce qui est d\u00e9j\u00e0 sous contrat</option>'
+    +'<option value="perm"'+(bs==='perm'?' selected':'')+'>les permanents seuls</option>'
+    +'</select></label>';
+  function weeks(cur,attr){
+    var t='';
+    // « Du » montre le premier jour employe, « Au » le DERNIER : afficher o0 des
+    // deux cotes faisait lire « du 23 au 30 aout » pour un renfort qui travaille
+    // en realite jusqu'au 5 septembre.
+    var fin=(attr!=='Du');
+    for(var k=0;k<n;k++) t+='<option value="'+k+'"'+(k===cur?' selected':'')+'>'+_pilFmtD(_rfIso(fin?ctx.W[k].o1:ctx.W[k].o0))+'</option>';
+    return '<label class="rf-f"><span>'+attr+'</span><select onchange="window._rfSel(\''+(attr==='Du'?'a':'b')+'\',this.value)"'+(s.R>0?'':' disabled')+'>'+t+'</select></label>';
+  }
+  return '<div class="rf-sel">'+selB+selP+selR+weeks(Math.min(s.a,n-1),'Du')+weeks(Math.min(s.b,n-1),'Au')
+    +'<span class="rf-selinfo">'
+    +(Math.abs(ctx.dP)>0.01?('socle simul\u00e9 <b>'+_ecoH1(ctx.headMoy)+'</b> au lieu de '+_ecoH1(ctx.headMesMoy)+' \u00b7 '):'')
+    +(s.R>0?(_pilNum((Math.min(s.b,n-1)-Math.min(s.a,n-1)+1))+' semaine'+((s.b-s.a)>0?'s':'')+' \u00b7 '+_pilNum(s.R*(Math.min(s.b,n-1)-Math.min(s.a,n-1)+1))+' semaine-renfort'):('aucun renfort en plus \u2014 '+ctx.baseLbl))
+    +'</span></div>';
+}
+
+function _rfBody(d){
+  var P=_rfPair(d), ctxP=P.plan, ctx=P.dec;
+  if(!ctxP) return _pilEmptyGo('Renseignez les dates de d\u00e9but et de fin de la p\u00e9riode : les fen\u00eatres de t\u00e2ches et la charge en d\u00e9coulent.','saisons','R\u00e9glages \u203a Campagne');
+  if(ctxP.noRate) return _pilEmptyGo('Renseignez un <b>taux horaire</b> dans la fiche de chaque salari\u00e9 pour chiffrer les sc\u00e9narios.','equipe','R\u00e9glages \u203a \u00c9quipe');
+  // Deux graphes seulement s'ils racontent deux choses differentes. Le tri est
+  // fait par _rfMemeImage, DANS _rfPair : quand les deux dessinent la meme
+  // image, la paire rend deux fois le plan et pose le drapeau `meme`. Ici il
+  // n'y a donc plus qu'a lire ctx!==ctxP — un seul juge, pas deux.
+  var deux=(ctx!==ctxP);
+  var n=ctx.W.length;
+  if(_RF_SEL.b>=n) _RF_SEL.b=n-1;
+  if(_RF_SEL.a>=n) _RF_SEL.a=0;
+  var res=_rfSim(ctx,_rfProf(ctx,_RF_SEL));
+  var strs=_rfStrategies(ctx);
+  var tab=_rfTable(ctx,res,strs);
+  var real=(typeof _pilTaskReal==='function')?_pilTaskReal(ctxP.cd,d):null;
+  var fait=Math.max(0,ctxP.charge-ctx.charge);
+
+  var kpi='<div class="pil-ck"><div class="kl">Socle d\u00e9j\u00e0 engag\u00e9'+(deux?' \u00b7 restant':'')+'</div><div class="kv">'+_ecoEur(ctx.socle)+'</div>'
+      +'<div class="ks">\u2248 '+_ecoH1(ctx.headMoy)+' pr\u00e9sents en moyenne'
+      +(Math.abs(ctx.dP)>0.01?(' <b style="color:#B85A1A">('+(ctx.dP>0?'+':'')+_ecoH1(ctx.dP)+' simul\u00e9, mesur\u00e9 '+_ecoH1(ctx.headMesMoy)+')</b>'):'')
+      +(ctx.trac.etp>0.01?(' \u00b7 '+_ecoH1(ctx.trac.etp)+' au tracteur'+(ctx.trac.mesure?' (mesur\u00e9)':' (forc\u00e9)')):'')+'</div></div>'
+    +'<div class="pil-ck"><div class="kl">Ce qui manque</div><div class="kv" style="color:'+(ctx.manque>0?'#9B2D1F':'#3D6B27')+'">'
+      +(ctx.manque>0?(_pilNum(ctx.manque)+'<span class="u"> h</span>'):'\u2014')+'</div>'
+      +'<div class="ks">'+(ctx.manque>0
+          ? ('pointe \u00e0 '+_ecoH1(ctx.renfortPic)+' renfort'+(ctx.renfortPic>1.5?'s':'')+' sur la semaine la plus tendue')
+          : 'les permanents suffisent')+'</div></div>'
+    +'<div class="pil-ck"><div class="kl">Pay\u00e9 sans travail ouvert</div><div class="kv" style="color:'+(res.inemploye>1?'#B85A1A':'#3D6B27')+'">'+_pilNum(res.inemploye)+'<span class="u"> h</span></div>'
+      +'<div class="ks">'+(res.induit>1?(_pilNum(res.induit)+' h ajout\u00e9es par le retard \u00b7 '+res.horsDelai+' t\u00e2che'+(res.horsDelai>1?'s':'')+' hors d\u00e9lai'):'aucune heure ajout\u00e9e par le retard')+'</div></div>'
+    +'<div class="pil-ck"><div class="kl">\u00c0 d\u00e9cider</div><div class="kv">'+_ecoEur(res.decide)+'</div>'
+      +'<div class="ks">'+(res.pointe>0?(_pilNum(res.pointe)+' renfort'+(res.pointe>1?'s':'')):'aucun renfort')+'</div></div>';
+
+  // Sur QUOI porte l'ecran. Dit en une phrase, en haut, avant tout chiffre.
+  var perim;
+  if(deux) perim='Cet \u00e9cran d\u00e9cide sur <b>ce qu\u2019il reste \u00e0 faire</b> \u00e0 partir d\u2019aujourd\u2019hui : <b>'+_pilNum(ctx.charge)+' h</b> sur les '+_pilNum(ctxP.charge)+' h de la campagne, '+_pilNum(fait)+' h d\u00e9j\u00e0 faites, <b>'+_pilNum(n)+' semaine'+(n>1?'s':'')+'</b> devant. Le plan complet de la campagne est plus bas, en \u00e9tape 5.';
+  else if(P.fini) perim='La campagne est <b>termin\u00e9e</b> : l\u2019\u00e9cran montre le plan complet, pour m\u00e9moire.';
+  // \u2605 Ce cas EXISTAIT et n'etait pas dit : la campagne a commence, mais aucune
+  //   heure n'a encore ete faite et aucune fenetre n'a bouge. Le reste et le
+  //   plan sont alors la MEME image \u2014 l'ecran en dessinait deux, a l'identique.
+  else if(P.meme) perim='La campagne a <b>commenc\u00e9</b>, mais rien n\u2019en est encore entam\u00e9 : ce qu\u2019il reste \u00e0 faire, c\u2019est toujours tout le plan. <b>Un seul graphique</b> \u2014 en dessiner deux identiques ne dirait rien de plus.';
+  else perim='La campagne <b>n\u2019a pas encore commenc\u00e9</b> : ce qu\u2019il reste \u00e0 faire, c\u2019est toute la campagne. Un seul graphique suffit.';
+
+  var boutons=strs.map(function(s,i){
+    return '<button class="rf-strat'+(s.best?' best':'')+'" onclick="window._rfAppliquer('+i+')">'+_pilEsc(s.nom)+'</button>';
+  }).join('');
+
+  var H='<div class="pil-cockpit-card" style="margin-bottom:12px"><div class="pil-cks">'+kpi+'</div></div>'
+    +'<div class="rf-how">'+perim+'</div>';
+
+  // ★★ « COMMENT LIRE » EST, PAR DEFINITION, CE QU'ON LIT UNE FOIS.
+  //   Cinq blocs de 130 a 300 caracteres expliquaient chacun la lecture d'un
+  //   graphe, affiches en permanence entre le titre de l'etape et le graphe
+  //   lui-meme. Une fois qu'on sait lire une frise, on ne relit pas la notice —
+  //   on la traverse pour atteindre le dessin. Ils passent derriere la pastille
+  //   du titre d'etape, ou ils restent a un doigt.
+  H+='<div class="rf-step"><div class="rf-n">1</div><div class="rf-t">Quand chaque travail peut se faire'
+    +(typeof _mvInfoBtn==='function'?(' '+_mvInfoBtn('pil.sim.frise')):'')+'</div></div>'
+    +'<div style="width:100%;overflow-x:auto" id="rf-g-frise"></div>';
+  if(typeof _pilFriseSvg==='function') window._mvGraphSuivre('#rf-g-frise', function(lg){ return _pilFriseSvg(ctxP.cd,real,lg); });
+
+  H+='<div class="rf-step"><div class="rf-n">2</div><div class="rf-t">'+(deux?'Ce qu\u2019il te reste \u00e0 faire, semaine par semaine':'Ton renfort, semaine par semaine')
+    +(typeof _mvInfoBtn==='function'?(' '+_mvInfoBtn('pil.sim.semaine')):'')+'</div></div>'
+    // ★ LA LEGENDE DES COULEURS RESTE : on ne la lit pas, on la CONSULTE du
+    //   regard, chaque fois qu'on revient sur le graphe. Ce qui part, c'est ce
+    //   que chaque couleur veut dire en profondeur — la definition du « retard »,
+    //   la majoration par semaine, les conges compris dans l'ecart.
+    +'<div class="rf-how">'
+    +'<span class="rf-k" style="background:#5C8A3E"></span>Vert : au travail. '
+    +'<span class="rf-k" style="background:#DCD6C6"></span>Hachur\u00e9 : pay\u00e9s sans travail ouvert. '
+    +'<span class="rf-k" style="background:#9B2D1F"></span>Rouge : en retard. '
+    +'<b>Ligne noire</b> : l\u2019\u00e9quipe d\u00e9j\u00e0 sous contrat, vendangeurs compris. '
+    +'<b>Choisissez votre renfort dans les listes ci-dessous</b> \u2014 il s\u2019<b>ajoute</b> \u00e0 cette ligne.</div>'
+    +_rfSelHtml(ctx)
+    +'<div class="rf-strats">'+boutons+'</div>'
+    +'<div style="width:100%;overflow-x:auto" id="rf-g-prof"></div>';
+  window._mvGraphSuivre('#rf-g-prof', function(lg){ return _rfProfilSvg(ctx,res,_RF_SEL,{grisJusqu:(deux?ctx.oDep:null),axe:(deux?'\u00c0 FAIRE':'CAMPAGNE'),note:(ctx.charge<0.5?'plus rien \u00e0 faire d\u2019ici la fin de la p\u00e9riode':null)},lg); });
+
+  // ETAPE 3 — L'ORDRE DES QUESTIONS EST LE SUJET. « Est-ce que ca tient » vient
+  // AVANT « combien ca coute ». Un montant lisible se compare : place en tete,
+  // il fait passer « aucun renfort » pour l'option economique alors qu'elle ne
+  // finit rien a temps. Le cout ne se lit qu'une fois l'echeance tranchee.
+  var nT=(ctx.tw||[]).length;
+  var verdict;
+  if(!res.deborde){
+    verdict='<div style="background:var(--tag-green-bg,#EEF4E7);border-radius:12px;padding:13px 15px;margin:10px 0 4px">'
+      +'<div style="font-size:var(--pt-base,14px);font-weight:600;color:var(--tag-green-tx,#3D6B27)">\u2713 Ta s\u00e9lection finit '
+      +(nT>1?('les '+_pilNum(nT)+' travaux dans leur fen\u00eatre'):'le travail dans sa fen\u00eatre')+'.</div>'
+      +'<div style="font-size:var(--pt-txt,12.5px);color:var(--tag-green-tx,#3D6B27);margin-top:4px;line-height:1.5">Aucun d\u00e9bordement, aucun travail pouss\u00e9 sur le suivant.</div></div>';
+  } else {
+    // ⚠⚠ UNE RECOLTE NON RENTREE N'EST PAS UN RETARD. Elle passait dans la meme
+    //   phrase (« rien n'est abandonne, +15 %/semaine ») et dans la meme colonne
+    //   « +N sem. » : on lisait une impossibilite comme un delai negociable.
+    var tete, corps;
+    if(res.nPerdu>0){
+      tete=_pilNum(res.nPerdu)+' travail'+(res.nPerdu>1?'x':'')+' ne peut'+(res.nPerdu>1?'vent':'')+' pas \u00eatre rattrap\u00e9'+(res.nPerdu>1?'s':'')+'.';
+      corps='Ce qui n\u2019est pas fait avant la date limite est <b>perdu</b>, pas report\u00e9 : '
+        +'<b>'+_pilNum(res.perdu)+' h</b> de travail ne se feront jamais. '
+        +'Du renfort pos\u00e9 apr\u00e8s cette date n\u2019y change rien \u2014 il faut qu\u2019il tombe <b>dans la fen\u00eatre</b>.';
+    } else if(res.horsDelai>0){
+      tete=_pilNum(res.horsDelai)+' travail'+(res.horsDelai>1?'x':'')+' ne finit'+(res.horsDelai>1?'ssent':'')+' pas dans sa fen\u00eatre.';
+      corps='Rien n\u2019est abandonn\u00e9 : ce qui d\u00e9borde pousse le travail suivant, et chaque semaine de retard le rend <b>'
+        +_pilNum(ctx.c.k*100)+' % plus long</b>'+(res.induit>1?(' \u2014 '+_pilNum(res.induit)+' h ajout\u00e9es en tout'):'')+'.';
+    } else {
+      tete='Le travail d\u00e9borde de '+_pilNum(Math.max(1,res.finSem-ctx.W.length+1))+' semaine'+((res.finSem-ctx.W.length+1)>1?'s':'')+' sur la suite.';
+      corps='Rien n\u2019est abandonn\u00e9 : ce qui d\u00e9borde mord sur la campagne suivante.';
+    }
+    verdict='<div style="background:var(--tag-red-bg,#FBEDEA);border-radius:12px;padding:13px 15px;margin:10px 0 4px">'
+      +'<div style="font-size:var(--pt-base,14px);font-weight:600;color:#9B2D1F">'+_mvIcon('alerte',16)+' '+tete+'</div>'
+      +'<div style="font-size:var(--pt-txt,12.5px);color:#9B2D1F;margin-top:4px;line-height:1.5">'+corps+'</div></div>'
+      +_rfRetardHtml(ctx,res);
+  }
+
+  // La reponse a « comment finir dans les fenetres », donnee en clair plutot que
+  // laissee a deduire d'une ligne de tableau.
+  var conseil='';
+  if(tab.mnRow && tab.mnRow.moi){
+    conseil='<div class="rf-how" style="border-color:rgba(201,168,76,.55)"><b>Ta s\u00e9lection est d\u00e9j\u00e0 le meilleur placement trouv\u00e9.</b> '
+      +'Aucune des autres strat\u00e9gies test\u00e9es ne tient les fen\u00eatres pour moins cher.</div>';
+  } else if(tab.mnRow){
+    var m=tab.mnRow, ec=(!res.deborde)?(res.decide-m.r.decide):0;
+    conseil='<div class="rf-how" style="border-color:rgba(201,168,76,.55)">'
+      +'<b>Le plus petit renfort qui y arrive.</b> '+_pilEsc(m.nom)
+      +(m.detail?(' \u2014 '+_pilEsc(m.detail)):'')+' : <b>'+_pilNum(m.r.capRenf)+' h</b> de renfort'
+      +(ec>1?(', soit <b>'+_ecoEur(ec)+'</b> de moins que ta s\u00e9lection'):'')
+      +'. Le bouton est dans la liste des propositions, \u00e9tape 2.</div>';
+  }
+
+  H+='<div class="rf-step"><div class="rf-n">3</div><div class="rf-t">Est-ce que \u00e7a tient dans les fen\u00eatres ?</div></div>'
+    +_rfBesoinHtml(ctx)+verdict+conseil;
+
+  H+='<div class="rf-step" style="margin-top:18px"><div class="rf-n">4</div><div class="rf-t">Ce que ce choix co\u00fbte'
+    +(typeof _mvInfoBtn==='function'?(' '+_mvInfoBtn('pil.sim.cout')):'')+'</div></div>'
+    +'<div style="width:100%;overflow-x:auto" id="rf-g-cout"></div>'
+    +tab.html;
+  window._mvGraphSuivre('#rf-g-cout', function(lg){ return _rfCoutSvg(ctx,res,tab.meilleur,lg); });
+
+  // ── Etape 4 : le PLAN. Meme graphique, meme axe, mais la campagne entiere et
+  //    la charge theorique. Repere de dimensionnement, jamais la decision — d'ou
+  //    sa place APRES le cout, et l'absence de selecteur.
+  if(deux){
+    var resP=_rfSim(ctxP,_rfProf(ctxP,{R:0,a:0,b:0}));
+    window._mvGraphSuivre('#rf-g-prof0', function(lg){ return _rfProfilSvg(ctxP,resP,null,{note:'le plan de d\u00e9part, avec '+(ctxP.baseLbl||'l\u2019\u00e9quipe'),axe:'CAMPAGNE ENTI\u00c8RE'},lg); });
+    H+='<div class="rf-step"><div class="rf-n">5</div><div class="rf-t">Le plan de d\u00e9part \u2014 toute la campagne'
+      +(typeof _mvInfoBtn==='function'?(' '+_mvInfoBtn('pil.sim.plan')):'')+'</div></div>'
+      +'<div style="width:100%;overflow-x:auto" id="rf-g-prof0"></div>'
+      +'<div class="rf-how">Sur la campagne enti\u00e8re : <b>'+_pilNum(ctxP.charge)+' h</b> de travail pour <b>'+_pilNum(ctxP.capDispo)+' h</b> de capacit\u00e9 disponible ('+_pilEsc(ctxP.baseLbl||'')+', tracteur d\u00e9duit). '
+      +(ctxP.manque>0?('Il en manquait <b style="color:#9B2D1F">'+_pilNum(ctxP.manque)+' h</b>, soit au moins <b>'+_ecoH1(ctxP.renfortMini)+'</b> renfort sur toute la p\u00e9riode.'):'L\u2019effectif d\u00e9j\u00e0 en place suffisait sur le papier.')
+      +' Sans aucun renfort de plus, il restait <b>'+_pilNum(resP.inemploye)+' h</b> pay\u00e9es sans travail ouvert.</div>';
+  }
+
+  // ★ « CE QUE LE MODELE SUPPOSE » est de la methode pure : cinq phrases sur les
+  //   conventions du simulateur. Elles ne disparaissent pas — elles cessent
+  //   d'etre lues a chaque simulation. La ligne qui reste porte le seul fait qui
+  //   change la lecture d'un resultat : rien n'est enregistre ici.
+  H+='<div class="rf-lim"><b>Ce que le mod\u00e8le suppose</b>'
+    +(typeof _mvInfoBtn==='function'?(' '+_mvInfoBtn('pil.sim.modele')):'')
+    +' \u00b7 aucune de ces simulations n\u2019est enregistr\u00e9e.</div>';
+  return H;
+}
+
+function _pilPanelRenfort(d){
+  _RF_D=d;
+  var ctx=_rfPair(d).dec, stat=_pilStat('\u2014','');
+  if(ctx && !ctx.noRate){
+    var r=_rfSim(ctx,_rfProf(ctx,_RF_SEL));
+    stat=_pilStat(r.pointe,' renfort'+(r.pointe>1?'s':'')+' \u00b7 '+_ecoEur(r.decide));
+  }
+  return _pilTile('renfort','#C9A84C','Renfort \u2014 combien, et quand', stat,
+    'ce qu\u2019il reste \u00e0 faire, et ce que le moment change', null,
+    '<div id="pil-rf-body">'+_rfBody(d)+'</div>');
+}
+
+// Interactions (onclick/onchange inline -> exposees sur window).
+window._rfSel = function(champ,val){
+  // ⚠ La saisie libre passe par openPrompt : prompt() natif ne rend RIEN en PWA
+  //   iOS, et c'est justement l'appareil du chef de culture pendant la vendange.
+  if(champ==='R' && String(val)==='__autre'){ window._rfSelAutre(); return; }
+  // ⚠ 'base' se traite AVANT le parseInt : 'eng' n'est pas un nombre, le garde
+  //   isFinite ci-dessous avalerait le champ en silence.
+  if(champ==='base'){ _RF_SEL.base=(String(val)==='perm')?'perm':'eng'; _rfRefresh(); return; }
+  var v=parseInt(val,10); if(!isFinite(v)) return;
+  if(champ==='dP'){ _RF_SEL.dP=parseFloat(val)||0; _rfRefresh(); return; }
+  if(champ==='R'){ _RF_SEL.R=Math.max(0,v); }
+  else if(champ==='a'){ _RF_SEL.a=v; if(_RF_SEL.b<v) _RF_SEL.b=v; }
+  else if(champ==='b'){ _RF_SEL.b=v; if(_RF_SEL.a>v) _RF_SEL.a=v; }
+  _rfRefresh();
+};
+window._rfSelAutre = function(){
+  if(typeof window.openPrompt!=='function'){
+    if(typeof showToast==='function') showToast('Saisie indisponible','#B85A1A');
+    _rfRefresh(); return;
+  }
+  window.openPrompt({
+    titre:'Combien de renforts ?', icone:'\uD83D\uDC65', unite:'pers.', type:'nombre',
+    sub:'Jusqu\u2019\u00e0 '+_RF_RMAX_DUR+' personnes \u2014 une vendange manuelle en demande souvent 30 \u00e0 50.',
+    valeur:String(_RF_SEL.R||0), btnLabel:'Appliquer',
+    cb:function(v){
+      var x=Math.round(parseFloat(String(v).replace(',','.'))||0);
+      _RF_SEL.R=Math.max(0,Math.min(_RF_RMAX_DUR,x));
+      _rfRefresh();
+    }
+  });
+  // Le <select> est reste sur « autre nombre… » : on le remet a sa valeur tout
+  // de suite, pour que fermer la saisie sans valider ne laisse pas un champ
+  // qui affiche autre chose que ce que le calcul utilise.
+  _rfRefresh();
+};
+window._rfAppliquer = function(i){
+  // ⚠ MEME contexte que _rfBody, sinon les index « Du / Au » designent d'autres
+  //   semaines. Et dP est CONSERVE : le laisser tomber le remettait a undefined,
+  //   ce qui decochait TOUTES les options du selecteur « Permanents » -> le
+  //   navigateur affichait la premiere (-2) alors que le calcul, lui, tournait a 0.
+  var ctx=_rfPair(_RF_D).dec; if(!ctx||ctx.noRate) return;
+  var s=_rfStrategies(ctx)[i];
+  if(s&&s.sel) _RF_SEL={R:s.sel.R,a:s.sel.a,b:s.sel.b,dP:(_RF_SEL&&_RF_SEL.dP)||0};
+  _rfRefresh();
+};
+function _rfRefresh(){
+  var host=document.getElementById('pil-rf-body');
+  if(host && _RF_D){
+    host.innerHTML=_rfBody(_RF_D);
+    // Le simulateur se reconstruit a chaque interaction, hors du chemin de
+    // _pilFillContent : il repeint donc ses graphes lui-meme.
+    if(window._mvGraphRepeindre) window._mvGraphRepeindre();
+  }
+}
+
+function _pilTabSim(d){
+  var H='<div class="pil-panels">';
+  if(_pilShow('sim_ordre')) H+=_pilPanelOrdrePassage(d);
+  if(_pilShow('sim_etsi')) H+=_pilPanelSimulateur(d);
+  if(_pilShow('sim_cout')) H+=_pilPanelRenfort(d);
+
+  H+='</div>';
+  return H;
+}
+
+
+
+// ════════════════════════════════════════════════════════════════════
+// REFONTE — navigation par onglets + cockpit décisionnel (Aujourd'hui)
+// ════════════════════════════════════════════════════════════════════
+
+// ── Date objectif de fin des travaux (PAR SAISON → CONFIG.objectifs_fin) ──
+function _pilSaisonNom(){ var sa=(typeof window._pilSaison==='function')?window._pilSaison():null; return sa?(sa.nom||''):''; }
+function _pilObjectifGet(){
+  var nom=_pilSaisonNom();
+  var o=(window.CONFIG&&window.CONFIG.objectifs_fin)||{};
+  if(nom && o[nom]) return o[nom];
+  var cd=(window._chargeSaisonData&&window.getSaisonActive)?window._chargeSaisonData(window._pilSaison()):null;
+  if(cd&&cd.fin) return cd.fin;
+  return null;
+}
+function _pilObjectifSet(iso){
+  if(!window.CONFIG) return false;
+  if(!(typeof window.isAdmin==='function'&&window.isAdmin())) return false;
+  var nom=_pilSaisonNom(); if(!nom) return false;
+  if(!window.CONFIG.objectifs_fin) window.CONFIG.objectifs_fin={};
+  window.CONFIG.objectifs_fin[nom]=iso;
+  try{ if(typeof window.saveData==='function') window.saveData('config'); }catch(e){}
+  return true;
+}
+
+// ── Jours ouvrés : objet Date + différence signée ──
+function _pilWdDateObj(n,from,chantier){
+  var dt=from?new Date(from):new Date(); if(n==null) return dt;
+  var added=0, guard=0;
+  while(added<n && guard<4000){ guard++; dt.setDate(dt.getDate()+1); var wd=dt.getDay(); if(chantier||(wd!==0&&wd!==6)) added++; }
+  return dt;
+}
+function _pilWdBetween(a,b){
+  var d=new Date(a), end=new Date(b); d.setHours(0,0,0,0); end.setHours(0,0,0,0);
+  if(d.getTime()===end.getTime()) return 0;
+  var sign=end>d?1:-1, n=0, guard=0;
+  while(d.getTime()!==end.getTime() && guard<4000){ guard++; d.setDate(d.getDate()+sign); var wd=d.getDay(); if(wd!==0&&wd!==6) n+=sign; }
+  return n;
+}
+function _pilDfrObj(dt){ var M=['janv.','févr.','mars','avr.','mai','juin','juil.','août','sept.','oct.','nov.','déc.'], J=['dim.','lun.','mar.','mer.','jeu.','ven.','sam.']; return J[dt.getDay()]+' '+dt.getDate()+' '+M[dt.getMonth()]; }
+function _pilEtpFmt(v){ return (Math.round((Number(v)||0)*10)/10).toString().replace('.',','); }
+
+// ══ LA PROJECTION DE FIN SE FAIT SUR LA CAPACITE PLANIFIEE ══════════════
+// ⚠️⚠️ DEFAUT CORRIGE LE 12/08, MESURE CHEZ MARCHAND-GRILLOT.
+//   L'ecran divisait la charge restante par la cadence des QUATRE DERNIERES
+//   SEMAINES, puis avançait d'autant de jours ouvres. Un 12 aout, sur un domaine
+//   ou la vendange demarre le 26 avec 36 personnes sous contrat, la cadence
+//   mesuree valait 15 h/j — une personne. Resultat affiche : « fin le 27 janvier,
+//   85 j de retard », sur une vendange de dix jours. La projection IGNORAIT les
+//   contrats deja signes et leurs dates de debut.
+//   Le pire n'est pas l'erreur, c'est son autorite : un chiffre bati sur un
+//   signal partiel ment avec l'aplomb d'une mesure.
+//
+//   ★ LA DONNEE EXISTAIT. weeks[].capH (planning.js, _capWeekReal) rend les
+//     heures REELLEMENT TRAVAILLABLES de l'equipe, semaine par semaine : modele
+//     horaire de CHACUN, entrees du planning (CP, fermeture, absence), contrats
+//     et effectif collectif compris. Une embauche qui commence le 26 aout y
+//     entre le 26 aout — pas avant, pas apres. _pilAnnuelData la transporte
+//     desormais ; elle etait calculee puis jetee.
+//
+//   ⚠️ UNE HEURE DE PRESENCE N'EST PAS UNE HEURE DE BAREME. Le facteur de
+//     conversion n'est pas invente ici : c'est l'ecart de cadence DEJA MESURE
+//     par _pecData (presence du planning moins heures de tracteur, rapportee au
+//     bareme fait). Quand il n'est pas fiable — avancement sous le seuil
+//     _PEC_CAD_AVC, ou il ne predit rien — le facteur vaut 1 et l'ecran l'ecrit.
+//     On ne muscle pas une projection avec une hypothese muette.
+//
+//   ⚠️ CHEVAUCHEMENTS : deux periodes qui se recouvrent produisent deux jeux de
+//     semaines sur les memes jours. On avance un curseur (`couvert`) et on saute
+//     toute semaine deja couverte : la capacite d'un jour ne se compte qu'une
+//     fois, meme quand la frise, elle, signale le doublon.
+function _pilCapaProj(charge, startIso){
+  if(!(charge>0)) return null;
+  var ann=null; try{ ann=_pilAnnuelData(); }catch(e){ ann=null; }
+  if(!ann||!ann.weeks||!ann.weeks.length) return null;
+
+  var k=1, kOk=false;
+  try{
+    var E=_pecData();
+    // \u2605\u2605\u2605 SEULE LA MARCHE 1 PILOTE UNE DATE (14/08/2026, soir).
+    //   La marche 2 - meme periode, campagne precedente - a ete branchee ici le
+    //   matin meme. Resultat mesure en vendange, a 0 % d'avancement : k=2,93, la
+    //   charge restante presque triplee, « -202 j de retard » sur un domaine qui
+    //   affichait 1 j d'avance la veille.
+    //   \u26a0 LE RAPPORT PRESENCE/BAREME N'EST PAS TRANSPOSABLE. Son numerateur
+    //   porte TOUT le domaine (cave, atelier, entretien, bureau), son denominateur
+    //   le seul travail de vigne. Pendant la vendange la cave tourne a plein : le
+    //   rapport mesure la cave, pas la cadence des rangs. La marche 1 tolerait ce
+    //   biais parce que le seuil de 40 % d'avancement garantit que la vigne domine
+    //   la presence ; la marche 2 n'a AUCUN garant equivalent.
+    //   \u26a0 LA BORNE [0,5 ; 3] N'A PAS PROTEGE : 2,93 passe a 0,07 pres. Une borne
+    //   calibree sur un biais faible ne rattrape pas un biais d'une autre nature.
+    if(E&&E.cad&&E.cad.ok&&E.cad.applic){
+      k=1+((E.cad.ecart||0)/100);
+      // Bornes de bon sens : un facteur hors de [0,5 ; 3] ne mesure plus une
+      // cadence, il mesure un trou de saisie. On le refuse plutot que de le
+      // propager dans une date affichee en gros.
+      if(k>=0.5 && k<=3) kOk=true; else k=1;
+    }
+  }catch(e){ k=1; kOk=false; }
+  var besoin=charge*k;
+
+  var o0=_pilAnnOrd(startIso);
+  if(isNaN(o0)) return null;
+  var ws=ann.weeks.filter(function(w){ return w.capH!=null && w.o1>=o0; })
+                  .sort(function(a,b){ return a.o0-b.o0; });
+  if(!ws.length) return null;
+
+  // \u2605\u2605\u2605 UNE SEMAINE ENTAMEE SE LIT AU JOUR, PAS AU PRORATA (12/08/2026).
+  //   AVANT : h = capH x (jours retenus / jours de la semaine). Les heures d'une
+  //   semaine ne sont pas etalees a plat sur ses sept jours — un week-end vaut 0,
+  //   et une equipe de vendange sous contrat du 26 aout au 4 septembre a TOUTES
+  //   ses heures dans les jours qu'on garde. Rogner la semaine du 24 au 30 aout
+  //   de 2/7 retirait 2/7 des heures de 40 vendangeurs absents les 24 et 25.
+  //   Mesure : meme equipe, meme charge, meme depart, fin annoncee entre le
+  //   7 septembre et le 1er octobre — voire « capacite insuffisante » — selon la
+  //   seule date d'ouverture de la periode, qui decide de l'alignement des
+  //   semaines. La reponse juste, lue jour par jour, ne bougeait pas : 4 sept.
+  //   La faute ne se voyait pas : apres la vendange il ne reste qu'une personne,
+  //   donc chaque heure perdue coute un JOUR de retard affiche.
+  //   MAINTENANT : _mvCapReelIn(cd, a, b) (planning.js), le cumul jour par jour
+  //   des heures reellement travaillables, lu sur la periode a laquelle la
+  //   semaine appartient (w.per -> ann.pers[].cd). Meme source pour la plage et
+  //   pour la descente au jour : la date de fin est le jour ou le cumul atteint
+  //   le besoin, pas une fraction de semaine arrondie.
+  //   \u26a0 REPLI ANNONCE (approx) si la donnee manque — cd d'un planning.js
+  //   anterieur a ce lot. On ne remplace jamais une mesure absente par une
+  //   estimation muette.
+  function _capIn(w,a,b){
+    var cdP=(ann.pers&&ann.pers[w.per])?ann.pers[w.per].cd:null;
+    var R=(typeof window._mvCapReelIn==='function')?window._mvCapReelIn(cdP,a,b):null;
+    return (R&&R.work!=null)?R.work:null;
+  }
+  var cum=0, couvert=o0-1, nSem=0, approx=false;
+  for(var i=0;i<ws.length;i++){
+    var w=ws[i];
+    var a=Math.max(w.o0, couvert+1);
+    if(a>w.o1) continue;                       // semaine deja couverte : doublon
+    var nd=w.o1-w.o0+1;
+    var exact=_capIn(w,a,w.o1+1);
+    var h=(exact!=null)?exact:(w.capH||0)*((w.o1-a+1)/Math.max(1,nd));
+    if(exact==null) approx=true;
+    couvert=w.o1;
+    if(!(h>0)) continue;
+    nSem++;
+    if(cum+h>=besoin){
+      var jour=w.o1;
+      if(exact!=null){
+        // Descente au JOUR, sur la MEME source : le premier jour ou le cumul
+        // atteint le besoin. Une semaine de 300 h ne fait plus « finir dimanche »
+        // un travail termine le mardi.
+        var c2=cum;
+        for(var o=a;o<=w.o1;o++){
+          var dh=_capIn(w,o,o+1); if(dh==null||!(dh>0)) continue;
+          if(c2+dh>=besoin){ jour=o; break; }
+          c2+=dh;
+        }
+      } else {
+        var frac=(besoin-cum)/h; jour=a+Math.max(0,Math.ceil(frac*(w.o1-a+1))-1);
+        if(jour>w.o1) jour=w.o1;
+      }
+      return { ok:true, fin:_pilOrdDate(jour), finOrd:jour, k:k, kOk:kOk,
+               besoin:besoin, hDispo:cum+h, sem:nSem, approx:approx };
+    }
+    cum+=h;
+  }
+  // La capacite planifiee ne suffit pas jusqu'au bout du cadre connu. C'est une
+  // REPONSE, pas une panne : elle chiffre le manque en heures.
+  return { ok:false, fin:null, k:k, kOk:kOk, besoin:besoin, hDispo:cum,
+           manque:Math.max(0,besoin-cum), sem:nSem, approx:approx,
+           finCadre:_pilOrdDate(couvert) };
+}
+function _pilOrdDate(o){ return new Date(Date.parse('2026-01-01T00:00:00')+o*86400000); }
+
+// ── Marge : projection vs objectif ──
+function _pilMargeCalc(d){
+  var c=_pilEchCadence(d), cadH=c.cadH;
+  var charge=d.totalReste||0;
+  // DEPART DE LA PROJECTION : on ne peut pas commencer avant l'ouverture de la
+  // fenetre. Projeter depuis le jour de consultation affichait « +4 j d'avance »
+  // un 26 juillet, sur une vendange qui ne demarre pas avant le 26 aout.
+  var sa=(typeof window._pilSaison==='function')?window._pilSaison():null;
+  var noms=(typeof window.getTachesSaison==='function')?window.getTachesSaison().map(function(t){return t.nom;}):[];
+  var fen=(typeof window._mvFenetre==='function')?window._mvFenetre(sa,noms):null;
+  var start=new Date(); start.setHours(0,0,0,0);
+  if(fen&&fen.debut){ var _fd=new Date(fen.debut+'T00:00:00'); if(_fd>start) start=_fd; }
+  // ⚠️ ISO LOCALE, jamais toISOString() : cette derniere convertit en UTC et
+  //   recule d'un jour tout l'ete a l'est de Greenwich. _pilAnnOrd lit du local.
+  var startIso=start.getFullYear()+'-'+String(start.getMonth()+1).padStart(2,'0')+'-'+String(start.getDate()).padStart(2,'0');
+
+  // 1) La capacite planifiee, quand le planning en connait une.
+  var P=null; try{ P=_pilCapaProj(charge,startIso); }catch(e){ P=null; }
+  var proj=null, seasonJ=null, src=null;
+  if(P&&P.ok&&P.fin){ proj=P.fin; seasonJ=_pilWdBetween(start,P.fin); src='planning'; }
+  // 2) Repli ANNONCE sur la cadence des 4 dernieres semaines : elle ne connait
+  //    pas les embauches a venir, l'ecran le dit au lieu de laisser croire.
+  if(!proj && cadH>0){
+    seasonJ=Math.ceil(charge/cadH);
+    proj=_pilWdDateObj(seasonJ,start,!!(fen&&fen.chantier));
+    src='cadence';
+  }
+  var objIso=_pilObjectifGet();
+  var obj=objIso?new Date(objIso+'T00:00:00'):null;
+  var marge=(proj&&obj)?_pilWdBetween(proj,obj):null;
+  return { cadH:cadH, estim:c.estim, seasonJ:seasonJ, proj:proj, objIso:objIso, obj:obj,
+           marge:marge, fen:fen, start:start, src:src, capa:P };
+}
+// La phrase sous le grand chiffre. Elle nomme SUR QUOI la date est batie : une
+// projection dont on ignore l'assiette est une opinion presentee en gras.
+function _pilMargeSous(m){
+  if(m.src==='planning'){
+    var kk=(m.capa&&m.capa.kOk)
+      ? (' \u00b7 cadence mesur\u00e9e \u00d7'+(Math.round((m.capa.k||1)*100)/100).toString().replace('.',','))
+      : ' \u00b7 une heure pr\u00e9sente = une heure de bar\u00e8me (cadence pas encore mesurable)';
+    return 'Avec l\u2019<b>\u00e9quipe d\u00e9j\u00e0 planifi\u00e9e</b> \u2014 contrats et dates de d\u00e9but compris \u2014 fin le <b>'
+      +_pilDfrObj(m.proj)+'</b>'+kk+'.';
+  }
+  if(m.capa && !m.capa.ok){
+    return 'L\u2019\u00e9quipe planifi\u00e9e n\u2019absorbe pas la charge restante\u00a0: il manque <b>~'
+      +_pilNum(Math.round(m.capa.manque))+' h</b> d\u2019ici la fin du calendrier renseign\u00e9. '
+      +'Embauche, d\u00e9calage d\u2019une t\u00e2che ou objectif repouss\u00e9 \u2014 voir Simuler.';
+  }
+  if(m.src==='cadence'){
+    return '\u00c0 la cadence actuelle (~'+Math.round(m.cadH)+' h/j'+(m.estim?' estim.':' \u00b7 4 sem.')
+      +'), fin le <b>'+_pilDfrObj(m.proj)+'</b>. '
+      +'<span style="opacity:.75">Le planning ne couvre pas la p\u00e9riode \u00e0 venir\u00a0: cette date ignore les embauches d\u00e9j\u00e0 sign\u00e9es.</span>';
+  }
+  return 'Cadence indisponible \u2014 renseigne le planning (4 derni\u00e8res semaines).';
+}
+
+// ── Frise de saison : aujourd'hui → objectif, fin prévue + marge ──
+function _pilCockpitTimeline(m){
+  if(!m.proj||!m.obj) return '';
+  var today=new Date(); today.setHours(0,0,0,0);
+  var T0=today.getTime(), endMs=Math.max(m.obj.getTime(),m.proj.getTime());
+  var span=endMs-T0; if(span<=0) span=86400000;
+  var buf=span*0.08+86400000*2, T1=endMs+buf;
+  function fr(t){ return Math.max(0,Math.min(1,(t-T0)/(T1-T0))); }
+  var fP=fr(m.proj.getTime()), fO=fr(m.obj.getTime());
+  var lo=Math.min(fP,fO)*100, hi=Math.max(fP,fO)*100, over=(m.marge!=null&&m.marge<0);
+  return '<div class="pil-tl-wrap"><div class="pil-tl">'
+    +'<div class="pil-tl-marge'+(over?' over':'')+'" style="left:'+lo.toFixed(1)+'%;right:'+(100-hi).toFixed(1)+'%"></div>'
+    +'<div class="pil-tl-mk pil-tl-today" style="left:0"><span class="cap">Auj.</span><span class="cap bot">'+_pilDfrObj(today)+'</span></div>'
+    +'<div class="pil-tl-mk pil-tl-proj" style="left:'+(fP*100).toFixed(1)+'%"><span class="cap">Fin prévue</span></div>'
+    +'<div class="pil-tl-mk pil-tl-obj" style="left:'+(fO*100).toFixed(1)+'%"><span class="cap">Objectif</span></div>'
+    +'</div></div>';
+}
+
+// ── Mini-KPI du cockpit ──
+// L'argent manquait a l'ecran qu'on ouvre le matin : le cockpit disait le TEMPS
+// (marge, charge, cadence, effectif) et rien du budget. Une seule tuile suffit,
+// celle qui porte la DERIVE — l'ecart entre ce qui est depense et ce qui est fait.
+// C'est le seul chiffre economique qui appelle une decision le jour meme.
+function _pilCkBudget(){
+  var E=_pecData();
+  if(!E.configured) return '<div class="pil-ck"><div class="kl">Budget consomm\u00e9</div><div class="kv">\u2014</div>'
+    +'<div class="ks">taux horaire \u00e0 renseigner (R\u00e9glages \u203A \u00c9quipe)</div></div>';
+  // \u2605 CINQUIEME POINT D'AFFICHAGE, OUBLIE LE MATIN. Les quatre points repris
+  //   pour annoncer la source etaient TOUS dans l'onglet Economie ; celui-ci et le
+  //   verdict sont sur l'ACCUEIL - les deux premiers chiffres que Nico voit. Un
+  //   ecart d'histoire affiche « cadence +193 % vs bareme » au present, c'est
+  //   exactement la faute de \u00a734 commise sur l'ecran le plus lu.
+  var ec=(E.cad.ok&&E.cad.applic)?E.cad.ecart:null;
+  var col = (ec===null)?'var(--texte)' : (ec>15?'var(--rouge)' : (ec>5?'var(--orange)' : 'var(--vert-med)'));
+  return '<div class="pil-ck"><div class="kl">Budget consomm\u00e9</div>'
+    +'<div class="kv" style="color:'+col+'">'+Math.round(E.cons)+'<span class="u"> %</span></div>'
+    +'<div class="ks">'+(ec===null
+        ? ('de '+_ecoEur(E.budget)+' \u00b7 '+Math.round(E.avc)+' % du travail fait')
+        : ('cadence <b style="color:'+col+'">'+(ec>0?'+':'')+Math.round(ec)+' %</b> vs bar\u00e8me \u00b7 fin \u2248 '+_pecEurK(E.projFin)))+'</div></div>';
+}
+function _pilCkEtp(d){
+  // ★ Le KPI suit la PORTEE, comme la photo Effectif juste au-dessus de lui.
+  //   Il lisait _pilSaison() : sur l'annee entiere il repondait pour une seule
+  //   campagne (36,6) sous une photo qui repondait pour l'annee. Meme mot, deux
+  //   nombres, a quinze centimetres l'un de l'autre.
+  // ★★★ DEUX DATES SOUS UNE SEULE BARRE DE FRACTION (12/08/2026).
+  //   La tuile ecrivait « 1 / 38,6 pers. — sous-effectif au pic ». Le 1 etait
+  //   la presence d'AUJOURD'HUI, le 38,6 le besoin de la SEMAINE DU PIC. Un
+  //   12 aout, avec 40 vendangeurs sous contrat de groupe a partir du 26, la
+  //   tuile criait au sous-effectif pendant que la photo juste au-dessus
+  //   annoncait « 42 presents cette semaine-la ». Deux verdicts opposes a
+  //   quinze centimetres l'un de l'autre, et aucune contradiction dans les
+  //   donnees : c'est le RAPPROCHEMENT qui etait faux.
+  //   Le module savait deja repondre : PP.head (effectif de la semaine du pic)
+  //   et PP.manque, que « Capacite vs charge » lit deja depuis le 12/08. La
+  //   tuile compare desormais PP.head a PP.pic — meme semaine, meme unite —
+  //   et la presence du jour reste ou elle a un sens : la tuile
+  //   « A la vigne aujourd'hui », juste en dessous.
+  var PP=_pilPicPortee();
+  var req=PP.ok?PP.pic:null;
+  var low=(req!=null && (PP.manque||0)>0.05);
+  // val et req sont la MEME grandeur A LA MEME DATE : des personnes de la semaine
+  // du pic, equipes collectives ponderees des deux cotes.
+  var val=(req!=null)?(PP.head||0):(d.presentChamp!=null?d.presentChamp:0);
+  var reqTxt=(req!=null)?(' / '+_pilEtpFmt(req)+' pers.'):'';
+  var sous = (req==null) ? 'à la vigne aujourd\'hui'
+    : ((low?('manque '+_pilEtpFmt(PP.manque)+' pers.'):'couvert')+' au pic \u00b7 '+_pilCadreLbl(PP));
+  return '<div class="pil-ck"><div class="kl">Effectif au pic</div><div class="kv">'+_pilEtpFmt(val)+'<span class="u">'+reqTxt+'</span></div>'
+    +'<div class="ks"'+(low?' style="color:var(--orange);font-weight:600"':'')+'>'+_pilEsc(sous)+'</div></div>';
+}
+function _pilCkJours(){
+  var days=_pilTreatDays();
+  var n=(days&&days.length)?days.filter(function(x){return x.start!=null;}).length:null;
+  var tot=(days&&days.length)?days.length:5;
+  return '<div class="pil-ck"><div class="kl">Jours favorables</div><div class="kv">'+(n!=null?n:'—')+'<span class="u"> / '+tot+' j</span></div><div class="ks">fenêtres de traitement à venir</div></div>';
+}
+
+// ── Tuiles « décision du jour » ──
+function _pilCkPres(d){
+  var ind=(d.presences||[]).filter(function(p){ return !p.bureau && p.etat!=='present'; });
+  var chips=ind.slice(0,4).map(function(p){
+    var lab=p.etat==='cp'?'\u2600\uFE0F '+p.nom+' · CP':p.etat==='recup'?'\u21BA '+p.nom+' · récup':p.etat==='maladie'?'\uD83E\uDD12 '+p.nom:'\u2715 '+p.nom;
+    var bg=p.etat==='cp'?'var(--orange-pale)':p.etat==='recup'?'rgba(123,109,184,.14)':'var(--rouge-pale)';
+    var col=p.etat==='cp'?'var(--orange)':p.etat==='recup'?'#7B6DB8':'var(--rouge)';
+    return '<span class="pil-chip2" style="background:'+bg+';color:'+col+'">'+_pilEsc(lab)+'</span>';
+  }).join('');
+  // \u26a0 CETTE TUILE COMPTE DES FICHES, et elle doit continuer : \u00ab 3 pr\u00e9sents
+  //   sur 4 \u00bb nomme les quatre lignes de l'equipe. Y mettre l'effectif pondere
+  //   donnerait \u00ab 28 pr\u00e9sents sur 4 \u00bb. Le nombre de PERSONNES est ajoute en
+  //   dessous, sous son propre nom, quand une equipe collective les separe.
+  var tot=(d.presences||[]).filter(function(p){return !p.bureau;}).length;
+  var pc=(d.presentFiches!=null?d.presentFiches:(d.presentChamp||0));
+  var pers=(d.presentChamp!=null?d.presentChamp:pc);
+  return '<div class="pil-tile2"><div class="pil-t2h"><span class="ic">'+_pilIco('equipe')+'</span><span class="t">À la vigne aujourd\'hui</span></div>'
+    +'<div class="pil-t2b"><div class="pil-big green">'+pc+' présent'+(pc>1?'s':'')+'</div>'
+    +'<div class="pil-t2s">sur '+tot+(ind.length?' · '+ind.length+' indisponible'+(ind.length>1?'s':''):' · équipe au complet')
+      +(pers>pc+0.5?(' · <b>'+_pilEtpFmt(pers)+' personnes</b> au total (équipe collective)'):'')+'</div>'
+    +(chips?'<div style="margin-top:7px">'+chips+'</div>':'')+'</div></div>';
+}
+function _pilCkTraiter(){
+  var days=_pilTreatDays(), big, bigCol, body;
+  if(days===undefined){ big='\u2014'; bigCol='var(--texte-doux)'; body='<div class="pil-t2s">pr\u00e9visions horaires indisponibles</div>'; }
+  else {
+    var tj=(days||[]).filter(function(x){ return /aujourd/i.test(x.label); })[0] || (days&&days[0]);
+    if(tj&&tj.start!=null){
+      big='Oui \u2014 '+tj.start+'h \u2192 '+tj.end+'h'; bigCol='var(--vert-med)';
+      var risk=tj.leach||(tj.ppMax!=null&&tj.ppMax>=PIL_TREAT_PP_ALERT);
+      body='<div class="pil-t2s">sec \u00b7 '+tj.wMax+' km/h \u00b7 '+tj.tMax+'\u00b0 \u00b7 meilleure fen\u00eatre du jour</div>'
+        +(risk?'<div class="pil-t2s" style="color:var(--orange);margin-top:5px">\u26A0 pluie ensuite \u2014 risque de lessivage</div>':'');
+    } else {
+      big='Pas aujourd\u2019hui'; bigCol='var(--orange)';
+      body='<div class="pil-t2s">'+(tj?('aucune fen\u00eatre \u00b7 '+tj.reason):'aucune fen\u00eatre claire')+'</div>';
+      var nxt=(days||[]).filter(function(x){ return x.start!=null; })[0];
+      if(nxt) body+='<div class="pil-t2s" style="margin-top:5px;color:var(--vert-med)">prochaine : '+nxt.label+' '+nxt.start+'h\u2192'+nxt.end+'h</div>';
+    }
+    // \u2605 LES CINQ JOURS ARRIVENT ICI, DERRIERE UN DEPLIANT. La carte vit dans une
+    //   grille de trois colonnes : cinq lignes toujours ouvertes etireraient ses
+    //   deux voisines sur toute leur hauteur. Ferme, le depliant ne coute qu'une
+    //   ligne ; ouvert, il porte exactement le dessin de l'ancienne carte.
+    //   \u26a0\ufe0f Ce n'est PAS \u00ab cacher un chiffre \u00bb : le verdict du jour \u2014 le seul qu'on
+    //     lit pour decider ce matin \u2014 reste en gros au-dessus, toujours affiche.
+    if(days && days.length){
+      body+='<details class="pil-t5"><summary>les '+days.length+' prochains jours</summary>'
+        +'<div class="pil-t5b">'+_pilTreatRows(days)+'</div></details>';
+    }
+  }
+  // La pastille suit la carte : la fiche `pil.traitement` etait posee sur celle
+  // qui disparait. Une fiche ecrite et posee nulle part est un rouge de harnais.
+  var _i=(typeof _mvInfoBtn==='function')?_mvInfoBtn('pil.traitement'):'';
+  // ⚠️ `data-mvt="traiter"` EST UN POINT D'ACCROCHE DE LA VISITE GUIDEE, au
+  //   meme titre que `.pil-dec` et `.pil-cockpit-card` (§20b). Sans lui, le
+  //   moment « Je traite ou pas ? » vise `.pil-tile2` et attrape « A la vigne
+  //   aujourd'hui », la premiere carte du cockpit. Ne pas renommer.
+  return '<div class="pil-tile2" data-mvt="traiter"><div class="pil-t2h"><span class="ic">'+_pilIco('goutte')+'</span><span class="t">Traiter ?</span>'+_i+'</div>'
+    +'<div class="pil-t2b"><div class="pil-big" style="color:'+bigCol+'">'+big+'</div>'+body+'</div></div>';
+}
+function _pilCkPrio(d){
+  var p=d.prio;
+  if(!p) return '<div class="pil-tile2"><div class="pil-t2h"><span class="ic">'+_pilIco('cible')+'</span><span class="t">Tâche prioritaire</span></div><div class="pil-t2b"><div class="pil-t2s">aucune tâche en cours</div></div></div>';
+  var col=_pilPctColor(p.pct||0);
+  return '<div class="pil-tile2"><div class="pil-t2h"><span class="ic">'+_pilIco('cible')+'</span><span class="t">Tâche prioritaire</span></div>'
+    +'<div class="pil-t2b"><div class="pil-big">'+_pilEsc(_pilTnom(p.nom))+'</div>'
+    +'<div class="pil-t2s">'+_pilNum(p.h_reste)+' h restantes · <b style="color:var(--or)">pôle long</b></div>'
+    +'<div class="pil-gbar"><i style="width:'+Math.min(p.pct||0,100)+'%;background:'+col+'"></i></div>'
+    +'<div class="pil-t2s" style="margin-top:5px">'+(p.pct||0)+'% fait</div></div></div>';
+}
+function _pilCkAlertes(d){
+  var al=[];
+  var minRev=null, minRevNom=null;
+  (d.tracs||[]).forEach(function(t){ if(t.revReste!=null && (minRev==null||t.revReste<minRev)){ minRev=t.revReste; minRevNom=t.nom; } });
+  if(minRev!=null && minRev<=120) al.push(['amb','Révision <b>'+_pilEsc(minRevNom)+'</b> dans '+_pilNum(minRev)+' h','à planifier']);
+  (d.tracs||[]).forEach(function(t){ if(t.rep) al.push(['red','<b>'+_pilEsc(t.nom)+'</b> immobilisé'+(t.rep.motif?' — '+_pilEsc(t.rep.motif):''), t.rep.prevu_retour?('retour '+_pilDfr(t.rep.prevu_retour)):'chez le réparateur']); });
+  if(d.gnr&&d.gnr.capacite){ var niv=Number(d.gnr.niveau)||0, pc=Math.round(niv/(Number(d.gnr.capacite)||1)*100); if(niv<=(Number(d.gnr.seuil)||0)) al.push(['red','Cuve GNR à <b>'+pc+' %</b> · '+_pilNum(niv)+' L','plein à prévoir']); }
+  var alerteN=d.ouAlerte||14;
+  (d.cuvees||[]).forEach(function(c){ if(c.last_ouillage){ var ds=_pilDaysSince(c.last_ouillage); if(ds>alerteN) al.push(['amb','Ouillage <b>'+_pilEsc((c.nom||'Cuvée')+(c.millesime?' '+c.millesime:''))+'</b> en retard','+'+(ds-alerteN)+' j']); } });
+  var inner;
+  if(!al.length){ inner='<div class="pil-alert"><span class="pt ok"></span><span>Rien à signaler — parc, GNR et cave à jour</span></div>'; }
+  else { inner=al.slice(0,8).map(function(a){ return '<div class="pil-alert"><span class="pt '+a[0]+'"></span><span>'+a[1]+'</span>'+(a[2]?'<span class="when">'+_pilEsc(a[2])+'</span>':'')+'</div>'; }).join(''); }
+  return '<div class="pil-tile2 pil-alertcard"><div class="pil-alerts">'+inner+'</div></div>';
+}
+
+// ── Onglet AUJOURD'HUI (cockpit) ──
+function _pilTabAuj(d){
+  var m=_pilMargeCalc(d), admin=(typeof window.isAdmin==='function')&&window.isAdmin(), H='';
+  var cockpit='';
+  if(_pilShow('auj_marge')){
+    var ringPc=d.gaugePct, C=2*Math.PI*74, dash=(ringPc/100*C);
+    var vBig, vCol, badgeCls, badgeTxt;
+    if(m.marge==null){ vBig='—'; vCol='var(--texte-doux)'; badgeCls='b-warn';
+      badgeTxt=(m.proj?'\u25CF objectif à poser':(m.capa&&!m.capa.ok?'\u25CF capacité insuffisante':'\u25CF projection indispo')); }
+    else if(m.marge>1){ vBig='+'+m.marge+' j d\'avance'; vCol='var(--vert-med)'; badgeCls='b-ok'; badgeTxt='\u25CF dans les temps'; }
+    else if(m.marge>=0){ vBig=(m.marge===0?'pile dans les temps':'+'+m.marge+' j'); vCol='var(--vert-med)'; badgeCls='b-warn'; badgeTxt='\u25CF juste'; }
+    else { vBig=m.marge+' j de retard'; vCol='var(--rouge)'; badgeCls='b-bad'; badgeTxt='\u25CF à accélérer'; }
+    cockpit+='<div class="pil-hero">'
+      +'<div class="pil-ring"><svg width="168" height="168" viewBox="0 0 168 168"><circle cx="84" cy="84" r="74" fill="none" stroke="var(--gris-clair)" stroke-width="7"/><circle cx="84" cy="84" r="74" fill="none" stroke="'+_pilPctColor(ringPc)+'" stroke-width="7" stroke-linecap="round" stroke-dasharray="'+dash.toFixed(1)+' '+C.toFixed(1)+'" transform="rotate(-90 84 84)"/></svg>'
+      +'<div class="pil-ring-mid"><div class="pc">'+ringPc+'%</div><div class="lb">saison faite</div></div></div>'
+      +'<div class="pil-verdict"><div class="vk">Marge sur votre objectif</div>'
+      +'<span class="pil-badge '+badgeCls+'">'+badgeTxt+'</span>'
+      +'<div class="vbig" style="color:'+vCol+'">'+vBig+'</div>'
+      +'<div class="vsub">'+_pilMargeSous(m)+'</div>'
+      +'<div class="pil-obj"><span class="ol">Objectif \u00b7 tout fini pour le</span>'
+      +'<input type="date" id="pil-obj-date" value="'+(m.objIso||'')+'"'+(admin?'':' disabled')+'>'
+      +'<span class="pil-obj-hint">'+(admin?'':'\uD83D\uDD12 admin')+'</span></div>'
+      +'</div></div>';
+    cockpit+=_pilCockpitTimeline(m);
+  }
+  var kpis='';
+  if(_pilShow('auj_charge')){
+    var _ksC = (m.seasonJ==null) ? 'projection indisponible'
+      : ('\u2248 '+m.seasonJ+' j ouvrés '+(m.src==='planning'?'d’ici là':'à la cadence'));
+    kpis+='<div class="pil-ck"><div class="kl">Charge restante</div><div class="kv">'+_pilNum(d.totalReste)+'<span class="u"> h</span></div><div class="ks">'+_ksC+'</div></div>';
+  }
+  if(_pilShow('auj_cadence')) kpis+='<div class="pil-ck"><div class="kl">Cadence équipe</div><div class="kv">'+(m.cadH>0?Math.round(m.cadH):'—')+'<span class="u"> h/j</span></div><div class="ks">'+(m.estim?'estimée (effectif)':'réelle · 4 dern. sem.')+'</div></div>';
+  if(_pilShow('auj_budget')) kpis+=_pilCkBudget();
+  if(_pilShow('auj_etp')) kpis+=_pilCkEtp(d);
+  if(_pilShow('auj_jours')) kpis+=_pilCkJours();
+  if(kpis) cockpit+='<div class="pil-cks">'+kpis+'</div>';
+  if(cockpit) H+='<div class="pil-cockpit-card">'+cockpit+'</div>';
+  var dec='';
+  if(_pilShow('auj_pres')) dec+=_pilCkPres(d);
+  if(_pilShow('auj_traiter')) dec+=_pilCkTraiter();
+  if(_pilShow('auj_prio')) dec+=_pilCkPrio(d);
+  if(dec) H+='<div class="pil-sec-h">La décision du jour</div><div class="pil-dec">'+dec+'</div>';
+  if(_pilShow('auj_alertes')) H+='<div class="pil-sec-h">Alertes matériel &amp; cave</div>'+_pilCkAlertes(d);
+  return H || '<div class="pil-empty">Aucun indicateur affiché — activez-les via « Choisir les indicateurs ».</div>';
+}
+
+// ── Onglet AVANCEMENT ──
+// ── Niveau 1 : L'ANNEE ──────────────────────────────────────────────────────
+// La vue d'ensemble. On y voit les douze mois d'un coup, les campagnes qui les
+// decoupent, et le cadre comptable qui dit ou l'annee commence. On zoome
+// depuis ici : cliquer une campagne pose la portee, et tout le module suit.
+// ════════════════════════════════════════════════════════════════════════════
+// LE BUDGET DE L'ANNEE, MOIS PAR MOIS — LE PREVU ET LE DEPENSE
+// ────────────────────────────────────────────────────────────────────────────
+// La carte « Deux façons de compter l'année », juste au-dessus, porte deja les
+// deux TOTAUX. Ce que ce graphe ajoute, c'est QUAND l'ecart s'ouvre : un total
+// ne dit pas si le retard s'est pris en avril ou en aout.
+//
+// ⚠️⚠️⚠️ DEUX PERIMETRES, ET C'EST DELIBERE — LE DIRE EST LA MOITIE DU TRAVAIL.
+//   · Le PREVU est du bareme : heures/ha × surface, etalees mois par mois par la
+//     fenetre de chaque tache (cd.months[].chargeOrd, calcule par planning.js),
+//     valorisees au taux moyen. Perimetre : LE TRAVAIL DE VIGNE, rien d'autre.
+//   · Le DEPENSE vient de _pexData : salaires charges, GNR, achats d'intrants,
+//     poses a la date de leur travail, de leur plein ou de leur achat. Perimetre :
+//     TOUT LE DOMAINE — la cave, l'atelier et le bureau y sont.
+//   L'ecart entre les deux courbes N'EST DONC PAS UN DEPASSEMENT. Pendant la
+//   vendange la cave tourne a plein : la courbe du depense decolle sans qu'un
+//   seul rang coute plus cher. Un ecran qui superposerait ces deux courbes sans
+//   le dire commettrait exactement la faute de §33/§34 — un numerateur et un
+//   denominateur qui ne parlent pas de la meme chose.
+//
+// ⚠️ POURQUOI PAS « BAREME PREVU CONTRE BAREME FAIT », qui serait a perimetre
+//   egal ? Parce que la donnee n'existe pas a l'echelle de l'annee, et le module
+//   l'ecrit deja dans _pilPhotosData : « le pourcentage fait n'a d'assiette que
+//   sur la periode CONSULTEE — calcHeures() ne connait qu'elle ». L'etendre a
+//   l'exercice serait un pourcentage sans denominateur. On ne trace pas une
+//   courbe qu'on ne sait pas calculer.
+//
+// ⚠️ Le depense S'ARRETE AU MOIS COURANT. Le prolonger a plat jusqu'a la cloture
+//   ferait lire « plus rien ne sort » la ou il n'y a simplement pas encore de
+//   donnee. Un trou n'est pas un zero, et un zero est une mesure.
+// ════════════════════════════════════════════════════════════════════════════
+function _pilAnBudgetData(){
+  var ann=null; try{ ann=_pilAnnuelData(); }catch(e){ ann=null; }
+  if(!ann || !ann.ex) return null;
+  var mois=null; try{ mois=_pexMoisWin(ann.ex); }catch(e){ mois=null; }
+  if(!mois || !mois.length) return null;
+
+  var taux=0; try{ taux=Number(_ecoRate())||0; }catch(e){ taux=0; }
+  var idx={}; mois.forEach(function(mo,i){ idx[mo.k]=i; });
+
+  // ── Le prevu : les heures de bareme, mois par mois ────────────────────────
+  // ⚠️ MEME BORNAGE QUE LES PHOTOS. Une campagne entierement hors de l'exercice
+  //   comptable n'entre pas dans un total annonce « sur l'exercice » — ann.hors
+  //   la nomme, et « Deux façons de compter » l'affiche deja en clair.
+  var hPrev=mois.map(function(){ return 0; }), nCd=0, nSansMois=0;
+  ann.pers.forEach(function(p){
+    if(!p.cd) return;
+    if(p.fin<ann.ex.d0 || p.debut>ann.ex.d1) return;
+    if(!p.cd.months || !p.cd.months.length){ nSansMois++; return; }
+    nCd++;
+    p.cd.months.forEach(function(x){
+      var k=x.yr+'-'+x.m;
+      if(idx[k]!=null) hPrev[idx[k]]+=Number(x.chargeOrd)||0;
+    });
+  });
+  var hTot=0; hPrev.forEach(function(h){ hTot+=h; });
+
+  // ── Le depense : le moteur de l'exercice, deja cadre sur des dates ────────
+  // On le CONSOMME, on ne le recalcule pas : un second calcul donnerait un
+  // second chiffre, et c'est la faute que ce module passe son temps a corriger.
+  var X=_pilExoData()||null;
+  var eReel=mois.map(function(mo){
+    if(!X || !X.byM || !X.byM[mo.k]) return null;
+    var b=X.byM[mo.k];
+    return (b.sal||0)+(b.gnr||0)+(b.ach||0)+(b.dep||0);
+  });
+  // Jusqu'ou la mesure porte : le mois qui contient aujourd'hui, ou le dernier
+  // mois de l'exercice s'il est clos. Au-dela, la courbe s'arrete.
+  var auj=(typeof window._mvAujIso==='function')?window._mvAujIso():'';
+  var iMax=mois.length-1;
+  if(auj && auj<=ann.ex.d1){
+    iMax=-1;
+    for(var q=0;q<mois.length;q++){ if(mois[q].d0<=auj) iMax=q; }
+    if(iMax<0) iMax=0;
+  }
+
+  var ePrev=hPrev.map(function(h){ return h*taux; });
+  var cumP=[], cumR=[], aP=0, aR=0, reelTot=0;
+  for(var i=0;i<mois.length;i++){
+    aP+=ePrev[i]; cumP.push(aP);
+    if(i<=iMax && eReel[i]!=null){ aR+=eReel[i]; cumR.push(aR); reelTot=aR; }
+    else cumR.push(null);
+  }
+  return { mois:mois, hPrev:hPrev, ePrev:ePrev, eReel:eReel,
+           cumP:cumP, cumR:cumR, iMax:iMax, taux:taux, hTot:hTot,
+           prevTot:aP, reelTot:reelTot, nCd:nCd, nSansMois:nSansMois,
+           reelOk:!!(X && X.total>0), ex:ann.ex };
+}
+
+function _pilAnBudgetSvg(B,w){
+  if(!B) return window._mvGraphVide('L\u2019exercice comptable n\u2019est pas d\u00e9limit\u00e9',
+    'R\u00e9glages \u203a Campagne : datez vos p\u00e9riodes, et fixez le mois d\u2019ouverture de l\u2019exercice.');
+  if(!(B.taux>0)) return window._mvGraphVide('Aucun taux horaire renseign\u00e9',
+    'Sans taux, les heures de bar\u00e8me ne se convertissent pas en euros. R\u00e9glages \u203a \u00c9quipe.');
+  if(!(B.prevTot>0)) return window._mvGraphVide('Aucune heure de bar\u00e8me sur l\u2019exercice',
+    'Datez vos campagnes et renseignez les heures/ha des travaux : le pr\u00e9vu en d\u00e9coule.');
+
+  var M=B.mois;
+  var maxV=0;
+  B.cumP.forEach(function(v){ if(v>maxV) maxV=v; });
+  B.cumR.forEach(function(v){ if(v!=null && v>maxV) maxV=v; });
+  var top=_pecNiceMax(maxV*1.08);
+
+  var c0=window._mvGraphCadre(w,100), et=c0.etroit;
+  // ⚠️⚠️ DEUX DEFAUTS VUS A LA CAPTURE, ET PAR RIEN D'AUTRE.
+  //   ① LES GRADUATIONS TOMBAIENT SUR DES VALEURS NON RONDES : 33,3 k · 66,7 k ·
+  //     133,3 k. Le cadre par defaut pose `grad` a 6, et _pecNiceMax rend un `top`
+  //     de la forme m x 10^n avec m dans {1 ; 1,5 ; 2 ; 2,5 ; 3 ; 4 ; 5 ; 7,5 ; 10}.
+  //     Divise par 6, AUCUN de ces neuf m ne tombe rond ; divise par 5, TOUS le
+  //     font (0,2 · 0,3 · 0,4 · 0,5 · 0,6 · 0,8 · 1 · 1,5 · 2). En etroit, 2 pas
+  //     jouent le meme role sans charger l'axe. C'est une propriete de
+  //     _pecNiceMax, pas un reglage a l'oeil.
+  //   ② LE « € » DE L'AXE CHEVAUCHAIT LA GRADUATION DU HAUT. L'unite se pose a
+  //     pT-4, la graduation la plus haute a pT+4 : huit pixels d'ecart pour du
+  //     texte de onze. Deux marges de plus en haut, et l'unite remonte d'autant.
+  //   \u26a0\ufe0f Les deux existent aussi dans _pexGraph, d'ou ce dessin est derive. Ils
+  //     n'y sont PAS corriges ici : cet ecran n'est pas dans le lot, et une
+  //     correction non demandee sur un graphe qu'on n'a pas regarde est un pari.
+  //     Note au backlog plutot qu'un geste en passant.
+  var c=window._mvGraphCadre(w, et?222:270, { padL:et?44:58, padR:et?12:18, padT:24, padB:et?30:34,
+                                              grad:(et?2:5) });
+  var W=c.w, pL=c.padL, pR=c.padR, pT=c.padT, iw=c.iw, ih=c.ih;
+  var step=(M.length>1)?(iw/(M.length-1)):iw;
+  function X(i){ return (M.length>1)?(pL+step*i):(pL+iw/2); }
+  function Y(v){ return pT+ih-(v/top)*ih; }
+
+  var g='';
+  for(var k=0;k<=c.grad;k++){
+    var v=top*k/c.grad, y=Y(v);
+    g+='<line x1="'+pL+'" y1="'+y.toFixed(1)+'" x2="'+(W-pR)+'" y2="'+y.toFixed(1)+'" stroke="'+c.col.grille+'" stroke-width="'+c.trait.grille+'"/>'
+      +'<text x="'+(pL-7)+'" y="'+(y+4).toFixed(1)+'" text-anchor="end" font-size="'+(et?c.txt.mini:c.txt.axe)+'" fill="'+c.col.texte+'">'+_pilEsc(_pecAxeEur(v))+'</text>';
+  }
+  g+='<text x="'+(pL-7)+'" y="'+(pT-11)+'" text-anchor="end" font-size="'+c.txt.unite+'" fill="'+c.col.texte+'">\u20AC</text>';
+
+  // Le prevu : trait plein clair sur toute l'annee — c'est un PLAN, il est connu
+  // d'avance jusqu'a la cloture.
+  var dP=''; B.cumP.forEach(function(v,i){ dP+=(i?' L ':'M ')+X(i).toFixed(1)+' '+Y(v).toFixed(1); });
+  g+='<path d="'+dP+'" fill="none" stroke="'+_PEC_COL.mo+'" stroke-width="2.2" stroke-linejoin="round" stroke-linecap="round" stroke-dasharray="6 4"/>';
+
+  // Le depense : trait plein, ARRETE au dernier mois mesure.
+  var dR='', nR=0;
+  B.cumR.forEach(function(v,i){ if(v==null) return; dR+=(nR?' L ':'M ')+X(i).toFixed(1)+' '+Y(v).toFixed(1); nR++; });
+  if(nR>0){
+    g+='<path d="'+dR+'" fill="none" stroke="#2C3E50" stroke-width="2.4" stroke-linejoin="round" stroke-linecap="round"/>';
+    g+='<circle cx="'+X(B.iMax).toFixed(1)+'" cy="'+Y(B.cumR[B.iMax]!=null?B.cumR[B.iMax]:0).toFixed(1)+'" r="3.6" fill="#2C3E50"/>';
+  }
+
+  var pas=et?(M.length>8?3:2):(M.length<=13?1:2);
+  M.forEach(function(mo,i){
+    if(i%pas===0)
+      g+='<text x="'+X(i).toFixed(1)+'" y="'+(c.h-11)+'" text-anchor="middle" font-size="'+(et?c.txt.mini:c.txt.axe)+'" fill="'+c.col.texte+'">'+_pilEsc(mo.lbl)+'</text>';
+  });
+
+  return window._mvGraphSvg(c, 'Cumul mois par mois du budget de vigne pr\u00e9vu au bar\u00e8me et de la d\u00e9pense r\u00e9elle du domaine.', g)
+    +'<div class="pil-anb-leg">'
+    +'<span><em style="background:transparent;border-top:2px dashed '+_PEC_COL.mo+';height:0;border-radius:0"></em>pr\u00e9vu \u00b7 vigne au bar\u00e8me</span>'
+    +'<span><em style="background:#2C3E50"></em>d\u00e9pens\u00e9 \u00b7 tout le domaine</span>'
+    +'</div>';
+}
+
+function _pilPanelAnBudget(){
+  var B=null; try{ B=_pilAnBudgetData(); }catch(e){ B=null;
+    if(window.logError) window.logError({level:'info',cat:'pilotage',msg:'budget annuel : calcul illisible'}); }
+
+  // La ligne de cadre porte LES DEUX PERIMETRES. C'est ce qui empeche de lire
+  // l'ecart comme un depassement — donc elle reste a l'ecran, toujours.
+  var sub = B
+    ? ('bar\u00e8me vigne \u00d7 ' + _ecoEur2(B.taux) + ' \u20ac/h, face \u00e0 la d\u00e9pense r\u00e9elle de tout le domaine')
+    : 'exercice comptable non d\u00e9limit\u00e9';
+  var stat = (B && B.prevTot>0)
+    ? _pilStat(_pilNb(Math.round(B.prevTot/1000)),' k\u20ac pr\u00e9vus', (B.reelOk?null:'sans mesure'))
+    : _pilStat('\u2014','');
+
+  var body='<div style="width:100%;overflow-x:auto" id="pil-g-anb"></div>';
+  window._mvGraphSuivre('#pil-g-anb', function(lg){ return _pilAnBudgetSvg(B,lg); }, {max:1400});
+
+  if(B && B.prevTot>0){
+    var ecart=(B.reelTot||0)-((B.cumP[B.iMax]!=null)?B.cumP[B.iMax]:0);
+    var moisLbl=(B.mois[B.iMax]?B.mois[B.iMax].lbl:'');
+    body+='<div style="font-size:var(--pt-micro,11px);color:var(--texte-doux);margin-top:11px;line-height:1.5;'
+      +'border:1px solid var(--gris-clair);border-radius:9px;padding:9px 12px">';
+    if(B.reelOk && B.reelTot>0){
+      body+='\u00c0 fin <b>'+_pilEsc(moisLbl)+'</b>, le plan de vigne cumule <b>'+_pilEsc(_pecEurK(B.cumP[B.iMax]||0))
+        +'</b> et la d\u00e9pense mesur\u00e9e <b>'+_pilEsc(_pecEurK(B.reelTot))+'</b>. '
+        +'<b>L\u2019\u00e9cart de '+_pilEsc(_pecEurK(Math.abs(ecart)))+' n\u2019est pas un d\u00e9passement</b> : '
+        +'les deux courbes ne couvrent pas le m\u00eame p\u00e9rim\u00e8tre.';
+    } else {
+      body+='La d\u00e9pense r\u00e9elle n\u2019est pas trac\u00e9e : le co\u00fbt de l\u2019exercice n\u2019a pas abouti. '
+        +'Seul le plan de vigne est lisible.';
+    }
+    if(B.nSansMois>0)
+      body+=' <b>'+B.nSansMois+' campagne'+(B.nSansMois>1?'s ne sont pas dat\u00e9es':' n\u2019est pas dat\u00e9e')
+        +'</b> : son bar\u00e8me n\u2019entre pas dans le plan.';
+    body+='</div>';
+    if(!B.reelOk)
+      body+=_pilEmptyGo('Le co\u00fbt de l\u2019exercice ne se calcule pas : ouvrez \u00c9conomie \u203a Exercice pour voir ce qui bloque.','eco','\u00c9conomie \u203a Exercice');
+  }
+
+  return _pilTile('anbudget','#8A5A38','Le budget de l\u2019ann\u00e9e, mois par mois',
+    stat, sub, null, body, 'pil.an.budget');
+}
+
+function _pilTabAn(d){
+  // Le bandeau d'alignement annee/vendange est deja DANS _pilPanelEtp
+  // (_pilAnneeVigneHtml). On ne le rappelle pas ici : deux cadres de l'annee
+  // sur un meme ecran, c'est la faute qu'on corrige.
+  var H='';
+  // Le cadre se lit AVANT les chiffres : sans lui, deux totaux differents pour
+  // « l'annee » passent pour une erreur.
+  if(_pilShow('an_cadres')){
+    var _a=null; try{ _a=_pilAnnuelData(); }catch(e){ _a=null; }
+    if(_a) H+=_pilDeuxCadresHtml(_a);
+  }
+  // Le graphe se lit APRES les deux cadres — ils disent ce que \u00ab l'annee \u00bb veut
+  // dire — et AVANT la frise des 52 semaines, qui descend au detail hebdomadaire.
+  var _pan='';
+  if(_pilShow('an_budget')) _pan+=_pilPanelAnBudget();
+  if(_pilShow('an_frise'))  _pan+=_pilPanelEtp(d);
+  if(_pan) H+='<div class="pil-panels">'+_pan+'</div>';
+  return H || '<div class="pil-empty">Aucun indicateur affiché.</div>';
+}
+
+function _pilTabAvc(d){
+  var H='';
+  if(_pilShow('avc_gauge')) H+='<div class="pil-gauge" id="pil-gauge"></div>';
+  var charts='';
+  if(_pilShow('avc_bar')) charts+='<div class="pil-panel"><div class="pil-panel-h"><div class="pil-panel-t">Avancement par tâche</div><div class="pil-seg" id="pil-bar-seg"><button data-b="saison" class="on">Cette saison</button><button data-b="cmp">Comparatif N-1</button></div></div><div class="pil-bar" id="pil-bar"></div></div>';
+  if(_pilShow('avc_pie')) charts+='<div class="pil-panel"><div class="pil-panel-h"><div class="pil-panel-t" id="pil-pie-title">Charge restante</div><div class="pil-seg" id="pil-pie-seg"><button data-m="reste" class="on">Restante</button><button data-m="fait">Réalisé</button><button data-m="plan">Planifié</button></div></div><div class="pil-pie-wrap"><div class="pil-donut" id="pil-donut"></div><div class="pil-pie-legend" id="pil-pie-legend"></div></div></div>';
+  if(charts) H+='<div class="pil-charts">'+charts+'</div>';
+  var panels='';
+  // « Charge & ETP » a QUITTE cet onglet : il porte une frise de douze mois,
+  // il n'a rien a faire dans un ecran qui parle d'une campagne. Il ouvre
+  // maintenant le niveau « L'annee ». Il n'est pas duplique : il n'existe
+  // qu'a un seul endroit, et c'est celui qui repond a sa question.
+  // ★★ LE MOUVEMENT INVERSE, le meme jour : la repartition du temps, la frise
+  // prevu/reel, la courbe par semaine et l'ecart sont DESCENDUS de « L'annee »
+  // vers ici. Ils detaillent une campagne ; ils etaient au-dessus de leur maille.
+  if(_pilShow('avc_temps')) panels+=_pilPanelTemps(d);
+  if(_pilShow('avc_echeances')) panels+=_pilPanelEcheances(d);
+  if(_pilShow('avc_carte')) panels+=_pilPanelCarte(d);
+
+  if(panels) H+='<div class="pil-panels">'+panels+'</div>';
+  return H || '<div class="pil-empty">Aucun indicateur affiché.</div>';
+}
+
+// ── Onglet PERSONNEL ──
+function _pilPanelCapacite(d){
+  var PP=_pilPicPortee(), cd=_pilCdVue();
+  var present=d.presentChamp!=null?d.presentChamp:0;
+  // ⚠️ CE SECOND APPEL ETAIT MUET : ni ligne de cadre, ni pastille. Le client
+  //   qui n'a pas encore date ses periodes tombait sur la seule carte de
+  //   l'onglet incapable de dire ce qu'elle montre. Trouve par le harnais, qui
+  //   exige les trois etages sur CHAQUE appel, pas seulement sur le plus frequent.
+  if(!PP.ok && !cd){ return _pilTile('capacite','#C9A84C','Capacité vs charge', _pilStat(present,' à la vigne'),
+    'présence du jour \u00b7 le pic ne peut pas être calculé', null,
+    _pilEmptyGo('Sans dates de campagne, l\'effectif nécessaire la semaine du pic ne se calcule pas : il n\'y a aucune fenêtre sur laquelle chercher ce pic.','saisons','Réglages \u203A Campagne'), 'pil.capacite'); }
+  // ★★★ ON NE SOUSTRAIT PLUS DEUX GRANDEURS QUI N'ONT NI LA MEME DATE NI LA
+  //   MEME UNITE. AVANT : `manque = PP.pic - d.presentChamp`.
+  //     · PP.pic  = le besoin de la SEMAINE DU PIC, quelque part dans l'exercice,
+  //                 en equivalents-personnes, equipes collectives PONDEREES.
+  //     · present = un COMPTAGE DE TETES d'AUJOURD'HUI, hors bureau, hors
+  //                 absents, ou une equipe de 40 vendangeurs pese 1.
+  //   Deux dates, deux unites, une soustraction — affichee en gros, en orange,
+  //   avec le mot ETP colle aux deux. Mesure du 12/08 : « 46,3 ETP au pic » moins
+  //   « 2 ETP presents » = « manque 44,3 ETP » sur un domaine de 4 personnes.
+  //   Le manque se lit desormais SUR LA SEMAINE DU PIC, contre l'effectif prevu
+  //   CETTE SEMAINE-LA (PP.manque, deja calcule par _pilPicPortee, source unique).
+  //   La presence du jour reste affichee — sous son propre nom, sans unite ETP.
+  var req=PP.pic||0, prevu=PP.head||0, manque=PP.manque||0;
+  var pCouv=req>0?Math.min(prevu/req*100,100):100;
+  var cadre=_pilCadreLbl(PP), sem=PP.picW?_pilSemLabO(PP.picW.o0):'';
+  var body='<div style="display:flex;justify-content:space-between;font-size:var(--pt-txt,12.5px);margin-bottom:3px"><span>Prévu au planning '+(sem?_pilEsc(sem):'la semaine du pic')+'</span><b>'+_pilEtpFmt(prevu)+' pers.</b></div>'
+    +'<div class="pil-gbar"><i style="width:'+pCouv.toFixed(0)+'%;background:var(--vert-med)"></i></div>'
+    +'<div style="display:flex;justify-content:space-between;font-size:var(--pt-txt,12.5px);margin:11px 0 3px"><span>Nécessaire cette semaine-là · pic sur '+_pilEsc(cadre)+'</span><b style="color:var(--orange)">'+_pilEtpFmt(req)+' pers.</b></div>'
+    +'<div class="pil-gbar"><i style="width:100%;background:var(--orange)"></i></div>'
+    +'<div class="pil-li-s" style="margin-top:10px">'+(manque>0.1?('Il manque \u2248 <b style="color:var(--orange)">'+_pilEtpFmt(manque)+' personne'+(manque>1.05?'s':'')+'</b> cette semaine-là. Options : renfort saisonnier, décaler une tâche, ou repousser l\'objectif (voir Simulateur).'):'Effectif suffisant pour le pic de charge sur '+_pilEsc(cadre)+'.')+'</div>'
+    // ★ AUJOURD'HUI EST UNE AUTRE QUESTION, ET ELLE A SON PROPRE ENCART. Le pic
+    //   peut tomber dans onze mois : comparer la presence du jour a ce besoin-la
+    //   n'apprend rien, et le faire en silence donne un chiffre faux.
+    // ★ TROIS PHRASES DEVIENNENT DEUX LIGNES DE CADRE + UNE FICHE.
+    //   Ce qui CADRE reste : « autre date », « autre fenetre » — sans elles on
+    //   soustrait deux grandeurs qui n'ont ni la meme date ni la meme unite,
+    //   la faute exacte de §33. Ce qui EXPLIQUE (hors bureau, hors absents,
+    //   equipe collective a son effectif, le pic peut tomber dans onze mois)
+    //   part dans MV_INFO['pil.capacite'] : ca se lit une fois, pas cent.
+    +'<div class="pil-li-s" style="margin-top:9px;color:var(--texte-doux)">Aujourd\u2019hui : <b>'+_pilEtpFmt(present)+'</b> personne'+(present>1.05?'s':'')+' au champ \u2014 <b>autre date</b> que le pic.</div>'
+    +(cd?('<div class="pil-li-s" style="margin-top:4px;color:var(--texte-doux)">Moyenne sur '+_pilEsc(cd.saison)+' : <b>'+_pilEtpFmt(cd.etpCible||0)+'</b> pers. \u2014 <b>autre fen\u00eatre</b> que le pic.</div>'):'');
+  // ★ La pastille quitte le corps pour l'EN-TETE : elle doit etre joignable
+  //   sans deplier, comme le chiffre qu'elle explique. Et le cadre quitte le
+  //   TITRE pour la ligne de cadre — un titre n'est pas l'endroit ou l'on ecrit
+  //   sur quelle fenetre un chiffre a ete calcule.
+  var sub='pic sur '+cadre+(sem?(' \u00b7 '+sem):'');
+  return _pilTile('capacite','#C9A84C','Capacité vs charge', _pilStat(_pilEtpFmt(req),' pers. au pic'), sub, null, body, 'pil.capacite');
+}
+function _pilTabPrs(d){
+  var H='<div class="pil-panels">';
+  if(_pilShow('prs_equipe')) H+=_pilPanelEquipe(d);
+  if(_pilShow('prs_presences')) H+=_pilPanelPresences(d);
+  if(_pilShow('prs_capacite')) H+=_pilPanelCapacite(d);
+  H+='</div>';
+  return H;
+}
+
+// ── Onglet MATÉRIEL ──
+function _pilPanelGnr(d){
+  var g=d.gnr;
+  // ③ « Cuve GNR a renseigner (Tracteur › Entretien) » etait du TEXTE MORT : il
+  //   fallait lire, retenir, sortir du module et retrouver l'onglet. C'est un
+  //   bouton, et il ouvre l'ecran directement.
+  if(!g||!g.capacite){ return _pilTile('gnr','#B85A1A','Cuve GNR', _pilStat('—',''), 'aucune cuve renseignée',
+    null, _pilEmptyGo('Sans capacité de cuve, le niveau ne se calcule pas et le carburant reste à zéro dans tous les budgets.','entretien','Tracteur \u203a Entretien'), 'pil.gnr'); }
+  var niveau=Number(g.niveau)||0, cap=Number(g.capacite)||1, pc=Math.round(niveau/cap*100), low=niveau<=(Number(g.seuil)||0);
+  var col=low?'var(--rouge)':(pc<=40?'var(--orange)':'var(--vert-med)');
+  // ★ LE GROS CHIFFRE DU CORPS DOUBLONNAIT CELUI DE L'EN-TETE : « 42 % » en
+  //   haut, « 840 L » juste dessous, deux fois la meme grandeur a deux echelles.
+  //   L'en-tete porte desormais les litres — ce qu'on lit pour decider d'un
+  //   plein — et le pourcentage passe en unite. Le corps garde la jauge.
+  var body='<div class="pil-gbar" style="height:14px"><i style="width:'+pc+'%;background:'+col+'"></i></div>'
+    +(low?_pilEmptyGo('Le niveau est sous votre seuil d\u2019alerte : prévoyez un plein avant la prochaine session.','entretien','Tracteur \u203a Entretien'):'');
+  return _pilTile('gnr','#B85A1A','Cuve GNR', _pilStat(_pilNum(niveau),' L sur '+_pilNum(cap), low?'bas':null),
+    'soit '+pc+' % \u00b7 niveau calculé, pas mesuré', pc, body, 'pil.gnr');
+}
+function _pilTabMat(d){
+  var H='<div class="pil-panels">';
+  if(_pilShow('mat_tracteur')) H+=_pilPanelTracteur(d);
+  if(_pilShow('mat_gnr')) H+=_pilPanelGnr(d);
+  H+='</div>';
+  return H;
+}
+
+// ── Onglet CAVE (sous-onglets Élevage / Vinification / Vendange) ──
+// ════════════════════════════════════════════════════════════
+// PILOTAGE › CAVE — cockpit decisionnel.
+// Trois sous-onglets, un verbe chacun : ce qui presse · le millesime ·
+// le parc & le cout. AUCUN calcul neuf sauf le volume restant a rentrer :
+// on consomme _mlAgenda, _mlChaine, _mlRendements, _mlResteARentrer et
+// _mvFutParc. Consommer, c'est l'inverse de dupliquer.
+// Repli complet : un cave.js ou un utils.js anterieur fait disparaitre le
+// bloc concerne, jamais l'onglet entier.
+// ════════════════════════════════════════════════════════════
+
+function _pcavF1(n){ if(n==null||isNaN(n)) return '—'; return (Math.round(n*10)/10).toString().replace('.',','); }
+function _pcavInt(n){ if(n==null||isNaN(n)) return '—'; return Math.round(n).toLocaleString('fr-FR').replace(/\u202f/g,'\u00a0'); }
+function _pcavHas(f){ return typeof window[f]==='function'; }
+// Cliquet C14 : aucun catch{} vide. Un repli qui echoue reste un repli,
+// mais il laisse une trace en 'info' — c'est ainsi qu'on apprend qu'un
+// moteur de la Cave a change de contrat.
+function _pcavLog(ou,e){ if(window.logError) window.logError({level:'info',cat:'pilotage',msg:'cave/'+ou,err:e}); }
+// Un millesime « a de la matiere » des qu'une seule etape est renseignee.
+// Sans ce test, un domaine vierge voit quatre tuiles a zero au lieu d'une
+// phrase honnete — et un parcours qui grossit au lieu de retrecir.
+function _pcavMatiere(ch){ if(!ch) return false;
+  return (ch.kg>0)||(ch.hlDecuve>0)||(ch.hlCuve>0)||(ch.hlFut>0)||(ch.btl>0); }
+
+// Millesime courant = celui de la campagne ouverte le 1er aout precedent.
+// _mvCampagneDe est la source unique (utils.js) ; repli local si absent.
+function _pcavCampagne(){
+  var iso=new Date().toISOString().slice(0,10);
+  if(_pcavHas('_mvCampagneDe')){ try{ return window._mvCampagneDe(iso); }catch(e){ _pcavLog('campagne',e); } }
+  var y=parseInt(iso.slice(0,4),10), m=parseInt(iso.slice(5,7),10);
+  return m>=8?y:y-1;
+}
+
+// Phase du calendrier : elle decide de l'ORDRE des blocs, jamais de leur
+// presence. Cacher un bloc, c'est le rendre introuvable le jour ou il compte.
+function _pcavPhase(){
+  var m=new Date().getMonth()+1;
+  if(m>=8 && m<=10) return 'vendange';
+  if(m>=4 && m<=7) return 'embouteillage';
+  return 'elevage';
+}
+
+// Contexte : tout ce que les blocs consomment, monte une seule fois.
+function _pcavCtx(d){
+  var mil=_pcavCampagne(), c={mil:mil, phase:_pcavPhase(), d:d};
+  c.alerte=(d&&d.ouAlerte)||14;
+  c.cuvees=(window.CAVE_ELEVAGE&&CAVE_ELEVAGE.cuvees)||[];
+  c.enElevage=c.cuvees.filter(function(x){ return x&&x.statut!=='embouteille'; });
+  try{ c.agenda=_pcavHas('_mlAgenda')?window._mlAgenda(new Date().toISOString().slice(0,10),4):null; }
+  catch(e){ c.agenda=null; }
+  // Le millesime affiche n'est pas forcement celui de la campagne ouverte.
+  // Le 7 aout, la campagne 2026-2027 vient de commencer mais le vin en cave
+  // est le 2025 : _mlChaine(2026) est vide et l'ecran serait blanc tout
+  // l'automne. On garde la campagne courante DES QU'ELLE A DE LA MATIERE,
+  // sinon on recule d'un cran. c.milAff porte le millesime retenu.
+  c.chaine=null; c.milAff=mil;
+  if(_pcavHas('_mlChaine')){
+    for(var _k=0;_k<2;_k++){
+      var _m=mil-_k, _ch=null;
+      try{ _ch=window._mlChaine(_m); }catch(e){ _pcavLog('chaine',e); }
+      if(_ch && _pcavMatiere(_ch)){ c.chaine=_ch; c.milAff=_m; break; }
+      if(_k===0 && _ch) c.chaine=_ch;
+    }
+    if(c.chaine && !_pcavMatiere(c.chaine)) c.chaine=null;
+  }
+  // ⚠ La famille _mvFut* PREND SES DONNEES EN ARGUMENT : elle vit dans
+  // utils.js, importe en PREMIER, elle ne peut donc pas compter sur les
+  // globales au chargement. Signature reelle :
+  //   _mvFutParc(INTRANTS, CAVE_ELEVAGE, curY)
+  // Appelee sans argument, elle renvoyait un parc a ZERO, en silence.
+  // Meme appel que reserve.js, qui est le patron de reference.
+  try{ c.parc=_pcavHas('_mvFutParc')
+        ? window._mvFutParc(window.INTRANTS, window.CAVE_ELEVAGE, null)
+        : null; }catch(e){ _pcavLog('futParc',e); c.parc=null; }
+  try{ c.rdt=_pcavHas('_mlRendements')?window._mlRendements(mil):[]; }catch(e){ c.rdt=[]; }
+  try{ c.reste=_pcavHas('_mlResteARentrer')?window._mlResteARentrer(mil):[]; }catch(e){ c.reste=[]; }
+  c.futL=_pcavHas('_caveFutL')?(window._caveFutL()||228):228;
+  c.anges=_pcavAnges(c);
+  return c;
+}
+
+// ── Part des anges : une MESURE, pas une estimation ─────────────────
+// Ce qu'on remet en ouillage est exactement ce qui s'est evapore. Les
+// operations stockent data.vol_total_L. On lit une collection, on ne
+// recopie aucun calcul : _mlVolParFut fait une moyenne PAR FUT, pas une
+// somme. Reserve honnete affichee a l'ecran : le soutirage retire aussi
+// du volume, cette mesure ne vaut que pour l'ouillage.
+// ── La part des anges, UNE LIGNE PAR MILLESIME ───────────────────────
+// ⚠ MODELE ARBITRE PAR NICO : on n'ouille pas les futs de 2025 avec du vin
+// de 2026. Chaque millesime a sa cave, son rythme, son evaporation. Un
+// chiffre unique melangeait un vin qui vient d'etre entonne et un vin en
+// fin d'elevage : une moyenne qui ne decrit aucun des deux.
+// Fenetre : DOUZE MOIS GLISSANTS. Le 5 aout, une campagne ouverte depuis
+// quatre jours ne contient presque aucun ouillage.
+function _pcavAnges(c){
+  var ops=(window.CAVE_ELEVAGE&&CAVE_ELEVAGE.operations)||[];
+  var d1=new Date().toISOString().slice(0,10);
+  var _d0=new Date(); _d0.setFullYear(_d0.getFullYear()-1);
+  var d0=_d0.toISOString().slice(0,10);
+  // Millesime de chaque cuvee, pour ventiler les ouillages.
+  var milDe={}, futDe={};
+  c.enElevage.forEach(function(x){
+    if(!x||!x.id) return;
+    milDe[x.id]=_pcavMilKey(x.millesime);
+    futDe[x.id]=(x.tonneaux||[]).reduce(function(s,t){ return s+(parseInt(t.nb,10)||0); },0);
+  });
+  var par={}, total={L:0,ops:0};
+  ops.forEach(function(o){
+    if(!o||o.type!=='ouillage'||!o.data) return;
+    var dt=o.date||''; if(dt<d0||dt>d1) return;
+    var v=parseFloat(o.data.vol_total_L); if(!v||isNaN(v)) return;
+    var ids=(o.cuvees_ids&&o.cuvees_ids.length)?o.cuvees_ids:(o.cuvee_id?[o.cuvee_id]:[]);
+    var mils={};
+    ids.forEach(function(id){ if(milDe[id]!=null) mils[milDe[id]]=1; });
+    var mk=Object.keys(mils);
+    total.L+=v; total.ops++;
+    // Depuis le lot A une operation ne porte qu'un millesime. Une operation
+    // mixte heritee est comptee dans le total mais PAS ventilee : mieux vaut
+    // un millesime sans ligne qu'une ligne fausse.
+    if(mk.length!==1) return;
+    var k=mk[0];
+    if(!par[k]) par[k]={mil:k, L:0, ops:0, futs:0};
+    par[k].L+=v; par[k].ops++;
+  });
+  // Volume loge par millesime = ses futs en vin x contenance.
+  c.enElevage.forEach(function(x){
+    if(!x||!x.id) return;
+    var k=milDe[x.id]; if(!par[k]) return;
+    par[k].futs+=futDe[x.id]||0;
+  });
+  var lignes=Object.keys(par).map(function(k){
+    var p=par[k], loge=p.futs*c.futL/100;
+    return {mil:k, hlPerdu:p.L/100, ops:p.ops, futs:p.futs, hlLoge:loge,
+            pctAn:loge>0?(p.L/100)/(loge+p.L/100)*100:null,
+            btl:Math.round(p.L/0.75)};
+  }).filter(function(x){ return x.hlPerdu>0; })
+    .sort(function(a,b){
+      if(a.mil==='?') return 1; if(b.mil==='?') return -1;
+      return Number(b.mil)-Number(a.mil);
+    });
+  if(!lignes.length && !total.ops) return null;
+  return {lignes:lignes, hlPerdu:total.L/100, ops:total.ops,
+          nonVentile:total.ops-lignes.reduce(function(s,x){ return s+x.ops; },0)};
+}
+function _pcavMilKey(m){ return (m==null||m==='')?'?':String(m); }
+
+// ── Briques de rendu ────────────────────────────────────────────────
+function _pcavRow(pt,html,when,act,kind,ref){
+  var b='';
+  if(act) b='<button class="pcav-act" onclick="_pcavGo(\''+_escAttr(kind)+'\',\''+_escAttr(String(ref||''))+'\')">'+_pilEsc(act)+'</button>';
+  return '<div class="pcav-row"><span class="pcav-pt '+pt+'"></span><div class="pcav-rm">'+html+'</div>'
+    +(when?'<span class="pcav-when">'+_pilEsc(when)+'</span>':'')+b+'</div>';
+}
+function _pcavSub(t){ return '<div class="pcav-sub">'+t+'</div>'; }
+// ★ 7e ARGUMENT OPTIONNEL, comme _pilTile : la cle de la fiche « i ». Les
+//   appels existants restent valides tels quels et posent leur pastille au fur
+//   et a mesure que leur fiche est ecrite. La pastille va dans l'EN-TETE, a
+//   cote du titre — pas dans le pied, ou elle serait sous le graphe.
+function _pcavCard(ico,dot,titre,stat,body,mini,infoCle){
+  return '<div class="pcav-card"><div class="pcav-h"><span class="pcav-dot" style="background:'+dot+'"></span>'
+    +'<span class="pcav-ico">'+ico+'</span><span class="pcav-t">'+_pilEsc(titre)+'</span>'
+    +(infoCle&&typeof _mvInfoBtn==='function'?_mvInfoBtn(infoCle):'')
+    +(stat?'<span class="pcav-stat">'+stat+'</span>':'')+'</div>'
+    +'<div class="pcav-b">'+body+'</div>'
+    +(mini?'<div class="pcav-mini">'+mini+'</div>':'')+'</div>';
+}
+function _pcavK(lab,val,unit,sub,dark,col){
+  return '<div class="pcav-k'+(dark?' dark':'')+'"><div class="pcav-kl">'+_pilEsc(lab)+'</div>'
+    +'<div class="pcav-kv"'+(col?' style="color:'+col+'"':'')+'>'+val+(unit?' <small>'+_pilEsc(unit)+'</small>':'')+'</div>'
+    +(sub?'<div class="pcav-ks">'+sub+'</div>':'')+'</div>';
+}
+
+// Depuis le Pilotage il faut d'abord ATTERRIR sur la Cave : _mlGo appelle
+// renderCave() mais ne change pas de page. Expression window : appelee
+// depuis un onclick, C15 la verrait morte sinon (cf. _arcOpen).
+window._pcavGo = function(kind,ref){
+  if(typeof goTo==='function') goTo('cave');
+  if(typeof window._mlGo==='function'){ try{ window._mlGo(kind,ref); return; }catch(e){ _pcavLog('go',e); } }
+  if(typeof showToast==='function') showToast('Ouvre la Cave pour ce geste','#B85A1A');
+};
+
+// ── Bloc « ce qui presse » : ouillage ────────────────────────────────
+// ── L'ouillage, groupe par millesime, avec le seuil propre a chacun ──
+function _pcavOuillage(c){
+  var groupes={}, nDue=0;
+  var milDe={};
+  c.enElevage.forEach(function(x){ if(x&&x.id) milDe[x.id]=_pcavMilKey(x.millesime); });
+  if(c.agenda){
+    var vus={};
+    c.agenda.forEach(function(s){ s.items.forEach(function(it){
+      if(it.kind!=='ouillage'||it.urgence!=='due'||vus[it.ref]) return;
+      vus[it.ref]=1; nDue++;
+      var k=milDe[it.ref]!=null?milDe[it.ref]:'?';
+      if(!groupes[k]) groupes[k]=[];
+      groupes[k].push(it);
+    }); });
+  }
+  var mils=Object.keys(groupes).sort(function(a,b){
+    if(a==='?') return 1; if(b==='?') return -1; return Number(b)-Number(a);
+  });
+  var multi=_pcavMilsCave(c).length>1;
+  var rows='';
+  mils.forEach(function(m){
+    if(multi) rows+='<div class="pcav-grp">'+_pilEsc(m==='?'?'Sans mill\u00e9sime':m)
+      +'<span>ouillage tous les '+_pcavSeuilDe(m,c)+' jours</span></div>';
+    groupes[m].forEach(function(it){
+      rows+=_pcavRow(it.note&&/jamais/.test(it.note)?'red':'amb',
+        '<b>'+_pilEsc(it.titre)+'</b>'+_pcavSub(_pilEsc(it.detail)+(it.note?' \u00b7 '+_pilEsc(it.note):'')),
+        '', 'Ouiller','ouillage',it.ref);
+    });
+  });
+  if(!nDue) rows=_pcavRow('ok','<b>Toutes les cuv\u00e9es sont \u00e0 jour</b>'
+    +_pcavSub(multi?'chaque mill\u00e9sime \u00e0 son propre rythme':('Seuil de '+_pcavSeuilDe(null,c)+' jours, r\u00e9gl\u00e9 dans la Cave')),'','','','');
+  else {
+    var reste=c.enElevage.length-nDue;
+    if(reste>0) rows+=_pcavRow('ok','<b>'+reste+' cuv\u00e9e'+(reste>1?'s':'')+'</b> \u00e0 jour','','','','');
+  }
+  return _pcavCard('\uD83E\uDEA3','#B23A52','Ouillage',
+    nDue?('<b>'+nDue+'</b> en retard'):'\u00e0 jour', rows,
+    multi
+      ? 'd\u00e9lai d\u2019alerte propre \u00e0 chaque mill\u00e9sime'
+      : 'seuil de vos r\u00e9glages Cave', 'pil.cav.ouillage');
+}
+
+// Le seuil affiche vient du Chai (_caveSeuilOu) : une regle recopiee ici
+// divergerait des le premier reglage. Repli sur le seuil du contexte, qui
+// est deja le reglage global du domaine.
+function _pcavSeuilDe(m,c){
+  if(_pcavHas('_caveSeuilOu')){
+    try{ return window._caveSeuilOu((m==null||m==='?')?null:m); }catch(e){ _pcavLog('seuil',e); }
+  }
+  return (c&&c.alerte)||14;
+}
+// Les millesimes reellement en cave, pour savoir s'il faut grouper.
+function _pcavMilsCave(c){
+  var set={};
+  c.enElevage.forEach(function(x){ if(x) set[_pcavMilKey(x.millesime)]=1; });
+  return Object.keys(set);
+}
+
+// ── Fermentations ────────────────────────────────────────────────────
+function _pcavFerment(c){
+  if(!c.agenda) return '';
+  var rows='', n=0, vus={};
+  c.agenda.forEach(function(s){ s.items.forEach(function(it){
+    if(it.kind!=='alerte'&&it.kind!=='fa'&&it.kind!=='decuvage'&&it.kind!=='demarrage'&&it.kind!=='mesure') return;
+    var k=it.kind+'|'+it.ref; if(vus[k]) return; vus[k]=1; n++;
+    var pt=(it.urgence==='due')?'red':(it.urgence==='warn'?'amb':(it.kind==='decuvage'?'ok':'amb'));
+    var act=null,kind=it.kind;
+    if(it.kind==='decuvage') act='Décuver';
+    else if(it.kind==='mesure'){ act='Relever'; kind='mesure'; }
+    else if(it.kind==='alerte'){ act='Relever'; kind='mesure'; }
+    rows+=_pcavRow(pt,'<b>'+_pilEsc(it.titre)+'</b>'+_pcavSub(_pilEsc(it.detail)+(it.note?' · '+_pilEsc(it.note):'')),
+      it.kind==='fa'?_pilDfr(it.date):'', act, kind, it.ref);
+  }); });
+  if(!n) return '';
+  return _pcavCard('\u2697\uFE0F','#7B4DB8','Fermentations','<b>'+n+'</b> à suivre',rows,
+    'Deux pentes sont calculées : la moyenne sur trois relevés projette la fin, les deux derniers détectent l’arrêt. Une moyenne seule lisse le décrochage — c’est exactement ce qu’il ne faut pas lisser.');
+}
+
+// ── Cuverie face au reste a rentrer ─────────────────────────────────
+// SEUL calcul neuf du lot : _mlResteARentrer renvoie des PARCELLES, pas des
+// hectolitres. On applique le rendement moyen deja constate sur la campagne
+// aux surfaces non recoltees. C'est un ordre de grandeur, l'ecran le dit.
+// Statuts de cuve REELS : 'setup' | 'fa' | 'mpf' | 'termine'. Une cuve est
+// active en 'fa'/'mpf' (meme critere que _vendIsActive), libre sinon.
+// « Prete a decuver » n'est pas un drapeau : c'est _mlProjFA().etat==='sec'.
+function _pcavCuverie(c){
+  if(!c.reste||!c.reste.length||!c.chaine) return '';
+  var ha=0; c.reste.forEach(function(p){ ha+=parseFloat(p.surface)||0; });
+  var haFait=c.chaine.ha||0, hlFait=c.chaine.hlDecuve||0;
+  if(ha<=0||haFait<=0||hlFait<=0) return '';
+  var rdt=hlFait/haFait, hlAttendu=ha*rdt;
+  var cuves=(window.CAVE_VENDANGE&&CAVE_VENDANGE.cuves_vinif)||[];
+  var libre=0, secs=0, hlSec=0;
+  cuves.forEach(function(cv){
+    if(!cv) return;
+    var v=parseFloat(cv.volume_hl)||0, actif=(cv.statut==='fa'||cv.statut==='mpf');
+    if(!actif){ libre+=v; return; }
+    if(_pcavHas('_mlProjFA')){
+      try{ if(window._mlProjFA(cv,new Date().toISOString().slice(0,10)).etat==='sec'){ secs++; hlSec+=v; } }catch(e){ _pcavLog('projFA',e); }
+    }
+  });
+  var manque=hlAttendu-libre;
+  var rows=_pcavRow('amb','<b>'+_pcavF1(ha)+' ha</b> encore sur pied'
+      +_pcavSub('≈ '+_pcavInt(hlAttendu)+' hL, à votre rendement moyen de '+_pcavF1(rdt)+' hL/ha'),'','','','')
+    +_pcavRow(libre>0?'ok':'amb','<b>'+_pcavInt(libre)+' hL</b> de cuverie libre','','','','');
+  if(manque>0){
+    rows+=_pcavRow('red','Il manque <b>'+_pcavInt(manque)+' hL</b>','','','','');
+    if(hlSec>0) rows+=_pcavRow('ok','<b>'+secs+' cuve'+(secs>1?'s':'')+'</b> sèche'+(secs>1?'s':'')+', décuvage possible'
+      +_pcavSub('libère '+_pcavInt(hlSec)+' hL'+(hlSec>=manque?' — l’écart se referme':'')),'','','','');
+  } else rows+=_pcavRow('ok','La cuverie couvre ce qui reste','','','','');
+  return _pcavCard('\uD83E\uDDFA','#5B9B3A','Cuverie face au reste à rentrer',
+    manque>0?('écart <b>'+_pcavInt(manque)+'</b> hL'):'suffisante', rows,
+    'Le volume attendu applique votre rendement moyen de la campagne aux surfaces non récoltées. C’est un ordre de grandeur, pas une pesée.');
+}
+
+// ── Renouvellement du parc ───────────────────────────────────────────
+function _pcavParcPresse(c){
+  var p=c.parc; if(!p) return '';
+  var rows=_pcavRow(p.aReformer>0?'amb':'ok',
+      '<b>'+p.aReformer+' barrique'+(p.aReformer>1?'s':'')+'</b> au-delà de '+p.vie+' vins'
+      +(p.aReformer>0?_pcavSub('à renouveler'):''),'','','','')
+    +_pcavRow('ok','<b>'+p.libres+' fût'+(p.libres>1?'s':'')+' libre'+(p.libres>1?'s':'')+'</b>'
+      +(p.neufs?_pcavSub('dont '+p.neufs+' neuf'+(p.neufs>1?'s':'')):''),'','','','');
+  if(p.aReformer>0) rows+=_pcavRow(p.libres>=p.aReformer?'ok':'red',
+    p.libres>=p.aReformer?'Le stock libre couvre le renouvellement'
+      :('Il manquerait <b>'+(p.aReformer-p.libres)+' fût'+((p.aReformer-p.libres)>1?'s':'')+'</b>'),'','','','');
+  return _pcavCard('\uD83D\uDEE2\uFE0F','#8A5A38','Renouvellement du parc',
+    '<b>'+p.aReformer+'</b> en fin de vie', rows,
+    'Aucun montant n’est affiché : le prix moyen d’une barrique n’est pas renseigné dans vos réglages Cave. Le plan reste exprimé en nombre de fûts.');
+}
+
+// ── Elevage en cours ─────────────────────────────────────────────────
+// L'app n'a AUCUN drapeau « prete a embouteiller » — ne pas en inventer un.
+// On affiche un fait verifiable : la duree d'elevage depuis date_entree, et
+// le nombre de futs qui reviendraient au parc a la mise.
+function _pcavElevage(c){
+  if(!c.enElevage.length) return '';
+  var now=Date.now();
+  var l=c.enElevage.map(function(x){
+    var d=x.date_entree?new Date(x.date_entree).getTime():0;
+    var mois=(d&&!isNaN(d))?Math.floor((now-d)/2629800000):null;
+    var nb=(x.tonneaux||[]).reduce(function(s,t){ return s+(parseInt(t.nb,10)||0); },0);
+    return {nom:(x.nom||'Cuvée')+' '+(x.millesime||''), mois:mois, nb:nb};
+  }).sort(function(a,b){ return (b.mois==null?-1:b.mois)-(a.mois==null?-1:a.mois); });
+  var rows=l.slice(0,6).map(function(x){
+    return _pcavRow(x.mois!=null&&x.mois>=18?'amb':'ok','<b>'+_pilEsc(x.nom)+'</b>'
+      +_pcavSub((x.mois==null?'date d’entonnage non renseignée':('en élevage depuis '+x.mois+' mois'))
+        +(x.nb?' · '+x.nb+' fût'+(x.nb>1?'s':''):'')),'','','','');
+  }).join('');
+  var tot=l.reduce(function(s,x){ return s+x.nb; },0);
+  return _pcavCard('\uD83C\uDF77','#B23A52','Élevage en cours',
+    '<b>'+l.length+'</b> cuvée'+(l.length>1?'s':''), rows,
+    'La durée se compte depuis la date d’entonnage. À la mise en bouteille, les '+tot+' barriques concernées reviennent au parc avec leur tonnelier et leur millésime.');
+}
+
+// ── Soutirage & malo ─────────────────────────────────────────────────
+// ⚠ MODELE : le soutirage se declenche a la fin de la malo, jamais a une
+// date. Et la fin se projette sur les valeurs d'acide malique MESUREES sur
+// CETTE cuvee — pas sur la duree des malos passees du domaine.
+// Le Pilotage consomme _mlProjMalo (cave.js), il ne recalcule rien.
+// Les doses de SO2 programmees a la saisie d'un soutirage. so2.dates[] est
+// STOCKE, puis plus jamais rappele nulle part. On ne montre que les doses A
+// VENIR : rien ne dit qu'une dose passee a ete faite, l'annoncer en retard
+// serait une accusation sans preuve.
+function _pcavSoutirages(c){
+  var ops=(window.CAVE_ELEVAGE&&CAVE_ELEVAGE.operations)||[];
+  var nom={}; c.cuvees.forEach(function(x){ if(x&&x.id) nom[x.id]=(x.nom||'Cuvée')+' '+(x.millesime||''); });
+  var doses=[], auj=new Date().toISOString().slice(0,10);
+  var fin=new Date(); fin.setDate(fin.getDate()+28); fin=fin.toISOString().slice(0,10);
+  ops.forEach(function(o){
+    if(!o||o.type!=='soutirage'||!o.date||!o.data) return;
+    var so2=o.data.so2; if(!so2||!so2.dates||!so2.dates.length) return;
+    var ids=(o.cuvees_ids&&o.cuvees_ids.length)?o.cuvees_ids:(o.cuvee_id?[o.cuvee_id]:[]);
+    so2.dates.forEach(function(dt,i){
+      if(!dt||dt<auj||dt>fin) return;
+      doses.push({date:dt, rang:i+1, sur:so2.dates.length, dose:so2.dose,
+                  unite:so2.unite||'cL', ids:ids, ref:ids[0]||''});
+    });
+  });
+  doses.sort(function(a,b){ return a.date<b.date?-1:(a.date>b.date?1:0); });
+  return {doses:doses, nom:nom};
+}
+// Le dernier soutirage de chaque cuvee. cave.js en porte la definition
+// (_caveLastSout) : on la consomme plutot que d'en garder une copie, sinon
+// les deux ecrans divergent au premier changement. Repli local pour un
+// cave.js anterieur chez un client pas encore a jour.
+function _pcavDernierSout(){
+  var d={};
+  if(typeof window._caveLastSout==='function'){
+    try{
+      ((window.CAVE_ELEVAGE&&CAVE_ELEVAGE.cuvees)||[]).forEach(function(c){
+        if(!c||!c.id) return;
+        var v=window._caveLastSout(c.id); if(v) d[c.id]=v;
+      });
+      return d;
+    }catch(e){ _pcavLog('lastSout',e); d={}; }
+  }
+  var ops=(window.CAVE_ELEVAGE&&CAVE_ELEVAGE.operations)||[];
+  ops.forEach(function(o){
+    if(!o||o.type!=='soutirage'||!o.date) return;
+    var ids=(o.cuvees_ids&&o.cuvees_ids.length)?o.cuvees_ids:(o.cuvee_id?[o.cuvee_id]:[]);
+    ids.forEach(function(id){ if(!d[id]||o.date>d[id]) d[id]=o.date; });
+  });
+  return d;
+}
+// Date a laquelle la malo a ete CONSTATEE finie. Elle sert de reference au
+// geste : un soutirage anterieur a cette date n'acquitte pas celui-ci.
+// Sans elle, un soutirage de mars valait quitus pour une malo finie en mai.
+function _pcavFinMalo(){
+  var ops=(window.CAVE_ELEVAGE&&CAVE_ELEVAGE.operations)||[], d={};
+  ops.forEach(function(o){
+    if(!o||o.type!=='analyse'||!o.data||o.data.fml!=='ok') return;
+    var dt=o.data.fml_date||o.date; if(!dt) return;
+    var ids=(o.cuvees_ids&&o.cuvees_ids.length)?o.cuvees_ids:(o.cuvee_id?[o.cuvee_id]:[]);
+    ids.forEach(function(id){ if(!d[id]||dt<d[id]) d[id]=dt; });
+  });
+  return d;
+}
+
+// Etat de chaque cuvee vis-a-vis du soutirage. Tout vient de _mlProjMalo,
+// sauf le drapeau declaratif fml_terminee, qui reste une verite du vigneron :
+// s'il declare la malo finie, elle est finie, meme sans mesure.
+function _pcavMalo(c){
+  var ds=_pcavDernierSout(), fm=_pcavFinMalo(), out=[];
+  var has=_pcavHas('_mlProjMalo');
+  c.enElevage.forEach(function(x){
+    if(!x||!x.id) return;
+    var p=null;
+    if(has){ try{ p=window._mlProjMalo(x); }catch(e){ _pcavLog('projMalo',e); } }
+    var etat=p?p.etat:'attente';
+    var finie=(etat==='finie')||!!x.fml_terminee;
+    var sout=ds[x.id]||null;
+    // Reference du geste : la date ou la malo a ete constatee finie.
+    var ref=(p&&p.etat==='finie'&&p.dernier)?p.dernier:(fm[x.id]||null);
+    // Un soutirage acquitte le geste s'il est POSTERIEUR a cette reference.
+    // Sans reference datee (malo declaree a la main, sans analyse), on garde
+    // le comportement d'avant : un soutirage suffit.
+    var acquitte=!!sout&&(!ref||sout>=ref);
+    // ⚠ Une seule verite desormais : l'operation datee. Le drapeau
+    // cuvee.sous_tire a ete retire du formulaire — sans date, il ne pouvait
+    // que contredire le journal du Chai a l'ecran.
+    out.push({id:x.id, nom:(x.nom||'Cuvée')+' '+(x.millesime||''),
+              p:p, etat:etat, finie:finie, sout:sout, ref:ref,
+              cas: finie ? (acquitte?'fait':'a_soutirer')
+                         : (p&&p.n?'suivie':(sout?'fait':'sans_mesure'))});
+  });
+  return out;
+}
+
+// La courbe : decroissance mesuree, en CSS pur. Un SVG a viewBox fixe
+// s'etire a ×5 sur grand ecran — piege corrige en aout sur la pyramide.
+function _pcavMaloCourbe(l){
+  var suivies=l.filter(function(x){ return x.p&&x.p.mesures&&x.p.mesures.length>=3; });
+  if(!suivies.length) return '';
+  var h='<div class="pcav-mal">';
+  suivies.slice(0,4).forEach(function(x){
+    var m=x.p.mesures, hi=Math.max.apply(null,m.map(function(v){ return v.val; }));
+    if(!(hi>0)) return;
+    var pts=m.map(function(v,i){
+      var xp=m.length>1?(i/(m.length-1)*100):0;
+      return {x:xp, y:Math.max(2,Math.min(100,v.val/hi*100)), v:v};
+    });
+    var barres=pts.map(function(pt){
+      var col=(pt.v.val<=(window._ML_MAL_FIN||0.1))?'var(--vert-med)':'var(--terre)';
+      return '<div class="pcav-mbar" style="left:'+pt.x+'%;height:'+pt.y+'%;background:'+col+'"></div>';
+    }).join('');
+    var seuil=Math.max(1,Math.min(100,(window._ML_MAL_FIN||0.1)/hi*100));
+    h+='<div class="pcav-mrow"><div class="pcav-mn">'+_pilEsc(x.nom)
+      +'<small>'+_pcavF1(m[0].val)+' → '+_pcavF1(m[m.length-1].val)+' g/L</small></div>'
+      +'<div class="pcav-mg"><span class="pcav-msl" style="bottom:'+seuil+'%"></span>'+barres+'</div>'
+      +'<div class="pcav-mj">'+(x.p.etat==='normal'?('~'+x.p.jours+' j'):'—')+'</div></div>';
+  });
+  h+='<div class="pcav-mleg">Chaque barre est une analyse. Le trait vert est le seuil de malo achevée ('
+    +_pcavF1(window._ML_MAL_FIN||0.1)+' g/L).</div></div>';
+  return h;
+}
+
+function _pcavSout(c){
+  var l=_pcavMalo(c), s=_pcavSoutirages(c), rows='', n=0;
+  var aS=l.filter(function(x){ return x.cas==='a_soutirer'; });
+
+  // 1. Le geste : malo finie, pas encore soutiree.
+  aS.forEach(function(x){
+    n++;
+    var det=(x.p&&x.p.etat==='finie')
+      ? ('malique à '+_pcavF1(x.p.mal)+' g/L au '+_pilDfr(x.p.dernier))
+      : 'malo déclarée terminée';
+    // Une cuvee deja soutiree PLUS TOT reste a soutirer : le geste qui suit la
+    // malo n'a pas eu lieu. On le dit, sinon l'ecran a l'air de se tromper.
+    if(x.sout) det+=' · dernier soutirage le '+_pilDfr(x.sout)+', avant la fin de malo';
+    rows+=_pcavRow('amb','<b>'+_pilEsc(x.nom)+'</b> est à soutirer'+_pcavSub(det),
+      '','Soutirer','soutirage',x.id);
+  });
+
+  // 2. Les malos suivies, avec leur projection.
+  l.filter(function(x){ return x.cas==='suivie'; }).slice(0,5).forEach(function(x){
+    n++;
+    var p=x.p, det, pt='ok';
+    if(p.etat==='normal'){
+      det='malique '+_pcavF1(p.mal)+' g/L · −'+_pcavF1(p.pente*100)+' g/L par 100 j'
+        +' · fin estimée vers le <b>'+_pilDfr(p.date)+'</b> (± '+p.marge+' j)';
+    } else if(p.etat==='bloquee'){
+      pt='red';
+      det='malique bloqué à '+_pcavF1(p.mal)+' g/L depuis '+p.stableJ+' jours'
+        +' · la moyenne donnait pourtant −'+_pcavF1(p.penteMoy*100)+' g/L par 100 j';
+    } else if(p.etat==='demarrage'){
+      det=p.n+' analyse'+(p.n>1?'s':'')+' · malique '+_pcavF1(p.mal)+' g/L'
+        +(p.proche?' — elle touche à sa fin':'')
+        +' · il en faut 3 pour projeter une date';
+    } else if(p.etat==='irreguliere'){
+      pt='amb';
+      det = p.monte
+        ? ('malique remonté de '+_pcavF1(p.monte)+' g/L entre les deux dernières analyses — vérifiez la saisie, le malique ne se recrée pas')
+        : ('malique '+_pcavF1(p.mal)+' g/L · les valeurs ne décroissent pas régulièrement, aucune date n’est projetée');
+    } else det='malo en cours';
+    rows+=_pcavRow(pt,'<b>'+_pilEsc(x.nom)+'</b>'+_pcavSub(det),'','','','');
+  });
+
+  // 3. Celles sans aucune mesure : on le dit, on n'invente pas.
+  var sans=l.filter(function(x){ return x.cas==='sans_mesure'; });
+  if(sans.length){
+    n++;
+    rows+=_pcavRow('ok','<b>'+sans.length+' cuvée'+(sans.length>1?'s':'')+'</b> sans mesure de malique'
+      +_pcavSub(sans.slice(0,4).map(function(x){ return _pilEsc(x.nom); }).join(' · ')
+        +' — saisissez le malique de votre bulletin d’analyse pour obtenir une projection'),'','','','');
+  }
+
+  // 4. Les doses de SO2 programmees au soutirage, que personne ne rappelle.
+  s.doses.slice(0,4).forEach(function(x){
+    n++;
+    var qui=x.ids.map(function(i){ return (s.nom[i]||'—'); }).filter(function(v,i,a){ return a.indexOf(v)===i; }).join(', ');
+    var j=Math.round((new Date(x.date)-new Date(new Date().toISOString().slice(0,10)))/86400000);
+    rows+=_pcavRow(j<=1?'amb':'ok','<b>SO\u2082 — dose '+x.rang+' sur '+x.sur+'</b>'
+      +_pcavSub(_pilEsc(qui)+(x.dose?(' · '+_pcavF1(x.dose)+' '+_pilEsc(x.unite)):'')),
+      j===0?'aujourd’hui':(j===1?'demain':'dans '+j+' j'),'','','');
+  });
+
+  if(!n) return '';
+  var suiv=l.filter(function(x){ return x.cas==='suivie'; }).length;
+  var stat = aS.length ? ('<b>'+aS.length+'</b> à soutirer')
+           : (suiv ? ('<b>'+suiv+'</b> malo'+(suiv>1?'s':'')+' suivie'+(suiv>1?'s':'')) : 'suivi');
+  var mini='projection sur l\u2019acide malique mesur\u00e9, jamais sur une dur\u00e9e moyenne'
+    +' La projection vient des valeurs d’acide malique mesurées sur chaque cuvée, jamais d’une durée moyenne.'
+    +' Deux pentes sont calculées : la moyenne sur trois analyses projette la fin, les deux dernières détectent un blocage.';
+  // _pcavCard applique _pilEsc : passer « &amp; » produirait « &amp;amp; ».
+  return _pcavCard('\uD83D\uDD04','#3D6B27','Soutirage & malo', stat,
+    rows+_pcavMaloCourbe(l), mini, 'pil.cav.malo');
+}
+
+// ── Verdict : le titre de l'onglet, un CONSTAT, jamais un jugement ───
+// Cuvees dont la malo est finie et qui n'ont pas ete soutirees depuis.
+// C'est un GESTE en attente, il passe devant un simple rappel de date.
+function _pcavASoutirer(c){
+  return _pcavMalo(c).filter(function(x){ return x.cas==='a_soutirer'; }).length;
+}
+// Malos qui stagnent : la pente recente est plate alors qu'il reste du
+// malique. C'est le seul etat de cave qui ne peut pas attendre la semaine
+// prochaine — une malo arretee redemarre d'autant plus mal qu'on tarde.
+function _pcavMaloBloquee(c){
+  return _pcavMalo(c).filter(function(x){ return x.p&&x.p.etat==='bloquee'; }).length;
+}
+// Doses de SO2 tombant dans les 7 jours. Sert au verdict : une date que le
+// vigneron a lui-meme programmee et que personne ne lui rappelle.
+function _pcavSo2Proche(c){
+  var s7=new Date(); s7.setDate(s7.getDate()+7); s7=s7.toISOString().slice(0,10);
+  var d=_pcavSoutirages(c).doses.filter(function(x){ return x.date<=s7; });
+  return d.length;
+}
+function _pcavVerdict(c){
+  var t=null, s=null, badge='b-neu', lab='Cave';
+  var nOu=0;
+  if(c.agenda){ var v={}; c.agenda.forEach(function(w){ w.items.forEach(function(it){
+    if(it.kind==='ouillage'&&it.urgence==='due'&&!v[it.ref]){ v[it.ref]=1; nOu++; } }); }); }
+  var nAl=0;
+  if(c.agenda){ c.agenda.forEach(function(w){ w.items.forEach(function(it){
+    if(it.kind==='alerte') nAl++; }); }); }
+  var haR=0; (c.reste||[]).forEach(function(p){ haR+=parseFloat(p.surface)||0; });
+
+  if(nAl>0){ lab='Vinification'; badge='b-bad';
+    t=nAl+' cuve'+(nAl>1?'s demandent':' demande')+' un contrôle';
+    s='La fermentation ralentit ou la température est haute. C’est le seul point de cet écran qui ne peut pas attendre demain.';
+  } else if(c.phase==='vendange'&&haR>0){ lab='Vendange'; badge='b-warn';
+    t=_pcavF1(haR)+' ha restent à rentrer';
+    s='Vérifiez que la cuverie suit avant de lancer la prochaine journée de récolte.';
+  } else if(nOu>0){ lab='Élevage'; badge='b-warn';
+    t=nOu+' cuvée'+(nOu>1?'s':'')+' à ouiller';
+    s='Le seuil de '+c.alerte+' jours est dépassé.';
+    if(c.anges&&c.anges.hlPerdu>0) s+=' Sur douze mois, la part des anges représente <b>'+_pcavF1(c.anges.hlPerdu)+' hL</b>.';
+  } else if(_pcavMaloBloquee(c)){ lab='Malo'; badge='b-bad';
+    var _b=_pcavMaloBloquee(c);
+    t=_b+' malo'+(_b>1?'s':'')+' ne descend'+(_b>1?'ent':'')+' plus';
+    s='L’acide malique stagne alors qu’il en reste. Les deux dernières analyses le montrent, la moyenne le lissait.';
+  } else if(_pcavASoutirer(c)){ lab='Soutirage'; badge='b-warn';
+    var _s=_pcavASoutirer(c);
+    t=_s+' cuvée'+(_s>1?'s ont':' a')+' fini sa malo';
+    s='La fermentation malo-lactique est terminée : c’est le moment de soutirer.';
+  } else if(_pcavSo2Proche(c)){ lab='Soutirage'; badge='b-warn';
+    var _n=_pcavSo2Proche(c);
+    t=_n+' dose'+(_n>1?'s':'')+' de SO\u2082 prévue'+(_n>1?'s':'')+' cette semaine';
+    s='Vous les aviez programmées en enregistrant le soutirage. Ma Vigne ne sait pas si elles ont été faites — elle rappelle seulement la date.';
+  } else if(c.parc&&c.parc.aReformer>0){ lab='Parc à fûts'; badge='b-warn';
+    t=c.parc.aReformer+' fût'+(c.parc.aReformer>1?'s arrivent':' arrive')+' en fin de vie';
+    s='Après ce millésime, ces barriques auront fait '+c.parc.vie+' vins. Vous avez <b>'+c.parc.libres+'</b> fûts libres.';
+  } else { lab='Cave'; badge='b-ok';
+    t='Rien ne presse aujourd’hui';
+    s='Ouillage à jour, aucune fermentation à surveiller, parc à fûts suffisant.';
+  }
+  return '<div class="pcav-verdict"><div class="pcav-vk"><span class="pil-badge '+badge+'">'+_pilEsc(lab)+'</span>'
+    +'<span>Cave · ce qui presse</span></div><div class="pcav-vbig">'+_pilEsc(t)+'</div>'
+    +'<div class="pcav-vsub">'+s+'</div></div>';
+}
+
+// ── Onglet 1 : ce qui presse ─────────────────────────────────────────
+// L'ORDRE suit le calendrier ; la PRESENCE des blocs ne change jamais.
+function _pcavVuePresse(c){
+  var ordre = c.phase==='vendange'      ? ['cuverie','ferment','ouillage','sout','parc','elevage']
+            : c.phase==='embouteillage' ? ['elevage','sout','parc','ouillage','ferment','cuverie']
+            :                             ['ouillage','sout','parc','ferment','elevage','cuverie'];
+  var F={cuverie:_pcavCuverie, ferment:_pcavFerment, ouillage:_pcavOuillage,
+         sout:_pcavSout, parc:_pcavParcPresse, elevage:_pcavElevage};
+  var h=_pcavVerdict(c);
+  ordre.forEach(function(k){ var f=F[k]; if(f){ try{ h+=f(c)||''; }catch(e){ _pcavLog('presse',e); } } });
+  return h;
+}
+
+// ── Onglet 2 : le millesime ──────────────────────────────────────────
+function _pcavFlux(c,ch,mil){
+  ch=ch||c.chaine; mil=(mil!=null)?mil:c.milAff;
+  if(!ch) return '';
+  var kgCuve=(ch.kg||0)-(ch.kgVendu||0);
+  var etapes=[];
+  if(ch.kg>0) etapes.push({n:'Rentré',s:'de la vigne',v:ch.kg/100,lab:_pcavInt(ch.kg)+' kg',cls:'g'});
+  if(ch.hlDecuve>0) etapes.push({n:'Encuvé',s:ch.parcelles+' parcelles',v:ch.hlDecuve,lab:_pcavInt(ch.hlDecuve)+' hL',cls:'o'});
+  if(ch.hlFut>0) etapes.push({n:'En fût',s:ch.futs+' barriques',v:ch.hlFut,lab:_pcavF1(ch.hlFut)+' hL',cls:''});
+  if(ch.btl>0) etapes.push({n:'En bouteille',s:'',v:ch.btl*0.75/100,lab:_pcavInt(ch.btl)+' cols',cls:'g'});
+  if(etapes.length<2) return '';
+  var max=0; etapes.forEach(function(e){ if(e.v>max) max=e.v; });
+  var h='';
+  etapes.forEach(function(e,i){
+    var w=Math.max(10,Math.min(100,Math.round(e.v/max*100)));
+    h+='<div class="pcav-fs"><div class="pcav-fn">'+_pilEsc(e.n)+(e.s?'<small>'+_pilEsc(e.s)+'</small>':'')+'</div>'
+      +'<div class="pcav-fw"><div class="pcav-fb '+e.cls+'" style="width:'+w+'%">'+e.lab+'</div></div></div>';
+    if(i===0&&ch.kgVendu>0) h+='<div class="pcav-fl"><div></div><div>− '+_pcavInt(ch.kgVendu)+' kg de raisin vendu</div></div>';
+    if(i===1&&ch.hlFut>0){ var p=ch.hlDecuve-ch.hlFut;
+      if(p>0) h+='<div class="pcav-fl"><div></div><div>− '+_pcavF1(p)+' hL de la benne au fût ('+_pcavF1(p/ch.hlDecuve*100)+' %)</div></div>'; }
+  });
+  var fin = ch.btl>0 ? '' : (ch.hlCuve>0
+    ? '<div class="pcav-fl"><div></div><div style="color:var(--texte-doux)">La perte totale se lira quand tout sera décuvé</div></div>'
+    : '<div class="pcav-fl"><div></div><div style="color:var(--texte-doux)">La perte totale se lira quand tout sera embouteillé</div></div>');
+  return _pcavCard('\uD83E\uDDEC','#8A5A38','De la benne à la bouteille','millésime '+mil,
+    '<div class="pcav-flux">'+h+fin+'</div>',
+    'Les étages non renseignés sont retirés plutôt qu’affichés à zéro — un parcours qui grossit dirait l’inverse de ce qui se passe.');
+}
+
+// ── Plusieurs millesimes coexistent en cave ──────────────────────────
+// ⚠ MODELE CORRIGE PAR NICO : en octobre, le millesime precedent est encore
+// en fut pendant que le nouveau entre en cuve. Un domaine qui eleve 24 mois
+// en a trois de front. L'ecran ne doit donc jamais supposer l'exclusivite.
+// _mlMillesimes() (cave.js) donne deja la liste ; _mlChaine(mil) sait lire
+// n'importe lequel. On les consomme, on ne recalcule rien.
+function _pcavMils(c){
+  var l=[];
+  if(!_pcavHas('_mlChaine')) return l;
+  var ans=[];
+  if(_pcavHas('_mlMillesimes')){ try{ ans=window._mlMillesimes()||[]; }catch(e){ _pcavLog('millesimes',e); } }
+  if(!ans.length){ ans=[c.mil, c.mil-1, c.mil-2]; }
+  ans.forEach(function(a){
+    var ch=null;
+    try{ ch=window._mlChaine(a); }catch(e){ _pcavLog('chaine/'+a,e); }
+    if(!ch||!_pcavMatiere(ch)) return;
+    // La phase la plus avancee ou se trouve encore du vin de ce millesime.
+    var phase = (ch.hlCuve>0) ? 'cuve' : (ch.hlFut>0 ? 'fut' : (ch.btl>0 ? 'bouteille' : 'rentre'));
+    l.push({mil:a, ch:ch, phase:phase});
+  });
+  l.sort(function(a,b){ return b.mil-a.mil; });
+  return l;
+}
+
+// Le bandeau : ce qui est en cave, tous millesimes, avant d'en ouvrir un.
+var _PCAV_PHASES={cuve:['En cuve','#7B4DB8'], fut:['En fût','#8A5A38'],
+                  bouteille:['En bouteille','#3D6B27'], rentre:['Rentré','#5B9B3A']};
+function _pcavBandeau(l, sel){
+  if(l.length<2) return '';
+  var cell=l.map(function(x){
+    var ph=_PCAV_PHASES[x.phase]||['—','#999'];
+    var vol = (x.phase==='cuve') ? (_pcavF1(x.ch.hlCuve)+' hL en cuve')
+            : (x.phase==='fut')  ? (_pcavF1(x.ch.hlFut)+' hL · '+x.ch.futs+' fûts')
+            : (x.phase==='bouteille') ? (_pcavInt(x.ch.btl)+' bouteilles')
+            : (_pcavInt(x.ch.kg)+' kg rentrés');
+    return '<button class="pcav-mil'+(x.mil===sel?' on':'')+'" data-mil="'+x.mil+'">'
+      +'<span class="pcav-milp" style="background:'+ph[1]+'"></span>'
+      +'<span class="pcav-mila">'+x.mil+'</span>'
+      +'<span class="pcav-milf">'+_pilEsc(ph[0])+'</span>'
+      +'<span class="pcav-milv">'+vol+'</span></button>';
+  }).join('');
+  return _pcavCard('\uD83C\uDF47','#8A5A38','En cave en ce moment',
+    '<b>'+l.length+'</b> millésimes','<div class="pcav-milg">'+cell+'</div>',
+    'Plusieurs millésimes cohabitent : le précédent finit son élevage pendant que le nouveau entre en cuve. Touchez-en un pour voir son parcours en détail.');
+}
+
+// ── Rendement face au plafond de l'appellation ───────────────────────
+// _mlRendements renvoie {parcelle, kg, hlHa, hlMin, hlMax, statut, max,
+// depasse, pct, vendu}. max vient de p.rdt_max, saisi par parcelle : sans lui,
+// pas de comparaison.
+// ★★★ RDT-1 — CETTE CARTE AFFICHAIT UN CHIFFRE NET LA OU LE MILLESIME AFFICHE
+// UNE FOURCHETTE. Meme donnee, deux ecrans, deux niveaux de certitude : celui
+// qui montre le chiffre net gagne la confiance, et c'est le mauvais. Un volume
+// n'est mesure qu'apres le decuvage ; avant, on annonce l'encadrement.
+function _pcavRdtTxt(r){
+  if(r.statut==='mesure'||r.hlMin==null||r.hlMax==null||r.hlMin===r.hlMax)
+    return _pcavF1(r.hlHa)+' hL/ha';
+  return _pcavF1(r.hlMin)+'\u2013'+_pcavF1(r.hlMax)+' hL/ha';
+}
+function _pcavRdt(c,mil){
+  // Les rendements ne valent que pour le millesime ouvert : c.rdt est monte
+  // pour le millesime du contexte, on le recalcule si l'on en ouvre un autre.
+  var src=c.rdt||[];
+  if(mil!=null&&mil!==c.milAff&&_pcavHas('_mlRendements')){
+    try{ src=window._mlRendements(mil)||[]; }catch(e){ _pcavLog('rdt/'+mil,e); src=[]; }
+  }
+  var l=src.filter(function(r){ return r&&r.hlHa!=null; });
+  if(!l.length) return '';
+  var avecMax=l.filter(function(r){ return r.pct!=null; });
+  // Un depassement ne se CONSTATE que sur un volume mesure. Sur une estimation,
+  // il se soupconne — et l'en-tete ne doit pas confondre les deux.
+  var over=avecMax.filter(function(r){ return r.depasse&&r.statut==='mesure'; }).length;
+  var overEst=avecMax.filter(function(r){ return r.depasse&&r.statut!=='mesure'; }).length;
+  var nEst=l.filter(function(r){ return r.statut!=='mesure'; }).length;
+  var rows=l.slice(0,10).map(function(r){
+    var nom=(r.parcelle&&r.parcelle.nom)||'—';
+    if(r.pct==null){
+      return '<div class="pcav-pl"><div class="pcav-py">'+_pilEsc(nom)+'<small>plafond non renseigné</small></div>'
+        +'<div class="pcav-pt2"><div class="pcav-ps" style="width:0"></div></div>'
+        +'<div class="pcav-pn">'+_pcavRdtTxt(r)+'</div></div>';
+    }
+    var norm=Math.max(0,Math.min(100,r.pct/115*100));
+    var col=r.depasse?'var(--rouge)':(r.pct>92?'var(--orange)':'var(--vert-med)');
+    return '<div class="pcav-pl"><div class="pcav-py">'+_pilEsc(nom)+'<small>max '+_pcavF1(r.max)+'</small></div>'
+      +'<div class="pcav-pt2"><div class="pcav-ps" style="width:'+norm+'%;background:'+col+'"></div>'
+      +'<span class="pcav-pmax"></span></div>'
+      +'<div class="pcav-pn" style="color:'+col+'">'+_pcavRdtTxt(r)+'</div></div>';
+  }).join('');
+  var leg='<div class="pcav-leg"><span><i style="background:var(--vert-med)"></i>sous 92 %</span>'
+    +'<span><i style="background:var(--orange)"></i>92 à 100 %</span>'
+    +'<span><i style="background:var(--rouge)"></i>au-dessus du plafond</span>'
+    +'<span><i style="background:var(--texte)"></i>le plafond</span></div>';
+  return _pcavCard('\uD83D\uDCD0','#A0291E','Rendement face au plafond de l’appellation',
+    over?('<b>'+over+'</b> au-dessus')
+      :(overEst?('<b>'+overEst+'</b> \u00e0 confirmer')
+      :(avecMax.length?'dans les clous':'plafonds non renseignés')),
+    '<div class="pcav-pyr">'+rows+leg+'</div>',
+    (l.length>10?('Les 10 plus forts rendements sur '+l.length+' parcelles vendang\u00e9es. '):'')
+    +(nEst?('Une fourchette signifie que le volume n\u2019est pas encore mesur\u00e9 : il le sera au d\u00e9cuvage. '):'')
+    +(avecMax.length
+      ? 'Trait vertical : votre plafond par parcelle.'
+      : 'Aucun plafond n’est renseigné. Posez-le une fois par parcelle depuis Le millésime pour obtenir la comparaison.'), 'pil.cav.rdt');
+}
+
+// ── Face a l'an dernier ──────────────────────────────────────────────
+// Meme axe que les Archives : campagne du 1er aout au 31 juillet.
+function _pcavN1(c,mil){
+  if(!_pcavHas('_mlChaine')) return '';
+  var _m=(mil!=null)?mil:(c.milAff!=null?c.milAff:c.mil);
+  var cur=null; try{ cur=window._mlChaine(_m); }catch(e){ _pcavLog('n1cur',e); return ''; }
+  if(!cur) return '';
+  var p=null; try{ p=window._mlChaine(_m-1); }catch(e){ _pcavLog('n1',e); return ''; }
+  if(!p||(!p.hlDecuve&&!p.kg&&!p.futs)) return '';
+  var rows='';
+  function ligne(lab,now,old,unit,hautEstBon){
+    if(now==null||old==null||!old) return;
+    var d=now-old, pct=Math.round(d/old*100), bon=hautEstBon?(d>=0):(d<=0);
+    rows+='<div class="pcav-cmp"><div><div class="pcav-cl">'+_pilEsc(lab)+'</div>'
+      +'<div class="pcav-cnow">'+_pcavF1(now)+' <small>'+_pilEsc(unit)+'</small></div></div>'
+      +'<div><span class="pcav-dl '+(bon?'ok':'wa')+'">'+(d>=0?'+':'')+pct+' %</span></div>'
+      +'<div class="pcav-cold">l’an dernier<br><b>'+_pcavF1(old)+' '+_pilEsc(unit)+'</b></div></div>';
+  }
+  var rNow=(cur.ha>0)?cur.hlDecuve/cur.ha:null;
+  var rOld=(p.ha>0)?p.hlDecuve/p.ha:null;
+  ligne('Rendement moyen',rNow,rOld,'hL/ha',true);
+  var pNow=(cur.hlDecuve>0&&cur.hlFut>0)?(cur.hlDecuve-cur.hlFut)/cur.hlDecuve*100:null;
+  var pOld=(p.hlDecuve>0&&p.hlFut>0)?(p.hlDecuve-p.hlFut)/p.hlDecuve*100:null;
+  ligne('Perte benne → fût',pNow,pOld,'%',false);
+  ligne('Raisin rentré',cur.kg/1000,p.kg/1000,'t',true);
+  if(!rows) return '';
+  return _pcavCard('\uD83D\uDD70\uFE0F','#8A5A38','Face à l’an dernier',
+    'campagne '+(_m-1)+'-'+_m, rows,
+    'Comparaison par campagne, du 1<sup>er</sup> août au 31 juillet — le même axe que les Archives. Le rendement moyen ne porte que sur les parcelles réellement récoltées.');
+}
+
+// ── Onglet 2 : assemblage ────────────────────────────────────────────
+function _pcavVueMillesime(c){
+  var l=_pcavMils(c);
+  // Le millesime ouvert : celui choisi s'il a encore de la matiere, sinon le
+  // plus recent qui en a. On ne se fige jamais sur un millesime disparu.
+  var sel=null;
+  if(_PCAV_MIL!=null) l.forEach(function(x){ if(x.mil===_PCAV_MIL) sel=x; });
+  if(!sel&&l.length) sel=l[0];
+  var ch=sel?sel.ch:(_pcavMatiere(c.chaine)?c.chaine:null);
+  var mil=sel?sel.mil:c.milAff;
+  var h=_pcavBandeau(l, mil);
+  if(ch){
+    h+='<div class="pcav-card"><div class="pcav-kg">'
+      +_pcavK('Surface récoltée',_pcavF1(ch.ha),'ha',(ch.parcelles||0)+' parcelles',1)
+      +_pcavK('Raisin rentré',_pcavF1((ch.kg||0)/1000),'t',ch.kgVendu?('dont '+_pcavInt(ch.kgVendu)+' kg vendus'):'')
+      +_pcavK('Rendement moyen',(ch.ha>0?_pcavF1(ch.hlDecuve/ch.ha):'—'),'hL/ha','sur les parcelles récoltées')
+      +_pcavK('Au chai',_pcavF1(ch.hlFut),'hL',(ch.futs||0)+' barriques')
+      +'</div></div>';
+  }
+  try{ h+=_pcavFlux(c,ch,mil)||''; }catch(e){ _pcavLog('flux',e); }
+  try{ h+=_pcavRdt(c,mil)||''; }catch(e){ _pcavLog('rdt',e); }
+  try{ h+=_pcavN1(c,mil)||''; }catch(e){ _pcavLog('n1',e); }
+  if(!h) h='<div class="pcav-vide">Aucune donnée de millésime pour la campagne '+c.mil+'-'+(c.mil+1)+'.<br>Le Cuvier alimente cet écran dès la première récolte saisie.</div>';
+  else if(l.length===1&&l[0].mil!==c.mil) h+='<div class="pcav-note"><span>'+_mvIcon('chrono',16)+'</span><div>Le millésime <b>'+c.mil+'</b> n’est pas encore rentré. Cet écran montre le <b>'+l[0].mil+'</b>, celui qui est en cave.</div></div>';
+  return h;
+}
+
+// ── Onglet 3 : le parc & le cout ─────────────────────────────────────
+function _pcavEtat(c){
+  var p=c.parc; if(!p) return '';
+  var hl=p.occupes*c.futL/100;
+  var k='<div class="pcav-kg">'
+    +_pcavK('Parc total',p.parc,'','barriques du domaine',1)
+    +_pcavK('En vin',p.occupes,'',_pcavF1(hl)+' hL logés')
+    +_pcavK('Libres',p.libres,'',p.neufs?('dont '+p.neufs+' neuve'+(p.neufs>1?'s':'')):'')
+    +_pcavK('Au-delà de '+p.vie+' vins',p.aReformer,'','à renouveler',0,p.aReformer?'var(--orange)':null)
+    +'</div>';
+  var mv=p.mouv||{entrees:0,sorties:0};
+  return _pcavCard('\uD83D\uDEE2\uFE0F','#8A5A38','État du parc',
+    '+'+(mv.entrees||0)+' / −'+(mv.sorties||0)+' cette année', k,
+    'Le parc additionne les fûts libres de La Réserve et les fûts en vin du Chai. Entonner, embouteiller ou retirer d’une cuvée ne change pas ce total : seuls acheter et se séparer le font varier.');
+}
+
+function _pcavPyramide(c){
+  var p=c.parc; if(!p||!p.lignes||!p.lignes.length) return '';
+  var max=0; p.lignes.forEach(function(l){ if(l.total>max) max=l.total; });
+  if(max<=0) return '';
+  var rows=p.lignes.map(function(l){
+    var w=Math.max(6,Math.min(100,Math.round(l.total/max*100)));
+    var col=(l.vins===0)?'#5B9B3A':(l.reforme?'#A0291E':'#8A5A38');
+    var wv=l.total?Math.round(l.enVin/l.total*100):0;
+    var age=(l.annee==null)?'origine inconnue':(l.vins===0?'neuf':l.vins+' vin'+(l.vins>1?'s':''));
+    return '<div class="pcav-pl"><div class="pcav-py">'+(l.annee==null?'—':l.annee)+'<small>'+age+'</small></div>'
+      +'<div class="pcav-pt2" style="width:'+w+'%"><div class="pcav-ps" style="width:'+wv+'%;background:'+col+'"></div>'
+      +'<div class="pcav-ps" style="width:'+(100-wv)+'%;background:'+col+';opacity:.28"></div></div>'
+      +'<div class="pcav-pn">'+l.enVin+' en vin · '+l.libres+' libre'+(l.libres>1?'s':'')+'</div></div>';
+  }).join('');
+  var leg='<div class="pcav-leg"><span><i style="background:#5B9B3A"></i>neuf</span>'
+    +'<span><i style="background:#8A5A38"></i>en cours de vie</span>'
+    +'<span><i style="background:#A0291E"></i>au-delà de '+p.vie+' vins</span>'
+    +'<span><i style="background:#8A5A38;opacity:.28"></i>partie libre, quel que soit l’âge</span></div>';
+  return _pcavCard('\uD83D\uDCCA','#B85A1A','Pyramide des âges','<b>'+p.parc+'</b> barriques',
+    '<div class="pcav-pyr">'+rows+leg+'</div>',
+    'L’âge se compte en année civile moins année d’achat : la vendange tombe en septembre, donc l’incrément du 1<sup>er</sup> janvier arrive après le millésime.');
+}
+
+// ── Part des anges : une mesure, avec sa reserve ecrite a l'ecran ────
+function _pcavAngesCard(c){
+  var a=c.anges;
+  if(!a) return _pcavCard('\u23F3','#A0291E','Part des anges','\u2014',
+    '<div class="pcav-vide">Aucun volume d\u2019ouillage saisi sur les douze derniers mois.<br>Renseignez le volume total \u00e0 chaque ouillage : cet \u00e9cran mesurera alors ce que l\u2019\u00e9levage vous co\u00fbte r\u00e9ellement.</div>','');
+  var rows='';
+  a.lignes.forEach(function(x){
+    var lbl=(x.mil==='?')?'Sans mill\u00e9sime':x.mil;
+    var pct=(x.pctAn==null)?'\u2014':(_pcavF1(x.pctAn)+' %/an');
+    rows+='<div class="pcav-agr">'
+      +'<div class="pcav-agm">'+_pilEsc(lbl)+'<small>'+x.ops+' ouillage'+(x.ops>1?'s':'')+' \u00b7 '+x.futs+' f\u00fbts</small></div>'
+      +'<div class="pcav-agv">'+_pcavF1(x.hlPerdu)+' <small>hL remis</small></div>'
+      +'<div class="pcav-agp">'+pct+'</div></div>';
+  });
+  if(a.nonVentile>0){
+    rows+='<div class="pcav-agr"><div class="pcav-agm" style="color:var(--texte-doux)">Non ventil\u00e9<small>'
+      +a.nonVentile+' op\u00e9ration'+(a.nonVentile>1?'s':'')+' couvrant plusieurs mill\u00e9simes</small></div>'
+      +'<div class="pcav-agv" style="color:var(--texte-doux)">\u2014</div><div class="pcav-agp">\u2014</div></div>';
+  }
+  if(!rows) rows='<div class="pcav-vide">Les ouillages des douze derniers mois ne se rattachent \u00e0 aucune cuv\u00e9e encore en \u00e9levage.</div>';
+  var stat=a.lignes.length?('<b>'+_pcavF1(a.hlPerdu)+'</b> hL sur douze mois'):'\u2014';
+  return _pcavCard('\u23F3','#A0291E','Part des anges', stat, '<div class="pcav-agt">'+rows+'</div>',
+    'douze derniers mois \u00b7 une ligne par mill\u00e9sime', 'pil.cav.anges');
+}
+
+function _pcavMouv(c){
+  var p=c.parc; if(!p||!p.mouv||!p.mouv.lignes||!p.mouv.lignes.length) return '';
+  var M=(typeof MV_FUT_MOTIFS!=='undefined')?MV_FUT_MOTIFS:(window.MV_FUT_MOTIFS||{});
+  var rows=p.mouv.lignes.slice(0,8).map(function(m){
+    var d=M[m.motif]||{lbl:m.motif,sens:m.sens,ico:''};
+    var pt=(m.sens==='entree')?'ok':(m.motif==='destruction'?'red':'amb');
+    var quoi=[m.four,m.ref,m.annee].filter(function(x){ return x; }).join(' · ');
+    return _pcavRow(pt,'<b>'+(m.sens==='entree'?'+':'−')+m.nb+' barrique'+(m.nb>1?'s':'')+'</b> — '+_pilEsc(d.lbl)
+      +(quoi?_pcavSub(_pilEsc(quoi)):''), _pilDfr(m.date),'','','');
+  }).join('');
+  var n=p.mouv.lignes.length;
+  return _pcavCard('\uD83D\uDDC3\uFE0F','#3D5166','Mouvements',
+    '+'+(p.mouv.entrees||0)+' / −'+(p.mouv.sorties||0), rows,
+    (n>8?('8 mouvements affichés sur '+n+'. '):'')+'Le registre explique exactement l’écart entre deux inventaires. Il ne se purge jamais.');
+}
+
+function _pcavVueParc(c){
+  var h='';
+  // ⚠ La part des anges se calcule sur les FUTS DES CUVEES, pas sur le parc :
+  // elle reste disponible meme si l'inventaire de La Reserve est vide. La
+  // sortir de la garde evite de la perdre pour une raison sans rapport.
+  if(!c.parc){
+    try{ h+=_pcavAngesCard(c)||''; }catch(e){ _pcavLog('anges',e); }
+    return h+'<div class="pcav-vide">Le parc à fûts n’est pas disponible.<br>Il se construit à partir de l’inventaire de La Réserve et des barriques en vin du Chai.</div>';
+  }
+  try{ h+=_pcavEtat(c)||''; }catch(e){ _pcavLog('etat',e); }
+  try{ h+=_pcavPyramide(c)||''; }catch(e){ _pcavLog('pyramide',e); }
+  try{ h+=_pcavAngesCard(c)||''; }catch(e){ _pcavLog('angescard',e); }
+  try{ h+=_pcavMouv(c)||''; }catch(e){ _pcavLog('mouv',e); }
+  h+='<div class="pcav-note"><span>'+_mvIcon('euro',16)+'</span><div><b>Aucun euro n’est affiché.</b> Le prix moyen d’une barrique n’est pas renseigné dans vos réglages Cave. Renseignez-le et cet écran chiffrera le renouvellement ; sinon le plan reste exprimé en nombre de fûts.</div></div>';
+  return h;
+}
+
+// ── CSS du module. Injecte ici, comme le fait deja le bloc `pec-` : ──
+// styles.css n'est pas touche, donc AUCUN bump (pilotage.js seul).
+function _pcavInjectCss(){
+  if(document.getElementById('pcav-css')) return;
+  var css=''
+  +'.pcav-verdict{background:var(--bg-card);border:1px solid var(--gris-clair);border-radius:15px;box-shadow:var(--shadow-sm);padding:22px 24px 20px;margin-bottom:16px}'
+  +'.pcav-vk{display:flex;align-items:center;gap:10px;font-size:var(--pt-lbl,10.5px);font-weight:600;letter-spacing:2.2px;text-transform:uppercase;color:var(--texte-doux);flex-wrap:wrap}'
+  +'.pcav-vbig{font-family:\'Cormorant Garamond\',Georgia,serif;font-weight:600;font-size:var(--pt-hero,40px);line-height:1.04;margin:6px 0 5px;color:var(--texte)}'
+  +'.pcav-vsub{font-size:var(--pt-base,14px);color:var(--texte-med);line-height:1.55;max-width:620px}'
+  +'.pcav-vsub b{color:var(--texte);font-weight:600}'
+  +'.pcav-card{background:var(--bg-card);border:1px solid var(--gris-clair);border-radius:15px;box-shadow:var(--shadow-sm);overflow:hidden;margin-bottom:16px}'
+  +'.pcav-h{display:flex;align-items:center;gap:10px;padding:13px 16px;min-height:44px;border-bottom:1px solid var(--gris-clair)}'
+  +'.pcav-dot{width:7px;height:7px;border-radius:50%;flex:none}'
+  +'.pcav-ico{width:28px;height:28px;border-radius:9px;background:var(--or-pale);display:flex;align-items:center;justify-content:center;flex:none;font-size:var(--pt-base,14px)}'
+  +'.pcav-t{font-size:var(--pt-micro,11px);letter-spacing:1.4px;text-transform:uppercase;font-weight:600;color:var(--texte-doux);flex:1}'
+  +'.pcav-stat{font-size:var(--pt-micro,11px);color:var(--texte-doux);font-weight:600;white-space:nowrap}'
+  +'.pcav-stat b{color:var(--texte)}'
+  +'.pcav-b{padding:2px 0}'
+  +'.pcav-mini{font-size:var(--pt-micro,11px);color:var(--texte-doux);padding:2px 17px 14px;line-height:1.55}'
+  +'.pcav-row{display:flex;align-items:center;gap:13px;padding:12px 17px;border-top:1px solid var(--gris-clair);font-size:var(--pt-txt,12.5px);color:var(--texte-med)}'
+  +'.pcav-row:first-child{border-top:none}'
+  +'.pcav-row b{color:var(--texte);font-weight:600}'
+  +'.pcav-rm{flex:1;min-width:0}'
+  +'.pcav-sub{font-size:var(--pt-micro,11px);color:var(--texte-doux);margin-top:2px;line-height:1.45}'
+  +'.pcav-pt{width:8px;height:8px;border-radius:50%;flex:none}'
+  +'.pcav-pt.red{background:var(--rouge);box-shadow:0 0 0 3px var(--rouge-pale)}'
+  +'.pcav-pt.amb{background:var(--orange);box-shadow:0 0 0 3px var(--orange-pale)}'
+  +'.pcav-pt.ok{background:var(--vert-med);box-shadow:0 0 0 3px var(--vert-pale)}'
+  +'.pcav-when{font-size:var(--pt-micro,11px);color:var(--texte-doux);white-space:nowrap}'
+  +'.pcav-act{border:1px solid var(--gris);background:var(--bg-card);border-radius:9px;padding:7px 12px;font-family:inherit;font-size:var(--pt-micro,11px);font-weight:600;color:var(--terre);cursor:pointer;white-space:nowrap;min-height:38px}'
+  +'.pcav-act:hover{background:var(--or-pale);border-color:var(--or)}'
+  +'.pcav-kg{display:grid;grid-template-columns:repeat(auto-fit,minmax(140px,1fr));gap:12px;padding:16px}'
+  +'.pcav-k{background:var(--or-pale);border:1px solid rgba(194,161,77,.28);border-radius:12px;padding:12px 14px}'
+  +'.pcav-kl{font-size:var(--pt-lbl,10.5px);letter-spacing:1.3px;text-transform:uppercase;color:var(--texte-doux);font-weight:600}'
+  +'.pcav-kv{font-family:\'Cormorant Garamond\',Georgia,serif;font-size:var(--pt-xl,27px);font-weight:600;color:var(--texte);line-height:1.05;margin-top:3px}'
+  +'.pcav-kv small{font-size:var(--pt-base,14px);color:var(--texte-doux);font-weight:500}'
+  +'.pcav-ks{font-size:var(--pt-micro,11px);color:var(--texte-doux);margin-top:2px;line-height:1.4}'
+  +'.pcav-k.dark{background:var(--cave);border-color:var(--cave)}'
+  +'.pcav-k.dark .pcav-kl,.pcav-k.dark .pcav-ks{color:rgba(240,226,200,.55)}'
+  +'.pcav-k.dark .pcav-kv{color:#F0E2C8}'
+  +'.pcav-k.dark .pcav-kv small{color:rgba(240,226,200,.55)}'
+  +'.pcav-flux{padding:18px 20px}'
+  +'.pcav-fs{display:grid;grid-template-columns:118px 1fr;gap:14px;align-items:center;margin-bottom:4px}'
+  +'.pcav-fn{font-size:var(--pt-micro,11px);font-weight:600;color:var(--texte-med);text-align:right}'
+  +'.pcav-fn small{display:block;font-size:var(--pt-lbl,10.5px);color:var(--texte-doux);font-weight:500}'
+  +'.pcav-fw{height:38px;display:flex;align-items:center}'
+  +'.pcav-fb{height:32px;border-radius:8px;background:linear-gradient(90deg,#7A1020,#B23A52);display:flex;align-items:center;padding-left:12px;color:#F0E2C8;font-size:var(--pt-txt,12.5px);font-weight:600;min-width:74px;box-sizing:border-box}'
+  +'.pcav-fb.g{background:linear-gradient(90deg,#2D5016,#5B9B3A)}'
+  +'.pcav-fb.o{background:linear-gradient(90deg,#8A5A38,#C2871E)}'
+  +'.pcav-fl{display:grid;grid-template-columns:118px 1fr;gap:14px;margin:1px 0 5px}'
+  +'.pcav-fl div:last-child{font-size:var(--pt-micro,11px);color:var(--orange);font-weight:600}'
+  +'.pcav-pyr{padding:14px 18px 16px}'
+  +'.pcav-pl{display:grid;grid-template-columns:82px 1fr 104px;gap:10px;align-items:center;margin-bottom:7px;font-size:var(--pt-txt,12.5px)}'
+  +'.pcav-py{color:var(--texte-med);font-weight:600;line-height:1.2}'
+  +'.pcav-py small{color:var(--texte-doux);font-weight:500;display:block;font-size:var(--pt-lbl,10.5px)}'
+  +'.pcav-pt2{height:22px;background:var(--gris-clair);border-radius:6px;overflow:hidden;display:flex;position:relative}'
+  +'.pcav-ps{height:100%}'
+  +'.pcav-pmax{position:absolute;left:86.96%;top:0;bottom:0;width:2px;background:var(--texte);opacity:.5}'
+  +'.pcav-pn{font-size:var(--pt-micro,11px);color:var(--texte-doux);text-align:right;font-weight:600}'
+  +'.pcav-leg{display:flex;gap:14px;flex-wrap:wrap;font-size:var(--pt-micro,11px);color:var(--texte-doux);margin-top:12px;padding-top:12px;border-top:1px solid var(--gris-clair)}'
+  +'.pcav-leg span{display:inline-flex;align-items:center;gap:6px}'
+  +'.pcav-leg i{width:11px;height:11px;border-radius:3px;display:inline-block}'
+  +'.pcav-cmp{display:grid;grid-template-columns:1fr auto 1fr;gap:10px;align-items:center;padding:13px 17px;border-top:1px solid var(--gris-clair);font-size:var(--pt-txt,12.5px)}'
+  +'.pcav-cmp:first-child{border-top:none}'
+  +'.pcav-cl{font-size:var(--pt-lbl,10.5px);letter-spacing:1.4px;text-transform:uppercase;color:var(--texte-doux);font-weight:600}'
+  +'.pcav-cnow{font-family:\'Cormorant Garamond\',Georgia,serif;font-size:var(--pt-lg,23px);font-weight:600;color:var(--texte);line-height:1.1}'
+  +'.pcav-cnow small{font-size:var(--pt-txt,12.5px);color:var(--texte-doux)}'
+  +'.pcav-cold{color:var(--texte-doux);text-align:right;font-size:var(--pt-micro,11px);line-height:1.5}'
+  +'.pcav-cold b{color:var(--texte-med)}'
+  +'.pcav-dl{font-size:var(--pt-micro,11px);font-weight:700;padding:3px 9px;border-radius:20px;white-space:nowrap}'
+  +'.pcav-dl.ok{background:var(--vert-pale);color:var(--vert-med)}'
+  +'.pcav-dl.wa{background:var(--orange-pale);color:var(--orange)}'
+  +'.pcav-note{background:var(--or-pale);border:1px solid rgba(194,161,77,.4);border-radius:12px;padding:12px 15px;font-size:var(--pt-txt,12.5px);color:var(--texte-med);display:flex;gap:10px;align-items:flex-start;line-height:1.5;margin-bottom:16px}'
+  +'.pcav-note b{color:var(--texte)}'
+  +'.pcav-vide{padding:26px 20px;text-align:center;font-size:var(--pt-txt,12.5px);color:var(--texte-doux);line-height:1.6}'
+  +'.pcav-milg{display:grid;grid-template-columns:repeat(auto-fit,minmax(150px,1fr));gap:10px;padding:16px}'
+  +'.pcav-mil{position:relative;text-align:left;border:1px solid var(--gris-clair);background:var(--bg-card);border-radius:12px;padding:12px 14px 12px 16px;cursor:pointer;font-family:inherit;min-height:44px;transition:.15s;display:block;width:100%}'
+  +'.pcav-mil:hover{border-color:var(--or);background:var(--or-pale)}'
+  +'.pcav-mil.on{background:var(--cave);border-color:var(--cave)}'
+  +'.pcav-milp{position:absolute;left:0;top:10px;bottom:10px;width:4px;border-radius:0 3px 3px 0}'
+  +'.pcav-mila{display:block;font-family:\'Cormorant Garamond\',Georgia,serif;font-size:var(--pt-xl,27px);font-weight:600;color:var(--texte);line-height:1.05}'
+  +'.pcav-mil.on .pcav-mila{color:#F0E2C8}'
+  +'.pcav-milf{display:block;font-size:var(--pt-lbl,10.5px);letter-spacing:1.3px;text-transform:uppercase;font-weight:600;color:var(--texte-doux);margin-top:2px}'
+  +'.pcav-mil.on .pcav-milf{color:var(--or)}'
+  +'.pcav-milv{display:block;font-size:var(--pt-micro,11px);color:var(--texte-doux);margin-top:3px}'
+  +'.pcav-mil.on .pcav-milv{color:rgba(240,226,200,.6)}'
+  +'.pcav-agt{padding:4px 0}'
+  +'.pcav-agr{display:grid;grid-template-columns:1fr auto 78px;gap:12px;align-items:center;padding:11px 17px;border-top:1px solid var(--gris-clair)}'
+  +'.pcav-agr:first-child{border-top:none}'
+  +'.pcav-agm{font-size:var(--pt-txt,12.5px);font-weight:600;color:var(--texte);line-height:1.25}'
+  +'.pcav-agm small{display:block;font-size:var(--pt-micro,11px);color:var(--texte-doux);font-weight:500;margin-top:1px}'
+  +'.pcav-agv{font-family:\'Cormorant Garamond\',Georgia,serif;font-size:var(--pt-lg,23px);font-weight:600;color:var(--texte);white-space:nowrap}'
+  +'.pcav-agv small{font-family:inherit;font-size:var(--pt-micro,11px);color:var(--texte-doux);font-weight:500}'
+  +'.pcav-agp{font-size:var(--pt-txt,12.5px);font-weight:600;color:var(--orange);text-align:right;white-space:nowrap}'
+  +'.pcav-grp{display:flex;align-items:baseline;gap:9px;padding:10px 17px 5px;font-size:var(--pt-micro,11px);letter-spacing:1.4px;text-transform:uppercase;font-weight:600;color:var(--terre);border-top:1px solid var(--gris-clair)}'
+  +'.pcav-grp:first-child{border-top:none}'
+  +'.pcav-grp span{font-size:var(--pt-lbl,10.5px);letter-spacing:0;text-transform:none;color:var(--texte-doux);font-weight:500}'
+  +'.pcav-mal{padding:14px 18px 16px;border-top:1px solid var(--gris-clair)}'
+  +'.pcav-mrow{display:grid;grid-template-columns:126px 1fr 52px;gap:12px;align-items:end;margin-bottom:14px}'
+  +'.pcav-mn{font-size:var(--pt-micro,11px);font-weight:600;color:var(--texte-med);line-height:1.25;padding-bottom:2px}'
+  +'.pcav-mn small{display:block;font-size:var(--pt-lbl,10.5px);color:var(--texte-doux);font-weight:500}'
+  +'.pcav-mg{position:relative;height:56px;border-bottom:1px solid var(--gris);background:linear-gradient(180deg,rgba(0,0,0,.012),transparent)}'
+  +'.pcav-mbar{position:absolute;bottom:0;width:9px;margin-left:-4px;border-radius:3px 3px 0 0;min-height:3px}'
+  +'.pcav-msl{position:absolute;left:0;right:0;height:1px;background:var(--vert-med);opacity:.65}'
+  +'.pcav-mj{font-size:var(--pt-micro,11px);color:var(--texte-doux);text-align:right;font-weight:600;padding-bottom:2px}'
+  +'.pcav-mleg{font-size:var(--pt-micro,11px);color:var(--texte-doux);line-height:1.5;padding-top:10px;border-top:1px solid var(--gris-clair)}'
+  +'@media(max-width:600px){'
+  +'.pcav-vbig{font-size:var(--pt-xxl,31px)}'
+  +'.pcav-fs,.pcav-fl{grid-template-columns:80px 1fr;gap:10px}'
+  +'.pcav-pl{grid-template-columns:64px 1fr 86px;gap:8px}'
+  +'.pcav-act{padding:7px 9px;font-size:var(--pt-micro,11px)}'
+  +'.pcav-cmp{grid-template-columns:1fr auto;row-gap:6px}'
+  +'.pcav-cold{grid-column:1/-1;text-align:left}'
+  +'.pcav-mrow{grid-template-columns:92px 1fr 44px;gap:8px}'
+  +'.pcav-agr{grid-template-columns:1fr auto;row-gap:4px}'
+  +'.pcav-agp{grid-column:1/-1;text-align:left}'
+  +'}';
+  var st=document.createElement('style');
+  st.id='pcav-css'; st.textContent=css;
+  document.head.appendChild(st);
+}
+
+// ── L'onglet ─────────────────────────────────────────────────────────
+// Millesime ouvert dans l'onglet. null = celui que le contexte a retenu.
+var _PCAV_MIL=null;
+var _PCAV_SUBS=[['urg','chrono','Ce qui presse'],['mil','raisin','Le millésime'],['parc','barrique','Le parc']];
+function _pilTabCav(d){
+  _pcavInjectCss();
+  var sub=_PIL_CAVSUB;
+  var nav='<div class="pil-subnav" id="pil-cavnav">'+_PCAV_SUBS.map(function(s){
+    return '<button data-s="'+s[0]+'"'+(sub===s[0]?' class="on"':'')+'>'+s[1]+' '+_pilEsc(s[2])+'</button>';
+  }).join('')+'</div>';
+  var c, body;
+  try{ c=_pcavCtx(d); }catch(e){ c=null; }
+  if(!c) return nav+'<div class="pcav-vide">La Cave n’est pas disponible sur cet appareil.<br>Rechargez l’application.</div>';
+  try{
+    if(sub==='mil') body=_pcavVueMillesime(c);
+    else if(sub==='parc') body=_pcavVueParc(c);
+    else body=_pcavVuePresse(c);
+  }catch(e){
+    window.logError&&window.logError({level:'error',cat:'pilotage',msg:'onglet cave',err:e});
+    body='<div class="pcav-vide">Cet écran n’a pas pu se construire.<br>L’incident a été enregistré.</div>';
+  }
+  return nav+_pilCadreAvert(_pilAvertCav())+body;
+}
+
+// ════════════════════════════════════
+// Économie (coût/ha par parcelle) + Conformité (cuivre · passages/IFT · DRE)
+// Lecture seule. Aucune écriture en base. Taux/prix/référence saisis dans
+// Réglages › Domaine (CONFIG.eco / CONFIG.conformite).
+// ════════════════════════════════════
+
+// ── Économie : config (lecture) ──
+function _ecoCfg(){
+  var e=(window.CONFIG&&window.CONFIG.eco)||{};
+  return {
+    // Barème par type de contrat : conservé en REPLI seulement. Le taux de référence
+    // est désormais individuel (fiche membre → collection `paie`).
+    taux:(e.taux_horaire&&typeof e.taux_horaire==='object')?e.taux_horaire:{},
+    // Prix du litre = moyenne PONDÉRÉE des appoints de cuve (Tracteur › Entretien),
+    // avec repli sur l'ancien champ manuel de Réglages. 0 = non renseigné.
+    // ⚠️ `paie` est admin-only en LECTURE : un profil `pilotage` non-admin lit 0 ici
+    //    et voit le coût GNR à zéro — c'est voulu (prix d'achat = donnée de gestion).
+    gnrL:(window._mvPaieGnrPMP?Number(window._mvPaieGnrPMP()):0)||Number(e.prix_gnr_litre)||0,
+    conso:(e.conso_gnr_lh!=null?Number(e.conso_gnr_lh):6)||0
+    // ⚠️⚠️ DEFINITION DU TAUX HORAIRE — UNE SEULE, VALABLE PARTOUT.
+    //   Le taux d'une fiche membre (collection `paie`, saisi dans Reglages > Equipe) est
+    //   un TAUX CHARGE : le COUT EMPLOYEUR a l'heure, cotisations patronales comprises.
+    //   C'est ce que le champ demande mot pour mot : « Taux horaire chargé (coût
+    //   employeur, € par heure) ».
+    //   => AUCUN coefficient de charges ne doit etre applique par-dessus. Il en a existe
+    //   un (CONFIG.eco.coef_charges) qui multipliait ce taux dans l'exercice comptable en
+    //   le presentant comme un brut : sur un domaine ayant saisi ses taux comme demande,
+    //   il comptait les cotisations DEUX FOIS (~+45 % de masse salariale fantome), et un
+    //   bandeau invitait meme a le renseigner. Lecteur, ecriture et libelles supprimes.
+    //   Une valeur `coef_charges` restee en base est desormais INERTE : plus personne ne
+    //   la lit. Ne pas la reintroduire — si un jour un domaine saisit des taux BRUTS, ce
+    //   qu'il faut ajouter est un interrupteur explicite « mes taux sont bruts / charges »,
+    //   pas un multiplicateur qui devine ce qu'il y a dans le nombre.
+  };
+}
+var _ECO_CONTRATS=['G\u00e9rant','CDI','CDD','TESA','Apprenti','Saisonnier','Extra'];
+function _ecoEur(n){ return (Math.round(Number(n)||0)).toLocaleString('fr-FR')+' \u20AC'; }
+function _ecoEur2(n){ return (Math.round((Number(n)||0)*100)/100).toLocaleString('fr-FR',{minimumFractionDigits:0,maximumFractionDigits:2}); }
+function _ecoH1(h){ return (Math.round((Number(h)||0)*10)/10).toLocaleString('fr-FR'); }
+// Taux horaire moyen de l'équipe de terrain (hors bureau) : moyenne des taux
+// configurés des membres actifs. Repli : moyenne des taux saisis. 0 = non configuré.
+function _ecoRate(){
+  var taux=_ecoCfg().taux;
+  // Taux INDIVIDUEL (fiche membre → collection `paie`) en priorité, barème par type
+  // de contrat en repli. La moyenne reste nécessaire : le coût MO d'une parcelle est
+  // un budget de saison (heures théoriques), on ne sait pas QUI fera QUELLE parcelle.
+  var P=(window._mvPaie?window._mvPaie():(window.PAIE||{}));
+  var indiv=(P&&P.taux&&typeof P.taux==='object')?P.taux:{};
+  // ⚠ La bonne question ici est « qui fait la CAMPAGNE ? », pas « qui est la aujourd'hui ? » :
+  // le cout MO d'une parcelle est un budget de saison. Filtrer a la date du jour ecartait
+  // les contrats deja termines — le 03/08/2026 sur un domaine reel il ne restait qu'UNE
+  // personne, et tout le cout du travail etait chiffre sur son seul taux.
+  // ⚠ REPLI OBLIGATOIRE : periode non datee ou liste vide -> on retombe sur l'ancien
+  // calcul (tous les actifs hors bureau), sinon le cout du travail s'afficherait a ZERO.
+  var _tousActifs=(window.MEMBRES||[]).filter(function(m){ return m && m.statut!=='Inactif' && !m.bureau; });
+  var _saR=(typeof window._pilSaison==='function')?window._pilSaison():null;
+  var _d0R=(_saR&&_saR.debut)||'', _d1R=(_saR&&_saR.fin)||'';
+  var membres=(_d0R && _d1R && typeof window._mvEnContratSurPeriode==='function')
+    ? (window.MEMBRES||[]).filter(function(m){ return window._mvEnContratSurPeriode(m,_d0R,_d1R); })
+    : [];
+  if(!membres.length) membres=_tousActifs;
+  // ★★★ TAUX A LA DATE. Le cout MO d'une parcelle est un budget de SAISON : le taux
+  // qui compte est celui qui valait AU DEBUT DE LA PERIODE CONSULTEE, pas celui
+  // d'aujourd'hui. Sans ca, une augmentation signee en aout rechiffrait le budget de
+  // la taille de fevrier — et le budget d'une campagne archivee bougeait tout seul.
+  // ⚠️ REPLI : periode non datee -> `_mvPaieTauxAt` sans date rend le taux courant,
+  // soit exactement l'ancien comportement. Aucune regression possible sur ce chemin.
+  var _atR=(typeof window._mvPaieTauxAt==='function')
+    ? function(nm){ return Number(window._mvPaieTauxAt(nm,_d0R))||0; }
+    : function(nm){ return Number(indiv[nm])||0; };
+  // ★ Pondéré par les heures annuelles du gabarit (backlog 9).
+  // Un temps plein a 12 €/h pese plus qu'un mi-temps a 14 €/h dans le budget global :
+  // la moyenne par tete surestime le taux quand le domaine melange durees inegales.
+  // Repli sur h=1 (= par tete, meme resultat qu'avant) si window._planGetRefH absent
+  // ou gabarit vide — aucune regression sur un domaine sans donnees de planning.
+  var sum=0, wsum=0;
+  membres.forEach(function(m){
+    var r=_atR(m.nom);
+    if(!(r>0)) r=Number(taux[m.type_contrat||'CDI'])||0;
+    if(r>0){
+      var plId=(typeof window._planPlId==='function')?window._planPlId(m):'standard';
+      var h=0;
+      if(typeof window._planGetRefH==='function'){
+        for(var mi=0;mi<12;mi++) h+=(window._planGetRefH(plId,mi)||0);
+      }
+      if(!(h>0)) h=1;
+      sum+=r*h; wsum+=h;
+    }
+  });
+  if(wsum>0) return sum/wsum;
+  var vals=_ECO_CONTRATS.map(function(k){ return Number(taux[k])||0; }).filter(function(v){ return v>0; });
+  return vals.length ? vals.reduce(function(a,b){return a+b;},0)/vals.length : 0;
+}
+function _ecoAllDefs(){ var a=(typeof window.getTachesSaison==='function')?window.getTachesSaison():(window.TACHES||[]); return (a||[]).slice(); }
+// Heures MO vigne (budget de la saison consultée) pour une parcelle : somme des
+// tâches applicables via _opParcFull (surface × h/ha, passages/niveaux, tarière).
+function _ecoParcMOh(p){
+  var s=0; _ecoAllDefs().forEach(function(def){ if(def && _opApplic(p,def)) s+=_opParcFull(p,def); });
+  return s;
+}
+// Entreplantation par parcelle : trous renseignés (tarière ou saisie) → heures → €.
+// SOUS-ENSEMBLE de _ecoParcMOh (mêmes défs, même formule) : ces heures sont déjà
+// comptées dans moh, on les isole pour les afficher et donner un coût au plant.
+// Aucun double compte : jamais additionné au total.
+function _ecoParcPlant(p){
+  // BUG CORRIGE : le nombre de trous est une propriete de la PARCELLE, pas de la
+  // tache. Des que deux taches sont pilotees par les trous (complantation ET
+  // plantation), l'ancienne boucle additionnait `plantation_trous` une fois par
+  // tache et affichait le DOUBLE de plants reellement mis en terre. Les HEURES,
+  // elles, restent la somme par tache : c'est ce que fait _opParcFull, et les deux
+  // doivent rester d'accord sous peine de faire diverger le budget et son detail.
+  var n=parseInt(p.plantation_trous)||0, h=0, nT=0;
+  if(n>0) _ecoAllDefs().forEach(function(def){
+    if(!def || !def.trous || !_opApplic(p,def)) return;
+    nT++; h+=n*_opMinTrou(def)/60;
+  });
+  return { trous:(nT>0?n:0), h:h, nTaches:nT };
+}
+// Minutes par plant du domaine (CONFIG.plantation_min_trou, défaut 3).
+function _ecoMinTrou(){ return _opMinTrou(null); }
+
+
+// Heures tracteur RÉALISÉES par parcelle (saison consultée), depuis les sessions.
+// Miroir de _tractHoursSeason ventilé par parcelle (préfère dmin/60 si chrono).
+// ── Équipe RÉELLE par parcelle (journal) ─────────────────────────
+// Le coût MO d'une parcelle était « heures de barème × taux MOYEN du domaine » :
+// deux parcelles faites par des équipes très différentes coûtaient pareil. Le journal
+// sait qui était où : `qui` (le validateur) + `membresEquipe`. On en tire un effectif
+// et un taux PON DÉRÉ par les personnes réellement venues. Repli explicite sur le taux
+// moyen (_ecoRate) quand la parcelle n'a aucune entrée — le badge le dit à l'écran.
+// ⚠️ Le journal dit QUI et QUAND, jamais COMBIEN D'HEURES. Une personne présente sur
+//    3 parcelles le même jour compte 1/3 de journée sur chacune : c'est la seule
+//    convention inventée ici, elle est assumée et annoncée sous le tableau.
+function _ecoEquipeByParc(){
+  var out={};
+  var s=(typeof window._pilSaison==='function')?window._pilSaison():null;
+  var seasonNom=(s&&s.nom)?s.nom:'';
+  function _in(j){
+    var sn=(window._saisonForDate&&j.date)?window._saisonForDate(j.date):null; sn=sn||j.saison||'';
+    if(sn) return sn===seasonNom;
+    return seasonNom===(((window.getSaisonActive&&window.getSaisonActive())||{}).nom||'');
+  }
+  var byNom={}; (window.MEMBRES||[]).forEach(function(m){ if(m&&m.nom) byNom[m.nom]=m; });
+  var per={}, spread={};
+  (window.JOURNAL||[]).forEach(function(j){
+    if(!j||j.meteo||j.statut!=='Valid\u00e9'||!j.parcelle||!j.date) return;
+    if(!_in(j)) return;
+    var noms=[]; if(j.qui) noms.push(j.qui);
+    (j.membresEquipe||[]).forEach(function(n){ if(n && noms.indexOf(n)<0) noms.push(n); });
+    if(!noms.length) return;
+    var k=j.parcelle;
+    if(!per[k]) per[k]={jours:{}, noms:{}};
+    if(!per[k].jours[j.date]) per[k].jours[j.date]=[];
+    noms.forEach(function(n){
+      if(per[k].jours[j.date].indexOf(n)<0) per[k].jours[j.date].push(n);
+      per[k].noms[n]=1;
+      var sk=n+'\u0000'+j.date;
+      if(!spread[sk]) spread[sk]={};
+      spread[sk][k]=1;
+    });
+  });
+  Object.keys(per).forEach(function(k){
+    var e=per[k], dates=Object.keys(e.jours), jh=0, sum=0, wt=0;
+    dates.forEach(function(dt){
+      e.jours[dt].forEach(function(n){
+        var nb=Object.keys(spread[n+'\u0000'+dt]||{}).length||1;
+        // POIDS : une equipe collective (vendange) vaut son effectif, pas 1. Sans lui,
+        // une parcelle vendangee par 30 personnes comptait UNE journee-homme — l'ecart
+        // « cadence reelle vs bareme » etait donc faux d'un facteur 30 sur ces
+        // parcelles — et son taux etait la moyenne simple du chef et de l'equipe au
+        // lieu d'etre, a juste titre, celui de l'equipe.
+        var pw=(typeof window._mvPoidsNom==='function')?window._mvPoidsNom(n):1;
+        var w=pw/nb;
+        jh+=w;
+        // ★ TAUX A LA DATE DU TRAVAIL : `dt` est la date du journal. Une augmentation
+        // de juillet ne doit pas rechiffrer la taille de fevrier.
+        var m=byNom[n], r=(m&&window._mvPaieTauxEffAt)?Number(window._mvPaieTauxEffAt(m,dt)):0;
+        if(r>0){ sum+=r*w; wt+=w; }
+      });
+    });
+    out[k]={ etp:dates.length?jh/dates.length:0, jh:jh, nj:dates.length,
+             taux:(wt>0?sum/wt:0), noms:Object.keys(e.noms) };
+  });
+  return out;
+}
+
+// ── Surcoût de retard par parcelle ───────────────────────────────
+// Une tâche finie hors de sa fenêtre coûte plus d'heures : la vigne a poussé, on
+// démêle au lieu de relever. Barème CONFIG.eco.pen_retard_sem % par semaine de
+// dépassement, plafonné à CONFIG.eco.pen_plafond %. Fenêtre = cd.taskWindows
+// (paramétrable dans Pilotage › Paramétrage), fin réelle = dernière validation.
+// ⚠️ Ce surcoût est MODÉLISÉ, pas payé. Il est calculé et affiché À PART, jamais
+//    fondu dans le coût MO : une heure payée et une heure supposée ne se mélangent pas.
+function _ecoRetardCfg(){
+  var e=(window.CONFIG&&window.CONFIG.eco)||{};
+  var p=Number(e.pen_retard_sem); if(!(isFinite(p)&&p>=0)) p=5;
+  var c=Number(e.pen_plafond);    if(!(isFinite(c)&&c>0))  c=50;
+  return { sem:p/100, cap:c/100, pct:p, capPct:c };
+}
+function _ecoRetardByParc(){
+  var out={}, cfg=_ecoRetardCfg();
+  if(!(cfg.sem>0)) return out;
+  var cd=(window._chargeSaisonData&&window.getSaisonActive)?window._chargeSaisonData(window._pilSaison()):null;
+  if(!cd||!cd.taskWindows||!cd.taskWindows.length) return out;
+  var winBy={}; cd.taskWindows.forEach(function(t){ if(t&&t.nom) winBy[_friseNorm(t.nom)]=t; });
+  // Appartenance a la saison : MEME filtre que _ecoEquipeByParc / _ecoTracHByParc /
+  // _ecoPhytoByParc, c.-a-d. _saisonForDate et non les bornes cd.debut/cd.fin.
+  // Une tache finie en retard peut deborder la date de fin de saison : la borner
+  // ici reviendrait a effacer precisement le cas qu'on cherche a mesurer.
+  var seasonNom=(cd&&cd.saison)?cd.saison:'';
+  function _inR(j){
+    var sn=(window._saisonForDate&&j.date)?window._saisonForDate(j.date):null; sn=sn||j.saison||'';
+    if(sn) return sn===seasonNom;
+    return seasonNom===(((window.getSaisonActive&&window.getSaisonActive())||{}).nom||'');
+  }
+  var last={};
+  (window.JOURNAL||[]).forEach(function(j){
+    if(!j||j.meteo||j.statut!=='Valid\u00e9'||!j.parcelle||!j.tache||!j.date) return;
+    if(!_inR(j)) return;
+    var k=j.parcelle+'\u0000'+_friseNorm(j.tache);
+    if(!last[k]||j.date>last[k]) last[k]=j.date;
+  });
+  var defs=_ecoAllDefs();
+  (window.PARCELLES||[]).forEach(function(p){
+    if(!p||p.statut==='Arrachee') return;
+    var h=0, wkMax=0, nb=0;
+    defs.forEach(function(def){
+      if(!def||!_opApplic(p,def)) return;
+      var w=winBy[_friseNorm(def.nom)]; if(!w||!w.end) return;
+      var fin=last[p.nom+'\u0000'+_friseNorm(def.nom)]; if(!fin||fin<=w.end) return;
+      var wk=(Date.parse(fin+'T00:00:00')-Date.parse(w.end+'T00:00:00'))/86400000/7;
+      if(!(wk>0)) return;
+      if(wk>wkMax) wkMax=wk;
+      nb++;
+      h+=_opParcFull(p,def)*Math.min(cfg.cap,cfg.sem*wk);
+    });
+    if(h>0) out[p.nom]={ h:h, sem:wkMax, nb:nb };
+  });
+  return out;
+}
+
+// ════════ CARBURANT REEL : LES LITRES DES PLEINS, PAS UN MODELE ════════
+// AVANT : le carburant etait ESTIME — heures de session x conso L/h x prix du litre.
+//   Le total n'etait donc que la somme d'estimations, et une session non notee
+//   faisait DISPARAITRE du carburant.
+// POURQUOI CA NE TENAIT PAS : les heures de session ne sont pas systematiquement
+//   saisies. Elles servent d'abord a etablir les moyennes h/ha par travail, pas a
+//   mesurer un volume consomme. Batir un cout dessus, c'est batir sur une base
+//   volontairement partielle.
+// APRES : le total EST la somme des pleins reellement faits — fiches d'entretien
+//   portant `litres_plein`. Les heures ne servent plus qu'a REPARTIR cette enveloppe
+//   entre les parcelles. Une heure oubliee DEPLACE desormais du carburant d'une
+//   parcelle vers une autre ; elle n'en fait plus disparaitre.
+// ⚠️ CE QUI RESTE APPROCHE, ET QUI EST DIT A L'ECRAN : la CLE de repartition. Un plein
+//   est date et rattache a un TRACTEUR, jamais a une parcelle — aucune donnee ne dit
+//   quels litres ont brule sur quelle parcelle. L'enveloppe est juste, sa ventilation
+//   est proportionnelle. C'est l'inverse exact d'avant, ou la ventilation etait
+//   coherente et l'enveloppe fausse.
+// ⚠️ REPLI ASSUME : aucun plein releve sur la fenetre => l'ancien modele reprend la
+//   main, ET L'ECRAN LE DIT. Un chiffre estime annonce comme mesure serait pire que
+//   l'estime annonce comme tel.
+// Libelle du poste carburant. UNE seule formulation pour la campagne et pour
+// l'exercice : deux ecrans qui affichent le meme poste doivent le decrire pareil.
+function _pecGnrDet(src,litres,n,nSans,cle,pu){
+  if(src!=='reel'){
+    return _pilNum(litres)+' L ESTIM\u00c9S \u00e0 '+_ecoEur2(pu)+' \u20AC/L \u2014 aucun plein relev\u00e9'
+      +(nSans>0?(' ('+nSans+' plein'+(nSans>1?'s':'')+' sans litres)'):'');
+  }
+  return _pilNum(litres)+' L relev\u00e9s \u00b7 '+n+' plein'+(n>1?'s':'')
+    +(cle==='surface'?' \u00b7 r\u00e9parti \u00e0 la surface':'')
+    +(nSans>0?(' \u00b7 '+nSans+' plein'+(nSans>1?'s':'')+' sans litres, non compt\u00e9'+(nSans>1?'s':'')):'');
+}
+function _ecoGnrPuAt(iso){
+  var pu=(window._mvPaieGnrPuAt)?Number(window._mvPaieGnrPuAt(iso)):0;
+  if(isFinite(pu)&&pu>0) return pu;
+  return _ecoCfg().gnrL;
+}
+// `win` = {d0,d1} en ISO, sinon la campagne consultee. MEME regle d'appartenance que
+// _ecoTracHByParc / _ecoPhytoByParc (_saisonForDate), pour que les trois ecrans
+// parlent de la meme periode.
+function _ecoGnrReel(win){
+  var out={ L:0, eur:0, n:0, nSansLitres:0, nSansPrix:0, byDate:{}, litresByDate:{}, ok:false };
+  var s=(typeof window._pilSaison==='function')?window._pilSaison():null;
+  var seasonNom=(s&&s.nom)?s.nom:'';
+  function _in(iso){
+    if(win&&win.d0&&win.d1) return !!iso && iso>=win.d0 && iso<=win.d1;
+    var sn=(window._saisonForDate&&iso)?window._saisonForDate(iso):null; sn=sn||'';
+    if(sn) return sn===seasonNom;
+    return seasonNom===(((window.getSaisonActive&&window.getSaisonActive())||{}).nom||'');
+  }
+  (window.ENTRETIENS||[]).forEach(function(f){
+    if(!f||!f.plein) return;
+    var iso=String(f.date||'').slice(0,10);
+    if(!iso||!_in(iso)) return;
+    var L=Number(f.litres_plein)||0;
+    // ⚠️ Un plein coche SANS litres est compte a part, jamais ignore en silence : c'est
+    //   la seule facon de distinguer « peu de carburant » de « carburant mal releve ».
+    //   Les fiches anterieures a la saisie obligatoire tombent toutes ici.
+    if(!(L>0)){ out.nSansLitres++; return; }
+    var pu=_ecoGnrPuAt(iso);
+    if(!(pu>0)) out.nSansPrix++;
+    var e=L*(pu>0?pu:0);
+    out.n++; out.L+=L; out.eur+=e;
+    out.byDate[iso]=(out.byDate[iso]||0)+e;
+    out.litresByDate[iso]=(out.litresByDate[iso]||0)+L;
+  });
+  out.ok = out.n>0;
+  return out;
+}
+// Heures tracteur par parcelle + COÛT au taux du conducteur de chaque session.
+// Le tractoriste est un ouvrier du domaine la plupart du temps : son taux est connu
+// (fiche membre → `paie`). Le valoriser à la moyenne d'équipe sous-évaluait le poste
+// dès qu'un apprenti tirait la moyenne vers le bas sans jamais conduire.
+// Repli par session : conducteur inconnu ou sans taux → taux moyen (_ecoRate).
+// ★ FENETRE OPTIONNELLE `win` = {d0,d1} en ISO : filtre les sessions PAR DATES au
+//   lieu de la periode consultee. Sert a Pilotage > Economie > Exercice, qui raisonne
+//   entre deux bilans et non par campagne. APPELEE SANS ARGUMENT, LA FONCTION EST
+//   STRICTEMENT INCHANGEE — une seule definition de « ce que coute une session ».
+function _ecoTracHByParc(win){
+  var out={h:{},cost:{},qui:{},nAnon:0,nSess:0,byDate:{},gnrByDate:{},hByDate:{},condByDate:{}};
+  var _rate0=_ecoRate(), _cfgT=_ecoCfg();
+  var _mBy={}; (window.MEMBRES||[]).forEach(function(m){ if(m&&m.nom) _mBy[m.nom]=m; });
+  // ★ TAUX A LA DATE DE LA SESSION. Une session de mars se valorise au taux de mars,
+  // meme si le conducteur a ete augmente depuis.
+  function _tauxCond(nom, iso){
+    var m=nom?_mBy[nom]:null;
+    var r=(m&&window._mvPaieTauxEffAt)?Number(window._mvPaieTauxEffAt(m,iso)):0;
+    return (isFinite(r)&&r>0)?r:0;
+  }
+  var s=(typeof window._pilSaison==='function')?window._pilSaison():null;
+  var seasonNom=(s&&s.nom)?s.nom:'';
+  var sess=window.SESSIONS||[], acts=window.ACTIVITES||[], parcs=window.PARCELLES||[];
+  function _in(se){
+    if(win&&win.d0&&win.d1){ var _d=String(se.date||'').slice(0,10); return !!_d && _d>=win.d0 && _d<=win.d1; }
+    var sn=(window._saisonForDate&&se.date)?window._saisonForDate(se.date):null; sn=sn||se.saison||'';
+    if(sn) return sn===seasonNom;
+    return seasonNom===(((window.getSaisonActive&&window.getSaisonActive())||{}).nom||'');
+  }
+  sess.forEach(function(se){
+    if(!se||!_in(se)) return;
+    var act=acts.find(function(a){return a&&a.nom===se.activite;});
+    var hha=act?(parseFloat(act.h_ha)||0):0;
+    var _tc=_tauxCond(se.conducteur, se.date), _tu=(_tc>0?_tc:_rate0);
+    out.nSess++; if(!(_tc>0)) out.nAnon++;
+    (se.parcellesFaites||[]).forEach(function(x){
+      var nom=(typeof x==='string')?x:((x&&x.nom)||''); if(!nom) return;
+      var d=(x&&typeof x==='object'&&typeof x.dmin==='number')?x.dmin:null, h;
+      if(d!=null){ h=d/60; }
+      else { if(hha<=0) return; var p=parcs.find(function(pp){return pp&&pp.nom===nom;}); h=(p?(parseFloat(p.surface)||0):0)*hha; }
+      out.h[nom]=(out.h[nom]||0)+h;
+      out.cost[nom]=(out.cost[nom]||0)+h*_tu;
+      // Source DATEE de la courbe d'engagement : conduite + carburant de CETTE session.
+      // Une seule definition de « ce que coute une session » — celle-ci.
+      if(se.date){
+        out.byDate[se.date]=(out.byDate[se.date]||0)+h*_tu+h*_cfgT.conso*_cfgT.gnrL;
+        // ★ AJOUT PUR : la CONDUITE seule, sans carburant. `byDate` ci-dessus melange les
+        //   deux et reste le REPLI (aucun plein releve). Des qu'on a des pleins, la courbe
+        //   d'engagement veut la conduite a la date de la SESSION et le carburant a la date
+        //   du PLEIN : deux evenements dates, et ce ne sont pas les memes dates.
+        out.condByDate[se.date]=(out.condByDate[se.date]||0)+h*_tu;
+        // ★ AJOUT PUR : la courbe d'engagement de la campagne veut le total (conduite +
+        //   carburant) ; l'exercice comptable veut le CARBURANT SEUL, parce que la conduite
+        //   est deja dans la masse salariale du planning. Deux besoins, un seul parcours.
+        out.gnrByDate[se.date]=(out.gnrByDate[se.date]||0)+h*_cfgT.conso*_cfgT.gnrL;
+        out.hByDate[se.date]=(out.hByDate[se.date]||0)+h;
+      }
+      if(se.conducteur){ if(!out.qui[nom]) out.qui[nom]={}; out.qui[nom][se.conducteur]=(out.qui[nom][se.conducteur]||0)+h; }
+    });
+  });
+  return out;
+}
+// Données économiques par parcelle (triées par coût/ha décroissant).
+function _ecoPhNorm(s){ return String(s==null?'':s).toLowerCase().normalize('NFD').replace(/[\u0300-\u036f]/g,'').replace(/[^a-z0-9]+/g,' ').trim(); }
+// Coût phyto par parcelle : dose_val × surface × prix unitaire de l'intrant (La Réserve).
+// Doses depuis TRAITEMENTS (structurées par l'assistant de traitement) ; prix depuis
+// INTRANTS.produits[].prixU. Conversion g→kg alignée sur reserve.js._conso. Honnête :
+// entrée sans dose_val = ignorée ; produit sans intrant/prix = non chiffré (signalé).
+// ★ Meme fenetre optionnelle que _ecoTracHByParc, meme raison, meme garantie :
+//   sans argument, comportement identique a la version precedente.
+function _ecoPhytoByParc(win){
+  var INT=(window.INTRANTS&&Array.isArray(window.INTRANTS.produits))?window.INTRANTS.produits:[];
+  var priceBy={};
+  // ★ Le prix unitaire vient du PMP des achats (window._rsvPrixU, La Reserve),
+  //   plus de `pr.prixU` — ce champ n'a jamais eu d'interface d'ecriture et
+  //   valait undefined chez tous les domaines reels. L'appel est GARDE : sans
+  //   reserve.js (module charge en DERNIER dans l'ordre d'import), on retombe
+  //   sur l'ancien champ au lieu de planter.
+  INT.forEach(function(pr){
+    if(!pr||pr.nom==null) return;
+    var k=_ecoPhNorm(pr.nom); if(k in priceBy) return;
+    var u=(typeof window._rsvPrixU==='function')?(Number(window._rsvPrixU(pr))||0):0;
+    if(!(u>0)) u=(Number(pr.prixU)>0)?Number(pr.prixU):0;
+    priceBy[k]=(u>0)?u:null;
+  });
+  var s=(typeof window._pilSaison==='function')?window._pilSaison():null;
+  var seasonNom=(s&&s.nom)?s.nom:'';
+  function _in(t){
+    if(win&&win.d0&&win.d1){ var _d=String(t.date||'').slice(0,10); return !!_d && _d>=win.d0 && _d<=win.d1; }
+    var sn=(window._saisonForDate&&t.date)?window._saisonForDate(t.date):null; sn=sn||t.saison||'';
+    if(sn) return sn===seasonNom;
+    return seasonNom===(((window.getSaisonActive&&window.getSaisonActive())||{}).nom||'');
+  }
+  var cost={}, unpriced={}, anyDose=false, byDate={};
+  (window.TRAITEMENTS||[]).forEach(function(e){
+    if(!e||!_in(e)) return;
+    if(e.dose_val==null||isNaN(e.dose_val)) return; // pas structuré → exclu du calcul
+    anyDose=true;
+    var base=String(e.dose_unit||'').toLowerCase().split('/')[0];
+    var pu=priceBy[_ecoPhNorm(e.produit)];
+    if(pu==null){ unpriced[e.produit||'?']=1; return; }
+    (e.parcelles||[]).forEach(function(nom){
+      var p=(window.PARCELLES||[]).find(function(x){ return x&&x.nom===nom; });
+      var surf=p?(parseFloat(p.surface)||0):0; if(surf<=0) return;
+      var qty=e.dose_val*surf*(base==='g'?0.001:1), eur=qty*pu;
+      cost[nom]=(cost[nom]||0)+eur;
+      if(e.date) byDate[e.date]=(byDate[e.date]||0)+eur;
+    });
+  });
+  return { cost:cost, unpriced:Object.keys(unpriced), anyDose:anyDose, hasIntrants:INT.length>0, byDate:byDate };
+}
+
+// ════════════════════════════════════════════════════════════════════════════════
+// ÉCONOMIE — refonte « outil de pilotage économique »
+// ════════════════════════════════════════════════════════════════════════════════
+// Ce que le module faisait avant : un seul chiffre, « Coût projeté saison », qui
+// additionnait un BUDGET de main-d'oeuvre (barème h/ha sur toute la période) et du
+// RÉALISÉ (tracteur, GNR, phyto à ce jour). Ni un budget, ni une dépense : rien
+// qu'on puisse piloter. Aucun graphique, aucune notion de rythme, aucun coût par
+// travail, aucun prix de revient.
+//
+// Le modèle retenu tient en quatre mots, et ce sont les seuls :
+//   BUDGET   — ce que la période coûtera si tout se fait au barème
+//   ENGAGÉ   — ce qui est déjà consommé à date (travail fait × taux, + réalisé)
+//   RESTE    — budget − engagé
+//   DÉRIVE   — % de budget consommé MOINS % de travail fait, en points
+// La dérive est le seul indicateur qui dise quelque chose : à 62 % de budget pour
+// 48 % de travail, la période finira 29 % au-dessus. Tout le reste en découle.
+//
+// Trois règles de méthode, tenues partout :
+//  1. Rien n'est inventé. Les heures viennent de _opParcFull / _opParcReste (les
+//     MÊMES fonctions que l'ordre de passage et le simulateur), les taux de `paie`,
+//     les heures tracteur des sessions, les doses du registre, les prix de La Réserve.
+//  2. Ce qui est projeté est dit projeté. Le tracteur, le GNR et le phyto ne sont
+//     connus qu'en réalisé : leur part de budget est une extrapolation au rythme
+//     constaté, affichée comme telle, et neutralisée sous 15 % d'avancement.
+//  3. Le surcoût de retard reste modélisé et tenu à part. Une heure supposée
+//     n'entre dans aucun total payé.
+// ════════════════════════════════════════════════════════════════════════════════
+
+// Palette des postes — une couleur, un poste, partout (KPI, donut, barres, tableau).
+var _PEC_COL = { mo:'#8A5A38', trac:'#2C3E50', gnr:'#C2871E', phy:'#5B2D8E', ret:'#B85A1A', dep:'#1A4A7A' };
+// ── LES ATELIERS — la DESTINATION de l'euro, pas sa nature ──────────────────
+// Economie trie par NATURE (salaire / carburant / achat / depense). L'atelier
+// est un SECOND AXE sur les MEMES euros : ou est parti l'argent, pas ce qu'on a
+// paye. Deux lectures, jamais deux totaux.
+// ⚠️ Le mot est « atelier » et pas « poste » : `poste` designe deja la nature
+//   (_PEC_COL, sous-vue `pos`). Deux sens pour un mot dans le meme ecran, c'est
+//   la confusion garantie a la premiere relecture.
+// ⚠️ La table vit dans reserve.js (module proprietaire d'INTRANTS) et n'est
+//   RECOPIEE nulle part : ces replis ne servent que si reserve.js est en retard
+//   chez un client, jamais comme seconde verite.
+var _PEX_ATE_ORD=['vigne','cave','trac','gen'];
+var _PEX_ATE_LBL={vigne:'Vigne',cave:'Cave',trac:'Tracteur',gen:'Non affect\u00e9'};
+var _PEX_ATE_COL={vigne:'#3D6B27',cave:'#8A5A38',trac:'#2C3E50',gen:'#DED7C9'};
+function _pexAteOrd(){ return (typeof window._rsvAteOrdre==='function')?window._rsvAteOrdre():_PEX_ATE_ORD.slice(); }
+function _pexAteLbl(k){ return (typeof window._rsvAteLbl==='function')?window._rsvAteLbl(k):(_PEX_ATE_LBL[k]||_PEX_ATE_LBL.gen); }
+// ⚠️ Meme couleur que reserve.js, y compris pour le seau. J'avais fonce le gris
+//   « pour qu'il se voie mieux » — la maquette dit #DED7C9 et elle a ete validee.
+//   Une maquette validee est une decision prise : la rouvrir a l'integration,
+//   c'est decider a la place de Nico sans le lui dire.
+function _pexAteCol(k){ return _PEX_ATE_COL[k]||_PEX_ATE_COL.gen; }
+function _pexAteDe(cat){
+  if(typeof window._rsvAteDe==='function') return window._rsvAteDe(cat);
+  var T={phyto:'vigne',oeno:'cave',vigne:'vigne',cave:'cave',trac:'trac',gen:'gen'};
+  return T[cat]||'gen';
+}
+
+// ── Formats ──────────────────────────────────────────────────────────
+// Un tableau de chiffres se lit mal en euros pleins : au-dela de 10 000 EUR on
+// passe en milliers, avec UNE decimale. Les totaux, eux, restent en euros exacts.
+function _pecEurK(n){
+  var v=Number(n)||0, a=Math.abs(v);
+  if(a>=10000) return (Math.round(v/100)/10).toLocaleString('fr-FR',{minimumFractionDigits:1,maximumFractionDigits:1})+' k\u20AC';
+  return _ecoEur(v);
+}
+function _pecPct(n){ return (Math.round((Number(n)||0)*10)/10).toLocaleString('fr-FR',{minimumFractionDigits:0,maximumFractionDigits:1})+' %'; }
+function _pecMoisCourt(m){ return ['janv.','f\u00e9vr.','mars','avr.','mai','juin','juil.','ao\u00fbt','sept.','oct.','nov.','d\u00e9c.'][m]||''; }
+function _pecIsoToMs(iso){ var t=Date.parse(String(iso||'')+'T00:00:00'); return isNaN(t)?null:t; }
+function _pecMsToIso(ms){ var d=new Date(ms); var m=d.getMonth()+1, j=d.getDate(); return d.getFullYear()+'-'+(m<10?'0':'')+m+'-'+(j<10?'0':'')+j; }
+function _pecDfrMs(ms){ var d=new Date(ms); return d.getDate()+' '+_pecMoisCourt(d.getMonth())+' '+d.getFullYear(); }
+
+// ── État de la vue (par utilisateur, par domaine) ────────────────────
+// Trois choix memorises : la sous-vue ouverte, le tri du tableau parcelles et son
+// sens. L'ancienne version repartait a zero a chaque ouverture « volontairement » ;
+// sur un outil qu'on consulte deux fois par jour, c'est une friction, pas une regle.
+var _PEC_SUB='syn', _PEC_PSORT='budget', _PEC_PDIR=-1;
+// Axe de lecture des consommables : 'nat' (par nature, l'axe historique) ou
+// 'ate' (par atelier). Memorise comme le reste de l'etat de la vue.
+var _PEC_AXE='ate';
+function _pecStKey(){ return 'mavigne_pec_'+_pilTenant(); }
+function _pecLoadSt(){
+  try{
+    var raw=localStorage.getItem(_pecStKey()); if(!raw) return;
+    var o=JSON.parse(raw); if(!o||typeof o!=='object') return;
+    if(o.sub==='syn'||o.sub==='pos'||o.sub==='par'||o.sub==='ach'||o.sub==='exe') _PEC_SUB=o.sub;
+    if(o.axe==='nat'||o.axe==='ate') _PEC_AXE=o.axe;
+    // Exercice consulte : une annee d'OUVERTURE, ou null = celui d'aujourd'hui.
+    _PEX_AN=(typeof o.exan==='number'&&isFinite(o.exan))?o.exan:null;
+    if(typeof o.psort==='string') _PEC_PSORT=o.psort;
+    if(o.pdir===1||o.pdir===-1) _PEC_PDIR=o.pdir;
+  }catch(e){ _PEC_SUB='syn'; }
+}
+function _pecSaveSt(){
+  try{ localStorage.setItem(_pecStKey(), JSON.stringify({sub:_PEC_SUB,psort:_PEC_PSORT,pdir:_PEC_PDIR,exan:_PEX_AN,axe:_PEC_AXE})); }
+  catch(e){ if(window.logError) window.logError({level:'info',cat:'pilotage',msg:'pec state'}); }
+}
+
+// ── Feuille de style, injectee une fois ──────────────────────────────
+// Le module vit dans src/styles.css comme tout le reste, MAIS ce lot ne devait
+// toucher qu'un seul fichier : toucher styles.css impose un bump APP + SW et un
+// re-deploiement de l'app entiere pour un onglet. Le bloc est donc porte par le
+// module qui l'utilise, sous un prefixe verifie sans collision (.pec-), et pose
+// une seule fois (idempotent). Rien n'empeche de le remonter dans styles.css plus
+// tard : les selecteurs sont deja ecrits pour.
+function _pecCss(){
+  if(document.getElementById('pec-css')) return;
+  var css=''
+  +'.pec-wrap{display:flex;flex-direction:column;gap:16px}'
+  +'.pec-subnav{display:flex;align-items:center;justify-content:space-between;gap:12px;flex-wrap:wrap}'
+  +'.pec-sub{display:inline-flex;border:1px solid var(--gris-clair);border-radius:12px;padding:3px;gap:3px;background:var(--bg-app);flex-wrap:wrap}'
+  +'.pec-sub button{border:0;background:transparent;color:var(--texte-doux);font-family:inherit;font-size:var(--pt-txt,12.5px);font-weight:600;padding:9px 15px;border-radius:9px;cursor:pointer;min-height:40px;white-space:nowrap}'
+  +'.pec-sub button.on{background:var(--bg-card);color:var(--texte);box-shadow:var(--shadow-sm)}'
+  +'.pec-card{background:var(--bg-card);border:1px solid var(--gris-clair);border-radius:15px;box-shadow:var(--shadow-sm);overflow:hidden;position:relative}'
+  +'.pec-ch{display:flex;align-items:baseline;justify-content:space-between;gap:10px 18px;padding:15px 18px 8px;flex-wrap:wrap}'
+  +'.pec-ct{font-family:\'Cormorant Garamond\',serif;font-size:var(--pt-md,20px);font-weight:600;color:var(--texte);line-height:1.15}'
+  +'.pec-cs{font-size:var(--pt-micro,11px);color:var(--texte-doux);line-height:1.5;flex:1;min-width:180px}'
+  +'.pec-cb{padding:2px 18px 18px}'
+  +'.pec-svg{max-width:100%;height:auto;display:block}'
+  +'.pec-lg i{width:16px;height:0;display:inline-block;flex:none}'
+  +'.pec-kpis{display:grid;grid-template-columns:repeat(auto-fit,minmax(196px,1fr));border-top:1px solid var(--gris-clair)}'
+  +'.pec-k{padding:15px 20px;border-right:1px solid var(--gris-clair);border-bottom:1px solid var(--gris-clair);margin-bottom:-1px}'
+  +'.pec-k .l{display:flex;align-items:center;gap:6px;font-size:var(--pt-lbl,10.5px);font-weight:600;letter-spacing:1.6px;text-transform:uppercase;color:var(--texte-doux)}'
+  +'.pec-k .v{font-family:\'Cormorant Garamond\',serif;font-size:var(--pt-xxl,31px);font-weight:600;margin-top:3px;line-height:1.05;color:var(--texte);font-variant-numeric:tabular-nums}'
+  +'.pec-k .v small{font-size:var(--pt-txt,12.5px);font-weight:600;color:var(--texte-doux)}'
+  +'.pec-k .s{font-size:var(--pt-micro,11px);color:var(--texte-doux);margin-top:4px;line-height:1.45}'
+  +'.pec-bar{height:11px;border-radius:6px;background:var(--gris-clair);overflow:hidden;display:flex}'
+  +'.pec-bar i{display:block;height:100%}'
+  +'.pec-leg{display:flex;flex-wrap:wrap;gap:7px 18px;margin-top:11px}'
+  +'.pec-lg{display:inline-flex;align-items:center;gap:7px;font-size:var(--pt-micro,11px);color:var(--texte-med)}'
+  +'.pec-lg em{width:11px;height:11px;border-radius:3px;display:inline-block;font-style:normal;flex:none}'
+  +'.pec-lg b{color:var(--texte);font-variant-numeric:tabular-nums}'
+  +'.pec-scroll{width:100%;overflow-x:auto;-webkit-overflow-scrolling:touch}'
+  +'.pec-tbl{width:100%;border-collapse:collapse;font-size:var(--pt-txt,12.5px);min-width:620px}'
+  +'.pec-tbl th{text-align:left;font-size:var(--pt-nano,9.5px);text-transform:uppercase;letter-spacing:.07em;color:var(--texte-doux);padding:9px 10px;border-bottom:1px solid var(--gris-clair);white-space:nowrap;font-weight:700}'
+  +'.pec-tbl th.s{cursor:pointer;user-select:none}'
+  +'.pec-tbl th.s:hover{color:var(--texte)}'
+  +'.pec-tbl th.on{color:var(--texte)}'
+  +'.pec-tbl td{padding:10px;border-bottom:1px solid var(--gris-clair);vertical-align:middle;color:var(--texte-med)}'
+  +'.pec-tbl td.r,.pec-tbl th.r{text-align:right;font-variant-numeric:tabular-nums;white-space:nowrap}'
+  +'.pec-tbl td.n{color:var(--texte);font-weight:600}'
+  +'.pec-tbl tbody tr:last-child td{border-bottom:0}'
+  +'.pec-tbl tfoot td{border-top:2px solid var(--gris);border-bottom:0;font-weight:700;color:var(--texte);padding-top:12px}'
+  // ══ LA CARTE DE FIABILITE ══
+  //   .pec-a (le pave colore) n'est plus produit par _pecAlertes ; ses regles
+  //   restent en place, d'autres vues peuvent encore s'en servir.
+  +'.pec-fia{border:1px solid;border-radius:13px;padding:13px 15px}'
+  +'.pec-fia.bad{background:var(--rouge-pale);border-color:rgba(160,41,30,.35)}'
+  +'.pec-fia.ok{background:var(--vert-pale);border-color:rgba(61,107,39,.3)}'
+  +'.pec-fia-h{display:flex;align-items:center;gap:13px}'
+  +'.pec-fia-n{font-family:\'Cormorant Garamond\',serif;font-size:var(--pt-xxl,31px);font-weight:700;line-height:1;flex:none;font-variant-numeric:tabular-nums}'
+  +'.pec-fia.bad .pec-fia-n{color:var(--rouge)}'
+  +'.pec-fia.ok .pec-fia-n{color:var(--vert-med)}'
+  +'.pec-fia-h>div{flex:1;min-width:0}'
+  +'.pec-fia-t{font-size:var(--pt-txt,12.5px);font-weight:700;color:var(--texte);line-height:1.3}'
+  +'.pec-fia-s{font-size:var(--pt-micro,11px);color:var(--texte-doux);margin-top:2px;line-height:1.4}'
+  +'.pec-fia-go{display:flex;flex-wrap:wrap;gap:7px;margin-top:11px}'
+  +'.pec-fia-x{font-size:var(--pt-micro,11px);color:var(--texte-doux);font-style:italic;align-self:center}'
+  //   La puce des remarques : le mur, replie en une ligne cliquable.
+  +'.pec-remq{display:flex;align-items:center;gap:9px;width:100%;margin-top:10px;padding:10px 13px;'
+  +'border:1px solid var(--gris);background:var(--bg-card);border-radius:11px;cursor:pointer;'
+  +'font-family:inherit;font-size:var(--pt-txt,12.5px);font-weight:600;color:var(--texte-med);text-align:left}'
+  +'.pec-remq:hover{border-color:var(--or);background:var(--or-pale)}'
+  +'.pec-remq-n{flex:none;min-width:21px;height:21px;border-radius:7px;background:var(--or);color:#1C1813;'
+  +'display:flex;align-items:center;justify-content:center;font-size:var(--pt-micro,11px);font-weight:800}'
+  +'.pec-remq-c{margin-left:auto;color:var(--texte-doux)}'
+  +'.pec-a{display:flex;gap:10px;align-items:flex-start;padding:12px 14px;border-radius:12px;border:1px solid;font-size:var(--pt-txt,12.5px);line-height:1.55;color:var(--texte-med)}'
+  +'.pec-a+.pec-a{margin-top:9px}'
+  +'.pec-a .e{font-size:var(--pt-base,14px);line-height:1.3;flex:none}'
+  +'.pec-a b{color:var(--texte)}'
+  +'.pec-a.bad{background:var(--rouge-pale);border-color:rgba(160,41,30,.35)}'
+  +'.pec-a.warn{background:var(--orange-pale);border-color:rgba(184,90,26,.35)}'
+  +'.pec-a.info{background:var(--or-pale);border-color:rgba(194,161,77,.42)}'
+  +'.pec-a.ok{background:var(--vert-pale);border-color:rgba(61,107,39,.32)}'
+  +'.pec-btn{border:1px solid var(--gris-clair);background:var(--bg-card);color:var(--texte-med);border-radius:10px;padding:10px 14px;font-family:inherit;font-size:var(--pt-txt,12.5px);font-weight:600;cursor:pointer;min-height:42px;display:inline-flex;align-items:center;gap:7px}'
+  +'.pec-btn:hover{background:var(--bg-app);color:var(--texte)}'
+  +'.pec-acts{display:flex;gap:9px;flex-wrap:wrap;margin-top:14px}'
+  +'.pec-tbl tr.pex-ag td{background:var(--bg-app);font-weight:700;color:var(--texte);font-size:var(--pt-micro,11px);text-transform:uppercase;letter-spacing:.06em;padding:7px 10px}'
+  +'.pec-tbl tr.pex-ag td em{width:9px;height:9px;border-radius:3px;display:inline-block;font-style:normal;margin-right:7px}'
+  +'.pach-p{border:1px dashed var(--gris);background:transparent;color:var(--texte);border-radius:8px;padding:5px 10px;font:inherit;font-size:var(--pt-txt,12.5px);font-weight:700;cursor:pointer;white-space:nowrap}'
+  +'.pach-p:hover{border-style:solid;border-color:var(--or);background:var(--or-pale)}'
+  +'.pach-p.vide{color:var(--orange);border-style:dotted}'
+  +'.pach-p.ok{color:var(--vert-med)}'
+  +'.pec-btn.on{background:var(--bg-app);color:var(--texte);border-color:var(--gris)}'
+  +'.pex-apill{display:inline-block;font-size:var(--pt-lbl,10.5px);font-weight:600;border-radius:7px;padding:3px 8px;line-height:1.4;white-space:nowrap}'
+  +'.pex-ctrl{margin-top:14px;border:1px dashed var(--gris);border-radius:13px;padding:12px 15px;background:var(--bg-app);font-size:var(--pt-micro,11px);color:var(--texte-doux);line-height:1.7}'
+  +'.pex-ctrl .l{font-size:var(--pt-lbl,10.5px);letter-spacing:.14em;text-transform:uppercase;font-weight:700;color:var(--texte-med);margin-bottom:2px}'
+  +'.pex-ctrl b{color:var(--texte)}'
+  +'.pex-ctrl b.ok{color:var(--vert-med)}'
+  +'.pex-ctrl.bad{border-color:rgba(160,41,30,.45);background:var(--rouge-pale)}'
+  +'.pex-ctrl b.ko{color:var(--rouge)}'
+  +'.pec-note{font-size:var(--pt-micro,11px);color:var(--texte-doux);line-height:1.6;margin-top:12px}'
+  +'.pec-note b{color:var(--texte-med)}'
+  +'.pec-verdict{display:flex;gap:15px;align-items:flex-start;padding:17px 20px}'
+  +'.pec-verdict .em{line-height:1;flex:none}'
+  +'.pec-verdict .t{font-family:\'Cormorant Garamond\',serif;font-size:var(--pt-lg,23px);font-weight:600;color:var(--texte);line-height:1.22}'
+  +'.pec-verdict .d{font-size:var(--pt-txt,12.5px);color:var(--texte-doux);margin-top:5px;line-height:1.6}'
+  +'.pec-verdict .d b{color:var(--texte-med)}'
+  // ★ MEME GRAMMAIRE QUE LA CARTE A TROIS ETAGES : filet dore devant, meme
+  //   taille, meme encre. Partout ou ce filet apparait, la phrase qui suit dit
+  //   SUR QUOI le chiffre au-dessus a ete calcule.
+  //   ⚠️ Le texte est enveloppe dans un <span> : dans un conteneur flex, CHAQUE
+  //     element enfant devient un item a part. Sans le span, le <b> du nom de
+  //     campagne formait sa propre colonne et la phrase se coupait en morceaux.
+  //     Vu a la capture, pas au preflight — aucun controle ne lit une mise en page.
+  +'.pec-vcadre{display:flex;align-items:flex-start;gap:7px;margin-top:9px;font-size:var(--pt-micro,11px);line-height:1.45;color:var(--texte-doux)}'
+  +'.pec-vcadre::before{content:"";width:2px;align-self:stretch;min-height:13px;border-radius:2px;background:var(--or);opacity:.85;flex:none;margin-top:1px}'
+  +'.pec-vcadre>span{flex:1;min-width:0}'
+  +'.pec-vcadre b{color:var(--texte-med)}'
+  +'.pec-vgo{display:flex;flex-wrap:wrap;gap:7px;margin-top:11px}'
+  +'.pec-pill{display:inline-block;font-size:var(--pt-lbl,10.5px);font-weight:700;border-radius:9px;padding:3px 9px;line-height:1.5}'
+  +'.pec-mini{display:grid;grid-template-columns:repeat(auto-fit,minmax(140px,1fr));gap:1px;background:var(--gris-clair);border-radius:12px;overflow:hidden;border:1px solid var(--gris-clair)}'
+  +'.pec-mini>div{background:var(--bg-card);padding:12px 14px}'
+  +'.pec-mini .l{font-size:var(--pt-nano,9.5px);font-weight:700;letter-spacing:1.3px;text-transform:uppercase;color:var(--texte-doux)}'
+  +'.pec-mini .v{font-family:\'Cormorant Garamond\',serif;font-size:var(--pt-lg,23px);font-weight:600;color:var(--texte);margin-top:2px;line-height:1.1;font-variant-numeric:tabular-nums}'
+  +'.pec-mini .v small{font-size:var(--pt-txt,12.5px);color:var(--texte-doux);font-weight:600}'
+  +'.pec-mini .s{font-size:var(--pt-lbl,10.5px);color:var(--texte-doux);margin-top:2px;line-height:1.4}'
+  +'.pec-empty{font-size:var(--pt-txt,12.5px);color:var(--texte-doux);font-style:italic;padding:14px 2px}'
+  +'.pec-grid2{display:grid;grid-template-columns:220px 1fr;gap:22px;align-items:center}'
+  +'@media(max-width:880px){.pec-grid2{grid-template-columns:1fr;gap:14px}}'
+  +'.pex-bar{display:flex;align-items:center;justify-content:space-between;gap:12px;flex-wrap:wrap}'
+  +'.pex-win{font-size:var(--pt-txt,12.5px);color:var(--texte-doux);font-weight:600}'
+  +'.pex-win b{color:var(--texte)}'
+  +'.pex-set{display:flex;align-items:flex-start;justify-content:space-between;gap:14px;flex-wrap:wrap}'
+  +'.pex-setl{font-size:var(--pt-base,14px);font-weight:600;color:var(--texte)}'
+  +'.pex-sets{font-size:var(--pt-micro,11px);color:var(--texte-doux);line-height:1.55;margin-top:3px;max-width:640px}'
+  +'.pex-selm{padding:9px 11px;border:1.5px solid var(--gris-clair);border-radius:10px;font-family:inherit;font-size:var(--pt-base,14px);background:var(--bg-app);color:var(--texte);min-height:42px;box-sizing:border-box}'
+  +'.pex-warn{border-left:3px solid var(--or);padding-left:13px}'
+  +'.pex-warn .t{font-family:\'Cormorant Garamond\',serif;font-size:var(--pt-md,20px);font-weight:600;color:var(--texte);line-height:1.25}'
+  +'.pex-warn .d{font-size:var(--pt-txt,12.5px);color:var(--texte-doux);margin-top:5px;line-height:1.6}'
+  +'.pex-warn .d b{color:var(--texte-med)}'
+  +'@media(max-width:640px){.pex-set{flex-direction:column}.pex-selm{width:100%}.pec-k{padding:13px 15px}.pec-k .v{font-size:var(--pt-xl,27px)}.pec-ct{font-size:var(--pt-md,20px)}.pec-verdict .t{font-size:var(--pt-md,20px)}.pec-subnav{align-items:flex-start}}';
+  var st=document.createElement('style');
+  st.id='pec-css'; st.textContent=css;
+  document.head.appendChild(st);
+}
+
+// ── Récolte de la période (kg) : la seule voie vers un prix de revient ──
+// rendement_hist est écrit par le Cuvier (_vendRecordRendement) : {millesime, kg,
+// kg_ha, date, …}. On prend d'abord les entrées DATÉES dans la période consultée —
+// exact, sans deviner de millésime. À défaut, le millésime le plus récent, annoncé
+// comme tel : un prix de revient calculé sur la récolte de l'an dernier reste utile,
+// à condition de ne jamais faire croire que c'est celle de l'année.
+function _pecRecolte(){
+  var s=(typeof window._pilSaison==='function')?window._pilSaison():null;
+  var d1=(s&&s.debut)?s.debut:null, d2=(s&&s.fin)?s.fin:null;
+  var P=(window.PARCELLES||[]).filter(function(p){ return p && p.statut!=='Arrachee'; });
+  function kgOf(p,r){
+    var v=Number(r&&r.kg)||0;
+    if(!(v>0)){ var kh=Number(r&&r.kg_ha)||0; if(kh>0) v=kh*(parseFloat(p.surface)||0); }
+    return v>0?v:0;
+  }
+  var kg=0, ha=0, n=0, mil=null;
+  if(d1&&d2){
+    P.forEach(function(p){
+      var sk=0, got=false;
+      (Array.isArray(p.rendement_hist)?p.rendement_hist:[]).forEach(function(r){
+        if(!r||!r.date||r.date<d1||r.date>d2) return;
+        var v=kgOf(p,r); if(v>0){ sk+=v; got=true; if(r.millesime!=null) mil=r.millesime; }
+      });
+      if(got){ kg+=sk; ha+=(parseFloat(p.surface)||0); n++; }
+    });
+    if(kg>0) return { kg:kg, ha:ha, n:n, mil:mil, src:'saison' };
+  }
+  var best=null;
+  P.forEach(function(p){ (Array.isArray(p.rendement_hist)?p.rendement_hist:[]).forEach(function(r){
+    var m=Number(r&&r.millesime)||0; if(m>0 && (best===null||m>best)) best=m; }); });
+  if(best===null) return { kg:0, ha:0, n:0, mil:null, src:'' };
+  kg=0; ha=0; n=0;
+  P.forEach(function(p){
+    var sk=0, got=false;
+    (Array.isArray(p.rendement_hist)?p.rendement_hist:[]).forEach(function(r){
+      if(!r||Number(r.millesime)!==best) return;
+      var v=kgOf(p,r); if(v>0){ sk+=v; got=true; }
+    });
+    if(got){ kg+=sk; ha+=(parseFloat(p.surface)||0); n++; }
+  });
+  return { kg:kg, ha:ha, n:n, mil:best, src:(kg>0?'hist':'') };
+}
+// Kilos de raisin par bouteille — hypothèse de conversion, JAMAIS une mesure.
+// Réglable dans Pilotage › Outils › Paramétrage. 1,3 kg/col est l'ordre de grandeur
+// bourguignon usuel (≈ 130 kg pour 1 hL) ; chaque domaine a le sien.
+function _pecKgB(){ var v=Number(((window.CONFIG&&window.CONFIG.eco)||{}).kg_bouteille); return (isFinite(v)&&v>0)?v:1.3; }
+// Journee de reference : convertit les journees-personnes du journal en heures, base
+// de l'ecart de cadence. Defaut 7 h, aligne sur le simulateur de renfort (_rfCfg.hJour).
+// UN SEUL lecteur : le defaut vivait en dur dans _pecData, il y aurait diverge du jour
+// ou le champ est devenu reglable.
+function _pecHJour(){ var v=Number(((window.CONFIG&&window.CONFIG.eco)||{}).h_jour); return (isFinite(v)&&v>0)?v:7; }
+
+// ── Moteur : budget / engagé / reste, par parcelle ET par travail ────
+// Les heures viennent de _opParcFull (budget) et _opParcReste (restant), c.-à-d.
+// EXACTEMENT le même moteur que l'ordre de passage et le simulateur de renfort.
+// Aucune troisième définition de « combien d'heures » dans ce fichier.
+// ── Presence reelle du domaine sur la periode consultee ──────────────
+// Source unique : _planWorkPersRange (planning.js), la MEME que Economie > Exercice.
+// On ne redefinit pas « combien d'heures a-t-on travaille » une seconde fois.
+//
+// ⚠ FENETRE : bornee a aujourd'hui, mais on verifie d'ABORD que la periode a
+// commence. Sans ce test, une periode a venir (debut 10/08 alors qu'on est le 09)
+// donne une fenetre a l'envers : la boucle ne tourne pas une seule fois et tout
+// sort a zero, sans erreur et sans trace. Meme famille que _mvFutParc() appelee
+// sans arguments. Vecu pendant la mesure qui a mene a ce lot.
+var _PEC_CAD_AVC = 0.40;   // avancement minimum pour afficher la cadence
+function _pecCadPresence(){
+  var s=(typeof window._pilSaison==='function')?window._pilSaison():null;
+  if(!s||!s.debut||!s.fin) return null;
+  if(typeof window._planWorkPersRange!=='function') return null;
+  var now=new Date(), t=_pexIso(now.getFullYear(), now.getMonth(), now.getDate());
+  var d0=String(s.debut).slice(0,10), d1=String(s.fin).slice(0,10);
+  if(d1>t) d1=t;
+  if(d1<d0) return null;                       // periode pas encore commencee
+  var okPer=(typeof window._mvEnContratSurPeriode==='function');
+  var mbrs=(window.MEMBRES||[]).filter(function(m){
+    if(!m||!m.nom) return false;
+    return okPer ? window._mvEnContratSurPeriode(m,d0,d1) : (m.statut!=='Inactif');
+  });
+  if(!mbrs.length) return null;
+  var D0=_pexD(d0), D1=_pexD(d1), h=0, n=0;
+  mbrs.forEach(function(m){
+    var v=0;
+    try{ v=Number(window._planWorkPersRange(m,D0,D1))||0; }
+    catch(e){ if(window.logError) window.logError({level:'info',cat:'eco',msg:'cadence presence '+(m.nom||'')}); }
+    if(v>0){ h+=v; n++; }
+  });
+  if(!(h>0)) return null;
+  return { h:h, n:n, d0:d0, d1:d1 };
+}
+
+// ★★★ MARCHE 2 DE L'ESCALIER — la meme periode, la campagne d'avant (backlog 7, §20b).
+// Rend {hReel,hBar,ecart,nom,d0,d1,nMbr} ou null. Chaque garde renvoie null plutot que
+// d'inventer : une marche vide se lit deja correctement a l'ecran (marche 3).
+//
+// ⚠️ hBar vient du SNAPSHOT (`stats.hFaites`, ecrit par _calcHistoStats a l'archivage) :
+//   c'est la seule grandeur de la periode passee qu'on ne peut pas recalculer, TRAVAUX
+//   ayant ete remis a zero au changement de campagne.
+// ⚠️ hReel se RECALCULE, lui, sur le planning : PLANNING_ENTRIES est cle par annee et
+//   n'est jamais purge. _planWorkPersRange est annee-aware (_planCtxYear), une fenetre
+//   d'aout a juillet traverse donc deux annees civiles sans se tromper.
+// ⚠️ Les membres sont filtres sur LEUR contrat de l'epoque, pas sur l'effectif du jour :
+//   sinon un saisonnier parti l'an dernier disparaitrait de sa propre periode.
+function _pecCadHisto(hBarCourant){
+  if(typeof _pilCmpSnapshot!=='function') return null;
+  var snap=null;
+  try{ snap=_pilCmpSnapshot(); }catch(e){ return null; }
+  if(!snap || !snap.stats) return null;
+  var hBar=Number(snap.stats.hFaites)||0;
+  if(!(hBar>0)) return null;
+  // Les dates viennent de SAISONS, pas du snapshot : une periode supprimee de SAISONS
+  // n'est plus datable, et on ne devine pas une fenetre.
+  var per=(typeof _pilCmpPeriode==='function')?_pilCmpPeriode(snap.saisonNom):null;
+  if(!per || !per.debut || !per.fin) return null;
+  var d0=String(per.debut).slice(0,10), d1=String(per.fin).slice(0,10);
+  if(d1<d0) return null;
+  if(typeof window._planWorkPersRange!=='function') return null;
+  var okPer=(typeof window._mvEnContratSurPeriode==='function');
+  var mbrs=(window.MEMBRES||[]).filter(function(m){
+    if(!m||!m.nom) return false;
+    return okPer ? window._mvEnContratSurPeriode(m,d0,d1) : (m.statut!=='Inactif');
+  });
+  if(!mbrs.length) return null;
+  var D0=_pexD(d0), D1=_pexD(d1), pres=0, n=0;
+  mbrs.forEach(function(m){
+    var v=0;
+    try{ v=Number(window._planWorkPersRange(m,D0,D1))||0; }
+    catch(e){ if(window.logError) window.logError({level:'info',cat:'eco',msg:'cadence histo '+(m.nom||'')}); }
+    if(v>0){ pres+=v; n++; }
+  });
+  if(!(pres>0)) return null;
+  // Tracteur de CETTE fenetre : _ecoTracHByParc accepte deja une fenetre de dates, et
+  // SESSIONS n'est pas purge au changement de campagne. Somme des heures, tous parcs.
+  var hTrac=0;
+  try{
+    var tw=_ecoTracHByParc({d0:d0,d1:d1});
+    Object.keys(tw.h||{}).forEach(function(k){ hTrac+=(tw.h[k]||0); });
+  }catch(e){ hTrac=0; }
+  var hReel=Math.max(0, pres-hTrac);
+  if(!(hReel>0)) return null;
+  return { hReel:hReel, hBar:hBar, ecart:((hReel-hBar)/hBar),
+           nom:String(snap.saisonNom||''), d0:d0, d1:d1, nMbr:n, hTrac:hTrac };
+}
+
+function _pecData(){
+  var cfg=_ecoCfg(), rate=_ecoRate();
+  var tracH=_ecoTracHByParc(), phy=_ecoPhytoByParc();
+  var eqp=_ecoEquipeByParc(), ret=_ecoRetardByParc(), rcfg=_ecoRetardCfg();
+  var defs=_ecoAllDefs();
+  var parc=(window.PARCELLES||[]).filter(function(p){ return p && p.statut!=='Arrachee'; });
+  // ── Carburant : enveloppe reelle + cle de repartition ────────────────
+  var gnrR=_ecoGnrReel();
+  // Cle = heures machine par parcelle. Repli SURFACE si aucune heure n'a ete saisie
+  // sur la campagne : sans lui, une enveloppe reelle de 900 L n'irait nulle part et
+  // le carburant retomberait a zero alors qu'on le connait au litre pres.
+  var _kBy={}, _kSum=0, _kSurf=false;
+  parc.forEach(function(p){ var k=tracH.h[p.nom]||0; _kBy[p.nom]=k; _kSum+=k; });
+  if(!(_kSum>0)){
+    _kSurf=true; _kSum=0;
+    parc.forEach(function(p){ var k=parseFloat(p.surface)||0; _kBy[p.nom]=k; _kSum+=k; });
+  }
+  var _gnrOn = gnrR.ok && _kSum>0;
+  var rows=[], tasks={}, tOrder=[], pairs=[];
+  var T={ bH:0,fH:0,rH:0, moB:0,moF:0,moR:0, tracF:0,tracH:0, gnrF:0, litres:0, phyF:0,
+          surf:0, retH:0, retE:0, nRet:0, nReel:0, trous:0, plantH:0, plantE:0, nSansTaux:0 };
+  parc.forEach(function(p){
+    var surf=parseFloat(p.surface)||0;
+    var eq=eqp[p.nom]||null;
+    var tx=(eq&&eq.taux>0)?eq.taux:rate;
+    var src=(eq&&eq.taux>0)?'reel':'moyen';
+    var bH=0, fH=0, rH=0, tks=[];
+    defs.forEach(function(def){
+      if(!def || !_opApplic(p,def)) return;
+      var full=Number(_opParcFull(p,def))||0;
+      if(!(full>0)) return;
+      var rst=Number(_opParcReste(p,def))||0;
+      if(!(rst>0)) rst=0; if(rst>full) rst=full;
+      var fait=full-rst;
+      bH+=full; rH+=rst; fH+=fait;
+      var t=tasks[def.nom];
+      if(!t){ t=tasks[def.nom]={ nom:def.nom, bH:0,fH:0,rH:0, bE:0,fE:0,rE:0, nP:0, surf:0 }; tOrder.push(def.nom); }
+      t.bH+=full; t.fH+=fait; t.rH+=rst;
+      t.bE+=full*tx; t.fE+=fait*tx; t.rE+=rst*tx;
+      t.nP++; t.surf+=surf;
+      if(fait>0) pairs.push({ parc:p.nom, norm:_friseNorm(def.nom), eur:fait*tx });
+      if(rst>0.01) tks.push(def.nom);
+    });
+    var thH=tracH.h[p.nom]||0, tracF=tracH.cost[p.nom]||0;
+    var litres, gnrF;
+    if(_gnrOn){ var _q=(_kBy[p.nom]||0)/_kSum; litres=gnrR.L*_q; gnrF=gnrR.eur*_q; }
+    else { litres=thH*cfg.conso; gnrF=litres*cfg.gnrL; }
+    var phyF=phy.cost[p.nom]||0;
+    var reel=tracF+gnrF+phyF;
+    var rr=ret[p.nom]||null, retH=rr?rr.h:0, retE=retH*tx;
+    var pl=_ecoParcPlant(p);
+    var budget=bH*tx+reel, engage=fH*tx+reel, resteE=rH*tx;
+    rows.push({ nom:p.nom, surf:surf, tx:tx, src:src,
+      bH:bH, fH:fH, rH:rH, pct:(bH>0?fH/bH*100:100),
+      moB:bH*tx, moF:fH*tx, moR:resteE,
+      thH:thH, tracF:tracF, litres:litres, gnrF:gnrF, phyF:phyF,
+      condu:(tracH.qui[p.nom]||null),
+      budget:budget, engage:engage, reste:resteE,
+      coutHa:(surf>0?budget/surf:0), engHa:(surf>0?engage/surf:0),
+      retH:retH, retE:retE, retSem:(rr?rr.sem:0),
+      trous:pl.trous, plantH:pl.h, plantE:pl.h*tx,
+      etp:(eq?eq.etp:0), nj:(eq?eq.nj:0), noms:(eq?eq.noms:[]), reste_taches:tks });
+    T.bH+=bH; T.fH+=fH; T.rH+=rH;
+    T.moB+=bH*tx; T.moF+=fH*tx; T.moR+=resteE;
+    T.tracF+=tracF; T.tracH+=thH; T.gnrF+=gnrF; T.litres+=litres; T.phyF+=phyF;
+    T.surf+=surf; T.retH+=retH; T.retE+=retE; if(retE>0) T.nRet++;
+    if(src==='reel') T.nReel++;
+    T.trous+=pl.trous; T.plantH+=pl.h; T.plantE+=pl.h*tx;
+  });
+  // Sources DATÉES pour la courbe d'engagement — reprises telles quelles des deux
+  // agrégateurs existants (une seule définition de « combien coûte une session »).
+  if(_gnrOn){
+    var _bd={};
+    Object.keys(tracH.condByDate||{}).forEach(function(iso){ _bd[iso]=(_bd[iso]||0)+(tracH.condByDate[iso]||0); });
+    Object.keys(gnrR.byDate||{}).forEach(function(iso){ _bd[iso]=(_bd[iso]||0)+(gnrR.byDate[iso]||0); });
+    T.byDateTrac=_bd;
+  } else {
+    T.byDateTrac = tracH.byDate || {};
+  }
+  // Tracabilite de la source, lue par le poste GNR et la carte de fiabilite.
+  T.gnrSrc = _gnrOn?'reel':'modele';
+  T.gnrN = gnrR.n; T.gnrNSansLitres = gnrR.nSansLitres; T.gnrCle = _kSurf?'surface':'heures';
+  T.byDatePhy  = phy.byDate  || {};
+
+  // Avancement de référence = heures de barème réalisées / heures de barème totales.
+  // C'est la MÊME grandeur que la jauge de l'onglet Avancement : deux écrans qui
+  // parlent d'« avancement » doivent afficher le même nombre.
+  var avc = T.bH>0 ? (T.fH/T.bH) : 1;
+  // Tracteur, GNR et phyto ne sont connus qu'en réalisé. Leur part de budget est
+  // extrapolée au rythme constaté (réalisé ÷ avancement) — et neutralisée sous
+  // 15 % d'avancement, où le rapport n'a plus aucune valeur prédictive.
+  var projOn = avc>=0.15;
+  var kProj = projOn ? (1/avc) : 1;
+  var tracB = T.tracF*kProj, gnrB = T.gnrF*kProj, phyB = T.phyF*kProj;
+  var budget = T.moB + tracB + gnrB + phyB;
+  var engage = T.moF + T.tracF + T.gnrF + T.phyF;
+  var resteE = Math.max(0, budget-engage);
+  var consPct = budget>0 ? (engage/budget*100) : 0;
+  var avcPct  = avc*100;
+
+  // ⚠⚠ PIEGE EVITE, trouve au harnais : un premier jet definissait la derive
+  // comme « % de budget consomme moins % de travail fait ». Or le budget du tracteur,
+  // du GNR et du phyto est extrapole PAR l'avancement (realise / avancement) : les
+  // deux pourcentages sont alors egaux PAR CONSTRUCTION, et l'indicateur affichait
+  // toujours zero. Un chiffre qui ne peut pas varier n'est pas un indicateur.
+  //
+  // La vraie derive est ailleurs, et elle se MESURE. MAIS PAS AU JOURNAL.
+  //
+  // ⚠⚠ DEFAUT CORRIGE LE 09/08, MESURE CHEZ MARCHAND-GRILLOT. La presence etait
+  // deduite des VALIDATIONS : une journee-personne portant une validation valait
+  // la journee de reference (7 h), une journee sans validation valait ZERO. Or une
+  // validation couvre plusieurs jours de travail. Mesure sur les periodes reelles :
+  // 12 journees sur 247 portaient une validation en hiver, 165 sur 559 au printemps.
+  // L'ecart de cadence sortait a -90 % puis -52,8 %, et l'ecran conseillait de
+  // REDUIRE un bareme qui, mesure au planning, est juste a quelques pour cent pres.
+  // Un mauvais conseil avec l'autorite d'une mesure.
+  //
+  // La presence vient donc du PLANNING (_planWorkPersRange, meme source que
+  // Economie > Exercice), moins les heures de sessions tracteur — et T.tracH est
+  // deja agregee ci-dessus, on ne recompte pas les sessions une seconde fois.
+  // 100 % des jours travailles : le probleme de couverture disparait.
+  //
+  // ⚠ CE QUE CE CHIFFRE CONTIENT ET QU'ON NE SAIT PAS RETIRER : le planning dit que
+  // la personne etait la, jamais CE QU'ELLE A FAIT (verifie : une entree porte des
+  // heures, un type cp/recup, un motif d'absence — aucune activite). Cave, atelier,
+  // entretien et bureau restent dedans. La presence est donc SUREVALUEE et l'ecart
+  // penche vers « bareme un peu serre » plutot que « large » : biais inverse de
+  // l'ancien, beaucoup plus petit, et ECRIT A L'ECRAN.
+  //
+  // ⚠ PERIMETRE — piege du §11c : la presence porte sur TOUT le domaine, le bareme
+  // doit donc porter sur TOUT le travail fait (T.fH), plus sur les seules parcelles
+  // connues du journal. Comparer un numerateur global a un denominateur partiel
+  // serait exactement le meme decalage, dans l'autre sens.
+  //
+  // GARDE-FOU : l'ancien seuil portait sur la COUVERTURE (30 % de surface nommee au
+  // journal) ; il n'a plus d'objet. Le risque restant est la REPRESENTATIVITE — la
+  // taille et le relevage n'ont pas la meme cadence, et le rapport de janvier ne
+  // predit pas juin. D'ou un seuil d'AVANCEMENT, _PEC_CAD_AVC.
+  var hJour=_pecHJour();
+  var cadP=_pecCadPresence();
+  var hBarC=T.fH;
+  var hReelC=cadP ? Math.max(0, cadP.h - T.tracH) : 0;
+  var cadOk = (hBarC>0 && hReelC>0 && avc>=_PEC_CAD_AVC);
+  var ecart = cadOk ? ((hReelC-hBarC)/hBarC) : 0;
+  // ★★★ ESCALIER DE SOURCES — MARCHE 2 (backlog 7, §20b).
+  // Marche 1 : la periode EN COURS des qu'elle a passe le seuil d'avancement (ci-dessus).
+  // Marche 2 : sous le seuil, la MEME PERIODE DE LA CAMPAGNE PRECEDENTE, si elle est
+  //   archivee. Meme arithmetique, meme discipline de perimetre : numerateur global
+  //   (presence planning de la fenetre, moins le tracteur de la fenetre) sur denominateur
+  //   global (heures de bareme faites, lues dans le snapshot).
+  // Marche 3 : rien — et l'ecran le dit deja.
+  // ⚠️ Le seuil ne s'applique PAS a la marche 2 : une campagne archivee est terminee,
+  //   son avancement est ce qu'il est. C'est la representativite qui justifiait le seuil,
+  //   et une periode close est representative d'elle-meme par construction.
+  // ⚠️ La source DOIT etre annoncee a l'ecran : un chiffre de l'an dernier presente comme
+  //   une mesure du moment serait exactement la faute de §34 — deux choses sous un mot.
+  var cadSrc = cadOk ? 'planning' : null;
+  var cadHist = null;
+  if(!cadOk){
+    cadHist = _pecCadHisto(hBarC);
+    if(cadHist){
+      cadOk   = true;
+      cadSrc  = 'histo';
+      hReelC  = cadHist.hReel;
+      hBarC   = cadHist.hBar;
+      ecart   = cadHist.ecart;
+    }
+  }
+  // ⚠ La cadence ne s'applique qu'au RESTE A ENGAGER. Appliquee au budget entier
+  // elle reecrivait le passe : a 100 % d'avancement, avec 79 358 € deja engages et
+  // 0 € restant, l'ecran projetait une fin a 37,4 k€ — une projection ne peut pas
+  // contredire ce qui est deja depense, sur la meme carte. A 0 % d'avancement le
+  // resultat est identique a l'ancien ; a 100 % elle retombe exactement sur l'engage.
+  // \u26a0 MEME REGLE QUE LA DATE (14/08/2026, soir) : un budget projete est une
+  //   PREVISION. La marche 2 ne prevoit rien, elle RAPPELLE. Sous le seuil, la
+  //   projection retombe sur le budget de bareme - exactement le comportement
+  //   d'avant le branchement de la marche 2. L'ecart histo reste LU a l'ecran,
+  //   il n'est plus MULTIPLIE par une charge.
+  var cadAppl = (cadSrc==='planning');
+  var projFin = cadAppl ? (engage + resteE*(1+ecart)) : budget;
+
+  var postes = [
+    { k:'mo',   lab:'Main-d\u2019\u0153uvre vigne', col:_PEC_COL.mo,   fait:T.moF,   budget:T.moB, proj:false, det:_ecoH1(T.fH)+' h faites sur '+_ecoH1(T.bH)+' h de bar\u00e8me' },
+    { k:'trac', lab:'Conduite tracteur',            col:_PEC_COL.trac, fait:T.tracF, budget:tracB, proj:projOn, det:_ecoH1(T.tracH)+' h de sessions' },
+    { k:'gnr',  lab:'Carburant GNR',                col:_PEC_COL.gnr,  fait:T.gnrF,  budget:gnrB,  proj:projOn, det:_pecGnrDet(T.gnrSrc,T.litres,T.gnrN,T.gnrNSansLitres,T.gnrCle,cfg.gnrL) },
+    { k:'phy',  lab:'Produits phyto',               col:_PEC_COL.phy,  fait:T.phyF,  budget:phyB,  proj:projOn, det:'doses \u00d7 surface \u00d7 prix R\u00e9serve' }
+  ];
+
+  var tlist = tOrder.map(function(n){ var t=tasks[n];
+    t.euHa = t.surf>0 ? t.bE/t.surf : 0;
+    t.pct  = t.bH>0 ? t.fH/t.bH*100 : 100;
+    t.part = budget>0 ? t.bE/budget*100 : 0;
+    return t; }).sort(function(a,b){ return b.bE-a.bE; });
+
+  var rec=_pecRecolte(), kgB=_pecKgB();
+  var bouteilles = (rec.kg>0) ? (rec.kg/kgB) : 0;
+
+  return {
+    rows:rows, tasks:tlist, pairs:pairs, tot:T, postes:postes,
+    rate:rate, cfg:cfg, phy:phy, rcfg:rcfg, minTrou:_ecoMinTrou(),
+    tracAnon:tracH.nAnon, tracSess:tracH.nSess,
+    avc:avcPct, cons:consPct, projOn:projOn,
+    cad:{ hReel:hReelC, hBar:hBarC, ok:cadOk, applic:cadAppl, ecart:ecart*100, hJour:hJour,
+          src:(cadSrc || (cadP?'planning':null)), hTrac:(cadHist?cadHist.hTrac:T.tracH), seuil:_PEC_CAD_AVC*100,
+          d0:(cadHist?cadHist.d0:(cadP?cadP.d0:'')), d1:(cadHist?cadHist.d1:(cadP?cadP.d1:'')),
+          nMbr:(cadHist?cadHist.nMbr:(cadP?cadP.n:0)),
+          histoNom:(cadHist?cadHist.nom:'') },
+    projFin:projFin,
+    budget:budget, engage:engage, resteE:resteE,
+    coutHaB:(T.surf>0?budget/T.surf:0), coutHaE:(T.surf>0?engage/T.surf:0),
+    rec:rec, kgB:kgB, bouteilles:bouteilles,
+    eurKg:(rec.kg>0?budget/rec.kg:0), eurBt:(bouteilles>0?budget/bouteilles:0),
+    eurPlant:(T.plantH>0?T.plantE/Math.max(1,T.trous):0),
+    hasRate:(rate>0), hasGnr:(cfg.gnrL>0), hasPhyto:(T.phyF>0),
+    hasPlant:(T.trous>0), hasTrac:(T.tracH>0),
+    configured:(rate>0 || cfg.gnrL>0)
+  };
+}
+
+// ── Courbe d'engagement : à quel rythme l'argent part-il ? ───────────
+// Chaque euro engagé est posé à SA date :
+//   · main-d'oeuvre → réparti à parts égales sur les validations datées du couple
+//     (parcelle, tâche) au journal — même convention 1/N que le coût par parcelle ;
+//   · tracteur + GNR → date de la session ;
+//   · phyto → date du traitement.
+// Les heures faites sans aucune trace au journal (import, reconstruction 🩹) ne
+// sont pas inventables : elles forment un socle daté au premier jour, annoncé.
+function _pecTimeline(E){
+  var s=(typeof window._pilSaison==='function')?window._pilSaison():null;
+  var seasonNom=(s&&s.nom)?s.nom:'';
+  var d1=(s&&s.debut)?s.debut:null, d2=(s&&s.fin)?s.fin:null;
+  function inS(dt){
+    if(!dt) return false;
+    var sn=(window._saisonForDate)?window._saisonForDate(dt):null;
+    if(sn) return sn===seasonNom;
+    return !!(d1&&d2&&dt>=d1&&dt<=d2);
+  }
+  var day={}, socle=0, minIso=null, maxIso=null;
+  function add(iso,v){
+    if(!(v>0)) return;
+    if(!iso){ socle+=v; return; }
+    day[iso]=(day[iso]||0)+v;
+    if(minIso===null||iso<minIso) minIso=iso;
+    if(maxIso===null||iso>maxIso) maxIso=iso;
+  }
+  var jp={};
+  (window.JOURNAL||[]).forEach(function(j){
+    if(!j || j.meteo || j.statut!=='Valid\u00e9' || !j.parcelle || !j.tache || !j.date) return;
+    if(!inS(j.date)) return;
+    var k=j.parcelle+'\u0000'+_friseNorm(j.tache);
+    if(!jp[k]) jp[k]={};
+    jp[k][j.date]=1;
+  });
+  E.pairs.forEach(function(pr){
+    var ds=Object.keys(jp[pr.parc+'\u0000'+pr.norm]||{}).sort();
+    if(!ds.length){ socle+=pr.eur; return; }
+    var q=pr.eur/ds.length;
+    ds.forEach(function(dt){ add(dt,q); });
+  });
+  Object.keys(E.tot.byDateTrac||{}).forEach(function(iso){ add(iso, E.tot.byDateTrac[iso]); });
+  Object.keys(E.tot.byDatePhy||{}).forEach(function(iso){ add(iso, E.tot.byDatePhy[iso]); });
+
+  var startIso = d1 || minIso;
+  if(!startIso) return { ok:false };
+  if(minIso && minIso<startIso) startIso=minIso;
+  var todayIso=_pecMsToIso(Date.now());
+  var lastIso = maxIso || startIso;
+  var endIso = d2 || lastIso;
+  var t0=_pecIsoToMs(startIso), tEnd=_pecIsoToMs(endIso), tToday=_pecIsoToMs(todayIso);
+  if(t0===null) return { ok:false };
+  if(tEnd===null || tEnd<t0) tEnd=t0+86400000*30;
+
+  // Cumul jour par jour (pas hebdomadaire à l'affichage, mais cumul exact au jour).
+  var keys=Object.keys(day).sort();
+  var cum=socle, pts=[{ t:t0, v:socle }];
+  keys.forEach(function(iso){
+    var t=_pecIsoToMs(iso); if(t===null||t<t0) { cum+=day[iso]; pts[0].v=cum; return; }
+    cum+=day[iso];
+    pts.push({ t:t, v:cum });
+  });
+  var engageDate=cum;
+
+  // Rythme des 28 derniers jours PRÉSENTS dans la période (pas du calendrier) :
+  // une équipe qui n'a rien saisi depuis trois semaines n'a pas un rythme nul,
+  // elle a un trou de saisie. On borne donc la fenêtre au dernier jour saisi.
+  var refMs = Math.min(tToday!==null?tToday:tEnd, tEnd);
+  var lastMs = pts.length>1 ? pts[pts.length-1].t : t0;
+  var winEnd = Math.min(refMs, Math.max(lastMs, t0));
+  var winStart = winEnd-28*86400000;
+  var vStart=socle;
+  pts.forEach(function(p){ if(p.t<=winStart) vStart=p.v; });
+  var days=Math.max(1,(winEnd-winStart)/86400000);
+  var pace=Math.max(0,(cum-vStart)/days);
+
+  var budget=E.budget||0;
+  var projMs=null;
+  if(pace>0 && budget>cum) projMs = winEnd + Math.ceil((budget-cum)/pace)*86400000;
+  var projEndV = null;
+  if(pace>0){
+    var toEnd=Math.max(0,(tEnd-winEnd)/86400000);
+    projEndV = cum + pace*toEnd;
+  }
+  var objIso=_pilObjectifGet(), objMs=objIso?_pecIsoToMs(objIso):null;
+  return { ok:pts.length>1 || socle>0, pts:pts, t0:t0, tEnd:tEnd, tToday:tToday, tLast:lastMs,
+           socle:socle, cum:cum, engageDate:engageDate, pace:pace, projMs:projMs, projEndV:projEndV,
+           budget:budget, objMs:objMs, objIso:objIso, nDays:days };
+}
+
+// ════════════════════════════════════════════════════════════════════════════════
+// GRAPHIQUES — SVG natif, zéro dépendance, couleurs par variables CSS
+// Les axes et les libellés utilisent var(--texte…) : les quatre graphes basculent
+// donc en thème sombre sans une ligne de plus.
+// ════════════════════════════════════════════════════════════════════════════════
+function _pecNiceMax(v){
+  v=Number(v)||0; if(!(v>0)) return 100;
+  var e=Math.pow(10,Math.floor(Math.log(v)/Math.LN10)), n=v/e;
+  var m = n<=1?1 : n<=1.5?1.5 : n<=2?2 : n<=2.5?2.5 : n<=3?3 : n<=4?4 : n<=5?5 : n<=7.5?7.5 : 10;
+  return m*e;
+}
+function _pecTrunc(s,n){ s=String(s==null?'':s); return s.length>n ? (s.slice(0,n-1)+'\u2026') : s; }
+function _pecAxeEur(v){
+  var a=Math.abs(v);
+  if(a>=1000) return (Math.round(v/100)/10).toLocaleString('fr-FR',{maximumFractionDigits:1})+' k';
+  return String(Math.round(v));
+}
+
+// ── 1. Courbe d'engagement (le graphe de pilotage) ───────────────────
+// Cumul réel des euros engagés, ligne de budget, et projection au rythme des
+// 28 derniers jours. Trois objets sur un seul axe : c'est tout ce qu'il faut pour
+// répondre à « est-ce que ça tient ? » sans lire une seule ligne de tableau.
+function _pecBurnSvg(E,TL,w){
+  if(!TL || !TL.ok || !TL.pts || TL.pts.length<1)
+    return window._mvGraphVide('Pas encore assez de travaux datés au journal',
+      'Le rythme de dépense se trace dès que des travaux sont validés depuis Parcelles.');
+  var c0=window._mvGraphCadre(w,300), et=c0.etroit;
+  var c=window._mvGraphCadre(w, et?244:320, { padL:et?46:64, padR:et?12:26, padT:26, padB:et?34:40 });
+  var W=c.w, pL=c.padL, pR=c.padR, pT=c.padT, iw=c.iw, ih=c.ih;
+  var tMax=Math.max(TL.tEnd, TL.tToday||0, TL.projMs||0, TL.tLast||0);
+  if(tMax<=TL.t0) tMax=TL.t0+86400000*30;
+  tMax=TL.t0+(tMax-TL.t0)*1.02;
+  var pFin=(E && E.cad && E.cad.ok && E.cad.applic && Math.abs(E.cad.ecart)>5) ? E.projFin : 0;
+  var yTop=_pecNiceMax(Math.max(TL.budget, TL.cum, TL.projEndV||0, pFin)*1.05);
+  function X(t){ return pL+(Math.max(TL.t0,Math.min(tMax,t))-TL.t0)/(tMax-TL.t0)*iw; }
+  function Y(v){ return pT+ih-(Math.max(0,Math.min(yTop,v))/yTop)*ih; }
+  var g='';
+  // Grille + axe des euros. L'unite est ecrite UNE fois, en tete d'axe.
+  for(var i=0;i<=c.grad;i++){
+    var v=yTop*i/c.grad, y=Y(v);
+    g+='<line x1="'+pL+'" y1="'+y.toFixed(1)+'" x2="'+(W-pR)+'" y2="'+y.toFixed(1)+'" stroke="'+c.col.grille+'" stroke-width="'+c.trait.grille+'"/>'
+      +'<text x="'+(pL-8)+'" y="'+(y+4).toFixed(1)+'" text-anchor="end" font-size="'+c.txt.axe+'" fill="'+c.col.texte+'">'+_pecAxeEur(v)+'</text>';
+  }
+  g+='<text x="'+(pL-8)+'" y="'+(pT-9)+'" text-anchor="end" font-size="'+c.txt.unite+'" fill="'+c.col.texte+'">\u20AC</text>';
+  // Axe des mois. Sur ecran etroit on double le pas : on retire des graduations,
+  // on ne reduit pas la police.
+  var d0=new Date(TL.t0), cur=new Date(d0.getFullYear(),d0.getMonth(),1), guard=0;
+  var spanD=(tMax-TL.t0)/86400000, stepM=spanD>460?3:(spanD>210?2:1);
+  if(et) stepM=stepM*2;
+  while(cur.getTime()<=tMax && guard<80){
+    guard++;
+    var tm=cur.getTime();
+    if(tm>=TL.t0){
+      var xm=X(tm);
+      g+='<line x1="'+xm.toFixed(1)+'" y1="'+pT+'" x2="'+xm.toFixed(1)+'" y2="'+(pT+ih)+'" stroke="'+c.col.grille+'" stroke-width="'+c.trait.grille+'" stroke-dasharray="2 5"/>'
+        +'<text x="'+xm.toFixed(1)+'" y="'+(pT+ih+18)+'" text-anchor="middle" font-size="'+(et?c.txt.mini:c.txt.axe)+'" fill="'+c.col.texte+'">'+_pecMoisCourt(cur.getMonth())+'</text>';
+    }
+    cur.setMonth(cur.getMonth()+stepM);
+  }
+  // Aire + courbe du cumul : la mesure.
+  var pts=TL.pts.filter(function(p){ return p.t<=tMax; });
+  if(!pts.length) pts=[TL.pts[0]];
+  var dLine='', dArea='M'+X(pts[0].t).toFixed(1)+' '+Y(0).toFixed(1);
+  pts.forEach(function(p,ix){
+    var x=X(p.t).toFixed(1), y=Y(p.v).toFixed(1);
+    dLine+=(ix?' L':'M')+x+' '+y;
+    dArea+=' L'+x+' '+y;
+  });
+  var lastP=pts[pts.length-1];
+  dArea+=' L'+X(lastP.t).toFixed(1)+' '+Y(0).toFixed(1)+' Z';
+  g+='<path d="'+dArea+'" fill="'+c.col.mesure+'" opacity="0.13"/>';
+  g+='<path d="'+dLine+'" fill="none" stroke="'+c.col.mesure+'" stroke-width="'+c.trait.mesure+'" stroke-linejoin="round" stroke-linecap="round"/>';
+  // Projection : le prolongement de la MEME mesure, donc la meme couleur, en
+  // pointille — ce n'est pas encore mesure.
+  if(TL.pace>0 && TL.projEndV!=null && TL.tEnd>lastP.t){
+    g+='<path d="M'+X(lastP.t).toFixed(1)+' '+Y(lastP.v).toFixed(1)+' L'+X(TL.tEnd).toFixed(1)+' '+Y(TL.projEndV).toFixed(1)+'" fill="none" stroke="'+c.col.mesure+'" stroke-width="'+c.trait.prevu+'" stroke-dasharray="7 5" stroke-opacity=".55" stroke-linecap="round"/>'
+      +'<circle cx="'+X(TL.tEnd).toFixed(1)+'" cy="'+Y(TL.projEndV).toFixed(1)+'" r="3.5" fill="none" stroke="'+c.col.mesure+'" stroke-width="1.5"/>';
+  }
+  g+='<circle cx="'+X(lastP.t).toFixed(1)+'" cy="'+Y(lastP.v).toFixed(1)+'" r="4" fill="'+c.col.mesure+'"/>';
+  // Budget : une reference decidee. Le trait est en --or ; l'etiquette ne l'est
+  // PAS — sur fond papier son contraste tombe a 2,37.
+  if(TL.budget>0){
+    var yb=Y(TL.budget);
+    g+='<line x1="'+pL+'" y1="'+yb.toFixed(1)+'" x2="'+(W-pR)+'" y2="'+yb.toFixed(1)+'" stroke="'+c.col.prevu+'" stroke-width="'+c.trait.prevu+'" stroke-dasharray="9 6"/>'
+      +'<text x="'+(W-pR)+'" y="'+(yb-7).toFixed(1)+'" text-anchor="end" font-size="'+c.txt.axe+'" font-weight="700" fill="'+c.col.texte+'">Budget '+_pilEsc(_pecEurK(TL.budget))+'</text>';
+  }
+  // Cout final projete par la CADENCE mesuree (temps passe / bareme). Trace seulement
+  // quand il s'ecarte vraiment du budget : deux lignes qui se superposent ne disent rien.
+  if(pFin>0){
+    var yf=Y(pFin), au=(pFin>TL.budget), cf=au?c.col.alerte:c.col.fait;
+    g+='<line x1="'+pL+'" y1="'+yf.toFixed(1)+'" x2="'+(W-pR)+'" y2="'+yf.toFixed(1)+'" stroke="'+cf+'" stroke-width="'+c.trait.seuil+'" stroke-dasharray="3 5"/>'
+      +'<text x="'+(W-pR)+'" y="'+(yf+(au?-7:15)).toFixed(1)+'" text-anchor="end" font-size="'+(et?c.txt.mini:c.txt.unite)+'" font-weight="700" fill="'+cf+'">'+(et?'\u00c0 la cadence \u00b7 ':'Fin projet\u00e9e \u00e0 la cadence \u00b7 ')+_pilEsc(_pecEurK(pFin))+'</text>';
+  }
+  // Aujourd'hui : un repere, pas une alerte. Le rouge reste au depassement.
+  if(TL.tToday!=null && TL.tToday>=TL.t0 && TL.tToday<=tMax){
+    var xt=X(TL.tToday);
+    g+='<line x1="'+xt.toFixed(1)+'" y1="'+(pT-4)+'" x2="'+xt.toFixed(1)+'" y2="'+(pT+ih)+'" stroke="'+c.col.texte+'" stroke-width="1.4" stroke-dasharray="4 3"/>'
+      +'<text x="'+xt.toFixed(1)+'" y="'+(pT-8)+'" text-anchor="middle" font-size="'+c.txt.mini+'" font-weight="700" fill="'+c.col.texte+'">auj.</text>';
+  }
+  // Objectif de fin des travaux : une date decidee, donc --or comme le budget.
+  if(TL.objMs!=null && TL.objMs>=TL.t0 && TL.objMs<=tMax){
+    var xo=X(TL.objMs);
+    g+='<line x1="'+xo.toFixed(1)+'" y1="'+pT+'" x2="'+xo.toFixed(1)+'" y2="'+(pT+ih)+'" stroke="'+c.col.prevu+'" stroke-width="'+c.trait.prevu+'" stroke-dasharray="3 4"/>'
+      +'<text x="'+xo.toFixed(1)+'" y="'+(pT+ih+(et?32:34))+'" text-anchor="middle" font-size="'+c.txt.mini+'" font-weight="700" fill="'+c.col.texte+'">objectif</text>';
+  }
+  var aria='Rythme d\u2019engagement des d\u00e9penses : '+_pecEurK(TL.cum)+' engag\u00e9s'
+    +(TL.budget>0?(' sur un budget de '+_pecEurK(TL.budget)):'')
+    +(TL.projEndV!=null?(', projection de fin de p\u00e9riode '+_pecEurK(TL.projEndV)):'')+'.';
+  return window._mvGraphSvg(c, aria, g);
+}
+
+// ── 2. Donut des postes ──────────────────────────────────────────────
+function _pecDonutSvg(items,c1,c2){
+  var tot=items.reduce(function(a,b){ return a+(b.v||0); },0);
+  if(!(tot>0)) return window._mvGraphVide('Aucun co\u00fbt chiffr\u00e9 sur la p\u00e9riode',
+    'Les co\u00fbts arrivent d\u00e8s qu\u2019un taux horaire est saisi dans R\u00e9glages \u203A \u00c9quipe.');
+  var cx=100,cy=100,r=88,ri=61,ang=-Math.PI/2,paths='';
+  var vis=items.filter(function(x){ return x.v>0; });
+  if(vis.length===1){
+    paths='<circle cx="'+cx+'" cy="'+cy+'" r="'+((r+ri)/2)+'" fill="none" stroke="'+vis[0].c+'" stroke-width="'+(r-ri)+'"/>';
+  } else {
+    vis.forEach(function(it){
+      var f=it.v/tot, a2=ang+f*Math.PI*2, lg=f>0.5?1:0;
+      var x1=cx+r*Math.cos(ang), y1=cy+r*Math.sin(ang);
+      var x2=cx+r*Math.cos(a2),  y2=cy+r*Math.sin(a2);
+      var xi2=cx+ri*Math.cos(a2),yi2=cy+ri*Math.sin(a2);
+      var xi1=cx+ri*Math.cos(ang),yi1=cy+ri*Math.sin(ang);
+      paths+='<path d="M'+x1.toFixed(2)+' '+y1.toFixed(2)+' A'+r+' '+r+' 0 '+lg+' 1 '+x2.toFixed(2)+' '+y2.toFixed(2)
+           +' L'+xi2.toFixed(2)+' '+yi2.toFixed(2)+' A'+ri+' '+ri+' 0 '+lg+' 0 '+xi1.toFixed(2)+' '+yi1.toFixed(2)+' Z" fill="'+it.c+'"/>';
+      ang=a2;
+    });
+  }
+  // Seul graphe de l'ecran a garder une taille fixe : un anneau ne gagne rien a
+  // s'elargir. width et height en dur, plafonnes par max-width — jamais etire.
+  return '<svg class="pec-svg" viewBox="0 0 200 200" width="200" height="200" style="max-width:210px;margin:0 auto" role="img" aria-label="R\u00e9partition du budget par poste, total '+_pilEsc(c1)+'">'
+    +paths
+    +'<text x="100" y="97" text-anchor="middle" font-size="24" font-weight="600" font-family="Cormorant Garamond,serif" fill="var(--texte)">'+_pilEsc(c1)+'</text>'
+    +'<text x="100" y="116" text-anchor="middle" font-size="11" fill="var(--texte-doux)">'+_pilEsc(c2)+'</text></svg>';
+}
+
+// ── 3. Coût par travail ──────────────────────────────────────────────
+// La vue qui manquait : ce n'est pas « quelle parcelle coûte cher », c'est « quel
+// TRAVAIL coûte cher ». C'est celle-là qui se traduit en décision — mécaniser,
+// prendre un renfort, changer la conduite.
+function _pecTaskSvg(E,w){
+  var ts=(E.tasks||[]).filter(function(t){ return t.bE>0; });
+  if(!ts.length) return window._mvGraphVide('Aucun travail chiffr\u00e9 sur la p\u00e9riode',
+    'Un travail est chiffr\u00e9 d\u00e8s qu\u2019il a des heures au bar\u00e8me et un taux horaire.');
+  var c0=window._mvGraphCadre(w,100), et=c0.etroit;
+  // Etroit : le nom passe AU-DESSUS de la barre, la gouttiere de 200 px
+  // disparait. Large : les trois colonnes habituelles.
+  var pL=et?0:200, pR=et?0:132, rowH=et?48:34, pT=et?24:26, pB=12;
+  var c=window._mvGraphCadre(w, pT+ts.length*rowH+pB, { padL:pL, padR:pR, padT:pT, padB:pB });
+  var W=c.w, iw=c.iw;
+  var mx=_pecNiceMax(ts[0].bE);
+  var lx=et?0:pL;
+  var g='<rect x="'+lx+'" y="7" width="11" height="9" rx="2" fill="'+_PEC_COL.mo+'"/>'
+       +'<text x="'+(lx+16)+'" y="15" font-size="'+c.txt.mini+'" fill="'+c.col.texte+'">Engag\u00e9</text>'
+       +'<rect x="'+(lx+78)+'" y="7" width="11" height="9" rx="2" fill="'+_PEC_COL.mo+'" opacity=".28"/>'
+       +'<text x="'+(lx+94)+'" y="15" font-size="'+c.txt.mini+'" fill="'+c.col.texte+'">Reste \u00e0 engager</text>';
+  ts.forEach(function(t,i){
+    var y=pT+i*rowH;
+    var wTot=t.bE/mx*iw, wDone=t.fE/mx*iw;
+    if(et){
+      var by=y+17, bh=14;
+      g+='<text x="0" y="'+(y+11)+'" font-size="'+c.txt.axe+'" font-weight="600" fill="var(--texte)">'+_pilEsc(_pecTrunc(_pilTnom(t.nom),22))+'</text>'
+        +'<text x="'+W+'" y="'+(y+11)+'" text-anchor="end" font-size="'+c.txt.axe+'" font-weight="700" fill="var(--texte)">'+_pilEsc(_pecEurK(t.bE))+'</text>'
+        +'<rect x="0" y="'+by+'" width="'+Math.max(1,wTot).toFixed(1)+'" height="'+bh+'" rx="4" fill="'+_PEC_COL.mo+'" opacity=".22"/>'
+        +'<rect x="0" y="'+by+'" width="'+Math.max(0,wDone).toFixed(1)+'" height="'+bh+'" rx="4" fill="'+_PEC_COL.mo+'"/>'
+        +'<text x="'+W+'" y="'+(by+bh+11)+'" text-anchor="end" font-size="'+c.txt.mini+'" fill="'+c.col.texte+'">'+_pilEsc(_ecoEur(t.euHa))+'/ha \u00b7 '+Math.round(t.pct)+' %</text>';
+    } else {
+      var by2=y+5, bh2=17;
+      g+='<text x="'+(pL-12)+'" y="'+(by2+13)+'" text-anchor="end" font-size="'+c.txt.val+'" font-weight="600" fill="var(--texte)">'+_pilEsc(_pecTrunc(_pilTnom(t.nom),24))+'</text>'
+        +'<rect x="'+pL+'" y="'+by2+'" width="'+Math.max(1,wTot).toFixed(1)+'" height="'+bh2+'" rx="4" fill="'+_PEC_COL.mo+'" opacity=".22"/>'
+        +'<rect x="'+pL+'" y="'+by2+'" width="'+Math.max(0,wDone).toFixed(1)+'" height="'+bh2+'" rx="4" fill="'+_PEC_COL.mo+'"/>'
+        +'<text x="'+(pL+wTot+10).toFixed(1)+'" y="'+(by2+13)+'" font-size="'+c.txt.val+'" font-weight="700" fill="var(--texte)">'+_pilEsc(_pecEurK(t.bE))+'</text>'
+        +'<text x="'+(W-4)+'" y="'+(by2+13)+'" text-anchor="end" font-size="'+c.txt.axe+'" fill="'+c.col.texte+'">'+_pilEsc(_ecoEur(t.euHa))+'/ha \u00b7 '+Math.round(t.pct)+' %</text>';
+    }
+  });
+  return window._mvGraphSvg(c, 'Co\u00fbt par travail : '+ts.length+' travaux chiffr\u00e9s, du plus cher au moins cher.', g);
+}
+
+// ── 4. Écart au coût moyen à l'hectare ───────────────────────────────
+// Le total d'une parcelle dépend surtout de sa taille : il ne dit rien. L'écart au
+// €/ha moyen, lui, isole ce qu'une parcelle a de particulier — plants, tâches en
+// plus, équipe plus chère, passages tracteur.
+function _pecEcartSvg(E,w){
+  var avg=E.coutHaB||0;
+  var rs=(E.rows||[]).filter(function(r){ return r.surf>0 && r.coutHa>0; })
+    .map(function(r){ return { nom:r.nom, ec:(avg>0?(r.coutHa-avg)/avg*100:0), ha:r.coutHa }; })
+    .sort(function(a,b){ return b.ec-a.ec; });
+  if(rs.length<2 || !(avg>0)) return window._mvGraphVide('Il faut au moins deux parcelles chiffr\u00e9es pour comparer',
+    'Une parcelle est chiffr\u00e9e quand elle a une surface et des travaux valid\u00e9s.');
+  var trunc=false;
+  if(rs.length>28){ rs=rs.slice(0,14).concat(rs.slice(-14)); trunc=true; }
+  var c0=window._mvGraphCadre(w,100), et=c0.etroit;
+  var rowH=et?26:24, pT=30, pB=14;
+  var c=window._mvGraphCadre(w, pT+rs.length*rowH+pB, { padL:0, padR:0, padT:pT, padB:pB });
+  var W=c.w, cx=Math.round(W/2), lab=et?92:150;
+  var half=Math.max(28, cx-lab-10);
+  var mx=Math.max(12, rs.reduce(function(a,b){ return Math.max(a,Math.abs(b.ec)); },0));
+  var g='<line x1="'+cx+'" y1="'+(pT-10)+'" x2="'+cx+'" y2="'+(pT+rs.length*rowH)+'" stroke="'+c.col.texte+'" stroke-width="1.4" opacity=".55"/>'
+       +'<text x="'+cx+'" y="'+(pT-16)+'" text-anchor="middle" font-size="'+c.txt.axe+'" font-weight="700" fill="'+c.col.texte+'">moyenne du domaine \u00b7 '+_pilEsc(_ecoEur(avg))+'/ha</text>';
+  rs.forEach(function(r,i){
+    var y=pT+i*rowH, by=y+4, bh=et?16:15;
+    var bw=Math.abs(r.ec)/mx*half, up=r.ec>=0;
+    var col=up?(r.ec>25?c.col.alerte:c.col.attention):c.col.fait;
+    g+='<rect x="'+(up?cx:cx-bw).toFixed(1)+'" y="'+by+'" width="'+Math.max(1,bw).toFixed(1)+'" height="'+bh+'" rx="3" fill="'+col+'" opacity=".85"/>'
+      +'<text x="'+(up?(cx-8):(cx+8))+'" y="'+(by+12)+'" text-anchor="'+(up?'end':'start')+'" font-size="'+c.txt.axe+'" fill="var(--texte)">'+_pilEsc(_pecTrunc(r.nom,et?13:20))+'</text>'
+      +'<text x="'+(up?(cx+bw+9):(cx-bw-9)).toFixed(1)+'" y="'+(by+12)+'" text-anchor="'+(up?'start':'end')+'" font-size="'+(et?c.txt.mini:c.txt.unite)+'" font-weight="700" fill="'+col+'">'+(up?'+':'\u2212')+Math.round(Math.abs(r.ec))+' %</text>';
+  });
+  var svg=window._mvGraphSvg(c, '\u00c9cart au co\u00fbt moyen \u00e0 l\u2019hectare, '+rs.length+' parcelles compar\u00e9es \u00e0 '+_ecoEur(avg)+' par hectare.', g);
+  if(trunc) svg+='<div class="pec-note">Les 14 parcelles les plus ch\u00e8res et les 14 les moins ch\u00e8res \u00e0 l\u2019hectare. Le tableau de l\u2019onglet <b>Parcelles</b> les porte toutes.</div>';
+  return svg;
+}
+
+// ── Verdict : une phrase, celle qu'on dirait à voix haute ────────────
+// ════════════════════════════════════════════════════════════════════════════
+// LE VERDICT — CE QUI SE PASSE, PAS COMMENT ON LE CALCULE
+// ════════════════════════════════════════════════════════════════════════════
+// C'est la premiere chose qu'on lit en ouvrant Economie, et la seule qui reponde
+// a « ou j'en suis ». Une seule branche s'affiche a la fois : ce n'etait donc
+// pas un mur. Le defaut etait ailleurs — CHAQUE branche melangeait trois choses
+// dans un meme paragraphe de 200 a 500 caracteres :
+//   ① le verdict lui-meme (l'ecart, la projection, l'engage) ;
+//   ② la mise en garde sur la METHODE — « la presence vient du planning, elle
+//     contient aussi la cave et l'atelier » — deja ecrite mot pour mot dans la
+//     fiche `pil.cadence` depuis le lot du 15/08. Elle etait donc dite DEUX fois,
+//     et la version du verdict vieillira separement de l'autre ;
+//   ③ un chemin a retenir : « Reglages › Taches », « Postes & travaux ».
+// Desormais : le verdict tient en une ou deux phrases, la methode est derriere
+// la pastille (une seule source), et les chemins sont des boutons.
+// ⚠️ La pastille est celle de `pil.cadence` — on n'ecrit pas une deuxieme fiche
+//   qui dirait la meme chose sous un autre nom.
+function _pecVerdict(E,TL){
+  var em=['graphique',''], t='', d='', act=[];
+  var ec=E.cad.ok?E.cad.ecart:null;
+  var sup=(ec!=null)?Math.max(0,E.projFin-E.budget):0;
+  if(!E.hasRate){
+    em=['eclair','']; t='Le chiffrage n\u2019est pas branch\u00e9';
+    d='Sans <b>taux horaire</b> dans les fiches salari\u00e9s, la main-d\u2019\u0153uvre \u2014 le premier poste du domaine \u2014 compte pour z\u00e9ro.';
+    act.push(['diag','equipe','R\u00e9glages \u203a \u00c9quipe']);
+  } else if(E.avc<3){
+    em=['pousse','']; t='La p\u00e9riode d\u00e9marre';
+    d='Budget de r\u00e9f\u00e9rence : <b>'+_pilEsc(_ecoEur(E.budget))+'</b>, soit <b>'+_pilEsc(_ecoEur(E.coutHaB))+' \u00e0 l\u2019hectare</b> sur '+_pilHa(E.tot.surf)+' ha.';
+  } else if(ec===null){
+    em=['journal','']; t='Le budget tient, la cadence reste \u00e0 mesurer';
+    d='<b>'+_pilEsc(_ecoEur(E.engage))+'</b> engag\u00e9s sur <b>'+_pilEsc(_ecoEur(E.budget))+'</b> ('+_pilEsc(_pecPct(E.cons))+'), pour '+_pilEsc(_pecPct(E.avc))+' du travail fait. '
+      +(E.cad.src
+         ? ('L\u2019\u00e9cart de cadence appara\u00eetra seul, d\u00e8s <b>'+Math.round(E.cad.seuil)+' %</b> d\u2019avancement.')
+         : 'L\u2019\u00e9cart de cadence est indisponible : aucune heure de planning sur cette p\u00e9riode.');
+  } else if(ec>15){
+    em=['alerte','rouge']; t='Le travail prend plus de temps que le bar\u00e8me';
+    d='Sur ce qui est fait, l\u2019\u00e9quipe a pass\u00e9 <b>'+_pilEsc(_pecPct(ec))+' de temps en plus</b> que le bar\u00e8me h/ha \u2014 '+_ecoH1(E.cad.hReel)+' h de pr\u00e9sence contre '+_ecoH1(E.cad.hBar)+' h pr\u00e9vues. \u00c0 cette cadence, la p\u00e9riode irait vers <b>'+_pilEsc(_pecEurK(E.projFin))+'</b>, soit <b>'+_pilEsc(_pecEurK(sup))+'</b> au-dessus du budget.';
+    act.push(['sub','pos','Voir quel travail d\u00e9rape']);
+    act.push(['diag','taches','R\u00e9glages \u203a T\u00e2ches']);
+  } else if(ec>5){
+    em=['alerte','or']; t='L\u00e9g\u00e8re d\u00e9rive de cadence';
+    d='<b>'+_pilEsc(_pecPct(ec))+'</b> de temps en plus que le bar\u00e8me sur le travail fait. Rien d\u2019alarmant \u2014 mais si cela tient jusqu\u2019au bout, la p\u00e9riode co\u00fbtera <b>'+_pilEsc(_pecEurK(E.projFin))+'</b> au lieu de '+_pilEsc(_pecEurK(E.budget))+'.';
+    act.push(['sub','pos','Voir travail par travail']);
+  } else if(ec<-8){
+    em=['graphique','vert']; t='L\u2019\u00e9quipe va plus vite que le bar\u00e8me';
+    d='<b>'+_pilEsc(_pecPct(Math.abs(ec)))+' de temps en moins</b> que pr\u00e9vu sur le travail fait. Deux lectures, qui ne s\u2019excluent pas : le bar\u00e8me h/ha est large, ou l\u2019\u00e9quipe est rod\u00e9e.';
+    act.push(['diag','taches','R\u00e9glages \u203a T\u00e2ches']);
+  } else {
+    em=['graphique','vert']; t='La cadence colle au bar\u00e8me';
+    d='\u00c9cart de <b>'+_pilEsc(_pecPct(Math.abs(ec)))+'</b> entre le temps pass\u00e9 et le bar\u00e8me : le budget de <b>'+_pilEsc(_ecoEur(E.budget))+'</b> est cr\u00e9dible. Engag\u00e9 \u00e0 ce jour <b>'+_pilEsc(_ecoEur(E.engage))+'</b>, reste \u00e0 engager <b>'+_pilEsc(_ecoEur(E.resteE))+'</b>.';
+  }
+  if(TL && TL.ok && TL.pace>0 && TL.projMs && TL.objMs && TL.projMs>TL.objMs){
+    d+=' \u23F1 Au rythme actuel, le budget serait \u00e9puis\u00e9 le <b>'+_pilEsc(_pecDfrMs(TL.projMs))+'</b>, apr\u00e8s l\u2019objectif de fin des travaux.';
+  }
+  // ★ MARCHE 2 : la cadence ne vient PAS de la periode en cours. Le dire avant tout le
+  //   reste, et remplacer le titre : les branches ci-dessus sont ecrites au present
+  //   (« l'equipe a passe », « la cadence colle ») et decriraient une periode qui n'est
+  //   pas celle affichee. Un chiffre d'histoire presente comme une mesure du moment est
+  //   exactement la faute de §34.
+  //   ⚠️ Ce qui reste ici est le CADRE — d'ou vient le chiffre, et qu'il sera remplace.
+  //   Le « pourquoi un seuil » est dans la fiche.
+  var cadre=null;
+  if(ec!=null && E.cad.src==='histo'){
+    t=t.replace(/^La cadence colle au bar\u00e8me$/,'La cadence de l\u2019an dernier collait au bar\u00e8me');
+    t='\u21a9\ufe0e '+t+' \u2014 mesur\u00e9 sur la campagne pr\u00e9c\u00e9dente';
+    cadre='mesur\u00e9 sur <b>'+_pilEsc(E.cad.histoNom||'la campagne pr\u00e9c\u00e9dente')+'</b> \u2014 cette p\u00e9riode en est \u00e0 '+Math.round(E.avc)+' % sur '+Math.round(E.cad.seuil)+' %';
+  }
+  var boutons=act.map(function(a){
+    return a[0]==='diag'
+      ? '<button class="pil-diag-go ghost" data-diag="'+_pilEsc(a[1])+'">'+_pilEsc(a[2])+' \u203a</button>'
+      : '<button class="pil-diag-go ghost" data-pec="sub" data-v="'+_pilEsc(a[1])+'">'+_pilEsc(a[2])+' \u203a</button>';
+  }).join('');
+  return '<div class="pec-card"><div class="pec-verdict"><div class="em">'+_mvIconTuile(em[0],em[1])+'</div><div>'
+    +'<div class="t">'+t+(typeof _mvInfoBtn==='function'?(' '+_mvInfoBtn('pil.cadence')):'')+'</div>'
+    +'<div class="d">'+d+'</div>'
+    +(cadre?('<div class="pec-vcadre"><span>'+cadre+'</span></div>'):'')
+    +(boutons?('<div class="pec-vgo">'+boutons+'</div>'):'')
+    +'</div></div></div>';
+}
+
+// ── Alertes : ce qui manque, ce qui dérape, ce qu'on peut corriger ───
+// Chaque alerte dit QUOI, POURQUOI ça compte, et OÙ le régler. Une alerte sans
+// point d'atterrissage n'est qu'un reproche.
+// ════════════════════════════════════════════════════════════════════════════
+// « CE QU'IL FAUT REGARDER » — DOUZE PARAGRAPHES DEVIENNENT UNE CARTE
+// ════════════════════════════════════════════════════════════════════════════
+// AVANT : jusqu'a douze pavés colorés empilés, de 100 à 350 caractères chacun,
+// tous au meme poids visuel. On ouvrait Économie et on lisait un mur avant
+// d'atteindre un chiffre. Le pire y cotoyait le details : « la main-d'oeuvre
+// compte pour zero » avait la meme taille que « le chiffre montera mecaniquement ».
+//
+// LA REGLE DES TROIS FAMILLES, appliquee :
+//   ① CE QUI CADRE — combien de postes sont a zero. Un chiffre, en gros.
+//   ② CE QUI EXPLIQUE — pourquoi un poste manquant met a zero, et le detail des
+//     remarques du moment : deux fiches « i », dont une VIVANTE.
+//   ③ CE QUI DIT QUOI FAIRE — un bouton par poste manquant, qui ouvre l'ecran.
+//
+// ⚠️ RIEN N'EST SUPPRIME. Les douze constats sont tous calcules, tous lisibles.
+//   Ce qui change, c'est ce qu'on voit SANS RIEN OUVRIR : le nombre de postes
+//   faussés et le geste pour les combler.
+//
+// ⚠️⚠️ DOUBLON CONNU, NON RESOLU ICI. `_pilDiag` (le bouton « à compléter » en
+//   tête de module) porte deja un constat « N fiches sans taux horaire ». Celui
+//   d'ici teste `!E.hasRate` — AUCUN taux, nulle part. Deux constats voisins sur
+//   la meme donnee, a deux endroits de la meme page. C'est la faute de §34 (trois
+//   endroits repondaient a « combien d'ETP ? ») en plus petit. La fusion est un
+//   chantier de moteur, pas d'ergonomie : elle est notee au backlog.
+
+// Un poste de depense qu'une donnee manquante met a ZERO — pas « a peu pres ».
+function _pecZeros(E){
+  var Z=[];
+  if(!E.hasRate) Z.push({ nom:'Main-d\u2019\u0153uvre', quoi:'taux horaire', cible:'equipe',  ou:'R\u00e9glages \u203a \u00c9quipe' });
+  if(!E.hasGnr)  Z.push({ nom:'Carburant',    quoi:'prix du GNR',  cible:'entretien', ou:'Tracteur \u203a Entretien' });
+  if(E.phy && !E.phy.anyDose)
+    Z.push({ nom:'Produits phyto', quoi:'dose structur\u00e9e', cible:null, ou:null });
+  else if(E.phy && E.phy.unpriced && E.phy.unpriced.length)
+    Z.push({ nom:E.phy.unpriced.length+' produit'+(E.phy.unpriced.length>1?'s':''), quoi:'prix unitaire dans La R\u00e9serve', cible:null, ou:null });
+  return Z;
+}
+
+// Les constats qui ne mettent rien a zero : le chiffre sort, il faut seulement
+// savoir comment il est fait. Ils vont dans la fiche vivante.
+function _pecRemarques(E,TL){
+  var R=[];
+  if(E.tracSess>0 && E.tracAnon>0)
+    R.push('<b>'+E.tracAnon+' session'+(E.tracAnon>1?'s':'')+'</b> de tracteur sur '+E.tracSess+' n\u2019'+(E.tracAnon>1?'ont':'a')+' pas de conducteur identifi\u00e9 (ou pas de taux) : ces heures sont valoris\u00e9es au <b>taux moyen du domaine</b>, pas au taux r\u00e9el.');
+  if(!E.projOn && E.avc>0)
+    R.push('Sous <b>15 % d\u2019avancement</b>, la projection du tracteur, du GNR et du phyto est neutralis\u00e9e : leur budget affiche le r\u00e9alis\u00e9 seul. Le chiffre montera m\u00e9caniquement.');
+  if(TL && TL.ok && TL.socle>0 && E.engage>0 && TL.socle/E.engage>0.10)
+    R.push('<b>'+_pilEsc(_pecEurK(TL.socle))+'</b> de travail fait n\u2019a <b>aucune trace dat\u00e9e</b> au journal (import ou reconstruction) : ces euros sont pos\u00e9s au premier jour de la p\u00e9riode sur la courbe, faute de mieux. Le total, lui, est juste.');
+  var chers=(E.rows||[]).filter(function(r){ return r.surf>0 && E.coutHaB>0 && r.coutHa>E.coutHaB*1.3; })
+                        .sort(function(a,b){ return b.coutHa-a.coutHa; });
+  if(chers.length)
+    R.push('<b>'+chers.length+' parcelle'+(chers.length>1?'s':'')+'</b> d\u00e9passe'+(chers.length>1?'nt':'')+' de plus de 30 % le co\u00fbt moyen \u00e0 l\u2019hectare : '
+      +_pilEsc(chers.slice(0,3).map(function(r){ return r.nom+' ('+_ecoEur(r.coutHa)+'/ha)'; }).join(', '))+(chers.length>3?'\u2026':'')
+      +'. \u00c0 regarder : plants, passages en plus, ou tri des t\u00e2ches.');
+  if(E.cad.ok && E.cad.ecart>15){
+    // ★ GARDE EXPLICITE, PAS STRUCTURELLE. La branche basse cite E.projFin : elle
+    //   n'a de sens que si la projection applique vraiment l'ecart. Le if/else le
+    //   garantissait par construction — et c'est le genre de garantie qu'un
+    //   refactor efface sans bruit. On l'ecrit.
+    if(E.cad.src==='histo' || !E.cad.applic)
+      R.push('L\u2019an dernier, sur la p\u00e9riode homologue (<b>'+_pilEsc(E.cad.histoNom||'campagne pr\u00e9c\u00e9dente')+'</b>), l\u2019\u00e9quipe avait pass\u00e9 <b>'+_pilEsc(_pecPct(E.cad.ecart))+' de temps en plus</b> que le bar\u00e8me h/ha. Cette p\u00e9riode-ci n\u2019est pas encore assez avanc\u00e9e pour se mesurer elle-m\u00eame ('+Math.round(E.avc)+' % sur '+Math.round(E.cad.seuil)+' % requis) : c\u2019est un <b>rep\u00e8re</b>, pas une pr\u00e9vision.');
+    else
+      R.push('Sur le travail d\u00e9j\u00e0 fait, l\u2019\u00e9quipe a pass\u00e9 <b>'+_pilEsc(_pecPct(E.cad.ecart))+' de temps en plus</b> que le bar\u00e8me h/ha. Si cela tient jusqu\u2019au bout, la p\u00e9riode co\u00fbtera <b>'+_pilEsc(_pecEurK(E.projFin))+'</b> au lieu de '+_pilEsc(_pecEurK(E.budget))+'. Deux causes possibles, et elles se distinguent dans <b>Postes &amp; travaux</b> : un bar\u00e8me trop serr\u00e9, ou un travail pr\u00e9cis qui d\u00e9rape.');
+  }
+  else if(!E.cad.ok && E.avc>10)
+    R.push(E.cad.src
+      ? ('L\u2019\u00e9cart de cadence n\u2019est pas encore affich\u00e9 : il demande <b>'+Math.round(E.cad.seuil)+' %</b> du bar\u00e8me r\u00e9alis\u00e9, la p\u00e9riode en est \u00e0 <b>'+Math.round(E.avc)+' %</b>. Rien \u00e0 faire, il appara\u00eetra seul.')
+      : 'L\u2019\u00e9cart de cadence est indisponible : aucune heure de planning sur cette p\u00e9riode, et aucune campagne comparable archiv\u00e9e. C\u2019est le planning qui mesure le temps pass\u00e9.');
+  if(E.tot.retE>0)
+    R.push('<b>'+_pilEsc(_ecoEur(E.tot.retE))+'</b> de surco\u00fbt de retard mod\u00e9lis\u00e9 sur '+E.tot.nRet+' parcelle'+(E.tot.nRet>1?'s':'')+' ('+E.rcfg.pct+' %/semaine hors fen\u00eatre, plafond '+E.rcfg.capPct+' %). <b>Mod\u00e9lis\u00e9, jamais pay\u00e9</b> : il n\u2019entre dans aucun total.');
+  return R;
+}
+
+// ════════════════════════════════════════════════════════════════════════════
+// LA CARTE DE FIABILITE — UN SEUL RENDU, DEUX ECRANS
+// ════════════════════════════════════════════════════════════════════════════
+// Ecrite pour la Synthese, elle sert a l'identique a l'Exercice : meme question
+// (« combien de postes sortent a zero, et comment les combler »), donc meme
+// carte. Deux implementations de la meme chose, c'est la garantie qu'elles
+// divergeront — et la faute que ce chantier passe son temps a corriger.
+//   Z = [{nom, quoi, cible, ou}]  les postes qu'une donnee manquante met a ZERO
+//   R = [html]                    ce qui change la lecture sans rien mettre a zero
+// ⚠️ La fiche des remarques est VIVANTE : ses paragraphes sont poses ici, juste
+//   avant que la pastille soit rendue. Si R est vide, MV_INFO garde son repli.
+function _pecFiabCard(Z, R, cleFia, cleRem, okTxt, okSous){
+  if(typeof window._mvInfoSet==='function' && R.length)
+    window._mvInfoSet(cleRem, { p:R });
+  var H='';
+  if(Z.length){
+    H+='<div class="pec-fia bad">'
+      +'<div class="pec-fia-h"><span class="pec-fia-n">'+Z.length+'</span>'
+      +'<div><div class="pec-fia-t">poste'+(Z.length>1?'s':'')+' compt\u00e9'+(Z.length>1?'s':'')+' pour z\u00e9ro</div>'
+      +'<div class="pec-fia-s">'+_pilEsc(Z.map(function(z){return z.nom;}).join(' \u00b7 '))+'</div></div>'
+      +(typeof _mvInfoBtn==='function'?_mvInfoBtn(cleFia):'')+'</div>'
+      // Un bouton par poste. Ceux qui n'ont pas de porte disent au moins ce qui
+      // manque, plutot que de promettre un ecran qui n'existe pas.
+      +'<div class="pec-fia-go">'
+      +Z.map(function(z){
+         return z.cible
+           ? '<button class="pil-diag-go ghost" data-diag="'+_pilEsc(z.cible)+'">'+_pilEsc(z.ou)+' \u203a</button>'
+           : '<span class="pec-fia-x">'+_pilEsc(z.quoi)+' \u00e0 renseigner</span>';
+       }).join('')
+      +'</div></div>';
+  } else {
+    H+='<div class="pec-fia ok"><div class="pec-fia-h"><span class="pec-fia-n">'+_mvIcon('check',16)+'</span>'
+      +'<div><div class="pec-fia-t">'+_pilEsc(okTxt)+'</div>'
+      +'<div class="pec-fia-s">'+_pilEsc(okSous)+'</div></div>'
+      +(typeof _mvInfoBtn==='function'?_mvInfoBtn(cleFia):'')+'</div></div>';
+  }
+  if(R.length){
+    H+='<button class="pec-remq" data-mvi="'+_pilEsc(cleRem)+'">'
+      +'<span class="pec-remq-n">'+R.length+'</span>remarque'+(R.length>1?'s':'')+' sur la lecture de ces chiffres'
+      +'<span class="pec-remq-c">\u203a</span></button>';
+  }
+  return H;
+}
+
+function _pecAlertes(E,TL){
+  return _pecFiabCard(_pecZeros(E), _pecRemarques(E,TL),
+    'pil.eco.fiabilite', 'pil.eco.remarques',
+    'Le chiffrage est complet', 'taux horaires, prix du GNR, doses et prix des produits');
+}
+
+// ── Vue 1 : Synthèse ─────────────────────────────────────────────────
+function _pecViewSynthese(E,TL){
+  var H=_pecVerdict(E,TL);
+  var ec=E.cad.ok?E.cad.ecart:null;
+  var dCol = (ec===null)?'var(--texte-doux)' : (ec>15?'var(--rouge)' : (ec>5?'var(--orange)' : 'var(--vert-med)'));
+  var pE=E.budget>0?Math.min(100,E.engage/E.budget*100):0;
+  H+='<div class="pec-card"><div class="pec-kpis">'
+    +'<div class="pec-k"><div class="l">Budget de la p\u00e9riode</div><div class="v">'+_pilEsc(_ecoEur(E.budget))+'</div>'
+      +'<div class="s">'+_pilEsc(_ecoEur(E.coutHaB))+' \u00e0 l\u2019hectare sur '+_pilHa(E.tot.surf)+' ha'+(E.projOn?' \u00b7 m\u00e9canique et phyto projet\u00e9s':'')+'</div></div>'
+    +'<div class="pec-k"><div class="l">Engag\u00e9 \u00e0 ce jour</div><div class="v">'+_pilEsc(_ecoEur(E.engage))+'</div>'
+      +'<div class="s">'+_pilEsc(_pecPct(E.cons))+' du budget \u00b7 '+_pilEsc(_ecoEur(E.coutHaE))+'/ha</div></div>'
+    +'<div class="pec-k"><div class="l">Reste \u00e0 engager</div><div class="v">'+_pilEsc(_ecoEur(E.resteE))+'</div>'
+      +'<div class="s">'+_ecoH1(E.tot.rH)+' h de travail encore \u00e0 faire</div></div>'
+    // ★ LA PASTILLE VIT A COTE DU CHIFFRE QU'ELLE EXPLIQUE. Elle etait posee dans
+    //   le pave d'alerte ; la refonte du mur l'a emportee avec lui, et la fiche
+    //   `pil.cadence` — le seuil, le biais cave/atelier/bureau, la regle du reste
+    //   a engager — est redevenue inatteignable. Trouve par le harnais, qui exige
+    //   que toute fiche ecrite soit posee quelque part.
+    +'<div class="pec-k"><div class="l">\u00c9cart de cadence'+(typeof _mvInfoBtn==='function'?(' '+_mvInfoBtn('pil.cadence')):'')+'</div>'
+      +'<div class="v" style="color:'+dCol+'">'+(ec===null?'\u2014':((ec>0?'+':'')+_pecPct(ec)))+'</div>'
+      +'<div class="s">'+(ec===null
+          ? (E.cad.src?('mesurable d\u00e8s '+Math.round(E.cad.seuil)+' % du bar\u00e8me r\u00e9alis\u00e9 \u00b7 '+Math.round(E.avc)+' % \u00e0 ce jour'):'aucune heure de planning sur la p\u00e9riode')
+          : (E.cad.src==='histo'
+              ? ('\u21a9\ufe0e campagne pr\u00e9c\u00e9dente \u00b7 fin projet\u00e9e \u00e0 <b>'+_pilEsc(_pecEurK(E.projFin))+'</b>')
+              : ('temps pass\u00e9 contre bar\u00e8me \u00b7 fin projet\u00e9e \u00e0 <b>'+_pilEsc(_pecEurK(E.projFin))+'</b>')))+'</div></div>'
+    +'</div>'
+    +'<div class="pec-cb" style="padding-top:16px">'
+    +'<div class="pec-bar"><i style="width:'+pE.toFixed(1)+'%;background:'+_PEC_COL.mo+'"></i></div>'
+    +'<div class="pec-leg"><span class="pec-lg"><em style="background:'+_PEC_COL.mo+'"></em>Engag\u00e9 <b>'+_pilEsc(_ecoEur(E.engage))+'</b></span>'
+    +'<span class="pec-lg"><em style="background:var(--gris-clair)"></em>Reste <b>'+_pilEsc(_ecoEur(E.resteE))+'</b></span>'
+    +'<span class="pec-lg" style="color:var(--texte-doux)">Travail fait <b>'+_pilEsc(_pecPct(E.avc))+'</b></span></div>'
+    +'</div></div>';
+
+  // Courbe d'engagement
+  var sub='';
+  if(TL && TL.ok){
+    var pj = (TL.pace>0 && TL.projEndV!=null) ? ('fin de p\u00e9riode projet\u00e9e \u00e0 '+_pecEurK(TL.projEndV)) : 'rythme non mesurable';
+    sub='Rythme des 28 derniers jours : <b>'+_pilEsc(_ecoEur(TL.pace))+' par jour</b> \u00b7 '+_pilEsc(pj)
+      + (TL.projMs?(' \u00b7 budget \u00e9puis\u00e9 le <b>'+_pilEsc(_pecDfrMs(TL.projMs))+'</b>'):'');
+  } else sub='Le trac\u00e9 se remplit \u00e0 mesure que les travaux sont valid\u00e9s au journal.';
+  window._mvGraphSuivre('#pec-g-burn', function(w){ return _pecBurnSvg(E,TL,w); });
+  H+='<div class="pec-card"><div class="pec-ch"><div class="pec-ct">Rythme de d\u00e9pense</div><div class="pec-cs">'+sub+'</div></div>'
+    +'<div class="pec-cb"><div id="pec-g-burn"></div>'
+    +'<div class="pec-leg"><span class="pec-lg"><em style="background:var(--terre)"></em>Engag\u00e9 cumul\u00e9</span>'
+    +'<span class="pec-lg"><i style="border-top:2px dashed var(--terre);opacity:.6"></i>Projection au rythme constat\u00e9</span>'
+    +'<span class="pec-lg"><i style="border-top:2px dashed var(--or)"></i>Budget</span>'
+    +(E.cad.ok&&E.cad.applic&&Math.abs(E.cad.ecart)>5?'<span class="pec-lg"><em style="background:'+(E.projFin>E.budget?'var(--rouge)':'var(--vert-med)')+'"></em>Fin projet\u00e9e \u00e0 la cadence mesur\u00e9e</span>':'')
+    +(TL&&TL.objMs?'<span class="pec-lg"><i style="border-top:2px dashed var(--or)"></i>Objectif de fin des travaux</span>':'')+'</div>'
+    +'<div class="pec-note">Chaque euro est pos\u00e9 \u00e0 <b>sa</b> date : la main-d\u2019\u0153uvre sur les validations du journal, le tracteur et le GNR sur la date de session, le phyto sur la date de traitement. Une personne pr\u00e9sente sur plusieurs parcelles le m\u00eame jour est r\u00e9partie \u00e0 parts \u00e9gales \u2014 le journal dit qui et quand, jamais combien d\u2019heures.<br>'
+      +'L\u2019<b>\u00e9cart de cadence</b> vient de l\u00e0 : les heures <b>r\u00e9ellement travaill\u00e9es au planning</b> sur la p\u00e9riode, moins les heures de sessions tracteur, compar\u00e9es aux heures de bar\u00e8me du travail fait. '
+      +(E.cad.ok
+         ? ((E.cad.src==='histo'
+              ? ('\u21a9\ufe0e <b>Mesur\u00e9 sur la campagne pr\u00e9c\u00e9dente</b> ('+_pilEsc(E.cad.histoNom||'p\u00e9riode homologue')+') : cette p\u00e9riode-ci n\u2019a pas encore atteint les '+Math.round(E.cad.seuil)+' % de bar\u00e8me r\u00e9alis\u00e9 qu\u2019il faut pour se mesurer elle-m\u00eame. ')
+              : '')
+            +'<b>'+_ecoH1(E.cad.hReel)+' h</b> de pr\u00e9sence contre <b>'+_ecoH1(E.cad.hBar)+' h</b> pr\u00e9vues'+(E.cad.hTrac>0?(', apr\u00e8s d\u00e9duction de '+_ecoH1(E.cad.hTrac)+' h de tracteur'):'')+'. \u26a0 Le planning dit que la personne \u00e9tait l\u00e0, jamais ce qu\u2019elle a fait : la cave, l\u2019atelier et le bureau restent dans ce total. La pr\u00e9sence est donc plut\u00f4t sur\u00e9valu\u00e9e.')
+         : ('Neutralis\u00e9 sous '+Math.round(E.cad.seuil)+' % du bar\u00e8me r\u00e9alis\u00e9 \u2014 '+Math.round(E.avc)+' % \u00e0 ce jour, et aucune campagne comparable archiv\u00e9e.'))+'</div>'
+    +'</div></div>';
+
+  // Prix de revient
+  var rec=E.rec, recTxt;
+  if(rec.src==='saison') recTxt='r\u00e9colte de la p\u00e9riode \u00b7 '+_pilNum(rec.kg)+' kg sur '+rec.n+' parcelle'+(rec.n>1?'s':'');
+  else if(rec.src==='hist') recTxt='derni\u00e8re r\u00e9colte connue \u2014 mill\u00e9sime <b>'+_pilEsc(String(rec.mil))+'</b> \u00b7 '+_pilNum(rec.kg)+' kg';
+  else recTxt='aucune r\u00e9colte enregistr\u00e9e \u2014 les rendements se saisissent au <b>Cuvier</b>';
+  var mini='<div><div class="l">Co\u00fbt \u00e0 l\u2019hectare</div><div class="v">'+_pilEsc(_ecoEur(E.coutHaB))+'</div><div class="s">budget \u00b7 engag\u00e9 '+_pilEsc(_ecoEur(E.coutHaE))+'</div></div>';
+  if(rec.kg>0){
+    mini+='<div><div class="l">Co\u00fbt du kilo</div><div class="v">'+_pilEsc(_ecoEur2(E.eurKg))+'<small> \u20AC/kg</small></div><div class="s">sur '+_pilNum(rec.kg)+' kg de raisin</div></div>'
+        +'<div><div class="l">Co\u00fbt de la bouteille</div><div class="v">'+_pilEsc(_ecoEur2(E.eurBt))+'<small> \u20AC</small></div><div class="s">\u2248 '+_pilNum(E.bouteilles)+' cols \u00e0 '+_pilEsc(_ecoEur2(E.kgB))+' kg/col</div></div>';
+  } else {
+    mini+='<div><div class="l">Co\u00fbt du kilo</div><div class="v">\u2014</div><div class="s">saisir la r\u00e9colte au Cuvier</div></div>';
+  }
+  if(E.hasPlant) mini+='<div><div class="l">Co\u00fbt du plant</div><div class="v">'+_pilEsc(_ecoEur2(E.eurPlant))+'<small> \u20AC</small></div><div class="s">'+_pilNum(E.tot.trous)+' plants \u00e0 '+E.minTrou+' min</div></div>';
+  mini+='<div><div class="l">Co\u00fbt de l\u2019heure</div><div class="v">'+_pilEsc(_ecoEur2(E.rate))+'<small> \u20AC/h</small></div><div class="s">taux moyen de l\u2019\u00e9quipe de terrain</div></div>';
+  // ① Le cadre dit SUR QUELLE RECOLTE le prix est calcule. L'hypothese de
+  //   conversion et ce que le prix ne contient pas expliquent le CALCUL : fiche.
+  //   ③ Le bouton « Regler les hypotheses » existait deja, deux lignes plus bas.
+  H+='<div class="pec-card"><div class="pec-ch"><div class="pec-ct">Prix de revient</div>'
+    +'<div class="pec-cs">'+recTxt+' \u00b7 co\u00fbts de <b>culture</b> seulement'
+    +(typeof _mvInfoBtn==='function'?(' '+_mvInfoBtn('pil.eco.revient')):'')+'</div></div>'
+    +'<div class="pec-cb"><div class="pec-mini">'+mini+'</div>'
+    +'<div class="pec-acts"><button class="pec-btn" data-pec="param"><span>\u2699\uFE0F</span> R\u00e9gler les hypoth\u00e8ses</button>'
+    +'<button class="pec-btn" data-pec="sub" data-v="pos"><span>'+_mvIcon('boussole',16)+'</span> Voir o\u00f9 part l\u2019argent</button></div></div></div>';
+
+  H+='<div class="pec-card"><div class="pec-ch"><div class="pec-ct">Ce qu\u2019il faut regarder</div></div><div class="pec-cb">'+_pecAlertes(E,TL)+'</div></div>';
+  return H;
+}
+
+// ── Vue 2 : Postes & travaux ─────────────────────────────────────────
+function _pecViewPostes(E){
+  var items=E.postes.filter(function(p){ return p.budget>0; }).map(function(p){ return { n:p.lab, v:p.budget, c:p.col }; });
+  var legs=E.postes.map(function(p){
+    var pc=E.budget>0?(p.budget/E.budget*100):0;
+    return '<tr><td class="n"><span style="display:inline-block;width:11px;height:11px;border-radius:3px;background:'+p.col+';margin-right:8px;vertical-align:-1px"></span>'+_pilEsc(p.lab)
+      +(p.proj?' <span class="pec-pill" style="background:var(--or-pale);color:var(--or-tx,#7A5E12)">projet\u00e9</span>':'')+'</td>'
+      +'<td class="r">'+_pilEsc(_ecoEur(p.fait))+'</td>'
+      +'<td class="r">'+_pilEsc(_ecoEur(p.budget))+'</td>'
+      +'<td class="r">'+_pilEsc(_pecPct(pc))+'</td>'
+      +'<td class="r">'+(E.tot.surf>0?_pilEsc(_ecoEur(p.budget/E.tot.surf)):'\u2014')+'</td>'
+      +'<td style="color:var(--texte-doux)">'+_pilEsc(p.det)+'</td></tr>';
+  }).join('');
+  var retRow = E.tot.retE>0
+    ? '<tr><td class="n" style="color:'+_PEC_COL.ret+'"><span style="display:inline-block;width:11px;height:11px;border-radius:3px;background:'+_PEC_COL.ret+';opacity:.5;margin-right:8px;vertical-align:-1px"></span>Surco\u00fbt de retard <span class="pec-pill" style="background:var(--orange-pale);color:var(--orange)">hors total</span></td>'
+      +'<td class="r">\u2014</td><td class="r" style="color:'+_PEC_COL.ret+'">+'+_pilEsc(_ecoEur(E.tot.retE))+'</td><td class="r">\u2014</td><td class="r">\u2014</td>'
+      +'<td style="color:var(--texte-doux)">'+_ecoH1(E.tot.retH)+' h mod\u00e9lis\u00e9es, jamais pay\u00e9es</td></tr>'
+    : '';
+  // ① Ce qui reste : la maille, et l'etat de la projection — deux choses qui
+  //   changent la lecture des montants. Le POURQUOI (bareme complet contre
+  //   realise) part dans la fiche.
+  var H='<div class="pec-card"><div class="pec-ch"><div class="pec-ct">O\u00f9 part l\u2019argent</div>'
+    +'<div class="pec-cs"><b>Budget</b> de la p\u00e9riode \u00b7 '+(E.projOn?'tracteur, GNR et phyto extrapol\u00e9s':'tracteur, GNR et phyto en r\u00e9alis\u00e9 seul')
+    +(typeof _mvInfoBtn==='function'?(' '+_mvInfoBtn('pil.eco.postes')):'')+'</div></div>'
+    +'<div class="pec-cb"><div class="pec-grid2">'
+    +'<div>'+_pecDonutSvg(items,_pecEurK(E.budget),'budget')+'</div>'
+    +'<div class="pec-scroll"><table class="pec-tbl" style="min-width:520px"><thead><tr><th>Poste</th><th class="r">Engag\u00e9</th><th class="r">Budget</th><th class="r">Part</th><th class="r">\u20AC/ha</th><th>Base de calcul</th></tr></thead>'
+    +'<tbody>'+legs+retRow+'</tbody>'
+    +'<tfoot><tr><td>Total</td><td class="r">'+_pilEsc(_ecoEur(E.engage))+'</td><td class="r">'+_pilEsc(_ecoEur(E.budget))+'</td><td class="r">100 %</td><td class="r">'+_pilEsc(_ecoEur(E.coutHaB))+'</td><td></td></tr></tfoot>'
+    +'</table></div></div></div></div>';
+
+  var trows=(E.tasks||[]).map(function(t){
+    return '<tr><td class="n">'+_pilEsc(_pilTnom(t.nom))+'</td>'
+      +'<td class="r">'+_ecoH1(t.bH)+' h</td>'
+      +'<td class="r">'+Math.round(t.pct)+' %</td>'
+      +'<td class="r">'+_pilEsc(_ecoEur(t.fE))+'</td>'
+      +'<td class="r">'+_pilEsc(_ecoEur(t.rE))+'</td>'
+      +'<td class="r n">'+_pilEsc(_ecoEur(t.bE))+'</td>'
+      +'<td class="r">'+_pilEsc(_ecoEur(t.euHa))+'</td>'
+      +'<td class="r">'+_pilEsc(_pecPct(t.part))+'</td></tr>';
+  }).join('');
+  window._mvGraphSuivre('#pec-g-task', function(w){ return _pecTaskSvg(E,w); });
+  H+='<div class="pec-card"><div class="pec-ch"><div class="pec-ct">Co\u00fbt par travail</div>'
+    +'<div class="pec-cs">Main-d\u2019\u0153uvre vigne uniquement'
+    +(typeof _mvInfoBtn==='function'?(' '+_mvInfoBtn('pil.eco.travaux')):'')+'</div></div>'
+    +'<div class="pec-cb"><div id="pec-g-task"></div>'
+    +'<div class="pec-scroll" style="margin-top:14px"><table class="pec-tbl"><thead><tr><th>Travail</th><th class="r">Heures</th><th class="r">Fait</th><th class="r">Engag\u00e9</th><th class="r">Reste</th><th class="r">Budget</th><th class="r">\u20AC/ha</th><th class="r">Part</th></tr></thead>'
+    +'<tbody>'+(trows||'<tr><td colspan="8" class="pec-empty">Aucun travail chiffr\u00e9.</td></tr>')+'</tbody></table></div>'
+    +'<div class="pec-acts"><button class="pec-btn" data-pec="sub" data-v="par"><span>\uD83C\uDF47</span> Voir parcelle par parcelle</button></div>'
+    +'</div></div>';
+  return H;
+}
+
+// ── Vue 3 : Parcelles ────────────────────────────────────────────────
+var _PEC_COLS=[
+  ['nom',   'Parcelle',  0],
+  ['surf',  'ha',        1],
+  ['pct',   'Fait',      1],
+  ['moF',   'MO',        1],
+  ['tracF', 'Tracteur',  1],
+  ['gnrF',  'GNR',       1],
+  ['phyF',  'Phyto',     1],
+  ['engage','Engag\u00e9',1],
+  ['reste', 'Reste',     1],
+  ['budget','Budget',    1],
+  ['coutHa','\u20AC/ha', 1]
+];
+function _pecSortRows(E){
+  var k=_PEC_PSORT, dir=_PEC_PDIR;
+  return (E.rows||[]).slice().sort(function(a,b){
+    var x=a[k], y=b[k];
+    if(typeof x==='string'||typeof y==='string') return String(x).localeCompare(String(y),'fr')*(dir<0?-1:1);
+    return ((Number(y)||0)-(Number(x)||0))*(dir<0?1:-1);
+  });
+}
+function _pecViewParcelles(E){
+  var rows=_pecSortRows(E);
+  var head=_PEC_COLS.map(function(c){
+    var on=(c[0]===_PEC_PSORT);
+    return '<th class="s'+(c[2]?' r':'')+(on?' on':'')+'" data-pec="ps" data-k="'+c[0]+'">'+_pilEsc(c[1])+(on?(_PEC_PDIR<0?' \u25BC':' \u25B2'):'')+'</th>';
+  }).join('');
+  var body=rows.map(function(r){
+    var badge = (r.src==='reel')
+      ? '<span class="pec-pill" style="background:var(--vert-pale);color:var(--vert-tx,#31601C)" title="taux pond\u00e9r\u00e9 par l\u2019\u00e9quipe r\u00e9ellement pr\u00e9sente">\u00e9quipe r\u00e9elle</span>'
+      : '<span class="pec-pill" style="background:var(--gris-clair);color:var(--texte-doux)" title="aucune \u00e9quipe identifi\u00e9e au journal">taux moyen</span>';
+    var ret = r.retE>0 ? ' <span class="pec-pill" style="background:var(--orange-pale);color:var(--orange)" title="surco\u00fbt de retard mod\u00e9lis\u00e9, hors total">+'+_ecoEur(r.retE)+' retard</span>' : '';
+    var plants = r.trous>0 ? ' <span class="pec-pill" style="background:var(--tag-purple-bg);color:var(--tag-purple-tx)">'+_pilNum(r.trous)+' plants</span>' : '';
+    var pcol=_pilPctColor(r.pct);
+    return '<tr><td class="n">'+_pilEsc(r.nom)+'<div style="margin-top:4px;display:flex;gap:5px;flex-wrap:wrap">'+badge+plants+ret+'</div></td>'
+      +'<td class="r">'+_pilHa(r.surf)+'</td>'
+      +'<td class="r" style="color:'+pcol+';font-weight:700">'+Math.round(r.pct)+' %</td>'
+      +'<td class="r">'+_pilEsc(_ecoEur(r.moF))+'</td>'
+      +'<td class="r">'+(r.tracF>0?_pilEsc(_ecoEur(r.tracF)):'\u2014')+'</td>'
+      +'<td class="r">'+(r.gnrF>0?_pilEsc(_ecoEur(r.gnrF)):'\u2014')+'</td>'
+      +'<td class="r">'+(r.phyF>0?_pilEsc(_ecoEur(r.phyF)):'\u2014')+'</td>'
+      +'<td class="r">'+_pilEsc(_ecoEur(r.engage))+'</td>'
+      +'<td class="r">'+_pilEsc(_ecoEur(r.reste))+'</td>'
+      +'<td class="r n">'+_pilEsc(_ecoEur(r.budget))+'</td>'
+      +'<td class="r">'+_pilEsc(_ecoEur(r.coutHa))+'</td></tr>';
+  }).join('') || '<tr><td colspan="11" class="pec-empty">Aucune parcelle active.</td></tr>';
+  var foot='<tr><td>'+rows.length+' parcelle'+(rows.length>1?'s':'')+'</td>'
+    +'<td class="r">'+_pilHa(E.tot.surf)+'</td><td class="r">'+Math.round(E.avc)+' %</td>'
+    +'<td class="r">'+_pilEsc(_ecoEur(E.tot.moF))+'</td><td class="r">'+_pilEsc(_ecoEur(E.tot.tracF))+'</td>'
+    +'<td class="r">'+_pilEsc(_ecoEur(E.tot.gnrF))+'</td><td class="r">'+_pilEsc(_ecoEur(E.tot.phyF))+'</td>'
+    +'<td class="r">'+_pilEsc(_ecoEur(E.engage))+'</td><td class="r">'+_pilEsc(_ecoEur(E.tot.moR))+'</td>'
+    +'<td class="r">'+_pilEsc(_ecoEur(E.budget))+'</td><td class="r">'+_pilEsc(_ecoEur(E.coutHaB))+'</td></tr>';
+  var H='<div class="pec-card"><div class="pec-ch"><div class="pec-ct">Co\u00fbt parcelle par parcelle</div>'
+    // ★ LA LEGENDE DES COLONNES N'EST PAS UN CADRE : c'est un mode d'emploi du
+    //   tableau. On le lit une fois, puis on connait ses colonnes. Il part dans
+    //   la fiche, avec « cliquez pour trier ».
+    +'<div class="pec-cs"><b>Budget</b> de la p\u00e9riode, parcelle par parcelle'
+    +(typeof _mvInfoBtn==='function'?(' '+_mvInfoBtn('pil.eco.parcelles')):'')+'</div></div>'
+    +'<div class="pec-cb"><div class="pec-scroll"><table class="pec-tbl" style="min-width:900px"><thead><tr>'+head+'</tr></thead><tbody>'+body+'</tbody><tfoot>'+foot+'</tfoot></table></div>'
+    +'<div class="pec-acts"><button class="pec-btn" data-pec="csv"><span>'+_mvIcon('chevron',16)+'</span> T\u00e9l\u00e9charger le tableau (CSV)</button>'
+    +'<button class="pec-btn" data-pec="copy"><span>'+_mvIcon('liste',16)+'</span> Copier pour un tableur</button></div>'
+    +'<div class="pec-note">Le co\u00fbt d\u2019une parcelle est un <b>co\u00fbt de culture</b> : ni vinification, ni foncier, ni amortissement du mat\u00e9riel. Les heures viennent du bar\u00e8me h/ha du domaine, le taux de la fiche de paie de chaque salari\u00e9, et le tracteur du taux de son conducteur.</div>'
+    +'</div></div>';
+  window._mvGraphSuivre('#pec-g-ecart', function(w){ return _pecEcartSvg(E,w); });
+  H+='<div class="pec-card"><div class="pec-ch"><div class="pec-ct">\u00c9cart au co\u00fbt moyen \u00e0 l\u2019hectare</div>'
+    +'<div class="pec-cs">\u00c0 surface \u00e9gale'
+    +(typeof _mvInfoBtn==='function'?(' '+_mvInfoBtn('pil.eco.parcelles')):'')+'</div></div>'
+    +'<div class="pec-cb"><div id="pec-g-ecart"></div></div></div>';
+  return H;
+}
+
+// ── Export : le tableau, tel qu'il est trié à l'écran ────────────────
+function _pecTableTxt(E,sep){
+  var rows=_pecSortRows(E);
+  var L=[['Parcelle','Surface ha','Avancement %','MO engagee EUR','Tracteur EUR','GNR EUR','Phyto EUR','Engage EUR','Reste EUR','Budget EUR','EUR par ha','Heures budget','Heures restantes','Taux EUR/h','Source taux','Plants','Retard modelise EUR'].join(sep)];
+  function n2(v){ return String(Math.round((Number(v)||0)*100)/100).replace('.',','); }
+  rows.forEach(function(r){
+    L.push([String(r.nom).replace(/[\t\r\n;]/g,' '), n2(r.surf), Math.round(r.pct), n2(r.moF), n2(r.tracF), n2(r.gnrF), n2(r.phyF),
+            n2(r.engage), n2(r.reste), n2(r.budget), n2(r.coutHa), n2(r.bH), n2(r.rH), n2(r.tx),
+            (r.src==='reel'?'equipe reelle':'taux moyen'), r.trous||0, n2(r.retE)].join(sep));
+  });
+  L.push(['TOTAL', n2(E.tot.surf), Math.round(E.avc), n2(E.tot.moF), n2(E.tot.tracF), n2(E.tot.gnrF), n2(E.tot.phyF),
+          n2(E.engage), n2(E.tot.moR), n2(E.budget), n2(E.coutHaB), n2(E.tot.bH), n2(E.tot.rH), n2(E.rate), '', E.tot.trous, n2(E.tot.retE)].join(sep));
+  return L.join('\r\n');
+}
+function _pecExport(kind,E){
+  var per=(typeof window._pilSaison==='function'&&window._pilSaison())?(window._pilSaison().nom||'periode'):'periode';
+  var safe=String(per).normalize('NFD').replace(/[\u0300-\u036f]/g,'').replace(/[^A-Za-z0-9_-]+/g,'-');
+  if(kind==='copy'){
+    var txt=_pecTableTxt(E,'\t');
+    if(navigator.clipboard && navigator.clipboard.writeText){
+      navigator.clipboard.writeText(txt).then(function(){
+        if(window.showToast) window.showToast('Tableau copi\u00e9 \u2014 collez-le dans votre tableur','#3D6B27');
+      }, function(){
+        if(window.showToast) window.showToast('Copie refus\u00e9e par le navigateur','#B85A1A');
+      });
+    } else if(window.showToast) window.showToast('Copie indisponible sur ce navigateur','#B85A1A');
+    return;
+  }
+  var csv=_pecTableTxt(E,';'), done=false;
+  try{
+    var b=new Blob(['\uFEFF'+csv],{type:'text/csv;charset=utf-8;'});
+    var u=URL.createObjectURL(b);
+    var a=document.createElement('a');
+    a.href=u; a.download='mavigne-couts-'+safe+'.csv'; a.style.display='none';
+    document.body.appendChild(a); a.click();
+    setTimeout(function(){ if(a.parentNode) a.parentNode.removeChild(a); URL.revokeObjectURL(u); },600);
+    done=true;
+  }catch(e){
+    if(window.logError) window.logError({level:'warning',cat:'pilotage',msg:'export CSV impossible'});
+  }
+  if(done){ if(window.showToast) window.showToast('Tableau export\u00e9','#3D6B27'); }
+  else _pecExport('copy',E);
+}
+
+// ── Barre de sous-vues ───────────────────────────────────────────────
+var _PEC_SUBS=[['syn','graphique','Synth\u00e8se'],['pos','cible','Postes & travaux'],['par','raisin','Parcelles'],['ach','euro','Achats'],['exe','calendrier','Exercice']];
+function _pecSubNav(E){
+  var b=_PEC_SUBS.map(function(s){
+    var ic=(typeof _mvIcon==='function')?_mvIcon(s[1],16):'';
+    return '<button data-pec="sub" data-v="'+s[0]+'"'+(s[0]===_PEC_SUB?' class="on"':'')+'><span style="margin-right:6px;display:inline-flex;vertical-align:-3px">'+ic+'</span>'+s[2]+'</button>';
+  }).join('');
+  var ctx='<div class="pec-cs" style="text-align:right;min-width:0">'+_pilEsc(_pilSaisonNom()||'\u2014')+' \u00b7 '
+    +_pilHa(E.tot.surf)+' ha \u00b7 taux moyen '+_pilEsc(_ecoEur2(E.rate))+' \u20AC/h</div>';
+  return '<div class="pec-subnav"><div class="pec-sub">'+b+'</div>'+ctx+'</div>';
+}
+
+// ── Onglet ÉCONOMIE ──────────────────────────────────────────────────
+// ════════════════════════════════════════════════════════════════════════════════
+// EXERCICE COMPTABLE — « d'une date de bilan à l'autre »
+// ════════════════════════════════════════════════════════════════════════════════
+// POURQUOI CE N'EST PAS LE BUDGET DE CAMPAGNE FILTRE PAR DATES.
+// Le budget de campagne (_pecData) est STRUCTUREL : surface x bareme h/ha x taux.
+// Il ne porte AUCUNE date, et il ne peut pas en porter — rien dans le modele ne dit
+// QUAND une tache se fera. Un exercice, lui, est une pure fenetre de dates. On ne
+// peut donc pas decouper l'un pour obtenir l'autre : il faut repartir des faits
+// DATES. C'est ce que fait ce moteur, et c'est pour cela qu'il vit a cote et non
+// dedans.
+//
+// ⚠⚠ LE PIEGE CENTRAL, EVITE : LE DOUBLE COMPTAGE DE LA CONDUITE.
+// Le budget de campagne separe « main-d'oeuvre vigne » (bareme h/ha) et « conduite
+// tracteur » (heures de session x taux du conducteur) parce que le bareme vigne ne
+// contient pas les heures passees sur le tracteur. Le PLANNING, lui, contient DEJA
+// toutes les heures payees — vigne, tracteur, cave, entretien, bureau. Additionner
+// la masse salariale du planning ET le cout de conduite compterait donc DEUX FOIS
+// les heures de tractoriste. L'exercice compte la paie UNE fois, et n'ajoute au
+// tracteur que son CARBURANT.
+//
+// LES TROIS POSTES, ET RIEN D'AUTRE :
+//   SALAIRES CHARGES  planning (_planPaidRange) x taux individuel (paie) — tout le
+//                     travail humain, effectif des equipes collectives compris.
+//   CARBURANT GNR     les LITRES DES PLEINS releves sur l'exercice, chacun a SA date,
+//                     au prix du litre en vigueur A CETTE DATE (moyenne ponderee des
+//                     appoints livres jusque-la). Aucun plein releve : repli sur
+//                     l'ancien modele heures x conso x prix, et l'ecran le dit.
+//   ACHATS D'INTRANTS le prix HT porte par chaque achat de La Reserve, a sa date.
+//                     C'est la FACTURE, pas la valorisation de stock : c'est elle
+//                     qui entre dans un compte de resultat.
+// La consommation phyto valorisee est affichee A PART, hors total : c'est une
+// mesure de stock, la mettre dans le total ferait compter le produit deux fois.
+//
+// ⚠ CE QUE MA VIGNE NE CONNAIT PAS, ET QUI EST DIT A L'ECRAN : fermage, amortissements,
+//   assurances, cotisations du chef d'exploitation, embouteillage, frais generaux.
+//   Le total n'est donc PAS un compte de resultat, et l'ecran ne laisse personne le
+//   croire. Un chiffre qu'on compare a autre chose que ce qu'il mesure est pire
+//   qu'un chiffre absent.
+// ════════════════════════════════════════════════════════════════════════════════
+
+// Exercice consulte (annee d'OUVERTURE). null = celui d'aujourd'hui. Memorise par
+// utilisateur et par domaine, comme la sous-vue et le tri du tableau parcelles.
+var _PEX_AN = null;
+function _pexEx(){
+  if(typeof window._mvExerciceAn!=='function') return null;
+  return (_PEX_AN==null) ? window._mvExercice() : window._mvExerciceAn(_PEX_AN);
+}
+// ISO -> Date LOCALE. Jamais new Date('AAAA-MM-JJ') : cette forme est lue en UTC et
+// decale d'un jour a l'ouest de Greenwich comme a l'est selon l'heure.
+function _pexD(iso){
+  var s=String(iso||'').slice(0,10);
+  return new Date(parseInt(s.slice(0,4),10), parseInt(s.slice(5,7),10)-1, parseInt(s.slice(8,10),10));
+}
+function _pexIso(y,m,d){ var mm=m+1; return y+'-'+(mm<10?'0':'')+mm+'-'+(d<10?'0':'')+d; }
+// Les mois de l'exercice, bornes par la fenetre (le premier et le dernier peuvent
+// etre partiels si la cloture ne tombe pas en fin de mois).
+function _pexMoisWin(ex){
+  var out=[], d=_pexD(ex.d0), end=_pexD(ex.d1), guard=0;
+  while(guard<24){
+    guard++;
+    var y=d.getFullYear(), m=d.getMonth();
+    var last=new Date(y,m+1,0);
+    var a=_pexIso(y,m,1), b=_pexIso(y,m,last.getDate());
+    if(a<ex.d0) a=ex.d0;
+    if(b>ex.d1) b=ex.d1;
+    out.push({k:y+'-'+m, y:y, m:m, d0:a, d1:b, lbl:_pecMoisCourt(m)});
+    if(b>=ex.d1) break;
+    d=new Date(y,m+1,1);
+    if(d>end) break;
+  }
+  return out;
+}
+
+// Source UNIQUE du libelle : le tableau des postes et la legende du graphe lisent la
+// meme fonction. Le poste s'appelle « chargés » parce qu'il L'EST — le taux de chaque
+// fiche est un cout employeur (cf. la definition posee dans _ecoCfg).
+function _pexSalLab(){ return 'Salaires charg\u00e9s'; }
+
+// ── Decoupage d'un mois aux dates de changement de taux ─────────────────────
+// Rend les sous-fenetres [d0,d1] sur lesquelles le taux d'une personne est CONSTANT.
+// Serie absente ou sans changement dans le mois -> UNE seule fenetre, identique au
+// mois : le chemin nominal ne coute rien et ne change aucun total.
+function _pexJourAvant(iso){
+  var p=String(iso||'').split('-');
+  if(p.length!==3) return iso;
+  var d=new Date(Number(p[0]),Number(p[1])-1,Number(p[2]));
+  d.setDate(d.getDate()-1);
+  return _pexIso(d.getFullYear(),d.getMonth(),d.getDate());
+}
+function _pexSegsTaux(nom, d0, d1){
+  var S=(typeof window._mvPaieSerie==='function')?(window._mvPaieSerie(nom)||[]):[];
+  var cuts=[d0];
+  S.forEach(function(e){
+    if(e && e.d>d0 && e.d<=d1 && cuts.indexOf(e.d)<0) cuts.push(e.d);
+  });
+  if(cuts.length===1) return [{d0:d0,d1:d1}];
+  cuts.sort();
+  var out=[];
+  for(var i=0;i<cuts.length;i++){
+    var a=cuts[i], b=(i+1<cuts.length)?_pexJourAvant(cuts[i+1]):d1;
+    if(b>=a) out.push({d0:a,d1:b});
+  }
+  return out;
+}
+
+// ── Moteur ──────────────────────────────────────────────────────────
+// `noCmp` coupe la comparaison a l'exercice precedent : c'est le garde-fou contre
+// la recursion infinie, l'appel N-1 se faisant avec noCmp=true.
+function _pexData(ex, noCmp){
+  ex = ex || _pexEx();
+  if(!ex) return null;
+  var cfg=_ecoCfg();
+  var mois=_pexMoisWin(ex);
+  var byM={}; mois.forEach(function(mo){ byM[mo.k]={sal:0, gnr:0, ach:0, dep:0}; });
+  var _n=new Date();
+  var auj=(typeof window._mvAujIso==='function')?window._mvAujIso():_pexIso(_n.getFullYear(),_n.getMonth(),_n.getDate());
+  var enCours=(auj>=ex.d0 && auj<=ex.d1);
+
+  // ── 1) SALAIRES CHARGES ────────────────────────────────────────────
+  // Qui ? Toute personne SOUS CONTRAT sur la fenetre — la meme question que partout
+  // ailleurs depuis le correctif des saisonniers disparus de l'historique. Le
+  // « bureau » N'EST PAS exclu : c'est un salaire, et on chiffre une masse salariale.
+  // Combien ? heures payees x taux CHARGE de la fiche. Le taux est deja le cout
+  // employeur : rien ne se multiplie par-dessus (definition unique dans _ecoCfg).
+  var okPer=(typeof window._mvEnContratSurPeriode==='function');
+  var mbrs=(window.MEMBRES||[]).filter(function(m){
+    if(!m||!m.nom) return false;
+    return okPer ? window._mvEnContratSurPeriode(m,ex.d0,ex.d1) : (m.statut!=='Inactif');
+  });
+  var canPaid=(typeof window._planPaidRange==='function');
+  var canWork=(typeof window._planWorkPersRange==='function');
+  var gens=[], salT=0, hPaid=0, hWork=0, nSansTaux=0, hSansTaux=0;
+  mbrs.forEach(function(mb){
+    if(!canPaid) return;
+    // ★★★ TAUX A LA DATE, SEGMENT PAR SEGMENT. Un mois est DECOUPE aux dates de
+    // changement de taux : une augmentation au 15 mars ne revalorise pas les quinze
+    // premiers jours. C'est tout l'objet du lot — un exercice DEJA CLOS ne doit plus
+    // bouger parce qu'on augmente quelqu'un aujourd'hui. Resoudre au mois entier
+    // aurait suffi a 95 %, et menti sur les 5 % restants avec l'autorite d'un total.
+    var hp=0, eur=0, hNoTx=0, txs=[];
+    mois.forEach(function(mo){
+      _pexSegsTaux(mb.nom, mo.d0, mo.d1).forEach(function(sg){
+        var h=Number(window._planPaidRange(mb,_pexD(sg.d0),_pexD(sg.d1)))||0;
+        if(!(h>0)) return;
+        var tx=(typeof window._mvPaieTauxEffAt==='function')?(Number(window._mvPaieTauxEffAt(mb,sg.d0))||0):0;
+        hp+=h;
+        if(tx>0){
+          eur+=h*tx; byM[mo.k].sal+=h*tx;
+          var L=txs[txs.length-1];
+          if(L && Math.abs(L.v-tx)<0.001) L.h+=h; else txs.push({v:tx,h:h});
+        } else hNoTx+=h;
+      });
+    });
+    var hw=canWork?(Number(window._planWorkPersRange(mb,_pexD(ex.d0),_pexD(ex.d1)))||0):0;
+    if(hp<=0 && hw<=0) return;
+    // Taux moyen PONDERE par les heures de chaque segment — le seul nombre unique
+    // qui ait un sens quand le taux a bouge en cours d'exercice.
+    var txMoy=((hp-hNoTx)>0)?(eur/(hp-hNoTx)):0;
+    // On compte les personnes SANS taux, et on retient leurs heures : c'est l'ampleur
+    // du trou, pas son nombre de lignes, qui interesse celui qui lit un exercice.
+    // ⚠️ On ne compte plus que les heures REELLEMENT non valorisees : quelqu'un dont
+    // le taux ne commence qu'en cours d'exercice n'a plus tout son exercice compte
+    // comme un trou.
+    if(hNoTx>0.05){ nSansTaux++; hSansTaux+=hNoTx; }
+    gens.push({ nom:mb.nom, tx:txMoy, txs:txs, hNoTx:hNoTx, hp:hp, hw:hw, eur:eur,
+                coll:!!(window._mvEstCollectif&&window._mvEstCollectif(mb)),
+                bureau:!!mb.bureau });
+    salT+=eur; hPaid+=hp; hWork+=hw;
+  });
+  gens.sort(function(a,b){ return b.eur-a.eur || (a.nom<b.nom?-1:1); });
+
+  // ── 2) CARBURANT GNR ───────────────────────────────────────────────
+  // Fenetre passee a _ecoTracHByParc : MEME fonction que la campagne, filtree par
+  // dates au lieu de la periode. Aucune copie privee de « ce que coute une session ».
+  var trac=_ecoTracHByParc({d0:ex.d0,d1:ex.d1});
+  var gnrT=0, tracH=0;
+  Object.keys(trac.hByDate||{}).forEach(function(iso){ tracH+=trac.hByDate[iso]||0; });
+  // ★ Ici, AUCUNE repartition a faire : l'exercice raisonne par mois, et un plein porte
+  //   deja sa date. Les litres tombent dans leur mois, exactement.
+  var gnrR=_ecoGnrReel({d0:ex.d0,d1:ex.d1});
+  var gnrSrc=gnrR.ok?'reel':'modele', litres=0;
+  function _gnrMois(iso,v){
+    gnrT+=v;
+    var k=parseInt(iso.slice(0,4),10)+'-'+(parseInt(iso.slice(5,7),10)-1);
+    if(byM[k]) byM[k].gnr+=v;
+  }
+  if(gnrR.ok){
+    litres=gnrR.L;
+    Object.keys(gnrR.byDate).forEach(function(iso){ _gnrMois(iso, gnrR.byDate[iso]||0); });
+  } else {
+    Object.keys(trac.gnrByDate||{}).forEach(function(iso){ _gnrMois(iso, trac.gnrByDate[iso]||0); });
+    litres=(cfg.conso>0)?tracH*cfg.conso:0;
+  }
+
+  // ── 3) ACHATS D'INTRANTS (La Reserve) ──────────────────────────────
+  // Le prix HT est OPTIONNEL a la saisie : on compte les lignes sans prix et on le
+  // DIT, plutot que de laisser un total silencieusement sous-evalue.
+  var ach=(window.INTRANTS&&Array.isArray(window.INTRANTS.achats))?window.INTRANTS.achats:[];
+  var prodBy={};
+  ((window.INTRANTS&&window.INTRANTS.produits)||[]).forEach(function(pr){ if(pr&&pr.id) prodBy[pr.id]=pr; });
+  var achT=0, nAch=0, nAchSansPrix=0, achRows=[];
+  ach.forEach(function(a){
+    if(!a||!a.date) return;
+    var iso=String(a.date).slice(0,10);
+    if(iso<ex.d0||iso>ex.d1) return;
+    nAch++;
+    var eur=Number(a.prix)||0;
+    if(!(eur>0)) nAchSansPrix++;
+    achT+=eur;
+    var k=parseInt(iso.slice(0,4),10)+'-'+(parseInt(iso.slice(5,7),10)-1);
+    if(byM[k]) byM[k].ach+=eur;
+    var pr=prodBy[a.prodId]||null;
+    achRows.push({ date:iso, nom:(pr&&pr.nom)||'\u2014', four:a.four||'',
+                   q:Number(a.q)||0, unite:(pr&&pr.unite)||'', eur:eur });
+  });
+  achRows.sort(function(a,b){ return a.date<b.date?1:-1; });
+
+  // ── 4) REPARATIONS : ce qui est passe chez le reparateur ───────────
+  // ⚠️ La source est REPARATEUR_HIST, pas les fiches d'entretien. Le cycle
+  //   « emmene chez le reparateur -> rentre » EST le signal d'une intervention
+  //   payante, et il existait deja : date de depart, date de retour, motif. Une
+  //   fiche d'entretien, elle, est une checklist quotidienne — plein, huile,
+  //   pression — qui n'a rien d'un achat.
+  // ⚠️⚠️ `eur != null` et NON `eur > 0` : un montant a ZERO est une VALEUR
+  //   (garantie, geste commercial), pas une absence. Le confondre avec un vide
+  //   ferait repasser une reparation sous garantie en « a chiffrer » a vie.
+  var RH=(window.REPARATEUR_HIST&&typeof window.REPARATEUR_HIST==='object')?window.REPARATEUR_HIST:{};
+  var repT=0, nRep=0, nRepSansPrix=0, repRows=[];
+  Object.keys(RH).forEach(function(tid){
+    var arr=RH[tid]; if(!Array.isArray(arr)) return;
+    arr.forEach(function(r){
+      if(!r||!r.retour) return;               // ventile a la date de RETOUR
+      var iso=String(r.retour).slice(0,10);
+      if(iso<ex.d0||iso>ex.d1) return;
+      nRep++;
+      var e=(r.eur!=null&&isFinite(Number(r.eur)))?Number(r.eur):null;
+      if(e==null) nRepSansPrix++; else repT+=e;
+      var k=parseInt(iso.slice(0,4),10)+'-'+(parseInt(iso.slice(5,7),10)-1);
+      if(byM[k]&&e!=null) byM[k].dep+=e;
+      repRows.push({ date:iso, depuis:r.depuis||'', lib:r.motif||'Intervention',
+                     four:r.four||'', eur:e, tid:tid });
+    });
+  });
+  repRows.sort(function(a,b){ return a.date<b.date?1:-1; });
+
+  // ── 5) LA REPARTITION PAR ATELIER ──────────────────────────────────
+  // ★★★ ELLE NE RECALCULE RIEN. Elle REVENTILE des euros deja comptes plus haut,
+  //   ce qui donne l'invariant : la somme des ateliers vaut exactement
+  //   achT + gnrT + repT. Un second calcul aurait donne un second chiffre — la
+  //   faute que ce module passe son temps a corriger.
+  // ⚠️ LES SALAIRES N'Y SONT PAS, et ce n'est pas un oubli : une entree de
+  //   planning porte des heures, un type de conge, un motif d'absence — JAMAIS
+  //   une activite. Rien ne dit si une journee est partie a la vigne ou a la
+  //   cuverie. Seule la conduite du tracteur est mesuree (sessions), et elle
+  //   reste dans la masse salariale : ici on ne compte que le carburant, sinon
+  //   la meme heure serait payee deux fois.
+  var ateEur={}, ateSrc={};
+  _pexAteOrd().forEach(function(k){ ateEur[k]=0; ateSrc[k]=[]; });
+  function _ateAdd(k,lib,src,eur){
+    if(!(eur>0)) return;
+    if(!(k in ateEur)) k='gen';
+    ateEur[k]+=eur; ateSrc[k].push({lib:lib, src:src, eur:eur});
+  }
+  // a) le carburant part au tracteur, toujours, sans un geste de saisie neuf
+  _ateAdd('trac','Carburant GNR', _pecGnrDet(gnrSrc,litres,gnrR.n,gnrR.nSansLitres,'',cfg.gnrL), gnrT);
+  // b) les achats : l'atelier se DEDUIT de la categorie du produit
+  var achByCat={}, achNByCat={};
+  ach.forEach(function(a){
+    if(!a||!a.date) return;
+    var iso=String(a.date).slice(0,10);
+    if(iso<ex.d0||iso>ex.d1) return;
+    var pr=prodBy[a.prodId]||null;
+    var cat=(pr&&pr.cat)||'gen';
+    achByCat[cat]=(achByCat[cat]||0)+(Number(a.prix)||0);
+    achNByCat[cat]=(achNByCat[cat]||0)+1;
+  });
+  var _CATNOM={phyto:'Phyto',oeno:'\u0152no (SO\u2082, levures)',vigne:'Fournitures vigne',
+               cave:'Fournitures cave',trac:'Pi\u00e8ces tracteur',gen:'G\u00e9n\u00e9ral'};
+  Object.keys(achByCat).forEach(function(cat){
+    var n=achNByCat[cat];
+    _ateAdd(_pexAteDe(cat), (_CATNOM[cat]||cat),
+            'La R\u00e9serve \u00b7 '+n+' achat'+(n>1?'s':''), achByCat[cat]);
+  });
+  // c) les reparations partent au tracteur : une machine chez le reparateur,
+  //    c'est le tracteur qui coute, jamais la vigne ni la cave. L'atelier ne se
+  //    demande donc pas ici non plus.
+  var repFam={};
+  repRows.forEach(function(r){
+    if(r.eur==null) return;
+    var fam=/r\u00e9vision|revision|entretien/i.test(r.lib)?'R\u00e9visions':'R\u00e9parations';
+    if(!repFam[fam]) repFam[fam]={eur:0,n:0};
+    repFam[fam].eur+=r.eur; repFam[fam].n++;
+  });
+  Object.keys(repFam).forEach(function(f){
+    _ateAdd('trac', f, 'R\u00e9parateur \u00b7 '+repFam[f].n+' passage'+(repFam[f].n>1?'s':''), repFam[f].eur);
+  });
+  var ateT=0; _pexAteOrd().forEach(function(k){ ateT+=ateEur[k]; });
+  _pexAteOrd().forEach(function(k){ ateSrc[k].sort(function(a,b){ return b.eur-a.eur; }); });
+
+  // ── 6) INFO hors total : consommation phyto valorisee ──────────────
+  var phy=_ecoPhytoByParc({d0:ex.d0,d1:ex.d1});
+  var phyConso=0; Object.keys(phy.cost||{}).forEach(function(k){ phyConso+=phy.cost[k]||0; });
+
+  // ── Totaux ─────────────────────────────────────────────────────────
+  var total=salT+gnrT+achT+repT;
+  var surf=0;
+  (window.PARCELLES||[]).forEach(function(p){ if(p&&p.statut!=='Arrachee') surf+=parseFloat(p.surface)||0; });
+  var postes=[
+    { k:'sal', lab:_pexSalLab(), col:_PEC_COL.mo,  eur:salT,
+      det:_ecoH1(hPaid)+' h pay\u00e9es \u00b7 '+gens.length+' personne'+(gens.length>1?'s':'')
+          +' \u00b7 co\u00fbt employeur (taux charg\u00e9 des fiches)' },
+    { k:'gnr', lab:'Carburant GNR',         col:_PEC_COL.gnr, eur:gnrT, det:_pecGnrDet(gnrSrc,litres,gnrR.n,gnrR.nSansLitres,'',cfg.gnrL) },
+    { k:'ach', lab:'Achats d\u2019intrants', col:_PEC_COL.phy, eur:achT, det:nAch+' achat'+(nAch>1?'s':'')+' de La R\u00e9serve' },
+    { k:'dep', lab:'R\u00e9parations',        col:_PEC_COL.dep, eur:repT,
+      det:nRep+' passage'+(nRep>1?'s':'')+' chez le r\u00e9parateur' }
+  ];
+  postes.forEach(function(p){ p.part = total>0 ? (p.eur/total*100) : 0; });
+
+  var cmp=null;
+  if(!noCmp && typeof window._mvExerciceAn==='function'){
+    var prev=_pexData(window._mvExerciceAn(ex.an-1), true);
+    if(prev && prev.total>0) cmp=prev;
+  }
+  return { ex:ex, mois:mois, byM:byM, gens:gens, postes:postes, achRows:achRows,
+           salT:salT, gnrT:gnrT, achT:achT, repT:repT, total:total,
+           repRows:repRows, nRep:nRep, nRepSansPrix:nRepSansPrix,
+           ateEur:ateEur, ateSrc:ateSrc, ateT:ateT,
+           gnrSrc:gnrSrc, gnrN:gnrR.n, gnrNSansLitres:gnrR.nSansLitres,
+           hPaid:hPaid, hWork:hWork, tracH:tracH, litres:litres, phyConso:phyConso,
+           surf:surf, coutHa:(surf>0?total/surf:0),
+           nSansTaux:nSansTaux, hSansTaux:hSansTaux,
+           nAch:nAch, nAchSansPrix:nAchSansPrix,
+           hasPlan:canPaid, hasGnr:(cfg.gnrL>0), enCours:enCours, auj:auj, cmp:cmp };
+}
+
+// ── Reglage : mois d'ouverture de l'exercice ────────────────────────
+// L'ECRITURE PASSE PAR window._ecoCfgSet (reglages.js), comme toute autre hypothese.
+// ⚠ Mais _ecoCfgSet applique une LISTE BLANCHE : une cle absente est un no-op
+//   SILENCIEUX. C'est exactement le motif qui a fait dormir le journal des erreurs
+//   pendant des mois. On relit donc apres l'appel, et si rien n'a bouge on le DIT.
+//   Cas concret : pilotage.js deploye sans reglages.js -> la cle n'est pas connue.
+function _pexSetMois(v){
+  if(!(typeof window.isAdmin==='function' && window.isAdmin())){
+    if(window.showToast) window.showToast('R\u00e9serv\u00e9 \u00e0 l\u2019administrateur','#C0392B');
+    return;
+  }
+  var m=parseInt(v,10); if(isNaN(m)||m<0||m>11) return;
+  var cur=(typeof window._mvExerciceMois==='function')?window._mvExerciceMois():7;
+  if(m===cur) return;
+  if(typeof window._ecoCfgSet==='function') window._ecoCfgSet('eco','exercice_mois',m);
+  var after=(typeof window._mvExerciceMois==='function')?window._mvExerciceMois():7;
+  if(after!==m){
+    if(window.showToast) window.showToast('R\u00e9glage non enregistr\u00e9 \u2014 mise \u00e0 jour de R\u00e9glages requise','#B85A1A');
+    return;
+  }
+  _PEX_AN=null;
+  _pecSaveSt();
+  if(window.showToast) window.showToast('Exercice comptable mis \u00e0 jour','#3D6B27');
+  _pilFillContent(_pilData());
+}
+window._pexSetMois=_pexSetMois;
+
+// ── Vue « Exercice » ────────────────────────────────────────────────
+function _pexBarreEx(E){
+  var list=(typeof window._mvExerciceList==='function')?window._mvExerciceList(4):[];
+  var chips=list.map(function(x){
+    return '<button data-pec="exy" data-v="'+x.an+'"'+(x.an===E.ex.an?' class="on"':'')+'>'+_pilEsc(x.court)+'</button>';
+  }).join('');
+  return '<div class="pex-bar"><div class="pec-sub">'+chips+'</div>'
+    +'<div class="pex-win">'+_pilEsc(E.ex.lbl)+(E.enCours?' \u00b7 <b>en cours</b>':'')+'</div></div>';
+}
+function _pexMoisChoix(){
+  var cur=(typeof window._mvExerciceMois==='function')?window._mvExerciceMois():7;
+  var lbl=window.MV_EX_MOIS_LBL||['janvier','f\u00e9vrier','mars','avril','mai','juin','juillet','ao\u00fbt','septembre','octobre','novembre','d\u00e9cembre'];
+  var admin=!!(typeof window.isAdmin==='function' && window.isAdmin());
+  var opts=lbl.map(function(nm,i){ return '<option value="'+i+'"'+(i===cur?' selected':'')+'>1er '+nm+'</option>'; }).join('');
+  return '<div class="pec-card"><div class="pec-cb">'
+    +'<div class="pex-set"><div><div class="pex-setl">'+_mvIcon('engrenage',16)+' Ouverture de l\u2019exercice</div>'
+    +'<div class="pex-sets">'+(admin
+      ? 'Le mois o\u00f9 votre exercice s\u2019ouvre. Par d\u00e9faut le 1<sup>er</sup> ao\u00fbt, l\u2019usage viticole\u00a0: on cl\u00f4ture apr\u00e8s la r\u00e9colte, pas au milieu. Ce choix vaut pour tout le domaine et ne touche ni aux campagnes, ni aux cong\u00e9s, ni \u00e0 aucun chiffre existant.'
+      : ''+_mvIcon('cadenas',16)+' Lecture seule \u2014 seul un administrateur peut changer la date de bilan.')+'</div></div>'
+    +'<select class="pex-selm"'+(admin?'':' disabled')+' onchange="window._pexSetMois&&window._pexSetMois(this.value)">'+opts+'</select>'
+    +'</div></div></div>';
+}
+// Barres empilees mois par mois. Un exercice se lit dans son rythme : deux mois de
+// vendange pesent plus que six mois d'hiver, et c'est ca qu'on veut voir.
+function _pexGraph(E,w){
+  var M=E.mois;
+  if(!M.length) return window._mvGraphVide('Aucun mois dans cet exercice',
+    'Choisissez un autre exercice dans la barre au-dessus.');
+  var maxV=0; M.forEach(function(mo){ var b=E.byM[mo.k]; var t=b.sal+b.gnr+b.ach+(b.dep||0); if(t>maxV) maxV=t; });
+  if(!(maxV>0)) return window._mvGraphVide('Aucune d\u00e9pense dat\u00e9e sur cet exercice',
+    'Les d\u00e9penses se posent \u00e0 la date de leur travail, de leur plein ou de leur achat.');
+  var top=_pecNiceMax(maxV*1.08);
+  var c0=window._mvGraphCadre(w,100), et=c0.etroit;
+  var c=window._mvGraphCadre(w, et?208:250, { padL:et?44:58, padR:14, padT:16, padB:et?30:34 });
+  var W=c.w, pL=c.padL, pR=c.padR, pT=c.padT, iw=c.iw, ih=c.ih;
+  var step=iw/M.length, bw=Math.min(46, step*0.66);
+  function Y(v){ return pT+ih-(v/top)*ih; }
+  var g='';
+  for(var i=0;i<=c.grad;i++){
+    var v=top*i/c.grad, y=Y(v);
+    g+='<line x1="'+pL+'" y1="'+y.toFixed(1)+'" x2="'+(W-pR)+'" y2="'+y.toFixed(1)+'" stroke="'+c.col.grille+'" stroke-width="'+c.trait.grille+'"/>'
+      +'<text x="'+(pL-7)+'" y="'+(y+4).toFixed(1)+'" text-anchor="end" font-size="'+(et?c.txt.mini:c.txt.axe)+'" fill="'+c.col.texte+'">'+_pilEsc(_pecAxeEur(v))+'</text>';
+  }
+  g+='<text x="'+(pL-7)+'" y="'+(pT-4)+'" text-anchor="end" font-size="'+c.txt.unite+'" fill="'+c.col.texte+'">\u20AC</text>';
+  var pas=et?(M.length>8?3:2):(M.length<=13?1:2);
+  M.forEach(function(mo,i){
+    var b=E.byM[mo.k], x=pL+step*i+(step-bw)/2, acc=0;
+    [['sal',_PEC_COL.mo],['gnr',_PEC_COL.gnr],['ach',_PEC_COL.phy],['dep',_PEC_COL.dep]].forEach(function(pr){
+      var v=b[pr[0]]||0; if(!(v>0)) return;
+      var y0=Y(acc+v), y1=Y(acc), hh=Math.max(1,y1-y0);
+      g+='<rect x="'+x.toFixed(1)+'" y="'+y0.toFixed(1)+'" width="'+bw.toFixed(1)+'" height="'+hh.toFixed(1)+'" fill="'+pr[1]+'" opacity="0.92"/>';
+      acc+=v;
+    });
+    if(i%pas===0)
+      g+='<text x="'+(x+bw/2).toFixed(1)+'" y="'+(c.h-11)+'" text-anchor="middle" font-size="'+(et?c.txt.mini:c.txt.axe)+'" fill="'+c.col.texte+'">'+_pilEsc(mo.lbl)+'</text>';
+  });
+  return window._mvGraphSvg(c, 'D\u00e9penses mois par mois sur l\u2019exercice, salaires charg\u00e9s, carburant et achats.', g)
+    +'<div class="pec-leg">'
+    +'<span class="pec-lg"><em style="background:'+_PEC_COL.mo+'"></em>'+_pexSalLab()+'</span>'
+    +'<span class="pec-lg"><em style="background:'+_PEC_COL.gnr+'"></em>Carburant GNR</span>'
+    +'<span class="pec-lg"><em style="background:'+_PEC_COL.phy+'"></em>Achats d\u2019intrants</span>'
+    +'<span class="pec-lg"><em style="background:'+_PEC_COL.dep+'"></em>D\u00e9penses</span>'
+    +'</div>';
+}
+
+// Alertes, KPI et le garde-fou « ce n'est pas un compte de resultat ».
+// Les postes de l'EXERCICE qu'une donnee manquante met a ZERO.
+// ⚠️ Ce n'est pas la meme liste que la Synthese : ici on chiffre un bilan
+//   entier, donc les achats d'intrants comptent, et le planning doit avoir ete
+//   charge une fois pour que les heures payees existent.
+function _pexZeros(E){
+  var Z=[];
+  if(!E.hasPlan) Z.push({ nom:'Salaires', quoi:'planning charg\u00e9', cible:null, ou:null });
+  else if(E.nSansTaux>0) Z.push({ nom:E.nSansTaux+' personne'+(E.nSansTaux>1?'s':'')+' sans taux',
+    quoi:'taux horaire', cible:'equipe', ou:'R\u00e9glages \u203a \u00c9quipe' });
+  if(!E.hasGnr && E.tracH>0) Z.push({ nom:'Carburant', quoi:'prix du GNR', cible:'entretien', ou:'Tracteur \u203a Entretien' });
+  if(E.nAchSansPrix>0) Z.push({ nom:E.nAchSansPrix+' achat'+(E.nAchSansPrix>1?'s':'')+' sans prix',
+    quoi:'prix HT dans La R\u00e9serve', cible:null, ou:null });
+  return Z;
+}
+
+// Ce qui ne met rien a zero mais change la lecture du total.
+function _pexRemarques(E){
+  var R=[];
+  if(E.hasPlan && E.nSansTaux>0 && E.hSansTaux>0)
+    R.push('<b>'+_ecoH1(E.hSansTaux)+' h</b> pay\u00e9es sont compt\u00e9es \u00e0 z\u00e9ro faute de taux horaire : la masse salariale est sous-\u00e9valu\u00e9e d\u2019autant.');
+  if(E.salT>0)
+    R.push('Les salaires sont compt\u00e9s au <b>taux horaire charg\u00e9</b> de chaque fiche : le co\u00fbt employeur, cotisations patronales comprises, tel qu\u2019il a \u00e9t\u00e9 saisi. <b>Aucun coefficient n\u2019est ajout\u00e9 par-dessus</b> : ce total vaut ce que valent vos taux. Le montant exact des cotisations reste celui de votre journal de paie.');
+  if(E.enCours)
+    R.push('Exercice <b>en cours</b> : ce total est arr\u00eat\u00e9 aux d\u00e9penses d\u00e9j\u00e0 saisies, ce n\u2019est pas une pr\u00e9vision de cl\u00f4ture. Les mois \u00e0 venir sont \u00e0 z\u00e9ro parce qu\u2019ils n\u2019ont rien \u00e0 montrer, pas parce qu\u2019ils ne co\u00fbteront rien.');
+  if(E.phyConso>0)
+    R.push('Les traitements de l\u2019exercice repr\u00e9sentent <b>'+_pilEsc(_ecoEur(E.phyConso))+'</b> de produit consomm\u00e9. Ce montant n\u2019est <b>pas</b> dans le total : c\u2019est une sortie de stock, l\u2019achat a d\u00e9j\u00e0 \u00e9t\u00e9 compt\u00e9 le jour de la facture. L\u2019\u00e9cart entre les deux, c\u2019est votre stock.');
+  return R;
+}
+
+// ⚠️⚠️ MEME REFONTE QUE LA SYNTHESE, MEME CARTE. Sept paves colores empiles
+//   avant le premier chiffre, tous au meme poids : « le planning n'est pas
+//   charge, les salaires comptent pour zero » pesait autant que « l'ecart entre
+//   les deux, c'est votre stock ». Le rendu est celui de _pecFiabCard — un seul
+//   pour les deux ecrans.
+function _pexEntete(E){
+  var A=[_pecFiabCard(_pexZeros(E), _pexRemarques(E),
+    'pil.exo.fiabilite', 'pil.exo.remarques',
+    'Le chiffrage de l\u2019exercice est complet', 'planning charg\u00e9, taux horaires, prix du GNR, prix des achats')];
+
+  var cmp=E.cmp, dPct=(cmp&&cmp.total>0)?((E.total-cmp.total)/cmp.total*100):null;
+  var kpis='<div class="pec-kpis">'
+    +'<div class="pec-k"><div class="l">D\u00e9penses de l\u2019exercice</div><div class="v">'+_pilEsc(_ecoEur(E.total))+'</div>'
+      +'<div class="s">'+_pilEsc(E.ex.lbl)+'</div></div>'
+    +'<div class="pec-k"><div class="l">\u00c0 l\u2019hectare</div><div class="v">'+_pilEsc(_ecoEur(E.coutHa))+'</div>'
+      +'<div class="s">sur '+_pilHa(E.surf)+' ha en production</div></div>'
+    +'<div class="pec-k"><div class="l">Part des salaires</div><div class="v">'+_pilEsc(_pecPct(E.total>0?E.salT/E.total*100:0))+'</div>'
+      +'<div class="s">'+_ecoH1(E.hPaid)+' h pay\u00e9es \u00b7 '+E.gens.length+' personne'+(E.gens.length>1?'s':'')+'</div></div>'
+    +(dPct!=null
+      ? '<div class="pec-k"><div class="l">Contre '+_pilEsc(cmp.ex.court)+'</div><div class="v">'+(dPct>0?'+':'')+_pilEsc(_pecPct(dPct))+'</div>'
+        +'<div class="s">'+_pilEsc(_pecEurK(cmp.total))+' l\u2019exercice pr\u00e9c\u00e9dent</div></div>'
+      : '<div class="pec-k"><div class="l">Contre l\u2019an dernier</div><div class="v">\u2014</div><div class="s">pas de donn\u00e9es sur l\u2019exercice pr\u00e9c\u00e9dent</div></div>')
+    +'</div>';
+
+  // ★ CE QUI CADRE RESTE, LA LISTE PART. « Ce n'est pas un compte de resultat »
+  //   change la lecture du chiffre : sans cette phrase, on le compare au bilan
+  //   du comptable et on conclut de travers. Elle reste, en une ligne.
+  //   L'inventaire de ce qui n'y est pas — fermage, amortissements, assurances,
+  //   cotisations d'exploitant, embouteillage, frais generaux — se lit une fois :
+  //   il passe dans MV_INFO['pil.exo.garde'].
+  var garde='<div class="pec-card"><div class="pec-cb"><div class="pex-warn">'
+    +'<div class="t">'+_mvIcon('recu',16)+' Ce total n\u2019est pas un compte de r\u00e9sultat'
+    +(typeof _mvInfoBtn==='function'?(' '+_mvInfoBtn('pil.exo.garde')):'')+'</div>'
+    +'<div class="d">Il chiffre vos <b>charges d\u2019exploitation</b>, d\u2019un bilan \u00e0 l\u2019autre \u2014 pas tout ce que co\u00fbte le domaine.</div>'
+    +'</div></div></div>';
+
+  var pr=E.postes.map(function(p){
+    var av=cmp?((cmp.postes.filter(function(q){return q.k===p.k;})[0]||{}).eur||0):null;
+    var dv=(av!=null&&av>0)?((p.eur-av)/av*100):null;
+    return '<tr><td class="n"><span style="display:inline-block;width:11px;height:11px;border-radius:3px;background:'+p.col+';margin-right:8px;vertical-align:-1px"></span>'+_pilEsc(p.lab)+'</td>'
+      +'<td class="r">'+_pilEsc(_ecoEur(p.eur))+'</td>'
+      +'<td class="r">'+_pilEsc(_pecPct(p.part))+'</td>'
+      +'<td class="r">'+(E.surf>0?_pilEsc(_ecoEur(p.eur/E.surf)):'\u2014')+'</td>'
+      +'<td class="r">'+(dv!=null?((dv>0?'+':'')+_pilEsc(_pecPct(dv))):'\u2014')+'</td>'
+      +'<td style="color:var(--texte-doux)">'+_pilEsc(p.det)+'</td></tr>';
+  }).join('');
+  var tPostes='<div class="pec-card"><div class="pec-ch"><div class="pec-ct">O\u00f9 est parti l\u2019argent</div>'
+    // ★ Le POURQUOI de « trois postes » — la conduite deja comptee dans les
+    //   salaires — explique le calcul. Il part dans la fiche de l'exercice.
+    +'<div class="pec-cs">Trois postes, et rien d\u2019autre'
+    +(typeof _mvInfoBtn==='function'?(' '+_mvInfoBtn('pil.exo.postes')):'')+'</div></div>'
+    +'<div class="pec-cb"><div class="pec-scroll"><table class="pec-tbl" style="min-width:560px">'
+    +'<thead><tr><th>Poste</th><th class="r">Montant</th><th class="r">Part</th><th class="r">\u20AC/ha</th><th class="r">vs '+_pilEsc(cmp?cmp.ex.court:'N-1')+'</th><th>Base de calcul</th></tr></thead>'
+    +'<tbody>'+pr+'</tbody>'
+    +'<tfoot><tr><td>Total</td><td class="r">'+_pilEsc(_ecoEur(E.total))+'</td><td class="r">100 %</td><td class="r">'+_pilEsc(_ecoEur(E.coutHa))+'</td><td class="r">'+(dPct!=null?((dPct>0?'+':'')+_pilEsc(_pecPct(dPct))):'\u2014')+'</td><td></td></tr></tfoot>'
+    +'</table></div></div></div>';
+  return { alertes:A.join(''), kpis:kpis, garde:garde, tPostes:tPostes };
+}
+
+// Detail des salaires — ADMIN uniquement : ce tableau expose la remuneration de
+// chaque personne. Meme regle que partout ailleurs (paie est admin-only en LECTURE).
+function _pexTableSal(E){
+  if(!(typeof window.isAdmin==='function' && window.isAdmin()))
+    return '<div class="pec-card"><div class="pec-cb"><div class="pec-empty">'+_mvIcon('cadenas',16)+' Le d\u00e9tail par personne est r\u00e9serv\u00e9 aux administrateurs.</div></div></div>';
+  if(!E.gens.length)
+    return '<div class="pec-card"><div class="pec-cb"><div class="pec-empty">Aucune heure pos\u00e9e au planning sur cet exercice.</div></div></div>';
+  var rows=E.gens.map(function(g){
+    var cp=Math.max(0,g.hp-g.hw);
+    // ★ Le taux n'est plus forcement UN nombre : quand il a change dans l'exercice,
+    // la colonne dit la SUITE des taux. Afficher la seule moyenne ponderee aurait
+    // rendu une valeur que personne n'a jamais signee sur un contrat.
+    var txCell;
+    if(g.txs && g.txs.length>1)
+      txCell=g.txs.map(function(t){ return _ecoEur2(t.v); }).join(' puis ')+' \u20AC';
+    else if(g.tx>0) txCell=_ecoEur2(g.tx)+' \u20AC';
+    else txCell='<span style="color:'+_PEC_COL.ret+'">\u2014</span>';
+    if(g.hNoTx>0.05 && g.txs && g.txs.length)
+      txCell+='<div style="font-size:var(--pt-lbl,10.5px);color:'+_PEC_COL.ret+'">'+_ecoH1(g.hNoTx)+' h sans taux</div>';
+    return '<tr><td class="n">'+_pilEsc(g.nom)
+      +(g.coll?' <span class="pec-pill" style="background:var(--or-pale);color:var(--or-tx,#7A5E12)">\u00e9quipe</span>':'')
+      +(g.bureau?' <span class="pec-pill" style="background:var(--gris-clair);color:var(--texte-doux)">bureau</span>':'')+'</td>'
+      +'<td class="r">'+_ecoH1(g.hp)+' h</td>'
+      +'<td class="r">'+_ecoH1(g.hw)+' h</td>'
+      +'<td class="r">'+(cp>0.05?(_ecoH1(cp)+' h'):'\u2014')+'</td>'
+      +'<td class="r">'+txCell+'</td>'
+      +'<td class="r">'+_pilEsc(_ecoEur(g.eur))+'</td></tr>';
+  }).join('');
+  var cpT=Math.max(0,E.hPaid-E.hWork);
+  return '<div class="pec-card"><div class="pec-ch"><div class="pec-ct">Les salaires, personne par personne</div>'
+    +'<div class="pec-cs">Heures <b>pay\u00e9es</b> et heures <b>au champ</b>'+(typeof _mvInfoBtn==='function'?(' '+_mvInfoBtn('pil.exo.salaires')):'')+''
+    +' Le taux affich\u00e9 est le <b>taux horaire charg\u00e9</b> de la fiche \u2014 le co\u00fbt employeur\u00a0: heures pay\u00e9es \u00d7 taux = co\u00fbt.'
+    +' Chaque heure est valoris\u00e9e au taux qui valait <b>ce jour-l\u00e0</b>\u00a0: quand un taux a chang\u00e9 dans l\u2019exercice, la colonne montre les deux, et le mois du changement est coup\u00e9 \u00e0 la bonne date.'
+    +'</div></div>'
+    +'<div class="pec-cb"><div class="pec-scroll"><table class="pec-tbl" style="min-width:560px">'
+    +'<thead><tr><th>Personne</th><th class="r">Pay\u00e9es</th><th class="r">Au champ</th><th class="r">CP &amp; abs.</th><th class="r">Taux charg\u00e9</th><th class="r">Co\u00fbt</th></tr></thead>'
+    +'<tbody>'+rows+'</tbody>'
+    +'<tfoot><tr><td>Total</td><td class="r">'+_ecoH1(E.hPaid)+' h</td><td class="r">'+_ecoH1(E.hWork)+' h</td><td class="r">'+(cpT>0.05?(_ecoH1(cpT)+' h'):'\u2014')+'</td><td class="r"></td><td class="r">'+_pilEsc(_ecoEur(E.salT))+'</td></tr></tfoot>'
+    +'</table></div></div></div>';
+}
+// Achats de La Reserve tombant dans la fenetre — la piece comptable, a sa date.
+function _pexTableAch(E){
+  if(!E.achRows.length)
+    return '<div class="pec-card"><div class="pec-cb"><div class="pec-empty">Aucun achat d\u2019intrant enregistr\u00e9 sur cet exercice (La R\u00e9serve).</div></div></div>';
+  var rows=E.achRows.slice(0,60).map(function(a){
+    return '<tr><td class="n">'+_pilEsc(_pecDfrMs(_pexD(a.date).getTime()))+'</td>'
+      +'<td>'+_pilEsc(a.nom)+'</td>'
+      +'<td>'+_pilEsc(a.four||'\u2014')+'</td>'
+      +'<td class="r">'+(a.q>0?(_pilEsc(_ecoEur2(a.q))+' '+_pilEsc(a.unite||'')):'\u2014')+'</td>'
+      +'<td class="r">'+(a.eur>0?_pilEsc(_ecoEur(a.eur)):'<span style="color:'+_PEC_COL.ret+'">sans prix</span>')+'</td></tr>';
+  }).join('');
+  return '<div class="pec-card"><div class="pec-ch"><div class="pec-ct">Les achats d\u2019intrants</div>'
+    +'<div class="pec-cs">Le <b>prix HT port\u00e9 par la ligne d\u2019achat</b>, \u00e0 sa date \u2014 la facture, pas la sortie de stock.'
+    +(E.achRows.length>60?(' Les 60 plus r\u00e9cents sont affich\u00e9s\u00a0; le total porte sur les '+E.achRows.length+'.'):'')+'</div></div>'
+    +'<div class="pec-cb"><div class="pec-scroll"><table class="pec-tbl" style="min-width:520px">'
+    +'<thead><tr><th>Date</th><th>Produit</th><th>Fournisseur</th><th class="r">Quantit\u00e9</th><th class="r">Prix HT</th></tr></thead>'
+    +'<tbody>'+rows+'</tbody>'
+    +'<tfoot><tr><td>Total</td><td></td><td></td><td></td><td class="r">'+_pilEsc(_ecoEur(E.achT))+'</td></tr></tfoot>'
+    +'</table></div></div></div>';
+}
+// Le detail des depenses, jumeau du tableau des achats : meme grammaire, meme
+// facon de dire l'absence de prix. Rendu seulement s'il y a quelque chose a
+// montrer — un tableau vide sur un domaine qui n'en saisit pas serait du bruit.
+function _pexTableDep(E){
+  if(!E.repRows||!E.repRows.length) return '';
+  var rows=E.repRows.slice(0,60).map(function(r){
+    // ⚠️ Trois etats, pas deux : un montant SAISI a zero veut dire « sans frais »
+    //   (garantie, geste commercial). Le confondre avec l'absence de montant
+    //   ferait figurer une reparation deja reglee dans la liste des choses a
+    //   chiffrer, indefiniment.
+    var val = (r.eur==null) ? '<span style="color:'+_PEC_COL.ret+'">\u00e0 chiffrer</span>'
+            : (r.eur>0 ? _pilEsc(_ecoEur(r.eur))
+                       : '<span style="color:'+_PEC_COL.mo+'">sans frais</span>');
+    var jours='';
+    if(r.depuis&&r.date){
+      var d0=_pexD(r.depuis).getTime(), d1=_pexD(r.date).getTime();
+      var nj=Math.round((d1-d0)/86400000);
+      if(nj>=0) jours=(nj+1)+'\u00a0j';
+    }
+    return '<tr><td class="n">'+_pilEsc(_pecDfrMs(_pexD(r.date).getTime()))+'</td>'
+      +'<td>'+_pilEsc(r.lib)+'</td>'
+      +'<td>'+_pilEsc(jours||'\u2014')+'</td>'
+      +'<td>'+_pilEsc(r.four||'\u2014')+'</td>'
+      +'<td class="r">'+val+'</td></tr>';
+  }).join('');
+  return '<div class="pec-card"><div class="pec-ch"><div class="pec-ct">Les passages chez le r\u00e9parateur</div>'
+    +'<div class="pec-cs">Chaque immobilisation, \u00e0 sa date de <b>retour</b> \u2014 c\u2019est le moment o\u00f9 la '
+    +'facture se d\u00e9clenche. Les fiches d\u2019entretien quotidiennes n\u2019y figurent pas.'
+    +(E.repRows.length>60?(' Les 60 plus r\u00e9centes sont affich\u00e9es\u00a0; le total porte sur les '+E.repRows.length+'.'):'')
+    +'</div></div>'
+    +'<div class="pec-cb"><div class="pec-scroll"><table class="pec-tbl" style="min-width:520px">'
+    +'<thead><tr><th>Retour</th><th>Motif</th><th>Immobilis\u00e9</th><th>R\u00e9parateur</th><th class="r">Montant HT</th></tr></thead>'
+    +'<tbody>'+rows+'</tbody>'
+    +'<tfoot><tr><td>Total chiffr\u00e9</td><td></td><td></td><td></td><td class="r">'+_pilEsc(_ecoEur(E.repT))+'</td></tr></tfoot>'
+    +'</table></div>'
+    +(E.nRepSansPrix>0?('<div class="pec-note"><b>'+E.nRepSansPrix+' passage'+(E.nRepSansPrix>1?'s':'')
+      +' sans montant</b> : \u00e0 chiffrer dans <b>\u00c9conomie \u203a Achats</b> quand la facture arrive.</div>'):'')
+    +'</div></div>';
+}
+
+// ══ LA CARTE DES CONSOMMABLES — DEUX AXES, UN SEUL TOTAL ═══════════════════
+// Ce qui se rachete chaque annee : achats de La Reserve, carburant, depenses.
+// La bascule ne change PAS le total, seulement la facon de le decouper.
+// ⚠️ Aucune font-size ecrite en dur dans ce fichier : le harnais d'echelle en
+//   refuse une seule. Tout passe par var(--pt-X,valeur), repli exact.
+function _pexConso(E){
+  var T=E.achT+E.gnrT+E.repT;
+  var ate=(_PEC_AXE==='ate');
+  var head='<div class="pec-ch"><div class="pec-ct">Les consommables</div>'
+    +'<div class="pec-cs">Ce qui se rach\u00e8te chaque ann\u00e9e, r\u00e9parti '
+    +(ate?'par <b>destination</b>':'par <b>nature de d\u00e9pense</b>')+'.'
+    +(typeof _mvInfoBtn==='function'?(' '+_mvInfoBtn('pil.exo.ateliers')):'')+'</div>'
+    +'<div class="pec-sub" role="group" aria-label="Axe de lecture">'
+      +'<button data-pec="axe" data-v="nat"'+(ate?'':' class="on"')+'>par nature</button>'
+      +'<button data-pec="axe" data-v="ate"'+(ate?' class="on"':'')+'>par atelier</button>'
+    +'</div></div>';
+  if(!(T>0)){
+    return '<div class="pec-card">'+head+'<div class="pec-cb">'
+      +'<div class="pec-empty">Aucun consommable chiffr\u00e9 sur cet exercice.</div>'
+      +'<div class="pec-note">Les achats se saisissent dans <b>La R\u00e9serve \u203a Intrants</b>, '
+      +'les r\u00e9visions et r\u00e9parations dans <b>La R\u00e9serve \u203a D\u00e9penses</b>. '
+      +'Le carburant vient tout seul des appoints de cuve.</div>'
+      +'<div class="pec-acts"><button class="pec-btn" data-pec="rsv" data-v="intrants">'
+      +'<span>\uFF0B</span> Saisir un achat</button>'
+      +'<button class="pec-btn" data-pec="pachgo">Chiffrer dans Achats</button></div>'
+      +'</div></div>';
+  }
+  var body;
+  if(ate) body=_pexAxeAtelier(E,T); else body=_pexAxeNature(E,T);
+  return '<div class="pec-card">'+head+body+'</div>'+(ate?_pexHorsPerim():'');
+}
+
+// Le hors-perimetre est une CARTE a lui, comme dans la maquette validee, et pas
+// une ligne de note en bas d'une autre. Ce qu'on exclut d'un total merite le
+// meme rang que ce qu'on y met : c'est la premiere question qu'on se pose devant
+// un chiffre qui ne colle pas au bilan comptable.
+function _pexHorsPerim(){
+  return '<div class="pec-card"><div class="pec-ch">'
+    +'<div class="pec-ct">Ce qui n\u2019entre pas dans ce total</div></div>'
+    +'<div class="pec-cb">'
+    +'<div class="pec-a info"><span class="e">'+(typeof _mvIcon==='function'?_mvIcon('outil',16):'')+'</span><div>'
+    +'<b>Le mat\u00e9riel, les outils port\u00e9s et les f\u00fbts achet\u00e9s</b> ne sont pas des consommables : '
+    +'on ne les rach\u00e8te pas l\u2019an prochain. Les f\u00fbts ont leur propre dur\u00e9e de vie dans '
+    +'l\u2019application et leur propre \u00e9cran \u2014 <b>Pilotage \u203a Cave \u203a Plan de renouvellement</b>.'
+    +'</div></div>'
+    +'<div class="pec-a ok" style="margin-top:9px"><span class="e">'+(typeof _mvIcon==='function'?_mvIcon('check',16):'')+'</span><div>'
+    +'La <b>location</b> de f\u00fbts, elle, entre : c\u2019est un loyer qui revient tous les ans, '
+    +'pas un f\u00fbt. <b>On chiffre ce qu\u2019on paie cette ann\u00e9e, pas ce qu\u2019on poss\u00e8de.</b>'
+    +'</div></div>'
+    +'</div></div>';
+}
+
+// ── Axe NATURE : l'axe historique, inchange dans son sens ───────────────────
+function _pexAxeNature(E,T){
+  var L=[['ach',E.achT,'Achats d\u2019intrants',_PEC_COL.phy, E.nAch+' achat'+(E.nAch>1?'s':'')+' de La R\u00e9serve'],
+         ['gnr',E.gnrT,'Carburant GNR',_PEC_COL.gnr, _ecoH1(E.litres)+' L \u00b7 '+E.gnrN+' appoint'+(E.gnrN>1?'s':'')],
+         ['dep',E.repT,'R\u00e9parations',_PEC_COL.dep, E.nRep+' passage'+(E.nRep>1?'s':'')+' chez le r\u00e9parateur']];
+  var k='<div class="pec-kpis">';
+  L.forEach(function(x){
+    if(!(x[1]>0)) return;
+    k+='<div class="pec-k"><div class="l"><em style="background:'+x[3]+'"></em>'+_pilEsc(x[2])+'</div>'
+      +'<div class="v">'+_pilEsc(_ecoEur(x[1]).replace(' \u20AC',''))+' <small>\u20AC</small></div>'
+      +'<div class="s">'+_pilEsc(x[4])+'</div></div>';
+  });
+  k+='</div>';
+  var bar='', leg='';
+  L.forEach(function(x){
+    if(!(x[1]>0)) return;
+    bar+='<i style="background:'+x[3]+';width:'+(x[1]/T*100).toFixed(2)+'%"></i>';
+    leg+='<span class="pec-lg"><em style="background:'+x[3]+'"></em>'+_pilEsc(x[2])
+        +' <b>'+_pilEsc(_ecoEur(x[1]))+'</b></span>';
+  });
+  return k+'<div class="pec-cb" style="padding-top:16px">'
+    +'<div class="pec-bar">'+bar+'</div><div class="pec-leg">'+leg+'</div>'
+    +'<div class="pec-vcadre"><span>Cet axe r\u00e9pond \u00e0 <b>« qu\u2019ai-je pay\u00e9 »</b>. '
+    +'L\u2019axe <b>atelier</b> r\u00e9pond \u00e0 <b>« pour quoi »</b>. Deux lectures des m\u00eames euros, '
+    +'jamais deux totaux.</span></div></div>';
+}
+
+// ── Axe ATELIER : la destination ────────────────────────────────────────────
+function _pexAxeAtelier(E,T){
+  var ORD=_pexAteOrd(), A=E.ateEur||{}, S=E.ateSrc||{};
+  var k='<div class="pec-kpis">';
+  ORD.forEach(function(a){
+    var v=A[a]||0; if(!(v>0)) return;
+    k+='<div class="pec-k"><div class="l"><em style="background:'+_pexAteCol(a)+'"></em>'+_pilEsc(_pexAteLbl(a))+'</div>'
+      +'<div class="v">'+_pilEsc(_ecoEur(v).replace(' \u20AC',''))+' <small>\u20AC</small></div>'
+      +'<div class="s">'+_pilEsc(_ecoEur2(v/T*100))+' % '
+      +(E.surf>0?('\u00b7 '+_pilEsc(_ecoEur(v/E.surf))+'/ha'):'')+'</div></div>';
+  });
+  k+='</div>';
+  var bar='', leg='';
+  ORD.forEach(function(a){
+    var v=A[a]||0; if(!(v>0)) return;
+    bar+='<i style="background:'+_pexAteCol(a)+';width:'+(v/T*100).toFixed(2)+'%"></i>';
+    leg+='<span class="pec-lg"><em style="background:'+_pexAteCol(a)+'"></em>'+_pilEsc(_pexAteLbl(a))
+        +' <b>'+_pilEsc(_ecoEur(v))+'</b></span>';
+  });
+  // Le detail : d'ou vient chaque euro. C'est ce qui rend la repartition
+  // verifiable au lieu d'etre a croire.
+  var rows='';
+  ORD.forEach(function(a){
+    var v=A[a]||0; if(!(v>0)) return;
+    rows+='<tr class="pex-ag"><td colspan="2"><em style="background:'+_pexAteCol(a)+'"></em>'
+      +_pilEsc(_pexAteLbl(a))+'</td><td class="r">'+_pilEsc(_ecoEur(v))+'</td>'
+      +'<td class="r">'+(E.surf>0?_pilEsc(_ecoEur(v/E.surf)):'\u2014')+'</td></tr>';
+    (S[a]||[]).forEach(function(l){
+      rows+='<tr><td class="n">'+_pilEsc(l.lib)+'</td><td>'+_pilEsc(l.src)+'</td>'
+        +'<td class="r">'+_pilEsc(_ecoEur(l.eur))+'</td>'
+        +'<td class="r">'+(E.surf>0?_pilEsc(_ecoEur(l.eur/E.surf)):'\u2014')+'</td></tr>';
+    });
+  });
+  // ★★★ LE CONTROLE EST AFFICHE, PAS SEULEMENT TESTE. Un lecteur qui voit
+  //   l'egalite tomber juste n'a pas besoin qu'on lui promette qu'elle l'est.
+  //   Un ecart signifie qu'un euro a ete compte deux fois, ou pas du tout.
+  var somme=E.achT+E.gnrT+E.repT, ok=Math.abs(E.ateT-somme)<0.005;
+  var ctrl='<div class="pex-ctrl'+(ok?'':' bad')+'">'
+    +'<div class="l">Contr\u00f4le</div><div>'
+    +ORD.filter(function(a){return (A[a]||0)>0;}).map(function(a){ return _pilEsc(_ecoEur(A[a]).replace(' \u20AC','')); }).join(' + ')
+    +' = <b>'+_pilEsc(_ecoEur(E.ateT))+'</b> &nbsp;=&nbsp; achats '+_pilEsc(_ecoEur(E.achT))
+    +' + GNR '+_pilEsc(_ecoEur(E.gnrT))+' + r\u00e9parations '+_pilEsc(_ecoEur(E.repT))
+    +' &nbsp;'+(ok?'<b class="ok">l\u2019\u00e9galit\u00e9 tombe juste</b>':'<b class="ko">\u00c9CART \u2014 un euro est compt\u00e9 deux fois, ou pas du tout</b>')
+    +'<br>Les salaires ('+_pilEsc(_ecoEur(E.salT))+') restent hors de ce d\u00e9compte.</div></div>';
+
+  var nsp='';
+  if(E.nAchSansPrix>0||E.nRepSansPrix>0){
+    var b=[];
+    if(E.nAchSansPrix>0) b.push('<b>'+E.nAchSansPrix+' achat'+(E.nAchSansPrix>1?'s':'')+'</b>');
+    if(E.nRepSansPrix>0) b.push('<b>'+E.nRepSansPrix+' r\u00e9paration'+(E.nRepSansPrix>1?'s':'')+'</b>');
+    nsp=b.join(' et ')+' sans prix : le total est <b>sous-\u00e9valu\u00e9 de ce que valent ces lignes</b>, '
+       +'jamais arrondi en silence.<br>';
+  }
+  return k+'<div class="pec-cb" style="padding-top:16px">'
+    +'<div class="pec-bar">'+bar+'</div><div class="pec-leg">'+leg+'</div>'
+    +'<div class="pec-vcadre"><span><b>Les salaires ne sont pas r\u00e9partis.</b> '
+    +'Une entr\u00e9e de planning porte des heures, un type de cong\u00e9, un motif d\u2019absence '
+    +'\u2014 <b>jamais une activit\u00e9</b>. Seule la conduite du tracteur est mesur\u00e9e, et elle '
+    +'reste dans la masse salariale : ici on ne compte que le carburant.</span></div>'
+    +'<div class="pec-scroll" style="margin-top:16px"><table class="pec-tbl" style="min-width:520px">'
+    +'<thead><tr><th>Poste</th><th>D\u2019o\u00f9 vient le chiffre</th><th class="r">Montant</th><th class="r">\u20AC/ha</th></tr></thead>'
+    +'<tbody>'+rows+'</tbody>'
+    +'<tfoot><tr><td colspan="2">Total consommables</td><td class="r">'+_pilEsc(_ecoEur(E.ateT))+'</td>'
+    +'<td class="r">'+(E.surf>0?_pilEsc(_ecoEur(E.ateT/E.surf)):'\u2014')+'</td></tr></tfoot>'
+    +'</table></div>'
+    +ctrl
+    +(nsp?('<div class="pec-note">'+nsp+'</div>'):'')
+    +'<div class="pec-acts">'
+    +'<button class="pec-btn" data-pec="rsv" data-v="intrants"><span>\uFF0B</span> Saisir un achat</button>'
+    +'<button class="pec-btn" data-pec="pachgo">Chiffrer dans Achats</button>'
+    +'</div>'
+    +'<div class="pec-note">Ces boutons <b>ouvrent La R\u00e9serve</b> \u2014 rien ne se saisit ici. '
+    +'Le Pilotage lit, il n\u2019\u00e9crit aucun fait d\u2019exploitation.</div>'
+    +'</div>';
+}
+
+// ══════════════════════ ACHATS — LE SEUL ENDROIT OU L'ON MET LES PRIX ═══════
+// ★★★ CE N'EST PAS UN SECOND FORMULAIRE DE SAISIE, c'est un ecran de
+//   VALORISATION. Le FAIT reste dans son module — le fut au parc, la reparation
+//   au tracteur, l'intrant a La Reserve — et cet ecran ne fait que deux choses :
+//   les lister toutes, et porter le PRIX.
+// ⚠️ La raison d'etre : le prix arrive PLUS TARD, souvent en lot (les factures
+//   du mois), et il n'interesse pas celui qui fait le geste sur le terrain.
+//   Le fait et le prix sont deux gestes, a deux moments, souvent par deux
+//   personnes. Les demander ensemble, c'est demander a un tractoriste qui rend
+//   les cles un chiffre qu'il n'a pas.
+// ⚠️⚠️ TROIS ETATS, JAMAIS DEUX :
+//     prix == null  -> a chiffrer (on ne sait pas encore)
+//     prix === 0    -> sans frais (garantie, geste commercial) — une VALEUR
+//     prix > 0      -> chiffre
+//   Un test `if(prix)` confondrait les deux premiers et laisserait une
+//   reparation sous garantie « a chiffrer » a vie, en faisant mentir le
+//   compteur d'en-tete tous les mois.
+// ⚠️ Le prix retourne DANS L'OBJET, pas dans une table de prix a part : un fut
+//   coute X, ce n'est pas une ligne comptable separee. Une table liee par
+//   identifiant laisserait des orphelins le jour ou l'objet est supprime.
+var _PACH_FILT='tout';   // 'tout' | 'sans'
+var _PACH_SRC={
+  rsv:  { lbl:'La R\u00e9serve',  col:'#5B2D8E', ecr:'La R\u00e9serve \u203a Intrants' },
+  fut:  { lbl:'Parc \u00e0 f\u00fbts', col:'#8A5A38', ecr:'La R\u00e9serve \u203a F\u00fbts' },
+  trac: { lbl:'R\u00e9parateur',  col:'#2C3E50', ecr:'Tracteur \u203a Retour du r\u00e9parateur' }
+};
+
+// Rassemble les trois sources. AUCUNE ne se recalcule : on lit les objets la ou
+// ils vivent, et l'identifiant sert a y reecrire le prix.
+function _pachLignes(){
+  var out=[];
+  var I=(window.INTRANTS&&typeof window.INTRANTS==='object')?window.INTRANTS:{};
+  var prodBy={}; (I.produits||[]).forEach(function(p){ if(p&&p.id) prodBy[p.id]=p; });
+
+  (I.achats||[]).forEach(function(a){
+    if(!a||!a.id) return;
+    var pr=prodBy[a.prodId]||null;
+    out.push({ src:'rsv', id:a.id, date:String(a.date||'').slice(0,10),
+      quoi:((pr&&pr.nom)||'Intrant')+(a.q?(' \u00b7 '+_pilHa(a.q)+' '+((pr&&pr.unite)||'')):''),
+      four:a.four||'', ate:_pexAteDe((pr&&pr.cat)||'gen'),
+      prix:(a.prix!=null&&isFinite(Number(a.prix)))?Number(a.prix):null, fact:a.fact||'' });
+  });
+
+  (I.futs||[]).forEach(function(f){
+    if(!f||!f.id) return;
+    out.push({ src:'fut', id:f.id, date:String(f.date||'').slice(0,10),
+      quoi:(f.qte||0)+' f\u00fbt'+((f.qte||0)>1?'s':'')+(f.ref?(' '+f.ref):'')+(f.annee?(' \u00b7 mill\u00e9sime '+f.annee):''),
+      four:f.four||'', ate:'cave',
+      prix:(f.prix!=null&&isFinite(Number(f.prix)))?Number(f.prix):null, fact:f.fact||'' });
+  });
+
+  var RH=(window.REPARATEUR_HIST&&typeof window.REPARATEUR_HIST==='object')?window.REPARATEUR_HIST:{};
+  Object.keys(RH).forEach(function(tid){
+    var arr=RH[tid]; if(!Array.isArray(arr)) return;
+    arr.forEach(function(r,i){
+      if(!r||!r.retour) return;
+      var j='';
+      if(r.depuis){
+        var nj=Math.round((_pexD(r.retour).getTime()-_pexD(r.depuis).getTime())/86400000);
+        if(nj>=0) j=' \u00b7 '+(nj+1)+'\u00a0j chez le r\u00e9parateur';
+      }
+      out.push({ src:'trac', id:tid+'|'+i, date:String(r.retour).slice(0,10),
+        quoi:(r.motif||'Intervention')+j, four:r.four||'', ate:'trac',
+        prix:(r.eur!=null&&isFinite(Number(r.eur)))?Number(r.eur):null, fact:r.fact||'' });
+    });
+  });
+
+  out.sort(function(a,b){ return a.date<b.date?1:(a.date>b.date?-1:0); });
+  return out;
+}
+
+// ★ Ecrit le prix DANS L'OBJET D'ORIGINE, puis sauvegarde le document qui le
+//   porte — jamais une copie locale. Rend le nom du document sauve, ou null.
+function _pachEcrit(src,id,prix,fact){
+  var I=window.INTRANTS||{};
+  if(src==='rsv'){
+    var a=(I.achats||[]).find(function(x){ return x&&x.id===id; });
+    if(!a) return null;
+    a.prix=prix; if(fact!=null) a.fact=fact;
+    return 'intrants';
+  }
+  if(src==='fut'){
+    var f=(I.futs||[]).find(function(x){ return x&&x.id===id; });
+    if(!f) return null;
+    f.prix=prix; if(fact!=null) f.fact=fact;
+    return 'intrants';
+  }
+  if(src==='trac'){
+    var p=String(id).split('|'), tid=p[0], k=parseInt(p[1],10);
+    var arr=(window.REPARATEUR_HIST||{})[tid];
+    if(!Array.isArray(arr)||!arr[k]) return null;
+    arr[k].eur=prix; if(fact!=null) arr[k].fact=fact;
+    return 'reparateur_hist';
+  }
+  return null;
+}
+
+function _pachView(){
+  var L=_pachLignes();
+  var chif=L.filter(function(x){ return x.prix!=null; });   // 0 EUR compte comme chiffre
+  var sans=L.filter(function(x){ return x.prix==null; });
+  var tot=chif.reduce(function(a,x){ return a+x.prix; },0);
+  var adm=(typeof isAdmin==='function')?isAdmin():false;
+
+  var h='';   // la sous-nav est posee par l'appelant
+
+  h+='<div class="pec-card"><div class="pec-ch"><div class="pec-ct">Tout ce qui a \u00e9t\u00e9 acquis</div>'
+   +'<div class="pec-cs">Chaque module y d\u00e9pose ses lignes. C\u2019est <b>le seul endroit o\u00f9 l\u2019on met '
+   +'les prix</b>.</div></div>'
+   +'<div class="pec-kpis">'
+   +'<div class="pec-k"><div class="l">Chiffr\u00e9</div><div class="v">'
+     +_pilEsc(_ecoEur(tot).replace(' \u20AC',''))+' <small>\u20AC</small></div>'
+     +'<div class="s">'+chif.length+' ligne'+(chif.length>1?'s':'')+' sur '+L.length+'</div></div>'
+   +'<div class="pec-k"><div class="l">\u00c0 chiffrer</div><div class="v"'
+     +(sans.length?(' style="color:'+_PEC_COL.ret+'"'):'')+'>'+sans.length+'</div>'
+     +'<div class="s">'+(sans.length?'le total est un plancher':'rien en attente')+'</div></div>'
+   +'<div class="pec-k"><div class="l">Sources</div><div class="v">'
+     +Object.keys(_PACH_SRC).filter(function(k){ return L.some(function(x){return x.src===k;}); }).length
+     +' <small>/ 3</small></div><div class="s">R\u00e9serve, f\u00fbts, r\u00e9parateur</div></div>'
+   +'</div></div>';
+
+  if(!L.length){
+    return h+'<div class="pec-card"><div class="pec-cb" style="padding-top:16px">'
+      +'<div class="pec-empty">Rien d\u2019acquis pour l\u2019instant.</div>'
+      +'<div class="pec-note">Les lignes arrivent d\u2019elles-m\u00eames\u00a0: un achat saisi dans La R\u00e9serve, '
+      +'un lot de f\u00fbts, une machine rentr\u00e9e du r\u00e9parateur. <b>Rien ne se cr\u00e9e ici.</b></div>'
+      +'</div></div>';
+  }
+
+  var V=(_PACH_FILT==='sans')?sans:L;
+  var rows=V.slice(0,120).map(function(x){
+    var S=_PACH_SRC[x.src]||_PACH_SRC.rsv;
+    // ⚠️ Trois etats. `x.prix>0` seul confondrait « sans frais » et « a chiffrer ».
+    var cell;
+    if(x.prix==null){
+      cell=adm?('<button class="pach-p vide" data-pec="pach" data-v="'+_escAttr(x.src+'::'+x.id)+'">\u00e0 chiffrer</button>')
+              :('<span style="color:'+_PEC_COL.ret+'">\u00e0 chiffrer</span>');
+    } else if(x.prix>0){
+      cell=adm?('<button class="pach-p" data-pec="pach" data-v="'+_escAttr(x.src+'::'+x.id)+'">'+_pilEsc(_ecoEur(x.prix))+'</button>')
+              :_pilEsc(_ecoEur(x.prix));
+    } else {
+      cell=adm?('<button class="pach-p ok" data-pec="pach" data-v="'+_escAttr(x.src+'::'+x.id)+'">sans frais</button>')
+              :'<span style="color:'+_PEC_COL.mo+'">sans frais</span>';
+    }
+    var A=_pexAteLbl(x.ate), AC=_pexAteCol(x.ate);
+    return '<tr><td>'+_pilEsc(x.date?_pecDfrMs(_pexD(x.date).getTime()):'\u2014')+'</td>'
+      +'<td class="n">'+_pilEsc(x.quoi)+'</td>'
+      +'<td><span class="pex-apill" style="background:color-mix(in srgb,'+S.col+' 13%,transparent);color:'+S.col+'">'
+        +_pilEsc(S.lbl)+'</span></td>'
+      +'<td><span class="pex-apill" style="background:color-mix(in srgb,'+AC+' 14%,transparent);color:'
+        +(x.ate==='gen'?'var(--texte-doux)':AC)+'">'+_pilEsc(A)+'</span></td>'
+      +'<td>'+_pilEsc(x.four||'\u2014')+'</td>'
+      +'<td class="r">'+cell+'</td></tr>';
+  }).join('');
+
+  h+='<div class="pec-card"><div class="pec-cb" style="padding-top:16px">'
+   +'<div class="pec-acts" style="margin-top:0;margin-bottom:14px">'
+     +(adm?'<button class="pec-btn pec-btn-p" data-pec="pachadd"><span>\uFF0B</span> Achat</button>':'')
+     +'<button class="pec-btn'+(_PACH_FILT==='tout'?' on':'')+'" data-pec="pachf" data-v="tout">Tout</button>'
+     +'<button class="pec-btn'+(_PACH_FILT==='sans'?' on':'')+'" data-pec="pachf" data-v="sans">\u00c0 chiffrer</button>'
+   +'</div>'
+   +'<div class="pec-scroll"><table class="pec-tbl" style="min-width:640px">'
+   +'<thead><tr><th>Date</th><th>Ce qui a \u00e9t\u00e9 acquis</th><th>Cr\u00e9\u00e9 dans</th><th>Atelier</th>'
+   +'<th>Fournisseur</th><th class="r">Prix HT</th></tr></thead><tbody>'
+   +(rows||'<tr><td colspan="6" style="text-align:center;padding:24px;color:var(--texte-doux)">Rien dans ce filtre.</td></tr>')
+   +'</tbody><tfoot><tr><td colspan="5">Total chiffr\u00e9</td><td class="r">'+_pilEsc(_ecoEur(tot))+'</td></tr></tfoot>'
+   +'</table></div>'
+   +'<div class="pec-vcadre"><span><b>Le prix retourne dans l\u2019objet</b>, pas dans une table \u00e0 part. '
+   +'Un f\u00fbt co\u00fbte X\u00a0\u2014 ce n\u2019est pas une ligne comptable s\u00e9par\u00e9e, et une table li\u00e9e par identifiant '
+   +'laisserait des orphelins le jour o\u00f9 l\u2019objet est supprim\u00e9.</span></div>'
+   +'<div class="pec-note">'
+   +(sans.length?('<b>'+sans.length+' ligne'+(sans.length>1?'s':'')+' sans prix</b>\u00a0: le total ci-dessus est '
+      +'<b>un plancher, pas une mesure</b>.<br>'):'')
+   +'<b>Rien ne se cr\u00e9e ici</b>\u00a0: chaque ligne existe parce qu\u2019un module l\u2019a enregistr\u00e9e. '
+   +'\u00ab\u00a0Achat\u00a0\u00bb ouvre le formulaire du module concern\u00e9, il n\u2019en fabrique pas un second.'
+   +(V.length>120?('<br>Les 120 lignes les plus r\u00e9centes sont affich\u00e9es\u00a0; le total porte sur les '+V.length+'.'):'')
+   +'</div></div></div>';
+
+  h+='<div class="pec-card"><div class="pec-ch"><div class="pec-ct">Ce que cet \u00e9cran ne fait pas</div></div>'
+   +'<div class="pec-cb">'
+   +'<div class="pec-a info"><span class="e">'+(typeof _mvIcon==='function'?_mvIcon('info',16):'')+'</span><div>'
+   +'<b>Il ne cr\u00e9e aucun formulaire.</b> Un intrant phyto demande la cat\u00e9gorie, l\u2019unit\u00e9, la contenance, '
+   +'la source de consommation et le catalogue E-Phy\u00a0: le refaire ici, ce serait deux formulaires \u00e0 tenir, '
+   +'qui divergeraient au premier lot.</div></div>'
+   +'<div class="pec-a info" style="margin-top:9px"><span class="e">'+(typeof _mvIcon==='function'?_mvIcon('cle',16):'')+'</span><div>'
+   +'<b>Les fiches d\u2019entretien n\u2019y montent pas.</b> Une checklist quotidienne \u2014 plein, huile, pression \u2014 '
+   +'n\u2019est pas un achat. Le signal d\u2019une intervention payante existe d\u00e9j\u00e0 et il est net\u00a0: '
+   +'<b>la machine est partie chez le r\u00e9parateur</b>.</div></div>'
+   +'</div></div>';
+  return h;
+}
+
+// Saisie du prix. ⚠️ Le prompt natif est volontaire ici : la valeur est UN
+// nombre, et un overlay maison pour un champ unique serait plus de code a tenir
+// que de service rendu. Le detail de la ligne est rappele dans l'invite, sinon
+// on chiffre a l'aveugle.
+function _pachOpen(ref){
+  if(typeof isAdmin!=='function'||!isAdmin()){ if(window.showToast) window.showToast('R\u00e9serv\u00e9 \u00e0 l\u2019administrateur','#C0392B'); return; }
+  var p=String(ref).split('::'); if(p.length<2) return;
+  var src=p[0], id=p.slice(1).join('::');
+  var L=_pachLignes();
+  var x=L.find(function(o){ return o.src===src && o.id===id; });
+  if(!x){ if(window.showToast) window.showToast('Ligne introuvable \u2014 rechargez l\u2019\u00e9cran','#B85A1A'); return; }
+  var S=_PACH_SRC[src]||_PACH_SRC.rsv;
+  var act=(x.prix!=null)?String(x.prix).replace('.',','):'';
+  var v=window.prompt(x.quoi+'\n'+(x.four||'sans fournisseur')+' \u00b7 '+S.ecr
+    +'\n\nMontant HT en euros. Laissez vide pour « \u00e0 chiffrer », 0 pour « sans frais ».', act);
+  if(v===null) return;                       // annule : on ne touche a rien
+  var t=String(v).trim().replace(',','.');
+  var prix;
+  if(t===''){ prix=null; }
+  else {
+    var n=parseFloat(t);
+    // ⚠️ `n>=0` et non `n>0` : saisir 0 est un ACTE (garantie), pas un vide.
+    if(!isFinite(n)||n<0){ if(window.showToast) window.showToast('Montant illisible','#B85A1A'); return; }
+    prix=n;
+  }
+  var doc=_pachEcrit(src,id,prix,null);
+  if(!doc){ if(window.showToast) window.showToast('Ligne introuvable \u2014 rien enregistr\u00e9','#B85A1A'); return; }
+  if(typeof window.saveData==='function') window.saveData(doc);
+  _pilFillContent(_pilData());
+  if(window.showToast) window.showToast(
+    prix==null ? 'Laiss\u00e9 \u00e0 chiffrer' : (prix>0 ? ('Enregistr\u00e9 dans '+S.ecr) : 'Not\u00e9 sans frais'),
+    prix==null ? '#B85A1A' : '#3D6B27');
+}
+
+// ★ « Achat » n'ouvre PAS un formulaire maison : il ouvre celui du module qui
+//   possede la donnee. C'est ce qui distingue cet ecran d'un second point de
+//   saisie — un intrant phyto demande le catalogue E-Phy, le refaire ici serait
+//   deux formulaires qui divergent.
+function _pachAdd(){
+  if(typeof isAdmin!=='function'||!isAdmin()){ if(window.showToast) window.showToast('R\u00e9serv\u00e9 \u00e0 l\u2019administrateur','#C0392B'); return; }
+  var q='Qu\u2019est-ce qui a \u00e9t\u00e9 acquis ?\n\n'
+    +'1 \u2014 un intrant (SO\u2082, levures, phyto, piquets, pi\u00e8ces\u2026)\n'
+    +'2 \u2014 des f\u00fbts\n'
+    +'3 \u2014 une machine partie chez le r\u00e9parateur\n\n'
+    +'Le formulaire du module concern\u00e9 s\u2019ouvrira.';
+  var c=window.prompt(q,'1');
+  if(c===null) return;
+  c=String(c).trim();
+  if(c==='3'){
+    if(!window.goTo){ if(window.showToast) window.showToast('Module Tracteur indisponible','#B85A1A'); return; }
+    window.goTo('tracteur');
+    if(window.showToast) window.showToast('Tracteur \u203a « Chez le r\u00e9parateur » \u2014 la ligne na\u00eetra au retour','#C2871E');
+    return;
+  }
+  if(c!=='1'&&c!=='2'){ if(window.showToast) window.showToast('Choix non reconnu','#B85A1A'); return; }
+  if(!window.goTo){ if(window.showToast) window.showToast('La R\u00e9serve est indisponible','#B85A1A'); return; }
+  var onglet=(c==='2')?'futs':'intrants';
+  window.goTo('reserve');
+  // Le delai : goTo declenche renderReserve, qui reconstruit la page. Ouvrir
+  // l'overlay dans la meme pile le ferait fermer aussitot.
+  setTimeout(function(){
+    try{
+      if(window._rsvTabTo) window._rsvTabTo(onglet);
+      var f=(c==='2')?window._rsvOpenFut:window._rsvOpenAchat;
+      if(typeof f==='function') setTimeout(f,180);
+    }catch(e){ if(window.logError) window.logError({level:'info',cat:'pilotage',msg:'pachAdd '+onglet}); }
+  },240);
+}
+
+// Assemblage de la sous-vue.
+function _pexView(){
+  var E=_pexData();
+  if(!E) return '<div class="pec-empty">Exercice indisponible \u2014 rechargez l\u2019application.</div>';
+  var V=_pexEntete(E);
+  window._mvGraphSuivre('#pec-g-pex', function(w){ return _pexGraph(E,w); });
+  return _pexBarreEx(E)
+    + V.kpis
+    + (V.alertes?('<div class="pec-card"><div class="pec-cb">'+V.alertes+'</div></div>'):'')
+    + '<div class="pec-card"><div class="pec-ch"><div class="pec-ct">Le rythme de l\u2019exercice</div>'
+      + '<div class="pec-cs">Mois par mois, ce qui est sorti'
+      +(typeof _mvInfoBtn==='function'?(' '+_mvInfoBtn('pil.exo.postes')):'')+'</div></div>'
+      + '<div class="pec-cb"><div id="pec-g-pex"></div></div></div>'
+    + V.tPostes
+    + V.garde
+    + _pexConso(E)
+    + _pexTableSal(E)
+    + _pexTableAch(E)
+    + _pexTableDep(E)
+    + _pexMoisChoix();
+}
+
+function _pilTabEco(d){
+  _pecCss();
+  var E=_pecData();
+  if(!E.configured){
+    return '<div class="pec-card"><div class="pec-verdict"><div class="em">'+_mvIcon('euro',24)+'</div><div>'
+      +'<div class="t">Le pilotage \u00e9conomique n\u2019est pas encore branch\u00e9</div>'
+      +'<div class="d">Deux donn\u00e9es suffisent \u00e0 tout d\u00e9clencher :<br>'
+      +'\u2022 un <b>taux horaire</b> dans la fiche de chaque salari\u00e9 (<b>R\u00e9glages \u203A \u00c9quipe</b>) ;<br>'
+      +'\u2022 le <b>prix du GNR</b>, saisi au prochain <b>appoint de cuve</b> (<b>Tracteur \u203A Entretien</b>).<br>'
+      +'Le budget, le rythme de d\u00e9pense, le co\u00fbt par travail et le prix de revient en d\u00e9coulent tout seuls \u2014 rien d\u2019autre \u00e0 saisir. Ces deux donn\u00e9es sont r\u00e9serv\u00e9es aux administrateurs.</div>'
+      +'<div class="pec-acts"><button class="pec-btn" data-pec="param"><span>'+_mvIcon('engrenage',16)+'</span> Param\u00e9trage du module</button></div>'
+      +'</div></div></div>';
+  }
+  var TL=_pecTimeline(E);
+  var body;
+  if(_PEC_SUB==='pos') body=_pecViewPostes(E);
+  else if(_PEC_SUB==='par') body=_pecViewParcelles(E);
+  else if(_PEC_SUB==='ach') body=_pachView();
+  else if(_PEC_SUB==='exe') body=_pexView();
+  else body=_pecViewSynthese(E,TL);
+  return '<div class="pec-wrap">'+_pilCadreAvert(_pilAvertEco())+_pecSubNav(E)+body+'</div>';
+}
+
+// ── Conformité : délai de rentrée (heures) — même logique que utils.dreEffectif ──
+function _pilDreHours(drae,type,dreH,dreHc){
+  var nU=Number(drae); nU=(isFinite(nU)&&nU>0)?nU:0;
+  var nC=Number(dreH); nC=(isFinite(nC)&&nC>0)?nC:0;
+  var eff=nU>nC?nU:nC;
+  if(eff>0) return eff;
+  if(type==='MFSC'||type==='Adjuvant') return 0;
+  return 6;
+}
+function _cfmCuCol(r){ return r>1?'--rouge':r>=0.875?'--orange':r>=0.75?'--or':'--vert-med'; }
+// Cuivre : cumul métal 7 ans / 28 kg·ha (source unique _cuParcRollSum).
+function _cfmCuivre(){
+  if(typeof window._cuParcRollSum!=='function') return { avail:false };
+  var PLAF=28;
+  var parc=(window.PARCELLES||[]).filter(function(p){ return p && p.statut!=='Arrachee'; });
+  var rows=parc.map(function(p){ var cu=window._cuParcRollSum(p.nom)||0; return { nom:p.nom, surf:parseFloat(p.surface)||0, cu:cu, ratio:cu/PLAF }; })
+    .filter(function(r){ return r.cu>0; })
+    .sort(function(a,b){ return b.cu-a.cu; });
+  return { avail:true, plaf:PLAF, rows:rows,
+           over:rows.filter(function(r){ return r.ratio>1; }).length,
+           warn:rows.filter(function(r){ return r.ratio>=0.875 && r.ratio<=1; }).length };
+}
+// Passages phyto par parcelle (saison consultée). Un passage = une intervention
+// (sessionId distinct), quel que soit le nombre de produits mélangés.
+function _cfmPassages(){
+  var s=(typeof window._pilSaison==='function')?window._pilSaison():null;
+  var seasonNom=(s&&s.nom)?s.nom:'';
+  function _in(t){
+    var sn=(window._saisonForDate&&t.date)?window._saisonForDate(t.date):null; sn=sn||t.saison||'';
+    if(sn) return sn===seasonNom;
+    return seasonNom===(((window.getSaisonActive&&window.getSaisonActive())||{}).nom||'');
+  }
+  var per={};
+  (window.TRAITEMENTS||[]).forEach(function(t){
+    if(!t||!_in(t)) return;
+    var sid=t.sessionId||('__'+(t.date||''));
+    (t.parcelles||[]).forEach(function(nom){ if(!nom) return; if(!per[nom]) per[nom]={sids:{},prod:0}; per[nom].sids[sid]=1; per[nom].prod++; });
+  });
+  return (window.PARCELLES||[]).filter(function(p){ return p && p.statut!=='Arrachee'; })
+    .map(function(p){ var e=per[p.nom]; return { nom:p.nom, pass:e?Object.keys(e.sids).length:0, prod:e?e.prod:0 }; })
+    .filter(function(r){ return r.pass>0; })
+    .sort(function(a,b){ return b.pass-a.pass; });
+}
+function _cfmIftRef(){ var c=(window.CONFIG&&window.CONFIG.conformite)||{}; var v=Number(c.ift_ref); return (isFinite(v)&&v>0)?{v:v,def:false}:{v:12,def:true}; }
+// DRE actif : dernier traitement par parcelle + fenêtre de rentrée encore ouverte.
+function _cfmDre(){
+  var traits=(window.TRAITEMENTS||[]).slice();
+  if(!traits.length) return { none:true };
+  traits.sort(function(a,b){ return String((b&&b.date)||'').localeCompare(String((a&&a.date)||'')); });
+  var now=Date.now(), active=[], seen={};
+  traits.forEach(function(t){
+    if(!t||!t.date) return;
+    var m=(window._phResolve?window._phResolve(t):{drae:t.drae,type:t.type,dreH:0,dreHc:''});
+    var dreH=_pilDreHours(m.drae,m.type,m.dreH,m.dreHc);
+    var hstr=t.heureFin||t.heureDebut||'08:00';
+    var startMs=new Date(t.date+'T'+hstr).getTime(); if(isNaN(startMs)) startMs=new Date(t.date).getTime();
+    var endMs=startMs+dreH*3600000;
+    (t.parcelles||[]).forEach(function(nom){
+      if(seen[nom]) return; seen[nom]=1; // ce traitement est le plus récent pour cette parcelle
+      if(dreH>0 && endMs>now) active.push({ nom:nom, produit:t.produit||'', dreH:dreH, endMs:endMs, remainH:Math.ceil((endMs-now)/3600000), date:t.date });
+    });
+  });
+  active.sort(function(a,b){ return b.endMs-a.endMs; });
+  return { none:false, active:active };
+}
+function _cfmDreEnd(ms){
+  var e=new Date(ms), now=new Date();
+  var hh=e.getHours(), mm=e.getMinutes();
+  var t=(hh<10?'0'+hh:hh)+' h'+(mm?(' '+(mm<10?'0'+mm:mm)):'');
+  function _sd(a,b){ return a.getFullYear()===b.getFullYear()&&a.getMonth()===b.getMonth()&&a.getDate()===b.getDate(); }
+  var tom=new Date(now); tom.setDate(tom.getDate()+1);
+  if(_sd(e,now)) return t;
+  if(_sd(e,tom)) return 'demain '+t;
+  var mo=e.getMonth()+1, dj=e.getDate();
+  return _pilDfr(e.getFullYear()+'-'+(mo<10?'0'+mo:mo)+'-'+(dj<10?'0'+dj:dj))+' '+t;
+}
+
+// ── Onglet CONFORMITÉ ──
+function _pilTabCfm(d){
+  var H='<div class="pil-panels">', any=false;
+  // Cuivre
+  if(_pilShow('cfm_cuivre')){
+    any=true;
+    var cu=_cfmCuivre();
+    if(!cu.avail){
+      H+=_pilTile('cuivre','#5B8DBF','Cuivre \u00b7 bio', _pilStat('\u2014',''), null, null, '<div class="pil-empty">Synth\u00e8se cuivre indisponible.</div>');
+    } else if(!cu.rows.length){
+      H+=_pilTile('cuivre','#5B8DBF','Cuivre \u00b7 bio (7 ans)', _pilStat('0',' apport'), null, null, '<div class="pil-empty">Aucun apport de cuivre enregistr\u00e9. Le suivi se remplit avec les traitements \u00e0 base de cuivre.</div>');
+    } else {
+      var crows=cu.rows.map(function(r){
+        var col=_cfmCuCol(r.ratio), pct=Math.min(r.ratio*100,100);
+        var st=r.ratio>1?'D\u00e9passement':r.ratio>=0.875?'Vigilance':'Conforme';
+        return '<div class="pil-li"><span class="pil-av" style="background:var('+col+');color:#fff;font-size:var(--pt-micro,11px)">Cu</span>'
+          +'<div class="pil-li-main"><div class="pil-li-t">'+_pilEsc(r.nom)+' <span style="color:var(--texte-doux);font-weight:500">\u00b7 '+_pilHa(r.surf)+' ha</span></div>'
+          +'<div class="pil-gbar" style="margin-top:6px"><i style="width:'+pct.toFixed(0)+'%;background:var('+col+')"></i></div>'
+          +'<div class="pil-li-s" style="color:var('+col+');font-weight:600;margin-top:3px">'+st+' \u00b7 '+(r.ratio*100).toFixed(0)+' % du plafond</div></div>'
+          +'<div class="pil-li-r" style="color:var('+col+')">'+(Math.round(r.cu*10)/10).toLocaleString('fr-FR')+'<span style="font-size:var(--pt-lbl,10.5px);font-weight:500;color:var(--texte-doux)"> kg/ha</span></div></div>';
+      }).join('');
+      var body='<div class="pil-ip-list">'+crows+'</div>'
+        +'<div class="pil-li-s" style="margin-top:10px;line-height:1.5"><b>Cuivre m\u00e9tal</b> sur 7 ans glissants \u00b7 plafond UE <b>28 kg/ha</b>'+(typeof _mvInfoBtn==='function'?(' '+_mvInfoBtn('pil.cfm.cuivre')):'')+'</div>';
+      var sw=cu.over?(_mvIcon('alerte',16)+' '+cu.over):(cu.warn?('\u2191 '+cu.warn):null);
+      H+=_pilTile('cuivre','#5B8DBF','Cuivre \u00b7 bio (7 ans)', _pilStat(cu.rows.length,' parcelle'+(cu.rows.length>1?'s':''), sw), null, null, body);
+    }
+  }
+  // Passages / IFT
+  if(_pilShow('cfm_ift')){
+    any=true;
+    var ref=_cfmIftRef(), pass=_cfmPassages();
+    if(!pass.length){
+      H+=_pilTile('ift','#3D6B27','Passages phyto', _pilStat('0',' passage'), null, null, '<div class="pil-empty">Aucun traitement enregistr\u00e9 cette saison.</div>');
+    } else {
+      var maxP=pass.reduce(function(a,b){return Math.max(a,b.pass);},0)||1;
+      var prows=pass.map(function(r){
+        var overRef=r.pass>ref.v, col=overRef?'--orange':'--vert-med';
+        return '<div class="pil-li"><span class="pil-av" style="background:#1E3418;color:#8FD07A">\uD83C\uDF3F</span>'
+          +'<div class="pil-li-main"><div class="pil-li-t">'+_pilEsc(r.nom)+'</div>'
+          +'<div class="pil-gbar" style="margin-top:6px"><i style="width:'+Math.min(r.pass/Math.max(ref.v,maxP)*100,100).toFixed(0)+'%;background:var('+col+')"></i></div>'
+          +'<div class="pil-li-s" style="margin-top:3px">'+r.prod+' application'+(r.prod>1?'s':'')+' de produit'+(overRef?' \u00b7 <b style="color:var(--orange)">au-dessus de la r\u00e9f.</b>':'')+'</div></div>'
+          +'<div class="pil-li-r" style="color:var('+col+')">'+r.pass+'<span style="font-size:var(--pt-lbl,10.5px);font-weight:500;color:var(--texte-doux)"> passages</span></div></div>';
+      }).join('');
+      var body2='<div class="pil-ip-list">'+prows+'</div>'
+        +'<div class="pil-li-s" style="margin-top:10px;line-height:1.5">Un <b>passage</b> = une intervention, quel que soit le nombre de produits'+(typeof _mvInfoBtn==='function'?(' '+_mvInfoBtn('pil.cfm.ift')):'')+'</div>';
+      var nOver=pass.filter(function(r){return r.pass>ref.v;}).length;
+      H+=_pilTile('ift','#3D6B27','Passages phyto / parcelle', _pilStat(pass.length,' parcelle'+(pass.length>1?'s':''), nOver?('\u2191 '+nOver):null), 'r\u00e9f. '+ref.v+' passages', null, body2);
+    }
+  }
+  // \u2605\u2605 LE REGISTRE PHYTO EST UNE PIECE DE CONFORMITE, PAS DE MATERIEL.
+  //   Il vivait sous \u00ab L'equipe & le materiel \u00bb, a cote du parc de tracteurs. Or
+  //   il lit LES MEMES traitements que \u00ab Passages phyto / parcelle \u00bb juste
+  //   au-dessus : l'un les agrege par parcelle, l'autre en montre les derniers.
+  //   Une source, deux onglets. Il se range ici, en detail de son propre agregat.
+  //   \u26a0\ufe0f LA CLE `mat_phyto` NE CHANGE PAS. Elle est gravee dans le localStorage
+  //     des clients : la renommer rallumerait la carte chez qui l'avait eteinte.
+  //     On deplace un rendu et une etiquette ; on ne renumerote rien en base.
+  if(_pilShow('mat_phyto')){ any=true; H+=_pilPanelPhyto(d); }
+  // DRE
+  if(_pilShow('cfm_dre')){
+    any=true;
+    var dre=_cfmDre();
+    if(dre.none){
+      H+=_pilTile('dre','#B85A1A','D\u00e9lai de rentr\u00e9e (DRE)', _pilStat('\u2014',''), null, null, '<div class="pil-empty">Aucun traitement enregistr\u00e9.</div>');
+    } else if(!dre.active.length){
+      H+=_pilTile('dre','#5B9B3A','D\u00e9lai de rentr\u00e9e (DRE)', _pilStat('0',' actif'), 'aucune parcelle en d\u00e9lai', null, '<div class="pil-empty" style="color:var(--vert-med);font-style:normal">\u2705 Aucun d\u00e9lai de rentr\u00e9e en cours \u2014 toutes les parcelles sont accessibles.</div>');
+    } else {
+      var drows=dre.active.map(function(a){
+        var urg=a.remainH<=2, col=urg?'--rouge':'--orange';
+        return '<div class="pil-li"><span class="pil-av" style="background:var('+col+');color:#fff">\u26D4</span>'
+          +'<div class="pil-li-main"><div class="pil-li-t">'+_pilEsc(a.nom)+'</div>'
+          +'<div class="pil-li-s" style="color:var('+col+');font-weight:600">Rentr\u00e9e interdite encore '+a.remainH+' h \u00b7 jusqu\u2019\u00e0 '+_cfmDreEnd(a.endMs)+'</div>'
+          +'<div class="pil-li-s">'+_pilEsc(a.produit||'traitement')+' \u00b7 DRE '+a.dreH+' h ('+_pilDfr(a.date)+')</div></div></div>';
+      }).join('');
+      var body3='<div class="pil-ip-list">'+drows+'</div>'
+        +'<div class="pil-li-s" style="margin-top:10px;line-height:1.5"><b>Ne pas p\u00e9n\u00e9trer la parcelle sans \u00e9quipement avant l\u2019heure indiqu\u00e9e.</b>'+(typeof _mvInfoBtn==='function'?(' '+_mvInfoBtn('pil.cfm.dre')):'')+'</div>';
+      H+=_pilTile('dre','#B85A1A','D\u00e9lai de rentr\u00e9e (DRE)', _pilStat(dre.active.length,' parcelle'+(dre.active.length>1?'s':''),'actif'), null, null, body3);
+    }
+  }
+  H+='</div>';
+  return any ? (_pilCadreAvert(_pilAvertCfm())+H) : '<div class="pil-empty">Aucun indicateur affich\u00e9 \u2014 activez-les via \u00ab Choisir les indicateurs \u00bb.</div>';
+}
+
+
+// ── Personnalisation PAR ONGLET (visibilité des tuiles) ──
+var _PIL_PERSO_DEFS={
+  auj:[['auj_marge','Marge sur objectif'],['auj_charge','Charge restante'],['auj_cadence','Cadence équipe'],['auj_budget','Budget consommé & dérive'],['auj_etp','ETP présents / requis'],['auj_jours','Jours favorables'],['auj_pres','À la vigne aujourd\'hui'],['auj_traiter','Traiter ? · fenêtre 5 jours'],['auj_prio','Tâche prioritaire'],['auj_alertes','Alertes matériel & cave']],
+  an: [['an_cadres','Deux fa\u00e7ons de compter l\'ann\u00e9e'],['an_budget','Le budget de l\'ann\u00e9e, mois par mois'],['an_frise','Les 52 semaines de l\'exercice']],
+  avc:[['avc_gauge','Jauge de saison'],['avc_bar','Avancement par tâche'],['avc_pie','Charge (donut)'],['avc_temps','Où va le temps de l\'équipe'],['avc_echeances','Échéances par tâche'],['avc_carte','Carte du domaine']],
+  equ:[['prs_equipe','Équipe'],['prs_presences','Présences du jour'],['prs_capacite','Capacité vs charge'],['mat_tracteur','Parc tracteur'],['mat_gnr','Cuve GNR']],
+  sim:[['sim_ordre','Ordre de passage'],['sim_etsi','Répartition « et si ? »'],['sim_cout','Renfort : combien et quand']],
+  cfm:[['cfm_cuivre','Cuivre (bio · 7 ans)'],['cfm_ift','Passages phyto / IFT'],['mat_phyto','Registre phyto'],['cfm_dre','Délai de rentrée (DRE)']]
+};
+function _pilPersoHtml(tab){
+  var defs=_PIL_PERSO_DEFS[tab]; if(!defs) return '';
+  return '<h3>Afficher dans cet onglet — réglage propre à chaque onglet, mémorisé pour vous</h3><div class="pil-opts">'
+    +defs.map(function(o){ return '<label><input type="checkbox" class="pil-sw" data-show="'+o[0]+'"'+(_pilShow(o[0])?' checked':'')+'> '+_pilEsc(o[1])+'</label>'; }).join('')
+    +'</div><div class="pil-perso-note">Décochez pour retirer une tuile. \uD83D\uDD12 Lecture seule — n\'affecte que votre affichage.</div>';
+}
+function _pilPersoChange(e){
+  var id=e.target.getAttribute&&e.target.getAttribute('data-show'); if(!id) return;
+  if(!_PIL_STATE.show) _PIL_STATE.show={};
+  _PIL_STATE.show[id]=e.target.checked?1:0;
+  _pilSaveState(_PIL_STATE);
+  _pilFillContent(_pilData());
+}
+
+// ── Header + barre d'onglets + squelette ──
+// ════════════════════════════════════════════════════════════════════════════════
+// ARCHIVES DES CAMPAGNES
+// Toutes les campagnes sur le MEME axe, 1er aout -> 31 juillet : de recolte a recolte, l'hiver
+// n'est pas coupe en deux par le 31 decembre. Empilees, elles repondent d'un coup d'oeil a la
+// seule question qui compte l'annee suivante : est-ce qu'on s'y est pris plus tot ?
+// L'echelle et la couleur viennent de reglages.js (charge AVANT pilotage) : une seule
+// implementation, sinon les deux frises divergeraient au premier correctif.
+// ════════════════════════════════════════════════════════════════════════════════
+function _arcN(s){ var p=String(s).split('-'); return Date.UTC(+p[0],+p[1]-1,+p[2])/864e5; }
+function _arcISO(n){ return new Date(n*864e5).toISOString().slice(0,10); }
+// Une periode appartient a la campagne ouverte le 1er aout qui precede son DEBUT.
+// L'axe campagne vit desormais dans utils.js (window._mvCampagneDe) : cave.js s'en
+// sert aussi pour « Le millesime ». Repli local conserve si utils.js est anterieur.
+function _arcCampagneDe(iso){
+  if(typeof window._mvCampagneDe==='function') return window._mvCampagneDe(iso);
+  var p=String(iso).split('-'); return (+p[1]>=8)?(+p[0]):(+p[0]-1);
+}
+// Heures d'une periode = celles figees dans l'instantane pris a la cloture. Une periode jamais
+// cloturee n'en a pas : elle se voit sur la frise, elle ne compte pas d'heures.
+function _arcHeures(nom){
+  var h=(window.HISTORIQUE||[]).find(function(x){ return x&&x.saisonNom===nom; });
+  return (h&&h.stats&&h.stats.hFaites)||0;
+}
+function _arcLigne(an,list,cur){
+  var a=_arcN(an+'-08-01'), b=_arcN((an+1)+'-07-31');
+  var pc=function(d){ return Math.max(0,Math.min(100,(_arcN(d)-a)/(b-a)*100)); };
+  var col=window._cmpCouleur||function(){ return '#8A5A38'; };
+  var segs=list.slice().sort(function(x,y){ return String(x.debut).localeCompare(String(y.debut)); })
+    .map(function(s){
+      var x=pc(s.debut), w=pc(s.fin)-x; if(w<=0) w=1;
+      return '<div class="arc-seg" style="left:'+x+'%;width:'+w+'%;background:'+col(s)+'">'
+        +'<b>'+_pilEsc(s.nom)+'</b></div>';
+    }).join('');
+  var today=new Date().toISOString().slice(0,10);
+  if(today>=_arcISO(a)&&today<=_arcISO(b)) segs+='<div class="arc-today" style="left:'+pc(today)+'%"></div>';
+  var h=list.reduce(function(n,s){ return n+_arcHeures(s.nom); },0);
+  var meta=list.length+' période'+(list.length>1?'s':'');
+  meta+=h>0 ? (' · '+_pilHa(h)+' h') : ' · pas d’instantané';
+  return '<div class="arc-row"><div class="arc-lab"><span class="y">Campagne '+an+'–'+(an+1)
+    +(cur?' <em>en cours</em>':'')+'</span><span class="m">'+meta+'</span></div>'
+    +'<div class="arc-fr'+(cur?' cur':' old')+'">'+segs+'</div></div>';
+}
+function _pilTabArc(d){
+  var S=(window.SAISONS||[]).filter(function(s){ return s&&s.debut&&s.fin&&s.fin>=s.debut; });
+  if(!S.length) return '<div class="arc-empty">Aucune période datée. Les campagnes apparaissent ici '
+    +'dès qu’une période porte un début et une fin (Réglages › Campagne).</div>';
+  var par={};
+  S.forEach(function(s){ var k=_arcCampagneDe(s.debut); (par[k]=par[k]||[]).push(s); });
+  var keys=Object.keys(par).map(Number).sort(function(x,y){ return y-x; });
+  var anCur=_arcCampagneDe(new Date().toISOString().slice(0,10));
+  var hTot=S.reduce(function(n,s){ return n+_arcHeures(s.nom); },0);
+  var h='<div class="arc-intro">Toutes les campagnes sur le même axe, <b>1ᵉʳ août → 31 juillet</b> : '
+    +'de récolte à récolte, l’hiver n’est pas coupé en deux. D’une ligne à l’autre, on lit le '
+    +'décalage des travaux.</div>';
+  h+=(window._cmpEchelle?window._cmpEchelle(_arcN(anCur+'-08-01'),_arcN((anCur+1)+'-07-31')):'');
+  h+=keys.map(function(k){ return _arcLigne(k,par[k],k===anCur); }).join('');
+  h+='<div class="arc-kpi">'
+    +'<div><div class="v">'+keys.length+'</div><div class="l">campagne'+(keys.length>1?'s':'')+'</div></div>'
+    +'<div><div class="v">'+S.length+'</div><div class="l">périodes</div></div>'
+    +'<div><div class="v">'+(hTot>0?_pilHa(hTot):'—')+'</div><div class="l">heures archivées</div></div>'
+    +'</div>';
+  h+='<button class="arc-cmp" onclick="window._arcOpenCmp&&window._arcOpenCmp()">'
+    +_mvIcon('graphique',16)+' Comparer deux saisons</button>';
+  // Le bilan de campagne vit dans cave.js (importe AVANT pilotage.js) : on ne
+  // duplique pas le moteur, on ouvre la porte depuis l'ecran de fin d'annee.
+  h+='<button class="arc-cmp" onclick="window._bcExportChoix&&window._bcExportChoix()">'
+    +_mvIcon('livre',16)+' \u00c9diter le bilan de campagne</button>';
+  h+='<div class="arc-note">Les heures viennent des instantanés pris à la clôture de chaque '
+    +'campagne : parcelles, journal, sessions et avancement y sont figés.</div>';
+  return h;
+}
+// Appele depuis Reglages > Campagne : bascule sur Pilotage et ouvre directement l'onglet.
+// Expression assignee a window et non fonction declaree : son seul appelant vit dans un onclick
+// d'un AUTRE fichier, et le cliquet C15 (fonction sans appelant) raisonne fichier par fichier.
+window._pilOpenArchives = function(){
+  _PIL_TAB='arc'; _pilSaveTab('arc');
+  if(window.goTo) window.goTo('pilotage'); else renderPilotage();
+};
+// Appele depuis Reglages > Domaine (carte Economie & conformite) : bascule sur Pilotage
+// et ouvre directement l'outil Parametrage, qui porte desormais les parametres de simulation.
+// Expression assignee a window et non fonction declaree : son seul appelant vit dans un onclick
+// d'un AUTRE fichier, et le cliquet C15 (fonction sans appelant) raisonne fichier par fichier.
+window._pilOpenParam = function(){
+  _PIL_TAB='param'; _pilSaveTab('param');
+  if(window.goTo) window.goTo('pilotage'); else renderPilotage();
+};
+// Le comparateur multi-saisons vivait derriere un bouton de Reglages : sa place est ici.
+window._arcOpenCmp = function(){
+  if(window.openOv) window.openOv('ovHistorique');
+  if(window.renderHistorique) window.renderHistorique();
+};
+
+function _pilTabsHtml(tab){
+  var cur=_PIL_TOOLS.find(function(t){return t[0]===tab;});
+  // Le numero de niveau se lit AVANT le nom : c'est lui qui dit que la barre
+  // se parcourt de gauche a droite, du large au fin. « Aujourd'hui » n'en
+  // porte pas : ce n'est pas un niveau de zoom, c'est le present. Et les
+  // ecrans de detail non plus — les numeroter ferait croire a huit niveaux.
+  var niv=0, apres=false, poseSep=false;
+  var h='<div class="mvu-tabs mvu-pil" id="pil-tabs">'+_PIL_TABS.map(function(t){
+    var sep=poseSep?'<span class="pil-tabsep" aria-hidden="true"></span>':'';
+    poseSep=false;
+    var n='';
+    if(!apres && t[0]!=='auj') n='<span class="pil-lvn">'+(++niv)+'</span>';
+    if(t[0]===_PIL_ZOOM_FIN){ apres=true; poseSep=true; }
+    return sep+'<button class="mvu-tab'+(t[0]===tab?' active':'')+'" data-tab="'+t[0]+'">'
+      +n+'<span class="mvu-tab-em">'+_mvIcon(t[1],18)+'</span>'+_pilEsc(t[2])+'</button>';
+  }).join('');
+  // Outil actif : epingle en fin de barre pour que l'utilisateur voie ou il se trouve.
+  if(cur) h+='<button class="mvu-tab active" data-tab="'+cur[0]+'"><span class="mvu-tab-em">'+_mvIcon(cur[1],18)+'</span>'+_pilEsc(cur[2])+'</button>';
+  h+='<button class="mvu-tab pil-outils-btn" id="pil-outils-btn" aria-label="Outils du pilotage" title="Outils"><span class="mvu-tab-em">'+_mvIcon('curseurs',18)+'</span>Outils</button></div>';
+  h+='<div class="pil-outils-menu" id="pil-outils-menu">'+_PIL_TOOLS.map(function(t){
+    return '<button data-tool="'+t[0]+'"><span class="pom-ic">'+_mvIcon(t[1],20)+'</span><span class="pom-t">'+t[2]+'</span><span class="pom-c">\u203A</span></button>';
+  }).join('')+'</div>';
+  return h;
+}
+function _pilHdrHtml(d){
+  return '<header class="pil-mast"><div class="pil-mast-orb"></div><div class="pil-mast-in">'
+    +'<button class="pil-icon" id="pil-back" title="Accueil">\u2302</button>'
+    +'<div class="pil-mast-id"><div class="pil-eyebrow"><span class="pil-syncdot"></span>Pilotage \u00b7 temps r\u00e9el</div>'
+    +'<div class="pil-dom" id="pil-dom-nom">'+_pilEsc(d.domaine)+'</div></div>'
+    +'<div class="pil-mast-right">'
+    +'<div class="pil-cell pil-saison"><div class="s1">P\u00e9riode</div><div class="s2" id="pil-saison">'+_pilEsc(d.saison)+'</div></div>'
+    +'<div class="pil-msep"></div>'
+    +'<div class="pil-cell"><div class="s1">Vignoble</div><div class="s2 alt">'+d.nActives+' parcelles \u00b7 '+_pilHa(d.surfTot)+' ha</div></div>'
+    +'<div class="pil-msep"></div>'
+    +'<div class="pil-meteo" id="pil-meteo" style="'+(d.meteo?'':'display:none')+'"></div>'
+    +'</div></div>'
+    // Hote de la pastille « ? Aide » : _mvInjectHelpBtn() cible strictement
+    // « .mod-header .mod-meta-row ». Pilotage est le SEUL module dont la page
+    // est un conteneur vide rempli en JS -> il n'en avait aucune, et sa fiche
+    // MV_AIDE.pilotage etait donc ecrite mais inatteignable. On pose un hote
+    // DEDIE plutot que la classe .mod-header sur .pil-mast : le bloc UI-4
+    // (styles.css) impose background/border/padding/box-shadow en !important
+    // sur .mod-header et masque ses pseudo-elements — le masthead serait
+    // repeint en clair sous son texte creme et perdrait son filet horizon.
+    +'<div class="mod-header pil-metahost"><div class="mod-meta-row"></div></div>'
+    +'</header>';
+}
+function _pilSkeleton(d,tab){
+  // L'onglet Économie n'a pas de roue crantée : ses trois sous-vues remplacent la
+  // liste de cases à cocher, et l'on ne masque pas un poste de dépense à la carte.
+  // ★★★ LE BANDEAU DE TITRE DISPARAIT.
+  //   `<h2 class="pil-h2">` repetait mot pour mot l'onglet actif, en 26 px, sur
+  //   une ligne a lui — et sur telephone, sur DEUX lignes. La barre d'onglets le
+  //   dit deja, en surbrillance. Ce que le titre apportait en plus, c'est le
+  //   SOUS-TITRE des libelles longs (« L'annee — les douze mois, d'un cadre a
+  //   l'autre ») : il descend en une ligne fine sous les onglets.
+  //   ⚠️ `_pilTabLabel` reste utilise : c'est lui qui porte ce sous-titre.
+  //   ★ « Choisir les indicateurs » occupait le reste de la ligne. Il rejoint le
+  //     menu ⚙ Outils, ou vivent deja Archives et Parametrage — c'est le meme
+  //     genre de geste, rare et volontaire. `#pil-gear` ne bouge pas de nom :
+  //     _pilBind le retrouve, et le panneau s'ouvre au meme endroit.
+  var avecPerso=(tab==='auj'||tab==='an'||tab==='avc'||tab==='equ'||tab==='sim'||tab==='cfm');
+  _pilCssV2(); _pilScopeLoad();
+  // La barre de portee se pose ENTRE le masthead et les onglets : elle dit ou
+  // l'on regarde avant de dire ce que l'on regarde. Les photos ouvrent le
+  // contenu, quel que soit l'onglet — on voit l'ensemble avant le detail.
+  return _pilHdrHtml(d)
+    +'<div class="pil-portee" id="pil-portee"><div class="pil-portee-in">'
+    +'<div class="pil-crumb" id="pil-crumb">'+_pilCrumbHtml()+'</div>'
+    +'<span id="pil-diagbtn-host">'+_pilDiagBtnHtml()+'</span>'
+    +'</div></div>'
+    +'<div class="pil-diagwrap" id="pil-diagwrap"><div class="pil-diagsheet" id="pil-diagsheet"></div></div>'
+    +'<div class="pil-tabsbar">'+_pilTabsHtml(tab)+'</div>'
+    +'<div class="pil-souslig"><span>'+_pilEsc(_pilTabLabel(tab))+'</span>'
+    +(avecPerso?'<button class="pil-gear2" id="pil-gear" title="Choisir les indicateurs" aria-label="Choisir les indicateurs"><span>\u2699</span></button>':'')+'</div>'
+    +'<div class="pil-wrap">'
+    +(_pilPhotosIci(tab)?('<div id="pil-photos-host">'+_pilPhotosHtml()+'</div>'):'')
+    +'<div class="pil-perso" id="pil-perso"></div>'
+    +'<div class="pil-content" id="pil-content"></div>'
+    +'</div>';
+}
+
+
+// ════════════════════════════════════════════════════════════════════════════
+// LA BARRE DE PORTEE ET LES QUATRE PHOTOS
+// Le module s'ouvrait sur sept onglets a plat — sept SUJETS, aucun niveau de
+// zoom. On ne voyait donc jamais l'annee : on tombait dans un sujet.
+// Ici : une ligne qui dit OU l'on regarde (le fil d'Ariane), et quatre photos
+// qui repondent aux quatre questions d'un domaine — travaux, effectif, budget,
+// conformite — a la maille de la portee. Cliquer une photo descend au detail.
+// ⚠️ Les photos lisent _PIL_SCOPE. Aucune ne garde d'etat a elle.
+// ★★★ ELLES NE SONT PLUS UN BANDEAU : CE SONT LES CHIFFRES D'UN NIVEAU.
+//   Le bandeau sortait sur les HUIT onglets. Sur Économie et sur Conformite, la
+//   photo repetait mot pour mot l'ecran juste en dessous — et le code l'admettait
+//   deja : cliquer une photo depuis son propre onglet ne navigue pas, elle DEFILE.
+//   Un bouton « voir le detail » qui ne peut que descendre dans la page est
+//   l'aveu qu'il n'avait rien a faire la.
+//   Elles vivent desormais sur les DEUX niveaux de zoom — l'annee et la campagne
+//   — et nulle part ailleurs. Sur « Aujourd'hui », le cockpit repond deja aux
+//   memes questions avec de meilleurs instruments (l'anneau, la marge, la charge
+//   restante, la cadence, le budget consomme) : les photos y faisaient un
+//   troisieme emploi. Sur les cinq ecrans de detail, on y ARRIVE par une photo.
+// ════════════════════════════════════════════════════════════════════════════
+function _pilPhotosIci(tab){ return tab==='an' || tab==='avc'; }
+function _pilCssV2(){
+  if(document.getElementById('pil-css-v2')) return;
+  // ═══ L'ECHELLE DE TEXTE — ONZE PAS NOMMES ═══
+  //   Declaree dans styles.css (:root) depuis ce lot : une echelle n'est pas la
+  //   propriete d'un module. Les 259 appels du fichier gardent leur REPLI —
+  //   var(--pt-txt,12.5px) — pour que le module reste juste meme si styles.css
+  //   est en retard chez un client. Une variable inconnue rend la declaration
+  //   invalide et fait retomber TOUT le texte a la taille heritee, en silence.
+  var css=''
+  +'.pil-portee{position:sticky;top:0;z-index:34;background:var(--bg-card);border-bottom:1px solid var(--gris);}'
+  // ⚠️⚠️ DEUX BARRES COLLANTES AU MEME `top` SE RECOUVRENT.
+  //   .pil-tabsbar est sticky top:0 z-index:60 (styles.css) et .pil-portee sticky
+  //   top:0 z-index:34 : des le premier scroll, la barre d'onglets passait
+  //   PAR-DESSUS le fil d'Ariane et le bouton « a completer ». La portee active
+  //   redevenait invisible en cours de lecture — le defaut meme que la refonte
+  //   corrigeait : un filtre qu'on oublie qu'il tourne est pire que pas de filtre.
+  //   La hauteur du fil se MESURE (deux lignes sur telephone, une puce de plus
+  //   quand une campagne est epinglee) et devient le `top` des onglets.
+  //   ★ `body .pil-tabsbar` : une classe de plus que styles.css, donc il gagne
+  //   SANS !important, meme si l'ordre des feuilles change un jour.
+  +'body .pil-tabsbar{top:var(--pil-portee-h,0px);}'
+  +'.pil-portee-in{max-width:1180px;margin:0 auto;padding:9px 16px;display:flex;align-items:center;gap:9px;flex-wrap:wrap}'
+  +'.pil-crumb{display:flex;align-items:center;gap:5px;flex-wrap:wrap;flex:1;min-width:0}'
+  +'.pil-cr{display:inline-flex;align-items:center;gap:6px;border:1px solid var(--gris);background:var(--bg-app);border-radius:9px;padding:5px 10px;font-size:var(--pt-txt,12.5px);font-weight:600;color:var(--texte);white-space:nowrap;min-height:34px;font-family:inherit;cursor:pointer}'
+  +'.pil-cr.root{background:var(--cave);border-color:var(--cave);color:var(--or-clair)}'
+  +'.pil-cr.sel{background:var(--terre-pale);border-color:var(--terre);color:var(--terre)}'
+  +'.pil-cr .x{border:0;background:none;color:inherit;opacity:.55;font-size:var(--pt-sm,17px);line-height:1;padding:0 0 0 3px;font-family:inherit;cursor:pointer;min-width:20px}'
+  +'.pil-cr .x:hover{opacity:1}'
+  +'.pil-cr-sep{color:var(--gris);font-size:var(--pt-txt,12.5px)}'
+  +'.pil-cr-note{font-size:var(--pt-micro,11px);color:var(--texte-doux);white-space:nowrap}'
+  +'.pil-photos{display:grid;grid-template-columns:repeat(3,1fr);gap:11px;margin:0 0 18px}'
+  +'.pil-photo{background:var(--bg-card);border:1px solid var(--gris-clair);border-radius:14px;padding:13px 14px 12px;box-shadow:var(--shadow-sm);text-align:left;width:100%;font-family:inherit;cursor:pointer;transition:border-color .12s;min-height:112px;display:block}'
+  +'.pil-photo:hover{border-color:var(--or)}'
+  +'.pil-photo .k{display:flex;align-items:center;gap:6px;font-size:var(--pt-nano,9.5px);letter-spacing:1.5px;text-transform:uppercase;color:var(--texte-doux);font-weight:700}'
+  +'.pil-photo .v{display:block;font-family:\'Cormorant Garamond\',serif;font-size:var(--pt-xxl,31px);font-weight:700;line-height:1.05;margin:5px 0 0;color:var(--cave);font-variant-numeric:tabular-nums}'
+  +'.pil-photo .u{display:inline;font-family:Outfit,sans-serif;font-size:var(--pt-base,14px);font-weight:600;color:var(--texte-doux)}'
+  +'.pil-photo .s{display:block;font-size:var(--pt-micro,11px);color:var(--texte-doux);margin-top:2px;line-height:1.35}'
+  +'.pil-photo .go{display:block;font-size:var(--pt-lbl,10.5px);color:var(--terre);font-weight:700;margin-top:7px}'
+  +'.pil-flag{display:inline-flex;align-items:center;justify-content:center;width:15px;height:15px;border-radius:50%;font-size:var(--pt-lbl,10.5px);font-weight:800;color:#fff;flex-shrink:0}'
+  +'.pil-lvn{display:inline-flex;align-items:center;justify-content:center;width:17px;height:17px;border-radius:50%;background:var(--gris-clair);color:var(--texte-doux);font-size:var(--pt-lbl,10.5px);font-weight:800;margin-right:6px;flex-shrink:0;font-family:Outfit,sans-serif}'
+  +'.mvu-tab.active .pil-lvn{background:var(--cave);color:var(--or-clair)}'
+  // Le filet dit ou s'arrete le zoom. Sans lui, « Cave » se lit comme un
+  // cinquieme niveau, et la barre redevient une liste de sujets.
+  +'.pil-tabsep{display:inline-block;width:1px;align-self:stretch;min-height:22px;margin:0 9px;background:var(--gris);flex-shrink:0}'
+  +'.pil-diagbtn{border:1px solid var(--orange);background:var(--orange-pale);color:var(--orange);border-radius:9px;padding:6px 11px;font-size:var(--pt-txt,12.5px);font-weight:700;white-space:nowrap;min-height:34px;font-family:inherit;cursor:pointer}'
+  +'.pil-diagbtn.grave{border-color:var(--rouge);background:var(--rouge-pale);color:var(--rouge)}'
+  +'.pil-diagbtn.clean{border-color:var(--vert-med);background:var(--vert-pale);color:var(--vert-med)}'
+  +'.pil-diagwrap{position:fixed;inset:0;background:rgba(20,17,13,.45);z-index:90;display:none;align-items:flex-end;justify-content:center}'
+  +'.pil-diagwrap.show{display:flex}'
+  +'.pil-diagsheet{background:var(--bg-app);width:100%;max-width:640px;max-height:86vh;overflow:auto;border-radius:18px 18px 0 0;padding:17px 17px 34px}'
+  +'.pil-diag-h{display:flex;align-items:flex-start;justify-content:space-between;gap:12px;margin-bottom:4px}'
+  +'.pil-diag-t{font-family:\'Cormorant Garamond\',serif;font-size:var(--pt-lg,23px);font-weight:700;color:var(--cave);line-height:1.15}'
+  +'.pil-diag-s{font-size:var(--pt-txt,12.5px);color:var(--texte-doux);margin-top:2px}'
+  +'.pil-diag-x{border:1px solid var(--gris);background:var(--bg-card);border-radius:8px;width:32px;height:32px;font-size:var(--pt-sm,17px);color:var(--texte-doux);flex-shrink:0;font-family:inherit;cursor:pointer}'
+  +'.pil-diag-ok{background:var(--bg-card);border:1px solid var(--gris-clair);border-radius:13px;padding:16px;text-align:center;color:var(--vert-med);font-weight:600;margin-top:11px}'
+  +'.pil-cov{display:flex;align-items:center;gap:12px;background:var(--bg-card);border:1px solid var(--gris-clair);border-radius:13px;padding:11px 13px;margin:11px 0 13px}'
+  +'.pil-cov-v{font-family:\'Cormorant Garamond\',serif;font-size:var(--pt-xxl,31px);font-weight:700;line-height:1;color:var(--orange);white-space:nowrap;flex-shrink:0}'
+  +'.pil-cov-t{font-size:var(--pt-txt,12.5px);line-height:1.45}'
+  +'.pil-cov-t span{color:var(--texte-doux)}'
+  +'.pil-dl{background:var(--bg-card);border:1px solid var(--gris-clair);border-left-width:4px;border-radius:11px;padding:11px 13px;margin-bottom:9px}'
+  +'.pil-dl.r{border-left-color:var(--rouge)}.pil-dl.o{border-left-color:var(--orange)}.pil-dl.b{border-left-color:#4A9FC8}'
+  +'.pil-dl-t{font-weight:700;font-size:var(--pt-base,14px);display:flex;align-items:center;gap:7px;margin-bottom:2px}'
+  +'.pil-dl-g{font-size:var(--pt-lbl,10.5px);letter-spacing:1px;text-transform:uppercase;color:var(--texte-doux);font-weight:700;margin-bottom:5px}'
+  +'.pil-dl-f{font-size:var(--pt-txt,12.5px);color:var(--texte-doux);line-height:1.5}'
+  +'.pil-dl-f b{color:var(--texte)}'
+  +'.pil-diag-go{margin-top:9px;border:1px solid var(--cave);background:var(--cave);color:var(--or-clair);border-radius:8px;padding:7px 13px;font-size:var(--pt-txt,12.5px);font-weight:700;font-family:inherit;cursor:pointer;min-height:34px}'
+  +'.pil-diag-go.ghost{background:var(--bg-card);color:var(--cave)}'
+  +'.pil-flag{cursor:pointer}'
+  // ══ LA SOUS-LIGNE — ce qui reste du bandeau de titre ══
+  +'.pil-souslig{max-width:1280px;margin:0 auto;padding:7px 24px 0;display:flex;align-items:center;gap:10px;'
+  +'font-size:var(--pt-micro,11px);color:var(--texte-doux);line-height:1.35}'
+  +'.pil-souslig>span{flex:1;min-width:0}'
+  +'.pil-souslig .pil-gear2{flex:none;padding:5px 9px;font-size:var(--pt-txt,12.5px);line-height:1}'
+  // ══ LES QUATRE PHOTOS ══
+  //   ⚠️⚠️ SUR TELEPHONE, ELLES PRENAIENT 259 px — MESURE, PAS ESTIME. Deux
+  //     rangees de deux, chacune avec son etiquette, son chiffre, son sous-titre
+  //     et son « voir le detail ». A elles seules, un tiers de l'ecran avant le
+  //     premier chiffre du contenu.
+  //   En frise d'une seule ligne, qui defile : le chiffre passe A COTE de
+  //     l'etiquette au lieu d'etre dessous, et « voir le detail » disparait — la
+  //     carte reste cliquable en entier, la fleche ne servait qu'a le dire.
+  //   ★ Les quatre restent VISIBLES d'un coup d'oeil : c'est leur raison d'etre.
+  //     On ne remplace pas quatre chiffres par un bouton « voir les chiffres ».
+    +'@media(max-width:700px){'
+  +'.pil-photos{display:flex;grid-template-columns:none;gap:8px;overflow-x:auto;scroll-snap-type:x proximity;'
+  +'-webkit-overflow-scrolling:touch;margin:0 -16px 12px;padding:0 16px 2px}'
+  +'.pil-photos::-webkit-scrollbar{display:none}'
+  +'.pil-photo{flex:0 0 auto;width:auto;min-width:142px;max-width:220px;padding:9px 12px;scroll-snap-align:start}'
+  +'.pil-photo .v{display:inline;font-size:var(--pt-lg,23px);margin:0}'
+  +'.pil-photo .s{white-space:nowrap;overflow:hidden;text-overflow:ellipsis;max-width:190px}'
+  +'.pil-photo .go{display:none}'
+  +'.pil-souslig{padding:6px 16px 0}'
+  +'.pil-cr-note{display:none}'
+  +'.pil-portee-in{padding:7px 16px;gap:7px}'
+  +'}'
+  +'@media(max-width:520px){.pil-tabsep{margin:0 5px}.pil-lvn{margin-right:4px}}'
+  // Le depliant des cinq jours dans \u00ab Traiter ? \u00bb. Il vit ici et non dans
+  // styles.css : c'est une regle de composant, propre a une seule carte.
+  +'.pil-t5{margin-top:10px;border-top:1px solid var(--gris-clair);padding-top:8px}'
+  +'.pil-t5>summary{cursor:pointer;list-style:none;font-size:var(--pt-micro,11px);font-weight:700;letter-spacing:.4px;text-transform:uppercase;color:var(--terre)}'
+  +'.pil-t5>summary::-webkit-details-marker{display:none}'
+  +'.pil-t5>summary::after{content:\" \u25b8\";display:inline-block;transition:transform .15s}'
+  +'.pil-t5[open]>summary::after{transform:rotate(90deg)}'
+  +'.pil-t5b{display:flex;flex-direction:column;gap:6px;margin-top:9px}'
+  // Le graphe du budget annuel : legende sur une ligne, comme celle d'\u00c9conomie.
+  +'.pil-anb-leg{display:flex;gap:15px;flex-wrap:wrap;font-size:var(--pt-micro,11px);color:var(--texte-doux);margin-top:9px}'
+  +'.pil-anb-leg span{display:inline-flex;align-items:center;gap:6px}'
+  +'.pil-anb-leg em{width:15px;height:10px;border-radius:3px;display:inline-block;font-style:normal}'
+  +'@media(max-width:430px){.pil-portee-in{padding:7px 12px}}'
+  // ══ LE MASTHEAD ══
+  //   200 px sur telephone : le nom du domaine passait a la ligne en 26 px, et
+  //   Periode / Vignoble s'empilaient dessous. On sait chez qui on est — ce nom
+  //   se lit une fois, pas a chaque ouverture. Il reste, plus petit, et les deux
+  //   cellules tiennent sur une ligne.
+  +'@media(max-width:700px){'
+  +'.pil-mast-in{padding:calc(env(safe-area-inset-top,0px) + 12px) 16px 12px;gap:11px;align-items:center}'
+  +'.pil-dom{font-size:var(--pt-lg,23px);margin-top:2px}'
+  +'.pil-mast-right{gap:14px;width:100%}'
+  +'.pil-cell .s2{font-size:var(--pt-base,14px)}'
+  +'.pil-icon{width:32px;height:32px;font-size:var(--pt-sm,17px)}'
+  +'}';
+  var el=document.createElement('style'); el.id='pil-css-v2'; el.textContent=css;
+  document.head.appendChild(el);
+}
+
+// ── Le fil d'Ariane ─────────────────────────────────────────────────────────
+// Une portee active se lit sur la MEME ligne que le reste, jamais repliee dans
+// un panneau : un filtre qu'on oublie qu'il tourne est pire que pas de filtre.
+// ── LE CADRE D'UN ECRAN, DIT QUAND IL DIFFERE DE LA PORTEE ──────────────────
+// ★★★ « TOUT L'ECRAN SUIT » N'ETAIT VRAI QUE DE LA MOITIE DE L'ECRAN.
+//   Le fil d'Ariane et les quatre photos suivent la portee. L'Economie, elle,
+//   cadre sur la PERIODE CONSULTEE ; la Cave suit le MILLESIME ; la Conformite
+//   roule sur SEPT ANS glissants. Avec « Vendanges » epingle en haut, ces trois
+//   ecrans repondaient donc sur une AUTRE fenetre — sans le dire. C'est la faute
+//   exacte qu'on reprochait au module avant sa refonte : une selection qui
+//   n'agit pas partout, et un chiffre dont le cadre n'est pas ecrit sous lui.
+//   ⚠️⚠️ ON N'AJOUTE PAS UN SIXIEME SELECTEUR — la refonte en a fondu cinq en un.
+//   On NOMME le cadre. Meme geste que l'avertissement du Parametrage, qui posait
+//   deja le principe : ce qui ne suit pas le zoom doit l'annoncer de lui-meme.
+function _pilCadreAvert(txt){
+  if(!txt) return '';
+  return '<div style="margin:0 0 12px;padding:9px 12px;border-radius:9px;background:var(--bg-card);'
+    +'border:1px solid var(--gris-clair);border-left:3px solid var(--or);color:var(--texte-doux);'
+    +'font-size:var(--pt-txt,12.5px);line-height:1.5">'+_mvIcon('info',16)+' '+txt+'</div>';
+}
+// L'Economie chiffre la periode CONSULTEE : _ecoAllDefs lit getTachesSaison(),
+// et les sessions sont filtrees PAR NOM DE SAISON. Elle ne sait cadrer ni sur
+// l'exercice ni sur une autre campagne — sauf sa sous-vue « Exercice », faite
+// pour ca, et qui a donc l'avertissement inverse.
+function _pilAvertEco(){
+  var nom=_pilSaisonNom(), camp=_PIL_SCOPE.camp;
+  if(_PEC_SUB==='exe'){
+    return camp ? ('Cette sous-vue cadre sur l\u2019<b>exercice comptable</b>, d\u2019un bilan \u00e0 l\u2019autre \u2014 pas sur <b>'
+      +_pilEsc(camp)+'</b>, la campagne \u00e9pingl\u00e9e en haut.') : '';
+  }
+  if(!nom || (camp && camp===nom)) return '';
+  if(camp) return 'Vous regardez <b>'+_pilEsc(camp)+'</b> en haut, mais cet \u00e9cran chiffre <b>'+_pilEsc(nom)
+    +'</b>, la p\u00e9riode consult\u00e9e. Le co\u00fbt d\u2019un bilan entier se lit dans la sous-vue <b>Exercice</b>.';
+  return 'Cet \u00e9cran chiffre <b>'+_pilEsc(nom)+'</b>, la p\u00e9riode consult\u00e9e \u2014 pas l\u2019exercice comptable'
+    +' affich\u00e9 en haut. Le co\u00fbt d\u2019un bilan entier se lit dans la sous-vue <b>Exercice</b>.';
+}
+function _pilAvertCav(){
+  var camp=_PIL_SCOPE.camp;
+  return camp ? ('La Cave suit le <b>mill\u00e9sime</b>, pas la campagne : cet \u00e9cran ne se recadre pas sur <b>'
+    +_pilEsc(camp)+'</b>.') : '';
+}
+function _pilAvertCfm(){
+  var camp=_PIL_SCOPE.camp;
+  return camp ? ('La conformit\u00e9 se lit sur l\u2019ann\u00e9e, et le cuivre sur <b>sept ans glissants</b>\u00a0: '
+    +'cet \u00e9cran ne se recadre pas sur <b>'+_pilEsc(camp)+'</b>.') : '';
+}
+function _pilCrumbHtml(){
+  // _mvExercice() rend {an,debut,fin} — il n'existe pas de fonction de libelle,
+  // on le compose ici plutot que d'appeler un helper imaginaire.
+  var ex='Exercice', X=null;
+  try{ X=(typeof window._mvExercice==='function')?window._mvExercice():null; }catch(e){ X=null; }
+  if(X && X.debut && X.fin){
+    var a0=String(X.debut).slice(0,4), a1=String(X.fin).slice(0,4);
+    // « Exercice comptable », pas « Exercice » : c'est le cadre du bilan, et
+    // le distinguer de l'annee vigne commence par le nommer.
+    ex='Exercice comptable '+(a0===a1?a0:(a0+'-'+a1.slice(2)));
+  }
+  var h='<button class="pil-cr root" id="pil-cr-root" title="Revenir \u00e0 l\u2019ann\u00e9e enti\u00e8re">\u2302 '+_pilEsc(ex)+'</button>';
+  if(_PIL_SCOPE.camp){
+    h+='<span class="pil-cr-sep">\u203A</span><span class="pil-cr sel">'+_mvIcon('raisin',16)+' '+_pilEsc(_PIL_SCOPE.camp)
+      +'<button class="x" id="pil-cr-x" title="Revenir \u00e0 l\u2019ann\u00e9e">\u00d7</button></span>';
+  } else {
+    // ★ « cliquez une campagne dans la frise pour zoomer » est une INSTRUCTION :
+    //   on l'apprend une fois, puis on la traverse. Elle disparait sur telephone,
+    //   ou elle prenait une ligne entiere de la barre collante — donc de chaque
+    //   ecran, en permanence. Sur grand ecran elle reste : la place ne manque pas.
+    h+='<span class="pil-cr-note">l\u2019ann\u00e9e enti\u00e8re \u2014 cliquez une campagne dans la frise pour zoomer</span>';
+  }
+  return h;
+}
+
+// ── Les quatre photos ───────────────────────────────────────────────────────
+// Chacune repond a UNE question et emmene a l'ecran qui la detaille. Un chiffre
+// dont les entrees sont incompletes porte un drapeau : il ne se tait pas et il
+// ne ment pas non plus, il dit qu'il est partiel.
+// ── LE COUT DE L'EXERCICE, LU AU BON ENDROIT ─────────────────────────
+// ⚠️⚠️ _pecData() cadre sur la CAMPAGNE CONSULTEE : _ecoAllDefs() lit
+//   getTachesSaison() et _ecoTracHByParc()/_ecoPhytoByParc() filtrent les
+//   sessions PAR NOM DE SAISON. L'afficher sous l'etiquette « exercice
+//   comptable » annonçait 45 k€ pour une annee entiere — le cout d'une vendange
+//   presente comme celui d'un bilan. La fonction qui cadre reellement entre deux
+//   bilans existe deja : _pexData (salaires charges + GNR + achats d'intrants,
+//   fenetre de dates, meme source que l'ecran Economie › Exercice).
+// noCmp=true : la comparaison a l'exercice N-1 double le travail et ne sert a
+// aucune des deux vues qui appellent d'ici.
+var _PIL_EXO=null;
+function _pilExoOublier(){ _PIL_EXO=null; }
+function _pilExoData(){
+  if(_PIL_EXO!==null) return _PIL_EXO;
+  var X=null;
+  try{ var ex=_pexEx(); if(ex) X=_pexData(ex,true); }
+  catch(e){ X=null; if(window.logError) window.logError({level:'info',cat:'pilotage',msg:'photos: cout d\u2019exercice illisible'}); }
+  _PIL_EXO=X||false;
+  return _PIL_EXO;
+}
+
+function _pilPhotosData(){
+  var ann=null; try{ ann=_pilAnnuelData(); }catch(e){ ann=null; }
+  if(ann) _pilScopeVerif(ann);
+  var camp=_PIL_SCOPE.camp, selP=ann?_pilAnnPer(camp):null;
+  // ⚠️ « SUR L'EXERCICE » DOIT VOULOIR DIRE SUR L'EXERCICE. Une periode qui tombe
+  //   entierement hors de l'exercice comptable (ann.hors la nomme, et le tableau
+  //   « Deux façons de compter » l'affiche en clair) n'entre pas dans un total
+  //   annonce « sur l'exercice ». Le bornage des SEMAINES vit dans _pilPicPortee,
+  //   definition unique du pic ; celui des HEURES vit ici.
+  function _dansEx(p){ return !(ann&&ann.ex) || !(p.fin<ann.ex.d0 || p.debut>ann.ex.d1); }
+
+  // TRAVAUX — heures de bareme de la portee.
+  // ⚠️⚠️ _chargeSaisonData NE REND PAS totalTotal/totalReste. Ces deux cles
+  //   viennent de calcHeures() (app.js), une TOUTE AUTRE fonction. Lues sur cd
+  //   elles valaient undefined, donc 0 apres `||0` : la photo affichait
+  //   « 0 h · aucune tache datee sur l'exercice » sur un domaine qui montrait
+  //   2 353 h restantes dans le KPI d'a cote, et le tableau « Deux façons de
+  //   compter » sortait quatre lignes a 0 h. Le total de bareme d'une periode
+  //   s'appelle `charge` — verifie dans planning.js, pas deduit du nom.
+  var hTot=0, hFait=0, pct=null, nPer=0;
+  try{
+    if(selP&&selP.cd){ hTot=Math.round(selP.cd.charge||0); nPer=1; }
+    else if(ann){ ann.pers.forEach(function(p){
+      if(!p.cd || !_dansEx(p)) return;
+      hTot+=Math.round(p.cd.charge||0); nPer++;
+    }); }
+  }
+  catch(e){ if(window.logError) window.logError({level:'info',cat:'pilotage',msg:'photos: charge illisible'}); }
+  // LE POURCENTAGE FAIT N'A D'ASSIETTE QUE SUR LA PERIODE CONSULTEE : calcHeures()
+  // ne connait qu'elle. L'etendre a une autre campagne, ou a l'exercice entier,
+  // serait un pourcentage sans denominateur. Il vaut null, et l'ecran le dit au
+  // lieu d'afficher un zero — un zero est une mesure.
+  try{
+    var _sn=_pilSaisonNom();
+    if(selP && _sn && selP.nom===_sn && typeof window.calcHeures==='function'){
+      var _ch=window.calcHeures();
+      var _tt=Math.round((_ch&&_ch.totalTotal)||0), _tr=Math.round((_ch&&_ch.totalReste)||0);
+      // Une seule source pour le total ET le pourcentage : melanger `charge`
+      // (bareme de la periode) et calcHeures (reste au journal) donnerait un
+      // pourcentage calcule sur un autre denominateur que celui affiche.
+      if(_tt>0){ hTot=_tt; hFait=Math.max(0,_tt-_tr); pct=Math.round(hFait/_tt*100); }
+    }
+  }catch(e){ pct=null; }
+
+  // EFFECTIF — le PIC, jamais la moyenne : une moyenne annuelle n'existe aucun
+  // jour de l'annee, et c'est le pic qui decide d'un recrutement.
+  // ★ UNE SEULE DEFINITION : _pilPicPortee, la meme que lit le KPI d'Aujourd'hui
+  //   et la tuile Charge & ETP. La photo la recalculait pour elle seule — c'est
+  //   exactement comme ça que deux ecrans finissent par se contredire.
+  var _PP=_pilPicPortee();
+  var pic=_PP.pic, picW=_PP.picW, moy=_PP.moy, head=_PP.head, manque=_PP.manque;
+
+  // BUDGET — DEUX SOURCES, PARCE QU'IL Y A DEUX QUESTIONS.
+  //   · portee = l'exercice  -> _pexData : ce que coute le bilan (salaires
+  //     charges, GNR, achats). C'est le seul moteur cadre sur des DATES.
+  //   · portee = une campagne -> _pecData : bareme x taux + tracteur + phyto,
+  //     mais _pecData ne sait cadrer QUE sur la periode consultee. Si la
+  //     campagne zoomee n'est pas celle-la, son chiffre ne la decrit pas : on
+  //     ne le colle pas sous son nom, on retombe sur l'exercice ET on le dit.
+  var eur=0, sansTaux=0, ecoOk=false;
+  // ⚠️ _pecData() rend le total sous la cle `tot`, pas `T` — verifie dans le
+  //    fichier, pas deduit du nom de la variable interne.
+  try{ var _P=_pecData(); if(_P&&_P.tot){ eur=(_P.tot.moB||0)+(_P.tot.tracF||0)+(_P.tot.phyF||0); sansTaux=_P.tot.nSansTaux||0; ecoOk=true; } }catch(e){ ecoOk=false; }
+  var exo=_pilExoData()||null;
+  var campEco=!!(camp && _pilSaisonNom() && camp===_pilSaisonNom());
+
+
+  return { ann:ann, selP:selP, hTot:hTot, hFait:hFait, pct:pct, nPer:nPer, pic:pic, picW:picW,
+           moy:moy, head:head, manque:manque, eur:eur, sansTaux:sansTaux, ecoOk:ecoOk,
+           exo:exo, campEco:campEco,
+           trous:(ann&&ann.trous)?ann.trous.length:0, ovl:(ann&&ann.ovl)?ann.ovl.length:0 };
+}
+
+
+// ── Le rendu des quatre photos ──────────────────────────────────────────────
+function _pilPhotoHtml(k,ico,val,unite,sous,cible,drapeau,quest){
+  // \u26A0\uFE0F Des <span display:block>, pas des <div> : le contenu d'un <button>
+  //    est du « phrasing content » en HTML5. Le clic marcherait quand meme,
+  //    mais §24 l'interdit \u2014 et un balisage invalide se paie plus tard, pas
+  //    tout de suite.
+  return '<button class="pil-photo" data-pgo="'+cible+'" data-pq="'+quest+'">'
+    +'<span class="k">'+_mvIcon(ico,16)+' '+k+(drapeau||'')+'</span>'
+    +'<span class="v">'+val+'<span class="u">'+unite+'</span></span>'
+    +'<span class="s">'+sous+'</span>'
+    +'<span class="go">voir le d\u00e9tail \u203A</span></button>';
+}
+function _pilFlag(g,titre){
+  var c=(g==='r')?'var(--rouge)':(g==='o'?'var(--orange)':'#4A9FC8');
+  return '<span class="pil-flag" style="background:'+c+'" title="'+_pilEsc(titre)+'">!</span>';
+}
+function _pilPhotosHtml(){
+  var D;
+  try{ D=_pilPhotosData(); }catch(e){ return ''; }
+  var camp=_PIL_SCOPE.camp, cadre=camp?('sur '+_pilEsc(camp)):'sur l\u2019exercice';
+
+  // ★ Les drapeaux viennent du MOTEUR, pas d'un test ecrit sur place : un
+  //   chiffre ne peut pas porter un drapeau que la liste ne contient pas.
+  var DG=_pilDiag();
+  function drap(quoi){
+    var l=DG.filter(function(d){ return d.touche && d.touche.indexOf(quoi)>=0; });
+    if(!l.length) return '';
+    var g=l.some(function(d){return d.g==='r';})?'r':(l.some(function(d){return d.g==='o';})?'o':'b');
+    return _pilFlag(g, l.length+' chose'+(l.length>1?'s':'')+' \u00e0 compl\u00e9ter \u2014 touchez pour voir');
+  }
+  // TRAVAUX
+  var fT=drap('travaux');
+  // La photo descend d'UN cran, pas au fond : sans portee elle mene a l'annee,
+  // avec une campagne selectionnee elle mene a cette campagne. C'est le zoom.
+  var sT;
+  if(!(D.hTot>0)) sT='aucun bar\u00e8me chiffr\u00e9 '+cadre;
+  else if(D.pct!=null) sT=D.pct+' % fait '+cadre;
+  else if(camp) sT='de bar\u00e8me '+cadre;
+  else sT='de bar\u00e8me \u00b7 '+D.nPer+' campagne'+(D.nPer>1?'s':'')+' dans l\u2019exercice';
+  var pTrav=_pilPhotoHtml('Travaux','feuille',_pilNb(D.hTot),' h', sT, camp?'avc':'an', fT, 'travaux');
+
+  // EFFECTIF — le pic, et le manque en clair s'il y en a un.
+  var sE = D.pic>0
+    ? ('au pic'+(D.picW?(' \u00b7 '+_pilNb(D.head)+' pr\u00e9sents cette semaine-l\u00e0'):''))
+    : 'aucune semaine mesur\u00e9e '+cadre;
+  var fE = drap('effectif') || ((D.manque>0.05) ? _pilFlag('o','Il manque '+_pilUn(D.manque)+' personne(s) au pic') : '');
+  var pEff=_pilPhotoHtml('Effectif','equipe',D.pic>0?_pilUn(D.pic):'\u2014',D.pic>0?' pers.':'', sE,'equ',fE,'effectif');
+
+  // BUDGET — le cadre du chiffre est ECRIT SOUS LE CHIFFRE, toujours.
+  var fB=drap('budget'), pBud;
+  if(!camp || !D.campEco){
+    // Portee = l'exercice, ou une campagne que le moteur economique ne sait pas
+    // cadrer : le seul chiffre defendable est celui du bilan.
+    var _X=D.exo;
+    var _note = camp
+      ? 'sur l\u2019<b>exercice comptable</b> \u2014 le co\u00fbt ne se recadre pas sur '+_pilEsc(camp)
+      : 'sur l\u2019<b>exercice comptable</b> \u00b7 salaires charg\u00e9s, GNR, achats';
+    pBud = (_X && _X.total>0)
+      ? _pilPhotoHtml('Budget','euro',_pilNb(Math.round(_X.total/1000)),' k\u20ac', _note,'eco',fB,'budget')
+      : _pilPhotoHtml('Budget','euro','\u2014','','le co\u00fbt de l\u2019exercice n\u2019a pas abouti','eco',
+          _pilFlag('r','Ouvrez \u00c9conomie \u203a Exercice pour voir ce qui bloque'),'budget');
+  } else {
+    pBud = D.ecoOk
+      ? _pilPhotoHtml('Budget','euro',_pilNb(Math.round(D.eur/1000)),' k\u20ac',
+          'sur '+_pilEsc(camp)+' \u00b7 main-d\u2019\u0153uvre, carburant et phyto','eco',fB,'budget')
+      : _pilPhotoHtml('Budget','euro','\u2014','','le calcul du co\u00fbt n\u2019a pas abouti','eco',
+          _pilFlag('r','Ouvrez \u00c9conomie pour voir ce qui bloque'),'budget');
+  }
+
+  // ★★★ LA PHOTO CONFORMITE A QUITTE LA BANDE, ET C'EST UNE QUESTION D'ECHELLE.
+  //   Les trois autres sont des statistiques DE LA PORTEE : Travaux en est la
+  //   somme, Effectif le maximum hebdomadaire, Budget la somme en euros. Le
+  //   cuivre, lui, roule sur SEPT ANS GLISSANTS et ignore la portee — le code
+  //   l'ecrivait deja en commentaire, sans en tirer la consequence. Un chiffre qui
+  //   ne bouge pas quand on clique une campagne n'a rien a faire dans une bande
+  //   qui se recadre. Il est consulte avant un controle, pas au fil de l'eau.
+  //   ⚠️ RIEN N'EST PERDU : l'onglet Conformite porte le cuivre en entier, et
+  //     _pilDiag continue de remonter ses constats (touche:['conf']) dans la
+  //     feuille « a completer », qui reste, elle, sur tous les onglets.
+  return '<div class="pil-photos">'+pTrav+pEff+pBud+'</div>';
+}
+function _pilNb(v){ v=Math.round(Number(v)||0); return String(v).replace(/\B(?=(\d{3})+(?!\d))/g,'\u00a0'); }
+function _pilUn(v){ return (Math.round((Number(v)||0)*10)/10).toString().replace('.',','); }
+
+// Repeint la barre de portee sans reconstruire la page. Appelee au clic sur une
+// campagne : la portee change, le fil et les photos suivent — c'est tout l'objet.
+function _pilPortee(){
+  _pilExoOublier(); _pilCdVueOublier();
+  var c=document.getElementById('pil-crumb'); if(c) c.innerHTML=_pilCrumbHtml();
+  var p=document.getElementById('pil-photos-host'); if(p) p.innerHTML=_pilPhotosHtml();
+  // Le compte des manques se repeint AUSSI : un bouton fige sur l'ancien
+  // nombre apres une correction, c'est un ecran qui se contredit.
+  var b=document.getElementById('pil-diagbtn-host'); if(b) b.innerHTML=_pilDiagBtnHtml();
+  _pilStickyH();
+}
+// La hauteur du fil d'Ariane est une DONNEE DE MISE EN PAGE, pas une constante.
+// Mesuree a chaque rendu et a chaque redimensionnement ; les onglets s'y calent.
+function _pilStickyH(){
+  var p=document.getElementById('pil-portee'); if(!p) return;
+  var h=Math.round(p.getBoundingClientRect().height)||0;
+  try{ document.documentElement.style.setProperty('--pil-portee-h', h+'px'); }
+  catch(e){ if(window.logError) window.logError({level:'info',cat:'pilotage',msg:'sticky: hauteur du fil'}); }
+}
+window._pilPortee = _pilPortee;
+
+
+// ════════════════════════════════════════════════════════════════════════════
+// LE MOTEUR DE DIAGNOSTIC
+// Le module comptait vingt-neuf impasses : du texte qui disait « Reglages ›
+// Saisons » sans AUCUN lien, et qu'on ne decouvrait qu'en ouvrant l'onglet qui
+// le contenait. Ici, une seule liste, trois gravites, et un bouton qui emmene
+// a l'endroit exact.
+//
+//   'r' BLOQUANT   le chiffre ne se calcule pas. Il affiche un tiret.
+//   'o' FAUSSANT   le chiffre SORT, mais faux ou partiel. Le plus dangereux :
+//                  un indicateur bati sur un signal partiel ment avec
+//                  l'autorite d'une mesure.
+//   'b' AMELIORABLE le chiffre est juste, il serait plus fin.
+//
+// ⚠️ Chaque constat porte : ce qui manque, CE QUE CA FAUSSE, et ou aller.
+//    Un diagnostic qui dit seulement « il manque X » laisse le lecteur juger
+//    de l'urgence sans les elements.
+// ⚠️ `touche` relie le constat aux photos. Un chiffre dont les entrees sont
+//    incompletes porte un drapeau — il ne se tait pas, et il ne ment pas.
+// ════════════════════════════════════════════════════════════════════════════
+// ★★ UNE CIBLE INTERNE AU MODULE. Le constat « vendange a cheval » portait
+//   `cible:'saisons'` : son bouton « Voir les deux cadres » ouvrait Reglages ›
+//   Campagne et faisait clignoter la liste des periodes. Le libelle promettait un
+//   ecran, le doigt en obtenait un autre. Le panneau vit ICI, au niveau ①.
+var _PIL_DIAG_CIBLES = {
+  saisons:   ['reglages','domaine','set-sec-saisons'],
+  taches:    ['reglages','vigne',  'set-sec-taches'],
+  dens:      ['reglages','vigne',  'set-sec-dens'],
+  secteurs:  ['reglages','vigne',  'set-sec-secteurs'],
+  equipe:    ['reglages','equipe', 'set-sec-equipe'],
+  tracteurs: ['reglages','tracteur','set-sec-tracteurs'],
+  parcelles: ['parcelles',null,null],
+  // ★ PREMIERE CIBLE HORS DES REGLAGES. « Cuve GNR a renseigner (Tracteur ›
+  //   Entretien) » etait du TEXTE MORT : il fallait lire, retenir, sortir du
+  //   module, retrouver l'onglet. Le 4e element nomme le commutateur du module
+  //   vise ; absent, on garde switchReglTab et les sept cibles au-dessus ne
+  //   changent pas d'un iota.
+  entretien: ['tracteur','entretiens',null,'switchTracOnglet'],
+  // La Reserve utilise son propre commutateur, _rsvTabTo, qui prend la CLE de
+  // l'onglet ('futs' | 'intrants' | 'depenses' | 'audit').
+  reserve:   ['reserve','intrants',null,'_rsvTabTo']
+};
+
+// Defile jusqu'au bloc et le fait clignoter une seconde. Sans le clignotement, on
+// arrive sur un ecran dense sans savoir ce qu'on venait y faire. Extrait de _pilGo :
+// la cible interne « les deux cadres » en a besoin aussi.
+function _pilFlash(el){
+  if(!el) return;
+  try{
+    el.scrollIntoView({behavior:'smooth',block:'center'});
+    el.style.transition='box-shadow .25s';
+    el.style.boxShadow='0 0 0 3px var(--or)';
+    setTimeout(function(){ el.style.boxShadow=''; }, 1400);
+  }catch(e){ if(window.logError) window.logError({level:'info',cat:'pilotage',msg:'flash'}); }
+}
+// Ouvre la page, bascule sur le bon onglet, fait defiler jusqu'au bloc, et le
+// fait clignoter une seconde. Sans le clignotement, on arrive sur un ecran
+// dense sans savoir ce qu'on venait y faire.
+window._pilGo = function(cible){
+  try{
+    // Cible INTERNE : on ne quitte pas le module, on change de niveau.
+    if(cible==='an_cadres'){
+      if(_PIL_TAB!=='an'){ _PIL_TAB='an'; _pilSaveTab('an'); renderPilotage(); }
+      setTimeout(function(){ _pilFlash(document.getElementById('pil-an-cadres')); }, 240);
+      return;
+    }
+    // Cible INTERNE : l'Exercice de l'Economie, sur l'axe atelier.
+    if(cible==='exercice'){
+      var _ch=false;
+      if(_PIL_TAB!=='eco'){ _PIL_TAB='eco'; _pilSaveTab('eco'); _ch=true; }
+      if(_PEC_SUB!=='exe'){ _PEC_SUB='exe'; _ch=true; }
+      if(_PEC_AXE!=='ate'){ _PEC_AXE='ate'; _ch=true; }
+      if(_ch){ _pecSaveSt(); renderPilotage(); }
+      return;
+    }
+    var C=_PIL_DIAG_CIBLES[cible]; if(!C) return;
+    if(window.goTo) window.goTo(C[0]);
+    setTimeout(function(){
+      try{
+        var _sw = C[3] || 'switchReglTab';
+        if(C[1] && typeof window[_sw]==='function') window[_sw](C[1]);
+        if(!C[2]) return;
+        _pilFlash(document.getElementById(C[2]));
+      }catch(e2){ if(window.logError) window.logError({level:'info',cat:'pilotage',msg:'diag: ancre '+cible}); }
+    }, 240);
+  }catch(e){ if(window.logError) window.logError({level:'info',cat:'pilotage',msg:'diag: navigation '+cible}); }
+};
+
+function _pilDiagJours(t){ return Math.max(1,(t[1]-t[0])+1); }
+
+// ★★★ LE BAREME D'UNE TACHE VIT DANS `t.hha`, PAS DANS `t.h_ha`.
+// ⚠️⚠️ Le constat « N taches sans bareme h/ha » testait `parseFloat(t.h_ha)`.
+//   Ce champ n'existe sur AUCUNE tache : `h_ha` ne vit que sur TRAVAUX[] (la
+//   table calculee, ecrite par calcHeures) et sur les ACTIVITES tracteur
+//   (a.h_ha). Sur une tache, il rend `undefined` — donc le test etait vrai pour
+//   TOUT LE MONDE, et le constat se declenchait sur 100 % des taches de la
+//   periode consultee, y compris celles dont le bareme etait rempli. Sur une
+//   periode a une seule tache, il annonce « 1 tache sans bareme » : plausible,
+//   et faux. MEME FAMILLE QUE CONFIG.ecartRang (§34d) : un champ suppose,
+//   jamais verifie contre le code qui l'ecrit.
+// Les quatre formes de bareme, dans l'ordre ou calcHeures les lit :
+//   simple / niveaux : t.hha porte deja le total (Relevage : somme des niveaux)
+//   passages         : t.passagesHha[] quand chaque passage a son propre taux
+//   trous (tariere)  : pas de h/ha du tout — le poids vient des trous plantes
+function _pilTacheHha(t){
+  if(!t) return 0;
+  var h=parseFloat(t.hha); if(h>0) return h;
+  if(t.niveaux && t.niveaux.length){
+    var sN=0; t.niveaux.forEach(function(n){ sN+=parseFloat(n&&n.hha)||0; });
+    if(sN>0) return sN;
+  }
+  if(t.passagesHha && t.passagesHha.length){
+    var sP=0; t.passagesHha.forEach(function(v){ sP+=parseFloat(v)||0; });
+    if(sP>0) return sP;
+  }
+  // Pilotee par la tariere : elle pese ses trous x minutes/trou. Pas de bareme
+  // h/ha a reclamer — en exiger un serait demander une donnee qui n'existe pas.
+  if(t.trous || t.nom==='Entreplantation'){
+    var np=(typeof window._plantPlanTrous==='function')?(window._plantPlanTrous(t.nom)||0):0;
+    if(np>0) return 1;
+  }
+  return 0;
+}
+
+// La liste des constats. Chacun est calcule sur les donnees reelles ; aucun
+// n'est ecrit en dur, et aucun n'apparait quand il n'a pas lieu d'etre.
+function _pilDiag(){
+  var out=[], i;
+  var ann=null; try{ ann=_pilAnnuelData(); }catch(e){ ann=null; }
+
+  // ── Les periodes ─────────────────────────────────────────────────────────
+  var sais=(window.SAISONS||[]);
+  var sansDates=sais.filter(function(p){ return p && (!p.debut||!p.fin); });
+  if(sansDates.length) out.push({ g:'r', cible:'saisons', touche:['travaux','effectif','budget'],
+    k:sansDates.length+' p\u00e9riode'+(sansDates.length>1?'s':'')+' sans dates',
+    f:'<b>'+_pilEsc(sansDates.map(function(p){return p.nom;}).join(', '))+'</b> n\u2019a pas de date de d\u00e9but ou de fin. '
+     +'Sans fen\u00eatre, la charge ne se calcule pas : ces travaux ne p\u00e8sent <b>rien</b>.',
+    ou:'R\u00e9glages \u203a Campagne' });
+
+  if(ann && ann.trous && ann.trous.length){
+    var j=0; ann.trous.forEach(function(t){ j+=_pilDiagJours(t); });
+    out.push({ g:'r', cible:'saisons', touche:['travaux','budget'],
+      k:'Trou de '+j+' jour'+(j>1?'s':'')+' dans le calendrier',
+      f:ann.trous.length+' fen\u00eatre'+(ann.trous.length>1?'s':'')+' de l\u2019exercice n\u2019'+(ann.trous.length>1?'ont':'a')+' aucune p\u00e9riode. '
+       +'Le travail de ces jours n\u2019est compt\u00e9 <b>nulle part</b> : ni dans la charge, ni dans le budget, ni dans l\u2019avancement.',
+      ou:'R\u00e9glages \u203a Campagne' });
+  }
+
+  // ⚠️⚠️ CONSTAT SUPPRIME (12/08/2026) : « N periodes se chevauchent — les
+  //   jours communs sont comptes deux fois, les heures et le cout sont gonfles
+  //   d'autant ». C'ETAIT FAUX. _chargeSaisonData (planning.js) calcule la
+  //   charge d'une periode sur les taches de SA liste (s.taches), jamais sur
+  //   ses jours : deux periodes qui partagent des dates ne partagent aucune
+  //   heure. Le constat accusait le calendrier du domaine d'une faute que le
+  //   calcul ne commet pas, en orange « le chiffre sort, mais faux » — et il
+  //   poussait a redecouper des periodes justes pour faire taire une alerte.
+  //   ★★★ ON COMPTE LES TACHES, PAS LES JOURS. Le chevauchement de calendrier
+  //   reste DIT, en gris, sous la frise annuelle (_pilPanelEtp) : c'est une
+  //   information de lecture, pas un defaut a corriger.
+  //   ⚠️ Ne pas le reintroduire sous une autre forme sans avoir d'abord
+  //   mesure un double comptage reel sur les donnees.
+
+  // ── Le cadre de l'annee ──────────────────────────────────────────────────
+  // ⚠️ CE CONSTAT A CHANGE DE NATURE (12/08/2026). Il disait « exercice mal
+  //    aligne » en orange, c'est-a-dire « votre chiffre est faux, corrigez ».
+  //    Faux conseil : un exercice comptable est fixe par le comptable. Une
+  //    vendange qui ouvre l'annee n'est PAS un defaut, c'est un calendrier —
+  //    et ce constat-la disparait completement.
+  //    Reste le seul fait utile : quand la borne TRAVERSE la vendange, la
+  //    recolte est repartie sur deux bilans. Ca ne se corrige pas, ca se sait.
+  //    Gravite 'b' : le chiffre est juste, on aide seulement a le lire.
+  if(ann && ann.align && ann.align.coupe && ann.vend && ann.ex){
+    var J=_pilAnnSplitVend(ann);
+    out.push({ g:'b', cible:'an_cadres', touche:['budget'],
+      k:'Votre vendange est \u00e0 cheval sur deux exercices',
+      f:'Sur ses <b>'+J.total+' jours</b>, <b>'+J.dedans+'</b> tombent dans cet exercice et <b>'+J.dehors+'</b> dans le suivant. '
+       +'Le co\u00fbt de la r\u00e9colte se lit donc sur <b>deux bilans</b>. Ce n\u2019est pas une erreur\u00a0: '
+       +'c\u2019est votre calendrier comptable, et il n\u2019y a rien \u00e0 corriger \u2014 seulement \u00e0 le savoir.',
+      ou:'Voir les deux cadres' });
+  }
+
+  // ── Le cout ──────────────────────────────────────────────────────────────
+  var P=null; try{ P=_pecData(); }catch(e){ P=null; }
+  if(P && P.tot && P.tot.nSansTaux>0) out.push({ g:'o', cible:'equipe', touche:['budget'],
+    k:P.tot.nSansTaux+' fiche'+(P.tot.nSansTaux>1?'s':'')+' sans taux horaire',
+    f:'Leurs heures comptent dans l\u2019effectif mais <b>pas dans le co\u00fbt</b>. La masse salariale affich\u00e9e est un plancher, pas une mesure.',
+    ou:'R\u00e9glages \u203a \u00c9quipe' });
+
+  // ── Les consommables : quand la repartition cesse de vouloir dire ────────
+  // ⚠️⚠️ LECON DU CONSTAT SUPPRIME LE 12/08 (« N periodes se chevauchent ») : il
+  //   accusait le calendrier d'une faute que le calcul ne commettait pas, et il
+  //   poussait a defaire des periodes justes pour faire taire une alerte. Ces
+  //   trois constats-ci ne decrivent QUE des faits mesures sur les donnees, et
+  //   chacun dit ce qu'il faut faire — jamais « votre chiffre est bizarre ».
+  var X=null; try{ X=_pexData(_pexEx(), true); }catch(e){ X=null; }
+  if(X && X.ateT>0){
+    // 1) Le seau « non affecte ». Le total reste JUSTE ; c'est la comparaison
+    //    entre ateliers qui devient hasardeuse quand un cinquieme des euros
+    //    n'est range nulle part. Gravite 'o' : le chiffre sort, mais il ne dit
+    //    pas ce qu'on croit qu'il dit.
+    // ⚠️ Le seuil est a 20 %, pas a 10 : les achats d'un domaine qui demarre
+    //   portent tous les categories historiques (phyto, oeno) et tombent donc
+    //   d'eux-memes dans un atelier. Un seuil bavard aurait appris a ignorer la
+    //   liste — le defaut le plus couteux qu'un diagnostic puisse avoir.
+    var _naPct=(X.ateEur&&X.ateEur.gen>0)?(X.ateEur.gen/X.ateT*100):0;
+    if(_naPct>=20) out.push({ g:'o', cible:'reserve', touche:['budget'],
+      k:Math.round(_naPct)+'\u00a0% des consommables sans atelier',
+      f:'<b>'+_pilEsc(_ecoEur(X.ateEur.gen))+'</b> ne sont rattach\u00e9s ni \u00e0 la vigne, ni \u00e0 la cave, '
+       +'ni au tracteur. Le total reste juste, mais <b>comparer les ateliers entre eux ne veut plus dire '
+       +'grand-chose</b> tant qu\u2019une part pareille reste de c\u00f4t\u00e9. Ces achats portent la cat\u00e9gorie '
+       +'\u00ab\u00a0G\u00e9n\u00e9ral\u00a0\u00bb\u00a0: en changer la range dans le bon atelier, sans rien resaisir.',
+      ou:'La R\u00e9serve \u203a Intrants' });
+
+    // 2) Les lignes muettes. Elles ne faussent pas la repartition : elles la
+    //    RETRECISSENT. Un poste peut sembler petit parce que ses factures ne
+    //    sont pas chiffrees, pas parce qu'il coute peu.
+    var _mu=(X.nAchSansPrix||0)+(X.nRepSansPrix||0);
+    if(_mu>0) out.push({ g:'o', cible:'reserve', touche:['budget'],
+      k:_mu+' ligne'+(_mu>1?'s':'')+' d\u2019achat sans prix',
+      f:'Elles comptent pour <b>z\u00e9ro euro</b> dans la r\u00e9partition. Un atelier peut donc para\u00eetre '
+       +'bon march\u00e9 simplement parce que ses factures ne sont pas chiffr\u00e9es. Le prix est facultatif '
+       +'\u2014 mais tant qu\u2019il manque, <b>le total est un plancher, pas une mesure</b>.',
+      ou:'La R\u00e9serve \u203a Intrants' });
+
+    // 3) L'invariant. Il ne doit JAMAIS casser — et s'il casse, il doit se voir
+    //    a l'ecran plutot que de se taire, comme la pastille « i » sans fiche.
+    //    Un ecart signifie qu'un euro est compte deux fois, ou pas du tout.
+    var _sm=(X.achT||0)+(X.gnrT||0)+(X.repT||0);
+    if(Math.abs(X.ateT-_sm)>=0.005) out.push({ g:'r', cible:'exercice', touche:['budget'],
+      k:'La r\u00e9partition par atelier ne tombe pas juste',
+      f:'La somme des ateliers (<b>'+_pilEsc(_ecoEur(X.ateT))+'</b>) devrait valoir exactement '
+       +'celle des sources (<b>'+_pilEsc(_ecoEur(_sm))+'</b>). L\u2019\u00e9cart signifie qu\u2019un euro est '
+       +'compt\u00e9 <b>deux fois, ou pas du tout</b>. C\u2019est un d\u00e9faut de l\u2019application, pas de vos '
+       +'donn\u00e9es\u00a0: signalez-le, ne corrigez rien.',
+      ou:'\u00c9conomie \u203a Exercice' });
+  }
+
+  // ── Les baremes ──────────────────────────────────────────────────────────
+  var tks=(typeof window.getTachesSaison==='function')?window.getTachesSaison():(window.TACHES||[]);
+  var sansBar=(tks||[]).filter(function(t){ return t && !(_pilTacheHha(t)>0); });
+  if(sansBar.length) out.push({ g:'o', cible:'taches', touche:['travaux','effectif'],
+    k:sansBar.length+' t\u00e2che'+(sansBar.length>1?'s':'')+' sans bar\u00e8me h/ha',
+    f:'<b>'+_pilEsc(sansBar.slice(0,4).map(function(t){return t.nom;}).join(', '))
+     +(sansBar.length>4?(' et '+(sansBar.length-4)+' autre'+(sansBar.length-4>1?'s':'')):'')
+     +'</b> n\u2019'+(sansBar.length>1?'ont':'a')+' pas d\u2019heures par hectare. '
+     +(sansBar.length>1?'Elles ne p\u00e8sent':'Elle ne p\u00e8se')+' <b>rien</b> dans la charge : le total affich\u00e9 est un plancher.',
+    ou:'R\u00e9glages \u203a Vigne \u203a T\u00e2ches' });
+
+  // ── Les parcelles ────────────────────────────────────────────────────────
+  var parc=(window.PARCELLES||[]).filter(function(x){ return x && x.statut!=='Arrachee'; });
+  var sansSurf=parc.filter(function(x){ return !(parseFloat(x.surface)>0); });
+  if(sansSurf.length) out.push({ g:'r', cible:'parcelles', touche:['travaux','budget'],
+    k:sansSurf.length+' parcelle'+(sansSurf.length>1?'s':'')+' sans surface',
+    f:'Toute la charge se calcule en heures par hectare. Une parcelle sans surface p\u00e8se <b>z\u00e9ro heure</b>, quel que soit le travail qu\u2019elle demande.',
+    ou:'Ouvrir les parcelles' });
+
+  // ── Les ecartements ──────────────────────────────────────────────────────
+  // ⚠️ Les ecartements ne sont PAS a la racine de CONFIG : ils vivent dans
+  //    CONFIG.vigne.{ec_rang, ec_pied}, ecrits par _tcvSetDens et lus par
+  //    _mvVigne(). Ma premiere version testait cfg.ecartRang — un champ qui
+  //    n'existe nulle part, donc un constat qui ne se serait JAMAIS declenche.
+  //    Un test qui ne peut pas rougir est pire qu'aucun test : il rassure.
+  var vg=null; try{ vg=(typeof window._mvVigne==='function')?window._mvVigne():null; }
+  catch(e){ vg=null; }
+  if(!vg || !(parseFloat(vg.ec_rang)>0) || !(parseFloat(vg.ec_pied)>0))
+    out.push({ g:'b', cible:'dens', touche:[],
+      k:'\u00c9cartements de plantation absents',
+      f:'Sans eux, le bar\u00e8me conseill\u00e9 suppose <b>10 000 pieds/ha</b>. \u00c0 6 000 pieds, il propose environ un tiers d\u2019heures de trop.',
+      ou:'R\u00e9glages \u203a Vigne' });
+
+  // ── La conformite ────────────────────────────────────────────────────────
+  // Sans ce constat, la photo Conformite pourrait porter un drapeau qui ouvre
+  // une feuille vide : la question `conf` n'existerait dans aucun `touche`.
+  var cu=null; try{ cu=_cfmCuivre(); }catch(e){ cu=null; }
+  if(cu && cu.avail && cu.over>0) out.push({ g:'r', cible:'parcelles', touche:['conf'],
+    k:cu.over+' parcelle'+(cu.over>1?'s':'')+' au-dessus du plafond de cuivre',
+    f:'Le plafond bio est de <b>'+cu.plaf+' kg/ha lisses sur 7 ans</b>. '
+     +(cu.over>1?'Ces parcelles le dépassent':'Cette parcelle le dépasse')+' : '
+     +'c’est un écart <b>opposable en contrôle</b>, pas un simple indicateur.',
+    ou:'Voir les parcelles' });
+  else if(cu && cu.avail && cu.warn>0) out.push({ g:'o', cible:'parcelles', touche:['conf'],
+    k:cu.warn+' parcelle'+(cu.warn>1?'s':'')+' proche'+(cu.warn>1?'s':'')+' du plafond de cuivre',
+    f:(cu.warn>1?'Elles ont':'Elle a')+' dépassé <b>87,5 %</b> des '+cu.plaf+' kg/ha autorisés sur 7 ans. '
+     +'Il reste de la marge, mais elle se compte maintenant en un ou deux passages.',
+    ou:'Voir les parcelles' });
+
+  // Rangees par ce que ca coute a la justesse : bloquant, puis faussant.
+  var R={r:0,o:1,b:2};
+  out.sort(function(a,b){ return R[a.g]-R[b.g]; });
+  return out;
+}
+
+// Le taux de couverture : un seul chiffre honnete plutot que douze avertis-
+// sements. Il pese chaque constat par sa gravite, pas par son nombre — dix
+// remarques ameliorables ne valent pas un trou dans le calendrier.
+function _pilDiagCouverture(L){
+  var pen=0, POIDS={r:9,o:5,b:2};
+  L.forEach(function(d){ pen+=POIDS[d.g]||0; });
+  return Math.max(35, 100-pen);
+}
+
+
+// ── La feuille de diagnostic ────────────────────────────────────────────────
+var _PIL_DIAG_GN = { r:['\uD83D\uDD34','Le chiffre ne se calcule pas'],
+                     o:['\uD83D\uDFE0','Le chiffre sort, mais faux'],
+                     b:['\uD83D\uDD35','Le chiffre est juste, il serait plus fin'] };
+
+function _pilDiagBtnHtml(){
+  var L=_pilDiag(), n=L.length;
+  if(!n) return '<button class="pil-diagbtn clean" id="pil-diagbtn">\u2713 rien \u00e0 compl\u00e9ter</button>';
+  return '<button class="pil-diagbtn'+(L[0].g==='r'?' grave':'')+'" id="pil-diagbtn">\u26A0 '
+    +n+' chose'+(n>1?'s':'')+' \u00e0 compl\u00e9ter</button>';
+}
+
+// `quoi` restreint aux constats qui touchent UN chiffre : ouvrir la liste
+// depuis la photo Budget ne doit pas noyer le lecteur sous les manques qui
+// n'entrent pas dans ce calcul-la.
+function _pilDiagSheetHtml(quoi){
+  var L=_pilDiag();
+  if(quoi) L=L.filter(function(d){ return d.touche && d.touche.indexOf(quoi)>=0; });
+  var LB={travaux:'les travaux',effectif:'l\u2019effectif',budget:'le budget',conf:'la conformit\u00e9'};
+  var h='<div class="pil-diag-h"><div><div class="pil-diag-t">'
+    +(quoi?('Ce qui affecte '+(LB[quoi]||'ce chiffre')):'Ce qu\u2019il manque')+'</div>'
+    +'<div class="pil-diag-s">'+(quoi
+      ? 'Les autres manques n\u2019entrent pas dans ce calcul.'
+      : 'Rang\u00e9 par ce que \u00e7a co\u00fbte \u00e0 la justesse de vos chiffres.')+'</div></div>'
+    +'<button class="pil-diag-x" id="pil-diag-x" aria-label="Fermer">\u00d7</button></div>';
+
+  if(!quoi){
+    var cv=_pilDiagCouverture(_pilDiag());
+    h+='<div class="pil-cov"><div class="pil-cov-v">'+cv+' %</div><div class="pil-cov-t">'
+      +'<b>Vos chiffres reposent sur '+cv+' % des donn\u00e9es attendues.</b><br>'
+      +'<span>Ce qui manque n\u2019est pas un z\u00e9ro, c\u2019est un trou. Un indicateur b\u00e2ti sur un signal '
+      +'partiel ment avec l\u2019autorit\u00e9 d\u2019une mesure.</span></div></div>';
+  }
+  if(!L.length) return h+'<div class="pil-diag-ok">\u2713 Rien ne manque'+(quoi?' pour ce chiffre.':'.')+'</div>';
+
+  h+=L.map(function(d){
+    var G=_PIL_DIAG_GN[d.g]||_PIL_DIAG_GN.b;
+    // ⚠️ LA BRANCHE `d.exm` A ETE RETIREE. Plus aucun constat ne pose ce champ
+    //   depuis que le lot 6 a cesse de prescrire un deplacement de cloture : le
+    //   bouton « Décaler l'ouverture » ne pouvait plus s'afficher. Un chemin mort
+    //   dans un moteur se remet a mentir des qu'on le relit.
+    var act='<button class="pil-diag-go ghost" data-diag="'+_pilEsc(d.cible)+'">'+_pilEsc(d.ou)+' \u203A</button>';
+    return '<div class="pil-dl '+d.g+'"><div class="pil-dl-t">'+G[0]+' '+_pilEsc(d.k)+'</div>'
+      +'<div class="pil-dl-g">'+G[1]+'</div>'
+      +'<div class="pil-dl-f">'+d.f+'</div>'+act+'</div>';
+  }).join('');
+  return h;
+}
+
+function _pilDiagOpen(quoi){
+  var w=document.getElementById('pil-diagwrap'); if(!w) return;
+  var b=document.getElementById('pil-diagsheet'); if(b) b.innerHTML=_pilDiagSheetHtml(quoi||null);
+  w.classList.add('show');
+}
+function _pilDiagClose(){
+  var w=document.getElementById('pil-diagwrap'); if(w) w.classList.remove('show');
+}
+
+// ── Paramétrage : carte « objectif » + fenêtres de tâches ──
+function _pilObjCard(cd,admin){
+  var objIso=_pilObjectifGet();
+  var cardCss='background:var(--bg-card);border:1px solid var(--gris-clair);border-radius:16px;padding:16px 18px;margin-bottom:16px';
+  var ttlCss='font-family:\'Cormorant Garamond\',serif;font-weight:700;font-size:var(--pt-md,20px);color:var(--cave)';
+  var inCss='border:1px solid var(--gris);border-radius:7px;padding:5px 8px;font-family:Outfit;font-size:var(--pt-base,14px);font-weight:700;background:#fff;color:var(--texte)';
+  var nom=cd?cd.saison:_pilSaisonNom();
+  return '<div style="'+cardCss+'">'
+    +'<div style="'+ttlCss+';margin-bottom:4px">\uD83C\uDFAF Objectif de fin des travaux</div>'
+    +'<div style="font-size:var(--pt-txt,12.5px);color:var(--texte-doux);margin-bottom:12px">Date à laquelle vous voulez que toutes les tâches de la saison soient terminées. La marge du tableau de bord compare la projection (cadence réelle) à cette date — indépendante de la fin de saison.</div>'
+    +'<div style="display:flex;align-items:center;gap:10px;flex-wrap:wrap"><span style="font-size:var(--pt-txt,12.5px);font-weight:700">Saison '+_pilEsc(nom||'—')+' — terminer pour le</span>'
+    +'<input type="date" id="pil-obj-param" value="'+(objIso||'')+'"'+(admin?'':' disabled')+' style="'+inCss+'">'
+    +(admin?'':'<span style="font-size:var(--pt-micro,11px);color:var(--texte-doux)">\uD83D\uDD12 admin</span>')+'</div></div>';
+}
+// ── Parametres du simulateur economique ─────────────────────────────
+// Rapatries de Reglages > Domaine > Economie : ces 5 valeurs pilotent DEUX onglets
+// (le surcout de retard par parcelle dans << Eco & conformite >>, et la courbe
+// << Cout selon l'effectif >> dans << Simulation >>). Leur place est donc ici, dans le
+// parametrage du module, et non dans un onglet de lecture.
+// L'ECRITURE EST DELEGUEE a window._ecoCfgSet (reglages.js, charge AVANT pilotage.js) :
+// liste blanche des cles + saveData('config'). Aucune copie privee de la logique.
+function _pilSimEcoCard(admin){
+  var e=(window.CONFIG&&window.CONFIG.eco)||{};
+  var cardCss='background:var(--bg-card);border:1px solid var(--gris-clair);border-radius:16px;padding:16px 18px;margin-bottom:16px';
+  var ttlCss='font-family:\'Cormorant Garamond\',serif;font-weight:700;font-size:var(--pt-md,20px);color:var(--cave)';
+  var inCss='width:78px;padding:7px 8px;border:1.5px solid var(--gris-clair);border-radius:9px;font-family:inherit;font-size:var(--pt-base,14px);text-align:right;background:var(--bg-app);color:var(--texte);box-sizing:border-box';
+  var dis=admin?'':' disabled';
+  // Vide = valeur par defaut : on n'ecrit jamais le defaut en base, il reste dans le lecteur
+  // (_ceCfg / _ecoRetardCfg). Le placeholder montre donc la valeur reellement appliquee.
+  function row(ico,titre,sous,key,def,unite,step,min,noTop){
+    var v=(e[key]!=null&&Number(e[key])>0)?e[key]:'';
+    var sep=noTop?'':';margin-top:12px;padding-top:12px;border-top:1px solid var(--gris-clair)';
+    return '<div style="display:flex;align-items:center;justify-content:space-between;gap:12px;flex-wrap:wrap'+sep+'">'
+      +'<div style="flex:1;min-width:190px"><div style="font-size:var(--pt-base,14px);color:var(--texte);font-weight:600">'+ico+' '+titre+'</div>'
+      +'<div style="font-size:var(--pt-micro,11px);color:var(--texte-doux)">'+sous+'</div></div>'
+      +'<span style="display:inline-flex;align-items:center;gap:5px">'
+      +'<input type="number" min="'+min+'" step="'+step+'" value="'+v+'" placeholder="'+def+'"'+dis
+      +' onchange="window._ecoCfgSet&&window._ecoCfgSet(\'eco\',\''+key+'\',this.value)" style="'+inCss+'">'
+      +'<span style="font-size:var(--pt-txt,12.5px);color:var(--texte-doux)">'+unite+'</span></span></div>';
+  }
+  var note = admin
+    ? 'Ces valeurs chiffrent le <b style="color:var(--texte)">surco\u00fbt de retard</b> par parcelle (onglet \u00c9co &amp; conformit\u00e9) et la courbe <b style="color:var(--texte)">\u00ab Renfort : combien, et quand \u00bb</b> (onglet D\u00e9cider). Elles ne touchent \u00e0 aucune paie : le retard est <b style="color:var(--texte)">mod\u00e9lis\u00e9, jamais pay\u00e9</b>. Vide = valeur par d\u00e9faut.'
+    : ''+_mvIcon('cadenas',16)+' Lecture seule \u2014 seul un administrateur peut modifier ces valeurs. Elles chiffrent le surco\u00fbt de retard par parcelle et le simulateur de renfort. Elles ne touchent \u00e0 aucune paie.';
+  return '<div style="'+cardCss+'">'
+    +'<div style="'+ttlCss+';margin-bottom:4px">\uD83C\uDF9B\uFE0F Simulation \u00e9conomique</div>'
+    +'<div style="font-size:var(--pt-txt,12.5px);color:var(--texte-doux);margin-bottom:10px;line-height:1.55">'+note+'</div>'
+    +'<div style="height:3px;border-radius:3px;background:linear-gradient(90deg,#8A5A38,#C2871E,#3D6B27);margin:0 0 14px"></div>'
+    +row('\u23F3','Le retard rallonge le travail','une t\u00e2che faite hors de sa fen\u00eatre prend ce temps en plus, par semaine de retard','k_retard','15','% / sem.','1','0',1)
+    +row('\uD83D\uDE9C','ETP au tracteur','laisser vide : mesur\u00e9 sur les sessions de la p\u00e9riode. Une valeur force l\u2019hypoth\u00e8se','trac_etp','mesur\u00e9','ETP','0.1','0')
+    +row('\u23F1','P\u00e9nalit\u00e9 de retard','surco\u00fbt par parcelle dans \u00c9co &amp; conformit\u00e9 (distinct du r\u00e9glage ci-dessus)','pen_retard_sem','5','% / sem.','1','0')
+    +row('\u26D4','Plafond de la p\u00e9nalit\u00e9','au-del\u00e0, la vigne est ce qu\u2019elle est','pen_plafond','50','%','5','0')
+    +row('\u23F0','Majoration des heures sup','au-del\u00e0 de la journ\u00e9e de r\u00e9f\u00e9rence','maj_hsup','25','%','5','0')
+    +row('\uD83D\uDC65','Cadence d\u2019un renfort','face \u00e0 un permanent, sa premi\u00e8re saison','rdt_renfort','85','%','5','1')
+    +row('\uD83D\uDCB6','Frais fixes par renfort','recrutement, \u00e9quipement, encadrement, trajets','cout_fixe_renfort','180','\u20AC','10','0')
+    +_pecHypoRows(admin)
+    +'</div>';
+}
+// Les DEUX hypotheses du pilotage economique. Ce ne sont pas des mesures : le kg par
+// col est une conversion d'usage, la journee de reference une convention. Toutes deux
+// changent des chiffres affiches en gros — elles doivent donc etre visibles et reglables,
+// pas cachees dans une constante.
+//
+// L'ECRITURE PASSE PAR window._ecoCfgSet, comme tout le reste de cette carte : aucune
+// copie privee du chemin d'ecriture. Mais _ecoCfgSet applique une LISTE BLANCHE de
+// cles ; une cle absente donne un no-op SILENCIEUX — exactement le motif qui avait fait
+// dormir le journal des erreurs pendant des mois. On relit donc la valeur apres l'appel,
+// et si rien n'a bouge on le DIT, plutot que de laisser croire que c'est enregistre.
+var _PEC_HYPO = {
+  kg_bouteille:{ ico:'\uD83C\uDF77', tit:'Raisin par bouteille',
+                 sub:'base du <b>co\u00fbt \u00e0 la bouteille</b> \u2014 hypoth\u00e8se de conversion, jamais une mesure',
+                 def:'1.3', unite:'kg / col', step:'0.1', min:'0.1' },
+  h_jour:      { ico:'\u23F1\uFE0F', tit:'Journ\u00e9e de r\u00e9f\u00e9rence',
+                 sub:'convertit les journ\u00e9es de pr\u00e9sence du journal en heures, base de l\u2019<b>\u00e9cart de cadence</b>',
+                 def:'7', unite:'h / jour', step:'0.5', min:'1' }
+};
+function _pecHypoVal(key){ return (key==='h_jour') ? _pecHJour() : _pecKgB(); }
+function _pecHypoSet(key,v){
+  if(!_PEC_HYPO[key]) return;
+  if(!(typeof window.isAdmin==='function' && window.isAdmin())) return;
+  var before=((window.CONFIG&&window.CONFIG.eco)||{})[key];
+  if(typeof window._ecoCfgSet==='function') window._ecoCfgSet('eco',key,v);
+  var after=((window.CONFIG&&window.CONFIG.eco)||{})[key];
+  if(String(after)===String(before)){
+    if(window.showToast) window.showToast('R\u00e9glage non enregistr\u00e9 \u2014 mise \u00e0 jour de R\u00e9glages requise','#B85A1A');
+    return;
+  }
+  if(window.showToast) window.showToast('Hypoth\u00e8se mise \u00e0 jour','#3D6B27');
+}
+window._pecHypoSet=_pecHypoSet;
+function _pecHypoRows(admin){
+  var inCss='width:78px;padding:7px 8px;border:1.5px solid var(--gris-clair);border-radius:9px;font-family:inherit;font-size:var(--pt-base,14px);text-align:right;background:var(--bg-app);color:var(--texte);box-sizing:border-box';
+  return Object.keys(_PEC_HYPO).map(function(k){
+    var o=_PEC_HYPO[k];
+    return '<div style="display:flex;align-items:center;justify-content:space-between;gap:12px;flex-wrap:wrap;margin-top:12px;padding-top:12px;border-top:1px solid var(--gris-clair)">'
+      +'<div style="flex:1;min-width:190px"><div style="font-size:var(--pt-base,14px);color:var(--texte);font-weight:600">'+o.ico+' '+o.tit+'</div>'
+      +'<div style="font-size:var(--pt-micro,11px);color:var(--texte-doux)">'+o.sub+'</div></div>'
+      +'<span style="display:inline-flex;align-items:center;gap:5px">'
+      +'<input type="number" min="'+o.min+'" step="'+o.step+'" value="'+_pecHypoVal(k)+'" placeholder="'+o.def+'"'+(admin?'':' disabled')
+      +' onchange="window._pecHypoSet&&window._pecHypoSet(\''+k+'\',this.value)" style="'+inCss+'">'
+      +'<span style="font-size:var(--pt-txt,12.5px);color:var(--texte-doux)">'+o.unite+'</span></span></div>';
+  }).join('');
+}
+function _pilParamBody(d){
+  var cd=(window._chargeSaisonData&&window.getSaisonActive)?window._chargeSaisonData(window._pilSaison()):null;
+  var admin=(typeof window.isAdmin==='function')&&window.isAdmin();
+  var cardCss='background:var(--bg-card);border:1px solid var(--gris-clair);border-radius:16px;padding:16px 18px;margin-bottom:16px';
+  var ttlCss='font-family:\'Cormorant Garamond\',serif;font-weight:700;font-size:var(--pt-md,20px);color:var(--cave)';
+  var thCss='text-align:left;font-size:var(--pt-micro,11px);text-transform:uppercase;letter-spacing:.04em;color:var(--texte-doux);padding:6px 8px;border-bottom:1px solid var(--gris-clair)';
+  var tdCss='padding:7px 8px;border-bottom:1px solid #F0ECE1';
+  if(!cd||!cd.taskWindows||!cd.taskWindows.length){
+    return '<div id="pil-param-host">'+_pilObjCard(cd,admin)
+      +'<div style="'+cardCss+'"><div style="'+ttlCss+';margin-bottom:8px">Paramétrage · fenêtres des tâches</div>'
+      +_pilEmptyGo('Renseignez les dates de la campagne active pour paramétrer les fenêtres de tâches.','saisons','Réglages \u203A Campagne')+'</div>'
+      +_pilSimEcoCard(admin)+'</div>';
+  }
+  function _o(y){ return Math.round((Date.parse(y+'T00:00:00')-Date.parse('2026-01-01T00:00:00'))/86400000); }
+  function durOf(a,b){ return _o(b)-_o(a)+1; }
+  var note = admin
+    ? 'Définis la fenêtre de chaque tâche (début, fin, durée). Elles pilotent la frise et la charge par mois. « auto » = calé sur l\'enchaînement par défaut.'
+    : '\uD83D\uDD12 Lecture seule — seul un administrateur peut modifier ces fenêtres.';
+  // ⚠️⚠️ LE PARAMETRAGE ECRIT, IL NE REGARDE PAS.
+  //   Depuis que la portee recadre les tuiles de lecture, on peut arriver ici en
+  //   ayant zoome sur une AUTRE campagne que celle qu'on consulte. Or les
+  //   echeances se rangent dans s.echeances de la periode CONSULTEE : suivre le
+  //   zoom ferait ecrire dans la mauvaise fiche. Le module ne suit donc pas le
+  //   zoom ici — et il le DIT, parce qu'une ecriture silencieuse au mauvais
+  //   endroit est le pire des defauts : elle ne se voit qu'a la campagne suivante.
+  var _zoomAilleurs = !!(_PIL_SCOPE.camp && cd && cd.saison && _PIL_SCOPE.camp!==cd.saison);
+  var _avert = _zoomAilleurs
+    ? ('<div style="margin:0 0 10px;padding:9px 12px;border-radius:9px;background:#FBF0DC;color:#8A5A38;font-size:var(--pt-txt,12.5px);line-height:1.5">'
+       +'\u26A0 Vous regardez <b>'+_pilEsc(_PIL_SCOPE.camp)+'</b> dans le reste du Pilotage, mais ce param\u00e9trage porte sur '
+       +'<b>'+_pilEsc(cd.saison)+'</b>, la p\u00e9riode consult\u00e9e. Pour param\u00e9trer '+_pilEsc(_PIL_SCOPE.camp)+', '
+       +'changez de p\u00e9riode consult\u00e9e (R\u00e9glages \u203a Campagne).</div>')
+    : '';
+  var rows=cd.taskWindows.map(function(t){
+    var dis=admin?'':' disabled';
+    var key=_friseNorm(t.nom);
+    // ★ TROISIEME ETAT, ET IL COMPTE : une consigne de fenetre a bien ete
+    //   enregistree pour cette tache, mais ses dates ne rencontrent PAS cette
+    //   periode (echeance d'une autre campagne, ou override global a dates
+    //   absolues applique a toutes les periodes). Le calcul retombe sur la
+    //   fenetre par defaut — et il le DIT, au lieu de laisser croire que la
+    //   consigne s'applique.
+    var tag=t.horsPeriode
+      ? '<span style="font-size:var(--pt-lbl,10.5px);color:#9B2D1F;font-weight:700" title="Une fen\u00eatre est enregistr\u00e9e pour cette t\u00e2che, mais ses dates sont hors de cette p\u00e9riode. La fen\u00eatre par d\u00e9faut est appliqu\u00e9e.">\u26a0 hors p\u00e9riode</span>'
+      : (t.custom?'<span style="font-size:var(--pt-lbl,10.5px);color:var(--orange);font-weight:700">\u2022 perso</span>':'<span style="font-size:var(--pt-lbl,10.5px);color:var(--texte-doux)">auto</span>');
+    var inCss='border:1px solid var(--gris);border-radius:7px;padding:3px 5px;font-family:Outfit;font-size:var(--pt-txt,12.5px);background:#fff';
+    var nCss='width:58px;text-align:center;border:1px solid var(--gris);border-radius:7px;padding:3px 0;font-family:Outfit;font-size:var(--pt-txt,12.5px);background:#fff';
+    return '<tr>'
+      +'<td style="'+tdCss+';white-space:nowrap"><span style="display:inline-block;width:10px;height:10px;border-radius:3px;background:'+_taskColor(t.nom)+';margin-right:7px;vertical-align:-1px"></span><b>'+_pilEsc(t.nom)+'</b> '+tag+'</td>'
+      +'<td style="'+tdCss+';color:var(--texte-doux);white-space:nowrap">'+_pilNum(t.h)+' h</td>'
+      +'<td style="'+tdCss+'"><input type="date" data-pw="start" data-k="'+key+'" value="'+t.start+'" min="'+cd.debut+'" max="'+cd.fin+'"'+dis+' style="'+inCss+'"></td>'
+      +'<td style="'+tdCss+'"><input type="date" data-pw="end" data-k="'+key+'" value="'+t.end+'" min="'+cd.debut+'" max="'+cd.fin+'"'+dis+' style="'+inCss+'"></td>'
+      +'<td style="'+tdCss+'"><input type="number" min="1" data-pw="dur" data-k="'+key+'" value="'+durOf(t.start,t.end)+'"'+dis+' style="'+nCss+'"></td>'
+      +'<td style="'+tdCss+'">'+((admin&&t.custom)?'<button data-pw="reset" data-k="'+key+'" style="border:1px solid var(--gris);background:#fff;border-radius:7px;padding:3px 9px;font-size:var(--pt-micro,11px);color:var(--texte-doux);cursor:pointer">\u21BA auto</button>':'')+'</td>'
+      +'</tr>';
+  }).join('');
+  var MN=['janv.','févr.','mars','avr.','mai','juin','juil.','août','sept.','oct.','nov.','déc.'];
+  var dd=new Date(cd.debut+'T00:00:00'), df=new Date(cd.fin+'T00:00:00');
+  var seasonTxt=dd.getDate()+' '+MN[dd.getMonth()]+' \u2192 '+df.getDate()+' '+MN[df.getMonth()]+' '+df.getFullYear();
+  var resetAll=admin?'<button id="pil-pw-resetall" style="border:1px solid var(--gris);background:#fff;border-radius:9px;padding:7px 12px;font-size:var(--pt-txt,12.5px);color:var(--texte-doux);cursor:pointer">Tout remettre en auto</button>':'';
+  return '<div id="pil-param-host">'+_pilObjCard(cd,admin)
+    +'<div style="'+cardCss+'">'
+    +_avert
+    +'<div style="'+ttlCss+';margin-bottom:4px">Paramétrage · fenêtres des tâches</div>'
+    +'<div style="font-size:var(--pt-txt,12.5px);color:var(--texte-doux);margin-bottom:10px">'+note+'</div>'
+    +'<div style="height:3px;border-radius:3px;background:linear-gradient(90deg,#9B2D1F,#C2871E,#C8B020,#5C8A3E,#3D6B27);margin:0 0 14px"></div>'
+    +'<div style="font-size:var(--pt-txt,12.5px);color:var(--texte-doux);margin-bottom:12px">Saison active · <b style="color:var(--texte)">'+_pilEsc(cd.saison)+'</b> &nbsp;·&nbsp; '+seasonTxt+' <span style="color:var(--texte-doux)">(modifiable dans Réglages \u203A Saisons)</span></div>'
+    +'<div style="width:100%;overflow-x:auto"><table style="width:100%;border-collapse:collapse;font-size:var(--pt-txt,12.5px);min-width:560px">'
+    +'<thead><tr><th style="'+thCss+'">Tâche</th><th style="'+thCss+'">Heures</th><th style="'+thCss+'">Début</th><th style="'+thCss+'">Fin</th><th style="'+thCss+'">Durée (j)</th><th style="padding:6px 8px;border-bottom:1px solid var(--gris-clair)"></th></tr></thead>'
+    +'<tbody>'+rows+'</tbody></table></div>'
+    +(resetAll?('<div style="margin-top:14px">'+resetAll+'</div>'):'')
+    +'</div>'
+    +_pilSimEcoCard(admin)
+    +'<div style="'+cardCss+';font-size:var(--pt-txt,12.5px);color:var(--texte-doux);line-height:1.55">Le <b style="color:var(--texte)">réel</b> de la frise (onglet Avancement) vient du <b style="color:var(--texte)">journal</b> : 1\u02B3\u1D49 validation de la tâche \u2192 date du 100 %. Rien à saisir ici pour le réel.</div>'
+    +'</div>';
+}
+function _pilBindParam(d){
+  var host=document.getElementById('pil-param-host'); if(!host) return;
+  var admin=(typeof window.isAdmin==='function')&&window.isAdmin();
+  function ord(y){ var p=String(y||'').split('-'); return Math.round((Date.UTC(+p[0],(+p[1]||1)-1,(+p[2]||1))-Date.UTC(2026,0,1))/86400000); }
+  function ford(n){ var dd=new Date(Date.UTC(2026,0,1)+n*86400000); var mm=dd.getUTCMonth()+1, dj=dd.getUTCDate(); return dd.getUTCFullYear()+'-'+(mm<10?'0'+mm:mm)+'-'+(dj<10?'0'+dj:dj); }
+  function getCd(){ return (window._chargeSaisonData&&window.getSaisonActive)?window._chargeSaisonData(window._pilSaison()):null; }
+  function clampO(o,cd){ var a=ord(cd.debut),b=ord(cd.fin); return Math.max(a,Math.min(b,o)); }
+  function cfg(){ if(!window.CONFIG) return null; if(!window.CONFIG.task_windows) window.CONFIG.task_windows={}; return window.CONFIG.task_windows; }
+  function ech(){ var s=(typeof window._pilSaison==='function')?window._pilSaison():null; if(!s) return null; if(!s.echeances||typeof s.echeances!=='object'||Array.isArray(s.echeances)) s.echeances={}; return s.echeances; }
+  function commit(msg){ try{ if(typeof window.saveData==='function'){ window.saveData('saisons'); window.saveData('config'); } }catch(e){} if(msg&&window.showToast) window.showToast(msg,'#3D6B27'); _pilFillContent(_pilData()); }
+  function winOf(k,cd){ var f=null; (cd.taskWindows||[]).forEach(function(t){ if(_friseNorm(t.nom)===k)f=t; }); return f; }
+  // Saisie de date : on ne valide JAMAIS a chaque 'change' (un input[type=date] en emet un
+  // par segment pendant la frappe -> commit + re-render intempestifs + valeur intermediaire).
+  // On lit la valeur FINALE au flush (focusout, ou debounce 800ms en filet pour le picker mobile).
+  var _pwTimer=null, _pwEl=null;
+  function _pwWatch(el){ if(!el) return false; if(el.id==='pil-obj-param') return true; var a=el.getAttribute&&el.getAttribute('data-pw'); return !!(a&&a!=='reset'); }
+  function _pwApply(){
+    if(_pwTimer){ clearTimeout(_pwTimer); _pwTimer=null; }
+    var el=_pwEl; _pwEl=null; if(!el || !document.body.contains(el)) return;
+    if(el.id==='pil-obj-param'){ if(admin && el.value){ _pilObjectifSet(el.value); if(window.showToast) window.showToast('Objectif mis à jour','#3D6B27'); } return; }
+    var pw=el.getAttribute&&el.getAttribute('data-pw'); if(!pw||pw==='reset') return;
+    if(!admin) return;
+    var k=el.getAttribute('data-k'); var cd=getCd(); if(!cd) return;
+    var w=winOf(k,cd); if(!w) return;
+    // Store unifie = echeances de la saison consultee (meme source que Reglages > Modifier la periode,
+    // lue en priorite par la charge/frise). On ecrit ICI, plus dans CONFIG.task_windows : sinon les
+    // echeances existantes masquaient la modif au re-render (impression de « ca revient a l'origine »).
+    var E=ech(); if(!E) return;
+    var ex=E[w.nom]; var cur=ex?{start:ex.d1||w.start,end:ex.d2||w.end}:{start:w.start,end:w.end};
+    if(pw==='start'){ if(!el.value) return; var nv=ford(clampO(ord(el.value),cd)); if(ord(nv)>ord(cur.end))cur.end=nv; cur.start=nv; }
+    else if(pw==='end'){ if(!el.value) return; var ne=ford(clampO(ord(el.value),cd)); if(ord(ne)<ord(cur.start))ne=cur.start; cur.end=ne; }
+    else if(pw==='dur'){ var dd2=Math.max(1,Math.round(parseFloat(el.value)||1)); cur.end=ford(clampO(ord(cur.start)+dd2-1,cd)); }
+    E[w.nom]={d1:cur.start,d2:cur.end};
+    commit('Fenêtre mise à jour');
+  }
+  function _pwSched(el){ _pwEl=el; if(_pwTimer) clearTimeout(_pwTimer); _pwTimer=setTimeout(_pwApply,800); }
+  host.addEventListener('change', function(e){ if(_pwWatch(e.target)) _pwSched(e.target); });
+  host.addEventListener('focusout', function(e){ if(_pwEl===e.target) _pwApply(); });
+  if(!admin) return;
+  host.addEventListener('click', function(e){
+    var pw=e.target.getAttribute&&e.target.getAttribute('data-pw');
+    if(pw==='reset'){ var k=e.target.getAttribute('data-k'); var cd=getCd(); var w=cd?winOf(k,cd):null; var E=ech(); if(E&&w) delete E[w.nom]; if(window.CONFIG&&window.CONFIG.task_windows) delete window.CONFIG.task_windows[k]; commit('Fenêtre remise en auto'); return; }
+    if(e.target.id==='pil-pw-resetall'){ var cd2=getCd(); var E2=ech(); if(cd2&&E2){ (cd2.taskWindows||[]).forEach(function(t){ delete E2[t.nom]; if(window.CONFIG&&window.CONFIG.task_windows) delete window.CONFIG.task_windows[_friseNorm(t.nom)]; }); } commit('Fenêtres remises en auto'); return; }
+  });
+}
+
+// ── Météo (chip header) ──
+function _pilRenderMeteo(d){
+  var el=document.getElementById('pil-meteo'); if(!el) return;
+  if(!d.meteo){ el.style.display='none'; return; }
+  el.style.display='';
+// ⚠️ Le cache meteo d'AVANT ce lot contient un emoji, celui d'apres un nom
+//   d'icone. On tranche sur la forme, sinon l'en-tete affiche « nuage » en
+//   toutes lettres — ce qui est exactement ce qui est arrive en production.
+  function _pilMeteoIco(v){
+    var x=String(v==null?'':v);
+    return /^[a-z][a-z0-9-]*$/.test(x) ? _mvIcon(x,20) : (x||_mvIcon('nuage',20));
+  }
+  var jrs=['dimanche','lundi','mardi','mercredi','jeudi','vendredi','samedi'];
+  var now=new Date(); var dateStr=jrs[now.getDay()]+' '+now.getDate()+' '+['janv.','févr.','mars','avr.','mai','juin','juil.','août','sept.','oct.','nov.','déc.'][now.getMonth()];
+  el.innerHTML='<span class="ico">'+_pilMeteoIco(d.meteo.emoji)+'</span><span class="t">'+(d.meteo.temp!=null?d.meteo.temp+'°':'—')+'</span>'
+    + '<span class="sub">'+(d.meteo.wind!=null?('vent '+d.meteo.wind+' km/h'):'')+'<br>'+dateStr+'</span>';
+}
+
+// ── Remplissage du contenu de l'onglet courant ──
+function _pilFillContent(d){
+  var host=document.getElementById('pil-content'); if(!host) return;
+  // Le cout d'exercice est memoise le temps d'UN rendu (deux lecteurs : la photo
+  // Budget et le panneau « Deux façons de compter »). On l'oublie a chaque
+  // repeinte : un chiffre fige apres une saisie de planning serait un ecran qui
+  // se contredit lui-meme, exactement ce qu'on vient de corriger.
+  _pilExoOublier(); _pilCdVueOublier();
+  var tab=_PIL_TAB;
+  if(tab==='param'){ host.innerHTML=_pilParamBody(d); _pilBindParam(d); return; }
+  if(tab==='auj') host.innerHTML=_pilTabAuj(d);
+  else if(tab==='an') host.innerHTML=_pilTabAn(d);
+  else if(tab==='avc') host.innerHTML=_pilTabAvc(d);
+  else if(tab==='equ'){
+    var _hEqu=
+        (_pilAnyShow(['prs_equipe','prs_presences','prs_capacite'])?'<div class="pil-sec-h">Personnel</div>'+_pilTabPrs(d):'')
+      + (_pilAnyShow(['mat_tracteur','mat_gnr'])?'<div class="pil-sec-h">Matériel</div>'+_pilTabMat(d):'');
+    // Les six autres onglets ont leur repli ; celui-ci sortait un ECRAN BLANC,
+    // sans meme la phrase qui dit comment rallumer les tuiles.
+    host.innerHTML=_hEqu || '<div class="pil-empty">Aucun indicateur affiché — activez-les via « Choisir les indicateurs ».</div>';
+  }
+  else if(tab==='cav') host.innerHTML=_pilTabCav(d);
+  else if(tab==='sim') host.innerHTML=_pilTabSim(d);
+  else if(tab==='eco') host.innerHTML=_pilTabEco(d);
+  else if(tab==='cfm') host.innerHTML=_pilTabCfm(d);
+  else if(tab==='arc') host.innerHTML=_pilTabArc(d);
+  // Les graphes enregistres se dessinent APRES la pose du HTML : c'est la que
+  // leur conteneur existe, donc que sa largeur est mesurable.
+  if(window._mvGraphRepeindre) window._mvGraphRepeindre();
+  _pilAfterFill(tab,d);
+}
+function _pilAfterFill(tab,d){
+  if(tab==='avc'){
+    if(_pilShow('avc_gauge')) _pilRenderGauge(d);
+    if(_pilShow('avc_bar')) _pilRenderBar(d);
+    if(_pilShow('avc_pie')) _pilRenderPie(d);
+    var carteOpen=_pilShow('avc_carte') && !(_PIL_STATE.collapsed&&_PIL_STATE.collapsed.carte);
+    if(carteOpen) _pilBuildMap(d);
+  }
+  if(tab==='sim' && _pilShow('sim_ordre') && !(_PIL_STATE.collapsed&&_PIL_STATE.collapsed.ordrepassage)) _opBuildMap();
+}
+
+// ── Délégation des interactions internes du contenu ──
+function _pilBindContent(content){
+  content.addEventListener('click', function(e){
+    var _cm=e.target.closest('.pcav-mil[data-mil]');
+    if(_cm){ e.stopPropagation(); _PCAV_MIL=parseInt(_cm.getAttribute('data-mil'),10); _pilFillContent(_pilData()); return; }
+    var cn=e.target.closest('#pil-cavnav button');
+    if(cn){ var s=cn.getAttribute('data-s'); if(s&&s!==_PIL_CAVSUB){ _PIL_CAVSUB=s; _pilSaveCav(s); _pilFillContent(_pilData()); } return; }
+    var _sb=e.target.closest('[data-sim]'); if(_sb){ e.stopPropagation(); _pilSimAction(_sb.getAttribute('data-sim'), _sb.getAttribute('data-ti')); return; }
+    var _ob=e.target.closest('[data-op]'); if(_ob){ e.stopPropagation(); _pilOpAction(_ob); return; }
+    var nb=e.target.closest('.pil-names-btn'); if(nb){ e.stopPropagation(); _pilNamesOn=!_pilNamesOn; _pilApplyNames(); nb.textContent=_pilNamesOn?'\uD83C\uDFF7 Noms \u2713':'\uD83C\uDFF7 Noms'; return; }
+    // Clic sur une campagne de la frise annuelle : zoom / retour. Re-cliquer la
+    // meme campagne (ou le bouton de retour, qui porte son nom) revient a l'annee.
+    // Reglage de l'ouverture d'exercice depuis la frise annuelle. _pexSetMois
+    // verifie lui-meme le droit admin et RELIT la valeur apres ecriture : si
+    // reglages.js n'est pas a jour, il le dit au lieu de faire semblant.
+    var _ex=e.target.closest('[data-exm]');
+    if(_ex){ e.stopPropagation(); var _em=parseInt(_ex.getAttribute('data-exm'),10);
+      _PIL_ANN=null; _PIL_ANNK='';
+      if(typeof window._pexSetMois==='function') window._pexSetMois(_em);
+      return; }
+    // Une photo emmene a l'ecran qui detaille sa question : on voit l'ensemble,
+    // puis on descend. C'est le zoom demande, avec les onglets pour destinations.
+    var _pg=e.target.closest('[data-pgo]');
+    // Changer d'onglet passe par _pilSetTab() — le clic sur #pil-tabs aussi.
+    //    Une seule facon de le faire, donc un seul endroit ou la corriger.
+    // Une photo drapeautee ouvre d'abord CE QUI LA FAUSSE : descendre au
+    // detail d'un chiffre faux, c'est lire un faux chiffre en plus grand.
+    var _pf=e.target.closest('.pil-flag');
+    if(_pf){ e.stopPropagation();
+      var _ph=_pf.closest('[data-pq]');
+      _pilDiagOpen(_ph?_ph.getAttribute('data-pq'):null); return; }
+    var _dg=e.target.closest('[data-diag]');
+    if(_dg){ e.stopPropagation(); _pilDiagClose(); window._pilGo(_dg.getAttribute('data-diag')); return; }
+    if(e.target.closest('#pil-diagbtn')){ e.stopPropagation(); _pilDiagOpen(null); return; }
+    if(e.target.closest('#pil-diag-x')){ e.stopPropagation(); _pilDiagClose(); return; }
+    if(e.target.id==='pil-diagwrap'){ e.stopPropagation(); _pilDiagClose(); return; }
+    if(_pg){ e.stopPropagation(); var _pt=_pg.getAttribute('data-pgo');
+      // Une cible que le module ne connait pas ne doit pas ecrire une cle morte
+      // dans localStorage : _pilLoadTab retomberait sur 'auj' au rechargement
+      // sans que personne comprenne pourquoi.
+      if(_pt && _PIL_VALID_TAB[_pt] && _pt!==_PIL_TAB){ _PIL_TAB=_pt; _pilSaveTab(_pt); renderPilotage();
+        if(window.scrollTo) window.scrollTo(0,0); }
+      // Deja sur l'ecran vise : le clic tombait dans le vide. « voir le detail »
+      // doit toujours faire quelque chose — ici, descendre au detail annonce.
+      else if(_pt===_PIL_TAB){ var _pc=document.getElementById('pil-content');
+        if(_pc){ try{ _pc.scrollIntoView({behavior:'smooth',block:'start'}); }
+          catch(e4){ if(window.logError) window.logError({level:'info',cat:'pilotage',msg:'photo: defilement'}); } } }
+      return; }
+    // Le fil d'Ariane : la croix et la racine ramenent a l'annee entiere.
+    var _cx=e.target.closest('#pil-cr-x, #pil-cr-root');
+    if(_cx){ e.stopPropagation();
+      if(_PIL_SCOPE.camp){ _pilScopeSet(null); _pilPortee(); _pilFillContent(_pilData()); }
+      return; }
+    var _ea=e.target.closest('[data-etpc]');
+    if(_ea){ e.stopPropagation(); var _en=_ea.getAttribute('data-etpc');
+      // ★ Le clic ne change plus un panneau : il change LA PORTEE. Le fil
+      //   d'Ariane et les quatre photos suivent, parce qu'ils lisent la meme
+      //   chose. C'est ce qui manquait : une selection sans effet ailleurs.
+      _pilScopeSet(_PIL_SCOPE.camp===_en?null:_en); _pilPortee(); _pilFillContent(_pilData()); return; }
+    var _ec=e.target.closest('[data-etp]'); if(_ec){ e.stopPropagation(); var _ek=_ec.getAttribute('data-etp'); if(!_PIL_STATE.sub)_PIL_STATE.sub={}; _PIL_STATE.sub[_ek]=(_PIL_STATE.sub[_ek]===0)?1:0; _pilSaveState(_PIL_STATE); _pilFillContent(_pilData()); return; }
+    // Économie : sous-vues, tri du tableau, export, raccourci Paramétrage.
+    var _pe=e.target.closest('[data-pec]');
+    if(_pe){
+      e.stopPropagation();
+      var _pa=_pe.getAttribute('data-pec');
+      if(_pa==='sub'){ var _pv=_pe.getAttribute('data-v'); if(_pv&&_pv!==_PEC_SUB){ _PEC_SUB=_pv; _pecSaveSt(); _pilFillContent(_pilData()); } return; }
+      if(_pa==='ps'){
+        var _pk=_pe.getAttribute('data-k');
+        // Re-cliquer la même colonne inverse le sens ; changer de colonne repart du
+        // plus grand (ou de A → Z pour un nom), ce que tout le monde attend d'un tableau.
+        if(_pk){ if(_pk===_PEC_PSORT) _PEC_PDIR=-_PEC_PDIR; else { _PEC_PSORT=_pk; _PEC_PDIR=(_pk==='nom')?1:-1; } _pecSaveSt(); _pilFillContent(_pilData()); }
+        return;
+      }
+      if(_pa==='exy'){ var _xv=parseInt(_pe.getAttribute('data-v'),10); if(!isNaN(_xv)){ _PEX_AN=_xv; _pecSaveSt(); _pilFillContent(_pilData()); } return; }
+      if(_pa==='pachgo'){ if(_PEC_SUB!=='ach'){ _PEC_SUB='ach'; _pecSaveSt(); _pilFillContent(_pilData()); } return; }
+      if(_pa==='pachf'){ var _fv=_pe.getAttribute('data-v');
+        if((_fv==='tout'||_fv==='sans')&&_fv!==_PACH_FILT){ _PACH_FILT=_fv; _pilFillContent(_pilData()); } return; }
+      if(_pa==='pach'){ _pachOpen(_pe.getAttribute('data-v')||''); return; }
+      if(_pa==='pachadd'){ _pachAdd(); return; }
+      if(_pa==='axe'){ var _av=_pe.getAttribute('data-v'); if((_av==='nat'||_av==='ate')&&_av!==_PEC_AXE){ _PEC_AXE=_av; _pecSaveSt(); _pilFillContent(_pilData()); } return; }
+      // Raccourci vers La Reserve : Pilotage LIT, il n'ecrit aucun fait
+      // d'exploitation. Un second formulaire de saisie ici serait une deuxieme
+      // porte vers le meme document — et deux sources d'un meme chiffre finissent
+      // toujours par se contredire. On ouvre donc l'ecran qui possede la donnee.
+      if(_pa==='rsv'){
+        var _rt=_pe.getAttribute('data-v')||'intrants';
+        if(!window.goTo){ if(window.showToast) window.showToast('La R\u00e9serve n\u2019est pas disponible','#B85A1A'); return; }
+        window.goTo('reserve');
+        setTimeout(function(){
+          try{ if(window._rsvTabTo) window._rsvTabTo(_rt); }
+          catch(e){ if(window.logError) window.logError({level:'info',cat:'pilotage',msg:'rsv tab '+_rt}); }
+        },240);
+        if(window.scrollTo) window.scrollTo(0,0);
+        return;
+      }
+      if(_pa==='param'){ _PIL_TAB='param'; _pilSaveTab('param'); renderPilotage(); if(window.scrollTo) window.scrollTo(0,0); return; }
+      if(_pa==='csv'||_pa==='copy'){ _pecExport(_pa,_pecData()); return; }
+      return;
+    }
+    var bs=e.target.closest('#pil-bar-seg button'); if(bs){ var b=bs.getAttribute('data-b'); if(b){ _PIL_STATE.bar=b; _pilSaveState(_PIL_STATE); _pilRenderBar(_pilData()); } return; }
+    var ps=e.target.closest('#pil-pie-seg button'); if(ps){ var pm=ps.getAttribute('data-m'); if(pm){ _PIL_STATE.pie=pm; _pilSaveState(_PIL_STATE); _pilRenderPie(_pilData()); } return; }
+    var head=e.target.closest('.pil-th');
+    if(head){ var tile=head.closest('.pil-tile'); if(!tile) return; var id=tile.getAttribute('data-pid'); if(!id) return; if(!_PIL_STATE.collapsed)_PIL_STATE.collapsed={}; _PIL_STATE.collapsed[id]=_PIL_STATE.collapsed[id]?0:1; var _ouvre=!_PIL_STATE.collapsed[id];
+        // ★ UNE SEULE CARTE DEPLIEE A LA FOIS, sur toute la page.
+        //   Une carte depliee prend toute la ligne — c'est necessaire (une carte,
+        //   une frise de douze mois), et c'est exactement ce qui empechait la
+        //   grille de se remplir quand tout etait ouvert par defaut. En refermer
+        //   une pour en ouvrir une autre coute le meme geste que de l'ouvrir, et
+        //   rend au reste de l'onglet ses deux a quatre colonnes.
+        //   ⚠️ On passe par le MEME chemin d'etat : rien n'est ferme a l'ecran
+        //     sans etre ecrit dans `collapsed`, sinon le prochain rendu rouvrirait.
+        if(_ouvre){
+          var _autres=document.querySelectorAll('.pil-tile.open');
+          for(var _i=0;_i<_autres.length;_i++){
+            var _t=_autres[_i]; if(_t===tile) continue;
+            var _id=_t.getAttribute('data-pid'); if(!_id) continue;
+            _PIL_STATE.collapsed[_id]=1; _t.classList.remove('open');
+            if(_id==='ordrepassage'&&_PIL_OP) _PIL_OP._pick=null;
+          }
+        }
+        _pilSaveState(_PIL_STATE); tile.classList.toggle('open',_ouvre);
+        // \u2605 UN GRAPHE DESSINE DANS UNE CARTE FERMEE L'A ETE A LA LARGEUR PAR
+        //   DEFAUT : .pil-tbody est en display:none, donc clientWidth vaut 0 et
+        //   _mvGraphW retombe sur MV_GRAPH_DEF. En ouvrant, la largeur reelle
+        //   existe enfin. _mvGraphRepeindre ne redessine que ce qui a change de
+        //   largeur : sur une carte sans graphe, il ne fait rien.
+        if(_ouvre && window._mvGraphRepeindre) window._mvGraphRepeindre();
+        // La barre \u00ab en main \u00bb est en position:fixed : replier le volet doit la
+        // l\u00e2cher, sinon elle flotterait au-dessus d'un contenu invisible.
+        if(id==='ordrepassage'){ if(_PIL_STATE.collapsed[id]){ if(_PIL_OP) _PIL_OP._pick=null; } else _opBuildMap(); } if(id==='carte'&&!_PIL_STATE.collapsed[id]) _pilBuildMap(_pilData()); return; }
+  });
+  var _odTimer=null, _odEl=null;
+  function _odApply(){
+    if(_odTimer){ clearTimeout(_odTimer); _odTimer=null; }
+    var el=_odEl; _odEl=null; if(!el || !el.value) return;
+    if(_pilObjectifSet(el.value)){ _pilFillContent(_pilData()); if(window.showToast) window.showToast('Objectif mis à jour','#3D6B27'); }
+  }
+  content.addEventListener('change', function(e){ if(e.target&&e.target.id==='pil-obj-date'){ _odEl=e.target; if(_odTimer) clearTimeout(_odTimer); _odTimer=setTimeout(_odApply,800); } });
+  content.addEventListener('change', function(e){ if(!e.target||!_PIL_OP) return; if(e.target.id==='pil-op-start'){ if(typeof window.isAdmin==='function'&&window.isAdmin()){ _PIL_OP._startNom=e.target.value||null; _PIL_OP.order=_opNNNames(_opActTodo()); _pilOpRefresh(); } } });
+  content.addEventListener('focusout', function(e){ if(e.target&&e.target.id==='pil-obj-date'&&_odEl===e.target) _odApply(); });
+  // Le glisser-d\u00e9poser de l'ordre de passage a \u00e9t\u00e9 retir\u00e9 : il \u00e9tait cass\u00e9
+  // (la ligne saisie recevait .dragging, donc son className n'\u00e9tait plus
+  // exactement 'pil-op-row', et la boucle qui masquait les s\u00e9parateurs de
+  // journ\u00e9e la passait elle aussi en display:none \u2014 elle dispara\u00eessait au
+  // moment o\u00f9 on la prenait) et, m\u00eame r\u00e9par\u00e9, il obligeait \u00e0 tenir le doigt
+  // en faisant d\u00e9filer une liste de 45 lignes. Remplac\u00e9 par \u00ab prise en main
+  // puis fente d'insertion \u00bb (data-op pick/pickr/drop/last/cancel), qui passe
+  // par la d\u00e9l\u00e9gation de clic ci-dessus \u2014 donc plus aucun \u00e9couteur ici.
+}
+
+// ── Branchement (une fois par render) ──
+function _pilBind(){
+  var back=document.getElementById('pil-back'); if(back) back.onclick=function(){ if(window.goHub) window.goHub(); };
+  var tabs=document.getElementById('pil-tabs');
+  var omenu=document.getElementById('pil-outils-menu');
+  function _pilOutilsClose(){ if(omenu) omenu.classList.remove('show'); }
+  if(tabs) tabs.addEventListener('click', function(e){
+    if(e.target.closest('#pil-outils-btn')){ if(omenu) omenu.classList.toggle('show'); return; }
+    var b=e.target.closest('[data-tab]'); if(!b) return;
+    _pilOutilsClose();
+    var t=b.getAttribute('data-tab'); if(!_pilSetTab(t)) return;
+  });
+  if(omenu) omenu.addEventListener('click', function(e){
+    var b=e.target.closest('[data-tool]'); if(!b) return;
+    _pilOutilsClose();
+    var t=b.getAttribute('data-tool'); if(!_pilSetTab(t)) return;
+  });
+  document.addEventListener('click', function(e){
+    if(!omenu||!omenu.classList.contains('show')) return;
+    if(e.target.closest('#pil-outils-menu')||e.target.closest('#pil-outils-btn')) return;
+    _pilOutilsClose();
+  });
+  var gear=document.getElementById('pil-gear');
+  if(gear) gear.onclick=function(){
+    var pz=document.getElementById('pil-perso'); if(!pz) return;
+    if(pz.classList.contains('show')){ pz.classList.remove('show'); pz.innerHTML=''; }
+    else { pz.innerHTML=_pilPersoHtml(_PIL_TAB); pz.classList.add('show'); }
+  };
+  var perso=document.getElementById('pil-perso'); if(perso) perso.addEventListener('change', _pilPersoChange);
+  // ⚠️⚠️ LA DELEGATION SE POSE SUR LA PAGE, PAS SUR #pil-content.
+  //   Defaut trouve le 12/08. Depuis la v6.50, les quatre photos
+  //   (#pil-photos-host), le fil d'Ariane (.pil-portee), le bouton
+  //   « N choses a completer » (#pil-diagbtn) et le panneau de diagnostic
+  //   (#pil-diagwrap) sont des FRERES de #pil-content, pas des descendants.
+  //   L'ecouteur etant pose sur #pil-content, aucun de leurs clics ne
+  //   l'atteignait : data-pgo (« voir le detail » sur les 4 photos), .pil-flag,
+  //   #pil-diagbtn, #pil-diag-x, #pil-cr-root et #pil-cr-x etaient MORTS.
+  //   Aucune erreur, aucune trace : le clic tombait dans le vide. C'est la
+  //   signature d'une delegation posee trop bas apres un deplacement de balise.
+  //   La page, elle, contient tout. Elle SURVIT aux rendus (renderPilotage
+  //   ecrase son innerHTML, pas ses ecouteurs) : on ne branche donc QU'UNE FOIS.
+  //   Sans ce verrou, chaque rendu empilerait un ecouteur de plus et un clic
+  //   ferait N fois son effet — un repli deviendrait un depli au 2e rendu.
+  var page=document.getElementById('page-pilotage');
+  if(page && !page._pilDeleg){ page._pilDeleg=1; _pilBindContent(page); }
+}
+
+// ── Rendu principal (appelé par goTo('pilotage')) ──
+function renderPilotage(){
+  var page=document.getElementById('page-pilotage'); if(!page) return;
+  _PIL_STATE=_pilLoadState(); _PIL_TAB=_pilLoadTab(); _PIL_CAVSUB=_pilLoadCav(); _pecLoadSt();
+  _pilExoOublier(); _pilCdVueOublier();
+  _pecCss();
+  var d=_pilData();
+  page.innerHTML=_pilSkeleton(d,_PIL_TAB);
+  _pilRenderMeteo(d);
+  _pilFillContent(d);
+  _pilBind();
+  // Idempotent : ne fait rien si la pastille est deja posee.
+  if(typeof window._mvInjectHelpBtn==='function') window._mvInjectHelpBtn();
+  if(!window._dataReady){ setTimeout(function(){ var p=document.querySelector('.page.active'); if(p&&p.id==='page-pilotage'){ try{ _pilFillContent(_pilData()); }catch(e){} } }, 800); }
+}
+
+// (_pilUpdateCard + carte hub « Pilotage » supprimées — hub purgé, plus aucun appelant · MAINT-2)
+
+// ── Exposition ──
+// _PIL_TABS / _PIL_TOOLS sont exposes pour l'AIDE (utils.js) : la fiche du
+// module liste les onglets en les LISANT ici, au lieu de les decrire dans une
+// phrase qui vieillit. Elle a annonce « Six onglets » pendant que le module en
+// comptait sept, avec deux noms qui n'existaient plus.
+// _PIL_SEM n'est plus expose ici : utils.js le fait, une seule fois, a la
+// source. Deux expositions du meme objet, c'est deux verites en puissance.
+window._pilPolyBreak  = _pilPolyBreak;
+window._PIL_TABS      = _PIL_TABS;
+window._PIL_TOOLS     = _PIL_TOOLS;
+window.renderPilotage = renderPilotage;
+window._pilGetTab     = function(){ return _pilLoadTab(); };
+window._pilSetTab     = function(t, silencieux){ return _pilSetTab(t, {silencieux:!!silencieux}); };
+window.openPilotage   = function(){ if(window.goTo) window.goTo('pilotage'); else renderPilotage(); };
+
+export { renderPilotage };

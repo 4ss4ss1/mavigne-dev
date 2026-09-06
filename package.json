@@ -1,0 +1,41 @@
+{
+  "type": "module",
+  "name": "ma-vigne",
+  "version": "1.0.0",
+  "description": "Application de gestion viticole — GUERETTECH",
+  "private": true,
+  "scripts": {
+    "dev": "vite",
+    "check": "node scripts/preflight.mjs && node scripts/mv-harnais-globaux.mjs && node scripts/mv-harnais-confidentialite.mjs && node scripts/mv-harnais-icones.mjs && node scripts/mv-harnais-theme.mjs && node scripts/mv-harnais-echelle.mjs && node scripts/mv-harnais-jetons.mjs && node scripts/mv-harnais-carte-parcelle.mjs && node scripts/mv-harnais-kml-fusion.mjs && node scripts/mv-harnais-effectif-periode.mjs && node scripts/mv-harnais-retard.mjs && node scripts/mv-harnais-releve.mjs && node scripts/mv-harnais-fuseau.mjs && node scripts/mv-harnais-ateliers.mjs && node scripts/mv-harnais-achats.mjs && node scripts/mv-harnais-vendange-parts.mjs && node scripts/mv-harnais-vendange-garde.mjs && node scripts/mv-harnais-intrants.mjs && node scripts/mv-harnais-fusion.mjs && node scripts/mv-harnais-alignement.mjs && node scripts/mv-harnais-majoration.mjs && node scripts/mv-harnais-agenda.mjs && node scripts/mv-harnais-reseau.mjs && node scripts/mv-harnais-auth1.mjs && node scripts/mv-harnais-toast-honnete.mjs && node scripts/mv-harnais-info.mjs && node scripts/harnais-claude-md.mjs && node scripts/banc/banc.mjs && node scripts/banc/garde-projection.mjs && node scripts/harnais-escattr.mjs && node scripts/build-guide.mjs --check",
+    "lint": "node scripts/lint-cliquet.mjs",
+    "lint:vocabulaire": "node scripts/lint-vocabulaire.mjs",
+    "prebuild": "node scripts/preflight.mjs && node scripts/mv-harnais-globaux.mjs && node scripts/mv-harnais-confidentialite.mjs && node scripts/mv-harnais-icones.mjs && node scripts/mv-harnais-theme.mjs && node scripts/mv-harnais-echelle.mjs && node scripts/mv-harnais-jetons.mjs && node scripts/mv-harnais-carte-parcelle.mjs && node scripts/mv-harnais-kml-fusion.mjs && node scripts/mv-harnais-effectif-periode.mjs && node scripts/mv-harnais-retard.mjs && node scripts/mv-harnais-releve.mjs && node scripts/mv-harnais-fuseau.mjs && node scripts/mv-harnais-ateliers.mjs && node scripts/mv-harnais-achats.mjs && node scripts/mv-harnais-vendange-parts.mjs && node scripts/mv-harnais-vendange-garde.mjs && node scripts/mv-harnais-intrants.mjs && node scripts/mv-harnais-fusion.mjs && node scripts/mv-harnais-alignement.mjs && node scripts/mv-harnais-majoration.mjs && node scripts/mv-harnais-agenda.mjs && node scripts/mv-harnais-reseau.mjs && node scripts/mv-harnais-auth1.mjs && node scripts/mv-harnais-toast-honnete.mjs && node scripts/mv-harnais-info.mjs && node scripts/harnais-claude-md.mjs && node scripts/banc/banc.mjs && node scripts/banc/garde-projection.mjs && node scripts/harnais-escattr.mjs && node scripts/build-guide.mjs --check",
+    "build": "vite build && node scripts/inject-precache.mjs",
+    "preview": "vite preview",
+    "test:smoke": "node scripts/smoke.mjs",
+    "test:sec7": "node scripts/harnais-sec7-contre.mjs",
+    "emu": "firebase emulators:start --only auth,firestore",
+    "seed:e2e": "node scripts/e2e-seed.mjs",
+    "test:e2e": "node scripts/e2e-local.mjs",
+    "test:e2e:emu": "node scripts/e2e.mjs",
+    "deploy:staging": "firebase hosting:channel:deploy staging --expires 30d",
+    "banc": "node scripts/banc/banc.mjs",
+    "banc:projection": "node scripts/banc/garde-projection.mjs",
+    "test:globaux": "node scripts/mv-harnais-globaux.mjs --contre",
+    "test:confidentialite": "node scripts/mv-harnais-confidentialite.mjs --contre"
+  },
+  "devDependencies": {
+    "eslint": "^10.4.1",
+    "@eslint/js": "^10.0.1",
+    "firebase-admin": "^12.7.0",
+    "playwright": "^1.49.0",
+    "terser": "^5.48.0",
+    "vite": "^5.4.0"
+  },
+  "dependencies": {
+    "firebase": "^10.12.0"
+  },
+  "engines": {
+    "node": ">=18.0.0"
+  }
+}

@@ -1,0 +1,155 @@
+{
+  "_note": "Reference du cliquet anti-regression du preflight (C11/C14/C15/C16/C18/C19/C23/C24/C25). Regraver : node scripts/preflight.mjs --baseline. Elle ne doit que DESCENDRE.",
+  "generated": "2026-08-31",
+  "C11_dead_ids": {
+    "src/admin-gt.js": [],
+    "src/app.js": [],
+    "src/cave.js": [],
+    "src/firebase.js": [],
+    "src/onboarding.js": [],
+    "src/phyto.js": [],
+    "src/pilotage.js": [],
+    "src/planning.js": [],
+    "src/reglages.js": [],
+    "src/reserve.js": [],
+    "src/tracteur.js": [
+      "catalogue-list-trac"
+    ],
+    "src/utils.js": []
+  },
+  "C14_empty_catch": {
+    "src/admin-gt.js": 7,
+    "src/app.js": 155,
+    "src/cave.js": 4,
+    "src/firebase.js": 19,
+    "src/onboarding.js": 4,
+    "src/phyto.js": 2,
+    "src/pilotage.js": 15,
+    "src/planning.js": 2,
+    "src/reglages.js": 1,
+    "src/reserve.js": 1,
+    "src/tracteur.js": 4,
+    "src/utils.js": 10
+  },
+  "C15_dead_fns": {
+    "src/admin-gt.js": [],
+    "src/app.js": [
+      "_tachesObjHasProg"
+    ],
+    "src/cave.js": [],
+    "src/firebase.js": [],
+    "src/onboarding.js": [],
+    "src/phyto.js": [],
+    "src/pilotage.js": [],
+    "src/planning.js": [],
+    "src/reglages.js": [],
+    "src/reserve.js": [],
+    "src/tracteur.js": [],
+    "src/utils.js": []
+  },
+  "C16_native_dialogs": {
+    "src/admin-gt.js": 0,
+    "src/app.js": 0,
+    "src/cave.js": 0,
+    "src/firebase.js": 0,
+    "src/onboarding.js": 0,
+    "src/phyto.js": 0,
+    "src/pilotage.js": 0,
+    "src/planning.js": 0,
+    "src/reglages.js": 0,
+    "src/reserve.js": 0,
+    "src/tracteur.js": 0,
+    "src/utils.js": 0
+  },
+  "C18_dup_ids": {
+    "index.html": []
+  },
+  "C19_unescaped": {
+    "src/admin-gt.js": 0,
+    "src/app.js": 13,
+    "src/cave.js": 0,
+    "src/firebase.js": 0,
+    "src/onboarding.js": 1,
+    "src/phyto.js": 0,
+    "src/pilotage.js": 0,
+    "src/planning.js": 0,
+    "src/reglages.js": 7,
+    "src/reserve.js": 0,
+    "src/tracteur.js": 2,
+    "src/utils.js": 1
+  },
+  "C23_handler_scope": {
+    "index.html": [],
+    "src/admin-gt.js": [],
+    "src/app.js": [],
+    "src/cave.js": [],
+    "src/firebase.js": [],
+    "src/onboarding.js": [],
+    "src/phyto.js": [],
+    "src/pilotage.js": [],
+    "src/planning.js": [],
+    "src/reglages.js": [],
+    "src/reserve.js": [],
+    "src/tracteur.js": [],
+    "src/utils.js": []
+  },
+  "C24a_mauvais_escapeur": {
+    "src/admin-gt.js": [],
+    "src/app.js": [],
+    "src/cave.js": [],
+    "src/firebase.js": [],
+    "src/onboarding.js": [],
+    "src/phyto.js": [],
+    "src/pilotage.js": [],
+    "src/planning.js": [],
+    "src/reglages.js": [],
+    "src/reserve.js": [],
+    "src/tracteur.js": [],
+    "src/utils.js": []
+  },
+  "C24b_slot_js_nu": {
+    "src/admin-gt.js": 57,
+    "src/app.js": 9,
+    "src/cave.js": 26,
+    "src/firebase.js": 0,
+    "src/onboarding.js": 1,
+    "src/phyto.js": 9,
+    "src/pilotage.js": 2,
+    "src/planning.js": 24,
+    "src/reglages.js": 17,
+    "src/reserve.js": 1,
+    "src/tracteur.js": 14,
+    "src/utils.js": 0
+  },
+  "C24c_interpolation_nue": {
+    "src/admin-gt.js": 0,
+    "src/app.js": 139,
+    "src/cave.js": 0,
+    "src/firebase.js": 0,
+    "src/onboarding.js": 0,
+    "src/phyto.js": 20,
+    "src/pilotage.js": 0,
+    "src/planning.js": 0,
+    "src/reglages.js": 149,
+    "src/reserve.js": 0,
+    "src/tracteur.js": 22,
+    "src/utils.js": 0
+  },
+  "C25_oncall_sans_appcheck": {
+    "functions/claims.js": [],
+    "functions/ephy.js": [],
+    "functions/index.js": [],
+    "functions/leads.js": [],
+    "functions/diag-ephy.cjs": []
+  },
+  "C25_surface_http": {
+    "functions/claims.js": [],
+    "functions/ephy.js": [],
+    "functions/index.js": [],
+    "functions/leads.js": [
+      "submitLead",
+      "submitMiseEnRoute"
+    ],
+    "functions/diag-ephy.cjs": []
+  }
+}

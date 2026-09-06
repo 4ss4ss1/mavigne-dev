@@ -1,0 +1,217 @@
+# ============================================================================
+#  MA VIGNE — CI
+#  --------------------------------------------------------------------------
+#  Tourne a CHAQUE push et a chaque pull request. Ce que faisait la discipline
+#  ("penser a lancer npm run check avant de pousser") devient mecanique.
+#
+#  ⚠️ CE WORKFLOW NE DEPLOIE RIEN, JAMAIS.
+#     Deployer reste une decision : bump APP + SW, WHATS_NEW redige, et l'ordre
+#     functions -> backfill -> hosting -> rules. La CI allume le feu vert ou
+#     rouge, elle ne touche pas au levier. Aucun secret n'est necessaire ici.
+#
+#  Deux jobs en parallele pour que le rouge soit lisible d'un coup d'oeil :
+#    · controles : preflight -> lint -> build -> smoke   (~3 min)
+#    · e2e       : les 10 pages, login DOM reel           (~5 min)
+# ============================================================================
+
+name: CI
+
+on:
+  push:
+  pull_request:
+  workflow_dispatch:        # bouton "Run workflow" dans l'onglet Actions
+
+# Un nouveau push sur la meme branche annule le run precedent : pas de file
+# d'attente quand on pousse trois commits d'affilee.
+concurrency:
+  group: ci-${{ github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  # ==========================================================================
+  controles:
+    name: Preflight · ESLint · Build · Smoke
+    runs-on: ubuntu-latest
+    timeout-minutes: 20
+
+    steps:
+      - name: Recuperer le depot
+        uses: actions/checkout@v5
+
+      - name: Node 22 (meme version que les Cloud Functions)
+        uses: actions/setup-node@v5
+        with:
+          node-version: '22'
+          cache: 'npm'
+
+      - name: Installer les dependances
+        run: npm ci
+
+      # C1–C22 : le filet anti-regression. Lecture seule, ~1 s.
+      # (npm run build le relance en prebuild ; ici c'est pour echouer VITE
+      #  et sur une etape NOMMEE, avant les 50 s de build.)
+      - name: Preflight (C1–C22)
+        run: node scripts/preflight.mjs
+
+      # Confidentialite : aucune adresse e-mail de tiers dans ce qui est PUBLIE.
+      # Vecu le 05/09 : app.js portait sept personnes nommees avec leur adresse
+      # personnelle reelle, servies a tous les domaines, depuis le premier commit.
+      # ⚠ Ne dit rien de l'historique git, qui garde tout : cf. CLAUDE.md.
+      - name: Confidentialite — aucune donnee personnelle publiee
+        run: |
+          node scripts/mv-harnais-confidentialite.mjs
+          node scripts/mv-harnais-confidentialite.mjs --contre
+
+      # Portee des noms apres bundling : un nom lu dans un module et declare
+      # dans un autre sans window n'existe pas dans le bundle (Rollup renomme).
+      - name: Globaux — un nom lu existe-t-il apres bundling
+        run: |
+          node scripts/mv-harnais-globaux.mjs
+          node scripts/mv-harnais-globaux.mjs --contre
+
+      # Cliquet : bloque toute erreur NOUVELLE, tolere le plafond documente
+      # dans scripts/lint-cliquet.mjs.
+      - name: ESLint — cliquet anti-regression
+        run: node scripts/lint-cliquet.mjs
+
+      # Cliquet de vocabulaire : « pause dejeuner » est banni du PLANNING (le mot
+      # designe en droit un droit du salarie). Il etait ecrit depuis le 11/08 mais
+      # AUCUN appelant ne l'executait — ni npm run lint, ni la CI. Branche ici.
+      - name: Vocabulaire — presence / coupure / heures dues
+        run: node scripts/lint-vocabulaire.mjs
+
+      # Le guide public est ASSEMBLE depuis guide/*.html par un script hors build.
+      # Vecu le 13/08 : les sources avaient ete enrichies sans regenerer, et la
+      # page deployee est restee en retard sans que rien ne le signale.
+      - name: Guide — la page deployee est en phase avec ses sources
+        run: node scripts/build-guide.mjs --check
+
+      # Le journal des nouveautes s'EXECUTE au lieu de se relire, et les
+      # documents ne doivent pas s'echapper de la charte MV_DOC (cliquet).
+      - name: Journal des nouveautes + chartes de document
+        run: |
+          node scripts/mv-whatsnew-check.mjs
+          node scripts/mv-chartes-doc.mjs
+
+      # Harnais des documents : modules reels charges dans Node, aucun reseau.
+      - name: Harnais — les six documents
+        run: |
+          node scripts/mv-harnais-cuvdoc.mjs
+          node scripts/mv-harnais-vignoble.mjs
+          node scripts/mv-harnais-releve.mjs
+          node scripts/mv-harnais-entretien.mjs
+
+      # Deux cliquets du Pilotage. L'echelle : 28 tailles de texte ecrites a la
+      # main vivent desormais sur onze pas nommes — sans ce controle, la 29e
+      # revient au premier ecran ajoute et rien ne rougit. La pastille : aucune
+      # ne doit ouvrir une feuille vide, aucune fiche ne doit rester orpheline,
+      # et l'ecouteur doit garder son stopPropagation (sans lui, ouvrir la fiche
+      # replie la tuile qu'on cherche a comprendre). La carte : le chiffre et sa
+      # ligne de cadre doivent rester DANS l'en-tete — c'est la seule chose qui
+      # autorise le repli par defaut — et la migration de disposition est
+      # EXECUTEE sur de vrais etats memorises, pas relue.
+      - name: Harnais — echelle, pastille « i », carte a trois etages
+        run: |
+          node scripts/mv-harnais-echelle.mjs   # + le cliquet d'espacement (DS-3)
+          node scripts/mv-harnais-info.mjs
+          node scripts/mv-harnais-carte.mjs
+
+      # Le jeu d'icones (DS-1). Un <use> qui vise un symbol absent ne rend RIEN,
+      # en silence : c'est le piege du repli CSS applique aux icones. Le harnais
+      # verifie que tout appel a son symbol, qu'aucun symbol ne dort sans emploi,
+      # qu'aucune forme ne fige sa couleur (elle ne se repeindrait plus en mode
+      # sombre), qu'aucun DOCUMENT IMPRIME n'appelle `_mvIcon` (le sprite n'existe
+      # pas dans l'onglet ou il s'ouvre) et que le compte d'emojis rendus NE
+      # REMONTE JAMAIS — module par module, pas seulement au total.
+      # ⚠️ La contre-epreuve tourne AUSSI : un harnais qui ne rougit jamais ne
+      #   prouve rien. Elle repose les six fautes, une par une, sur une copie.
+      # ⚠️ Le sprite est COMMITE et `lucide-static` n'est PAS une dependance :
+      # la CI n'installe rien de plus. `build-sprite.mjs` est un outil manuel.
+      - name: Harnais — le jeu d'icones, et sa contre-epreuve
+        run: |
+          node scripts/mv-harnais-icones.mjs
+          node scripts/mv-harnais-icones-contre.mjs
+
+      # La carte d'une PARCELLE dans la liste (a ne pas confondre avec
+      # `mv-harnais-carte.mjs`, qui vise la carte a trois etages du Pilotage).
+      # ⚠️ Il existe parce qu'une regle CSS a vecu des mois SANS ATTEINDRE son
+      #   element : `.pc-ord` etait ecrite `.pc-nom .pc-ord`, or `.pc-nom` est le
+      #   titre d'AVANT la charte DS-2 et plus aucun ecran ne l'emet. Le rang de
+      #   tournee sortait en texte brut, colle au nom. Une regle qui ne s'applique
+      #   a rien ne casse pas : elle se tait. Ni node --check, ni ESLint, ni le
+      #   preflight ne pouvaient la voir. Le harnais reconstruit la CHAINE
+      #   D'ANCETRES emise par app.js et exige qu'une regle la MATCHE.
+      # ⚠️⚠️ La contre-epreuve tourne AUSSI, et elle a servi le jour meme : la
+      #   premiere version du controle cherchait `.pc-ord` QUELQUE PART dans la
+      #   feuille — et `.pc-nom .pc-ord` contient cette chaine. Elle repondait
+      #   vert sur le defaut exact qu'elle visait. Meme famille que §48.
+      - name: Harnais — la carte de parcelle, et sa contre-epreuve
+        run: |
+          node scripts/mv-harnais-carte-parcelle.mjs
+          node scripts/mv-harnais-carte-parcelle.mjs --contre
+
+      # La visite guidee est la VITRINE : une demo cassee est cassee en public.
+      # Deux regles qu'aucun autre controle ne porte. ① On ne facture que ce
+      # qu'on a montre : toute ligne de DEMO2_CREDITS doit etre demontree par
+      # un moment (la plus grosse ligne du chiffrage ne l'etait pas). ② Aucun
+      # moment ne vise le corps d'une carte du Pilotage : depuis §42 elles
+      # arrivent repliees, `querySelector` trouve un element qui mesure zero,
+      # et les masques couvrent l'ecran ENTIER. C22 voit qu'un selecteur EXISTE,
+      # jamais qu'il est VISIBLE.
+      # ⚠️ La contre-epreuve tourne AUSSI en CI : un harnais qui ne rougit
+      #   jamais ne prouve rien, et c'est elle qui a trouve que l'assertion sur
+      #   les selecteurs se prouvait toute seule (elle cherchait la cible dans
+      #   le fichier qui l'ecrit).
+      - name: Harnais — la visite guidee, et sa contre-epreuve
+        run: |
+          node scripts/harnais-demo.mjs
+          node scripts/harnais-demo-contre.mjs
+
+      # Vite + inject-precache (postbuild, idempotent).
+      - name: Build
+        run: npm run build
+
+      - name: Chromium pour le smoke
+        run: npx playwright install --with-deps chromium
+
+      # L'app boote-t-elle vraiment ? Le type de bug que node --check ne voit pas.
+      - name: Smoke — l'app demarre sans exception
+        run: npm run test:smoke
+
+      # Utile quand le smoke tombe : on recupere le bundle exact qui a echoue.
+      - name: Garder le build en cas d'echec
+        if: failure()
+        uses: actions/upload-artifact@v5
+        with:
+          name: dist-echec
+          path: dist/
+          retention-days: 5
+
+  # ==========================================================================
+  e2e:
+    name: E2E — 10 pages, login DOM reel
+    runs-on: ubuntu-latest
+    timeout-minutes: 25
+
+    steps:
+      - name: Recuperer le depot
+        uses: actions/checkout@v5
+
+      - name: Node 22
+        uses: actions/setup-node@v5
+        with:
+          node-version: '22'
+          cache: 'npm'
+
+      - name: Installer les dependances
+        run: npm ci
+
+      - name: Chromium pour le e2e
+        run: npx playwright install --with-deps chromium
+
+      # Reseau Firebase coupe, donnees injectees, aucun contact avec la prod.
+      # ⚠️ Ce test charge Leaflet depuis unpkg : une panne d'unpkg peut le faire
+      #    rougir sans qu'aucune ligne de code soit en cause. Dans ce cas,
+      #    "Re-run failed jobs" dans l'onglet Actions.
+      - name: E2E local (donnees injectees)
+        run: npm run test:e2e

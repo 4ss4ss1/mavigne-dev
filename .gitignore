@@ -1,0 +1,65 @@
+# Dépendances Node
+node_modules/
+
+# Build Vite
+dist/
+
+# Environnement local
+.env
+.env.local
+.env.*.local
+
+# Firebase
+.firebase/
+firebase-debug.log*
+firebase-debug.*.log*
+
+# Cache Vite
+.vite/
+
+# Logs
+logs
+*.log
+npm-debug.log*
+yarn-debug.log*
+yarn-error.log*
+
+# Éditeurs
+.vscode/
+.idea/
+*.suo
+*.ntvs*
+*.njsproj
+*.sln
+*.sw?
+
+# OS
+.DS_Store
+Thumbs.db
+
+# Runtime data
+pids
+*.pid
+*.seed
+*.pid.lock
+
+# Couverture de tests
+coverage
+lib-cov
+
+# ── Cles de service — JAMAIS dans le depot ──
+# scripts/restore-from-json.js lit ./serviceAccountKey.json : le fichier n'a jamais
+# ete commite, mais rien ne l'en empechait. Une cle de compte de service donne un
+# acces ADMIN COMPLET a Firestore, sans passer par les regles.
+serviceAccountKey.json
+*serviceAccount*.json
+*-adminsdk-*.json
+
+# ── Exports et sauvegardes de donnees client ──
+# Contours parcellaires, exports de registre, sauvegardes JSON d'un domaine :
+# ce sont des donnees d'exploitation, elles ne vivent pas dans le code (CONF-1/2/3).
+*.kml
+*.kmz
+*.csv
+sauvegardes/
+exports/

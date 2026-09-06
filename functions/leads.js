@@ -1,0 +1,554 @@
+'use strict';
+
+// MA VIGNE — Auto-capture des demandes d'essai (formulaire public)
+// ─────────────────────────────────────────────────────────────────
+// Cloud Function HTTP appelée par public/essai.html (essai-ma-vigne.html).
+// • Aucune écriture client direct en Firestore : tout passe par cette function
+//   (admin SDK → contourne les règles). Surface publique = ce seul endpoint.
+// • DÉDUPLICATION PAR E-MAIL : docId = SHA-256 de l'e-mail normalisé →
+//   une seule fiche par adresse. Les renvois incrémentent un compteur,
+//   sans réécrire la fiche ni renvoyer de mail.
+// • E-mail de notification via l'extension « Trigger Email » (collection `mail`).
+// • Anti-bot : champ honeypot.
+//
+// Déploiement : firebase deploy --only functions
+// Exposition recommandée : rewrite hosting /api/lead (voir firebase.json).
+
+const { onRequest } = require('firebase-functions/v2/https');
+const { logger }    = require('firebase-functions');
+const admin         = require('firebase-admin');
+const crypto        = require('crypto');
+
+if (!admin.apps.length) { try { admin.initializeApp(); } catch (_) {} }
+
+// ── Config ────────────────────────────────────────────────────────
+const DEST            = 'ngdevpro@gmail.com';
+const LEADS           = 'leads';   // collection des demandes (read = GT only)
+const MAIL_COLLECTION = 'mail';    // file de l'extension « Trigger Email »
+const ALLOWED_ORIGINS = [
+  'https://mavigneapp.fr',
+  'https://www.mavigneapp.fr',
+  'https://mavigne-a0fd5.web.app',
+  'https://mavigne-a0fd5.firebaseapp.com',
+  'http://localhost:5173',
+];
+
+// ── Anti-abus : le DÉBIT (SEC-6) ──────────────────────────────────
+// Les deux endpoints publics avaient honeypot + CORS + clip() : ces filtres bornent
+// le CONTENU d'une requête, jamais son NOMBRE. Un script qui poste dix mille fois les
+// passe tous — dix mille fiches `leads`, et surtout vingt mille messages dans la file
+// `mail`, dont le quota d'envoi est PARTAGÉ avec les codes GT et les identifiants
+// clients. C'est ce plafond-là que le débit protège en premier.
+//
+// ⚠️⚠️ MÊME COMPTEUR QUE claims.js, ET LA FENÊTRE EST UNE CONTRAINTE, PAS UN CHOIX.
+// Même document, même format {value:{hash:{count,ts}}}. checkAndBumpThrottle() purge le
+// document ENTIER avec SA fenêtre à chaque passage — `if (now - map[k].ts > 15 min)
+// delete map[k]` ne regarde pas à qui appartient la clé. Une fenêtre plus longue ici
+// serait donc silencieusement ramenée à 15 min au premier checkTrialToken venu.
+// Assouplir la FENÊTRE exige de toucher claims.js ; tant qu'on ne l'a pas fait, les
+// deux doivent être égales. La LIMITE, elle, est libre : c'est le seul curseur ici.
+//
+// ⚠️ Clés PRÉFIXÉES : même document, compteurs distincts. Sans le préfixe, un prospect
+// qui envoie le formulaire d'essai puis sa mise en route consommerait le quota de son
+// propre activateTrial (plafonné à 15, lui) et se verrait refuser l'ouverture de son
+// essai — le formulaire fermerait la porte qu'il sert à ouvrir.
+const THROTTLE_DOC        = '_guerettech/trial_throttle';
+const THROTTLE_WINDOW_MS  = 15 * 60 * 1000;   // ⚠️ DOIT rester égal à claims.js
+const PUBLIC_THROTTLE_MAX = 30;               // tentatives / IP / fenêtre, les DEUX endpoints réunis
+const THROTTLE_PREFIX     = 'pub:';
+
+// ── Helpers ───────────────────────────────────────────────────────
+const clip    = (s, n) => String(s == null ? '' : s).trim().slice(0, n);
+const emailOk = (v) => /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(v);
+const esc     = (s) => String(s == null ? '' : s)
+  .replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;')
+  .replace(/"/g, '&quot;');
+
+// Hash court et non réversible de l'IP appelante (aucune IP en clair stockée — RGPD).
+// ⚠️ Ce n'est PAS ipHash() de claims.js, et la différence n'est pas cosmétique : là-bas
+//    l'objet est un onCall, dont l'IP se trouve sous request.rawRequest. Ici on est en
+//    onRequest — `req` EST la requête Express, et `req.rawRequest` n'existe pas. Recopier
+//    l'autre version rendrait 'unknown' pour TOUT LE MONDE : un compteur unique pour la
+//    planète entière, saturé par le premier bot venu, et plus un seul formulaire ne passe.
+function ipHashReq(req) {
+  let raw = 'unknown';
+  try {
+    const h = (req && req.headers) || {};
+    const xff = h['x-forwarded-for'] || h['X-Forwarded-For'];
+    raw = (xff ? String(xff).split(',')[0] : (req && req.ip)) || 'unknown';
+  } catch (e) { /* fail-open */ }
+  return THROTTLE_PREFIX + crypto.createHash('sha256').update(String(raw).trim()).digest('hex').slice(0, 24);
+}
+
+// true = tentative autorisée · false = fenêtre saturée. Transaction et purge identiques
+// à claims.js. ⚠️ `tx.set` SANS merge : avec merge, les clés que la purge vient de
+// supprimer seraient réécrites par la fusion et le document grossirait sans fin.
+async function bumpPublicThrottle(db, key) {
+  const ref = db.doc(THROTTLE_DOC);
+  const now = Date.now();
+  return db.runTransaction(async (tx) => {
+    const snap = await tx.get(ref);
+    const map = (snap.exists && snap.data() && typeof snap.data().value === 'object' && snap.data().value) ? snap.data().value : {};
+    for (const k of Object.keys(map)) {
+      if (!map[k] || (now - map[k].ts) > THROTTLE_WINDOW_MS) delete map[k];
+    }
+    const e = map[key];
+    if (e && (now - e.ts) <= THROTTLE_WINDOW_MS) {
+      if (e.count >= PUBLIC_THROTTLE_MAX) { tx.set(ref, { value: map }); return false; }
+      e.count += 1; e.ts = now;
+    } else {
+      map[key] = { count: 1, ts: now };
+    }
+    tx.set(ref, { value: map });
+    return true;
+  });
+}
+
+// Rend true si la requête peut continuer. Ne lève JAMAIS : un compteur en panne ne doit
+// pas fermer le formulaire (fail-open, comme les quatre appels de claims.js).
+// ⚠️ Trace en WARNING, jamais en ERROR : les alertes log-based partent à ERROR. Un bot
+//    qui martèle enverrait alors un mail par requête — à l'adresse même dont ce garde-fou
+//    protège le quota d'envoi. Le remède deviendrait le symptôme.
+async function debitOk(db, req, quoi) {
+  const key = ipHashReq(req);
+  const passe = await bumpPublicThrottle(db, key).catch(() => true);
+  if (!passe) {
+    logger.warn('[Débit] Seuil atteint — ' + quoi + ' · clé ' + key
+                + ' · max ' + PUBLIC_THROTTLE_MAX + ' / ' + (THROTTLE_WINDOW_MS / 60000) + ' min'
+                + ' · réponse 200 rendue au client');
+  }
+  return passe;
+}
+
+function buildLead(b, req) {
+  const modules = Array.isArray(b.modules)
+    ? b.modules.slice(0, 12).map(m => clip(m, 80)).filter(Boolean)
+    : [];
+  return {
+    domaine:     clip(b.domaine, 120),
+    email:       clip(b.email, 160).toLowerCase(),
+    tel:         clip(b.tel, 40),
+    region:      clip(b.region, 120),
+    ville:       clip(b.ville, 80),
+    cp:          clip(b.cp, 10).replace(/\D/g, '').slice(0, 5),
+    surface:     clip(b.surface, 20),
+    users:       clip(b.users, 20),
+    modules,
+    commune:     clip(b.commune, 80),
+    parcellaire: clip(b.parcellaire, 80),
+    nbparc:      clip(b.nbparc, 20),
+    perm:        clip(b.perm, 20),
+    saiso:       clip(b.saiso, 20),
+    engins:      clip(b.engins, 20),
+    conduite:    clip(b.conduite, 40),
+    cuvees:      clip(b.cuvees, 20),
+    message:     clip(b.message, 2000),
+    userAgent:   clip(req.headers['user-agent'], 300),
+  };
+}
+
+// ── Composition de l'e-mail de notification ──────────────────────
+function mailSubject(l) { return `🍇 Demande d'essai — ${l.domaine}`; }
+
+function mailText(l) {
+  const ln = (lab, val) => val ? `${lab} : ${val}\n` : '';
+  let t = "Nouvelle demande d'essai Ma Vigne\n\n";
+  t += ln('Domaine', l.domaine);
+  t += ln('E-mail', l.email);
+  t += ln('Téléphone', l.tel);
+  t += ln('Commune', [l.ville, l.cp].filter(Boolean).join(' '));
+  t += ln('Région / appellation', l.region);
+  t += ln('Surface', l.surface ? l.surface + ' ha' : '');
+  t += ln('Utilisateurs', l.users);
+  t += '\nModules souhaités :\n';
+  t += l.modules.length ? l.modules.map(m => '  - ' + m).join('\n') + '\n' : '  (à définir)\n';
+  const parc = [l.commune, l.parcellaire, l.nbparc ? l.nbparc + ' parcelles' : ''].filter(Boolean).join(' · ');
+  if (parc) t += `\nParcelles : ${parc}\n`;
+  const eq = [l.perm ? l.perm + ' permanents' : '', l.saiso ? 'saisonniers : ' + l.saiso : ''].filter(Boolean).join(' · ');
+  if (eq) t += `Équipe : ${eq}\n`;
+  if (l.engins)   t += `Matériel : ${l.engins} engins\n`;
+  if (l.conduite) t += `Conduite : ${l.conduite}\n`;
+  if (l.cuvees)   t += `Cave : ${l.cuvees} cuvées\n`;
+  if (l.message)  t += `\nMessage :\n${l.message}\n`;
+  t += `\n— Répondez à cet e-mail pour joindre directement ${l.domaine}.`;
+  return t;
+}
+
+function mailHtml(l) {
+  const row = (lab, val) => val
+    ? `<tr><td style="padding:4px 14px 4px 0;color:#6E6456;white-space:nowrap">${esc(lab)}</td><td style="padding:4px 0;font-weight:600">${esc(val)}</td></tr>`
+    : '';
+  const mods = l.modules.length
+    ? l.modules.map(m => `<li>${esc(m)}</li>`).join('')
+    : '<li>à définir</li>';
+  const parc = [l.commune, l.parcellaire, l.nbparc ? l.nbparc + ' parcelles' : ''].filter(Boolean).join(' · ');
+  const eq   = [l.perm ? l.perm + ' permanents' : '', l.saiso ? 'saisonniers : ' + l.saiso : ''].filter(Boolean).join(' · ');
+  let extra = '';
+  extra += row('Parcelles', parc);
+  extra += row('Équipe', eq);
+  if (l.engins)   extra += row('Matériel', l.engins + ' engins');
+  if (l.conduite) extra += row('Conduite', l.conduite);
+  if (l.cuvees)   extra += row('Cave', l.cuvees + ' cuvées');
+  return `<div style="font-family:system-ui,Arial,sans-serif;max-width:520px;color:#14110D">
+  <h2 style="font-size:18px;margin:0 0 12px;font-weight:600">Nouvelle demande d'essai Ma Vigne</h2>
+  <table style="font-size:14px;border-collapse:collapse">
+    ${row('Domaine', l.domaine)}${row('E-mail', l.email)}${row('Téléphone', l.tel)}${row('Commune', [l.ville, l.cp].filter(Boolean).join(' '))}${row('Région', l.region)}${row('Surface', l.surface ? l.surface + ' ha' : '')}${row('Utilisateurs', l.users)}${extra}
+  </table>
+  <p style="font-size:14px;margin:14px 0 4px;color:#6E6456">Modules souhaités</p>
+  <ul style="font-size:14px;margin:0 0 12px;padding-left:20px">${mods}</ul>
+  ${l.message ? `<p style="font-size:14px;margin:14px 0 4px;color:#6E6456">Message</p><p style="font-size:14px;white-space:pre-wrap;margin:0;padding:10px 12px;background:#F7F4EC;border-radius:8px">${esc(l.message)}</p>` : ''}
+  <p style="font-size:13px;color:#6E6456;margin-top:18px">Répondez à cet e-mail pour joindre directement ${esc(l.domaine)}.</p>
+</div>`;
+}
+
+// ── Accusé de réception envoyé au client ─────────────────────────
+// Écrit à la première personne : c'est Nicolas qui répondra, pas un robot. Le rôle de ce
+// message est de dire trois choses et pas une de plus — c'est bien arrivé, voici ce qui
+// va se passer, voici sous combien de temps. Aucun prix, aucun argumentaire : la demande
+// d'essai n'est pas le moment de vendre.
+function ackText(l) {
+  return "Bonjour,\n\n"
+    + "J'ai bien re\u00e7u votre demande d'essai pour " + l.domaine + ".\n\n"
+    + "Je vous r\u00e9ponds personnellement sous 24 heures, avec les quelques \u00e9l\u00e9ments dont "
+    + "j'ai besoin pour pr\u00e9parer votre domaine. L'objectif est que le jour o\u00f9 vous ouvrez "
+    + "l'application, elle contienne d\u00e9j\u00e0 vos parcelles et votre \u00e9quipe \u2014 pas une "
+    + "d\u00e9monstration.\n\n"
+    + "Vous pouvez r\u00e9pondre directement \u00e0 ce message.\n\n"
+    + "\u00c0 tr\u00e8s vite,\n\n"
+    + "Nicolas Gu\u00e9ret\n"
+    + "Ma Vigne \u2014 GUERETTECH\n"
+    + "06 99 42 48 59\n"
+    + "mavigneapp.fr";
+}
+
+function ackHtml(l) {
+  return `<div style="font-family:system-ui,Arial,sans-serif;max-width:520px;color:#14110D;font-size:15px;line-height:1.6">
+  <p>Bonjour,</p>
+  <p>J\u2019ai bien re\u00e7u votre demande d\u2019essai pour <strong>${esc(l.domaine)}</strong>.</p>
+  <p>Je vous r\u00e9ponds personnellement sous 24 heures, avec les quelques \u00e9l\u00e9ments dont j\u2019ai besoin
+     pour pr\u00e9parer votre domaine. L\u2019objectif est que le jour o\u00f9 vous ouvrez l\u2019application, elle
+     contienne d\u00e9j\u00e0 vos parcelles et votre \u00e9quipe \u2014 pas une d\u00e9monstration.</p>
+  <p>Vous pouvez r\u00e9pondre directement \u00e0 ce message.</p>
+  <p style="margin-top:22px">\u00c0 tr\u00e8s vite,<br>
+     <strong>Nicolas Gu\u00e9ret</strong><br>
+     <span style="color:#6E6456">Ma Vigne \u2014 GUERETTECH</span><br>
+     <span style="color:#6E6456">06 99 42 48 59 \u00b7 mavigneapp.fr</span></p>
+</div>`;
+}
+
+// ── Accusé de réception MISE EN ROUTE, envoyé au client ──────────
+// Le formulaire d'essai avait son accusé ; celui-ci n'en avait pas. Or c'est le plus
+// long des deux — dix-sept questions — et le seul dont la réponse est INCOMPLÈTE sans
+// un second geste : les fichiers ne partent pas avec le formulaire. Un client qui
+// envoie ses réponses et ne reçoit rien n'a donc ni preuve d'envoi, ni rappel de ce
+// qui manque encore. D'où trois choses, et pas une de plus : c'est arrivé · voici ce
+// que vous m'avez envoyé · voici ce qu'il reste à joindre.
+//
+// ⚠️ La liste des pièces est écrite ICI en toutes lettres, sans effectif ni chiffre :
+//    elle part chez n'importe quel domaine, pas chez un seul.
+const MER_PIECES = [
+  'votre fichier parcellaire (KML, KMZ, ou un export PAC / Telepac)',
+  'la liste de vos salariés permanents — nom et rôle',
+  'vos tracteurs et engins — type, marque, modèle',
+  'vos cuvées, vos cuves et vos fûts',
+  'vos temps par hectare, si vous en suivez déjà',
+];
+
+function merAckText(domaine, recap) {
+  let t = 'Bonjour,\n\n'
+    + 'J\u2019ai bien reçu vos réponses de mise en route pour ' + domaine + '.\n\n'
+    + 'Il me reste à recevoir vos fichiers : ils ne partent pas avec le formulaire. '
+    + 'Répondez simplement à ce message en y joignant ce que vous avez sous la main :\n\n';
+  MER_PIECES.forEach((p) => { t += '  - ' + p + '\n'; });
+  t += '\nNe les retapez pas : le format dans lequel ils existent chez vous me convient.\n\n'
+    + 'Dès que j\u2019ai tout, j\u2019installe votre domaine et je vous envoie vos identifiants. '
+    + 'Le jour où vous ouvrez l\u2019application, elle contient déjà vos parcelles, votre équipe '
+    + 'et votre matériel.\n\n'
+    + '— Vos réponses, telles que je les ai reçues —\n\n'
+    + (recap || '(récapitulatif vide)')
+    + '\n\nÀ très vite,\n\n'
+    + 'Nicolas Guéret\nMa Vigne — GUERETTECH\n06 99 42 48 59\nmavigneapp.fr';
+  return t;
+}
+
+function merAckHtml(domaine, recap) {
+  const items = MER_PIECES.map((p) => `<li style="margin-bottom:6px">${esc(p)}</li>`).join('');
+  return `<div style="font-family:system-ui,Arial,sans-serif;max-width:560px;color:#14110D;font-size:15px;line-height:1.6">
+  <p>Bonjour,</p>
+  <p>J\u2019ai bien reçu vos réponses de mise en route pour <strong>${esc(domaine)}</strong>.</p>
+  <p>Il me reste à recevoir <strong>vos fichiers</strong> : ils ne partent pas avec le formulaire.
+     Répondez simplement à ce message en y joignant ce que vous avez sous la main.</p>
+  <ul style="font-size:14px;margin:0 0 14px;padding-left:20px">${items}</ul>
+  <p style="font-size:14px;color:#6E6456">Ne les retapez pas : le format dans lequel ils existent
+     chez vous me convient.</p>
+  <p>Dès que j\u2019ai tout, j\u2019installe votre domaine et je vous envoie vos identifiants. Le jour où
+     vous ouvrez l\u2019application, elle contient déjà vos parcelles, votre équipe et votre matériel.</p>
+  <p style="font-size:13px;color:#6E6456;margin:22px 0 6px">Vos réponses, telles que je les ai reçues</p>
+  <pre style="font-size:12.5px;white-space:pre-wrap;margin:0;padding:12px 14px;background:#F7F4EC;border-radius:8px;font-family:inherit;color:#4A4238">${esc(recap)}</pre>
+  <p style="margin-top:22px">À très vite,<br>
+     <strong>Nicolas Guéret</strong><br>
+     <span style="color:#6E6456">Ma Vigne — GUERETTECH</span><br>
+     <span style="color:#6E6456">06 99 42 48 59 · mavigneapp.fr</span></p>
+</div>`;
+}
+
+// ══════════════════════════════════════════════════════════════════
+// MISE EN ROUTE — les reponses d'installation, en base
+// ══════════════════════════════════════════════════════════════════
+// public/mise-en-route.html pose 17 questions et rendait ses reponses en
+// COPIER-COLLER, ou en brouillon d'e-mail VIDE : un mailto avec corps triple de
+// volume une fois les accents encodes, et Outlook le tronque sans prevenir. Il
+// fallait donc recopier a la main dans l'assistant d'installation.
+//
+// OU CA S'ECRIT, ET POURQUOI PAS AILLEURS : dans le document `leads` DEJA indexe
+// sur sha256(e-mail), sous la cle `mer`. Aucune collection nouvelle, donc aucune
+// regle a deployer — `leads` est deja en read:isGtAdmin / write:false — et les
+// reponses atterrissent dans le dossier que l'assistant d'installation ouvre.
+// Si la personne n'est jamais passee par le formulaire d'essai, le dossier est
+// cree ici, avec sa source.
+const MER_MAX_CH = 60;     // nombre de champs retenus, par famille
+const MER_MAX_L  = 600;    // longueur d'une reponse
+const MER_MAX_R  = 20000;  // longueur du recapitulatif
+
+// Le texte du recapitulatif est construit par la PAGE, pas ici : les 60 libelles
+// n'existent qu'a un seul endroit. Le serveur ne le reecrit pas, il le borne.
+function buildMer(b) {
+  const t = {}, r = {};
+  const src = (b && typeof b.t === 'object' && b.t) ? b.t : {};
+  const rad = (b && typeof b.r === 'object' && b.r) ? b.r : {};
+  Object.keys(src).slice(0, MER_MAX_CH).forEach((k) => {
+    const v = clip(src[k], MER_MAX_L);
+    if (v) t[clip(k, 40)] = v;
+  });
+  Object.keys(rad).slice(0, MER_MAX_CH).forEach((k) => {
+    const v = clip(rad[k], MER_MAX_L);
+    if (v) r[clip(k, 40)] = v;
+  });
+  const c = Array.isArray(b.c) ? b.c.slice(0, MER_MAX_CH).map((x) => clip(x, 120)).filter(Boolean) : [];
+  return { t, r, c, recap: clip(b.recap, MER_MAX_R) };
+}
+
+exports.submitMiseEnRoute = onRequest(
+  {
+    region:         'europe-west1',
+    memory:         '256MiB',
+    timeoutSeconds: 30,
+    maxInstances:   3,
+    cors:           ALLOWED_ORIGINS,
+  },
+  async (req, res) => {
+    if (req.method === 'OPTIONS') { res.status(204).send(''); return; }
+    if (req.method !== 'POST') { res.status(405).json({ error: 'method_not_allowed' }); return; }
+
+    const b = (req.body && typeof req.body === 'object') ? req.body : {};
+    if (clip(b.hp, 200)) { res.status(200).json({ status: 'saved' }); return; }
+
+    // ⚠️ APRÈS le honeypot, et l'ordre compte dans ce sens-là seulement : un bot qui
+    //    remplit le champ piège sort à la ligne du dessus SANS consommer le quota de
+    //    son IP — donc sans fermer le formulaire au prospect qui partagerait cette IP
+    //    (4G en CGNAT, wifi de salon, coopérative).
+    // ⚠️ Réponse 200 et même corps que le honeypot : rien ne doit pousser un vrai
+    //    prospect à ressaisir dix-sept réponses. Le refus ne se lit que dans les logs.
+    if (!(await debitOk(admin.firestore(), req, 'mise-en-route'))) {
+      res.status(200).json({ status: 'saved' });
+      return;
+    }
+
+    const domaine = clip(b.dom, 120);
+    const email   = clip(b.ctMail, 160).toLowerCase();
+    if (!domaine)        { res.status(400).json({ error: 'missing_domaine' }); return; }
+    if (!emailOk(email)) { res.status(400).json({ error: 'invalid_email' });  return; }
+
+    const mer  = buildMer(b);
+    mer.userAgent = clip(req.headers['user-agent'], 300);
+    const hash = crypto.createHash('sha256').update(email).digest('hex');
+    const db   = admin.firestore();
+    const ref  = db.collection(LEADS).doc(hash);
+
+    // ⚠️ La transaction rend DEUX faits, pas un : le dossier existait-il, et une mise
+    //    en route y avait-elle DEJA ete deposee. Le second borne l'accuse de reception
+    //    a un seul envoi par adresse — sans quoi ce formulaire deviendrait un moyen
+    //    d'envoyer autant de messages qu'on veut a l'adresse de son choix.
+    let connu = false, dejaMer = false;
+    try {
+      const _out = await db.runTransaction(async (tx) => {
+        const snap = await tx.get(ref);
+        const prev = snap.exists ? (snap.data() || {}) : {};
+        const base = {
+          mer:      Object.assign({}, mer, { at: admin.firestore.FieldValue.serverTimestamp() }),
+          merCount: admin.firestore.FieldValue.increment(1),
+        };
+        if (snap.exists) { tx.set(ref, base, { merge: true }); return { connu: true, dejaMer: !!prev.mer }; }
+        // Personne d'inconnu : la mise en route peut arriver sans demande d'essai
+        // prealable (lien envoye de la main a la main). On ouvre le dossier.
+        tx.set(ref, Object.assign({
+          domaine:   domaine,
+          email:     email,
+          source:    'mise-en-route',
+          attempts:  0,
+          createdAt: admin.firestore.FieldValue.serverTimestamp(),
+        }, base));
+        return { connu: false, dejaMer: false };
+      });
+      connu = _out.connu; dejaMer = _out.dejaMer;
+    } catch (err) {
+      logger.error('[MER] Échec écriture Firestore', err);
+      res.status(500).json({ error: 'server_error' });
+      return;
+    }
+
+    // ⚠️ Le mail ne conditionne PAS la reponse : les reponses sont en base, et c'est
+    //    ce qui compte. Un envoi rate ne doit pas pousser le client a tout recommencer.
+    try {
+      await db.collection(MAIL_COLLECTION).add({
+        to:      [DEST],
+        replyTo: email,
+        message: {
+          subject: '\u{1F527} Mise en route \u2014 ' + domaine,
+          text:    'Réponses de mise en route\n\n' + (mer.recap || '(récapitulatif vide)')
+                   + '\n\n— ' + domaine + ' <' + email + '>'
+                   + (connu ? '\n(dossier déjà connu)' : '\n(nouveau dossier)'),
+          html:    '<div style="font-family:system-ui,Arial,sans-serif;max-width:560px;color:#14110D">'
+                   + '<h2 style="font-size:18px;margin:0 0 4px;font-weight:600">Mise en route \u2014 ' + esc(domaine) + '</h2>'
+                   + '<p style="font-size:13px;color:#6E6456;margin:0 0 14px">' + esc(email)
+                   + (connu ? ' \u00b7 dossier d\u00e9j\u00e0 connu' : ' \u00b7 nouveau dossier') + '</p>'
+                   + '<pre style="font-size:13px;white-space:pre-wrap;margin:0;padding:12px 14px;'
+                   + 'background:#F7F4EC;border-radius:8px;font-family:inherit">' + esc(mer.recap) + '</pre>'
+                   + '<p style="font-size:13px;color:#6E6456;margin-top:16px">Les r\u00e9ponses sont dans le dossier, '
+                   + 'reprises telles quelles par l\u2019assistant d\u2019installation.</p></div>',
+        },
+      });
+    } catch (err) {
+      logger.warn('[MER] Réponses enregistrées mais e-mail non mis en file', err);
+    }
+
+    // ── Accusé de réception AU CLIENT ────────────────────────────
+    // Une seule fois par adresse : on n'arrive ici avec dejaMer=false que sur la
+    // PREMIERE mise en route de ce dossier. Un renvoi met les réponses à jour en
+    // base — c'est le comportement voulu — mais ne renvoie aucun message.
+    // ⚠️ Un échec d'envoi ne doit jamais faire échouer la demande : les réponses
+    //    sont en base, et c'est ce qui compte.
+    if (!dejaMer) {
+      try {
+        await db.collection(MAIL_COLLECTION).add({
+          to:      [email],
+          replyTo: DEST,
+          message: {
+            subject: 'Vos réponses de mise en route — ' + domaine,
+            text:    merAckText(domaine, mer.recap),
+            html:    merAckHtml(domaine, mer.recap),
+          },
+        });
+      } catch (err) {
+        logger.warn('[MER] Accusé de réception non mis en file', err);
+      }
+    }
+
+    logger.info(`[MER] Mise en route — ${domaine} <${email}>` + (connu ? ' (dossier connu)' : ' (nouveau)')
+                + (dejaMer ? ' · accusé déjà envoyé' : ' · accusé envoyé'));
+    res.status(200).json({ status: 'saved' });
+  }
+);
+
+// ── Function HTTP ─────────────────────────────────────────────────
+exports.submitLead = onRequest(
+  {
+    region:         'europe-west1',
+    memory:         '256MiB',
+    timeoutSeconds: 30,
+    maxInstances:   3,            // garde-fou coût/abus
+    cors:           ALLOWED_ORIGINS,
+  },
+  async (req, res) => {
+    if (req.method === 'OPTIONS') { res.status(204).send(''); return; }
+    if (req.method !== 'POST') { res.status(405).json({ error: 'method_not_allowed' }); return; }
+
+    const b = (req.body && typeof req.body === 'object') ? req.body : {};
+
+    // Honeypot : rempli uniquement par les bots → on simule un succès.
+    if (clip(b.hp, 200)) { res.status(200).json({ status: 'created' }); return; }
+
+    // Débit par IP — APRÈS le honeypot (voir submitMiseEnRoute pour le pourquoi de
+    // l'ordre) et AVANT la validation : un envoi malformé en rafale doit compter lui
+    // aussi, sans quoi il suffirait d'omettre le domaine pour poster sans limite.
+    if (!(await debitOk(admin.firestore(), req, 'lead'))) {
+      res.status(200).json({ status: 'created' });
+      return;
+    }
+
+    const lead = buildLead(b, req);
+    if (!lead.domaine)        { res.status(400).json({ error: 'missing_domaine' }); return; }
+    if (!emailOk(lead.email)) { res.status(400).json({ error: 'invalid_email' });  return; }
+
+    const hash = crypto.createHash('sha256').update(lead.email).digest('hex');
+    const db   = admin.firestore();
+    const ref  = db.collection(LEADS).doc(hash);
+
+    let created = false;
+    try {
+      created = await db.runTransaction(async (tx) => {
+        const snap = await tx.get(ref);
+        if (snap.exists) {
+          tx.update(ref, {
+            attempts:      admin.firestore.FieldValue.increment(1),
+            lastAttemptAt: admin.firestore.FieldValue.serverTimestamp(),
+          });
+          return false;
+        }
+        tx.set(ref, Object.assign({
+          attempts:  1,
+          createdAt: admin.firestore.FieldValue.serverTimestamp(),
+        }, lead));
+        return true;
+      });
+    } catch (err) {
+      logger.error('[Lead] Échec écriture Firestore', err);
+      res.status(500).json({ error: 'server_error' });
+      return;
+    }
+
+    if (!created) {
+      logger.info(`[Lead] Doublon ignoré — ${lead.email}`);
+      res.status(200).json({ status: 'duplicate' });
+      return;
+    }
+
+    // Notification e-mail via l'extension « Trigger Email ».
+    try {
+      await db.collection(MAIL_COLLECTION).add({
+        to:      [DEST],
+        replyTo: lead.email,
+        message: {
+          subject: mailSubject(lead),
+          text:    mailText(lead),
+          html:    mailHtml(lead),
+        },
+      });
+    } catch (err) {
+      // Le lead EST enregistré : on ne fait pas échouer la requête.
+      logger.warn('[Lead] Lead sauvegardé mais e-mail non mis en file', err);
+    }
+
+    // ── Accusé de réception AU CLIENT ────────────────────────────
+    // Sans lui, la personne qui vient d'envoyer le formulaire ne reçoit rien du tout et
+    // ne sait pas si son message est parti. Envoyé une seule fois : on n'arrive ici que
+    // sur un lead réellement créé (les renvois sortent plus haut sur `duplicate`).
+    // Un échec d'envoi ne doit jamais faire échouer la demande — elle est déjà en base.
+    try {
+      await db.collection(MAIL_COLLECTION).add({
+        to:      [lead.email],
+        replyTo: DEST,
+        message: {
+          subject: 'Votre demande d\u2019essai Ma Vigne',
+          text:    ackText(lead),
+          html:    ackHtml(lead),
+        },
+      });
+    } catch (err) {
+      logger.warn('[Lead] Accusé de réception non mis en file', err);
+    }
+
+    logger.info(`[Lead] Nouveau lead — ${lead.domaine} <${lead.email}>`);
+    res.status(200).json({ status: 'created' });
+  }
+);

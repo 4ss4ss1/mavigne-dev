@@ -1,0 +1,284 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>Conditions Générales — Ma Vigne · GUERETTECH</title>
+<meta name="description" content="Conditions Générales d'Utilisation et de Service de Ma Vigne — logiciel SaaS de gestion viticole édité par GUERETTECH. Version 1.1, droit français.">
+<link rel="canonical" href="https://mavigneapp.fr/cgu.html">
+<link rel="stylesheet" href="/fonts/fonts.css">
+<style>
+  :root{
+    --texte:#2A2520; --texte-doux:#6B6358; --vert:#3D6B27;
+    --bg-app:#F2EFE7; --bg-card:#FBFAF6; --line:#E7E1D5;
+    --or:#B8911F; --bordeaux:#7A1020;
+  }
+  *{box-sizing:border-box}
+  html{-webkit-text-size-adjust:100%}
+  body{
+    margin:0; background:var(--bg-app); color:var(--texte);
+    font-family:'Outfit',system-ui,-apple-system,sans-serif;
+    font-size:14px; line-height:1.7;
+    padding:0 16px calc(60px + env(safe-area-inset-bottom,0px));
+  }
+  .wrap{max-width:760px; margin:0 auto}
+
+  header{
+    text-align:center; padding:38px 0 22px;
+  }
+  .brand{
+    display:inline-flex; align-items:center; gap:10px; margin-bottom:14px;
+  }
+  .brand-mark{
+    width:42px; height:42px; border-radius:50%;
+    background:linear-gradient(150deg,#1C1813,#14110D);
+    border:1.5px solid var(--or); display:flex; align-items:center; justify-content:center;
+    color:var(--or); font-size:20px;
+  }
+  .brand-name{font-family:'Cormorant Garamond',serif; font-size:26px; font-weight:700; color:var(--texte); line-height:1}
+  .brand-name small{display:block; font-family:'Outfit',sans-serif; font-size:10px; font-weight:600; letter-spacing:2px; text-transform:uppercase; color:var(--or); margin-top:3px}
+  h1{
+    font-family:'Cormorant Garamond',serif; font-size:30px; font-weight:700;
+    color:var(--bordeaux); margin:10px 0 4px; line-height:1.1;
+  }
+  .meta{font-size:11px; color:var(--texte-doux); letter-spacing:.4px}
+
+  .doc{
+    background:var(--bg-card); border:1px solid var(--line); border-radius:18px;
+    padding:30px 28px 34px; box-shadow:0 8px 30px rgba(0,0,0,0.05);
+    font-size:13px; color:var(--texte); line-height:1.7;
+  }
+  .intro{
+    background:rgba(61,107,39,0.09); border:1px solid rgba(61,107,39,0.25);
+    border-radius:10px; padding:12px 16px; margin:0 0 20px;
+    font-size:12px; color:var(--texte-doux); line-height:1.6;
+  }
+  .intro strong{color:var(--vert)}
+
+  .cgu-art{
+    font-family:'Cormorant Garamond',serif; font-size:21px; font-weight:700;
+    color:var(--bordeaux); margin:28px 0 8px; padding-bottom:6px;
+    border-bottom:1px solid var(--line);
+  }
+  .cgu-art:first-of-type{margin-top:4px}
+  .cgu-sub{
+    font-weight:600; color:var(--or); font-size:11px; text-transform:uppercase;
+    letter-spacing:.6px; margin:13px 0 3px;
+  }
+  .doc p{margin:0 0 8px}
+  .cgu-tbl{width:100%; border-collapse:collapse; margin:8px 0 12px; font-size:12px}
+  .cgu-tbl th{background:var(--bg-app); text-align:left; padding:8px 11px; font-weight:600; border:1px solid var(--line)}
+  .cgu-tbl td{padding:8px 11px; border:1px solid var(--line); vertical-align:top}
+  .doc a{color:var(--or); text-decoration:none; font-weight:500}
+  .doc a:hover{text-decoration:underline}
+
+  footer{
+    text-align:center; font-size:11px; color:var(--texte-doux);
+    padding:24px 0 4px; line-height:1.7;
+  }
+  footer a{color:var(--or); text-decoration:none}
+  .back{
+    display:inline-block; margin-top:14px; font-size:12px; font-weight:600;
+    color:var(--vert); text-decoration:none;
+  }
+
+  @media(max-width:560px){
+    .doc{padding:22px 18px 26px; border-radius:14px}
+    h1{font-size:25px}
+    .cgu-art{font-size:19px}
+  }
+  @media print{
+    body{background:#fff; padding:0}
+    .doc{box-shadow:none; border:none; border-radius:0; padding:0}
+    .back{display:none}
+    .mvd-noprint{display:none!important}
+    a{color:#000}
+  }
+</style>
+</head>
+<body>
+<div class="wrap">
+
+  <header>
+    <div class="brand">
+      <div class="brand-mark">&#x1F347;</div>
+      <div class="brand-name">Ma Vigne<small>GUERETTECH</small></div>
+    </div>
+    <h1>Conditions Générales d'Utilisation et de Service</h1>
+    <div class="meta">Version 1.1 — Juin 2026 · Contrat SaaS B2B · Droit français</div>
+    <div class="meta" id="mvd-badge" style="display:none;margin-top:5px;color:var(--vert);font-weight:700"></div>
+  </header>
+
+  <div class="mvd-noprint" id="mvd-print" style="display:none;text-align:right;margin:0 0 12px">
+    <button onclick="window.print()" style="font-family:'Outfit',sans-serif;font-weight:600;font-size:13px;color:#fff;background:var(--vert);border:0;border-radius:10px;padding:10px 16px;cursor:pointer">&#128424;&#65039; Imprimer / Enregistrer en PDF</button>
+  </div>
+
+  <div class="doc">
+
+    <div id="mvd-draft" style="display:none;margin:0 0 16px;padding:9px 13px;border:1px dashed var(--or);background:rgba(184,145,58,0.10);border-radius:8px;font-size:12px;color:var(--texte-doux)"><strong style="color:var(--or)">Projet &mdash; non sign&eacute;.</strong> Aper&ccedil;u rempli avec les informations saisies dans Ma Vigne. La signature &eacute;lectronique se fait dans l&#39;application.</div>
+
+    <div class="intro">
+      <strong>Contrat SaaS B2B</strong> — entre <strong>GUERETTECH</strong> (Prestataire) et tout domaine viticole abonné (Client). Toute utilisation du service vaut acceptation.
+    </div>
+
+    <div class="cgu-art">Article 1 — Objet et définitions</div>
+    <div class="cgu-sub">1.1 Objet</div>
+    <p>Les présentes CGU définissent les droits et obligations dans le cadre de la mise à disposition en mode SaaS de <strong>Ma Vigne</strong> — logiciel de gestion viticole accessible via navigateur et installable en PWA.</p>
+    <div class="cgu-sub">1.2 Définitions</div>
+    <table class="cgu-tbl">
+      <tr><th>Terme</th><th>Définition</th></tr>
+      <tr><td><strong>Service</strong></td><td>L&#39;application Ma Vigne dans sa version en vigueur.</td></tr>
+      <tr><td><strong>Prestataire</strong></td><td>Nicolas GUERET — GUERETTECH, SIRET 98214811600022.</td></tr>
+      <tr><td><strong>Client</strong></td><td>Personne morale ou physique ayant souscrit à une offre Ma Vigne dans le cadre d&#39;une activité viticole professionnelle.</td></tr>
+      <tr><td><strong>Utilisateur</strong></td><td>Toute personne accédant au Service avec les identifiants fournis par le Client.</td></tr>
+      <tr><td><strong>Données agronomiques</strong></td><td>Parcelles, travaux, traitements, sessions tracteur, membres, plannings et toute donnée métier saisie.</td></tr>
+      <tr><td><strong>Espace Client</strong></td><td>Environnement isolé associé à l&#39;identifiant unique du Client (tenant) dans Firebase.</td></tr>
+    </table>
+
+    <div class="cgu-art">Article 2 — Accès au service</div>
+    <div class="cgu-sub">2.1–2.4 Conditions, comptes, multi-supports, hors ligne</div>
+    <p>L&#39;accès est réservé aux Clients ayant souscrit et finalisé l&#39;installation. Le Client est responsable de la confidentialité des identifiants de ses Utilisateurs. Compte administrateur créé par e-mail/mot de passe lors de l&#39;onboarding. Accès depuis tout navigateur moderne (Android, iOS, desktop). Mode hors ligne partiel disponible.</p>
+    <div class="cgu-sub">2.5 Obligations du Client</div>
+    <p>Usage conforme à sa destination (gestion viticole), pas d&#39;accès à l&#39;Espace d&#39;un autre Client, signalement sans délai de toute utilisation non autorisée.</p>
+
+    <div class="cgu-art">Article 3 — Conditions financières</div>
+    <div class="cgu-sub">3.1 Offre</div>
+    <p>Forfait d&#39;installation + abonnement mensuel ou annuel (mises à jour et support inclus), définis dans le devis ou bon de commande signé.</p>
+    <div class="cgu-sub">3.2 Révision des tarifs</div>
+    <p>Préavis de <strong>60 jours</strong>. Résiliation sans frais possible avant l&#39;entrée en vigueur des nouveaux tarifs.</p>
+    <div class="cgu-sub">3.3 Paiement et pénalités de retard</div>
+    <div style="background:rgba(184,145,58,0.12);border:1px solid rgba(184,145,58,0.3);border-radius:8px;padding:11px 13px;margin:6px 0;font-size:12px;line-height:1.6">
+      <strong>Pénalités — art. L441-10 C. com.</strong> : Tout retard donne lieu, dès le lendemain de l&#39;échéance, à des pénalités au taux de <strong>3 fois le taux d&#39;intérêt légal</strong>, exigibles de plein droit.<br>
+      + <strong>Indemnité forfaitaire de 40 €</strong> pour frais de recouvrement (art. D441-5 C. com.), de plein droit.
+    </div>
+    <p>Retard &gt; 30 jours → suspension du Service jusqu&#39;à régularisation complète (principal + pénalités), après mise en demeure sans effet sous 8 jours.</p>
+
+    <div class="cgu-art">Article 4 — Données personnelles et RGPD</div>
+    <div class="cgu-sub">4.1 Responsabilité du traitement</div>
+    <p>Prestataire = <strong>responsable de traitement</strong> pour les données de la relation commerciale. Il agit comme <strong>sous-traitant</strong> (art. 28 RGPD) pour les données personnelles des Utilisateurs — le Client en étant le responsable.</p>
+    <div class="cgu-sub">4.2–4.3 Données collectées et stockage</div>
+    <p>E-mail du Compte administrateur + éventuelles données de facturation. Données Utilisateurs stockées dans l&#39;Espace Client isolé, hébergé Firebase (Google LLC), centres de données européens.</p>
+    <div class="cgu-sub">4.4 Droits des personnes</div>
+    <p>Droits d&#39;accès, rectification, effacement, portabilité et opposition exercés auprès du Client ou à <strong>ngdevpro@gmail.com</strong>. Réponse sous 30 jours.</p>
+    <div class="cgu-sub">4.5 Conservation</div>
+    <p>Données conservées pendant l&#39;abonnement + <strong>90 jours</strong> post-résiliation pour export, puis suppression définitive.</p>
+    <div class="cgu-sub">4.6 Sécurité</div>
+    <p>Authentification Firebase, chiffrement HTTPS/TLS, règles Firestore garantissant l&#39;isolation des Espaces Clients, sauvegardes régulières.</p>
+    <div class="cgu-sub">4.7 Sous-traitants</div>
+    <table class="cgu-tbl">
+      <tr><th>Sous-traitant</th><th>Rôle</th></tr>
+      <tr><td>Google LLC (Firebase)</td><td>Hébergement BDD, authentification</td></tr>
+      <tr><td>Google LLC (Firebase Hosting)</td><td>Hébergement application web</td></tr>
+    </table>
+    <p>Sous-traitants soumis à des clauses contractuelles types RGPD. Toute modification substantielle du socle technique sera notifiée au Client.</p>
+    <div class="cgu-sub">4.8 Notification des violations de données</div>
+    <div style="background:rgba(65,110,200,0.1);border:1px solid rgba(65,110,200,0.25);border-radius:8px;padding:11px 13px;margin:6px 0 10px;font-size:12px;line-height:1.6">
+      En qualité de sous-traitant (art. 28 RGPD), le Prestataire notifie le Client <strong>dans les meilleurs délais</strong> après toute violation de données : nature, catégories de données, mesures prises. Le Client apprécie ensuite l&#39;opportunité de notifier la CNIL (72 h, art. 33 RGPD) et les personnes concernées.
+    </div>
+
+    <div class="cgu-art">Article 5 — Données agronomiques et confidentialité</div>
+    <div class="cgu-sub">5.1–5.2 Propriété et confidentialité</div>
+    <p>Les Données agronomiques sont la <strong>propriété exclusive du Client</strong>. Le Prestataire ne les utilise pas à des fins commerciales ou statistiques. Confidentialité stricte.</p>
+    <div class="cgu-sub">5.3 Export et réversibilité</div>
+    <p>Export JSON disponible à tout moment depuis les Réglages.</p>
+    <div style="background:rgba(0,0,0,0.03);border:1px solid var(--line);border-radius:8px;padding:10px 13px;margin:4px 0 10px;font-size:12px;line-height:1.6">
+      <strong>Étendue de la réversibilité</strong> : La fourniture de l&#39;export JSON constitue <strong>l&#39;intégralité de la prestation de réversibilité</strong>. Toute migration vers un système tiers est une prestation séparée, sur devis.
+    </div>
+
+    <div class="cgu-art">Article 6 — Disponibilité et maintenance</div>
+    <div class="cgu-sub">6.1 Disponibilité</div>
+    <p>Obligation de moyens — disponibilité cible <strong>99 %</strong> sur base mensuelle (~7 h max/mois), hors maintenance planifiée. Interruptions Firebase, opérateur tiers ou force majeure exclues du calcul.</p>
+    <div class="cgu-sub">6.2–6.4 Maintenance, mises à jour, support</div>
+    <p>Maintenance planifiée hors 7h–20h Paris. Mises à jour automatiques incluses dans l&#39;abonnement (pas de suppression de fonctionnalité essentielle sans préavis 30 j). Support par e-mail à ngdevpro@gmail.com — accusé de réception sous <strong>48 h ouvrées</strong>.</p>
+
+    <div class="cgu-art">Article 7 — Propriété intellectuelle</div>
+    <p>Ma Vigne, son code, son design et ses algorithmes sont la propriété exclusive du Prestataire (droit d&#39;auteur). L&#39;abonnement confère un droit d&#39;usage personnel, non exclusif, non transférable. Le Client conserve tous ses droits sur ses données et son identité.</p>
+
+    <div class="cgu-art">Article 8 — Responsabilité et garanties</div>
+    <div class="cgu-sub">8.1 Limitation de responsabilité</div>
+    <p>Obligation de moyens. Responsabilité plafonnée aux sommes versées sur les <strong>6 derniers mois</strong>.</p>
+    <div class="cgu-sub">8.2 Exclusions et force majeure</div>
+    <p>Exclusions : interruptions Firebase / opérateur ; manipulation erronée par le Client ; non-conformité réglementaire phytosanitaire <em>(le registre est un outil d&#39;aide — conformité à la charge du Client)</em> ; force majeure (art. 1218 C. civ.).</p>
+    <div style="background:rgba(0,0,0,0.03);border:1px solid var(--line);border-radius:8px;padding:10px 13px;margin:4px 0 10px;font-size:12px;line-height:1.6">
+      <strong>Force majeure et facturation</strong> : Interruption totale &gt; 72 h → suspension des obligations. &gt; 30 jours → résiliation sans indemnité sur notification écrite. Périodes d&#39;inaccessibilité totale &gt; 72 h consécutives → avoir ou remboursement <strong>au prorata temporis</strong>.
+    </div>
+
+    <div class="cgu-art">Article 9 — Durée et résiliation</div>
+    <p>Durée indéterminée à compter de l&#39;installation, reconduction tacite. <strong>Résiliation Client</strong> : préavis 30 j par écrit. <strong>Résiliation Prestataire</strong> : non-paiement (mise en demeure 15 j) ; violation grave (8 j) ; cessation d&#39;activité (préavis 3 mois). À l&#39;issue : accès suspendu, données conservées 90 j puis supprimées.</p>
+
+    <div class="cgu-art">Article 10 — Dispositions diverses</div>
+    <p>Modifications des CGU : préavis 30 j, poursuite d&#39;utilisation = acceptation. Les présentes CGU et le devis/bon de commande constituent l&#39;intégralité de l&#39;accord. <strong>Droit français applicable.</strong> Compétence exclusive : tribunaux du ressort du siège du Prestataire.</p>
+
+    <div style="background:rgba(0,0,0,0.03);border-radius:8px;padding:12px 14px;font-size:12px;color:var(--texte-doux);line-height:1.7;margin:18px 0 4px">
+      <strong>GUERETTECH</strong> · Nicolas GUERET · SIRET 98214811600022 · <a href="mailto:ngdevpro@gmail.com">ngdevpro@gmail.com</a><br>
+      Ma Vigne — service SaaS de gestion viticole · CGU v1.1 — Juin 2026
+    </div>
+
+    <div id="mvd-personal" style="display:none;margin:18px 0 4px">
+      <div class="cgu-art">Parties au pr&eacute;sent contrat</div>
+      <table class="cgu-tbl">
+        <tr><th>Qualit&eacute;</th><th>Partie</th></tr>
+        <tr><td><strong>Client</strong></td><td><strong id="mvd-rs">&mdash;</strong><br>SIRET : <span id="mvd-siret">&mdash;</span> &middot; Si&egrave;ge : <span id="mvd-adr">&mdash;</span><br>Repr&eacute;sent&eacute;(e) par : <span id="mvd-rep">&mdash;</span> &middot; Fonction : <span id="mvd-fct">&mdash;</span></td></tr>
+        <tr><td><strong>Prestataire</strong></td><td>GUERETTECH &mdash; Nicolas GU&Eacute;RET &middot; SIRET 982 148 116 00022 &middot; ngdevpro@gmail.com</td></tr>
+      </table>
+      <div id="mvd-sign" style="display:none;margin:8px 0 4px;padding:14px 16px;border:1px solid rgba(61,107,39,0.35);background:rgba(61,107,39,0.06);border-radius:12px">
+        <div style="font-family:'Cormorant Garamond',serif;font-size:18px;font-weight:700;color:var(--vert);margin-bottom:8px">&#10003; Accept&eacute; par voie &eacute;lectronique</div>
+        <table class="cgu-tbl" style="margin:0">
+          <tr><td style="width:42%"><strong>Pour le Client</strong></td><td><span id="mvd-sg-rs">&mdash;</span> &mdash; repr&eacute;sent&eacute;(e) par <span id="mvd-sg-sig">&mdash;</span></td></tr>
+          <tr><td><strong>Date et heure (serveur)</strong></td><td id="mvd-sg-ts">&mdash;</td></tr>
+          <tr><td><strong>R&eacute;f&eacute;rence</strong></td><td id="mvd-sg-ref">&mdash;</td></tr>
+          <tr><td><strong>Empreinte CGU (SHA-256)</strong></td><td id="mvd-sg-hcgv" style="word-break:break-all;font-size:10.5px">&mdash;</td></tr>
+          <tr><td><strong>Empreinte DPA (SHA-256)</strong></td><td id="mvd-sg-hdpa" style="word-break:break-all;font-size:10.5px">&mdash;</td></tr>
+        </table>
+        <p style="margin:10px 0 0;font-size:11.5px;color:var(--texte-doux);line-height:1.6">La preuve horodat&eacute;e est conserv&eacute;e c&ocirc;t&eacute; serveur et vaut preuve pour les deux parties.</p>
+      </div>
+    </div>
+
+  </div>
+
+  <footer>
+    © 2026 Nicolas GUERET / GUERETTECH — Tous droits réservés<br>
+    <span style="display:block;margin-top:6px"><a href="https://mavigneapp.fr/mentions-legales.html">Mentions légales</a> · <a href="https://mavigneapp.fr/confidentialite.html">Confidentialité</a> · <a href="https://mavigneapp.fr/cgu.html">CGU</a></span>
+    <a href="https://mavigneapp.fr" class="back">← Retour à Ma Vigne</a>
+  </footer>
+
+</div>
+<script>
+(function(){
+  try{
+    var h=(location.hash||'');
+    var mode=h.indexOf('mvp')>=0?'draft':(h.indexOf('mv')>=0?'signed':'');
+    if(!mode) return;
+    var key=mode==='draft'?'mv_terms_draft':'mv_terms_fill';
+    var raw=null; try{ raw=localStorage.getItem(key); }catch(e){ return; }
+    if(!raw) return;
+    var d; try{ d=JSON.parse(raw); }catch(e){ return; }
+    if(!d||typeof d!=='object') return;
+    var T=function(id,v){ var el=document.getElementById(id); if(el) el.textContent=(v==null?'':String(v)); };
+    var show=function(id,on){ var el=document.getElementById(id); if(el) el.style.display=on?'':'none'; };
+    var fmtSiret=function(s){ s=(s||'').replace(/\D/g,''); if(s.length!==14) return s||'\u2014'; return s.slice(0,3)+' '+s.slice(3,6)+' '+s.slice(6,9)+' '+s.slice(9); };
+    T('mvd-rs', d.rs||'\u2014');
+    T('mvd-siret', fmtSiret(d.siret));
+    var adr=(d.adr||'').trim(); if(d.cpv) adr=adr?(adr+', '+d.cpv):d.cpv;
+    T('mvd-adr', adr||'\u2014');
+    T('mvd-rep', d.sig_nom||'\u2014');
+    T('mvd-fct', d.sig_fct||'\u2014');
+    show('mvd-personal', true); show('mvd-print', true);
+    var bd=document.getElementById('mvd-badge'); if(bd&&d.rs){ bd.textContent='Exemplaire du domaine '+d.rs; bd.style.display=''; }
+    if(mode==='signed'){
+      T('mvd-sg-rs', d.rs||'\u2014');
+      T('mvd-sg-sig', (d.sig_nom||'\u2014')+(d.sig_fct?(' \u00b7 '+d.sig_fct):''));
+      var when='\u2014'; try{ if(d.date_iso){ var dt=new Date(d.date_iso); if(!isNaN(dt.getTime())) when=dt.toLocaleDateString('fr-FR',{day:'2-digit',month:'long',year:'numeric'})+' \u00e0 '+dt.toLocaleTimeString('fr-FR',{hour:'2-digit',minute:'2-digit'}); } }catch(e){}
+      T('mvd-sg-ts', when);
+      T('mvd-sg-ref', d.ref||'\u2014');
+      T('mvd-sg-hcgv', d.hashCgv||'\u2014');
+      T('mvd-sg-hdpa', d.hashDpa||'\u2014');
+      show('mvd-sign', true); show('mvd-draft', false);
+    } else {
+      show('mvd-draft', true); show('mvd-sign', false);
+    }
+  }catch(e){}
+})();
+</script>
+</body>
+</html>

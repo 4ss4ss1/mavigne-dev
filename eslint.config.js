@@ -1,0 +1,45 @@
+import js from "@eslint/js";
+
+export default [
+  js.configs.recommended,
+  {
+    files: ["src/**/*.js"],
+    languageOptions: {
+      ecmaVersion: "latest",
+      sourceType: "module",
+      globals: {
+        window: "readonly",
+        document: "readonly",
+        console: "readonly",
+        localStorage: "readonly",
+        setTimeout: "readonly",
+        clearTimeout: "readonly",
+        setInterval: "readonly",
+        clearInterval: "readonly",
+        fetch: "readonly",
+        alert: "readonly",
+        confirm: "readonly",
+        navigator: "readonly",
+        location: "readonly",
+        history: "readonly",
+        URL: "readonly",
+        URLSearchParams: "readonly",
+        FileReader: "readonly",
+        Blob: "readonly",
+        Promise: "readonly",
+        firebase: "readonly",
+        L: "readonly",
+      },
+    },
+    rules: {
+      "no-unused-vars": "off",
+      "no-undef": "off",
+      "no-empty": "off",
+      "no-useless-escape": "off",
+      "no-useless-assignment": "off",
+      "no-self-assign": "off",
+      "no-redeclare": "error",
+      "no-unreachable": "error",
+    },
+  },
+];
