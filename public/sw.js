@@ -1,4 +1,42 @@
-// MA VIGNE — Service Worker v7.38
+// MA VIGNE — Service Worker v7.39
+// v7.39 (06/09/2026) — PARC-1 : changer l'etape d'une cuve garde la DATE du
+//   changement. Signale par Nico : « si je suis en prefermentaire a froid, a un
+//   moment elle va passer en fermentation alcoolique, mais il ne faut pas que
+//   ca me change le statut entier de la cuve depuis la date de creation ».
+//   ★★★ `statut` EST UN SCALAIRE : il dit ou en est la cuve, jamais depuis
+//   quand. Rien n'ecrivait la date d'un passage MPF -> FA, donc tout ce qui
+//   comptait des jours partait de `date_entree` — et une cuve avait l'air
+//   d'etre dans son etat courant DEPUIS L'ENCUVAGE.
+//   ★ `statut_hist` : [{id,statut,date}], empile a chaque changement REEL, aux
+//   TROIS endroits ou le statut bouge (fiche, decuvage, fusion). La frise porte
+//   les dates, le detail dit « FA depuis le 16/09 · 3 j », et le parcours se
+//   corrige ligne a ligne — meme porte que les releves de CUV-1.
+//   ⚠️⚠️ AUCUN RATTRAPAGE INVENTE sur les cuves d'avant ce lot : on ne connait
+//   pas la date de leur etat courant, et `date_entree` ne la donne pas. La
+//   frise ecrit « — ». Un tiret se corrige, une date fausse se croit.
+//   ⚠️ Bornes posees AVANT toute ecriture : anterieur a l'encuvage ou dans le
+//   futur = refus, la fiche reste intacte. Supprimer une etape efface une date,
+//   PAS un fait : le statut ne retrograde pas. Une cuve decuvee ou fusionnee
+//   garde 'termine' — sa cuvee existe deja au Chai.
+//   ★★ _mlProjFA comptait « demarrage < 3 j » depuis l'ENCUVAGE : cinq jours de
+//   macera""tion a froid passaient pour cinq jours de fermentation, et la
+//   projection de fin s'ouvrait sur une cuve qui n'avait pas commence. Elle
+//   compte desormais depuis le debut de FA quand on le connait ; sans parcours,
+//   l'ancien comportement a l'identique. `jCuve` garde son sens : l'agenda
+//   l'affiche sous le nom « en cuve depuis ».
+//   ★ Cahier de cuverie : duree de macerati""on REELLE quand elle est connue,
+//   sinon la duree PREVUE, annoncee comme telle.
+//   ⚠️ Defaut trouve en chemin : .mvv-histwrap / .mvv-hrow vivent dans
+//   _vendEnsureSheetCss, que renderCaveVendange n'appelait pas — l'historique
+//   des releves sortait SANS STYLE tant qu'aucune feuille n'avait ete ouverte.
+//   ⚠️ Le harnais FUS-1 plantait : saveVendFusion appelle _vendHistPose, non
+//   extrait. Un lot qui change une fonction doit rebrancher le harnais qui la
+//   joue — +4 assertions FUS-1, et mv-harnais-parcours.mjs (161 assertions,
+//   10 contre-epreuves jouees UNE PAR UNE).
+//   ⚠️ Deux de mes assertions etaient fausses au premier lancement :
+//   /mvv-hrow/ matche aussi -l/-d/-u, et le toast dit « Anterieur » avec une
+//   majuscule. Se demander si le controle a tort AVANT d'accuser le code.
+//   APP 6.79 -> 6.80.
 // v7.38 (06/09/2026) — CUV-4 : le Cuvier ne savait dire que ce qui EST rentre.
 //   La question du matin, en pleine vendange, est l'inverse : qu'est-ce qu'il
 //   reste ? Il fallait comparer de tete l'ecran Recoltes et le parcellaire.
@@ -3245,7 +3283,7 @@
 // v2.22 — Fix profils vides : guard vide dans loadData() pour MEMBRES/SAISONS/TACHES
 // v2.17 — Onboarding intégré + tenantId · v2.06 — Firebase Auth · v2.00–v2.05 — divers
 const DEBUG = self.location.hostname === 'localhost' || self.location.hostname === '127.0.0.1';
-const CACHE_NAME   = 'mavigne-v7.38';
+const CACHE_NAME   = 'mavigne-v7.39';
 const TENANT_CACHE = 'mavigne-tenant';   // Cache persistant — préservé à chaque mise à jour SW
 const SYNC_TAG     = 'mavigne-sync';
 
@@ -3261,7 +3299,7 @@ const CDN_URLS = [
 ];
 
 self.addEventListener('install', event => {
-  if(DEBUG) console.log('[SW] Ma Vigne v7.38 installé');
+  if(DEBUG) console.log('[SW] Ma Vigne v7.39 installé');
   event.waitUntil(
     caches.open(CACHE_NAME).then(async cache => {
       // ── Cœur applicatif : STRICT (mise à jour ATOMIQUE) ──
@@ -3277,7 +3315,7 @@ self.addEventListener('install', event => {
 });
 
 self.addEventListener('activate', event => {
-  if(DEBUG) console.log('[SW] Ma Vigne v7.38 activé');
+  if(DEBUG) console.log('[SW] Ma Vigne v7.39 activé');
   event.waitUntil(
     caches.keys().then(keys =>
       Promise.all(

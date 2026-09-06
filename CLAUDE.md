@@ -2,7 +2,37 @@
 
 > Document de référence du projet **Ma Vigne** (GUERETTECH). Il est le **porteur de vérité** :
 > la mémoire Claude est plafonnée, ce fichier ne l'est pas.
-> Dernière consolidation : **6 septembre 2026** — ★★★ **LE HARNAIS A REFUSÉ DE ROUGIR, ET IL AVAIT
+> Dernière consolidation : **6 septembre 2026 (soir)** — ★★★ **UN STATUT N'EST PAS UNE DATE
+> (§81)**. **APP 6.79 → 6.80 · SW 7.38 → 7.39.** Lot **PARC-1**, demandé par Nico : *« si je suis en
+> préfermentaire à froid, à un moment elle va passer en fermentation alcoolique, mais il ne faut pas
+> que ça me change le statut entier de la cuve depuis la date de création »*.
+> ★★★ **`statut` EST UN SCALAIRE : il dit où en est la cuve, jamais depuis quand.** Rien n'écrivait
+> la date d'un passage MPF → FA. Tout ce qui comptait des jours partait donc de `date_entree`, et
+> une cuve avait l'air d'être dans son état courant **depuis l'encuvage**. *Un champ qui n'a qu'une
+> valeur ne peut pas porter une histoire — il faut lui en donner une.*
+> ★ **`statut_hist`** — `[{id,statut,date}]` — s'empile aux **trois** endroits où le statut bouge
+> (fiche, décuvage, fusion), et se corrige **ligne à ligne**, même porte que les relevés de CUV-1.
+> ⚠️⚠️ **AUCUN RATTRAPAGE INVENTÉ sur les cuves d'avant ce lot** : on ne connaît pas la date de leur
+> état courant, et `date_entree` ne la donne pas. La frise écrit **« — »**. *Un tiret se corrige, une
+> date fausse se croit.* La contre-épreuve n°10 vérifie précisément qu'on ne retombe pas sur
+> `date_entree` en repli.
+> ★★ **Un défaut de calcul en prime, jamais signalé** : `_mlProjFA` comptait son garde « démarrage
+> < 3 j » depuis l'**encuvage**. Cinq jours de macération à froid passaient pour cinq jours de
+> fermentation, et la **projection de fin s'ouvrait sur une cuve qui n'avait pas commencé**.
+> `jCuve` garde son sens — l'agenda l'affiche sous le nom « en cuve depuis » — et un `jFA` neuf
+> porte le nouveau. *Changer le sens d'une variable sans changer son nom déplace le défaut ailleurs.*
+> ⚠️⚠️⚠️ **LE DÉPÔT AVAIT ÉTÉ RÉÉCRIT SOUS MES PIEDS, POUR LA SECONDE FOIS EN UNE JOURNÉE.** Mon
+> clone était sur `8ce647b`, disparu du distant. La règle de §80f a servi le jour même où elle a été
+> écrite : **`git fetch` avant le premier bump**. Les 18 ancres du patch tenaient toutes, mais **le
+> contrat du module avait changé** — mes deux écrivains utilisaient `window.fbSave('cave_vendange')`
+> nu, l'idiome d'avant VD-SAVE. *Une ancre qui tient ne prouve pas qu'un contrat tient.*
+> ⚠️ **Et le harnais FUS-1 plantait** : `saveVendFusion` appelle désormais `_vendHistPose`, non
+> extrait. **Un lot qui change une fonction doit rebrancher le harnais qui la joue.**
+> ★ **Trois cliquets ont mordu**, tous les trois avec raison : C24b (un `s[0]` nu dans un slot
+> `onclick`), la graisse `400` hors des trois pas, et **le compte d'emojis** (un `⚙` posé dans un
+> texte de `WHATS_NEW` — la charte n'écrit pas d'emoji dans une phrase). Détail en **§81**.
+>
+> ★ Précédente : **6 septembre 2026** — ★★★ **LE HARNAIS A REFUSÉ DE ROUGIR, ET IL AVAIT
 > RAISON (§80)**. **APP 6.78 → 6.79 · SW 7.37 → 7.38.** Lot **CUV-4** : Nico demande à voir, au
 > Cuvier, *les parcelles qui n'ont pas eu de récoltes enregistrées*. L'écran Récoltes ne savait
 > montrer que ce qui **est** rentré ; la question du matin, en pleine vendange, est l'inverse.
@@ -12995,3 +13025,192 @@ taire.
 dans **toute** la page — que le texte visible contient légitimement, `_escHtml` fait son travail —
 au lieu des seuls slots `onclick` ; l'autre attendait une surface calculée de tête, fausse de 0,5 ha.
 **Corrigées avant de conclure quoi que ce soit sur le code.**
+
+---
+
+## 81. ★★★ PARC-1 — UN STATUT N'EST PAS UNE DATE (06/09 soir — APP 6.79 → 6.80 · SW 7.38 → 7.39)
+
+**La demande de Nico**, dictée : *« Quand je change le statut d'une cuve, il faut que ça mette la
+date du changement de statut. Par exemple, si je suis en préfermentaire à froid, à un moment elle va
+passer en fermentation alcoolique, mais il ne faut pas que ça me change le statut entier de la cuve
+depuis le début de la date de création. Il faut que ça me le change ce statut au moment où je change
+le statut. »*
+
+### 81a. ★★★ Le diagnostic : un champ qui n'a qu'une valeur ne peut pas porter une histoire
+
+`cuves_vinif[].statut` est un **scalaire** : `setup | mpf | fa | decuvage | fml | termine`. Il dit
+**où en est** la cuve, jamais **depuis quand**. Aucun des trois endroits qui l'écrivent
+(`saveVendCuve`, `saveVendDecuvage`, `saveVendFusion`) ne datait le passage.
+
+Conséquence directe : la seule date disponible pour tout ce qui compte des jours était
+`date_entree` — la date d'encuvage. Une cuve qui venait de passer de MPF à FA **avait l'air d'être
+en fermentation depuis l'encuvage**. C'est exactement ce que Nico décrit.
+
+> ★★★ **Le symptôme n'était pas un calcul faux, c'était une donnée qui n'existait pas.** Aucun
+> harnais n'aurait pu l'attraper : il n'y avait rien à vérifier.
+
+### 81b. Le modèle : `statut_hist`
+
+`[{id, statut, date}]`, rangé par date, ids posés à la lecture (`_vendHist`, même anatomie que
+`_vendTriMes` de CUV-1). Six fonctions, toutes dans `cave.js` :
+
+| fonction | ce qu'elle rend |
+|---|---|
+| `_vendHist(c)` | le parcours trié, ids posés |
+| `_vendStatIdx(c,st)` | l'index de la **DERNIÈRE** occurrence d'une étape |
+| `_vendStatDeb` / `_vendStatFin` | date d'entrée / de sortie de cette occurrence |
+| `_vendStatDuree` | jours passés dans l'étape, **`null`** si la date d'entrée est inconnue |
+| `_vendHistPose(c,st,date)` | empile **si et seulement si** l'étape change réellement |
+
+⚠️ **`_vendStatIdx` lit la DERNIÈRE occurrence, pas la première.** Un retour en arrière — FA → MPF
+pour rattraper une saisie — est possible, et « depuis quand est-elle en FA » doit lire le dernier
+passage. Contre-épreuve n°3 dédiée.
+
+⚠️ **`_vendStatDuree` rend `null`, jamais `0`.** *Zéro est un nombre, et un nombre se croit.* C'est
+§34 du projet rejoué : une valeur manquante ne doit pas se déguiser en valeur mesurée.
+Contre-épreuve n°2.
+
+### 81c. ★★★ Aucun rattrapage inventé, et la contre-épreuve qui le garde
+
+Les cuves créées **avant** ce lot n'ont pas d'historique. On connaît leur statut courant et leur
+`date_entree` — mais **`date_entree` n'est pas la date de leur passage**. Une cuve encuvée le 12 et
+passée en FA le 16 rendrait « FA depuis le 12 » : la même erreur qu'on vient de corriger, réécrite
+en dur dans la migration.
+
+**Décision : rien n'est migré.** La frise affiche **« — »** sous une étape franchie dont la date est
+inconnue. C'est une invitation à la poser, pas un trou.
+
+> ★★ *Un tiret se corrige, une date fausse se croit.*
+
+⚠️ La **contre-épreuve n°10** injecte exactement le repli tentant —
+`_vendStatDeb(c,s[0]) || c.date_entree` — et le harnais doit rougir. Sans elle, un futur lot
+« améliorerait » la frise en rebranchant `date_entree`, et personne ne le verrait.
+
+### 81d. Les deux portes, et une seule vérité
+
+- **La fiche « Modifier »** : dès que le `<select>` de statut change, un champ **« Depuis le »**
+  apparaît sous lui, réglé sur aujourd'hui, modifiable. Injecté **depuis `cave.js`**
+  (`_vcuvInjectStatDate`, patron de `_vendInjectClientField`) — `index.html` n'est pas touché pour
+  la fonctionnalité, seulement pour les quatre affichages de version.
+- **Le parcours** : un `<details>` sous la frise, une ligne par passage avec sa durée, un crayon par
+  ligne. Le bouton **« Changer l'étape »** du détail ouvre la même feuille.
+
+⚠️ **Une correction n'est qu'un passage dont on rectifie la date** : deux écrans différents auraient
+fabriqué deux vérités. `openVendStat(cuveId, histId)` sert les deux cas.
+
+⚠️ **Les bornes sont posées AVANT toute écriture**, dans `saveVendCuve` comme dans `saveVendStat` :
+date antérieure à l'encuvage, ou postérieure à aujourd'hui → toast et `return`, **la fiche reste
+intacte**. Contre-épreuves n°6 et n°7.
+
+⚠️ **Supprimer une étape efface une date, PAS un fait.** Retirer le dernier passage ne rétrograde
+pas la cuve : corriger une faute de frappe ne doit pas remettre une cuve en fermentation.
+
+⚠️ **Le statut suit la dernière étape du parcours**, sinon la frise et le badge se contrediraient.
+**Deux exceptions fermes** : une cuve **fusionnée** ou **décuvée** reste `termine` — sa cuvée existe
+déjà au Chai, et une correction de date ne doit pas la rouvrir. Contre-épreuve n°9.
+
+### 81e. ★★ Un défaut de calcul trouvé en chemin, jamais signalé
+
+`_mlProjFA` refusait d'ouvrir sa projection tant que `jCuve < 3` — et `jCuve` comptait depuis
+l'**encuvage**. Cinq jours de macération préfermentaire à froid, deux jours de fermentation :
+l'application croyait la cuve partie depuis sept jours et **annonçait une date de fin sur une
+fermentation qui venait de commencer**.
+
+Le garde compte désormais depuis le début de FA quand le parcours le connaît ; sans parcours,
+**l'ancien comportement à l'identique**.
+
+⚠️ **`jCuve` n'a PAS changé de sens** : `_mlAgenda` l'affiche sous le nom « en cuve depuis N j ».
+Un `jFA` neuf porte le nouveau sens. *Changer le sens d'une variable sans changer son nom ne corrige
+pas un défaut, il le déplace dans un écran voisin.* Contre-épreuve n°8.
+
+★ **Le cahier de cuverie** imprime désormais la durée de macération **réellement faite** ; quand
+elle n'est pas connue, la durée **prévue** (`mpf.duree_j`), **annoncée comme telle**. *Un document
+qui imprime une intention sans le dire la fait passer pour un fait.*
+
+### 81f. ⚠️ Un défaut d'affichage trouvé par accident
+
+`.mvv-histwrap`, `.mvv-hrow` et leurs enfants vivent dans **`_vendEnsureSheetCss`**, appelée par
+`_vendSheet` — donc **seulement à la première ouverture d'une feuille**. Or le détail déplié d'une
+cuve les utilise depuis CUV-1 : **l'historique des relevés sortait sans style** tant qu'aucune
+feuille n'avait été ouverte dans la session. Personne ne l'avait signalé parce qu'on ouvre presque
+toujours une feuille avant de déplier une cuve. `renderCaveVendange` appelle maintenant les deux.
+
+### 81g. ⚠️⚠️⚠️ Le dépôt réécrit une seconde fois dans la journée — §80f a servi le jour même
+
+Le clone de la session portait `8ce647b`. `git fetch` a répondu
+`+ 8ce647b...ee69077 main -> origin/main (forced update)` : **le commit de base n'existait plus**, et
+le distant était passé de **6.74 / 7.29** à **6.79 / 7.38**, avec **CUV-4 sur `cave.js`**.
+
+**Les 18 ancres du patch tenaient toutes.** C'est ce qui rend le piège dangereux : un dry-run vert
+sur une base neuve dit que les *emplacements* sont là, **pas que le contrat du module est le même**.
+Trois choses avaient changé sous les ancres :
+
+1. **VD-SAVE.** Mes deux écrivains appelaient `window.fbSave('cave_vendange', …)` nu — l'idiome
+   d'avant §75. `mv-harnais-vendange-garde` l'a attrapé : *« restant(s) : 2 »*. Passés à
+   `_vendFbSave` (le vert ne part que sur `{ok:true}`) et `_vendGarde()` en tête.
+2. **Le harnais FUS-1 plantait.** `saveVendFusion` appelle maintenant `_vendHistPose`, qui n'était
+   pas dans ses `MORCEAUX`. ★ **Un lot qui change une fonction doit rebrancher le harnais qui la
+   joue** — et le harnais l'a dit en plantant, pas en se taisant.
+3. **Trois cliquets ont mordu, tous les trois avec raison** : `C24b` (un `s[0]` posé nu dans un slot
+   `onclick` — constante littérale, **échappée quand même**, §72e), la graisse `400` hors des trois
+   pas 500/600/700, et **le compte d'emojis** (`utils 77→78` : un `⚙` posé en tête d'une phrase de
+   `WHATS_NEW`. *La charte n'écrit pas d'emoji dans un texte — elle appelle une icône.*)
+
+> ★★★ **RÈGLE ÉTENDUE : une ancre qui tient ne prouve pas qu'un contrat tient.** Après un
+> `forced update`, il ne suffit pas de rejouer le patch et de lire « dry run vert ». Il faut relire
+> ce que le module attend de ses écrivains — et **lancer les harnais avant de croire au diff**.
+
+### 81h. Le filet — `scripts/mv-harnais-parcours.mjs`
+
+**161 assertions**, méthode C20 : les vraies fonctions sont **extraites de `cave.js` et exécutées**
+(y compris `saveVendCuve` et `saveVendStat` en entier). Aucun motif de texte — un contrôle qui lit
+du texte aurait dit vert sur la moitié de ces défauts.
+
+⚠️ **Toutes les dates du décor sont relatives à aujourd'hui** (`jourMoins`, `jourPlus`) : *un harnais
+qui fige une année devient faux le 1ᵉʳ janvier* (§80g).
+
+**Dix contre-épreuves, JOUÉES UNE PAR UNE**, chacune sur un seul défaut réintroduit (§80d). Un
+sabotage dont l'ancre a disparu, ou qui devient ambigu, **échoue bruyamment** au lieu de se taire.
+Les dix mordent.
+
+⚠️ **Deux de mes propres assertions étaient fausses au premier lancement**, et c'est la troisième
+session de suite : `/mvv-hrow/` matche aussi `-l`, `-d` et `-u` (8 au lieu de 2), et le toast dit
+« **A**ntérieur » avec une majuscule que ma regex n'admettait pas. ★ **Se demander si le contrôle a
+tort AVANT d'accuser le code** — la règle existait, elle a resservi.
+
+⚠️ Les rouges d'un sabotage polluaient le rapport final : `ko` était restauré, **pas `dit`**. Un
+harnais qui remet son compteur sans remettre son journal ment sur ce qu'il a trouvé.
+
+★ **Le harnais FUS-1 gagne 4 assertions** : la fusion date le passage des absorbées **au jour de la
+fusion, pas à aujourd'hui**, et la porteuse n'en reçoit aucune — elle continue sa fermentation.
+
+### 81i. La note de livraison
+
+| fichier | ce qui change | bump |
+|---|---|---|
+| `src/cave.js` | PARC-1 (§81b–81f) — +260 lignes, 8 suppressions | — |
+| `scripts/mv-harnais-parcours.mjs` (neuf) | 161 assertions · 10 contre-épreuves | — |
+| `scripts/mv-harnais-fusion.mjs` | morceaux PARC-1 + 4 assertions | — |
+| `package.json` | branché dans `check` **et** `prebuild` | — |
+| `src/utils.js` | `APP_VERSION` · `WHATS_NEW` (bloc 6.80, 3 items) · `MV_AIDE.cave` (4 points) | ★ APP |
+| `index.html` | les **4** affichages de version | ★ APP |
+| `public/sw.js` | en-tête · `CACHE_NAME` · les **2** `console.log` · changelog prépendé | ★ SW |
+| `guide/08-cave.html` · `public/guide.html` | 4 puces, guide régénéré | — |
+| `CLAUDE.md` | cette section | — |
+
+**`_mvtSteps` : rien à changer, et c'est VÉRIFIÉ, pas supposé.** Les cibles de la visite guidée ont
+été extraites et listées : `#mvc-elevage`, `#page-cave`, `#ml-body`, `#cave-view-mil` — **aucune ne
+vise `.mvv-*`**, ni la frise, ni le parcours. Même conclusion qu'en §70h, refaite sur le code
+d'aujourd'hui.
+
+### 81j. ⚠️ Ce que ce lot ne fait pas
+
+- **Le parcours n'entre pas au registre des manipulations**, et c'est délibéré : un changement
+  d'étape est du **suivi**, pas une manipulation (doctrine `_rmLignes`, déjà posée).
+- **Aucune alerte sur une MPF qui dépasse sa durée prévue.** `mpf.duree_j` est maintenant
+  comparable au réel — la comparaison n'est pas faite. Candidat backlog.
+- **`_vendSparkline` indexe toujours par position, pas par date** (§70g) : le parcours ne change
+  rien à cette déformation.
+- **Les contrôles Playwright n'ont pas pu tourner** ici : `cdn.playwright.dev` est hors liste
+  blanche du bac à sable. *Ce n'est pas un vert, c'est un contrôle non joué* — à faire côté Nico.
+

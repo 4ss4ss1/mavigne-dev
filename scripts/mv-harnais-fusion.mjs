@@ -43,7 +43,11 @@ const MORCEAUX = [
   bloc(SRC, 'function _vendRepere(c){', '\n}'),
   bloc(SRC, 'function _vendTriRepere(a,b){', '\n}'),
   bloc(SRC, 'function _vendEstFusionnee(c)', '\n'),
+  bloc(SRC, 'function _vendTriDate(a,b){', '\n}'),
   bloc(SRC, 'function _vendTriOps(c){', '\n}'),
+  // PARC-1 : saveVendFusion date desormais le passage des cuves absorbees.
+  bloc(SRC, 'function _vendHist(c){', '\n}'),
+  bloc(SRC, 'function _vendHistPose(c,st,date){', '\n}'),
   bloc(SRC, 'function _vendCuvCsDom(cuveId, exclId){', '\n}'),
   bloc(SRC, 'function _vendVolLoge(cv){', '\n}'),
   bloc(SRC, 'function _vendFusCuves(){', '\n}'),
@@ -65,6 +69,7 @@ var TOASTS = [], CHAMPS = {};
 function showToast(m){ TOASTS.push(String(m)); }
 function canWrite(){ return true; }
 function _vendGarde(){ return true; }                          // VD-GARDE (cave.js)
+function _mlAuj(){ return new Date().toISOString().slice(0,10); }  // PARC-1  (cave.js)
 function _vendFbSave(m,c){ if(m) showToast(m,c); }             // VD-SAVE  (cave.js)
 function _vendSheetClose(){}
 function renderVendCuves(){}
@@ -237,6 +242,24 @@ const PARC = [
   const l2 = API._vendFusCuves().map(c => c.id).sort();
   T('Z2 une cuve fusionnee restee en FA est quand meme exclue',
     l2.join(',') === 'c1,c3', 'rendu : ' + l2.join(','));
+}
+
+/* ═══════════ 6bis. PARC-1 : la fusion DATE le passage ═══════════════ */
+{
+  const cv = monde();
+  API.pose(cv, PARC, { c1:1, c2:1 }, 'c1', { 'vfus-nom':'A+B', 'vfus-date':'2026-09-28' });
+  API.saveVendFusion();
+  const c2 = cv.cuves_vinif.find(c => c.id === 'c2');
+  T('P1 l\'absorbee porte une etape de parcours', Array.isArray(c2.statut_hist) && c2.statut_hist.length === 1,
+    'rendu : ' + JSON.stringify(c2.statut_hist));
+  T('P2 elle est datee du JOUR DE LA FUSION, pas d\'aujourd\'hui',
+    c2.statut_hist && c2.statut_hist[0].date === '2026-09-28',
+    'rendu : ' + (c2.statut_hist && c2.statut_hist[0].date));
+  T('P3 et elle dit « termine »', c2.statut_hist && c2.statut_hist[0].statut === 'termine');
+  /* La porteuse ne change PAS d'etape : elle continue sa fermentation. */
+  const c1 = cv.cuves_vinif.find(c => c.id === 'c1');
+  T('P4 la porteuse ne recoit aucune etape', !(c1.statut_hist && c1.statut_hist.length),
+    'rendu : ' + JSON.stringify(c1.statut_hist));
 }
 
 /* ═══════════ 7. Le nom propose ══════════════════════════════════════ */

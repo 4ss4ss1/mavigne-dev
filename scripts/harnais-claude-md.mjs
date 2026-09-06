@@ -197,7 +197,7 @@ t(`tout script de scripts/ est nommé dans le document (${muets.length} muet(s))
 }
 
 /* 2) Une section ne disparaît pas, même si son numéro est réutilisé. */
-const SECTIONS = 112;  /* +§80 (CUV-4). Relevé DANS LE LOT qui ajoute la section : le message
+const SECTIONS = 113;  /* +§81 (PARC-1). +§80 (CUV-4). Relevé DANS LE LOT qui ajoute la section : le message
                           « ↑ N de plus » est une consigne, et un cran de jeu laissé aujourd'hui
                           en vaut dix-neuf dans trois semaines — c'est exactement ce qui s'est
                           produit le 06/09.
