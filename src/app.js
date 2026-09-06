@@ -5239,7 +5239,17 @@ function goTo(page){
 let homeCardMode = 0; // 0 = avancement global, 1 = tâche en cours — mémorisé par utilisateur (v4.34)
 function _homeCardModeKey(){return 'mavigne_card_mode_'+(window.TENANT_ID||'default')+'_'+((currentUser&&currentUser.nom)||'anon');}
 function _homeLoadCardMode(){try{var v=parseInt(localStorage.getItem(_homeCardModeKey())||'0',10);return (v===1)?1:0;}catch(e){return 0;}}
-let DOMAINE_NOM = _MV_IS_MG ? 'Domaine Marchand-Grillot' : 'Mon domaine'; // Nom configurable du domaine viticole (autres tenants : neutre jusqu'au chargement Firestore)
+/* ★ CONF-4 (05/09/2026) — DERNIER NOM DE CLIENT SORTI DU CODE.
+   Ce repli affichait le nom du domaine de référence chez TOUS les domaines, et
+   dans un dépôt public. Comme le KML, il ne pouvait partir qu'après vérification
+   que la source de rechange répond : `config.domaine_nom` est renseigné en base
+   (contrôlé dans Réglages › Domaine avant ce lot).
+   ⚠ Deux chemins le remplacent, et le premier suffit : l'instantané localStorage
+   (`d.CONFIG.domaine_nom`) le pose AVANT tout réseau, puis `applyFbData('config')`
+   le confirme. Un appareil déjà utilisé ne verra donc aucun changement ; un
+   appareil neuf et hors ligne affichera « Mon domaine » le temps du premier
+   chargement — comme tous les autres domaines depuis toujours. */
+let DOMAINE_NOM = 'Mon domaine'; // écrasé par CONFIG.domaine_nom (instantané local, puis Firestore)
 window.DOMAINE_NOM = DOMAINE_NOM; // Exposer immédiatement pour applyDomNom() (appelée au login avant Firebase)
 
 function getHomeCardData(){
@@ -5835,7 +5845,11 @@ function _dmrEtapes(){
   try { taches = (window.TACHES||[]).filter(function(t){ return t && parseFloat(t.hha) > 0; }).length; } catch(e) { taches = 0; }
 
   return [
-    { k:'dom',  ok: !!(cfg.domaine_nom || window.DOMAINE_NOM), go:'dom',
+    /* ⚠ `|| window.DOMAINE_NOM` retiré : cette variable vaut TOUJOURS quelque
+       chose — au pire le repli « Mon domaine » — donc la coche était verte même
+       chez un domaine qui n'avait jamais saisi son nom. Une coche qui ne peut
+       pas être rouge ne dit rien. Seule la valeur EN BASE compte. */
+    { k:'dom',  ok: !!(cfg.domaine_nom), go:'dom',
       t:'Le nom de votre domaine',
       f:'Il apparaît en tête de chaque document que vous imprimez.' },
     { k:'parc', ok: _dmrLen(window.PARCELLES) > 0,

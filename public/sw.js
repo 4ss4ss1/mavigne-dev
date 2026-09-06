@@ -1,4 +1,24 @@
-// MA VIGNE — Service Worker v7.35
+// MA VIGNE — Service Worker v7.36
+// v7.36 (05/09/2026) — CONF-4 : le dernier nom de client sort du code.
+//   `DOMAINE_NOM` portait en dur le nom du domaine de reference. Repli affiche a
+//   l'ecran de connexion avant que Firestore reponde — donc servi a TOUS les
+//   domaines et publie. Retire apres verification que `config.domaine_nom` est
+//   renseigne en base : meme ordre que pour le KML, on ne coupe un repli qu'une
+//   fois la source de rechange vue a l'ecran.
+//   ★ Aucun changement visible attendu : l'instantane localStorage pose le nom
+//   AVANT tout reseau (d.CONFIG.domaine_nom). Seul un appareil neuf ET hors ligne
+//   affichera « Mon domaine » le temps du premier chargement — comme tous les
+//   autres domaines depuis toujours.
+//   ★★ AU PASSAGE, UNE COCHE QUI NE POUVAIT PAS ETRE ROUGE. Le tableau de bord
+//   d'installation testait `cfg.domaine_nom || window.DOMAINE_NOM` : la seconde
+//   vaut toujours quelque chose, la coche « nom du domaine » etait donc verte meme
+//   chez un domaine qui n'avait jamais saisi le sien. Seule la valeur EN BASE
+//   compte desormais. ⚠ Un client qui n'a pas renseigne son nom verra la coche
+//   passer au rouge : c'est la verite, elle etait cachee.
+//   ⚠️ APP_VERSION inchange (6.77) : app.js touche, utils.js non, rien de visible.
+//   ★ Fin de la serie CONF : plus aucun nom de client, aucune adresse de tiers,
+//   aucune donnee d'exploitation dans src/, index.html, firestore.rules ni ce
+//   fichier. Ce qui reste est ferme et justifie ligne par ligne dans CLAUDE.md.
 // v7.35 (05/09/2026) — CONF-3 : les 46 contours parcellaires sortent du code.
 //   Dernier morceau de donnee d'exploitation encore servi dans le bundle. Le
 //   trace GPS des vignes du domaine de reference partait chez TOUS les domaines
@@ -3136,7 +3156,7 @@
 // v2.22 — Fix profils vides : guard vide dans loadData() pour MEMBRES/SAISONS/TACHES
 // v2.17 — Onboarding intégré + tenantId · v2.06 — Firebase Auth · v2.00–v2.05 — divers
 const DEBUG = self.location.hostname === 'localhost' || self.location.hostname === '127.0.0.1';
-const CACHE_NAME   = 'mavigne-v7.35';
+const CACHE_NAME   = 'mavigne-v7.36';
 const TENANT_CACHE = 'mavigne-tenant';   // Cache persistant — préservé à chaque mise à jour SW
 const SYNC_TAG     = 'mavigne-sync';
 
@@ -3152,7 +3172,7 @@ const CDN_URLS = [
 ];
 
 self.addEventListener('install', event => {
-  if(DEBUG) console.log('[SW] Ma Vigne v7.35 installé');
+  if(DEBUG) console.log('[SW] Ma Vigne v7.36 installé');
   event.waitUntil(
     caches.open(CACHE_NAME).then(async cache => {
       // ── Cœur applicatif : STRICT (mise à jour ATOMIQUE) ──
@@ -3168,7 +3188,7 @@ self.addEventListener('install', event => {
 });
 
 self.addEventListener('activate', event => {
-  if(DEBUG) console.log('[SW] Ma Vigne v7.35 activé');
+  if(DEBUG) console.log('[SW] Ma Vigne v7.36 activé');
   event.waitUntil(
     caches.keys().then(keys =>
       Promise.all(

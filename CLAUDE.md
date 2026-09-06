@@ -3829,9 +3829,24 @@ Un lot n'est livrable que quand **les six** sont vraies. Les écrire dans la ré
    ★ **Garde-fou posé** : `initMap` journalise en `info` un domaine qui a des parcelles et
    zéro contour. Avant, la carte nue était indiscernable d'un domaine sans KML — un écran
    vide n'est pas un message.
-   ⚠ **Reste `DOMAINE_NOM = 'Domaine …'`**, même famille : repli affiché avant que Firestore
-   réponde. À vider **seulement** après avoir vérifié que `config.domaine_nom` est renseigné
-   (Réglages › Domaine). Sinon le domaine s'affiche « Mon domaine ».
+   ★★ **CONF-4 (05/09) — `DOMAINE_NOM` VIDÉ, ET C'ÉTAIT LE DERNIER.** Même famille que le KML :
+   un repli affiché avant que Firestore réponde. Vidé **après** vérification que
+   `config.domaine_nom` est renseigné en base. Deux chemins le remplacent et le premier suffit :
+   l'instantané localStorage le pose avant tout réseau. **Plus aucun nom de client dans `src/`,
+   `index.html`, `firestore.rules` ni `public/sw.js`.**
+   ★ **Au passage, une coche qui ne pouvait pas être rouge.** Le tableau de bord d'installation
+   testait `cfg.domaine_nom || window.DOMAINE_NOM` — la seconde vaut toujours quelque chose, la
+   coche « nom du domaine » était donc verte chez un domaine qui n'avait jamais saisi le sien.
+   Seule la valeur **en base** compte désormais. ⚠ Conséquence assumée : un client qui n'a pas
+   renseigné son nom verra la coche passer au rouge. C'est la vérité, elle était cachée.
+   ★★ **Ce qui reste en clair, et pourquoi — liste close** : le slug `marchand-grillot` (numéro
+   de dossier, présent dans l'URL, les règles et les chemins Firestore) ; la liste noire de
+   `harnais-vitrine.mjs` (pour vérifier qu'un nom n'apparaît pas sur la vitrine, il faut savoir
+   lequel chercher — et `scripts/` n'entre pas dans le bundle) ; les deux adresses de l'éditeur
+   dans `TOLEREES`. ⚠ `SAISONS`, `ACTIVITES`, `TRACTEURS_LIST` gardent un jeu par défaut spécifique
+   au domaine de référence : c'est un défaut de conception (le tenant ne devrait pas fuiter dans
+   le code), **pas** une donnée confidentielle — saisons génériques, vocabulaire de métier, « T1
+   T2 T3 » sans modèle ni immatriculation. À traiter comme dette, pas comme fuite.
    ⚠ **Reste à traiter** : les noms de domaines clients dans les **commentaires**
    de dix modules, les cas de facturation **nominatifs** d'`admin-gt.js` (montants, numéros de
    facture), et la ligne de `firestore.rules` qui détaille l'effectif d'un domaine. Le contrôle
