@@ -253,8 +253,8 @@
   calculé dans le Pilotage. Une saisie, plusieurs usages.</div></div>
 
   <h3>{ic:chrono} Le millésime</h3>
-  <p>Cette troisième section ne demande <b>aucune saisie</b> : tout s'y déduit de ce qui est déjà
-  enregistré au Cuvier et au Chai.</p>
+  <p>Cette troisième section ne demande <b>qu'une seule saisie</b>, le plafond de rendement : tout
+  le reste s'y déduit de ce qui est déjà enregistré au Cuvier et au Chai.</p>
   <ul class="dot">
     <li><b>Ce qui vient</b> : l'agenda des quatre prochaines semaines — ouillages dus, cuves à
     mesurer, fin de fermentation estimée, cuvées à soutirer, températures hautes.</li>
@@ -262,6 +262,26 @@
     chiffrées entre chaque étape, puis le rendement de chaque parcelle face au maximum de
     l'appellation.</li>
   </ul>
+
+  <h4 style="margin-top:22px">{ic:balance} Le rendement maximum de l'appellation</h4>
+  <p>C'est la seule valeur que cet écran vous demande, et elle appartient au <b>millésime</b>, pas à
+  la parcelle : le rendement annuel autorisé est fixé <b>par arrêté, campagne par campagne</b>. Un
+  plafond posé pour 2026 ne dit rien de 2025.</p>
+  <ul class="dot">
+    <li><b>Où le poser</b> : dans « La ligne de vie », touchez une parcelle sous « Rendement par
+      parcelle ». Le même geste existe sur la carte <b>Pilotage › Cave › Le millésime</b>, qui est
+      justement celle qui vous montre lesquelles en manquent. Réservé à l'administrateur.</li>
+    <li><b>Valider à vide</b> retire le plafond de cette année-là, et d'elle seule.</li>
+    <li><b>Une valeur « héritée »</b> vient de l'ancien réglage, qui ne portait aucune année. Elle
+      continue de servir tant que rien n'est posé pour le millésime, et l'écran le dit : elle n'a
+      été vérifiée contre l'arrêté d'<b>aucune</b> campagne.</li>
+    <li><b>Après la première pose</b>, l'application propose de porter la même valeur sur les
+      parcelles du millésime qui n'ont <b>aucun</b> plafond — elle les nomme avant de rien faire, et
+      ne touche jamais celles qui en ont déjà un.</li>
+  </ul>
+  <div class="note"><span class="ni" aria-hidden="true">{ic:info}</span><div><b>Deux écrans portent le
+  nom « Le millésime ».</b> La <b>section de la Cave</b>, où tout se saisit, et l'<b>onglet du
+  Pilotage</b>, qui lit et compare. Depuis cette mise à jour, le plafond se pose dans les deux.</div></div>
   <div class="note"><span class="ni" aria-hidden="true">{ic:calendrier}</span><div><b>Les relevés se rangent
   par date, pas par ordre de saisie.</b> Un carnet resté au cuvier et rattrapé le lendemain se plaçait en
   bout de liste, et tout ce qui lit « le dernier relevé » le croyait le plus récent : la jauge d'avancement,

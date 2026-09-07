@@ -5176,6 +5176,26 @@ function _pcavK(lab,val,unit,sub,dark,col){
 // Depuis le Pilotage il faut d'abord ATTERRIR sur la Cave : _mlGo appelle
 // renderCave() mais ne change pas de page. Expression window : appelee
 // depuis un onclick, C15 la verrait morte sinon (cf. _arcOpen).
+// ★ Poser un plafond depuis le Pilotage. L'ECRITURE n'est pas ici : c'est
+//   `_mlSetRdtMax` (cave.js) qui verifie le droit, ecrit dans PARCELLES et
+//   propose la pose groupee. On ne lui passe que deux choses — l'annee que CET
+//   ecran affiche, et ce qu'il faut redessiner quand c'est fait.
+// ⚠️ Sans la Cave chargee, on le DIT au lieu d'ouvrir une saisie qui ne partira
+//   nulle part. Le silence, ici, ressemblerait exactement au defaut qu'on corrige.
+function _pcavPoseRdt(nom,mil){
+  if(!_pcavHas('_mlSetRdtMax')){
+    if(window.showToast) window.showToast('Ouvre la Cave pour ce geste','#B85A1A');
+    return;
+  }
+  var m=parseInt(mil,10);
+  if(!(isFinite(m)&&m>0)){
+    if(window.showToast) window.showToast('Mill\u00e9sime ind\u00e9termin\u00e9','#B85A1A');
+    return;
+  }
+  window._mlSetRdtMax(nom, m, function(){ _pilFillContent(_pilData()); });
+}
+window._pcavPoseRdt = _pcavPoseRdt;
+
 window._pcavGo = function(kind,ref){
   if(typeof goTo==='function') goTo('cave');
   if(typeof window._mlGo==='function'){ try{ window._mlGo(kind,ref); return; }catch(e){ _pcavLog('go',e); } }
@@ -5711,24 +5731,45 @@ function _pcavRdt(c,mil){
   var over=avecMax.filter(function(r){ return r.depasse&&r.statut==='mesure'; }).length;
   var overEst=avecMax.filter(function(r){ return r.depasse&&r.statut!=='mesure'; }).length;
   var nEst=l.filter(function(r){ return r.statut!=='mesure'; }).length;
+  /* ★★★ LA CARTE PORTE LE GESTE. Elle disait « posez-le depuis Le millesime »
+     — et le Pilotage a un onglet qui s'appelle « Le millesime ». On lisait donc
+     ce renvoi DEPUIS l'ecran qu'il croyait designer, et l'option n'y etait pas.
+     C'est ici qu'on voit lesquelles manquent : c'est ici qu'on doit pouvoir la
+     poser. L'ECRITURE reste celle de la Cave (`_mlSetRdtMax`) : une seule
+     porte, un seul controle de droit, un seul format de donnee.
+     ⚠️ Sans millesime resolu, pas de bouton : poser un plafond « pour rien »
+     ecrirait sur une annee que l'ecran ne nomme pas. */
+  var _m=parseInt(mil,10);
+  var pose=(isFinite(_m)&&_m>0)&&_pcavHas('_mlSetRdtMax')
+    &&!!(typeof window.isAdmin==='function'&&window.isAdmin());
   var rows=l.slice(0,10).map(function(r){
     var nom=(r.parcelle&&r.parcelle.nom)||'—';
+    var ouv=pose?('<button type="button" class="pcav-pl" data-rdtmax="'+_pilEsc(nom)+'" data-rmil="'+_m+'">'):'<div class="pcav-pl">';
+    var fer=pose?'</button>':'</div>';
     if(r.pct==null){
-      return '<div class="pcav-pl"><div class="pcav-py">'+_pilEsc(nom)+'<small>plafond non renseigné</small></div>'
+      return ouv+'<div class="pcav-py">'+_pilEsc(nom)+'<small>'+(pose?'poser le plafond':'plafond non renseigné')+'</small></div>'
         +'<div class="pcav-pt2"><div class="pcav-ps" style="width:0"></div></div>'
-        +'<div class="pcav-pn">'+_pcavRdtTxt(r)+'</div></div>';
+        +'<div class="pcav-pn">'+_pcavRdtTxt(r)+'</div>'+fer;
     }
     var norm=Math.max(0,Math.min(100,r.pct/115*100));
     var col=r.depasse?'var(--rouge)':(r.pct>92?'var(--orange)':'var(--vert-med)');
-    return '<div class="pcav-pl"><div class="pcav-py">'+_pilEsc(nom)+'<small>max '+_pcavF1(r.max)+'</small></div>'
+    /* ⚠️ Un plafond HERITE vient de l'ancien reglage sans millesime : il n'a ete
+       verifie contre l'arrete d'aucune campagne. Le taire ferait passer une
+       valeur non datee pour une valeur de l'annee. */
+    return ouv+'<div class="pcav-py">'+_pilEsc(nom)+'<small>max '+_pcavF1(r.max)
+      +(r.maxSrc==='herite'?' · hérité':'')+'</small></div>'
       +'<div class="pcav-pt2"><div class="pcav-ps" style="width:'+norm+'%;background:'+col+'"></div>'
       +'<span class="pcav-pmax"></span></div>'
-      +'<div class="pcav-pn" style="color:'+col+'">'+_pcavRdtTxt(r)+'</div></div>';
+      +'<div class="pcav-pn" style="color:'+col+'">'+_pcavRdtTxt(r)+'</div>'+fer;
   }).join('');
   var leg='<div class="pcav-leg"><span><i style="background:var(--vert-med)"></i>sous 92 %</span>'
     +'<span><i style="background:var(--orange)"></i>92 à 100 %</span>'
     +'<span><i style="background:var(--rouge)"></i>au-dessus du plafond</span>'
     +'<span><i style="background:var(--texte)"></i>le plafond</span></div>';
+  /* ⚠️ « Posez-le depuis Le millesime » designait la section de la CAVE et se
+     lisait depuis l'onglet du PILOTAGE qui porte le meme nom : le chemin doit
+     etre complet, ou il ne sert a rien. Et quand le geste est ici, on le dit
+     ici — on n'envoie plus ailleurs pour ce qui se fait sur place. */
   return _pcavCard('\uD83D\uDCD0','#A0291E','Rendement face au plafond de l’appellation',
     over?('<b>'+over+'</b> au-dessus')
       :(overEst?('<b>'+overEst+'</b> \u00e0 confirmer')
@@ -5737,8 +5778,11 @@ function _pcavRdt(c,mil){
     (l.length>10?('Les 10 plus forts rendements sur '+l.length+' parcelles vendang\u00e9es. '):'')
     +(nEst?('Une fourchette signifie que le volume n\u2019est pas encore mesur\u00e9 : il le sera au d\u00e9cuvage. '):'')
     +(avecMax.length
-      ? 'Trait vertical : votre plafond par parcelle.'
-      : 'Aucun plafond n’est renseigné. Posez-le une fois par parcelle depuis Le millésime pour obtenir la comparaison.'), 'pil.cav.rdt');
+      ? ('Trait vertical : votre plafond par parcelle pour '+(isFinite(_m)&&_m>0?_m:'ce mill\u00e9sime')+'. ')
+      : ('Aucun plafond n\u2019est renseign\u00e9 pour '+(isFinite(_m)&&_m>0?_m:'ce mill\u00e9sime')+'. '))
+    +(pose
+      ? 'Touchez une parcelle pour le poser \u2014 le plafond appartient au mill\u00e9sime, pas \u00e0 la parcelle.'
+      : 'Il se pose dans <b>Cave \u203a Le mill\u00e9sime \u203a La ligne de vie</b>, par un administrateur.'), 'pil.cav.rdt');
 }
 
 // ── Face a l'an dernier ──────────────────────────────────────────────
@@ -5955,6 +5999,15 @@ function _pcavInjectCss(){
   +'.pcav-ps{height:100%}'
   +'.pcav-pmax{position:absolute;left:86.96%;top:0;bottom:0;width:2px;background:var(--texte);opacity:.5}'
   +'.pcav-pn{font-size:var(--pt-micro,11px);color:var(--texte-doux);text-align:right;font-weight:600}'
+  /* ⚠️ Un <button> reste une GRILLE : `.pcav-pl` porte deja display:grid, on ne
+     redit pas la mise en page ici, on ne fait que retirer l'habillage natif du
+     bouton. Redefinir les colonnes creerait une seconde verite qui divergerait
+     du palier mobile juste en dessous. */
+  +'button.pcav-pl{width:100%;box-sizing:border-box;border:none;background:none;'
+    +'font-family:inherit;font-size:var(--pt-txt,12.5px);color:inherit;text-align:left;'
+    +'cursor:pointer;padding:5px 7px;border-radius:9px;min-height:44px}'
+  +'button.pcav-pl:hover{background:rgba(138,90,56,.07)}'
+  +'button.pcav-pl:focus-visible{outline:2px solid var(--terre);outline-offset:1px}'
   +'.pcav-leg{display:flex;gap:14px;flex-wrap:wrap;font-size:var(--pt-micro,11px);color:var(--texte-doux);margin-top:12px;padding-top:12px;border-top:1px solid var(--gris-clair)}'
   +'.pcav-leg span{display:inline-flex;align-items:center;gap:6px}'
   +'.pcav-leg i{width:11px;height:11px;border-radius:3px;display:inline-block}'
@@ -10771,6 +10824,11 @@ function _pilBindContent(content){
   content.addEventListener('click', function(e){
     var _cm=e.target.closest('.pcav-mil[data-mil]');
     if(_cm){ e.stopPropagation(); _PCAV_MIL=parseInt(_cm.getAttribute('data-mil'),10); _pilFillContent(_pilData()); return; }
+    // Le plafond de rendement se pose depuis la carte qui montre lesquelles
+    // manquent. L'ecriture reste dans la Cave : _pcavPoseRdt ne fait que lui
+    // passer le millesime affiche et lui dire quoi redessiner.
+    var _rm=e.target.closest('[data-rdtmax]');
+    if(_rm){ e.stopPropagation(); _pcavPoseRdt(_rm.getAttribute('data-rdtmax'), _rm.getAttribute('data-rmil')); return; }
     var cn=e.target.closest('#pil-cavnav button');
     if(cn){ var s=cn.getAttribute('data-s'); if(s&&s!==_PIL_CAVSUB){ _PIL_CAVSUB=s; _pilSaveCav(s); _pilFillContent(_pilData()); } return; }
     var _sb=e.target.closest('[data-sim]'); if(_sb){ e.stopPropagation(); _pilSimAction(_sb.getAttribute('data-sim'), _sb.getAttribute('data-ti')); return; }

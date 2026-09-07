@@ -2,7 +2,29 @@
 
 > Document de référence du projet **Ma Vigne** (GUERETTECH). Il est le **porteur de vérité** :
 > la mémoire Claude est plafonnée, ce fichier ne l'est pas.
-> Dernière consolidation : **7 septembre 2026 (soir)** — ★★★ **UN COMPARATIF SE LIT EN JOURS, PAS EN
+> Dernière consolidation : **7 septembre 2026 (nuit)** — ★★★ **UN PLAFOND DE RENDEMENT APPARTIENT À
+> UN MILLÉSIME (§90)**. **APP 6.87 → 6.88 · SW 7.46 → 7.47.** Lot **RDTMIL-1**, signalé par Nico :
+> *« impossible de rentrer des plafonds de rendement pour les millésimes […] il n'y a juste pas
+> l'option »*.
+> ★★★ **DEUX ÉCRANS S'APPELLENT « LE MILLÉSIME »** — la section de la Cave, où l'on saisit, et
+> l'onglet du Pilotage, qui lit. La carte renvoyait *« posez-le depuis Le millésime »* et Nico lisait
+> cette phrase **depuis l'écran qui porte ce nom**. *Un chemin incomplet entre deux écrans homonymes
+> ne renvoie nulle part : il fait croire à une option absente.* La carte porte désormais le geste.
+> ★★★ **ET LE FOND ÉTAIT PIRE** : `p.rdt_max` était un **scalaire**. Le rendement annuel autorisé
+> est fixé par arrêté, campagne par campagne — le poser en 2026 réécrivait 2025, en silence, sur un
+> écran qui affichait pourtant une année. C'est **§81 vu depuis la vigne**. `p.rdt_max_hist` =
+> `[{mil,max}]`. ⚠️⚠️ **AUCUN RATTRAPAGE** : l'ancien scalaire n'est pas recopié dans une campagne
+> qu'on ne connaît pas, il devient le repli, **annoncé « hérité »**. *Un chiffre daté d'office se
+> croirait.*
+> ★ **La corvée est une cause, pas une conséquence** : 45 parcelles × un chiffre dicté par un seul
+> arrêté explique à soi seul qu'aucun plafond n'ait jamais été renseigné. Après la première pose, on
+> propose de la porter sur celles qui n'en ont **aucun** — nommées d'abord, jamais celles qui en ont
+> un.
+> ⚠️ **Deux garanties fausses trouvées dans le guide**, dont une l'était déjà avant ce lot : *« le
+> Pilotage ne modifie jamais rien »* (`_pexSetMois` écrit depuis des semaines) et *« Le millésime ne
+> demande aucune saisie »*. ★ **Nico est TOUJOURS en admin** — règle ajoutée (§90g). Détail en **§90**.
+>
+> ★ Précédente : **7 septembre 2026 (soir)** — ★★★ **UN COMPARATIF SE LIT EN JOURS, PAS EN
 > DATES (§88)**. **APP 6.85 → 6.86 · SW 7.44 → 7.45.** Lot **CUVDOC-3**, demandé par Nico : voir
 > *« celles qui partent plus vite, celles qui partent après. Pourquoi ? »*. Le cahier de cuverie
 > s'ouvre sur un **comparatif de toutes les cuves**, superposées sur **leur propre jour
@@ -14138,3 +14160,137 @@ commités : la garde de base était **désarmée**. Remise à `721f3ce` dans ce 
 | `scripts/mv-harnais-courbes.mjs` · `package.json` | 44 assertions, 12 contre-épreuves, câblé dans `check`, `prebuild`, `test:courbes` | — |
 | `scripts/harnais-claude-md.mjs` | `SECTIONS` 120 → 121 | — |
 | `.mv-base` | `721f3ce` | — |
+
+---
+
+## 90. ★★★ RDTMIL-1 — UN PLAFOND DE RENDEMENT APPARTIENT À UN MILLÉSIME, ET DEUX ÉCRANS PORTAIENT LE MÊME NOM (07/09 — APP 6.87 → 6.88 · SW 7.46 → 7.47 · base `4d5fc61`)
+
+> **Point de départ**, signalé par Nico : *« impossible de rentrer des plafonds de rendement pour
+> les millésimes »*, puis, capture à l'appui : *« il n'y a juste pas l'option »*.
+> Sur la capture : **Pilotage › Cave › Le millésime**, 45 parcelles vendangées, les dix plus forts
+> rendements, et sous chaque nom la même mention — **« plafond non renseigné »**, dix fois.
+
+### 90a. ★★★ TROIS DÉFAUTS EMPILÉS, ET LE PLUS VISIBLE ÉTAIT LE MOINS GRAVE
+
+La première réponse a été une piste morte : *« es-tu bien admin ? »*. **Nico est toujours en
+admin** — c'est désormais écrit dans les règles de travail (§90g). Une question dont la réponse est
+invariablement la même n'est pas un diagnostic, c'est un aller-retour perdu.
+
+Le vrai diagnostic tenait en une observation : **l'écran de la capture n'est pas celui du renvoi.**
+
+| | où | ce qu'il fait |
+|---|---|---|
+| **« Le millésime » du Pilotage** | `_PCAV_SUBS`, `pilotage.js` | lit, compare — **aucun `onclick`** |
+| **« Le millésime » de la Cave** | `cave-sec-millesime`, `index.html` | onglet *La ligne de vie* → la saisie |
+
+La carte disait : *« Posez-le une fois par parcelle **depuis Le millésime** »*. Nico lisait cette
+phrase **depuis un écran qui porte exactement ce nom**.
+★★★ **UN CHEMIN INCOMPLET ENTRE DEUX ÉCRANS HOMONYMES NE RENVOIE NULLE PART — il fait croire à une
+option absente.** Le renvoi n'était pas faux : il était *indiscernable d'une promesse non tenue*.
+
+### 90b. ★★★ LE FOND : `p.rdt_max` ÉTAIT UN SCALAIRE
+
+Le rendement annuel autorisé est fixé **par arrêté, campagne par campagne**. Une parcelle n'a pas
+UN plafond, elle en a **un par millésime**. Or le champ n'en portait qu'un : le poser depuis
+l'écran d'un millésime **réécrivait 2025 et 2024**, en silence, sur un écran qui affichait pourtant
+une année en toutes lettres.
+
+C'est **§81 vu depuis la vigne** : *un champ qui n'a qu'une valeur ne peut pas porter une
+histoire.* `p.rdt_max_hist` = `[{mil,max}]`, corrigeable ligne à ligne, même porte que
+`statut_hist` et les relevés de CUV-1.
+
+⚠️⚠️ **AUCUN RATTRAPAGE INVENTÉ.** L'ancien scalaire n'est **pas** recopié dans un millésime : on ne
+sait pas de quelle campagne il vient. Il devient le **repli**, annoncé **« hérité »** partout où il
+sert — écran de la Cave, carte du Pilotage, fiche `MV_INFO`. *Un chiffre daté d'office se croirait ;
+un « hérité » se corrige.* Rien à ressaisir, et rien de faux affirmé.
+
+⚠️ **`_vendSetRdtMax` n'écrit JAMAIS `p.rdt_max`.** L'écraser ferait disparaître le repli de **tous
+les autres millésimes** en posant celui-ci. La contre-épreuve n°4 vérifie précisément ça.
+
+### 90c. ★ LA CORVÉE EST UNE CAUSE, PAS UNE CONSÉQUENCE
+
+Quarante-cinq parcelles, une saisie chacune, un chiffre identique dicté par un seul arrêté :
+**ça explique à soi seul qu'aucun plafond n'ait jamais été renseigné.** Un écran peut être juste et
+rester vide parce que le remplir coûte trop cher.
+
+Après la **première** pose, `_mlRdtProposeGroupe` propose de porter la valeur sur les parcelles du
+millésime qui n'ont **aucun** plafond.
+⚠️⚠️ **Jamais celles qui en ont un, posé OU hérité** : on ne remplace pas en lot une valeur que
+quelqu'un a mise. Et la proposition **NOMME** ce qu'elle va toucher (six noms puis « et N autres ») —
+*« les autres » ne se vérifie pas avant de dire oui.*
+★ Une seule écriture pour tout le lot, via `_vendParcLot` : 45 parcelles ne font pas 45 transactions
+sur la collection la plus protégée de l'application.
+
+### 90d. Une seule porte, deux appelants
+
+`_mlSetRdtMax(nom, mil, apres)` — le droit admin, l'écriture et le format vivent **dans la Cave**.
+Le Pilotage ne fait que l'appeler.
+★★ **`apres` rend la main à l'appelant** : sans lui, poser depuis le Pilotage redessinait la Cave —
+l'écran qu'on ne regarde pas. *Un geste partagé doit rendre la main à celui qui l'a déclenché, pas à
+celui qui l'a écrit.*
+⚠️ **Sans millésime résolu, aucun bouton et aucune saisie** : écrire un plafond « pour rien »
+poserait une valeur sur une année que l'écran ne nomme pas. `data-rmil` porte l'année, `_pcavPoseRdt`
+la revalide.
+★ Le `<button>` du Pilotage **reste une grille** : `.pcav-pl` porte déjà `display:grid`, la règle
+`button.pcav-pl` ne fait que retirer l'habillage natif. Redéfinir les colonnes créerait une seconde
+vérité qui divergerait du palier mobile situé quarante lignes plus bas.
+
+### 90e. ⚠️⚠️ CE QUE LE LOT A TROUVÉ EN CHEMIN, SANS LE CHERCHER
+
+Le guide affirmait, en tête du Pilotage : *« Il ne modifie jamais rien »*. **C'était déjà faux avant
+ce lot** — `_pexSetMois` écrit `CONFIG.eco.exercice_mois` depuis la frise annuelle depuis des
+semaines. Et le guide de la Cave annonçait que Le millésime *« ne demande aucune saisie »* alors que
+`p.rdt_max` s'y posait depuis §? *Une phrase de garantie vieillit moins bien qu'une phrase de
+description : personne ne la relit, parce qu'elle rassure.* Les deux sont corrigées, et le guide dit
+maintenant **quels** deux réglages se posent dans le Pilotage et pourquoi (c'est là qu'on voit qu'ils
+manquent).
+
+⚠️ **`.mv-base` était resté sur `721f3ce`** alors que §89 est commité (`4d5fc61`) : la garde était
+désarmée, **pour la seconde fois en quatre lots** (§86, §89h). Remise à `4d5fc61`.
+⚠️ **L'en-tête de `CLAUDE.md` annonçait encore APP 6.86 / SW 7.45** alors que le dépôt était en
+6.87 / 7.46. L'en-tête décroche du corps — l'avertissement écrit plus haut dans ce document vaut
+toujours : **se fier aux sections, pas au résumé.**
+
+### 90f. Vérifications
+
+`npm run check` **EXIT=0** · `node --check` sur les 4 JS touchés · harnais neuf
+`mv-harnais-rdtmil.mjs` **52 vertes / 0 rouge**, **5 contre-épreuves** toutes rouges sur code cassé ·
+`v7.46` subsiste **exactement une fois** dans `sw.js` (le changelog du lot précédent — piège §7) ·
+les 3 noms d'icônes de `WHATS_NEW` (`balance`, `raisin`, `liste`) **existent dans le sprite**,
+vérifié au grep sur `index.html` · guide régénéré, `build-guide.mjs --check` vert.
+
+### 90g. ★ RÈGLE DE TRAVAIL AJOUTÉE
+
+★ **Nico est TOUJOURS en admin.** Ne jamais lui demander de vérifier son rôle, ni proposer
+« compte non admin » comme cause d'un symptôme. C'est une piste morte qui coûte un aller-retour à
+chaque fois.
+
+### 90h. La note de livraison
+
+**Base : `4d5fc61`.**
+
+| fichier | ce qui change | bump |
+|---|---|---|
+| `src/cave.js` | `_vendRdtMax` · `_vendSetRdtMax` · `_mlRdtSansMax` · `_mlRdtProposeGroupe` · `_mlSetRdtMax(nom,mil,apres)` · `_mlGo('rdtmax')` · 4 textes de `_mlRenderVie` · 3 exports `window` | — |
+| `src/pilotage.js` | `_pcavPoseRdt`, lignes `pcav-pl` en `<button data-rdtmax data-rmil>`, CSS `button.pcav-pl`, délégation `[data-rdtmax]`, **renvoi corrigé**, mention « hérité » | — |
+| `src/utils.js` | 6.88, 3 items `WHATS_NEW`, `MV_INFO` `pil.cav.rdt` (+2 §, 1 réécrit), `MV_AIDE` cave (+3 points) | ★ APP |
+| `index.html` · `public/sw.js` | 4 porteurs · 7.47 + changelog | ★ APP · ★ SW |
+| `guide/08-cave.html` · `guide/11-pilotage.html` · `public/guide.html` | le plafond par millésime ; **deux garanties fausses retirées** (§90e) | — |
+| `scripts/mv-harnais-rdtmil.mjs` (neuf) · `package.json` | 52 assertions + 5 contre-épreuves, câblé dans `check` et `prebuild` | — |
+| `scripts/harnais-claude-md.mjs` | `SECTIONS` 121 → 122 | — |
+| `.mv-base` | `4d5fc61` | — |
+
+### 90i. ⚠️ Ce qui reste ouvert
+
+- **Le plafond reste posé PARCELLE par parcelle.** L'arrêté, lui, vise une **appellation**. Il
+  n'existe **aucun champ `appellation`** sur une parcelle (vérifié : ni dans `_parseKML`, ni dans les
+  données de démo). La pose groupée est un contournement honnête, pas la bonne modélisation. Le vrai
+  lot serait `p.appellation`, à traiter **avec** « import KML en MERGE » (§28) — sans quoi un
+  ré-import l'effacerait.
+- **`_mlRendements` écarte toujours en silence** une récolte dont le nom de parcelle n'est pas
+  apparié (`if(!p) return;`). Le Cuvier le signale (§80), Le millésime non : une parcelle peut
+  manquer du bloc « Rendement par parcelle » sans qu'une ligne le dise.
+- **La pose groupée ne propose rien pour un millésime sans récolte** — le bloc entier n'existe pas
+  dans ce cas. Un millésime antérieur au suivi du Cuvier (`ch.retro`) reste sans plafond possible.
+- **Deux écrans s'appellent toujours « Le millésime ».** Ce lot rend le doublon inoffensif ; il ne le
+  supprime pas.

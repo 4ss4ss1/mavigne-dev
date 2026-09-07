@@ -1,4 +1,29 @@
-// MA VIGNE — Service Worker v7.46
+// MA VIGNE — Service Worker v7.47
+// v7.47 (07/09/2026) — RDTMIL-1 : UN PLAFOND DE RENDEMENT APPARTIENT A UN
+//   MILLESIME, ET IL SE POSE LA OU L'ON VOIT QU'IL MANQUE.
+//   Signale par Nico, capture a l'appui : « impossible de rentrer des plafonds
+//   de rendement pour les millesimes […] il n'y a juste pas l'option ».
+//   ★★★ TROIS DEFAUTS EMPILES, ET LE PLUS VISIBLE ETAIT LE MOINS GRAVE.
+//   1. `p.rdt_max` etait un SCALAIRE. Le rendement annuel autorise est fixe par
+//      arrete, campagne par campagne : le poser depuis l'ecran d'un millesime
+//      reecrivait tous les autres, en silence. C'est §81 vu depuis la vigne —
+//      un champ qui n'a qu'une valeur ne peut pas porter une histoire.
+//      `p.rdt_max_hist` = [{mil,max}]. ⚠️ AUCUN RATTRAPAGE : l'ancien scalaire
+//      n'est pas recopie dans une annee qu'on ne connait pas, il devient le
+//      repli, ANNONCE « herite ». Un chiffre date d'office se croirait.
+//   2. LA CARTE DU PILOTAGE RENVOYAIT « depuis Le millesime » — et le Pilotage
+//      a un onglet qui porte EXACTEMENT ce nom. On lisait donc le renvoi depuis
+//      l'ecran qu'il croyait designer. Un chemin incomplet entre deux ecrans
+//      homonymes ne renvoie nulle part : il fait croire a une option absente.
+//      La carte porte desormais le geste ; le chemin complet n'est ecrit que
+//      lorsque le geste n'y est pas possible.
+//   3. ★ POSER 45 FOIS LE MEME CHIFFRE N'EST PAS UNE SAISIE, C'EST UNE CORVEE.
+//      Elle explique a elle seule qu'un domaine de 45 parcelles n'ait jamais eu
+//      un seul plafond. Apres la premiere pose, on propose de la porter sur
+//      celles qui n'en ont AUCUN — nommees d'abord, jamais celles qui en ont un.
+//   ⚠️ Une seule porte d'ecriture (`_mlSetRdtMax`), appelee par deux ecrans :
+//      un seul controle de droit, un seul format. `apres` rend la main a
+//      l'appelant — sans lui, poser depuis le Pilotage redessinait la Cave.
 // v7.46 (07/09/2026) — PILCRB-1 : LES COURBES DE LA CAVE, DANS LE PILOTAGE.
 //   Demande par Nico : « dans pilotage cave je souhaite un module avec
 //   graphique, un graphe avec toutes les densites des cuves ramenees a j=0 et
@@ -3450,7 +3475,7 @@
 // v2.22 — Fix profils vides : guard vide dans loadData() pour MEMBRES/SAISONS/TACHES
 // v2.17 — Onboarding intégré + tenantId · v2.06 — Firebase Auth · v2.00–v2.05 — divers
 const DEBUG = self.location.hostname === 'localhost' || self.location.hostname === '127.0.0.1';
-const CACHE_NAME   = 'mavigne-v7.46';
+const CACHE_NAME   = 'mavigne-v7.47';
 const TENANT_CACHE = 'mavigne-tenant';   // Cache persistant — préservé à chaque mise à jour SW
 const SYNC_TAG     = 'mavigne-sync';
 
@@ -3466,7 +3491,7 @@ const CDN_URLS = [
 ];
 
 self.addEventListener('install', event => {
-  if(DEBUG) console.log('[SW] Ma Vigne v7.46 installé');
+  if(DEBUG) console.log('[SW] Ma Vigne v7.47 installé');
   event.waitUntil(
     caches.open(CACHE_NAME).then(async cache => {
       // ── Cœur applicatif : STRICT (mise à jour ATOMIQUE) ──
@@ -3482,7 +3507,7 @@ self.addEventListener('install', event => {
 });
 
 self.addEventListener('activate', event => {
-  if(DEBUG) console.log('[SW] Ma Vigne v7.46 activé');
+  if(DEBUG) console.log('[SW] Ma Vigne v7.47 activé');
   event.waitUntil(
     caches.keys().then(keys =>
       Promise.all(

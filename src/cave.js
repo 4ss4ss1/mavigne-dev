@@ -6898,6 +6898,58 @@ function _vendParcLot(fn){
     if(!_vendParcDiff && _vendParcSale){ _vendParcSale=false; _vendSaveParcelles(); }
   }
 }
+
+// ═══════════════════════════════════════════════════════════════════════════
+// ★★★ UN PLAFOND DE RENDEMENT N'EST PAS UNE CONSTANTE DE LA PARCELLE.
+//   Le rendement annuel autorise est fixe par arrete, campagne par campagne :
+//   une parcelle n'a pas UN plafond, elle en a un PAR MILLESIME. `p.rdt_max`
+//   etait un scalaire — le poser depuis l'ecran d'un millesime reecrivait
+//   TOUS les autres, en silence, sur un ecran qui affichait pourtant une
+//   annee en toutes lettres. C'est §81 vu depuis la vigne : un champ qui n'a
+//   qu'une valeur ne peut pas porter une histoire.
+//
+//   `p.rdt_max_hist` = [{mil, max}] — une ligne par millesime, corrigeable
+//   ligne a ligne, meme porte que `statut_hist` et que les releves de CUV-1.
+//
+// ⚠️⚠️ AUCUN RATTRAPAGE INVENTE. L'ancien `p.rdt_max` n'est PAS recopie dans un
+//   millesime : on ne sait pas de quelle campagne il vient, et `date_entree`
+//   de la parcelle ne le dirait pas davantage. Il devient le REPLI, annonce
+//   comme « herite » partout ou il sert, et se corrige millesime par
+//   millesime. Un chiffre date d'office se croirait ; un « herite » se corrige.
+//
+// ⚠️ SOURCE UNIQUE : `_mlRendements` (Le millesime) et la carte du Pilotage
+//   lisent tous les deux CETTE fonction, via window. Deux definitions du meme
+//   plafond, ce sont deux ecrans qui finiront par ne pas dire la meme chose.
+// ═══════════════════════════════════════════════════════════════════════════
+function _vendRdtMax(p,mil){
+  if(!p) return {max:null,src:null};
+  var k=String(mil), h=null;
+  (p.rdt_max_hist||[]).forEach(function(x){ if(x&&String(x.mil)===k) h=x; });
+  if(h){ var v=parseFloat(h.max); if(isFinite(v)&&v>0) return {max:v,src:'mil'}; }
+  var g=parseFloat(p.rdt_max);
+  if(isFinite(g)&&g>0) return {max:g,src:'herite'};
+  return {max:null,src:null};
+}
+// Ecriture d'un plafond pour UN millesime. `val` nul ou <= 0 retire la ligne :
+// effacer une valeur fausse doit couter aussi peu que la poser.
+// ⚠️ N'ECRIT JAMAIS `p.rdt_max`. L'ancien scalaire est un heritage, pas une
+//   case ou ranger du neuf : l'ecraser ferait disparaitre le repli de TOUS les
+//   autres millesimes en posant celui-ci.
+function _vendSetRdtMax(p,mil,val){
+  if(!p||mil==null||mil==='') return false;
+  if(!Array.isArray(p.rdt_max_hist)) p.rdt_max_hist=[];
+  var k=String(mil), i=-1;
+  p.rdt_max_hist.forEach(function(x,n){ if(x&&String(x.mil)===k) i=n; });
+  var v=parseFloat(val);
+  if(!(isFinite(v)&&v>0)){
+    if(i<0) return false;
+    p.rdt_max_hist.splice(i,1);
+    return true;
+  }
+  v=Math.round(v*10)/10;
+  if(i<0) p.rdt_max_hist.push({mil:k,max:v}); else p.rdt_max_hist[i].max=v;
+  return true;
+}
 // Upsert par recolte_id. Millésime = année civile de la date de récolte.
 function _vendRecordRendement(rec, prev){
   try{
@@ -9862,7 +9914,12 @@ function _mlRendements(mil){
     /* La meilleure valeur disponible : le volume connu, plus une estimation du
        reste. Sans aucun volume connu, elle vaut exactement le calcul d'avant. */
     o.hlHa = s>0?Math.round((d.vol.hl+d.vol.kgKo/kgHl)/s*10)/10:null;
-    o.max  = parseFloat(o.parcelle.rdt_max)||null;
+    /* ★ Le plafond suit le MILLESIME demande, pas la parcelle en general.
+       `maxSrc` dit d'ou il vient : 'mil' = pose pour cette annee, 'herite' =
+       l'ancien reglage tous millesimes confondus. L'ecran doit pouvoir faire
+       la difference — un chiffre herite n'a pas ete verifie contre l'arrete. */
+    var mx=_vendRdtMax(o.parcelle,mil);
+    o.max=mx.max; o.maxSrc=mx.src;
     o.depasse = (o.max&&o.hlHa)?(o.hlHa>o.max):false;
     o.pct = (o.max&&o.hlHa)?Math.round(o.hlHa/o.max*100):null;
     return o;
@@ -9872,6 +9929,22 @@ function _mlRendements(mil){
     if(b.pct==null) return -1;
     return b.pct-a.pct;
   });
+}
+
+/* ★ Les parcelles RECOLTEES sur ce millesime qui n'ont AUCUN plafond — ni pose
+   pour l'annee, ni herite. C'est exactement la liste que la carte annonce
+   « plafond non renseigne », et c'est la seule que la pose groupee propose de
+   remplir : on ne remplace jamais en lot une valeur que quelqu'un a posee.
+   ⚠️ Passe par `_mlRecoltesDe` et `_vendParcByName` — le filtre du millesime et
+   l'appariement des noms n'ont qu'une definition dans ce fichier. */
+function _mlRdtSansMax(mil){
+  var out=[], vus={};
+  _mlRecoltesDe(mil).forEach(function(r){
+    var p=_vendParcByName(r.parcelle); if(!p||vus[p.nom]) return;
+    vus[p.nom]=1;
+    if(_vendRdtMax(p,mil).max==null) out.push(p);
+  });
+  return out;
 }
 
 /* ★ Source unique avec Le Cuvier (_vendResteARentrer). Cette fonction comparait
@@ -10007,6 +10080,18 @@ function _mlGo(kind,ref){
     if(isSaisonnier()){ showToast('Acc\u00e8s lecture seule','#B85A1A'); return; }
     caveSection='elevage'; renderCave();
     _caveQuickOp(null,'soutirage',ref);
+    return;
+  }
+  // ★ Le plafond de rendement se pose DANS la Cave, section « Le millesime »,
+  //   onglet « La ligne de vie » — et le Pilotage a un onglet qui porte
+  //   EXACTEMENT le meme nom. Un renvoi ecrit en toutes lettres se lit comme
+  //   « c'est ici » quand on est deja sur un ecran qui s'appelle pareil : il
+  //   faut y ATTERRIR, pas le decrire.
+  if(kind==='rdtmax'){
+    caveSection='millesime'; _mlTab='vie';
+    var _rm=parseInt(ref,10);
+    if(isFinite(_rm)&&_rm>0) _mlMil=_rm;
+    renderCave();
     return;
   }
   // ⚠ Les kinds ci-dessous decrivent une CUVE : ils vivent au Cuvier.
@@ -10196,13 +10281,16 @@ function _mlRenderVie(){
     var adm=(typeof isAdmin==='function'&&isAdmin());
     _mlRdtCss();
     h+='<div class="mlx-sec">Rendement par parcelle</div>';
+    /* ★ Le plafond est desormais celui du MILLESIME ouvert : le dire ici, sinon
+       poser 45 en 2026 aurait l'air de valoir pour 2025 — c'est exactement ce
+       que faisait l'ancien scalaire, en silence. */
     h+='<div class="mlx-hint">'+(rd.some(function(r){return r.max;})
-        ? 'Le trait vertical est le maximum de l\u2019appellation. Un d\u00e9passement ne bloque rien : il se voit.'
-        : 'Aucun maximum d\u2019appellation renseign\u00e9.'+(adm?' Touchez une parcelle pour le poser.':''))+'</div>';
+        ? 'Le trait vertical est le maximum de l\u2019appellation pour '+mil+'. Un d\u00e9passement ne bloque rien : il se voit.'
+        : 'Aucun maximum d\u2019appellation renseign\u00e9 pour '+mil+'.'+(adm?' Touchez une parcelle pour le poser.':''))+'</div>';
     rd.forEach(function(r){
       var ech=(r.max||0)*1.15;
       var wFill=r.max?Math.min(100,Math.round((r.hlHa/ech)*100)):0;
-      h+='<button class="mlx-rd'+(r.depasse?' over':'')+'" onclick="_mlSetRdtMax(\''+_escAttr(r.parcelle.nom)+'\')">'
+      h+='<button class="mlx-rd'+(r.depasse?' over':'')+'" onclick="_mlSetRdtMax(\''+_escAttr(r.parcelle.nom)+'\','+_escAttr(mil)+')">'
         +'<span class="mlx-rdh"><span class="mlx-rdn">'+_escHtml(r.parcelle.nom)+'</span>'
         +(r.depasse?'<span class="mlx-tag">au-dessus</span>':'')
         +(r.vendu?'<span class="mlx-tag sold">vendu</span>':'')
@@ -10222,10 +10310,12 @@ function _mlRenderVie(){
              depassement d'appellation constate. Tant que le volume n'est pas
              mesure, le pourcentage est annonce comme approche. */
           +'<span class="mlx-rdf"><span>'+(r.statut==='mesure'?'':'\u2248 ')+r.pct+' % du maximum</span>'
-          +'<span>max '+r.max+' hL/ha</span></span>';
+          /* ⚠️ Un plafond HERITE de l'ancien reglage n'a ete verifie contre
+             aucun arrete : il se lit, il ne se croit pas. L'ecran le dit. */
+          +'<span>max '+_mvF1(r.max)+' hL/ha'+(r.maxSrc==='herite'?' \u00b7 h\u00e9rit\u00e9':'')+'</span></span>';
       } else {
-        h+='<span class="mlx-rdf"><span>'+(adm?'Toucher pour poser le maximum de l\u2019appellation'
-          :'Maximum de l\u2019appellation non renseign\u00e9')+'</span></span>';
+        h+='<span class="mlx-rdf"><span>'+(adm?('Toucher pour poser le maximum de l\u2019appellation '+mil)
+          :('Maximum de l\u2019appellation non renseign\u00e9 pour '+mil))+'</span></span>';
       }
       h+='</button>';
     });
@@ -10255,28 +10345,89 @@ function _mlRenderVie(){
   return h;
 }
 
-// Maximum de l'appellation : seule donnee que l'ecran demande, posee une fois
-// par parcelle, par un administrateur. Ecrite dans PARCELLES, pas ailleurs.
-function _mlSetRdtMax(nom){
+// Maximum de l'appellation : seule donnee que l'ecran demande, posee par
+// parcelle ET PAR MILLESIME, par un administrateur. Ecrite dans PARCELLES.
+//
+// ★★ UNE SEULE PORTE D'ECRITURE, APPELEE PAR DEUX ECRANS : la carte du
+//   millesime (Cave) et la carte du Pilotage. `apres` est ce que l'appelant
+//   veut redessiner — sans lui, la Cave se redessine, ce qui est faux quand on
+//   pose depuis le Pilotage. Un geste partage doit rendre la main a celui qui
+//   l'a declenche, pas a celui qui l'a ecrit.
+function _mlSetRdtMax(nom,mil,apres){
   if(typeof isAdmin!=='function'||!isAdmin()){
     showToast('R\u00e9serv\u00e9 \u00e0 l\u2019administrateur','#B85A1A'); return;
   }
   var p=_vendParcByName(nom);
   if(!p){ showToast('Parcelle introuvable','#B85A1A'); return; }
   if(typeof window.openPrompt!=='function'){ showToast('Saisie indisponible','#B85A1A'); return; }
+  var m=(mil!=null&&mil!=='')?mil:_mlMilActif();
+  var cur=_vendRdtMax(p,m);
+  var rendre=(typeof apres==='function')?apres:function(){ renderCaveMillesime(); };
   window.openPrompt({
-    titre:'Rendement maximum', sub:nom+' \u2014 le plafond de l\u2019appellation, en hL/ha.',
-    valeur:(p.rdt_max!=null?String(p.rdt_max):''), unite:'hL/ha', icone:'raisin',
-    type:'nombre', placeholder:'45', btnLabel:'Enregistrer',
+    titre:'Rendement maximum '+m,
+    sub:nom+' \u2014 le plafond de l\u2019appellation pour ce mill\u00e9sime, en hL/ha.'
+      +(cur.src==='herite'?' Aujourd\u2019hui h\u00e9rit\u00e9 de l\u2019ancien r\u00e9glage, tous mill\u00e9simes confondus.':''),
+    /* ⚠️ Le champ ne pre-remplit QUE la valeur de CE millesime. Un plafond
+       herite s'affiche en repere gris (placeholder) : le pre-remplir ferait
+       dater d'office une valeur dont on ignore la campagne d'origine. */
+    valeur:(cur.src==='mil'?String(cur.max):''), unite:'hL/ha', icone:'raisin',
+    type:'nombre', placeholder:(cur.max!=null?_mvF1(cur.max):'45'), btnLabel:'Enregistrer',
     cb:function(v){
-      var n=parseFloat(String(v).replace(',','.'));
+      var s=String(v==null?'':v).trim();
+      // Valider a vide RETIRE le plafond de ce millesime, lui seul. Effacer une
+      // valeur fausse doit couter aussi peu que la poser.
+      if(!s){
+        if(_vendSetRdtMax(p,m,null)){
+          _vendSaveParcelles();
+          showToast(nom+' \u00b7 plafond '+m+' retir\u00e9','#B85A1A');
+        }
+        rendre(); return;
+      }
+      var n=parseFloat(s.replace(',','.'));
       if(!isFinite(n)||n<=0){ showToast('Valeur non comprise','#B85A1A'); return; }
-      p.rdt_max=Math.round(n*10)/10;
+      _vendSetRdtMax(p,m,n);
       _vendSaveParcelles();
-      showToast(''+nom+' \u00b7 max '+_mvF1(p.rdt_max)+' hL/ha','#3D6B27');
-      renderCaveMillesime();
+      var q=_vendRdtMax(p,m).max;
+      showToast(nom+' \u00b7 '+m+' \u00b7 max '+_mvF1(q)+' hL/ha','#3D6B27');
+      rendre();
+      _mlRdtProposeGroupe(q,m,rendre);
     }
   });
+}
+
+// ★★★ POSER QUARANTE-CINQ FOIS LE MEME CHIFFRE N'EST PAS UNE SAISIE, C'EST UNE
+//   CORVEE — et une corvee ne se fait pas. Elle explique a elle seule qu'un
+//   domaine de 45 parcelles n'ait jamais eu un seul plafond renseigne. Un
+//   arrete fixe le meme rendement pour toute une appellation : apres la
+//   premiere pose, on PROPOSE de porter la valeur sur les parcelles du
+//   millesime qui n'ont AUCUN plafond.
+// ⚠️⚠️ Jamais celles qui en ont un, pose OU herite : on ne remplace pas en lot
+//   une valeur que quelqu'un a mise. Et la proposition NOMME ce qu'elle va
+//   toucher — « les autres » ne se verifie pas avant de dire oui.
+function _mlRdtProposeGroupe(val,mil,rendre){
+  if(!(val>0)) return;
+  if(typeof window.openConfirmDel!=='function') return;
+  var l=_mlRdtSansMax(mil); if(!l.length) return;
+  var noms=l.map(function(p){ return p.nom; });
+  var n=noms.length, s=(n>1?'s':'');
+  var apercu=noms.slice(0,6).join(', ')+(n>6?(' et '+(n-6)+' autre'+(n>7?'s':'')):'');
+  // Le prompt vient de se fermer : laisser l'overlay finir sa sortie avant d'en
+  // ouvrir un second. Deux overlays qui se croisent, c'est §85.
+  setTimeout(function(){
+    window.openConfirmDel(
+      _mvF1(val)+' hL/ha sur '+n+' autre'+s+' parcelle'+s+' ?',
+      'Mill\u00e9sime '+mil+' \u2014 '+apercu+'. Ces parcelles n\u2019ont aucun plafond. '
+        +'Celles qui en ont un ne sont pas touch\u00e9es.',
+      function(){
+        // Une seule ecriture pour tout le lot : 45 parcelles ne font pas 45
+        // transactions sur la collection la plus protegee de l'application.
+        _vendParcLot(function(){
+          l.forEach(function(p){ if(_vendSetRdtMax(p,mil,val)) _vendSaveParcelles(); });
+        });
+        showToast(n+' plafond'+s+' pos\u00e9'+s+' \u00b7 '+mil,'#3D6B27');
+        rendre();
+      },'raisin','Appliquer','#3D6B27');
+  },260);
 }
 
 function _mlSetMil(m){ _mlMil=m; renderCaveMillesime(); }
@@ -10326,6 +10477,10 @@ window.renderCaveMillesime = renderCaveMillesime;
 window._mlSetTab           = _mlSetTab;
 window._mlSetMil           = _mlSetMil;
 window._mlSetRdtMax        = _mlSetRdtMax;
+// ★ Lus par le Pilotage : le plafond n'a qu'UNE definition, et elle est ici.
+window._vendRdtMax         = _vendRdtMax;
+window._vendSetRdtMax      = _vendSetRdtMax;
+window._mlRdtSansMax       = _mlRdtSansMax;
 window._mlGo               = _mlGo;
 window._mlAgenda           = _mlAgenda;
 window._mlProjFA           = _mlProjFA;
