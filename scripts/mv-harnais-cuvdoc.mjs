@@ -376,6 +376,87 @@ T('...et surtout aucun etat vide d\'ecran sur du papier',
 T('le tableau, lui, est toujours la', k6.indexOf('<td class="n">1092</td>') !== -1);
 window.CAVE_VENDANGE.cuves_vinif = cuvS0;
 
+console.log('\n6d. Le comparatif des cuves');
+const cvS2 = window.CAVE_VENDANGE.cuves_vinif.slice();
+const anaC = window.CAVE_VENDANGE.analyses.slice();
+/* ⚠️ Une analyse POSTERIEURE a l'encuvage, mais dans la campagne : c'est elle
+   qui prouve la borne haute. Sans elle, la borne ne serait jamais eprouvee. */
+window.CAVE_VENDANGE.analyses = anaC.concat([A('Ergot', d(Y1,'09-20'), 240)]);
+window.CAVE_VENDANGE.cuves_vinif = [
+  /* Cuve A : la plus RAPIDE en pts/j (13,1) mais seche au jour 8.
+     ⚠️ Son premier releve est ANTERIEUR a l'encuvage — il doit disparaitre,
+     sinon le depart serait lu a 1080 au lieu de 1100. */
+  { id:'A', nom:'Cuve A', volume_hl:20, statut:'termine', parcelles:['Ergot','Jouise'],
+    date_entree:d(Y1,'09-16'), mesures_fa:[
+      { id:'a0', date:d(Y1,'09-15'), densite:1080, temp_c:20 },
+      { id:'a1', date:d(Y1,'09-16'), densite:1100, temp_c:20 },
+      { id:'a2', date:d(Y1,'09-20'), densite:1050, temp_c:20 },
+      { id:'a3', date:d(Y1,'09-24'), densite:995,  temp_c:20 }], operations:[] },
+  /* Cuve B : plus LENTE en pts/j (12,7) mais seche au jour 6. */
+  { id:'B', nom:'Cuve B', volume_hl:15, statut:'termine', parcelles:['Bollery Blanc'],
+    date_entree:d(Y1,'09-20'), mesures_fa:[
+      { id:'b1', date:d(Y1,'09-20'), densite:1070, temp_c:20 },
+      { id:'b2', date:d(Y1,'09-23'), densite:1030, temp_c:20 },
+      { id:'b3', date:d(Y1,'09-26'), densite:994,  temp_c:20 }], operations:[] },
+  /* Cuve C : aucune date d'encuvage — pas de J0, donc pas de cinetique. */
+  { id:'C', nom:'Cuve C', volume_hl:10, statut:'fa', parcelles:['Comble'],
+    mesures_fa:[
+      { id:'c1', date:d(Y1,'09-18'), densite:1085, temp_c:20 },
+      { id:'c2', date:d(Y1,'09-22'), densite:1020, temp_c:20 },
+      { id:'c3', date:d(Y1,'09-25'), densite:998,  temp_c:20 }], operations:[] }
+];
+docs.length = 0; window._cuvDoc(String(Y1));
+const kC = (docs[0] || { corps:'' }).corps || '';
+const svgC = (kC.match(/<svg[\s\S]*?<\/svg>/) || [''])[0];
+T('le comparatif est en tete du cahier',
+  kC.indexOf('Comparatif des cuves') !== -1
+  && kC.indexOf('Comparatif des cuves') < kC.indexOf('class="cd-cuve'));
+T('deux cinetiques tracees, chacune avec son point de depart',
+  (svgC.match(/<polyline/g) || []).length === 2
+  && (svgC.match(/<circle[^>]*r="3"/g) || []).length === 2);
+T('l\'axe compte des JOURS, pas des dates',
+  /<text[^>]*>J0<\/text>/.test(svgC) && /<text[^>]*>J8<\/text>/.test(svgC)
+  && svgC.indexOf('16/09') === -1);
+T('chaque courbe porte son nom au bout',
+  svgC.indexOf('>Cuve A</text>') !== -1 && svgC.indexOf('>Cuve B</text>') !== -1);
+/* ⚠️ Les deux cuves finissent a 995 et 994 : leurs noms tombent au MEME endroit.
+   C'est le cas le plus banal — elles finissent toutes seches — et sans
+   ecartement le graphe ment sur qui est qui. */
+const yl = [...svgC.matchAll(/<text x="\d+" y="([\d.]+)"[^>]*font-weight="600"/g)].map(m => +m[1]);
+T('...et deux noms ne s\'ecrivent jamais l\'un sur l\'autre',
+  yl.length === 2 && Math.abs(yl[0] - yl[1]) >= 10.5,
+  'ecart ' + (yl.length === 2 ? Math.abs(yl[0] - yl[1]).toFixed(1) : '?'));
+T('la cuve sans date d\'encuvage est ecartee, et le document le DIT',
+  svgC.indexOf('>Cuve C</text>') === -1 && kC.indexOf('1</b> cuve ne figure pas ici') !== -1);
+
+const rgs = [...kC.matchAll(/<tr><td>Cuve ([AB])<\/td>([\s\S]*?)<\/tr>/g)];
+/* ★★ LE CLASSEMENT. Cuve A est la plus rapide en pts/j (13,1 contre 12,7) mais
+   Cuve B est seche DEUX JOURS PLUS TOT. Une pente moyenne sur six jours n'est
+   pas comparable a une pente sur huit : le classement se fait sur le jour ou
+   996 a ete RELEVE, la seule grandeur qui mesure la meme chose. */
+T('le tableau classe par jour du vin sec, pas par vitesse',
+  rgs.length === 2 && rgs[0][2].indexOf('J6') !== -1 && rgs[1][2].indexOf('J8') !== -1,
+  rgs.map(r => 'Cuve ' + r[1]).join(' puis '));
+const ligA = (rgs.find(r => r[1] === 'A') || ['', '', ''])[2];
+T('le releve d\'AVANT l\'encuvage ne fait pas le depart (1100, pas 1080)',
+  ligA.indexOf('>1100<') !== -1 && ligA.indexOf('>1080<') === -1);
+/* Ergot 215 sur 0,37 ha et Jouise 205 sur 0,52 ha : pondere 209, simple 210.
+   Un point d'ecart — c'est tout ce qu'il faut pour que le harnais tranche. */
+T('le sucre a la vigne est pondere par la surface (209, pas 210)',
+  ligA.indexOf('>209<') !== -1, ligA.indexOf('>210<') !== -1 ? 'moyenne simple' : '');
+T('une analyse POSTERIEURE a l\'encuvage n\'y entre pas',
+  ligA.indexOf('>226<') === -1 && ligA.indexOf('>240<') === -1);
+T('la vitesse porte l\'intervalle sur lequel elle est calculee',
+  ligA.indexOf('J0–J8') !== -1);
+
+/* Sous deux cinetiques, il n'y a rien a comparer : pas de bloc du tout. */
+window.CAVE_VENDANGE.cuves_vinif = [cvS2[0]];
+docs.length = 0; window._cuvDoc(String(Y1));
+T('une seule cuve comparable : aucun comparatif',
+  ((docs[0] || { corps:'' }).corps || '').indexOf('Comparatif des cuves') === -1);
+window.CAVE_VENDANGE.cuves_vinif = cvS2;
+window.CAVE_VENDANGE.analyses = anaC;
+
 console.log('\n7. Structure HTML des deux documents');
 for (const X of [D, K]) {
   const h = X.corps;
@@ -447,7 +528,22 @@ if (CONTRE && !ko) {
     ['garde anti-chevauchement des libelles desarme',
       '    if(x - _xEt < 34) return;', '    if(x - _xEt < 0) return;'],
     ['la legende ne date plus les passages',
-      '    h += \'<div class=\"mvfm-ets\">\';', '    h += \'<div class=\"mvfm-rien\">\';']
+      '    h += \'<div class=\"mvfm-ets\">\';', '    h += \'<div class=\"mvfm-rien\">\';'],
+    ['comparatif absent du cahier', "    + _cmpBloc(cuves)\n", ''],
+    ['comparatif classe sur la vitesse au lieu du jour du vin sec',
+      '    if(a.jSec != null && b.jSec != null) return a.jSec - b.jSec;',
+      '    if(a.vit != null && b.vit != null) return b.vit - a.vit;'],
+    ['sucre a la vigne en moyenne simple',
+      '    ? lus.reduce(function(s, x){ return s + x.suc * x.ha; }, 0) / hs',
+      '    ? lus.reduce(function(s, x){ return s + x.suc; }, 0) / lus.length'],
+    ['analyse posterieure a l\u2019encuvage prise en compte',
+      'a && a.parcelle === nom && a.date && a.date <= ref &&',
+      'a && a.parcelle === nom && a.date &&'],
+    ['releve anterieur a l\u2019encuvage garde dans la cinetique',
+      '    return (j < 0) ? null : { j:j, d:d, t:(m.temp_c != null ? m.temp_c : null) };',
+      '    return { j:j, d:d, t:(m.temp_c != null ? m.temp_c : null) };'],
+    ['ecartement des noms de courbe desarme',
+      '    var y = Math.max(L.y, prec + 11);', '    var y = L.y;']
   ];
   console.log('\n  CONTRE-EPREUVES — ' + DEFAUTS.length + ' defauts reinjectes un par un\n');
   let sansEffet = 0;

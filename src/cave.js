@@ -11552,6 +11552,16 @@ var MV_CUVDOC_CSS = ''
      la grille TRACENT, ils n'ecrivent jamais (charte MV_GRAPH). */
   + ':root{--terre:#8A5A38;--or:#C8A060;--vert-med:#3D6B27;--rouge:#A0291E;'
     + '--orange:#B85A1A;--gris-clair:#E4DCCB;--texte-doux:#7A7263}'
+  /* Le comparatif : deux variables de plus, hors MV_GRAPH_COL — les six
+     couleurs de courbe s'y puisent (§86b : ce que le document invoque, il le
+     declare). */
+  + ':root{--bleu:#1A4A7A;--phyto:#5B2D8E}'
+  + '.cmp-gr{margin:2px 0 10px}'
+  + '.cmp-gr svg{display:block;max-width:100%;height:auto}'
+  + '.cmp-note{font-size:8.5px;color:#7A7263;line-height:1.5;margin-top:5px}'
+  + '.cmp-note b{color:#2D1B09}'
+  + '.cmp-tb{margin-bottom:12px}'
+  + '.cmp-tb td i{font-style:normal;color:#8A8272}'
   + '.cd-gr{margin:1px 0 9px}'
   + '.cd-gr svg{display:block;max-width:100%;height:auto}'
   + '.mvfm-lg{display:flex;gap:6px 16px;flex-wrap:wrap;font-size:8.5px;color:#7A7263;margin-top:5px}'
@@ -11787,6 +11797,233 @@ function _cuvJours(a, b){
   return isFinite(d) ? d : null;
 }
 
+/* ═══════════ LE COMPARATIF DES CUVES — CUVDOC-3 ═══════════
+   ⚠️⚠️ CE GRAPHE N'EST PAS CELUI DE L'ECRAN, ET C'EST VOULU. §86 interdit de
+   REDESSINER une courbe qui existe deja ailleurs ; ici il n'y en a aucune a
+   copier — l'ecran n'a pas de comparatif. Ce qui est partage, c'est le SOCLE :
+   `_mvGraphCadre` / `_mvGraphSvg`, les memes gouttieres, les memes tailles de
+   texte, les memes roles de couleur. Le jour ou ce comparatif monte sur un
+   ecran, il appellera CETTE fonction, pas une seconde.
+   ★★★ CE QUI CHANGE TOUT : l'axe des X compte des JOURS DEPUIS L'ENCUVAGE, pas
+   des dates. Sur un calendrier, une cuve encuvee le 17 et une autre le 24
+   n'ont aucun point commun ; alignees sur leur propre J0, leurs cinetiques se
+   superposent et se comparent. C'est la seule facon de voir laquelle part vite.
+   ⚠️ J0 = `date_entree`, jamais le premier releve. Deux origines differentes
+   dans un meme graphe, ce sont deux echelles qui se ressemblent : une cuve
+   mesuree trois jours apres l'encuvage aurait l'air d'avoir demarre plus bas.
+   Une cuve sans date d'encuvage est donc ECARTEE, et le document le DIT.
+   ⚠️ Un releve anterieur a l'encuvage (j < 0) est ecarte de meme : ce n'est pas
+   une cinetique, c'est une saisie a corriger. */
+var MV_CMP_H   = 320;
+var MV_CMP_MIN = 2;      /* sous deux cuves, il n'y a rien a comparer */
+/* Six roles de la charte, tous lisibles sur blanc. Des `var()`, pas des hex :
+   le document les declare dans son :root (§86b), et l'assertion du harnais
+   verifie qu'aucun n'y manque. */
+var MV_CMP_COL = ['var(--terre)', 'var(--vert-med)', 'var(--bleu)',
+                  'var(--orange)', 'var(--phyto)', 'var(--rouge)'];
+
+/* La serie d'une cuve, ramenee a son J0. null quand il n'y a pas de quoi
+   tracer — jamais une serie vide, qui ferait une ligne plate a l'ecran. */
+function _cmpSerie(c){
+  var j0 = Date.parse(c && c.date_entree);
+  if(isNaN(j0)) return null;
+  var pts = (c.mesures_fa || []).map(function(m){
+    var t = Date.parse(m && m.date), d = _vendMesD20(m);
+    if(isNaN(t) || d == null) return null;
+    var j = Math.round((t - j0) / 86400000);
+    return (j < 0) ? null : { j:j, d:d, t:(m.temp_c != null ? m.temp_c : null) };
+  }).filter(Boolean).sort(function(a, b){ return a.j - b.j; });
+  if(pts.length < 2) return null;
+  var prem = pts[0], der = pts[pts.length - 1], jSec = null;
+  for(var i = 0; i < pts.length; i++) if(pts[i].d <= _ML_D20_SEC){ jSec = pts[i].j; break; }
+  var tps = pts.filter(function(p){ return p.t != null; }).map(function(p){ return p.t; });
+  var span = der.j - prem.j;
+  return {
+    nom: String(c.nom || 'Cuve'), cuve: c, pts: pts,
+    dDeb: prem.d, dFin: der.d, jDeb: prem.j, jFin: der.j,
+    /* ⚠️ Le jour OBSERVE sec, pas un jour interpole : le document ne date pas
+       un evenement que personne n'a mesure. */
+    jSec: jSec,
+    tMoy: tps.length ? (tps.reduce(function(s, x){ return s + x; }, 0) / tps.length) : null,
+    tMax: tps.length ? Math.max.apply(null, tps) : null,
+    /* Points de densite par jour, sur l'intervalle REELLEMENT observe. */
+    vit: (span > 0) ? ((prem.d - der.d) / span) : null
+  };
+}
+
+/* Le sucre a la vigne, avant l'encuvage : la derniere analyse de chaque
+   parcelle de la cuve, ponderee par la surface — une moyenne simple ferait
+   peser 0,26 ha autant que 1,54 ha (meme regle qu'au controle de maturite).
+   ⚠️ On ne connait PAS la part de chaque parcelle reellement entree dans la
+   cuve : c'est un ordre de grandeur, et le document le dit.
+   ⚠️ Bornes des deux cotes : rien apres l'encuvage (ce serait la vendange en
+   cours, deja rentree), rien au-dela d'une campagne (ce serait l'an dernier). */
+function _cmpVigne(c){
+  var ref = c && c.date_entree; if(!ref) return null;
+  var tj = Date.parse(ref); if(isNaN(tj)) return null;
+  var noms = (c.parcelles || []).map(function(p){ return String(p || '').trim(); }).filter(Boolean);
+  if(!noms.length) return null;
+  var ha = {};
+  (window.PARCELLES || []).forEach(function(p){
+    if(p && p.nom) ha[String(p.nom).trim()] = parseFloat(p.surface) || 0;
+  });
+  var lus = [];
+  noms.forEach(function(nom){
+    var arr = (CAVE_VENDANGE.analyses || []).filter(function(a){
+      return a && a.parcelle === nom && a.date && a.date <= ref && _matJours(a.date, tj) <= _MAT_CAMP_J;
+    }).sort(function(a, b){ return String(a.date) < String(b.date) ? -1 : 1; });
+    if(arr.length) lus.push({ suc: _matSuc(arr[arr.length - 1]), ha: ha[nom] || 0 });
+  });
+  if(!lus.length) return { suc:null, n:0, nTot:noms.length };
+  var hs = lus.reduce(function(s, x){ return s + x.ha; }, 0);
+  var suc = (hs > 0)
+    ? lus.reduce(function(s, x){ return s + x.suc * x.ha; }, 0) / hs
+    : lus.reduce(function(s, x){ return s + x.suc; }, 0) / lus.length;
+  return { suc:suc, n:lus.length, nTot:noms.length, pond:(hs > 0) };
+}
+
+/* Le trace superpose. Pas de legende separee : chaque courbe porte SON NOM au
+   bout, a hauteur de son dernier point. Une legende de douze cuves oblige a
+   faire l'aller-retour entre une pastille de couleur et un trait ; un nom pose
+   au bout de la ligne se lit d'un coup. Les noms qui se chevauchent sont
+   ecartes verticalement — jamais superposes. */
+function _cmpSvg(S, w){
+  var c = window._mvGraphCadre(w, MV_CMP_H, { padL:52, padR:92, padT:26, padB:34 });
+  var pL = c.padL, pT = c.padT, iw = c.iw, ih = c.ih;
+  var jMax = 1, lo = _ML_D20_SEC, hi = _ML_D20_SEC;
+  S.forEach(function(s){ s.pts.forEach(function(p){
+    if(p.j > jMax) jMax = p.j;
+    if(p.d < lo) lo = p.d;
+    if(p.d > hi) hi = p.d;
+  }); });
+  var dMin = Math.min(_ML_D20_SEC - 6, lo - 4), dMax = hi + 6, dSp = Math.max(1, dMax - dMin);
+  var X = function(j){ return pL + (j / jMax) * iw; };
+  var Y = function(d){ return pT + ih - ((d - dMin) / dSp) * ih; };
+  var g = '';
+
+  // La grille et l'axe des densites.
+  for(var i = 0; i <= c.grad; i++){
+    var v = dMin + (dSp * i / c.grad), y = Y(v);
+    g += '<line x1="' + pL + '" y1="' + y.toFixed(1) + '" x2="' + (pL + iw) + '" y2="' + y.toFixed(1)
+      + '" stroke="' + c.col.grille + '" stroke-width="1"/>'
+      + '<text x="' + (pL - 8) + '" y="' + (y + 4).toFixed(1) + '" text-anchor="end" font-size="'
+      + c.txt.axe + '" fill="' + c.col.texte + '">' + Math.round(v) + '</text>';
+  }
+  g += '<text x="' + (pL - 8) + '" y="' + (pT - 10) + '" text-anchor="end" font-size="'
+    + c.txt.unite + '" fill="' + c.col.texte + '">d20</text>';
+
+  // L'axe des JOURS. Un pas entier : « J2,5 » ne veut rien dire.
+  var pas = Math.max(1, Math.ceil(jMax / c.grad));
+  for(var j = 0; j <= jMax; j += pas){
+    var x = X(j);
+    g += '<line x1="' + x.toFixed(1) + '" y1="' + (pT + ih) + '" x2="' + x.toFixed(1) + '" y2="'
+      + (pT + ih + 4) + '" stroke="' + c.col.grille + '" stroke-width="1"/>'
+      + '<text x="' + x.toFixed(1) + '" y="' + (c.h - 11) + '" text-anchor="middle" font-size="'
+      + c.txt.axe + '" fill="' + c.col.texte + '">J' + j + '</text>';
+  }
+  g += '<text x="' + (pL + iw) + '" y="' + (c.h - 11) + '" text-anchor="end" font-size="'
+    + c.txt.unite + '" fill="' + c.col.texte + '">jours depuis l’encuvage</text>';
+
+  // Le seuil du vin sec, la meme reference que sur la courbe de chaque cuve.
+  var ys = Y(_ML_D20_SEC);
+  g += '<line x1="' + pL + '" y1="' + ys.toFixed(1) + '" x2="' + (pL + iw) + '" y2="' + ys.toFixed(1)
+    + '" stroke="' + c.col.fait + '" stroke-width="1.2" stroke-dasharray="5 4"/>'
+    + '<text x="' + (pL + 6) + '" y="' + (ys - 6).toFixed(1) + '" font-size="' + c.txt.mini
+    + '" font-weight="700" fill="' + c.col.fait + '">' + _ML_D20_SEC + ' · vin sec</text>';
+
+  // Les courbes, et le point de DEPART marque : c'est lui que Nico compare.
+  var lbl = [];
+  S.forEach(function(s, k){
+    var col = MV_CMP_COL[k % MV_CMP_COL.length];
+    var pol = s.pts.map(function(p){ return X(p.j).toFixed(1) + ',' + Y(p.d).toFixed(1); }).join(' ');
+    g += '<polyline points="' + pol + '" fill="none" stroke="' + col + '" stroke-width="1.8"'
+      + ' stroke-linejoin="round" stroke-linecap="round"'
+      + (k >= MV_CMP_COL.length ? ' stroke-dasharray="6 3"' : '') + '/>'
+      + '<circle cx="' + X(s.jDeb).toFixed(1) + '" cy="' + Y(s.dDeb).toFixed(1)
+      + '" r="3" fill="' + col + '"/>';
+    lbl.push({ y:Y(s.dFin), x:X(s.jFin), nom:s.nom, col:col });
+  });
+
+  /* Ecartement des noms : trie par hauteur, puis chacun repousse le suivant.
+     Sans ce passage, deux cuves qui finissent a la meme densite — le cas le
+     plus BANAL, puisqu'elles finissent toutes seches — ecrivent leur nom l'un
+     sur l'autre, et le graphe ment sur qui est qui. */
+  lbl.sort(function(a, b){ return a.y - b.y; });
+  var prec = -99;
+  lbl.forEach(function(L){
+    var y = Math.max(L.y, prec + 11);
+    if(y > pT + ih + 8) y = pT + ih + 8;
+    L.yl = y; prec = y;
+  });
+  lbl.forEach(function(L){
+    g += '<line x1="' + (L.x + 2).toFixed(1) + '" y1="' + L.y.toFixed(1) + '" x2="' + (pL + iw + 5)
+      + '" y2="' + L.yl.toFixed(1) + '" stroke="' + L.col + '" stroke-width="0.8" opacity="0.55"/>'
+      + '<text x="' + (pL + iw + 8) + '" y="' + (L.yl + 3.5).toFixed(1) + '" font-size="' + c.txt.mini
+      + '" font-weight="600" fill="' + L.col + '">' + _escHtml(L.nom) + '</text>';
+  });
+
+  var aria = 'Comparatif de ' + S.length + ' cuves alignées sur leur jour d’encuvage : densité à 20 °C '
+    + 'de ' + Math.round(dMax) + ' à ' + Math.round(dMin) + ' sur ' + jMax + ' jours.';
+  return window._mvGraphSvg(c, aria, g);
+}
+
+/* Le comparatif complet : le trace, puis le tableau qui repond au « pourquoi ».
+   Trie par VITESSE decroissante — c'est le classement demande : qui part vite,
+   qui part apres. Les cuves sans vitesse mesurable ferment la marche. */
+function _cmpBloc(cuves){
+  var S = [], hors = 0;
+  (cuves || []).forEach(function(c){
+    var s = _cmpSerie(c);
+    if(s) S.push(s); else hors++;
+  });
+  if(S.length < MV_CMP_MIN) return '';
+  /* ⚠️⚠️ LE CLASSEMENT NE SE FAIT PAS SUR LA VITESSE, ET C'EST IMPORTANT.
+     Une pente moyenne calculee sur trois jours n'est PAS comparable a une
+     pente calculee sur dix : le debut d'une fermentation en est la phase la
+     plus rapide, donc une cuve a peine relevee sortirait toujours en tete du
+     « qui part le plus vite ». Le classement se fait sur le JOUR OU 996 A ETE
+     RELEVE — une grandeur comparable, mesuree sur la meme chose. Les cuves qui
+     n'y sont pas encore ferment la marche, la plus avancee d'abord. */
+  S.sort(function(a, b){
+    if(a.jSec != null && b.jSec != null) return a.jSec - b.jSec;
+    if(a.jSec != null) return -1;
+    if(b.jSec != null) return 1;
+    return a.dFin - b.dFin;
+  });
+  var spd = (_vendCfg().sucre_par_degre) || 16.83;
+  var lignes = S.map(function(s){
+    var vg = _cmpVigne(s.cuve);
+    var vgTxt = '—';
+    if(vg && vg.suc != null){
+      vgTxt = Math.round(vg.suc);
+      if(vg.n < vg.nTot) vgTxt += ' <i>(' + vg.n + '/' + vg.nTot + ')</i>';
+    }
+    return '<tr><td>' + _escHtml(s.nom) + '</td>'
+      + '<td>' + _vendFrDate(s.cuve.date_entree) + '</td>'
+      + '<td class="n">' + Math.round(s.dDeb) + '</td>'
+      + '<td class="n">' + Math.round(_vendSucre(s.dDeb)) + '</td>'
+      + '<td class="n">' + _mvF1(_vendSucre(s.dDeb) / spd) + '</td>'
+      + '<td class="n">' + vgTxt + '</td>'
+      + '<td class="n">' + (s.tMoy != null ? (_mvF1(s.tMoy) + ' · ' + _mvF1(s.tMax)) : '—') + '</td>'
+      + '<td class="n">' + (s.jSec != null ? ('J' + s.jSec) : ('<i>J' + s.jFin + ' · ' + Math.round(s.dFin) + '</i>')) + '</td>'
+      + '<td class="n">' + (s.vit != null
+          ? (_mvF1(s.vit) + ' <i>J' + s.jDeb + '–J' + s.jFin + '</i>') : '—') + '</td></tr>';
+  }).join('');
+
+  return '<h2>Comparatif des cuves</h2>'
+    + '<div class="cmp-gr mvdoc-avoid">' + _cmpSvg(S, MV_CUVDOC_GRW)
+    + '<div class="cmp-note">Chaque cuve est alignée sur <b>son propre jour d’encuvage</b> : J0 est '
+    + 'sa date d’entrée, pas une date du calendrier. Le point plein marque la <b>densité de départ</b>. '
+    + 'Le tableau est classé par <b>jour d’atteinte du vin sec</b>.'
+    + (hors ? (' <b>' + hors + '</b> cuve' + (hors > 1 ? 's ne figurent' : ' ne figure') + ' pas ici : '
+        + 'sans date d’encuvage ou avec moins de deux relevés de densité, il n’y a pas de cinétique à tracer.') : '')
+    + '</div></div>'
+    + '<table class="cmp-tb mvdoc-avoid"><thead><tr><th>Cuve</th><th>Encuvée</th>'
+    + '<th class="n">Départ d20</th><th class="n">Sucre g/L</th><th class="n">Degré pot.</th>'
+    + '<th class="n">Vigne g/L</th><th class="n">T° moy · max</th><th class="n">Vin sec</th>'
+    + '<th class="n">Pts/j</th></tr></thead><tbody>' + lignes + '</tbody></table>';
+}
+
 /* ── La courbe de fermentation, dans le cahier ─────────────────────────────
    ⚠️⚠️ AUCUN TRACE NEUF ICI. C'est `_vendFermSvg`, CELUI DE L'ECRAN, appele
    avec la largeur de la page. Redessiner la meme cinetique une seconde fois
@@ -11922,6 +12159,7 @@ function _cuvDoc(an){
     + '<div class="cd-k"><b>Sucre ajouté</b><span>' + _mvF1(totSuc) + ' <small>kg</small></span>'
       + '<i>toutes cuves confondues</i></div>'
     + '</div>'
+    + _cmpBloc(cuves)
     + sections
     + '<div class="mvdoc-lim"><b>Ce document présente vos propres relevés.</b> '
     + 'C’est un état interne : il ne tient lieu d’aucune déclaration, et il ne remplace pas le '
@@ -11933,7 +12171,16 @@ function _cuvDoc(an){
     + 'La <b>courbe</b> est celle de l’écran, à l’identique : densité corrigée en trait '
     + 'plein sur l’axe de gauche, température en pointillé sur celui de droite, un repère '
     + 'en haut par opération datée, et le seuil du vin sec en tireté. Une cuve qui a moins '
-    + 'de trois relevés de densité n’a pas de courbe : son tableau suffit.</div>';
+    + 'de trois relevés de densité n’a pas de courbe : son tableau suffit. '
+    + 'Le <b>comparatif</b> de tête aligne les cuves sur leur propre jour d’encuvage, et non sur '
+    + 'le calendrier : c’est ce qui rend deux cinétiques superposables. Le <b>sucre à la vigne</b> '
+    + 'est la dernière analyse d’avant encuvage de chaque parcelle de la cuve, pondérée par la '
+    + 'surface ; la part réelle de chaque parcelle entrée dans la cuve n’étant pas connue, c’est '
+    + 'un ordre de grandeur. La colonne <b>vin sec</b> donne le jour où 996 a été <b>relevé</b>, '
+    + 'jamais un jour interpolé ; en italique, la cuve n’y est pas encore et le dernier point est '
+    + 'rappelé. La colonne <b>pts/j</b> porte l’intervalle sur lequel elle est calculée : '
+    + 'une pente moyenne sur trois jours n’est <b>pas comparable</b> à une pente sur dix, le début '
+    + 'd’une fermentation en étant la phase la plus rapide.</div>';
 
   if(typeof window._mvDocOpen !== 'function'){
     showToast('Mise à jour incomplète — rechargez l’application', '#B85A1A'); return;

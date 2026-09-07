@@ -2,7 +2,27 @@
 
 > Document de référence du projet **Ma Vigne** (GUERETTECH). Il est le **porteur de vérité** :
 > la mémoire Claude est plafonnée, ce fichier ne l'est pas.
-> Dernière consolidation : **7 septembre 2026 (suite)** — ★★ **LE PALIER S'EXPLIQUE AUSSI (§87)**.
+> Dernière consolidation : **7 septembre 2026 (soir)** — ★★★ **UN COMPARATIF SE LIT EN JOURS, PAS EN
+> DATES (§88)**. **APP 6.85 → 6.86 · SW 7.44 → 7.45.** Lot **CUVDOC-3**, demandé par Nico : voir
+> *« celles qui partent plus vite, celles qui partent après. Pourquoi ? »*. Le cahier de cuverie
+> s'ouvre sur un **comparatif de toutes les cuves**, superposées sur **leur propre jour
+> d'encuvage** : sur un calendrier, une cuve entrée le 16 et une autre le 24 n'ont aucun point
+> commun. ⚠️ **J0 = `date_entree`, jamais le premier relevé** — deux origines dans un même graphe,
+> ce sont deux échelles qui se ressemblent. Une cuve sans date d'encuvage est **écartée**, et le
+> document dit combien il en écarte.
+> ★★★ **LE CLASSEMENT NE SE FAIT PAS SUR LA VITESSE**, et c'est l'aperçu qui l'a démenti : une cuve
+> à deux relevés sortait en tête à 12,8 pts/j devant une cuve suivie dix jours. **Une pente sur
+> trois jours n'est pas comparable à une pente sur dix** — le début d'une fermentation en est la
+> phase la plus rapide. Le tri se fait sur le **jour où 996 a été RELEVÉ**, jamais interpolé, et la
+> colonne pts/j **porte désormais son intervalle**. *Un rapport qui laisse tirer une conclusion
+> fausse de ses propres chiffres est pire qu'un rapport qui se tait.*
+> ★ Le **sucre relevé à la vigne** avant encuvage rejoint le sucre de départ de cuve — pondéré par
+> la surface, borné des deux côtés. ★ Pas de légende : chaque courbe porte son nom au bout, **et
+> les noms s'écartent** — deux cuves finissent à la même densité, c'est le cas le plus banal.
+> ⚠️ Le comparatif n'existe QUE dans le document ; rien n'est redessiné (§86), le socle est partagé.
+> Détail en **§88**.
+>
+> ★ Précédente : **7 septembre 2026 (suite)** — ★★ **LE PALIER S'EXPLIQUE AUSSI (§87)**.
 > **APP 6.84 → 6.85 · SW 7.43 → 7.44.** Lot **CUVDOC-2**, demandé par Nico : *« si c'est possible de
 > rajouter sur le graph le moment de changement d'état de la cuve »*. Le lot M3 avait daté les
 > **opérations** sur la courbe : une **remontée** s'expliquait. Un **palier**, non — cinq jours à
@@ -13870,3 +13890,99 @@ c'est **ce commit** qu'il faut écrire dans `.mv-base`, pas `494385f`.
 | `guide/08-cave.html` · `public/guide.html` | la lecture de la courbe, écran et document | — |
 | `scripts/mv-harnais-cuvdoc.mjs` | +13 assertions, +4 contre-épreuves (19/19 rouges) | — |
 | `scripts/harnais-claude-md.mjs` | `SECTIONS` 118 → 119 | — |
+
+## 88. ★★★ CUVDOC-3 — LE COMPARATIF, EN JOURS ET NON EN DATES (07/09 — APP 6.85 → 6.86 · SW 7.44 → 7.45 · base `494385f`)
+
+> **Point de départ**, demandé par Nico : *« je voyais plus un graphique comparatif, avec tous les
+> avancements et les densités qui évoluent, mais pas de date du premier septembre au dix septembre —
+> plutôt jour zéro, jour un, jour deux. Pour voir celles qui partent plus vite, celles qui partent
+> après. Pourquoi ? Est-ce que c'est une densité plus élevée, un taux de sucre ? Pourquoi pas même un
+> comparatif avec les relevés faits lors des analyses avant vendange. »*
+
+### 88a. ★★★ CE QUI CHANGE TOUT : L'AXE DES X COMPTE DES JOURS
+
+Sur un calendrier, une cuve encuvée le 16 et une autre le 24 **n'ont aucun point commun** : leurs
+courbes se croisent sans se comparer. Alignées sur **leur propre J0**, leurs cinétiques se
+superposent, et la question de Nico devient lisible d'un coup d'œil.
+
+⚠️ **J0 = `date_entree`, JAMAIS le premier relevé.** Deux origines différentes dans un même graphe,
+ce sont deux échelles qui se ressemblent : une cuve mesurée trois jours après l'encuvage aurait
+l'air d'avoir démarré plus bas. Une cuve **sans date d'encuvage est écartée**, et le document
+**écrit combien il en écarte, et pourquoi**.
+
+⚠️ Un relevé **antérieur** à l'encuvage est écarté de même. Ce n'est pas une cinétique, c'est une
+saisie à corriger — et il ferait mentir la densité de départ. La contre-épreuve n°24 le prouve : le
+départ passerait de 1100 à 1080.
+
+### 88b. ★★★ LE CLASSEMENT NE SE FAIT PAS SUR LA VITESSE
+
+Premier jet : trier par pente moyenne décroissante. **L'aperçu l'a démenti tout de suite** — une
+cuve avec deux relevés sortait en tête à 12,8 points/jour, devant une cuve suivie dix jours à 10,8.
+
+★★ **Une pente moyenne sur trois jours n'est pas comparable à une pente sur dix.** Le début d'une
+fermentation en est la phase la plus rapide : une cuve à peine relevée gagnerait **toujours** le
+classement du « qui part le plus vite ». Le tri se fait donc sur le **jour où 996 a été RELEVÉ** —
+la seule grandeur qui mesure la même chose sur toutes les cuves. Les cuves qui n'y sont pas encore
+ferment la marche, la plus avancée d'abord.
+
+★ La colonne pts/j **reste**, mais elle **porte désormais son intervalle** (`10,8 J1–J10`) : le
+chiffre ne peut plus être lu hors du temps sur lequel il a été mesuré. Et l'encadré de limite le dit
+en toutes lettres. *Un rapport qui laisse tirer une conclusion fausse de ses propres chiffres est
+pire qu'un rapport qui se tait.*
+
+⚠️ **Le jour du vin sec est le jour OBSERVÉ**, jamais interpolé. Quand la cuve n'y est pas, la
+colonne rappelle en italique son dernier point (`J3 · 1054`) au lieu d'inventer une projection.
+
+### 88c. Le « pourquoi » : la vigne rejoint la cuve
+
+Le tableau met côte à côte la **densité de départ**, le **sucre de départ**, le **degré potentiel**,
+et le **sucre relevé à la vigne** — la dernière analyse d'avant encuvage de chaque parcelle de la
+cuve, **pondérée par la surface** (une moyenne simple ferait peser 0,26 ha autant que 1,54 ha : même
+règle qu'au contrôle de maturité, contre-épreuve n°22).
+
+⚠️ **Bornée des DEUX côtés** : rien après l'encuvage (ce serait la vendange en cours, déjà rentrée —
+contre-épreuve n°23), rien au-delà d'une campagne (ce serait l'an dernier).
+⚠️ **La part réelle de chaque parcelle entrée dans la cuve n'est pas connue** : c'est un ordre de
+grandeur, et le document l'écrit plutôt que de laisser croire à une mesure.
+
+### 88d. Pas de légende : le nom au bout de la courbe
+
+Une légende de douze cuves oblige à l'aller-retour entre une pastille et un trait. Chaque courbe
+porte donc **son nom à son extrémité**, dans sa couleur, relié par un filet.
+
+★ **Et les noms s'écartent.** Deux cuves finissent à la même densité — **le cas le plus banal,
+puisqu'elles finissent toutes sèches** — et leurs noms tomberaient l'un sur l'autre. Sans ce
+passage, le graphe **ment sur qui est qui** sans que rien ne le signale. Contre-épreuve n°25.
+
+Six rôles de la charte servent de palette (`--terre`, `--vert-med`, `--bleu`, `--orange`,
+`--phyto`, `--rouge`), en `var()` et non en hex — le document les déclare dans son `:root`, et
+l'assertion de §86b vérifie qu'aucun n'y manque. Au-delà de six cuves, le trait passe en tireté.
+
+### 88e. ⚠️ Ce comparatif n'existe QUE dans le document
+
+§86 interdit de **redessiner** une courbe qui existe ailleurs. Ici il n'y en avait aucune à copier :
+**l'écran n'a pas de comparatif**. Ce qui est partagé, c'est le **socle** — `_mvGraphCadre`,
+`_mvGraphSvg`, les mêmes gouttières, les mêmes tailles, les mêmes rôles de couleur. Le jour où ce
+comparatif monte sur un écran, il appellera `_cmpSvg`, **pas une seconde fonction**.
+
+### 88f. Connu, non traité
+
+`_vendDegrePot()` divise par **16,83 en dur** et ignore le `sucre_par_degre` des réglages, alors que
+les écrans de vendange lisent tous la config. Le comparatif utilise donc `_vendSucre(d) / spd`, la
+convention majoritaire — mais **deux définitions du degré potentiel coexistent dans le code**. À
+unifier dans un lot dédié, pas en passant.
+
+### 88g. La note de livraison
+
+**Base : `494385f`.** ⚠️ **Ce lot REMPLACE les livraisons §86 et §87** : les fichiers portent **les
+trois** lots. Si l'un des deux précédents a déjà été commité, c'est **ce commit** qu'il faut écrire
+dans `.mv-base`.
+
+| fichier | ce qui change | bump |
+|---|---|---|
+| `src/cave.js` | `_cmpSerie` · `_cmpVigne` · `_cmpSvg` · `_cmpBloc`, appel en tête de `_cuvDoc`, CSS `.cmp-*` papier, encadré de limite | — |
+| `src/utils.js` | 6.86, 1 item `WHATS_NEW`, `MV_AIDE` cave | ★ APP |
+| `index.html` · `public/sw.js` | 4 porteurs · 7.45 + changelog | ★ APP · ★ SW |
+| `guide/08-cave.html` · `public/guide.html` | le comparatif et sa lecture | — |
+| `scripts/mv-harnais-cuvdoc.mjs` | +12 assertions, +6 contre-épreuves (25/25 rouges) | — |
+| `scripts/harnais-claude-md.mjs` | `SECTIONS` 119 → 120 | — |

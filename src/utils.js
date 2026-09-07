@@ -23,7 +23,7 @@ export const GT_ADMIN_EMAIL = 'ngdevpro@gmail.com';
 // WHATS_NEW   : tableau vide = modal desactive pour cette version.
 // Format item : { emoji:'📅', titre:'Titre court', desc:'Phrase utilisateur.' }
 // Regle : seulement les changements visibles par les utilisateurs.
-export const APP_VERSION = '6.85';
+export const APP_VERSION = '6.86';
 // ════ Journal des nouveautés (récap cumulatif) ════
 // Une entrée par version, la PLUS RÉCENTE EN HAUT : { v:'5.10', items:[ {emoji,titre,desc}, … ] }
 // À chaque release visible → AJOUTER un bloc en tête (ne pas remplacer). items:[] = release technique (rien à afficher).
@@ -354,6 +354,10 @@ window._mvGraphRepeindre = function(){
 };
 
 export const WHATS_NEW = [
+  { v: '6.86', items: [
+    { emoji: 'graphique', titre: 'Un comparatif de toutes les cuves, align\u00e9es sur leur jour d\u2019encuvage',
+      desc: "Le cahier de cuverie s\u2019ouvre maintenant sur un <b>comparatif</b>\u00a0: toutes les cin\u00e9tiques sur un m\u00eame graphe, mais <b>en jours depuis l\u2019encuvage</b> plut\u00f4t qu\u2019en dates. Sur un calendrier, une cuve entr\u00e9e le 16 et une autre le 24 n\u2019ont aucun point commun\u00a0; align\u00e9es sur leur propre J0, elles se superposent et se comparent. Chaque courbe porte son nom au bout et un <b>point plein \u00e0 son d\u00e9part</b>. Dessous, un tableau r\u00e9pond au \u00ab\u00a0pourquoi\u00a0\u00bb\u00a0: densit\u00e9 et sucre de d\u00e9part, degr\u00e9 potentiel, <b>sucre \u00e0 la vigne</b> relev\u00e9 lors des derni\u00e8res analyses d\u2019avant encuvage, temp\u00e9rature moyenne et maxi, jour d\u2019atteinte du vin sec et vitesse moyenne. Le classement se fait sur le <b>jour du vin sec</b>, pas sur la vitesse\u00a0: une pente mesur\u00e9e sur trois jours n\u2019est pas comparable \u00e0 une pente mesur\u00e9e sur dix." }
+  ] },
   { v: '6.85', items: [
     { emoji: 'parcours', titre: 'La courbe montre les changements d\u2019\u00e9tat de la cuve',
       desc: "Une remont\u00e9e de la courbe s\u2019expliquait d\u00e9j\u00e0 par une chaptalisation, dat\u00e9e sur le graphe. Un <b>palier</b>, lui, ne s\u2019expliquait pas\u00a0: cinq jours \u00e0 12\u00a0\u00b0C en mac\u00e9ration pr\u00e9fermentaire ressemblaient \u00e0 une fermentation qui tra\u00eene. Chaque <b>passage</b> de la cuve \u2014 MPF, FA, d\u00e9cuvage, FML \u2014 pose maintenant un <b>trait vertical gris tiret\u00e9</b> sur la courbe, nomm\u00e9 dans la marge, et la l\u00e9gende les date en jours. Sur l\u2019\u00e9cran du Cuvier comme dans le cahier de cuverie. Une cuve dont les passages n\u2019ont jamais \u00e9t\u00e9 dat\u00e9s n\u2019a aucun trait\u00a0: l\u2019application pr\u00e9f\u00e8re ne rien dessiner qu\u2019une date invent\u00e9e." }
@@ -2209,7 +2213,7 @@ var MV_AIDE = {
       ['Le millésime', "annonce ce qui vient dans les quatre prochaines semaines, puis retrace le parcours du vin, de la benne à la bouteille."],
       ['Votre rendement au pressoir', "se règle au Cuvier, onglet Réglages, en kilos de raisin par hectolitre. Tous les écrans qui transforment des raisins en volume s’en servent — la chaîne de la récolte à la bouteille comme le bilan de campagne."],
       ['Les analyses labo', "s’attachent en PDF à la cuvée. Les supprimer est réservé à l’administrateur."],
-      ['Quatre documents sortent de la Cave', "depuis Réglages, onglet App, « Documents & impressions » : le contrôle de maturité avant vendange, le cahier de cuverie pendant la fermentation, le registre des manipulations et le bilan de campagne. Ce sont des états internes : Ma Vigne prépare, vous déclarez. Le cahier de cuverie imprime aussi <b>la courbe</b> de chaque cuve — densité et température, avec les opérations datées — au-dessus de son tableau ; sous trois relevés de densité, il n’y a pas de courbe."],
+      ['Quatre documents sortent de la Cave', "depuis Réglages, onglet App, « Documents & impressions » : le contrôle de maturité avant vendange, le cahier de cuverie pendant la fermentation, le registre des manipulations et le bilan de campagne. Ce sont des états internes : Ma Vigne prépare, vous déclarez. Le cahier de cuverie imprime aussi <b>la courbe</b> de chaque cuve — densité et température, avec les opérations datées — au-dessus de son tableau ; sous trois relevés de densité, il n’y a pas de courbe. Il s’ouvre sur un <b>comparatif</b> de toutes les cuves, alignées sur leur jour d’encuvage et non sur le calendrier, avec le sucre relevé à la vigne avant l’encuvage."],
       ['Deux autres s’éditent au plus près de la livraison', "le bon de livraison d’un chargement et le récapitulatif de campagne d’un acheteur, depuis les ventes en vrac. Ils portent le nom du domaine, les kilos livrés, et les volumes rendus dès que le client a répondu."]
     ]
   },

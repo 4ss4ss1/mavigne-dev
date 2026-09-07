@@ -1,4 +1,32 @@
-// MA VIGNE — Service Worker v7.44
+// MA VIGNE — Service Worker v7.45
+// v7.45 (07/09/2026) — CUVDOC-3 : LE COMPARATIF, EN JOURS ET NON EN DATES.
+//   Demande par Nico : « un graphique comparatif avec tous les avancements et
+//   les densites qui evoluent, mais pas de date du 1er au 10 septembre, plutot
+//   jour zero, jour un... voir celles qui partent plus vite, celles qui
+//   partent apres. Pourquoi ? »
+//   ★★★ L'AXE DES X COMPTE DES JOURS DEPUIS L'ENCUVAGE. Sur un calendrier, une
+//   cuve entree le 16 et une autre le 24 n'ont aucun point commun ; alignees
+//   sur leur propre J0, leurs cinetiques se superposent et se comparent.
+//   ⚠ J0 = `date_entree`, JAMAIS le premier releve : deux origines dans un
+//   meme graphe, ce sont deux echelles qui se ressemblent. Une cuve sans date
+//   d'encuvage est ECARTEE, et le document le dit.
+//   ⚠ Un releve anterieur a l'encuvage est ecarte : ce n'est pas une
+//   cinetique, c'est une saisie a corriger.
+//   ★★ LE CLASSEMENT NE SE FAIT PAS SUR LA VITESSE. Une pente moyenne sur trois
+//   jours n'est pas comparable a une pente sur dix : le debut d'une
+//   fermentation en est la phase la plus rapide, donc une cuve a peine relevee
+//   sortirait toujours en tete. Le tri se fait sur le JOUR OU 996 A ETE
+//   RELEVE, la seule grandeur qui mesure la meme chose sur toutes.
+//   ★ Pas de legende : chaque courbe porte SON NOM au bout, ecarte de ses
+//   voisins. Deux cuves finissent a la meme densite — le cas le plus banal,
+//   puisqu'elles finissent toutes seches — et leurs noms se superposeraient.
+//   ★ Le sucre A LA VIGNE (derniere analyse d'avant encuvage, ponderee par la
+//   surface) rejoint le sucre au depart de cuve : c'est la reponse au
+//   « pourquoi ». Bornee des DEUX cotes : rien apres l'encuvage, rien au-dela
+//   d'une campagne.
+//   ⚠ Le comparatif n'existe QUE dans le document — l'ecran n'en a pas. Rien
+//   n'est donc redessine (§86) : le jour ou il monte sur un ecran, il appellera
+//   _cmpSvg, pas une seconde fonction.
 // v7.44 (07/09/2026) — CUVDOC-2 : LES CHANGEMENTS D'ETAT SUR LA COURBE.
 //   Demande par Nico : « si c'est possible de rajouter sur le graph le moment
 //   de changement d'etat de la cuve ». Une REMONTEE de la courbe s'expliquait
@@ -3394,7 +3422,7 @@
 // v2.22 — Fix profils vides : guard vide dans loadData() pour MEMBRES/SAISONS/TACHES
 // v2.17 — Onboarding intégré + tenantId · v2.06 — Firebase Auth · v2.00–v2.05 — divers
 const DEBUG = self.location.hostname === 'localhost' || self.location.hostname === '127.0.0.1';
-const CACHE_NAME   = 'mavigne-v7.44';
+const CACHE_NAME   = 'mavigne-v7.45';
 const TENANT_CACHE = 'mavigne-tenant';   // Cache persistant — préservé à chaque mise à jour SW
 const SYNC_TAG     = 'mavigne-sync';
 
@@ -3410,7 +3438,7 @@ const CDN_URLS = [
 ];
 
 self.addEventListener('install', event => {
-  if(DEBUG) console.log('[SW] Ma Vigne v7.44 installé');
+  if(DEBUG) console.log('[SW] Ma Vigne v7.45 installé');
   event.waitUntil(
     caches.open(CACHE_NAME).then(async cache => {
       // ── Cœur applicatif : STRICT (mise à jour ATOMIQUE) ──
@@ -3426,7 +3454,7 @@ self.addEventListener('install', event => {
 });
 
 self.addEventListener('activate', event => {
-  if(DEBUG) console.log('[SW] Ma Vigne v7.44 activé');
+  if(DEBUG) console.log('[SW] Ma Vigne v7.45 activé');
   event.waitUntil(
     caches.keys().then(keys =>
       Promise.all(
