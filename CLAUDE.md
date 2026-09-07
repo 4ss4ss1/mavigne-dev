@@ -2,7 +2,52 @@
 
 > Document de référence du projet **Ma Vigne** (GUERETTECH). Il est le **porteur de vérité** :
 > la mémoire Claude est plafonnée, ce fichier ne l'est pas.
-> Dernière consolidation : **6 septembre 2026 (soir)** — ★★★ **UN STATUT N'EST PAS UNE DATE
+> Dernière consolidation : **7 septembre 2026 (suite)** — ★★ **LE PALIER S'EXPLIQUE AUSSI (§87)**.
+> **APP 6.84 → 6.85 · SW 7.43 → 7.44.** Lot **CUVDOC-2**, demandé par Nico : *« si c'est possible de
+> rajouter sur le graph le moment de changement d'état de la cuve »*. Le lot M3 avait daté les
+> **opérations** sur la courbe : une **remontée** s'expliquait. Un **palier**, non — cinq jours à
+> 12 °C en macération préfermentaire ressemblent à une fermentation qui traîne. C'est **§81 vu
+> depuis le graphe**. Chaque passage de `statut_hist` pose un **trait vertical gris tireté**, nommé
+> dans la marge haute, la seule bande qui ne croise rien.
+> ★★ **Le changement vit dans `_vendFermSvg`** : l'écran du Cuvier ET le cahier de cuverie le
+> reçoivent d'un seul geste — le bénéfice qu'on achète en refusant de redessiner (§86).
+> ⚠️⚠️ **Aucun rattrapage inventé** : une cuve d'avant PARC-1 n'a aucun trait, rien n'est déduit de
+> `date_entree`. Borné à la fenêtre du graphe, comme les opérations : `X()` colle une date hors
+> champ au bord, et un passage collé au bord se lit comme un passage **au** bord.
+> ★★★ **Une assertion neuve a rougi, et c'était ELLE qui avait tort** : j'attendais « un seul nom
+> écrit », il y en avait deux, et c'était juste. *L'invariant n'est pas un COMPTE, c'est un ÉCART* —
+> un test qui fige un nombre observé interdit au code d'avoir raison autrement. Détail en **§87**.
+>
+> ★ Précédente : **7 septembre 2026** — ★★★ **UN DOCUMENT NE CHARGE PAS LA FEUILLE DE
+> STYLE (§86)**. **APP 6.83 → 6.84 · SW 7.42 → 7.43.** Lot **CUVDOC-1**, demandé par Nico : *« dans
+> le rapport PDF du cuvier pour les contrôles de densité, j'aimerais que apparaissent aussi les
+> graphiques, température, densité »*. Le cahier de cuverie sortait les relevés en **tableau seul**.
+> ★★ **AUCUN TRACÉ NEUF** : la courbe du cahier **est** `_vendFermSvg`, celle de l'écran, appelée à
+> **640 px** — la largeur utile d'un A4 portrait. *Redessiner la même cinétique pour le papier, ce
+> serait deux vérités en puissance sur le même relevé.* Bénéfice inattendu du palier de
+> recomposition : au-dessus de 560 px le tracé garde ses **deux axes chiffrés**, densité à gauche,
+> degrés à droite — ce que l'écran d'un téléphone ne peut pas offrir.
+> ⚠️⚠️⚠️ **LE PIÈGE : UN DOCUMENT S'OUVRE DANS SA FENÊTRE ET NE CHARGE PAS `styles.css`.** C'est la
+> frontière de §59, prise par l'autre bout. `MV_GRAPH_COL` peint en `var(--terre)`,
+> `var(--orange)`… **sans repli** : les quatre tracés seraient sortis **noirs les uns sur les
+> autres**, et **rien ne l'aurait signalé** — le document s'imprime, il est juste illisible. Le CSS
+> du cahier pose donc ses propres couleurs, en **valeurs de mode clair TOUJOURS** (une page
+> s'imprime sur du papier blanc même quand l'écran est sombre), dont deux prises à **l'encre du
+> document** et non à celle de l'écran. Contrastes **calculés** : 4,80 · 4,65 · 6,20 · 5,83.
+> ★ **Sous trois densités, pas de courbe** : `_vendFermSvg` y rend l'**état vide de l'ÉCRAN**, qui
+> propose un geste à faire. *Un geste ne se propose pas sur du papier.*
+> ⚠️⚠️ **ET LE HARNAIS EXISTAIT, VERT, DANS AUCUN PIPELINE** — 46 assertions qui ne tournaient que
+> si quelqu'un y pensait. *Un filet qu'on doit se rappeler de tendre n'est pas un filet* (§83, §78).
+> Câblé dans `check` et `prebuild`, +14 assertions, +5 contre-épreuves. La plus utile ne teste
+> aucune couleur : elle exige que **tout `var(--x)` d'un document soit déclaré par ce document**.
+> ⚠️ **`.mv-base` du dépôt était resté sur `ab77457`** après l'intégration de §85 — la garde était
+> désarmée. Remise à `494385f`. Détail en **§86**.
+>
+> ⚠️ **Cet en-tête a décroché du corps du document** : les lots **§82 à §85** (CUV-5, la garde de
+> base, CUV-6, UI-Z) ne sont pas dans cette chaîne de « précédentes », alors qu'ils sont bien dans
+> le document. Se fier aux sections, pas au résumé.
+>
+> ★ Précédente : **6 septembre 2026 (soir)** — ★★★ **UN STATUT N'EST PAS UNE DATE
 > (§81)**. **APP 6.79 → 6.80 · SW 7.38 → 7.39.** Lot **PARC-1**, demandé par Nico : *« si je suis en
 > préfermentaire à froid, à un moment elle va passer en fermentation alcoolique, mais il ne faut pas
 > que ça me change le statut entier de la cuve depuis la date de création »*.
@@ -13652,3 +13697,176 @@ présente.
 | `src/styles.css` | `.pil-scrim` 9998 → 8900, `.pil-drawer` 9999 → 8910 | ★ APP |
 | `src/utils.js` · `index.html` · `public/sw.js` | 6.83, 1 item, 4 porteurs, changelog | ★ APP · ★ SW |
 | `scripts/mv-harnais-couches.mjs` (neuf) · `package.json` | 11 assertions, câblé dans `check` et `prebuild` | — |
+
+## 86. ★★★ CUVDOC-1 — LA COURBE DANS LE CAHIER, ET LE DOCUMENT QUI NE CHARGE PAS LA FEUILLE (07/09 — APP 6.83 → 6.84 · SW 7.42 → 7.43 · base `494385f`)
+
+> **Point de départ**, demandé par Nico : *« dans le rapport PDF du cuvier pour les contrôles de
+> densité, j'aimerais que apparaissent aussi les graphiques, température, densité »*. Le **cahier de
+> cuverie** (`_cuvDoc`) imprimait les relevés en **tableau seul** — jusqu'à trente lignes de
+> chiffres par cuve, où l'allure de la fermentation ne se voyait pas. L'écran, lui, avait la courbe
+> depuis le lot M3.
+
+### 86a. Ce qui a été fait — et ce qui n'a surtout pas été fait
+
+⚠️⚠️ **AUCUN TRACÉ NEUF.** La courbe du cahier **est** `_vendFermSvg`, celle de l'écran, appelée
+avec la largeur de la page. Écrire un second dessin pour le papier, ce serait **deux vérités en
+puissance sur le même relevé** — précisément ce que l'en-tête des documents du Cuvier refuse déjà
+pour les calculs (*« le document LIT l'écran, il ne le refait pas »*). La règle vaut aussi pour
+**le dessin**, pas seulement pour les chiffres.
+
+★ **Le palier de recomposition sert enfin à quelque chose.** `_mvGraphCadre` masque l'axe des
+degrés sous 560 px : deux axes chiffrés ne tiennent pas sur un téléphone. Le document appelle à
+**640 px** — `MV_CUVDOC_GRW`, la largeur utile d'un A4 portrait (210 mm − 24 mm de marges = 703 px,
+moins les 18 px de `.mvdoc-body` de chaque côté = 667). Sur le papier la place ne manque pas :
+**l'axe des températures reste chiffré**, ce que l'écran d'un téléphone ne peut pas offrir.
+
+### 86b. ⚠️⚠️⚠️ LE PIÈGE : UN DOCUMENT NE CHARGE PAS `styles.css`
+
+`_mvDocOpen` produit un **Blob** ouvert dans sa propre fenêtre. Il n'y charge que
+`/fonts/fonts.css` et les deux feuilles qu'il compose lui-même. **Aucune variable de thème ne
+l'atteint** — c'est la même frontière qu'en **§59**, prise par l'autre bout.
+
+Or `MV_GRAPH_COL` peint en `var(--terre)`, `var(--orange)`, `var(--gris-clair)`… **sans repli**.
+Collée telle quelle dans un document, la courbe de densité, celle de température, la grille et les
+repères d'opération seraient **tous sortis noirs, les uns sur les autres**. ★★★ **Et rien ne
+l'aurait signalé** : le document s'imprime, il est juste illisible. Un défaut qui ne produit ni
+erreur ni page blanche ne se découvre qu'en regardant une feuille sortie de l'imprimante.
+
+Le CSS du cahier pose donc ses propres couleurs, dans son `:root` — l'idiome existait déjà, et il
+est **exempté nommément** dans `mv-harnais-jetons.mjs` : `_rsCss()` (rapport de saison) déclare
+`--ligne` pour la même raison, *« un AUTRE DOCUMENT, qui ne charge pas styles.css »*.
+
+⚠️ **Valeurs de MODE CLAIR, toujours.** Une page s'imprime sur du papier blanc **même quand l'écran
+est en sombre**. Reprendre « les couleurs en vigueur » aurait donné du blanc sur blanc.
+
+⚠️ **Deux rôles prennent l'encre du DOCUMENT, pas celle de l'écran** : la grille (`#E4DCCB`, le
+filet du pied de page de MV_DOC) et l'or (`#C8A060`, celui des filets du cahier). *Un graphe posé
+sur cette feuille doit être de cette feuille.*
+
+★ **Contrastes calculés, pas supposés** — les quatre rôles qui **écrivent** sur blanc : texte
+`#7A7263` **4,80** · orange `#B85A1A` **4,65** · vert `#3D6B27` **6,20** · terre `#8A5A38` **5,83**.
+Tous au-dessus de 4,5. L'or et la grille **tracent, ils n'écrivent jamais** (charte MV_GRAPH).
+
+★★ **Les SEPT rôles sont déclarés, pas les six utilisés.** Le jour où le tracé de l'écran en prend
+un de plus, le papier n'a pas à attendre un lot pour le peindre — et il ne le peindra pas en noir.
+
+### 86c. Sous trois densités, le document se tait
+
+`_vendFermSvg` rend, sous trois relevés, l'**état vide de l'écran** : un encadré à bord tireté qui
+**propose un geste à faire**. Un geste ne se propose pas sur du papier, et le tableau juste
+en dessous dit déjà qu'il n'y a rien. `_cuvDocGraph` garde donc le seuil et rend `''`.
+
+⚠️ **Le compte porte sur les relevés qui ont une DATE ET UNE DENSITÉ** — le même filtre que le
+tracé. Compter `mesures_fa` tout court ferait passer **trois prises de température seule** pour une
+cinétique, et ferait ressortir l'état vide sur le papier. C'est la contre-épreuve n°15.
+
+### 86d. ★★ LE HARNAIS EXISTAIT, VERT, ET N'ÉTAIT DANS AUCUN PIPELINE
+
+`scripts/mv-harnais-cuvdoc.mjs` — 46 assertions, 10 contre-épreuves, écrit au lot des deux
+documents du Cuvier — n'était **ni dans `check` ni dans `prebuild`**. Il ne tournait que si
+quelqu'un pensait à le lancer à la main. ★★★ **Un filet qu'on doit se rappeler de tendre n'est pas
+un filet** : c'est exactement la leçon de §83 sur la garde de base, et de §78 sur le seul filet
+jamais joué. Il entre dans les deux pipelines, plus une commande `npm run test:cuvdoc` pour les
+contre-épreuves, sur le modèle de `test:globaux`.
+
+Ajoutées : **14 assertions** (la courbe existe, c'est bien le tracé de l'écran à 640 px, l'axe des
+degrés est chiffré, les deux polylignes, un repère par opération, le seuil du vin sec, la légende,
+l'encadré de limite, l'absence de courbe et surtout **l'absence d'état vide** sur une cuve sans
+relevé puis sur une cuve à une seule densité) et **5 contre-épreuves**, toutes rouges.
+
+★★★ **L'assertion qui compte** : pour **chaque** document produit, tout `var(--x)` présent dans le
+corps doit être **déclaré dans le CSS de ce document**. Elle ne teste pas une couleur en
+particulier — elle teste la **frontière** de §86b, et elle vaudra pour le prochain document qui
+embarquera un tracé.
+
+⚠️ **Et elle est VIDE sur le contrôle de maturité**, qui n'invoque aucune couleur. Le harnais le
+**dit** — « aucune couleur invoquée — RIEN À VÉRIFIER ICI » — au lieu de laisser un vert compter
+pour une couverture. *« Rien à vérifier » n'est pas « vérifié »* (§59e).
+
+### 86e. Connu, non traité
+
+`.cd-cuve` porte `mvdoc-avoid` : une cuve tient sur une page **ou** le navigateur passe outre. La
+courbe ajoute ~330 px à chaque section ; une cuve à vingt relevés dépassera plus souvent l'A4 et se
+coupera. Je ne change pas la règle de coupure dans ce lot : **je ne l'ai pas vue à l'impression**,
+et §85c dit ce que vaut un réglage de mise en page décidé à l'aveugle. À trancher sur une feuille
+sortie de l'imprimante, pas sur du code.
+
+### 86f. La note de livraison
+
+**Base : `494385f`.** Si `git rev-parse origin/main` ne rend pas ce SHA, **rejeu** (§83).
+⚠️ `.mv-base` du dépôt était resté sur `ab77457` après l'intégration de §85 : ce lot le remet à
+jour. Un fichier de base périmé désarme la garde au lieu de la tendre.
+
+| fichier | ce qui change | bump |
+|---|---|---|
+| `src/cave.js` | `MV_CUVDOC_CSS` (`:root` + légende papier), `MV_CUVDOC_GRW`, `_cuvDocGraph`, insertion dans `_cuvDoc`, encadré de limite | — |
+| `src/utils.js` | 6.84, 1 item `WHATS_NEW`, `MV_AIDE` cave | ★ APP |
+| `index.html` | 4 porteurs de version | ★ APP |
+| `public/sw.js` | 7.43 : en-tête, `CACHE_NAME`, 2 `console.log`, changelog | ★ SW |
+| `guide/08-cave.html` · `public/guide.html` | la courbe décrite là où le cahier l'est déjà (§27a) | — |
+| `scripts/mv-harnais-cuvdoc.mjs` · `package.json` | +14 assertions, +5 contre-épreuves, câblé dans `check`, `prebuild`, `test:cuvdoc` | — |
+| `scripts/harnais-claude-md.mjs` | `SECTIONS` 113 → 118 (⚠️ il en réclamait déjà 4 de plus) | — |
+| `.mv-base` | `494385f` | — |
+
+## 87. ★★ CUVDOC-2 — LE PALIER S'EXPLIQUE AUSSI (07/09 — APP 6.84 → 6.85 · SW 7.43 → 7.44 · base `494385f`)
+
+> **Point de départ**, demandé par Nico dans la foulée de §86 : *« si c'est possible de rajouter sur
+> le graph le moment de changement d'état de la cuve »*.
+
+Le lot M3 avait posé les **opérations datées** sur la courbe, avec cette phrase en en-tête : *« la
+seule remontée de la courbe s'explique par une chaptalisation ; sans les repères, personne ne peut
+le voir »*. C'était vrai — et incomplet. **Une remontée s'expliquait, un PALIER non.** Cinq jours à
+12 °C en macération préfermentaire ressemblent, sur un tracé de densité, à une fermentation qui
+traîne. C'est le défaut de §81 vu depuis le graphe : *un statut n'est pas une date*, et une durée
+qu'on ne date pas se lit sur la courbe comme un ralentissement.
+
+### 87a. Le tracé
+
+★ Chaque entrée de **`statut_hist`** (PARC-1) pose un **trait vertical gris tireté** sur toute la
+hauteur du tracé, **nommé dans la marge haute** — la seule bande où il ne croise ni la courbe, ni la
+température, ni les repères d'opération, posés 5 px plus bas. Le vocabulaire est celui de
+`_vendStatLbl` : **MPF, FA, Décuvage, FML**, les mêmes mots que la frise et que la ligne « Parcours »
+du cahier.
+
+★★ **Le changement vit dans `_vendFermSvg`.** L'**écran** du Cuvier et le **cahier de cuverie** le
+reçoivent d'un seul geste, puisque §86 a fait du document un lecteur de l'écran. *Une seule
+modification, deux surfaces — c'est le bénéfice qu'on achète en refusant de redessiner.*
+
+⚠️⚠️ **AUCUN RATTRAPAGE INVENTÉ.** Une cuve d'avant PARC-1 n'a pas de `statut_hist` : elle n'a
+**aucun trait**. Rien n'est déduit de `date_entree`. *Un tiret se corrige, une date fausse se croit* —
+la règle de §81 tient jusque dans le dessin.
+
+⚠️ **Borné à la fenêtre du graphe**, comme les opérations. `X()` **ramène une date hors champ sur le
+bord** : un décuvage postérieur au dernier relevé s'y collerait et se lirait comme un décuvage **au**
+dernier relevé. Le parcours complet reste imprimé dans la ligne d'identité, trois lignes plus haut.
+
+⚠️ **Deux passages trop proches ne s'écrivent pas l'un sur l'autre** : sous 34 px, le trait reste, le
+nom part en légende. La légende, elle, les date **tous** en jours — c'est elle qui garantit que rien
+n'est perdu quand la place manque.
+
+### 87b. ★★★ UNE ASSERTION NEUVE A ROUGI, ET C'ÉTAIT ELLE QUI AVAIT TORT
+
+Trois passages en trois jours, et j'avais écrit : *« un seul nom écrit, les autres partent en
+légende »*. Le harnais a rendu **deux**. Réflexe de §80 — **demander d'abord lequel a tort, du test
+ou du code** : c'était le test. Le curseur `_xEt` ne bouge que sur un nom **écrit**, donc le
+troisième passage se mesure au **premier** — 47 px, aucun chevauchement. Le code avait raison
+autrement que prévu.
+
+★★★ **L'invariant n'est pas un COMPTE, c'est un ÉCART.** L'assertion lit désormais les abscisses des
+libellés et exige que chaque écart tienne le seuil. *Un test qui fige un nombre observé interdit au
+code d'avoir raison autrement*, et il rougit au premier changement de largeur — pour rien.
+
+### 87c. La note de livraison
+
+**Base : `494385f`.** ⚠️ **Ce lot REMPLACE la livraison §86** : `cave.js`, `utils.js`, `index.html`,
+`sw.js`, le guide, le harnais et `CLAUDE.md` portent **les deux** lots. Si §86 a déjà été commité,
+c'est **ce commit** qu'il faut écrire dans `.mv-base`, pas `494385f`.
+
+| fichier | ce qui change | bump |
+|---|---|---|
+| `src/cave.js` | `_vendFermSvg` : traits d'état + libellés ; `_fermLegende(…, ets)` ; CSS `.mvfm-et` écran **et** papier | — |
+| `src/utils.js` | 6.85, 1 item `WHATS_NEW`, `MV_AIDE` « Ce que porte la courbe » | ★ APP |
+| `index.html` · `public/sw.js` | 4 porteurs · 7.44 + changelog | ★ APP · ★ SW |
+| `guide/08-cave.html` · `public/guide.html` | la lecture de la courbe, écran et document | — |
+| `scripts/mv-harnais-cuvdoc.mjs` | +13 assertions, +4 contre-épreuves (19/19 rouges) | — |
+| `scripts/harnais-claude-md.mjs` | `SECTIONS` 118 → 119 | — |

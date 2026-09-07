@@ -120,6 +120,13 @@ Object.assign(window.CAVE_VENDANGE, {
     { id:'c1', nom:'Cuve 3', volume_hl:24, statut:'termine', parcelles:['Ergot','Jouise'],
       date_entree:d(Y1,'09-16'), erasflage:'total', so2_g_hl:3, levures:'indigenes',
       nb_caisses:120, mpf:{ active:true, temp_c:12, duree_j:4 },
+      /* PARC-1 : le parcours date. Le decuvage tombe APRES le dernier releve —
+         il est donc hors de la fenetre du graphe, et ne doit pas y figurer. */
+      statut_hist:[
+        { id:'st1', statut:'mpf',      date:d(Y1,'09-17') },
+        { id:'st2', statut:'fa',       date:d(Y1,'09-20') },
+        { id:'st3', statut:'decuvage', date:d(Y1,'09-26') }
+      ],
       mesures_fa:[
         { id:'m1', date:d(Y1,'09-17'), densite:1092, temp_c:18,   remontages:2, pigeages:1, note:'départ' },
         { id:'m2', date:d(Y1,'09-20'), densite:1050, temp_c:28,   remontages:2, pigeages:2, note:'' },
@@ -243,6 +250,132 @@ T('l\'identite de la cuve est complete',
   && k.indexOf('Macération préfermentaire') !== -1 && k.indexOf('Cuvaison') !== -1);
 T('les 3 releves sont comptes dans les metas', (K.metas || []).join(' ').indexOf('3 relevés') !== -1);
 
+console.log('\n6b. La courbe de fermentation dans le cahier');
+/* ⚠️ La cuve 3 porte 3 densites : c'est le minimum du trace. La cuve 5 n'en a
+   aucune. Le cahier doit donc contenir UNE courbe, pas deux. */
+const svg = (k.match(/<svg[\s\S]*?<\/svg>/) || [''])[0];
+T('la cuve a trois densites porte une courbe',
+  (k.match(/class="cd-gr/g) || []).length === 1 && svg !== '',
+  (k.match(/class="cd-gr/g) || []).length + ' bloc(s)');
+T('la cuve sans releve n\'en porte pas — et pas d\'etat vide d\'ecran',
+  k.indexOf('mv-graph-vide') === -1);
+T('c\'est le trace de l\'ECRAN, a la largeur de la page (640 px)',
+  svg.indexOf('viewBox="0 0 640 288"') !== -1, (svg.match(/viewBox="[^"]*"/) || [''])[0]);
+/* ★ Le point de ce lot : les DEUX axes chiffres. Sous 560 px le trace masque
+   celui des degres — sur le papier, la place ne manque pas. */
+T('l\'axe des degres est chiffre a droite',
+  (svg.match(/°<\/text>/g) || []).length >= 3
+  && k.indexOf('axe de droite masqué') === -1,
+  (svg.match(/°<\/text>/g) || []).length + ' graduations');
+T('densite ET temperature sont tracees (deux polylignes)',
+  (svg.match(/<polyline/g) || []).length === 2, (svg.match(/<polyline/g) || []).length + '');
+T('chaque operation datee porte son repere',
+  (svg.match(/<circle[^>]*r="3\.4"/g) || []).length === 2);
+T('le seuil du vin sec est trace et nomme', svg.indexOf('vin sec') !== -1);
+T('la legende nomme les deux courbes',
+  k.indexOf('densité ramenée à 20 °C') !== -1 && k.indexOf('température de cuve') !== -1);
+T('l\'encadre de limite explique la courbe',
+  k.indexOf('La <b>courbe</b> est celle de l’écran') !== -1
+  && k.indexOf('moins de trois relevés') !== -1);
+
+/* ★★★ LE CONTROLE QUI COMPTE VRAIMENT. Un document s'ouvre dans SA fenetre :
+   il ne charge pas styles.css, donc aucune variable de theme ne l'atteint. Le
+   trace de l'ecran peint en var(--terre), var(--orange)… Si le CSS du document
+   ne les declare pas, les courbes sortent NOIRES l'une sur l'autre — et rien
+   ne le signale : le document s'imprime, il est juste illisible. */
+for (const X of [D, K]) {
+  const appels = [...new Set([...(X.corps || '').matchAll(/var\(\s*(--[a-z0-9-]+)\s*\)/g)].map(m => m[1]))];
+  const nus = appels.filter(v => (X.css || '').indexOf(v + ':') === -1);
+  /* ⚠️ Un document sans aucun var() rend cette assertion VIDE. On le DIT au
+     lieu de laisser un vert compter pour une couverture : « rien a verifier »
+     n'est pas « verifie » (§59e, l'assertion illisible qui passe pour vraie). */
+  T(X.titre + (appels.length
+      ? ' : les ' + appels.length + ' couleurs invoquees sont declarees par le document'
+      : ' : aucune couleur invoquee — RIEN A VERIFIER ICI'),
+    nus.length === 0, nus.join(', '));
+}
+
+console.log('\n6b-bis. Les changements d\'etat sur la courbe');
+const ets = (svg.match(/stroke-dasharray="4 3"/g) || []).length;
+T('les deux passages de la fenetre sont traces', ets === 2, ets + ' trait(s)');
+T('le decuvage, hors fenetre, ne l\'est PAS',
+  k.indexOf('>Décuvage</span>') === -1 && k.indexOf('>Décuvage<') === -1);
+T('chaque trait porte son nom dans la marge haute',
+  svg.indexOf('>MPF</text>') !== -1 && svg.indexOf('>FA</text>') !== -1);
+T('la legende date les passages en jours',
+  /<span class="mvfm-et"><i><\/i><b>J0<\/b> MPF<\/span>/.test(k)
+  && /<span class="mvfm-et"><i><\/i><b>J3<\/b> FA<\/span>/.test(k));
+T('la legende annonce le trait tirete gris', k.indexOf('changement d’état de la cuve') !== -1);
+T('l\'etiquette d\'accessibilite les compte', svg.indexOf('2 changements d’état') !== -1);
+
+/* ⚠️⚠️ PARC-1 : AUCUN RATTRAPAGE INVENTE. Une cuve d'avant ce lot n'a pas de
+   `statut_hist` — le graphe ne doit alors poser AUCUN repere, et surtout pas
+   un repere deduit de `date_entree`. Une date fausse se croit. */
+const cvS1 = window.CAVE_VENDANGE.cuves_vinif.slice();
+const sansH = JSON.parse(JSON.stringify(cvS1[0])); delete sansH.statut_hist;
+window.CAVE_VENDANGE.cuves_vinif = [sansH];
+docs.length = 0; window._cuvDoc(String(Y1));
+const kH = (docs[0] || { corps:'' }).corps || '';
+T('cuve d\'avant PARC-1 : aucun repere d\'etat invente',
+  kH.indexOf('stroke-dasharray="4 3"') === -1 && kH.indexOf('mvfm-ets') === -1);
+T('...mais la courbe, elle, est bien la', kH.indexOf('class="cd-gr') !== -1);
+
+/* ⚠️ Deux passages trop proches ne s'ecrivent pas l'un sur l'autre : le trait
+   reste, le nom part en legende. Sans ce garde, les libelles se superposent et
+   le graphe devient illisible SANS QUE RIEN NE LE SIGNALE. */
+const serre = JSON.parse(JSON.stringify(cvS1[0]));
+serre.mesures_fa = [];
+for (let i = 1; i <= 24; i++)
+  serre.mesures_fa.push({ id:'s' + i, date:d(Y1, '09-' + String(i).padStart(2,'0')),
+    densite: 1092 - i * 4, temp_c: 20 });
+serre.operations = [];
+serre.statut_hist = [
+  { id:'q1', statut:'mpf', date:d(Y1,'09-02') },
+  { id:'q2', statut:'fa',  date:d(Y1,'09-03') },
+  { id:'q3', statut:'fml', date:d(Y1,'09-04') }
+];
+window.CAVE_VENDANGE.cuves_vinif = [serre];
+docs.length = 0; window._cuvDoc(String(Y1));
+const kS = (docs[0] || { corps:'' }).corps || '';
+const svgS = (kS.match(/<svg[\s\S]*?<\/svg>/) || [''])[0];
+T('trois passages en trois jours : trois traits',
+  (svgS.match(/stroke-dasharray="4 3"/g) || []).length === 3);
+/* ⚠️ LA PREMIERE VERSION DE CETTE ASSERTION ETAIT FAUSSE, ET C'EST ELLE QUI
+   A ROUGI, PAS LE CODE. J'attendais « un seul nom » ; il y en a deux, et c'est
+   JUSTE : `_xEt` ne bouge que sur un nom ECRIT, donc le troisieme passage est
+   a 47 px du premier — il ne chevauche rien. L'invariant n'est pas un COMPTE,
+   c'est un ECART. Un test qui fige un nombre observe interdit au code d'avoir
+   raison autrement. */
+const xEts = [...svgS.matchAll(/<text x="([\d.]+)"[^>]*font-weight="600"/g)].map(m => +m[1]);
+const ecarts = xEts.slice(1).map((x, i) => x - xEts[i]);
+T('...moins de trois noms ecrits : certains ont cede la place',
+  xEts.length < 3 && xEts.length >= 1, xEts.length + ' libelle(s)');
+T('...et aucun de ceux qui restent n\'en chevauche un autre (≥ 34 px)',
+  ecarts.every(e => e >= 34), 'ecarts ' + ecarts.map(e => Math.round(e)).join(', '));
+T('la legende, elle, les nomme tous les trois',
+  (kS.match(/<span class="mvfm-et">/g) || []).length === 3);
+window.CAVE_VENDANGE.cuves_vinif = cvS1;
+
+console.log('\n6c. Sous trois densites, pas de courbe');
+const cuvS0 = window.CAVE_VENDANGE.cuves_vinif.slice();
+const base3 = JSON.parse(JSON.stringify(cuvS0[0]));
+/* Trois releves, mais UNE SEULE densite : compter `mesures_fa` tout court
+   ferait passer deux prises de temperature pour une cinetique. */
+base3.mesures_fa = [
+  { id:'x1', date:d(Y1,'09-17'), densite:1092, temp_c:18 },
+  { id:'x2', date:d(Y1,'09-19'), densite:null, temp_c:26 },
+  { id:'x3', date:d(Y1,'09-21'), densite:null, temp_c:24 }
+];
+window.CAVE_VENDANGE.cuves_vinif = [base3];
+docs.length = 0; window._cuvDoc(String(Y1));
+const k6 = (docs[0] || { corps:'' }).corps || '';
+T('trois releves dont une seule densite : aucune courbe',
+  k6.indexOf('class="cd-gr') === -1 && k6.indexOf('<svg') === -1);
+T('...et surtout aucun etat vide d\'ecran sur du papier',
+  k6.indexOf('mv-graph-vide') === -1);
+T('le tableau, lui, est toujours la', k6.indexOf('<td class="n">1092</td>') !== -1);
+window.CAVE_VENDANGE.cuves_vinif = cuvS0;
+
 console.log('\n7. Structure HTML des deux documents');
 for (const X of [D, K]) {
   const h = X.corps;
@@ -294,7 +427,27 @@ if (CONTRE && !ko) {
     ['parcelles jamais mesurees oubliees',
       '  if(S.jamais && S.jamais.length){', '  if(false && S.jamais && S.jamais.length){'],
     ['moyenne simple au lieu de ponderee',
-      '_matDocVal(b.pond, spd, un)', '_matDocVal(b.simple, spd, un)']
+      '_matDocVal(b.pond, spd, un)', '_matDocVal(b.simple, spd, un)'],
+    ['couleurs du graphe non declarees par le document',
+      "  + ':root{--terre:#8A5A38;--or:#C8A060;--vert-med:#3D6B27;--rouge:#A0291E;'\n"
+      + "    + '--orange:#B85A1A;--gris-clair:#E4DCCB;--texte-doux:#7A7263}'\n", ''],
+    ['courbe absente du cahier', "      + grf + tbl + (tops ?", "      + tbl + (tops ?"],
+    ['largeur de page sous le palier : l\u2019axe des degres disparait',
+      'var MV_CUVDOC_GRW = 640;', 'var MV_CUVDOC_GRW = 420;'],
+    ['garde des trois densites levee : l\u2019etat vide de l\u2019ecran sur du papier',
+      '  if(n < 3) return \'\';', '  if(n < 0) return \'\';'],
+    ['comptage sur mesures_fa au lieu des densites datees',
+      '    return m && m.date && m.densite != null; }).length;',
+      '    return !!m; }).length;'],
+    ['changements d\u2019etat non bornes a la fenetre du graphe',
+      "    var t = Date.parse(e && e.date); return !isNaN(t) && t >= t0 && t <= t1; });",
+      "    var t = Date.parse(e && e.date); return !isNaN(t); });"],
+    ['repere d\u2019etat non trace',
+      "stroke-width=\"1.2\" stroke-dasharray=\"4 3\"/>';", "stroke-width=\"0\"/>';"],
+    ['garde anti-chevauchement des libelles desarme',
+      '    if(x - _xEt < 34) return;', '    if(x - _xEt < 0) return;'],
+    ['la legende ne date plus les passages',
+      '    h += \'<div class=\"mvfm-ets\">\';', '    h += \'<div class=\"mvfm-rien\">\';']
   ];
   console.log('\n  CONTRE-EPREUVES — ' + DEFAUTS.length + ' defauts reinjectes un par un\n');
   let sansEffet = 0;

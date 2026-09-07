@@ -1,4 +1,44 @@
-// MA VIGNE — Service Worker v7.42
+// MA VIGNE — Service Worker v7.44
+// v7.44 (07/09/2026) — CUVDOC-2 : LES CHANGEMENTS D'ETAT SUR LA COURBE.
+//   Demande par Nico : « si c'est possible de rajouter sur le graph le moment
+//   de changement d'etat de la cuve ». Une REMONTEE de la courbe s'expliquait
+//   deja (chaptalisation, datee). Un PALIER, non : cinq jours a 12 °C en
+//   macerati""on prefermentaire ressemblaient a une fermentation qui traine.
+//   ★ Chaque passage de `statut_hist` (PARC-1) pose un trait vertical GRIS
+//   TIRETE, nomme dans la marge haute — la seule bande ou il ne croise ni la
+//   courbe, ni la temperature, ni les reperes d'operation.
+//   ★★ Le changement vit dans _vendFermSvg : l'ECRAN du Cuvier et le cahier de
+//   cuverie le recoivent d'un seul geste, puisque le document lit l'ecran.
+//   ⚠⚠ AUCUN RATTRAPAGE INVENTE : une cuve d'avant PARC-1 n'a pas de
+//   `statut_hist` et n'a donc AUCUN trait. Rien n'est deduit de `date_entree`.
+//   ⚠ Borne a la fenetre du graphe comme les operations : X() ramene une date
+//   hors champ sur le bord, et un passage colle au bord se lit comme un
+//   passage AU bord — faux.
+//   ⚠ Deux passages trop proches ne s'ecrivent pas l'un sur l'autre : le trait
+//   reste, le nom part en legende, qui les date TOUS en jours.
+//   ★★★ UNE ASSERTION NEUVE A ROUGI, ET C'ETAIT ELLE QUI AVAIT TORT : j'y
+//   attendais « un seul nom ecrit » ; il y en avait deux, et c'etait juste.
+//   L'invariant n'est pas un COMPTE, c'est un ECART.
+// v7.43 (07/09/2026) — CUVDOC-1 : LE CAHIER DE CUVERIE IMPRIME LA COURBE.
+//   Demande par Nico : « dans le rapport PDF du cuvier pour les controles de
+//   densite, j'aimerais que apparaissent aussi les graphiques, temperature,
+//   densite ». Le document sortait les releves en tableau seul.
+//   ★ AUCUN TRACE NEUF : c'est _vendFermSvg, celui de l'ecran, appele a 640 px
+//   (largeur utile d'un A4 portrait). Redessiner la meme cinetique pour le
+//   papier, ce serait deux verites en puissance sur le meme releve.
+//   ★★ Au-dessus de 560 px le trace garde ses DEUX axes chiffres : densite a
+//   gauche, degres a droite. Sur telephone il en masque un ; sur le papier la
+//   place ne manque pas, l'axe reste.
+//   ⚠️⚠️ UN DOCUMENT NE CHARGE PAS styles.css. Le trace peint en var(--terre),
+//   var(--orange)… : sans declaration, les courbes sortaient NOIRES l'une sur
+//   l'autre. Le CSS du cahier pose donc ses propres couleurs, en valeurs de
+//   MODE CLAIR toujours — une page s'imprime sur du papier blanc, meme quand
+//   l'ecran est en sombre. Contrastes calcules, pas supposes.
+//   ★ Sous trois densites, PAS de courbe : _vendFermSvg y rend l'etat vide de
+//   l'ECRAN, qui propose un geste a faire. Un geste ne se propose pas sur du
+//   papier ; le tableau dit deja qu'il n'y a rien.
+//   ★★ scripts/mv-harnais-cuvdoc.mjs existait, vert, et n'etait dans AUCUN
+//   pipeline. Il y entre, avec 14 assertions neuves et 5 contre-epreuves.
 // v7.42 (06/09/2026) — UI-Z : LES DIALOGUES MODAUX S'OUVRAIENT DERRIERE.
 //   Signale par Nico : la confirmation d'une correction de poids apparaissait
 //   DERRIERE la feuille du Cuvier. Invisible, injoignable, le clic « a cote »
@@ -3354,7 +3394,7 @@
 // v2.22 — Fix profils vides : guard vide dans loadData() pour MEMBRES/SAISONS/TACHES
 // v2.17 — Onboarding intégré + tenantId · v2.06 — Firebase Auth · v2.00–v2.05 — divers
 const DEBUG = self.location.hostname === 'localhost' || self.location.hostname === '127.0.0.1';
-const CACHE_NAME   = 'mavigne-v7.42';
+const CACHE_NAME   = 'mavigne-v7.44';
 const TENANT_CACHE = 'mavigne-tenant';   // Cache persistant — préservé à chaque mise à jour SW
 const SYNC_TAG     = 'mavigne-sync';
 
@@ -3370,7 +3410,7 @@ const CDN_URLS = [
 ];
 
 self.addEventListener('install', event => {
-  if(DEBUG) console.log('[SW] Ma Vigne v7.42 installé');
+  if(DEBUG) console.log('[SW] Ma Vigne v7.44 installé');
   event.waitUntil(
     caches.open(CACHE_NAME).then(async cache => {
       // ── Cœur applicatif : STRICT (mise à jour ATOMIQUE) ──
@@ -3386,7 +3426,7 @@ self.addEventListener('install', event => {
 });
 
 self.addEventListener('activate', event => {
-  if(DEBUG) console.log('[SW] Ma Vigne v7.42 activé');
+  if(DEBUG) console.log('[SW] Ma Vigne v7.44 activé');
   event.waitUntil(
     caches.keys().then(keys =>
       Promise.all(

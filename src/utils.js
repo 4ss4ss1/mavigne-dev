@@ -23,7 +23,7 @@ export const GT_ADMIN_EMAIL = 'ngdevpro@gmail.com';
 // WHATS_NEW   : tableau vide = modal desactive pour cette version.
 // Format item : { emoji:'📅', titre:'Titre court', desc:'Phrase utilisateur.' }
 // Regle : seulement les changements visibles par les utilisateurs.
-export const APP_VERSION = '6.83';
+export const APP_VERSION = '6.85';
 // ════ Journal des nouveautés (récap cumulatif) ════
 // Une entrée par version, la PLUS RÉCENTE EN HAUT : { v:'5.10', items:[ {emoji,titre,desc}, … ] }
 // À chaque release visible → AJOUTER un bloc en tête (ne pas remplacer). items:[] = release technique (rien à afficher).
@@ -354,6 +354,14 @@ window._mvGraphRepeindre = function(){
 };
 
 export const WHATS_NEW = [
+  { v: '6.85', items: [
+    { emoji: 'parcours', titre: 'La courbe montre les changements d\u2019\u00e9tat de la cuve',
+      desc: "Une remont\u00e9e de la courbe s\u2019expliquait d\u00e9j\u00e0 par une chaptalisation, dat\u00e9e sur le graphe. Un <b>palier</b>, lui, ne s\u2019expliquait pas\u00a0: cinq jours \u00e0 12\u00a0\u00b0C en mac\u00e9ration pr\u00e9fermentaire ressemblaient \u00e0 une fermentation qui tra\u00eene. Chaque <b>passage</b> de la cuve \u2014 MPF, FA, d\u00e9cuvage, FML \u2014 pose maintenant un <b>trait vertical gris tiret\u00e9</b> sur la courbe, nomm\u00e9 dans la marge, et la l\u00e9gende les date en jours. Sur l\u2019\u00e9cran du Cuvier comme dans le cahier de cuverie. Une cuve dont les passages n\u2019ont jamais \u00e9t\u00e9 dat\u00e9s n\u2019a aucun trait\u00a0: l\u2019application pr\u00e9f\u00e8re ne rien dessiner qu\u2019une date invent\u00e9e." }
+  ] },
+  { v: '6.84', items: [
+    { emoji: 'graphique', titre: 'Le cahier de cuverie imprime la courbe de fermentation',
+      desc: "Le document sortait vos relev\u00e9s en tableau\u00a0: des dizaines de lignes de chiffres, o\u00f9 l\u2019allure de la fermentation ne se voyait pas. Chaque cuve porte maintenant, au-dessus de son tableau, <b>la courbe de l\u2019\u00e9cran</b> \u2014 densit\u00e9 corrig\u00e9e \u00e0 20\u00a0\u00b0C en trait plein, <b>temp\u00e9rature</b> en pointill\u00e9 sur son propre axe chiffr\u00e9, un rep\u00e8re en haut pour chaque op\u00e9ration dat\u00e9e, et le seuil du vin sec. Une remont\u00e9e de la courbe se lit alors pour ce qu\u2019elle est\u00a0: la chaptalisation, \u00e0 la date o\u00f9 elle a \u00e9t\u00e9 faite. Une cuve qui a moins de trois relev\u00e9s de densit\u00e9 garde son tableau seul." }
+  ] },
   { v: '6.83', items: [
     { emoji: 'bouclier', titre: 'La fen\u00eatre de confirmation s\u2019ouvrait derri\u00e8re la feuille',
       desc: "En corrigeant un poids de caisse, la fen\u00eatre \u00ab\u00a0Corriger 36 r\u00e9coltes\u00a0?\u00a0\u00bb s\u2019ouvrait <b>derri\u00e8re</b> l\u2019\u00e9cran du Cuvier\u00a0: invisible, impossible \u00e0 atteindre, et le clic \u00e0 c\u00f4t\u00e9 annulait tout sans rien enregistrer. <b>La correction ne partait jamais.</b> Le d\u00e9faut touchait toutes les confirmations et toutes les saisies de valeur ouvertes depuis un \u00e9cran du Cuvier \u2014 supprimer une r\u00e9colte, une cuve, un relev\u00e9, un client \u2014 ainsi que le tiroir du Pilotage. Tout dialogue passe maintenant <b>au-dessus</b> de ce qu\u2019il interrompt." }
@@ -2184,6 +2192,7 @@ var MV_AIDE = {
       ['La fin de fermentation et la fin de malo', "sont estimées à partir de vos propres relevés : la densité pour l’une, l’acide malique pour l’autre. Sans trois mesures, l’écran dit « démarrage » plutôt qu’une date inventée."],
       ['Trouver une cuve', "la liste du Cuvier est rangée dans l’ordre de votre cuverie — celui écrit sur les cuves, celui dans lequel vous marchez. Une cuve garde donc sa place d’un jour à l’autre, même après un relevé. Vous pouvez trier par urgence ou par avancement, filtrer, et chercher par nom ou par parcelle dès six cuves."],
       ['Une cuve s’ouvre au doigt', "la liste ne montre que l’essentiel : repère, nom, densité, température, avancement. Touchez une ligne pour déplier sa courbe, ses trois derniers chiffres et ses boutons. Une seule cuve reste ouverte à la fois."],
+      ['Ce que porte la courbe', "densité ramenée à 20 °C en trait plein, température en pointillé sur son propre axe, seuil du vin sec en tireté, un repère rond par opération datée, et un trait vertical gris tireté à chaque changement d’état de la cuve. Une remontée ne s’explique que par une chaptalisation ; un palier, souvent par une macération préfermentaire. Une cuve dont les passages n’ont jamais été datés n’a aucun trait vertical."],
       ['Le plan de cuverie', "le second bouton en haut à droite montre la cave en vignettes : chaque cuve avec son niveau et sa couleur. Une cuve qui n’a pas été mesurée depuis la veille passe au rouge. C’est la vue du matin."],
       ['Fusionner des cuves', "plusieurs cuves peuvent n’en faire plus qu’une. Les raisins, les kilos et les parcelles suivent vers la cuve d’arrivée — qui peut être une des cuves choisies ou une cuve libre du parc. Les cuves de départ quittent la liste, libèrent leur cuve, et gardent leurs relevés et leurs opérations sous leur nom d’origine : c’est sous ce nom que le SO₂ a été ajouté. L’assemblage part au registre des manipulations. Tant que rien n’est décuvé, le volume affiché est une estimation d’après les caisses, et l’écran le dit."],
       ['Changer l’étape d’une cuve garde la date', "une cuve qui passe de macération préfermentaire à fermentation alcoolique ne perd plus ce qui précède : chaque passage est daté. Dans la fiche de la cuve, dès que vous changez le statut, un champ « Depuis le » apparaît, réglé sur aujourd’hui — changez-le si vous notez le passage le lendemain. La frise des étapes porte les dates, et la cuve annonce depuis quand elle est dans l’étape où elle est."],
@@ -2200,7 +2209,7 @@ var MV_AIDE = {
       ['Le millésime', "annonce ce qui vient dans les quatre prochaines semaines, puis retrace le parcours du vin, de la benne à la bouteille."],
       ['Votre rendement au pressoir', "se règle au Cuvier, onglet Réglages, en kilos de raisin par hectolitre. Tous les écrans qui transforment des raisins en volume s’en servent — la chaîne de la récolte à la bouteille comme le bilan de campagne."],
       ['Les analyses labo', "s’attachent en PDF à la cuvée. Les supprimer est réservé à l’administrateur."],
-      ['Quatre documents sortent de la Cave', "depuis Réglages, onglet App, « Documents & impressions » : le contrôle de maturité avant vendange, le cahier de cuverie pendant la fermentation, le registre des manipulations et le bilan de campagne. Ce sont des états internes : Ma Vigne prépare, vous déclarez."],
+      ['Quatre documents sortent de la Cave', "depuis Réglages, onglet App, « Documents & impressions » : le contrôle de maturité avant vendange, le cahier de cuverie pendant la fermentation, le registre des manipulations et le bilan de campagne. Ce sont des états internes : Ma Vigne prépare, vous déclarez. Le cahier de cuverie imprime aussi <b>la courbe</b> de chaque cuve — densité et température, avec les opérations datées — au-dessus de son tableau ; sous trois relevés de densité, il n’y a pas de courbe."],
       ['Deux autres s’éditent au plus près de la livraison', "le bon de livraison d’un chargement et le récapitulatif de campagne d’un acheteur, depuis les ventes en vrac. Ils portent le nom du domaine, les kilos livrés, et les volumes rendus dès que le client a répondu."]
     ]
   },

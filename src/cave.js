@@ -8142,6 +8142,10 @@ function _caveV2InjectCss(){
   +'.mvfm-op{display:flex;align-items:baseline;gap:7px;font-size:12px;color:var(--texte-med,#4A4A3A)}'
   +'.mvfm-op i{width:7px;height:7px;border-radius:50%;background:var(--or,#C2A14D);flex:none}'
   +'.mvfm-op b{font-weight:600;color:var(--texte,#2A241C);font-variant-numeric:tabular-nums}'
+  +'.mvfm-ets{display:flex;flex-wrap:wrap;gap:4px 14px;margin-top:8px}'
+  +'.mvfm-et{display:inline-flex;align-items:center;gap:6px;font-size:12px;color:var(--texte-med,#4A4A3A)}'
+  +'.mvfm-et i{width:12px;height:0;border-top:2px dashed var(--texte-doux,#5F5F5F);flex:none}'
+  +'.mvfm-et b{font-weight:600;color:var(--texte,#2A241C);font-variant-numeric:tabular-nums}'
   +'.mvfm-note{font-size:11.5px;color:var(--texte-doux,#5F5F5F);margin-top:10px;line-height:1.5}'
   +'.mvfm-fin{font-size:12.5px;color:var(--texte-med,#4A4A3A);margin-top:10px;padding-top:10px;border-top:1px solid var(--gris-clair,#ECE6DA)}'
   +'.mvfm-fin b{color:var(--terre,#8A5A38)}'
@@ -8345,6 +8349,35 @@ function _vendFermSvg(cu, w){
       + '<circle cx="' + x.toFixed(1) + '" cy="' + (pT - 8) + '" r="3.4" fill="' + c.col.prevu + '"/>';
   });
 
+  /* ★ LES CHANGEMENTS D'ETAT, sur le meme axe des dates. Une remontee
+     s'explique par une chaptalisation ; un PALIER, lui, s'explique par un
+     passage — cinq jours a 12 °C en macerati""on prefermentaire ne sont pas
+     une fermentation qui traine.
+     ⚠⚠ `statut_hist` (PARC-1) est la SEULE source. Aucune date n'est deduite
+     de `date_entree` : une cuve d'avant PARC-1 n'a donc AUCUN repere ici, et
+     c'est voulu. Un tiret se corrige, une date fausse se croit.
+     ⚠ Borne a la fenetre du graphe, comme les operations : X() ramene une
+     date hors champ sur le bord, et un passage colle au bord se lit comme un
+     passage AU bord — c'est-a-dire faux. */
+  var ets = _vendHist(cu).filter(function(e){
+    var t = Date.parse(e && e.date); return !isNaN(t) && t >= t0 && t <= t1; });
+  var _xEt = -99;
+  ets.forEach(function(e){
+    var x = X(Date.parse(e.date));
+    g += '<line x1="' + x.toFixed(1) + '" y1="' + pT + '" x2="' + x.toFixed(1) + '" y2="' + (pT + ih) + '" stroke="' + c.col.texte + '" stroke-width="1.2" stroke-dasharray="4 3"/>';
+    /* Le nom vit dans la marge HAUTE : la seule bande ou il ne croise ni la
+       courbe, ni la temperature, ni les reperes d'operation (poses 5 px plus
+       bas). Deux passages trop proches ne s'ecrivent PAS l'un sur l'autre :
+       le trait reste, le nom part en legende, qui les date tous. */
+    var lbl = _vendStatLbl(e.statut), lg = lbl.length * 5.6;
+    if(x - _xEt < 34) return;
+    var fin = (x + 6 + lg) > (W - 2);
+    g += '<text x="' + (fin ? (x - 4) : (x + 4)).toFixed(1) + '" y="' + (pT - 13) + '"'
+      + (fin ? ' text-anchor="end"' : '') + ' font-size="' + c.txt.mini + '" font-weight="600" fill="'
+      + c.col.texte + '">' + _escHtml(lbl) + '</text>';
+    _xEt = x;
+  });
+
   // Temperature : une mesure, mais pas LA mesure de cet ecran — trait fin.
   if(temps.length >= 2){
     var dt = mes.filter(function(m){ return m.temp_c != null; })
@@ -8366,16 +8399,19 @@ function _vendFermSvg(cu, w){
 
   var der = _vendMesD20(mes[mes.length-1]);
   var aria = 'Fermentation de ' + (cu.nom || 'la cuve') + ' : ' + mes.length + ' relev\u00e9s, densit\u00e9 de '
-    + Math.round(ds[0]) + ' \u00e0 ' + Math.round(der) + ', ' + ops.length + ' op\u00e9rations dat\u00e9es.';
-  return window._mvGraphSvg(c, aria, g) + _fermLegende(cu, ops, t0, mes, deuxAxes);
+    + Math.round(ds[0]) + ' \u00e0 ' + Math.round(der) + ', ' + ops.length + ' op\u00e9rations dat\u00e9es'
+    + (ets.length ? (', ' + ets.length + ' changement' + (ets.length > 1 ? 's' : '') + ' d\u2019\u00e9tat') : '') + '.';
+  return window._mvGraphSvg(c, aria, g) + _fermLegende(cu, ops, t0, mes, deuxAxes, ets);
 }
 
-function _fermLegende(cu, ops, t0, mes, deuxAxes){
+function _fermLegende(cu, ops, t0, mes, deuxAxes, ets){
   function jour(d){ return Math.round((Date.parse(d) - t0) / 86400000); }
   var h = '<div class="mvfm-lg">'
     + '<span><i class="l" style="background:var(--terre)"></i>densit\u00e9 ramen\u00e9e \u00e0 20 \u00b0C</span>'
     + '<span><i class="d" style="border-top-color:var(--orange)"></i>temp\u00e9rature de cuve'
-    + (deuxAxes ? '' : ' (axe de droite masqu\u00e9 sur \u00e9cran \u00e9troit)') + '</span></div>';
+    + (deuxAxes ? '' : ' (axe de droite masqu\u00e9 sur \u00e9cran \u00e9troit)') + '</span>'
+    + ((ets && ets.length) ? '<span><i class="d" style="border-top-color:var(--texte-doux,#5F5F5F)"></i>changement d\u2019\u00e9tat de la cuve</span>' : '')
+    + '</div>';
   if(ops.length){
     h += '<div class="mvfm-ops">';
     ops.forEach(function(o){
@@ -8385,6 +8421,17 @@ function _fermLegende(cu, ops, t0, mes, deuxAxes){
       else if(o.dose != null) det = ' \u00b7 ' + o.dose + ' g/hL';
       else if(o.type === 'delestage') det = ' \u00b7 ' + (o.nb || 1) + '\u00d7';
       h += '<span class="mvfm-op"><i></i><b>J' + jour(o.date) + '</b> ' + _escHtml(_vendOpLbl(o.type)) + det + '</span>';
+    });
+    h += '</div>';
+  }
+  /* Les passages, dates en jours comme les operations. C'est ce qui rend le
+     trait lisible quand deux d'entre eux sont trop proches pour porter leur
+     nom sur le graphe : la legende, elle, les nomme TOUS. */
+  if(ets && ets.length){
+    h += '<div class="mvfm-ets">';
+    ets.forEach(function(e){
+      h += '<span class="mvfm-et"><i></i><b>J' + jour(e.date) + '</b> '
+        + _escHtml(_vendStatLbl(e.statut)) + '</span>';
     });
     h += '</div>';
   }
@@ -11486,7 +11533,46 @@ var MV_CUVDOC_CSS = ''
   + '.cd-idr em{font-style:normal;font-size:9px;color:#7A7263}'
   + '.cd-idr em b{font-weight:700;color:#2D1B09}'
   + '.cd-tag{display:inline-block;font-size:8px;font-weight:700;letter-spacing:.4px;text-transform:uppercase;'
-    + 'padding:1.5px 6px;border-radius:9px;background:#F0E6D2;color:#7B4A1A;margin-left:6px}';
+    + 'padding:1.5px 6px;border-radius:9px;background:#F0E6D2;color:#7B4A1A;margin-left:6px}'
+  /* ── Le graphe de fermentation, sur le papier ─────────────────────────────
+     Un document s'ouvre dans SA fenetre : il ne charge jamais styles.css, donc
+     AUCUNE variable de theme ne l'atteint (§59). Or le trace de l'ecran peint
+     en var(--terre), var(--orange), … — sans ces declarations, les courbes
+     sortiraient TOUTES NOIRES, l'une sur l'autre, illisibles.
+     ⚠️ Valeurs de MODE CLAIR, toujours : une page s'imprime sur du papier
+     blanc, meme quand l'ecran est en sombre.
+     ⚠️ Les SEPT roles de MV_GRAPH_COL sont poses, pas les six utilises
+     aujourd'hui : le jour ou le trace de l'ecran en prend un de plus, le
+     papier n'a pas a attendre un lot pour le peindre.
+     ⚠️ Deux roles prennent l'encre du DOCUMENT et non celle de l'ecran : la
+     grille (#E4DCCB, le filet du pied de page) et l'or (#C8A060, celui des
+     filets du cahier). Un graphe pose sur cette feuille est de cette feuille.
+     Contrastes sur blanc, calcules et non supposes : texte 4,80 · orange 4,65
+     · vert 6,20 · terre 5,83 — les quatre qui ECRIVENT passent 4,5. L'or et
+     la grille TRACENT, ils n'ecrivent jamais (charte MV_GRAPH). */
+  + ':root{--terre:#8A5A38;--or:#C8A060;--vert-med:#3D6B27;--rouge:#A0291E;'
+    + '--orange:#B85A1A;--gris-clair:#E4DCCB;--texte-doux:#7A7263}'
+  + '.cd-gr{margin:1px 0 9px}'
+  + '.cd-gr svg{display:block;max-width:100%;height:auto}'
+  + '.mvfm-lg{display:flex;gap:6px 16px;flex-wrap:wrap;font-size:8.5px;color:#7A7263;margin-top:5px}'
+  + '.mvfm-lg span{display:inline-flex;align-items:center;gap:5px}'
+  + '.mvfm-lg i.l{width:14px;height:3px;border-radius:2px}'
+  + '.mvfm-lg i.d{width:14px;height:0;border-top:2px dashed}'
+  /* La liste des reperes RESTE : c'est elle qui rend le trait lisible — une
+     remontee de la courbe ne s'explique que par une chaptalisation datee. Mais
+     elle passe en LIGNE et non en colonne : empilees, huit operations
+     prendraient sur le papier la place d'un tableau. */
+  + '.mvfm-ops{display:flex;flex-wrap:wrap;gap:3px 14px;margin-top:6px}'
+  + '.mvfm-op{display:inline-flex;align-items:baseline;gap:5px;font-size:8.5px;color:#5A5244}'
+  + '.mvfm-op i{width:5px;height:5px;border-radius:50%;background:#C8A060;flex:none}'
+  + '.mvfm-op b{font-weight:700;color:#2D1B09}'
+  + '.mvfm-ets{display:flex;flex-wrap:wrap;gap:3px 14px;margin-top:5px}'
+  + '.mvfm-et{display:inline-flex;align-items:center;gap:5px;font-size:8.5px;color:#5A5244}'
+  + '.mvfm-et i{width:11px;height:0;border-top:2px dashed #7A7263;flex:none}'
+  + '.mvfm-et b{font-weight:700;color:#2D1B09}'
+  + '.mvfm-note{font-size:8.5px;color:#7A7263;margin-top:5px;line-height:1.5}'
+  + '.mvfm-fin{font-size:9px;color:#5A5244;margin-top:5px;padding-top:5px;border-top:1px solid #EDE7DA}'
+  + '.mvfm-fin b{color:#8A5A38}';
 
 /* ── Le controle de maturite ───────────────────────────────────────────────
    Une matrice : une ligne par parcelle, une colonne par jour de releve. C'est
@@ -11701,6 +11787,30 @@ function _cuvJours(a, b){
   return isFinite(d) ? d : null;
 }
 
+/* ── La courbe de fermentation, dans le cahier ─────────────────────────────
+   ⚠️⚠️ AUCUN TRACE NEUF ICI. C'est `_vendFermSvg`, CELUI DE L'ECRAN, appele
+   avec la largeur de la page. Redessiner la meme cinetique une seconde fois
+   pour le papier, ce serait deux verites en puissance sur le meme releve —
+   exactement ce que l'en-tete des documents du Cuvier refuse.
+   ⚠️ On ne l'appelle QUE si la cuve a de quoi tracer. Sous trois densites,
+   `_vendFermSvg` rend l'etat vide de l'ECRAN : un encadre a bord tirete qui
+   propose un geste a faire. Un geste ne se propose pas sur du papier, et le
+   tableau juste en dessous dit deja qu'il n'y a rien. Le document se tait.
+   ⚠️ Le compte porte sur les relevés qui ont une DATE ET UNE DENSITE — le
+   meme filtre que le trace. Compter `mesures_fa` tout court ferait passer
+   trois releves de temperature seule pour une courbe. */
+var MV_CUVDOC_GRW = 640;   /* A4 portrait, marges 12 mm, corps 18 px : 667 px
+                              utiles. Au-dessus de 560, le trace garde ses DEUX
+                              axes chiffres — densite a gauche, degres a droite.
+                              Sous ce palier il en masque un : sur le papier,
+                              la place ne manque pas, l'axe reste. */
+function _cuvDocGraph(c){
+  var n = ((c && c.mesures_fa) || []).filter(function(m){
+    return m && m.date && m.densite != null; }).length;
+  if(n < 3) return '';
+  return '<div class="cd-gr mvdoc-avoid">' + _vendFermSvg(c, MV_CUVDOC_GRW) + '</div>';
+}
+
 function _cuvDoc(an){
   var cuves = (CAVE_VENDANGE.cuves_vinif || []).filter(function(c){ return _cuvAn(c) === String(an); })
     .sort(function(a, b){ return String(a.date_entree || '') < String(b.date_entree || '') ? -1 : 1; });
@@ -11735,6 +11845,9 @@ function _cuvDoc(an){
     var dDeb = mes.length ? _vendMesD20(mes[0]) : null;
     var dFin = mes.length ? _vendMesD20(mes[mes.length - 1]) : null;
 
+    /* La courbe d'abord, le tableau ensuite : l'une montre ce qui s'est
+       passe, l'autre le prouve jour par jour. */
+    var grf = _cuvDocGraph(c);
     var tbl = mes.length
       ? ('<table><thead><tr><th>Date</th><th class="n">Densité</th><th class="n">à 20 °C</th>'
           + '<th class="n">T °C</th><th class="n">Sucre g/L</th><th class="n">Avanc.</th>'
@@ -11795,7 +11908,7 @@ function _cuvDoc(an){
     return '<div class="cd-cuve mvdoc-avoid"><h3>' + _escHtml(c.nom || 'Cuve')
       + '<span class="cd-tag">' + _escHtml(_vendStatLbl(c.statut)) + '</span></h3>'
       + '<div class="cd-idr">' + id.join('') + '</div>'
-      + tbl + (tops ? ('<h2 style="margin-top:9px">Opérations</h2>' + tops) : '') + pied + '</div>';
+      + grf + tbl + (tops ? ('<h2 style="margin-top:9px">Opérations</h2>' + tops) : '') + pied + '</div>';
   }).join('');
 
   var enCours = cuves.filter(function(c){ return c.statut !== 'termine'; }).length;
@@ -11816,7 +11929,11 @@ function _cuvDoc(an){
     + 'La <b>densité à 20 °C</b> est votre densité corrigée par la température saisie — sans '
     + 'température, la valeur brute est reprise telle quelle. Le <b>sucre restant</b> et '
     + 'l’<b>avancement</b> sont estimés à partir de cette densité : ce sont des ordres de '
-    + 'grandeur, jamais une analyse de laboratoire.</div>';
+    + 'grandeur, jamais une analyse de laboratoire. '
+    + 'La <b>courbe</b> est celle de l’écran, à l’identique : densité corrigée en trait '
+    + 'plein sur l’axe de gauche, température en pointillé sur celui de droite, un repère '
+    + 'en haut par opération datée, et le seuil du vin sec en tireté. Une cuve qui a moins '
+    + 'de trois relevés de densité n’a pas de courbe : son tableau suffit.</div>';
 
   if(typeof window._mvDocOpen !== 'function'){
     showToast('Mise à jour incomplète — rechargez l’application', '#B85A1A'); return;
