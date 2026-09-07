@@ -542,8 +542,17 @@ if (CONTRE && !ko) {
     ['releve anterieur a l\u2019encuvage garde dans la cinetique',
       '    return (j < 0) ? null : { j:j, d:d, t:(m.temp_c != null ? m.temp_c : null) };',
       '    return { j:j, d:d, t:(m.temp_c != null ? m.temp_c : null) };'],
+    /* ⚠ L'ecartement vit desormais dans `_cmpEcarte` (PILCRB-1, §89d), partage
+       par les trois traces. On sabote LA REGLE, pas la copie qui n'existe plus. */
     ['ecartement des noms de courbe desarme',
-      '    var y = Math.max(L.y, prec + 11);', '    var y = L.y;']
+      '    var y = Math.max(L.y, prec + hMin, yLo);', '    var y = L.y;'],
+    /* ★★ LE DEFAUT DE 6.86, EN CONTRE-EPREUVE PERMANENTE. Le rabattement sur le
+       bord bas DEFAISAIT l'ecartement qu'on venait de faire : trois cuves
+       finissant a la meme densite — le cas nominal, puisqu'elles finissent
+       toutes seches — sortaient a 6,6 px d'ecart pour un texte de 10 px.
+       Reinjecter le rabattement DOIT rougir. */
+    ['rabattement sur le bord bas au lieu de la remontee en bloc',
+      '  var trop = lbl[n - 1].yl - yHi;', '  var trop = 0; lbl.forEach(function(L){ if(L.yl > yHi) L.yl = yHi; });']
   ];
   console.log('\n  CONTRE-EPREUVES — ' + DEFAUTS.length + ' defauts reinjectes un par un\n');
   let sansEffet = 0;

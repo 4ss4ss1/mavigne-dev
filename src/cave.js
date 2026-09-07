@@ -835,7 +835,7 @@ function _caveJDet(op){
     var chips='';
     if(op.data.so2_libre) chips+='<span class="mvc-tag mvc-tag-so2">SO\u2082 libre '+op.data.so2_libre+'</span>';
     if(op.data.so2_total) chips+='<span class="mvc-tag mvc-tag-so2">SO\u2082 total '+op.data.so2_total+'</span>';
-    if(op.data.av) chips+='<span class="mvc-tag mvc-tag-av">AV '+op.data.av+'</span>';
+    if(op.data.av) chips+='<span class="mvc-tag mvc-tag-av">AV '+op.data.av+' g/L</span>';
     if(op.data.malique!=null) chips+='<span class="mvc-tag mvc-tag-av">Malique '+op.data.malique+' g/L</span>';
     if(op.data.fml){var fc=op.data.fml==='ok'?'mvc-tag-fmlok':op.data.fml==='cours'?'mvc-tag-fmlc':'mvc-tag-fmlno';chips+='<span class="mvc-tag '+fc+'">'+_caveFmlLabel(op.data.fml)+'</span>';}
     if(chips) h+='<div class="mvc-jtags">'+chips+'</div>';
@@ -7440,7 +7440,7 @@ function generateCaveExport() {
       var parts=[];
       if(op.data.so2_libre)parts.push('SO\u2082 libre: '+op.data.so2_libre+' mg/L');
       if(op.data.so2_total)parts.push('SO\u2082 total: '+op.data.so2_total+' mg/L');
-      if(op.data.av)parts.push('Alcool: '+op.data.av+'% vol.');
+      if(op.data.av)parts.push('Ac. volatile: '+op.data.av+' g/L');
       if(op.data.fml&&op.data.fml!=='none'){var fl={cours:'FML en cours',ok:'FML termin\u00E9e',non:'Pas de FML'}[op.data.fml]||'';if(fl)parts.push(fl);}
       if(parts.length)lines.push(parts.join(' \u00B7 '));
       if(op.data.pdf_nom)lines.push(op.data.pdf_nom);
@@ -11814,6 +11814,56 @@ function _cuvJours(a, b){
    Une cuve sans date d'encuvage est donc ECARTEE, et le document le DIT.
    ⚠️ Un releve anterieur a l'encuvage (j < 0) est ecarte de meme : ce n'est pas
    une cinetique, c'est une saisie a corriger. */
+/* ══ L'ECARTEMENT DES NOMS — UNE SEULE REGLE, TROIS TRACES ══════════════
+   ★★★ DEFAUT TROUVE PAR LE HARNAIS, DANS LE CODE DE 6.86, ET LE HARNAIS
+   AVAIT RAISON. L'ancien passage repoussait chaque nom de 11 px puis RABATTAIT
+   sur le bord bas celui qui depassait :
+       if(y > pT + ih + 8) y = pT + ih + 8;
+   Le rabattement DEFAIT l'ecartement qu'on vient de faire. Mesure : trois
+   cuves finissant toutes a 994 — le cas que §88d appelle lui-meme « le plus
+   BANAL, puisqu'elles finissent toutes seches » — sortaient a 276,4 / 287,4 /
+   294,0. Le dernier ecart tombait a 6,6 px pour un texte de 10 px : les
+   lettres se chevauchaient. Le graphe mentait sur qui est qui, exactement ce
+   que §88d disait avoir corrige.
+   ⚠️ LA CAUSE EST GENERALE : la pile pousse vers le BAS, or les noms se
+   tassent justement en bas quand toutes les cuves finissent seches. Un
+   plafond bas est donc touche a tous les coups, precisement dans le cas
+   nominal. La correction ne rabat plus : quand la pile deborde, elle REMONTE
+   EN BLOC, ce qui preserve tous les ecarts.
+   ⚠️ Et si meme la remontee ne suffit pas — plus de noms que de hauteur — on
+   ne triche pas : les ecarts sont repartis egalement sur la hauteur
+   disponible, et l'appelant voit un tassement REGULIER au lieu de deux noms
+   superposes au hasard.
+   ★ `hMin` est l'ecart minimal ; `yLo`/`yHi` les bornes du cadre. */
+function _cmpEcarte(lbl, hMin, yLo, yHi){
+  if(!lbl || !lbl.length) return lbl;
+  hMin = hMin || 11;
+  lbl.sort(function(a, b){ return a.y - b.y; });
+  var n = lbl.length, dispo = yHi - yLo;
+  /* Plus de noms que de place : tassement REGULIER, jamais deux au meme y. */
+  if(dispo < (n - 1) * hMin){
+    var pas = (n > 1) ? (dispo / (n - 1)) : 0;
+    lbl.forEach(function(L, i){ L.yl = yLo + i * pas; });
+    return lbl;
+  }
+  var prec = -1e9;
+  lbl.forEach(function(L){
+    var y = Math.max(L.y, prec + hMin, yLo);
+    L.yl = y; prec = y;
+  });
+  /* ★ LA REMONTEE EN BLOC : ce qui depasse en bas est retire a TOUTE la pile.
+     C'est ce qui remplace le rabattement, et c'est ce qui preserve les ecarts. */
+  var trop = lbl[n - 1].yl - yHi;
+  if(trop > 0){
+    for(var i = n - 1; i >= 0; i--){
+      lbl[i].yl -= trop;
+      if(i > 0 && lbl[i].yl - lbl[i - 1].yl >= hMin) break;
+      if(i === 0 && lbl[0].yl < yLo) lbl[0].yl = yLo;
+    }
+  }
+  return lbl;
+}
+
 var MV_CMP_H   = 320;
 var MV_CMP_MIN = 2;      /* sous deux cuves, il n'y a rien a comparer */
 /* Six roles de la charte, tous lisibles sur blanc. Des `var()`, pas des hex :
@@ -11948,13 +11998,7 @@ function _cmpSvg(S, w){
      Sans ce passage, deux cuves qui finissent a la meme densite — le cas le
      plus BANAL, puisqu'elles finissent toutes seches — ecrivent leur nom l'un
      sur l'autre, et le graphe ment sur qui est qui. */
-  lbl.sort(function(a, b){ return a.y - b.y; });
-  var prec = -99;
-  lbl.forEach(function(L){
-    var y = Math.max(L.y, prec + 11);
-    if(y > pT + ih + 8) y = pT + ih + 8;
-    L.yl = y; prec = y;
-  });
+  _cmpEcarte(lbl, 11, pT + 4, pT + ih + 8);
   lbl.forEach(function(L){
     g += '<line x1="' + (L.x + 2).toFixed(1) + '" y1="' + L.y.toFixed(1) + '" x2="' + (pL + iw + 5)
       + '" y2="' + L.yl.toFixed(1) + '" stroke="' + L.col + '" stroke-width="0.8" opacity="0.55"/>'
@@ -11967,29 +12011,142 @@ function _cmpSvg(S, w){
   return window._mvGraphSvg(c, aria, g);
 }
 
-/* Le comparatif complet : le trace, puis le tableau qui repond au « pourquoi ».
-   Trie par VITESSE decroissante — c'est le classement demande : qui part vite,
-   qui part apres. Les cuves sans vitesse mesurable ferment la marche. */
-function _cmpBloc(cuves){
+/* ══ LES SERIES, CONSTRUITES ET CLASSEES — UNE SEULE FOIS, DEUX LECTEURS ══
+   Le cahier de cuverie (`_cmpBloc`) et l'ecran du Pilotage passent tous les
+   deux par ici. Deux tris ecrits separement, ce sont deux classements qui
+   divergent au premier changement — et le document et l'ecran diraient alors
+   deux verites sur les memes cuves.
+   ⚠️⚠️ LE CLASSEMENT NE SE FAIT PAS SUR LA VITESSE, ET C'EST IMPORTANT.
+   Une pente moyenne calculee sur trois jours n'est PAS comparable a une pente
+   calculee sur dix : le debut d'une fermentation en est la phase la plus
+   rapide, donc une cuve a peine relevee sortirait toujours en tete du
+   « qui part le plus vite ». Le classement se fait sur le JOUR OU 996 A ETE
+   RELEVE — une grandeur comparable, mesuree sur la meme chose. Les cuves qui
+   n'y sont pas encore ferment la marche, la plus avancee d'abord.
+   `hors` n'est pas un dechet : c'est le compte que les deux surfaces DOIVENT
+   afficher. Une cuve ecartee en silence, c'est un graphe qui ment par omission. */
+function _cmpSeries(cuves){
   var S = [], hors = 0;
   (cuves || []).forEach(function(c){
     var s = _cmpSerie(c);
     if(s) S.push(s); else hors++;
   });
-  if(S.length < MV_CMP_MIN) return '';
-  /* ⚠️⚠️ LE CLASSEMENT NE SE FAIT PAS SUR LA VITESSE, ET C'EST IMPORTANT.
-     Une pente moyenne calculee sur trois jours n'est PAS comparable a une
-     pente calculee sur dix : le debut d'une fermentation en est la phase la
-     plus rapide, donc une cuve a peine relevee sortirait toujours en tete du
-     « qui part le plus vite ». Le classement se fait sur le JOUR OU 996 A ETE
-     RELEVE — une grandeur comparable, mesuree sur la meme chose. Les cuves qui
-     n'y sont pas encore ferment la marche, la plus avancee d'abord. */
   S.sort(function(a, b){
     if(a.jSec != null && b.jSec != null) return a.jSec - b.jSec;
     if(a.jSec != null) return -1;
     if(b.jSec != null) return 1;
     return a.dFin - b.dFin;
   });
+  return { S:S, hors:hors };
+}
+
+/* ══ LES TEMPERATURES, SUR LE MEME RAIL DE JOURS ══
+   ★★ CE TRACE EST NEUF, ET C'EST LEGITIME. §86 interdit de REDESSINER une
+   courbe qui existe ailleurs : `_vendFermSvg` trace bien une temperature, mais
+   d'UNE cuve, sur un axe de DATES. Superposer plusieurs cuves sur leur propre
+   J0 n'existe nulle part — il n'y a rien a copier. Ce qui est partage, c'est
+   le socle : meme cadre, meme palette, meme ecartement des noms que `_cmpSvg`.
+   ⚠️ Les series sont CELLES DE `_cmpSerie` : meme filtre, meme J0, meme ordre,
+   donc meme couleur pour la meme cuve d'un graphe a l'autre. Recalculer ici,
+   ce serait risquer qu'une cuve change de couleur entre densite et temperature.
+   ⚠️ Une cuve dont aucun releve ne porte de temperature n'est pas tracee — et
+   le compte de celles qui manquent remonte a l'appelant. Un releve sans
+   temperature n'est pas une temperature de zero. */
+var MV_CMP_TH   = 240;
+var MV_CMP_TMIN = 18;   /* fenetre de travail basse, en °C */
+var MV_CMP_TMAX = 30;   /* au-dessus, le releve est signale : c'est le seuil
+                           qui declenche deja l'alerte « temperature haute » */
+function _cmpTempSvg(S, w){
+  var c = window._mvGraphCadre(w, MV_CMP_TH, { padL:52, padR:92, padT:26, padB:34 });
+  var pL = c.padL, pT = c.padT, iw = c.iw, ih = c.ih;
+  var T = [];
+  (S || []).forEach(function(s, k){
+    var pts = s.pts.filter(function(p){ return p.t != null; });
+    if(pts.length >= 2) T.push({ nom:s.nom, pts:pts, col:MV_CMP_COL[k % MV_CMP_COL.length], k:k });
+  });
+  if(T.length < MV_CMP_MIN) return '';
+  var jMax = 1, lo = MV_CMP_TMIN, hi = MV_CMP_TMAX;
+  T.forEach(function(s){ s.pts.forEach(function(p){
+    if(p.j > jMax) jMax = p.j;
+    if(p.t < lo) lo = p.t;
+    if(p.t > hi) hi = p.t;
+  }); });
+  var tMin = Math.floor((lo - 2) / 2) * 2, tMax = Math.ceil((hi + 2) / 2) * 2;
+  var tSp = Math.max(1, tMax - tMin);
+  var X = function(j){ return pL + (j / jMax) * iw; };
+  var Y = function(t){ return pT + ih - ((t - tMin) / tSp) * ih; };
+
+  /* La fenetre de travail est une BANDE, pas un seuil : entre 18 et 30 °C il
+     n'y a rien a decider. Un trait unique se lirait comme une limite. */
+  var g = '<rect x="' + pL + '" y="' + Y(MV_CMP_TMAX).toFixed(1) + '" width="' + iw
+    + '" height="' + (Y(MV_CMP_TMIN) - Y(MV_CMP_TMAX)).toFixed(1) + '" fill="' + c.col.fait
+    + '" opacity="0.09"/>';
+
+  for(var i = 0; i <= c.grad; i++){
+    var v = tMin + (tSp * i / c.grad), y = Y(v);
+    g += '<line x1="' + pL + '" y1="' + y.toFixed(1) + '" x2="' + (pL + iw) + '" y2="' + y.toFixed(1)
+      + '" stroke="' + c.col.grille + '" stroke-width="1"/>'
+      + '<text x="' + (pL - 8) + '" y="' + (y + 4).toFixed(1) + '" text-anchor="end" font-size="'
+      + c.txt.axe + '" fill="' + c.col.texte + '">' + Math.round(v) + '</text>';
+  }
+  g += '<text x="' + (pL - 8) + '" y="' + (pT - 10) + '" text-anchor="end" font-size="'
+    + c.txt.unite + '" fill="' + c.col.texte + '">\u00b0C</text>';
+
+  var pas = Math.max(1, Math.ceil(jMax / c.grad));
+  for(var j = 0; j <= jMax; j += pas){
+    var x = X(j);
+    g += '<line x1="' + x.toFixed(1) + '" y1="' + (pT + ih) + '" x2="' + x.toFixed(1) + '" y2="'
+      + (pT + ih + 4) + '" stroke="' + c.col.grille + '" stroke-width="1"/>'
+      + '<text x="' + x.toFixed(1) + '" y="' + (c.h - 11) + '" text-anchor="middle" font-size="'
+      + c.txt.axe + '" fill="' + c.col.texte + '">J' + j + '</text>';
+  }
+  g += '<text x="' + (pL + iw) + '" y="' + (c.h - 11) + '" text-anchor="end" font-size="'
+    + c.txt.unite + '" fill="' + c.col.texte + '">jours depuis l\u2019encuvage</text>';
+
+  var lbl = [], chauds = 0;
+  T.forEach(function(s){
+    var pol = s.pts.map(function(p){ return X(p.j).toFixed(1) + ',' + Y(p.t).toFixed(1); }).join(' ');
+    g += '<polyline points="' + pol + '" fill="none" stroke="' + s.col + '" stroke-width="1.8"'
+      + ' stroke-linejoin="round" stroke-linecap="round"'
+      + (s.k >= MV_CMP_COL.length ? ' stroke-dasharray="6 3"' : '') + '/>';
+    /* ★ Seuls les releves CHAUDS portent un point. Un point partout ferait du
+       bruit ; un point nulle part laisserait passer le releve qui compte. */
+    s.pts.forEach(function(p){
+      if(p.t < MV_CMP_TMAX) return;
+      chauds++;
+      g += '<circle cx="' + X(p.j).toFixed(1) + '" cy="' + Y(p.t).toFixed(1)
+        + '" r="3.2" fill="' + c.col.alerte + '"/>';
+    });
+    var der = s.pts[s.pts.length - 1];
+    lbl.push({ y:Y(der.t), x:X(der.j), nom:s.nom, col:s.col });
+  });
+
+  /* Meme ecartement qu'en §88d, et pour la meme raison : deux cuves finissent
+     souvent a la meme temperature de fin de fermentation.
+     ⚠️ J'avais d'abord RECOPIE le passage de `_cmpSvg` ici — defaut compris.
+     C'est l'argument meme d'une regle partagee : une copie propage la faute
+     avant qu'on l'ait trouvee. */
+  _cmpEcarte(lbl, 11, pT + 4, pT + ih + 8);
+  lbl.forEach(function(L){
+    g += '<line x1="' + (L.x + 2).toFixed(1) + '" y1="' + L.y.toFixed(1) + '" x2="' + (pL + iw + 5)
+      + '" y2="' + L.yl.toFixed(1) + '" stroke="' + L.col + '" stroke-width="0.8" opacity="0.55"/>'
+      + '<text x="' + (pL + iw + 8) + '" y="' + (L.yl + 3.5).toFixed(1) + '" font-size="' + c.txt.mini
+      + '" font-weight="600" fill="' + L.col + '">' + _escHtml(L.nom) + '</text>';
+  });
+
+  var aria = 'Temp\u00e9ratures de ' + T.length + ' cuves align\u00e9es sur leur jour d\u2019encuvage : de '
+    + Math.round(tMin) + ' \u00e0 ' + Math.round(tMax) + ' degr\u00e9s sur ' + jMax + ' jours, '
+    + (chauds ? (chauds + ' relev\u00e9s \u00e0 ' + MV_CMP_TMAX + ' degr\u00e9s ou plus.') : 'aucun relev\u00e9 au-dessus de ' + MV_CMP_TMAX + ' degr\u00e9s.');
+  return window._mvGraphSvg(c, aria, g);
+}
+
+/* Le comparatif complet : le trace, puis le tableau qui repond au « pourquoi ».
+   ⚠️ Le tri vit dans `_cmpSeries`, PAS ici — et il porte sur le jour du vin sec,
+   pas sur la vitesse (§88b). Le commentaire qui disait « trie par vitesse
+   decroissante » datait du premier jet et contredisait son propre code. */
+function _cmpBloc(cuves){
+  var _r = _cmpSeries(cuves), S = _r.S, hors = _r.hors;
+  if(S.length < MV_CMP_MIN) return '';
   var spd = (_vendCfg().sucre_par_degre) || 16.83;
   var lignes = S.map(function(s){
     var vg = _cmpVigne(s.cuve);
@@ -12215,3 +12372,48 @@ window._matDoc     = _matDoc;
 window._matAnnees  = _matAnnees;
 window._cuvDoc     = _cuvDoc;
 window._cuvAnnees  = _cuvAnnees;
+
+/* ══ LE PONT VERS PILOTAGE › CAVE › LES COURBES (PILCRB-1) ═══════════════
+   ★★★ LE NOM EXPOSE N'EST PAS LE NOM INTERNE, ET C'EST DELIBERE.
+   `window._cmpVisibles`, `_cmpCouleur`, `_cmpEchelle`, `_cmpAnneeExercice` et
+   `_cmpFenetre` appartiennent DEJA a reglages.js, ou `_cmp` veut dire
+   « CAMPAGNE ». Exposer `window._cmpSvg` depuis la cave mettrait deux sujets
+   sans rapport sous le meme prefixe global : le jour ou quelqu'un cherche
+   « a quoi sert _cmp », il trouverait deux reponses.
+   ⚠️ Ce n'est PAS une seconde fonction : §88e exige que le comparatif monte a
+   l'ecran en appelant `_cmpSvg`, et c'est exactement `_cmpSvg` qui est derriere
+   `_cuvCmpSvg`. Une seule implementation, un nom global desambiguïse. */
+window._cuvCmpSeries  = _cmpSeries;
+window._cuvCmpSvg     = _cmpSvg;
+window._cuvCmpTempSvg = _cmpTempSvg;
+window._cuvCmpVigne   = _cmpVigne;
+window._cuvCmpMin     = MV_CMP_MIN;
+window._cuvCmpEcarte  = _cmpEcarte;
+/* Le seuil du vin sec : l'ecran des courbes l'ECRIT dans sa legende. Sans
+   exposition il aurait fallu le recopier — et deux 996 dans deux fichiers,
+   c'est un jour ou l'un des deux change seul. */
+window._ML_D20_SEC    = _ML_D20_SEC;
+/* Blocs 1 et 4 : l'ecran des courbes REUTILISE des traces qui existent. Il ne
+   redessine ni la maturite ni la chaine des volumes (§86).
+   ⚠️⚠️ `_vendMatSvg` N'EST PAS EXPOSEE DIRECTEMENT, et c'est le point important.
+   Sa signature est `(byP, w, opt)` : un OBJET de regroupement, pas la
+   collection. Exposer la fonction nue obligerait pilotage.js a refaire ce
+   regroupement — et le jour ou la regle de regroupement change ici, l'autre
+   fichier continuerait tranquillement avec l'ancienne. C'est la lecon
+   « verifier les signatures d'entree, pas seulement les contrats de retour » :
+   `_mvFutParc` appelee nue rendait un parc a ZERO, en silence.
+   On expose donc un POINT D'ENTREE qui porte le regroupement ET l'objectif. */
+window._cuvMatSvg = function(w){
+  var byP = {};
+  (CAVE_VENDANGE.analyses || []).forEach(function(a){
+    if(!a || !a.parcelle) return;
+    (byP[a.parcelle] = byP[a.parcelle] || []).push(a);
+  });
+  if(!Object.keys(byP).length) return '';
+  /* L'objectif n'existe que si le domaine l'a pose : absent, la ligne ne
+     s'affiche pas. Meme appel que l'ecran des analyses — pas un second. */
+  return _vendMatSvg(byP, w, { objectif: parseFloat(_vendCfg().mat_objectif) || 0 });
+};
+window._caveBilanChaine  = _caveBilanChaine;
+window._caveBtlGraphSvg  = _caveBtlGraphSvg;
+window._mlMesMalo     = _mlMesMalo;

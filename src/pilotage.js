@@ -6002,7 +6002,45 @@ function _pcavInjectCss(){
   +'.pcav-msl{position:absolute;left:0;right:0;height:1px;background:var(--vert-med);opacity:.65}'
   +'.pcav-mj{font-size:var(--pt-micro,11px);color:var(--texte-doux);text-align:right;font-weight:600;padding-bottom:2px}'
   +'.pcav-mleg{font-size:var(--pt-micro,11px);color:var(--texte-doux);line-height:1.5;padding-top:10px;border-top:1px solid var(--gris-clair)}'
+  /* ── PILCRB-1 : les courbes ───────────────────────────────── */
+  +'.pcrb-intro{font-size:var(--pt-txt,12.5px);color:var(--texte-med);line-height:1.65;padding:2px 2px 4px}'
+  +'.pcrb-intro b{color:var(--texte)}'
+  +'.pcrb-h{display:flex;align-items:flex-start;gap:11px;padding:14px 17px 12px;border-bottom:1px solid var(--gris-clair)}'
+  +'.pcrb-ico{width:30px;height:30px;border-radius:9px;background:var(--terre-pale);flex:none;display:flex;align-items:center;justify-content:center;color:var(--terre)}'
+  +'.pcrb-t{flex:1;min-width:0}'
+  +'.pcrb-t b{display:block;font-size:var(--pt-base,14px);font-weight:600;color:var(--texte);line-height:1.3}'
+  +'.pcrb-t span{display:block;font-size:var(--pt-micro,11px);color:var(--texte-doux);margin-top:2px;line-height:1.45}'
+  /* ⚠️⚠️ L'ENCRE DU BADGE EST `--texte-med`, ET C'EST MESURE, PAS CHOISI.
+     `--or` sur `--or-pale` donne 6,08:1 en sombre mais 2,23:1 en CLAIR ;
+     `--terre` fait l'inverse : 5,27 en clair, 2,64 en sombre. Chercher un
+     defaut de contraste dans UN seul theme n'en trouve que la moitie (§67).
+     `--texte-med` tient des deux cotes : 8,13 et 7,14. */
+  +'.pcrb-j0{font-size:var(--pt-lbl,10.5px);letter-spacing:1.2px;text-transform:uppercase;font-weight:700;color:var(--texte-med);background:var(--or-pale);border:1px solid rgba(194,161,77,.55);border-radius:20px;padding:3px 10px;white-space:nowrap;flex:none;align-self:flex-start}'
+  +'.pcrb-b{padding:14px 17px 16px}'
+  /* Le graphe deborde plutot que de s'ecraser : sous 360 px, 148 px de
+     gouttieres ne laissent pas de quoi lire une courbe. Il defile. */
+  +'.pcrb-g{overflow-x:auto;margin:0 -17px;padding:0 17px}'
+  +'.pcrb-g svg{display:block}'
+  +'.pcrb-note{background:var(--or-pale);border:1px solid rgba(194,161,77,.4);border-radius:12px;padding:11px 14px;font-size:var(--pt-txt,12.5px);color:var(--texte-med);line-height:1.55;margin-top:13px}'
+  +'.pcrb-note b{color:var(--texte)}'
+  +'.pcrb-tb{width:100%;border-collapse:collapse;font-size:var(--pt-micro,11px);margin-top:13px}'
+  +'.pcrb-tb th{text-align:left;font-size:var(--pt-lbl,10.5px);letter-spacing:.9px;text-transform:uppercase;color:var(--texte-doux);font-weight:600;padding:0 0 7px;border-bottom:1px solid var(--gris-clair);white-space:nowrap}'
+  +'.pcrb-tb td{padding:8px 0;border-bottom:1px solid var(--gris-clair);color:var(--texte-med);white-space:nowrap}'
+  +'.pcrb-tb tr:last-child td{border-bottom:none}'
+  +'.pcrb-tb .n{text-align:right}'
+  +'.pcrb-tb i{font-style:normal;color:var(--texte-doux);font-weight:500}'
+  +'.pcrb-tb small{color:var(--texte-doux)}'
+  +'.pcrb-nm{display:flex;align-items:center;gap:7px;font-weight:600;color:var(--texte)}'
+  +'.pcrb-dot{width:9px;height:9px;border-radius:3px;flex:none}'
+  +'.pcrb-sec{font-family:\'Cormorant Garamond\',Georgia,serif;font-size:var(--pt-sm,17px);font-weight:600;color:var(--texte)}'
+  +'.pcrb-nsec{font-style:italic;color:var(--texte-doux)}'
   +'@media(max-width:600px){'
+  /* Les trois colonnes de contexte se replient, elles ne disparaissent pas :
+     le cahier de cuverie les porte toutes les neuf. */
+  +'.pcrb-tb .o{display:none}'
+  +'.pcrb-h{padding:12px 14px 10px}'
+  +'.pcrb-b{padding:12px 14px 14px}'
+  +'.pcrb-g{margin:0 -14px;padding:0 14px}'
   +'.pcav-vbig{font-size:var(--pt-xxl,31px)}'
   +'.pcav-fs,.pcav-fl{grid-template-columns:80px 1fr;gap:10px}'
   +'.pcav-pl{grid-template-columns:64px 1fr 86px;gap:8px}'
@@ -6018,15 +6056,380 @@ function _pcavInjectCss(){
   document.head.appendChild(st);
 }
 
+/* ══════════════════════════════════════════════════════════════════════════
+   PILCRB-1 — PILOTAGE › CAVE › LES COURBES
+   Le parcours d'un vin, en quatre temps. ★★★ IL N'Y A PAS UN J0 UNIQUE : la
+   vigne compte a rebours de la recolte, la cuve compte depuis l'encuvage, le
+   fut depuis l'entonnage. Empiler ces trois origines sur un seul axe donnerait
+   une echelle qui RESSEMBLE a une mesure sans en etre une. Chaque bloc porte
+   donc son propre zero, ecrit en toutes lettres a cote de son titre.
+   ⚠️⚠️ CE QUE CET ECRAN NE FAIT PAS : il ne redessine rien. La maturite est
+   `_cuvMatSvg`, celle de l'ecran des analyses. Le comparatif de densites est
+   `_cmpSvg`, celui du cahier de cuverie — §88e le reservait explicitement pour
+   ce jour-la. La chaine des volumes est `_caveBtlGraphSvg`, celle du Chai.
+   SEUL le trace des temperatures est neuf, parce qu'il n'existait nulle part.
+   ══════════════════════════════════════════════════════════════════════════ */
+function _pcavHasW(f){ return typeof window[f]==='function'; }
+
+/* L'en-tete d'un bloc : le titre, ce qu'on y lit, et LE ZERO. Le badge n'est
+   pas decoratif — c'est lui qui empeche de lire deux graphes sur la meme
+   echelle mentale. */
+function _pcrbTete(ico,titre,sous,zero,infoCle){
+  return '<div class="pcrb-h"><span class="pcrb-ico">'+(_pcavHasW('_mvIcon')?window._mvIcon(ico,18):'')+'</span>'
+    +'<span class="pcrb-t"><b>'+_pilEsc(titre)+'</b><span>'+sous+'</span></span>'
+    +(infoCle&&typeof _mvInfoBtn==='function'?_mvInfoBtn(infoCle):'')
+    +'<span class="pcrb-j0">'+_pilEsc(zero)+'</span></div>';
+}
+function _pcrbCard(ico,titre,sous,zero,corps,pied,infoCle){
+  return '<div class="pcav-card">'+_pcrbTete(ico,titre,sous,zero,infoCle)
+    +'<div class="pcrb-b">'+corps+(pied?('<div class="pcrb-note">'+pied+'</div>'):'')+'</div></div>';
+}
+/* Le graphe est TOUJOURS pose par le registre : c'est lui qui mesure la vraie
+   largeur du conteneur et qui repeint au redimensionnement. Un SVG a viewBox
+   fixe pose en dur s'etire a x5 sur grand ecran — piege deja paye. */
+function _pcrbSlot(id){ return '<div class="pcrb-g" id="'+id+'"></div>'; }
+
+/* ── 2 · LE COMPARATIF DES DENSITES ─────────────────────────────────────── */
+/* Les series sont construites UNE fois par rendu et relues par les deux
+   graphes : meme ordre, donc meme couleur pour la meme cuve d'un trace a
+   l'autre. Les recalculer separement, ce serait accepter qu'une cuve change
+   de couleur entre la densite et la temperature. */
+var _PCRB_S=null, _PCRB_HORS=0, _PCRB_ELEV=null, _PCRB_CH=null;
+function _pcrbSeries(){
+  _PCRB_S=null; _PCRB_HORS=0;
+  if(!_pcavHasW('_cuvCmpSeries')) return null;
+  var cv=(window.CAVE_VENDANGE&&window.CAVE_VENDANGE.cuves_vinif)||[];
+  try{
+    var r=window._cuvCmpSeries(cv);
+    _PCRB_S=r.S||[]; _PCRB_HORS=r.hors||0;
+  }catch(e){ _pcavLog('cmpSeries',e); _PCRB_S=null; }
+  return _PCRB_S;
+}
+function _pcrbEcarte(){
+  if(!_PCRB_HORS) return '';
+  return ' <b>'+_PCRB_HORS+'</b> cuve'+(_PCRB_HORS>1?'s ne figurent':' ne figure')+' pas ici\u00a0: '
+    +'sans date d\u2019encuvage il n\u2019y a pas de J0, et sans deux relev\u00e9s de densit\u00e9 il n\u2019y a pas de '
+    +'cin\u00e9tique. <b>Rien n\u2019est d\u00e9duit</b> \u2014 une date d\u2019encuvage devin\u00e9e se croirait.';
+}
+function _pcrbDens(){
+  var min=(window._cuvCmpMin||2);
+  if(!_PCRB_S||_PCRB_S.length<min)
+    return _pcrbCard('graphique','Les densit\u00e9s, ramen\u00e9es \u00e0 J0',
+      'Toutes les cuves superpos\u00e9es sur leur propre jour d\u2019encuvage.','J0 = encuvage',
+      (_pcavHasW('_mvGraphVide')
+        ? window._mvGraphVide('Pas encore de quoi comparer','Il faut deux cuves encuv\u00e9es et suivies pour superposer des cin\u00e9tiques.')
+        : '<div class="pcav-vide">Pas encore de quoi comparer.</div>'),
+      _pcrbEcarte(),'pil.cav.courbes');
+  var sec=(window._ML_D20_SEC||996);
+  return _pcrbCard('graphique','Les densit\u00e9s, ramen\u00e9es \u00e0 J0',
+    'Sur un calendrier, une cuve entr\u00e9e le 16 et une autre le 24 n\u2019ont aucun point commun.',
+    'J0 = encuvage', _pcrbSlot('pcrb-g-dens')+_pcrbTable(),
+    '<b>Le classement ne se fait pas sur la vitesse.</b> Une pente moyenne sur trois jours n\u2019est '
+    +'pas comparable \u00e0 une pente sur dix \u2014 le d\u00e9but d\u2019une fermentation en est la phase la plus '
+    +'rapide. Le tri porte sur le <b>jour o\u00f9 '+sec+' a \u00e9t\u00e9 relev\u00e9</b>, jamais interpol\u00e9, et la '
+    +'colonne pts/j porte son intervalle.'+_pcrbEcarte(),'pil.cav.courbes');
+}
+/* Le tableau qui repond au « pourquoi ». Il ne recopie PAS celui du cahier :
+   le papier a la place de neuf colonnes, un telephone n'en tient que trois.
+   Les trois autres se replient sous 600 px, elles ne disparaissent pas. */
+function _pcrbTable(){
+  var sec=(window._ML_D20_SEC||996);
+  var h='<table class="pcrb-tb"><thead><tr><th>Cuve</th><th class="n">Vin sec</th><th class="n">Pts/j</th>'
+    +'<th class="n o">D\u00e9part</th><th class="n o">T\u00b0 moy \u00b7 max</th><th class="n o">Vigne</th></tr></thead><tbody>';
+  _PCRB_S.forEach(function(s,i){
+    var vg=null;
+    if(_pcavHasW('_cuvCmpVigne')){ try{ vg=window._cuvCmpVigne(s.cuve); }catch(e){ _pcavLog('vigne',e); } }
+    var vgTxt='\u2014';
+    if(vg&&vg.suc!=null){
+      vgTxt=Math.round(vg.suc)+' <small>g/L</small>';
+      /* ⚠️ Une moyenne sur 2 parcelles de 3 n'est pas une moyenne de la cuve :
+         on ecrit la fraction plutot que de laisser croire au compte plein. */
+      if(vg.n<vg.nTot) vgTxt+=' <i>('+vg.n+'/'+vg.nTot+')</i>';
+    }
+    h+='<tr data-crb="'+i+'"><td><span class="pcrb-nm"><i class="pcrb-dot" style="background:'
+      +_PCRB_COL[i%_PCRB_COL.length]+'"></i>'+_pilEsc(s.nom)+'</span></td>'
+      +'<td class="n">'+(s.jSec!=null?('<b class="pcrb-sec">J'+s.jSec+'</b>')
+          :('<i class="pcrb-nsec">pas encore \u00b7 J'+s.jFin+' \u00e0 '+Math.round(s.dFin)+'</i>'))+'</td>'
+      +'<td class="n">'+(s.vit!=null?(_pcavF1(s.vit)+' <i>J'+s.jDeb+'\u2013J'+s.jFin+'</i>'):'\u2014')+'</td>'
+      +'<td class="n o">'+Math.round(s.dDeb)+'</td>'
+      +'<td class="n o">'+(s.tMoy!=null?(_pcavF1(s.tMoy)+' \u00b7 '+_pcavF1(s.tMax)):'\u2014')+'</td>'
+      +'<td class="n o">'+vgTxt+'</td></tr>';
+  });
+  return h+'</tbody></table>';
+}
+/* La palette DOIT etre celle de `_cmpSvg`, sinon la pastille du tableau ne
+   designe pas la courbe qu'elle pretend designer. Les memes six roles, dans
+   le meme ordre — c'est un contrat, pas une coincidence. */
+var _PCRB_COL=['var(--terre)','var(--vert-med)','var(--bleu)','var(--orange)','var(--phyto)','var(--rouge)'];
+
+/* ── 3 · LES TEMPERATURES ────────────────────────────────────────────────── */
+function _pcrbTemp(){
+  var min=(window._cuvCmpMin||2), n=0;
+  if(_PCRB_S) _PCRB_S.forEach(function(s){
+    if(s.pts.filter(function(p){ return p.t!=null; }).length>=2) n++; });
+  var corps = (n>=min) ? _pcrbSlot('pcrb-g-temp')
+    : (_pcavHasW('_mvGraphVide')
+        ? window._mvGraphVide('Pas assez de temp\u00e9ratures relev\u00e9es',
+            'Deux relev\u00e9s portant une temp\u00e9rature, sur deux cuves, suffisent \u00e0 comparer.')
+        : '<div class="pcav-vide">Pas assez de temp\u00e9ratures relev\u00e9es.</div>');
+  var manque=(_PCRB_S?_PCRB_S.length:0)-n;
+  return _pcrbCard('thermometre','Les temp\u00e9ratures, m\u00eame J0',
+    'Un palier de densit\u00e9 s\u2019explique souvent ici\u00a0: douze degr\u00e9s cinq jours durant, '
+    +'c\u2019est une mac\u00e9ration, pas une fermentation qui tra\u00eene.','J0 = encuvage',
+    corps,
+    'La bande verte est la <b>fen\u00eatre de travail</b>. Au-dessus de 30\u00a0\u00b0C le relev\u00e9 porte un '
+    +'point rouge \u2014 c\u2019est le seuil qui d\u00e9clenche d\u00e9j\u00e0 l\u2019alerte \u00ab\u00a0temp\u00e9rature haute\u00a0\u00bb dans '
+    +'<b>Ce qui presse</b>. Un relev\u00e9 sans temp\u00e9rature n\u2019est pas une temp\u00e9rature de z\u00e9ro\u00a0: '
+    +'il est simplement absent du trac\u00e9.'
+    +(manque>0?(' <b>'+manque+'</b> cuve'+(manque>1?'s n\u2019ont':' n\u2019a')+' pas assez de relev\u00e9s '
+      +'portant une temp\u00e9rature.'):''),'pil.cav.courbes');
+}
+
+/* ── 1 · LA MATURITE, ET LE J0 QU'ON N'A PAS ─────────────────────────────── */
+/* ★★★ CE BLOC RESTE SUR UN AXE DE DATES, ET C'EST UN CHOIX, PAS UN OUBLI.
+   La maquette validee proposait un axe « jours AVANT recolte ». En l'ecrivant,
+   deux obstacles : la date de recolte d'une parcelle n'est pas un champ, elle
+   se deduit des apports ; et une parcelle NON ENCORE VENDANGEE n'a donc aucun
+   J0. Le bloc serait vide pendant tout le mois d'aout et la premiere quinzaine
+   de septembre — exactement la periode ou la question « laquelle vendanger
+   d'abord » se pose. Un graphe qui se vide au moment ou il sert ne sert pas.
+   ⚠️ Et le trace existe deja : `_cuvMatSvg` est celui de l'ecran des analyses.
+   §86 interdit d'en ecrire un second pour la meme donnee. */
+function _pcrbMat(){
+  var n=((window.CAVE_VENDANGE&&window.CAVE_VENDANGE.analyses)||[]).length;
+  var corps = n ? _pcrbSlot('pcrb-g-mat')
+    : (_pcavHasW('_mvGraphVide')
+        ? window._mvGraphVide('Aucune analyse de maturit\u00e9 enregistr\u00e9e',
+            'Chaque mesure au r\u00e9fractom\u00e8tre, saisie au Cuvier, alimente cette courbe.')
+        : '<div class="pcav-vide">Aucune analyse de maturit\u00e9.</div>');
+  return _pcrbCard('raisin','Les maturit\u00e9s, avant r\u00e9colte',
+    'Le sucre relev\u00e9 au r\u00e9fractom\u00e8tre, une courbe par parcelle.','calendrier',
+    corps,
+    'Ce bloc reste sur un <b>axe de dates</b>, et non en jours avant r\u00e9colte\u00a0: une parcelle pas '
+    +'encore vendang\u00e9e n\u2019a pas de date de r\u00e9colte, donc pas de J0 \u2014 le graphe serait vide '
+    +'pendant toute la p\u00e9riode o\u00f9 il sert. Ces courbes sont <b>par parcelle</b>, pas par cuve\u00a0: '
+    +'la part r\u00e9elle de chaque parcelle entr\u00e9e dans une cuve n\u2019est pas enregistr\u00e9e, et le '
+    +'rapprochement vigne\u00a0\u2192\u00a0cuve de la colonne \u00ab\u00a0Vigne\u00a0\u00bb reste un <b>ordre de grandeur</b>, '
+    +'pond\u00e9r\u00e9 par la surface.','pil.cav.courbes');
+}
+
+/* ── 4 · L'ELEVAGE : LA MALO, SUR UN VRAI AXE DE TEMPS ───────────────────── */
+/* ⚠️⚠️ AUCUNE TEMPERATURE N'EST ENREGISTREE EN ELEVAGE. `temp_c` n'existe que
+   sur les releves de fermentation, sur la cible de maceration et sur la
+   temperature des raisins au quai. Un ouillage, un soutirage, un sulfitage,
+   une analyse : aucun ne porte de temperature. La courbe de temperature
+   S'ARRETE DONC AU DECUVAGE, et cet ecran le DIT plutot que de laisser
+   chercher un graphe qui n'existe pas.
+   ★★ Ce trace apporte ce que `_pcavMaloCourbe` (Ce qui presse) ne peut pas
+   donner : un AXE DE TEMPS. Les barres de l'autre ecran sont espacees a
+   intervalle egal, par rang — deux analyses a six semaines d'ecart et deux a
+   trois jours d'ecart y dessinent la meme pente. Ici l'abscisse est le mois
+   reel depuis l'entonnage. Ce n'est pas le meme graphe redessine, c'est
+   l'information que l'autre ne porte pas. */
+var MV_CRB_ELEV_MAX=6;
+function _pcrbElevSeries(c){
+  if(!_pcavHasW('_mlMesMalo')) return [];
+  var out=[];
+  (c.enElevage||[]).forEach(function(x){
+    if(!x||!x.id) return;
+    var m=[];
+    try{ m=window._mlMesMalo(x.id)||[]; }catch(e){ _pcavLog('mesMalo',e); return; }
+    if(m.length<2) return;
+    /* ⚠️ J0 = la date d'ENTONNAGE. Sans elle, on ne cale rien sur le premier
+       releve en repli : ce serait une seconde origine deguisee en premiere.
+       La cuvee est ecartee, et le compte remonte. */
+    var t0=Date.parse(x.date_entonnage||x.date_debut||'');
+    if(isNaN(t0)) return;
+    var pts=m.map(function(v){
+      var t=Date.parse(v.date); if(isNaN(t)) return null;
+      var mo=(t-t0)/86400000/30.44;
+      return (mo<0)?null:{m:mo, v:v.val};
+    }).filter(Boolean);
+    if(pts.length<2) return;
+    out.push({nom:((x.nom||'Cuv\u00e9e')+' '+(x.millesime||'')).trim(), pts:pts});
+  });
+  /* La plus avancee d'abord : c'est celle dont on parle en premier. */
+  out.sort(function(a,b){ return a.pts[a.pts.length-1].v-b.pts[b.pts.length-1].v; });
+  return out;
+}
+function _pcrbElevSvg(D,w){
+  var c=window._mvGraphCadre(w,236,{padL:52,padR:96,padT:26,padB:34});
+  var pL=c.padL,pT=c.padT,iw=c.iw,ih=c.ih;
+  var fin=(window._ML_MAL_FIN||0.1);
+  var mMax=1, hi=fin, lo=fin;
+  D.forEach(function(s){ s.pts.forEach(function(p){
+    if(p.m>mMax) mMax=p.m; if(p.v>hi) hi=p.v; if(p.v<lo) lo=p.v; }); });
+  mMax=Math.max(1,Math.ceil(mMax));
+  var vMin=Math.max(0,lo-0.2), vMax=hi+0.2, vSp=Math.max(0.1,vMax-vMin);
+  var X=function(m){ return pL+(m/mMax)*iw; };
+  var Y=function(v){ return pT+ih-((v-vMin)/vSp)*ih; };
+  var g='';
+  for(var i=0;i<=c.grad;i++){
+    var v=vMin+(vSp*i/c.grad), y=Y(v);
+    g+='<line x1="'+pL+'" y1="'+y.toFixed(1)+'" x2="'+(pL+iw)+'" y2="'+y.toFixed(1)
+      +'" stroke="'+c.col.grille+'" stroke-width="1"/>'
+      +'<text x="'+(pL-8)+'" y="'+(y+4).toFixed(1)+'" text-anchor="end" font-size="'+c.txt.axe
+      +'" fill="'+c.col.texte+'">'+(Math.round(v*100)/100).toFixed(2).replace('.',',')+'</text>';
+  }
+  g+='<text x="'+(pL-8)+'" y="'+(pT-10)+'" text-anchor="end" font-size="'+c.txt.unite
+    +'" fill="'+c.col.texte+'">g/L</text>';
+  var pas=Math.max(1,Math.ceil(mMax/c.grad));
+  for(var m=0;m<=mMax;m+=pas){
+    g+='<text x="'+X(m).toFixed(1)+'" y="'+(c.h-11)+'" text-anchor="middle" font-size="'+c.txt.axe
+      +'" fill="'+c.col.texte+'">M'+m+'</text>';
+  }
+  g+='<text x="'+(pL+iw)+'" y="'+(c.h-11)+'" text-anchor="end" font-size="'+c.txt.unite
+    +'" fill="'+c.col.texte+'">mois depuis l\u2019entonnage</text>';
+  var ys=Y(fin);
+  g+='<line x1="'+pL+'" y1="'+ys.toFixed(1)+'" x2="'+(pL+iw)+'" y2="'+ys.toFixed(1)
+    +'" stroke="'+c.col.fait+'" stroke-width="1.2" stroke-dasharray="5 4"/>'
+    +'<text x="'+(pL+6)+'" y="'+(ys-6).toFixed(1)+'" font-size="'+c.txt.mini
+    +'" font-weight="700" fill="'+c.col.fait+'">malo achev\u00e9e \u00b7 '+String(fin).replace('.',',')+'</text>';
+  var lbl=[];
+  D.slice(0,MV_CRB_ELEV_MAX).forEach(function(s,k){
+    var col=_PCRB_COL[k%_PCRB_COL.length];
+    var pol=s.pts.map(function(p){ return X(p.m).toFixed(1)+','+Y(p.v).toFixed(1); }).join(' ');
+    /* ★ Le trait est TIRETE : entre deux analyses, personne n'a mesure. Une
+       ligne pleine laisserait croire a un suivi continu. */
+    g+='<polyline points="'+pol+'" fill="none" stroke="'+col+'" stroke-width="1.5"'
+      +' stroke-dasharray="5 3" stroke-linejoin="round" opacity="0.75"/>';
+    s.pts.forEach(function(p){
+      g+='<circle cx="'+X(p.m).toFixed(1)+'" cy="'+Y(p.v).toFixed(1)+'" r="3.4" fill="'+col+'"/>'; });
+    var der=s.pts[s.pts.length-1];
+    lbl.push({y:Y(der.v),x:X(der.m),nom:s.nom,col:col});
+  });
+  /* Meme regle d'ecartement que les deux autres traces — celle de cave.js,
+     pas une troisieme copie. Trois cuvees finissent toutes a 0,04 g/L en fin
+     de malo : c'est le meme « cas banal » qu'en §88d, avec la meme cause. */
+  if(typeof window._cuvCmpEcarte==='function') window._cuvCmpEcarte(lbl,11,pT+4,pT+ih+8);
+  else { lbl.sort(function(a,b){ return a.y-b.y; });
+         var prec=-1e9;
+         lbl.forEach(function(L){ var y=Math.max(L.y,prec+11); L.yl=y; prec=y; }); }
+  lbl.forEach(function(L){
+    g+='<line x1="'+(L.x+2).toFixed(1)+'" y1="'+L.y.toFixed(1)+'" x2="'+(pL+iw+5)
+      +'" y2="'+L.yl.toFixed(1)+'" stroke="'+L.col+'" stroke-width="0.8" opacity="0.55"/>'
+      +'<text x="'+(pL+iw+8)+'" y="'+(L.yl+3.5).toFixed(1)+'" font-size="'+c.txt.mini
+      +'" font-weight="600" fill="'+L.col+'">'+_pilEsc(L.nom)+'</text>';
+  });
+  return window._mvGraphSvg(c,'Acide malique de '+lbl.length+' cuv\u00e9es en \u00e9levage, '
+    +'par mois depuis l\u2019entonnage, sur '+mMax+' mois.',g);
+}
+
+function _pcrbElev(c){
+  var D=_pcrbElevSeries(c), n=(c.enElevage||[]).length;
+  _PCRB_ELEV=D;   /* la pose relit ce tableau : le calculer sans le garder
+                     laisserait le graphe vide sans rien signaler */
+  var corps = D.length ? _pcrbSlot('pcrb-g-elev')
+    : (_pcavHasW('_mvGraphVide')
+        ? window._mvGraphVide('Pas encore de suivi de malo \u00e0 comparer',
+            'Deux analyses portant l\u2019acide malique, sur une cuv\u00e9e entonn\u00e9e \u00e0 date connue.')
+        : '<div class="pcav-vide">Pas encore de suivi de malo.</div>');
+  var caches=Math.max(0,D.length-MV_CRB_ELEV_MAX);
+  var hors=n-D.length;
+  return _pcrbCard('barrique','L\u2019\u00e9levage\u00a0: la malo, mois par mois',
+    'Chaque point est une analyse de laboratoire.','J0 = entonnage',
+    corps,
+    '<b>Aucune temp\u00e9rature n\u2019est enregistr\u00e9e en \u00e9levage.</b> Un ouillage, un soutirage, un '
+    +'sulfitage, une analyse\u00a0: aucun ne porte de temp\u00e9rature. La courbe de temp\u00e9rature '
+    +'s\u2019arr\u00eate donc au d\u00e9cuvage, et rien ne la prolongera tant qu\u2019un champ n\u2019aura pas \u00e9t\u00e9 '
+    +'ajout\u00e9 \u00e0 la saisie du Chai.<br>Le trait est <b>tiret\u00e9</b>\u00a0: entre deux analyses, personne '
+    +'n\u2019a mesur\u00e9.'
+    +(hors>0?(' <b>'+hors+'</b> cuv\u00e9e'+(hors>1?'s n\u2019apparaissent':' n\u2019appara\u00eet')+' pas\u00a0: '
+      +'moins de deux analyses de malique, ou pas de date d\u2019entonnage \u2014 sans elle il n\u2019y a pas de '
+      +'M0, et le premier relev\u00e9 n\u2019en tient pas lieu.'):'')
+    +(caches>0?(' Les '+MV_CRB_ELEV_MAX+' plus avanc\u00e9es sont trac\u00e9es\u00a0; '+caches+' autre'
+      +(caches>1?'s':'')+' plus bas dans le Chai.'):''),'pil.cav.courbes');
+}
+
+/* ── 5 · LA CHAINE DES VOLUMES ───────────────────────────────────────────── */
+/* Aucun trace neuf : `_caveBtlGraphSvg` est celui du Chai. On choisit la
+   cuvee qui a la chaine la PLUS COMPLETE — celle qui a le plus d'etapes
+   renseignees. Prendre la premiere de la liste montrerait souvent deux barres
+   sur quatre, et l'ecran aurait l'air casse alors qu'il manque une saisie. */
+function _pcrbChaine(c){
+  if(!_pcavHasW('_caveBilanChaine')||!_pcavHasW('_caveBtlGraphSvg'))
+    return '';
+  var best=null, bestN=0;
+  ((window.CAVE_ELEVAGE&&window.CAVE_ELEVAGE.cuvees)||[]).forEach(function(x){
+    var ch=null;
+    try{ ch=window._caveBilanChaine(x); }catch(e){ _pcavLog('bilanChaine',e); return; }
+    if(!ch) return;
+    var n=(ch.recolteKg!=null?1:0)+(ch.cuveHl!=null?1:0)+1+(ch.nbBtl!=null?1:0);
+    if(n>bestN){ bestN=n; best={cuv:x,ch:ch}; }
+  });
+  if(!best||bestN<2) return '';
+  _PCRB_CH=best;
+  return _pcrbCard('bouteille','De la r\u00e9colte \u00e0 la bouteille',
+    _pilEsc(best.cuv.nom||'Cuv\u00e9e')+'\u00a0\u00b7 ce que chaque \u00e9tape a laiss\u00e9 passer.','cha\u00eene',
+    _pcrbSlot('pcrb-g-chain'),
+    'La cuv\u00e9e montr\u00e9e est celle dont la cha\u00eene est la <b>plus compl\u00e8te</b>. Une \u00e9tape absente '
+    +'n\u2019est pas un z\u00e9ro\u00a0: elle n\u2019est simplement pas dessin\u00e9e. Le d\u00e9tail de chaque cuv\u00e9e vit '
+    +'dans <b>Le Chai\u00a0\u203a Bouteilles</b>.','pil.cav.courbes');
+}
+
+/* ── LA VUE ──────────────────────────────────────────────────────────────── */
+function _pcavVueCourbes(c){
+  /* ⚠️ Remise a zero AVANT de reconstruire : ces trois variables survivent au
+     rendu. Sans cela, un ecran qui n'a plus de chaine a montrer garderait
+     celle du rendu precedent, et le graphe pretendrait parler d'une cuvee
+     qui n'est plus a l'ecran. */
+  _PCRB_ELEV=null; _PCRB_CH=null;
+  _pcrbSeries();
+  var h='<div class="pcrb-intro">Le parcours d\u2019un vin, <b>en quatre temps</b>. Chaque temps a son '
+    +'propre jour z\u00e9ro\u00a0: la vigne compte sur le calendrier, la cuve compte depuis l\u2019encuvage, '
+    +'le f\u00fbt depuis l\u2019entonnage. <b>Il n\u2019y a pas de J0 unique</b> \u2014 les superposer sur un seul '
+    +'axe donnerait une \u00e9chelle qui ressemble \u00e0 une mesure sans en \u00eatre une.</div>';
+  h+=_pcrbMat();
+  h+=_pcrbDens();
+  h+=_pcrbTemp();
+  h+=_pcrbElev(c);
+  h+=_pcrbChaine(c);
+  return h;
+}
+
+/* ── LA POSE DES GRAPHES ─────────────────────────────────────────────────────
+   ⚠️⚠️ Le registre `_mvGraphSuivre` mesure la VRAIE largeur du conteneur et
+   repeint au redimensionnement. On OUBLIE la famille avant de la reposer :
+   sans cela le registre grossit a chaque passage sur l'onglet, et chaque
+   entree morte se redessine dans le vide a chaque resize.
+   ⚠️ Cette fonction est appelee APRES l'insertion du HTML, jamais pendant :
+   `_mvGraphSuivre` cherche son conteneur par selecteur. */
+function _pcrbPose(){
+  if(!_pcavHasW('_mvGraphSuivre')) return;
+  window._mvGraphOublier&&window._mvGraphOublier('#pcrb-g-');
+  if(document.getElementById('pcrb-g-mat')&&_pcavHasW('_cuvMatSvg'))
+    window._mvGraphSuivre('#pcrb-g-mat',function(w){ return window._cuvMatSvg(w); });
+  if(document.getElementById('pcrb-g-dens')&&_PCRB_S&&_pcavHasW('_cuvCmpSvg'))
+    window._mvGraphSuivre('#pcrb-g-dens',function(w){ return window._cuvCmpSvg(_PCRB_S,w); });
+  if(document.getElementById('pcrb-g-temp')&&_PCRB_S&&_pcavHasW('_cuvCmpTempSvg'))
+    window._mvGraphSuivre('#pcrb-g-temp',function(w){ return window._cuvCmpTempSvg(_PCRB_S,w); });
+  var el=document.getElementById('pcrb-g-elev');
+  if(el&&_PCRB_ELEV&&_PCRB_ELEV.length)
+    window._mvGraphSuivre('#pcrb-g-elev',function(w){ return _pcrbElevSvg(_PCRB_ELEV,w); });
+  if(document.getElementById('pcrb-g-chain')&&_PCRB_CH)
+    window._mvGraphSuivre('#pcrb-g-chain',function(w){
+      return window._caveBtlGraphSvg(_PCRB_CH.ch,_PCRB_CH.ch.nbBtl,w); });
+}
+
 // ── L'onglet ─────────────────────────────────────────────────────────
 // Millesime ouvert dans l'onglet. null = celui que le contexte a retenu.
 var _PCAV_MIL=null;
-var _PCAV_SUBS=[['urg','chrono','Ce qui presse'],['mil','raisin','Le millésime'],['parc','barrique','Le parc']];
+var _PCAV_SUBS=[['urg','chrono','Ce qui presse'],['mil','raisin','Le millésime'],['parc','barrique','Le parc'],['crb','graphique','Les courbes']];
 function _pilTabCav(d){
   _pcavInjectCss();
   var sub=_PIL_CAVSUB;
+  /* ⚠⚠⚠ DEFAUT TROUVE EN POSANT LA 4e SOUS-VUE : `s[1]` EST UN NOM D'ICONE,
+     et il etait insere TEL QUEL. Les trois boutons de cet ecran affichaient
+     donc, en toutes lettres, « chrono Ce qui presse », « raisin Le millesime »
+     et « barrique Le parc ». Les trois icones existent bien dans le sprite —
+     personne n'avait oublie de les dessiner, on avait oublie de les APPELER.
+     `_pecSubNav`, la sous-nav voisine du MEME fichier, fait `_mvIcon(s[1],16)`
+     depuis toujours : le bon geste etait a quelques ecrans de la. */
   var nav='<div class="pil-subnav" id="pil-cavnav">'+_PCAV_SUBS.map(function(s){
-    return '<button data-s="'+s[0]+'"'+(sub===s[0]?' class="on"':'')+'>'+s[1]+' '+_pilEsc(s[2])+'</button>';
+    var ic=(typeof _mvIcon==='function')?_mvIcon(s[1],16):'';
+    return '<button data-s="'+s[0]+'"'+(sub===s[0]?' class="on"':'')
+      +'><span style="margin-right:6px;display:inline-flex;vertical-align:-3px">'+ic+'</span>'
+      +_pilEsc(s[2])+'</button>';
   }).join('')+'</div>';
   var c, body;
   try{ c=_pcavCtx(d); }catch(e){ c=null; }
@@ -6034,6 +6437,7 @@ function _pilTabCav(d){
   try{
     if(sub==='mil') body=_pcavVueMillesime(c);
     else if(sub==='parc') body=_pcavVueParc(c);
+    else if(sub==='crb') body=_pcavVueCourbes(c);
     else body=_pcavVuePresse(c);
   }catch(e){
     window.logError&&window.logError({level:'error',cat:'pilotage',msg:'onglet cave',err:e});
@@ -10341,6 +10745,17 @@ function _pilFillContent(d){
   _pilAfterFill(tab,d);
 }
 function _pilAfterFill(tab,d){
+  /* Les courbes de la Cave se posent ICI : leur conteneur vient d'etre insere,
+     donc sa largeur est enfin mesurable. `_mvGraphRepeindre`, juste au-dessus,
+     ne suffit pas — il repeint les graphes DEJA enregistres, or ceux-ci
+     changent de contenu a chaque rendu. */
+  if(tab==='cav'){
+    if(_PIL_CAVSUB==='crb'){ try{ _pcrbPose(); }catch(e){ _pcavLog('poseCourbes',e); } }
+    /* ⚠️ On oublie la famille des que l'on QUITTE la sous-vue : sinon le
+       registre garde des entrees dont le conteneur n'existe plus, et chaque
+       redimensionnement les redessine dans le vide. */
+    else if(window._mvGraphOublier) window._mvGraphOublier('#pcrb-g-');
+  }
   if(tab==='avc'){
     if(_pilShow('avc_gauge')) _pilRenderGauge(d);
     if(_pilShow('avc_bar')) _pilRenderBar(d);

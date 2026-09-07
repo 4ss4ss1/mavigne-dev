@@ -23,7 +23,7 @@ export const GT_ADMIN_EMAIL = 'ngdevpro@gmail.com';
 // WHATS_NEW   : tableau vide = modal desactive pour cette version.
 // Format item : { emoji:'📅', titre:'Titre court', desc:'Phrase utilisateur.' }
 // Regle : seulement les changements visibles par les utilisateurs.
-export const APP_VERSION = '6.86';
+export const APP_VERSION = '6.87';
 // ════ Journal des nouveautés (récap cumulatif) ════
 // Une entrée par version, la PLUS RÉCENTE EN HAUT : { v:'5.10', items:[ {emoji,titre,desc}, … ] }
 // À chaque release visible → AJOUTER un bloc en tête (ne pas remplacer). items:[] = release technique (rien à afficher).
@@ -354,6 +354,16 @@ window._mvGraphRepeindre = function(){
 };
 
 export const WHATS_NEW = [
+  { v: '6.87', items: [
+    { emoji: 'graphique', titre: 'Les courbes de la cave, r\u00e9unies dans le Pilotage',
+      desc: "<b>Pilotage \u203a Cave</b> gagne un quatri\u00e8me \u00e9cran, <b>Les courbes</b>\u00a0: le parcours d\u2019un vin, de la maturit\u00e9 \u00e0 la bouteille, sur une seule page. On y retrouve le <b>comparatif des cuves</b> du cahier de cuverie \u2014 toutes les densit\u00e9s align\u00e9es sur <b>leur propre jour d\u2019encuvage</b> \u2014 accompagn\u00e9 d\u2019un trac\u00e9 neuf des <b>temp\u00e9ratures</b> sur le m\u00eame rail de jours\u00a0: un palier de densit\u00e9 s\u2019explique souvent l\u00e0, douze degr\u00e9s cinq jours durant, c\u2019est une mac\u00e9ration et pas une fermentation qui tra\u00eene. La malo s\u2019affiche d\u00e9sormais sur un <b>vrai axe de temps</b>, en mois depuis l\u2019entonnage\u00a0: deux analyses \u00e0 six semaines d\u2019\u00e9cart ne dessinent plus la m\u00eame pente que deux analyses \u00e0 trois jours. <b>Aucune temp\u00e9rature n\u2019est enregistr\u00e9e en \u00e9levage</b>\u00a0: la courbe s\u2019arr\u00eate au d\u00e9cuvage, et l\u2019\u00e9cran le dit plut\u00f4t que de vous laisser chercher." },
+    { emoji: 'oeil', titre: 'Les onglets de la Cave affichaient le nom de leur ic\u00f4ne',
+      desc: "Les boutons de <b>Pilotage \u203a Cave</b> \u00e9crivaient, en toutes lettres, \u00ab\u00a0chrono Ce qui presse\u00a0\u00bb, \u00ab\u00a0raisin Le mill\u00e9sime\u00a0\u00bb et \u00ab\u00a0barrique Le parc\u00a0\u00bb. Les ic\u00f4nes existaient\u00a0; elles n\u2019\u00e9taient simplement pas appel\u00e9es. Elles s\u2019affichent." },
+    { emoji: 'eprouvette', titre: 'L\u2019export du Chai annon\u00e7ait un degr\u00e9 d\u2019alcool \u00e0 la place de l\u2019acidit\u00e9 volatile',
+      desc: "Dans l\u2019export des op\u00e9rations, la valeur d\u2019<b>acidit\u00e9 volatile</b> d\u2019une analyse sortait sous le nom \u00ab\u00a0Alcool\u00a0\u00bb et en \u00ab\u00a0%\u00a0vol.\u00a0\u00bb, au lieu de <b>g/L</b>. Le chiffre \u00e9tait le bon, son nom ne l\u2019\u00e9tait pas \u2014 et un registre de cave se relit parfois des ann\u00e9es plus tard. Les autres \u00e9crans disaient d\u00e9j\u00e0 juste. La puce d\u2019analyse porte aussi son unit\u00e9, comme celle de l\u2019acide malique \u00e0 c\u00f4t\u00e9." },
+    { emoji: 'graphique', titre: 'Deux cuves finissant \u00e0 la m\u00eame densit\u00e9 \u00e9crivaient leur nom l\u2019un sur l\u2019autre',
+      desc: "Sur le comparatif du cahier de cuverie, les noms pos\u00e9s au bout des courbes s\u2019\u00e9cartaient bien\u2026 sauf quand la pile touchait le bas du cadre, o\u00f9 le dernier \u00e9tait rabattu sur le bord. Or les cuves <b>finissent toutes s\u00e8ches</b>\u00a0: c\u2019\u00e9tait donc le cas le plus courant, et le graphe pouvait se tromper sur qui est qui. La pile remonte d\u00e9sormais en bloc." }
+  ] },
   { v: '6.86', items: [
     { emoji: 'graphique', titre: 'Un comparatif de toutes les cuves, align\u00e9es sur leur jour d\u2019encuvage',
       desc: "Le cahier de cuverie s\u2019ouvre maintenant sur un <b>comparatif</b>\u00a0: toutes les cin\u00e9tiques sur un m\u00eame graphe, mais <b>en jours depuis l\u2019encuvage</b> plut\u00f4t qu\u2019en dates. Sur un calendrier, une cuve entr\u00e9e le 16 et une autre le 24 n\u2019ont aucun point commun\u00a0; align\u00e9es sur leur propre J0, elles se superposent et se comparent. Chaque courbe porte son nom au bout et un <b>point plein \u00e0 son d\u00e9part</b>. Dessous, un tableau r\u00e9pond au \u00ab\u00a0pourquoi\u00a0\u00bb\u00a0: densit\u00e9 et sucre de d\u00e9part, degr\u00e9 potentiel, <b>sucre \u00e0 la vigne</b> relev\u00e9 lors des derni\u00e8res analyses d\u2019avant encuvage, temp\u00e9rature moyenne et maxi, jour d\u2019atteinte du vin sec et vitesse moyenne. Le classement se fait sur le <b>jour du vin sec</b>, pas sur la vitesse\u00a0: une pente mesur\u00e9e sur trois jours n\u2019est pas comparable \u00e0 une pente mesur\u00e9e sur dix." }
@@ -2542,6 +2552,18 @@ export const MV_INFO = {
     'Le <b>trait vertical</b> est le plafond que vous avez renseigné <b>par parcelle</b>, depuis Le millésime. Ce n\u2019est pas une valeur du logiciel.',
     'L\u2019échelle va jusqu\u2019à <b>115 % du plafond</b> : c\u2019est ce qui permet à un dépassement de se voir déborder, au lieu d\u2019être écrasé contre le bord.',
     'Les parcelles <b>sans plafond renseigné</b> n\u2019entrent pas dans la comparaison — elles sont listées à part plutôt que comptées comme conformes.'
+  ] },
+
+  'pil.cav.courbes': { t: 'Les courbes de la cave', p: [
+    'Chaque bloc porte <b>son propre jour z\u00e9ro</b>, \u00e9crit \u00e0 c\u00f4t\u00e9 de son titre. La vigne compte sur le calendrier, la cuve depuis l\u2019<b>encuvage</b>, le f\u00fbt depuis l\u2019<b>entonnage</b>. Les empiler sur un seul axe donnerait une \u00e9chelle qui ressemble \u00e0 une mesure sans en \u00eatre une.',
+    'Sur un calendrier, une cuve entr\u00e9e le 16 et une autre le 24 n\u2019ont <b>aucun point commun</b>. Align\u00e9es sur leur propre J0, leurs cin\u00e9tiques se superposent et se comparent.',
+    'Le tableau est class\u00e9 sur le <b>jour o\u00f9 le vin sec a \u00e9t\u00e9 relev\u00e9</b>, jamais sur la vitesse : une pente mesur\u00e9e sur trois jours n\u2019est pas comparable \u00e0 une pente mesur\u00e9e sur dix, et le d\u00e9but d\u2019une fermentation en est la phase la plus rapide.',
+    'Le jour du vin sec est le jour <b>observ\u00e9</b>. Quand la cuve n\u2019y est pas encore, la colonne rappelle son dernier point au lieu d\u2019inventer une projection.',
+    'Une cuve <b>sans date d\u2019encuvage est \u00e9cart\u00e9e</b>, et l\u2019\u00e9cran dit combien il en \u00e9carte. Une date devin\u00e9e se croirait ; une cuve absente se corrige.',
+    'Sur les temp\u00e9ratures, un <b>palier de densit\u00e9</b> trouve souvent son explication : douze degr\u00e9s cinq jours durant, c\u2019est une mac\u00e9ration pr\u00e9fermentaire, pas une fermentation qui tra\u00eene.',
+    '<b>Aucune temp\u00e9rature n\u2019est enregistr\u00e9e en \u00e9levage.</b> Ni l\u2019ouillage, ni le soutirage, ni le sulfitage, ni l\u2019analyse n\u2019en portent. La courbe s\u2019arr\u00eate au d\u00e9cuvage.',
+    'Sur la malo, le trait est <b>tiret\u00e9</b> : entre deux analyses, personne n\u2019a mesur\u00e9. Une ligne pleine laisserait croire \u00e0 un suivi continu.',
+    'La colonne \u00ab Vigne \u00bb est la derni\u00e8re analyse d\u2019avant encuvage de chaque parcelle de la cuve, <b>pond\u00e9r\u00e9e par la surface</b>. La part r\u00e9elle de chaque parcelle entr\u00e9e dans la cuve n\u2019\u00e9tant pas connue, c\u2019est un <b>ordre de grandeur</b>.'
   ] },
 
   // ══ LA CAMPAGNE ══

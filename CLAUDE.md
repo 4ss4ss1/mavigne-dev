@@ -13986,3 +13986,155 @@ dans `.mv-base`.
 | `guide/08-cave.html` · `public/guide.html` | le comparatif et sa lecture | — |
 | `scripts/mv-harnais-cuvdoc.mjs` | +12 assertions, +6 contre-épreuves (25/25 rouges) | — |
 | `scripts/harnais-claude-md.mjs` | `SECTIONS` 119 → 120 | — |
+
+## 89. ★★★ PILCRB-1 — LES COURBES DE LA CAVE, ET L'ÉCARTEMENT QUI SE DÉFAISAIT LUI-MÊME (07/09 — APP 6.86 → 6.87 · SW 7.45 → 7.46 · base `721f3ce`)
+
+> **Point de départ**, demandé par Nico : *« dans pilotage cave je souhaite un module avec
+> graphique, par exemple, un graphe avec toutes les densités des cuves ramenées à j=0 et pas à date.
+> Le détail des températures, et ceci pour toutes les opérations d'élevage depuis la récolte ou
+> analyse avant récolte jusqu'à la mise en bouteille. »*
+> Maquette livrée, validée d'un « tout est ok », puis intégrée — avec **deux écarts assumés** que
+> l'écriture du code a rendus nécessaires (§89e).
+
+### 89a. ★★★ IL N'Y A PAS UN J0 UNIQUE — ET C'EST LA RÉPONSE À LA DEMANDE
+
+La demande dit « depuis la récolte jusqu'à la mise en bouteille », et se lit comme **un seul axe**.
+Elle n'en admet pas un seul. La vigne compte sur le **calendrier** ; la cuve compte depuis
+l'**encuvage** ; le fût compte depuis l'**entonnage**. Ce sont trois événements distincts, séparés
+de semaines, et la grandeur mesurée change à chaque fois — sucre, puis densité, puis malique.
+
+★★ **Empiler trois origines sur un axe donne une échelle qui RESSEMBLE à une mesure sans en être
+une.** L'écran pose donc **quatre blocs**, et chacun **écrit son zéro en toutes lettres à côté de
+son titre** (`.pcrb-j0`). Le badge n'est pas décoratif : c'est lui qui empêche de lire deux graphes
+sur la même échelle mentale.
+
+### 89b. ⚠️⚠️⚠️ AUCUNE TEMPÉRATURE N'EST ENREGISTRÉE EN ÉLEVAGE
+
+`temp_c` n'existe qu'à **quatre** endroits, tous en amont du décuvage : la température des raisins
+au quai (`recoltes[]`), la cible de macération (`cuves_vinif[].mpf`), le relevé de fermentation
+(`mesures_fa[]`), la cible d'une thermorégulation de cuverie (`operations[]`, INTR-1).
+
+**Les opérations d'élevage n'en portent aucune** : ni `ouillage`, ni `soutirage`, ni `soufre`, ni
+`analyse`. La demande « le détail des températures … jusqu'à la mise en bouteille » **ne peut donc
+pas être satisfaite** sans un champ neuf à la saisie du Chai.
+
+★★★ **L'écran le DIT, en clair, là où on le cherche** — dans le pied du bloc élevage, pas dans une
+note de bas de page. *Un écran qui laisse chercher un graphe absent coûte plus cher qu'un écran qui
+annonce son absence.* Décision prise avec Nico : **on n'ajoute pas le champ dans ce lot**. La
+courbe s'arrête au décuvage, et l'écran l'assume.
+
+### 89c. Ce qui est réutilisé, et ce qui est neuf
+
+§86 interdit de **redessiner** une courbe qui existe ailleurs. Appliqué bloc par bloc :
+
+| bloc | tracé | neuf ? |
+|---|---|---|
+| Maturités | `_cuvMatSvg` → `_vendMatSvg`, celui du Cuvier | non |
+| Densités J0 | **`_cmpSvg`**, celui du cahier de cuverie | non — §88e le réservait |
+| Températures J0 | `_cmpTempSvg` | **oui** |
+| Malo par mois | `_pcrbElevSvg` | **oui** |
+| Chaîne des volumes | `_caveBtlGraphSvg`, celui du Chai | non |
+
+★★ **§88e tenait sa promesse** : *« le jour où ce comparatif monte sur un écran, il appellera
+`_cmpSvg`, pas une seconde fonction »*. C'est exactement ce qui s'est passé, un lot plus tard.
+
+★ **Les deux tracés neufs le sont pour la même raison** : il n'existait rien à copier.
+`_vendFermSvg` trace bien une température, mais d'**une** cuve sur un axe de **dates**.
+`_pcavMaloCourbe` trace bien la malo, mais **sans axe de temps** — ses barres sont espacées par
+**rang**, si bien que deux analyses à six semaines d'écart et deux à trois jours y dessinent la
+**même pente**. Ce n'est pas le même graphe redessiné, c'est l'information que l'autre ne porte pas.
+
+### 89d. ★★★ LE HARNAIS A ROUGI, ET C'ÉTAIT LE CODE DE 6.86 QUI AVAIT TORT
+
+L'assertion « aucun chevauchement entre deux noms » est sortie **rouge sur du code déjà en ligne**.
+Réflexe de §80 — demander d'abord lequel a tort, du test ou du code. C'était le **code**.
+
+`_cmpSvg` écartait bien les noms de 11 px, puis **rabattait sur le bord bas** celui qui dépassait :
+
+```js
+if(y > pT + ih + 8) y = pT + ih + 8;   // ← défait l'écartement qu'on vient de faire
+```
+
+**Mesuré**, trois cuves finissant toutes à 994 : **276,4 / 287,4 / 294,0**. Dernier écart **6,6 px
+pour un texte de 10 px** — les lettres se chevauchent.
+
+★★★ **ET LA CAUSE EST GÉNÉRALE, PAS MARGINALE.** La pile pousse vers le **bas** ; or les noms se
+tassent en bas **précisément quand toutes les cuves finissent sèches** — c'est-à-dire le cas que
+§88d appelle lui-même *« le plus BANAL, puisqu'elles finissent toutes sèches »*. Le plafond était
+donc touché **dans le cas nominal**, et le graphe pouvait mentir sur qui est qui, sans rien
+signaler. *§88d avait écrit la règle et posé, dans la même fonction, ce qui la défaisait.*
+
+★ **Correction** : `_cmpEcarte(lbl, hMin, yLo, yHi)`, **une seule règle pour les trois tracés**.
+Quand la pile déborde, elle **remonte en bloc** au lieu d'être rabattue — tous les écarts sont
+préservés. Et quand même la remontée ne suffit pas (plus de noms que de hauteur), les écarts sont
+**répartis également** : un tassement régulier se voit, deux noms superposés au hasard non.
+
+⚠️⚠️ **J'AVAIS RECOPIÉ LE DÉFAUT DANS `_cmpTempSvg` AVANT DE LE TROUVER.** C'est l'argument même de
+la règle partagée : *une copie propage la faute avant qu'on l'ait trouvée.*
+
+### 89e. Les deux écarts par rapport à la maquette validée
+
+⚠️ **Le bloc maturité reste sur un AXE DE DATES**, pas en « jours avant récolte » comme la maquette
+le proposait. Deux obstacles apparus **à l'écriture**, donc postérieurs au « ok » : la date de
+récolte d'une parcelle **n'est pas un champ** (elle se déduit des apports), et une parcelle **non
+encore vendangée n'a aucun J0**. Le bloc aurait été **vide pendant tout août et la première
+quinzaine de septembre** — exactement quand la question « laquelle vendanger d'abord » se pose.
+*Un graphe qui se vide au moment où il sert ne sert pas.* Et le tracé existe déjà (§86).
+
+⚠️ **Les séries d'élevage sont la MALO seule**, pas le sélecteur malique / SO₂ / AV de la maquette.
+`_mlMesMalo` est la source unique du malique et elle existe ; SO₂ et AV n'ont pas d'équivalent, et
+les écrire ici créerait **trois lectures d'`op.data` en parallèle de celle du Chai**. À faire dans
+un lot dédié, avec le défaut de §89g réglé d'abord.
+
+★ *Une maquette validée n'est pas exemptée de la règle « vérifier, ne pas croire ».*
+
+### 89f. ⚠️ LES SOUS-ONGLETS AFFICHAIENT LE NOM DE LEUR ICÔNE
+
+Trouvé en posant la quatrième sous-vue. `_pilTabCav` insérait `s[1]` **tel quel** :
+
+```js
+'>'+s[1]+' '+_pilEsc(s[2])+'</button>'   // s[1] est un NOM d'icône
+```
+
+Les trois boutons de **Pilotage › Cave** affichaient donc, en toutes lettres, **« chrono Ce qui
+presse »**, **« raisin Le millésime »**, **« barrique Le parc »**. Les trois icônes existent dans le
+sprite : personne n'avait oublié de les dessiner, on avait oublié de les **appeler**.
+
+★ **`_pecSubNav`, la sous-nav voisine du MÊME fichier, fait `_mvIcon(s[1],16)` depuis toujours.** Le
+bon geste était à quelques écrans de là. *Un défaut purement visuel ne déclenche aucune erreur, ne
+casse aucun test, et survit à tous les passages de préflight : il ne se trouve qu'en regardant.*
+
+### 89g. ⚠️ `av` SORTAIT SOUS UN NOM FAUX — TROUVÉ EN CHEMIN, CORRIGÉ DANS LE LOT
+
+`generateCaveExport()` (`cave.js`) écrit **« Alcool : 0,42 % vol. »** pour le champ `av`, qui est
+l'**acidité volatile en g/L** partout ailleurs : le libellé du formulaire (`index.html`), son
+placeholder `ex. 0.42`, et les **trois** autres sites qui l'affichent (`_caveJDet`, la carte de
+cuvée, le journal). **Un registre de cave qui exporte un chiffre sous un nom faux.**
+
+★ **Confirmé par Nico — « c'est acidité volatile » — donc corrigé dans ce lot** : l'export dit
+désormais `Ac. volatile: … g/L`, comme les quatre autres sites. *Le chiffre était juste ; c'est son
+nom qui mentait, et un registre de cave se relit des années plus tard.*
+
+★ **Et une seconde, trouvée dans la foulée** : la puce d'analyse écrivait `AV 0,42` **sans unité**,
+collée à une puce `Malique 1,80 g/L` qui, elle, porte la sienne. *Deux nombres côte à côte, l'un
+unité l'autre non, se lisent sur la même échelle.* Unité ajoutée.
+
+⚠️ **Ce que ce lot NE corrige PAS** : les deux définitions du degré potentiel de §88f
+(`_vendDegrePot()` divise par 16,83 en dur, le comparatif lit `sucre_par_degre`). Même famille —
+une grandeur, deux vérités — mais c'est un lot dédié, pas un passage.
+
+### 89h. La note de livraison
+
+**Base : `721f3ce`.** ⚠️ `.mv-base` était resté sur `494385f` alors que §86, §87 et §88 sont
+commités : la garde de base était **désarmée**. Remise à `721f3ce` dans ce lot.
+
+| fichier | ce qui change | bump |
+|---|---|---|
+| `src/cave.js` | `_cmpEcarte` (partagé), `_cmpSeries` (tri extrait de `_cmpBloc`), `_cmpTempSvg`, pont `_cuvCmp*` + `_cuvMatSvg` | — |
+| `src/pilotage.js` | 4ᵉ sous-vue `crb`, `_pcavVueCourbes` et sa famille `_pcrb*`, CSS `.pcrb-*`, pose via `_mvGraphSuivre`, **correctif `_mvIcon` de la sous-nav** | — |
+| `src/utils.js` | 6.87, 3 items `WHATS_NEW`, `MV_AIDE` `pil.cav.courbes` (9 §) | ★ APP |
+| `index.html` · `public/sw.js` | 4 porteurs · 7.46 + changelog | ★ APP · ★ SW |
+| `guide/11-pilotage.html` · `public/guide.html` | la sous-vue, ses quatre zéros et la limite de température (§27a) | — |
+| `scripts/mv-harnais-courbes.mjs` · `package.json` | 44 assertions, 12 contre-épreuves, câblé dans `check`, `prebuild`, `test:courbes` | — |
+| `scripts/harnais-claude-md.mjs` | `SECTIONS` 120 → 121 | — |
+| `.mv-base` | `721f3ce` | — |

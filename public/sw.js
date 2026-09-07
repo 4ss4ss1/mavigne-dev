@@ -1,4 +1,32 @@
-// MA VIGNE — Service Worker v7.45
+// MA VIGNE — Service Worker v7.46
+// v7.46 (07/09/2026) — PILCRB-1 : LES COURBES DE LA CAVE, DANS LE PILOTAGE.
+//   Demande par Nico : « dans pilotage cave je souhaite un module avec
+//   graphique, un graphe avec toutes les densites des cuves ramenees a j=0 et
+//   pas a date, le detail des temperatures, et ceci pour toutes les operations
+//   d'elevage depuis la recolte ou analyse avant recolte jusqu'a la mise en
+//   bouteille. »
+//   ★★★ IL N'Y A PAS UN J0 UNIQUE. La vigne compte sur le calendrier, la cuve
+//   compte depuis l'encuvage, le fut depuis l'entonnage. Empiler ces trois
+//   origines sur un seul axe donnerait une echelle qui RESSEMBLE a une mesure
+//   sans en etre une. Quatre blocs, chacun avec son zero ecrit en toutes
+//   lettres a cote de son titre.
+//   ⚠⚠ AUCUNE TEMPERATURE N'EST ENREGISTREE EN ELEVAGE : `temp_c` n'existe que
+//   sur les releves de fermentation, la cible de maceration et les raisins au
+//   quai. Un ouillage, un soutirage, un sulfitage, une analyse n'en portent
+//   aucune. La courbe s'ARRETE AU DECUVAGE, et l'ecran le DIT.
+//   ★ Le comparatif de densites MONTE A L'ECRAN sans etre redessine : c'est
+//   `_cmpSvg`, celle du cahier de cuverie, comme le prevoyait le lot CUVDOC-3.
+//   Idem pour la maturite et la chaine des volumes. SEUL le trace des
+//   temperatures est neuf, parce qu'il n'existait nulle part.
+//   ★ La malo passe sur un VRAI AXE DE TEMPS, en mois depuis l'entonnage. Les
+//   barres de « Ce qui presse » sont espacees par RANG : deux analyses a six
+//   semaines d'ecart et deux a trois jours y dessinent la meme pente.
+//   ⚠ CORRIGE : les sous-onglets de Pilotage > Cave affichaient le NOM de leur
+//   icone — « chrono Ce qui presse ». `_mvIcon` n'etait pas appelee.
+//   ⚠⚠ CORRIGE dans le comparatif de 6.86 : l'ecartement des noms etait DEFAIT
+//   par un rabattement sur le bord bas. Trois cuves finissant a 994 sortaient
+//   a 6,6 px d'ecart pour un texte de 10 px. Or elles finissent TOUTES seches :
+//   c'etait le cas nominal. La pile remonte en bloc.
 // v7.45 (07/09/2026) — CUVDOC-3 : LE COMPARATIF, EN JOURS ET NON EN DATES.
 //   Demande par Nico : « un graphique comparatif avec tous les avancements et
 //   les densites qui evoluent, mais pas de date du 1er au 10 septembre, plutot
@@ -3422,7 +3450,7 @@
 // v2.22 — Fix profils vides : guard vide dans loadData() pour MEMBRES/SAISONS/TACHES
 // v2.17 — Onboarding intégré + tenantId · v2.06 — Firebase Auth · v2.00–v2.05 — divers
 const DEBUG = self.location.hostname === 'localhost' || self.location.hostname === '127.0.0.1';
-const CACHE_NAME   = 'mavigne-v7.45';
+const CACHE_NAME   = 'mavigne-v7.46';
 const TENANT_CACHE = 'mavigne-tenant';   // Cache persistant — préservé à chaque mise à jour SW
 const SYNC_TAG     = 'mavigne-sync';
 
@@ -3438,7 +3466,7 @@ const CDN_URLS = [
 ];
 
 self.addEventListener('install', event => {
-  if(DEBUG) console.log('[SW] Ma Vigne v7.45 installé');
+  if(DEBUG) console.log('[SW] Ma Vigne v7.46 installé');
   event.waitUntil(
     caches.open(CACHE_NAME).then(async cache => {
       // ── Cœur applicatif : STRICT (mise à jour ATOMIQUE) ──
@@ -3454,7 +3482,7 @@ self.addEventListener('install', event => {
 });
 
 self.addEventListener('activate', event => {
-  if(DEBUG) console.log('[SW] Ma Vigne v7.45 activé');
+  if(DEBUG) console.log('[SW] Ma Vigne v7.46 activé');
   event.waitUntil(
     caches.keys().then(keys =>
       Promise.all(
