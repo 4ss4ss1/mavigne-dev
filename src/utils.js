@@ -23,7 +23,7 @@ export const GT_ADMIN_EMAIL = 'ngdevpro@gmail.com';
 // WHATS_NEW   : tableau vide = modal desactive pour cette version.
 // Format item : { emoji:'📅', titre:'Titre court', desc:'Phrase utilisateur.' }
 // Regle : seulement les changements visibles par les utilisateurs.
-export const APP_VERSION = '6.88';
+export const APP_VERSION = '6.91';
 // ════ Journal des nouveautés (récap cumulatif) ════
 // Une entrée par version, la PLUS RÉCENTE EN HAUT : { v:'5.10', items:[ {emoji,titre,desc}, … ] }
 // À chaque release visible → AJOUTER un bloc en tête (ne pas remplacer). items:[] = release technique (rien à afficher).
@@ -354,6 +354,26 @@ window._mvGraphRepeindre = function(){
 };
 
 export const WHATS_NEW = [
+  { v: '6.91', items: [
+    { emoji: 'balance', titre: 'Le rendement moyen se calcule sur la surface que vous avez vraiment r\u00e9colt\u00e9e',
+      desc: "Quand vous vendez du raisin, vous saisissez la <b>surface achet\u00e9e</b> par l\u2019acheteur. Cette information n\u2019\u00e9tait pas lue\u00a0: la moyenne du domaine rapportait ce que vous rentrez \u00e0 la surface <b>enti\u00e8re</b> des parcelles. Elle la rapporte d\u00e9sormais \u00e0 <b>ce qui vous reste</b>. Deux chiffres cohabitent maintenant, et c\u2019est voulu\u00a0: la <b>ligne d\u2019une parcelle</b> montre tout son raisin sur toute sa surface \u2014 c\u2019est ce que l\u2019arr\u00eat\u00e9 plafonne, quel que soit l\u2019acheteur\u00a0; la <b>moyenne du domaine</b> montre ce qui remplit votre cave." },
+    { emoji: 'alerte', titre: 'Une surface vendue non renseign\u00e9e est d\u00e9sormais annonc\u00e9e',
+      desc: "Si plusieurs destinations d\u2019une m\u00eame parcelle n\u2019ont pas de surface achet\u00e9e saisie, l\u2019application partage la surface <b>au prorata des kilos</b> \u2014 ce qui suppose un rendement identique partout. C\u2019est une hypoth\u00e8se, pas une mesure. Le chiffre sort quand m\u00eame, mais pr\u00e9c\u00e9d\u00e9 d\u2019un \u00ab \u2248 \u00bb, et l\u2019\u00e9cran <b>compte les parcelles concern\u00e9es</b> pour que vous sachiez o\u00f9 compl\u00e9ter. Le bilan de campagne imprim\u00e9 porte la m\u00eame r\u00e9serve." }
+  ] },
+  { v: '6.90', items: [
+    { emoji: 'balance', titre: 'Le rendement moyen ne comptait pas votre raisin vendu',
+      desc: "Le chiffre du haut d\u2019\u00e9cran additionnait le vin <b>log\u00e9 au domaine</b> et le divisait par la surface <b>totale</b> r\u00e9colt\u00e9e. Or le raisin vendu ne passe jamais en cuve\u00a0: sur une vendange o\u00f9 <b>9\u00a0370\u00a0kg sur 29\u00a0t</b> partent chez un acheteur, un tiers de la r\u00e9colte sortait du calcul <b>en gardant sa surface au d\u00e9nominateur</b>. La moyenne tombait \u00e0 13,7\u00a0hL/ha pendant que les parcelles juste en dessous annon\u00e7aient 24 \u00e0 48. <b>Vendre son raisin ne fait pas baisser son rendement.</b> La moyenne agr\u00e8ge d\u00e9sormais exactement les m\u00eames parcelles que la liste, et tombe donc dans sa fourchette." },
+    { emoji: 'oeil', titre: 'Une parcelle sans surface ne se glisse plus dans la moyenne',
+      desc: "Ses kilos comptaient au num\u00e9rateur sans que sa surface compte au d\u00e9nominateur\u00a0: elle <b>gonflait</b> le rendement de tout le domaine. Elle est maintenant \u00e9cart\u00e9e des deux c\u00f4t\u00e9s, et l\u2019\u00e9cran <b>dit combien</b> l\u2019ont \u00e9t\u00e9 plut\u00f4t que de les faire dispara\u00eetre en silence." }
+  ] },
+  { v: '6.89', items: [
+    { emoji: 'etiquette', titre: 'D\u00e9clarez vos appellations, et le plafond se pose une seule fois',
+      desc: "Un arr\u00eat\u00e9 ne vise pas une parcelle, il vise une <b>appellation</b>. <b>R\u00e9glages \u203a Domaine \u203a Appellations</b> vous laisse d\u00e9clarer les v\u00f4tres, poser leur rendement maximum <b>pour chaque mill\u00e9sime</b>, et y rattacher vos parcelles d\u2019une liste d\u00e9roulante. Un plafond pos\u00e9 directement sur une parcelle reste <b>prioritaire</b> : un r\u00e9glage g\u00e9n\u00e9ral ne d\u00e9fait jamais une saisie faite \u00e0 la main. Renommer une appellation emm\u00e8ne ses parcelles avec elle ; la supprimer vous dit d\u2019abord combien en perdront le rattachement." },
+    { emoji: 'balance', titre: 'Le rendement moyen affichait \u00ab 0 hL/ha \u00bb alors que rien n\u2019\u00e9tait mesur\u00e9',
+      desc: "Sur <b>Pilotage \u203a Cave \u203a Le mill\u00e9sime</b>, le rendement moyen ne divisait que le volume <b>d\u00e9cuv\u00e9</b> \u2014 nul tant qu\u2019aucune cuve n\u2019est termin\u00e9e. La carte annon\u00e7ait donc <b>0 hL/ha</b> juste sous un bandeau disant \u00ab 162 hL en cuve \u00bb, et juste au-dessus de parcelles \u00e0 44 hL/ha. <b>Un z\u00e9ro a l\u2019aplomb d\u2019un fait</b> : il se croit. Le chiffre inclut d\u00e9sormais ce qui est encore en cuve, s\u2019affiche pr\u00e9c\u00e9d\u00e9 d\u2019un \u00ab \u2248 \u00bb tant que tout n\u2019est pas d\u00e9cuv\u00e9, et dit \u00ab mesur\u00e9 au d\u00e9cuvage \u00bb quand il n\u2019y a rien \u00e0 annoncer." },
+    { emoji: 'document', titre: 'Le bilan de campagne et le Pilotage donnaient deux rendements diff\u00e9rents',
+      desc: "Le document <b>Bilan de campagne</b> estimait le rendement moyen d\u2019apr\u00e8s les kilos pendant que le Pilotage divisait le volume d\u00e9cuv\u00e9 : deux chiffres pour une seule grandeur, sans que rien ne le dise. Ils lisent maintenant <b>le m\u00eame calcul</b>, et le document imprim\u00e9 pr\u00e9cise lui aussi si le chiffre est mesur\u00e9 ou estim\u00e9 \u2014 il se relit des ann\u00e9es plus tard, sans l\u2019\u00e9cran \u00e0 c\u00f4t\u00e9." }
+  ] },
   { v: '6.88', items: [
     { emoji: 'balance', titre: 'Le plafond de rendement appartient au mill\u00e9sime, plus \u00e0 la parcelle',
       desc: "Le <b>rendement maximum de l\u2019appellation</b> ne se posait qu\u2019<b>une fois par parcelle</b>, sans ann\u00e9e\u00a0: le r\u00e9gler pour 2026 r\u00e9\u00e9crivait 2025 et 2024, en silence, sur un \u00e9cran qui affichait pourtant un mill\u00e9sime. Or ce plafond est fix\u00e9 <b>par arr\u00eat\u00e9, campagne par campagne</b>. Chaque mill\u00e9sime a maintenant le sien. <b>Rien n\u2019est \u00e0 ressaisir</b>\u00a0: une valeur pos\u00e9e avant cette mise \u00e0 jour continue de servir partout, annonc\u00e9e comme <b>h\u00e9rit\u00e9e</b> \u2014 elle n\u2019a \u00e9t\u00e9 v\u00e9rifi\u00e9e contre l\u2019arr\u00eat\u00e9 d\u2019aucune ann\u00e9e, autant le dire. Corrigez-la mill\u00e9sime par mill\u00e9sime, et validez \u00e0 vide pour retirer celui d\u2019une ann\u00e9e." },
@@ -2231,6 +2251,7 @@ var MV_AIDE = {
       ['Le millésime', "annonce ce qui vient dans les quatre prochaines semaines, puis retrace le parcours du vin, de la benne à la bouteille."],
       ['Le rendement maximum de l\u2019appellation', "se pose par parcelle ET par millésime, en touchant une parcelle dans « La ligne de vie » — ou depuis la même carte du Pilotage. Le rendement annuel autorisé est fixé par arrêté, campagne par campagne : une valeur posée pour 2026 ne dit rien de 2025. Valider à vide retire celui d\u2019une année. Réservé à l\u2019administrateur."],
       ['Une valeur « héritée »', "vient de l\u2019ancien réglage, qui ne portait pas d\u2019année. Elle continue de servir partout où rien n\u2019est posé, et l\u2019écran le dit : elle n\u2019a été vérifiée contre l\u2019arrêté d\u2019aucune campagne. Poser le plafond du millésime la remplace pour cette année-là, sans toucher aux autres."],
+      ['L’appellation porte le plafond', "déclarez vos appellations dans Réglages › Domaine, posez leur rendement maximum pour chaque millésime, et rattachez-y vos parcelles. L’ordre est : le plafond de la parcelle s’il existe, sinon celui de son appellation, sinon l’ancien réglage sans année. Une saisie faite à la main n’est jamais défaite par un réglage général."],
       ['Poser un plafond, puis tous les autres', "après la première saisie, l\u2019application propose de porter la même valeur sur les parcelles du millésime qui n\u2019ont aucun plafond, en les nommant d\u2019abord. Celles qui en ont déjà un ne sont jamais touchées."],
       ['Votre rendement au pressoir', "se règle au Cuvier, onglet Réglages, en kilos de raisin par hectolitre. Tous les écrans qui transforment des raisins en volume s’en servent — la chaîne de la récolte à la bouteille comme le bilan de campagne."],
       ['Les analyses labo', "s’attachent en PDF à la cuvée. Les supprimer est réservé à l’administrateur."],

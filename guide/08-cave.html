@@ -151,6 +151,24 @@
   document le dit : en cas d'écart, le pont-bascule du réceptionnaire fait foi. De même, les volumes
   sont ceux <b>annoncés par le client</b> : ils n'engagent pas le domaine.</div></div>
 
+  <div class="note"><span class="ni" aria-hidden="true">{ic:balance}</span><div><b>Deux rendements
+  cohabitent sur cet écran, et c'est voulu.</b> La <b>ligne d'une parcelle</b> montre tout son raisin
+  sur toute sa surface : c'est ce que l'arrêté plafonne, quel que soit l'acheteur. Le <b>rendement
+  moyen du domaine</b>, en haut, montre ce qui remplit votre cave — ce que vous avez rentré, divisé
+  par la surface que vous avez <b>réellement récoltée</b>, c'est-à-dire la surface des parcelles
+  moins les <b>surfaces achetées</b> que vous saisissez sur chaque vente. Les deux coïncident quand
+  les parcelles vendues rendent comme les autres, et divergent sinon : c'est une information, pas une
+  incohérence.</div></div>
+
+  <div class="note"><span class="ni" aria-hidden="true">{ic:alerte}</span><div><b>Quand une surface
+  achetée n'est pas saisie</b> et que plusieurs destinations se partagent la parcelle, l'application
+  répartit la surface <b>au prorata des kilos</b> — ce qui suppose un rendement identique partout.
+  C'est une hypothèse, pas une mesure : le chiffre sort précédé d'un <b>« ≈ »</b> et l'écran compte
+  les parcelles concernées, pour que vous sachiez où compléter. Une parcelle dont le domaine n'a
+  <b>aucune surface</b> est écartée du calcul, et là aussi l'écran vous dit combien. Tant que tout
+  n'est pas décuvé, le chiffre reste une estimation. Le <b>bilan de campagne</b> imprime la même
+  valeur avec la même réserve — il se relit sans l'écran à côté.</div></div>
+
   <h4 style="margin-top:22px">{ic:graphique} Le rendement : ce qu'il affirme, et ce qu'il ne sait pas encore</h4>
   <p>Dans <b>Le millésime</b>, le rendement par parcelle ne se contente plus d'une estimation. Il va
   chercher le volume là où il a été <b>mesuré</b>, dans cet ordre : les litres rendus par l'acheteur,
@@ -268,9 +286,16 @@
   la parcelle : le rendement annuel autorisé est fixé <b>par arrêté, campagne par campagne</b>. Un
   plafond posé pour 2026 ne dit rien de 2025.</p>
   <ul class="dot">
-    <li><b>Où le poser</b> : dans « La ligne de vie », touchez une parcelle sous « Rendement par
-      parcelle ». Le même geste existe sur la carte <b>Pilotage › Cave › Le millésime</b>, qui est
-      justement celle qui vous montre lesquelles en manquent. Réservé à l'administrateur.</li>
+    <li><b>Le plus simple : par appellation.</b> Déclarez vos appellations dans <b>Réglages ›
+      Domaine › Appellations</b>, posez le plafond de l'arrêté pour chaque millésime, rattachez-y
+      vos parcelles. Un seul chiffre, une seule fois. La carte du rendement écrit alors le nom de
+      l'appellation d'où vient le plafond.</li>
+    <li><b>Poser une exception sur une parcelle</b> : dans « La ligne de vie », touchez une parcelle
+      sous « Rendement par parcelle ». Le même geste existe sur la carte <b>Pilotage › Cave › Le
+      millésime</b>, celle qui vous montre lesquelles en manquent. Réservé à l'administrateur.</li>
+    <li><b>L'ordre est toujours le même</b> : le plafond de la parcelle s'il existe, sinon celui de
+      son appellation, sinon l'ancien réglage sans année. Une valeur posée à la main n'est jamais
+      défaite par un réglage général.</li>
     <li><b>Valider à vide</b> retire le plafond de cette année-là, et d'elle seule.</li>
     <li><b>Une valeur « héritée »</b> vient de l'ancien réglage, qui ne portait aucune année. Elle
       continue de servir tant que rien n'est posé pour le millésime, et l'écran le dit : elle n'a

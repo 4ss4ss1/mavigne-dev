@@ -2,7 +2,42 @@
 
 > Document de référence du projet **Ma Vigne** (GUERETTECH). Il est le **porteur de vérité** :
 > la mémoire Claude est plafonnée, ce fichier ne l'est pas.
-> Dernière consolidation : **7 septembre 2026 (nuit)** — ★★★ **UN PLAFOND DE RENDEMENT APPARTIENT À
+> Dernière consolidation : **7 septembre 2026 (nuit)** — ★★★ **LA SURFACE ACHETÉE ÉTAIT SAISIE,
+> PERSONNE NE LA LISAIT (§93)**. **APP 6.90 → 6.91 · SW 7.49 → 7.50.** Quatrième version du
+> rendement moyen. ⚠️⚠️ **`_vendSurfParc` déduisait DÉJÀ la part du domaine** — surface de la parcelle
+> moins les surfaces achetées saisies (`src:'reste'`), en place depuis VD-3. *Trois corrections
+> successives ont porté sur la formule sans jamais aller voir ce que la donnée savait déjà.*
+> ★ **Avant de changer un calcul, chercher si l'information manquante est déjà quelque part.**
+> ★★★ **Deux grandeurs distinctes désormais, et elles doivent le rester** : la ligne d'une parcelle =
+> tout son raisin / toute sa surface, ce que l'arrêté plafonne ; la moyenne du domaine = ce qu'il
+> rentre / ce qu'il récolte. L'invariant de §92 (« la moyenne est l'agrégat de la liste ») tombe
+> **délibérément**. ⚠️ `reste-prorata` (plusieurs destinations sans surface saisie) suppose un
+> rendement identique partout : le chiffre sort, marqué « ≈ », et l'écran **compte** les parcelles
+> concernées. Détail en **§93**.
+>
+> ★ Précédente : **7 septembre 2026 (nuit)** — ★★★ **VENDRE SON RAISIN NE FAIT PAS BAISSER
+> SON RENDEMENT (§92)**. **APP 6.89 → 6.90 · SW 7.48 → 7.49.** Nico, sur la correction de la veille :
+> *« Mais pour le moment rien de décuvé, je ne comprends pas. »* Il avait raison — **§91b était faux
+> à son tour**. Le rendement moyen a eu **trois formules** : `hlDecuve/ha` (0 hL/ha), puis
+> `(hlDecuve+hlCuve)/ha` (13,7), enfin l'agrégat des mêmes parcelles que la liste (20,3). `hlCuve` ne
+> compte que le raisin **logé au domaine** : les 9 370 kg vendus sur 29 t sortaient du numérateur
+> **en gardant leur surface au dénominateur**.
+> ★ **Et la leçon de méthode** : §91b a corrigé le symptôme visible en gardant la cause — une seconde
+> formule pour une seule grandeur. Le chiffre est devenu *vraisemblable*, donc plus dur à contester.
+> *Un chiffre faux qui devient plausible est plus dangereux qu'un chiffre faux qui saute aux yeux.*
+> Le test : **ce total est-il l'agrégat de ce que l'écran affiche juste à côté ?** Détail en **§92**.
+>
+> ★ Précédente : **7 septembre 2026 (nuit)** — ★★★ **L'APPELLATION PORTE LE PLAFOND, ET
+> « 0 hL/ha » N'ÉTAIT PAS UNE MESURE (§91)**. **APP 6.88 → 6.89 · SW 7.47 → 7.48.** Un arrêté ne vise
+> pas une parcelle : `CONFIG.appellations`, déclarées dans Réglages › Domaine, plafond par millésime,
+> `p.appellation` pour le rattachement. ⚠️ Ordre **parcelle > appellation > ancien scalaire** — une
+> saisie faite à la main n'est jamais défaite par un réglage général.
+> ★★★ **Et le rendement moyen affichait « 0 hL/ha »** sous un bandeau disant 162 hL en cuve : il ne
+> divisait que le volume décuvé. *Un zéro se croit ; une absence de mesure se comprend.* ⚠️⚠️ Deux
+> définitions coexistaient — le bilan de campagne estimait d'après les kilos (~18 hL/ha sur les mêmes
+> données). `_mlRdtMoyen` est la seule désormais, et elle rend un statut. Détail en **§91**.
+>
+> ★ Précédente : **7 septembre 2026 (nuit)** — ★★★ **UN PLAFOND DE RENDEMENT APPARTIENT À
 > UN MILLÉSIME (§90)**. **APP 6.87 → 6.88 · SW 7.46 → 7.47.** Lot **RDTMIL-1**, signalé par Nico :
 > *« impossible de rentrer des plafonds de rendement pour les millésimes […] il n'y a juste pas
 > l'option »*.
@@ -14294,3 +14329,275 @@ chaque fois.
   dans ce cas. Un millésime antérieur au suivi du Cuvier (`ch.retro`) reste sans plafond possible.
 - **Deux écrans s'appellent toujours « Le millésime ».** Ce lot rend le doublon inoffensif ; il ne le
   supprime pas.
+
+---
+
+## 91. ★★★ RDTAOC-1 — L'APPELLATION PORTE LE PLAFOND, ET « 0 hL/ha » N'ÉTAIT PAS UNE MESURE (07/09 — APP 6.88 → 6.89 · SW 7.47 → 7.48 · base `4d5fc61`)
+
+> **Deux demandes de Nico**, dans le même message : *« fais le par appellation aussi (possibilité de
+> fixer les appellations via réglages, domaine) »* et *« tu regarderas le problème dans millésimes,
+> les chiffres des hL ne correspondent à rien (162 hL encore en cuve alors qu'à droite ça ne dit pas
+> la même chose) »*.
+
+### 91a. ★★★ UN ARRÊTÉ NE VISE PAS UNE PARCELLE
+
+§90 avait posé le plafond **par millésime**, mais toujours **par parcelle** — et §90i le disait déjà :
+*la pose groupée est un contournement honnête, pas la bonne modélisation.* 45 saisies pour un seul
+chiffre, c'est aussi **45 endroits où il pourra diverger l'an prochain**.
+
+`CONFIG.appellations = [{nom, rdt_max_hist:[{mil,max}]}]`, déclarées dans **Réglages › Domaine**.
+Le rattachement est `p.appellation`, **le NOM et pas un identifiant** : il survit en clair à un
+ré-import KML, et se relit dans un export sans table de correspondance.
+
+⚠️⚠️ **Comparaison NORMALISÉE** (`_vendAocNorm`, §80) : `Gevrey-Chambertin` et `gevrey-chambertin  `
+sont la même appellation. Comparer des noms bruts, c'est très exactement ce qui faisait disparaître
+des parcelles sans un mot.
+
+★★★ **L'ORDRE DE RÉSOLUTION EST DÉLIBÉRÉ** — `_vendRdtMax`, source unique :
+
+| rang | source | `src` |
+|---|---|---|
+| 1 | la parcelle, pour ce millésime | `mil` |
+| 2 | son appellation, pour ce millésime | `aoc` |
+| 3 | l'ancien scalaire sans année | `herite` |
+
+⚠️ **La parcelle passe AVANT l'appellation.** Un plafond posé à la main est une décision explicite de
+quelqu'un ; la faire écraser par un réglage général reviendrait à **défaire une saisie sans le
+dire**. Les deux écrans nomment désormais l'appellation d'où vient le chiffre.
+
+★ **Renommer emmène les parcelles.** Sans report du nom sur `p.appellation`, renommer détacherait
+toutes ses parcelles d'un coup, en silence : leur plafond passerait à « non renseigné » à l'écran
+suivant. **Supprimer dit d'abord combien de parcelles perdront leur rattachement.**
+
+⚠️ `CONFIG.appellations` est un **tableau** : il ne peut pas passer par `_ecoCfgSet`, dont la liste
+blanche n'accepte que des nombres. Écriture dédiée, **mutation en place** — remplacer l'objet
+`CONFIG` emporterait tout le reste.
+⚠️ Habillage **inline**, comme la carte voisine `eco-conf-card`. Les classes `mvc-*` sont posées par
+`_caveV2InjectCss` : arriver dans les Réglages **sans avoir ouvert la Cave** aurait rendu la carte
+sans style.
+
+### 91b. ★★★ « 0 hL/ha » SOUS UN BANDEAU QUI DIT 162 hL
+
+Ce que Nico voyait, sur un seul écran :
+
+| élément | valeur | d'où |
+|---|---|---|
+| bandeau | **162 hL en cuve** | `hlCuve` — estimation d'après les kilos |
+| KPI « Rendement moyen » | **0 hL/ha** | `hlDecuve / ha` |
+| parcelles, 30 px plus bas | **24 à 48 hL/ha** | fourchettes par parcelle |
+
+`hlDecuve` ne compte que les cuves au statut `termine`. **Tant que rien n'est décuvé, il vaut zéro** —
+et zéro divisé par 11,8 ha s'affichait `0`, avec l'aplomb d'un fait mesuré.
+★★★ **UN ZÉRO SE CROIT ; UNE ABSENCE DE MESURE SE COMPREND.** C'est le même défaut que la fourchette
+par parcelle corrigeait déjà en RDT-1, resté en place un étage plus haut.
+
+⚠️⚠️ **Et il y avait DEUX définitions du « rendement moyen »** : le Pilotage divisait le volume
+décuvé, le **bilan de campagne** (`_cuvDocCtx`) estimait d'après les kilos — `(kg/ha)/kgHl`, soit
+~18 hL/ha sur les mêmes données. *Une grandeur, deux vérités, deux écrans, aucun des deux ne le
+disait.* Motif §34i, jamais soldé de ce côté.
+
+`_mlRdtMoyen(ch)` est désormais la seule définition. Elle additionne mesuré et estimé, et rend un
+**statut** que les deux surfaces affichent : `≈` tant que tout n'est pas décuvé, « mesuré au
+décuvage » quand il n'y a rien à annoncer.
+⚠️ **Une seule cuve encore pleine suffit à rendre le total estimé** — même règle que par parcelle :
+le volume de vin n'existe qu'au décuvage.
+⚠️ Le document imprimé porte la réserve lui aussi : il se relit des années plus tard, **sans l'écran
+à côté**.
+
+### 91c. ⚠️ Le cliquet a mordu deux fois, et il avait raison deux fois
+
+- **`catch {}` vide** (+1) : le repli de `_aocMils` avalait l'indisponibilité de la Cave. Une liste
+  de millésimes vide ressemble à un domaine neuf. `logError({level:'info'})`.
+- **Échelle des icônes** : `_mvIcon('crayon',14)`, `('corbeille',14)`, `('plus',15)` — hors de
+  l'échelle 16/18/20/24/40. Ramenés à 16. Référence d'emojis regravée (`--baseline`, −1).
+
+### 91d. Vérifications
+
+`npm run check` **EXIT=0** · preflight **0 erreur / 0 avertissement** · `mv-harnais-rdtmil.mjs`
+**80 vertes / 0 rouge**, 5 contre-épreuves rouges sur code cassé · `v7.47` subsiste exactement une
+fois dans `sw.js` · icônes `etiquette`, `crayon`, `corbeille`, `plus`, `balance`, `document`
+vérifiées au grep dans le sprite · guide régénéré, `--check` vert.
+
+### 91e. La note de livraison
+
+**Base : `4d5fc61`.** ⚠️ Ce lot s'empile sur **RDTMIL-1 (§90) non commité** : les deux se livrent
+ensemble, `.mv-base` porte la base commune.
+
+| fichier | ce qui change | bump |
+|---|---|---|
+| `src/cave.js` | `_vendAocNorm/List/De/Max`, `_vendRdtMax` à 3 rangs (+`aoc`), `_mlRdtMoyen`, bilan de campagne relié, 5 exports | — |
+| `src/reglages.js` | carte **Appellations** (déclarer, plafond/millésime, renommer, supprimer, rattacher), `_aoc*` | — |
+| `src/pilotage.js` | KPI « Rendement moyen » par `_mlRdtMoyen`, mention de l'appellation | — |
+| `src/utils.js` | 6.89, 3 items `WHATS_NEW`, `MV_AIDE` cave (+1 point) | ★ APP |
+| `index.html` · `public/sw.js` | 4 porteurs · 7.48 + changelog | ★ APP · ★ SW |
+| `guide/08-cave.html` · `guide/12-reglages.html` · `public/guide.html` | l'appellation, l'ordre de priorité, le « ≈ » du rendement moyen | — |
+| `scripts/mv-harnais-rdtmil.mjs` | 52 → **80 assertions** (blocs G, H, I) | — |
+| `scripts/mv-icones-baseline.json` · `scripts/harnais-claude-md.mjs` | référence regravée · `SECTIONS` 122 → 123 | — |
+
+### 91f. ⚠️ Ce qui reste ouvert
+
+- **Le rattachement se fait parcelle par parcelle**, dans une liste déroulante. Pour 45 parcelles
+  c'est long. Un rattachement en lot (« toutes celles dont le nom commence par… ») reste à faire.
+- **Aucun contrôle de cohérence** : rien n'empêche de rattacher une parcelle de village à une
+  appellation 1er cru. L'application ne connaît pas le cadastre viticole, et **inventer une règle
+  qu'elle ne peut pas vérifier serait pire que ne rien dire**.
+- **`p.appellation` n'est pas protégé d'un ré-import KML** — même dette que `p.commune` et
+  `p.rdt_max` (§28). À traiter dans le lot « import en MERGE », pas avant.
+- **Le rendement moyen rapporte le volume du domaine à la surface TOTALE récoltée**, part vendue en
+  raisin comprise. Sur une parcelle vendue pour moitié, il sous-estime. Le calcul par parcelle, lui,
+  gère les portions : les réconcilier est un lot en soi.
+- **`_mlRendements` écarte toujours en silence** une récolte dont le nom de parcelle n'est pas
+  apparié (§90i, inchangé).
+
+---
+
+## 92. ★★★ RDTMOY-1 — VENDRE SON RAISIN NE FAIT PAS BAISSER SON RENDEMENT (07/09 — APP 6.89 → 6.90 · SW 7.48 → 7.49 · base `4d5fc61`)
+
+> **Nico, sur la correction de la veille** : *« Mais pour le moment rien de décuvé, je ne comprends
+> pas. »* Il avait raison. **§91b était faux à son tour.**
+
+### 92a. ★★★ TROISIÈME VERSION DU MÊME CHIFFRE, ET LA PREMIÈRE JUSTE
+
+| | formule | sur la capture de Nico |
+|---|---|---|
+| v1 | `hlDecuve / ha` | **0 hL/ha** — rien de décuvé |
+| v2 (§91b) | `(hlDecuve + hlCuve) / ha` | **13,7 hL/ha** |
+| v3 | agrégat des mêmes parcelles que la liste | **20,3 hL/ha** |
+
+`hlCuve` ne compte que le raisin **logé au domaine** : `_vendCuvKgDom`. Les **9 370 kg vendus sur
+29 t** ne passent jamais en cuve. Ils sortaient donc du numérateur **en gardant leur surface au
+dénominateur** — un tiers de la vendange manquant, et une moyenne qui contredisait la liste affichée
+trente pixels plus bas (24 à 48 hL/ha).
+
+★★★ **LE RENDEMENT D'UNE PARCELLE, C'EST CE QU'ELLE A PRODUIT, PAS CE QUE LE DOMAINE EN A GARDÉ.**
+Le calcul **par parcelle** le disait depuis VD-3 : `o.hlHa = (vol.hl + vol.kgKo/kgHl) / s`, tout le
+raisin, vendu compris. La moyenne, elle, menait sa vie à côté avec sa propre formule.
+⚠️ *Deux calculs pour une seule grandeur finissent toujours par diverger.* Ici, d'un tiers — et
+**deux corrections successives n'ont pas suffi** parce que les deux réparaient l'affichage sans
+supprimer le second calcul. `_mlRdtMoyen` agrège désormais `_mlRendements` : par construction, la
+moyenne tombe dans la fourchette de la liste.
+
+⚠️⚠️ **Une parcelle SANS SURFACE apportait ses kilos au numérateur sans porter de dénominateur** :
+elle gonflait le rendement du domaine entier. Écartée des deux côtés — et **comptée à l'écran**
+(§80 : on n'écarte pas en silence).
+⚠️ Le statut ne vaut `mesure` que si **toutes** les parcelles retenues le sont. Une seule estimation,
+et la moyenne est une estimation.
+⚠️ `_mlRendements` est rejoué alors que la carte du Pilotage l'appelle déjà. Assumé : un cache aurait
+sa propre durée de vie, donc sa propre façon de mentir.
+
+### 92b. ★ CE QUE CE LOT APPREND SUR LA MÉTHODE
+
+§91b a **corrigé un symptôme visible** (« 0 hL/ha ») en gardant la cause (une seconde formule). Le
+chiffre est devenu plausible — 13,7 au lieu de 0 — donc **plus difficile à contester**. Sans la
+lecture de Nico, il passait.
+★ **Un chiffre faux qui devient vraisemblable est plus dangereux qu'un chiffre faux qui saute aux
+yeux.** Le test à poser d'emblée : *ce total est-il l'agrégat de ce que l'écran affiche juste à
+côté ?* S'il ne l'est pas, il n'a pas à exister.
+
+### 92c. Vérifications
+
+`npm run check` **EXIT=0** · `mv-harnais-rdtmil.mjs` **86 vertes / 0 rouge**, 5 contre-épreuves ·
+bloc H rejoue la formule **extraite de la source** sur un domaine calqué sur la capture (11,8 ha,
+29 t dont 9 370 kg vendus, rien de décuvé) et vérifie que la moyenne **égale la moyenne pondérée des
+hL/ha des parcelles** · `v7.48` subsiste exactement une fois dans `sw.js`.
+
+### 92d. La note de livraison
+
+**Base : `4d5fc61`.** ⚠️ S'empile sur §90 et §91, non commités : les trois se livrent ensemble.
+
+| fichier | ce qui change | bump |
+|---|---|---|
+| `src/cave.js` | `_mlRdtMoyen` réécrit en agrégat, `d.rdtMoyenSs` | — |
+| `src/pilotage.js` | KPI : sous-ligne des parcelles écartées | — |
+| `src/utils.js` | 6.90, 2 items `WHATS_NEW` | ★ APP |
+| `index.html` · `public/sw.js` | 4 porteurs · 7.49 + changelog | ★ APP · ★ SW |
+| `guide/08-cave.html` · `public/guide.html` | l'agrégat, le raisin vendu, les parcelles écartées | — |
+| `scripts/mv-harnais-rdtmil.mjs` | bloc H réécrit, 80 → **86 assertions** | — |
+| `scripts/harnais-claude-md.mjs` | `SECTIONS` 123 → 124 | — |
+
+### 92e. ⚠️ Ce qui reste ouvert
+
+- **Le dénominateur reste la parcelle ENTIÈRE**, comme dans `_vendRdtParc` (choix assumé et
+  documenté là-bas : le domaine travaille toute la vigne). Une parcelle vendue **en partie** compte
+  donc sa surface entière — cohérent avec la ligne de la parcelle, mais à savoir.
+- **La surface vient de `p.surface`**, pas de la surface réellement récoltée sur le millésime. Une
+  parcelle arrachée en cours de campagne ou plantée à moitié fausse le rapport, sans qu'aucun écran
+  le dise.
+- Les points ouverts de §90i et §91f sont inchangés.
+
+---
+
+## 93. ★★★ RDTMOY-2 — LA SURFACE ACHETÉE ÉTAIT SAISIE, PERSONNE NE LA LISAIT (07/09 — APP 6.90 → 6.91 · SW 7.49 → 7.50 · base `4d5fc61`)
+
+> **Nico** : *« On indique la surface vendue donc il faut se servir de cette info pour le calcul de la
+> surface réellement récoltée. Si cette info n'est pas indiquée alors il faudra l'indiquer dans le
+> calcul qu'il manque cette info pour un résultat juste. »*
+
+### 93a. ★★★ QUATRIÈME VERSION, ET LA DONNÉE SAVAIT DEPUIS LE DÉBUT
+
+| | formule | |
+|---|---|---|
+| v1 | `hlDecuve / ha` | 0 hL/ha |
+| v2 (§91b) | `(hlDecuve+hlCuve) / ha` | 13,7 |
+| v3 (§92) | tout le raisin / toute la surface | 20,3 |
+| **v4** | **volume du domaine / surface réellement récoltée** | **le bon** |
+
+⚠️⚠️ **`_vendSurfParc` déduisait DÉJÀ la part du domaine** : surface de la parcelle **moins les
+surfaces achetées saisies** sur les portions vendues — c'est le cas `src:'reste'`, en place depuis
+VD-3. **Trois corrections successives ont porté sur la formule sans jamais aller voir ce que la
+donnée savait déjà.**
+★ *Avant de changer un calcul, chercher si l'information manquante est déjà quelque part.* Elle
+l'était, à deux fonctions de distance, avec son étiquette (`_vendSurfLbl` : « surface achetée »).
+
+### 93b. ★★★ DEUX GRANDEURS DISTINCTES, ET ELLES DOIVENT LE RESTER
+
+- **La ligne d'une parcelle** = tout son raisin / toute sa surface. C'est ce que **l'arrêté
+  plafonne**, quel que soit l'acheteur. Inchangée.
+- **La moyenne du domaine** = ce qu'il rentre / ce qu'il récolte. C'est **ce qui remplit sa cave**.
+
+Elles coïncident quand les parcelles vendues rendent comme les autres, et divergent sinon — *ce qui
+est une information, pas une incohérence*. §92 avait posé l'invariant « la moyenne est l'agrégat de
+la liste » : il tombe ici, **délibérément**, et les deux écrans le disent.
+
+### 93c. ⚠️ CE QUI MANQUE DOIT SE LIRE DANS LE CHIFFRE
+
+`src:'reste-prorata'` = **plusieurs destinations sans surface achetée saisie** : le partage se fait
+au prorata des kilos, ce qui **suppose un rendement identique partout**. Hypothèse, pas mesure.
+Le chiffre sort quand même — refuser de répondre ne rend service à personne — mais **précédé d'un
+« ≈ »**, et l'écran **compte les parcelles concernées** pour qu'on sache où compléter. Le document
+imprimé porte la même réserve : il se relit sans l'écran à côté.
+⚠️ Une parcelle où le domaine n'a **aucune** surface est écartée, et comptée séparément (§80).
+⚠️ Une parcelle **entièrement vendue** (`dp.kg <= 0`) n'est ni comptée ni signalée : le domaine n'y
+a rien récolté, ce n'est pas une information manquante.
+
+### 93d. Vérifications
+
+`npm run check` **EXIT=0** · preflight 0/0 · `mv-harnais-rdtmil.mjs` **90 vertes / 0 rouge**, 5
+contre-épreuves · le bloc H rejoue la formule extraite de la source sur les cinq cas : surface
+achetée déclarée, `reste-prorata`, `aucune`, part mesurée, parcelle 100 % vendue · `v7.49` subsiste
+exactement une fois dans `sw.js` · icône `alerte` vérifiée dans le sprite.
+
+### 93e. La note de livraison
+
+**Base : `4d5fc61`.** ⚠️ S'empile sur §90, §91 et §92, non commités : les quatre se livrent ensemble.
+
+| fichier | ce qui change | bump |
+|---|---|---|
+| `src/cave.js` | `_mlRdtMoyen` lit `d.surf.lignes` (part domaine) et `d.parts`, `approx`/`sansSurface`, `d.rdtMoyenAx`/`Ha` | — |
+| `src/pilotage.js` | KPI : réserve nommée, « sur X ha réellement récoltés » | — |
+| `src/utils.js` | 6.91, 2 items `WHATS_NEW` | ★ APP |
+| `index.html` · `public/sw.js` | 4 porteurs · 7.50 + changelog | ★ APP · ★ SW |
+| `guide/08-cave.html` · `public/guide.html` | les deux rendements, la réserve du prorata | — |
+| `scripts/mv-harnais-rdtmil.mjs` | bloc H réécrit, 86 → **90 assertions** | — |
+| `scripts/harnais-claude-md.mjs` | `SECTIONS` 124 → 125 | — |
+
+### 93f. ⚠️ Ce qui reste ouvert
+
+- **`_vendSurfParc` signale aussi `conflit` (deux surfaces achetées différentes pour un même
+  acheteur), `depasse` (les surfaces achetées excèdent la parcelle) et `orphelin`.** Ces trois
+  signaux existent et ne sont **remontés nulle part** dans la moyenne du domaine — un `depasse`
+  rendrait pourtant la part du domaine négative, donc nulle, donc la parcelle écartée **sans dire
+  pourquoi**.
+- **La surface reste `p.surface`**, la surface cadastrale, pas la surface en production. Une parcelle
+  arrachée en cours de campagne ou plantée à moitié fausse le rapport (§92e, inchangé).
+- Points ouverts de §90i et §91f inchangés.

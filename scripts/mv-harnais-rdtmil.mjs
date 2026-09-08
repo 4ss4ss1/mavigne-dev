@@ -45,7 +45,8 @@ function t(nom, ok) {
 }
 
 /* ══ EXTRACTION ════════════════════════════════════════════════════════════ */
-const NOMS = ['_vendParcByName', '_vendRdtMax', '_vendSetRdtMax'];
+const NOMS = ['_vendParcByName', '_vendAocNorm', '_vendAocList', '_vendAocDe',
+              '_vendAocMax', '_vendRdtMax', '_vendSetRdtMax', '_mlRdtMoyen'];
 function extraire(nom) {
   const m = new RegExp('^function ' + nom + '\\s*\\(', 'm').exec(CAVE);
   if (!m) { console.error('ABSENTE de src/cave.js : ' + nom); process.exit(1); }
@@ -58,11 +59,11 @@ function extraire(nom) {
 }
 const BLOC = NOMS.map(extraire).sort((a, b) => a[0] - b[0]).map(x => x[1]).join('\n');
 
-function monter(parc, mutation) {
+function monter(parc, mutation, aoc) {
   const corps = mutation ? mutation(BLOC) : BLOC;
-  const w = { PARCELLES: parc };
+  const w = { PARCELLES: parc, CONFIG: { appellations: aoc || [] } };
   return new Function('PARCELLES', 'window',
-    corps + '\nreturn {_vendRdtMax,_vendSetRdtMax,_vendParcByName};')(parc, w);
+    corps + '\nreturn {_vendRdtMax,_vendSetRdtMax,_vendParcByName,_vendAocDe,_vendAocMax,_mlRdtMoyen};')(parc, w);
 }
 
 const neuve = () => ([
@@ -171,6 +172,133 @@ console.log('\n\u2500\u2500 E. UNE SEULE PORTE D\'ECRITURE, deux appelants \u250
   t('_mlGo sait atterrir sur l\'ecran de pose', /kind==='rdtmax'/.test(CAVE));
 }
 
+console.log('\u2500\u2500 G. L\'APPELLATION : la ou le plafond a un sens \u2500\u2500');
+{
+  const AOC = [{ nom: 'Gevrey-Chambertin', rdt_max_hist: [{ mil: '2026', max: 40 }] },
+               { nom: 'Gevrey-Chambertin 1er Cru', rdt_max_hist: [{ mil: '2026', max: 45 }] }];
+  const P = [
+    { nom: 'Ruchottes', surface: 0.42, appellation: 'Gevrey-Chambertin 1er Cru' },
+    { nom: '20 Rangs',  surface: 1.05, appellation: 'gevrey-chambertin  ' },  // casse + espaces
+    { nom: 'Reniard',   surface: 0.30, appellation: 'Appellation Inconnue' },
+    { nom: 'Au Vell\u00e9', surface: 0.61, rdt_max: 38 },
+    { nom: 'Herbues',   surface: 0.50, appellation: 'Gevrey-Chambertin', rdt_max_hist: [{ mil: '2026', max: 33 }] }
+  ];
+  const M = monter(P, null, AOC);
+  const g = n => M._vendRdtMax(M._vendParcByName(n), 2026);
+  t('une parcelle prend le plafond de son appellation', g('Ruchottes').max === 45);
+  t('\u2026 et le DECLARE comme venant de l\'appellation', g('Ruchottes').src === 'aoc');
+  t('\u2026 en nommant laquelle', g('Ruchottes').aoc === 'Gevrey-Chambertin 1er Cru');
+  t('★ le rattachement se compare NORMALISE (casse et espaces)', g('20 Rangs').max === 40);
+  t('une appellation inconnue ne rend aucun plafond', g('Reniard').max === null);
+  t('\u2026 et ne pretend pas etre rattachee', g('Reniard').aoc === null);
+  t('★ le plafond POSE SUR LA PARCELLE bat celui de l\'appellation',
+    g('Herbues').max === 33 && g('Herbues').src === 'mil');
+  t('sans appellation, l\'ancien scalaire reste le repli',
+    g('Au Vell\u00e9').max === 38 && g('Au Vell\u00e9').src === 'herite');
+  t('une annee sans arrete pose ne rend rien', M._vendRdtMax(M._vendParcByName('Ruchottes'), 2025).max === null);
+  t('_vendAocMax ignore une valeur <= 0',
+    M._vendAocMax({ rdt_max_hist: [{ mil: '2026', max: 0 }] }, 2026) === null);
+}
+
+console.log('\n\u2500\u2500 H. LE RENDEMENT MOYEN : ce que le domaine rentre, sur ce qu\'il recolte \u2500\u2500');
+{
+  /* Formule EXTRAITE de la source, rejouee sur un domaine calque sur la capture
+     de Nico : 11,8 ha, rien de decuve, et une parcelle dont une partie est
+     vendue AVEC sa surface achetee saisie.
+     Historique des faux : hlDecuve/ha -> 0 ; (hlDecuve+hlCuve)/ha -> 13,7 ;
+     tout/tout -> 20,3 (juste pour la vigne, pas pour la cave). */
+  const F = /function _mlRdtMoyen\(ch\)\{[\s\S]*?\n\}/.exec(CAVE);
+  t('_mlRdtMoyen existe', !!F);
+  const src = F ? F[0] : '';
+
+  // parts : la portion domaine {kg, hl, connu} ; surf : la ligne domaine {ha, src}
+  const P = (nom, kg, hl, connu, ha, ssrc) => ({
+    parcelle: { nom: nom, surface: 3 }, kg: kg,
+    rdt: { parts: [{ dom: true, kg: kg, hl: hl, connu: connu },
+                   { dom: false, kg: 1000, hl: 0, connu: 0 }],
+           surf: { lignes: [{ dom: true, ha: ha, src: ssrc },
+                            { dom: false, ha: 1, src: 'declaree' }] },
+           vol: { hl: hl, kgKo: kg - connu, statut: connu >= kg ? 'mesure' : 'estime' } }
+  });
+  const moy = (liste, retro) => new Function('window', 'ch',
+    'function _mlKgHl(){return 121;}function _mlRendements(){return '
+    + JSON.stringify(liste) + ';}\n' + src + '\nreturn _mlRdtMoyen(ch);')({}, { millesime: 2026, retro: retro });
+
+  {
+    // 3 ha de parcelle, 1 ha vendu et DECLARE -> le domaine a recolte 2 ha.
+    const r = moy([P('A', 4840, 0, 0, 2, 'reste')]);
+    t('★ la surface ACHETEE est deduite : 2 ha, pas 3', r.ha === 2);
+    t('★ \u2026 et le volume est celui du DOMAINE seul', Math.round(r.hl) === 40);
+    t('★ 20 hL/ha \u2014 le rendement de la cave, pas celui de la vigne',
+      Math.round(r.hlHa * 10) / 10 === 20);
+    t('rien de mesure \u2192 statut estime', r.statut === 'estime');
+    t('aucune information ne manque', r.approx === 0 && r.sansSurface === 0);
+  }
+  {
+    // Surface achetee NON saisie sur deux destinations -> partage au prorata.
+    const r = moy([P('B', 4840, 0, 0, 1.8, 'reste-prorata')]);
+    t('★ une surface vendue non renseign\u00e9e est COMPT\u00c9E, pas ignor\u00e9e', r.approx === 1);
+    t('\u2026 et le chiffre sort quand m\u00eame, marqu\u00e9 comme approch\u00e9', r.hlHa != null);
+  }
+  {
+    const r = moy([P('C', 2000, 0, 0, 0, 'aucune')]);
+    t('★ sans aucune surface pour le domaine, la parcelle est \u00e9cart\u00e9e', r.sansSurface === 1);
+    t('\u2026 et rien n\'est invent\u00e9 : pas de chiffre', r.hlHa === null);
+  }
+  {
+    const r = moy([P('D', 2420, 20, 2420, 2, 'declaree')]);
+    t('la part du domaine enti\u00e8rement mesur\u00e9e \u2192 statut mesure', r.statut === 'mesure');
+    t('\u2026 et le volume connu est repris tel quel', r.hl === 20);
+  }
+  {
+    // Parcelle 100 % vendue : le domaine n'a rien rentre, elle ne pese pas.
+    const z = { parcelle: { nom: 'E', surface: 3 }, kg: 0,
+      rdt: { parts: [{ dom: true, kg: 0, hl: 0, connu: 0 }],
+             surf: { lignes: [{ dom: true, ha: 0, src: 'aucune' }] }, vol: {} } };
+    t('★ une parcelle enti\u00e8rement vendue n\'est pas compt\u00e9e comme \u00ab sans surface \u00bb',
+      moy([z]).sansSurface === 0);
+  }
+  t('un millesime retro retombe sur son bilan fige',
+    moy([], true) && new Function('window', 'ch',
+      'function _mlKgHl(){return 121;}function _mlRendements(){return [];}\n' + src
+      + '\nreturn _mlRdtMoyen(ch);')({}, { retro: true, ha: 10, hlDecuve: 300, millesime: 2019 }).hlHa === 30);
+
+  t('★ le Pilotage et le bilan lisent la MEME fonction',
+    /_pcavHas\('_mlRdtMoyen'\)\?window\._mlRdtMoyen\(ch\)/.test(PILO)
+    && /var _rm = _mlRdtMoyen\(d\.chaine\);/.test(CAVE));
+  t('★ plus aucune division ch.hlDecuve\/ch.ha a l\'ecran', !/ch\.hlDecuve\/ch\.ha/.test(PILO));
+  t('★ la moyenne ne lit plus hlCuve : le raisin vendu n\'y passe jamais',
+    !/hlCuve/.test(src));
+  t('★ elle lit la surface par `_vendSurfParc`, pas `p.surface`',
+    /d\.surf\.lignes/.test(src) && !/parseFloat\(o\.parcelle\.surface\)/.test(src));
+  t('les deux surfaces nomment l\'information qui manque',
+    /vendue'\+\(rm\.approx>1\?'s':''\)\+' non renseign/.test(PILO)
+    && /d\.rdtMoyenAx>0/.test(CAVE));
+  t('le bilan imprime porte le \u00ab \u2248 \u00bb quand une surface manque',
+    CAVE.includes("((d.rdtMoyenEst||d.rdtMoyenAx>0)?'\\u2248 ':'')"));
+}
+
+console.log('\n\u2500\u2500 I. la carte des Reglages \u2500\u2500');
+{
+  const REG = readFileSync('src/reglages.js', 'utf8');
+  t('la carte existe et est rendue avec l\'onglet Domaine',
+    /function _aocRenderCard\(\)/.test(REG) && /_ecoRenderConfigCard\(\);\n    _aocRenderCard\(\);/.test(REG));
+  t('elle est reservee a l\'administrateur',
+    /function _aocRenderCard\(\)\{\n  if\(typeof isAdmin==='function'&&!isAdmin\(\)\) return;/.test(REG));
+  t('CONFIG.appellations est mute EN PLACE, jamais remplace',
+    !/CONFIG\s*=\s*\{[^}]*appellations/.test(REG));
+  t('★ renommer une appellation reporte le nom sur ses parcelles',
+    /l\.forEach\(function\(p\)\{ p\.appellation=neuf; \}\)/.test(REG));
+  t('★ supprimer DIT combien de parcelles sont detachees',
+    /perd'\+\(n>1\?'ent':''\)\+' son rattachement/.test(REG));
+  t('un doublon de nom est refuse au nom normalise',
+    /if\(_aocTrouve\(nom\)\)\{[^}]*existe d/.test(REG));
+  t('l\'habillage est inline, pas les classes mvc-\* de la Cave',
+    !/class="mvc-set-card"/.test(REG.slice(REG.indexOf('function _aocRenderCard'))));
+  t('les millesimes proposes viennent de la Cave, pas de nulle part',
+    /_mlMillesimes\(\)/.test(REG));
+}
+
 console.log('\n\u2500\u2500 F. le renvoi nomme un CHEMIN, pas un ecran homonyme \u2500\u2500');
 {
   t('★ plus aucun \u00ab depuis Le millesime \u00bb seul dans le Pilotage',
@@ -203,7 +331,7 @@ if (CONTRE) {
       s => s.replace('var g=parseFloat(p.rdt_max);', 'var g=NaN;'),
       M => M._vendRdtMax(M._vendParcByName('Au Vell\u00e9'), 2026).max === 40],
     ['l\'heritage cesse de se declarer \u2192 on croit une valeur datee',
-      s => s.replace("return {max:g,src:'herite'};", "return {max:g,src:'mil'};"),
+      s => s.replace("return {max:g,src:'herite',aoc:nom};", "return {max:g,src:'mil',aoc:nom};"),
       M => M._vendRdtMax(M._vendParcByName('Au Vell\u00e9'), 2026).src === 'herite'],
     ['l\'ecriture ignore le millesime \u2192 une annee ecrase l\'autre',
       s => s.replace('var k=String(mil), i=-1;', 'var k="*", i=-1;'),

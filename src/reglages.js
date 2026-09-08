@@ -449,6 +449,7 @@ function renderReglages(){
         : 'Non renseign\u00e9s \u2014 le bar\u00e8me suppose 10 000 pieds/ha';
     }
     _ecoRenderConfigCard();
+    _aocRenderCard();
     _reglStashRow();
     // Tâches
     // Source unique : la liste portée par la période consultée (et non plus le 1er mot de son nom).
@@ -4747,6 +4748,238 @@ function _ecoRenderConfigCard(){
     +'<div style="font-size:11.5px;color:var(--texte-doux);margin-top:12px;line-height:1.5">Le coût phyto par parcelle est calculé dans Pilotage depuis les <b>doses</b> (assistant de traitement) × le <b>prix unitaire des intrants</b> de La Réserve.</div>'
     +'</div>';
 }
+
+
+// ═══════════════════════════════════════════════════════════════════════════
+// ★★★ LES APPELLATIONS — Reglages > Domaine (admin)
+// ═══════════════════════════════════════════════════════════════════════════
+//  UN ARRETE NE VISE PAS UNE PARCELLE, IL VISE UNE APPELLATION. Le plafond de
+//  rendement se posait parcelle par parcelle : 45 saisies pour un seul chiffre,
+//  et 45 endroits ou il pourra diverger l'an prochain. On declare ici les
+//  appellations du domaine, chacune avec son plafond PAR MILLESIME, puis on y
+//  rattache les parcelles.
+//
+//  ⚠️ ORDRE DE RESOLUTION (cave.js `_vendRdtMax`) : parcelle > appellation >
+//  ancien reglage sans annee. La parcelle passe AVANT : un plafond pose a la
+//  main est une decision explicite, un reglage general ne doit pas la defaire
+//  en silence.
+//
+//  ⚠️⚠️ `CONFIG.appellations` est un TABLEAU : il ne peut pas passer par
+//  `_ecoCfgSet`, dont la liste blanche n'accepte que des nombres. Ecriture
+//  dediee ci-dessous, qui mute CONFIG EN PLACE (jamais de remplacement de
+//  l'objet : le reste de CONFIG partirait avec).
+// ═══════════════════════════════════════════════════════════════════════════
+function _aocNorm(s){ return String(s==null?'':s).trim().toLowerCase().replace(/\s+/g,' '); }
+function _aocAll(){
+  if(!window.CONFIG) window.CONFIG={};
+  if(!Array.isArray(window.CONFIG.appellations)) window.CONFIG.appellations=[];
+  return window.CONFIG.appellations;
+}
+function _aocSave(){ if(window.saveData) window.saveData('config'); }
+function _aocTrouve(nom){
+  var k=_aocNorm(nom), out=null;
+  _aocAll().forEach(function(a){ if(a&&_aocNorm(a.nom)===k) out=a; });
+  return out;
+}
+/* Les millesimes qu'on peut vouloir plafonner : ceux que la Cave connait, plus
+   la campagne en cours. On ne propose jamais une annee sortie de nulle part. */
+function _aocMils(){
+  var s={};
+  if(typeof window._mlMillesimes==='function'){
+    // La Cave peut ne pas etre chargee : on retombe sur l'annee civile seule,
+    // mais on le TRACE. Un catch muet ici masquerait une liste de millesimes
+    // vide qui ressemble a un domaine neuf.
+    try{ (window._mlMillesimes()||[]).forEach(function(m){ s[m]=1; }); }
+    catch(e){ if(window.logError) window.logError({level:'info',cat:'reglages',msg:'appellations/millesimes',err:e}); }
+  }
+  var an=new Date().getFullYear(); s[an]=1;
+  return Object.keys(s).map(Number).filter(function(m){ return m>1900; })
+    .sort(function(a,b){ return b-a; }).slice(0,6);
+}
+function _aocParcelles(nom){
+  var k=_aocNorm(nom);
+  return (window.PARCELLES||[]).filter(function(p){ return p&&_aocNorm(p.appellation)===k; });
+}
+
+window._aocAjouter=function(){
+  if(typeof isAdmin==='function'&&!isAdmin()){ if(window.showToast) window.showToast('R\u00e9serv\u00e9 \u00e0 l\u2019administrateur','#B85A1A'); return; }
+  if(typeof window.openPrompt!=='function'){ if(window.showToast) window.showToast('Saisie indisponible','#B85A1A'); return; }
+  window.openPrompt({
+    titre:'Nouvelle appellation', sub:'Le nom tel qu\u2019il figure sur l\u2019arr\u00eat\u00e9 \u2014 « Gevrey-Chambertin », « Gevrey-Chambertin 1er Cru »\u2026',
+    valeur:'', icone:'etiquette', type:'texte', placeholder:'Gevrey-Chambertin', btnLabel:'Cr\u00e9er',
+    cb:function(v){
+      var nom=String(v==null?'':v).trim();
+      if(!nom){ if(window.showToast) window.showToast('Nom vide','#B85A1A'); return; }
+      // ⚠️ Doublon detecte au nom NORMALISE : deux appellations qui ne different
+      //    que par une majuscule donneraient deux plafonds pour un seul arrete.
+      if(_aocTrouve(nom)){ if(window.showToast) window.showToast('Cette appellation existe d\u00e9j\u00e0','#B85A1A'); return; }
+      _aocAll().push({nom:nom, rdt_max_hist:[]});
+      _aocSave();
+      if(window.showToast) window.showToast(nom+' \u00b7 appellation cr\u00e9\u00e9e','#3D6B27');
+      _aocRenderCard();
+    }
+  });
+};
+
+window._aocRenommer=function(nom){
+  if(typeof isAdmin==='function'&&!isAdmin()){ if(window.showToast) window.showToast('R\u00e9serv\u00e9 \u00e0 l\u2019administrateur','#B85A1A'); return; }
+  var a=_aocTrouve(nom); if(!a||typeof window.openPrompt!=='function') return;
+  window.openPrompt({
+    titre:'Renommer l\u2019appellation', sub:'Les parcelles rattach\u00e9es suivent le nouveau nom.',
+    valeur:a.nom, icone:'etiquette', type:'texte', btnLabel:'Renommer',
+    cb:function(v){
+      var neuf=String(v==null?'':v).trim();
+      if(!neuf){ if(window.showToast) window.showToast('Nom vide','#B85A1A'); return; }
+      var autre=_aocTrouve(neuf);
+      if(autre&&autre!==a){ if(window.showToast) window.showToast('Ce nom est d\u00e9j\u00e0 pris','#B85A1A'); return; }
+      /* ★ LES PARCELLES SUIVENT. Renommer l'appellation sans reporter le nom sur
+         `p.appellation` detacherait toutes ses parcelles d'un coup, sans un mot :
+         leur plafond deviendrait « non renseigne » a l'ecran suivant. */
+      var l=_aocParcelles(a.nom);
+      l.forEach(function(p){ p.appellation=neuf; });
+      a.nom=neuf;
+      _aocSave();
+      if(l.length&&window.saveData) window.saveData('parcelles');
+      if(window.showToast) window.showToast(neuf+(l.length?(' \u00b7 '+l.length+' parcelle'+(l.length>1?'s':'')+' suivi'+(l.length>1?'es':'e')):''),'#3D6B27');
+      _aocRenderCard();
+    }
+  });
+};
+
+window._aocSupprimer=function(nom){
+  if(typeof isAdmin==='function'&&!isAdmin()){ if(window.showToast) window.showToast('R\u00e9serv\u00e9 \u00e0 l\u2019administrateur','#B85A1A'); return; }
+  var a=_aocTrouve(nom); if(!a) return;
+  var l=_aocParcelles(a.nom), n=l.length;
+  if(typeof window.openConfirmDel!=='function') return;
+  // ⚠️ On DIT ce que la suppression emporte. « Supprimer ? » sans le nombre de
+  //    parcelles detachees ferait disparaitre N plafonds sans previsualisation.
+  window.openConfirmDel('Supprimer \u00ab '+a.nom+' \u00bb ?',
+    n?(n+' parcelle'+(n>1?'s':'')+' perd'+(n>1?'ent':'')+' son rattachement et son plafond. Les plafonds pos\u00e9s directement sur une parcelle ne bougent pas.')
+     :'Aucune parcelle n\u2019y est rattach\u00e9e.',
+    function(){
+      l.forEach(function(p){ delete p.appellation; });
+      var A=_aocAll(), i=A.indexOf(a); if(i>=0) A.splice(i,1);
+      _aocSave();
+      if(n&&window.saveData) window.saveData('parcelles');
+      if(window.showToast) window.showToast('\u00ab '+a.nom+' \u00bb supprim\u00e9e','#B85A1A');
+      _aocRenderCard();
+    },'corbeille','Supprimer','#C0392B');
+};
+
+window._aocSetMax=function(nom,mil){
+  if(typeof isAdmin==='function'&&!isAdmin()){ if(window.showToast) window.showToast('R\u00e9serv\u00e9 \u00e0 l\u2019administrateur','#B85A1A'); return; }
+  var a=_aocTrouve(nom); if(!a||typeof window.openPrompt!=='function') return;
+  if(!Array.isArray(a.rdt_max_hist)) a.rdt_max_hist=[];
+  var k=String(mil), cur=null;
+  a.rdt_max_hist.forEach(function(x){ if(x&&String(x.mil)===k) cur=x; });
+  window.openPrompt({
+    titre:'Rendement maximum '+mil, sub:a.nom+' \u2014 le plafond de l\u2019arr\u00eat\u00e9 pour ce mill\u00e9sime, en hL/ha. Valider \u00e0 vide le retire.',
+    valeur:(cur?String(cur.max):''), unite:'hL/ha', icone:'balance',
+    type:'nombre', placeholder:'45', btnLabel:'Enregistrer',
+    cb:function(v){
+      var s=String(v==null?'':v).trim();
+      if(!s){
+        if(cur){ a.rdt_max_hist.splice(a.rdt_max_hist.indexOf(cur),1); _aocSave();
+          if(window.showToast) window.showToast(a.nom+' \u00b7 plafond '+mil+' retir\u00e9','#B85A1A'); }
+        _aocRenderCard(); return;
+      }
+      var x=parseFloat(s.replace(',','.'));
+      if(!isFinite(x)||x<=0){ if(window.showToast) window.showToast('Valeur non comprise','#B85A1A'); return; }
+      x=Math.round(x*10)/10;
+      if(cur) cur.max=x; else a.rdt_max_hist.push({mil:k,max:x});
+      _aocSave();
+      if(window.showToast) window.showToast(a.nom+' \u00b7 '+mil+' \u00b7 '+String(x).replace('.',',')+' hL/ha','#3D6B27');
+      _aocRenderCard();
+    }
+  });
+};
+
+/* Rattachement d'une parcelle. Valeur vide = detachee.
+   ⚠️ Ecrit dans PARCELLES, la collection la plus protegee : une seule parcelle
+      par appel, et `saveData('parcelles')` derriere — jamais un lot implicite. */
+window._aocSetParc=function(nomParc,nomAoc){
+  if(typeof isAdmin==='function'&&!isAdmin()){ if(window.showToast) window.showToast('R\u00e9serv\u00e9 \u00e0 l\u2019administrateur','#B85A1A'); return; }
+  var k=_aocNorm(nomParc), p=null;
+  (window.PARCELLES||[]).forEach(function(x){ if(x&&_aocNorm(x.nom)===k) p=x; });
+  if(!p){ if(window.showToast) window.showToast('Parcelle introuvable','#B85A1A'); return; }
+  var a=nomAoc?_aocTrouve(nomAoc):null;
+  if(nomAoc&&!a){ if(window.showToast) window.showToast('Appellation inconnue','#B85A1A'); return; }
+  if(a) p.appellation=a.nom; else delete p.appellation;
+  if(window.saveData) window.saveData('parcelles');
+  _aocRenderCard();
+};
+
+function _aocRenderCard(){
+  if(typeof isAdmin==='function'&&!isAdmin()) return;
+  var host=document.getElementById('saisons-list'); if(!host||!host.parentNode) return;
+  var card=document.getElementById('aoc-card');
+  if(!card){
+    card=document.createElement('div'); card.id='aoc-card';
+    var anc=document.getElementById('eco-conf-card');
+    host.parentNode.insertBefore(card, anc?anc.nextSibling:host.nextSibling);
+  }
+  var A=_aocAll(), mils=_aocMils();
+  var parcs=(window.PARCELLES||[]).filter(function(p){ return p&&p.nom&&String(p.statut||'').toLowerCase()!=='arrachée'&&String(p.statut||'').toLowerCase()!=='arrachee'; });
+  var esc=(typeof _escHtml==='function')?_escHtml:function(x){ return String(x==null?'':x); };
+  var att=(typeof _escAttr==='function')?_escAttr:function(x){ return String(x==null?'':x).replace(/'/g,'&#39;').replace(/"/g,'&quot;'); };
+  var lblCss='font-size:11px;font-weight:700;letter-spacing:.06em;text-transform:uppercase;color:var(--texte-doux);margin-bottom:6px';
+  var btnCss='min-width:36px;min-height:36px;border:1px solid var(--gris-clair);background:transparent;border-radius:9px;cursor:pointer;color:var(--texte-med);display:inline-flex;align-items:center;justify-content:center';
+
+  /* ⚠️ Habillage INLINE, comme la carte voisine `eco-conf-card`. Les classes
+     `mvc-*` sont posees par `_caveV2InjectCss` (cave.js) : arriver dans les
+     Reglages sans avoir ouvert la Cave rendrait cette carte SANS STYLE. */
+  var h='<div style="background:var(--bg-card);border:1px solid var(--gris-clair);border-radius:16px;padding:16px 18px;margin:14px 0">'
+    +'<div style="font-family:\'Cormorant Garamond\',serif;font-weight:700;font-size:20px;color:var(--cave,#14110D);margin-bottom:3px">Appellations et plafonds de rendement</div>'
+    +'<div style="font-size:12.5px;color:var(--texte-doux);margin-bottom:12px">Le rendement maximum est fix\u00e9 <b>par arr\u00eat\u00e9, campagne par campagne</b>. D\u00e9clarez vos appellations, posez leur plafond pour chaque mill\u00e9sime, puis rattachez vos parcelles. Un plafond pos\u00e9 directement sur une parcelle (Cave \u203a Le mill\u00e9sime) reste <b>prioritaire</b> sur celui de son appellation.</div>'
+    +'<div style="height:3px;border-radius:3px;background:linear-gradient(90deg,#8A5A38,#C2871E,#3D6B27);margin-bottom:14px"></div>';
+
+  if(!A.length){
+    h+='<div style="font-size:12.5px;color:var(--texte-doux);padding:10px 0">Aucune appellation d\u00e9clar\u00e9e. Tant qu\u2019il n\u2019y en a pas, chaque parcelle porte son propre plafond.</div>';
+  }
+  A.forEach(function(a){
+    var n=_aocParcelles(a.nom).length;
+    h+='<div style="border:1px solid var(--gris-clair);border-radius:11px;padding:11px 12px;margin-top:10px">'
+      +'<div style="display:flex;align-items:center;gap:8px;flex-wrap:wrap">'
+      +'<b style="font-size:13.5px;color:var(--texte);flex:1;min-width:140px">'+esc(a.nom)+'</b>'
+      +'<span style="font-size:11.5px;color:var(--texte-doux)">'+n+' parcelle'+(n>1?'s':'')+'</span>'
+      +'<button title="Renommer" aria-label="Renommer" onclick="window._aocRenommer(\''+att(a.nom)+'\')" style="'+btnCss+'">'+_mvIcon('crayon',16)+'</button>'
+      +'<button title="Supprimer" aria-label="Supprimer" onclick="window._aocSupprimer(\''+att(a.nom)+'\')" style="'+btnCss+'">'+_mvIcon('corbeille',16)+'</button>'
+      +'</div>'
+      +'<div style="display:flex;gap:6px;flex-wrap:wrap;margin-top:9px">';
+    mils.forEach(function(m){
+      var v=null; (a.rdt_max_hist||[]).forEach(function(x){ if(x&&String(x.mil)===String(m)) v=x.max; });
+      h+='<button onclick="window._aocSetMax(\''+att(a.nom)+'\','+att(m)+')" '
+        +'style="border:1.5px solid '+(v!=null?'var(--vert-med)':'var(--gris-clair)')+';background:'+(v!=null?'rgba(91,155,58,.08)':'transparent')+';'
+        +'border-radius:9px;padding:6px 10px;font-family:inherit;font-size:12px;color:var(--texte);cursor:pointer;min-height:36px">'
+        +'<b>'+m+'</b> \u00b7 '+(v!=null?(String(v).replace('.',',')+' hL/ha'):'\u2014')+'</button>';
+    });
+    h+='</div></div>';
+  });
+
+  h+='<button onclick="window._aocAjouter()" style="margin-top:12px;width:100%;min-height:44px;border:1.5px dashed var(--gris-clair);background:transparent;border-radius:11px;font-family:inherit;font-size:13px;color:var(--texte-med);cursor:pointer;display:flex;align-items:center;justify-content:center;gap:7px">'+_mvIcon('plus',16)+' Ajouter une appellation</button>';
+
+  if(A.length&&parcs.length){
+    var opts=function(sel){
+      var o='<option value="">\u2014 aucune \u2014</option>';
+      A.forEach(function(a){ o+='<option value="'+att(a.nom)+'"'+(_aocNorm(sel)===_aocNorm(a.nom)?' selected':'')+'>'+esc(a.nom)+'</option>'; });
+      return o;
+    };
+    h+='<div style="height:1px;background:var(--gris-clair);margin:16px 0 12px"></div><div style="'+lblCss+'">Rattachement des parcelles</div>'
+      +'<div style="font-size:11.5px;color:var(--texte-doux);margin-bottom:9px">Une parcelle sans appellation garde le plafond qu\u2019on lui a pos\u00e9 directement, ou aucun.</div>'
+      +'<div style="max-height:340px;overflow:auto;border:1px solid var(--gris-clair);border-radius:11px">';
+    parcs.forEach(function(p,i){
+      h+='<div style="display:flex;align-items:center;gap:9px;padding:7px 10px'+(i?';border-top:1px solid var(--gris-clair)':'')+'">'
+        +'<span style="flex:1;min-width:0;font-size:12.5px;color:var(--texte);overflow:hidden;text-overflow:ellipsis;white-space:nowrap">'+esc(p.nom)+'</span>'
+        +'<select onchange="window._aocSetParc(\''+att(p.nom)+'\',this.value)" '
+        +'style="max-width:180px;padding:5px 7px;border:1.5px solid var(--gris-clair);border-radius:8px;font-family:inherit;font-size:12px;background:var(--bg-app);color:var(--texte)">'
+        +opts(p.appellation)+'</select></div>';
+    });
+    h+='</div>';
+  }
+  h+='</div>';
+  card.innerHTML=h;
+}
+window._aocRenderCard=_aocRenderCard;
 
 // ═══════════════ Synthèse cuivre métal (bio) ═══════════════
 var _cuState={mode:'an'};

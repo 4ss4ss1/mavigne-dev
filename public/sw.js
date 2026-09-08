@@ -1,4 +1,75 @@
-// MA VIGNE — Service Worker v7.47
+// MA VIGNE — Service Worker v7.50
+// v7.50 (07/09/2026) — RDTMOY-2 : LA SURFACE ACHETEE ETAIT SAISIE, PERSONNE NE
+//   LA LISAIT.
+//   Nico : « On indique la surface vendue donc il faut se servir de cette info
+//   pour le calcul de la surface reellement recoltee. Si cette info n'est pas
+//   indiquee alors il faudra l'indiquer dans le calcul qu'il manque cette info
+//   pour un resultat juste. »
+//   ★★★ QUATRIEME VERSION DU RENDEMENT MOYEN. hlDecuve/ha (0) ; volume du
+//   domaine / surface TOTALE (13,7) ; tout / tout (20,3) ; enfin volume du
+//   domaine / surface REELLEMENT RECOLTEE.
+//   ⚠️ `_vendSurfParc` deduisait DEJA la part du domaine — surface de la
+//   parcelle moins les surfaces achetees saisies (`src:'reste'`). L'information
+//   existait depuis VD-3. Trois corrections successives ont porte sur la
+//   formule sans jamais aller voir ce que la donnee savait deja.
+//   ★★★ DEUX GRANDEURS DISTINCTES, ET ELLES DOIVENT LE RESTER : la LIGNE d'une
+//   parcelle = tout son raisin / toute sa surface, ce que l'arrete plafonne,
+//   quel que soit l'acheteur. La MOYENNE du domaine = ce qu'il rentre / ce
+//   qu'il recolte, ce qui remplit sa cave. Elles coincident quand les parcelles
+//   vendues rendent comme les autres, divergent sinon — c'est une information.
+//   ⚠️⚠️ `src:'reste-prorata'` = plusieurs destinations sans surface achetee
+//   saisie : partage au prorata des kilos, ce qui SUPPOSE un rendement
+//   identique partout. Hypothese, pas mesure. Le cas est COMPTE et nomme a
+//   l'ecran comme sur le document imprime, au lieu de rendre un chiffre qui
+//   aurait l'air juste.
+// v7.49 (07/09/2026) — RDTMOY-1 : VENDRE SON RAISIN NE FAIT PAS BAISSER SON
+//   RENDEMENT.
+//   Nico, sur la correction de la veille : « Mais pour le moment rien de
+//   decuve, je ne comprends pas ». Il avait raison, et ma correction du 7/09
+//   (§91b) etait fausse a son tour.
+//   ★★★ TROISIEME VERSION DU MEME CHIFFRE, ET LA PREMIERE JUSTE.
+//   v1 : hlDecuve / ha        -> 0 hL/ha tant que rien n'est decuve.
+//   v2 : (hlDecuve+hlCuve)/ha -> 13,7 hL/ha. hlCuve ne compte QUE le raisin
+//        loge au domaine ; les 9 370 kg vendus sur 29 t sortaient du
+//        numerateur EN GARDANT LEUR SURFACE au denominateur. Un tiers de la
+//        vendange manquait, et la moyenne contredisait la liste juste dessous
+//        (24 a 48 hL/ha).
+//   v3 : agregat des MEMES parcelles que la liste -> 20,3 hL/ha, dans la
+//        fourchette par construction.
+//   ⚠️ Le rendement d'une parcelle, c'est CE QU'ELLE A PRODUIT — pas ce que le
+//   domaine en a garde. Le calcul par parcelle le disait depuis VD-3 ; la
+//   moyenne menait sa vie a cote, avec sa propre formule. Deux calculs pour une
+//   grandeur finissent toujours par diverger : ici, d'un tiers.
+//   ⚠️⚠️ Une parcelle SANS SURFACE apportait ses kilos au numerateur sans porter
+//   de denominateur : elle gonflait le rendement du domaine entier. Ecartee des
+//   deux cotes, et COMPTEE a l'ecran (§80 : on n'ecarte pas en silence).
+// v7.48 (07/09/2026) — RDTAOC-1 : L'APPELLATION PORTE LE PLAFOND, ET LE
+//   RENDEMENT MOYEN CESSE D'ANNONCER ZERO.
+//   Demande de Nico : « fais le par appellation aussi (possibilite de fixer les
+//   appellations via reglages, domaine) » + « les chiffres des hl ne
+//   correspondent a rien (162 hL encore en cuve alors qu'a droite ca ne dit pas
+//   la meme chose) ».
+//   ★★★ UN ARRETE NE VISE PAS UNE PARCELLE, IL VISE UNE APPELLATION. RDTMIL-1
+//   posait le plafond parcelle par parcelle : 45 saisies pour un seul chiffre,
+//   et 45 endroits ou il divergera. `CONFIG.appellations` = [{nom,
+//   rdt_max_hist:[{mil,max}]}], declarees dans Reglages > Domaine, `p.appellation`
+//   pour le rattachement — le NOM, pas un identifiant : il survit en clair a un
+//   re-import KML et se relit dans un export sans table de correspondance.
+//   ⚠️ Ordre de resolution DELIBERE : parcelle > appellation > ancien scalaire.
+//   La parcelle passe AVANT : un plafond pose a la main est une decision
+//   explicite, un reglage general ne doit pas la defaire en silence.
+//   ⚠️⚠️ Rattachement compare NORMALISE (§80) : « Gevrey-Chambertin » et
+//   « gevrey-chambertin  » sont la meme appellation. Comparer des noms bruts,
+//   c'est ce qui faisait disparaitre des parcelles sans un mot.
+//   ★★★ ET LE DEFAUT DES hL : le rendement moyen du Pilotage ne divisait que
+//   `hlDecuve`, nul tant qu'aucune cuve n'est `termine`. Il affichait donc
+//   « 0 hL/ha » SOUS un bandeau annoncant 162 hL en cuve et AU-DESSUS de
+//   parcelles a 44 hL/ha. Un zero a l'aplomb d'un fait mesure ; une absence de
+//   mesure doit se lire comme telle.
+//   ⚠️ Et il y avait DEUX definitions : le bilan de campagne estimait, lui,
+//   d'apres les kilos (~18 hL/ha sur les memes donnees). Une grandeur, deux
+//   verites, deux ecrans. `_mlRdtMoyen` est desormais la seule, et elle rend un
+//   STATUT (mesure / estime) que les deux affichent.
 // v7.47 (07/09/2026) — RDTMIL-1 : UN PLAFOND DE RENDEMENT APPARTIENT A UN
 //   MILLESIME, ET IL SE POSE LA OU L'ON VOIT QU'IL MANQUE.
 //   Signale par Nico, capture a l'appui : « impossible de rentrer des plafonds
@@ -3475,7 +3546,7 @@
 // v2.22 — Fix profils vides : guard vide dans loadData() pour MEMBRES/SAISONS/TACHES
 // v2.17 — Onboarding intégré + tenantId · v2.06 — Firebase Auth · v2.00–v2.05 — divers
 const DEBUG = self.location.hostname === 'localhost' || self.location.hostname === '127.0.0.1';
-const CACHE_NAME   = 'mavigne-v7.47';
+const CACHE_NAME   = 'mavigne-v7.50';
 const TENANT_CACHE = 'mavigne-tenant';   // Cache persistant — préservé à chaque mise à jour SW
 const SYNC_TAG     = 'mavigne-sync';
 
@@ -3491,7 +3562,7 @@ const CDN_URLS = [
 ];
 
 self.addEventListener('install', event => {
-  if(DEBUG) console.log('[SW] Ma Vigne v7.47 installé');
+  if(DEBUG) console.log('[SW] Ma Vigne v7.50 installé');
   event.waitUntil(
     caches.open(CACHE_NAME).then(async cache => {
       // ── Cœur applicatif : STRICT (mise à jour ATOMIQUE) ──
@@ -3507,7 +3578,7 @@ self.addEventListener('install', event => {
 });
 
 self.addEventListener('activate', event => {
-  if(DEBUG) console.log('[SW] Ma Vigne v7.47 activé');
+  if(DEBUG) console.log('[SW] Ma Vigne v7.50 activé');
   event.waitUntil(
     caches.keys().then(keys =>
       Promise.all(

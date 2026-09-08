@@ -1,5 +1,5 @@
 {
-  "total": 670,
+  "total": 669,
   "modules": {
     "app": 79,
     "utils": 77,
@@ -11,7 +11,7 @@
     "phyto": 10,
     "reserve": 14,
     "admin-gt": 62,
-    "firebase": 14,
+    "firebase": 13,
     "onboarding": 15,
     "index.html": 1,
     "guide/01-demarrer.html": 0,

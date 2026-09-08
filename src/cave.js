@@ -6921,14 +6921,56 @@ function _vendParcLot(fn){
 //   lisent tous les deux CETTE fonction, via window. Deux definitions du meme
 //   plafond, ce sont deux ecrans qui finiront par ne pas dire la meme chose.
 // ═══════════════════════════════════════════════════════════════════════════
+/* ── L'APPELLATION : la ou le plafond a un sens ─────────────────────────────
+   ★★★ UN ARRETE NE VISE PAS UNE PARCELLE, IL VISE UNE APPELLATION. Poser le
+   plafond parcelle par parcelle etait un contournement : 45 saisies pour un
+   seul chiffre, et 45 endroits ou il pourra diverger. Les appellations se
+   declarent une fois (Reglages > Domaine), portent leur plafond PAR
+   MILLESIME, et les parcelles s'y rattachent.
+   ⚠️ `CONFIG.appellations` = [{nom, rdt_max_hist:[{mil,max}]}]. Le rattachement
+   est `p.appellation`, le NOM — pas un identifiant : il survit a un re-import
+   KML en clair, et se relit dans un export sans table de correspondance.
+   ⚠️⚠️ La comparaison est NORMALISEE (§80) : « Gevrey-Chambertin » et
+   « gevrey-chambertin  » sont la meme appellation. Comparer des noms bruts,
+   c'est exactement ce qui faisait disparaitre des parcelles en silence. */
+function _vendAocNorm(s){ return String(s==null?'':s).trim().toLowerCase().replace(/\s+/g,' '); }
+function _vendAocList(){
+  var C=(window.CONFIG&&window.CONFIG.appellations);
+  return Array.isArray(C)?C.filter(function(a){ return a&&_vendAocNorm(a.nom); }):[];
+}
+function _vendAocDe(p){
+  var k=_vendAocNorm(p&&p.appellation); if(!k) return null;
+  var out=null;
+  _vendAocList().forEach(function(a){ if(_vendAocNorm(a.nom)===k) out=a; });
+  return out;
+}
+/* Le plafond d'une appellation pour un millesime. Meme forme que celui d'une
+   parcelle : une liste, pas un scalaire — un arrete par campagne. */
+function _vendAocMax(a,mil){
+  if(!a) return null;
+  var k=String(mil), v=null;
+  (a.rdt_max_hist||[]).forEach(function(x){ if(x&&String(x.mil)===k) v=parseFloat(x.max); });
+  return (isFinite(v)&&v>0)?v:null;
+}
+
+/* ★★★ L'ORDRE DE RESOLUTION, ET IL EST DELIBERE :
+     1. la parcelle pour CE millesime  -> 'mil'    (l'exception assumee)
+     2. son appellation pour CE millesime -> 'aoc' (la regle generale)
+     3. l'ancien scalaire sans annee   -> 'herite' (le repli, jamais date)
+   ⚠️ La parcelle passe AVANT l'appellation : un plafond pose a la main sur une
+   parcelle est une decision explicite de quelqu'un. La faire ecraser par un
+   reglage general reviendrait a defaire une saisie sans le dire. */
 function _vendRdtMax(p,mil){
-  if(!p) return {max:null,src:null};
+  if(!p) return {max:null,src:null,aoc:null};
+  var aoc=_vendAocDe(p), nom=aoc?aoc.nom:null;
   var k=String(mil), h=null;
   (p.rdt_max_hist||[]).forEach(function(x){ if(x&&String(x.mil)===k) h=x; });
-  if(h){ var v=parseFloat(h.max); if(isFinite(v)&&v>0) return {max:v,src:'mil'}; }
+  if(h){ var v=parseFloat(h.max); if(isFinite(v)&&v>0) return {max:v,src:'mil',aoc:nom}; }
+  var a=_vendAocMax(aoc,mil);
+  if(a!=null) return {max:a,src:'aoc',aoc:nom};
   var g=parseFloat(p.rdt_max);
-  if(isFinite(g)&&g>0) return {max:g,src:'herite'};
-  return {max:null,src:null};
+  if(isFinite(g)&&g>0) return {max:g,src:'herite',aoc:nom};
+  return {max:null,src:null,aoc:nom};
 }
 // Ecriture d'un plafond pour UN millesime. `val` nul ou <= 0 retire la ligne :
 // effacer une valeur fausse doit couter aussi peu que la poser.
@@ -9819,6 +9861,90 @@ function _mlChaine(mil){
           cuvees:cuvees, futs:nFuts, hlFut:Math.round(hlFut*10)/10, btl:nBtl};
 }
 
+/* ═══════════════════════════════════════════════════════════════════════════
+   ★★★ LE RENDEMENT MOYEN A ETE FAUX DE TROIS FACONS DIFFERENTES.
+
+   1. Le Pilotage divisait `hlDecuve` par la surface. `hlDecuve` ne compte que
+      les cuves au statut `termine` : tant que rien n'est decuve, il vaut 0. La
+      carte affichait donc « 0 hL/ha » sous un bandeau annoncant « 162 hL en
+      cuve » et au-dessus de parcelles a 44 hL/ha.
+   2. Le bilan de campagne, lui, estimait d'apres les kilos : ~18 hL/ha sur les
+      memes donnees. Une grandeur, deux verites, deux ecrans.
+   3. ⚠️⚠️ ET LA PREMIERE CORRECTION (§91b) ETAIT FAUSSE AUSSI. Elle additionnait
+      `hlDecuve + hlCuve` — soit le volume LOGE AU DOMAINE — et le divisait par
+      la surface TOTALE recoltee. Or le raisin vendu ne passe jamais en cuve :
+      9 370 kg sur 29 t, un tiers de la vendange, sortaient du numerateur en
+      gardant leur surface au denominateur. Le chiffre tombait a 13,7 hL/ha
+      pendant que les parcelles juste dessous annoncaient 24 a 48.
+      *Nico l'a vu tout de suite : « rien de decuve, je ne comprends pas ».*
+
+   4. ⚠️⚠️ ET LA DEUXIEME CORRECTION (§92) N'ALLAIT PAS AU BOUT. Elle divisait
+      TOUT le raisin par TOUTE la surface : le rendement agronomique de la
+      vigne, celui que l'arrete plafonne — c'est juste pour la LISTE par
+      parcelle, mais ce n'est pas ce que le domaine rentre. Or la surface
+      achetee par chaque acheteur EST SAISIE : `_vendSurfParc` en deduit deja
+      la part du domaine (`src:'reste'`). L'information existait, personne ne
+      la lisait ici.
+
+   ★★★ DEUX GRANDEURS DISTINCTES, ET ELLES DOIVENT LE RESTER :
+     \u2022 la LIGNE d'une parcelle = tout son raisin / toute sa surface. C'est ce
+       que l'arrete plafonne, quel que soit l'acheteur.
+     \u2022 la MOYENNE du domaine = ce que le domaine a rentre / la surface qu'il a
+       reellement recoltee. C'est ce qui remplit sa cave.
+   Elles coincident quand les parcelles vendues rendent comme les autres, et
+   divergent sinon — ce qui est une information, pas une incoherence.
+
+   ★★★ LE RENDEMENT D'UNE PARCELLE, C'EST CE QU'ELLE A PRODUIT — pas ce que le
+   domaine en a garde. Vendre son raisin ne fait pas baisser le rendement, et
+   c'est bien ce que dit le calcul PAR PARCELLE depuis VD-3. La moyenne doit
+   donc etre l'agregat de ces memes parcelles, pas un second calcul parallele :
+   somme des volumes, somme des surfaces. Par construction, elle tombe alors
+   dans la fourchette de la liste affichee juste en dessous.
+
+   ⚠️ Une parcelle SANS SURFACE est ecartee des DEUX cotes — sinon ses kilos
+   gonfleraient un rapport dont ils ne paient pas le denominateur. Et on dit
+   combien : §80, on n'ecarte pas en silence.
+   ⚠️ Le statut ne vaut `mesure` que si TOUTES les parcelles retenues sont
+   mesurees. Une seule estimation, et la moyenne est une estimation.
+   ⚠️ Cout : `_mlRendements` est rejoue ici alors que la carte du Pilotage
+   l'appelle deja. C'est assume — un cache aurait sa propre duree de vie, donc
+   sa propre facon de mentir.
+   ═══════════════════════════════════════════════════════════════════════════ */
+function _mlRdtMoyen(ch){
+  var vide={hlHa:null,statut:null,ha:0,hl:0,sansSurface:0,approx:0};
+  if(!ch) return vide;
+  /* Millesime anterieur au suivi du Cuvier : aucune recolte a agreger, le bilan
+     fige a la mise en bouteille est tout ce qui existe. */
+  if(ch.retro) return (ch.ha>0&&ch.hlDecuve>0)
+    ? {hlHa:ch.hlDecuve/ch.ha,statut:'mesure',ha:ch.ha,hl:ch.hlDecuve,sansSurface:0,approx:0}
+    : vide;
+  var kgHl=_mlKgHl(), hl=0, ha=0, sansSurface=0, approx=0, tousMesures=true, vu=false;
+  _mlRendements(ch.millesime).forEach(function(o){
+    var d=o.rdt; if(!d||!d.surf) return;
+    /* ★★★ LA PART DU DOMAINE, DES DEUX COTES DE LA DIVISION.
+       `_vendSurfParc` connait deja la surface reellement recoltee par le
+       domaine : c'est la surface de la parcelle MOINS les surfaces achetees
+       saisies sur les portions vendues (`src:'reste'`). L'information existait,
+       elle n'etait simplement pas lue ici. */
+    var dp=null; (d.parts||[]).forEach(function(x){ if(x.dom) dp=x; });
+    if(!dp||!(dp.kg>0)) return;                      // rien pour le domaine ici
+    var dh=0, dsrc='aucune';
+    (d.surf.lignes||[]).forEach(function(l){ if(l.dom){ dh=l.ha||0; dsrc=l.src; } });
+    /* ⚠️ `reste-prorata` = PLUSIEURS destinations sans surface achetee saisie :
+       le partage se fait alors au prorata des kilos, ce qui SUPPOSE un rendement
+       identique partout. C'est une hypothese, pas une mesure — on compte le cas
+       et l'ecran le dit, au lieu de rendre un chiffre qui aurait l'air juste. */
+    if(dsrc==='reste-prorata') approx++;
+    if(!(dh>0)){ sansSurface++; return; }            // rien a diviser : ecartee
+    var connu=dp.connu||0;
+    hl+=(dp.hl||0)+Math.max(0,dp.kg-connu)/kgHl; ha+=dh; vu=true;
+    if(connu<dp.kg) tousMesures=false;
+  });
+  if(!vu||!(ha>0)) return {hlHa:null,statut:null,ha:0,hl:0,sansSurface:sansSurface,approx:approx};
+  return {hlHa:hl/ha, statut:(tousMesures?'mesure':'estime'),
+          ha:ha, hl:hl, sansSurface:sansSurface, approx:approx};
+}
+
 function _mlMillesimes(){
   var set={};
   (CAVE_VENDANGE.recoltes||[]).forEach(function(r){
@@ -9919,7 +10045,7 @@ function _mlRendements(mil){
        l'ancien reglage tous millesimes confondus. L'ecran doit pouvoir faire
        la difference — un chiffre herite n'a pas ete verifie contre l'arrete. */
     var mx=_vendRdtMax(o.parcelle,mil);
-    o.max=mx.max; o.maxSrc=mx.src;
+    o.max=mx.max; o.maxSrc=mx.src; o.maxAoc=mx.aoc;
     o.depasse = (o.max&&o.hlHa)?(o.hlHa>o.max):false;
     o.pct = (o.max&&o.hlHa)?Math.round(o.hlHa/o.max*100):null;
     return o;
@@ -10312,7 +10438,8 @@ function _mlRenderVie(){
           +'<span class="mlx-rdf"><span>'+(r.statut==='mesure'?'':'\u2248 ')+r.pct+' % du maximum</span>'
           /* ⚠️ Un plafond HERITE de l'ancien reglage n'a ete verifie contre
              aucun arrete : il se lit, il ne se croit pas. L'ecran le dit. */
-          +'<span>max '+_mvF1(r.max)+' hL/ha'+(r.maxSrc==='herite'?' \u00b7 h\u00e9rit\u00e9':'')+'</span></span>';
+          +'<span>max '+_mvF1(r.max)+' hL/ha'
+            +(r.maxSrc==='herite'?' \u00b7 h\u00e9rit\u00e9':(r.maxSrc==='aoc'&&r.maxAoc?(' \u00b7 '+_escHtml(r.maxAoc)):''))+'</span></span>';
       } else {
         h+='<span class="mlx-rdf"><span>'+(adm?('Toucher pour poser le maximum de l\u2019appellation '+mil)
           :('Maximum de l\u2019appellation non renseign\u00e9 pour '+mil))+'</span></span>';
@@ -10481,6 +10608,12 @@ window._mlSetRdtMax        = _mlSetRdtMax;
 window._vendRdtMax         = _vendRdtMax;
 window._vendSetRdtMax      = _vendSetRdtMax;
 window._mlRdtSansMax       = _mlRdtSansMax;
+window._mlRdtMoyen         = _mlRdtMoyen;
+// ★ Lus par Reglages (declaration) et par le Pilotage (affichage).
+window._vendAocList        = _vendAocList;
+window._vendAocDe          = _vendAocDe;
+window._vendAocMax         = _vendAocMax;
+window._vendAocNorm        = _vendAocNorm;
 window._mlGo               = _mlGo;
 window._mlAgenda           = _mlAgenda;
 window._mlProjFA           = _mlProjFA;
@@ -11169,10 +11302,16 @@ function _bcData(ctx, c, mil){
 
   /* Rendement moyen du domaine : sur les seules parcelles RECOLTEES.
      Le rapporter a la surface totale ferait mentir le chiffre d'un domaine
-     qui a vendu du raisin sur pied ou laisse une parcelle. */
-  if(d.chaine && d.chaine.ha > 0){
-    d.rdtMoyen = (d.chaine.kg / d.chaine.ha) / (d.chaine.kgHl || 135);
-  } else d.rdtMoyen = null;
+     qui a vendu du raisin sur pied ou laisse une parcelle.
+     ★ SOURCE UNIQUE avec la carte du Pilotage (_mlRdtMoyen). Ce document
+     calculait sa propre estimation d'apres les kilos pendant que le Pilotage
+     divisait le volume decuve : deux chiffres pour une seule grandeur. */
+  var _rm = _mlRdtMoyen(d.chaine);
+  d.rdtMoyen    = _rm.hlHa;
+  d.rdtMoyenEst = (_rm.statut === 'estime');
+  d.rdtMoyenSs  = _rm.sansSurface || 0;
+  d.rdtMoyenAx  = _rm.approx || 0;
+  d.rdtMoyenHa  = _rm.ha || 0;
 
   /* Cuvees en elevage au 31 juillet. Filtrees sur le millesime du document :
      chaque millesime est une entite a part, dans sa propre cave. Le total
@@ -11241,8 +11380,16 @@ function _bcDoc(ctx, DOM, c, mil){
     {v:ch ? _bcInt(ch.kg/1000) : '\u2014', u:'t', l:'de raisin rentr\u00e9',
      s:ch ? (ch.parcelles + ' parcelle' + (ch.parcelles>1?'s':'') + ' r\u00e9colt\u00e9e'
             + (ch.parcelles>1?'s':'')) : ''},
-    {v:d.rdtMoyen!=null ? _bcF(d.rdtMoyen,1) : '\u2014', u:'hL/ha', l:'rendement moyen',
-     s:'sur les parcelles r\u00e9colt\u00e9es'},
+    /* ⚠️ Un document imprime se relit des annees plus tard, sans l'ecran a cote :
+       il doit dire lui-meme si le chiffre est mesure ou estime. */
+    {v:d.rdtMoyen!=null ? ((d.rdtMoyenEst?'\u2248 ':'')+_bcF(d.rdtMoyen,1)) : '\u2014', u:'hL/ha', l:'rendement moyen',
+     /* ⚠️ Un document imprime se relit sans l'ecran a cote : il doit porter
+        lui-meme la reserve, et nommer l'information qui manque. */
+     s:d.rdtMoyen==null ? 'surface r\u00e9colt\u00e9e non renseign\u00e9e'
+       : (d.rdtMoyenAx>0 ? (d.rdtMoyenAx+' surface'+(d.rdtMoyenAx>1?'s':'')+' vendue'+(d.rdtMoyenAx>1?'s':'')+' non renseign\u00e9e'+(d.rdtMoyenAx>1?'s':''))
+       : (d.rdtMoyenSs>0 ? (d.rdtMoyenSs+' parcelle'+(d.rdtMoyenSs>1?'s':'')+' sans surface, \u00e9cart\u00e9e'+(d.rdtMoyenSs>1?'s':''))
+       : (d.rdtMoyenEst ? 'estim\u00e9 \u2014 tout n\u2019est pas d\u00e9cuv\u00e9'
+                        : 'sur '+_bcF(d.rdtMoyenHa,2)+' ha r\u00e9ellement r\u00e9colt\u00e9s')))},
     {v:_bcF(d.chaiHl,0), u:'hL', l:'au chai',
      s:d.chaiFuts + ' f\u00fbt' + (d.chaiFuts>1?'s':'') + ' en \u00e9levage'}
   ];
@@ -11335,7 +11482,7 @@ function _bcDoc(ctx, DOM, c, mil){
       + '<td class="n">' + _bcF(ch.ha,2) + ' ha</td>'
       + '<td class="n">' + _bcInt(rows.reduce(function(s,o){ return s+o.caisses; },0)) + '</td>'
       + '<td class="n">' + _bcInt(ch.kg) + '</td>'
-      + '<td class="n s">' + (d.rdtMoyen!=null ? _bcF(d.rdtMoyen,1) : '\u2014') + '</td>'
+      + '<td class="n s">' + (d.rdtMoyen!=null ? (((d.rdtMoyenEst||d.rdtMoyenAx>0)?'\u2248 ':'')+_bcF(d.rdtMoyen,1)) : '\u2014') + '</td>'
       + '<td></td></tr></tfoot></table>';
     if(ch.kgVendu > 0){
       h += '<div class="bc-note">Dont <b>' + _bcInt(ch.kgVendu) + ' kg</b> de raisin vendu, '

@@ -5757,7 +5757,7 @@ function _pcavRdt(c,mil){
        verifie contre l'arrete d'aucune campagne. Le taire ferait passer une
        valeur non datee pour une valeur de l'annee. */
     return ouv+'<div class="pcav-py">'+_pilEsc(nom)+'<small>max '+_pcavF1(r.max)
-      +(r.maxSrc==='herite'?' · hérité':'')+'</small></div>'
+      +(r.maxSrc==='herite'?' · hérité':(r.maxSrc==='aoc'&&r.maxAoc?(' · '+_pilEsc(r.maxAoc)):''))+'</small></div>'
       +'<div class="pcav-pt2"><div class="pcav-ps" style="width:'+norm+'%;background:'+col+'"></div>'
       +'<span class="pcav-pmax"></span></div>'
       +'<div class="pcav-pn" style="color:'+col+'">'+_pcavRdtTxt(r)+'</div>'+fer;
@@ -5831,7 +5831,30 @@ function _pcavVueMillesime(c){
     h+='<div class="pcav-card"><div class="pcav-kg">'
       +_pcavK('Surface récoltée',_pcavF1(ch.ha),'ha',(ch.parcelles||0)+' parcelles',1)
       +_pcavK('Raisin rentré',_pcavF1((ch.kg||0)/1000),'t',ch.kgVendu?('dont '+_pcavInt(ch.kgVendu)+' kg vendus'):'')
-      +_pcavK('Rendement moyen',(ch.ha>0?_pcavF1(ch.hlDecuve/ch.ha):'—'),'hL/ha','sur les parcelles récoltées')
+      /* ★★★ CE CHIFFRE A ETE FAUX QUATRE FOIS. Volume decuve seul (0 hL/ha),
+         puis volume du domaine sur la surface TOTALE (13,7), puis tout le
+         raisin sur toute la surface (20,3 \u2014 juste pour la vigne, mais pas pour
+         la cave). Il rapporte desormais ce que le domaine a rentre a la surface
+         qu'il a REELLEMENT recoltee : la surface achetee par chaque acheteur est
+         saisie, `_vendSurfParc` en deduit la part du domaine.
+         ⚠️ Et quand cette saisie MANQUE, on le dit au lieu de rendre un chiffre
+         qui aurait l'air juste. */
+      +(function(){
+        var rm=_pcavHas('_mlRdtMoyen')?window._mlRdtMoyen(ch):{hlHa:null,statut:null,sansSurface:0,approx:0,ha:0};
+        var sub;
+        if(rm.hlHa==null){
+          sub=(rm.sansSurface>0||rm.approx>0)?'surface r\u00e9colt\u00e9e non renseign\u00e9e':'mesur\u00e9 au d\u00e9cuvage';
+        } else {
+          var b=[];
+          if(rm.approx>0) b.push(rm.approx+' surface'+(rm.approx>1?'s':'')+' vendue'+(rm.approx>1?'s':'')+' non renseign\u00e9e'+(rm.approx>1?'s':''));
+          if(rm.sansSurface>0) b.push(rm.sansSurface+' parcelle'+(rm.sansSurface>1?'s':'')+' \u00e9cart\u00e9e'+(rm.sansSurface>1?'s':''));
+          if(!b.length&&rm.statut!=='mesure') b.push('estim\u00e9 \u2014 tout n\u2019est pas d\u00e9cuv\u00e9');
+          sub=b.length?b.join(' \u00b7 ')
+             :('sur '+_pcavF1(rm.ha)+' ha r\u00e9ellement r\u00e9colt\u00e9s');
+        }
+        return _pcavK('Rendement moyen',
+          rm.hlHa!=null?((rm.statut==='mesure'&&!rm.approx?'':'\u2248 ')+_pcavF1(rm.hlHa)):'—','hL/ha',sub);
+      })()
       +_pcavK('Au chai',_pcavF1(ch.hlFut),'hL',(ch.futs||0)+' barriques')
       +'</div></div>';
   }
