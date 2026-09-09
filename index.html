@@ -624,7 +624,7 @@
         <p style="margin:0 0 14px">Firebase / Google LLC — 1600 Amphitheatre Pkwy, Mountain View, CA 94043, USA. Transfert encadré par les clauses contractuelles types de la Commission européenne.</p>
         <div style="font-weight:700;font-size:13px;margin-bottom:6px;color:#4A2060">Cookies &amp; traceurs</div>
         <p style="margin:0 0 14px">Aucun cookie publicitaire. L'application utilise uniquement le stockage local (localStorage) pour sauvegarder vos données de travail sur votre appareil.</p>
-        <div style="text-align:center;color:#9A9A8A;font-size:10px;margin-top:8px">© 2026 Nicolas GUERET / GUERETTECH · Ma Vigne · v6.96</div>
+        <div style="text-align:center;color:#9A9A8A;font-size:10px;margin-top:8px">© 2026 Nicolas GUERET / GUERETTECH · Ma Vigne · v6.99</div>
         <button onclick="document.getElementById('login-mentions-ov').style.display='none'" style="display:block;width:100%;margin-top:20px;padding:14px;background:#3D6B27;color:white;border:none;border-radius:12px;font-family:'Outfit',sans-serif;font-size:14px;font-weight:600;cursor:pointer;-webkit-tap-highlight-color:transparent">Fermer</button>
       </div>
     </div>
@@ -1189,6 +1189,7 @@
         <div class="mod-header-sub" id="phyto-header-sub">Registre &amp; catalogue</div>
       </div>
       <span class="mod-header-badge" id="phyto-header-badge">0 traitement</span>
+      <button class="mod-home-btn mv-regl-gear" onclick="_mvReglOpen('phyto')" style="margin-left:6px" aria-label="Documents du Phyto" title="Réglages"><svg class="mv-ic" width="18" height="18" viewBox="0 0 24 24" aria-hidden="true"><use href="#ic-engrenage"></use></svg></button>
       
     </div>
     <div class="mod-meta-row mvu-meta">
@@ -1206,10 +1207,6 @@
   <div class="content" style="padding-top:12px;padding-bottom:100px">
     <div class="chips-row" id="phyto-type-row-trac"></div>
     <div id="traitements-list-trac"></div>
-    <!-- Export réglementaire du registre — visibilité pilotée par _phytoSyncTabs() (registre + admin) -->
-    <div id="phyto-export-row" style="display:none;margin-top:16px">
-      <button onclick="_phytoExportCsv()" style="width:100%;background:#5A2D8E;color:white;border:none;border-radius:12px;padding:14px 18px;font-size:14px;font-weight:600;font-family:'Outfit',sans-serif;cursor:pointer;text-align:left;display:flex;align-items:center;gap:10px;min-height:44px"><svg class="mv-ic" width="16" height="16" viewBox="0 0 24 24" aria-hidden="true" focusable="false"><use href="#ic-graphique"></use></svg> <span style="display:block"><span style="display:block">Exporter le registre (Excel / CSV)</span><span style="font-size:11px;opacity:0.8;font-weight:400;display:block">Format électronique lisible par machine — arrêté du 24 décembre 2025</span></span></button>
-    </div>
     <div id="tab-cat-trac" style="display:none">
       <div id="cat-ephy-view">
         <div class="ephy-search"><span class="ephy-si"><svg class="mv-ic" width="16" height="16" viewBox="0 0 24 24" aria-hidden="true" focusable="false"><use href="#ic-loupe"></use></svg></span><input id="ephy-q" type="text" oninput="ephyRender()" placeholder="Produit, substance, n° AMM…"><button class="ephy-clr" id="ephy-clr" onclick="ephyClear()"><svg class="mv-ic" width="16" height="16" viewBox="0 0 24 24" aria-hidden="true" focusable="false"><use href="#ic-croix"></use></svg></button></div>
@@ -1249,7 +1246,7 @@
       <span class="mod-header-icon"><svg class="mv-ic" width="20" height="20" viewBox="0 0 24 24" aria-hidden="true"><use href="#ic-curseurs"></use></svg></span>
       <div class="mod-header-titles">
         <div class="mod-header-title">Réglages</div>
-        <div class="mod-header-sub">Ma Vigne v6.96</div>
+        <div class="mod-header-sub">Ma Vigne v6.99</div>
       </div>
       <span class="mod-header-badge" style="background:rgba(61,107,39,0.2);color:#7CB95A;border:1px solid rgba(61,107,39,0.3)" id="regl-role-badge">Admin</span>
       
@@ -1263,7 +1260,7 @@
     <div class="mvu-tabs" id="regl-tabs-row" style="display:none">
       <button class="mvu-tab active" id="regl-tbtn-domaine" onclick="switchReglTab(&#39;domaine&#39;)"><span class="mvu-tab-em"><svg class="mv-ic" width="18" height="18" viewBox="0 0 24 24" aria-hidden="true"><use href="#ic-maison"></use></svg></span>Domaine</button>
       <button class="mvu-tab" id="regl-tbtn-equipe" onclick="switchReglTab(&#39;equipe&#39;)"><span class="mvu-tab-em"><svg class="mv-ic" width="18" height="18" viewBox="0 0 24 24" aria-hidden="true"><use href="#ic-equipe"></use></svg></span>Équipe</button>
-      <button class="mvu-tab" id="regl-tbtn-app" onclick="switchReglTab(&#39;app&#39;)"><span class="mvu-tab-em"><svg class="mv-ic" width="18" height="18" viewBox="0 0 24 24" aria-hidden="true"><use href="#ic-curseurs"></use></svg></span>App</button>
+      <button class="mvu-tab" id="regl-tbtn-app" onclick="switchReglTab(&#39;app&#39;)"><span class="mvu-tab-em"><svg class="mv-ic" width="18" height="18" viewBox="0 0 24 24" aria-hidden="true"><use href="#ic-curseurs"></use></svg></span>Moi</button>
     </div>
   </div>
 
@@ -1303,9 +1300,16 @@
         </button>
       </div>
     </div>
-  </div>
 
-  <!-- ══ Onglet Vigne ══ -->
+    <!-- Données du domaine (lot NAV-5) : le catalogue complet des documents vivait sous « App » ;
+         un registre ou une sauvegarde sont du domaine, pas de l'application. -->
+    <div class="set-sec" id="set-sec-donnees">
+      <div class="set-title">Données</div>
+      <div style="margin:0 16px">
+<div id="regl-export-row" class="set-row" onclick="openDocs()"><div class="sr-l"><div class="sr-ico" style="background:var(--bleu-pale)"><svg class="mv-ic" width="18" height="18" viewBox="0 0 24 24" aria-hidden="true" focusable="false"><use href="#ic-imprimante"></use></svg></div><div><div class="sr-lbl">Documents &amp; impressions</div><div class="sr-sub">Le catalogue complet — chaque module a les siens dans sa roue crantée</div></div></div><div class="sr-arr">›</div></div>
+      </div>
+    </div>
+  </div>
 
   <!-- ══ Onglet Équipe ══ -->
   <div id="regl-view-equipe" style="display:none">
@@ -1338,7 +1342,6 @@
         </div>
         <div class="set-row" id="regl-plein-soleil-row" onclick="toggleHiContrast()"><div class="sr-l"><div class="sr-ico" style="background:var(--terre-pale)"><svg class="mv-ic" width="18" height="18" viewBox="0 0 24 24" aria-hidden="true" focusable="false"><use href="#ic-soleil"></use></svg></div><div><div class="sr-lbl">Plein soleil</div><div class="sr-sub">Contraste renforcé pour lire au soleil</div></div></div><div class="sr-arr" id="regl-hc-state">Activer</div></div>
         <div class="set-row" onclick="requestNotifications()"><div class="sr-l"><div class="sr-ico" style="background:var(--terre-pale)"><svg class="mv-ic" width="18" height="18" viewBox="0 0 24 24" aria-hidden="true" focusable="false"><use href="#ic-cloche"></use></svg></div><div><div class="sr-lbl">Notifications</div><div class="sr-sub" id="notif-status">Alertes gel, DAR, validations</div></div></div><div class="sr-arr" id="notif-arr">›</div></div>
-        <div id="regl-export-row" class="set-row" onclick="openDocs()"><div class="sr-l"><div class="sr-ico" style="background:var(--bleu-pale)"><svg class="mv-ic" width="18" height="18" viewBox="0 0 24 24" aria-hidden="true" focusable="false"><use href="#ic-imprimante"></use></svg></div><div><div class="sr-lbl">Documents &amp; impressions</div><div class="sr-sub">Registres, rapports, inventaires, sauvegarde</div></div></div><div class="sr-arr">›</div></div>
         <div class="set-row" onclick="openOv(&#39;ovHubAide&#39;)"><div class="sr-l"><div class="sr-ico" style="background:var(--vert-pale)">&#x1F4D6;</div><div><div class="sr-lbl">Aide &amp; Documentation</div><div class="sr-sub">D&eacute;marrage rapide &amp; guide complet</div></div></div><div class="sr-arr">&rsaquo;</div></div><div class="set-row" onclick="openReport()"><div class="sr-l"><div class="sr-ico" style="background:var(--rouge-pale)">&#x1F41B;</div><div><div class="sr-lbl">Signaler un probl&egrave;me</div><div class="sr-sub">Envoy&eacute; directement &agrave; l&#39;&eacute;quipe Ma Vigne</div></div></div><div class="sr-arr">&rsaquo;</div></div>
         <div class="set-row" onclick="openOv(&#39;ovMentions&#39;)"><div class="sr-l"><div class="sr-ico" style="background:var(--phyto-pale)"><svg class="mv-ic" width="18" height="18" viewBox="0 0 24 24" aria-hidden="true" focusable="false"><use href="#ic-balance"></use></svg></div><div><div class="sr-lbl">CGU &amp; Mentions légales</div><div class="sr-sub">Contrat · RGPD · v1.1</div></div></div><div class="sr-arr">›</div></div>
         <div class="set-row" style="border-radius:0 0 16px 16px" onclick="logout()"><div class="sr-l"><div class="sr-ico" style="background:var(--gris-clair)"><svg class="mv-ic" width="18" height="18" viewBox="0 0 24 24" aria-hidden="true" focusable="false"><use href="#ic-deconnexion"></use></svg></div><div><div class="sr-lbl">Se déconnecter</div></div></div><div class="sr-arr">›</div></div>
@@ -1350,7 +1353,7 @@
         <div class="set-row set-danger-row" style="border-radius:16px;border:1.5px solid var(--rouge)" onclick="openOvDanger(&#39;reset&#39;)"><div class="sr-l"><div class="sr-ico" style="background:var(--rouge-pale)"><svg class="mv-ic" width="18" height="18" viewBox="0 0 24 24" aria-hidden="true" focusable="false"><use href="#ic-corbeille"></use></svg></div><div><div class="sr-lbl" style="color:var(--rouge);font-weight:700">Réinitialiser l'application</div><div class="sr-sub">Efface toutes les sauvegardes locales</div></div></div><div class="sr-arr" style="color:var(--rouge)">›</div></div>
       </div>
     </div>
-    <div class="ver-tag">Ma Vigne v6.96 · Catalogue phyto officiel E-Phy (ANSES) <svg class="mv-ic" width="16" height="16" viewBox="0 0 24 24" aria-hidden="true" focusable="false"><use href="#ic-feuille"></use></svg></div>
+    <div class="ver-tag">Ma Vigne v6.99 · Catalogue phyto officiel E-Phy (ANSES) <svg class="mv-ic" width="16" height="16" viewBox="0 0 24 24" aria-hidden="true" focusable="false"><use href="#ic-feuille"></use></svg></div>
     <div class="mv-legal-foot" style="text-align:center;font-size:10px;color:var(--texte-doux);padding:0 0 16px;line-height:1.9"><a href="/mentions-legales.html" target="_blank" rel="noopener" style="color:var(--texte-doux);text-decoration:underline">Mentions légales</a> · <a href="/confidentialite.html" target="_blank" rel="noopener" style="color:var(--texte-doux);text-decoration:underline">Confidentialité</a> · <a href="/cgu.html" target="_blank" rel="noopener" style="color:var(--texte-doux);text-decoration:underline">CGU</a></div>
   </div>
 </div>
@@ -1524,7 +1527,68 @@
       <div id="act-trac-list" style="background:var(--bg-card);border-radius:16px;padding:0 16px;margin:0 16px;box-shadow:var(--shadow-sm)"></div>
     </div>
   </div>
+      <div id="regl-eco-tracteur"></div>
       <div class="set-sec" id="regl-docs-tracteur"></div>
+    </div>
+  </div>
+</div>
+
+<!-- LA ROUE CRANTÉE DU PLANNING (lot NAV-2) : « Le cadre » — ce qui se règle une fois l'an — puis les documents.
+     _planRenderCadre / _planRenderGridEditor écrivent dans #plan-cadre-host (repli : #plan-body). -->
+<div class="overlay" id="ovReglPlanning" onclick="closeOv(event,'ovReglPlanning')">
+  <div class="modal" onclick="event.stopPropagation()">
+    <div class="modal-handle"></div>
+    <div class="modal-hd">
+      <div class="modal-title">Réglages · Planning</div>
+      <div class="modal-sub">Le cadre de l’année — modèles de semaine, coupure, convention, congés, heures sup — et les relevés</div>
+    </div>
+    <div class="modal-body mv-regl-body" style="padding:8px 0 12px">
+      <div id="plan-cadre-host" style="padding:0 14px"></div>
+      <div class="set-sec" id="regl-docs-planning" style="margin-top:18px"></div>
+    </div>
+  </div>
+</div>
+
+<!-- LA ROUE CRANTÉE DU PILOTAGE (lot NAV-3) : le Paramétrage (objectifs, fenêtres, hypothèses), l'IFT de référence, le bilan.
+     _pilParamRender écrit dans #pil-regl-host ; _ecoRenderIftCard dans #regl-eco-pilotage. -->
+<div class="overlay" id="ovReglPilotage" onclick="closeOv(event,'ovReglPilotage')">
+  <div class="modal" onclick="event.stopPropagation()">
+    <div class="modal-handle"></div>
+    <div class="modal-hd">
+      <div class="modal-title">Réglages · Pilotage</div>
+      <div class="modal-sub">Objectifs de fin, fenêtres des tâches, hypothèses de calcul, IFT de référence — et le bilan de campagne</div>
+    </div>
+    <div class="modal-body mv-regl-body" style="padding:8px 0 12px">
+      <div id="pil-regl-host" style="padding:0 14px"></div>
+      <div id="regl-eco-pilotage"></div>
+      <div class="set-sec" id="regl-docs-pilotage" style="margin-top:18px"></div>
+    </div>
+  </div>
+</div>
+
+<div class="overlay" id="ovReglPhyto" onclick="closeOv(event,'ovReglPhyto')">
+  <div class="modal" onclick="event.stopPropagation()">
+    <div class="modal-handle"></div>
+    <div class="modal-hd">
+      <div class="modal-title">Réglages · Phyto</div>
+      <div class="modal-sub">Le registre sous ses deux formes, et le budget cuivre</div>
+    </div>
+    <div class="modal-body mv-regl-body" style="padding:8px 0 12px">
+      <div class="set-sec" id="regl-docs-phyto"></div>
+    </div>
+  </div>
+</div>
+
+<div class="overlay" id="ovReglReserve" onclick="closeOv(event,'ovReglReserve')">
+  <div class="modal" onclick="event.stopPropagation()">
+    <div class="modal-handle"></div>
+    <div class="modal-hd">
+      <div class="modal-title">Réglages · Réserve</div>
+      <div class="modal-sub">Les deux inventaires — et où vont les prix</div>
+    </div>
+    <div class="modal-body mv-regl-body" style="padding:8px 0 12px">
+      <div class="set-sec" id="regl-eco-reserve"><div class="set-title">Où vont les prix</div><div style="margin:0 16px"><div class="set-row" style="cursor:default"><div class="sr-l"><div class="sr-ico" style="background:var(--or-pale)"><svg class="mv-ic" width="18" height="18" viewBox="0 0 24 24" aria-hidden="true"><use href="#ic-euro"></use></svg></div><div><div class="sr-lbl">Aucun prix ne se saisit ici</div><div class="sr-sub">Les achats se chiffrent dans Pilotage › Économie › Achats ; la fiche d’un intrant en déduit son prix moyen.</div></div></div></div></div></div>
+      <div class="set-sec" id="regl-docs-reserve" style="margin-top:18px"></div>
     </div>
   </div>
 </div>
@@ -1753,6 +1817,7 @@
         <div class="mod-header-sub">Heures &eacute;quipe</div>
       </div>
       <span class="mod-header-badge" id="plan-header-badge">&mdash;</span>
+      <button class="mod-home-btn mv-regl-gear" onclick="_mvReglOpen('planning')" style="margin-left:6px" aria-label="Réglages et documents du Planning" title="Réglages"><svg class="mv-ic" width="18" height="18" viewBox="0 0 24 24" aria-hidden="true"><use href="#ic-engrenage"></use></svg></button>
       
     </div>
     <div class="mod-meta-row mvu-meta">
@@ -1766,7 +1831,6 @@
     <div class="mvu-tabs" id="plan-tabs">
       <button class="mvu-tab plan-tab-admin" data-tab="mois" onclick="planSwitchTab(&#39;mois&#39;)"><span class="mvu-tab-em"><svg class="mv-ic" width="18" height="18" viewBox="0 0 24 24" aria-hidden="true"><use href="#ic-calendrier"></use></svg></span>Le mois</button>
       <button class="mvu-tab plan-tab-admin" data-tab="gens" onclick="planSwitchTab(&#39;gens&#39;)"><span class="mvu-tab-em"><svg class="mv-ic" width="18" height="18" viewBox="0 0 24 24" aria-hidden="true"><use href="#ic-equipe"></use></svg></span>Les gens</button>
-      <button class="mvu-tab plan-tab-admin" data-tab="cadre" onclick="planSwitchTab(&#39;cadre&#39;)"><span class="mvu-tab-em"><svg class="mv-ic" width="18" height="18" viewBox="0 0 24 24" aria-hidden="true"><use href="#ic-curseurs"></use></svg></span>Le cadre</button>
     </div>
   </div>
 
@@ -1886,7 +1950,7 @@
       <button class="mvu-tab active" id="cave-sec-aujourdhui" onclick="selectCaveSection(&#39;aujourdhui&#39;)"><span class="mvu-tab-em"><svg class="mv-ic" width="18" height="18" viewBox="0 0 24 24" aria-hidden="true"><use href="#ic-chrono"></use></svg></span>Aujourd'hui</button>
       <button class="mvu-tab" id="cave-sec-vendange" onclick="selectCaveSection(&#39;vendange&#39;)"><span class="mvu-tab-em"><svg class="mv-ic" width="18" height="18" viewBox="0 0 24 24" aria-hidden="true"><use href="#ic-raisin"></use></svg></span>Le Cuvier</button>
       <button class="mvu-tab" id="cave-sec-elevage" onclick="selectCaveSection(&#39;elevage&#39;)"><span class="mvu-tab-em"><svg class="mv-ic" width="18" height="18" viewBox="0 0 24 24" aria-hidden="true"><use href="#ic-cuve"></use></svg></span>Le Chai</button>
-      <button class="mvu-tab" id="cave-sec-millesime" onclick="selectCaveSection(&#39;millesime&#39;)"><span class="mvu-tab-em"><svg class="mv-ic" width="18" height="18" viewBox="0 0 24 24" aria-hidden="true"><use href="#ic-parcours"></use></svg></span>Le millésime</button>
+      <button class="mvu-tab" id="cave-sec-millesime" onclick="selectCaveSection(&#39;millesime&#39;)"><span class="mvu-tab-em"><svg class="mv-ic" width="18" height="18" viewBox="0 0 24 24" aria-hidden="true"><use href="#ic-parcours"></use></svg></span>Le Millésime</button>
     </div>
   </div>
 
@@ -1907,7 +1971,7 @@
       <div id="cave-reg-cuvier"></div>
       <div class="creg-grp">Le Chai</div>
       <div id="mvc-body-reglages"></div>
-      <div class="creg-grp">Le millésime</div>
+      <div class="creg-grp">Le Millésime</div>
       <div id="cave-reg-mil"></div>
       <div class="creg-grp">Documents</div>
       <div id="cave-reg-docs"></div>
@@ -3408,7 +3472,7 @@
         <div style="font-size:10px;color:rgba(240,226,200,0.55);letter-spacing:1.2px;margin-top:2px;">MISE &#xC0; JOUR</div>
       </div>
       <div style="background:rgba(200,176,32,0.12);border:1px solid rgba(200,176,32,0.35);border-radius:7px;padding:4px 10px;flex-shrink:0;">
-        <span id="wn-version-badge" style="color:#C8B020;font-size:12px;font-weight:600;">v6.96</span>
+        <span id="wn-version-badge" style="color:#C8B020;font-size:12px;font-weight:600;">v6.99</span>
       </div>
     </div>
     <div class="modal-body">

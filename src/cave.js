@@ -10848,7 +10848,7 @@ function _caveMilMatiere(){
 
 function _caveHeaderRender(){
   var ico=document.getElementById('cave-hdr-ico'); _mvSetIcon(ico,'verre',20);
-  var ttl=document.getElementById('cave-hdr-title'); if(ttl) ttl.textContent='La Cave';
+  var ttl=document.getElementById('cave-hdr-title'); if(ttl) ttl.textContent='Cave';
   var sub=document.getElementById('cave-hdr-sub'); if(sub) sub.textContent=(window.DOMAINE_NOM||'Mon domaine');
   var bdg=document.getElementById('cave-hdr-badge'); if(bdg) bdg.textContent='Campagne '+_mlCampagne();
   if(typeof window._mvMetaSync==='function') window._mvMetaSync();

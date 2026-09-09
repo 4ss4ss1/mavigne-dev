@@ -4488,9 +4488,13 @@ window._goLanding=_goLanding;
 //   (renderReglages n'affichait ces onglets qu'à lui). Un ouvrier ne la voit pas.
 var _MV_REGL = {
   vigne:    { ov:'ovReglVigne',    docs:'regl-docs-vigne',    titre:'Vigne' },
-  tracteur: { ov:'ovReglTracteur', docs:'regl-docs-tracteur', titre:'Tracteur' }
+  tracteur: { ov:'ovReglTracteur', docs:'regl-docs-tracteur', titre:'Tracteur' },
+  planning: { ov:'ovReglPlanning', docs:'regl-docs-planning', titre:'Planning' },
+  pilotage: { ov:'ovReglPilotage', docs:'regl-docs-pilotage', titre:'Pilotage' },
+  phyto:    { ov:'ovReglPhyto',    docs:'regl-docs-phyto',    titre:'Phyto' },
+  reserve:  { ov:'ovReglReserve',  docs:'regl-docs-reserve',  titre:'R\u00e9serve' }
 };
-var _MV_REGL_DOC_ICO = { vignoble:'carte', saison:'graphique', csvJournal:'journal', csvParcelles:'liste', entretien:'outil' };
+var _MV_REGL_DOC_ICO = { vignoble:'carte', saison:'graphique', csvJournal:'journal', csvParcelles:'liste', entretien:'outil', mois:'calendrier', releve:'personne', annuel:'calendrier', annuelNom:'personne', etp:'graphique', bilan:'graphique', phytoPdf:'eprouvette', phytoCsv:'liste', cuivre:'fiole', futs:'barrique', intrants:'carton' };
 function _mvReglDocs(mod){
   var cat=window.MV_DOCS; if(!Array.isArray(cat)) return [];
   var out=[];
@@ -4503,30 +4507,49 @@ function _mvReglDocsHtml(mod, titre){
   var h='<div class="set-title">Documents \u00b7 '+_escHtml(titre)+'</div><div style="margin:0 16px">';
   l.forEach(function(x){
     var d=x.d;
-    h+='<div class="set-row" onclick="docsGo('+x.i+')"><div class="sr-l"><div class="sr-ico" style="background:var(--bleu-pale)">'
+    h+='<div class="set-row" onclick="_mvReglDocGo('+x.i+')"><div class="sr-l"><div class="sr-ico" style="background:var(--bleu-pale)">'
       +_mvIcon(_MV_REGL_DOC_ICO[d.act]||'imprimante',18)+'</div><div><div class="sr-lbl">'+_escHtml(d.t||'')+'</div>'
       +'<div class="sr-sub">'+(d.ask?_escHtml(d.ask)+' \u00b7 ':'')+_escHtml(String(d.fm||'pdf').toUpperCase())+'</div></div></div>'
       +'<div class="sr-arr">\u203a</div></div>';
   });
   // Le catalogue entier reste à sa place : la roue ne sert que les documents du module.
   h+='<div class="set-row" style="border-radius:0 0 16px 16px" onclick="_mvReglTousDocs()"><div class="sr-l"><div class="sr-ico" style="background:var(--gris-clair)">'
-    +_mvIcon('dossier',18)+'</div><div><div class="sr-lbl">Tous les documents</div><div class="sr-sub">Le catalogue complet, dans R\u00e9glages \u203a App</div></div></div><div class="sr-arr">\u203a</div></div>';
+    +_mvIcon('dossier',18)+'</div><div><div class="sr-lbl">Tous les documents</div><div class="sr-sub">Le catalogue complet, dans R\u00e9glages \u203a Domaine</div></div></div><div class="sr-arr">\u203a</div></div>';
   return h+'</div>';
+}
+// docsGo(i) reste le seul chemin vers un document. Mais quatre documents du
+// Planning (relevé mensuel, relevé individuel, planning d'un salarié, Heures & ETP)
+// sont des VOLETS du hub #ovDocs : appelés depuis une roue, ils changeraient de
+// volet dans une feuille fermée — rien à l'écran. On ferme la roue, on ouvre le
+// hub, puis docsGo(i) fait comme d'habitude. Le savoir « lequel est un volet »
+// reste dans reglages.js, à côté de docsGo (_docsEstVolet).
+function _mvReglDocGo(i){
+  var d=(window.MV_DOCS||[])[i]; if(!d) return;
+  var volet=(typeof window._docsEstVolet==='function')&&window._docsEstVolet(d.act);
+  if(!volet){ docsGo(i); return; }
+  Object.keys(_MV_REGL).forEach(function(k){ closeOv(null,_MV_REGL[k].ov); });
+  if(window.openDocs) window.openDocs();
+  setTimeout(function(){ docsGo(i); },60);
 }
 function _mvReglTousDocs(){
   // Une seule roue est ouverte à la fois ; on les ferme toutes, sans argument dans
   // l'onclick (C24b : aucune valeur interpolée dans un gestionnaire).
   Object.keys(_MV_REGL).forEach(function(k){ closeOv(null,_MV_REGL[k].ov); });
   goTo('reglages');
-  setTimeout(function(){ try{ if(window.switchReglTab) window.switchReglTab('app'); if(window.openDocs) window.openDocs(); }catch(e){ if(window.logError)window.logError({level:'info',cat:'nav',msg:'roue: tous les documents'}); } },260);
+  setTimeout(function(){ try{ if(window.switchReglTab) window.switchReglTab('domaine'); if(window.openDocs) window.openDocs(); }catch(e){ if(window.logError)window.logError({level:'info',cat:'nav',msg:'roue: tous les documents'}); } },260);
 }
 function _mvReglOpen(mod){
   var R=_MV_REGL[mod]; if(!R) return;
   if(!isAdmin()){ showToast('R\u00e9serv\u00e9 \u00e0 l\u2019administrateur','#C0392B'); return; }
   if(!window._dataReady){ showToast('Chargement en cours\u2026','#B85A1A'); return; }
-  // Les blocs sont remplis par les écrivains de Réglages, exactement comme quand
+  // Les blocs sont remplis par les écrivains d'origine, exactement comme quand
   // on ouvrait l'onglet : on les rappelle, on ne les recopie pas.
-  try{ if(window.renderReglages) window.renderReglages(); }catch(e){ if(window.logError)window.logError({level:'info',cat:'nav',msg:'roue: renderReglages',detail:(e&&e.message)||''}); }
+  try{
+    if(mod==='planning'){ if(window._planCadreOpen) window._planCadreOpen(); }
+    else if(mod==='pilotage'){ if(window._pilParamOpen) window._pilParamOpen(); }
+    else if(mod==='phyto'||mod==='reserve'){ /* documents seulement : rien à remplir */ }
+    else if(window.renderReglages) window.renderReglages();
+  }catch(e){ if(window.logError)window.logError({level:'info',cat:'nav',msg:'roue: rendu '+mod,detail:(e&&e.message)||''}); }
   var docs=document.getElementById(R.docs);
   if(docs) docs.innerHTML=_mvReglDocsHtml(mod, R.titre);
   openOv(R.ov);
@@ -4540,6 +4563,7 @@ function _mvReglSync(){
 window._MV_REGL=_MV_REGL;
 window._mvReglDocs=_mvReglDocs;
 window._mvReglDocsHtml=_mvReglDocsHtml;
+window._mvReglDocGo=_mvReglDocGo;
 window._mvReglTousDocs=_mvReglTousDocs;
 window._mvReglOpen=_mvReglOpen;
 window._mvReglSync=_mvReglSync;

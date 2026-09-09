@@ -2058,15 +2058,19 @@ var PLAN_BG='#1C1A2E',PLAN_ACC='var(--plan-acc)',PLAN_ACC2='var(--plan-acc)';
 //   cadre → modèles de semaine, coupure, convention, congés, heures sup
 // ★ Même patron que Pilotage › Cave (§20g) : la table de migration existe pour que
 //   l'onglet mémorisé d'un client ne le renvoie pas dans le vide.
-var _PLAN_TAB_MIGR={planning:'mois',equipe:'mois',tableau:'mois',saisie:'mois',templates:'cadre'};
-var _PLAN_VALID_TAB={mois:1,gens:1,cadre:1,moi:1};
+// ★ Lot NAV-2 : « Le cadre » n'est plus un onglet. Ce qui se règle une fois l'an
+//   vit dans la roue crantée de l'en-tête (#ovReglPlanning), comme la Vigne, le
+//   Tracteur et la Cave. Les clés mémorisées 'cadre' et 'templates' atterrissent
+//   sur le mois ; planSwitchTab('cadre') ouvre la roue — personne ne voit le vide.
+var _PLAN_TAB_MIGR={planning:'mois',equipe:'mois',tableau:'mois',saisie:'mois',templates:'mois',cadre:'mois'};
+var _PLAN_VALID_TAB={mois:1,gens:1,moi:1};
 
 function renderPlanning(){
   if(!window._dataReady){ var _pb=document.getElementById('plan-body'); if(_pb)_pb.innerHTML=window._mvSk('planning'); return; }
   var pg=document.getElementById('page-planning');
   if(!pg)return;
   _planMigrateYears();
-  // Les trois onglets d'administration ; l'ouvrier n'en voit aucun et tombe
+  // Les deux onglets d'administration ; l'ouvrier n'en voit aucun et tombe
   // directement sur son mois — un onglet unique n'est pas un choix, c'est un décor.
   var adm=isAdmin();
   document.querySelectorAll('.plan-tab-admin').forEach(function(t){t.style.display=adm?'':'none';});
@@ -2082,10 +2086,8 @@ function renderPlanning(){
 function _planRenderHeader(){
   var sb=document.getElementById('plan-stats-band');
   if(!sb)return;
-  // La bande de chiffres suit l'onglet. « Le cadre » n'en porte aucun : ce sont des
-  // réglages, pas une mesure — y afficher une charge du mois serait un décor.
-  if(planTab==='cadre'){sb.innerHTML='';}
-  else if(planTab==='gens'&&isAdmin()){
+  // La bande de chiffres suit l'onglet.
+  if(planTab==='gens'&&isAdmin()){
     var _act=_pl2Actifs();
     var _hT=_act.reduce(function(s,m){return s+_planCalcMonth(m,planMonth);},0);
     var _hR=_act.reduce(function(s,m){return s+((_planSummary(m,planMonth)||{}).ref||0);},0);
@@ -2142,13 +2144,14 @@ function _planRenderHeader(){
 
 function _planRenderBody(){
   if(!isAdmin()){_planRenderMon();_pl2AbarSync();return;}
-  if(planTab==='cadre')_planRenderCadre();
-  else if(planTab==='gens')_planRenderGens();
+  if(planTab==='gens')_planRenderGens();
   else _pl2RenderEquipe();
   _pl2AbarSync();
 }
 
 function planSwitchTab(tab){
+  // Tolérance : l'ancien onglet « Le cadre » est la roue crantée (lot NAV-2).
+  if(tab==='cadre'){ if(window._mvReglOpen) window._mvReglOpen('planning'); return; }
   planTab=tab;
   if(tab!=='mois')planSelClear();
   _planRenderHeader();
@@ -3519,13 +3522,13 @@ function _planFicheRender(){
     var cpPris=_planCpPris(mbr.nom),cpSolde=_planCpSolde(mbr),cpIni=mbr.cp_initial_j||0;
     // ⚠️ Le mode de decompte et la periode de reference sont des reglages DU DOMAINE :
     //    ils se reglaient ici, dans la fiche d'UNE personne, ou les changer touchait
-    //    tout le monde sans le dire. Ils vivent desormais dans l'onglet « Le cadre ».
+    //    tout le monde sans le dire. Ils vivent desormais dans la roue crantee (ex-onglet « Le cadre »).
     h='<div class="pl2-fstat">'
       +'<div class="pl2-fs"><span class="pl2-fs-v">'+cpIni+'</span><span class="pl2-fs-l">Solde initial (j)</span></div>'
       +'<div class="pl2-fs"><span class="pl2-fs-v" style="color:'+(cpPris>0?'var(--orange)':'var(--texte)')+'">'+cpPris+'</span><span class="pl2-fs-l">Pris (j)</span></div>'
       +'<div class="pl2-fs"><span class="pl2-fs-v" style="color:'+(cpSolde>5?'var(--vert-med)':cpSolde>=0?'var(--orange)':'var(--rouge)')+'">'+cpSolde+'</span><span class="pl2-fs-l">Restants (j)</span></div>'
     +'</div>'
-    +'<div class="pl2-note">D\u00e9compte sur la p\u00e9riode <b>'+_planCpPeriodeLbl()+'</b>. Le solde initial se r\u00e8gle dans R\u00e9glages \u203a Membres, la r\u00e8gle de d\u00e9compte du domaine dans l\u2019onglet <b>Le cadre</b>.</div>';
+    +'<div class="pl2-note">D\u00e9compte sur la p\u00e9riode <b>'+_planCpPeriodeLbl()+'</b>. Le solde initial se r\u00e8gle dans R\u00e9glages \u203a \u00c9quipe, la r\u00e8gle de d\u00e9compte du domaine dans la <b>roue crant\u00e9e</b> du Planning.</div>';
   }
   if(t==='hsup')h=_planHsupCard(mbr);
   if(t==='ac')h=_planAcomptesCard(mbr,true);
@@ -3961,8 +3964,14 @@ function planCpRemove(){
 
 // ── ANCIENS SALARIÉS (overlay) ──
 // ── ONGLET « LE CADRE » (admin) — ce qui se regle une fois par an ──
+// L'hôte du cadre (lot NAV-2) : la feuille de la roue crantée quand elle existe,
+// #plan-body sinon — le même code sert les deux, rien n'est recopié.
+function _planCadreHost(){ return document.getElementById('plan-cadre-host')||document.getElementById('plan-body'); }
+// Ouverture par la roue : on part toujours de la liste, jamais d'un éditeur laissé ouvert.
+function _planCadreOpen(){ _planEditing=null; _planRenderCadre(); }
+window._planCadreOpen=_planCadreOpen;
 function _planRenderCadre(){
-  var body=document.getElementById('plan-body');
+  var body=_planCadreHost();
   if(!body)return;
   if(_planEditing){_planRenderGridEditor();return;}
 
@@ -4273,7 +4282,7 @@ function planOpenGridEditor(templateId){
 }
 
 function _planRenderGridEditor(){
-  var body=document.getElementById('plan-body');
+  var body=_planCadreHost();
   if(!body||!_planEditing)return;
   var id=_planEditing.id;
   var m=_planEditing.month;

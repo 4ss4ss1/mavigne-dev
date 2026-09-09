@@ -2,7 +2,29 @@
 
 > Document de référence du projet **Ma Vigne** (GUERETTECH). Il est le **porteur de vérité** :
 > la mémoire Claude est plafonnée, ce fichier ne l'est pas.
-> Dernière consolidation : **9 septembre 2026 (nuit, NAV)** — ★★★ **NAV-1, LA ROUE CRANTÉE DES MODULES (§98)** :
+> Dernière consolidation : **9 septembre 2026 (nuit, NAV-4/5)** — **LA SÉRIE NAV EST CLOSE (§101)** : roue crantée sur
+> les **sept** modules (Phyto et Réserve : documents seulement ; le bouton d'export quitte le bas du registre phyto —
+> ⚠️ l'audit NAV-0 le disait *dans la barre d'onglets*, c'était faux, il était sous la liste) ; « App » → « Moi », le
+> catalogue des documents passe dans **Domaine › Données** ; les en-têtes disent « Cave » et « Réserve » ; « Le Millésime » ;
+> « Paramétrage » n'apparaît plus. **APP 6.98 → 6.99 · SW 7.57 → 7.58**, s'empile sur §98–§100 (non commités). De **6
+> endroits où l'on règle, 3 mots, 3 portes** à **1 règle, 1 mot, 1 porte**. Détail en **§101**.
+>
+> ★ Précédente : **9 septembre 2026 (nuit, NAV-3)** — ★★★ **LE PILOTAGE N'A PLUS DE BOUTON « OUTILS » (§100)** :
+> Archives est le 8ᵉ onglet, après le filet ; le Paramétrage se rend dans la roue (`_pilParamRender` → `#pil-regl-host`,
+> repeint par `_pilFillContent` quand la feuille est ouverte). ⚠️ La clé `'param'` est traitée **hors** de `_PIL_TAB_MIGR`
+> (`_PIL_TAB_ROUE`) : C22 lit cette table comme la liste des clés mortes et rougissait sur le `'param'` homonyme du Cuvier. La
+> carte « Économie & conformité » de Réglages › Domaine **disparaît** : conso GNR → roue du Tracteur, IFT → roue du Pilotage
+> (mêmes écrivains `_ecoCfgSet`). Sept règles CSS `.pil-outils-*` retirées. **APP 6.97 → 6.98 · SW 7.56 → 7.57**, s'empile sur
+> §98–§99 (non commités). Détail en **§100**.
+>
+> ★ Précédente : **9 septembre 2026 (nuit, NAV-2)** — **LE CADRE DU PLANNING EST DANS LA ROUE (§99)** :
+> « Le cadre » quitte `#plan-tabs` ; `_planRenderCadre` / `_planRenderGridEditor` écrivent dans `#plan-cadre-host`
+> (feuille `#ovReglPlanning`, repli `#plan-body`), `cadre`/`templates` migrent vers `mois`, `planSwitchTab('cadre')` ouvre
+> la roue. Les cinq documents du Planning sont dans la roue ; ⚠️ quatre sont des **volets du hub** (`_docsEstVolet`,
+> à côté de `docsGo`) — `_mvReglDocGo` ferme la roue, ouvre le hub, puis `docsGo(i)`. **APP 6.96 → 6.97 · SW 7.55 →
+> 7.56**, s'empile sur §98 (non commité). Détail en **§99**.
+>
+> ★ Précédente : **9 septembre 2026 (nuit, NAV)** — ★★★ **NAV-1, LA ROUE CRANTÉE DES MODULES (§98)** :
 > un module règle ses affaires **chez lui**. Réglages › Vigne et › Tracteur deviennent la roue crantée de
 > leur en-tête (blocs **reparentés** dans `#ovReglVigne` / `#ovReglTracteur`, mêmes id, mêmes écrivains), avec
 > les documents du module (`MV_DOCS` filtré, `docsGo(i)`). Réglages : **5 → 3 onglets**, bande de compteurs
@@ -15134,3 +15156,203 @@ trancher), casse « Le Millésime », `#page-chat` (§51 — à trancher).
 `scripts/mv-harnais-regl-module.mjs` (nouveau), `scripts/mv-harnais-info.mjs`,
 `scripts/harnais-claude-md.mjs`, `package.json`, `.mv-base`, `CLAUDE.md`. Puis `node scripts/build-guide.mjs`
 (régénère `public/guide.html`, non livré), `npm run build && firebase deploy`.
+
+## 99. NAV-2 — LE CADRE DU PLANNING EST DANS LA ROUE CRANTÉE (09/09 — APP 6.96 → 6.97 · SW 7.55 → 7.56 · base `f79891c`, s'empile sur §98)
+
+> Lot **②** de la série ouverte en §98 (« suite », sans autre mot). Même règle : un module règle ses affaires
+> chez lui. ⚠️ **S'empile sur §98, non commité** : les deux lots se livrent ensemble, sur la même base.
+
+### 99a. Ce qui bouge
+
+- **« Le cadre » n'est plus un onglet.** La fiche le disait elle-même : *« ce qui se règle une fois par
+  an »* — un réglage annuel n'avait pas sa place à côté du mois. Le bouton `data-tab="cadre"` quitte
+  `#plan-tabs` (deux onglets admin : Le mois, Les gens ; l'ouvrier n'en a toujours aucun). La roue
+  `_mvReglOpen('planning')` est sur l'en-tête, après le badge.
+- **Le même code sert la feuille** : `_planRenderCadre` et `_planRenderGridEditor` (l'éditeur de modèle
+  de semaine, qui se rend au même endroit) écrivent dans `_planCadreHost()` = `#plan-cadre-host` (dans
+  `#ovReglPlanning`) avec **repli sur `#plan-body`** — les treize appelants (`planSavePause`,
+  `planSaveCoupure`, `planOpenGridEditor`, `planDeleteTemplate`…) n'ont pas bougé. `_planCadreOpen()`
+  (exposé) remet `_planEditing=null` puis rend : la roue s'ouvre toujours sur la liste, jamais sur un
+  éditeur laissé ouvert à la fermeture précédente. `_mvReglOpen` branche : `planning → _planCadreOpen`,
+  sinon `renderReglages`.
+- **Personne ne voit le vide** : `_PLAN_TAB_MIGR.cadre → 'mois'`, `templates → 'mois'` (était `→ 'cadre'`),
+  `_PLAN_VALID_TAB` sans `cadre`, `planSwitchTab('cadre')` ouvre la roue. Les deux branches
+  `planTab==='cadre'` de l'en-tête et du corps sont retirées (mortes).
+- ⚠️ **QUATRE DOCUMENTS DU PLANNING SONT DES VOLETS DU HUB.** `docsGo(i)` pour `mois`, `releve`,
+  `annuelNom`, `etp` ne génère rien : il *change de volet* dans `#ovDocs` (`_docsPane`, `_docsReleveOpen`,
+  `_docsPlanNomOpen`). Appelé depuis une roue, il aurait changé de volet dans une feuille fermée — rien à
+  l'écran, sans erreur. `_mvReglDocGo(i)` (app.js) demande à `_docsEstVolet(act)` — posé dans
+  `reglages.js` **à côté de `docsGo`**, là où vit le savoir — et, pour un volet, ferme les roues, `openDocs()`,
+  puis `docsGo(i)` 60 ms plus tard ; sinon `docsGo(i)` direct. Toutes les lignes de toutes les roues
+  passent par `_mvReglDocGo` (harnais : contre-épreuve sur le court-circuit). `etp` reçoit `mod:'planning'`.
+- **Textes** : `planning.js` (« la règle de décompte … dans l'onglet Le cadre » → roue ; « Réglages ›
+  Membres » → « Réglages › Équipe », qui est le vrai nom de l'onglet), fiche `MV_AIDE.planning` (« Deux
+  onglets » + la roue, coupure, majorations, relevé mensuel), guide **10** (sous-titre, section « Deux
+  onglets, et une roue crantée », trois chemins, majorations, relevé individuel, planning de l'année — et
+  « l'onglet Modèles », qui n'existait plus depuis la migration `templates → cadre` : un texte mort depuis
+  des mois, trouvé en relisant). `WHATS_NEW` 6.97, un item.
+
+### 99b. Vérifications
+
+`npm run check` **EXIT=0** · preflight **0 erreur** · `mv-harnais-regl-module` **98/98** dont **17
+contre-épreuves** (+6 : onglet revenu, `_planRenderCadre` sur `#plan-body`, migration perdue,
+`_docsEstVolet` qui oublie ETP, `_mvReglDocGo` sans hub pour un volet, lignes qui court-circuitent) ;
+`_docsEstVolet` et `_mvReglDocGo` **exécutés** (séquence attendue pour un volet : fermer les trois roues,
+ouvrir le hub, `docsGo(1)`) · `WHATS_NEW` exécuté (6.97, 1 item) · `v7.56` cinq fois · guide régénéré ·
+`npm run build` EXIT=0. Pas de rendu navigateur (pas de Chromium ici) : à vérifier en admin — la roue du
+Planning ouvre le cadre, un modèle de semaine s'édite dans la feuille, « Relevé mensuel » ouvre le hub
+sur le bon volet.
+
+### 99c. Reste ouvert
+
+L'éditeur de modèle de semaine se rend dans une feuille de 88 vh : à juger à l'usage sur téléphone. Suite :
+**NAV-3** Pilotage (Paramétrage + indicateurs → roue, Archives en onglet, IFT/conso GNR hors de Réglages),
+**NAV-4** documents Phyto/Réserve (bouton CSV hors de `#phyto-tabs-row`), **NAV-5** vocabulaire.
+
+### 99d. La note de livraison
+
+**Base : `f79891c`**, `.mv-base` inchangé. Livré dans l'état cumulé §98 → §99 : `index.html`, `src/app.js`,
+`src/planning.js`, `src/reglages.js`, `src/utils.js`, `public/sw.js`, `guide/10-planning.html`,
+`scripts/mv-harnais-regl-module.mjs`, `scripts/harnais-claude-md.mjs`, `CLAUDE.md` (+ les fichiers de §98
+inchangés depuis). Puis `node scripts/build-guide.mjs`, `npm run build && firebase deploy`.
+
+## 100. ★★★ NAV-3 — LE PILOTAGE N'A PLUS DE BOUTON « OUTILS » : ARCHIVES EST UN ONGLET, LE PARAMÉTRAGE EST DANS LA ROUE (09/09 — APP 6.97 → 6.98 · SW 7.56 → 7.57 · base `f79891c`, s'empile sur §98 et §99)
+
+> Lot **③** de la série NAV. ⚠️ **S'empile sur §98–§99, non commités** : les trois lots se livrent ensemble.
+
+### 100a. Ce qui bouge
+
+- **« Outils » cachait deux natures.** *Archives* se lit — c'est un écran de détail comme Économie et
+  Conformité : `['arc','carton','Archives']` ferme `_PIL_TABS`, après le filet. *Paramétrage* se règle —
+  objectifs de fin, fenêtres des tâches, hypothèses de calcul (`_pilSimEcoCard`) : il se rend dans la
+  feuille `#ovReglPilotage` (`_pilParamRender(d)` → `#pil-regl-host`, puis `_pilBindParam(d)` — **mêmes
+  écrivains** — puis `_ecoRenderIftCard()`). `_PIL_TOOLS`, le bouton `#pil-outils-btn`, le menu, ses deux
+  écouteurs dans `_pilBind` et **sept règles CSS** `.pil-outils-*` : supprimés. La roue est dans
+  `pil-mast-right`, rendue **par `_pilHdrHtml` admin seulement** (l'en-tête est re-rendu en JS : `_mvReglSync`
+  ne suffirait pas), branchée dans `_pilBind`.
+- ⚠️⚠️ **LA CLÉ `'param'` NE PASSE PAS PAR `_PIL_TAB_MIGR`.** Première version : `param:'auj'` dans la table,
+  comme `cav`. C22 a rougi… **sur `cave.js`** : le préflight lit `_PIL_TAB_MIGR` comme *la liste des clés
+  mortes du Pilotage* et cherche `'param'` dans tous les autres fichiers — or le Cuvier a sa propre clé
+  `'param'` (tolérance CAVE-2, `switchVendOng('param')` ouvre la roue de la Cave, gravée par
+  `mv-harnais-cave-reglages`). Deux modules, un homonyme, un contrôle mécanique qui ne distingue pas.
+  Sortie : `var _PIL_TAB_ROUE='param'`, traité à part — mémorisé → `_pilLoadTab` rouvre sur `auj` ;
+  demandé → `_pilSetTab('param')` ouvre la roue et rend `false`. Le harnais grave que `param` n'est **pas**
+  dans `_PIL_TAB_MIGR` (contre-épreuve). *Un contrôle qui raisonne sur une table lui donne un second sens :
+  l'écrire, c'est le lire deux fois.*
+- **La feuille est hors de `#pil-content`** : la délégation de clic du contenu ne la voit pas. `_pilParamOpen`
+  pose sur `#pil-regl-host` la seule délégation dont le corps a besoin — les boutons « à compléter »
+  (`data-diag`), qui ferment la feuille avant `_pilGo`. Un commit du Paramétrage rappelle `_pilFillContent`,
+  qui finit par `_pilParamRefresh(d)` : la feuille ouverte se repeint (le tableau des fenêtres suit).
+- **Deux nombres rentrent chez eux.** La carte « Économie & conformité » de Réglages › Domaine commençait par
+  « Se renseigne ailleurs » (taux → Équipe, prix GNR → Tracteur, simulation → Paramétrage) avant de garder
+  deux inputs. `_ecoRenderConfigCard` est remplacée par `_ecoRenderConsoCard()` (roue du Tracteur,
+  `#regl-eco-tracteur` : conso L/h + état du prix du litre, qui se saisit à l'appoint) et
+  `_ecoRenderIftCard()` (roue du Pilotage, `#regl-eco-pilotage`, exposée) — **mêmes écrivains**
+  `_ecoCfgSet('conso'|'ift')`. `_aocRenderCard` (appellations) s'ancrait sur `#eco-conf-card` : elle suit
+  `#saisons-list` directement. `_pilOpenParam` (seul appelant : cette carte) est supprimé.
+- **Le raccourci Paramétrage de l'Économie** (`data-pec="param"`) et le texte du graphe vide (« Les fenêtres
+  se posent dans… ») ouvrent / nomment la roue. `_mvAideOngletsPil` ne lit plus `_PIL_TOOLS`.
+- **La fiche Pilotage disait faux** (§98a) : « Rien ne se saisit ici » devient « Presque tout se lit, quatre
+  choses s'écrivent » — prix des achats, ordre de passage, mois d'exercice, et ce que porte la roue. Deux
+  fiches « i » (`MV_INFO` : coût à la bouteille, simulateur) et le point « hors période » nomment la roue.
+  `WHATS_NEW` : **l'histoire n'est pas réécrite** — les anciens items qui disent « Outils › Paramétrage »
+  restent ; le harnais ne contrôle que ce qui suit `var MV_AIDE`. Guide **11** (« La roue crantée — ce qui
+  se règle » remplace « Outils du pilotage »), **12** (l'IFT et la conso ne sont plus là), **06** (carte
+  Carburant). `WHATS_NEW` 6.98, deux items.
+- **Non déplacé, et dit** : « Choisir les indicateurs » (`#pil-gear`) reste **par onglet** — c'est un réglage
+  de tuiles, contextuel à l'écran qu'on regarde ; la maquette NAV-0 le mettait dans la roue, le code montre
+  que ce serait un sélecteur d'onglet en plus. Il reste où il est.
+
+### 100b. Vérifications
+
+`npm run check` **EXIT=0** · preflight **0 erreur** (après le C22 ci-dessus) · `mv-harnais-regl-module`
+**131/131** dont **25 contre-épreuves** (+8 : `param` revenu dans `_PIL_VALID_TAB`, `param` dans
+`_PIL_TAB_MIGR`, mémorisé non ramené, feuille non repeinte, carte IFT dans la mauvaise feuille, Carburant
+non rendue, fiche qui promet le vide) ; `_ecoRenderIftCard` **exécutée** sur un DOM factice (valeur,
+écrivain, icône) · `mv-harnais-rdtmil` **85/85** (l'assertion sur l'ordre des cartes suit
+`_ecoRenderConsoCard`) · `mv-harnais-icones` : `TABLES_TRIPLET` sans `_PIL_TOOLS` · `WHATS_NEW` exécuté
+(6.98, 2 items) · `v7.57` cinq fois · guide régénéré · `npm run build` EXIT=0. Pas de rendu navigateur :
+à vérifier en admin — la barre du Pilotage finit par Archives, la roue ouvre le Paramétrage, une fenêtre
+modifiée se voit sans fermer la feuille, l'IFT se saisit dans la roue et Conformité le lit.
+
+### 100c. La note de livraison
+
+**Base : `f79891c`**. Livré dans l'état cumulé §98 → §100 : `index.html`, `src/app.js`, `src/pilotage.js`,
+`src/reglages.js`, `src/utils.js`, `src/styles.css`, `public/sw.js`, `guide/06`, `guide/11`, `guide/12`,
+`scripts/mv-harnais-regl-module.mjs`, `scripts/mv-harnais-icones.mjs`, `scripts/mv-harnais-rdtmil.mjs`,
+`scripts/harnais-claude-md.mjs`, `CLAUDE.md` (+ les fichiers de §98–§99). Suite : **NAV-4** documents Phyto
+et Réserve (le bouton CSV quitte `#phyto-tabs-row`), **NAV-5** vocabulaire.
+
+## 101. NAV-4/5 — ROUES PHYTO ET RÉSERVE, ET LE VOCABULAIRE : LA SÉRIE NAV EST CLOSE (09/09 — APP 6.98 → 6.99 · SW 7.57 → 7.58 · base `f79891c`, s'empile sur §98–§100)
+
+> Lots **④ et ⑤** de la série NAV, livrés ensemble (« Suite nav 4 et nav 5 »). ⚠️ **S'empilent sur §98–§100,
+> non commités** : les cinq lots se livrent sur la même base.
+
+### 101a. NAV-4 — les deux derniers modules
+
+- **Phyto** : la roue (`_mvReglOpen('phyto')`, admin) ouvre `#ovReglPhyto` — documents seulement : registre PDF,
+  registre tableur (CSV 2027), synthèse cuivre, via `MV_DOCS.filter(mod==='phyto')`. Le **bouton violet
+  « Exporter le registre »** qui vivait **au bas de la liste du registre** (`#phyto-export-row`, admin, onglet
+  Registre) disparaît, avec son bloc dans `_phytoSyncTabs`. ⚠️ **Correction de l'audit NAV-0 (§98a, ligne
+  « 3 portes »)** : il disait ce bouton *dans `#phyto-tabs-row`*. Faux — il était sous la liste, dans
+  `.content`. La conclusion tient (une porte de plus vers un document, hors règle), la localisation ne tenait
+  pas. *Une mesure citée avec un sélecteur doit avoir été lue à ce sélecteur.*
+- **Réserve** : l'en-tête est rendu en JS (`renderReserve`) — la roue y est rendue **admin seulement**, comme
+  au Pilotage. `#ovReglReserve` : une ligne « Aucun prix ne se saisit ici » (les achats se chiffrent dans
+  Pilotage › Économie › Achats — ce que la fiche disait déjà, la roue le redit là où on cherche), puis les
+  deux inventaires. `_mvReglOpen` ne rappelle **aucun écrivain** pour ces deux modules.
+- La roue est donc sur les **sept modules** (Vigne, Tracteur, Phyto, Cave, Réserve, Planning, Pilotage) ;
+  Réglages n'en a pas — c'est lui le transversal.
+
+### 101b. NAV-5 — le vocabulaire
+
+- **« App » → « Moi »** (libellé seul ; la clé `app`, l'id `regl-tbtn-app` et `#regl-view-app` ne bougent pas —
+  on renomme, on ne renumérote pas). Le troisième onglet ne porte plus que le personnel : mot de passe,
+  thème, plein soleil, notifications, aide, signaler, CGU, déconnexion — plus la zone dangereuse (admin).
+- **Documents & impressions passe dans Domaine** (`#set-sec-donnees`, carte « Données », en fin d'onglet).
+  `_reglStashRow` s'ancre sur `#regl-export-row` : la ligne « saisies non enregistrées » (admin) déménage
+  avec elle — chez les données, c'est mieux. « Tous les documents » depuis une roue va dans Domaine.
+  Chemins réécrits : guide **01, 04, 08, 10, 12, 13, 14**, fiches Cave et Réglages, `_mvReglDocsHtml`.
+- **Les en-têtes disent le mot du dock** : « Réserve » (`reserve.js`, fiche `MV_AIDE.reserve.titre`),
+  « Cave » (`_caveHeaderRender`). **« Le Millésime »** s'écrit comme « Le Cuvier » et « Le Chai »
+  (`#cave-sec-millesime`, groupe de la roue, fiche).
+- **« Paramétrage » n'apparaît plus à l'écran** : les deux titres de carte deviennent « Fenêtres des
+  tâches » (la feuille s'appelle déjà Réglages · Pilotage), le raccourci de l'Économie « Réglages du
+  module », la note de la frise « roue crantée ». Le harnais grave l'absence du mot hors commentaires.
+  `lint-vocabulaire` n'est pas étendu : il compte ligne par ligne, commentaires compris, et le mot y est
+  légitime en histoire — le harnais fait ce travail sur le source sans commentaires.
+- **`#page-chat` reste.** Inatteignable (`goTo('chat')` n'est écrit nulle part), rendu honnête en §51 ; le
+  retirer ne change rien pour l'utilisateur et ouvre un risque pour rien. Trancher un autre jour, avec
+  la même méthode que CAVE-5 (appelant par appelant).
+
+### 101c. Vérifications
+
+`npm run check` **EXIT=0** · preflight **0 erreur** · `mv-harnais-regl-module` **152/152** dont **30
+contre-épreuves** (+5 : export revenu sous le registre, onglet redevenu App, documents retournés sous
+App, « La Réserve », « Paramétrage » dans un titre) · `WHATS_NEW` exécuté (6.99, 2 items) · `v7.58` cinq
+fois · guide régénéré · `npm run build` EXIT=0 · démo, whatsnew, cliquets verts. Pas de rendu navigateur.
+
+### 101d. Le bilan de la série (mesuré en §98a, relu ici)
+
+| | NAV-0 | Après NAV-5 |
+|---|---|---|
+| Endroits où l'on règle | 6 | **1 règle** : la roue du module ; Réglages = Domaine · Équipe · Moi |
+| Mots pour « réglage » | 3 | **1** |
+| Portes vers un document | 3 + 9 renvois | **1 règle** : la roue du module ; le catalogue dans Domaine |
+| Onglets de Réglages | 5 | **3** |
+| Sorties dans l'en-tête | 2 | **1** (le dock) |
+| Titres de la Vigne | 3 | **1** |
+| Écrans de saisie de `CONFIG.eco` | 2 | **1** (roue du Pilotage ; conso GNR : roue du Tracteur) |
+| Onglets du Planning (admin) | 3 | **2** |
+| « Outils » du Pilotage | Archives + Paramétrage | **Archives** onglet, Paramétrage → roue |
+| Aide qui disait faux | 2 | **0** (fiche Pilotage, guide Réglages, + « onglet Modèles » mort) |
+
+Reste ouvert : la roue de la Cave est une **section**, les six autres une **feuille** — même geste, deux
+anatomies (à juger à l'usage) ; « Choisir les indicateurs » reste par onglet (§100a) ; `#page-chat`.
+
+### 101e. La note de livraison
+
+**Base : `f79891c`**. Livré dans l'état cumulé §98 → §101 : `index.html`, `src/app.js`, `src/phyto.js`,
+`src/reserve.js`, `src/cave.js`, `src/pilotage.js`, `src/utils.js`, `public/sw.js`, `guide/01, 04, 07, 08, 09,
+10, 12, 13, 14`, `scripts/mv-harnais-regl-module.mjs`, `scripts/harnais-claude-md.mjs`, `CLAUDE.md` (+ les
+fichiers de §98–§100). Puis `node scripts/build-guide.mjs`, `npm run build && firebase deploy`.

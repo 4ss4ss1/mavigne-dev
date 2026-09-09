@@ -440,7 +440,7 @@ function renderReglages(){
            +' m \u00b7 '+_dvR.pieds.toLocaleString('fr-FR')+' pieds/ha')
         : 'Non renseign\u00e9s \u2014 le bar\u00e8me suppose 10 000 pieds/ha';
     }
-    _ecoRenderConfigCard();
+    _ecoRenderConsoCard();
     _aocRenderCard();
     _reglStashRow();
     // Tâches
@@ -3095,7 +3095,7 @@ var MV_DOCS = [
   { f:'suivi', act:'entretien', mod:'tracteur', ico:'\u{1F69C}', bg:'var(--acier-pale)', fm:'pdf', ov:true,
     t:'Carnet d\u2019entretien', ask:'Choix de la machine',
     s:'Entretiens r\u00e9alis\u00e9s et \u00e0 venir, par machine, avec les heures et le GNR.' },
-  { f:'suivi', act:'etp',       mod:'',         ico:'\u2699\u{FE0F}', bg:'var(--gris-clair)', fm:'reg',
+  { f:'suivi', act:'etp',       mod:'planning', ico:'\u2699\u{FE0F}', bg:'var(--gris-clair)', fm:'reg',
     t:'Heures & ETP de la saison', ask:'',
     s:'Un r\u00e9glage, pas un document : ces heures alimentent le rapport de saison.' },
 
@@ -3206,6 +3206,10 @@ window.docsBack=function(){
 // Une action = un nom, jamais du code stocke en donnee. Si la fonction cible
 // manque (module pas encore charge, fichier plus ancien chez un client), on le
 // dit au lieu de laisser un clic sans effet.
+// Les quatre documents qui sont des VOLETS du hub (#docs-pane-*) : ils ne
+// s'affichent que le hub ouvert. Lu par les roues crantées (_mvReglDocGo).
+function _docsEstVolet(act){ return act==='mois'||act==='releve'||act==='annuelNom'||act==='etp'; }
+window._docsEstVolet=_docsEstVolet;
 window.docsGo=function(i){
   var d=MV_DOCS[i]; if(!d) return;
   if(!_docsCan(d.mod)) return;
@@ -4677,71 +4681,54 @@ window._ecoCfgSet=function(group,key,val){
   } else { return; }
   if(window.saveData) window.saveData('config');
 };
-function _ecoRenderConfigCard(){
+// ═══ CONSO GNR ET IFT DE RÉFÉRENCE — chacun chez son module (lot NAV-3) ═══
+// La carte « Économie & conformité » de Réglages › Domaine commençait par dire
+// « se renseigne ailleurs » (taux → Équipe, prix GNR → Tracteur, simulation →
+// Pilotage) avant de garder DEUX nombres sans porte métier. Ils en ont une :
+// la conso de référence est un réglage du Tracteur, l'IFT de référence un
+// réglage de la Conformité, donc du Pilotage. Deux cartes, deux roues.
+// Les écrivains n'ont pas changé : _ecoCfgSet('conso'|'ift', …).
+var _ECO_IN_CSS='width:78px;padding:7px 8px;border:1.5px solid var(--gris-clair);border-radius:9px;font-family:inherit;font-size:14px;text-align:right;background:var(--bg-app);color:var(--texte);box-sizing:border-box';
+var _ECO_ROW_CSS='display:flex;align-items:center;justify-content:space-between;gap:12px;flex-wrap:wrap';
+function _ecoCarte(titre,sous,corps){
+  return '<div style="background:var(--bg-card);border:1px solid var(--gris-clair);border-radius:16px;padding:16px 18px;margin:14px 16px">'
+    +'<div style="font-family:\'Cormorant Garamond\',serif;font-weight:700;font-size:20px;color:var(--cave,#14110D);margin-bottom:3px">'+titre+'</div>'
+    +'<div style="font-size:12.5px;color:var(--texte-doux);margin-bottom:12px">'+sous+'</div>'
+    +corps+'</div>';
+}
+// Roue du Tracteur : la conso de référence, et l'état du prix du GNR (qui se
+// saisit à l'appoint, jamais ici).
+function _ecoRenderConsoCard(){
   if(typeof isAdmin==='function' && !isAdmin()) return;
-  var host=document.getElementById('saisons-list'); if(!host||!host.parentNode) return;
-  var card=document.getElementById('eco-conf-card');
-  if(!card){ card=document.createElement('div'); card.id='eco-conf-card'; host.parentNode.insertBefore(card, host.nextSibling); }
+  var card=document.getElementById('regl-eco-tracteur'); if(!card) return;
   var e=(window.CONFIG&&window.CONFIG.eco)||{};
   var conso=(e.conso_gnr_lh!=null?e.conso_gnr_lh:6);
-  var cf=(window.CONFIG&&window.CONFIG.conformite)||{};
-  var iftRef=(cf.ift_ref!=null&&Number(cf.ift_ref)>0)?cf.ift_ref:'';
-  var inCss='width:78px;padding:7px 8px;border:1.5px solid var(--gris-clair);border-radius:9px;font-family:inherit;font-size:14px;text-align:right;background:var(--bg-app);color:var(--texte);box-sizing:border-box';
-  var lblCss='font-size:11px;font-weight:700;letter-spacing:.06em;text-transform:uppercase;color:var(--texte-doux);margin-bottom:6px';
-  var rowCss='display:flex;align-items:center;justify-content:space-between;gap:12px;flex-wrap:wrap';
-  // Les deux valeurs qui étaient saisies ici se renseignent désormais là où l'information
-  // existe vraiment : le taux dans la fiche de chaque membre, le prix du GNR au moment
-  // de l'appoint de cuve. La carte ne garde que les paramètres sans porte d'entrée métier.
-  var nTaux=0, nMbr=0;
-  (window.MEMBRES||[]).forEach(function(m){
-    if(!m||m.statut==='Inactif'||m.bureau) return;
-    nMbr++; if(_paieTaux(m.nom)!=null) nTaux++;
-  });
   var pmp=(window._mvPaieGnrPMP?window._mvPaieGnrPMP():0);
   var nApp=_paie().gnr_appoints.length;
-  var goCss='padding:7px 12px;border:1.5px solid var(--gris-clair);border-radius:9px;background:var(--bg-app);color:var(--texte);font-family:inherit;font-size:12.5px;font-weight:600;cursor:pointer;min-height:44px;white-space:nowrap';
-  var okCss='font-size:11.5px;font-weight:600;color:var(--vert,#3D6B27)';
-  var todoCss='font-size:11.5px;font-weight:600;color:var(--orange,#B85A1A)';
-  var tauxEtat = nTaux>0
-    ? ('<span style="'+okCss+'">'+nTaux+' / '+nMbr+' renseigné'+(nTaux>1?'s':'')+'</span>')
-    : ('<span style="'+todoCss+'">à renseigner</span>');
   var gnrEtat = pmp>0
-    ? ('<span style="'+okCss+'">'+(Math.round(pmp*100)/100).toLocaleString('fr-FR',{minimumFractionDigits:0,maximumFractionDigits:2})+' €/L</span>'
-       +'<div style="font-size:11px;color:var(--texte-doux)">'+(nApp>0?('moyenne pondérée sur '+nApp+' appoint'+(nApp>1?'s':'')):'ancienne saisie manuelle')+'</div>')
-    : ('<span style="'+todoCss+'">à renseigner</span>');
-  card.innerHTML=''
-    +'<div style="background:var(--bg-card);border:1px solid var(--gris-clair);border-radius:16px;padding:16px 18px;margin:14px 0">'
-    +'<div style="font-family:\'Cormorant Garamond\',serif;font-weight:700;font-size:20px;color:var(--cave,#14110D);margin-bottom:3px">Économie & conformité</div>'
-    +'<div style="font-size:12.5px;color:var(--texte-doux);margin-bottom:12px">Alimente le tableau de bord <b>Pilotage</b> (coût/ha par parcelle, passages/IFT, DRE).</div>'
-    +'<div style="height:3px;border-radius:3px;background:linear-gradient(90deg,#8A5A38,#C2871E,#3D6B27);margin-bottom:14px"></div>'
-    +'<div style="'+lblCss+'">Se renseigne ailleurs</div>'
-    +'<div style="'+rowCss+';padding:9px 0;border-bottom:1px solid var(--gris-clair)">'+_mvIconTuile('personne','terre')+'<div style="flex:1;min-width:170px">'
-      +'<div style="font-size:13.5px;color:var(--texte);font-weight:600">Taux horaire chargé</div>'
-      +'<div style="font-size:11.5px;color:var(--texte-doux)">un taux par personne, dans sa fiche</div>'
-      +'<div style="margin-top:3px">'+tauxEtat+'</div></div>'
-      +'<button type="button" onclick="window.switchReglTab(\'equipe\')" style="'+goCss+'">Ouvrir Équipe ›</button></div>'
-    +'<div style="'+rowCss+';padding:9px 0;border-bottom:1px solid var(--gris-clair)">'+_mvIconTuile('carburant','or')+'<div style="flex:1;min-width:170px">'
+    ? ('<span style="font-size:11.5px;font-weight:600;color:var(--vert,#3D6B27)">'+(Math.round(pmp*100)/100).toLocaleString('fr-FR',{minimumFractionDigits:0,maximumFractionDigits:2})+' \u20ac/L</span>'
+       +'<div style="font-size:11px;color:var(--texte-doux)">'+(nApp>0?('moyenne pond\u00e9r\u00e9e sur '+nApp+' appoint'+(nApp>1?'s':'')):'ancienne saisie manuelle')+'</div>')
+    : ('<span style="font-size:11.5px;font-weight:600;color:var(--orange,#B85A1A)">\u00e0 renseigner \u00e0 l\u2019appoint</span>');
+  card.innerHTML=_ecoCarte('Carburant','Alimente le co\u00fbt GNR par parcelle et par session dans <b>Pilotage</b>.',
+     '<div style="'+_ECO_ROW_CSS+'"><div style="flex:1;min-width:180px"><div style="font-size:13.5px;color:var(--texte);font-weight:600">Consommation GNR moyenne</div><div style="font-size:11.5px;color:var(--texte-doux)">estime le GNR par heure de tracteur quand le compteur ne le dit pas</div></div>'
+      +'<span style="display:inline-flex;align-items:center;gap:5px"><input type="number" min="0" step="0.5" value="'+conso+'" placeholder="6" onchange="window._ecoCfgSet(\'conso\',null,this.value)" style="'+_ECO_IN_CSS+'"><span style="font-size:12px;color:var(--texte-doux)">L/h</span></span></div>'
+    +'<div style="'+_ECO_ROW_CSS+';margin-top:12px;padding-top:12px;border-top:1px solid var(--gris-clair)">'+_mvIconTuile('carburant','or')+'<div style="flex:1;min-width:170px">'
       +'<div style="font-size:13.5px;color:var(--texte);font-weight:600">Prix du litre de GNR</div>'
-      +'<div style="font-size:11.5px;color:var(--texte-doux)">saisi à chaque appoint de la cuve</div>'
-      +'<div style="margin-top:3px">'+gnrEtat+'</div></div>'
-      +'<button type="button" onclick="window.goTo&&window.goTo(\'tracteur\')" style="'+goCss+'">Ouvrir Tracteur ›</button></div>'
-    // Les parametres de simulation (penalite de retard, heures sup, renfort) ont rejoint
-    // Pilotage > Outils > Parametrage : ils pilotent DEUX onglets de Pilotage et aucun
-    // ecran de Reglages. On garde ici le panneau indicateur, dans l'idiome des deux lignes
-    // ci-dessus, pour que l'admin qui les cherche ici ne se retrouve pas devant du vide.
-    +'<div style="'+rowCss+';padding:9px 0">'+_mvIconTuile('curseurs','terre')+'<div style="flex:1;min-width:170px">'
-      +'<div style="font-size:13.5px;color:var(--texte);font-weight:600">Paramètres de simulation</div>'
-      +'<div style="font-size:11.5px;color:var(--texte-doux)">pénalité de retard, heures sup, renfort</div>'
-      +'<div style="margin-top:3px"><span style="font-size:11.5px;font-weight:600;color:var(--texte-doux)">chiffrent le surcoût de retard et la courbe « Coût selon l’effectif »</span></div></div>'
-      +'<button type="button" onclick="window._pilOpenParam&&window._pilOpenParam()" style="'+goCss+'">Ouvrir Paramétrage ›</button></div>'
-    +'<div style="'+lblCss+';margin-top:18px">Paramètres du domaine</div>'
-    +'<div style="'+rowCss+'"><div style="flex:1;min-width:180px"><div style="font-size:13.5px;color:var(--texte);font-weight:600">Consommation GNR moyenne</div><div style="font-size:11.5px;color:var(--texte-doux)">estime le GNR par parcelle (≈ 6 L/h)</div></div>'
-      +'<span style="display:inline-flex;align-items:center;gap:5px"><input type="number" min="0" step="0.5" value="'+conso+'" placeholder="6" onchange="window._ecoCfgSet(\'conso\',null,this.value)" style="'+inCss+'"><span style="font-size:12px;color:var(--texte-doux)">L/h</span></span></div>'
-    +'<div style="'+rowCss+';margin-top:12px;padding-top:12px;border-top:1px solid var(--gris-clair)"><div style="flex:1;min-width:180px"><div style="font-size:13.5px;color:var(--texte);font-weight:600">'+_mvIcon('eprouvette',16)+' Passages phyto de référence</div><div style="font-size:11.5px;color:var(--texte-doux)">indicatif régional (Bourgogne ≈ 12) — vide = défaut</div></div>'
-      +'<span style="display:inline-flex;align-items:center;gap:5px"><input type="number" min="0" step="1" value="'+iftRef+'" placeholder="12" onchange="window._ecoCfgSet(\'ift\',null,this.value)" style="'+inCss+'"><span style="font-size:12px;color:var(--texte-doux)">passages</span></span></div>'
-    +'<div style="font-size:11.5px;color:var(--texte-doux);margin-top:12px;line-height:1.5">Le coût phyto par parcelle est calculé dans Pilotage depuis les <b>doses</b> (assistant de traitement) × le <b>prix unitaire des intrants</b> de La Réserve.</div>'
-    +'</div>';
+      +'<div style="font-size:11.5px;color:var(--texte-doux)">saisi \u00e0 chaque appoint de la cuve, onglet Sessions</div>'
+      +'<div style="margin-top:3px">'+gnrEtat+'</div></div></div>');
 }
+// Roue du Pilotage : l'IFT de référence, base de l'onglet Conformité.
+function _ecoRenderIftCard(){
+  if(typeof isAdmin==='function' && !isAdmin()) return;
+  var card=document.getElementById('regl-eco-pilotage'); if(!card) return;
+  var cf=(window.CONFIG&&window.CONFIG.conformite)||{};
+  var iftRef=(cf.ift_ref!=null&&Number(cf.ift_ref)>0)?cf.ift_ref:'';
+  card.innerHTML=_ecoCarte('Conformit\u00e9','Base de l\u2019onglet <b>Conformit\u00e9</b> : passages phyto et IFT.',
+     '<div style="'+_ECO_ROW_CSS+'"><div style="flex:1;min-width:180px"><div style="font-size:13.5px;color:var(--texte);font-weight:600">'+_mvIcon('eprouvette',16)+' IFT de r\u00e9f\u00e9rence</div><div style="font-size:11.5px;color:var(--texte-doux)">la r\u00e9f\u00e9rence r\u00e9gionale \u00e0 laquelle vos passages se comparent</div></div>'
+      +'<span style="display:inline-flex;align-items:center;gap:5px"><input type="number" min="0" step="1" value="'+iftRef+'" placeholder="12" onchange="window._ecoCfgSet(\'ift\',null,this.value)" style="'+_ECO_IN_CSS+'"><span style="font-size:12px;color:var(--texte-doux)">IFT</span></span></div>'
+    +'<div style="font-size:11.5px;color:var(--texte-doux);margin-top:12px;line-height:1.5">Le co\u00fbt phyto par parcelle est calcul\u00e9 dans Pilotage depuis les <b>doses</b> (assistant de traitement) \u00d7 le <b>prix unitaire des intrants</b> (Pilotage \u203a \u00c9conomie \u203a Achats).</div>');
+}
+window._ecoRenderIftCard=_ecoRenderIftCard;
 
 
 // ═══════════════════════════════════════════════════════════════════════════
@@ -4909,8 +4896,7 @@ function _aocRenderCard(){
   var card=document.getElementById('aoc-card');
   if(!card){
     card=document.createElement('div'); card.id='aoc-card';
-    var anc=document.getElementById('eco-conf-card');
-    host.parentNode.insertBefore(card, anc?anc.nextSibling:host.nextSibling);
+    host.parentNode.insertBefore(card, host.nextSibling);
   }
   var A=_aocAll(), mils=_aocMils();
   var parcs=(window.PARCELLES||[]).filter(function(p){ return p&&p.nom&&String(p.statut||'').toLowerCase()!=='arrachée'&&String(p.statut||'').toLowerCase()!=='arrachee'; });
@@ -4919,7 +4905,7 @@ function _aocRenderCard(){
   var lblCss='font-size:11px;font-weight:700;letter-spacing:.06em;text-transform:uppercase;color:var(--texte-doux);margin-bottom:6px';
   var btnCss='min-width:36px;min-height:36px;border:1px solid var(--gris-clair);background:transparent;border-radius:9px;cursor:pointer;color:var(--texte-med);display:inline-flex;align-items:center;justify-content:center';
 
-  /* ⚠️ Habillage INLINE, comme la carte voisine `eco-conf-card`. Les classes
+  /* ⚠️ Habillage INLINE (comme les cartes des roues, reglages.js). Les classes
      `mvc-*` sont posees par `_caveV2InjectCss` (cave.js) : arriver dans les
      Reglages sans avoir ouvert la Cave rendrait cette carte SANS STYLE. */
   var h='<div style="background:var(--bg-card);border:1px solid var(--gris-clair);border-radius:16px;padding:16px 18px;margin:14px 0">'

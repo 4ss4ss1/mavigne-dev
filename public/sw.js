@@ -1,4 +1,23 @@
-// MA VIGNE — Service Worker v7.55
+// MA VIGNE — Service Worker v7.58
+// v7.58 (09/09/2026) — NAV-4/5 : ROUES PHYTO ET RESERVE, VOCABULAIRE. Le bouton
+//   d'export CSV quitte le bas du registre phyto (#phyto-export-row retire) ;
+//   #ovReglPhyto et #ovReglReserve ne portent que les documents. « App » devient
+//   « Moi », le catalogue des documents passe dans Domaine (#set-sec-donnees),
+//   les en-tetes disent « Cave » et « Reserve », « Le Millesime » prend sa
+//   majuscule, « Parametrage » disparait des ecrans. APP 6.99.
+// v7.57 (09/09/2026) — NAV-3 : LE PARAMETRAGE DU PILOTAGE EST DANS LA ROUE.
+//   Plus de bouton « Outils » ni de menu : Archives est le 8e onglet (apres le
+//   filet), le Parametrage se rend dans #pil-regl-host (feuille #ovReglPilotage,
+//   _pilParamOpen / _pilParamRefresh), la cle memorisee 'param' migre vers 'auj'.
+//   La carte « Economie & conformite » de Reglages > Domaine disparait : conso GNR
+//   dans la roue du Tracteur (_ecoRenderConsoCard), IFT de reference dans celle du
+//   Pilotage (_ecoRenderIftCard). Sept regles CSS .pil-outils-* retirees. APP 6.98.
+// v7.56 (09/09/2026) — NAV-2 : LE CADRE DU PLANNING EST DANS LA ROUE CRANTEE.
+//   L'onglet « Le cadre » quitte #plan-tabs ; _planRenderCadre ecrit dans
+//   #plan-cadre-host (feuille #ovReglPlanning), les cles 'cadre'/'templates'
+//   migrent vers 'mois'. Les cinq documents du Planning sont dans la roue ; les
+//   volets du hub (mois, releve, annuelNom, etp) y sont emmenes par _mvReglDocGo.
+//   APP 6.97.
 // v7.55 (09/09/2026) — NAV-1 : LA ROUE CRANTEE DES MODULES. Les reglages de la
 //   Vigne et du Tracteur quittent le module Reglages pour la roue crantee de
 //   leur en-tete (blocs reparentes dans #ovReglVigne / #ovReglTracteur, memes
@@ -3620,7 +3639,7 @@
 // v2.22 — Fix profils vides : guard vide dans loadData() pour MEMBRES/SAISONS/TACHES
 // v2.17 — Onboarding intégré + tenantId · v2.06 — Firebase Auth · v2.00–v2.05 — divers
 const DEBUG = self.location.hostname === 'localhost' || self.location.hostname === '127.0.0.1';
-const CACHE_NAME   = 'mavigne-v7.55';
+const CACHE_NAME   = 'mavigne-v7.58';
 const TENANT_CACHE = 'mavigne-tenant';   // Cache persistant — préservé à chaque mise à jour SW
 const SYNC_TAG     = 'mavigne-sync';
 
@@ -3636,7 +3655,7 @@ const CDN_URLS = [
 ];
 
 self.addEventListener('install', event => {
-  if(DEBUG) console.log('[SW] Ma Vigne v7.55 installé');
+  if(DEBUG) console.log('[SW] Ma Vigne v7.58 installé');
   event.waitUntil(
     caches.open(CACHE_NAME).then(async cache => {
       // ── Cœur applicatif : STRICT (mise à jour ATOMIQUE) ──
@@ -3652,7 +3671,7 @@ self.addEventListener('install', event => {
 });
 
 self.addEventListener('activate', event => {
-  if(DEBUG) console.log('[SW] Ma Vigne v7.55 activé');
+  if(DEBUG) console.log('[SW] Ma Vigne v7.58 activé');
   event.waitUntil(
     caches.keys().then(keys =>
       Promise.all(

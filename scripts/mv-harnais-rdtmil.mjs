@@ -286,7 +286,10 @@ console.log('\n\u2500\u2500 I. la carte des Reglages \u2500\u2500');
 {
   const REG = readFileSync('src/reglages.js', 'utf8');
   t('la carte existe et est rendue avec l\'onglet Domaine',
-    /function _aocRenderCard\(\)/.test(REG) && /_ecoRenderConfigCard\(\);\n    _aocRenderCard\(\);/.test(REG));
+    // ★ Lot NAV-3 : la carte « Economie & conformite » n'existe plus (conso GNR dans la
+    //   roue du Tracteur, IFT dans celle du Pilotage) ; la carte des appellations suit
+    //   directement _ecoRenderConsoCard dans renderReglages, et s'ancre sur #saisons-list.
+    /function _aocRenderCard\(\)/.test(REG) && /_ecoRenderConsoCard\(\);\n    _aocRenderCard\(\);/.test(REG));
   t('elle est reservee a l\'administrateur',
     /function _aocRenderCard\(\)\{\n  if\(typeof isAdmin==='function'&&!isAdmin\(\)\) return;/.test(REG));
   t('CONFIG.appellations est mute EN PLACE, jamais remplace',

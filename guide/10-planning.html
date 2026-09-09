@@ -2,19 +2,22 @@
 <section id="planning">
   <div class="sec-h">
     <div class="sec-ic" aria-hidden="true">{ic:calendrier}</div>
-    <div><h2>Planning RH</h2><div class="sub">Le mois · Les gens · Le cadre</div></div>
+    <div><h2>Planning RH</h2><div class="sub">Le mois · Les gens · et la roue crantée</div></div>
   </div>
   <p class="lead">Le Planning gère les horaires réels de l'équipe, les congés, le compteur d'heures et
   les acomptes. C'est un module <b>réservé à l'administrateur</b> ; chaque salarié y voit son propre
   mois, et rien d'autre.</p>
 
-  <h3>{ic:balance} Trois onglets, un verbe chacun</h3>
+  <h3>{ic:balance} Deux onglets, et une roue crantée</h3>
   <ul class="dot">
     <li><b>Le mois</b> — la grille de toute l'équipe. C'est là qu'on tient le planning au jour le jour.</li>
     <li><b>Les gens</b> — une ligne par salarié <b>du mois affiché</b>, sa fiche (mois, congés,
     compteur, acomptes, PDF), le récap annuel et les anciens salariés.</li>
-    <li><b>Le cadre</b> — ce qui se règle une fois par an : modèles de semaine, coupure, convention
-    collective, règle de décompte des congés, sort des heures faites au-delà du planning.</li>
+    <li><b>La roue crantée</b> {ic:engrenage}, en haut à droite — ce qui se règle une fois par an :
+    modèles de semaine, coupure, convention collective, règle de décompte des congés, sort des heures
+    faites au-delà du planning. C'était l'onglet « Le cadre » ; un réglage annuel n'a pas sa place à
+    côté du mois. La roue porte aussi les <b>relevés à imprimer</b> : relevé mensuel, relevé d'un
+    salarié, planning de l'année, planning de l'année d'un salarié, Heures &amp; ETP.</li>
   </ul>
   <p>Un salarié qui n'est pas administrateur ne voit <b>aucun onglet</b> : il arrive directement sur
   son mois.</p>
@@ -100,7 +103,7 @@
   <h3>{ic:balance} Le cadre légal, affiché en permanence</h3>
   <p>Les valeurs par défaut suivent la convention nationale <b>Production agricole et CUMA
   (IDCC 7024)</b>. Elles sont <b>paramétrables</b> pour s'adapter à une autre convention&nbsp;:
-  <span class="path">Planning › Le cadre</span>.</p>
+  <span class="path">Planning › {ic:engrenage}</span>.</p>
   <div class="tw"><table>
     <tr><th>Repère</th><th>Valeur par défaut</th></tr>
     <tr><td>Durée légale hebdomadaire</td><td>35 h</td></tr>
@@ -206,7 +209,7 @@
 
   <h3>{ic:calendrier} Dimanches et jours f&eacute;ri&eacute;s travaill&eacute;s</h3>
   <p>Un dimanche de vendange ou un jour f&eacute;ri&eacute; pass&eacute; &agrave; la vigne se majore
-  automatiquement. Deux taux se r&egrave;glent dans <b>Le cadre</b> : <b>50&nbsp;%</b> le dimanche et
+  automatiquement. Deux taux se r&egrave;glent dans la roue crant&eacute;e : <b>50&nbsp;%</b> le dimanche et
   <b>100&nbsp;%</b> un jour f&eacute;ri&eacute; par d&eacute;faut.</p>
   <ul class="dot">
     <li>Seules les <b>heures r&eacute;ellement faites</b> comptent. Un f&eacute;ri&eacute;
@@ -253,7 +256,7 @@
   Le compteur du <b>Tracteur</b>, lui, dit bien « pause déjeuner » : seul en cabine, le
   conducteur en choisit vraiment le moment. Le mot y est donc exact.</div></div>
   <p>L'heure de la coupure se règle dans
-  <span class="path">Planning › Le cadre</span>,
+  <span class="path">Planning › {ic:engrenage}</span>,
   sous la durée. Trois réponses
   possibles : une heure fixe, « selon le chantier », ou rien. Tant que rien n'est renseigné,
   l'application n'affiche que la durée, sans prétendre savoir quand elle tombe. Un domaine dont la
@@ -261,7 +264,7 @@
 
   <h3>{ic:personne} Le relevé d'un seul salarié</h3>
   <p>C'est le document qu'on vous demande en premier lors d'un contrôle. Il s'édite depuis
-  <span class="path">Réglages › App › Documents &amp; impressions</span> en choisissant
+  la roue crantée du Planning, <span class="path">Planning › {ic:engrenage} › Documents</span>, en choisissant
   <b>la personne et le mois</b>, ou depuis le bouton <b>PDF</b> de sa fiche — c'est le même
   document dans les deux cas.</p>
   <ul class="dot">
@@ -286,7 +289,7 @@
   décompte d'heures, <b>pas un bulletin de paie</b> : aucun montant n'y figure.</div></div>
 
   <h3>{ic:calendrier} Le planning de l'année</h3>
-  <p>Depuis Réglages, onglet App, « Documents &amp; impressions », le document
+  <p>Depuis la roue crantée du Planning (ou le catalogue complet, Réglages › Domaine), le document
   <b>Planning de l'année</b> sort le rythme de travail sur douze mois : jours travaillés,
   heures de <b>prise et de fin de service</b>, coupure déjeuner, fermetures du domaine et jours
   fériés. Il vous demande l'année, et propose par défaut celle à venir.</p>
@@ -322,7 +325,8 @@
   les douze mois, et le total distingue les deux. Ce qui sera saisi <b>après</b> l'édition ne peut
   évidemment pas y figurer.</div></div>
   <div class="note warn"><span class="ni" aria-hidden="true">{ic:alerte}</span><div>Pour imprimer l'année
-  <b>à venir</b>, importez d'abord son planning au format CSV depuis l'onglet Modèles. Sans modèle
+  <b>à venir</b>, importez d'abord son planning au format CSV depuis la roue crantée, bloc Modèles de
+  semaine. Sans modèle
   enregistré pour cette année-là, le document se rabat sur le modèle intégré, dont les jours sont
   calés sur un autre calendrier : les jours de semaine ne tombent pas aux mêmes dates. Le document
   vous le signale en clair, mais ne le diffusez pas à l'équipe en l'état.</div></div>

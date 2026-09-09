@@ -23,7 +23,7 @@ export const GT_ADMIN_EMAIL = 'ngdevpro@gmail.com';
 // WHATS_NEW   : tableau vide = modal desactive pour cette version.
 // Format item : { emoji:'📅', titre:'Titre court', desc:'Phrase utilisateur.' }
 // Regle : seulement les changements visibles par les utilisateurs.
-export const APP_VERSION = '6.96';
+export const APP_VERSION = '6.99';
 // ════ Journal des nouveautés (récap cumulatif) ════
 // Une entrée par version, la PLUS RÉCENTE EN HAUT : { v:'5.10', items:[ {emoji,titre,desc}, … ] }
 // À chaque release visible → AJOUTER un bloc en tête (ne pas remplacer). items:[] = release technique (rien à afficher).
@@ -354,11 +354,27 @@ window._mvGraphRepeindre = function(){
 };
 
 export const WHATS_NEW = [
+  { v: '6.99', items: [
+    { emoji: 'engrenage', titre: 'Chaque module a sa roue crant\u00e9e \u2014 le Phyto et la R\u00e9serve aussi',
+      desc: "Le registre phyto (PDF et fichier tableur) et la synth\u00e8se cuivre s\u2019impriment depuis la roue du Phyto ; le gros bouton violet au bas du registre n\u2019existe plus. Les deux inventaires de la R\u00e9serve sont dans la sienne. M\u00eame geste sur les sept modules." },
+    { emoji: 'curseurs', titre: 'R\u00e9glages : Domaine, \u00c9quipe, Moi',
+      desc: "Le troisi\u00e8me onglet s\u2019appelle <b>Moi</b> : mot de passe, th\u00e8me, plein soleil, notifications, aide, CGU, d\u00e9connexion. Le catalogue complet des documents \u2014 registres, rapports, sauvegarde \u2014 est pass\u00e9 dans <b>Domaine</b>, o\u00f9 il a sa place. Un mot par chose : les en-t\u00eates disent \u00ab Cave \u00bb et \u00ab R\u00e9serve \u00bb comme le menu du bas, \u00ab Le Mill\u00e9sime \u00bb s\u2019\u00e9crit comme \u00ab Le Cuvier \u00bb, et le mot \u00ab Param\u00e9trage \u00bb a disparu." }
+  ] },
+  { v: '6.98', items: [
+    { emoji: 'graphique', titre: 'Le Pilotage n\u2019a plus de bouton \u00ab Outils \u00bb',
+      desc: "Il cachait deux choses de nature diff\u00e9rente. <b>Archives</b> se lit : c\u2019est maintenant un onglet, apr\u00e8s \u00c9conomie et Conformit\u00e9. <b>Param\u00e9trage</b> se r\u00e8gle : objectifs de fin, fen\u00eatres des t\u00e2ches et hypoth\u00e8ses de calcul sont dans la roue crant\u00e9e en haut \u00e0 droite, avec le bilan de campagne \u00e0 imprimer." },
+    { emoji: 'curseurs', titre: 'Deux nombres ont rejoint leur module',
+      desc: "La consommation GNR de r\u00e9f\u00e9rence est dans la roue du Tracteur, avec l\u2019\u00e9tat du prix du litre ; l\u2019IFT de r\u00e9f\u00e9rence dans la roue du Pilotage, \u00e0 c\u00f4t\u00e9 de ce qu\u2019il alimente. La carte \u00ab \u00c9conomie &amp; conformit\u00e9 \u00bb de R\u00e9glages \u203a Domaine, qui commen\u00e7ait par dire \u00ab se renseigne ailleurs \u00bb, n\u2019existe plus." }
+  ] },
+  { v: '6.97', items: [
+    { emoji: 'calendrier', titre: 'Le Planning a deux onglets, et sa roue crant\u00e9e',
+      desc: "\u00ab Le cadre \u00bb \u2014 mod\u00e8les de semaine, coupure, convention, r\u00e8gle des cong\u00e9s, heures sup \u2014 se r\u00e8gle une fois l\u2019an : il n\u2019avait rien \u00e0 faire \u00e0 c\u00f4t\u00e9 du mois. Il est dans la roue crant\u00e9e en haut \u00e0 droite, avec les relev\u00e9s \u00e0 imprimer \u2014 relev\u00e9 mensuel, relev\u00e9 d\u2019un salari\u00e9, planning de l\u2019ann\u00e9e, Heures &amp; ETP. Un onglet m\u00e9moris\u00e9 sur \u00ab Le cadre \u00bb rouvre sur le mois." }
+  ] },
   { v: '6.96', items: [
     { emoji: 'engrenage', titre: 'La Vigne et le Tracteur r\u00e8glent leurs affaires chez eux',
       desc: "Une roue crant\u00e9e en haut \u00e0 droite de la Vigne ouvre vos t\u00e2ches et leur bar\u00e8me, vos \u00e9cartements de plantation et vos secteurs m\u00e9t\u00e9o ; celle du Tracteur ouvre le parc, les activit\u00e9s et le chrono. C\u2019\u00e9tait dans R\u00e9glages, deux onglets plus loin \u2014 m\u00eame \u00e9cran, m\u00eame contenu, \u00e0 un tap du module. Comme la Cave depuis la semaine derni\u00e8re." },
     { emoji: 'imprimante', titre: 'Les documents d\u2019un module sont dans sa roue',
-      desc: "L\u2019\u00e9tat du vignoble, le rapport de saison et les fichiers du journal et des parcelles s\u2019impriment depuis la roue de la Vigne ; le carnet d\u2019entretien depuis celle du Tracteur. Le catalogue complet reste dans R\u00e9glages \u203a App \u203a Documents &amp; impressions." },
+      desc: "L\u2019\u00e9tat du vignoble, le rapport de saison et les fichiers du journal et des parcelles s\u2019impriment depuis la roue de la Vigne ; le carnet d\u2019entretien depuis celle du Tracteur. Le catalogue complet reste dans R\u00e9glages \u203a Domaine \u203a Documents &amp; impressions." },
     { emoji: 'curseurs', titre: 'R\u00e9glages a trois onglets, et une seule sortie par \u00e9cran',
       desc: "Domaine, \u00c9quipe, App \u2014 plus de barre qui d\u00e9file, plus de compteurs en t\u00eate. Le petit bouton maison des en-t\u00eates est parti : il faisait la m\u00eame chose que le menu du bas, et sur l\u2019Accueil il vous envoyait ailleurs. Le voyant de synchronisation, lui, est toujours \u00e0 sa place." }
   ] },
@@ -2145,14 +2161,11 @@ function _mvAideSections(sel, amorce, suite) {
 // épingle en plus l'outil ouvert, elle n'annonce donc pas toujours le même
 // nombre. Le code, lui, ne varie pas.
 function _mvAideOngletsPil() {
-  var t = window._PIL_TABS, o = window._PIL_TOOLS;
+  var t = window._PIL_TABS;
   if (!t || !t.length) return null;
   var noms = t.map(function (x) { return x[2]; });
-  var outils = (o && o.length)
-    ? (' Le bouton Outils ouvre ' + _mvAideEnum(o.map(function (x) { return x[2].toLowerCase(); })) + '.')
-    : '';
   return [_mvAideNb(noms.length) + ' onglets',
-    ': ' + _mvAideEnum(noms) + '.' + outils + ' Le dernier ouvert revient à la visite suivante.'];
+    ': ' + _mvAideEnum(noms) + '. Le dernier ouvert revient à la visite suivante.'];
 }
 
 var MV_AIDE = {
@@ -2217,26 +2230,27 @@ var MV_AIDE = {
       ['Un traitement', "= des produits, les parcelles cochées et un conducteur. La surface se calcule seule."],
       ['Le bouton rond en bas à droite', "ouvre un nouveau traitement."],
       ['Le délai de rentrée', "se déduit des mentions de danger du produit : la parcelle traitée se ferme d’elle-même jusqu’à son heure de libération."],
-      ['Le registre sort sous deux formes', ": le PDF à présenter, et un fichier tableur avec une ligne par produit et par parcelle. Ce second format est celui qui sera attendu en contrôle à partir du 1er janvier 2027."],
-      ['Le budget cuivre', "cumule le cuivre métal sur sept ans glissants face au plafond. Il informe, il ne bloque rien."],
+      ['Le registre sort sous deux formes', "depuis la roue crantée en haut à droite : le PDF à présenter, et un fichier tableur avec une ligne par produit et par parcelle. Ce second format est celui qui sera attendu en contrôle à partir du 1er janvier 2027."],
+      ['Le budget cuivre', "cumule le cuivre métal sur sept ans glissants face au plafond. Il informe, il ne bloque rien. Sa synthèse s’imprime depuis la roue crantée."],
       ['Accès', ": rôle Admin ou Tractoriste."]
     ]
   },
   planning: {
     ico: 'calendrier', titre: 'Planning', ancre: 'planning',
     points: [
-      ['Trois onglets', ": Le mois, la grille de toute l’équipe. Les gens, une ligne par salarié et sa fiche. Le cadre, ce qui se règle une fois par an. Un salarié qui n’est pas administrateur n’a pas d’onglets : il arrive sur son mois."],
+      ['Deux onglets', ": Le mois, la grille de toute l’équipe. Les gens, une ligne par salarié et sa fiche. Un salarié qui n’est pas administrateur n’a pas d’onglets : il arrive sur son mois."],
+      ['La roue crantée', "en haut à droite ouvre le cadre de l’année — modèles de semaine, coupure, convention, règle des congés, sort des heures sup — et les relevés à imprimer. Administrateur seulement."],
       ['Toucher une case', "la coche. Toucher le numéro du jour, en haut, coche toute l’équipe ce jour-là ; toucher un nom coche sa ligne ; toucher « Salarié », dans le coin, coche tout ce qui est affiché. Un deuxième appui décoche."],
       ['La barre du bas', "dit qui est coché et à quelles dates, puis propose ce qui s’applique vraiment à cette sélection — heures, congé, absence, récup, chaleur, effacer. Une case ou trente, c’est le même geste et la même fiche."],
       ['Sur une période plus longue', "que la vue affichée, deux boutons au-dessus de la grille posent des congés ou des horaires chaleur du jour au jour, pour plusieurs salariés."],
       ['Les heures dues', "se décomptent sur une absence injustifiée ou un retard. Un arrêt de travail est neutre, une formation compte comme du travail."],
       ['Un retard se note par l’heure d’arrivée', ": indiquez l’heure à laquelle la personne est arrivée, l’écran calcule ce qui manque. La journée est payée à hauteur de ce qui a été fait, et les heures manquées tirent sur le compteur d’heures sup, comme une récupération — sans qu’aucun réglage soit nécessaire. Arriver après la fin prévue n’est plus un retard : la saisie bascule seule en absence injustifiée."],
-      ['Présence, coupure, heures dues', "trois nombres qui se ressemblent et ne disent pas la même chose. La ‹‹ présence ›› va de l’arrivée au départ. La ‹‹ coupure ›› est le temps non travaillé au milieu : sa durée et son heure sont fixées par le domaine, dans l’onglet Le cadre, ce n’est pas un moment que chacun choisit. Les ‹‹ heures dues ›› sont ce qui part en paie et alimente le compteur des 1 607 h. Une journée de 09:00 à 16:00 avec une heure de coupure fait 7 h de présence et 6 h dues."],
+      ['Présence, coupure, heures dues', "trois nombres qui se ressemblent et ne disent pas la même chose. La ‹‹ présence ›› va de l’arrivée au départ. La ‹‹ coupure ›› est le temps non travaillé au milieu : sa durée et son heure sont fixées par le domaine, dans la roue crantée du Planning, ce n’est pas un moment que chacun choisit. Les ‹‹ heures dues ›› sont ce qui part en paie et alimente le compteur des 1 607 h. Une journée de 09:00 à 16:00 avec une heure de coupure fait 7 h de présence et 6 h dues."],
       ['Le planning de l’année', "s’imprime depuis le même endroit : le rythme sur douze mois, avec les heures de prise et de fin de service et la coupure déjeuner. Une page par modèle de semaine — c’est le document qu’on remet à l’équipe pour l’année à venir. Une variante nominative sort la même grille pour une seule personne, bornée à ses contrats, avec ses jours de formation et ses congés déjà posés."],
-      ['Le relevé mensuel', "s’imprime depuis Réglages, onglet App, « Documents & impressions ». C’est un relevé d’heures, pas un bulletin de paie."],
+      ['Le relevé mensuel', "s’imprime depuis la roue crantée du Planning, bloc Documents. C’est un relevé d’heures, pas un bulletin de paie."],
       ['Le relevé d’un seul salarié', "s’imprime au même endroit, en choisissant la personne et le mois : son mois jour par jour, ses contrats avec leurs coupures, ses congés payés, son compteur d’heures et son annualisation, avec deux lignes de signature. Le bouton PDF de sa fiche sort exactement le même document. Les anciens salariés y figurent aussi, marqués comme tels : un relevé est un document d’histoire."],
       ['Un ancien salarié', "reste compté dans les mois où il était sous contrat. Reculez d’un mois dans Les gens : il reprend sa ligne dans la liste, avec ses heures, et il disparaît de la section Anciens salariés ce mois-là. Passer une fiche en Inactif ferme son accès à l’application, cela n’efface aucune heure déjà faite."],
-      ['Dimanches et jours fériés travaillés', "se majorent tout seuls — 50 % le dimanche, 100 % un jour férié, taux modifiables dans Le cadre. Seules les heures réellement faites comptent : un férié chômé reste payé sans majoration, un congé ou une récup ne majorent rien, et un férié qui tombe un dimanche prend le taux le plus fort, jamais les deux. La majoration part en paie si vos heures sup se paient, au compteur si elles se récupèrent. Elle ne compte pas dans les 1 607 h."],
+      ['Dimanches et jours fériés travaillés', "se majorent tout seuls — 50 % le dimanche, 100 % un jour férié, taux modifiables dans la roue crantée du Planning. Seules les heures réellement faites comptent : un férié chômé reste payé sans majoration, un congé ou une récup ne majorent rien, et un férié qui tombe un dimanche prend le taux le plus fort, jamais les deux. La majoration part en paie si vos heures sup se paient, au compteur si elles se récupèrent. Elle ne compte pas dans les 1 607 h."],
     ['Taux horaires et acomptes', ": administrateurs seulement, et jamais enregistrés sur l’appareil."]
     ]
   },
@@ -2245,7 +2259,7 @@ var MV_AIDE = {
     points: [
       function () {
         return _mvAideSections('#cave-sec-tabs .mvu-tab', 'sections',
-          "Aujourd’hui dit ce qui presse, Le Cuvier suit la vendange, Le Chai suit l’élevage, Le millésime raconte le vin.");
+          "Aujourd’hui dit ce qui presse, Le Cuvier suit la vendange, Le Chai suit l’élevage, Le Millésime raconte le vin.");
       },
       ['Aujourd’hui', "est l’écran d’arrivée de la Cave. En tête, le verdict : ce qui ne peut pas attendre, dans l’ordre — une fermentation qui ralentit, une malo bloquée, des cuves sans relevé depuis hier ou avant, du raisin à rentrer, des fûts à ouiller, une malo finie à soutirer, une dose de SO\u2082 programmée. Dessous, les quatre semaines à venir, et ce qui n’a pas de date (les fûts en fin de vie). Chaque ligne est un bouton qui ouvre le geste. Tout vient de ce qui est déjà saisi, rien de plus à remplir."],
       ['Les quatre chiffres du haut', "sont ceux de la cave entière, les mêmes sur les quatre onglets : hL en cuve (une estimation d’après les kilos tant que rien n’est décuvé, marquée ≈), fûts en vin, lignes à faire cette semaine, tonnes rentrées. La ligne sous la bande dit sur quel millésime ils sont calculés. Le filtre millésime du Chai n’agit que sur sa liste, pas sur la bande."],
@@ -2291,12 +2305,12 @@ var MV_AIDE = {
       ['Poser un plafond, puis tous les autres', "après la première saisie, l\u2019application propose de porter la même valeur sur les parcelles du millésime qui n\u2019ont aucun plafond, en les nommant d\u2019abord. Celles qui en ont déjà un ne sont jamais touchées."],
       ['Votre rendement au pressoir', "se règle dans la roue crantée de la Cave, bloc Le Cuvier, en kilos de raisin par hectolitre. Tous les écrans qui transforment des raisins en volume s’en servent — la chaîne de la récolte à la bouteille comme le bilan de campagne."],
       ['Les analyses labo', "s’attachent en PDF à la cuvée. Les supprimer est réservé à l’administrateur."],
-      ['Quatre documents sortent de la Cave', "depuis la roue crantée de la Cave, bloc Documents — ou depuis Réglages, onglet App, « Documents & impressions », qui les a tous : le contrôle de maturité avant vendange, le cahier de cuverie pendant la fermentation, le registre des manipulations et le bilan de campagne. Ce sont des états internes : Ma Vigne prépare, vous déclarez. Le cahier de cuverie imprime aussi <b>la courbe</b> de chaque cuve — densité et température, avec les opérations datées — au-dessus de son tableau ; sous trois relevés de densité, il n’y a pas de courbe. Il s’ouvre sur un <b>comparatif</b> de toutes les cuves, alignées sur leur jour d’encuvage et non sur le calendrier, avec le sucre relevé à la vigne avant l’encuvage."],
+      ['Quatre documents sortent de la Cave', "depuis la roue crantée de la Cave, bloc Documents — ou depuis Réglages, onglet Domaine, « Documents & impressions », qui les a tous : le contrôle de maturité avant vendange, le cahier de cuverie pendant la fermentation, le registre des manipulations et le bilan de campagne. Ce sont des états internes : Ma Vigne prépare, vous déclarez. Le cahier de cuverie imprime aussi <b>la courbe</b> de chaque cuve — densité et température, avec les opérations datées — au-dessus de son tableau ; sous trois relevés de densité, il n’y a pas de courbe. Il s’ouvre sur un <b>comparatif</b> de toutes les cuves, alignées sur leur jour d’encuvage et non sur le calendrier, avec le sucre relevé à la vigne avant l’encuvage."],
       ['Deux autres s’éditent au plus près de la livraison', "le bon de livraison d’un chargement et le récapitulatif de campagne d’un acheteur, depuis les ventes en vrac. Ils portent le nom du domaine, les kilos livrés, et les volumes rendus dès que le client a répondu."]
     ]
   },
   reserve: {
-    ico: 'carton', titre: 'La Réserve', ancre: 'reserve',
+    ico: 'carton', titre: 'Réserve', ancre: 'reserve',
     points: [
       function () {
         return _mvAideSections('.mvr-tabs .mvu-tab', 'onglets',
@@ -2306,6 +2320,7 @@ var MV_AIDE = {
       ['En tête de Fûts', "deux lectures venues de la Cave : la part des anges — ce que l’ouillage a réellement remis dans chaque cuvée sur douze mois, une ligne par millésime — et la pyramide des âges du parc, avec les barriques au-delà de la durée de vie fixée. Elles étaient dans le Pilotage ; le parc n’a plus qu’un chez-soi."],
       ['Entonner, embouteiller ou retirer', "ne change pas le nombre de fûts du domaine. Seuls acheter et se séparer le font."],
       ['Le registre des mouvements', "en bas de l’onglet garde chaque entrée et chaque sortie, avec son motif."],
+      ['La roue crantée', "en haut à droite imprime les deux inventaires, fûts et intrants. Administrateur seulement."],
       ['Le prix moyen d’un intrant', "n’est pas saisi ici : il se calcule sur vos factures, euros divisés par quantité, et s’affiche sur la fiche. Les lignes sans prix sont écartées du calcul plutôt que comptées à zéro — sinon la moyenne serait tirée vers le bas sans en avoir l’air."],
       ['Les prix se mettent ailleurs', "dans <b>Pilotage › Économie › Achats</b>, qui rassemble tout ce qui a été acquis — intrants, fûts, passages chez le réparateur. C’est voulu : le prix arrive avec la facture, des semaines après le geste, et on le saisit en une fois plutôt qu’écran par écran."],
       ['Le bilan se calcule seul', ": inventaire d’ouverture + achats − consommation. Aucun stock à tenir à la main."],
@@ -2317,7 +2332,8 @@ var MV_AIDE = {
   pilotage: {
     ico: 'graphique', titre: 'Pilotage', ancre: 'pilotage',
     points: [
-      ['Rien ne se saisit ici', ": tout est en lecture seule. Les chiffres viennent du journal, du planning et des sessions tracteur."],
+      ['Presque tout se lit, quatre choses s’écrivent', ": les chiffres viennent du journal, du planning, des sessions tracteur et de la cave. Ce qui s’écrit ici est nommé : les prix des achats (Économie), l’ordre de passage (Décider), le mois d’ouverture de l’exercice (L’année), et ce que porte la roue crantée."],
+      ['La roue crantée', "en haut à droite ouvre ce qui se règle : objectifs de fin, fenêtres des tâches, hypothèses de calcul, IFT de référence — et le bilan de campagne à imprimer. Administrateur seulement."],
       ['Les cartes arrivent repliées', ": chaque bloc montre son <b>chiffre</b> et la ligne qui dit sur quoi il a été calculé, même fermé — rien n’est caché. Touchez-en une pour voir son détail : elle s’ouvre en grand, et la précédente se referme, pour que les autres restent rangées côte à côte."],
       ['Le petit rond « i » dit d’où vient un chiffre', ": touchez-le, une fiche s’ouvre et explique comment ce chiffre est calculé, sur quelle fenêtre, et ce qu’il ne dit pas. Ce qui <b>cadre</b> un chiffre — sa date, sa source, son périmètre — reste toujours affiché à côté de lui, en une ligne. C’est la méthode qui se range, jamais le cadre."],
       ['Quand il manque quelque chose, un bouton vous y emmène', ": plus de chemin à retenir. « Cuve GNR à renseigner », « fiches à passer en Inactif » — le bouton ouvre l’écran concerné, sur le bon onglet, et fait clignoter l’endroit exact une seconde."],
@@ -2330,7 +2346,7 @@ var MV_AIDE = {
       ['La campagne', "montre l’avancement, mais aussi — sous « Où va le temps de l’équipe » — comment la présence se partage entre vigne, tracteur et le reste, avec la frise prévu/réel, la courbe par semaine et l’écart. Ces blocs parlent d’une campagne ; le pic de la semaine la plus chargée, lui, se lit dans « L’année »."],
       ['Deux périodes qui se chevauchent', "ne comptent rien deux fois : les heures suivent les tâches, et une tâche n’appartient qu’à une seule période. Sur les jours communs, la frise hachure le fond en violet — il y a deux barres au même endroit, on lit la plus haute."],
       ['Une fenêtre de tâche s’arrête le jour écrit', " : fin au 25 avril, le 25 travaille. Et les heures se répartissent au prorata des jours <b>travaillables</b> : une semaine de ponts en reçoit moins, les semaines pleines récupèrent le reste."],
-      ['Le marqueur « hors période »', "dans Outils › Paramétrage veut dire qu’une fenêtre enregistrée ne tombe pas dans cette période. La fenêtre par défaut s’applique à la place, et l’écran le dit au lieu d’écraser tout le travail sur un seul jour."],
+      ['Le marqueur « hors période »', "dans la roue crantée, fenêtres des tâches, veut dire qu’une fenêtre enregistrée ne tombe pas dans cette période. La fenêtre par défaut s’applique à la place, et l’écran le dit au lieu d’écraser tout le travail sur un seul jour."],
       ['Décider', "— l’onglet s’appelait <b>Simuler</b>, mais l’ordre de passage qu’on y enregistre part sur l’écran de toute l’équipe : c’est le seul endroit du Pilotage qui change ce que les autres voient. On simule, puis on décide de diffuser. Il répond à deux questions : dans quel ordre passer sur les parcelles, et combien de renfort prendre — à quelle date, et pour quel coût. La simulation part de l’effectif <b>déjà sous contrat</b>, vendangeurs compris : le renfort que vous posez s’ajoute à cette ligne. Le sélecteur « On part de » permet de repasser aux permanents seuls pour préparer la campagne suivante."],
       ['Décider compte sur la fenêtre du TRAVAIL', ", pas sur le calendrier d’aujourd’hui. Quarante vendangeurs engagés du 26 août au 4 septembre comptent dès maintenant pour l’ordre de passage et la répartition de la vendange — même si vous êtes seul dans les rangs ce matin. Le jour du travail, personne n’est en congé et tous les contrats courent."],
       ['Un contrat de groupe compte pour son effectif', " : une fiche « équipe de vendange » à 40 vaut 40 personnes, pas une ligne. Inutile de créer quarante fiches. L’écran dit toujours sur quelles dates il a compté, et affiche l’écart avec la présence du jour."],
@@ -2362,7 +2378,7 @@ var MV_AIDE = {
       ['Le taux horaire d’un salarié', "porte une date. Une augmentation s’enregistre « à partir du » jour choisi : les heures déjà travaillées gardent l’ancien taux, et le coût d’un exercice clos ne bouge plus. La fiche liste tout ce que ce taux a valu ; pour corriger une simple faute de frappe sans créer d’augmentation, videz la date. Ces montants sont visibles des seuls administrateurs."],
       ['Le mot de passe initial', "d’un nouveau membre s’affiche une seule fois — notez-le avant de fermer."],
       ['Passer un membre en inactif', "plutôt que le supprimer conserve son historique."],
-      ['Documents & impressions', "dans l’onglet App rassemble tout ce que Ma Vigne sait sortir : ce qui est obligatoire en contrôle, vos états internes, et vos données brutes."],
+      ['Documents & impressions', "dans l’onglet Domaine rassemble tout ce que Ma Vigne sait sortir : ce qui est obligatoire en contrôle, vos états internes, et vos données brutes."],
       ['La zone dangereuse', "ne réinitialise que cet appareil : les données du domaine restent sur le serveur."]
     ]
   }
@@ -2582,7 +2598,7 @@ export const MV_INFO = {
     '<b>Sauf les travaux sans rattrapage</b> — la vendange. Ce qui n\u2019est pas fait dans la fenêtre est <b>perdu</b> : les heures perdues sont comptées, la <b>valeur de la récolte non rentrée ne l\u2019est pas</b>, volontairement. Mettre un prix sur une récolte perdue supposerait un cours et un rendement que Ma Vigne ne connaît pas.',
     'Les <b>heures induites par le retard</b>, elles, sont comptées : chaque semaine hors fenêtre rend le travail plus long.',
     'Les fenêtres viennent des <b>dates que vous avez saisies</b> ; ce qui est déjà fait vient de l\u2019<b>avancement réel des parcelles</b>. Le hachuré ne compte que le travail de vigne : le tracteur est déduit, la cave et l\u2019entretien ne le sont pas encore.',
-    'Ces réglages se modifient dans <b>Outils \u203a Paramétrage</b>. <b>Rien n\u2019est enregistré ici</b> : une simulation ne change aucune donnée du domaine.'
+    'Ces réglages se modifient dans la <b>roue crantée du Pilotage</b>. <b>Rien n\u2019est enregistré ici</b> : une simulation ne change aucune donnée du domaine.'
   ] },
 
   // ══ CONFORMITÉ ══
@@ -2643,7 +2659,7 @@ export const MV_INFO = {
 
   'pil.eco.revient': { t: 'Le prix de revient', p: [
     'Ce sont les <b>coûts de culture</b> : ce qu\u2019il a fallu pour amener le raisin jusqu\u2019au bout du rang. <b>Ni vinification, ni sèche, ni foncier, ni amortissement</b> — ces postes-là ne passent pas par Ma Vigne.',
-    'Le coût <b>à la bouteille</b> repose sur une <b>hypothèse de conversion</b> : un nombre de kilos de raisin par col. C\u2019est un réglage, pas une mesure — il se change dans <b>Outils \u203a Paramétrage</b>, avec la journée de référence.',
+    'Le coût <b>à la bouteille</b> repose sur une <b>hypothèse de conversion</b> : un nombre de kilos de raisin par col. C\u2019est un réglage, pas une mesure — il se change dans la <b>roue crantée du Pilotage</b>, avec la journée de référence.',
     'Le coût <b>au kilo</b>, lui, ne dépend d\u2019aucune hypothèse : il divise simplement le coût de culture par la récolte pesée.',
     'Quand aucune récolte n\u2019est enregistrée, l\u2019écran le dit plutôt que d\u2019afficher un prix. Les rendements se saisissent au <b>Cuvier</b>.'
   ] },

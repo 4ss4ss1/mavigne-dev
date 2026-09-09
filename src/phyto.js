@@ -35,13 +35,8 @@ function _phytoSyncTabs(){
     if(b) b.classList.toggle('active', t===_phytoTab);
   });
   // FAB « nouveau traitement » : sur le registre uniquement, et seulement si le rôle l'autorise
-  // Export réglementaire : sur le registre seulement, et pour un administrateur seulement.
-  var exp=document.getElementById('phyto-export-row');
-  if(exp){
-    var admE=false;
-    try{ admE=(typeof window.isAdmin==='function')&&window.isAdmin(); }catch(e){ admE=false; }
-    exp.style.display=(!isCat&&admE)?'':'none';
-  }
+  // L'export réglementaire ne vit plus au bas du registre : il est dans la roue
+  // crantée du module, avec le PDF et la synthèse cuivre (lot NAV-4).
   var fab=document.getElementById('phyto-fab');
   if(fab){
     var canW=true;

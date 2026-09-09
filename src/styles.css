@@ -89,7 +89,7 @@
      14 a 40px et plus. Trois populations, trois pas — le troisieme ne manquait
      pas de justification, il manquait tout court. Ses clients sont nommes :
      .ent-confirm-modal, .saison-menu, .ov-plan-sheet, #mv-dock-sheet,
-     .pil-drawer, .pl2-mbar, .mvt-card, .pil-outils-menu, .mvds-sheet. */
+     .pil-drawer, .pl2-mbar, .mvt-card, .mvds-sheet. */
   --shadow-lg:0 4px 8px rgba(40,30,15,0.08),0 24px 56px rgba(40,30,15,0.18);
 
   /* GRAISSES — trois pas. 1971 font-weight mesures, tous fichiers :
@@ -3827,22 +3827,8 @@ body.mv-trial-on #app-root{padding-top:calc(env(safe-area-inset-top,0px) + 44px)
    Bloc appended → gagne par ordre de source. */
 .pil-tabsbar .mvu-tabs.mvu-pil{max-width:1280px;margin:0 auto;padding:9px 24px;}
 .mvu-tabs.mvu-pil .mvu-tab{flex:0 0 auto;}
-.mvu-tab.pil-outils-btn{margin-left:auto;opacity:.85;}
-.mvu-tab.pil-outils-btn:hover{opacity:1;}
 
 /* Menu Outils : petit panneau sous la barre, fermé par défaut */
-.pil-outils-menu{display:none;position:absolute;right:24px;z-index:70;min-width:230px;
-  background:var(--bg-card);border:1px solid var(--gris-clair);border-radius:14px;
-  box-shadow:0 10px 30px rgba(20,17,13,.22);padding:6px;margin-top:4px;}
-.pil-outils-menu.show{display:block;}
-.pil-outils-menu button{display:flex;align-items:center;gap:11px;width:100%;padding:11px 12px;border:0;
-  background:transparent;border-radius:10px;cursor:pointer;font-family:'Outfit',sans-serif;
-  font-size:14px;font-weight:600;color:var(--texte);text-align:left;min-height:44px;}
-.pil-outils-menu button:hover{background:var(--terre-pale);}
-.pil-outils-menu .pom-ic{font-size:18px;line-height:1;}
-.pil-outils-menu .pom-t{flex:1;}
-.pil-outils-menu .pom-c{color:var(--or);font-size:18px;}
-@media (max-width:600px){ .pil-outils-menu{right:12px;left:12px;min-width:0;} }
 
 
 /* ═══ NAV UNIFIÉE — étape 6 : Vigne (Accueil / Parcelles / Journal) ═══

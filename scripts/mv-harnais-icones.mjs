@@ -235,7 +235,7 @@ const RE_TABLES = /(?:var|const|export const)\s+([A-Za-z_$][\w$]*_(?:IC|ICO|ICON
    ★ Ce registre est une liste EN DUR, et c'est assume : une liste explicite
      et fausse se corrige ; un trou silencieux, non. Toute nouvelle table
      d'icones s'ajoute ici — sinon l'e2e la trouvera, plus tard et plus cher. */
-const TABLES_TRIPLET = [['pilotage', '_PIL_TABS'], ['pilotage', '_PIL_TOOLS']];
+const TABLES_TRIPLET = [['pilotage', '_PIL_TABS']];   // _PIL_TOOLS a disparu au lot NAV-3 (Archives est un onglet, le Parametrage est dans la roue)
 /* ⚠️ CINQUIEME ANGLE MORT, ferme des l'ecriture cette fois. `WHATS_NEW` porte un
    champ `emoji:` qui accepte desormais les DEUX ecritures (_wnIco) : un emoji
    pour les trente blocs deja ecrits, un NOM D'ICONE pour les suivants. Sans

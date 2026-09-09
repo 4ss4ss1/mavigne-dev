@@ -203,27 +203,35 @@ var _PIL_TABS = [
   //     verifiee par C22. On renomme, on ne renumerote pas.
   ['sim','curseurs','D\u00e9cider'],
   ['eco','euro','Économie'],
-  ['cfm','alerte','Conformité']
+  ['cfm','alerte','Conformité'],
+  // ★ Lot NAV-3 : Archives se LIT, c'est un écran de détail comme Économie et
+  //   Conformité — un onglet après le filet. Le bouton « Outils » qui le cachait
+  //   avec Paramétrage n'existe plus : ce qui se RÈGLE (objectifs, fenêtres,
+  //   hypothèses, IFT de référence) vit dans la roue crantée de l'en-tête.
+  ['arc','carton','Archives']
 ];
 // Ou s'arrete le zoom et ou commencent les ecrans de detail. La barre pose un
 // filet entre les deux : sans lui, « Cave » se lit comme un cinquieme niveau.
 var _PIL_ZOOM_FIN = 'sim';
-// Outils : accessibles par le bouton dedie, pas dans la barre.
-var _PIL_TOOLS = [['arc','carton','Archives'],['param','curseurs','Paramétrage']];
 // ★★ LA BARRE ET LE TITRE DISENT ENFIN LA MEME CHOSE. La refonte avait renomme
 // _PIL_TABS sans toucher a _PIL_LABELS : on cliquait « La campagne » et on
 // atterrissait sous « Avancement », « Simuler » sous « Decider » — le libelle que
 // le lot 5 declarait mort. Et `an` n'avait AUCUNE entree : le titre du niveau ①
 // sortait VIDE, la roue crantee flottant seule dans l'en-tete.
 // ⚠️ Les cles ne bougent pas ; seuls les mots changent.
-var _PIL_LABELS = {auj:'Aujourd\'hui',an:'L\'année — les douze mois, d\'un cadre à l\'autre',avc:'La campagne — avancement, temps et échéances',equ:'L\'équipe & le matériel',cav:'Cave',eco:'Économie — budget, rythme de dépense et prix de revient',cfm:'Conformité — cuivre, passages phyto et délai de rentrée',arc:'Archives des campagnes',sim:'Décider — ordre de passage, effectif et renfort',param:'Paramétrage'};
-var _PIL_VALID_TAB = {auj:1,an:1,avc:1,equ:1,cav:1,eco:1,cfm:1,arc:1,sim:1,param:1};
+var _PIL_LABELS = {auj:'Aujourd\'hui',an:'L\'année — les douze mois, d\'un cadre à l\'autre',avc:'La campagne — avancement, temps et échéances',equ:'L\'équipe & le matériel',cav:'Cave',eco:'Économie — budget, rythme de dépense et prix de revient',cfm:'Conformité — cuivre, passages phyto et délai de rentrée',arc:'Archives des campagnes',sim:'Décider — ordre de passage, effectif et renfort'};
+var _PIL_VALID_TAB = {auj:1,an:1,avc:1,equ:1,cav:1,eco:1,cfm:1,arc:1,sim:1};
 // Migration des onglets memorises avant le regroupement.
 // Migration des cles memorisees : `ecf` (l'onglet composite) part sur l'economie.
 // `eco` et `cfm` etaient des cles historiques deja vues : elles redeviennent valides.
 var _PIL_TAB_MIGR = {prs:'equ',mat:'equ',ecf:'eco',cav:'auj'};   // cav : l'onglet Cave est rentre dans la Cave (lot CAVE-3)
+// ★ 'param' (le Parametrage, lot NAV-3) ne passe PAS par _PIL_TAB_MIGR : C22 lit
+//   cette table comme la liste des cles mortes et rougirait sur le 'param' du
+//   Cuvier (cave.js, cle homonyme, tolerance CAVE-2). Il est traite a part :
+//   memorise -> on rouvre sur Aujourd'hui ; demande -> on ouvre la roue.
+var _PIL_TAB_ROUE = 'param';
 function _pilTabKey(){ return 'mavigne_pil_tab_'+_pilTenant(); }
-function _pilLoadTab(){ try{ var t=localStorage.getItem(_pilTabKey()); if(_PIL_TAB_MIGR[t]) t=_PIL_TAB_MIGR[t]; if(_PIL_VALID_TAB[t]) return t; }catch(e){} return 'auj'; }
+function _pilLoadTab(){ try{ var t=localStorage.getItem(_pilTabKey()); if(t===_PIL_TAB_ROUE) t='auj'; if(_PIL_TAB_MIGR[t]) t=_PIL_TAB_MIGR[t]; if(_PIL_VALID_TAB[t]) return t; }catch(e){} return 'auj'; }
 function _pilSaveTab(t){ try{ localStorage.setItem(_pilTabKey(), t); }catch(e){} }
 // ── LE seul chemin pour changer d'onglet. Le clic sur #pil-tabs le traverse,
 //   et un appelant exterieur aussi. Options :
@@ -231,6 +239,7 @@ function _pilSaveTab(t){ try{ localStorage.setItem(_pilTabKey(), t); }catch(e){}
 //                  avait avant une demo ne doit pas lui faire sauter l'ecran).
 //   Rend false quand rien n'a change — cle inconnue, ou onglet deja actif.
 function _pilSetTab(t, opts){
+  if(t===_PIL_TAB_ROUE){ if(window._mvReglOpen) window._mvReglOpen('pilotage'); return false; }
   if(!t || !_PIL_VALID_TAB[t]){
     if(window.logError) window.logError({level:'info',cat:'pilotage',msg:'_pilSetTab : cle inconnue '+t});
     return false;
@@ -974,7 +983,7 @@ function _pilEchelle(cd,w){
 function _pilFriseSvg(cd,real,w){
   var tw=cd.taskWindows||[];
   if(!tw.length) return window._mvGraphVide('Aucune fen\u00eatre de travail sur la p\u00e9riode',
-    'Les fen\u00eatres se posent dans Pilotage \u203a Outils \u203a Param\u00e9trage.');
+    'Les fen\u00eatres se posent dans la roue crant\u00e9e du Pilotage.');
   var E=_pilEchelle(cd,w), _o=E.o, X=E.X;
   var gc=window._mvGraphCadre(E.W,1);
   var TODAY=E.todayIso;
@@ -2031,7 +2040,7 @@ function _pilPanelTemps(d){
     +'<div style="font-size:var(--pt-micro,11px);color:var(--texte-doux);margin-top:10px;background:rgba(74,159,200,.08);border-radius:8px;padding:8px 11px">'+_footR+'</div>'
   +'</div>';
   var body=chips+repartBlock;
-  if(s.etp_frise!==0){ body+='<div style="font-size:var(--pt-lbl,10.5px);color:var(--texte-doux);margin:14px 0 6px">Frise pr\u00e9vu / r\u00e9el \u2014 fen\u00eatres modifiables dans l\'onglet <b>Param\u00e9trage</b></div>'
+  if(s.etp_frise!==0){ body+='<div style="font-size:var(--pt-lbl,10.5px);color:var(--texte-doux);margin:14px 0 6px">Frise pr\u00e9vu / r\u00e9el \u2014 fen\u00eatres modifiables dans la <b>roue crant\u00e9e</b></div>'
     +'<div style="width:100%;overflow-x:auto" id="pil-g-frise"></div>'+friseLeg;
     window._mvGraphSuivre('#pil-g-frise', function(lg){ return _pilFriseSvg(cd,real,lg); }, {max:1800}); }
   if(s.etp_courbe!==0){ body+='<div style="'+secTtl+'">'+_pilEsc(cd.saison)+' \u2014 personnes n\u00e9cessaires / semaine</div><div style="width:100%;overflow-x:auto" id="pil-g-dem"></div>'+curveLeg;
@@ -7874,7 +7883,7 @@ function _pilTabEco(d){
       +'\u2022 un <b>taux horaire</b> dans la fiche de chaque salari\u00e9 (<b>R\u00e9glages \u203A \u00c9quipe</b>) ;<br>'
       +'\u2022 le <b>prix du GNR</b>, saisi au prochain <b>appoint de cuve</b> (<b>Tracteur \u203A Entretien</b>).<br>'
       +'Le budget, le rythme de d\u00e9pense, le co\u00fbt par travail et le prix de revient en d\u00e9coulent tout seuls \u2014 rien d\u2019autre \u00e0 saisir. Ces deux donn\u00e9es sont r\u00e9serv\u00e9es aux administrateurs.</div>'
-      +'<div class="pec-acts"><button class="pec-btn" data-pec="param"><span>'+_mvIcon('engrenage',16)+'</span> Param\u00e9trage du module</button></div>'
+      +'<div class="pec-acts"><button class="pec-btn" data-pec="param"><span>'+_mvIcon('engrenage',16)+'</span> R\u00e9glages du module</button></div>'
       +'</div></div></div>';
   }
   var TL=_pecTimeline(E);
@@ -8150,14 +8159,6 @@ window._pilOpenArchives = function(){
   _PIL_TAB='arc'; _pilSaveTab('arc');
   if(window.goTo) window.goTo('pilotage'); else renderPilotage();
 };
-// Appele depuis Reglages > Domaine (carte Economie & conformite) : bascule sur Pilotage
-// et ouvre directement l'outil Parametrage, qui porte desormais les parametres de simulation.
-// Expression assignee a window et non fonction declaree : son seul appelant vit dans un onclick
-// d'un AUTRE fichier, et le cliquet C15 (fonction sans appelant) raisonne fichier par fichier.
-window._pilOpenParam = function(){
-  _PIL_TAB='param'; _pilSaveTab('param');
-  if(window.goTo) window.goTo('pilotage'); else renderPilotage();
-};
 // Le comparateur multi-saisons vivait derriere un bouton de Reglages : sa place est ici.
 window._arcOpenCmp = function(){
   if(window.openOv) window.openOv('ovHistorique');
@@ -8165,7 +8166,6 @@ window._arcOpenCmp = function(){
 };
 
 function _pilTabsHtml(tab){
-  var cur=_PIL_TOOLS.find(function(t){return t[0]===tab;});
   // Le numero de niveau se lit AVANT le nom : c'est lui qui dit que la barre
   // se parcourt de gauche a droite, du large au fin. « Aujourd'hui » n'en
   // porte pas : ce n'est pas un niveau de zoom, c'est le present. Et les
@@ -8179,12 +8179,6 @@ function _pilTabsHtml(tab){
     if(t[0]===_PIL_ZOOM_FIN){ apres=true; poseSep=true; }
     return sep+'<button class="mvu-tab'+(t[0]===tab?' active':'')+'" data-tab="'+t[0]+'">'
       +n+'<span class="mvu-tab-em">'+_mvIcon(t[1],18)+'</span>'+_pilEsc(t[2])+'</button>';
-  }).join('');
-  // Outil actif : epingle en fin de barre pour que l'utilisateur voie ou il se trouve.
-  if(cur) h+='<button class="mvu-tab active" data-tab="'+cur[0]+'"><span class="mvu-tab-em">'+_mvIcon(cur[1],18)+'</span>'+_pilEsc(cur[2])+'</button>';
-  h+='<button class="mvu-tab pil-outils-btn" id="pil-outils-btn" aria-label="Outils du pilotage" title="Outils"><span class="mvu-tab-em">'+_mvIcon('curseurs',18)+'</span>Outils</button></div>';
-  h+='<div class="pil-outils-menu" id="pil-outils-menu">'+_PIL_TOOLS.map(function(t){
-    return '<button data-tool="'+t[0]+'"><span class="pom-ic">'+_mvIcon(t[1],20)+'</span><span class="pom-t">'+t[2]+'</span><span class="pom-c">\u203A</span></button>';
   }).join('')+'</div>';
   return h;
 }
@@ -8198,6 +8192,8 @@ function _pilHdrHtml(d){
     +'<div class="pil-cell"><div class="s1">Vignoble</div><div class="s2 alt">'+d.nActives+' parcelles \u00b7 '+_pilHa(d.surfTot)+' ha</div></div>'
     +'<div class="pil-msep"></div>'
     +'<div class="pil-meteo" id="pil-meteo" style="'+(d.meteo?'':'display:none')+'"></div>'
+    // La roue crantée du module (lot NAV-3) : ce qui se règle, et le bilan de campagne.
+    +(((typeof window.isAdmin==='function')&&window.isAdmin())?'<button class="pil-icon mv-regl-gear" id="pil-regl-gear" title="R\u00e9glages" aria-label="R\u00e9glages et documents du Pilotage">'+_mvIcon('engrenage',18)+'</button>':'')
     +'</div></div>'
     // Hote de la pastille « ? Aide » : _mvInjectHelpBtn() cible strictement
     // « .mod-header .mod-meta-row ». Pilotage est le SEUL module dont la page
@@ -9146,7 +9142,7 @@ function _pilParamBody(d){
   var tdCss='padding:7px 8px;border-bottom:1px solid #F0ECE1';
   if(!cd||!cd.taskWindows||!cd.taskWindows.length){
     return '<div id="pil-param-host">'+_pilObjCard(cd,admin)
-      +'<div style="'+cardCss+'"><div style="'+ttlCss+';margin-bottom:8px">Paramétrage · fenêtres des tâches</div>'
+      +'<div style="'+cardCss+'"><div style="'+ttlCss+';margin-bottom:8px">Fenêtres des tâches</div>'
       +_pilEmptyGo('Renseignez les dates de la campagne active pour paramétrer les fenêtres de tâches.','saisons','Réglages \u203A Campagne')+'</div>'
       +_pilSimEcoCard(admin)+'</div>';
   }
@@ -9199,7 +9195,7 @@ function _pilParamBody(d){
   return '<div id="pil-param-host">'+_pilObjCard(cd,admin)
     +'<div style="'+cardCss+'">'
     +_avert
-    +'<div style="'+ttlCss+';margin-bottom:4px">Paramétrage · fenêtres des tâches</div>'
+    +'<div style="'+ttlCss+';margin-bottom:4px">Fenêtres des tâches</div>'
     +'<div style="font-size:var(--pt-txt,12.5px);color:var(--texte-doux);margin-bottom:10px">'+note+'</div>'
     +'<div style="height:3px;border-radius:3px;background:linear-gradient(90deg,#9B2D1F,#C2871E,#C8B020,#5C8A3E,#3D6B27);margin:0 0 14px"></div>'
     +'<div style="font-size:var(--pt-txt,12.5px);color:var(--texte-doux);margin-bottom:12px">Saison active · <b style="color:var(--texte)">'+_pilEsc(cd.saison)+'</b> &nbsp;·&nbsp; '+seasonTxt+' <span style="color:var(--texte-doux)">(modifiable dans Réglages \u203A Saisons)</span></div>'
@@ -9285,7 +9281,6 @@ function _pilFillContent(d){
   // se contredit lui-meme, exactement ce qu'on vient de corriger.
   _pilExoOublier(); _pilCdVueOublier();
   var tab=_PIL_TAB;
-  if(tab==='param'){ host.innerHTML=_pilParamBody(d); _pilBindParam(d); return; }
   if(tab==='auj') host.innerHTML=_pilTabAuj(d);
   else if(tab==='an') host.innerHTML=_pilTabAn(d);
   else if(tab==='avc') host.innerHTML=_pilTabAvc(d);
@@ -9305,7 +9300,43 @@ function _pilFillContent(d){
   // leur conteneur existe, donc que sa largeur est mesurable.
   if(window._mvGraphRepeindre) window._mvGraphRepeindre();
   _pilAfterFill(tab,d);
+  // La feuille de la roue, si elle est ouverte, se repeint avec le contenu : un
+  // commit du Paramétrage rappelle _pilFillContent, et sa carte doit suivre.
+  _pilParamRefresh(d);
 }
+// ── LA ROUE CRANTÉE DU PILOTAGE (lot NAV-3) ──
+// Le Paramétrage (objectifs de fin, fenêtres des tâches, hypothèses de calcul)
+// se rend dans #pil-regl-host, dans la feuille #ovReglPilotage — même corps,
+// mêmes écrivains (_pilParamBody / _pilBindParam) qu'à l'époque de l'onglet.
+// ⚠️ La feuille est HORS de #pil-content : la délégation de clic du contenu ne
+//   la voit pas. On y pose la seule délégation dont le corps a besoin, celle des
+//   boutons « à compléter » (data-diag) — qui ferment la feuille avant d'aller.
+function _pilParamRender(d){
+  var host=document.getElementById('pil-regl-host'); if(!host) return false;
+  host.innerHTML=_pilParamBody(d);
+  _pilBindParam(d);
+  if(window._ecoRenderIftCard) window._ecoRenderIftCard();
+  return true;
+}
+function _pilParamRefresh(d){
+  var ov=document.getElementById('ovReglPilotage');
+  if(!ov||!ov.classList.contains('open')) return;
+  _pilParamRender(d);
+}
+window._pilParamOpen=function(){
+  var ok=_pilParamRender(_pilData());
+  var host=document.getElementById('pil-regl-host');
+  if(host&&!host._mvDiagBound){
+    host._mvDiagBound=true;
+    host.addEventListener('click', function(e){
+      var dg=e.target.closest('[data-diag]'); if(!dg) return;
+      e.stopPropagation();
+      if(window.closeOv) window.closeOv(null,'ovReglPilotage');
+      window._pilGo(dg.getAttribute('data-diag'));
+    });
+  }
+  return ok;
+};
 function _pilAfterFill(tab,d){
   if(tab==='avc'){
     if(_pilShow('avc_gauge')) _pilRenderGauge(d);
@@ -9408,7 +9439,7 @@ function _pilBindContent(content){
         if(window.scrollTo) window.scrollTo(0,0);
         return;
       }
-      if(_pa==='param'){ _PIL_TAB='param'; _pilSaveTab('param'); renderPilotage(); if(window.scrollTo) window.scrollTo(0,0); return; }
+      if(_pa==='param'){ if(window._mvReglOpen) window._mvReglOpen('pilotage'); return; }
       if(_pa==='csv'||_pa==='copy'){ _pecExport(_pa,_pecData()); return; }
       return;
     }
@@ -9466,24 +9497,12 @@ function _pilBindContent(content){
 // ── Branchement (une fois par render) ──
 function _pilBind(){
   var tabs=document.getElementById('pil-tabs');
-  var omenu=document.getElementById('pil-outils-menu');
-  function _pilOutilsClose(){ if(omenu) omenu.classList.remove('show'); }
   if(tabs) tabs.addEventListener('click', function(e){
-    if(e.target.closest('#pil-outils-btn')){ if(omenu) omenu.classList.toggle('show'); return; }
     var b=e.target.closest('[data-tab]'); if(!b) return;
-    _pilOutilsClose();
     var t=b.getAttribute('data-tab'); if(!_pilSetTab(t)) return;
   });
-  if(omenu) omenu.addEventListener('click', function(e){
-    var b=e.target.closest('[data-tool]'); if(!b) return;
-    _pilOutilsClose();
-    var t=b.getAttribute('data-tool'); if(!_pilSetTab(t)) return;
-  });
-  document.addEventListener('click', function(e){
-    if(!omenu||!omenu.classList.contains('show')) return;
-    if(e.target.closest('#pil-outils-menu')||e.target.closest('#pil-outils-btn')) return;
-    _pilOutilsClose();
-  });
+  var gearR=document.getElementById('pil-regl-gear');
+  if(gearR) gearR.onclick=function(){ if(window._mvReglOpen) window._mvReglOpen('pilotage'); };
   var gear=document.getElementById('pil-gear');
   if(gear) gear.onclick=function(){
     var pz=document.getElementById('pil-perso'); if(!pz) return;
@@ -9528,7 +9547,7 @@ function renderPilotage(){
 // (_pilUpdateCard + carte hub « Pilotage » supprimées — hub purgé, plus aucun appelant · MAINT-2)
 
 // ── Exposition ──
-// _PIL_TABS / _PIL_TOOLS sont exposes pour l'AIDE (utils.js) : la fiche du
+// _PIL_TABS est expose pour l'AIDE (utils.js) : la fiche du
 // module liste les onglets en les LISANT ici, au lieu de les decrire dans une
 // phrase qui vieillit. Elle a annonce « Six onglets » pendant que le module en
 // comptait sept, avec deux noms qui n'existaient plus.
@@ -9536,7 +9555,6 @@ function renderPilotage(){
 // source. Deux expositions du meme objet, c'est deux verites en puissance.
 window._pilPolyBreak  = _pilPolyBreak;
 window._PIL_TABS      = _PIL_TABS;
-window._PIL_TOOLS     = _PIL_TOOLS;
 window.renderPilotage = renderPilotage;
 window._pilGetTab     = function(){ return _pilLoadTab(); };
 window._pilSetTab     = function(t, silencieux){ return _pilSetTab(t, {silencieux:!!silencieux}); };

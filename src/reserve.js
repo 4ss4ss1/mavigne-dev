@@ -242,9 +242,11 @@ function renderReserve(){
       +'<div class="mod-header-top">'
         +'<span class="mod-header-icon">'+_mvIcon('carton',20)+'</span>'
         +'<div class="mod-header-titles">'
-          +'<div class="mod-header-title">La Réserve</div>'
+          +'<div class="mod-header-title">Réserve</div>'
           +'<div class="mod-header-sub">Intrants, stock &amp; fûts</div>'
         +'</div>'
+        // La roue crantée (lot NAV-4) : les deux inventaires. L'en-tête est rendu en JS : admin seulement, ici.
+        +(((typeof window.isAdmin==='function')&&window.isAdmin())?'<button class="mod-home-btn mv-regl-gear" onclick="_mvReglOpen(\'reserve\')" style="margin-left:auto" aria-label="Documents de la R\u00e9serve" title="R\u00e9glages">'+_mvIcon('engrenage',18)+'</button>':'')
       +'</div>'
       +'<div class="mod-meta-row mvu-meta">'
         +'<div class="hv2-saison-pill" data-mv-pill><span class="hv2-dot"></span>&nbsp;<span data-mv-saison></span></div>'
