@@ -23,7 +23,7 @@ export const GT_ADMIN_EMAIL = 'ngdevpro@gmail.com';
 // WHATS_NEW   : tableau vide = modal desactive pour cette version.
 // Format item : { emoji:'📅', titre:'Titre court', desc:'Phrase utilisateur.' }
 // Regle : seulement les changements visibles par les utilisateurs.
-export const APP_VERSION = '6.91';
+export const APP_VERSION = '6.95';
 // ════ Journal des nouveautés (récap cumulatif) ════
 // Une entrée par version, la PLUS RÉCENTE EN HAUT : { v:'5.10', items:[ {emoji,titre,desc}, … ] }
 // À chaque release visible → AJOUTER un bloc en tête (ne pas remplacer). items:[] = release technique (rien à afficher).
@@ -354,6 +354,28 @@ window._mvGraphRepeindre = function(){
 };
 
 export const WHATS_NEW = [
+  { v: '6.95', items: [
+    { emoji: 'corbeille', titre: 'Un peu de m\u00e9nage dans la Cave',
+      desc: "Trois \u00e9crans de l\u2019ancienne Cave, d\u2019avant Le Chai, dormaient encore dans l\u2019application sans jamais s\u2019afficher. Ils sont retir\u00e9s, avec ce qui ne servait qu\u2019\u00e0 eux. Rien ne change \u00e0 l\u2019\u00e9cran\u00a0: la s\u00e9rie \u00ab\u00a0une question, un \u00e9cran\u00a0\u00bb est termin\u00e9e." },
+  ] },
+  { v: '6.94', items: [
+    { emoji: 'verre', titre: 'La Cave du Pilotage est rentr\u00e9e dans la Cave',
+      desc: "L\u2019onglet <b>Pilotage \u203a Cave</b> \u00e9tait une seconde cave, rang\u00e9e par question sur les m\u00eames moteurs. Il n\u2019existe plus\u00a0: ce qui presse est <b>Cave \u203a Aujourd\u2019hui</b>, le mill\u00e9sime et ses courbes sont <b>Cave \u203a Le mill\u00e9sime</b>, le parc \u00e0 f\u00fbts est en t\u00eate de <b>La R\u00e9serve \u203a F\u00fbts</b>. Dans Pilotage \u203a Aujourd\u2019hui reste une carte <b>Cave</b>\u00a0: le verdict et un bouton. Un appareil qui avait m\u00e9moris\u00e9 l\u2019onglet s\u2019ouvre sur Aujourd\u2019hui." },
+    { emoji: 'graphique', titre: 'Le mill\u00e9sime a deux onglets\u00a0: La ligne de vie, Les courbes',
+      desc: "La ligne de vie gagne ses quatre chiffres en t\u00eate et la comparaison <b>face \u00e0 l\u2019an dernier</b>\u00a0; Les courbes mettent toutes les cuves c\u00f4te \u00e0 c\u00f4te, chacune sur son jour z\u00e9ro. Un seul \u00e9cran s\u2019appelle d\u00e9sormais \u00ab\u00a0Le mill\u00e9sime\u00a0\u00bb." },
+  ] },
+  { v: '6.93', items: [
+    { emoji: 'engrenage', titre: 'Les r\u00e9glages de la cave ont une seule porte : la roue crant\u00e9e',
+      desc: "Le Cuvier avait son onglet R\u00e9glages, Le Chai aussi. Les deux sont r\u00e9unis derri\u00e8re la roue en haut \u00e0 droite de la Cave, avec le renvoi vers les appellations et les documents de la cave. Ce qu\u2019on r\u00e8gle une fois l\u2019an ne se glisse plus entre deux onglets du quotidien." },
+    { emoji: 'raisin', titre: 'Au Cuvier, les onglets disent ce qu\u2019ils contiennent',
+      desc: "\u00ab\u00a0Cuvier\u00a0\u00bb dans \u00ab\u00a0Le Cuvier\u00a0\u00bb s\u2019appelle <b>Cuves</b>, et \u00ab\u00a0Analyses\u00a0\u00bb \u2014 les contr\u00f4les de maturit\u00e9, \u00e0 la vigne \u2014 s\u2019appelle <b>Maturit\u00e9s</b>\u00a0: Le Chai a ses analyses labo, un m\u00eame mot pour deux choses ne renvoyait nulle part. L\u2019ordre suit la vendange\u00a0: R\u00e9coltes, Cuves, Maturit\u00e9s." },
+  ] },
+  { v: '6.92', items: [
+    { emoji: 'chrono', titre: 'La Cave s\u2019ouvre sur Aujourd\u2019hui',
+      desc: "Un seul \u00e9cran dit ce qui presse\u00a0: cuves \u00e0 mesurer, ouillages dus, soutirages \u00e0 faire, doses de SO\u2082 programm\u00e9es \u2014 puis les quatre semaines \u00e0 venir. Chaque ligne est un bouton vers le geste. \u00ab\u00a0Ce qui vient\u00a0\u00bb du mill\u00e9sime disait la m\u00eame chose que \u00ab\u00a0Ce qui presse\u00a0\u00bb du Pilotage\u00a0: c\u2019est ici d\u00e9sormais, l\u00e0 o\u00f9 l\u2019on fait le geste." },
+    { emoji: 'graphique', titre: 'Quatre chiffres, les m\u00eames sur tous les onglets de la Cave',
+      desc: "hL en cuve, f\u00fbts en vin, \u00e0 faire cette semaine, tonnes rentr\u00e9es. La bande changeait de sens d\u2019un onglet \u00e0 l\u2019autre\u00a0; elle est maintenant la photo de la cave enti\u00e8re, et la ligne sous les chiffres dit sur quel mill\u00e9sime ils sont calcul\u00e9s." },
+  ] },
   { v: '6.91', items: [
     { emoji: 'balance', titre: 'Le rendement moyen se calcule sur la surface que vous avez vraiment r\u00e9colt\u00e9e',
       desc: "Quand vous vendez du raisin, vous saisissez la <b>surface achet\u00e9e</b> par l\u2019acheteur. Cette information n\u2019\u00e9tait pas lue\u00a0: la moyenne du domaine rapportait ce que vous rentrez \u00e0 la surface <b>enti\u00e8re</b> des parcelles. Elle la rapporte d\u00e9sormais \u00e0 <b>ce qui vous reste</b>. Deux chiffres cohabitent maintenant, et c\u2019est voulu\u00a0: la <b>ligne d\u2019une parcelle</b> montre tout son raisin sur toute sa surface \u2014 c\u2019est ce que l\u2019arr\u00eat\u00e9 plafonne, quel que soit l\u2019acheteur\u00a0; la <b>moyenne du domaine</b> montre ce qui remplit votre cave." },
@@ -2213,16 +2235,20 @@ var MV_AIDE = {
     points: [
       function () {
         return _mvAideSections('#cave-sec-tabs .mvu-tab', 'sections',
-          "Le Cuvier suit la vendange, Le Chai suit l’élevage, Le millésime raconte le vin.");
+          "Aujourd’hui dit ce qui presse, Le Cuvier suit la vendange, Le Chai suit l’élevage, Le millésime raconte le vin.");
       },
+      ['Aujourd’hui', "est l’écran d’arrivée de la Cave. En tête, le verdict : ce qui ne peut pas attendre, dans l’ordre — une fermentation qui ralentit, une malo bloquée, des cuves sans relevé depuis hier ou avant, du raisin à rentrer, des fûts à ouiller, une malo finie à soutirer, une dose de SO\u2082 programmée. Dessous, les quatre semaines à venir, et ce qui n’a pas de date (les fûts en fin de vie). Chaque ligne est un bouton qui ouvre le geste. Tout vient de ce qui est déjà saisi, rien de plus à remplir."],
+      ['Les quatre chiffres du haut', "sont ceux de la cave entière, les mêmes sur les quatre onglets : hL en cuve (une estimation d’après les kilos tant que rien n’est décuvé, marquée ≈), fûts en vin, lignes à faire cette semaine, tonnes rentrées. La ligne sous la bande dit sur quel millésime ils sont calculés. Le filtre millésime du Chai n’agit que sur sa liste, pas sur la bande."],
+      ['La roue crantée', "en haut à droite réunit ce qu’on règle une fois l’an : les réglages du Cuvier (poids par caisse, rendement jus, base du rendement, correction d’un poids déjà saisi, clients vrac), ceux du Chai (alerte d’ouillage, contenance d’un fût, convertisseur SO\u2082, parc à cuves), le renvoi vers les appellations et leurs plafonds, et les documents de la cave. Aucun onglet du quotidien ne porte plus de réglage."],
+      ['Les onglets du Cuvier', "suivent la vendange : Récoltes, Cuves, Maturités. « Cuves » est l’ancien onglet « Cuvier » ; « Maturités » est l’ancien « Analyses » — ce sont les contrôles de maturité à la vigne, à ne pas confondre avec les analyses labo du Chai."],
       ['Un millésime à la fois', "une opération porte sur une seule année. Changer de millésime en haut du formulaire vide la sélection : on ne mélange pas deux vins dans un même geste."],
       ['Le délai d’ouillage', "se règle pour tout le domaine, et se resserre millésime par millésime — un vin jeune se surveille de plus près."],
-      ['Le parc à cuves', "se déclare une fois dans les Réglages du Chai : un nom, une contenance en litres, une matière. La même cuve sert à vinifier au Cuvier puis à élever au Chai, et l’application sait laquelle est prise — dans les deux cas."],
+      ['Le parc à cuves', "se déclare une fois dans la roue crantée de la Cave, bloc Le Chai : un nom, une contenance en litres, une matière. La même cuve sert à vinifier au Cuvier puis à élever au Chai, et l’application sait laquelle est prise — dans les deux cas."],
       ['Au Cuvier', "une cuve de vinification peut être rattachée à une cuve du parc. C’est ce rattachement qui rend l’occupation juste : sans lui, le parc ne voit que Le Chai et annonce libre une cuve qui fermente. Facultatif — la saisie libre reste possible."],
       ['Au décuvage', "vous choisissez où part le vin : barriques, cuve, ou les deux. Le répartiteur met la cuve d’abord et convertit le reste en barriques. La cuve que vous videz reste choisissable — élever sur lies dans la cuve de fermentation est un usage courant, pas une erreur de saisie."],
       ['Une récolte peut avoir plusieurs destinataires', "sur la même parcelle et le même jour : le domaine, et un ou plusieurs acheteurs de raisin. Une ligne chacun, avec ses caisses, son poids par caisse et, si l’acheteur a pris une partie de la parcelle, sa surface. Laissée vide, la surface prend tout le reste."],
       ['Le poids d’une caisse est un poids du jour', "il est figé sur l’apport au moment où vous le saisissez. La fiche du client ne fait que le proposer : la corriger plus tard ne déplace aucun kilo déjà livré, ni sur un bon déjà signé."],
-      ['Corriger un poids après coup', "quand la caisse elle-même pesait autre chose que ce qui était annoncé, Réglages du Cuvier › « Corriger un poids déjà saisi » reprend tout un millésime d’un coup. L’écran liste les poids réellement en place, ce qu’ils pèsent, et montre le résultat destinataire par destinataire avant d’appliquer. Les rendements des parcelles suivent. Les litres rendus par un acheteur ne bougent pas : ce sont les siens."],
+      ['Corriger un poids après coup', "quand la caisse elle-même pesait autre chose que ce qui était annoncé, la roue crantée de la Cave › Le Cuvier › « Corriger un poids déjà saisi » reprend tout un millésime d’un coup. L’écran liste les poids réellement en place, ce qu’ils pèsent, et montre le résultat destinataire par destinataire avant d’appliquer. Les rendements des parcelles suivent. Les litres rendus par un acheteur ne bougent pas : ce sont les siens."],
       ['Le poids réel se vide quand vous changez de ligne', "c’est voulu : un poids de remplacement ne veut rien dire hors du poids qu’il remplace. Le correcteur sélectionne d’office la caisse la plus lourde à l’ouverture — vérifiez toujours quelle ligne est retenue avant de saisir. Au-delà de 40 % d’écart, l’écran vous le signale."],
       ['Les hectolitres estimés viennent des kilos', "la jauge d’une cuve, les apports par parcelle et la proposition de fûts se calculent sur le poids réel de chaque apport, pas sur le nombre de caisses multiplié par le réglage. Avec plusieurs tailles de caisse, c’est la seule façon d’être juste. Le volume mesuré au décuvage, lui, prime toujours sur l’estimation."],
       ['Le bon de livraison', "s’ouvre depuis la ligne « kg vendus en raisin » de l’écran Récoltes. Une livraison, c’est un chargement : un client, une date, même s’il emporte deux parcelles. Le bon ne dit que des kilos — aucun prix."],
@@ -2248,14 +2274,14 @@ var MV_AIDE = {
       ['La quantité se calcule sur un volume, et ce volume dit d’où il vient', "tant que la cuve n’est pas décuvée, c’est sa <b>contenance</b> qui sert de repère, pas son contenu : la saisie affiche « volume estimé », et le registre imprime « (estimé) ». Corriger le volume à la main reste possible, et se voit."],
       ['Un stock négatif n’empêche jamais d’enregistrer', "le tanin est déjà dans la cuve : refuser la saisie parce qu’une facture manque ferait mentir le suivi pour protéger la comptabilité. L’écart part dans La Réserve, qui le nomme et le garde jusqu’à régularisation."],
       ['Encore sur pied', "en haut de l\u2019écran Récoltes, les parcelles actives qui n\u2019ont aucune récolte saisie sur la campagne, la plus mûre en premier d\u2019après vos analyses. Une parcelle arrachée n\u2019y figure pas ; une parcelle sans surface renseignée, si. Toucher une ligne ouvre la nouvelle récolte avec la parcelle déjà choisie. Un nom de parcelle absent du parcellaire est signalé sous la carte : c\u2019est ce qui explique un compte qui semble faux."],
-      ['Le millésime', "annonce ce qui vient dans les quatre prochaines semaines, puis retrace le parcours du vin, de la benne à la bouteille."],
+      ['Le millésime', "a deux onglets. La ligne de vie : quatre chiffres en tête, le parcours du vin de la benne à la bouteille, le rendement de chaque parcelle face à son plafond, d’où vient chaque cuvée, et face à l’an dernier. Les courbes : toutes les cuves côte à côte, chacune sur son jour zéro. C’est le seul écran de ce nom — celui du Pilotage est rentré ici."],
       ['Le rendement maximum de l\u2019appellation', "se pose par parcelle ET par millésime, en touchant une parcelle dans « La ligne de vie » — ou depuis la même carte du Pilotage. Le rendement annuel autorisé est fixé par arrêté, campagne par campagne : une valeur posée pour 2026 ne dit rien de 2025. Valider à vide retire celui d\u2019une année. Réservé à l\u2019administrateur."],
       ['Une valeur « héritée »', "vient de l\u2019ancien réglage, qui ne portait pas d\u2019année. Elle continue de servir partout où rien n\u2019est posé, et l\u2019écran le dit : elle n\u2019a été vérifiée contre l\u2019arrêté d\u2019aucune campagne. Poser le plafond du millésime la remplace pour cette année-là, sans toucher aux autres."],
       ['L’appellation porte le plafond', "déclarez vos appellations dans Réglages › Domaine, posez leur rendement maximum pour chaque millésime, et rattachez-y vos parcelles. L’ordre est : le plafond de la parcelle s’il existe, sinon celui de son appellation, sinon l’ancien réglage sans année. Une saisie faite à la main n’est jamais défaite par un réglage général."],
       ['Poser un plafond, puis tous les autres', "après la première saisie, l\u2019application propose de porter la même valeur sur les parcelles du millésime qui n\u2019ont aucun plafond, en les nommant d\u2019abord. Celles qui en ont déjà un ne sont jamais touchées."],
-      ['Votre rendement au pressoir', "se règle au Cuvier, onglet Réglages, en kilos de raisin par hectolitre. Tous les écrans qui transforment des raisins en volume s’en servent — la chaîne de la récolte à la bouteille comme le bilan de campagne."],
+      ['Votre rendement au pressoir', "se règle dans la roue crantée de la Cave, bloc Le Cuvier, en kilos de raisin par hectolitre. Tous les écrans qui transforment des raisins en volume s’en servent — la chaîne de la récolte à la bouteille comme le bilan de campagne."],
       ['Les analyses labo', "s’attachent en PDF à la cuvée. Les supprimer est réservé à l’administrateur."],
-      ['Quatre documents sortent de la Cave', "depuis Réglages, onglet App, « Documents & impressions » : le contrôle de maturité avant vendange, le cahier de cuverie pendant la fermentation, le registre des manipulations et le bilan de campagne. Ce sont des états internes : Ma Vigne prépare, vous déclarez. Le cahier de cuverie imprime aussi <b>la courbe</b> de chaque cuve — densité et température, avec les opérations datées — au-dessus de son tableau ; sous trois relevés de densité, il n’y a pas de courbe. Il s’ouvre sur un <b>comparatif</b> de toutes les cuves, alignées sur leur jour d’encuvage et non sur le calendrier, avec le sucre relevé à la vigne avant l’encuvage."],
+      ['Quatre documents sortent de la Cave', "depuis la roue crantée de la Cave, bloc Documents — ou depuis Réglages, onglet App, « Documents & impressions », qui les a tous : le contrôle de maturité avant vendange, le cahier de cuverie pendant la fermentation, le registre des manipulations et le bilan de campagne. Ce sont des états internes : Ma Vigne prépare, vous déclarez. Le cahier de cuverie imprime aussi <b>la courbe</b> de chaque cuve — densité et température, avec les opérations datées — au-dessus de son tableau ; sous trois relevés de densité, il n’y a pas de courbe. Il s’ouvre sur un <b>comparatif</b> de toutes les cuves, alignées sur leur jour d’encuvage et non sur le calendrier, avec le sucre relevé à la vigne avant l’encuvage."],
       ['Deux autres s’éditent au plus près de la livraison', "le bon de livraison d’un chargement et le récapitulatif de campagne d’un acheteur, depuis les ventes en vrac. Ils portent le nom du domaine, les kilos livrés, et les volumes rendus dès que le client a répondu."]
     ]
   },
@@ -2267,6 +2293,7 @@ var MV_AIDE = {
           "C’est la comptabilité matière du domaine, pensée pour le contrôle bio.");
       },
       ['L’onglet Fûts porte le parc entier', "les fûts vides du magasin et ceux qui sont en vin au chai, additionnés. Ce ne sont pas deux comptabilités : ce sont deux états du même fût."],
+      ['En tête de Fûts', "deux lectures venues de la Cave : la part des anges — ce que l’ouillage a réellement remis dans chaque cuvée sur douze mois, une ligne par millésime — et la pyramide des âges du parc, avec les barriques au-delà de la durée de vie fixée. Elles étaient dans le Pilotage ; le parc n’a plus qu’un chez-soi."],
       ['Entonner, embouteiller ou retirer', "ne change pas le nombre de fûts du domaine. Seuls acheter et se séparer le font."],
       ['Le registre des mouvements', "en bas de l’onglet garde chaque entrée et chaque sortie, avec son motif."],
       ['Le prix moyen d’un intrant', "n’est pas saisi ici : il se calcule sur vos factures, euros divisés par quantité, et s’affiche sur la fiche. Les lignes sans prix sont écartées du calcul plutôt que comptées à zéro — sinon la moyenne serait tirée vers le bas sans en avoir l’air."],
@@ -2306,9 +2333,9 @@ var MV_AIDE = {
       ['Conformité', "suit le cuivre sur sept ans, le nombre de passages, le <b>registre phyto</b> et les délais de rentrée en cours. Le registre était rangé dans « L’équipe &amp; le matériel » alors qu’il lit exactement les mêmes traitements que « Passages phyto » : il est désormais juste en dessous, en détail de ce total."],
       ['« Traiter ? » porte les cinq jours', ": la fenêtre de traitement était affichée à <b>deux endroits</b> — sur Aujourd’hui et dans le matériel — pour une seule source. C’est une décision du jour : elle reste dans Aujourd’hui. Le verdict du moment est en grand, les cinq jours à venir se déplient sous « les 5 prochains jours ». Rien n’a été retiré du calcul."],
       ['Le budget de l’année, mois par mois', ": dans <b>L’année</b>, deux courbes cumulées — le prévu au barème en tireté, la dépense réelle en trait plein. ⚠️ <b>L’écart n’est pas un dépassement</b> : le prévu ne chiffre que la vigne, la dépense porte tout le domaine, cave et atelier compris. L’écran l’écrit sous le graphe, et le « i » en donne le détail."],
-      ['Cave', "dit ce qui presse aujourd’hui, où en est le millésime, et ce que coûte le parc à fûts."],
+      ['Cave', "n’est plus un onglet : une carte dans Aujourd’hui dit combien de gestes pressent et ouvre la Cave. Le millésime, ses courbes et le parc à fûts vivent chez eux — Cave › Le millésime, La Réserve › Fûts."],
       ['Archives', "empile les campagnes sur un même axe, du 1er août au 31 juillet : le décalage d’une année sur l’autre se lit d’un coup d’œil."],
-      ['Le « i » est partout, maintenant', ": les huit onglets suivent la même règle — le chiffre, une ligne qui dit sur quoi il porte, le détail du calcul derrière le « i ». Dans <b>Décider</b>, chaque étape a le sien : il remplace les pavés « comment lire » qui séparaient le titre du graphique. La <b>légende des couleurs</b>, elle, reste affichée : on ne la lit pas, on la consulte."],
+      ['Le « i » est partout, maintenant', ": les sept onglets suivent la même règle — le chiffre, une ligne qui dit sur quoi il porte, le détail du calcul derrière le « i ». Dans <b>Décider</b>, chaque étape a le sien : il remplace les pavés « comment lire » qui séparaient le titre du graphique. La <b>légende des couleurs</b>, elle, reste affichée : on ne la lit pas, on la consulte."],
       ['Il se lit aussi sur téléphone', ": les chiffres du haut se rangent en une ligne qui défile, et le titre de l’onglet ne prend plus de place — la barre d’onglets le dit déjà. Le grand écran reste plus confortable pour les tableaux et les graphiques, mais vous n’avez plus à faire défiler un écran entier avant d’atteindre un chiffre."]
     ]
   },
@@ -2462,6 +2489,16 @@ export const _PIL_SEM = {
 //   fiche posee ailleurs vieillirait sans que personne ne la relise.
 export const MV_INFO = {
 
+  'cave.auj': { t: 'Ce qui presse', p: [
+    'Le verdict est un <b>constat</b>, jamais un jugement. Il suit un ordre fixe : une fermentation qui ralentit ou une température haute, une malo qui ne descend plus ; puis les cuves sans relevé depuis hier ou avant ; puis, en vendange, le raisin encore sur pied ; puis les fûts dont le seuil d\u2019ouillage est dépassé ; puis une malo finie qui n\u2019a pas été soutirée ; puis une dose de SO\u2082 programmée cette semaine ; enfin les fûts en fin de vie. <b>Un geste passe devant un rappel de date.</b>',
+    'Les <b>quatre semaines</b> viennent de ce qui est déjà saisi : les relevés de densité (fin de fermentation projetée sur les trois derniers, ralentissement détecté sur les deux derniers), le dernier ouillage et le seuil de chaque millésime, les analyses d\u2019acide malique, les soutirages et les dates de SO\u2082 posées avec eux.',
+    'Une dose de SO\u2082 est <b>rappelée</b>, pas vérifiée : l\u2019application connaît la date que vous avez posée au soutirage, pas le geste. Enregistrer l\u2019opération « soufre » est ce qui l\u2019acquitte.',
+    'Les <b>fûts en fin de vie</b> n\u2019ont pas de date : ils sont listés à part plutôt que rangés dans une semaine choisie au hasard. Une échéance inventée se croirait.',
+    'Une cuve de moins de trois jours ou de moins de trois relevés n\u2019est pas projetable : l\u2019écran dit « démarrage », pas une date.',
+    'Un <b>ouillage</b> est dû quand le délai d\u2019alerte du millésime est dépassé — chaque millésime a le sien, réglable dans la roue crantée, bloc Le Chai. Le volume à compléter est déduit des ouillages passés de la cuvée, jamais d\u2019une moyenne par fût.',
+    'Un <b>soutirage</b> se déclenche à la fin de la malo, pas à une date : la projection vient des valeurs d\u2019acide malique mesurées. Deux pentes sont calculées, la moyenne sur trois analyses projette la fin, les deux dernières détectent un blocage.'
+  ] },
+
   'pil.capacite': { t: 'Capacité au pic', p: [
     'Le pic est la <b>semaine la plus chargée</b>, jamais une moyenne. Une moyenne annuelle n\u2019existe aucun jour de l\u2019année ; c\u2019est le pic qui décide d\u2019un recrutement.',
     'Cette carte montre le <b>pic à venir</b> : la semaine la plus chargée parmi celles qui ne sont pas encore finies. Sur un exercice, le pic est presque toujours la <b>vendange</b> — consultée en septembre, elle est derrière, et on ne recrute pas pour une semaine faite. Le pic de l\u2019exercice reste écrit en bas de la carte, daté et marqué <b>déjà passé</b> ; l\u2019onglet <b>L\u2019année</b>, lui, le montre toujours en grand, c\u2019est son rôle.',
@@ -2558,37 +2595,24 @@ export const MV_INFO = {
   ] },
 
   // ══ CAVE ══
-  'pil.cav.anges': { t: 'La part des anges', p: [
+  'cave.anges': { t: 'La part des anges', p: [
     'Ce que vous remettez en <b>ouillage</b> est exactement ce qui s\u2019est <b>évaporé</b> : c\u2019est une <b>mesure</b>, pas une valeur théorique tirée d\u2019un abaque.',
     'Chaque millésime a sa ligne — <b>on n\u2019ouille pas les fûts d\u2019une année avec le vin d\u2019une autre</b>.',
     '\u26a0\ufe0f Un <b>soutirage</b> retire aussi du volume sans être une évaporation. Sur un mois où vous avez soutiré, le chiffre est donc surévalué.',
     'Le calcul demande le <b>volume total saisi à chaque ouillage</b>. Sans lui, cet écran reste vide plutôt que d\u2019inventer une moyenne.'
   ] },
 
-  'pil.cav.malo': { t: 'Soutirage et malo', p: [
-    'Le soutirage se déclenche à la <b>fin de la malo</b>, pas à une date du calendrier : cet écran ne parle donc <b>jamais de retard</b>.',
-    'La projection vient des valeurs d\u2019<b>acide malique mesurées</b> sur chaque cuvée, jamais d\u2019une durée moyenne.',
-    '<b>Deux pentes</b> sont calculées : la moyenne sur trois analyses <b>projette la fin</b>, les deux dernières <b>détectent un blocage</b>. Une moyenne seule lisserait le décrochage et ne le verrait pas.',
-    'Une remontée de malique entre deux analyses signale une <b>erreur de saisie</b> : le malique ne se recrée pas.'
-  ] },
-
-  'pil.cav.ouillage': { t: 'Les ouillages à faire', p: [
-    'Chaque millésime a son <b>propre délai d\u2019alerte</b>, réglable dans les réglages du Chai : un vin jeune se rattrape plus souvent qu\u2019un vin d\u2019un an.',
-    'Le <b>volume à compléter</b> est déduit des ouillages passés de la cuvée — pas d\u2019une moyenne théorique par fût.',
-    'Un fût qui n\u2019a jamais été ouillé n\u2019a pas d\u2019historique : l\u2019écran le signale plutôt que de lui prêter le comportement des autres.'
-  ] },
-
-  'pil.cav.rdt': { t: 'Rendement face au plafond', p: [
+  'cave.rdt': { t: 'Rendement face au plafond', p: [
     'Un rendement s\u2019affiche en <b>fourchette</b> tant que le volume n\u2019a pas été mesuré, et il ne l\u2019est qu\u2019<b>au décuvage</b> : avant, la cuve contient du raisin, pas du vin. Le chiffre net ne vient qu\u2019ensuite.',
-    'Au-delà de dix parcelles vendangées, la carte montre les <b>dix plus forts rendements</b>. C\u2019est une liste de ce qu\u2019il faut regarder, jamais la moyenne du domaine.',
+    'Chaque parcelle vendangée a sa ligne, du rendement le plus fort au plus faible. Ce n\u2019est pas la moyenne du domaine : elle est en tête de l\u2019écran, dans les quatre chiffres.',
     'Le <b>trait vertical</b> est le plafond que vous avez renseigné, <b>par parcelle et par millésime</b>. Ce n\u2019est pas une valeur du logiciel : le rendement annuel autorisé est fixé par arrêté, campagne par campagne.',
-    'Un administrateur le pose <b>ici même</b>, en touchant une parcelle : c\u2019est cet écran qui montre lesquelles en manquent. Il se pose aussi depuis <b>Cave \u203a Le millésime \u203a La ligne de vie</b> \u2014 la section de la Cave, à ne pas confondre avec l\u2019onglet du même nom où vous êtes.',
+    'Un administrateur le pose <b>ici même</b>, en touchant une parcelle : c\u2019est cet écran qui montre lesquelles en manquent.',
     'Un plafond marqué <b>hérité</b> vient de l\u2019ancien réglage, celui qui ne portait aucune année. Il sert de repli tant qu\u2019aucune valeur n\u2019est posée pour le millésime, mais il n\u2019a été vérifié contre l\u2019arrêté d\u2019<b>aucune</b> campagne.',
     'L\u2019échelle va jusqu\u2019à <b>115 % du plafond</b> : c\u2019est ce qui permet à un dépassement de se voir déborder, au lieu d\u2019être écrasé contre le bord.',
     'Les parcelles <b>sans plafond renseigné</b> n\u2019entrent pas dans la comparaison — elles sont listées à part plutôt que comptées comme conformes.'
   ] },
 
-  'pil.cav.courbes': { t: 'Les courbes de la cave', p: [
+  'cave.courbes': { t: 'Les courbes de la cave', p: [
     'Chaque bloc porte <b>son propre jour z\u00e9ro</b>, \u00e9crit \u00e0 c\u00f4t\u00e9 de son titre. La vigne compte sur le calendrier, la cuve depuis l\u2019<b>encuvage</b>, le f\u00fbt depuis l\u2019<b>entonnage</b>. Les empiler sur un seul axe donnerait une \u00e9chelle qui ressemble \u00e0 une mesure sans en \u00eatre une.',
     'Sur un calendrier, une cuve entr\u00e9e le 16 et une autre le 24 n\u2019ont <b>aucun point commun</b>. Align\u00e9es sur leur propre J0, leurs cin\u00e9tiques se superposent et se comparent.',
     'Le tableau est class\u00e9 sur le <b>jour o\u00f9 le vin sec a \u00e9t\u00e9 relev\u00e9</b>, jamais sur la vitesse : une pente mesur\u00e9e sur trois jours n\u2019est pas comparable \u00e0 une pente mesur\u00e9e sur dix, et le d\u00e9but d\u2019une fermentation en est la phase la plus rapide.',

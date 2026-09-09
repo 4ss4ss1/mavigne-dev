@@ -2,7 +2,7 @@
 <section id="pilotage">
   <div class="sec-h">
     <div class="sec-ic" aria-hidden="true">{ic:graphique}</div>
-    <div><h2>Pilotage</h2><div class="sub">Aujourd'hui · L'année · La campagne · L'équipe &amp; le matériel · Décider · Cave · Économie · Conformité</div></div>
+    <div><h2>Pilotage</h2><div class="sub">Aujourd'hui · L'année · La campagne · L'équipe &amp; le matériel · Décider · Économie · Conformité</div></div>
   </div>
   <p class="lead">Le Pilotage est un tableau de bord de <b>lecture</b>, pensé pour décider :
   où en est-on, tiendra-t-on les délais, peut-on traiter demain, combien coûte cet hectare. Il ne
@@ -112,21 +112,21 @@
   <p>C'est la troisième règle du module, après la ligne de cadre et le petit « i » :
   <b>ce qui dit quoi faire est un bouton, jamais une phrase à exécuter de mémoire.</b></p>
 
-  <div class="note tip"><span class="ni" aria-hidden="true">{ic:valide}</span><div>Les <b>huit onglets</b>
-  suivent désormais cette règle, y compris <b>Décider</b>, <b>Cave</b> et <b>Conformité</b>. Dans le
+  <div class="note tip"><span class="ni" aria-hidden="true">{ic:valide}</span><div>Les <b>sept onglets</b>
+  suivent désormais cette règle, y compris <b>Décider</b> et <b>Conformité</b>. Dans le
   simulateur, chaque étape porte son « i » — il remplace le pavé « comment lire » qui s'intercalait
   entre le titre et le graphique. La <b>légende des couleurs</b>, elle, reste affichée sous le graphe :
   celle-là ne se lit pas, elle se consulte du regard.</div></div>
 
   <h3>{ic:boussole} Comment il se lit</h3>
   <p>Les onglets vont du <b>large au fin</b> : l'année, puis la campagne, puis l'équipe et le matériel,
-  puis la décision. Ils portent leur numéro. Après le trait, la Cave, l'Économie et la Conformité
+  puis la décision. Ils portent leur numéro. Après le trait, l'Économie et la Conformité
   sont des <b>écrans de détail</b> — pas des niveaux de zoom.</p>
   <ul class="dot">
     <li><b>La barre du haut dit où vous regardez</b> : l'exercice entier, ou une campagne. Cliquez
     une campagne dans la frise de l'année et les trois chiffres du haut, la frise et les tableaux
     de la campagne suivent. La croix revient à l'année. <b>Trois écrans ont leur propre cadre</b> et
-    ne se recadrent pas : l'Économie chiffre la période consultée, la Cave suit le millésime, la
+    ne se recadrent pas : l'Économie chiffre la période consultée, la
     Conformité roule sur sept ans glissants — chacun l'écrit au-dessus de ses chiffres, plutôt que
     de répondre en silence sur une autre fenêtre que celle affichée.</li>
     <li><b>Trois chiffres en tête de « L'année » et de « La campagne »</b> : les travaux, l'effectif,
@@ -202,7 +202,7 @@
     y pèse son <b>effectif inscrit au contrat</b>, pas une ligne de tableau.</li>
     <li><b>Jours favorables</b> à venir, et <b>Traiter&nbsp;?</b> — la réponse du jour.</li>
     <li><b>À la vigne aujourd'hui</b> : présences réelles, absences déduites du planning.</li>
-    <li><b>Tâche prioritaire</b> en cours et <b>alertes</b> matériel &amp; cave.</li>
+    <li><b>Tâche prioritaire</b> en cours et <b>alertes</b> matériel, et la carte <b>Cave</b> — ce qui presse, un bouton.</li>
   </ul>
 
   <h3>{ic:raisin} La campagne</h3>
@@ -314,69 +314,17 @@
     <li>Probabilité de pluie affichée par créneau.</li>
   </ul>
 
-  <h3>{ic:verre} Cave</h3>
-  <p>Quatre questions, dans cet ordre : <b>ce qui presse</b> aujourd'hui — ouillages en retard, cuves
-  à mesurer, fermentation qui ralentit, cuvées à soutirer ; <b>où en est le millésime</b> — de la
-  benne à la bouteille, rendement face au maximum de l'appellation — que vous posez là, millésime par
-  millésime, en touchant une parcelle —, comparaison avec l'année
-  précédente ; <b>ce que coûte le parc à fûts</b> — pyramide des âges, part des anges,
-  renouvellement à prévoir ; et <b>les courbes</b>, où se compare ce qui, ailleurs, se lit cuve
-  par cuve.</p>
+  <h3>{ic:verre} La Cave n'est plus un onglet du Pilotage</h3>
+  <p>Elle en avait un, avec quatre écrans — ce qui presse, le millésime, le parc, les courbes —
+  construits sur les moteurs de la Cave, comme une seconde cave rangée autrement. Un mot porté par
+  deux écrans ne renvoie nulle part : tout est <b>rentré chez lui</b>. Ce qui presse est l'écran
+  d'arrivée de la Cave, <span class="path">Cave › Aujourd'hui</span> ; le millésime et les courbes
+  sont <span class="path">Cave › Le millésime</span> ; le parc à fûts — pyramide des âges, part des
+  anges — est en tête de <span class="path">La Réserve › Fûts</span>.</p>
+  <p>Ici, dans <b>Aujourd'hui</b>, il reste une carte <b>Cave</b> : combien de gestes cette semaine,
+  le verdict en une ligne, et un bouton <b>Ouvrir la Cave</b>. Une photo et une porte, pas une
+  seconde cave. Un appareil qui avait mémorisé l'onglet Cave s'ouvre sur Aujourd'hui.</p>
 
-  <h3>{ic:graphique} Les courbes — comparer, pas consulter</h3>
-  <p>Les autres écrans de la cave répondent sur <b>une</b> cuve. Celui-ci les met <b>côte à
-  côte</b>. Rien ne s'y saisit : c'est un écran de comparaison, pas de relevé.</p>
-  <p>Le parcours d'un vin s'y lit en quatre temps, et <b>chaque temps a son propre jour zéro</b>,
-  écrit en toutes lettres à côté de son titre. La vigne compte sur le calendrier, la cuve compte
-  depuis l'<b>encuvage</b>, le fût depuis l'<b>entonnage</b>. Ce ne sont pas trois détails : c'est
-  ce qui vous évite de lire deux graphes sur la même échelle mentale alors qu'ils n'en ont pas.</p>
-  <div class="cards">
-    <div class="card"><h4>{ic:raisin} Les maturités</h4><ul class="dot">
-      <li>Le sucre au réfractomètre, une courbe par <b>parcelle</b></li>
-      <li>Sur un <b>axe de dates</b> : une parcelle pas encore vendangée n'a pas de date de récolte,
-        donc pas de jour zéro</li>
-      <li>C'est la même courbe qu'au Cuvier — pas une seconde version</li>
-    </ul></div>
-    <div class="card"><h4>{ic:graphique} Les densités</h4><ul class="dot">
-      <li>Toutes les cuves sur <b>leur propre jour d'encuvage</b></li>
-      <li>Le tableau dessous répond au « pourquoi » : densité de départ, température moyenne et
-        maxi, sucre relevé à la vigne</li>
-      <li>Sur téléphone, trois colonnes se replient ; le <b>cahier de cuverie</b> les porte toutes</li>
-    </ul></div>
-    <div class="card"><h4>{ic:thermometre} Les températures</h4><ul class="dot">
-      <li>Le <b>même rail de jours</b> que les densités</li>
-      <li>La bande verte est la fenêtre de travail ; au-dessus de 30 °C, le relevé porte un point rouge</li>
-      <li>Un relevé sans température n'est pas une température de zéro : il est absent du tracé</li>
-    </ul></div>
-    <div class="card"><h4>{ic:barrique} La malo</h4><ul class="dot">
-      <li>En <b>mois depuis l'entonnage</b>, pas par rang d'analyse</li>
-      <li>Le trait est <b>tireté</b> : entre deux analyses, personne n'a mesuré</li>
-      <li>Une cuvée sans date d'entonnage n'apparaît pas — le premier relevé n'en tient pas lieu</li>
-    </ul></div>
-  </div>
-  <div class="note tip"><span class="ni" aria-hidden="true">{ic:doigt}</span><div>Sur un calendrier,
-  une cuve entrée le 16 et une autre le 24 <b>n'ont aucun point commun</b> : leurs courbes se
-  croisent sans se comparer. Alignées sur leur propre jour zéro, leurs cinétiques se superposent,
-  et « celle qui part vite » se voit d'un coup d'œil.</div></div>
-  <div class="note"><span class="ni" aria-hidden="true">{ic:chrono}</span><div>Le tableau est classé
-  sur le <b>jour où le vin sec a été relevé</b>, jamais sur la vitesse. Une pente mesurée sur trois
-  jours n'est pas comparable à une pente mesurée sur dix, et le début d'une fermentation en est la
-  phase la plus rapide : une cuve à peine relevée gagnerait <b>toujours</b> le classement. La
-  colonne « pts/j » porte donc l'<b>intervalle</b> sur lequel elle a été mesurée.</div></div>
-  <div class="note warn"><span class="ni" aria-hidden="true">{ic:alerte}</span><div><b>Aucune
-  température n'est enregistrée en élevage.</b> Ni l'ouillage, ni le soutirage, ni le sulfitage,
-  ni l'analyse ne portent de température : seuls les relevés de fermentation en ont une. La courbe
-  de température <b>s'arrête donc au décuvage</b>. L'écran le dit plutôt que de vous laisser
-  chercher un graphe qui n'existe pas.</div></div>
-  <div class="note"><span class="ni" aria-hidden="true">{ic:info}</span><div>Une cuve <b>sans date
-  d'encuvage est écartée</b> du comparatif, et l'écran dit combien il en écarte, et pourquoi. Rien
-  n'est deviné : une date fausse se croirait, une cuve absente se corrige. La colonne « Vigne »,
-  elle, est un <b>ordre de grandeur</b> — la part réelle de chaque parcelle entrée dans la cuve
-  n'est pas enregistrée, la moyenne est pondérée par la surface.</div></div>
-  <div class="note"><span class="ni" aria-hidden="true">{ic:chrono}</span><div>Une campagne contient
-  <b>deux millésimes</b> : celui qui rentre en septembre et celui qui finit son élevage. En début de
-  campagne, l'écran montre donc le millésime <b>qui est en cave</b>, et le dit explicitement plutôt
-  que d'afficher des colonnes vides.</div></div>
   <h3>{ic:euro} Économie · {ic:balance} Conformité</h3>
   <div class="cards">
     <div class="card"><h4>{ic:euro} Économie</h4><ul class="dot">

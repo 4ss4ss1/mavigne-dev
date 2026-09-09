@@ -1711,10 +1711,6 @@ body.mv-trial-on #app-root{padding-top:calc(env(safe-area-inset-top,0px) + 44px)
 .cave-op-sub{font-size:11px;color:var(--texte-doux);margin-top:2px;}
 .cave-op-date{font-size:11px;color:var(--texte-doux);opacity:.7;margin-left:auto;flex-shrink:0;}
 /* FAB */
-.cave-fab-row{display:flex;justify-content:flex-end;padding:10px 14px 20px;}
-.cave-jf-btn{background:var(--gris-clair);border:1px solid var(--gris);border-radius:20px;padding:6px 12px;font-size:12px;font-weight:500;cursor:pointer;white-space:nowrap;color:var(--texte-doux);font-family:inherit;}
-.cave-jf-btn.sel{background:#C0845A;border-color:#C0845A;color:#fff;}
-.cave-fab{display:flex;align-items:center;gap:8px;background:#C0845A;border:none;border-radius:13px;padding:12px 20px;cursor:pointer;color:#fff;font-family:'Outfit',sans-serif;font-size:13px;font-weight:600;min-height:44px;}
 /* Barriques */
 .cave-cuv-group{margin-bottom:16px;}
 .cave-cuv-hdr{display:flex;align-items:flex-start;justify-content:space-between;margin-bottom:8px;}
@@ -1871,8 +1867,6 @@ body.mv-trial-on #app-root{padding-top:calc(env(safe-area-inset-top,0px) + 44px)
 }
 
 /* -- Cave Vendange -- */
-.cave-divers-row{width:100%;display:flex;align-items:center;gap:12px;padding:12px 14px;border:0.5px solid var(--gris);border-radius:12px;background:var(--bg-card);cursor:pointer;margin-bottom:8px;font-family:'Outfit',sans-serif;}
-.cave-divers-ico{width:38px;height:38px;border-radius:10px;display:flex;align-items:center;justify-content:center;font-size:18px;flex-shrink:0;}
 .rfut-reason-btn{padding:9px 8px;border:1.5px solid var(--gris);border-radius:10px;background:transparent;font-size:12px;font-weight:500;color:var(--texte-doux);cursor:pointer;font-family:'Outfit',sans-serif;min-height:40px;}
 .rfut-reason-btn.sel{border-color:#C0845A;background:rgba(192,132,90,0.1);color:#C0845A;}
 .cave-pdf-chip{padding:3px 9px;border:1px solid rgba(192,132,90,0.4);border-radius:7px;background:rgba(192,132,90,0.1);font-size:10px;color:#C0845A;cursor:pointer;font-family:'Outfit',sans-serif;min-height:28px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;max-width:160px;}
@@ -2228,6 +2222,8 @@ body.mv-trial-on #app-root{padding-top:calc(env(safe-area-inset-top,0px) + 44px)
 /* — Rangée KPI : une carte segmentée par hairlines — */
 .pil-cks{display:grid;grid-template-columns:repeat(auto-fit,minmax(200px,1fr));border-top:1px solid var(--gris-clair);}
 .pil-ck{padding:16px 22px;border-right:1px solid var(--gris-clair);border-bottom:1px solid var(--gris-clair);margin-bottom:-1px;}
+/* La carte Cave d'Aujourd'hui (lot CAVE-3) : une photo, un bouton — pas une seconde cave. */
+.pil-ck-btn{margin-top:8px;font-family:inherit;font-size:12px;font-weight:600;border:1px solid var(--terre);color:var(--terre);background:transparent;border-radius:9px;padding:4px 12px;cursor:pointer;min-height:32px;}
 .pil-ck:last-child{border-right:none;}
 .pil-ck .kl{display:flex;align-items:center;gap:7px;font-size:10px;font-weight:600;letter-spacing:1.8px;text-transform:uppercase;color:var(--texte-doux);}
 .pil-ck .kv{font-family:'Cormorant Garamond',serif;font-size:32px;font-weight:600;margin-top:4px;color:var(--texte);line-height:1.05;font-variant-numeric:tabular-nums;}
@@ -3998,7 +3994,7 @@ a[href^="mailto:"]{color:var(--or-tx);}
 /* — 6. Surfaces PLEINES or / terracotta : le blanc n'y passe pas
        (1,04:1 sur or, 3,14:1 sur terracotta). Le fond garde sa teinte,
        seul le texte s'assombrit — le langage « cave » est preserve. — */
-.cave-fab,.cave-fab span,.cave-jf-btn.sel,.cave-empty-btn,.mvc-batch,
+.cave-empty-btn,.mvc-batch,
 .mvc-tab-badge,.agt-err-badge,.mvr-btn-g,.scard-enc-hint{color:#241A10;}
 [style*="background:#C0845A"],[style*="background: #C0845A"],
 [style*="background:#C2A14D"],[style*="background: #C2A14D"],

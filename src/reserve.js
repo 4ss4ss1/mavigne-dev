@@ -306,7 +306,10 @@ function _rsvCssAte(){
 function _rsvRenderBody(){
   var b=document.getElementById('mvr-body'); if(!b) return;
   if(!window._dataReady){ b.innerHTML=window._mvSk('reserve'); return; }
-  if(_rsvTab==='futs') b.innerHTML=_rsvFutsHtml()+(window._rsvMouvHtml?_rsvMouvHtml():'');
+  // Lot CAVE-3/4 : la lecture du parc (etat, pyramide, part des anges,
+  // mouvements des douze mois) vient de la Cave — ex-Pilotage › Cave › Le parc —
+  // et se rend ICI, en tete de Futs : une seule definition, un seul chez-soi.
+  if(_rsvTab==='futs') b.innerHTML=(typeof window._caveParcHtml==='function'?window._caveParcHtml():'')+_rsvFutsHtml()+(window._rsvMouvHtml?_rsvMouvHtml():'');
   else if(_rsvTab==='intrants') b.innerHTML=_rsvIntrantsHtml();
   else b.innerHTML=_rsvAuditHtml();
 }

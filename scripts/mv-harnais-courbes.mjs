@@ -27,7 +27,9 @@ function bloc(src, debut, fin) {
 }
 
 const cave = fs.readFileSync(path.join(R, 'src/cave.js'), 'utf8');
-const pilo = fs.readFileSync(path.join(R, 'src/pilotage.js'), 'utf8');
+/* Lot CAVE-3 : la vue des courbes est RENTREE dans cave.js (ex-Pilotage › Cave).
+   `pilo` garde son nom pour ne pas reecrire le harnais : il pointe la Cave. */
+const pilo = fs.readFileSync(path.join(R, 'src/cave.js'), 'utf8');
 
 /* ── Le décor : le socle graphique réel d'utils.js, pas un faux ─────────── */
 const utils = fs.readFileSync(path.join(R, 'src/utils.js'), 'utf8');
@@ -182,12 +184,12 @@ const manquants = [...invoques].filter(v => !declares.has(v));
 T('tout var(--x) des courbes est déclaré dans styles.css',
   manquants.length === 0, manquants.join(', '));
 
-console.log('\n── LE CORRECTIF DE LA SOUS-NAV ───────────────────────────────');
-const navBloc = bloc(pilo, "var _PCAV_SUBS=", "var c, body;");
-T('la sous-nav appelle _mvIcon au lieu d’insérer le nom brut', navBloc.includes('_mvIcon(s[1],16)'));
-T('le nom d’icône n’est plus concaténé tel quel', !/\+s\[1\]\+' '\+/.test(navBloc));
-T('la 4e sous-vue est déclarée', navBloc.includes("['crb','graphique','Les courbes']"));
-T('les 4 icônes existent dans le sprite', (() => {
+console.log('\n── LES COURBES SONT UN ONGLET DU MILLESIME (lot CAVE-3) ────────');
+const idx = fs.readFileSync(path.join(R, 'index.html'), 'utf8');
+T('l’onglet Les courbes est déclaré dans la barre du millésime', /id="ml-tab-crb" onclick="_mlSetTab\('crb'\)"/.test(idx));
+T('renderCaveMillesime pose les courbes après le HTML (_pcrbPose)', /_mlTab==='crb'\)\{[\s\S]{0,400}_pcrbPose\(\)/.test(pilo));
+T('la famille de graphes est oubliée dès qu’on quitte les courbes', /_mvGraphOublier\('#pcrb-g-'\)/.test(pilo));
+T('les icônes existent dans le sprite', (() => {
   const sprite = new Set([...fs.readFileSync(path.join(R, 'index.html'), 'utf8')
     .matchAll(/id="ic-([a-z0-9-]+)"/g)].map(m => m[1]));
   return ['chrono', 'raisin', 'barrique', 'graphique', 'thermometre', 'bouteille'].every(n => sprite.has(n));

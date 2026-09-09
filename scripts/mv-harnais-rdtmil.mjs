@@ -159,16 +159,18 @@ console.log('\n\u2500\u2500 E. UNE SEULE PORTE D\'ECRITURE, deux appelants \u250
   t('elle n\'ecrit plus jamais p.rdt_max directement',
     !/p\.rdt_max\s*=\s*Math\.round/.test(CAVE));
   t('_vendRdtMax est expose pour le Pilotage', /window\._vendRdtMax\s*=/.test(CAVE));
-  t('le Pilotage n\'ecrit PAS lui-meme : il appelle la porte de la Cave',
-    /window\._mlSetRdtMax\(nom,\s*m,\s*function\(\)\{ _pilFillContent\(_pilData\(\)\); \}\)/.test(PILO)
-    && !/rdt_max_hist/.test(PILO));
+  /* Lot CAVE-3 : la carte « Rendement face au plafond » du Pilotage a disparu
+     avec l'onglet Pilotage › Cave — c'etait une copie du bloc de La ligne de
+     vie. Le Pilotage ne touche plus au plafond, ni en lecture ni en ecriture. */
+  t('le Pilotage n\'a plus de carte rendement : ni pose, ni historique',
+    !/_mlSetRdtMax/.test(PILO) && !/rdt_max/.test(PILO) && !/_pcavRdt/.test(PILO));
   // ⚠️ C24b : toute valeur posee dans un slot JS de gestionnaire passe par
   //    _escAttr, y compris un nombre. Le cliquet compte, il ne raisonne pas —
   //    et une exception « c'est un entier » se transforme un jour en variable.
   t('le bouton du millesime passe bien le millesime, via _escAttr',
     /_mlSetRdtMax\(\\''\+_escAttr\(r\.parcelle\.nom\)\+'\\','\+_escAttr\(mil\)\+'\)/.test(CAVE));
-  t('★ sans millesime resolu, le Pilotage n\'ouvre AUCUNE saisie',
-    /if\(!\(isFinite\(m\)&&m>0\)\)\{/.test(PILO));
+  t('★ la pose passe par la porte de la Cave, seul ecrivain',
+    /function _mlSetRdtMax\(nom,mil,apres\)/.test(CAVE) && !/_pcavPoseRdt/.test(CAVE));
   t('_mlGo sait atterrir sur l\'ecran de pose', /kind==='rdtmax'/.test(CAVE));
 }
 
@@ -263,8 +265,10 @@ console.log('\n\u2500\u2500 H. LE RENDEMENT MOYEN : ce que le domaine rentre, su
       'function _mlKgHl(){return 121;}function _mlRendements(){return [];}\n' + src
       + '\nreturn _mlRdtMoyen(ch);')({}, { retro: true, ha: 10, hlDecuve: 300, millesime: 2019 }).hlHa === 30);
 
-  t('★ le Pilotage et le bilan lisent la MEME fonction',
-    /_pcavHas\('_mlRdtMoyen'\)\?window\._mlRdtMoyen\(ch\)/.test(PILO)
+  /* Lot CAVE-3 : la tuile « Rendement moyen » est rentree dans la Cave
+     (_mlTuiles) ; le Pilotage n'affiche plus de rendement de cave. */
+  t('★ la tuile du millesime et le bilan lisent la MEME fonction',
+    /function _mlTuiles\(ch\)\{[\s\S]{0,200}_mlRdtMoyen\(ch\)/.test(CAVE)
     && /var _rm = _mlRdtMoyen\(d\.chaine\);/.test(CAVE));
   t('★ plus aucune division ch.hlDecuve\/ch.ha a l\'ecran', !/ch\.hlDecuve\/ch\.ha/.test(PILO));
   t('★ la moyenne ne lit plus hlCuve : le raisin vendu n\'y passe jamais',
@@ -272,7 +276,7 @@ console.log('\n\u2500\u2500 H. LE RENDEMENT MOYEN : ce que le domaine rentre, su
   t('★ elle lit la surface par `_vendSurfParc`, pas `p.surface`',
     /d\.surf\.lignes/.test(src) && !/parseFloat\(o\.parcelle\.surface\)/.test(src));
   t('les deux surfaces nomment l\'information qui manque',
-    /vendue'\+\(rm\.approx>1\?'s':''\)\+' non renseign/.test(PILO)
+    /vendue'\+\(rm\.approx>1\?'s':''\)\+' non renseign/.test(CAVE)
     && /d\.rdtMoyenAx>0/.test(CAVE));
   t('le bilan imprime porte le \u00ab \u2248 \u00bb quand une surface manque',
     CAVE.includes("((d.rdtMoyenEst||d.rdtMoyenAx>0)?'\\u2248 ':'')"));
@@ -303,18 +307,20 @@ console.log('\n\u2500\u2500 F. le renvoi nomme un CHEMIN, pas un ecran homonyme 
 {
   t('★ plus aucun \u00ab depuis Le millesime \u00bb seul dans le Pilotage',
     !/depuis Le mill\u00e9sime pour obtenir/.test(PILO));
-  t('le chemin complet est ecrit quand le geste n\'est pas sur place',
-    /Cave \\u203a Le mill\\u00e9sime \\u203a La ligne de vie/.test(PILO));
-  t('la carte propose le geste sur place quand il est possible',
-    /Touchez une parcelle pour le poser/.test(PILO));
-  t('la fiche MV_INFO previent de l\'homonymie',
-    /à ne pas confondre avec l\\u2019onglet du même nom/.test(UTIL));
+  /* Lot CAVE-3 : il n'y a plus qu'UN ecran « Le millesime » — l'homonymie que
+     ces trois assertions gardaient a disparu avec l'onglet Pilotage › Cave. */
+  t('un seul ecran s\'appelle « Le millesime » : le Pilotage n\'en a plus',
+    !/\['cav',/.test(PILO) && !/_pcavVueMillesime/.test(PILO) && !/_pcavVueMillesime/.test(CAVE));
+  t('la carte propose le geste sur place : chaque ligne de rendement pose le plafond',
+    /onclick="_mlSetRdtMax\(/.test(CAVE));
+  t('la fiche MV_INFO du rendement suit le bloc de la Cave (cave.rdt, « ici meme »)',
+    /'cave\.rdt'/.test(UTIL) && /le pose <b>ici même<\/b>/.test(UTIL) && !/'pil\.cav\.rdt'/.test(UTIL));
   t('l\'ecran du millesime nomme l\'annee de son plafond',
     /titre:'Rendement maximum '\+m,/.test(CAVE)
     && /appellation pour ce mill\\u00e9sime/.test(CAVE)
     && /appellation renseign\\u00e9 pour '\+mil/.test(CAVE));
   t('un plafond herite est annonce comme tel a l\'ecran',
-    /maxSrc==='herite'/.test(CAVE) && /maxSrc==='herite'/.test(PILO));
+    /maxSrc==='herite'/.test(CAVE));
   t('le guide ne dit plus que le Pilotage ne modifie jamais rien',
     !/Il ne\s+modifie jamais rien/.test(readFileSync('guide/11-pilotage.html', 'utf8')));
   t('le guide de la Cave ne dit plus \u00ab aucune saisie \u00bb',

@@ -2,7 +2,51 @@
 
 > Document de référence du projet **Ma Vigne** (GUERETTECH). Il est le **porteur de vérité** :
 > la mémoire Claude est plafonnée, ce fichier ne l'est pas.
-> Dernière consolidation : **7 septembre 2026 (nuit)** — ★★★ **LA SURFACE ACHETÉE ÉTAIT SAISIE,
+> Dernière consolidation : **9 septembre 2026 (nuit, fin)** — **CAVE-5, LE MÉNAGE (§97)** : les trois blocs
+> morts d'`index.html` (la Cave d'avant Le Chai, 52 lignes) retirés avec leurs seuls appelants et six règles
+> CSS. **APP 6.94 → 6.95 · SW 7.53 → 7.54**, un item `WHATS_NEW` qui dit qu'il n'y a rien à voir. La série CAVE est close : de **3 modules,
+> 13 écrans, 5 barres, 4 homonymes** à **8 écrans, 4 barres, 0 homonyme**. Détail en **§97**.
+>
+> ★ Précédente : **9 septembre 2026 (nuit)** — ★★★ **L'ONGLET PILOTAGE › CAVE EST RENTRÉ DANS
+> LA CAVE (§96)**. **APP 6.93 → 6.94 · SW 7.52 → 7.53.** Lots **CAVE-3 et 4**, empilés sur §94 et §95 (non
+> commités, les trois se livrent ensemble). Le bloc de 1 528 lignes est ramené dans `cave.js` ; ce qui
+> doublait Aujourd'hui et La ligne de vie est **supprimé**, C15 en guide. Le millésime a **deux onglets**
+> (La ligne de vie + tuiles + N-1 · Les courbes), le parc est **en tête de La Réserve › Fûts**, le Pilotage
+> garde **une carte et un bouton** et migre `cav → auj`. ⚠️⚠️ Deux pièges de déménagement : un `typeof`
+> sur un import qui change de sens en changeant de fichier (la pastille « i » n'aurait jamais rendu), et
+> un **export pendant** qui aurait fait tomber la Cave entière au chargement — trouvé par balayage, qui
+> a lui-même retiré quatre exports légitimes (`async function`) avant relecture au diff. Détail en **§96**.
+>
+> ★ Précédente : **9 septembre 2026 (soir)** — ★★★ **UN MOT, UN ÉCRAN : LES ONGLETS DU CUVIER,
+> ET UNE SEULE PORTE POUR LES RÉGLAGES DE LA CAVE (§95)**. **APP 6.92 → 6.93 · SW 7.51 → 7.52.** Lot
+> **CAVE-2**, empilé sur §94 (non commité). « Cuvier » dans « Le Cuvier » s'appelle **Cuves**, « Analyses »
+> (maturités, à la vigne) s'appelle **Maturités** — clés inchangées, libellés seuls, ordre de la vendange.
+> ★ **La roue crantée** de l'en-tête ouvre une section `reglages` **sans onglet** : réglages du Cuvier et
+> du Chai (mêmes écrivains, autres hôtes), renvoi vers les appellations, documents de la cave lus dans
+> `MV_DOCS` par `docsGo(i)` — **aucune copie**. Les anciennes clés `param`/`reglages` **atterrissent sur la
+> roue**. ⚠️ Un bouchon de harnais mentait depuis un lot (`_vendTab='param'`) : un bouchon décrit l'état
+> du module au jour où on l'écrit. Détail en **§95**.
+>
+> ★ Précédente : **9 septembre 2026** — ★★★ **LA CAVE S'OUVRE SUR AUJOURD'HUI, ET DEUX
+> ÉCRANS DISAIENT LA MÊME CHOSE (§94)**. **APP 6.91 → 6.92 · SW 7.50 → 7.51.** Lot **CAVE-1**, premier
+> de cinq, sur la maquette validée le 08/09 (*« c'est parfait »*). Nico : *« c'est un peu le bordel
+> dans l'application entre les infos dans pilotage, les infos dans le cuvier, les infos un peu
+> partout »*. Mesuré : **3 modules, 13 écrans, 5 barres**, « Le millésime » ×2, « Cuvier » dans
+> « Le Cuvier », « Ce qui vient » et « Ce qui presse » sur le **même moteur**, `#cave-kpis` écrit à
+> **trois** endroits avec trois sens. ★★★ **La cause** : la Cave rangée par contenant, le Pilotage
+> rangé par question, sur les mêmes moteurs — chaque information a deux adresses.
+> ★ Une quatrième section **Aujourd'hui**, écran d'arrivée : verdict (hiérarchie du Pilotage + « à
+> mesurer »), quatre semaines en trois blocs, « Sans échéance » pour les fûts en fin de vie, chaque
+> ligne un bouton. Soutirage, malo bloquée et SO₂ **portés** dans `cave.js` par-dessus `_mlAgenda`
+> (inchangé). En-tête et bande écrits **une fois** par `renderCave`, les mêmes sur les quatre onglets.
+> ⚠️⚠️ **Le lot a été construit en deux temps, et le second a relu le premier comme le code d'un
+> autre** : quatre défauts trouvés (la vue du millésime visible sous Aujourd'hui, un verdict qui
+> comptait des lignes, des fûts comptés autrement qu'au Chai, « à mesurer » plus strict que le
+> Cuvier), et un harnais qui ne cherchait les pastilles « i » que là où elles avaient
+> toujours été. ⚠️ Les copies `_pcavMalo` / `_pcavSoutirages` **restent au Pilotage jusqu'au
+> lot ③**. Détail en **§94**.
+>
+> ★ Précédente : **7 septembre 2026 (nuit)** — ★★★ **LA SURFACE ACHETÉE ÉTAIT SAISIE,
 > PERSONNE NE LA LISAIT (§93)**. **APP 6.90 → 6.91 · SW 7.49 → 7.50.** Quatrième version du
 > rendement moyen. ⚠️⚠️ **`_vendSurfParc` déduisait DÉJÀ la part du domaine** — surface de la parcelle
 > moins les surfaces achetées saisies (`src:'reste'`), en place depuis VD-3. *Trois corrections
@@ -14601,3 +14645,379 @@ exactement une fois dans `sw.js` · icône `alerte` vérifiée dans le sprite.
 - **La surface reste `p.surface`**, la surface cadastrale, pas la surface en production. Une parcelle
   arrachée en cours de campagne ou plantée à moitié fausse le rapport (§92e, inchangé).
 - Points ouverts de §90i et §91f inchangés.
+
+---
+
+## 94. ★★★ CAVE-1 — LA CAVE S'OUVRE SUR AUJOURD'HUI, ET DEUX ÉCRANS DISAIENT LA MÊME CHOSE (09/09 — APP 6.91 → 6.92 · SW 7.50 → 7.51 · base `4124074`)
+
+> **Point de départ**, Nico : *« j'ai l'impression que c'est un peu le bordel dans l'application
+> entre les infos dans pilotage, les infos dans le cuvier, les infos un peu partout. »* Puis, sur la
+> maquette : *« c'est parfait »*. C'est la phrase du Planning (§19a), prise par le bout de la Cave.
+> Lot **①** d'une série de **cinq**, découpée sur la maquette validée le 08/09 :
+> ① Aujourd'hui + bande commune + landing · ② Cuvier/Chai renommés, réglages vers ⚙ ·
+> ③ Le millésime fusionné + carte Cave du Pilotage + migration `cav` · ④ La Réserve › Fûts reçoit
+> « Le parc » · ⑤ ménage des trois blocs morts d'`index.html`.
+
+### 94a. ★★★ LE DIAGNOSTIC, MESURÉ SUR LE CODE AVANT LA MAQUETTE
+
+| Constat | Chiffre |
+|---|---|
+| Modules où vit une information de cave | **3** (Cave, Pilotage, Réserve) + Réglages › Domaine |
+| Écrans / barres d'onglets | **13 / 5** |
+| Même mot, deux écrans | « Le millésime » ×2 (§90i le disait) · **« Cuvier » dans « Le Cuvier »** · « Réglages » ×2 dans la Cave + le module · « Analyses » (maturité) / « Analyse » (labo) |
+| Même question, deux écrans | « Ce qui vient » ≈ « Ce qui presse », **même moteur `_mlAgenda`** · « La ligne de vie » ≈ Pilotage › « Le millésime », **mêmes `_mlChaine` / `_mlRendements`** · les fûts à **3** endroits |
+| Écrivains de `#cave-kpis` | **3** — `_mvcRenderHeader` (cuvées/fûts/hL/à ouiller, **suivant le filtre du Chai**), `_vendRefreshCockpit` (caisses/t/hL cuvés/en ferment.), `renderCaveMillesime` (fûts sem./à mesurer/en cuve/alertes). Trois bandes, trois sens, un seul en-tête |
+| Blocs morts dans `index.html` | **3** (`#cave-view-cuv`, `#cave-view-journal`, `#cave-view-divers`) — jamais affichés, plus lus par aucun JS |
+
+★★★ **La cause en une phrase** : la Cave a été rangée **par contenant** (Cuvier / Chai / Millésime), puis
+le Pilotage s'est fabriqué une seconde cave rangée **par question** (ce qui presse / le millésime / le
+parc / les courbes). Deux classements sur les mêmes moteurs → chaque information a deux adresses.
+*Un mot porté par deux écrans ne renvoie nulle part* (§90a) ; c'est le même défaut, généralisé.
+
+### 94b. Ce que le lot pose
+
+- **`aujourdhui`**, quatrième section, **première dans la barre et écran d'arrivée** (`caveSection`
+  par défaut). Verdict en tête, puis les quatre semaines en **trois blocs** (cette semaine, la
+  suivante, les deux dernières ensemble), puis **« Sans échéance »**. Chaque ligne est **un** bouton
+  vers le geste (`_mlGo`, kinds **`so2`** → opération soufre, **`fut`** → La Réserve › Fûts).
+- ★★★ **`_mlAgenda` ne bouge pas** : `mv-harnais-agenda` l'extrait et l'exécute à l'identique. Ce que
+  seul le Pilotage savait — **soutirage à faire, malo bloquée, doses de SO₂ programmées** — est
+  **porté** dans cave.js (`_mlFinMalo`, `_mlMalo`, `_mlSo2Doses`) et vient **par-dessus**, dans
+  `_mlAgendaComplet`. ⚠️ **Les copies du Pilotage (`_pcavMalo`, `_pcavSoutirages`, `_pcavFinMalo`)
+  restent en place jusqu'au lot ③**, à l'identique de ce qui est porté. Deux définitions pendant
+  deux lots : assumé, daté, et c'est le lot ③ qui les supprime avec l'onglet.
+- **`_mlVerdict`** : la hiérarchie du Pilotage (§20g), **plus « N cuves à mesurer » juste après les
+  alertes** — la maquette validée l'affiche en tête, et c'est ce que la barre d'état du Cuvier compte
+  déjà : **pas de relevé depuis hier ou avant** (`_vendStale >= 1`), pas seulement les « due » à deux
+  jours — vu au rendu, le verdict disait 1 quand la ligne du dessous disait 2. Ordre : contrôle (alerte FA, température, **malo bloquée**) › à mesurer › raisin sur pied (en
+  vendange) › ouillage › soutirage › SO₂ cette semaine › fûts en fin de vie › « Rien ne presse ».
+  ★ Un geste passe devant un rappel de date. ★ Le verdict compte des **cuves**, pas des lignes : une
+  cuve qui ralentit ET chauffe en faisait deux.
+- ★★ **Les fûts en fin de vie n'ont pas de date** : ils sont listés à part, jamais rangés dans une
+  semaine choisie au hasard. *Une échéance inventée se croirait* (§20g, §90b).
+- **`_caveHeaderRender` + `_caveKpisRender`**, appelés **une fois** par `renderCave` : titre « La Cave »,
+  badge « Campagne N », et **quatre chiffres identiques sur les quatre onglets** — ≈ hL en cuve ·
+  fûts en vin · à faire (lignes de la semaine) · t rentrées — avec leur **ligne de cadre**
+  (`#cave-kpis-note` : « Millésime 2026 en cuve · 2025 au chai »). C'est la règle des quatre photos
+  du Pilotage, appliquée à la Cave. ⚠️ **Conséquence assumée : la bande du Chai ne suit plus son
+  filtre millésime** — elle est la photo de la cave entière, le filtre n'agit que sur la liste.
+  Le millésime « en cuve » suit la règle de `_pcavCtx` : la campagne ouverte si elle a de la matière,
+  sinon le millésime précédent (`_caveMilMatiere`).
+- **« Ce qui vient » disparaît du millésime**, et `#ml-tabs-row` avec lui : *un onglet unique n'est pas
+  un choix, c'est un décor* (§19a). `_mlSetTab` et `_mlRenderVenir` sont **supprimés** (C15), et
+  `_mlEvHtml` est réécrit pour la nouvelle anatomie (icône du sprite, verbe à droite en `<span>`,
+  jamais un `<button>` dans un `<button>`).
+- **Visite guidée 17 h 15** et **chapitre démo** suivent : `selectCaveSection('aujourdhui')`,
+  `sel:['#auj-body','#cave-view-auj','#page-cave']`.
+
+### 94c. ⚠️⚠️ LE LOT A ÉTÉ CONSTRUIT EN DEUX TEMPS, ET LE SECOND A RELU LE PREMIER
+
+La session a été coupée après le patch, avant la livraison. Le bac à sable avait gardé les fichiers
+patchés. **Ils ont été relus comme le code d'un autre, diff par diff, avant d'en écrire une ligne de
+plus** — règle d'or n°3, appliquée à mon propre travail. Quatre défauts trouvés à cette relecture et au rendu dans un navigateur :
+
+1. **`renderCave` ne masque `#cave-view-mil` qu'après la branche `aujourdhui`** : venir du millésime
+   laissait sa vue visible **sous** Aujourd'hui. `renderCaveAujourdhui` la masque lui-même.
+2. **Le verdict comptait des lignes** (`n('alerte')+n('malo')`) là où il annonce des cuves.
+3. **« Fûts en vin » lisait `parc.occupes`** : `_mvFutEnVin` ne lit que `tonneaux[]`, une cuvée
+   d'avant le parc y a zéro fût. La bande compte comme Le Chai (`_caveNbTonneaux`).
+4. **Le verdict ne comptait que les cuves « due »** (≥ 2 j sans relevé) quand la ligne de semaine et
+   le Cuvier comptent dès hier — « 1 cuve à mesurer » au-dessus de « 2 cuves à mesurer ».
+
+★ Et un troisième par le filet : `mv-harnais-info` ne cherchait les pastilles « i » que dans
+`utils.js`, `pilotage.js` et `index.html` — la fiche `cave.auj`, posée depuis `cave.js`, sortait
+« orpheline ». **Le corpus inclut désormais `cave.js`.** Un harnais qui ne regarde que là où les
+pastilles ont toujours été ne voit pas la première posée ailleurs.
+
+### 94d. Vérifications
+
+`npm run check` **EXIT=0** · preflight **0 / 0** · harnais neuf **`mv-harnais-cave-auj.mjs`** — **46
+assertions vertes**, **6 contre-épreuves** (ordre `||9`, soutirage antérieur acquittant, fenêtre SO₂ à
+J+28, mesures devant les alertes, fûts datés, cuvée embouteillée suivie) toutes rouges sur code cassé,
+câblé dans `check` et `prebuild` · `mv-harnais-agenda` inchangé et vert · `mv-harnais-info` **128**
+vertes après extension du corpus · `harnais-demo` 144 vertes + 7/7 contre-épreuves (le point 17 h 15
+et le chapitre « Aujourd'hui ») · `node --check` sur les 3 JS · `v7.50` subsiste exactement une fois
+dans `sw.js` · les 2 icônes de `WHATS_NEW` (`chrono`, `graphique`) et les 10 de `_AUJ_ICO` existent
+dans le sprite · guide régénéré, `--check` vert · `npm run build` EXIT=0 · **`test:smoke` OK** (boot,
+23/23 globals, zéro exception) · ★ **l'écran rendu dans un navigateur headless** avec des données
+injectées : bande, note de cadre, verdict, trois blocs, 10 boutons, zéro bouton imbriqué, zéro erreur
+JS, la vue du millésime bien masquée après un aller-retour.
+**Non vérifiable ici** : `test:e2e`, le déploiement.
+
+### 94e. La note de livraison
+
+**Base : `4124074`.** `.mv-base` livré avec le lot (il pointait encore sur `4d5fc61`).
+
+| fichier | ce qui change | bump |
+|---|---|---|
+| `src/cave.js` | section `aujourdhui` · `_mlFinMalo` · `_mlMalo` · `_mlSo2Doses` · `_mlParc` · `_mlPhase` · `_mlAgendaComplet` · `_mlSansDate` · `_mlVerdict` · `_aujRender` · `renderCaveAujourdhui` · `_caveHeaderRender` · `_caveKpisRender` · `_caveMilMatiere` · `_mlEvHtml` réécrit · `_mlGo` (`so2`, `fut`) · 3 écrivains de bande et 3 d'en-tête retirés · `_mlRenderVenir` et `_mlSetTab` supprimés · 6 exports `window` | — |
+| `src/app.js` | visite 17 h 15 → Aujourd'hui · `_MVT_CHAPS` chapitre « Aujourd'hui », millésime relibellé « la ligne de vie » | ★ APP |
+| `src/utils.js` | 6.92 · 2 items `WHATS_NEW` · `MV_AIDE` cave (+2 points, 2 réécrits) · `MV_INFO` `cave.auj` (5 §) | ★ APP |
+| `index.html` · `public/sw.js` | onglet Aujourd'hui en tête, `#cave-view-auj`, `#cave-kpis-note`, `#ml-tabs-row` retiré · 4 porteurs · 7.51 + changelog | ★ APP · ★ SW |
+| `guide/08-cave.html` | section « Aujourd'hui — ce qui presse », lead, Le millésime relu ; **`public/guide.html` à régénérer (`node scripts\build-guide.mjs`)** | — |
+| `scripts/mv-harnais-cave-auj.mjs` (neuf) · `package.json` | 46 + 6 · câblé dans `check` et `prebuild` | — |
+| `scripts/mv-harnais-info.mjs` | corpus + `cave.js` | — |
+| `scripts/harnais-claude-md.mjs` | `SECTIONS` 125 → 126 | — |
+| `.mv-base` | `4124074` | — |
+
+### 94f. ⚠️ Ce qui reste ouvert — et ce que les lots ② à ⑤ doivent tenir
+
+- **Pilotage › Cave existe encore**, avec ses quatre sous-onglets et ses copies de moteurs. Le lot ③ le
+  remplace par une carte dans Aujourd'hui (une photo, un bouton) et migre `cav` → `auj` dans
+  `_PIL_TAB_MIGR` ; C22 vérifiera qu'aucun fichier ne le demande plus. `_PIL_CAVSUB` (mémorisé chez
+  les clients) devient une clé morte à ignorer.
+- **Les fiches `pil.cav.*`** suivent leurs cartes au lot ③ (malo, ouillage, rdt, anges, courbes).
+- **« Cuvier » dans « Le Cuvier », « Analyses »/« Maturités », les deux « Réglages »** : lot ②.
+- **La bande** rend `hlCuve` (estimation d'après les kilos, marquée ≈) : quand une cuve est décuvée le
+  volume mesuré ne s'y voit pas — c'est « Au chai » qui le porte. À réévaluer quand Le millésime
+  fusionnera (lot ③), pour que la bande et l'écran du dessous disent la même chose.
+- Points ouverts de §90i, §91f, §93f inchangés.
+
+---
+
+## 95. ★★★ CAVE-2 — UN MOT, UN ÉCRAN : LES ONGLETS DU CUVIER, ET UNE SEULE PORTE POUR LES RÉGLAGES DE LA CAVE (09/09 — APP 6.92 → 6.93 · SW 7.51 → 7.52 · base `4124074`, s'empile sur §94)
+
+> Lot **②** de la série ouverte en §94 (« Suite », sans autre mot). ⚠️ **S'empile sur §94, non
+> commité** : les deux se livrent ensemble, sur la même base.
+
+### 95a. Ce que le lot corrige, mesuré en §94a
+
+- **« Cuvier » dans « Le Cuvier »** — un sous-onglet qui portait le nom de sa section. Il s'appelle
+  **Cuves**. **« Analyses »** portait les contrôles de maturité *à la vigne*, pendant que Le Chai a ses
+  *analyses labo* : un mot pour deux choses. Il s'appelle **Maturités**. ★ **Les clés ne bougent
+  pas** (`rec`, `cuves`, `ana`) : seuls les libellés, et l'ordre suit la vendange — Récoltes, Cuves,
+  Maturités. Le chapitre démo « Contrôle de maturité » (`switchVendOng('ana')`) n'a rien à changer.
+- **« Réglages » vivait deux fois dans la Cave** — un onglet du Cuvier (`param`), un onglet du Chai
+  (`reglages`) — plus le module. Ce qu'on règle une fois l'an n'a rien à faire entre deux onglets du
+  quotidien : **une roue crantée dans l'en-tête** (`#cave-hdr-gear`) ouvre une section **`reglages`
+  SANS onglet** — la barre ne la montre pas, seule la roue l'ouvre — qui réunit les réglages du
+  Cuvier, ceux du Chai, le renvoi vers les appellations, et les documents de la cave.
+
+### 95b. ★★★ AUCUNE COPIE — les écrivains changent d'hôte, pas de définition
+
+- `renderVendParam` écrit dans **`#cave-reg-cuvier`** (au lieu de `#mvv-body`) ; `renderCaveReglages`
+  garde **`#mvc-body-reglages`**, dont le `<div>` a **déménagé** d'`#mvc-elevage` vers
+  `#cave-view-reg`. Tous les appelants (`_caveSetSeuilMil`, le parc à cuves, `_vendSetRdtBase`,
+  `_vpcAppliquer`…) continuent d'appeler les mêmes fonctions. `_vpcAppliquer` teste désormais
+  `caveSection==='reglages'` pour savoir quel écran rafraîchir.
+- **Les documents** : `_caveRegDocs` lit **`window.MV_DOCS`** (exposé par `reglages.js`, une ligne) et
+  garde `mod==='cave'` + le bilan de campagne + l'inventaire des fûts ; chaque ligne appelle
+  **`docsGo(i)`** avec l'index réel du catalogue. `cave.js` ne recopie **aucun titre** de document.
+  ⚠️ **Décision assumée, contraire à une phrase du guide** (« jamais depuis le Cuvier lui-même : tout
+  ce que Ma Vigne sait imprimer se trouve au même endroit ») : la roue est un **raccourci** vers le
+  même catalogue, pas une seconde liste. Réglages › App › Documents & impressions reste l'endroit
+  qui les a tous, et le guide le dit maintenant en ces termes.
+- **Les appellations et leurs plafonds** sont un réglage du **domaine** : `_caveGoAoc` y va
+  (`goTo('reglages')` → `switchReglTab('domaine')` → `#aoc-card` éclairé), même geste que `_pilGo`.
+- **Tolérance** : `switchVendOng('param')`, `switchCaveOng('reglages')` et `('divers')` **ouvrent la
+  roue** au lieu de viser le vide — un client (ou un vieux lien) qui les demande encore atterrit.
+
+### 95c. Ce que le lot a fait sortir
+
+- **Un harnais avait un bouchon d'état périmé.** `mv-harnais-poids-caisse` extrait `_vpcAppliquer` et
+  posait `var _vendTab = 'param'` en prélude ; la fonction lit désormais `caveSection` →
+  `ReferenceError` dans `prebuild`. Le prélude pose `caveSection='reglages'`. ★ Un bouchon décrit
+  l'état du module au moment où le harnais a été écrit : quand le module change d'état, le bouchon
+  ment en silence jusqu'à ce qu'une variable manque.
+- **Une assertion du lot ① était trop littérale** : elle exigeait la liste exacte des quatre sections
+  dans le filet de `renderCave`. Elle exige maintenant qu'`aujourdhui` y soit, en tête, et soit le
+  repli — la liste peut s'allonger.
+- **Trois textes d'écran** disaient encore « Réglages du Chai » (parc vide, cuve à déclarer) : ils
+  disent « la roue crantée de la Cave, bloc Le Chai ». `MV_INFO` `pil.cav.ouillage` aussi.
+
+### 95d. Vérifications
+
+`npm run check` **EXIT=0** · preflight **0 / 0** · harnais neuf **`mv-harnais-cave-reglages.mjs`** —
+**39 assertions**, dont 3 **exécutées** (`_caveRegDocs` sur un catalogue fictif : le filtre, l'index
+réel, le catalogue absent), **6 contre-épreuves** rouges sur code cassé (tolérance retirée, `reglages`
+remis aux ONGLETS, filtre sans bilan, `MV_DOCS` non exposé, la roue redevenue onglet, `renderVendParam`
+revenu dans `#mvv-body`) · `mv-harnais-cave-auj` 52/52 · `mv-harnais-poids-caisse` 71 · `harnais-demo`
+et contre · `npm run build` EXIT=0 · `WHATS_NEW` 6.93 exécuté (2 items, `engrenage`, `raisin`) ·
+`v7.51` une fois dans `sw.js` · ★ **la roue rendue dans un navigateur headless** : les quatre blocs
+peuplés, zéro erreur JS. **Non vérifié ici** : `test:e2e`, le déploiement.
+
+### 95e. La note de livraison
+
+**Base : `4124074`**, `.mv-base` inchangé. ⚠️ S'empile sur §94 : les deux lots se livrent ensemble.
+
+| fichier | ce qui change | bump |
+|---|---|---|
+| `src/cave.js` | onglets du Cuvier · `switchVendOng`/`switchCaveOng` (tolérances) · section `reglages` · `_caveRegInjectCss` · `_caveOpenReglages` · `_caveGoAoc` · `_caveRegDocs` · `_caveRegDocsHtml` · `renderCaveReglagesCave` · hôte de `renderVendParam` · 3 textes · 3 exports | — |
+| `src/reglages.js` | `window.MV_DOCS = MV_DOCS` | — |
+| `src/utils.js` | 6.93 · 2 items `WHATS_NEW` · `MV_AIDE` cave (+2 points, 4 réécrits) · `MV_INFO` `pil.cav.ouillage` | ★ APP |
+| `index.html` · `public/sw.js` | roue `#cave-hdr-gear` · `#cave-view-reg` (4 hôtes) · onglet et vue Réglages du Chai retirés · 4 porteurs · 7.52 + changelog | ★ APP · ★ SW |
+| `guide/08-cave.html` | cartes Cuves / Maturités / Réglages, chemins, documents ; **`public/guide.html` à régénérer** | — |
+| `scripts/mv-harnais-cave-reglages.mjs` (neuf) · `package.json` | 39 + 6 · câblé dans `check` et `prebuild` | — |
+| `scripts/mv-harnais-cave-auj.mjs` · `scripts/mv-harnais-poids-caisse.mjs` · `scripts/harnais-claude-md.mjs` | assertion assouplie · bouchon `caveSection` · `SECTIONS` 126 → 127 | — |
+
+### 95f. ⚠️ Ce qui reste ouvert
+
+- **Lot ③** : Le millésime fusionné (La ligne de vie · Les courbes), la carte Cave du Pilotage,
+  `cav → auj` dans `_PIL_TAB_MIGR`, suppression des copies `_pcavMalo`/`_pcavSoutirages`, fiches
+  `pil.cav.*` → `cave.*`. **Lot ④** : La Réserve › Fûts reçoit « Le parc ». **Lot ⑤** : les trois blocs
+  morts d'`index.html`.
+- **`_PIL_CAVSUB` et l'onglet Pilotage › Cave** existent toujours (lot ③).
+- Le bouton « Bouteilles » du Chai reste créé dynamiquement par `_caveEnsureBtlTab` après « Cuvées » :
+  inchangé, mais c'est un onglet que la barre ne déclare pas en HTML.
+- Points ouverts de §94f inchangés.
+
+---
+
+## 96. ★★★ CAVE-3 (+④) — L'ONGLET PILOTAGE › CAVE EST RENTRÉ DANS LA CAVE (09/09 — APP 6.93 → 6.94 · SW 7.52 → 7.53 · base `4124074`, s'empile sur §94 et §95)
+
+> Lots **③ et ④** de la série (« Suite », puis « Go »), livrés ensemble parce que supprimer l'onglet
+> obligeait à reloger **le parc** le même jour. ⚠️ **S'empile sur §94 et §95, non commités** : les
+> trois se livrent ensemble, sur la même base.
+
+### 96a. Ce que le lot fait, mesuré
+
+- **Le bloc Pilotage › Cave** (lignes 5004 → 6531 de `pilotage.js` : **1 528 lignes, 69 fonctions**)
+  est **rentré dans `cave.js`**, ses noms `_pcav*` / `_pcrb*` conservés (privés ; les harnais les
+  extraient par leur nom). **Supprimé, pas ramené** — tout ce qui doublait Aujourd'hui et La ligne de
+  vie : `_pcavVuePresse`, `_pcavVerdict`, `_pcavMalo`, `_pcavSoutirages`, `_pcavFinMalo`,
+  `_pcavDernierSout`, les six blocs « ce qui presse », `_pcavFlux`, `_pcavRdt`, `_pcavRdtTxt`,
+  `_pcavBandeau`, `_pcavMils`, `_pcavVueMillesime`, `_pcavPoseRdt`, `_pcavEtat`, `_pcavMouv`,
+  `_pcavRow`, `_pcavSub`, `_pcavMaloCourbe`, `_pcavSeuilDe`, `_pcavMilsCave`, `_pilTabCav`,
+  `_pilAvertCav`, `_pilDaysSince`. ★ **C15 (fonction morte) a servi de guide** : coupe → preflight →
+  coupe, jusqu'à zéro. Puis un balayage « toute `_pcav*` a un appelant » (le harnais le grave).
+- **Adaptations** du bloc : `_pcavCtx()` sans le `d` du Pilotage (seuil via `_caveSeuilGlobal`),
+  `_pilEsc` → `_escHtml`, `_pilDfr` → `_mlFrC`, `_pilFillContent(_pilData())` → `renderCaveMillesime()`,
+  emojis de cartes → sprite (`chrono`, `graphique`, `sablier`).
+- **Le millésime a deux onglets** (`#ml-tabs-row` recréé) : **La ligne de vie** = `_mlRenderVie` +
+  **`_mlTuiles(ch)` en tête** (surface récoltée, raisin rentré, rendement moyen via `_mlRdtMoyen`, au
+  chai) + **`_pcavN1` en pied** ; **Les courbes** = `_pcavVueCourbes(c)` puis `_pcrbPose()` après la
+  pose du HTML. ★ `renderCave` **oublie la famille de graphes** (`_mvGraphOublier('#pcrb-g-')`) dès
+  qu'on n'est plus sur les courbes — la règle de `_pilAfterFill`, transposée.
+- **Le parc** : `window._caveParcHtml()` = part des anges + pyramide, rendu **en tête de La Réserve ›
+  Fûts**. ⚠️ **La Réserve portait déjà** l'état du parc (`_rsvParcHtml` : total, en vin, libres, à
+  réformer, mouvements de l'année) et le registre des mouvements : `_pcavEtat` et `_pcavMouv` auraient
+  été des doubles. Supprimés.
+- **Pilotage** : `cav` retiré de `_PIL_TABS`, **`cav:'auj'` dans `_PIL_TAB_MIGR`**, `_PIL_CAVSUB` +
+  `_pilLoadCav`/`_pilSaveCav` + les trois handlers de `_pilBindContent` + la branche de `_pilAfterFill`
+  retirés. **Carte `Cave` dans Aujourd'hui** (`_pilCkCave`, panneau `auj_cave`, style `.pil-ck-btn`) :
+  N à faire cette semaine, le verdict en une ligne, bouton « Ouvrir la Cave » → `selectCaveSection
+  ('aujourdhui')`. Elle **lit** `window._mlVerdict` / `_mlAgendaComplet` — une seule définition.
+  ★ **L'alerte ouillage de `_pilCkAlertes` est retirée** : seuil global (`d.ouAlerte`) là où la Cave
+  applique le seuil de chaque millésime — c'était une seconde définition du retard. Le bloc s'appelle
+  « Alertes matériel ».
+- **Les fiches suivent leurs cartes** : `pil.cav.anges` → `cave.anges`, `pil.cav.courbes` →
+  `cave.courbes`, `pil.cav.rdt` → **`cave.rdt` posée sur « Rendement par parcelle »** de La ligne de vie
+  (texte réécrit : plus de « dix plus forts », plus d'homonymie) ; `pil.cav.malo` et `pil.cav.ouillage`
+  n'ont plus de carte propre → **leurs paragraphes rejoignent `cave.auj`**, les clés disparaissent.
+
+### 96b. ★★★ CE QUE LA COUPE A FAIT SORTIR
+
+1. **`_pcavCard` testait `typeof _mvInfoBtn==='function'`** — vrai dans `pilotage.js` (importé), **faux
+   dans `cave.js`** (pas importé) : la pastille « i » des cartes ramenées n'aurait **jamais rendu**, sans
+   erreur. Passé par `window._mvInfoBtn`. ★ *Un `typeof` sur un import est une garde qui change de
+   sens quand le code change de fichier.* Le harnais le grave, avec sa contre-épreuve.
+2. **Un export pendant** : `window._pcavPoseRdt = _pcavPoseRdt;` avait survécu à la coupe de sa
+   fonction → **`ReferenceError` au chargement du module**, donc la Cave entière. Trouvé par un balayage
+   « tout `window.X = Y` a son `Y` défini », que le patch aurait dû faire d'emblée. ⚠️ Ce balayage a
+   d'abord **retiré quatre exports légitimes** (`saveCaveOp`, `_attachPdfToOp`, `saveCaveAna`,
+   `saveRetraitFut` : des `async function`, que mon regex `^function` ne voyait pas) — vus au `git diff`,
+   remis à leur place depuis `HEAD`. ★★ *Un outil de nettoyage se relit au diff, jamais à son message
+   de succès.*
+3. **Trois harnais et un cliquet gravaient l'ancienne géographie** : `mv-harnais-courbes` extrayait la vue
+   de `pilotage.js` ; `mv-harnais-rdtmil` exigeait la carte rendement du Pilotage et « la fiche prévient
+   de l'homonymie » — l'homonymie n'existe plus ; `mv-harnais-info` cherchait `_pcavCard` et les fiches
+   `pil.cav.*` dans le Pilotage ; `mv-harnais-echelle` gravait **huit** clés d'onglet et ne lisait le pas
+   `hero` que dans `pilotage.js`. Tous repointés, et chacun dit pourquoi. ★ Le cliquet d'espacement a
+   attrapé `padding:6px 10px` sur le bouton neuf : `4px 12px`, dans l'échelle.
+4. **Le cliquet d'emojis par module** (26 → 30 sur `cave.js`) : le bloc déplacé en portait quatre. Sprite.
+
+### 96c. ⚠️ Décisions assumées
+
+- **Les noms `_pcav*` restent** dans `cave.js`. Une renommée de quarante fonctions n'aurait rien dit de
+  plus et aurait cassé trois harnais d'extraction pour rien. La tête du bloc dit d'où il vient.
+- **Le parc n'apporte à la Réserve que ce qu'elle n'avait pas** (anges, pyramide). La note « aucun euro
+  n'est affiché » est partie avec `_pcavVueParc` d'origine.
+- **`_pilCkAlertes` perd son alerte ouillage** sans remplacement local : la carte Cave du même écran
+  porte le verdict, calculé par la Cave.
+- **Le chapitre « Les courbes » du guide du Pilotage** est déplacé tel quel dans le guide de la Cave, sous
+  Le millésime ; le guide du Pilotage garde un paragraphe « La Cave n'est plus un onglet du Pilotage ».
+
+### 96d. Vérifications
+
+`npm run check` **EXIT=0** · preflight **0 / 0** · harnais neuf **`mv-harnais-cave-mil.mjs`** — **39
+assertions** (dont 2 exécutées : `_mlTuiles` sur une chaîne fictive et sans matière ; un balayage
+« aucune `_pcav*` sans appelant »), **6 contre-épreuves** rouges sur code cassé (migration retirée, carte
+qui recalcule, courbes sans `_pcrbPose`, Réserve sans parc, verdict recopié, pastille hors window) ·
+`mv-harnais-cave-auj` 53/53 (deux assertions du lot ① mises à jour : la barre du millésime est revenue
+avec deux onglets, `_mlSetTab('venir')` atterrit sur Aujourd'hui) · `courbes`, `rdtmil` (83), `info`,
+`echelle` (29) repointés et verts · `npm run build` EXIT=0 · `WHATS_NEW` 6.94 exécuté (2 items, `verre`,
+`graphique`) · `v7.52` une fois dans `sw.js` · ★ **rendu navigateur** : Le millésime › Les courbes,
+La ligne de vie (tuiles + N-1), la carte Cave du Pilotage, La Réserve › Fûts, zéro erreur JS.
+**Non vérifié ici** : `test:e2e`, le déploiement.
+
+### 96e. La note de livraison
+
+**Base : `4124074`**, `.mv-base` inchangé. ⚠️ S'empile sur §94 et §95 : **les trois lots se livrent
+ensemble** ; les fichiers livrés sont l'état cumulé.
+
+| fichier | ce qui change | bump |
+|---|---|---|
+| `src/cave.js` | bloc `_pcav*`/`_pcrb*` (40 fonctions), `_mlTuiles`, `_mlSetTab`, `_caveParcHtml`, deux onglets du millésime, oubli des graphes, fiches `cave.*`, pastille via window, 2 exports | — |
+| `src/pilotage.js` | −1 528 lignes · onglet `cav` retiré, migration `cav:'auj'`, `_pilCkCave` + `auj_cave`, `_pilCkAlertes` sans ouillage, texte « renouvellement » → La Réserve › Fûts | ★ APP |
+| `src/reserve.js` · `src/styles.css` | `_caveParcHtml()` en tête de Fûts · `.pil-ck-btn` | — |
+| `src/utils.js` | 6.94 · 2 items `WHATS_NEW` · `MV_AIDE` cave / pilotage (« sept onglets ») / réserve · `MV_INFO` `cave.anges`, `cave.courbes`, `cave.rdt`, `cave.auj` enrichie, `pil.cav.*` retirées | ★ APP |
+| `index.html` · `public/sw.js` | `#ml-tabs-row` (vie · crb) · 4 porteurs · 7.53 + changelog | ★ APP · ★ SW |
+| `guide/08-cave.html` · `11-pilotage.html` · `09-reserve.html` · `12-reglages.html` | Le millésime à deux onglets + chapitre « Les courbes » déplacé · « La Cave n'est plus un onglet du Pilotage », sept onglets · parc en tête de Fûts · un seul écran ; **`public/guide.html` à régénérer** | — |
+| `scripts/mv-harnais-cave-mil.mjs` (neuf) · `package.json` | 39 + 6 · câblé dans `check` et `prebuild` | — |
+| `scripts/mv-harnais-cave-auj.mjs` · `mv-harnais-courbes.mjs` · `mv-harnais-rdtmil.mjs` · `mv-harnais-info.mjs` · `mv-harnais-echelle.mjs` · `harnais-claude-md.mjs` | repointés · `SECTIONS` 127 → 128 | — |
+
+### 96f. ⚠️ Ce qui reste ouvert
+
+- **Lot ⑤** : les trois blocs morts d'`index.html` (`#cave-view-cuv`, `#cave-view-journal`,
+  `#cave-view-divers`).
+- **`_PIL_CAVSUB`** reste une clé `localStorage` chez les clients (`mavigne_pil_cav_*`) que plus rien ne
+  lit : inoffensive, jamais nettoyée.
+- **`d.ouAlerte`** est encore calculé par `_pilData` sans lecteur.
+- Le bouton « Bouteilles » du Chai (§95f) et les points ouverts de §94f inchangés.
+
+---
+
+## 97. CAVE-5 — MÉNAGE : LA CAVE D'AVANT LE CHAI DORMAIT DANS `index.html` (09/09 — APP 6.94 → 6.95 · SW 7.53 → 7.54 · base `4124074`, s'empile sur §94, §95, §96)
+
+> Lot **⑤**, le dernier de la série ouverte en §94. Aucun effet visible ; c'est le point de la maquette
+> validée le 08/09 qui disait « trois blocs morts ». ⚠️ **S'empile sur §94–§96, non commités** : les
+> quatre lots se livrent ensemble, sur la même base.
+
+### 97a. Ce qui dormait, mesuré (§94a)
+
+- **`#cave-view-cuv`** (avec `#cave-cuv-body` et un FAB « Nouvelle opération »), **`#cave-view-journal`**
+  (chips de filtre, zone d'import, `#cave-ana-input`, FAB), **`#cave-view-divers`** (alerte d'ouillage à
+  7/14 jours, convertisseur SO₂) : **52 lignes** d'`index.html`, la Cave d'avant Le Chai. **Aucun JS ne
+  lisait ces ids** ; `renderCave` les masquait à chaque rendu par la liste `['cuv','journal','divers',…]`.
+  `#cave-view-cuv` était même `display:block` en dur — masqué au premier rendu, jamais vu.
+- **Ce que le retrait a entraîné, vérifié appelant par appelant** : `setOuillageAlerte` +
+  `_caveOuillageRefresh` (seul le bloc `divers` les appelait ; le seuil d'ouillage se règle depuis
+  longtemps dans la roue crantée, par millésime) → **supprimés** avec leur export. `setCaveJFilter`,
+  `_onCaveAnaFileChange`, `openOvCaveAna`, `openOvCaveOp`, `openOvCaveConvert` **restent** : le Journal du
+  Chai a ses propres chips `.mvc-jf` et son propre `#mvc-ana-input`. Six règles CSS (`.cave-fab*`,
+  `.cave-jf-btn*`, `.cave-divers-*`) retirées, et deux sélecteurs sortis de la règle de thème.
+- Les listes de masquage ne citent plus `cuv`, `journal`, `divers` (4 sites).
+
+### 97b. Vérifications
+
+`npm run check` **EXIT=0** · preflight **0 / 0** · `mv-harnais-cave-auj` **57/57** (+4 : les blocs ne
+reviennent pas, les listes sont propres, le couple mort a disparu, **l'import d'analyse PDF vit toujours
+par le Journal du Chai**) · `WHATS_NEW` **6.95, un item** (`mv-whatsnew-check` refuse un bloc de tête vide : « depuis 6.94 → le
+seul bloc 6.95 » ; l'item dit qu'il n'y a rien à voir) · `v7.53` une fois dans `sw.js` · `npm run build` EXIT=0.
+
+### 97c. La note de livraison
+
+**Base : `4124074`**, `.mv-base` inchangé. Livré dans l'état cumulé §94 → §97.
+
+| fichier | ce qui change | bump |
+|---|---|---|
+| `index.html` · `public/sw.js` | 3 blocs morts retirés (52 lignes) · 4 porteurs · 7.54 + changelog | ★ APP · ★ SW |
+| `src/cave.js` · `src/styles.css` · `src/utils.js` | listes de masquage · `setOuillageAlerte`/`_caveOuillageRefresh` retirés · 6 règles CSS · 6.95, un item `WHATS_NEW` | — |
+| `scripts/mv-harnais-cave-auj.mjs` · `scripts/harnais-claude-md.mjs` | +4 assertions · `SECTIONS` 128 → 129 | — |
+
+### 97d. La série CAVE, en une ligne chacune
+
+① Aujourd'hui, écran d'arrivée, bande et en-tête uniques (§94) · ② un mot, un écran, une roue crantée
+pour les réglages (§95) · ③+④ l'onglet Pilotage › Cave rentré dans la Cave, le parc à la Réserve (§96) ·
+⑤ le ménage (§97). **Mesuré au départ : 3 modules, 13 écrans, 5 barres, 4 homonymes. À l'arrivée : la
+Cave et la Réserve, 8 écrans, 4 barres, 0 homonyme** — et une carte dans le Pilotage.

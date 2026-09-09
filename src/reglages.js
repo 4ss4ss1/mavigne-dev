@@ -3122,6 +3122,8 @@ var MV_DOCS = [
     s:'Remet en place une sauvegarde. Remplace les donn\u00e9es actuelles.' }
 ];
 
+// ★ Lu par la Cave (roue crantee, lot CAVE-2) : un seul catalogue, docsGo(i) pour tous.
+window.MV_DOCS = MV_DOCS;
 var MV_DOCS_FAM = [
   { k:'oblig', ico:'\u{1F4CB}', lbl:'Obligatoire',
     intro:'<b>Ce que vous devez pouvoir sortir en contr\u00f4le.</b> Gardez-les au format demand\u00e9, pas seulement \u00e0 l\u2019\u00e9cran.' },

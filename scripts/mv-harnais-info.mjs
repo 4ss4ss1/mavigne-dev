@@ -11,6 +11,9 @@ import fs from 'node:fs';
 
 const U    = fs.readFileSync('src/utils.js', 'utf8');
 const PIL  = fs.readFileSync('src/pilotage.js', 'utf8');
+/* ★ Lot CAVE-1 : la Cave pose sa propre pastille (cave.auj). Un corpus limite au
+   Pilotage aurait dit « fiche orpheline » sur une pastille bien reelle. */
+const CAVE = fs.readFileSync('src/cave.js', 'utf8');
 const HTML = fs.readFileSync('index.html', 'utf8');
 const CSS  = fs.readFileSync('src/styles.css', 'utf8');
 function corpsPil(nom){
@@ -20,7 +23,7 @@ function corpsPil(nom){
   return '';
 }
 const nu = s => s.split('\n').filter(l => !l.trimStart().startsWith('//')).join('\n');
-const UNU = nu(U), PILNU = nu(PIL);
+const UNU = nu(U), PILNU = nu(PIL), CAVENU = nu(CAVE);
 
 let ok = 0, ko = 0;
 const t = (nom, cond, detail) => {
@@ -71,8 +74,8 @@ t('les balises <b> sont refermees',
    litteralement, partout hors du dictionnaire — c'est vrai quelle que soit la
    facon dont elle est posee. */
 const HORS = [UNU.slice(0, UNU.indexOf('const MV_INFO = {')) + UNU.slice(UNU.indexOf('\n};', UNU.indexOf('const MV_INFO = {'))),
-              PILNU, HTML].join('\n');
-const posees = new Set([...[UNU, PILNU, HTML].join('\n')
+              PILNU, CAVENU, HTML].join('\n');
+const posees = new Set([...[UNU, PILNU, CAVENU, HTML].join('\n')
   .matchAll(/_mvInfoBtn\(\s*'([^']+)'|data-mvi="([^"]+)"/g)]
   .map(m => m[1] || m[2]).filter(x => x && !x.includes('+')));
 t('toute pastille posee a sa fiche', [...posees].every(k => cles.includes(k)),
@@ -343,13 +346,17 @@ t('le fait qui protege reste a l\'ecran (delai de rentree)',
 t('le detail CLP est parti dans la fiche',
   !PILNU.includes('phrases de risque CLP') && txt.includes('phrases de risque CLP'));
 
+/* Lot CAVE-3 : les cartes de l'ex-Pilotage › Cave sont rentrees dans cave.js,
+   et leurs fiches ont suivi (pil.cav.* → cave.*). Ouillage et malo n'ont plus de
+   carte propre : leurs paragraphes vivent dans cave.auj, la fiche d'Aujourd'hui. */
 t('_pcavCard accepte une cle de fiche (7e argument)',
-  /function _pcavCard\(ico,dot,titre,stat,body,mini,infoCle\)/.test(PILNU));
+  /function _pcavCard\(ico,dot,titre,stat,body,mini,infoCle\)/.test(CAVENU));
 t('… et la pose dans l\'en-tete, pas dans le pied',
-  /pcav-t">'\+_pilEsc\(titre\)\+'<\/span>'\s*\+\(infoCle/.test(PILNU));
-t('les quatre cartes de la Cave portent leur fiche',
-  ['anges','malo','ouillage','rdt'].every(k => PILNU.includes("'pil.cav." + k + "'")));
-const ANGES = (PILNU.match(/'[^']{0,400}',\s*'pil\.cav\.anges'\)/) || [''])[0];
+  /pcav-t">'\+_escHtml\(titre\)\+'<\/span>'\s*\+\(infoCle/.test(CAVENU));
+t('les cartes de la Cave portent leur fiche',
+  ['anges','rdt','courbes','auj'].every(k => CAVENU.includes("'cave." + k + "'")));
+t('aucune fiche pil.cav.* ne survit', !/'pil\.cav\./.test(UNU) && !/'pil\.cav\./.test(PILNU) && !/'pil\.cav\./.test(CAVENU));
+const ANGES = (CAVENU.match(/'[^']{0,400}',\s*'cave\.anges'\)/) || [''])[0];
 t('la note de la part des anges est ramenee a une ligne',
   ANGES.length > 0 && ANGES.length < 130, ANGES.length + ' caracteres (130 max)');
 t('… et la mesure est dans la fiche', /exactement ce qui s.{0,3}est/.test(txt));

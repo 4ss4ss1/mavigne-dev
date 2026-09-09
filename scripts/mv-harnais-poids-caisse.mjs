@@ -91,7 +91,11 @@ if (manquants.length){
 const PRELUDE = `
 var CAVE_VENDANGE = {config:{poids_caisse_kg:25,ratio_min:130,ratio_max:140},recoltes:[],cuves_vinif:[],clients:[]};
 var PARCELLES = [];
-var _vendTab = 'param';
+var _vendTab = 'rec';
+/* Lot CAVE-2 : les reglages du Cuvier vivent dans la roue crantee (section
+   'reglages' de la Cave), plus dans un onglet 'param'. _vpcAppliquer teste
+   caveSection pour savoir quel ecran rafraichir. */
+var caveSection = 'reglages';
 var _vpc = {mil:null, ancien:null, nouveau:null, defaut:true, clients:true};
 var _journal = {saves:0, toasts:[], fb:[]};
 var window = { get CAVE_VENDANGE(){return CAVE_VENDANGE;}, set CAVE_VENDANGE(v){CAVE_VENDANGE=v;},

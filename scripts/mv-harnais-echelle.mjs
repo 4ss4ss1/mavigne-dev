@@ -101,7 +101,10 @@ t('aucune taille de texte ecrite en dur', enDur.length === 0,
 /* 5. Aucun pas invoque qui ne soit declare : une faute de frappe passerait
       inapercue, le repli rendant l'affichage juste et le pas mort. */
 const declares = new Set(PAS.map(p => p[0]));
-const invoques = new Set([...SRC.matchAll(/var\(--pt-([a-z]+)\s*,/g)].map(m => m[1]));
+/* Lot CAVE-3 : l'ex-onglet Pilotage › Cave vit dans cave.js et garde l'echelle
+   du Pilotage (le pas hero, entre autres). On lit les deux modules. */
+const CAVE = readFileSync('src/cave.js', 'utf8');
+const invoques = new Set([...(SRC + '\n' + CAVE).matchAll(/var\(--pt-([a-z]+)\s*,/g)].map(m => m[1]));
 t('aucun pas invoque hors de la liste', [...invoques].every(x => declares.has(x)),
   [...invoques].filter(x => !declares.has(x)).join(', '));
 t('aucun pas declare sans emploi', [...declares].every(x => invoques.has(x)),
@@ -120,8 +123,11 @@ t('chaque repli redit la valeur du pas', mauvais.length === 0,
       ni les cles d'onglet memorisees chez les clients. */
 for (const sel of ['pil-tile', 'data-pid', 'pil-cockpit-card', 'pil-dec', 'pil-th'])
   t(`« ${sel} » intact (vise par la visite guidee / C22)`, SRC.includes(sel));
-t('les huit cles d\'onglet sont intactes',
-  ['auj','an','avc','equ','sim','cav','eco','cfm'].every(k => new RegExp(`\\['${k}',`).test(SRC)));
+/* Lot CAVE-3 : l'onglet Cave est rentre dans la Cave. Sept cles vivantes, et la
+   huitieme (cav) survit en MIGRATION : un client qui l'a memorisee atterrit. */
+t('les sept cles d\'onglet sont intactes',
+  ['auj','an','avc','equ','sim','eco','cfm'].every(k => new RegExp(`\\['${k}',`).test(SRC)));
+t('la cle cav est migree, pas perdue', /cav:'auj'/.test(SRC) && !/\['cav',/.test(SRC));
 t('le nombre de catch vides n\'a pas bouge (cliquet C14)',
   (BRUT.match(/catch\s*\([^)]*\)\s*\{\s*\}/g) || []).length === 15);
 

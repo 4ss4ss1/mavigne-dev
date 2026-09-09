@@ -2323,8 +2323,10 @@ var _mvtSteps = [
 
   { kick:'17 h 15', tx:'Et la question du lendemain : qu\u2019est-ce qui m\u2019attend ? Ouillages dus, cuves \u00e0 mesurer, f\u00fbts \u00e0 pr\u00e9parer \u2014 la semaine se range toute seule, du raisin \u00e0 la bouteille.',
     hyp:'Le mill\u00e9sime est un fil : la parcelle, la cuve, le f\u00fbt et la bouteille sont le m\u00eame vin. Le Cuvier et la vendange cuve par cuve vous attendent dans les \u00e9crans.',
-    nav:function(){ if(window.goTo) window.goTo('cave'); setTimeout(function(){ try{ if(window.selectCaveSection) window.selectCaveSection('millesime'); }catch(e){ if(window.logError)window.logError({level:'error',cat:'visite',msg:'millesime: '+(e&&e.message)}); } },260); },
-    sel:['#ml-body','#cave-view-mil','#page-cave'] },
+    // ★ Lot CAVE-1 : « qu'est-ce qui m'attend ? » a sa reponse dans l'onglet
+    //   Aujourd'hui de la Cave, plus dans Le millesime.
+    nav:function(){ if(window.goTo) window.goTo('cave'); setTimeout(function(){ try{ if(window.selectCaveSection) window.selectCaveSection('aujourdhui'); }catch(e){ if(window.logError)window.logError({level:'error',cat:'visite',msg:'aujourdhui: '+(e&&e.message)}); } },260); },
+    sel:['#auj-body','#cave-view-auj','#page-cave'] },
 
   // ══ ACTE III — CE QUE CA REND ══
   // ⚠️⚠️ NE PAS ANNONCER « une heure de retard » ICI. _pl2Cell rend TOUTE entree
@@ -2668,7 +2670,8 @@ var _MVT_CHAPS=[
   {f:'cave',  id:'cave',     ic:'barrique', t:'Le Chai \u2014 \u00e9levage', x:'Cuv\u00e9es en f\u00fbt ou en cuve, rappels d\u2019ouillage, analyses labo, part des anges.'},
   {f:'cave',  id:'cuvier',   ic:'raisin', t:'Le Cuvier \u2014 la vendange', x:'Du raisin \u00e0 la cuve : caisses, \u00e9tat du raisin, \u00e9raflage, densit\u00e9s jour par jour.'},
   {f:'cave',  id:'maturite', ic:'microscope', t:'Contr\u00f4le de maturit\u00e9', x:'Vos relev\u00e9s au r\u00e9fractom\u00e8tre : qui monte, qui stagne, dans quel ordre r\u00e9colter.'},
-  {f:'cave',  id:'millesime',ic:'chrono', t:'Le mill\u00e9sime \u2014 ce qui vient', x:'La semaine \u00e0 venir en cave, et le fil complet d\u2019un mill\u00e9sime, de la parcelle \u00e0 la bouteille.'},
+  {f:'cave',  id:'aujourdhui',ic:'chrono', t:'Aujourd\u2019hui \u2014 ce qui presse', x:'Le verdict du matin et les quatre semaines \u00e0 venir : cuves \u00e0 mesurer, ouillages, soutirages. Chaque ligne m\u00e8ne au geste.'},
+  {f:'cave',  id:'millesime',ic:'parcours', t:'Le mill\u00e9sime \u2014 la ligne de vie', x:'Le fil complet d\u2019un mill\u00e9sime, de la parcelle \u00e0 la bouteille, et le rendement face au plafond.'},
   {f:'cave',  id:'bouteille',ic:'bouteille', t:'La mise en bouteille', x:'Le compte de bouteilles, les pertes \u00e9tape par \u00e9tape, et l\u2019archive par mill\u00e9sime.'},
 
   {f:'equipe',id:'planning', ic:'calendrier', t:'Planning & heures', x:'Pr\u00e9sence, compteur annuel des 1607 h, heures suppl\u00e9mentaires, cong\u00e9s et acomptes.'},
@@ -2767,6 +2770,7 @@ function _mvtChapter(id){
     else if(id==='bouteille'){ _mvtGoCave('elevage',function(){ if(window.switchCaveOng) window.switchCaveOng('bouteille'); }); }
     else if(id==='cuvier'){ _mvtGoCave('vendange',function(){ if(window.switchVendOng) window.switchVendOng('rec'); }); }
     else if(id==='maturite'){ _mvtGoCave('vendange',function(){ if(window.switchVendOng) window.switchVendOng('ana'); }); }
+    else if(id==='aujourdhui'){ _mvtGoCave('aujourdhui',null); }
     else if(id==='millesime'){ _mvtGoCave('millesime',null); }
     else if(id==='planning'){ goTo('planning'); }
     else if(id==='fiche'){ goTo('planning'); setTimeout(function(){ try{ if(window.openPlanFiche) window.openPlanFiche('Jean'); }catch(e){ if(window.logError)window.logError({level:'info',cat:'demo',msg:'planFiche'}); } },300); }

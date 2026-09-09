@@ -34,7 +34,7 @@ var _vmesureEditId = null;   // releve en cours de correction, null en creation
 var _vmRem = 2;
 var _vmPig = 1;
 var caveTab = 'cuv';   // onglet actif du Chai — DOIT etre l'un des 4 de switchCaveOng
-var caveSection = 'elevage'; // section active : 'elevage' (Le Chai) | 'vendange' (Le Cuvier). Plus de s\u00E9lecteur interm\u00E9diaire : onglets unifi\u00E9s dans l'en-t\u00EAte.
+var caveSection = 'aujourdhui'; // section active : 'aujourdhui' (l'arrivee) | 'elevage' (Le Chai) | 'vendange' (Le Cuvier) | 'millesime'. La Cave s'ouvre TOUJOURS sur Aujourd'hui : le verdict dit ce qui presse, chaque ligne mene au geste (lot CAVE-1).
 var _caveFml = 'none';
 var _caveOpType = 'ouillage';
 var _copCuvSel = new Set();
@@ -685,21 +685,9 @@ function _mvcRenderHeader(){
   var due=_caveAlerts().filter(function(a){ return _caveDansFiltre(a.cuv); }).length;
   var okN=Math.max(0,act.length-due);
   var okPct=act.length?Math.round(okN/act.length*100):100;
-  var kpis=[[act.length,'Cuvées',false],[futs,'Fûts',false],[hl,'hL',false],[due,'À ouiller',true]];
-  // En-t\u00EAte UNIQUE : on alimente le bandeau commun (plus de second en-t\u00EAte empil\u00E9)
-  var _ico=document.getElementById('cave-hdr-ico'); _mvSetIcon(_ico,'cuve',20);
-  var _ttl=document.getElementById('cave-hdr-title'); if(_ttl) _ttl.textContent='Le Chai';
-  var _sub=document.getElementById('cave-hdr-sub'); if(_sub) _sub.textContent=(window.DOMAINE_NOM||'Mon domaine');
-  var _bdg=document.getElementById('cave-hdr-badge');
-  if(_bdg) _bdg.textContent=act.length?(act.length+' cuv\u00E9e'+(act.length>1?'s':'')):'\u2014';
-  // Bande de chiffres HORS en-t\u00EAte \u2192 hauteur d'en-t\u00EAte constante
-  var _kp=document.getElementById('cave-kpis');
-  if(_kp){
-    _kp.style.display='';
-    _kp.innerHTML=kpis.map(function(k){
-      return '<div class="mvu-kpi'+(k[2]&&due>0?' due':'')+'"><div class="mvu-kpi-v">'+k[0]+'</div><div class="mvu-kpi-l">'+k[1]+'</div></div>';
-    }).join('');
-  }
+  // ★ L'en-tete (titre, icone, badge) et la bande #cave-kpis sont ecrits par
+  //   renderCave, pour la Cave entiere (lot CAVE-1). Ici ne reste que la barre
+  //   d'etat du Chai, qui suit le filtre millesime.
   if(el) el.innerHTML=''
     +'<div class="mvc-health"><div class="mvc-health-track"><div class="mvc-health-ok" style="width:'+okPct+'%"></div><div class="mvc-health-due" style="width:'+(100-okPct)+'%"></div></div>'
     +'<div class="mvc-health-lbl"><span><b>'+okN+'</b> \u00e0 jour</span><span>'+(due?'<b>'+due+'</b> en retard':'Chai sous contr\u00f4le \u2713')+'</span></div></div>';
@@ -1068,23 +1056,38 @@ function _caveFutPrompt(){
 
 
 function _caveSyncSecTabs(){
-  ['elevage','vendange','millesime'].forEach(function(s){
+  ['aujourdhui','elevage','vendange','millesime'].forEach(function(s){
     var b=document.getElementById('cave-sec-'+s);
     if(b) b.classList.toggle('active', s===caveSection);
   });
+  // La roue crantee n'est pas un onglet, mais elle dit quand on est chez elle.
+  var g=document.getElementById('cave-hdr-gear');
+  if(g) g.classList.toggle('active', caveSection==='reglages');
 }
 
 function renderCave() {
   // Filet de tolerance : une valeur hors des TROIS sections connues replie sur
   // l'Elevage. Sans lui, une valeur reposee par un autre module masque les trois
   // vues et la Cave s'ouvre VIDE, sans erreur et sans test qui le voie.
-  if (['elevage','vendange','millesime'].indexOf(caveSection)<0) caveSection = 'elevage';
+  if (['aujourdhui','elevage','vendange','millesime','reglages'].indexOf(caveSection)<0) caveSection = 'aujourdhui';
+  // Les courbes du millesime s'enregistrent aupres de _mvGraphRepeindre :
+  // des qu'on n'est plus sur elles, on oublie la famille, sinon chaque
+  // redimensionnement les redessine dans un conteneur qui n'existe plus.
+  if(!(caveSection==='millesime'&&_mlTab==='crb') && window._mvGraphOublier){ try{ window._mvGraphOublier('#pcrb-g-'); }catch(e){ if(window.logError) window.logError({level:'info',cat:'cave',msg:'oubli courbes',err:e}); } }
   _caveSyncSecTabs();
+  // L'en-tete et la bande de chiffres sont ceux de la Cave ENTIERE, ecrits une
+  // seule fois ici — plus par chaque section (lot CAVE-1).
+  _caveHeaderRender();
+  _caveKpisRender();
+  var _aujHost=document.getElementById('cave-view-auj'); if(_aujHost) _aujHost.style.display='none';
+  var _regHost=document.getElementById('cave-view-reg'); if(_regHost) _regHost.style.display='none';
+  if (caveSection === 'reglages') { _mvcHide(); _mlHideAutres(); renderCaveReglagesCave(); return; }
+  if (caveSection === 'aujourdhui') { _mvcHide(); _mlHideAutres(); renderCaveAujourdhui(); return; }
   if (caveSection === 'millesime') { _mvcHide(); _mlHideAutres(); renderCaveMillesime(); return; }
   var _mlHost=document.getElementById('cave-view-mil'); if(_mlHost) _mlHost.style.display='none';
   if (caveSection === 'vendange') { _mvcHide(); renderCaveVendange(); return; }
   // ── Élevage (refonte mvc) ──
-  ['cuv','journal','divers','vend'].forEach(function(t){var v=document.getElementById('cave-view-'+t);if(v)v.style.display='none';});
+  ['vend','auj','reg'].forEach(function(t){var v=document.getElementById('cave-view-'+t);if(v)v.style.display='none';});
   var mlv2=document.getElementById('cave-view-mil'); if(mlv2) mlv2.style.display='none';
   var host=document.getElementById('mvc-elevage'); if(host) host.style.display='block';
   _mvcRenderHeader();
@@ -1102,7 +1105,7 @@ function selectCaveSection(id) {
 
 // Masque les vues du Chai et du Cuvier quand on ouvre Le millesime.
 function _mlHideAutres(){
-  ['cuv','journal','divers','vend'].forEach(function(t){
+  ['vend','auj','reg'].forEach(function(t){
     var v=document.getElementById('cave-view-'+t); if(v) v.style.display='none';
   });
 }
@@ -1112,8 +1115,10 @@ function switchCaveOng(tab) {
   // Les QUATRE onglets du Chai, definis UNE seule fois : le filet ci-dessous et la
   // boucle d'affichage doivent parler de la meme liste (deux definitions du meme
   // concept dans un module = incoherence garantie entre deux ecrans).
-  var ONGLETS = ['cuv','journal','reglages','bouteille'];
-  if(tab==='divers') tab='reglages';
+  var ONGLETS = ['cuv','journal','bouteille'];
+  // Les reglages du Chai sont dans la roue crantee (lot CAVE-2) : les anciennes
+  // cles y atterrissent.
+  if(tab==='divers'||tab==='reglages'){ _caveOpenReglages(); return; }
   // Filet de tolerance, meme patron que switchPhytoTab qui replie tout inconnu sur 'reg'.
   // Sans lui, une valeur hors liste (l'ancien 'dash' du tableau de bord purge, ou une
   // valeur reposee par un autre module) masque les QUATRE vues et n'active aucun
@@ -1129,7 +1134,6 @@ function switchCaveOng(tab) {
   });
   if(tab==='cuv') renderCaveCuvees();
   else if(tab==='journal') renderCaveJournal();
-  else if(tab==='reglages') renderCaveReglages();
   else if(tab==='bouteille') renderCaveBouteille();
 }
 
@@ -2453,22 +2457,22 @@ function _vendCockpitHtml(){
     +'<div class="mvv-health"><div class="mvv-health-track" id="mvv-health-track"></div><div class="mvv-health-lbl" id="mvv-health-lbl"></div></div>'
     +'</div>'
     +'<div class="mvu-tabs mvu-sub">'
-    +'<button class="mvu-tab" id="mvv-tab-ana" onclick="switchVendOng(\'ana\')"><span class="t-ico"></span> Analyses</button>'
+    // ★ Lot CAVE-2 : l'onglet « Cuvier » dans « Le Cuvier » s'appelle Cuves,
+    //   « Analyses » (les maturites, a la vigne) s'appelle Maturites — le Chai a
+    //   ses analyses labo, un mot pour deux choses ne renvoie nulle part. Les
+    //   reglages sont partis dans la roue crantee de l'en-tete. Les CLES ne
+    //   changent pas ('rec','cuves','ana') : seuls les libelles.
     +'<button class="mvu-tab" id="mvv-tab-rec" onclick="switchVendOng(\'rec\')"><span class="t-ico"></span> Récoltes</button>'
-    +'<button class="mvu-tab" id="mvv-tab-cuves" onclick="switchVendOng(\'cuves\')"><span class="t-ico"></span> Cuvier</button>'
-    +'<button class="mvu-tab" id="mvv-tab-param" onclick="switchVendOng(\'param\')"><span class="t-ico"></span> Réglages</button>'
+    +'<button class="mvu-tab" id="mvv-tab-cuves" onclick="switchVendOng(\'cuves\')"><span class="t-ico"></span> Cuves</button>'
+    +'<button class="mvu-tab" id="mvv-tab-ana" onclick="switchVendOng(\'ana\')"><span class="t-ico"></span> Maturités</button>'
     +'</div>';
 }
 function _vendRefreshCockpit(){
   var d=_vendKpiData();
-  // La bande de chiffres est celle de la Cave entiere, la meme que Le Chai
-  // (_mvcRenderHeader) et Le millesime : une seule barre, une seule peau.
-  var kp=document.getElementById('cave-kpis');
-  if(kp){
-    kp.style.display='';
-    var kpis=[[d.caisses,'Caisses',false],[d.tonnes+'t','Récoltés',false],[d.hl,'hL cuvés',false],[d.enFA,'En ferment.',d.enFA>0]];
-    kp.innerHTML=kpis.map(function(k){return '<div class="mvu-kpi'+(k[2]?' live':'')+'"><div class="mvu-kpi-v">'+k[0]+'</div><div class="mvu-kpi-l">'+k[1]+'</div></div>';}).join('');
-  }
+  // La bande #cave-kpis est celle de la Cave entiere, ecrite par renderCave
+  // (lot CAVE-1). On la rafraichit ici parce qu'un releve ou un apport vient
+  // peut-etre de changer ses chiffres.
+  _caveKpisRender();
   var ok=d.activeN-d.due; var okPct=d.activeN?Math.round(ok/d.activeN*100):100;
   var ht=document.getElementById('mvv-health-track');
   if(ht) ht.innerHTML='<div class="mvv-health-ok" style="width:'+okPct+'%"></div><div class="mvv-health-due" style="width:'+(100-okPct)+'%"></div>';
@@ -2481,10 +2485,9 @@ function _vendRefreshCockpit(){
 }
 function _vendRenderTab(){
   if(!window._dataReady){ var _vb=document.getElementById('mvv-body'); if(_vb)_vb.innerHTML=window._mvSk('cuvier'); return; }
-  ['ana','cuves','rec','param'].forEach(function(t){var b=document.getElementById('mvv-tab-'+t); if(b) b.classList.toggle('active',t===_vendTab);});
+  ['rec','cuves','ana'].forEach(function(t){var b=document.getElementById('mvv-tab-'+t); if(b) b.classList.toggle('active',t===_vendTab);});
   if(_vendTab==='ana') renderVendAna();
   else if(_vendTab==='rec') renderVendRec();
-  else if(_vendTab==='param') renderVendParam();
   else renderVendCuves();
 }
 
@@ -2494,15 +2497,9 @@ function renderCaveVendange() {
      detail deplie s'en sert AVANT qu'aucune feuille n'ait ete ouverte :
      sans cet appel, l'historique sortait sans style au premier affichage. */
   _vendEnsureSheetCss();
-  var icoEl=document.getElementById('cave-hdr-ico'); _mvSetIcon(icoEl,'raisin',20);
-  var titleEl=document.getElementById('cave-hdr-title'); if(titleEl) titleEl.textContent='Le Cuvier';
-  var subEl=document.getElementById('cave-hdr-sub'); if(subEl) subEl.textContent=(window.DOMAINE_NOM||'Mon domaine');
-  var bdgV=document.getElementById('cave-hdr-badge'); if(bdgV) bdgV.textContent='Campagne '+(new Date().getFullYear());
-  // Etat initial propre : _vendRefreshCockpit la remplit et la rallume des que
-  // les donnees sont la (skeleton tant que _dataReady est faux).
-  var kpV=document.getElementById('cave-kpis'); if(kpV){ kpV.innerHTML=''; kpV.style.display='none'; }
+  // ★ L'en-tete et la bande #cave-kpis sont ecrits par renderCave (lot CAVE-1).
   var mvcHost=document.getElementById('mvc-elevage'); if(mvcHost) mvcHost.style.display='none';
-  ['cuv','journal','divers'].forEach(function(t){var v=document.getElementById('cave-view-'+t);if(v)v.style.display='none';});
+  ['auj','reg'].forEach(function(t){var v=document.getElementById('cave-view-'+t);if(v)v.style.display='none';});
   var mlv=document.getElementById('cave-view-mil'); if(mlv) mlv.style.display='none';
   var vv=document.getElementById('cave-view-vend'); if(vv) vv.style.display='block';
   var body=document.getElementById('cave-vend-body'); if(!body) return;
@@ -2995,7 +2992,8 @@ function renderVendCuves() {
 
 function _vendCfg(){return Object.assign({poids_caisse_kg:25,ratio_min:130,ratio_max:140,sucre_par_degre:16.83},CAVE_VENDANGE.config||{});}
 function renderVendParam() {
-  var el=document.getElementById('mvv-body'); if(!el) return;
+  // Lot CAVE-2 : les reglages du Cuvier vivent dans la roue crantee de la Cave.
+  var el=document.getElementById('cave-reg-cuvier'); if(!el) return;
   var cfg=_vendCfg();
   var pck=cfg.poids_caisse_kg, rMin=cfg.ratio_min, rMax=cfg.ratio_max;
   var ex=100*pck;
@@ -3282,7 +3280,7 @@ function _vcuvParcRender(){
   var parc=_caveParc();
   if(!parc.length){
     host.innerHTML='<div class="mvc-pk-vide">Aucune cuve d\u00e9clar\u00e9e. '
-      +'Le parc se remplit dans R\u00e9glages du Chai.</div>';
+      +'Le parc se remplit dans la roue crant\u00e9e de la Cave, bloc Le Chai.</div>';
     return;
   }
   // La cuve deja rattachee a CETTE cuve de vinification reste proposee : sinon
@@ -4824,7 +4822,7 @@ function _vendDecPickHtml(){
   var libres=_caveParc().filter(function(p){ return !_caveCuveOcc(p.id, _vendDecCuveId); });
   if(!libres.length)
     return '<div class="mvv-dlnote">Aucune cuve libre dans le parc. Lib\u00e9rez-en une, '
-      +'ou d\u00e9clarez-en une nouvelle dans R\u00e9glages du Chai.</div>';
+      +'ou d\u00e9clarez-en une nouvelle dans la roue crant\u00e9e de la Cave, bloc Le Chai.</div>';
   var volHl=_vendDecVolHl();
   var h='<label class="mvv-flbl">Quelle cuve</label>';
   libres.forEach(function(p){
@@ -6239,7 +6237,7 @@ function _vpcAppliquer(){
     +' · '+nApp+' apport'+(nApp>1?'s':'')+(suite.length?(' · '+suite.join(' et ')):''),'#3D6B27');
   _vpc.nouveau=null;
   _vendSheetClose();
-  if(_vendTab==='param') renderVendParam();
+  if(caveSection==='reglages') renderVendParam();
   else if(_vendTab==='rec') renderVendRec();
 }
 
@@ -7395,20 +7393,6 @@ window.CAVE_ELEVAGE         = CAVE_ELEVAGE;
 window.toggleCopInt          = toggleCopInt;
 window.renderCave           = renderCave;
 window.selectCaveSection    = selectCaveSection;
-function setOuillageAlerte(n){
-  if(typeof isAdmin==='function' && !isAdmin()){ if(window.showToast)window.showToast('Admin requis','#C0392B'); return; }
-  if(!CAVE_ELEVAGE.config) CAVE_ELEVAGE.config={};
-  CAVE_ELEVAGE.config.ouillage_alerte_j = n;
-  window.CAVE_ELEVAGE = CAVE_ELEVAGE;
-  window.fbSaveToast({cave_elevage:CAVE_ELEVAGE},'Alerte ouillage : '+n+' jours','#3D6B27');
-  _caveOuillageRefresh();
-}
-function _caveOuillageRefresh(){
-  var v=(CAVE_ELEVAGE.config && CAVE_ELEVAGE.config.ouillage_alerte_j) || 14;
-  var el=document.getElementById('cave-ouillage-val'); if(el) el.textContent=v;
-  [7,14].forEach(function(n){ var b=document.getElementById('cave-oub-'+n); if(!b)return; var on=(Number(v)===n); b.style.borderColor=on?'#4A9FC8':'var(--gris)'; b.style.background=on?'rgba(74,159,200,0.14)':'transparent'; b.style.color=on?'#4A9FC8':'var(--texte)'; b.style.fontWeight=on?'700':'600'; });
-}
-window.setOuillageAlerte    = setOuillageAlerte;
 window.switchCaveOng        = switchCaveOng;
 window.openOvCaveOp         = openOvCaveOp;
 window.saveCaveOp           = saveCaveOp;
@@ -7697,7 +7681,7 @@ function _caveAffRender(){
     +'<div class="mvc-aff-t">Ajouter une cuve</div>'
     +'<div class="mvc-aff-d">Seules les cuves libres apparaissent \u2014 une cuve ne peut pas porter deux vins \u00e0 la fois.</div>';
   if(!_caveParc().length){
-    h+='<div class="mvc-pk-vide">Aucune cuve dans le parc.<br>D\u00e9clarez-en une dans R\u00e9glages du Chai.</div>';
+    h+='<div class="mvc-pk-vide">Aucune cuve dans le parc.<br>D\u00e9clarez-en une dans la roue crant\u00e9e de la Cave, bloc Le Chai.</div>';
   } else if(!libres.length){
     h+='<div class="mvc-pk-vide">Toutes les cuves du parc sont occup\u00e9es.<br>Videz-en une, ou d\u00e9clarez-en une nouvelle.</div>';
   } else {
@@ -7950,6 +7934,10 @@ async function saveCaveAna() {
 }
 
 function switchVendOng(tab) {
+  // L'ancien onglet Reglages du Cuvier est dans la roue crantee (lot CAVE-2) :
+  // une cle 'param' encore demandee y atterrit au lieu de viser le vide.
+  if(tab==='param'){ _caveOpenReglages(); return; }
+  if(['rec','cuves','ana'].indexOf(tab)<0) tab='cuves';
   _vendTab = tab;
   _vendRenderTab();
 }
@@ -9494,11 +9482,12 @@ window._caveAffRetirer   = _caveAffRetirer;
 window._mvcRenderHeader  = _mvcRenderHeader;
 
 // ════════════════════════════════════════════════════════════════════════════
-// LE MILLESIME — 3e section de la Cave, a cote du Chai et du Cuvier.
+// LE MILLESIME — la section de LECTURE de la Cave, a cote d'Aujourd'hui, du
+// Chai et du Cuvier.
 //
-// Deux questions, deux sous-onglets :
-//   « Ce qui vient »   -> l'agenda des 4 prochaines semaines
-//   « La ligne de vie » -> le parcours du millesime, de la vigne a la bouteille
+// Une vue : « La ligne de vie » -> le parcours du millesime, de la vigne a la
+// bouteille. L'agenda des 4 semaines (_mlAgenda, ex-« Ce qui vient ») vit
+// desormais dans l'onglet Aujourd'hui (lot CAVE-1), mais son moteur reste ici.
 //
 // AUCUNE SAISIE NOUVELLE. Tout se deduit de ce qui est deja enregistre :
 // last_ouillage, mesures_fa, operations d'ouillage, recoltes, cuves, decuvages.
@@ -9512,7 +9501,7 @@ window._mvcRenderHeader  = _mvcRenderHeader;
 // Pilotage. Deux definitions du meme concept = incoherence garantie.
 // ════════════════════════════════════════════════════════════════════════════
 
-var _mlTab = 'venir';        // 'venir' | 'vie'
+var _mlTab = 'vie';         // 'vie' (La ligne de vie) | 'crb' (Les courbes, lot CAVE-3)          // 'vie' seul : « Ce qui vient » est devenu l'onglet Aujourd'hui de la Cave (lot CAVE-1)
 var _mlMil = null;           // millesime consulte ; null = campagne en cours
 var _ML_SEM = 4;             // horizon de l'agenda, en semaines
 var _ML_D20_SEC = 996;       // densite 20 C sous laquelle le vin est sec
@@ -10168,18 +10157,22 @@ function _mlInjectCss(){
 // ── RENDU ────────────────────────────────────────────────────────────────
 var _ML_LBL={ouillage:'Ouiller', mesure:'Mesurer', fa:'Fin de fermentation',
   decuvage:'D\u00e9cuvage possible', alerte:'\u00c0 contr\u00f4ler',
-  demarrage:'D\u00e9part en fermentation'};
+  demarrage:'D\u00e9part en fermentation', soutirage:'Soutirer', malo:'Malo bloqu\u00e9e',
+  so2:'Dose de SO\u2082', fut:'Parc \u00e0 f\u00fbts'};
 
+// Une ligne de l'agenda = un bouton vers le geste. L'icone vient du sprite
+// (cliquet des emojis), le verbe se lit a droite — jamais un chemin a retenir.
+// ⚠️ Pas de <button> dans un <button> : le verbe est un <span> habille.
 function _mlEvHtml(it){
-  var right = (it.kind==='ouillage')
-    ? '<span class="mlx-j"><b>'+it.futs+'</b>f\u00fbts</span>'
-    : '<span class="mlx-j">'+_mlFrJ(it.date).replace(' ','<b>')+'</b></span>';
+  var ico=_AUJ_ICO[it.kind]||'chrono', verbe=_AUJ_VERBE[it.kind]||'Voir';
+  var quand = (it.kind==='ouillage') ? (it.futs+' f\u00fbt'+(it.futs>1?'s':''))
+            : (it.date ? _mlFrJ(it.date) : '');
   return '<button class="mlx-ev '+(it.urgence||'')+'" onclick="_mlGo(\''+_escAttr(it.kind)+'\',\''+_escAttr(it.ref)+'\')">'
-    +'<span class="mlx-p '+it.kind+'"></span><span class="mlx-b">'
+    +'<span class="auj-ic">'+_mvIcon(ico,16)+'</span><span class="mlx-b">'
     +'<span class="mlx-t">'+_escHtml(it.titre)+'</span>'
-    +'<span class="mlx-d">'+_ML_LBL[it.kind]+' \u00b7 '+_escHtml(it.detail)+'</span>'
+    +'<span class="mlx-d">'+_ML_LBL[it.kind]+' \u00b7 '+_escHtml(it.detail)+(quand?' \u00b7 '+_escHtml(quand):'')+'</span>'
     +(it.note?'<span class="mlx-n">'+_escHtml(it.note)+'</span>':'')
-    +'</span>'+right+'</button>';
+    +'</span><span class="auj-act">'+_escHtml(verbe)+'</span></button>';
 }
 
 // Chaque ligne renvoie vers l'ecran qui existe deja : rien de neuf a apprendre.
@@ -10208,6 +10201,20 @@ function _mlGo(kind,ref){
     _caveQuickOp(null,'soutirage',ref);
     return;
   }
+  // Une dose de SO2 programmee : le geste est une operation « soufre » du Chai
+  // sur la cuvee visee.
+  if(kind==='so2'){
+    if(isSaisonnier()){ showToast('Acc\u00e8s lecture seule','#B85A1A'); return; }
+    caveSection='elevage'; renderCave();
+    _caveQuickOp(null,'soufre',ref);
+    return;
+  }
+  // Les futs en fin de vie vivent au parc, dans La Reserve : on y va.
+  if(kind==='fut'){
+    if(window.goTo) window.goTo('reserve');
+    if(typeof window._rsvTabTo==='function') window._rsvTabTo('futs');
+    return;
+  }
   // ★ Le plafond de rendement se pose DANS la Cave, section « Le millesime »,
   //   onglet « La ligne de vie » — et le Pilotage a un onglet qui porte
   //   EXACTEMENT le meme nom. Un renvoi ecrit en toutes lettres se lit comme
@@ -10229,34 +10236,6 @@ function _mlGo(kind,ref){
     return;
   }
   caveSection='elevage'; renderCave();
-}
-
-function _mlRenderVenir(){
-  var from=_mlAuj(), ag=_mlAgenda(from,_ML_SEM), h='';
-  var vide=ag.every(function(s){ return !s.items.length; });
-  if(vide){
-    return '<div class="mlx-empty">Rien ne vient dans les quatre prochaines semaines.<br>'
-      +'Ni f\u00fbt \u00e0 ouiller, ni cuve en fermentation.</div>';
-  }
-  h+='<div class="mlx-sec">Les quatre prochaines semaines</div>';
-  h+='<div class="mlx-hint">Tout vient de ce qui est d\u00e9j\u00e0 saisi : dernier ouillage, relev\u00e9s de '
-    +'densit\u00e9, seuil d\u2019alerte '+(_caveMilsEnCave().length>1?'de chaque mill\u00e9sime':'du domaine ('+_mlSeuil()+' jours)')+'. Rien de plus \u00e0 remplir.</div>';
-  ag.forEach(function(s,i){
-    var r=_mlResumeSem(s), sum=[];
-    if(r.futs) sum.push('<b>'+r.futs+' f\u00fbt'+(r.futs>1?'s':'')+'</b> \u00e0 ouiller (~'+r.litres+' L)');
-    if(r.mesures) sum.push(r.mesures+' cuve'+(r.mesures>1?'s':'')+' \u00e0 mesurer');
-    if(r.alertes) sum.push('<span class="al">'+r.alertes+' alerte'+(r.alertes>1?'s':'')+'</span>');
-    h+='<div class="mlx-wk'+(i===0?' now':'')+'">'
-      +'<div class="mlx-wkh"><span class="mlx-wkt">'+(i===0?'Cette semaine':'Semaine du '+_mlFrC(s.lundi))+'</span>'
-      +(i===0?'<span class="mlx-wknow">en cours</span>':'')
-      +'<span class="mlx-wkd">'+_mlFrC(s.lundi)+' \u2013 '+_mlFrC(s.dim)+'</span></div>'
-      +(sum.length?'<div class="mlx-wks">'+sum.join(' \u00b7 ')+'</div>':'')
-      +(s.items.length?s.items.map(_mlEvHtml).join(''):'<div class="mlx-wke">Rien de pr\u00e9vu.</div>')
-      +'</div>';
-  });
-  h+='<div class="mlx-hint" style="margin-top:14px">La charge repart au rythme propre \u00e0 chaque mill\u00e9sime : '
-    +'c\u2019est le rythme d\u2019ouillage r\u00e9gl\u00e9 dans Le Chai.</div>';
-  return h;
 }
 
 // Le graphique est dessine a 1 unite SVG = 1 pixel. Sans cela, width:100% plus
@@ -10370,6 +10349,7 @@ function _mlRenderVie(){
       +'Les r\u00e9coltes se saisissent au Cuvier, les cuv\u00e9es au Chai.</div>';
   }
 
+  h+=_mlTuiles(ch);
   h+='<div class="mlx-sec">De la vigne \u00e0 la bouteille</div>';
   _mlFluxCh=ch; _mlFluxW0=_mlFluxW();
   h+='<div class="mlx-flux"><div class="mlx-fluxsvg">'+_mlFluxSvg(ch,_mlFluxW0)+'</div>';
@@ -10406,7 +10386,7 @@ function _mlRenderVie(){
   if(rd.length){
     var adm=(typeof isAdmin==='function'&&isAdmin());
     _mlRdtCss();
-    h+='<div class="mlx-sec">Rendement par parcelle</div>';
+    h+='<div class="mlx-sec">Rendement par parcelle'+(typeof window._mvInfoBtn==='function'?window._mvInfoBtn('cave.rdt'):'')+'</div>';
     /* ★ Le plafond est desormais celui du MILLESIME ouvert : le dire ici, sinon
        poser 45 en 2026 aurait l'air de valoir pour 2025 — c'est exactement ce
        que faisait l'ancien scalaire, en silence. */
@@ -10469,6 +10449,8 @@ function _mlRenderVie(){
         +_caveDateFr(x.o.cuve.date_entree)+'</span><b>'+Math.round(kg)+' kg</b></div></div>';
     });
   }
+  // Face au millesime precedent — ex-carte de Pilotage › Cave › Le millesime (lot CAVE-3).
+  try{ h+=_pcavN1({mil:mil, milAff:mil}, mil)||''; }catch(e){ _pcavLog('n1',e); }
   return h;
 }
 
@@ -10558,16 +10540,1371 @@ function _mlRdtProposeGroupe(val,mil,rendre){
 }
 
 function _mlSetMil(m){ _mlMil=m; renderCaveMillesime(); }
-function _mlSetTab(t){ _mlTab=(t==='vie')?'vie':'venir'; renderCaveMillesime(); }
+// ═══════════════════════════════════════════════════════════
+// AUJOURD'HUI — L'ECRAN D'ARRIVEE DE LA CAVE (lot CAVE-1)
+//
+// Deux ecrans repondaient a « qu'est-ce qui presse ? » : « Ce qui vient » ici,
+// « Ce qui presse » au Pilotage — sur le MEME moteur (_mlAgenda), avec deux
+// presentations. Un seul ecran desormais, et il est dans la Cave : c'est ici
+// qu'on FAIT le geste. Le Pilotage consommera _mlVerdict / _mlAgendaComplet
+// (lot ③) ; en attendant ses copies _pcavMalo / _pcavSoutirages restent en
+// place, a l'identique de ce qui est porte ci-dessous.
+//
+// ⚠️ _mlAgenda ne bouge pas : son harnais (mv-harnais-agenda) l'extrait et
+//    l'execute a l'identique. Ce que le Chai ajoute (soutirage, malo, SO2)
+//    vient PAR-DESSUS, dans _mlAgendaComplet.
+// ⚠️ Les fûts en fin de vie n'ont PAS de date : ils ne rentrent dans aucune
+//    semaine. Les dater serait inventer une echeance (§20g).
+// ═══════════════════════════════════════════════════════════
 
-function renderCaveMillesime(){
-  _mlInjectCss();
-  var icoEl=document.getElementById('cave-hdr-ico'); _mvSetIcon(icoEl,'chrono',20);
-  var ttlEl=document.getElementById('cave-hdr-title'); if(ttlEl) ttlEl.textContent='Le mill\u00e9sime';
-  var subEl=document.getElementById('cave-hdr-sub'); if(subEl) subEl.textContent=(window.DOMAINE_NOM||'Mon domaine');
+// Date a laquelle la malo a ete CONSTATEE finie, par cuvee. C'est la reference
+// du geste de soutirage : un soutirage anterieur a cette date n'acquitte pas
+// celui-ci — sans elle, un soutirage de mars valait quitus pour une malo
+// finie en mai.
+function _mlFinMalo(){
+  var ops=(CAVE_ELEVAGE.operations||[]), d={};
+  ops.forEach(function(o){
+    if(!o||o.type!=='analyse'||!o.data||o.data.fml!=='ok') return;
+    var dt=o.data.fml_date||o.date; if(!dt) return;
+    var ids=(o.cuvees_ids&&o.cuvees_ids.length)?o.cuvees_ids:(o.cuvee_id?[o.cuvee_id]:[]);
+    ids.forEach(function(id){ if(!d[id]||dt<d[id]) d[id]=dt; });
+  });
+  return d;
+}
+
+// Etat de chaque cuvee en elevage vis-a-vis du soutirage. Tout vient de
+// _mlProjMalo, sauf le drapeau declaratif fml_terminee, qui reste une verite du
+// vigneron : s'il declare la malo finie, elle est finie, meme sans mesure.
+//   cas : 'a_soutirer' (malo finie, aucun soutirage posterieur) · 'fait' ·
+//         'suivie' (des mesures, pas finie) · 'sans_mesure'
+function _mlMalo(){
+  var fm=_mlFinMalo(), out=[];
+  (CAVE_ELEVAGE.cuvees||[]).forEach(function(x){
+    if(!x||!x.id||x.statut==='embouteille') return;
+    var p=null;
+    try{ p=window._mlProjMalo(x); }
+    catch(e){ if(window.logError) window.logError({level:'info',cat:'cave',msg:'aujourdhui/projMalo',err:e}); }
+    var etat=p?p.etat:'attente';
+    var finie=(etat==='finie')||!!x.fml_terminee;
+    var sout=_caveLastSout(x.id)||null;
+    var ref=(p&&p.etat==='finie'&&p.dernier)?p.dernier:(fm[x.id]||null);
+    var acquitte=!!sout&&(!ref||sout>=ref);
+    out.push({id:x.id, nom:_mlNomCuvee(x), p:p, etat:etat, finie:finie, sout:sout, ref:ref,
+              cas: finie ? (acquitte?'fait':'a_soutirer')
+                         : (p&&p.n?'suivie':(sout?'fait':'sans_mesure'))});
+  });
+  return out;
+}
+
+// Doses de SO2 programmees au soutirage et tombant dans la fenetre
+// [from, from + nSem*7 - 1]. La date est celle que le vigneron a posee
+// lui-meme ; l'application la rappelle, elle ne sait pas si la dose a ete
+// faite.
+function _mlSo2Doses(from,nSem){
+  var fin=_mlAddJ(from,(nSem||4)*7-1), doses=[], nom={};
+  (CAVE_ELEVAGE.cuvees||[]).forEach(function(x){ if(x&&x.id) nom[x.id]=_mlNomCuvee(x); });
+  (CAVE_ELEVAGE.operations||[]).forEach(function(o){
+    if(!o||o.type!=='soutirage'||!o.date||!o.data) return;
+    var so2=o.data.so2; if(!so2||!so2.dates||!so2.dates.length) return;
+    var ids=(o.cuvees_ids&&o.cuvees_ids.length)?o.cuvees_ids:(o.cuvee_id?[o.cuvee_id]:[]);
+    so2.dates.forEach(function(dt,i){
+      if(!dt||dt<from||dt>fin) return;
+      doses.push({date:dt, rang:i+1, sur:so2.dates.length, dose:so2.dose,
+                  unite:so2.unite||'cL', ids:ids, ref:ids[0]||''});
+    });
+  });
+  doses.sort(function(a,b){ return a.date<b.date?-1:(a.date>b.date?1:0); });
+  return {doses:doses, nom:nom};
+}
+
+// Le parc a futs, par le moteur du parc. ⚠️ _mvFutParc PREND SES DONNEES EN
+// ARGUMENT (utils.js est importe en premier) — meme appel que reserve.js.
+function _mlParc(){
+  if(typeof window._mvFutParc!=='function'||!window.INTRANTS) return null;
+  try{ return window._mvFutParc(window.INTRANTS, CAVE_ELEVAGE, null); }
+  catch(e){ if(window.logError) window.logError({level:'info',cat:'cave',msg:'aujourdhui/parc',err:e}); return null; }
+}
+
+// Phase du calendrier : elle decide de l'ORDRE et du verdict de vendange,
+// jamais de la presence d'un bloc.
+function _mlPhase(){
+  var m=new Date().getMonth()+1;
+  if(m>=8 && m<=10) return 'vendange';
+  if(m>=4 && m<=7) return 'embouteillage';
+  return 'elevage';
+}
+
+// L'agenda complet : celui du Cuvier et des ouillages (_mlAgenda), plus ce
+// que le Chai sait — soutirage a faire, malo bloquee, doses de SO2.
+function _mlAgendaComplet(from,nSem){
+  nSem=nSem||_ML_SEM;
+  var sem=_mlAgenda(from,nSem);
+  function pousse(d,item){
+    for(var k=0;k<sem.length;k++){
+      if(d>=sem[k].lundi && d<=sem[k].dim){ item.date=d; sem[k].items.push(item); return true; }
+    }
+    return false;
+  }
+  _mlMalo().forEach(function(x){
+    if(x.cas==='a_soutirer'){
+      pousse(from,{kind:'soutirage', titre:x.nom,
+        detail:'malo finie'+(x.ref?' le '+_mlFrC(x.ref):'')+', pas encore soutir\u00e9e', ref:x.id});
+    } else if(x.p&&x.p.etat==='bloquee'){
+      pousse(from,{kind:'malo', titre:x.nom,
+        detail:'l\u2019acide malique ne descend plus \u00b7 '+_mvF1(x.p.mal)+' g/L',
+        note:'malo bloqu\u00e9e \u2014 \u00e0 contr\u00f4ler', urgence:'due', ref:x.id});
+    }
+  });
+  var so=_mlSo2Doses(from,nSem);
+  so.doses.forEach(function(d){
+    pousse(d.date,{kind:'so2', titre:so.nom[d.ref]||'Cuv\u00e9e',
+      detail:'dose '+d.rang+'/'+d.sur+(d.dose?' \u00b7 '+d.dose+' '+d.unite:''),
+      note:'programm\u00e9e au soutirage', ref:d.ref});
+  });
+  // Meme regle d'ordre que _mlAgenda : jamais (ordre[k]||9), 'alerte' vaut 0.
+  var ordre={alerte:0,malo:0,mesure:1,soutirage:2,fa:3,decuvage:4,so2:5,demarrage:6,ouillage:7};
+  sem.forEach(function(s){
+    s.items.sort(function(a,b){
+      if(a.date!==b.date) return a.date<b.date?-1:1;
+      var oa=(ordre[a.kind]!=null?ordre[a.kind]:9), ob=(ordre[b.kind]!=null?ordre[b.kind]:9);
+      return oa-ob;
+    });
+  });
+  return sem;
+}
+
+// Ce qui n'a pas de date : on le liste a part, on ne l'invente pas.
+function _mlSansDate(parc){
+  var l=[];
+  if(parc&&parc.aReformer>0){
+    l.push({kind:'fut', titre:parc.aReformer+' f\u00fbt'+(parc.aReformer>1?'s':'')+' au-del\u00e0 de '+parc.vie+' vins',
+      detail:'\u00e0 renouveler avant le prochain entonnage \u00b7 '+(parc.libres||0)+' libre'+(parc.libres>1?'s':'')+' au magasin', ref:''});
+  }
+  return l;
+}
+
+// LE VERDICT — un constat, jamais un jugement. Meme hierarchie que le
+// Pilotage (§20g), plus « a mesurer » juste apres les alertes : c'est la
+// question du matin en vendange, et la barre d'etat du Cuvier la compte deja.
+// Un geste passe devant un rappel de date.
+function _mlVerdict(sem, ctx){
+  ctx=ctx||{};
+  var items=[]; (sem||[]).forEach(function(s){ items=items.concat(s.items); });
+  function n(k,u){ return items.filter(function(i){ return i.kind===k&&(u==null||i.urgence===u); }).length; }
+  var cand=[];
+  // Une cuve qui ralentit ET chauffe porte deux lignes d'alerte : on compte
+  // les cuves, pas les lignes.
+  var vuAl={}, nAl=0;
+  items.forEach(function(i){ if((i.kind==='alerte'||i.kind==='malo')&&!vuAl[i.ref||i.titre]){ vuAl[i.ref||i.titre]=1; nAl++; } });
+  if(nAl) cand.push({cls:'due', t:nAl+' cuve'+(nAl>1?'s demandent':' demande')+' un contr\u00f4le',
+    why:'La fermentation ralentit, la temp\u00e9rature est haute ou la malo ne descend plus. C\u2019est le seul point qui ne peut pas attendre demain.'});
+  // « A mesurer » = pas de releve depuis hier ou avant : la definition du
+  // Cuvier (_vendStale >= 1), celle de sa barre d'etat et du resume de la
+  // semaine. Ne compter que les « due » (>= 2 j) faisait dire 1 au verdict
+  // quand la ligne du dessous disait 2.
+  var nMe=n('mesure');
+  if(nMe) cand.push({cls:'due', t:nMe+' cuve'+(nMe>1?'s':'')+' \u00e0 mesurer',
+    why:'Pas de relev\u00e9 depuis hier ou avant.'});
+  if(ctx.phase==='vendange'&&ctx.haReste>0) cand.push({cls:'warn', t:_mvF1(ctx.haReste)+' ha restent \u00e0 rentrer',
+    why:'V\u00e9rifiez que la cuverie suit avant la prochaine journ\u00e9e de r\u00e9colte.'});
+  var vu={}, nOu=0;
+  items.forEach(function(i){ if(i.kind==='ouillage'&&i.urgence==='due'&&!vu[i.ref]){ vu[i.ref]=1; nOu++; } });
+  if(nOu) cand.push({cls:'warn', t:nOu+' cuv\u00e9e'+(nOu>1?'s':'')+' \u00e0 ouiller',
+    why:'Le seuil d\u2019ouillage est d\u00e9pass\u00e9.'});
+  var nS=n('soutirage');
+  if(nS) cand.push({cls:'warn', t:nS+' cuv\u00e9e'+(nS>1?'s ont':' a')+' fini sa malo',
+    why:'C\u2019est le moment de soutirer.'});
+  var nSo=(sem&&sem[0])?sem[0].items.filter(function(i){ return i.kind==='so2'; }).length:0;
+  if(nSo) cand.push({cls:'warn', t:nSo+' dose'+(nSo>1?'s':'')+' de SO\u2082 cette semaine',
+    why:'Vous les aviez programm\u00e9es en enregistrant le soutirage. L\u2019application rappelle la date, elle ne sait pas si la dose a \u00e9t\u00e9 faite.'});
+  var parc=ctx.parc;
+  if(parc&&parc.aReformer>0) cand.push({cls:'warn', t:parc.aReformer+' f\u00fbt'+(parc.aReformer>1?'s arrivent':' arrive')+' en fin de vie',
+    why:'Apr\u00e8s ce mill\u00e9sime, ces barriques auront fait '+parc.vie+' vins.'});
+  if(!cand.length) return {cls:'ok', t:'Rien ne presse aujourd\u2019hui',
+    s:'Ouillage \u00e0 jour, aucune fermentation \u00e0 surveiller, parc \u00e0 f\u00fbts suffisant.'};
+  var first=cand[0], s='';
+  if(cand.length>1) s='Et '+cand[1].t+'. ';
+  return {cls:first.cls, t:first.t, s:s+first.why};
+}
+
+var _AUJ_ICO={ouillage:'goutte', mesure:'thermometre', fa:'sablier', decuvage:'cuve', alerte:'alerte',
+  demarrage:'flamme', soutirage:'barrique', malo:'eprouvette', so2:'fiole', fut:'barrique'};
+// Le verbe du geste — c'est lui qu'on lit a droite de la ligne, pas un chemin.
+var _AUJ_VERBE={ouillage:'Ouiller', mesure:'Relever', fa:'Voir', decuvage:'D\u00e9cuver', alerte:'Relever',
+  demarrage:'Voir', soutirage:'Soutirer', malo:'Voir', so2:'Doser', fut:'Le parc'};
+
+function _aujInjectCss(){
+  if(document.getElementById('mv-auj-css')) return;
+  var s=document.createElement('style'); s.id='mv-auj-css';
+  s.textContent=''
+  +'.auj-hero{background:var(--bg-card,#FBFAF6);border:1px solid var(--gris-clair,#ECE6DA);border-radius:16px;padding:16px;margin-bottom:12px;box-shadow:0 1px 4px rgba(20,17,13,.06)}'
+  +'.auj-k{font-size:10.5px;letter-spacing:.4px;text-transform:uppercase;color:var(--texte-doux,#5F5F5F)}'
+  +'.auj-big{font-family:\'Cormorant Garamond\',Georgia,serif;font-size:34px;font-weight:600;line-height:1.05;margin:4px 0 2px;color:var(--texte,#1A1A14)}'
+  +'.auj-hero.due .auj-big{color:var(--rouge,#A0291E)}.auj-hero.warn .auj-big{color:var(--orange,#B85A1A)}.auj-hero.ok .auj-big{color:var(--vert-med,#3D6B27)}'
+  +'.auj-sous{font-size:12.5px;color:var(--texte-med,#4A4A3A);line-height:1.45}'
+  +'.auj-cadre{display:flex;gap:8px;align-items:flex-start;font-size:11px;color:var(--texte-doux,#5F5F5F);margin-top:10px;line-height:1.4}'
+  +'.auj-cadre i{flex:0 0 2px;height:14px;background:var(--or,#C2A14D);border-radius:2px;margin-top:2px}'
+  +'.auj-cadre .mv-i{margin-left:4px;vertical-align:-3px}'
+  +'.auj-ic{width:30px;height:30px;border-radius:9px;display:grid;place-items:center;flex-shrink:0;margin-top:2px;background:var(--gris-clair,#ECE6DA);color:var(--texte-med,#4A4A3A)}'
+  +'.mlx-ev.due .auj-ic{background:var(--rouge-pale,#FAEAE8);color:var(--rouge,#A0291E)}'
+  +'.mlx-ev.warn .auj-ic{background:var(--orange-pale,#FBF0E6);color:var(--orange,#B85A1A)}'
+  +'.auj-act{align-self:center;border:1px solid var(--terre,#8A5A38);color:var(--terre,#8A5A38);font-weight:600;font-size:12px;padding:7px 11px;border-radius:9px;white-space:nowrap;flex-shrink:0}'
+  +'.mlx-ev.due .auj-act{border-color:var(--rouge,#A0291E);color:var(--rouge,#A0291E)}'
+  +'.auj-sd{margin-top:14px}'
+  +'.cave-kpis-note{display:flex;gap:6px;align-items:center;font-size:10.5px;color:var(--texte-doux,#5F5F5F);padding:6px 16px 0}'
+  +'.cave-kpis-note i{display:inline-block;width:2px;height:12px;background:var(--or,#C2A14D);border-radius:2px;flex-shrink:0}';
+  document.head.appendChild(s);
+}
+
+// L'ecran : verdict, puis les quatre semaines en trois blocs, puis ce qui n'a
+// pas de date. Chaque ligne est un bouton vers le geste (_mlGo).
+function _aujRender(){
+  var from=_mlAuj(), sem=_mlAgendaComplet(from,_ML_SEM);
+  var mil=_mlCampagne(), haR=0;
+  try{ (_mlResteARentrer(mil)||[]).forEach(function(p){ haR+=parseFloat(p.surface)||0; }); }
+  catch(e){ if(window.logError) window.logError({level:'info',cat:'cave',msg:'aujourdhui/reste',err:e}); }
+  var parc=_mlParc();
+  var v=_mlVerdict(sem,{phase:_mlPhase(), haReste:haR, parc:parc});
+  var nFA=(CAVE_VENDANGE.cuves_vinif||[]).filter(_vendIsActive).length;
+  var nEl=(CAVE_ELEVAGE.cuvees||[]).filter(function(c){ return c&&c.statut!=='embouteille'; }).length;
+  var h='<div class="auj-hero '+v.cls+'"><div class="auj-k">Ce qui presse</div>'
+    +'<div class="auj-big">'+_escHtml(v.t)+'</div><div class="auj-sous">'+_escHtml(v.s)+'</div>'
+    +'<div class="auj-cadre"><i></i><span>Calcul\u00e9 sur '+nFA+' cuve'+(nFA>1?'s':'')+' en fermentation et '
+    +nEl+' cuv\u00e9e'+(nEl>1?'s':'')+' en \u00e9levage, avec le seuil d\u2019ouillage de chaque mill\u00e9sime.'
+    +(typeof window._mvInfoBtn==='function'?window._mvInfoBtn('cave.auj'):'')+'</span></div></div>';
+  // Trois blocs : cette semaine, la suivante, puis les deux dernieres ensemble.
+  var blocs=[{t:'Cette semaine', s:[sem[0]], now:true},
+             {t:'Semaine prochaine', s:[sem[1]]},
+             {t:'Dans 2 \u00e0 4 semaines', s:sem.slice(2)}];
+  var vide=sem.every(function(s){ return !s.items.length; });
+  if(vide){
+    h+='<div class="mlx-empty">Rien ne vient dans les quatre prochaines semaines.<br>'
+      +'Ni f\u00fbt \u00e0 ouiller, ni cuve en fermentation, ni soutirage en attente.</div>';
+  } else {
+    blocs.forEach(function(b){
+      var items=[], r={futs:0,litres:0,alertes:0,mesures:0};
+      b.s.forEach(function(s){ if(!s) return; items=items.concat(s.items);
+        var rr=_mlResumeSem(s); r.futs+=rr.futs; r.litres+=rr.litres; r.alertes+=rr.alertes; r.mesures+=rr.mesures; });
+      var d0=b.s[0]?b.s[0].lundi:null, d1=b.s[b.s.length-1]?b.s[b.s.length-1].dim:null;
+      var sum=[];
+      if(r.futs) sum.push('<b>'+r.futs+' f\u00fbt'+(r.futs>1?'s':'')+'</b> \u00e0 ouiller (~'+r.litres+' L)');
+      if(r.mesures) sum.push(r.mesures+' cuve'+(r.mesures>1?'s':'')+' \u00e0 mesurer');
+      if(r.alertes) sum.push('<span class="al">'+r.alertes+' alerte'+(r.alertes>1?'s':'')+'</span>');
+      h+='<div class="mlx-wk'+(b.now?' now':'')+'">'
+        +'<div class="mlx-wkh"><span class="mlx-wkt">'+b.t+'</span>'
+        +(b.now?'<span class="mlx-wknow">en cours</span>':'')
+        +(d0&&d1?'<span class="mlx-wkd">'+_mlFrC(d0)+' \u2013 '+_mlFrC(d1)+'</span>':'')+'</div>'
+        +(sum.length?'<div class="mlx-wks">'+sum.join(' \u00b7 ')+'</div>':'')
+        +(items.length?items.map(_mlEvHtml).join(''):'<div class="mlx-wke">Rien de pr\u00e9vu.</div>')
+        +'</div>';
+    });
+  }
+  var sd=_mlSansDate(parc);
+  if(sd.length){
+    h+='<div class="mlx-wk auj-sd"><div class="mlx-wkh"><span class="mlx-wkt">Sans \u00e9ch\u00e9ance</span></div>'
+      +sd.map(_mlEvHtml).join('')+'</div>';
+  }
+  h+='<div class="mlx-hint" style="margin-top:14px">Tout vient de ce qui est d\u00e9j\u00e0 saisi : relev\u00e9s de densit\u00e9, dernier ouillage, analyses de malo, soutirages. Rien de plus \u00e0 remplir.</div>';
+  return h;
+}
+
+function renderCaveAujourdhui(){
+  _mlInjectCss(); _aujInjectCss();
+  // ⚠️ renderCave ne masque #cave-view-mil qu'APRES la branche aujourdhui :
+  //   venir du millesime laissait sa vue visible sous celle-ci.
+  var mlv=document.getElementById('cave-view-mil'); if(mlv) mlv.style.display='none';
+  var host=document.getElementById('cave-view-auj'); if(!host) return;
+  host.style.display='block';
+  var body=document.getElementById('auj-body'); if(!body) return;
+  if(!window._dataReady){ body.innerHTML=window._mvSk?window._mvSk('chai'):''; return; }
+  body.innerHTML=_caveSaisBanner()+_aujRender();
+}
+
+// ── L'EN-TETE ET LA BANDE, UNE SEULE FOIS ────────────────────────────────
+// Trois sections ecrivaient chacune le titre, l'icone, le badge ET les quatre
+// chiffres de #cave-kpis — trois bandes differentes sous le meme en-tete, et
+// « 162 hL en cuve » ici quand la bande d'a cote disait autre chose (§91).
+// La bande est la photo de la Cave entiere, la meme sur les quatre onglets ;
+// c'est la regle des quatre photos du Pilotage. Le filtre millesime du Chai
+// n'agit que sur sa liste.
+
+// Un millesime « a de la matiere » des qu'une seule etape est renseignee.
+function _mlMatiere(ch){ if(!ch) return false;
+  return (ch.kg>0)||(ch.hlDecuve>0)||(ch.hlCuve>0)||(ch.hlFut>0)||(ch.btl>0); }
+
+// Le millesime en cuve : la campagne ouverte si elle a de la matiere, sinon
+// le precedent — le 7 aout, la campagne vient de s'ouvrir et le vin en cave
+// est celui de l'annee d'avant.
+function _caveMilMatiere(){
+  var mil=_mlCampagne(), ch=null, m=mil;
+  for(var k=0;k<2;k++){
+    var c=null;
+    try{ c=_mlChaine(mil-k); }
+    catch(e){ if(window.logError) window.logError({level:'info',cat:'cave',msg:'kpis/chaine',err:e}); }
+    if(c&&_mlMatiere(c)){ ch=c; m=mil-k; break; }
+  }
+  return {mil:m, ch:ch};
+}
+
+function _caveHeaderRender(){
+  var ico=document.getElementById('cave-hdr-ico'); _mvSetIcon(ico,'verre',20);
+  var ttl=document.getElementById('cave-hdr-title'); if(ttl) ttl.textContent='La Cave';
+  var sub=document.getElementById('cave-hdr-sub'); if(sub) sub.textContent=(window.DOMAINE_NOM||'Mon domaine');
   var bdg=document.getElementById('cave-hdr-badge'); if(bdg) bdg.textContent='Campagne '+_mlCampagne();
+  if(typeof window._mvMetaSync==='function') window._mvMetaSync();
+}
+
+function _caveKpisRender(){
+  _aujInjectCss();
+  var kp=document.getElementById('cave-kpis'); if(!kp) return;
+  var note=document.getElementById('cave-kpis-note');
+  if(!window._dataReady){ kp.innerHTML=''; kp.style.display='none'; if(note) note.style.display='none'; return; }
+  var mm=_caveMilMatiere(), ch=mm.ch;
+  // Les futs en vin se comptent comme Le Chai les compte (_caveNbTonneaux :
+  // tonneaux[] ou l'ancien nb_tonneaux). ⚠️ Pas parc.occupes : _mvFutEnVin ne
+  // lit que tonneaux[], une cuvee d'avant le parc n'y a aucun fut.
+  var futsVin=(CAVE_ELEVAGE.cuvees||[]).filter(function(c){ return c&&c.statut!=='embouteille'; })
+        .reduce(function(s,c){ return s+_caveNbTonneaux(c); },0);
+  var sem=_mlAgendaComplet(_mlAuj(),1);
+  var aFaire=sem[0].items.length;
+  // Source absente ⇒ tiret, jamais zero. hlCuve est une estimation d'apres les
+  // kilos tant que rien n'est decuve : elle porte son « ≈ ».
+  var hl = ch ? ((ch.hlCuve>0?'\u2248 ':'')+ch.hlCuve) : '\u2014';
+  var t  = ch ? (_mvF1((ch.kg||0)/1000)+' t') : '\u2014';
+  var kpis=[[hl,'hL en cuve',false],[futsVin,'f\u00fbts en vin',false],[aFaire,'\u00e0 faire',aFaire>0],[t,'rentr\u00e9es',false]];
+  kp.style.display='';
+  kp.innerHTML=kpis.map(function(k){
+    return '<div class="mvu-kpi'+(k[2]?' due':'')+'"><div class="mvu-kpi-v">'+k[0]+'</div><div class="mvu-kpi-l">'+k[1]+'</div></div>';
+  }).join('');
+  if(note){
+    var mils=_caveMilsEnCave().filter(function(m){ return m!=='?' && String(m)!==String(mm.mil); });
+    var txt = (ch&&ch.hlCuve>0) ? ('Mill\u00e9sime '+mm.mil+' en cuve') : 'Rien en cuve';
+    if(mils.length) txt+=' \u00b7 '+mils.join(', ')+' au chai';
+    else if(futsVin>0) txt+=' \u00b7 '+mm.mil+' au chai';
+    note.style.display='';
+    note.innerHTML='<i></i>'+_escHtml(txt);
+  }
+}
+
+// _mlSetTab a disparu avec la barre de sous-onglets : « Ce qui vient » est
+// l'onglet Aujourd'hui de la Cave, et La ligne de vie est seule ici. Le lot
+// des courbes recreera un aiguillage quand il y aura deux vues.
+
+// ═══════════════════════════════════════════════════════════
+// REGLAGES & DOCUMENTS DE LA CAVE — la roue crantee de l'en-tete (lot CAVE-2)
+//
+// « Reglages » vivait DEUX fois dans la Cave : un onglet du Cuvier, un onglet
+// du Chai — plus le module Reglages. Ce qu'on regle une fois l'an n'a rien a
+// faire entre deux onglets du quotidien : il sort dans une vue unique, ouverte
+// par la roue crantee de l'en-tete, qui reunit les reglages du Cuvier, ceux du
+// Chai, le renvoi vers les appellations, et les documents de la cave.
+//
+// ⚠️ AUCUNE COPIE : renderVendParam et renderCaveReglages restent les deux
+//    seuls ecrivains de leurs reglages, ils changent seulement d'hote. Les
+//    documents viennent du catalogue MV_DOCS (reglages.js) par docsGo(i) —
+//    Reglages › App › Documents & impressions reste l'endroit qui les a TOUS,
+//    ceci est un raccourci, pas une seconde liste.
+// ⚠️ 'reglages' est une section SANS onglet : la barre ne la montre pas, seule
+//    la roue l'ouvre. Les anciennes cles ('param' du Cuvier, 'reglages' du
+//    Chai) y atterrissent — un client qui les demande encore ne voit pas le vide.
+// ═══════════════════════════════════════════════════════════
+
+function _caveRegInjectCss(){
+  if(document.getElementById('mv-creg-css')) return;
+  var s=document.createElement('style'); s.id='mv-creg-css';
+  s.textContent=''
+  +'.creg-h{font-family:\'Cormorant Garamond\',Georgia,serif;font-size:22px;font-weight:600;color:var(--texte,#1A1A14);line-height:1.1}'
+  +'.creg-s{font-size:12px;color:var(--texte-doux,#5F5F5F);margin:2px 0 6px}'
+  +'.creg-grp{font-size:10.5px;letter-spacing:.13em;text-transform:uppercase;color:var(--terre,#8A5A38);font-weight:600;margin:18px 2px 8px}'
+  +'.creg-row{display:flex;justify-content:space-between;align-items:center;gap:10px;width:100%;text-align:left;font-family:inherit;background:var(--bg-card,#FBFAF6);border:1px solid var(--gris-clair,#ECE6DA);border-radius:12px;padding:11px 12px;margin-bottom:6px;font-size:13px;color:var(--texte,#1A1A14);cursor:pointer;min-height:44px}'
+  +'.creg-row:disabled{opacity:.5;cursor:default}'
+  +'.creg-row .l{display:flex;align-items:center;gap:10px;min-width:0}'
+  +'.creg-row .ic{width:28px;height:28px;border-radius:8px;display:grid;place-items:center;flex-shrink:0;background:var(--gris-clair,#ECE6DA);color:var(--texte-med,#4A4A3A)}'
+  +'.creg-row .t{font-weight:500}'
+  +'.creg-row .d{display:block;font-size:11px;color:var(--texte-doux,#5F5F5F);margin-top:1px}'
+  +'.creg-row .r{font-size:12px;color:var(--texte-doux,#5F5F5F);white-space:nowrap;flex-shrink:0}'
+  +'#cave-hdr-gear.active{background:var(--or,#C2A14D);color:var(--cave,#14110D);border-color:var(--or,#C2A14D)}';
+  document.head.appendChild(s);
+}
+
+// Ouvre la vue depuis la roue crantee, ou depuis une ancienne cle d'onglet.
+function _caveOpenReglages(){
+  caveSection='reglages';
+  renderCave();
+}
+
+// Les appellations et leurs plafonds sont un reglage du DOMAINE, pas de la
+// cave : on y va, on ne les recopie pas. Meme geste que _pilGo du Pilotage.
+function _caveGoAoc(){
+  if(window.goTo) window.goTo('reglages');
+  setTimeout(function(){
+    try{
+      if(typeof window.switchReglTab==='function') window.switchReglTab('domaine');
+      var el=document.getElementById('aoc-card'); if(!el) return;
+      el.scrollIntoView({behavior:'smooth',block:'center'});
+      el.style.transition='box-shadow .25s'; el.style.boxShadow='0 0 0 3px var(--or)';
+      setTimeout(function(){ el.style.boxShadow=''; },1400);
+    }catch(e){ if(window.logError) window.logError({level:'info',cat:'cave',msg:'reglages/aoc',err:e}); }
+  },240);
+}
+
+// Les documents de la cave : ceux du catalogue MV_DOCS dont le module est la
+// cave, plus le bilan de campagne et l'inventaire des futs, qui parlent d'elle.
+var _CREG_DOC_ICO={cuverie:'journal', manip:'liste', bilan:'document', futs:'barrique',
+  matur:'microscope', recoltes:'raisin', elevage:'barrique'};
+function _caveRegDocs(){
+  var cat=window.MV_DOCS; if(!Array.isArray(cat)) return [];
+  var out=[];
+  cat.forEach(function(d,i){
+    if(!d) return;
+    if(d.mod==='cave'||d.act==='bilan'||d.act==='futs') out.push({i:i, d:d});
+  });
+  return out;
+}
+function _caveRegDocsHtml(){
+  var l=_caveRegDocs();
+  if(!l.length) return '<div class="mlx-hint">Les documents s\u2019\u00e9ditent depuis R\u00e9glages \u203a App \u203a Documents &amp; impressions.</div>';
+  var can=function(mod){ if(!mod) return true;
+    try{ return (typeof window._canModule==='function')?!!window._canModule(mod):true; }catch(e){ return true; } };
+  return l.map(function(x){
+    var d=x.d, ok=can(d.mod);
+    return '<button type="button" class="creg-row" onclick="docsGo('+x.i+')"'+(ok?'':' disabled')+'>'
+      +'<span class="l"><span class="ic">'+_mvIcon(_CREG_DOC_ICO[d.act]||'document',16)+'</span>'
+      +'<span><span class="t">'+_escHtml(d.t||'')+'</span>'
+      +(d.ask?'<span class="d">'+_escHtml(d.ask)+'</span>':'')+'</span></span>'
+      +'<span class="r">'+_escHtml(String(d.fm||'pdf').toUpperCase())+'</span></button>';
+  }).join('')
+  +'<div class="mlx-hint" style="margin-top:8px">Tous les documents de l\u2019application restent r\u00e9unis dans R\u00e9glages \u203a App \u203a Documents &amp; impressions.</div>';
+}
+
+function renderCaveReglagesCave(){
+  _caveRegInjectCss(); _mlInjectCss();
+  var mlv=document.getElementById('cave-view-mil'); if(mlv) mlv.style.display='none';
+  var host=document.getElementById('cave-view-reg'); if(!host) return;
+  host.style.display='block';
+  // Le Cuvier et Le Chai ecrivent chacun dans leur hote, comme avant.
+  renderVendParam();
+  renderCaveReglages();
+  var mil=document.getElementById('cave-reg-mil');
+  if(mil) mil.innerHTML='<button type="button" class="creg-row" onclick="_caveGoAoc()">'
+    +'<span class="l"><span class="ic">'+_mvIcon('etiquette',16)+'</span>'
+    +'<span><span class="t">Appellations &amp; plafonds de rendement</span>'
+    +'<span class="d">Un r\u00e9glage du domaine, campagne par campagne</span></span></span>'
+    +'<span class="r">R\u00e9glages \u203a Domaine \u203a</span></button>';
+  var docs=document.getElementById('cave-reg-docs');
+  if(docs) docs.innerHTML=_caveRegDocsHtml();
+}
+
+// ═══════════════════════════════════════════════════════════
+// LE MILLESIME — LES COURBES, LES TUILES, FACE A N-1, LE PARC (lot CAVE-3)
+//
+// Ce bloc VIENT DU PILOTAGE (ex-onglet Pilotage › Cave, §20g, §89) : il y
+// avait ete construit comme une seconde cave, rangee par question, sur les
+// moteurs de ce fichier. Le lot CAVE-3 le ramene chez lui. Les noms _pcav* /
+// _pcrb* sont conserves tels quels : ils sont prives, les harnais les
+// extraient par leur nom, et une renommee de 40 fonctions n'aurait rien dit
+// de plus. Ce qui doublait Aujourd'hui (_pcavVuePresse, _pcavVerdict,
+// _pcavMalo, _pcavSoutirages…) et La ligne de vie (_pcavFlux, _pcavRdt,
+// _pcavBandeau…) n'a PAS ete ramene : supprime.
+//   - _pcavCtx()      : le contexte (parc, futL, cuvees en elevage, agenda)
+//   - _mlTuiles(ch)   : les quatre chiffres en tete de La ligne de vie
+//   - _pcavN1(c,mil)  : face au millesime precedent
+//   - _pcavVueParc(c) : le parc a futs → rendu dans La Reserve › Futs
+//   - _pcavVueCourbes(c) + _pcrbPose() : Le millesime › Les courbes
+// ═══════════════════════════════════════════════════════════
+// ════════════════════════════════════════════════════════════
+// PILOTAGE › CAVE — cockpit decisionnel.
+// Trois sous-onglets, un verbe chacun : ce qui presse · le millesime ·
+// le parc & le cout. AUCUN calcul neuf sauf le volume restant a rentrer :
+// on consomme _mlAgenda, _mlChaine, _mlRendements, _mlResteARentrer et
+// _mvFutParc. Consommer, c'est l'inverse de dupliquer.
+// Repli complet : un cave.js ou un utils.js anterieur fait disparaitre le
+// bloc concerne, jamais l'onglet entier.
+// ════════════════════════════════════════════════════════════
+
+function _pcavF1(n){ if(n==null||isNaN(n)) return '—'; return (Math.round(n*10)/10).toString().replace('.',','); }
+function _pcavInt(n){ if(n==null||isNaN(n)) return '—'; return Math.round(n).toLocaleString('fr-FR').replace(/\u202f/g,'\u00a0'); }
+function _pcavHas(f){ return typeof window[f]==='function'; }
+// Cliquet C14 : aucun catch{} vide. Un repli qui echoue reste un repli,
+// mais il laisse une trace en 'info' — c'est ainsi qu'on apprend qu'un
+// moteur de la Cave a change de contrat.
+function _pcavLog(ou,e){ if(window.logError) window.logError({level:'info',cat:'cave',msg:'millesime/'+ou,err:e}); }
+// Un millesime « a de la matiere » des qu'une seule etape est renseignee.
+// Sans ce test, un domaine vierge voit quatre tuiles a zero au lieu d'une
+// phrase honnete — et un parcours qui grossit au lieu de retrecir.
+function _pcavMatiere(ch){ if(!ch) return false;
+  return (ch.kg>0)||(ch.hlDecuve>0)||(ch.hlCuve>0)||(ch.hlFut>0)||(ch.btl>0); }
+
+// Millesime courant = celui de la campagne ouverte le 1er aout precedent.
+// _mvCampagneDe est la source unique (utils.js) ; repli local si absent.
+function _pcavCampagne(){
+  var iso=new Date().toISOString().slice(0,10);
+  if(_pcavHas('_mvCampagneDe')){ try{ return window._mvCampagneDe(iso); }catch(e){ _pcavLog('campagne',e); } }
+  var y=parseInt(iso.slice(0,4),10), m=parseInt(iso.slice(5,7),10);
+  return m>=8?y:y-1;
+}
+
+// Phase du calendrier : elle decide de l'ORDRE des blocs, jamais de leur
+// presence. Cacher un bloc, c'est le rendre introuvable le jour ou il compte.
+function _pcavPhase(){
+  var m=new Date().getMonth()+1;
+  if(m>=8 && m<=10) return 'vendange';
+  if(m>=4 && m<=7) return 'embouteillage';
+  return 'elevage';
+}
+
+// Contexte : tout ce que les blocs consomment, monte une seule fois.
+function _pcavCtx(){
+  var mil=_pcavCampagne(), c={mil:mil, phase:_pcavPhase()};
+  c.alerte=_caveSeuilGlobal()||14;
+  c.cuvees=(window.CAVE_ELEVAGE&&CAVE_ELEVAGE.cuvees)||[];
+  c.enElevage=c.cuvees.filter(function(x){ return x&&x.statut!=='embouteille'; });
+  try{ c.agenda=_pcavHas('_mlAgenda')?window._mlAgenda(new Date().toISOString().slice(0,10),4):null; }
+  catch(e){ c.agenda=null; }
+  // Le millesime affiche n'est pas forcement celui de la campagne ouverte.
+  // Le 7 aout, la campagne 2026-2027 vient de commencer mais le vin en cave
+  // est le 2025 : _mlChaine(2026) est vide et l'ecran serait blanc tout
+  // l'automne. On garde la campagne courante DES QU'ELLE A DE LA MATIERE,
+  // sinon on recule d'un cran. c.milAff porte le millesime retenu.
+  c.chaine=null; c.milAff=mil;
+  if(_pcavHas('_mlChaine')){
+    for(var _k=0;_k<2;_k++){
+      var _m=mil-_k, _ch=null;
+      try{ _ch=window._mlChaine(_m); }catch(e){ _pcavLog('chaine',e); }
+      if(_ch && _pcavMatiere(_ch)){ c.chaine=_ch; c.milAff=_m; break; }
+      if(_k===0 && _ch) c.chaine=_ch;
+    }
+    if(c.chaine && !_pcavMatiere(c.chaine)) c.chaine=null;
+  }
+  // ⚠ La famille _mvFut* PREND SES DONNEES EN ARGUMENT : elle vit dans
+  // utils.js, importe en PREMIER, elle ne peut donc pas compter sur les
+  // globales au chargement. Signature reelle :
+  //   _mvFutParc(INTRANTS, CAVE_ELEVAGE, curY)
+  // Appelee sans argument, elle renvoyait un parc a ZERO, en silence.
+  // Meme appel que reserve.js, qui est le patron de reference.
+  try{ c.parc=_pcavHas('_mvFutParc')
+        ? window._mvFutParc(window.INTRANTS, window.CAVE_ELEVAGE, null)
+        : null; }catch(e){ _pcavLog('futParc',e); c.parc=null; }
+  try{ c.rdt=_pcavHas('_mlRendements')?window._mlRendements(mil):[]; }catch(e){ c.rdt=[]; }
+  try{ c.reste=_pcavHas('_mlResteARentrer')?window._mlResteARentrer(mil):[]; }catch(e){ c.reste=[]; }
+  c.futL=_pcavHas('_caveFutL')?(window._caveFutL()||228):228;
+  c.anges=_pcavAnges(c);
+  return c;
+}
+
+// ── Part des anges : une MESURE, pas une estimation ─────────────────
+// Ce qu'on remet en ouillage est exactement ce qui s'est evapore. Les
+// operations stockent data.vol_total_L. On lit une collection, on ne
+// recopie aucun calcul : _mlVolParFut fait une moyenne PAR FUT, pas une
+// somme. Reserve honnete affichee a l'ecran : le soutirage retire aussi
+// du volume, cette mesure ne vaut que pour l'ouillage.
+// ── La part des anges, UNE LIGNE PAR MILLESIME ───────────────────────
+// ⚠ MODELE ARBITRE PAR NICO : on n'ouille pas les futs de 2025 avec du vin
+// de 2026. Chaque millesime a sa cave, son rythme, son evaporation. Un
+// chiffre unique melangeait un vin qui vient d'etre entonne et un vin en
+// fin d'elevage : une moyenne qui ne decrit aucun des deux.
+// Fenetre : DOUZE MOIS GLISSANTS. Le 5 aout, une campagne ouverte depuis
+// quatre jours ne contient presque aucun ouillage.
+function _pcavAnges(c){
+  var ops=(window.CAVE_ELEVAGE&&CAVE_ELEVAGE.operations)||[];
+  var d1=new Date().toISOString().slice(0,10);
+  var _d0=new Date(); _d0.setFullYear(_d0.getFullYear()-1);
+  var d0=_d0.toISOString().slice(0,10);
+  // Millesime de chaque cuvee, pour ventiler les ouillages.
+  var milDe={}, futDe={};
+  c.enElevage.forEach(function(x){
+    if(!x||!x.id) return;
+    milDe[x.id]=_pcavMilKey(x.millesime);
+    futDe[x.id]=(x.tonneaux||[]).reduce(function(s,t){ return s+(parseInt(t.nb,10)||0); },0);
+  });
+  var par={}, total={L:0,ops:0};
+  ops.forEach(function(o){
+    if(!o||o.type!=='ouillage'||!o.data) return;
+    var dt=o.date||''; if(dt<d0||dt>d1) return;
+    var v=parseFloat(o.data.vol_total_L); if(!v||isNaN(v)) return;
+    var ids=(o.cuvees_ids&&o.cuvees_ids.length)?o.cuvees_ids:(o.cuvee_id?[o.cuvee_id]:[]);
+    var mils={};
+    ids.forEach(function(id){ if(milDe[id]!=null) mils[milDe[id]]=1; });
+    var mk=Object.keys(mils);
+    total.L+=v; total.ops++;
+    // Depuis le lot A une operation ne porte qu'un millesime. Une operation
+    // mixte heritee est comptee dans le total mais PAS ventilee : mieux vaut
+    // un millesime sans ligne qu'une ligne fausse.
+    if(mk.length!==1) return;
+    var k=mk[0];
+    if(!par[k]) par[k]={mil:k, L:0, ops:0, futs:0};
+    par[k].L+=v; par[k].ops++;
+  });
+  // Volume loge par millesime = ses futs en vin x contenance.
+  c.enElevage.forEach(function(x){
+    if(!x||!x.id) return;
+    var k=milDe[x.id]; if(!par[k]) return;
+    par[k].futs+=futDe[x.id]||0;
+  });
+  var lignes=Object.keys(par).map(function(k){
+    var p=par[k], loge=p.futs*c.futL/100;
+    return {mil:k, hlPerdu:p.L/100, ops:p.ops, futs:p.futs, hlLoge:loge,
+            pctAn:loge>0?(p.L/100)/(loge+p.L/100)*100:null,
+            btl:Math.round(p.L/0.75)};
+  }).filter(function(x){ return x.hlPerdu>0; })
+    .sort(function(a,b){
+      if(a.mil==='?') return 1; if(b.mil==='?') return -1;
+      return Number(b.mil)-Number(a.mil);
+    });
+  if(!lignes.length && !total.ops) return null;
+  return {lignes:lignes, hlPerdu:total.L/100, ops:total.ops,
+          nonVentile:total.ops-lignes.reduce(function(s,x){ return s+x.ops; },0)};
+}
+function _pcavMilKey(m){ return (m==null||m==='')?'?':String(m); }
+
+// ── Briques de rendu ────────────────────────────────────────────────
+// ★ 7e ARGUMENT OPTIONNEL, comme _pilTile : la cle de la fiche « i ». Les
+//   appels existants restent valides tels quels et posent leur pastille au fur
+//   et a mesure que leur fiche est ecrite. La pastille va dans l'EN-TETE, a
+//   cote du titre — pas dans le pied, ou elle serait sous le graphe.
+function _pcavCard(ico,dot,titre,stat,body,mini,infoCle){
+  return '<div class="pcav-card"><div class="pcav-h"><span class="pcav-dot" style="background:'+dot+'"></span>'
+    +'<span class="pcav-ico">'+ico+'</span><span class="pcav-t">'+_escHtml(titre)+'</span>'
+    +(infoCle&&typeof window._mvInfoBtn==='function'?window._mvInfoBtn(infoCle):'')
+    +(stat?'<span class="pcav-stat">'+stat+'</span>':'')+'</div>'
+    +'<div class="pcav-b">'+body+'</div>'
+    +(mini?'<div class="pcav-mini">'+mini+'</div>':'')+'</div>';
+}
+function _pcavK(lab,val,unit,sub,dark,col){
+  return '<div class="pcav-k'+(dark?' dark':'')+'"><div class="pcav-kl">'+_escHtml(lab)+'</div>'
+    +'<div class="pcav-kv"'+(col?' style="color:'+col+'"':'')+'>'+val+(unit?' <small>'+_escHtml(unit)+'</small>':'')+'</div>'
+    +(sub?'<div class="pcav-ks">'+sub+'</div>':'')+'</div>';
+}
+
+// Depuis le Pilotage il faut d'abord ATTERRIR sur la Cave : _mlGo appelle
+// renderCave() mais ne change pas de page. Expression window : appelee
+// depuis un onclick, C15 la verrait morte sinon (cf. _arcOpen).
+// ★ Poser un plafond depuis le Pilotage. L'ECRITURE n'est pas ici : c'est
+//   `_mlSetRdtMax` (cave.js) qui verifie le droit, ecrit dans PARCELLES et
+//   propose la pose groupee. On ne lui passe que deux choses — l'annee que CET
+//   ecran affiche, et ce qu'il faut redessiner quand c'est fait.
+// ⚠️ Sans la Cave chargee, on le DIT au lieu d'ouvrir une saisie qui ne partira
+//   nulle part. Le silence, ici, ressemblerait exactement au defaut qu'on corrige.
+
+
+// Les millesimes reellement en cave, pour savoir s'il faut grouper.
+// ── Fermentations ────────────────────────────────────────────────────
+// ── Cuverie face au reste a rentrer ─────────────────────────────────
+// SEUL calcul neuf du lot : _mlResteARentrer renvoie des PARCELLES, pas des
+// hectolitres. On applique le rendement moyen deja constate sur la campagne
+// aux surfaces non recoltees. C'est un ordre de grandeur, l'ecran le dit.
+// Statuts de cuve REELS : 'setup' | 'fa' | 'mpf' | 'termine'. Une cuve est
+// active en 'fa'/'mpf' (meme critere que _vendIsActive), libre sinon.
+// « Prete a decuver » n'est pas un drapeau : c'est _mlProjFA().etat==='sec'.
+// ── Renouvellement du parc ───────────────────────────────────────────
+// ── Elevage en cours ─────────────────────────────────────────────────
+// L'app n'a AUCUN drapeau « prete a embouteiller » — ne pas en inventer un.
+// On affiche un fait verifiable : la duree d'elevage depuis date_entree, et
+// le nombre de futs qui reviendraient au parc a la mise.
+// ── Soutirage & malo ─────────────────────────────────────────────────
+// ⚠ MODELE : le soutirage se declenche a la fin de la malo, jamais a une
+// date. Et la fin se projette sur les valeurs d'acide malique MESUREES sur
+// CETTE cuvee — pas sur la duree des malos passees du domaine.
+// Le Pilotage consomme _mlProjMalo (cave.js), il ne recalcule rien.
+// Les doses de SO2 programmees a la saisie d'un soutirage. so2.dates[] est
+// STOCKE, puis plus jamais rappele nulle part. On ne montre que les doses A
+// VENIR : rien ne dit qu'une dose passee a ete faite, l'annoncer en retard
+// serait une accusation sans preuve.
+// Le dernier soutirage de chaque cuvee. cave.js en porte la definition
+// (_caveLastSout) : on la consomme plutot que d'en garder une copie, sinon
+// les deux ecrans divergent au premier changement. Repli local pour un
+// cave.js anterieur chez un client pas encore a jour.
+// Date a laquelle la malo a ete CONSTATEE finie. Elle sert de reference au
+// geste : un soutirage anterieur a cette date n'acquitte pas celui-ci.
+// Sans elle, un soutirage de mars valait quitus pour une malo finie en mai.
+// Etat de chaque cuvee vis-a-vis du soutirage. Tout vient de _mlProjMalo,
+// sauf le drapeau declaratif fml_terminee, qui reste une verite du vigneron :
+// s'il declare la malo finie, elle est finie, meme sans mesure.
+// La courbe : decroissance mesuree, en CSS pur. Un SVG a viewBox fixe
+// s'etire a ×5 sur grand ecran — piege corrige en aout sur la pyramide.
+// ── Verdict : le titre de l'onglet, un CONSTAT, jamais un jugement ───
+// Cuvees dont la malo est finie et qui n'ont pas ete soutirees depuis.
+// C'est un GESTE en attente, il passe devant un simple rappel de date.
+// Malos qui stagnent : la pente recente est plate alors qu'il reste du
+// malique. C'est le seul etat de cave qui ne peut pas attendre la semaine
+// prochaine — une malo arretee redemarre d'autant plus mal qu'on tarde.
+// Doses de SO2 tombant dans les 7 jours. Sert au verdict : une date que le
+// vigneron a lui-meme programmee et que personne ne lui rappelle.
+// ── Onglet 1 : ce qui presse ─────────────────────────────────────────
+// L'ORDRE suit le calendrier ; la PRESENCE des blocs ne change jamais.
+// ── Onglet 2 : le millesime ──────────────────────────────────────────
+// ── Plusieurs millesimes coexistent en cave ──────────────────────────
+// ⚠ MODELE CORRIGE PAR NICO : en octobre, le millesime precedent est encore
+// en fut pendant que le nouveau entre en cuve. Un domaine qui eleve 24 mois
+// en a trois de front. L'ecran ne doit donc jamais supposer l'exclusivite.
+// _mlMillesimes() (cave.js) donne deja la liste ; _mlChaine(mil) sait lire
+// n'importe lequel. On les consomme, on ne recalcule rien.
+// Le bandeau : ce qui est en cave, tous millesimes, avant d'en ouvrir un.
+var _PCAV_PHASES={cuve:['En cuve','#7B4DB8'], fut:['En fût','#8A5A38'],
+                  bouteille:['En bouteille','#3D6B27'], rentre:['Rentré','#5B9B3A']};
+// ── Rendement face au plafond de l'appellation ───────────────────────
+// _mlRendements renvoie {parcelle, kg, hlHa, hlMin, hlMax, statut, max,
+// depasse, pct, vendu}. max vient de p.rdt_max, saisi par parcelle : sans lui,
+// pas de comparaison.
+// ★★★ RDT-1 — CETTE CARTE AFFICHAIT UN CHIFFRE NET LA OU LE MILLESIME AFFICHE
+// UNE FOURCHETTE. Meme donnee, deux ecrans, deux niveaux de certitude : celui
+// qui montre le chiffre net gagne la confiance, et c'est le mauvais. Un volume
+// n'est mesure qu'apres le decuvage ; avant, on annonce l'encadrement.
+// ── Face a l'an dernier ──────────────────────────────────────────────
+// Meme axe que les Archives : campagne du 1er aout au 31 juillet.
+// Les quatre chiffres en tete de La ligne de vie — ex-tuiles de Pilotage › Cave ›
+// Le millesime, rapportees au millesime que les puces de la Cave ont choisi.
+function _mlTuiles(ch){
+  if(!ch||!_pcavMatiere(ch)) return '';
+  var rm=null; try{ rm=_mlRdtMoyen(ch); }catch(e){ rm={hlHa:null,statut:null,sansSurface:0,approx:0,ha:0}; }
+  var sub;
+  if(rm.hlHa==null){
+    sub=(rm.sansSurface>0||rm.approx>0)?'surface r\u00e9colt\u00e9e non renseign\u00e9e':'mesur\u00e9 au d\u00e9cuvage';
+  } else {
+    var b=[];
+    if(rm.approx>0) b.push(rm.approx+' surface'+(rm.approx>1?'s':'')+' vendue'+(rm.approx>1?'s':'')+' non renseign\u00e9e'+(rm.approx>1?'s':''));
+    if(rm.sansSurface>0) b.push(rm.sansSurface+' parcelle'+(rm.sansSurface>1?'s':'')+' \u00e9cart\u00e9e'+(rm.sansSurface>1?'s':''));
+    if(!b.length&&rm.statut!=='mesure') b.push('estim\u00e9 \u2014 tout n\u2019est pas d\u00e9cuv\u00e9');
+    sub=b.length?b.join(' \u00b7 '):('sur '+_pcavF1(rm.ha)+' ha r\u00e9ellement r\u00e9colt\u00e9s');
+  }
+  return '<div class="pcav-card"><div class="pcav-kg">'
+    +_pcavK('Surface r\u00e9colt\u00e9e',_pcavF1(ch.ha),'ha',(ch.parcelles||0)+' parcelles',1)
+    +_pcavK('Raisin rentr\u00e9',_pcavF1((ch.kg||0)/1000),'t',ch.kgVendu?('dont '+_pcavInt(ch.kgVendu)+' kg vendus'):'')
+    +_pcavK('Rendement moyen', rm.hlHa!=null?((rm.statut==='mesure'&&!rm.approx?'':'\u2248 ')+_pcavF1(rm.hlHa)):'\u2014','hL/ha',sub)
+    +_pcavK('Au chai',_pcavF1(ch.hlFut),'hL',(ch.futs||0)+' barriques')
+    +'</div></div>';
+}
+
+function _pcavN1(c,mil){
+  if(!_pcavHas('_mlChaine')) return '';
+  var _m=(mil!=null)?mil:(c.milAff!=null?c.milAff:c.mil);
+  var cur=null; try{ cur=window._mlChaine(_m); }catch(e){ _pcavLog('n1cur',e); return ''; }
+  if(!cur) return '';
+  var p=null; try{ p=window._mlChaine(_m-1); }catch(e){ _pcavLog('n1',e); return ''; }
+  if(!p||(!p.hlDecuve&&!p.kg&&!p.futs)) return '';
+  var rows='';
+  function ligne(lab,now,old,unit,hautEstBon){
+    if(now==null||old==null||!old) return;
+    var d=now-old, pct=Math.round(d/old*100), bon=hautEstBon?(d>=0):(d<=0);
+    rows+='<div class="pcav-cmp"><div><div class="pcav-cl">'+_escHtml(lab)+'</div>'
+      +'<div class="pcav-cnow">'+_pcavF1(now)+' <small>'+_escHtml(unit)+'</small></div></div>'
+      +'<div><span class="pcav-dl '+(bon?'ok':'wa')+'">'+(d>=0?'+':'')+pct+' %</span></div>'
+      +'<div class="pcav-cold">l’an dernier<br><b>'+_pcavF1(old)+' '+_escHtml(unit)+'</b></div></div>';
+  }
+  var rNow=(cur.ha>0)?cur.hlDecuve/cur.ha:null;
+  var rOld=(p.ha>0)?p.hlDecuve/p.ha:null;
+  ligne('Rendement moyen',rNow,rOld,'hL/ha',true);
+  var pNow=(cur.hlDecuve>0&&cur.hlFut>0)?(cur.hlDecuve-cur.hlFut)/cur.hlDecuve*100:null;
+  var pOld=(p.hlDecuve>0&&p.hlFut>0)?(p.hlDecuve-p.hlFut)/p.hlDecuve*100:null;
+  ligne('Perte benne → fût',pNow,pOld,'%',false);
+  ligne('Raisin rentré',cur.kg/1000,p.kg/1000,'t',true);
+  if(!rows) return '';
+  return _pcavCard(_mvIcon('chrono',16),'#8A5A38','Face à l’an dernier',
+    'campagne '+(_m-1)+'-'+_m, rows,
+    'Comparaison par campagne, du 1<sup>er</sup> août au 31 juillet — le même axe que les Archives. Le rendement moyen ne porte que sur les parcelles réellement récoltées.');
+}
+
+// ── Onglet 2 : assemblage ────────────────────────────────────────────
+// ── Onglet 3 : le parc & le cout ─────────────────────────────────────
+function _pcavPyramide(c){
+  var p=c.parc; if(!p||!p.lignes||!p.lignes.length) return '';
+  var max=0; p.lignes.forEach(function(l){ if(l.total>max) max=l.total; });
+  if(max<=0) return '';
+  var rows=p.lignes.map(function(l){
+    var w=Math.max(6,Math.min(100,Math.round(l.total/max*100)));
+    var col=(l.vins===0)?'#5B9B3A':(l.reforme?'#A0291E':'#8A5A38');
+    var wv=l.total?Math.round(l.enVin/l.total*100):0;
+    var age=(l.annee==null)?'origine inconnue':(l.vins===0?'neuf':l.vins+' vin'+(l.vins>1?'s':''));
+    return '<div class="pcav-pl"><div class="pcav-py">'+(l.annee==null?'—':l.annee)+'<small>'+age+'</small></div>'
+      +'<div class="pcav-pt2" style="width:'+w+'%"><div class="pcav-ps" style="width:'+wv+'%;background:'+col+'"></div>'
+      +'<div class="pcav-ps" style="width:'+(100-wv)+'%;background:'+col+';opacity:.28"></div></div>'
+      +'<div class="pcav-pn">'+l.enVin+' en vin · '+l.libres+' libre'+(l.libres>1?'s':'')+'</div></div>';
+  }).join('');
+  var leg='<div class="pcav-leg"><span><i style="background:#5B9B3A"></i>neuf</span>'
+    +'<span><i style="background:#8A5A38"></i>en cours de vie</span>'
+    +'<span><i style="background:#A0291E"></i>au-delà de '+p.vie+' vins</span>'
+    +'<span><i style="background:#8A5A38;opacity:.28"></i>partie libre, quel que soit l’âge</span></div>';
+  return _pcavCard(_mvIcon('graphique',16),'#B85A1A','Pyramide des âges','<b>'+p.parc+'</b> barriques',
+    '<div class="pcav-pyr">'+rows+leg+'</div>',
+    'L’âge se compte en année civile moins année d’achat : la vendange tombe en septembre, donc l’incrément du 1<sup>er</sup> janvier arrive après le millésime.');
+}
+
+// ── Part des anges : une mesure, avec sa reserve ecrite a l'ecran ────
+function _pcavAngesCard(c){
+  var a=c.anges;
+  if(!a) return _pcavCard(_mvIcon('sablier',16),'#A0291E','Part des anges','\u2014',
+    '<div class="pcav-vide">Aucun volume d\u2019ouillage saisi sur les douze derniers mois.<br>Renseignez le volume total \u00e0 chaque ouillage : cet \u00e9cran mesurera alors ce que l\u2019\u00e9levage vous co\u00fbte r\u00e9ellement.</div>','');
+  var rows='';
+  a.lignes.forEach(function(x){
+    var lbl=(x.mil==='?')?'Sans mill\u00e9sime':x.mil;
+    var pct=(x.pctAn==null)?'\u2014':(_pcavF1(x.pctAn)+' %/an');
+    rows+='<div class="pcav-agr">'
+      +'<div class="pcav-agm">'+_escHtml(lbl)+'<small>'+x.ops+' ouillage'+(x.ops>1?'s':'')+' \u00b7 '+x.futs+' f\u00fbts</small></div>'
+      +'<div class="pcav-agv">'+_pcavF1(x.hlPerdu)+' <small>hL remis</small></div>'
+      +'<div class="pcav-agp">'+pct+'</div></div>';
+  });
+  if(a.nonVentile>0){
+    rows+='<div class="pcav-agr"><div class="pcav-agm" style="color:var(--texte-doux)">Non ventil\u00e9<small>'
+      +a.nonVentile+' op\u00e9ration'+(a.nonVentile>1?'s':'')+' couvrant plusieurs mill\u00e9simes</small></div>'
+      +'<div class="pcav-agv" style="color:var(--texte-doux)">\u2014</div><div class="pcav-agp">\u2014</div></div>';
+  }
+  if(!rows) rows='<div class="pcav-vide">Les ouillages des douze derniers mois ne se rattachent \u00e0 aucune cuv\u00e9e encore en \u00e9levage.</div>';
+  var stat=a.lignes.length?('<b>'+_pcavF1(a.hlPerdu)+'</b> hL sur douze mois'):'\u2014';
+  return _pcavCard(_mvIcon('sablier',16),'#A0291E','Part des anges', stat, '<div class="pcav-agt">'+rows+'</div>',
+    'douze derniers mois \u00b7 une ligne par mill\u00e9sime', 'cave.anges');
+}
+
+function _pcavVueParc(c){
+  // Rendu en tete de La Reserve › Futs (lot CAVE-3/4). La Reserve porte deja
+  // l'etat du parc (total, en vin, libres, a reformer, mouvements de l'annee)
+  // et le registre des mouvements : on n'apporte ici QUE ce qu'elle n'a pas —
+  // la pyramide des ages et la part des anges.
+  // ⚠ La part des anges se calcule sur les FUTS DES CUVEES, pas sur le parc :
+  // elle reste disponible meme si l'inventaire de La Reserve est vide.
+  var h='';
+  try{ h+=_pcavAngesCard(c)||''; }catch(e){ _pcavLog('angescard',e); }
+  if(c.parc){ try{ h+=_pcavPyramide(c)||''; }catch(e){ _pcavLog('pyramide',e); } }
+  return h;
+}
+
+// ── CSS du module. Injecte ici, comme le fait deja le bloc `pec-` : ──
+// styles.css n'est pas touche, donc AUCUN bump (pilotage.js seul).
+function _pcavInjectCss(){
+  if(document.getElementById('pcav-css')) return;
+  var css=''
+  +'.pcav-verdict{background:var(--bg-card);border:1px solid var(--gris-clair);border-radius:15px;box-shadow:var(--shadow-sm);padding:22px 24px 20px;margin-bottom:16px}'
+  +'.pcav-vk{display:flex;align-items:center;gap:10px;font-size:var(--pt-lbl,10.5px);font-weight:600;letter-spacing:2.2px;text-transform:uppercase;color:var(--texte-doux);flex-wrap:wrap}'
+  +'.pcav-vbig{font-family:\'Cormorant Garamond\',Georgia,serif;font-weight:600;font-size:var(--pt-hero,40px);line-height:1.04;margin:6px 0 5px;color:var(--texte)}'
+  +'.pcav-vsub{font-size:var(--pt-base,14px);color:var(--texte-med);line-height:1.55;max-width:620px}'
+  +'.pcav-vsub b{color:var(--texte);font-weight:600}'
+  +'.pcav-card{background:var(--bg-card);border:1px solid var(--gris-clair);border-radius:15px;box-shadow:var(--shadow-sm);overflow:hidden;margin-bottom:16px}'
+  +'.pcav-h{display:flex;align-items:center;gap:10px;padding:13px 16px;min-height:44px;border-bottom:1px solid var(--gris-clair)}'
+  +'.pcav-dot{width:7px;height:7px;border-radius:50%;flex:none}'
+  +'.pcav-ico{width:28px;height:28px;border-radius:9px;background:var(--or-pale);display:flex;align-items:center;justify-content:center;flex:none;font-size:var(--pt-base,14px)}'
+  +'.pcav-t{font-size:var(--pt-micro,11px);letter-spacing:1.4px;text-transform:uppercase;font-weight:600;color:var(--texte-doux);flex:1}'
+  +'.pcav-stat{font-size:var(--pt-micro,11px);color:var(--texte-doux);font-weight:600;white-space:nowrap}'
+  +'.pcav-stat b{color:var(--texte)}'
+  +'.pcav-b{padding:2px 0}'
+  +'.pcav-mini{font-size:var(--pt-micro,11px);color:var(--texte-doux);padding:2px 17px 14px;line-height:1.55}'
+  +'.pcav-row{display:flex;align-items:center;gap:13px;padding:12px 17px;border-top:1px solid var(--gris-clair);font-size:var(--pt-txt,12.5px);color:var(--texte-med)}'
+  +'.pcav-row:first-child{border-top:none}'
+  +'.pcav-row b{color:var(--texte);font-weight:600}'
+  +'.pcav-rm{flex:1;min-width:0}'
+  +'.pcav-sub{font-size:var(--pt-micro,11px);color:var(--texte-doux);margin-top:2px;line-height:1.45}'
+  +'.pcav-pt{width:8px;height:8px;border-radius:50%;flex:none}'
+  +'.pcav-pt.red{background:var(--rouge);box-shadow:0 0 0 3px var(--rouge-pale)}'
+  +'.pcav-pt.amb{background:var(--orange);box-shadow:0 0 0 3px var(--orange-pale)}'
+  +'.pcav-pt.ok{background:var(--vert-med);box-shadow:0 0 0 3px var(--vert-pale)}'
+  +'.pcav-when{font-size:var(--pt-micro,11px);color:var(--texte-doux);white-space:nowrap}'
+  +'.pcav-act{border:1px solid var(--gris);background:var(--bg-card);border-radius:9px;padding:7px 12px;font-family:inherit;font-size:var(--pt-micro,11px);font-weight:600;color:var(--terre);cursor:pointer;white-space:nowrap;min-height:38px}'
+  +'.pcav-act:hover{background:var(--or-pale);border-color:var(--or)}'
+  +'.pcav-kg{display:grid;grid-template-columns:repeat(auto-fit,minmax(140px,1fr));gap:12px;padding:16px}'
+  +'.pcav-k{background:var(--or-pale);border:1px solid rgba(194,161,77,.28);border-radius:12px;padding:12px 14px}'
+  +'.pcav-kl{font-size:var(--pt-lbl,10.5px);letter-spacing:1.3px;text-transform:uppercase;color:var(--texte-doux);font-weight:600}'
+  +'.pcav-kv{font-family:\'Cormorant Garamond\',Georgia,serif;font-size:var(--pt-xl,27px);font-weight:600;color:var(--texte);line-height:1.05;margin-top:3px}'
+  +'.pcav-kv small{font-size:var(--pt-base,14px);color:var(--texte-doux);font-weight:500}'
+  +'.pcav-ks{font-size:var(--pt-micro,11px);color:var(--texte-doux);margin-top:2px;line-height:1.4}'
+  +'.pcav-k.dark{background:var(--cave);border-color:var(--cave)}'
+  +'.pcav-k.dark .pcav-kl,.pcav-k.dark .pcav-ks{color:rgba(240,226,200,.55)}'
+  +'.pcav-k.dark .pcav-kv{color:#F0E2C8}'
+  +'.pcav-k.dark .pcav-kv small{color:rgba(240,226,200,.55)}'
+  +'.pcav-flux{padding:18px 20px}'
+  +'.pcav-fs{display:grid;grid-template-columns:118px 1fr;gap:14px;align-items:center;margin-bottom:4px}'
+  +'.pcav-fn{font-size:var(--pt-micro,11px);font-weight:600;color:var(--texte-med);text-align:right}'
+  +'.pcav-fn small{display:block;font-size:var(--pt-lbl,10.5px);color:var(--texte-doux);font-weight:500}'
+  +'.pcav-fw{height:38px;display:flex;align-items:center}'
+  +'.pcav-fb{height:32px;border-radius:8px;background:linear-gradient(90deg,#7A1020,#B23A52);display:flex;align-items:center;padding-left:12px;color:#F0E2C8;font-size:var(--pt-txt,12.5px);font-weight:600;min-width:74px;box-sizing:border-box}'
+  +'.pcav-fb.g{background:linear-gradient(90deg,#2D5016,#5B9B3A)}'
+  +'.pcav-fb.o{background:linear-gradient(90deg,#8A5A38,#C2871E)}'
+  +'.pcav-fl{display:grid;grid-template-columns:118px 1fr;gap:14px;margin:1px 0 5px}'
+  +'.pcav-fl div:last-child{font-size:var(--pt-micro,11px);color:var(--orange);font-weight:600}'
+  +'.pcav-pyr{padding:14px 18px 16px}'
+  +'.pcav-pl{display:grid;grid-template-columns:82px 1fr 104px;gap:10px;align-items:center;margin-bottom:7px;font-size:var(--pt-txt,12.5px)}'
+  +'.pcav-py{color:var(--texte-med);font-weight:600;line-height:1.2}'
+  +'.pcav-py small{color:var(--texte-doux);font-weight:500;display:block;font-size:var(--pt-lbl,10.5px)}'
+  +'.pcav-pt2{height:22px;background:var(--gris-clair);border-radius:6px;overflow:hidden;display:flex;position:relative}'
+  +'.pcav-ps{height:100%}'
+  +'.pcav-pmax{position:absolute;left:86.96%;top:0;bottom:0;width:2px;background:var(--texte);opacity:.5}'
+  +'.pcav-pn{font-size:var(--pt-micro,11px);color:var(--texte-doux);text-align:right;font-weight:600}'
+  /* ⚠️ Un <button> reste une GRILLE : `.pcav-pl` porte deja display:grid, on ne
+     redit pas la mise en page ici, on ne fait que retirer l'habillage natif du
+     bouton. Redefinir les colonnes creerait une seconde verite qui divergerait
+     du palier mobile juste en dessous. */
+  +'button.pcav-pl{width:100%;box-sizing:border-box;border:none;background:none;'
+    +'font-family:inherit;font-size:var(--pt-txt,12.5px);color:inherit;text-align:left;'
+    +'cursor:pointer;padding:5px 7px;border-radius:9px;min-height:44px}'
+  +'button.pcav-pl:hover{background:rgba(138,90,56,.07)}'
+  +'button.pcav-pl:focus-visible{outline:2px solid var(--terre);outline-offset:1px}'
+  +'.pcav-leg{display:flex;gap:14px;flex-wrap:wrap;font-size:var(--pt-micro,11px);color:var(--texte-doux);margin-top:12px;padding-top:12px;border-top:1px solid var(--gris-clair)}'
+  +'.pcav-leg span{display:inline-flex;align-items:center;gap:6px}'
+  +'.pcav-leg i{width:11px;height:11px;border-radius:3px;display:inline-block}'
+  +'.pcav-cmp{display:grid;grid-template-columns:1fr auto 1fr;gap:10px;align-items:center;padding:13px 17px;border-top:1px solid var(--gris-clair);font-size:var(--pt-txt,12.5px)}'
+  +'.pcav-cmp:first-child{border-top:none}'
+  +'.pcav-cl{font-size:var(--pt-lbl,10.5px);letter-spacing:1.4px;text-transform:uppercase;color:var(--texte-doux);font-weight:600}'
+  +'.pcav-cnow{font-family:\'Cormorant Garamond\',Georgia,serif;font-size:var(--pt-lg,23px);font-weight:600;color:var(--texte);line-height:1.1}'
+  +'.pcav-cnow small{font-size:var(--pt-txt,12.5px);color:var(--texte-doux)}'
+  +'.pcav-cold{color:var(--texte-doux);text-align:right;font-size:var(--pt-micro,11px);line-height:1.5}'
+  +'.pcav-cold b{color:var(--texte-med)}'
+  +'.pcav-dl{font-size:var(--pt-micro,11px);font-weight:700;padding:3px 9px;border-radius:20px;white-space:nowrap}'
+  +'.pcav-dl.ok{background:var(--vert-pale);color:var(--vert-med)}'
+  +'.pcav-dl.wa{background:var(--orange-pale);color:var(--orange)}'
+  +'.pcav-note{background:var(--or-pale);border:1px solid rgba(194,161,77,.4);border-radius:12px;padding:12px 15px;font-size:var(--pt-txt,12.5px);color:var(--texte-med);display:flex;gap:10px;align-items:flex-start;line-height:1.5;margin-bottom:16px}'
+  +'.pcav-note b{color:var(--texte)}'
+  +'.pcav-vide{padding:26px 20px;text-align:center;font-size:var(--pt-txt,12.5px);color:var(--texte-doux);line-height:1.6}'
+  +'.pcav-milg{display:grid;grid-template-columns:repeat(auto-fit,minmax(150px,1fr));gap:10px;padding:16px}'
+  +'.pcav-mil{position:relative;text-align:left;border:1px solid var(--gris-clair);background:var(--bg-card);border-radius:12px;padding:12px 14px 12px 16px;cursor:pointer;font-family:inherit;min-height:44px;transition:.15s;display:block;width:100%}'
+  +'.pcav-mil:hover{border-color:var(--or);background:var(--or-pale)}'
+  +'.pcav-mil.on{background:var(--cave);border-color:var(--cave)}'
+  +'.pcav-milp{position:absolute;left:0;top:10px;bottom:10px;width:4px;border-radius:0 3px 3px 0}'
+  +'.pcav-mila{display:block;font-family:\'Cormorant Garamond\',Georgia,serif;font-size:var(--pt-xl,27px);font-weight:600;color:var(--texte);line-height:1.05}'
+  +'.pcav-mil.on .pcav-mila{color:#F0E2C8}'
+  +'.pcav-milf{display:block;font-size:var(--pt-lbl,10.5px);letter-spacing:1.3px;text-transform:uppercase;font-weight:600;color:var(--texte-doux);margin-top:2px}'
+  +'.pcav-mil.on .pcav-milf{color:var(--or)}'
+  +'.pcav-milv{display:block;font-size:var(--pt-micro,11px);color:var(--texte-doux);margin-top:3px}'
+  +'.pcav-mil.on .pcav-milv{color:rgba(240,226,200,.6)}'
+  +'.pcav-agt{padding:4px 0}'
+  +'.pcav-agr{display:grid;grid-template-columns:1fr auto 78px;gap:12px;align-items:center;padding:11px 17px;border-top:1px solid var(--gris-clair)}'
+  +'.pcav-agr:first-child{border-top:none}'
+  +'.pcav-agm{font-size:var(--pt-txt,12.5px);font-weight:600;color:var(--texte);line-height:1.25}'
+  +'.pcav-agm small{display:block;font-size:var(--pt-micro,11px);color:var(--texte-doux);font-weight:500;margin-top:1px}'
+  +'.pcav-agv{font-family:\'Cormorant Garamond\',Georgia,serif;font-size:var(--pt-lg,23px);font-weight:600;color:var(--texte);white-space:nowrap}'
+  +'.pcav-agv small{font-family:inherit;font-size:var(--pt-micro,11px);color:var(--texte-doux);font-weight:500}'
+  +'.pcav-agp{font-size:var(--pt-txt,12.5px);font-weight:600;color:var(--orange);text-align:right;white-space:nowrap}'
+  +'.pcav-grp{display:flex;align-items:baseline;gap:9px;padding:10px 17px 5px;font-size:var(--pt-micro,11px);letter-spacing:1.4px;text-transform:uppercase;font-weight:600;color:var(--terre);border-top:1px solid var(--gris-clair)}'
+  +'.pcav-grp:first-child{border-top:none}'
+  +'.pcav-grp span{font-size:var(--pt-lbl,10.5px);letter-spacing:0;text-transform:none;color:var(--texte-doux);font-weight:500}'
+  +'.pcav-mal{padding:14px 18px 16px;border-top:1px solid var(--gris-clair)}'
+  +'.pcav-mrow{display:grid;grid-template-columns:126px 1fr 52px;gap:12px;align-items:end;margin-bottom:14px}'
+  +'.pcav-mn{font-size:var(--pt-micro,11px);font-weight:600;color:var(--texte-med);line-height:1.25;padding-bottom:2px}'
+  +'.pcav-mn small{display:block;font-size:var(--pt-lbl,10.5px);color:var(--texte-doux);font-weight:500}'
+  +'.pcav-mg{position:relative;height:56px;border-bottom:1px solid var(--gris);background:linear-gradient(180deg,rgba(0,0,0,.012),transparent)}'
+  +'.pcav-mbar{position:absolute;bottom:0;width:9px;margin-left:-4px;border-radius:3px 3px 0 0;min-height:3px}'
+  +'.pcav-msl{position:absolute;left:0;right:0;height:1px;background:var(--vert-med);opacity:.65}'
+  +'.pcav-mj{font-size:var(--pt-micro,11px);color:var(--texte-doux);text-align:right;font-weight:600;padding-bottom:2px}'
+  +'.pcav-mleg{font-size:var(--pt-micro,11px);color:var(--texte-doux);line-height:1.5;padding-top:10px;border-top:1px solid var(--gris-clair)}'
+  /* ── PILCRB-1 : les courbes ───────────────────────────────── */
+  +'.pcrb-intro{font-size:var(--pt-txt,12.5px);color:var(--texte-med);line-height:1.65;padding:2px 2px 4px}'
+  +'.pcrb-intro b{color:var(--texte)}'
+  +'.pcrb-h{display:flex;align-items:flex-start;gap:11px;padding:14px 17px 12px;border-bottom:1px solid var(--gris-clair)}'
+  +'.pcrb-ico{width:30px;height:30px;border-radius:9px;background:var(--terre-pale);flex:none;display:flex;align-items:center;justify-content:center;color:var(--terre)}'
+  +'.pcrb-t{flex:1;min-width:0}'
+  +'.pcrb-t b{display:block;font-size:var(--pt-base,14px);font-weight:600;color:var(--texte);line-height:1.3}'
+  +'.pcrb-t span{display:block;font-size:var(--pt-micro,11px);color:var(--texte-doux);margin-top:2px;line-height:1.45}'
+  /* ⚠️⚠️ L'ENCRE DU BADGE EST `--texte-med`, ET C'EST MESURE, PAS CHOISI.
+     `--or` sur `--or-pale` donne 6,08:1 en sombre mais 2,23:1 en CLAIR ;
+     `--terre` fait l'inverse : 5,27 en clair, 2,64 en sombre. Chercher un
+     defaut de contraste dans UN seul theme n'en trouve que la moitie (§67).
+     `--texte-med` tient des deux cotes : 8,13 et 7,14. */
+  +'.pcrb-j0{font-size:var(--pt-lbl,10.5px);letter-spacing:1.2px;text-transform:uppercase;font-weight:700;color:var(--texte-med);background:var(--or-pale);border:1px solid rgba(194,161,77,.55);border-radius:20px;padding:3px 10px;white-space:nowrap;flex:none;align-self:flex-start}'
+  +'.pcrb-b{padding:14px 17px 16px}'
+  /* Le graphe deborde plutot que de s'ecraser : sous 360 px, 148 px de
+     gouttieres ne laissent pas de quoi lire une courbe. Il defile. */
+  +'.pcrb-g{overflow-x:auto;margin:0 -17px;padding:0 17px}'
+  +'.pcrb-g svg{display:block}'
+  +'.pcrb-note{background:var(--or-pale);border:1px solid rgba(194,161,77,.4);border-radius:12px;padding:11px 14px;font-size:var(--pt-txt,12.5px);color:var(--texte-med);line-height:1.55;margin-top:13px}'
+  +'.pcrb-note b{color:var(--texte)}'
+  +'.pcrb-tb{width:100%;border-collapse:collapse;font-size:var(--pt-micro,11px);margin-top:13px}'
+  +'.pcrb-tb th{text-align:left;font-size:var(--pt-lbl,10.5px);letter-spacing:.9px;text-transform:uppercase;color:var(--texte-doux);font-weight:600;padding:0 0 7px;border-bottom:1px solid var(--gris-clair);white-space:nowrap}'
+  +'.pcrb-tb td{padding:8px 0;border-bottom:1px solid var(--gris-clair);color:var(--texte-med);white-space:nowrap}'
+  +'.pcrb-tb tr:last-child td{border-bottom:none}'
+  +'.pcrb-tb .n{text-align:right}'
+  +'.pcrb-tb i{font-style:normal;color:var(--texte-doux);font-weight:500}'
+  +'.pcrb-tb small{color:var(--texte-doux)}'
+  +'.pcrb-nm{display:flex;align-items:center;gap:7px;font-weight:600;color:var(--texte)}'
+  +'.pcrb-dot{width:9px;height:9px;border-radius:3px;flex:none}'
+  +'.pcrb-sec{font-family:\'Cormorant Garamond\',Georgia,serif;font-size:var(--pt-sm,17px);font-weight:600;color:var(--texte)}'
+  +'.pcrb-nsec{font-style:italic;color:var(--texte-doux)}'
+  +'@media(max-width:600px){'
+  /* Les trois colonnes de contexte se replient, elles ne disparaissent pas :
+     le cahier de cuverie les porte toutes les neuf. */
+  +'.pcrb-tb .o{display:none}'
+  +'.pcrb-h{padding:12px 14px 10px}'
+  +'.pcrb-b{padding:12px 14px 14px}'
+  +'.pcrb-g{margin:0 -14px;padding:0 14px}'
+  +'.pcav-vbig{font-size:var(--pt-xxl,31px)}'
+  +'.pcav-fs,.pcav-fl{grid-template-columns:80px 1fr;gap:10px}'
+  +'.pcav-pl{grid-template-columns:64px 1fr 86px;gap:8px}'
+  +'.pcav-act{padding:7px 9px;font-size:var(--pt-micro,11px)}'
+  +'.pcav-cmp{grid-template-columns:1fr auto;row-gap:6px}'
+  +'.pcav-cold{grid-column:1/-1;text-align:left}'
+  +'.pcav-mrow{grid-template-columns:92px 1fr 44px;gap:8px}'
+  +'.pcav-agr{grid-template-columns:1fr auto;row-gap:4px}'
+  +'.pcav-agp{grid-column:1/-1;text-align:left}'
+  +'}';
+  var st=document.createElement('style');
+  st.id='pcav-css'; st.textContent=css;
+  document.head.appendChild(st);
+}
+
+/* ══════════════════════════════════════════════════════════════════════════
+   PILCRB-1 — PILOTAGE › CAVE › LES COURBES
+   Le parcours d'un vin, en quatre temps. ★★★ IL N'Y A PAS UN J0 UNIQUE : la
+   vigne compte a rebours de la recolte, la cuve compte depuis l'encuvage, le
+   fut depuis l'entonnage. Empiler ces trois origines sur un seul axe donnerait
+   une echelle qui RESSEMBLE a une mesure sans en etre une. Chaque bloc porte
+   donc son propre zero, ecrit en toutes lettres a cote de son titre.
+   ⚠️⚠️ CE QUE CET ECRAN NE FAIT PAS : il ne redessine rien. La maturite est
+   `_cuvMatSvg`, celle de l'ecran des analyses. Le comparatif de densites est
+   `_cmpSvg`, celui du cahier de cuverie — §88e le reservait explicitement pour
+   ce jour-la. La chaine des volumes est `_caveBtlGraphSvg`, celle du Chai.
+   SEUL le trace des temperatures est neuf, parce qu'il n'existait nulle part.
+   ══════════════════════════════════════════════════════════════════════════ */
+function _pcavHasW(f){ return typeof window[f]==='function'; }
+
+/* L'en-tete d'un bloc : le titre, ce qu'on y lit, et LE ZERO. Le badge n'est
+   pas decoratif — c'est lui qui empeche de lire deux graphes sur la meme
+   echelle mentale. */
+function _pcrbTete(ico,titre,sous,zero,infoCle){
+  return '<div class="pcrb-h"><span class="pcrb-ico">'+(_pcavHasW('_mvIcon')?window._mvIcon(ico,18):'')+'</span>'
+    +'<span class="pcrb-t"><b>'+_escHtml(titre)+'</b><span>'+sous+'</span></span>'
+    +(infoCle&&typeof window._mvInfoBtn==='function'?window._mvInfoBtn(infoCle):'')
+    +'<span class="pcrb-j0">'+_escHtml(zero)+'</span></div>';
+}
+function _pcrbCard(ico,titre,sous,zero,corps,pied,infoCle){
+  return '<div class="pcav-card">'+_pcrbTete(ico,titre,sous,zero,infoCle)
+    +'<div class="pcrb-b">'+corps+(pied?('<div class="pcrb-note">'+pied+'</div>'):'')+'</div></div>';
+}
+/* Le graphe est TOUJOURS pose par le registre : c'est lui qui mesure la vraie
+   largeur du conteneur et qui repeint au redimensionnement. Un SVG a viewBox
+   fixe pose en dur s'etire a x5 sur grand ecran — piege deja paye. */
+function _pcrbSlot(id){ return '<div class="pcrb-g" id="'+id+'"></div>'; }
+
+/* ── 2 · LE COMPARATIF DES DENSITES ─────────────────────────────────────── */
+/* Les series sont construites UNE fois par rendu et relues par les deux
+   graphes : meme ordre, donc meme couleur pour la meme cuve d'un trace a
+   l'autre. Les recalculer separement, ce serait accepter qu'une cuve change
+   de couleur entre la densite et la temperature. */
+var _PCRB_S=null, _PCRB_HORS=0, _PCRB_ELEV=null, _PCRB_CH=null;
+function _pcrbSeries(){
+  _PCRB_S=null; _PCRB_HORS=0;
+  if(!_pcavHasW('_cuvCmpSeries')) return null;
+  var cv=(window.CAVE_VENDANGE&&window.CAVE_VENDANGE.cuves_vinif)||[];
+  try{
+    var r=window._cuvCmpSeries(cv);
+    _PCRB_S=r.S||[]; _PCRB_HORS=r.hors||0;
+  }catch(e){ _pcavLog('cmpSeries',e); _PCRB_S=null; }
+  return _PCRB_S;
+}
+function _pcrbEcarte(){
+  if(!_PCRB_HORS) return '';
+  return ' <b>'+_PCRB_HORS+'</b> cuve'+(_PCRB_HORS>1?'s ne figurent':' ne figure')+' pas ici\u00a0: '
+    +'sans date d\u2019encuvage il n\u2019y a pas de J0, et sans deux relev\u00e9s de densit\u00e9 il n\u2019y a pas de '
+    +'cin\u00e9tique. <b>Rien n\u2019est d\u00e9duit</b> \u2014 une date d\u2019encuvage devin\u00e9e se croirait.';
+}
+function _pcrbDens(){
+  var min=(window._cuvCmpMin||2);
+  if(!_PCRB_S||_PCRB_S.length<min)
+    return _pcrbCard('graphique','Les densit\u00e9s, ramen\u00e9es \u00e0 J0',
+      'Toutes les cuves superpos\u00e9es sur leur propre jour d\u2019encuvage.','J0 = encuvage',
+      (_pcavHasW('_mvGraphVide')
+        ? window._mvGraphVide('Pas encore de quoi comparer','Il faut deux cuves encuv\u00e9es et suivies pour superposer des cin\u00e9tiques.')
+        : '<div class="pcav-vide">Pas encore de quoi comparer.</div>'),
+      _pcrbEcarte(),'cave.courbes');
+  var sec=(window._ML_D20_SEC||996);
+  return _pcrbCard('graphique','Les densit\u00e9s, ramen\u00e9es \u00e0 J0',
+    'Sur un calendrier, une cuve entr\u00e9e le 16 et une autre le 24 n\u2019ont aucun point commun.',
+    'J0 = encuvage', _pcrbSlot('pcrb-g-dens')+_pcrbTable(),
+    '<b>Le classement ne se fait pas sur la vitesse.</b> Une pente moyenne sur trois jours n\u2019est '
+    +'pas comparable \u00e0 une pente sur dix \u2014 le d\u00e9but d\u2019une fermentation en est la phase la plus '
+    +'rapide. Le tri porte sur le <b>jour o\u00f9 '+sec+' a \u00e9t\u00e9 relev\u00e9</b>, jamais interpol\u00e9, et la '
+    +'colonne pts/j porte son intervalle.'+_pcrbEcarte(),'cave.courbes');
+}
+/* Le tableau qui repond au « pourquoi ». Il ne recopie PAS celui du cahier :
+   le papier a la place de neuf colonnes, un telephone n'en tient que trois.
+   Les trois autres se replient sous 600 px, elles ne disparaissent pas. */
+function _pcrbTable(){
+  var sec=(window._ML_D20_SEC||996);
+  var h='<table class="pcrb-tb"><thead><tr><th>Cuve</th><th class="n">Vin sec</th><th class="n">Pts/j</th>'
+    +'<th class="n o">D\u00e9part</th><th class="n o">T\u00b0 moy \u00b7 max</th><th class="n o">Vigne</th></tr></thead><tbody>';
+  _PCRB_S.forEach(function(s,i){
+    var vg=null;
+    if(_pcavHasW('_cuvCmpVigne')){ try{ vg=window._cuvCmpVigne(s.cuve); }catch(e){ _pcavLog('vigne',e); } }
+    var vgTxt='\u2014';
+    if(vg&&vg.suc!=null){
+      vgTxt=Math.round(vg.suc)+' <small>g/L</small>';
+      /* ⚠️ Une moyenne sur 2 parcelles de 3 n'est pas une moyenne de la cuve :
+         on ecrit la fraction plutot que de laisser croire au compte plein. */
+      if(vg.n<vg.nTot) vgTxt+=' <i>('+vg.n+'/'+vg.nTot+')</i>';
+    }
+    h+='<tr data-crb="'+i+'"><td><span class="pcrb-nm"><i class="pcrb-dot" style="background:'
+      +_PCRB_COL[i%_PCRB_COL.length]+'"></i>'+_escHtml(s.nom)+'</span></td>'
+      +'<td class="n">'+(s.jSec!=null?('<b class="pcrb-sec">J'+s.jSec+'</b>')
+          :('<i class="pcrb-nsec">pas encore \u00b7 J'+s.jFin+' \u00e0 '+Math.round(s.dFin)+'</i>'))+'</td>'
+      +'<td class="n">'+(s.vit!=null?(_pcavF1(s.vit)+' <i>J'+s.jDeb+'\u2013J'+s.jFin+'</i>'):'\u2014')+'</td>'
+      +'<td class="n o">'+Math.round(s.dDeb)+'</td>'
+      +'<td class="n o">'+(s.tMoy!=null?(_pcavF1(s.tMoy)+' \u00b7 '+_pcavF1(s.tMax)):'\u2014')+'</td>'
+      +'<td class="n o">'+vgTxt+'</td></tr>';
+  });
+  return h+'</tbody></table>';
+}
+/* La palette DOIT etre celle de `_cmpSvg`, sinon la pastille du tableau ne
+   designe pas la courbe qu'elle pretend designer. Les memes six roles, dans
+   le meme ordre — c'est un contrat, pas une coincidence. */
+var _PCRB_COL=['var(--terre)','var(--vert-med)','var(--bleu)','var(--orange)','var(--phyto)','var(--rouge)'];
+
+/* ── 3 · LES TEMPERATURES ────────────────────────────────────────────────── */
+function _pcrbTemp(){
+  var min=(window._cuvCmpMin||2), n=0;
+  if(_PCRB_S) _PCRB_S.forEach(function(s){
+    if(s.pts.filter(function(p){ return p.t!=null; }).length>=2) n++; });
+  var corps = (n>=min) ? _pcrbSlot('pcrb-g-temp')
+    : (_pcavHasW('_mvGraphVide')
+        ? window._mvGraphVide('Pas assez de temp\u00e9ratures relev\u00e9es',
+            'Deux relev\u00e9s portant une temp\u00e9rature, sur deux cuves, suffisent \u00e0 comparer.')
+        : '<div class="pcav-vide">Pas assez de temp\u00e9ratures relev\u00e9es.</div>');
+  var manque=(_PCRB_S?_PCRB_S.length:0)-n;
+  return _pcrbCard('thermometre','Les temp\u00e9ratures, m\u00eame J0',
+    'Un palier de densit\u00e9 s\u2019explique souvent ici\u00a0: douze degr\u00e9s cinq jours durant, '
+    +'c\u2019est une mac\u00e9ration, pas une fermentation qui tra\u00eene.','J0 = encuvage',
+    corps,
+    'La bande verte est la <b>fen\u00eatre de travail</b>. Au-dessus de 30\u00a0\u00b0C le relev\u00e9 porte un '
+    +'point rouge \u2014 c\u2019est le seuil qui d\u00e9clenche d\u00e9j\u00e0 l\u2019alerte \u00ab\u00a0temp\u00e9rature haute\u00a0\u00bb dans '
+    +'<b>Ce qui presse</b>. Un relev\u00e9 sans temp\u00e9rature n\u2019est pas une temp\u00e9rature de z\u00e9ro\u00a0: '
+    +'il est simplement absent du trac\u00e9.'
+    +(manque>0?(' <b>'+manque+'</b> cuve'+(manque>1?'s n\u2019ont':' n\u2019a')+' pas assez de relev\u00e9s '
+      +'portant une temp\u00e9rature.'):''),'cave.courbes');
+}
+
+/* ── 1 · LA MATURITE, ET LE J0 QU'ON N'A PAS ─────────────────────────────── */
+/* ★★★ CE BLOC RESTE SUR UN AXE DE DATES, ET C'EST UN CHOIX, PAS UN OUBLI.
+   La maquette validee proposait un axe « jours AVANT recolte ». En l'ecrivant,
+   deux obstacles : la date de recolte d'une parcelle n'est pas un champ, elle
+   se deduit des apports ; et une parcelle NON ENCORE VENDANGEE n'a donc aucun
+   J0. Le bloc serait vide pendant tout le mois d'aout et la premiere quinzaine
+   de septembre — exactement la periode ou la question « laquelle vendanger
+   d'abord » se pose. Un graphe qui se vide au moment ou il sert ne sert pas.
+   ⚠️ Et le trace existe deja : `_cuvMatSvg` est celui de l'ecran des analyses.
+   §86 interdit d'en ecrire un second pour la meme donnee. */
+function _pcrbMat(){
+  var n=((window.CAVE_VENDANGE&&window.CAVE_VENDANGE.analyses)||[]).length;
+  var corps = n ? _pcrbSlot('pcrb-g-mat')
+    : (_pcavHasW('_mvGraphVide')
+        ? window._mvGraphVide('Aucune analyse de maturit\u00e9 enregistr\u00e9e',
+            'Chaque mesure au r\u00e9fractom\u00e8tre, saisie au Cuvier, alimente cette courbe.')
+        : '<div class="pcav-vide">Aucune analyse de maturit\u00e9.</div>');
+  return _pcrbCard('raisin','Les maturit\u00e9s, avant r\u00e9colte',
+    'Le sucre relev\u00e9 au r\u00e9fractom\u00e8tre, une courbe par parcelle.','calendrier',
+    corps,
+    'Ce bloc reste sur un <b>axe de dates</b>, et non en jours avant r\u00e9colte\u00a0: une parcelle pas '
+    +'encore vendang\u00e9e n\u2019a pas de date de r\u00e9colte, donc pas de J0 \u2014 le graphe serait vide '
+    +'pendant toute la p\u00e9riode o\u00f9 il sert. Ces courbes sont <b>par parcelle</b>, pas par cuve\u00a0: '
+    +'la part r\u00e9elle de chaque parcelle entr\u00e9e dans une cuve n\u2019est pas enregistr\u00e9e, et le '
+    +'rapprochement vigne\u00a0\u2192\u00a0cuve de la colonne \u00ab\u00a0Vigne\u00a0\u00bb reste un <b>ordre de grandeur</b>, '
+    +'pond\u00e9r\u00e9 par la surface.','cave.courbes');
+}
+
+/* ── 4 · L'ELEVAGE : LA MALO, SUR UN VRAI AXE DE TEMPS ───────────────────── */
+/* ⚠️⚠️ AUCUNE TEMPERATURE N'EST ENREGISTREE EN ELEVAGE. `temp_c` n'existe que
+   sur les releves de fermentation, sur la cible de maceration et sur la
+   temperature des raisins au quai. Un ouillage, un soutirage, un sulfitage,
+   une analyse : aucun ne porte de temperature. La courbe de temperature
+   S'ARRETE DONC AU DECUVAGE, et cet ecran le DIT plutot que de laisser
+   chercher un graphe qui n'existe pas.
+   ★★ Ce trace apporte ce que `_pcavMaloCourbe` (Ce qui presse) ne peut pas
+   donner : un AXE DE TEMPS. Les barres de l'autre ecran sont espacees a
+   intervalle egal, par rang — deux analyses a six semaines d'ecart et deux a
+   trois jours d'ecart y dessinent la meme pente. Ici l'abscisse est le mois
+   reel depuis l'entonnage. Ce n'est pas le meme graphe redessine, c'est
+   l'information que l'autre ne porte pas. */
+var MV_CRB_ELEV_MAX=6;
+function _pcrbElevSeries(c){
+  if(!_pcavHasW('_mlMesMalo')) return [];
+  var out=[];
+  (c.enElevage||[]).forEach(function(x){
+    if(!x||!x.id) return;
+    var m=[];
+    try{ m=window._mlMesMalo(x.id)||[]; }catch(e){ _pcavLog('mesMalo',e); return; }
+    if(m.length<2) return;
+    /* ⚠️ J0 = la date d'ENTONNAGE. Sans elle, on ne cale rien sur le premier
+       releve en repli : ce serait une seconde origine deguisee en premiere.
+       La cuvee est ecartee, et le compte remonte. */
+    var t0=Date.parse(x.date_entonnage||x.date_debut||'');
+    if(isNaN(t0)) return;
+    var pts=m.map(function(v){
+      var t=Date.parse(v.date); if(isNaN(t)) return null;
+      var mo=(t-t0)/86400000/30.44;
+      return (mo<0)?null:{m:mo, v:v.val};
+    }).filter(Boolean);
+    if(pts.length<2) return;
+    out.push({nom:((x.nom||'Cuv\u00e9e')+' '+(x.millesime||'')).trim(), pts:pts});
+  });
+  /* La plus avancee d'abord : c'est celle dont on parle en premier. */
+  out.sort(function(a,b){ return a.pts[a.pts.length-1].v-b.pts[b.pts.length-1].v; });
+  return out;
+}
+function _pcrbElevSvg(D,w){
+  var c=window._mvGraphCadre(w,236,{padL:52,padR:96,padT:26,padB:34});
+  var pL=c.padL,pT=c.padT,iw=c.iw,ih=c.ih;
+  var fin=(window._ML_MAL_FIN||0.1);
+  var mMax=1, hi=fin, lo=fin;
+  D.forEach(function(s){ s.pts.forEach(function(p){
+    if(p.m>mMax) mMax=p.m; if(p.v>hi) hi=p.v; if(p.v<lo) lo=p.v; }); });
+  mMax=Math.max(1,Math.ceil(mMax));
+  var vMin=Math.max(0,lo-0.2), vMax=hi+0.2, vSp=Math.max(0.1,vMax-vMin);
+  var X=function(m){ return pL+(m/mMax)*iw; };
+  var Y=function(v){ return pT+ih-((v-vMin)/vSp)*ih; };
+  var g='';
+  for(var i=0;i<=c.grad;i++){
+    var v=vMin+(vSp*i/c.grad), y=Y(v);
+    g+='<line x1="'+pL+'" y1="'+y.toFixed(1)+'" x2="'+(pL+iw)+'" y2="'+y.toFixed(1)
+      +'" stroke="'+c.col.grille+'" stroke-width="1"/>'
+      +'<text x="'+(pL-8)+'" y="'+(y+4).toFixed(1)+'" text-anchor="end" font-size="'+c.txt.axe
+      +'" fill="'+c.col.texte+'">'+(Math.round(v*100)/100).toFixed(2).replace('.',',')+'</text>';
+  }
+  g+='<text x="'+(pL-8)+'" y="'+(pT-10)+'" text-anchor="end" font-size="'+c.txt.unite
+    +'" fill="'+c.col.texte+'">g/L</text>';
+  var pas=Math.max(1,Math.ceil(mMax/c.grad));
+  for(var m=0;m<=mMax;m+=pas){
+    g+='<text x="'+X(m).toFixed(1)+'" y="'+(c.h-11)+'" text-anchor="middle" font-size="'+c.txt.axe
+      +'" fill="'+c.col.texte+'">M'+m+'</text>';
+  }
+  g+='<text x="'+(pL+iw)+'" y="'+(c.h-11)+'" text-anchor="end" font-size="'+c.txt.unite
+    +'" fill="'+c.col.texte+'">mois depuis l\u2019entonnage</text>';
+  var ys=Y(fin);
+  g+='<line x1="'+pL+'" y1="'+ys.toFixed(1)+'" x2="'+(pL+iw)+'" y2="'+ys.toFixed(1)
+    +'" stroke="'+c.col.fait+'" stroke-width="1.2" stroke-dasharray="5 4"/>'
+    +'<text x="'+(pL+6)+'" y="'+(ys-6).toFixed(1)+'" font-size="'+c.txt.mini
+    +'" font-weight="700" fill="'+c.col.fait+'">malo achev\u00e9e \u00b7 '+String(fin).replace('.',',')+'</text>';
+  var lbl=[];
+  D.slice(0,MV_CRB_ELEV_MAX).forEach(function(s,k){
+    var col=_PCRB_COL[k%_PCRB_COL.length];
+    var pol=s.pts.map(function(p){ return X(p.m).toFixed(1)+','+Y(p.v).toFixed(1); }).join(' ');
+    /* ★ Le trait est TIRETE : entre deux analyses, personne n'a mesure. Une
+       ligne pleine laisserait croire a un suivi continu. */
+    g+='<polyline points="'+pol+'" fill="none" stroke="'+col+'" stroke-width="1.5"'
+      +' stroke-dasharray="5 3" stroke-linejoin="round" opacity="0.75"/>';
+    s.pts.forEach(function(p){
+      g+='<circle cx="'+X(p.m).toFixed(1)+'" cy="'+Y(p.v).toFixed(1)+'" r="3.4" fill="'+col+'"/>'; });
+    var der=s.pts[s.pts.length-1];
+    lbl.push({y:Y(der.v),x:X(der.m),nom:s.nom,col:col});
+  });
+  /* Meme regle d'ecartement que les deux autres traces — celle de cave.js,
+     pas une troisieme copie. Trois cuvees finissent toutes a 0,04 g/L en fin
+     de malo : c'est le meme « cas banal » qu'en §88d, avec la meme cause. */
+  if(typeof window._cuvCmpEcarte==='function') window._cuvCmpEcarte(lbl,11,pT+4,pT+ih+8);
+  else { lbl.sort(function(a,b){ return a.y-b.y; });
+         var prec=-1e9;
+         lbl.forEach(function(L){ var y=Math.max(L.y,prec+11); L.yl=y; prec=y; }); }
+  lbl.forEach(function(L){
+    g+='<line x1="'+(L.x+2).toFixed(1)+'" y1="'+L.y.toFixed(1)+'" x2="'+(pL+iw+5)
+      +'" y2="'+L.yl.toFixed(1)+'" stroke="'+L.col+'" stroke-width="0.8" opacity="0.55"/>'
+      +'<text x="'+(pL+iw+8)+'" y="'+(L.yl+3.5).toFixed(1)+'" font-size="'+c.txt.mini
+      +'" font-weight="600" fill="'+L.col+'">'+_escHtml(L.nom)+'</text>';
+  });
+  return window._mvGraphSvg(c,'Acide malique de '+lbl.length+' cuv\u00e9es en \u00e9levage, '
+    +'par mois depuis l\u2019entonnage, sur '+mMax+' mois.',g);
+}
+
+function _pcrbElev(c){
+  var D=_pcrbElevSeries(c), n=(c.enElevage||[]).length;
+  _PCRB_ELEV=D;   /* la pose relit ce tableau : le calculer sans le garder
+                     laisserait le graphe vide sans rien signaler */
+  var corps = D.length ? _pcrbSlot('pcrb-g-elev')
+    : (_pcavHasW('_mvGraphVide')
+        ? window._mvGraphVide('Pas encore de suivi de malo \u00e0 comparer',
+            'Deux analyses portant l\u2019acide malique, sur une cuv\u00e9e entonn\u00e9e \u00e0 date connue.')
+        : '<div class="pcav-vide">Pas encore de suivi de malo.</div>');
+  var caches=Math.max(0,D.length-MV_CRB_ELEV_MAX);
+  var hors=n-D.length;
+  return _pcrbCard('barrique','L\u2019\u00e9levage\u00a0: la malo, mois par mois',
+    'Chaque point est une analyse de laboratoire.','J0 = entonnage',
+    corps,
+    '<b>Aucune temp\u00e9rature n\u2019est enregistr\u00e9e en \u00e9levage.</b> Un ouillage, un soutirage, un '
+    +'sulfitage, une analyse\u00a0: aucun ne porte de temp\u00e9rature. La courbe de temp\u00e9rature '
+    +'s\u2019arr\u00eate donc au d\u00e9cuvage, et rien ne la prolongera tant qu\u2019un champ n\u2019aura pas \u00e9t\u00e9 '
+    +'ajout\u00e9 \u00e0 la saisie du Chai.<br>Le trait est <b>tiret\u00e9</b>\u00a0: entre deux analyses, personne '
+    +'n\u2019a mesur\u00e9.'
+    +(hors>0?(' <b>'+hors+'</b> cuv\u00e9e'+(hors>1?'s n\u2019apparaissent':' n\u2019appara\u00eet')+' pas\u00a0: '
+      +'moins de deux analyses de malique, ou pas de date d\u2019entonnage \u2014 sans elle il n\u2019y a pas de '
+      +'M0, et le premier relev\u00e9 n\u2019en tient pas lieu.'):'')
+    +(caches>0?(' Les '+MV_CRB_ELEV_MAX+' plus avanc\u00e9es sont trac\u00e9es\u00a0; '+caches+' autre'
+      +(caches>1?'s':'')+' plus bas dans le Chai.'):''),'cave.courbes');
+}
+
+/* ── 5 · LA CHAINE DES VOLUMES ───────────────────────────────────────────── */
+/* Aucun trace neuf : `_caveBtlGraphSvg` est celui du Chai. On choisit la
+   cuvee qui a la chaine la PLUS COMPLETE — celle qui a le plus d'etapes
+   renseignees. Prendre la premiere de la liste montrerait souvent deux barres
+   sur quatre, et l'ecran aurait l'air casse alors qu'il manque une saisie. */
+function _pcrbChaine(c){
+  if(!_pcavHasW('_caveBilanChaine')||!_pcavHasW('_caveBtlGraphSvg'))
+    return '';
+  var best=null, bestN=0;
+  ((window.CAVE_ELEVAGE&&window.CAVE_ELEVAGE.cuvees)||[]).forEach(function(x){
+    var ch=null;
+    try{ ch=window._caveBilanChaine(x); }catch(e){ _pcavLog('bilanChaine',e); return; }
+    if(!ch) return;
+    var n=(ch.recolteKg!=null?1:0)+(ch.cuveHl!=null?1:0)+1+(ch.nbBtl!=null?1:0);
+    if(n>bestN){ bestN=n; best={cuv:x,ch:ch}; }
+  });
+  if(!best||bestN<2) return '';
+  _PCRB_CH=best;
+  return _pcrbCard('bouteille','De la r\u00e9colte \u00e0 la bouteille',
+    _escHtml(best.cuv.nom||'Cuv\u00e9e')+'\u00a0\u00b7 ce que chaque \u00e9tape a laiss\u00e9 passer.','cha\u00eene',
+    _pcrbSlot('pcrb-g-chain'),
+    'La cuv\u00e9e montr\u00e9e est celle dont la cha\u00eene est la <b>plus compl\u00e8te</b>. Une \u00e9tape absente '
+    +'n\u2019est pas un z\u00e9ro\u00a0: elle n\u2019est simplement pas dessin\u00e9e. Le d\u00e9tail de chaque cuv\u00e9e vit '
+    +'dans <b>Le Chai\u00a0\u203a Bouteilles</b>.','cave.courbes');
+}
+
+/* ── LA VUE ──────────────────────────────────────────────────────────────── */
+function _pcavVueCourbes(c){
+  /* ⚠️ Remise a zero AVANT de reconstruire : ces trois variables survivent au
+     rendu. Sans cela, un ecran qui n'a plus de chaine a montrer garderait
+     celle du rendu precedent, et le graphe pretendrait parler d'une cuvee
+     qui n'est plus a l'ecran. */
+  _PCRB_ELEV=null; _PCRB_CH=null;
+  _pcrbSeries();
+  var h='<div class="pcrb-intro">Le parcours d\u2019un vin, <b>en quatre temps</b>. Chaque temps a son '
+    +'propre jour z\u00e9ro\u00a0: la vigne compte sur le calendrier, la cuve compte depuis l\u2019encuvage, '
+    +'le f\u00fbt depuis l\u2019entonnage. <b>Il n\u2019y a pas de J0 unique</b> \u2014 les superposer sur un seul '
+    +'axe donnerait une \u00e9chelle qui ressemble \u00e0 une mesure sans en \u00eatre une.</div>';
+  h+=_pcrbMat();
+  h+=_pcrbDens();
+  h+=_pcrbTemp();
+  h+=_pcrbElev(c);
+  h+=_pcrbChaine(c);
+  return h;
+}
+
+/* ── LA POSE DES GRAPHES ─────────────────────────────────────────────────────
+   ⚠️⚠️ Le registre `_mvGraphSuivre` mesure la VRAIE largeur du conteneur et
+   repeint au redimensionnement. On OUBLIE la famille avant de la reposer :
+   sans cela le registre grossit a chaque passage sur l'onglet, et chaque
+   entree morte se redessine dans le vide a chaque resize.
+   ⚠️ Cette fonction est appelee APRES l'insertion du HTML, jamais pendant :
+   `_mvGraphSuivre` cherche son conteneur par selecteur. */
+function _pcrbPose(){
+  if(!_pcavHasW('_mvGraphSuivre')) return;
+  window._mvGraphOublier&&window._mvGraphOublier('#pcrb-g-');
+  if(document.getElementById('pcrb-g-mat')&&_pcavHasW('_cuvMatSvg'))
+    window._mvGraphSuivre('#pcrb-g-mat',function(w){ return window._cuvMatSvg(w); });
+  if(document.getElementById('pcrb-g-dens')&&_PCRB_S&&_pcavHasW('_cuvCmpSvg'))
+    window._mvGraphSuivre('#pcrb-g-dens',function(w){ return window._cuvCmpSvg(_PCRB_S,w); });
+  if(document.getElementById('pcrb-g-temp')&&_PCRB_S&&_pcavHasW('_cuvCmpTempSvg'))
+    window._mvGraphSuivre('#pcrb-g-temp',function(w){ return window._cuvCmpTempSvg(_PCRB_S,w); });
+  var el=document.getElementById('pcrb-g-elev');
+  if(el&&_PCRB_ELEV&&_PCRB_ELEV.length)
+    window._mvGraphSuivre('#pcrb-g-elev',function(w){ return _pcrbElevSvg(_PCRB_ELEV,w); });
+  if(document.getElementById('pcrb-g-chain')&&_PCRB_CH)
+    window._mvGraphSuivre('#pcrb-g-chain',function(w){
+      return window._caveBtlGraphSvg(_PCRB_CH.ch,_PCRB_CH.ch.nbBtl,w); });
+}
+
+// ── L'onglet ─────────────────────────────────────────────────────────
+// Millesime ouvert dans l'onglet. null = celui que le contexte a retenu.
+// ════════════════════════════════════
+// Économie (coût/ha par parcelle) + Conformité (cuivre · passages/IFT · DRE)
+// Lecture seule. Aucune écriture en base. Taux/prix/référence saisis dans
+// Réglages › Domaine (CONFIG.eco / CONFIG.conformite).
+// ════════════════════════════════════
+
+// ── Économie : config (lecture) ──
+function renderCaveMillesime(){
+  _mlInjectCss(); _pcavInjectCss();
+  // ★ L'en-tete et la bande #cave-kpis sont ecrits par renderCave (lot CAVE-1).
   var mvcHost=document.getElementById('mvc-elevage'); if(mvcHost) mvcHost.style.display='none';
-  ['cuv','journal','divers','vend'].forEach(function(t){
+  ['vend','auj','reg'].forEach(function(t){
     var v=document.getElementById('cave-view-'+t); if(v) v.style.display='none';
   });
   var host=document.getElementById('cave-view-mil'); if(!host) return;
@@ -10575,33 +11912,52 @@ function renderCaveMillesime(){
 
   var body=document.getElementById('ml-body'); if(!body) return;
   if(!window._dataReady){
-    var kpS=document.getElementById('cave-kpis'); if(kpS){ kpS.innerHTML=''; kpS.style.display='none'; }
     body.innerHTML=window._mvSk?window._mvSk('chai'):'';
     return;
   }
-
-  // bande de chiffres
-  var ag=_mlAgenda(_mlAuj(),_ML_SEM), r=_mlResumeSem(ag[0]);
-  var actives=(CAVE_VENDANGE.cuves_vinif||[]).filter(_vendIsActive).length;
-  var kp=document.getElementById('cave-kpis');
-  if(kp){
-    kp.style.display='';
-    kp.innerHTML=[[r.futs,'f\u00fbts cette sem.',false],[r.mesures,'\u00e0 mesurer',false],
-                  [actives,'en cuve',false],[r.alertes,'alertes',r.alertes>0]]
-      .map(function(k){
-        return '<div class="mvu-kpi'+(k[2]?' due':'')+'"><div class="mvu-kpi-v">'+k[0]
-          +'</div><div class="mvu-kpi-l">'+k[1]+'</div></div>';
-      }).join('');
+  // Deux onglets depuis le lot CAVE-3 : La ligne de vie (la Cave) et Les courbes
+  // (ex-Pilotage › Cave › Les courbes, ramenees ici).
+  var tv=document.getElementById('ml-tab-vie'); if(tv) tv.classList.toggle('active',_mlTab!=='crb');
+  var tc=document.getElementById('ml-tab-crb'); if(tc) tc.classList.toggle('active',_mlTab==='crb');
+  if(_mlTab==='crb'){
+    var c=null; try{ c=_pcavCtx(); }catch(e){ _pcavLog('ctx',e); }
+    body.innerHTML=_caveSaisBanner()+(c?_pcavVueCourbes(c)
+      :'<div class="pcav-vide">Cet \u00e9cran n\u2019a pas pu se construire.<br>L\u2019incident a \u00e9t\u00e9 enregistr\u00e9.</div>');
+    try{ _pcrbPose(); }catch(e){ _pcavLog('poseCourbes',e); }
+    return;
   }
-  var tv=document.getElementById('ml-tab-venir'); if(tv) tv.classList.toggle('active',_mlTab==='venir');
-  var tl=document.getElementById('ml-tab-vie');   if(tl) tl.classList.toggle('active',_mlTab==='vie');
-  body.innerHTML=_caveSaisBanner()+(_mlTab==='vie'?_mlRenderVie():_mlRenderVenir());
+  body.innerHTML=_caveSaisBanner()+_mlRenderVie();
   _mlFluxPaint();   // la largeur reelle n'est connue qu'une fois le HTML pose
   _mlFluxHook();
+}
+function _mlSetTab(t){
+  // « Ce qui vient » vit dans Aujourd'hui depuis le lot CAVE-1.
+  if(t==='venir'){ caveSection='aujourdhui'; renderCave(); return; }
+  _mlTab=(t==='crb')?'crb':'vie';
+  renderCaveMillesime();
+}
+// Le parc a futs, rendu par La Reserve › Futs (lot CAVE-3/4) : une seule
+// definition, ici, sur le contexte de la cave.
+function _caveParcHtml(){
+  _pcavInjectCss();
+  var c=null; try{ c=_pcavCtx(); }catch(e){ _pcavLog('ctx',e); return ''; }
+  try{ return _pcavVueParc(c)||''; }catch(e){ _pcavLog('parc',e); return ''; }
 }
 
 window.renderCaveMillesime = renderCaveMillesime;
 window._mlSetTab           = _mlSetTab;
+window._caveParcHtml       = _caveParcHtml;
+window.renderCaveAujourdhui= renderCaveAujourdhui;
+window.renderCaveReglagesCave = renderCaveReglagesCave;
+window._caveOpenReglages   = _caveOpenReglages;
+window._caveGoAoc          = _caveGoAoc;
+// ★ Lus par le Pilotage (carte Cave, lot ③) : le verdict et l'agenda complet
+//   n'ont qu'UNE definition, et elle est ici.
+window._mlAgendaComplet    = _mlAgendaComplet;
+window._mlVerdict          = _mlVerdict;
+window._mlMalo             = _mlMalo;
+window._mlSo2Doses         = _mlSo2Doses;
+window._caveKpisRender     = _caveKpisRender;
 window._mlSetMil           = _mlSetMil;
 window._mlSetRdtMax        = _mlSetRdtMax;
 // ★ Lus par le Pilotage : le plafond n'a qu'UNE definition, et elle est ici.

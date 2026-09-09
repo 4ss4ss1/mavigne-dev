@@ -1,4 +1,71 @@
-// MA VIGNE — Service Worker v7.50
+// MA VIGNE — Service Worker v7.54
+// v7.54 (09/09/2026) — CAVE-5 : MENAGE. Les trois blocs morts d'index.html
+//   (#cave-view-cuv, #cave-view-journal, #cave-view-divers — la Cave d'avant
+//   Le Chai) sont retires : plus aucun JS ne les lisait, renderCave les
+//   masquait a chaque rendu. Avec eux : setOuillageAlerte/_caveOuillageRefresh
+//   (seul l'ancien bloc les appelait), six regles CSS, et les cles 'cuv',
+//   'journal', 'divers' des listes de masquage. Aucun effet visible.
+// v7.53 (09/09/2026) — CAVE-3 : L'ONGLET PILOTAGE › CAVE EST RENTRE DANS LA CAVE.
+//   Lot ③ (+④) de la serie (maquette validee le 08/09). C'etait une seconde
+//   cave, rangee par question, sur les moteurs de cave.js. Le bloc (1 528
+//   lignes, 69 fonctions) est ramene dans cave.js ; ce qui doublait Aujourd'hui
+//   et La ligne de vie est SUPPRIME (verdict, malo, soutirages, flux, rendement,
+//   bandeau) ; le reste garde ses noms _pcav*/_pcrb*.
+//     - Cave › Le millesime : deux onglets, La ligne de vie (+ quatre tuiles en
+//       tete, + face a N-1 en pied) et Les courbes (_pcavVueCourbes, _pcrbPose
+//       apres la pose du HTML, famille oubliee des qu'on quitte).
+//     - La Reserve › Futs : en tete, _caveParcHtml() = part des anges + pyramide
+//       (la Reserve porte deja l'etat du parc et les mouvements).
+//     - Pilotage : onglet cav retire, cav → auj dans _PIL_TAB_MIGR, _PIL_CAVSUB
+//       et ses handlers retires ; carte Cave dans Aujourd'hui (_pilCkCave, cle
+//       auj_cave) qui LIT _mlVerdict/_mlAgendaComplet ; l'alerte ouillage de
+//       _pilCkAlertes (seuil global, seconde definition) retiree.
+//     - fiches pil.cav.* → cave.anges / cave.courbes / cave.rdt (posee sur
+//       « Rendement par parcelle ») ; malo et ouillage fondues dans cave.auj.
+//   ⚠️ _pcavCard testait typeof _mvInfoBtn — hors import dans cave.js, la
+//   pastille « i » n'aurait jamais rendu : window._mvInfoBtn.
+// v7.52 (09/09/2026) — CAVE-2 : UN MOT, UN ECRAN — ET UNE SEULE PORTE POUR LES
+//   REGLAGES DE LA CAVE.
+//   Lot ② de la serie (maquette validee le 08/09). Mesure au lot ① : « Cuvier »
+//   etait un sous-onglet DE « Le Cuvier », « Analyses » (maturites, a la vigne)
+//   se confondait avec les analyses labo du Chai, et « Reglages » vivait deux
+//   fois dans la Cave — un onglet au Cuvier, un au Chai — plus le module.
+//     - Cuvier : Recoltes · Cuves · Maturites (cles inchangees rec/cuves/ana,
+//       libelles seuls). Plus d'onglet Reglages.
+//     - Chai : Cuvees · Journal (· Bouteilles). Plus d'onglet Reglages.
+//     - roue crantee dans l'en-tete (#cave-hdr-gear) → section 'reglages' SANS
+//       onglet : reglages du Cuvier (renderVendParam, hote #cave-reg-cuvier),
+//       reglages du Chai (renderCaveReglages, hote #mvc-body-reglages deplace),
+//       renvoi vers Reglages › Domaine › appellations, documents de la cave lus
+//       dans MV_DOCS (expose sur window) via docsGo — aucune copie.
+//     - tolerance : switchVendOng('param') et switchCaveOng('reglages') ouvrent
+//       la roue au lieu de viser le vide.
+//   ⚠️ Les documents de la cave ont desormais DEUX portes ; Reglages › App ›
+//   Documents & impressions reste celle qui les a tous.
+// v7.51 (09/09/2026) — CAVE-1 : LA CAVE S'OUVRE SUR AUJOURD'HUI.
+//   Nico : « c'est un peu le bordel dans l'application entre les infos dans
+//   pilotage, les infos dans le cuvier, les infos un peu partout. »
+//   Mesure sur le code : une info de cave vivait dans 3 modules, 13 ecrans,
+//   5 barres d'onglets ; « Ce qui vient » (Cave › Le millesime) et « Ce qui
+//   presse » (Pilotage › Cave) rendaient le MEME moteur (_mlAgenda) sur deux
+//   ecrans ; la bande #cave-kpis etait ecrite a trois endroits, avec trois
+//   sens differents.
+//   ★ Lot ① d'une serie de cinq (maquette validee le 08/09) :
+//     - nouvelle section « aujourdhui », ecran d'ARRIVEE de la Cave : verdict
+//       (hierarchie du Pilotage + « a mesurer »), agenda 4 semaines en trois
+//       blocs, « sans echeance » pour les futs en fin de vie. Chaque ligne =
+//       un bouton vers le geste (_mlGo, kinds so2 et fut ajoutes).
+//     - _mlAgendaComplet : soutirage a faire, malo bloquee, doses SO2 par-dessus
+//       _mlAgenda (inchange, son harnais l'extrait a l'identique). Moteurs
+//       portes de pilotage.js (_pcavMalo/_pcavSoutirages), qui y restent en
+//       double jusqu'au lot ③.
+//     - en-tete et bande de quatre chiffres ecrits UNE fois par renderCave, les
+//       memes sur les quatre onglets, avec leur ligne de cadre (#cave-kpis-note).
+//     - « Ce qui vient » retire du millesime ; #ml-tabs-row retire (un onglet
+//       unique est un decor). _mlSetTab('venir') atterrit sur Aujourd'hui.
+//     - visite guidee 17 h 15 et chapitre demo « Aujourd'hui » suivent.
+//   ⚠️ La bande du Chai ne suit plus le filtre millesime : elle est la photo
+//   de la cave entiere, le filtre n'agit que sur la liste.
 // v7.50 (07/09/2026) — RDTMOY-2 : LA SURFACE ACHETEE ETAIT SAISIE, PERSONNE NE
 //   LA LISAIT.
 //   Nico : « On indique la surface vendue donc il faut se servir de cette info
@@ -3546,7 +3613,7 @@
 // v2.22 — Fix profils vides : guard vide dans loadData() pour MEMBRES/SAISONS/TACHES
 // v2.17 — Onboarding intégré + tenantId · v2.06 — Firebase Auth · v2.00–v2.05 — divers
 const DEBUG = self.location.hostname === 'localhost' || self.location.hostname === '127.0.0.1';
-const CACHE_NAME   = 'mavigne-v7.50';
+const CACHE_NAME   = 'mavigne-v7.54';
 const TENANT_CACHE = 'mavigne-tenant';   // Cache persistant — préservé à chaque mise à jour SW
 const SYNC_TAG     = 'mavigne-sync';
 
@@ -3562,7 +3629,7 @@ const CDN_URLS = [
 ];
 
 self.addEventListener('install', event => {
-  if(DEBUG) console.log('[SW] Ma Vigne v7.50 installé');
+  if(DEBUG) console.log('[SW] Ma Vigne v7.54 installé');
   event.waitUntil(
     caches.open(CACHE_NAME).then(async cache => {
       // ── Cœur applicatif : STRICT (mise à jour ATOMIQUE) ──
@@ -3578,7 +3645,7 @@ self.addEventListener('install', event => {
 });
 
 self.addEventListener('activate', event => {
-  if(DEBUG) console.log('[SW] Ma Vigne v7.50 activé');
+  if(DEBUG) console.log('[SW] Ma Vigne v7.54 activé');
   event.waitUntil(
     caches.keys().then(keys =>
       Promise.all(
