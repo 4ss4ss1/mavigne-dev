@@ -1,0 +1,38 @@
+#!/bin/sh
+# ─────────────────────────────────────────────────────────────
+# MA VIGNE — garde du guide public (§27d)
+#
+# POURQUOI. `public/guide.html` est ASSEMBLE depuis guide/NN-*.html par
+# scripts/build-guide.mjs. Il est commite. Une source modifiee sans
+# regeneration = la CI rouge (`build-guide.mjs --check`), et, si elle passait,
+# l'ancien guide en ligne. Le controle existait a trois endroits (npm run check,
+# prebuild, CI) — les trois APRES le commit. Ce crochet le met AVANT.
+#
+# INSTALLATION (une fois, dans le depot) :
+#     git config core.hooksPath scripts/hooks
+# Il tourne aussi depuis GitHub Desktop, qui execute les crochets.
+#
+# CE QU'IL FAIT. Si le commit touche guide/, il regenere public/guide.html et
+# l'ajoute au commit. Rien d'autre. Aucun autre crochet, aucune autre regle :
+# on ne rajoute rien a la ligne de build (§6).
+# ─────────────────────────────────────────────────────────────
+racine=$(git rev-parse --show-toplevel) || exit 0
+cd "$racine" || exit 0
+
+# Sources du guide dans ce commit ? (--diff-filter exclut les suppressions pures)
+git diff --cached --name-only --diff-filter=ACMR | grep -q '^guide/.*\.html$' || exit 0
+
+if ! command -v node >/dev/null 2>&1; then
+  echo "guide : node introuvable — impossible de regenerer public/guide.html." >&2
+  echo "  Lance 'node scripts/build-guide.mjs' dans un terminal, ajoute le fichier, recommite." >&2
+  echo "  (Ou 'git commit --no-verify' si tu sais ce que tu fais : la CI, elle, verifiera.)" >&2
+  exit 1
+fi
+
+node scripts/build-guide.mjs || {
+  echo "guide : build-guide.mjs a echoue — commit interrompu." >&2
+  exit 1
+}
+git add public/guide.html
+echo "guide : public/guide.html regenere et ajoute au commit."
+exit 0

@@ -4555,6 +4555,29 @@ node scripts\build-guide.mjs --check
 
 Il n'écrit rien. Il dit « guide.html est a jour » — ou il **sort en erreur**.
 
+★★★ **09/09 — LE CONTRÔLE ÉTAIT PARTOUT, MAIS TOUJOURS APRÈS LE COMMIT.**
+`build-guide.mjs --check` tourne dans **`npm run check`**, dans **`prebuild`** (donc `npm run build`)
+et dans la **CI**. Les trois arrivent *après* le `git push` quand on intègre puis pousse depuis
+GitHub Desktop : la CI rougit à chaque lot qui touche `guide/` — cinq fois de suite pendant la série
+NAV, qui a modifié **douze** sources. Le défaut n'est ni dans le script ni dans la règle : c'est un
+**geste manuel placé après le geste qui le rend nécessaire**.
+
+**Le crochet `scripts/hooks/pre-commit`** le remet avant. Si le commit touche `guide/*.html`, il
+lance `build-guide.mjs` et **ajoute `public/guide.html` au commit** ; sinon il ne fait rien. Il
+s'installe une fois, dans le dépôt :
+
+```
+git config core.hooksPath scripts/hooks
+```
+
+⚠️ Il ne **remplace** aucun contrôle — `--check` reste dans `check`, `prebuild` et la CI ; il évite
+seulement d'y arriver rouge. ⚠️ Il ne touche **que** le guide : aucun autre crochet, rien d'ajouté à
+la ligne de build (§6). Si `node` est introuvable, il **arrête le commit** avec la commande à taper
+plutôt que de laisser passer en silence — un garde-fou qui échoue discrètement est pire qu'aucun.
+Sous Linux, le fichier doit être exécutable (`git update-index --chmod=+x scripts/hooks/pre-commit`).
+La règle « **ne jamais livrer `public/guide.html`** » ci-dessus **ne change pas** : Claude livre les
+sources, le crochet fabrique le généré chez Nico.
+
 ### ⚠️⚠️ POURQUOI LE SCRIPT N'EST PAS DANS LE BUILD
 
 **C'est délibéré.** La règle « jamais un second `&& node scripts/…` » (§6) reste intacte.

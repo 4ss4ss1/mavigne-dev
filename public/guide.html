@@ -569,9 +569,9 @@ mark{background:rgba(200,176,32,.32);color:var(--cream);border-radius:3px;paddin
 
   <h3><svg class="g-ic" width="18" height="18" viewBox="0 0 24 24" aria-hidden="true" focusable="false"><use href="#ic-oeil"></use></svg> Confort de lecture</h3>
   <ul class="dot">
-    <li><b>Thème</b> clair, sombre ou automatique — <span class="path">Réglages › App › Thème</span>.</li>
+    <li><b>Thème</b> clair, sombre ou automatique — <span class="path">Réglages › Moi › Thème</span>.</li>
     <li><b>Mode plein soleil</b> : contraste renforcé pour lire l'écran dehors, en plein midi —
-    <span class="path">Réglages › App › Plein soleil</span>. Le réglage est mémorisé par appareil.</li>
+    <span class="path">Réglages › Moi › Plein soleil</span>. Le réglage est mémorisé par appareil.</li>
     <li>Le <b>zoom</b> du téléphone fonctionne normalement dans toute l'application.</li>
   </ul>
 </section>
@@ -751,7 +751,7 @@ mark{background:rgba(200,176,32,.32);color:var(--cream);border-radius:3px;paddin
   <h4 style="margin-top:22px"><svg class="g-ic" width="18" height="18" viewBox="0 0 24 24" aria-hidden="true" focusable="false"><use href="#ic-imprimante"></use></svg> Le vignoble sur une page</h4>
   <p><b>L'état du vignoble</b> s'édite depuis la roue crantée de la Vigne,
   <span class="path">Vigne › <svg class="g-ic" width="18" height="18" viewBox="0 0 24 24" aria-hidden="true" focusable="false"><use href="#ic-engrenage"></use></svg> › Documents</span> — ou depuis le catalogue complet,
-  <span class="path">Réglages › App › Documents &amp; impressions</span>. Une ligne par parcelle :
+  <span class="path">Réglages › Domaine › Documents &amp; impressions</span>. Une ligne par parcelle :
   commune, surface, cépage(s), avancement de la période consultée, dernière intervention du journal,
   dernier rendement ramené à l'hectare. Puis la répartition par cépage, et les parcelles arrachées
   à part.</p>
@@ -815,7 +815,7 @@ mark{background:rgba(200,176,32,.32);color:var(--cream);border-radius:3px;paddin
     communes sont actives, une météo par secteur apparaît sur l'Accueil.</li>
     <li><b>Documents</b> : l'état du vignoble, le rapport de saison, le journal des travaux et
     l'avancement par parcelle en fichier. Le catalogue complet reste dans
-    <span class="path">Réglages › App › Documents &amp; impressions</span>.</li>
+    <span class="path">Réglages › Domaine › Documents &amp; impressions</span>.</li>
   </ul>
   <p>L'en-tête dit <b>Vigne</b> sur les trois onglets — Accueil, Parcelles, Journal — comme les autres
   modules disent leur nom. Le bouton maison des en-têtes n'existe plus : le menu du bas est la seule
@@ -1038,10 +1038,13 @@ mark{background:rgba(200,176,32,.32);color:var(--cream);border-radius:3px;paddin
     éventuel à saisir par parcelle.</li>
     <li><b>Chronométrer le temps réel</b>, en tête des activités : bascule ON/OFF pour tout le
     domaine. Sans elle, le barème h/ha prend le relais et rien n'est mesuré.</li>
+    <li><b>Carburant</b> : la consommation GNR de référence (L/h), qui estime le GNR d'une session
+    quand le compteur ne le dit pas, et l'état du prix du litre.</li>
     <li><b>Documents</b> : le carnet d'entretien, machine par machine.</li>
   </ul>
   <p>Les conducteurs autorisés se cochent sur la fiche du membre (<span class="path">Réglages ›
-  Équipe</span>, rôle Tractoriste) ; le prix du litre de GNR se saisit à chaque appoint de cuve.</p>
+  Équipe</span>, rôle Tractoriste) ; le prix du litre de GNR se saisit à chaque appoint de cuve,
+  jamais dans un réglage.</p>
 </section>
 
 
@@ -1119,6 +1122,10 @@ mark{background:rgba(200,176,32,.32);color:var(--cream);border-radius:3px;paddin
     <div class="dbody">C'est la durée pendant laquelle personne ne doit retourner dans la parcelle
     traitée. L'application le calcule à partir du produit, l'affiche sur l'Accueil et le rappelle dans
     l'onglet Conformité du Pilotage.</div></details>
+  <h3><svg class="g-ic" width="18" height="18" viewBox="0 0 24 24" aria-hidden="true" focusable="false"><use href="#ic-engrenage"></use></svg> La roue crantée — les documents du Phyto</h3>
+  <p>En haut à droite, la roue crantée imprime le <b>registre</b> sous ses deux formes — le PDF à
+  présenter, le fichier tableur attendu en contrôle à partir de 2027 — et la <b>synthèse cuivre</b>.
+  Le bouton d'export qui vivait au bas du registre n'existe plus. Administrateur seulement.</p>
 </section>
 
 
@@ -1521,7 +1528,7 @@ mark{background:rgba(200,176,32,.32);color:var(--cream);border-radius:3px;paddin
   millésime est en cave, ce choix n'apparaît pas et l'écran est exactement celui d'avant.</div></div>
   <div class="note"><span class="ni" aria-hidden="true"><svg class="g-ic" width="18" height="18" viewBox="0 0 24 24" aria-hidden="true" focusable="false"><use href="#ic-liste"></use></svg></span><div><b>Quatre documents
   s'impriment</b> depuis la <b>roue crantée</b> de la Cave, bloc Documents — ou depuis
-  <span class="path">Réglages › App › Documents &amp; impressions</span>, qui les a tous :
+  <span class="path">Réglages › Domaine › Documents &amp; impressions</span>, qui les a tous :
   le <b>contrôle de maturité</b> (avant vendange), le <b>cahier de cuverie</b> (pendant la
   fermentation), le <b>registre des manipulations</b> (enrichissement, sulfitage, adjonctions,
   pratiques de cave, millésime par millésime) et le <b>bilan de campagne</b>. Ce sont des
@@ -1584,7 +1591,7 @@ mark{background:rgba(200,176,32,.32);color:var(--cream);border-radius:3px;paddin
 
   <h4 style="margin-top:22px"><svg class="g-ic" width="18" height="18" viewBox="0 0 24 24" aria-hidden="true" focusable="false"><use href="#ic-imprimante"></use></svg> Sortir la vendange sur papier</h4>
   <p>Les deux écrans du Cuvier ont chacun leur document. On les édite depuis la <b>roue crantée</b>
-  de la Cave, bloc Documents, ou depuis <span class="path">Réglages › App › Documents &amp;
+  de la Cave, bloc Documents, ou depuis <span class="path">Réglages › Domaine › Documents &amp;
   impressions</span> — même catalogue, mêmes documents : tout ce que Ma Vigne sait imprimer reste
   réuni là, la roue n'en est qu'un raccourci.</p>
   <ul class="dot">
@@ -1729,25 +1736,32 @@ mark{background:rgba(200,176,32,.32);color:var(--cream);border-radius:3px;paddin
   <details><summary>Puis-je m'en servir sans être en bio&nbsp;?</summary>
     <div class="dbody">Bien sûr. Le bilan matière est conçu pour le contrôle bio, mais le suivi de stock
     et l'inventaire des fûts servent à n'importe quel domaine.</div></details>
+  <h3><svg class="g-ic" width="18" height="18" viewBox="0 0 24 24" aria-hidden="true" focusable="false"><use href="#ic-engrenage"></use></svg> La roue crantée — les deux inventaires</h3>
+  <p>En haut à droite, la roue crantée imprime l'<b>inventaire des fûts</b> et l'<b>inventaire des
+  intrants</b>. Elle rappelle aussi qu'aucun prix ne se saisit dans la Réserve : les achats se chiffrent
+  dans <span class="path">Pilotage › Économie › Achats</span>. Administrateur seulement.</p>
 </section>
 
 
 <section id="planning">
   <div class="sec-h">
     <div class="sec-ic" aria-hidden="true"><svg class="g-ic" width="18" height="18" viewBox="0 0 24 24" aria-hidden="true" focusable="false"><use href="#ic-calendrier"></use></svg></div>
-    <div><h2>Planning RH</h2><div class="sub">Le mois · Les gens · Le cadre</div></div>
+    <div><h2>Planning RH</h2><div class="sub">Le mois · Les gens · et la roue crantée</div></div>
   </div>
   <p class="lead">Le Planning gère les horaires réels de l'équipe, les congés, le compteur d'heures et
   les acomptes. C'est un module <b>réservé à l'administrateur</b> ; chaque salarié y voit son propre
   mois, et rien d'autre.</p>
 
-  <h3><svg class="g-ic" width="18" height="18" viewBox="0 0 24 24" aria-hidden="true" focusable="false"><use href="#ic-balance"></use></svg> Trois onglets, un verbe chacun</h3>
+  <h3><svg class="g-ic" width="18" height="18" viewBox="0 0 24 24" aria-hidden="true" focusable="false"><use href="#ic-balance"></use></svg> Deux onglets, et une roue crantée</h3>
   <ul class="dot">
     <li><b>Le mois</b> — la grille de toute l'équipe. C'est là qu'on tient le planning au jour le jour.</li>
     <li><b>Les gens</b> — une ligne par salarié <b>du mois affiché</b>, sa fiche (mois, congés,
     compteur, acomptes, PDF), le récap annuel et les anciens salariés.</li>
-    <li><b>Le cadre</b> — ce qui se règle une fois par an : modèles de semaine, coupure, convention
-    collective, règle de décompte des congés, sort des heures faites au-delà du planning.</li>
+    <li><b>La roue crantée</b> <svg class="g-ic" width="18" height="18" viewBox="0 0 24 24" aria-hidden="true" focusable="false"><use href="#ic-engrenage"></use></svg>, en haut à droite — ce qui se règle une fois par an :
+    modèles de semaine, coupure, convention collective, règle de décompte des congés, sort des heures
+    faites au-delà du planning. C'était l'onglet « Le cadre » ; un réglage annuel n'a pas sa place à
+    côté du mois. La roue porte aussi les <b>relevés à imprimer</b> : relevé mensuel, relevé d'un
+    salarié, planning de l'année, planning de l'année d'un salarié, Heures &amp; ETP.</li>
   </ul>
   <p>Un salarié qui n'est pas administrateur ne voit <b>aucun onglet</b> : il arrive directement sur
   son mois.</p>
@@ -1833,7 +1847,7 @@ mark{background:rgba(200,176,32,.32);color:var(--cream);border-radius:3px;paddin
   <h3><svg class="g-ic" width="18" height="18" viewBox="0 0 24 24" aria-hidden="true" focusable="false"><use href="#ic-balance"></use></svg> Le cadre légal, affiché en permanence</h3>
   <p>Les valeurs par défaut suivent la convention nationale <b>Production agricole et CUMA
   (IDCC 7024)</b>. Elles sont <b>paramétrables</b> pour s'adapter à une autre convention&nbsp;:
-  <span class="path">Planning › Le cadre</span>.</p>
+  <span class="path">Planning › <svg class="g-ic" width="18" height="18" viewBox="0 0 24 24" aria-hidden="true" focusable="false"><use href="#ic-engrenage"></use></svg></span>.</p>
   <div class="tw"><table>
     <tr><th>Repère</th><th>Valeur par défaut</th></tr>
     <tr><td>Durée légale hebdomadaire</td><td>35 h</td></tr>
@@ -1939,7 +1953,7 @@ mark{background:rgba(200,176,32,.32);color:var(--cream);border-radius:3px;paddin
 
   <h3><svg class="g-ic" width="18" height="18" viewBox="0 0 24 24" aria-hidden="true" focusable="false"><use href="#ic-calendrier"></use></svg> Dimanches et jours f&eacute;ri&eacute;s travaill&eacute;s</h3>
   <p>Un dimanche de vendange ou un jour f&eacute;ri&eacute; pass&eacute; &agrave; la vigne se majore
-  automatiquement. Deux taux se r&egrave;glent dans <b>Le cadre</b> : <b>50&nbsp;%</b> le dimanche et
+  automatiquement. Deux taux se r&egrave;glent dans la roue crant&eacute;e : <b>50&nbsp;%</b> le dimanche et
   <b>100&nbsp;%</b> un jour f&eacute;ri&eacute; par d&eacute;faut.</p>
   <ul class="dot">
     <li>Seules les <b>heures r&eacute;ellement faites</b> comptent. Un f&eacute;ri&eacute;
@@ -1986,7 +2000,7 @@ mark{background:rgba(200,176,32,.32);color:var(--cream);border-radius:3px;paddin
   Le compteur du <b>Tracteur</b>, lui, dit bien « pause déjeuner » : seul en cabine, le
   conducteur en choisit vraiment le moment. Le mot y est donc exact.</div></div>
   <p>L'heure de la coupure se règle dans
-  <span class="path">Planning › Le cadre</span>,
+  <span class="path">Planning › <svg class="g-ic" width="18" height="18" viewBox="0 0 24 24" aria-hidden="true" focusable="false"><use href="#ic-engrenage"></use></svg></span>,
   sous la durée. Trois réponses
   possibles : une heure fixe, « selon le chantier », ou rien. Tant que rien n'est renseigné,
   l'application n'affiche que la durée, sans prétendre savoir quand elle tombe. Un domaine dont la
@@ -1994,7 +2008,7 @@ mark{background:rgba(200,176,32,.32);color:var(--cream);border-radius:3px;paddin
 
   <h3><svg class="g-ic" width="18" height="18" viewBox="0 0 24 24" aria-hidden="true" focusable="false"><use href="#ic-personne"></use></svg> Le relevé d'un seul salarié</h3>
   <p>C'est le document qu'on vous demande en premier lors d'un contrôle. Il s'édite depuis
-  <span class="path">Réglages › App › Documents &amp; impressions</span> en choisissant
+  la roue crantée du Planning, <span class="path">Planning › <svg class="g-ic" width="18" height="18" viewBox="0 0 24 24" aria-hidden="true" focusable="false"><use href="#ic-engrenage"></use></svg> › Documents</span>, en choisissant
   <b>la personne et le mois</b>, ou depuis le bouton <b>PDF</b> de sa fiche — c'est le même
   document dans les deux cas.</p>
   <ul class="dot">
@@ -2019,7 +2033,7 @@ mark{background:rgba(200,176,32,.32);color:var(--cream);border-radius:3px;paddin
   décompte d'heures, <b>pas un bulletin de paie</b> : aucun montant n'y figure.</div></div>
 
   <h3><svg class="g-ic" width="18" height="18" viewBox="0 0 24 24" aria-hidden="true" focusable="false"><use href="#ic-calendrier"></use></svg> Le planning de l'année</h3>
-  <p>Depuis Réglages, onglet App, « Documents &amp; impressions », le document
+  <p>Depuis la roue crantée du Planning (ou le catalogue complet, Réglages › Domaine), le document
   <b>Planning de l'année</b> sort le rythme de travail sur douze mois : jours travaillés,
   heures de <b>prise et de fin de service</b>, coupure déjeuner, fermetures du domaine et jours
   fériés. Il vous demande l'année, et propose par défaut celle à venir.</p>
@@ -2055,7 +2069,8 @@ mark{background:rgba(200,176,32,.32);color:var(--cream);border-radius:3px;paddin
   les douze mois, et le total distingue les deux. Ce qui sera saisi <b>après</b> l'édition ne peut
   évidemment pas y figurer.</div></div>
   <div class="note warn"><span class="ni" aria-hidden="true"><svg class="g-ic" width="18" height="18" viewBox="0 0 24 24" aria-hidden="true" focusable="false"><use href="#ic-alerte"></use></svg></span><div>Pour imprimer l'année
-  <b>à venir</b>, importez d'abord son planning au format CSV depuis l'onglet Modèles. Sans modèle
+  <b>à venir</b>, importez d'abord son planning au format CSV depuis la roue crantée, bloc Modèles de
+  semaine. Sans modèle
   enregistré pour cette année-là, le document se rabat sur le modèle intégré, dont les jours sont
   calés sur un autre calendrier : les jours de semaine ne tombent pas aux mêmes dates. Le document
   vous le signale en clair, mais ne le diffusez pas à l'équipe en l'état.</div></div>
@@ -2482,10 +2497,13 @@ mark{background:rgba(200,176,32,.32);color:var(--cream);border-radius:3px;paddin
   <p>Les heures affichées viennent des instantanés pris à la clôture de chaque campagne — une période jamais clôturée apparaît sur la frise sans compter d'heures. C'est aussi ici que se compare l'avancement de deux saisons.</p>
   <div class="note"><b>Pourquoi les vieilles périodes ont disparu des Réglages.</b> <span class="path">Réglages › Campagne</span> n'affiche que les dix-huit derniers mois, plus ce qui est en cours ou à venir : au-delà, la liste devenait illisible. Rien n'est supprimé — tout est ici.</div>
 
-  <h3><svg class="g-ic" width="18" height="18" viewBox="0 0 24 24" aria-hidden="true" focusable="false"><use href="#ic-outil"></use></svg> Outils du pilotage</h3>
-  <p>Le bouton <b>Outils</b>, en bout de barre d'onglets, ouvre ce qu'on ne consulte pas tous les
-  jours : les <b>Archives</b> décrites ci-dessus, et le <b>Paramétrage</b> — objectifs de fin,
-  fenêtres des tâches et hypothèses de calcul.</p>
+  <h3><svg class="g-ic" width="18" height="18" viewBox="0 0 24 24" aria-hidden="true" focusable="false"><use href="#ic-engrenage"></use></svg> La roue crantée — ce qui se règle</h3>
+  <p>Les <b>Archives</b> se lisent : c'est un onglet, le dernier après le filet, à côté d'Économie et
+  de Conformité. Ce qui se <b>règle</b> vit dans la roue crantée de l'en-tête, en haut à droite :
+  les <b>objectifs de fin</b>, les <b>fenêtres des tâches</b>, les <b>hypothèses de calcul</b>
+  (raisin par bouteille, journée de référence, surcoût de retard, renfort), l'<b>IFT de
+  référence</b> de l'onglet Conformité — et le <b>bilan de campagne</b> à imprimer. Réservée à
+  l'administrateur. Le bouton « Outils » qui mêlait ces deux natures n'existe plus.</p>
   <p>Dans le tableau des <b>fenêtres des tâches</b>, chaque ligne porte son origine : <b>auto</b>
   (l'enchaînement par défaut), <b>• perso</b> (les dates que vous avez saisies), et
   <b><svg class="g-ic" width="18" height="18" viewBox="0 0 24 24" aria-hidden="true" focusable="false"><use href="#ic-alerte"></use></svg> hors période</b>.</p>
@@ -2521,10 +2539,10 @@ mark{background:rgba(200,176,32,.32);color:var(--cream);border-radius:3px;paddin
 <section id="reglages">
   <div class="sec-h">
     <div class="sec-ic" aria-hidden="true"><svg class="g-ic" width="18" height="18" viewBox="0 0 24 24" aria-hidden="true" focusable="false"><use href="#ic-engrenage"></use></svg></div>
-    <div><h2>Réglages</h2><div class="sub">Domaine · Équipe · App</div></div>
+    <div><h2>Réglages</h2><div class="sub">Domaine · Équipe · Moi</div></div>
   </div>
   <p class="lead">Trois onglets pour l'administrateur — ce qui n'appartient à aucun module : le domaine,
-  l'équipe, votre compte. Les autres membres n'y trouvent que l'onglet <b>App</b>, avec leur mot de
+  l'équipe, votre compte. Les autres membres n'y trouvent que l'onglet <b>Moi</b>, avec leur mot de
   passe, l'affichage et l'aide. C'est aussi d'ici que s'ouvre cette documentation.</p>
   <div class="note info"><span class="ni" aria-hidden="true"><svg class="g-ic" width="18" height="18" viewBox="0 0 24 24" aria-hidden="true" focusable="false"><use href="#ic-info"></use></svg></span><div><b>Un module règle ses
   affaires chez lui.</b> Les tâches, le barème, les plantations et les secteurs météo sont dans la roue
@@ -2538,8 +2556,9 @@ mark{background:rgba(200,176,32,.32);color:var(--cream);border-radius:3px;paddin
     <li><b>Localisation</b> pour la météo, avec un bouton <b>Centrer sur mes parcelles</b>.</li>
     <li><b>Lien d'invitation</b> à partager avec un nouveau membre.</li>
     <li><b>Saisons</b> : créer, dater, activer, consulter l'<b>historique</b>, <b>clôturer la campagne</b>.</li>
-    <li><b>Économie &amp; conformité</b> : passages phyto de référence (IFT) et consommation de référence du
-    tracteur. Les hypothèses du simulateur, elles, sont dans <span class="path">Pilotage › Outils › Paramétrage</span>.</li>
+    <li>L'IFT de référence et la consommation GNR de référence ne sont plus ici : chacun est dans la
+    roue crantée de son module — <span class="path">Pilotage › <svg class="g-ic" width="18" height="18" viewBox="0 0 24 24" aria-hidden="true" focusable="false"><use href="#ic-engrenage"></use></svg></span> et
+    <span class="path">Tracteur › <svg class="g-ic" width="18" height="18" viewBox="0 0 24 24" aria-hidden="true" focusable="false"><use href="#ic-engrenage"></use></svg></span>.</li>
     <li><b>Appellations et plafonds de rendement</b> — voir ci-dessous.</li>
   </ul>
 
@@ -2594,22 +2613,20 @@ mark{background:rgba(200,176,32,.32);color:var(--cream);border-radius:3px;paddin
   <p>Quand un contrat arrive à terme, un <b>rappel</b> apparaît en tête de la fiche et dans la liste des
   membres, trente jours avant, avec de quoi renouveler ou acter l'arrêt en un geste.</p>
 
-  <h3><svg class="g-ic" width="18" height="18" viewBox="0 0 24 24" aria-hidden="true" focusable="false"><use href="#ic-engrenage"></use></svg> App — accessible à tous</h3>
+  <h3><svg class="g-ic" width="18" height="18" viewBox="0 0 24 24" aria-hidden="true" focusable="false"><use href="#ic-personne"></use></svg> Moi — accessible à tous</h3>
   <ul class="dot">
     <li><b>Changer mon mot de passe.</b></li>
     <li><b>Thème</b> clair / sombre / automatique, <b>mode plein soleil</b>, <b>notifications</b>.</li>
     <li><b>Aide &amp; Documentation</b> : démarrage rapide et guide complet — vous y êtes.</li>
     <li><b>Signaler un problème</b> : le message part avec le contexte technique, ce qui évite les
     allers-retours pour comprendre ce qui s'est passé.</li>
-    <li><b>Documents &amp; impressions</b> : tout ce que Ma Vigne sait sortir, en un seul endroit,
-    classé par usage — voir ci-dessous.</li>
     <li><b>CGU &amp; mentions légales</b>, dont l'accès à votre exemplaire signé.</li>
     <li><b>Se déconnecter</b> — utile sur un appareil partagé : la déconnexion nettoie les données
     laissées en local.</li>
   </ul>
   <h3>Documents &amp; impressions</h3>
-  <p>Les exports étaient éparpillés dans six écrans. Ils sont désormais réunis dans
-  <span class="path">Réglages › App › Documents &amp; impressions</span>, en trois familles.</p>
+  <p>Le catalogue complet est dans <span class="path">Réglages › Domaine › Documents &amp;
+  impressions</span>, en trois familles — et chaque module a les siens dans sa roue crantée.</p>
   <ul class="dot">
     <li><b>Obligatoire</b> — ce que vous devez pouvoir sortir en contrôle : registre phyto en PDF
     <b>et</b> en fichier tableur, synthèse cuivre, relevé mensuel d'heures.</li>
@@ -2623,7 +2640,7 @@ mark{background:rgba(200,176,32,.32);color:var(--cream);border-radius:3px;paddin
   est masqué pour vous n'apparaît pas dans la liste : inutile de proposer un registre de cave à un
   domaine qui ne vinifie pas.</div></div>
 
-  <div class="note warn"><span class="ni" aria-hidden="true"><svg class="g-ic" width="18" height="18" viewBox="0 0 24 24" aria-hidden="true" focusable="false"><use href="#ic-alerte"></use></svg></span><div>La <b>zone dangereuse</b> en bas de l'onglet App
+  <div class="note warn"><span class="ni" aria-hidden="true"><svg class="g-ic" width="18" height="18" viewBox="0 0 24 24" aria-hidden="true" focusable="false"><use href="#ic-alerte"></use></svg></span><div>La <b>zone dangereuse</b> en bas de l'onglet Moi
   réinitialise l'application sur <em aria-hidden="true">cet appareil</em>. Les données du domaine restent intactes sur le
   serveur, mais l'appareil devra tout retélécharger. À n'utiliser qu'en dernier recours.</div></div>
 
@@ -2632,7 +2649,7 @@ mark{background:rgba(200,176,32,.32);color:var(--cream);border-radius:3px;paddin
     fichier <b>KML</b> : le parcellaire est intégré avec ses contours, ce qui donne immédiatement la
     carte colorée. Un tracé manuel reste possible en secours.</div></details>
   <details><summary>Où trouve-t-on cette documentation depuis l'application&nbsp;?</summary>
-    <div class="dbody"><span class="path">Réglages › App › Aide &amp; Documentation</span>. Les deux
+    <div class="dbody"><span class="path">Réglages › Moi › Aide &amp; Documentation</span>. Les deux
     pages s'ouvrent dans un nouvel onglet et peuvent être imprimées ou enregistrées en PDF.</div></details>
 </section>
 
@@ -2664,7 +2681,7 @@ mark{background:rgba(200,176,32,.32);color:var(--cream);border-radius:3px;paddin
   <p>Les documents se déclenchaient autrefois depuis quatre points d'entrée répartis sur six écrans :
   un bouton dans le Cuvier, un autre dans les outils du Tracteur, deux dans La Réserve, une section
   dans les Réglages. Il fallait savoir où chacun avait été rangé. Ils sont maintenant réunis dans
-  <span class="path">Réglages › App › Documents &amp; impressions</span>, classés
+  <span class="path">Réglages › Domaine › Documents &amp; impressions</span>, classés
   <b>par usage et non par module</b>.</p>
   <div class="tw"><table>
     <tr><th>Famille</th><th>Ce qu'on y trouve</th></tr>
@@ -2698,7 +2715,7 @@ mark{background:rgba(200,176,32,.32);color:var(--cream);border-radius:3px;paddin
   être restaurée sans tout réécrire.</p>
   <div class="note tip"><span class="ni" aria-hidden="true"><svg class="g-ic" width="18" height="18" viewBox="0 0 24 24" aria-hidden="true" focusable="false"><use href="#ic-eclair"></use></svg></span><div>Prenez l'habitude d'un <b>export JSON avant chaque
   opération sensible</b> (import de parcellaire, clôture de campagne, gros nettoyage) :
-  <span class="path">Réglages › App › Documents &amp; impressions › Données brutes</span>, ligne
+  <span class="path">Réglages › Domaine › Documents &amp; impressions › Données brutes</span>, ligne
   <b>Sauvegarde complète</b>. Trente secondes, et vous dormez mieux.</div></div>
 
   <h3><svg class="g-ic" width="18" height="18" viewBox="0 0 24 24" aria-hidden="true" focusable="false"><use href="#ic-antenne"></use></svg> Hors connexion</h3>
@@ -2732,7 +2749,7 @@ mark{background:rgba(200,176,32,.32);color:var(--cream);border-radius:3px;paddin
   relation ; son acceptation se fait dans l'application, avec accusé de réception horodaté.</div></div>
 
   <h3><svg class="g-ic" width="18" height="18" viewBox="0 0 24 24" aria-hidden="true" focusable="false"><use href="#ic-loupe"></use></svg> Un problème&nbsp;? Il se signale depuis l'app</h3>
-  <p>La pastille <span class="path">? Aide</span>, en haut de chaque écran, ouvre également <span class="path">Signaler un problème</span> — pré-rempli avec l'écran d'où vous partez. Le chemin complet reste <span class="path">Réglages › App</span>. Le message transmet
+  <p>La pastille <span class="path">? Aide</span>, en haut de chaque écran, ouvre également <span class="path">Signaler un problème</span> — pré-rempli avec l'écran d'où vous partez. Le chemin complet reste <span class="path">Réglages › Moi</span>. Le message transmet
   <b>accompagné du contexte technique</b> : version, module concerné, dernières erreurs rencontrées.
   C'est infiniment plus efficace qu'un « ça bugue » par SMS, et ça évite deux jours d'aller-retour.</p>
   <p>Les incidents sérieux n'attendent d'ailleurs pas votre signalement : ils laissent
@@ -2806,7 +2823,7 @@ mark{background:rgba(200,176,32,.32);color:var(--cream);border-radius:3px;paddin
     après chaque mise à jour.</div></details>
   <details><summary>L'écran est illisible en plein soleil</summary>
     <div class="dbody">Activez le <b>mode plein soleil</b> :
-    <span class="path">Réglages › App › Plein soleil</span>. Contraste renforcé, mémorisé sur votre
+    <span class="path">Réglages › Moi › Plein soleil</span>. Contraste renforcé, mémorisé sur votre
     appareil.</div></details>
   <details><summary>La carte ne s'affiche pas</summary>
     <div class="dbody">La carte a besoin du réseau au premier chargement. Sans contours de parcelles
@@ -2839,7 +2856,7 @@ mark{background:rgba(200,176,32,.32);color:var(--cream);border-radius:3px;paddin
     graver un objectif.</div></details>
 
   <h3><svg class="g-ic" width="18" height="18" viewBox="0 0 24 24" aria-hidden="true" focusable="false"><use href="#ic-alerte"></use></svg> Rien de tout cela</h3>
-  <p>Utilisez la pastille <span class="path">? Aide</span> de l'écran concerné, ou <span class="path">Réglages › App › <svg class="g-ic" width="18" height="18" viewBox="0 0 24 24" aria-hidden="true" focusable="false"><use href="#ic-bogue"></use></svg> Signaler un problème</span> — le contexte technique
+  <p>Utilisez la pastille <span class="path">? Aide</span> de l'écran concerné, ou <span class="path">Réglages › Moi › <svg class="g-ic" width="18" height="18" viewBox="0 0 24 24" aria-hidden="true" focusable="false"><use href="#ic-bogue"></use></svg> Signaler un problème</span> — le contexte technique
   part avec votre message. Ou écrivez à <a href="mailto:ngdevpro@gmail.com">ngdevpro@gmail.com</a> en
   précisant&nbsp;: <b>ce que vous faisiez</b>, <b>ce que vous attendiez</b>, <b>ce qui s'est passé</b>,
   et le module concerné.</p>
