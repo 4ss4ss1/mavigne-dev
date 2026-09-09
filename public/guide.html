@@ -438,7 +438,7 @@ mark{background:rgba(200,176,32,.32);color:var(--cream);border-radius:3px;paddin
 <a href="#saisons"><em aria-hidden="true"><svg class="g-ic" width="18" height="18" viewBox="0 0 24 24" aria-hidden="true" focusable="false"><use href="#ic-calendrier"></use></svg></em><span>Saisons &amp; tâches<br><span style="font-size:11.5px;color:var(--muted)">Cycle, heures/ha, trous</span></span></a>
 <a href="#tracteur"><em aria-hidden="true"><svg class="g-ic" width="18" height="18" viewBox="0 0 24 24" aria-hidden="true" focusable="false"><use href="#ic-tracteur"></use></svg></em><span>Tracteur<br><span style="font-size:11.5px;color:var(--muted)">Sessions, entretien, GNR</span></span></a>
 <a href="#phyto"><em aria-hidden="true"><svg class="g-ic" width="18" height="18" viewBox="0 0 24 24" aria-hidden="true" focusable="false"><use href="#ic-eprouvette"></use></svg></em><span>Phyto<br><span style="font-size:11.5px;color:var(--muted)">Registre &amp; catalogue E-Phy</span></span></a>
-<a href="#cave"><em aria-hidden="true"><svg class="g-ic" width="18" height="18" viewBox="0 0 24 24" aria-hidden="true" focusable="false"><use href="#ic-verre"></use></svg></em><span>Cave<br><span style="font-size:11.5px;color:var(--muted)">Le Cuvier, Le Chai, Le millésime</span></span></a>
+<a href="#cave"><em aria-hidden="true"><svg class="g-ic" width="18" height="18" viewBox="0 0 24 24" aria-hidden="true" focusable="false"><use href="#ic-verre"></use></svg></em><span>Cave<br><span style="font-size:11.5px;color:var(--muted)">Aujourd'hui, Le Cuvier, Le Chai, Le millésime</span></span></a>
 <a href="#reserve"><em aria-hidden="true"><svg class="g-ic" width="18" height="18" viewBox="0 0 24 24" aria-hidden="true" focusable="false"><use href="#ic-carton"></use></svg></em><span>La Réserve<br><span style="font-size:11.5px;color:var(--muted)">Intrants, parc à fûts, bilan matière</span></span></a>
 <a href="#planning"><em aria-hidden="true"><svg class="g-ic" width="18" height="18" viewBox="0 0 24 24" aria-hidden="true" focusable="false"><use href="#ic-calendrier"></use></svg></em><span>Planning RH<br><span style="font-size:11.5px;color:var(--muted)">Heures, congés, compteur</span></span></a>
 <a href="#pilotage"><em aria-hidden="true"><svg class="g-ic" width="18" height="18" viewBox="0 0 24 24" aria-hidden="true" focusable="false"><use href="#ic-graphique"></use></svg></em><span>Pilotage<br><span style="font-size:11.5px;color:var(--muted)">Tableau de bord décisionnel</span></span></a>
@@ -1087,13 +1087,39 @@ mark{background:rgba(200,176,32,.32);color:var(--cream);border-radius:3px;paddin
 <section id="cave">
   <div class="sec-h">
     <div class="sec-ic" aria-hidden="true"><svg class="g-ic" width="18" height="18" viewBox="0 0 24 24" aria-hidden="true" focusable="false"><use href="#ic-verre"></use></svg></div>
-    <div><h2>Cave</h2><div class="sub">Le Cuvier · Le Chai · Le millésime</div></div>
+    <div><h2>Cave</h2><div class="sub">Aujourd'hui · Le Cuvier · Le Chai · Le millésime</div></div>
   </div>
-  <p class="lead">La Cave suit le chemin du raisin, à travers deux espaces qui existent vraiment dans le
-  bâtiment : <b>Le Cuvier</b> pour la vendange et les fermentations, <b>Le Chai</b> pour l'élevage
-  jusqu'à la mise en bouteille. Une cuve décuvée passe de l'un à l'autre en une action. Une
-  troisième section, <b>Le millésime</b>, ne se saisit pas : elle relit ce que les deux premières
-  ont enregistré.</p>
+  <p class="lead">La Cave s'ouvre sur <b>Aujourd'hui</b> : ce qui presse, puis les quatre semaines à
+  venir, chaque ligne menant au geste. Elle suit ensuite le chemin du raisin, à travers deux espaces
+  qui existent vraiment dans le bâtiment : <b>Le Cuvier</b> pour la vendange et les fermentations,
+  <b>Le Chai</b> pour l'élevage jusqu'à la mise en bouteille. Une cuve décuvée passe de l'un à l'autre
+  en une action. La dernière section, <b>Le millésime</b>, relit ce que les deux autres ont
+  enregistré. Les <b>quatre chiffres</b> sous l'en-tête sont ceux de la cave entière, les mêmes sur
+  les quatre onglets ; la ligne dessous dit sur quel millésime ils sont calculés. La <b>roue crantée</b>,
+  en haut à droite, réunit ce qu'on règle une fois l'an et ce qu'on imprime.</p>
+
+  <h3><svg class="g-ic" width="18" height="18" viewBox="0 0 24 24" aria-hidden="true" focusable="false"><use href="#ic-chrono"></use></svg> Aujourd'hui — ce qui presse</h3>
+  <p>C'est l'écran d'arrivée. Rien ne s'y saisit : tout vient de ce que le Cuvier et le Chai ont déjà
+  enregistré — relevés de densité, dernier ouillage, analyses de malo, soutirages et les dates de SO<sub>2</sub>
+  posées avec eux.</p>
+  <ul class="dot">
+    <li><b>Le verdict</b>, en tête : un constat, dans un ordre fixe. Une fermentation qui ralentit ou une
+      température haute, une malo qui ne descend plus ; puis les cuves sans relevé depuis hier ou avant ;
+      en vendange, le raisin encore sur pied ; les fûts dont le seuil d'ouillage est dépassé ; une malo
+      finie pas encore soutirée ; une dose de SO<sub>2</sub> programmée cette semaine ; enfin les fûts en
+      fin de vie. <b>Un geste passe devant un rappel de date.</b> Quand rien de tout cela n'est vrai,
+      l'écran le dit : « Rien ne presse aujourd'hui ».</li>
+    <li><b>Les quatre semaines</b>, en trois blocs : cette semaine, la suivante, puis les deux
+      dernières ensemble. Ouillages dus, cuves à mesurer, fin de fermentation estimée, décuvage
+      possible, soutirages, doses de SO<sub>2</sub>.</li>
+    <li><b>Sans échéance</b> : les fûts au-delà de leur nombre de vins. Ils n'ont pas de date, ils ne
+      sont donc rangés dans aucune semaine.</li>
+    <li><b>Chaque ligne est un bouton</b> : « Relever » ouvre le relevé de la cuve, « Ouiller » et
+      « Soutirer » ouvrent l'opération sur la cuvée, « Doser » l'opération soufre, « Le parc » ouvre
+      les fûts de La Réserve.</li>
+    <li>Une dose de SO<sub>2</sub> est <b>rappelée</b>, pas vérifiée : l'application connaît la date posée au
+      soutirage, pas le geste. Enregistrer l'opération soufre est ce qui l'acquitte.</li>
+  </ul>
 
   <h3><svg class="g-ic" width="18" height="18" viewBox="0 0 24 24" aria-hidden="true" focusable="false"><use href="#ic-raisin"></use></svg> Le Cuvier — vendange et fermentations</h3>
   <div class="cards">
@@ -1110,8 +1136,9 @@ mark{background:rgba(200,176,32,.32);color:var(--cream);border-radius:3px;paddin
         du parcellaire est signalé sous la carte.</li>
       <li>Comparaison d'un millésime à l'autre, parcelle par parcelle</li>
     </ul></div>
-    <div class="card"><h4><svg class="g-ic" width="18" height="18" viewBox="0 0 24 24" aria-hidden="true" focusable="false"><use href="#ic-hautbas"></use></svg> Cuvier</h4><ul class="dot">
+    <div class="card"><h4><svg class="g-ic" width="18" height="18" viewBox="0 0 24 24" aria-hidden="true" focusable="false"><use href="#ic-hautbas"></use></svg> Cuves</h4><ul class="dot">
       <li>État de chaque cuve : volume, contenu, stade</li>
+      <li>Densités, températures, courbes de fermentation, relevé après relevé</li>
       <li>Suivi des opérations de vinification</li>
       <li>Indicateur de santé de l'ensemble du cuvier, en un coup d'œil</li>
       <li><b>Trouver une cuve</b> : la liste suit <b>l'ordre de votre cuverie</b> — celui écrit sur les
@@ -1155,13 +1182,13 @@ mark{background:rgba(200,176,32,.32);color:var(--cream);border-radius:3px;paddin
     logée en bois. En mixte, ce qui ne tient pas dans la cuve passe en barriques. La cuve que vous videz
     reste proposée : élever sur lies là où l'on a fermenté est un usage courant.</li>
     </ul></div>
-    <div class="card"><h4><svg class="g-ic" width="18" height="18" viewBox="0 0 24 24" aria-hidden="true" focusable="false"><use href="#ic-microscope"></use></svg> Analyses</h4><ul class="dot">
-      <li>Densités, températures, analyses de laboratoire</li>
-      <li>Courbes de suivi de fermentation</li>
-      <li>Pièce jointe PDF possible sur une analyse</li>
+    <div class="card"><h4><svg class="g-ic" width="18" height="18" viewBox="0 0 24 24" aria-hidden="true" focusable="false"><use href="#ic-microscope"></use></svg> Maturités</h4><ul class="dot">
       <li><b>Maturité avant vendange</b> : sucre ou degré au réfractomètre, parcelle par parcelle</li>
+      <li>Qui monte, qui stagne, dans quel ordre récolter — la synthèse à date est décrite plus bas</li>
+      <li>C'était l'onglet « Analyses » : les analyses de laboratoire, elles, vivent au Chai</li>
     </ul></div>
-    <div class="card"><h4><svg class="g-ic" width="18" height="18" viewBox="0 0 24 24" aria-hidden="true" focusable="false"><use href="#ic-engrenage"></use></svg> Réglages du Cuvier</h4><ul class="dot">
+    <div class="card"><h4><svg class="g-ic" width="18" height="18" viewBox="0 0 24 24" aria-hidden="true" focusable="false"><use href="#ic-engrenage"></use></svg> Réglages du Cuvier — dans la roue crantée</h4><ul class="dot">
+      <li>Ils ne sont plus un onglet : la <b>roue crantée</b> en haut à droite de la Cave les réunit avec ceux du Chai</li>
       <li>Déclaration des cuves et de leurs volumes</li>
       <li>Poids d'une caisse, rendement en jus, sucre par degré</li>
       <li><b>Corriger un poids déjà saisi</b> : reprendre tout un millésime d'un coup</li>
@@ -1181,7 +1208,7 @@ mark{background:rgba(200,176,32,.32);color:var(--cream);border-radius:3px;paddin
       jour à l'autre. La fiche du client <b>propose</b> son poids habituel, elle ne l'impose pas.
       Corriger cette fiche plus tard ne déplace <b>aucun</b> kilo déjà livré.</li>
     <li><b>Quand c'est la caisse qui s'est trompée, pas la saisie.</b> Des caisses annoncées à
-      25&nbsp;kg qui en pesaient 20, découvertes en fin de vendange : <b>Réglages du Cuvier &rsaquo;
+      25&nbsp;kg qui en pesaient 20, découvertes en fin de vendange : <b>roue crantée &rsaquo; Le Cuvier &rsaquo;
       « Corriger un poids déjà saisi »</b> reprend tout un millésime en une fois. L'écran liste les
       poids <b>réellement en place</b> — c'est la seule vue de l'application qui les montre — avec
       le nombre de récoltes, de caisses et de tonnes derrière chacun. Vous saisissez le poids réel,
@@ -1213,7 +1240,7 @@ mark{background:rgba(200,176,32,.32);color:var(--cream);border-radius:3px;paddin
 
   <h4 style="margin-top:22px"><svg class="g-ic" width="18" height="18" viewBox="0 0 24 24" aria-hidden="true" focusable="false"><use href="#ic-document"></use></svg> Le bon de livraison, et ce que le client renvoie</h4>
   <p>Depuis l'écran <b>Récoltes</b>, la ligne « kg vendus en raisin » ouvre les <b>ventes en
-  vrac</b> : un client, ses livraisons, ses documents. Même chemin depuis les Réglages du Cuvier.</p>
+  vrac</b> : un client, ses livraisons, ses documents. Même chemin depuis la roue crantée, bloc Le Cuvier.</p>
   <ul class="dot">
     <li><b>Une livraison, c'est un chargement</b> : un client, une date. Deux parcelles livrées le
       même jour au même acheteur ne font qu'un seul bon — c'est ce qu'il a reçu.</li>
@@ -1280,7 +1307,7 @@ mark{background:rgba(200,176,32,.32);color:var(--cream);border-radius:3px;paddin
   </ul>
 
   <h4 style="margin-top:22px"><svg class="g-ic" width="18" height="18" viewBox="0 0 24 24" aria-hidden="true" focusable="false"><use href="#ic-raisin"></use></svg> Maturité : « où en est-on » quand on n'a pas tout mesuré</h4>
-  <p>Au-dessus des courbes, l'onglet <b>Analyses</b> affiche une synthèse à date : la moyenne du
+  <p>Au-dessus des courbes, l'onglet <b>Maturités</b> affiche une synthèse à date : la moyenne du
   <b>domaine</b>, celle des <b>rouges</b> et celle des <b>blancs</b>, puis le classement de toutes les
   parcelles, de la plus avancée à la plus en retard. Tapez sur « Rouges » ou « Blancs » pour ne garder
   que celles-là ; retapez pour revenir au domaine.</p>
@@ -1304,7 +1331,7 @@ mark{background:rgba(200,176,32,.32);color:var(--cream);border-radius:3px;paddin
       pointillé</b> : ce sont des conversions, pas des mesures.</li>
   </ul>
   <div class="note tip"><span class="ni" aria-hidden="true"><svg class="g-ic" width="18" height="18" viewBox="0 0 24 24" aria-hidden="true" focusable="false"><use href="#ic-eclair"></use></svg></span><div>Le coefficient de conversion
-  (Réglages du Cuvier, <b>sucre par degré</b>) est <b>enregistré avec chaque analyse</b>. Le modifier
+  (roue crantée &rsaquo; Le Cuvier, <b>sucre par degré</b>) est <b>enregistré avec chaque analyse</b>. Le modifier
   plus tard ne change donc pas les mesures déjà saisies — seulement les suivantes.</div></div>
 
   <h3><svg class="g-ic" width="18" height="18" viewBox="0 0 24 24" aria-hidden="true" focusable="false"><use href="#ic-barrique"></use></svg> Le Chai — élevage</h3>
@@ -1316,14 +1343,14 @@ mark{background:rgba(200,176,32,.32);color:var(--cream);border-radius:3px;paddin
     Il évite l'erreur de calcul classique entre liquide et pastille.</li>
     <li><b>Pièces jointes</b> : un bulletin d'analyse en PDF peut être rattaché à une opération.</li>
     <li><b>Mise en bouteille</b> : clôture le suivi de la cuvée et fige le millésime.</li>
-    <li><b>Alerte d'ouillage</b> réglable de 3 à 30 jours — <span class="path">Cave › Le Chai › Réglages</span>.
+    <li><b>Alerte d'ouillage</b> réglable de 3 à 30 jours — <span class="path">Cave › roue crantée › Le Chai</span>.
     Le délai peut être <b>resserré millésime par millésime</b> : un vin jeune se surveille de plus près.
     Sans réglage propre, un millésime suit le délai général du domaine — rien ne change tant que vous n'y touchez pas.</li>
   </ul>
 
   <h4>Le parc à cuves</h4>
   <p>Tout ne vieillit pas en barrique. Déclarez vos cuves une bonne fois dans
-  <span class="path">Cave › Le Chai › Réglages › Le parc à cuves</span> : un nom, une contenance
+  <span class="path">Cave › roue crantée › Le Chai › Le parc à cuves</span> : un nom, une contenance
   <b>en litres</b>, et une matière. C'est réservé à l'administrateur.</p>
   <ul class="dot">
     <li><b>La matière décide de l'ouillage</b>, pas le type de contenant. <b>Inox</b> et <b>béton</b>
@@ -1355,12 +1382,11 @@ mark{background:rgba(200,176,32,.32);color:var(--cream);border-radius:3px;paddin
   l'<b>historique des rendements</b> visible dans la fiche de chaque parcelle, et le coût par hectare
   calculé dans le Pilotage. Une saisie, plusieurs usages.</div></div>
 
-  <h3><svg class="g-ic" width="18" height="18" viewBox="0 0 24 24" aria-hidden="true" focusable="false"><use href="#ic-chrono"></use></svg> Le millésime</h3>
-  <p>Cette troisième section ne demande <b>qu'une seule saisie</b>, le plafond de rendement : tout
-  le reste s'y déduit de ce qui est déjà enregistré au Cuvier et au Chai.</p>
+  <h3><svg class="g-ic" width="18" height="18" viewBox="0 0 24 24" aria-hidden="true" focusable="false"><use href="#ic-parcours"></use></svg> Le millésime</h3>
+  <p>Cette section ne demande <b>qu'une seule saisie</b>, le plafond de rendement : tout le reste s'y
+  déduit de ce qui est déjà enregistré au Cuvier et au Chai. L'agenda des quatre semaines, qui s'y
+  trouvait, est dans <b>Aujourd'hui</b>.</p>
   <ul class="dot">
-    <li><b>Ce qui vient</b> : l'agenda des quatre prochaines semaines — ouillages dus, cuves à
-    mesurer, fin de fermentation estimée, cuvées à soutirer, températures hautes.</li>
     <li><b>La ligne de vie</b> : le parcours du vin de la benne à la bouteille, avec les pertes
     chiffrées entre chaque étape, puis le rendement de chaque parcelle face au maximum de
     l'appellation.</li>
@@ -1456,16 +1482,73 @@ mark{background:rgba(200,176,32,.32);color:var(--cream);border-radius:3px;paddin
   2026. Changer de millésime en tête du formulaire vide donc la sélection de cuvées. Si un seul
   millésime est en cave, ce choix n'apparaît pas et l'écran est exactement celui d'avant.</div></div>
   <div class="note"><span class="ni" aria-hidden="true"><svg class="g-ic" width="18" height="18" viewBox="0 0 24 24" aria-hidden="true" focusable="false"><use href="#ic-liste"></use></svg></span><div><b>Quatre documents
-  s'impriment</b> depuis <span class="path">Réglages › App › Documents &amp; impressions</span> :
+  s'impriment</b> depuis la <b>roue crantée</b> de la Cave, bloc Documents — ou depuis
+  <span class="path">Réglages › App › Documents &amp; impressions</span>, qui les a tous :
   le <b>contrôle de maturité</b> (avant vendange), le <b>cahier de cuverie</b> (pendant la
   fermentation), le <b>registre des manipulations</b> (enrichissement, sulfitage, adjonctions,
   pratiques de cave, millésime par millésime) et le <b>bilan de campagne</b>. Ce sont des
   <b>états internes</b> : Ma Vigne prépare, l'exploitant déclare.</div></div>
 
+  <h4 style="margin-top:22px"><svg class="g-ic" width="18" height="18" viewBox="0 0 24 24" aria-hidden="true" focusable="false"><use href="#ic-graphique"></use></svg> Les courbes — comparer, pas consulter</h4>
+  <p>Les autres écrans de la Cave répondent sur <b>une</b> cuve. Celui-ci — l'onglet <b>Les courbes</b> du
+  millésime — les met <b>côte à côte</b>. Rien ne s'y saisit : c'est un écran de comparaison, pas de relevé.</p>
+  <p>Le parcours d'un vin s'y lit en quatre temps, et <b>chaque temps a son propre jour zéro</b>,
+  écrit en toutes lettres à côté de son titre. La vigne compte sur le calendrier, la cuve compte
+  depuis l'<b>encuvage</b>, le fût depuis l'<b>entonnage</b>. Ce ne sont pas trois détails : c'est
+  ce qui vous évite de lire deux graphes sur la même échelle mentale alors qu'ils n'en ont pas.</p>
+  <div class="cards">
+    <div class="card"><h4><svg class="g-ic" width="18" height="18" viewBox="0 0 24 24" aria-hidden="true" focusable="false"><use href="#ic-raisin"></use></svg> Les maturités</h4><ul class="dot">
+      <li>Le sucre au réfractomètre, une courbe par <b>parcelle</b></li>
+      <li>Sur un <b>axe de dates</b> : une parcelle pas encore vendangée n'a pas de date de récolte,
+        donc pas de jour zéro</li>
+      <li>C'est la même courbe qu'au Cuvier — pas une seconde version</li>
+    </ul></div>
+    <div class="card"><h4><svg class="g-ic" width="18" height="18" viewBox="0 0 24 24" aria-hidden="true" focusable="false"><use href="#ic-graphique"></use></svg> Les densités</h4><ul class="dot">
+      <li>Toutes les cuves sur <b>leur propre jour d'encuvage</b></li>
+      <li>Le tableau dessous répond au « pourquoi » : densité de départ, température moyenne et
+        maxi, sucre relevé à la vigne</li>
+      <li>Sur téléphone, trois colonnes se replient ; le <b>cahier de cuverie</b> les porte toutes</li>
+    </ul></div>
+    <div class="card"><h4><svg class="g-ic" width="18" height="18" viewBox="0 0 24 24" aria-hidden="true" focusable="false"><use href="#ic-thermometre"></use></svg> Les températures</h4><ul class="dot">
+      <li>Le <b>même rail de jours</b> que les densités</li>
+      <li>La bande verte est la fenêtre de travail ; au-dessus de 30 °C, le relevé porte un point rouge</li>
+      <li>Un relevé sans température n'est pas une température de zéro : il est absent du tracé</li>
+    </ul></div>
+    <div class="card"><h4><svg class="g-ic" width="18" height="18" viewBox="0 0 24 24" aria-hidden="true" focusable="false"><use href="#ic-barrique"></use></svg> La malo</h4><ul class="dot">
+      <li>En <b>mois depuis l'entonnage</b>, pas par rang d'analyse</li>
+      <li>Le trait est <b>tireté</b> : entre deux analyses, personne n'a mesuré</li>
+      <li>Une cuvée sans date d'entonnage n'apparaît pas — le premier relevé n'en tient pas lieu</li>
+    </ul></div>
+  </div>
+  <div class="note tip"><span class="ni" aria-hidden="true"><svg class="g-ic" width="18" height="18" viewBox="0 0 24 24" aria-hidden="true" focusable="false"><use href="#ic-doigt"></use></svg></span><div>Sur un calendrier,
+  une cuve entrée le 16 et une autre le 24 <b>n'ont aucun point commun</b> : leurs courbes se
+  croisent sans se comparer. Alignées sur leur propre jour zéro, leurs cinétiques se superposent,
+  et « celle qui part vite » se voit d'un coup d'œil.</div></div>
+  <div class="note"><span class="ni" aria-hidden="true"><svg class="g-ic" width="18" height="18" viewBox="0 0 24 24" aria-hidden="true" focusable="false"><use href="#ic-chrono"></use></svg></span><div>Le tableau est classé
+  sur le <b>jour où le vin sec a été relevé</b>, jamais sur la vitesse. Une pente mesurée sur trois
+  jours n'est pas comparable à une pente mesurée sur dix, et le début d'une fermentation en est la
+  phase la plus rapide : une cuve à peine relevée gagnerait <b>toujours</b> le classement. La
+  colonne « pts/j » porte donc l'<b>intervalle</b> sur lequel elle a été mesurée.</div></div>
+  <div class="note warn"><span class="ni" aria-hidden="true"><svg class="g-ic" width="18" height="18" viewBox="0 0 24 24" aria-hidden="true" focusable="false"><use href="#ic-alerte"></use></svg></span><div><b>Aucune
+  température n'est enregistrée en élevage.</b> Ni l'ouillage, ni le soutirage, ni le sulfitage,
+  ni l'analyse ne portent de température : seuls les relevés de fermentation en ont une. La courbe
+  de température <b>s'arrête donc au décuvage</b>. L'écran le dit plutôt que de vous laisser
+  chercher un graphe qui n'existe pas.</div></div>
+  <div class="note"><span class="ni" aria-hidden="true"><svg class="g-ic" width="18" height="18" viewBox="0 0 24 24" aria-hidden="true" focusable="false"><use href="#ic-info"></use></svg></span><div>Une cuve <b>sans date
+  d'encuvage est écartée</b> du comparatif, et l'écran dit combien il en écarte, et pourquoi. Rien
+  n'est deviné : une date fausse se croirait, une cuve absente se corrige. La colonne « Vigne »,
+  elle, est un <b>ordre de grandeur</b> — la part réelle de chaque parcelle entrée dans la cuve
+  n'est pas enregistrée, la moyenne est pondérée par la surface.</div></div>
+  <div class="note"><span class="ni" aria-hidden="true"><svg class="g-ic" width="18" height="18" viewBox="0 0 24 24" aria-hidden="true" focusable="false"><use href="#ic-chrono"></use></svg></span><div>Une campagne contient
+  <b>deux millésimes</b> : celui qui rentre en septembre et celui qui finit son élevage. En début de
+  campagne, l'écran montre donc le millésime <b>qui est en cave</b>, et le dit explicitement plutôt
+  que d'afficher des colonnes vides.</div></div>
+
   <h4 style="margin-top:22px"><svg class="g-ic" width="18" height="18" viewBox="0 0 24 24" aria-hidden="true" focusable="false"><use href="#ic-imprimante"></use></svg> Sortir la vendange sur papier</h4>
-  <p>Les deux écrans du Cuvier ont chacun leur document. On les édite depuis
-  <span class="path">Réglages › App › Documents &amp; impressions</span>, jamais depuis le Cuvier
-  lui-même : tout ce que Ma Vigne sait imprimer se trouve au même endroit.</p>
+  <p>Les deux écrans du Cuvier ont chacun leur document. On les édite depuis la <b>roue crantée</b>
+  de la Cave, bloc Documents, ou depuis <span class="path">Réglages › App › Documents &amp;
+  impressions</span> — même catalogue, mêmes documents : tout ce que Ma Vigne sait imprimer reste
+  réuni là, la roue n'en est qu'un raccourci.</p>
   <ul class="dot">
     <li><b>Le contrôle de maturité</b> reprend vos relèvements d'avant vendange sous forme de
       tableau : <b>une ligne par parcelle, une colonne par jour de relèvement</b>, dans l'ordre de
@@ -1566,6 +1649,10 @@ mark{background:rgba(200,176,32,.32);color:var(--cream);border-radius:3px;paddin
   <p>L'onglet s'ouvre sur le <b>parc entier</b> : les fûts vides du magasin <b>et</b> ceux qui sont
   en vin au chai, additionnés. Ce ne sont pas deux comptabilités à réconcilier — ce sont deux états
   du même fût.</p>
+  <p>En tête, deux lectures venues de la Cave : la <b>part des anges</b> — ce que l'ouillage a
+  réellement remis dans chaque cuvée sur les douze derniers mois, une ligne par millésime — et la
+  <b>pyramide des âges</b> du parc, qui montre combien de barriques dépassent la durée de vie que vous
+  avez fixée. Elles étaient dans le Pilotage ; le parc n'a plus qu'un seul chez-soi.</p>
   <div class="note tip"><span class="ni" aria-hidden="true"><svg class="g-ic" width="18" height="18" viewBox="0 0 24 24" aria-hidden="true" focusable="false"><use href="#ic-eclair"></use></svg></span><div><b>Entonner, embouteiller
   ou retirer une cuvée ne change pas le nombre de fûts du domaine.</b> Seuls <b>acheter</b> et
   <b>se séparer</b> le font. C'est la règle qui permet de faire confiance au total.</div></div>
@@ -1981,7 +2068,7 @@ mark{background:rgba(200,176,32,.32);color:var(--cream);border-radius:3px;paddin
 <section id="pilotage">
   <div class="sec-h">
     <div class="sec-ic" aria-hidden="true"><svg class="g-ic" width="18" height="18" viewBox="0 0 24 24" aria-hidden="true" focusable="false"><use href="#ic-graphique"></use></svg></div>
-    <div><h2>Pilotage</h2><div class="sub">Aujourd'hui · L'année · La campagne · L'équipe &amp; le matériel · Décider · Cave · Économie · Conformité</div></div>
+    <div><h2>Pilotage</h2><div class="sub">Aujourd'hui · L'année · La campagne · L'équipe &amp; le matériel · Décider · Économie · Conformité</div></div>
   </div>
   <p class="lead">Le Pilotage est un tableau de bord de <b>lecture</b>, pensé pour décider :
   où en est-on, tiendra-t-on les délais, peut-on traiter demain, combien coûte cet hectare. Il ne
@@ -2091,21 +2178,21 @@ mark{background:rgba(200,176,32,.32);color:var(--cream);border-radius:3px;paddin
   <p>C'est la troisième règle du module, après la ligne de cadre et le petit « i » :
   <b>ce qui dit quoi faire est un bouton, jamais une phrase à exécuter de mémoire.</b></p>
 
-  <div class="note tip"><span class="ni" aria-hidden="true"><svg class="g-ic" width="18" height="18" viewBox="0 0 24 24" aria-hidden="true" focusable="false"><use href="#ic-valide"></use></svg></span><div>Les <b>huit onglets</b>
-  suivent désormais cette règle, y compris <b>Décider</b>, <b>Cave</b> et <b>Conformité</b>. Dans le
+  <div class="note tip"><span class="ni" aria-hidden="true"><svg class="g-ic" width="18" height="18" viewBox="0 0 24 24" aria-hidden="true" focusable="false"><use href="#ic-valide"></use></svg></span><div>Les <b>sept onglets</b>
+  suivent désormais cette règle, y compris <b>Décider</b> et <b>Conformité</b>. Dans le
   simulateur, chaque étape porte son « i » — il remplace le pavé « comment lire » qui s'intercalait
   entre le titre et le graphique. La <b>légende des couleurs</b>, elle, reste affichée sous le graphe :
   celle-là ne se lit pas, elle se consulte du regard.</div></div>
 
   <h3><svg class="g-ic" width="18" height="18" viewBox="0 0 24 24" aria-hidden="true" focusable="false"><use href="#ic-boussole"></use></svg> Comment il se lit</h3>
   <p>Les onglets vont du <b>large au fin</b> : l'année, puis la campagne, puis l'équipe et le matériel,
-  puis la décision. Ils portent leur numéro. Après le trait, la Cave, l'Économie et la Conformité
+  puis la décision. Ils portent leur numéro. Après le trait, l'Économie et la Conformité
   sont des <b>écrans de détail</b> — pas des niveaux de zoom.</p>
   <ul class="dot">
     <li><b>La barre du haut dit où vous regardez</b> : l'exercice entier, ou une campagne. Cliquez
     une campagne dans la frise de l'année et les trois chiffres du haut, la frise et les tableaux
     de la campagne suivent. La croix revient à l'année. <b>Trois écrans ont leur propre cadre</b> et
-    ne se recadrent pas : l'Économie chiffre la période consultée, la Cave suit le millésime, la
+    ne se recadrent pas : l'Économie chiffre la période consultée, la
     Conformité roule sur sept ans glissants — chacun l'écrit au-dessus de ses chiffres, plutôt que
     de répondre en silence sur une autre fenêtre que celle affichée.</li>
     <li><b>Trois chiffres en tête de « L'année » et de « La campagne »</b> : les travaux, l'effectif,
@@ -2181,7 +2268,7 @@ mark{background:rgba(200,176,32,.32);color:var(--cream);border-radius:3px;paddin
     y pèse son <b>effectif inscrit au contrat</b>, pas une ligne de tableau.</li>
     <li><b>Jours favorables</b> à venir, et <b>Traiter&nbsp;?</b> — la réponse du jour.</li>
     <li><b>À la vigne aujourd'hui</b> : présences réelles, absences déduites du planning.</li>
-    <li><b>Tâche prioritaire</b> en cours et <b>alertes</b> matériel &amp; cave.</li>
+    <li><b>Tâche prioritaire</b> en cours et <b>alertes</b> matériel, et la carte <b>Cave</b> — ce qui presse, un bouton.</li>
   </ul>
 
   <h3><svg class="g-ic" width="18" height="18" viewBox="0 0 24 24" aria-hidden="true" focusable="false"><use href="#ic-raisin"></use></svg> La campagne</h3>
@@ -2293,69 +2380,17 @@ mark{background:rgba(200,176,32,.32);color:var(--cream);border-radius:3px;paddin
     <li>Probabilité de pluie affichée par créneau.</li>
   </ul>
 
-  <h3><svg class="g-ic" width="18" height="18" viewBox="0 0 24 24" aria-hidden="true" focusable="false"><use href="#ic-verre"></use></svg> Cave</h3>
-  <p>Quatre questions, dans cet ordre : <b>ce qui presse</b> aujourd'hui — ouillages en retard, cuves
-  à mesurer, fermentation qui ralentit, cuvées à soutirer ; <b>où en est le millésime</b> — de la
-  benne à la bouteille, rendement face au maximum de l'appellation — que vous posez là, millésime par
-  millésime, en touchant une parcelle —, comparaison avec l'année
-  précédente ; <b>ce que coûte le parc à fûts</b> — pyramide des âges, part des anges,
-  renouvellement à prévoir ; et <b>les courbes</b>, où se compare ce qui, ailleurs, se lit cuve
-  par cuve.</p>
+  <h3><svg class="g-ic" width="18" height="18" viewBox="0 0 24 24" aria-hidden="true" focusable="false"><use href="#ic-verre"></use></svg> La Cave n'est plus un onglet du Pilotage</h3>
+  <p>Elle en avait un, avec quatre écrans — ce qui presse, le millésime, le parc, les courbes —
+  construits sur les moteurs de la Cave, comme une seconde cave rangée autrement. Un mot porté par
+  deux écrans ne renvoie nulle part : tout est <b>rentré chez lui</b>. Ce qui presse est l'écran
+  d'arrivée de la Cave, <span class="path">Cave › Aujourd'hui</span> ; le millésime et les courbes
+  sont <span class="path">Cave › Le millésime</span> ; le parc à fûts — pyramide des âges, part des
+  anges — est en tête de <span class="path">La Réserve › Fûts</span>.</p>
+  <p>Ici, dans <b>Aujourd'hui</b>, il reste une carte <b>Cave</b> : combien de gestes cette semaine,
+  le verdict en une ligne, et un bouton <b>Ouvrir la Cave</b>. Une photo et une porte, pas une
+  seconde cave. Un appareil qui avait mémorisé l'onglet Cave s'ouvre sur Aujourd'hui.</p>
 
-  <h3><svg class="g-ic" width="18" height="18" viewBox="0 0 24 24" aria-hidden="true" focusable="false"><use href="#ic-graphique"></use></svg> Les courbes — comparer, pas consulter</h3>
-  <p>Les autres écrans de la cave répondent sur <b>une</b> cuve. Celui-ci les met <b>côte à
-  côte</b>. Rien ne s'y saisit : c'est un écran de comparaison, pas de relevé.</p>
-  <p>Le parcours d'un vin s'y lit en quatre temps, et <b>chaque temps a son propre jour zéro</b>,
-  écrit en toutes lettres à côté de son titre. La vigne compte sur le calendrier, la cuve compte
-  depuis l'<b>encuvage</b>, le fût depuis l'<b>entonnage</b>. Ce ne sont pas trois détails : c'est
-  ce qui vous évite de lire deux graphes sur la même échelle mentale alors qu'ils n'en ont pas.</p>
-  <div class="cards">
-    <div class="card"><h4><svg class="g-ic" width="18" height="18" viewBox="0 0 24 24" aria-hidden="true" focusable="false"><use href="#ic-raisin"></use></svg> Les maturités</h4><ul class="dot">
-      <li>Le sucre au réfractomètre, une courbe par <b>parcelle</b></li>
-      <li>Sur un <b>axe de dates</b> : une parcelle pas encore vendangée n'a pas de date de récolte,
-        donc pas de jour zéro</li>
-      <li>C'est la même courbe qu'au Cuvier — pas une seconde version</li>
-    </ul></div>
-    <div class="card"><h4><svg class="g-ic" width="18" height="18" viewBox="0 0 24 24" aria-hidden="true" focusable="false"><use href="#ic-graphique"></use></svg> Les densités</h4><ul class="dot">
-      <li>Toutes les cuves sur <b>leur propre jour d'encuvage</b></li>
-      <li>Le tableau dessous répond au « pourquoi » : densité de départ, température moyenne et
-        maxi, sucre relevé à la vigne</li>
-      <li>Sur téléphone, trois colonnes se replient ; le <b>cahier de cuverie</b> les porte toutes</li>
-    </ul></div>
-    <div class="card"><h4><svg class="g-ic" width="18" height="18" viewBox="0 0 24 24" aria-hidden="true" focusable="false"><use href="#ic-thermometre"></use></svg> Les températures</h4><ul class="dot">
-      <li>Le <b>même rail de jours</b> que les densités</li>
-      <li>La bande verte est la fenêtre de travail ; au-dessus de 30 °C, le relevé porte un point rouge</li>
-      <li>Un relevé sans température n'est pas une température de zéro : il est absent du tracé</li>
-    </ul></div>
-    <div class="card"><h4><svg class="g-ic" width="18" height="18" viewBox="0 0 24 24" aria-hidden="true" focusable="false"><use href="#ic-barrique"></use></svg> La malo</h4><ul class="dot">
-      <li>En <b>mois depuis l'entonnage</b>, pas par rang d'analyse</li>
-      <li>Le trait est <b>tireté</b> : entre deux analyses, personne n'a mesuré</li>
-      <li>Une cuvée sans date d'entonnage n'apparaît pas — le premier relevé n'en tient pas lieu</li>
-    </ul></div>
-  </div>
-  <div class="note tip"><span class="ni" aria-hidden="true"><svg class="g-ic" width="18" height="18" viewBox="0 0 24 24" aria-hidden="true" focusable="false"><use href="#ic-doigt"></use></svg></span><div>Sur un calendrier,
-  une cuve entrée le 16 et une autre le 24 <b>n'ont aucun point commun</b> : leurs courbes se
-  croisent sans se comparer. Alignées sur leur propre jour zéro, leurs cinétiques se superposent,
-  et « celle qui part vite » se voit d'un coup d'œil.</div></div>
-  <div class="note"><span class="ni" aria-hidden="true"><svg class="g-ic" width="18" height="18" viewBox="0 0 24 24" aria-hidden="true" focusable="false"><use href="#ic-chrono"></use></svg></span><div>Le tableau est classé
-  sur le <b>jour où le vin sec a été relevé</b>, jamais sur la vitesse. Une pente mesurée sur trois
-  jours n'est pas comparable à une pente mesurée sur dix, et le début d'une fermentation en est la
-  phase la plus rapide : une cuve à peine relevée gagnerait <b>toujours</b> le classement. La
-  colonne « pts/j » porte donc l'<b>intervalle</b> sur lequel elle a été mesurée.</div></div>
-  <div class="note warn"><span class="ni" aria-hidden="true"><svg class="g-ic" width="18" height="18" viewBox="0 0 24 24" aria-hidden="true" focusable="false"><use href="#ic-alerte"></use></svg></span><div><b>Aucune
-  température n'est enregistrée en élevage.</b> Ni l'ouillage, ni le soutirage, ni le sulfitage,
-  ni l'analyse ne portent de température : seuls les relevés de fermentation en ont une. La courbe
-  de température <b>s'arrête donc au décuvage</b>. L'écran le dit plutôt que de vous laisser
-  chercher un graphe qui n'existe pas.</div></div>
-  <div class="note"><span class="ni" aria-hidden="true"><svg class="g-ic" width="18" height="18" viewBox="0 0 24 24" aria-hidden="true" focusable="false"><use href="#ic-info"></use></svg></span><div>Une cuve <b>sans date
-  d'encuvage est écartée</b> du comparatif, et l'écran dit combien il en écarte, et pourquoi. Rien
-  n'est deviné : une date fausse se croirait, une cuve absente se corrige. La colonne « Vigne »,
-  elle, est un <b>ordre de grandeur</b> — la part réelle de chaque parcelle entrée dans la cuve
-  n'est pas enregistrée, la moyenne est pondérée par la surface.</div></div>
-  <div class="note"><span class="ni" aria-hidden="true"><svg class="g-ic" width="18" height="18" viewBox="0 0 24 24" aria-hidden="true" focusable="false"><use href="#ic-chrono"></use></svg></span><div>Une campagne contient
-  <b>deux millésimes</b> : celui qui rentre en septembre et celui qui finit son élevage. En début de
-  campagne, l'écran montre donc le millésime <b>qui est en cave</b>, et le dit explicitement plutôt
-  que d'afficher des colonnes vides.</div></div>
   <h3><svg class="g-ic" width="18" height="18" viewBox="0 0 24 24" aria-hidden="true" focusable="false"><use href="#ic-euro"></use></svg> Économie · <svg class="g-ic" width="18" height="18" viewBox="0 0 24 24" aria-hidden="true" focusable="false"><use href="#ic-balance"></use></svg> Conformité</h3>
   <div class="cards">
     <div class="card"><h4><svg class="g-ic" width="18" height="18" viewBox="0 0 24 24" aria-hidden="true" focusable="false"><use href="#ic-euro"></use></svg> Économie</h4><ul class="dot">
@@ -2470,7 +2505,7 @@ mark{background:rgba(200,176,32,.32);color:var(--cream);border-radius:3px;paddin
   millésime, puis rattachez vos parcelles à l'aide de la liste déroulante en bas de la carte.</p>
   <ul class="dot">
     <li><b>Un chiffre, une fois</b> — au lieu d'une saisie par parcelle. Les cartes de rendement
-      (Cave › Le millésime, et Pilotage › Cave) écrivent alors le nom de l'appellation d'où vient le
+      (Cave › Le millésime) écrit alors le nom de l'appellation d'où vient le
       plafond.</li>
     <li><b>L'ordre de priorité</b> : le plafond posé sur la parcelle, sinon celui de son appellation,
       sinon l'ancien réglage qui ne portait pas d'année. <b>Une saisie faite à la main n'est jamais
