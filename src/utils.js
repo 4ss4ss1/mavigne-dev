@@ -23,7 +23,7 @@ export const GT_ADMIN_EMAIL = 'ngdevpro@gmail.com';
 // WHATS_NEW   : tableau vide = modal desactive pour cette version.
 // Format item : { emoji:'📅', titre:'Titre court', desc:'Phrase utilisateur.' }
 // Regle : seulement les changements visibles par les utilisateurs.
-export const APP_VERSION = '6.95';
+export const APP_VERSION = '6.96';
 // ════ Journal des nouveautés (récap cumulatif) ════
 // Une entrée par version, la PLUS RÉCENTE EN HAUT : { v:'5.10', items:[ {emoji,titre,desc}, … ] }
 // À chaque release visible → AJOUTER un bloc en tête (ne pas remplacer). items:[] = release technique (rien à afficher).
@@ -354,6 +354,14 @@ window._mvGraphRepeindre = function(){
 };
 
 export const WHATS_NEW = [
+  { v: '6.96', items: [
+    { emoji: 'engrenage', titre: 'La Vigne et le Tracteur r\u00e8glent leurs affaires chez eux',
+      desc: "Une roue crant\u00e9e en haut \u00e0 droite de la Vigne ouvre vos t\u00e2ches et leur bar\u00e8me, vos \u00e9cartements de plantation et vos secteurs m\u00e9t\u00e9o ; celle du Tracteur ouvre le parc, les activit\u00e9s et le chrono. C\u2019\u00e9tait dans R\u00e9glages, deux onglets plus loin \u2014 m\u00eame \u00e9cran, m\u00eame contenu, \u00e0 un tap du module. Comme la Cave depuis la semaine derni\u00e8re." },
+    { emoji: 'imprimante', titre: 'Les documents d\u2019un module sont dans sa roue',
+      desc: "L\u2019\u00e9tat du vignoble, le rapport de saison et les fichiers du journal et des parcelles s\u2019impriment depuis la roue de la Vigne ; le carnet d\u2019entretien depuis celle du Tracteur. Le catalogue complet reste dans R\u00e9glages \u203a App \u203a Documents &amp; impressions." },
+    { emoji: 'curseurs', titre: 'R\u00e9glages a trois onglets, et une seule sortie par \u00e9cran',
+      desc: "Domaine, \u00c9quipe, App \u2014 plus de barre qui d\u00e9file, plus de compteurs en t\u00eate. Le petit bouton maison des en-t\u00eates est parti : il faisait la m\u00eame chose que le menu du bas, et sur l\u2019Accueil il vous envoyait ailleurs. Le voyant de synchronisation, lui, est toujours \u00e0 sa place." }
+  ] },
   { v: '6.95', items: [
     { emoji: 'corbeille', titre: 'Un peu de m\u00e9nage dans la Cave',
       desc: "Trois \u00e9crans de l\u2019ancienne Cave, d\u2019avant Le Chai, dormaient encore dans l\u2019application sans jamais s\u2019afficher. Ils sont retir\u00e9s, avec ce qui ne servait qu\u2019\u00e0 eux. Rien ne change \u00e0 l\u2019\u00e9cran\u00a0: la s\u00e9rie \u00ab\u00a0une question, un \u00e9cran\u00a0\u00bb est termin\u00e9e." },
@@ -2157,6 +2165,7 @@ var MV_AIDE = {
       ['Appui long puis glisser', "déplace un bloc ; l’œil le masque. Chacun règle son Accueil."],
       ['La pastille de saison', "change la vue. Revenir sur une période passée ne touche pas à la période active."],
       ['Actualiser', "force une resynchronisation quand un chiffre semble figé."],
+      ['La roue crantée', "en haut à droite ouvre ce qui se règle une fois l’an pour la vigne — tâches et barème, écartements de plantation, secteurs météo — et les documents de la vigne. Administrateur seulement ; l’en-tête dit « Vigne » sur les trois onglets."],
       ['« Tu prends le tracteur aujourd’hui ? »', "se pose à la première ouverture du jour, à ceux qui sont à la fois ouvriers et tractoristes et seulement si une session tracteur est ouverte. La réponse tient la journée et se repose le lendemain. Elle range le menu du bas et choisit l’écran d’ouverture : elle ne change aucun de vos droits, et rien ne disparaît — le reste passe sous « Plus », où se trouve aussi le retour au terrain."],
       ['La météo a besoin du réseau.', "Hors ligne, elle affiche la dernière prévision reçue."]
     ]
@@ -2170,7 +2179,7 @@ var MV_AIDE = {
       ['Onglet Carte', ": les contours viennent de votre export PAC ou d’un fichier KML."],
       ['La recherche', "accepte le nom du climat comme le lieu-dit."],
       ['Une parcelle arrachée', "sort des totaux mais reste dans l’historique."],
-      ['L’état du vignoble', "s’imprime depuis Réglages, onglet App, « Documents & impressions » : toutes vos parcelles sur une page, avec la surface, le cépage, la commune, l’avancement, le dernier travail, le dernier rendement — et la liste de ce qui reste à renseigner."]
+      ['L’état du vignoble', "s’imprime depuis la roue crantée de la Vigne, bloc Documents : toutes vos parcelles sur une page, avec la surface, le cépage, la commune, l’avancement, le dernier travail, le dernier rendement — et la liste de ce qui reste à renseigner."]
     ]
   },
   journal: {
@@ -2180,7 +2189,7 @@ var MV_AIDE = {
       ['Une équipe au travail', "tient en une seule entrée : tous les noms y figurent, et le travail se partage entre eux."],
       ['Les filtres', "par parcelle et par tâche se cumulent ; la pastille rappelle ce qui est actif."],
       ['Une saisie faite hors réseau', "repart toute seule au retour du signal."],
-      ['Le journal en fichier', "se prend dans Réglages, onglet App, « Documents & impressions »."]
+      ['Le journal en fichier', "se prend dans la roue crantée de la Vigne, bloc Documents."]
     ]
   },
   tracteur: {
@@ -2194,9 +2203,10 @@ var MV_AIDE = {
       ['Ce chrono ne fait pas votre journée de travail', ": il mesure le temps passé dans les parcelles, pour budgéter les travaux. Le lavage, les niveaux et le plein n’y sont pas."],
       ['Une mesure aberrante est écartée', ": très au-dessus ou très en dessous du barème, la parcelle est cochée au barème sans temps constaté, et l’écran dit lequel. Si cela arrive tous les jours, c’est le barème h/ha de l’activité qui est à revoir, pas celui qui conduit."],
       ['Les parcelles se rangent par distance', "à celle où vous êtes ; une tournée fixée par le chef passe devant. Les distances viennent des contours de vos parcelles, jamais d’un suivi de votre position."],
-      ['Le chrono s’active par le domaine', ": Réglages, onglet Tracteur, en tête des activités. Sans lui, le barème h/ha prend le relais et rien ne se mesure."],
+      ['Le chrono s’active par le domaine', ": la roue crantée du Tracteur, en tête des activités. Sans lui, le barème h/ha prend le relais et rien ne se mesure."],
       ['L’appoint de cuve GNR', "remonte le niveau et recalcule le prix du litre en moyenne pondérée."],
-      ['Le carnet d’entretien', "s’imprime machine par machine depuis Réglages, onglet App, « Documents & impressions »."],
+      ['Le carnet d’entretien', "s’imprime machine par machine depuis la roue crantée du Tracteur, bloc Documents."],
+      ['La roue crantée', "en haut à droite réunit le parc, les activités et leur barème h/ha, le chrono, et le carnet d’entretien. Administrateur seulement."],
       ['Rôle Tractoriste requis', "pour écrire : sans lui, l’écran passe en consultation seule."]
     ]
   },
@@ -2344,9 +2354,9 @@ var MV_AIDE = {
     points: [
       function () {
         return _mvAideSections('#regl-tabs-row .mvu-tab', 'onglets',
-          "Chacun regroupe ce qui se règle une fois et ne bouge plus souvent.");
+          "Ce qui n’appartient à aucun module : le domaine, l’équipe, votre compte.");
       },
-      ['Onglet Vigne', ": vos tâches, leurs heures par hectare, le barème de la convention, vos écartements de plantation et vos périodes de travail."],
+      ['Les réglages de la Vigne et du Tracteur', "ne sont plus ici : chaque module les règle chez lui, par la roue crantée de son en-tête — tâches, barème et plantations pour la Vigne, parc, activités et chrono pour le Tracteur. La Cave fait pareil depuis peu."],
       ['Vos écartements', "ramènent les heures conseillées à votre densité réelle. Sans eux, le barème suppose 10 000 pieds à l’hectare — vos heures à vous, elles, ne bougent jamais."],
       ['Le barème de référence', "se choisit par région dans l’écran du barème, ouvert par « Nouvelle tâche selon le barème de la convention » : la Bourgogne ou la Gironde pour l’instant, chacune avec son texte source et sa date. C’est une référence, pas une règle : en changer ne modifie aucune de vos valeurs."],
       ['Le taux horaire d’un salarié', "porte une date. Une augmentation s’enregistre « à partir du » jour choisi : les heures déjà travaillées gardent l’ancien taux, et le coût d’un exercice clos ne bouge plus. La fiche liste tout ce que ce taux a valu ; pour corriger une simple faute de frappe sans créer d’augmentation, videz la date. Ces montants sont visibles des seuls administrateurs."],

@@ -171,7 +171,9 @@ function _etpLoadSeason(){
 window._etpLoadSeason=_etpLoadSeason;
 function switchReglTab(tab){
   reglTab=tab;
-  ['domaine','vigne','equipe','tracteur','app'].forEach(function(t){
+  // Vigne et Tracteur ne sont plus des onglets : leurs blocs vivent dans la roue
+  // crantée de leur module (lot NAV-1, #ovReglVigne / #ovReglTracteur).
+  ['domaine','equipe','app'].forEach(function(t){
     var btn=document.getElementById('regl-tbtn-'+t);
     var view=document.getElementById('regl-view-'+t);
     if(btn)btn.classList.toggle('active',t===tab);
@@ -319,14 +321,6 @@ window._reglStashAbandonner = _reglStashAbandonner;
 
 function renderReglages(){
   if(!window._dataReady){ var _rml=document.getElementById('membres-list'); if(_rml)_rml.innerHTML=window._mvSk('reglages'); return; }
-  // Stats band en-tête
-  const smb=document.getElementById('regl-stat-membres');
-  const stk=document.getElementById('regl-stat-taches');
-  const str=document.getElementById('regl-stat-tracteurs');
-  if(smb)smb.textContent=window.MEMBRES.length;
-  if(stk)stk.textContent=window.TACHES.length;
-  if(str)str.textContent=window.TRACTEURS_LIST.length;
-
   // Badge rôle dans l'en-tête
   const roleB=document.getElementById('regl-role-badge');
   if(roleB){
@@ -360,12 +354,12 @@ function renderReglages(){
     if(domValEl)domValEl.textContent=window.DOMAINE_NOM;
   }
 
-  // Onglets : admin = 5 onglets (Domaine · Vigne · Équipe · Tracteur · App) ; non-admin = App seul
+  // Onglets : admin = 3 onglets (Domaine · Équipe · App) ; non-admin = App seul.
+  // Les blocs Vigne et Tracteur ne sont plus ici : ils sont dans la roue crantée de
+  // leur module (lot NAV-1), et renderReglages continue de les remplir plus bas.
   const _tabsRow=document.getElementById('regl-tabs-row');
   const _pDomaine=document.getElementById('regl-view-domaine');
-  const _pVigne=document.getElementById('regl-view-vigne');
   const _pEquipe=document.getElementById('regl-view-equipe');
-  const _pTrac=document.getElementById('regl-view-tracteur');
   const _pApp=document.getElementById('regl-view-app');
   const secDanger=document.getElementById('set-sec-danger');
   if(isAdmin()){
@@ -375,9 +369,7 @@ function renderReglages(){
   } else {
     if(_tabsRow)_tabsRow.style.display='none';
     if(_pDomaine)_pDomaine.style.display='none';
-    if(_pVigne)_pVigne.style.display='none';
     if(_pEquipe)_pEquipe.style.display='none';
-    if(_pTrac)_pTrac.style.display='none';
     if(_pApp)_pApp.style.display='block';
     if(secDanger)secDanger.style.display='none';
   }
@@ -3066,10 +3058,10 @@ var MV_DOCS = [
     s:'Les douze mois d\u2019une seule personne, born\u00e9s \u00e0 ses contrats, avec ses jours de formation et ses cong\u00e9s d\u00e9j\u00e0 pos\u00e9s. La feuille qu\u2019elle emporte.' },
 
   // --- Suivi du domaine : des etats internes, jamais des declarations ---
-  { f:'suivi', act:'vignoble',  mod:'',         ico:'\u{1F5FA}\u{FE0F}', bg:'var(--vert-pale)', fm:'pdf',
+  { f:'suivi', act:'vignoble',  mod:'vigne',    ico:'\u{1F5FA}\u{FE0F}', bg:'var(--vert-pale)', fm:'pdf',
     t:'\u00c9tat du vignoble', ask:'',
     s:'Toutes vos parcelles sur une page : surface, c\u00e9page, commune, avancement, dernier travail, dernier rendement \u2014 et ce qui reste \u00e0 renseigner.' },
-  { f:'suivi', act:'saison',    mod:'',         ico:'\u{1F4C4}', bg:'var(--or-pale)',    fm:'pdf', ov:true,
+  { f:'suivi', act:'saison',    mod:'vigne',    ico:'\u{1F4C4}', bg:'var(--or-pale)',    fm:'pdf', ov:true,
     t:'Rapport de saison', ask:'Choix de la p\u00e9riode',
     s:'Avancement, tracteur, entretiens, incidents, phyto, cuivre et ETP sur une p\u00e9riode.' },
   { f:'suivi', act:'annuel',    mod:'planning', ico:'\u{1F5D3}\u{FE0F}', bg:'var(--bleu-pale)', fm:'pdf',
@@ -3108,10 +3100,10 @@ var MV_DOCS = [
     s:'Un r\u00e9glage, pas un document : ces heures alimentent le rapport de saison.' },
 
   // --- Donnees brutes ---
-  { f:'brut',  act:'csvJournal',   mod:'', ico:'\u{1F4CB}', bg:'var(--vert-pale)',  fm:'csv',
+  { f:'brut',  act:'csvJournal',   mod:'vigne', ico:'\u{1F4CB}', bg:'var(--vert-pale)',  fm:'csv',
     t:'Journal des travaux', ask:'',
     s:'Toutes les entr\u00e9es avec date, parcelle, t\u00e2che, ouvrier et statut.' },
-  { f:'brut',  act:'csvParcelles', mod:'', ico:'\u{1F5FA}\u{FE0F}', bg:'var(--or-pale)', fm:'csv',
+  { f:'brut',  act:'csvParcelles', mod:'vigne', ico:'\u{1F5FA}\u{FE0F}', bg:'var(--or-pale)', fm:'csv',
     t:'Avancement par parcelle', ask:'',
     s:'Une ligne par parcelle, une colonne par t\u00e2che.' },
   { f:'brut',  act:'json',         mod:'', ico:'\u{1F4BE}', bg:'var(--gris-clair)', fm:'json',

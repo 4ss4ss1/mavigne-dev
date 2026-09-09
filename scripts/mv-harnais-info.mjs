@@ -186,9 +186,15 @@ t('_pilGo sait appeler un autre commutateur que switchReglTab',
   /var _sw = C\[3\] \|\| 'switchReglTab'/.test(PILNU));
 t('le commutateur vise existe bien sur window',
   fs.readFileSync('src/tracteur.js','utf8').includes('window.switchTracOnglet'));
-t('les sept cibles d\'origine gardent leur forme a trois elements',
-  ['saisons','taches','dens','secteurs','equipe','tracteurs'].every(k =>
+// ★ Lot NAV-1 (§98) : quatre cibles ont quitte Reglages pour la roue crantee de
+//   leur module — elles portent un 4e element, '_mvReglOpen'. Les deux qui
+//   restent dans Reglages gardent leur forme a trois elements.
+t('les deux cibles restees dans Reglages gardent leur forme a trois elements',
+  ['saisons','equipe'].every(k =>
     new RegExp(k + ":\\s*\\['reglages',").test(PILNU)));
+t('les quatre cibles de la Vigne et du Tracteur visent la roue crantee de leur module',
+  ['taches','dens','secteurs'].every(k => new RegExp(k + ":\\s*\\['home',\\s*'vigne',\\s*'set-sec-[a-z]+',\\s*'_mvReglOpen'\\]").test(PILNU))
+  && /tracteurs:\s*\['tracteur','tracteur','set-sec-tracteurs','_mvReglOpen'\]/.test(PILNU));
 
 /* ══ 5 quinquies. LES FICHES VIVANTES ══
    Un contenu calcule a l'execution echapperait a tout controle statique. La

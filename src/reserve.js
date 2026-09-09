@@ -245,7 +245,6 @@ function renderReserve(){
           +'<div class="mod-header-title">La Réserve</div>'
           +'<div class="mod-header-sub">Intrants, stock &amp; fûts</div>'
         +'</div>'
-        +'<button class="mod-home-btn" onclick="goHub()">'+_mvIcon('maison',18)+'</button>'
       +'</div>'
       +'<div class="mod-meta-row mvu-meta">'
         +'<div class="hv2-saison-pill" data-mv-pill><span class="hv2-dot"></span>&nbsp;<span data-mv-saison></span></div>'

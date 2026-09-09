@@ -2693,7 +2693,7 @@ var _MVT_CHAPS=[
 
   {f:'pap',   id:'documents',ic:'imprimante', t:'Documents & impressions', x:'Vingt-deux documents pr\u00eats : registres, relev\u00e9s MSA, inventaires, sauvegarde.'},
   {f:'pap',   id:'archives', ic:'dossier', t:'Les campagnes archiv\u00e9es', x:'Toutes vos saisons sur le m\u00eame axe : d\u2019une ann\u00e9e \u00e0 l\u2019autre, le d\u00e9calage se lit.'},
-  {f:'pap',   id:'reglages', ic:'engrenage', t:'Tout est param\u00e9trable', x:'T\u00e2ches, heures/ha, \u00e9quipe, communes, mat\u00e9riel, produits, formules de calcul.'}
+  {f:'pap',   id:'reglages', ic:'engrenage', t:'Tout est param\u00e9trable', x:'Le domaine et l\u2019\u00e9quipe ici ; les t\u00e2ches, les communes et le mat\u00e9riel dans la roue crant\u00e9e de leur module.'}
 ];
 function _mvtMenu(){
   _mvtChapterClose(true);
@@ -2780,7 +2780,7 @@ function _mvtChapter(id){
     else if(id==='reserve'){ goTo('reserve'); setTimeout(function(){ try{ if(window._rsvTabTo) window._rsvTabTo('audit'); }catch(e){ if(window.logError)window.logError({level:'info',cat:'demo',msg:'rsvTabTo'}); } },240); }
     else if(id==='documents'){ goTo('reglages'); setTimeout(function(){ try{ if(window.openDocs) window.openDocs(); }catch(e){ if(window.logError)window.logError({level:'info',cat:'demo',msg:'openDocs'}); } },300); }
     else if(id==='archives'){ if(window._pilOpenArchives) window._pilOpenArchives(); else _mvtGoPilTab('arc'); }
-    else if(id==='reglages'){ goTo('reglages'); setTimeout(function(){ try{ if(window.switchReglTab) window.switchReglTab('vigne'); }catch(e){ if(window.logError)window.logError({level:'info',cat:'demo',msg:'switchReglTab'}); } },280); }
+    else if(id==='reglages'){ goTo('reglages'); setTimeout(function(){ try{ if(window.switchReglTab) window.switchReglTab('domaine'); }catch(e){ if(window.logError)window.logError({level:'info',cat:'demo',msg:'switchReglTab'}); } },280); }
     else if(id==='ouvrier'){
       window._mvtOuvrierActive=true;
       try{ if(window.currentUser){ window.currentUser.roles=['ouvrier']; } if(typeof currentUser!=='undefined'){ currentUser.roles=['ouvrier']; } if(typeof applyRoles==='function')applyRoles(); }catch(e){ if(window.logError)window.logError({level:'info',cat:'demo',msg:'roles ouvrier'}); }
@@ -3237,6 +3237,7 @@ function applyRoles(){
   // Mode plein soleil — appliquer la préférence de l'utilisateur (#6)
   _hcApply(_hcLoad());
   if(window._dockBuild)_dockBuild();
+  _mvReglSync();
   // La question du jour. Si SESSIONS n'est pas encore charge, _mvModeCheck sort sans
   // rien marquer : le rattrapage differe repose la question une fois les donnees la.
   _mvModeCheck();
@@ -4473,6 +4474,76 @@ function _goLanding(){
   goTo((_it[0]&&_it[0].p)||'reglages');
 }
 window._goLanding=_goLanding;
+// ═══════════════════════════════════════════════════════════════════════
+// LA ROUE CRANTÉE DES MODULES (lot NAV-1, §98) — un module règle ses affaires
+// chez lui. Le patron est celui de la Cave (lot CAVE-2, validé) : une roue dans
+// l'en-tête, qui ouvre les réglages du module puis ses documents.
+// ⚠️ AUCUNE COPIE. Les blocs de réglage sont ceux de l'ancien onglet Réglages ›
+//   Vigne / › Tracteur, reparentés tels quels dans une feuille (index.html,
+//   #ovReglVigne / #ovReglTracteur) : mêmes id, mêmes écrivains (renderReglages,
+//   renderTracteurSet, renderActTracList). Les documents sont ceux du catalogue
+//   MV_DOCS (reglages.js), filtrés par module et servis par docsGo(i) — le seul
+//   chemin vers un document, comme dans la Cave.
+// ⚠️ La roue est réservée à l'administrateur : ce qu'elle ouvre l'était déjà
+//   (renderReglages n'affichait ces onglets qu'à lui). Un ouvrier ne la voit pas.
+var _MV_REGL = {
+  vigne:    { ov:'ovReglVigne',    docs:'regl-docs-vigne',    titre:'Vigne' },
+  tracteur: { ov:'ovReglTracteur', docs:'regl-docs-tracteur', titre:'Tracteur' }
+};
+var _MV_REGL_DOC_ICO = { vignoble:'carte', saison:'graphique', csvJournal:'journal', csvParcelles:'liste', entretien:'outil' };
+function _mvReglDocs(mod){
+  var cat=window.MV_DOCS; if(!Array.isArray(cat)) return [];
+  var out=[];
+  cat.forEach(function(d,i){ if(d && d.mod===mod) out.push({i:i, d:d}); });
+  return out;
+}
+function _mvReglDocsHtml(mod, titre){
+  var l=_mvReglDocs(mod);
+  if(!l.length) return '';
+  var h='<div class="set-title">Documents \u00b7 '+_escHtml(titre)+'</div><div style="margin:0 16px">';
+  l.forEach(function(x){
+    var d=x.d;
+    h+='<div class="set-row" onclick="docsGo('+x.i+')"><div class="sr-l"><div class="sr-ico" style="background:var(--bleu-pale)">'
+      +_mvIcon(_MV_REGL_DOC_ICO[d.act]||'imprimante',18)+'</div><div><div class="sr-lbl">'+_escHtml(d.t||'')+'</div>'
+      +'<div class="sr-sub">'+(d.ask?_escHtml(d.ask)+' \u00b7 ':'')+_escHtml(String(d.fm||'pdf').toUpperCase())+'</div></div></div>'
+      +'<div class="sr-arr">\u203a</div></div>';
+  });
+  // Le catalogue entier reste à sa place : la roue ne sert que les documents du module.
+  h+='<div class="set-row" style="border-radius:0 0 16px 16px" onclick="_mvReglTousDocs()"><div class="sr-l"><div class="sr-ico" style="background:var(--gris-clair)">'
+    +_mvIcon('dossier',18)+'</div><div><div class="sr-lbl">Tous les documents</div><div class="sr-sub">Le catalogue complet, dans R\u00e9glages \u203a App</div></div></div><div class="sr-arr">\u203a</div></div>';
+  return h+'</div>';
+}
+function _mvReglTousDocs(){
+  // Une seule roue est ouverte à la fois ; on les ferme toutes, sans argument dans
+  // l'onclick (C24b : aucune valeur interpolée dans un gestionnaire).
+  Object.keys(_MV_REGL).forEach(function(k){ closeOv(null,_MV_REGL[k].ov); });
+  goTo('reglages');
+  setTimeout(function(){ try{ if(window.switchReglTab) window.switchReglTab('app'); if(window.openDocs) window.openDocs(); }catch(e){ if(window.logError)window.logError({level:'info',cat:'nav',msg:'roue: tous les documents'}); } },260);
+}
+function _mvReglOpen(mod){
+  var R=_MV_REGL[mod]; if(!R) return;
+  if(!isAdmin()){ showToast('R\u00e9serv\u00e9 \u00e0 l\u2019administrateur','#C0392B'); return; }
+  if(!window._dataReady){ showToast('Chargement en cours\u2026','#B85A1A'); return; }
+  // Les blocs sont remplis par les écrivains de Réglages, exactement comme quand
+  // on ouvrait l'onglet : on les rappelle, on ne les recopie pas.
+  try{ if(window.renderReglages) window.renderReglages(); }catch(e){ if(window.logError)window.logError({level:'info',cat:'nav',msg:'roue: renderReglages',detail:(e&&e.message)||''}); }
+  var docs=document.getElementById(R.docs);
+  if(docs) docs.innerHTML=_mvReglDocsHtml(mod, R.titre);
+  openOv(R.ov);
+}
+// La roue n'apparaît qu'à l'administrateur ; rappelé par applyRoles.
+function _mvReglSync(){
+  var adm=false; try{ adm=isAdmin(); }catch(e){ adm=false; }
+  var bs=document.querySelectorAll('.mv-regl-gear');
+  for(var i=0;i<bs.length;i++) bs[i].style.display=adm?'':'none';
+}
+window._MV_REGL=_MV_REGL;
+window._mvReglDocs=_mvReglDocs;
+window._mvReglDocsHtml=_mvReglDocsHtml;
+window._mvReglTousDocs=_mvReglTousDocs;
+window._mvReglOpen=_mvReglOpen;
+window._mvReglSync=_mvReglSync;
+
 function _dockDef(){
   var it=[];
   // ⚠️ La NAVIGATION est l'un des trois endroits ou l'icone est legitime — c'est
@@ -5897,8 +5968,11 @@ function _dmrConseils(){
 window._dmrGo = function(k){
   try {
     if (k === 'parc') { if (window.goTo) window.goTo('parcelles'); return; }
+    // Les réglages de la Vigne vivent dans la roue crantée de la Vigne (lot NAV-1) :
+    // on y va depuis l'Accueil, sans passer par Réglages.
+    if (k === 'vigne') { if (window._mvReglOpen) window._mvReglOpen('vigne'); return; }
     if (window.goTo) window.goTo('reglages');
-    var onglet = (k === 'dom') ? 'domaine' : (k === 'equipe' ? 'equipe' : 'vigne');
+    var onglet = (k === 'dom') ? 'domaine' : 'equipe';
     setTimeout(function(){ if (window.switchReglTab) window.switchReglTab(onglet); }, 220);
   } catch(e) { if (window.logError) window.logError({ level:'info', cat:'home', msg:'dmrGo' }); }
 };
@@ -10722,13 +10796,12 @@ function _syncMakeDot(){
   return b;
 }
 function _syncEnsureDots(){
-  // un point avant chaque bouton ⌂ (goHub) des headers de module
-  document.querySelectorAll('button.mod-home-btn').forEach(function(btn){
-    var oc=btn.getAttribute('onclick')||'';
-    if(oc.indexOf('goHub')<0)return;
-    var prev=btn.previousElementSibling;
-    if(prev&&prev.classList&&prev.classList.contains('mv-syncdot'))return;
-    btn.parentNode.insertBefore(_syncMakeDot(),btn);
+  // ⚠️ Le point s'accrochait au bouton maison (goHub) de chaque en-tête. Le bouton
+  //   est parti (lot NAV-1 : le dock est la seule sortie) — le point, lui, reste :
+  //   en bout de rangée de chaque .mod-header-top, là où il était.
+  document.querySelectorAll('.mod-header-top').forEach(function(top){
+    if(top.querySelector('.mv-syncdot'))return;
+    top.appendChild(_syncMakeDot());
   });
 }
 function _syncSetState(state,count){

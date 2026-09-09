@@ -2,7 +2,15 @@
 
 > Document de référence du projet **Ma Vigne** (GUERETTECH). Il est le **porteur de vérité** :
 > la mémoire Claude est plafonnée, ce fichier ne l'est pas.
-> Dernière consolidation : **9 septembre 2026 (nuit, fin)** — **CAVE-5, LE MÉNAGE (§97)** : les trois blocs
+> Dernière consolidation : **9 septembre 2026 (nuit, NAV)** — ★★★ **NAV-1, LA ROUE CRANTÉE DES MODULES (§98)** :
+> un module règle ses affaires **chez lui**. Réglages › Vigne et › Tracteur deviennent la roue crantée de
+> leur en-tête (blocs **reparentés** dans `#ovReglVigne` / `#ovReglTracteur`, mêmes id, mêmes écrivains), avec
+> les documents du module (`MV_DOCS` filtré, `docsGo(i)`). Réglages : **5 → 3 onglets**, bande de compteurs
+> retirée. Le bouton 🏠 quitte les **10 en-têtes de module** — ⚠️ il portait le **voyant de synchro**, ré-ancré
+> sur `.mod-header-top`. Titre « Vigne » sur les trois pages. **APP 6.95 → 6.96 · SW 7.54 → 7.55**, base
+> `f79891c`. Audit NAV-0 mesuré (6 endroits où l'on règle, 3 mots, 3 portes) et plan NAV-2…6 en **§98**.
+>
+> ★ Précédente : **9 septembre 2026 (nuit, fin)** — **CAVE-5, LE MÉNAGE (§97)** : les trois blocs
 > morts d'`index.html` (la Cave d'avant Le Chai, 52 lignes) retirés avec leurs seuls appelants et six règles
 > CSS. **APP 6.94 → 6.95 · SW 7.53 → 7.54**, un item `WHATS_NEW` qui dit qu'il n'y a rien à voir. La série CAVE est close : de **3 modules,
 > 13 écrans, 5 barres, 4 homonymes** à **8 écrans, 4 barres, 0 homonyme**. Détail en **§97**.
@@ -15021,3 +15029,108 @@ seul bloc 6.95 » ; l'item dit qu'il n'y a rien à voir) · `v7.53` une fois dan
 pour les réglages (§95) · ③+④ l'onglet Pilotage › Cave rentré dans la Cave, le parc à la Réserve (§96) ·
 ⑤ le ménage (§97). **Mesuré au départ : 3 modules, 13 écrans, 5 barres, 4 homonymes. À l'arrivée : la
 Cave et la Réserve, 8 écrans, 4 barres, 0 homonyme** — et une carte dans le Pilotage.
+
+## 98. ★★★ NAV-1 — LA ROUE CRANTÉE DES MODULES : UN MODULE RÈGLE SES AFFAIRES CHEZ LUI (09/09 — APP 6.95 → 6.96 · SW 7.54 → 7.55 · base `f79891c`)
+
+> Lot **①** d'une série ouverte par un audit mesuré (NAV-0 : `audit-ux-navigation.md` + `maquette-nav.html`,
+> 8 écrans cliquables, livrés le 09/09). Commande : « améliore la navigation, l'expérience, la cohérence des
+> réglages ». Même méthode que la Cave (§94) : **mesurer sur le code, maquetter, puis un lot par règle.**
+
+### 98a. Ce que le code disait (NAV-0)
+
+| Constat | Mesure |
+|---|---|
+| Endroits où l'on règle quelque chose | **6** — Réglages (5 onglets) · Cave ⚙ · Planning › Le cadre · Pilotage › Outils › Paramétrage · « Choisir les indicateurs » · Accueil (appui long) |
+| Mots pour « réglage » | **3** — Réglages · Paramétrage · Le cadre |
+| Portes vers un document | **3** — Réglages › App · Cave ⚙ · un bouton d'export **dans la barre d'onglets** du Phyto — plus **9** renvois « Réglages, onglet App » dans `MV_AIDE` |
+| Bouton 🏠 (`goHub`) dans l'en-tête | **11 / 11** pages ; sur l'Accueil, il envoie l'admin au Pilotage (`_landingPage`) |
+| Titre d'en-tête ≠ mot du dock | **3** — Vigne (Accueil / Mes Parcelles / Journal), Cave, Réserve |
+| `CONFIG.eco` | **2** écrans de saisie (Réglages › Domaine et Pilotage › Paramétrage) |
+| Aide qui dit faux | fiche Pilotage point 1 (« rien ne se saisit ici ») · guide Réglages (simulateur situé dans Domaine) |
+
+**La cause en une phrase** : quatre patrons pour ranger un réglage — la Cave chez elle (§95), la Vigne et
+le Tracteur dans un autre module, le Planning dans un onglet du quotidien, le Pilotage derrière « Outils ».
+C'est §94a, généralisé. **Six règles cibles** : ⚙ sur chaque module (réglages + documents) · Réglages =
+Domaine · Équipe · Moi · un document se prend dans la roue du module qui le produit · un seul mot,
+« Réglages » · une seule sortie par en-tête · l'aide corrigée dans le lot qui touche l'écran.
+
+### 98b. Ce que le lot fait — et ce qu'il a trouvé en le faisant
+
+- **Reparenté, pas recopié.** `#regl-view-vigne` (tâches & barème, plantations, secteurs météo) et
+  `#regl-view-tracteur` (parc, activités, chrono) quittent `#page-reglages` pour deux feuilles
+  `.overlay > .modal` posées avant `#page-chat` : **mêmes id, mêmes écrivains** (`renderReglages`,
+  `renderTracteurSet`, `renderActTracList` n'ont pas bougé d'une ligne). `_mvReglOpen(mod)` (app.js,
+  devant `_dockDef`) refuse un non-admin, rappelle `renderReglages()` pour remplir, rend le bloc
+  Documents, puis `openOv`. Registre `_MV_REGL` ; la roue est `class="mod-home-btn mv-regl-gear"`,
+  visible admin seulement (`_mvReglSync` depuis `applyRoles`).
+- **Les documents du module** : `MV_DOCS` filtré par `d.mod`, une ligne `.set-row` par document,
+  `docsGo(i)` avec **l'index du catalogue** (contre-épreuve : l'index de la liste filtrée rougit). Les
+  quatre documents `mod:''` de la vigne (vignoble, saison, csvJournal, csvParcelles) portent maintenant
+  `mod:'vigne'` — ce qui les grise, comme les autres, chez qui la Vigne est masquée. « Tous les
+  documents » renvoie au catalogue de Réglages › App, sans argument dans l'`onclick` (C24b a rougi sur
+  la première version, qui interpolait `mod`).
+- **Réglages 5 → 3** (`switchReglTab` ne connaît que `domaine`, `equipe`, `app`), `mvu-tabs-many`
+  retiré, bande `#regl-kpis` retirée avec ses trois écrivains. « App » garde son nom **pour ce lot** :
+  le renommage en « Moi » touche neuf textes, il attend NAV-6.
+- ⚠️⚠️ **LE BOUTON 🏠 PORTAIT LE VOYANT DE SYNCHRO.** `_syncEnsureDots` insérait le point
+  « synchronisé / hors ligne / N en attente » *devant chaque bouton `goHub`*. Retirer les dix boutons sans
+  le lire aurait fait disparaître l'indicateur hors-ligne de dix écrans, sans erreur et sans test. Il
+  s'ancre désormais en **fin de `.mod-header-top`** — même place visuelle. *Un bouton qu'on retire, on lit
+  d'abord qui s'y accroche.* Deux variantes trouvées au passage : le Planning avait un `&#x2302;` texte
+  au lieu du SVG (une ancre unique aurait laissé sa maison), et le Pilotage un `#pil-back` à lui — sans
+  voyant de synchro, ce qui était déjà une incohérence. Le seul `goHub()` restant dans `index.html` est
+  celui du panneau GT ; la fonction reste (login, retour de démo).
+- **Titre « Vigne »** sur les trois pages, icône `feuille` sur les trois ; les sous-titres (`#hv2-header-sub`,
+  `#p-saison-sub`, `#j-sub`) sont inchangés. Les fiches `MV_AIDE` gardent leur titre par écran.
+- **Les renvois suivent** : `_PIL_DIAG_CIBLES` (taches, dens, secteurs → `['home','vigne',id,'_mvReglOpen']`,
+  tracteurs → `['tracteur',…]`) via le 4ᵉ élément déjà prévu par §info ; les libellés `ou:` disent « Roue
+  crantée de la Vigne › … » ; `_dmrGo('vigne')` (Mise en route) ouvre la roue ; le chapitre de démo
+  « Réglages » atterrit sur Domaine et dit où sont les autres.
+- **Différé et dit** : conso GNR et IFT de référence restent dans Réglages › Domaine › Économie &
+  conformité (NAV-4 les emporte avec Paramétrage). La roue de la Cave reste une **section** (§95), celle
+  de la Vigne et du Tracteur une **feuille** : même geste, deux anatomies — à unifier en NAV-6 si la
+  feuille tient à l'usage (les blocs de la Vigne ouvrent eux-mêmes des feuilles : `ovTache`, écartements,
+  communes — elles s'empilent au-dessus, et reviennent sur la roue à la fermeture).
+
+### 98c. Accompagnement (règle n°4)
+
+`MV_AIDE` : Accueil (+ la roue), Parcelles et Journal (documents → roue), Tracteur (chrono → roue,
+carnet → roue, + la roue), Réglages (le premier point dit ce qui reste ; « Onglet Vigne » remplacé par
+« Les réglages de la Vigne et du Tracteur ne sont plus ici »). Guide : **04** reçoit le bloc Vigne de 12
+(+ un `<h3>` roue), **06** le bloc Tracteur (+ roue), **12** passe à trois onglets et corrige au passage
+« paramètres du simulateur » (ils sont dans Pilotage › Paramétrage, pas dans Domaine), **13** nomme les
+roues, **05** et **14** : cinq chemins « Réglages › Vigne › … » → « Vigne › {ic:engrenage} › … » ;
+`demarrage.html` une ligne. ⚠️ Le caractère ⚙ dans un texte du guide **compte comme un emoji** pour
+`mv-harnais-icones` (cliquet par surface) : écrire `{ic:engrenage}`, jamais ⚙. `WHATS_NEW` 6.96 : trois
+items (la roue, les documents, Réglages à trois onglets et la sortie unique).
+
+### 98d. Vérifications
+
+`npm run check` **EXIT=0** · preflight **0 erreur** · `mv-harnais-regl-module` **73/73** dont **11
+contre-épreuves** (bloc recopié, onglet Vigne revenu, compteurs revenus, maison revenue, voyant sur goHub,
+roue ouverte à un ouvrier, index de liste au lieu d'index de catalogue, titre non échappé, cible du
+Pilotage dans Réglages, `mod:''` oublié, fiche qui renvoie dans Réglages › App) · `mv-harnais-info`
+**130/130** (l'assertion « les sept cibles gardent trois éléments » gravait l'ancien monde : réécrite en
+deux — les deux restées dans Réglages, les quatre qui ouvrent une roue) · `WHATS_NEW` exécuté en Node
+(6.96, 3 items) · `v7.55` cinq fois dans `sw.js` · guide régénéré (`build-guide --check` vert) ·
+`npm run build` EXIT=0.
+
+### 98e. La suite (après validation à l'usage)
+
+**NAV-2** Planning : « Le cadre » quitte `#plan-tabs` pour la roue (`_PLAN_TAB_MIGR.cadre → mois`).
+**NAV-3** Pilotage : Paramétrage + « Choisir les indicateurs » → roue ; « Outils » disparaît, Archives = 8ᵉ
+onglet après le filet ; IFT et conso GNR quittent Réglages › Domaine ; fiche point 1 réécrite.
+**NAV-4** Documents : roue sur Phyto (le bouton CSV quitte `#phyto-tabs-row`) et Réserve ; les
+renvois restants (Planning ×2, Cave ×1). **NAV-5** Vocabulaire : « Paramétrage » et « Le cadre » bannis
+(`lint-vocabulaire`), « App » → « Moi », titres d'en-tête = mots du dock (« Cave », « Réserve » — à
+trancher), casse « Le Millésime », `#page-chat` (§51 — à trancher).
+
+### 98f. La note de livraison
+
+**Base : `f79891c`**, `.mv-base` mis à jour. Fichiers : `index.html` (racine), `src/app.js`,
+`src/reglages.js`, `src/pilotage.js`, `src/reserve.js`, `src/utils.js`, `public/sw.js`,
+`public/demarrage.html`, `guide/04-vigne.html`, `guide/05-saisons.html`, `guide/06-tracteur.html`,
+`guide/12-reglages.html`, `guide/13-donnees.html`, `guide/14-depannage.html`,
+`scripts/mv-harnais-regl-module.mjs` (nouveau), `scripts/mv-harnais-info.mjs`,
+`scripts/harnais-claude-md.mjs`, `package.json`, `.mv-base`, `CLAUDE.md`. Puis `node scripts/build-guide.mjs`
+(régénère `public/guide.html`, non livré), `npm run build && firebase deploy`.

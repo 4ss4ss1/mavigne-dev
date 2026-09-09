@@ -2016,7 +2016,7 @@ function _pilPanelTemps(d){
       +(Math.round(_ratio*10)/10).toString().replace('.',',')+'</b>. Rien ne reste pour la cave, les trajets ou l\u2019entretien.';
   } else {
     _footR+='Le reste ('+_etpF(_aut)+' ETP) part sur cave, trajets, entretien\u2026'
-      +((_tH>0)?'':' Renseignez un bar\u00e8me h/ha par activit\u00e9 (R\u00e9glages \u203a Tracteur) pour d\u00e9tacher le tracteur d\u2019\u00ab Autres \u00bb.');
+      +((_tH>0)?'':' Renseignez un bar\u00e8me h/ha par activit\u00e9 (roue crant\u00e9e du Tracteur \u203a Activit\u00e9s) pour d\u00e9tacher le tracteur d\u2019\u00ab Autres \u00bb.');
   }
   // ★ Une moyenne n'est pas un pic : le dire ICI, a cote du chiffre moyen, est le
   //   seul endroit ou quelqu'un risque de le confondre avec un besoin reel.
@@ -8190,7 +8190,6 @@ function _pilTabsHtml(tab){
 }
 function _pilHdrHtml(d){
   return '<header class="pil-mast"><div class="pil-mast-orb"></div><div class="pil-mast-in">'
-    +'<button class="pil-icon" id="pil-back" title="Accueil">\u2302</button>'
     +'<div class="pil-mast-id"><div class="pil-eyebrow"><span class="pil-syncdot"></span>Pilotage \u00b7 temps r\u00e9el</div>'
     +'<div class="pil-dom" id="pil-dom-nom">'+_pilEsc(d.domaine)+'</div></div>'
     +'<div class="pil-mast-right">'
@@ -8699,11 +8698,14 @@ window._pilPortee = _pilPortee;
 //   ecran, le doigt en obtenait un autre. Le panneau vit ICI, au niveau ①.
 var _PIL_DIAG_CIBLES = {
   saisons:   ['reglages','domaine','set-sec-saisons'],
-  taches:    ['reglages','vigne',  'set-sec-taches'],
-  dens:      ['reglages','vigne',  'set-sec-dens'],
-  secteurs:  ['reglages','vigne',  'set-sec-secteurs'],
+  // ★ Les réglages de la Vigne et du Tracteur vivent dans la roue crantée de leur
+  //   module (lot NAV-1) : on ouvre le module, puis sa roue, puis on fait
+  //   clignoter le bloc — qui a gardé son id en changeant d'hôte.
+  taches:    ['home',    'vigne',  'set-sec-taches',   '_mvReglOpen'],
+  dens:      ['home',    'vigne',  'set-sec-dens',     '_mvReglOpen'],
+  secteurs:  ['home',    'vigne',  'set-sec-secteurs', '_mvReglOpen'],
   equipe:    ['reglages','equipe', 'set-sec-equipe'],
-  tracteurs: ['reglages','tracteur','set-sec-tracteurs'],
+  tracteurs: ['tracteur','tracteur','set-sec-tracteurs','_mvReglOpen'],
   parcelles: ['parcelles',null,null],
   // ★ PREMIERE CIBLE HORS DES REGLAGES. « Cuve GNR a renseigner (Tracteur ›
   //   Entretien) » etait du TEXTE MORT : il fallait lire, retenir, sortir du
@@ -8919,7 +8921,7 @@ function _pilDiag(){
      +(sansBar.length>4?(' et '+(sansBar.length-4)+' autre'+(sansBar.length-4>1?'s':'')):'')
      +'</b> n\u2019'+(sansBar.length>1?'ont':'a')+' pas d\u2019heures par hectare. '
      +(sansBar.length>1?'Elles ne p\u00e8sent':'Elle ne p\u00e8se')+' <b>rien</b> dans la charge : le total affich\u00e9 est un plancher.',
-    ou:'R\u00e9glages \u203a Vigne \u203a T\u00e2ches' });
+    ou:'Roue crant\u00e9e de la Vigne \u203a T\u00e2ches' });
 
   // ── Les parcelles ────────────────────────────────────────────────────────
   var parc=(window.PARCELLES||[]).filter(function(x){ return x && x.statut!=='Arrachee'; });
@@ -8941,7 +8943,7 @@ function _pilDiag(){
     out.push({ g:'b', cible:'dens', touche:[],
       k:'\u00c9cartements de plantation absents',
       f:'Sans eux, le bar\u00e8me conseill\u00e9 suppose <b>10 000 pieds/ha</b>. \u00c0 6 000 pieds, il propose environ un tiers d\u2019heures de trop.',
-      ou:'R\u00e9glages \u203a Vigne' });
+      ou:'Roue crant\u00e9e de la Vigne \u203a Vos plantations' });
 
   // ── La conformite ────────────────────────────────────────────────────────
   // Sans ce constat, la photo Conformite pourrait porter un drapeau qui ouvre
@@ -9463,7 +9465,6 @@ function _pilBindContent(content){
 
 // ── Branchement (une fois par render) ──
 function _pilBind(){
-  var back=document.getElementById('pil-back'); if(back) back.onclick=function(){ if(window.goHub) window.goHub(); };
   var tabs=document.getElementById('pil-tabs');
   var omenu=document.getElementById('pil-outils-menu');
   function _pilOutilsClose(){ if(omenu) omenu.classList.remove('show'); }

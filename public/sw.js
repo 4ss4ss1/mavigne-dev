@@ -1,4 +1,11 @@
-// MA VIGNE — Service Worker v7.54
+// MA VIGNE — Service Worker v7.55
+// v7.55 (09/09/2026) — NAV-1 : LA ROUE CRANTEE DES MODULES. Les reglages de la
+//   Vigne et du Tracteur quittent le module Reglages pour la roue crantee de
+//   leur en-tete (blocs reparentes dans #ovReglVigne / #ovReglTracteur, memes
+//   id), avec les documents du module. Reglages passe a trois onglets, sans
+//   bande de compteurs. Le bouton maison quitte les dix en-tetes de module : le
+//   dock est la seule sortie ; le voyant de synchro s'ancre sur .mod-header-top.
+//   Titre « Vigne » sur les trois pages du module. APP 6.96.
 // v7.54 (09/09/2026) — CAVE-5 : MENAGE. Les trois blocs morts d'index.html
 //   (#cave-view-cuv, #cave-view-journal, #cave-view-divers — la Cave d'avant
 //   Le Chai) sont retires : plus aucun JS ne les lisait, renderCave les
@@ -3613,7 +3620,7 @@
 // v2.22 — Fix profils vides : guard vide dans loadData() pour MEMBRES/SAISONS/TACHES
 // v2.17 — Onboarding intégré + tenantId · v2.06 — Firebase Auth · v2.00–v2.05 — divers
 const DEBUG = self.location.hostname === 'localhost' || self.location.hostname === '127.0.0.1';
-const CACHE_NAME   = 'mavigne-v7.54';
+const CACHE_NAME   = 'mavigne-v7.55';
 const TENANT_CACHE = 'mavigne-tenant';   // Cache persistant — préservé à chaque mise à jour SW
 const SYNC_TAG     = 'mavigne-sync';
 
@@ -3629,7 +3636,7 @@ const CDN_URLS = [
 ];
 
 self.addEventListener('install', event => {
-  if(DEBUG) console.log('[SW] Ma Vigne v7.54 installé');
+  if(DEBUG) console.log('[SW] Ma Vigne v7.55 installé');
   event.waitUntil(
     caches.open(CACHE_NAME).then(async cache => {
       // ── Cœur applicatif : STRICT (mise à jour ATOMIQUE) ──
@@ -3645,7 +3652,7 @@ self.addEventListener('install', event => {
 });
 
 self.addEventListener('activate', event => {
-  if(DEBUG) console.log('[SW] Ma Vigne v7.54 activé');
+  if(DEBUG) console.log('[SW] Ma Vigne v7.55 activé');
   event.waitUntil(
     caches.keys().then(keys =>
       Promise.all(

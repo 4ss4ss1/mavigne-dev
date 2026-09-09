@@ -624,7 +624,7 @@
         <p style="margin:0 0 14px">Firebase / Google LLC — 1600 Amphitheatre Pkwy, Mountain View, CA 94043, USA. Transfert encadré par les clauses contractuelles types de la Commission européenne.</p>
         <div style="font-weight:700;font-size:13px;margin-bottom:6px;color:#4A2060">Cookies &amp; traceurs</div>
         <p style="margin:0 0 14px">Aucun cookie publicitaire. L'application utilise uniquement le stockage local (localStorage) pour sauvegarder vos données de travail sur votre appareil.</p>
-        <div style="text-align:center;color:#9A9A8A;font-size:10px;margin-top:8px">© 2026 Nicolas GUERET / GUERETTECH · Ma Vigne · v6.95</div>
+        <div style="text-align:center;color:#9A9A8A;font-size:10px;margin-top:8px">© 2026 Nicolas GUERET / GUERETTECH · Ma Vigne · v6.96</div>
         <button onclick="document.getElementById('login-mentions-ov').style.display='none'" style="display:block;width:100%;margin-top:20px;padding:14px;background:#3D6B27;color:white;border:none;border-radius:12px;font-family:'Outfit',sans-serif;font-size:14px;font-weight:600;cursor:pointer;-webkit-tap-highlight-color:transparent">Fermer</button>
       </div>
     </div>
@@ -640,14 +640,14 @@
     <div class="mod-header-top">
       <span class="mod-header-icon"><svg class="mv-ic" width="20" height="20" viewBox="0 0 24 24" aria-hidden="true"><use href="#ic-feuille"></use></svg></span>
       <div class="mod-header-titles">
-        <div class="mod-header-title">Accueil</div>
+        <div class="mod-header-title">Vigne</div>
         <div class="mod-header-sub" id="hv2-header-sub">Tableau de bord</div>
       </div>
       <div style="display:flex;gap:6px;align-items:center;flex-shrink:0">
         <div class="hv2-avatar-wrap" onclick="logout()"><div class="hv2-avatar" id="up-ava-v2">N</div></div>
         <button id="hv2-perso-btn" onclick="toggleHomeEdit()" class="mod-home-btn" title="Personnaliser"><svg class="mv-ic" width="18" height="18" viewBox="0 0 24 24" aria-hidden="true"><use href="#ic-curseurs"></use></svg></button>
         <button id="hv2-refresh-btn" onclick="refreshApp()" class="mod-home-btn" title="Actualiser"><svg class="mv-ic" width="18" height="18" viewBox="0 0 24 24" aria-hidden="true"><use href="#ic-rotation"></use></svg></button>
-        <button onclick="goHub()" class="mod-home-btn" title="Hub"><svg class="mv-ic" width="18" height="18" viewBox="0 0 24 24" aria-hidden="true"><use href="#ic-maison"></use></svg></button>
+        <button class="mod-home-btn mv-regl-gear" onclick="_mvReglOpen('vigne')" aria-label="Réglages et documents de la Vigne" title="Réglages"><svg class="mv-ic" width="18" height="18" viewBox="0 0 24 24" aria-hidden="true"><use href="#ic-engrenage"></use></svg></button>
       </div>
     </div>
     <div class="mod-meta-row mvu-meta">
@@ -808,13 +808,13 @@
 <div class="page" id="page-parcelles">
   <div class="mod-header h-parcelles">
     <div class="mod-header-top">
-      <span class="mod-header-icon"><svg class="mv-ic" width="20" height="20" viewBox="0 0 24 24" aria-hidden="true"><use href="#ic-carte"></use></svg></span>
+      <span class="mod-header-icon"><svg class="mv-ic" width="20" height="20" viewBox="0 0 24 24" aria-hidden="true"><use href="#ic-feuille"></use></svg></span>
       <div class="mod-header-titles">
-        <div class="mod-header-title">Mes Parcelles</div>
+        <div class="mod-header-title">Vigne</div>
         <div class="mod-header-sub" id="p-saison-sub"></div>
       </div>
       <span class="mod-header-badge" id="pc-badge">45 actives</span>
-      <button class="mod-home-btn" onclick="goHub()" style="margin-left:6px"><svg class="mv-ic" width="18" height="18" viewBox="0 0 24 24" aria-hidden="true"><use href="#ic-maison"></use></svg></button>
+      <button class="mod-home-btn mv-regl-gear" onclick="_mvReglOpen('vigne')" style="margin-left:6px" aria-label="Réglages et documents de la Vigne" title="Réglages"><svg class="mv-ic" width="18" height="18" viewBox="0 0 24 24" aria-hidden="true"><use href="#ic-engrenage"></use></svg></button>
     </div>
     <div class="mod-meta-row mvu-meta">
       <div class="hv2-saison-pill"><span class="hv2-dot"></span>&nbsp;<span id="saison-badge-parc"></span></div>
@@ -1068,13 +1068,13 @@
 <div class="page" id="page-journal">
   <div class="mod-header h-journal">
     <div class="mod-header-top">
-      <span class="mod-header-icon"><svg class="mv-ic" width="20" height="20" viewBox="0 0 24 24" aria-hidden="true"><use href="#ic-journal"></use></svg></span>
+      <span class="mod-header-icon"><svg class="mv-ic" width="20" height="20" viewBox="0 0 24 24" aria-hidden="true"><use href="#ic-feuille"></use></svg></span>
       <div class="mod-header-titles">
-        <div class="mod-header-title">Journal</div>
+        <div class="mod-header-title">Vigne</div>
         <div class="mod-header-sub" id="j-sub">0 entrées</div>
       </div>
       <button id="journal-add-btn" class="mod-header-action" onclick="openJournalEntry()">＋ Ajouter</button>
-      <button class="mod-home-btn" onclick="goHub()" style="margin-left:6px"><svg class="mv-ic" width="18" height="18" viewBox="0 0 24 24" aria-hidden="true"><use href="#ic-maison"></use></svg></button>
+      <button class="mod-home-btn mv-regl-gear" onclick="_mvReglOpen('vigne')" style="margin-left:6px" aria-label="Réglages et documents de la Vigne" title="Réglages"><svg class="mv-ic" width="18" height="18" viewBox="0 0 24 24" aria-hidden="true"><use href="#ic-engrenage"></use></svg></button>
     </div>
     <div class="mod-meta-row mvu-meta">
       <div class="hv2-saison-pill"><span class="hv2-dot"></span>&nbsp;<span id="saison-badge-jour"></span></div>
@@ -1120,7 +1120,7 @@
         <div class="mod-header-sub" id="trac-header-sub">Parc · Saison 2026</div>
       </div>
       <span class="mod-header-badge" id="trac-header-badge">0 sessions</span>
-      <button class="mod-home-btn" onclick="goHub()" style="margin-left:6px"><svg class="mv-ic" width="18" height="18" viewBox="0 0 24 24" aria-hidden="true"><use href="#ic-maison"></use></svg></button>
+      <button class="mod-home-btn mv-regl-gear" onclick="_mvReglOpen('tracteur')" style="margin-left:6px" aria-label="Réglages et documents du Tracteur" title="Réglages"><svg class="mv-ic" width="18" height="18" viewBox="0 0 24 24" aria-hidden="true"><use href="#ic-engrenage"></use></svg></button>
     </div>
     <div class="mod-meta-row mvu-meta">
       <div class="hv2-saison-pill" data-mv-pill><span class="hv2-dot"></span>&nbsp;<span data-mv-saison></span></div>
@@ -1189,7 +1189,7 @@
         <div class="mod-header-sub" id="phyto-header-sub">Registre &amp; catalogue</div>
       </div>
       <span class="mod-header-badge" id="phyto-header-badge">0 traitement</span>
-      <button class="mod-home-btn" onclick="goHub()" style="margin-left:6px"><svg class="mv-ic" width="18" height="18" viewBox="0 0 24 24" aria-hidden="true"><use href="#ic-maison"></use></svg></button>
+      
     </div>
     <div class="mod-meta-row mvu-meta">
       <div class="hv2-saison-pill" data-mv-pill><span class="hv2-dot"></span>&nbsp;<span data-mv-saison></span></div>
@@ -1249,10 +1249,10 @@
       <span class="mod-header-icon"><svg class="mv-ic" width="20" height="20" viewBox="0 0 24 24" aria-hidden="true"><use href="#ic-curseurs"></use></svg></span>
       <div class="mod-header-titles">
         <div class="mod-header-title">Réglages</div>
-        <div class="mod-header-sub">Ma Vigne v6.95</div>
+        <div class="mod-header-sub">Ma Vigne v6.96</div>
       </div>
       <span class="mod-header-badge" style="background:rgba(61,107,39,0.2);color:#7CB95A;border:1px solid rgba(61,107,39,0.3)" id="regl-role-badge">Admin</span>
-      <button class="mod-home-btn" onclick="goHub()" style="margin-left:6px"><svg class="mv-ic" width="18" height="18" viewBox="0 0 24 24" aria-hidden="true"><use href="#ic-maison"></use></svg></button>
+      
     </div>
     <div class="mod-meta-row mvu-meta">
       <div class="hv2-saison-pill" data-mv-pill><span class="hv2-dot"></span>&nbsp;<span data-mv-saison></span></div>
@@ -1260,21 +1260,14 @@
       <div class="hv2-date" data-mv-date></div>
     </div>
     <!-- Onglets unifiés (.mvu-tabs) — réutilisés par tous les modules ; classe active conservée pour switchReglTab -->
-    <div class="mvu-tabs mvu-tabs-many" id="regl-tabs-row" style="display:none">
+    <div class="mvu-tabs" id="regl-tabs-row" style="display:none">
       <button class="mvu-tab active" id="regl-tbtn-domaine" onclick="switchReglTab(&#39;domaine&#39;)"><span class="mvu-tab-em"><svg class="mv-ic" width="18" height="18" viewBox="0 0 24 24" aria-hidden="true"><use href="#ic-maison"></use></svg></span>Domaine</button>
-      <button class="mvu-tab" id="regl-tbtn-vigne" onclick="switchReglTab(&#39;vigne&#39;)"><span class="mvu-tab-em"><svg class="mv-ic" width="18" height="18" viewBox="0 0 24 24" aria-hidden="true"><use href="#ic-feuille"></use></svg></span>Vigne</button>
       <button class="mvu-tab" id="regl-tbtn-equipe" onclick="switchReglTab(&#39;equipe&#39;)"><span class="mvu-tab-em"><svg class="mv-ic" width="18" height="18" viewBox="0 0 24 24" aria-hidden="true"><use href="#ic-equipe"></use></svg></span>Équipe</button>
-      <button class="mvu-tab" id="regl-tbtn-tracteur" onclick="switchReglTab(&#39;tracteur&#39;)"><span class="mvu-tab-em"><svg class="mv-ic" width="18" height="18" viewBox="0 0 24 24" aria-hidden="true"><use href="#ic-tracteur"></use></svg></span>Tracteur</button>
       <button class="mvu-tab" id="regl-tbtn-app" onclick="switchReglTab(&#39;app&#39;)"><span class="mvu-tab-em"><svg class="mv-ic" width="18" height="18" viewBox="0 0 24 24" aria-hidden="true"><use href="#ic-curseurs"></use></svg></span>App</button>
     </div>
   </div>
 
-  <!-- Bande de stats déplacée hors de l'en-tête → hauteur d'en-tête constante d'une page à l'autre -->
-  <div class="mvu-kpis" id="regl-kpis">
-    <div class="mvu-kpi"><div class="mvu-kpi-v" id="regl-stat-membres">0</div><div class="mvu-kpi-l">Membres</div></div>
-    <div class="mvu-kpi"><div class="mvu-kpi-v" id="regl-stat-taches">0</div><div class="mvu-kpi-l">Tâches</div></div>
-    <div class="mvu-kpi"><div class="mvu-kpi-v" id="regl-stat-tracteurs">0</div><div class="mvu-kpi-l">Tracteurs</div></div>
-  </div>
+  <!-- La bande de compteurs (membres · tâches · tracteurs) est retirée (lot NAV-1) : un écran de réglage n'a pas de KPI. -->
 
   <!-- ══ Onglet Domaine ══ -->
   <div id="regl-view-domaine" style="display:none">
@@ -1313,48 +1306,6 @@
   </div>
 
   <!-- ══ Onglet Vigne ══ -->
-  <div id="regl-view-vigne" style="display:none">
-    <div class="set-sec" id="set-sec-taches">
-      <div class="set-title">Tâches — <span id="taches-saison-label"></span></div>
-      <div style="background:var(--bg-card);border-radius:16px;padding:0 16px;margin:0 16px;box-shadow:var(--shadow-sm)">
-        <div id="taches-config-list"></div>
-      </div>
-      <!-- Deux portes d'entrée pour ajouter une tâche, côte à côte : le barème de la
-           convention (ex-bandeau en tête de liste) et la création libre. Même cible que
-           l'ancien bandeau : window.openTacheConv('') ouvre le barème, où un travail se
-           touche pour l'ajouter à la saison. -->
-      <div style="padding:0 16px;margin-top:8px;display:flex;gap:8px;flex-wrap:wrap">
-        <button class="mbtn" style="flex:1 1 210px;margin-top:0;font-size:12.5px;padding:10px;line-height:1.35;background:var(--terre-pale,#F3EADF);color:var(--texte);border:1.5px solid rgba(138,90,56,0.32)" onclick="window.openTacheConv&amp;&amp;window.openTacheConv(&#39;&#39;)"><svg class="mv-ic" width="16" height="16" viewBox="0 0 24 24" aria-hidden="true" focusable="false"><use href="#ic-liste"></use></svg> ＋ Nouvelle tâche selon le barème de la convention</button>
-        <button class="mbtn verte" style="flex:1 1 210px;margin-top:0;font-size:12.5px;padding:10px;line-height:1.35" onclick="openOv(&#39;ovTache&#39;)">＋ Nouvelle tâche libre</button>
-      </div>
-      <div id="passages-config-section" style="display:none">
-        <div class="section-header" style="padding:18px 16px 6px;display:flex;align-items:center;gap:8px">
-          <span style="font-size:18px"><svg class="mv-ic" width="18" height="18" viewBox="0 0 24 24" aria-hidden="true" focusable="false"><use href="#ic-rotation"></use></svg></span>
-          <div>
-            <div style="font-size:13px;font-weight:700;color:var(--texte)">Passages prévus par saison</div>
-            <div style="font-size:11px;color:var(--texte-doux);margin-top:1px">Configurer le nombre de passages pour Ébourgeonnage et Pioche</div>
-          </div>
-        </div>
-        <div id="passages-config-list" style="padding:0 16px 8px"></div>
-      </div>
-    </div>
-    <!-- Ecartements de plantation. Le reglage EXISTAIT (window._tcvSetDens, reglages.js)
-         mais ne s'atteignait que depuis le modal du bareme, ouvert par un bouton libelle
-         « Nouvelle tache » : introuvable. Le conseil de la Mise en route menait deja ici,
-         sur un onglet qui ne portait pas le reglage. Meme fonction, porte visible. -->
-    <div class="set-sec" id="set-sec-dens">
-      <div class="set-title">Vos plantations</div>
-      <div style="background:var(--bg-card);border-radius:16px;margin:0 16px;box-shadow:var(--shadow-sm)">
-        <div class="set-row" style="border-radius:16px" onclick="window._tcvSetDens&amp;&amp;window._tcvSetDens()"><div class="sr-l"><div class="sr-ico" style="background:var(--vert-pale)"><svg class="mv-ic" width="18" height="18" viewBox="0 0 24 24" aria-hidden="true" focusable="false"><use href="#ic-feuille"></use></svg></div><div><div class="sr-lbl">Écartements de plantation</div><div class="sr-sub" id="regl-dens-sub">Non renseignés</div></div></div><div class="sr-arr">›</div></div>
-      </div>
-    </div>
-    <div class="set-sec" id="set-sec-secteurs">
-      <div class="set-title">Parcelles &amp; secteurs météo</div>
-      <div style="background:var(--bg-card);border-radius:16px;margin:0 16px;box-shadow:var(--shadow-sm)">
-        <div class="set-row" style="border-radius:16px" onclick="openCommunesBulk()"><div class="sr-l"><div class="sr-ico" style="background:var(--bleu-pale)"><svg class="mv-ic" width="18" height="18" viewBox="0 0 24 24" aria-hidden="true" focusable="false"><use href="#ic-carte"></use></svg></div><div><div class="sr-lbl">Communes &amp; météo par secteur</div><div class="sr-sub">Affecter chaque parcelle à sa commune</div></div></div><div class="sr-arr">›</div></div>
-      </div>
-    </div>
-  </div>
 
   <!-- ══ Onglet Équipe ══ -->
   <div id="regl-view-equipe" style="display:none">
@@ -1365,23 +1316,6 @@
     </div>
   </div>
 
-  <!-- ══ Onglet Tracteur ══ -->
-  <!-- Parc + activités : vivaient dans l'onglet Équipe (héritage), sortis ici. -->
-  <div id="regl-view-tracteur" style="display:none">
-    <div class="set-sec" id="set-sec-tracteurs">
-      <div class="set-title"><svg class="mv-ic" width="16" height="16" viewBox="0 0 24 24" aria-hidden="true" focusable="false"><use href="#ic-tracteur"></use></svg> Parc tracteurs</div>
-      <div id="tracteurs-set-list" style="padding:0 16px"></div>
-      <div style="padding:0 16px;margin-top:8px"><button class="mbtn verte" style="margin-top:0;font-size:13px;padding:10px" onclick="openOv(&#39;ovAddTracteur&#39;)">＋ Ajouter un tracteur</button></div>
-    </div>
-    <div class="set-sec" id="set-sec-act-trac">
-      <div style="display:flex;align-items:center;justify-content:space-between;padding:0 16px 0">
-        <div class="set-title" style="padding:0;margin:0"><svg class="mv-ic" width="16" height="16" viewBox="0 0 24 24" aria-hidden="true" focusable="false"><use href="#ic-lien"></use></svg> Activités tracteur</div>
-        <button onclick="openOvNouvelleActivite()" style="background:var(--vert);color:#fff;border:none;border-radius:8px;padding:6px 13px;font-family:&#39;Outfit&#39;,sans-serif;font-size:13px;font-weight:700;cursor:pointer;min-height:44px">＋ Ajouter</button>
-      </div>
-      <div style="font-size:12px;color:var(--texte-doux);padding:4px 16px 10px">Tracteur par défaut + champ de saisie optionnel lors de la validation.</div>
-      <div id="act-trac-list" style="background:var(--bg-card);border-radius:16px;padding:0 16px;margin:0 16px;box-shadow:var(--shadow-sm)"></div>
-    </div>
-  </div>
 
   <!-- ══ Onglet App ══ -->
   <div id="regl-view-app" style="display:block">
@@ -1416,7 +1350,7 @@
         <div class="set-row set-danger-row" style="border-radius:16px;border:1.5px solid var(--rouge)" onclick="openOvDanger(&#39;reset&#39;)"><div class="sr-l"><div class="sr-ico" style="background:var(--rouge-pale)"><svg class="mv-ic" width="18" height="18" viewBox="0 0 24 24" aria-hidden="true" focusable="false"><use href="#ic-corbeille"></use></svg></div><div><div class="sr-lbl" style="color:var(--rouge);font-weight:700">Réinitialiser l'application</div><div class="sr-sub">Efface toutes les sauvegardes locales</div></div></div><div class="sr-arr" style="color:var(--rouge)">›</div></div>
       </div>
     </div>
-    <div class="ver-tag">Ma Vigne v6.95 · Catalogue phyto officiel E-Phy (ANSES) <svg class="mv-ic" width="16" height="16" viewBox="0 0 24 24" aria-hidden="true" focusable="false"><use href="#ic-feuille"></use></svg></div>
+    <div class="ver-tag">Ma Vigne v6.96 · Catalogue phyto officiel E-Phy (ANSES) <svg class="mv-ic" width="16" height="16" viewBox="0 0 24 24" aria-hidden="true" focusable="false"><use href="#ic-feuille"></use></svg></div>
     <div class="mv-legal-foot" style="text-align:center;font-size:10px;color:var(--texte-doux);padding:0 0 16px;line-height:1.9"><a href="/mentions-legales.html" target="_blank" rel="noopener" style="color:var(--texte-doux);text-decoration:underline">Mentions légales</a> · <a href="/confidentialite.html" target="_blank" rel="noopener" style="color:var(--texte-doux);text-decoration:underline">Confidentialité</a> · <a href="/cgu.html" target="_blank" rel="noopener" style="color:var(--texte-doux);text-decoration:underline">CGU</a></div>
   </div>
 </div>
@@ -1501,6 +1435,97 @@
     <div class="modal-handle" style="--handle-bg:rgba(255,255,255,0.15)"></div>
     <div class="modal-hd"><div class="modal-title" style="color:#E8EAF0"><svg class="mv-ic" width="18" height="18" viewBox="0 0 24 24" aria-hidden="true" focusable="false"><use href="#ic-epingle"></use></svg> Choisir une parcelle</div></div>
     
+  </div>
+</div>
+
+<!-- LA ROUE CRANTÉE DU MODULE (lot NAV-1) : les réglages du module, puis ses documents.
+     Le bloc est celui de l'ancien onglet Réglages › Vigne, reparenté tel quel (mêmes id, mêmes écrivains).
+     Ouvert par _mvReglOpen('vigne') depuis l'en-tête du module. -->
+<div class="overlay" id="ovReglVigne" onclick="closeOv(event,'ovReglVigne')">
+  <div class="modal" onclick="event.stopPropagation()">
+    <div class="modal-handle"></div>
+    <div class="modal-hd">
+      <div class="modal-title">Réglages · Vigne</div>
+      <div class="modal-sub">Ce qui se règle une fois l’an, et les documents de la vigne</div>
+    </div>
+    <div class="modal-body mv-regl-body" style="padding:8px 0 12px">
+  <div id="regl-view-vigne">
+    <div class="set-sec" id="set-sec-taches">
+      <div class="set-title">Tâches — <span id="taches-saison-label"></span></div>
+      <div style="background:var(--bg-card);border-radius:16px;padding:0 16px;margin:0 16px;box-shadow:var(--shadow-sm)">
+        <div id="taches-config-list"></div>
+      </div>
+      <!-- Deux portes d'entrée pour ajouter une tâche, côte à côte : le barème de la
+           convention (ex-bandeau en tête de liste) et la création libre. Même cible que
+           l'ancien bandeau : window.openTacheConv('') ouvre le barème, où un travail se
+           touche pour l'ajouter à la saison. -->
+      <div style="padding:0 16px;margin-top:8px;display:flex;gap:8px;flex-wrap:wrap">
+        <button class="mbtn" style="flex:1 1 210px;margin-top:0;font-size:12.5px;padding:10px;line-height:1.35;background:var(--terre-pale,#F3EADF);color:var(--texte);border:1.5px solid rgba(138,90,56,0.32)" onclick="window.openTacheConv&amp;&amp;window.openTacheConv(&#39;&#39;)"><svg class="mv-ic" width="16" height="16" viewBox="0 0 24 24" aria-hidden="true" focusable="false"><use href="#ic-liste"></use></svg> ＋ Nouvelle tâche selon le barème de la convention</button>
+        <button class="mbtn verte" style="flex:1 1 210px;margin-top:0;font-size:12.5px;padding:10px;line-height:1.35" onclick="openOv(&#39;ovTache&#39;)">＋ Nouvelle tâche libre</button>
+      </div>
+      <div id="passages-config-section" style="display:none">
+        <div class="section-header" style="padding:18px 16px 6px;display:flex;align-items:center;gap:8px">
+          <span style="font-size:18px"><svg class="mv-ic" width="18" height="18" viewBox="0 0 24 24" aria-hidden="true" focusable="false"><use href="#ic-rotation"></use></svg></span>
+          <div>
+            <div style="font-size:13px;font-weight:700;color:var(--texte)">Passages prévus par saison</div>
+            <div style="font-size:11px;color:var(--texte-doux);margin-top:1px">Configurer le nombre de passages pour Ébourgeonnage et Pioche</div>
+          </div>
+        </div>
+        <div id="passages-config-list" style="padding:0 16px 8px"></div>
+      </div>
+    </div>
+    <!-- Ecartements de plantation. Le reglage EXISTAIT (window._tcvSetDens, reglages.js)
+         mais ne s'atteignait que depuis le modal du bareme, ouvert par un bouton libelle
+         « Nouvelle tache » : introuvable. Le conseil de la Mise en route menait deja ici,
+         sur un onglet qui ne portait pas le reglage. Meme fonction, porte visible. -->
+    <div class="set-sec" id="set-sec-dens">
+      <div class="set-title">Vos plantations</div>
+      <div style="background:var(--bg-card);border-radius:16px;margin:0 16px;box-shadow:var(--shadow-sm)">
+        <div class="set-row" style="border-radius:16px" onclick="window._tcvSetDens&amp;&amp;window._tcvSetDens()"><div class="sr-l"><div class="sr-ico" style="background:var(--vert-pale)"><svg class="mv-ic" width="18" height="18" viewBox="0 0 24 24" aria-hidden="true" focusable="false"><use href="#ic-feuille"></use></svg></div><div><div class="sr-lbl">Écartements de plantation</div><div class="sr-sub" id="regl-dens-sub">Non renseignés</div></div></div><div class="sr-arr">›</div></div>
+      </div>
+    </div>
+    <div class="set-sec" id="set-sec-secteurs">
+      <div class="set-title">Parcelles &amp; secteurs météo</div>
+      <div style="background:var(--bg-card);border-radius:16px;margin:0 16px;box-shadow:var(--shadow-sm)">
+        <div class="set-row" style="border-radius:16px" onclick="openCommunesBulk()"><div class="sr-l"><div class="sr-ico" style="background:var(--bleu-pale)"><svg class="mv-ic" width="18" height="18" viewBox="0 0 24 24" aria-hidden="true" focusable="false"><use href="#ic-carte"></use></svg></div><div><div class="sr-lbl">Communes &amp; météo par secteur</div><div class="sr-sub">Affecter chaque parcelle à sa commune</div></div></div><div class="sr-arr">›</div></div>
+      </div>
+    </div>
+  </div>
+      <div class="set-sec" id="regl-docs-vigne"></div>
+    </div>
+  </div>
+</div>
+
+<!-- LA ROUE CRANTÉE DU MODULE (lot NAV-1) : les réglages du module, puis ses documents.
+     Le bloc est celui de l'ancien onglet Réglages › Tracteur, reparenté tel quel (mêmes id, mêmes écrivains).
+     Ouvert par _mvReglOpen('tracteur') depuis l'en-tête du module. -->
+<div class="overlay" id="ovReglTracteur" onclick="closeOv(event,'ovReglTracteur')">
+  <div class="modal" onclick="event.stopPropagation()">
+    <div class="modal-handle"></div>
+    <div class="modal-hd">
+      <div class="modal-title">Réglages · Tracteur</div>
+      <div class="modal-sub">Le parc, les activités, le chrono — et le carnet d’entretien</div>
+    </div>
+    <div class="modal-body mv-regl-body" style="padding:8px 0 12px">
+  <!-- ══ Onglet Tracteur ══ -->
+  <!-- Parc + activités : vivaient dans l'onglet Équipe (héritage), sortis ici. -->
+  <div id="regl-view-tracteur">
+    <div class="set-sec" id="set-sec-tracteurs">
+      <div class="set-title"><svg class="mv-ic" width="16" height="16" viewBox="0 0 24 24" aria-hidden="true" focusable="false"><use href="#ic-tracteur"></use></svg> Parc tracteurs</div>
+      <div id="tracteurs-set-list" style="padding:0 16px"></div>
+      <div style="padding:0 16px;margin-top:8px"><button class="mbtn verte" style="margin-top:0;font-size:13px;padding:10px" onclick="openOv(&#39;ovAddTracteur&#39;)">＋ Ajouter un tracteur</button></div>
+    </div>
+    <div class="set-sec" id="set-sec-act-trac">
+      <div style="display:flex;align-items:center;justify-content:space-between;padding:0 16px 0">
+        <div class="set-title" style="padding:0;margin:0"><svg class="mv-ic" width="16" height="16" viewBox="0 0 24 24" aria-hidden="true" focusable="false"><use href="#ic-lien"></use></svg> Activités tracteur</div>
+        <button onclick="openOvNouvelleActivite()" style="background:var(--vert);color:#fff;border:none;border-radius:8px;padding:6px 13px;font-family:&#39;Outfit&#39;,sans-serif;font-size:13px;font-weight:700;cursor:pointer;min-height:44px">＋ Ajouter</button>
+      </div>
+      <div style="font-size:12px;color:var(--texte-doux);padding:4px 16px 10px">Tracteur par défaut + champ de saisie optionnel lors de la validation.</div>
+      <div id="act-trac-list" style="background:var(--bg-card);border-radius:16px;padding:0 16px;margin:0 16px;box-shadow:var(--shadow-sm)"></div>
+    </div>
+  </div>
+      <div class="set-sec" id="regl-docs-tracteur"></div>
+    </div>
   </div>
 </div>
 
@@ -1728,7 +1753,7 @@
         <div class="mod-header-sub">Heures &eacute;quipe</div>
       </div>
       <span class="mod-header-badge" id="plan-header-badge">&mdash;</span>
-      <button class="mod-home-btn" onclick="goHub()" style="margin-left:6px">&#x2302;</button>
+      
     </div>
     <div class="mod-meta-row mvu-meta">
       <div class="hv2-saison-pill" data-mv-pill><span class="hv2-dot"></span>&nbsp;<span data-mv-saison></span></div>
@@ -1849,7 +1874,7 @@
       <span class="mod-header-badge" id="cave-hdr-badge">—</span>
       <!-- Réglages & documents de la cave (lot CAVE-2) : ce qu'on règle une fois l'an sort des onglets du quotidien -->
       <button class="mod-home-btn" id="cave-hdr-gear" onclick="_caveOpenReglages()" style="margin-left:6px" aria-label="Réglages et documents de la cave"><svg class="mv-ic" width="18" height="18" viewBox="0 0 24 24" aria-hidden="true"><use href="#ic-engrenage"></use></svg></button>
-      <button class="mod-home-btn" onclick="goHub()" style="margin-left:6px"><svg class="mv-ic" width="18" height="18" viewBox="0 0 24 24" aria-hidden="true"><use href="#ic-maison"></use></svg></button>
+      
     </div>
     <div class="mod-meta-row mvu-meta">
       <div class="hv2-saison-pill" data-mv-pill><span class="hv2-dot"></span>&nbsp;<span data-mv-saison></span></div>
@@ -3383,7 +3408,7 @@
         <div style="font-size:10px;color:rgba(240,226,200,0.55);letter-spacing:1.2px;margin-top:2px;">MISE &#xC0; JOUR</div>
       </div>
       <div style="background:rgba(200,176,32,0.12);border:1px solid rgba(200,176,32,0.35);border-radius:7px;padding:4px 10px;flex-shrink:0;">
-        <span id="wn-version-badge" style="color:#C8B020;font-size:12px;font-weight:600;">v6.95</span>
+        <span id="wn-version-badge" style="color:#C8B020;font-size:12px;font-weight:600;">v6.96</span>
       </div>
     </div>
     <div class="modal-body">

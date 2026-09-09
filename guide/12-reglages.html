@@ -1,12 +1,17 @@
-<!-- @nav emoji="{ic:engrenage}" titre="Réglages" sous="Administrer le domaine" -->
+<!-- @nav emoji="{ic:engrenage}" titre="Réglages" sous="Domaine, équipe, compte" -->
 <section id="reglages">
   <div class="sec-h">
     <div class="sec-ic" aria-hidden="true">{ic:engrenage}</div>
-    <div><h2>Réglages</h2><div class="sub">Domaine · Vigne · Équipe · Tracteur · App</div></div>
+    <div><h2>Réglages</h2><div class="sub">Domaine · Équipe · App</div></div>
   </div>
-  <p class="lead">Cinq onglets pour l'administrateur ; les autres membres n'y trouvent que
-  l'onglet <b>App</b>, avec leur mot de passe, l'affichage et l'aide. C'est aussi d'ici que s'ouvre
-  cette documentation.</p>
+  <p class="lead">Trois onglets pour l'administrateur — ce qui n'appartient à aucun module : le domaine,
+  l'équipe, votre compte. Les autres membres n'y trouvent que l'onglet <b>App</b>, avec leur mot de
+  passe, l'affichage et l'aide. C'est aussi d'ici que s'ouvre cette documentation.</p>
+  <div class="note info"><span class="ni" aria-hidden="true">{ic:info}</span><div><b>Un module règle ses
+  affaires chez lui.</b> Les tâches, le barème, les plantations et les secteurs météo sont dans la roue
+  crantée de la <b>Vigne</b> ; le parc, les activités et le chrono dans celle du <b>Tracteur</b> ; le
+  Cuvier et le Chai dans celle de la <b>Cave</b>. Chaque roue porte aussi les documents de son
+  module.</div></div>
 
   <h3>{ic:maison} Domaine</h3>
   <ul class="dot">
@@ -14,7 +19,8 @@
     <li><b>Localisation</b> pour la météo, avec un bouton <b>Centrer sur mes parcelles</b>.</li>
     <li><b>Lien d'invitation</b> à partager avec un nouveau membre.</li>
     <li><b>Saisons</b> : créer, dater, activer, consulter l'<b>historique</b>, <b>clôturer la campagne</b>.</li>
-    <li><b>Économie &amp; conformité</b> : passages phyto de référence, paramètres du simulateur.</li>
+    <li><b>Économie &amp; conformité</b> : passages phyto de référence (IFT) et consommation de référence du
+    tracteur. Les hypothèses du simulateur, elles, sont dans <span class="path">Pilotage › Outils › Paramétrage</span>.</li>
     <li><b>Appellations et plafonds de rendement</b> — voir ci-dessous.</li>
   </ul>
 
@@ -36,21 +42,6 @@
     <li>Deux noms qui ne diffèrent que par une majuscule ou une espace sont <b>la même
       appellation</b> : le doublon est refusé, et le rattachement les reconnaît.</li>
     <li>Réservé à l'<b>administrateur</b>.</li>
-  </ul>
-
-  <h3>{ic:feuille} Vigne</h3>
-  <ul class="dot">
-    <li><b>Tâches</b> : heures par hectare, passages prévus par saison, temps par trou de
-    l'entreplantation, création de tâches propres au domaine.</li>
-    <li><b>Le barème de référence</b> se choisit <b>par région</b> dans l'écran du barème, ouvert par
-    <em aria-hidden="true">＋ Nouvelle tâche selon le barème de la convention</em> : la Bourgogne ou la
-    Gironde pour l'instant, chacune avec son texte source et sa date. C'est une référence indicative,
-    pas une règle : en changer ne modifie aucune de vos valeurs.</li>
-    <li><b>Vos plantations</b> : la distance entre vos rangs et entre vos pieds. Elles ramènent
-    les heures conseillées à votre densité réelle — sans elles, le barème suppose 10 000
-    pieds/hectare.</li>
-    <li><b>Parcelles &amp; secteurs météo</b> : affecter chaque parcelle à sa commune. Dès que deux
-    communes sont actives, une météo par secteur apparaît sur l'Accueil.</li>
   </ul>
 
   <h3>{ic:equipe} Équipe</h3>
@@ -83,16 +74,6 @@
   d'écart n'en font qu'un.</p>
   <p>Quand un contrat arrive à terme, un <b>rappel</b> apparaît en tête de la fiche et dans la liste des
   membres, trente jours avant, avec de quoi renouveler ou acter l'arrêt en un geste.</p>
-
-  <h3>{ic:tracteur} Tracteur</h3>
-  <ul class="dot">
-    <li><b>Parc</b> : machines, compteurs d'heures, seuils de révision.</li>
-    <li><b>Activités</b> : la liste proposée aux tractoristes, le barème h/ha de chacune, et le champ
-    éventuel à saisir par parcelle.</li>
-    <li><b>Chronométrer le temps réel</b>, en tête des activités : bascule ON/OFF pour tout le
-    domaine. Sans elle, le barème h/ha prend le relais et rien n'est mesuré.</li>
-    <li>Conducteurs autorisés, <b>prix du litre de GNR</b> (saisi à chaque appoint de cuve).</li>
-  </ul>
 
   <h3>{ic:engrenage} App — accessible à tous</h3>
   <ul class="dot">
