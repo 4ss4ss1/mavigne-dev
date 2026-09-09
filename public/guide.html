@@ -442,7 +442,7 @@ mark{background:rgba(200,176,32,.32);color:var(--cream);border-radius:3px;paddin
 <a href="#reserve"><em aria-hidden="true"><svg class="g-ic" width="18" height="18" viewBox="0 0 24 24" aria-hidden="true" focusable="false"><use href="#ic-carton"></use></svg></em><span>La Réserve<br><span style="font-size:11.5px;color:var(--muted)">Intrants, parc à fûts, bilan matière</span></span></a>
 <a href="#planning"><em aria-hidden="true"><svg class="g-ic" width="18" height="18" viewBox="0 0 24 24" aria-hidden="true" focusable="false"><use href="#ic-calendrier"></use></svg></em><span>Planning RH<br><span style="font-size:11.5px;color:var(--muted)">Heures, congés, compteur</span></span></a>
 <a href="#pilotage"><em aria-hidden="true"><svg class="g-ic" width="18" height="18" viewBox="0 0 24 24" aria-hidden="true" focusable="false"><use href="#ic-graphique"></use></svg></em><span>Pilotage<br><span style="font-size:11.5px;color:var(--muted)">Tableau de bord décisionnel</span></span></a>
-<a href="#reglages"><em aria-hidden="true"><svg class="g-ic" width="18" height="18" viewBox="0 0 24 24" aria-hidden="true" focusable="false"><use href="#ic-engrenage"></use></svg></em><span>Réglages<br><span style="font-size:11.5px;color:var(--muted)">Administrer le domaine</span></span></a>
+<a href="#reglages"><em aria-hidden="true"><svg class="g-ic" width="18" height="18" viewBox="0 0 24 24" aria-hidden="true" focusable="false"><use href="#ic-engrenage"></use></svg></em><span>Réglages<br><span style="font-size:11.5px;color:var(--muted)">Domaine, équipe, compte</span></span></a>
 <a href="#donnees"><em aria-hidden="true"><svg class="g-ic" width="18" height="18" viewBox="0 0 24 24" aria-hidden="true" focusable="false"><use href="#ic-bouclier"></use></svg></em><span>Données &amp; sécurité<br><span style="font-size:11.5px;color:var(--muted)">Sauvegardes, hors-ligne, RGPD</span></span></a>
 <a href="#depannage"><em aria-hidden="true"><svg class="g-ic" width="18" height="18" viewBox="0 0 24 24" aria-hidden="true" focusable="false"><use href="#ic-pansement"></use></svg></em><span>Ça ne marche pas<br><span style="font-size:11.5px;color:var(--muted)">Réponses aux vrais blocages</span></span></a>
 <a href="#glossaire"><em aria-hidden="true"><svg class="g-ic" width="18" height="18" viewBox="0 0 24 24" aria-hidden="true" focusable="false"><use href="#ic-livre"></use></svg></em><span>Glossaire<br><span style="font-size:11.5px;color:var(--muted)">Le vocabulaire de l'app</span></span></a>
@@ -749,7 +749,8 @@ mark{background:rgba(200,176,32,.32);color:var(--cream);border-radius:3px;paddin
   à 100&nbsp;%. Ce n'est pas un bug : s'il n'y a rien à faire, il n'y a rien à finir.</div></div>
 
   <h4 style="margin-top:22px"><svg class="g-ic" width="18" height="18" viewBox="0 0 24 24" aria-hidden="true" focusable="false"><use href="#ic-imprimante"></use></svg> Le vignoble sur une page</h4>
-  <p><b>L'état du vignoble</b> s'édite depuis
+  <p><b>L'état du vignoble</b> s'édite depuis la roue crantée de la Vigne,
+  <span class="path">Vigne › <svg class="g-ic" width="18" height="18" viewBox="0 0 24 24" aria-hidden="true" focusable="false"><use href="#ic-engrenage"></use></svg> › Documents</span> — ou depuis le catalogue complet,
   <span class="path">Réglages › App › Documents &amp; impressions</span>. Une ligne par parcelle :
   commune, surface, cépage(s), avancement de la période consultée, dernière intervention du journal,
   dernier rendement ramené à l'hectare. Puis la répartition par cépage, et les parcelles arrachées
@@ -796,6 +797,29 @@ mark{background:rgba(200,176,32,.32);color:var(--cream);border-radius:3px;paddin
     <div class="dbody">Vérifiez la <b>saison consultée</b> en haut de l'écran : vous regardez peut-être
     une autre saison que celle où vous avez validé. Vérifiez ensuite l'indicateur de synchronisation :
     s'il est orange, la saisie part dès le retour du réseau.</div></details>
+  <h3><svg class="g-ic" width="18" height="18" viewBox="0 0 24 24" aria-hidden="true" focusable="false"><use href="#ic-engrenage"></use></svg> La roue crantée — ce qui se règle une fois l'an</h3>
+  <p>En haut à droite des trois onglets, la roue crantée ouvre les réglages de la vigne et ses
+  documents. Ils vivaient dans <span class="path">Réglages › Vigne</span> ; c'est le même écran, à un
+  tap du module — comme la Cave fait avec les siens. Réservée à l'<b>administrateur</b>.</p>
+  <ul class="dot">
+    <li><b>Tâches</b> : heures par hectare, passages prévus par saison, temps par trou de
+    l'entreplantation, création de tâches propres au domaine.</li>
+    <li><b>Le barème de référence</b> se choisit <b>par région</b> dans l'écran du barème, ouvert par
+    <em aria-hidden="true">＋ Nouvelle tâche selon le barème de la convention</em> : la Bourgogne ou la
+    Gironde pour l'instant, chacune avec son texte source et sa date. C'est une référence indicative,
+    pas une règle : en changer ne modifie aucune de vos valeurs.</li>
+    <li><b>Vos plantations</b> : la distance entre vos rangs et entre vos pieds. Elles ramènent
+    les heures conseillées à votre densité réelle — sans elles, le barème suppose 10 000
+    pieds/hectare.</li>
+    <li><b>Parcelles &amp; secteurs météo</b> : affecter chaque parcelle à sa commune. Dès que deux
+    communes sont actives, une météo par secteur apparaît sur l'Accueil.</li>
+    <li><b>Documents</b> : l'état du vignoble, le rapport de saison, le journal des travaux et
+    l'avancement par parcelle en fichier. Le catalogue complet reste dans
+    <span class="path">Réglages › App › Documents &amp; impressions</span>.</li>
+  </ul>
+  <p>L'en-tête dit <b>Vigne</b> sur les trois onglets — Accueil, Parcelles, Journal — comme les autres
+  modules disent leur nom. Le bouton maison des en-têtes n'existe plus : le menu du bas est la seule
+  façon de changer de module.</p>
 </section>
 
 
@@ -833,15 +857,15 @@ mark{background:rgba(200,176,32,.32);color:var(--cream);border-radius:3px;paddin
 
   <h3><svg class="g-ic" width="18" height="18" viewBox="0 0 24 24" aria-hidden="true" focusable="false"><use href="#ic-chrono"></use></svg> Les tâches et leurs heures par hectare</h3>
   <p>Les valeurs livrées par défaut suivent un <b>barème conventionnel régional</b>, choisi à
-  l'installation dans <span class="path">Réglages › Vigne › Barème de la convention</span>. Chaque
+  l'installation dans <span class="path">Vigne › <svg class="g-ic" width="18" height="18" viewBox="0 0 24 24" aria-hidden="true" focusable="false"><use href="#ic-engrenage"></use></svg> › Barème de la convention</span>. Chaque
   barème affiche <b>son texte source et sa date</b> ; celui de la Côte de Nuits, en vigne basse, est
   celui d'origine. Elles sont un point de départ, <b>ajustables tâche par tâche</b> dans
-  <span class="path">Réglages › Vigne › Tâches</span>.</p>
+  <span class="path">Vigne › <svg class="g-ic" width="18" height="18" viewBox="0 0 24 24" aria-hidden="true" focusable="false"><use href="#ic-engrenage"></use></svg> › Tâches</span>.</p>
   <div class="note tip"><span class="ni" aria-hidden="true"><svg class="g-ic" width="18" height="18" viewBox="0 0 24 24" aria-hidden="true" focusable="false"><use href="#ic-eclair"></use></svg></span><div><b>La densité fait le
   gros de l'écart entre régions.</b> Les barèmes sont tous exprimés à 10 000 pieds/hectare ; vos
   écartements de plantation ramènent ensuite les heures à votre densité réelle, comme le prescrit
   l'accord lui-même. Sans écartements renseignés, rien ne bouge — le coefficient vaut 1. Ils se
-  saisissent dans <span class="path">Réglages › Vigne › Vos plantations</span> : la distance d'un
+  saisissent dans <span class="path">Vigne › <svg class="g-ic" width="18" height="18" viewBox="0 0 24 24" aria-hidden="true" focusable="false"><use href="#ic-engrenage"></use></svg> › Vos plantations</span> : la distance d'un
   rang au suivant, puis celle d'un pied au suivant, en mètres. L'application en déduit vos
   pieds/hectare.</div></div>
   <div class="note"><span class="ni" aria-hidden="true"><svg class="g-ic" width="18" height="18" viewBox="0 0 24 24" aria-hidden="true" focusable="false"><use href="#ic-crayon"></use></svg></span><div>Quand vous modifiez une valeur,
@@ -876,7 +900,7 @@ mark{background:rgba(200,176,32,.32);color:var(--cream);border-radius:3px;paddin
     <li>Le tractoriste saisit le <b>nombre de trous percés</b> parcelle par parcelle, pendant une session
     à la tarière.</li>
     <li>Le temps de la tâche devient alors <b>nombre de trous × temps par trou</b>
-    (<b>3&nbsp;minutes</b> par défaut, réglable dans <span class="path">Réglages › Vigne › Tâches</span>).</li>
+    (<b>3&nbsp;minutes</b> par défaut, réglable dans <span class="path">Vigne › <svg class="g-ic" width="18" height="18" viewBox="0 0 24 24" aria-hidden="true" focusable="false"><use href="#ic-engrenage"></use></svg> › Tâches</span>).</li>
     <li>Tant qu'aucun trou n'est saisi, le calcul revient au forfait à la surface.</li>
     <li>La mise à jour est <b>immédiate</b> : cocher, décocher ou supprimer une session recalcule tout.</li>
   </ul>
@@ -906,7 +930,7 @@ mark{background:rgba(200,176,32,.32);color:var(--cream);border-radius:3px;paddin
     <li><b>Ouvrir Tracteur, bouton ＋</b>Sur téléphone, le bouton rond en bas à droite propose
     <em aria-hidden="true">Session tracteur</em> ou <em aria-hidden="true">Traitement phyto</em>.</li>
     <li><b>Choisir la machine et l'activité</b>Broyage, labour, rognage, tarière… Les activités sont
-    définies par l'administrateur dans <span class="path">Réglages › Tracteur</span>.</li>
+    définies par l'administrateur dans la roue crantée du module, <span class="path">Tracteur › <svg class="g-ic" width="18" height="18" viewBox="0 0 24 24" aria-hidden="true" focusable="false"><use href="#ic-engrenage"></use></svg> › Activités</span>.</li>
     <li><b>Cocher les parcelles au fur et à mesure</b>La surface travaillée se cumule en hectares.
     Certaines activités demandent une valeur à chaque parcelle (le nombre de trous, par exemple).</li>
     <li><b>Laisser la session ouverte</b>Elle se termine automatiquement à 100&nbsp;%, et ses dates de
@@ -923,7 +947,7 @@ mark{background:rgba(200,176,32,.32);color:var(--cream);border-radius:3px;paddin
   </ul>
 
   <h3><svg class="g-ic" width="18" height="18" viewBox="0 0 24 24" aria-hidden="true" focusable="false"><use href="#ic-chrono"></use></svg> Le chrono : la coche est la mesure</h3>
-  <p>Facultatif, activé par le domaine dans <span class="path">Réglages › Tracteur</span>, en tête des
+  <p>Facultatif, activé par le domaine dans <span class="path">Tracteur › <svg class="g-ic" width="18" height="18" viewBox="0 0 24 24" aria-hidden="true" focusable="false"><use href="#ic-engrenage"></use></svg> › Activités</span>, en tête des
   activités. Sans lui, le barème h/ha prend le relais et rien n'est mesuré. Il n'enregistre
   <b>aucun trajet GPS</b>.</p>
   <ul class="dot">
@@ -1004,6 +1028,20 @@ mark{background:rgba(200,176,32,.32);color:var(--cream);border-radius:3px;paddin
     chiffrée : elle est comptée à part et son nombre s'affiche sur la ligne « Carburant GNR » du
     Pilotage. Vérifiez aussi qu'un <b>appoint de cuve</b> avec son prix au litre a été saisi : sans
     prix connu, les litres existent mais valent zéro euro.</div></details>
+  <h3><svg class="g-ic" width="18" height="18" viewBox="0 0 24 24" aria-hidden="true" focusable="false"><use href="#ic-engrenage"></use></svg> La roue crantée — le parc, les activités, le chrono</h3>
+  <p>En haut à droite de l'en-tête, la roue crantée ouvre ce qui se règle une fois l'an pour le
+  tracteur. C'était <span class="path">Réglages › Tracteur</span> ; même écran, à un tap du module.
+  Réservée à l'<b>administrateur</b>.</p>
+  <ul class="dot">
+    <li><b>Parc</b> : machines, compteurs d'heures, seuils de révision.</li>
+    <li><b>Activités</b> : la liste proposée aux tractoristes, le barème h/ha de chacune, et le champ
+    éventuel à saisir par parcelle.</li>
+    <li><b>Chronométrer le temps réel</b>, en tête des activités : bascule ON/OFF pour tout le
+    domaine. Sans elle, le barème h/ha prend le relais et rien n'est mesuré.</li>
+    <li><b>Documents</b> : le carnet d'entretien, machine par machine.</li>
+  </ul>
+  <p>Les conducteurs autorisés se cochent sur la fiche du membre (<span class="path">Réglages ›
+  Équipe</span>, rôle Tractoriste) ; le prix du litre de GNR se saisit à chaque appoint de cuve.</p>
 </section>
 
 
@@ -2483,11 +2521,16 @@ mark{background:rgba(200,176,32,.32);color:var(--cream);border-radius:3px;paddin
 <section id="reglages">
   <div class="sec-h">
     <div class="sec-ic" aria-hidden="true"><svg class="g-ic" width="18" height="18" viewBox="0 0 24 24" aria-hidden="true" focusable="false"><use href="#ic-engrenage"></use></svg></div>
-    <div><h2>Réglages</h2><div class="sub">Domaine · Vigne · Équipe · Tracteur · App</div></div>
+    <div><h2>Réglages</h2><div class="sub">Domaine · Équipe · App</div></div>
   </div>
-  <p class="lead">Cinq onglets pour l'administrateur ; les autres membres n'y trouvent que
-  l'onglet <b>App</b>, avec leur mot de passe, l'affichage et l'aide. C'est aussi d'ici que s'ouvre
-  cette documentation.</p>
+  <p class="lead">Trois onglets pour l'administrateur — ce qui n'appartient à aucun module : le domaine,
+  l'équipe, votre compte. Les autres membres n'y trouvent que l'onglet <b>App</b>, avec leur mot de
+  passe, l'affichage et l'aide. C'est aussi d'ici que s'ouvre cette documentation.</p>
+  <div class="note info"><span class="ni" aria-hidden="true"><svg class="g-ic" width="18" height="18" viewBox="0 0 24 24" aria-hidden="true" focusable="false"><use href="#ic-info"></use></svg></span><div><b>Un module règle ses
+  affaires chez lui.</b> Les tâches, le barème, les plantations et les secteurs météo sont dans la roue
+  crantée de la <b>Vigne</b> ; le parc, les activités et le chrono dans celle du <b>Tracteur</b> ; le
+  Cuvier et le Chai dans celle de la <b>Cave</b>. Chaque roue porte aussi les documents de son
+  module.</div></div>
 
   <h3><svg class="g-ic" width="18" height="18" viewBox="0 0 24 24" aria-hidden="true" focusable="false"><use href="#ic-maison"></use></svg> Domaine</h3>
   <ul class="dot">
@@ -2495,7 +2538,8 @@ mark{background:rgba(200,176,32,.32);color:var(--cream);border-radius:3px;paddin
     <li><b>Localisation</b> pour la météo, avec un bouton <b>Centrer sur mes parcelles</b>.</li>
     <li><b>Lien d'invitation</b> à partager avec un nouveau membre.</li>
     <li><b>Saisons</b> : créer, dater, activer, consulter l'<b>historique</b>, <b>clôturer la campagne</b>.</li>
-    <li><b>Économie &amp; conformité</b> : passages phyto de référence, paramètres du simulateur.</li>
+    <li><b>Économie &amp; conformité</b> : passages phyto de référence (IFT) et consommation de référence du
+    tracteur. Les hypothèses du simulateur, elles, sont dans <span class="path">Pilotage › Outils › Paramétrage</span>.</li>
     <li><b>Appellations et plafonds de rendement</b> — voir ci-dessous.</li>
   </ul>
 
@@ -2517,21 +2561,6 @@ mark{background:rgba(200,176,32,.32);color:var(--cream);border-radius:3px;paddin
     <li>Deux noms qui ne diffèrent que par une majuscule ou une espace sont <b>la même
       appellation</b> : le doublon est refusé, et le rattachement les reconnaît.</li>
     <li>Réservé à l'<b>administrateur</b>.</li>
-  </ul>
-
-  <h3><svg class="g-ic" width="18" height="18" viewBox="0 0 24 24" aria-hidden="true" focusable="false"><use href="#ic-feuille"></use></svg> Vigne</h3>
-  <ul class="dot">
-    <li><b>Tâches</b> : heures par hectare, passages prévus par saison, temps par trou de
-    l'entreplantation, création de tâches propres au domaine.</li>
-    <li><b>Le barème de référence</b> se choisit <b>par région</b> dans l'écran du barème, ouvert par
-    <em aria-hidden="true">＋ Nouvelle tâche selon le barème de la convention</em> : la Bourgogne ou la
-    Gironde pour l'instant, chacune avec son texte source et sa date. C'est une référence indicative,
-    pas une règle : en changer ne modifie aucune de vos valeurs.</li>
-    <li><b>Vos plantations</b> : la distance entre vos rangs et entre vos pieds. Elles ramènent
-    les heures conseillées à votre densité réelle — sans elles, le barème suppose 10 000
-    pieds/hectare.</li>
-    <li><b>Parcelles &amp; secteurs météo</b> : affecter chaque parcelle à sa commune. Dès que deux
-    communes sont actives, une météo par secteur apparaît sur l'Accueil.</li>
   </ul>
 
   <h3><svg class="g-ic" width="18" height="18" viewBox="0 0 24 24" aria-hidden="true" focusable="false"><use href="#ic-equipe"></use></svg> Équipe</h3>
@@ -2564,16 +2593,6 @@ mark{background:rgba(200,176,32,.32);color:var(--cream);border-radius:3px;paddin
   d'écart n'en font qu'un.</p>
   <p>Quand un contrat arrive à terme, un <b>rappel</b> apparaît en tête de la fiche et dans la liste des
   membres, trente jours avant, avec de quoi renouveler ou acter l'arrêt en un geste.</p>
-
-  <h3><svg class="g-ic" width="18" height="18" viewBox="0 0 24 24" aria-hidden="true" focusable="false"><use href="#ic-tracteur"></use></svg> Tracteur</h3>
-  <ul class="dot">
-    <li><b>Parc</b> : machines, compteurs d'heures, seuils de révision.</li>
-    <li><b>Activités</b> : la liste proposée aux tractoristes, le barème h/ha de chacune, et le champ
-    éventuel à saisir par parcelle.</li>
-    <li><b>Chronométrer le temps réel</b>, en tête des activités : bascule ON/OFF pour tout le
-    domaine. Sans elle, le barème h/ha prend le relais et rien n'est mesuré.</li>
-    <li>Conducteurs autorisés, <b>prix du litre de GNR</b> (saisi à chaque appoint de cuve).</li>
-  </ul>
 
   <h3><svg class="g-ic" width="18" height="18" viewBox="0 0 24 24" aria-hidden="true" focusable="false"><use href="#ic-engrenage"></use></svg> App — accessible à tous</h3>
   <ul class="dot">
@@ -2656,6 +2675,10 @@ mark{background:rgba(200,176,32,.32);color:var(--cream);border-radius:3px;paddin
     <tr><td><svg class="g-ic" width="18" height="18" viewBox="0 0 24 24" aria-hidden="true" focusable="false"><use href="#ic-carton"></use></svg> <b>Données brutes</b></td><td>Vos données telles quelles, pour votre tableur ou votre
     comptable : journal des travaux, avancement par parcelle, sauvegarde complète.</td></tr>
   </table></div>
+  <p>Depuis peu, chaque module a aussi <b>ses</b> documents à portée de main, dans la roue crantée de son
+  en-tête : ceux de la vigne dans <span class="path">Vigne › <svg class="g-ic" width="18" height="18" viewBox="0 0 24 24" aria-hidden="true" focusable="false"><use href="#ic-engrenage"></use></svg></span>, le carnet d'entretien dans
+  <span class="path">Tracteur › <svg class="g-ic" width="18" height="18" viewBox="0 0 24 24" aria-hidden="true" focusable="false"><use href="#ic-engrenage"></use></svg></span>, ceux de la cave dans <span class="path">Cave › <svg class="g-ic" width="18" height="18" viewBox="0 0 24 24" aria-hidden="true" focusable="false"><use href="#ic-engrenage"></use></svg></span>. Même
+  catalogue, filtré par module ; le catalogue complet reste ici.</p>
   <p>Chaque ligne annonce son <b>format</b> et ce qu'elle va vous demander <em aria-hidden="true">avant</em>
   de générer. Un document dont le module est masqué pour vous reste visible mais grisé : le cacher
   laisserait croire qu'il n'existe pas.</p>
@@ -2808,7 +2831,7 @@ mark{background:rgba(200,176,32,.32);color:var(--cream);border-radius:3px;paddin
     aux administrateurs.</div></details>
   <details><summary>Le nombre d'heures d'une tâche ne correspond pas au terrain</summary>
     <div class="dbody">Ajustez les heures par hectare dans
-    <span class="path">Réglages › Vigne › Tâches</span>. Le barème livré est une base conventionnelle,
+    <span class="path">Vigne › <svg class="g-ic" width="18" height="18" viewBox="0 0 24 24" aria-hidden="true" focusable="false"><use href="#ic-engrenage"></use></svg> › Tâches</span>. Le barème livré est une base conventionnelle,
     pas une vérité : chaque domaine a ses pentes, ses âges de vigne et ses habitudes.</div></details>
   <details><summary>La date de fin projetée bouge tout le temps</summary>
     <div class="dbody">C'est voulu : elle suit la <b>cadence réelle</b> des dernières semaines. Une
