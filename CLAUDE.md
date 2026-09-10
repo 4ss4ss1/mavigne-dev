@@ -15923,3 +15923,70 @@ parc.
 
 **Ouvert** : pas de réglage d'écran pour `futs_preavis` (constante à 90 j) ; le guide
 `guide/` ne décrit pas encore le champ acheté/loué ; `demarrage.html` non touché.
+
+
+## 106. ★★★ PORTES — LA CHAÎNE LOCALE ET LA CHAÎNE CI SONT LA MÊME PORTE
+
+**Base** `eb12c01` · aucun bump (`scripts/`, `package.json`) · 10/09/2026
+
+### Le défaut : deux portes, et personne ne le savait
+
+Le push échouait « pratiquement à chaque fois », sur une porte différente à chaque lot :
+`lint-cliquet` (`no-redeclare`), `lint-vocabulaire`, `mv-whatsnew-check`… Corriger l'erreur
+du jour ne réglait rien, parce que **l'erreur n'était pas le défaut**.
+
+Mesuré, pas supposé : `.github/workflows/ci.yml` lançait **25** invocations
+`node scripts/…`, `npm run check` en lançait **46**, et **quatorze** de la première liste
+étaient absentes de la seconde :
+
+```
+harnais-demo.mjs · harnais-demo-contre.mjs · lint-cliquet.mjs · lint-vocabulaire.mjs
+mv-chartes-doc.mjs · mv-harnais-carte.mjs · mv-harnais-entretien.mjs
+mv-harnais-icones-contre.mjs · mv-harnais-vignoble.mjs · mv-whatsnew-check.mjs
+mv-harnais-carte-parcelle.mjs --contre · mv-harnais-confidentialite.mjs --contre
+mv-harnais-globaux.mjs --contre · mv-harnais-pic-avenir.mjs --contre
+```
+
+⚠️ **Le poste ne pouvait pas voir ce que le push allait trouver.** Un lot passait vert en
+local *par construction* : la porte locale ne contenait pas la porte du CI. Les quatre
+`--contre` manquantes sont le cas le plus dur — ce sont les contre-épreuves, la moitié qui
+prouve qu'un harnais mord.
+
+### La correction du jour, et celle qui compte
+
+Les 14 sont ajoutées à `check` **et** à `prebuild` (61 invocations chacune, identiques).
+Deux portes rapides passent **en tête**, juste après `mv-base` : un `no-redeclare` doit
+coûter dix secondes, pas la chaîne entière.
+
+Mais ajouter 14 lignes ne ferme que le trou du jour. `scripts/mv-harnais-portes.mjs` ferme
+le **prochain** : il parse `ci.yml` et `package.json`, et assère
+
+- **CI ⊆ check** — toute étape ajoutée au CI sans pendant local rougit sur le poste ;
+- **check ≡ prebuild** — les deux chaînes locales restent jumelles ;
+- `lint-cliquet` est bien dans la chaîne locale (la porte qui a fait échouer le plus de
+  push).
+
+L'inverse (check ⊄ CI) reste **légitime** : `mv-base`, le banc et `harnais-claude-md` n'ont
+de sens qu'en local. La liste `CI_SEUL` est **vide** et toute entrée future s'y justifie en
+commentaire — sinon c'est le trou d'hier qui revient sous un autre nom.
+
+⚠️ **Coût mesuré** : la chaîne passe à ~123 s, dont ~50 s pour `mv-harnais-icones-contre`
+et ~9 s pour `lint-cliquet`. C'est le prix d'une porte unique. Le CI les payait déjà.
+
+### Le défaut qui a déclenché tout ça
+
+`src/pilotage.js` — `var _pv` dans le bloc `pachper` de la délégation de clic, alors qu'un
+`var _pv` existait quatorze lignes plus haut dans le bloc `sub`. Même fonction, même portée.
+
+⚠️ **`const` et non `var` dans cette délégation.** C'est UNE fonction de plusieurs centaines
+de lignes où chaque lot ajoute son `if(_pa===…)`. Avec `var`, deux lots qui choisissent le
+même nom court se marchent dessus ; avec `const`, chacun reste dans son bloc `{}`. La règle
+vaut pour toute nouvelle branche de cette fonction.
+
+### Fichiers
+
+`package.json`, `scripts/mv-harnais-portes.mjs` (nouveau), `scripts/harnais-claude-md.mjs`
+(cliquet SECTIONS), `src/pilotage.js`, `CLAUDE.md`.
+
+**Ouvert** : aucun garde ne vérifie que le CI ne *retire* pas une étape ; et `--contre`
+n'est pas systématique — plusieurs harnais en ont une que ni le CI ni `check` n'appellent.

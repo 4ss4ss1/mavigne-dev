@@ -9916,7 +9916,12 @@ function _pilBindContent(content){
         if((_fv==='tout'||_fv==='sans')&&_fv!==_PACH_FILT){ _PACH_FILT=_fv; _pilFillContent(_pilData()); } return; }
       if(_pa==='futtr'){ var _tv=_pe.getAttribute('data-v');
         if(typeof window._pexSetFutTrait==='function') window._pexSetFutTrait(_tv); return; }
-      if(_pa==='pachper'){ var _pv=_pe.getAttribute('data-v');
+      // ⚠️ `const` ET NON `var` : cette delegation est UNE SEULE fonction de plusieurs
+      //   centaines de lignes, ou chaque lot ajoute son `if(_pa===…)`. Un `var _pv`
+      //   de plus y retombe dans la MEME portee que celui du bloc 'sub' 14 lignes
+      //   plus haut -> no-redeclare. Un `const` reste dans son bloc `{}` : deux lots
+      //   peuvent choisir le meme nom sans jamais se marcher dessus.
+      if(_pa==='pachper'){ const _pv=_pe.getAttribute('data-v');
         if((_pv==='exe'||_pv==='tout')&&_pv!==_PACH_PER){ _PACH_PER=_pv; _pilFillContent(_pilData()); } return; }
       if(_pa==='pach'){ _pachOpen(_pe.getAttribute('data-v')||''); return; }
       if(_pa==='pachadd'){ _pachAdd(); return; }
