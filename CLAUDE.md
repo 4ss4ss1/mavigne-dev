@@ -2,7 +2,15 @@
 
 > Document de référence du projet **Ma Vigne** (GUERETTECH). Il est le **porteur de vérité** :
 > la mémoire Claude est plafonnée, ce fichier ne l'est pas.
-> Dernière consolidation : **10 septembre 2026 (CAVE-6)** — **L'ORDRE DU CUVIER, LE FILTRE DU CHAI,
+> Dernière consolidation : **10 septembre 2026 (PIL-COH + PIL-EXO + PIL-DIAG)** — ★★★ **LE PILOTAGE NE SE CONTREDIT
+> PLUS (§103), L'EXERCICE EST COUPÉ AU JOUR ET IL N'Y A PLUS QU'UNE LISTE « À COMPLÉTER » (§104)** : un bac qui EXÉCUTE
+> les huit onglets a trouvé onze défauts (deux dates de fin, une cadence qui comptait une fiche pour 30 vendangeurs, un
+> écart refusé ici et appliqué là, la masse salariale sans le bureau — 0a-quater enfin livré) ; l'Exercice dit engagé /
+> prévu / à la clôture et se compare à l'an dernier aux mêmes jours ; `_pecZeros` relit `_pilDiag`. ⚠️⚠️ **Le lot a été
+> construit deux fois** : CAVE-6 avait pris 7.00 / 7.59 entre les deux — rejoué sur `d92de47`, puis sur `ae9adbd`. **APP 7.00 → 7.01 ·
+> SW 7.59 → 7.60.** Détail en **§103** et **§104**.
+>
+> ★ Précédente : **10 septembre 2026 (CAVE-6)** — **L'ORDRE DU CUVIER, LE FILTRE DU CHAI,
 > ET 482 TAILLES DE TEXTE (§102)**. Trois demandes de Nico en un message. ① Les onglets du Cuvier
 > suivent la vendange : **Maturités → Récoltes → Cuves** (clés, handlers et `_vendTab` inchangés).
 > ⚠️ **L'onglet d'arrivée reste « Cuves » — question ouverte.** ② Le filtre millésime **existait**
@@ -18,9 +26,7 @@
 > ⚠️⚠️⚠️ **Le ménage des 58 classes mortes a été ABANDONNÉ en cours de lot** : mon détecteur a pris
 > `.join` et `.toFixed` pour des sélecteurs et supprimé 25 lignes de code — rattrapé par
 > `node --check`, base restaurée, patchs rejoués. **APP 6.99 → 7.00 · SW 7.58 → 7.59**, base
-> `a5c978c`. Détail en **§102**.
->
-> ★ Précédente : **9 septembre 2026 (nuit, NAV-4/5)** — **LA SÉRIE NAV EST CLOSE (§101)** : roue crantée sur
+> `a5c978c`. Détail en **§102**. **9 septembre 2026 (nuit, NAV-4/5)** — **LA SÉRIE NAV EST CLOSE (§101)** : roue crantée sur
 > les **sept** modules (Phyto et Réserve : documents seulement ; le bouton d'export quitte le bas du registre phyto —
 > ⚠️ l'audit NAV-0 le disait *dans la barre d'onglets*, c'était faux, il était sous la liste) ; « App » → « Moi », le
 > catalogue des documents passe dans **Domaine › Données** ; les en-têtes disent « Cave » et « Réserve » ; « Le Millésime » ;
@@ -15576,3 +15582,161 @@ que le harnais, **visible du client cette fois**. Un utilisateur qui déroule se
 reste, les renommages Cuves/Maturités, demeure vrai) **dans le prochain lot qui touche `utils.js`**
 — pas de cycle de déploiement pour une phrase seule.
 
+## 103. ★★★ PIL-COH — LE PILOTAGE NE SE CONTREDIT PLUS : ONZE DÉFAUTS TROUVÉS EN EXÉCUTANT LES HUIT ONGLETS (10/09 — livré avec §104 : APP 7.00 → 7.01 · SW 7.59 → 7.60 · base `ae9adbd`)
+
+**Point de départ**, mot pour mot : *« En tant qu'analyste et expert en ergonomie, améliore significativement le module
+pilotage. Il doit être parfait, avec les bonnes informations, pas d'erreur de calcul et cohérent. »*
+
+### 103a. La méthode — un bac qui rend les écrans, pas un audit qui relit le code
+
+Aucun harnais du projet n'exécutait un ONGLET entier : le banc (§43d) mesure dix fonctions, les harnais C20 en
+extraient trois ou quatre. **Le bac de ce lot charge `utils`, `planning`, `reglages`, `tracteur`, `reserve`, `phyto`,
+`cave` et `pilotage` pour de vrai** (jsdom, `window = globalThis`, horloge figée), extrait la fermeture de `calcHeures`
+depuis `app.js`, pose un domaine SYNTHÉTIQUE (11,8 ha, 12 parcelles, 3 permanents + 1 CDD fini + 1 équipe de vendange de
+30 + 2 bureau, 4 périodes, journal, sessions, traitements, paie) et rend les huit onglets à deux dates — le 10/09 en
+vendange, le 16/11 en hiver. On lit le TEXTE rendu. ⚠️ **Piège de montage** : `planning.js` remet `window.PLANNING_ENTRIES`
+à `{}` en se chargeant — les données se posent APRÈS les modules, comme `applyFbData` le fait dans l'app. Sans ça, la CP
+d'Ana n'existait pas et « 4 présents sur 4 » passait pour juste.
+★ Le bac n'est pas livré (il vit dans le bac à sable, avec ses 60 Mo de jsdom) ; **ce qu'il a trouvé l'est**, sous forme
+d'assertions fonctionnelles dans `scripts/mv-harnais-pil-coherence.mjs`.
+
+### 103b. Les onze défauts, mesurés sur l'écran rendu
+
+| # | ce que l'écran disait | la cause | le correctif |
+|---|---|---|---|
+| **A** | Aujourd'hui « fin le ven. 11 sept. » · La campagne › Échéances « fin de saison ~mar. 29 sept. » | `_pilPanelEcheances` divisait la charge par la cadence des 4 dernières semaines ; le cockpit lit la capacité planifiée depuis §34 | la carte lit **`_pilMargeCalc`**, le « N j » par tâche passe par `_pilCapaProj` (3ᵉ argument `kPre` : le facteur calculé une fois), et la ligne de cadre nomme la source |
+| **B** | « Cadence équipe 26 h/j » sous « 32 personnes dans les rangs » | `_planTeamCadence_` (planning.js) comptait une FICHE = 1 et un CP = présence | × `_planEffN`, `_planWorkH` au lieu de `_planDayH`, rend `hPers` (h par personne-jour) |
+| **S** | Simulateur « et si ? » : « 13 j à cet effectif » pour 324 h à 33 — la tournée, juste au-dessus, disait 2 j | `perH = cadH/nMes` : 28 jours de présence divisés par l'effectif d'AUJOURD'HUI | `perH = c.hPers` (mesuré), repli journée réglée |
+| **C** | Marge : « cadence pas encore mesurable » · tuile Budget : « cadence +232 % vs barème · fin ≈ 30,3 k€ » — le MÊME écart | la borne [0,5 ; 3] ne vivait que dans `_pilCapaProj`, côté date ; `_pecData` appliquait l'écart aux euros sans borne | **`_PEC_CAD_KMIN/KMAX` dans `_pecData`**, `cad.horsBornes`, `applic=false` dans les deux sens ; `_pilCapaProj` ne porte plus de borne ; la marge écrit « hors bornes : non retenu » |
+| **C'** | Verdict histo : « +23 % de temps en plus… la période irait vers 37,1 k€, soit **0 €** au-dessus du budget » | `projFin = budget` quand non appliqué, mais la phrase de projection restait | `_pecNonRetenu(E)` : un écart lu n'écrit plus de projection ; tuile « Écart de cadence » idem |
+| **G** | Équipe › « 5/6 présents au champ » · cockpit « 3 sur 4 » | `_pilPanelPresences` comptait le bureau sous le mot « au champ » | mêmes nombres que le cockpit (`presentFiches` / `nVchamp`), liste hors bureau |
+| **I** | taux moyen 18,75 €/h en vendange (30 vendangeurs à 16 €) | `_ecoRate` pesait chaque taux par les heures de sa grille sur DOUZE mois, une fiche = 1 — le backlog disait « pondéré par les heures : FAIT », c'était vrai et insuffisant | poids = `_planWorkPersRange` sur la période (contrats, effectif), repli grille × `_mvEffDef` ; cache oublié par `_pilExoOublier` ; 16,65 €/h |
+| **J** | photo Travaux « 7 611 h · 3 campagnes dans l'exercice » avec un printemps qui finit le 23 août dans un exercice ouvert le 1er août | une période à cheval comptait en entier | prorata des jours, et l'écran écrit « 1 à cheval, au prorata de ses jours » ; le tableau « Deux façons de compter » garde la ligne entière |
+| **R** | « Rythme des 28 derniers jours : 362 € par jour » à dix jours de vendange, fin projetée SOUS le budget pendant que la cadence disait le double | la fenêtre remontait avant le début de période | `winStart = max(t0, …)`, `nDays` affiché (« 16 derniers jours : 633 €/j ») |
+| **E** | Exercice : 4 personnes, 129 k€ — Étienne et Chloé absents, pastille « bureau » (l. 7359) jamais rendue | 0a-quater, reporté le 14/08 : `_mvEnContratSurPeriode` écartait le bureau dès sa première ligne, contre son propre commentaire | 4ᵉ argument **`avecBureau`** (utils.js), `true` au seul appelant `_pexData` ; colonne « Au champ » → **« Travaillées »** ; ★ **livré sur décision explicite de Nico** (*« le point E, il faut la pastille bureau »*) — les trois lecteurs de capacité restent hors bureau |
+| **K/D** | `_pilOrdDate` en époque locale + `86400000` (le piège du 12/08, en sens inverse) · « 1 tâches » | — | `new Date(2026,0,1+o)` (débordement de jour, robuste au changement d'heure) · pluriel |
+
+★★★ **La leçon** : *neuf de ces onze défauts ne se voient QUE deux onglets à la fois.* Chaque chiffre était défendable
+seul ; c'est leur voisinage qui mentait. Un contrôle par fonction ne peut pas le trouver — seul un écran rendu à côté d'un
+autre écran rendu le peut. **Le test qui manque au projet est celui-là : deux onglets, mêmes données, mêmes grandeurs.**
+
+### 103c. Ce que le bac a vu et que le lot n'a PAS traité
+
+- **L'Exercice affiche dix mois PLANIFIÉS comme « payés » et « sortis »** : au 10/09, « Dépenses de l'exercice 129 k€ ·
+  en cours » agrège deux mois payés et dix mois de grille de planning. `enCours` existe dans `_pexData` et n'est lu que
+  pour le mot « en cours ». **Séparer « engagé à ce jour » de « prévu jusqu'à la clôture » change l'écran : maquette
+  d'abord.**
+- **Le doublon `_pilDiag` / `_pecZeros`** (§42k) — inchangé, maquette d'abord.
+- **Le budget de campagne est un barème × taux moyen** : sur une vendange à 80 h/ha barème et 33 personnes, l'écart de
+  cadence sort à +232 %. Le bac le dit hors bornes — c'est le comportement voulu — mais c'est le **barème** qu'un
+  domaine devra corriger, pas l'écran (§20b, « on corrige le barème, jamais le taux »).
+- ⚠️ La contre-épreuve « époque locale » n'est probante que sous un fuseau à changement d'heure : le harnais l'exige
+  (`TZ=Europe/Paris node scripts/mv-harnais-pil-coherence.mjs --contre`) et refuse de conclure sous UTC — le bac à sable
+  de Claude est le seul endroit du monde où l'ancienne version était juste (§ `_mvJourApres`).
+
+### 103d. Vérifications
+
+`mv-harnais-pil-coherence` **26/26**, contre-épreuves **9/9 rougissent** (sous `TZ=Europe/Paris`). `npm run check` :
+preflight **0 erreur · 0 avertissement**, tous les harnais verts jusqu'à `harnais-claude-md` (qui rougissait sur le seul
+script non nommé ici — le nouveau harnais, désormais nommé ; `SECTIONS` 133 → 135, CAVE-6 n'ayant pas relevé le sien). `WHATS_NEW` **exécuté** : `7.00`,
+5 items, icônes `chrono/equipe/euro/personne/graphique` présentes dans le sprite. `v7.59` cinq fois dans `sw.js`, quatre
+`v7.00` dans `index.html`. Guide **11** régénéré (`build-guide` : 15 sections). Fiche `MV_AIDE.pilotage` relue : l'entrée
+« cherche sa source dans un ordre » disait « hypothèse de projection » pour l'histo — réécrite (lu, non appliqué).
+`MV_INFO` : `pil.cadence` (+1 § borne), `pil.exo.salaires` (titre + bureau), `pil.an.budget` (pondération), `pil.presences`
+disait DÉJÀ « hors bureau » — c'est le code qui était faux. **Pas de rendu navigateur** : à regarder en admin — Aujourd'hui
+et La campagne donnent la même date de fin ; la marge écrit « hors bornes » quand la tuile Budget le dit ; Exercice montre
+la pastille bureau et la colonne Travaillées.
+
+### 103e. La note de livraison
+
+**Base : `ae9adbd`.** ⚠️⚠️ **CE LOT A ÉTÉ CONSTRUIT DEUX FOIS.** Livré une première fois sur `a5c978c` en **7.00 / 7.59** ; entre-temps Nico a intégré CAVE-6 (§102, autre conversation) qui a pris **exactement ces deux numéros**. Le second « go » disait *« revérifie tous les fichiers »* : `git pull` a montré le commit `d92de47`, le lot a été **rejoué sur la base neuve** (les fichiers non touchés par CAVE-6 — `pilotage.js`, `planning.js`, guide 11, banc, `package.json` — repris tels quels, `utils.js` re-patché motif par motif, versions **7.01 / 7.60**). La règle d'or n°1, vécue une fois de plus : *un fichier complet livré depuis une base vieille de quelques heures est une bombe à retardement* — et réutiliser 7.00 aurait figé pour toujours les clients passés sur CAVE-6. `.mv-base` regravé sur `d92de47` (il pointait encore sur `f79891c`).
+Livré : `src/pilotage.js`, `src/planning.js`, `src/utils.js`, `index.html`, `public/sw.js`, `.mv-base`, `package.json`
+(harnais branché dans `check` et `prebuild`), `scripts/mv-harnais-pil-coherence.mjs`, `scripts/harnais-claude-md.mjs`,
+`guide/11-pilotage.html` (puis `node scripts/build-guide.mjs`), `CLAUDE.md`.
+
+## 104. ★★★ PIL-EXO + PIL-DIAG — L'EXERCICE EST COUPÉ AU JOUR, ET UNE SEULE LISTE « À COMPLÉTER » (10/09 — APP 7.00 → 7.01 · SW 7.59 → 7.60 · base `ae9adbd`, livré avec §103)
+
+> Sur la maquette `maquette-pil-exercice.html` (deux écrans, curseur « aujourd'hui », avant/après), validée par
+> *« go »*. Les deux choix laissés ouverts ont été tranchés par défaut : **un mois entamé est coupé au jour**, et la
+> comparaison N-1 passe par **un 3ᵉ argument de `_pexData`**.
+
+### 104a. PIL-EXO — engagé, prévu, à la clôture
+
+**Le défaut** (§103c) : `_pexData` valorisait les douze mois de l'exercice depuis la grille du planning et l'écran
+disait « Dépenses de l'exercice 216 k€ · 10 113 h **payées** · ce qui est **sorti** » un 10 septembre. `enCours`
+existait et ne servait qu'au mot « en cours ».
+
+- **`_pexData(ex, noCmp, coupeIso)`** : la coupe vaut aujourd'hui (exercice en cours), la clôture (clos : tout est
+  engagé), la veille de l'ouverture (futur : tout est prévu), ou la date passée. Chaque segment de paie
+  (`_pexSegsTaux`) est **coupé à la coupe** : la part ≤ coupe est engagée (`byM[].sal`, `salT`, `hPaid`), la part
+  après est prévue (`byM[].salP`, `salP`, `hPaidP`). `total` reste l'**engagé** — tous les lecteurs existants
+  (photos, cadres, budget de l'année, diagnostic) voient ce qui est réel ; `totalP` et `totalClot` sont neufs.
+- ⚠️ **Les faits datés s'arrêtent à `dFin = min(coupe, d1)`** — les trois filtres `iso>ex.d1` sont devenus
+  `iso>dFin`, et les fenêtres GNR / tracteur / phyto aussi. Ce n'est pas une coquetterie : c'est ce qui permet de
+  rejouer l'an dernier **aux mêmes jours**. Un achat daté après aujourd'hui sort de l'engagé ; la Réserve le compte
+  toujours.
+- ★ **À date comparable** : `cmpDate = _pexData(exP, true, exP.d0 + (coupe − ex.d0))`. Avant, « +20,8 % » comparait
+  dix mois de grille à douze mois payés. L'écran porte les deux : *à date comparable* (sorti contre sorti) et
+  *exercice complet, prévu compris* — et dit lequel contient du prévu. ⚠️ Sur le domaine d'essai, +236 % à date
+  comparable : l'an dernier n'avait pas d'équipe de vendange en septembre. **Le chiffre est vrai, et il dit ce
+  qu'il compare.**
+- **L'écran** (`_pexEntete`) : quatre KPI quand `enCoursC` — Engagé à ce jour · Prévu jusqu'à la clôture (fond
+  hachuré `.pex-prevu`) · À la clôture, engagé et prévu · Contre N-1 à date comparable — et une ligne de cadre
+  (« Au 10 sept. : 19 % de l'exercice est sorti… un mois entamé est coupé au jour »). Exercice clos : l'en-tête
+  d'avant, intact. Le tableau des postes gagne **Engagé · Prévu · À la clôture** ; la part et le €/ha se lisent à
+  la clôture quand il y a du prévu ; la note sous le tableau dit que carburant, achats et réparations n'ont pas de
+  prévu. ⚠️ **Cette note était d'abord tombée DANS le `<table>`** : le navigateur la hissait au-dessus du tableau.
+  Vu au bac, dans le texte rendu, pas dans le code.
+- **Le graphe** (`_pexGraph`) : le prévu hachuré (`<pattern id="pex-hach">`, trait `_PEC_COL.mo`), le trait
+  d'aujourd'hui en `_PIL_SEM.aujourdhui` à la fraction du mois, légende « prévu (grille du planning) ».
+- **Les salaires** : colonne **Prévues** (à l'exercice en cours), total idem. **Le cadre « Exercice comptable »**
+  de L'année : le chiffre reste l'engagé, la ligne dessous nomme la clôture, prévu compris. **La photo Budget** :
+  « engagés sur l'exercice · N k€ à la clôture, prévu compris ».
+- Trois dates-helpers UTC de bout en bout (`_pexIsoToMs2`, `_pexIsoPlus`, `_pexJourApres`) — la règle de
+  `_mvJourApres`, jamais minuit local relu en UTC ; exécutés au harnais sur le 31 → 01 et le 28 févr. → 1ᵉʳ mars.
+
+### 104b. PIL-DIAG — une seule liste
+
+Le doublon `_pilDiag` / `_pecZeros` (§42k) : deux moteurs, deux vocabulaires (« chose à compléter » / « poste
+compté pour zéro »), le même taux horaire manquant nommé de deux façons — et le prix du GNR comme les doses phyto
+absents du bandeau.
+
+- **`_pilDiag` gagne les trois postes à zéro**, marqués `zero:true` et `poste:` : *Aucun taux horaire* (gravité
+  `r` — remplace la ligne « N fiches sans taux » quand il n'y a aucun taux nulle part, qui reste pour le cas
+  partiel), *Prix du GNR inconnu* (`cible:'entretien'`), *Doses phyto non structurées* (`cible:'phyto'`, **cible
+  neuve** dans `_PIL_DIAG_CIBLES`) ou *N produits sans prix unitaire* (`cible:'reserve'`).
+- **`_pecZeros(E)` ne calcule plus rien** : `_pilDiag()` filtré sur `touche:budget`, puis `zero` ; `Z.nBudget`
+  compte tout ce qui touche le budget. **`_pecFiabCard`** écrit « 2 des 4 choses à compléter qui touchent ce
+  budget » — mêmes libellés, mêmes boutons `data-diag`. Un constat ne peut plus exister dans une liste sans exister
+  dans l'autre.
+- ★ **`_pilDiag` est mémoïsé le temps d'un rendu** (`_PIL_DIAGC`, oublié par `_pilExoOublier`) : il est désormais
+  lu par le bandeau, les photos, la feuille et la carte d'Économie, et il appelle `_pecData` + `_pexData`.
+- **Non touché, et dit** : `_pexZeros` (la carte de fiabilité de l'**Exercice**) garde sa liste — planning chargé,
+  taux, GNR, prix des achats — ce sont des manques de l'exercice, pas de la campagne. Fusion possible plus tard,
+  même patron.
+
+### 104c. Vérifications
+
+★ **Troisième base.** Entre la maquette et le « go », Nico a poussé `ae9adbd` (« package ») : le harnais
+`cave-reglages` relevé (le rouge que ce lot avait signalé sur `d92de47` — voir le post-scriptum de §102), `cave6`
+branché dans `check`/`prebuild`. **Rejoué une fois de plus** : fichiers repris du stash, `package.json` et `CLAUDE.md`
+refaits sur la version de Nico. *Deux pushs en une heure : la fraîcheur se re-mesure avant CHAQUE livraison, pas une
+fois par session.*
+Harnais `mv-harnais-pil-coherence` étendu : **42/42**, **12 contre-épreuves** rougissent (+3 : `_pecZeros` qui
+reprend sa liste, le prévu qui retombe dans l'engagé, N-1 comparé sur l'exercice entier). Bac aux deux dates
+(10/09 vendange, 16/11 hiver) : huit onglets, zéro crash, zéro NaN ; Exercice au 10/09 : engagé 40,6 k€ · prévu
+175,8 k€ · clôture 216,4 k€ · « 19 % sorti » ; carte d'Économie « 2 des 4 choses à compléter ». `WHATS_NEW`
+exécuté : `7.01`, 7 items (5 de §103 + 2). `MV_INFO` : `pil.exo.postes` (coupe, deux comparaisons),
+`pil.eco.fiabilite` (la liste du bandeau) ; `MV_AIDE.pilotage` : « La carte de fiabilité » réécrite, entrée
+« Économie › Exercice » ajoutée. Guide 11 : un paragraphe Exercice. **Pas de rendu navigateur** : à regarder en
+admin — les quatre KPI de l'Exercice, le hachuré et le trait du jour sur le graphe, la colonne Prévues, la carte
+« Ce qu'il faut regarder » avec « N des M ».
+
+### 104d. La note de livraison
+
+**Base : `ae9adbd`.** Livré (état cumulé §103 + §104) : `src/pilotage.js`, `src/planning.js`, `src/utils.js`,
+`index.html`, `public/sw.js`, `.mv-base`, `package.json`, `scripts/mv-harnais-pil-coherence.mjs`,
+`scripts/harnais-claude-md.mjs`, `scripts/banc/garde-projection.mjs`, `guide/11-pilotage.html` (puis
+`node scripts/build-guide.mjs`), `CLAUDE.md`. **Ouvert** : la fusion `_pexZeros` ; le bac (jsdom + domaine
+synthétique) qui a trouvé les défauts de §103 vit hors du dépôt — le rapatrier en `scripts/bac/` est le prochain
+outil qui manque (§103b : *le test qui manque au projet est celui-là*).

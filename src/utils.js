@@ -23,7 +23,7 @@ export const GT_ADMIN_EMAIL = 'ngdevpro@gmail.com';
 // WHATS_NEW   : tableau vide = modal desactive pour cette version.
 // Format item : { emoji:'📅', titre:'Titre court', desc:'Phrase utilisateur.' }
 // Regle : seulement les changements visibles par les utilisateurs.
-export const APP_VERSION = '7.00';
+export const APP_VERSION = '7.01';
 // ════ Journal des nouveautés (récap cumulatif) ════
 // Une entrée par version, la PLUS RÉCENTE EN HAUT : { v:'5.10', items:[ {emoji,titre,desc}, … ] }
 // À chaque release visible → AJOUTER un bloc en tête (ne pas remplacer). items:[] = release technique (rien à afficher).
@@ -354,6 +354,22 @@ window._mvGraphRepeindre = function(){
 };
 
 export const WHATS_NEW = [
+  { v: '7.01', items: [
+    { emoji: 'euro', titre: 'L\u2019exercice est coup\u00e9 au jour : engag\u00e9, pr\u00e9vu, \u00e0 la cl\u00f4ture',
+      desc: "\u00c9conomie \u203a Exercice disait \u00ab 216 k\u20ac \u00b7 10 113 h pay\u00e9es \u00bb un 10 septembre \u2014 deux mois sortis et dix mois lus dans la grille du planning. Il dit maintenant <b>ce qui est sorti</b> \u00e0 ce jour, <b>ce que la grille pr\u00e9voit</b> jusqu\u2019\u00e0 la cl\u00f4ture (hachur\u00e9 sur le graphe, avec le trait d\u2019aujourd\u2019hui), et le total des deux. Un mois entam\u00e9 est coup\u00e9 au jour. La comparaison avec l\u2019an dernier se fait <b>aux m\u00eames jours</b>, et l\u2019exercice complet dit qu\u2019il contient du pr\u00e9vu." },
+    { emoji: 'alerte', titre: 'Une seule liste \u00ab \u00e0 compl\u00e9ter \u00bb',
+      desc: "Le bandeau en t\u00eate du Pilotage et la carte \u00ab Ce qu\u2019il faut regarder \u00bb d\u2019\u00c9conomie tenaient chacun leur liste, avec des mots diff\u00e9rents. La carte relit d\u00e9sormais celle du bandeau, n\u2019en garde que ce qui met un poste du budget \u00e0 z\u00e9ro, et le dit : \u00ab 2 des 3 choses \u00e0 compl\u00e9ter \u00bb. M\u00eames mots, m\u00eames boutons \u2014 et le prix du GNR comme les doses phyto figurent enfin dans le bandeau." },
+    { emoji: 'chrono', titre: 'Le Pilotage donne une seule date de fin',
+      desc: "La carte <b>\u00c9ch\u00e9ances par t\u00e2che</b> (La campagne) calculait sa propre fin de saison, avec la cadence des quatre derni\u00e8res semaines, pendant qu\u2019<b>Aujourd\u2019hui</b> lisait l\u2019\u00e9quipe planifi\u00e9e : jusqu\u2019\u00e0 dix-huit jours d\u2019\u00e9cart entre deux onglets. Les deux lisent maintenant le m\u00eame calcul, et la carte dit lequel." },
+    { emoji: 'equipe', titre: 'Une \u00e9quipe de vendange compte pour son effectif, partout',
+      desc: "La \u00ab Cadence \u00e9quipe \u00bb, le simulateur \u00ab et si ? \u00bb et le taux horaire moyen comptaient une ligne d\u2019\u00e9quipe collective pour <b>une</b> personne. Trente vendangeurs valaient une fiche : le simulateur annon\u00e7ait 13 jours pour un travail que la tourn\u00e9e finissait en 2. Un cong\u00e9 pay\u00e9 ne compte plus comme une pr\u00e9sence." },
+    { emoji: 'euro', titre: 'Un \u00e9cart de cadence hors bornes se lit, il ne s\u2019applique plus',
+      desc: "Quand le facteur sort de [0,5\u00a0; 3], il mesure un trou de saisie, pas une cadence. Il n\u2019\u00e9tait d\u00e9j\u00e0 pas appliqu\u00e9 \u00e0 la date de fin \u2014 mais il l\u2019\u00e9tait au budget projet\u00e9 \u00e0 quinze centim\u00e8tres. Les deux disent d\u00e9sormais la m\u00eame chose, et pourquoi. M\u00eame r\u00e8gle pour un \u00e9cart lu sur la campagne pr\u00e9c\u00e9dente : le verdict ne projette plus \u00ab 0 \u20ac au-dessus du budget \u00bb." },
+    { emoji: 'personne', titre: 'La masse salariale de l\u2019exercice compte le bureau',
+      desc: "\u00c9conomie \u203a Exercice \u00e9cartait les salaires administratifs alors que le tableau les annon\u00e7ait. Ils y sont, avec une pastille <b>bureau</b> ; la colonne s\u2019appelle <b>Travaill\u00e9es</b>. La capacit\u00e9 au champ, le pic et le renfort restent hors bureau." },
+    { emoji: 'graphique', titre: 'Quatre chiffres remis d\u2019aplomb',
+      desc: "<b>Pr\u00e9sences du jour</b> compte hors bureau, comme la carte du cockpit. Le <b>rythme de d\u00e9pense</b> ne remonte plus avant le d\u00e9but de la p\u00e9riode (dix jours de vendange \u00e9tal\u00e9s sur vingt-huit donnaient un rythme trois fois trop bas). La photo <b>Travaux</b> compte une campagne \u00e0 cheval sur la cl\u00f4ture au prorata de ses jours dans l\u2019exercice. Et \u00ab 1 t\u00e2ches \u00bb s\u2019\u00e9crit au singulier." }
+  ] },
   { v: '7.00', items: [
     { emoji: 'raisin', titre: 'Le Cuvier se lit dans l\u2019ordre de la vendange',
       desc: "Ses trois onglets \u00e9taient rang\u00e9s <b>R\u00e9coltes \u00b7 Cuves \u00b7 Maturit\u00e9s</b>, c\u2019est-\u00e0-dire en partant du milieu. Ils suivent maintenant le raisin : <b>Maturit\u00e9s</b> \u00e0 la vigne, avant de couper \u2014 puis <b>R\u00e9coltes</b>, ce qui rentre \u2014 puis <b>Cuves</b>, ce qui fermente. Rien d\u2019autre ne bouge : m\u00eames \u00e9crans, m\u00eames gestes." },
@@ -2360,10 +2376,11 @@ var MV_AIDE = {
       ['Un contrat de groupe compte pour son effectif', " : une fiche « équipe de vendange » à 40 vaut 40 personnes, pas une ligne. Inutile de créer quarante fiches. L’écran dit toujours sur quelles dates il a compté, et affiche l’écart avec la présence du jour."],
       ['Le manque d’effectif se lit sur la semaine du pic', ", contre ce qui est prévu au planning <b>cette semaine-là</b> — pas contre la présence d’aujourd’hui. Un pic qui tombe dans onze mois ne se compare pas à qui est là ce matin."],
       ['Le total de l’Exercice n’est pas un compte de résultat', ": Ma Vigne connaît ce qui passe par elle — heures payées, carburant, achats d’intrants. Ni le fermage, ni les amortissements, ni les assurances, ni vos cotisations d’exploitant. Ce total sert à <b>piloter vos charges d’un bilan à l’autre</b>, pas à remplacer votre comptable."],
-      ['La carte de fiabilité d’Économie', ": elle dit combien de <b>postes de dépense sortent à zéro</b> faute d’une donnée — un taux horaire, le prix du GNR, une dose. Ce n’est pas « un peu bas » : c’est zéro, et le budget affiché n’est qu’un plancher. Chaque poste manquant porte son bouton. La puce « N remarques » en dessous ouvre tout ce qui n’empêche pas un calcul mais change sa lecture."],
+      ['La carte de fiabilité d’Économie', ": elle relit la liste du bandeau <b>« à compléter »</b> — mêmes lignes, mêmes mots, mêmes boutons — et n’en garde que ce qui met un <b>poste de ce budget à zéro</b> : un taux horaire, le prix du GNR, une dose. Ce n’est pas « un peu bas » : c’est zéro, et le budget affiché n’est qu’un plancher. La puce « N remarques » en dessous ouvre tout ce qui n’empêche pas un calcul mais change sa lecture."],
       ['Économie', "compare un budget de barème à ce qui est engagé, sur la <b>période consultée</b> — le coût d’un bilan entier se lit dans sa sous-vue <b>Exercice</b>. Quand l’écart est grand, c’est le barème qu’on corrige dans Réglages, jamais le taux horaire."],
+      ['Économie › Exercice', "coupe l’année <b>au jour</b> : l’<b>engagé</b> (ce qui est sorti) à gauche d’aujourd’hui, le <b>prévu</b> (les salaires que la grille du planning annonce) hachuré à droite, et le total à la clôture qui dit qu’il contient du prévu. Contre l’an dernier, la comparaison se fait <b>aux mêmes jours</b>, pas dix mois de grille contre douze mois payés."],
       ['La carte de verdict d’Économie', ": elle dit en une phrase où vous en êtes, et pose les boutons pour agir — voir quel travail dérape, ouvrir le barème. Quand la cadence affichée vient de la campagne précédente, une ligne sous le texte le dit, avec le nom de cette campagne. Le <b>comment</b> du calcul est derrière son petit « i »."],
-      ['L’écart de cadence cherche sa source dans un ordre', ", et dit toujours laquelle il a trouvée. D’abord <b>la période en cours</b>, dès 40 % de barème réalisé. Sinon <b>la même période de la campagne précédente</b>, si elle est archivée — la ligne porte alors un <b>↩</b> et nomme la campagne : c’est une hypothèse de projection, pas une mesure du moment. Sinon rien, et l’écran l’écrit plutôt que d’afficher un chiffre inventé."],
+      ['L’écart de cadence cherche sa source dans un ordre', ", et dit toujours laquelle il a trouvée. D’abord <b>la période en cours</b>, dès 40 % de barème réalisé. Sinon <b>la même période de la campagne précédente</b>, si elle est archivée — la ligne porte alors un <b>↩</b> et nomme la campagne : cet écart-là <b>se lit, il ne s’applique pas</b> au budget ni à la date de fin. Même règle quand le facteur sort de [0,5 ; 3] : un trou de saisie n’est pas une cadence, l’écran le dit. Sinon rien, et l’écran l’écrit plutôt que d’afficher un chiffre inventé."],
       ['Conformité', "suit le cuivre sur sept ans, le nombre de passages, le <b>registre phyto</b> et les délais de rentrée en cours. Le registre était rangé dans « L’équipe &amp; le matériel » alors qu’il lit exactement les mêmes traitements que « Passages phyto » : il est désormais juste en dessous, en détail de ce total."],
       ['« Traiter ? » porte les cinq jours', ": la fenêtre de traitement était affichée à <b>deux endroits</b> — sur Aujourd’hui et dans le matériel — pour une seule source. C’est une décision du jour : elle reste dans Aujourd’hui. Le verdict du moment est en grand, les cinq jours à venir se déplient sous « les 5 prochains jours ». Rien n’a été retiré du calcul."],
       ['Le budget de l’année, mois par mois', ": dans <b>L’année</b>, deux courbes cumulées — le prévu au barème en tireté, la dépense réelle en trait plein. ⚠️ <b>L’écart n’est pas un dépassement</b> : le prévu ne chiffre que la vigne, la dépense porte tout le domaine, cave et atelier compris. L’écran l’écrit sous le graphe, et le « i » en donne le détail."],
@@ -2547,7 +2564,8 @@ export const MV_INFO = {
     'Il cherche sa source dans un ordre, et <b>dit toujours laquelle il a trouvée</b>. D\u2019abord la période en cours, dès <b>40 % du barème réalisé</b> — en dessous, le travail fait ne ressemble pas assez à celui qui reste. Sinon la <b>même période de la campagne précédente</b>, si elle est archivée : la ligne porte alors un <b>\u21a9</b> et nomme la campagne. Sinon rien, et l\u2019écran l\u2019écrit plutôt que d\u2019inventer un chiffre.',
     'La cadence ne s\u2019applique qu\u2019au <b>reste à engager</b>, jamais à ce qui est déjà dépensé : à 100 % d\u2019avancement, la projection retombe exactement sur l\u2019engagé. Sans cette règle, l\u2019écran annonçait une fin à 37 k\u20ac alors que 79 k\u20ac étaient déjà payés — sur la même carte.',
     '<b>Un biais assumé.</b> Une entrée de planning porte des heures, jamais une activité : la cave, l\u2019atelier et le bureau restent donc dans la présence, alors que le barème ne compte que la vigne. La présence est <b>surévaluée</b>, et l\u2019indicateur penche vers « barème un peu serré ». Sur une période où la cave tourne, l\u2019écart parle surtout d\u2019elle.',
-    'Quand l\u2019écart est grand, c\u2019est le <b>barème</b> qu\u2019on corrige dans Réglages \u203a Tâches, <b>jamais le taux horaire</b>.'
+    'Quand l\u2019écart est grand, c\u2019est le <b>barème</b> qu\u2019on corrige dans Réglages \u203a Tâches, <b>jamais le taux horaire</b>.',
+    '<b>Une borne de bon sens.</b> Si le facteur (1 + écart) sort de <b>[0,5\u00a0; 3]</b>, l\u2019écart ne mesure plus une cadence mais un trou de saisie : il reste <b>affiché</b>, mais n\u2019est appliqué <b>ni au budget projeté, ni à la date de fin</b> \u2014 le reste à engager est compté au barème, et chaque écran le dit. Même règle pour un écart lu sur la campagne précédente : il se lit, il ne multiplie rien.'
   ] },
 
   // ⚠️ FICHE VIVANTE : ses paragraphes sont remplaces a chaque rendu par
@@ -2559,6 +2577,7 @@ export const MV_INFO = {
 
   'pil.eco.fiabilite': { t: 'Fiabilité des chiffres', p: [
     'Chaque donnée manquante ne rend pas un chiffre <b>approximatif</b> : elle met un poste entier à <b>zéro</b>. Un budget auquel il manque la main-d\u2019\u0153uvre n\u2019est pas « un peu bas », il est faux.',
+    'Cette carte relit la liste du bandeau <b>« à compléter »</b> en tête du module — les mêmes lignes, les mêmes mots, les mêmes boutons — et n\u2019en garde que ce qui met un poste de <b>ce</b> budget à zéro. « 2 des 3 choses à compléter » : les autres touchent les heures ou la conformité, pas les euros.',
     '<b>Taux horaire</b> — il vit dans la fiche de chaque salarié, Réglages \u203a Équipe. C\u2019est le taux <b>chargé</b> : le coût employeur, cotisations patronales comprises. Sans lui, la main-d\u2019\u0153uvre — le premier poste du domaine — compte pour zéro partout sur cet écran.',
     '<b>Prix du GNR</b> — il se déduit tout seul des <b>appoints de cuve</b> saisis dans Tracteur \u203a Entretien, en moyenne pondérée arrêtée à la date de chaque plein. Aucun appoint saisi, aucun prix : le carburant reste à zéro.',
     '<b>Les litres</b> — ils viennent des <b>pleins</b> notés sur les fiches d\u2019entretien, pas d\u2019une consommation théorique. Un plein non noté est du carburant absent du coût.',
@@ -2700,7 +2719,8 @@ export const MV_INFO = {
     '<b>Quatre postes, et rien d\u2019autre</b> : les salaires, le carburant, les achats d\u2019intrants et les r\u00e9parations (les passages chez le r\u00e9parateur, \u00e0 leur date de retour).',
     'La <b>conduite</b> du tracteur est déjà dans les salaires — c\u2019est du temps de travail payé. La compter une seconde fois au poste tracteur reviendrait à <b>payer deux fois le tractoriste</b>. Seul son <b>carburant</b> s\u2019ajoute.',
     'Le graphique <b>mois par mois</b> montre ce qui est sorti, à la date où c\u2019est sorti. Un exercice viticole n\u2019est pas régulier : la taille en hiver, les vendanges à l\u2019automne, un creux en été. Ces bosses sont normales — c\u2019est justement ce qu\u2019on vient regarder.',
-    'Sur un exercice <b>en cours</b>, les mois à venir sont à zéro parce qu\u2019ils n\u2019ont rien à montrer, pas parce qu\u2019ils ne coûteront rien.'
+    'Sur un exercice <b>en cours</b>, l\u2019année est coupée <b>au jour</b> : à gauche d\u2019aujourd\u2019hui, l\u2019<b>engagé</b> — ce qui est sorti, à sa date ; à droite, le <b>prévu</b> — les salaires que la grille du planning annonce jusqu\u2019à la clôture, hachurés. Un mois entamé est coupé au jour, jamais compté d\u2019un seul côté. Le carburant, les achats et les réparations n\u2019ont pas de prévu : Ma Vigne ne connaît que ce qui est sorti.',
+    'Contre l\u2019an dernier, deux comparaisons : <b>à date comparable</b> — ce qui est sorti aux mêmes jours après l\u2019ouverture — et l\u2019<b>exercice complet</b>, qui contient du prévu et le dit.'
   ] },
 
   'pil.exo.ateliers': { t: 'Vigne, cave, tracteur — et ce que ça ne dit pas', p: [
@@ -2711,8 +2731,9 @@ export const MV_INFO = {
     'Ce qui <b>n\u2019entre pas</b> : le matériel, les outils portés, les fûts <b>achetés</b>. On ne les rachète pas l\u2019an prochain, et un fût a déjà sa durée de vie et son écran de renouvellement. Une <b>location</b> de fûts, elle, entre : c\u2019est un loyer annuel.'
   ] },
 
-  'pil.exo.salaires': { t: 'Heures payées, heures au champ', p: [
-    'Les <b>heures payées</b> incluent les congés payés, les récupérations et les absences rémunérées. Les <b>heures au champ</b> ne comptent que le travail effectif.',
+  'pil.exo.salaires': { t: 'Heures payées, heures travaillées', p: [
+    'Les <b>heures payées</b> incluent les congés payés, les récupérations et les absences rémunérées. Les <b>heures travaillées</b> ne comptent que le travail effectif.',
+    'Le <b>bureau</b> y est, avec sa pastille : on chiffre une masse salariale, et un salaire est un salaire. Il reste <b>hors</b> de tout ce qui mesure la vigne \u2014 capacité, pic, cadence, renfort.',
     'L\u2019écart entre les deux, ce sont donc précisément <b>les congés et les absences rémunérées</b>. Il est normal ; c\u2019est son évolution qui parle.',
     'Une <b>ligne d\u2019équipe</b> compte son effectif réel, jour par jour : une équipe de quatre sur trois jours vaut douze journées-personne, pas trois.',
     '\u{1F512} Ce tableau nomme la rémunération de chaque personne : il est réservé aux administrateurs, comme partout ailleurs dans Ma Vigne.'
@@ -2793,7 +2814,7 @@ export const MV_INFO = {
     'Pourquoi pas \u00ab barème prévu contre barème fait \u00bb, qui serait à périmètre égal ? Parce que <b>l\u2019avancement ne se connaît que sur la campagne consultée</b>. L\u2019étendre à l\u2019exercice entier donnerait un pourcentage sans dénominateur. On ne trace pas une courbe qu\u2019on ne sait pas calculer.',
     'Le dépensé <b>s\u2019arrête au mois en cours</b>. Le prolonger à plat jusqu\u2019à la clôture ferait lire \u00ab plus rien ne sort \u00bb là où il n\u2019y a pas encore de donnée.',
     'Une campagne <b>entièrement hors</b> de l\u2019exercice comptable n\u2019entre pas dans le prévu \u2014 c\u2019est le même bornage que les chiffres du haut. Une campagne <b>sans dates</b> n\u2019y entre pas non plus, et l\u2019écran la compte sous le graphe.',
-    'Le taux horaire est une <b>moyenne pondérée</b> : le coût d\u2019une parcelle est un budget de saison, on ne sait pas qui fera quel rang.'
+    'Le taux horaire est une <b>moyenne pondérée</b> par les heures que chacun travaille sur la période, effectif d\u2019équipe compris : le coût d\u2019une parcelle est un budget de saison, on ne sait pas qui fera quel rang.'
   ] }
 
 };
@@ -3660,8 +3681,13 @@ window._mvJourApres = function(iso){
   return d.toISOString().slice(0, 10);
 };
 
-window._mvEnContratSurPeriode = function(m, d0, d1){
-  if(!m || m.bureau) return false;
+// ★ 4e argument `avecBureau` (10/09/2026) : « qui travaille la vigne ? » exclut le
+//   bureau, « qui coute ? » l'inclut. Les trois lecteurs de capacite passent sans
+//   lui ; la masse salariale de l'exercice (_pexData) passe true — un salaire est
+//   un salaire. Avant, son commentaire disait « le bureau N'EST PAS exclu » et
+//   cette ligne faisait le contraire (defaut 0a-quater, mesure le 14/08).
+window._mvEnContratSurPeriode = function(m, d0, d1, avecBureau){
+  if(!m || (m.bureau && !avecBureau)) return false;
   var P = window._mvContrats(m);
   // ★★★ SANS AUCUNE DATE = CDI DEPUIS TOUJOURS, PRESENT SUR TOUTE PERIODE.
   //   Convention posee par Nico le 09/07/2026 et jamais revisee : « effectif present

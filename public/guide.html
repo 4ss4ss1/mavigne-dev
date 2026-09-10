@@ -2218,7 +2218,15 @@ mark{background:rgba(200,176,32,.32);color:var(--cream);border-radius:3px;paddin
   <p>La sous-vue <b>Exercice</b> — le coût d'un bilan à l'autre — suit exactement la même règle :
   la même carte, les mêmes boutons, la même puce. Elle a seulement ses propres postes, parce qu'un
   exercice entier compte aussi les <b>achats d'intrants</b> et demande que le <b>Planning</b> ait été
-  ouvert au moins une fois pour connaître vos heures payées.</p>
+  ouvert au moins une fois pour connaître vos heures payées. Sa masse salariale compte <b>tout le
+  monde</b>, bureau compris — un salaire est un salaire, et une pastille le signale dans le tableau ;
+  la capacité au champ, le pic et le renfort, eux, restent hors bureau.</p>
+  <p>Sur un exercice <b>en cours</b>, l'année est coupée <b>au jour</b> : à gauche d'aujourd'hui,
+  l'<b>engagé</b> — ce qui est sorti, à sa date ; à droite, le <b>prévu</b> — les salaires que la grille du
+  planning annonce jusqu'à la clôture, hachurés sur le graphe. Un mois entamé est coupé au jour. Le
+  carburant, les achats et les réparations n'ont pas de prévu&nbsp;: Ma Vigne ne connaît que ce qui est
+  sorti. La comparaison avec l'an dernier se fait <b>aux mêmes jours</b> après l'ouverture, et le total à la
+  clôture dit qu'il contient du prévu.</p>
   <div class="note warn"><span class="ni" aria-hidden="true"><svg class="g-ic" width="18" height="18" viewBox="0 0 24 24" aria-hidden="true" focusable="false"><use href="#ic-recu"></use></svg></span><div><b>Ce total n'est pas un
   compte de résultat.</b> Ma Vigne connaît ce qui passe par elle : les heures payées, le carburant,
   les achats d'intrants. Elle ne connaît <b>ni le fermage, ni les amortissements, ni les assurances,
@@ -2230,7 +2238,7 @@ mark{background:rgba(200,176,32,.32);color:var(--cream);border-radius:3px;paddin
   d'Économie suivent maintenant la même règle : sous le titre, <b>une ligne</b> qui dit sur quoi porte
   le chiffre — « budget de la période », « main-d'œuvre vigne uniquement », « à surface égale ». Le
   <b>comment</b> est derrière le « i » de la carte : l'hypothèse de conversion du prix de revient, le
-  détail des colonnes, la différence entre heures payées et heures au champ.</div></div>
+  détail des colonnes, la différence entre heures payées et heures travaillées.</div></div>
 
   <h3><svg class="g-ic" width="18" height="18" viewBox="0 0 24 24" aria-hidden="true" focusable="false"><use href="#ic-lien"></use></svg> Ce qui manque devient un bouton</h3>
   <p>Quand un chiffre ne peut pas être juste faute d'une donnée, le Pilotage ne se contente plus de
@@ -2321,10 +2329,12 @@ mark{background:rgba(200,176,32,.32);color:var(--cream);border-radius:3px;paddin
 
   <h3><svg class="g-ic" width="18" height="18" viewBox="0 0 24 24" aria-hidden="true" focusable="false"><use href="#ic-boussole"></use></svg> Aujourd'hui</h3>
   <ul class="dot">
-    <li><b>Marge sur objectif</b> : en avance ou en retard sur la date de fin visée, d'après la cadence
-    réellement constatée.</li>
+    <li><b>Marge sur objectif</b> : en avance ou en retard sur la date de fin visée, d'après
+    l'<b>équipe déjà planifiée</b> — contrats et dates de début compris. C'est <b>la seule date de
+    fin du module</b> : la carte « Échéances par tâche » de La campagne lit le même calcul et le dit.</li>
     <li><b>Charge restante</b>, exprimée en <b>jours ouvrés</b> et non en heures abstraites.</li>
-    <li><b>Cadence de l'équipe</b> sur les dernières semaines.</li>
+    <li><b>Cadence de l'équipe</b> sur les dernières semaines&nbsp;: les heures réellement travaillées
+    au planning, une équipe collective à son effectif, un congé payé compté zéro.</li>
     <li><b>Effectif</b> : combien de personnes sont au champ aujourd'hui, et combien il en faudrait
     la semaine la plus chargée. Les deux se comptent de la même façon — une <b>équipe collective</b>
     y pèse son <b>effectif inscrit au contrat</b>, pas une ligne de tableau.</li>
@@ -2415,7 +2425,8 @@ mark{background:rgba(200,176,32,.32);color:var(--cream);border-radius:3px;paddin
   <h3><svg class="g-ic" width="18" height="18" viewBox="0 0 24 24" aria-hidden="true" focusable="false"><use href="#ic-equipe"></use></svg> Équipe</h3>
   <ul class="dot">
     <li>Composition de l'équipe et <b>présences du jour</b>. « 3 présents sur 4 » compte des
-    <b>fiches</b> ; le nombre de <b>personnes</b> apparaît en dessous quand une équipe collective
+    <b>fiches</b>, hors bureau — les mêmes nombres que la carte « À la vigne aujourd'hui » du
+    cockpit ; le nombre de <b>personnes</b> apparaît en dessous quand une équipe collective
     sépare les deux.</li>
     <li><b>Capacité face à la charge</b> : le besoin de la semaine la plus chargée, comparé à
     l'effectif <b>prévu au planning cette semaine-là</b> — pas à la présence d'aujourd'hui. Un pic qui
@@ -2499,7 +2510,11 @@ mark{background:rgba(200,176,32,.32);color:var(--cream);border-radius:3px;paddin
   <div class="note"><b>La cadence ne s'applique qu'au reste à engager.</b> Appliquée au budget
   entier, elle réécrirait le passé&nbsp;: à 100&nbsp;% d'avancement, la fin projetée retombe
   exactement sur ce qui est déjà engagé. Une projection ne peut pas contredire une dépense
-  déjà faite, sur la même carte.</div>
+  déjà faite, sur la même carte.<br>
+  <b>Et elle a une borne de bon sens.</b> Si le facteur (1&nbsp;+&nbsp;écart) sort de
+  [0,5&nbsp;; 3], l'écart mesure un trou de saisie, pas une cadence&nbsp;: il reste affiché, mais
+  n'est appliqué <b>ni au budget projeté, ni à la date de fin</b>, et chaque écran écrit pourquoi.
+  Un écart lu sur la campagne précédente se lit de la même façon, sans multiplier le reste.</div>
 
   <h3><svg class="g-ic" width="18" height="18" viewBox="0 0 24 24" aria-hidden="true" focusable="false"><use href="#ic-dossier"></use></svg> Archives des campagnes</h3>
   <p>Toutes les campagnes sur un <b>même axe, du 1<sup>er</sup> août au 31 juillet</b> : de récolte à récolte, l'hiver n'est pas coupé en deux par le 31 décembre. Empilées, elles répondent à la question qui compte l'année suivante : <b>est-ce qu'on s'y est pris plus tôt ?</b></p>

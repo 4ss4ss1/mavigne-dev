@@ -1616,25 +1616,37 @@ function _planTeamCadence_(from, to){
   //   et la cadence remontait mecaniquement (moins de monde pour les memes heures).
   var _isoD=function(x){return x.getFullYear()+'-'+String(x.getMonth()+1).padStart(2,'0')+'-'+String(x.getDate()).padStart(2,'0');};
   var mbrs = _planMbrsPer(_isoD(from),_isoD(to)).filter(function(m){ return !m.bureau; });
-  var totalH = 0, jours = {}, guard = 0;
+  // ★★★ UNE LIGNE D'EQUIPE PESE SON EFFECTIF, ET UN CONGE N'EST PAS UNE PRESENCE (10/09/2026).
+  //   Cette cadence nourrit trois ecrans du Pilotage (KPI « Cadence equipe », repli de
+  //   la marge, simulateur « et si »). Elle comptait une FICHE pour une personne : une
+  //   equipe de vendange de 30 pesait 1, comme une CP pesait une journee de presence.
+  //   Mesure au bac : « 26 h/j » pendant qu'une tuile voisine annoncait 32 personnes
+  //   dans les rangs — et le simulateur en deduisait 13 jours pour 324 h a 33.
+  //   Meme paire de mesures que _planRangeH_ (mode 'work' x _planEffN) : une seule
+  //   definition de « combien d'heures a-t-on travaille ».
+  //   hPers = heures de travail par PERSONNE et par jour travaille — la « journee
+  //   mesuree » que le simulateur attendait sous le nom perH.
+  var totalH = 0, jours = {}, guard = 0, persJ = 0;
   var cur = new Date(from.getFullYear(), from.getMonth(), from.getDate());
   var end = new Date(to.getFullYear(), to.getMonth(), to.getDate());
   while(cur <= end && guard < 400){
     guard++;
-    var m = cur.getMonth(), d = cur.getDate(), dayTeam = 0;
-    _planCtxYear = cur.getFullYear();
+    var m = cur.getMonth(), d = cur.getDate(), dayTeam = 0, yr = cur.getFullYear();
+    _planCtxYear = yr;
     for(var i=0;i<mbrs.length;i++){
       var mbr = mbrs[i];
       if(!_planInContractRead(mbr, m, d)) continue;
       var ent = _pEntDay(mbr.nom,m,d);
-      dayTeam += _planDayH(_planPlId(mbr), m, d, ent);
+      var hM = _planWorkH(_planPlId(mbr), m, d, ent, yr);
+      if(hM > 0){ var nM = _planEffN(mbr, m, d); dayTeam += hM * nM; persJ += nM; }
     }
     if(dayTeam > 0){ totalH += dayTeam; jours[m + '-' + d] = 1; }
     cur.setDate(cur.getDate() + 1);
   }
   _planCtxYear = null;
   var jo = Object.keys(jours).length;
-  return { totalH: totalH, joursOuvres: jo, cadence: jo > 0 ? totalH / jo : 0 };
+  return { totalH: totalH, joursOuvres: jo, cadence: jo > 0 ? totalH / jo : 0,
+           persJours: persJ, hPers: persJ > 0 ? totalH / persJ : 0 };
 }
 // ── CP : jours pris (comptage entrées type=cp toutes années, calendrier réel par année) ──
 // ── Periode de reference des CONGES PAYES ──

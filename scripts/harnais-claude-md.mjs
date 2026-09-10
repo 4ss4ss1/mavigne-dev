@@ -197,7 +197,7 @@ t(`tout script de scripts/ est nommé dans le document (${muets.length} muet(s))
 }
 
 /* 2) Une section ne disparaît pas, même si son numéro est réutilisé. */
-const SECTIONS = 133;  /* +§101 (NAV-4/5). +§100 (NAV-3). +§99 (NAV-2). +§98 (NAV-1). +§97 (CAVE-5). +§96 (CAVE-3). +§95 (CAVE-2). +§94 (CAVE-1). +§93 (RDTMOY-2). +§92 (RDTMOY-1). +§91 (RDTAOC-1). +§90 (RDTMIL-1). +§89 (PILCRB-1). +§88 (CUVDOC-3). +§87 (CUVDOC-2). +§86 (CUVDOC-1) — et RATTRAPAGE des 4 crans que le script réclamait depuis §82. +§81 (PARC-1). +§80 (CUV-4). Relevé DANS LE LOT qui ajoute la section : le message
+const SECTIONS = 135;  /* +§104 (PIL-EXO/DIAG). +§103 (PIL-COH). +§102 (CAVE-6, non relevé dans son lot). +§101 (NAV-4/5). +§100 (NAV-3). +§99 (NAV-2). +§98 (NAV-1). +§97 (CAVE-5). +§96 (CAVE-3). +§95 (CAVE-2). +§94 (CAVE-1). +§93 (RDTMOY-2). +§92 (RDTMOY-1). +§91 (RDTAOC-1). +§90 (RDTMIL-1). +§89 (PILCRB-1). +§88 (CUVDOC-3). +§87 (CUVDOC-2). +§86 (CUVDOC-1) — et RATTRAPAGE des 4 crans que le script réclamait depuis §82. +§81 (PARC-1). +§80 (CUV-4). Relevé DANS LE LOT qui ajoute la section : le message
                           « ↑ N de plus » est une consigne, et un cran de jeu laissé aujourd'hui
                           en vaut dix-neuf dans trois semaines — c'est exactement ce qui s'est
                           produit le 06/09.

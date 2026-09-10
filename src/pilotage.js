@@ -485,7 +485,7 @@ function _pilRenderGauge(d){
   var g=document.getElementById('pil-gauge'); if(!g) return;
   g.innerHTML =
     '<div class="pil-gauge-top">'
-    + '<div><div class="pil-gauge-lab">Avancement de la saison</div><div class="pil-gm" style="margin-top:5px">'+_pilEsc(d.saison)+' · '+d.data.length+' tâches</div></div>'
+    + '<div><div class="pil-gauge-lab">Avancement de la saison</div><div class="pil-gm" style="margin-top:5px">'+_pilEsc(d.saison)+' · '+d.data.length+' tâche'+(d.data.length>1?'s':'')+'</div></div>'
     + '<div class="pil-gauge-pct">'+d.gaugePct+'<small>%</small></div>'
     + '</div>'
     + '<div class="pil-gauge-track"><div class="pil-gauge-fill" style="width:'+d.gaugePct+'%"></div></div>'
@@ -876,7 +876,11 @@ function _pilPanelTracteur(d){
 }
 function _pilPanelPresences(d){
   var s=_PIL_STATE.sub||{};
-  var list=(d.presences||[]).filter(function(p){ if(p.etat==='cp')return s.pres_cp; if(p.etat==='recup')return s.pres_recup; if(p.etat==='maladie'||p.etat==='absent')return s.pres_mal; return false; });
+  // ★ « au champ » compte hors bureau — les MEMES nombres que la carte « A la vigne
+  //   aujourd'hui » du cockpit (presentFiches / nVchamp). La tuile disait « 5/6
+  //   presents au champ » avec deux administratifs dedans, pendant que le cockpit
+  //   disait 3 sur 4 : deux comptages du meme matin, a un onglet d'ecart.
+  var list=(d.presences||[]).filter(function(p){ if(p.bureau) return false; if(p.etat==='cp')return s.pres_cp; if(p.etat==='recup')return s.pres_recup; if(p.etat==='maladie'||p.etat==='absent')return s.pres_mal; return false; });
   var rows=list.map(function(p){
     var c=(window.COULEURS_MBR&&window.COULEURS_MBR[p.nom])||'#3D6B27', lab, col;
     if(p.etat==='cp'){ lab='Congé payé'; col='var(--orange)'; }
@@ -889,8 +893,8 @@ function _pilPanelPresences(d){
   //   tort au pic ou a la moyenne, qui portent sur d'autres fenetres.
   var _abs=list.length;
   return _pilTile('presences','#C9A84C','Présences du jour',
-    _pilStat((d.nPresent||0)+'/'+((d.membres||[]).length),' présents',null),
-    'au champ, aujourd\u2019hui'+(_abs?(' \u00b7 '+_abs+' absence'+(_abs>1?'s':'')+' déclarée'+(_abs>1?'s':'')):''),
+    _pilStat((d.presentFiches!=null?d.presentFiches:(d.nPresent||0))+'/'+(d.nVchamp!=null?d.nVchamp:((d.membres||[]).length)),' présents',null),
+    'au champ, aujourd\u2019hui \u00b7 hors bureau'+(_abs?(' \u00b7 '+_abs+' absence'+(_abs>1?'s':'')+' déclarée'+(_abs>1?'s':'')):''),
     null, '<div class="pil-ip-list">'+rows+'</div>', 'pil.presences');
 }
 function _pilPanelPhyto(d){
@@ -916,8 +920,18 @@ function _pilEchCadence(d){
     try{ var _t=new Date(), _f=new Date(); _f.setDate(_f.getDate()-28); cad=window._planTeamCadence(_f,_t); }catch(e){ cad=null; }
   }
   var cadH=(cad && cad.cadence>0)?cad.cadence:0, estim=false;
-  if(!cadH){ var nV=(d.membres||[]).filter(function(m){ return m && !m.bureau; }).length; if(nV>0){ cadH=7*nV; estim=true; } }
-  return { cadH:cadH, estim:estim };
+  // ★ Le repli pese l'effectif collectif (une equipe de 30 n'est pas une fiche) et
+  //   lit la journee reglee du domaine, pas 7 ecrit en dur.
+  var hJ=_pecHJour();
+  var nV=(d.membres||[]).reduce(function(a,m){
+    return a + ((m&&!m.bureau)?((typeof window._mvEffDef==='function')?window._mvEffDef(m):1):0);
+  },0);
+  if(!cadH){ if(nV>0){ cadH=hJ*nV; estim=true; } }
+  // hPers : heures de travail par PERSONNE et par jour, MESUREES au planning (28 j).
+  // C'est la seule « journee » que le simulateur a le droit de diviser : cadH/nV
+  // melangeait 28 jours de presence avec l'effectif d'aujourd'hui.
+  var hPers=(cad && cad.hPers>0)?cad.hPers:hJ;
+  return { cadH:cadH, estim:estim, hPers:hPers, nPers:nV };
 }
 function _pilWorkdayDate(n){
   if(n==null) return '—';
@@ -1617,9 +1631,15 @@ function _pilDeuxCadresHtml(ann){
   //   salaires charges (heures payees x taux charge des fiches, planning),
   //   carburant GNR et achats d'intrants sur la fenetre du bilan.
   var eur=null, det='', X=_pilExoData()||null;
-  if(X && X.total>0){
+  if(X && (X.total>0 || X.totalP>0)){
     eur=X.total;
-    det=_ecoH1(X.hPaid)+' h pay\u00e9es \u00b7 '+X.gens.length+' personne'+(X.gens.length>1?'s':'')
+    // ★ Exercice en cours : le chiffre est l'ENGAGÉ (ce qui est sorti) ; la ligne
+    //   dessous nomme la clôture, prévu compris. Avant, 216 k€ « payés » un 10
+    //   septembre — dix mois de grille comptés comme sortis.
+    det=(X.enCoursC
+          ? ('engag\u00e9s au '+_pilDfr(X.coupe)+' \u00b7 <b>'+_pilNb(Math.round(X.totalClot/1000))+' k\u20ac</b> \u00e0 la cl\u00f4ture, pr\u00e9vu compris<br>')
+          : '')
+       +_ecoH1(X.hPaid)+' h pay\u00e9es \u00b7 '+X.gens.length+' personne'+(X.gens.length>1?'s':'')
        +(X.gnrT>0?(' \u00b7 '+_pilNb(Math.round(X.litres))+' L de GNR'):'')
        +(X.nAch>0?(' \u00b7 '+X.nAch+' achat'+(X.nAch>1?'s':'')):'');
   }
@@ -2052,23 +2072,44 @@ function _pilPanelTemps(d){
 
 function _pilFmtD(iso){ var pp=String(iso||'').split('-'); if(pp.length!==3)return String(iso||''); var mo=['janv.','févr.','mars','avr.','mai','juin','juil.','août','sept.','oct.','nov.','déc.']; var mi=parseInt(pp[1],10)-1; return parseInt(pp[2],10)+' '+(mo[mi]||''); }
 function _pilEchWin(e){ if(!e)return ''; var a=e.d1?_pilFmtD(e.d1):'', b=e.d2?_pilFmtD(e.d2):''; if(a&&b)return a+' → '+b; if(a)return 'dès '+a; if(b)return 'jusqu’au '+b; return ''; }
+// ★★★ UNE SEULE DATE DE FIN PAR MODULE (10/09/2026).
+//   Cette carte projetait la fin de saison toute seule : charge restante divisee
+//   par la presence des quatre dernieres semaines. Le cockpit, lui, lit la
+//   CAPACITE PLANIFIEE (contrats et dates de debut compris) et ne retombe sur la
+//   cadence que s'il n'a rien d'autre. Mesure au bac, le meme jour, sur les memes
+//   donnees : « fin le ven. 11 sept. » sur Aujourd'hui, « fin de saison ~mar. 29
+//   sept. » ici — dix-huit jours d'ecart entre deux onglets voisins. La carte lit
+//   desormais _pilMargeCalc, la definition du cockpit, et dit sa source. Le
+//   « N j » de chaque tache est obtenu par le meme moteur (_pilCapaProj), comme si
+//   toute l'equipe planifiee ne faisait que cette tache — c'est le sens qu'avait
+//   deja la division par la cadence, sur une source enfin commune.
 function _pilPanelEcheances(d){
-  var c=_pilEchCadence(d), cadH=c.cadH;
+  var m=_pilMargeCalc(d), cadH=m.cadH;
   var _echS=((window._pilSaison&&window._pilSaison())||{}).echeances||{};
   var act=(d.active||[]).filter(function(t){ return (t.h_reste||0)>0; });
+  var plan=(m.src==='planning');
+  var startIso=m.start.getFullYear()+'-'+String(m.start.getMonth()+1).padStart(2,'0')+'-'+String(m.start.getDate()).padStart(2,'0');
+  var kPre=(m.capa)?{k:m.capa.k,kOk:m.capa.kOk,kHors:m.capa.kHors,kEcart:m.capa.kEcart}:null;
   var rows=act.map(function(t){
-    return { nom:t.nom, pct:t.pct||0, hreste:t.h_reste||0, jours:(cadH>0?Math.ceil((t.h_reste||0)/cadH):null), ech:_echS[t.nom]||null };
+    var h=t.h_reste||0, j=null;
+    if(plan){
+      var P=null; try{ P=_pilCapaProj(h,startIso,kPre); }catch(e){ P=null; }
+      if(P&&P.ok&&P.fin) j=Math.max(1,_pilWdBetween(m.start,P.fin)+((P.finOrd===_pilAnnOrd(startIso))?1:0));
+    } else if(cadH>0) j=Math.ceil(h/cadH);
+    return { nom:t.nom, pct:t.pct||0, hreste:h, jours:j, ech:_echS[t.nom]||null };
   });
   rows.sort(function(a,b){ return (b.jours||0)-(a.jours||0); });
   var maxJ=rows.length?(rows[0].jours||0):0;
-  var seasonJ=(cadH>0)?Math.ceil((d.totalReste||0)/cadH):null;
+  var seasonJ=m.seasonJ;
   var statHtml=_pilStat(rows.length, ' tâche'+(rows.length>1?'s':''));
-  var subHtml=(cadH>0)
-    ? ('fin de saison ~'+_pilWorkdayDate(seasonJ)+' · '+(seasonJ!=null?seasonJ:'—')+' j ouvrés · ~'+Math.round(cadH)+' h/j'+(c.estim?' (estim.)':' (4 sem.)'))
-    : 'cadence indisponible — repose sur le planning';
+  var subHtml;
+  if(m.proj) subHtml='fin de saison ~'+_pilDfrObj(m.proj)+' · '+(seasonJ!=null?seasonJ:'—')+' j ouvrés · '
+    +(plan?'équipe planifiée (même calcul qu’Aujourd’hui)':('~'+Math.round(cadH)+' h/j'+(m.estim?' (estim.)':' (4 sem.)')+' — le planning ne couvre pas la suite'));
+  else if(m.capa&&!m.capa.ok) subHtml='l’équipe planifiée n’absorbe pas la charge : il manque ~'+_pilNum(Math.round(m.capa.manque))+' h';
+  else subHtml='cadence indisponible — repose sur le planning';
   var body;
   if(!rows.length){ body='<div class="pil-empty">Aucune tâche en cours</div>'; }
-  else if(cadH<=0){ body='<div class="pil-empty">Cadence indisponible : les jours ouvrés se calculent sur le planning (4 dernières semaines).</div>'; }
+  else if(!plan && cadH<=0){ body='<div class="pil-empty">Cadence indisponible : les jours ouvrés se calculent sur le planning (4 dernières semaines).</div>'; }
   else {
     body='<div class="pil-ip-list">'+rows.map(function(r){
       var col=_pilPctColor(r.pct);
@@ -2214,7 +2255,12 @@ function _pilSimInitData(d){
   //   ces heures, pas celle qui viendra. Le remplacer par l'effectif futur
   //   diviserait la cadence par 41 et rendrait chaque personne 41 fois plus lente.
   var nMes=Math.max(1,nV);
-  var perH=(cadH>0)?(cadH/nMes):0;
+  // ★ perH etait cadH/nMes : 28 jours de presence divises par l'effectif du JOUR.
+  //   En vendange, l'equipe de 30 arrivee depuis dix jours donnait 0,8 h par
+  //   personne et par jour, donc « 13 j a cet effectif » pour 324 h a 33 — pendant
+  //   que la tournee, juste au-dessus, disait 2 j. La journee mesuree par personne
+  //   vient desormais de la meme mesure (c.hPers), repli journee reglee.
+  var perH=(cadH>0)?c.hPers:0;
   var presentJour=(typeof d.presentChamp==='number')?d.presentChamp:nV;
   var tasks=(d.active||[]).filter(function(t){ return (t.h_reste||0)>0; }).sort(function(a,b){ return (b.h_reste||0)-(a.h_reste||0); }).map(function(t){ return {nom:t.nom,hreste:Math.round(t.h_reste||0),pct:t.pct||0}; });
   // \u2605 LE POINT DE DEPART EST L'EFFECTIF SOUS CONTRAT PENDANT CES TRAVAUX.
@@ -3987,7 +4033,7 @@ function _rfBody(d){
     +'<div class="pil-ck"><div class="kl">Pay\u00e9 sans travail ouvert</div><div class="kv" style="color:'+(res.inemploye>1?'#B85A1A':'#3D6B27')+'">'+_pilNum(res.inemploye)+'<span class="u"> h</span></div>'
       +'<div class="ks">'+(res.induit>1?(_pilNum(res.induit)+' h ajout\u00e9es par le retard \u00b7 '+res.horsDelai+' t\u00e2che'+(res.horsDelai>1?'s':'')+' hors d\u00e9lai'):'aucune heure ajout\u00e9e par le retard')+'</div></div>'
     +'<div class="pil-ck"><div class="kl">\u00c0 d\u00e9cider</div><div class="kv">'+_ecoEur(res.decide)+'</div>'
-      +'<div class="ks">'+(res.pointe>0?(_pilNum(res.pointe)+' renfort'+(res.pointe>1?'s':'')):'aucun renfort')+'</div></div>';
+      +'<div class="ks">'+(res.pointe>0?(_pilNum(res.pointe)+' renfort'+(res.pointe>1?'s':'')):('aucun renfort'+((res.hSup>1)?(' \u00b7 '+_pilNum(res.hSup)+' h sup des permanents'):'')))+'</div></div>';
 
   // Sur QUOI porte l'ecran. Dit en une phrase, en haut, avant tout chiffre.
   var perim;
@@ -4266,13 +4312,16 @@ function _pilEtpFmt(v){ return (Math.round((Number(v)||0)*10)/10).toString().rep
 //     semaines sur les memes jours. On avance un curseur (`couvert`) et on saute
 //     toute semaine deja couverte : la capacite d'un jour ne se compte qu'une
 //     fois, meme quand la frise, elle, signale le doublon.
-function _pilCapaProj(charge, startIso){
+function _pilCapaProj(charge, startIso, kPre){
   if(!(charge>0)) return null;
   var ann=null; try{ ann=_pilAnnuelData(); }catch(e){ ann=null; }
   if(!ann||!ann.weeks||!ann.weeks.length) return null;
 
-  var k=1, kOk=false;
-  try{
+  var k=1, kOk=false, kHors=false, kEcart=null;
+  // kPre : facteur deja obtenu par un premier appel (les Echeances par tache le
+  // passent) — on ne rejoue pas _pecData pour chaque ligne.
+  if(kPre){ k=(kPre.k>0)?kPre.k:1; kOk=!!kPre.kOk; kHors=!!kPre.kHors; kEcart=(kPre.kEcart!=null)?kPre.kEcart:null; }
+  else try{
     var E=_pecData();
     // \u2605\u2605\u2605 SEULE LA MARCHE 1 PILOTE UNE DATE (14/08/2026, soir).
     //   La marche 2 - meme periode, campagne precedente - a ete branchee ici le
@@ -4287,12 +4336,15 @@ function _pilCapaProj(charge, startIso){
     //   la presence ; la marche 2 n'a AUCUN garant equivalent.
     //   \u26a0 LA BORNE [0,5 ; 3] N'A PAS PROTEGE : 2,93 passe a 0,07 pres. Une borne
     //   calibree sur un biais faible ne rattrape pas un biais d'une autre nature.
-    if(E&&E.cad&&E.cad.ok&&E.cad.applic){
-      k=1+((E.cad.ecart||0)/100);
-      // Bornes de bon sens : un facteur hors de [0,5 ; 3] ne mesure plus une
-      // cadence, il mesure un trou de saisie. On le refuse plutot que de le
-      // propager dans une date affichee en gros.
-      if(k>=0.5 && k<=3) kOk=true; else k=1;
+    // ★ LA BORNE [0,5 ; 3] VIT DANS _pecData (10/09/2026), plus ici. Elle etait
+    //   posee sur la DATE seulement : le meme ecart (+232 %) etait refuse par la
+    //   marge (« cadence pas encore mesurable ») et applique par la tuile Budget
+    //   (« fin ≈ 30,3 k€ ») a quinze centimetres. Un facteur qui mesure un trou de
+    //   saisie ne vaut pas plus pour des euros que pour des jours : E.cad.applic
+    //   est desormais faux dans les deux cas, et E.cad.horsBornes dit pourquoi.
+    if(E&&E.cad&&E.cad.ok){
+      kEcart=E.cad.ecart; kHors=!!E.cad.horsBornes;
+      if(E.cad.applic){ k=1+((E.cad.ecart||0)/100); if(k>0) kOk=true; else k=1; }
     }
   }catch(e){ k=1; kOk=false; }
   var besoin=charge*k;
@@ -4356,18 +4408,23 @@ function _pilCapaProj(charge, startIso){
         var frac=(besoin-cum)/h; jour=a+Math.max(0,Math.ceil(frac*(w.o1-a+1))-1);
         if(jour>w.o1) jour=w.o1;
       }
-      return { ok:true, fin:_pilOrdDate(jour), finOrd:jour, k:k, kOk:kOk,
+      return { ok:true, fin:_pilOrdDate(jour), finOrd:jour, k:k, kOk:kOk, kHors:kHors, kEcart:kEcart,
                besoin:besoin, hDispo:cum+h, sem:nSem, approx:approx };
     }
     cum+=h;
   }
   // La capacite planifiee ne suffit pas jusqu'au bout du cadre connu. C'est une
   // REPONSE, pas une panne : elle chiffre le manque en heures.
-  return { ok:false, fin:null, k:k, kOk:kOk, besoin:besoin, hDispo:cum,
+  return { ok:false, fin:null, k:k, kOk:kOk, kHors:kHors, kEcart:kEcart, besoin:besoin, hDispo:cum,
            manque:Math.max(0,besoin-cum), sem:nSem, approx:approx,
            finCadre:_pilOrdDate(couvert) };
 }
-function _pilOrdDate(o){ return new Date(Date.parse('2026-01-01T00:00:00')+o*86400000); }
+// ★ L'inverse LOCAL de _pilAnnOrd (qui parse en heure locale). Le constructeur
+//   Date(an, mois, 1+o) deborde proprement de jour en jour : pas de +86400000
+//   qui, a cheval sur un changement d'heure, tomberait a 23 h la veille. _pilOrdD
+//   reste l'inverse UTC (pour les ISO et les accesseurs getUTC*) — deux inverses,
+//   un par horloge, jamais l'une lue avec les accesseurs de l'autre.
+function _pilOrdDate(o){ return new Date(2026,0,1+o); }
 
 // ── Marge : projection vs objectif ──
 function _pilMargeCalc(d){
@@ -4408,7 +4465,9 @@ function _pilMargeSous(m){
   if(m.src==='planning'){
     var kk=(m.capa&&m.capa.kOk)
       ? (' \u00b7 cadence mesur\u00e9e \u00d7'+(Math.round((m.capa.k||1)*100)/100).toString().replace('.',','))
-      : ' \u00b7 une heure pr\u00e9sente = une heure de bar\u00e8me (cadence pas encore mesurable)';
+      : ((m.capa&&m.capa.kHors)
+          ? (' \u00b7 une heure pr\u00e9sente = une heure de bar\u00e8me (\u00e9cart de cadence mesur\u00e9 '+((m.capa.kEcart>0)?'+':'')+Math.round(m.capa.kEcart||0)+' %, hors bornes\u00a0: non retenu)')
+          : ' \u00b7 une heure pr\u00e9sente = une heure de bar\u00e8me (cadence pas encore mesurable)');
     return 'Avec l\u2019<b>\u00e9quipe d\u00e9j\u00e0 planifi\u00e9e</b> \u2014 contrats et dates de d\u00e9but compris \u2014 fin le <b>'
       +_pilDfrObj(m.proj)+'</b>'+kk+'.';
   }
@@ -4459,10 +4518,16 @@ function _pilCkBudget(){
   //   exactement la faute de \u00a734 commise sur l'ecran le plus lu.
   var ec=(E.cad.ok&&E.cad.applic)?E.cad.ecart:null;
   var col = (ec===null)?'var(--texte)' : (ec>15?'var(--rouge)' : (ec>5?'var(--orange)' : 'var(--vert-med)'));
+  // Un ecart MESURE mais NON RETENU (hors bornes, ou lu sur la campagne
+  // precedente) se dit : sinon la tuile se tait la ou la marge, juste au-dessus,
+  // explique pourquoi elle ne l'applique pas.
+  var nr=(E.cad.ok&&!E.cad.applic)
+    ? (' \u00b7 \u00e9cart '+((E.cad.ecart>0)?'+':'')+Math.round(E.cad.ecart)+' % '+(E.cad.horsBornes?'hors bornes, non retenu':'lu sur la campagne pr\u00e9c\u00e9dente, non retenu'))
+    : '';
   return '<div class="pil-ck"><div class="kl">Budget consomm\u00e9</div>'
     +'<div class="kv" style="color:'+col+'">'+Math.round(E.cons)+'<span class="u"> %</span></div>'
     +'<div class="ks">'+(ec===null
-        ? ('de '+_ecoEur(E.budget)+' \u00b7 '+Math.round(E.avc)+' % du travail fait')
+        ? ('de '+_ecoEur(E.budget)+' \u00b7 '+Math.round(E.avc)+' % du travail fait'+nr)
         : ('cadence <b style="color:'+col+'">'+(ec>0?'+':'')+Math.round(ec)+' %</b> vs bar\u00e8me \u00b7 fin \u2248 '+_pecEurK(E.projFin)))+'</div></div>';
 }
 function _pilCkEtp(d){
@@ -5062,6 +5127,7 @@ function _ecoEur2(n){ return (Math.round((Number(n)||0)*100)/100).toLocaleString
 function _ecoH1(h){ return (Math.round((Number(h)||0)*10)/10).toLocaleString('fr-FR'); }
 // Taux horaire moyen de l'équipe de terrain (hors bureau) : moyenne des taux
 // configurés des membres actifs. Repli : moyenne des taux saisis. 0 = non configuré.
+var _ECO_RATE_CACHE={k:null,v:0};   // oublie a chaque repeinte (_pilExoOublier)
 function _ecoRate(){
   var taux=_ecoCfg().taux;
   // Taux INDIVIDUEL (fiche membre → collection `paie`) en priorité, barème par type
@@ -5096,21 +5162,38 @@ function _ecoRate(){
   // la moyenne par tete surestime le taux quand le domaine melange durees inegales.
   // Repli sur h=1 (= par tete, meme resultat qu'avant) si window._planGetRefH absent
   // ou gabarit vide — aucune regression sur un domaine sans donnees de planning.
+  // ★★ LE POIDS D'UN TAUX, C'EST CE QUE LA PERSONNE TRAVAILLE SUR LA PERIODE
+  //   (10/09/2026). Avant : les heures de reference de sa grille sur DOUZE mois,
+  //   une fiche = une personne. Une equipe de vendange de 30 a 16 €/h pesait donc
+  //   autant qu'un permanent a 22 €/h sur l'annee entiere : 18,75 €/h affiche, 16,3
+  //   reel — et le budget de la vendange, qui en decoule, faux de 15 %.
+  //   _planWorkPersRange : les heures REELLEMENT travaillees sur [d0,d1], contrats
+  //   et effectif collectif compris — la meme source que la cadence et l'exercice.
+  //   Repli (planning absent) : grille annuelle x effectif de la fiche.
+  var ck=_d0R+'|'+_d1R+'|'+membres.length;
+  if(_ECO_RATE_CACHE.k===ck) return _ECO_RATE_CACHE.v;
   var sum=0, wsum=0;
+  var canW=(_d0R && _d1R && typeof window._planWorkPersRange==='function');
+  var dA=canW?new Date(_d0R+'T00:00:00'):null, dB=canW?new Date(_d1R+'T00:00:00'):null;
   membres.forEach(function(m){
     var r=_atR(m.nom);
     if(!(r>0)) r=Number(taux[m.type_contrat||'CDI'])||0;
     if(r>0){
-      var plId=(typeof window._planPlId==='function')?window._planPlId(m):'standard';
+      var eff=(typeof window._mvEffDef==='function')?window._mvEffDef(m):1;
       var h=0;
-      if(typeof window._planGetRefH==='function'){
-        for(var mi=0;mi<12;mi++) h+=(window._planGetRefH(plId,mi)||0);
+      if(canW){ try{ h=Number(window._planWorkPersRange(m,dA,dB))||0; }catch(e){ h=0; } }
+      if(!(h>0)){
+        var plId=(typeof window._planPlId==='function')?window._planPlId(m):'standard';
+        if(typeof window._planGetRefH==='function'){
+          for(var mi=0;mi<12;mi++) h+=(window._planGetRefH(plId,mi)||0);
+        }
+        h=h*eff;
       }
-      if(!(h>0)) h=1;
+      if(!(h>0)) h=eff;
       sum+=r*h; wsum+=h;
     }
   });
-  if(wsum>0) return sum/wsum;
+  if(wsum>0){ _ECO_RATE_CACHE={k:ck,v:sum/wsum}; return sum/wsum; }
   var vals=_ECO_CONTRATS.map(function(k){ return Number(taux[k])||0; }).filter(function(v){ return v>0; });
   return vals.length ? vals.reduce(function(a,b){return a+b;},0)/vals.length : 0;
 }
@@ -5562,6 +5645,9 @@ function _pecCss(){
   +'.pec-lg i{width:16px;height:0;display:inline-block;flex:none}'
   +'.pec-kpis{display:grid;grid-template-columns:repeat(auto-fit,minmax(196px,1fr));border-top:1px solid var(--gris-clair)}'
   +'.pec-k{padding:15px 20px;border-right:1px solid var(--gris-clair);border-bottom:1px solid var(--gris-clair);margin-bottom:-1px}'
+  +'.pec-k.pex-prevu{background:repeating-linear-gradient(135deg,transparent 0 7px,rgba(138,90,56,.07) 7px 9px)}'
+  +'.pec-k.pex-prevu .v{color:var(--texte-med)}'
+  +'.pex-prevu-c{color:var(--texte-doux)}'
   +'.pec-k .l{display:flex;align-items:center;gap:6px;font-size:var(--pt-lbl,10.5px);font-weight:600;letter-spacing:1.6px;text-transform:uppercase;color:var(--texte-doux)}'
   +'.pec-k .v{font-family:\'Cormorant Garamond\',serif;font-size:var(--pt-xxl,31px);font-weight:600;margin-top:3px;line-height:1.05;color:var(--texte);font-variant-numeric:tabular-nums}'
   +'.pec-k .v small{font-size:var(--pt-txt,12.5px);font-weight:600;color:var(--texte-doux)}'
@@ -5743,6 +5829,12 @@ function _pecHJour(){ var v=Number(((window.CONFIG&&window.CONFIG.eco)||{}).h_jo
 // sort a zero, sans erreur et sans trace. Meme famille que _mvFutParc() appelee
 // sans arguments. Vecu pendant la mesure qui a mene a ce lot.
 var _PEC_CAD_AVC = 0.40;   // avancement minimum pour afficher la cadence
+// ★ Bornes de bon sens sur le facteur de cadence (1 + ecart). Hors de [0,5 ; 3] on
+//   ne mesure plus une cadence, on mesure un trou de saisie : l'ecart reste LU
+//   (verdict, tuiles) mais n'est APPLIQUE ni au budget projete ni a la date de
+//   fin. Une seule borne pour les euros et pour les jours — elle ne vivait que
+//   dans _pilCapaProj, cote date (10/09/2026).
+var _PEC_CAD_KMIN = 0.5, _PEC_CAD_KMAX = 3;
 function _pecCadPresence(){
   var s=(typeof window._pilSaison==='function')?window._pilSaison():null;
   if(!s||!s.debut||!s.fin) return null;
@@ -5999,7 +6091,9 @@ function _pecData(){
   //   projection retombe sur le budget de bareme - exactement le comportement
   //   d'avant le branchement de la marche 2. L'ecart histo reste LU a l'ecran,
   //   il n'est plus MULTIPLIE par une charge.
-  var cadAppl = (cadSrc==='planning');
+  var kCad=1+ecart;
+  var cadHors=(cadOk && cadSrc==='planning' && (kCad<_PEC_CAD_KMIN || kCad>_PEC_CAD_KMAX));
+  var cadAppl = (cadSrc==='planning' && !cadHors);
   var projFin = cadAppl ? (engage + resteE*(1+ecart)) : budget;
 
   var postes = [
@@ -6024,6 +6118,7 @@ function _pecData(){
     tracAnon:tracH.nAnon, tracSess:tracH.nSess,
     avc:avcPct, cons:consPct, projOn:projOn,
     cad:{ hReel:hReelC, hBar:hBarC, ok:cadOk, applic:cadAppl, ecart:ecart*100, hJour:hJour,
+          horsBornes:cadHors, kmin:_PEC_CAD_KMIN, kmax:_PEC_CAD_KMAX,
           src:(cadSrc || (cadP?'planning':null)), hTrac:(cadHist?cadHist.hTrac:T.tracH), seuil:_PEC_CAD_AVC*100,
           d0:(cadHist?cadHist.d0:(cadP?cadP.d0:'')), d1:(cadHist?cadHist.d1:(cadP?cadP.d1:'')),
           nMbr:(cadHist?cadHist.nMbr:(cadP?cadP.n:0)),
@@ -6109,7 +6204,13 @@ function _pecTimeline(E){
   var refMs = Math.min(tToday!==null?tToday:tEnd, tEnd);
   var lastMs = pts.length>1 ? pts[pts.length-1].t : t0;
   var winEnd = Math.min(refMs, Math.max(lastMs, t0));
-  var winStart = winEnd-28*86400000;
+  // ★ La fenetre ne remonte pas AVANT le debut de la periode : dix jours de
+  //   vendange etales sur vingt-huit donnaient « 362 € par jour » quand la caisse
+  //   sortait 1 000 € par jour — et une fin de periode projetee SOUS le budget
+  //   pendant que la cadence, a cote, annoncait le double. nDays dit la vraie
+  //   longueur de la fenetre, et l'ecran l'affiche.
+  var winStart = Math.max(t0, winEnd-28*86400000);
+  if(winStart>winEnd) winStart=winEnd;
   var vStart=socle;
   pts.forEach(function(p){ if(p.t<=winStart) vStart=p.v; });
   var days=Math.max(1,(winEnd-winStart)/86400000);
@@ -6363,6 +6464,15 @@ function _pecEcartSvg(E,w){
 // la pastille (une seule source), et les chemins sont des boutons.
 // ⚠️ La pastille est celle de `pil.cadence` — on n'ecrit pas une deuxieme fiche
 //   qui dirait la meme chose sous un autre nom.
+// La phrase qui dit qu'un ecart est LU sans etre APPLIQUE. Avant, le verdict
+// gardait « la periode irait vers X » avec X = le budget : « +23 % de temps en
+// plus… soit 0 € au-dessus du budget ». Un ecart qui ne multiplie rien ne doit
+// pas produire une projection qui contredit sa propre phrase.
+function _pecNonRetenu(E){
+  if(E.cad.horsBornes) return 'Cet \u00e9cart sort des bornes de bon sens (facteur hors ['+String(E.cad.kmin).replace('.',',')+'\u00a0; '+E.cad.kmax+'])\u00a0: il mesure sans doute un trou de saisie, <b>il n\u2019est pas appliqu\u00e9 au budget</b>. Le reste \u00e0 engager est compt\u00e9 au bar\u00e8me.';
+  if(E.cad.src==='histo') return 'Mesur\u00e9 sur la campagne pr\u00e9c\u00e9dente, cet \u00e9cart se lit, <b>il n\u2019est pas appliqu\u00e9 au budget</b> de celle-ci\u00a0: le reste \u00e0 engager est compt\u00e9 au bar\u00e8me.';
+  return 'Cet \u00e9cart <b>n\u2019est pas appliqu\u00e9 au budget</b>\u00a0: le reste \u00e0 engager est compt\u00e9 au bar\u00e8me.';
+}
 function _pecVerdict(E,TL){
   var em=['graphique',''], t='', d='', act=[];
   var ec=E.cad.ok?E.cad.ecart:null;
@@ -6382,12 +6492,18 @@ function _pecVerdict(E,TL){
          : 'L\u2019\u00e9cart de cadence est indisponible : aucune heure de planning sur cette p\u00e9riode.');
   } else if(ec>15){
     em=['alerte','rouge']; t='Le travail prend plus de temps que le bar\u00e8me';
-    d='Sur ce qui est fait, l\u2019\u00e9quipe a pass\u00e9 <b>'+_pilEsc(_pecPct(ec))+' de temps en plus</b> que le bar\u00e8me h/ha \u2014 '+_ecoH1(E.cad.hReel)+' h de pr\u00e9sence contre '+_ecoH1(E.cad.hBar)+' h pr\u00e9vues. \u00c0 cette cadence, la p\u00e9riode irait vers <b>'+_pilEsc(_pecEurK(E.projFin))+'</b>, soit <b>'+_pilEsc(_pecEurK(sup))+'</b> au-dessus du budget.';
+    d='Sur ce qui est fait, l\u2019\u00e9quipe a pass\u00e9 <b>'+_pilEsc(_pecPct(ec))+' de temps en plus</b> que le bar\u00e8me h/ha \u2014 '+_ecoH1(E.cad.hReel)+' h de pr\u00e9sence contre '+_ecoH1(E.cad.hBar)+' h pr\u00e9vues. '
+      +(E.cad.applic
+          ? ('\u00c0 cette cadence, la p\u00e9riode irait vers <b>'+_pilEsc(_pecEurK(E.projFin))+'</b>, soit <b>'+_pilEsc(_pecEurK(sup))+'</b> au-dessus du budget.')
+          : _pecNonRetenu(E));
     act.push(['sub','pos','Voir quel travail d\u00e9rape']);
     act.push(['diag','taches','R\u00e9glages \u203a T\u00e2ches']);
   } else if(ec>5){
     em=['alerte','or']; t='L\u00e9g\u00e8re d\u00e9rive de cadence';
-    d='<b>'+_pilEsc(_pecPct(ec))+'</b> de temps en plus que le bar\u00e8me sur le travail fait. Rien d\u2019alarmant \u2014 mais si cela tient jusqu\u2019au bout, la p\u00e9riode co\u00fbtera <b>'+_pilEsc(_pecEurK(E.projFin))+'</b> au lieu de '+_pilEsc(_pecEurK(E.budget))+'.';
+    d='<b>'+_pilEsc(_pecPct(ec))+'</b> de temps en plus que le bar\u00e8me sur le travail fait. '
+      +(E.cad.applic
+          ? ('Rien d\u2019alarmant \u2014 mais si cela tient jusqu\u2019au bout, la p\u00e9riode co\u00fbtera <b>'+_pilEsc(_pecEurK(E.projFin))+'</b> au lieu de '+_pilEsc(_pecEurK(E.budget))+'.')
+          : _pecNonRetenu(E));
     act.push(['sub','pos','Voir travail par travail']);
   } else if(ec<-8){
     em=['graphique','vert']; t='L\u2019\u00e9quipe va plus vite que le bar\u00e8me';
@@ -6455,14 +6571,17 @@ function _pecVerdict(E,TL){
 //   chantier de moteur, pas d'ergonomie : elle est notee au backlog.
 
 // Un poste de depense qu'une donnee manquante met a ZERO — pas « a peu pres ».
+// ★★ Ne calcule plus rien : la liste vient de _pilDiag() (une seule définition),
+//   filtrée sur les constats qui touchent le budget et mettent un poste À ZÉRO.
+//   `nBudget` compte tout ce qui touche le budget — c'est le « N des M » de la
+//   carte. `E` reste en argument pour le harnais et les appelants existants.
 function _pecZeros(E){
-  var Z=[];
-  if(!E.hasRate) Z.push({ nom:'Main-d\u2019\u0153uvre', quoi:'taux horaire', cible:'equipe',  ou:'R\u00e9glages \u203a \u00c9quipe' });
-  if(!E.hasGnr)  Z.push({ nom:'Carburant',    quoi:'prix du GNR',  cible:'entretien', ou:'Tracteur \u203a Entretien' });
-  if(E.phy && !E.phy.anyDose)
-    Z.push({ nom:'Produits phyto', quoi:'dose structur\u00e9e', cible:null, ou:null });
-  else if(E.phy && E.phy.unpriced && E.phy.unpriced.length)
-    Z.push({ nom:E.phy.unpriced.length+' produit'+(E.phy.unpriced.length>1?'s':''), quoi:'prix unitaire dans La R\u00e9serve', cible:null, ou:null });
+  var L=[]; try{ L=_pilDiag(); }catch(e){ L=[]; }
+  var B=L.filter(function(d){ return d && d.touche && d.touche.indexOf('budget')>=0; });
+  var Z=B.filter(function(d){ return d.zero; }).map(function(d){
+    return { nom:d.k, poste:d.poste||d.k, quoi:d.k, cible:d.cible||null, ou:d.ou||null, g:d.g };
+  });
+  Z.nBudget=B.length;
   return Z;
 }
 
@@ -6517,10 +6636,12 @@ function _pecFiabCard(Z, R, cleFia, cleRem, okTxt, okSous){
     window._mvInfoSet(cleRem, { p:R });
   var H='';
   if(Z.length){
+    var nB=Z.nBudget||Z.length;
     H+='<div class="pec-fia bad">'
       +'<div class="pec-fia-h"><span class="pec-fia-n">'+Z.length+'</span>'
       +'<div><div class="pec-fia-t">poste'+(Z.length>1?'s':'')+' compt\u00e9'+(Z.length>1?'s':'')+' pour z\u00e9ro</div>'
-      +'<div class="pec-fia-s">'+_pilEsc(Z.map(function(z){return z.nom;}).join(' \u00b7 '))+'</div></div>'
+      +'<div class="pec-fia-s">'+_pilEsc(Z.map(function(z){return z.nom;}).join(' \u00b7 '))
+      +(nB>Z.length?(' \u2014 '+Z.length+' des '+nB+' choses \u00e0 compl\u00e9ter qui touchent ce budget'):(' \u2014 les m\u00eames que le bandeau \u00ab \u00e0 compl\u00e9ter \u00bb'))+'</div></div>'
       +(typeof _mvInfoBtn==='function'?_mvInfoBtn(cleFia):'')+'</div>'
       // Un bouton par poste. Ceux qui n'ont pas de porte disent au moins ce qui
       // manque, plutot que de promettre un ecran qui n'existe pas.
@@ -6574,8 +6695,10 @@ function _pecViewSynthese(E,TL){
       +'<div class="s">'+(ec===null
           ? (E.cad.src?('mesurable d\u00e8s '+Math.round(E.cad.seuil)+' % du bar\u00e8me r\u00e9alis\u00e9 \u00b7 '+Math.round(E.avc)+' % \u00e0 ce jour'):'aucune heure de planning sur la p\u00e9riode')
           : (E.cad.src==='histo'
-              ? ('\u21a9\ufe0e campagne pr\u00e9c\u00e9dente \u00b7 fin projet\u00e9e \u00e0 <b>'+_pilEsc(_pecEurK(E.projFin))+'</b>')
-              : ('temps pass\u00e9 contre bar\u00e8me \u00b7 fin projet\u00e9e \u00e0 <b>'+_pilEsc(_pecEurK(E.projFin))+'</b>')))+'</div></div>'
+              ? '\u21a9\ufe0e campagne pr\u00e9c\u00e9dente \u00b7 lu, <b>non appliqu\u00e9 au budget</b>'
+              : (E.cad.horsBornes
+                  ? 'hors bornes \u00b7 <b>non appliqu\u00e9 au budget</b>'
+                  : ('temps pass\u00e9 contre bar\u00e8me \u00b7 fin projet\u00e9e \u00e0 <b>'+_pilEsc(_pecEurK(E.projFin))+'</b>'))))+'</div></div>'
     +'</div>'
     +'<div class="pec-cb" style="padding-top:16px">'
     +'<div class="pec-bar"><i style="width:'+pE.toFixed(1)+'%;background:'+_PEC_COL.mo+'"></i></div>'
@@ -6588,7 +6711,8 @@ function _pecViewSynthese(E,TL){
   var sub='';
   if(TL && TL.ok){
     var pj = (TL.pace>0 && TL.projEndV!=null) ? ('fin de p\u00e9riode projet\u00e9e \u00e0 '+_pecEurK(TL.projEndV)) : 'rythme non mesurable';
-    sub='Rythme des 28 derniers jours : <b>'+_pilEsc(_ecoEur(TL.pace))+' par jour</b> \u00b7 '+_pilEsc(pj)
+    var _nd=Math.max(1,Math.round(TL.nDays||28));
+    sub='Rythme des '+_nd+' dernier'+(_nd>1?'s':'')+' jour'+(_nd>1?'s':'')+' : <b>'+_pilEsc(_ecoEur(TL.pace))+' par jour</b> \u00b7 '+_pilEsc(pj)
       + (TL.projMs?(' \u00b7 budget \u00e9puis\u00e9 le <b>'+_pilEsc(_pecDfrMs(TL.projMs))+'</b>'):'');
   } else sub='Le trac\u00e9 se remplit \u00e0 mesure que les travaux sont valid\u00e9s au journal.';
   window._mvGraphSuivre('#pec-g-burn', function(w){ return _pecBurnSvg(E,TL,w); });
@@ -6901,6 +7025,11 @@ function _pexSalLab(){ return 'Salaires charg\u00e9s'; }
 // Rend les sous-fenetres [d0,d1] sur lesquelles le taux d'une personne est CONSTANT.
 // Serie absente ou sans changement dans le mois -> UNE seule fenetre, identique au
 // mois : le chemin nominal ne coute rien et ne change aucun total.
+// Le lendemain / le décalage en jours d'une date ISO, en UTC de bout en bout
+// (la règle de _mvJourApres : jamais minuit local relu en UTC).
+function _pexJourApres(iso){ return _pexIsoPlus(iso,1); }
+function _pexIsoToMs2(iso){ var p=String(iso||'').split('-'); return Date.UTC(+p[0],(+p[1]||1)-1,(+p[2]||1)); }
+function _pexIsoPlus(iso,n){ var d=new Date(_pexIsoToMs2(iso)+n*86400000); return d.toISOString().slice(0,10); }
 function _pexJourAvant(iso){
   var p=String(iso||'').split('-');
   if(p.length!==3) return iso;
@@ -6927,15 +7056,35 @@ function _pexSegsTaux(nom, d0, d1){
 // ── Moteur ──────────────────────────────────────────────────────────
 // `noCmp` coupe la comparaison a l'exercice precedent : c'est le garde-fou contre
 // la recursion infinie, l'appel N-1 se faisant avec noCmp=true.
-function _pexData(ex, noCmp){
+// ★★★ LA COUPE — ENGAGÉ / PRÉVU (lot PIL-EXO, 10/09/2026).
+//   L'exercice affichait « Dépenses de l'exercice 216 k€ · 10 113 h payées » un
+//   10 septembre : deux mois sortis et dix mois LUS DANS LA GRILLE du planning,
+//   sous les mots « payées » et « sorti ». `enCours` existait et ne servait qu'au
+//   mot « en cours ». L'exercice est désormais coupé AU JOUR :
+//     engagé = tout ce qui est daté jusqu'à la coupe (salaires payés, pleins,
+//              achats, réparations) ;
+//     prévu  = les salaires que la grille annonce APRÈS la coupe, jusqu'à la
+//              clôture — et rien d'autre : un plein ou un achat n'a pas de prévu.
+//   La coupe vaut aujourd'hui (exercice en cours), la clôture (exercice clos :
+//   tout est engagé), la veille de l'ouverture (exercice futur : tout est prévu),
+//   ou la date passée en 3e argument — c'est ce qui permet de comparer l'an
+//   dernier « à date comparable », aux mêmes jours.
+//   ⚠️ Les lecteurs existants (photos, cadres, budget de l'année, diagnostic)
+//   lisent `total` et `byM[].sal` : ils voient l'ENGAGÉ, ce qui est réel.
+//   `totalP` / `salP` / `byM[].salP` portent le prévu, `totalClot` la somme.
+function _pexData(ex, noCmp, coupeIso){
   ex = ex || _pexEx();
   if(!ex) return null;
   var cfg=_ecoCfg();
   var mois=_pexMoisWin(ex);
-  var byM={}; mois.forEach(function(mo){ byM[mo.k]={sal:0, gnr:0, ach:0, dep:0}; });
+  var byM={}; mois.forEach(function(mo){ byM[mo.k]={sal:0, salP:0, gnr:0, ach:0, dep:0}; });
   var _n=new Date();
   var auj=(typeof window._mvAujIso==='function')?window._mvAujIso():_pexIso(_n.getFullYear(),_n.getMonth(),_n.getDate());
   var enCours=(auj>=ex.d0 && auj<=ex.d1);
+  var coupe=(typeof coupeIso==='string'&&coupeIso)?coupeIso:(enCours?auj:((auj>ex.d1)?ex.d1:_pexJourAvant(ex.d0)));
+  if(coupe>ex.d1) coupe=ex.d1;
+  var dFin=(coupe<ex.d1)?coupe:ex.d1;           // borne des faits DATÉS (engagé)
+  var enCoursC=(coupe>=ex.d0 && coupe<ex.d1);   // il reste du prévu après la coupe
 
   // ── 1) SALAIRES CHARGES ────────────────────────────────────────────
   // Qui ? Toute personne SOUS CONTRAT sur la fenetre — la meme question que partout
@@ -6946,11 +7095,15 @@ function _pexData(ex, noCmp){
   var okPer=(typeof window._mvEnContratSurPeriode==='function');
   var mbrs=(window.MEMBRES||[]).filter(function(m){
     if(!m||!m.nom) return false;
-    return okPer ? window._mvEnContratSurPeriode(m,ex.d0,ex.d1) : (m.statut!=='Inactif');
+    // ★ 4e argument true (10/09/2026) : SANS lui, _mvEnContratSurPeriode ecartait le
+    //   bureau des sa premiere ligne — et le commentaire ci-dessus etait faux depuis
+    //   le 14/08 (defaut 0a-quater). Les salaires administratifs entrent enfin dans
+    //   la masse salariale ; la pastille « bureau » du tableau peut s'afficher.
+    return okPer ? window._mvEnContratSurPeriode(m,ex.d0,ex.d1,true) : (m.statut!=='Inactif');
   });
   var canPaid=(typeof window._planPaidRange==='function');
   var canWork=(typeof window._planWorkPersRange==='function');
-  var gens=[], salT=0, hPaid=0, hWork=0, nSansTaux=0, hSansTaux=0;
+  var gens=[], salT=0, salP=0, hPaid=0, hPaidP=0, hWork=0, nSansTaux=0, hSansTaux=0;
   mbrs.forEach(function(mb){
     if(!canPaid) return;
     // ★★★ TAUX A LA DATE, SEGMENT PAR SEGMENT. Un mois est DECOUPE aux dates de
@@ -6958,22 +7111,31 @@ function _pexData(ex, noCmp){
     // premiers jours. C'est tout l'objet du lot — un exercice DEJA CLOS ne doit plus
     // bouger parce qu'on augmente quelqu'un aujourd'hui. Resoudre au mois entier
     // aurait suffi a 95 %, et menti sur les 5 % restants avec l'autorite d'un total.
-    var hp=0, eur=0, hNoTx=0, txs=[];
+    var hp=0, hpP=0, eur=0, eurP=0, hNoTx=0, txs=[];
     mois.forEach(function(mo){
       _pexSegsTaux(mb.nom, mo.d0, mo.d1).forEach(function(sg){
-        var h=Number(window._planPaidRange(mb,_pexD(sg.d0),_pexD(sg.d1)))||0;
-        if(!(h>0)) return;
         var tx=(typeof window._mvPaieTauxEffAt==='function')?(Number(window._mvPaieTauxEffAt(mb,sg.d0))||0):0;
-        hp+=h;
-        if(tx>0){
-          eur+=h*tx; byM[mo.k].sal+=h*tx;
-          var L=txs[txs.length-1];
-          if(L && Math.abs(L.v-tx)<0.001) L.h+=h; else txs.push({v:tx,h:h});
-        } else hNoTx+=h;
+        // ★ Le segment est coupé à la coupe : jusqu'à elle, ENGAGÉ ; après, PRÉVU.
+        //   Un mois entamé est donc coupé au jour, pas compté en entier d'un côté.
+        var parts=[];
+        if(sg.d0<=coupe) parts.push({d0:sg.d0, d1:(sg.d1<=coupe?sg.d1:coupe), prevu:false});
+        if(sg.d1>coupe)  parts.push({d0:(sg.d0>coupe?sg.d0:_pexJourApres(coupe)), d1:sg.d1, prevu:true});
+        parts.forEach(function(pt){
+          if(pt.d1<pt.d0) return;
+          var h=Number(window._planPaidRange(mb,_pexD(pt.d0),_pexD(pt.d1)))||0;
+          if(!(h>0)) return;
+          if(pt.prevu){ hpP+=h; if(tx>0){ eurP+=h*tx; byM[mo.k].salP+=h*tx; } else hNoTx+=h; return; }
+          hp+=h;
+          if(tx>0){
+            eur+=h*tx; byM[mo.k].sal+=h*tx;
+            var L=txs[txs.length-1];
+            if(L && Math.abs(L.v-tx)<0.001) L.h+=h; else txs.push({v:tx,h:h});
+          } else hNoTx+=h;
+        });
       });
     });
-    var hw=canWork?(Number(window._planWorkPersRange(mb,_pexD(ex.d0),_pexD(ex.d1)))||0):0;
-    if(hp<=0 && hw<=0) return;
+    var hw=(canWork && dFin>=ex.d0)?(Number(window._planWorkPersRange(mb,_pexD(ex.d0),_pexD(dFin)))||0):0;
+    if(hp<=0 && hw<=0 && hpP<=0) return;
     // Taux moyen PONDERE par les heures de chaque segment — le seul nombre unique
     // qui ait un sens quand le taux a bouge en cours d'exercice.
     var txMoy=((hp-hNoTx)>0)?(eur/(hp-hNoTx)):0;
@@ -6983,22 +7145,22 @@ function _pexData(ex, noCmp){
     // le taux ne commence qu'en cours d'exercice n'a plus tout son exercice compte
     // comme un trou.
     if(hNoTx>0.05){ nSansTaux++; hSansTaux+=hNoTx; }
-    gens.push({ nom:mb.nom, tx:txMoy, txs:txs, hNoTx:hNoTx, hp:hp, hw:hw, eur:eur,
+    gens.push({ nom:mb.nom, tx:txMoy, txs:txs, hNoTx:hNoTx, hp:hp, hpP:hpP, hw:hw, eur:eur, eurP:eurP,
                 coll:!!(window._mvEstCollectif&&window._mvEstCollectif(mb)),
                 bureau:!!mb.bureau });
-    salT+=eur; hPaid+=hp; hWork+=hw;
+    salT+=eur; salP+=eurP; hPaid+=hp; hPaidP+=hpP; hWork+=hw;
   });
   gens.sort(function(a,b){ return b.eur-a.eur || (a.nom<b.nom?-1:1); });
 
   // ── 2) CARBURANT GNR ───────────────────────────────────────────────
   // Fenetre passee a _ecoTracHByParc : MEME fonction que la campagne, filtree par
   // dates au lieu de la periode. Aucune copie privee de « ce que coute une session ».
-  var trac=_ecoTracHByParc({d0:ex.d0,d1:ex.d1});
+  var trac=_ecoTracHByParc({d0:ex.d0,d1:dFin});
   var gnrT=0, tracH=0;
   Object.keys(trac.hByDate||{}).forEach(function(iso){ tracH+=trac.hByDate[iso]||0; });
   // ★ Ici, AUCUNE repartition a faire : l'exercice raisonne par mois, et un plein porte
   //   deja sa date. Les litres tombent dans leur mois, exactement.
-  var gnrR=_ecoGnrReel({d0:ex.d0,d1:ex.d1});
+  var gnrR=_ecoGnrReel({d0:ex.d0,d1:dFin});
   var gnrSrc=gnrR.ok?'reel':'modele', litres=0;
   function _gnrMois(iso,v){
     gnrT+=v;
@@ -7023,7 +7185,7 @@ function _pexData(ex, noCmp){
   ach.forEach(function(a){
     if(!a||!a.date) return;
     var iso=String(a.date).slice(0,10);
-    if(iso<ex.d0||iso>ex.d1) return;
+    if(iso<ex.d0||iso>dFin) return;
     nAch++;
     var eur=Number(a.prix)||0;
     if(!(eur>0)) nAchSansPrix++;
@@ -7052,7 +7214,7 @@ function _pexData(ex, noCmp){
     arr.forEach(function(r){
       if(!r||!r.retour) return;               // ventile a la date de RETOUR
       var iso=String(r.retour).slice(0,10);
-      if(iso<ex.d0||iso>ex.d1) return;
+      if(iso<ex.d0||iso>dFin) return;
       nRep++;
       var e=(r.eur!=null&&isFinite(Number(r.eur)))?Number(r.eur):null;
       if(e==null) nRepSansPrix++; else repT+=e;
@@ -7089,7 +7251,7 @@ function _pexData(ex, noCmp){
   ach.forEach(function(a){
     if(!a||!a.date) return;
     var iso=String(a.date).slice(0,10);
-    if(iso<ex.d0||iso>ex.d1) return;
+    if(iso<ex.d0||iso>dFin) return;
     var pr=prodBy[a.prodId]||null;
     var cat=(pr&&pr.cat)||'gen';
     achByCat[cat]=(achByCat[cat]||0)+(Number(a.prix)||0);
@@ -7119,15 +7281,16 @@ function _pexData(ex, noCmp){
   _pexAteOrd().forEach(function(k){ ateSrc[k].sort(function(a,b){ return b.eur-a.eur; }); });
 
   // ── 6) INFO hors total : consommation phyto valorisee ──────────────
-  var phy=_ecoPhytoByParc({d0:ex.d0,d1:ex.d1});
+  var phy=_ecoPhytoByParc({d0:ex.d0,d1:dFin});
   var phyConso=0; Object.keys(phy.cost||{}).forEach(function(k){ phyConso+=phy.cost[k]||0; });
 
   // ── Totaux ─────────────────────────────────────────────────────────
-  var total=salT+gnrT+achT+repT;
+  var total=salT+gnrT+achT+repT;          // ENGAGÉ à la coupe
+  var totalP=salP, totalClot=total+totalP;  // prévu (grille) · à la clôture
   var surf=0;
   (window.PARCELLES||[]).forEach(function(p){ if(p&&p.statut!=='Arrachee') surf+=parseFloat(p.surface)||0; });
   var postes=[
-    { k:'sal', lab:_pexSalLab(), col:_PEC_COL.mo,  eur:salT,
+    { k:'sal', lab:_pexSalLab(), col:_PEC_COL.mo,  eur:salT, eurP:salP,
       det:_ecoH1(hPaid)+' h pay\u00e9es \u00b7 '+gens.length+' personne'+(gens.length>1?'s':'')
           +' \u00b7 co\u00fbt employeur (taux charg\u00e9 des fiches)' },
     { k:'gnr', lab:'Carburant GNR',         col:_PEC_COL.gnr, eur:gnrT, det:_pecGnrDet(gnrSrc,litres,gnrR.n,gnrR.nSansLitres,'',cfg.gnrL) },
@@ -7135,12 +7298,23 @@ function _pexData(ex, noCmp){
     { k:'dep', lab:'R\u00e9parations',        col:_PEC_COL.dep, eur:repT,
       det:nRep+' passage'+(nRep>1?'s':'')+' chez le r\u00e9parateur' }
   ];
-  postes.forEach(function(p){ p.part = total>0 ? (p.eur/total*100) : 0; });
+  postes.forEach(function(p){ var _b=enCoursC?totalClot:total, _e=p.eur+(enCoursC?(p.eurP||0):0); p.part = _b>0 ? (_e/_b*100) : 0; });
 
-  var cmp=null;
+  var cmp=null, cmpDate=null;
   if(!noCmp && typeof window._mvExerciceAn==='function'){
-    var prev=_pexData(window._mvExerciceAn(ex.an-1), true);
+    var exP=window._mvExerciceAn(ex.an-1);
+    var prev=_pexData(exP, true);
     if(prev && prev.total>0) cmp=prev;
+    // ★ À DATE COMPARABLE : l'an dernier rejoué jusqu'aux MÊMES JOURS après
+    //   l'ouverture. Sans ça, « +20,8 % » comparait dix mois de grille à douze
+    //   mois payés — deux exercices qui n'ont pas la même longueur.
+    if(enCoursC && exP && exP.d0){
+      var _dj=Math.round((_pexIsoToMs2(coupe)-_pexIsoToMs2(ex.d0))/86400000);
+      var _cp=_pexIsoPlus(exP.d0,_dj);
+      if(_cp>exP.d1) _cp=exP.d1;
+      var prevD=_pexData(exP, true, _cp);
+      if(prevD && prevD.total>0) cmpDate=prevD;
+    }
   }
   return { ex:ex, mois:mois, byM:byM, gens:gens, postes:postes, achRows:achRows,
            salT:salT, gnrT:gnrT, achT:achT, repT:repT, total:total,
@@ -7151,7 +7325,10 @@ function _pexData(ex, noCmp){
            surf:surf, coutHa:(surf>0?total/surf:0),
            nSansTaux:nSansTaux, hSansTaux:hSansTaux,
            nAch:nAch, nAchSansPrix:nAchSansPrix,
-           hasPlan:canPaid, hasGnr:(cfg.gnrL>0), enCours:enCours, auj:auj, cmp:cmp };
+           hasPlan:canPaid, hasGnr:(cfg.gnrL>0), enCours:enCours, auj:auj, cmp:cmp,
+           coupe:coupe, dFin:dFin, enCoursC:enCoursC,
+           salP:salP, hPaidP:hPaidP, totalP:totalP, totalClot:totalClot,
+           coutHaClot:(surf>0?totalClot/surf:0), cmpDate:cmpDate };
 }
 
 // ── Reglage : mois d'ouverture de l'exercice ────────────────────────
@@ -7209,7 +7386,7 @@ function _pexGraph(E,w){
   var M=E.mois;
   if(!M.length) return window._mvGraphVide('Aucun mois dans cet exercice',
     'Choisissez un autre exercice dans la barre au-dessus.');
-  var maxV=0; M.forEach(function(mo){ var b=E.byM[mo.k]; var t=b.sal+b.gnr+b.ach+(b.dep||0); if(t>maxV) maxV=t; });
+  var maxV=0; M.forEach(function(mo){ var b=E.byM[mo.k]; var t=b.sal+b.gnr+b.ach+(b.dep||0)+(b.salP||0); if(t>maxV) maxV=t; });
   if(!(maxV>0)) return window._mvGraphVide('Aucune d\u00e9pense dat\u00e9e sur cet exercice',
     'Les d\u00e9penses se posent \u00e0 la date de leur travail, de leur plein ou de leur achat.');
   var top=_pecNiceMax(maxV*1.08);
@@ -7226,20 +7403,36 @@ function _pexGraph(E,w){
   }
   g+='<text x="'+(pL-7)+'" y="'+(pT-4)+'" text-anchor="end" font-size="'+c.txt.unite+'" fill="'+c.col.texte+'">\u20AC</text>';
   var pas=et?(M.length>8?3:2):(M.length<=13?1:2);
+  // ★ Le PRÉVU (salaires lus dans la grille après la coupe) est hachuré, et la
+  //   coupe est marquée : douze barres pleines de la même couleur laissaient lire
+  //   « sorti » sur dix mois de grille.
+  g+='<defs><pattern id="pex-hach" width="6" height="6" patternUnits="userSpaceOnUse" patternTransform="rotate(45)">'
+    +'<rect width="6" height="6" fill="var(--bg-card)"/><line x1="0" y1="0" x2="0" y2="6" stroke="'+_PEC_COL.mo+'" stroke-width="1.6" stroke-opacity=".6"/></pattern></defs>';
+  var xCoupe=null;
   M.forEach(function(mo,i){
     var b=E.byM[mo.k], x=pL+step*i+(step-bw)/2, acc=0;
-    [['sal',_PEC_COL.mo],['gnr',_PEC_COL.gnr],['ach',_PEC_COL.phy],['dep',_PEC_COL.dep]].forEach(function(pr){
+    [['sal',_PEC_COL.mo],['gnr',_PEC_COL.gnr],['ach',_PEC_COL.phy],['dep',_PEC_COL.dep],['salP','url(#pex-hach)']].forEach(function(pr){
       var v=b[pr[0]]||0; if(!(v>0)) return;
       var y0=Y(acc+v), y1=Y(acc), hh=Math.max(1,y1-y0);
-      g+='<rect x="'+x.toFixed(1)+'" y="'+y0.toFixed(1)+'" width="'+bw.toFixed(1)+'" height="'+hh.toFixed(1)+'" fill="'+pr[1]+'" opacity="0.92"/>';
+      g+='<rect x="'+x.toFixed(1)+'" y="'+y0.toFixed(1)+'" width="'+bw.toFixed(1)+'" height="'+hh.toFixed(1)+'" fill="'+pr[1]+'" opacity="0.92"'+(pr[0]==='salP'?(' stroke="'+_PEC_COL.mo+'" stroke-width=".8" stroke-opacity=".7"'):'')+'/>';
       acc+=v;
     });
+    if(E.enCoursC && E.coupe>=mo.d0 && E.coupe<=mo.d1){
+      var nj=Math.max(1,Math.round((_pexIsoToMs2(mo.d1)-_pexIsoToMs2(mo.d0))/86400000)+1);
+      var fr=(Math.round((_pexIsoToMs2(E.coupe)-_pexIsoToMs2(mo.d0))/86400000)+1)/nj;
+      xCoupe=x+bw*Math.max(0,Math.min(1,fr));
+    }
     if(i%pas===0)
       g+='<text x="'+(x+bw/2).toFixed(1)+'" y="'+(c.h-11)+'" text-anchor="middle" font-size="'+(et?c.txt.mini:c.txt.axe)+'" fill="'+c.col.texte+'">'+_pilEsc(mo.lbl)+'</text>';
   });
-  return window._mvGraphSvg(c, 'D\u00e9penses mois par mois sur l\u2019exercice, salaires charg\u00e9s, carburant et achats.', g)
+  if(xCoupe!=null){
+    g+='<line x1="'+xCoupe.toFixed(1)+'" y1="'+(pT-6)+'" x2="'+xCoupe.toFixed(1)+'" y2="'+(pT+ih)+'" stroke="'+_PIL_SEM.aujourdhui+'" stroke-width="2"/>'
+      +'<text x="'+xCoupe.toFixed(1)+'" y="'+(pT-9)+'" text-anchor="'+(xCoupe>W-70?'end':'middle')+'" font-size="'+c.txt.mini+'" font-weight="600" fill="'+_PIL_SEM.aujourdhui+'">aujourd\u2019hui</text>';
+  }
+  return window._mvGraphSvg(c, 'D\u00e9penses mois par mois sur l\u2019exercice\u00a0: sorti \u00e0 gauche d\u2019aujourd\u2019hui, lu dans la grille du planning \u00e0 droite.', g)
     +'<div class="pec-leg">'
     +'<span class="pec-lg"><em style="background:'+_PEC_COL.mo+'"></em>'+_pexSalLab()+'</span>'
+    +(E.enCoursC?'<span class="pec-lg"><em style="background:repeating-linear-gradient(135deg,'+_PEC_COL.mo+'99 0 2px,transparent 2px 5px);border:1px solid '+_PEC_COL.mo+'"></em>pr\u00e9vu (grille du planning)</span>':'')
     +'<span class="pec-lg"><em style="background:'+_PEC_COL.gnr+'"></em>Carburant GNR</span>'
     +'<span class="pec-lg"><em style="background:'+_PEC_COL.phy+'"></em>Achats d\u2019intrants</span>'
     +'<span class="pec-lg"><em style="background:'+_PEC_COL.dep+'"></em>D\u00e9penses</span>'
@@ -7287,7 +7480,34 @@ function _pexEntete(E){
     'Le chiffrage de l\u2019exercice est complet', 'planning charg\u00e9, taux horaires, prix du GNR, prix des achats')];
 
   var cmp=E.cmp, dPct=(cmp&&cmp.total>0)?((E.total-cmp.total)/cmp.total*100):null;
-  var kpis='<div class="pec-kpis">'
+  var kpis;
+  if(E.enCoursC){
+    // ★ EXERCICE EN COURS : trois nombres, pas un. Engagé (sorti), prévu (grille),
+    //   à la clôture. Le « contre N-1 » compare l'engagé aux MÊMES JOURS de l'an
+    //   dernier ; l'exercice complet, prévu compris, est dit en dessous et dit qu'il
+    //   contient du prévu. Avant : « Dépenses de l'exercice 216 k€ · en cours » et
+    //   « +20,8 % » — dix mois de grille comparés à douze mois payés.
+    var cd=E.cmpDate, dDate=(cd&&cd.total>0)?((E.total-cd.total)/cd.total*100):null;
+    var dClot=(cmp&&cmp.total>0)?((E.totalClot-cmp.total)/cmp.total*100):null;
+    kpis='<div class="pec-kpis">'
+      +'<div class="pec-k"><div class="l">Engag\u00e9 \u00e0 ce jour</div><div class="v">'+_pilEsc(_ecoEur(E.total))+'</div>'
+        +'<div class="s">sorti au '+_pilEsc(_pilDfr(E.coupe))+' \u00b7 '+_ecoH1(E.hPaid)+' h pay\u00e9es</div></div>'
+      +'<div class="pec-k pex-prevu"><div class="l">Pr\u00e9vu jusqu\u2019\u00e0 la cl\u00f4ture</div><div class="v">'+_pilEsc(_ecoEur(E.totalP))+'</div>'
+        +'<div class="s">salaires lus dans la grille du planning \u00b7 '+_ecoH1(E.hPaidP)+' h</div></div>'
+      +'<div class="pec-k"><div class="l">\u00c0 la cl\u00f4ture, engag\u00e9 et pr\u00e9vu</div><div class="v">'+_pilEsc(_ecoEur(E.totalClot))+'</div>'
+        +'<div class="s">'+_pilEsc(_ecoEur(E.coutHaClot))+' \u00e0 l\u2019hectare sur '+_pilHa(E.surf)+' ha</div></div>'
+      +(dDate!=null
+        ? '<div class="pec-k"><div class="l">Contre '+_pilEsc(cd.ex.court)+' \u00e0 date comparable</div><div class="v">'+(dDate>0?'+':'')+_pilEsc(_pecPct(dDate))+'</div>'
+          +'<div class="s">'+_pilEsc(_pecEurK(cd.total))+' sortis aux m\u00eames jours'
+          +(dClot!=null?(' \u00b7 exercice complet '+(dClot>0?'+':'')+_pilEsc(_pecPct(dClot))+', <b>pr\u00e9vu compris</b>'):'')+'</div></div>'
+        : (dClot!=null
+            ? '<div class="pec-k"><div class="l">Contre '+_pilEsc(cmp.ex.court)+'</div><div class="v">'+(dClot>0?'+':'')+_pilEsc(_pecPct(dClot))+'</div>'
+              +'<div class="s">'+_pilEsc(_pecEurK(cmp.total))+' l\u2019exercice pr\u00e9c\u00e9dent \u00b7 <b>pr\u00e9vu compris</b></div></div>'
+            : '<div class="pec-k"><div class="l">Contre l\u2019an dernier</div><div class="v">\u2014</div><div class="s">pas de donn\u00e9es sur l\u2019exercice pr\u00e9c\u00e9dent</div></div>'))
+      +'</div>'
+      +'<div class="pec-vcadre" style="margin:2px 0 12px"><span>Au <b>'+_pilEsc(_pilDfr(E.coupe))+'</b>\u00a0: <b>'+Math.round(E.totalClot>0?E.total/E.totalClot*100:0)+'\u00a0%</b> de l\u2019exercice est sorti. Le reste est lu dans la grille du planning \u2014 un mois entam\u00e9 est coup\u00e9 au jour. Le carburant, les achats et les r\u00e9parations n\u2019ont pas de pr\u00e9vu\u00a0: on ne sait que ce qui est sorti.</span></div>';
+  } else {
+  kpis='<div class="pec-kpis">'
     +'<div class="pec-k"><div class="l">D\u00e9penses de l\u2019exercice</div><div class="v">'+_pilEsc(_ecoEur(E.total))+'</div>'
       +'<div class="s">'+_pilEsc(E.ex.lbl)+'</div></div>'
     +'<div class="pec-k"><div class="l">\u00c0 l\u2019hectare</div><div class="v">'+_pilEsc(_ecoEur(E.coutHa))+'</div>'
@@ -7299,6 +7519,7 @@ function _pexEntete(E){
         +'<div class="s">'+_pilEsc(_pecEurK(cmp.total))+' l\u2019exercice pr\u00e9c\u00e9dent</div></div>'
       : '<div class="pec-k"><div class="l">Contre l\u2019an dernier</div><div class="v">\u2014</div><div class="s">pas de donn\u00e9es sur l\u2019exercice pr\u00e9c\u00e9dent</div></div>')
     +'</div>';
+  }
 
   // ★ CE QUI CADRE RESTE, LA LISTE PART. « Ce n'est pas un compte de resultat »
   //   change la lecture du chiffre : sans cette phrase, on le compare au bilan
@@ -7312,26 +7533,32 @@ function _pexEntete(E){
     +'<div class="d">Il chiffre vos <b>charges d\u2019exploitation</b>, d\u2019un bilan \u00e0 l\u2019autre \u2014 pas tout ce que co\u00fbte le domaine.</div>'
     +'</div></div></div>';
 
+  var PV=!!E.enCoursC;
   var pr=E.postes.map(function(p){
     var av=cmp?((cmp.postes.filter(function(q){return q.k===p.k;})[0]||{}).eur||0):null;
-    var dv=(av!=null&&av>0)?((p.eur-av)/av*100):null;
+    var pClot=p.eur+(p.eurP||0);
+    var dv=(av!=null&&av>0)?(((PV?pClot:p.eur)-av)/av*100):null;
     return '<tr><td class="n"><span style="display:inline-block;width:11px;height:11px;border-radius:3px;background:'+p.col+';margin-right:8px;vertical-align:-1px"></span>'+_pilEsc(p.lab)+'</td>'
       +'<td class="r">'+_pilEsc(_ecoEur(p.eur))+'</td>'
+      +(PV?('<td class="r pex-prevu-c">'+((p.eurP!=null)?_pilEsc(_ecoEur(p.eurP)):'\u2014')+'</td><td class="r">'+_pilEsc(_ecoEur(pClot))+'</td>'):'')
       +'<td class="r">'+_pilEsc(_pecPct(p.part))+'</td>'
-      +'<td class="r">'+(E.surf>0?_pilEsc(_ecoEur(p.eur/E.surf)):'\u2014')+'</td>'
+      +'<td class="r">'+(E.surf>0?_pilEsc(_ecoEur((PV?pClot:p.eur)/E.surf)):'\u2014')+'</td>'
       +'<td class="r">'+(dv!=null?((dv>0?'+':'')+_pilEsc(_pecPct(dv))):'\u2014')+'</td>'
       +'<td style="color:var(--texte-doux)">'+_pilEsc(p.det)+'</td></tr>';
   }).join('');
+  var dClotT=(cmp&&cmp.total>0)?(((PV?E.totalClot:E.total)-cmp.total)/cmp.total*100):null;
   var tPostes='<div class="pec-card"><div class="pec-ch"><div class="pec-ct">O\u00f9 est parti l\u2019argent</div>'
     // ★ Le POURQUOI de « trois postes » — la conduite deja comptee dans les
     //   salaires — explique le calcul. Il part dans la fiche de l'exercice.
     +'<div class="pec-cs">Trois postes, et rien d\u2019autre'
     +(typeof _mvInfoBtn==='function'?(' '+_mvInfoBtn('pil.exo.postes')):'')+'</div></div>'
     +'<div class="pec-cb"><div class="pec-scroll"><table class="pec-tbl" style="min-width:560px">'
-    +'<thead><tr><th>Poste</th><th class="r">Montant</th><th class="r">Part</th><th class="r">\u20AC/ha</th><th class="r">vs '+_pilEsc(cmp?cmp.ex.court:'N-1')+'</th><th>Base de calcul</th></tr></thead>'
+    +'<thead><tr><th>Poste</th><th class="r">'+(PV?'Engag\u00e9':'Montant')+'</th>'+(PV?'<th class="r">Pr\u00e9vu</th><th class="r">\u00c0 la cl\u00f4ture</th>':'')+'<th class="r">Part</th><th class="r">\u20AC/ha</th><th class="r">vs '+_pilEsc(cmp?cmp.ex.court:'N-1')+(PV?' (cl\u00f4ture)':'')+'</th><th>Base de calcul</th></tr></thead>'
     +'<tbody>'+pr+'</tbody>'
-    +'<tfoot><tr><td>Total</td><td class="r">'+_pilEsc(_ecoEur(E.total))+'</td><td class="r">100 %</td><td class="r">'+_pilEsc(_ecoEur(E.coutHa))+'</td><td class="r">'+(dPct!=null?((dPct>0?'+':'')+_pilEsc(_pecPct(dPct))):'\u2014')+'</td><td></td></tr></tfoot>'
-    +'</table></div></div></div>';
+    +'<tfoot><tr><td>Total</td><td class="r">'+_pilEsc(_ecoEur(E.total))+'</td>'+(PV?('<td class="r pex-prevu-c">'+_pilEsc(_ecoEur(E.totalP))+'</td><td class="r">'+_pilEsc(_ecoEur(E.totalClot))+'</td>'):'')+'<td class="r">100 %</td><td class="r">'+_pilEsc(_ecoEur(PV?E.coutHaClot:E.coutHa))+'</td><td class="r">'+(dClotT!=null?((dClotT>0?'+':'')+_pilEsc(_pecPct(dClotT))):'\u2014')+'</td><td></td></tr></tfoot>'
+    +'</table></div>'
+    +(PV?'<div class="pec-cs" style="padding:8px 2px 0">Le carburant, les achats et les r\u00e9parations n\u2019ont <b>pas de colonne pr\u00e9vu</b>\u00a0: Ma Vigne ne conna\u00eet que ce qui est sorti. Seuls les salaires se lisent d\u2019avance, dans la grille du planning.</div>':'')
+    +'</div></div>';
   return { alertes:A.join(''), kpis:kpis, garde:garde, tPostes:tPostes };
 }
 
@@ -7359,20 +7586,21 @@ function _pexTableSal(E){
       +(g.bureau?' <span class="pec-pill" style="background:var(--gris-clair);color:var(--texte-doux)">bureau</span>':'')+'</td>'
       +'<td class="r">'+_ecoH1(g.hp)+' h</td>'
       +'<td class="r">'+_ecoH1(g.hw)+' h</td>'
+      +(E.enCoursC?('<td class="r pex-prevu-c">'+((g.hpP>0.05)?(_ecoH1(g.hpP)+' h'):'\u2014')+'</td>'):'')
       +'<td class="r">'+(cp>0.05?(_ecoH1(cp)+' h'):'\u2014')+'</td>'
       +'<td class="r">'+txCell+'</td>'
       +'<td class="r">'+_pilEsc(_ecoEur(g.eur))+'</td></tr>';
   }).join('');
   var cpT=Math.max(0,E.hPaid-E.hWork);
   return '<div class="pec-card"><div class="pec-ch"><div class="pec-ct">Les salaires, personne par personne</div>'
-    +'<div class="pec-cs">Heures <b>pay\u00e9es</b> et heures <b>au champ</b>'+(typeof _mvInfoBtn==='function'?(' '+_mvInfoBtn('pil.exo.salaires')):'')+''
+    +'<div class="pec-cs">Heures <b>pay\u00e9es</b> et heures <b>travaill\u00e9es</b> \u2014 bureau compris'+(typeof _mvInfoBtn==='function'?(' '+_mvInfoBtn('pil.exo.salaires')):'')+''
     +' Le taux affich\u00e9 est le <b>taux horaire charg\u00e9</b> de la fiche \u2014 le co\u00fbt employeur\u00a0: heures pay\u00e9es \u00d7 taux = co\u00fbt.'
     +' Chaque heure est valoris\u00e9e au taux qui valait <b>ce jour-l\u00e0</b>\u00a0: quand un taux a chang\u00e9 dans l\u2019exercice, la colonne montre les deux, et le mois du changement est coup\u00e9 \u00e0 la bonne date.'
     +'</div></div>'
     +'<div class="pec-cb"><div class="pec-scroll"><table class="pec-tbl" style="min-width:560px">'
-    +'<thead><tr><th>Personne</th><th class="r">Pay\u00e9es</th><th class="r">Au champ</th><th class="r">CP &amp; abs.</th><th class="r">Taux charg\u00e9</th><th class="r">Co\u00fbt</th></tr></thead>'
+    +'<thead><tr><th>Personne</th><th class="r">Pay\u00e9es</th><th class="r">Travaill\u00e9es</th>'+(E.enCoursC?'<th class="r">Pr\u00e9vues</th>':'')+'<th class="r">CP &amp; abs.</th><th class="r">Taux charg\u00e9</th><th class="r">Co\u00fbt</th></tr></thead>'
     +'<tbody>'+rows+'</tbody>'
-    +'<tfoot><tr><td>Total</td><td class="r">'+_ecoH1(E.hPaid)+' h</td><td class="r">'+_ecoH1(E.hWork)+' h</td><td class="r">'+(cpT>0.05?(_ecoH1(cpT)+' h'):'\u2014')+'</td><td class="r"></td><td class="r">'+_pilEsc(_ecoEur(E.salT))+'</td></tr></tfoot>'
+    +'<tfoot><tr><td>Total</td><td class="r">'+_ecoH1(E.hPaid)+' h</td><td class="r">'+_ecoH1(E.hWork)+' h</td>'+(E.enCoursC?('<td class="r pex-prevu-c">'+_ecoH1(E.hPaidP)+' h</td>'):'')+'<td class="r">'+(cpT>0.05?(_ecoH1(cpT)+' h'):'\u2014')+'</td><td class="r"></td><td class="r">'+_pilEsc(_ecoEur(E.salT))+'</td></tr></tfoot>'
     +'</table></div></div></div>';
 }
 // Achats de La Reserve tombant dans la fenetre — la piece comptable, a sa date.
@@ -8469,7 +8697,7 @@ function _pilCrumbHtml(){
 // noCmp=true : la comparaison a l'exercice N-1 double le travail et ne sert a
 // aucune des deux vues qui appellent d'ici.
 var _PIL_EXO=null;
-function _pilExoOublier(){ _PIL_EXO=null; }
+function _pilExoOublier(){ _PIL_EXO=null; _ECO_RATE_CACHE={k:null,v:0}; _PIL_DIAGC=null; }
 function _pilExoData(){
   if(_PIL_EXO!==null) return _PIL_EXO;
   var X=null;
@@ -8498,12 +8726,23 @@ function _pilPhotosData(){
   //   2 353 h restantes dans le KPI d'a cote, et le tableau « Deux façons de
   //   compter » sortait quatre lignes a 0 h. Le total de bareme d'une periode
   //   s'appelle `charge` — verifie dans planning.js, pas deduit du nom.
-  var hTot=0, hFait=0, pct=null, nPer=0;
+  var hTot=0, hFait=0, pct=null, nPer=0, nChev=0;
   try{
     if(selP&&selP.cd){ hTot=Math.round(selP.cd.charge||0); nPer=1; }
     else if(ann){ ann.pers.forEach(function(p){
       if(!p.cd || !_dansEx(p)) return;
-      hTot+=Math.round(p.cd.charge||0); nPer++;
+      // ★ Une periode A CHEVAL sur la cloture entre au PRORATA de ses jours dans
+      //   l'exercice (10/09/2026). Elle comptait en entier : un printemps qui finit
+      //   le 23 aout mettait ses 4 779 h dans un exercice ouvert le 1er aout, ou il
+      //   n'a que 23 jours sur 145. Le tableau « Deux facons de compter » garde la
+      //   ligne entiere — c'est lui qui explique le partage.
+      var h=Math.round(p.cd.charge||0), part=1;
+      if(ann.ex){
+        var a=_pilAnnOrd(p.debut), b=_pilAnnOrd(p.fin);
+        var a2=Math.max(a,ann.s), b2=Math.min(b,ann.e);
+        if(!isNaN(a)&&!isNaN(b)&&b>=a&&(a2>a||b2<b)){ part=Math.max(0,(b2-a2+1))/(b-a+1); nChev++; }
+      }
+      hTot+=Math.round(h*part); nPer++;
     }); }
   }
   catch(e){ if(window.logError) window.logError({level:'info',cat:'pilotage',msg:'photos: charge illisible'}); }
@@ -8555,7 +8794,7 @@ function _pilPhotosData(){
   return { ann:ann, selP:selP, hTot:hTot, hFait:hFait, pct:pct, nPer:nPer, pic:pic, picW:picW,
            moy:moy, head:head, corps:corps, picPasse:picPasse,
            manque:manque, eur:eur, sansTaux:sansTaux, ecoOk:ecoOk,
-           exo:exo, campEco:campEco,
+           exo:exo, campEco:campEco, nChev:nChev,
            trous:(ann&&ann.trous)?ann.trous.length:0, ovl:(ann&&ann.ovl)?ann.ovl.length:0 };
 }
 
@@ -8598,7 +8837,8 @@ function _pilPhotosHtml(){
   if(!(D.hTot>0)) sT='aucun bar\u00e8me chiffr\u00e9 '+cadre;
   else if(D.pct!=null) sT=D.pct+' % fait '+cadre;
   else if(camp) sT='de bar\u00e8me '+cadre;
-  else sT='de bar\u00e8me \u00b7 '+D.nPer+' campagne'+(D.nPer>1?'s':'')+' dans l\u2019exercice';
+  else sT='de bar\u00e8me \u00b7 '+D.nPer+' campagne'+(D.nPer>1?'s':'')+' dans l\u2019exercice'
+    +(D.nChev>0?(' \u00b7 '+D.nChev+' \u00e0 cheval, au prorata de ses jours'):'');
   var pTrav=_pilPhotoHtml('Travaux','feuille',_pilNb(D.hTot),' h', sT, camp?'avc':'an', fT, 'travaux');
 
   // EFFECTIF — le pic, et le manque en clair s'il y en a un.
@@ -8617,9 +8857,10 @@ function _pilPhotosHtml(){
     // Portee = l'exercice, ou une campagne que le moteur economique ne sait pas
     // cadrer : le seul chiffre defendable est celui du bilan.
     var _X=D.exo;
+    var _clot=(_X && _X.enCoursC)?(' \u00b7 '+_pilNb(Math.round(_X.totalClot/1000))+' k\u20ac \u00e0 la cl\u00f4ture, pr\u00e9vu compris'):'';
     var _note = camp
-      ? 'sur l\u2019<b>exercice comptable</b> \u2014 le co\u00fbt ne se recadre pas sur '+_pilEsc(camp)
-      : 'sur l\u2019<b>exercice comptable</b> \u00b7 salaires charg\u00e9s, GNR, achats';
+      ? 'engag\u00e9s sur l\u2019<b>exercice comptable</b> \u2014 le co\u00fbt ne se recadre pas sur '+_pilEsc(camp)+_clot
+      : 'engag\u00e9s sur l\u2019<b>exercice comptable</b> \u00b7 salaires charg\u00e9s, GNR, achats'+_clot;
     pBud = (_X && _X.total>0)
       ? _pilPhotoHtml('Budget','euro',_pilNb(Math.round(_X.total/1000)),' k\u20ac', _note,'eco',fB,'budget')
       : _pilPhotoHtml('Budget','euro','\u2014','','le co\u00fbt de l\u2019exercice n\u2019a pas abouti','eco',
@@ -8709,6 +8950,7 @@ var _PIL_DIAG_CIBLES = {
   //   vise ; absent, on garde switchReglTab et les sept cibles au-dessus ne
   //   changent pas d'un iota.
   entretien: ['tracteur','entretiens',null,'switchTracOnglet'],
+  phyto:     ['phyto',null,null],
   // La Reserve utilise son propre commutateur, _rsvTabTo, qui prend la CLE de
   // l'onglet ('futs' | 'intrants' | 'depenses' | 'audit').
   reserve:   ['reserve','intrants',null,'_rsvTabTo']
@@ -8797,7 +9039,11 @@ function _pilTacheHha(t){
 
 // La liste des constats. Chacun est calcule sur les donnees reelles ; aucun
 // n'est ecrit en dur, et aucun n'apparait quand il n'a pas lieu d'etre.
+// ★ Mémoïsé le temps d'un rendu : la liste est lue par le bandeau, les photos,
+//   la feuille et désormais la carte d'Économie. _pilExoOublier l'oublie.
+var _PIL_DIAGC=null;
 function _pilDiag(){
+  if(_PIL_DIAGC) return _PIL_DIAGC;
   var out=[], i;
   var ann=null; try{ ann=_pilAnnuelData(); }catch(e){ ann=null; }
 
@@ -8854,10 +9100,32 @@ function _pilDiag(){
 
   // ── Le cout ──────────────────────────────────────────────────────────────
   var P=null; try{ P=_pecData(); }catch(e){ P=null; }
-  if(P && P.tot && P.tot.nSansTaux>0) out.push({ g:'o', cible:'equipe', touche:['budget'],
+  // ★★ UNE SEULE LISTE (lot PIL-DIAG, 10/09/2026). La carte « Ce qu'il faut regarder »
+  //   d'Économie tenait sa propre liste (_pecZeros) : « poste compté pour zéro »
+  //   ici, « chose à compléter » là, deux moteurs, deux vocabulaires, le même taux
+  //   horaire manquant nommé de deux façons. Les postes à zéro sont désormais des
+  //   constats de CE moteur, marqués `zero:true` ; la carte d'Économie relit
+  //   _pilDiag() filtré sur `budget` — mêmes mots, mêmes boutons, même compte.
+  if(P && !P.hasRate) out.push({ g:'r', cible:'equipe', touche:['budget'], zero:true, poste:'Main-d\u2019\u0153uvre',
+    k:'Aucun taux horaire',
+    f:'Sans taux dans les fiches salari\u00e9s, la <b>main-d\u2019\u0153uvre compte pour z\u00e9ro</b> \u2014 le premier poste du domaine. Le budget affich\u00e9 est un plancher.',
+    ou:'R\u00e9glages \u203a \u00c9quipe' });
+  else if(P && P.tot && P.tot.nSansTaux>0) out.push({ g:'o', cible:'equipe', touche:['budget'],
     k:P.tot.nSansTaux+' fiche'+(P.tot.nSansTaux>1?'s':'')+' sans taux horaire',
     f:'Leurs heures comptent dans l\u2019effectif mais <b>pas dans le co\u00fbt</b>. La masse salariale affich\u00e9e est un plancher, pas une mesure.',
     ou:'R\u00e9glages \u203a \u00c9quipe' });
+  if(P && !P.hasGnr) out.push({ g:'o', cible:'entretien', touche:['budget'], zero:true, poste:'Carburant',
+    k:'Prix du GNR inconnu',
+    f:'Aucun appoint de cuve saisi\u00a0: le <b>carburant compte pour z\u00e9ro</b>, sur la campagne comme sur l\u2019exercice. Le prix se d\u00e9duit des pleins not\u00e9s dans Tracteur \u203a Entretien.',
+    ou:'Tracteur \u203a Entretien' });
+  if(P && P.phy && !P.phy.anyDose) out.push({ g:'o', cible:'phyto', touche:['budget'], zero:true, poste:'Produits phyto',
+    k:'Doses phyto non structur\u00e9es',
+    f:'Aucun traitement ne porte de dose structur\u00e9e\u00a0: les <b>produits comptent pour z\u00e9ro</b>. La dose se saisit au traitement, le prix dans La R\u00e9serve.',
+    ou:'Phyto \u203a Registre' });
+  else if(P && P.phy && P.phy.unpriced && P.phy.unpriced.length) out.push({ g:'o', cible:'reserve', touche:['budget'], zero:true, poste:'Produits phyto',
+    k:P.phy.unpriced.length+' produit'+(P.phy.unpriced.length>1?'s':'')+' sans prix unitaire',
+    f:'Leur dose est connue, pas leur prix\u00a0: ces traitements <b>comptent pour z\u00e9ro</b>. Le prix se pose dans La R\u00e9serve, sur l\u2019achat.',
+    ou:'La R\u00e9serve \u203a Intrants' });
 
   // ── Les consommables : quand la repartition cesse de vouloir dire ────────
   // ⚠️⚠️ LECON DU CONSTAT SUPPRIME LE 12/08 (« N periodes se chevauchent ») : il
@@ -8960,6 +9228,7 @@ function _pilDiag(){
   // Rangees par ce que ca coute a la justesse : bloquant, puis faussant.
   var R={r:0,o:1,b:2};
   out.sort(function(a,b){ return R[a.g]-R[b.g]; });
+  _PIL_DIAGC=out;
   return out;
 }
 

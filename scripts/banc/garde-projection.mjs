@@ -17,16 +17,20 @@ console.log('\n── Garde de montage ──');
 t('_pecCadHisto existe', /function _pecCadHisto\(/.test(src));
 t('_pilCapaProj existe', /function _pilCapaProj\(/.test(src));
 t('cadSrc existe', /var cadSrc *=/.test(src));
-t('cadAppl est defini', /var cadAppl *= *\(cadSrc==='planning'\)/.test(src));
+// ★ PIL-COH (10/09/2026) : applic derive de la SOURCE **et** de la borne de bon sens —
+//   un facteur hors [0,5 ; 3] mesure un trou de saisie, il ne s'applique ni aux euros
+//   ni a la date. Les quatre assertions ci-dessous suivent cette forme ; leur INTENTION
+//   (§43c) est inchangee.
+t('cadAppl est defini', /var cadAppl *= *\(cadSrc==='planning' && !cadHors\)/.test(src));
 
 console.log('\n── 1. applic derive de la SOURCE, pas de ok ──');
-t('applic vrai seulement en marche 1', /cadAppl *= *\(cadSrc==='planning'\)/.test(src));
+t('applic vrai seulement en marche 1', /cadAppl *= *\(cadSrc==='planning' && !cadHors\)/.test(src));
 t('applic expose dans E.cad', /cad:\{[^}]*applic:cadAppl/.test(src.replace(/\n/g, ' ')));
 
 console.log('\n── 2. Tout site PROJECTIF est garde ──');
 // Un site projectif = il multiplie une charge/un budget, ou trace une fin.
 const sites = [
-  ['facteur k de la date', /if\(E&&E\.cad&&E\.cad\.ok&&E\.cad\.applic\)\{\s*\n\s*k=1\+/],
+  ['facteur k de la date', /if\(E\.cad\.applic\)\{ k=1\+/],
   ['budget projete', /var projFin = cadAppl \? \(engage \+ resteE\*\(1\+ecart\)\)/],
   ['ligne de fin du graphe', /var pFin=\(E && E\.cad && E\.cad\.ok && E\.cad\.applic/],
   ['legende fin projetee', /E\.cad\.ok&&E\.cad\.applic&&Math\.abs\(E\.cad\.ecart\)>5\?'<span class="pec-lg">/],
@@ -60,7 +64,7 @@ t('alerte histo ne promet plus de projection',
 t('alerte histo dit « repere »', /c\\u2019est un <b>rep\\u00e8re<\/b>, pas une pr\\u00e9vision/.test(src));
 
 console.log('\n── 5. Bornes et seuil intacts ──');
-t('borne [0,5 ; 3] toujours en place', /k>=0\.5 && k<=3/.test(src));
+t('borne [0,5 ; 3] toujours en place (dans _pecData, une fois pour les euros ET la date)', /var _PEC_CAD_KMIN = 0\.5, _PEC_CAD_KMAX = 3;/.test(src) && /kCad<_PEC_CAD_KMIN \|\| kCad>_PEC_CAD_KMAX/.test(src));
 t('seuil d\'avancement inchange', /_PEC_CAD_AVC = 0\.40/.test(src));
 
 console.log('\n' + (ko ? '\u2717 ' + ko + ' ECHEC(S)' : '\u2713 ' + ok + ' assertions vertes'));
