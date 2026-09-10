@@ -1168,6 +1168,12 @@ mark{background:rgba(200,176,32,.32);color:var(--cream);border-radius:3px;paddin
 
   <h3><svg class="g-ic" width="18" height="18" viewBox="0 0 24 24" aria-hidden="true" focusable="false"><use href="#ic-raisin"></use></svg> Le Cuvier — vendange et fermentations</h3>
   <div class="cards">
+    <div class="card"><h4><svg class="g-ic" width="18" height="18" viewBox="0 0 24 24" aria-hidden="true" focusable="false"><use href="#ic-microscope"></use></svg> Maturités</h4><ul class="dot">
+      <li><b>Maturité avant vendange</b> : sucre ou degré au réfractomètre, parcelle par parcelle</li>
+      <li>Qui monte, qui stagne, dans quel ordre récolter — la synthèse à date est décrite plus bas</li>
+      <li>C'était l'onglet « Analyses » : les analyses de laboratoire, elles, vivent au Chai</li>
+      <li>Il vient <b>en premier</b> : les trois onglets suivent la vendange, de la vigne à la cuve</li>
+    </ul></div>
     <div class="card"><h4><svg class="g-ic" width="18" height="18" viewBox="0 0 24 24" aria-hidden="true" focusable="false"><use href="#ic-raisin"></use></svg> Récoltes</h4><ul class="dot">
       <li>Saisie des apports par parcelle : caisses, date, état sanitaire</li>
       <li><b>Une récolte peut avoir plusieurs destinataires</b> : le domaine et un ou plusieurs
@@ -1226,11 +1232,6 @@ mark{background:rgba(200,176,32,.32);color:var(--cream);border-radius:3px;paddin
     <b>en barriques</b>, <b>en cuve</b>, ou <b>les deux</b> — et le suivi d'ouillage démarre pour la part
     logée en bois. En mixte, ce qui ne tient pas dans la cuve passe en barriques. La cuve que vous videz
     reste proposée : élever sur lies là où l'on a fermenté est un usage courant.</li>
-    </ul></div>
-    <div class="card"><h4><svg class="g-ic" width="18" height="18" viewBox="0 0 24 24" aria-hidden="true" focusable="false"><use href="#ic-microscope"></use></svg> Maturités</h4><ul class="dot">
-      <li><b>Maturité avant vendange</b> : sucre ou degré au réfractomètre, parcelle par parcelle</li>
-      <li>Qui monte, qui stagne, dans quel ordre récolter — la synthèse à date est décrite plus bas</li>
-      <li>C'était l'onglet « Analyses » : les analyses de laboratoire, elles, vivent au Chai</li>
     </ul></div>
     <div class="card"><h4><svg class="g-ic" width="18" height="18" viewBox="0 0 24 24" aria-hidden="true" focusable="false"><use href="#ic-engrenage"></use></svg> Réglages du Cuvier — dans la roue crantée</h4><ul class="dot">
       <li>Ils ne sont plus un onglet : la <b>roue crantée</b> en haut à droite de la Cave les réunit avec ceux du Chai</li>
@@ -1381,9 +1382,17 @@ mark{background:rgba(200,176,32,.32);color:var(--cream);border-radius:3px;paddin
 
   <h3><svg class="g-ic" width="18" height="18" viewBox="0 0 24 24" aria-hidden="true" focusable="false"><use href="#ic-barrique"></use></svg> Le Chai — élevage</h3>
   <ul class="dot">
-    <li><b>Cuvées</b> : liste des vins en élevage, avec leur statut et leur millésime, filtrables.
+    <li><b>Cuvées</b> : liste des vins en élevage, avec leur statut et leur millésime.
     Une cuvée peut tenir des <b>fûts</b>, une <b>cuve</b>, ou les deux à la fois.</li>
-    <li><b>Journal</b> : chaque opération datée — soutirage, ouillage, débourbage, filtration, sulfitage…</li>
+    <li><b>Le filtre millésime</b> est <b>sous les onglets</b> et vaut pour les trois : cuvées, journal,
+    bouteilles. Il n'apparaît que si le chai contient plus d'un millésime. Un millésime entièrement
+    embouteillé reste proposé — ses bouteilles et ses opérations existent — mais sans compteur de
+    cuvées, parce qu'un « 0 » se lirait comme une absence. Il n'agit pas sur les quatre chiffres du
+    haut, qui restent ceux de la cave entière.</li>
+    <li><b>Journal</b> : chaque opération datée — soutirage, ouillage, débourbage, filtration, sulfitage…
+    Sous filtre, une opération qui porte sur <b>deux millésimes à la fois</b> n'est rattachée à aucun :
+    elle en sort, et l'écran <b>dit combien il en écarte</b> plutôt que de les faire disparaître en
+    silence. Elles restent visibles sur « Tous ».</li>
     <li><b>Analyses SO₂</b> avec un <b>convertisseur intégré</b> : grammes, pastilles, dilution.
     Il évite l'erreur de calcul classique entre liquide et pastille.</li>
     <li><b>Pièces jointes</b> : un bulletin d'analyse en PDF peut être rattaché à une opération.</li>

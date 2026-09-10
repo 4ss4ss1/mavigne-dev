@@ -23,7 +23,7 @@ export const GT_ADMIN_EMAIL = 'ngdevpro@gmail.com';
 // WHATS_NEW   : tableau vide = modal desactive pour cette version.
 // Format item : { emoji:'📅', titre:'Titre court', desc:'Phrase utilisateur.' }
 // Regle : seulement les changements visibles par les utilisateurs.
-export const APP_VERSION = '6.99';
+export const APP_VERSION = '7.00';
 // ════ Journal des nouveautés (récap cumulatif) ════
 // Une entrée par version, la PLUS RÉCENTE EN HAUT : { v:'5.10', items:[ {emoji,titre,desc}, … ] }
 // À chaque release visible → AJOUTER un bloc en tête (ne pas remplacer). items:[] = release technique (rien à afficher).
@@ -354,6 +354,14 @@ window._mvGraphRepeindre = function(){
 };
 
 export const WHATS_NEW = [
+  { v: '7.00', items: [
+    { emoji: 'raisin', titre: 'Le Cuvier se lit dans l\u2019ordre de la vendange',
+      desc: "Ses trois onglets \u00e9taient rang\u00e9s <b>R\u00e9coltes \u00b7 Cuves \u00b7 Maturit\u00e9s</b>, c\u2019est-\u00e0-dire en partant du milieu. Ils suivent maintenant le raisin : <b>Maturit\u00e9s</b> \u00e0 la vigne, avant de couper \u2014 puis <b>R\u00e9coltes</b>, ce qui rentre \u2014 puis <b>Cuves</b>, ce qui fermente. Rien d\u2019autre ne bouge : m\u00eames \u00e9crans, m\u00eames gestes." },
+    { emoji: 'barrique', titre: 'Le filtre mill\u00e9sime vaut pour tout Le Chai',
+      desc: "Il vivait en t\u00eate de la liste des cuv\u00e9es : passer au <b>Journal</b> le faisait dispara\u00eetre de l\u2019\u00e9cran alors qu\u2019il restait pos\u00e9, et l\u2019on ne pouvait pas demander \u00ab qu\u2019a-t-on fait sur le 2025 \u00bb. Il est d\u00e9sormais <b>sous les onglets</b> et s\u2019applique aux trois : cuv\u00e9es, journal, bouteilles. Une op\u00e9ration qui porte sur deux mill\u00e9simes \u00e0 la fois n\u2019est rattach\u00e9e \u00e0 aucun : elle sort du filtre, et l\u2019\u00e9cran dit combien il en \u00e9carte plut\u00f4t que de les faire dispara\u00eetre en silence." },
+    { emoji: 'verre', titre: 'Les textes de la Cave ont retrouv\u00e9 une taille',
+      desc: "Trente-sept tailles de caract\u00e8re diff\u00e9rentes cohabitaient dans la Cave, dont du <b>7,5\u00a0px</b> \u2014 illisible \u00e0 bout de bras, entre deux rangs. Elles suivent maintenant la m\u00eame \u00e9chelle que le reste de l\u2019application, et <b>rien ne descend sous 9,5\u00a0px</b>. Les tailles montent l\u00e9g\u00e8rement par endroits : c\u2019est voulu." }
+  ] },
   { v: '6.99', items: [
     { emoji: 'engrenage', titre: 'Chaque module a sa roue crant\u00e9e \u2014 le Phyto et la R\u00e9serve aussi',
       desc: "Le registre phyto (PDF et fichier tableur) et la synth\u00e8se cuivre s\u2019impriment depuis la roue du Phyto ; le gros bouton violet au bas du registre n\u2019existe plus. Les deux inventaires de la R\u00e9serve sont dans la sienne. M\u00eame geste sur les sept modules." },
@@ -2262,9 +2270,9 @@ var MV_AIDE = {
           "Aujourd’hui dit ce qui presse, Le Cuvier suit la vendange, Le Chai suit l’élevage, Le Millésime raconte le vin.");
       },
       ['Aujourd’hui', "est l’écran d’arrivée de la Cave. En tête, le verdict : ce qui ne peut pas attendre, dans l’ordre — une fermentation qui ralentit, une malo bloquée, des cuves sans relevé depuis hier ou avant, du raisin à rentrer, des fûts à ouiller, une malo finie à soutirer, une dose de SO\u2082 programmée. Dessous, les quatre semaines à venir, et ce qui n’a pas de date (les fûts en fin de vie). Chaque ligne est un bouton qui ouvre le geste. Tout vient de ce qui est déjà saisi, rien de plus à remplir."],
-      ['Les quatre chiffres du haut', "sont ceux de la cave entière, les mêmes sur les quatre onglets : hL en cuve (une estimation d’après les kilos tant que rien n’est décuvé, marquée ≈), fûts en vin, lignes à faire cette semaine, tonnes rentrées. La ligne sous la bande dit sur quel millésime ils sont calculés. Le filtre millésime du Chai n’agit que sur sa liste, pas sur la bande."],
+      ['Les quatre chiffres du haut', "sont ceux de la cave entière, les mêmes sur les quatre onglets : hL en cuve (une estimation d’après les kilos tant que rien n’est décuvé, marquée ≈), fûts en vin, lignes à faire cette semaine, tonnes rentrées. La ligne sous la bande dit sur quel millésime ils sont calculés. Le filtre millésime du Chai agit sur ses trois onglets — cuvées, journal, bouteilles — mais pas sur la bande."],
       ['La roue crantée', "en haut à droite réunit ce qu’on règle une fois l’an : les réglages du Cuvier (poids par caisse, rendement jus, base du rendement, correction d’un poids déjà saisi, clients vrac), ceux du Chai (alerte d’ouillage, contenance d’un fût, convertisseur SO\u2082, parc à cuves), le renvoi vers les appellations et leurs plafonds, et les documents de la cave. Aucun onglet du quotidien ne porte plus de réglage."],
-      ['Les onglets du Cuvier', "suivent la vendange : Récoltes, Cuves, Maturités. « Cuves » est l’ancien onglet « Cuvier » ; « Maturités » est l’ancien « Analyses » — ce sont les contrôles de maturité à la vigne, à ne pas confondre avec les analyses labo du Chai."],
+      ['Les onglets du Cuvier', "suivent la vendange dans l’ordre où elle se fait : Maturités à la vigne, Récoltes, puis Cuves. « Cuves » est l’ancien onglet « Cuvier » ; « Maturités » est l’ancien « Analyses » — ce sont les contrôles de maturité à la vigne, à ne pas confondre avec les analyses labo du Chai."],
       ['Un millésime à la fois', "une opération porte sur une seule année. Changer de millésime en haut du formulaire vide la sélection : on ne mélange pas deux vins dans un même geste."],
       ['Le délai d’ouillage', "se règle pour tout le domaine, et se resserre millésime par millésime — un vin jeune se surveille de plus près."],
       ['Le parc à cuves', "se déclare une fois dans la roue crantée de la Cave, bloc Le Chai : un nom, une contenance en litres, une matière. La même cuve sert à vinifier au Cuvier puis à élever au Chai, et l’application sait laquelle est prise — dans les deux cas."],

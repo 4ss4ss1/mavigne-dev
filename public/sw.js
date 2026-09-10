@@ -1,4 +1,14 @@
-// MA VIGNE — Service Worker v7.58
+// MA VIGNE — Service Worker v7.59
+// v7.59 (09/09/2026) — CAVE-6 : L'ORDRE DU CUVIER, LE FILTRE DU CHAI, LES
+//   POLICES. Les trois onglets du Cuvier suivent la vendange (Maturites,
+//   Recoltes, Cuves) ; cles, handlers et onglet d'arrivee inchanges. Le filtre
+//   millesime quitte la liste des cuvees pour #mvc-milbar, sous la barre
+//   d'onglets : les TROIS vues du Chai s'y accrochent par _caveDansFiltre, le
+//   journal via _rmMilCuvees (celle du registre imprime, pas une seconde
+//   definition) ; une operation non rattachable sort du filtre ET est comptee a
+//   l'ecran. 415 tailles de texte en dur passent aux onze pas --pt-* avec un
+//   plancher a 9,5 px ; les 68 des feuilles de documents restent en dur (un
+//   document ne charge pas styles.css, §86). APP 7.00.
 // v7.58 (09/09/2026) — NAV-4/5 : ROUES PHYTO ET RESERVE, VOCABULAIRE. Le bouton
 //   d'export CSV quitte le bas du registre phyto (#phyto-export-row retire) ;
 //   #ovReglPhyto et #ovReglReserve ne portent que les documents. « App » devient
@@ -3639,7 +3649,7 @@
 // v2.22 — Fix profils vides : guard vide dans loadData() pour MEMBRES/SAISONS/TACHES
 // v2.17 — Onboarding intégré + tenantId · v2.06 — Firebase Auth · v2.00–v2.05 — divers
 const DEBUG = self.location.hostname === 'localhost' || self.location.hostname === '127.0.0.1';
-const CACHE_NAME   = 'mavigne-v7.58';
+const CACHE_NAME   = 'mavigne-v7.59';
 const TENANT_CACHE = 'mavigne-tenant';   // Cache persistant — préservé à chaque mise à jour SW
 const SYNC_TAG     = 'mavigne-sync';
 
@@ -3655,7 +3665,7 @@ const CDN_URLS = [
 ];
 
 self.addEventListener('install', event => {
-  if(DEBUG) console.log('[SW] Ma Vigne v7.58 installé');
+  if(DEBUG) console.log('[SW] Ma Vigne v7.59 installé');
   event.waitUntil(
     caches.open(CACHE_NAME).then(async cache => {
       // ── Cœur applicatif : STRICT (mise à jour ATOMIQUE) ──
@@ -3671,7 +3681,7 @@ self.addEventListener('install', event => {
 });
 
 self.addEventListener('activate', event => {
-  if(DEBUG) console.log('[SW] Ma Vigne v7.58 activé');
+  if(DEBUG) console.log('[SW] Ma Vigne v7.59 activé');
   event.waitUntil(
     caches.keys().then(keys =>
       Promise.all(

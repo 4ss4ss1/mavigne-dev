@@ -2,7 +2,25 @@
 
 > Document de référence du projet **Ma Vigne** (GUERETTECH). Il est le **porteur de vérité** :
 > la mémoire Claude est plafonnée, ce fichier ne l'est pas.
-> Dernière consolidation : **9 septembre 2026 (nuit, NAV-4/5)** — **LA SÉRIE NAV EST CLOSE (§101)** : roue crantée sur
+> Dernière consolidation : **10 septembre 2026 (CAVE-6)** — **L'ORDRE DU CUVIER, LE FILTRE DU CHAI,
+> ET 482 TAILLES DE TEXTE (§102)**. Trois demandes de Nico en un message. ① Les onglets du Cuvier
+> suivent la vendange : **Maturités → Récoltes → Cuves** (clés, handlers et `_vendTab` inchangés).
+> ⚠️ **L'onglet d'arrivée reste « Cuves » — question ouverte.** ② Le filtre millésime **existait**
+> (le tableau de la Règle d'or n°3 le disait, et il avait raison) : ce qui manquait était sa
+> **PORTÉE**. Écrit en tête de `renderCaveCuvees`, il **disparaissait de l'écran en restant posé**
+> quand on passait au Journal. Il vit dans **`#mvc-milbar`** sous les onglets et vaut pour les
+> trois vues ; le journal lit **`_rmMilCuvees`**, celle du registre imprimé, jamais une seconde
+> définition. ⚠️ Une opération non rattachable sort du filtre **et est comptée à l'écran**.
+> ③ **482 tailles de texte en dur, 37 valeurs** — la Cave n'était jamais passée à l'échelle du
+> projet. **415 remplacements**, plancher de lisibilité à **9,5 px**, les 68 des documents
+> imprimables restent en dur (§86). ⚠️⚠️ **La piste évidente était fausse** : les deux fautes de
+> contraste à 1,12:1 trouvées sont sur des classes **mortes** — zéro faute sur le vivant.
+> ⚠️⚠️⚠️ **Le ménage des 58 classes mortes a été ABANDONNÉ en cours de lot** : mon détecteur a pris
+> `.join` et `.toFixed` pour des sélecteurs et supprimé 25 lignes de code — rattrapé par
+> `node --check`, base restaurée, patchs rejoués. **APP 6.99 → 7.00 · SW 7.58 → 7.59**, base
+> `a5c978c`. Détail en **§102**.
+>
+> ★ Précédente : **9 septembre 2026 (nuit, NAV-4/5)** — **LA SÉRIE NAV EST CLOSE (§101)** : roue crantée sur
 > les **sept** modules (Phyto et Réserve : documents seulement ; le bouton d'export quitte le bas du registre phyto —
 > ⚠️ l'audit NAV-0 le disait *dans la barre d'onglets*, c'était faux, il était sous la liste) ; « App » → « Moi », le
 > catalogue des documents passe dans **Domaine › Données** ; les en-têtes disent « Cave » et « Réserve » ; « Le Millésime » ;
@@ -15379,3 +15397,131 @@ anatomies (à juger à l'usage) ; « Choisir les indicateurs » reste par onglet
 `src/reserve.js`, `src/cave.js`, `src/pilotage.js`, `src/utils.js`, `public/sw.js`, `guide/01, 04, 07, 08, 09,
 10, 12, 13, 14`, `scripts/mv-harnais-regl-module.mjs`, `scripts/harnais-claude-md.mjs`, `CLAUDE.md` (+ les
 fichiers de §98–§100). Puis `node scripts/build-guide.mjs`, `npm run build && firebase deploy`.
+
+---
+
+## 102. CAVE-6 — L'ORDRE DU CUVIER, LE FILTRE DU CHAI, ET 482 TAILLES DE TEXTE (10/09 — APP 6.99 → 7.00 · SW 7.58 → 7.59 · base `a5c978c`)
+
+**Trois phrases de Nico**, dans le même message : *« dans le cuvier : ordre des modules doit etre
+maturité / recolte / cuvier · dans le chai : il faut pouvoir filtrer par millesime · revoir toutes
+les polices et bug d'affichage dans la cave »*.
+
+### ① L'ordre du Cuvier — trois boutons qui changent de place
+
+`Récoltes · Cuves · Maturités` → **`Maturités · Récoltes · Cuves`**. L'ordre précédent partait du
+milieu ; celui-ci suit le raisin — à la vigne avant de couper, ce qui rentre, ce qui fermente.
+**Les clés (`ana`/`rec`/`cuves`), les handlers et `_vendTab` ne bougent pas** : seule la position
+des trois boutons change. La boucle d'activation de `_vendRenderTab` a été réordonnée avec eux —
+c'est la deuxième liste du même concept, et deux listes qui divergent, c'est le défaut que
+`switchCaveOng` documente déjà dix lignes plus haut.
+
+⚠️ **CE QUI N'A PAS ÉTÉ CHANGÉ, ET C'EST UNE QUESTION OUVERTE** : l'onglet d'arrivée reste
+**Cuves** (`_vendTab='cuves'`, posé à trois endroits par `_mlGo`). On arrive donc sur le troisième
+onglet. Nico n'a parlé que de l'ordre ; changer le point d'arrivée est une décision de produit,
+pas une conséquence mécanique. **À trancher.**
+
+### ② Le filtre millésime — il existait, il était au mauvais étage
+
+⚠️⚠️ **PREMIER RÉFLEXE, ET IL A ÉVITÉ UN DOUBLON** : `CLAUDE.md` disait déjà, dans le tableau de la
+Règle d'or n°3, *« il faut un filtre millésime dans le Chai » → **`_caveMillFilter` existe depuis
+longtemps***. Vérifié : il existait bien, avec `_caveDansFiltre` et `_caveCuvsFiltrees` en source
+unique depuis la série MILLÉSIME (§20h). **Écrire un second filtre aurait été la faute exacte que
+ce tableau existe pour empêcher.**
+
+★★★ **CE QUI MANQUAIT VRAIMENT : SA PORTÉE.** Les chips étaient écrites **en tête de
+`renderCaveCuvees`**, c'est-à-dire dans le corps d'un seul des trois onglets. Conséquence :
+passer au **Journal** faisait disparaître le filtre **de l'écran alors qu'il restait posé** — et
+le Journal, l'endroit même où l'on demande *« qu'a-t-on fait sur le 2025 »*, n'en avait aucun.
+*Un filtre invisible qui continue d'agir est pire qu'un filtre absent.*
+
+- Il vit dans **`#mvc-milbar`**, créé en JS après `#mvc-tabs-row` — **même patron que
+  `_caveEnsureBtlTab`**, qui crée déjà l'onglet Bouteilles à cet endroit. `index.html` n'est donc
+  pas touché pour ce bloc.
+- ★ **`#mvc-milbar:empty{display:none}`** : un domaine à un seul millésime ne voit pas une bande
+  vide. L'écran reste celui d'avant, au pixel près.
+- Les **trois** vues s'accrochent à `_caveDansFiltre` — cuvées, journal, bouteilles.
+- ★★ **Le journal lit `_rmMilCuvees`**, la fonction du **registre imprimé**, et pas une seconde
+  définition de « le millésime de cette opération ». Deux définitions divergeraient, et **l'écran
+  finirait par contredire le document** qu'il est censé préparer.
+- ⚠️⚠️ **Une opération mixte ou orpheline sort du filtre — ET EST COMPTÉE À L'ÉCRAN.** Même
+  arbitrage qu'au registre (§20h), mais avec une différence qui compte : un document se relit une
+  fois l'an, un écran se consulte tous les jours. *Une ligne qui disparaît sans un mot se lit comme
+  une perte de donnée.* La note dit combien, et rappelle qu'elles sont sur « Tous ».
+- ★ **La liste des millésimes proposés inclut les cuvées EMBOUTEILLÉES** : un millésime tout en
+  bouteille a encore des bouteilles en stock et des opérations au journal. Mais il n'a plus de cuvée
+  en élevage, donc **pas de compteur** — *un « 0 » se lirait comme une absence, pas comme un
+  compte.* Le compteur garde son sens unique : les cuvées en élevage.
+- ⚠️ **La bande `#cave-kpis` n'est PAS filtrée**, et c'est inchangé : elle porte les chiffres de la
+  Cave entière, les mêmes sur les quatre sections (§94). La fiche `MV_AIDE` le disait déjà — elle a
+  été corrigée sur la portée, pas sur ce point.
+
+### ③ Les polices — le vrai chiffre était 482, et ce n'était pas un problème de contraste
+
+**Mesuré avant d'écrire une ligne** : `cave.js` portait **482 déclarations `font-size` en dur, sur
+37 valeurs différentes** — dont du **7,5 px**, du 8 px, du 8,5 px. Le Pilotage est passé aux onze
+pas `--pt-*` en août (§42) ; **la Cave ne l'a jamais été.**
+
+⚠️⚠️ **ET LA PISTE ÉVIDENTE ÉTAIT FAUSSE.** J'ai cherché §21c en premier — une couleur de FOND
+employée comme encre. Trouvé **deux** occurrences à **1,12:1 en mode sombre** (`.mvv-tab.active`,
+`.mvv-kpi`), le chiffre exact de §67. **Les deux sont sur des classes MORTES** : aucun HTML de
+l'application ne les pose depuis les lots CAVE-1 à 5. *Un défaut réel, mesuré, reproductible — et
+strictement sans effet.* **Zéro faute de contraste sur les classes vivantes de la Cave.**
+★ **La leçon** : chercher le défaut qu'on connaît déjà fait trouver ce qu'on cherche, pas ce qui
+gêne l'utilisateur. Le compte des classes vivantes aurait dû venir **avant** le calcul des ratios.
+
+**Le remappage** : **415 remplacements** vers `var(--pt-*, <valeur>)`, chaque appel avec son repli.
+37 valeurs → 11 pas. **24 tailles remontées à un plancher de lisibilité de 9,5 px** — sous ce pas,
+ce n'est plus une taille, c'est un aveu. Les écarts sont ≤ 1 px sur 401 des 415.
+
+⚠️ **LES 68 RESTANTES NE SONT PAS UN OUBLI** : ce sont les trois feuilles de documents imprimables
+(`RM_CSS`, `BC_CSS`, `MV_CUVDOC_CSS`). **Un document s'ouvre dans sa fenêtre et ne charge pas
+`styles.css`** (§86). Y écrire `var(--pt-txt,12.5px)` fonctionnerait — par le repli — mais
+**déclarerait une dépendance qui n'existe pas**. Leurs tailles restent en dur, c'est leur règle.
+
+### ⚠️⚠️⚠️ CE QUI A MAL TOURNÉ — LE MÉNAGE CSS, ABANDONNÉ EN COURS DE LOT
+
+L'audit a trouvé **58 classes CSS déclarées par `cave.js` et posées nulle part** — les vestiges
+`mvv-*` et `pcav-*` des lots CAVE-3/4, que le ménage de CAVE-5 n'avait pas ramassés (il visait
+`index.html`). J'ai voulu les retirer.
+
+**Mon détecteur a pris `.join`, `.toFixed` et `.getFullYear` pour des sélecteurs CSS.** Ma regex
+n'exigeait qu'une ligne de concaténation commençant par `+'` — ce que fait aussi tout le HTML
+généré du fichier. **Vingt-cinq lignes de code JS ont été supprimées.**
+
+★★★ **CE QUI L'A ATTRAPÉ : `node --check`, immédiatement après.** Pas une assertion, pas un
+harnais — le contrôle de syntaxe le plus bête de la chaîne. *Un lot qui supprime des lignes doit
+être suivi d'un contrôle de syntaxe avant tout autre raisonnement.*
+
+★★ **Ce que j'ai fait, et c'est la bonne réponse** : **ne pas réparer à la main**. Base restaurée
+depuis la copie figée, les cinq patchs sains rejoués dans l'ordre, `node --check` vert.
+**Le ménage est ABANDONNÉ pour ce lot** — c'est du ménage, invisible du client, et un lot plus
+petit dont on est sûr vaut mieux qu'un gros lot fragile.
+
+⚠️ **RESTE OUVERT** : les **58 classes mortes** (~7 ko de CSS injecté à chaque affichage de la
+Cave) et les deux fautes de contraste qu'elles portent. **À faire dans un lot dédié**, avec la
+bonne ancre : ne retenir une ligne que si elle contient une **accolade CSS** et qu'aucun de ses
+sélecteurs n'est posé. La liste est reproductible en quelques lignes de Python.
+
+### Ce qui a été mesuré
+
+| Contrôle | Résultat |
+|---|---|
+| `node scripts/preflight.mjs` | **0 erreur · 0 avertissement** |
+| `scripts/mv-harnais-cave6.mjs` (neuf) | **17 vertes, 0 rouge**, 3 contre-épreuves |
+| `WHATS_NEW` **exécuté** en Node | tête = `APP_VERSION`, ordre strict, 0 doublon, 0 demi-surrogate **non apparié** |
+| cliquet C14 (`catch{}`) | `cave.js` 3 → 3 · `utils.js` 10 → 10 |
+| balance `<div>`/`<span>`/`<button>` | écarts base = écarts patché (non-régression) |
+| tailles de texte en dur, `cave.js` | **482 → 68** (les 68 = feuilles de documents) |
+| diff `cave.js` | 909 lignes, dont **811 de polices** et **98 dans le périmètre des trois patchs, une par une** |
+| déplacement de la carte du guide | **même longueur, même liste triée de caractères** — aucun octet réécrit |
+
+⚠️ **Le harnais `mv-harnais-globaux.mjs` N'A PAS ÉTÉ JOUÉ** : `eslint` n'est pas installé dans le
+bac à sable. Il est dans `npm run check` côté Nico — c'est lui qui vérifie qu'aucun nom libre neuf
+ne manque son `window.` (§24). Les trois fonctions ajoutées (`_caveMilsDuChai`, `_caveEnsureMilBar`,
+`_caveMilBarRender`) ne sont appelées **que depuis `cave.js`**, donc hors du piège ; `_caveSetMill`,
+seule visée par un `onclick`, était **déjà exposée**.
+
+⚠️ **Et ce qu'aucun contrôle n'a lu : la mise en page.** 415 tailles ont bougé, la plupart de
++0,5 px, quelques-unes de +1,5 px sur des badges étroits. **Aucun harnais ne voit un texte qui
+déborde d'une pastille.** À regarder à l'œil sur les quatre sections de la Cave.
+
