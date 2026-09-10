@@ -15525,3 +15525,54 @@ seule visée par un `onclick`, était **déjà exposée**.
 +0,5 px, quelques-unes de +1,5 px sur des badges étroits. **Aucun harnais ne voit un texte qui
 déborde d'une pastille.** À regarder à l'œil sur les quatre sections de la Cave.
 
+### ⚠️⚠️⚠️ POST-SCRIPTUM (10/09, après le push `d92de47`) — LA CI A ROUGI, ET ELLE AVAIT DEUX RAISONS
+
+`mv-harnais-cave-reglages.mjs` (le harnais de CAVE-2) a rougi sur deux assertions, et la CI s'est
+arrêtée là : **les 12 contrôles suivants n'ont jamais tourné.** Aucun défaut du lot — mais deux
+leçons, et la seconde vaut plus que la première.
+
+**① LE HARNAIS ÉTAIT VERT ET GRAVAIT UN CONTRESENS.** Il figeait `'rec,cuves,ana'` **sous le nom
+« ordre de la vendange : Récoltes, Cuves, Maturités »**. Or Récoltes-Cuves-Maturités n'est pas
+l'ordre de la vendange : *on contrôle la maturité AVANT de couper.* Le **nom de l'assertion et son
+contenu se contredisaient** — et le harnais est resté vert du 09 au 10/09 sans que rien ne le
+signale.
+
+★★★ **UN VERT NE PROUVE QUE LA CONFORMITÉ AU CONTENU, JAMAIS LA JUSTESSE DU NOM.** C'est Nico qui
+l'a vu à l'œil, en regardant l'écran. Quand on grave une règle sous un nom qui l'explique, **il faut
+relire le nom autant que le test** — sinon on fabrique un cliquet qui protège une erreur.
+Les deux assertions figent maintenant `'ana,rec,cuves'` ; contre-épreuve jouée : l'ancien ordre
+réinjecté dans `_vendRenderTab` **rougit bien** (38/39).
+
+**② MA FAUTE : JE N'AI PAS LANCÉ LA CHAÎNE.** J'avais lancé `preflight.mjs` (vert) puis
+`npm run check`, qui **s'est arrêté au troisième maillon** — `mv-harnais-globaux.mjs` exige
+`eslint`, absent du bac à sable. J'ai noté « harnais globaux non joué » **et je me suis arrêté là**,
+alors que les **40 maillons suivants** ne demandaient rien de particulier. `cave-reglages` est le
+33ᵉ : il aurait rougi en trois secondes.
+
+★★★ **RÈGLE : `npm run check` QUI S'ARRÊTE SUR UNE DÉPENDANCE ABSENTE N'EST PAS « JOUÉ ».** Il faut
+**sauter le maillon manquant et lancer les autres un par un**. Boucle :
+```bash
+python3 -c "import json,io;print('\n'.join(x.strip() for x in json.load(io.open('package.json'))['scripts']['check'].split('&&')))" \
+  | while read -r c; do eval "$c" >/dev/null 2>&1 && echo "ok  $c" || echo "KO  $c"; done
+```
+**Chaîne complète rejouée : 42 verts sur 42.** Seuls `mv-harnais-globaux` et `lint-cliquet` restent
+non jouables ici — les deux, et **eux seuls**, dépendent d'`eslint`.
+
+**③ ET LE HARNAIS DU LOT N'ÉTAIT BRANCHÉ NULLE PART.** `mv-harnais-cave6.mjs` n'était ni dans
+`check`, ni dans `prebuild`, ni dans la CI : **17 assertions que personne n'exécutait.** C'est le
+défaut que le workflow dénonce déjà en commentaire (*« AUCUN appelant ne l'executait — ni npm run
+lint, ni la CI »*), et je venais de le reproduire. Branché dans `check` **et** `prebuild`, après
+`mv-harnais-cave-mil.mjs` — donc joué par la CI au `npm run build`.
+★ **Écrire un harnais et ne pas le brancher, c'est écrire un commentaire.**
+
+**Aucun bump** : `scripts/` et `package.json` ne sont ni servis au client ni précachés (vérifié —
+`PRECACHE_ASSETS` est rempli au build depuis le bundle Vite, la seule mention de `package.json`
+dans `sw.js` est un commentaire). **APP 7.00 · SW 7.59 inchangés.**
+
+⚠️ **RESTE OUVERT — UNE PHRASE FAUSSE DANS LE JOURNAL DES NOUVEAUTÉS.** `src/utils.js`, bloc
+**v6.93** (CAVE-2) : *« L'ordre suit la vendange : Récoltes, Cuves, Maturités. »* Même contresens
+que le harnais, **visible du client cette fois**. Un utilisateur qui déroule ses nouveautés lit
+6.93 puis 7.00 et voit deux « ordres de la vendange » contradictoires. À retirer du bloc 6.93 (le
+reste, les renommages Cuves/Maturités, demeure vrai) **dans le prochain lot qui touche `utils.js`**
+— pas de cycle de déploiement pour une phrase seule.
+

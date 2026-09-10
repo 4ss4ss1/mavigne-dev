@@ -11,9 +11,18 @@
    par deux écrans ne renvoie nulle part (§90a).
 
    CE QU'IL GRAVE
-   1. Le Cuvier a trois onglets, dans l'ordre de la vendange : Récoltes, Cuves,
-      Maturités — les CLÉS ne bougent pas ('rec','cuves','ana'), seuls les
-      libellés. Plus d'onglet Réglages, ni ici ni au Chai.
+   1. Le Cuvier a trois onglets, dans l'ordre de la vendange : Maturités,
+      Récoltes, Cuves — les CLÉS ne bougent pas ('rec','cuves','ana'), seuls
+      les libellés et LA POSITION. Plus d'onglet Réglages, ni ici ni au Chai.
+
+   ⚠️⚠️ CORRIGÉ PAR CAVE-6 (§102), ET LA LEÇON VAUT PLUS QUE LA CORRECTION.
+   Ce harnais gravait 'rec,cuves,ana' sous le nom « ordre de la vendange ».
+   Or Récoltes-Cuves-Maturités N'EST PAS l'ordre de la vendange : on contrôle
+   la maturité AVANT de couper. Le nom de l'assertion et son contenu se
+   contredisaient — et le harnais est resté VERT du 09 au 10/09, parce qu'un
+   vert ne prouve que la conformité au CONTENU, jamais la justesse du NOM.
+   C'est Nico qui l'a vu à l'œil, pas la CI. Quand on grave une règle sous un
+   nom qui l'explique, il faut relire le nom autant que le test.
    2. Une seule porte pour les réglages de la cave : la roue crantée de
       l'en-tête, qui ouvre une section SANS onglet ('reglages').
    3. Les anciennes clés ('param' du Cuvier, 'reglages' et 'divers' du Chai)
@@ -70,11 +79,11 @@ function jouer(src, html, reg, ut, silencieux) {
   const cockpit = extraire(src, '_vendCockpitHtml') || '';
   T(!/mvv-tab-param/.test(cockpit), 'plus d\u2019onglet R\u00e9glages au Cuvier');
   const ordre = [...cockpit.matchAll(/mvv-tab-(rec|cuves|ana)/g)].map(m => m[1]);
-  T(ordre.join(',') === 'rec,cuves,ana', 'ordre de la vendange : R\u00e9coltes, Cuves, Maturit\u00e9s', ordre.join(','));
+  T(ordre.join(',') === 'ana,rec,cuves', 'ordre de la vendange : Maturit\u00e9s, R\u00e9coltes, Cuves', ordre.join(','));
   T(/> Cuves<\/button>/.test(cockpit) && !/> Cuvier<\/button>/.test(cockpit), '\u00ab Cuvier \u00bb dans \u00ab Le Cuvier \u00bb s\u2019appelle Cuves');
   T(/> Maturit\u00e9s<\/button>/.test(cockpit) && !/> Analyses<\/button>/.test(cockpit), '\u00ab Analyses \u00bb s\u2019appelle Maturit\u00e9s');
   const rt = extraire(src, '_vendRenderTab') || '';
-  T(/\['rec','cuves','ana'\]/.test(rt) && !/'param'/.test(rt), '_vendRenderTab ne conna\u00eet que les trois cl\u00e9s');
+  T(/\['ana','rec','cuves'\]/.test(rt) && !/'param'/.test(rt), '_vendRenderTab : les trois cl\u00e9s, DANS L\u2019ORDRE DES BOUTONS');
   const sv = extraire(src, 'switchVendOng') || '';
   T(/tab==='param'[^\n]*_caveOpenReglages\(\)/.test(sv), 'switchVendOng(\'param\') ouvre la roue (tol\u00e9rance)');
   T(/indexOf\(tab\)<0\)\s*tab='cuves'/.test(sv), 'une cl\u00e9 inconnue du Cuvier replie sur Cuves');
