@@ -4675,6 +4675,23 @@ window._ecoCfgSet=function(group,key,val){
     //                  Lu par window._mvExercice (utils.js), source unique de la fenetre
     //                  << de date de bilan a date de bilan >>. 0 est une valeur LEGITIME
     //                  (annee civile) : ne jamais traiter 0 comme << non renseigne >> ici.
+    //   futs_trait   : traitement du FUT ACHETE dans l'exercice comptable.
+    //                  'hors' (defaut) = il ne compte pas ; 'achat' = il compte en
+    //                  entier a la date de sa facture. Lu par _ecoFutTrait (pilotage.js).
+    // ⚠⚠ CETTE CLE EST UNE CHAINE, PAS UN NOMBRE. Tout le reste de ce groupe passe
+    //   par _ecoNum, qui rend 0 sur du texte : ecrire 'achat' par le chemin numerique
+    //   aurait enregistre 0, le lecteur serait retombe sur son defaut, et le reglage
+    //   aurait eu l'air de ne pas prendre — sans une seule erreur nulle part. Les
+    //   valeurs autorisees sont enumerees ici : une chaine libre n'entre pas.
+    var _ECO_TXT={futs_trait:{hors:1, achat:1}};
+    if(_ECO_TXT[key]){
+      var _tv=String(val==null?'':val).trim();
+      if(!_ECO_TXT[key][_tv]) return;
+      if(!C.eco||typeof C.eco!=='object') C.eco={};
+      C.eco[key]=_tv;
+      if(window.saveData) window.saveData('config');
+      return;
+    }
     if(['pen_retard_sem','pen_plafond','rdt_renfort','cout_fixe_renfort','maj_hsup','k_retard','trac_etp','kg_bouteille','h_jour','exercice_mois'].indexOf(key)<0) return;
     if(!C.eco||typeof C.eco!=='object') C.eco={};
     C.eco[key]=_ecoNum(val);

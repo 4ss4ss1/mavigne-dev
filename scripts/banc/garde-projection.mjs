@@ -15,7 +15,8 @@ const L = src.split('\n');
 console.log('\n── Garde de montage ──');
 // Sans ces ancres, un renommage ferait verdir un harnais vide (§40).
 t('_pecCadHisto existe', /function _pecCadHisto\(/.test(src));
-t('_pilCapaProj existe', /function _pilCapaProj\(/.test(src));
+t('_pilFacteurK existe (ex-_pilCapaProj, PIL-FIN 10/09)', /function _pilFacteurK\(/.test(src));
+t('_pilFinPlan existe et lit _rfSim', /function _pilFinPlan\(/.test(src) && /_rfSim\(C,null\)/.test(src));
 t('cadSrc existe', /var cadSrc *=/.test(src));
 // ★ PIL-COH (10/09/2026) : applic derive de la SOURCE **et** de la borne de bon sens —
 //   un facteur hors [0,5 ; 3] mesure un trou de saisie, il ne s'applique ni aux euros

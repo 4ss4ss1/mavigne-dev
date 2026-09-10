@@ -29,7 +29,12 @@ var INTRANTS = {
   // `prix` : total HT du lot, ABSENT a la livraison et rempli plus tard depuis
   // Pilotage > Economie > Achats. Absent (a chiffrer) et 0 (offert) sont deux
   // etats distincts — d'ou `!=null` partout et jamais `||`.
-  futs: [],           // [{id,four,ref,annee,qte,date,prix}]
+  // ★ `mode` : 'achat' (defaut, retro-compatible) ou 'loc'. Un lot LOUE porte
+  //   `loyer` (HT PAR FUT ET PAR AN), `debut` et `fin` de contrat, et jamais de
+  //   `prix`. Un lot ACHETE porte `prix` (total HT du lot) et `dfact` (date de
+  //   facture) — `date` reste la date de saisie, elle ne date rien d'autre.
+  //   Le moteur economique est dans utils.js (_mvFutLoyer), lu par pilotage.js.
+  futs: [],           // [{id,mode,four,ref,annee,qte,date,dfact,prix,loyer,debut,fin}]
   fut_mouv: [],       // [{id,date,sens,motif,four,ref,annee,nb,note}] — registre du parc
   fut_four: [],       // fournisseurs mémorisés (fûts)
   fut_ref: [],        // références mémorisées (fûts)
@@ -429,9 +434,11 @@ function _rsvFutsHtml(){
       h+='<div class="mvr-fcard">'
         +'<div class="mvr-fband"></div>'
         +'<div class="mvr-fin">'
-          +'<div class="mvr-ftop"><div class="mvr-fref">'+_escHtml(f.ref||'Réf. non précisée')+'</div>'
+          +'<div class="mvr-ftop"><div class="mvr-fref">'+_escHtml(f.ref||'Réf. non précisée')
+            +'<span class="mvr-ftag '+(f.mode==='loc'?'mvr-ftag-loc">loué':'mvr-ftag-ach">acheté')+'</span></div>'
           +_rsvFutQteHtml(f, adm)+'</div>'
           +'<div class="mvr-fmeta"><span>'+_mvIcon('calendrier',16)+' '+_escHtml(f.annee||'—')+'</span></div>'
+          +_rsvFutEcoHtml(f)
           +(adm?'<div class="mvr-frow"><button class="mvr-mini" onclick="_rsvOpenFut(\''+_escAttr(f.id)+'\')">\u270F\uFE0F Modifier</button><button class="mvr-mini mvr-mini-d" onclick="_rsvDelFut(\''+_escAttr(f.id)+'\')">\uD83D\uDDD1\uFE0F</button></div>':'')
         +'</div>'
       +'</div>';
@@ -439,6 +446,23 @@ function _rsvFutsHtml(){
     h+='</div></div></div></div>';
   });
   return h;
+}
+
+// Ce que la carte d'un lot dit de son argent : un loyer et son échéance, ou un
+// prix et sa facture. Rien d'inventé — un champ vide se dit « à chiffrer ».
+function _rsvFutEcoHtml(f){
+  if(f && f.mode==='loc'){
+    var j=(window._mvFutJoursFin)?window._mvFutJoursFin(f):null;
+    var ech = (j==null) ? 'contrat sans date de fin'
+      : (j<0 ? '<b>contrat échu depuis '+Math.abs(j)+' j — à rendre</b>'
+             : ('fin de contrat dans '+j+' j'+(j<=90?' — <b>à rendre</b>':'')));
+    return '<div class="mvr-floc">'
+      +(f.loyer!=null?(_fmt(f.loyer)+' \u20AC HT / fût / an'):'loyer non renseigné')
+      +' \u00b7 '+ech+'</div>';
+  }
+  if(f && f.prix!=null) return '<div class="mvr-floc" style="color:var(--texte-doux,#5F5F5F)">'
+    +_fmt(f.prix)+' \u20AC HT le lot'+(f.dfact?(' \u00b7 facture du '+(window.fmtDate?window.fmtDate(f.dfact):f.dfact)):'')+'</div>';
+  return '<div class="mvr-floc" style="color:var(--orange,#B85A1A)">prix à chiffrer \u2014 Économie \u203a Achats</div>';
 }
 
 // ── Overlay fût : ajout / édition ──
@@ -452,19 +476,36 @@ function _rsvOpenFut(id){
   document.getElementById('mvr-fut-ref').value=f?(f.ref||''):'';
   document.getElementById('mvr-fut-annee').value=f?(f.annee||''):(new Date().getFullYear());
   document.getElementById('mvr-fut-qte').value=f?(f.qte||''):'';
+  var _v=function(id,val){ var e=document.getElementById(id); if(e) e.value=(val==null?'':val); };
+  _v('mvr-fut-dfact', f?(f.dfact||f.date||''):_today());
+  _v('mvr-fut-prix',  (f&&f.prix!=null)?f.prix:'');
+  _v('mvr-fut-loyer', (f&&f.loyer!=null)?f.loyer:'');
+  _v('mvr-fut-debut', f?(f.debut||''):'');
+  _v('mvr-fut-fin',   f?(f.fin||''):'');
+  _rsvSetFutMode((f&&f.mode==='loc')?'loc':'achat');
   _rsvFutFourChange(); // réfs proposées scopées au fournisseur du lot
   if(window.openOv) window.openOv('ovRsvFut');
 }
 window._rsvOpenFut=_rsvOpenFut;
 
-// deux lots de fûts sont « le même » si fournisseur + référence + millésime
-// coïncident (comparaison tolérante). Saisir deux fois le même lot par le
-// formulaire doit fusionner les quantités — comme le fait déjà le +/- — au lieu
-// de créer une carte en double.
-function _futSameLot(x, four, ref, annee){
-  var n=function(v){ return String(v==null?'':v).trim().toLowerCase(); };
-  return n(x.four)===n(four) && n(x.ref)===n(ref) && n(x.annee)===n(annee);
+// Le segment acheté / loué. Un seul bloc visible : les deux jeux de champs ne
+// veulent pas dire la même chose et n'ont aucune raison de cohabiter à l'écran.
+var _rsvFutMode='achat';
+function _rsvSetFutMode(m){
+  _rsvFutMode=(m==='loc')?'loc':'achat';
+  var seg=document.getElementById('mvr-fut-mode');
+  if(seg) Array.prototype.forEach.call(seg.querySelectorAll('button'), function(b){
+    b.classList.toggle('on', b.getAttribute('data-m')===_rsvFutMode);
+  });
+  var a=document.getElementById('mvr-fut-bloc-achat'), l=document.getElementById('mvr-fut-bloc-loc');
+  if(a) a.style.display=(_rsvFutMode==='achat')?'':'none';
+  if(l) l.style.display=(_rsvFutMode==='loc')?'':'none';
 }
+window._rsvSetFutMode=_rsvSetFutMode;
+
+// ⚠️ `_futSameLot` a été retiré avec la fusion silencieuse (lot FUT-LOC) : plus
+// aucun appelant. L'égalité « même lot » vit dans utils.js (_mvFutMemeLot), lue
+// par le parc, le loyer et le registre — une seule définition, comme avant.
 
 function _rsvSaveFut(){
   if(!isAdmin()){ showToast('Réservé à l\'administrateur','#C0392B'); return; }
@@ -474,22 +515,38 @@ function _rsvSaveFut(){
   var qte=parseInt(document.getElementById('mvr-fut-qte').value)||0;
   if(!four && !ref){ showToast('Renseigne au moins le fournisseur ou la référence','#B85A1A'); return; }
   if(qte<=0){ showToast('Indique une quantité de fûts','#B85A1A'); return; }
+  var loc=(_rsvFutMode==='loc');
+  var _d=function(id){ var e=document.getElementById(id); return e?String(e.value||'').slice(0,10):''; };
+  var dfact=_d('mvr-fut-dfact'), debut=_d('mvr-fut-debut'), fin=_d('mvr-fut-fin');
+  var prix=_rsvPrixOuNull('mvr-fut-prix'), loyer=_rsvPrixOuNull('mvr-fut-loyer');
+  if(loc && debut && fin && fin<debut){ showToast('La fin du contrat précède son début','#C0392B'); return; }
   _uniqPush(INTRANTS.fut_four, four);
   _uniqPush(INTRANTS.fut_ref, ref);
-  var merged=false;
+  // ★ Champs du mode retenu SEULEMENT. Écrire les deux jeux laisserait un loyer
+  //   sur un lot acheté : un chiffre mort qu'un lecteur finirait par croire.
+  var champs=loc
+    ? {mode:'loc',   loyer:loyer, debut:debut, fin:fin, prix:null, dfact:''}
+    : {mode:'achat', prix:prix,   dfact:dfact, loyer:null, debut:'', fin:''};
   if(_rsvEditFut){
     var f=INTRANTS.futs.find(function(x){return x.id===_rsvEditFut;});
-    if(f){ f.four=four; f.ref=ref; f.annee=annee; f.qte=qte; }
+    if(f){
+      f.four=four; f.ref=ref; f.annee=annee; f.qte=qte;
+      Object.keys(champs).forEach(function(k){ f[k]=champs[k]; });
+    }
   } else {
-    // lot identique déjà présent ? on fusionne (le +/- gère ensuite la quantité)
-    var dup=INTRANTS.futs.find(function(x){return _futSameLot(x, four, ref, annee);});
-    if(dup){ dup.qte=(parseInt(dup.qte)||0)+qte; merged=true; }
-    else INTRANTS.futs.push({id:_rid(), four:four, ref:ref, annee:annee, qte:qte, date:_today()});
+    // ⚠️⚠️ LA FUSION SILENCIEUSE EST RETIRÉE. Deux livraisons du même fût
+    //   grossissaient un lot existant sans toucher ni sa date ni son prix : le
+    //   second réassort était alors compté au prix du premier, et daté de l'année
+    //   du premier. Deux factures = deux lots. Le +/- de la carte reste là pour
+    //   corriger une quantité ; il ne sert plus à empiler des achats.
+    var np={id:_rid(), four:four, ref:ref, annee:annee, qte:qte, date:_today()};
+    Object.keys(champs).forEach(function(k){ np[k]=champs[k]; });
+    INTRANTS.futs.push(np);
   }
   saveIntrants();
   if(window.closeOv) window.closeOv(null,'ovRsvFut');
   _rsvRenderBody();
-  showToast(merged?'Fûts ajoutés au lot existant':'Fûts enregistrés','#3D6B27');
+  showToast(loc?'Contrat de location enregistré':'Fûts enregistrés','#3D6B27');
 }
 window._rsvSaveFut=_rsvSaveFut;
 
@@ -547,6 +604,21 @@ function _rsvInjectCss(){
     +'.mvr-fstepv{font-family:\'Cormorant Garamond\',Georgia,serif;font-size:28px;font-weight:700;color:var(--terre,#8A5A38);line-height:1;display:block}'
     +'.mvr-fstepl{font-size:10.5px;color:var(--muted,#7A7060);margin-top:-1px}'
     +'@media(hover:hover){.mvr-fstepb:hover{background:var(--terre-pale,#F3EADF)}}'
+    +'.mvr-mseg{display:flex;border:1.5px solid var(--gris,#DED7C9);border-radius:999px;overflow:hidden;background:var(--bg-card,#FBFAF6);margin-bottom:12px}'
+    +'.mvr-mseg button{flex:1;border:0;background:transparent;color:var(--texte-med,#4A4A3A);padding:10px 6px;font:600 12px/1 inherit;cursor:pointer}'
+    +'.mvr-mseg button.on{background:var(--terre,#8A5A38);color:#FBF7F1}'
+    +'.mvr-fhint{font-size:10.5px;color:var(--texte-doux,#5F5F5F);line-height:1.45;margin:-4px 0 12px}'
+    +'.mvr-ftag{display:inline-block;font-size:9.5px;font-weight:700;border-radius:3px;padding:1px 6px;letter-spacing:.03em;margin-left:6px;vertical-align:1px}'
+    +'.mvr-ftag-ach{background:var(--terre-pale,#F3EADF);color:var(--terre,#8A5A38)}'
+    +'.mvr-ftag-loc{background:var(--bleu-pale,#E8F0FA);color:var(--bleu,#1A4A7A)}'
+    +'.mvr-floc{font-size:11px;color:var(--bleu,#1A4A7A);line-height:1.45;margin-top:5px}'
+    +'.mvr-parc-sig{display:flex;gap:8px;margin-top:9px}'
+    +'.mvr-parc-sig>div{flex:1;border-radius:10px;padding:7px 9px;text-align:left}'
+    +'.mvr-parc-sig .n{font-size:19px;font-weight:700;line-height:1.1}'
+    +'.mvr-parc-sig .l{font-size:9.5px;text-transform:uppercase;letter-spacing:.06em;opacity:.8;font-weight:600}'
+    +'.mvr-parc-sig .s{font-size:10px;opacity:.75;margin-top:2px;line-height:1.35}'
+    +'.mvr-sig-ref{background:var(--orange-pale,#FBF0E6);color:var(--orange,#B85A1A)}'
+    +'.mvr-sig-ren{background:var(--bleu-pale,#E8F0FA);color:var(--bleu,#1A4A7A)}'
     +'@media(hover:hover){.mvr-fchip:hover{border-color:var(--terre,#8A5A38)}.mvr-sghd:hover{background:rgba(138,90,56,.04)}}'
     +'.mvr-flabel{font-size:11px;font-weight:600;color:var(--muted,#7A7060);text-transform:uppercase;letter-spacing:.6px;margin:2px 2px 8px}'
     +'.mvr-fbar{display:flex;gap:8px;overflow-x:auto;padding:1px 2px 10px;-webkit-overflow-scrolling:touch;scrollbar-width:none}'
@@ -893,6 +965,20 @@ function _rsvCalcQ(){
 }
 window._rsvCalcQ=_rsvCalcQ;
 
+// ★★★ ABSENT ET ZERO SONT DEUX ETATS. `parseFloat('')||0` ecrivait 0 quand le
+//   champ etait vide : la ligne s'affichait « sans frais » dans Economie > Achats
+//   — un etat DELIBEREMENT distinct de « a chiffrer » — et ne remontait jamais
+//   dans le filtre des lignes a chiffrer. Le commentaire du modele, lui, disait
+//   deja « ABSENT a la livraison ». Le fichier se contredisait lui-meme.
+function _rsvPrixOuNull(id){
+  var el=document.getElementById(id); if(!el) return null;
+  var t=String(el.value||'').trim().replace(',','.');
+  if(t==='') return null;
+  var n=parseFloat(t);
+  return (isFinite(n)&&n>=0)?n:null;
+}
+window._rsvPrixOuNull=_rsvPrixOuNull;
+
 function _rsvSaveAchat(){
   if(!isAdmin()){ showToast('Réservé à l\'administrateur','#C0392B'); return; }
   var sel=document.getElementById('mvr-a-prod').value;
@@ -916,7 +1002,7 @@ function _rsvSaveAchat(){
   _uniqPush(INTRANTS.achat_four, four);
   INTRANTS.achats.push({id:_rid(), prodId:prodId, date:document.getElementById('mvr-a-date').value||_today(),
     four:four, q:q, unites:n||null, lot:document.getElementById('mvr-a-lot').value.trim(),
-    fact:document.getElementById('mvr-a-fact').value.trim(), prix:parseFloat(document.getElementById('mvr-a-prix').value)||0});
+    fact:document.getElementById('mvr-a-fact').value.trim(), prix:_rsvPrixOuNull('mvr-a-prix')});
   saveIntrants();
   if(window.closeOv) window.closeOv(null,'ovRsvAchat');
   _rsvRenderBody();
@@ -1159,6 +1245,22 @@ function _rsvEnsureOverlays(){
       +'<div class="mvr-sugg" id="mvr-fut-sugg"></div>'
       +'<div class="mvr-f2"><div><div class="mvr-fl">Millésime du fût</div><input type="number" class="mvr-fi" id="mvr-fut-annee" placeholder="2026"></div>'
       +'<div><div class="mvr-fl">Quantité</div><input type="number" class="mvr-fi" id="mvr-fut-qte" placeholder="nb de fûts"></div></div>'
+      +'<div class="mvr-fl">Ce lot est</div>'
+      +'<div class="mvr-mseg" id="mvr-fut-mode">'
+        +'<button type="button" data-m="achat" onclick="_rsvSetFutMode(\'achat\')">Acheté</button>'
+        +'<button type="button" data-m="loc" onclick="_rsvSetFutMode(\'loc\')">Loué</button>'
+      +'</div>'
+      +'<div id="mvr-fut-bloc-achat">'
+        +'<div class="mvr-f2"><div><div class="mvr-fl">Date de facture</div><input type="date" class="mvr-fi" id="mvr-fut-dfact"></div>'
+        +'<div><div class="mvr-fl">Prix HT du lot</div><input type="number" step="0.01" class="mvr-fi" id="mvr-fut-prix" placeholder="à chiffrer"></div></div>'
+        +'<div class="mvr-fhint">Le prix peut rester vide : la ligne apparaîtra « à chiffrer » dans Économie \u203a Achats, le jour où la facture arrive.</div>'
+      +'</div>'
+      +'<div id="mvr-fut-bloc-loc">'
+        +'<div class="mvr-fl">Loyer HT par fût et par an</div><input type="number" step="0.01" class="mvr-fi" id="mvr-fut-loyer" placeholder="ex. 190">'
+        +'<div class="mvr-f2"><div><div class="mvr-fl">Début du contrat</div><input type="date" class="mvr-fi" id="mvr-fut-debut"></div>'
+        +'<div><div class="mvr-fl">Fin du contrat</div><input type="date" class="mvr-fi" id="mvr-fut-fin"></div></div>'
+        +'<div class="mvr-fhint">Par fût, pas par lot : rendre deux fûts en cours de contrat fait baisser le loyer tout seul. Il entre dans l\u2019exercice au prorata des jours.</div>'
+      +'</div>'
       +'<div class="mvr-hint">Les fournisseurs et références saisis réapparaissent ensuite dans les listes déroulantes.</div>'
       +'<div class="mvr-btnrow" style="margin-top:18px"><button class="mvr-btn mvr-btn-o" onclick="closeOv(null,\'ovRsvFut\')">Annuler</button><button class="mvr-btn mvr-btn-p" onclick="_rsvSaveFut()">\u2713 Enregistrer</button></div>'
     +'</div></div></div>'
@@ -1251,8 +1353,24 @@ function _rsvParcHtml(){
     +  '<div class="mvr-parc-n">' + p.parc + '</div>'
     +  '<div class="mvr-parc-l">f\u00fbts au domaine</div>'
     +  '<div class="mvr-parc-s">' + p.occupes + ' en vin \u00b7 ' + p.libres + ' libre'
-    +  (p.libres > 1 ? 's' : '') + (p.aReformer ? ' \u00b7 ' + p.aReformer + ' au-del\u00e0 de '
-    +  p.vie + ' vins' : '') + '</div>';
+    +  (p.libres > 1 ? 's' : '')
+    +  ((p.locQte > 0) ? ' \u00b7 ' + p.locQte + ' lou\u00e9' + (p.locQte > 1 ? 's' : '') : '')
+    +  '</div>';
+  // ★★★ DEUX SIGNAUX, DEUX GESTES. Reformer un fut, c'est s'en separer ; rendre
+  //   un fut loue, c'est honorer un contrat. Les fondre dans un compteur unique
+  //   donnait un ordre faux — et on ne reforme pas le bien d'un autre.
+  if(p.aReformer > 0 || p.aRendre > 0 || p.locQte > 0){
+    h += '<div class="mvr-parc-sig">'
+      +  '<div class="mvr-sig-ref"><div class="l">\u00c0 r\u00e9former</div>'
+      +    '<div class="n">' + p.aReformer + '</div>'
+      +    '<div class="s">' + (p.aReformer ? ('achet\u00e9s, au-del\u00e0 de ' + p.vie + ' vins')
+                                            : ('aucun au-del\u00e0 de ' + p.vie + ' vins')) + '</div></div>'
+      +  '<div class="mvr-sig-ren"><div class="l">\u00c0 rendre</div>'
+      +    '<div class="n">' + p.aRendre + '</div>'
+      +    '<div class="s">' + (p.aRendre ? ('contrat clos sous ' + p.preavis + ' j')
+                                          : ('aucun contrat sous ' + p.preavis + ' j')) + '</div></div>'
+      +  '</div>';
+  }
   if(mv.entrees || mv.sorties){
     h += '<div class="mvr-parc-mv"><span class="up">+' + mv.entrees + '</span>'
       +  '<span class="dn">\u2212' + mv.sorties + '</span>'

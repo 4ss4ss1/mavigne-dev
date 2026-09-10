@@ -1,14 +1,19 @@
 // MA VIGNE — Service Worker v7.61
-// v7.61 (10/09/2026) — PIL-FIN : LA DATE DE FIN D'AUJOURD'HUI EST CELLE DE LA
-//   CAMPAGNE. « +32 j d'avance » sur Aujourd'hui, du rouge fin mars sur La
-//   campagne, memes donnees : _pilCapaProj (supprime) cumulait l'equipe des le
-//   1er jour de la periode sans fenetres ni tracteur. _pilMargeCalc lit
-//   _pilFinPlan = _rfCtx(d,'reste',{sansTaux,sansSel}) + _rfSim, capacite normale
-//   (hMax=hJour), sans rallongement du retard (k=0), facteur de cadence
-//   (_pilFacteurK) sur les heures ; fin descendue au jour (_pilFinJour), « vers
-//   le » et equipe reconduite au-dela du cadre (_rfSim.apres). Echeances par
-//   tache lit m.capa.taches (deborde de N sem.). Jours ouvres depuis aujourd'hui.
-//   MV_INFO pil.marge. APP 7.01 -> 7.02.
+// v7.61 (10/09/2026) — FUT-LOC : LE FUT LOUE EXISTE, ET L'EXERCICE LE COMPTE.
+//   Un lot porte `mode` : achat (defaut) ou loc. Le loue porte un loyer HT par
+//   fut et par an, un debut et une fin de contrat ; il entre dans l'exercice au
+//   PRORATA DES JOURS, sur les futs REELLEMENT DETENUS (libres + en vin, apparies
+//   par _mvFutMemeLot) et selon l'escalier des retours lu dans fut_mouv. Deux
+//   textes le promettaient depuis le premier jour (carte << ce qui n'entre pas >>,
+//   fiche pil.exo.postes) alors que _pexData ne lisait PAS INTRANTS.futs. Le fut
+//   ACHETE entre au choix du domaine (CONFIG.eco.futs_trait : hors | achat),
+//   defaut hors = aucun chiffre existant ne bouge ; pas d'amortissement, decision
+//   ecrite dans le code. Parc : deux signaux separes, a reformer (achete, fin de
+//   vie) et a rendre (loue, fin de contrat) — le loue sort de l'alerte de reforme
+//   sans quitter la pyramide. Achats : 4e source, loyer en lecture seule, ecran
+//   borne a l'exercice. Trois etats absent/zero/montant retablis sur le prix d'un
+//   achat Reserve et sur le loyer. Fusion silencieuse des lots retiree : deux
+//   factures = deux lots, avec date de facture. APP 7.01 -> 7.02.
 // v7.60 (10/09/2026) — PIL-COH + PIL-EXO + PIL-DIAG : LE PILOTAGE NE SE CONTREDIT
 //   PLUS. Une seule date de fin (Echeances lit _pilMargeCalc) ; cadence d'equipe
 //   x effectif collectif, CP = 0 (_planTeamCadence_) ; borne [0,5;3] dans _pecData

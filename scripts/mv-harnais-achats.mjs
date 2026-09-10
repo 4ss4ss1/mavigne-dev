@@ -79,10 +79,25 @@ t('la cle INTRANTS.depenses a disparu', !/depenses:\s*\[\]/.test(RSV));
 t('le garde ne compte plus une cle inexistante',
   /\['produits','achats','inventaires','futs'\]/.test(readFileSync('src/firebase.js', 'utf8')));
 t('_eur2 survit au retrait du bloc qui le portait', /function _eur2\(n\)/.test(RSV));
-t('le prix des futs est declare au modele', /futs: \[\],\s*\/\/ \[\{id,four,ref,annee,qte,date,prix\}\]/.test(RSV));
+// ⚠️ L'ancienne version epinglait la LISTE EXACTE des champs du modele. Elle
+//   rougissait donc au premier champ ajoute, alors que `prix` y etait toujours.
+//   On teste ce qu'on veut prouver : le modele est COMMENTE et nomme ses champs.
+t('le prix des futs est declare au modele', /futs: \[\],\s*\/\/ \[\{[^}]*\bprix\b[^}]*\}\]/.test(RSV));
+t('le modele declare AUSSI le mode, le loyer et la date de facture (FUT-LOC)',
+  /futs: \[\],\s*\/\/ \[\{[^}]*\bmode\b[^}]*\}\]/.test(RSV)
+  && /futs: \[\],\s*\/\/ \[\{[^}]*\bloyer\b[^}]*\}\]/.test(RSV)
+  && /futs: \[\],\s*\/\/ \[\{[^}]*\bdfact\b[^}]*\}\]/.test(RSV));
 
 console.log('\n── L\'EXERCICE RESTE COHERENT\n');
-t('le total additionne les reparations, plus des depenses', /var total=salT\+gnrT\+achT\+repT;/.test(PIL));
+// ⚠️ Meme correction que dans mv-harnais-ateliers.mjs : on epingle la PRESENCE
+//   de chaque terme, pas l'expression entiere avec son point-virgule.
+t('le total additionne les reparations, plus des depenses', /var total=salT\+gnrT\+achT\+repT/.test(PIL));
+t('le total porte aussi le loyer des futs et les futs achetes (FUT-LOC)',
+  /var total=salT\+gnrT\+achT\+repT\+locT\+futT;/.test(PIL));
+t('un loyer ne se chiffre pas dans Achats : la ligne est en lecture seule',
+  /if\(x\.ro\)\{/.test(PIL) && /src:'futloc'/.test(PIL));
+t('l\u2019ecran Achats est borne a un exercice',
+  /_PACH_PER='exe'/.test(PIL) && /x\.date>=ex\.d0 && x\.date<=ex\.d1/.test(PIL));
 t('les trois sommes mensuelles portent le 4e poste',
   /b\.sal\+b\.gnr\+b\.ach\+\(b\.dep\|\|0\)/.test(PIL) && /\(b\.ach\|\|0\)\+\(b\.dep\|\|0\)/.test(PIL));
 t('les reparations partent au tracteur, jamais ailleurs',

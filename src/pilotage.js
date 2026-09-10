@@ -2079,33 +2079,33 @@ function _pilEchWin(e){ if(!e)return ''; var a=e.d1?_pilFmtD(e.d1):'', b=e.d2?_p
 //   cadence que s'il n'a rien d'autre. Mesure au bac, le meme jour, sur les memes
 //   donnees : « fin le ven. 11 sept. » sur Aujourd'hui, « fin de saison ~mar. 29
 //   sept. » ici — dix-huit jours d'ecart entre deux onglets voisins. La carte lit
-//   desormais _pilMargeCalc, la definition du cockpit, et dit sa source.
-// ★ 10/09 (soir) : chaque tache lit SA fin dans la MEME simulation que le
-//   cockpit (_pilFinPlan → m.capa.taches) : sa fenetre, l'equipe partagee avec
-//   les taches ouvertes en meme temps, le tracteur deduit. Avant, chaque ligne
-//   etait projetee « comme si toute l'equipe ne faisait que cette tache »,
-//   depuis le 1er jour de la periode — une taille du 26 novembre recevait
-//   l'equipe d'octobre. « N j » = jours ouvres d'ici la, depuis aujourd'hui.
+//   desormais _pilMargeCalc, la definition du cockpit, et dit sa source. Le
+//   « N j » de chaque tache est obtenu par le meme moteur (_pilCapaProj), comme si
+//   toute l'equipe planifiee ne faisait que cette tache — c'est le sens qu'avait
+//   deja la division par la cadence, sur une source enfin commune.
 function _pilPanelEcheances(d){
   var m=_pilMargeCalc(d), cadH=m.cadH;
   var _echS=((window._pilSaison&&window._pilSaison())||{}).echeances||{};
   var act=(d.active||[]).filter(function(t){ return (t.h_reste||0)>0; });
   var plan=(m.src==='planning');
-  var parT={}; if(plan&&m.capa&&m.capa.taches) m.capa.taches.forEach(function(s){ parT[_friseNorm(s.nom)]=s; });
+  var startIso=m.start.getFullYear()+'-'+String(m.start.getMonth()+1).padStart(2,'0')+'-'+String(m.start.getDate()).padStart(2,'0');
+  var kPre=(m.capa)?{k:m.capa.k,kOk:m.capa.kOk,kHors:m.capa.kHors,kEcart:m.capa.kEcart}:null;
   var rows=act.map(function(t){
-    var h=t.h_reste||0, j=null, s=null;
-    if(plan){ s=parT[_friseNorm(t.nom)]||null; if(s&&s.fin) j=Math.max(1,_pilWdBetween(m.today,s.fin)); }
-    else if(cadH>0) j=Math.ceil(h/cadH);
-    return { nom:t.nom, pct:t.pct||0, hreste:h, jours:j, ech:_echS[t.nom]||null, sim:s };
+    var h=t.h_reste||0, j=null;
+    if(plan){
+      var P=null; try{ P=_pilCapaProj(h,startIso,kPre); }catch(e){ P=null; }
+      if(P&&P.ok&&P.fin) j=Math.max(1,_pilWdBetween(m.start,P.fin)+((P.finOrd===_pilAnnOrd(startIso))?1:0));
+    } else if(cadH>0) j=Math.ceil(h/cadH);
+    return { nom:t.nom, pct:t.pct||0, hreste:h, jours:j, ech:_echS[t.nom]||null };
   });
   rows.sort(function(a,b){ return (b.jours||0)-(a.jours||0); });
   var maxJ=rows.length?(rows[0].jours||0):0;
   var seasonJ=m.seasonJ;
   var statHtml=_pilStat(rows.length, ' tâche'+(rows.length>1?'s':''));
   var subHtml;
-  if(m.proj) subHtml='fin de saison '+(m.capa&&m.capa.approx?'vers le ':'~')+_pilDfrObj(m.proj)+' · '+(seasonJ!=null?seasonJ:'—')+' j ouvrés · '
-    +(plan?'même calcul qu’Aujourd’hui — La campagne sans renfort, aux heures normales':('~'+Math.round(cadH)+' h/j'+(m.estim?' (estim.)':' (4 sem.)')+' — le planning ne couvre pas la suite'));
-  else if(m.capa&&!m.capa.ok) subHtml='l’équipe planifiée n’absorbe pas la charge : il resterait ~'+_pilNum(Math.round(m.capa.manque||0))+' h le '+_pilDfrObj(m.capa.finCamp);
+  if(m.proj) subHtml='fin de saison ~'+_pilDfrObj(m.proj)+' · '+(seasonJ!=null?seasonJ:'—')+' j ouvrés · '
+    +(plan?'équipe planifiée (même calcul qu’Aujourd’hui)':('~'+Math.round(cadH)+' h/j'+(m.estim?' (estim.)':' (4 sem.)')+' — le planning ne couvre pas la suite'));
+  else if(m.capa&&!m.capa.ok) subHtml='l’équipe planifiée n’absorbe pas la charge : il manque ~'+_pilNum(Math.round(m.capa.manque))+' h';
   else subHtml='cadence indisponible — repose sur le planning';
   var body;
   if(!rows.length){ body='<div class="pil-empty">Aucune tâche en cours</div>'; }
@@ -2118,10 +2118,7 @@ function _pilPanelEcheances(d){
         + '<span class="pil-av" style="background:'+col+'26;color:'+col+'"></span>'
         + '<div class="pil-li-main">'
         +   '<div class="pil-li-t">'+_pilEsc(_pilTnom(r.nom))+'</div>'
-        +   '<div class="pil-li-s">'+r.pct+'% fait · '+_pilNum(r.hreste)+' h restantes'+((r.ech&&(r.ech.d1||r.ech.d2))?' · '+_pilEchWin(r.ech):'')
-        +     ((r.sim&&r.sim.lbl)?(' · fin ≈ '+_pilEsc(r.sim.lbl)+(r.sim.hors?' (après la période)':'')):'')
-        +     ((r.sim&&r.sim.perdu>0.01)?' · <b style="color:var(--rouge)">perdu</b>':((r.sim&&r.sim.dep>0)?(' · <b style="color:var(--rouge)">déborde de '+r.sim.dep+' sem.</b>'):''))
-        +     (pole?' · <b style="color:var(--or)">pôle long</b>':'')+'</div>'
+        +   '<div class="pil-li-s">'+r.pct+'% fait · '+_pilNum(r.hreste)+' h restantes'+((r.ech&&(r.ech.d1||r.ech.d2))?' · '+_pilEchWin(r.ech):'')+(pole?' · <b style="color:var(--or)">pôle long</b>':'')+'</div>'
         + '</div>'
         + '<div class="pil-li-r"><b style="font-size:var(--pt-sm,17px);color:'+(pole?'var(--or)':'var(--texte)')+'">'+(r.jours!=null?r.jours+' j':'—')+'</b></div>'
         + '</div>';
@@ -3248,14 +3245,10 @@ function _rfHIn(cd,t,a,b){
   if(den!=null&&den>0){ var num=_rfCapIn(cd,A,B); return t.h*(num||0)/den; }
   return t.h*(B-A)/Math.max(1,t.we-t.ws);
 }
-function _rfCtx(d,mode,cdIn,opts){
+function _rfCtx(d,mode,cdIn){
   var cd=cdIn||_rfCd();
   if(!cd||!(cd.charge>0)||!(cd.weeks&&cd.weeks.length)) return null;
-  // \u2605 opts.sansTaux : la date de fin du cockpit (_pilFinPlan) lit ce contexte
-  //   pour ses semaines, ses fenetres et sa capacite \u2014 pas pour ses euros. Sans
-  //   taux horaire le simulateur de renfort n'a rien a chiffrer et s'arrete ;
-  //   une date de fin, elle, ne coute rien : rate=0, socle=0, meme calendrier.
-  var rate=_ecoRate(); if(!(rate>0)){ if(opts&&opts.sansTaux) rate=0; else return { noRate:true }; }
+  var rate=_ecoRate(); if(!(rate>0)) return { noRate:true };
   var c=_rfCfg(), WA=cd.weeks, capTfull=0, i;
   for(i=0;i<WA.length;i++) capTfull+=(WA[i].cap||0);
   if(!(capTfull>0)) return null;
@@ -3286,7 +3279,7 @@ function _rfCtx(d,mode,cdIn,opts){
       //   `fr` supposait les heures etalees a plat sur les sept jours : un
       //   mercredi, il gardait 5/7 d'une semaine dont le week-end vaut 0 et dont
       //   une equipe collective peut porter la totalite sur deux jours. Meme
-      //   defaut, meme correction que l'ex-_pilCapaProj (aujourd'hui _pilFinJour) — et meme source : capCum via
+      //   defaut, meme correction que _pilCapaProj — et meme source : capCum via
       //   _rfCapIn pour la capacite 1 ETP, capRCum via _mvCapReelIn pour les
       //   heures reelles. `fr` ne sert plus que de repli quand la donnee manque.
       var cpX=_rfCapIn(cd,o0,w.o1+1), cp=(cpX!=null)?cpX:(w.cap||0)*fr;
@@ -3319,11 +3312,7 @@ function _rfCtx(d,mode,cdIn,opts){
   // en montrait 2 a 3. Repli sur head si planning.js n'expose pas headPerm.
   // Le curseur « Permanents » applique un DELTA a l'effectif mesure, il ne le
   // remplace pas : l'escalier des contrats reste visible.
-  // \u2605 opts.sansSel : le cockpit lit l'equipe DEJA SOUS CONTRAT, jamais la
-  //   simulation en cours dans La campagne. Sans ce drapeau, « +2 permanents »
-  //   pose dans le simulateur aurait avance la date d'Aujourd'hui.
-  var sansSel=!!(opts&&opts.sansSel);
-  var dP=sansSel?0:((_RF_SEL&&_RF_SEL.dP)||0);
+  var dP=(_RF_SEL&&_RF_SEL.dP)||0;
   // ★★★ LA SIMULATION PART DE CE QU'ON SAIT DEJA — LES CONTRATS SIGNES.
   // ⚠⚠ AVANT : le socle lisait TOUJOURS headPerm, l'effectif permanent, equipes
   //   collectives EXCLUES. L'intention etait bonne (« on ne raisonne pas un
@@ -3339,7 +3328,7 @@ function _rfCtx(d,mode,cdIn,opts){
   //   'perm' reste accessible au selecteur : il repond a l'autre question,
   //   « de quoi aurais-je besoin si je n'avais embauche personne », utile pour
   //   preparer la campagne suivante. Ce n'est simplement plus le defaut.
-  var eng=sansSel||!(_RF_SEL && _RF_SEL.base==='perm');
+  var eng=!(_RF_SEL && _RF_SEL.base==='perm');
   function _hdW(w){ var v=eng?w.head:(w.headPerm!=null?w.headPerm:w.head); return (v!=null?v:(w.head||0))||0; }
   function _chW(w){ var v=eng?w.capH:w.capHPerm; return (v!=null)?v:null; }
   function _cpW(w){ var v=eng?w.capPay:w.capPayPerm; return (v!=null)?v:null; }
@@ -3478,7 +3467,7 @@ function _rfSim(ctx,prof){
     return { nom:t.nom, rest:t.h, h0:t.h, ouv:wOf(t.ws), lim:wOf(t.we-1),
              fin:null, dep:0, cpt:!!t.cpt, perdu:0 };
   });
-  var hSup=0, induit=0, capRenf=0, pointe=0, inemploye=0, sem=0, fin0=null, parSem=[], apres=[];
+  var hSup=0, induit=0, capRenf=0, pointe=0, inemploye=0, sem=0, fin0=null, parSem=[];
   for(var w=0; w<nW+200; w++){
     var iw=Math.min(w,nW-1), cap=W[iw].cap||0, R=(prof&&prof[w])||0;
     if(R>pointe) pointe=R;
@@ -3550,13 +3539,7 @@ function _rfSim(ctx,prof){
     //   l'inflation des heures : il quitte le debut et s'accumule a la fin.
     var resteTot=0, resteRet=0;
     st.forEach(function(s){ resteTot+=s.rest; if(w>s.lim) resteRet+=s.rest; });
-    // \u2605 resteTot (nominal, toutes taches) voyage avec chaque semaine : c'est ce
-    //   que la date de fin d'Aujourd'hui lit au dernier jour de la campagne.
-    //   `apres` garde les semaines PROLONGEES (w >= nW, meme capacite que la
-    //   derniere) : c'est la qu'une fin hors campagne se descend au jour
-    //   (_pilFinJour). Le graphe de renfort ne lit que parSem[i<nW] : inchange.
-    if(w<nW) parSem.push({w:w,R:R,cap:cap,capNorm:capNorm,used:used,reste:resteRet,resteTot:resteTot,dispo:dispoP});
-    else apres.push({w:w,cap:cap,capNorm:capNorm,used:used,resteTot:resteTot});
+    if(w<nW) parSem.push({w:w,R:R,cap:cap,capNorm:capNorm,used:used,reste:resteRet,dispo:dispoP});
     sem=w;
     // Le compteur « paye sans travail ouvert » doit courir JUSQU'A LA FIN DE LA
     // CAMPAGNE : s'arreter des que le travail est boucle sous-comptait toutes les
@@ -3592,7 +3575,7 @@ function _rfSim(ctx,prof){
            // depasser nW-1 (la boucle court jusqu'a nW+200) : _rfWkEnd extrapole.
            taches:st.map(function(s){ return {nom:s.nom, lim:s.lim, fin:(s.fin===null?null:s.fin),
                                              dep:s.dep, cpt:!!s.cpt, perdu:(s.perdu||0), h0:s.h0}; }),
-           parSem:parSem, apres:apres };
+           parSem:parSem };
 }
 
 // ⚠⚠ RECHERCHE BORNEE. L'ancienne version balayait TOUTES les combinaisons
@@ -4300,112 +4283,141 @@ function _pilWdBetween(a,b){
 function _pilDfrObj(dt){ var M=['janv.','févr.','mars','avr.','mai','juin','juil.','août','sept.','oct.','nov.','déc.'], J=['dim.','lun.','mar.','mer.','jeu.','ven.','sam.']; return J[dt.getDay()]+' '+dt.getDate()+' '+M[dt.getMonth()]; }
 function _pilEtpFmt(v){ return (Math.round((Number(v)||0)*10)/10).toString().replace('.',','); }
 
-// ══ LA DATE DE FIN VIENT DU SIMULATEUR DE LA CAMPAGNE ═══════════════════
-// ⚠️⚠️ DEFAUT MESURE LE 10/09/2026, CAPTURE DE NICO A L'APPUI.
-//   « +32 j d'avance, fin le 15 fevr. » sur Aujourd'hui ; sur La campagne, les
-//   memes donnees dessinaient du ROUGE fin mars (travail en retard) et le
-//   tableau des fenetres disait 4,9 personnes necessaires pour 2,8 la.
-//   Le cockpit avait SON moteur (_pilCapaProj, supprime ici) : il cumulait
-//   toute la capacite de l'equipe contre toute la charge a partir du 1er
-//   octobre, comme si la taille pouvait se faire en octobre — huit semaines
-//   d'equipe comptees pour un travail dont la fenetre ouvre le 26 novembre.
-//   Il ne retirait pas les heures tracteur, et ignorait que les fenetres se
-//   chevauchent. Chaque chiffre etait defendable seul ; leur voisinage mentait
-//   (§103, la meme lecon, un onglet plus loin). Mesure au bac, fonctions
-//   reelles, domaine synthetique cale sur la capture : +51 j d'avance ici,
-//   409 h en retard au 31 mars la, fin le 19 mai.
-// ★ UN SEUL MOTEUR. La date lit _rfCtx(d,'reste') + _rfSim, exactement ce que
-//   La campagne dessine avec « aucun renfort » : chaque travail dans SA
-//   fenetre, les taches ouvertes en meme temps se partagent l'equipe, le
-//   tracteur est deduit, contrats et planning (CP, fermeture) lus jour par
-//   jour. Trois ecarts VOULUS avec La campagne, ecrits a l'ecran et dans MV_INFO :
-//   - la capacite NORMALE (hMax = hJour). Nico, 10/09 : « si je ne touche rien
-//     a mon planning et mes embauches aujourd'hui, a quelle date les travaux
-//     seront termines ». Pas d'heures sup dans une date « si je ne touche
-//     rien » ; La campagne, elle, cherche ce qu'il FAUDRAIT, et s'en autorise.
-//   - PAS de rallongement du retard (c.k = 0). Le simulateur suppose qu'un
-//     travail hors fenetre coute +15 %/semaine : juste pour dimensionner un
-//     renfort, absurde pour une date — mesure au bac, 644 h restantes le
-//     31 mars finissaient le 20 JUILLET, le facteur ayant atteint x4. Une date
-//     « si je ne touche rien » lit les heures du planning, sans penalite.
-//   - le facteur de cadence mesure (_pilFacteurK), applique aux heures des
-//     taches quand _pecData le juge applicable. La campagne raisonne au bareme.
-//   Au-dela de la derniere semaine planifiee, _rfSim reconduit l'equipe de
-//   cette semaine-la (memes heures, meme tracteur) : la date sort quand meme,
-//   marquee « vers le », et la phrase dit ce qu'il restait a la fin du cadre.
-function _pilFacteurK(){
+// ══ LA PROJECTION DE FIN SE FAIT SUR LA CAPACITE PLANIFIEE ══════════════
+// ⚠️⚠️ DEFAUT CORRIGE LE 12/08, MESURE CHEZ MARCHAND-GRILLOT.
+//   L'ecran divisait la charge restante par la cadence des QUATRE DERNIERES
+//   SEMAINES, puis avançait d'autant de jours ouvres. Un 12 aout, sur un domaine
+//   ou la vendange demarre le 26 avec 36 personnes sous contrat, la cadence
+//   mesuree valait 15 h/j — une personne. Resultat affiche : « fin le 27 janvier,
+//   85 j de retard », sur une vendange de dix jours. La projection IGNORAIT les
+//   contrats deja signes et leurs dates de debut.
+//   Le pire n'est pas l'erreur, c'est son autorite : un chiffre bati sur un
+//   signal partiel ment avec l'aplomb d'une mesure.
+//
+//   ★ LA DONNEE EXISTAIT. weeks[].capH (planning.js, _capWeekReal) rend les
+//     heures REELLEMENT TRAVAILLABLES de l'equipe, semaine par semaine : modele
+//     horaire de CHACUN, entrees du planning (CP, fermeture, absence), contrats
+//     et effectif collectif compris. Une embauche qui commence le 26 aout y
+//     entre le 26 aout — pas avant, pas apres. _pilAnnuelData la transporte
+//     desormais ; elle etait calculee puis jetee.
+//
+//   ⚠️ UNE HEURE DE PRESENCE N'EST PAS UNE HEURE DE BAREME. Le facteur de
+//     conversion n'est pas invente ici : c'est l'ecart de cadence DEJA MESURE
+//     par _pecData (presence du planning moins heures de tracteur, rapportee au
+//     bareme fait). Quand il n'est pas fiable — avancement sous le seuil
+//     _PEC_CAD_AVC, ou il ne predit rien — le facteur vaut 1 et l'ecran l'ecrit.
+//     On ne muscle pas une projection avec une hypothese muette.
+//
+//   ⚠️ CHEVAUCHEMENTS : deux periodes qui se recouvrent produisent deux jeux de
+//     semaines sur les memes jours. On avance un curseur (`couvert`) et on saute
+//     toute semaine deja couverte : la capacite d'un jour ne se compte qu'une
+//     fois, meme quand la frise, elle, signale le doublon.
+function _pilCapaProj(charge, startIso, kPre){
+  if(!(charge>0)) return null;
+  var ann=null; try{ ann=_pilAnnuelData(); }catch(e){ ann=null; }
+  if(!ann||!ann.weeks||!ann.weeks.length) return null;
+
   var k=1, kOk=false, kHors=false, kEcart=null;
-  try{
+  // kPre : facteur deja obtenu par un premier appel (les Echeances par tache le
+  // passent) — on ne rejoue pas _pecData pour chaque ligne.
+  if(kPre){ k=(kPre.k>0)?kPre.k:1; kOk=!!kPre.kOk; kHors=!!kPre.kHors; kEcart=(kPre.kEcart!=null)?kPre.kEcart:null; }
+  else try{
     var E=_pecData();
-    // ★ LA BORNE [0,5 ; 3] VIT DANS _pecData (10/09/2026) : E.cad.applic est
-    //   faux hors bornes ou en source historique, E.cad.horsBornes dit pourquoi.
-    //   Un facteur qui mesure un trou de saisie ne vaut pas plus pour des
-    //   jours que pour des euros.
+    // \u2605\u2605\u2605 SEULE LA MARCHE 1 PILOTE UNE DATE (14/08/2026, soir).
+    //   La marche 2 - meme periode, campagne precedente - a ete branchee ici le
+    //   matin meme. Resultat mesure en vendange, a 0 % d'avancement : k=2,93, la
+    //   charge restante presque triplee, « -202 j de retard » sur un domaine qui
+    //   affichait 1 j d'avance la veille.
+    //   \u26a0 LE RAPPORT PRESENCE/BAREME N'EST PAS TRANSPOSABLE. Son numerateur
+    //   porte TOUT le domaine (cave, atelier, entretien, bureau), son denominateur
+    //   le seul travail de vigne. Pendant la vendange la cave tourne a plein : le
+    //   rapport mesure la cave, pas la cadence des rangs. La marche 1 tolerait ce
+    //   biais parce que le seuil de 40 % d'avancement garantit que la vigne domine
+    //   la presence ; la marche 2 n'a AUCUN garant equivalent.
+    //   \u26a0 LA BORNE [0,5 ; 3] N'A PAS PROTEGE : 2,93 passe a 0,07 pres. Une borne
+    //   calibree sur un biais faible ne rattrape pas un biais d'une autre nature.
+    // ★ LA BORNE [0,5 ; 3] VIT DANS _pecData (10/09/2026), plus ici. Elle etait
+    //   posee sur la DATE seulement : le meme ecart (+232 %) etait refuse par la
+    //   marge (« cadence pas encore mesurable ») et applique par la tuile Budget
+    //   (« fin ≈ 30,3 k€ ») a quinze centimetres. Un facteur qui mesure un trou de
+    //   saisie ne vaut pas plus pour des euros que pour des jours : E.cad.applic
+    //   est desormais faux dans les deux cas, et E.cad.horsBornes dit pourquoi.
     if(E&&E.cad&&E.cad.ok){
       kEcart=E.cad.ecart; kHors=!!E.cad.horsBornes;
       if(E.cad.applic){ k=1+((E.cad.ecart||0)/100); if(k>0) kOk=true; else k=1; }
     }
   }catch(e){ k=1; kOk=false; }
-  return { k:k, kOk:kOk, kHors:kHors, kEcart:kEcart };
-}
-// Le jour ou la semaine w finit son travail : les heures consommees cette
-// semaine-la, posees sur les heures REELLES de l'equipe jour par jour
-// (_mvCapReelIn : le planning de chacun), a la part du tracteur pres. Une
-// semaine prolongee (w au-dela de la campagne) reprend le profil de la
-// derniere semaine, decale de sept jours par semaine — la convention de
-// _rfWkEnd. Une semaine de 300 h ne fait pas « finir dimanche » un travail
-// termine le mardi (lecon du 12/08, conservee).
-function _pilFinJour(ctx, w, usedH, capNormH){
-  var W=ctx.W, last=W.length-1, wk=W[Math.min(Math.max(0,w),last)];
-  var shift=(w>last)?7*(w-last):0, o0=wk.o0, o1=wk.o1, jours=[], tot=0;
-  for(var o=o0;o<=o1;o++){
-    var R=(typeof window._mvCapReelIn==='function')?window._mvCapReelIn(ctx.cd,o,o+1):null;
-    var h=(R&&R.work>0)?R.work:0; jours.push(h); tot+=h;
+  var besoin=charge*k;
+
+  var o0=_pilAnnOrd(startIso);
+  if(isNaN(o0)) return null;
+  var ws=ann.weeks.filter(function(w){ return w.capH!=null && w.o1>=o0; })
+                  .sort(function(a,b){ return a.o0-b.o0; });
+  if(!ws.length) return null;
+
+  // \u2605\u2605\u2605 UNE SEMAINE ENTAMEE SE LIT AU JOUR, PAS AU PRORATA (12/08/2026).
+  //   AVANT : h = capH x (jours retenus / jours de la semaine). Les heures d'une
+  //   semaine ne sont pas etalees a plat sur ses sept jours — un week-end vaut 0,
+  //   et une equipe de vendange sous contrat du 26 aout au 4 septembre a TOUTES
+  //   ses heures dans les jours qu'on garde. Rogner la semaine du 24 au 30 aout
+  //   de 2/7 retirait 2/7 des heures de 40 vendangeurs absents les 24 et 25.
+  //   Mesure : meme equipe, meme charge, meme depart, fin annoncee entre le
+  //   7 septembre et le 1er octobre — voire « capacite insuffisante » — selon la
+  //   seule date d'ouverture de la periode, qui decide de l'alignement des
+  //   semaines. La reponse juste, lue jour par jour, ne bougeait pas : 4 sept.
+  //   La faute ne se voyait pas : apres la vendange il ne reste qu'une personne,
+  //   donc chaque heure perdue coute un JOUR de retard affiche.
+  //   MAINTENANT : _mvCapReelIn(cd, a, b) (planning.js), le cumul jour par jour
+  //   des heures reellement travaillables, lu sur la periode a laquelle la
+  //   semaine appartient (w.per -> ann.pers[].cd). Meme source pour la plage et
+  //   pour la descente au jour : la date de fin est le jour ou le cumul atteint
+  //   le besoin, pas une fraction de semaine arrondie.
+  //   \u26a0 REPLI ANNONCE (approx) si la donnee manque — cd d'un planning.js
+  //   anterieur a ce lot. On ne remplace jamais une mesure absente par une
+  //   estimation muette.
+  function _capIn(w,a,b){
+    var cdP=(ann.pers&&ann.pers[w.per])?ann.pers[w.per].cd:null;
+    var R=(typeof window._mvCapReelIn==='function')?window._mvCapReelIn(cdP,a,b):null;
+    return (R&&R.work!=null)?R.work:null;
   }
-  if(!(tot>0)||!(capNormH>0)) return o1+shift;
-  var ratio=capNormH/tot, cum=0, need=usedH-1e-6;
-  for(var i=0;i<jours.length;i++){ if(!(jours[i]>0)) continue; cum+=jours[i]*ratio; if(cum>=need) return o0+i+shift; }
-  return o1+shift;
-}
-// La projection du cockpit. null = le simulateur n'a pas de quoi raisonner
-// (pas de periode, planning vide, campagne finie) : _pilMargeCalc retombe
-// alors sur la cadence, et le dit.
-function _pilFinPlan(d){
-  var ctx=null; try{ ctx=_rfCtx(d,'reste',null,{sansTaux:true,sansSel:true}); }catch(e){ ctx=null; }
-  if(!ctx||ctx.noRate||ctx.fini||!ctx.W||!ctx.W.length) return null;
-  var K=_pilFacteurK(), k=K.k;
-  var today=new Date(); today.setHours(0,0,0,0);
-  var nW=ctx.W.length, finCamp=_pilOrdDate(ctx.W[nW-1].o1);
-  var base={ k:k, kOk:K.kOk, kHors:K.kHors, kEcart:K.kEcart, finCamp:finCamp, nW:nW, ctx:ctx };
-  if(!(ctx.charge>0.5)||!ctx.tw.length) return Object.assign(base,{ ok:true, fin:today, fini:true, hors:false, approx:false, besoin:0, resteFin:0, nDep:0, taches:[] });
-  // Heures des taches x facteur de cadence ; capacite NORMALE (pas d'heures
-  // sup) ; aucun rallongement du retard (k=0). Le couperet des taches sans
-  // rattrapage (vendange) reste : ce qui n'est pas fait dans la fenetre est perdu.
-  var tw=ctx.tw.map(function(t){ return { nom:t.nom, h:t.h*k, ws:t.ws, we:t.we, cpt:t.cpt }; });
-  var c=Object.assign({}, ctx.c, { hMax: ctx.c.hJour, k: 0 });
-  var C=Object.assign({}, ctx, { tw:tw, c:c, charge:ctx.charge*k });
-  var r=_rfSim(C,null);
-  var finW=null, inachev=false;
-  (r.taches||[]).forEach(function(s){ if(s.fin==null) inachev=true; else if(finW==null||s.fin>finW) finW=s.fin; });
-  var taches=(r.taches||[]).map(function(s){
-    var fw=s.fin, o1=(fw==null)?null:_rfWkEnd(ctx,fw), lo=(o1==null)?null:((fw<nW)?ctx.W[fw].o0:(o1-6));
-    return { nom:s.nom, sem:fw, fin:(o1==null)?null:_pilOrdDate(o1), lbl:(o1==null)?'':_rfLabJ([{o0:lo,o1:o1}],0),
-             hors:(fw!=null&&fw>=nW), dep:s.dep||0, perdu:s.perdu||0, lim:_pilOrdDate(_rfWkEnd(ctx,s.lim)) };
-  });
-  var resteFin=(r.parSem&&r.parSem.length)?(r.parSem[r.parSem.length-1].resteTot||0):0;
-  var nDep=(r.taches||[]).filter(function(s){ return s.dep>0; }).length;
-  if(inachev||finW==null){
-    // Plus aucune heure planifiee ne fait avancer le travail : la derniere
-    // semaine, reconduite, ne delivre rien. C'est une REPONSE, chiffree.
-    return Object.assign(base,{ ok:false, fin:null, fini:false, hors:true, approx:false, besoin:C.charge,
-                                manque:resteFin, resteFin:resteFin, nDep:nDep, taches:taches });
+  var cum=0, couvert=o0-1, nSem=0, approx=false;
+  for(var i=0;i<ws.length;i++){
+    var w=ws[i];
+    var a=Math.max(w.o0, couvert+1);
+    if(a>w.o1) continue;                       // semaine deja couverte : doublon
+    var nd=w.o1-w.o0+1;
+    var exact=_capIn(w,a,w.o1+1);
+    var h=(exact!=null)?exact:(w.capH||0)*((w.o1-a+1)/Math.max(1,nd));
+    if(exact==null) approx=true;
+    couvert=w.o1;
+    if(!(h>0)) continue;
+    nSem++;
+    if(cum+h>=besoin){
+      var jour=w.o1;
+      if(exact!=null){
+        // Descente au JOUR, sur la MEME source : le premier jour ou le cumul
+        // atteint le besoin. Une semaine de 300 h ne fait plus « finir dimanche »
+        // un travail termine le mardi.
+        var c2=cum;
+        for(var o=a;o<=w.o1;o++){
+          var dh=_capIn(w,o,o+1); if(dh==null||!(dh>0)) continue;
+          if(c2+dh>=besoin){ jour=o; break; }
+          c2+=dh;
+        }
+      } else {
+        var frac=(besoin-cum)/h; jour=a+Math.max(0,Math.ceil(frac*(w.o1-a+1))-1);
+        if(jour>w.o1) jour=w.o1;
+      }
+      return { ok:true, fin:_pilOrdDate(jour), finOrd:jour, k:k, kOk:kOk, kHors:kHors, kEcart:kEcart,
+               besoin:besoin, hDispo:cum+h, sem:nSem, approx:approx };
+    }
+    cum+=h;
   }
-  var hors=(finW>=nW);
-  var ps=hors?(((r.apres||[])[finW-nW])||null):(r.parSem[finW]||null);
-  var jour=ps?_pilFinJour(ctx,finW,ps.used,ps.capNorm):_rfWkEnd(ctx,finW);
-  return Object.assign(base,{ ok:true, fin:_pilOrdDate(jour), finOrd:jour, fini:false, hors:hors, approx:hors,
-                              besoin:C.charge, resteFin:(hors?resteFin:0), deborde:!!r.deborde, nDep:nDep,
-                              taches:taches });
+  // La capacite planifiee ne suffit pas jusqu'au bout du cadre connu. C'est une
+  // REPONSE, pas une panne : elle chiffre le manque en heures.
+  return { ok:false, fin:null, k:k, kOk:kOk, kHors:kHors, kEcart:kEcart, besoin:besoin, hDispo:cum,
+           manque:Math.max(0,besoin-cum), sem:nSem, approx:approx,
+           finCadre:_pilOrdDate(couvert) };
 }
 // ★ L'inverse LOCAL de _pilAnnOrd (qui parse en heure locale). Le constructeur
 //   Date(an, mois, 1+o) deborde proprement de jour en jour : pas de +86400000
@@ -4418,23 +4430,22 @@ function _pilOrdDate(o){ return new Date(2026,0,1+o); }
 function _pilMargeCalc(d){
   var c=_pilEchCadence(d), cadH=c.cadH;
   var charge=d.totalReste||0;
+  // DEPART DE LA PROJECTION : on ne peut pas commencer avant l'ouverture de la
+  // fenetre. Projeter depuis le jour de consultation affichait « +4 j d'avance »
+  // un 26 juillet, sur une vendange qui ne demarre pas avant le 26 aout.
   var sa=(typeof window._pilSaison==='function')?window._pilSaison():null;
   var noms=(typeof window.getTachesSaison==='function')?window.getTachesSaison().map(function(t){return t.nom;}):[];
   var fen=(typeof window._mvFenetre==='function')?window._mvFenetre(sa,noms):null;
-  var today=new Date(); today.setHours(0,0,0,0);
-  // DEPART DU REPLI cadence : jamais avant l'ouverture de la fenetre. Projeter
-  // depuis le jour de consultation affichait « +4 j d'avance » un 26 juillet,
-  // sur une vendange qui ne demarre pas avant le 26 aout. Le simulateur, lui,
-  // ouvre chaque tache a SA date : il n'a pas besoin de ce depart.
-  var start=new Date(today.getTime());
+  var start=new Date(); start.setHours(0,0,0,0);
   if(fen&&fen.debut){ var _fd=new Date(fen.debut+'T00:00:00'); if(_fd>start) start=_fd; }
+  // ⚠️ ISO LOCALE, jamais toISOString() : cette derniere convertit en UTC et
+  //   recule d'un jour tout l'ete a l'est de Greenwich. _pilAnnOrd lit du local.
+  var startIso=start.getFullYear()+'-'+String(start.getMonth()+1).padStart(2,'0')+'-'+String(start.getDate()).padStart(2,'0');
 
-  // 1) Le simulateur de La campagne, quand le planning en connait une.
-  //    ★ Les jours ouvres se comptent depuis AUJOURD'HUI : « d'ici la » disait
-  //    97 j ouvres comptes depuis le 1er octobre, un 10 septembre.
-  var P=null; try{ P=_pilFinPlan(d); }catch(e){ P=null; }
+  // 1) La capacite planifiee, quand le planning en connait une.
+  var P=null; try{ P=_pilCapaProj(charge,startIso); }catch(e){ P=null; }
   var proj=null, seasonJ=null, src=null;
-  if(P&&P.ok&&P.fin){ proj=P.fin; seasonJ=Math.max(0,_pilWdBetween(today,P.fin)); src='planning'; }
+  if(P&&P.ok&&P.fin){ proj=P.fin; seasonJ=_pilWdBetween(start,P.fin); src='planning'; }
   // 2) Repli ANNONCE sur la cadence des 4 dernieres semaines : elle ne connait
   //    pas les embauches a venir, l'ecran le dit au lieu de laisser croire.
   if(!proj && cadH>0){
@@ -4446,30 +4457,24 @@ function _pilMargeCalc(d){
   var obj=objIso?new Date(objIso+'T00:00:00'):null;
   var marge=(proj&&obj)?_pilWdBetween(proj,obj):null;
   return { cadH:cadH, estim:c.estim, seasonJ:seasonJ, proj:proj, objIso:objIso, obj:obj,
-           marge:marge, fen:fen, start:start, today:today, src:src, capa:P };
+           marge:marge, fen:fen, start:start, src:src, capa:P };
 }
 // La phrase sous le grand chiffre. Elle nomme SUR QUOI la date est batie : une
 // projection dont on ignore l'assiette est une opinion presentee en gras.
 function _pilMargeSous(m){
   if(m.src==='planning'){
-    var P=m.capa||{};
-    if(P.fini) return 'Plus rien \u00e0 faire sur cette campagne\u00a0: tout est fini.';
-    var kk=(P.kOk)
-      ? (' Cadence mesur\u00e9e \u00d7'+(Math.round((P.k||1)*100)/100).toString().replace('.',',')+' sur les heures restantes.')
-      : (P.kHors
-          ? (' Une heure pr\u00e9sente = une heure de bar\u00e8me (\u00e9cart de cadence mesur\u00e9 '+((P.kEcart>0)?'+':'')+Math.round(P.kEcart||0)+' %, hors bornes\u00a0: non retenu).')
-          : ' Une heure pr\u00e9sente = une heure de bar\u00e8me (cadence pas encore mesurable).');
-    var h='Si le planning et les contrats restent tels quels, tout est fini '
-      +(P.approx?('<b>vers le '+_pilDfrObj(m.proj)+'</b>'):('le <b>'+_pilDfrObj(m.proj)+'</b>'))+'. '
-      +'Comme La campagne sans renfort \u2014 chaque travail dans sa fen\u00eatre, tracteur d\u00e9duit \u2014 aux heures normales du planning.'+kk;
-    if(P.hors) h+=' <span style="opacity:.75">Au-del\u00e0 du '+_pilDfrObj(P.finCamp)+', l\u2019\u00e9quipe de la derni\u00e8re semaine planifi\u00e9e est reconduite\u00a0; il restait ~'+_pilNum(Math.round(P.resteFin||0))+' h ce jour-l\u00e0.</span>';
-    if(P.nDep>0) h+=' <b style="color:var(--rouge)">'+(P.nDep>1?(P.nDep+' travaux d\u00e9bordent leur fen\u00eatre'):'1 travail d\u00e9borde sa fen\u00eatre')+'</b> \u2014 voir La campagne.';
-    return h;
+    var kk=(m.capa&&m.capa.kOk)
+      ? (' \u00b7 cadence mesur\u00e9e \u00d7'+(Math.round((m.capa.k||1)*100)/100).toString().replace('.',','))
+      : ((m.capa&&m.capa.kHors)
+          ? (' \u00b7 une heure pr\u00e9sente = une heure de bar\u00e8me (\u00e9cart de cadence mesur\u00e9 '+((m.capa.kEcart>0)?'+':'')+Math.round(m.capa.kEcart||0)+' %, hors bornes\u00a0: non retenu)')
+          : ' \u00b7 une heure pr\u00e9sente = une heure de bar\u00e8me (cadence pas encore mesurable)');
+    return 'Avec l\u2019<b>\u00e9quipe d\u00e9j\u00e0 planifi\u00e9e</b> \u2014 contrats et dates de d\u00e9but compris \u2014 fin le <b>'
+      +_pilDfrObj(m.proj)+'</b>'+kk+'.';
   }
   if(m.capa && !m.capa.ok){
-    return 'L\u2019\u00e9quipe planifi\u00e9e n\u2019absorbe pas la charge restante\u00a0: il resterait <b>~'
-      +_pilNum(Math.round(m.capa.manque||0))+' h</b> le '+_pilDfrObj(m.capa.finCamp)+', et plus aucune heure planifi\u00e9e ensuite. '
-      +'Embauche, d\u00e9calage d\u2019une t\u00e2che ou objectif repouss\u00e9 \u2014 voir La campagne.';
+    return 'L\u2019\u00e9quipe planifi\u00e9e n\u2019absorbe pas la charge restante\u00a0: il manque <b>~'
+      +_pilNum(Math.round(m.capa.manque))+' h</b> d\u2019ici la fin du calendrier renseign\u00e9. '
+      +'Embauche, d\u00e9calage d\u2019une t\u00e2che ou objectif repouss\u00e9 \u2014 voir Simuler.';
   }
   if(m.src==='cadence'){
     return '\u00c0 la cadence actuelle (~'+Math.round(m.cadH)+' h/j'+(m.estim?' estim.':' \u00b7 4 sem.')
@@ -4698,7 +4703,7 @@ function _pilTabAuj(d){
     cockpit+='<div class="pil-hero">'
       +'<div class="pil-ring"><svg width="168" height="168" viewBox="0 0 168 168"><circle cx="84" cy="84" r="74" fill="none" stroke="var(--gris-clair)" stroke-width="7"/><circle cx="84" cy="84" r="74" fill="none" stroke="'+_pilPctColor(ringPc)+'" stroke-width="7" stroke-linecap="round" stroke-dasharray="'+dash.toFixed(1)+' '+C.toFixed(1)+'" transform="rotate(-90 84 84)"/></svg>'
       +'<div class="pil-ring-mid"><div class="pc">'+ringPc+'%</div><div class="lb">saison faite</div></div></div>'
-      +'<div class="pil-verdict"><div class="vk">Marge sur votre objectif '+_mvInfoBtn('pil.marge')+'</div>'
+      +'<div class="pil-verdict"><div class="vk">Marge sur votre objectif</div>'
       +'<span class="pil-badge '+badgeCls+'">'+badgeTxt+'</span>'
       +'<div class="vbig" style="color:'+vCol+'">'+vBig+'</div>'
       +'<div class="vsub">'+_pilMargeSous(m)+'</div>'
@@ -5549,7 +5554,8 @@ function _ecoPhytoByParc(win){
 // ════════════════════════════════════════════════════════════════════════════════
 
 // Palette des postes — une couleur, un poste, partout (KPI, donut, barres, tableau).
-var _PEC_COL = { mo:'#8A5A38', trac:'#2C3E50', gnr:'#C2871E', phy:'#5B2D8E', ret:'#B85A1A', dep:'#1A4A7A' };
+var _PEC_COL = { mo:'#8A5A38', trac:'#2C3E50', gnr:'#C2871E', phy:'#5B2D8E', ret:'#B85A1A', dep:'#1A4A7A',
+                 loc:'#1D6F8C', fut:'#6B4226' };
 // ── LES ATELIERS — la DESTINATION de l'euro, pas sa nature ──────────────────
 // Economie trie par NATURE (salaire / carburant / achat / depense). L'atelier
 // est un SECOND AXE sur les MEMES euros : ou est parti l'argent, pas ce qu'on a
@@ -5748,6 +5754,13 @@ function _pecCss(){
   +'.pex-setl{font-size:var(--pt-base,14px);font-weight:600;color:var(--texte)}'
   +'.pex-sets{font-size:var(--pt-micro,11px);color:var(--texte-doux);line-height:1.55;margin-top:3px;max-width:640px}'
   +'.pex-selm{padding:9px 11px;border:1.5px solid var(--gris-clair);border-radius:10px;font-family:inherit;font-size:var(--pt-base,14px);background:var(--bg-app);color:var(--texte);min-height:42px;box-sizing:border-box}'
+  +'.pex-fopts{display:flex;flex-direction:column;gap:8px}'
+  +'.pex-fopt{display:block;width:100%;text-align:left;border:1.5px solid var(--gris-clair);background:var(--bg-card);border-radius:12px;padding:11px 13px;cursor:pointer;font-family:inherit;color:var(--texte)}'
+  +'.pex-fopt .t{display:block;font-size:var(--pt-base,14px);font-weight:600}'
+  +'.pex-fopt .d{display:block;font-size:var(--pt-micro,11px);color:var(--texte-doux);line-height:1.5;margin-top:4px}'
+  +'.pex-fopt.on{border-color:#3D6B27;background:#EAF3E2}'
+  +'.pex-fopt.on .d{color:#3D6B27}'
+  +'.pex-fopt:disabled{opacity:.62;cursor:default}'
   +'.pex-warn{border-left:3px solid var(--or);padding-left:13px}'
   +'.pex-warn .t{font-family:\'Cormorant Garamond\',serif;font-size:var(--pt-md,20px);font-weight:600;color:var(--texte);line-height:1.25}'
   +'.pex-warn .d{font-size:var(--pt-txt,12.5px);color:var(--texte-doux);margin-top:5px;line-height:1.6}'
@@ -5828,7 +5841,7 @@ var _PEC_CAD_AVC = 0.40;   // avancement minimum pour afficher la cadence
 //   ne mesure plus une cadence, on mesure un trou de saisie : l'ecart reste LU
 //   (verdict, tuiles) mais n'est APPLIQUE ni au budget projete ni a la date de
 //   fin. Une seule borne pour les euros et pour les jours — elle ne vivait que
-//   dans l'ex-_pilCapaProj, cote date (10/09/2026) ; _pilFacteurK la lit ici.
+//   dans _pilCapaProj, cote date (10/09/2026).
 var _PEC_CAD_KMIN = 0.5, _PEC_CAD_KMAX = 3;
 function _pecCadPresence(){
   var s=(typeof window._pilSaison==='function')?window._pilSaison():null;
@@ -7072,7 +7085,7 @@ function _pexData(ex, noCmp, coupeIso){
   if(!ex) return null;
   var cfg=_ecoCfg();
   var mois=_pexMoisWin(ex);
-  var byM={}; mois.forEach(function(mo){ byM[mo.k]={sal:0, salP:0, gnr:0, ach:0, dep:0}; });
+  var byM={}; mois.forEach(function(mo){ byM[mo.k]={sal:0, salP:0, gnr:0, ach:0, dep:0, fut:0}; });
   var _n=new Date();
   var auj=(typeof window._mvAujIso==='function')?window._mvAujIso():_pexIso(_n.getFullYear(),_n.getMonth(),_n.getDate());
   var enCours=(auj>=ex.d0 && auj<=ex.d1);
@@ -7221,6 +7234,54 @@ function _pexData(ex, noCmp, coupeIso){
   });
   repRows.sort(function(a,b){ return a.date<b.date?1:-1; });
 
+  // ── 4b) LES FUTS — LOUES ET ACHETES ────────────────────────────────
+  // ⚠️ CE BLOC MANQUAIT DEPUIS LE PREMIER JOUR. `_pexData` ne lisait pas une seule
+  //   fois INTRANTS.futs, pendant que DEUX textes de l'application promettaient le
+  //   contraire : la carte « Ce qui n'entre pas dans ce total » et la fiche d'aide
+  //   `pil.exo.postes`, toutes deux ecrivant « une location de futs, elle, entre ».
+  //   Une promesse ecrite deux fois, tenue zero fois.
+  // ⚠️ LE MOIS SE CALCULE EN REJOUANT LE MOTEUR SUR LA FENETRE DU MOIS, jamais en
+  //   divisant l'annee par douze : un contrat qui demarre en septembre ne coute
+  //   rien en aout. L'integration est additive, la somme des mois vaut l'annee.
+  var _CE=window.CAVE_ELEVAGE||null;
+  var _okLoy=(typeof window._mvFutLoyer==='function');
+  var locR=_okLoy ? window._mvFutLoyer(window.INTRANTS,_CE,ex.d0,dFin,ex.an)
+                  : {eur:0, lignes:[], n:0, nSansLoyer:0, nAmbigu:0};
+  var locT=locR.eur||0;
+  if(locT>0){
+    mois.forEach(function(mo){
+      var f1=(mo.d1<dFin)?mo.d1:dFin;
+      if(f1<mo.d0) return;
+      var r=window._mvFutLoyer(window.INTRANTS,_CE,mo.d0,f1,ex.an);
+      if(byM[mo.k] && r && r.eur>0) byM[mo.k].fut+=r.eur;
+    });
+  }
+
+  // Les futs ACHETES : comptes a la date de leur facture, et seulement si le
+  // domaine l'a demande. Le prix ABSENT n'est pas zero — il se chiffre dans Achats.
+  var futTrait=_ecoFutTrait();
+  var okDate=(typeof window._mvFutDateAchat==='function');
+  var okLoc=(typeof window._mvFutEstLoc==='function');
+  var futT=0, nFutAch=0, nFutSansPrix=0, futRows=[];
+  ((window.INTRANTS&&window.INTRANTS.futs)||[]).forEach(function(f){
+    if(!f) return;
+    if(okLoc ? window._mvFutEstLoc(f) : (f.mode==='loc')) return;
+    var iso=okDate ? window._mvFutDateAchat(f) : String(f.dfact||f.date||'').slice(0,10);
+    if(!iso || iso<ex.d0 || iso>dFin) return;
+    nFutAch++;
+    var e=(f.prix!=null&&isFinite(Number(f.prix)))?Number(f.prix):null;
+    if(e==null) nFutSansPrix++;
+    var v=(futTrait==='achat'&&e!=null)?e:0;
+    futT+=v;
+    if(v>0){
+      var k=parseInt(iso.slice(0,4),10)+'-'+(parseInt(iso.slice(5,7),10)-1);
+      if(byM[k]) byM[k].fut+=v;
+    }
+    futRows.push({date:iso, nom:((typeof window._mvFutRef==='function'&&window._mvFutRef(f))||'Lot sans nom'),
+                  four:f.four||'', qte:Math.max(0,parseInt(f.qte,10)||0), eur:e, compte:v});
+  });
+  futRows.sort(function(a,b){ return a.date<b.date?1:-1; });
+
   // ── 5) LA REPARTITION PAR ATELIER ──────────────────────────────────
   // ★★★ ELLE NE RECALCULE RIEN. Elle REVENTILE des euros deja comptes plus haut,
   //   ce qui donne l'invariant : la somme des ateliers vaut exactement
@@ -7272,6 +7333,12 @@ function _pexData(ex, noCmp, coupeIso){
   Object.keys(repFam).forEach(function(f){
     _ateAdd('trac', f, 'R\u00e9parateur \u00b7 '+repFam[f].n+' passage'+(repFam[f].n>1?'s':''), repFam[f].eur);
   });
+  // d) les futs vont a la cave, et nulle part ailleurs : un fut ne travaille ni
+  //    dans les rangs ni a l'atelier. L'atelier ne se demande donc pas ici.
+  if(locT>0) _ateAdd('cave','Location de f\u00fbts',
+    'La R\u00e9serve \u00b7 '+locR.n+' contrat'+(locR.n>1?'s':''), locT);
+  if(futT>0) _ateAdd('cave',_pexFutLbl(),
+    'La R\u00e9serve \u00b7 '+nFutAch+' lot'+(nFutAch>1?'s':'')+' factur\u00e9'+(nFutAch>1?'s':''), futT);
   var ateT=0; _pexAteOrd().forEach(function(k){ ateT+=ateEur[k]; });
   _pexAteOrd().forEach(function(k){ ateSrc[k].sort(function(a,b){ return b.eur-a.eur; }); });
 
@@ -7280,7 +7347,7 @@ function _pexData(ex, noCmp, coupeIso){
   var phyConso=0; Object.keys(phy.cost||{}).forEach(function(k){ phyConso+=phy.cost[k]||0; });
 
   // ── Totaux ─────────────────────────────────────────────────────────
-  var total=salT+gnrT+achT+repT;          // ENGAGÉ à la coupe
+  var total=salT+gnrT+achT+repT+locT+futT;   // ENGAGÉ à la coupe
   var totalP=salP, totalClot=total+totalP;  // prévu (grille) · à la clôture
   var surf=0;
   (window.PARCELLES||[]).forEach(function(p){ if(p&&p.statut!=='Arrachee') surf+=parseFloat(p.surface)||0; });
@@ -7293,6 +7360,10 @@ function _pexData(ex, noCmp, coupeIso){
     { k:'dep', lab:'R\u00e9parations',        col:_PEC_COL.dep, eur:repT,
       det:nRep+' passage'+(nRep>1?'s':'')+' chez le r\u00e9parateur' }
   ];
+  if(locT>0) postes.push({ k:'loc', lab:'Location de f\u00fbts', col:_PEC_COL.loc, eur:locT,
+    det:locR.n+' contrat'+(locR.n>1?'s':'')+' \u00b7 loyer au prorata des jours' });
+  if(futT>0) postes.push({ k:'fut', lab:_pexFutLbl(), col:_PEC_COL.fut, eur:futT,
+    det:nFutAch+' lot'+(nFutAch>1?'s':'')+' factur\u00e9'+(nFutAch>1?'s':'')+' dans l\u2019exercice' });
   postes.forEach(function(p){ var _b=enCoursC?totalClot:total, _e=p.eur+(enCoursC?(p.eurP||0):0); p.part = _b>0 ? (_e/_b*100) : 0; });
 
   var cmp=null, cmpDate=null;
@@ -7313,6 +7384,8 @@ function _pexData(ex, noCmp, coupeIso){
   }
   return { ex:ex, mois:mois, byM:byM, gens:gens, postes:postes, achRows:achRows,
            salT:salT, gnrT:gnrT, achT:achT, repT:repT, total:total,
+           locT:locT, locR:locR, futT:futT, futTrait:futTrait, futRows:futRows,
+           nFutAch:nFutAch, nFutSansPrix:nFutSansPrix,
            repRows:repRows, nRep:nRep, nRepSansPrix:nRepSansPrix,
            ateEur:ateEur, ateSrc:ateSrc, ateT:ateT,
            gnrSrc:gnrSrc, gnrN:gnrR.n, gnrNSansLitres:gnrR.nSansLitres,
@@ -7324,6 +7397,86 @@ function _pexData(ex, noCmp, coupeIso){
            coupe:coupe, dFin:dFin, enCoursC:enCoursC,
            salP:salP, hPaidP:hPaidP, totalP:totalP, totalClot:totalClot,
            coutHaClot:(surf>0?totalClot/surf:0), cmpDate:cmpDate };
+}
+
+// ── UN FUT ACHETE, COMMENT LE COMPTER ? (lot FUT-LOC, 10/09/2026) ───────────
+// Deux valeurs, et une seule question : est-ce que le fut achete sort de la
+// caisse cette annee-la, oui ou non.
+//   'hors'  (DEFAUT) — il ne compte pas. C'est le comportement d'avant ce lot :
+//                      aucun chiffre ne bouge chez un domaine qui ne touche rien.
+//   'achat'          — il compte en entier a la date de sa facture.
+// ⚠️ IL N'Y A PAS DE TROISIEME VALEUR, ET C'EST UNE DECISION. Etaler un fut sur
+//   cinq ans, c'est un amortissement : le travail du bilan, pas celui d'une appli
+//   de vigne. Un amortissement approximatif affiche a cote d'une masse salariale
+//   exacte donnerait a l'ensemble l'autorite d'un compte de resultat qu'il n'est
+//   pas. Ne pas le reintroduire sans rouvrir cette question-la.
+// ⚠️ La LOCATION, elle, n'a pas de reglage : un loyer est une charge de l'annee
+//   ou il est du. Il n'y a rien a choisir.
+var _PEX_FUT_TRAIT = {hors:1, achat:1};
+function _ecoFutTrait(){
+  var e=(window.CONFIG&&window.CONFIG.eco)||{};
+  var v=String(e.futs_trait||'').trim();
+  return _PEX_FUT_TRAIT[v] ? v : 'hors';
+}
+function _pexFutLbl(){ return 'F\u00fbts achet\u00e9s'; }
+
+// Ecriture du traitement des futs achetes. Meme prudence que _pexSetMois : on
+// relit apres l'appel, parce qu'_ecoCfgSet applique une LISTE BLANCHE et qu'une
+// cle inconnue y est un no-op SILENCIEUX.
+function _pexSetFutTrait(v){
+  if(!(typeof window.isAdmin==='function' && window.isAdmin())){
+    if(window.showToast) window.showToast('R\u00e9serv\u00e9 \u00e0 l\u2019administrateur','#C0392B');
+    return;
+  }
+  var t=String(v||'').trim();
+  if(!_PEX_FUT_TRAIT[t]) return;
+  if(t===_ecoFutTrait()) return;
+  if(typeof window._ecoCfgSet==='function') window._ecoCfgSet('eco','futs_trait',t);
+  if(_ecoFutTrait()!==t){
+    if(window.showToast) window.showToast('R\u00e9glage non enregistr\u00e9 \u2014 mise \u00e0 jour de R\u00e9glages requise','#B85A1A');
+    return;
+  }
+  if(window.showToast) window.showToast(t==='achat'
+    ? 'Les f\u00fbts achet\u00e9s comptent d\u00e9sormais dans l\u2019exercice'
+    : 'Les f\u00fbts achet\u00e9s sortent de l\u2019exercice','#3D6B27');
+  _pilFillContent(_pilData());
+}
+window._pexSetFutTrait=_pexSetFutTrait;
+
+// La carte du reglage. Elle dit ce que CHAQUE choix ferait, pas seulement lequel
+// est coche : un reglage dont on ne voit pas l'effet ne se choisit pas, il se subit.
+function _pexFutChoix(){
+  var cur=_ecoFutTrait();
+  var admin=!!(typeof window.isAdmin==='function' && window.isAdmin());
+  var O=[['hors','Hors exercice',
+          'Le f\u00fbt achet\u00e9 est un bien qui dure : il ne compte que dans le parc. C\u2019est le r\u00e9glage par d\u00e9faut.'],
+         ['achat','Compt\u00e9 en entier \u00e0 l\u2019achat',
+          'Le lot tombe dans l\u2019exercice de sa facture. Une grosse commande fait une bosse \u2014 et c\u2019est vrai, elle a bien \u00e9t\u00e9 pay\u00e9e cette ann\u00e9e-l\u00e0.']];
+  var opts=O.map(function(o){
+    return '<button class="pex-fopt'+(cur===o[0]?' on':'')+'"'+(admin?'':' disabled')
+      +' data-pec="futtr" data-v="'+o[0]+'">'
+      +'<span class="t">'+_pilEsc(o[1])+'</span>'
+      +'<span class="d">'+o[2]+'</span></button>';
+  }).join('');
+  return '<div class="pec-card"><div class="pec-ch">'
+    +'<div class="pec-ct">Un f\u00fbt achet\u00e9, comment le compter\u00a0?</div>'
+    +'<div class="pec-cs">'+(admin
+      ? 'Un f\u00fbt sert plusieurs vins. Le compter en entier l\u2019ann\u00e9e de l\u2019achat fait une bosse\u00a0; ne pas le compter du tout fait un trou. \u00c0 vous de dire.'
+      : ''+(typeof _mvIcon==='function'?_mvIcon('cadenas',16):'')+' Lecture seule \u2014 seul un administrateur peut changer ce r\u00e9glage.')
+    +'</div></div>'
+    +'<div class="pec-cb"><div class="pex-fopts">'+opts+'</div>'
+    +'<div class="pec-a warn" style="margin-top:10px"><span class="e">'
+      +(typeof _mvIcon==='function'?_mvIcon('alerte',16):'')+'</span><div>'
+    +'Changer ce r\u00e9glage <b>r\u00e9\u00e9crit les exercices d\u00e9j\u00e0 clos</b>\u00a0: le m\u00eame lot y entrera ou en sortira. '
+    +'On le choisit \u00e0 l\u2019installation, pas en cours d\u2019ann\u00e9e.</div></div>'
+    +'<div class="pec-a ok" style="margin-top:9px"><span class="e">'
+      +(typeof _mvIcon==='function'?_mvIcon('check',16):'')+'</span><div>'
+    +'<b>La location n\u2019a pas de r\u00e9glage.</b> Un loyer est une charge de l\u2019ann\u00e9e o\u00f9 il est d\u00fb '
+    +'\u2014 il n\u2019y a rien \u00e0 choisir. Il entre au prorata des jours de contrat.</div></div>'
+    +'<div class="pec-note"><b>Pas d\u2019amortissement, et c\u2019est voulu.</b> \u00c9taler un f\u00fbt sur cinq ans, '
+    +'c\u2019est le travail du bilan. Un amortissement approximatif affich\u00e9 \u00e0 c\u00f4t\u00e9 d\u2019une masse salariale '
+    +'exacte donnerait \u00e0 l\u2019ensemble l\u2019autorit\u00e9 d\u2019un compte de r\u00e9sultat qu\u2019il n\u2019est pas.</div>'
+    +'</div></div>';
 }
 
 // ── Reglage : mois d'ouverture de l'exercice ────────────────────────
@@ -7381,7 +7534,10 @@ function _pexGraph(E,w){
   var M=E.mois;
   if(!M.length) return window._mvGraphVide('Aucun mois dans cet exercice',
     'Choisissez un autre exercice dans la barre au-dessus.');
-  var maxV=0; M.forEach(function(mo){ var b=E.byM[mo.k]; var t=b.sal+b.gnr+b.ach+(b.dep||0)+(b.salP||0); if(t>maxV) maxV=t; });
+  // ⚠️ TOUTE CLE COMPTEE DANS LE TOTAL DOIT ETRE EMPILEE ICI. Un poste ajoute au
+  //   moteur sans etre ajoute a cette somme rabaisse l'echelle : la derniere barre
+  //   deborde du cadre, en silence.
+  var maxV=0; M.forEach(function(mo){ var b=E.byM[mo.k]; var t=b.sal+b.gnr+b.ach+(b.dep||0)+(b.fut||0)+(b.salP||0); if(t>maxV) maxV=t; });
   if(!(maxV>0)) return window._mvGraphVide('Aucune d\u00e9pense dat\u00e9e sur cet exercice',
     'Les d\u00e9penses se posent \u00e0 la date de leur travail, de leur plein ou de leur achat.');
   var top=_pecNiceMax(maxV*1.08);
@@ -7406,7 +7562,7 @@ function _pexGraph(E,w){
   var xCoupe=null;
   M.forEach(function(mo,i){
     var b=E.byM[mo.k], x=pL+step*i+(step-bw)/2, acc=0;
-    [['sal',_PEC_COL.mo],['gnr',_PEC_COL.gnr],['ach',_PEC_COL.phy],['dep',_PEC_COL.dep],['salP','url(#pex-hach)']].forEach(function(pr){
+    [['sal',_PEC_COL.mo],['gnr',_PEC_COL.gnr],['ach',_PEC_COL.phy],['dep',_PEC_COL.dep],['fut',_PEC_COL.loc],['salP','url(#pex-hach)']].forEach(function(pr){
       var v=b[pr[0]]||0; if(!(v>0)) return;
       var y0=Y(acc+v), y1=Y(acc), hh=Math.max(1,y1-y0);
       g+='<rect x="'+x.toFixed(1)+'" y="'+y0.toFixed(1)+'" width="'+bw.toFixed(1)+'" height="'+hh.toFixed(1)+'" fill="'+pr[1]+'" opacity="0.92"'+(pr[0]==='salP'?(' stroke="'+_PEC_COL.mo+'" stroke-width=".8" stroke-opacity=".7"'):'')+'/>';
@@ -7431,6 +7587,7 @@ function _pexGraph(E,w){
     +'<span class="pec-lg"><em style="background:'+_PEC_COL.gnr+'"></em>Carburant GNR</span>'
     +'<span class="pec-lg"><em style="background:'+_PEC_COL.phy+'"></em>Achats d\u2019intrants</span>'
     +'<span class="pec-lg"><em style="background:'+_PEC_COL.dep+'"></em>D\u00e9penses</span>'
+    +(((E.locT||0)+(E.futT||0))>0?'<span class="pec-lg"><em style="background:'+_PEC_COL.loc+'"></em>F\u00fbts</span>':'')
     +'</div>';
 }
 
@@ -7447,6 +7604,15 @@ function _pexZeros(E){
   if(!E.hasGnr && E.tracH>0) Z.push({ nom:'Carburant', quoi:'prix du GNR', cible:'entretien', ou:'Tracteur \u203a Entretien' });
   if(E.nAchSansPrix>0) Z.push({ nom:E.nAchSansPrix+' achat'+(E.nAchSansPrix>1?'s':'')+' sans prix',
     quoi:'prix HT dans La R\u00e9serve', cible:null, ou:null });
+  // ★ Les reparations a chiffrer etaient COMPTEES (nRepSansPrix) et AFFICHEES deux
+  //   fois plus bas, mais absentes de la seule liste qu'on lit pour savoir quoi
+  //   completer. Un trou qu'on mesure et qu'on ne dit pas au bon endroit.
+  if(E.nRepSansPrix>0) Z.push({ nom:E.nRepSansPrix+' r\u00e9paration'+(E.nRepSansPrix>1?'s':'')+' \u00e0 chiffrer',
+    quoi:'montant HT dans \u00c9conomie \u203a Achats', cible:null, ou:null });
+  if(E.futTrait==='achat' && E.nFutSansPrix>0) Z.push({ nom:E.nFutSansPrix+' lot'+(E.nFutSansPrix>1?'s':'')+' de f\u00fbts sans prix',
+    quoi:'prix HT dans \u00c9conomie \u203a Achats', cible:null, ou:null });
+  if(E.locR && E.locR.nSansLoyer>0) Z.push({ nom:E.locR.nSansLoyer+' contrat'+(E.locR.nSansLoyer>1?'s':'')+' sans loyer',
+    quoi:'loyer HT par f\u00fbt et par an', cible:null, ou:null });
   return Z;
 }
 
@@ -7694,18 +7860,38 @@ function _pexConso(E){
 // une ligne de note en bas d'une autre. Ce qu'on exclut d'un total merite le
 // meme rang que ce qu'on y met : c'est la premiere question qu'on se pose devant
 // un chiffre qui ne colle pas au bilan comptable.
+// ★★★ CETTE CARTE PROMETTAIT LA LOCATION AVANT QU'ELLE EXISTE.
+//   Elle ecrivait « la location de futs, elle, entre » alors qu'aucun champ ne
+//   permettait de dire qu'un lot etait loue, et que _pexData ne lisait pas une
+//   seule fois INTRANTS.futs. La fiche d'aide `pil.exo.postes` disait la meme
+//   chose. Deux textes, une promesse, zero code. Depuis le lot FUT-LOC, elle est
+//   vraie — et le fut ACHETE depend d'un reglage, donc la carte le relit.
 function _pexHorsPerim(){
+  var t=_ecoFutTrait();
   return '<div class="pec-card"><div class="pec-ch">'
     +'<div class="pec-ct">Ce qui n\u2019entre pas dans ce total</div></div>'
     +'<div class="pec-cb">'
-    +'<div class="pec-a info"><span class="e">'+(typeof _mvIcon==='function'?_mvIcon('outil',16):'')+'</span><div>'
-    +'<b>Le mat\u00e9riel, les outils port\u00e9s et les f\u00fbts achet\u00e9s</b> ne sont pas des consommables : '
-    +'on ne les rach\u00e8te pas l\u2019an prochain. Les f\u00fbts ont leur propre dur\u00e9e de vie dans '
-    +'l\u2019application et leur propre \u00e9cran \u2014 <b>La R\u00e9serve \u203a F\u00fbts</b>, pyramide des \u00e2ges en t\u00eate.'
+    +'<div class="pec-a ok"><span class="e">'+(typeof _mvIcon==='function'?_mvIcon('check',16):'')+'</span><div>'
+    +'La <b>location</b> de f\u00fbts entre, <b>au prorata des jours</b> de contrat : c\u2019est un loyer '
+    +'qui revient tous les ans, pas un f\u00fbt. Il est calcul\u00e9 sur les f\u00fbts que vous d\u00e9tenez, '
+    +'libres et en vin.'
     +'</div></div>'
-    +'<div class="pec-a ok" style="margin-top:9px"><span class="e">'+(typeof _mvIcon==='function'?_mvIcon('check',16):'')+'</span><div>'
-    +'La <b>location</b> de f\u00fbts, elle, entre : c\u2019est un loyer qui revient tous les ans, '
-    +'pas un f\u00fbt. <b>On chiffre ce qu\u2019on paie cette ann\u00e9e, pas ce qu\u2019on poss\u00e8de.</b>'
+    +((t==='achat')
+      ? ('<div class="pec-a ok" style="margin-top:9px"><span class="e">'+(typeof _mvIcon==='function'?_mvIcon('check',16):'')+'</span><div>'
+        +'Les <b>f\u00fbts achet\u00e9s</b> entrent aussi, en entier l\u2019ann\u00e9e de leur facture \u2014 '
+        +'c\u2019est le r\u00e9glage que vous avez choisi. Le mat\u00e9riel et les outils port\u00e9s, non : '
+        +'ils n\u2019ont pas de prix dans l\u2019application.'
+        +'</div></div>')
+      : ('<div class="pec-a info" style="margin-top:9px"><span class="e">'+(typeof _mvIcon==='function'?_mvIcon('outil',16):'')+'</span><div>'
+        +'<b>Le mat\u00e9riel, les outils port\u00e9s et les f\u00fbts achet\u00e9s</b> ne sont pas des consommables : '
+        +'on ne les rach\u00e8te pas l\u2019an prochain. Les f\u00fbts ont leur propre \u00e9cran \u2014 '
+        +'<b>La R\u00e9serve \u203a F\u00fbts</b>, pyramide des \u00e2ges en t\u00eate. Vous pouvez les faire entrer '
+        +'ici : le r\u00e9glage est en bas de cet \u00e9cran.'
+        +'</div></div>')) 
+    +'<div class="pec-a warn" style="margin-top:9px"><span class="e">'+(typeof _mvIcon==='function'?_mvIcon('alerte',16):'')+'</span><div>'
+    +'<b>Ce total n\u2019est pas un compte de r\u00e9sultat.</b> Ni fermage, ni MSA, ni assurance, ni \u00e9nergie, '
+    +'ni amortissement du mat\u00e9riel. C\u2019est ce que Ma\u00a0Vigne mesure \u2014 la vigne et la cave \u2014 '
+    +'pas ce que votre comptable arr\u00eatera.'
     +'</div></div>'
     +'</div></div>';
 }
@@ -7714,7 +7900,9 @@ function _pexHorsPerim(){
 function _pexAxeNature(E,T){
   var L=[['ach',E.achT,'Achats d\u2019intrants',_PEC_COL.phy, E.nAch+' achat'+(E.nAch>1?'s':'')+' de La R\u00e9serve'],
          ['gnr',E.gnrT,'Carburant GNR',_PEC_COL.gnr, _ecoH1(E.litres)+' L \u00b7 '+E.gnrN+' appoint'+(E.gnrN>1?'s':'')],
-         ['dep',E.repT,'R\u00e9parations',_PEC_COL.dep, E.nRep+' passage'+(E.nRep>1?'s':'')+' chez le r\u00e9parateur']];
+         ['dep',E.repT,'R\u00e9parations',_PEC_COL.dep, E.nRep+' passage'+(E.nRep>1?'s':'')+' chez le r\u00e9parateur'],
+         ['loc',E.locT||0,'Location de f\u00fbts',_PEC_COL.loc, ((E.locR&&E.locR.n)||0)+' contrat'+(((E.locR&&E.locR.n)||0)>1?'s':'')+' \u00b7 au prorata des jours'],
+         ['fut',E.futT||0,_pexFutLbl(),_PEC_COL.fut, (E.nFutAch||0)+' lot'+((E.nFutAch||0)>1?'s':'')+' factur\u00e9'+((E.nFutAch||0)>1?'s':'')]];
   var k='<div class="pec-kpis">';
   L.forEach(function(x){
     if(!(x[1]>0)) return;
@@ -7834,10 +8022,15 @@ function _pexAxeAtelier(E,T){
 //   coute X, ce n'est pas une ligne comptable separee. Une table liee par
 //   identifiant laisserait des orphelins le jour ou l'objet est supprime.
 var _PACH_FILT='tout';   // 'tout' | 'sans'
+// ★ L'ECRAN N'ETAIT BORNE PAR AUCUNE DATE : son « Total chiffre » couvrait tout
+//   l'historique du domaine, pose a cote d'un total d'exercice. Deux nombres
+//   voisins qui ne pouvaient QUE diverger, sans que rien ne dise pourquoi.
+var _PACH_PER='exe';     // 'exe' | 'tout'
 var _PACH_SRC={
-  rsv:  { lbl:'La R\u00e9serve',  col:'#5B2D8E', ecr:'La R\u00e9serve \u203a Intrants' },
-  fut:  { lbl:'Parc \u00e0 f\u00fbts', col:'#8A5A38', ecr:'La R\u00e9serve \u203a F\u00fbts' },
-  trac: { lbl:'R\u00e9parateur',  col:'#2C3E50', ecr:'Tracteur \u203a Retour du r\u00e9parateur' }
+  rsv:   { lbl:'La R\u00e9serve',  col:'#5B2D8E', ecr:'La R\u00e9serve \u203a Intrants' },
+  fut:   { lbl:'Parc \u00e0 f\u00fbts', col:'#8A5A38', ecr:'La R\u00e9serve \u203a F\u00fbts' },
+  futloc:{ lbl:'Location',     col:'#1D6F8C', ecr:'La R\u00e9serve \u203a F\u00fbts (contrat)' },
+  trac:  { lbl:'R\u00e9parateur',  col:'#2C3E50', ecr:'Tracteur \u203a Retour du r\u00e9parateur' }
 };
 
 // Rassemble les trois sources. AUCUNE ne se recalcule : on lit les objets la ou
@@ -7856,9 +8049,27 @@ function _pachLignes(){
       prix:(a.prix!=null&&isFinite(Number(a.prix)))?Number(a.prix):null, fact:a.fact||'' });
   });
 
+  // ★ Un lot LOUE n'a pas de prix d'achat : il a un loyer, connu le jour de la
+  //   signature. Il ne se chiffre donc PAS ici — il s'affiche en lecture seule,
+  //   pour que cet ecran reste le seul ou l'on voit tout l'argent, et le montant
+  //   affiche est celui de l'EXERCICE COURANT, au prorata des jours.
+  var _exC=(typeof _pexEx==='function')?_pexEx():null;
   (I.futs||[]).forEach(function(f){
     if(!f||!f.id) return;
-    out.push({ src:'fut', id:f.id, date:String(f.date||'').slice(0,10),
+    var estLoc=(typeof window._mvFutEstLoc==='function')?window._mvFutEstLoc(f):(f.mode==='loc');
+    if(estLoc){
+      var lr=null;
+      if(_exC && typeof window._mvFutLoyerLot==='function')
+        lr=window._mvFutLoyerLot(I, window.CAVE_ELEVAGE||null, f, _exC.d0, _exC.d1, _exC.an);
+      out.push({ src:'futloc', id:f.id, date:String(f.debut||f.date||'').slice(0,10), ro:true,
+        quoi:(f.qte||0)+' f\u00fbt'+((f.qte||0)>1?'s':'')+(f.ref?(' '+f.ref):'')+' \u00b7 location'
+             +((lr&&lr.jours>0)?(' \u00b7 '+lr.jours+'\u00a0j sur l\u2019exercice'):''),
+        four:f.four||'', ate:'cave',
+        prix:(lr&&!lr.sansLoyer)?lr.eur:null, fact:f.fact||'' });
+      return;
+    }
+    var dt=(typeof window._mvFutDateAchat==='function')?window._mvFutDateAchat(f):String(f.dfact||f.date||'').slice(0,10);
+    out.push({ src:'fut', id:f.id, date:dt,
       quoi:(f.qte||0)+' f\u00fbt'+((f.qte||0)>1?'s':'')+(f.ref?(' '+f.ref):'')+(f.annee?(' \u00b7 mill\u00e9sime '+f.annee):''),
       four:f.four||'', ate:'cave',
       prix:(f.prix!=null&&isFinite(Number(f.prix)))?Number(f.prix):null, fact:f.fact||'' });
@@ -7881,6 +8092,14 @@ function _pachLignes(){
   });
 
   out.sort(function(a,b){ return a.date<b.date?1:(a.date>b.date?-1:0); });
+  // ⚠️ Le bornage se fait ICI, en sortie, et nulle part ailleurs : _pachOpen relit
+  //   la meme liste pour retrouver une ligne, et une ligne filtree d'un cote mais
+  //   pas de l'autre rendrait « ligne introuvable » sur un bouton visible.
+  if(_PACH_PER==='exe'){
+    var ex=(typeof _pexEx==='function')?_pexEx():null;
+    if(ex && ex.d0 && ex.d1)
+      out=out.filter(function(x){ return x.date && x.date>=ex.d0 && x.date<=ex.d1; });
+  }
   return out;
 }
 
@@ -7931,7 +8150,7 @@ function _pachView(){
      +'<div class="s">'+(sans.length?'le total est un plancher':'rien en attente')+'</div></div>'
    +'<div class="pec-k"><div class="l">Sources</div><div class="v">'
      +Object.keys(_PACH_SRC).filter(function(k){ return L.some(function(x){return x.src===k;}); }).length
-     +' <small>/ 3</small></div><div class="s">R\u00e9serve, f\u00fbts, r\u00e9parateur</div></div>'
+     +' <small>/ 4</small></div><div class="s">R\u00e9serve, f\u00fbts, location, r\u00e9parateur</div></div>'
    +'</div></div>';
 
   if(!L.length){
@@ -7973,6 +8192,8 @@ function _pachView(){
      +(adm?'<button class="pec-btn pec-btn-p" data-pec="pachadd"><span>\uFF0B</span> Achat</button>':'')
      +'<button class="pec-btn'+(_PACH_FILT==='tout'?' on':'')+'" data-pec="pachf" data-v="tout">Tout</button>'
      +'<button class="pec-btn'+(_PACH_FILT==='sans'?' on':'')+'" data-pec="pachf" data-v="sans">\u00c0 chiffrer</button>'
+     +'<button class="pec-btn'+(_PACH_PER==='exe'?' on':'')+'" data-pec="pachper" data-v="exe">Exercice</button>'
+     +'<button class="pec-btn'+(_PACH_PER==='tout'?' on':'')+'" data-pec="pachper" data-v="tout">Tout l\u2019historique</button>'
    +'</div>'
    +'<div class="pec-scroll"><table class="pec-tbl" style="min-width:640px">'
    +'<thead><tr><th>Date</th><th>Ce qui a \u00e9t\u00e9 acquis</th><th>Cr\u00e9\u00e9 dans</th><th>Atelier</th>'
@@ -8016,6 +8237,13 @@ function _pachOpen(ref){
   var L=_pachLignes();
   var x=L.find(function(o){ return o.src===src && o.id===id; });
   if(!x){ if(window.showToast) window.showToast('Ligne introuvable \u2014 rechargez l\u2019\u00e9cran','#B85A1A'); return; }
+  // ★ Une ligne en lecture seule porte un montant CALCULE (le loyer au prorata).
+  //   L'ecrire ici en ferait une saisie qui contredirait le contrat des le
+  //   lendemain — on renvoie a l'endroit ou la donnee vit vraiment.
+  if(x.ro){
+    if(window.showToast) window.showToast('Loyer du contrat \u2014 il se modifie dans La R\u00e9serve \u203a F\u00fbts','#1D6F8C');
+    return;
+  }
   var S=_PACH_SRC[src]||_PACH_SRC.rsv;
   var act=(x.prix!=null)?String(x.prix).replace('.',','):'';
   var v=window.prompt(x.quoi+'\n'+(x.four||'sans fournisseur')+' \u00b7 '+S.ecr
@@ -8093,7 +8321,8 @@ function _pexView(){
     + _pexTableSal(E)
     + _pexTableAch(E)
     + _pexTableDep(E)
-    + _pexMoisChoix();
+    + _pexMoisChoix()
+    + _pexFutChoix();
 }
 
 function _pilTabEco(d){
@@ -9685,6 +9914,10 @@ function _pilBindContent(content){
       if(_pa==='pachgo'){ if(_PEC_SUB!=='ach'){ _PEC_SUB='ach'; _pecSaveSt(); _pilFillContent(_pilData()); } return; }
       if(_pa==='pachf'){ var _fv=_pe.getAttribute('data-v');
         if((_fv==='tout'||_fv==='sans')&&_fv!==_PACH_FILT){ _PACH_FILT=_fv; _pilFillContent(_pilData()); } return; }
+      if(_pa==='futtr'){ var _tv=_pe.getAttribute('data-v');
+        if(typeof window._pexSetFutTrait==='function') window._pexSetFutTrait(_tv); return; }
+      if(_pa==='pachper'){ var _pv=_pe.getAttribute('data-v');
+        if((_pv==='exe'||_pv==='tout')&&_pv!==_PACH_PER){ _PACH_PER=_pv; _pilFillContent(_pilData()); } return; }
       if(_pa==='pach'){ _pachOpen(_pe.getAttribute('data-v')||''); return; }
       if(_pa==='pachadd'){ _pachAdd(); return; }
       if(_pa==='axe'){ var _av=_pe.getAttribute('data-v'); if((_av==='nat'||_av==='ate')&&_av!==_PEC_AXE){ _PEC_AXE=_av; _pecSaveSt(); _pilFillContent(_pilData()); } return; }

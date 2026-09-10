@@ -355,8 +355,20 @@ window._mvGraphRepeindre = function(){
 
 export const WHATS_NEW = [
   { v: '7.02', items: [
-    { emoji: 'chrono', titre: 'La date de fin d\u2019Aujourd\u2019hui est celle de La campagne',
-      desc: "Aujourd\u2019hui annon\u00e7ait <b>+32 j d\u2019avance</b> pendant que La campagne montrait du travail en retard fin mars, sur les m\u00eames donn\u00e9es : le cockpit comptait l\u2019\u00e9quipe d\u2019octobre sur une taille qui n\u2019ouvre qu\u2019en novembre, et ne d\u00e9duisait pas le tracteur. La date, la marge et les \u00ab N j \u00bb par t\u00e2che viennent d\u00e9sormais du simulateur de La campagne sans renfort \u2014 chaque travail dans sa fen\u00eatre, tracteur d\u00e9duit, aux heures normales du planning. Les jours ouvr\u00e9s se comptent depuis aujourd\u2019hui, la phrase sous le chiffre dit quand l\u2019\u00e9quipe est reconduite au-del\u00e0 de la p\u00e9riode, et un petit \u00ab i \u00bb explique le calcul." }
+    { emoji: 'carton', titre: 'Un lot de f\u00fbts est achet\u00e9 ou lou\u00e9',
+      desc: "La R\u00e9serve \u203a F\u00fbts vous demande d\u00e9sormais si le lot est <b>achet\u00e9</b> ou <b>lou\u00e9</b>. Un lot lou\u00e9 porte son <b>loyer HT par f\u00fbt et par an</b> et les dates de son contrat ; un lot achet\u00e9 porte sa <b>date de facture</b>, qui remplace la date de saisie. Les lots existants restent des achats, rien \u00e0 reprendre." },
+    { emoji: 'euro', titre: 'La location de f\u00fbts entre enfin dans l\u2019exercice',
+      desc: "\u00c9conomie \u203a Exercice l\u2019annon\u00e7ait depuis le premier jour sans jamais le faire. Le loyer y figure maintenant comme un poste \u00e0 part, <b>au prorata des jours de contrat</b> \u2014 un contrat ouvert en septembre ne co\u00fbte pas une ann\u00e9e pleine sur un exercice ouvert en ao\u00fbt \u2014 et calcul\u00e9 sur les f\u00fbts que vous d\u00e9tenez vraiment, libres comme en vin. Rendre deux f\u00fbts en cours de contrat fait baisser le loyer tout seul." },
+    { emoji: 'engrenage', titre: 'Un f\u00fbt achet\u00e9 : \u00e0 vous de dire s\u2019il compte',
+      desc: "En bas de l\u2019Exercice, un r\u00e9glage : le f\u00fbt achet\u00e9 reste <b>hors exercice</b> (par d\u00e9faut, aucun de vos chiffres ne bouge) ou <b>compte en entier \u00e0 la date de sa facture</b>. Chaque choix affiche ce qu\u2019il ferait avant que vous le preniez." },
+    { emoji: 'alerte', titre: '\u00c0 r\u00e9former et \u00e0 rendre ne sont plus le m\u00eame compteur',
+      desc: "Le parc \u00e0 f\u00fbts s\u00e9pare les deux : un f\u00fbt achet\u00e9 en fin de vie se <b>r\u00e9forme</b>, un f\u00fbt lou\u00e9 en fin de contrat se <b>rend</b>. Le lou\u00e9 sort de l\u2019alerte de r\u00e9forme \u2014 on ne r\u00e9forme pas le bien d\u2019un autre \u2014 mais il garde sa place dans la pyramide des \u00e2ges." },
+    { emoji: 'document', titre: '\u00ab \u00e0 chiffrer \u00bb et \u00ab sans frais \u00bb ne se confondent plus',
+      desc: "Un achat enregistr\u00e9 sans prix s\u2019affichait \u00ab sans frais \u00bb dans \u00c9conomie \u203a Achats et n\u2019apparaissait jamais dans le filtre \u00ab \u00c0 chiffrer \u00bb. C\u2019est corrig\u00e9 : un prix vide reste vide. Les r\u00e9parations en attente de facture rejoignent aussi la liste \u00ab \u00e0 compl\u00e9ter \u00bb de l\u2019exercice." },
+    { emoji: 'calendrier', titre: 'L\u2019\u00e9cran Achats se borne \u00e0 l\u2019exercice',
+      desc: "Son total couvrait tout l\u2019historique du domaine, pos\u00e9 \u00e0 c\u00f4t\u00e9 d\u2019un total d\u2019exercice qui, lui, ne couvrait qu\u2019une ann\u00e9e. Deux boutons choisissent maintenant la fen\u00eatre : <b>Exercice</b> ou <b>Tout l\u2019historique</b>." },
+    { emoji: 'carton', titre: 'Deux livraisons du m\u00eame f\u00fbt font deux lots',
+      desc: "Saisir un r\u00e9assort identique grossissait le lot existant sans toucher \u00e0 sa date ni \u00e0 son prix : la seconde commande \u00e9tait alors compt\u00e9e au prix de la premi\u00e8re, et dat\u00e9e de son ann\u00e9e. Chaque facture a maintenant son lot. Le +/- de la carte reste l\u00e0 pour corriger une quantit\u00e9." }
   ] },
   { v: '7.01', items: [
     { emoji: 'euro', titre: 'L\u2019exercice est coup\u00e9 au jour : engag\u00e9, pr\u00e9vu, \u00e0 la cl\u00f4ture',
@@ -2368,7 +2380,6 @@ var MV_AIDE = {
       _mvAideOngletsPil,
       ['La barre du haut dit où vous regardez', ": l’exercice entier, ou une campagne. Cliquez une campagne dans la frise de l’année et les trois chiffres du haut, la frise et les tableaux de la campagne suivent. La croix revient à l’année. <b>Trois écrans ont leur propre cadre</b> et ne se recadrent pas : Économie chiffre la période consultée, la Cave suit le millésime, la Conformité roule sur sept ans — chacun l’écrit au-dessus de ses chiffres."],
       ['Les trois chiffres du haut', "— les travaux, l’effectif, le budget — ne s’affichent que sur <b>L’année</b> et <b>La campagne</b>, les deux niveaux de zoom. Ils changent avec ce que vous regardez, et chacun mène à l’écran qui le détaille. Ailleurs, ils ne servaient plus à choisir où aller : sur Économie et sur Conformité, ils répétaient l’écran juste en dessous."],
-      ['Une seule date de fin', "pour tout le module : Aujourd’hui, sa frise et Échéances par tâche lisent la même simulation que La campagne sans renfort — chaque travail dans sa fenêtre, l’équipe partagée entre les travaux ouverts en même temps, le tracteur déduit, aux heures normales du planning. Le « i » à côté de la marge dit les trois choses qui la distinguent du simulateur de renfort, et « vers le » signale une fin après la période, l’équipe de la dernière semaine reconduite."],
       ['La conformité n’est plus dans cette ligne', "et c’est une question d’échelle : le cuivre roule sur <b>sept ans glissants</b>, il ne bouge pas quand vous cliquez une campagne. Un chiffre qui ignore la portée n’a pas sa place dans une ligne qui se recadre. Il se lit en entier dans l’onglet Conformité, et le bouton « à compléter » remonte toujours ses alertes, sur tous les onglets."],
       ['Le bouton « à compléter »', "liste ce qui manque pour que vos chiffres soient justes, et vous emmène à l’endroit exact où le renseigner. Un rond rouge sur un chiffre veut dire qu’il ne se calcule pas ; un rond orange, qu’il sort mais faux."],
       ['Les onglets vont du large au fin', ": l’année, puis la campagne, puis l’équipe et le matériel, puis la décision. Après le trait, ce sont des écrans de détail — on y arrive aussi en touchant un des trois chiffres."],
@@ -2555,15 +2566,6 @@ export const MV_INFO = {
     'Un <b>soutirage</b> se déclenche à la fin de la malo, pas à une date : la projection vient des valeurs d\u2019acide malique mesurées. Deux pentes sont calculées, la moyenne sur trois analyses projette la fin, les deux dernières détectent un blocage.'
   ] },
 
-  'pil.marge': { t: 'La date de fin, et la marge', p: [
-    'La date r\u00e9pond \u00e0 une seule question : <b>si le planning et les contrats restent tels quels, quand tout est-il fini ?</b> Elle vient du m\u00eame simulateur que La campagne avec \u00ab aucun renfort \u00bb : chaque travail commence \u00e0 l\u2019ouverture de <b>sa fen\u00eatre</b> \u2014 pas au premier jour de la p\u00e9riode \u2014, les travaux ouverts en m\u00eame temps se <b>partagent l\u2019\u00e9quipe</b>, les heures de <b>tracteur</b> sont d\u00e9duites, et l\u2019\u00e9quipe est lue <b>jour par jour</b> dans le planning : horaire de chacun, cong\u00e9s, fermeture, contrats et dates de d\u00e9but, effectif d\u2019une \u00e9quipe collective.',
-    '<b>Trois diff\u00e9rences avec La campagne, voulues.</b> La date est prise <b>aux heures normales</b> du planning, sans les heures suppl\u00e9mentaires que le simulateur s\u2019autorise quand il cherche un renfort. Un travail hors fen\u00eatre <b>n\u2019est pas rallong\u00e9</b> : le simulateur suppose +15 % par semaine de retard pour dimensionner un renfort, une date \u00ab si je ne touche rien \u00bb lit les heures telles quelles. Et l\u2019<b>\u00e9cart de cadence</b> mesur\u00e9, quand il est applicable, multiplie les heures restantes \u2014 La campagne raisonne au bar\u00e8me.',
-    'Au-del\u00e0 de la derni\u00e8re semaine planifi\u00e9e, l\u2019\u00e9quipe de cette semaine-l\u00e0 est <b>reconduite</b> telle quelle : la date sort quand m\u00eame, pr\u00e9c\u00e9d\u00e9e de \u00ab vers le \u00bb, et la phrase dit ce qu\u2019il restait \u00e0 faire \u00e0 la fin du cadre.',
-    'La <b>marge</b> compte les jours ouvr\u00e9s (lundi \u00e0 vendredi) entre cette date et l\u2019objectif pos\u00e9 pour la campagne. \u00ab Charge restante \u00bb et ses jours ouvr\u00e9s se comptent depuis <b>aujourd\u2019hui</b>.',
-    'Si le planning ne couvre pas encore la p\u00e9riode, l\u2019\u00e9cran retombe sur la cadence des quatre derni\u00e8res semaines \u2014 et l\u2019annonce, car cette cadence ignore les embauches d\u00e9j\u00e0 sign\u00e9es.',
-    'Les m\u00eames fins par travail se lisent dans <b>\u00c9ch\u00e9ances par t\u00e2che</b> (La campagne) : un travail qui finit apr\u00e8s sa fen\u00eatre y est marqu\u00e9 \u00ab d\u00e9borde de N sem. \u00bb. Le 10 septembre 2026, Aujourd\u2019hui affichait \u00ab +32 j d\u2019avance \u00bb pendant que La campagne montrait du travail en retard fin mars : le cockpit comptait l\u2019\u00e9quipe d\u2019octobre sur une taille qui n\u2019ouvre qu\u2019en novembre.'
-  ] },
-
   'pil.capacite': { t: 'Capacité au pic', p: [
     'Le pic est la <b>semaine la plus chargée</b>, jamais une moyenne. Une moyenne annuelle n\u2019existe aucun jour de l\u2019année ; c\u2019est le pic qui décide d\u2019un recrutement.',
     'Cette carte montre le <b>pic à venir</b> : la semaine la plus chargée parmi celles qui ne sont pas encore finies. Sur un exercice, le pic est presque toujours la <b>vendange</b> — consultée en septembre, elle est derrière, et on ne recrute pas pour une semaine faite. Le pic de l\u2019exercice reste écrit en bas de la carte, daté et marqué <b>déjà passé</b> ; l\u2019onglet <b>L\u2019année</b>, lui, le montre toujours en grand, c\u2019est son rôle.',
@@ -2742,7 +2744,7 @@ export const MV_INFO = {
     '<b>L\u2019atelier ne se saisit pas</b>, il se déduit. Un produit phyto part sur la vigne, un produit œno dans la cave, le carburant au tracteur. Une intervention passe au tracteur d\u2019office, parce qu\u2019une machine chez le réparateur, c\u2019est le tracteur qui coûte.',
     '<b>Les salaires n\u2019y sont pas, et ce n\u2019est pas un oubli.</b> Une entrée de planning porte des heures, un type de congé, un motif d\u2019absence — jamais une activité. Rien ne dit si une journée est partie à la vigne ou à la cuverie. Seule la conduite du tracteur est mesurée, et elle <b>reste</b> dans la masse salariale : ici on ne compte que son carburant, sinon la même heure serait payée deux fois.',
     '<b>« Non affecté » est affiché exprès.</b> Sans ce seau, un achat qui ne rentre dans aucune case serait rangé de force ailleurs, et le total mentirait avec l\u2019autorité d\u2019un chiffre.',
-    'Ce qui <b>n\u2019entre pas</b> : le matériel, les outils portés, les fûts <b>achetés</b>. On ne les rachète pas l\u2019an prochain, et un fût a déjà sa durée de vie et son écran de renouvellement. Une <b>location</b> de fûts, elle, entre : c\u2019est un loyer annuel.'
+    'Ce qui <b>n\u2019entre pas</b> : le matériel et les outils portés. Les fûts <b>achetés</b> n\u2019entrent que si vous l\u2019avez demandé — <em>Pilotage \u203a Économie \u203a Paramétrage</em>, « un fût acheté, comment le compter ». Une <b>location</b> de fûts, elle, entre toujours : c\u2019est un loyer, il revient tous les ans. Il est calculé au prorata des jours de contrat, sur les fûts que vous détenez.'
   ] },
 
   'pil.exo.salaires': { t: 'Heures payées, heures travaillées', p: [
@@ -2767,7 +2769,7 @@ export const MV_INFO = {
   ] },
 
   'pil.exo.garde': { t: 'Ce que ce total ne contient pas', p: [
-    'Ma Vigne connaît <b>ce qui passe par elle</b> : les heures payées, le carburant, les achats d\u2019intrants. C\u2019est déjà l\u2019essentiel de vos charges d\u2019exploitation, et c\u2019est ce qui se pilote au fil de l\u2019année.',
+    'Ma Vigne connaît <b>ce qui passe par elle</b> : les heures payées, le carburant, les achats d\u2019intrants, les réparations et les loyers de fûts. C\u2019est déjà l\u2019essentiel de vos charges d\u2019exploitation, et c\u2019est ce qui se pilote au fil de l\u2019année.',
     'Elle ne connaît <b>ni le fermage, ni les amortissements, ni les assurances, ni vos cotisations d\u2019exploitant, ni l\u2019embouteillage, ni les frais généraux</b> — elle ne les voit jamais passer.',
     'Ce chiffre sert donc à <b>piloter vos charges d\u2019un bilan à l\u2019autre</b> : voir si elles montent, où, et pourquoi. Il ne remplace pas votre comptable, et il ne se compare pas ligne à ligne à son bilan.',
     'Le <b>produit consommé en traitements</b> n\u2019y est pas non plus : c\u2019est une sortie de stock, et l\u2019achat a déjà été compté le jour de la facture. Le compter deux fois gonflerait le total.'
@@ -4129,10 +4131,137 @@ function _mvFutEnVin(CAVE_ELEVAGE, curY){
   return {lignes:lignes, total:total, sansRef:sansRef,
           tracePct: total>0 ? Math.round((total-sansRef)/total*100) : 100};
 }
+// ════════════════════════════════════════════════════════════════════════════
+// LE FUT LOUE — un lot est ACHETE ou LOUE (lot FUT-LOC, 10/09/2026)
+// ────────────────────────────────────────────────────────────────────────────
+// L'exercice comptable et la fiche d'aide promettaient la location depuis le
+// premier jour : « une location de futs, elle, entre : c'est un loyer annuel ».
+// Le modele ne portait AUCUN champ pour la dire. Promesse ecrite deux fois,
+// tenue zero. `mode` la rend saisissable :
+//   'achat' (defaut, retro-compatible) -> `prix` = total HT du lot, `dfact` = date
+//                                          de facture, `fact` = numero
+//   'loc'                              -> `loyer` = HT par fut ET PAR AN,
+//                                          `debut` / `fin` = bornes du contrat
+// ⚠️ `loyer` est PAR FUT et non par lot : rendre deux futs en cours de contrat
+//   doit faire baisser le loyer sans qu'on retouche le contrat.
+// ⚠️⚠️ L'ASSIETTE N'EST PAS `qte`. INTRANTS.futs[].qte ne compte que les futs
+//   LIBRES — des qu'un fut part en cuvee il vit dans CAVE_ELEVAGE (_mvFutEnVin).
+//   Facturer sur `qte` seul, ce serait ne payer que les futs vides. On apparie
+//   donc le lot avec les futs en vin sur le triplet four/ref/annee, par
+//   _mvFutMemeLot — la meme egalite que partout, jamais une seconde definition.
+// ⚠️⚠️⚠️ SI DEUX LOTS PARTAGENT LE TRIPLET, on ne devine pas : l'assiette
+//   retombe sur les futs libres et le lot ressort `ambigu:true`. Repartir les
+//   futs en vin « au prorata » aurait donne un chiffre plausible et faux, avec
+//   l'autorite d'une mesure.
+function _mvFutModeDe(f){ return (f && f.mode === 'loc') ? 'loc' : 'achat'; }
+function _mvFutEstLoc(f){ return _mvFutModeDe(f) === 'loc'; }
+// Date qui DATE un lot achete : la facture d'abord, la saisie en repli. Les lots
+// crees avant ce lot n'ont que `date` (= _today() du jour de saisie) : on ne
+// fabrique pas une date de facture qu'on n'a pas, on utilise celle qui existe.
+function _mvFutDateAchat(f){ return String((f && (f.dfact || f.date)) || '').slice(0,10); }
+
+function _mvFutMs(iso){
+  var p = String(iso || '').split('-');
+  if(p.length < 3) return null;
+  var t = Date.UTC(+p[0], (+p[1] || 1) - 1, (+p[2] || 1));
+  return isFinite(t) ? t : null;
+}
+function _mvFutIso(ms){ return new Date(ms).toISOString().slice(0,10); }
+
+// Assiette d'un lot loue : futs libres + futs en vin du MEME lot.
+function _mvFutAssiette(INTRANTS, CAVE_ELEVAGE, f, curY){
+  var libres = Math.max(0, parseInt(f && f.qte, 10) || 0);
+  var jumeaux = ((INTRANTS && INTRANTS.futs) || []).filter(function(x){ return _mvFutMemeLot(x, f); });
+  if(jumeaux.length > 1) return {q:libres, enVin:0, ambigu:true};
+  var ev = _mvFutEnVin(CAVE_ELEVAGE, curY), enVin = 0;
+  (ev.lignes || []).forEach(function(l){ if(_mvFutMemeLot(l, f)) enVin += (parseInt(l.nb,10) || 0); });
+  return {q:libres + enVin, enVin:enVin, ambigu:false};
+}
+
+// Mouvements qui changent ce qu'on DETIENT. Entonner ou embouteiller deplace un
+// fut, ne l'ajoute ni ne le retire : ces motifs-la n'entrent pas ici.
+var MV_FUT_DETENTION = {achat:1, vente:-1, retour:-1, destruction:-1};
+
+// Loyer d'UN lot sur une fenetre de dates, au prorata des JOURS et de la
+// quantite REELLEMENT detenue chaque jour.
+// ⚠️ La quantite est remontee en arriere depuis aujourd'hui : q(t) = detenu
+//   aujourd'hui moins la somme signee des mouvements posterieurs a t. C'est la
+//   seule facon d'avoir la quantite d'un jour passe sans stocker un historique
+//   qui n'existe pas.
+// ⚠️ `fut_mouv` date ses entrees AU JOUR DE LA SAISIE, pas au jour du fait
+//   (_mvFutTracer). Un retour note trois jours plus tard decale le loyer de trois
+//   jours — quelques euros. C'est ecrit ici pour ne pas etre redecouvert.
+function _mvFutLoyerLot(INTRANTS, CAVE_ELEVAGE, f, d0, d1, curY){
+  var vide = {eur:0, jours:0, qFin:0, ambigu:false, sansLoyer:false};
+  if(!_mvFutEstLoc(f)) return vide;
+  // ★ ABSENT ET ZERO SONT DEUX ETATS, ici comme pour les prix. `Number(null)`
+  //   vaut 0 : ecrit tel quel, un contrat SANS loyer passait pour une location
+  //   GRATUITE — 0 EUR facture, et rien dans la liste « a completer ». Un loyer de
+  //   0 reste legitime (fut prete par la tonnellerie) : c'est bien trois etats.
+  var loyer = (f.loyer != null && isFinite(Number(f.loyer))) ? Number(f.loyer) : null;
+  var a0 = _mvFutMs(f.debut), a1 = _mvFutMs(f.fin);
+  var w0 = _mvFutMs(d0), w1 = _mvFutMs(d1);
+  if(w0 == null || w1 == null) return vide;
+  if(a0 == null) a0 = w0;                       // contrat sans debut : la fenetre
+  if(a1 == null) a1 = w1;                       // contrat sans fin   : la fenetre
+  var s = Math.max(a0, w0), e = Math.min(a1, w1);
+  var A = _mvFutAssiette(INTRANTS, CAVE_ELEVAGE, f, curY);
+  if(e < s) return {eur:0, jours:0, qFin:A.q, ambigu:A.ambigu, sansLoyer:(loyer == null)};
+  if(loyer == null || !(loyer >= 0))
+    return {eur:0, jours:Math.round((e-s)/86400000)+1, qFin:A.q, ambigu:A.ambigu, sansLoyer:true};
+
+  // Mouvements de detention du lot, dates, tries du plus recent au plus ancien.
+  var mv = ((INTRANTS && INTRANTS.fut_mouv) || []).filter(function(m){
+    return m && MV_FUT_DETENTION[m.motif] != null && _mvFutMemeLot(m, f) && _mvFutMs(m.date) != null;
+  }).sort(function(x, y){ return _mvFutMs(y.date) - _mvFutMs(x.date); });
+
+  var jours = 0, cumul = 0;
+  for(var t = s; t <= e; t += 86400000){
+    var q = A.q;
+    for(var i = 0; i < mv.length; i++){
+      var md = _mvFutMs(mv[i].date);
+      if(md <= t) break;                        // trie : au premier passe, on sort
+      q -= MV_FUT_DETENTION[mv[i].motif] * (parseInt(mv[i].nb, 10) || 0);
+    }
+    if(q > 0){ cumul += q; jours++; }
+  }
+  return {eur:cumul * loyer / 365, jours:jours, qFin:A.q, ambigu:A.ambigu, sansLoyer:false};
+}
+
+// Tous les lots loues sur une fenetre. Rend le total ET le detail : un ecran qui
+// affiche un loyer doit pouvoir dire de quel contrat il vient.
+function _mvFutLoyer(INTRANTS, CAVE_ELEVAGE, d0, d1, curY){
+  var lignes = [], eur = 0, nSansLoyer = 0, nAmbigu = 0;
+  ((INTRANTS && INTRANTS.futs) || []).forEach(function(f){
+    if(!_mvFutEstLoc(f)) return;
+    var r = _mvFutLoyerLot(INTRANTS, CAVE_ELEVAGE, f, d0, d1, curY);
+    if(r.sansLoyer) nSansLoyer++;
+    if(r.ambigu) nAmbigu++;
+    if(r.jours <= 0 && !(r.eur > 0)) return;    // contrat entierement hors fenetre
+    eur += r.eur;
+    lignes.push({id:f.id, nom:_mvFutRef(f) || 'Lot sans nom', four:f.four || '', ref:f.ref || '',
+                 annee:_mvFutAn(f.annee), loyer:Number(f.loyer) || 0, qte:r.qFin,
+                 debut:f.debut || '', fin:f.fin || '', jours:r.jours, eur:r.eur,
+                 ambigu:r.ambigu, sansLoyer:r.sansLoyer});
+  });
+  lignes.sort(function(a, b){ return b.eur - a.eur; });
+  return {eur:eur, lignes:lignes, n:lignes.length, nSansLoyer:nSansLoyer, nAmbigu:nAmbigu};
+}
+
+// Jours restants avant la fin d'un contrat, a partir d'une date de reference.
+function _mvFutJoursFin(f, isoRef){
+  if(!_mvFutEstLoc(f)) return null;
+  var a1 = _mvFutMs(f.fin), r = _mvFutMs(isoRef || new Date().toISOString().slice(0,10));
+  if(a1 == null || r == null) return null;
+  return Math.round((a1 - r) / 86400000);
+}
+
 function _mvFutParc(INTRANTS, CAVE_ELEVAGE, curY){
   curY = curY || new Date().getFullYear();
   var cfg = (window.CONFIG && window.CONFIG.cave) || {};
   var vie = parseInt(cfg.futs_vie, 10) || 5;
+  var preavis = parseInt(cfg.futs_preavis, 10);
+  if(!(preavis > 0)) preavis = 90;              // jours avant fin de contrat
   var st = _mvFutStock(INTRANTS, curY), ev = _mvFutEnVin(CAVE_ELEVAGE, curY);
   var parAnnee = {};
   function add(a, n, cle){
@@ -4152,10 +4281,47 @@ function _mvFutParc(INTRANTS, CAVE_ELEVAGE, curY){
     return b.annee - a.annee;
   });
   var parc = st.total + ev.total;
-  return {curY:curY, vie:vie, stock:st, enVin:ev, libres:st.total, occupes:ev.total,
+
+  // ★★★ DEUX SIGNAUX, DEUX GESTES (lot FUT-LOC, 10/09/2026).
+  //   Un fut ACHETE en fin de vie se REFORME. Un fut LOUE en fin de contrat se
+  //   REND. Le meme compteur pour les deux donnait un ordre faux : on ne reforme
+  //   pas le bien de quelqu'un d'autre, et un contrat qui se termine ne previent
+  //   pas parce que le fut a fait cinq vins.
+  // ⚠️ Le loue reste dans la PYRAMIDE et dans la part des anges : il travaille
+  //   comme les autres. Il sort de la seule alerte de reforme.
+  var refIso = _mvFutIso(Date.UTC(curY, new Date().getMonth(), new Date().getDate()));
+  var loc = [], aRendre = 0, locQte = 0;
+  ((INTRANTS && INTRANTS.futs) || []).forEach(function(f){
+    if(!_mvFutEstLoc(f)) return;
+    var A = _mvFutAssiette(INTRANTS, CAVE_ELEVAGE, f, curY);
+    var j = _mvFutJoursFin(f, refIso);
+    locQte += A.q;
+    var due = (j != null && j <= preavis);
+    if(due) aRendre += A.q;
+    loc.push({id:f.id, nom:_mvFutRef(f) || 'Lot sans nom', four:f.four || '', ref:f.ref || '',
+              annee:_mvFutAn(f.annee), qte:A.q, libres:Math.max(0, parseInt(f.qte,10) || 0),
+              enVin:A.enVin, ambigu:A.ambigu, loyer:Number(f.loyer) || 0,
+              debut:f.debut || '', fin:f.fin || '', jours:j, aRendre:due});
+  });
+  loc.sort(function(a, b){
+    if(a.jours == null) return 1;
+    if(b.jours == null) return -1;
+    return a.jours - b.jours;
+  });
+
+  // Les futs loues sortent du compteur de reforme. `lignes[].reforme` reste un
+  // drapeau d'AGE par annee — c'est ce que la pyramide colore, et le loue y garde
+  // sa place ; seul le NOMBRE a reformer est net de location.
+  var aRef = lignes.filter(function(l){ return l.reforme; })
+                   .reduce(function(s, l){ return s + l.total; }, 0);
+  var locRef = loc.filter(function(l){ return l.annee != null && (curY - l.annee) >= vie; })
+                  .reduce(function(s, l){ return s + l.qte; }, 0);
+  aRef = Math.max(0, aRef - locRef);
+
+  return {curY:curY, vie:vie, preavis:preavis, stock:st, enVin:ev, libres:st.total, occupes:ev.total,
           parc:parc, sansRef:ev.sansRef, tracePct:ev.tracePct, lignes:lignes,
-          aReformer:lignes.filter(function(l){ return l.reforme; })
-                          .reduce(function(s,l){ return s+l.total; }, 0),
+          aReformer:aRef,
+          loc:loc, locQte:locQte, aRendre:aRendre, achQte:Math.max(0, parc - locQte),
           neufs:lignes.filter(function(l){ return l.vins === 0; })
                       .reduce(function(s,l){ return s+l.total; }, 0),
           mouv:_mvFutMouv(INTRANTS, curY)};
@@ -4273,6 +4439,14 @@ window._mvFutMouv      = _mvFutMouv;
 window._mvFutStock     = _mvFutStock;
 window._mvFutEnVin     = _mvFutEnVin;
 window._mvFutParc      = _mvFutParc;
+window._mvFutModeDe    = _mvFutModeDe;
+window._mvFutEstLoc    = _mvFutEstLoc;
+window._mvFutDateAchat = _mvFutDateAchat;
+window._mvFutAssiette  = _mvFutAssiette;
+window._mvFutLoyerLot  = _mvFutLoyerLot;
+window._mvFutLoyer     = _mvFutLoyer;
+window._mvFutJoursFin  = _mvFutJoursFin;
+window.MV_FUT_DETENTION= MV_FUT_DETENTION;
 window._mvFutEntrer    = _mvFutEntrer;
 window._mvFutLiberer   = _mvFutLiberer;
 window._mvFutRetirer   = _mvFutRetirer;

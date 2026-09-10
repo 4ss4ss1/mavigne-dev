@@ -137,7 +137,27 @@ mord('« sans frais » traite comme un vide', () => {
   return X.nRepSansPrix === 1; });
 
 console.log('\n── LA SOURCE\n');
-t('les reparations entrent dans le total', /var total=salT\+gnrT\+achT\+repT;/.test(SRC));
+// ⚠️ CETTE ASSERTION EPINGLAIT L'EXPRESSION ENTIERE (`...+repT;`, point-virgule
+//   compris). Elle rougissait donc au premier poste AJOUTE au total, alors que
+//   les reparations y etaient toujours : elle testait la forme, pas la propriete.
+//   Elle teste desormais la PRESENCE de chaque terme. Regle generale : un test de
+//   source epingle ce qu'il veut prouver, jamais la ligne qui l'entoure.
+t('les reparations entrent dans le total', /var total=salT\+gnrT\+achT\+repT/.test(SRC));
+t('le loyer des futs et les futs achetes entrent aussi (FUT-LOC)',
+  /var total=salT\+gnrT\+achT\+repT\+locT\+futT;/.test(SRC));
+t('le poste fut est EMPILE dans le graphe mensuel, pas seulement compte',
+  /\+\(b\.fut\|\|0\)\+\(b\.salP\|\|0\)/.test(SRC) && /\['fut',_PEC_COL\.loc\]/.test(SRC));
+t('les futs vont a la CAVE, jamais ailleurs',
+  /_ateAdd\('cave','Location de f/.test(SRC) && /_ateAdd\('cave',_pexFutLbl\(\)/.test(SRC));
+// ⚠️ NE PAS CHERCHER LE MOT « amorti » : il figure legitimement dans un texte
+//   utilisateur (« Pas d'amortissement, et c'est voulu »). Un test qui cherche un
+//   MOT au lieu d'une PROPRIETE rougit sur la phrase qui explique la decision.
+//   Ce qu'on veut prouver : deux valeurs de reglage, et aucun etalement sur une
+//   duree de vie dans le moteur economique.
+t('le fut ACHETE a un reglage a DEUX valeurs',
+  /_PEX_FUT_TRAIT = \{hors:1, achat:1\}/.test(SRC));
+t('aucun etalement sur la duree de vie du fut dans le moteur',
+  !/futs_vie/.test(SRC) && !/futVie/.test(SRC));
 t('les TROIS sommes mensuelles portent le 4e poste',
   /b\.sal\+b\.gnr\+b\.ach\+\(b\.dep\|\|0\)/.test(SRC) && /\(b\.ach\|\|0\)\+\(b\.dep\|\|0\)/.test(SRC)
   && /\['dep',_PEC_COL\.dep\]/.test(SRC));
