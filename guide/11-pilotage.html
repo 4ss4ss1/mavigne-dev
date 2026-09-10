@@ -201,10 +201,14 @@
 
   <h3>{ic:boussole} Aujourd'hui</h3>
   <ul class="dot">
-    <li><b>Marge sur objectif</b> : en avance ou en retard sur la date de fin visée, d'après
-    l'<b>équipe déjà planifiée</b> — contrats et dates de début compris. C'est <b>la seule date de
-    fin du module</b> : la carte « Échéances par tâche » de La campagne lit le même calcul et le dit.</li>
-    <li><b>Charge restante</b>, exprimée en <b>jours ouvrés</b> et non en heures abstraites.</li>
+    <li><b>Marge sur objectif</b> : en avance ou en retard sur la date de fin visée. La date répond
+    à une seule question — <i>si le planning et les contrats restent tels quels, quand tout est-il
+    fini&nbsp;?</i> — et vient du <b>même calcul que La campagne sans renfort</b>&nbsp;: chaque travail
+    dans <b>sa fenêtre</b>, l'équipe partagée entre les travaux ouverts en même temps, le tracteur
+    déduit, aux heures normales du planning. C'est <b>la seule date de fin du module</b>&nbsp;: la carte
+    « Échéances par tâche » de La campagne lit la même simulation, travail par travail. « Vers le »
+    signale une fin après la période, l'équipe de la dernière semaine reconduite.</li>
+    <li><b>Charge restante</b>, exprimée en <b>jours ouvrés</b> comptés depuis aujourd'hui.</li>
     <li><b>Cadence de l'équipe</b> sur les dernières semaines&nbsp;: les heures réellement travaillées
     au planning, une équipe collective à son effectif, un congé payé compté zéro.</li>
     <li><b>Effectif</b> : combien de personnes sont au champ aujourd'hui, et combien il en faudrait
@@ -416,13 +420,17 @@
   vous suit d'une session à l'autre.</p>
 
   <details><summary>D'où vient la date de fin projetée&nbsp;?</summary>
-    <div class="dbody">De l'<b>équipe déjà planifiée</b>, lue <b>jour par jour</b>&nbsp;: le modèle
-    horaire de chacun, les entrées du planning (congés, fermeture, absence), les <b>contrats signés
-    et leurs dates de début</b>, et l'effectif d'une équipe collective. Une vendange engagée du
-    26&nbsp;août au 4&nbsp;septembre absorbe donc de la charge à partir du 26, pas avant, et jamais
-    au prorata d'une semaine entamée. On y ajoute, quand il est mesurable, l'écart de cadence déjà
-    constaté (une heure présente ne vaut pas toujours une heure de barème)&nbsp;; sinon la phrase
-    sous le chiffre le dit.<br>
+    <div class="dbody">Du <b>simulateur de La campagne</b>, avec « aucun renfort »&nbsp;: chaque travail
+    commence à l'ouverture de <b>sa fenêtre</b> — pas au premier jour de la période —, les travaux
+    ouverts en même temps se <b>partagent l'équipe</b>, les heures de <b>tracteur</b> sont déduites, et
+    l'équipe est lue <b>jour par jour</b> dans le planning&nbsp;: le modèle horaire de chacun, les
+    congés, la fermeture, les <b>contrats signés et leurs dates de début</b>, l'effectif d'une équipe
+    collective. Une taille dont la fenêtre ouvre le 26&nbsp;novembre ne reçoit donc pas l'équipe
+    d'octobre. Trois choses la distinguent du simulateur de renfort, et le « i » les dit&nbsp;: les
+    heures <b>normales</b> du planning (pas d'heures supplémentaires), <b>aucun rallongement</b> du
+    travail en retard, et l'<b>écart de cadence</b> mesuré appliqué aux heures restantes quand il est
+    applicable. Au-delà de la dernière semaine planifiée, l'équipe de cette semaine-là est reconduite
+    telle quelle&nbsp;: la date sort, précédée de « vers le », et la phrase dit ce qu'il restait.<br>
     Si le planning ne couvre pas encore la période à venir, l'écran retombe sur la <b>cadence des
     quatre dernières semaines</b> — et l'annonce, car cette cadence-là ignore les embauches déjà
     signées.</div></details>

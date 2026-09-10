@@ -1,4 +1,14 @@
-// MA VIGNE — Service Worker v7.60
+// MA VIGNE — Service Worker v7.61
+// v7.61 (10/09/2026) — PIL-FIN : LA DATE DE FIN D'AUJOURD'HUI EST CELLE DE LA
+//   CAMPAGNE. « +32 j d'avance » sur Aujourd'hui, du rouge fin mars sur La
+//   campagne, memes donnees : _pilCapaProj (supprime) cumulait l'equipe des le
+//   1er jour de la periode sans fenetres ni tracteur. _pilMargeCalc lit
+//   _pilFinPlan = _rfCtx(d,'reste',{sansTaux,sansSel}) + _rfSim, capacite normale
+//   (hMax=hJour), sans rallongement du retard (k=0), facteur de cadence
+//   (_pilFacteurK) sur les heures ; fin descendue au jour (_pilFinJour), « vers
+//   le » et equipe reconduite au-dela du cadre (_rfSim.apres). Echeances par
+//   tache lit m.capa.taches (deborde de N sem.). Jours ouvres depuis aujourd'hui.
+//   MV_INFO pil.marge. APP 7.01 -> 7.02.
 // v7.60 (10/09/2026) — PIL-COH + PIL-EXO + PIL-DIAG : LE PILOTAGE NE SE CONTREDIT
 //   PLUS. Une seule date de fin (Echeances lit _pilMargeCalc) ; cadence d'equipe
 //   x effectif collectif, CP = 0 (_planTeamCadence_) ; borne [0,5;3] dans _pecData
@@ -3658,7 +3668,7 @@
 // v2.22 — Fix profils vides : guard vide dans loadData() pour MEMBRES/SAISONS/TACHES
 // v2.17 — Onboarding intégré + tenantId · v2.06 — Firebase Auth · v2.00–v2.05 — divers
 const DEBUG = self.location.hostname === 'localhost' || self.location.hostname === '127.0.0.1';
-const CACHE_NAME   = 'mavigne-v7.60';
+const CACHE_NAME   = 'mavigne-v7.61';
 const TENANT_CACHE = 'mavigne-tenant';   // Cache persistant — préservé à chaque mise à jour SW
 const SYNC_TAG     = 'mavigne-sync';
 
@@ -3674,7 +3684,7 @@ const CDN_URLS = [
 ];
 
 self.addEventListener('install', event => {
-  if(DEBUG) console.log('[SW] Ma Vigne v7.60 installé');
+  if(DEBUG) console.log('[SW] Ma Vigne v7.61 installé');
   event.waitUntil(
     caches.open(CACHE_NAME).then(async cache => {
       // ── Cœur applicatif : STRICT (mise à jour ATOMIQUE) ──
@@ -3690,7 +3700,7 @@ self.addEventListener('install', event => {
 });
 
 self.addEventListener('activate', event => {
-  if(DEBUG) console.log('[SW] Ma Vigne v7.60 activé');
+  if(DEBUG) console.log('[SW] Ma Vigne v7.61 activé');
   event.waitUntil(
     caches.keys().then(keys =>
       Promise.all(

@@ -2,7 +2,20 @@
 
 > Document de référence du projet **Ma Vigne** (GUERETTECH). Il est le **porteur de vérité** :
 > la mémoire Claude est plafonnée, ce fichier ne l'est pas.
-> Dernière consolidation : **10 septembre 2026 (PIL-COH + PIL-EXO + PIL-DIAG)** — ★★★ **LE PILOTAGE NE SE CONTREDIT
+> Dernière consolidation : **10 septembre 2026 (soir, PIL-FIN)** — ★★★ **LA DATE DE FIN D'AUJOURD'HUI EST CELLE DE LA
+> CAMPAGNE (§105)**. Nico : *« je crois que les 32 jours d'avance sont faux »*. Ils l'étaient : « +32 j d'avance, fin le
+> 15 févr. » sur Aujourd'hui, du **rouge** fin mars sur La campagne et « 4,9 personnes pour 2,8 » dans le tableau des
+> fenêtres, sur les mêmes données. Le cockpit avait **son** moteur (`_pilCapaProj`) : il cumulait l'équipe dès le
+> **1er jour de la période** (le « 97 j ouvrés » le prouvait) sur une taille dont la fenêtre ouvre le 26 novembre, sans
+> tracteur, sans chevauchement. Mesuré au bac, fonctions réelles : **+51 j ici, 409 h en retard là**. `_pilMargeCalc`
+> lit désormais **`_pilFinPlan` = `_rfCtx(d,'reste',{sansTaux})` + `_rfSim`** — le moteur de La campagne — à la
+> **capacité normale**, **sans rallongement du retard**, facteur de cadence sur les heures ; fin descendue au jour,
+> « vers le » et équipe reconduite au-delà du cadre. `_pilCapaProj` supprimé. Échéances par tâche lit `m.capa.taches`.
+> ⚠️ **Deux arbitrages pris et écrits** (§105c) : le rallongement du retard du simulateur faisait finir 644 h le
+> **20 juillet** (facteur ×4) ; les 1,3 ETP de tracteur déduits tout l'hiver sur la capture sont une **hypothèse à
+> vérifier** (roue › ETP au tracteur). **APP 7.01 → 7.02 · SW 7.60 → 7.61**, base `eb12c01`. Détail en **§105**.
+>
+> ★ Précédente : **10 septembre 2026 (PIL-COH + PIL-EXO + PIL-DIAG)** — ★★★ **LE PILOTAGE NE SE CONTREDIT
 > PLUS (§103), L'EXERCICE EST COUPÉ AU JOUR ET IL N'Y A PLUS QU'UNE LISTE « À COMPLÉTER » (§104)** : un bac qui EXÉCUTE
 > les huit onglets a trouvé onze défauts (deux dates de fin, une cadence qui comptait une fiche pour 30 vendangeurs, un
 > écart refusé ici et appliqué là, la masse salariale sans le bureau — 0a-quater enfin livré) ; l'Exercice dit engagé /
@@ -15740,3 +15753,123 @@ admin — les quatre KPI de l'Exercice, le hachuré et le trait du jour sur le g
 `node scripts/build-guide.mjs`), `CLAUDE.md`. **Ouvert** : la fusion `_pexZeros` ; le bac (jsdom + domaine
 synthétique) qui a trouvé les défauts de §103 vit hors du dépôt — le rapatrier en `scripts/bac/` est le prochain
 outil qui manque (§103b : *le test qui manque au projet est celui-là*).
+
+## 105. ★★★ PIL-FIN — LA DATE DE FIN D'AUJOURD'HUI EST CELLE DE LA CAMPAGNE (10/09 soir — APP 7.01 → 7.02 · SW 7.60 → 7.61 · base `eb12c01`)
+
+**Point de départ**, mot pour mot : *« Je crois que les 32 jours d'avance sont faux. Vérifie tous les calculs
+nécessaires. »* Trois captures : Aujourd'hui (« +32 j d'avance · fin le lun. 15 févr. · 2 411 h · ≈ 97 j ouvrés d'ici
+là »), La campagne › renfort (« aucun renfort en plus » : quatre barres rouges fin mars, 16–18 pers·sem), le tableau
+des fenêtres (Taille 2,1 · Tirage 1,5 · Brûlage 1,3 « il faudrait » pour 2,8 « déjà là »).
+
+### 105a. Ce qui était vrai, ce qui était faux
+
+- **L'arithmétique était juste.** `_pilWdBetween(15 févr., 31 mars) = 32`. Et **`97` trahissait le départ** :
+  `_pilWdBetween(1 oct., 15 févr.) = 97` (depuis aujourd'hui, 112). Le cockpit projetait depuis `fen.debut` = le
+  1er jour de la période, alors que « d'ici là » se lit depuis aujourd'hui.
+- **La date était fausse, structurellement.** `_pilCapaProj` cumulait **toute** la capacité (`capH`, planning jour par
+  jour) contre **toute** la charge à partir du 1er octobre — huit semaines d'équipe créditées à une taille dont la
+  fenêtre ouvre le 26 novembre. Sur le graphe de La campagne, ce sont les semaines **hachurées** de novembre
+  (« payés sans travail ouvert ») : Aujourd'hui les comptait comme de la taille faite. Il ne déduisait pas les heures
+  tracteur (`_rfCtx` les déduit : d'où 2,8 « déjà là » sous une ligne noire à 4,1) et ignorait que trois fenêtres se
+  chevauchent. **Échéances par tâche** faisait pire : chaque tâche projetée seule, avec toute l'équipe, depuis le
+  1er octobre.
+- ★★★ **La leçon de §103, un onglet plus loin.** §103 avait unifié Aujourd'hui et Échéances sur `_pilMargeCalc` — deux
+  écrans, un moteur, **le mauvais**. La campagne, elle, avait le bon (`_rfSim` : fenêtres, partage, tracteur) et disait
+  le contraire du cockpit sur les mêmes données. *Une seule date par module* ne suffit pas : il faut **une seule
+  simulation par question**, et la question « quand est-ce fini ? » est celle du simulateur.
+
+### 105b. Mesuré au bac (fonctions réelles extraites, domaine synthétique calé sur la capture)
+
+2 411 h · 5 puis 4 personnes à 37,5 h · fermeture 24/12 → 3/1 · Réparation 150 h (1–28 oct.), Taille 1 000 h (26/11 →
+3/3), Tirage 700 h (3/12 → 17/3), Brûlage 561 h (10/12 → 17/3) · tracteur 1,3 ETP comme la capture.
+
+| moteur | départ | fin | marge vs 31/03 |
+|---|---|---|---|
+| `_pilCapaProj` (ancien cockpit) | 1er oct. | **19 janv.** | **+51 j** |
+| `_pilCapaProj` depuis la 1re fenêtre | 26 nov. | 29 mars | +2 j |
+| `_rfSim` tel quel (La campagne, hMax 8, retard +15 %/sem) | fenêtres | **20 juil.** (644 h restantes le 31/3, facteur ×4) | −79 j |
+| `_rfSim` capacité normale, sans rallongement — **PIL-FIN** | fenêtres | **11 mai** (580 h restantes le 31/3) | **−29 j** |
+| idem sans tracteur | fenêtres | 22 mars | +7 j |
+| idem cadence ×1,2 | fenêtres | 12 avr. | −8 j |
+
+Le profil des rouges du bac (4,9 · 4,1 · 13,2 · 10,9 pers·sem) a la forme de ceux de la capture (~17 · 8 · 16 · 18). Sur
+les données réelles, non lues, la fin tombe entre mi-avril et début mai.
+
+### 105c. Le lot — et les deux arbitrages
+
+- **`_pilFinPlan(d)`** (pilotage.js) : `_rfCtx(d,'reste',null,{sansTaux:true,sansSel:true})` puis `_rfSim(C,null)` avec
+  `C.c = {hMax: hJour, k: 0}` et `tw[].h × k` (facteur de `_pilFacteurK`, ex-bloc k de `_pilCapaProj`, mêmes lignes
+  pour les harnais). Fin = `max(taches[].fin)` ; **descente au jour** par `_pilFinJour` (heures consommées de la
+  semaine posées sur `_mvCapReelIn` jour par jour, part du tracteur au prorata) ; au-delà du cadre, `_rfSim.apres`
+  (semaines prolongées, ajout pur) et le profil de la dernière semaine décalé de 7 j — la convention de `_rfWkEnd`.
+  Rend `taches[]` (fin, libellé de semaine, `dep`, `perdu`, `hors`), `resteFin`, `nDep`, `approx`, `finCamp`.
+- **`_pilMargeCalc`** lit `_pilFinPlan` ; `seasonJ` depuis **aujourd'hui** ; repli cadence inchangé (départ borné à la
+  fenêtre). **`_pilMargeSous`** : *« Si le planning et les contrats restent tels quels, tout est fini le … Comme La
+  campagne sans renfort — chaque travail dans sa fenêtre, tracteur déduit — aux heures normales du planning. »* + la
+  cadence, + « Au-delà du 31 mars, l'équipe de la dernière semaine planifiée est reconduite ; il restait ~N h », + « N
+  travaux débordent leur fenêtre — voir La campagne ». Pastille **`pil.marge`** (MV_INFO, neuve) à côté de « Marge sur
+  votre objectif ».
+- **`_pilPanelEcheances`** : chaque ligne lit `m.capa.taches` — « fin ≈ 6–12 mai (après la période) · déborde de
+  10 sem. » / « perdu » ; « N j » depuis aujourd'hui ; cadre « même calcul qu'Aujourd'hui — La campagne sans renfort,
+  aux heures normales ».
+- **`_rfCtx(d,mode,cdIn,opts)`** : `opts.sansTaux` (rate=0 — une date ne coûte rien) et **`opts.sansSel`** — le cockpit lit
+  l'équipe **déjà sous contrat**, jamais la sélection en cours de La campagne (`_RF_SEL` : « +3 permanents » posés dans
+  le simulateur auraient avancé la date d'Aujourd'hui — trouvé en relisant `_rfCtx`, contre-épreuve posée). **`_rfSim`** : `parSem[].resteTot`
+  et `apres[]` (ajouts purs ; `_rfProfilSvg` lit `parSem[i<n]`, inchangé). **`_pilCapaProj` supprimé** (un moteur mort
+  est une invitation).
+- ⚠️ **Arbitrage 1 — capacité normale, sans rallongement.** Nico : *« la fin prévue à la capacité normale, c'est-à-dire
+  celle inscrite dans planning… si je ne touche rien à mon planning et mes embauches aujourd'hui, à quelle date les
+  travaux seront terminés »*. Donc `hMax = hJour` (pas les 8 h/j que le simulateur s'autorise). Et **`k = 0`** : le
+  rallongement du retard (+15 %/semaine hors fenêtre, `_rfCfg().k`) est juste pour **dimensionner un renfort**, absurde
+  pour une **date** — mesuré, 644 h restantes le 31 mars finissaient le **20 juillet**, le facteur ayant atteint ×4.
+  Ce sont trois écarts **voulus** avec La campagne (heures sup, rallongement, cadence), tous trois écrits dans
+  `pil.marge` et dans le guide. *Les rouges de La campagne restent calculés avec le rallongement* : c'est son rôle.
+- ⚠️ **Arbitrage 2 — le tracteur déduit tout l'hiver.** Sur la capture, ~1,3 ETP de tracteur sont retirés de
+  décembre à mars (ligne noire 4,1, « déjà là » 2,8). `_rfTracEtp` lit `CONFIG.eco.trac_etp` (roue du Pilotage,
+  « ETP au tracteur — laisser vide : mesuré sur les sessions de la période ») ; sur une période sans session, seule
+  une valeur **forcée** donne 1,3. Une moyenne annuelle appliquée à l'hiver **surestime** la déduction et recule la date
+  — c'est **une hypothèse du domaine**, pas un défaut du code, et c'est écrit ici pour que Nico la vérifie. Le lot ne
+  la touche pas.
+- **Non touché, et dit** : la charge du simulateur = barème × surface × (1 − % fait) par tâche (`cd.taskWindows`), le
+  KPI « Charge restante » = `calcHeures().totalReste` ; identiques sur les tâches simples, ils peuvent différer sur une
+  tâche à passages dont chaque passage porte son propre h/ha. La dernière semaine fusionnée (8–13 j) sert de profil
+  aux semaines prolongées à 7 j près — la convention de `_rfWkEnd`, la même que La campagne.
+
+### 105d. Vérifications
+
+`mv-harnais-pil-coherence` **57/57** (+15 : ⑭ exécute `_pilMargeCalc → _pilFinPlan → _rfCtx → _rfSim` sur une campagne
+de 26 semaines, une personne à 37,5 h, 300 h dont la fenêtre ouvre en semaine 8 : fin **semaine 15** et non 7, fin au
+**mer. 20 janv.** au jour près, marge 50, jours ouvrés depuis aujourd'hui, tracteur 0,5 ETP → semaine 23, 1 200 h →
+« vers le » + 225 h restantes + semaine 31, fenêtre d'une semaine → même fin (pas de rallongement), sans taux
+horaire → date quand même, ×1,5 → semaine 19, hors bornes → 15, sélection « +3 permanents » ignorée). ⚠️ Le module
+extrait est mis en cache par source : la sélection se pose **après** l'import (`_setSel`), sinon la contre-épreuve
+passait verte. Contre-épreuves **17/17** rougissent (+5 : tâche démarrée au 1er jour de la période, tracteur non
+déduit, rallongement du retard, heures sup, cockpit qui lit la simulation). `npm run check` : preflight **0 erreur ·
+0 avertissement**, tous harnais verts, `garde-projection` 19/19 (`_pilFacteurK` + `_pilFinPlan` en garde de montage),
+`harnais-claude-md` SECTIONS 135 → **137** (le script en réclamait un de plus depuis §104). `WHATS_NEW` **exécuté** : `7.02`, 1 item,
+icône `chrono`. `v7.61` cinq fois dans `sw.js`, quatre `v7.02` dans `index.html`. Guide 11 régénéré. `MV_AIDE.pilotage`
+relue : « Une seule date de fin » ajoutée ; `MV_INFO` : `pil.marge` neuve (posée), `pil.cadence` et `pil.sim.modele`
+relues, rien à changer. **Pas de rendu navigateur** : à regarder en admin — Aujourd'hui doit dire une fin en avril
+ou mai avec « vers le », un reste au 31 mars et « 3 travaux débordent leur fenêtre » ; Échéances par tâche doit
+porter « déborde de N sem. » ; La campagne inchangée.
+
+### 105e. La note de livraison
+
+**Base : `eb12c01`** (« piotage » — PIL-COH intégré ; `.mv-base` pointait encore sur `ae9adbd`, regravé).
+
+| Fichier | Ce qui change | Bump ? |
+|---|---|---|
+| `src/pilotage.js` | la date de fin, la marge et les « N j » par tâche viennent du simulateur de La campagne ; « vers le », reste au 31/3, débordements ; pastille « i » | — |
+| `src/utils.js` | `APP_VERSION 7.02`, `WHATS_NEW`, `MV_INFO pil.marge`, `MV_AIDE.pilotage` | ★ APP |
+| `index.html` | 4 × `v7.02` | ★ APP |
+| `public/sw.js` | `v7.61`, changelog | ★ SW |
+| `guide/11-pilotage.html` | Aujourd'hui + « D'où vient la date de fin » — puis `node scripts/build-guide.mjs` | — |
+| `scripts/mv-harnais-pil-coherence.mjs` | ⑤/⑥ suivent `_pilFacteurK`/`m.capa.taches`, ⑭ exécuté, 4 contre-épreuves | — |
+| `scripts/banc/garde-projection.mjs` | garde de montage sur `_pilFacteurK` et `_pilFinPlan` | — |
+| `scripts/harnais-claude-md.mjs` | SECTIONS 137 | — |
+| `.mv-base` | `eb12c01` | — |
+| `CLAUDE.md` | §105 | — |
+
+**Ouvert** : rapatrier le bac de §103 et celui-ci (`bac-marge.mjs`, `bac-fin.mjs`, domaine synthétique) en
+`scripts/bac/` ; La campagne et Aujourd'hui divergent encore *par construction* quand la cadence mesurée s'applique
+(La campagne au barème) — à trancher un jour dans un seul sens.

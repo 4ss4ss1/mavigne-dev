@@ -23,7 +23,7 @@ export const GT_ADMIN_EMAIL = 'ngdevpro@gmail.com';
 // WHATS_NEW   : tableau vide = modal desactive pour cette version.
 // Format item : { emoji:'📅', titre:'Titre court', desc:'Phrase utilisateur.' }
 // Regle : seulement les changements visibles par les utilisateurs.
-export const APP_VERSION = '7.01';
+export const APP_VERSION = '7.02';
 // ════ Journal des nouveautés (récap cumulatif) ════
 // Une entrée par version, la PLUS RÉCENTE EN HAUT : { v:'5.10', items:[ {emoji,titre,desc}, … ] }
 // À chaque release visible → AJOUTER un bloc en tête (ne pas remplacer). items:[] = release technique (rien à afficher).
@@ -354,6 +354,10 @@ window._mvGraphRepeindre = function(){
 };
 
 export const WHATS_NEW = [
+  { v: '7.02', items: [
+    { emoji: 'chrono', titre: 'La date de fin d\u2019Aujourd\u2019hui est celle de La campagne',
+      desc: "Aujourd\u2019hui annon\u00e7ait <b>+32 j d\u2019avance</b> pendant que La campagne montrait du travail en retard fin mars, sur les m\u00eames donn\u00e9es : le cockpit comptait l\u2019\u00e9quipe d\u2019octobre sur une taille qui n\u2019ouvre qu\u2019en novembre, et ne d\u00e9duisait pas le tracteur. La date, la marge et les \u00ab N j \u00bb par t\u00e2che viennent d\u00e9sormais du simulateur de La campagne sans renfort \u2014 chaque travail dans sa fen\u00eatre, tracteur d\u00e9duit, aux heures normales du planning. Les jours ouvr\u00e9s se comptent depuis aujourd\u2019hui, la phrase sous le chiffre dit quand l\u2019\u00e9quipe est reconduite au-del\u00e0 de la p\u00e9riode, et un petit \u00ab i \u00bb explique le calcul." }
+  ] },
   { v: '7.01', items: [
     { emoji: 'euro', titre: 'L\u2019exercice est coup\u00e9 au jour : engag\u00e9, pr\u00e9vu, \u00e0 la cl\u00f4ture',
       desc: "\u00c9conomie \u203a Exercice disait \u00ab 216 k\u20ac \u00b7 10 113 h pay\u00e9es \u00bb un 10 septembre \u2014 deux mois sortis et dix mois lus dans la grille du planning. Il dit maintenant <b>ce qui est sorti</b> \u00e0 ce jour, <b>ce que la grille pr\u00e9voit</b> jusqu\u2019\u00e0 la cl\u00f4ture (hachur\u00e9 sur le graphe, avec le trait d\u2019aujourd\u2019hui), et le total des deux. Un mois entam\u00e9 est coup\u00e9 au jour. La comparaison avec l\u2019an dernier se fait <b>aux m\u00eames jours</b>, et l\u2019exercice complet dit qu\u2019il contient du pr\u00e9vu." },
@@ -2364,6 +2368,7 @@ var MV_AIDE = {
       _mvAideOngletsPil,
       ['La barre du haut dit où vous regardez', ": l’exercice entier, ou une campagne. Cliquez une campagne dans la frise de l’année et les trois chiffres du haut, la frise et les tableaux de la campagne suivent. La croix revient à l’année. <b>Trois écrans ont leur propre cadre</b> et ne se recadrent pas : Économie chiffre la période consultée, la Cave suit le millésime, la Conformité roule sur sept ans — chacun l’écrit au-dessus de ses chiffres."],
       ['Les trois chiffres du haut', "— les travaux, l’effectif, le budget — ne s’affichent que sur <b>L’année</b> et <b>La campagne</b>, les deux niveaux de zoom. Ils changent avec ce que vous regardez, et chacun mène à l’écran qui le détaille. Ailleurs, ils ne servaient plus à choisir où aller : sur Économie et sur Conformité, ils répétaient l’écran juste en dessous."],
+      ['Une seule date de fin', "pour tout le module : Aujourd’hui, sa frise et Échéances par tâche lisent la même simulation que La campagne sans renfort — chaque travail dans sa fenêtre, l’équipe partagée entre les travaux ouverts en même temps, le tracteur déduit, aux heures normales du planning. Le « i » à côté de la marge dit les trois choses qui la distinguent du simulateur de renfort, et « vers le » signale une fin après la période, l’équipe de la dernière semaine reconduite."],
       ['La conformité n’est plus dans cette ligne', "et c’est une question d’échelle : le cuivre roule sur <b>sept ans glissants</b>, il ne bouge pas quand vous cliquez une campagne. Un chiffre qui ignore la portée n’a pas sa place dans une ligne qui se recadre. Il se lit en entier dans l’onglet Conformité, et le bouton « à compléter » remonte toujours ses alertes, sur tous les onglets."],
       ['Le bouton « à compléter »', "liste ce qui manque pour que vos chiffres soient justes, et vous emmène à l’endroit exact où le renseigner. Un rond rouge sur un chiffre veut dire qu’il ne se calcule pas ; un rond orange, qu’il sort mais faux."],
       ['Les onglets vont du large au fin', ": l’année, puis la campagne, puis l’équipe et le matériel, puis la décision. Après le trait, ce sont des écrans de détail — on y arrive aussi en touchant un des trois chiffres."],
@@ -2548,6 +2553,15 @@ export const MV_INFO = {
     'Une cuve de moins de trois jours ou de moins de trois relevés n\u2019est pas projetable : l\u2019écran dit « démarrage », pas une date.',
     'Un <b>ouillage</b> est dû quand le délai d\u2019alerte du millésime est dépassé — chaque millésime a le sien, réglable dans la roue crantée, bloc Le Chai. Le volume à compléter est déduit des ouillages passés de la cuvée, jamais d\u2019une moyenne par fût.',
     'Un <b>soutirage</b> se déclenche à la fin de la malo, pas à une date : la projection vient des valeurs d\u2019acide malique mesurées. Deux pentes sont calculées, la moyenne sur trois analyses projette la fin, les deux dernières détectent un blocage.'
+  ] },
+
+  'pil.marge': { t: 'La date de fin, et la marge', p: [
+    'La date r\u00e9pond \u00e0 une seule question : <b>si le planning et les contrats restent tels quels, quand tout est-il fini ?</b> Elle vient du m\u00eame simulateur que La campagne avec \u00ab aucun renfort \u00bb : chaque travail commence \u00e0 l\u2019ouverture de <b>sa fen\u00eatre</b> \u2014 pas au premier jour de la p\u00e9riode \u2014, les travaux ouverts en m\u00eame temps se <b>partagent l\u2019\u00e9quipe</b>, les heures de <b>tracteur</b> sont d\u00e9duites, et l\u2019\u00e9quipe est lue <b>jour par jour</b> dans le planning : horaire de chacun, cong\u00e9s, fermeture, contrats et dates de d\u00e9but, effectif d\u2019une \u00e9quipe collective.',
+    '<b>Trois diff\u00e9rences avec La campagne, voulues.</b> La date est prise <b>aux heures normales</b> du planning, sans les heures suppl\u00e9mentaires que le simulateur s\u2019autorise quand il cherche un renfort. Un travail hors fen\u00eatre <b>n\u2019est pas rallong\u00e9</b> : le simulateur suppose +15 % par semaine de retard pour dimensionner un renfort, une date \u00ab si je ne touche rien \u00bb lit les heures telles quelles. Et l\u2019<b>\u00e9cart de cadence</b> mesur\u00e9, quand il est applicable, multiplie les heures restantes \u2014 La campagne raisonne au bar\u00e8me.',
+    'Au-del\u00e0 de la derni\u00e8re semaine planifi\u00e9e, l\u2019\u00e9quipe de cette semaine-l\u00e0 est <b>reconduite</b> telle quelle : la date sort quand m\u00eame, pr\u00e9c\u00e9d\u00e9e de \u00ab vers le \u00bb, et la phrase dit ce qu\u2019il restait \u00e0 faire \u00e0 la fin du cadre.',
+    'La <b>marge</b> compte les jours ouvr\u00e9s (lundi \u00e0 vendredi) entre cette date et l\u2019objectif pos\u00e9 pour la campagne. \u00ab Charge restante \u00bb et ses jours ouvr\u00e9s se comptent depuis <b>aujourd\u2019hui</b>.',
+    'Si le planning ne couvre pas encore la p\u00e9riode, l\u2019\u00e9cran retombe sur la cadence des quatre derni\u00e8res semaines \u2014 et l\u2019annonce, car cette cadence ignore les embauches d\u00e9j\u00e0 sign\u00e9es.',
+    'Les m\u00eames fins par travail se lisent dans <b>\u00c9ch\u00e9ances par t\u00e2che</b> (La campagne) : un travail qui finit apr\u00e8s sa fen\u00eatre y est marqu\u00e9 \u00ab d\u00e9borde de N sem. \u00bb. Le 10 septembre 2026, Aujourd\u2019hui affichait \u00ab +32 j d\u2019avance \u00bb pendant que La campagne montrait du travail en retard fin mars : le cockpit comptait l\u2019\u00e9quipe d\u2019octobre sur une taille qui n\u2019ouvre qu\u2019en novembre.'
   ] },
 
   'pil.capacite': { t: 'Capacité au pic', p: [
