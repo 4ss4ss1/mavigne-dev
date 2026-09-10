@@ -16165,3 +16165,108 @@ a bouge depuis, sans conflit et sans bruit.
 quand `git fetch` montre le distant en avance sur `.mv-base` ; et un garde devrait refuser
 un lot qui livre `CLAUDE.md` et `harnais-claude-md.mjs` ensemble sans que le nombre de
 sections MONTE.
+
+
+## 108. ★★★ VIG-TRI + VIG-TACHE — LA PARCELLE COMMENCÉE PASSE EN TÊTE, ET CRÉER UNE TÂCHE TIENT DANS UN ÉCRAN
+
+**Base** `cefd52d` · **APP 7.03 → 7.04 · SW 7.62 → 7.63** · 10/09/2026
+
+⚠️ **Le lot a été construit deux fois.** Il l'avait été sur `94555e6` en APP 7.03 / SW 7.62 ; PIL-FIN
+(§105) est arrivé entre-temps et a pris ces deux numéros. Rejoué tel quel sur `cefd52d` en **7.04 /
+7.63** — `src/app.js` et `src/reglages.js` n'étaient pas touchés par PIL-FIN, seuls les quatre
+affichages de version, `WHATS_NEW`, l'en-tête du SW et le cliquet `SECTIONS` ont dû suivre. C'est la
+troisième fois (cf. §103) : **un lot qui n'est pas poussé le jour même se rejoue, il ne se recolle
+pas.**
+
+Deux demandes de Nico en un message : *« lorsqu'une tâche dans vigne est commencée (marquée début)
+il faut mettre la parcelle en haut de la liste »* et *« il faut revoir comment créer une tâche dans
+une saison et qui n'appartient pas à une convention, car il faut faire beaucoup de va-et-vient »*.
+Les deux étaient des défauts, pas des préférences.
+
+### ① Le tri disait l'inverse de ce qu'on voulait, et ne voyait pas la moitié des tâches
+
+`renderParcelles`, comparateur : `const ordre={'Non démarré':0,'En cours':1}`. **Commencé valait 1,
+donc DERNIER.** Le commentaire au-dessus — « Non démarré > En cours » — décrivait fidèlement un tri
+que personne ne voulait : il était juste, et c'est la règle qui était fausse.
+
+⚠️ **Et sur une tâche à passages ou à niveaux, l'état ne comptait pas du tout.**
+`_tachesFor(p)[tâche]` y rend un **objet** (`{p1:'Commencé', ov:null}`) : `ordre[objet]` vaut
+`undefined`, ramené à 0 par `??0` **des deux côtés**. Relevage et Ébourgeonnage n'ont jamais été
+triés par leur état, depuis toujours, en silence.
+
+**La règle posée** : la parcelle dont l'étape courante est commencée passe en tête, **au-dessus de
+la tournée du domaine ET de la proximité GPS**. Le commentaire de la tournée disait que le GPS
+« gagne toujours » : il ne gagne plus. Appuyer sur « Début » est un geste **explicite** sur une
+parcelle précise ; la tournée et le GPS sont des rangements automatiques. Le geste gagne, et il ne
+dure que le temps du travail — la parcelle quitte la tête à la validation.
+
+★ **L'état se lit par `_pvCurStarted` / `_pvCurDone`**, les fonctions qui décident déjà de
+l'affichage des boutons « Début » et « Valider ». Une seconde table d'états aurait fait deux vérités
+pour une même question — la faute de §47a. Les trois natures de tâche (simple, passages, niveaux) se
+trient désormais pareil, et l'étape courante compte. Ce qui reste à faire passe avant ce qui est
+fait, à la place de l'ancienne table.
+
+### ② Une tâche créée hors convention disparaissait au moment où on l'enregistrait
+
+`saveTache()` poussait l'entrée dans `TACHES` **et rien d'autre**. L'écran lit `getTachesSaison()`,
+filtré par `s.taches` de la période. Une tâche libre n'appartenant à aucune période **sortait de la
+liste à la seconde où on la créait**. Il fallait ensuite Réglages › Campagne › Modifier la période
+pour la cocher — puis **rouvrir** la même période pour saisir ses dates, `_esEchTasks` n'étant
+construit qu'à l'ouverture. Mesuré : **4 écrans, 2 allers-retours, 1 disparition silencieuse**.
+
+⚠️⚠️ **`tcfgSave()`, lui, posait la tâche dans la période consultée.** Deux chemins pour un même
+effet, dont **un seul le faisait** : c'est la forme exacte du défaut, pas son symptôme.
+
+**`_perPoseTache(nom, périodes, dates)` est désormais l'écrivain UNIQUE** de l'appartenance d'une
+tâche à une période — et il pose les échéances dans le même passage. `_tcfgApply()` est l'écrivain
+unique de l'entrée `TACHES` ; `tcfgSave()` n'est plus qu'un appelant et n'écrit rien en base
+lui-même.
+
+**Un seul bouton, `＋ Nouvelle tâche`.** Les deux portes (« selon le barème » / « libre »)
+obligeaient à choisir sa source *avant* de savoir si le travail existe dans la convention — c'est au
+champ de recherche de répondre. Le panneau : le travail (recherche dans le barème, sinon création du
+travail du domaine), ses heures (mêmes contrôles que `_tcfg`), et **les périodes avec leurs dates**,
+celle qu'on consulte cochée d'avance. Refus explicite si aucune période n'est cochée — sans elle la
+tâche n'apparaît nulle part, et c'était précisément le piège.
+
+⚠️ **Le barème reste consultable depuis ce panneau** (`Voir le barème de la convention et vos
+écartements`) : c'est le seul écran où se choisissent le **barème régional** et les **écartements de
+plantation**. Supprimer son bouton sans ce lien aurait fermé cette porte — `MV_AIDE` et
+`guide/04-vigne.html` la nommaient tous les deux.
+
+★ **Nouvelle branche dans `_tcfgApply`** : un travail hors catalogue n'avait **ni `saisons` ni
+`anytime`** (le `else if(c)` ne le couvrait pas). Sans étiquette dans la liste, et introuvable par le
+repli `_tachesSaisonLegacy`.
+
+③ `_esBuildEch()` — dans « Modifier la période », cocher une tâche ouvre sa ligne de dates **tout de
+suite**. ⚠️ Le rebuild **relit d'abord ce qui est saisi à l'écran** : repartir de `s.echeances`
+effacerait les dates tapées à l'instant.
+
+### Le harnais
+
+`scripts/mv-harnais-vigne-tri.mjs` (**18 assertions + 4 contre-épreuves**), branché sur `check`,
+`prebuild` **et** la CI — la porte unique de §107. Il exécute le vrai comparateur extrait d'`app.js`
+et le vrai `_perPoseTache` extrait de `reglages.js`.
+
+⚠️ **Deux assertions textuelles ont rougi à tort** : elles cherchaient l'ancienne table dans tout
+`app.js`, et la section du lot la **cite en commentaire**. Corrigé en testant le comparateur **privé
+de ses lignes de commentaire** — un grep brut compte les commentaires (§53a), vécu une fois de plus.
+
+⚠️ Un `catch{}` vide posé sur le `focus()` du champ de recherche a fait monter le cliquet C14. Retiré
+plutôt que journalisé : `setSelectionRange` sur un `input[type=text]` ne demande pas de filet, et un
+catch vide est une erreur avalée pour rien.
+
+### Fichiers
+
+`src/app.js`, `src/reglages.js`, `index.html`, `src/utils.js` (APP_VERSION, WHATS_NEW, MV_AIDE),
+`public/sw.js`, `guide/04-vigne.html` + `public/guide.html` régénéré,
+`scripts/mv-harnais-vigne-tri.mjs` (nouveau), `package.json`, `.github/workflows/ci.yml`,
+`scripts/harnais-claude-md.mjs` (cliquet SECTIONS), `.mv-base`, `CLAUDE.md`.
+
+Retirés avec leurs appelants : `saveTache`, `openOvTache`, `addTacheFromCatalogue`,
+`showOvTacheForm`, `showOvTacheCatalog`, et les cinq lignes d'exposition d'`app.js` qui les nommaient
+— **elles étaient déjà mortes** (`typeof` sur des identifiants d'un autre module).
+
+**Ouvert** : sur « Toutes tâches » il n'y a pas de tâche courante, donc pas de remontée — décision
+assumée, le bouton « Début » n'y existe pas non plus. `demarrage.html` ne décrit toujours pas la
+création d'une tâche. La carte (`refreshMapColors`) ne signale pas la parcelle commencée.

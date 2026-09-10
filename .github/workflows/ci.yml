@@ -86,6 +86,15 @@ jobs:
       - name: Guide — la page deployee est en phase avec ses sources
         run: node scripts/build-guide.mjs --check
 
+      # Le tri des parcelles et l'appartenance d'une tache a une periode. La table
+      # d'etats faisait DESCENDRE la parcelle qu'on venait de commencer, et une tache
+      # creee hors convention n'entrait dans aucune periode : elle disparaissait de
+      # l'ecran au moment de l'enregistrement. Contre-epreuve incluse.
+      - name: Harnais — tri des parcelles + tache/periode
+        run: |
+          node scripts/mv-harnais-vigne-tri.mjs
+          node scripts/mv-harnais-vigne-tri.mjs --contre
+
       # Le journal des nouveautes s'EXECUTE au lieu de se relire, et les
       # documents ne doivent pas s'echapper de la charte MV_DOC (cliquet).
       - name: Journal des nouveautes + chartes de document

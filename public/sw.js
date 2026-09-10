@@ -1,4 +1,20 @@
-// MA VIGNE — Service Worker v7.62
+// MA VIGNE — Service Worker v7.63
+// v7.63 (10/09/2026) — VIG-TRI + VIG-TACHE : LA PARCELLE COMMENCEE PASSE EN TETE,
+//   ET CREER UNE TACHE TIENT DANS UN ECRAN. (1) Le tri des parcelles lisait une table
+//   {'Non démarré':0,'En cours':1} : la parcelle sur laquelle on venait d'appuyer
+//   « Debut » descendait EN DERNIER, et sur une tache a passages ou a niveaux l'etat
+//   ne comptait pas du tout (ordre[objet] = undefined). L'etat se lit maintenant par
+//   _pvCurStarted / _pvCurDone — les memes definitions que les boutons de la carte —
+//   et la commencee passe AVANT la tournee du domaine et la proximite GPS : un geste
+//   explicite bat un rangement automatique, et il ne dure que le temps du travail.
+//   (2) Une tache creee hors convention n'entrait dans AUCUNE periode (saveTache
+//   ecrivait TACHES et rien d'autre) : elle disparaissait de l'ecran au moment meme ou
+//   on l'enregistrait. Les deux boutons d'ajout deviennent « + Nouvelle tache » : un
+//   champ de recherche, le bareme s'il y est, le travail du domaine sinon, et les
+//   PERIODES avec leurs dates dans le meme ecran. _perPoseTache est l'ecrivain unique
+//   de l'appartenance d'une tache a une periode ; _tcfgApply celui de l'entree TACHES.
+//   (3) Dans « Modifier la periode », cocher une tache ouvre sa ligne de dates tout de
+//   suite (elle n'etait construite qu'a l'ouverture). APP 7.03 -> 7.04.
 // v7.62 (10/09/2026) — FUT-LOC : LE FUT LOUE EXISTE, ET L'EXERCICE LE COMPTE.
 //   Un lot porte `mode` : achat (defaut) ou loc. Le loue porte un loyer HT par
 //   fut et par an, un debut et une fin de contrat ; il entre dans l'exercice au
@@ -3684,7 +3700,7 @@
 // v2.22 — Fix profils vides : guard vide dans loadData() pour MEMBRES/SAISONS/TACHES
 // v2.17 — Onboarding intégré + tenantId · v2.06 — Firebase Auth · v2.00–v2.05 — divers
 const DEBUG = self.location.hostname === 'localhost' || self.location.hostname === '127.0.0.1';
-const CACHE_NAME   = 'mavigne-v7.62';
+const CACHE_NAME   = 'mavigne-v7.63';
 const TENANT_CACHE = 'mavigne-tenant';   // Cache persistant — préservé à chaque mise à jour SW
 const SYNC_TAG     = 'mavigne-sync';
 
@@ -3700,7 +3716,7 @@ const CDN_URLS = [
 ];
 
 self.addEventListener('install', event => {
-  if(DEBUG) console.log('[SW] Ma Vigne v7.62 installé');
+  if(DEBUG) console.log('[SW] Ma Vigne v7.63 installé');
   event.waitUntil(
     caches.open(CACHE_NAME).then(async cache => {
       // ── Cœur applicatif : STRICT (mise à jour ATOMIQUE) ──
@@ -3716,7 +3732,7 @@ self.addEventListener('install', event => {
 });
 
 self.addEventListener('activate', event => {
-  if(DEBUG) console.log('[SW] Ma Vigne v7.62 activé');
+  if(DEBUG) console.log('[SW] Ma Vigne v7.63 activé');
   event.waitUntil(
     caches.keys().then(keys =>
       Promise.all(

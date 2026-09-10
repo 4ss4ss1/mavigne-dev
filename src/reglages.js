@@ -1143,65 +1143,205 @@ function saveSaison(){
   document.getElementById('ovSaison').classList.remove('open');
   renderReglages();showToast('Période '+nom+' créée'+(_nsTachesSel.size?(' · '+_nsTachesSel.size+' tâche'+(_nsTachesSel.size>1?'s':'')):''),'#3D6B27');
 }
-function openOvTache(){
-  var cat=document.getElementById('ovt-catalog');
-  var frm=document.getElementById('ovt-form');
-  if(cat)cat.style.display='block';
-  if(frm)frm.style.display='none';
-  var grid=document.getElementById('ovt-presets-grid');
-  if(grid){
-    var dejaLa=(window.TACHES||[]).map(function(t){return t.nom;});
-    function itemHtml(c){
-      var deja=dejaLa.indexOf(c.nom)>=0;
-      var info;
-      if(c.trous)info=_mvIcon('tariere',16)+' Piloté par tarière';
-      else if(c.tempsReel)info=_mvIcon('chrono',16)+' Temps réel';
-      else if(c.type==='niveaux')info='Conseillé '+c.niveaux.reduce(function(s,n){return s+n.hha;},0)+' h/ha';
-      else if(c.type==='passages')info='Conseillé '+c.passagesHha.join('/')+' h/ha';
-      else info='Conseillé '+c.hha+' h/ha';
-      var saisLbl=c.anytime?'Toute l&#39;année':(c.saisons||[]).join(', ');
-      return '<div class="ovt-cat-item" data-nom="'+_escAttr(c.nom)+'" style="display:flex;align-items:center;gap:10px;padding:11px 13px;border-radius:10px;margin-bottom:7px;cursor:pointer;background:'+(deja?'rgba(90,156,74,0.08)':'var(--bg-card)')+';border:1px solid '+(deja?'rgba(90,156,74,0.3)':'var(--gris)')+'">'
-        +'<span style="font-size:20px;flex-shrink:0">'+_mvIconTache(c.nom,20)+'</span>'
-        +'<div style="flex:1;min-width:0"><div style="font-size:14px;font-weight:600;color:var(--texte)">'+c.label+'</div><div style="font-size:11px;color:var(--texte-doux);margin-top:1px">'+info+' · '+saisLbl+'</div></div>'
-        +(deja?'<span style="font-size:13px;color:var(--vert);font-weight:700">'+_mvIcon('check',16)+'</span>':'<span style="font-size:18px;color:var(--vert)">+</span>')
-        +'</div>';
+/* ══════════════════════════════════════════════════════════════════════════
+   UNE SEULE PORTE POUR CRÉER UNE TÂCHE — lot VIG-TACHE
+   ──────────────────────────────────────────────────────────────────────────
+   AVANT : deux boutons (« selon le barème » / « libre »), et une tâche libre qui
+   n'entrait JAMAIS dans la liste de la période — saveTache() poussait dans TACHES
+   et rien d'autre, alors que l'écran lit getTachesSaison(), filtré par s.taches.
+   La tâche disparaissait donc au moment même où on l'enregistrait ; il fallait
+   aller la cocher dans Réglages › Campagne, puis ROUVRIR la période pour ses dates.
+   APRÈS : un panneau. On tape le nom ; s'il est dans la convention on le propose,
+   sinon on crée le travail du domaine. Les périodes et leurs dates sont dans le
+   MÊME écran, celle qu'on consulte cochée d'avance.
+   ⚠️ Le barème reste consultable d'ici : c'est là que se choisissent le barème
+     régional et les écartements de plantation, et nulle part ailleurs.
+   ══════════════════════════════════════════════════════════════════════════ */
+var _tn=null;
+var _TN_SEC='font-size:10.5px;font-weight:800;letter-spacing:.05em;text-transform:uppercase;color:var(--terre);margin:16px 2px 7px';
+var _TN_HINT='font-size:11.5px;color:var(--texte-doux);margin:9px 2px 6px;line-height:1.45';
+var _TN_OPT='display:flex;align-items:center;gap:9px;padding:10px 12px;border-radius:11px;margin-bottom:6px;cursor:pointer;background:var(--bg-card);border:1px solid var(--gris)';
+
+function _tnLbl(){ return _tn.choix?((_tnCatOf(_tn.choix)||{}).label||_tn.choix):String(_tn.q||'').trim(); }
+function _tnCatOf(nom){ return (window.TACHES_CATALOGUE||[]).find(function(x){return x.nom===nom;}); }
+// Périodes proposées = la fenêtre de travail des réglages (_cmpVisibles), jamais les archives.
+function _tnPeriodes(){ return _cmpVisibles(); }
+
+function openTacheNew(){
+  var per=_regPeriode(), sel={};
+  if(per) sel[per.nom]=true;
+  _tn={q:'',choix:null,libre:false,hha:'',count:2,hours:[],perSel:sel,dates:{}};
+  _tnRender(); window.openOv('ovTache');
+}
+function _tnQ(v){ _tn.q=v; _tnRender(); }
+function _tnPick(nom){
+  var c=_tnCatOf(nom); if(!c)return;
+  _tn.choix=nom; _tn.libre=false; _tn.q=nom;
+  if(c.type==='passages'){ _tn.count=(c.passagesHha?c.passagesHha.length:2); _tn.hours=(c.passagesHha?c.passagesHha.slice():[]); }
+  else if(c.type==='niveaux'){ _tn.count=(c.niveaux?c.niveaux.length:3); _tn.hours=(c.niveaux?c.niveaux.map(function(n){return n.hha;}):[]); }
+  else if(c.tempsReel){ _tn.hha=''; }
+  else if(!c.trous){ _tn.hha=(window._mvHhaDens?window._mvHhaDens(_tcfgCatBar(c).hha):c.hha); }
+  if(c.trous) _tn.minTrou=(window.CONFIG&&parseFloat(CONFIG.plantation_min_trou))||c.minTrou||3;
+  _tnRender();
+}
+function _tnLibre(){ _tn.libre=true; _tn.choix=null; _tn.hha=''; _tnRender(); }
+function _tnBack(){ _tn.choix=null; _tn.libre=false; _tnRender(); }
+function _tnCount(n){ _tn.count=n; var c=_tnCatOf(_tn.choix); while(_tn.hours.length<n)_tn.hours.push(_tcfgCatRef(c,_tn.hours.length)); _tnRender(); }
+function _tnHour(i,v){ var n=parseFloat(v); if(i<0)_tn.hha=isNaN(n)?'':n; else _tn.hours[i]=isNaN(n)?0:n; }
+function _tnMinTrou(v){ var n=parseFloat(v); _tn.minTrou=isNaN(n)?3:n; }
+function _tnTogPer(nom){ if(_tn.perSel[nom])delete _tn.perSel[nom]; else _tn.perSel[nom]=true; _tnRender(); }
+function _tnDate(nom,k,v){ _tn.dates[nom]=_tn.dates[nom]||{}; _tn.dates[nom][k]=v; }
+function _tnVoirBareme(){ window.closeOv(null,'ovTache'); if(window.openTacheConv)window.openTacheConv(''); }
+
+function _tnRender(){
+  var host=document.getElementById('tn-body'); if(!host)return;
+  var q=String(_tn.q||'').trim(), ql=q.toLowerCase(), h='';
+  h+='<div style="'+_TN_SEC+';margin-top:2px">Le travail</div>';
+  if(!_tn.choix&&!_tn.libre){
+    h+='<input type="text" class="fi" id="tn-q" autocomplete="off" placeholder="Tape le nom du travail\u2026" value="'+_escAttr(_tn.q)+'" oninput="window._tnQ(this.value)">';
+    var deja=(window.TACHES||[]).map(function(t){return t.nom;});
+    var hits=(window.TACHES_CATALOGUE||[]).filter(function(c){
+      if(!ql)return true;
+      return String(c.label||c.nom).toLowerCase().indexOf(ql)>=0||String(c.nom).toLowerCase().indexOf(ql)>=0;
+    });
+    if(hits.length){
+      h+='<div style="'+_TN_HINT+'">'+(q?'Dans la convention\u00a0:':'Les travaux de la convention\u00a0:')+'</div>';
+      h+=hits.slice(0,q?6:4).map(function(c){
+        var info=c.trous?'Piloté par tarière'
+          :c.tempsReel?'Temps réel'
+          :(c.type==='niveaux'&&c.niveaux)?('Conseillé '+c.niveaux.reduce(function(s,n){return s+n.hha;},0)+' h/ha')
+          :(c.type==='passages'&&c.passagesHha)?('Conseillé '+c.passagesHha.join('/')+' h/ha')
+          :('Conseillé '+c.hha+' h/ha');
+        var dj=deja.indexOf(c.nom)>=0;
+        return '<div style="'+_TN_OPT+'" onclick="window._tnPick(\''+_escAttr(c.nom)+'\')">'
+          +'<span style="flex:none">'+_mvIconTache(c.nom,18)+'</span>'
+          +'<span style="flex:1;min-width:0"><span style="display:block;font-size:13.5px;font-weight:600;color:var(--texte)">'+_escHtml(c.label||c.nom)+'</span>'
+          +'<span style="display:block;font-size:11px;color:var(--texte-doux);margin-top:1px">'+info+(dj?' \u00b7 déjà au domaine':'')+'</span></span>'
+          +'<span style="font-size:17px;color:var(--vert-med);flex:none">+</span></div>';
+      }).join('');
     }
-    var oblig=(window.TACHES_CATALOGUE||[]).filter(function(c){return c.obligatoire;});
-    var compl=(window.TACHES_CATALOGUE||[]).filter(function(c){return !c.obligatoire;});
-    var grpStyle='font-size:11px;font-weight:800;letter-spacing:.04em;text-transform:uppercase;color:var(--terre);margin:14px 0 8px';
-    grid.innerHTML='<div style="'+grpStyle+'">'+_mvIcon('liste',16)+' Travaux obligatoires</div>'+oblig.map(itemHtml).join('')
-      +'<div style="'+grpStyle+'">'+_mvIcon('chrono',16)+' Travaux complémentaires</div>'+compl.map(itemHtml).join('');
-    grid.querySelectorAll('.ovt-cat-item').forEach(function(el){el.addEventListener('click',function(){openTacheCfg(el.dataset.nom);});});
+    var exact=hits.some(function(c){return String(c.label||c.nom).toLowerCase()===ql||String(c.nom).toLowerCase()===ql;});
+    if(q&&!exact){
+      h+='<div style="'+_TN_OPT+';background:var(--terre-pale);border:1.5px dashed rgba(138,90,56,0.45)" onclick="window._tnLibre()">'
+        +'<span style="flex:1;min-width:0"><span style="display:block;font-size:13.5px;font-weight:600;color:var(--terre)">Créer «\u00a0'+_escHtml(q)+'\u00a0»</span>'
+        +'<span style="display:block;font-size:11px;color:var(--texte-doux);margin-top:1px">Travail du domaine, hors convention \u2014 au temps réel</span></span>'
+        +'<span style="font-size:17px;color:var(--terre);flex:none">+</span></div>';
+    }
+    if(!q) h+='<div style="'+_TN_HINT+'">Le nom que tu tapes n\u2019y est pas\u00a0? Le panneau proposera de créer le travail du domaine.</div>';
+    h+='<div class="tcv-lnk" style="color:var(--terre);margin-top:4px" onclick="window._tnVoirBareme()">Voir le barème de la convention et vos écartements</div>';
+    host.innerHTML=h;
+    var inp=document.getElementById('tn-q');
+    // Le panneau se repeint a chaque frappe : sans cela le curseur quitte le champ au
+    // premier caractere. setSelectionRange est sur sur un input[type=text], aucun filet
+    // a poser ici — un catch vide serait une erreur avalee pour rien (C14).
+    if(inp&&_tn.q){ inp.focus(); inp.setSelectionRange(inp.value.length,inp.value.length); }
+    return;
   }
-  window.openOv('ovTache');
+  // ── Le travail est choisi ──
+  var c=_tnCatOf(_tn.choix);
+  h+='<div style="display:flex;align-items:center;gap:9px;padding:11px 12px;border-radius:11px;background:var(--vert-pale);border:1px solid rgba(61,107,39,0.32)">'
+    +'<span style="flex:none">'+_mvIconTache(_tn.choix||'',18)+'</span>'
+    +'<span style="flex:1;min-width:0"><span style="display:block;font-size:13.5px;font-weight:600;color:var(--texte)">'+_escHtml(_tnLbl())+'</span>'
+    +'<span style="display:block;font-size:11px;color:var(--texte-doux);margin-top:1px">'+(_tn.libre?'Hors convention \u00b7 temps réel':'Travail de la convention')+'</span></span>'
+    +'<button style="flex:none;padding:6px 11px;border-radius:9px;border:1.5px solid var(--gris);background:transparent;font-family:inherit;font-size:11.5px;font-weight:600;color:var(--texte-doux);cursor:pointer" onclick="window._tnBack()">Changer</button></div>';
+  // ── Les heures ──
+  h+='<div style="'+_TN_SEC+'">Les heures</div>';
+  if(c&&c.trous){
+    h+='<div class="tcfg-tar">'+_mvIcon('tariere',16)+' <b>Piloté par la tarière</b> \u2014 temps = trous saisis en session × le délai ci-dessous.</div>'
+      +'<div class="tcfg-hrow"><input class="tcfg-in" type="number" min="0.5" max="60" step="0.5" value="'+Number(_tn.minTrou||3)+'" oninput="window._tnMinTrou(this.value)"><span class="tcfg-u">min/trou</span></div>';
+  } else if(_tn.libre||(c&&c.tempsReel)){
+    h+='<div class="tcfg-tr">'+_mvIcon('chrono',16)+' <b>Temps réel</b> \u2014 pas d\u2019heures conventionnelles. Estimation facultative, pour la charge et l\u2019ETP.</div>'
+      +'<div class="tcfg-hrow"><input class="tcfg-in" type="number" min="0" max="500" value="'+(_tn.hha===''?'':Number(_tn.hha))+'" placeholder="\u2014" oninput="window._tnHour(-1,this.value)"><span class="tcfg-u">h/ha</span></div>';
+  } else if(c&&(c.type==='passages'||c.type==='niveaux')){
+    var kind=c.type==='passages'?'passage':'niveau', K=c.type==='passages'?'P':'N';
+    h+='<div class="tcfg-lbl">Nombre de '+kind+'s</div><div class="tcfg-cnt">'
+      +[1,2,3].map(function(n){return '<button class="tcfg-cc'+(_tn.count===n?' on':'')+'" onclick="window._tnCount('+n+')">'+n+'</button>';}).join('')+'</div>'
+      +'<div class="tcfg-lbl">Heures par '+kind+'</div>';
+    for(var i=0;i<_tn.count;i++){
+      var ref=_tcfgCatRef(c,i), cur=(_tn.hours[i]!=null)?_tn.hours[i]:ref;
+      h+='<div class="tcfg-hrow"><span class="tcfg-k">'+K+(i+1)+'</span>'
+        +'<input class="tcfg-in" type="number" min="0" max="500" value="'+Number(cur)+'" oninput="window._tnHour('+i+',this.value)">'
+        +'<span class="tcfg-u">h/ha</span><span class="tcfg-co">Conseillé '+ref+_tcfgDensNote(_tcfgCatRefBrut(c,i),ref)+'</span></div>';
+    }
+  } else if(c){
+    var r0=(window._mvHhaDens?window._mvHhaDens(_tcfgCatBar(c).hha):c.hha);
+    h+='<div class="tcfg-hrow"><input class="tcfg-in" type="number" min="0" max="500" value="'+Number(_tn.hha===''?r0:_tn.hha)+'" oninput="window._tnHour(-1,this.value)">'
+      +'<span class="tcfg-u">h/ha</span><span class="tcfg-co">Conseillé '+r0+_tcfgDensNote(_tcfgCatBar(c).hha,r0)+'</span></div>';
+  }
+  // ── Où elle se travaille ──
+  h+='<div style="'+_TN_SEC+'">Où elle se travaille</div>';
+  var pers=_tnPeriodes();
+  if(!pers.length){ h+='<div style="'+_TN_HINT+'">Aucune période à afficher.</div>'; }
+  h+=pers.map(function(s){
+    var on=!!_tn.perSel[s.nom], d=_tn.dates[s.nom]||{}, cons=(_regPeriode()||{}).nom===s.nom;
+    var row='<div style="display:flex;align-items:center;gap:9px;padding:10px 12px;border-radius:11px;cursor:pointer;background:'+(on?'var(--vert-pale)':'var(--bg-card)')+';border:1px solid '+(on?'rgba(61,107,39,0.32)':'var(--gris)')+'" onclick="window._tnTogPer(\''+_escAttr(s.nom)+'\')">'
+      +'<span style="width:18px;height:18px;border-radius:5px;flex:none;border:1.5px solid '+(on?'var(--vert-med)':'var(--gris)')+';background:'+(on?'var(--vert-med)':'transparent')+';color:var(--bg-card);display:flex;align-items:center;justify-content:center">'+(on?_mvIcon('check',16):'')+'</span>'
+      +'<span style="flex:1;min-width:0"><span style="display:block;font-size:13px;font-weight:600;color:var(--texte)">'+_escHtml(s.nom)+(cons?' '+_mvBadge('consultée','neutre'):'')+'</span>'
+      +'<span style="display:block;font-size:11px;color:var(--texte-doux)">'+_escHtml(s.periode||((s.debut||'')+' \u2192 '+(s.fin||'')))+'</span></span></div>';
+    if(on) row+='<div style="display:flex;align-items:center;gap:6px;padding:8px 2px 2px 38px">'
+      +'<input type="date" class="fi" style="margin:0;flex:1;font-size:12px;padding:7px 9px" value="'+_escAttr(d.d1||'')+'" onchange="window._tnDate(\''+_escAttr(s.nom)+'\',\'d1\',this.value)">'
+      +'<span style="color:var(--texte-doux);font-size:12px">\u2192</span>'
+      +'<input type="date" class="fi" style="margin:0;flex:1;font-size:12px;padding:7px 9px" value="'+_escAttr(d.d2||'')+'" onchange="window._tnDate(\''+_escAttr(s.nom)+'\',\'d2\',this.value)"></div>';
+    return '<div style="margin-bottom:7px">'+row+'</div>';
+  }).join('');
+  h+='<div style="'+_TN_HINT+'">Les dates préparent le Pilotage. Elles restent facultatives, et se modifient plus tard dans la période.</div>';
+  h+='<button class="mbtn verte" onclick="window._tnSave()" style="margin-top:6px">Enregistrer la tâche</button>';
+  h+='<button class="mbtn" onclick="window.closeOv(null,\'ovTache\')" style="background:transparent;border:1.5px solid var(--gris);color:var(--texte-doux);margin-top:6px">Annuler</button>';
+  host.innerHTML=h;
 }
-function addTacheFromCatalogue(nom){ openTacheCfg(nom); }
-function showOvTacheForm(){
-  var cat=document.getElementById('ovt-catalog');
-  var frm=document.getElementById('ovt-form');
-  if(cat)cat.style.display='none';
-  if(frm)frm.style.display='block';
+
+function _tnSave(){
+  var nom=_tn.choix||String(_tn.q||'').trim();
+  if(!nom){ showToast('Nom requis','#B85A1A'); return; }
+  if(!_tn.choix){
+    // Un travail du domaine ne peut pas porter le nom d'un travail existant : le nom est
+    // la CLÉ (p.taches, s.taches, journal). Deux « Pioche » seraient une seule tâche.
+    if((window.TACHES||[]).some(function(t){return t.nom===nom;})
+      ||(window.TACHES_CATALOGUE||[]).some(function(c){return c.nom===nom;})){
+      showToast('«\u00a0'+nom+'\u00a0» existe déjà','#B85A1A'); return;
+    }
+  }
+  var pers=Object.keys(_tn.perSel).filter(function(k){return _tn.perSel[k];});
+  if(!pers.length){ showToast('Choisis au moins une période \u2014 sans elle, la tâche n\u2019apparaît nulle part','#B85A1A'); return; }
+  var c=_tnCatOf(_tn.choix);
+  // On écrit par _tcfgApply : UNE seule construction de l'entrée TACHES pour les deux
+  // portes (le barème et ce panneau). C'est ce qui manquait — saveTache() avait la sienne.
+  _tcfg={nom:nom,type:(c&&c.type)||null,trous:!!(c&&c.trous),tempsReel:!!(c&&c.tempsReel)||!!_tn.libre,isEdit:false};
+  if(_tn.libre){ _tcfg.anytime=true; _tcfg.custom=true; _tcfg.estimate=(_tn.hha===''?'':Number(_tn.hha)); }
+  else if(c&&c.trous){ _tcfg.minTrou=Number(_tn.minTrou||3); }
+  else if(c&&c.tempsReel){ _tcfg.estimate=(_tn.hha===''?'':Number(_tn.hha)); }
+  else if(c&&(c.type==='passages'||c.type==='niveaux')){ _tcfg.count=_tn.count; _tcfg.hours=_tn.hours.slice(0,_tn.count); }
+  else if(c){ _tcfg.simple=Number(_tn.hha===''?(window._mvHhaDens?window._mvHhaDens(_tcfgCatBar(c).hha):c.hha):_tn.hha); }
+  var r=_tcfgApply();
+  var saveSais=_perPoseTache(nom,pers,_tn.dates);
+  window.saveData('taches'); if(r.saveCfg)window.saveData('config');
+  if(saveSais)window.saveData('saisons'); window.saveData('travaux');
+  window.closeOv(null,'ovTache');
+  showToast(((c&&c.label)||nom)+' ajoutée \u00b7 '+pers.length+' période'+(pers.length>1?'s':''),'#3D6B27');
+  _tcfg=null; _tn=null; renderReglages();
+  if(window.renderParcelles)window.renderParcelles(); if(window.computePStats)window.computePStats();
 }
-function showOvTacheCatalog(){
-  var cat=document.getElementById('ovt-catalog');
-  var frm=document.getElementById('ovt-form');
-  if(cat)cat.style.display='block';
-  if(frm)frm.style.display='none';
+
+/* ÉCRIVAIN UNIQUE de l'appartenance d'une tâche à des périodes, et de ses dates.
+   ⚠️ Il n'y en avait pas : tcfgSave() posait la tâche dans la période consultée,
+     saveTache() ne le faisait nulle part. Deux chemins pour un même effet, c'est
+     exactement ce qui a produit la disparition silencieuse. */
+function _perPoseTache(nom, periodes, dates){
+  var touche=false;
+  (periodes||[]).forEach(function(pn){
+    var s=(window.SAISONS||[]).find(function(x){return x&&x.nom===pn;}); if(!s)return;
+    if(!Array.isArray(s.taches))s.taches=[];
+    if(s.taches.indexOf(nom)<0){ s.taches.push(nom); touche=true; }
+    var d=dates&&dates[pn];
+    if(d&&(d.d1||d.d2)){
+      if(!s.echeances||typeof s.echeances!=='object'||Array.isArray(s.echeances))s.echeances={};
+      s.echeances[nom]={d1:d.d1||'',d2:d.d2||''}; touche=true;
+    }
+  });
+  if(touche) window.SAISONS=window.SAISONS;
+  return touche;
 }
-function saveTache(){
-  var nom=document.getElementById('nt-nom').value.trim();
-  if(!nom){showToast('Nom requis','#B85A1A');return;}
-  if((window.TACHES||[]).find(function(t){return t.nom===nom;})||(window.TACHES_CATALOGUE||[]).find(function(c){return c.nom===nom;})){showToast('« '+nom+' » existe déjà','#B85A1A');return;}
-  var hRaw=document.getElementById('nt-hha').value;var hha=parseFloat(hRaw);
-  var t={nom:nom,anytime:true,tempsReel:true,complementaire:true,custom:true};
-  if(!isNaN(hha)&&hha>0)t.hha=hha;
-  window.TACHES.push(t);window.TACHES=window.TACHES;
-  window.saveData('taches','Travail ajouté');
-  document.getElementById('ovTache').classList.remove('open');
-  document.getElementById('nt-nom').value='';document.getElementById('nt-hha').value='';
-  showToast(nom+' ajouté (temps réel)','#3D6B27');
-  renderReglages();
-}
+
 // ════════ SAISONS AGRICOLES (création) ════════
 // Les quatre types de saison (Hiver/Printemps/Été/Automne) ont été retirés : un domaine découpe
 // son année comme il la travaille — deux périodes ici, quatre ailleurs, « saison de taille » et
@@ -1403,7 +1543,11 @@ function _tcfgHour(i,v){var num=parseFloat(v);var c=(window.TACHES_CATALOGUE||[]
 function _tcfgEstimate(v){var num=parseFloat(v);_tcfg.estimate=isNaN(num)?'':num;}
 function _tcfgMinTrou(v){var num=parseFloat(v);_tcfg.minTrou=isNaN(num)?3:num;}
 function _tcfgReset(i,ref){if(i<0){_tcfg.simple=ref;}else{_tcfg.hours[i]=ref;}_tcfgRender();}
-function tcfgSave(){
+// Construction de l'entrée TACHES à partir de _tcfg. ÉCRIVAIN UNIQUE, partagé par les
+// DEUX portes : le barème (tcfgSave) et le panneau « Nouvelle tâche » (_tnSave).
+// ⚠️ Il n'écrit RIEN en base : l'appelant décide de ses saveData, parce que lui seul
+//   sait s'il touche aussi aux périodes.
+function _tcfgApply(){
   var c=(window.TACHES_CATALOGUE||[]).find(function(x){return x.nom===_tcfg.nom;});
   var t={nom:_tcfg.nom};
   // Cet écran édite les HEURES. Il ne doit rien effacer d'autre. L'entrée était
@@ -1420,7 +1564,13 @@ function tcfgSave(){
     // Tâche ajoutée depuis le barème : saisons du catalogue, ce que l'écran montrait déjà.
     if(c.anytime) t.anytime=true;
     else if(c.saisons) t.saisons=c.saisons.slice();
+  } else if(_tcfg.anytime){
+    // Travail du domaine, hors catalogue (panneau « Nouvelle tâche »). Sans cette branche
+    // il n'aurait NI saisons NI anytime : la ligne des réglages n'afficherait aucune
+    // étiquette de période, et le repli _tachesSaisonLegacy ne le trouverait jamais.
+    t.anytime=true;
   }
+  if(_tcfg.custom) t.custom=true;
   var saveCfg=false;
   if(_tcfg.trous){t.trous=true;if(_tcfg.minTrou){window.CONFIG=window.CONFIG||{};CONFIG.plantation_min_trou=_tcfg.minTrou;saveCfg=true;}}
   else if(_tcfg.tempsReel){t.tempsReel=true;t.complementaire=true;if(_tcfg.estimate!==''&&_tcfg.estimate>0)t.hha=_tcfg.estimate;}
@@ -1430,14 +1580,16 @@ function tcfgSave(){
   var idx=(window.TACHES||[]).findIndex(function(x){return x.nom===_tcfg.nom;});
   if(idx>=0)window.TACHES[idx]=t;else window.TACHES.push(t);
   window.TACHES=window.TACHES;
-  // La tâche doit figurer dans la liste de la période consultée, sinon elle n'apparaît nulle part.
-  var _per=_regPeriode(), saveSais=false;
-  if(_per){
-    if(!Array.isArray(_per.taches))_per.taches=[];
-    if(_per.taches.indexOf(_tcfg.nom)<0){ _per.taches.push(_tcfg.nom); window.SAISONS=window.SAISONS; saveSais=true; }
-  }
   if(window.TRAVAUX){delete window.TRAVAUX[_tcfg.nom];if(window.recalcTravaux)window.recalcTravaux(_tcfg.nom);window.TRAVAUX=window.TRAVAUX;}
-  window.saveData('taches');if(saveCfg)window.saveData('config');if(saveSais)window.saveData('saisons');window.saveData('travaux');
+  return {saveCfg:saveCfg};
+}
+// Le barème : la tâche est posée dans la période CONSULTÉE, par l'écrivain unique.
+function tcfgSave(){
+  var c=(window.TACHES_CATALOGUE||[]).find(function(x){return x.nom===_tcfg.nom;});
+  var r=_tcfgApply();
+  var _per=_regPeriode();
+  var saveSais=_per?_perPoseTache(_tcfg.nom,[_per.nom],null):false;
+  window.saveData('taches');if(r.saveCfg)window.saveData('config');if(saveSais)window.saveData('saisons');window.saveData('travaux');
   window.closeOv(null,'ovTacheCfg');
   showToast(((c&&c.label)||_tcfg.nom)+' enregistrée','#3D6B27');
   _tcfg=null;renderReglages();
@@ -4232,6 +4384,7 @@ function applyDomNom(){
   if(dvEl)dvEl.textContent=window.DOMAINE_NOM;
 }
 var _esEchTasks=[];
+var _esSaison=null;
 var _esTachesSel=new Set();
 function _esBuildTaches(){
   var host=document.getElementById('es-taches-pick'); if(!host)return;
@@ -4252,7 +4405,33 @@ function _esBuildTaches(){
 }
 function _esToggleTache(nom){
   if(_esTachesSel.has(nom))_esTachesSel.delete(nom); else _esTachesSel.add(nom);
-  _esBuildTaches();
+  _esBuildTaches(); _esBuildEch();
+}
+
+/* Les lignes de dates SUIVENT les cases cochées, en direct. Elles n'étaient construites
+   qu'à l'ouverture (_esEchTasks figé) : cocher une tâche n'ouvrait sa ligne qu'après
+   avoir enregistré et ROUVERT la période — le second aller-retour du parcours.
+   ⚠️ On relit d'abord ce qui est SAISI à l'écran : un rebuild qui repartirait de
+     s.echeances effacerait les dates tapées à l'instant. */
+function _esBuildEch(){
+  var host=document.getElementById('es-echeances'); if(!host)return;
+  var vus={};
+  (_esEchTasks||[]).forEach(function(tn,i){
+    var d1=(document.getElementById('es-ech-'+i+'-d1')||{}).value||'';
+    var d2=(document.getElementById('es-ech-'+i+'-d2')||{}).value||'';
+    if(d1||d2) vus[tn]={d1:d1,d2:d2};
+  });
+  var base=(_esSaison&&_esSaison.echeances&&typeof _esSaison.echeances==='object'&&!Array.isArray(_esSaison.echeances))?_esSaison.echeances:{};
+  _esEchTasks=Array.from(_esTachesSel||[]);
+  if(!_esEchTasks.length){
+    host.innerHTML='<div style="font-size:12.5px;color:var(--texte-doux);padding:4px 0">Aucune t\u00e2che pour cette p\u00e9riode \u2014 coche-les au-dessus.</div>';
+    return;
+  }
+  host.innerHTML=_esEchTasks.map(function(tn,i){
+    var e=vus[tn]||base[tn]||{};
+    return '<div class="es-ech-row"><div class="es-ech-nom">'+_escHtml(tn)+'</div>'
+      +'<div class="es-ech-dts"><input type="date" class="fi es-ech-d" id="es-ech-'+i+'-d1" value="'+_escAttr(e.d1||'')+'"><span class="es-ech-arrow">\u2192</span><input type="date" class="fi es-ech-d" id="es-ech-'+i+'-d2" value="'+_escAttr(e.d2||'')+'"></div></div>';
+  }).join('');
 }
 
 function openEditSaison(nom){
@@ -4267,17 +4446,7 @@ function openEditSaison(nom){
   _esTachesSel=new Set(Array.isArray(s.taches)?s.taches:[]);
   _esBuildTaches();
   // Dates de travaux estimees par tache (par INSTANCE de periode) -> preparation du pilotage.
-  var ech=(s.echeances&&typeof s.echeances==='object'&&!Array.isArray(s.echeances))?s.echeances:{};
-  _esEchTasks=Array.from(_esTachesSel);
-  var host=document.getElementById('es-echeances');
-  if(host){
-    if(!_esEchTasks.length){ host.innerHTML='<div style="font-size:12.5px;color:var(--texte-doux);padding:4px 0">Aucune t\u00e2che pour cette saison \u2014 assignez-en dans R\u00e9glages \u203a T\u00e2ches.</div>'; }
-    else host.innerHTML=_esEchTasks.map(function(tn,i){
-      var e=ech[tn]||{};
-      return '<div class="es-ech-row"><div class="es-ech-nom">'+_escHtml(tn)+'</div>'
-        +'<div class="es-ech-dts"><input type="date" class="fi es-ech-d" id="es-ech-'+i+'-d1" value="'+_escAttr(e.d1||'')+'"><span class="es-ech-arrow">\u2192</span><input type="date" class="fi es-ech-d" id="es-ech-'+i+'-d2" value="'+_escAttr(e.d2||'')+'"></div></div>';
-    }).join('');
-  }
+  _esSaison=s; _esEchTasks=[]; _esBuildEch();
   window.openOv('ovEditSaison');
 }
 // Renommer une période : le nom sert de CLÉ de rangement de l'avancement (p.tachesAll[nom],
@@ -4348,11 +4517,19 @@ window._toggleActChampReset  = _toggleActChampReset;
 window._setActChampType      = _setActChampType;
 window.activateSaison        = activateSaison;
 window.saveSaison            = saveSaison;
-window.openOvTache           = openOvTache;
-window.addTacheFromCatalogue = addTacheFromCatalogue;
-window.showOvTacheForm       = showOvTacheForm;
-window.showOvTacheCatalog    = showOvTacheCatalog;
-window.saveTache             = saveTache;
+window.openTacheNew          = openTacheNew;
+window._tnQ                  = _tnQ;
+window._tnPick               = _tnPick;
+window._tnLibre              = _tnLibre;
+window._tnBack               = _tnBack;
+window._tnCount              = _tnCount;
+window._tnHour               = _tnHour;
+window._tnMinTrou            = _tnMinTrou;
+window._tnTogPer             = _tnTogPer;
+window._tnDate               = _tnDate;
+window._tnSave               = _tnSave;
+window._tnVoirBareme         = _tnVoirBareme;
+window._perPoseTache         = _perPoseTache;
 window.deleteTache           = deleteTache;
 window.openEditHha           = openEditHha;
 window.openSaison            = openSaison;

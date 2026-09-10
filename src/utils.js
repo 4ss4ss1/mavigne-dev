@@ -23,7 +23,7 @@ export const GT_ADMIN_EMAIL = 'ngdevpro@gmail.com';
 // WHATS_NEW   : tableau vide = modal desactive pour cette version.
 // Format item : { emoji:'📅', titre:'Titre court', desc:'Phrase utilisateur.' }
 // Regle : seulement les changements visibles par les utilisateurs.
-export const APP_VERSION = '7.03';
+export const APP_VERSION = '7.04';
 // ════ Journal des nouveautés (récap cumulatif) ════
 // Une entrée par version, la PLUS RÉCENTE EN HAUT : { v:'5.10', items:[ {emoji,titre,desc}, … ] }
 // À chaque release visible → AJOUTER un bloc en tête (ne pas remplacer). items:[] = release technique (rien à afficher).
@@ -354,6 +354,16 @@ window._mvGraphRepeindre = function(){
 };
 
 export const WHATS_NEW = [
+  { v: '7.04', items: [
+    { emoji: 'liste', titre: 'La parcelle o\u00f9 vous travaillez passe en t\u00eate',
+      desc: "Vous appuyez sur <b>D\u00e9but</b> sur une parcelle&nbsp;: elle monte imm\u00e9diatement en haut de la liste, et elle y reste jusqu\u2019\u00e0 ce que vous validiez. Elle passe devant la tourn\u00e9e du domaine et devant la proximit\u00e9&nbsp;GPS, parce qu\u2019appuyer sur D\u00e9but est un geste que vous avez fait expr\u00e8s. Avant, elle descendait \u2014 et sur les t\u00e2ches \u00e0 passages ou \u00e0 niveaux, comme le Relevage ou l\u2019\u00c9bourgeonnage, l\u2019\u00e9tat ne comptait pas du tout dans l\u2019ordre." },
+    { emoji: 'feuille', titre: 'Cr\u00e9er une t\u00e2che&nbsp;: un seul \u00e9cran',
+      desc: "\u00ab Nouvelle t\u00e2che selon le bar\u00e8me \u00bb et \u00ab Nouvelle t\u00e2che libre \u00bb ne font plus qu\u2019un bouton, <b>\uFF0B Nouvelle t\u00e2che</b>, dans la roue crant\u00e9e de la Vigne. Vous tapez le nom&nbsp;: s\u2019il existe dans la convention on vous le propose avec ses heures de r\u00e9f\u00e9rence, sinon on cr\u00e9e votre travail \u00e0 vous. Les p\u00e9riodes o\u00f9 la t\u00e2che se fait \u2014 et leurs dates estim\u00e9es \u2014 sont dans le m\u00eame \u00e9cran, celle que vous consultez d\u00e9j\u00e0 coch\u00e9e. Le bar\u00e8me de la convention et vos \u00e9cartements se consultent depuis ce m\u00eame panneau." },
+    { emoji: 'alerte', titre: 'Une t\u00e2che cr\u00e9\u00e9e ne dispara\u00eet plus',
+      desc: "Une t\u00e2che cr\u00e9\u00e9e hors convention n\u2019\u00e9tait rattach\u00e9e \u00e0 aucune p\u00e9riode&nbsp;: elle sortait de la liste au moment m\u00eame o\u00f9 vous l\u2019enregistriez, et il fallait aller la cocher dans la p\u00e9riode pour la revoir. Elle est maintenant pos\u00e9e dans les p\u00e9riodes que vous cochez, en une fois." },
+    { emoji: 'calendrier', titre: 'Cocher une t\u00e2che ouvre ses dates tout de suite',
+      desc: "Dans <b>Modifier la p\u00e9riode</b>, cocher une t\u00e2che n\u2019ouvrait sa ligne de dates qu\u2019apr\u00e8s avoir enregistr\u00e9 puis rouvert la p\u00e9riode. La ligne appara\u00eet d\u00e9sormais au moment o\u00f9 vous cochez, et les dates d\u00e9j\u00e0 tap\u00e9es ne sont pas perdues." }
+  ] },
   { v: '7.03', items: [
     { emoji: 'carton', titre: 'Un lot de f\u00fbts est achet\u00e9 ou lou\u00e9',
       desc: "La R\u00e9serve \u203a F\u00fbts vous demande d\u00e9sormais si le lot est <b>achet\u00e9</b> ou <b>lou\u00e9</b>. Un lot lou\u00e9 porte son <b>loyer HT par f\u00fbt et par an</b> et les dates de son contrat ; un lot achet\u00e9 porte sa <b>date de facture</b>, qui remplace la date de saisie. Les lots existants restent des achats, rien \u00e0 reprendre." },
@@ -2420,7 +2430,7 @@ var MV_AIDE = {
       },
       ['Les réglages de la Vigne et du Tracteur', "ne sont plus ici : chaque module les règle chez lui, par la roue crantée de son en-tête — tâches, barème et plantations pour la Vigne, parc, activités et chrono pour le Tracteur. La Cave fait pareil depuis peu."],
       ['Vos écartements', "ramènent les heures conseillées à votre densité réelle. Sans eux, le barème suppose 10 000 pieds à l’hectare — vos heures à vous, elles, ne bougent jamais."],
-      ['Le barème de référence', "se choisit par région dans l’écran du barème, ouvert par « Nouvelle tâche selon le barème de la convention » : la Bourgogne ou la Gironde pour l’instant, chacune avec son texte source et sa date. C’est une référence, pas une règle : en changer ne modifie aucune de vos valeurs."],
+      ['Le barème de référence', "se choisit par région dans l’écran du barème, ouvert depuis « ＋ Nouvelle tâche » par le lien « Voir le barème de la convention et vos écartements » : la Bourgogne ou la Gironde pour l’instant, chacune avec son texte source et sa date. C’est une référence, pas une règle : en changer ne modifie aucune de vos valeurs."],
       ['Le taux horaire d’un salarié', "porte une date. Une augmentation s’enregistre « à partir du » jour choisi : les heures déjà travaillées gardent l’ancien taux, et le coût d’un exercice clos ne bouge plus. La fiche liste tout ce que ce taux a valu ; pour corriger une simple faute de frappe sans créer d’augmentation, videz la date. Ces montants sont visibles des seuls administrateurs."],
       ['Le mot de passe initial', "d’un nouveau membre s’affiche une seule fois — notez-le avant de fermer."],
       ['Passer un membre en inactif', "plutôt que le supprimer conserve son historique."],

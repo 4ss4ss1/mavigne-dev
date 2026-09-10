@@ -7017,6 +7017,22 @@ function renderParcelles(){
     // Parcelles arrachées toujours en dernier
     const arrA=a.statut==='Arrachee'?1:0, arrB=b.statut==='Arrachee'?1:0;
     if(arrA!==arrB)return arrA-arrB;
+    // ★★★ LA PARCELLE OU L'ON TRAVAILLE PASSE EN TETE — au-dessus de la tournee ET de
+    //   la proximite GPS. Appuyer sur « Debut » est un geste EXPLICITE sur une parcelle
+    //   precise ; la tournee et le GPS sont des rangements automatiques. Le geste gagne,
+    //   et il ne dure que le temps du travail : la parcelle quitte la tete des qu'on
+    //   valide. C'est aussi le seul moyen de retrouver d'un coup d'oeil, a la fin d'un
+    //   rang, celle sur laquelle on a appuye il y a deux heures.
+    //   ⚠️ L'etat se lit par _pvCurStarted : LA definition, celle qui decide deja de
+    //     l'affichage du bouton « Debut ». L'ancienne table posee plus bas
+    //     ({'Non démarré':0,'En cours':1}) faisait DESCENDRE la parcelle commencee — le
+    //     commentaire au-dessus decrivait fidelement un tri qu'on ne voulait pas — et
+    //     elle ne voyait pas les taches a passages ni a niveaux : _tachesFor(p)[t] y rend
+    //     un OBJET, donc ordre[objet] vaut undefined, ramene a 0 des DEUX cotes.
+    if(pTacheFilter!=='toutes'){
+      const ca=_pvCurStarted(a,pTacheFilter)?0:1, cb=_pvCurStarted(b,pTacheFilter)?0:1;
+      if(ca!==cb)return ca-cb;
+    }
     if(_pProxPos){
       const da=_pProxDistOf(a), db=_pProxDistOf(b);
       if(da!==db)return da-db;
@@ -7032,11 +7048,11 @@ function renderParcelles(){
       else if(ob) return 1;
     }
     if(pTacheFilter!=='toutes'){
-      // Tri par statut de la tâche filtrée : Non démarré > En cours
-      const ordre={'Non démarré':0,'En cours':1};
-      const sa=ordre[(_tachesFor(a)[pTacheFilter])||'Non démarré']??0;
-      const sb=ordre[(_tachesFor(b)[pTacheFilter])||'Non démarré']??0;
-      if(sa!==sb)return sa-sb;
+      // Ce qui reste a faire avant ce qui est fait. Les commencees sont deja passees en
+      // tete plus haut. Meme lecture que le filtre « A faire » (_pvCurDone) : l'ecran ne
+      // peut plus dire une chose et le tri une autre, et l'etape courante compte enfin.
+      const da=_pvCurDone(a,pTacheFilter)?1:0, db=_pvCurDone(b,pTacheFilter)?1:0;
+      if(da!==db)return da-db;
     }
     const pa=getPCls(a).pct, pb=getPCls(b).pct;
     if(pa!==pb)return pa-pb;
@@ -10286,11 +10302,6 @@ async function refreshApp(){
   if (typeof saveSaison !== "undefined") window.saveSaison = saveSaison;
   if (typeof saveSdTracPicker !== "undefined") window.saveSdTracPicker = saveSdTracPicker;
   if (typeof saveSession !== "undefined") window.saveSession = saveSession;
-  if (typeof saveTache !== "undefined") window.saveTache = saveTache;
-  if (typeof openOvTache !== "undefined") window.openOvTache = openOvTache;
-  if (typeof addTacheFromCatalogue !== "undefined") window.addTacheFromCatalogue = addTacheFromCatalogue;
-  if (typeof showOvTacheForm !== "undefined") window.showOvTacheForm = showOvTacheForm;
-  if (typeof showOvTacheCatalog !== "undefined") window.showOvTacheCatalog = showOvTacheCatalog;
   if (typeof _computeAutoNiv !== "undefined") window._computeAutoNiv = _computeAutoNiv;
   if (typeof getTacheStatut !== "undefined") window.getTacheStatut = getTacheStatut;
   if (typeof _relNivState !== "undefined") window._relNivState = _relNivState;
