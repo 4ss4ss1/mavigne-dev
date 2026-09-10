@@ -23,7 +23,7 @@ export const GT_ADMIN_EMAIL = 'ngdevpro@gmail.com';
 // WHATS_NEW   : tableau vide = modal desactive pour cette version.
 // Format item : { emoji:'📅', titre:'Titre court', desc:'Phrase utilisateur.' }
 // Regle : seulement les changements visibles par les utilisateurs.
-export const APP_VERSION = '7.02';
+export const APP_VERSION = '7.03';
 // ════ Journal des nouveautés (récap cumulatif) ════
 // Une entrée par version, la PLUS RÉCENTE EN HAUT : { v:'5.10', items:[ {emoji,titre,desc}, … ] }
 // À chaque release visible → AJOUTER un bloc en tête (ne pas remplacer). items:[] = release technique (rien à afficher).
@@ -354,7 +354,7 @@ window._mvGraphRepeindre = function(){
 };
 
 export const WHATS_NEW = [
-  { v: '7.02', items: [
+  { v: '7.03', items: [
     { emoji: 'carton', titre: 'Un lot de f\u00fbts est achet\u00e9 ou lou\u00e9',
       desc: "La R\u00e9serve \u203a F\u00fbts vous demande d\u00e9sormais si le lot est <b>achet\u00e9</b> ou <b>lou\u00e9</b>. Un lot lou\u00e9 porte son <b>loyer HT par f\u00fbt et par an</b> et les dates de son contrat ; un lot achet\u00e9 porte sa <b>date de facture</b>, qui remplace la date de saisie. Les lots existants restent des achats, rien \u00e0 reprendre." },
     { emoji: 'euro', titre: 'La location de f\u00fbts entre enfin dans l\u2019exercice',
@@ -369,6 +369,10 @@ export const WHATS_NEW = [
       desc: "Son total couvrait tout l\u2019historique du domaine, pos\u00e9 \u00e0 c\u00f4t\u00e9 d\u2019un total d\u2019exercice qui, lui, ne couvrait qu\u2019une ann\u00e9e. Deux boutons choisissent maintenant la fen\u00eatre : <b>Exercice</b> ou <b>Tout l\u2019historique</b>." },
     { emoji: 'carton', titre: 'Deux livraisons du m\u00eame f\u00fbt font deux lots',
       desc: "Saisir un r\u00e9assort identique grossissait le lot existant sans toucher \u00e0 sa date ni \u00e0 son prix : la seconde commande \u00e9tait alors compt\u00e9e au prix de la premi\u00e8re, et dat\u00e9e de son ann\u00e9e. Chaque facture a maintenant son lot. Le +/- de la carte reste l\u00e0 pour corriger une quantit\u00e9." }
+  ] },
+  { v: '7.02', items: [
+    { emoji: 'chrono', titre: 'La date de fin d\u2019Aujourd\u2019hui est celle de La campagne',
+      desc: "Aujourd\u2019hui annon\u00e7ait <b>+32 j d\u2019avance</b> pendant que La campagne montrait du travail en retard fin mars, sur les m\u00eames donn\u00e9es : le cockpit comptait l\u2019\u00e9quipe d\u2019octobre sur une taille qui n\u2019ouvre qu\u2019en novembre, et ne d\u00e9duisait pas le tracteur. La date, la marge et les \u00ab N j \u00bb par t\u00e2che viennent d\u00e9sormais du simulateur de La campagne sans renfort \u2014 chaque travail dans sa fen\u00eatre, tracteur d\u00e9duit, aux heures normales du planning. Les jours ouvr\u00e9s se comptent depuis aujourd\u2019hui, la phrase sous le chiffre dit quand l\u2019\u00e9quipe est reconduite au-del\u00e0 de la p\u00e9riode, et un petit \u00ab i \u00bb explique le calcul." }
   ] },
   { v: '7.01', items: [
     { emoji: 'euro', titre: 'L\u2019exercice est coup\u00e9 au jour : engag\u00e9, pr\u00e9vu, \u00e0 la cl\u00f4ture',
@@ -2380,6 +2384,7 @@ var MV_AIDE = {
       _mvAideOngletsPil,
       ['La barre du haut dit où vous regardez', ": l’exercice entier, ou une campagne. Cliquez une campagne dans la frise de l’année et les trois chiffres du haut, la frise et les tableaux de la campagne suivent. La croix revient à l’année. <b>Trois écrans ont leur propre cadre</b> et ne se recadrent pas : Économie chiffre la période consultée, la Cave suit le millésime, la Conformité roule sur sept ans — chacun l’écrit au-dessus de ses chiffres."],
       ['Les trois chiffres du haut', "— les travaux, l’effectif, le budget — ne s’affichent que sur <b>L’année</b> et <b>La campagne</b>, les deux niveaux de zoom. Ils changent avec ce que vous regardez, et chacun mène à l’écran qui le détaille. Ailleurs, ils ne servaient plus à choisir où aller : sur Économie et sur Conformité, ils répétaient l’écran juste en dessous."],
+      ['Une seule date de fin', "pour tout le module : Aujourd’hui, sa frise et Échéances par tâche lisent la même simulation que La campagne sans renfort — chaque travail dans sa fenêtre, l’équipe partagée entre les travaux ouverts en même temps, le tracteur déduit, aux heures normales du planning. Le « i » à côté de la marge dit les trois choses qui la distinguent du simulateur de renfort, et « vers le » signale une fin après la période, l’équipe de la dernière semaine reconduite."],
       ['La conformité n’est plus dans cette ligne', "et c’est une question d’échelle : le cuivre roule sur <b>sept ans glissants</b>, il ne bouge pas quand vous cliquez une campagne. Un chiffre qui ignore la portée n’a pas sa place dans une ligne qui se recadre. Il se lit en entier dans l’onglet Conformité, et le bouton « à compléter » remonte toujours ses alertes, sur tous les onglets."],
       ['Le bouton « à compléter »', "liste ce qui manque pour que vos chiffres soient justes, et vous emmène à l’endroit exact où le renseigner. Un rond rouge sur un chiffre veut dire qu’il ne se calcule pas ; un rond orange, qu’il sort mais faux."],
       ['Les onglets vont du large au fin', ": l’année, puis la campagne, puis l’équipe et le matériel, puis la décision. Après le trait, ce sont des écrans de détail — on y arrive aussi en touchant un des trois chiffres."],
@@ -2566,6 +2571,15 @@ export const MV_INFO = {
     'Un <b>soutirage</b> se déclenche à la fin de la malo, pas à une date : la projection vient des valeurs d\u2019acide malique mesurées. Deux pentes sont calculées, la moyenne sur trois analyses projette la fin, les deux dernières détectent un blocage.'
   ] },
 
+  'pil.marge': { t: 'La date de fin, et la marge', p: [
+    'La date r\u00e9pond \u00e0 une seule question : <b>si le planning et les contrats restent tels quels, quand tout est-il fini ?</b> Elle vient du m\u00eame simulateur que La campagne avec \u00ab aucun renfort \u00bb : chaque travail commence \u00e0 l\u2019ouverture de <b>sa fen\u00eatre</b> \u2014 pas au premier jour de la p\u00e9riode \u2014, les travaux ouverts en m\u00eame temps se <b>partagent l\u2019\u00e9quipe</b>, les heures de <b>tracteur</b> sont d\u00e9duites, et l\u2019\u00e9quipe est lue <b>jour par jour</b> dans le planning : horaire de chacun, cong\u00e9s, fermeture, contrats et dates de d\u00e9but, effectif d\u2019une \u00e9quipe collective.',
+    '<b>Trois diff\u00e9rences avec La campagne, voulues.</b> La date est prise <b>aux heures normales</b> du planning, sans les heures suppl\u00e9mentaires que le simulateur s\u2019autorise quand il cherche un renfort. Un travail hors fen\u00eatre <b>n\u2019est pas rallong\u00e9</b> : le simulateur suppose +15 % par semaine de retard pour dimensionner un renfort, une date \u00ab si je ne touche rien \u00bb lit les heures telles quelles. Et l\u2019<b>\u00e9cart de cadence</b> mesur\u00e9, quand il est applicable, multiplie les heures restantes \u2014 La campagne raisonne au bar\u00e8me.',
+    'Au-del\u00e0 de la derni\u00e8re semaine planifi\u00e9e, l\u2019\u00e9quipe de cette semaine-l\u00e0 est <b>reconduite</b> telle quelle : la date sort quand m\u00eame, pr\u00e9c\u00e9d\u00e9e de \u00ab vers le \u00bb, et la phrase dit ce qu\u2019il restait \u00e0 faire \u00e0 la fin du cadre.',
+    'La <b>marge</b> compte les jours ouvr\u00e9s (lundi \u00e0 vendredi) entre cette date et l\u2019objectif pos\u00e9 pour la campagne. \u00ab Charge restante \u00bb et ses jours ouvr\u00e9s se comptent depuis <b>aujourd\u2019hui</b>.',
+    'Si le planning ne couvre pas encore la p\u00e9riode, l\u2019\u00e9cran retombe sur la cadence des quatre derni\u00e8res semaines \u2014 et l\u2019annonce, car cette cadence ignore les embauches d\u00e9j\u00e0 sign\u00e9es.',
+    'Les m\u00eames fins par travail se lisent dans <b>\u00c9ch\u00e9ances par t\u00e2che</b> (La campagne) : un travail qui finit apr\u00e8s sa fen\u00eatre y est marqu\u00e9 \u00ab d\u00e9borde de N sem. \u00bb. Le 10 septembre 2026, Aujourd\u2019hui affichait \u00ab +32 j d\u2019avance \u00bb pendant que La campagne montrait du travail en retard fin mars : le cockpit comptait l\u2019\u00e9quipe d\u2019octobre sur une taille qui n\u2019ouvre qu\u2019en novembre.'
+  ] },
+
   'pil.capacite': { t: 'Capacité au pic', p: [
     'Le pic est la <b>semaine la plus chargée</b>, jamais une moyenne. Une moyenne annuelle n\u2019existe aucun jour de l\u2019année ; c\u2019est le pic qui décide d\u2019un recrutement.',
     'Cette carte montre le <b>pic à venir</b> : la semaine la plus chargée parmi celles qui ne sont pas encore finies. Sur un exercice, le pic est presque toujours la <b>vendange</b> — consultée en septembre, elle est derrière, et on ne recrute pas pour une semaine faite. Le pic de l\u2019exercice reste écrit en bas de la carte, daté et marqué <b>déjà passé</b> ; l\u2019onglet <b>L\u2019année</b>, lui, le montre toujours en grand, c\u2019est son rôle.',
@@ -2731,8 +2745,8 @@ export const MV_INFO = {
     'La répartition d\u2019une journée entre plusieurs parcelles suit une <b>règle 1/N</b> : c\u2019est la seule convention inventée par le logiciel, et elle suppose qu\u2019une parcelle se fait dans la journée.'
   ] },
 
-  'pil.exo.postes': { t: 'Les quatre postes de l\u2019exercice', p: [
-    '<b>Quatre postes, et rien d\u2019autre</b> : les salaires, le carburant, les achats d\u2019intrants et les r\u00e9parations (les passages chez le r\u00e9parateur, \u00e0 leur date de retour).',
+  'pil.exo.postes': { t: 'Les postes de l\u2019exercice', p: [
+    '<b>Quatre postes toujours présents</b> : les salaires, le carburant, les achats d\u2019intrants et les réparations (les passages chez le réparateur, à leur date de retour). Deux s\u2019ajoutent quand ils existent : la <b>location de fûts</b>, au prorata des jours de contrat, et les <b>fûts achetés</b> si vous avez choisi de les compter.',
     'La <b>conduite</b> du tracteur est déjà dans les salaires — c\u2019est du temps de travail payé. La compter une seconde fois au poste tracteur reviendrait à <b>payer deux fois le tractoriste</b>. Seul son <b>carburant</b> s\u2019ajoute.',
     'Le graphique <b>mois par mois</b> montre ce qui est sorti, à la date où c\u2019est sorti. Un exercice viticole n\u2019est pas régulier : la taille en hiver, les vendanges à l\u2019automne, un creux en été. Ces bosses sont normales — c\u2019est justement ce qu\u2019on vient regarder.',
     'Sur un exercice <b>en cours</b>, l\u2019année est coupée <b>au jour</b> : à gauche d\u2019aujourd\u2019hui, l\u2019<b>engagé</b> — ce qui est sorti, à sa date ; à droite, le <b>prévu</b> — les salaires que la grille du planning annonce jusqu\u2019à la clôture, hachurés. Un mois entamé est coupé au jour, jamais compté d\u2019un seul côté. Le carburant, les achats et les réparations n\u2019ont pas de prévu : Ma Vigne ne connaît que ce qui est sorti.',
