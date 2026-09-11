@@ -12298,6 +12298,36 @@ function _pcavInjectCss(){
   +'.pcrb-dot{width:9px;height:9px;border-radius:3px;flex:none}'
   +'.pcrb-sec{font-family:\'Cormorant Garamond\',Georgia,serif;font-size:var(--pt-sm,17px);font-weight:600;color:var(--texte)}'
   +'.pcrb-nsec{font-style:italic;color:var(--texte-doux)}'
+  /* ── CRB-2 : le selecteur de cuves et le slot sans debord ────────── */
+  /* ⚠ `.pcrb-g` deborde volontairement de ses gouttieres (les trois autres
+     graphes en ont besoin). Le couloir, lui, tient dans la carte : il ne doit
+     PAS declencher un defilement horizontal de 34 px a chaque ouverture. */
+  +'.pcrb-g.crb-g{overflow-x:visible;margin:0;padding:0}'
+  +'.crb-chps{margin:0 -17px 2px;padding:0 17px}'
+  +'.crb-sc{display:flex;gap:7px;overflow-x:auto;padding:2px 0 9px;-webkit-overflow-scrolling:touch}'
+  +'.crb-sc::-webkit-scrollbar{height:4px}'
+  +'.crb-sc::-webkit-scrollbar-thumb{background:var(--gris);border-radius:4px}'
+  /* 36 px de haut, 44 de cible avec le padding vertical du conteneur : on les
+     touche avec des gants, entre deux cuves. */
+  +'.crb-chp{flex:none;font:inherit;font-size:var(--pt-micro,11px);font-weight:600;cursor:pointer;'
+    /* \u26a0 `--gris-clair`, pas `--gris` : le filet du projet a ete arbitre, et
+       `--gris` est le PERDANT (mv-harnais-jetons tient son compte a la baisse).
+       Un lot qui lui rend du terrain fait rougir le cliquet \u2014 il a rougi. */
+    +'white-space:nowrap;border:1px solid var(--gris-clair);background:var(--blanc);color:var(--texte-med);'
+    +'border-radius:20px;padding:7px 12px;min-height:36px;display:flex;align-items:center;gap:6px}'
+  +'.crb-chp i{width:8px;height:8px;border-radius:3px;background:var(--gris);flex:none}'
+  +'.crb-chp[data-on=\'A\']{border-color:var(--terre);color:var(--terre);border-width:1.5px}'
+  +'.crb-chp[data-on=\'A\'] i{background:var(--terre)}'
+  +'.crb-chp[data-on=\'B\']{border-color:var(--bleu);color:var(--bleu);border-width:1.5px}'
+  +'.crb-chp[data-on=\'B\'] i{background:var(--bleu)}'
+  +'.crb-aide{font-size:var(--pt-micro,11px);color:var(--texte-doux);line-height:1.5;padding:0 0 10px}'
+  /* La pastille du tableau suit LE ROLE, pas le rang. Grise par defaut : elle
+     ne peut pas designer une courbe que le couloir ne trace plus. */
+  +'.pcrb-tb tr[data-crbn]{cursor:pointer}'
+  +'.pcrb-tb tr[data-on=\'A\']{background:var(--terre-pale)}'
+  +'.pcrb-tb tr[data-on=\'B\']{background:var(--bleu-pale)}'
+  +'.pcrb-tb tr[data-on=\'A\'] .pcrb-dot{background:var(--terre)}'
+  +'.pcrb-tb tr[data-on=\'B\'] .pcrb-dot{background:var(--bleu)}'
   +'@media(max-width:600px){'
   /* Les trois colonnes de contexte se replient, elles ne disparaissent pas :
      le cahier de cuverie les porte toutes les neuf. */
@@ -12305,6 +12335,8 @@ function _pcavInjectCss(){
   +'.pcrb-h{padding:12px 14px 10px}'
   +'.pcrb-b{padding:12px 14px 14px}'
   +'.pcrb-g{margin:0 -14px;padding:0 14px}'
+  +'.pcrb-g.crb-g{margin:0;padding:0}'
+  +'.crb-chps{margin:0 -14px 2px;padding:0 14px}'
   +'.pcav-vbig{font-size:var(--pt-xxl,31px)}'
   +'.pcav-fs,.pcav-fl{grid-template-columns:80px 1fr;gap:10px}'
   +'.pcav-pl{grid-template-columns:64px 1fr 86px;gap:8px}'
@@ -12351,7 +12383,7 @@ function _pcrbCard(ico,titre,sous,zero,corps,pied,infoCle){
 /* Le graphe est TOUJOURS pose par le registre : c'est lui qui mesure la vraie
    largeur du conteneur et qui repeint au redimensionnement. Un SVG a viewBox
    fixe pose en dur s'etire a x5 sur grand ecran — piege deja paye. */
-function _pcrbSlot(id){ return '<div class="pcrb-g" id="'+id+'"></div>'; }
+function _pcrbSlot(id,cls){ return '<div class="pcrb-g'+(cls?(' '+cls):'')+'" id="'+id+'"></div>'; }
 
 /* ── 2 · LE COMPARATIF DES DENSITES ─────────────────────────────────────── */
 /* Les series sont construites UNE fois par rendu et relues par les deux
@@ -12367,8 +12399,82 @@ function _pcrbSeries(){
     var r=window._cuvCmpSeries(cv);
     _PCRB_S=r.S||[]; _PCRB_HORS=r.hors||0;
   }catch(e){ _pcavLog('cmpSeries',e); _PCRB_S=null; }
+  /* ⚠ CRB-2 — LA SELECTION SE NETTOIE ICI. Elle survit au rendu : apres un
+     changement de millesime, elle designerait des cuves qui ne sont plus a
+     l'ecran, et le couloir aurait l'air de ne pas suivre. Meme piege que la
+     portee fantome du Pilotage. */
+  var noms={}; (_PCRB_S||[]).forEach(function(s){ noms[s.nom]=1; });
+  _CRB_SEL=_CRB_SEL.filter(function(n){ return noms[n]; });
+  /* Le defaut ne s'applique QUE tant que l'utilisateur n'a rien touche : une
+     selection vide qu'il a faite lui-meme se respecte. */
+  if(!_CRB_SEL.length && !_CRB_TOUCHE && _PCRB_S && _PCRB_S.length) _CRB_SEL=[_PCRB_S[0].nom];
   return _PCRB_S;
 }
+/* ── CRB-2 : LE SELECTEUR ───────────────────────────────────────
+   DEUX barres identiques, UN seul etat. La barre est repetee sur les deux
+   cartes parce que le graphe des temperatures est plus bas que l'ecran : y
+   renvoyer l'utilisateur vers une barre qu'il ne voit plus, ce serait ecrire un
+   mode d'emploi au lieu de dessiner (§27a). Elles refletent `_CRB_SEL`, jamais
+   un etat a elles. */
+function _crbChipsBtns(){
+  var h = '';
+  (_PCRB_S||[]).forEach(function(s){
+    var k = _CRB_SEL.indexOf(s.nom), on = (k === 0) ? 'A' : ((k === 1) ? 'B' : '');
+    h += '<button type="button" class="crb-chp" data-crbn="' + _escHtml(s.nom) + '"'
+      + (on ? (' data-on="' + on + '"') : '') + ' aria-pressed="' + (on ? 'true' : 'false') + '"'
+      + ' onclick="_crbTap(\'' + _escAttr(s.nom) + '\')"><i></i>' + _escHtml(s.nom) + '</button>';
+  });
+  return h;
+}
+function _crbAideTxt(){
+  var l = 2 - _CRB_SEL.length;
+  if(l === 2) return 'Touchez une cuve pour la suivre par-dessus le couloir. Deux au maximum \u2014 '
+    + 'au-del\u00e0, on retombe sur le graphe qu\u2019on vient de remplacer.';
+  if(l === 1) return 'Une cuve suivie. Vous pouvez en ajouter une seconde pour comparer.';
+  return 'Deux cuves suivies. En toucher une troisi\u00e8me rel\u00e2che la premi\u00e8re.';
+}
+function _crbChips(k){
+  if(!_PCRB_S || _PCRB_S.length < 2) return '';
+  return '<div class="crb-chps"><div class="crb-sc" id="crb-sc-' + k + '" role="group"'
+    + ' aria-label="Les cuves \u00e0 suivre">' + _crbChipsBtns() + '</div></div>'
+    + '<div class="crb-aide" id="crb-aide-' + k + '">' + _escHtml(_crbAideTxt()) + '</div>';
+}
+/* ⚠ On met a jour des ATTRIBUTS, jamais l'innerHTML de la barre : reconstruire
+   la bande remettrait son defilement a zero, et toucher la cuve 12 ferait sauter
+   l'ecran au debut de la liste. */
+function _crbSync(){
+  var maj = function(el){
+    var n = el.getAttribute('data-crbn'), k = _CRB_SEL.indexOf(n), on = (k === 0) ? 'A' : ((k === 1) ? 'B' : '');
+    if(on) el.setAttribute('data-on', on); else el.removeAttribute('data-on');
+    if(el.tagName === 'BUTTON') el.setAttribute('aria-pressed', on ? 'true' : 'false');
+  };
+  var q = document.querySelectorAll('[data-crbn]'), i;
+  for(i = 0; i < q.length; i++) maj(q[i]);
+  ['dens','temp'].forEach(function(k){
+    var a = document.getElementById('crb-aide-' + k);
+    if(a) a.textContent = _crbAideTxt();
+  });
+}
+window._crbTap = function(nom){
+  _CRB_TOUCHE = true;
+  var k = _CRB_SEL.indexOf(nom);
+  if(k >= 0) _CRB_SEL.splice(k, 1);
+  else { _CRB_SEL.push(nom); if(_CRB_SEL.length > 2) _CRB_SEL.shift(); }
+  _crbSync();
+  _crbRepeint();
+};
+/* Repeindre les DEUX graphes du couloir, et eux seuls. Le registre saute un
+   dessin quand rien n'a bouge (meme largeur, meme element, contenu present) :
+   on l'oublie d'abord, sinon le trace garderait l'ancienne selection. */
+function _crbRepeint(){
+  if(!_pcavHasW('_mvGraphSuivre')) return;
+  [['dens','d'],['temp','t']].forEach(function(x){
+    if(!document.getElementById('pcrb-g-' + x[0])) return;
+    window._mvGraphOublier && window._mvGraphOublier('#pcrb-g-' + x[0]);
+    window._mvGraphSuivre('#pcrb-g-' + x[0], function(w){ return _crbEnvSvg(_PCRB_S, w, x[1]); });
+  });
+}
+
 function _pcrbEcarte(){
   if(!_PCRB_HORS) return '';
   return ' <b>'+_PCRB_HORS+'</b> cuve'+(_PCRB_HORS>1?'s ne figurent':' ne figure')+' pas ici\u00a0: '
@@ -12386,13 +12492,37 @@ function _pcrbDens(){
       _pcrbEcarte(),'cave.courbes');
   var sec=(window._ML_D20_SEC||996);
   return _pcrbCard('graphique','Les densit\u00e9s, ramen\u00e9es \u00e0 J0',
-    'Sur un calendrier, une cuve entr\u00e9e le 16 et une autre le 24 n\u2019ont aucun point commun.',
-    'J0 = encuvage', _pcrbSlot('pcrb-g-dens')+_pcrbTable(),
-    '<b>Le classement ne se fait pas sur la vitesse.</b> Une pente moyenne sur trois jours n\u2019est '
-    +'pas comparable \u00e0 une pente sur dix \u2014 le d\u00e9but d\u2019une fermentation en est la phase la plus '
-    +'rapide. Le tri porte sur le <b>jour o\u00f9 '+sec+' a \u00e9t\u00e9 relev\u00e9</b>, jamais interpol\u00e9, et la '
-    +'colonne pts/j porte son intervalle.'+_pcrbEcarte(),'cave.courbes');
+    'Le couloir de tout le cuvage, et la cuve que vous suivez par-dessus.',
+    'J0 = encuvage', _crbChips('dens')+_pcrbSlot('pcrb-g-dens','crb-g')+_crbLeg(true)+_pcrbTable(),
+    '<b>La zone dor\u00e9e va de la cuve la plus lente \u00e0 la plus rapide</b>, jour par jour, et le '
+    +'trait pointill\u00e9 est la m\u00e9diane du cuvage. Quinze traits nomm\u00e9s tenaient sur le papier, '
+    +'pas sur un t\u00e9l\u00e9phone. <b>Appuyez sur le graphe</b> pour lire un jour : votre cuve, la '
+    +'m\u00e9diane, et l\u2019\u00e9cart entre les deux.'+_crbNoteInterp()
+    +' <b>Le classement du tableau ne se fait pas sur la vitesse.</b> Une pente moyenne sur trois '
+    +'jours n\u2019est pas comparable \u00e0 une pente sur dix \u2014 le d\u00e9but d\u2019une fermentation en est la '
+    +'phase la plus rapide. Le tri porte sur le <b>jour o\u00f9 '+sec+' a \u00e9t\u00e9 relev\u00e9</b>, jamais '
+    +'interpol\u00e9.'+_pcrbEcarte(),'cave.courbes');
 }
+/* La legende du couloir, et la note qui dit ce qu'on a le droit de lire.
+   ★ Ecrite une fois, lue par les deux cartes : deux legendes redigees separement
+   divergent au premier changement, et l'ecran dirait deux choses du meme dessin. */
+function _crbLeg(dens){
+  return '<div class="crb-aide" style="padding-top:8px">'
+    + '<b style="color:var(--texte-med)">La zone dor\u00e9e</b>\u00a0: du minimum au maximum du cuvage. '
+    + '<b style="color:var(--texte-med)">Le pointill\u00e9</b>\u00a0: la m\u00e9diane. '
+    + '<b style="color:var(--terre)">Trait plein</b> et <b style="color:var(--bleu)">trait tiret\u00e9</b>\u00a0: '
+    + 'les cuves que vous suivez.' + (dens ? '' : ' La bande verte est la fen\u00eatre de travail.')
+    + '</div>';
+}
+/* ⚠ CE QU'ON DIT DE L'INTERPOLATION, ET POURQUOI ON LE DIT. La mediane d'un
+   jour ou personne n'a releve est une mediane d'estimations. Le taire, ce serait
+   donner a un chiffre calcule l'aplomb d'un chiffre mesure. */
+function _crbNoteInterp(){
+  return ' Un jour o\u00f9 une cuve n\u2019a pas \u00e9t\u00e9 relev\u00e9e, sa valeur est <b>estim\u00e9e entre ses '
+    + 'deux relev\u00e9s voisins</b> \u2014 jamais avant le premier ni apr\u00e8s le dernier. L\u2019\u00e9tiquette '
+    + 'donne les deux comptes\u00a0: cuves dans le couloir, et cuves r\u00e9ellement relev\u00e9es ce jour-l\u00e0.';
+}
+
 /* Le tableau qui repond au « pourquoi ». Il ne recopie PAS celui du cahier :
    le papier a la place de neuf colonnes, un telephone n'en tient que trois.
    Les trois autres se replient sous 600 px, elles ne disparaissent pas. */
@@ -12410,8 +12540,13 @@ function _pcrbTable(){
          on ecrit la fraction plutot que de laisser croire au compte plein. */
       if(vg.n<vg.nTot) vgTxt+=' <i>('+vg.n+'/'+vg.nTot+')</i>';
     }
-    h+='<tr data-crb="'+i+'"><td><span class="pcrb-nm"><i class="pcrb-dot" style="background:'
-      +_PCRB_COL[i%_PCRB_COL.length]+'"></i>'+_escHtml(s.nom)+'</span></td>'
+    /* La ligne est une SECONDE PORTE vers le meme geste : le tableau classe les
+       quinze cuves, la bande de chips les fait defiler. Toucher la ligne qu'on
+       vient de lire vaut mieux que retrouver sa chip. */
+    var kSel=_CRB_SEL.indexOf(s.nom), onSel=(kSel===0)?'A':((kSel===1)?'B':'');
+    h+='<tr data-crb="'+i+'" data-crbn="'+_escHtml(s.nom)+'"'+(onSel?(' data-on="'+onSel+'"'):'')
+      +' onclick="_crbTap(\''+_escAttr(s.nom)+'\')"><td><span class="pcrb-nm">'
+      +'<i class="pcrb-dot" style="background:'+_PCRB_COL[0]+'"></i>'+_escHtml(s.nom)+'</span></td>'
       +'<td class="n">'+(s.jSec!=null?('<b class="pcrb-sec">J'+s.jSec+'</b>')
           :('<i class="pcrb-nsec">pas encore \u00b7 J'+s.jFin+' \u00e0 '+Math.round(s.dFin)+'</i>'))+'</td>'
       +'<td class="n">'+(s.vit!=null?(_pcavF1(s.vit)+' <i>J'+s.jDeb+'\u2013J'+s.jFin+'</i>'):'\u2014')+'</td>'
@@ -12421,17 +12556,22 @@ function _pcrbTable(){
   });
   return h+'</tbody></table>';
 }
-/* La palette DOIT etre celle de `_cmpSvg`, sinon la pastille du tableau ne
-   designe pas la courbe qu'elle pretend designer. Les memes six roles, dans
-   le meme ordre — c'est un contrat, pas une coincidence. */
-var _PCRB_COL=['var(--terre)','var(--vert-med)','var(--bleu)','var(--orange)','var(--phyto)','var(--rouge)'];
+/* ⚠⚠ CE COMMENTAIRE DISAIT L'INVERSE, ET IL AVAIT RAISON — AVANT CRB-2.
+   Il exigeait que la pastille reprenne la palette de `_cmpSvg`, « sinon elle ne
+   designe pas la courbe qu'elle pretend designer ». Depuis le couloir, l'ecran
+   ne trace plus quinze courbes de couleurs : une pastille coloree designerait
+   une courbe qui n'existe plus. Elle est donc GRISE par defaut, et ne prend une
+   couleur que pour les une ou deux cuves reellement tracees — par le CSS, sur
+   `tr[data-on]`. ★ Le cahier de cuverie, lui, garde ses quinze couleurs :
+   `_cmpSvg` n'a pas bouge. */
+var _PCRB_COL=['var(--gris)'];
 
 /* ── 3 · LES TEMPERATURES ────────────────────────────────────────────────── */
 function _pcrbTemp(){
   var min=(window._cuvCmpMin||2), n=0;
   if(_PCRB_S) _PCRB_S.forEach(function(s){
     if(s.pts.filter(function(p){ return p.t!=null; }).length>=2) n++; });
-  var corps = (n>=min) ? _pcrbSlot('pcrb-g-temp')
+  var corps = (n>=min) ? (_crbChips('temp')+_pcrbSlot('pcrb-g-temp','crb-g')+_crbLeg(false))
     : (_pcavHasW('_mvGraphVide')
         ? window._mvGraphVide('Pas assez de temp\u00e9ratures relev\u00e9es',
             'Deux relev\u00e9s portant une temp\u00e9rature, sur deux cuves, suffisent \u00e0 comparer.')
@@ -12441,10 +12581,12 @@ function _pcrbTemp(){
     'Un palier de densit\u00e9 s\u2019explique souvent ici\u00a0: douze degr\u00e9s cinq jours durant, '
     +'c\u2019est une mac\u00e9ration, pas une fermentation qui tra\u00eene.','J0 = encuvage',
     corps,
-    'La bande verte est la <b>fen\u00eatre de travail</b>. Au-dessus de 30\u00a0\u00b0C le relev\u00e9 porte un '
-    +'point rouge \u2014 c\u2019est le seuil qui d\u00e9clenche d\u00e9j\u00e0 l\u2019alerte \u00ab\u00a0temp\u00e9rature haute\u00a0\u00bb dans '
-    +'<b>Ce qui presse</b>. Un relev\u00e9 sans temp\u00e9rature n\u2019est pas une temp\u00e9rature de z\u00e9ro\u00a0: '
-    +'il est simplement absent du trac\u00e9.'
+    'La bande verte est la <b>fen\u00eatre de travail</b>, de 18 \u00e0 30\u00a0\u00b0C \u2014 30\u00a0\u00b0C est le seuil '
+    +'qui d\u00e9clenche d\u00e9j\u00e0 l\u2019alerte \u00ab\u00a0temp\u00e9rature haute\u00a0\u00bb dans <b>Ce qui presse</b>. '
+    +'<b>La m\u00eame cuve reste s\u00e9lectionn\u00e9e</b> qu\u2019au-dessus\u00a0: le palier de densit\u00e9 et la '
+    +'temp\u00e9rature qui l\u2019explique se lisent sur la m\u00eame cuve, sans rien retoucher. '
+    +'Un relev\u00e9 sans temp\u00e9rature n\u2019est pas une temp\u00e9rature de z\u00e9ro\u00a0: '
+    +'il est simplement absent du trac\u00e9.'+_crbNoteInterp()
     +(manque>0?(' <b>'+manque+'</b> cuve'+(manque>1?'s n\u2019ont':' n\u2019a')+' pas assez de relev\u00e9s '
       +'portant une temp\u00e9rature.'):''),'cave.courbes');
 }
@@ -12663,10 +12805,10 @@ function _pcrbPose(){
   window._mvGraphOublier&&window._mvGraphOublier('#pcrb-g-');
   if(document.getElementById('pcrb-g-mat')&&_pcavHasW('_cuvMatSvg'))
     window._mvGraphSuivre('#pcrb-g-mat',function(w){ return window._cuvMatSvg(w); });
-  if(document.getElementById('pcrb-g-dens')&&_PCRB_S&&_pcavHasW('_cuvCmpSvg'))
-    window._mvGraphSuivre('#pcrb-g-dens',function(w){ return window._cuvCmpSvg(_PCRB_S,w); });
-  if(document.getElementById('pcrb-g-temp')&&_PCRB_S&&_pcavHasW('_cuvCmpTempSvg'))
-    window._mvGraphSuivre('#pcrb-g-temp',function(w){ return window._cuvCmpTempSvg(_PCRB_S,w); });
+  /* ★ CRB-2 : l'ecran passe par le COULOIR, plus par la superposition. Le
+     cahier de cuverie, lui, continue d'appeler `_cmpSvg` / `_cmpTempSvg`
+     directement — sur A4 les quinze noms tiennent. */
+  if(_PCRB_S) _crbRepeint();
   var el=document.getElementById('pcrb-g-elev');
   if(el&&_PCRB_ELEV&&_PCRB_ELEV.length)
     window._mvGraphSuivre('#pcrb-g-elev',function(w){ return _pcrbElevSvg(_PCRB_ELEV,w); });
@@ -14583,6 +14725,294 @@ function _cmpTempSvg(S, w){
   return window._mvGraphSvg(c, aria, g);
 }
 
+/* ═══════════════════════════════════════════════════════════════════════════
+   CRB-2 — L'ENVELOPPE DE DISPERSION. POUR L'ECRAN SEULEMENT.
+   ★★★ POURQUOI UN SECOND DESSIN DE LA MEME DONNEE, ALORS QUE §86 L'INTERDIT.
+   La regle interdit de REDESSINER une courbe qui existe ailleurs. Ici ce n'est
+   pas le meme dessin : `_cmpSvg` SUPERPOSE quinze traits nommes, l'enveloppe
+   les RESUME en un couloir. Et les deux surfaces n'ont ni la meme place ni le
+   meme geste. Sur A4, quinze noms tiennent dans 92 px de gouttiere et il n'y a
+   pas de doigt : le cahier de cuverie garde `_cmpSvg`, inchange. Sur 336 px, la
+   meme gouttiere mange le tiers du trace pour ecrire quinze noms qu'on ne lit
+   pas — et c'est exactement ce que Nico a appele « illisible ».
+   ⚠⚠ LE CAHIER DE CUVERIE NE DOIT PAS PASSER PAR ICI. `_cmpBloc` appelle
+   `_cmpSvg` / `_cmpTempSvg` et rien d'autre. Un couloir sans selecteur de cuve
+   sur du papier ne repondrait a aucune question.
+   ═══════════════════════════════════════════════════════════════════════════ */
+var MV_CRB_NMIN = 3;      /* sous trois cuves, une « dispersion » n'en est pas une */
+var MV_CRB_DLO  = 990,  MV_CRB_DHI = 1100;   /* l'axe des densites, fixe */
+var MV_CRB_TLO  = 10,   MV_CRB_THI = 35;     /* l'axe des temperatures, fixe */
+var MV_CRB_H    = 276,  MV_CRB_TH2 = 244;
+/* Deux ROLES, pas deux index. `MV_CMP_COL` attribue une couleur par rang parmi
+   quinze ; ici il n'y a que « la cuve suivie » et « celle a laquelle on la
+   compare ». Une couleur de rang designerait une courbe qui n'est plus tracee. */
+var MV_CRB_COLA = 'var(--terre)', MV_CRB_COLB = 'var(--bleu)';
+
+/* Les cuves mises en avant — DEUX au plus. Au-dela, on retombe sur le probleme
+   qu'on vient de resoudre. `_CRB_TOUCHE` distingue « l'utilisateur n'a rien
+   choisi » de « l'utilisateur a tout deselectionne » : le premier merite un
+   defaut, le second merite qu'on le respecte. */
+var _CRB_SEL = [], _CRB_TOUCHE = false;
+
+/* ── LA VALEUR D'UNE CUVE AU JOUR J ─────────────────────────────────
+   ★★★ LE SEUL ARBITRAGE DE MODELE DU LOT.
+   Une enveloppe demande une valeur par cuve ET par jour. Or personne ne releve
+   les quinze cuves tous les jours : sans rien, la mediane sauterait d'un jour a
+   l'autre selon QUI a ete mesure, pas selon ce qui se passe en cuve.
+   Le choix : INTERPOLATION LINEAIRE ENTRE DEUX RELEVES REELS DE LA MEME CUVE,
+   et rien d'autre. Jamais avant le premier releve, jamais apres le dernier —
+   ce serait extrapoler, c'est-a-dire inventer.
+   Pourquoi c'est defendable : densite et temperature sont des grandeurs
+   CONTINUES, et l'ecart entre deux releves est d'un a deux jours. Ce n'est pas
+   du meme ordre qu'une date d'encuvage devinee (§88a).
+   ⚠ Ce que ca coute, et qui s'ecrit a l'ecran : la mediane d'un jour non releve
+   est une mediane d'estimations. L'infobulle donne les DEUX comptes — cuves
+   prises en compte, et cuves reellement relevees ce jour-la. */
+function _crbVal(pts, j, cle){
+  var P = [], i;
+  for(i = 0; i < (pts||[]).length; i++) if(pts[i][cle] != null) P.push(pts[i]);
+  if(P.length < 2) return null;
+  if(j < P[0].j || j > P[P.length - 1].j) return null;
+  for(i = 0; i < P.length; i++){
+    if(P[i].j === j) return { v:P[i][cle], reel:true };
+    if(P[i].j > j){
+      var a = P[i-1], b = P[i];
+      return { v: a[cle] + (b[cle] - a[cle]) * ((j - a.j) / (b.j - a.j)), reel:false };
+    }
+  }
+  return null;
+}
+
+function _crbMed(v){
+  if(!v.length) return null;
+  var a = v.slice().sort(function(x, y){ return x - y; }), n = a.length, m = n >> 1;
+  return (n % 2) ? a[m] : (a[m-1] + a[m]) / 2;
+}
+
+/* ── L'ENVELOPPE ────────────────────────────────────────────────
+   Par jour : le minimum, le maximum, la mediane, et DEUX comptes.
+   ⚠ `jCoupe` est le dernier jour ou trois cuves sont encore suivies. Au-dela,
+   min = max = mediane et le couloir devient un trait : un trait plat ferait
+   croire a une convergence alors qu'il ne reste qu'une cuve. */
+function _crbEnv(S, cle){
+  var jMax = 0, sans = 0;
+  (S||[]).forEach(function(s){
+    var n = 0;
+    s.pts.forEach(function(p){ if(p[cle] != null) n++; });
+    if(n < 2){ sans++; return; }
+    if(s.jFin > jMax) jMax = s.jFin;
+  });
+  var J = [], jc = -1;
+  for(var j = 0; j <= jMax; j++){
+    var vals = [], reels = 0;
+    (S||[]).forEach(function(s){
+      var r = _crbVal(s.pts, j, cle);
+      if(r){ vals.push(r.v); if(r.reel) reels++; }
+    });
+    if(!vals.length) continue;
+    J.push({ j:j, min:Math.min.apply(null, vals), max:Math.max.apply(null, vals),
+             med:_crbMed(vals), n:vals.length, reels:reels });
+    if(vals.length >= MV_CRB_NMIN) jc = j;
+  }
+  return { jours:J, jMax:jMax, jCoupe:jc, sans:sans };
+}
+
+/* Les jours CONTIGUS, en troncons : un trou dans le couloir ne se comble pas
+   par un trait droit que personne n'a mesure. */
+function _crbTroncons(jours, jMax){
+  var T = [], cur = [];
+  jours.forEach(function(d){
+    if(d.j > jMax) return;
+    if(cur.length && d.j !== cur[cur.length-1].j + 1){ T.push(cur); cur = []; }
+    cur.push(d);
+  });
+  if(cur.length) T.push(cur);
+  return T;
+}
+
+/* La serie d'une cuve par son nom. Le nom N'EST PAS unique dans l'absolu —
+   `_mlNomCuvee` le rappelle — mais il l'est DANS un millesime, et l'ecran n'en
+   affiche qu'un. Les gardes de `_pcrbSeries` (« un nom en double sort du
+   selecteur ») ferment le reste. */
+function _crbSerie(nom){
+  var S = _PCRB_S || [];
+  for(var i = 0; i < S.length; i++) if(S[i].nom === nom) return S[i];
+  return null;
+}
+
+/* ── LE TRACE ───────────────────────────────────────────────────
+   ⚠ LES BORNES SONT FIXES, ET ELARGIES SI LA DONNEE SORT. Un axe qui s'ajuste
+   aux donnees fait paraitre enorme un ecart de deux points, et deux captures
+   d'un millesime a l'autre ne se comparent plus. Un axe fixe qui COUPE une
+   valeur serait pire : les bornes s'ecartent quand il le faut, jamais moins. */
+function _crbEnvSvg(S, w, cle){
+  var dens = (cle === 'd');
+  var env = _crbEnv(S, cle);
+  if(!env.jours.length) return '';
+  var c = window._mvGraphCadre(w, dens ? MV_CRB_H : MV_CRB_TH2,
+    { padL:42, padR:16, padT:24, padB:32 });
+  var pL = c.padL, pT = c.padT, iw = c.iw, ih = c.ih;
+  var jMax = Math.max(1, env.jMax), lo = null, hi = null;
+  env.jours.forEach(function(d){
+    if(lo == null || d.min < lo) lo = d.min;
+    if(hi == null || d.max > hi) hi = d.max;
+  });
+  var pasV = dens ? 25 : 5, marge = dens ? 3 : 2;
+  var aLo = dens ? MV_CRB_DLO : MV_CRB_TLO, aHi = dens ? MV_CRB_DHI : MV_CRB_THI;
+  /* \u26a0 L'ELARGISSEMENT S'ARRONDIT AU PAS DE GRADUATION. Sans cela, une cuve a
+     8 \u00b0C descendait le cadre a 6 mais laissait le premier trait chiffre a 10 :
+     la courbe plongeait sous la derniere ligne, dans une zone sans repere. Un
+     cadre elargi qui ne dit pas jusqu'ou il descend ne vaut pas mieux qu'un
+     cadre qui coupe. */
+  if(lo - marge < aLo) aLo = Math.floor((lo - marge) / pasV) * pasV;
+  if(hi + marge > aHi) aHi = Math.ceil((hi + marge) / pasV) * pasV;
+  var sp  = Math.max(1, aHi - aLo);
+  var X = function(j){ return pL + (j / jMax) * iw; };
+  var Y = function(v){ return pT + ih - ((v - aLo) / sp) * ih; };
+  var g = '';
+
+  /* La fenetre de travail des temperatures : une BANDE, pas un seuil. Entre 18
+     et 30 °C il n'y a rien a decider ; un trait unique se lirait comme une
+     limite. Meme constante que `_cmpTempSvg` — deux valeurs ecrites deux fois,
+     ce sont deux verites au premier changement. */
+  if(!dens) g += '<rect x="' + pL + '" y="' + Y(MV_CMP_TMAX).toFixed(1) + '" width="' + iw
+    + '" height="' + (Y(MV_CMP_TMIN) - Y(MV_CMP_TMAX)).toFixed(1) + '" fill="' + c.col.fait
+    + '" opacity="0.09"/>';
+
+  for(var v = Math.ceil(aLo / pasV) * pasV; v <= aHi; v += pasV){
+    var y = Y(v);
+    g += '<line x1="' + pL + '" y1="' + y.toFixed(1) + '" x2="' + (pL + iw) + '" y2="' + y.toFixed(1)
+      + '" stroke="' + c.col.grille + '" stroke-width="1"/>'
+      + '<text x="' + (pL - 7) + '" y="' + (y + 4).toFixed(1) + '" text-anchor="end" font-size="'
+      + c.txt.axe + '" fill="' + c.col.texte + '">' + Math.round(v) + '</text>';
+  }
+  g += '<text x="' + (pL - 7) + '" y="' + (pT - 9) + '" text-anchor="end" font-size="'
+    + c.txt.unite + '" fill="' + c.col.texte + '">' + (dens ? 'd20' : '\u00b0C') + '</text>';
+
+  /* L'axe des JOURS. Un pas entier : « J2,5 » ne veut rien dire. */
+  var pasJ = Math.max(1, Math.ceil(jMax / c.grad));
+  for(var j = 0; j <= jMax; j += pasJ){
+    var x = X(j);
+    g += '<line x1="' + x.toFixed(1) + '" y1="' + (pT + ih) + '" x2="' + x.toFixed(1) + '" y2="'
+      + (pT + ih + 4) + '" stroke="' + c.col.grille + '" stroke-width="1"/>'
+      + '<text x="' + x.toFixed(1) + '" y="' + (c.h - 10) + '" text-anchor="middle" font-size="'
+      + c.txt.axe + '" fill="' + c.col.texte + '">J' + j + '</text>';
+  }
+  g += '<text x="' + (pL + iw) + '" y="' + (c.h - 10) + '" text-anchor="end" font-size="'
+    + c.txt.unite + '" fill="' + c.col.texte + '">jours depuis l\u2019encuvage</text>';
+
+  /* LE COULOIR, puis LA MEDIANE. Trait fin pointille et NEUTRE : c'est un
+     repere, pas une cuve. Lui donner une couleur de la palette, ce serait la
+     faire passer pour une seizieme cuve. */
+  if(env.jCoupe >= 1){
+    _crbTroncons(env.jours, env.jCoupe).forEach(function(T){
+      if(T.length < 2) return;
+      var haut = T.map(function(d){ return X(d.j).toFixed(1) + ',' + Y(d.max).toFixed(1); });
+      var bas  = T.slice().reverse().map(function(d){ return X(d.j).toFixed(1) + ',' + Y(d.min).toFixed(1); });
+      g += '<polygon points="' + haut.concat(bas).join(' ') + '" fill="' + c.col.prevu
+        + '" fill-opacity="0.20"/>'
+        + '<polyline points="' + haut.join(' ') + '" fill="none" stroke="' + c.col.prevu
+        + '" stroke-width="1" opacity="0.7"/>'
+        + '<polyline points="' + bas.join(' ') + '" fill="none" stroke="' + c.col.prevu
+        + '" stroke-width="1" opacity="0.7"/>'
+        + '<polyline points="' + T.map(function(d){ return X(d.j).toFixed(1) + ',' + Y(d.med).toFixed(1); }).join(' ')
+        + '" fill="none" stroke="' + c.col.texte + '" stroke-width="1.4" stroke-dasharray="5 4"'
+        + ' stroke-linecap="round"/>';
+    });
+    /* La ou le couloir s'arrete, on le DIT. Un trait qui s'interrompt sans
+       raison se lit comme une panne. */
+    if(env.jCoupe < jMax)
+      g += '<line x1="' + X(env.jCoupe).toFixed(1) + '" y1="' + pT + '" x2="' + X(env.jCoupe).toFixed(1)
+        + '" y2="' + (pT + ih) + '" stroke="' + c.col.grille + '" stroke-width="1" stroke-dasharray="2 3"/>';
+  }
+
+  /* Le seuil du vin sec — la meme reference que sur la courbe de chaque cuve. */
+  if(dens && _ML_D20_SEC >= aLo && _ML_D20_SEC <= aHi){
+    var ys = Y(_ML_D20_SEC);
+    g += '<line x1="' + pL + '" y1="' + ys.toFixed(1) + '" x2="' + (pL + iw) + '" y2="' + ys.toFixed(1)
+      + '" stroke="' + c.col.fait + '" stroke-width="1.2" stroke-dasharray="5 4"/>'
+      + '<text x="' + (pL + 5) + '" y="' + (ys - 5).toFixed(1) + '" font-size="' + c.txt.mini
+      + '" font-weight="700" fill="' + c.col.fait + '">' + _ML_D20_SEC + ' \u00b7 vin sec</text>';
+  }
+
+  /* LES CUVES MISES EN AVANT, par-dessus le couloir. La seconde est pointillee :
+     sur un ecran en plein soleil, deux traits pleins de couleurs voisines se
+     confondent, un trait pointille ne se confond avec rien. */
+  var vus = [];
+  _CRB_SEL.forEach(function(nom, k){
+    var s = _crbSerie(nom); if(!s) return;
+    var col = k ? MV_CRB_COLB : MV_CRB_COLA;
+    var Pt = s.pts.filter(function(p){ return p[cle] != null; });
+    if(Pt.length < 2) return;
+    vus.push(nom);
+    g += '<polyline points="' + Pt.map(function(p){ return X(p.j).toFixed(1) + ',' + Y(p[cle]).toFixed(1); }).join(' ')
+      + '" fill="none" stroke="' + col + '" stroke-width="2.6" stroke-linejoin="round"'
+      + ' stroke-linecap="round"' + (k ? ' stroke-dasharray="7 3.5"' : '') + '/>';
+    Pt.forEach(function(p){
+      g += '<circle cx="' + X(p.j).toFixed(1) + '" cy="' + Y(p[cle]).toFixed(1) + '" r="2.4" fill="' + col + '"/>';
+    });
+  });
+
+  /* LES ZONES DE TOUCHE (socle CUVGR-3) — une colonne par jour, bord a bord.
+     ⚠ EMISES EN DERNIER : un <rect> pose avant le trace serait recouvert.
+     ⚠ `tt` porte du HTML ; les NOMS DE CUVES y sont echappes ici, le socle
+     echappe ensuite l'attribut. Sans le premier echappement, une cuve nommee
+     avec un chevron injecterait une balise dans l'infobulle. */
+  var demi = (iw / jMax) / 2;
+  env.jours.forEach(function(d){
+    var xm = X(d.j);
+    var tt = '<div class="t">J' + d.j + '</div>';
+    var anc = null;
+    _CRB_SEL.forEach(function(nom, k){
+      var s = _crbSerie(nom); if(!s) return;
+      var r = _crbVal(s.pts, d.j, cle);
+      tt += '<div class="r"><i>' + _escHtml(nom) + '</i><b>'
+        + (r ? (_mvF1(r.v) + (dens ? '' : ' \u00b0C') + (r.reel ? '' : ' ~')) : '\u2014') + '</b></div>';
+      if(r && anc == null) anc = Y(r.v);
+      if(r && !k) anc = Y(r.v);
+    });
+    tt += '<div class="r"><i>m\u00e9diane</i><b>' + _mvF1(d.med) + (dens ? '' : ' \u00b0C') + '</b></div>';
+    /* L'ECART, en toutes lettres. Un signe seul laisse le lecteur faire le
+       calcul metier ; « en retard sur » le lui donne. */
+    var prem = _CRB_SEL.length ? _crbSerie(_CRB_SEL[0]) : null;
+    var rp = prem ? _crbVal(prem.pts, d.j, cle) : null;
+    if(rp && d.n > 1){
+      var e = rp.v - d.med, a = Math.abs(e);
+      if(a < (dens ? 0.5 : 0.15)) tt += '<div class="o">sur la m\u00e9diane du cuvage</div>';
+      else tt += '<div class="o">' + (e > 0 ? '+' : '\u2212') + _mvF1(a) + (dens ? ' pts ' : ' \u00b0C ')
+        + (dens ? (e > 0 ? 'en retard sur' : 'en avance sur') : (e > 0 ? 'au-dessus de' : 'en dessous de'))
+        + ' la m\u00e9diane</div>';
+    }
+    tt += '<div class="o">' + d.n + ' cuve' + (d.n > 1 ? 's' : '') + ' dans le couloir'
+      + (d.reels < d.n ? (', dont ' + d.reels + ' relev\u00e9e' + (d.reels > 1 ? 's' : '') + ' ce jour-l\u00e0') : '')
+      + '</div>';
+    g += window._mvGraphHit(c, xm, (anc == null) ? Y(d.med) : anc,
+      Math.max(pL, xm - demi), Math.min(pL + iw, xm + demi), tt);
+  });
+
+  var aria = (dens ? 'Densit\u00e9s' : 'Temp\u00e9ratures') + ' de ' + (S||[]).length
+    + ' cuves align\u00e9es sur leur jour d\u2019encuvage : couloir du minimum au maximum et m\u00e9diane, '
+    + 'de J0 \u00e0 J' + jMax + '. '
+    + (vus.length ? ('Mis en avant : ' + vus.join(', ') + '.') : 'Aucune cuve mise en avant.');
+  return window._mvGraphSvg(c, aria, g);
+}
+
+/* Le second trace du comparatif imprime : les temperatures, sur le meme rail de
+   jours. ⚠ Le bloc entier disparait quand le trace est vide — un titre suivi
+   d'un blanc sur du papier se lit comme une panne d'impression. */
+function _cmpTempBlocDoc(S){
+  var svg = _cmpTempSvg(S, MV_CUVDOC_GRW);
+  if(!svg) return '';
+  return '<div class="cmp-gr mvdoc-avoid">' + svg
+    + '<div class="cmp-note"><b>Les temp\u00e9ratures, sur le m\u00eame rail de jours.</b> '
+    + 'La bande verte est la fen\u00eatre de travail, de ' + MV_CMP_TMIN + ' \u00e0 ' + MV_CMP_TMAX
+    + '\u00a0\u00b0C\u00a0; au-dessus de ' + MV_CMP_TMAX + '\u00a0\u00b0C, le relev\u00e9 porte un point rouge. '
+    + 'Un <b>palier de densit\u00e9</b> trouve souvent son explication ici\u00a0: douze degr\u00e9s cinq jours '
+    + 'durant, c\u2019est une mac\u00e9ration pr\u00e9fermentaire, pas une fermentation qui tra\u00eene. '
+    + '<b>Une cuve dont aucun relev\u00e9 ne porte de temp\u00e9rature n\u2019est pas trac\u00e9e</b> \u2014 un relev\u00e9 '
+    + 'sans temp\u00e9rature n\u2019est pas une temp\u00e9rature de z\u00e9ro.</div></div>';
+}
+
 /* Le comparatif complet : le trace, puis le tableau qui repond au « pourquoi ».
    ⚠️ Le tri vit dans `_cmpSeries`, PAS ici — et il porte sur le jour du vin sec,
    pas sur la vitesse (§88b). Le commentaire qui disait « trie par vitesse
@@ -14618,6 +15048,16 @@ function _cmpBloc(cuves){
     + (hors ? (' <b>' + hors + '</b> cuve' + (hors > 1 ? 's ne figurent' : ' ne figure') + ' pas ici : '
         + 'sans date d’encuvage ou avec moins de deux relevés de densité, il n’y a pas de cinétique à tracer.') : '')
     + '</div></div>'
+    /* ★★ LES TEMPERATURES ARRIVENT SUR LE PAPIER (CRB-2, arbitrage de Nico).
+       `_cmpTempSvg` n'avait plus aucun appelant depuis que l'ecran est passe au
+       couloir : elle n'a jamais ete imprimee, seulement affichee. Deux issues
+       possibles — la supprimer, ou la mettre la ou elle a de la place. C'est la
+       seconde qui a ete retenue : sur A4 les quinze noms tiennent, et le cahier
+       porte deja la colonne « T° moy · max » sans jamais montrer la COURBE qui
+       l'explique. Un palier de densite se lit ici, plus dans un tableau.
+       ⚠ Elle rend '' quand moins de deux cuves portent une temperature : on ne
+       pose ni titre ni note sur un graphe absent. */
+    + _cmpTempBlocDoc(S)
     + '<table class="cmp-tb mvdoc-avoid"><thead><tr><th>Cuve</th><th>Encuvée</th>'
     + '<th class="n">Départ d20</th><th class="n">Sucre g/L</th><th class="n">Degré pot.</th>'
     + '<th class="n">Vigne g/L</th><th class="n">T° moy · max</th><th class="n">Vin sec</th>'

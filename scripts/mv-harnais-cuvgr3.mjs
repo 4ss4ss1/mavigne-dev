@@ -147,11 +147,18 @@ T('\u00ab touchez la courbe \u00bb est masqu\u00e9 \u00e0 l\u2019impression',
   /\.mvfm-tap\{display:none\}/.test(fs.readFileSync(path.resolve(CIBLE), 'utf8')));
 
 console.log('\n\u2500\u2500 6. \u2605 AUCUN AUTRE GRAPHE N\u2019EST TOUCH\u00c9 \u2500\u2500');
-/* Tous les graphes ne sont pas exposes : on vise la SOURCE. Un seul appelant
-   de _mvGraphHit, donc un seul graphe qui a change de sortie. */
+/* Tous les graphes ne sont pas exposes : on vise la SOURCE.
+   \u26a0\u26a0 CETTE ASSERTION ETAIT UN CLIQUET A L'ENVERS (CRB-2, 11/09). Elle
+   exigeait `nHit === 1` : elle rougissait donc des qu'on AJOUTAIT une infobulle
+   a un second graphe \u2014 c'est-a-dire exactement le geste qu'elle devrait
+   encourager. Meme defaut que `A8` de mv-harnais-audit-pil (\u00a76c).
+   Convertie : LE COMPTE NE DESCEND JAMAIS. Il protege ce que le lot CUVGR-3 a
+   pose (la courbe de fermentation) sans interdire la suite. */
 const SRC_CAVE = fs.readFileSync(path.resolve(CIBLE), 'utf8');
+const CRB_HIT_MIN = 2;   /* _vendFermSvg (CUVGR-3) + _crbEnvSvg (CRB-2) */
 const nHit = (SRC_CAVE.match(/_mvGraphHit\(/g) || []).length;
-T('\u2605 un seul graphe appelle _mvGraphHit', nHit === 1, 'appels=' + nHit);
+T('\u2605 le nombre de graphes a infobulle ne descend jamais (>= ' + CRB_HIT_MIN + ')',
+  nHit >= CRB_HIT_MIN, 'appels=' + nHit);
 const nSvg = (SRC_CAVE.match(/window\._mvGraphSvg\(/g) || []).length;
 T('les autres graphes appellent toujours le socle inchang\u00e9 (' + nSvg + ')', nSvg >= 6);
 /* Le socle : un graphe sans zone ne declenche rien du tout. */

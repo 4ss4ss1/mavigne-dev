@@ -190,6 +190,17 @@ jobs:
           node scripts/mv-harnais-pic-avenir.mjs
           node scripts/mv-harnais-pic-avenir.mjs --contre
 
+      # CRB-2 — l'enveloppe de dispersion des courbes de la cave. Il tient les
+      # invariants du moteur (min <= mediane <= max, aucune extrapolation, le
+      # couloir qui s'arrete sous trois cuves) ET le fait que le cahier de
+      # cuverie imprime ne passe PAS par le couloir.
+      # ⚠️ La contre-epreuve tourne AUSSI ici : un harnais qui ne rougit sur
+      #    rien ne prouve rien.
+      - name: Harnais — CRB-2, le couloir des courbes
+        run: |
+          node scripts/mv-harnais-crb2.mjs
+          node scripts/mv-harnais-crb2.mjs --contre
+
       # Vite + inject-precache (postbuild, idempotent).
       - name: Build
         run: npm run build

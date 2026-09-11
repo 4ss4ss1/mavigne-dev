@@ -16419,3 +16419,154 @@ Trois conflits à résoudre avant de le rejouer sur `d2efe12` :
    devenir « le relevé du jour ET du moment courant ».
 
 Le lot non intégré est conservé tel quel ; il ne doit pas être collé sans ces trois corrections.
+
+---
+
+## 111. ★★★ CRB-2 — LE COULOIR REMPLACE LA SUPERPOSITION, SUR L'ÉCRAN SEULEMENT (11/09 — `cave.js` + `utils.js` + `index.html` + `sw.js` + `guide/` + `scripts/` + `package.json` + `ci.yml` · APP 7.06 → 7.07 · SW 7.66 → 7.67 · base `708ead1`)
+
+### 111a. Le geste, et la phrase qui l'a déclenché
+
+> « Le graphique dans les courbes de la cave est illisible, et pour les densités et pour les
+> températures. »
+
+**Le chiffre derrière la phrase.** `_cmpSvg` pose chaque nom de cuve **au bout de sa courbe**, ce
+qui exige `padR:92`. Sur une carte de 336 px (téléphone de 390), il restait **220 px** pour tracer —
+et quinze traits s'y croisaient. Le couloir n'a **aucun nom à écrire** : `padR:16`, **278 px de
+tracé, +26 %**, et un seul trait à suivre.
+
+★★★ **LA DÉCISION DE FOND : ON NE RÉSUME PAS, ON HIÉRARCHISE.** Une moyenne des quinze cuves aurait
+perdu la cuve qui décroche — or c'est exactement celle qu'on cherche. Le couloir garde **les deux
+extrêmes et la médiane** (donc toute la dispersion), et la cuve qu'on interroge se pose **par-dessus**.
+La question réelle n'est jamais « à quoi ressemblent mes quinze cuves » : c'est *« où en est
+celle-là par rapport aux autres »*.
+
+### 111b. ⚠️⚠️ POURQUOI UN SECOND DESSIN DE LA MÊME DONNÉE, ALORS QUE §86 L'INTERDIT
+
+La règle interdit de **redessiner** une courbe qui existe ailleurs. Ce n'est pas le même dessin :
+`_cmpSvg` **superpose** quinze traits nommés, `_crbEnvSvg` les **résume** en un couloir. Et les deux
+surfaces n'ont ni la même place ni le même geste — A4 a 92 px de marge et aucun doigt ; 336 px n'a
+ni l'un ni l'autre.
+
+★ **Le critère généralisable** : deux tracés de la même donnée sont légitimes quand ils répondent à
+**deux questions différentes** sur **deux supports** qui n'ont pas les mêmes contraintes. Ils ne le
+sont pas quand ils répondent à la même question deux fois — c'est ce que §86 visait.
+
+### 111c. Ce que le lot a changé
+
+| | avant | après |
+|---|---|---|
+| tracé, sur 336 px de carte | 220 px | **278 px** |
+| courbes à l'écran | 15 nommées | **couloir + médiane + 1 ou 2 cuves** |
+| gouttière de droite | 92 px | **16 px** |
+| débord horizontal | 34 px, à chaque ouverture | **aucun** (`.pcrb-g.crb-g`) |
+| pastille du tableau | une des 6 couleurs de `MV_CMP_COL` | **grise**, sauf les cuves tracées |
+| lire une valeur | descendre dans le tableau | **appui sur le graphe** (socle CUVGR-3) |
+| cahier de cuverie | 1 tracé (densités) | **2 tracés** (densités **et températures**) |
+
+★★ **LA SÉLECTION EST PARTAGÉE PAR LES DEUX GRAPHES**, et c'est le vrai apport ergonomique : le
+palier de densité et la macération qui l'explique se lisent sur **la même cuve**, sans rien
+retoucher. La barre de pastilles est **répétée** sur les deux cartes (le graphe des températures est
+sous la ligne de flottaison) mais reflète **un seul état**, `_CRB_SEL` — renvoyer l'utilisateur vers
+une barre qu'il ne voit plus, ce serait écrire un mode d'emploi au lieu de dessiner (§27a).
+
+⚠️ **DEUX CUVES AU MAXIMUM, ET C'EST LA RAISON D'ÊTRE DU LOT.** À trois, on retombe sur le problème
+qu'on vient de résoudre. La troisième relâche la première : jamais un refus, jamais un blocage.
+
+### 111d. ★★★ LE SEUL ARBITRAGE DE MODÈLE : L'INTERPOLATION
+
+Une enveloppe demande une valeur **par cuve et par jour**. Personne ne relève quinze cuves tous les
+jours : sans rien, la médiane sauterait d'un jour à l'autre selon **qui** a été mesuré, pas selon ce
+qui se passe en cuve.
+
+**Retenu** : interpolation linéaire **entre deux relevés RÉELS de la même cuve**, et rien d'autre.
+Jamais avant le premier, jamais après le dernier — ce serait extrapoler, c'est-à-dire inventer.
+Densité et température sont **continues**, et l'écart entre deux relevés est d'un à deux jours : ce
+n'est pas du même ordre qu'une date d'encuvage devinée (§88a).
+
+⚠️ **CE QUE ÇA COÛTE EST ÉCRIT À L'ÉCRAN**, pas seulement en commentaire. L'étiquette porte **les
+deux comptes** — cuves dans le couloir, cuves réellement relevées ce jour-là — et marque d'un `~`
+toute valeur estimée. *Un chiffre calculé qui se présente comme un chiffre mesuré est un mensonge
+poli.*
+
+⚠️ **`jCoupe` — le couloir s'arrête sous trois cuves.** Au-delà, min = médiane = max : un couloir
+plat ferait croire à une convergence alors qu'il ne reste qu'une cuve. Un trait vertical gris dit
+**où** il s'arrête — un tracé qui s'interrompt sans raison se lit comme une panne.
+
+### 111e. ⚠️ LES BORNES SONT FIXES, ET ÉLARGIES SI LA DONNÉE SORT
+
+`990–1100` en densité, `10–35 °C` en température : deux captures d'un millésime à l'autre se
+comparent alors à l'œil, là où un axe ajusté fait paraître énorme un écart de deux points.
+
+★ **Défaut trouvé par le harnais, pas à la lecture** : l'élargissement descendait bien le cadre
+(8 °C → plancher à 6) **mais pas la graduation**, dont le premier trait restait à 10. La courbe
+plongeait sous la dernière ligne chiffrée, dans une zone sans repère. **L'élargissement s'arrondit
+désormais au pas de graduation.** *Un cadre élargi qui ne dit pas jusqu'où il descend ne vaut pas
+mieux qu'un cadre qui coupe.*
+
+### 111f. ★★★ TROIS DÉFAUTS ANTÉRIEURS, TROUVÉS EN CHEMIN
+
+**1. Un cliquet À L'ENVERS dans `mv-harnais-cuvgr3`.** `T('★ un seul graphe appelle _mvGraphHit',
+nHit === 1)` rougissait dès qu'on **ajoutait** une infobulle à un second graphe — exactement le
+geste qu'il devrait encourager. C'est le cas `A8` de `mv-harnais-audit-pil`, une seconde fois.
+Converti en **plancher** (`nHit >= 2`). ⚠️ **Tout contrôle écrit avec un `===` est suspect : compte-t-il
+ce qu'on veut interdire, ou ce qu'on veut encourager ?**
+
+**2. Une pastille qui désignait une courbe disparue.** Le commentaire de `_PCRB_COL` exigeait la
+palette de `_cmpSvg`, *« sinon la pastille ne désigne pas la courbe qu'elle prétend désigner »* — et
+il avait raison **avant** ce lot. Depuis le couloir, l'écran ne trace plus quinze couleurs : une
+pastille colorée désignerait une courbe qui n'existe plus. Grise par défaut, colorée par le CSS sur
+`tr[data-on]`. *Un commentaire juste devient faux sans qu'une ligne de son code bouge.*
+
+**3. ★★★ `_cmpTempSvg` N'AVAIT PLUS AUCUN APPELANT — ET LE PREFLIGHT NE LE VOYAIT PAS.** Le tracé
+des températures n'était appelé que par l'écran ; le cahier imprimé ne l'a **jamais** porté. Passer
+l'écran au couloir l'a rendu mort — mais `window._cuvCmpTempSvg = _cmpTempSvg;` le maintient
+vivant aux yeux de C15. **Une fonction morte derrière un export vivant est invisible au filet.**
+★ **Arbitré par Nico : on le met sur le papier.** `_cmpTempBlocDoc(S)` l'imprime sous le comparatif
+des densités. Sur A4 la place existe, et le cahier donnait déjà « T° moy · max » en colonne **sans
+jamais montrer la courbe qui l'explique**. ⚠️ Le bloc **entier** disparaît si le tracé est vide :
+un titre suivi d'un blanc, sur du papier, se lit comme une panne d'impression.
+
+### 111g. ⚠️ CE QUE LE PAPIER GARDE, ET POURQUOI
+
+**`_cmpSvg` n'a pas bougé d'un octet.** `_cuvDoc` continue d'imprimer les quinze courbes nommées :
+A4 a la place, et il n'y a **pas de doigt** pour choisir une cuve sur du papier. Un couloir sans
+sélecteur ne répondrait à aucune question — il montrerait la dispersion sans jamais dire de qui on
+parle. **C'est le même raisonnement que §111b, pris par l'autre bout.**
+
+### 111h. Vérifications
+
+`mv-harnais-crb2.mjs` (neuf, branché dans **`check` ET `prebuild`** — `mv-harnais-portes` exige que
+les deux portes lancent exactement la même chose — et en CI avec sa contre-épreuve) : **66
+assertions vertes, 10/10 contre-épreuves rouges**. `npm run check` complet vert. Guide régénéré.
+`WHATS_NEW` 7.07 **exécuté**. `v7.67` 4 fois dans `sw.js`, `v7.66` exactement une fois (la ligne de
+changelog du lot précédent, préservée).
+
+⚠️⚠️ **QUATRE FOIS, C'EST L'ASSERTION QUI AVAIT TORT, PAS LE CODE.**
+· `jCoupe` : j'avais écrit 8 en comptant de tête, il reste trois cuves à J9.
+· une contre-épreuve sur la borne haute **restait verte** : retirer la garde ne change rien, la
+boucle épuise ses points et rend `null` toute seule — c'est de la **défense en profondeur**, pas un
+test aveugle. Sabotage remplacé par un qui mord.
+· une seconde contre-épreuve **rejouait le code intact** au lieu de le casser : ce n'était pas un
+sabotage, c'était une répétition de l'assertion.
+· une ancre `s[i:i+22]` mordait sur l'indentation de la ligne suivante et a écrit l'ouverture du
+`<table>` **deux fois**. Piège (k) de §25, huitième occurrence : **extraire une LIGNE ENTIÈRE**.
+
+★ **Et une faute relevée en me relisant, pas par un filet** : `<b>température s</b>`, dans un texte
+**client** du journal des nouveautés. §25-23, encore.
+
+⚠️ **Un cliquet a mordu pour de bon** : ma bordure de pastille était en `1px solid var(--gris)`,
+**le perdant de l'arbitrage du filet** (`mv-harnais-jetons`). Passée en `--gris-clair`.
+
+⚠️ **Deux baisses de cliquet sont ANTÉRIEURES au lot** — mesuré sur `HEAD` en worktree, mêmes
+chiffres : `rayons en dur 194 → 193` et `graisses hors pas 147 → 146`. **À regraver**, pas par ce lot.
+
+### 111i. ⚠️⚠️ CE QUI N'A PAS ÉTÉ MESURÉ
+
+**Aucun rendu n'a été regardé.** Ni Chromium ni Playwright dans le bac à sable. Restent à voir à
+l'œil, et c'est le point faible du paquet (§42h) :
+1. **le couloir doré en mode SOMBRE** — `var(--or)` à 20 % d'opacité sur `--blanc` sombre n'a jamais
+   été vu ; le fond de carte change de sens entre les deux thèmes ;
+2. **la bande de pastilles** sur un vrai téléphone : quinze chips, débordement, cible au doigt ;
+3. **l'infobulle sur les colonnes de bord** — la pose se borne au cadre, mais ça se regarde ;
+4. **le cahier de cuverie imprimé**, qui porte maintenant deux graphes sur la même page : c'est le
+   seul endroit où une pagination peut casser, et aucun harnais ne lit une mise en page.

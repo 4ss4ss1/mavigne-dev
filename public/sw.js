@@ -1,4 +1,19 @@
-// MA VIGNE — Service Worker v7.66
+// MA VIGNE — Service Worker v7.67
+// v7.67 (11/09/2026) — CRB-2 : LE COULOIR REMPLACE LA SUPERPOSITION, SUR L'ECRAN
+//   SEULEMENT. Cave > Le millesime > Les courbes tracait quinze cuves superposees,
+//   chacune portant son nom au bout : 92 px de gouttiere pour les noms, soit un
+//   tiers du trace sur un telephone, et quinze traits qui se croisent. Les deux
+//   graphes (densites, temperatures) montrent desormais une ENVELOPPE min/max
+//   doree, sa MEDIANE en pointille, et par-dessus une ou DEUX cuves choisies dans
+//   une bande de pastilles (ou en touchant une ligne du tableau). La selection est
+//   PARTAGEE par les deux graphes. Infobulle au doigt via le socle CUVGR-3 :
+//   valeur, mediane, ecart en toutes lettres, et les deux comptes de cuves.
+//   ⚠ LE CAHIER DE CUVERIE IMPRIME NE CHANGE PAS : `_cmpSvg` est intact, sur A4
+//   les quinze noms tiennent. ⚠ Un jour non releve est INTERPOLE entre les deux
+//   releves voisins de la meme cuve, jamais extrapole, et l'etiquette le marque.
+//   ⚠ Le cliquet « un seul graphe appelle _mvGraphHit » de mv-harnais-cuvgr3
+//   etait A L'ENVERS (il rougissait quand on AJOUTAIT une infobulle) : converti
+//   en plancher. Trace : 220 -> 278 px de large sur un ecran de 390 px.
 // v7.66 (11/09/2026) — CUVGR-3 : L'INFOBULLE TACTILE, DANS LE SOCLE. Un graphe
 //   rendait une image : sur un telephone la valeur exacte d'un point n'etait
 //   lisible nulle part. `_mvGraphTouch` + `_mvGraphHit` vivent dans utils.js ;
@@ -3739,7 +3754,7 @@
 // v2.22 — Fix profils vides : guard vide dans loadData() pour MEMBRES/SAISONS/TACHES
 // v2.17 — Onboarding intégré + tenantId · v2.06 — Firebase Auth · v2.00–v2.05 — divers
 const DEBUG = self.location.hostname === 'localhost' || self.location.hostname === '127.0.0.1';
-const CACHE_NAME   = 'mavigne-v7.66';
+const CACHE_NAME   = 'mavigne-v7.67';
 const TENANT_CACHE = 'mavigne-tenant';   // Cache persistant — préservé à chaque mise à jour SW
 const SYNC_TAG     = 'mavigne-sync';
 
@@ -3755,7 +3770,7 @@ const CDN_URLS = [
 ];
 
 self.addEventListener('install', event => {
-  if(DEBUG) console.log('[SW] Ma Vigne v7.66 installé');
+  if(DEBUG) console.log('[SW] Ma Vigne v7.67 installé');
   event.waitUntil(
     caches.open(CACHE_NAME).then(async cache => {
       // ── Cœur applicatif : STRICT (mise à jour ATOMIQUE) ──
@@ -3771,7 +3786,7 @@ self.addEventListener('install', event => {
 });
 
 self.addEventListener('activate', event => {
-  if(DEBUG) console.log('[SW] Ma Vigne v7.66 activé');
+  if(DEBUG) console.log('[SW] Ma Vigne v7.67 activé');
   event.waitUntil(
     caches.keys().then(keys =>
       Promise.all(
