@@ -8921,6 +8921,9 @@ function _caveV2InjectCss(){
   +'.mvap-tot em{font-style:normal;font-size:var(--pt-micro,11px);color:var(--texte-doux,#5F5F5F);font-variant-numeric:tabular-nums}'
   +'.mvap-note{font-size:var(--pt-micro,11px);color:var(--texte-doux,#5F5F5F);margin-top:10px;line-height:1.5}'
   +'.mvfm-lg{display:flex;gap:14px;flex-wrap:wrap;font-size:var(--pt-micro,11px);color:var(--texte-doux,#5F5F5F);margin-top:11px}'
+  /* CUVGR-3 : le geste s'annonce, sinon personne ne devine qu'on peut toucher. */
+  +'.mvfm-tap{color:var(--terre,#8A5A38);font-weight:600}'
+  +'@media(hover:hover) and (pointer:fine){.mvfm-tap::before{content:""}}'
   +'.mvfm-lg span{display:inline-flex;align-items:center;gap:6px}'
   +'.mvfm-lg i.l{width:15px;height:3px;border-radius:2px}'
   +'.mvfm-lg i.d{width:15px;height:0;border-top:2px dashed}'
@@ -9085,7 +9088,9 @@ function _apportsPied(rs, caches){
 // sur le meme axe. La seule remontee de la courbe s'explique par une
 // chaptalisation ; sans les reperes, personne ne peut le voir.
 // ═══════════════════════════════════════════════════════════════════════════
-function _vendFermSvg(cu, w){
+/* CUVGR-3 — `opts.sansTouche` : le cahier de cuverie part a l'imprimante, des
+   zones de touche invisibles n'y servent a rien et pesent. */
+function _vendFermSvg(cu, w, opts){
   var mes = ((cu && cu.mesures_fa) || []).slice()
     .filter(function(m){ return m && m.date && m.densite != null; })
     .sort(function(a,b){ return a.date < b.date ? -1 : 1; });
@@ -9184,6 +9189,31 @@ function _vendFermSvg(cu, w){
     g += '<circle cx="' + X(Date.parse(m.date)).toFixed(1) + '" cy="' + Yd(_vendMesD20(m)).toFixed(1) + '" r="3.2" fill="' + c.col.mesure + '"/>';
   });
 
+  /* ★ CUVGR-3 — UNE COLONNE DE TOUCHE PAR RELEVE, sur toute la hauteur. Viser
+     un point de 3 px au doigt est impossible ; viser la bande verticale qui le
+     contient ne demande rien. Les colonnes se touchent bord a bord : aucun
+     creux entre deux ou le doigt tomberait dans le vide.
+     ⚠️ Emises EN DERNIER, donc au-dessus de tout le trace : un <rect> pose
+     avant la courbe serait recouvert et n'attraperait plus rien. */
+  if(!(opts && opts.sansTouche)){
+    mes.forEach(function(m, k){
+      var xm = X(Date.parse(m.date));
+      var xa = (k === 0) ? pL : (xm + X(Date.parse(mes[k-1].date))) / 2;
+      var xb = (k === mes.length-1) ? (W - c.padR) : (xm + X(Date.parse(mes[k+1].date))) / 2;
+      var opJ = ops.filter(function(o){ return o.date === m.date; });
+      var etJ = ets.filter(function(e){ return e.date === m.date; });
+      var tt = '<div class="t">' + _escHtml(_vendFrDate(m.date)) + ' \u00b7 J' + jour(Date.parse(m.date)) + '</div>'
+        + '<div class="r"><i>densit\u00e9 \u00e0 20 \u00b0C</i><b>' + _mvF1(_vendMesD20(m)) + '</b></div>'
+        + (m.temp_c != null ? ('<div class="r"><i>temp\u00e9rature</i><b>' + _mvF1(m.temp_c) + ' \u00b0C</b></div>') : '')
+        + ((m.pigeages != null || m.remontages != null)
+            ? ('<div class="r"><i>pigeages / remontages</i><b>' + (m.pigeages || 0) + ' / ' + (m.remontages || 0) + '</b></div>') : '')
+        + (etJ.length ? ('<div class="o">' + _escHtml(etJ.map(function(e){ return _vendStatLbl(e.statut); }).join(' \u00b7 ')) + '</div>') : '')
+        + (opJ.length ? ('<div class="o">' + _escHtml(opJ.map(function(o){ return _vendOpLbl(o.type); }).join(' \u00b7 ')) + '</div>') : '')
+        + (m.note ? ('<div class="o">' + _escHtml(m.note) + '</div>') : '');
+      g += window._mvGraphHit(c, xm, Yd(_vendMesD20(m)), xa, xb, tt);
+    });
+  }
+
   var pas = et ? Math.max(1, Math.ceil(jour(t1) / 3)) : Math.max(1, Math.ceil(jour(t1) / 6));
   for(var j = 0; j <= jour(t1); j += pas){
     var xj = X(t0 + j * 86400000);
@@ -9204,6 +9234,7 @@ function _fermLegende(cu, ops, t0, mes, deuxAxes, ets){
     + '<span><i class="d" style="border-top-color:var(--orange)"></i>temp\u00e9rature de cuve'
     + (deuxAxes ? '' : ' (axe de droite masqu\u00e9 sur \u00e9cran \u00e9troit)') + '</span>'
     + ((ets && ets.length) ? '<span><i class="d" style="border-top-color:var(--texte-doux,#5F5F5F)"></i>changement d\u2019\u00e9tat de la cuve</span>' : '')
+    + '<span class="mvfm-tap">Touchez la courbe pour lire un relev\u00e9</span>'
     + '</div>';
   if(ops.length){
     h += '<div class="mvfm-ops">';
@@ -13976,6 +14007,7 @@ var MV_CUVDOC_CSS = ''
   + '.cd-gr{margin:1px 0 9px}'
   + '.cd-gr svg{display:block;max-width:100%;height:auto}'
   + '.mvfm-lg{display:flex;gap:6px 16px;flex-wrap:wrap;font-size:8.5px;color:#7A7263;margin-top:5px}'
+  + '.mvfm-tap{display:none}'   /* CUVGR-3 : « touchez la courbe » ne se lit pas sur papier */
   + '.mvfm-lg span{display:inline-flex;align-items:center;gap:5px}'
   + '.mvfm-lg i.l{width:14px;height:3px;border-radius:2px}'
   + '.mvfm-lg i.d{width:14px;height:0;border-top:2px dashed}'
@@ -14613,7 +14645,7 @@ function _cuvDocGraph(c){
   var n = ((c && c.mesures_fa) || []).filter(function(m){
     return m && m.date && m.densite != null; }).length;
   if(n < 3) return '';
-  return '<div class="cd-gr mvdoc-avoid">' + _vendFermSvg(c, MV_CUVDOC_GRW) + '</div>';
+  return '<div class="cd-gr mvdoc-avoid">' + _vendFermSvg(c, MV_CUVDOC_GRW, { sansTouche:true }) + '</div>';
 }
 
 function _cuvDoc(an){
@@ -14804,6 +14836,9 @@ window._cuvCmpEcarte  = _cmpEcarte;
    exposition il aurait fallu le recopier — et deux 996 dans deux fichiers,
    c'est un jour ou l'un des deux change seul. */
 window._ML_D20_SEC    = _ML_D20_SEC;
+/* CUVGR-3 : la courbe est expos\u00e9e pour que le harnais lise le VRAI svg,
+   pas une copie. */
+window._vendFermSvg   = _vendFermSvg;
 /* Blocs 1 et 4 : l'ecran des courbes REUTILISE des traces qui existent. Il ne
    redessine ni la maturite ni la chaine des volumes (§86).
    ⚠️⚠️ `_vendMatSvg` N'EST PAS EXPOSEE DIRECTEMENT, et c'est le point important.

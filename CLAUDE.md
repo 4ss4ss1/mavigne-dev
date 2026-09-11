@@ -16332,3 +16332,90 @@ phrase « Le Cuvier et la vendange cuve par cuve vous attendent dans les écrans
 
 ⚠ **`cave.js` passe de 855 ko à 896 ko.** Le seuil de §20 est franchi de plus belle : le prochain
 lot du Cuvier doit poser la question d'un `cave-tournee.js` séparé (coût : un bump APP + SW).
+
+---
+
+## 110. ★★★ CUVGR-3 — L'INFOBULLE TACTILE VIT DANS LE SOCLE, ET L'ÉCHAPPEMENT DES GRAPHES N'EXISTAIT PAS (11/09 — APP 7.05 → 7.06 · SW 7.65 → 7.66 · base `d2efe12`)
+
+### 110a. Le geste
+
+Un graphe rend une **image** : sur un téléphone, la valeur exacte d'un point n'est lisible nulle
+part — il faut descendre dans la liste des relevés. Un appui sur la courbe ouvre une étiquette.
+
+★ **UN GRAPHE S'Y INSCRIT SEUL.** `_mvGraphTouch` et `_mvGraphHit` vivent dans `utils.js` ; un
+graphe s'inscrit en émettant des `<rect class="mvg-hit" data-tt="…">`, et `_mvGraphDessine` câble le
+reste **après chaque peinture** (l'écouteur une seule fois sur la boîte, qui survit à `innerHTML` ;
+l'infobulle recréée, puisque les enfants viennent d'être effacés). *Les quatorze graphes qui n'en
+émettent pas ne changent pas d'un octet* — c'est ce qui rend un lot de socle sûr.
+
+★ **Une colonne de touche par relevé, bord à bord.** Viser un point de 3 px au doigt est
+impossible ; viser la bande verticale qui le contient ne demande rien. Un creux entre deux colonnes,
+c'est un doigt qui tombe dans le vide — le harnais compte les creux.
+⚠ **Émises EN DERNIER** : un `<rect>` posé avant la courbe serait recouvert et n'attraperait plus
+rien.
+⚠ Les coordonnées sont en unités de `viewBox` ; la boîte peut être plus étroite. L'infobulle
+applique le rapport `clientWidth / viewBox.width`, sinon elle se pose à côté du point sur un écran
+qui a rétréci.
+⚠ `sansTouche` pour le **cahier de cuverie** : rien d'invisible sur du papier.
+
+### 110b. ⚠⚠ CE QUE ÇA NE FAIT PAS, ET C'EST UNE DÉCISION
+
+Le `<svg>` garde `role="img"` et son `aria-label`. Les zones sont **`aria-hidden`** : elles n'entrent
+pas dans l'arbre d'accessibilité. Rendre chaque point focalisable ajouterait vingt arrêts de
+tabulation par graphe et quinze graphes par écran — *un lecteur d'écran y perdrait plus qu'il n'y
+gagnerait.* L'`aria-label` porte déjà le résumé ; la **liste des relevés** sous le graphe reste la
+source accessible, et le guide le dit. À rouvrir si un utilisateur au clavier le demande.
+
+### 110c. ★★★ TROUVÉ EN CHEMIN, ANTÉRIEUR AU LOT : UN GARDE QUI NE GARDAIT RIEN
+
+`_mvGraphSvg` échappait son `aria-label` ainsi :
+`var e = (typeof window._escHtml === 'function') ? window._escHtml : function(x){ return String(x); };`
+
+★★★ **`window._escHtml` n'est assigné NULLE PART dans l'application.** Six endroits le lisent
+derrière ce `typeof`, tous retombent sur `String(x)`. L'`aria-label` d'un graphe n'a donc **jamais**
+été échappé — alors que le commentaire d'à côté affirme *« l'echappement est fait ici »*. Une cuve
+nommée `Cuve "Haute"` refermait l'attribut.
+
+*Un garde qui ne garde rien est pire qu'une absence de garde : il se lit comme une protection, et
+personne ne revient vérifier.* Même famille que le 29 de §109 (CUVGR-1, non intégré) et que l'aide
+des Courbes : **un commentaire qui décrit une intention, pas le code.** Le socle porte désormais son
+propre `_mvEsc` — il ne dépend plus d'un global optionnel pour être correct.
+
+Le défaut est sorti parce que `data-tt` porte du HTML **avec des guillemets** : le premier
+`class="t"` refermait l'attribut et coupait l'infobulle en deux. Sept assertions rouges, **une seule
+cause**.
+
+### 110d. Vérifications
+
+`mv-harnais-cuvgr3.mjs` (neuf) — **31 assertions vertes, 6 contre-épreuves rouges** (zones émises
+avant la courbe, colonnes disjointes, zones dans l'arbre d'accessibilité, papier avec zones,
+infobulle non échappée, guillemet non échappé dans `_mvEsc`) · `mv-harnais-cuvdoc`,
+`mv-harnais-cuv7`, `mv-harnais-courbes`, `mv-harnais-agenda`, `mv-harnais-cave-auj`,
+`mv-harnais-parcours`, `mv-harnais-releve`, `mv-harnais-cave6`, `mv-harnais-echelle`, `preflight`
+verts · `WHATS_NEW` 7.06 **exécuté** · `v7.66` 5 fois dans `sw.js` · guide régénéré.
+
+⚠ Une contre-épreuve a été **jetée parce qu'elle ne mordait pas** : redéléguer `_mvEsc` à
+`window._escHtml` ne casse rien, puisque le global n'existe pas et que le repli reste le bon.
+*Un sabotage qui laisse le harnais vert n'est pas un harnais qui échoue — c'est un sabotage mal
+choisi.* Remplacé par le guillemet non échappé, qui mord.
+
+### 110e. ⚠⚠⚠ CUVGR-1 ET CUVGR-2 N'ONT JAMAIS ÉTÉ INTÉGRÉS
+
+Deux sessions ont travaillé sur la base `82f87ee` le même jour. **CUV-7** (la tournée) a été
+commité et a pris §109, APP 7.05 et SW 7.64. Le lot **CUVGR-1 + CUVGR-2 + CUVGR-2b** (seuil de
+température réglable et borné à la FA, chute journalière, champ `moment`, pente sur 24 h, seuil de
+ralentissement réglable) revendiquait **les mêmes numéros** et n'est **pas** dans le dépôt.
+
+Trois conflits à résoudre avant de le rejouer sur `d2efe12` :
+1. **`_vendLastD` vs `_vendLastMes`.** CUV-7 pose la règle *« `_vendLastMes` pour DATER,
+   `_vendLastD` pour CALCULER »*. `_vendAlerteTemp` lit une **température** : depuis la tournée, un
+   relevé peut ne porter qu'une densité → il lui faut un `_vendLastT`, sinon l'alerte se tait sur
+   une cuve chaude relevée le matin.
+2. **`_mlProjFA`** a été modifié par CUV-7 (`_vendLastD`) et par CUVGR-2 (la pente sur 24 h). À
+   fusionner, pas à remplacer.
+3. ★★★ **Contradiction de fond.** CUV-7 règle ② : *« un relevé par cuve et par jour »*,
+   `_vtEcrire` met à jour `_vtMesJour`. CUVGR-2 rend **deux** relevés par jour légitimes (matin /
+   soir). En l'état, **la tournée du soir écraserait le relevé du matin.** `_vtMesJour` devrait
+   devenir « le relevé du jour ET du moment courant ».
+
+Le lot non intégré est conservé tel quel ; il ne doit pas être collé sans ces trois corrections.

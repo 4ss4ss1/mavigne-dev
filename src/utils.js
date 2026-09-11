@@ -23,7 +23,7 @@ export const GT_ADMIN_EMAIL = 'ngdevpro@gmail.com';
 // WHATS_NEW   : tableau vide = modal desactive pour cette version.
 // Format item : { emoji:'📅', titre:'Titre court', desc:'Phrase utilisateur.' }
 // Regle : seulement les changements visibles par les utilisateurs.
-export const APP_VERSION = '7.05';
+export const APP_VERSION = '7.06';
 // ════ Journal des nouveautés (récap cumulatif) ════
 // Une entrée par version, la PLUS RÉCENTE EN HAUT : { v:'5.10', items:[ {emoji,titre,desc}, … ] }
 // À chaque release visible → AJOUTER un bloc en tête (ne pas remplacer). items:[] = release technique (rien à afficher).
@@ -254,15 +254,26 @@ window._mvGraphCadre = function(w, h, o){
   };
 };
 
+// L'echappeur du socle. ⚠️⚠️ AVANT CUVGR-3, ces fonctions lisaient
+// `window._escHtml` derriere un `typeof === 'function'` — et ce global N'EST
+// DEFINI NULLE PART dans l'application. Le repli `String(x)` etait donc pris a
+// TOUS LES COUPS : l'`aria-label` d'un graphe n'a jamais ete echappe, alors que
+// le commentaire d'a cote affirmait le contraire. Une cuve nommee
+// `Cuve "Haute"` refermait l'attribut. Un garde qui ne garde rien est pire
+// qu'une absence de garde : il se lit comme une protection.
+function _mvEsc(x){
+  return String(x == null ? '' : x)
+    .replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;')
+    .replace(/"/g, '&quot;').replace(/'/g, '&#39;');
+}
+
 // La balise <svg> de la charte. width et height en dur = une unite vaut un
 // pixel : c'est ce qui empeche l'etirement, et ce qui rend les font-size vrais.
 // ⚠️ `aria` recoit du TEXTE BRUT : l'echappement est fait ici, pas avant, sinon
 // une esperluette ressort en &amp;amp;.
 window._mvGraphSvg = function(c, aria, corps){
-  var e = (typeof window._escHtml === 'function') ? window._escHtml
-        : function(x){ return String(x == null ? '' : x); };
   return '<svg viewBox="0 0 ' + c.w + ' ' + c.h + '" width="' + c.w + '" height="' + c.h + '"'
-    + ' xmlns="http://www.w3.org/2000/svg" role="img" aria-label="' + e(aria || '') + '"'
+    + ' xmlns="http://www.w3.org/2000/svg" role="img" aria-label="' + _mvEsc(aria || '') + '"'
     + ' style="display:block">' + (corps || '') + '</svg>';
 };
 
@@ -280,11 +291,103 @@ window._mvGraphVide = function(quoi, geste){
       + '.mv-graph-vide .s{font-size:12.5px;color:var(--texte-med);margin-top:4px;line-height:1.55}';
     document.head.appendChild(st);
   }
-  var e = (typeof window._escHtml === 'function') ? window._escHtml
-        : function(x){ return String(x == null ? '' : x); };
   return '<div class="mv-graph-vide"><div class="t">'
-    + e(quoi || 'Rien a afficher pour le moment') + '</div>'
-    + (geste ? '<div class="s">' + e(geste) + '</div>' : '') + '</div>';
+    + _mvEsc(quoi || 'Rien a afficher pour le moment') + '</div>'
+    + (geste ? '<div class="s">' + _mvEsc(geste) + '</div>' : '') + '</div>';
+};
+
+// ═══════════ CUVGR-3 — L'INFOBULLE TACTILE, DANS LE SOCLE ═══════════
+// Un graphe rend une image : sur un telephone, la valeur exacte d'un point
+// n'est lisible nulle part. On la donne au DOIGT.
+//
+// ⚠️⚠️ CE QUE CA NE FAIT PAS, ET C'EST VOULU : le <svg> garde `role="img"` et
+// son `aria-label`. Les zones de touche sont `aria-hidden` — elles n'entrent
+// PAS dans l'arbre d'accessibilite. Rendre chaque point focalisable ajouterait
+// vingt arrets de tabulation par graphe et quinze graphes par ecran : un
+// lecteur d'ecran y perdrait plus qu'il n'y gagnerait. L'`aria-label` porte
+// deja le resume (bornes, nombre de releves, operations). Le detail point par
+// point reste une commodite au pointeur, et la LISTE des releves, sous le
+// graphe, reste la source accessible.
+//
+// ★ UN GRAPHE S'Y INSCRIT SEUL : il lui suffit d'emettre des <rect
+// class="mvg-hit" data-tt="..."> ; `_mvGraphDessine` cable le reste apres
+// chaque peinture. Les graphes qui n'en emettent pas ne changent pas d'un
+// octet — c'est ce qui rend ce lot sur pour les quinze autres.
+function _mvGraphTtCss(){
+  if(document.getElementById('mv-graph-tt-css')) return;
+  var st = document.createElement('style');
+  st.id = 'mv-graph-tt-css';
+  st.textContent =
+    '.mvg-box{position:relative}'
+    + '.mvg-hit{fill:transparent;cursor:pointer}'
+    + '.mvg-tt{position:absolute;z-index:6;min-width:140px;max-width:230px;pointer-events:none;'
+    + 'background:#241C16;color:#F5F1E8;border-radius:10px;padding:8px 10px;'
+    + 'font-size:var(--pt-micro,11.5px);line-height:1.45;box-shadow:0 6px 20px rgba(0,0,0,.28);'
+    + 'opacity:0;transform:translateY(4px);transition:opacity .12s,transform .12s}'
+    + '.mvg-tt.on{opacity:1;transform:translateY(0)}'
+    + '.mvg-tt .t{font-weight:700;color:var(--or-clair,#D8BC72);margin-bottom:3px}'
+    + '.mvg-tt .r{display:flex;justify-content:space-between;gap:12px}'
+    + '.mvg-tt .r i{font-style:normal;opacity:.72}'
+    + '.mvg-tt .o{margin-top:5px;padding-top:5px;border-top:1px solid rgba(255,255,255,.18);opacity:.9}'
+    + '@media print{.mvg-tt{display:none}}';
+  document.head.appendChild(st);
+}
+
+var _mvTtGlobal = false;
+window._mvGraphTouch = function(box){
+  if(!box || !box.querySelector('.mvg-hit')) return;
+  _mvGraphTtCss();
+  box.classList.add('mvg-box');
+  // L'infobulle est recreee a chaque peinture : `innerHTML` vient d'effacer
+  // les enfants. L'ECOUTEUR, lui, est pose une seule fois sur la boite, qui
+  // survit — sinon on en empilerait un par redimensionnement.
+  var tt = document.createElement('div');
+  tt.className = 'mvg-tt';
+  box.appendChild(tt);
+  box._mvTt = tt;
+  if(box._mvTtCable) return;
+  box._mvTtCable = true;
+  box.addEventListener('pointerdown', function(ev){
+    var t = box._mvTt; if(!t) return;
+    var h = ev.target && ev.target.closest ? ev.target.closest('.mvg-hit') : null;
+    if(!h){ t.classList.remove('on'); return; }
+    var html = h.getAttribute('data-tt'); if(!html) return;
+    t.innerHTML = html;
+    t.classList.add('on');
+    // Le SVG est dessine en unites de viewBox ; la boite peut etre plus
+    // etroite. On ramene les coordonnees a l'echelle reelle, sinon l'infobulle
+    // se pose a cote du point sur un ecran qui a retreci.
+    var svg = box.querySelector('svg');
+    var k = (svg && svg.viewBox && svg.viewBox.baseVal && svg.viewBox.baseVal.width > 0)
+      ? (svg.clientWidth / svg.viewBox.baseVal.width) : 1;
+    if(!(k > 0)) k = 1;
+    var x = (parseFloat(h.getAttribute('data-x')) || 0) * k;
+    var y = (parseFloat(h.getAttribute('data-y')) || 0) * k;
+    t.style.left = '0px'; t.style.top = '0px';
+    var bw = box.clientWidth, tw = t.offsetWidth, th = t.offsetHeight;
+    var lx = Math.max(4, Math.min(Math.max(4, bw - tw - 4), x - tw / 2));
+    var ly = y - th - 12; if(ly < 2) ly = y + 14;   // jamais hors du cadre
+    t.style.left = lx + 'px'; t.style.top = ly + 'px';
+  });
+  if(!_mvTtGlobal){
+    _mvTtGlobal = true;
+    document.addEventListener('pointerdown', function(ev){
+      for(var i = 0; i < _MV_GRAPHS.length; i++){
+        var b = document.querySelector(_MV_GRAPHS[i].sel);
+        if(b && b._mvTt && !b.contains(ev.target)) b._mvTt.classList.remove('on');
+      }
+    });
+  }
+};
+
+// Une zone de touche : une colonne pleine hauteur, centree sur le point.
+// `x`/`y` sont les coordonnees du POINT (pour poser l'infobulle), `xa`/`xb`
+// les bornes de la colonne. `tt` est du HTML deja echappe par l'appelant.
+window._mvGraphHit = function(c, x, y, xa, xb, tt){
+  var lg = Math.max(1, xb - xa);
+  return '<rect class="mvg-hit" aria-hidden="true" x="' + xa.toFixed(1) + '" y="0" width="'
+    + lg.toFixed(1) + '" height="' + c.h + '" data-x="' + x.toFixed(1) + '" data-y="' + y.toFixed(1)
+    + '" data-tt="' + _mvEsc(tt) + '"/>';
 };
 
 // ── Le registre : un graphe enregistre se repeint quand la largeur bouge ─────
@@ -313,6 +416,9 @@ function _mvGraphDessine(e){
   }
   e.w = w; e.el = box;
   box.innerHTML = (html == null) ? '' : html;
+  // CUVGR-3 : un graphe qui a emis des zones de touche recoit son infobulle.
+  // Les autres ne passent meme pas la premiere ligne de _mvGraphTouch.
+  if(window._mvGraphTouch) window._mvGraphTouch(box);
 }
 
 // Enregistre un graphe et le dessine tout de suite. Le selecteur doit etre
@@ -354,6 +460,10 @@ window._mvGraphRepeindre = function(){
 };
 
 export const WHATS_NEW = [
+  { v: '7.06', items: [
+    { emoji: 'graphique', titre: 'Touchez la courbe de fermentation pour lire un relev\u00e9',
+      desc: "La courbe montrait la forme, jamais les chiffres\u00a0: pour savoir ce que valait ce point-l\u00e0, il fallait descendre dans la liste des relev\u00e9s. Un <b>appui sur la courbe</b> ouvre maintenant une \u00e9tiquette\u00a0: la date, la densit\u00e9 \u00e0 20&nbsp;\u00b0C, la temp\u00e9rature, les pigeages et remontages, l\u2019op\u00e9ration et la note du jour. Pas besoin de viser le point\u00a0: toute la colonne au-dessus r\u00e9pond. Le cahier de cuverie imprim\u00e9 ne change pas." }
+  ] },
   { v: '7.05', items: [
     { emoji: 'cuve', titre: 'La tourn\u00e9e du cuvier',
       desc: "Un quatri\u00e8me onglet dans Le Cuvier\u00a0: <b>Tourn\u00e9e</b>. Toutes vos cuves en fermentation sur un seul \u00e9cran, deux champs par cuve, temp\u00e9rature et densit\u00e9. La touche <b>Suivant</b> du clavier passe \u00e0 la cuve d\u2019apr\u00e8s sans refermer le clavier ni vous faire viser un champ, et la ligne passe au vert quand elle est faite. Avant, il fallait ouvrir, saisir, enregistrer et fermer une fiche par cuve\u00a0: quinze fois." },
@@ -2331,6 +2441,7 @@ var MV_AIDE = {
       ['Les quatre chiffres du haut', "sont ceux de la cave entière, les mêmes sur les quatre onglets : hL en cuve (une estimation d’après les kilos tant que rien n’est décuvé, marquée ≈), fûts en vin, lignes à faire cette semaine, tonnes rentrées. La ligne sous la bande dit sur quel millésime ils sont calculés. Le filtre millésime du Chai agit sur ses trois onglets — cuvées, journal, bouteilles — mais pas sur la bande."],
       ['La roue crantée', "en haut à droite réunit ce qu’on règle une fois l’an : les réglages du Cuvier (poids par caisse, rendement jus, base du rendement, correction d’un poids déjà saisi, clients vrac), ceux du Chai (alerte d’ouillage, contenance d’un fût, convertisseur SO\u2082, parc à cuves), le renvoi vers les appellations et leurs plafonds, et les documents de la cave. Aucun onglet du quotidien ne porte plus de réglage."],
       ['Les onglets du Cuvier', "suivent la vendange dans l’ordre où elle se fait : Maturités à la vigne, Récoltes, Cuves, puis Tournée — le geste quotidien, en bout de chaîne. « Cuves » est l’ancien onglet « Cuvier » ; « Maturités » est l’ancien « Analyses » — ce sont les contrôles de maturité à la vigne, à ne pas confondre avec les analyses labo du Chai. On arrive toujours sur « Cuves » : on n’atterrit pas dans un écran de saisie."],
+      ['Lire un relevé sur la courbe', "un appui sur la courbe de fermentation ouvre une étiquette : la date, la densité à 20 °C, la température, les pigeages et remontages, l’opération et la note de ce jour-là. Toute la colonne au-dessus du point répond — inutile de viser. Un appui à côté la referme. La liste des relevés, sous le graphe, reste la source complète : c’est elle qu’un lecteur d’écran lit, l’étiquette est une commodité au doigt."],
       ['La tournée', "est l’écran de la main gauche, au milieu du cuvier : toutes les cuves en fermentation l’une sous l’autre, deux champs par cuve. La touche « Suivant » du clavier enchaîne température, densité, cuve suivante sans jamais refermer le clavier, et le champ visé remonte au centre de l’écran. La ligne passe au vert dès que les deux chiffres y sont ; la barre du haut dit combien de cuves restent. Filtrez sur « Reste à faire » pour ne plus voir que celles-là."],
       ['Ce que la tournée écrit', "un relevé par cuve et par jour, le même objet que « Saisir une mesure » — corrigible au crayon depuis la cuve, courbe comprise. Elle met à jour le relevé du jour au lieu d’en créer un second. Un champ laissé vide veut dire « je n’ai pas saisi », jamais « efface » : pour retirer une valeur, passez par « Saisir une mesure », qui reconstruit le relevé en entier."],
       ['Les compteurs P et R', "pigeage et remontage. Un appui ajoute un, un appui long en retire un. Ils se posent sur le relevé du jour, comme dans la fiche de mesure. Le nom de qui fait la tournée se choisit en haut à droite et part sur chaque relevé : c’est ce qui répond à « qui a pigé ? » trois semaines plus tard."],

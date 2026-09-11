@@ -1,4 +1,20 @@
-// MA VIGNE — Service Worker v7.65
+// MA VIGNE — Service Worker v7.66
+// v7.66 (11/09/2026) — CUVGR-3 : L'INFOBULLE TACTILE, DANS LE SOCLE. Un graphe
+//   rendait une image : sur un telephone la valeur exacte d'un point n'etait
+//   lisible nulle part. `_mvGraphTouch` + `_mvGraphHit` vivent dans utils.js ;
+//   un graphe s'y inscrit en emettant des <rect class="mvg-hit">, et
+//   `_mvGraphDessine` cable le reste apres chaque peinture — les quatorze
+//   graphes qui n'en emettent pas ne changent pas d'un octet. Une colonne de
+//   touche par releve, bord a bord : viser un point de 3 px au doigt est
+//   impossible. Emises EN DERNIER, sinon la courbe les recouvre. Le cahier de
+//   cuverie passe `sansTouche` : rien d'invisible sur le papier.
+//   ⚠️⚠️ TROUVE EN CHEMIN, ANTERIEUR AU LOT : `window._escHtml` n'est DEFINI
+//   nulle part. Six endroits le lisaient derriere un `typeof === 'function'` et
+//   retombaient tous sur `String(x)` — l'aria-label d'un graphe n'a donc JAMAIS
+//   ete echappe, alors que le commentaire du socle affirmait le contraire. Une
+//   cuve nommee `Cuve "Haute"` refermait l'attribut. Le socle porte desormais
+//   son propre echappeur, `_mvEsc`. Un garde qui ne garde rien est pire qu'une
+//   absence de garde : il se lit comme une protection.
 // v7.65 (11/09/2026) — CUV-7 rattrapage : deux tailles d'icone hors echelle
 //   dans la tournee, _mvIcon('plus',22) et _mvIcon('check',14). L'echelle du
 //   jeu est 16/18/20/24/40 et mv-harnais-icones la tient : passees a 24 et 16.
@@ -3723,7 +3739,7 @@
 // v2.22 — Fix profils vides : guard vide dans loadData() pour MEMBRES/SAISONS/TACHES
 // v2.17 — Onboarding intégré + tenantId · v2.06 — Firebase Auth · v2.00–v2.05 — divers
 const DEBUG = self.location.hostname === 'localhost' || self.location.hostname === '127.0.0.1';
-const CACHE_NAME   = 'mavigne-v7.65';
+const CACHE_NAME   = 'mavigne-v7.66';
 const TENANT_CACHE = 'mavigne-tenant';   // Cache persistant — préservé à chaque mise à jour SW
 const SYNC_TAG     = 'mavigne-sync';
 
@@ -3739,7 +3755,7 @@ const CDN_URLS = [
 ];
 
 self.addEventListener('install', event => {
-  if(DEBUG) console.log('[SW] Ma Vigne v7.65 installé');
+  if(DEBUG) console.log('[SW] Ma Vigne v7.66 installé');
   event.waitUntil(
     caches.open(CACHE_NAME).then(async cache => {
       // ── Cœur applicatif : STRICT (mise à jour ATOMIQUE) ──
@@ -3755,7 +3771,7 @@ self.addEventListener('install', event => {
 });
 
 self.addEventListener('activate', event => {
-  if(DEBUG) console.log('[SW] Ma Vigne v7.65 activé');
+  if(DEBUG) console.log('[SW] Ma Vigne v7.66 activé');
   event.waitUntil(
     caches.keys().then(keys =>
       Promise.all(
