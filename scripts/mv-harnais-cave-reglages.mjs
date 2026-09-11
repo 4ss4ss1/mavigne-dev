@@ -78,12 +78,12 @@ function jouer(src, html, reg, ut, silencieux) {
   console.log(silencieux ? '' : '\n  Les onglets du Cuvier');
   const cockpit = extraire(src, '_vendCockpitHtml') || '';
   T(!/mvv-tab-param/.test(cockpit), 'plus d\u2019onglet R\u00e9glages au Cuvier');
-  const ordre = [...cockpit.matchAll(/mvv-tab-(rec|cuves|ana)/g)].map(m => m[1]);
-  T(ordre.join(',') === 'ana,rec,cuves', 'ordre de la vendange : Maturit\u00e9s, R\u00e9coltes, Cuves', ordre.join(','));
+  const ordre = [...cockpit.matchAll(/mvv-tab-(rec|cuves|ana|tour)/g)].map(m => m[1]);
+  T(ordre.join(',') === 'ana,rec,cuves,tour', 'ordre de la vendange : Maturit\u00e9s, R\u00e9coltes, Cuves, Tourn\u00e9e', ordre.join(','));
   T(/> Cuves<\/button>/.test(cockpit) && !/> Cuvier<\/button>/.test(cockpit), '\u00ab Cuvier \u00bb dans \u00ab Le Cuvier \u00bb s\u2019appelle Cuves');
   T(/> Maturit\u00e9s<\/button>/.test(cockpit) && !/> Analyses<\/button>/.test(cockpit), '\u00ab Analyses \u00bb s\u2019appelle Maturit\u00e9s');
   const rt = extraire(src, '_vendRenderTab') || '';
-  T(/\['ana','rec','cuves'\]/.test(rt) && !/'param'/.test(rt), '_vendRenderTab : les trois cl\u00e9s, DANS L\u2019ORDRE DES BOUTONS');
+  T(/\['ana','rec','cuves','tour'\]/.test(rt) && !/'param'/.test(rt), '_vendRenderTab : les quatre cl\u00e9s, DANS L\u2019ORDRE DES BOUTONS');
   const sv = extraire(src, 'switchVendOng') || '';
   T(/tab==='param'[^\n]*_caveOpenReglages\(\)/.test(sv), 'switchVendOng(\'param\') ouvre la roue (tol\u00e9rance)');
   T(/indexOf\(tab\)<0\)\s*tab='cuves'/.test(sv), 'une cl\u00e9 inconnue du Cuvier replie sur Cuves');
