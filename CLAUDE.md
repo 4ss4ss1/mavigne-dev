@@ -16270,3 +16270,65 @@ Retirés avec leurs appelants : `saveTache`, `openOvTache`, `addTacheFromCatalog
 **Ouvert** : sur « Toutes tâches » il n'y a pas de tâche courante, donc pas de remontée — décision
 assumée, le bouton « Début » n'y existe pas non plus. `demarrage.html` ne décrit toujours pas la
 création d'une tâche. La carte (`refreshMapColors`) ne signale pas la parcelle commencée.
+
+## 109. ★★★ CUV-7 — LA TOURNÉE DU CUVIER, ET LE RELEVÉ QUI N'A PAS DE DENSITÉ (11/09 — `cave.js` + `utils.js` + `index.html` + `sw.js` + `guide/` + `scripts/` · APP 7.04 → 7.05 · SW 7.63 → 7.64 · base `82f87ee`)
+
+**Le geste.** Quinze cuves en fermentation, un téléphone tenu d'une main, debout au milieu du
+cuvier. L'écran Cuves demandait **par cuve** : ouvrir la feuille, saisir, enregistrer, fermer.
+Quinze fois. La **Tournée** est un 4ᵉ onglet qui met les cuves actives l'une sous l'autre, deux
+champs chacune, et **enchaîne les champs au clavier** — T° → densité → cuve suivante — sans jamais
+refermer le clavier virtuel.
+
+★★ **L'ORDRE DES ONGLETS SUIT TOUJOURS CAVE-6** : Maturités → Récoltes → Cuves → **Tournée**, du
+plus amont au plus aval. ⚠ **L'onglet d'arrivée reste `cuves`** : on n'atterrit pas dans un écran
+de saisie. La clé neuve est `tour` ; aucune clé existante n'a bougé.
+
+★★★ **LES QUATRE RÈGLES DE L'ÉCRAN, à connaître avant d'y toucher** :
+① **Aucun re-rendu pendant la saisie.** Reconstruire la liste à chaque frappe ferait perdre le
+focus et refermerait le clavier — le seul défaut qui rendrait l'écran inutilisable sur le terrain.
+`_vtIn` ne touche que les classes de la ligne et le HTML des pastilles.
+② **Un relevé par cuve et par jour.** `openOvVendMesure` EMPILE un relevé à chaque enregistrement ;
+en tournée, corriger une faute de frappe aurait posé un deuxième point sur la même date. `_vtEcrire`
+cherche le relevé du jour (`_vtMesJour`) et le MET À JOUR — quel que soit l'écran qui l'a écrit.
+③ **Jamais un vide sur une valeur.** Un champ laissé vide veut dire « je n'ai pas saisi », pas
+« efface ». `_vtEcrire` n'impose que ce que la tournée porte (`densite`, `temp_c`, compteurs, `qui`) —
+la `note` écrite ailleurs survit. C'est l'invariant « `Object.assign` puis imposer », appliqué à un
+objet existant plutôt qu'à un objet reconstruit.
+④ **Une écriture, différée de 1,2 s.** `_vendFbSave` réécrit **tout** le document `cave_vendange` :
+une écriture par frappe, c'est des centaines de documents complets par tournée. `_vtPlan` réarme une
+minuterie, `_vtEcrire` écrit une fois. Message vide (§68) : un succès ne dit rien, un échec parle.
+
+⚠⚠⚠ **LE DURCISSEMENT INDISSOCIABLE — `_vendLastD`.** La tournée permet un relevé qui ne porte
+**qu'une température ou qu'un compteur de pigeages** : `densite` y est absente. Quatre consommateurs
+lisaient `_vendLastMes` et calculaient dessus. Trouvés en relisant, avant écriture :
+- `_vendFaPct(_vendMesD20(last))` à **3 endroits** (ligne, cellule du plan, sélecteur de fusion) →
+  une cuve suivie depuis trois semaines affichait **0 %** parce qu'on avait pigé le matin ;
+- `_vendSparkline` ne filtrait pas → `Math.min` avalait un `null` comme 0 et **écrasait la courbe**
+  (`_vendFermSvg`, lui, filtrait déjà : le filtre existait, à un seul des deux endroits) ;
+- la tuile « densité à 20 °C » du détail affichait **NaN** ;
+- `_mlProjFA` prenait `m[m.length-1]` et rendait `attente` sur une cuve pleine d'historique.
+★ **`_vendLastD(c)` = le dernier relevé QUI PORTE UNE DENSITÉ.** Règle générale :
+**`_vendLastMes` pour DATER, `_vendLastD` pour CALCULER.**
+
+★ **L'intervention groupée** (bouton flottant → feuille) écrit **une opération par cuve retenue**,
+chacune sur **`_vendIntrVol(c)`** — son volume propre, avec sa source (`mesure` / `estime`).
+⚠⚠ **Jamais un volume commun** : c'est exactement la faute de RDT-1, une dose juste sur un volume
+faux donne une quantité fausse affichée avec l'aplomb d'un calcul. Chaque opération reste
+corrigible depuis sa cuve, comme si elle avait été saisie à la main.
+
+★ **L'intervenant** (`qui[]` sur le relevé) comble le manque n° 9 du backlog : Le Cuvier ne
+l'enregistrait nulle part. Il se choisit une fois pour toute la tournée.
+
+★★ **Harnais `scripts/mv-harnais-cuv7.mjs`** — 20 assertions sur les **vraies** fonctions extraites
+de `cave.js`, dont **3 contre-preuves** (empilement, vide écrasant, `_vendLastD` dégradé en
+`_vendLastMes`) qui doivent rougir. ⚠ **Les dates du jeu d'essai sont RELATIVES à aujourd'hui** :
+écrites en dur, elles ont collisionné avec la date du jour et fait rougir un code juste — le test
+était faux, pas le code (7ᵉ fois).
+
+⚠ **Décision d'accompagnement prise au lot, pas différée** : `MV_AIDE.cave` portait « les trois
+onglets » — corrigé, plus 5 entrées neuves ; `guide/08-cave.html` a sa carte Tournée. **La visite
+guidée n'a rien à corriger** : ses deux moments Cave portent sur « Aujourd'hui » et Le Chai, et la
+phrase « Le Cuvier et la vendange cuve par cuve vous attendent dans les écrans » reste vraie.
+
+⚠ **`cave.js` passe de 855 ko à 896 ko.** Le seuil de §20 est franchi de plus belle : le prochain
+lot du Cuvier doit poser la question d'un `cave-tournee.js` séparé (coût : un bump APP + SW).

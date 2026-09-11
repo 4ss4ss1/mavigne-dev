@@ -1,4 +1,20 @@
-// MA VIGNE — Service Worker v7.63
+// MA VIGNE — Service Worker v7.64
+// v7.64 (11/09/2026) — CUV-7 : LA TOURNEE DU CUVIER. Quinze cuves demandaient
+//   quinze fois le meme geste : ouvrir la fiche, saisir, enregistrer, fermer.
+//   Un quatrieme onglet met les cuves en fermentation sur un seul ecran, deux
+//   champs par cuve, et la touche Suivant du clavier enchaine temperature ->
+//   densite -> cuve suivante sans refermer le clavier virtuel. Compteurs P/R
+//   au pouce (appui long = -1), intervention groupee au bouton flottant avec
+//   le volume PROPRE a chaque cuve, et un releve par cuve et par jour (mise a
+//   jour, pas empilement). L'ecriture est unique et differee de 1,2 s : le
+//   document cave_vendange est reecrit en entier a chaque sauvegarde, une
+//   ecriture par frappe en aurait fait des centaines par tournee.
+//   ⚠ Durcissement indissociable : un releve peut desormais ne porter qu'une
+//   temperature ou qu'un compteur. `_vendLastD` (dernier releve QUI PORTE une
+//   densite) remplace `_vendLastMes` partout ou l'on CALCULE — % de FA (3
+//   endroits), sparkline, tuile densite du detail, projection de fin de FA.
+//   Sans lui, une cuve suivie depuis trois semaines affichait 0 % parce qu'on
+//   avait pige le matin, et sa courbe s'ecrasait sur zero. APP 7.04 -> 7.05.
 // v7.63 (10/09/2026) — VIG-TRI + VIG-TACHE : LA PARCELLE COMMENCEE PASSE EN TETE,
 //   ET CREER UNE TACHE TIENT DANS UN ECRAN. (1) Le tri des parcelles lisait une table
 //   {'Non démarré':0,'En cours':1} : la parcelle sur laquelle on venait d'appuyer
@@ -3700,7 +3716,7 @@
 // v2.22 — Fix profils vides : guard vide dans loadData() pour MEMBRES/SAISONS/TACHES
 // v2.17 — Onboarding intégré + tenantId · v2.06 — Firebase Auth · v2.00–v2.05 — divers
 const DEBUG = self.location.hostname === 'localhost' || self.location.hostname === '127.0.0.1';
-const CACHE_NAME   = 'mavigne-v7.63';
+const CACHE_NAME   = 'mavigne-v7.64';
 const TENANT_CACHE = 'mavigne-tenant';   // Cache persistant — préservé à chaque mise à jour SW
 const SYNC_TAG     = 'mavigne-sync';
 
@@ -3716,7 +3732,7 @@ const CDN_URLS = [
 ];
 
 self.addEventListener('install', event => {
-  if(DEBUG) console.log('[SW] Ma Vigne v7.63 installé');
+  if(DEBUG) console.log('[SW] Ma Vigne v7.64 installé');
   event.waitUntil(
     caches.open(CACHE_NAME).then(async cache => {
       // ── Cœur applicatif : STRICT (mise à jour ATOMIQUE) ──
@@ -3732,7 +3748,7 @@ self.addEventListener('install', event => {
 });
 
 self.addEventListener('activate', event => {
-  if(DEBUG) console.log('[SW] Ma Vigne v7.63 activé');
+  if(DEBUG) console.log('[SW] Ma Vigne v7.64 activé');
   event.waitUntil(
     caches.keys().then(keys =>
       Promise.all(

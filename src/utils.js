@@ -23,7 +23,7 @@ export const GT_ADMIN_EMAIL = 'ngdevpro@gmail.com';
 // WHATS_NEW   : tableau vide = modal desactive pour cette version.
 // Format item : { emoji:'📅', titre:'Titre court', desc:'Phrase utilisateur.' }
 // Regle : seulement les changements visibles par les utilisateurs.
-export const APP_VERSION = '7.04';
+export const APP_VERSION = '7.05';
 // ════ Journal des nouveautés (récap cumulatif) ════
 // Une entrée par version, la PLUS RÉCENTE EN HAUT : { v:'5.10', items:[ {emoji,titre,desc}, … ] }
 // À chaque release visible → AJOUTER un bloc en tête (ne pas remplacer). items:[] = release technique (rien à afficher).
@@ -354,6 +354,18 @@ window._mvGraphRepeindre = function(){
 };
 
 export const WHATS_NEW = [
+  { v: '7.05', items: [
+    { emoji: 'cuve', titre: 'La tourn\u00e9e du cuvier',
+      desc: "Un quatri\u00e8me onglet dans Le Cuvier\u00a0: <b>Tourn\u00e9e</b>. Toutes vos cuves en fermentation sur un seul \u00e9cran, deux champs par cuve, temp\u00e9rature et densit\u00e9. La touche <b>Suivant</b> du clavier passe \u00e0 la cuve d\u2019apr\u00e8s sans refermer le clavier ni vous faire viser un champ, et la ligne passe au vert quand elle est faite. Avant, il fallait ouvrir, saisir, enregistrer et fermer une fiche par cuve\u00a0: quinze fois." },
+    { emoji: 'check', titre: 'Pigeages et remontages au pouce',
+      desc: "Deux compteurs par cuve, <b>P</b> et <b>R</b>\u00a0: un appui ajoute un, un appui long en retire un. Pas d\u2019\u00e9cran \u00e0 ouvrir, pas de champ \u00e0 viser." },
+    { emoji: 'etincelles', titre: 'Sulfiter huit cuves en une fois',
+      desc: "Le bouton <b>\uFF0B</b> en bas \u00e0 droite de la tourn\u00e9e ouvre une intervention group\u00e9e\u00a0: l\u2019op\u00e9ration, les cuves (ou <b>Toutes</b>), la dose. Chaque cuve re\u00e7oit son op\u00e9ration avec <b>son propre volume</b>, et chacune reste corrigible depuis sa fiche." },
+    { emoji: 'chrono', titre: 'Un relev\u00e9 par cuve et par jour',
+      desc: "La tourn\u00e9e met \u00e0 jour le relev\u00e9 du jour au lieu d\u2019en empiler un deuxi\u00e8me\u00a0: corriger une faute de frappe ne pose plus deux points sur la m\u00eame date dans la courbe. Un champ laiss\u00e9 vide veut dire \u00ab je n\u2019ai pas saisi \u00bb, jamais \u00ab efface \u00bb\u00a0\u2014 pour effacer une valeur, passez par \u00ab Saisir une mesure \u00bb." },
+    { emoji: 'graphique', titre: 'Le pourcentage de FA ne tombe plus \u00e0 z\u00e9ro',
+      desc: "Un relev\u00e9 qui ne porte qu\u2019une temp\u00e9rature ou qu\u2019un pigeage faisait afficher \u00ab 0\u00a0% \u00bb \u00e0 une cuve suivie depuis trois semaines, et aplatissait sa courbe. L\u2019avancement, la courbe et la fin estim\u00e9e partent d\u00e9sormais du dernier relev\u00e9 qui porte une densit\u00e9." }
+  ] },
   { v: '7.04', items: [
     { emoji: 'liste', titre: 'La parcelle o\u00f9 vous travaillez passe en t\u00eate',
       desc: "Vous appuyez sur <b>D\u00e9but</b> sur une parcelle&nbsp;: elle monte imm\u00e9diatement en haut de la liste, et elle y reste jusqu\u2019\u00e0 ce que vous validiez. Elle passe devant la tourn\u00e9e du domaine et devant la proximit\u00e9&nbsp;GPS, parce qu\u2019appuyer sur D\u00e9but est un geste que vous avez fait expr\u00e8s. Avant, elle descendait \u2014 et sur les t\u00e2ches \u00e0 passages ou \u00e0 niveaux, comme le Relevage ou l\u2019\u00c9bourgeonnage, l\u2019\u00e9tat ne comptait pas du tout dans l\u2019ordre." },
@@ -2318,7 +2330,12 @@ var MV_AIDE = {
       ['Aujourd’hui', "est l’écran d’arrivée de la Cave. En tête, le verdict : ce qui ne peut pas attendre, dans l’ordre — une fermentation qui ralentit, une malo bloquée, des cuves sans relevé depuis hier ou avant, du raisin à rentrer, des fûts à ouiller, une malo finie à soutirer, une dose de SO\u2082 programmée. Dessous, les quatre semaines à venir, et ce qui n’a pas de date (les fûts en fin de vie). Chaque ligne est un bouton qui ouvre le geste. Tout vient de ce qui est déjà saisi, rien de plus à remplir."],
       ['Les quatre chiffres du haut', "sont ceux de la cave entière, les mêmes sur les quatre onglets : hL en cuve (une estimation d’après les kilos tant que rien n’est décuvé, marquée ≈), fûts en vin, lignes à faire cette semaine, tonnes rentrées. La ligne sous la bande dit sur quel millésime ils sont calculés. Le filtre millésime du Chai agit sur ses trois onglets — cuvées, journal, bouteilles — mais pas sur la bande."],
       ['La roue crantée', "en haut à droite réunit ce qu’on règle une fois l’an : les réglages du Cuvier (poids par caisse, rendement jus, base du rendement, correction d’un poids déjà saisi, clients vrac), ceux du Chai (alerte d’ouillage, contenance d’un fût, convertisseur SO\u2082, parc à cuves), le renvoi vers les appellations et leurs plafonds, et les documents de la cave. Aucun onglet du quotidien ne porte plus de réglage."],
-      ['Les onglets du Cuvier', "suivent la vendange dans l’ordre où elle se fait : Maturités à la vigne, Récoltes, puis Cuves. « Cuves » est l’ancien onglet « Cuvier » ; « Maturités » est l’ancien « Analyses » — ce sont les contrôles de maturité à la vigne, à ne pas confondre avec les analyses labo du Chai."],
+      ['Les onglets du Cuvier', "suivent la vendange dans l’ordre où elle se fait : Maturités à la vigne, Récoltes, Cuves, puis Tournée — le geste quotidien, en bout de chaîne. « Cuves » est l’ancien onglet « Cuvier » ; « Maturités » est l’ancien « Analyses » — ce sont les contrôles de maturité à la vigne, à ne pas confondre avec les analyses labo du Chai. On arrive toujours sur « Cuves » : on n’atterrit pas dans un écran de saisie."],
+      ['La tournée', "est l’écran de la main gauche, au milieu du cuvier : toutes les cuves en fermentation l’une sous l’autre, deux champs par cuve. La touche « Suivant » du clavier enchaîne température, densité, cuve suivante sans jamais refermer le clavier, et le champ visé remonte au centre de l’écran. La ligne passe au vert dès que les deux chiffres y sont ; la barre du haut dit combien de cuves restent. Filtrez sur « Reste à faire » pour ne plus voir que celles-là."],
+      ['Ce que la tournée écrit', "un relevé par cuve et par jour, le même objet que « Saisir une mesure » — corrigible au crayon depuis la cuve, courbe comprise. Elle met à jour le relevé du jour au lieu d’en créer un second. Un champ laissé vide veut dire « je n’ai pas saisi », jamais « efface » : pour retirer une valeur, passez par « Saisir une mesure », qui reconstruit le relevé en entier."],
+      ['Les compteurs P et R', "pigeage et remontage. Un appui ajoute un, un appui long en retire un. Ils se posent sur le relevé du jour, comme dans la fiche de mesure. Le nom de qui fait la tournée se choisit en haut à droite et part sur chaque relevé : c’est ce qui répond à « qui a pigé ? » trois semaines plus tard."],
+      ['L’intervention groupée', "le bouton ＋ en bas à droite de la tournée : une opération, les cuves retenues (ou « Toutes »), une dose. Chaque cuve reçoit sa propre opération, calculée sur SON volume — jamais sur un volume commun. Chacune se corrige ensuite depuis sa cuve, comme si elle avait été saisie à la main."],
+      ['La tournée s’enregistre toute seule', "une seule fois, une seconde après votre dernière frappe, pas à chaque chiffre tapé. Un « Enregistré » discret passe sous la barre. Si le réseau manque au fond du cuvier, l’écran le dit et garde votre saisie : elle repart dès que le téléphone accroche."],
       ['Un millésime à la fois', "une opération porte sur une seule année. Changer de millésime en haut du formulaire vide la sélection : on ne mélange pas deux vins dans un même geste."],
       ['Le délai d’ouillage', "se règle pour tout le domaine, et se resserre millésime par millésime — un vin jeune se surveille de plus près."],
       ['Le parc à cuves', "se déclare une fois dans la roue crantée de la Cave, bloc Le Chai : un nom, une contenance en litres, une matière. La même cuve sert à vinifier au Cuvier puis à élever au Chai, et l’application sait laquelle est prise — dans les deux cas."],
