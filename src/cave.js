@@ -9273,6 +9273,8 @@ function _fermLegende(cu, ops, t0, mes, deuxAxes, ets){
 // si la journee de recolte de demain peut etre lancee.
 // ═══════════════════════════════════════════════════════════════════════════
 var MV_CUV_LARG = 92;   // largeur minimale d'une cuve lisible
+var MV_CUV_GAP  = 12;   // gouttiere entre deux cuves
+var MV_CUV_PIED = 44;   // les trois lignes de legende sous une cuve
 
 function _cuveCouches(cu, recs){
   var mine = (recs || []).filter(function(r){ return r && r.cuve_id === cu.id; });
@@ -9288,68 +9290,126 @@ function _cuveCouches(cu, recs){
   return { couches: cs, plein: plein, cap: parseFloat(cu.volume_hl) || 0 };
 }
 
+/* ★★★ TOUTES LES CUVES, SANS EXCEPTION.
+   Avant : les cuves qui ne tenaient pas sur UNE rangee etaient coupees
+   (`slice(0, tient)`) — 3 sur un telephone, 7 sur un ecran large — et le pied
+   disait « N cuves de plus, visibles sur un ecran plus large ». Deux
+   consequences, dont la seconde etait invisible :
+   ① on ne voyait pas ses cuves ;
+   ② ⚠️⚠️ LE TAUX DE REMPLISSAGE NE PORTAIT QUE SUR LES CUVES AFFICHEES.
+      « La cuverie est remplie a 62 % » se calculait sur 3 cuves sur 15, et
+      c'est le chiffre qui decide si la journee de recolte de demain part.
+      Un total qui n'est pas l'agregat de ce que l'ecran montre est faux — le
+      test de §92, rejoue ici.
+   Desormais les cuves passent A LA LIGNE. La largeur d'une cuve ne descend
+   jamais sous MV_CUV_LARG : c'est le plancher de lisibilite, on ajoute une
+   rangee plutot que de retrecir. La hauteur du corps se resserre quand il y a
+   plusieurs rangees, sinon un cuvier de quinze cuves ferait trois ecrans.
+   ⚠️ L'echelle verticale (`capMax`) est GLOBALE : une cuve de 50 hL doit
+   paraitre plus petite qu'une de 100 hL, qu'elles soient sur la meme rangee ou
+   non. Une echelle par rangee ferait mentir la comparaison.
+   ⚠️ L'ordre est celui de la liste du Cuvier (`_vendTriRepere`, le repere ecrit
+   sur la cuve) : §72a a etabli que la memoire spatiale prime. Avant, la coupe
+   gardait les N premieres de l'ordre de stockage — arbitraire.
+   ⚠️ Une cuve sans contenance NI contenu n'etait pas dessinee du tout. Elle
+   l'est maintenant, en tirete : une cuve qui disparait sans le dire est
+   exactement ce qu'on corrige ici. Elle ne compte pas dans le taux, et le pied
+   le dit. */
 function _vendRemplirSvg(cuves, recs, w){
-  var cs = (cuves || []).map(function(cu){
+  var cs = (cuves || []).slice().sort(_vendTriRepere).map(function(cu){
     var d = _cuveCouches(cu, recs);
     return { cu:cu, couches:d.couches, plein:d.plein, cap:d.cap };
-  }).filter(function(x){ return x.plein > 0 || x.cap > 0; });
-  if(!cs.length) return window._mvGraphVide('Aucune cuve remplie pour l\u2019instant',
-    'Rattachez vos pes\u00e9es \u00e0 une cuve pour voir l\u2019assemblage se dessiner.');
+  });
+  if(!cs.length) return window._mvGraphVide('Aucune cuve de vinification en cours',
+    'Cr\u00e9ez une cuve et rattachez-y vos pes\u00e9es pour voir l\u2019assemblage se dessiner.');
 
-  var c0 = window._mvGraphCadre(w, 100), et = c0.etroit;
-  var c = window._mvGraphCadre(w, et ? 250 : 288, { padL: 4, padR: 4, padT: 10, padB: et ? 54 : 50 });
-  var W = c.w, iw = c.iw;
-  var tient = Math.max(1, Math.floor((iw + 12) / (MV_CUV_LARG + 12)));
-  var caches = Math.max(0, cs.length - tient);
-  cs = cs.slice(0, tient);
-  var bw = (iw - 12 * (cs.length - 1)) / cs.length;
-  var hMax = c.ih;
+  // La largeur utile se mesure AVANT de connaitre la hauteur : c'est elle qui
+  // dit combien de cuves tiennent sur une rangee, donc combien de rangees.
+  var c0 = window._mvGraphCadre(w, 100, { padL: 4, padR: 4 }), et = c0.etroit;
+  var iw = c0.iw;
+  var parLigne = Math.max(1, Math.floor((iw + MV_CUV_GAP) / (MV_CUV_LARG + MV_CUV_GAP)));
+  var lignes = Math.ceil(cs.length / parLigne);
+  var hCorps = lignes >= 4 ? (et ? 110 : 124)
+             : lignes >= 2 ? (et ? 134 : 150)
+             :               (et ? 186 : 228);
+  var hRang = hCorps + MV_CUV_PIED;
+  var hTot = 10 + lignes * hRang + (lignes - 1) * 10 + 6;
+
+  var c = window._mvGraphCadre(w, hTot, { padL: 4, padR: 4, padT: 10, padB: 6 });
+  var parRang = Math.min(parLigne, cs.length);
+  var bw = (c.iw - MV_CUV_GAP * (parRang - 1)) / parRang;
   var capMax = Math.max.apply(null, cs.map(function(x){ return Math.max(x.cap, x.plein); })) || 1;
 
   var g = '';
   cs.forEach(function(x, i){
-    var bx = c.padL + i * (bw + 12);
-    var hCuve = Math.max(30, x.cap / capMax * hMax);
-    var by = c.padT + (hMax - hCuve);
-    // La cuve : un contour, et le vide au-dessus qui se voit.
-    g += '<rect x="' + bx.toFixed(1) + '" y="' + by.toFixed(1) + '" width="' + bw.toFixed(1) + '" height="' + hCuve.toFixed(1) + '" rx="4" fill="var(--bg-card)" stroke="' + c.col.grille + '" stroke-width="1.5"/>';
+    var r  = Math.floor(i / parLigne), k0 = i % parLigne;
+    var bx = c.padL + k0 * (bw + MV_CUV_GAP);
+    var yT = c.padT + r * (hRang + 10);
+    // La hauteur du CONTOUR est la contenance, jamais le contenu : le rectangle
+    // est le recipient. Une cuve remplie au-dela de sa contenance deborde
+    // VOLONTAIREMENT par le haut (c'est le signal, cf. la fusion) — mais le
+    // debordement est borne a la rangee, sinon il irait ecrire par-dessus les
+    // noms de la rangee du dessus.
+    var hCuve = Math.max(30, x.cap / capMax * hCorps);
+    var by = yT + (hCorps - hCuve);
+    var vide = (x.cap <= 0 && x.plein <= 0);
+    var den = x.cap || x.plein || 1;
+    var hPile = (x.plein / den) * hCuve;
+    var kEch = (hPile > hCorps) ? (hCorps / hPile) : 1;
+    // La cuve : un contour, et le vide au-dessus qui se voit. En tirete quand
+    // la contenance n'est pas renseignee — le trait dit ce qui manque.
+    g += '<rect x="' + bx.toFixed(1) + '" y="' + by.toFixed(1) + '" width="' + bw.toFixed(1)
+       + '" height="' + hCuve.toFixed(1) + '" rx="4" fill="var(--bg-card)" stroke="' + c.col.grille
+       + '" stroke-width="1.5"' + (x.cap > 0 ? '' : ' stroke-dasharray="4 3"') + '/>';
     var acc = 0;
-    x.couches.forEach(function(o, k){
-      var hh = (o.hl / (x.cap || x.plein || 1)) * hCuve;
+    x.couches.forEach(function(o, kk){
+      var hh = (o.hl / den) * hCuve * kEch;
       var y = by + hCuve - acc - hh;
-      var op = 1 - k * 0.16;
+      var op = 1 - kk * 0.16;
       g += '<rect x="' + (bx + 2).toFixed(1) + '" y="' + y.toFixed(1) + '" width="' + (bw - 4).toFixed(1) + '" height="' + Math.max(1, hh).toFixed(1) + '" fill="' + c.col.mesure + '" opacity="' + Math.max(0.3, op).toFixed(2) + '"/>';
       if(hh >= 15)
         g += '<text x="' + (bx + 7).toFixed(1) + '" y="' + (y + 13).toFixed(1) + '" font-size="' + c.txt.mini + '" font-weight="600" fill="#fff">' + _escHtml(_apTronc(o.nom, et ? 11 : 15)) + '</text>'
            + '<text x="' + (bx + 7).toFixed(1) + '" y="' + (y + 24).toFixed(1) + '" font-size="' + c.txt.mini + '" fill="#fff" opacity=".85">' + _mvF1(o.hl) + ' hL</text>';
       acc += hh;
     });
+    // Les trois lignes de legende, calees sous LA RANGEE, jamais sous le SVG.
+    var yL = yT + hCorps;
     var pct = x.cap > 0 ? Math.round(x.plein / x.cap * 100) : 0;
-    g += '<text x="' + (bx + bw/2).toFixed(1) + '" y="' + (c.h - 34) + '" text-anchor="middle" font-size="' + c.txt.axe + '" font-weight="600" fill="var(--texte)">' + _escHtml(_apTronc(x.cu.nom || '', et ? 12 : 16)) + '</text>'
-      + '<text x="' + (bx + bw/2).toFixed(1) + '" y="' + (c.h - 21) + '" text-anchor="middle" font-size="' + c.txt.mini + '" font-weight="700" fill="' + c.col.mesure + '">' + _mvF1(x.plein) + ' hL</text>'
-      + '<text x="' + (bx + bw/2).toFixed(1) + '" y="' + (c.h - 9) + '" text-anchor="middle" font-size="' + c.txt.mini + '" fill="' + c.col.texte + '">' + (x.cap > 0 ? 'sur ' + _mvF1(x.cap) + ' \u00b7 ' + pct + ' %' : '') + '</text>';
+    var sous = x.cap > 0 ? 'sur ' + _mvF1(x.cap) + ' \u00b7 ' + pct + ' %' : 'contenance ?';
+    g += '<text x="' + (bx + bw/2).toFixed(1) + '" y="' + (yL + 16).toFixed(1) + '" text-anchor="middle" font-size="' + c.txt.axe + '" font-weight="600" fill="var(--texte)">' + _escHtml(_apTronc(x.cu.nom || '', et ? 12 : 16)) + '</text>'
+      + '<text x="' + (bx + bw/2).toFixed(1) + '" y="' + (yL + 29).toFixed(1) + '" text-anchor="middle" font-size="' + c.txt.mini + '" font-weight="700" fill="' + (vide ? c.col.texte : c.col.mesure) + '">' + (vide ? '\u2014' : _mvF1(x.plein) + ' hL') + '</text>'
+      + '<text x="' + (bx + bw/2).toFixed(1) + '" y="' + (yL + 41).toFixed(1) + '" text-anchor="middle" font-size="' + c.txt.mini + '" fill="' + c.col.texte + '">' + sous + '</text>';
   });
 
   var tPlein = cs.reduce(function(s,x){ return s + x.plein; }, 0);
   var tCap = cs.reduce(function(s,x){ return s + x.cap; }, 0);
-  var aria = 'Remplissage des cuves : ' + cs.length + ' cuves, ' + _mvF1(tPlein) + ' hectolitres'
+  var sansCap = cs.filter(function(x){ return !(x.cap > 0); }).length;
+  var aria = 'Remplissage des cuves : ' + cs.length + ' cuve' + (cs.length > 1 ? 's' : '')
+    + ', ' + _mvF1(tPlein) + ' hectolitres'
     + (tCap > 0 ? ' pour ' + _mvF1(tCap) + ' de cuverie' : '') + '.';
-  return window._mvGraphSvg(c, aria, g) + _remplirPied(tPlein, tCap, caches);
+  return window._mvGraphSvg(c, aria, g) + _remplirPied(tPlein, tCap, sansCap, cs.length);
 }
 
 function _apTronc(s, n){ s = String(s || ''); return s.length > n ? s.slice(0, n - 1) + '\u2026' : s; }
 
-function _remplirPied(plein, cap, caches){
+/* Le pied dit l'ASSIETTE du chiffre (§7) : sur quoi porte le pourcentage, et
+   ce qui n'y est pas. La ligne « N cuves de plus, visibles sur un ecran plus
+   large » a disparu avec la coupe — elle decrivait un chemin qui n'existe
+   plus (test du mode d'emploi, §27a). */
+function _remplirPied(plein, cap, sansCap, total){
   var h = '';
   if(cap > 0){
     var pct = Math.round(plein / cap * 100);
-    h += '<div class="mvcv-ord">La cuverie est remplie \u00e0 <b>' + pct + ' %</b>. '
-      + 'C\u2019est le chiffre qui dit si la journ\u00e9e de r\u00e9colte de demain peut \u00eatre lanc\u00e9e.</div>';
+    h += '<div class="mvcv-ord">La cuverie est remplie \u00e0 <b>' + pct + ' %</b> \u2014 '
+      + _mvF1(plein) + ' hL sur ' + _mvF1(cap) + ' hL, ' + total + ' cuve' + (total > 1 ? 's' : '')
+      + ' en cours. C\u2019est le chiffre qui dit si la journ\u00e9e de r\u00e9colte de demain peut \u00eatre lanc\u00e9e.</div>';
   }
   h += '<div class="mvcv-note">Chaque apport garde le nom de sa parcelle jusque dans la cuve. '
     + 'Le vide au-dessus, c\u2019est la marge qui reste.</div>';
-  if(caches > 0) h += '<div class="mvcv-note">' + caches + ' cuve' + (caches > 1 ? 's' : '')
-    + ' de plus, visible' + (caches > 1 ? 's' : '') + ' sur un \u00e9cran plus large ou fiche par fiche.</div>';
+  if(sansCap > 0) h += '<div class="mvcv-note">' + sansCap + ' cuve' + (sansCap > 1 ? 's' : '')
+    + ' sans contenance renseign\u00e9e (trait tiret\u00e9) : ' + (sansCap > 1 ? 'elles ne comptent' : 'elle ne compte')
+    + ' pas dans le taux de remplissage.</div>';
+  h += '<div class="mvcv-note">Les cuves d\u00e9cuv\u00e9es n\u2019y sont pas : leur vin est parti en f\u00fbt.</div>';
   return h;
 }
 
