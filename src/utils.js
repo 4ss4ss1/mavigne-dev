@@ -23,7 +23,7 @@ export const GT_ADMIN_EMAIL = 'ngdevpro@gmail.com';
 // WHATS_NEW   : tableau vide = modal desactive pour cette version.
 // Format item : { emoji:'📅', titre:'Titre court', desc:'Phrase utilisateur.' }
 // Regle : seulement les changements visibles par les utilisateurs.
-export const APP_VERSION = '7.07';
+export const APP_VERSION = '7.08';
 // ════ Journal des nouveautés (récap cumulatif) ════
 // Une entrée par version, la PLUS RÉCENTE EN HAUT : { v:'5.10', items:[ {emoji,titre,desc}, … ] }
 // À chaque release visible → AJOUTER un bloc en tête (ne pas remplacer). items:[] = release technique (rien à afficher).
@@ -460,6 +460,25 @@ window._mvGraphRepeindre = function(){
 };
 
 export const WHATS_NEW = [
+  { v: '7.08', items: [
+    { emoji: 'euro', titre: 'Les prix d\u2019achat s\u2019enregistrent de nouveau',
+      desc: "Dans <b>Pilotage \u203a \u00c9conomie \u203a Achats</b>, chiffrer un achat d\u2019intrants ou un lot de f\u00fbts "
+        + "affichait bien le message vert \u00ab\u00a0Enregistr\u00e9\u00a0\u00bb\u2026 et le prix <b>disparaissait au rechargement</b>. "
+        + "Le montant \u00e9tait pos\u00e9 en m\u00e9moire mais <b>n\u2019\u00e9tait jamais envoy\u00e9</b>\u00a0: l\u2019application le confiait "
+        + "\u00e0 la mauvaise porte, qui sauvait tous les <b>autres</b> documents et jamais celui-l\u00e0. Rien ne circulait "
+        + "donc dans le reste du Pilotage. C\u2019est corrig\u00e9\u00a0: <b>ressaisissez vos prix, ils tiennent</b>. Les montants "
+        + "des interventions chez le r\u00e9parateur, eux, n\u2019ont jamais \u00e9t\u00e9 touch\u00e9s." },
+    { emoji: 'barrique', titre: 'Le registre des mouvements de f\u00fbts ne s\u2019efface plus',
+      desc: "Les entr\u00e9es et sorties du parc \u00e0 f\u00fbts \u2014 achats, ventes, f\u00fbts reform\u00e9s ou rendus \u2014 "
+        + "\u00e9taient bien enregistr\u00e9es, mais <b>jamais relues</b> au d\u00e9marrage\u00a0: le registre repartait vide, et "
+        + "la premi\u00e8re sauvegarde suivante l\u2019<b>\u00e9crasait pour de bon</b>. Il est de nouveau charg\u00e9 et conserv\u00e9. "
+        + "<b>Attention</b>\u00a0: les mouvements perdus avant cette version ne peuvent pas \u00eatre retrouv\u00e9s. Le "
+        + "<b>nombre de f\u00fbts au domaine</b>, lui, n\u2019a jamais d\u00e9pendu de ce registre." },
+    { emoji: 'bouclier', titre: 'Une sauvegarde qui ne part pas vous le dit',
+      desc: "Quand l\u2019application ne savait pas o\u00f9 ranger une saisie, elle <b>ne disait rien</b> et sauvait "
+        + "autre chose \u00e0 la place. Elle refuse d\u00e9sormais franchement, l\u2019\u00e9crit \u00e0 l\u2019\u00e9cran en rouge et le consigne "
+        + "dans <b>\u00ab\u00a0Signaler un probl\u00e8me\u00a0\u00bb</b>. Un message vert veut dire que c\u2019est fait." }
+  ] },
   { v: '7.07', items: [
     { emoji: 'graphique', titre: 'Les courbes du mill\u00e9sime deviennent lisibles sur t\u00e9l\u00e9phone',
       desc: "Quinze cuves superpos\u00e9es, quinze noms \u00e9crits dans la marge\u00a0: sur un t\u00e9l\u00e9phone, le trac\u00e9 tenait dans un tiers de l\u2019\u00e9cran et plus personne n\u2019y lisait rien. <b>Cave \u203a Le mill\u00e9sime \u203a Les courbes</b> montre d\u00e9sormais un <b>couloir</b>\u00a0: la zone dor\u00e9e va de la cuve la plus lente \u00e0 la plus rapide, le pointill\u00e9 est la m\u00e9diane du cuvage. <b>Touchez une pastille</b> au-dessus du graphe \u2014 ou une ligne du tableau \u2014 et cette cuve-l\u00e0 passe en trait \u00e9pais par-dessus le couloir. Deux au maximum, et la m\u00eame s\u00e9lection vaut pour les densit\u00e9s comme pour les temp\u00e9ratures. <b>Un appui sur le graphe</b> donne le jour\u00a0: votre cuve, la m\u00e9diane, et l\u2019\u00e9cart entre les deux. Sur le <b>cahier de cuverie imprim\u00e9</b>, rien ne se r\u00e9sume\u00a0: les quinze courbes gardent leur nom, une feuille A4 a la place. Il gagne m\u00eame un second trac\u00e9, celui des <b>temp\u00e9ratures</b> sur le m\u00eame rail de jours \u2014 le palier de densit\u00e9 et la mac\u00e9ration qui l\u2019explique se lisent enfin c\u00f4te \u00e0 c\u00f4te sur le papier." }

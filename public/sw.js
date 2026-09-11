@@ -1,4 +1,20 @@
-// MA VIGNE — Service Worker v7.67
+// MA VIGNE — Service Worker v7.68
+// v7.68 (11/09/2026) — PIL-ACH : LE PRIX N'ARRIVAIT JAMAIS AU DISQUE. Pilotage >
+//   Economie > Achats ecrivait le prix dans l'objet, puis appelait
+//   saveData('intrants'). Or 'intrants' N'EST PAS une cle de saveData : INTRANTS
+//   vit dans reserve.js, se charge par _rsvApply et se sauve par saveIntrants().
+//   Une cle inconnue etait traitee comme « pas de cle » -> branche MULTI-CLES :
+//   les 23 AUTRES documents reecrits, jamais celui-la. Toast vert, zero ecriture,
+//   prix perdu au rechargement -- et plus rien qui circule dans l'Economie.
+//   _pachSave route desormais chaque document vers SON ecrivain, et un echec ne
+//   s'annonce plus « Enregistre ». ⚠ saveData REFUSE une cle inconnue (trace
+//   `guard` + toast rouge) au lieu de retomber sur la sauvegarde multi-cles, qui
+//   reecrivait au passage journal/sessions/traitements depuis la memoire.
+//   ⚠⚠ Trouve au passage : `fut_mouv` (registre du parc a futs) etait sauve mais
+//   ABSENT du squelette de _rsvApply -- jamais relu, donc ecrase a la sauvegarde
+//   suivante. Perte silencieuse, corrigee. Le harnais achats teste desormais la
+//   CHAINE ENTIERE (nom de document -> ecrivain existant) et exige que chaque
+//   cle du modele INTRANTS soit relue : 4 contre-epreuves, 4 rouges.
 // v7.67 (11/09/2026) — CRB-2 : LE COULOIR REMPLACE LA SUPERPOSITION, SUR L'ECRAN
 //   SEULEMENT. Cave > Le millesime > Les courbes tracait quinze cuves superposees,
 //   chacune portant son nom au bout : 92 px de gouttiere pour les noms, soit un
@@ -3754,7 +3770,7 @@
 // v2.22 — Fix profils vides : guard vide dans loadData() pour MEMBRES/SAISONS/TACHES
 // v2.17 — Onboarding intégré + tenantId · v2.06 — Firebase Auth · v2.00–v2.05 — divers
 const DEBUG = self.location.hostname === 'localhost' || self.location.hostname === '127.0.0.1';
-const CACHE_NAME   = 'mavigne-v7.67';
+const CACHE_NAME   = 'mavigne-v7.68';
 const TENANT_CACHE = 'mavigne-tenant';   // Cache persistant — préservé à chaque mise à jour SW
 const SYNC_TAG     = 'mavigne-sync';
 
@@ -3770,7 +3786,7 @@ const CDN_URLS = [
 ];
 
 self.addEventListener('install', event => {
-  if(DEBUG) console.log('[SW] Ma Vigne v7.67 installé');
+  if(DEBUG) console.log('[SW] Ma Vigne v7.68 installé');
   event.waitUntil(
     caches.open(CACHE_NAME).then(async cache => {
       // ── Cœur applicatif : STRICT (mise à jour ATOMIQUE) ──
@@ -3786,7 +3802,7 @@ self.addEventListener('install', event => {
 });
 
 self.addEventListener('activate', event => {
-  if(DEBUG) console.log('[SW] Ma Vigne v7.67 activé');
+  if(DEBUG) console.log('[SW] Ma Vigne v7.68 activé');
   event.waitUntil(
     caches.keys().then(keys =>
       Promise.all(

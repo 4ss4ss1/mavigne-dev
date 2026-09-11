@@ -782,6 +782,25 @@ function saveData(keyHint, toastMsg, toastCoul) {
     config:             window.CONFIG || CONFIG,
   };
 
+  // ★★★ UNE CLE INCONNUE N'EST PAS « PAS DE CLE ».
+  //   Sans ce garde-fou, `saveData('intrants')` (cle qui n'existe PAS dans W --
+  //   INTRANTS vit dans reserve.js et se sauve par `saveIntrants()`) tombait
+  //   dans la branche multi-cles plus bas : les 23 documents connus reecrits,
+  //   et jamais celui qu'on demandait. Aucun message, aucune trace : la saisie
+  //   restait en memoire et disparaissait au rechargement. Vecu sur les prix
+  //   d'achat de Pilotage > Economie > Achats.
+  //   ⚠️ En prime, la branche multi-cles reecrivait le journal, les sessions et
+  //   les traitements depuis la memoire -- un risque d'ecrasement pour une
+  //   ecriture qui ne les concernait pas.
+  //   Le silence etait le vrai defaut : on journalise ET on le dit a l'ecran.
+  if(keyHint && W[keyHint] === undefined) {
+    if(window.logError) window.logError({level:'warning', cat:'guard',
+      msg:'saveData(' + keyHint + ') ignore -- document inconnu',
+      detail:'saveData ne connait pas cette cle ; appeler l\'ecrivain du module'});
+    if(window.showToast) showToast('Non enregistr\u00e9 \u2014 document inconnu (' + keyHint + ')', '#C0392B');
+    return;
+  }
+
   // localStorage fallback (immédiat, hors ligne) — écriture groupée, cf. _mvSnapWrite plus haut
   _mvSnapSave();
 

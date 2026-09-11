@@ -8221,6 +8221,23 @@ function _pachView(){
   return h;
 }
 
+// ★★★ CHAQUE DOCUMENT A SON ECRIVAIN, ET `intrants` N'EST PAS UNE CLE DE
+//   saveData. app.js ne connait pas INTRANTS (ni dans sa table `W`, ni dans le
+//   snapshot localStorage) : il est charge par `_rsvApply` et sauve par
+//   `saveIntrants()`, dans reserve.js. Passer 'intrants' a saveData faisait
+//   tomber l'appel dans la branche MULTI-CLES -- les 23 AUTRES documents
+//   reecrits, et jamais celui qu'on voulait ecrire. Le prix restait en memoire,
+//   le toast disait vert, le rechargement effacait tout.
+//   ⚠️ Ne jamais deviner l'ecrivain : si le module n'est pas la, on le DIT.
+function _pachSave(doc){
+  if(doc==='intrants'){
+    if(typeof window.saveIntrants!=='function') return false;
+    window.saveIntrants(); return true;
+  }
+  if(typeof window.saveData!=='function') return false;
+  window.saveData(doc); return true;
+}
+
 // Saisie du prix. ⚠️ Le prompt natif est volontaire ici : la valeur est UN
 // nombre, et un overlay maison pour un champ unique serait plus de code a tenir
 // que de service rendu. Le detail de la ligne est rappele dans l'invite, sinon
@@ -8255,8 +8272,11 @@ function _pachOpen(ref){
   }
   var doc=_pachEcrit(src,id,prix,null);
   if(!doc){ if(window.showToast) window.showToast('Ligne introuvable \u2014 rien enregistr\u00e9','#B85A1A'); return; }
-  if(typeof window.saveData==='function') window.saveData(doc);
+  // ⚠️ L'ecriture memoire est DEJA faite par _pachEcrit. Si la persistance ne
+  //   part pas, ne pas annoncer « Enregistre » : on repeint et on le dit.
+  var _ok=_pachSave(doc);
   _pilFillContent(_pilData());
+  if(!_ok){ if(window.showToast) window.showToast('Non enregistr\u00e9 \u2014 module indisponible, rechargez l\u2019application','#C0392B'); return; }
   if(window.showToast) window.showToast(
     prix==null ? 'Laiss\u00e9 \u00e0 chiffrer' : (prix>0 ? ('Enregistr\u00e9 dans '+S.ecr) : 'Not\u00e9 sans frais'),
     prix==null ? '#B85A1A' : '#3D6B27');

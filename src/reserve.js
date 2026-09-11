@@ -1324,7 +1324,12 @@ function _rsvEnsureOverlays(){
 // ── applyFbData branché depuis app.js appelle window.INTRANTS via ce setter ──
 window._rsvApply=function(value){
   if(!value||typeof value!=='object') return;
-  var d={produits:[],achats:[],inventaires:[],futs:[],fut_four:[],fut_ref:[],achat_four:[]};
+  // ⚠⚠ `fut_mouv` MANQUAIT A CETTE LISTE. Il est ecrit par `_mvFutTracer`
+  //   (utils.js) et sauve avec le reste du document, mais n'etait jamais
+  //   RELU : au rechargement il repartait a [], et la premiere sauvegarde
+  //   suivante ecrasait le registre du parc dans Firestore. Toute cle du
+  //   modele INTRANTS doit figurer ici, sinon elle se perd en silence.
+  var d={produits:[],achats:[],inventaires:[],futs:[],fut_mouv:[],fut_four:[],fut_ref:[],achat_four:[]};
   Object.keys(d).forEach(function(k){ INTRANTS[k]=Array.isArray(value[k])?value[k]:d[k]; });
   window.INTRANTS=INTRANTS;
   var ap=document.querySelector('.page.active');

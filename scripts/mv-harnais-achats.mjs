@@ -107,5 +107,73 @@ t('la sous-vue Achats est declaree et routee',
 t('la sous-nav rend ses pictos par le sprite, plus en emojis',
   /_mvIcon\(s\[1\],16\)/.test(PIL));
 
+console.log('\n\u2500\u2500 LE PRIX ARRIVE-T-IL JUSQU\'AU DISQUE ?\n');
+/* \u2605\u2605\u2605 LE TROU DU LOT PRECEDENT. Le harnais verifiait que _pachEcrit rend le NOM
+   du document -- jamais que ce nom menait a un ECRIVAIN. 'intrants' n'existe pas
+   dans la table `W` de saveData (INTRANTS vit dans reserve.js) : l'appel tombait
+   dans la branche multi-cles, sauvait les 23 AUTRES documents, et le prix ne
+   quittait jamais la memoire. Toast vert, rien sur le disque.
+   On teste desormais la CHAINE ENTIERE : nom rendu -> ecrivain qui existe. */
+const APP = readFileSync('src/app.js', 'utf8');
+
+// Les cles que saveData sait ecrire, lues dans la table W elle-meme.
+const _w = APP.slice(APP.indexOf('const W = {'), APP.indexOf('};', APP.indexOf('const W = {')));
+const CLES_SAVEDATA = [...(_w.matchAll(/^\s{4}([a-z_]+):/gm))].map(m => m[1]);
+t('la table W de saveData a pu etre lue', CLES_SAVEDATA.length > 10, CLES_SAVEDATA.length + ' cles');
+
+// Les documents que _pachEcrit peut rendre, lus dans _pachEcrit lui-meme.
+const _pe = PIL.slice(PIL.indexOf('function _pachEcrit'), PIL.indexOf('function _pachView'));
+const DOCS_RENDUS = [...new Set([...(_pe.matchAll(/return '([a-z_]+)';/g))].map(m => m[1]))];
+t('_pachEcrit rend bien intrants ET reparateur_hist',
+  DOCS_RENDUS.includes('intrants') && DOCS_RENDUS.includes('reparateur_hist'),
+  DOCS_RENDUS.join(', '));
+
+t('_pachOpen ne passe plus le document a saveData en aveugle',
+  !/if\(typeof window\.saveData==='function'\) window\.saveData\(doc\);/.test(PIL));
+t('_pachSave existe et route le document vers son module',
+  /function _pachSave\(doc\)\{/.test(PIL) && /window\.saveIntrants\(\)/.test(PIL));
+t('reserve.js expose bien saveIntrants', /window\.saveIntrants\s*=\s*saveIntrants/.test(RSV));
+t('saveIntrants persiste le document intrants', /fbSave\('intrants',\s*INTRANTS\)/.test(RSV));
+
+/* La garantie structurelle : CHAQUE document rendu doit avoir un ecrivain --
+   soit une cle connue de saveData, soit une branche explicite de _pachSave. */
+const _ps = PIL.slice(PIL.indexOf('function _pachSave'), PIL.indexOf('// Saisie du prix.'));
+DOCS_RENDUS.forEach(function(d){
+  const routeMaison = new RegExp("doc==='" + d + "'").test(_ps);
+  t('« ' + d + ' » a un ecrivain (saveData ou _pachSave)',
+    CLES_SAVEDATA.includes(d) || routeMaison,
+    'ni cle de saveData, ni branche de _pachSave -- le prix ne partira pas');
+});
+
+t('un echec de persistance ne s\'annonce pas « Enregistr\u00e9 »',
+  /var _ok=_pachSave\(doc\);/.test(PIL) && /if\(!_ok\)\{/.test(PIL));
+
+console.log('\n\u2500\u2500 saveData REFUSE UNE CLE QU\'ELLE NE CONNAIT PAS\n');
+/* \u26a0\ufe0f La cause premiere : une cle inconnue etait traitee comme « pas de cle »
+   et declenchait la sauvegarde multi-cles. Silencieuse, et elle reecrivait
+   journal/sessions/traitements depuis la memoire au passage. */
+t('la branche multi-cles n\'est plus atteignable par une cle inconnue',
+  /if\(keyHint && W\[keyHint\] === undefined\)/.test(APP));
+t('le refus laisse une trace ET un message',
+  /msg:'saveData\(' \+ keyHint \+ '\) ignore -- document inconnu'/.test(APP)
+  && /Non enregistr\\u00e9 \\u2014 document inconnu/.test(APP));
+t('le garde est pose APRES la table W (sinon W[keyHint] est indefini partout)',
+  APP.indexOf('if(keyHint && W[keyHint] === undefined)') > APP.indexOf('const W = {'));
+
+console.log('\n\u2500\u2500 TOUTE CLE DU MODELE INTRANTS EST RELUE\n');
+/* \u26a0\u26a0 Une cle ecrite mais jamais relue se perd EN SILENCE : au rechargement
+   elle repart a sa valeur par defaut, et la sauvegarde suivante l'ecrase dans
+   Firestore. C'est ce qui arrivait a `fut_mouv`, le registre du parc a futs. */
+const _mod = RSV.slice(RSV.indexOf('var INTRANTS = {'), RSV.indexOf('window.INTRANTS = INTRANTS;'));
+const CLES_MODELE = [...(_mod.matchAll(/^\s{2}([a-z_]+):/gm))].map(m => m[1]);
+const _ap = RSV.slice(RSV.indexOf('window._rsvApply='), RSV.indexOf('window._rsvApply=') + 700);
+const _sq = (_ap.match(/var d=\{([^}]*)\}/) || [,''])[1];
+const CLES_RELUES = [...(_sq.matchAll(/([a-z_]+):/g))].map(m => m[1]);
+t('le modele INTRANTS a pu etre lu', CLES_MODELE.length >= 7, CLES_MODELE.join(', '));
+CLES_MODELE.forEach(function(k){
+  t('« ' + k +' » est relu par _rsvApply', CLES_RELUES.includes(k),
+    'ecrit dans Firestore mais jamais recharge -- perte silencieuse au 1er rechargement');
+});
+
 console.log(`\n  ${ok} vert · ${ko} rouge\n`);
 process.exit(ko ? 1 : 0);
