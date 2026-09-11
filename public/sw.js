@@ -1,4 +1,11 @@
-// MA VIGNE — Service Worker v7.64
+// MA VIGNE — Service Worker v7.65
+// v7.65 (11/09/2026) — CUV-7 rattrapage : deux tailles d'icone hors echelle
+//   dans la tournee, _mvIcon('plus',22) et _mvIcon('check',14). L'echelle du
+//   jeu est 16/18/20/24/40 et mv-harnais-icones la tient : passees a 24 et 16.
+//   ⚠ Bump par REGLE DU DOUTE : la correction ne touche que cave.js (module,
+//   normalement sans bump), mais rien ne prouve que 7.64 n'a pas ete deploye.
+//   Reutiliser un numero vivant gele l'ancien index.html pour toujours ; en
+//   sauter un ne coute rien. APP reste 7.05 (aucun changement visible).
 // v7.64 (11/09/2026) — CUV-7 : LA TOURNEE DU CUVIER. Quinze cuves demandaient
 //   quinze fois le meme geste : ouvrir la fiche, saisir, enregistrer, fermer.
 //   Un quatrieme onglet met les cuves en fermentation sur un seul ecran, deux
@@ -3716,7 +3723,7 @@
 // v2.22 — Fix profils vides : guard vide dans loadData() pour MEMBRES/SAISONS/TACHES
 // v2.17 — Onboarding intégré + tenantId · v2.06 — Firebase Auth · v2.00–v2.05 — divers
 const DEBUG = self.location.hostname === 'localhost' || self.location.hostname === '127.0.0.1';
-const CACHE_NAME   = 'mavigne-v7.64';
+const CACHE_NAME   = 'mavigne-v7.65';
 const TENANT_CACHE = 'mavigne-tenant';   // Cache persistant — préservé à chaque mise à jour SW
 const SYNC_TAG     = 'mavigne-sync';
 
@@ -3732,7 +3739,7 @@ const CDN_URLS = [
 ];
 
 self.addEventListener('install', event => {
-  if(DEBUG) console.log('[SW] Ma Vigne v7.64 installé');
+  if(DEBUG) console.log('[SW] Ma Vigne v7.65 installé');
   event.waitUntil(
     caches.open(CACHE_NAME).then(async cache => {
       // ── Cœur applicatif : STRICT (mise à jour ATOMIQUE) ──
@@ -3748,7 +3755,7 @@ self.addEventListener('install', event => {
 });
 
 self.addEventListener('activate', event => {
-  if(DEBUG) console.log('[SW] Ma Vigne v7.64 activé');
+  if(DEBUG) console.log('[SW] Ma Vigne v7.65 activé');
   event.waitUntil(
     caches.keys().then(keys =>
       Promise.all(

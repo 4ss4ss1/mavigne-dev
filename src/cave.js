@@ -8119,7 +8119,7 @@ function renderVendTour(){
   h+='</div>';
   if(canEdit) h+='<div class="mvt-bot">'
     +'<button class="mvt-fin" onclick="_vtFin()">Terminer la tournée <small id="mvt-fin-n"></small></button>'
-    +'<button class="mvt-fab" onclick="_vtSheet()" aria-label="Intervention groupée">'+_mvIcon('plus',22)+'</button>'
+    +'<button class="mvt-fab" onclick="_vtSheet()" aria-label="Intervention groupée">'+_mvIcon('plus',24)+'</button>'
     +'</div>';
   h+='</div>';
   host.innerHTML=h;
@@ -8151,7 +8151,7 @@ function _vtRowHtml(c,canEdit){
     +(function(){var rp=_vendRepere(c);return rp?'<span class="mvt-rep">'+_escHtml(rp)+'</span>':'';})()
     +'<span class="mvt-nom">'+_escHtml(c.nom||'Cuve')+'</span>'
     +'<span class="mvt-tags" id="mvt-tg-'+_escAttr(c.id)+'">'+_vtTags(c)+'</span>'
-    +'<span class="mvt-chk">'+_mvIcon('check',14)+'</span>'
+    +'<span class="mvt-chk">'+_mvIcon('check',16)+'</span>'
     +'</div>';
   if(!inact){
     if(canEdit){
