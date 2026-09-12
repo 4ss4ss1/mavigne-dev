@@ -64,7 +64,10 @@ function extraire(src, nom) {
   }
   console.error('accolade non ferm\u00e9e : ' + nom); process.exit(1);
 }
+// _caveFmlDerniereOp / _caveFmlEtat : lecture unique de la FML (12/09). _mlMalo
+// les appelle ; sans eux dans l'extraction, le bloc leve un ReferenceError.
 const NOMS = ['_mlD', '_mlIso', '_mlAddJ', '_mlEcartJ', '_mlLundi', '_mlFrC',
+  '_caveFmlDerniereOp', '_caveFmlEtat',
   '_mlFinMalo', '_mlMalo', '_mlSo2Doses', '_mlAgendaComplet', '_mlSansDate', '_mlVerdict'];
 function bloc(src) {
   return NOMS.map(n => extraire(src, n)).sort((a, b) => a[0] - b[0]).map(x => x[1]).join('\n');

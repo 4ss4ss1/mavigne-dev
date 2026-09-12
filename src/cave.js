@@ -731,14 +731,21 @@ function _caveNoOuHtml(c){
 }
 function _caveAnaLineHtml(c){
   var la=_caveLastAna(c.id);
-  if(!la) return '<div class="mvc-cuv-ana"><span class="mvc-tag-none">Aucune analyse enregistr\u00e9e</span></div>';
+  // ★ L'etiquette FML passe par _caveFmlEtat : les DEUX portes de saisie
+  //   comptent, et la plus recente gagne. Avant, la derniere analyse gagnait
+  //   sans condition et « Terminee » coche dans la fiche ne changeait rien.
+  // ⚠️ Elle ne depend plus non plus de l'existence d'une analyse : une cuvee
+  //   declaree finie dans sa fiche, sans aucune analyse, le disait a
+  //   Aujourd'hui et se taisait ici.
+  var fml=_caveFmlEtat(c);
+  var fmlTag='';
+  if(fml==='ok') fmlTag='<span class="mvc-tag mvc-tag-fmlok">FML '+_mvIcon('check',16)+'</span>';
+  else if(fml==='cours') fmlTag='<span class="mvc-tag mvc-tag-fmlc">FML en cours</span>';
+  if(!la) return '<div class="mvc-cuv-ana">'+(fmlTag||'<span class="mvc-tag-none">Aucune analyse enregistr\u00e9e</span>')+'</div>';
   var so2=(la._src==='op'&&la.data)?la.data.so2_libre:null;
-  var lao=_caveLastAnaOp(c.id);
-  var fml=(lao&&lao.data)?lao.data.fml:(c.fml_terminee?'ok':null);
   var tags='';
   if(so2) tags+='<span class="mvc-tag mvc-tag-so2">SO\u2082 '+so2+' mg/L</span>';
-  if(fml==='ok') tags+='<span class="mvc-tag mvc-tag-fmlok">FML '+_mvIcon('check',16)+'</span>';
-  else if(fml==='cours') tags+='<span class="mvc-tag mvc-tag-fmlc">FML en cours</span>';
+  tags+=fmlTag;
   var pdf=(la.data&&la.data.pdf_url)?'<span class="mvc-tag-pdf">'+_mvIcon('document',16)+'</span>':'';
   if(!tags&&!pdf) tags='<span class="mvc-tag-none">Analyse le '+_caveDateFr(la.date_analyse)+'</span>';
   return '<div class="mvc-cuv-ana">'+tags+pdf+'<span class="mvc-ana-date">'+_caveDateFr(la.date_analyse)+'</span></div>';
@@ -1488,7 +1495,10 @@ function openOvCavee(cuvId) {
   el=document.getElementById('cuv-millesime'); if(el) el.value=cuv?cuv.millesime:new Date().getFullYear();
   el=document.getElementById('cuv-statut'); if(el) el.value=cuv?(cuv.statut||'elevage'):'elevage';
   // Basculement FML
-  var fmlInit=cuv&&cuv.fml_terminee?'ok':'non';
+  // ★ Meme lecture que les cartes du Chai : une malo declaree finie par une
+  //   ANALYSE ouvrait la fiche sur « Non terminee », qui contredisait
+  //   l'etiquette « FML ✓ » de la carte juste derriere.
+  var fmlInit=(cuv&&_caveFmlEtat(cuv)==='ok')?'ok':'non';
   var hFml=document.getElementById('cuv-fml-val');if(hFml)hFml.value=fmlInit;
   window._cuvToggle('fml',fmlInit);
   // Peupler la r\u00E9partition des tonneaux
@@ -1515,14 +1525,27 @@ function saveCuvee() {
   var nbTotal=tonneaux.reduce(function(s,t){return s+(t.nb||0);},0);
   if(!nom){showToast('Saisissez un nom','#E07060');return;}
   if(!nbTotal){showToast('Indiquez au moins un tonneau','#E07060');return;}
+  // ★ La declaration de la fiche est DATEE : c'est ce qui permet a une analyse
+  //   posterieure de la corriger sans qu'on ait a revenir decocher le bouton.
+  var _fmlAuj=new Date().toISOString().split('T')[0];
   if(existId) {
     var idx=CAVE_ELEVAGE.cuvees.findIndex(function(c){return c.id===existId;});
     // sous_tire n'est plus ecrit : l'ancienne valeur reste en base, inerte,
     // et n'est plus lue nulle part. Le soutirage vit dans les operations.
-    if(idx!==-1) Object.assign(CAVE_ELEVAGE.cuvees[idx],{nom:nom,millesime:millesime,tonneaux:tonneaux,statut:statut,fml_terminee:fmlTerminee});
+    if(idx!==-1) {
+      var _prevC=CAVE_ELEVAGE.cuvees[idx];
+      // ⚠️ On ne REDATE pas un drapeau deja pose et deja date : reenregistrer
+      //    la fiche pour corriger un nom ferait passer la declaration devant
+      //    une analyse plus recente.
+      var _fmlD=_prevC.fml_terminee_date||null;
+      if(fmlTerminee&&(!_prevC.fml_terminee||!_fmlD)) _fmlD=_fmlAuj;
+      if(!fmlTerminee) _fmlD=null;
+      Object.assign(_prevC,{nom:nom,millesime:millesime,tonneaux:tonneaux,statut:statut,fml_terminee:fmlTerminee,fml_terminee_date:_fmlD});
+    }
   } else {
     CAVE_ELEVAGE.cuvees.push({id:'cuv_'+Date.now(),nom:nom,millesime:millesime,
-      tonneaux:tonneaux,statut:'elevage',fml_terminee:fmlTerminee,last_ouillage:null,last_analyse:null});
+      tonneaux:tonneaux,statut:'elevage',fml_terminee:fmlTerminee,fml_terminee_date:fmlTerminee?_fmlAuj:null,
+      last_ouillage:null,last_analyse:null});
   }
   window.CAVE_ELEVAGE=CAVE_ELEVAGE;
   window.fbSaveToast({cave_elevage:CAVE_ELEVAGE},existId?'Cuv\u00e9e mise \u00e0 jour':'Cuv\u00e9e cr\u00e9\u00e9e','#C0845A');
@@ -1563,15 +1586,52 @@ function _caveLastSout(cuvId){
   return l.length?l[0].date:null;
 }
 
-function _caveLastAnaOp(cuvId) {
-  // Retourne la derniere operation de type 'analyse' pour cette cuvee (pour FML/SO2)
-  var ops=(CAVE_ELEVAGE.operations||[]).filter(function(op){
-    if(op.type!=='analyse')return false;
+// ── FML : DEUX PORTES DE SAISIE, UNE SEULE LECTURE ──────────────────────
+// La malo finie se declare a DEUX endroits : la fiche cuvee (bouton
+// « Terminee » -> `cuvee.fml_terminee`) et l'operation d'analyse
+// (`op.data.fml`). Le Chai ne lisait que la SECONDE, et sans condition :
+//   var fml=(lao&&lao.data)?lao.data.fml:(c.fml_terminee?'ok':null);
+// le drapeau n'etait consulte que s'il n'existait AUCUNE analyse. Cocher
+// « Terminee » dans la fiche ne changeait donc rien a l'ecran des lors qu'une
+// analyse anterieure disait « En cours ». Aujourd'hui (`_mlMalo`) lisait deja
+// le drapeau : les deux ecrans se contredisaient sur la meme cuvee, le meme
+// jour. Signale par Nico le 12/09 sur deux cuvees dont la malo etait finie.
+// ★ REGLE : la declaration la PLUS RECENTE gagne, quelle que soit sa porte.
+function _caveFmlDerniereOp(cuvId) {
+  // Derniere analyse qui DIT quelque chose de la FML, pour cette cuvee.
+  // ⚠️ On ne prend pas « la derniere analyse » tout court : le selecteur FML
+  //    du formulaire retombe sur 'none' a chaque ouverture (_caveOpReset), donc
+  //    une analyse de SO2 saisie sans y toucher effacait l'etiquette d'une malo
+  //    en cours. Seul 'cours' / 'ok' / 'non' est une declaration ; 'none' et
+  //    l'absence de champ n'en sont pas une.
+  var best=null;
+  (CAVE_ELEVAGE.operations||[]).forEach(function(op){
+    if(!op||op.type!=='analyse'||!op.data)return;
+    var f=op.data.fml;
+    if(f!=='cours'&&f!=='ok'&&f!=='non')return;
     var ids=op.cuvees_ids||(op.cuvee_id?[op.cuvee_id]:[]);
-    return ids.indexOf(cuvId)!==-1;
+    if(ids.indexOf(cuvId)===-1)return;
+    // ⚠️ `>=`, pas `>`. A date egale c'est la saisie la plus recemment
+    //    ENREGISTREE qui doit gagner : avec `>`, une analyse « Terminee » posee
+    //    le meme jour qu'une « En cours » perdait contre elle, en silence.
+    if(!best||(op.date||'')>=(best.date||''))best=op;
   });
-  if(!ops.length)return null;
-  return ops.reduce(function(best,op){return(!best||op.date>best.date)?op:best;},null);
+  return best;
+}
+function _caveFmlEtat(c) {
+  // Etat FML affichable d'une cuvee : 'ok' | 'cours' | 'non' | null.
+  // Lecture unique, partagee par les cartes du Chai, la fiche cuvee et _mlMalo.
+  if(!c)return null;
+  var op=_caveFmlDerniereOp(c.id);
+  var mes=op?op.data.fml:null;
+  if(!c.fml_terminee)return mes;
+  // ⚠️ Le drapeau de la fiche n'etait pas date avant ce lot. Sans date, il
+  //    reste la verite du vigneron et gagne (§ lot MALO). Date, il se laisse
+  //    corriger par une analyse POSTERIEURE — sinon un drapeau pose une fois
+  //    epinglerait « FML ✓ » a vie, y compris contre la mesure du lendemain.
+  var d=c.fml_terminee_date||null;
+  if(mes&&d&&op&&(op.date||'')>d)return mes;
+  return 'ok';
 }
 
 function _caveLastAna(cuvId) {
@@ -7554,9 +7614,13 @@ function openCuveeDetail(cuvId){
   var lSO2L=null,lSO2T=null,lFml=null,lAv=null,lPdfUrl=null,lPdfNom=null;
   if(lAna&&lAna._src==='op'&&lAna.data){
     lSO2L=lAna.data.so2_libre;lSO2T=lAna.data.so2_total;
-    lFml=lAna.data.fml;lAv=lAna.data.av;
+    lAv=lAna.data.av;
     lPdfUrl=lAna.data.pdf_url;lPdfNom=lAna.data.pdf_nom;
   } else if(lAna&&lAna.data){lPdfUrl=lAna.data.pdf_url;lPdfNom=lAna.data.pdf_nom;}
+  // ★ Meme lecture que les cartes du Chai. Avant ce lot la fiche ne lisait
+  //   QUE la derniere analyse — et jamais `fml_terminee` : une cuvee declaree
+  //   finie dans sa propre fiche n'y voyait aucune etiquette.
+  lFml=_caveFmlEtat(cuv);
   var fmlH='';
   if(lFml==='ok')fmlH='<div style="font-size:var(--pt-lbl,10.5px);font-weight:600;color:#3A8C40;background:rgba(58,140,64,0.12);border-radius:6px;padding:2px 8px;display:inline-block;margin-top:4px;">FML \u2713</div>';
   else if(lFml==='cours')fmlH='<div style="font-size:var(--pt-lbl,10.5px);font-weight:600;color:#B8913A;background:rgba(184,145,58,0.12);border-radius:6px;padding:2px 8px;display:inline-block;margin-top:4px;">FML en cours</div>';
@@ -11732,7 +11796,11 @@ function _mlMalo(){
     try{ p=window._mlProjMalo(x); }
     catch(e){ if(window.logError) window.logError({level:'info',cat:'cave',msg:'aujourdhui/projMalo',err:e}); }
     var etat=p?p.etat:'attente';
-    var finie=(etat==='finie')||!!x.fml_terminee;
+    // ★ Meme lecture que le Chai (_caveFmlEtat) : le drapeau de la fiche ET
+    //   l'analyse qui dit « Terminee » valent declaration. Avant ce lot seul le
+    //   drapeau comptait ici, et seule l'analyse comptait la-bas : declarer par
+    //   une porte laissait l'autre ecran dire le contraire.
+    var finie=(etat==='finie')||(_caveFmlEtat(x)==='ok');
     var sout=_caveLastSout(x.id)||null;
     var ref=(p&&p.etat==='finie'&&p.dernier)?p.dernier:(fm[x.id]||null);
     var acquitte=!!sout&&(!ref||sout>=ref);
