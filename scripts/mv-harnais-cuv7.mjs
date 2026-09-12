@@ -12,7 +12,11 @@ function extrait(nom) {
   }
   throw new Error('accolades : ' + nom);
 }
-const NOMS = ['_vtJour','_vtNum','_vtB','_vtMesJour','_vtEcrire','_vtActives','_vendLastD','_vtFait','_vtPart'];
+const NOMS = ['_vtJour','_vtNum','_vtB','_vtMesJour','_vtEcrire','_vtActives','_vendLastD','_vtFait','_vtPart',
+  /* CUV-9 : _vtActives passe par _vendSuivie. Les trois predicats sont
+     EXTRAITS (c'est le sujet), le seuil est bouchonne (ce n'est pas le
+     sujet : il a son propre harnais, mv-harnais-cuv8). */
+  '_vendDecuvee','_vendFaEnCours','_vendSuivie'];
 // ⚠ Ordre réel du fichier : on relit les indices avant de découper.
 NOMS.sort((a,b)=>SRC.indexOf('function '+a+'(')-SRC.indexOf('function '+b+'('));
 
@@ -27,6 +31,8 @@ var CAVE_VENDANGE={cuves_vinif:[]}, _VT_BUF={}, _VT_WHO=[];
 function _vendTriMes(c){ var m=(c&&c.mesures_fa)||[]; if(m.length>1) m.sort(function(a,b){return a.date<b.date?-1:1;}); return m; }
 function _vendIsActive(c){ return c.statut==='fa'||c.statut==='mpf'; }
 function _vendEstFusionnee(c){ return !!(c.fusion); }
+function _vendMesD20(m){ return m?m.densite:null; }   // bouchon : pas de T° ici
+function _vendDSec(){ return 996; }                   // bouchon : cf. cuv8
 function canWrite(){ return true; }
 var ECRITURES=0;
 function _vendFbSave(){ ECRITURES++; return null; }
@@ -37,6 +43,7 @@ var navigator={};
 var showToast=function(){};
 `;
   const post = `\nreturn {CV:CAVE_VENDANGE,BUF:_VT_BUF,WHO:_VT_WHO,ecrire:_vtEcrire,lastD:_vendLastD,jour:_vtJour,
+  actives:_vtActives,
   set:function(cv,buf,who){CAVE_VENDANGE=cv;_VT_BUF=buf;_VT_WHO=who||[];},nEcr:function(){return ECRITURES;}};`;
   return new Function(pre + code + post)();
 }
@@ -81,6 +88,22 @@ console.log('\n── CUV-7 · écriture de la tournée ──');
   t('2ᵉ enregistrement : aucun relevé de plus sur c1', r.c1.mesures_fa.length === 3);
   t('2ᵉ enregistrement : aucun relevé de plus sur c3', r.c3.mesures_fa.length === 1);
 }
+console.log('\n── CUV-9 · la tournée garde une cuve décuvée qui fermente ──');
+{
+  const H2 = monter();
+  const dec = (id, d) => ({ id, nom: id, statut: 'termine', decuvage: { date: jm(1) },
+                            mesures_fa: [{ id: 'm', date: jm(1), densite: d }] });
+  const sucre = dec('avec-sucre', 999);   // au-dessus du seuil bouchonné (996)
+  const seche = dec('seche', 993);        // en dessous : l'affaire est close
+  H2.set({ cuves_vinif: [sucre, seche] }, {}, []);
+  const ids = H2.actives().map(c => c.id);
+  t('une cuve décuvée encore sucrée reste dans la tournée', ids.indexOf('avec-sucre') >= 0);
+  t('une cuve décuvée et sèche en sort', ids.indexOf('seche') < 0);
+  const fus = dec('fusionnee', 999); fus.fusion = { vers: 'x' };
+  H2.set({ cuves_vinif: [fus] }, {}, []);
+  t('★ une cuve FUSIONNÉE ne suit rien : son vin est ailleurs', H2.actives().length === 0);
+}
+
 console.log('\n── CUV-7 · _vendLastD ──');
 {
   const H = monter(null);

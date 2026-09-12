@@ -23,7 +23,7 @@ export const GT_ADMIN_EMAIL = 'ngdevpro@gmail.com';
 // WHATS_NEW   : tableau vide = modal desactive pour cette version.
 // Format item : { emoji:'📅', titre:'Titre court', desc:'Phrase utilisateur.' }
 // Regle : seulement les changements visibles par les utilisateurs.
-export const APP_VERSION = '7.11';
+export const APP_VERSION = '7.12';
 // ════ Journal des nouveautés (récap cumulatif) ════
 // Une entrée par version, la PLUS RÉCENTE EN HAUT : { v:'5.10', items:[ {emoji,titre,desc}, … ] }
 // À chaque release visible → AJOUTER un bloc en tête (ne pas remplacer). items:[] = release technique (rien à afficher).
@@ -460,6 +460,27 @@ window._mvGraphRepeindre = function(){
 };
 
 export const WHATS_NEW = [
+  { v: '7.12', items: [
+    { emoji: 'eprouvette', titre: 'Le seuil du vin sec suit votre mo\u00fbt, plus un nombre unique',
+      desc: "Jusqu\u2019ici, une seule densit\u00e9 (996) servait de \u00ab\u00a0vin sec\u00a0\u00bb \u00e0 toutes les cuves. "
+        + "Elle n\u2019existe pas\u00a0: une cuve est s\u00e8che d\u2019autant plus bas que son mo\u00fbt \u00e9tait riche. "
+        + "Chaque cuve a d\u00e9sormais <b>son</b> seuil, calcul\u00e9 sur le degr\u00e9 potentiel de son mo\u00fbt "
+        + "\u2014 lu sur votre premier relev\u00e9, \u00e0 d\u00e9faut sur vos contr\u00f4les de maturit\u00e9, et une "
+        + "chaptalisation l\u2019abaisse. Un mo\u00fbt \u00e0 12\u00b0 est sec vers <b>995</b>, un mo\u00fbt \u00e0 14\u00b0 vers "
+        + "<b>992,7</b>. Avant, l\u2019\u00e9cran d\u00e9clarait s\u00e8che une cuve qui portait encore 8\u00a0g/L sur un "
+        + "millésime chaud. La courbe, le cahier de cuverie et le comparatif portent tous le m\u00eame "
+        + "seuil, et le comparatif dessine une <b>bande</b> quand vos cuves n\u2019ont pas le m\u00eame. "
+        + "Le chiffre reste une estimation\u00a0: seule une analyse de sucres r\u00e9ducteurs tranche." },
+    { emoji: 'cuve', titre: 'Une cuve d\u00e9cuv\u00e9e avant la fin de FA reste suivie',
+      desc: "\u00c9couler t\u00f4t pour arr\u00eater l\u2019extraction du marc et laisser la fermentation finir en "
+        + "phase liquide est une pratique courante \u2014 l\u2019application, elle, fermait le dossier au "
+        + "d\u00e9cuvage\u00a0: plus de bouton pour relever, la cuve sortait de la tourn\u00e9e, et le comparatif "
+        + "la laissait \u00ab\u00a0pas encore\u00a0\u00bb s\u00e8che pour toujours. Elle porte maintenant "
+        + "<b>D\u00e9cuv\u00e9e \u00b7 FA</b>, garde \u00ab\u00a0Saisir une mesure\u00a0\u00bb, <b>reste dans la tourn\u00e9e</b> et dans "
+        + "la liste \u00e0 mesurer, jusqu\u2019au relev\u00e9 qui passe sous son seuil \u2014 c\u2019est la m\u00eame courbe, "
+        + "pas une seconde. La cuv\u00e9e n\u00e9e du d\u00e9cuvage l\u2019annonce aussi au Chai, pour ne pas sulfiter "
+        + "sur du sucre." }
+  ] },
   { v: '7.11', items: [
     { emoji: 'euro', titre: 'Ce qui est sorti cette ann\u00e9e, d\u00e8s l\u2019ouverture de l\u2019\u00c9conomie',
       desc: "Une bande <b>L\u2019exercice en cours</b> se pose sous le budget de campagne, dans "
@@ -2527,16 +2548,18 @@ var MV_AIDE = {
       ['Une cuve n’est pas un fût', "elle ne sort pas de La Réserve, elle n’a pas d’âge, et elle a sa contenance propre. Ajouter une cuve à une cuvée ne change aucun compte de fûts. Le volume que vous inscrivez est celui qui est réellement dedans, pas la contenance de la cuve."],
       ['L’ouillage suit le bois, pas le contenant', "inox et béton ne s’évaporent pas : une cuvée logée seulement là n’a pas de jauge de part des anges et ne déclenche aucune alerte. Un foudre bois, si. Une cuvée mixte garde sa jauge, cadrée sur sa seule part en fût."],
       ['La fin de fermentation et la fin de malo', "sont estimées à partir de vos propres relevés : la densité pour l’une, l’acide malique pour l’autre. Sans trois mesures, l’écran dit « démarrage » plutôt qu’une date inventée."],
+      ['Le seuil du vin sec appartient à la cuve', "il n’y a pas une densité unique du vin sec : plus le moût était riche, plus la cuve finit bas. Chaque cuve a le sien, calculé sur le degré potentiel de son moût — lu sur votre premier relevé s’il a été pris avant le départ, sinon sur vos contrôles de maturité ; une chaptalisation datée l’abaisse. Un moût à 12° est sec vers 995, un moût à 14° vers 992,7. Quand rien ne permet de le lire, la cuve prend le seuil général et l’écran écrit « seuil général » à côté. <b>C’est une estimation</b> : seule une analyse de sucres réducteurs déclare un vin sec."],
+      ['Décuver avant la fin de la fermentation', "c’est une pratique, pas une erreur de saisie : on écoule tôt pour arrêter l’extraction du marc, et la fermentation se termine en phase liquide. La cuve porte alors <b>Décuvée · FA</b>, garde son bouton « Saisir une mesure », reste dans la tournée et dans les cuves à mesurer. Les relevés d’après le décuvage continuent la même courbe. La cuvée née du décuvage le signale au Chai, pour ne pas sulfiter sur du sucre."],
       ['Trouver une cuve', "la liste du Cuvier est rangée dans l’ordre de votre cuverie — celui écrit sur les cuves, celui dans lequel vous marchez. Une cuve garde donc sa place d’un jour à l’autre, même après un relevé. Vous pouvez trier par urgence ou par avancement, filtrer, et chercher par nom ou par parcelle dès six cuves."],
       ['Une cuve s’ouvre au doigt', "la liste ne montre que l’essentiel : repère, nom, densité, température, avancement. Touchez une ligne pour déplier sa courbe, ses trois derniers chiffres et ses boutons. Une seule cuve reste ouverte à la fois."],
-      ['Ce que porte la courbe', "densité ramenée à 20 °C en trait plein, température en pointillé sur son propre axe, seuil du vin sec en tireté, un repère rond par opération datée, et un trait vertical gris tireté à chaque changement d’état de la cuve. Une remontée ne s’explique que par une chaptalisation ; un palier, souvent par une macération préfermentaire. Une cuve dont les passages n’ont jamais été datés n’a aucun trait vertical."],
+      ['Ce que porte la courbe', "densité ramenée à 20 °C en trait plein, température en pointillé sur son propre axe, le seuil de vin sec <b>de cette cuve</b> en tireté, un repère rond par opération datée, et un trait vertical gris tireté à chaque changement d’état de la cuve. Une remontée ne s’explique que par une chaptalisation ; un palier, souvent par une macération préfermentaire. Une cuve dont les passages n’ont jamais été datés n’a aucun trait vertical."],
       ['Le plan de cuverie', "le second bouton en haut à droite montre la cave en vignettes : chaque cuve avec son niveau et sa couleur. Une cuve qui n’a pas été mesurée depuis la veille passe au rouge. C’est la vue du matin."],
       ['Fusionner des cuves', "plusieurs cuves peuvent n’en faire plus qu’une. Les raisins, les kilos et les parcelles suivent vers la cuve d’arrivée — qui peut être une des cuves choisies ou une cuve libre du parc. Les cuves de départ quittent la liste, libèrent leur cuve, et gardent leurs relevés et leurs opérations sous leur nom d’origine : c’est sous ce nom que le SO₂ a été ajouté. L’assemblage part au registre des manipulations. Tant que rien n’est décuvé, le volume affiché est une estimation d’après les caisses, et l’écran le dit."],
       ['Changer l’étape d’une cuve garde la date', "une cuve qui passe de macération préfermentaire à fermentation alcoolique ne perd plus ce qui précède : chaque passage est daté. Dans la fiche de la cuve, dès que vous changez le statut, un champ « Depuis le » apparaît, réglé sur aujourd’hui — changez-le si vous notez le passage le lendemain. La frise des étapes porte les dates, et la cuve annonce depuis quand elle est dans l’étape où elle est."],
       ['Le parcours se corrige, étape par étape', "dépliez la cuve : sous la frise, « Parcours » liste tous ses passages avec leur durée, un crayon par ligne. Le bouton « Changer l’étape » fait la même chose depuis le détail. Une date antérieure à l’encuvage ou postérieure à aujourd’hui est refusée. Supprimer une étape efface une date, pas un fait : le statut de la cuve ne change pas."],
       ['Les cuves d’avant cette mise à jour n’ont pas de date de passage', "on ne connaît pas le jour où elles sont entrées dans leur étape actuelle, et la date d’encuvage ne le dit pas. La frise écrit un tiret plutôt qu’une date fausse : un tiret se corrige, une date fausse se croit. Posez-la à la main si vous la connaissez."],
       ['La fin de fermentation ne compte que les jours de FA', "cinq jours de macération à froid ne sont pas cinq jours de fermentation. Tant que la fermentation n’a pas trois jours, l’écran dit « démarrage » au lieu d’une date de fin. Le cahier de cuverie imprime la durée de macération réellement faite ; à défaut, la durée prévue, et il le dit."],
-      ['Un relevé se corrige', "dépliez la cuve : la liste de ses relevés s’ouvre sous la courbe ; le crayon rouvre celui que vous désignez, date comprise. Les relevés se rangent par date, pas par ordre de saisie : un carnet rattrapé le lendemain se remet tout seul à sa place, et la fin de fermentation estimée suit. La liste reste ouverte sur une cuve déjà décuvée."],
+      ['Un relevé se corrige', "dépliez la cuve : la liste de ses relevés s’ouvre sous la courbe ; le crayon rouvre celui que vous désignez, date comprise. Les relevés se rangent par date, pas par ordre de saisie : un carnet rattrapé le lendemain se remet tout seul à sa place, et la fin de fermentation estimée suit. La liste reste ouverte sur une cuve déjà décuvée, et la saisie aussi tant que sa fermentation n’est pas finie."],
       ['Une opération se corrige aussi', "toutes sont listées, plus seulement la dernière. Corriger ou supprimer une saignée rend d’abord les hectolitres à la cuve avant d’appliquer la nouvelle valeur : le volume ne se retranche jamais deux fois."],
       ['Un refroidissement dit par quel moyen', "groupe de froid, échangeur, glace carbonique, azote liquide, CO₂ liquide, eau froide. Les trois qui se pèsent demandent une quantité en kilos, et la carboglace annonce l’abaissement approximatif — un ordre de grandeur, la cuve n’étant pas isolée. Le moyen et la quantité partent au registre des manipulations : c’est là qu’on les cherche."],
       ['Tanins, enzymes et bentonite', "se posent sur une cuve comme les autres opérations, mais le produit se choisit dans La Réserve : c’est ce qui permet de sortir la quantité du stock toute seule. L’unité de dose suit le produit — g/hL pour ce qui se pèse, mL/hL pour ce qui se verse. Sans produit choisi, l’opération s’enregistre quand même, hors bilan matière, et l’écran le dit."],

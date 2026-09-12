@@ -42,6 +42,10 @@ const vue    = bloc(pilo, 'var MV_CRB_ELEV_MAX=6;', 'function _pcrbElev(c){');
 
 const ctx = {
   window: {}, _ML_D20_SEC: 996, _ML_MAL_FIN: 0.1,
+  /* CUV-8 : le seuil est desormais une propriete de la CUVE. Bouchon lisible
+     depuis le decor (`__dSec`) pour pouvoir eprouver la bande du comparatif ;
+     a defaut 996, ce qui rend le graphe identique a l'avant-CUV-8. */
+  _vendDSec: c => (c && c.__dSec != null) ? c.__dSec : 996,
   CAVE_VENDANGE: { analyses: [], config: {} }, PARCELLES: [],
   _escHtml: s => String(s == null ? '' : s).replace(/&/g, '&amp;').replace(/</g, '&lt;'),
   _pilEsc: s => String(s == null ? '' : s).replace(/&/g, '&amp;').replace(/</g, '&lt;'),

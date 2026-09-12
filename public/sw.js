@@ -1,4 +1,21 @@
-// MA VIGNE — Service Worker v7.71
+// MA VIGNE — Service Worker v7.72
+// v7.72 (12/09/2026) — CUV-8 + CUV-9 : LE SEUIL DU VIN SEC APPARTIENT A LA CUVE,
+//   ET LA FA CONTINUE APRES LE DECUVAGE.
+//   996 servait de « vin sec » a toutes les cuves. Ce nombre n'existe pas : la
+//   densite d'un vin sec suit son alcool, donc le degre potentiel du mout. Un
+//   mout a 12 deg est sec vers 995, un mout a 14 deg vers 992,7 — l'ecran
+//   declarait donc sec un vin portant encore 8 g/L sur un millesime chaud, et
+//   refusait de declarer sec un vin a 1 g/L sur un millesime leger.
+//   ⚠ La PENTE de la table IFV (2,59 g/L par point) n'a pas ete reprise : vraie
+//     en fin de FA, elle annonce 257 g/L sur un mout a 1092 qui en porte 218.
+//     La pente vient d'un bilan de matiere, exacte aux deux bouts. Un harnais du
+//     cahier de cuverie a attrape l'ecart.
+//   ⚠⚠ Le degre potentiel n'est JAMAIS invente : premier releve s'il est encore
+//     un mout (>= 1050), sinon les maturites des parcelles, sinon repli sur 996
+//     en l'ecrivant. Chaptalisation datee ajoutee dans tous les cas.
+//   ⚠ CUV-9 : une cuve decuvee au-dessus de son seuil reste suivie (tournee,
+//     liste a mesurer, bouton de saisie). Son STATUT ne change pas — le parcours
+//     reste clos (§81). C'est la meme serie de densites qui continue.
 // v7.71 (12/09/2026) — ECO-EXO : « L'EXERCICE EN COURS » SUR LA SYNTHESE.
 //   Renommer la carte (v7.70) a leve la confusion, pas le besoin : « combien est
 //   sorti cette annee » n'avait aucune reponse sans changer d'onglet. Une bande se
@@ -3812,7 +3829,7 @@
 // v2.22 — Fix profils vides : guard vide dans loadData() pour MEMBRES/SAISONS/TACHES
 // v2.17 — Onboarding intégré + tenantId · v2.06 — Firebase Auth · v2.00–v2.05 — divers
 const DEBUG = self.location.hostname === 'localhost' || self.location.hostname === '127.0.0.1';
-const CACHE_NAME   = 'mavigne-v7.71';
+const CACHE_NAME   = 'mavigne-v7.72';
 const TENANT_CACHE = 'mavigne-tenant';   // Cache persistant — préservé à chaque mise à jour SW
 const SYNC_TAG     = 'mavigne-sync';
 
@@ -3828,7 +3845,7 @@ const CDN_URLS = [
 ];
 
 self.addEventListener('install', event => {
-  if(DEBUG) console.log('[SW] Ma Vigne v7.71 installé');
+  if(DEBUG) console.log('[SW] Ma Vigne v7.72 installé');
   event.waitUntil(
     caches.open(CACHE_NAME).then(async cache => {
       // ── Cœur applicatif : STRICT (mise à jour ATOMIQUE) ──
@@ -3844,7 +3861,7 @@ self.addEventListener('install', event => {
 });
 
 self.addEventListener('activate', event => {
-  if(DEBUG) console.log('[SW] Ma Vigne v7.71 activé');
+  if(DEBUG) console.log('[SW] Ma Vigne v7.72 activé');
   event.waitUntil(
     caches.keys().then(keys =>
       Promise.all(

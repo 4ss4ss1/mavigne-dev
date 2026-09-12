@@ -94,6 +94,10 @@ var _VEND_STAT = ${JSON.stringify({
   })};
 var _VEND_STEPS = [['setup','Setup'],['mpf','MPF'],['fa','FA'],['decuvage','D\u00e9cuv.'],['fml','FML'],['termine','Fini']];
 var _ML_D20_SEC = 996;
+/* CUV-8 : bouchon. Ce harnais mesure le PARCOURS DATE d'une cuve, pas le
+   seuil du vin sec — celui-ci a son harnais (mv-harnais-cuv8). Rendre 996,
+   c'est garder ici exactement le comportement d'avant CUV-8. */
+function _vendDSec(){ return 996; }
 var _vcuvRef = null, _vcuvFromGrp = null, _vcuvMpfActive = false;
 var _vstCuveId = null, _vstEditId = null, _vstSel = '';
 function showToast(m, c){ TOASTS.push(String(m)); }

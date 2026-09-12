@@ -753,6 +753,24 @@ function _caveSoutLineHtml(c){
   return '<div class="mvc-cuv-sout"><span class="mvc-tag mvc-tag-sout">'+_mvIcon('hautbas',16)+' Soutir\u00e9e le '+_caveDateFr(d)+'</span>'
     +(n>1?'<span class="mvc-sout-note">'+n+' soutirages</span>':'')+'</div>';
 }
+/* ★★ CUV-9 — LA CUVEE QUI FERMENTE ENCORE LE DIT AU CHAI.
+   Le vin decuve avant la fin de la FA est PHYSIQUEMENT au Chai, et c'est la
+   qu'on decide de sulfiter. Sulfiter sur sucre, c'est une malo sur sucre.
+   La cuvee n'a pas de densite a elle : elle lit celle de la cuve d'ou elle
+   vient (`decuvage.cuvee_id`). Rien n'est recopie, rien ne peut diverger. */
+function _caveCuveSource(cuvee){
+  if(!cuvee||!cuvee.id||!window.CAVE_VENDANGE) return null;
+  var L=(CAVE_VENDANGE.cuves_vinif||[]);
+  for(var i=0;i<L.length;i++) if(L[i]&&L[i].decuvage&&L[i].decuvage.cuvee_id===cuvee.id) return L[i];
+  return null;
+}
+function _caveFaLineHtml(c){
+  var src=_caveCuveSource(c); if(!src||!_vendFaEnCours(src)) return '';
+  var d=_vendMesD20(_vendLastD(src));
+  return '<div class="mvc-fa-line">'+_mvIcon('alerte',16)+' <b>Fermentation non finie</b> \u00b7 '
+    +Math.round(d)+' \u00e0 20\u00a0\u00b0C au dernier relev\u00e9 de '+_escHtml(src.nom||'la cuve')
+    +' \u2014 attendez la fin de FA avant de sulfiter.</div>';
+}
 function _caveCuvCardHtml(c,w){
   var st=_caveState(c);
   var nbT=_caveNbTonneaux(c);
@@ -777,6 +795,7 @@ function _caveCuvCardHtml(c,w){
     +'<div class="mvc-cuv-head"><div class="mvc-cuv-lead"><div class="mvc-cuv-name">'+_escHtml(c.nom)+'</div>'
     +(tonStr?'<div class="mvc-cuv-ton">'+tonStr+'</div>':'')+'</div>'+right+'</div>'
     +'<div class="mvc-cuv-vol">'+_mvIcon(nbT?'barrique':'cuve',16)+' '+(_caveContenantsHtml(c)||'aucun contenant')+' <span class="mvc-dot"></span> '+hl+' hL</div>'
+    +(isEmb?'':_caveFaLineHtml(c))
     +(isEmb?'':(_caveOuille(c)?_caveGaugeHtml(c):_caveNoOuHtml(c)))
     +_caveAnaLineHtml(c)
     +(isEmb?'':_caveSoutLineHtml(c))
@@ -2201,7 +2220,16 @@ button.mvv-reste-li{cursor:pointer}
 }
 
 function _vendFrDate(s){ if(!s) return ''; var p=String(s).split('-'); return p.length===3?(p[2]+'/'+p[1]):s; }
-function _vendFaPct(d){ if(!d) return 0; return Math.max(0,Math.min(100,Math.round((1085-d)/(1085-990)*100))); }
+/* ★ CUV-8 : l'avancement va du depart REELLEMENT LU au seuil de CETTE cuve.
+   Entre 1085 et 990 pour tout le monde, une cuve partie a 1060 affichait
+   26 % le jour de son encuvage. Sans premier releve exploitable, l'ancien
+   depart sert de repli — a l'identique. */
+function _vendFaPct(c,d){
+  if(d==null||!(d>0)) return 0;
+  var ds=_vendDSec(c), d0=_vendD0(c);
+  if(d0==null||!(d0>ds+10)) d0=1085;
+  return Math.max(0,Math.min(100,Math.round((d0-d)/(d0-ds)*100)));
+}
 function _vendHlRange(kg){ var c=_vendCfg(); if(!kg) return '0'; return (kg/c.ratio_max).toFixed(1)+'–'+(kg/c.ratio_min).toFixed(1); }
 function _vendEtatBadge(p){ p=parseInt(p)||0;
   if(p>=80) return _mvBadge('Sanitaire '+p+' %','vert');
@@ -2298,9 +2326,9 @@ function _vendTriRepere(a,b){
 function _vendADecuver(c){ 
   if(c.statut!=='fa') return false;
   var l=_vendLastMes(c);
-  return !!l && _vendFaPct(_vendMesD20(l))>=90;
+  return !!l && _vendFaPct(c,_vendMesD20(l))>=90;
 }
-function _vendADue(c){ return _vendIsActive(c) && _vendStale(c)>=1; }
+function _vendADue(c){ return _vendSuivie(c) && _vendStale(c)>=1; }
 function _vendEstFusionnee(c){ return !!(c && c.fusion && c.fusion.vers); }
 
 var _VEND_FILS=[['toutes','Toutes'],['fa','En fermentation'],['due','\u00c0 mesurer'],
@@ -2328,7 +2356,7 @@ function _vendListe(cuves){
   if(_vendTri==='urg')     l.sort(function(a,b){ return (_vendStale(b)-_vendStale(a)) || _vendTriRepere(a,b); });
   else if(_vendTri==='fa') l.sort(function(a,b){
     var pa=_vendLastMes(a), pb=_vendLastMes(b);
-    var va=pa?_vendFaPct(_vendMesD20(pa)):-1, vb=pb?_vendFaPct(_vendMesD20(pb)):-1;
+    var va=pa?_vendFaPct(a,_vendMesD20(pa)):-1, vb=pb?_vendFaPct(b,_vendMesD20(pb)):-1;
     return (vb-va) || _vendTriRepere(a,b);
   });
   else l.sort(_vendTriRepere);
@@ -2810,11 +2838,15 @@ function _vendMajFils(){
 function _vendLigneHtml(c,canEdit){
   var ouv=(_vendOuvert===c.id), last=_vendLastMes(c), act=_vendIsActive(c);
   var lastD=_vendLastD(c);
-  var pct=lastD?_vendFaPct(_vendMesD20(lastD)):0;
+  var pct=lastD?_vendFaPct(c,_vendMesD20(lastD)):0;
   var stale=_vendStale(c);
-  var cls=c.statut==='termine'?'fini':(_vendADue(c)?'due':(act?'fa':''));
+  /* ★ CUV-9 : « décuvée » ne prime plus sur « à mesurer ». Une cuve décuvée
+     qui fermente encore doit se voir comme une cuve à relever, pas comme une
+     affaire classée. */
+  var cls=_vendADue(c)?'due':(c.statut==='termine'?'fini':(act?'fa':''));
   var rep=_vendRepere(c);
-  var etat = c.statut==='termine' ? '<span class="mvv-etat">D\u00e9cuv\u00e9e</span>'
+  var etat = _vendFaEnCours(c)    ? '<span class="mvv-etat due">D\u00e9cuv\u00e9e \u00b7 FA</span>'
+    : c.statut==='termine'        ? '<span class="mvv-etat">D\u00e9cuv\u00e9e</span>'
     : c.statut==='setup'          ? '<span class="mvv-etat">Encuvage</span>'
     : _vendADue(c)                ? '<span class="mvv-etat due">'+stale+' j</span>'
     : act                         ? '<span class="mvv-etat ok">\u00e0 jour</span>'
@@ -2870,8 +2902,8 @@ function _vendDetailHtml(c,canEdit){
       chips.push('<span class="mvv-chip '+_vendTempCls(last.temp_c)+'">'+_vendCuvF1(last.temp_c)
         +'<span class="u">\u00b0C</span></span>');
     if(act && last.densite!=null)
-      chips.push('<span class="mvv-chip">reste ~'+_vendCuvF1(_vendDegrePot(_vendMesD20(last)))
-        +'<span class="u">\u00b0 potentiels</span></span>');
+      chips.push('<span class="mvv-chip">reste ~'+_vendCuvF1(_vendSucreRest(c,_vendMesD20(last)))
+        +'<span class="u">g/L de sucre</span></span>');
     if(last.remontages>0) chips.push('<span class="mvv-chip">'+last.remontages+'<span class="u">remont.</span></span>');
     if(last.pigeages>0)   chips.push('<span class="mvv-chip">'+last.pigeages+'<span class="u">pigeage'+(last.pigeages>1?'s':'')+'</span></span>');
     if(chips.length) h+='<div class="mvv-chips">'+chips.join('')+'</div>';
@@ -2893,13 +2925,28 @@ function _vendDetailHtml(c,canEdit){
       +_escHtml(c.fusion_src.map(function(x){return x.nom;}).join(', '))
       +' rejoint'+(c.fusion_src.length>1?'s':'')+' cette cuve. Les relev\u00e9s ant\u00e9rieurs portent sur un autre volume.</div>';
   }
+  /* ★★ CUV-9 — LE MOT QUI MANQUAIT. Une cuve décuvée avec du sucre n'est ni
+     finie ni en panne : elle finit sa fermentation ailleurs. L'écran le dit,
+     avec le seuil ET d'où il vient. */
+  if(_vendFaEnCours(c)){
+    var _dl=_vendMesD20(_vendLastD(c));
+    h+='<div class="mvv-detnote"><b>D\u00e9cuv\u00e9e le '+_vendFrDate(c.decuvage.date)
+      +', fermentation non finie.</b> Derni\u00e8re densit\u00e9 '+Math.round(_dl)
+      +' \u00e0 20\u00a0\u00b0C, soit ~'+_vendCuvF1(_vendSucreRest(c,_dl))+'\u00a0g/L de sucre, '
+      +'pour un seuil de '+_escHtml(_vendDSecTxt(c))+'. Elle se termine en phase liquide\u00a0: '
+      +'continuez \u00e0 relever, c\u2019est la m\u00eame courbe. Seule une analyse de sucres '
+      +'r\u00e9ducteurs tranche pour de bon.</div>';
+  } else if(_vendDecuvee(c)&&_vendJourSec(c)){
+    h+='<div class="mvv-detnote">Relev\u00e9e s\u00e8che le <b>'+_vendFrDate(_vendJourSec(c))
+      +'</b> \u2014 seuil '+_escHtml(_vendDSecTxt(c))+'.</div>';
+  }
   if(_vendEstFusionnee(c)){
     h+='<div class="mvv-detnote">Fusionn\u00e9e le '+_vendFrDate(c.fusion.date)+' dans <b>'
       +_escHtml(c.fusion.vers_nom||'une autre cuve')+'</b>. Ses relev\u00e9s et ses op\u00e9rations restent au registre.</div>';
   }
   if(canEdit && !_vendEstFusionnee(c)){
     h+='<div class="mvv-actrow" style="flex-wrap:wrap">';
-    if(act) h+='<button class="mvv-act2 dec" onclick="openOvVendMesure(\''+_escAttr(c.id)+'\')">Saisir une mesure</button>';
+    if(act||_vendFaEnCours(c)) h+='<button class="mvv-act2 dec" onclick="openOvVendMesure(\''+_escAttr(c.id)+'\')">Saisir une mesure</button>';
     if(c.statut==='setup') h+='<button class="mvv-act2 dec" onclick="openOvVendCuve(\''+_escAttr(c.id)+'\')">D\u00e9marrer la fermentation</button>';
     if(c.statut!=='termine')
       h+='<button class="mvv-act2" onclick="openVendStat(\''+_escAttr(c.id)+'\')">Changer l\u2019\u00e9tape</button>';
@@ -2920,14 +2967,15 @@ function _vendDetailHtml(c,canEdit){
 function _vendCellHtml(c){
   var ouv=(_vendOuvert===c.id), last=_vendLastMes(c);
   var lastD=_vendLastD(c);
-  var pct=lastD?_vendFaPct(_vendMesD20(lastD)):0;
+  var pct=lastD?_vendFaPct(c,_vendMesD20(lastD)):0;
   var cap=parseFloat(c.volume_hl)||0;
   var dedans=_vendVolLoge(c)>0?_vendVolLoge(c):_vendHlKg(_vendCuvKgDom(c.id));
   var niv = (c.statut==='setup'||!(cap>0)) ? 0 : Math.max(8,Math.min(100,Math.round(dedans/cap*100)));
   var col = c.statut==='termine' ? '#C0BAAE' : _vendADue(c) ? '#C86A4E'
           : _vendIsActive(c) ? '#8A5A38' : '#9A93A8';
   var H=52, y=6+(H)*(1-niv/100);
-  var sous = c.statut==='termine' ? 'd\u00e9cuv\u00e9e' : c.statut==='setup' ? 'en attente'
+  var sous = _vendFaEnCours(c) ? 'd\u00e9cuv\u00e9e \u00b7 FA en cours'
+    : c.statut==='termine' ? 'd\u00e9cuv\u00e9e' : c.statut==='setup' ? 'en attente'
     : _vendADue(c) ? _vendStale(c)+' j sans relev\u00e9' : (pct?pct+'\u00a0% FA':'suivie');
   var rep=_vendRepere(c);
   var uid=_mvgId(c.id);
@@ -3674,6 +3722,8 @@ function _vendEnsureSheetCss(){
 .mvv-decsum::-webkit-details-marker{display:none}
 .mvv-decrow{display:flex;justify-content:space-between;gap:10px;font-size:var(--pt-txt,12.5px);color:var(--texte-med,#4A4A3A);padding:7px 2px;border-top:1px solid rgba(138,90,56,.10)}
 .mvv-decrow .u{color:var(--texte-doux,#5F5F5F)}
+.mvc-fa-line{display:flex;align-items:center;gap:6px;margin:7px 0 2px;padding:6px 9px;border-radius:9px;background:rgba(200,106,78,.12);color:#A8452C;font-size:var(--pt-micro,11px);line-height:1.4}
+.mvv-decfa{display:inline-block;margin-left:7px;padding:1px 7px;border-radius:8px;background:rgba(200,106,78,.14);color:#C86A4E;font-weight:700;font-size:var(--pt-nano,9.5px);letter-spacing:.3px;text-transform:uppercase}
 .mvv-histwrap{margin-top:10px;background:var(--bg-app,#F2EFE7);border:1px solid rgba(138,90,56,.10);border-radius:9px;padding:0 10px 6px}
 .mvv-histwrap>summary{font-size:var(--pt-micro,11px);letter-spacing:0;text-transform:none;color:var(--texte-med,#4A4A3A);font-weight:600;padding:8px 0}
 .mvv-hrow{display:flex;align-items:center;justify-content:space-between;gap:8px;padding:7px 0;border-top:1px solid rgba(138,90,56,.10)}
@@ -3702,8 +3752,143 @@ function _vendD20(densite,temp){
   return densite+_vendCorrTerm(temp)-_vendCorrTerm(20); // C(20)=0
 }
 function _vendMesD20(m){ return m?_vendD20(m.densite,m.temp_c):null; }
+/* Le sucre d'un MOUT, lu sur sa densite. Vrai AVANT la fermentation, et la
+   seulement : dans une cuve qui fermente, l'alcool a deja fait descendre la
+   densite. Pour le sucre qui reste en cours de FA, c'est _vendSucreRest. */
 function _vendSucre(d20){ if(d20==null) return 0; return Math.max(0,2.564*d20-2581.5); }
-function _vendDegrePot(d20){ return _vendSucre(d20)/16.83; }
+
+/* ═══════════════════════════════════════════════════════════════════════════
+   CUV-8 — LE SEUIL DU VIN SEC APPARTIENT A LA CUVE, PAS A L'APPLICATION
+   ═══════════════════════════════════════════════════════════════════════════
+   Un seul nombre servait de « vin sec » pour tout le monde : 996. Ce nombre
+   n'existe pas. La densite d'un vin sec depend de son ALCOOL, donc du sucre
+   qu'il y avait dans le mout. Table IFV Occitanie (mutage des vins doux), lue
+   a l'envers : a densite donnee, le sucre restant depend du degre potentiel du
+   mout AVANT mise en fermentation.
+     - la densite a sucre nul vaut 1007,18 - 1,101 x degre potentiel ;
+     - c'est CE point-la qui est bien cale dans la table, et c'est le seul
+       qu'on lui emprunte.
+   ⚠⚠ LA PENTE DE LA TABLE (2,59 g/L par point) N'A PAS ETE REPRISE. Elle est
+     vraie autour de 0,990-1,040, la ou la table a ete faite, et FAUSSE des
+     qu'on l'etire jusqu'au mout : prolongee a 1092, elle annonce 257 g/L la
+     ou le mout en porte 218. La pente utilisee ici sort d'un bilan de
+     matiere, exact aux deux bouts : le sucre passe de S0 au mout a zero a la
+     densite ci-dessus, et un gramme de sucre qui part enleve a la fois son
+     propre poids (1/2,564 point) et celui de l'alcool qu'il fabrique
+     (1,101/spd point). Soit spd / (spd/2,564 + 1,101) = 2,20 g/L par point
+     avec le reglage par defaut. Un harnais du cahier de cuverie a attrape
+     l'ecart : il attendait 218 g/L sur un mout a 1092, la pente de la table
+     en rendait 257.
+   Un mout a 12 deg est sec vers 994, un mout a 14 deg vers 992. Avec 996 pour
+   tout le monde, l'ecran declarait sec un vin qui portait encore 5,7 g/L sur
+   un millesime chaud, et refusait de declarer sec un vin a 1 g/L sur un
+   millesime leger. Les DEUX erreurs, dans la meme constante.
+
+   ⚠ CE N'EST QU'UNE ESTIMATION. Le seul verdict est l'analyse : sucres
+     reducteurs sous 2 g/L. L'ecran ecrit « seuil estime », jamais « sec »
+     comme un fait mesure.
+   ⚠⚠ LE DEGRE POTENTIEL N'EST JAMAIS INVENTE. Trois sources, dans cet ordre :
+       1. le premier releve de la cuve, s'il est encore un mout (>= 1050) ;
+       2. a defaut, les controles de maturite des parcelles de la cuve ;
+       3. a defaut, RIEN — et la cuve retombe sur le seuil general (996), en
+          le disant.
+     Une chaptalisation datee ajoute ses degres dans les trois cas.
+   ⚠ `_cmpVigne` est appele par `typeof` : les harnais qui extraient une
+     poignee de fonctions n'ont pas a monter toute la chaine des maturites
+     pour eprouver un seuil.
+*/
+var _VEND_SEC_A   = 1007.18;   // densite a sucre nul = A - B x degre potentiel
+var _VEND_SEC_B   = 1.101;
+var _VEND_SEC_G   = 2;         // g/L : le seuil oenologique du vin sec
+var _VEND_D_MOUT  = 1050;      // en dessous, un releve n'est plus un mout
+/* La pente suit le reglage « sucre par degre » de la cave : la changer sans
+   changer la pente ferait mentir les deux ecrans qui l'affichent. */
+function _vendSucPente(){
+  var spd=_vendCfg().sucre_par_degre||16.83;
+  return spd/(spd/2.564+_VEND_SEC_B);
+}
+
+/* Les relevés portant une densite, dans l'ordre des dates. */
+function _vendMesD(c){
+  return (((c&&c.mesures_fa)||[]).filter(function(m){ return m&&m.date&&m.densite!=null; })
+    .slice().sort(function(a,b){ return a.date<b.date?-1:1; }));
+}
+function _vendD0(c){ var m=_vendMesD(c); return m.length?_vendMesD20(m[0]):null; }
+/* Les degres apportes par les chaptalisations DATEES de la cuve. */
+function _vendChaptDeg(c){
+  return ((c&&c.operations)||[]).reduce(function(s,o){
+    var d=(o&&o.type==='chaptalisation')?parseFloat(o.degre):0;
+    return s+((d>0)?d:0);
+  },0);
+}
+/* Le degre potentiel du mout avant FA, chaptalisation comprise. null = inconnu. */
+function _vendDPot(c){
+  if(!c) return null;
+  var spd=_vendCfg().sucre_par_degre||16.83;
+  var base=null, d0=_vendD0(c);
+  if(d0!=null&&d0>=_VEND_D_MOUT) base=_vendSucre(d0)/spd;
+  if(base==null&&typeof _cmpVigne==='function'){
+    var vg=null; try{ vg=_cmpVigne(c); }catch(e){ vg=null; }
+    if(vg&&vg.suc>0) base=vg.suc/spd;
+  }
+  if(!(base>0)) return null;
+  return base+_vendChaptDeg(c);
+}
+/* La densite a 20 C a laquelle CETTE cuve n'a plus de sucre du tout. */
+function _vendDZero(c){
+  var dp=_vendDPot(c);
+  return (dp==null)?null:(_VEND_SEC_A-_VEND_SEC_B*dp);
+}
+/* La densite a 20 C sous laquelle CETTE cuve est seche (2 g/L). */
+function _vendDSec(c){
+  var dz=_vendDZero(c);
+  if(dz==null) return (_ML_D20_SEC||996);
+  var d=dz+_VEND_SEC_G/_vendSucPente();
+  return Math.round(Math.max(984,Math.min(999,d))*10)/10;
+}
+/* Le seuil ecrit, et d'ou il vient. Un seuil sans provenance se croit. */
+function _vendDSecTxt(c){
+  var dp=_vendDPot(c), d=_vendDSec(c);
+  return (Math.round(d*10)/10).toString().replace('.',',')
+    +(dp==null?' (seuil g\u00e9n\u00e9ral)':' (mo\u00fbt \u00e0 '+(Math.round(dp*10)/10).toString().replace('.',',')+'\u00b0)');
+}
+/* Le sucre encore fermentescible a cette densite, DANS CETTE CUVE. */
+function _vendSucreRest(c,d20){
+  if(d20==null) return 0;
+  var dz=_vendDZero(c);
+  if(dz==null) return _vendSucre(d20);
+  return Math.max(0,_vendSucPente()*(d20-dz));
+}
+
+/* ═══════════════════════════════════════════════════════════════════════════
+   CUV-9 — LA FERMENTATION CONTINUE APRES LE DECUVAGE
+   ═══════════════════════════════════════════════════════════════════════════
+   Decuver avant la fin de la FA est une pratique, pas un accident : on ecoule
+   tot pour arreter l'extraction du marc, et la fermentation se termine EN
+   PHASE LIQUIDE dans le contenant d'arrivee. L'application, elle, fermait le
+   dossier au decuvage : plus de bouton pour relever, la cuve disparaissait de
+   la tournee, et le comparatif la laissait « pas encore » seche pour toujours.
+   ⚠ LE STATUT NE CHANGE PAS. La cuve est decuvee, son parcours est clos
+     (§81, PARC-1) : corriger une date ne doit pas la rouvrir. Ce qui continue,
+     c'est la SERIE de densites — la meme, jamais une seconde.
+   ⚠ Une cuve FUSIONNEE ne suit rien : son vin est ailleurs, sous un autre nom.
+*/
+function _vendDecuvee(c){ return !!(c&&c.decuvage&&c.decuvage.date); }
+function _vendFaEnCours(c){
+  if(!_vendDecuvee(c)||_vendEstFusionnee(c)) return false;
+  var l=_vendLastD(c); if(!l||l.densite==null) return false;
+  return _vendMesD20(l)>_vendDSec(c);
+}
+/* Le jour ou la cuve a ete RELEVEE seche. Jamais interpole, jamais devine :
+   une cuve jamais mesuree sous son seuil n'a pas de date, et l'ecran met un
+   tiret plutot qu'une date fabriquee. */
+function _vendJourSec(c){
+  var ds=_vendDSec(c), m=_vendMesD(c);
+  for(var i=0;i<m.length;i++) if(_vendMesD20(m[i])<=ds) return m[i].date;
+  return null;
+}
+/* La cuve est-elle encore suivie ? En FA, ou decuvee avec du sucre. */
+function _vendSuivie(c){ return _vendIsActive(c)||_vendFaEnCours(c); }
 
 // —— Clients vrac + poids récolte ——
 function _vendClients(){ if(!CAVE_VENDANGE.clients) CAVE_VENDANGE.clients=[]; return CAVE_VENDANGE.clients; }
@@ -5612,7 +5797,7 @@ function _vendFusHtml(){
   h+='<label class="mvv-flbl">Quelles cuves <span class="mvv-fhint">(au moins deux)</span></label>';
   all.forEach(function(c){
     var sel=!!_vendFusSel[c.id], rep=_vendRepere(c), last=_vendLastD(c);
-    var pct=last?_vendFaPct(_vendMesD20(last)):0;
+    var pct=last?_vendFaPct(c,_vendMesD20(last)):0;
     var m=[]; if(rep) m.push(rep);
     m.push(_vendCuvF1(_vendFusHl(c))+'\u00a0hL');
     if(c.parcelles&&c.parcelles.length) m.push(c.parcelles.join(', '));
@@ -5818,9 +6003,16 @@ function _vendDecuveesSection(list){
   if(!list.length) return '';
   var rows=list.slice().sort(function(a,b){var da=(a.decuvage||{}).date||'',db=(b.decuvage||{}).date||'';return da>db?-1:1;}).map(function(c){
     var d=c.decuvage||{};
-    return '<div class="mvv-decrow"><span>'+_escHtml(c.nom)+'</span><span class="u">'+(d.date?_vendFrDate(d.date):'')+' · '+(c.volume_hl||0)+' hL → Le Chai</span></div>';
+    /* ★ CUV-9 : une ligne de décuvage dit aussi où en est la fermentation.
+       Sans ça, il fallait déplier les cuves une par une pour le savoir. */
+    var js=_vendJourSec(c);
+    var fa=_vendFaEnCours(c) ? '<span class="mvv-decfa">FA en cours</span>'
+      : (js?(' · sèche le '+_vendFrDate(js)):'');
+    return '<div class="mvv-decrow"><span>'+_escHtml(c.nom)+'</span><span class="u">'+(d.date?_vendFrDate(d.date):'')+' · '+(c.volume_hl||0)+' hL → Le Chai'+fa+'</span></div>';
   }).join('');
-  return '<details class="mvv-decwrap"><summary class="mvv-decsum">Décuvées ('+list.length+')</summary>'+rows+'</details>';
+  var nFa=list.filter(_vendFaEnCours).length;
+  return '<details class="mvv-decwrap"'+(nFa?' open':'')+'><summary class="mvv-decsum">Décuvées ('+list.length+')'
+    +(nFa?' — '+nFa+' en fermentation':'')+'</summary>'+rows+'</details>';
 }
 
 // —— Gestionnaire de clients vrac ——
@@ -8063,9 +8255,12 @@ function _vtNum(v){
   var n=parseFloat(s);
   return isFinite(n)?n:null;
 }
+/* ★ CUV-9 : une cuve decuvee dont la FA n'est pas finie RESTE dans la
+   tournee. C'est meme la ou le releve compte le plus : plus de marc, plus
+   de chapeau, rien dans le cuvier ne rappelle qu'il faut aller voir. */
 function _vtActives(){
   return (CAVE_VENDANGE.cuves_vinif||[]).filter(function(c){
-    return _vendIsActive(c) && !_vendEstFusionnee(c);
+    return _vendSuivie(c) && !_vendEstFusionnee(c);
   });
 }
 // Le relevé du jour, s'il existe — quel que soit l'écran qui l'a écrit.
@@ -8108,7 +8303,8 @@ function renderVendTour(){
   var a=_vtActives();
   if(!a.length){
     host.innerHTML='<div class="mvt-vide"><div class="mvt-vide-t">Aucune cuve en fermentation</div>'
-      +'<div class="mvt-vide-d">La tournée s\'ouvre dès qu\'une cuve passe en macération ou en fermentation. '
+      +'<div class="mvt-vide-d">La tournée s\'ouvre dès qu\'une cuve passe en macération ou en fermentation, '
+      +'et une cuve décuvée y reste tant que sa fermentation n\'est pas finie. '
       +'Les cuves se créent depuis l\'onglet Cuves.</div>'
       +'<button class="mvv-act2 dec" onclick="switchVendOng(\'cuves\')">Aller aux cuves</button></div>';
     return;
@@ -8195,9 +8391,10 @@ function _vtTags(c){
   var t=_vtNum(b.t); if(t==null) t=(lt&&lt.temp_c!=null)?lt.temp_c:null;
   var d=_vtNum(b.d);
   if(c.statut==='mpf') o+='<span class="mvt-tag">macération</span>';
+  if(_vendFaEnCours(c)) o+='<span class="mvt-tag">décuvée</span>';
   if(t!=null&&t>=30) o+='<span class="mvt-tag hot">'+_vendCuvF1(t)+' °C</span>';
   if(d!=null){
-    if(d<=995) o+='<span class="mvt-tag fin">FA finie</span>';
+    if(d<=_vendDSec(c)) o+='<span class="mvt-tag fin">FA finie</span>';
     else if(lt&&lt.densite!=null&&(lt.densite-d)<=1&&_vendSince(lt.date)>=1)
       o+='<span class="mvt-tag pal">palier</span>';
   }
@@ -9108,7 +9305,8 @@ function _vendFermSvg(cu, w, opts){
   var W = c.w, pL = c.padL, pT = c.padT, iw = c.iw, ih = c.ih;
 
   var ds = mes.map(function(m){ return _vendMesD20(m); });
-  var dMin = Math.min(_ML_D20_SEC - 6, Math.min.apply(null, ds) - 4);
+  var dSec = _vendDSec(cu);   /* ★ CUV-8 : le seuil de CETTE cuve. */
+  var dMin = Math.min(dSec - 6, Math.min.apply(null, ds) - 4);
   var dMax = Math.max.apply(null, ds) + 6;
   var temps = mes.map(function(m){ return m.temp_c; }).filter(function(x){ return x != null; });
   var tMin = temps.length ? Math.min.apply(null, temps) - 3 : 10;
@@ -9132,10 +9330,10 @@ function _vendFermSvg(cu, w, opts){
   }
   g += '<text x="' + (pL - 8) + '" y="' + (pT - 10) + '" text-anchor="end" font-size="' + c.txt.unite + '" fill="' + c.col.texte + '">d20</text>';
 
-  // Le seuil du vin sec : la meme constante que la projection de fin.
-  var ysec = Yd(_ML_D20_SEC);
+  // Le seuil du vin sec : le meme nombre que la projection de fin.
+  var ysec = Yd(dSec);
   g += '<line x1="' + pL + '" y1="' + ysec.toFixed(1) + '" x2="' + (W - c.padR) + '" y2="' + ysec.toFixed(1) + '" stroke="' + c.col.fait + '" stroke-width="' + c.trait.seuil + '" stroke-dasharray="5 4"/>'
-    + '<text x="' + (pL + 6) + '" y="' + (ysec - 6).toFixed(1) + '" font-size="' + c.txt.mini + '" font-weight="700" fill="' + c.col.fait + '">' + _ML_D20_SEC + ' \u00b7 vin sec</text>';
+    + '<text x="' + (pL + 6) + '" y="' + (ysec - 6).toFixed(1) + '" font-size="' + c.txt.mini + '" font-weight="700" fill="' + c.col.fait + '">' + _mvF1(dSec) + ' \u00b7 vin sec</text>';
 
   // Les operations, posees sur l'axe des dates. C'est la piece qui manquait.
   var ops = ((cu && cu.operations) || []).slice()
@@ -9263,8 +9461,14 @@ function _fermLegende(cu, ops, t0, mes, deuxAxes, ets){
   if(chap.length) h += '<div class="mvfm-note">La seule remont\u00e9e possible de la courbe, c\u2019est une chaptalisation. '
     + 'Elle est ici dat\u00e9e au m\u00eame endroit que la mesure, on ne la cherche plus.</div>';
   var der = _vendMesD20(mes[mes.length-1]);
-  if(der <= _ML_D20_SEC) h += '<div class="mvfm-fin"><b>' + Math.round(der) + ' au jour '
-    + jour(mes[mes.length-1].date) + '</b> : la cuve est s\u00e8che. Ce n\u2019est pas un pressentiment, c\u2019est la derni\u00e8re mesure.</div>';
+  var _dsc = _vendDSec(cu);
+  if(der <= _dsc) h += '<div class="mvfm-fin"><b>' + Math.round(der) + ' au jour '
+    + jour(mes[mes.length-1].date) + '</b> : la cuve est pass\u00e9e sous son seuil de '
+    + _mvF1(_dsc) + '. Ce n\u2019est pas un pressentiment, c\u2019est la derni\u00e8re mesure \u2014 '
+    + 'seule une analyse de sucres r\u00e9ducteurs la d\u00e9clare s\u00e8che.</div>';
+  else if(_vendFaEnCours(cu)) h += '<div class="mvfm-fin"><b>' + Math.round(der)
+    + ' au d\u00e9cuvage</b> : la fermentation n\u2019\u00e9tait pas finie, elle se termine en phase '
+    + 'liquide. Le seuil de cette cuve est ' + _mvF1(_dsc) + '.</div>';
   return h;
 }
 
@@ -10346,7 +10550,10 @@ window._mvcRenderHeader  = _mvcRenderHeader;
 var _mlTab = 'vie';         // 'vie' (La ligne de vie) | 'crb' (Les courbes, lot CAVE-3)          // 'vie' seul : « Ce qui vient » est devenu l'onglet Aujourd'hui de la Cave (lot CAVE-1)
 var _mlMil = null;           // millesime consulte ; null = campagne en cours
 var _ML_SEM = 4;             // horizon de l'agenda, en semaines
-var _ML_D20_SEC = 996;       // densite 20 C sous laquelle le vin est sec
+/* ★ CUV-8 : ce n'est plus LE seuil, c'est le REPLI. Une cuve dont on ne peut
+   pas lire le degre potentiel du mout n'a pas de seuil a elle : elle prend
+   celui-ci, et l'ecran ecrit « seuil general » a cote. Voir _vendDSec. */
+var _ML_D20_SEC = 996;       // densite 20 C : repli quand le degre est inconnu
 
 // ── dates ────────────────────────────────────────────────────────────────
 function _mlD(iso){ var p=String(iso).split('-'); return new Date(+p[0],+p[1]-1,+p[2]); }
@@ -10540,7 +10747,8 @@ function _mlProjFA(c,now){
   if(!m.length) return {etat:'attente'};
   var last=m[m.length-1], dl=_vendMesD20(last), dernier=last.date;
   if(dl==null) return {etat:'attente'};
-  if(dl<=_ML_D20_SEC) return {etat:'sec', d20:dl, dernier:dernier};
+  var _ds=_vendDSec(c);
+  if(dl<=_ds) return {etat:'sec', d20:dl, dernier:dernier, dSec:_ds};
   var jCuve=c.date_entree?_mlEcartJ(c.date_entree,now):99;
   /* ★ PARC-1 — le garde « demarrage » comptait depuis l'ENCUVAGE : cinq jours
      de maceration a froid passaient pour cinq jours de fermentation, et la
@@ -10558,7 +10766,9 @@ function _mlProjFA(c,now){
   if(penteRec<1.5) return {etat:'ralentit', d20:dl, pente:Math.round(penteRec*10)/10,
                            penteMoy:Math.round(penteMoy*10)/10, dernier:dernier,
                            stableJ:_mlEcartJ(a.date,b.date)};
-  var jours=(dl-995)/penteMoy;
+  /* ★ CUV-8 : la fin se projette sur le seuil de CETTE cuve, plus sur 995 —
+     un nombre qui n'etait meme pas celui du reste de l'ecran (996). */
+  var jours=(dl-_ds)/penteMoy;
   return {etat:'normal', d20:dl, pente:Math.round(penteMoy*10)/10,
           jours:Math.max(0,Math.round(jours*10)/10),
           date:_mlAddJ(dernier,Math.max(0,Math.round(jours))),
@@ -10567,7 +10777,7 @@ function _mlProjFA(c,now){
 
 function _mlAMesurer(from){
   return (CAVE_VENDANGE.cuves_vinif||[]).filter(function(c){
-    if(!c||!_vendIsActive(c)) return false;
+    if(!c||!_vendSuivie(c)) return false;
     var l=_vendLastMes(c); if(!l) return true;
     return _mlEcartJ(l.date,from)>=1;
   }).map(function(c){
@@ -12550,7 +12760,6 @@ function _pcrbDens(){
         ? window._mvGraphVide('Pas encore de quoi comparer','Il faut deux cuves encuv\u00e9es et suivies pour superposer des cin\u00e9tiques.')
         : '<div class="pcav-vide">Pas encore de quoi comparer.</div>'),
       _pcrbEcarte(),'cave.courbes');
-  var sec=(window._ML_D20_SEC||996);
   return _pcrbCard('graphique','Les densit\u00e9s, ramen\u00e9es \u00e0 J0',
     'Le couloir de tout le cuvage, et la cuve que vous suivez par-dessus.',
     'J0 = encuvage', _crbChips('dens')+_pcrbSlot('pcrb-g-dens','crb-g')+_crbLeg(true)+_pcrbTable(),
@@ -12560,8 +12769,10 @@ function _pcrbDens(){
     +'m\u00e9diane, et l\u2019\u00e9cart entre les deux.'+_crbNoteInterp()
     +' <b>Le classement du tableau ne se fait pas sur la vitesse.</b> Une pente moyenne sur trois '
     +'jours n\u2019est pas comparable \u00e0 une pente sur dix \u2014 le d\u00e9but d\u2019une fermentation en est la '
-    +'phase la plus rapide. Le tri porte sur le <b>jour o\u00f9 '+sec+' a \u00e9t\u00e9 relev\u00e9</b>, jamais '
-    +'interpol\u00e9.'+_pcrbEcarte(),'cave.courbes');
+    +'phase la plus rapide. Le tri porte sur le <b>jour o\u00f9 la cuve a \u00e9t\u00e9 relev\u00e9e sous SON '
+    +'seuil de vin sec</b>, jamais interpol\u00e9. <b>Ce seuil n\u2019est pas le m\u00eame pour toutes</b>\u00a0: '
+    +'il suit le degr\u00e9 potentiel du mo\u00fbt \u2014 un mo\u00fbt \u00e0 12\u00b0 est sec vers 994, un mo\u00fbt \u00e0 14\u00b0 '
+    +'vers 992.'+_pcrbEcarte(),'cave.courbes');
 }
 /* La legende du couloir, et la note qui dit ce qu'on a le droit de lire.
    ★ Ecrite une fois, lue par les deux cartes : deux legendes redigees separement
@@ -12587,7 +12798,6 @@ function _crbNoteInterp(){
    le papier a la place de neuf colonnes, un telephone n'en tient que trois.
    Les trois autres se replient sous 600 px, elles ne disparaissent pas. */
 function _pcrbTable(){
-  var sec=(window._ML_D20_SEC||996);
   var h='<table class="pcrb-tb"><thead><tr><th>Cuve</th><th class="n">Vin sec</th><th class="n">Pts/j</th>'
     +'<th class="n o">D\u00e9part</th><th class="n o">T\u00b0 moy \u00b7 max</th><th class="n o">Vigne</th></tr></thead><tbody>';
   _PCRB_S.forEach(function(s,i){
@@ -14530,11 +14740,14 @@ function _cmpSerie(c){
   }).filter(Boolean).sort(function(a, b){ return a.j - b.j; });
   if(pts.length < 2) return null;
   var prem = pts[0], der = pts[pts.length - 1], jSec = null;
-  for(var i = 0; i < pts.length; i++) if(pts[i].d <= _ML_D20_SEC){ jSec = pts[i].j; break; }
+  /* ★ CUV-8 : chaque cuve a SON seuil. Comparer quinze cuves a 996 revenait a
+     donner la meme ligne d'arrivee a un mout a 11 deg et a un mout a 14. */
+  var dSec = _vendDSec(c);
+  for(var i = 0; i < pts.length; i++) if(pts[i].d <= dSec){ jSec = pts[i].j; break; }
   var tps = pts.filter(function(p){ return p.t != null; }).map(function(p){ return p.t; });
   var span = der.j - prem.j;
   return {
-    nom: String(c.nom || 'Cuve'), cuve: c, pts: pts,
+    nom: String(c.nom || 'Cuve'), cuve: c, pts: pts, dSec: dSec,
     dDeb: prem.d, dFin: der.d, jDeb: prem.j, jFin: der.j,
     /* ⚠️ Le jour OBSERVE sec, pas un jour interpole : le document ne date pas
        un evenement que personne n'a mesure. */
@@ -14585,13 +14798,19 @@ function _cmpVigne(c){
 function _cmpSvg(S, w){
   var c = window._mvGraphCadre(w, MV_CMP_H, { padL:52, padR:92, padT:26, padB:34 });
   var pL = c.padL, pT = c.padT, iw = c.iw, ih = c.ih;
-  var jMax = 1, lo = _ML_D20_SEC, hi = _ML_D20_SEC;
+  /* ★ CUV-8 : les seuils des cuves affichees. Un seul trait « vin sec » pour
+     quinze cuves de degres differents dessinait une ligne d'arrivee commune
+     qui n'existe pas. Des qu'ils different, c'est une BANDE. */
+  var _sc = S.map(function(s){ return (s.dSec != null) ? s.dSec : _ML_D20_SEC; });
+  var sLo = _sc.length ? Math.min.apply(null, _sc) : _ML_D20_SEC;
+  var sHi = _sc.length ? Math.max.apply(null, _sc) : _ML_D20_SEC;
+  var jMax = 1, lo = sLo, hi = sHi;
   S.forEach(function(s){ s.pts.forEach(function(p){
     if(p.j > jMax) jMax = p.j;
     if(p.d < lo) lo = p.d;
     if(p.d > hi) hi = p.d;
   }); });
-  var dMin = Math.min(_ML_D20_SEC - 6, lo - 4), dMax = hi + 6, dSp = Math.max(1, dMax - dMin);
+  var dMin = Math.min(sLo - 6, lo - 4), dMax = hi + 6, dSp = Math.max(1, dMax - dMin);
   var X = function(j){ return pL + (j / jMax) * iw; };
   var Y = function(d){ return pT + ih - ((d - dMin) / dSp) * ih; };
   var g = '';
@@ -14620,11 +14839,15 @@ function _cmpSvg(S, w){
     + c.txt.unite + '" fill="' + c.col.texte + '">jours depuis l’encuvage</text>';
 
   // Le seuil du vin sec, la meme reference que sur la courbe de chaque cuve.
-  var ys = Y(_ML_D20_SEC);
+  var ys = Y(sLo), yh = Y(sHi), bande = (sHi - sLo) >= 0.5;
+  if(bande) g += '<rect x="' + pL + '" y="' + yh.toFixed(1) + '" width="' + iw.toFixed(1)
+    + '" height="' + Math.max(1, ys - yh).toFixed(1) + '" fill="' + c.col.fait + '" fill-opacity="0.12"/>';
   g += '<line x1="' + pL + '" y1="' + ys.toFixed(1) + '" x2="' + (pL + iw) + '" y2="' + ys.toFixed(1)
     + '" stroke="' + c.col.fait + '" stroke-width="1.2" stroke-dasharray="5 4"/>'
-    + '<text x="' + (pL + 6) + '" y="' + (ys - 6).toFixed(1) + '" font-size="' + c.txt.mini
-    + '" font-weight="700" fill="' + c.col.fait + '">' + _ML_D20_SEC + ' · vin sec</text>';
+    + '<text x="' + (pL + 6) + '" y="' + (yh - 6).toFixed(1) + '" font-size="' + c.txt.mini
+    + '" font-weight="700" fill="' + c.col.fait + '">'
+    + (bande ? ('vin sec · ' + _mvF1(sLo) + '–' + _mvF1(sHi) + ' selon la cuve')
+             : (_mvF1(sLo) + ' · vin sec')) + '</text>';
 
   // Les courbes, et le point de DEPART marque : c'est lui que Nico compare.
   var lbl = [];
@@ -14987,12 +15210,22 @@ function _crbEnvSvg(S, w, cle){
   }
 
   /* Le seuil du vin sec — la meme reference que sur la courbe de chaque cuve. */
-  if(dens && _ML_D20_SEC >= aLo && _ML_D20_SEC <= aHi){
-    var ys = Y(_ML_D20_SEC);
-    g += '<line x1="' + pL + '" y1="' + ys.toFixed(1) + '" x2="' + (pL + iw) + '" y2="' + ys.toFixed(1)
-      + '" stroke="' + c.col.fait + '" stroke-width="1.2" stroke-dasharray="5 4"/>'
-      + '<text x="' + (pL + 5) + '" y="' + (ys - 5).toFixed(1) + '" font-size="' + c.txt.mini
-      + '" font-weight="700" fill="' + c.col.fait + '">' + _ML_D20_SEC + ' \u00b7 vin sec</text>';
+  /* ★ CUV-8 : une BANDE des que les cuves affichees n'ont pas le meme seuil. */
+  if(dens){
+    var _sq = (S || []).map(function(s){ return (s && s.dSec != null) ? s.dSec : _ML_D20_SEC; });
+    var qLo = _sq.length ? Math.min.apply(null, _sq) : _ML_D20_SEC;
+    var qHi = _sq.length ? Math.max.apply(null, _sq) : _ML_D20_SEC;
+    if(qLo >= aLo && qHi <= aHi){
+      var ys = Y(qLo), yq = Y(qHi), bnd = (qHi - qLo) >= 0.5;
+      if(bnd) g += '<rect x="' + pL + '" y="' + yq.toFixed(1) + '" width="' + iw.toFixed(1)
+        + '" height="' + Math.max(1, ys - yq).toFixed(1) + '" fill="' + c.col.fait + '" fill-opacity="0.12"/>';
+      g += '<line x1="' + pL + '" y1="' + ys.toFixed(1) + '" x2="' + (pL + iw) + '" y2="' + ys.toFixed(1)
+        + '" stroke="' + c.col.fait + '" stroke-width="1.2" stroke-dasharray="5 4"/>'
+        + '<text x="' + (pL + 5) + '" y="' + (yq - 5).toFixed(1) + '" font-size="' + c.txt.mini
+        + '" font-weight="700" fill="' + c.col.fait + '">'
+        + (bnd ? ('vin sec \u00b7 ' + _mvF1(qLo) + '\u2013' + _mvF1(qHi))
+               : (_mvF1(qLo) + ' \u00b7 vin sec')) + '</text>';
+    }
   }
 
   /* LES CUVES MISES EN AVANT, par-dessus le couloir. La seconde est pointillee :
@@ -15169,8 +15402,8 @@ function _cuvDoc(an){
         + '<td class="n">' + (m.densite != null ? Math.round(m.densite) : '—') + '</td>'
         + '<td class="n">' + (d20 != null ? Math.round(d20) : '—') + '</td>'
         + '<td class="n">' + (m.temp_c != null ? _mvF1(m.temp_c) : '—') + '</td>'
-        + '<td class="n">' + (d20 != null ? Math.round(_vendSucre(d20)) : '—') + '</td>'
-        + '<td class="n">' + (d20 != null ? _vendFaPct(d20) + ' %' : '—') + '</td>'
+        + '<td class="n">' + (d20 != null ? Math.round(_vendSucreRest(c,d20)) : '—') + '</td>'
+        + '<td class="n">' + (d20 != null ? _vendFaPct(c,d20) + ' %' : '—') + '</td>'
         + '<td class="n">' + (m.remontages || 0) + '</td>'
         + '<td class="n">' + (m.pigeages || 0) + '</td>'
         + '<td>' + _escHtml(m.note || '') + '</td></tr>';

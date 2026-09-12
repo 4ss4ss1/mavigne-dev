@@ -45,7 +45,9 @@ function pose(ok, nom) {
 const NOMS = ['_caveCuvesBois', '_caveOuille', '_caveNbTonneaux',
   '_mlD', '_mlIso', '_mlAddJ', '_mlEcartJ', '_mlLundi',
   '_mlVolParFut', '_mlOuillages', '_mlAMesurer', '_mlAgenda', '_mlResumeSem',
-  '_vendIsActive', '_vendTriDate', '_vendTriMes', '_vendLastMes'];
+  '_vendIsActive', '_vendTriDate', '_vendTriMes', '_vendLastMes', '_vendLastD',
+  /* CUV-9 : _mlAMesurer passe par _vendSuivie — extrait, c'est le sujet. */
+  '_vendEstFusionnee', '_vendDecuvee', '_vendFaEnCours', '_vendSuivie'];
 
 function extraire(nom) {
   const m = new RegExp('^function ' + nom + '\\s*\\(', 'm').exec(SRC);
@@ -68,14 +70,19 @@ const BLOC = NOMS.map(extraire).sort((a, b) => a[0] - b[0]).map(x => x[1]).join(
 function monter(ce, cv, mutation, seuilFn) {
   const corps = mutation ? mutation(BLOC) : BLOC;
   return new Function('CAVE_ELEVAGE', 'CAVE_VENDANGE', '_mlSeuil', '_mlProjFA',
-    '_mlNomCuvee', '_caveCuve', '_caveMat',
+    '_mlNomCuvee', '_caveCuve', '_caveMat', '_vendMesD20', '_vendDSec',
     corps + '\nreturn {_mlOuillages,_mlAgenda,_mlVolParFut,_caveOuille,_mlAMesurer,_mlResumeSem};'
   )(ce, cv,
     seuilFn || (c => (c && c.millesime === 2026) ? 7 : 14),
     () => ({ etat: 'rien' }),
     c => c.nom,
     ref => ({ nom: ref, matiere: ref === 'cuve-bois' ? 'bois' : 'inox' }),
-    mat => ({ ouille: mat === 'bois' })
+    mat => ({ ouille: mat === 'bois' }),
+    /* Deux bouchons hors sujet : la correction de température et le seuil du
+       vin sec ont chacun leur harnais. Ce qui est mesuré ici, c'est QUI entre
+       dans la liste à mesurer. */
+    m => (m && m.densite != null) ? m.densite : null,
+    () => 996
   );
 }
 

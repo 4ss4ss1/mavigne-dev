@@ -16816,3 +16816,160 @@ séparément.
    chez un gros domaine, c'est le premier endroit à instrumenter — un cache mémoïsé par exercice
    serait la réponse, pas la suppression de la bande.
 3. **`npm run build`, `test:smoke`, `test:e2e`** : pas de navigateur dans le bac à sable.
+
+## 115. ★★★ CUV-8 — LE SEUIL DU VIN SEC APPARTIENT À LA CUVE, PAS À L'APPLICATION (12/09 — `cave.js` + `utils.js` + `index.html` + `sw.js` + `guide/` + `scripts/` + `package.json` · APP 7.11 → 7.12 · SW 7.71 → 7.72 · base `710f4b9`)
+
+**Le point de départ, dit par Nico** : *« il y a une cuve qu'on a décuvée, qui était encore à 997.
+Du coup, dans l'appli, elle marque encore non fini. »* Puis, sans qu'on le lui souffle : *« je pense
+qu'en fonction des régions et du taux d'alcool, les densités pour dire qu'une cuve est sèche
+doivent être différentes. Vérifie tout ça. »* **Il avait raison, et le défaut était plus profond que
+le nombre affiché.**
+
+### Ce que disait l'application, en trois nombres différents
+
+| Endroit | Seuil |
+|---|---|
+| `_ML_D20_SEC` (`cave.js`) — ligne « vin sec » du cahier, colonne Vin sec, état `sec` | **996** |
+| tag « FA finie » de la tournée, et `jours=(dl-995)/pente` dans `_mlProjFA` | **995** |
+| `_vendFaPct` : 100 % d'avancement | **990** |
+
+**Trois nombres pour la même idée, sur le même écran.** Et un quatrième défaut, invisible :
+`_vendSucre(d20) = 2,564 × d20 − 2581,5` est la formule du **moût**, appliquée à une cuve qui
+fermente. Elle annonce **0 g/L dès 1007** : la puce « reste ~0° potentiels » d'une cuve à 997
+mentait, et la colonne « Sucre g/L » du cahier de cuverie aussi.
+
+### Ce que dit l'œnologie — sources vérifiées
+
+- **La fin de FA est une ANALYSE, pas une densité** : sucres réducteurs **sous 2 g/L**
+  (Tec & Doc, *Le Vin*, ch. 4).
+- **La masse volumique des vins secs va de 0,990 à 0,996** et « dépend de la teneur en alcool et de
+  la valeur de l'extrait sec » (même ouvrage, ch. 2). **Une fourchette, pas un nombre.**
+- Véron (cours d'œnologie) : FA terminée quand la densité est **sous 995/992**. Là encore un
+  intervalle.
+- **Table IFV Occitanie « mutage des vins doux »**, lue à l'envers : à densité donnée, le sucre
+  restant dépend du **degré potentiel du moût avant FA**. Ses zéros s'alignent sur une droite :
+  **densité à sucre nul = 1007,18 − 1,101 × DP** (vérifié sur les dix colonnes, 11° → 20°).
+
+### ⚠️⚠️ LA PENTE DE LA TABLE N'A PAS ÉTÉ REPRISE — ET C'EST UN HARNAIS QUI L'A DIT
+
+La table donne aussi une pente : **2,59 g/L par point de densité**. Elle est vraie **là où la table
+a été faite** (0,990–1,040) et **fausse dès qu'on l'étire jusqu'au moût** : prolongée à 1092, elle
+annonce **257 g/L** là où le moût en porte **218**. Le premier jet l'a reprise telle quelle, et
+`mv-harnais-cuvdoc` a rougi immédiatement — il attendait 218 sur un moût à 1092.
+
+La pente retenue sort d'un **bilan de matière**, exacte aux deux bouts : un gramme de sucre qui part
+enlève son propre poids (1/2,564 point) **et** celui de l'alcool qu'il fabrique (1,101/spd point) →
+`spd / (spd/2,564 + 1,101)` = **2,196 g/L par point** avec le réglage par défaut.
+★ **Elle suit le réglage « sucre par degré » de la cave** : le changer sans changer la pente ferait
+mentir les deux écrans qui l'affichent.
+
+★★★ **LEÇON GÉNÉRALE : UNE TABLE PROFESSIONNELLE EST UN AJUSTEMENT LOCAL.** On lui emprunte le point
+qu'elle a mesuré (ici le zéro), jamais la droite entière. Le harnais du cahier de cuverie a servi de
+**garde-fou physique** — il n'avait pas été écrit pour ça.
+
+### Le modèle retenu
+
+```
+densité à sucre nul   dz = 1007,18 − 1,101 × DP
+sucre restant         S(d) = max(0, pente × (d − dz))
+seuil « vin sec »     dSec = dz + 2 / pente          (2 g/L)
+```
+Résultat : **12° → 994,9 · 13° → 993,8 · 14° → 992,7 · 15° → 991,6.**
+
+### ⚠️⚠️ LE DEGRÉ POTENTIEL N'EST JAMAIS INVENTÉ
+
+Trois sources, dans cet ordre, et rien d'autre :
+1. **le premier relevé de la cuve, s'il est encore un moût (≥ 1050)** — sous ce seuil, la
+   fermentation est partie et le degré serait sous-évalué ;
+2. à défaut, **les contrôles de maturité des parcelles de la cuve** (`_cmpVigne`) ;
+3. à défaut, **rien** : la cuve retombe sur le seuil général (996) et **l'écran écrit « seuil
+   général » à côté du chiffre**.
+
+Une chaptalisation **datée** ajoute ses degrés dans les trois cas.
+★ `_cmpVigne` est appelé **par `typeof`** : un harnais qui éprouve un seuil n'a pas à monter toute
+la chaîne des maturités.
+
+### Ce qui a changé à l'écran
+
+- **La courbe d'une cuve** porte SON seuil, écrit à la décimale.
+- **Les deux comparatifs** (cahier de cuverie, couloir CRB-2) dessinent une **BANDE** min–max dès
+  que les cuves affichées n'ont pas le même seuil. ★ **Un trait unique pour quinze cuves de degrés
+  différents dessinait une ligne d'arrivée qui n'existe pas.** Quand les seuils coïncident, la bande
+  se referme sur le trait d'avant — aucune régression visuelle.
+- **`_vendFaPct` prend la cuve** : l'avancement va du **départ réellement lu** au seuil de la cuve.
+  Entre 1085 et 990 pour tout le monde, une cuve partie à 1060 affichait **26 % le jour de son
+  encuvage**.
+- **La puce du détail** dit désormais des **g/L de sucre**, pas des degrés potentiels calculés faux.
+- `_vendDegrePot` est **supprimée** — une fonction morte est une invitation.
+
+### Le harnais
+
+`scripts/mv-harnais-cuv8.mjs` — **30 assertions vertes, 7 contre-épreuves qui mordent**, sur les
+vraies fonctions extraites. Seul `_vendCfg` est bouchonné (c'est une donnée, pas une règle). Il est
+dans `npm run check` et dans `prebuild`, contre-épreuve comprise.
+
+### ⚠️ UN HARNAIS ÉTAIT MORT DEPUIS §81, ET PERSONNE NE L'A VU
+
+`scripts/mv-harnais-cuvier-correction.mjs` plante en `ReferenceError: _vendStatDeb is not defined`
+**sur la base pristine `710f4b9`** — constaté en le rejouant avant d'y toucher. PARC-1 (§81) a
+appris à `_mlProjFA` à lire le parcours daté sans que la liste d'extraction suive. **Il n'est pas
+dans `npm run check`** (vérifié : zéro occurrence dans `package.json`), donc rien ne rougissait.
+Il a été **laissé en l'état** par ce lot : le réparer demande aussi de reprendre ses décors, c'est
+un lot à lui seul. ★ **Règle : un harnais hors de la chaîne n'est pas un harnais, c'est un fichier.**
+
+## 116. ★★★ CUV-9 — LA FERMENTATION CONTINUE APRÈS LE DÉCUVAGE (12/09 — livré avec §115, même bump)
+
+**Décuver avant la fin de la FA est une pratique documentée, pas un accident.** On écoule tôt pour
+arrêter l'extraction du marc, et la fermentation se termine **en phase liquide** dans le contenant
+d'arrivée (Wikipédia « Décuvage » ; IFV, *Clés d'élaboration des vins rouges fruités* : décuvage
+précoce + fin de FA en phase liquide à 18–20 °C ; un cours de vinification chiffre le décuvage à
+1010 plutôt qu'à 999 quand les tanins sont verts).
+
+**Ce que faisait l'application** : `saveVendDecuvage` posait `statut='termine'`, le parcours se
+fermait, et avec lui tout le suivi. Plus de bouton « Saisir une mesure », la cuve sortait de la
+tournée et de la liste à mesurer, et le comparatif la laissait **« pas encore » sèche pour
+toujours**. C'est exactement ce que Nico voyait sur sa cuve à 997.
+
+### Le modèle — ce qui continue, et ce qui ne bouge pas
+
+⚠️⚠️ **LE STATUT NE CHANGE PAS.** La cuve est décuvée, son parcours est **clos** (§81) : corriger une
+date ne doit pas la rouvrir alors que la cuvée existe déjà au Chai. **Ce qui continue, c'est la
+SÉRIE de densités — la même, jamais une seconde.** Aucune entité neuve, aucun champ neuf : quatre
+prédicats lus sur ce qui est déjà là.
+
+```
+_vendDecuvee(c)    décuvage.date posée
+_vendFaEnCours(c)  décuvée, non fusionnée, dernière d20 > son seuil
+_vendJourSec(c)    le PREMIER relevé passé sous le seuil — jamais interpolé, null sinon
+_vendSuivie(c)     _vendIsActive(c) || _vendFaEnCours(c)
+```
+
+⚠️ **Une cuve FUSIONNÉE ne suit rien** : son vin est ailleurs, sous un autre nom. C'est une
+contre-épreuve du harnais.
+
+### Ce que ça change à l'écran
+
+- La ligne porte **« Décuvée · FA »** en rouge, et `_vendADue` prime désormais sur `statut==='termine'`
+  pour la couleur : **« décuvée » ne doit plus primer sur « à mesurer ».**
+- Le détail explique la situation, avec la dernière densité, les g/L restants, le seuil **et d'où il
+  vient** — puis rappelle que **seule une analyse de sucres réducteurs tranche**.
+- **Le bouton « Saisir une mesure » revient.** La tournée la garde (`_vtActives` passe par
+  `_vendSuivie`), avec un tag « décuvée » ; `_mlAMesurer` aussi.
+  ★ **C'est là que le relevé compte le plus : plus de marc, plus de chapeau, rien dans le cuvier ne
+  rappelle qu'il faut aller voir.**
+- La section **Décuvées** s'ouvre d'office quand l'une d'elles fermente, compte celles qui sont
+  concernées, et date les autres (« sèche le … »).
+- ★★ **AU CHAI** : la cuvée née du décuvage affiche **« Fermentation non finie »**. Elle n'a pas de
+  densité à elle — `_caveCuveSource` remonte à la cuve par `decuvage.cuvee_id`. **Rien n'est
+  recopié, rien ne peut diverger.** C'est là qu'on décide de sulfiter, et **on ne sulfite pas sur du
+  sucre** : malo sur sucre, piqûre lactique.
+
+### Ce qui reste ouvert
+
+1. **Aucun champ « degré potentiel » saisissable.** Volontaire : les trois sources couvrent les cas
+   réels et un champ de plus se serait rempli une fois puis oublié. À rouvrir si un client vinifie
+   sans jamais relever le moût.
+2. **Le seuil général (996) n'est pas réglable** dans la roue crantée de la Cave. Le rendre réglable
+   demanderait un écran ; le calcul par cuve rend le repli rare.
+3. **`npm run build`, `test:smoke`, `test:e2e`** : pas de navigateur dans le bac à sable — les trois
+   restent à jouer côté Nico.
