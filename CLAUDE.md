@@ -16700,3 +16700,119 @@ piège documenté au §6b, rencontré pour de bon. Chaîne ajoutée à ses `NOMS
    jours de remplacement, capacité réelle (`_capWeekReal` lit `_planGetTpl('standard', année)`),
    relevé MSA. **Les totaux mensuels et le plafond 1 607 h, eux, n'ont jamais bougé** — ils sont la
    seule chose que ce défaut ne touchait pas.
+
+## 113. ★★★ ECO-NOM — DEUX CARTES D'ARGENT PORTAIENT PRESQUE LE MÊME NOM (12/09 — `pilotage.js` + `utils.js` + `index.html` + `sw.js` + `guide/` + `scripts/` · APP 7.09 → 7.10 · SW 7.69 → 7.70 · base `0573c9d`)
+
+**Le signalement, en une phrase** : *« les achats et dépense GNR n'apparaissent pas dans où part
+l'argent ; si Postes et travaux ne concerne que la saison en cours, il faut alors le même tableau
+dans Synthèse pour les dépenses engagées dans l'année fiscale. »*
+
+### 113a. Ce qui était vrai, ce qui ne l'était pas
+
+| Le constat | Vérifié ? | Pourquoi |
+|---|---|---|
+| Les **achats** manquent à « Où part l'argent » | **oui** — et par construction | `_pecData` (pilotage.js) ne construit que **quatre** postes : main-d'œuvre vigne, conduite tracteur, carburant GNR, produits phyto. C'est un **barème** — surface × h/ha × taux — qui ne porte **aucune date**. Un achat en porte une. On ne peut pas découper l'un pour obtenir l'autre : c'était **déjà écrit** en tête du moteur d'exercice. |
+| Le **GNR** manque à « Où part l'argent » | **non** | La ligne `k:'gnr'` est **toujours rendue** dans le tableau ; seul le **donut** filtre les postes à 0 (`items = postes.filter(p => p.budget > 0)`). Elle vaut 0 € dans trois cas : aucun plein daté dans la **saison consultée** (`_ecoGnrReel` sans fenêtre → appartenance par `_saisonForDate`), pleins cochés **sans litres** (comptés à part, `nSansLitres`), ou repli modèle **sans prix du GNR** réglé. |
+| Il faut le tableau de l'année fiscale | **il existait déjà** | **Économie › Exercice**, carte « Où est parti l'argent » (`_pexPostes`) : salaires, carburant GNR, achats d'intrants, réparations, plus location de fûts et fûts achetés quand ils existent — colonnes Engagé / Prévu / À la clôture / Part / €/ha / vs N-1. **Économie › Achats** est déjà borné à l'exercice (`_PACH_PER='exe'`). |
+
+⚠️⚠️ **LE VRAI DÉFAUT N'ÉTAIT PAS UN CALCUL, C'ÉTAIT UN NOM.** Deux cartes du même onglet
+s'appelaient à **un mot près** pareil :
+
+- campagne → **« Où part l'argent »** (`_pecViewPostes`)
+- exercice → **« Où est parti l'argent »** (`_pexPostes`)
+
+Un présent et un passé pour distinguer un barème sans date d'une fenêtre de dates : personne ne lit
+ça. C'est **exactement** la faute des §94/§95 — *un mot, un écran* — en plus petit, et restée en
+place pendant que la série CAVE la corrigeait ailleurs.
+
+### 113b. Ce que le lot fait, et ce qu'il ne fait pas
+
+1. La carte de la campagne s'appelle **« Le coût de la campagne »**. Elle dit ce qu'elle **est**.
+2. Une **ligne de cadre** (`pec-vcadre`) sous le tableau dit ce qu'elle **n'est pas** : les achats,
+   les réparations et les fûts n'y sont pas — *ils portent une date, ce budget n'en porte aucune*.
+3. Un bouton **« Voir les dépenses de l'exercice »** (`data-pec="sub" data-v="exe"`) ouvre la porte.
+   Le chemin n'est **pas** écrit en toutes lettres dans un paragraphe : le harnais `mv-harnais-info`
+   l'interdit depuis le lot du verdict, et il a raison.
+4. Le bouton de la Synthèse (« Voir où part l'argent ») suit le nouveau nom.
+5. La fiche `pil.eco.postes` prend son titre et **deux paragraphes de périmètre** en tête.
+
+**⚠️ CE QUE LE LOT NE FAIT PAS, ET C'EST DÉLIBÉRÉ** — Nico avait validé « laisser *Où part l'argent*
+à l'exercice ». Le titre de l'exercice **ne bouge pas** : « est parti » est un **passé**, et c'est
+très exactement ce que cette carte mesure — de l'argent **sorti**, à sa date. Renommer les deux
+aurait coûté une seconde fiche, un second passage dans le guide et une seconde ligne de changelog
+pour **zéro** gain de clarté. **La collision se lève d'un seul côté.** Écart assumé, dit ici plutôt
+que passé sous silence.
+
+### 113c. Le sous-titre n'était pas l'endroit
+
+Premier réflexe : écrire « les achats n'y sont pas » dans le `pec-cs` de la carte. **Rouge du
+harnais** — *« aucun sous-titre de carte ne dépasse la ligne de cadre »*, plafond 95 caractères hors
+balises. La règle est juste : un sous-titre est une **ligne de cadre**, pas un mode d'emploi ; on le
+relit à chaque ouverture au lieu d'une fois. Le texte est donc parti en `pec-vcadre`, sous le
+tableau, là où vivent déjà les mêmes mises au point de l'exercice.
+
+### 113d. Reste ouvert — la bande « L'exercice en cours » sur Synthèse
+
+La demande initiale portait sur la **Synthèse**. Une maquette est livrée à part (`maquette-eco-synthese-exercice.html`) :
+une bande compacte — total engagé de l'exercice, puis salaires / GNR / achats / réparations, et le
+lien. Elle **lit `_pexData()`** : aucun second moteur, aucun second total. Elle n'est pas intégrée —
+maquette, validation, intégration, dans cet ordre (§42h).
+
+### 113e. ⚠️ CE QUI N'A PAS ÉTÉ MESURÉ
+
+1. **Aucun rendu n'a été regardé.** Ni clair, ni sombre, ni téléphone. La ligne de cadre est un
+   `display:flex` avec un `<span>` — le piège du §24 est évité par construction, mais ça se regarde.
+2. **`npm run build`, `test:smoke`, `test:e2e`** : pas de navigateur dans le bac à sable.
+3. ⚠️ **Le zéro du GNR chez Nico n'est pas établi.** Les trois causes possibles sont listées en
+   113a ; laquelle joue se lit sur la ligne « Base de calcul » du tableau — « L relevés » ou
+   « L ESTIMÉS ». Non vérifié faute d'accès aux données.
+
+## 114. ★★★ ECO-EXO — « L'EXERCICE EN COURS » SE POSE SOUS LE BUDGET DE CAMPAGNE (12/09 — `pilotage.js` + `utils.js` + `index.html` + `sw.js` + `guide/` + `scripts/` · APP 7.10 → 7.11 · SW 7.70 → 7.71 · base `0573c9d`, s'empile sur §113)
+
+Renommer la carte (§113) a levé la **confusion**. Ça n'a pas répondu à la **question** : *« combien
+est sorti cette année »* n'avait toujours aucune réponse sans changer d'onglet. Une bande
+**L'exercice en cours** se pose donc sur Économie › Synthèse, **juste sous le budget de campagne** —
+position arbitrée par Nico sur maquette, contre « en bas de la Synthèse ». Les deux périmètres se
+lisent l'un après l'autre, chacun nommé, la ligne de cadre de la bande disant en quoi ils diffèrent.
+
+### 114a. Ce qu'elle ne fait pas
+
+⚠️ **Elle ne calcule rien.** Elle appelle `_pexData`, le moteur qui alimente déjà l'onglet Exercice.
+Un second calcul du même total, ce sont **deux vérités qui finissent par diverger** — la faute de
+§47a, en plus discret parce que les deux chiffres ne sont jamais côte à côte.
+
+⚠️⚠️ **Elle ne suit pas `_PEX_AN`.** L'onglet Exercice se parque sur l'année consultée, et cette
+mémoire **survit au rechargement** (`_pecSaveSt`). Une bande titrée « en cours » qui afficherait
+2024 parce qu'on l'a consulté la veille serait un mensonge silencieux. Elle passe
+`_mvExercice()` **explicitement**, jamais `_pexEx()`.
+
+⚠️ **`noCmp = true`.** Sans lui, `_pexData` relance le moteur sur l'exercice précédent **puis** une
+troisième fois « à date comparable » : trois passes, à chaque rendu de l'écran, pour un écart que la
+bande n'affiche pas.
+
+### 114b. Aucune classe neuve — et ce que ça a révélé
+
+La bande n'utilise que des classes existantes. La couleur vit dans la **légende** (`.pec-lg em`,
+stylée) et pas dans les étiquettes des chiffres.
+
+⚠️ **Trouvé au passage, non corrigé** : `.pec-k .l em` **n'a aucune règle CSS**. `_pexAxeNature`
+pose pourtant un `<em style="background:…">` dans chaque étiquette de KPI — un `em` inline, sans
+contenu ni dimension : **le carré de couleur y est invisible**. Ce n'est pas le sujet de ce lot ; il
+est noté ici pour ne pas être redécouvert.
+
+### 114c. La fiche est réutilisée, pas dupliquée
+
+La pastille de la bande ouvre **`pil.exo.postes`** — la fiche des postes de l'exercice, qui dit déjà
+exactement ce qu'il faut (quatre postes toujours présents, la conduite déjà dans les salaires, la
+coupe au jour). Écrire une seconde fiche pour le même contenu, c'est deux textes qui vieillissent
+séparément.
+
+### 114d. ⚠️ CE QUI N'A PAS ÉTÉ MESURÉ
+
+1. **Aucun rendu n'a été regardé** — ni clair, ni sombre, ni téléphone. Deux `pec-k` dans une grille
+   `minmax(196px,1fr)` : à 430 px ils passent l'un sous l'autre, c'est voulu, mais ça se regarde.
+2. **Le coût du second appel à `_pexData`** au rendu de la Synthèse n'est pas chronométré. Une passe
+   parcourt planning, sessions, intrants et réparations sur douze mois. Si l'onglet devient lent
+   chez un gros domaine, c'est le premier endroit à instrumenter — un cache mémoïsé par exercice
+   serait la réponse, pas la suppression de la bande.
+3. **`npm run build`, `test:smoke`, `test:e2e`** : pas de navigateur dans le bac à sable.

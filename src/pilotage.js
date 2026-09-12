@@ -6675,6 +6675,89 @@ function _pecAlertes(E,TL){
     'Le chiffrage est complet', 'taux horaires, prix du GNR, doses et prix des produits');
 }
 
+// ══ LA BANDE DE L'EXERCICE, POSEE SUR LA SYNTHESE ══════════════════════════
+// \u2605\u2605\u2605 POURQUOI ELLE EXISTE. Le signalement de §113 cherchait les achats et le
+//   carburant dans le budget de campagne. Ils n'y sont pas, et ne peuvent pas y
+//   etre. Renommer la carte a leve la confusion ; ca n'a pas repondu a la question
+//   posee — « combien est sorti cette annee » n'avait aucune reponse sans changer
+//   d'onglet.
+// \u26a0 ELLE NE CALCULE RIEN. Elle appelle _pexData, le moteur qui alimente deja
+//   l'onglet Exercice. Un SECOND calcul du meme total, ce sont deux verites qui
+//   finissent par diverger : la faute de §47a, en plus discret.
+// \u26a0\u26a0 ELLE NE SUIT PAS _PEX_AN. L'onglet Exercice se parque sur l'annee qu'on
+//   consulte, et cette memoire SURVIT AU RECHARGEMENT (_pecSaveSt). Une bande
+//   titree « en cours » qui afficherait 2024 parce qu'on l'a consulte la veille
+//   serait un mensonge silencieux : elle passe donc _mvExercice() EXPLICITEMENT,
+//   jamais _pexEx().
+// \u26a0 `noCmp = true` : la comparaison a N-1 relance _pexData sur l'exercice
+//   precedent PUIS une troisieme fois « a date comparable ». La bande n'affiche
+//   aucun ecart — ce serait trois passes du moteur, a chaque rendu de l'ecran,
+//   pour un chiffre qu'on ne montre pas.
+// \u26a0 Aucune classe neuve. La couleur vit dans la LEGENDE (.pec-lg em, stylee) et
+//   pas dans les etiquettes des chiffres : `.pec-k .l em` n'a AUCUNE regle, un
+//   carre de couleur y est invisible. Constate dans _pexAxeNature, non corrige
+//   ici — ce n'est pas le sujet de ce lot, mais c'est note.
+function _pecBandeExo(){
+  if(typeof window._mvExercice!=='function') return '';
+  var X=null;
+  try{ X=_pexData(window._mvExercice(), true); }
+  catch(e){ if(window.logError) window.logError({level:'info',cat:'eco',msg:'bande exercice'}); return ''; }
+  if(!X || !X.ex) return '';
+
+  var head='<div class="pec-card"><div class="pec-ch"><div class="pec-ct">L\u2019exercice en cours</div>'
+    +'<div class="pec-cs">'+_pilEsc(X.ex.court)+' \u00b7 sorti au '+_pilEsc(_pilDfr(X.coupe))
+    +(typeof _mvInfoBtn==='function'?(' '+_mvInfoBtn('pil.exo.postes')):'')+'</div></div>';
+
+  var porte='<button class="pec-btn" data-pec="sub" data-v="exe"><span>'+_mvIcon('calendrier',16)+'</span> Ouvrir l\u2019exercice</button>';
+
+  if(!(X.total>0)){
+    return head+'<div class="pec-cb">'
+      +'<div class="pec-empty">Rien de chiffr\u00e9 sur cet exercice pour l\u2019instant.</div>'
+      +'<div class="pec-note">Les salaires viennent du <b>Planning</b>, le carburant des <b>appoints de cuve</b>, '
+      +'les achats et les r\u00e9parations de <b>La R\u00e9serve</b> \u2014 les prix se posent dans <b>\u00c9conomie \u203a Achats</b>.</div>'
+      +'<div class="pec-acts">'+porte+'</div></div></div>';
+  }
+
+  var NAT=[['sal',X.salT,'Salaires',_PEC_COL.mo],
+           ['gnr',X.gnrT,'Carburant GNR',_PEC_COL.gnr],
+           ['ach',X.achT,'Achats d\u2019intrants',_PEC_COL.phy],
+           ['dep',X.repT,'R\u00e9parations',_PEC_COL.dep],
+           ['loc',X.locT||0,'Location de f\u00fbts',_PEC_COL.loc],
+           ['fut',X.futT||0,_pexFutLbl(),_PEC_COL.fut]];
+  var bar='', leg='';
+  NAT.forEach(function(x){
+    if(!(x[1]>0)) return;
+    bar+='<i style="background:'+x[3]+';width:'+(x[1]/X.total*100).toFixed(2)+'%"></i>';
+    leg+='<span class="pec-lg"><em style="background:'+x[3]+'"></em>'+_pilEsc(x[2])
+       +' <b>'+_pilEsc(_ecoEur(x[1]))+'</b></span>';
+  });
+
+  var nsp='';
+  if(X.nAchSansPrix>0||X.nRepSansPrix>0){
+    var b=[];
+    if(X.nAchSansPrix>0) b.push('<b>'+X.nAchSansPrix+' achat'+(X.nAchSansPrix>1?'s':'')+'</b>');
+    if(X.nRepSansPrix>0) b.push('<b>'+X.nRepSansPrix+' r\u00e9paration'+(X.nRepSansPrix>1?'s':'')+'</b>');
+    nsp='<div class="pec-note">'+b.join(' et ')+' sans prix\u00a0: ce total est un <b>plancher</b>, jamais arrondi en silence.</div>';
+  }
+
+  return head
+    +'<div class="pec-kpis">'
+    +'<div class="pec-k"><div class="l">Sorti depuis l\u2019ouverture</div><div class="v">'+_pilEsc(_ecoEur(X.total))+'</div>'
+      +'<div class="s">'+(X.enCoursC?('\u00e0 la cl\u00f4ture '+_pilEsc(_pecEurK(X.totalClot))+' avec les salaires pr\u00e9vus'):'exercice clos')+'</div></div>'
+    +'<div class="pec-k"><div class="l">\u00c0 l\u2019hectare</div><div class="v">'+_pilEsc(_ecoEur(X.coutHa))+'</div>'
+      +'<div class="s">sur '+_pilHa(X.surf)+' ha plant\u00e9s</div></div>'
+    +'</div>'
+    +'<div class="pec-cb" style="padding-top:16px">'
+    +'<div class="pec-bar">'+bar+'</div><div class="pec-leg">'+leg+'</div>'
+    +'<div class="pec-vcadre"><span>Ce sont les euros <b>sortis</b>, chacun \u00e0 sa date, <b>salaires compris</b>\u00a0: '
+    +'d\u2019un bilan \u00e0 l\u2019autre, pas d\u2019une vendange \u00e0 l\u2019autre. Le <b>co\u00fbt de la campagne</b>, plus haut, '
+    +'est un bar\u00e8me et ne porte aucune date. Deux questions, jamais deux totaux d\u2019une m\u00eame chose.</span></div>'
+    +nsp
+    +'<div class="pec-acts">'+porte
+    +(nsp?'<button class="pec-btn" data-pec="pachgo">Chiffrer dans Achats</button>':'')
+    +'</div></div></div>';
+}
+
 // ── Vue 1 : Synthèse ─────────────────────────────────────────────────
 function _pecViewSynthese(E,TL){
   var H=_pecVerdict(E,TL);
@@ -6709,6 +6792,11 @@ function _pecViewSynthese(E,TL){
     +'<span class="pec-lg"><em style="background:var(--gris-clair)"></em>Reste <b>'+_pilEsc(_ecoEur(E.resteE))+'</b></span>'
     +'<span class="pec-lg" style="color:var(--texte-doux)">Travail fait <b>'+_pilEsc(_pecPct(E.avc))+'</b></span></div>'
     +'</div></div>';
+
+  // La bande de l'exercice se pose JUSTE SOUS le budget de campagne : les deux
+  // perimetres se lisent l'un apres l'autre, chacun nomme, la ligne de cadre de la
+  // bande disant en quoi ils different. Position arbitree par Nico sur maquette.
+  H+=_pecBandeExo();
 
   // Courbe d'engagement
   var sub='';
@@ -6758,7 +6846,7 @@ function _pecViewSynthese(E,TL){
     +(typeof _mvInfoBtn==='function'?(' '+_mvInfoBtn('pil.eco.revient')):'')+'</div></div>'
     +'<div class="pec-cb"><div class="pec-mini">'+mini+'</div>'
     +'<div class="pec-acts"><button class="pec-btn" data-pec="param"><span>\u2699\uFE0F</span> R\u00e9gler les hypoth\u00e8ses</button>'
-    +'<button class="pec-btn" data-pec="sub" data-v="pos"><span>'+_mvIcon('boussole',16)+'</span> Voir o\u00f9 part l\u2019argent</button></div></div></div>';
+    +'<button class="pec-btn" data-pec="sub" data-v="pos"><span>'+_mvIcon('boussole',16)+'</span> Voir le co\u00fbt de la campagne</button></div></div></div>';
 
   H+='<div class="pec-card"><div class="pec-ch"><div class="pec-ct">Ce qu\u2019il faut regarder</div></div><div class="pec-cb">'+_pecAlertes(E,TL)+'</div></div>';
   return H;
@@ -6785,7 +6873,17 @@ function _pecViewPostes(E){
   // ① Ce qui reste : la maille, et l'etat de la projection — deux choses qui
   //   changent la lecture des montants. Le POURQUOI (bareme complet contre
   //   realise) part dans la fiche.
-  var H='<div class="pec-card"><div class="pec-ch"><div class="pec-ct">O\u00f9 part l\u2019argent</div>'
+  // \u2605\u2605\u2605 DEUX CARTES S'APPELAIENT PRESQUE PAREIL. « Ou part l'argent » (ici, la
+  //   CAMPAGNE) et « Ou est parti l'argent » (l'EXERCICE, _pexPostes). Un mot d'ecart
+  //   pour deux perimetres qui n'ont ni la meme maille ni la meme source : celui-ci
+  //   est un BAREME sans date (surface x h/ha x taux), l'autre une fenetre de DATES
+  //   qui compte les achats, les reparations et les futs. On venait donc chercher ici
+  //   des achats qui, par construction, n'y seront jamais.
+  //   La carte de la campagne dit desormais ce qu'elle EST — un cout de culture — et
+  //   la ligne de cadre en bas dit ce qu'elle N'EST PAS, avec la porte vers l'exercice.
+  //   \u26a0 Le titre de l'exercice ne bouge PAS : « est parti » est un passe, et c'est
+  //     exactement ce qu'il mesure. La collision se leve d'un seul cote.
+  var H='<div class="pec-card"><div class="pec-ch"><div class="pec-ct">Le co\u00fbt de la campagne</div>'
     +'<div class="pec-cs"><b>Budget</b> de la p\u00e9riode \u00b7 '+(E.projOn?'tracteur, GNR et phyto extrapol\u00e9s':'tracteur, GNR et phyto en r\u00e9alis\u00e9 seul')
     +(typeof _mvInfoBtn==='function'?(' '+_mvInfoBtn('pil.eco.postes')):'')+'</div></div>'
     +'<div class="pec-cb"><div class="pec-grid2">'
@@ -6793,7 +6891,10 @@ function _pecViewPostes(E){
     +'<div class="pec-scroll"><table class="pec-tbl" style="min-width:520px"><thead><tr><th>Poste</th><th class="r">Engag\u00e9</th><th class="r">Budget</th><th class="r">Part</th><th class="r">\u20AC/ha</th><th>Base de calcul</th></tr></thead>'
     +'<tbody>'+legs+retRow+'</tbody>'
     +'<tfoot><tr><td>Total</td><td class="r">'+_pilEsc(_ecoEur(E.engage))+'</td><td class="r">'+_pilEsc(_ecoEur(E.budget))+'</td><td class="r">100 %</td><td class="r">'+_pilEsc(_ecoEur(E.coutHaB))+'</td><td></td></tr></tfoot>'
-    +'</table></div></div></div></div>';
+    +'</table></div></div>'
+    +'<div class="pec-vcadre"><span>Ce sont les <b>co\u00fbts de culture</b> de la campagne. Les <b>achats</b>, les <b>r\u00e9parations</b> et les <b>f\u00fbts</b> n\u2019y sont pas\u00a0: ils portent une date, ce budget n\u2019en porte aucune.</span></div>'
+    +'<div class="pec-acts"><button class="pec-btn" data-pec="sub" data-v="exe"><span>'+_mvIcon('calendrier',16)+'</span> Voir les d\u00e9penses de l\u2019exercice</button></div>'
+    +'</div></div>';
 
   var trows=(E.tasks||[]).map(function(t){
     return '<tr><td class="n">'+_pilEsc(_pilTnom(t.nom))+'</td>'

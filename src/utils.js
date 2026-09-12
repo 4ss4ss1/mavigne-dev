@@ -23,7 +23,7 @@ export const GT_ADMIN_EMAIL = 'ngdevpro@gmail.com';
 // WHATS_NEW   : tableau vide = modal desactive pour cette version.
 // Format item : { emoji:'📅', titre:'Titre court', desc:'Phrase utilisateur.' }
 // Regle : seulement les changements visibles par les utilisateurs.
-export const APP_VERSION = '7.09';
+export const APP_VERSION = '7.11';
 // ════ Journal des nouveautés (récap cumulatif) ════
 // Une entrée par version, la PLUS RÉCENTE EN HAUT : { v:'5.10', items:[ {emoji,titre,desc}, … ] }
 // À chaque release visible → AJOUTER un bloc en tête (ne pas remplacer). items:[] = release technique (rien à afficher).
@@ -460,6 +460,28 @@ window._mvGraphRepeindre = function(){
 };
 
 export const WHATS_NEW = [
+  { v: '7.11', items: [
+    { emoji: 'euro', titre: 'Ce qui est sorti cette ann\u00e9e, d\u00e8s l\u2019ouverture de l\u2019\u00c9conomie',
+      desc: "Une bande <b>L\u2019exercice en cours</b> se pose sous le budget de campagne, dans "
+        + "<b>Pilotage \u203a \u00c9conomie \u203a Synth\u00e8se</b>\u00a0: le total <b>sorti depuis l\u2019ouverture</b> de l\u2019exercice, "
+        + "son co\u00fbt \u00e0 l\u2019hectare, et sa r\u00e9partition entre <b>salaires</b>, <b>carburant</b>, <b>achats</b>, "
+        + "<b>r\u00e9parations</b> et <b>f\u00fbts</b>. Les deux chiffres se lisent d\u00e9sormais l\u2019un sous l\u2019autre\u00a0: "
+        + "au-dessus ce que la campagne <b>co\u00fbtera</b> \u2014 un bar\u00e8me, sans date \u2014, en dessous ce qui est "
+        + "<b>r\u00e9ellement sorti</b> du compte, \u00e0 sa date. "
+        + "Quand des achats ou des r\u00e9parations attendent leur facture, la bande le dit\u00a0: le total "
+        + "affich\u00e9 est alors un <b>plancher</b>." }
+  ] },
+  { v: '7.10', items: [
+    { emoji: 'euro', titre: 'Deux \u00e9crans d\u2019argent qui portaient presque le m\u00eame nom',
+      desc: "Dans <b>Pilotage \u203a \u00c9conomie</b>, deux cartes s\u2019appelaient \u00e0 un mot pr\u00e8s pareil\u00a0: "
+        + "\u00ab\u00a0O\u00f9 part l\u2019argent\u00a0\u00bb (la campagne) et \u00ab\u00a0O\u00f9 est parti l\u2019argent\u00a0\u00bb (l\u2019exercice). "
+        + "On y cherchait donc ses <b>achats</b>, ses <b>r\u00e9parations</b> et ses <b>f\u00fbts</b>\u00a0\u2014 qui n\u2019y sont pas, "
+        + "et ne peuvent pas y \u00eatre\u00a0: la carte de la campagne est un <b>bar\u00e8me</b> (surface \u00d7 heures par hectare "
+        + "\u00d7 taux), elle ne porte aucune date, alors qu\u2019un achat en porte une. "
+        + "Elle s\u2019appelle d\u00e9sormais <b>Le co\u00fbt de la campagne</b>, elle \u00e9crit noir sur blanc ce qu\u2019elle "
+        + "ne contient pas, et un bouton m\u00e8ne \u00e0 <b>Exercice</b>, o\u00f9 tout l\u2019argent sorti est compt\u00e9 "
+        + "d\u2019un bilan \u00e0 l\u2019autre, salaires compris." }
+  ] },
   { v: '7.09', items: [
     { emoji: 'calendrier', titre: 'Le planning d\u2019une ann\u00e9e neuve ne d\u00e9cale plus les jours',
       desc: "Sur une ann\u00e9e sans mod\u00e8le enregistr\u00e9 \u2014 2027, par exemple \u2014 la grille affichait "
@@ -2905,7 +2927,9 @@ export const MV_INFO = {
     'Quand aucune récolte n\u2019est enregistrée, l\u2019écran le dit plutôt que d\u2019afficher un prix. Les rendements se saisissent au <b>Cuvier</b>.'
   ] },
 
-  'pil.eco.postes': { t: 'Où part l\u2019argent', p: [
+  'pil.eco.postes': { t: 'Le coût de la campagne', p: [
+    'Cet écran chiffre le <b>coût de culture</b> d\u2019une campagne : ce qu\u2019il faut de main-d\u2019œuvre, de tracteur, de carburant et de produits pour mener le raisin au bout du rang.',
+    'Les <b>achats</b>, les <b>réparations</b> et les <b>fûts</b> n\u2019y sont pas, et ne peuvent pas y être : ils portent une <b>date</b>, ce budget n\u2019en porte aucune — c\u2019est un barème, pas un relevé. Ils se comptent dans <b>Exercice</b>, d\u2019un bilan à l\u2019autre, avec les salaires.',
     'Les quatre postes ne sont pas connus de la même façon, et c\u2019est ce qui explique leurs écarts de fiabilité.',
     'La <b>main-d\u2019\u0153uvre vigne</b> est un <b>barème complet</b> : surface \u00d7 heures par hectare \u00d7 taux de l\u2019équipe, sur toute la période — y compris le travail qui reste à faire.',
     'Le <b>tracteur</b> et le <b>phyto</b> ne sont connus qu\u2019en <b>réalisé</b> : ils n\u2019existent que là où une session ou un traitement a été saisi. Au-delà de <b>15 % d\u2019avancement</b>, ils sont extrapolés au rythme constaté ; en dessous, ils affichent le réalisé seul, parce qu\u2019extrapoler sur trois sessions ne veut rien dire.',

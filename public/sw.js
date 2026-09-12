@@ -1,4 +1,26 @@
-// MA VIGNE — Service Worker v7.69
+// MA VIGNE — Service Worker v7.71
+// v7.71 (12/09/2026) — ECO-EXO : « L'EXERCICE EN COURS » SUR LA SYNTHESE.
+//   Renommer la carte (v7.70) a leve la confusion, pas le besoin : « combien est
+//   sorti cette annee » n'avait aucune reponse sans changer d'onglet. Une bande se
+//   pose SOUS le budget de campagne -- total sorti, cout a l'hectare, repartition
+//   salaires / carburant / achats / reparations / futs.
+//   ⚠ Elle NE CALCULE RIEN : elle appelle _pexData, le moteur de l'onglet Exercice.
+//     Un second calcul du meme total, ce sont deux verites qui divergent.
+//   ⚠⚠ Elle ne suit PAS _PEX_AN (l'annee parquee dans l'onglet Exercice, memorisee
+//     entre deux sessions) : une bande titree « en cours » qui afficherait 2024
+//     serait un mensonge silencieux. Elle passe _mvExercice() explicitement.
+//   ⚠ noCmp=true : la comparaison a N-1 couterait trois passes du moteur, a chaque
+//     rendu, pour un ecart que la bande n'affiche pas.
+// v7.70 (12/09/2026) — ECO-NOM : DEUX CARTES D'ARGENT PORTAIENT PRESQUE LE MEME
+//   NOM. Dans Pilotage > Economie, « Ou part l'argent » (la CAMPAGNE) et « Ou est
+//   parti l'argent » (l'EXERCICE) tenaient a un mot pres. On venait chercher dans
+//   la premiere ses achats, ses reparations et ses futs -- qui n'y sont pas et ne
+//   peuvent pas y etre : c'est un BAREME sans date (surface x h/ha x taux), quand
+//   un achat porte une date. La carte de la campagne s'appelle desormais « Le cout
+//   de la campagne », une ligne de cadre dit ce qu'elle ne contient pas, et un
+//   bouton mene a l'Exercice.
+//   ⚠ Le titre de l'exercice ne bouge PAS : « est parti » est un passe, et c'est
+//     exactement ce qu'il mesure. La collision se leve d'un seul cote.
 // v7.69 (11/09/2026) — PLAN-RECAL : UN MODELE DE PLANNING EST UN CALENDRIER, PAS
 //   UNE SEMAINE TYPE. Il se lit « mois > numero du jour > heures » et ne porte
 //   NULLE PART le jour de la semaine. Sur une annee sans modele enregistre, le
@@ -3790,7 +3812,7 @@
 // v2.22 — Fix profils vides : guard vide dans loadData() pour MEMBRES/SAISONS/TACHES
 // v2.17 — Onboarding intégré + tenantId · v2.06 — Firebase Auth · v2.00–v2.05 — divers
 const DEBUG = self.location.hostname === 'localhost' || self.location.hostname === '127.0.0.1';
-const CACHE_NAME   = 'mavigne-v7.69';
+const CACHE_NAME   = 'mavigne-v7.71';
 const TENANT_CACHE = 'mavigne-tenant';   // Cache persistant — préservé à chaque mise à jour SW
 const SYNC_TAG     = 'mavigne-sync';
 
@@ -3806,7 +3828,7 @@ const CDN_URLS = [
 ];
 
 self.addEventListener('install', event => {
-  if(DEBUG) console.log('[SW] Ma Vigne v7.69 installé');
+  if(DEBUG) console.log('[SW] Ma Vigne v7.71 installé');
   event.waitUntil(
     caches.open(CACHE_NAME).then(async cache => {
       // ── Cœur applicatif : STRICT (mise à jour ATOMIQUE) ──
@@ -3822,7 +3844,7 @@ self.addEventListener('install', event => {
 });
 
 self.addEventListener('activate', event => {
-  if(DEBUG) console.log('[SW] Ma Vigne v7.69 activé');
+  if(DEBUG) console.log('[SW] Ma Vigne v7.71 activé');
   event.waitUntil(
     caches.keys().then(keys =>
       Promise.all(
