@@ -31,7 +31,8 @@ const NOMS = [
   '_vendCorrTerm', '_vendD20', '_vendMesD20', '_vendSucre',
   '_vendSucPente', '_vendMesD', '_vendD0', '_vendChaptDeg', '_vendDPot',
   '_vendDZero', '_vendDSec', '_vendDSecTxt', '_vendSucreRest', '_vendFaPct',
-  '_vendDecuvee', '_vendFaEnCours', '_vendJourSec', '_vendSuivie',
+  '_vendDecuvee', '_vendFaEnCours', '_vendJourSec', '_vendSuivie', '_vendDecD20',
+  '_vendFrDate', '_pcrbFin',
   '_mlD', '_mlIso', '_mlEcartJ', '_mlAddJ', '_mlAuj', '_mlProjFA'
 ];
 function extraire(nom) {
@@ -69,7 +70,7 @@ function _vendCfg(){ return { sucre_par_degre: ${SPD} }; }
 const RETOUR = `
 return { _vendSucre, _vendSucPente, _vendDPot, _vendDZero, _vendDSec, _vendDSecTxt,
          _vendSucreRest, _vendFaPct, _vendDecuvee, _vendFaEnCours, _vendJourSec,
-         _vendSuivie, _vendD0, _mlProjFA, _ML_D20_SEC };
+         _vendSuivie, _vendD0, _vendDecD20, _vendMesD, _pcrbFin, _mlProjFA, _ML_D20_SEC };
 `;
 function monter(mutation) {
   const corps = mutation ? mutation(BLOC) : BLOC;
@@ -97,8 +98,9 @@ function cuve(dp, suite, opts) {
                          date_entree: J(0), parcelles: [], mesures_fa: mes,
                          operations: [] }, opts || {});
 }
-const decuvee = (c, date) => Object.assign(c, {
-  statut: 'termine', decuvage: { date: date || J(9), cuvee_id: 'cuv_x' } });
+const decuvee = (c, fin, opts) => Object.assign(c, { statut: 'termine',
+  decuvage: Object.assign({ date: J(9), cuvee_id: 'cuv_x' },
+    (fin === undefined ? {} : { fa_finie: fin }), opts || {}) });
 
 const A = monter();
 
@@ -175,17 +177,53 @@ if (!CONTRE) {
     pose(A._vendFaPct(c, 1010) > 0 && A._vendFaPct(c, 1010) < 100, 'et il monte entre les deux');
   }
 
-  console.log('\n── 7 · CUV-9 · la FA continue après le décuvage ──');
+  console.log('\n── 7 · CUV-10 · le décuvage est un FAIT, pas une densité ──');
   {
-    const sucre = decuvee(cuve(13, [1040, 1005, 997]));
-    const seche = decuvee(cuve(13, [1040, 1005, 992]));
-    pose(A._vendFaEnCours(sucre), '★ décuvée à 997 sur un moût à 13° : la FA n’est pas finie');
-    pose(!A._vendFaEnCours(seche), 'décuvée à 992 : elle l’est');
-    pose(A._vendSuivie(sucre) && !A._vendSuivie(seche), 'la première reste suivie, pas la seconde');
-    pose(!A._vendFaEnCours(cuve(13, [1040, 1005, 997])), 'une cuve NON décuvée n’est pas « décuvée en FA »');
-    const fus = decuvee(cuve(13, [1040, 1005, 997]));
+    /* Même densité de fin sur les trois : seul le fait noté au décuvage change.
+       C'est tout le lot CUV-10 en une assertion. */
+    const finie   = decuvee(cuve(13, [1040, 1005, 997]), true);
+    const afinir  = decuvee(cuve(13, [1040, 1005, 997]), false);
+    const ancienne= decuvee(cuve(13, [1040, 1005, 997]));          // avant le lot
+    pose(!A._vendFaEnCours(finie), '★ décuvée à 997 mais déclarée finie en cuve : pas en FA');
+    pose(A._vendFaEnCours(afinir), '★ même densité, déclarée à finir au chai : en FA');
+    pose(!A._vendFaEnCours(ancienne), '★ décuvée avant le lot : rien n’est deviné (pas de backfill)');
+    pose(A._vendSuivie(afinir) && !A._vendSuivie(finie), 'seule la première reste suivie');
+    pose(!A._vendFaEnCours(cuve(13, [1040, 1005, 997])), 'une cuve NON décuvée n’est jamais dans ce cas');
+    const fus = decuvee(cuve(13, [1040, 1005, 997]), false);
     fus.fusion = { vers: 'autre', date: J(8) };
     pose(!A._vendFaEnCours(fus), '★ une cuve fusionnée ne suit rien : son vin est ailleurs');
+    /* Le repere ne doit plus rien armer : une cuve tres sucree, declaree finie,
+       reste finie. C'est la degustation qui a tranche, pas le densimetre. */
+    pose(!A._vendFaEnCours(decuvee(cuve(13, [1040, 1020]), true)),
+      '★★ le repère n’arme plus rien : même à 1020, un « finie » reste finie');
+  }
+
+  console.log('\n── 7b · la densité de mise en fût ──');
+  {
+    const sans = decuvee(cuve(13, [1040, 997]), true);
+    pose(A._vendDecD20(sans) === null, 'pas de densité saisie : rien, pas un zéro');
+    const avec = decuvee(cuve(13, [1040, 997]), true, { densite_fut: 999, temp_fut: 26 });
+    console.log('   999 relevé à 26 °C → ' + r1(A._vendDecD20(avec)) + ' à 20 °C');
+    pose(A._vendDecD20(avec) > 999, '★ elle est ramenée à 20 °C comme tout relevé');
+    const brut = decuvee(cuve(13, [1040, 997]), true, { densite_fut: 999 });
+    pose(A._vendDecD20(brut) === 999, 'sans température, la valeur brute est reprise');
+    pose(A._vendMesD(avec).every(m => m.densite !== 999),
+      '★★ elle ne rejoint PAS la série de la cuve : la courbe ne remonte pas');
+  }
+
+  console.log('\n── 7c · le comparatif ne dit plus « pas encore » d’une cuve décuvée ──');
+  {
+    const fin = s => A._pcrbFin(s);
+    const enCours = { cuve: cuve(13, [1040, 1005, 997]), jSec: null, jFin: 14, dFin: 997 };
+    const dec = { cuve: decuvee(cuve(13, [1040, 1005, 997]), true), jSec: null, jFin: 14, dFin: 997 };
+    const decFa = { cuve: decuvee(cuve(13, [1040, 1005, 997]), false), jSec: null, jFin: 14, dFin: 997 };
+    const rep = { cuve: cuve(13, [1040, 992]), jSec: 12, jFin: 12, dFin: 992 };
+    pose(/en cours/.test(fin(enCours)) && !/pas encore/.test(fin(enCours)),
+      '★ une cuve qui fermente est « en cours », plus « pas encore »');
+    pose(/d\u00e9cuv\u00e9e/.test(fin(dec)) && !/en cours/.test(fin(dec)),
+      '★★ une cuve décuvée affiche la DATE de son décuvage');
+    pose(/FA au chai/.test(fin(decFa)), 'celle qui finit au chai le dit en plus');
+    pose(/rep\u00e8re/.test(fin(rep)), 'le passage sous le repère est marqué comme un repère');
   }
 
   console.log('\n── 8 · la date de vin sec est RELEVÉE, jamais interpolée ──');
@@ -248,8 +286,23 @@ if (CONTRE) {
   mord('★ une cuve fusionnée redevient « en FA »',
     b => b.replace(/if\(!_vendDecuvee\(c\)\|\|_vendEstFusionnee\(c\)\) return false;/,
                    'if(!_vendDecuvee(c)) return false;'),
-    F => { const f = decuvee(cuve(13, [1040, 1005, 997]));
+    F => { const f = decuvee(cuve(13, [1040, 1005, 997]), false);
            f.fusion = { vers: 'autre', date: J(8) }; return !F._vendFaEnCours(f); });
+
+  mord('★★ le repère redécide de la fin de FA à la place du vigneron',
+    b => b.replace(/return c\.decuvage\.fa_finie===false;/,
+                   'var l=_vendLastD(c); return !!l && _vendMesD20(l)>_vendDSec(c);'),
+    F => !F._vendFaEnCours(decuvee(cuve(13, [1040, 1005, 997]), true)));
+
+  mord('la cuve décuvée avant le lot est devinée « à finir »',
+    b => b.replace(/return c\.decuvage\.fa_finie===false;/,
+                   'return c.decuvage.fa_finie!==true;'),
+    F => !F._vendFaEnCours(decuvee(cuve(13, [1040, 1005, 997]))));
+
+  mord('★ la densité de mise en fût cesse d’être corrigée en température',
+    b => b.replace(/return _vendD20\(d\.densite_fut,\(d\.temp_fut!=null\)\?d\.temp_fut:null\);/,
+                   'return d.densite_fut;'),
+    F => F._vendDecD20(decuvee(cuve(13, [1040, 997]), true, { densite_fut: 999, temp_fut: 26 })) > 999);
 
   mord('_vendJourSec rend le DERNIER relevé sec au lieu du premier',
     b => b.replace(/for\(var i=0;i<m\.length;i\+\+\) if\(_vendMesD20\(m\[i\]\)<=ds\) return m\[i\]\.date;/,

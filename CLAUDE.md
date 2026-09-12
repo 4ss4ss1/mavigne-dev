@@ -16819,6 +16819,21 @@ séparément.
 
 ## 115. ★★★ CUV-8 — LE SEUIL DU VIN SEC APPARTIENT À LA CUVE, PAS À L'APPLICATION (12/09 — `cave.js` + `utils.js` + `index.html` + `sw.js` + `guide/` + `scripts/` + `package.json` · APP 7.11 → 7.12 · SW 7.71 → 7.72 · base `710f4b9`)
 
+> ⚠️⚠️⚠️ **SECTION CORRIGÉE LE 12/09 AU SOIR — LE MODÈLE DÉCRIT PLUS BAS EST FAUX POUR CE
+> DOMAINE, ET IL EST EN PRODUCTION.** Lire §117 avant de s'appuyer sur quoi que ce soit d'ici.
+>
+> · **Ce qui reste vrai** : la pente de **1,1 point de densité par degré potentiel**. C'est
+>   l'éthanol qui allège, ça se transporte d'une région à l'autre.
+> · **Ce qui saute** : **l'ancrage**. Il vient de la table IFV Occitanie, faite sur des **vins doux
+>   du Languedoc**. Il pose la cuve sèche à **992,7** pour un moût à 14°. Chez Marchand-Grillot,
+>   moûts à **13,5–14°**, une cuve est sèche lue à **997–998**. **Quatre à cinq points d'écart.**
+> · **Conséquence en production** : les cuves qui ont fini — Clos de la cabotte, Creot, Bollery
+>   rouge, Gevrey Village — restent **« pas encore »** dans le comparatif du Pilotage › Cave, et
+>   `_vendFaEnCours` les déclare **en fermentation** alors qu'elles ont fini **en cuve**.
+> · ⚠️ **Et surtout : le seuil ne doit PAS être un verdict.** Nico, 12/09 : *« il n'y a pas de
+>   seuil. C'est fini plus ou moins en fonction de l'état de ce qu'il y a dans la cuve et de ce
+>   qu'on goûte. »* **Le décuvage se décide à la dégustation, jamais sur un chiffre.**
+
 **Le point de départ, dit par Nico** : *« il y a une cuve qu'on a décuvée, qui était encore à 997.
 Du coup, dans l'appli, elle marque encore non fini. »* Puis, sans qu'on le lui souffle : *« je pense
 qu'en fonction des régions et du taux d'alcool, les densités pour dire qu'une cuve est sèche
@@ -16919,6 +16934,25 @@ un lot à lui seul. ★ **Règle : un harnais hors de la chaîne n'est pas un ha
 
 ## 116. ★★★ CUV-9 — LA FERMENTATION CONTINUE APRÈS LE DÉCUVAGE (12/09 — livré avec §115, même bump)
 
+> ⚠️⚠️ **SECTION CORRIGÉE LE 12/09 AU SOIR.** La pratique décrite ici existe, **mais ce n'est pas
+> celle de ce domaine** : chez Marchand-Grillot **la FA finit EN CUVE**, et le décuvage vient
+> après. `_vendFaEnCours`, tel qu'il est livré, se déclenche donc sur des cuves **qui ont fini** —
+> parce qu'il compare une densité à un seuil importé (§117).
+>
+> ★★★ **DEUX ERREURS DE LECTURE À NE PAS REFAIRE**, toutes deux commises le 12/09 sur une capture
+> du comparatif, toutes deux corrigées par Nico :
+> 1. **« Les cuves à 1002–1027 sont des séries abandonnées »** — **faux**. Elles **fermentent
+>    encore, en cuve, aujourd'hui**. « Pas encore » y est juste. Un écran qui dit vrai n'est pas un
+>    écran en panne.
+> 2. **« 1027 au J11 avec 7 pts/jour, donc sèche vers J16 »** — **faux par construction**. La
+>    cinétique n'est **pas une droite** : plate au départ, elle accélère, puis **ralentit en fin**.
+>    ⚠️ **Ça condamne aussi `_mlProjFA`**, qui projette sur la moyenne des trois derniers relevés
+>    — précisément au moment où la pente s'écrase. À reprendre (§117).
+>
+> **La règle sous-jacente** : la fin de FA doit devenir un **fait constaté** — une analyse de sucres
+> réducteurs, ou une déclaration du vigneron — sur le patron de `fml_terminee` au Chai
+> (*« s'il déclare la malo finie, elle est finie, même sans mesure »*). Pas un calcul.
+
 **Décuver avant la fin de la FA est une pratique documentée, pas un accident.** On écoule tôt pour
 arrêter l'extraction du marc, et la fermentation se termine **en phase liquide** dans le contenant
 d'arrivée (Wikipédia « Décuvage » ; IFV, *Clés d'élaboration des vins rouges fruités* : décuvage
@@ -16973,3 +17007,163 @@ contre-épreuve du harnais.
    demanderait un écran ; le calcul par cuve rend le repli rare.
 3. **`npm run build`, `test:smoke`, `test:e2e`** : pas de navigateur dans le bac à sable — les trois
    restent à jouer côté Nico.
+
+## 117. ★★★ LA ZONE DE 996 — CE QU'ON GARDE, ET CE QUE LE LABO DOIT TRANCHER (12/09 soir — aucun code touché · base `fc45fb9`)
+
+**Décision de Nico, 12/09 au soir** : *« la zone de 996 est quand même une zone indicatrice de cuves
+sèches, donc à approfondir une fois qu'on aura les résultats du labo, pour voir les degrés qui
+restent dans les vins en fonction du sucre et des degrés potentiels des moûts. »*
+
+**On garde donc la zone de 996 comme REPÈRE. Jamais comme verdict.** Elle se dessine sur un graphe,
+elle s'écrit « repère », et elle ne déclenche rien : ni « FA finie », ni « pas encore », ni une
+entrée dans la tournée.
+
+### Ce qu'on sait du domaine, et qui doit primer sur toute table
+
+| Fait | Valeur |
+|---|---|
+| Degré potentiel des moûts (Gevrey, 2026) | **13,5 – 14°** |
+| Densité lue quand la cuve est sèche | **997 – 998** |
+| Ce qui décide du décuvage | **la dégustation et l'état de la cuve** — aucun chiffre |
+| Où finit la FA | **en cuve**, le décuvage vient après |
+
+### ⚠️ LA CONTRADICTION, ET ELLE N'EST PAS TRANCHÉE
+
+Le bilan de matière dit qu'à **997 sur un moût à 13,5–14°**, il reste du sucre. Nico goûte sec.
+**Trois causes possibles, aucune écartée :**
+
+1. **La lecture est haute.** CO₂ dissous d'un vin jeune, jus trouble sur lies, étalonnage du
+   densimètre. Les trois tirent dans le même sens, de quelques points.
+2. **L'extrait sec décale la densité à sucre nul.** Un pinot de Gevrey sur lies n'a pas l'extrait
+   d'un vin doux du Languedoc, et c'est de là que vient l'ancrage actuel.
+3. **Il reste réellement quelques grammes**, consommés après entonnage.
+
+### CE QU'IL FAUT MESURER POUR FERMER LA QUESTION
+
+⚠️ **Une seule cuve ne suffit pas : ce qu'on cherche est une RELATION, pas un point.** Sur plusieurs
+cuves, au même moment :
+
+- **sucres réducteurs** (labo) — le seul verdict ;
+- **densité relevée** et **température** au moment du prélèvement ;
+- **degré potentiel du moût avant FA**, chaptalisation comprise ;
+- **degré acquis** du vin.
+
+De quoi tracer, pour CE domaine, le vrai lien entre densité lue et sucre restant. **Ensuite
+seulement** : caler la zone sur les lectures du domaine, garder la pente de 1,1 pt/degré pour
+l'écart entre cuves, et laisser le fait constaté écrire « sèche ».
+
+### ⚠️⚠️ LE RELARGAGE DE PRESSE — LA VALEUR QUI MANQUE
+
+**Au décuvage on presse** pour extraire les jus restés dans les raisins, et le pressurage
+**relargue du sucre** : la densité de la masse remonte par rapport au vin de goutte.
+★ **La valeur qui compte pour la suite est celle de la MISE EN FÛT**, goutte et presse assemblées.
+**Elle n'existe nulle part dans l'application aujourd'hui** — c'est le champ à ajouter dans la
+feuille « Décuver → Le Chai », et à afficher au Chai, puisque c'est là qu'on décide de sulfiter.
+
+### Le lot à venir, quand la zone sera calée
+
+1. **La fin de FA devient un fait constaté** — analyse de sucres réducteurs saisie, ou déclaration
+   datée, sur le patron de `fml_terminee`. La densité s'affiche, elle n'arbitre plus.
+2. **Le repère se cale sur le domaine** : un réglage de la Cave porte la densité de cuve sèche
+   observée ; la pente de 1,1 pt/degré ne sert plus qu'à écarter les cuves entre elles.
+3. **Densité de mise en fût** au décuvage, et **densité** ajoutée au formulaire d'analyse du Chai —
+   pas d'écran neuf, pas de seconde série.
+4. **`_mlProjFA` à reprendre** : une projection linéaire sur une cinétique qui ralentit annonce une
+   fin trop proche, systématiquement.
+
+⚠️ **Tant que ce lot n'est pas passé, `_vendFaEnCours` se trompe sur les cuves décuvées sèches à
+997–998.** C'est le prix de l'intégration de §115/§116 avant correction — assumé, et daté ici.
+
+## 118. ★★★ CUV-10 — LE DÉCUVAGE EST UN FAIT, LE SEUIL REDEVIENT UN REPÈRE (12/09 soir — `cave.js` + `utils.js` + `index.html` + `sw.js` + `guide/` + `scripts/` · APP 7.12 → 7.13 · SW 7.72 → 7.73 · base `fc45fb9`)
+
+**La capture du 12/09.** Douze cuves dans le comparatif du Pilotage › Cave. Une seule porte une
+date ; les onze autres disent **« pas encore »**. Nico : *« ici plusieurs cuvées sont décuvées, une
+seule apparaît terminée. »* Clos de la cabotte, Creot, Bollery rouge et Gevrey Village **ont fini,
+en cuve, marc sorti** — et l'écran les annonçait inachevées.
+
+### La cause racine, et elle n'est pas dans le calcul
+
+`_vendFaEnCours` et la colonne « Vin sec » **comparaient une densité à un repère calculé**. Or
+personne ici ne décide sur un chiffre. Nico, 12/09 :
+
+> *« Il n'y a pas de seuil. Le seuil, c'est fini, c'est fini plus ou moins en fonction de l'état de
+> ce qu'il y a dans la cuve et de ce qu'on goûte. »*
+
+★★★ **Sortir le marc, c'est avoir constaté que c'était fini.** Le décuvage **est** le fait. Un
+calcul ne peut pas le contredire, et n'a pas à le confirmer.
+
+### Le modèle
+
+| Avant | Après |
+|---|---|
+| `_vendFaEnCours` = décuvée ET dernière densité > seuil | `_vendFaEnCours` = décuvée ET `decuvage.fa_finie === false` |
+| colonne « Vin sec » : `jSec` ou « pas encore · J14 à 997 » | colonne « Fin de FA » : la **date du décuvage**, sinon « J12 · repère », sinon « en cours · J14 à 997 » |
+| le seuil arme la tournée, le badge, la colonne | **le repère n'arme plus rien** |
+
+**La feuille de décuvage pose la question une fois** : « Terminée en cuve » (coché d'avance — c'est
+le cas courant ici) ou « Elle finira au chai ». Deux chips, pas un interrupteur : un interrupteur se
+lit comme un réglage, deux chips comme une question.
+
+⚠️⚠️ **AUCUN BACKFILL — règle PARC-1 (§81).** Une cuve décuvée avant ce lot n'a pas de `fa_finie`.
+Elle n'est donc **ni** « en FA » **ni** « déclarée finie » : l'écran écrit « décuvée le … », ce qui
+est vrai, puis **« l'état de la fermentation n'a pas été noté à ce moment-là : l'écran ne le devine
+pas »**. Trois états, pas deux — et le troisième se dit.
+
+★ **« pas encore » devient « en cours ».** Une cuve qui fermente n'est **pas en retard** sur quelque
+chose. Le mot portait un jugement que la donnée ne justifiait pas.
+
+### ★★ LA DENSITÉ DE MISE EN FÛT — LA VALEUR QUI MANQUAIT
+
+Nico, 12/09 : *« dans tous les cas il y a un petit relargage pendant la presse, on presse les moûts
+au décuvage pour extraire les jus qui restent dans les raisins. Cette valeur sera à indiquer au
+moment de mettre en fût. »*
+
+Champ facultatif dans la feuille de décuvage : densité + température, **goutte et presse
+assemblées**. Ramenée à 20 °C comme tout relevé, affichée sur la cuvée au Chai.
+
+⚠️ **ELLE NE REJOINT PAS `mesures_fa`.** Ce n'est pas un relevé de cuve : c'est le point de fermeture
+de la cuve et d'ouverture de la cuvée. L'y verser ferait **remonter la courbe de fermentation sans
+qu'aucune chaptalisation ne l'explique** — le piège de §20, et le harnais le garde.
+
+### Ce que le repère devient
+
+Il se dessine sur les courbes, et **le détail de la cuve dit enfin où il est et d'où il vient** :
+« Repère de densité : 993,8 (moût à 13°) · courbe passée dessous le 16/09. Un repère de lecture, pas
+un verdict : la fin de fermentation se constate à la dégustation. »
+Le tag de la tournée passe de **« FA finie »** à **« sous le repère »**.
+
+⚠️ **Sa valeur reste fausse pour ce domaine** — cuves sèches à 997-998 au densimètre, calcul plus
+bas. C'est §117, et ça se cale au labo. **Mais ça ne bloque plus rien** : le repère n'arbitre plus.
+
+### ★★★ CE QUE CETTE SÉRIE A COÛTÉ, ET LA LEÇON
+
+Trois lots pour un même sujet, dont **deux faux** :
+- **§115** a importé l'ancrage d'une table IFV faite sur des **vins doux du Languedoc** ;
+- **§116** a bâti un prédicat sur cet ancrage, et l'a mis en production ;
+- **§118** retire le calcul du chemin de décision.
+
+★★★ **LA LEÇON : QUAND UNE RÈGLE MÉTIER PEUT ÊTRE UN FAIT SAISI, ELLE NE DOIT PAS ÊTRE UN CALCUL.**
+Le calcul importe une hypothèse étrangère au domaine ; le fait saisi vient de celui qui goûte.
+Le même patron existait déjà à trois mètres — `fml_terminee` au Chai : *« s'il déclare la malo
+finie, elle est finie, même sans mesure »*. **Il fallait le lire avant d'écrire une formule.**
+
+★★ **Corollaire de méthode** : j'ai construit §115/§116 sur **une** phrase de Nico (« une cuve
+décuvée encore à 997 ») sans lui demander **ce que fait le domaine**. Trois questions au départ —
+où finit la FA, qui décide du décuvage, quelle densité pour une cuve sèche chez vous — auraient
+évité les deux lots. §Communication le dit déjà : *« quand Nico décrit sa pratique, ce n'est jamais
+un détail d'affichage. »* Encore faut-il la lui demander.
+
+### Le harnais
+
+`scripts/mv-harnais-cuv8.mjs` — **40 assertions vertes, 10 contre-épreuves qui mordent**. Les trois
+qui comptent : à **densité identique**, une cuve déclarée finie et une cuve déclarée à finir ne sont
+pas dans le même état ; une cuve décuvée **avant** le lot n'est devinée dans aucun des deux ; et la
+densité de mise en fût **ne rejoint pas** la série de la cuve.
+
+### Ce qui reste ouvert
+
+1. **La valeur du repère** — §117, à caler sur des sucres réducteurs.
+2. **`_mlProjFA`** projette encore en droite sur une cinétique qui ralentit (§116).
+3. **Pas de reprise a posteriori** de l'état de FA sur les cuves déjà décuvées. Volontaire : ce
+   serait un backfill inventé. Si le besoin vient, ce sera un geste explicite du vigneron.
+4. **`npm run build`, `test:smoke`, `test:e2e`** : pas de navigateur dans le bac à sable.

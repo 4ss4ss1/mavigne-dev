@@ -1,4 +1,19 @@
-// MA VIGNE — Service Worker v7.72
+// MA VIGNE — Service Worker v7.73
+// v7.73 (12/09/2026) — CUV-10 : LE DECUVAGE EST UN FAIT, LE SEUIL REDEVIENT UN REPERE.
+//   Le comparatif annoncait « pas encore » sur des cuves DECUVEES, marc sorti :
+//   il comparait une densite a un repere calcule. Or chez ce domaine LA FA FINIT
+//   EN CUVE, et le decuvage se decide a la degustation — Nico, 12/09 : « il n'y a
+//   pas de seuil ». Quatre cuves finies sur douze etaient annoncees inachevees.
+//   ⚠ `_vendFaEnCours` ne lit plus AUCUNE densite : seule la case decochee au
+//     decuvage l'arme. Le repere ne declenche plus rien nulle part.
+//   ⚠⚠ AUCUN BACKFILL (regle PARC-1) : une cuve decuvee avant ce lot n'a pas de
+//     `fa_finie`. L'ecran ecrit « decuvee le … », ce qui est vrai, et s'arrete la.
+//   ★ NOUVEAU CHAMP : densite de mise en fut (+ temperature) au decuvage, goutte
+//     et presse assemblees — le pressurage relargue du sucre et fait remonter la
+//     densite. Elle NE rejoint PAS `mesures_fa` : y verser une valeur remontee
+//     ferait remonter la courbe sans chaptalisation pour l'expliquer (§20).
+//   ⚠ La valeur du repere reste a caler sur des analyses de sucres reducteurs :
+//     les cuves du domaine sont seches vers 997-998, le calcul dit plus bas (§117).
 // v7.72 (12/09/2026) — CUV-8 + CUV-9 : LE SEUIL DU VIN SEC APPARTIENT A LA CUVE,
 //   ET LA FA CONTINUE APRES LE DECUVAGE.
 //   996 servait de « vin sec » a toutes les cuves. Ce nombre n'existe pas : la
@@ -3829,7 +3844,7 @@
 // v2.22 — Fix profils vides : guard vide dans loadData() pour MEMBRES/SAISONS/TACHES
 // v2.17 — Onboarding intégré + tenantId · v2.06 — Firebase Auth · v2.00–v2.05 — divers
 const DEBUG = self.location.hostname === 'localhost' || self.location.hostname === '127.0.0.1';
-const CACHE_NAME   = 'mavigne-v7.72';
+const CACHE_NAME   = 'mavigne-v7.73';
 const TENANT_CACHE = 'mavigne-tenant';   // Cache persistant — préservé à chaque mise à jour SW
 const SYNC_TAG     = 'mavigne-sync';
 
@@ -3845,7 +3860,7 @@ const CDN_URLS = [
 ];
 
 self.addEventListener('install', event => {
-  if(DEBUG) console.log('[SW] Ma Vigne v7.72 installé');
+  if(DEBUG) console.log('[SW] Ma Vigne v7.73 installé');
   event.waitUntil(
     caches.open(CACHE_NAME).then(async cache => {
       // ── Cœur applicatif : STRICT (mise à jour ATOMIQUE) ──
@@ -3861,7 +3876,7 @@ self.addEventListener('install', event => {
 });
 
 self.addEventListener('activate', event => {
-  if(DEBUG) console.log('[SW] Ma Vigne v7.72 activé');
+  if(DEBUG) console.log('[SW] Ma Vigne v7.73 activé');
   event.waitUntil(
     caches.keys().then(keys =>
       Promise.all(

@@ -764,12 +764,17 @@ function _caveCuveSource(cuvee){
   for(var i=0;i<L.length;i++) if(L[i]&&L[i].decuvage&&L[i].decuvage.cuvee_id===cuvee.id) return L[i];
   return null;
 }
+/* ★ CUV-10 : deux lignes possibles, jamais les deux. L'alerte ne part QUE sur
+   un fait note au decuvage — plus sur une densite comparee a un repere. */
 function _caveFaLineHtml(c){
-  var src=_caveCuveSource(c); if(!src||!_vendFaEnCours(src)) return '';
-  var d=_vendMesD20(_vendLastD(src));
-  return '<div class="mvc-fa-line">'+_mvIcon('alerte',16)+' <b>Fermentation non finie</b> \u00b7 '
-    +Math.round(d)+' \u00e0 20\u00a0\u00b0C au dernier relev\u00e9 de '+_escHtml(src.nom||'la cuve')
-    +' \u2014 attendez la fin de FA avant de sulfiter.</div>';
+  var src=_caveCuveSource(c); if(!src) return '';
+  if(_vendFaEnCours(src))
+    return '<div class="mvc-fa-line">'+_mvIcon('alerte',16)+' <b>Fermentation \u00e0 finir</b> \u2014 '
+      +_escHtml(src.nom||'la cuve')+' a \u00e9t\u00e9 d\u00e9cuv\u00e9e avant la fin de FA. '
+      +'Attendez qu\u2019elle soit finie avant de sulfiter.</div>';
+  var d=_vendDecD20(src); if(d==null) return '';
+  return '<div class="mvc-fut-line">'+_mvIcon('eprouvette',16)+' Mise en f\u00fbt \u00e0 <b>'
+    +Math.round(d)+'</b> \u00e0 20\u00a0\u00b0C \u00b7 goutte et presse assembl\u00e9es</div>';
 }
 function _caveCuvCardHtml(c,w){
   var st=_caveState(c);
@@ -2907,6 +2912,18 @@ function _vendDetailHtml(c,canEdit){
     if(last.remontages>0) chips.push('<span class="mvv-chip">'+last.remontages+'<span class="u">remont.</span></span>');
     if(last.pigeages>0)   chips.push('<span class="mvv-chip">'+last.pigeages+'<span class="u">pigeage'+(last.pigeages>1?'s':'')+'</span></span>');
     if(chips.length) h+='<div class="mvv-chips">'+chips.join('')+'</div>';
+    /* ★★ CUV-10 — LE REPERE SE PRESENTE COMME UN REPERE. Il etait dessine sur
+       la courbe sans jamais dire d'ou il venait ni ce qu'il vaut. Ecrit ici,
+       avec sa provenance et le jour ou la courbe est passee dessous, il
+       redevient ce qu'il est : une aide a la lecture. C'est la degustation
+       qui declare la fin de FA (§117). */
+    if(last&&last.densite!=null){
+      var _js=_vendJourSec(c);
+      h+='<div class="mvv-detnote">Rep\u00e8re de densit\u00e9\u00a0: <b>'+_escHtml(_vendDSecTxt(c))+'</b>'
+        +(_js?(' \u00b7 courbe pass\u00e9e dessous le '+_vendFrDate(_js)):'')
+        +'. Un rep\u00e8re de lecture, pas un verdict\u00a0: la fin de fermentation se constate '
+        +'\u00e0 la d\u00e9gustation.</div>';
+    }
   }
   var det=[];
   var cs=_vendCuvCsDom(c.id);
@@ -2928,17 +2945,23 @@ function _vendDetailHtml(c,canEdit){
   /* ★★ CUV-9 — LE MOT QUI MANQUAIT. Une cuve décuvée avec du sucre n'est ni
      finie ni en panne : elle finit sa fermentation ailleurs. L'écran le dit,
      avec le seuil ET d'où il vient. */
-  if(_vendFaEnCours(c)){
-    var _dl=_vendMesD20(_vendLastD(c));
-    h+='<div class="mvv-detnote"><b>D\u00e9cuv\u00e9e le '+_vendFrDate(c.decuvage.date)
-      +', fermentation non finie.</b> Derni\u00e8re densit\u00e9 '+Math.round(_dl)
-      +' \u00e0 20\u00a0\u00b0C, soit ~'+_vendCuvF1(_vendSucreRest(c,_dl))+'\u00a0g/L de sucre, '
-      +'pour un seuil de '+_escHtml(_vendDSecTxt(c))+'. Elle se termine en phase liquide\u00a0: '
-      +'continuez \u00e0 relever, c\u2019est la m\u00eame courbe. Seule une analyse de sucres '
-      +'r\u00e9ducteurs tranche pour de bon.</div>';
-  } else if(_vendDecuvee(c)&&_vendJourSec(c)){
-    h+='<div class="mvv-detnote">Relev\u00e9e s\u00e8che le <b>'+_vendFrDate(_vendJourSec(c))
-      +'</b> \u2014 seuil '+_escHtml(_vendDSecTxt(c))+'.</div>';
+  if(_vendDecuvee(c)){
+    var _df=_vendDecD20(c);
+    var _fut=(_df!=null)?(' Densit\u00e9 \u00e0 la mise en f\u00fbt\u00a0: <b>'+Math.round(_df)
+      +'</b> \u00e0 20\u00a0\u00b0C, goutte et presse assembl\u00e9es.'):'';
+    if(_vendFaEnCours(c)){
+      h+='<div class="mvv-detnote"><b>D\u00e9cuv\u00e9e le '+_vendFrDate(c.decuvage.date)
+        +', fermentation \u00e0 finir au chai.</b> Vous l\u2019avez indiqu\u00e9 au d\u00e9cuvage\u00a0: '
+        +'elle se termine en phase liquide. Continuez \u00e0 relever, c\u2019est la m\u00eame courbe.'
+        +_fut+'</div>';
+    } else if(c.decuvage.fa_finie===true){
+      h+='<div class="mvv-detnote"><b>D\u00e9cuv\u00e9e le '+_vendFrDate(c.decuvage.date)
+        +'</b> \u2014 fermentation constat\u00e9e termin\u00e9e en cuve.'+_fut+'</div>';
+    } else {
+      h+='<div class="mvv-detnote"><b>D\u00e9cuv\u00e9e le '+_vendFrDate(c.decuvage.date)
+        +'</b>. L\u2019\u00e9tat de la fermentation n\u2019a pas \u00e9t\u00e9 not\u00e9 \u00e0 ce moment-l\u00e0\u00a0: '
+        +'l\u2019\u00e9cran ne le devine pas.'+_fut+'</div>';
+    }
   }
   if(_vendEstFusionnee(c)){
     h+='<div class="mvv-detnote">Fusionn\u00e9e le '+_vendFrDate(c.fusion.date)+' dans <b>'
@@ -3723,6 +3746,7 @@ function _vendEnsureSheetCss(){
 .mvv-decrow{display:flex;justify-content:space-between;gap:10px;font-size:var(--pt-txt,12.5px);color:var(--texte-med,#4A4A3A);padding:7px 2px;border-top:1px solid rgba(138,90,56,.10)}
 .mvv-decrow .u{color:var(--texte-doux,#5F5F5F)}
 .mvc-fa-line{display:flex;align-items:center;gap:6px;margin:7px 0 2px;padding:6px 9px;border-radius:9px;background:rgba(200,106,78,.12);color:#A8452C;font-size:var(--pt-micro,11px);line-height:1.4}
+.mvc-fut-line{display:flex;align-items:center;gap:6px;margin:7px 0 2px;padding:6px 9px;border-radius:9px;background:rgba(138,90,56,.08);color:var(--texte-med,#4A4A3A);font-size:var(--pt-micro,11px);line-height:1.4}
 .mvv-decfa{display:inline-block;margin-left:7px;padding:1px 7px;border-radius:8px;background:rgba(200,106,78,.14);color:#C86A4E;font-weight:700;font-size:var(--pt-nano,9.5px);letter-spacing:.3px;text-transform:uppercase}
 .mvv-histwrap{margin-top:10px;background:var(--bg-app,#F2EFE7);border:1px solid rgba(138,90,56,.10);border-radius:9px;padding:0 10px 6px}
 .mvv-histwrap>summary{font-size:var(--pt-micro,11px);letter-spacing:0;text-transform:none;color:var(--texte-med,#4A4A3A);font-weight:600;padding:8px 0}
@@ -3874,14 +3898,23 @@ function _vendSucreRest(c,d20){
    ⚠ Une cuve FUSIONNEE ne suit rien : son vin est ailleurs, sous un autre nom.
 */
 function _vendDecuvee(c){ return !!(c&&c.decuvage&&c.decuvage.date); }
+/* ★★★ CUV-10 — LE DECUVAGE EST UN FAIT CONSTATE, PAS UNE DENSITE COMPAREE.
+   Ce predicat comparait la derniere densite a un seuil calcule. Faux ici :
+   chez ce domaine LA FA FINIT EN CUVE, et sortir le marc, c'est avoir constate
+   que c'etait fini. Nico, 12/09 : « il n'y a pas de seuil, c'est fini plus ou
+   moins en fonction de l'etat de ce qu'il y a dans la cuve et de ce qu'on
+   goute ». Le seuil declarait donc « en fermentation » quatre cuves finies.
+   ⚠ SEULE la case decochee au decuvage arme ce predicat. Aucun chiffre.
+   ⚠⚠ PAS DE BACKFILL (regle PARC-1) : une cuve decuvee AVANT ce lot n'a pas de
+     `fa_finie`. Elle n'est donc ni « en FA » ni « declaree finie » — l'ecran
+     dit « decuvee le … », ce qui est vrai, sans pretendre savoir le reste. */
 function _vendFaEnCours(c){
   if(!_vendDecuvee(c)||_vendEstFusionnee(c)) return false;
-  var l=_vendLastD(c); if(!l||l.densite==null) return false;
-  return _vendMesD20(l)>_vendDSec(c);
+  return c.decuvage.fa_finie===false;
 }
-/* Le jour ou la cuve a ete RELEVEE seche. Jamais interpole, jamais devine :
-   une cuve jamais mesuree sous son seuil n'a pas de date, et l'ecran met un
-   tiret plutot qu'une date fabriquee. */
+/* Le jour ou la cuve est passee sous son REPERE de densite. Jamais interpole,
+   jamais devine — et ce n'est PAS un verdict de fin de FA : c'est un reperage
+   de courbe, que la degustation confirme ou non (§117). */
 function _vendJourSec(c){
   var ds=_vendDSec(c), m=_vendMesD(c);
   for(var i=0;i<m.length;i++) if(_vendMesD20(m[i])<=ds) return m[i].date;
@@ -3889,6 +3922,19 @@ function _vendJourSec(c){
 }
 /* La cuve est-elle encore suivie ? En FA, ou decuvee avec du sucre. */
 function _vendSuivie(c){ return _vendIsActive(c)||_vendFaEnCours(c); }
+/* ★★ CUV-10 — LA DENSITE DE MISE EN FUT. Au decuvage on PRESSE pour extraire
+   les jus restes dans les raisins, et le pressurage RELARGUE du sucre : la
+   densite de la masse remonte par rapport au vin de goutte. La valeur qui
+   compte pour la suite est donc celle de la masse assemblee, goutte + presse,
+   au moment de l'entonnage. Elle n'existait nulle part.
+   ⚠ Elle ne rejoint PAS `mesures_fa` : ce n'est pas un releve de cuve, c'est
+     le point de fermeture de la cuve et d'ouverture de la cuvee. L'y verser
+     ferait remonter la courbe de fermentation sans qu'aucune chaptalisation
+     ne l'explique (§20, piege connu). */
+function _vendDecD20(c){
+  var d=c&&c.decuvage; if(!d||d.densite_fut==null) return null;
+  return _vendD20(d.densite_fut,(d.temp_fut!=null)?d.temp_fut:null);
+}
 
 // —— Clients vrac + poids récolte ——
 function _vendClients(){ if(!CAVE_VENDANGE.clients) CAVE_VENDANGE.clients=[]; return CAVE_VENDANGE.clients; }
@@ -4967,6 +5013,9 @@ var _vendDecNb=2, _vendDecCuveId=null;
 // ⚠️ 'fut' est le DEFAUT et le reste : un domaine sans cuve ne doit voir aucune
 //   difference. La bascule n'apparait meme pas si le parc a cuves est vide.
 var _vendDecMode='fut', _vendDecCuveRef=null, _vendDecCuveL=0;
+/* CUV-10 : coche par defaut. Chez ce domaine la FA finit en cuve — le cas
+   courant ne doit demander aucun geste. */
+var _vendDecFaFinie=true;
 // Choix des futs a l'entonnage : {lot_id: nb}. Vide = on retombe sur le simple
 // compte de barriques, comme avant ce lot.
 var _vendDecChoix={};
@@ -4979,6 +5028,7 @@ function openVendDecuvage(cuveId){
   var _futHl=_caveFutHl(), _futTxt=String(_futHl).replace('.',',');
   _vendDecNb=Math.max(1,Math.round(_vendDecVolHl()/_futHl));
   _vendDecMode='fut'; _vendDecCuveRef=null; _vendDecCuveL=0;
+  _vendDecFaFinie=true;
   // ⚠️ Le CSS du parc vit dans _caveV2InjectCss : sans cet appel, le selecteur
   //   de cuve sortirait SANS STYLE quand on decuve sans etre passe par Le Chai.
   _caveV2InjectCss();
@@ -4996,12 +5046,49 @@ function openVendDecuvage(cuveId){
     +'<input id="vdec-nom" class="mvv-tin" type="text" value="'+_escHtml(c.nom||'')+'">'
     +'<label class="mvv-flbl">Millésime</label>'
     +'<input id="vdec-mil" class="mvv-tin" type="number" value="'+yr+'" min="2000" max="'+(yr+1)+'">'
+    +_vendDecFaHtml(c)
     +_vendDecSegHtml()
     +'<div id="vdec-zone"></div>'
     +'<button class="mvv-save" style="margin-top:18px" onclick="saveVendDecuvage()" id="vdec-go">D\u00e9cuver et cr\u00e9er la cuv\u00e9e</button>';
   _vendSheet(html);
   _vendDecZone();
 }
+
+/* ★★★ CUV-10 — CE QUE LE DECUVAGE ENREGISTRE EN PLUS.
+   Deux choses, et elles sont dans le meme geste parce qu'elles se decident au
+   meme moment, la main sur la vanne :
+     - l'etat de la fermentation, CONSTATE : « termin\u00e9e » par defaut, parce que
+       c'est le cas courant ici. La decocher est un acte volontaire — on ecoule
+       expres avec du sucre pour finir en phase liquide ;
+     - la densite de la masse a l'entonnage, goutte et presse assemblees.
+   ⚠ Aucun des deux n'est OBLIGATOIRE : un decuvage sans densite reste un
+     decuvage. Un champ qui bloque une vanne se contourne par un faux chiffre. */
+function _vendDecFaHtml(c){
+  var rep=_vendLastD(c), d=rep?Math.round(_vendMesD20(rep)):null;
+  return '<label class="mvv-flbl">La fermentation est-elle termin\u00e9e\u00a0?</label>'
+    +'<div class="mvv-optabs" id="vdec-fa">'
+    +'<button type="button" class="mvv-optab on" onclick="_vendDecFaSet(1)">Termin\u00e9e en cuve</button>'
+    +'<button type="button" class="mvv-optab" onclick="_vendDecFaSet(0)">Elle finira au chai</button>'
+    +'</div>'
+    +'<div class="mvv-fnote" id="vdec-fa-note">C\u2019est vous qui le constatez, \u00e0 la d\u00e9gustation '
+    +'et \u00e0 l\u2019\u00e9tat de la cuve. Aucun chiffre ne le d\u00e9cide.'
+    +(d!=null?(' Dernier relev\u00e9\u00a0: <b>'+d+'</b> \u00e0 20\u00a0\u00b0C.'):'')+'</div>'
+    +'<label class="mvv-flbl">Densit\u00e9 \u00e0 la mise en f\u00fbt <span class="mvv-fhint">(facultatif)</span></label>'
+    +'<div style="display:flex;gap:9px">'
+    +'<input id="vdec-dens" class="mvv-tin" type="number" step="0.1" inputmode="decimal" placeholder="densit\u00e9">'
+    +'<input id="vdec-temp" class="mvv-tin" type="number" step="0.1" inputmode="decimal" placeholder="\u00b0C">'
+    +'</div>'
+    +'<div class="mvv-fnote">La masse assembl\u00e9e, <b>goutte et presse</b>\u00a0: le pressurage relargue '
+    +'du sucre, la densit\u00e9 remonte. C\u2019est celle-l\u00e0 que Le Chai affichera.</div>';
+}
+function _vendDecFaSet(v){
+  _vendDecFaFinie=!!v;
+  var z=document.getElementById('vdec-fa');
+  if(z){ var b=z.querySelectorAll('.mvv-optab');
+    if(b[0]) b[0].classList.toggle('on',_vendDecFaFinie);
+    if(b[1]) b[1].classList.toggle('on',!_vendDecFaFinie); }
+}
+window._vendDecFaSet=_vendDecFaSet;
 
 // La bascule n'existe que s'il y a des cuves : sinon, l'ecran d'avant, a l'identique.
 function _vendDecSegHtml(){
@@ -5270,7 +5357,12 @@ function saveVendDecuvage(){
   }
   if(!CAVE_ELEVAGE.cuvees) CAVE_ELEVAGE.cuvees=[];
   CAVE_ELEVAGE.cuvees.push(cuvee);
-  c.decuvage={date:new Date().toISOString().slice(0,10),cuvee_id:cuvee.id};
+  var _dfd=parseFloat((document.getElementById('vdec-dens')||{}).value);
+  var _dft=parseFloat((document.getElementById('vdec-temp')||{}).value);
+  c.decuvage={date:new Date().toISOString().slice(0,10),cuvee_id:cuvee.id,
+    fa_finie:!!_vendDecFaFinie,
+    densite_fut:(isFinite(_dfd)&&_dfd>0)?_dfd:null,
+    temp_fut:isFinite(_dft)?_dft:null};
   /* ★★★ RDT-2 — LE VOLUME MESURE, ECRIT UNE FOIS, AU SEUL MOMENT OU IL EXISTE.
      C'est ce qui vient d'etre loge au Chai : futs entonnes + cuves remplies. Il
      ne touche PAS `volume_hl`, qui reste la contenance de la cuve — la jauge de
@@ -6005,14 +6097,14 @@ function _vendDecuveesSection(list){
     var d=c.decuvage||{};
     /* ★ CUV-9 : une ligne de décuvage dit aussi où en est la fermentation.
        Sans ça, il fallait déplier les cuves une par une pour le savoir. */
-    var js=_vendJourSec(c);
-    var fa=_vendFaEnCours(c) ? '<span class="mvv-decfa">FA en cours</span>'
-      : (js?(' · sèche le '+_vendFrDate(js)):'');
+    var _dd=_vendDecD20(c);
+    var fa=_vendFaEnCours(c) ? '<span class="mvv-decfa">FA au chai</span>'
+      : (_dd!=null ? (' · mise en fût à '+Math.round(_dd)) : '');
     return '<div class="mvv-decrow"><span>'+_escHtml(c.nom)+'</span><span class="u">'+(d.date?_vendFrDate(d.date):'')+' · '+(c.volume_hl||0)+' hL → Le Chai'+fa+'</span></div>';
   }).join('');
   var nFa=list.filter(_vendFaEnCours).length;
   return '<details class="mvv-decwrap"'+(nFa?' open':'')+'><summary class="mvv-decsum">Décuvées ('+list.length+')'
-    +(nFa?' — '+nFa+' en fermentation':'')+'</summary>'+rows+'</details>';
+    +(nFa?' — '+nFa+' à finir au chai':'')+'</summary>'+rows+'</details>';
 }
 
 // —— Gestionnaire de clients vrac ——
@@ -8394,7 +8486,8 @@ function _vtTags(c){
   if(_vendFaEnCours(c)) o+='<span class="mvt-tag">décuvée</span>';
   if(t!=null&&t>=30) o+='<span class="mvt-tag hot">'+_vendCuvF1(t)+' °C</span>';
   if(d!=null){
-    if(d<=_vendDSec(c)) o+='<span class="mvt-tag fin">FA finie</span>';
+    /* ★ CUV-10 : un repere, pas un verdict. C'est la degustation qui tranche. */
+    if(d<=_vendDSec(c)) o+='<span class="mvt-tag fin">sous le repère</span>';
     else if(lt&&lt.densite!=null&&(lt.densite-d)<=1&&_vendSince(lt.date)>=1)
       o+='<span class="mvt-tag pal">palier</span>';
   }
@@ -12798,7 +12891,7 @@ function _crbNoteInterp(){
    le papier a la place de neuf colonnes, un telephone n'en tient que trois.
    Les trois autres se replient sous 600 px, elles ne disparaissent pas. */
 function _pcrbTable(){
-  var h='<table class="pcrb-tb"><thead><tr><th>Cuve</th><th class="n">Vin sec</th><th class="n">Pts/j</th>'
+  var h='<table class="pcrb-tb"><thead><tr><th>Cuve</th><th class="n">Fin de FA</th><th class="n">Pts/j</th>'
     +'<th class="n o">D\u00e9part</th><th class="n o">T\u00b0 moy \u00b7 max</th><th class="n o">Vigne</th></tr></thead><tbody>';
   _PCRB_S.forEach(function(s,i){
     var vg=null;
@@ -12817,8 +12910,7 @@ function _pcrbTable(){
     h+='<tr data-crb="'+i+'" data-crbn="'+_escHtml(s.nom)+'"'+(onSel?(' data-on="'+onSel+'"'):'')
       +' onclick="_crbTap(\''+_escAttr(s.nom)+'\')"><td><span class="pcrb-nm">'
       +'<i class="pcrb-dot" style="background:'+_PCRB_COL[0]+'"></i>'+_escHtml(s.nom)+'</span></td>'
-      +'<td class="n">'+(s.jSec!=null?('<b class="pcrb-sec">J'+s.jSec+'</b>')
-          :('<i class="pcrb-nsec">pas encore \u00b7 J'+s.jFin+' \u00e0 '+Math.round(s.dFin)+'</i>'))+'</td>'
+      +'<td class="n">'+_pcrbFin(s)+'</td>'
       +'<td class="n">'+(s.vit!=null?(_pcavF1(s.vit)+' <i>J'+s.jDeb+'\u2013J'+s.jFin+'</i>'):'\u2014')+'</td>'
       +'<td class="n o">'+Math.round(s.dDeb)+'</td>'
       +'<td class="n o">'+(s.tMoy!=null?(_pcavF1(s.tMoy)+' \u00b7 '+_pcavF1(s.tMax)):'\u2014')+'</td>'
@@ -12826,6 +12918,28 @@ function _pcrbTable(){
   });
   return h+'</tbody></table>';
 }
+/* ★★★ CUV-10 — « PAS ENCORE » MENTAIT SUR LES CUVES DECUVEES.
+   La colonne comparait une densite a un repere. Une cuve DECUVEE affichait donc
+   « pas encore · J14 a 997 » alors qu'elle avait fini en cuve et que le marc
+   etait sorti. Vu sur une capture du 12/09 : quatre cuves finies sur douze,
+   toutes annoncees inachevees.
+   ⚠ L'ordre de lecture est celui des FAITS, puis des reperes :
+     1. decuvee                -> la date du decuvage, c'est un fait ;
+     2. passee sous le repere  -> le jour, marque comme un repere ;
+     3. ni l'un ni l'autre     -> « en cours », avec ou elle en est.
+   ⚠ « en cours » remplace « pas encore » : une cuve qui fermente n'est pas en
+     retard sur quelque chose. */
+function _pcrbFin(s){
+  var c=s&&s.cuve;
+  if(c&&c.decuvage&&c.decuvage.date){
+    var t='<b class="pcrb-sec">d\u00e9cuv\u00e9e '+_vendFrDate(c.decuvage.date)+'</b>';
+    if(c.decuvage.fa_finie===false) t+=' <i class="pcrb-nsec">\u00b7 FA au chai</i>';
+    return t;
+  }
+  if(s.jSec!=null) return '<b class="pcrb-sec">J'+s.jSec+'</b> <i class="pcrb-nsec">rep\u00e8re</i>';
+  return '<i class="pcrb-nsec">en cours \u00b7 J'+s.jFin+' \u00e0 '+Math.round(s.dFin)+'</i>';
+}
+
 /* ⚠⚠ CE COMMENTAIRE DISAIT L'INVERSE, ET IL AVAIT RAISON — AVANT CRB-2.
    Il exigeait que la pastille reprenne la palette de `_cmpSvg`, « sinon elle ne
    designe pas la courbe qu'elle pretend designer ». Depuis le couloir, l'ecran

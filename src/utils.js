@@ -23,7 +23,7 @@ export const GT_ADMIN_EMAIL = 'ngdevpro@gmail.com';
 // WHATS_NEW   : tableau vide = modal desactive pour cette version.
 // Format item : { emoji:'📅', titre:'Titre court', desc:'Phrase utilisateur.' }
 // Regle : seulement les changements visibles par les utilisateurs.
-export const APP_VERSION = '7.12';
+export const APP_VERSION = '7.13';
 // ════ Journal des nouveautés (récap cumulatif) ════
 // Une entrée par version, la PLUS RÉCENTE EN HAUT : { v:'5.10', items:[ {emoji,titre,desc}, … ] }
 // À chaque release visible → AJOUTER un bloc en tête (ne pas remplacer). items:[] = release technique (rien à afficher).
@@ -460,6 +460,30 @@ window._mvGraphRepeindre = function(){
 };
 
 export const WHATS_NEW = [
+  { v: '7.13', items: [
+    { emoji: 'cuve', titre: 'D\u00e9cuver, c\u2019est dire que la fermentation est finie',
+      desc: "Le comparatif annon\u00e7ait <b>\u00ab pas encore \u00bb</b> sur des cuves d\u00e9j\u00e0 d\u00e9cuv\u00e9es, marc "
+        + "sorti. Il comparait une densit\u00e9 \u00e0 un rep\u00e8re calcul\u00e9\u00a0; or ce n\u2019est pas un chiffre qui "
+        + "dit qu\u2019une cuve est finie, <b>c\u2019est vous</b>, \u00e0 la d\u00e9gustation et \u00e0 l\u2019\u00e9tat de la cuve. "
+        + "D\u00e9sormais la feuille de d\u00e9cuvage pose la question une fois\u00a0: <b>termin\u00e9e en cuve</b> "
+        + "(coch\u00e9 d\u2019avance) ou <b>elle finira au chai</b>. La colonne s\u2019appelle <b>Fin de FA</b> et "
+        + "affiche la <b>date du d\u00e9cuvage</b>\u00a0; une cuve qui fermente encore est \u00ab en cours \u00bb, "
+        + "plus \u00ab pas encore \u00bb. Les cuves d\u00e9cuv\u00e9es <b>avant</b> cette mise \u00e0 jour gardent leur "
+        + "date sans que rien ne soit devin\u00e9 pour elles." },
+    { emoji: 'eprouvette', titre: 'La densit\u00e9 \u00e0 la mise en f\u00fbt, l\u00e0 o\u00f9 elle se prend',
+      desc: "Au d\u00e9cuvage on presse, et le pressurage <b>relargue du sucre</b>\u00a0: la densit\u00e9 de la "
+        + "masse remonte par rapport au vin de goutte. La feuille \u00ab D\u00e9cuver \u00bb accepte donc une "
+        + "<b>densit\u00e9 de mise en f\u00fbt</b> avec sa temp\u00e9rature, goutte et presse assembl\u00e9es. Elle "
+        + "s\u2019affiche sur la cuv\u00e9e au Chai. Elle ne rejoint pas la courbe du Cuvier\u00a0: ce n\u2019est pas "
+        + "un relev\u00e9 de cuve, c\u2019est le point de fermeture de l\u2019une et d\u2019ouverture de l\u2019autre." },
+    { emoji: 'graphique', titre: 'Le seuil de vin sec redevient un rep\u00e8re',
+      desc: "Il ne d\u00e9clenche plus rien\u00a0: ni \u00ab finie \u00bb, ni \u00ab pas finie \u00bb, ni une entr\u00e9e dans la "
+        + "tourn\u00e9e. Il se dessine sur les courbes, et le d\u00e9tail d\u2019une cuve dit d\u00e9sormais <b>o\u00f9 il "
+        + "est et d\u2019o\u00f9 il vient</b> \u2014 le degr\u00e9 potentiel du mo\u00fbt, ou le rep\u00e8re g\u00e9n\u00e9ral quand "
+        + "rien ne permet de le lire. <b>Sa valeur reste \u00e0 caler sur vos analyses</b>\u00a0: nos "
+        + "cuves sont s\u00e8ches vers 997-998 au densim\u00e8tre, un chiffre plus haut que ce que dit le "
+        + "calcul. Une s\u00e9rie de sucres r\u00e9ducteurs au labo tranchera." }
+  ] },
   { v: '7.12', items: [
     { emoji: 'eprouvette', titre: 'Le seuil du vin sec suit votre mo\u00fbt, plus un nombre unique',
       desc: "Jusqu\u2019ici, une seule densit\u00e9 (996) servait de \u00ab\u00a0vin sec\u00a0\u00bb \u00e0 toutes les cuves. "
@@ -2548,8 +2572,9 @@ var MV_AIDE = {
       ['Une cuve n’est pas un fût', "elle ne sort pas de La Réserve, elle n’a pas d’âge, et elle a sa contenance propre. Ajouter une cuve à une cuvée ne change aucun compte de fûts. Le volume que vous inscrivez est celui qui est réellement dedans, pas la contenance de la cuve."],
       ['L’ouillage suit le bois, pas le contenant', "inox et béton ne s’évaporent pas : une cuvée logée seulement là n’a pas de jauge de part des anges et ne déclenche aucune alerte. Un foudre bois, si. Une cuvée mixte garde sa jauge, cadrée sur sa seule part en fût."],
       ['La fin de fermentation et la fin de malo', "sont estimées à partir de vos propres relevés : la densité pour l’une, l’acide malique pour l’autre. Sans trois mesures, l’écran dit « démarrage » plutôt qu’une date inventée."],
-      ['Le seuil du vin sec appartient à la cuve', "il n’y a pas une densité unique du vin sec : plus le moût était riche, plus la cuve finit bas. Chaque cuve a le sien, calculé sur le degré potentiel de son moût — lu sur votre premier relevé s’il a été pris avant le départ, sinon sur vos contrôles de maturité ; une chaptalisation datée l’abaisse. Un moût à 12° est sec vers 995, un moût à 14° vers 992,7. Quand rien ne permet de le lire, la cuve prend le seuil général et l’écran écrit « seuil général » à côté. <b>C’est une estimation</b> : seule une analyse de sucres réducteurs déclare un vin sec."],
-      ['Décuver avant la fin de la fermentation', "c’est une pratique, pas une erreur de saisie : on écoule tôt pour arrêter l’extraction du marc, et la fermentation se termine en phase liquide. La cuve porte alors <b>Décuvée · FA</b>, garde son bouton « Saisir une mesure », reste dans la tournée et dans les cuves à mesurer. Les relevés d’après le décuvage continuent la même courbe. La cuvée née du décuvage le signale au Chai, pour ne pas sulfiter sur du sucre."],
+      ['Le repère de densité, et ce qu’il ne fait pas', "chaque cuve porte un repère de vin sec calculé sur le degré potentiel de son moût — lu sur votre premier relevé s’il a été pris avant le départ, sinon sur vos contrôles de maturité ; une chaptalisation datée l’abaisse. Le détail de la cuve écrit où il est et d’où il vient. <b>Il ne déclenche rien</b> : ni « finie », ni une entrée dans la tournée. C’est un repère de lecture sur la courbe, et sa valeur reste à caler sur vos analyses."],
+      ['Décuver, c’est constater que c’est fini', "la feuille de décuvage pose la question une fois : <b>terminée en cuve</b> (coché d’avance, c’est le cas courant) ou <b>elle finira au chai</b>. C’est vous qui répondez, à la dégustation et à l’état de la cuve ; aucun chiffre ne le décide. Dans le second cas seulement, la cuve porte <b>Décuvée · FA</b>, garde « Saisir une mesure », reste dans la tournée, et la cuvée le signale au Chai pour ne pas sulfiter sur du sucre. Les cuves décuvées avant cette mise à jour n’ont pas de réponse enregistrée : l’écran ne la devine pas."],
+      ['La densité à la mise en fût', "même feuille, champ facultatif : la densité de la masse assemblée, <b>goutte et presse</b>, avec sa température. Le pressurage relargue du sucre et fait remonter la densité — c’est cette valeur-là qui compte pour la suite, pas le dernier relevé de cuve. Elle s’affiche sur la cuvée au Chai et ne rejoint jamais la courbe du Cuvier."],
       ['Trouver une cuve', "la liste du Cuvier est rangée dans l’ordre de votre cuverie — celui écrit sur les cuves, celui dans lequel vous marchez. Une cuve garde donc sa place d’un jour à l’autre, même après un relevé. Vous pouvez trier par urgence ou par avancement, filtrer, et chercher par nom ou par parcelle dès six cuves."],
       ['Une cuve s’ouvre au doigt', "la liste ne montre que l’essentiel : repère, nom, densité, température, avancement. Touchez une ligne pour déplier sa courbe, ses trois derniers chiffres et ses boutons. Une seule cuve reste ouverte à la fois."],
       ['Ce que porte la courbe', "densité ramenée à 20 °C en trait plein, température en pointillé sur son propre axe, le seuil de vin sec <b>de cette cuve</b> en tireté, un repère rond par opération datée, et un trait vertical gris tireté à chaque changement d’état de la cuve. Une remontée ne s’explique que par une chaptalisation ; un palier, souvent par une macération préfermentaire. Une cuve dont les passages n’ont jamais été datés n’a aucun trait vertical."],

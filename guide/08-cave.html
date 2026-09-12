@@ -109,21 +109,29 @@
       <li>Les cuves <b>créées avant cette mise à jour</b> n'ont pas de date de passage : on ne sait
     pas quel jour elles sont entrées dans leur étape actuelle, et la date d'encuvage ne le dit pas.
     La frise écrit un <b>tiret</b> plutôt qu'une date fausse. Posez-la à la main si vous la connaissez.</li>
-      <li><b>Le seuil du vin sec appartient à la cuve, pas à l'application.</b> Il n'y a pas une
-    densité unique du vin sec : plus le moût était riche, plus la cuve finit bas. Chaque cuve a le
-    sien, calculé sur le <b>degré potentiel de son moût</b> — lu sur votre premier relevé s'il a été
+      <li><b>Le repère de densité, et ce qu'il ne fait pas.</b> Chaque cuve porte un repère de vin
+    sec calculé sur le <b>degré potentiel de son moût</b> — lu sur votre premier relevé s'il a été
     pris avant le départ en fermentation, sinon sur vos contrôles de maturité ; une
-    <b>chaptalisation datée</b> l'abaisse. Un moût à 12° est sec vers <b>995</b>, un moût à 14° vers
-    <b>992,7</b>. Quand rien ne permet de le lire, la cuve prend le <b>seuil général</b> et l'écran
-    l'écrit à côté du chiffre. C'est une <b>estimation</b> : seule une analyse de sucres réducteurs
-    déclare un vin sec.</li>
-      <li><b>Décuver avant la fin de la fermentation</b> est une pratique, pas une erreur de saisie :
-    on écoule tôt pour arrêter l'extraction du marc, et la fermentation se termine en phase liquide.
-    La cuve porte alors <b>Décuvée · FA</b>, garde son bouton <b>Saisir une mesure</b>, <b>reste dans
-    la tournée</b> et dans les cuves à mesurer, jusqu'au relevé qui passe sous son seuil. Les relevés
-    d'après le décuvage continuent la <b>même courbe</b> : il n'y en a jamais deux. La cuvée née du
-    décuvage l'annonce aussi au <b>Chai</b> — c'est là qu'on décide de sulfiter, et on ne sulfite pas
-    sur du sucre.</li>
+    <b>chaptalisation datée</b> l'abaisse. Le détail de la cuve écrit où il est et d'où il vient.
+    <b>Il ne déclenche rien</b> : ni « finie », ni une entrée dans la tournée. C'est un repère de
+    lecture sur la courbe. <b>Sa valeur reste à caler</b> : au domaine, les cuves sont sèches
+    vers <b>997-998</b> au densimètre, plus haut que ce que dit le calcul. Une série d'analyses de
+    sucres réducteurs tranchera.</li>
+      <li><b>Décuver, c'est constater que la fermentation est finie.</b> La feuille de décuvage pose
+    la question une fois : <b>terminée en cuve</b> — coché d'avance, c'est le cas courant — ou
+    <b>elle finira au chai</b>. C'est vous qui répondez, à la dégustation et à l'état de la cuve :
+    <b>aucun chiffre ne le décide</b>. Dans le second cas seulement, la cuve porte <b>Décuvée ·
+    FA</b>, garde son bouton <b>Saisir une mesure</b>, reste dans la tournée, et la cuvée le signale
+    au <b>Chai</b> — c'est là qu'on décide de sulfiter, et on ne sulfite pas sur du sucre. Les
+    relevés d'après le décuvage continuent la <b>même courbe</b> : il n'y en a jamais deux. Les
+    cuves décuvées <b>avant</b> cette mise à jour n'ont pas de réponse enregistrée : l'écran ne la
+    devine pas.</li>
+      <li><b>La densité à la mise en fût</b>, dans la même feuille, facultative : la densité de la
+    masse assemblée, <b>goutte et presse</b>, avec sa température. Le pressurage relargue du sucre
+    et fait remonter la densité — c'est cette valeur-là qui compte pour la suite, pas le dernier
+    relevé de cuve. Elle s'affiche sur la cuvée au Chai et <b>ne rejoint jamais</b> la courbe du
+    Cuvier : ce n'est pas un relevé de cuve, c'est le point de fermeture de l'une et d'ouverture de
+    l'autre.</li>
       <li>La <b>fin de fermentation estimée</b> ne compte que les jours de <b>FA</b> : cinq jours de
     macération à froid ne sont pas cinq jours de fermentation. Le <b>cahier de cuverie</b> imprime la
     durée de macération <b>réellement faite</b> ; à défaut, la durée <b>prévue</b>, et il le dit.</li>
@@ -508,8 +516,9 @@
   ce jour-là. Et le couloir <b>s'arrête quand il reste moins de trois cuves</b> suivies : à deux, un
   couloir plat ferait croire à une convergence.</div></div>
   <div class="note"><span class="ni" aria-hidden="true">{ic:chrono}</span><div>Le tableau est classé
-  sur le <b>jour où la cuve a été relevée sous SON seuil de vin sec</b>, jamais sur la vitesse.
-  Ce seuil n'est pas le même pour toutes : quand vos cuves diffèrent, le graphe dessine une
+  sur la <b>fin de FA</b>, jamais sur la vitesse. Une cuve <b>décuvée</b> y affiche la date de son
+  décuvage — c'est un fait ; une cuve qui fermente encore affiche <b>« en cours »</b> et où elle en
+  est. Le repère n'est pas le même pour toutes : quand vos cuves diffèrent, le graphe dessine une
   <b>bande</b> au lieu d'un trait. Une pente mesurée sur trois
   jours n'est pas comparable à une pente mesurée sur dix, et le début d'une fermentation en est la
   phase la plus rapide : une cuve à peine relevée gagnerait <b>toujours</b> le classement. La

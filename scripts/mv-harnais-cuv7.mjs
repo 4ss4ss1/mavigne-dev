@@ -91,15 +91,22 @@ console.log('\n── CUV-7 · écriture de la tournée ──');
 console.log('\n── CUV-9 · la tournée garde une cuve décuvée qui fermente ──');
 {
   const H2 = monter();
-  const dec = (id, d) => ({ id, nom: id, statut: 'termine', decuvage: { date: jm(1) },
-                            mesures_fa: [{ id: 'm', date: jm(1), densite: d }] });
-  const sucre = dec('avec-sucre', 999);   // au-dessus du seuil bouchonné (996)
-  const seche = dec('seche', 993);        // en dessous : l'affaire est close
+  /* CUV-10 : ce n'est plus la densité qui décide, c'est la case cochée au
+     décuvage. Même densité sur les deux cuves : seul le fait les sépare. */
+  const dec = (id, fin) => ({ id, nom: id, statut: 'termine',
+                            decuvage: { date: jm(1), fa_finie: fin },
+                            mesures_fa: [{ id: 'm', date: jm(1), densite: 997 }] });
+  const sucre = dec('avec-sucre', false); // écoulée exprès avant la fin
+  const seche = dec('seche', true);       // finie en cuve : l'affaire est close
   H2.set({ cuves_vinif: [sucre, seche] }, {}, []);
   const ids = H2.actives().map(c => c.id);
-  t('une cuve décuvée encore sucrée reste dans la tournée', ids.indexOf('avec-sucre') >= 0);
-  t('une cuve décuvée et sèche en sort', ids.indexOf('seche') < 0);
-  const fus = dec('fusionnee', 999); fus.fusion = { vers: 'x' };
+  t('une cuve décuvée « à finir au chai » reste dans la tournée', ids.indexOf('avec-sucre') >= 0);
+  t('★ à densité IDENTIQUE, celle déclarée finie en sort', ids.indexOf('seche') < 0);
+  const muet = { id: 'muet', nom: 'muet', statut: 'termine', decuvage: { date: jm(1) },
+                 mesures_fa: [{ id: 'm', date: jm(1), densite: 997 }] };
+  H2.set({ cuves_vinif: [muet] }, {}, []);
+  t('★ une cuve décuvée AVANT ce lot n’est pas devinée en FA', H2.actives().length === 0);
+  const fus = dec('fusionnee', false); fus.fusion = { vers: 'x' };
   H2.set({ cuves_vinif: [fus] }, {}, []);
   t('★ une cuve FUSIONNÉE ne suit rien : son vin est ailleurs', H2.actives().length === 0);
 }
