@@ -16570,3 +16570,133 @@ l'œil, et c'est le point faible du paquet (§42h) :
 3. **l'infobulle sur les colonnes de bord** — la pose se borne au cadre, mais ça se regarde ;
 4. **le cahier de cuverie imprimé**, qui porte maintenant deux graphes sur la même page : c'est le
    seul endroit où une pagination peut casser, et aucun harnais ne lit une mise en page.
+
+---
+
+## 112. ★★★ PLAN-RECAL — UN MODÈLE DE PLANNING EST UN CALENDRIER, PAS UNE SEMAINE TYPE (11/09 — `planning.js` + `utils.js` + `index.html` + `sw.js` + `guide/` + `scripts/` + `package.json` + `ci.yml` · APP 7.08 → 7.09 · SW 7.68 → 7.69 · base `a1d0001`)
+
+**Le signalement, en une phrase** : *« dans le planning de Chloé les jours de travail sont tous
+décalés d'une journée (elle commence à travailler le mardi pour finir le samedi, au lieu de
+commencer le lundi pour finir le vendredi), dans les réglages du planning tout est pourtant ok. »*
+
+### 112a. La cause, et pourquoi elle a tenu si longtemps
+
+`PLANNING_TEMPLATES[année][modèle][mois][NUMÉRO DU JOUR] = heures`. **Le jour de la semaine
+n'apparaît nulle part.** Un modèle n'est pas un rythme hebdomadaire : c'est le **calendrier d'une
+année précise**. `PLAN_DEF.standard` et `PLAN_DEF.nico` sont calés sur **2026** (nouveau :
+`PLAN_DEF_AN`).
+
+`_planGetTpl` y retombait **en silence** dès que l'année affichée n'avait aucun modèle enregistré —
+et le double repli `|| PLAN_DEF.standard` frappait aussi un salarié dont le modèle maison manquait
+à l'année.
+
+| `standard` lu sur | Di | Lu | Ma | Me | Je | Ve | Sa |
+|---|---|---|---|---|---|---|---|
+| **2026** (son année) | 0 | **45** | 46 | 46 | 46 | **39** | 1 |
+| **2027** | 1 | **0** | 45 | 46 | 46 | 46 | **39** |
+
+⚠️⚠️⚠️ **ET AUCUN TOTAL NE BOUGEAIT.** `_planGetRefH` somme le mois sans regarder les jours de
+semaine : **223 jours, 1 589 h, avant comme après**. Le contrôle par les totaux ne POUVAIT PAS voir
+ce défaut — c'est très exactement pourquoi « dans les réglages tout est pourtant ok ». Et la liste
+des modèles affiche toujours `standard` et `nico` quelle que soit l'année : rien n'indiquait qu'il
+en manquait un.
+
+★★★ **LA LEÇON GÉNÉRALE, LA PLUS RÉUTILISABLE DU LOT : un invariant de SOMME ne surveille pas une
+PERMUTATION.** Tout contrôle qui additionne est aveugle à l'ordre — et l'ordre est ce qui fait un
+planning. À se demander devant tout cliquet chiffré : *qu'est-ce qu'il laisserait passer sans
+changer de valeur ?*
+
+### 112b. ⚠️⚠️⚠️ LE GUIDE ET LE DOCUMENT IMPRIMÉ DÉCRIVAIENT LE DÉFAUT AU LIEU DE LE CORRIGER
+
+Trouvé en appliquant la règle d'or n°4. `_paDoc` portait déjà ceci, et `guide/10-planning.html` le
+répétait **au public** :
+
+> « Le document est construit sur le modèle intégré, dont les jours sont calés sur un autre
+> calendrier : les jours de semaine ne tombent pas aux mêmes dates. »
+
+**C'était exact.** Une session précédente avait donc diagnostiqué le bug, l'avait écrit noir sur
+blanc dans **deux supports client** — et l'avait classé comme une *limite du document imprimé* au
+lieu de remonter à `_planGetTpl`, où il vivait pour **tout le module**. Pendant ce temps la grille
+de l'application affichait la même erreur **sans rien dire du tout**.
+
+★★★ **À RETENIR : une limitation qu'on documente au lieu de la corriger devient invisible.** Le
+texte rassure celui qui l'écrit (« c'est dit »), il ne rassure personne d'autre, et il **fige** le
+défaut : plus rien ne le signale comme anomalie. **Quand on s'apprête à écrire « attention, X est
+faux », se demander d'abord pourquoi X est faux.** Même famille que le test du mode d'emploi
+(§27a) et que l'écran « à venir » du Pilotage (§20g), un cran plus grave : ici le texte était juste.
+
+### 112c. La règle, arbitrée par Nico — NE RIEN INVENTER
+
+Le recalage transporte chaque jour à **même jour de semaine et même rang dans le mois** (le 3ᵉ mardi
+de mars reste le 3ᵉ mardi de mars — sans le rang, la semaine de vendange remonterait en début de mois).
+
+⚠️⚠️ **Ce n'est PAS une translation** : un mois a cinq jeudis une année et quatre la suivante.
+**Mesuré, `standard` 2026 → 2027 : 7 jours et 52,5 h sans place** (1 589 h → 1 536,5 h).
+
+Deux règles étaient possibles, les deux ont été chiffrées avant d'écrire une ligne :
+**A** recaler puis compléter avec l'horaire habituel du jour (le total se conserve, mais l'application
+pose des heures que personne n'a décidées) · **B** recaler seulement et **afficher ce qui manque**.
+★ **Nico a tranché B le 11/09.** Raison qui vaut au-delà de ce lot : **un planning se signe**. Une
+heure inventée dans un prévisionnel remonte ensuite dans la référence, l'écart, les heures dues et
+le relevé MSA — et personne ne saura qu'elle vient de l'application.
+
+### 112d. Ce qui a été écrit
+
+| Fonction | Rôle |
+|---|---|
+| `PLAN_DEF_AN` | l'année de calage des modèles intégrés — **2026** |
+| `_planRecaleMap(m,anSrc,anDst)` | correspondance d'un mois, par jour de semaine **et** rang |
+| `_planRecale(grille,anSrc,anDst)` | rend `{g, perdus:[{m,d,h}], vides:[{m,d}]}` — identité si `anSrc===anDst` |
+| `_planTplDef(plId,yr)` | le modèle intégré recalé, **mémorisé** (`_planGetTpl` est appelé ~30× par rendu) |
+| `_planTplDefInfo(plId,yr)` | le même, avec ce qu'il a coûté |
+| ★ `_planRecaleEtat(yr,ids)` | **source unique** du constat — le bandeau ET le document imprimé la lisent |
+| `_planRecaleBar()` | le bandeau, sous les onglets d'année de « Le mois », admin seulement |
+
+⚠️ **`planUpdateDay` repartait de `PLAN_DEF` BRUT** : toucher **une seule case** de janvier 2027
+recopiait le janvier **2026** entier dans la base. Le glissement passait du code aux données, et il
+n'en ressortait plus. C'était le piège le plus coûteux du lot, et c'est celui qu'on déclenche en
+essayant de corriger à la main.
+★ La garde `PLAN_DEF[id] ? … : null` est **conservée volontairement** : sans elle, `_planTplDef`
+retombant sur `standard`, un modèle maison aurait hérité du mois de `standard` au premier chiffre saisi.
+
+⚠️ **Un modèle ENREGISTRÉ pour l'année n'est jamais touché** — c'est la donnée du client, posée pour
+cette année-là. Le recalage ne concerne que le repli.
+
+### 112e. `scripts/mv-harnais-recalage.mjs` — 33 assertions, 7 contre-épreuves, branché en CI
+
+Les moteurs ne lisent aucun champ du DOM : ils s'**extraient du vrai fichier** et s'exécutent dans
+Node. Les commentaires sont retirés avant toute assertion (§34g).
+Ce qu'il tient : l'**identité** 2026→2026 (même référence) · le jour de semaine et le **rang**
+conservés sur 300+ jours · l'égalité `cible + perdus = source`, jour de semaine par jour de semaine ·
+`heures sortantes = heures perdues` · les places à pourvoir déclarées et réellement vides ·
+`_timings` (clé par mois) recopié tel quel contre `_timings_jour` (clé par jour) recalé · la
+mémorisation · et **deux cliquets de mesure** : 7 jours, 52,5 h.
+Statique : `_planGetTpl` ne sert plus `PLAN_DEF` brut · `planUpdateDay` non plus · le bandeau est
+branché · le document imprimé lit `_planRecaleEtat` et **ne dit plus** que les jours tombent faux.
+
+⚠️ **Un harnais existant a cessé de démarrer** : `mv-harnais-effectif-periode` extrait `_planGetTpl`,
+qui appelle désormais `_planTplDef` — `ReferenceError`, script mort. **Dépendances en chaîne**, le
+piège documenté au §6b, rencontré pour de bon. Chaîne ajoutée à ses `NOMS`.
+
+### 112f. Ce que le lot a coûté ailleurs
+
+- **Deux rouges du harnais des icônes**, tous deux justes : `_mvIcon('info',15)` hors de l'échelle
+  16/18/20/24/40, et **un emoji rendu de plus** dans `utils.js` (un `⚠️` glissé dans un texte de
+  `WHATS_NEW` — réflexe de commentaire appliqué à du texte client, §6b).
+- **Le piège de l'espace insécable** (§24, CSS/HTML 10) : l'ancre du guide contenait `calendrier\xa0:`.
+  Retapée, elle n'a jamais correspondu ; **extraite par `repr()`, elle a correspondu du premier coup.**
+- `guide/10-planning.html` réécrit et régénéré ; `MV_AIDE.planning` reçoit un point « Changer d'année ».
+
+### 112g. ⚠️ CE QUI N'A PAS ÉTÉ MESURÉ
+
+1. **Aucun rendu n'a été regardé** — le bandeau n'a jamais été vu, ni en clair ni en sombre, ni sur
+   un téléphone. Il est en `display:flex` avec une icône et un `<span>` : le piège du §24 est évité
+   par construction, mais ça se regarde (§42h).
+2. **`npm run build`, `test:smoke` et `test:e2e`** : pas de navigateur dans le bac à sable.
+3. ⚠️⚠️ **L'ampleur chez le client n'est pas établie.** Avec 2027 affiché et aucun modèle enregistré,
+   le mécanisme ne fait aucune différence entre les personnes : **toute l'équipe glisse**, pas la
+   seule Chloé. À confirmer d'un coup d'œil sur une autre ligne.
+4. ⚠️⚠️⚠️ **Les chiffres déjà lus sur une année neuve étaient faux** : écart du jour, heures dues,
+   jours de remplacement, capacité réelle (`_capWeekReal` lit `_planGetTpl('standard', année)`),
+   relevé MSA. **Les totaux mensuels et le plafond 1 607 h, eux, n'ont jamais bougé** — ils sont la
+   seule chose que ce défaut ne touchait pas.

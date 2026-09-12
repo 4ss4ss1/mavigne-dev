@@ -201,6 +201,15 @@ jobs:
           node scripts/mv-harnais-crb2.mjs
           node scripts/mv-harnais-crb2.mjs --contre
 
+      # ⚠️⚠️ Un modele de planning est un CALENDRIER, pas une semaine type : il se
+      # lit « mois -> numero du jour -> heures ». Relu sur une autre annee il
+      # glisse d'un jour (0 lundi et 39 samedis sur 2027), ET AUCUN TOTAL NE
+      # BOUGE — aucun controle par les sommes ne pouvait le voir.
+      - name: Harnais — recalage du modele sur l'annee affichee
+        run: |
+          node scripts/mv-harnais-recalage.mjs
+          node scripts/mv-harnais-recalage.mjs --contre
+
       # Vite + inject-precache (postbuild, idempotent).
       - name: Build
         run: npm run build

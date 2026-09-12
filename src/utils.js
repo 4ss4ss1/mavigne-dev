@@ -23,7 +23,7 @@ export const GT_ADMIN_EMAIL = 'ngdevpro@gmail.com';
 // WHATS_NEW   : tableau vide = modal desactive pour cette version.
 // Format item : { emoji:'📅', titre:'Titre court', desc:'Phrase utilisateur.' }
 // Regle : seulement les changements visibles par les utilisateurs.
-export const APP_VERSION = '7.08';
+export const APP_VERSION = '7.09';
 // ════ Journal des nouveautés (récap cumulatif) ════
 // Une entrée par version, la PLUS RÉCENTE EN HAUT : { v:'5.10', items:[ {emoji,titre,desc}, … ] }
 // À chaque release visible → AJOUTER un bloc en tête (ne pas remplacer). items:[] = release technique (rien à afficher).
@@ -460,6 +460,23 @@ window._mvGraphRepeindre = function(){
 };
 
 export const WHATS_NEW = [
+  { v: '7.09', items: [
+    { emoji: 'calendrier', titre: 'Le planning d\u2019une ann\u00e9e neuve ne d\u00e9cale plus les jours',
+      desc: "Sur une ann\u00e9e sans mod\u00e8le enregistr\u00e9 \u2014 2027, par exemple \u2014 la grille affichait "
+        + "<b>tous les jours d\u00e9cal\u00e9s d\u2019une case</b>\u00a0: quelqu\u2019un qui travaille du lundi au vendredi "
+        + "apparaissait <b>du mardi au samedi</b>. En cause\u00a0: un mod\u00e8le de planning n\u2019est pas une semaine "
+        + "type, c\u2019est un <b>calendrier</b>, et il \u00e9tait relu tel quel sur l\u2019ann\u00e9e suivante. "
+        + "Les jours sont d\u00e9sormais <b>replac\u00e9s sur le bon jour de la semaine</b>. "
+        + "Point important\u00a0: <b>aucun total ne bougeait</b>, ni le mois, ni les 1\u00a0607\u00a0h. C\u2019est pourquoi les r\u00e9glages "
+        + "avaient l\u2019air justes. <b>Reprenez l\u2019\u00e9cart et les heures dues des mois d\u00e9j\u00e0 consult\u00e9s "
+        + "sur une ann\u00e9e neuve</b>, ils \u00e9taient calcul\u00e9s sur le mauvais calendrier." },
+    { emoji: 'info', titre: 'L\u2019\u00e9cran dit d\u2019o\u00f9 vient la grille, et ce qui manque',
+      desc: "Tant qu\u2019aucun mod\u00e8le n\u2019est enregistr\u00e9 pour l\u2019ann\u00e9e affich\u00e9e, un bandeau au-dessus "
+        + "de la grille annonce que c\u2019est un <b>report</b> du mod\u00e8le int\u00e9gr\u00e9, et compte les <b>jours "
+        + "qui restent \u00e0 poser</b>\u00a0: une ann\u00e9e n\u2019a pas les m\u00eames semaines qu\u2019une autre, un mois peut "
+        + "compter cinq jeudis puis quatre. <b>Rien n\u2019est ajout\u00e9 \u00e0 votre place</b> \u2014 un planning se signe. "
+        + "Le planning imprim\u00e9 dit la m\u00eame chose, au m\u00eame endroit du raisonnement." },
+  ]},
   { v: '7.08', items: [
     { emoji: 'euro', titre: 'Les prix d\u2019achat s\u2019enregistrent de nouveau',
       desc: "Dans <b>Pilotage \u203a \u00c9conomie \u203a Achats</b>, chiffrer un achat d\u2019intrants ou un lot de f\u00fbts "
@@ -2419,6 +2436,7 @@ var MV_AIDE = {
       ['L’appoint de cuve GNR', "remonte le niveau et recalcule le prix du litre en moyenne pondérée."],
       ['Le carnet d’entretien', "s’imprime machine par machine depuis la roue crantée du Tracteur, bloc Documents."],
       ['La roue crantée', "en haut à droite réunit le parc, les activités et leur barème h/ha, le chrono, et le carnet d’entretien. Administrateur seulement."],
+      ['Changer d’année', "se fait par les onglets au-dessus de la grille. Tant qu’aucun modèle n’est enregistré pour une année, sa grille est un report du modèle intégré, replacé sur les bons jours de la semaine. Un bandeau le dit et compte les jours qui restent à poser : une année n’a pas les mêmes semaines qu’une autre, et rien n’est ajouté à votre place."],
       ['Rôle Tractoriste requis', "pour écrire : sans lui, l’écran passe en consultation seule."]
     ]
   },

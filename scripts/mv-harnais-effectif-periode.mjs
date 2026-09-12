@@ -63,6 +63,10 @@ function ligne(s, motif, nom) {
 const NOMS = [
   '_pY', '_pEntYear', '_pEntMonth', '_pEntDay', '_pTplStore',
   '_planDuesDebut', '_planDuesActive', '_planAbsDef', '_planAbsMotif', '_planAbsH',
+  // ⚠️ Dependances en chaine ajoutees le 11/09 : _planGetTpl passe par _planTplDef
+  //    (recalage du modele integre sur l'annee affichee). Sans elles, la fonction
+  //    leve, le catch de l'appelant avale, et le harnais ne demarre meme pas.
+  '_planRecaleMap', '_planRecale', '_planTplDef',
   '_planDays', '_planGetTpl', '_planGetRefH', '_planFmt',
   '_planInContract', '_planJourCouvert', '_planDansCtr',
   '_planInContractRead', '_planInContractCtr', '_planWide',
@@ -94,6 +98,8 @@ function makeEnv(opts) {
     ligne(s, /^var PLAN_MOIS_C=.*$/m, 'PLAN_MOIS_C'),
     ligne(s, /^var PLAN_BG=.*$/m, 'PLAN_BG'),
     'var PLAN_PAUSE_MIN=60;',
+    ligne(s, /^var PLAN_DEF_AN=.*$/m, 'PLAN_DEF_AN'),
+    'var _PLAN_RECALE_CACHE={};',
     'var PLANNING_TEMPLATES=' + JSON.stringify(opts.templates || {}) + ';',
     'var PLANNING_ENTRIES=' + JSON.stringify(opts.entrees || {}) + ';',
     'var planYear=' + (opts.an != null ? opts.an : 2026) + ';',

@@ -1,4 +1,24 @@
-// MA VIGNE — Service Worker v7.68
+// MA VIGNE — Service Worker v7.69
+// v7.69 (11/09/2026) — PLAN-RECAL : UN MODELE DE PLANNING EST UN CALENDRIER, PAS
+//   UNE SEMAINE TYPE. Il se lit « mois > numero du jour > heures » et ne porte
+//   NULLE PART le jour de la semaine. Sur une annee sans modele enregistre, le
+//   repli servait PLAN_DEF tel quel -- une grille calee sur 2026 : relue sur 2027,
+//   45 lundis devenaient 0 lundi et 39 samedis. Un salarie du lundi au vendredi
+//   s'affichait du mardi au samedi (remonte du terrain).
+//   ⚠⚠ ET AUCUN TOTAL NE BOUGEAIT : _planGetRefH somme le mois sans regarder les
+//   jours de semaine -- 223 jours, 1589 h, avant comme apres. Aucun controle par
+//   les sommes ne POUVAIT voir ce defaut, et l'ecran des reglages avait l'air juste.
+//   _planRecale replace chaque jour a MEME JOUR DE SEMAINE et MEME RANG dans le
+//   mois. Ce n'est pas une translation : un mois a cinq jeudis une annee et quatre
+//   la suivante (mesure 2026>2027 sur `standard` : 7 jours, 52,5 h sans place).
+//   ★ Regle arbitree par Nico : NE RIEN INVENTER. Les trous sont comptes et
+//   affiches, jamais combles -- un planning se signe.
+//   ⚠ planUpdateDay repartait de PLAN_DEF BRUT : toucher une case de janvier 2027
+//   recopiait janvier 2026 en base, et le decalage n'en ressortait plus.
+//   ⚠⚠ Trouve au passage : le planning imprime ET le guide public DECRIVAIENT ce
+//   defaut au lieu de le corriger (« les jours de semaine ne tombent pas aux memes
+//   dates »). Les deux textes sont refaits et lisent la MEME source que l'ecran.
+//   Harnais : 33 assertions, 7 contre-epreuves, branche en CI.
 // v7.68 (11/09/2026) — PIL-ACH : LE PRIX N'ARRIVAIT JAMAIS AU DISQUE. Pilotage >
 //   Economie > Achats ecrivait le prix dans l'objet, puis appelait
 //   saveData('intrants'). Or 'intrants' N'EST PAS une cle de saveData : INTRANTS
@@ -3770,7 +3790,7 @@
 // v2.22 — Fix profils vides : guard vide dans loadData() pour MEMBRES/SAISONS/TACHES
 // v2.17 — Onboarding intégré + tenantId · v2.06 — Firebase Auth · v2.00–v2.05 — divers
 const DEBUG = self.location.hostname === 'localhost' || self.location.hostname === '127.0.0.1';
-const CACHE_NAME   = 'mavigne-v7.68';
+const CACHE_NAME   = 'mavigne-v7.69';
 const TENANT_CACHE = 'mavigne-tenant';   // Cache persistant — préservé à chaque mise à jour SW
 const SYNC_TAG     = 'mavigne-sync';
 
@@ -3786,7 +3806,7 @@ const CDN_URLS = [
 ];
 
 self.addEventListener('install', event => {
-  if(DEBUG) console.log('[SW] Ma Vigne v7.68 installé');
+  if(DEBUG) console.log('[SW] Ma Vigne v7.69 installé');
   event.waitUntil(
     caches.open(CACHE_NAME).then(async cache => {
       // ── Cœur applicatif : STRICT (mise à jour ATOMIQUE) ──
@@ -3802,7 +3822,7 @@ self.addEventListener('install', event => {
 });
 
 self.addEventListener('activate', event => {
-  if(DEBUG) console.log('[SW] Ma Vigne v7.68 activé');
+  if(DEBUG) console.log('[SW] Ma Vigne v7.69 activé');
   event.waitUntil(
     caches.keys().then(keys =>
       Promise.all(

@@ -452,10 +452,103 @@ function _planMonthWeeks(m){
     return {no:w.no,mon:w.mon,sun:sun,days:w.days,partial:(w.mon.getMonth()!==m||sun.getMonth()!==m)};
   });
 }
+// ── ★★★ RECALAGE D'UN MODÈLE SUR UNE AUTRE ANNÉE (11/09/2026) ───────────────
+// ⚠️⚠️⚠️ UN MODÈLE DE PLANNING N'EST PAS UNE SEMAINE TYPE : C'EST UN CALENDRIER.
+// Il se lit « mois → numéro du jour → heures » et ne porte NULLE PART le jour de
+// la semaine. Relu sur une autre année, chaque jour glisse.
+//   Mesuré sur PLAN_DEF.standard, calé sur 2026 : 45 lundis · 39 vendredis · 0 dimanche.
+//   LE MÊME OBJET relu sur 2027 : 0 LUNDI · 39 SAMEDIS.
+// Symptôme remonté du terrain : un salarié du lundi au vendredi s'affichait du
+// mardi au samedi sur 2027.
+// ⚠️⚠️ ET AUCUN TOTAL NE BOUGEAIT. `_planGetRefH` somme le mois sans regarder les
+// jours de semaine : 223 jours, 1 589 h, avant comme après. C'est exactement
+// pourquoi rien ne l'a signalé pendant des mois — le contrôle par les totaux ne
+// POUVAIT PAS voir ce défaut, et l'écran des réglages avait l'air juste.
+var PLAN_DEF_AN=2026;   // année de calage de PLAN_DEF.standard et PLAN_DEF.nico
+
+// Correspondance d'un mois : jour de l'année source → jour de l'année cible, à
+// MÊME JOUR DE SEMAINE et MÊME RANG dans le mois (le 3ᵉ mardi de mars reste le
+// 3ᵉ mardi de mars). Le rang compte autant que le jour : sans lui, la semaine de
+// vendange partirait au début du mois.
+function _planRecaleMap(m,anSrc,anDst){
+  var place={},cpt={},nbD=new Date(anDst,m+1,0).getDate(),d,w;
+  for(d=1;d<=nbD;d++){ w=new Date(anDst,m,d).getDay(); cpt[w]=(cpt[w]||0)+1; place[w+'|'+cpt[w]]=d; }
+  var map={},cs={},nbS=new Date(anSrc,m+1,0).getDate(),s,ws,dd;
+  for(s=1;s<=nbS;s++){ ws=new Date(anSrc,m,s).getDay(); cs[ws]=(cs[ws]||0)+1; dd=place[ws+'|'+cs[ws]]; if(dd)map[s]=dd; }
+  return map;
+}
+
+// ⚠️⚠️ CE N'EST PAS UNE TRANSLATION, et c'est le point qui se perd le plus vite :
+// un mois peut avoir cinq jeudis une année et quatre la suivante.
+// Mesure 2026 → 2027 sur `standard` : 7 jours sans place, 52,5 h.
+// ★ RÈGLE ARBITRÉE PAR NICO LE 11/09 : NE RIEN INVENTER. Les heures qui n'ont pas
+//   de place sortent dans `perdus`, les jours travaillés restés vides dans
+//   `vides`, et l'écran les affiche. Compléter d'office aurait posé dans un
+//   planning des heures que personne n'a décidées — et un planning se signe.
+// Renvoie {g, perdus:[{m,d,h}], vides:[{m,d}]}.
+function _planRecale(grille,anSrc,anDst){
+  var perdus=[],vides=[];
+  if(!grille)return {g:{},perdus:perdus,vides:vides};
+  if(anSrc===anDst)return {g:grille,perdus:perdus,vides:vides};
+  var out={},m,d;
+  // Ce qui n'est pas un mois se recopie tel quel — `_timings` est clé par MOIS,
+  // il ne glisse pas. `_timings_jour`, lui, est clé par JOUR : traité plus bas.
+  Object.keys(grille).forEach(function(k){ if(!/^(?:[0-9]|1[01])$/.test(k)&&k!=='_timings_jour')out[k]=grille[k]; });
+  for(m=0;m<12;m++){
+    var mo=grille[m]; if(!mo)continue;
+    var map=_planRecaleMap(m,anSrc,anDst),res={},pris={},dows={},_m=m;
+    Object.keys(mo).forEach(function(k){
+      if(!/^\d+$/.test(k))return;
+      var s=parseInt(k,10),dd=map[s];
+      dows[new Date(anSrc,_m,s).getDay()]=1;
+      if(dd){ res[dd]=mo[k]; pris[dd]=1; }
+      else perdus.push({m:_m,d:s,h:parseFloat(mo[k])||0});
+    });
+    // Un jour d'arrivée dont le jour de semaine est travaillé ce mois-là mais qui
+    // n'a rien reçu est une PLACE À POURVOIR, pas un repos. Le taire ferait passer
+    // un jour de travail pour un jour de congé — le défaut qu'on corrige, à l'envers.
+    var nbD=new Date(anDst,m+1,0).getDate();
+    for(d=1;d<=nbD;d++){ if(!pris[d]&&dows[new Date(anDst,m,d).getDay()])vides.push({m:m,d:d}); }
+    out[m]=res;
+  }
+  if(grille._timings_jour){
+    var tj={};
+    Object.keys(grille._timings_jour).forEach(function(km){
+      var mm=parseInt(km,10); if(isNaN(mm)||mm<0||mm>11)return;
+      var mp=_planRecaleMap(mm,anSrc,anDst),src=grille._timings_jour[km],dst={};
+      Object.keys(src).forEach(function(kd){ var nd=mp[parseInt(kd,10)]; if(nd)dst[nd]=src[kd]; });
+      tj[mm]=dst;
+    });
+    out._timings_jour=tj;
+  }
+  return {g:out,perdus:perdus,vides:vides};
+}
+
+// Modèle intégré, recalé sur l'année demandée. Mémorisé : `_planGetTpl` est appelé
+// une trentaine de fois par rendu et PLAN_DEF ne bouge jamais de la session.
+var _PLAN_RECALE_CACHE={};
+function _planTplDef(plId,yr){
+  var base=PLAN_DEF[plId]||PLAN_DEF.standard;
+  if(yr==null||yr===PLAN_DEF_AN)return base;
+  var k=plId+'|'+yr;
+  if(!_PLAN_RECALE_CACHE[k])_PLAN_RECALE_CACHE[k]=_planRecale(base,PLAN_DEF_AN,yr);
+  return _PLAN_RECALE_CACHE[k].g;
+}
+// Le même recalage, avec ce qu'il a coûté. Sert au bandeau : un repli muet cache
+// une régression (leçon du 09/08), et celui-ci se taisait depuis toujours.
+function _planTplDefInfo(plId,yr){
+  if(yr==null||yr===PLAN_DEF_AN)return {g:PLAN_DEF[plId]||PLAN_DEF.standard,perdus:[],vides:[]};
+  _planTplDef(plId,yr);
+  return _PLAN_RECALE_CACHE[plId+'|'+yr];
+}
 function _planGetTpl(plId,yr){
   var _Y=(yr!=null?yr:_pY());
   var _st=PLANNING_TEMPLATES[_Y];
-  return (_st&&_st[plId])||PLAN_DEF[plId]||PLAN_DEF.standard;
+  // ⚠️ Le repli sur le modèle intégré RECALE désormais sur _Y. Servir la grille
+  //    2026 telle quelle était le défaut : silencieux, et invisible aux totaux.
+  //    Un modèle ENREGISTRÉ pour l'année, lui, n'est jamais touché : c'est la
+  //    donnée du client, posée pour cette année-là.
+  return (_st&&_st[plId])||_planTplDef(plId,_Y);
 }
 function _planGetRefH(plId,m){
   // Toujours calculer depuis la grille du template (PLAN_DEF + overrides Firebase).
@@ -2447,7 +2540,7 @@ function _pl2Annual_(){
 function _pl2RenderEquipe(){
   var body=document.getElementById('plan-body');
   if(!body)return;
-  body.innerHTML=_pl2YearTabs()+_pl2Toolbar()+_planPeriodeBar()+_pl2Board()+_pl2HorsContrat();
+  body.innerHTML=_pl2YearTabs()+_planRecaleBar()+_pl2Toolbar()+_planPeriodeBar()+_pl2Board()+_pl2HorsContrat();
   _pl2MbarSync();
   if(_pl2PulseNom){
     var row=body.querySelector('.pl2-pulse');
@@ -2464,6 +2557,70 @@ function _pl2RenderEquipe(){
 // ★ Ce que la grille ne sait pas cocher : une plage qui déborde la vue affichée
 //   (trois semaines de congés, deux mois de canicule). Deux boutons visibles,
 //   au lieu d'un menu « Outils » qui cachait quatre entrées derrière un engrenage.
+// ★★ LE REPLI N'EST PLUS MUET (11/09/2026).
+//   Quand l'année affichée n'a aucun modèle enregistré, la grille n'est pas un
+//   modèle : c'est un RECALAGE du modèle intégré. Il faut le dire, et dire ce
+//   qui n'a pas trouvé de place — sinon on remplace un mensonge silencieux
+//   (des lundis affichés le mardi) par un autre (des jours de travail affichés
+//   en repos). Règle B, arbitrée par Nico : ne rien inventer, tout montrer.
+// ★★ UNE SEULE DÉFINITION de « cette année tourne-t-elle sur un modèle recalé, et
+//   qu'est-ce qui manque ». Le bandeau de la grille et le planning imprimé posent
+//   la même question : ils ne peuvent pas y répondre chacun de leur côté, sinon
+//   l'écran et le papier finissent par se contredire devant le salarié.
+//   `ids` = les modèles concernés, que l'appelant seul sait établir (l'équipe du
+//   mois affiché pour la grille, les groupes de l'année pour le document).
+//   Renvoie null quand il n'y a rien à signaler.
+function _planRecaleEtat(yr,ids){
+  if(yr===PLAN_DEF_AN)return null;
+  var st=PLANNING_TEMPLATES[yr]||{},vus={},noms=[],perdus=0,vides=0;
+  (ids||[]).forEach(function(id0){
+    var id=id0;
+    if(st[id])return;                  // modèle enregistré pour CETTE année : rien à signaler
+    if(!PLAN_DEF[id])id='standard';    // modèle absent de l'année : c'est `standard` qui sert
+    if(vus[id])return;
+    vus[id]=1; noms.push(id);
+    var inf=_planTplDefInfo(id,yr)||{};
+    perdus+=(inf.perdus||[]).length;
+    vides +=(inf.vides ||[]).length;
+  });
+  if(!noms.length)return null;
+  return {noms:noms,perdus:perdus,vides:vides,trous:perdus+vides};
+}
+
+function _planRecaleBar(){
+  var Y=_pY();
+  if(typeof isAdmin!=='function'||!isAdmin())return '';
+  var ids=(_pl2Actifs()||[]).map(function(mbr){return _planPlId(mbr);});
+  var et=_planRecaleEtat(Y,ids);
+  if(!et)return '';
+  var noms=et.noms,trous=et.trous,pl=trous>1;
+  var lbl=noms.length>1
+    ?('Les mod\u00e8les \u00ab\u202f'+_escHtml(noms.join('\u202f\u00bb, \u00ab\u202f'))+'\u202f\u00bb ont \u00e9t\u00e9 replac\u00e9s')
+    :('Le mod\u00e8le \u00ab\u202f'+_escHtml(noms[0])+'\u202f\u00bb a \u00e9t\u00e9 replac\u00e9');
+  // ⚠️ Le texte de la phrase vit dans un <span> : dans un conteneur flex, chaque
+  //   enfant devient une colonne, et une phrase nue se couperait en morceaux (§24).
+  return '<div style="display:flex;gap:11px;align-items:flex-start;flex-wrap:wrap;'
+      +'border:1.5px solid var(--gris-clair);border-left:4px solid var(--or);border-radius:12px;'
+      +'background:var(--bg-card);padding:11px 13px;margin-bottom:10px">'
+    +'<div style="flex:1;min-width:0">'
+      +'<div style="display:flex;align-items:center;gap:6px;font-size:13.5px;font-weight:700;color:var(--texte);line-height:1.3">'
+        +_mvIcon('info',16)+'<span>La grille de '+Y+' est un report du mod\u00e8le '+PLAN_DEF_AN+'</span>'
+      +'</div>'
+      +'<div style="font-size:12px;color:var(--texte-doux);line-height:1.5;margin-top:4px">'
+        +'Aucun mod\u00e8le n\u2019est enregistr\u00e9 pour '+Y+'. '+lbl+' sur les bons jours de la semaine\u202f: '
+        +'sans \u00e7a, un lundi de '+PLAN_DEF_AN+' tombait un mardi en '+Y+'.'
+        +(trous
+          ?(' <b>'+trous+' jour'+(pl?'s':'')+' rest'+(pl?'ent':'e')+' \u00e0 poser</b> \u2014 une ann\u00e9e n\u2019a pas '
+            +'les m\u00eames semaines qu\u2019une autre, et rien n\u2019a \u00e9t\u00e9 ajout\u00e9 \u00e0 votre place.')
+          :' Aucun jour ne manque.')
+      +'</div>'
+    +'</div>'
+    +'<button onclick="planSwitchTab(\u0027cadre\u0027)" style="cursor:pointer;font-family:inherit;font-size:12.5px;'
+      +'font-weight:600;padding:8px 13px;border-radius:10px;border:1.5px solid var(--or);background:transparent;'
+      +'color:var(--texte);white-space:nowrap">Ouvrir le mod\u00e8le</button>'
+  +'</div>';
+}
+
 function _planPeriodeBar(){
   return '<div class="pl2-perbar">'
     +'<button onclick="openPlanCP()"><span>'+_mvIcon('soleil',16)+'</span> Cong\u00e9s sur une p\u00e9riode</button>'
@@ -4364,7 +4521,14 @@ function planUpdateDay(input){
   if(!_pTplStore()[id])_pTplStore()[id]={};
   if(!_pTplStore()[id][m])_pTplStore()[id][m]={};
   // Fusionner avec défaut
-  var defData=PLAN_DEF[id]&&PLAN_DEF[id][m]?Object.assign({},PLAN_DEF[id][m]):{};
+  // ⚠️⚠️ La grille de départ est le modèle intégré RECALÉ sur l'année affichée.
+  //   Avec PLAN_DEF brut, toucher UNE SEULE case de janvier 2027 recopiait le
+  //   janvier 2026 entier dans la base : le glissement passait du code aux
+  //   données, et il n'en ressortait plus.
+  //   ⚠️ La garde `PLAN_DEF[id]` reste : sans elle, un modèle maison hériterait
+  //   du mois de `standard` au premier chiffre saisi (_planTplDef y retombe).
+  var _bse=PLAN_DEF[id]?_planTplDef(id,_pY()):null;
+  var defData=_bse&&_bse[m]?Object.assign({},_bse[m]):{};
   Object.assign(defData,_pTplStore()[id][m]);
   if(h>0)defData[d]=h;else delete defData[d];
   _pTplStore()[id][m]=defData;
@@ -6081,12 +6245,24 @@ function _paDoc(yr,nom){
     + '<b>travaill\u00e9es</b>, coupure d\u00e9duite. Cong\u00e9s, absences et r\u00e9cup\u00e9rations n\u2019y figurent pas : ils '
     + 'apparaissent sur le relev\u00e9 mensuel d\u2019heures. Ni un contrat de travail, ni un bulletin de paie.</div>';
 
-  var neuf = (typeof _planYearHasData==='function' && !_planYearHasData(yr));
-  if(neuf){
+  // ⚠️⚠️ CE BLOC DISAIT LE DÉFAUT AU LIEU DE L'ÉVITER (corrigé le 11/09/2026).
+  //   Il annonçait « les jours de semaine ne tombent pas aux mêmes dates » — c'était
+  //   vrai, et documenté jusque dans le guide public, pendant que la grille de l'app
+  //   affichait la même erreur SANS rien dire. Un document qui décrit son propre
+  //   défaut n'est pas un avertissement, c'est un correctif qu'on n'a pas écrit.
+  //   Les jours tombent désormais juste ; ce qui reste vrai, ce sont les trous.
+  //   ★ Le constat vient de `_planRecaleEtat`, la même source que le bandeau de la
+  //   grille : l'écran et le papier ne peuvent plus se contredire.
+  var _et=(typeof _planRecaleEtat==='function')?_planRecaleEtat(yr,grps.map(function(g){return g.id;})):null;
+  if(_et){
     lim += '<div class="mvdoc-lim"><b>L\u2019ann\u00e9e '+yr+' n\u2019a pas encore de mod\u00e8le enregistr\u00e9.</b> '
-        + 'Le document est construit sur le mod\u00e8le int\u00e9gr\u00e9, dont les jours sont cal\u00e9s sur un autre '
-        + 'calendrier : les jours de semaine ne tombent pas aux m\u00eames dates. Importez le planning de '
-        + 'l\u2019ann\u00e9e au format CSV avant de le diffuser \u00e0 l\u2019\u00e9quipe.</div>';
+        + 'Le document reprend le mod\u00e8le int\u00e9gr\u00e9, replac\u00e9 sur les bons jours de la semaine de '+yr+'. '
+        + (_et.trous
+            ? (_et.trous+' jour'+(_et.trous>1?'s':'')+' n\u2019'+(_et.trous>1?'ont':'a')+' pas d\u2019\u00e9quivalent d\u2019une ann\u00e9e '
+               + '\u00e0 l\u2019autre et rest'+(_et.trous>1?'ent':'e')+' \u00e0 poser : compl\u00e9tez le mod\u00e8le avant de diffuser '
+               + 'ce document \u00e0 l\u2019\u00e9quipe.')
+            : 'Aucun jour ne manque.')
+        + '</div>';
   }
 
 
