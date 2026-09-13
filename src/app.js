@@ -4542,7 +4542,7 @@ var _MV_REGL = {
   phyto:    { ov:'ovReglPhyto',    docs:'regl-docs-phyto',    titre:'Phyto' },
   reserve:  { ov:'ovReglReserve',  docs:'regl-docs-reserve',  titre:'R\u00e9serve' }
 };
-var _MV_REGL_DOC_ICO = { vignoble:'carte', saison:'graphique', csvJournal:'journal', csvParcelles:'liste', entretien:'outil', mois:'calendrier', releve:'personne', annuel:'calendrier', annuelNom:'personne', etp:'graphique', bilan:'graphique', phytoPdf:'eprouvette', phytoCsv:'liste', cuivre:'fiole', futs:'barrique', intrants:'carton' };
+var _MV_REGL_DOC_ICO = { vignoble:'carte', saison:'graphique', journal:'journal', csvJournal:'liste', csvParcelles:'liste', entretien:'outil', mois:'calendrier', releve:'personne', annuel:'calendrier', annuelNom:'personne', etp:'graphique', bilan:'graphique', phytoPdf:'eprouvette', phytoCsv:'liste', cuivre:'fiole', futs:'barrique', intrants:'carton' };
 function _mvReglDocs(mod){
   var cat=window.MV_DOCS; if(!Array.isArray(cat)) return [];
   var out=[];

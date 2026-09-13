@@ -10959,6 +10959,19 @@ var _ML_SEM = 4;             // horizon de l'agenda, en semaines
    celui-ci, et l'ecran ecrit « seuil general » a cote. Voir _vendDSec. */
 var _ML_D20_SEC = 996;       // densite 20 C : repli quand le degre est inconnu
 
+// ★★ AXE-1 — LE MOIS D'OUVERTURE DE LA CAMPAGNE, POUR LES REPLIS DE CE FICHIER.
+// utils.js porte la source unique (_mvCampagneMois). Ici on ne redefinit pas
+// l'axe : on lit le MEME reglage quand la source n'est pas encore chargee.
+// ⚠️ Sans ca, un repli fige a 8 rendrait un millesime faux les mois qui
+//    separent les deux mois d'ouverture — deux mois par an, sans rien afficher.
+function _mvCampMoisRepli(){
+  if(typeof window!=='undefined' && typeof window._mvCampagneMois==='function'){
+    try{ return window._mvCampagneMois(); }catch(e){ if(window.logError) window.logError({level:'info',cat:'cave',msg:'axe campagne illisible \u2014 repli sur le defaut'}); }
+  }
+  var v=parseInt((((typeof window!=='undefined'&&window.CONFIG)||{}).eco||{}).campagne_mois,10);
+  return (isNaN(v)||v<0||v>11)?7:v;
+}
+
 // ── dates ────────────────────────────────────────────────────────────────
 function _mlD(iso){ var p=String(iso).split('-'); return new Date(+p[0],+p[1]-1,+p[2]); }
 function _mlIso(d){
@@ -10978,7 +10991,11 @@ function _mlFrC(iso){ var d=_mlD(iso); return d.getDate()+' '+_ML_MOIS[d.getMont
 // lot : un cave.js neuf avec un utils.js ancien ne doit pas planter.
 function _mlCampagne(){
   if(typeof window._mvCampagneDe==='function') return window._mvCampagneDe(_mlAuj());
-  var p=_mlAuj().split('-'); return (+p[1]>=8)?(+p[0]):(+p[0]-1);
+  /* ★ AXE-1 : le repli lit le meme reglage que la source unique. Un repli qui
+     garde 8 en dur pendant que l'app est reglee sur octobre produit un
+     millesime faux DEUX MOIS PAR AN, en silence. */
+  var md=_mvCampMoisRepli()+1;
+  var p=_mlAuj().split('-'); return (+p[1]>=md)?(+p[0]):(+p[0]-1);
 }
 function _mlMilActif(){ return _mlMil!=null?_mlMil:_mlCampagne(); }
 // Le millesime affiche son propre seuil : _mlSeuil prend la cuvee quand on
@@ -12503,7 +12520,7 @@ function _pcavCampagne(){
   var iso=_mvToday();
   if(_pcavHas('_mvCampagneDe')){ try{ return window._mvCampagneDe(iso); }catch(e){ _pcavLog('campagne',e); } }
   var y=parseInt(iso.slice(0,4),10), m=parseInt(iso.slice(5,7),10);
-  return m>=8?y:y-1;
+  return m>=_mvCampMoisRepli()+1?y:y-1;   /* ★ AXE-1 : meme reglage que la source */
 }
 
 // Phase du calendrier : elle decide de l'ORDRE des blocs, jamais de leur
@@ -12763,7 +12780,7 @@ function _pcavN1(c,mil){
   if(!rows) return '';
   return _pcavCard(_mvIcon('chrono',16),'#8A5A38','Face à l’an dernier',
     'campagne '+(_m-1)+'-'+_m, rows,
-    'Comparaison par campagne, du 1<sup>er</sup> août au 31 juillet — le même axe que les Archives. Le rendement moyen ne porte que sur les parcelles réellement récoltées.');
+    'Comparaison par campagne — le même axe que les Archives, sur le mois d’ouverture réglé dans le Pilotage. Le rendement moyen ne porte que sur les parcelles réellement récoltées.');
 }
 
 // ── Onglet 2 : assemblage ────────────────────────────────────────────
@@ -13692,10 +13709,19 @@ function _rmDate(iso){
 function _rmCampagne(iso){
   if(typeof window !== 'undefined' && typeof window._mvCampagneDe === 'function')
     return window._mvCampagneDe(iso);
+  var md = _mvCampMoisRepli()+1;          /* ★ AXE-1 */
   var p = String(iso||'').split('-');
   var a = parseInt(p[0],10), m = parseInt(p[1],10);
-  if(!a || !m){ var d = new Date(); return (d.getMonth()+1 >= 8) ? d.getFullYear() : d.getFullYear()-1; }
-  return (m >= 8) ? a : (a - 1);
+  if(!a || !m){ var d = new Date(); return ((d.getMonth()+1) >= md) ? d.getFullYear() : d.getFullYear()-1; }
+  return (m >= md) ? a : (a - 1);
+}
+/* Libelle de la fenetre d'une campagne, pour les en-tetes de documents. */
+function _rmBornesLbl(c){
+  if(typeof window !== 'undefined' && typeof window._mvCampagneBornes === 'function'){
+    try{ var b = window._mvCampagneBornes(c); if(b && b.lbl) return b.lbl; }
+    catch(e){ if(window.logError) window.logError({level:'info',cat:'cave',msg:'bornes de campagne illisibles \u2014 libelle de repli'}); }
+  }
+  return '1\u1D49\u02B3 ao\u00fbt ' + c + ' \u2192 31 juillet ' + (c+1);
 }
 
 /* ── Le detail lisible d'une manipulation ──────────────────────────
@@ -13919,7 +13945,7 @@ function _rmDoc(CAVE_VENDANGE, CAVE_ELEVAGE, DOM, campagne, millesime){
         ? ('<span>Mill\u00e9sime <b>' + millesime + '</b></span>'
            + '<span>toutes les manipulations de ce vin, de la cuve au f\u00fbt</span>')
         : ('<span>Campagne <b>' + campagne + '\u2013' + (campagne+1) + '</b></span>'
-           + '<span>du 1<sup>er</sup> ao\u00fbt ' + campagne + ' au 31 juillet ' + (campagne+1) + '</span>'))
+           + '<span>' + _rmEsc(_rmBornesLbl(campagne)) + '</span>'))
     + '<span>\u00e9dit\u00e9 le ' + jj + '</span></div></div>';
 
   /* ── les deux chiffres qu'un contrôle regarde en premier ── */
@@ -14184,13 +14210,25 @@ function _bcMois(iso){
 function _bcCampagne(iso){
   if(typeof window !== 'undefined' && typeof window._mvCampagneDe === 'function')
     return window._mvCampagneDe(iso);
+  var md = _mvCampMoisRepli()+1;          /* ★ AXE-1 */
   var p = String(iso||'').split('-');
   var a = parseInt(p[0],10), m = parseInt(p[1],10);
-  if(!a || !m){ var d = new Date(); return (d.getMonth()+1 >= 8) ? d.getFullYear() : d.getFullYear()-1; }
-  return (m >= 8) ? a : (a-1);
+  if(!a || !m){ var d = new Date(); return ((d.getMonth()+1) >= md) ? d.getFullYear() : d.getFullYear()-1; }
+  return (m >= md) ? a : (a-1);
 }
 /* Bornes d'une campagne : 1er aout -> 31 juillet, la meme partout. */
-function _bcBornes(c){ return {d0:c + '-08-01', d1:(c+1) + '-07-31'}; }
+/* ★ AXE-1 : les bornes viennent de _mvCampagneBornes (utils.js), pas d'ici.
+   Elles etaient ecrites en dur a quatre endroits ; le jour ou le mois
+   d'ouverture est devenu un reglage, trois d'entre eux auraient menti.
+   Repli en dur conserve : un cave.js neuf sur un utils.js ancien ne plante pas. */
+function _bcBornes(c){
+  if(typeof window!=='undefined' && typeof window._mvCampagneBornes==='function'){
+    try{ var b=window._mvCampagneBornes(c); if(b&&b.d0&&b.d1) return {d0:b.d0, d1:b.d1, lbl:b.lbl, court:b.court}; }
+    catch(e){ if(window.logError) window.logError({level:'info',cat:'cave',msg:'bornes de campagne illisibles \u2014 repli 1er aout'}); }
+  }
+  return {d0:c + '-08-01', d1:(c+1) + '-07-31',
+          lbl:'1\u1D49\u02B3 ao\u00fbt '+c+' \u2192 31 juillet '+(c+1), court:c+'\u2013'+(c+1)};
+}
 
 /* ── LA VIGNE : ce qui a ete fait, depuis le journal ───────────────
    ⚠️ Le journal porte une entree par VALIDATION. Une parcelle relevee
@@ -14351,7 +14389,7 @@ function _bcDoc(ctx, DOM, c, mil){
     + '<div class="bc-hero-y">' + c + '\u2013' + (c+1)
     + (d.memeAxe ? '' : ' \u00b7 mill\u00e9sime ' + d.millesime) + '</div>'
     + '<div class="bc-hero-c"><span>' + e(DOM.commune||'') + '</span>'
-    + '<span>du 1<sup>er</sup> ao\u00fbt ' + c + ' au 31 juillet ' + (c+1) + '</span>'
+    + '<span>' + e(d.bornes.lbl || ('du 1er ao\u00fbt ' + c + ' au 31 juillet ' + (c+1))) + '</span>'
     + '<span>\u00e9dit\u00e9 le ' + jj + '</span></div></div>';
 
   /* ── les quatre chiffres de l'année ── */

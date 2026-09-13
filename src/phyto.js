@@ -993,13 +993,28 @@ function _phCsvJour(t){
 //    deja vecu), et un export vide sans explication est pire que pas d'option.
 // ⚠️ Repli complet : si utils.js ne fournit pas _mvExercice, l'option disparait et
 //    « tout le registre » reste toujours la — le bouton ne peut jamais rester muet.
+// \u2605\u2605\u2605 AXE-1 \u2014 LES FENETRES VIENNENT DE utils.js, ELLES NE SONT PLUS DEFINIES ICI.
+// Deux defauts corriges d'un coup :
+//   \u2460 la ligne « Campagne consultee » nommait CAMPAGNE une PERIODE de travail.
+//     Trois sens pour un mot, dans une app ou le bilan et les Archives en ont un
+//     quatrieme. Un vigneron qui sortait « la campagne » ici et « la campagne »
+//     la-bas obtenait deux perimetres, sans qu'aucun ecran ne le dise.
+//   \u2461 la vraie campagne (l'axe des Archives) n'etait pas proposee du tout.
+// \u26a0\ufe0f Repli local conserve, comportement de l'ancienne version, si utils.js est
+//   anterieur a ce lot : un phyto.js neuf sur un utils.js ancien ne plante pas.
 function _phytoFenetres(){
+  if(typeof window._mvFenetresAnnee === 'function'){
+    try{
+      var L = window._mvFenetresAnnee({campagnes:3, exercices:2});
+      if(L && L.length) return L;
+    }catch(e){ if(window.logError) window.logError({level:'info',cat:'phyto',msg:'liste des fenetres illisible \u2014 repli local'}); }
+  }
   var out = [];
   if(typeof window._mvExercice === 'function'){
     var ex = null;
-    try{ ex = window._mvExercice(); }catch(e){ ex = null; }
+    try{ ex = window._mvExercice(); }catch(e2){ ex = null; }
     if(ex && ex.d0 && ex.d1){
-      out.push({ k:'ex', lbl:'Exercice en cours',
+      out.push({ k:'ex', axe:'exercice', lbl:'Exercice en cours',
                  sub:(ex.lbl || (_phCsvDate(ex.d0)+' \u2192 '+_phCsvDate(ex.d1))),
                  d0:ex.d0, d1:ex.d1 });
     }
@@ -1007,13 +1022,14 @@ function _phytoFenetres(){
   var nom = (typeof window._visuSaison === 'function') ? window._visuSaison() : '';
   var s   = (nom && typeof window._saisonObj === 'function') ? window._saisonObj(nom) : null;
   if(s && s.debut && s.fin){
-    out.push({ k:'camp', lbl:'Campagne consult\u00e9e',
-               sub:nom+' \u2014 du '+_phCsvDate(s.debut)+' au '+_phCsvDate(s.fin),
+    out.push({ k:'per', axe:'periode', lbl:'P\u00e9riode de travail \u2014 '+nom,
+               sub:'du '+_phCsvDate(s.debut)+' au '+_phCsvDate(s.fin),
                d0:s.debut, d1:s.fin });
   }
-  out.push({ k:'tout', lbl:'Tout le registre', sub:'depuis la mise en service', d0:'', d1:'' });
+  out.push({ k:'tout', axe:'tout', lbl:'Tout le registre', sub:'depuis la mise en service', d0:'', d1:'' });
   return out;
 }
+window._phytoFenetres = _phytoFenetres;
 // Nombre de TRAITEMENTS dans une fenetre (pas de lignes : on ne construit rien ici).
 // ⚠️ Volontairement leger — un comptage complet a chaque ouverture du panneau
 //    ressemblerait a « le bouton ne marche pas ».
@@ -1084,15 +1100,20 @@ window._phytoCsvRows = function(fen){
 // Panneau de choix de la fenetre. Ouvert par le bouton d'export (appel sans argument),
 // donc index.html n'a pas a etre touche. Porte aussi l'AIDE : ce que contient la
 // colonne de surface, dit au seul moment ou la question se pose.
-function _phytoExportChoix(){
+// \u2605 AXE-1 : `cible` vaut 'csv' (defaut, comportement d'origine) ou 'pdf'.
+// Le PDF sortait SANS AUCUNE BORNE en se titrant « Campagne <nom de la periode
+// active> » \u2014 un registre reglementaire de cinq ans presente comme une annee.
+// Les deux documents passent desormais par la meme question et la meme liste.
+function _phytoExportChoix(cible){
   if(!_phytoExportGarde()) return;
+  var pdf = (cible === 'pdf');
   var ovId = 'ovPhytoExport';
   var ov = document.getElementById(ovId);
   if(!ov){
     ov = document.createElement('div'); ov.id = ovId; ov.className = 'overlay';
     ov.setAttribute('onclick', "closeOv(event,'"+ovId+"')");
     ov.innerHTML = `<div class="ov-panel"><div class="ov-drag"></div>
-      <div class="ov-hd"><div class="ov-title">Exporter le registre</div><div class="ov-close" onclick="closeOv(null,'${ovId}')">${_mvIcon('croix',18)}</div></div>
+      <div class="ov-hd"><div class="ov-title" id="phx-title">Exporter le registre</div><div class="ov-close" onclick="closeOv(null,'${ovId}')">${_mvIcon('croix',18)}</div></div>
       <div id="phx-body" style="padding:0 20px 20px;overflow-y:auto;max-height:70vh"></div>
       <div style="padding:0 20px 16px">
         <button class="mbtn" onclick="closeOv(null,'${ovId}')" style="width:100%;font-family:Outfit,sans-serif;font-size:13px;padding:12px;border-radius:12px;border:1.5px solid var(--gris);background:var(--bg-card);color:var(--texte-doux);cursor:pointer;min-height:44px">Annuler</button>
@@ -1105,7 +1126,9 @@ function _phytoExportChoix(){
   F.forEach(function(f, i){
     var n = _phytoFenCompte(f);
     var acc = (i===0);
-    h += `<button onclick="_phytoExportCsv('${f.k}')" style="width:100%;display:block;text-align:left;background:var(--bg-card);border:1.5px solid ${acc?'#5A2D8E':'var(--gris)'};border-radius:12px;padding:14px 16px;margin-bottom:10px;cursor:pointer;font-family:Outfit,sans-serif;min-height:44px">
+    var _k = (typeof _escAttr==='function') ? _escAttr(f.k) : String(f.k);
+    var appel = pdf ? ("exportPDFPhyto('"+_k+"')") : ("_phytoExportCsv('"+_k+"')");
+    h += `<button onclick="${appel}" style="width:100%;display:block;text-align:left;background:var(--bg-card);border:1.5px solid ${acc?'#5A2D8E':'var(--gris)'};border-radius:12px;padding:14px 16px;margin-bottom:10px;cursor:pointer;font-family:Outfit,sans-serif;min-height:44px">
       <span style="display:block;font-size:14px;font-weight:600;color:var(--texte)">${_escHtml(f.lbl)}</span>
       <span style="display:block;font-size:11px;color:var(--texte-doux);margin-top:3px;line-height:1.4">${_escHtml(f.sub)}</span>
       <span style="display:block;font-size:11px;color:${n?'#5A2D8E':'var(--texte-doux)'};font-weight:600;margin-top:5px">${n} traitement${n>1?'s':''}</span>
@@ -1117,8 +1140,13 @@ function _phytoExportChoix(){
     </div>`;
   var body = ov.querySelector('#phx-body');
   if(body) body.innerHTML = h;
+  /* \u26a0\ufe0f L'overlay est cree UNE fois puis reutilise : son titre doit etre reecrit
+     a chaque ouverture, sinon le second document herite du libelle du premier. */
+  var ttl = ov.querySelector('#phx-title');
+  if(ttl) ttl.textContent = pdf ? 'Imprimer le registre' : 'Exporter le registre';
   openOv(ovId);
 }
+window._phytoExportChoix = _phytoExportChoix;
 
 // Sans argument : ouvre le choix de fenetre (c'est le clic sur le bouton d'export).
 // Avec une cle de fenetre : construit et telecharge.

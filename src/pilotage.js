@@ -529,7 +529,7 @@ function _pilCmpPeriode(nom){
 // Position d'une periode sur l'axe campagne : sa campagne, et son rang en jours depuis le 1er aout.
 function _pilCmpOffset(deb){
   var an=_arcCampagneDe(deb);
-  return {an:an, off:_arcN(deb)-_arcN(an+'-08-01')};
+  return {an:an, off:_arcN(deb)-_arcN(_arcBornes(an).d0)};   /* ★ AXE-1 */
 }
 // Ecart maximal tolere entre deux periodes homologues d'une campagne a l'autre. 75 jours laissent
 // passer un printemps ouvert le 1er mars une annee et le 5 avril la suivante, sans jamais confondre
@@ -7602,6 +7602,133 @@ function _pexSetMois(v){
 }
 window._pexSetMois=_pexSetMois;
 
+// ── Reglage : mois d'ouverture de la CAMPAGNE (l'annee vigne) ────────
+// ★★★ AXE-1. Meme patron que _pexSetMois, et il vit a cote de lui A DESSEIN :
+// les deux cadres annuels du domaine se reglent au meme endroit, sinon on en
+// deplace un en oubliant l'autre — c'est exactement ce qui produit deux
+// chiffres plausibles pour la meme annee.
+// ⚠️ Contrairement a l'exercice, celui-ci CHANGE des chiffres deja affiches :
+//   les Archives, le bilan de campagne, le millesime en cours pres d'une
+//   bascule. On le dit dans le toast, on ne le laisse pas decouvrir.
+function _pilSetCampMois(v){
+  if(!(typeof window.isAdmin==='function' && window.isAdmin())){
+    if(window.showToast) window.showToast('R\u00e9serv\u00e9 \u00e0 l\u2019administrateur','#C0392B');
+    return;
+  }
+  var m=parseInt(v,10); if(isNaN(m)||m<0||m>11) return;
+  var cur=(typeof window._mvCampagneMois==='function')?window._mvCampagneMois():7;
+  if(m===cur) return;
+  if(typeof window._ecoCfgSet==='function') window._ecoCfgSet('eco','campagne_mois',m);
+  var after=(typeof window._mvCampagneMois==='function')?window._mvCampagneMois():7;
+  if(after!==m){
+    if(window.showToast) window.showToast('R\u00e9glage non enregistr\u00e9 \u2014 mise \u00e0 jour de R\u00e9glages requise','#B85A1A');
+    return;
+  }
+  _pilExoOublier();
+  _pecSaveSt();
+  if(window.showToast) window.showToast('Ann\u00e9e vigne mise \u00e0 jour \u2014 Archives et bilan recadr\u00e9s','#3D6B27');
+  _pilFillContent(_pilData());
+}
+window._pilSetCampMois=_pilSetCampMois;
+
+// \u2605\u2605\u2605 OU TOMBE LA VENDANGE DANS UNE CAMPAGNE OUVERTE AU MOIS `md`.
+// Ce n'est pas un reglage de MOIS, c'est un reglage de CAMPAGNE : une campagne
+// est un cycle de production, et ce qui le borne est la vendange. Le mois n'est
+// que la traduction de ce choix en calendrier.
+// \u26a0\ufe0f Ne PAS confondre avec `ann.align`, qui mesure la meme chose contre
+//   l'EXERCICE COMPTABLE. Les deux questions sont differentes, et la reponse ne
+//   se lit pas pareil : un exercice est une DONNEE du comptable, on constate ou
+//   tombe la vendange dedans (\u00a734). Une campagne, elle, n'appartient qu'au
+//   domaine \u2014 rien d'exterieur n'impose qu'elle coupe sa propre recolte en deux.
+function _pilCampVend(md){
+  var ann=null; try{ ann=_pilAnnuelData(); }catch(e){ ann=null; }
+  if(!ann || !ann.vend || !ann.vend.debut || !ann.vend.fin) return null;
+  var vd=ann.vend.debut, vf=ann.vend.fin;
+  function bornes(an){
+    var fin=new Date(an+1, md, 0), mm=md+1, fm=fin.getMonth()+1, fj=fin.getDate();
+    return {d0:an+'-'+(mm<10?'0':'')+mm+'-01',
+            d1:fin.getFullYear()+'-'+(fm<10?'0':'')+fm+'-'+(fj<10?'0':'')+fj};
+  }
+  /* \u2605\u2605 LA CAMPAGNE CANDIDATE SE DEDUIT DE `md`, JAMAIS DE L'AXE EN VIGUEUR.
+     \u26a0\ufe0f DEFAUT VECU, trouve par le banc de documents : on prenait
+     _arcCampagneDe(aujourd'hui) \u2014 qui lit le reglage COURANT \u2014 puis on bornait
+     avec le mois CANDIDAT. Des que les deux different, c'est-a-dire des qu'on
+     deroule le selecteur (l'usage meme de l'ecran), la vendange tombait hors
+     des bornes : `pos` montait au-dessus de 1 et `clot` (pos>=0.72) passait a
+     vrai. L'ecran annonçait qu'une vendange CLOTURAIT la campagne qu'elle
+     OUVRE, et le bouton de calage disparaissait. La question posee est \u00ab si
+     j'ouvre en <md>, ou tombe ma recolte ? \u00bb : la reponse ne peut pas dependre
+     du reglage actuel.
+     \u26a0 Les 33 assertions du harnais AXE-1 lisaient ce code sans l'executer et
+       le trouvaient bon. */
+  var mdp=md+1, pv=String(vd).split('-'), pan=parseInt(pv[0],10), pmo=parseInt(pv[1],10);
+  var c=(pmo>=mdp)?pan:(pan-1);
+  var b=bornes(c);
+  var coupe=(vf>b.d1);          /* le debut est dans la fenetre par construction */
+  var s=_arcN(b.d0), e=_arcN(b.d1), pos=(_arcN(vd)-s)/Math.max(1,(e-s));
+  return {debut:vd, fin:vf, coupe:coupe, pos:pos,
+          clot:(!coupe && pos>=0.72), ouvre:(!coupe && pos<0.28),
+          moisIdeal:(ann.align&&ann.align.moisIdeal!=null)?ann.align.moisIdeal:null};
+}
+
+// Le bloc de reglage, rendu sous celui de l'exercice.
+function _pilCampMoisChoix(){
+  var cur=(typeof window._mvCampagneMois==='function')?window._mvCampagneMois():7;
+  var lbl=window.MV_EX_MOIS_LBL||['janvier','f\u00e9vrier','mars','avril','mai','juin','juillet','ao\u00fbt','septembre','octobre','novembre','d\u00e9cembre'];
+  var admin=!!(typeof window.isAdmin==='function' && window.isAdmin());
+  var opts=lbl.map(function(nm,i){ return '<option value="'+i+'"'+(i===cur?' selected':'')+'>1er '+nm+'</option>'; }).join('');
+  var b=_arcBornes(_arcCampagneDe(_mvToday()));
+  var V=_pilCampVend(cur);
+
+  /* \u2605 CE QUE LE CADRE FAIT DE LA VENDANGE \u2014 constate, jamais prescrit.
+     Sans vendange datee on ne devine pas : la ligne dit qu'elle ne sait pas,
+     plutot que de laisser croire que le cadre est bon. */
+  var etat='';
+  if(!V){
+    etat='<div class="pex-sets" style="margin-top:9px">Aucune vendange dat\u00e9e\u00a0: impossible de dire '
+        +'o\u00f9 elle tombe dans ce cadre. Datez la fen\u00eatre de la t\u00e2che Vendange (roue crant\u00e9e, '
+        +'fen\u00eatres des t\u00e2ches).</div>';
+  } else {
+    var dit = V.coupe
+      ? '<b>votre vendange est coup\u00e9e en deux</b> par cette borne\u00a0: une partie de la r\u00e9colte '
+        +'compte dans une campagne, le reste dans la suivante'
+      : (V.clot
+          ? 'votre vendange <b>cl\u00f4ture</b> cette campagne\u00a0: le cycle se ferme sur la r\u00e9colte qu\u2019il a produite'
+          : (V.ouvre
+              ? 'votre vendange <b>ouvre</b> cette campagne\u00a0: elle compte avec les travaux qui feront la '
+                +'r\u00e9colte <em>suivante</em>'
+              : 'votre vendange tombe <b>au milieu</b> de cette campagne'));
+    etat='<div class="pex-sets" style="margin-top:9px">Vendange du <b>'+_pilEsc(_pilDfr(V.debut))
+        +'</b> au <b>'+_pilEsc(_pilDfr(V.fin))+'</b>\u00a0: '+dit+'.</div>';
+    /* Le geste, seulement quand il y a quelque chose a faire, et seulement pour
+       un admin. Il porte le mois DEDUIT de la vendange du domaine \u2014 jamais un
+       mois choisi d'avance : c'est la difference entre un reglage de campagne et
+       un conseil generique. */
+    if(admin && V.moisIdeal!=null && V.moisIdeal!==cur && (V.coupe || !V.clot)){
+      etat+='<button class="arc-cmp" style="margin-top:9px" '
+          +'onclick="window._pilSetCampMois&&window._pilSetCampMois('+Number(V.moisIdeal)+')">'
+          +_mvIcon('raisin',16)+' Caler la campagne sur ma vendange (1<sup>er</sup> '
+          +_pilEsc(lbl[V.moisIdeal])+')</button>';
+    }
+  }
+
+  return '<div class="pec-card"><div class="pec-cb">'
+    +'<div class="pex-set"><div><div class="pex-setl">'+_mvIcon('raisin',16)+' Le cadre de votre campagne'
+    +(typeof _mvInfoBtn==='function'?(' '+_mvInfoBtn('pil.camp.mois')):'')+'</div>'
+    +'<div class="pex-sets">'+(admin
+      ? 'Une campagne est un <b>cycle de production</b>, et ce qui le borne est la <b>vendange</b>\u00a0: '
+        +'le mois n\u2019est que la traduction de ce choix en calendrier. C\u2019est l\u2019axe des Archives et du '
+        +'bilan de campagne. Contrairement \u00e0 l\u2019exercice comptable ci-dessus, <b>rien d\u2019ext\u00e9rieur ne '
+        +'vous l\u2019impose</b>. Le changer <b>recadre des chiffres d\u00e9j\u00e0 affich\u00e9s</b>\u00a0; il ne touche '
+        +'ni au mill\u00e9sime d\u2019un vin, ni \u00e0 vos p\u00e9riodes de travail.'
+      : ''+_mvIcon('cadenas',16)+' Lecture seule \u2014 seul un administrateur peut changer le cadre des campagnes.')+'</div></div>'
+    +'<select class="pex-selm"'+(admin?'':' disabled')+' onchange="window._pilSetCampMois&&window._pilSetCampMois(this.value)">'+opts+'</select>'
+    +'</div>'
+    +'<div class="pex-sets" style="margin-top:9px">Campagne en cours\u00a0: <b>'+_pilEsc(b.lbl||'')+'</b></div>'
+    +etat
+    +'</div></div>';
+}
+
 // ── Vue « Exercice » ────────────────────────────────────────────────
 function _pexBarreEx(E){
   var list=(typeof window._mvExerciceList==='function')?window._mvExerciceList(4):[];
@@ -8438,6 +8565,7 @@ function _pexView(){
     + _pexTableAch(E)
     + _pexTableDep(E)
     + _pexMoisChoix()
+    + _pilCampMoisChoix()          /* ★ AXE-1 : les deux cadres annuels, cote a cote */
     + _pexFutChoix();
 }
 
@@ -8664,7 +8792,28 @@ function _arcISO(n){ return new Date(n*864e5).toISOString().slice(0,10); }
 // sert aussi pour « Le millesime ». Repli local conserve si utils.js est anterieur.
 function _arcCampagneDe(iso){
   if(typeof window._mvCampagneDe==='function') return window._mvCampagneDe(iso);
-  var p=String(iso).split('-'); return (+p[1]>=8)?(+p[0]):(+p[0]-1);
+  /* ★ AXE-1 : le repli lit le meme reglage que la source, jamais 8 en dur. */
+  var md=_arcCampMois()+1;
+  var p=String(iso).split('-'); return (+p[1]>=md)?(+p[0]):(+p[0]-1);
+}
+// ★★ AXE-1 — LES BORNES D'UNE CAMPAGNE, EN UN SEUL ENDROIT DANS CE FICHIER.
+// Elles etaient recopiees en dur trois fois ('-08-01' / '-07-31') : l'offset de
+// _pilCmpOffset, la frise d'_arcLigne et l'echelle de _pilTabArc. Le jour ou le
+// mois d'ouverture devient un reglage, trois copies en dur, c'est trois ecrans
+// qui se contredisent — et une frise decalee ne LEVE AUCUNE ALARME.
+function _arcCampMois(){
+  if(typeof window._mvCampagneMois==='function'){ try{ return window._mvCampagneMois(); }
+    catch(e){ if(window.logError) window.logError({level:'info',cat:'pilotage',msg:'axe campagne illisible \u2014 repli sur le defaut'}); } }
+  var v=parseInt(((window.CONFIG&&window.CONFIG.eco)||{}).campagne_mois,10);
+  return (isNaN(v)||v<0||v>11)?7:v;
+}
+function _arcBornes(an){
+  if(typeof window._mvCampagneBornes==='function'){
+    try{ var b=window._mvCampagneBornes(an); if(b&&b.d0&&b.d1) return b; }
+    catch(e){ if(window.logError) window.logError({level:'info',cat:'pilotage',msg:'bornes de campagne illisibles \u2014 repli 1er aout'}); }
+  }
+  return {an:an, d0:an+'-08-01', d1:(an+1)+'-07-31', court:an+'\u2013'+(an+1),
+          lbl:'1\u1D49\u02B3 ao\u00fbt '+an+' \u2192 31 juillet '+(an+1)};
 }
 // Heures d'une periode = celles figees dans l'instantane pris a la cloture. Une periode jamais
 // cloturee n'en a pas : elle se voit sur la frise, elle ne compte pas d'heures.
@@ -8673,7 +8822,7 @@ function _arcHeures(nom){
   return (h&&h.stats&&h.stats.hFaites)||0;
 }
 function _arcLigne(an,list,cur){
-  var a=_arcN(an+'-08-01'), b=_arcN((an+1)+'-07-31');
+  var _b=_arcBornes(an), a=_arcN(_b.d0), b=_arcN(_b.d1);   /* ★ AXE-1 */
   var pc=function(d){ return Math.max(0,Math.min(100,(_arcN(d)-a)/(b-a)*100)); };
   var col=window._cmpCouleur||function(){ return '#8A5A38'; };
   var segs=list.slice().sort(function(x,y){ return String(x.debut).localeCompare(String(y.debut)); })
@@ -8687,7 +8836,7 @@ function _arcLigne(an,list,cur){
   var h=list.reduce(function(n,s){ return n+_arcHeures(s.nom); },0);
   var meta=list.length+' période'+(list.length>1?'s':'');
   meta+=h>0 ? (' · '+_pilHa(h)+' h') : ' · pas d’instantané';
-  return '<div class="arc-row"><div class="arc-lab"><span class="y">Campagne '+an+'–'+(an+1)
+  return '<div class="arc-row"><div class="arc-lab"><span class="y">Campagne '+_pilEsc(_b.court||(an+'–'+(an+1)))   /* ★ AXE-1 */
     +(cur?' <em>en cours</em>':'')+'</span><span class="m">'+meta+'</span></div>'
     +'<div class="arc-fr'+(cur?' cur':' old')+'">'+segs+'</div></div>';
 }
@@ -8700,10 +8849,15 @@ function _pilTabArc(d){
   var keys=Object.keys(par).map(Number).sort(function(x,y){ return y-x; });
   var anCur=_arcCampagneDe(_mvToday());
   var hTot=S.reduce(function(n,s){ return n+_arcHeures(s.nom); },0);
-  var h='<div class="arc-intro">Toutes les campagnes sur le même axe, <b>1ᵉʳ août → 31 juillet</b> : '
+  /* ★ AXE-1 : l'axe est un reglage, l'intro le LIT. Elle l'annonçait en dur —
+     un domaine regle sur octobre lisait « 1er août → 31 juillet » sous une frise
+     qui commençait en octobre. Un ecran qui recite un reglage qu'il n'a pas lu
+     est pire qu'un ecran muet : il fait croire que le reglage a rate. */
+  var _bc=_arcBornes(anCur);
+  var h='<div class="arc-intro">Toutes les campagnes sur le même axe, <b>'+_pilEsc(_bc.lbl||'1ᵉʳ août → 31 juillet')+'</b> : '
     +'de récolte à récolte, l’hiver n’est pas coupé en deux. D’une ligne à l’autre, on lit le '
     +'décalage des travaux.</div>';
-  h+=(window._cmpEchelle?window._cmpEchelle(_arcN(anCur+'-08-01'),_arcN((anCur+1)+'-07-31')):'');
+  h+=(window._cmpEchelle?window._cmpEchelle(_arcN(_bc.d0),_arcN(_bc.d1)):'');
   h+=keys.map(function(k){ return _arcLigne(k,par[k],k===anCur); }).join('');
   h+='<div class="arc-kpi">'
     +'<div><div class="v">'+keys.length+'</div><div class="l">campagne'+(keys.length>1?'s':'')+'</div></div>'

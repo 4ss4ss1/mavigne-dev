@@ -23,7 +23,7 @@ export const GT_ADMIN_EMAIL = 'ngdevpro@gmail.com';
 // WHATS_NEW   : tableau vide = modal desactive pour cette version.
 // Format item : { emoji:'📅', titre:'Titre court', desc:'Phrase utilisateur.' }
 // Regle : seulement les changements visibles par les utilisateurs.
-export const APP_VERSION = '7.17';
+export const APP_VERSION = '7.18';
 // ════ Journal des nouveautés (récap cumulatif) ════
 // Une entrée par version, la PLUS RÉCENTE EN HAUT : { v:'5.10', items:[ {emoji,titre,desc}, … ] }
 // À chaque release visible → AJOUTER un bloc en tête (ne pas remplacer). items:[] = release technique (rien à afficher).
@@ -710,6 +710,42 @@ window._mvGraphRepeindre = function(){
 };
 
 export const WHATS_NEW = [
+  { v: '7.18', items: [
+    { emoji: 'raisin', titre: 'Le cadre de votre campagne se r\u00e8gle enfin',
+      desc: "L\u2019application datait vos campagnes <b>du 1<sup>er</sup> ao\u00fbt au 31 juillet</b>, sans "
+        + "que vous puissiez y toucher. Or une campagne est un <b>cycle de production</b>, et ce qui "
+        + "le borne, c\u2019est votre <b>vendange</b>. Sur le cadre d\u2019ao\u00fbt elle tombe dans les premiers "
+        + "jours\u00a0: elle <b>ouvre</b> l\u2019ann\u00e9e au lieu de la clore, et la campagne 2025-2026 associait "
+        + "la r\u00e9colte de 2025 aux travaux qui feraient le mill\u00e9sime 2026. <b>Le cadre de la campagne "
+        + "se r\u00e8gle</b> d\u00e9sormais, dans la roue du Pilotage, juste sous celui de l\u2019exercice "
+        + "comptable\u00a0: vos deux ann\u00e9es au m\u00eame endroit. L\u2019\u00e9cran vous dit o\u00f9 tombe <b>votre</b> "
+        + "vendange dans le cadre choisi \u2014 elle l\u2019ouvre, elle la cl\u00f4t, ou la borne la coupe en deux "
+        + "\u2014 et le mois qu\u2019il propose est celui qui suit la fin de vos vendanges, lu dans vos propres "
+        + "dates. Rien ne bouge tant que vous n\u2019y touchez pas, et ce choix ne change ni le "
+        + "mill\u00e9sime d\u2019un vin, ni vos p\u00e9riodes de travail." },
+    { emoji: 'journal', titre: 'Imprimer tout ce qui a \u00e9t\u00e9 fait sur une ann\u00e9e',
+      desc: "Il manquait le document le plus simple\u00a0: la <b>liste</b> des interventions sur une "
+        + "ann\u00e9e. Le bilan de campagne la r\u00e9sumait t\u00e2che par t\u00e2che, le fichier Excel du journal "
+        + "sortait tout l\u2019historique d\u2019un bloc. Le <b>journal des interventions</b> (Documents \u2039 Suivi "
+        + "du domaine) se demande sur la campagne, sur l\u2019exercice comptable ou sur une p\u00e9riode de "
+        + "travail, et rend trois sections dat\u00e9es\u00a0: travaux de la vigne, sessions tracteur, "
+        + "traitements. Le panneau annonce le nombre d\u2019interventions <b>avant</b> d\u2019imprimer." },
+    { emoji: 'eprouvette', titre: 'Le registre phyto imprim\u00e9 sortait toutes vos ann\u00e9es',
+      desc: "Le PDF n\u2019\u00e9tait born\u00e9 par <b>aucune date</b>\u00a0: il imprimait la totalit\u00e9 des "
+        + "traitements depuis la mise en service, en se titrant \u00ab\u00a0Campagne\u00a0\u00bb suivi du nom de "
+        + "votre p\u00e9riode de travail en cours \u2014 et l\u2019attestation \u00e0 signer, en bas, certifiait "
+        + "\u00ab\u00a0pour la campagne\u00a0\u00bb ce m\u00eame nom. Le fichier Excel du m\u00eame registre, lui, \u00e9tait "
+        + "correctement born\u00e9 depuis des semaines. <b>Le PDF pose maintenant la m\u00eame question</b>, "
+        + "porte ses vraies dates sur la couverture, dans la mention r\u00e9glementaire et dans "
+        + "l\u2019attestation, et compte les traitements sans date qu\u2019il a d\u00fb \u00e9carter." },
+    { emoji: 'boussole', titre: 'Le mot \u00ab\u00a0campagne\u00a0\u00bb voulait dire trois choses',
+      desc: "Selon l\u2019\u00e9cran, il d\u00e9signait l\u2019axe des Archives, le cycle d\u2019une vendange \u00e0 la "
+        + "suivante, ou simplement votre <b>p\u00e9riode de travail</b> en cours \u2014 l\u2019export phyto "
+        + "proposait ainsi une \u00ab\u00a0campagne consult\u00e9e\u00a0\u00bb qui \u00e9tait un printemps. Tous les documents "
+        + "dat\u00e9s lisent d\u00e9sormais <b>la m\u00eame liste de fen\u00eatres</b>, o\u00f9 chacune porte son nom\u00a0: "
+        + "campagne, exercice comptable, p\u00e9riode de travail. Quand deux d\u2019entre elles tombent aux "
+        + "m\u00eames dates, la liste le dit au lieu de vous laisser choisir au hasard." }
+  ] },
   { v: '7.17', items: [
     { emoji: 'reveil', titre: 'Une saisie faite \u00e0 minuit et demie \u00e9tait dat\u00e9e de la veille',
       desc: "L\u2019application prenait la date sur l\u2019horloge de r\u00e9f\u00e9rence mondiale, pas sur la v\u00f4tre. "
@@ -2972,7 +3008,8 @@ var MV_AIDE = {
   pilotage: {
     ico: 'graphique', titre: 'Pilotage', ancre: 'pilotage',
     points: [
-      ['Presque tout se lit, quatre choses s’écrivent', ": les chiffres viennent du journal, du planning, des sessions tracteur et de la cave. Ce qui s’écrit ici est nommé : les prix des achats (Économie), l’ordre de passage (Décider), le mois d’ouverture de l’exercice (L’année), et ce que porte la roue crantée."],
+      ['Presque tout se lit, cinq choses s’écrivent', ": les chiffres viennent du journal, du planning, des sessions tracteur et de la cave. Ce qui s’écrit ici est nommé : les prix des achats (Économie), l’ordre de passage (Décider), le mois d’ouverture de l’exercice comptable et celui de l’année vigne (roue crantée, Économie › Exercice), et ce que porte la roue crantée."],
+      ['Vos deux années se règlent au même endroit', ": la roue crantée porte l’ouverture de l’<b>exercice comptable</b> — celui de votre bilan, fixé par votre comptable — et, juste dessous, le <b>cadre de votre campagne</b>, l’axe des Archives et du bilan de campagne. Une campagne est un cycle de production : ce qui la borne, c’est la <b>vendange</b>, et le mois n’en est que la traduction. L’écran dit où tombe la vôtre dans le cadre choisi — elle l’ouvre, elle la clôt, ou la borne la coupe en deux — et propose le mois qui suit la fin de vos vendanges. Le changer recadre des chiffres déjà affichés, jamais vos saisies."],
       ['La roue crantée', "en haut à droite ouvre ce qui se règle : objectifs de fin, fenêtres des tâches, hypothèses de calcul, IFT de référence — et le bilan de campagne à imprimer. Administrateur seulement."],
       ['Les cartes arrivent repliées', ": chaque bloc montre son <b>chiffre</b> et la ligne qui dit sur quoi il a été calculé, même fermé — rien n’est caché. Touchez-en une pour voir son détail : elle s’ouvre en grand, et la précédente se referme, pour que les autres restent rangées côte à côte."],
       ['Le petit rond « i » dit d’où vient un chiffre', ": touchez-le, une fiche s’ouvre et explique comment ce chiffre est calculé, sur quelle fenêtre, et ce qu’il ne dit pas. Ce qui <b>cadre</b> un chiffre — sa date, sa source, son périmètre — reste toujours affiché à côté de lui, en une ligne. C’est la méthode qui se range, jamais le cadre."],
@@ -3368,6 +3405,31 @@ export const MV_INFO = {
     'L\u2019écart entre les deux, ce sont donc précisément <b>les congés et les absences rémunérées</b>. Il est normal ; c\u2019est son évolution qui parle.',
     'Une <b>ligne d\u2019équipe</b> compte son effectif réel, jour par jour : une équipe de quatre sur trois jours vaut douze journées-personne, pas trois.',
     '\u{1F512} Ce tableau nomme la rémunération de chaque personne : il est réservé aux administrateurs, comme partout ailleurs dans Ma Vigne.'
+  ] },
+
+  'pil.camp.mois': { t: 'Le mois o\u00f9 s\u2019ouvre votre ann\u00e9e vigne', p: [
+    'Votre domaine a <b>deux ann\u00e9es</b>, et elles ne r\u00e9pondent pas \u00e0 la m\u00eame question. L\u2019<b>exercice comptable</b> est celui de votre bilan, fix\u00e9 par votre comptable. L\u2019<b>ann\u00e9e vigne</b> est un cycle de production : c\u2019est l\u2019axe des Archives et du bilan de campagne.',
+    'Ce qui borne un cycle, c\u2019est la <b>vendange</b> : le mois d\u2019ouverture n\u2019en est que la traduction en calendrier. Par d\u00e9faut la campagne s\u2019ouvre le <b>1<sup>er</sup> ao\u00fbt</b> ; sur ce cadre, la vendange tombe dans les premiers jours : elle <b>ouvre</b> l\u2019ann\u00e9e au lieu de la clore, et la campagne associe une r\u00e9colte aux travaux qui feront la <b>suivante</b>.',
+    'L\u2019\u00e9cran vous dit o\u00f9 tombe <b>votre</b> vendange dans le cadre choisi \u2014 elle l\u2019ouvre, elle la cl\u00f4t, ou elle est <b>coup\u00e9e en deux</b> par la borne. Le mois propos\u00e9 est celui qui suit la fin de vos vendanges, lu dans vos propres dates : ce n\u2019est pas un mois choisi d\u2019avance.',
+    'Une vendange coup\u00e9e en deux campagnes n\u2019a, elle, aucune raison d\u2019exister : contrairement \u00e0 l\u2019exercice comptable, <b>rien d\u2019ext\u00e9rieur ne vous impose ce cadre</b>.',
+    'Ce que ce r\u00e9glage change : les <b>Archives</b>, le <b>bilan de campagne</b>, les fen\u00eatres propos\u00e9es dans les documents dat\u00e9s, et le mill\u00e9sime consid\u00e9r\u00e9 comme «\u00a0en cours\u00a0» pr\u00e8s d\u2019une bascule.',
+    'Ce qu\u2019il ne change <b>pas</b> : le mill\u00e9sime d\u2019un vin, qui reste l\u2019ann\u00e9e civile de sa vendange \u2014 une campagne en contient toujours deux ; vos <b>p\u00e9riodes de travail</b>, qui gardent leurs dates ; et votre exercice comptable, qui se r\u00e8gle juste au-dessus.',
+    'Attention : le d\u00e9placer <b>recadre des chiffres d\u00e9j\u00e0 affich\u00e9s</b> : une m\u00eame journ\u00e9e de travail peut passer d\u2019une campagne \u00e0 l\u2019autre. Rien n\u2019est perdu, tout est recompt\u00e9.'
+  ] },
+
+  'doc.fenetres': { t: 'Sur quelle p\u00e9riode porte un document', p: [
+    'Trois cadres vous sont propos\u00e9s, et ils portent chacun leur nom. La <b>campagne</b> est votre ann\u00e9e vigne, l\u2019axe des Archives. L\u2019<b>exercice comptable</b> est celui du bilan. La <b>p\u00e9riode de travail</b> est l\u2019une de vos saisons dat\u00e9es \u2014 un printemps, un hiver \u2014, jamais une ann\u00e9e enti\u00e8re.',
+    'Quand deux cadres tombent aux <b>m\u00eames dates</b>, la liste le dit plut\u00f4t que de masquer une ligne : deux r\u00e9ponses identiques \u00e0 deux questions diff\u00e9rentes, c\u2019est une information.',
+    'Le nombre annonc\u00e9 sous chaque choix est <b>compt\u00e9 pour de vrai</b>, avant d\u2019imprimer. C\u2019est ce qui \u00e9vite de sortir trente pages pour d\u00e9couvrir qu\u2019on avait pris la mauvaise fen\u00eatre.',
+    'Une saisie <b>sans date</b> n\u2019appartient \u00e0 aucune fen\u00eatre : elle sort du document born\u00e9, et le document le dit au lieu de la taire.'
+  ] },
+
+  'doc.journal': { t: 'Le journal des interventions', p: [
+    'La <b>liste</b> de ce qui a \u00e9t\u00e9 fait, jour par jour, sur la fen\u00eatre que vous choisissez. \u00c0 c\u00f4t\u00e9 : le <b>bilan de campagne</b> r\u00e9sume la m\u00eame mati\u00e8re t\u00e2che par t\u00e2che, et le <b>fichier Excel du journal</b> sort tout l\u2019historique sans bornes, pour le retrier vous-m\u00eame.',
+    'Trois sections, <b>trois sources distinctes</b> : les travaux valid\u00e9s au journal, les sessions du module Tracteur, les traitements. Elles <b>ne s\u2019additionnent pas</b> \u2014 un rognage peut figurer \u00e0 la fois en session tracteur et en travail valid\u00e9. Le document donne trois compteurs nomm\u00e9s, jamais leur somme.',
+    'La <b>surface cumul\u00e9e</b> additionne les passages : une parcelle relev\u00e9e trois fois compte trois fois sa surface. C\u2019est l\u2019effort r\u00e9el, pas un doublon \u2014 le nombre de <b>parcelles touch\u00e9es</b>, lui, ne les compte qu\u2019une fois.',
+    'N\u2019y figurent pas : les travaux <b>non valid\u00e9s</b> (en cours, annul\u00e9s) et les relev\u00e9s m\u00e9t\u00e9o.',
+    '\u00c9tat interne : il pr\u00e9sente ce que vous avez saisi et ne tient lieu d\u2019aucune d\u00e9claration. Pour un contr\u00f4le phyto, c\u2019est le <b>registre phytosanitaire</b> qui fait foi.'
   ] },
 
   'pil.exo.remarques': { t: 'Les remarques du moment', p: [
@@ -4635,13 +4697,114 @@ function _mvModsDefaut(roles) {
 window._MV_MODS_ROLE = _MV_MODS_ROLE;
 window._mvModsDefaut = _mvModsDefaut;
 
+// ★★★ AXE-1 — LE MOIS D'OUVERTURE DE LA CAMPAGNE EST UN REGLAGE.
+// Il valait 8 en dur (1er aout -> 31 juillet). C'est l'usage de reference, ce
+// n'est pas l'usage de tout le monde : sur bien des domaines l'annee vigne va
+// d'octobre a septembre, pour que la VENDANGE CLOTURE le cycle qu'elle
+// aboutit, au lieu de l'ouvrir. Avec aout, la campagne 2025-2026 associe la
+// vendange 2025 aux travaux qui produiront le millesime 2026 : le document le
+// dit, mais le cadre reste faux pour qui compte autrement.
+// ⚠️ DEFAUT 7 (aout) : aucun domaine existant ne bouge sans le demander.
+// ⚠️⚠️ Ce reglage ne touche PAS le millesime (annee civile de vendange, §11c) :
+//   une campagne contient deux millesimes quel que soit son mois d'ouverture.
+var MV_CAMP_MOIS_DEF = 7;                     // aout — l'usage historique
+function _mvCampagneMois(){
+  var v=parseInt(((window.CONFIG&&window.CONFIG.eco)||{}).campagne_mois,10);
+  return (isNaN(v)||v<0||v>11)?MV_CAMP_MOIS_DEF:v;
+}
+// Campagne CONTENANT une date. Le numero est celui de l'annee d'OUVERTURE :
+// avec un mois d'ouverture en octobre, le 6 septembre 2026 est encore sur 2025.
 function _mvCampagneDe(iso){
+  var md=_mvCampagneMois()+1;                 // 1-12, pour comparer au mois ISO
   var p=String(iso||'').split('-');
   var an=parseInt(p[0],10), mo=parseInt(p[1],10);
-  if(!an||!mo) { var d=new Date(); return (d.getMonth()+1>=8)?d.getFullYear():d.getFullYear()-1; }
-  return (mo>=8)?an:(an-1);
+  if(!an||!mo) { var d=new Date(); return ((d.getMonth()+1)>=md)?d.getFullYear():d.getFullYear()-1; }
+  return (mo>=md)?an:(an-1);
+}
+// ★★ SOURCE UNIQUE DES BORNES. Elles etaient recopiees a quatre endroits en
+//    dur ('-08-01' / '-07-31') : cave.js (bilan), pilotage.js (archives, frise).
+//    new Date(an+1, md, 0) rend le dernier jour du mois precedent l'annee
+//    suivante, y compris md=0 (campagne civile : 1er janv -> 31 dec).
+function _mvCampagneBornes(c){
+  c=parseInt(c,10); if(isNaN(c)) c=_mvCampagneDe(_mvAujIso());
+  var md=_mvCampagneMois();
+  var fin=new Date(c+1, md, 0);
+  var mm=md+1, fm=fin.getMonth()+1, fj=fin.getDate();
+  return {
+    an:c, mois:md, civil:(md===0),
+    d0:c+'-'+(mm<10?'0':'')+mm+'-01',
+    d1:fin.getFullYear()+'-'+(fm<10?'0':'')+fm+'-'+(fj<10?'0':'')+fj,
+    court:(md===0)?String(c):(c+'\u2013'+(c+1)),
+    lbl:(md===0)
+      ? ('Ann\u00e9e civile '+c)
+      : ('1\u1D49\u02B3 '+MV_EX_MOIS_LBL[md]+' '+c+' \u2192 '+fj+' '+MV_EX_MOIS_LBL[fin.getMonth()]+' '+fin.getFullYear())
+  };
 }
 window._mvCampagneDe      = _mvCampagneDe;
+window._mvCampagneMois    = _mvCampagneMois;
+window._mvCampagneBornes  = _mvCampagneBornes;
+
+// ════════════════════════════════════════════════════════════════════════════
+// ★★★ LES FENETRES D'UNE ANNEE — la liste unique que lisent les documents
+//
+// Un document date doit dire SUR QUOI il porte, et deux documents qui disent
+// « la campagne » doivent parler de la meme chose. Avant ce lot, le mot servait
+// a trois sens : l'axe 1er aout, l'« annee vigne » du Pilotage (d'apres une
+// vendange a la fin de la suivante) et, dans l'export phyto, la PERIODE de
+// travail consultee. Un vigneron qui sortait deux registres « de la campagne »
+// obtenait deux perimetres.
+//
+// ⚠️ La periode de travail garde son nom : « periode », jamais « campagne ».
+// ⚠️ La derniere entree n'a pas de bornes ('' / '') : c'est « tout », et un
+//    lecteur doit tester d0 ET d1 avant de filtrer.
+// ════════════════════════════════════════════════════════════════════════════
+function _mvFenetresAnnee(opt){
+  opt=opt||{};
+  var out=[], nCamp=parseInt(opt.campagnes,10), nExo=parseInt(opt.exercices,10);
+  if(isNaN(nCamp)) nCamp=3;
+  if(isNaN(nExo))  nExo=2;
+  var auj=(typeof _mvAujIso==='function')?_mvAujIso():new Date().toISOString().slice(0,10);
+
+  // 1) Les campagnes, la plus recente d'abord. C'est l'annee de TRAVAIL.
+  var cCur=_mvCampagneDe(auj);
+  for(var i=0;i<nCamp;i++){
+    var b=_mvCampagneBornes(cCur-i);
+    out.push({k:'camp'+(cCur-i), axe:'campagne',
+              lbl:'Campagne '+b.court+(i===0?' (en cours)':''),
+              sub:b.lbl, d0:b.d0, d1:b.d1});
+  }
+  // 2) Les exercices comptables. Ils peuvent coincider avec la campagne — on le
+  //    DIT plutot que de masquer la ligne : deux cadres qui tombent ensemble,
+  //    c'est une information, pas un doublon a cacher.
+  if(typeof _mvExerciceList==='function'){
+    var L=[]; try{ L=_mvExerciceList(nExo)||[]; }catch(e){ L=[]; }
+    L.forEach(function(x,j){
+      if(!x||!x.d0||!x.d1) return;
+      var meme=out.some(function(f){ return f.axe==='campagne' && f.d0===x.d0 && f.d1===x.d1; });
+      out.push({k:'exo'+x.an, axe:'exercice',
+                lbl:'Exercice comptable '+x.court+(j===0?' (en cours)':''),
+                sub:x.lbl+(meme?' \u2014 m\u00eames dates que la campagne':''),
+                d0:x.d0, d1:x.d1});
+    });
+  }
+  // 3) La periode de travail consultee — nommee periode, jamais campagne.
+  var nom=(typeof window._visuSaison==='function')?window._visuSaison():'';
+  var s=(nom && typeof window._saisonObj==='function')?window._saisonObj(nom):null;
+  if(s && s.debut && s.fin){
+    out.push({k:'per', axe:'periode', lbl:'P\u00e9riode de travail \u2014 '+nom,
+              sub:'du '+_mvFenFr(s.debut)+' au '+_mvFenFr(s.fin), d0:s.debut, d1:s.fin});
+  }
+  // 4) Tout. Sans bornes : c'est ce qui rend le filtre facultatif chez l'appelant.
+  out.push({k:'tout', axe:'tout', lbl:'Tout l\u2019historique',
+            sub:'depuis la mise en service', d0:'', d1:''});
+  return out;
+}
+function _mvFenFr(iso){
+  var p=String(iso||'').split('-');
+  return (p.length===3)?(p[2]+'/'+p[1]+'/'+p[0]):String(iso||'');
+}
+window._mvFenetresAnnee   = _mvFenetresAnnee;
+window._mvFenFr           = _mvFenFr;
 
 // ════════════════════════════════════════════════════════════════════════════
 // LE PARC A FUTS — mouvements d'entree et de sortie

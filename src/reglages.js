@@ -3187,7 +3187,7 @@ function deleteHistoSnapshot(nomSaison){
 var MV_DOCS = [
   // --- Obligatoire : ce qu'il faut pouvoir sortir en controle ---
   { f:'oblig', act:'phytoPdf',  mod:'phyto',    ico:'\u{1F9EA}', bg:'var(--phyto-pale)', fm:'pdf',
-    t:'Registre phytosanitaire', ask:'Toute la campagne',
+    t:'Registre phytosanitaire', ask:'Choix de la p\u00e9riode',
     s:'Tous les traitements avec AMM, dose, d\u00e9lai avant r\u00e9colte et d\u00e9lai de rentr\u00e9e.' },
   { f:'oblig', act:'phytoCsv',  mod:'phyto',    ico:'\u{1F4CA}', bg:'var(--vert-pale)',  fm:'csv',
     t:'Registre phyto \u2014 fichier Excel', ask:'', urgent:true,
@@ -3210,6 +3210,12 @@ var MV_DOCS = [
     s:'Les douze mois d\u2019une seule personne, born\u00e9s \u00e0 ses contrats, avec ses jours de formation et ses cong\u00e9s d\u00e9j\u00e0 pos\u00e9s. La feuille qu\u2019elle emporte.' },
 
   // --- Suivi du domaine : des etats internes, jamais des declarations ---
+  // \u2605 AXE-1 : la LISTE des interventions sur une fenetre choisie. Le bilan de
+  //   campagne la RESUME (un agregat par tache), le CSV du journal la sort BRUTE
+  //   et sans borne : entre les deux, il manquait le document qu'on imprime.
+  { f:'suivi', act:'journal',   mod:'vigne',    ico:_mvIcon('journal',20), bg:'var(--or-pale)', fm:'pdf', ov:true,
+    t:'Journal des interventions', ask:'Campagne, exercice ou p\u00e9riode',
+    s:'Tout ce qui a \u00e9t\u00e9 fait sur la fen\u00eatre choisie, jour par jour\u00a0: travaux de la vigne, sessions tracteur et traitements.' },
   { f:'suivi', act:'vignoble',  mod:'vigne',    ico:'\u{1F5FA}\u{FE0F}', bg:'var(--vert-pale)', fm:'pdf', ov:true,
     t:'\u00c9tat du vignoble', ask:'Tri des parcelles',
     s:'Toutes vos parcelles sur une page : surface, c\u00e9page, commune, avancement, dernier travail, dernier rendement \u2014 et ce qui reste \u00e0 renseigner.' },
@@ -3253,8 +3259,8 @@ var MV_DOCS = [
 
   // --- Donnees brutes ---
   { f:'brut',  act:'csvJournal',   mod:'vigne', ico:'\u{1F4CB}', bg:'var(--vert-pale)',  fm:'csv',
-    t:'Journal des travaux', ask:'Par date, puis par parcelle',
-    s:'Toutes les entr\u00e9es avec date, parcelle, t\u00e2che, ouvrier et statut.' },
+    t:'Journal des travaux \u2014 fichier Excel', ask:'Par date, puis par parcelle',
+    s:'Toutes les entr\u00e9es depuis la mise en service \u2014 sans bornes de date \u2014 avec parcelle, t\u00e2che, ouvrier et statut. Pour une ann\u00e9e pr\u00e9cise, pr\u00e9f\u00e9rez le journal des interventions.' },
   { f:'brut',  act:'csvParcelles', mod:'vigne', ico:'\u{1F5FA}\u{FE0F}', bg:'var(--or-pale)', fm:'csv',
     t:'Avancement par parcelle', ask:'Par parcelle, de A \u00e0 Z',
     s:'Une ligne par parcelle, une colonne par t\u00e2che.' },
@@ -3401,6 +3407,7 @@ window.docsGo=function(i){
     case 'cuverie':      fn=window._cuvExportChoix;        break;
     case 'elevage':      fn=window.openOvCaveExport;       break;
     case 'entretien':    fn=window.ouvrirExportEntretien;  break;
+    case 'journal':      fn=window.exportJournalInterventions; break;   /* \u2605 AXE-1 */
     case 'csvJournal':   fn=window.exportCSVJournal;       break;
     case 'csvParcelles': fn=window.exportCSVParcelles;     break;
     case 'json':         fn=window.exportJSON;             break;
@@ -3556,6 +3563,316 @@ function exportCSVJournal(){
   dlFile('\uFEFF'+csv,`mavigne_journal_${date}.csv`,'text/csv;charset=utf-8');
   showExportFeedback(`${travaux.length} entrées exportées en CSV !`);
 }
+
+// ═══════════════════════════════════════════════════════════════════════════
+// ★★★ AXE-1 — LE JOURNAL DES INTERVENTIONS
+//
+// Ce qui manquait : « imprimer tout ce qui a ete fait sur l'annee ». L'app
+// savait le resumer (bilan de campagne : un agregat par tache) et savait le
+// sortir brut (CSV du journal : TOUT l'historique, sans borne), mais aucun
+// document ne donnait la LISTE des interventions sur une fenetre choisie.
+//
+// ★★ TROIS SOURCES, TROIS SECTIONS, ET ON NE LES ADDITIONNE PAS.
+//   le journal (travail a la vigne) · les sessions (tracteur) · les
+//   traitements (phyto). Un total unique les melangerait : un rognage passe
+//   en session tracteur ET valide au journal serait compte deux fois. Le
+//   document donne trois compteurs nommes, jamais leur somme.
+//
+// ⚠️ LA SURFACE TRAVAILLEE ADDITIONNE LES PASSAGES. Le journal porte une
+//   entree par VALIDATION : une parcelle relevee trois fois y figure trois
+//   fois — c'est l'effort reel, et c'est voulu (cf. _bcVigne). Le document
+//   l'ECRIT a cote du chiffre : un chiffre juste mais mal lu vaut un chiffre
+//   faux, et celui-la se lit spontanement comme un doublon.
+// ═══════════════════════════════════════════════════════════════════════════
+var _JIV_CSS =
+ '*{margin:0;padding:0;box-sizing:border-box}'
++'body{font-family:Outfit,system-ui,sans-serif;color:#1A1A14;background:#fff;font-size:11px}'
++'@page{size:A4 portrait;margin:11mm}'
++'.jiv-cov{background:#2A1A10;color:#fff;padding:22px 26px;display:flex;align-items:flex-end;justify-content:space-between;gap:16px}'
++'.jiv-k{font-size:9px;letter-spacing:3px;text-transform:uppercase;opacity:.45;margin-bottom:5px}'
++'.jiv-t{font-family:"Cormorant Garamond",Georgia,serif;font-size:27px;font-weight:700;line-height:1.05}'
++'.jiv-s{opacity:.72;font-size:12px;margin-top:4px}'
++'.jiv-m{text-align:right;opacity:.55;font-size:10px;line-height:1.6}'
++'.jiv-kpi{display:flex;gap:10px;padding:14px 26px 4px;flex-wrap:wrap}'
++'.jiv-kc{flex:1;min-width:110px;border:1px solid #E3DFD4;border-radius:11px;padding:9px 12px}'
++'.jiv-kv{font-family:"Cormorant Garamond",Georgia,serif;font-size:23px;font-weight:700;color:#2A1A10;line-height:1.05}'
++'.jiv-kl{font-size:9.5px;text-transform:uppercase;letter-spacing:.8px;color:#7A7A6A;font-weight:600;margin-top:2px}'
++'.jiv-ks{font-size:9.5px;color:#8A8A7A;margin-top:2px;line-height:1.35}'
++'.jiv-sec{padding:16px 26px 0;break-inside:auto}'
++'.jiv-st{font-family:"Cormorant Garamond",Georgia,serif;font-size:19px;font-weight:700;color:#2A1A10;'
+        +'border-bottom:2px solid #2A1A10;padding-bottom:4px;margin-bottom:3px}'
++'.jiv-sx{font-size:10px;color:#7A7A6A;margin-bottom:8px;line-height:1.45}'
++'table{width:100%;border-collapse:collapse}'
++'th{font-size:8.5px;text-transform:uppercase;letter-spacing:.7px;color:#7A7A6A;text-align:left;'
+   +'padding:5px 6px;border-bottom:1px solid #D8D3C6;font-weight:700}'
++'td{padding:4px 6px;border-bottom:1px solid #EFEBE1;vertical-align:top;line-height:1.35}'
++'tr{break-inside:avoid}'
++'.jiv-mo td{background:#F4F1E8;font-weight:700;font-size:10px;text-transform:uppercase;'
+            +'letter-spacing:1px;color:#5A4A38;padding:5px 6px}'
++'.r{text-align:right;font-variant-numeric:tabular-nums}.c{text-align:center}'
++'.mut{color:#8A8A7A}.b{font-weight:600}'
++'.tag{display:inline-block;font-size:8.5px;font-weight:700;padding:1px 6px;border-radius:20px}'
++'.tg-ok{background:#E3EDDD;color:#2C6E29}.tg-w{background:#F7F1D9;color:#7D6608}'
++'.tg-n{background:#EFEFE9;color:#7A7A6A}'
++'.jiv-vide{font-style:italic;color:#8A8A7A;padding:9px 0;font-size:10.5px}'
++'.jiv-note{margin:16px 26px 0;background:#F4F1E8;border-radius:11px;padding:11px 13px;'
+           +'font-size:9.5px;color:#5A4A38;line-height:1.55}'
++'.jiv-ft{margin-top:16px;padding:9px 26px;border-top:1px solid #D8D3C6;display:flex;'
+         +'justify-content:space-between;font-size:8.5px;color:#8A8A7A}';
+
+function _jivEsc(s){ return String(s==null?'':s)
+  .replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;'); }
+var _JIV_MOIS=['janvier','f\u00e9vrier','mars','avril','mai','juin','juillet',
+               'ao\u00fbt','septembre','octobre','novembre','d\u00e9cembre'];
+function _jivJ(iso){ var p=String(iso||'').split('-');
+  return (p.length===3)?(parseInt(p[2],10)+'/'+p[1]):'\u2014'; }
+function _jivMoisLbl(iso){ var p=String(iso||'').split('-');
+  return (p.length>=2)?(_JIV_MOIS[parseInt(p[1],10)-1]+' '+p[0]):''; }
+function _jivDansFen(iso,d0,d1){
+  if(!d0||!d1) return !!iso;
+  return !!iso && iso>=d0 && iso<=d1;
+}
+/* Le nom des gens sur une entree : l'ouvrier seul, ou l'equipe entiere.
+   ⚠️ JOURNAL.membresEquipe est la structure qui rend possible tout le reste
+   (§15) — la lire, jamais se contenter de `qui` quand elle est la. */
+function _jivQui(j){
+  var L=[]; if(j&&j.qui) L.push(j.qui);
+  ((j&&j.membresEquipe)||[]).forEach(function(n){ if(n && L.indexOf(n)<0) L.push(n); });
+  return L;
+}
+
+/* ── Le rassemblement, separe du rendu pour etre executable seul ── */
+function _jivData(fen){
+  var d0=(fen&&fen.d0)||'', d1=(fen&&fen.d1)||'';
+  var surf={}; (window.PARCELLES||[]).forEach(function(p){ if(p&&p.nom) surf[p.nom]=parseFloat(p.surface)||0; });
+
+  var jours={}, gens={}, parcs={}, surfCum=0, sansDate=0;
+  var trav=(window.JOURNAL||[]).filter(function(j){
+    if(!j || j.meteo) return false;
+    if(j.statut!=='Valid\u00e9') return false;        /* accentue : correspondance exacte (§15) */
+    if(!j.date){ sansDate++; return false; }
+    return _jivDansFen(j.date,d0,d1);
+  }).sort(function(a,b){
+    return String(a.date).localeCompare(String(b.date))
+        || String(a.parcelle||'').localeCompare(String(b.parcelle||''),'fr')
+        || String(a.tache||'').localeCompare(String(b.tache||''),'fr');
+  });
+  trav.forEach(function(j){
+    jours[j.date]=1;
+    if(j.parcelle && j.parcelle!=='Domaine'){ parcs[j.parcelle]=1; surfCum+=(surf[j.parcelle]||0); }
+    _jivQui(j).forEach(function(n){ gens[n]=1; });
+  });
+
+  var TL=window.TRACTEURS_LIST||[];
+  var sess=(window.SESSIONS||[]).filter(function(s){
+    return s && s.date && _jivDansFen(s.date,d0,d1);
+  }).sort(function(a,b){ return String(a.date).localeCompare(String(b.date)); });
+
+  var trt=(window.TRAITEMENTS||[]).filter(function(t){
+    return t && t.date && _jivDansFen(t.date,d0,d1);
+  }).sort(function(a,b){ return String(a.date).localeCompare(String(b.date)); });
+
+  return {
+    d0:d0, d1:d1, borne:!!(d0&&d1), sansDate:sansDate,
+    trav:trav, sess:sess, trt:trt, TL:TL, surf:surf,
+    jours:Object.keys(jours).length, gens:Object.keys(gens).length,
+    parcs:Object.keys(parcs).length, surfCum:surfCum
+  };
+}
+
+/* ── Le document ── */
+function _jivDoc(D, fen){
+  var e=_jivEsc, DOM=window.DOMAINE_NOM||'Domaine';
+  var a=new Date();
+  var jj=String(a.getDate()).padStart(2,'0')+'/'+String(a.getMonth()+1).padStart(2,'0')+'/'+a.getFullYear();
+  var fenTxt=D.borne
+    ? ('du '+(window._mvFenFr?window._mvFenFr(D.d0):D.d0)+' au '+(window._mvFenFr?window._mvFenFr(D.d1):D.d1))
+    : 'tout l\u2019historique';
+
+  var h='<div class="jiv-cov"><div><div class="jiv-k">Ma Vigne \u00b7 \u00e9tat interne</div>'
+    +'<div class="jiv-t">Journal des interventions</div>'
+    +'<div class="jiv-s">'+e((fen&&fen.lbl)||'')+'</div></div>'
+    +'<div class="jiv-m">'+e(DOM)+'<br>'+e(fenTxt)+'<br>\u00e9dit\u00e9 le '+jj+'</div></div>';
+
+  /* Quatre compteurs, chacun nomme. Jamais un total qui melange les sources. */
+  function kpi(v,l,s){ return '<div class="jiv-kc"><div class="jiv-kv">'+v+'</div>'
+    +'<div class="jiv-kl">'+l+'</div>'+(s?('<div class="jiv-ks">'+s+'</div>'):'')+'</div>'; }
+  h+='<div class="jiv-kpi">'
+    +kpi(D.trav.length,'travaux valid\u00e9s',D.jours+' jour'+(D.jours>1?'s':'')+' avec du travail')
+    +kpi(D.sess.length,'sessions tracteur','')
+    +kpi(D.trt.length,'traitements','')
+    +kpi(D.parcs,'parcelles touch\u00e9es',
+         D.surfCum>0?((Math.round(D.surfCum*10)/10).toString().replace('.',',')+' ha cumul\u00e9s, passages compris'):'')
+    +'</div>';
+
+  /* ── 1) La vigne ── */
+  h+='<div class="jiv-sec"><div class="jiv-st">Travaux de la vigne</div>'
+    +'<div class="jiv-sx">Une ligne par validation. Une parcelle travaill\u00e9e en plusieurs passages '
+    +'appara\u00eet plusieurs fois\u00a0: c\u2019est l\u2019effort r\u00e9el, pas un doublon.</div>';
+  if(!D.trav.length){
+    h+='<div class="jiv-vide">Aucun travail valid\u00e9 sur cette p\u00e9riode.</div>';
+  }else{
+    h+='<table><thead><tr><th style="width:9%">Date</th><th style="width:24%">Parcelle</th>'
+      +'<th style="width:8%" class="r">Surface</th><th style="width:26%">T\u00e2che</th>'
+      +'<th style="width:33%">Qui</th></tr></thead><tbody>';
+    var moisCur='';
+    D.trav.forEach(function(j){
+      var m=_jivMoisLbl(j.date);
+      if(m!==moisCur){ moisCur=m; h+='<tr class="jiv-mo"><td colspan="5">'+e(m)+'</td></tr>'; }
+      var sf=(j.parcelle && j.parcelle!=='Domaine')?(D.surf[j.parcelle]||0):0;
+      var qui=_jivQui(j);
+      h+='<tr><td class="mut">'+_jivJ(j.date)+'</td>'
+        +'<td class="b">'+e(j.parcelle||'\u2014')+'</td>'
+        +'<td class="r mut">'+(sf>0?((Math.round(sf*100)/100).toString().replace('.',',')+' ha'):'\u2014')+'</td>'
+        +'<td>'+e(j.tache||'\u2014')+'</td>'
+        +'<td class="mut">'+(qui.length?e(qui.join(', ')):'\u2014')
+        +(j.equipe?' <span class="tag tg-n">\u00e9quipe</span>':'')+'</td></tr>';
+    });
+    h+='</tbody></table>';
+  }
+  h+='</div>';
+
+  /* ── 2) Le tracteur ── */
+  h+='<div class="jiv-sec"><div class="jiv-st">Travaux au tracteur</div>'
+    +'<div class="jiv-sx">Les sessions enregistr\u00e9es par le module Tracteur. Elles ne s\u2019additionnent '
+    +'pas aux travaux ci-dessus\u00a0: une m\u00eame op\u00e9ration peut figurer dans les deux.</div>';
+  if(!D.sess.length){
+    h+='<div class="jiv-vide">Aucune session sur cette p\u00e9riode.</div>';
+  }else{
+    h+='<table><thead><tr><th style="width:9%">Date</th><th style="width:28%">Activit\u00e9</th>'
+      +'<th style="width:19%">Machine</th><th style="width:19%">Conducteur</th>'
+      +'<th style="width:10%" class="r">Surface</th><th style="width:15%" class="c">\u00c9tat</th>'
+      +'</tr></thead><tbody>';
+    var mS='';
+    D.sess.forEach(function(s){
+      var m=_jivMoisLbl(s.date);
+      if(m!==mS){ mS=m; h+='<tr class="jiv-mo"><td colspan="6">'+e(m)+'</td></tr>'; }
+      var tn=''; for(var i=0;i<D.TL.length;i++){ if(D.TL[i] && D.TL[i].id===s.tracteurId){ tn=D.TL[i].nom||''; break; } }
+      var av=(s.avancement||0), fini=(av>=100||s.statut==='Valid\u00e9'||s.statut==='Termin\u00e9');
+      h+='<tr><td class="mut">'+_jivJ(s.date)+'</td>'
+        +'<td class="b">'+e(s.activite||'\u2014')+'</td>'
+        +'<td class="mut">'+e(tn||'\u2014')+'</td>'
+        +'<td class="mut">'+e(s.conducteur||'\u2014')+'</td>'
+        +'<td class="r mut">'+((s.surface!=null)?((Math.round((parseFloat(s.surface)||0)*100)/100).toString().replace('.',',')+' ha'):'\u2014')+'</td>'
+        +'<td class="c"><span class="tag '+(fini?'tg-ok':'tg-w')+'">'+e(s.statut||(av+'\u00a0%'))+'</span></td></tr>';
+    });
+    h+='</tbody></table>';
+  }
+  h+='</div>';
+
+  /* ── 3) La protection ── */
+  h+='<div class="jiv-sec"><div class="jiv-st">Traitements phytosanitaires</div>'
+    +'<div class="jiv-sx">Rappel de ce qui a \u00e9t\u00e9 appliqu\u00e9. Il ne remplace pas le '
+    +'<b>registre phytosanitaire</b>, seul document opposable en contr\u00f4le.</div>';
+  if(!D.trt.length){
+    h+='<div class="jiv-vide">Aucun traitement sur cette p\u00e9riode.</div>';
+  }else{
+    h+='<table><thead><tr><th style="width:9%">Date</th><th style="width:30%">Produit</th>'
+      +'<th style="width:15%">Dose</th><th style="width:30%">Parcelles</th>'
+      +'<th style="width:16%">Op\u00e9rateur</th></tr></thead><tbody>';
+    var mT='';
+    D.trt.forEach(function(t){
+      var m=_jivMoisLbl(t.date);
+      if(m!==mT){ mT=m; h+='<tr class="jiv-mo"><td colspan="5">'+e(m)+'</td></tr>'; }
+      var R=(typeof window._phResolve==='function')?window._phResolve(t):{};
+      var pl=t.parcelles;
+      var ptxt=(typeof pl==='string')?(pl||'Domaine entier')
+              :(!pl||!pl.length)?'Domaine entier'
+              :(pl.length<=3?pl.join(', '):(pl.slice(0,3).join(', ')+' +'+(pl.length-3)));
+      h+='<tr><td class="mut">'+_jivJ(t.date)+'</td>'
+        +'<td class="b">'+e(t.produit||'\u2014')+'</td>'
+        +'<td class="mut">'+e(R.dose||t.dose||'\u2014')+'</td>'
+        +'<td class="mut">'+e(ptxt)+'</td>'
+        +'<td class="mut">'+e(t.conducteur||t.operateur||'\u2014')+'</td></tr>';
+    });
+    h+='</tbody></table>';
+  }
+  h+='</div>';
+
+  /* ★ Ce que le document N'EST PAS : ecrit, pas devine. Un etat interne pris
+     pour une declaration est une faute qu'on ne decouvre qu'en controle. */
+  h+='<div class="jiv-note"><b>\u00c0 savoir.</b> \u00c9tat interne\u00a0: il pr\u00e9sente ce que vous avez saisi et '
+    +'ne tient lieu d\u2019aucune d\u00e9claration. Les trois sections viennent de trois sources distinctes '
+    +'et <b>ne s\u2019additionnent pas</b>. Les travaux non valid\u00e9s (en cours, annul\u00e9s) et les relev\u00e9s '
+    +'m\u00e9t\u00e9o n\u2019y figurent pas.'
+    +(D.sansDate?(' <b>'+D.sansDate+' entr\u00e9e'+(D.sansDate>1?'s':'')+' sans date</b> '
+       +(D.sansDate>1?'ont':'a')+' \u00e9t\u00e9 \u00e9cart\u00e9'+(D.sansDate>1?'es':'e')+'.'):'')
+    +'</div>';
+
+  h+='<div class="jiv-ft"><span>'+e(DOM)+' \u00b7 journal des interventions</span>'
+    +'<span>'+e(fenTxt)+'</span></div>';
+
+  return '<!DOCTYPE html><html lang="fr"><head><meta charset="utf-8">'
+    +'<title>Journal des interventions \u2014 '+e(DOM)+'</title>'
+    +'<link rel="stylesheet" href="/fonts/fonts.css">'
+    +'<style>'+_JIV_CSS+'</style></head><body>'+h
+    +'<scr'+'ipt>window.onload=function(){setTimeout(function(){window.print();},500);};</scr'+'ipt>'
+    +'</body></html>';
+}
+
+/* Sans argument : la question. Avec une cle de fenetre : le document.
+   ⚠️ Meme regle que le registre phyto — pas de repli « tout sortir » quand la
+   cle est inconnue : on repose la question. */
+window.exportJournalInterventions = function(mode){
+  if(typeof isAdmin==='function' && !isAdmin()){ showToast('R\u00e9serv\u00e9 \u00e0 l\u2019administrateur','#C0392B'); return; }
+  var F=[];
+  if(typeof window._mvFenetresAnnee==='function'){
+    try{ F=window._mvFenetresAnnee({campagnes:3, exercices:2})||[]; }catch(e){ F=[]; }
+  }
+  if(!F.length) F=[{k:'tout', axe:'tout', lbl:'Tout l\u2019historique', sub:'depuis la mise en service', d0:'', d1:''}];
+  var fen=null;
+  for(var i=0;i<F.length;i++){ if(F[i].k===mode){ fen=F[i]; break; } }
+  if(!fen){ _jivChoix(F); return; }
+
+  var D=_jivData(fen);
+  if(!D.trav.length && !D.sess.length && !D.trt.length){
+    showToast('Aucune intervention sur cette p\u00e9riode','#B85A1A'); return;
+  }
+  try{
+    var blob=new Blob([_jivDoc(D,fen)],{type:'text/html'});
+    var w=window.open(URL.createObjectURL(blob),'_blank');
+    if(!w){ showToast('Autorise les pop-ups pour imprimer','#B85A1A'); return; }
+    showExportFeedback((D.trav.length+D.sess.length+D.trt.length)+' intervention(s) \u2014 '+(fen.lbl||''));
+  }catch(err){ showToast('Impression impossible','#C0392B'); }
+};
+
+/* Le panneau de choix. Il porte le COMPTE de chaque fenetre : c'est ce qui
+   evite d'imprimer trente pages pour decouvrir qu'on a pris la mauvaise. */
+function _jivChoix(F){
+  var id='ovJivExport', ov=document.getElementById(id);
+  if(!ov){
+    ov=document.createElement('div'); ov.id=id; ov.className='overlay';
+    ov.setAttribute('onclick',"closeOv(event,'"+id+"')");
+    ov.innerHTML='<div class="ov-panel"><div class="ov-drag"></div>'
+      +'<div class="ov-hd"><div class="ov-title">Journal des interventions</div>'
+      +(typeof window._mvInfoBtn==='function'?('<div style="display:flex;align-items:center;padding:0 6px">'+window._mvInfoBtn('doc.journal')+'</div>'):'')
+      +'<div class="ov-close" onclick="closeOv(null,\'ovJivExport\')">'+_mvIcon('croix',18)+'</div></div>'
+      +'<div id="jiv-body" style="padding:0 20px 20px;overflow-y:auto;max-height:70vh"></div>'
+      +'<div style="padding:0 20px 16px"><button class="mbtn" onclick="closeOv(null,\'ovJivExport\')" '
+      +'style="width:100%;font-family:Outfit,sans-serif;font-size:13px;padding:12px;border-radius:12px;'
+      +'border:1.5px solid var(--gris);background:var(--bg-card);color:var(--texte-doux);cursor:pointer;'
+      +'min-height:44px">Annuler</button></div></div>';
+    document.body.appendChild(ov);
+  }
+  var _ib=(typeof window._mvInfoBtn==='function')?window._mvInfoBtn:function(){ return ''; };
+  var h='<div style="font-size:12px;color:var(--texte-doux);line-height:1.5;margin-bottom:14px">'
+    +'Sur quelle p\u00e9riode\u00a0? '+_ib('doc.fenetres')+'</div>';
+  F.forEach(function(f,i){
+    var D=_jivData(f), n=D.trav.length+D.sess.length+D.trt.length;
+    var acc=(i===0);
+    h+='<button onclick="window.exportJournalInterventions(\''+_escAttr(f.k)+'\')" '
+      +'style="width:100%;display:block;text-align:left;background:var(--bg-card);border:1.5px solid '
+      +(acc?'var(--vert,#3D6B27)':'var(--gris)')+';border-radius:12px;padding:14px 16px;margin-bottom:10px;'
+      +'cursor:pointer;font-family:Outfit,sans-serif;min-height:44px">'
+      +'<span style="display:block;font-size:14px;font-weight:600;color:var(--texte)">'+_escHtml(f.lbl)+'</span>'
+      +'<span style="display:block;font-size:11px;color:var(--texte-doux);margin-top:3px;line-height:1.4">'+_escHtml(f.sub||'')+'</span>'
+      +'<span style="display:block;font-size:11px;color:'+(n?'var(--vert,#3D6B27)':'var(--texte-doux)')
+      +';font-weight:600;margin-top:5px">'+n+' intervention'+(n>1?'s':'')+'</span></button>';
+  });
+  var body=ov.querySelector('#jiv-body'); if(body) body.innerHTML=h;
+  openOv(id);
+}
+
 function exportCSVParcelles(){
   if(!isAdmin())return;
   const tachesSaison=window.getTachesSaison();
@@ -4128,11 +4445,51 @@ function exportPDFMois(){
 
 
 // ════ EXPORT PDF REGISTRE PHYTO ════
-function exportPDFPhyto(){
+/* Date ISO -> jour en clair, pour les libelles de fenetre du registre.
+   Definie HORS de exportPDFPhyto : `fmtD` y est une closure, et l'appeler
+   depuis un gabarit compte comme une interpolation nue (cliquet C24c). */
+function _phytoFmtIso(iso){
+  var M=['janvier','f\u00e9vrier','mars','avril','mai','juin','juillet','ao\u00fbt',
+         'septembre','octobre','novembre','d\u00e9cembre'];
+  var p=String(iso||'').split('-');
+  if(p.length!==3) return '';
+  var m=parseInt(p[1],10);
+  return parseInt(p[2],10)+' '+(M[m-1]||'')+' '+p[0];
+}
+
+// \u2605\u2605\u2605 AXE-1 \u2014 CE DOCUMENT N'ETAIT BORNE PAR RIEN.
+// Il sortait `[...window.TRAITEMENTS]` en entier \u2014 tout l'historique \u2014 et se
+// titrait « Campagne <annee> » ou `annee` valait le NOM DE LA PERIODE ACTIVE
+// (« Printemps 2026 », « Hiver »...). L'attestation a signer disait « je
+// certifie l'exactitude [...] pour la campagne X ». Trois mensonges dans un
+// document reglementaire, et le CSV du MEME registre etait, lui, correctement
+// borne depuis des semaines : deux exports, deux perimetres.
+// \u2605 Sans argument : on pose la question (meme panneau que le CSV, meme liste).
+//   Avec une cle de fenetre : on filtre, et le document DIT sa fenetre.
+function exportPDFPhyto(mode){
   if(!isAdmin())return;
-  const saison=window.getSaisonActive();
-  const annee=saison.nom||new Date().getFullYear();
+  /* Aucune cle -> le panneau de choix. Le repli n'est PAS « tout sortir » :
+     un document non borne qui s'annonce borne est precisement le defaut corrige. */
+  if(!mode){
+    if(typeof window._phytoExportChoix==='function'){ window._phytoExportChoix('pdf'); return; }
+    mode='tout';                                  /* phyto.js ancien : on assume, et on le dit */
+  }
+  var _fen=null;
+  if(typeof window._phytoFenetres==='function'){
+    try{
+      var _F=window._phytoFenetres();
+      for(var _i=0;_i<_F.length;_i++){ if(_F[_i].k===mode){ _fen=_F[_i]; break; } }
+    }catch(e){ if(window.logError) window.logError({level:'info',cat:'reglages',msg:'fenetres du registre illisibles \u2014 document non borne'}); }
+  }
+  if(!_fen) _fen={k:'tout', axe:'tout', lbl:'Tout le registre', sub:'depuis la mise en service', d0:'', d1:''};
+  const _b0=_fen.d0||'', _b1=_fen.d1||'', _borne=!!(_b0&&_b1);
+  const annee=_fen.lbl||'';
   const today=new Date();
+  /* Les libelles de fenetre sont calcules ICI, une fois, et poses tels quels dans
+     les gabarits : une date ISO ne contient que des chiffres et des tirets, mais
+     une interpolation nue dans un gabarit HTML reste une interpolation nue. */
+  const _fenD0=_phytoFmtIso(_b0), _fenD1=_phytoFmtIso(_b1);
+  const _fenTxt=_borne?('du '+_fenD0+' au '+_fenD1):'depuis la mise en service';
   const moisNoms=['janvier','février','mars','avril','mai','juin','juillet','août','septembre','octobre','novembre','décembre'];
   const fmtD=d=>{if(!d)return'—';const a=d.split('-');return`${parseInt(a[2])} ${moisNoms[parseInt(a[1])-1]} ${a[0]}`;};
   const R=t=>window._phResolve?window._phResolve(t):{type:t.type||'—',amm:t.amm||'',dar:(t.dar!=null?t.dar:null),drae:t.drae||0,znt:(t.znt!=null?t.znt:null),sub:t.sub||'',dose:t.dose||''};
@@ -4143,7 +4500,17 @@ function exportPDFPhyto(){
   const haTot=actives.reduce((s,p)=>s+(p.surface||0),0);
   const parcTxt=t=>{const a=t.parcelles;if(typeof a==='string')return a||'Domaine entier';if(!a||!a.length)return 'Domaine entier';if(totAct&&a.length>=totAct)return `Domaine entier (${a.length})`;if(a.length<=3)return a.join(', ');return a.slice(0,3).join(', ')+` +${a.length-3}`;};
 
-  const data=[...(window.TRAITEMENTS||[])].sort((a,b)=>(a.date||'').localeCompare(b.date||''));
+  /* \u26a0\ufe0f Un traitement SANS DATE ne peut appartenir a aucune fenetre : il sort du
+     document borne, et le document le COMPTE plutot que de le taire. */
+  let _sansDate=0;
+  const data=[...(window.TRAITEMENTS||[])]
+    .filter(t=>{
+      if(!_borne) return true;
+      const j=String((t&&t.date)||'');
+      if(!j){ _sansDate++; return false; }
+      return (j>=_b0 && j<=_b1);
+    })
+    .sort((a,b)=>(a.date||'').localeCompare(b.date||''));
   const nbTotal=data.length;
   const cuivreItems=data.filter(t=>R(t).type==='Cuivre');
   const soufreItems=data.filter(t=>R(t).type==='Soufre');
@@ -4185,7 +4552,7 @@ function exportPDFPhyto(){
 
   const html=`<!DOCTYPE html>
 <html lang="fr"><head><meta charset="UTF-8">
-<title>Registre Phytosanitaire — ${annee}</title>
+<title>Registre Phytosanitaire — ${esc(annee)}</title>
 <link rel="stylesheet" href="/fonts/fonts.css">
 <style>
   @page{size:A4 landscape;margin:9mm;}
@@ -4238,12 +4605,12 @@ function exportPDFPhyto(){
 </style></head><body>
 
 <div class="cover">
-  <div class="cover-l"><div class="cover-pic">${_mvIconInline('eprouvette',40)}</div><div class="cover-brand">Ma Vigne · Registre réglementaire</div><div class="cover-title">Registre Phytosanitaire</div><div class="cover-sub">${annee} · ${esc(window.DOMAINE_NOM||'Domaine')} · ${haTot.toFixed(2)} ha</div></div>
+  <div class="cover-l"><div class="cover-pic">${_mvIconInline('eprouvette',40)}</div><div class="cover-brand">Ma Vigne · Registre réglementaire</div><div class="cover-title">Registre Phytosanitaire</div><div class="cover-sub">${esc(annee)} · ${esc(window.DOMAINE_NOM||'Domaine')} · ${haTot.toFixed(2)} ha</div></div>
   <div class="cover-meta">Généré le ${today.toLocaleDateString('fr-FR')}<br>Document confidentiel</div>
 </div>
 
 <div class="mention">
-  <strong>Obligation réglementaire</strong> — Registre établi conformément à l'article L.254-3-1 du Code rural et de la pêche maritime. Il consigne l'ensemble des utilisations de produits phytopharmaceutiques sur le domaine pour la campagne ${annee}. À conserver 5 ans minimum.
+  <strong>Obligation réglementaire</strong> — Registre établi conformément à l'article L.254-3-1 du Code rural et de la pêche maritime. Il consigne les utilisations de produits phytopharmaceutiques sur le domaine ${_fenTxt}. À conserver 5 ans minimum.${_sansDate?` <b>${Number(_sansDate)} traitement${_sansDate>1?'s':''} sans date ${_sansDate>1?'ont':'a'} été écarté${_sansDate>1?'s':''}</b> — datez-${_sansDate>1?'les':'le'} pour ${_sansDate>1?'les':'le'} faire apparaître.`:''}
 </div>
 
 <div class="stats-row">
@@ -4256,8 +4623,8 @@ function exportPDFPhyto(){
 </div>
 
 <div class="section">
-  <div class="section-title">Ensemble des traitements — Campagne ${annee}</div>
-  ${data.length===0?'<p style="color:var(--texte-doux,#7A7A6A);font-style:italic;padding:12px 0">Aucun traitement enregistré pour cette saison.</p>':`
+  <div class="section-title">${_borne?`Traitements ${_fenTxt}`:`Ensemble des traitements — tout l'historique`}</div>
+  ${data.length===0?'<p style="color:var(--texte-doux,#7A7A6A);font-style:italic;padding:12px 0">Aucun traitement sur cette période.</p>':`
   <table class="reg">
     <colgroup><col style="width:3%"><col style="width:7%"><col style="width:17%"><col style="width:12%"><col style="width:7%"><col style="width:8%"><col style="width:12%"><col style="width:11%"><col style="width:5%"><col style="width:7%"><col style="width:7%"><col style="width:11%"></colgroup>
     <thead><tr>
@@ -4279,7 +4646,7 @@ ${_cuivrePdfSection()}
 
 <div class="section">
   <div class="section-title">Certification et signatures</div>
-  <p style="font-size:10px;color:#4A4A3A;margin-bottom:10px;line-height:1.55">Je soussigné(e), certifie l'exactitude des informations portées dans ce registre phytosanitaire pour la campagne ${annee}.</p>
+  <p style="font-size:10px;color:#4A4A3A;margin-bottom:10px;line-height:1.55">Je soussigné(e), certifie l'exactitude des informations portées dans ce registre phytosanitaire ${_borne?`pour la période ${_fenTxt}`:`depuis la mise en service du registre`}.</p>
   <div class="signature-grid">
     <div class="sig-box"><div class="sig-lbl">Responsable du domaine · Date</div></div>
     <div class="sig-box"><div class="sig-lbl">Cachet du domaine</div></div>
@@ -4288,7 +4655,7 @@ ${_cuivrePdfSection()}
 </div>
 
 <div class="footer">
-  <span>Ma Vigne · Registre Phytosanitaire · Campagne ${annee}</span>
+  <span>Ma Vigne · Registre Phytosanitaire · ${esc(annee)}</span>
   <span>Données E-Phy indicatives, non opposables — Conservation obligatoire 5 ans</span>
 </div>
 
@@ -4298,7 +4665,7 @@ ${_cuivrePdfSection()}
   win.document.write(html);
   win.document.close();
   win.onload=()=>{win.focus();win.print();};
-  showExportFeedback(`Registre phyto ${annee} généré — ${nbTotal} traitement${nbTotal>1?'s':''} !`);
+  showExportFeedback(`Registre phyto généré — ${nbTotal} traitement${nbTotal>1?'s':''}${_sansDate?` · ${_sansDate} sans date écarté${_sansDate>1?'s':''}`:''}`);
 }
 
 // ════ PDF RAPPORT DE SAISON ════
@@ -4864,6 +5231,13 @@ window._ecoCfgSet=function(group,key,val){
     //                  Lu par window._mvExercice (utils.js), source unique de la fenetre
     //                  << de date de bilan a date de bilan >>. 0 est une valeur LEGITIME
     //                  (annee civile) : ne jamais traiter 0 comme << non renseigne >> ici.
+    //   campagne_mois : mois d'OUVERTURE de l'ANNEE VIGNE (0-11, defaut 7 = aout).
+    //                  Lu par window._mvCampagneMois / _mvCampagneBornes (utils.js),
+    //                  source unique de l'axe des Archives et du bilan de campagne.
+    //                  ⚠️ DEUX CADRES DISTINCTS : exercice_mois est celui du COMPTABLE,
+    //                  campagne_mois celui du CYCLE DE VIGNE. Ils peuvent coincider ;
+    //                  ils ne doivent JAMAIS etre confondus dans un ecrivain commun.
+    //                  0 est legitime ici aussi (campagne civile).
     //   futs_trait   : traitement du FUT ACHETE dans l'exercice comptable.
     //                  'hors' (defaut) = il ne compte pas ; 'achat' = il compte en
     //                  entier a la date de sa facture. Lu par _ecoFutTrait (pilotage.js).
@@ -4881,7 +5255,7 @@ window._ecoCfgSet=function(group,key,val){
       if(window.saveData) window.saveData('config');
       return;
     }
-    if(['pen_retard_sem','pen_plafond','rdt_renfort','cout_fixe_renfort','maj_hsup','k_retard','trac_etp','kg_bouteille','h_jour','exercice_mois'].indexOf(key)<0) return;
+    if(['pen_retard_sem','pen_plafond','rdt_renfort','cout_fixe_renfort','maj_hsup','k_retard','trac_etp','kg_bouteille','h_jour','exercice_mois','campagne_mois'].indexOf(key)<0) return;
     if(!C.eco||typeof C.eco!=='object') C.eco={};
     C.eco[key]=_ecoNum(val);
   } else { return; }

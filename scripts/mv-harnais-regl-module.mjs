@@ -275,7 +275,11 @@ function jouer(app, html, reg, pil, rsv, ut, pln, silencieux) {
   }
   T(!/_PIL_TOOLS/.test(ut), 'l\u2019aide ne lit plus _PIL_TOOLS');
   const fpil = fiche('pilotage');
-  T(!/Rien ne se saisit ici/.test(fpil) && /quatre choses s\u2019\u00e9crivent/.test(fpil) && /roue crant\u00e9e/.test(fpil), 'la fiche Pilotage ne promet plus qu\u2019on n\u2019y \u00e9crit rien, et nomme la roue');
+  /* ⚠️ Le NOMBRE etait fige a « quatre » : le lot AXE-1, qui AJOUTE le reglage de
+     l'annee vigne, faisait rougir une assertion qui allait dans son sens. Ce qui
+     compte est que la fiche ne promette plus qu'on n'y ecrit rien, qu'elle dise
+     combien de choses s'y ecrivent, et qu'elle nomme la roue. */
+  T(!/Rien ne se saisit ici/.test(fpil) && /(deux|trois|quatre|cinq|six|sept) choses s\u2019\u00e9crivent/.test(fpil) && /roue crant\u00e9e/.test(fpil), 'la fiche Pilotage ne promet plus qu\u2019on n\u2019y \u00e9crit rien, et nomme la roue');
   // Le journal WHATS_NEW est de l'histoire : on ne le réécrit pas. L'aide et les fiches « i », si.
   const aideEtInfo = ut.slice(ut.indexOf('var MV_AIDE = {'));
   T(!/Outils \u203a Param\u00e9trage/.test(aideEtInfo) && !/Outils \\u203a Param/.test(aideEtInfo), 'plus aucun \u00ab Outils \u203a Param\u00e9trage \u00bb dans l\u2019aide ni les fiches \u00ab i \u00bb');

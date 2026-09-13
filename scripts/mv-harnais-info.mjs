@@ -14,6 +14,11 @@ const PIL  = fs.readFileSync('src/pilotage.js', 'utf8');
 /* ★ Lot CAVE-1 : la Cave pose sa propre pastille (cave.auj). Un corpus limite au
    Pilotage aurait dit « fiche orpheline » sur une pastille bien reelle. */
 const CAVE = fs.readFileSync('src/cave.js', 'utf8');
+/* ★ Lot AXE-1 : le catalogue des documents vit dans reglages.js, et ses panneaux
+   de choix posent leurs pastilles (doc.fenetres, doc.journal). Meme cause que la
+   ligne au-dessus, deux lots plus tard — quand une surface pose une pastille,
+   elle entre dans le corpus, sinon la fiche passe pour orpheline. */
+const REGL = fs.readFileSync('src/reglages.js', 'utf8');
 const HTML = fs.readFileSync('index.html', 'utf8');
 const CSS  = fs.readFileSync('src/styles.css', 'utf8');
 function corpsPil(nom){
@@ -23,7 +28,7 @@ function corpsPil(nom){
   return '';
 }
 const nu = s => s.split('\n').filter(l => !l.trimStart().startsWith('//')).join('\n');
-const UNU = nu(U), PILNU = nu(PIL), CAVENU = nu(CAVE);
+const UNU = nu(U), PILNU = nu(PIL), CAVENU = nu(CAVE), REGLNU = nu(REGL);
 
 let ok = 0, ko = 0;
 const t = (nom, cond, detail) => {
@@ -74,8 +79,8 @@ t('les balises <b> sont refermees',
    litteralement, partout hors du dictionnaire — c'est vrai quelle que soit la
    facon dont elle est posee. */
 const HORS = [UNU.slice(0, UNU.indexOf('const MV_INFO = {')) + UNU.slice(UNU.indexOf('\n};', UNU.indexOf('const MV_INFO = {'))),
-              PILNU, CAVENU, HTML].join('\n');
-const posees = new Set([...[UNU, PILNU, CAVENU, HTML].join('\n')
+              PILNU, CAVENU, REGLNU, HTML].join('\n');
+const posees = new Set([...[UNU, PILNU, CAVENU, REGLNU, HTML].join('\n')
   .matchAll(/_mvInfoBtn\(\s*'([^']+)'|data-mvi="([^"]+)"/g)]
   .map(m => m[1] || m[2]).filter(x => x && !x.includes('+')));
 t('toute pastille posee a sa fiche', [...posees].every(k => cles.includes(k)),

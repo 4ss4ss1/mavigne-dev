@@ -1088,6 +1088,10 @@ mark{background:rgba(200,176,32,.32);color:var(--cream);border-radius:3px;paddin
     <li>Les parcelles encore sous délai de rentrée sont signalées sur l'Accueil.</li>
     <li>Le registre s'exporte sous <b>deux formes</b> : le <b>PDF</b> à présenter, et un
     <b>fichier tableur</b> avec une ligne par produit et par parcelle, coordonnées GPS comprises.</li>
+    <li>Les <b>deux</b> vous demandent d'abord <b>sur quelle période</b> : la campagne, l'exercice
+    comptable, ou une période de travail. Le document porte ensuite ses dates réelles sur sa
+    couverture, dans sa mention réglementaire et dans l'attestation à signer — et il compte les
+    traitements <b>sans date</b> qu'il a dû écarter.</li>
   </ul>
   <div class="note"><span class="ni" aria-hidden="true"><svg class="g-ic" width="18" height="18" viewBox="0 0 24 24" aria-hidden="true" focusable="false"><use href="#ic-calendrier"></use></svg></span><div>Le format électronique
   <b>lisible par machine</b> devient le format attendu en contrôle au <b>1<sup>er</sup> janvier
@@ -2616,7 +2620,24 @@ mark{background:rgba(200,176,32,.32);color:var(--cream);border-radius:3px;paddin
   Un écart lu sur la campagne précédente se lit de la même façon, sans multiplier le reste.</div>
 
   <h3><svg class="g-ic" width="18" height="18" viewBox="0 0 24 24" aria-hidden="true" focusable="false"><use href="#ic-dossier"></use></svg> Archives des campagnes</h3>
-  <p>Toutes les campagnes sur un <b>même axe, du 1<sup>er</sup> août au 31 juillet</b> : de récolte à récolte, l'hiver n'est pas coupé en deux par le 31 décembre. Empilées, elles répondent à la question qui compte l'année suivante : <b>est-ce qu'on s'y est pris plus tôt ?</b></p>
+  <p>Toutes les campagnes sur un <b>même axe</b> : de récolte à récolte, l'hiver n'est pas coupé en deux par le 31 décembre. Empilées, elles répondent à la question qui compte l'année suivante : <b>est-ce qu'on s'y est pris plus tôt ?</b></p>
+  <p>Cet axe s'ouvre par défaut le <b>1<sup>er</sup> août</b>, et il <b>se règle</b> :
+  <span class="path">Pilotage › <svg class="g-ic" width="18" height="18" viewBox="0 0 24 24" aria-hidden="true" focusable="false"><use href="#ic-engrenage"></use></svg> › Le cadre de votre campagne</span>, juste sous l'ouverture
+  de votre exercice comptable. Une campagne est un <b>cycle de production</b> : ce qui la borne, c'est
+  la <b>vendange</b>, et le mois n'en est que la traduction en calendrier. Sur le cadre d'août, la
+  vendange tombe dans les premiers jours : elle <b>ouvre</b> l'année au lieu de la clore, et la campagne
+  associe une récolte aux travaux qui feront la <em aria-hidden="true">suivante</em>.</p>
+  <p>L'écran vous dit où tombe <b>votre</b> vendange dans le cadre choisi — elle l'ouvre, elle la clôt,
+  ou la borne la <b>coupe en deux</b> — et le mois qu'il propose est celui qui suit la fin de vos
+  vendanges, lu dans vos propres dates. Ce n'est pas un mois décidé d'avance. Une vendange coupée en
+  deux campagnes n'a d'ailleurs aucune raison d'exister : contrairement à l'exercice comptable, rien
+  d'extérieur ne vous impose ce cadre.</p>
+  <div class="note info"><span class="ni" aria-hidden="true"><svg class="g-ic" width="18" height="18" viewBox="0 0 24 24" aria-hidden="true" focusable="false"><use href="#ic-info"></use></svg></span><div><b>Vos deux années ne sont pas la même.</b>
+  L'<b>exercice comptable</b> est celui de votre bilan, fixé par votre comptable — on ne le déplace pas
+  pour qu'un graphique tombe mieux. L'<b>année vigne</b> est un cycle de production. Elles peuvent
+  coïncider ; elles répondent à deux questions. Déplacer l'année vigne <b>recadre des chiffres déjà
+  affichés</b> — une journée de travail peut passer d'une campagne à l'autre — mais ne touche ni au
+  millésime d'un vin, ni à vos périodes de travail.</div></div>
   <p>Les heures affichées viennent des instantanés pris à la clôture de chaque campagne — une période jamais clôturée apparaît sur la frise sans compter d'heures. C'est aussi ici que se compare l'avancement de deux saisons.</p>
   <div class="note"><b>Pourquoi les vieilles périodes ont disparu des Réglages.</b> <span class="path">Réglages › Campagne</span> n'affiche que les dix-huit derniers mois, plus ce qui est en cours ou à venir : au-delà, la liste devenait illisible. Rien n'est supprimé — tout est ici.</div>
 
@@ -2814,8 +2835,9 @@ mark{background:rgba(200,176,32,.32);color:var(--cream);border-radius:3px;paddin
     <tr><th>Famille</th><th>Ce qu'on y trouve</th></tr>
     <tr><td><svg class="g-ic" width="18" height="18" viewBox="0 0 24 24" aria-hidden="true" focusable="false"><use href="#ic-liste"></use></svg> <b>Obligatoire</b></td><td>Ce que vous devez pouvoir sortir en contrôle : registre
     phyto en PDF et en fichier, synthèse cuivre, relevé mensuel d'heures.</td></tr>
-    <tr><td><svg class="g-ic" width="18" height="18" viewBox="0 0 24 24" aria-hidden="true" focusable="false"><use href="#ic-graphique"></use></svg> <b>Suivi du domaine</b></td><td>Vos états internes : rapport de saison, planning de
-    l'année, bilan de campagne, registre des manipulations, inventaires, carnet d'entretien.</td></tr>
+    <tr><td><svg class="g-ic" width="18" height="18" viewBox="0 0 24 24" aria-hidden="true" focusable="false"><use href="#ic-graphique"></use></svg> <b>Suivi du domaine</b></td><td>Vos états internes : journal des interventions,
+    rapport de saison, planning de l'année, bilan de campagne, registre des manipulations, inventaires,
+    carnet d'entretien.</td></tr>
     <tr><td><svg class="g-ic" width="18" height="18" viewBox="0 0 24 24" aria-hidden="true" focusable="false"><use href="#ic-carton"></use></svg> <b>Données brutes</b></td><td>Vos données telles quelles, pour votre tableur ou votre
     comptable : journal des travaux, avancement par parcelle, sauvegarde complète.</td></tr>
   </table></div>
@@ -2830,6 +2852,30 @@ mark{background:rgba(200,176,32,.32);color:var(--cream);border-radius:3px;paddin
   volontairement dans leur écran</b> : la fiche salarié et l'export CSV du planning dépendent du mois
   affiché, le CSV des coûts du Pilotage suit la période consultée. Sortis de leur contexte, ils
   produiraient le document d'un autre mois — en silence.</div></div>
+
+  <h3><svg class="g-ic" width="18" height="18" viewBox="0 0 24 24" aria-hidden="true" focusable="false"><use href="#ic-journal"></use></svg> Imprimer tout ce qui a été fait sur une année</h3>
+  <p>Le <b>journal des interventions</b> (<span class="path">Documents &amp; impressions › Suivi du domaine</span>)
+  donne la <b>liste</b> de ce qui a été fait, jour par jour, sur la fenêtre que vous choisissez. C'est le
+  document à sortir quand on vous demande «&nbsp;tout ce qui a été fait cette année&nbsp;».</p>
+  <div class="tw"><table>
+    <tr><th>Document</th><th>Ce qu'il donne</th></tr>
+    <tr><td><b>Journal des interventions</b></td><td>La <b>liste</b> datée, sur une fenêtre au choix. Trois
+    sections : travaux de la vigne, sessions tracteur, traitements.</td></tr>
+    <tr><td><b>Bilan de campagne</b></td><td>Le <b>résumé</b> de la même matière, tâche par tâche, sur une
+    campagne.</td></tr>
+    <tr><td><b>Journal des travaux</b> (fichier)</td><td>Tout l'historique <b>sans bornes</b>, à retrier
+    dans votre tableur.</td></tr>
+  </table></div>
+  <p>Les documents datés vous proposent tous les <b>mêmes trois cadres</b>, et chacun porte son nom : la
+  <b>campagne</b> (votre année vigne, réglée dans le Pilotage), l'<b>exercice comptable</b>, ou une
+  <b>période de travail</b> — un printemps, un hiver, jamais une année entière. Le nombre annoncé sous
+  chaque choix est compté pour de vrai : on ne sort pas trente pages pour découvrir qu'on avait pris la
+  mauvaise fenêtre.</p>
+  <div class="note info"><span class="ni" aria-hidden="true"><svg class="g-ic" width="18" height="18" viewBox="0 0 24 24" aria-hidden="true" focusable="false"><use href="#ic-info"></use></svg></span><div><b>Trois sources, trois compteurs, jamais leur
+  somme.</b> Un rognage peut figurer à la fois en session tracteur et en travail validé : les additionner
+  le compterait deux fois. De même, la <b>surface cumulée</b> additionne les passages — une parcelle
+  relevée trois fois compte trois fois — alors que le nombre de <b>parcelles touchées</b> ne les compte
+  qu'une. C'est l'effort d'un côté, l'étendue de l'autre.</div></div>
 
   <h3><svg class="g-ic" width="18" height="18" viewBox="0 0 24 24" aria-hidden="true" focusable="false"><use href="#ic-carton"></use></svg> Sauvegardes automatiques</h3>
   <div class="tw"><table>

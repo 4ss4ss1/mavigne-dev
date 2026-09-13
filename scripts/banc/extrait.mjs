@@ -44,7 +44,10 @@ function ligneVar(src, nom) {
 export function chargePilotage(fichier) {
   const src = fs.readFileSync(fichier || path.join(RACINE, 'src/pilotage.js'), 'utf8');
 
-  const FN = ['_arcN', '_arcISO', '_arcCampagneDe', '_arcHeures',
+  /* ★ AXE-1 : _arcCampMois et _arcBornes sont les dependances neuves de
+     _arcCampagneDe et _pilCmpOffset (l'axe campagne est devenu un reglage).
+     Les oublier ici ne rougit pas une assertion : le banc PLANTE. */
+  const FN = ['_arcN', '_arcISO', '_arcCampMois', '_arcBornes', '_arcCampagneDe', '_arcHeures',
               '_pilCmpPeriode', '_pilCmpOffset', '_pilCmpSnapshot',
               '_pilCmpSegment', '_pilCmpRecouvre', '_pilCmpAcheve'];
   const VR = ['_PIL_CMP_TOL', '_PIL_CMP_RECOUV', '_PIL_CMP_ACHEVE'];

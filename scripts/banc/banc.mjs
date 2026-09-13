@@ -147,8 +147,13 @@ const regles = [
    'un ratio bati sur une periode incomplete mesure un trou de saisie'],
   ['si appariement, son denominateur n\'est pas nul',
    () => !app_() || (mesures.hBar_denominateur || 0) > 0],
+  /* ⚠️ Le nombre suit la liste FN d'extrait.mjs — il n'a pas de sens en soi.
+     10 → 12 au lot AXE-1 : _arcCampagneDe et _pilCmpOffset ont gagne deux
+     dependances (_arcCampMois, _arcBornes) quand l'axe campagne est devenu un
+     reglage. La garde reste ce qu'elle est : elle interdit qu'un banc VIDE
+     verdisse, elle ne fige pas un inventaire. */
   ['les fonctions reelles sont bien extraites (garde de montage)',
-   () => mesures.nb_fonctions_extraites === 10,
+   () => mesures.nb_fonctions_extraites === 12,
    'un banc qui n\'a rien charge verdit sur du vide'],
   ['le cas legitime s\'apparie toujours',
    () => mesures.scenario_legitime === 'Printemps 2026',

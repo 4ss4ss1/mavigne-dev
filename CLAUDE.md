@@ -17675,3 +17675,166 @@ bien le bug ») : il faut aussi vérifier **qu'il ne l'invente pas**.
   `mv-harnais-icones` (deux noms d'icônes **inventés** dans le `WHATS_NEW` — `horloge` et `reglage`
   n'existent pas, `reveil` et `curseurs` si). *Celui qui pose les filets s'y prend aussi, et c'est
   la preuve qu'ils valent quelque chose.*
+
+
+## 123. ★★★ AXE-1 — UNE CAMPAGNE EST BORNÉE PAR SA VENDANGE, ET TROIS DOCUMENTS NE DISAIENT PAS SUR QUOI ILS PORTAIENT (13/09 — `utils.js` + `cave.js` + `pilotage.js` + `phyto.js` + `reglages.js` + `app.js` + `index.html` + `sw.js` + `guide/` + `scripts/` + `package.json` · APP 7.17 → 7.18 · SW 7.77 → 7.78 · base `25d7fa9`)
+
+**Point de départ**, mot pour mot : *« vérifie rapidement si je peux faire une impression de tous ce
+qui a été fait sur l'année vigne (c'est a dire de octobre année N à septembre année N+1) […] vérifie
+aussi pour une année fiscale. Vérifie que l'appli soit bien bornée avec les année et campagne
+annuelle afin qu'il n'y ait pas de doublon et que tout soit cohérent. »*
+
+**La réponse courte était non, trois fois.** L'axe campagne était **1er août → 31 juillet en dur** ;
+aucun document ne listait les interventions sur une fenêtre choisie ; et le registre phyto imprimé
+n'était borné par rien.
+
+### 123a. ★★★ CE N'EST PAS UN RÉGLAGE DE MOIS, C'EST UN RÉGLAGE DE CAMPAGNE
+
+**La correction de Nico, en cours de lot** : *« c'est pas un réglage a octobre c'est un réglage de
+campagne »*. Le premier jet nommait le bloc « Ouverture de l'année vigne », vantait le 1er octobre
+dans le `WHATS_NEW`, la fiche `MV_INFO`, l'aide et le guide — **il prescrivait un mois**.
+
+★★★ **Une campagne est un cycle de production. Ce qui la borne est la VENDANGE ; le mois n'en est
+que la traduction en calendrier.** Le bloc s'appelle « Le cadre de votre campagne », et
+`_pilCampVend(md)` cadre la vendange **sur la campagne candidate** pour dire ce que ce cadre en
+fait : elle l'**ouvre**, elle la **clôt**, ou la borne la **coupe en deux**. Le mois proposé est
+`ann.align.moisIdeal` — *celui qui suit la fin des vendanges du domaine, lu dans ses propres dates*.
+⚠️ **L'information existait déjà** (§34, `_pilAnnuelData`) et le premier jet ne l'avait pas lue :
+c'est **§93 encore une fois** — *avant d'écrire une valeur, chercher si la donnée est déjà quelque
+part*.
+
+⚠️⚠️ **Ne pas confondre avec `ann.align`, qui mesure la même chose contre l'EXERCICE.** §34 a
+tranché : un exercice comptable est une **donnée** du comptable, on constate seulement où la
+vendange tombe dedans — *on ne le déplace pas pour qu'un graphique tombe mieux*. Une campagne, elle,
+n'appartient qu'au domaine : **rien d'extérieur n'impose qu'elle coupe sa propre récolte en deux**,
+et là on peut le dire franchement. **Deux cadres, deux régimes de parole. Ne pas rouvrir §34-0c.**
+
+### 123b. L'axe devient un réglage — et les copies en dur tombent
+
+- **`utils.js`** : `MV_CAMP_MOIS_DEF = 7`, `_mvCampagneMois()` (lit `CONFIG.eco.campagne_mois`),
+  `_mvCampagneDe()` réécrite, et **`_mvCampagneBornes(c)` — source unique des bornes**, qui rend
+  `{d0,d1,court,lbl,civil}`. `new Date(c+1, md, 0)` donne la fin quel que soit le mois, `md=0`
+  (campagne civile) compris.
+- ⚠️ **Quatre copies en dur** retirées : `_bcBornes` (cave), l'offset d'appariement, la frise
+  `_arcLigne`, l'échelle `_pilTabArc` (pilotage) → `_arcBornes()`.
+- ⚠️⚠️ **Cinq replis étaient figés à 8** (`_mlCampagne`, `_pcavCampagne`, `_rmCampagne`,
+  `_bcCampagne`, `_arcCampagneDe`). *Un repli figé pendant que l'app est réglée ailleurs rend un
+  millésime faux **deux mois par an**, sans rien afficher.* Ils lisent le même réglage
+  (`_mvCampMoisRepli` / `_arcCampMois`).
+- ★ **Trois écrans RÉCITAIENT l'axe** au lieu de le lire (intro des Archives, en-tête du bilan,
+  légende du comparatif). *Un écran qui récite un réglage qu'il n'a pas lu est pire qu'un écran
+  muet : il fait croire que le réglage a raté.*
+- **Défaut inchangé à août** : non-régression prouvée sur **396 dates de 2020 à 2030, zéro écart**.
+
+### 123c. `_mvFenetresAnnee` — le mot « campagne » avait trois sens
+
+L'axe des Archives, l'« année vigne » du Pilotage (construite sur les **périodes**), et — dans
+l'export phyto — la **période de travail consultée**, proposée sous l'étiquette « Campagne
+consultée ». *Un vigneron qui sortait deux registres « de la campagne » obtenait deux périmètres.*
+Une liste unique, chaque fenêtre porte son nom (campagne · exercice comptable · période de travail ·
+tout), lue par les documents. ★ Quand deux cadres tombent aux **mêmes dates**, la liste **le dit**
+au lieu de masquer une ligne.
+
+### 123d. ★★★ LE REGISTRE PHYTO PDF N'ÉTAIT BORNÉ PAR RIEN
+
+`[...window.TRAITEMENTS]`, **tout l'historique**, sous un titre « Campagne `${annee}` » où `annee`
+valait **le nom de la période active** (« Printemps 2026 »). L'attestation à signer certifiait
+*« pour la campagne Printemps 2026 »*. ⚠️⚠️ **Et le CSV du même registre était correctement borné
+depuis des semaines** : deux exports du même document, deux périmètres, dont un réglementaire.
+Le PDF passe par le même panneau, et les **six** endroits où il s'annonce disent ses vraies dates.
+Les traitements sans date sont écartés **et comptés**.
+
+### 123e. Le journal des interventions
+
+Entre le bilan de campagne (un **résumé** par tâche) et le CSV du journal (**tout**, sans bornes), il
+manquait la **liste** sur une fenêtre choisie. Trois sections datées : vigne · tracteur · phyto.
+★★ **Trois compteurs nommés, jamais leur somme** — un rognage peut figurer en session tracteur ET en
+travail validé. Et la **surface cumulée additionne les passages** (§7 : annoncer l'assiette d'un
+chiffre), à côté du nombre de parcelles touchées qui, lui, ne les compte qu'une fois.
+
+### 123f. Ce que les filets ont attrapé — l'auteur du lot compris
+
+- **7 `catch{}` vides** (C14), **2 slots C24b**, **1 interpolation C24c**, et
+  **`_mvFenetreParCle`** écrite sans appelant → supprimée (§25.11), pas branchée pour la forme.
+- ⚠️⚠️ **UN CONTRÔLE FAIT TAIRE, PAS SATISFAIT** : en passant la clé par une variable dans
+  `_phytoExportChoix`, le compteur C24b est **descendu de 9 à 8** — la détection était masquée et
+  la clé **toujours pas échappée**. *Un cliquet qui baisse mérite le même examen qu'un cliquet qui
+  monte.*
+- ⚠️ **Un `node --check` vert après un assert tombé** : le sw.js validé était le fichier **non
+  patché** (§25.3, revécu).
+- **Deux assertions fausses pour zéro bug** : `mv-harnais-regl-module` figeait « **quatre** choses
+  s'écrivent » (un lot qui en **ajoute** une la faisait rougir), et `mv-harnais-info` ne lisait pas
+  `reglages.js` — **le catalogue des documents y vit** et y pose ses pastilles. Assouplies sur le
+  nombre, étendues sur la couverture ; **jamais contournées**.
+- **Le banc a PLANTÉ**, il n'a pas rougi : `extrait.mjs` ne connaissait pas les deux dépendances
+  neuves d'`_arcCampagneDe`. *Un banc qui plante dit au moins qu'il ne sait plus lire ; le pire
+  serait qu'il verdisse sur du vide* — c'est ce que sa garde de montage protège (10 → 12).
+
+### 123g. `scripts/mv-harnais-axe.mjs` — 33 assertions, 7 défauts réinjectés
+
+Branché dans `check` et `prebuild`, contre-épreuve comprise. Il **exécute** le moteur (396 dates,
+bissextiles, campagne civile) et lit le code **sans ses commentaires** (§34g).
+★★★ **La contre-épreuve injecte les défauts EN MÉMOIRE, jamais sur disque** (§25.2 : une
+contre-épreuve avait laissé les fichiers abîmés). **Et elle porte une garde d'injection** : elle
+compte les défauts **réellement** appliqués.
+⚠️⚠️ **Elle a servi tout de suite** : deux injections d'abord **mortes** (une regex qui ne matchait
+pas) *ressemblaient trait pour trait à un harnais aveugle* ; puis, une fois vivantes, elles ont
+révélé **deux assertions trop faibles** — l'une comptait les bornes en dur en tolérant le repli
+(supprimer l'appel à la source unique ne la bougeait pas), l'autre testait `/moisIdeal/` (un
+littéral posé devant la laissait verte). Renforcées. **7/7 injectés, 9 assertions rougissent.**
+
+### 123g bis. ★★★ `scripts/mv-banc-documents.mjs` — ET LE DEFAUT QU'IL A TROUVÉ APRÈS LA LIVRAISON
+
+★★★ **Le lot avait livré trois documents — deux neufs — sans qu'une seule ligne de leur code
+n'ait jamais été EXÉCUTÉE.** `node --check` vert, 33 assertions vertes, preflight vert : *aucun de
+ces filets ne construit un document*. `_jivData`, `_jivDoc`, `_pilCampVend` étaient **lus**, pas
+lancés. ⚠️ **Un document faux ne plante pas : il s'imprime.**
+
+**Ce que le banc a trouvé en une seule exécution — dans du code déjà livré :**
+
+⚠️⚠️⚠️ **`_pilCampVend` déduisait la campagne candidate de l'AXE EN VIGUEUR, puis la bornait avec le
+mois CANDIDAT.** Dès que les deux diffèrent — *c'est-à-dire dès qu'on déroule le sélecteur, l'usage
+même de l'écran* — la vendange tombait hors des bornes, `pos` montait à **1,107**, et `clot`
+(`pos>=0.72`) passait à vrai. **L'écran annonçait qu'une vendange CLÔTURAIT la campagne qu'elle
+OUVRE**, et le bouton de calage disparaissait — exactement l'inverse de ce que le lot venait de
+corriger. La campagne candidate se déduit désormais de `md` seul : *la réponse à « si j'ouvre en
+&lt;md&gt;, où tombe ma récolte ? » ne peut pas dépendre du réglage actuel.*
+
+**Ce que le banc vérifie** (34 assertions) : le filtre mord **aux deux bords** (30/09 dedans, 01/10
+dehors) ; l'équipe compte ses membres et pas seulement `qui` ; une parcelle absente du parcellaire
+vaut **0 et jamais NaN** ; la surface additionne les passages **quand le compte de parcelles ne le
+fait pas** ; et sur le document construit — aucun `undefined` / `NaN` / `[object Object]` / `null` /
+`\uXXXX` **n'atteint la page**, les balises s'équilibrent, un nom hostile est échappé, chaque section
+pose ses intertitres dans l'ordre.
+
+⚠️⚠️ **CINQ ASSERTIONS FAUSSES POUR ZÉRO BUG, dans ce seul banc** : le montage tronqué avant
+`var _JIV_MOIS` (défaut du banc, pas du code) ; `/<tr>/` qui ne comptait pas `<tr class="jiv-mo">`
+(4 contre 7 sur un HTML sain — *les `<td>` à 18/18 étaient le signe que c'était le compteur*) ;
+« septembre 2026 » cherché dans le texte entier alors que **le libellé de couverture le contient
+déjà** ; une liste d'intertitres à plat supposée croissante alors que **chaque section repart** ;
+et deux injections mortes.
+
+★★★ **ET UN FAUX VERT DE CONTRE-ÉPREUVE, LE PLUS INSTRUCTIF DU LOT.** L'injection d'origine visait
+`if(!_borne) return !!iso;` — *une ligne qui n'existe pas*. Elle était morte depuis le début. La
+contre-épreuve passait quand même, parce que sa condition était « au moins un rouge » **et que les
+rouges venaient des assertions fausses, pas du défaut**. Elle n'a été démasquée qu'en mettant le
+banc au vert. ⚠️ **Une contre-épreuve dont la condition est « il reste des rouges » ne prouve rien
+tant que le banc n'est pas vert par ailleurs.** Garde d'injection posée (5/5 injectés, 11 rouges),
+comme sur `mv-harnais-axe`.
+
+### 123h. La note de livraison
+
+**Base : `25d7fa9`** (⚠️ deux commits de Nico — `584975e`, `25d7fa9` — sont arrivés entre la lecture
+d'audit et la construction : la fraîcheur **re-mesurée avant le paquet**, comme le veut la règle
+d'or n°1, a évité de livrer sur une base morte). Livré : `src/utils.js`, `src/cave.js`,
+`src/pilotage.js`, `src/phyto.js`, `src/reglages.js`, `src/app.js`, `index.html`, `public/sw.js`,
+`guide/07-phyto.html`, `guide/11-pilotage.html`, `guide/13-donnees.html` (puis
+`node scripts/build-guide.mjs`), `scripts/mv-harnais-axe.mjs`, `scripts/mv-harnais-info.mjs`,
+`scripts/mv-harnais-regl-module.mjs`, `scripts/banc/extrait.mjs`, `scripts/banc/banc.mjs`,
+`scripts/banc/baseline.json`, `scripts/preflight-baseline.json`, `package.json`, `CLAUDE.md`.
+
+**Ouvert, et dit** : ① **aucun rendu navigateur** — à regarder en admin : le bloc « Le cadre de votre
+campagne » et sa ligne de vendange, le panneau du journal des interventions, le registre phyto avec
+ses dates. ② `_pexZeros` reste à fusionner (§104b). ③ **Le Pilotage n'imprime toujours rien** :
+l'écran Économie › Exercice n'a aucun export — le journal des interventions le contourne, il ne le
+remplace pas.
