@@ -796,9 +796,15 @@ d'exploration** tant qu'aucun patch n'en sort. **Mais toute conclusion tirée de
   `public/guide.html` est produit par `scripts/build-guide.mjs`. Livré à côté de sa source, il a
   coûté **deux allers-retours de CI** — une fois la source manquait, une fois c'est le généré qui
   était revenu en arrière. **On livre l'entrée, on nomme la commande.** Détail : §27d.
-  ⚠️ **Et le dossier de sortie est PLAT** : impossible d'y créer `guide/11-pilotage.html`. Tout
-  fichier dont le nom de livraison diffère de son nom dans le dépôt doit voir ce renommage
-  **annoncé en tête de réponse**, en clair. Sinon il n'est pas intégré, et rien ne le signale.
+  ★★ **CORRECTION DU 13/09 — LE DOSSIER DE SORTIE N'EST PLUS PLAT.** Il a longtemps été écrit ici
+  qu'on ne pouvait pas y créer `guide/11-pilotage.html` : **c'est faux aujourd'hui**, vérifié en
+  créant l'arborescence puis en la relisant. **Livrer désormais dans un dossier qui REPRODUIT
+  l'arborescence du dépôt** (`mavigne-7.18/src/utils.js`, `mavigne-7.18/functions/package.json`) :
+  c'est la façon la plus sûre de répondre à la question « où ça va ? », puisque le chemin voyage
+  avec le fichier. ⚠️ **Le tableau de destination reste obligatoire quand même** : sur mobile, et
+  dans la liste des pièces jointes, seul le nom de base s'affiche.
+  ⚠️ Si un jour le renommage redevient inévitable, il doit être **annoncé en tête de réponse**,
+  en clair. Sinon il n'est pas intégré, et rien ne le signale.
 
 ★ **Le réflexe md5, systématique — pour ce qui n'est PAS dans le dépôt.** Quand un upload est censé
 contenir un patch livré plus tôt, comparer son empreinte à celle du fichier de sortie **avant** de
@@ -1050,12 +1056,22 @@ ce que la précédente a fait.
 **LA NOTE DE LIVRAISON — dire ce qui change, FICHIER PAR FICHIER.**
 
 Une livraison n'est pas une liste de fichiers joints. Nico doit pouvoir décider **quoi remplacer**
-sans ouvrir un seul fichier. Chaque lot se termine donc par un tableau :
+sans ouvrir un seul fichier, **et savoir où chaque fichier va sans avoir à le deviner**. Chaque lot
+se termine donc par un tableau :
 
-| Fichier | Ce qui change | Bump ? |
-|---|---|---|
-| `src/pilotage.js` | ce que ça change **pour l'utilisateur**, en une ligne | — |
-| `src/utils.js` | idem | ★ APP |
+| Fichier livré | À déposer dans | Ce qui change | Bump ? |
+|---|---|---|---|
+| `pilotage.js` | `mavigne-dev\src\` | ce que ça change **pour l'utilisateur**, en une ligne | — |
+| `utils.js` | `mavigne-dev\src\` | idem | ★ APP |
+| `package.json` | `mavigne-dev\functions\` ⚠️ **pas la racine** | idem | — |
+
+★★★ **LA COLONNE « À DÉPOSER DANS » EST OBLIGATOIRE — EXIGÉE PAR NICO, RAPPELÉE LE 13/09.**
+Nico réintègre à la main dans l'Explorateur Windows : un fichier sans destination est un fichier
+qu'il faut chercher. ⚠️ **Le piège est le nom qui existe à DEUX endroits** : `package.json` vit à
+la racine *et* dans `functions\`, `index.js` dans `functions\` *et* ailleurs. Livrer
+« `package.json` » sans dire lequel, c'est livrer une devinette — vécu le 13/09, où Nico a renvoyé
+le fichier de la racine pendant qu'il manquait celui de `functions\`. **Chemin Windows complet
+depuis `mavigne-dev\`, toujours, même quand ça semble évident.**
 
 - **Une ligne par fichier**, écrite du point de vue de l'effet, pas de la mécanique.
 - **La colonne bump est obligatoire** — c'est l'erreur la plus coûteuse du projet, et la seule
@@ -17821,6 +17837,47 @@ rouges venaient des assertions fausses, pas du défaut**. Elle n'a été démasq
 banc au vert. ⚠️ **Une contre-épreuve dont la condition est « il reste des rouges » ne prouve rien
 tant que le banc n'est pas vert par ailleurs.** Garde d'injection posée (5/5 injectés, 11 rouges),
 comme sur `mv-harnais-axe`.
+
+### 123g ter. ★★ UNE CONTRE-ÉPREUVE NE S'AFFICHE PAS EN ROUGE (13/09, sur remarque de Nico)
+
+Les deux nouveaux scripts affichaient, en mode `--contre`, **la liste entière de leurs assertions
+avec 9 puis 11 lignes en rouge** — des rouges *attendus*, mais peints comme des échecs. Nico a
+renvoyé la sortie : dans une chaîne de 80 scripts, ça ne se distingue pas d'une panne.
+
+★★★ **HABITUER L'ŒIL AU ROUGE ATTENDU, C'EST LE RENDRE AVEUGLE AU ROUGE QUI COMPTE.** Le patron
+existait déjà (`cuv8`, `recalage`) : une contre-épreuve affiche **`vert  <le défaut> → détecté`**
+et conclut par « N/N défauts attrapés ». **Un rouge y signale un défaut qui PASSE**, jamais un
+défaut vu. Après correction : **zéro `✗` dans toute la chaîne**, `exit=0`.
+
+★★ **Et le passage au patron a DURCI la preuve.** L'ancienne version injectait les défauts **tous
+ensemble** puis comptait les rouges — *un défaut pouvait être masqué par un autre, ou couvert par
+une assertion qui rougissait pour une tout autre raison*. Chacun est désormais injecté **seul**, sur
+des sources recharguées, et doit être attrapé **isolément** : 7/7 pour `mv-harnais-axe`, 5/5 pour
+`mv-banc-documents`. La forme n'était pas qu'une question de forme.
+
+### 123h bis. ★★★ DEUX RÈGLES DÉJÀ ÉCRITES, DEUX RÈGLES VIOLÉES — LE 13/09
+
+Nico, en fin de session : *« je t'ai demandé d'être clair dans tes réponses et de m'indiquer aussi
+où mettre les fichiers à chaque fois »*. ⚠️ **Les deux manquements étaient déjà couverts par ce
+document, et le lot les a commis quand même.**
+
+- **Aucun tableau de livraison** (§16) sur deux paquets successifs — 22 fichiers présentés sans une
+  ligne disant où chacun va. Le tableau gagne une **colonne « À déposer dans »**, désormais
+  obligatoire.
+- ⚠️ **`public/guide.html` livré DEUX FOIS**, alors que le corollaire du 14/08 l'interdit
+  explicitement : *on livre l'entrée, on nomme la commande*. Un fichier qu'un script fabrique n'a
+  rien à faire dans un paquet — il a déjà coûté deux allers-retours de CI en août.
+
+★★ **CE QUE ÇA A COÛTÉ, CONCRÈTEMENT.** Firebase a refusé un déploiement pour un
+`functions/package.json` supprimé par un commit antérieur (`584975e`, sans rapport avec le lot).
+En réponse, Nico a renvoyé le `package.json` **de la racine** — *parce que rien, dans mes messages,
+ne distinguait jamais les deux*. **Un nom de fichier qui existe à deux endroits du dépôt doit
+TOUJOURS voyager avec son dossier.**
+
+★ **Correctif de fond, pas seulement de forme** : le dossier de sortie **accepte les
+sous-dossiers** (vérifié le 13/09 — la ligne « le dossier de sortie est PLAT » était périmée).
+Les paquets reproduisent donc l'arborescence du dépôt, pour que le chemin voyage avec le fichier.
+Le tableau reste obligatoire par-dessus : sur mobile, seul le nom de base s'affiche.
 
 ### 123h. La note de livraison
 
