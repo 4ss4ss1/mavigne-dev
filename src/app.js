@@ -10477,6 +10477,17 @@ async function refreshApp(){
   window.openConfirmDel   = openConfirmDel;
   window.couleurTracType  = couleurTracType;
   window.fmtDate          = fmtDate;
+  // Lot SAUV-1 : une restauration remplace les 26 documents du tenant. La snapshot
+  // hors ligne, elle, porte encore l'etat d'AVANT : la laisser en place, c'est garder
+  // une copie perimee que le prochain demarrage sans reseau relirait comme si de rien
+  // n'etait. On annule le flush en attente AVANT d'effacer -- sinon il se reecrit
+  // juste apres (cf. la note posee au-dessus de _mvSnapCancel).
+  window._mvPurgerSnapshot = function(){
+    try{ _mvSnapCancel(); }
+    catch(e){ if(window.logError) window.logError({level:'info', cat:'storage', msg:'purge snapshot : annulation du flush', detail:String(e)}); }
+    try{ var _k = _mvLsKey(); if(_k) localStorage.removeItem(_k); }
+    catch(e2){ if(window.logError) window.logError({level:'info', cat:'storage', msg:'purge snapshot : effacement impossible', detail:String(e2)}); }
+  };
 })();
 
 function switchVigneOng(dest){

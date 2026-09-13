@@ -1,4 +1,15 @@
-// MA VIGNE — Service Worker v7.78
+// MA VIGNE — Service Worker v7.79
+// v7.79 (13/09/2026) — SAUV-1 : LA << SAUVEGARDE COMPLETE >> N'EN GARDAIT PAS LE TIERS, ET LA RESTAURATION DETRUISAIT CE QU'ELLE N'AVAIT PAS SAUVEGARDE.
+//   L'export ecrivait 8 documents sur 26 (dehors : tout le planning, toute la cave, la reserve, les machines, les entretiens, les contours KML, la config, la paie) sous une
+//   etiquette qui promettait << toutes les donnees du domaine >>. Il se DERIVE desormais de COLLECTIONS (fbLireTout) : une seconde liste ecrite a la main se perime au premier
+//   lot qui ajoute une collection, et elle se perime en silence. Lecture cote FIRESTORE et non memoire : la memoire est partielle (une cle dont le pull a echoue n'y est pas)
+//   et transformee (kml reconstruit, taches normalisees, cave fusionnee avec ses defauts) -- un aller-retour doit rendre le document tel qu'il est stocke.
+//   ⚠️⚠️⚠️ Le vrai defaut etait la RESTAURATION : l'export ne gardait de chaque salarie que {nom,roles,statut} et l'import reecrivait la fiche AVEC CA, puis la poussait en base
+//   -- historique des contrats (source de tout cout de main-d'oeuvre date), e-mails, couleurs et drapeau bureau detruits par le geste cense reparer.
+//   fbRestaurerTout ecrit en direct (setDoc) : PAS via fbSave -- `parcelles` y partirait en fusion 3-way (une restauration qui fusionne garde ce qu'on voulait effacer) et la
+//   garde anti-ecrasement refuserait toute collection divisee par deux, ce qu'une restauration legitime peut avoir a faire. Contrepartie : l'ecran compare le fichier a l'etat
+//   du serveur et nomme, ligne par ligne, ce qui est remplace / ce qui retrecit / ce a quoi on ne touche pas. `_baseParcelles` est remise a l'etat restaure (sinon la premiere
+//   ecriture de parcelle ferait remonter ce qu'on vient d'effacer) ; la snapshot hors ligne est purgee et l'app se recharge.
 // v7.78 (13/09/2026) — AXE-1 : LE CADRE DE LA CAMPAGNE DEVIENT UN REGLAGE, BORNE PAR LA VENDANGE (l'ecran dit ou tombe la recolte dans le cadre choisi — elle l'ouvre, elle le clot, ou la borne la coupe — et propose le mois qui SUIT la fin des vendanges du domaine, lu dans ses dates, jamais un mois decide d'avance) (_mvCampagneMois / _mvCampagneBornes, source unique des bornes ; 4 copies en dur retirees dans cave.js et pilotage.js, 5 replis alignes — un repli fige a 8 rendait un millesime faux deux mois par an) · _mvFenetresAnnee : une seule liste de fenetres datees, chacune nommee (campagne / exercice comptable / periode de travail) — l'export phyto ne nomme plus << campagne >> une periode · REGISTRE PHYTO PDF ENFIN BORNE : il sortait TOUT l'historique en se titrant << Campagne <nom de la periode active> >>, attestation a signer comprise, alors que le CSV du meme registre etait borne · document neuf : le journal des interventions (3 sections datees, trois compteurs nommes, jamais leur somme) · le reglage de l'annee vigne se pose sous celui de l'exercice
 // v7.77 (13/09/2026) — AUDIT : le registre commercial quitte le document public (_guerettech/clients, GT-only) · 78 dates recalees en heure LOCALE (_mvToday/_mvISO) · plus de defaut 'marchand-grillot' dans la cle locale ni dans le start_url du manifest · cuivre : moyenne 7 ans divisee par les annees COUVERTES, plafond derive du reglage · reglages vendange bornes · filet sitemap
 // v7.76 (12/09/2026) — TRI-3 : LA FEUILLE DE TRI REMPLACE LES DEUX DERNIERS
@@ -3909,7 +3920,7 @@
 // v2.22 — Fix profils vides : guard vide dans loadData() pour MEMBRES/SAISONS/TACHES
 // v2.17 — Onboarding intégré + tenantId · v2.06 — Firebase Auth · v2.00–v2.05 — divers
 const DEBUG = self.location.hostname === 'localhost' || self.location.hostname === '127.0.0.1';
-const CACHE_NAME   = 'mavigne-v7.78';
+const CACHE_NAME   = 'mavigne-v7.79';
 const TENANT_CACHE = 'mavigne-tenant';   // Cache persistant — préservé à chaque mise à jour SW
 const SYNC_TAG     = 'mavigne-sync';
 
@@ -3925,7 +3936,7 @@ const CDN_URLS = [
 ];
 
 self.addEventListener('install', event => {
-  if(DEBUG) console.log('[SW] Ma Vigne v7.78 installé');
+  if(DEBUG) console.log('[SW] Ma Vigne v7.79 installé');
   event.waitUntil(
     caches.open(CACHE_NAME).then(async cache => {
       // ── Cœur applicatif : STRICT (mise à jour ATOMIQUE) ──
@@ -3941,7 +3952,7 @@ self.addEventListener('install', event => {
 });
 
 self.addEventListener('activate', event => {
-  if(DEBUG) console.log('[SW] Ma Vigne v7.78 activé');
+  if(DEBUG) console.log('[SW] Ma Vigne v7.79 activé');
   event.waitUntil(
     caches.keys().then(keys =>
       Promise.all(

@@ -796,15 +796,9 @@ d'exploration** tant qu'aucun patch n'en sort. **Mais toute conclusion tirée de
   `public/guide.html` est produit par `scripts/build-guide.mjs`. Livré à côté de sa source, il a
   coûté **deux allers-retours de CI** — une fois la source manquait, une fois c'est le généré qui
   était revenu en arrière. **On livre l'entrée, on nomme la commande.** Détail : §27d.
-  ★★ **CORRECTION DU 13/09 — LE DOSSIER DE SORTIE N'EST PLUS PLAT.** Il a longtemps été écrit ici
-  qu'on ne pouvait pas y créer `guide/11-pilotage.html` : **c'est faux aujourd'hui**, vérifié en
-  créant l'arborescence puis en la relisant. **Livrer désormais dans un dossier qui REPRODUIT
-  l'arborescence du dépôt** (`mavigne-7.18/src/utils.js`, `mavigne-7.18/functions/package.json`) :
-  c'est la façon la plus sûre de répondre à la question « où ça va ? », puisque le chemin voyage
-  avec le fichier. ⚠️ **Le tableau de destination reste obligatoire quand même** : sur mobile, et
-  dans la liste des pièces jointes, seul le nom de base s'affiche.
-  ⚠️ Si un jour le renommage redevient inévitable, il doit être **annoncé en tête de réponse**,
-  en clair. Sinon il n'est pas intégré, et rien ne le signale.
+  ⚠️ **Et le dossier de sortie est PLAT** : impossible d'y créer `guide/11-pilotage.html`. Tout
+  fichier dont le nom de livraison diffère de son nom dans le dépôt doit voir ce renommage
+  **annoncé en tête de réponse**, en clair. Sinon il n'est pas intégré, et rien ne le signale.
 
 ★ **Le réflexe md5, systématique — pour ce qui n'est PAS dans le dépôt.** Quand un upload est censé
 contenir un patch livré plus tôt, comparer son empreinte à celle du fichier de sortie **avant** de
@@ -1056,22 +1050,12 @@ ce que la précédente a fait.
 **LA NOTE DE LIVRAISON — dire ce qui change, FICHIER PAR FICHIER.**
 
 Une livraison n'est pas une liste de fichiers joints. Nico doit pouvoir décider **quoi remplacer**
-sans ouvrir un seul fichier, **et savoir où chaque fichier va sans avoir à le deviner**. Chaque lot
-se termine donc par un tableau :
+sans ouvrir un seul fichier. Chaque lot se termine donc par un tableau :
 
-| Fichier livré | À déposer dans | Ce qui change | Bump ? |
-|---|---|---|---|
-| `pilotage.js` | `mavigne-dev\src\` | ce que ça change **pour l'utilisateur**, en une ligne | — |
-| `utils.js` | `mavigne-dev\src\` | idem | ★ APP |
-| `package.json` | `mavigne-dev\functions\` ⚠️ **pas la racine** | idem | — |
-
-★★★ **LA COLONNE « À DÉPOSER DANS » EST OBLIGATOIRE — EXIGÉE PAR NICO, RAPPELÉE LE 13/09.**
-Nico réintègre à la main dans l'Explorateur Windows : un fichier sans destination est un fichier
-qu'il faut chercher. ⚠️ **Le piège est le nom qui existe à DEUX endroits** : `package.json` vit à
-la racine *et* dans `functions\`, `index.js` dans `functions\` *et* ailleurs. Livrer
-« `package.json` » sans dire lequel, c'est livrer une devinette — vécu le 13/09, où Nico a renvoyé
-le fichier de la racine pendant qu'il manquait celui de `functions\`. **Chemin Windows complet
-depuis `mavigne-dev\`, toujours, même quand ça semble évident.**
+| Fichier | Ce qui change | Bump ? |
+|---|---|---|
+| `src/pilotage.js` | ce que ça change **pour l'utilisateur**, en une ligne | — |
+| `src/utils.js` | idem | ★ APP |
 
 - **Une ligne par fichier**, écrite du point de vue de l'effet, pas de la mécanique.
 - **La colonne bump est obligatoire** — c'est l'erreur la plus coûteuse du projet, et la seule
@@ -5082,12 +5066,12 @@ L'hypothèse en vigueur — la lecture seule dure — n'a jamais été confirmé
 
 ### ⚠️⚠️ NOUVEAU AU BACKLOG (issu de §43 — 15/08)
 
-- ⚠️⚠️ **Refondre l'export JSON** — ⚠️ **le dénominateur a bougé : 8 clés sur 27**, pas 24
-  (`COLLECTIONS`, `firebase.js:232`, compté le 16/08). L'export manque toujours `travaux`,
-  `catalogue`, `conducteurs`, `activites`, `tracteurs_list`, `entretiens`, `reparateur`,
-  `reparateur_hist`, `cave_elevage`, `cave_vendange`, les cinq clés `planning_*`, `kml_polygons`,
-  `intrants` et `paie`. **La liste s'allonge pendant que l'export reste figé** : c'est exactement
-  l'argument de la dériver de `COLLECTIONS` au lieu de la maintenir. Détail : **§43f**.
+- ✅ ~~**Refondre l'export JSON**~~ — **FAIT le 13/09, §124 (SAUV-1).** L'entrée disait
+  « 8 clés sur 27 » ; le compte exact était **8 sur 26**, et le vrai défaut n'était pas l'export
+  mais la **restauration**, qui réécrivait la fiche membre tronquée par-dessus l'historique des
+  contrats. L'export dérive désormais de `COLLECTIONS` — c'était bien l'argument de l'entrée, et
+  il était juste. ★ *Une entrée de backlog qui nomme la bonne cause peut quand même sous-estimer
+  le dégât : celle-ci parlait d'un fichier incomplet, pas d'une perte de données.*
 - ⚠️⚠️ **Vérifier la persistance cloud tenant par tenant** — le code est bon, l'existence des
   documents chez chaque client n'est pas prouvée. Procédure : **§43g**.
 - ⚠️ **La marge en jours n'est surveillée par aucun test** — bloqué par l'export. **§43f**.
@@ -17838,47 +17822,6 @@ banc au vert. ⚠️ **Une contre-épreuve dont la condition est « il reste des
 tant que le banc n'est pas vert par ailleurs.** Garde d'injection posée (5/5 injectés, 11 rouges),
 comme sur `mv-harnais-axe`.
 
-### 123g ter. ★★ UNE CONTRE-ÉPREUVE NE S'AFFICHE PAS EN ROUGE (13/09, sur remarque de Nico)
-
-Les deux nouveaux scripts affichaient, en mode `--contre`, **la liste entière de leurs assertions
-avec 9 puis 11 lignes en rouge** — des rouges *attendus*, mais peints comme des échecs. Nico a
-renvoyé la sortie : dans une chaîne de 80 scripts, ça ne se distingue pas d'une panne.
-
-★★★ **HABITUER L'ŒIL AU ROUGE ATTENDU, C'EST LE RENDRE AVEUGLE AU ROUGE QUI COMPTE.** Le patron
-existait déjà (`cuv8`, `recalage`) : une contre-épreuve affiche **`vert  <le défaut> → détecté`**
-et conclut par « N/N défauts attrapés ». **Un rouge y signale un défaut qui PASSE**, jamais un
-défaut vu. Après correction : **zéro `✗` dans toute la chaîne**, `exit=0`.
-
-★★ **Et le passage au patron a DURCI la preuve.** L'ancienne version injectait les défauts **tous
-ensemble** puis comptait les rouges — *un défaut pouvait être masqué par un autre, ou couvert par
-une assertion qui rougissait pour une tout autre raison*. Chacun est désormais injecté **seul**, sur
-des sources recharguées, et doit être attrapé **isolément** : 7/7 pour `mv-harnais-axe`, 5/5 pour
-`mv-banc-documents`. La forme n'était pas qu'une question de forme.
-
-### 123h bis. ★★★ DEUX RÈGLES DÉJÀ ÉCRITES, DEUX RÈGLES VIOLÉES — LE 13/09
-
-Nico, en fin de session : *« je t'ai demandé d'être clair dans tes réponses et de m'indiquer aussi
-où mettre les fichiers à chaque fois »*. ⚠️ **Les deux manquements étaient déjà couverts par ce
-document, et le lot les a commis quand même.**
-
-- **Aucun tableau de livraison** (§16) sur deux paquets successifs — 22 fichiers présentés sans une
-  ligne disant où chacun va. Le tableau gagne une **colonne « À déposer dans »**, désormais
-  obligatoire.
-- ⚠️ **`public/guide.html` livré DEUX FOIS**, alors que le corollaire du 14/08 l'interdit
-  explicitement : *on livre l'entrée, on nomme la commande*. Un fichier qu'un script fabrique n'a
-  rien à faire dans un paquet — il a déjà coûté deux allers-retours de CI en août.
-
-★★ **CE QUE ÇA A COÛTÉ, CONCRÈTEMENT.** Firebase a refusé un déploiement pour un
-`functions/package.json` supprimé par un commit antérieur (`584975e`, sans rapport avec le lot).
-En réponse, Nico a renvoyé le `package.json` **de la racine** — *parce que rien, dans mes messages,
-ne distinguait jamais les deux*. **Un nom de fichier qui existe à deux endroits du dépôt doit
-TOUJOURS voyager avec son dossier.**
-
-★ **Correctif de fond, pas seulement de forme** : le dossier de sortie **accepte les
-sous-dossiers** (vérifié le 13/09 — la ligne « le dossier de sortie est PLAT » était périmée).
-Les paquets reproduisent donc l'arborescence du dépôt, pour que le chemin voyage avec le fichier.
-Le tableau reste obligatoire par-dessus : sur mobile, seul le nom de base s'affiche.
-
 ### 123h. La note de livraison
 
 **Base : `25d7fa9`** (⚠️ deux commits de Nico — `584975e`, `25d7fa9` — sont arrivés entre la lecture
@@ -17895,3 +17838,139 @@ campagne » et sa ligne de vendange, le panneau du journal des interventions, le
 ses dates. ② `_pexZeros` reste à fusionner (§104b). ③ **Le Pilotage n'imprime toujours rien** :
 l'écran Économie › Exercice n'a aucun export — le journal des interventions le contourne, il ne le
 remplace pas.
+
+## 124. ★★★ SAUV-1 — « SAUVEGARDE COMPLÈTE » EN GARDAIT HUIT SUR VINGT-SIX, ET LA RESTAURATION DÉTRUISAIT CE QU'ELLE N'AVAIT PAS SAUVEGARDÉ (13/09 soir — `firebase.js` + `reglages.js` + `app.js` + `index.html` + `sw.js` + `guide/` + `scripts/` + `package.json` · APP 7.18 → 7.19 · SW 7.78 → 7.79 · base `ee724dc`)
+
+**Point de départ**, mot pour mot : *« il faut gérer en priorité l'export JSON ! »*, puis, une fois
+les arbitrages posés : *« le json doit avoir absolument toutes les données du tenant et la
+restauration doit être parfaite comme si aucun problème »*.
+
+### 124a. La mesure, avant toute ligne
+
+Le hub Documents annonçait **« Sauvegarde complète — toutes les données du domaine dans un seul
+fichier. À garder au chaud. »** `exportJSON` écrivait **8 clés sur 26** : `parcelles`, `journal`
+(filtré `!j.meteo`), `sessions`, `traitements`, `membres` (tronqué), `saisons`, `taches`,
+`historique`. Dehors : les **quatre** collections du planning, les **deux** de la cave, `intrants`,
+`travaux`, `catalogue`, `conducteurs`, `activites`, `tracteurs_list`, `entretiens`, `reparateur`,
+`reparateur_hist`, `kml_polygons`, `config`, `paie`.
+
+⚠️ **Le filet réel n'était pas là** : §9 tient l'export Firestore natif (2 h, 7 j) et un backup JSON
+par tenant (3 h, 30 j). Ce n'était donc pas une bombe à retardement — **c'était un écran qui ment**,
+et un geste de restauration plus dangereux que ne rien faire.
+
+### 124b. ⚠️⚠️⚠️ LE VRAI DÉFAUT : LA RESTAURATION DÉTRUISAIT L'HISTORIQUE DES CONTRATS
+
+L'export gardait `membres:MEMBRES.map(m=>({nom,roles,statut}))`. `importJSON` faisait
+`window.MEMBRES = data.membres` **puis `saveData('membres')`**. Une restauration écrasait donc en
+base les **`m.hist[]`** — source de vérité des contrats depuis §37, et de tout coût de
+main-d'œuvre daté — les e-mails, les couleurs et le drapeau `bureau`.
+★★★ **Le seul geste de l'application capable de ce dégât-là était celui qu'on déclenche quand tout
+va déjà mal.** Une sauvegarde partielle est une gêne ; une *restauration* partielle qui réécrit
+par-dessus est une perte.
+
+### 124c. La cause racine, et la règle qui en sort
+
+Une **seconde liste de clés**, écrite à la main à côté de `COLLECTIONS`. Elle s'est périmée à chaque
+lot qui ajoutait une collection — et **en silence** : rien ne rougissait, le fichier sortait quand
+même.
+★★★ **UN FICHIER QUI S'APPELLE « SAUVEGARDE COMPLÈTE » SE DÉRIVE DE LA LISTE DES COLLECTIONS,
+JAMAIS D'UNE LISTE PARALLÈLE.** `window.MV_COLLECTIONS = COLLECTIONS.slice()`, et le harnais
+interdit qu'un littéral de clés réapparaisse dans `exportJSON`.
+
+### 124d. ⚠️⚠️ ON LIT FIRESTORE, PAS LA MÉMOIRE — deux raisons, pas une
+
+- La mémoire est **partielle** : une clé dont le pull a échoué n'y est pas, et `paie` n'y descend
+  jamais chez un non-admin. *Une sauvegarde faite sur un état partiel est pire qu'une absence de
+  sauvegarde : elle rassure.*
+- La mémoire est **transformée** : `applyFbData` reconstruit `kml_polygons` en `[lat,lng]`,
+  `_normalizeTaches` normalise, `cave_*` est fusionné avec ses valeurs par défaut. Un aller-retour
+  doit rendre le document **tel qu'il est stocké**, pas tel que l'application l'avait interprété.
+
+`fbLireTout()` lit les 26 documents en parallèle (le SDK multiplexe, cf. PERF-1), **chacun avec son
+catch** — un refus sur une clé ne doit pas annuler les vingt-cinq autres — et distingue trois
+états : lu · jamais créé · en erreur. ★ **Un document qui existe sans champ `value` n'est pas une
+donnée** : le compter présent ferait écrire `undefined` à la restauration.
+
+### 124e. ⚠️⚠️⚠️ ET ON N'ÉCRIT PAS PAR `fbSave` — deux raisons, pas une
+
+- **`parcelles` y part en fusion 3-way** (`_saveParcellesMerged`). *Une restauration qui fusionne
+  garde ce qu'on voulait justement effacer : ce n'est plus une restauration, c'est un mélange.*
+- **La garde anti-écrasement** (`_mvBlockDestructive`) refuse toute écriture qui divise une
+  collection par deux. C'est exactement ce qu'une restauration légitime peut avoir à faire.
+
+`fbRestaurerTout()` écrit en `setDoc` direct, **séquentiellement** (en cas de coupure, le rapport
+dit où l'on s'est arrêté), puis applique en mémoire **par `applyFbData`** — le chemin du pull, avec
+sa reconversion KML et ses cascades : les réécrire ici, c'est se donner un second comportement à
+maintenir.
+★★★ **La contrepartie de passer outre la garde est un écran, pas un silence.** La garde protège
+d'un *accident*, et un accident ne s'annonce pas. Le volet lit l'état actuel, le met en regard du
+fichier avec **le même compteur que la garde** (`window._mvTailleDoc` = `_mvDocSize`), et nomme
+ligne par ligne : ce qui est remplacé (`avant → après`, rouge quand ça baisse), ce qui **rétrécit**
+en tout, et ce à quoi on ne touche pas parce que le fichier ne le contient pas.
+
+### 124f. Trois pièges que le lot a dû fermer
+
+- ⚠️⚠️ **`_baseParcelles` doit suivre.** C'est l'état serveur de référence du merge 3-way. Laissée
+  sur l'état d'AVANT, la première écriture de parcelle **ferait remonter ce que la restauration
+  vient d'effacer** — et personne ne comprendrait pourquoi.
+- ⚠️⚠️ **La snapshot hors ligne porte encore l'état d'avant.** `window._mvPurgerSnapshot()`
+  (app.js) l'efface — ★ en appelant `_mvSnapCancel()` **avant**, sinon un flush en attente la
+  réécrit juste après, comme le dit déjà la note posée au-dessus de la fonction. Puis
+  `location.reload()` : une restauration parfaite repart d'un démarrage propre.
+- ★★ **Un fichier ancien porte les parcelles SANS l'avancement qui en découle.** `travaux` se
+  déduit des parcelles et l'ancien format ne le sauvegardait pas : restaurer les parcelles seules
+  laisserait des pourcentages calculés sur les parcelles d'avant, **sur l'écran d'accueil, sans
+  rien pour le signaler**. `recalcAllTravaux()` est rappelée et le résultat écrit — `travaux` est
+  volontairement hors de la garde (collection dérivée), `fbSave` suffit.
+
+### 124g. Ce que le preflight a attrapé — l'auteur du lot compris
+
+Quatre erreurs au premier passage : **deux `catch{}` vides** (app.js 157 contre 155, reglages.js 3
+contre 1), **un `console.log` de sw.js resté en v7.78** alors que l'en-tête disait 7.79 (le contrôle
+de cohérence de version lit *les quatre* endroits), et ★ **`recalcAllTravaux` déclarée sans
+appelant** — je venais de supprimer son unique appel avec l'ancien `importJSON`. *Le filet n'a pas
+seulement signalé du code mort : il a mis le doigt sur le cas du fichier ancien, que je n'avais pas
+vu.*
+
+### 124h. `scripts/mv-harnais-sauvegarde.mjs` — 38 assertions, 6 injections
+
+Branché dans `check` et `prebuild`, contre-épreuve comprise. Il **exécute** `_mvSauvLire` extrait du
+vrai `reglages.js` (format 2, format ancien, fichier quelconque) et lit le code sans ses
+commentaires (§34g). Les injections sont **en mémoire, jamais sur disque** (§25.2), avec garde
+d'injection : **6/6 appliqués, 7 assertions rougissent**.
+
+⚠️⚠️ **UNE INJECTION NE TOUCHAIT PAS L'ASSERTION QU'ELLE CROYAIT TESTER.** « la restauration
+repasse par `fbSave` » remplaçait la ligne d'écriture — qui vit dans `_mvRestaurerUne`, pas dans
+`fbRestaurerTout`. Mon assertion ne lisait que le corps de la seconde : elle serait **restée verte**
+pendant que la première réécrivait par `fbSave`. C'est §123g à nouveau, dans le lot suivant. Les
+deux corps sont désormais couverts.
+
+★★★ **L'assertion qui ne se périmera pas** : *les 26 collections ont toutes un nom en clair*
+(`MV_SAUV_NOMS`). Une collection ajoutée demain sans libellé ferait afficher
+« `planning_hsup` : 0 → 41 » à un vigneron. C'est la règle d'or n°5 transformée en filet.
+
+### 124i. Une prise en passant
+
+`_docsPane` portait la liste de ses volets **écrite à la main** —
+`['docs-pane-mois','docs-pane-etp','docs-pane-releve']` — et elle avait **déjà un trou** :
+`docs-pane-plannom` (§NAV) n'y figurait pas, donc une fois ouvert il restait visible **sous** le
+volet suivant. Elle balaie maintenant les volets réellement présents dans `#docs-pane`. *Même
+maladie que la liste de clés de l'export, dans le même fichier, à trois cents lignes d'écart.*
+
+### 124j. La note de livraison
+
+**Base : `ee724dc`.** Livré : `src/firebase.js`, `src/reglages.js`, `src/app.js`, `src/utils.js`,
+`index.html`, `public/sw.js`, `guide/13-donnees.html` (puis `node scripts/build-guide.mjs`),
+`scripts/mv-harnais-sauvegarde.mjs`, `scripts/harnais-claude-md.mjs`, `package.json`, `CLAUDE.md`.
+`npm run check` joué **en entier**, ESLint installé dans le bac à sable (`npm install eslint@9
+--no-save`, cf. §28) pour que `lint-cliquet` et `mv-harnais-globaux` tournent vraiment.
+
+**Ouvert, et dit** : ① **aucun rendu navigateur** — le volet de comparaison est du HTML neuf, à
+regarder en admin, thème clair et sombre, et sur téléphone. ② **Le poids du fichier n'a pas été
+mesuré sur un vrai domaine** : avec les contours KML et le planning, il peut passer de quelques
+centaines de ko à plusieurs Mo — l'indentation a été retirée pour cette raison, mais la mesure
+reste à faire chez MG. ③ **La restauration n'a jamais été jouée de bout en bout** : à essayer sur
+un slug jetable, jamais sur un tenant vivant. ④ `npm run build`, `test:smoke`, `test:e2e` : pas de
+navigateur dans le bac à sable. ⑤ ★ Le fichier contient les **taux horaires** : c'est la décision
+de Nico (« absolument toutes les données »), le guide le dit, mais aucune protection ne l'entoure
+côté disque du client.

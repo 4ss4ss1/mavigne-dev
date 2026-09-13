@@ -3266,10 +3266,12 @@ var MV_DOCS = [
     s:'Une ligne par parcelle, une colonne par t\u00e2che.' },
   { f:'brut',  act:'json',         mod:'', ico:'\u{1F4BE}', bg:'var(--gris-clair)', fm:'json',
     t:'Sauvegarde compl\u00e8te', ask:'',
-    s:'Toutes les donn\u00e9es du domaine dans un seul fichier. \u00c0 garder au chaud.' },
+    s:'Tout le domaine dans un seul fichier\u00a0: parcelles, journal, planning, cave, r\u00e9serve, '
+     +'machines, r\u00e9glages et taux horaires. Lu directement sur le serveur, pas sur cet appareil.' },
   { f:'brut',  act:'restore',      mod:'', ico:'\u21A9\u{FE0F}', bg:'var(--rouge-pale)', fm:'imp',
-    t:'Restaurer depuis un fichier', ask:'',
-    s:'Remet en place une sauvegarde. Remplace les donn\u00e9es actuelles.' }
+    t:'Restaurer depuis un fichier', ask:'\u00c9tat actuel compar\u00e9 au fichier',
+    s:'Remet le domaine dans l\u2019\u00e9tat de la sauvegarde. L\u2019\u00e9cran vous montre ce qui change, '
+     +'\u00e9l\u00e9ment par \u00e9l\u00e9ment, avant que rien ne soit \u00e9crit.' }
 ];
 
 // ★ Lu par la Cave (roue crantee, lot CAVE-2) : un seul catalogue, docsGo(i) pour tous.
@@ -3350,9 +3352,15 @@ window.docsFam=function(k){ _docsFam=k; _docsRender(); };
 function _docsPane(id){
   var home=document.getElementById('docs-home'), pane=document.getElementById('docs-pane');
   if(!home||!pane) return;
-  ['docs-pane-mois','docs-pane-etp','docs-pane-releve'].forEach(function(p){
-    var el=document.getElementById(p); if(el) el.style.display=(p===id)?'':'none';
-  });
+  /* ★ SAUV-1 : la liste etait ECRITE A LA MAIN, et elle avait deja un trou --
+     `docs-pane-plannom` (le planning annuel d'un salarie) n'y figurait pas : une
+     fois ouvert, il restait visible SOUS le volet suivant. On balaie desormais
+     les volets reellement presents dans #docs-pane. Une liste en dur d'elements
+     qu'un lot peut ajouter se perime au lot suivant, en silence. */
+  var _volets=pane.querySelectorAll('[id^="docs-pane-"]');
+  for(var _v=0;_v<_volets.length;_v++){
+    _volets[_v].style.display=(_volets[_v].id===id)?'':'none';
+  }
   home.style.display='none'; pane.style.display='';
 }
 window.docsBack=function(){
@@ -3449,71 +3457,329 @@ function showExportFeedback(msg){
   el.textContent=msg;el.style.display='block';
   setTimeout(()=>{el.style.display='none';},3000);
 }
-function exportJSON(){
+/* ═══════════════════════════════════════════════════════════════════════════
+   SAUVEGARDE COMPLETE & RESTAURATION — lot SAUV-1
+   ═══════════════════════════════════════════════════════════════════════════
+   Ce qu'on a trouvé en lisant le code : l'écran annonçait « Sauvegarde
+   complète — toutes les données du domaine dans un seul fichier » et en
+   écrivait HUIT sur vingt-six. Manquaient le planning entier, toute la cave,
+   les intrants, les machines, les entretiens, les contours de parcelles, la
+   configuration et la paie.
+
+   ⚠️⚠️⚠️ ET LA RESTAURATION DÉTRUISAIT CE QU'ELLE N'AVAIT PAS SAUVEGARDÉ.
+   L'export ne gardait de chaque salarié que { nom, roles, statut } ; l'import
+   réécrivait la fiche AVEC ÇA, puis la poussait en base. Un domaine qui
+   restaurait perdait l'historique de ses contrats — la source de vérité de
+   tout coût de main-d'œuvre daté depuis le lot CONTRATS — les e-mails, les
+   couleurs et le drapeau bureau. Le geste censé réparer était le seul de
+   l'application qui pouvait faire ce dégât-là.
+
+   La règle qui en sort : ★★★ UN FICHIER QUI S'APPELLE « SAUVEGARDE COMPLÈTE »
+   SE DÉRIVE DE LA LISTE DES COLLECTIONS, JAMAIS D'UNE LISTE ÉCRITE À LA MAIN.
+   Une seconde liste se périme au premier lot qui ajoute une collection, et
+   elle se périme EN SILENCE : rien ne rougit, le fichier sort quand même, et
+   personne ne s'en aperçoit avant d'en avoir besoin.
+   ═══════════════════════════════════════════════════════════════════════════ */
+
+var MV_SAUV_FORMAT  = 'mavigne-sauvegarde';
+var MV_SAUV_VERSION = 2;
+
+/* Les huit clés de l'ancien format plat (il se reconnaît à `version:'4.7'`).
+   Un client a peut-être un tel fichier dans un tiroir : on sait encore le
+   relire, et l'écran dira franchement ce qu'il ne contient pas. */
+var MV_SAUV_LEGACY = ['parcelles','journal','sessions','traitements','membres','saisons','taches','historique'];
+
+/* Noms en clair. Une ligne « planning_hsup : 0 → 41 » ne dit rien à personne. */
+var MV_SAUV_NOMS = {
+  parcelles:'Parcelles', journal:'Journal des travaux', sessions:'Sessions tracteur',
+  travaux:'Avancement des travaux', traitements:'Registre phytosanitaire',
+  catalogue:'Catalogue des produits', conducteurs:'Conducteurs', activites:'Activités tracteur',
+  membres:'Équipe et contrats', saisons:'Périodes de travail', taches:'Tâches et barème',
+  config:'Réglages du domaine', historique:'Historique d’activité',
+  tracteurs_list:'Machines', entretiens:'Entretiens', reparateur:'Réparateurs',
+  reparateur_hist:'Immobilisations', cave_elevage:'Chai — élevage',
+  cave_vendange:'Cuvier — vendange et cuves', planning_templates:'Modèles de semaine',
+  planning_entries:'Planning — saisies', planning_acomptes:'Acomptes',
+  planning_hsup:'Heures supplémentaires', kml_polygons:'Contours des parcelles',
+  intrants:'Réserve — intrants', paie:'Taux horaires et GNR'
+};
+function _sauvNom(k){ return MV_SAUV_NOMS[k] || k; }
+
+/* ── L'export ─────────────────────────────────────────────────────────────
+   ⚠️ On lit FIRESTORE, pas la mémoire. La mémoire est partielle (une clé dont
+   le chargement a échoué n'y est pas) et transformée (contours reconstruits,
+   tâches normalisées, cave fusionnée avec ses valeurs par défaut). Une
+   sauvegarde doit rendre le document tel qu'il est stocké, sinon l'aller-retour
+   ne rend pas le même domaine. Détail : fbLireTout, dans firebase.js. */
+async function exportJSON(){
   if(!isAdmin())return;
-  const data={exportDate:new Date().toISOString(),version:'4.7',domaine:(window.DOMAINE_NOM||'Mon domaine'),parcelles:window.PARCELLES,journal:window.JOURNAL.filter(j=>!j.meteo),sessions:window.SESSIONS,traitements:window.TRAITEMENTS,membres:window.MEMBRES.map(m=>({nom:m.nom,roles:m.roles,statut:m.statut})),saisons:window.SAISONS,taches:window.TACHES,historique:window.HISTORIQUE};
-  const date=_mvToday();
-  dlFile(JSON.stringify(data,null,2),`mavigne_export_${date}.json`,'application/json');
-  showExportFeedback('Export JSON téléchargé !');
+  if(typeof window.fbLireTout!=='function'){
+    showImportFeedback('Mise à jour incomplète — rechargez l’application.','var(--rouge-pale)','var(--rouge)');
+    return;
+  }
+  showExportFeedback('Lecture des données du domaine…');
+  var r;
+  try{ r = await window.fbLireTout(); }
+  catch(e){
+    showImportFeedback('Lecture impossible — vérifiez votre connexion.','var(--rouge-pale)','var(--rouge)');
+    if(window.logError) window.logError({level:'error',cat:'sauvegarde',msg:'fbLireTout a levé',detail:String(e)});
+    return;
+  }
+  var attendues = (window.MV_COLLECTIONS||[]).slice();
+  var presentes = Object.keys(r.data);
+  var incomplet = (r.erreurs.length>0);
+
+  /* ★ Le fichier porte lui-même le compte de ce qu'il contient ET de ce qu'il
+     n'a pas pu lire. C'est la leçon de l'ancien format : il ne disait rien, et
+     c'est ce silence qui a fait croire pendant des mois qu'il était complet. */
+  var fichier = {
+    meta:{
+      format: MV_SAUV_FORMAT,
+      version_format: MV_SAUV_VERSION,
+      app_version: (window.APP_VERSION||''),
+      tenant: (r.tenant||''),
+      domaine: (window.DOMAINE_NOM||''),
+      date: new Date().toISOString(),
+      complet: !incomplet && (presentes.length + r.manquants.length === attendues.length),
+      cles_attendues: attendues,
+      cles_presentes: presentes,
+      cles_jamais_creees: r.manquants,
+      cles_en_erreur: r.erreurs
+    },
+    donnees: r.data
+  };
+  /* ⚠️ Pas d'indentation : elle double le poids d'un fichier qui porte déjà
+     tout le planning et tous les contours de parcelles. Un fichier de
+     sauvegarde se relit avec un outil, pas à l'œil. */
+  var txt = JSON.stringify(fichier);
+  var ko  = Math.round((new Blob([txt]).size)/1024);
+  var nom = 'mavigne_sauvegarde_' + (r.tenant||'domaine') + '_' + _mvToday()
+          + (incomplet ? '_INCOMPLETE' : '') + '.json';
+  dlFile(txt, nom, 'application/json');
+
+  if(incomplet){
+    var quoi = r.erreurs.map(function(e){ return _sauvNom(e.cle); }).join(', ');
+    showImportFeedback('Sauvegarde INCOMPLÈTE — ' + r.erreurs.length + ' élément(s) illisible(s) : '
+      + quoi + '. Le fichier est téléchargé quand même et le dit à l’intérieur.',
+      'var(--rouge-pale)','var(--rouge)');
+    return;
+  }
+  showExportFeedback('Sauvegarde téléchargée — ' + presentes.length + ' éléments sur '
+    + attendues.length + ', ' + ko + ' ko.');
 }
+
+/* ── La lecture d'un fichier ──────────────────────────────────────────────── */
+var _mvSauvEnCours = null;   /* { donnees, meta, nom } — le fichier lu, pas encore appliqué */
+
+function _mvSauvLire(data){
+  if(!data || typeof data!=='object') return null;
+  if(data.donnees && typeof data.donnees==='object' && data.meta && data.meta.format===MV_SAUV_FORMAT){
+    return { donnees:data.donnees, meta:data.meta };
+  }
+  /* Format historique : les huit clés à plat. */
+  if(Array.isArray(data.parcelles)){
+    var d={};
+    MV_SAUV_LEGACY.forEach(function(k){ if(data[k]!==undefined && data[k]!==null) d[k]=data[k]; });
+    return { donnees:d, meta:{ format:MV_SAUV_FORMAT, version_format:1, ancien:true,
+      date:(data.exportDate||''), domaine:(data.domaine||''), app_version:(data.version||'') } };
+  }
+  return null;
+}
+
 function importJSON(input){
   if(!isAdmin())return;
-  const file=input.files[0];
+  var file=input.files[0];
   if(!file){return;}
-  // Réinitialiser l'input pour permettre de recharger le même fichier
-  input.value='';
-  const reader=new FileReader();
+  input.value='';   /* permet de recharger le même fichier */
+  var reader=new FileReader();
   reader.onload=function(e){
-    let data;
-    try{data=JSON.parse(e.target.result);}
+    var data;
+    try{ data=JSON.parse(e.target.result); }
     catch(err){
       showImportFeedback('Fichier JSON invalide — vérifiez le fichier.','var(--rouge-pale)','var(--rouge)');
       return;
     }
-    // Validation minimale
-    if(!data.parcelles||!Array.isArray(data.parcelles)){
-      showImportFeedback('Format non reconnu — ce fichier n\'est pas un export Ma Vigne.','var(--rouge-pale)','var(--rouge)');
+    var lu=_mvSauvLire(data);
+    if(!lu){
+      showImportFeedback('Format non reconnu — ce fichier n’est pas une sauvegarde Ma Vigne.','var(--rouge-pale)','var(--rouge)');
       return;
     }
-    const nb=data.parcelles.length;
-    const date=data.exportDate?new Date(data.exportDate).toLocaleDateString('fr-FR'):'inconnue';
-    window.openConfirmDel('Charger cet export ?',''+nb+' parcelles · Export du '+date+'\nLes données actuelles seront remplacées.',function(){
-      // Appliquer les données
-      if(data.parcelles){window.PARCELLES.length=0;data.parcelles.forEach(p=>window.PARCELLES.push(p));}
-      if(data.journal){window.JOURNAL=data.journal;window.JOURNAL=window.JOURNAL;}
-      if(data.sessions){window.SESSIONS=data.sessions;window.SESSIONS=window.SESSIONS;}
-      if(data.traitements){window.TRAITEMENTS=data.traitements;window.TRAITEMENTS=window.TRAITEMENTS;}
-      if(data.membres){
-        var _importedMbr = data.membres;
-        var _cu = window.currentUser;
-        if(_cu && _cu.email && !_cu._isGTAdmin) {
-          var _cuInList = _importedMbr.some(function(m){ return m.email === _cu.email; });
-          if(!_cuInList) {
-            _importedMbr = [{nom:_cu.nom, email:_cu.email, roles:_cu.roles||['admin'], couleur:_cu.couleur||'#3D6B27', statut:'actif'}].concat(_importedMbr);
-          }
-        }
-        window.MEMBRES = _importedMbr;
-      }
-      if(data.saisons){window.SAISONS=data.saisons;window.SAISONS=window.SAISONS;}
-      if(data.taches){window.TACHES=data.taches;window.TACHES=window.TACHES;}
-      if(data.historique){window.HISTORIQUE=data.historique;window.HISTORIQUE=window.HISTORIQUE;}
-      if(typeof recalcAllTravaux==='function')recalcAllTravaux();
-      if(typeof window.saveData==='function'){
-        ['parcelles','journal','sessions','traitements','membres','saisons','taches','historique'].forEach(k=>window.saveData(k));
-      }
-      if(typeof window.renderHome==='function')window.renderHome();
-      if(typeof window.renderParcelles==='function')window.renderParcelles();
-      if(typeof window.computePStats==='function')window.computePStats();
-      if(typeof renderReglages==='function')renderReglages();
-      window.closeOv(null,'ovDocs');
-      showImportFeedback(`Import réussi — ${nb} parcelles chargées depuis l'export du ${date}.`,'var(--vert-pale)','var(--vert)');
-    },'dossier','Charger l\'export');
+    _mvSauvEnCours={ donnees:lu.donnees, meta:lu.meta, nom:(file.name||'') };
+    _docsRestOpen();
   };
   reader.onerror=function(){
     showImportFeedback('Erreur de lecture du fichier.','var(--rouge-pale)','var(--rouge)');
   };
   reader.readAsText(file);
 }
+
+/* ── Le volet de restauration ──────────────────────────────────────────────
+   ★★★ ON NE RESTAURE PAS À L'AVEUGLE. L'écran lit l'état actuel du domaine,
+   le met en regard du fichier, et nomme ligne par ligne ce qui va grossir, ce
+   qui va rétrécir et ce à quoi on ne touchera pas. C'est la contrepartie
+   assumée du fait qu'une restauration passe OUTRE la garde anti-écrasement :
+   la garde protège d'un accident, et un accident ne s'annonce pas. */
+async function _docsRestOpen(){
+  var pane=document.getElementById('docs-pane');
+  if(!pane || !_mvSauvEnCours){
+    if(window.showToast) window.showToast('Écran indisponible','#B85A1A');
+    return;
+  }
+  var host=document.getElementById('docs-pane-restore');
+  if(!host){
+    host=document.createElement('div');
+    host.id='docs-pane-restore';
+    host.style.display='none';
+    pane.appendChild(host);
+  }
+  host.innerHTML='<div style="background:var(--fond-module);border-radius:14px;padding:16px;'
+    + 'font-size:12px;color:var(--texte-doux)">Lecture de l’état actuel du domaine…</div>';
+  _docsPane('docs-pane-restore');
+
+  var av={ data:{}, erreurs:[] };
+  try{ if(typeof window.fbLireTout==='function') av=await window.fbLireTout(); }
+  catch(e){
+    /* L'état actuel est illisible : on ne peut plus comparer. On l'écrit à
+       l'écran plutôt que d'afficher un tableau de comparaison faux. */
+    if(window.logError) window.logError({level:'error',cat:'restauration',msg:'état actuel illisible avant restauration',detail:String(e)});
+  }
+
+  var taille=(typeof window._mvTailleDoc==='function')
+    ? window._mvTailleDoc
+    : function(k,v){ return Array.isArray(v)?v.length:(v&&typeof v==='object'?Object.keys(v).length:(v==null?0:1)); };
+
+  var cles=(window.MV_COLLECTIONS||[]).slice();
+  var D=_mvSauvEnCours.donnees, meta=_mvSauvEnCours.meta||{};
+  var remplace=[], intouchees=[], perte=0;
+  cles.forEach(function(k){
+    var dans=Object.prototype.hasOwnProperty.call(D,k) && D[k]!==undefined && D[k]!==null;
+    var nAv=taille(k, av.data[k]);
+    if(!dans){ intouchees.push({k:k, n:nAv}); return; }
+    var nAp=taille(k, D[k]);
+    if(nAp<nAv) perte+=(nAv-nAp);
+    remplace.push({k:k, av:nAv, ap:nAp});
+  });
+
+  var dateTxt = meta.date ? new Date(meta.date).toLocaleString('fr-FR') : 'date inconnue';
+  var h='<div style="background:var(--rouge-pale);border-radius:14px;padding:14px 16px">'
+    + '<div style="font-size:13px;font-weight:700;color:var(--rouge);margin-bottom:4px">Restaurer une sauvegarde</div>'
+    + '<div style="font-size:11px;color:var(--texte-doux);line-height:1.5;margin-bottom:12px">'
+      + _docsEsc(_mvSauvEnCours.nom) + '<br>Sauvegarde du ' + _docsEsc(dateTxt)
+      + (meta.domaine ? ' · ' + _docsEsc(meta.domaine) : '')
+      + (meta.app_version ? ' · version ' + _docsEsc(meta.app_version) : '')
+      + '</div>';
+
+  if(meta.ancien){
+    h+='<div style="background:var(--or-pale);border-radius:10px;padding:9px 11px;font-size:11px;'
+      + 'line-height:1.5;margin-bottom:10px"><b>Fichier d’une ancienne version.</b> Il ne contient '
+      + 'que huit éléments sur ' + cles.length + ', et les fiches de l’équipe y sont incomplètes '
+      + '(nom, rôles et statut seulement). Les contrats, e-mails et couleurs actuels seront '
+      + '<b>conservés</b> : ce fichier ne les remplace pas.</div>';
+  }
+  if(meta.complet===false || (meta.cles_en_erreur && meta.cles_en_erreur.length)){
+    h+='<div style="background:var(--or-pale);border-radius:10px;padding:9px 11px;font-size:11px;'
+      + 'line-height:1.5;margin-bottom:10px"><b>Cette sauvegarde se déclare incomplète.</b> '
+      + 'Certains éléments n’avaient pas pu être lus au moment où elle a été faite.</div>';
+  }
+
+  h+='<div style="font-size:11px;font-weight:700;color:var(--rouge);margin:2px 0 6px">'
+    + 'Remplacés (' + remplace.length + ')</div>';
+  h+= remplace.length
+    ? remplace.map(function(x){
+        var baisse=(x.ap<x.av);
+        return '<div style="display:flex;justify-content:space-between;gap:8px;font-size:11px;'
+          + 'padding:3px 0;border-bottom:1px solid rgba(0,0,0,.05)">'
+          + '<span>' + _docsEsc(_sauvNom(x.k)) + '</span>'
+          + '<span style="font-variant-numeric:tabular-nums;font-weight:600;'
+          + (baisse?'color:var(--rouge)':'color:var(--texte-doux)') + '">'
+          + x.av + ' \u2192 ' + x.ap + '</span></div>';
+      }).join('')
+    : '<div style="font-size:11px;color:var(--texte-doux)">Aucun.</div>';
+
+  if(intouchees.length){
+    h+='<div style="font-size:11px;font-weight:700;color:var(--texte-doux);margin:12px 0 6px">'
+      + 'Absents du fichier — laissés tels quels (' + intouchees.length + ')</div>'
+      + '<div style="font-size:11px;color:var(--texte-doux);line-height:1.6">'
+      + intouchees.map(function(x){
+          return _docsEsc(_sauvNom(x.k)) + (x.n ? ' (' + x.n + ')' : '');
+        }).join(' · ')
+      + '</div>';
+  }
+
+  if(perte>0){
+    h+='<div style="background:var(--rouge-pale);border:1px solid var(--rouge);border-radius:10px;'
+      + 'padding:9px 11px;font-size:11px;line-height:1.5;margin-top:12px">'
+      + '<b>' + perte + ' ligne(s) de moins</b> après restauration. Si ce n’est pas ce que vous '
+      + 'attendez, faites d’abord une sauvegarde de l’état actuel et comparez les deux fichiers.</div>';
+  }
+
+  h+='<div style="font-size:10px;color:var(--texte-doux);line-height:1.5;margin-top:12px">'
+    + 'La restauration écrit dans le domaine, pour tout le monde. L’application se recharge '
+    + 'ensuite pour repartir sur les données restaurées.</div>'
+    + '<button id="docs-rest-go" onclick="_docsRestGo()" style="background:var(--rouge);color:white;'
+    + 'border:none;border-radius:10px;padding:11px 18px;font-size:13px;font-weight:600;'
+    + 'font-family:\'Outfit\',sans-serif;width:100%;cursor:pointer;margin-top:10px">'
+    + 'Restaurer ' + remplace.length + ' élément(s)</button>'
+    + '</div>';
+  host.innerHTML=h;
+}
+
+window._docsRestGo = async function(){
+  if(!_mvSauvEnCours){ if(window.showToast) window.showToast('Aucun fichier chargé','#B85A1A'); return; }
+  if(typeof window.fbRestaurerTout!=='function'){
+    showImportFeedback('Mise à jour incomplète — rechargez l’application.','var(--rouge-pale)','var(--rouge)');
+    return;
+  }
+  var btn=document.getElementById('docs-rest-go');
+  if(btn){ btn.disabled=true; btn.textContent='Restauration en cours…'; btn.style.opacity='.6'; }
+  var rap;
+  try{ rap=await window.fbRestaurerTout(_mvSauvEnCours.donnees); }
+  catch(e){ rap={ ecrites:[], absentes:[], erreurs:[{cle:'*',code:String(e)}] }; }
+
+  var reactive=function(t){
+    if(btn){ btn.disabled=false; btn.textContent=t; btn.style.opacity='1'; }
+  };
+  if(rap.demo){
+    reactive('Restaurer');
+    showImportFeedback('Démonstration — aucune donnée n’est écrite dans ce domaine d’essai.','var(--or-pale)','var(--terre)');
+    return;
+  }
+  if(rap.horsligne){
+    reactive('Restaurer');
+    showImportFeedback('Hors ligne — une restauration se fait en ligne. Réessayez une fois le réseau revenu.','var(--rouge-pale)','var(--rouge)');
+    return;
+  }
+  if(rap.erreurs.length){
+    reactive('Réessayer');
+    var quoi=rap.erreurs.map(function(e){ return _sauvNom(e.cle); }).join(', ');
+    showImportFeedback(rap.ecrites.length + ' élément(s) restauré(s), ' + rap.erreurs.length
+      + ' en échec : ' + quoi + '. Rien n’est perdu — réessayez.','var(--rouge-pale)','var(--rouge)');
+    return;
+  }
+  /* ★★★ UN FICHIER ANCIEN PORTE LES PARCELLES SANS L'AVANCEMENT QUI EN DECOULE.
+     `travaux` (surfaces faites, heures restantes, pourcentages) se déduit des
+     parcelles ; l'ancien format ne le sauvegardait pas. Restaurer les parcelles
+     seules laisserait un avancement calculé sur les parcelles d'AVANT — des
+     pourcentages faux, sur un écran d'accueil, sans rien pour le signaler.
+     On le recalcule et on l'écrit. ⚠️ `travaux` est volontairement hors de la
+     garde anti-écrasement (collection dérivée, régénérable) : fbSave suffit. */
+  if(rap.ecrites.indexOf('parcelles')>=0 && rap.absentes.indexOf('travaux')>=0){
+    try{
+      recalcAllTravaux();
+      if(window.fbSave) await window.fbSave('travaux', window.TRAVAUX);
+    }catch(e){
+      if(window.logError) window.logError({level:'warning',cat:'restauration',msg:'avancement non recalculé après restauration',detail:String(e)});
+    }
+  }
+  showImportFeedback('Restauration terminée — ' + rap.ecrites.length
+    + ' élément(s). L’application se recharge…','var(--vert-pale)','var(--vert)');
+  _mvSauvEnCours=null;
+  /* La copie hors ligne porte encore l'état d'AVANT : la purger, sinon un
+     démarrage sans réseau la relirait comme si de rien n'était. */
+  try{ if(typeof window._mvPurgerSnapshot==='function') window._mvPurgerSnapshot(); }
+  catch(e){ if(window.logError) window.logError({level:'info',cat:'restauration',msg:'purge de la copie hors ligne impossible',detail:String(e)}); }
+  setTimeout(function(){ location.reload(); }, 1800);
+};
 function showImportFeedback(msg,bg,color){
   // Afficher dans l'overlay s'il est ouvert, sinon en toast en bas
   const el=document.getElementById('export-feedback');

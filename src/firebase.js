@@ -2084,4 +2084,132 @@ window.fbDeleteAnalyse = async function(storagePath) {
 };
 
 
+/* ═══════════════════════════════════════════════════════════════════════════
+   SAUVEGARDE COMPLETE DU TENANT — lot SAUV-1
+   ═══════════════════════════════════════════════════════════════════════════
+   Le hub Documents promettait « toutes les donnees du domaine dans un seul
+   fichier » et en ecrivait HUIT sur vingt-six. Pire : la restauration
+   reappliquait la fiche membre TRONQUEE de l'export (nom / roles / statut) et
+   la poussait en base — elle detruisait l'historique des contrats, les
+   e-mails et le drapeau bureau, c'est-a-dire des donnees qu'elle n'avait
+   jamais sauvegardees.
+
+   ⚠️⚠️⚠️ DEUX RAISONS DE LIRE FIRESTORE ET NON LA MEMOIRE :
+     · la memoire est PARTIELLE (une cle dont le pull a echoue n'y est pas ;
+       `paie` n'y descend jamais chez un non-admin) et une sauvegarde faite
+       sur un etat partiel est pire qu'une absence de sauvegarde ;
+     · la memoire est TRANSFORMEE (kml_polygons reconstruit en [lat,lng],
+       taches normalisees, cave_* fusionnees avec leurs valeurs par defaut).
+       Un aller-retour doit rendre le document tel qu'il etait, pas tel que
+       l'application l'avait interprete.
+
+   ⚠️⚠️⚠️ ET DEUX RAISONS DE NE PAS PASSER PAR fbSave POUR REECRIRE :
+     · `parcelles` y part en FUSION 3-way (_saveParcellesMerged). Une
+       restauration qui fusionne garde ce qu'on voulait justement effacer :
+       ce n'est plus une restauration, c'est un melange ;
+     · la garde anti-ecrasement (_mvBlockDestructive) refuse toute ecriture
+       qui divise une collection par deux. C'est exactement ce qu'une
+       restauration legitime peut avoir a faire. On ne la contourne PAS en
+       silence : l'ecran nomme cle par cle ce qui retrecit et attend un
+       accord explicite (cf. _docsRestOpen dans reglages.js). La garde protege
+       d'un accident ; une restauration n'en est pas un.
+   ═══════════════════════════════════════════════════════════════════════════ */
+
+/* La liste, exposee. ⚠️ Une SECONDE liste ailleurs se perimerait au premier lot
+   qui ajoute une collection — c'est precisement le defaut qu'on repare ici. */
+window.MV_COLLECTIONS = COLLECTIONS.slice();
+
+/* Le compteur de la garde, expose pour que l'ecran de restauration puisse
+   annoncer « 412 -> 3 » avec le MEME chiffre que celui qui bloquerait. */
+window._mvTailleDoc = function (key, val) { return _mvDocSize(key, val); };
+
+/* Lecture BRUTE de tout le tenant. Aucune application en memoire : on rend ce
+   que Firestore contient. Les lectures partent ensemble (le SDK les multiplexe
+   sur un seul flux, cf. PERF-1) et chacune porte son catch — un refus sur une
+   cle ne doit pas annuler les vingt-cinq autres. */
+window.fbLireTout = async function () {
+  var out = { ok:false, tenant:TENANT_ID, data:{}, manquants:[], erreurs:[] };
+  var lectures = COLLECTIONS.map(function (key) {
+    return getDoc(fbDocRef(key)).then(
+      function (snap) { return { key:key, snap:snap }; },
+      function (e)    { return { key:key, err:e }; }
+    );
+  });
+  var res = await Promise.all(lectures);
+  for (var i = 0; i < res.length; i++) {
+    var r = res[i];
+    if (r.err) {
+      out.erreurs.push({ cle:r.key, code:(r.err && r.err.code) ? String(r.err.code) : String(r.err) });
+      continue;
+    }
+    if (!r.snap.exists()) { out.manquants.push(r.key); continue; }
+    var v = r.snap.data() ? r.snap.data().value : undefined;
+    /* Un document qui existe sans champ `value` n'est pas une donnee : le
+       compter comme presente ferait ecrire `undefined` a la restauration. */
+    if (v === undefined) { out.manquants.push(r.key); continue; }
+    out.data[r.key] = v;
+  }
+  out.ok = (out.erreurs.length === 0);
+  return out;
+};
+
+/* Ecriture BRUTE, document par document, dans l'ordre de COLLECTIONS.
+   Sequentielle et non parallele : en cas de coupure au milieu, le rapport dit
+   exactement ou l'on s'est arrete. */
+async function _mvRestaurerUne(key, val) {
+  _ignoreNext[key]   = true;
+  _ignoreBefore[key] = Date.now() + 8000;   /* la fenetre standard est de 4 s ; une
+                                               restauration ecrit 26 docs a la suite */
+  await _retryAsync(function () {
+    return setDoc(fbDocRef(key), { value: _fbClone(key, val) });
+  }, 3, 1000);
+}
+
+window.fbRestaurerTout = async function (donnees) {
+  var rap = { ecrites:[], absentes:[], erreurs:[], demo:false, horsligne:false };
+  if (!donnees || typeof donnees !== 'object') { rap.erreurs.push({ cle:'*', code:'donnees-vides' }); return rap; }
+  /* La demo n'ecrit jamais dans Firestore (meme regle que fbSave) : le dire,
+     plutot que d'annoncer une restauration qui n'a rien ecrit. */
+  if (TENANT_ID === 'domaine-dupont') { rap.demo = true; return rap; }
+  /* Hors ligne, la file d'attente serait un piege : 26 documents en file, sans
+     ordre garanti, ecrits au retour du reseau par-dessus des saisies faites
+     entre-temps. Une restauration se fait en ligne ou ne se fait pas. */
+  if (!navigator.onLine) { rap.horsligne = true; return rap; }
+
+  for (var i = 0; i < COLLECTIONS.length; i++) {
+    var key = COLLECTIONS[i];
+    if (!Object.prototype.hasOwnProperty.call(donnees, key) ||
+        donnees[key] === undefined || donnees[key] === null) {
+      rap.absentes.push(key); continue;
+    }
+    try { await _mvRestaurerUne(key, donnees[key]); rap.ecrites.push(key); }
+    catch (e) {
+      rap.erreurs.push({ cle:key, code:(e && e.code) ? String(e.code) : String(e) });
+      if (window.logError) window.logError({ level:'critical', cat:'restauration',
+        msg:'restauration ' + key + ' ECHOUEE', detail:String(e) });
+    }
+  }
+
+  /* ⚠️⚠️ LA BASE DE FUSION DOIT SUIVRE. `_baseParcelles` est l'etat serveur de
+     reference du merge 3-way : laisse sur l'etat d'AVANT, la premiere ecriture
+     de parcelle qui suit ferait remonter ce que la restauration vient
+     d'effacer, et personne ne comprendrait pourquoi. */
+  if (rap.ecrites.indexOf('parcelles') >= 0 && Array.isArray(donnees.parcelles)) {
+    _baseParcelles = deepClone(donnees.parcelles);
+  }
+
+  /* Application en memoire par le chemin NORMAL — celui du pull. Il porte la
+     reconversion kml_polygons et toutes les cascades de applyFbData : les
+     reecrire ici, c'est se donner un second comportement a maintenir. */
+  for (var j = 0; j < rap.ecrites.length; j++) {
+    var k = rap.ecrites[j];
+    try { applyFbData(k, donnees[k]); }
+    catch (e2) {
+      if (window.logError) window.logError({ level:'warning', cat:'restauration',
+        msg:'restauration ' + k + ' ecrite mais non appliquee en memoire', detail:String(e2) });
+    }
+  }
+  return rap;
+};
+
 if(DEBUG) console.log('🔥 Firebase prêt, en attente de _fbLoad()');

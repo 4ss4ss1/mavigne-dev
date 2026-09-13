@@ -23,7 +23,7 @@ export const GT_ADMIN_EMAIL = 'ngdevpro@gmail.com';
 // WHATS_NEW   : tableau vide = modal desactive pour cette version.
 // Format item : { emoji:'📅', titre:'Titre court', desc:'Phrase utilisateur.' }
 // Regle : seulement les changements visibles par les utilisateurs.
-export const APP_VERSION = '7.18';
+export const APP_VERSION = '7.19';
 // ════ Journal des nouveautés (récap cumulatif) ════
 // Une entrée par version, la PLUS RÉCENTE EN HAUT : { v:'5.10', items:[ {emoji,titre,desc}, … ] }
 // À chaque release visible → AJOUTER un bloc en tête (ne pas remplacer). items:[] = release technique (rien à afficher).
@@ -710,6 +710,28 @@ window._mvGraphRepeindre = function(){
 };
 
 export const WHATS_NEW = [
+  { v: '7.19', items: [
+    { emoji: 'bouclier', titre: 'Votre sauvegarde ne gardait qu’un tiers du domaine',
+      desc: "Le fichier proposé sous « Sauvegarde complète » n’en portait pas le tiers : "
+        + "il gardait vos parcelles, votre journal, vos sessions tracteur et votre registre "
+        + "phyto, et laissait dehors <b>tout le planning</b>, <b>toute la cave</b>, la réserve, "
+        + "les machines, les entretiens, les contours de vos parcelles, vos réglages et vos taux "
+        + "horaires. Il se construit désormais à partir de la <b>liste des données du domaine "
+        + "elle-même</b> : ce qui existe est dedans, et ce qui viendra plus tard y sera aussi, sans "
+        + "que personne ait à y penser. Le fichier est lu <b>sur le serveur</b>, pas sur votre "
+        + "téléphone, et il écrit à l’intérieur de lui-même ce qu’il contient — s’il manque quelque "
+        + "chose, il le dit, au lieu de vous laisser croire que tout y est." },
+    { emoji: 'retour', titre: 'Restaurer effaçait l’historique de vos contrats',
+      desc: "L’ancienne sauvegarde ne gardait de chaque salarié que son <b>nom, ses rôles et son "
+        + "statut</b> — et la restauration réécrivait la fiche avec ça. Elle détruisait donc "
+        + "<b>l’historique des contrats</b>, qui porte tous vos coûts de main-d’œuvre datés, ainsi "
+        + "que les adresses e-mail et les couleurs de l’équipe. Le geste censé vous sortir "
+        + "d’affaire était le seul de l’application capable de faire ce dégât-là. C’est corrigé. "
+        + "Et avant d’écrire quoi que ce soit, l’écran <b>compare le fichier à votre domaine "
+        + "actuel</b> et vous montre, élément par élément, ce qui sera remplacé, ce qui va "
+        + "rétrécir et ce à quoi il ne touchera pas. Vos anciens fichiers de sauvegarde restent "
+        + "lisibles : l’écran signale simplement ce qu’ils ne contiennent pas." }
+  ] },
   { v: '7.18', items: [
     { emoji: 'raisin', titre: 'Le cadre de votre campagne se r\u00e8gle enfin',
       desc: "L\u2019application datait vos campagnes <b>du 1<sup>er</sup> ao\u00fbt au 31 juillet</b>, sans "
