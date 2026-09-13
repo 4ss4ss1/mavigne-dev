@@ -81,7 +81,34 @@ export function controler(racine){
   } catch {
     return { etat:'sans-git', msg:'pas de depot git lisible — controle NON joue' };
   }
-  if (!sale) return { etat:'desarme', msg:'.mv-base est deja commite (' + base.slice(0,7) + ') — rien a verifier' };
+  /* ★★★ LE TROU DU 13/09 — ET IL A COÛTÉ UNE SECTION ENTIÈRE (§126).
+     Le contrôle se désarmait AU COMMIT. Donc en CI, où l'arbre est toujours
+     propre, il ne s'armait JAMAIS : un lot construit sur A, collé sur B, puis
+     commité, passait au vert partout. C'est exactement ce qui est arrivé —
+     SAUV-1 poussé, VIS-1 (bâti sur le commit d'avant) collé par-dessus, et
+     §124 effacée sans un mot.
+     ⚠️ Il ne s'arme QUE si le DERNIER COMMIT touche `.mv-base` : sinon le
+     commit suivant (une correction de typo, une note) sortirait rouge à
+     jamais, et un contrôle qu'on doit désactiver à la main est un contrôle
+     qu'on finit par retirer. La présence d'un lot frais reste la condition
+     d'armement — c'est la même règle, lue après le commit au lieu d'avant.
+     ⚠️ `HEAD~1` exige un historique : la CI clone en `fetch-depth: 0`. Sans
+     parent lisible, on le DIT et on laisse passer. */
+  if (!sale) {
+    let touche = false, parent = null;
+    try {
+      touche = git(['diff', '--name-only', 'HEAD~1', 'HEAD'], racine).split('\n').includes('.mv-base');
+      if (touche) parent = git(['rev-parse', 'HEAD~1'], racine);
+    } catch {
+      return { etat:'desarme', msg:'.mv-base commite (' + base.slice(0,7) + '), parent illisible — controle NON joue' };
+    }
+    if (!touche) return { etat:'desarme', msg:'.mv-base est deja commite (' + base.slice(0,7) + ') — rien a verifier' };
+    if (parent.toLowerCase().startsWith(base)) {
+      return { etat:'ok', msg:'lot commite sur ' + base.slice(0,7) + ', qui est bien le parent du commit' };
+    }
+    return { etat:'ecart', base, head:parent,
+      msg:'le lot declare la base ' + base.slice(0,7) + ', mais il a ete commite SUR ' + parent.slice(0,7) };
+  }
 
   if (head.toLowerCase().startsWith(base)) {
     return { etat:'ok', msg:'lot construit sur ' + base.slice(0,7) + ', qui est bien le HEAD' };
@@ -116,10 +143,28 @@ if (CONTRE){
   fs.writeFileSync(path.join(d, '.mv-base'), '0'.repeat(40) + '\n');
   A('★★ un lot collé sur un AUTRE commit rougit', controler(d).etat, 'ecart');
 
+  /* ⚠️ CE CAS A CHANGÉ DE SENS le 13/09. Avant, un `.mv-base` commité désarmait
+     le contrôle, point — et c'est par là que l'écrasement est passé. Il ne se
+     désarme plus que si le DERNIER commit ne le touche pas : ici, un commit de
+     suite. */
   d = mk('deja-commite'); h = init(d);
   fs.writeFileSync(path.join(d, '.mv-base'), h + '\n');
   git(['add', '.'], d); git(['commit', '-qm', 'lot'], d);
-  A('★ une fois commité, le contrôle se désarme seul', controler(d).etat, 'desarme');
+  fs.writeFileSync(path.join(d, 'x'), 'c'); git(['commit', '-aqm', 'une suite qui ne touche pas .mv-base'], d);
+  A('★ un commit de suite désarme le contrôle', controler(d).etat, 'desarme');
+
+  /* ★★ LES DEUX CAS QUE LE TROU LAISSAIT PASSER : le lot est COMMITÉ, et c'est
+     exactement l'état dans lequel la CI le lit. */
+  d = mk('commite-sur-sa-base'); h = init(d);
+  fs.writeFileSync(path.join(d, '.mv-base'), h + '\n');
+  git(['add', '.'], d); git(['commit', '-qm', 'lot sur sa base'], d);
+  A('★ un lot commité sur SA base passe (le parent EST la base)', controler(d).etat, 'ok');
+
+  d = mk('commite-ailleurs'); init(d);
+  fs.writeFileSync(path.join(d, 'x'), 'b'); git(['commit', '-aqm', 'un autre lot entre-temps'], d);
+  fs.writeFileSync(path.join(d, '.mv-base'), '0'.repeat(40) + '\n');
+  git(['add', '.'], d); git(['commit', '-qm', 'lot colle par-dessus'], d);
+  A('★★★ un lot COMMITÉ sur un autre commit rougit (le trou du 13/09)', controler(d).etat, 'ecart');
 
   d = mk('sans-base');
   A('pas de .mv-base : dit « absent », ne rougit pas', controler(d).etat, 'absent');
@@ -142,6 +187,8 @@ else if (r.etat === 'ecart'){
   console.log('\n    ' + R + 'NE PAS COMMITER.' + T + ' Coller un fichier complet par-dessus un commit');
   console.log('    plus recent EFFACE ce que ce commit avait apporte au meme fichier,');
   console.log('    sans conflit et sans un mot. Redemander un rejeu du lot sur ' + r.head.slice(0,7) + '.');
+  console.log('    ' + G + '(Deja pousse ? la fusion a trois voies rattrape : base = la base' + T);
+  console.log('    ' + G + ' declaree, notre = HEAD, leur = le commit ecrase.)' + T);
   console.log('    ' + G + '(CLAUDE.md §82a — c\'est deja arrive une fois, le 06/09.)' + T + '\n');
   process.exit(1);
 } else console.log('  ' + G + '· ' + r.msg + T + '\n');
