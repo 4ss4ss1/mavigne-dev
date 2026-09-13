@@ -137,6 +137,16 @@ T('_dpRendHistRows agrege 2025 : 2000 kg / 0,37 ha',
 await import(pathToFileURL(CIBLE).href);
 const docs = [];
 window._mvDocOpen = o => { docs.push(o); return true; };
+/* ⚠️ TRI-2 — `_vgnExportVignoble` POSE MAINTENANT UNE QUESTION avant d'editer.
+   `utils.js` est importe par `reglages.js`, donc `window._mvTriOuvrir` EXISTE
+   ici : sans ce bouchon, la feuille s'ouvrirait et attendrait un clic, et le
+   harnais compterait dix-sept rouges pour un document jamais demande.
+   Le bouchon joue l'utilisateur qui VALIDE LE DEFAUT : le document teste
+   ci-dessous est donc bien celui qui sort quand on ne touche a rien. */
+window._mvTriOuvrir = o => {
+  o.cb(Object.assign({ cle:'tournee', sens:'asc' }, o.defaut || {}));
+  return true;
+};
 
 console.log('\n1. Lecture du domaine');
 const L = window._vgnLignes();

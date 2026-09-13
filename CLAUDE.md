@@ -17167,3 +17167,319 @@ densité de mise en fût **ne rejoint pas** la série de la cuve.
 3. **Pas de reprise a posteriori** de l'état de FA sur les cuves déjà décuvées. Volontaire : ce
    serait un backfill inventé. Si le besoin vient, ce sera un geste explicite du vigneron.
 4. **`npm run build`, `test:smoke`, `test:e2e`** : pas de navigateur dans le bac à sable.
+
+## 119. ★★★ TRI-1 — L'ORDRE DES LIGNES DEVIENT UNE QUESTION, ET LE RENDEMENT REDEVIENT CELUI D'UNE PARCELLE (12/09 soir — `utils.js` + `cave.js` + `reglages.js` + `index.html` + `sw.js` + `scripts/` · APP 7.13 → 7.14 · SW 7.73 → 7.74 · base `43a95ab`)
+
+### Le point de départ
+
+Nico, 12/09 : *« il faut pouvoir faire un tri dans les options d'impression (par exemple récolte
+de vendange) par nom, taille, ou rendement. »*
+
+L'audit du catalogue a montré que **six documents sur onze sortaient dans l'ordre du tableau
+SOURCE** : l'ordre de saisie des récoltes, l'ordre de `PARCELLES`, l'ordre de `INTRANTS.produits`.
+Ce n'est pas un ordre, c'est l'absence d'ordre — sur le papier, personne ne peut y chercher une
+ligne. Les cinq autres avaient un ordre **choisi et justifié** (tournée par commune pour l'état du
+vignoble, cuivre décroissant pour la synthèse, ordre de maturité pour le contrôle, chronologie
+pour les deux registres réglementaires) : ceux-là ne se remplacent pas, ils s'offrent en option.
+
+### ★★★ CE QUE L'AUDIT A TROUVÉ EN CHEMIN — TROIS DÉFAUTS, UNE SEULE FAMILLE
+
+La demande portait sur l'ordre. Le code du document des récoltes portait trois erreurs de
+**périmètre** : un chiffre juste, posé sur le mauvais ensemble.
+
+**1. Le document ignorait le millésime.** `exportVendRecoltesPdf` prenait `CAVE_VENDANGE.recoltes`
+**en entier** — la collection est cumulative, elle porte toutes les vendanges — et se titrait
+`'Récoltes ' + new Date().getFullYear()`. À la vendange 2027, une feuille intitulée « Récoltes
+2027 » aurait listé 2026, avec le bon titre et les mauvaises lignes. Personne ne l'avait vu parce
+que l'application n'a encore vécu qu'une seule vendange.
+
+**2. Le rendement d'un apport n'existe pas.** La colonne calculait `_recKg(r) / _vendParcSurf(r.parcelle)` :
+les kilos **d'une benne** sur la surface de **toute la parcelle**. Trois bennes sur La Justice
+affichaient donc trois **tiers** de rendement, chacun présenté comme un rendement, chacun sous un
+en-tête qui disait « Rendement ». Et c'est ce défaut-là qui rendait la demande initiale piégeuse :
+*trier par rendement* aurait classé des fractions.
+
+**3. Les deux destinations coupaient le rendement en deux.** Le document a deux sections, cuvier et
+vrac. Une parcelle qui part aux deux — cas courant — aurait vu **chaque moitié** annoncée comme son
+rendement, dans sa section.
+
+★★ **La règle qui en sort, et qui vaut au-delà de ce document : LE RENDEMENT APPARTIENT À LA
+PARCELLE ET AU MILLÉSIME, JAMAIS À LA LIGNE.** `_vendRecRdt(parcelle, millésime)` est le seul
+endroit qui le calcule, et il lit **toujours** toutes les récoltes du millésime — jamais la liste
+de la section en cours de rendu. Un rendement dont le dénominateur et le numérateur ne couvrent
+pas le même ensemble est un rapport, pas un rendement. C'est §Économie qui le disait déjà pour la
+cadence : *« le dénominateur doit couvrir le même périmètre que le numérateur »*, et c'est la
+deuxième fois que le même défaut se paie.
+
+### MV_TRI — la primitive, à côté de MV_DOC
+
+`utils.js`, juste après `MV_DOC`, parce que le tri appartient à la **grammaire du document** et non
+à un module : `cave.js`, `reglages.js`, `reserve.js` et `phyto.js` en auront tous besoin.
+
+Elle **ne trie rien**. Le document seul sait ce que valent ses lignes. Elle pose la question,
+retient la réponse et rend la phrase à imprimer :
+
+| Fonction | Ce qu'elle fait |
+|---|---|
+| `_mvTriOuvrir(o)` | la feuille : année, groupement, clé, sens. Rend `false` s'il n'y a rien à demander |
+| `_mvTriPhrase(o,c)` | la phrase de l'en-tête — « rendement — le plus fort d'abord » |
+| `_mvTriLu(memo,def)` | le choix de la dernière fois, complété par les défauts du document |
+| `_mvTriCmp(c,val,bris)` | un comparateur : le sens s'applique **une fois**, pas dans chaque document |
+
+⚠️ **Une clé peut n'avoir de sens que dans un groupement** (`grp:['apport']`). Elle est alors
+montrée **barrée**, jamais retirée : une option qui disparaît laisse croire qu'elle n'existe pas.
+Et changer de groupement **lâche** une clé devenue sans objet plutôt que de trier sur du vide.
+
+⚠️ **L'ANNÉE N'EST PAS MÉMORISÉE, et c'est délibéré.** Retenir « 2025 » ferait sortir l'an prochain
+un document de l'an dernier — exactement le défaut n° 1 que ce lot corrige, réintroduit par la
+mémoire. La clé, le sens et le groupement, eux, sont des habitudes : ils se retiennent.
+
+⚠️ **`localStorage`, PAS `CONFIG`.** C'est une préférence d'affichage de la personne qui tient le
+téléphone, pas une règle du domaine : le tri choisi par le chef de culture n'a pas à changer le
+document du salarié. Stockage refusé (navigation privée) → `MV_TRI_MEMO_KO` et **la feuille cesse
+de promettre qu'elle retient**, plutôt que de le promettre en vain.
+
+⚠️ **Le document DOIT écrire l'ordre dans son en-tête.** Deux tirages du même document, triés
+différemment, se ressemblent sans l'être. Une feuille posée sur un bureau doit dire comment elle
+est rangée.
+
+⚠️ `_mvTriValider` ouvre le document dans un `setTimeout(…, 80)` — **le même délai qu'`openPrompt`**,
+pas un chiffre neuf. Le `window.open` de `_mvDocOpen` dépend de l'activation utilisateur ; changer
+ce délai, c'est risquer un bloqueur de pop-up sur un chemin qui marche en production.
+
+### Le document des récoltes
+
+Un tri par clé de **parcelle** (nom, surface, rendement) range les **parcelles** ; à l'intérieur de
+chacune, les apports gardent l'ordre du calendrier. Deux bennes de la même parcelle portent la même
+valeur sur ces clés : les trier l'une contre l'autre ferait dépendre le résultat de la stabilité du
+tri du navigateur. Un tri par **date** ou par **kilos** range les lignes une à une — et n'est offert
+qu'en mode apport.
+
+Le mode « une ligne par parcelle » agrège les apports du millésime. **L'état moyen y est pondéré par
+les kilos** : une benne de 30 kg ne pèse pas autant qu'une de 2 000 dans l'état sanitaire d'une
+parcelle.
+
+Le pied de tableau ne totalise **que ce qui s'additionne** — un rendement moyen ne se somme pas, la
+case reste vide plutôt que fausse — et son `colspan` de queue se **calcule** : un nombre écrit à la
+main devient faux au premier ajout de colonne (il l'était déjà, à 9 pour 4 colonnes restantes).
+
+Une parcelle **sans surface enregistrée** laisse la case vide et le document **la nomme**. Rien
+n'est estimé : un rendement sans dénominateur n'est pas un petit rendement.
+
+⚠️ **Repli** : si `_mvTriOuvrir` manque (`utils.js` en retard chez un client), le document sort quand
+même — millésime le plus récent, ordre de saisie, soit exactement le comportement d'avant le lot.
+Un document vaut mieux qu'un toast.
+
+### Ce qui a bougé ailleurs
+
+- `MV_DOCS` (`reglages.js`) : `ask:'Millésime, puis tri'` et `ov:true` — le hub se ferme avant la
+  feuille, comme pour les quatre autres documents qui posent une question.
+- `mv-chartes-doc.mjs` : le producteur s'appelle désormais `_vendRecoltesDoc`. **Une fonction
+  renommée sans mettre à jour ce script fausse le compte** — le script le dit lui-même.
+- `MV_AIDE` : la Cave annonçait **quatre** documents et en listait quatre. Sa roue crantée en sort
+  **sept** (les cinq du module, plus le bilan de campagne et l'inventaire des fûts, qui parlent
+  d'elle). Le texte traînait depuis CAVE-2 ; il est corrigé au passage, avec le tri.
+
+### Le harnais
+
+`scripts/mv-harnais-tri1.mjs` — **42 vertes, 5 contre-épreuves qui mordent**. Les fonctions sont
+**extraites de `cave.js` et `utils.js`**, dans l'ordre réel du fichier, et jouées sur un jeu de
+récoltes construit pour porter les trois défauts : une parcelle en trois bennes, une parcelle
+cuvier + vrac, deux millésimes dans la même collection.
+
+★ **Une assertion a rougi à tort, et c'est le TEST qui avait tort** : l'état moyen pondéré et la
+moyenne simple tombaient tous deux sur 90 avec le jeu d'essai initial. Une assertion qui ne peut
+pas distinguer ne prouve rien — les états ont été écartés (96 / 90 / 60) pour que 84 ≠ 82.
+C'est la huitième fois que la question *« lequel des deux a tort, le test ou le code ? »* fait
+gagner du temps.
+
+### Ce qui reste ouvert — les dix autres documents
+
+L'audit est fait, le mécanisme est là ; il reste à le brancher. Par ordre d'urgence réelle :
+
+1. **Inventaire des intrants** (`_rsvExportPdf`) — `INTRANTS.produits.forEach`, ordre brut. Clés :
+   nom, catégorie, stock, cohérence.
+2. **Avancement par parcelle** (`exportCSVParcelles`) — `window.PARCELLES.map`, ordre brut. Clés :
+   nom, surface, statut, avancement.
+3. **Journal des travaux** (`exportCSVJournal`) — ordre brut du journal. Clés : date, parcelle,
+   tâche, ouvrier.
+4. **État du vignoble** (`_vgnDoc`) — le plus riche : `_vgnLignes()` porte déjà nom, commune,
+   surface, cépage, avancement, dernier travail, dernier rendement. Défaut à garder : la tournée.
+5. **Synthèse cuivre**, **contrôle de maturité**, **cahier de cuverie**, **suivi d'élevage**,
+   **inventaire des fûts** — ordre actuel justifié, le tri s'y ajoute en option.
+6. **Registre phyto (PDF et CSV)** et **registre des manipulations** — chronologiques par nature.
+   **Ne pas y toucher** : un registre se lit dans l'ordre où les choses se sont passées.
+
+⚠️ Le rendement de l'**état du vignoble** (`rendCell`, dernier `rendement_hist`) et celui d'ici sont
+deux chemins vers la même grandeur. Ils n'ont pas été confrontés. **À vérifier avant de brancher le
+tri par rendement sur ce document-là** — §Économie : deux définitions d'un même chiffre finissent
+toujours par diverger.
+
+7. **`npm run build`, `check`, `test:smoke`, `test:e2e`** : pas de navigateur ni de dépendances dans
+   le bac à sable. Syntaxe vérifiée (`node --check`), `WHATS_NEW` vérifié **en l'exécutant**,
+   `mv-chartes-doc` et `mv-harnais-tri1` verts.
+
+## 120. ★★★ TRI-2 — LE VIGNOBLE ET LE MAGASIN SE RANGENT, ET LES DEUX RENDEMENTS SONT RÉCONCILIÉS (12/09 soir — `utils.js` + `reglages.js` + `reserve.js` + `index.html` + `sw.js` + `scripts/` · APP 7.14 → 7.15 · SW 7.74 → 7.75 · base `43a95ab`, s'empile sur §119)
+
+### Ce que le lot branche
+
+`MV_TRI` existait depuis §119 mais ne servait qu'un document. Trois de plus, dans l'ordre
+d'urgence que §119 avait publié :
+
+| Document | Avant | Maintenant |
+|---|---|---|
+| **État du vignoble** | tournée, sans choix | tournée *(défaut)*, parcelle, surface, avancement, rendement, dernier travail |
+| **Inventaire des intrants** | ordre brut de `INTRANTS.produits` | nom *(défaut)*, catégorie, stock, cohérence |
+| **Journal des travaux** (CSV) | ordre brut du journal | date, puis parcelle, puis tâche — **sans question** |
+| **Avancement par parcelle** (CSV) | ordre brut de `PARCELLES` | parcelle A → Z — **sans question** |
+
+★ **Pourquoi les CSV ne posent PAS de question.** Un tableur retrie en un clic : une feuille de
+tri avant un téléchargement serait de la friction pour rien. Mais l'ordre de saisie n'était pas
+un ordre — **deux exports du même jour pouvaient sortir différemment**, et comparer deux fichiers
+devenait illisible. Un ordre stable ne se demande pas, il se pose. Même raisonnement pour le
+**parc de fûts** du bilan matière : il n'a qu'un ordre qui vaille — fournisseur, millésime récent
+en tête, référence — et c'est déjà celui de l'inventaire des fûts. *Deux documents qui parlent
+des mêmes objets ne doivent pas les ranger différemment.*
+
+### ★★★ LA RÈGLE QUI SORT DE CE LOT : UNE ABSENCE N'EST PAS UNE PETITE VALEUR
+
+Une parcelle sans rendement connu n'est pas la moins productive. Une surface non renseignée n'est
+pas une petite surface. Un stock « à activer » n'est pas un stock de zéro : sa valeur est
+**inconnue**, pas nulle. Un tri naïf (`(x||0)`) les range tous en tête d'un ordre croissant, où
+ils se lisent comme des zéros mesurés.
+
+**Elles partent donc en fin de liste DANS LES DEUX SENS**, avec le nom pour départager. Une
+absence ne se retourne pas quand on retourne le tri — c'est la même règle que celle déjà posée
+dans `_vgnLignes` pour les communes vides, et c'est le cousin direct de l'invariant `(table[k] ||
+default)` interdit quand `table[k]` peut valoir 0.
+
+### Le défaut ne bouge pas, et il ne se recalcule pas
+
+`_vgnLignes()` rend déjà la tournée. `_vgnTrier` ne la **recalcule pas** : sur la clé `tournee`
+elle rend **la liste elle-même**, le même objet. Un tri « équivalent » réécrit à la main aurait
+placé « Sans commune » ailleurs — la règle des communes vides vit dans `_vgnLignes`, pas dans le
+comparateur. Le harnais l'exige par identité d'objet (`===`), pas par égalité de contenu.
+
+### ★★ « Dernier rendement connu » ne compare pas la même année
+
+C'est le dernier de **chaque** parcelle : toutes n'ont pas été vendangées la même année. Trier
+cette colonne classe donc des millésimes différents les uns contre les autres. Le classement
+reste utile — *quelles parcelles ont produit le plus, la dernière fois qu'on les a vendangées* —
+mais il ne doit pas se faire passer pour une campagne. **Le document nomme désormais les
+millésimes comparés sous le tableau** dès qu'il y en a plusieurs, et la feuille de tri le dit
+avant d'éditer.
+
+★ C'est la même faute que §119 défaisait d'un cran plus bas : là, un rendement d'apport se faisait
+passer pour un rendement de parcelle ; ici, un rendement de 2024 se ferait passer pour un
+rendement de 2026. **Un classement rend comparables des choses qui ne le sont pas** — c'est ce
+qu'il fait de mieux, et c'est exactement ce dont il faut se méfier.
+
+### ★ La question laissée ouverte par §119 est tranchée : les deux rendements SONT le même
+
+§119 se terminait sur : *« `rendCell` et `_vendRecRdt` sont deux chemins vers la même grandeur.
+Ils n'ont pas été confrontés. »* C'est fait, et **ils concordent par construction** :
+
+| | `_vendRecRdt` (cave.js) | `_dpRendHistRows` (app.js) |
+|---|---|---|
+| Numérateur | `Σ _recKg(r)` sur les récoltes du millésime | `Σ e.kg`, et `e.kg = _recKg(rec)` à l'écriture |
+| Dénominateur | `_vendParcSurf(nom)` = `parseFloat(p.surface)` | `parseFloat(p.surface)` |
+| Agrégation | somme puis division | somme puis division puis arrondi |
+| Base déclarée | parcelle entière | `kg_ha_base:'parcelle_entiere'` |
+
+Même numérateur, même dénominateur, même ordre des opérations. La **seule** différence est la
+source : `_vendRecRdt` lit les récoltes vivantes, `_dpRendHistRows` lit la dénormalisation posée
+sur la parcelle par `_vendRecordRendement`. Ils ne peuvent diverger que si la dénormalisation est
+**périmée** — et ce risque-là porte déjà son garde-fou depuis CUV-6, qui a rendu son `catch` muet
+bavard.
+
+⚠️ Le harnais fige cette concordance : trois parcelles, deux millésimes, une parcelle partagée
+cuvier/vrac, et une contre-épreuve qui remplace le dénominateur par la **surface attribuée** —
+elle mord. Si un futur lot fait glisser l'un des deux chemins vers `surface_attribuee_ha`, ça
+rougit le jour même au lieu de se découvrir sur une facture.
+
+### Le harnais
+
+`scripts/mv-harnais-tri2.mjs` — **40 vertes, 6 contre-épreuves qui mordent**. Fonctions extraites
+de `reglages.js`, `reserve.js`, `cave.js` et `app.js`. Les deux CSV sont éprouvés **par leur
+sortie** : le fichier est capté par un `dlFile` bouchonné, puis relu ligne à ligne — et le même
+jeu passé **à l'envers** doit produire un fichier identique au bit près.
+
+### Ce qui reste ouvert
+
+1. **Synthèse cuivre** — ordre Cu décroissant, justifié ; le tri s'y ajoutera en option (nom,
+   surface, nombre d'applications). Pas urgent : son ordre actuel est déjà le bon par défaut.
+2. **Contrôle de maturité, cahier de cuverie, suivi d'élevage, inventaire des fûts** — même cas.
+3. **Registre phyto (PDF et CSV), registre des manipulations** — chronologiques par nature.
+   **Ne pas y toucher.**
+4. **Le rapport de saison et le relevé mensuel** restent hors charte MV_DOC (`document.write`) :
+   les convertir change la largeur utile et demande un rendu, pas une relecture de source.
+5. **`npm run build`, `test:smoke`, `test:e2e`** : pas de navigateur dans le bac à sable.
+   `npm run check` joué en entier, au vert.
+
+## 121. TRI-3 — LES DEUX DERNIERS PROMPTS D'ANNÉE DEVIENNENT DES FEUILLES, ET LA FAMILLE SE REFERME (12/09 soir — `cave.js` + `reglages.js` + `utils.js` + `index.html` + `sw.js` + `scripts/` · APP 7.15 → 7.16 · SW 7.75 → 7.76 · base `43a95ab`, s'empile sur §119 et §120)
+
+### Une feuille de plus ne doit pas être une question de plus
+
+Le contrôle de maturité et le cahier de cuverie posaient déjà leur année dans un `openPrompt`.
+Ajouter une feuille de tri **par-dessus** aurait fait deux questions à la suite pour un seul
+document — une régression déguisée en fonctionnalité. MV_TRI sait poser l'année (`annees`), et
+n'affiche la rangée que s'il y en a plusieurs : le prompt disparaît, le geste ne s'allonge pas,
+et le tri vient en plus.
+
+| Document | Défaut *(inchangé)* | Clés ajoutées |
+|---|---|---|
+| **Contrôle de maturité** | maturité décroissante | parcelle, surface, vitesse, dernier relèvement |
+| **Cahier de cuverie** | encuvage croissant | cuve, volume, cuvaison |
+
+Sur la clé par défaut, `_matTrier` et `_cuvTrier` rendent **la liste reçue, le même objet**. Le
+harnais l'exige par identité (`===`), comme `_vgnTrier` en §120 : un comparateur « équivalent »
+réécrit à la main ajouterait un départage par nom que le document n'avait pas, et deux tirages
+identiques cesseraient de l'être.
+
+★ **Un en-tête qui survit au tri est un en-tête qui ment.** Le tableau de maturité s'intitulait
+« Ordre de maturité » quel que soit le classement. Il ne le dit plus que quand c'en est un.
+
+### ★★★ CE QUI N'AURA PAS DE TRI, ET POURQUOI — la famille est close
+
+Trois documents restaient sur la liste de §120. Aucun ne recevra de feuille, et **chacun pour une
+raison différente de « pas le temps »** :
+
+1. **Le suivi d'élevage a déjà son écran.** `ovCaveExport` filtre par cuvées, par types
+   d'opération, par plage de dates, et offre déjà le groupement par cuvée ou par date. Une
+   seconde feuille serait un doublon **moins riche** que ce qui existe.
+2. **L'inventaire des fûts est structuré par fournisseur.** Son ordre n'est pas un rangement,
+   c'est son **plan** : sections par fournisseur avec sous-totaux, puis répartition par millésime.
+   Trier autrement ne range pas le document, il le refait.
+3. **La synthèse cuivre n'est pas un document.** ⚠️ **L'audit de §119 s'est trompé** : il l'a
+   listée avec ses clés de tri (« nom · surface · nb applications ») comme si elle s'imprimait.
+   `openSyntheseCuivre` ouvre un **écran**. Le tableau cuivre ne sort sur papier que comme
+   **section du registre phyto** — chronologique, réglementaire, à ne pas toucher. Il n'y avait
+   rien à trier là, et l'audit initial le comptait quand même.
+
+★ **Ce que ça dit de l'audit** : il a été fait sur les noms du catalogue et le code des
+générateurs, pas sur ce que chaque entrée **ouvre réellement**. Onze lignes, une fausse. C'est
+peu, mais une entrée de catalogue n'est pas un document : la prochaine fois, suivre le `case` du
+`docsGo` jusqu'au bout avant d'écrire une ligne dans un tableau d'audit.
+
+### Le compte final
+
+**Cinq documents posent leur ordre** — état du vignoble, inventaire des intrants, récoltes de la
+vendange, contrôle de maturité, cahier de cuverie. **Deux exports CSV** ont un ordre stable sans
+question. **Deux registres** restent chronologiques par nature. **Trois documents** gardent
+l'ordre qui est leur structure. Reste hors sujet : le rapport de saison et le relevé mensuel,
+toujours hors charte MV_DOC (`document.write`) — leur conversion change la largeur utile et
+demande un rendu, pas une relecture de source.
+
+### Le harnais
+
+`scripts/mv-harnais-tri3.mjs` — **34 vertes, 6 contre-épreuves**. En plus des deux moteurs, il
+éprouve la **structure** : que les `openPrompt` ont disparu, que les cinq entrées de catalogue
+annoncent leur question et ferment le hub (`ov:true`), et que les trois documents laissés de côté
+le sont bien — l'élevage garde son overlay, les fûts leur `_futsBySupplier`, le cuivre son écran.
+
+★★ **Le piège des commentaires a mordu, pour la cinquième fois recensée** (§53, §57i, §58, la
+contre-épreuve de `harnais-claude-md`, et ici). L'assertion « plus d'`openPrompt` » sortait rouge
+sur un code parfaitement correct : le **commentaire** de `_matExportChoix` cite `openPrompt` pour
+raconter sa disparition. Un grep brut compte les commentaires. On cherche désormais un **appel**
+(`/openPrompt\s*\(/`) dans un source **décommenté**, et une contre-épreuve garde la trace du
+piège. *Le test avait tort, pas le code* — huitième fois que la question fait gagner du temps.

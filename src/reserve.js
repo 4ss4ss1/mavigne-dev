@@ -1063,16 +1063,92 @@ function _rsvAuditHtml(){
   return h;
 }
 
-window._rsvExportPdf=function(){
+/* ── TRI-2 — le bilan matiere se range ─────────────────────────────────────
+   Le document sortait dans l'ordre brut de `INTRANTS.produits` et de
+   `INTRANTS.futs` : l'ordre de creation des fiches. Sur le papier, personne ne
+   peut y chercher un produit.
+   ⚠️ LE PARC DE FUTS NE POSE PAS DE QUESTION. Il n'a qu'un ordre qui vaille —
+   fournisseur, puis millesime du plus recent au plus ancien, puis reference —
+   et c'est deja celui de l'inventaire des futs. Deux documents qui parlent des
+   memes objets ne doivent pas les ranger differemment. */
+var MV_TRI_INTRANTS = [
+  { v:'nom',       lbl:'Nom',        a:'A \u2192 Z', z:'Z \u2192 A' },
+  { v:'categorie', lbl:'Cat\u00e9gorie', a:'A \u2192 Z, puis par nom', z:'Z \u2192 A, puis par nom' },
+  { v:'stock',     lbl:'Stock',      a:'le plus faible d\u2019abord', z:'le plus fort d\u2019abord' },
+  { v:'coherence', lbl:'Coh\u00e9rence',  a:'ce qui va d\u2019abord', z:'les \u00e9carts d\u2019abord' }
+];
+/* ⚠️ Un stock « a activer » (conso non suivie) n'est PAS un stock de zero : la
+   valeur est inconnue, pas nulle. Il part en fin de liste dans les deux sens,
+   comme toute absence. */
+function _rsvTriProduits(list, c){
+  var sg = (c && c.sens === 'desc') ? -1 : 1;
+  var cle = (c && c.cle) || 'nom';
+  var nom = function(p){ return String(p.nom || ''); };
+  var val = function(p){
+    var s = _stock(p), att = (p.conso_src === 'registre' && !s.known);
+    if(cle === 'categorie') return String(_CATLBL[p.cat] || p.cat || '');
+    if(cle === 'stock')     return att ? null : (s.q || 0);
+    if(cle === 'coherence') return att ? null : ((s.known && s.q < 0) ? 1 : 0);
+    return nom(p);
+  };
+  return list.slice().sort(function(a, b){
+    var x = val(a), y = val(b);
+    if(x == null || y == null){
+      if(x == null && y == null) return nom(a).localeCompare(nom(b), 'fr');
+      return x == null ? 1 : -1;
+    }
+    var d = (typeof x === 'string') ? x.localeCompare(y, 'fr') : (x - y);
+    return d ? sg * d : nom(a).localeCompare(nom(b), 'fr');
+  });
+}
+/* Le meme ordre que l'inventaire des futs : fournisseur, millesime recent en
+   tete, puis reference. Aucun choix a faire, donc aucune question posee. */
+function _rsvTriFuts(list){
+  return list.slice().sort(function(a, b){
+    var d = String(a.four || '\uFFFF').localeCompare(String(b.four || '\uFFFF'), 'fr');
+    if(d) return d;
+    var ya = parseInt(a.annee, 10) || 0, yb = parseInt(b.annee, 10) || 0;
+    if(ya !== yb) return yb - ya;
+    return String(a.ref || '').localeCompare(String(b.ref || ''), 'fr');
+  });
+}
+
+window._rsvExportPdf = function(){
+  var opts = {
+    titre:'Inventaire des intrants', icone:'carton', memo:'intrants',
+    sub:'Dans quel ordre ranger les intrants\u00a0? Le document \u00e9crit cet ordre dans son en-t\u00eate.',
+    cles: MV_TRI_INTRANTS, defaut:{ cle:'nom', sens:'asc' },
+    btn:'\u00c9diter le document',
+    compte: function(){ var n = (INTRANTS.produits || []).length;
+                        return n + ' intrant' + (n > 1 ? 's' : ''); },
+    note: function(c){
+      if(c.cle === 'coherence')
+        return 'Le sens d\u00e9croissant met <b>les \u00e9carts en t\u00eate</b>\u00a0: c\u2019est la lecture de '
+             + 'contr\u00f4le. Un intrant dont la consommation n\u2019est pas encore suivie part en fin de '
+             + 'liste \u2014 son stock est inconnu, pas nul.';
+      if(c.cle === 'stock')
+        return 'Les stocks se comparent en unit\u00e9s <b>diff\u00e9rentes</b> (kg, L, unit\u00e9s)\u00a0: ce tri '
+             + 'range des nombres, pas des quantit\u00e9s comparables entre elles.';
+      return 'Le parc de f\u00fbts garde son ordre habituel\u00a0: fournisseur, puis mill\u00e9sime, comme '
+           + 'l\u2019inventaire des f\u00fbts.';
+    },
+    cb: function(c){ _rsvDoc(c); }
+  };
+  if(typeof window._mvTriOuvrir !== 'function' || !window._mvTriOuvrir(opts))
+    _rsvDoc({ cle:'nom', sens:'asc' });
+};
+
+function _rsvDoc(c){
+  c = c || { cle:'nom', sens:'asc' };
   var rows='';
-  INTRANTS.produits.forEach(function(p){
+  _rsvTriProduits(INTRANTS.produits || [], c).forEach(function(p){
     var s=_stock(p); var pending=(p.conso_src==='registre'&&!s.known);
     rows+='<tr><td class="l">'+_escHtml(p.nom)+' ('+(_CATLBL[p.cat]||p.cat)+')</td><td>'+_fmt(s.ouv)+'</td><td>+'+_fmt(s.achats)+'</td>'
       +'<td>'+(pending?'à activer':'\u2212'+_fmt(s.conso))+'</td><td><b>'+(pending?'\u2014':_fmt(s.q)+' '+_escHtml(p.unite))+'</b></td>'
       +'<td>'+(pending?'\u2014':((s.known&&s.q<0)?'ecart':'ok'))+'</td></tr>';
   });
   var futRows='';
-  INTRANTS.futs.forEach(function(f){ futRows+='<tr><td class="l">'+_escHtml(f.ref||'—')+'</td><td>'+_escHtml(f.four||'—')+'</td><td>'+_escHtml(f.annee||'—')+'</td><td>'+(parseInt(f.qte)||0)+'</td></tr>'; });
+  _rsvTriFuts(INTRANTS.futs || []).forEach(function(f){ futRows+='<tr><td class="l">'+_escHtml(f.ref||'—')+'</td><td>'+_escHtml(f.four||'—')+'</td><td>'+_escHtml(f.annee||'—')+'</td><td>'+(parseInt(f.qte)||0)+'</td></tr>'; });
   var dom=_escHtml(window.DOMAINE_NOM||'Domaine');
   if(typeof window._mvDocOpen!=='function'){ showToast('Mise \u00e0 jour incompl\u00e8te \u2014 rechargez l\u2019application','#B85A1A'); return; }
   var css='h2{font-size:12px;font-weight:700;text-transform:uppercase;letter-spacing:1.1px;color:#8A5A38;'
@@ -1092,12 +1168,18 @@ window._rsvExportPdf=function(){
     +'(r\u00e8glement d\u00e9l\u00e9gu\u00e9 UE 2021/771, art. 1). Les sorties sont d\u00e9riv\u00e9es automatiquement : '
     +'op\u00e9rations de cave pour l\u2019\u0153nologie, registre phytosanitaire pour les traitements. '
     +'\u00c9tat interne \u2014 ce n\u2019est pas une d\u00e9claration officielle.</div>';
+  var ordre = (typeof window._mvTriPhrase === 'function')
+    ? window._mvTriPhrase({ cles: MV_TRI_INTRANTS }, c) : '';
   window._mvDocOpen({
     titre:'Bilan mati\u00e8re \u2014 intrants', domaine:dom, orient:'portrait', cat:'reserve',
-    metas:['Arr\u00eat\u00e9 au '+_frDate(_today())],
+    metas:['Arr\u00eat\u00e9 au '+_frDate(_today()),
+           ordre ? ('Intrants tri\u00e9s par '+ordre) : ''],
     corps:corps, css:css
   });
 }
+window._rsvDoc        = _rsvDoc;
+window._rsvTriFuts    = _rsvTriFuts;
+window._rsvTriProduits = _rsvTriProduits;
 
 // ═══════════════════════════ EXPORT PDF — INVENTAIRE DES FÛTS ═══════════════════════════
 function _rsvExportFutsPdf(){

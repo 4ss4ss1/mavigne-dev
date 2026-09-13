@@ -1,4 +1,67 @@
-// MA VIGNE — Service Worker v7.73
+// MA VIGNE — Service Worker v7.76
+// v7.76 (12/09/2026) — TRI-3 : LA FEUILLE DE TRI REMPLACE LES DEUX DERNIERS
+//   `openPrompt` D'ANNEE, ET LA FAMILLE EST CLOSE.
+//   Controle de maturite et cahier de cuverie posaient deja leur annee dans un
+//   openPrompt. MV_TRI la pose AUSSI (rangee masquee s'il n'y a qu'une annee) :
+//   le geste ne s'allonge pas, il gagne le tri. Deux questions a la suite
+//   auraient ete une regression, une seule feuille est un gain.
+//   ⚠ DEFAUTS INCHANGES : maturite decroissante pour l'un, encuvage croissant
+//     pour l'autre — et sur la cle par defaut, `_matTrier`/`_cuvTrier` rendent la
+//     LISTE TELLE QUELLE. Un comparateur 'equivalent' ajouterait un departage
+//     que le document n'avait pas.
+//   ⚠ Le titre du tableau de maturite ne dit 'Ordre de maturite' que quand
+//     c'en est un. Un en-tete qui survit au tri est un en-tete qui ment.
+//   ⚠ DEUX DOCUMENTS N'AURONT PAS DE TRI, ET C'EST UNE DECISION :
+//     · le SUIVI D'ELEVAGE a deja son propre ecran de filtres (cuvees, types,
+//       plage de dates, groupement) — une seconde feuille serait un doublon ;
+//     · l'INVENTAIRE DES FUTS est STRUCTURE par fournisseur : son ordre est son
+//       plan, le changer refait le document au lieu de le ranger.
+//   ⚠ CORRECTION DU REGISTRE : la 'synthese cuivre' listee comme document dans
+//     l'audit de §119 N'EN EST PAS UN. `openSyntheseCuivre` ouvre un ECRAN ; le
+//     tableau cuivre ne s'imprime que comme SECTION du registre phyto, qui est
+//     chronologique et reglementaire. Rien a trier la.
+//   ⚠ AUCUNE DONNEE TOUCHEE.
+// v7.75 (12/09/2026) — TRI-2 : MV_TRI SE BRANCHE SUR L'ETAT DU VIGNOBLE ET LE
+//   BILAN MATIERE ; LES DEUX CSV RECOIVENT UN ORDRE STABLE.
+//   ⚠ DEFAUT INCHANGE, VOLONTAIREMENT : l'etat du vignoble sort toujours dans
+//     la TOURNEE (commune puis nom) et `_vgnTrier` rend alors la liste TELLE
+//     QUELLE, sans la retrier — le document par defaut est au bit pres celui
+//     d'avant le lot.
+//   ⚠ UNE VALEUR ABSENTE PART EN FIN DE LISTE DANS LES DEUX SENS. Une parcelle
+//     sans rendement n'est pas la moins productive, un stock 'a activer' n'est
+//     pas un stock de zero : les ranger en tete d'un tri croissant les ferait
+//     lire comme des zeros.
+//   ⚠⚠ 'Dernier rendement connu' N'EST PAS LE MEME MILLESIME d'une ligne a
+//     l'autre : c'est le dernier de CHAQUE parcelle. Trier cette colonne compare
+//     des annees differentes ; le document NOMME desormais les millesimes
+//     compares sous le tableau des qu'il y en a plusieurs.
+//   ✓ RENDEMENTS RECONCILIES : `_dpRendHistRows` (app.js, via rendement_hist)
+//     et `_vendRecRdt` (cave.js, via les recoltes) donnent le MEME kg/ha — meme
+//     numerateur `_recKg`, meme denominateur (surface entiere), meme agregation
+//     par millesime. Verifie par harnais, pas suppose.
+//   ⚠ Le parc de futs ne pose AUCUNE question : fournisseur puis millesime,
+//     comme l'inventaire des futs. Deux documents parlant des memes objets ne
+//     doivent pas les ranger differemment.
+//   ⚠ AUCUNE DONNEE TOUCHEE.
+// v7.74 (12/09/2026) — TRI-1 : L'ORDRE DES LIGNES DEVIENT UNE QUESTION, ET LE
+//   RENDEMENT REDEVIENT CELUI D'UNE PARCELLE.
+//   Le document des recoltes sortait dans l'ordre de SAISIE — aucun ordre pour
+//   qui cherche une parcelle sur la feuille. Nouvelle primitive MV_TRI dans
+//   utils.js, a cote de MV_DOC : elle pose l'annee, le groupement, la cle et
+//   le sens, retient le choix (localStorage, PAS CONFIG : c'est une preference
+//   d'affichage, pas une regle du domaine) et rend la phrase a imprimer.
+//   ⚠ TROIS DEFAUTS CORRIGES sur le document des recoltes :
+//     1. il prenait TOUT l'historique en se titrant avec l'annee courante ;
+//     2. sa colonne rendement divisait les kilos D'UN APPORT par la surface de
+//        TOUTE la parcelle — trois bennes = trois tiers de rendement ;
+//     3. une parcelle partant au cuvier ET en vrac voyait chaque moitie
+//        annoncee comme son rendement.
+//   ⚠⚠ `_vendRecRdt(parcelle, millesime)` est le SEUL calcul de rendement ici,
+//     et il lit toujours toutes les recoltes du millesime — jamais la liste de
+//     la section en cours de rendu.
+//   ⚠ L'ANNEE N'EST PAS MEMORISEE : retenir 2025 ferait sortir l'an prochain un
+//     document de l'an dernier, avec le bon titre et les mauvaises lignes.
+//   ⚠ AUCUNE DONNEE TOUCHEE : le lot ne lit que ce qui est deja enregistre.
 // v7.73 (12/09/2026) — CUV-10 : LE DECUVAGE EST UN FAIT, LE SEUIL REDEVIENT UN REPERE.
 //   Le comparatif annoncait « pas encore » sur des cuves DECUVEES, marc sorti :
 //   il comparait une densite a un repere calcule. Or chez ce domaine LA FA FINIT
@@ -3844,7 +3907,7 @@
 // v2.22 — Fix profils vides : guard vide dans loadData() pour MEMBRES/SAISONS/TACHES
 // v2.17 — Onboarding intégré + tenantId · v2.06 — Firebase Auth · v2.00–v2.05 — divers
 const DEBUG = self.location.hostname === 'localhost' || self.location.hostname === '127.0.0.1';
-const CACHE_NAME   = 'mavigne-v7.73';
+const CACHE_NAME   = 'mavigne-v7.76';
 const TENANT_CACHE = 'mavigne-tenant';   // Cache persistant — préservé à chaque mise à jour SW
 const SYNC_TAG     = 'mavigne-sync';
 
@@ -3860,7 +3923,7 @@ const CDN_URLS = [
 ];
 
 self.addEventListener('install', event => {
-  if(DEBUG) console.log('[SW] Ma Vigne v7.73 installé');
+  if(DEBUG) console.log('[SW] Ma Vigne v7.76 installé');
   event.waitUntil(
     caches.open(CACHE_NAME).then(async cache => {
       // ── Cœur applicatif : STRICT (mise à jour ATOMIQUE) ──
@@ -3876,7 +3939,7 @@ self.addEventListener('install', event => {
 });
 
 self.addEventListener('activate', event => {
-  if(DEBUG) console.log('[SW] Ma Vigne v7.73 activé');
+  if(DEBUG) console.log('[SW] Ma Vigne v7.76 activé');
   event.waitUntil(
     caches.keys().then(keys =>
       Promise.all(

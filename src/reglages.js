@@ -3210,8 +3210,8 @@ var MV_DOCS = [
     s:'Les douze mois d\u2019une seule personne, born\u00e9s \u00e0 ses contrats, avec ses jours de formation et ses cong\u00e9s d\u00e9j\u00e0 pos\u00e9s. La feuille qu\u2019elle emporte.' },
 
   // --- Suivi du domaine : des etats internes, jamais des declarations ---
-  { f:'suivi', act:'vignoble',  mod:'vigne',    ico:'\u{1F5FA}\u{FE0F}', bg:'var(--vert-pale)', fm:'pdf',
-    t:'\u00c9tat du vignoble', ask:'',
+  { f:'suivi', act:'vignoble',  mod:'vigne',    ico:'\u{1F5FA}\u{FE0F}', bg:'var(--vert-pale)', fm:'pdf', ov:true,
+    t:'\u00c9tat du vignoble', ask:'Tri des parcelles',
     s:'Toutes vos parcelles sur une page : surface, c\u00e9page, commune, avancement, dernier travail, dernier rendement \u2014 et ce qui reste \u00e0 renseigner.' },
   { f:'suivi', act:'saison',    mod:'vigne',    ico:'\u{1F4C4}', bg:'var(--or-pale)',    fm:'pdf', ov:true,
     t:'Rapport de saison', ask:'Choix de la p\u00e9riode',
@@ -3229,17 +3229,17 @@ var MV_DOCS = [
   { f:'suivi', act:'futs',      mod:'reserve',  ico:'\u{1F6E2}\u{FE0F}', bg:'var(--or-pale)', fm:'pdf',
     t:'Inventaire des f\u00fbts', ask:'',
     s:'Le parc entier : f\u00fbts libres, f\u00fbts en vin, pyramide des \u00e2ges et mouvements.' },
-  { f:'suivi', act:'intrants',  mod:'reserve',  ico:'\u{1F4E6}', bg:'var(--acier-pale)', fm:'pdf',
-    t:'Inventaire des intrants', ask:'',
-    s:'Stocks, achats et consommations du magasin.' },
+  { f:'suivi', act:'intrants',  mod:'reserve',  ico:'\u{1F4E6}', bg:'var(--acier-pale)', fm:'pdf', ov:true,
+    t:'Inventaire des intrants', ask:'Tri des intrants',
+    s:'Stocks, achats et consommations du magasin, dans l\u2019ordre que vous choisissez.' },
   { f:'suivi', act:'matur',     mod:'cave',     ico:'\u{1F347}', bg:'var(--vert-pale)',  fm:'pdf', ov:true,
-    t:'Contr\u00f4le de maturit\u00e9', ask:'Choix de l\u2019ann\u00e9e',
+    t:'Contr\u00f4le de maturit\u00e9', ask:'Vendange, puis tri',
     s:'Vos rel\u00e8vements avant vendange, parcelle par parcelle et jour par jour, dans l\u2019ordre de maturit\u00e9.' },
-  { f:'suivi', act:'recoltes',  mod:'cave',     ico:'\u{1F347}', bg:'var(--rouge-pale)', fm:'pdf',
-    t:'R\u00e9coltes de la vendange', ask:'',
-    s:'Caisses, kilos et hectolitres par parcelle et par cuve.' },
+  { f:'suivi', act:'recoltes',  mod:'cave',     ico:'\u{1F347}', bg:'var(--rouge-pale)', fm:'pdf', ov:true,
+    t:'R\u00e9coltes de la vendange', ask:'Mill\u00e9sime, puis tri',
+    s:'Caisses, kilos et hectolitres par parcelle et par cuve, dans l\u2019ordre que vous choisissez.' },
   { f:'suivi', act:'cuverie',   mod:'cave',     ico:'\u{1FAA3}', bg:'var(--terre-pale)', fm:'pdf', ov:true,
-    t:'Cahier de cuverie', ask:'Choix de l\u2019ann\u00e9e',
+    t:'Cahier de cuverie', ask:'Vendange, puis tri',
     s:'Une page par cuve : densit\u00e9s, temp\u00e9ratures, remontages, pigeages et op\u00e9rations de la fermentation.' },
   { f:'suivi', act:'elevage',   mod:'cave',     ico:'\u{1F377}', bg:'var(--rouge-pale)', fm:'pdf', ov:true,
     t:'Suivi d\u2019\u00e9levage', ask:'',
@@ -3253,10 +3253,10 @@ var MV_DOCS = [
 
   // --- Donnees brutes ---
   { f:'brut',  act:'csvJournal',   mod:'vigne', ico:'\u{1F4CB}', bg:'var(--vert-pale)',  fm:'csv',
-    t:'Journal des travaux', ask:'',
+    t:'Journal des travaux', ask:'Par date, puis par parcelle',
     s:'Toutes les entr\u00e9es avec date, parcelle, t\u00e2che, ouvrier et statut.' },
   { f:'brut',  act:'csvParcelles', mod:'vigne', ico:'\u{1F5FA}\u{FE0F}', bg:'var(--or-pale)', fm:'csv',
-    t:'Avancement par parcelle', ask:'',
+    t:'Avancement par parcelle', ask:'Par parcelle, de A \u00e0 Z',
     s:'Une ligne par parcelle, une colonne par t\u00e2che.' },
   { f:'brut',  act:'json',         mod:'', ico:'\u{1F4BE}', bg:'var(--gris-clair)', fm:'json',
     t:'Sauvegarde compl\u00e8te', ask:'',
@@ -3538,7 +3538,16 @@ function recalcAllTravaux(){
 // une seule colonne — et les nombres à virgule décimale s'y mélangent au séparateur.
 function exportCSVJournal(){
   if(!isAdmin())return;
-  const travaux=window.JOURNAL.filter(j=>!j.meteo);
+  /* ⚠️ PAS DE FEUILLE DE TRI SUR UN CSV, mais PLUS D'ORDRE BRUT NON PLUS. Un
+     tableur retrie en un clic — poser une question avant un telechargement
+     serait de la friction pour rien. En revanche l'ordre de `window.JOURNAL`
+     est celui de la saisie : deux exports du meme jour peuvent sortir dans deux
+     ordres differents, et un diff entre deux fichiers devient illisible. Un
+     ordre STABLE ne se demande pas, il se pose. */
+  const travaux=window.JOURNAL.filter(j=>!j.meteo).slice().sort((a,b)=>
+    String(a.date||'').localeCompare(String(b.date||''))
+    || String(a.parcelle||'').localeCompare(String(b.parcelle||''),'fr')
+    || String(a.tache||'').localeCompare(String(b.tache||''),'fr'));
   const cols=['Date','Parcelle','Tâche','Ouvrier','Statut','Équipe'];
   const q=v=>`"${String(v==null?'':v).replace(/"/g,'""')}"`;
   const rows=travaux.map(j=>[j.date,j.parcelle,j.tache,j.qui||'',j.statut,j.equipe?'Oui':'Non'].map(q).join(';'));
@@ -3554,7 +3563,10 @@ function exportCSVParcelles(){
   const cols=['Parcelle','Surface (ha)','Statut','Avancement (%)',...colsTaches];
   const q=v=>`"${String(v==null?'':v).replace(/"/g,'""')}"`;
   const dec=v=>String(v==null?'':v).replace('.',',');
-  const rows=window.PARCELLES.map(p=>{
+  /* Meme regle que le journal : un ordre stable, pose sans question. */
+  const parcs=window.PARCELLES.slice().sort((a,b)=>
+    String(a.nom||'').localeCompare(String(b.nom||''),'fr'));
+  const rows=parcs.map(p=>{
     const cl=window.getPCls(p);
     const tacheVals=colsTaches.map(t=>p.taches[t]||'Non démarré');
     return [q(p.nom),q(dec(p.surface)),q(p.statut),q(cl.pct),...tacheVals.map(q)].join(';');
@@ -5747,12 +5759,54 @@ function _vgnParCepage(lignes){
     .sort(function(a, b){ return b.ha - a.ha; });
 }
 
-function _vgnDoc(){
+/* ── TRI-2 — l'ordre du document, et ce que la colonne rendement compare ────
+   `_vgnLignes()` rend deja la TOURNEE (commune puis nom) : c'est le defaut, et
+   il ne se recalcule pas — on rend la liste telle quelle pour que le document
+   par defaut soit EXACTEMENT celui d'avant ce lot.
+   ⚠️ UNE VALEUR ABSENTE PART EN FIN DE LISTE DANS LES DEUX SENS. Une parcelle
+   sans rendement connu n'est pas la moins productive, et une surface non
+   renseignee n'est pas une petite surface : les ranger en tete d'un tri
+   croissant les ferait lire comme des zeros. */
+var _VGN_TRI_VAL = {
+  nom:        function(l){ return l.nom; },
+  surface:    function(l){ return l.ha > 0 ? l.ha : null; },
+  avancement: function(l){ return l.pct; },
+  rendement:  function(l){ return (l.rend && l.rend.kg_ha != null) ? l.rend.kg_ha : null; },
+  dernier:    function(l){ return (l.dernier && l.dernier.date) ? String(l.dernier.date) : null; }
+};
+var MV_TRI_VIGNOBLE = [
+  { v:'tournee',    lbl:'Tourn\u00e9e',        a:'commune par commune', z:'en sens inverse' },
+  { v:'nom',        lbl:'Parcelle',       a:'A \u2192 Z', z:'Z \u2192 A' },
+  { v:'surface',    lbl:'Surface',        a:'la plus petite d\u2019abord', z:'la plus grande d\u2019abord' },
+  { v:'avancement', lbl:'Avancement',     a:'la moins avanc\u00e9e d\u2019abord', z:'la plus avanc\u00e9e d\u2019abord' },
+  { v:'rendement',  lbl:'Rendement',      a:'le plus faible d\u2019abord', z:'le plus fort d\u2019abord' },
+  { v:'dernier',    lbl:'Dernier travail', a:'le plus ancien d\u2019abord', z:'le plus r\u00e9cent d\u2019abord' }
+];
+function _vgnTrier(list, c){
+  if(!c || !c.cle || c.cle === 'tournee')
+    return (c && c.sens === 'desc') ? list.slice().reverse() : list;
+  var f = _VGN_TRI_VAL[c.cle]; if(!f) return list;
+  var sg = (c.sens === 'desc') ? -1 : 1;
+  return list.slice().sort(function(a, b){
+    var x = f(a), y = f(b);
+    if(x == null || y == null){                       // l'absence ne se compare pas
+      if(x == null && y == null) return a.nom.localeCompare(b.nom, 'fr');
+      return x == null ? 1 : -1;
+    }
+    var d = (typeof x === 'string') ? x.localeCompare(y, 'fr') : (x - y);
+    return d ? sg * d : a.nom.localeCompare(b.nom, 'fr');
+  });
+}
+window._vgnTrier = _vgnTrier;
+
+function _vgnDoc(c){
   var lignes = _vgnLignes();
   if(!lignes.length){ showToast('Aucune parcelle enregistr\u00e9e', '#B85A1A'); return; }
   var act = lignes.filter(function(l){ return !l.arrachee; });
   var arr = lignes.filter(function(l){ return l.arrachee; });
   if(!act.length){ showToast('Aucune parcelle active', '#B85A1A'); return; }
+  c = c || { cle:'tournee', sens:'asc' };
+  act = _vgnTrier(act, c); arr = _vgnTrier(arr, c);
 
   var haAct = act.reduce(function(s, l){ return s + l.ha; }, 0);
   // La surface affichee est celle que l'application affiche partout ailleurs.
@@ -5835,6 +5889,24 @@ function _vgnDoc(){
     + 'ne comptent ni au num\u00e9rateur ni au d\u00e9nominateur. Le total, lui, est <b>pond\u00e9r\u00e9 par la '
     + 'surface</b>. Le dernier travail vient du journal, hors rel\u00e9v\u00e9s m\u00e9t\u00e9o.</div>';
 
+  /* ⚠️⚠️ « Dernier rendement connu » N'EST PAS LE MEME MILLESIME D'UNE LIGNE A
+     L'AUTRE : c'est le dernier de CHAQUE parcelle. Trier cette colonne, c'est
+     donc comparer des annees differentes des qu'il y en a plusieurs. Le
+     document le DIT, au lieu de laisser le classement le taire. */
+  var milRdt = {};
+  act.concat(arr).forEach(function(l){
+    if(l.rend && l.rend.millesime) milRdt[l.rend.millesime] = (milRdt[l.rend.millesime] || 0) + 1;
+  });
+  var milList = Object.keys(milRdt).map(Number).sort(function(a, b){ return b - a; });
+  if(milList.length > 1){
+    corps += '<div class="cd-note"><b>Les rendements de cette colonne ne sont pas tous du m\u00eame '
+      + 'mill\u00e9sime</b> : ' + milList.map(function(m){
+          return milRdt[m] + ' parcelle' + (milRdt[m] > 1 ? 's' : '') + ' en ' + m; }).join(', ')
+      + '. C\u2019est le dernier rendement connu de chaque parcelle, pas un classement d\u2019une m\u00eame '
+      + 'ann\u00e9e. Ils viennent tous du m\u00eame calcul : les kilos rentr\u00e9s sur le mill\u00e9sime, '
+      + 'ramen\u00e9s \u00e0 la surface enti\u00e8re de la parcelle.</div>';
+  }
+
   corps += '<h2>Par c\u00e9page</h2>'
     + '<table><thead><tr><th>C\u00e9page</th><th class="n">Parcelles</th><th class="n">ha</th>'
     + '<th class="n">Part du domaine</th></tr></thead><tbody>'
@@ -5892,12 +5964,40 @@ function _vgnDoc(){
     titre: '\u00c9tat du vignoble',
     orient: 'paysage', cat: 'parcelles', css: MV_VGNDOC_CSS, corps: corps,
     metas: [act.length + ' parcelle' + (act.length > 1 ? 's' : '') + ' \u00b7 ' + _vgnNum(haRef) + ' ha',
-            saison, '\u00c9dit\u00e9 le ' + new Date().toLocaleDateString('fr-FR')]
+            saison,
+            (typeof window._mvTriPhrase === 'function'
+              ? 'Tri\u00e9 par ' + window._mvTriPhrase({ cles: MV_TRI_VIGNOBLE }, c) : ''),
+            '\u00c9dit\u00e9 le ' + new Date().toLocaleDateString('fr-FR')]
   });
   showToast('\u{1F5FA} \u00c9tat du vignoble \u00b7 ' + act.length + ' parcelles', '#3D6B27');
 }
 
-window._vgnExportVignoble = function(){ _vgnDoc(); };
+window._vgnExportVignoble = function(){
+  var opts = {
+    titre:'\u00c9tat du vignoble', icone:'carte', memo:'vignoble',
+    sub:'Dans quel ordre ranger les parcelles\u00a0? Le document \u00e9crit cet ordre dans son en-t\u00eate.',
+    cles: MV_TRI_VIGNOBLE, defaut:{ cle:'tournee', sens:'asc' },
+    btn:'\u00c9diter le document',
+    compte: function(){ var n = _vgnLignes().filter(function(l){ return !l.arrachee; }).length;
+                        return n + ' parcelle' + (n > 1 ? 's' : ''); },
+    note: function(ch){
+      if(ch.cle === 'tournee')
+        return 'L\u2019ordre de la tourn\u00e9e\u00a0: commune par commune, puis par nom. Les parcelles sans '
+             + 'commune renseign\u00e9e passent en fin de liste.';
+      if(ch.cle === 'rendement')
+        return '<b>Attention\u00a0:</b> c\u2019est le <b>dernier</b> rendement connu de chaque parcelle, et '
+             + 'toutes n\u2019ont pas \u00e9t\u00e9 vendang\u00e9es la m\u00eame ann\u00e9e. Le document nomme les '
+             + 'mill\u00e9simes compar\u00e9s sous le tableau.';
+      return 'Une parcelle dont la valeur manque part en fin de liste, dans les deux sens\u00a0: une '
+           + 'donn\u00e9e absente n\u2019est pas une petite valeur.';
+    },
+    cb: function(ch){ _vgnDoc(ch); }
+  };
+  // Repli : utils.js en retard chez un client -> le document sort dans la tournee,
+  // c'est-a-dire exactement comme avant ce lot.
+  if(typeof window._mvTriOuvrir !== 'function' || !window._mvTriOuvrir(opts))
+    _vgnDoc({ cle:'tournee', sens:'asc' });
+};
 window._vgnLignes         = _vgnLignes;
 window._vgnParCepage      = _vgnParCepage;
 window._vgnDoc            = _vgnDoc;

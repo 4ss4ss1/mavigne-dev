@@ -53,13 +53,13 @@ const DOCS = [
   ['src/reglages.js', 'exportPDFPhyto',           'Registre phytosanitaire'],
   ['src/planning.js', 'planExportPDF',            'Relev\u00e9 individuel'],
   ['src/planning.js', '_paDoc',                   'Planning de l\u2019ann\u00e9e'],
-  ['src/cave.js',     'exportVendRecoltesPdf',    'R\u00e9coltes de la vendange'],
+  ['src/cave.js',     '_vendRecoltesDoc',         'R\u00e9coltes de la vendange'],
   ['src/cave.js',     'generateCaveExport',       'Suivi d\u2019\u00e9levage'],
   ['src/cave.js',     '_rmExport',                'Registre des manipulations'],
   ['src/cave.js',     '_bcExport',                'Bilan de campagne'],
   ['src/cave.js',     '_matDoc',                  'Contr\u00f4le de maturit\u00e9'],
   ['src/cave.js',     '_cuvDoc',                  'Cahier de cuverie'],
-  ['src/reserve.js',  '_rsvExportPdf',            'Inventaire des intrants'],
+  ['src/reserve.js',  '_rsvDoc',                  'Inventaire des intrants'],
   ['src/reserve.js',  '_rsvExportFutsPdf',        'Inventaire des f\u00fbts'],
   ['src/reglages.js', '_vgnDoc',                  '\u00c9tat du vignoble']
 ];

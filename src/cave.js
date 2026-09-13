@@ -7165,74 +7165,301 @@ function _vendCuveFromRecolte(idx){
 }
 
 // —— Export PDF des récoltes (cuvier + vrac) ——
+/* ★★★ TROIS DEFAUTS CORRIGES ICI (lot TRI-1), tous de la meme famille : un
+   chiffre juste, pose sur le mauvais perimetre.
+   1. LE MILLESIME. Le document prenait `CAVE_VENDANGE.recoltes` EN ENTIER et se
+      titrait avec l'annee courante. Des la vendange suivante, une feuille
+      intitulee « Recoltes 2027 » aurait liste 2026. Le millesime se DEMANDE.
+   2. LE RENDEMENT D'UN APPORT N'EXISTE PAS. La colonne divisait les kilos d'UNE
+      BENNE par la surface de TOUTE la parcelle. Trois bennes sur La Justice
+      affichaient trois tiers de rendement, chacun presente comme un rendement.
+   3. LES DEUX DESTINATIONS. Une parcelle qui part au cuvier ET en vrac a UN
+      rendement, pas deux : il se calcule sur la somme de ses kilos du
+      millesime. Section par section, chaque moitie aurait ete annoncee comme
+      le rendement de la parcelle.
+   ⚠️ Le rendement appartient a la PARCELLE et au MILLESIME. `_vendRecRdt` est
+   le seul endroit qui le calcule ici, et il lit TOUJOURS toutes les recoltes du
+   millesime — jamais la liste de la section en cours de rendu. */
+
+/* Le millesime d'une recolte. Meme regle que partout : la date fait foi. */
+function _vendRecMil(r){ return String(_vendMillOfDate(r&&r.date)); }
+
+/* Les millesimes qui ont au moins une recolte, du plus recent au plus ancien. */
+function _vendRecAnnees(){
+  var s={};
+  (CAVE_VENDANGE.recoltes||[]).forEach(function(r){ s[_vendRecMil(r)]=1; });
+  return Object.keys(s).sort().reverse();
+}
+
+/* Le rendement d'une parcelle sur un millesime, en kg/ha. TOUS ses kilos,
+   cuvier et vrac reunis, sur sa surface. 0 quand la surface est inconnue :
+   un rendement sans denominateur n'est pas un petit rendement. */
+function _vendRecRdt(nom, mil){
+  var surf=_vendParcSurf(nom); if(!(surf>0)) return 0;
+  var kg=(CAVE_VENDANGE.recoltes||[]).reduce(function(s,r){
+    return s+((r.parcelle===nom && _vendRecMil(r)===String(mil)) ? _recKg(r) : 0);
+  },0);
+  return kg/surf;
+}
+
+/* Les cles de tri offertes. `grp` borne une cle a un groupement : trier des
+   LIGNES par date n'a plus de sens quand une ligne agrege plusieurs journees. */
+var MV_TRI_RECOLTES = [
+  { v:'saisie',  lbl:'Ordre de saisie', a:'du premier au dernier', z:'du dernier au premier', grp:['apport'] },
+  { v:'nom',     lbl:'Parcelle',        a:'A \u2192 Z',            z:'Z \u2192 A' },
+  { v:'surface', lbl:'Surface',         a:'la plus petite d\u2019abord', z:'la plus grande d\u2019abord' },
+  { v:'rdt',     lbl:'Rendement',       a:'le plus faible d\u2019abord', z:'le plus fort d\u2019abord' },
+  { v:'kg',      lbl:'Kilos rentr\u00e9s', a:'les moins lourds d\u2019abord', z:'les plus lourds d\u2019abord', grp:['apport'] },
+  { v:'date',    lbl:'Date',            a:'la plus ancienne d\u2019abord', z:'la plus r\u00e9cente d\u2019abord', grp:['apport'] }
+];
+
+/* Trier des APPORTS. ⚠️ Une cle de PARCELLE (nom, surface, rendement) range les
+   parcelles, PAS les bennes : a l'interieur d'une parcelle, les apports gardent
+   l'ordre du calendrier. Deux bennes de la meme parcelle ne se comparent pas
+   sur un nom ou une surface — elles porteraient la meme valeur, et l'ordre
+   final dependrait de la stabilite du tri du navigateur. */
+function _vendRecTriApports(list, c){
+  var sg=(c.sens==='desc')?-1:1, mil=String(c.an);
+  var rang={}; (CAVE_VENDANGE.recoltes||[]).forEach(function(r,i){ rang[r.id]=i; });
+  var parc=(c.cle==='nom'||c.cle==='surface'||c.cle==='rdt');
+  var val=function(r){
+    if(c.cle==='surface') return _vendParcSurf(r.parcelle);
+    if(c.cle==='rdt')     return _vendRecRdt(r.parcelle, mil);
+    if(c.cle==='kg')      return _recKg(r);
+    if(c.cle==='date')    return String(r.date||'');
+    return rang[r.id]!=null?rang[r.id]:0;
+  };
+  return list.slice().sort(function(x,y){
+    if(parc){
+      if((x.parcelle||'')!==(y.parcelle||'')){
+        var d=(c.cle==='nom') ? String(x.parcelle||'').localeCompare(String(y.parcelle||''),'fr')
+                              : (val(x)-val(y));
+        if(d) return sg*d;
+        return String(x.parcelle||'').localeCompare(String(y.parcelle||''),'fr');
+      }
+      return String(x.date||'').localeCompare(String(y.date||''));
+    }
+    var a=val(x), b=val(y);
+    var e=(typeof a==='string')?a.localeCompare(b,'fr'):(a-b);
+    if(e) return sg*e;
+    return (rang[x.id]||0)-(rang[y.id]||0);
+  });
+}
+
+/* Regrouper par parcelle. L'etat moyen est PONDERE PAR LES KILOS : une benne de
+   30 kg ne pese pas autant qu'une de 2 000 dans l'etat sanitaire d'une parcelle. */
+function _vendRecGrouper(list, c){
+  var m={}, ord=[];
+  list.forEach(function(r){
+    var k=r.parcelle||'\u2014';
+    if(!m[k]){ m[k]={nom:k,n:0,cs:0,kg:0,d0:r.date,d1:r.date,dest:[],er:{},etat:0}; ord.push(k); }
+    var g=m[k], kg=_recKg(r);
+    g.n++; g.cs+=(r.nb_caisses||0); g.kg+=kg; g.etat+=(r.etat_pct||0)*kg;
+    g.er[r.erasflage||'total']=1;
+    if(String(r.date||'')<String(g.d0||'')) g.d0=r.date;
+    if(String(r.date||'')>String(g.d1||'')) g.d1=r.date;
+    var d=(r.vendu?(r.client||'Vrac g\u00e9n\u00e9rique'):(r.cuvee||'\u2014'));
+    if(g.dest.indexOf(d)===-1) g.dest.push(d);
+  });
+  var sg=(c.sens==='desc')?-1:1, mil=String(c.an);
+  var arr=ord.map(function(k){return m[k];});
+  arr.sort(function(x,y){
+    var d;
+    if(c.cle==='nom')          d=x.nom.localeCompare(y.nom,'fr');
+    else if(c.cle==='surface') d=_vendParcSurf(x.nom)-_vendParcSurf(y.nom);
+    else if(c.cle==='rdt')     d=_vendRecRdt(x.nom,mil)-_vendRecRdt(y.nom,mil);
+    else if(c.cle==='kg')      d=x.kg-y.kg;
+    else                       d=String(x.d0||'').localeCompare(String(y.d0||''));
+    if(d) return sg*d;
+    return x.nom.localeCompare(y.nom,'fr');
+  });
+  return arr;
+}
+
+/* L'entree du catalogue : on demande le millesime et l'ordre, puis on edite. */
 window.exportVendRecoltesPdf = function(){
-  var recs=CAVE_VENDANGE.recoltes||[];
-  if(!recs.length){ showToast('Aucune récolte à exporter','#B85A1A'); return; }
-  var cfg=_vendCfg();
+  var ans=_vendRecAnnees();
+  if(!ans.length){ showToast('Aucune r\u00e9colte \u00e0 exporter','#B85A1A'); return; }
+  var opts={
+    titre:'R\u00e9coltes de la vendange', icone:'raisin', memo:'recoltes',
+    sub:'Le millesime, puis l\u2019ordre des lignes. Le document \u00e9crit cet ordre dans son en-t\u00eate.',
+    annees:ans, anLbl:'Mill\u00e9sime',
+    groupes:[{v:'apport',lbl:'Apport'},{v:'parcelle',lbl:'Parcelle'}],
+    grpLbl:'Une ligne par', grpHint:'ce que compte une ligne du tableau',
+    cles:MV_TRI_RECOLTES, defaut:{cle:'nom',sens:'asc',groupe:'apport'},
+    btn:'\u00c9diter le document',
+    compte:function(c){
+      var l=(CAVE_VENDANGE.recoltes||[]).filter(function(r){return _vendRecMil(r)===String(c.an);});
+      var n=(c.groupe==='parcelle') ? Object.keys(l.reduce(function(o,r){o[r.parcelle||'\u2014']=1;return o;},{})).length : l.length;
+      return n+' ligne'+(n>1?'s':'');
+    },
+    note:function(c){
+      if(c.groupe==='parcelle')
+        return 'Les apports du mill\u00e9sime sont additionn\u00e9s, la p\u00e9riode va de la premi\u00e8re benne '
+             + '\u00e0 la derni\u00e8re. C\u2019est la vue qui r\u00e9pond \u00e0 \u00ab combien a fait cette parcelle \u00bb.';
+      if(c.cle==='nom'||c.cle==='surface'||c.cle==='rdt')
+        return 'Le tri range les <b>parcelles</b>\u00a0; \u00e0 l\u2019int\u00e9rieur de chacune, les apports gardent '
+             + 'l\u2019ordre du calendrier.';
+      return 'Le tri range les <b>lignes</b> une \u00e0 une\u00a0: deux bennes d\u2019une m\u00eame parcelle peuvent '
+           + 'se retrouver \u00e9loign\u00e9es dans le tableau.';
+    },
+    cb:function(c){ _vendRecoltesDoc(c); }
+  };
+  // Repli : si la feuille de tri manque (fichier en retard chez un client), le
+  // document sort quand meme, sur le millesime le plus recent et dans l'ordre
+  // de saisie — l'ordre d'avant ce lot. Un document est plus utile qu'un toast.
+  if(typeof window._mvTriOuvrir!=='function' || !window._mvTriOuvrir(opts)){
+    _vendRecoltesDoc({an:ans[0],cle:'saisie',sens:'asc',groupe:'apport'});
+  }
+};
+
+function _vendRecoltesDoc(c){
+  c=c||{}; var mil=String(c.an||_vendRecAnnees()[0]||new Date().getFullYear());
+  if(!c.cle) c.cle='saisie'; if(!c.sens) c.sens='asc'; if(!c.groupe) c.groupe='apport';
+  var recs=(CAVE_VENDANGE.recoltes||[]).filter(function(r){return _vendRecMil(r)===mil;});
+  if(!recs.length){ showToast('Aucune r\u00e9colte sur '+mil,'#B85A1A'); return; }
   var domNom=window.DOMAINE_NOM||'Ma Vigne';
   var now=new Date().toLocaleDateString('fr-FR',{day:'2-digit',month:'long',year:'numeric'});
-  var yr=new Date().getFullYear();
-  var erLbl={total:'Éraflée',partiel:'Partielle',entiere:'Vendange entière'};
-  function _row(r,vrac){
-    var kg=_recKg(r), surf=_vendParcSurf(r.parcelle);
-    var kgha=surf>0?Math.round(kg/surf).toLocaleString('fr-FR')+' kg/ha':'—';
-    var dest=vrac?(r.client||'Vrac générique'):(r.cuvee||'—');
-    return '<tr><td>'+_escHtml(r.parcelle||'')+'</td>'
+  var erLbl={total:'\u00c9rafl\u00e9e',partiel:'Partielle',entiere:'Vendange enti\u00e8re'};
+  var grp=(c.groupe==='parcelle');
+  var nf=function(n){ return Math.round(n).toLocaleString('fr-FR'); };
+  var rdtTxt=function(nom){ var v=_vendRecRdt(nom,mil); return v>0?nf(v)+' kg/ha':'\u2014'; };
+  // Combien d'apports cette parcelle a-t-elle sur le millesime ? Au-dela d'un
+  // seul, la valeur affichee n'est pas celle de la ligne : elle est marquee.
+  var nApp={}; recs.forEach(function(r){ var k=r.parcelle||'\u2014'; nApp[k]=(nApp[k]||0)+1; });
+  var partout={}; recs.forEach(function(r){ var k=r.parcelle||'\u2014';
+    if(!partout[k]) partout[k]={c:0,v:0}; partout[k][r.vendu?'v':'c']++; });
+  var marque=function(nom){
+    var p=partout[nom]||{c:0,v:0};
+    if(p.c&&p.v)        return '<span class="rq">toute la parcelle</span>';
+    if((nApp[nom]||0)>1) return '<span class="rq">parcelle</span>';
+    return '';
+  };
+
+  function ligneApport(r,vrac){
+    var kg=_recKg(r), nom=r.parcelle||'\u2014';
+    var dest=vrac?(r.client||'Vrac g\u00e9n\u00e9rique'):(r.cuvee||'\u2014');
+    return '<tr><td>'+_escHtml(nom)+'</td>'
       +'<td>'+_vendFrDate(r.date)+'</td>'
       +'<td>'+_escHtml(dest)+'</td>'
       +'<td class="n">'+(r.nb_caisses||0)+'</td>'
-      +'<td class="n">'+kg.toLocaleString('fr-FR')+'</td>'
-      +'<td class="n">'+kgha+'</td>'
-      +'<td class="n">'+(r.etat_pct||0)+'%</td>'
-      +'<td>'+(erLbl[r.erasflage]||'—')+'</td>'
+      +'<td class="n">'+nf(kg)+'</td>'
+      +'<td class="n">'+rdtTxt(nom)+marque(nom)+'</td>'
+      +'<td class="n">'+(r.etat_pct||0)+'\u202f%</td>'
+      +'<td>'+(erLbl[r.erasflage]||'\u2014')+'</td>'
       +(vrac?'':'<td class="n">'+_vendHlRange(kg)+' hL</td>')
       +'</tr>';
   }
+  function ligneParcelle(g,vrac){
+    var er=Object.keys(g.er);
+    return '<tr><td>'+_escHtml(g.nom)+'</td>'
+      +'<td class="n">'+(_vendParcSurf(g.nom)>0?_vendParcSurf(g.nom).toFixed(2):'\u2014')+'</td>'
+      +'<td>'+(g.d0===g.d1?_vendFrDate(g.d0):_vendFrDate(g.d0)+' \u2192 '+_vendFrDate(g.d1))+'</td>'
+      +'<td>'+_escHtml(g.dest.join(' \u00b7 '))+'</td>'
+      +'<td class="n">'+g.n+'</td>'
+      +'<td class="n">'+g.cs+'</td>'
+      +'<td class="n">'+nf(g.kg)+'</td>'
+      +'<td class="n">'+rdtTxt(g.nom)+marque(g.nom)+'</td>'
+      +'<td class="n">'+(g.kg>0?Math.round(g.etat/g.kg):0)+'\u202f%</td>'
+      +'<td>'+(er.length>1?'Mixte':(erLbl[er[0]]||'\u2014'))+'</td>'
+      +(vrac?'':'<td class="n">'+_vendHlRange(g.kg)+' hL</td>')
+      +'</tr>';
+  }
+
+  function section(titre, list, vrac){
+    if(!list.length) return '';
+    var cs=list.reduce(function(s,r){return s+(r.nb_caisses||0);},0);
+    var kg=list.reduce(function(s,r){return s+_recKg(r);},0);
+    var cols, corps, nSom, nTete;
+    if(grp){
+      var gs=_vendRecGrouper(list,c);
+      cols=['Parcelle','ha','P\u00e9riode',vrac?'Client(s)':'Cuv\u00e9e(s)','Apports','Caisses','kg','kg/ha','\u00c9tat moy.','\u00c9raflage'].concat(vrac?[]:['hL est.']);
+      corps=gs.map(function(g){return ligneParcelle(g,vrac);}).join('');
+      nTete=4; nSom='<td class="n">'+list.length+'</td><td class="n">'+cs+'</td><td class="n">'+nf(kg)+'</td>';
+      var nP=gs.length;
+      var titre2=titre+' \u2014 '+nP+' parcelle'+(nP>1?'s':'');
+      return _vendRecTable(titre2,cols,corps,nTete,nSom,3,vrac);
+    }
+    cols=['Parcelle','Date',vrac?'Client':'Cuv\u00e9e','Caisses','kg','kg/ha parcelle','\u00c9tat','\u00c9raflage'].concat(vrac?[]:['hL est.']);
+    corps=_vendRecTriApports(list,c).map(function(r){return ligneApport(r,vrac);}).join('');
+    nTete=3; nSom='<td class="n">'+cs+'</td><td class="n">'+nf(kg)+'</td>';
+    return _vendRecTable(titre+' \u2014 '+list.length+' apport'+(list.length>1?'s':''),
+                         cols,corps,nTete,nSom,2,vrac);
+  }
+  /* Le pied ne totalise QUE ce qui s'additionne. Un rendement moyen ne se somme
+     pas : la case reste vide plutot que fausse. Le colspan de queue se CALCULE
+     — un nombre ecrit a la main devient faux au premier ajout de colonne. */
+  function _vendRecTable(titre,cols,corps,nTete,nSom,nbSom,vrac){
+    var num={'Caisses':1,'kg':1,'kg/ha':1,'kg/ha parcelle':1,'\u00c9tat':1,'\u00c9tat moy.':1,
+             'hL est.':1,'ha':1,'Apports':1};
+    var th=cols.map(function(x){ return '<th'+(num[x]?' class="n"':'')+'>'+x+'</th>'; }).join('');
+    var reste=cols.length-nTete-nbSom;
+    return '<h2>'+titre+'</h2>'
+      +'<table><thead><tr>'+th+'</tr></thead><tbody>'+corps
+      +'<tr class="tot"><td colspan="'+nTete+'">Total</td>'+nSom
+      +(reste>0?'<td colspan="'+reste+'"></td>':'')+'</tr>'
+      +'</tbody></table>';
+  }
+
   var cuvier=recs.filter(function(r){return !r.vendu;});
   var vrac=recs.filter(function(r){return r.vendu;});
-  function _tot(list){var c=list.reduce(function(s,r){return s+(r.nb_caisses||0);},0);var k=list.reduce(function(s,r){return s+_recKg(r);},0);return {c:c,k:k};}
-  var tc=_tot(cuvier), tv=_tot(vrac), ta=_tot(recs);
-  var secCuvier=cuvier.length?(
-    '<h2>Parti au cuvier — '+cuvier.length+' récolte'+(cuvier.length>1?'s':'')+'</h2>'
-    +'<table><thead><tr><th>Parcelle</th><th>Date</th><th>Cuvée</th><th>Caisses</th><th>kg</th><th>Rendement</th><th>État</th><th>Éraflage</th><th>hL est.</th></tr></thead><tbody>'
-    +cuvier.map(function(r){return _row(r,false);}).join('')
-    +'<tr class="tot"><td colspan="3">Total cuvier</td><td class="n">'+tc.c+'</td><td class="n">'+tc.k.toLocaleString('fr-FR')+'</td><td colspan="4"></td></tr>'
-    +'</tbody></table>'):'';
-  var secVrac=vrac.length?(
-    '<h2>Vendu en vrac — '+vrac.length+' récolte'+(vrac.length>1?'s':'')+'</h2>'
-    +'<table><thead><tr><th>Parcelle</th><th>Date</th><th>Client</th><th>Caisses</th><th>kg</th><th>Rendement</th><th>État</th><th>Éraflage</th></tr></thead><tbody>'
-    +vrac.map(function(r){return _row(r,true);}).join('')
-    +'<tr class="tot"><td colspan="3">Total vrac</td><td class="n">'+tv.c+'</td><td class="n">'+tv.k.toLocaleString('fr-FR')+'</td><td colspan="3"></td></tr>'
-    +'</tbody></table>'):'';
+  var tot=function(l){ return {c:l.reduce(function(s,r){return s+(r.nb_caisses||0);},0),
+                               k:l.reduce(function(s,r){return s+_recKg(r);},0)}; };
+  var tc=tot(cuvier), tv=tot(vrac), ta=tot(recs);
+  var parcs=Object.keys(nApp);
+  var sansSurf=parcs.filter(function(n){ return !(_vendParcSurf(n)>0); });
+  var mixtes=parcs.filter(function(n){ var p=partout[n]; return p&&p.c&&p.v; });
+
+  var note='<div class="rnote"><b>Le rendement porte sur toute la parcelle</b>\u00a0: ses kilos du '
+    +'mill\u00e9sime, cuvier et vrac r\u00e9unis, ramen\u00e9s \u00e0 sa surface. Ce n\u2019est jamais le rendement '
+    +'d\u2019un apport\u00a0: une benne n\u2019a pas de rendement.'
+    +(mixtes.length?' '+mixtes.length+' parcelle'+(mixtes.length>1?'s partent':' part')
+      +' \u00e0 la fois au cuvier et en vrac\u00a0: le m\u00eame chiffre appara\u00eet dans les deux sections, '
+      +'et non deux moiti\u00e9s.':'')
+    +(sansSurf.length?' <b>'+sansSurf.length+' parcelle'+(sansSurf.length>1?'s':'')+' sans surface '
+      +'enregistr\u00e9e</b>\u00a0: '+_escHtml(sansSurf.join(', '))+'. Leur rendement ne peut pas \u00eatre '
+      +'calcul\u00e9 \u2014 il est laiss\u00e9 vide, pas estim\u00e9.':'')
+    +'</div>';
+
   var css='*{box-sizing:border-box;margin:0;padding:0}'
     +'h1{font-size:var(--pt-md,20px);color:#1A0E05;margin-bottom:3px}'
-    +'.sub{font-size:var(--pt-txt,12.5px);color:#7B4A1A;font-weight:600;margin-bottom:4px}'
-    +'.meta{font-size:var(--pt-micro,11px);color:#999;margin-bottom:16px}'
-    +'.kpis{display:flex;gap:22px;flex-wrap:wrap;background:#FAF5EE;border:1px solid #E8D5B0;border-radius:8px;padding:10px 16px;margin-bottom:18px}'
+    +'.kpis{display:flex;gap:22px;flex-wrap:wrap;background:#FAF5EE;border:1px solid #E8D5B0;border-radius:8px;padding:10px 16px;margin-bottom:16px}'
     +'.kpi strong{display:block;font-size:var(--pt-nano,9.5px);text-transform:uppercase;letter-spacing:.5px;color:#8B6020;margin-bottom:2px}'
     +'.kpi{font-size:var(--pt-base,14px);color:#3A2A0E;font-weight:700}'
     +'h2{font-size:var(--pt-base,14px);color:#2D1B09;margin:18px 0 8px}'
     +'table{width:100%;border-collapse:collapse;font-size:var(--pt-txt,12.5px);margin-bottom:6px}'
     +'th{text-align:left;padding:7px 9px;background:#2D1B09;color:#F5E6CC;font-size:var(--pt-lbl,10.5px);text-transform:uppercase;letter-spacing:.5px}'
+    +'th.n{text-align:right}'
     +'td{border-bottom:1px solid #EEE;padding:6px 9px}'
     +'td.n{text-align:right;white-space:nowrap}'
-    +'th:nth-child(n+4){text-align:right}'
     +'tr:nth-child(even) td{background:#FAFAFA}'
     +'tr.tot td{background:#F5F0E8;font-weight:700;border-top:2px solid #C8A060;border-bottom:none}'
-    +'.footer{margin-top:16px;font-size:var(--pt-lbl,10.5px);color:#BBB;text-align:right;border-top:1px solid #EEE;padding-top:8px}'
+    +'.rq{display:inline-block;background:#EFE3C6;color:#6B4A10;font-size:var(--pt-nano,9.5px);'
+      +'font-weight:700;padding:1px 5px;border-radius:4px;margin-left:5px;letter-spacing:.2px}'
+    +'.rnote{font-size:var(--pt-nano,9.5px);color:#7A7263;line-height:1.55;margin:2px 0 10px}'
     +'';
   if(typeof window._mvDocOpen!=='function'){ showToast('Mise \u00e0 jour incompl\u00e8te \u2014 rechargez l\u2019application','#B85A1A'); return; }
   var corps='<div class="kpis"><div class="kpi"><strong>Caisses</strong>'+ta.c+'</div>'
     +'<div class="kpi"><strong>R\u00e9colt\u00e9</strong>'+(ta.k/1000).toFixed(2)+' t</div>'
     +'<div class="kpi"><strong>Au cuvier</strong>'+(tc.k/1000).toFixed(2)+' t</div>'
-    +'<div class="kpi"><strong>En vrac</strong>'+(tv.k/1000).toFixed(2)+' t</div></div>'
-    +secCuvier+secVrac;
+    +'<div class="kpi"><strong>En vrac</strong>'+(tv.k/1000).toFixed(2)+' t</div>'
+    +'<div class="kpi"><strong>Parcelles</strong>'+parcs.length+'</div></div>'
+    +section('Parti au cuvier',cuvier,false)+note+section('Vendu en vrac',vrac,true);
+  var ordre=(typeof window._mvTriPhrase==='function')
+    ? window._mvTriPhrase({cles:MV_TRI_RECOLTES},c) : '';
   window._mvDocOpen({
-    titre:'R\u00e9coltes '+yr, domaine:domNom, orient:'paysage', cat:'cave',
-    metas:['\u00c9dit\u00e9 le '+now, recs.length+' r\u00e9colte'+(recs.length>1?'s':'')],
+    titre:'R\u00e9coltes de la vendange', domaine:domNom, orient:'paysage', cat:'cave',
+    metas:['Mill\u00e9sime '+mil,
+           recs.length+' apport'+(recs.length>1?'s':'')+' \u00b7 '+parcs.length+' parcelle'+(parcs.length>1?'s':''),
+           'Une ligne par '+(grp?'parcelle':'apport'),
+           ordre?('Tri\u00e9 par '+ordre):'',
+           '\u00c9dit\u00e9 le '+now],
     corps:corps, css:css
   });
 }
+window._vendRecoltesDoc = _vendRecoltesDoc;
+window._vendRecRdt      = _vendRecRdt;
+window._vendRecAnnees   = _vendRecAnnees;
 
 window._vendCuveFromRecolte  = _vendCuveFromRecolte;
 
@@ -14656,7 +14883,46 @@ function _matDocVal(suc, spd, un){ return un === 'a' ? _mvF1(suc / spd) : String
 function _matDocAlt(suc, spd, un){ return un === 'a' ? (Math.round(suc) + ' g/L') : ('~' + _mvF1(suc / spd) + ' %vol'); }
 function _matDocUn(un){ return un === 'a' ? '%vol' : 'g/L'; }
 
-function _matDoc(an){
+/* ── TRI-3 — l'ordre du contrôle de maturité ────────────────────────────────
+   ⚠️ `_matClasse` rend deja les parcelles du plus mur au moins mur, sans
+   departage : sur la cle par defaut on rend donc la liste TELLE QUELLE, sans
+   la retrier. Un comparateur « equivalent » ajouterait un departage par nom
+   que le document n'avait pas, et deux tirages identiques ne le seraient plus.
+   ⚠️ Une valeur absente (pas de vitesse faute d'un second releve) part en fin
+   de liste dans les deux sens : on ne sait pas qu'elle est lente, on ne sait
+   rien d'elle. */
+var MV_TRI_MATURITE = [
+  { v:'maturite', lbl:'Maturit\u00e9',  a:'la moins m\u00fbre d\u2019abord', z:'la plus m\u00fbre d\u2019abord' },
+  { v:'nom',      lbl:'Parcelle',   a:'A \u2192 Z', z:'Z \u2192 A' },
+  { v:'surface',  lbl:'Surface',    a:'la plus petite d\u2019abord', z:'la plus grande d\u2019abord' },
+  { v:'vitesse',  lbl:'Vitesse',    a:'la plus lente d\u2019abord', z:'la plus rapide d\u2019abord' },
+  { v:'releve',   lbl:'Dernier rel\u00e8vement', a:'le plus ancien d\u2019abord', z:'le plus r\u00e9cent d\u2019abord' }
+];
+function _matTrier(rangs, c){
+  c = c || { cle:'maturite', sens:'desc' };
+  if(c.cle === 'maturite')
+    return (c.sens === 'asc') ? rangs.slice().reverse() : rangs;
+  var sg = (c.sens === 'desc') ? -1 : 1;
+  var val = function(r){
+    if(c.cle === 'nom')     return String(r.nom || '');
+    if(c.cle === 'surface') { var h = _vendParcSurf(r.nom); return h > 0 ? h : null; }
+    if(c.cle === 'vitesse') return (r.vit == null) ? null : r.vit;
+    if(c.cle === 'releve')  return r.date ? String(r.date) : null;
+    return null;
+  };
+  return rangs.slice().sort(function(a, b){
+    var x = val(a), y = val(b);
+    if(x == null || y == null){
+      if(x == null && y == null) return String(a.nom).localeCompare(String(b.nom), 'fr');
+      return x == null ? 1 : -1;
+    }
+    var d = (typeof x === 'string') ? x.localeCompare(y, 'fr') : (x - y);
+    return d ? sg * d : String(a.nom).localeCompare(String(b.nom), 'fr');
+  });
+}
+window._matTrier = _matTrier;
+
+function _matDoc(an, mtri){
   var spd = (_vendCfg().sucre_par_degre) || 16.83;
   var ref = _matRefIso(an);
   var tj  = Date.parse(ref);
@@ -14683,7 +14949,7 @@ function _matDoc(an){
   var toutes = Object.keys(jours).sort();
   var cols   = toutes.length > 8 ? toutes.slice(-8) : toutes;
   var caches = toutes.length - cols.length;
-  var rangs  = _matClasse(byP, spd);
+  var rangs  = _matTrier(_matClasse(byP, spd), mtri);
 
   /* Rentrees : la synthese sait deja lesquelles, et depuis quand. */
   var rentree = {};
@@ -14734,7 +15000,8 @@ function _matDoc(an){
   var corps = '<div class="cd-kpis">'
     + tuile('Domaine', S.tiles.dom) + tuile('Rouges', S.tiles.rge) + tuile('Blancs', S.tiles.bl)
     + '</div>'
-    + '<h2>Ordre de maturité — ' + rangs.length + ' parcelle' + (rangs.length > 1 ? 's' : '')
+    + '<h2>' + ((!mtri || mtri.cle === 'maturite') ? 'Ordre de maturité' : 'Les parcelles suivies')
+      + ' — ' + rangs.length + ' parcelle' + (rangs.length > 1 ? 's' : '')
     + ' suivie' + (rangs.length > 1 ? 's' : '') + '</h2>'
     + '<table><thead>' + tete + '</thead><tbody>' + lignes + '</tbody></table>'
     + '<div class="cd-note">Valeurs en ' + _matDocUn(un) + '. La vitesse est calculée sur les deux '
@@ -14782,6 +15049,8 @@ function _matDoc(an){
     metas: [nTot + ' relevé' + (nTot > 1 ? 's' : '') + ' sur ' + rangs.length + ' parcelle'
               + (rangs.length > 1 ? 's' : ''),
             'du ' + _vendFrDate(d1) + ' au ' + _vendFrDate(d2),
+            (typeof window._mvTriPhrase === 'function' && mtri)
+              ? ('Trié par ' + window._mvTriPhrase({ cles: MV_TRI_MATURITE }, mtri)) : '',
             'Édité le ' + new Date().toLocaleDateString('fr-FR')]
   });
   showToast('Contrôle de maturité ' + an, '#3D6B27');
@@ -14790,18 +15059,30 @@ function _matDoc(an){
 /* Ne jamais poser une question dont la reponse est unique. */
 window._matExportChoix = function(){
   var ans = _matAnnees();
-  if(!ans.length){ showToast('Aucun relevé de maturité enregistré', '#B85A1A'); return; }
-  if(ans.length === 1 || typeof window.openPrompt !== 'function'){ _matDoc(ans[0]); return; }
-  window.openPrompt({
-    titre:'Quelle année ?', unite:'', icone:'raisin', type:'nombre',
-    sub:'Le contrôle de maturité se lit vendange par vendange. Disponibles : ' + ans.join(', ') + '.',
-    valeur:String(ans[0]), placeholder:String(ans[0]), btnLabel:'Éditer le relevé',
-    cb:function(v){
-      var n = String(parseInt(String(v).replace(/\D/g, ''), 10));
-      if(ans.indexOf(n) < 0){ showToast('Aucun relevé sur ' + n, '#B85A1A'); return; }
-      _matDoc(n);
-    }
-  });
+  if(!ans.length){ showToast('Aucun relev\u00e9 de maturit\u00e9 enregistr\u00e9', '#B85A1A'); return; }
+  /* ⚠️ UNE SEULE FEUILLE, PAS DEUX QUESTIONS A LA SUITE. `openPrompt` posait
+     l'annee ; MV_TRI la pose AUSSI, et n'affiche la rangee que s'il y en a
+     plusieurs. Le geste ne s'allonge donc pas, il gagne le tri. */
+  var opts = {
+    titre:'Contr\u00f4le de maturit\u00e9', icone:'raisin', memo:'maturite',
+    sub:'Le contr\u00f4le se lit vendange par vendange. Choisissez l\u2019ann\u00e9e, puis l\u2019ordre des parcelles.',
+    annees:ans, anLbl:'Vendange',
+    cles:MV_TRI_MATURITE, defaut:{ cle:'maturite', sens:'desc' },
+    btn:'\u00c9diter le relev\u00e9',
+    note:function(c){
+      if(c.cle === 'maturite')
+        return 'L\u2019ordre du document depuis toujours\u00a0: la parcelle la plus avanc\u00e9e en t\u00eate, '
+             + 'celle qui d\u00e9cide de la date de vendange.';
+      if(c.cle === 'vitesse')
+        return 'La vitesse se calcule sur les <b>deux derniers</b> rel\u00e8vements. Une parcelle qui n\u2019en '
+             + 'a qu\u2019un n\u2019a pas de vitesse\u00a0: elle part en fin de liste, pas en t\u00eate.';
+      return 'Le titre du tableau suit l\u2019ordre choisi\u00a0: il ne dira \u00ab ordre de maturit\u00e9 \u00bb que '
+           + 'si c\u2019en est un.';
+    },
+    cb:function(c){ _matDoc(c.an, c); }
+  };
+  if(typeof window._mvTriOuvrir !== 'function' || !window._mvTriOuvrir(opts))
+    _matDoc(ans[0], { cle:'maturite', sens:'desc' });
 };
 
 /* ── Le cahier de cuverie ──────────────────────────────────────────────────
@@ -15563,10 +15844,51 @@ function _cuvDocGraph(c){
   return '<div class="cd-gr mvdoc-avoid">' + _vendFermSvg(c, MV_CUVDOC_GRW, { sansTouche:true }) + '</div>';
 }
 
-function _cuvDoc(an){
+/* ── TRI-3 — l'ordre du cahier de cuverie ──────────────────────────
+   Une page par cuve. L'ordre par defaut est celui de l'ENCUVAGE : le cahier se
+   lit comme la vendange s'est passee. Sur cette cle on rend la liste telle
+   qu'elle sort du filtre, sans la retrier.
+   ⚠️ Sur vingt cuves, chercher « Cuve 7 » dans un ordre chronologique demande
+   de parcourir tout le document ; c'est la seule raison d'offrir un autre ordre. */
+var MV_TRI_CUVERIE = [
+  { v:'encuvage', lbl:'Encuvage', a:'la premi\u00e8re entr\u00e9e d\u2019abord', z:'la derni\u00e8re entr\u00e9e d\u2019abord' },
+  { v:'nom',      lbl:'Cuve',     a:'A \u2192 Z', z:'Z \u2192 A' },
+  { v:'volume',   lbl:'Volume',   a:'la plus petite d\u2019abord', z:'la plus grande d\u2019abord' },
+  { v:'duree',    lbl:'Cuvaison', a:'la plus courte d\u2019abord', z:'la plus longue d\u2019abord' }
+];
+function _cuvTrier(cuves, c){
+  c = c || { cle:'encuvage', sens:'asc' };
+  if(c.cle === 'encuvage')
+    return (c.sens === 'desc') ? cuves.slice().reverse() : cuves;
+  var sg = (c.sens === 'desc') ? -1 : 1;
+  var val = function(x){
+    if(c.cle === 'nom')    return String(x.nom || '');
+    if(c.cle === 'volume') return (x.volume_hl > 0) ? x.volume_hl : null;
+    if(c.cle === 'duree'){
+      var mes = x.mesures_fa || [];
+      var fin = (x.decuvage && x.decuvage.date) || (mes.length ? mes[mes.length - 1].date : null);
+      var nj  = _cuvJours(x.date_entree, fin);
+      return (nj == null) ? null : nj;      // une cuve encore en cuve n'a pas de duree
+    }
+    return null;
+  };
+  return cuves.slice().sort(function(a, b){
+    var x = val(a), y = val(b);
+    if(x == null || y == null){
+      if(x == null && y == null) return String(a.nom || '').localeCompare(String(b.nom || ''), 'fr');
+      return x == null ? 1 : -1;
+    }
+    var d = (typeof x === 'string') ? x.localeCompare(y, 'fr') : (x - y);
+    return d ? sg * d : String(a.nom || '').localeCompare(String(b.nom || ''), 'fr');
+  });
+}
+window._cuvTrier = _cuvTrier;
+
+function _cuvDoc(an, ctri){
   var cuves = (CAVE_VENDANGE.cuves_vinif || []).filter(function(c){ return _cuvAn(c) === String(an); })
     .sort(function(a, b){ return String(a.date_entree || '') < String(b.date_entree || '') ? -1 : 1; });
   if(!cuves.length){ showToast('Aucune cuve sur ' + an, '#B85A1A'); return; }
+  cuves = _cuvTrier(cuves, ctri);
 
   var totVol = 0, totMes = 0, totSuc = 0, totRem = 0, totPig = 0;
   var sections = cuves.map(function(c){
@@ -15705,6 +16027,8 @@ function _cuvDoc(an){
     orient: 'portrait', cat: 'cave', css: MV_CUVDOC_CSS, corps: corps,
     metas: [cuves.length + ' cuve' + (cuves.length > 1 ? 's' : ''),
             totMes + ' relevé' + (totMes > 1 ? 's' : '') + ' de fermentation',
+            (typeof window._mvTriPhrase === 'function' && ctri)
+              ? ('Trié par ' + window._mvTriPhrase({ cles: MV_TRI_CUVERIE }, ctri)) : '',
             'Édité le ' + new Date().toLocaleDateString('fr-FR')]
   });
   showToast('Cahier de cuverie ' + an, '#3D6B27');
@@ -15712,18 +16036,27 @@ function _cuvDoc(an){
 
 window._cuvExportChoix = function(){
   var ans = _cuvAnnees();
-  if(!ans.length){ showToast('Aucune cuve de vinification enregistrée', '#B85A1A'); return; }
-  if(ans.length === 1 || typeof window.openPrompt !== 'function'){ _cuvDoc(ans[0]); return; }
-  window.openPrompt({
-    titre:'Quelle vendange ?', unite:'', icone:'seau', type:'nombre',
-    sub:'Une cuve appartient à l’année où elle est entrée. Disponibles : ' + ans.join(', ') + '.',
-    valeur:String(ans[0]), placeholder:String(ans[0]), btnLabel:'Éditer le cahier',
-    cb:function(v){
-      var n = String(parseInt(String(v).replace(/\D/g, ''), 10));
-      if(ans.indexOf(n) < 0){ showToast('Aucune cuve sur ' + n, '#B85A1A'); return; }
-      _cuvDoc(n);
-    }
-  });
+  if(!ans.length){ showToast('Aucune cuve de vinification enregistr\u00e9e', '#B85A1A'); return; }
+  var opts = {
+    titre:'Cahier de cuverie', icone:'seau', memo:'cuverie',
+    sub:'Une cuve appartient \u00e0 l\u2019ann\u00e9e o\u00f9 elle est entr\u00e9e. Choisissez la vendange, puis l\u2019ordre des pages.',
+    annees:ans, anLbl:'Vendange',
+    cles:MV_TRI_CUVERIE, defaut:{ cle:'encuvage', sens:'asc' },
+    btn:'\u00c9diter le cahier',
+    note:function(c){
+      if(c.cle === 'encuvage')
+        return 'Le cahier se lit comme la vendange s\u2019est pass\u00e9e\u00a0: dans l\u2019ordre o\u00f9 les cuves ont '
+             + '\u00e9t\u00e9 remplies.';
+      if(c.cle === 'duree')
+        return 'Une cuve <b>encore en cuve</b> n\u2019a pas de dur\u00e9e de cuvaison\u00a0: elle part en fin de '
+             + 'liste, dans les deux sens.';
+      return 'Une page par cuve, dans l\u2019ordre choisi. Le comparatif de t\u00eate, lui, garde son '
+           + 'alignement sur le jour d\u2019encuvage.';
+    },
+    cb:function(c){ _cuvDoc(c.an, c); }
+  };
+  if(typeof window._mvTriOuvrir !== 'function' || !window._mvTriOuvrir(opts))
+    _cuvDoc(ans[0], { cle:'encuvage', sens:'asc' });
 };
 
 window._matDoc     = _matDoc;

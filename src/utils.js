@@ -23,7 +23,7 @@ export const GT_ADMIN_EMAIL = 'ngdevpro@gmail.com';
 // WHATS_NEW   : tableau vide = modal desactive pour cette version.
 // Format item : { emoji:'📅', titre:'Titre court', desc:'Phrase utilisateur.' }
 // Regle : seulement les changements visibles par les utilisateurs.
-export const APP_VERSION = '7.13';
+export const APP_VERSION = '7.16';
 // ════ Journal des nouveautés (récap cumulatif) ════
 // Une entrée par version, la PLUS RÉCENTE EN HAUT : { v:'5.10', items:[ {emoji,titre,desc}, … ] }
 // À chaque release visible → AJOUTER un bloc en tête (ne pas remplacer). items:[] = release technique (rien à afficher).
@@ -140,6 +140,256 @@ window._mvDocOpen = function(o){
     if(window.showToast) window.showToast('Document impossible \u00e0 produire', '#C0392B');
     return false;
   }
+};
+
+
+// ═══════════════════════════════════════════════════════════════════════════
+// MV_TRI — l'ordre des lignes d'un document imprime
+// ═══════════════════════════════════════════════════════════════════════════
+// Onze documents sortent d'un tableau. Six d'entre eux le sortaient dans
+// l'ordre du tableau SOURCE : l'ordre de saisie des recoltes, l'ordre de
+// PARCELLES, l'ordre de INTRANTS.produits. Ce n'est pas un ordre, c'est
+// l'absence d'ordre — sur le papier, personne ne peut y chercher une ligne.
+//
+// La primitive vit ici, a cote de MV_DOC, parce que le tri appartient a la
+// GRAMMAIRE du document, pas a un module : cave.js, reglages.js, reserve.js et
+// phyto.js en auront tous besoin, et utils.js est importe en premier.
+//
+// Elle ne trie RIEN. Le document seul sait ce que valent ses lignes ; elle
+// pose la question, retient la reponse et rend la phrase a imprimer.
+//
+// ⚠️ TROIS CHOSES SONT DEMANDEES ENSEMBLE, jamais trois feuilles a la suite :
+//   · l'annee ou le millesime, quand le document en couvre plusieurs
+//   · ce que compte une ligne (le groupement), quand il y a un choix
+//   · la cle de tri et son sens
+// Une cle peut n'avoir de sens que dans un groupement (`grp:['apport']`) : elle
+// est alors montree BARREE, jamais retiree — une option qui disparait laisse
+// croire qu'elle n'existe pas.
+//
+// ⚠️ L'ANNEE N'EST PAS MEMORISEE, et c'est deliberé. Retenir « 2025 » ferait
+// sortir l'an prochain un document de l'an dernier, avec le bon titre et les
+// mauvaises lignes — exactement le defaut que ce lot corrige. La cle, le sens
+// et le groupement, eux, sont des habitudes : ils se retiennent.
+//
+// ⚠️ Le choix est retenu dans localStorage, PAS dans CONFIG. C'est une
+// preference d'affichage de la personne qui tient le telephone, pas une regle
+// du domaine : le tri choisi par le chef de culture n'a pas a changer le
+// document du salarie. Stockage refuse (navigation privee) : la feuille cesse
+// de promettre qu'elle retient, plutot que de le promettre en vain.
+//
+// ⚠️ Le document DOIT ecrire l'ordre dans son en-tete (_mvTriPhrase). Deux
+// tirages du meme document, tries differemment, se ressemblent sans l'etre :
+// une feuille posee sur un bureau doit dire comment elle est rangee.
+
+var MV_TRI_ETAT = null;   // { o:options, e:{an,groupe,cle,sens} } tant que la feuille est ouverte
+var MV_TRI_MEMO_KO = false;
+
+function _mvTriCss(){
+  if(document.getElementById('mv-tri-css')) return;
+  var s=document.createElement('style'); s.id='mv-tri-css';
+  s.textContent=''
+   +'.mvt-ov{position:fixed;inset:0;z-index:9200;background:rgba(0,0,0,.58);display:flex;'
+     +'align-items:flex-end;justify-content:center;opacity:0;pointer-events:none;transition:opacity .22s}'
+   +'.mvt-ov.open{opacity:1;pointer-events:auto}'
+   +'.mvt-sh{width:100%;max-width:560px;max-height:88vh;overflow-y:auto;background:var(--bg-card,#FBFAF6);'
+     +'border:1px solid rgba(138,90,56,.12);border-bottom:none;border-radius:24px 24px 0 0;'
+     +'padding:18px 17px calc(20px + env(safe-area-inset-bottom,0px));color:var(--texte,#1A1A14);'
+     +'transform:translateY(100%);transition:transform .26s cubic-bezier(.4,0,.2,1);'
+     +'font-family:inherit;box-shadow:0 -12px 40px rgba(20,17,13,.22)}'
+   +'.mvt-ov.open .mvt-sh{transform:translateY(0)}'
+   +'.mvt-sh *{box-sizing:border-box}'
+   +'.mvt-hd{display:flex;align-items:flex-start;justify-content:space-between;gap:10px}'
+   +'.mvt-t{font-family:\'Cormorant Garamond\',Georgia,serif;font-weight:600;font-size:var(--pt-lg,23px);'
+     +'line-height:1.15;display:flex;align-items:center;gap:8px}'
+   +'.mvt-x{background:var(--bg-app,#F2EFE7);border:1px solid rgba(138,90,56,.18);'
+     +'color:var(--texte-doux,#5F5F5F);width:38px;height:38px;border-radius:10px;cursor:pointer;'
+     +'flex-shrink:0;display:flex;align-items:center;justify-content:center}'
+   +'.mvt-sub{font-size:var(--pt-txt,12.5px);color:var(--texte-doux,#5F5F5F);line-height:1.5;margin-top:5px}'
+   +'.mvt-l{display:block;font-size:var(--pt-micro,11px);letter-spacing:.8px;text-transform:uppercase;'
+     +'color:var(--texte-doux,#5F5F5F);font-weight:700;margin:15px 0 7px}'
+   +'.mvt-l i{font-style:normal;font-weight:400;text-transform:none;letter-spacing:0}'
+   +'.mvt-row{display:flex;flex-wrap:wrap;gap:6px}'
+   +'.mvt-seg{display:flex;gap:6px}.mvt-seg .mvt-b{flex:1;text-align:center}'
+   +'.mvt-b{border:1px solid rgba(138,90,56,.2);background:transparent;color:var(--texte-med,#4A4A3A);'
+     +'border-radius:10px;padding:9px 12px;font-size:var(--pt-txt,12.5px);font-weight:600;'
+     +'cursor:pointer;font-family:inherit;min-height:40px}'
+   +'.mvt-b.on{background:var(--cave,#14110D);border-color:var(--cave,#14110D);color:#F0E2C8}'
+   +'.mvt-b[disabled]{opacity:.4;cursor:not-allowed;text-decoration:line-through}'
+   +'.mvt-note{background:var(--or-pale,#FAF3E0);border-left:3px solid var(--or,#C2A14D);'
+     +'border-radius:0 6px 6px 0;padding:9px 11px;font-size:var(--pt-micro,11px);'
+     +'color:var(--texte-med,#4A4A3A);line-height:1.55;margin-top:13px}'
+   +'.mvt-go{width:100%;margin-top:16px;padding:14px;border:0;border-radius:13px;cursor:pointer;'
+     +'background:var(--cave,#14110D);color:#F3EEE2;font-family:inherit;font-size:var(--pt-base,14px);'
+     +'font-weight:600}'
+   +'.mvt-mem{text-align:center;font-size:var(--pt-lbl,10.5px);color:var(--texte-doux,#5F5F5F);margin-top:9px}';
+  document.head.appendChild(s);
+}
+
+// Les cles utilisables dans un groupement donne. `grp` absent = partout.
+function _mvTriDispo(o, groupe){
+  return (o.cles||[]).filter(function(k){ return !k.grp || !groupe || k.grp.indexOf(groupe)!==-1; });
+}
+function _mvTriCle(o, v){
+  var l=o.cles||[];
+  for(var i=0;i<l.length;i++){ if(l[i].v===v) return l[i]; }
+  return null;
+}
+
+// La phrase a imprimer dans l'en-tete. Elle est ECRITE POUR L'OEIL : « A -> Z »
+// se lit, « croissant » se traduit.
+window._mvTriPhrase = function(o, c){
+  if(!o||!c) return '';
+  var k=_mvTriCle(o, c.cle); if(!k) return '';
+  return String(k.lbl).toLowerCase()+' \u2014 '+(c.sens==='desc'?k.z:k.a);
+};
+
+// Le choix retenu de la derniere fois, complete par les defauts du document.
+window._mvTriLu = function(memo, def){
+  def=def||{};
+  var d={ cle:def.cle||'', sens:(def.sens==='desc')?'desc':'asc', groupe:def.groupe||'' };
+  if(!memo) return d;
+  var raw=null;
+  try{ raw=window.localStorage.getItem('mv.tri.'+memo); }
+  catch(e){ MV_TRI_MEMO_KO=true; return d; }
+  if(!raw) return d;
+  try{
+    var j=JSON.parse(raw);
+    if(j&&j.cle)    d.cle=String(j.cle);
+    if(j&&j.sens)   d.sens=(j.sens==='desc')?'desc':'asc';
+    if(j&&j.groupe) d.groupe=String(j.groupe);
+  }catch(e){
+    if(window.logError) window.logError({level:'info',cat:'tri',msg:'choix de tri illisible : '+memo});
+  }
+  return d;
+};
+function _mvTriEcrire(memo, c){
+  if(!memo) return;
+  try{ window.localStorage.setItem('mv.tri.'+memo,
+        JSON.stringify({cle:c.cle,sens:c.sens,groupe:c.groupe})); }
+  catch(e){ MV_TRI_MEMO_KO=true; }
+}
+
+// Un comparateur a partir d'une fonction de valeur : le sens s'applique ICI,
+// une fois, au lieu d'etre redit dans chaque document. `bris` departage les
+// egalites — sans lui, l'ordre final depend de la stabilite du tri.
+window._mvTriCmp = function(c, val, bris){
+  var sg=(c&&c.sens==='desc')?-1:1;
+  return function(a,b){
+    var x=val(a), y=val(b), d;
+    if(typeof x==='string'||typeof y==='string') d=String(x).localeCompare(String(y),'fr');
+    else d=(x||0)-(y||0);
+    if(d) return sg*d;
+    return bris?bris(a,b):0;
+  };
+};
+
+function _mvTriRendre(){
+  var S=MV_TRI_ETAT; if(!S) return;
+  var ov=document.getElementById('mv-tri-ov'); if(!ov) return;
+  var o=S.o, e=S.e;
+  var esc=(typeof window._escHtml==='function')?window._escHtml:function(x){return String(x==null?'':x);};
+  var ico=(typeof window._mvIcon==='function')?window._mvIcon(o.icone||'imprimante',20):'';
+  var b=function(on,act,txt,off){
+    return '<button type="button" class="mvt-b'+(on?' on':'')+'"'+(off?' disabled':'')
+      +' aria-pressed="'+(on?'true':'false')+'" onclick="'+act+'">'+txt+'</button>';
+  };
+  var h='<div class="mvt-hd"><div class="mvt-t">'+ico+esc(o.titre||'Trier le document')+'</div>'
+    +'<button type="button" class="mvt-x" onclick="window._mvTriFermer()" aria-label="Fermer">'
+    +((typeof window._mvIcon==='function')?window._mvIcon('croix',18):'\u00d7')+'</button></div>';
+  if(o.sub) h+='<div class="mvt-sub">'+esc(o.sub)+'</div>';
+
+  if(o.annees&&o.annees.length>1){
+    h+='<span class="mvt-l">'+esc(o.anLbl||'Ann\u00e9e')+'</span><div class="mvt-row">'
+      +o.annees.map(function(a){ return b(String(a)===String(e.an),
+          'window._mvTriSet(\'an\',\''+esc(a)+'\')', esc(a)); }).join('')+'</div>';
+  }
+  if(o.groupes&&o.groupes.length>1){
+    h+='<span class="mvt-l">'+esc(o.grpLbl||'Une ligne par')
+      +(o.grpHint?' <i>'+esc(o.grpHint)+'</i>':'')+'</span><div class="mvt-seg">'
+      +o.groupes.map(function(g){ return b(g.v===e.groupe,
+          'window._mvTriSet(\'groupe\',\''+esc(g.v)+'\')', esc(g.lbl)); }).join('')+'</div>';
+  }
+  var dispo=_mvTriDispo(o, e.groupe);
+  h+='<span class="mvt-l">Trier par</span><div class="mvt-row">'
+    +(o.cles||[]).map(function(k){
+        var off=!dispo.some(function(d){return d.v===k.v;});
+        return b(k.v===e.cle, 'window._mvTriSet(\'cle\',\''+esc(k.v)+'\')', esc(k.lbl), off);
+      }).join('')+'</div>';
+
+  var kc=_mvTriCle(o,e.cle)||{a:'croissant',z:'d\u00e9croissant'};
+  // ⚠️ PAS DE FLECHE HAUT/BAS ICI. Le libelle dit deja le sens (« A \u2192 Z »,
+  // « la plus grande d'abord ») ; une fleche collee devant serait un PICTOGRAMME
+  // brut dans une surface qui n'en veut plus (harnais des icones), et elle ne
+  // dirait rien que le mot ne dise mieux.
+  h+='<span class="mvt-l">Sens</span><div class="mvt-seg">'
+    +b(e.sens==='asc','window._mvTriSet(\'sens\',\'asc\')',esc(kc.a))
+    +b(e.sens==='desc','window._mvTriSet(\'sens\',\'desc\')',esc(kc.z))+'</div>';
+
+  var c={an:e.an,cle:e.cle,sens:e.sens,groupe:e.groupe};
+  if(typeof o.note==='function'){ var n=o.note(c); if(n) h+='<div class="mvt-note">'+n+'</div>'; }
+  var cpt=(typeof o.compte==='function')?o.compte(c):'';
+  h+='<button type="button" class="mvt-go" onclick="window._mvTriValider()">'
+    +esc(o.btn||'\u00c9diter le document')+(cpt?' \u00b7 '+esc(cpt):'')+'</button>';
+  if(o.memo && !MV_TRI_MEMO_KO)
+    h+='<div class="mvt-mem">Ce choix est retenu pour la prochaine fois.</div>';
+  ov.innerHTML='<div class="mvt-sh" onclick="event.stopPropagation()">'+h+'</div>';
+}
+
+window._mvTriSet = function(champ, val){
+  var S=MV_TRI_ETAT; if(!S) return;
+  S.e[champ]=val;
+  // Changer de groupement peut retirer le sol sous la cle choisie : on retombe
+  // sur la premiere cle valable plutot que de trier sur une cle sans effet.
+  if(champ==='groupe'){
+    var d=_mvTriDispo(S.o, S.e.groupe);
+    if(d.length && !d.some(function(k){return k.v===S.e.cle;})) S.e.cle=d[0].v;
+  }
+  _mvTriRendre();
+};
+window._mvTriFermer = function(){
+  var ov=document.getElementById('mv-tri-ov'); if(ov) ov.classList.remove('open');
+  MV_TRI_ETAT=null;
+};
+window._mvTriValider = function(){
+  var S=MV_TRI_ETAT; if(!S) return;
+  var o=S.o, c={an:S.e.an, cle:S.e.cle, sens:S.e.sens, groupe:S.e.groupe};
+  _mvTriEcrire(o.memo, c);
+  window._mvTriFermer();
+  // Le document s'ouvre APRES la fermeture, comme openPrompt : deux surfaces
+  // empilees pendant que le navigateur ouvre un onglet donnent l'impression
+  // que rien ne s'est passe.
+  setTimeout(function(){ if(typeof o.cb==='function') o.cb(c); }, 80);
+};
+
+// Ouvre la feuille. Renvoie false si le document n'a rien a demander : l'appelant
+// edite alors directement, sans poser une question a une seule reponse.
+window._mvTriOuvrir = function(o){
+  o=o||{};
+  var cles=o.cles||[]; if(!cles.length) return false;
+  var m=window._mvTriLu(o.memo, o.defaut);
+  var grps=o.groupes||[];
+  var e={
+    an: (o.annees&&o.annees.length)?String((o.defaut&&o.defaut.an)||o.annees[0]):'',
+    groupe: grps.length ? (grps.some(function(g){return g.v===m.groupe;})?m.groupe:grps[0].v) : '',
+    cle: m.cle, sens: m.sens
+  };
+  var dispo=_mvTriDispo(o, e.groupe);
+  if(!dispo.length) return false;
+  if(!dispo.some(function(k){return k.v===e.cle;})) e.cle=dispo[0].v;
+  MV_TRI_ETAT={o:o, e:e};
+  _mvTriCss();
+  var ov=document.getElementById('mv-tri-ov');
+  if(!ov){
+    ov=document.createElement('div'); ov.id='mv-tri-ov'; ov.className='mvt-ov';
+    ov.addEventListener('click',function(ev){ if(ev.target===ov) window._mvTriFermer(); });
+    document.addEventListener('keydown',function(ev){
+      if(ev.key==='Escape' && MV_TRI_ETAT) window._mvTriFermer();
+    });
+    document.body.appendChild(ov);
+  }
+  _mvTriRendre();
+  requestAnimationFrame(function(){ ov.classList.add('open'); });
+  return true;
 };
 
 // ═══════════════════════════════════════
@@ -460,6 +710,66 @@ window._mvGraphRepeindre = function(){
 };
 
 export const WHATS_NEW = [
+  { v: '7.16', items: [
+    { emoji: 'raisin', titre: 'Le contr\u00f4le de maturit\u00e9 et le cahier de cuverie se rangent aussi',
+      desc: "Les deux documents demandaient d\u00e9j\u00e0 leur ann\u00e9e dans une petite bo\u00eete\u00a0; c\u2019est "
+        + "maintenant la m\u00eame feuille que les autres, avec <b>l\u2019ordre en plus</b>. Le "
+        + "<b>contr\u00f4le de maturit\u00e9</b>\u00a0: maturit\u00e9 (l\u2019ordre habituel, toujours par d\u00e9faut), "
+        + "parcelle, surface, vitesse, date du dernier rel\u00e8vement. Le <b>cahier de "
+        + "cuverie</b>\u00a0: encuvage (par d\u00e9faut), cuve, volume, dur\u00e9e de cuvaison \u2014 utile pour "
+        + "retrouver une cuve par son nom quand il y en a vingt. Aucun geste de plus\u00a0: la "
+        + "question de l\u2019ann\u00e9e et celle du tri tiennent sur le m\u00eame \u00e9cran." },
+    { emoji: 'document', titre: 'Le titre du tableau ne ment plus sur son ordre',
+      desc: "Le contr\u00f4le de maturit\u00e9 annon\u00e7ait \u00ab\u00a0Ordre de maturit\u00e9\u00a0\u00bb quel que soit le "
+        + "classement. Il ne le dit plus que quand c\u2019en est un. Une cuve encore en cuve n\u2019a pas "
+        + "de dur\u00e9e de cuvaison, une parcelle avec un seul rel\u00e8vement n\u2019a pas de vitesse\u00a0: "
+        + "elles partent <b>en fin de liste dans les deux sens</b>, jamais en t\u00eate d\u2019un ordre "
+        + "croissant o\u00f9 elles se liraient comme des z\u00e9ros." }
+  ] },
+  { v: '7.15', items: [
+    { emoji: 'carte', titre: 'L\u2019\u00e9tat du vignoble et le bilan mati\u00e8re se rangent aussi',
+      desc: "Apr\u00e8s les r\u00e9coltes, deux autres documents demandent leur ordre. <b>\u00c9tat du "
+        + "vignoble</b>\u00a0: tourn\u00e9e (l\u2019ordre habituel, toujours par d\u00e9faut), parcelle, surface, "
+        + "avancement, dernier rendement ou date du dernier travail. <b>Inventaire des "
+        + "intrants</b>\u00a0: nom, cat\u00e9gorie, stock, ou coh\u00e9rence \u2014 ce dernier en d\u00e9croissant "
+        + "met <b>les \u00e9carts en t\u00eate</b>, pour le contr\u00f4le. Une parcelle ou un produit dont la "
+        + "valeur manque part <b>en fin de liste dans les deux sens</b>\u00a0: une donn\u00e9e absente "
+        + "n\u2019est pas une petite valeur." },
+    { emoji: 'graphique', titre: 'Le dernier rendement connu n\u2019est pas la m\u00eame ann\u00e9e partout',
+      desc: "La colonne \u00ab\u00a0dernier rendement\u00a0\u00bb de l\u2019\u00e9tat du vignoble montre le dernier de "
+        + "<b>chaque</b> parcelle\u00a0: toutes n\u2019ont pas \u00e9t\u00e9 vendang\u00e9es la m\u00eame ann\u00e9e. Le "
+        + "document <b>nomme d\u00e9sormais les mill\u00e9simes compar\u00e9s</b> sous le tableau d\u00e8s qu\u2019il "
+        + "y en a plusieurs. Le classement reste utile, il ne fait plus croire \u00e0 une m\u00eame "
+        + "campagne." },
+    { emoji: 'liste', titre: 'Les deux exports CSV sortent toujours dans le m\u00eame ordre',
+      desc: "<b>Journal des travaux</b> par date puis par parcelle, <b>avancement par parcelle</b> "
+        + "de A \u00e0 Z. Ils suivaient l\u2019ordre de saisie\u00a0: deux exports du m\u00eame jour pouvaient "
+        + "sortir diff\u00e9remment, et comparer deux fichiers devenait illisible. Aucune question "
+        + "n\u2019est pos\u00e9e \u2014 un tableur retrie en un clic, mais l\u2019ordre de d\u00e9part est d\u00e9sormais "
+        + "stable." }
+  ] },
+  { v: '7.14', items: [
+    { emoji: 'imprimante', titre: 'Vos documents s\u2019impriment dans l\u2019ordre que vous choisissez',
+      desc: "Le document <b>R\u00e9coltes de la vendange</b> sortait ses lignes dans l\u2019ordre o\u00f9 vous "
+        + "les aviez saisies \u2014 c\u2019est-\u00e0-dire dans aucun ordre, pour qui cherche une parcelle sur "
+        + "la feuille. Il demande maintenant <b>par quoi trier</b>\u00a0: parcelle, surface, rendement, "
+        + "kilos ou date, dans un sens ou dans l\u2019autre. Vous pouvez aussi lui demander <b>une ligne "
+        + "par parcelle</b> au lieu d\u2019une ligne par benne. L\u2019ordre choisi est <b>\u00e9crit dans "
+        + "l\u2019en-t\u00eate</b>\u00a0: deux tirages tri\u00e9s diff\u00e9remment ne se ressemblent plus sans le dire. "
+        + "Votre choix est retenu pour la fois suivante." },
+    { emoji: 'raisin', titre: 'Une benne n\u2019a pas de rendement',
+      desc: "La colonne \u00ab\u00a0rendement\u00a0\u00bb divisait les kilos <b>d\u2019un seul apport</b> par la surface "
+        + "de <b>toute la parcelle</b>. Trois bennes sur la m\u00eame parcelle affichaient donc trois "
+        + "tiers de rendement, chacun pr\u00e9sent\u00e9 comme un rendement. Le chiffre est d\u00e9sormais celui "
+        + "de la <b>parcelle enti\u00e8re sur le mill\u00e9sime</b>, cuvier et vrac r\u00e9unis \u2014 une parcelle "
+        + "qui part aux deux endroits n\u2019en montre plus deux moiti\u00e9s. Une parcelle sans surface "
+        + "enregistr\u00e9e laisse la case <b>vide</b>, et le document dit lesquelles." },
+    { emoji: 'calendrier', titre: 'Le document des r\u00e9coltes demande son mill\u00e9sime',
+      desc: "Il prenait <b>tout l\u2019historique</b> des r\u00e9coltes et se titrait avec l\u2019ann\u00e9e en cours\u00a0: "
+        + "d\u00e8s la vendange suivante, une feuille intitul\u00e9e \u00ab\u00a02027\u00a0\u00bb aurait list\u00e9 2026. Le "
+        + "mill\u00e9sime se choisit maintenant \u00e0 l\u2019ouverture, et il est <b>toujours \u00e9crit</b> en t\u00eate "
+        + "du document." }
+  ] },
   { v: '7.13', items: [
     { emoji: 'cuve', titre: 'D\u00e9cuver, c\u2019est dire que la fermentation est finie',
       desc: "Le comparatif annon\u00e7ait <b>\u00ab pas encore \u00bb</b> sur des cuves d\u00e9j\u00e0 d\u00e9cuv\u00e9es, marc "
@@ -2600,7 +2910,9 @@ var MV_AIDE = {
       ['Poser un plafond, puis tous les autres', "après la première saisie, l\u2019application propose de porter la même valeur sur les parcelles du millésime qui n\u2019ont aucun plafond, en les nommant d\u2019abord. Celles qui en ont déjà un ne sont jamais touchées."],
       ['Votre rendement au pressoir', "se règle dans la roue crantée de la Cave, bloc Le Cuvier, en kilos de raisin par hectolitre. Tous les écrans qui transforment des raisins en volume s’en servent — la chaîne de la récolte à la bouteille comme le bilan de campagne."],
       ['Les analyses labo', "s’attachent en PDF à la cuvée. Les supprimer est réservé à l’administrateur."],
-      ['Quatre documents sortent de la Cave', "depuis la roue crantée de la Cave, bloc Documents — ou depuis Réglages, onglet Domaine, « Documents & impressions », qui les a tous : le contrôle de maturité avant vendange, le cahier de cuverie pendant la fermentation, le registre des manipulations et le bilan de campagne. Ce sont des états internes : Ma Vigne prépare, vous déclarez. Le cahier de cuverie imprime aussi <b>la courbe</b> de chaque cuve — densité et température, avec les opérations datées — au-dessus de son tableau ; sous trois relevés de densité, il n’y a pas de courbe. Il s’ouvre sur un <b>comparatif</b> de toutes les cuves, alignées sur leur jour d’encuvage et non sur le calendrier, avec le sucre relevé à la vigne avant l’encuvage."],
+      ['Sept documents sortent de la Cave', "depuis la roue crantée de la Cave, bloc Documents — ou depuis Réglages, onglet Domaine, « Documents & impressions », qui les a tous : le contrôle de maturité avant vendange, les récoltes de la vendange, le cahier de cuverie pendant la fermentation, le suivi d’élevage, le registre des manipulations, le bilan de campagne et l’inventaire des fûts. Ce sont des états internes : Ma Vigne prépare, vous déclarez. Le cahier de cuverie imprime aussi <b>la courbe</b> de chaque cuve — densité et température, avec les opérations datées — au-dessus de son tableau ; sous trois relevés de densité, il n’y a pas de courbe. Il s’ouvre sur un <b>comparatif</b> de toutes les cuves, alignées sur leur jour d’encuvage et non sur le calendrier, avec le sucre relevé à la vigne avant l’encuvage."],
+      ['Cinq documents demandent leur ordre', "l’<b>état du vignoble</b>, l’<b>inventaire des intrants</b>, les <b>récoltes de la vendange</b>, le <b>contrôle de maturité</b> et le <b>cahier de cuverie</b> posent la question avant d’éditer, et écrivent l’ordre choisi dans leur en-tête. Une valeur manquante part toujours en fin de liste, dans les deux sens : une donnée absente n’est pas une petite valeur. Les deux exports CSV, eux, ne demandent rien mais sortent désormais toujours dans le même ordre."],
+      ['Les récoltes se trient avant d’imprimer', "le document demande le <b>millésime</b>, puis par quoi trier : parcelle, surface, rendement, kilos ou date. Il sait aussi sortir <b>une ligne par parcelle</b> au lieu d’une ligne par benne. L’ordre choisi est écrit dans l’en-tête du document, et retenu pour la fois suivante. <b>Le rendement affiché est celui de la parcelle entière</b>, cuvier et vrac réunis — une benne n’a pas de rendement."],
       ['Deux autres s’éditent au plus près de la livraison', "le bon de livraison d’un chargement et le récapitulatif de campagne d’un acheteur, depuis les ventes en vrac. Ils portent le nom du domaine, les kilos livrés, et les volumes rendus dès que le client a répondu."]
     ]
   },
