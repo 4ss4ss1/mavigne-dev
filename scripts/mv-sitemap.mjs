@@ -10,8 +10,21 @@
 //  C22 dit la meme chose de l'accompagnement : ce qui DECRIT le produit doit
 //  etre tenu par un filet, pas par la memoire de celui qui livre.
 //
-//  DEUX REGLES TENUES ICI :
-//    ★ un `<lastmod>` ne peut pas etre ANTERIEUR au dernier commit de sa page ;
+//  ⚠️⚠️⚠️ CORRIGE LE 13/09, LE JOUR MEME : LA PREMIERE VERSION ROUGISSAIT TOUJOURS.
+//  `actions/checkout@v5` clone en PROFONDEUR 1. Dans un clone superficiel,
+//  `git log -1 -- <fichier>` ne connait qu'un seul commit : il rend la date de
+//  HEAD pour TOUS les fichiers. Les six pages sortaient donc perimees a chaque
+//  passage de CI, et comme ce script tourne aussi en `prebuild`, il BLOQUAIT LE
+//  DEPLOIEMENT. ★★★ Un controle qui depend en silence de la profondeur du clone
+//  est un piege : il doit MESURER son environnement avant de juger, et se TAIRE
+//  quand il ne peut pas mesurer. Un filet qui rougit toujours ne dit plus rien.
+//  ★★ Et la severite : le sitemap se regenere APRES le commit des pages, donc il
+//  est normalement en retard de quelques jours. Ce n'est pas le defaut trouve —
+//  celui-la etait de 40 a 70 jours. Au-dela de SEUIL_JOURS : rouge. En deca :
+//  une ATTENTION qui nomme la commande, et le build passe.
+//
+//  TROIS REGLES TENUES ICI :
+//    ★ un `<lastmod>` ne derive pas de plus de SEUIL_JOURS du dernier commit ;
 //    ★ toute page publique INDEXABLE est soit dans le sitemap, soit dans la
 //      liste d'exclusions ci-dessous — jamais nulle part. Une page qui invite
 //      l'indexation (`index,follow`) et qu'aucun sitemap ne cite est un choix,
@@ -34,6 +47,18 @@ const PUBLIC = path.join(RACINE, 'public');
 const SITEMAP = path.join(PUBLIC, 'sitemap.xml');
 const CHECK  = process.argv.includes('--check');
 
+// ── Le retard TOLERE entre un commit de page et la regeneration du sitemap ───
+// Quelques jours ne coutent rien : Google recrawle de lui-meme. Deux mois lui
+// disent que la page est morte — c'etait le defaut trouve (40 a 70 jours).
+const SEUIL_JOURS = 30;
+
+// ── Sait-on seulement dater ? ────────────────────────────────────────────────
+// En clone superficiel, git ne PEUT PAS repondre. On le dit, et on se tait.
+const SUPERFICIEL = (() => {
+  try { return execFileSync('git', ['rev-parse', '--is-shallow-repository'],
+    { cwd: RACINE, encoding: 'utf8' }).trim() === 'true'; } catch { return false; }
+})();
+
 // ── Les pages publiques indexables volontairement HORS sitemap ──────────────
 // ⚠️ Ce n'est pas une liste de commodite : chaque entree porte sa raison, et
 //    c'est elle qu'on relit quand on se demande « pourquoi cette page n'y est
@@ -44,8 +69,11 @@ const HORS_SITEMAP = {
   'mise-en-route.html': 'noindex,nofollow — formulaire client, jamais public',
 };
 
-const rouge = [], vert = [];
+const rouge = [], vert = [], attention = [];
 const dit = (ok, msg) => { (ok ? vert : rouge).push(msg); console.log((ok ? '   \u001b[32mvert \u001b[0m  ' : '   \u001b[31mROUGE\u001b[0m  ') + msg); };
+const note = (msg) => { attention.push(msg); console.log('   \u001b[33mATTENTION\u001b[0m  ' + msg); };
+const JOUR = 86400000;
+const ecart = (a, b) => Math.round((Date.parse(b) - Date.parse(a)) / JOUR);
 
 // ── Date du dernier commit d'un fichier (AAAA-MM-JJ) ────────────────────────
 function dateGit(rel) {
@@ -77,14 +105,25 @@ console.log('\n\u001b[1m\u2500\u2500 SITEMAP \u2014 les lastmod suivent-ils les 
 console.log('\u001b[2m  ' + pages.length + ' page(s) publique(s) \u00b7 ' + indexable.length
   + ' indexable(s) \u00b7 ' + entrees.length + ' dans le sitemap\u001b[0m');
 
-// ── R1 : chaque lastmod est au moins aussi recent que son dernier commit ────
+// ── R1 : la fraicheur, SI on peut la mesurer ────────────────────────────────
+if (SUPERFICIEL) {
+  note('clone SUPERFICIEL (fetch-depth 1) \u2014 git rend la date de HEAD pour tout fichier : '
+     + 'la fraicheur n\u2019est pas mesurable ici, regle ignor\u00e9e. '
+     + 'Pour la r\u00e9tablir en CI : `fetch-depth: 0` sur actions/checkout.');
+}
 for (const e of entrees) {
   const rel = 'public/' + e.fichier;
   if (!fs.existsSync(path.join(RACINE, rel))) { dit(false, e.fichier + ' \u2014 cite au sitemap mais ABSENT de public/'); continue; }
+  if (SUPERFICIEL) continue;
   const g = dateGit(rel);
   if (!g) { dit(true, e.fichier + ' \u2014 pas d\u2019historique git (fichier neuf), ignore'); continue; }
-  if (e.lastmod < g) { dit(false, e.fichier + ' \u2014 lastmod ' + e.lastmod + ' < dernier commit ' + g); e.attendu = g; }
-  else dit(true, e.fichier + ' \u2014 lastmod ' + e.lastmod + ' \u2265 commit ' + g);
+  if (e.lastmod >= g) { dit(true, e.fichier + ' \u2014 lastmod ' + e.lastmod + ' \u2265 commit ' + g); continue; }
+  e.attendu = g;
+  const j = ecart(e.lastmod, g);
+  if (j > SEUIL_JOURS) dit(false, e.fichier + ' \u2014 lastmod ' + e.lastmod + ', commit ' + g
+    + ' : ' + j + ' jours de retard (seuil ' + SEUIL_JOURS + ')');
+  else note(e.fichier + ' \u2014 lastmod ' + e.lastmod + ', commit ' + g
+    + ' : ' + j + ' jour(s) de retard, sous le seuil');
 }
 
 // ── R2 : aucune page indexable orpheline ────────────────────────────────────
@@ -112,6 +151,11 @@ for (const e of entrees) {
 
 // ── Reecriture (hors --check) ───────────────────────────────────────────────
 if (!CHECK) {
+  if (SUPERFICIEL) {
+    console.log('\n  \u2717 clone superficiel : les dates git sont fausses ici, RIEN n\u2019est r\u00e9\u00e9crit.');
+    console.log('    Relancer depuis un clone complet (git fetch --unshallow).');
+    process.exit(1);
+  }
   let n = 0;
   for (const e of entrees) {
     if (!e.attendu) continue;
@@ -124,6 +168,9 @@ if (!CHECK) {
   process.exit(0);
 }
 
-if (rouge.length) console.log('\n\u001b[2m  \u2192 la remise \u00e0 jour est une commande : node scripts/mv-sitemap.mjs (sans --check),\n     A LANCER APRES le commit des pages \u2014 c\'est git qui date, pas le disque.\u001b[0m');
-console.log('\n\u001b[1m  ' + vert.length + ' vert \u00b7 ' + rouge.length + ' rouge\u001b[0m\n');
+if (rouge.length || attention.length)
+  console.log('\n\u001b[2m  \u2192 la remise \u00e0 jour est une commande : node scripts/mv-sitemap.mjs (sans --check),\n'
+            + '     A LANCER APRES le commit des pages \u2014 c\'est git qui date, pas le disque.\u001b[0m');
+console.log('\n\u001b[1m  ' + vert.length + ' vert \u00b7 ' + attention.length + ' attention \u00b7 '
+          + rouge.length + ' rouge\u001b[0m\n');
 process.exit(rouge.length ? 1 : 0);

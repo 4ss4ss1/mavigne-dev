@@ -37,6 +37,11 @@ jobs:
     steps:
       - name: Recuperer le depot
         uses: actions/checkout@v5
+        with:
+          # ⚠️ fetch-depth 0 — sans l'historique complet, `git log -1 -- <fichier>`
+          # rend la date de HEAD pour TOUS les fichiers : mv-sitemap.mjs ne peut
+          # plus dater les pages et se met en veille (13/09, §122b).
+          fetch-depth: 0
 
       - name: Node 22 (meme version que les Cloud Functions)
         uses: actions/setup-node@v5
@@ -239,6 +244,11 @@ jobs:
     steps:
       - name: Recuperer le depot
         uses: actions/checkout@v5
+        with:
+          # ⚠️ fetch-depth 0 — sans l'historique complet, `git log -1 -- <fichier>`
+          # rend la date de HEAD pour TOUS les fichiers : mv-sitemap.mjs ne peut
+          # plus dater les pages et se met en veille (13/09, §122b).
+          fetch-depth: 0
 
       - name: Node 22
         uses: actions/setup-node@v5

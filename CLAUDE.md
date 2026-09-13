@@ -17626,6 +17626,38 @@ par six bouchons écrits à la main.** Un bouchon a sa propre signature : il suf
 reparte en UTC pour que les six restent verts sur un code faux. Le module extrait les fonctions
 réelles, comme le fait déjà le harnais fuseau.
 
+### ⚠⚠⚠ §122b — LE FILET NEUF A BLOQUÉ LE DÉPLOIEMENT LE JOUR MÊME
+
+Premier passage de CI après intégration : **les six pages rouges**, `Process completed with exit
+code 1`. Et comme `mv-sitemap.mjs` tourne aussi en `prebuild`, **le build ne passait plus**.
+
+★★★ **LA CAUSE N'EST PAS LE SEUIL, C'EST LA MESURE.** `actions/checkout@v5` clone en
+**profondeur 1**. Dans un clone superficiel, `git log -1 --format=%ad -- <fichier>` ne connaît
+qu'un seul commit : il rend **la date de HEAD pour tous les fichiers**. Le contrôle comparait donc
+chaque `lastmod` à la date du jour — il ne pouvait que rougir, à chaque passage, pour toujours.
+Reproduit à l'identique par `git clone --depth 1` avant d'écrire une ligne de correctif.
+
+★★ **UN CONTRÔLE DOIT MESURER SON ENVIRONNEMENT AVANT DE JUGER.** `git rev-parse
+--is-shallow-repository` : en clone superficiel, la règle de fraîcheur se met en **veille** avec une
+ATTENTION qui nomme le remède, et le régénérateur **refuse d'écrire** plutôt que de graver des dates
+fausses dans le sitemap. *Un filet qui rougit toujours ne dit plus rien — il apprend juste à être
+ignoré, et il emporte le déploiement avec lui.*
+
+★★ **ET LA SÉVÉRITÉ ÉTAIT FAUSSE AUSSI, indépendamment.** Le sitemap se régénère **après** le
+commit des pages : il est normalement en retard de quelques jours, et exiger zéro imposait une danse
+à deux commits pour chaque retouche d'une page publique. Le défaut trouvé, lui, était de **40 à 70
+jours**. → `SEUIL_JOURS = 30` : au-delà rouge, en deçà ATTENTION. Les règles **structurelles** (page
+citée mais absente, page indexable orpheline, `canonical` ≠ `loc`) restent bloquantes en toutes
+circonstances : elles ne dépendent pas de git.
+
+★ `.github/workflows/ci.yml` : **`fetch-depth: 0`** sur les deux `checkout`, pour que la règle
+serve vraiment en CI au lieu de dormir.
+
+⚠ **La leçon, et elle vaut pour tous les filets à venir** : un contrôle neuf se rejoue **dans les
+conditions de la CI**, pas seulement dans le bac à sable. Ici, un `git clone --depth 1` de trente
+secondes aurait tout dit avant la livraison. C'est le pendant de §6b (« vérifier qu'un test attrape
+bien le bug ») : il faut aussi vérifier **qu'il ne l'invente pas**.
+
 ### ⚠⚠⚠ Ce que ce lot dit de la méthode d'audit elle-même
 
 - **Deux constats de l'audit étaient FAUX, et ils ont été retirés.** `_vendDegrePot` (16,83 en dur)
