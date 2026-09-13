@@ -1620,6 +1620,10 @@ window._startDemoVisite = _startDemoVisite;
 // ── Données de démo scénarisées (en mémoire — bac à sable, aucune écriture) ──
 function _visiteScenario(){
   var now=new Date();
+  // Le nom de la periode active, ecrit UNE fois : les sessions tracteur le
+  // portent aussi, et deux libelles differents pour la meme periode font deux
+  // campagnes dans les ecrans qui regroupent par saison.
+  var _MVT_SAISON='Apr\u00e8s-vendange '+now.getFullYear()+'-'+(now.getFullYear()+1);
   function _p2(n){ return (n<10?'0':'')+n; }
   function _isoH(dt){ return dt.getFullYear()+'-'+_p2(dt.getMonth()+1)+'-'+_p2(dt.getDate())+'T'+_p2(dt.getHours())+':00'; }
   function _isoD(dt){ return dt.getFullYear()+'-'+_p2(dt.getMonth()+1)+'-'+_p2(dt.getDate()); }
@@ -1683,10 +1687,12 @@ function _visiteScenario(){
 
   // 3) Priorité diffusée + équipe + avancement réaliste (~45%)
   var _ts=(typeof getTachesSaison==='function')?getTachesSaison():[];
-  var _tache=_ts.some(function(t){return t.nom==='Ebourgeonnage';})?'Ebourgeonnage':(_ts.length?_ts[0].nom:'Ebourgeonnage');
+  // ★ APRES LA VENDANGE, ON NE DEBOURGEONNE PLUS. La tache du jour est celle
+  //   de la periode : reparation du palissage, avant que la taille commence.
+  var _tache=_ts.some(function(t){return t.nom==='Palissage';})?'Palissage':(_ts.length?_ts[0].nom:'Palissage');
   window._visiteTache=_tache;
   try{ priorityTask=_tache; window.priorityTask=_tache; }catch(e){}
-  try{ priorityMessage='Priorit\u00e9 du jour \u2014 '+_tache.toLowerCase()+' (secteur Gevrey-bas)'; window.priorityMessage=priorityMessage; }catch(e){}
+  try{ priorityMessage='Priorit\u00e9 du jour \u2014 '+_tache.toLowerCase()+', on finit le secteur Gevrey-bas avant la taille'; window.priorityMessage=priorityMessage; }catch(e){}
   try{ pTacheFilter=_tache; }catch(e){}
   try{
     var _me=(currentUser&&currentUser.nom)||'';
@@ -1699,16 +1705,14 @@ function _visiteScenario(){
     _actP.forEach(function(p){ if(!p.taches)p.taches={}; if(_cumS < _totS*0.45){ p.taches[_tache]={ov:null,p1:'Valid\u00e9',p2:'Valid\u00e9'}; _cumS+=(+p.surface||0); } });
     if(typeof recalcTravaux==='function') recalcTravaux(_tache);
   }catch(e){}
-  // ★★ LE DELAI DE RENTREE EST SEME, IL N'EST PLUS ANNULE.
-  //   `{}` vide neutralisait le badge rouge sur les fiches parcelle — alors que
-  //   les donnees de la visite portent un Profiler d'HIER, drae 48 h, sur ces
-  //   deux parcelles, et que la tuile DRE du Pilotage (_cfmDre, qui lit
-  //   TRAITEMENTS et ignore cette table) les affiche DEJA comme fermees. La
-  //   liste disait donc le contraire du Pilotage. Un delai actif ne bloque pas
-  //   la validation (app.js ~6529 : badge + liseré rouge, rien d'autre), et
-  //   aucune des deux n'est la premiere carte de la liste : le moment d'action
-  //   n'est pas touche.
-  window._visiteDrae={'Les Charmes':18,'La Combotte':18};
+  // ★★ LE DELAI DE RENTREE A DISPARU AVEC LE PRINTEMPS, ET C'EST VOULU.
+  //   Il etait seme sur deux parcelles parce qu'un Profiler datait de la
+  //   veille — DAR 28 jours, sur des parcelles VENDANGEES cinq jours plus tot.
+  //   Le registre se contredisait lui-meme, et c'est l'ecran que le moment du
+  //   controle met en avant. Le dernier passage recule desormais AVANT la
+  //   recolte : plus aucun delai de rentree n'est actif, `_cfmDre` n'en trouve
+  //   aucun, et la liste dit la meme chose que le Pilotage.
+  window._visiteDrae={};
   try{ var _tnp=(localStorage.getItem('mavigne_tenant')||'domaine-dupont'); localStorage.setItem('mavigne_pil_tab_'+_tnp,'auj'); }catch(e){}
 
   // 4) Conducteurs + activités (objets : sinon .nom indéfini)
@@ -1718,7 +1722,11 @@ function _visiteScenario(){
     {nom:'Buttage',   emoji:'\u26F0\uFE0F', tracteurDefautId:'trac1', champCustom:null},
     {nom:'Intercep',  emoji:'\uD83E\uDE9A', tracteurDefautId:'trac2', champCustom:null},
     {nom:'Traitement',emoji:'\uD83D\uDCA7', tracteurDefautId:'trac2', champCustom:null},
-    {nom:'Broyage',   emoji:'\uD83C\uDF3F', tracteurDefautId:'trac1', champCustom:null}
+    {nom:'Broyage',   emoji:'\uD83C\uDF3F', tracteurDefautId:'trac1', champCustom:null},
+    /* ⚠️ Un NOM d'icone, pas un emoji : `_actIcone` laisse passer les deux, mais
+       le cliquet du jeu d'icones interdit toute remontee du compte d'emojis
+       par surface (DS-1) — un emoji de plus dans app.js sort rouge. */
+    {nom:'Benne vendange', emoji:'raisin', tracteurDefautId:'trac1', champCustom:null}
   ]);
 
   // 5) Tracteurs (compteur + prochaine révision = alerte)
@@ -1730,11 +1738,11 @@ function _visiteScenario(){
   try{ window.CONFIG=window.CONFIG||{}; window.CONFIG.gnr={capacite:1000, niveau:255, seuil:300, maj:_daysAgo(2)}; window.CONFIG.features=Object.assign({}, window.CONFIG.features||{}, {cave:true}); }catch(e){}
 
   // 6) Sessions tracteur (terminées + en cours)
-  var _sn=((window.SAISONS||[]).find(function(s){return s&&s.active;})||{}).nom||'Printemps 2026';
+  var _sn=_MVT_SAISON;
   _ap('sessions',[
-    {id:'sess1', saison:_sn, activite:'Intercep', date:_daysAgo(1), conducteur:'Jean', statut:'Termin\u00e9', avancement:100, parcellesFaites:['Les Charmes','La Combotte','Les Perri\u00e8res'], tracteurId:'trac2', tracteurOverride:false, note:'', dateFin:_daysAgo(1)},
-    {id:'sess2', saison:_sn, activite:'Griffage', date:_daysAgo(3), conducteur:'Paul', statut:'Termin\u00e9', avancement:100, parcellesFaites:['Clos du Moulin','Champ de la Croix'], tracteurId:'trac1', tracteurOverride:false, note:'', dateFin:_daysAgo(3)},
-    {id:'sess3', saison:_sn, activite:'Broyage', date:_isoD(now), conducteur:'Marie', statut:'En cours', avancement:40, parcellesFaites:['Vieilles Vignes'], tracteurId:'trac1', tracteurOverride:false, note:'Inter-rangs'}
+    {id:'sess1', saison:_sn, activite:'Benne vendange', date:_daysAgo(12), conducteur:'Jean', statut:'Termin\u00e9', avancement:100, parcellesFaites:['Les Charmes','La Combotte','Vieilles Vignes','Champ de la Croix','Aux Murgers','Les Perri\u00e8res','Clos du Moulin','En Bertrange'], tracteurId:'trac1', tracteurOverride:false, note:'Huit jours de bennes', dateFin:_daysAgo(4)},
+    {id:'sess2', saison:_sn, activite:'Broyage', date:_daysAgo(2), conducteur:'Paul', statut:'Termin\u00e9', avancement:100, parcellesFaites:['Clos du Moulin','Champ de la Croix'], tracteurId:'trac1', tracteurOverride:false, note:'Inter-rangs apr\u00e8s vendange', dateFin:_daysAgo(2)},
+    {id:'sess3', saison:_sn, activite:'Griffage', date:_isoD(now), conducteur:'Marie', statut:'En cours', avancement:35, parcellesFaites:['Les Perri\u00e8res'], tracteurId:'trac1', tracteurOverride:false, note:''}
   ]);
 
   // 7) Entretiens (pleins + anomalie)
@@ -1752,30 +1760,35 @@ function _visiteScenario(){
     {nom:'Pyr\u00e9vert',          type:'Insecticide',amm:'2100403', dar:3,  drae:48, znt:20, dose:'1,25 L/ha', cible:'Cicadelle', usage:'ZNT 20 m \u2014 anti-d\u00e9rive requis.', source:'mine'},
     {nom:'Vacciplant',              type:'Biocontr\u00f4le',amm:'2150016', dar:0, drae:6, znt:5, dose:'0,75 L/ha', cible:'Stimulateur', usage:'Biocontr\u00f4le \u2014 sans DAR.', source:'mine'}
   ]);
+  // ⚠️ LES DATES SONT LE SUJET. Un DAR de 28 jours pose la veille d'une recolte
+  //   rentree depuis cinq jours n'est pas une demonstration, c'est une faute
+  //   que le premier vigneron venu lira comme telle. Les trois passages sont
+  //   ceux d'une fin de campagne : le dernier soufre six semaines avant la
+  //   premiere benne, delais tenus, et rien depuis.
   _ap('traitements',[
-    {produit:'Profiler', type:'Fongicide', amm:'2090093', dar:28, drae:48, znt:5, dose:'2,5 kg/ha', operateur:'Jean', date:_daysAgo(1), parcelles:['Les Charmes','La Combotte'], note:'Pression mildiou \u2014 avant pluie'},
-    {produit:'Soufre mouillable', type:'Soufre', amm:'9000287', dar:0, drae:24, znt:5, dose:'8 kg/ha', operateur:'Paul', date:_daysAgo(5), parcelles:['Les Perri\u00e8res'], note:''},
-    {produit:'Bouillie bordelaise RSR', type:'Cuivre', amm:'2020047', dar:21, drae:6, znt:5, dose:'1,5 kg/ha', operateur:'Marie', date:_daysAgo(11), parcelles:['Clos du Moulin','Vieilles Vignes'], note:''}
+    {produit:'Soufre mouillable', type:'Soufre', amm:'9000287', dar:0, drae:24, znt:5, dose:'8 kg/ha', operateur:'Paul', date:_daysAgo(47), parcelles:['Les Charmes','La Combotte','Les Perri\u00e8res','Clos du Moulin'], note:'Dernier passage avant vendange'},
+    {produit:'Bouillie bordelaise RSR', type:'Cuivre', amm:'2020047', dar:21, drae:6, znt:5, dose:'1,5 kg/ha', cuMetal:1.6, operateur:'Marie', date:_daysAgo(63), parcelles:['Clos du Moulin','Vieilles Vignes','Champ de la Croix','En Bertrange'], note:''},
+    {produit:'Vacciplant', type:'Biocontr\u00f4le', amm:'2150016', dar:0, drae:6, znt:5, dose:'0,75 L/ha', operateur:'Jean', date:_daysAgo(75), parcelles:['Aux Murgers','En Bertrange'], note:'Biocontr\u00f4le'}
   ]);
 
-  // 9) Journal (déjà vécu : validations + équipes) — v5.95 : épaissi à 14
-  //    entrées sur ~3 semaines pour donner de la matière à l'Économie
-  //    (coût 1/N par parcelle, tractoriste à son taux) et au simulateur.
+  // 9) Journal — LES QUATRE DERNIERS JOURS SONT D'APRES-VENDANGE, l'ete reste
+  //    en historique : c'est lui qui donne sa matiere a l'Economie (cout 1/N
+  //    par parcelle) et au simulateur, et il ne se raconte plus au present.
   _ap('journal',[
-    {id:'j1', date:_daysAgo(1), parcelle:'Les Perri\u00e8res', tache:'Ebourgeonnage', qui:'Sophie', statut:'Valid\u00e9', equipe:true,  membresEquipe:['Sophie','Paul'], note:''},
-    {id:'j2', date:_daysAgo(1), parcelle:'La Combotte',   tache:'Relevage',      qui:'Jean',   statut:'Valid\u00e9', equipe:true,  membresEquipe:['Jean','Marie'], niveaux:['n1','n2']},
-    {id:'j3', date:_daysAgo(2), parcelle:'Les Charmes',   tache:'Ebourgeonnage', qui:'Paul',   statut:'Valid\u00e9', equipe:false, membresEquipe:[], note:''},
-    {id:'j4', date:_daysAgo(2), parcelle:'Clos du Moulin',tache:'Pioche',        qui:'Marie',  statut:'Valid\u00e9', equipe:false, membresEquipe:[], note:''},
-    {id:'j5', date:_daysAgo(3), parcelle:'Champ de la Croix', tache:'Ebourgeonnage', qui:'Sophie', statut:'Valid\u00e9', equipe:true, membresEquipe:['Sophie','Jean','Paul'], note:'Secteur Brochon'},
-    {id:'j6', date:_daysAgo(4), parcelle:'En Bertrange',  tache:'Ebourgeonnage', qui:'Marie',  statut:'Valid\u00e9', equipe:true,  membresEquipe:['Marie','Sophie'], note:''},
-    {id:'j7', date:_daysAgo(5), parcelle:'Vieilles Vignes', tache:'Ebourgeonnage', qui:'Paul', statut:'Valid\u00e9', equipe:true,  membresEquipe:['Paul','Marie','Sophie'], note:'Tout \u00e0 la main'},
-    {id:'j8', date:_daysAgo(6), parcelle:'Aux Murgers',   tache:'Pioche',        qui:'Sophie', statut:'Valid\u00e9', equipe:false, membresEquipe:[], note:''},
-    {id:'j9', date:_daysAgo(8), parcelle:'La Combotte',   tache:'Ebourgeonnage', qui:'Jean',   statut:'Valid\u00e9', equipe:true,  membresEquipe:['Jean','Paul'], note:''},
-    {id:'j10',date:_daysAgo(9), parcelle:'Les Charmes',   tache:'Relevage',      qui:'Marie',  statut:'Valid\u00e9', equipe:true,  membresEquipe:['Marie','Sophie'], niveaux:['n1']},
-    {id:'j11',date:_daysAgo(12),parcelle:'Les Perri\u00e8res', tache:'Pioche',    qui:'Paul',   statut:'Valid\u00e9', equipe:false, membresEquipe:[], note:''},
-    {id:'j12',date:_daysAgo(15),parcelle:'Champ de la Croix', tache:'Pioche',    qui:'Marie',  statut:'Valid\u00e9', equipe:true,  membresEquipe:['Marie','Jean'], note:''},
-    {id:'j13',date:_daysAgo(18),parcelle:'Vieilles Vignes', tache:'Pioche',      qui:'Sophie', statut:'Valid\u00e9', equipe:true,  membresEquipe:['Sophie','Paul'], note:'Rangs serr\u00e9s'},
-    {id:'j14',date:_daysAgo(21),parcelle:'En Bertrange',  tache:'Pioche',        qui:'Jean',   statut:'Valid\u00e9', equipe:false, membresEquipe:[], note:''}
+    {id:'j1', date:_daysAgo(1), parcelle:'Les Perri\u00e8res', tache:'Palissage', qui:'Sophie', statut:'Valid\u00e9', equipe:true,  membresEquipe:['Sophie','Paul'], note:'Fils casses au bout du rang'},
+    {id:'j2', date:_daysAgo(1), parcelle:'La Combotte',   tache:'Palissage', qui:'Jean',   statut:'Valid\u00e9', equipe:true,  membresEquipe:['Jean','Marie'], note:''},
+    {id:'j3', date:_daysAgo(2), parcelle:'Les Charmes',   tache:'Palissage', qui:'Paul',   statut:'Valid\u00e9', equipe:false, membresEquipe:[], note:''},
+    {id:'j4', date:_daysAgo(3), parcelle:'Clos du Moulin',tache:'Palissage', qui:'Marie',  statut:'Valid\u00e9', equipe:false, membresEquipe:[], note:'Piquets remplaces'},
+    {id:'j5', date:_daysAgo(38), parcelle:'Champ de la Croix', tache:'Relevage', qui:'Sophie', statut:'Valid\u00e9', equipe:true, membresEquipe:['Sophie','Jean','Paul'], niveaux:['n1','n2']},
+    {id:'j6', date:_daysAgo(45), parcelle:'En Bertrange',  tache:'Relevage',     qui:'Marie',  statut:'Valid\u00e9', equipe:true,  membresEquipe:['Marie','Sophie'], niveaux:['n1']},
+    {id:'j7', date:_daysAgo(52), parcelle:'Vieilles Vignes', tache:'Accolage',   qui:'Paul',   statut:'Valid\u00e9', equipe:true,  membresEquipe:['Paul','Marie','Sophie'], note:''},
+    {id:'j8', date:_daysAgo(60), parcelle:'Aux Murgers',   tache:'Pioche',       qui:'Sophie', statut:'Valid\u00e9', equipe:false, membresEquipe:[], note:''},
+    {id:'j9', date:_daysAgo(74), parcelle:'La Combotte',   tache:'Ebourgeonnage',qui:'Jean',   statut:'Valid\u00e9', equipe:true,  membresEquipe:['Jean','Paul'], note:''},
+    {id:'j10',date:_daysAgo(81), parcelle:'Les Charmes',   tache:'Ebourgeonnage',qui:'Marie',  statut:'Valid\u00e9', equipe:true,  membresEquipe:['Marie','Sophie'], note:''},
+    {id:'j11',date:_daysAgo(88), parcelle:'Les Perri\u00e8res', tache:'Ebourgeonnage', qui:'Paul', statut:'Valid\u00e9', equipe:false, membresEquipe:[], note:''},
+    {id:'j12',date:_daysAgo(95), parcelle:'Champ de la Croix', tache:'Pioche',   qui:'Marie',  statut:'Valid\u00e9', equipe:true,  membresEquipe:['Marie','Jean'], note:''},
+    {id:'j13',date:_daysAgo(102),parcelle:'Vieilles Vignes', tache:'Pioche',     qui:'Sophie', statut:'Valid\u00e9', equipe:true,  membresEquipe:['Sophie','Paul'], note:'Rangs serr\u00e9s'},
+    {id:'j14',date:_daysAgo(109),parcelle:'En Bertrange',  tache:'Ebourgeonnage',qui:'Jean',   statut:'Valid\u00e9', equipe:false, membresEquipe:[], note:''}
   ]);
 
   // 9pre) MEMBRES : la ligne « permanents présents » du simulateur compte les
@@ -1785,6 +1798,18 @@ function _visiteScenario(){
   try{
     var _coreM={'Marie':1,'Jean':1,'Sophie':1,'Paul':1};
     var _mAll=(window.MEMBRES||[]).map(function(mx){ var c=JSON.parse(JSON.stringify(mx||{})); if(c&&c.nom&&!_coreM[c.nom]) c.bureau=true; return c; });
+    // ★ LES VENDANGEURS DE SEPTEMBRE. Leur contrat est fini : ils passent en
+    //   « anciens salaries » dans Les gens, AVEC leurs jours faits. C'est
+    //   exactement ce que montre le moment des saisonniers — un saisonnier ne
+    //   s'efface pas le jour ou son contrat s'arrete. `bureau:false` : ils ne
+    //   sont pas comptes comme permanents (le filtre du simulateur ne garde
+    //   que les ACTIFS non-bureau, et ils sont inactifs).
+    var _vdgNoms=['Camille','Lucie','Nina','Th\u00e9o','Basile','Awa'];
+    var _vdgCoul=['#8A5A38','#3D6B27','#7A2E3B','#1A4A7A','#C2871E','#5B2D8E'];
+    _vdgNoms.forEach(function(nm,i){
+      if(_mAll.some(function(x){ return x && x.nom===nm; })) return;
+      _mAll.push({nom:nm, roles:['ouvrier'], couleur:_vdgCoul[i%_vdgCoul.length], statut:'Inactif', bureau:false});
+    });
     if(_mAll.length) _ap('membres',_mAll);
   }catch(e){ if(window.logError)window.logError({level:'info',cat:'demo',msg:'membres bureau'}); }
 
@@ -1796,11 +1821,24 @@ function _visiteScenario(){
   try{
     var _yrS=now.getFullYear();
     var _sAll=(window.SAISONS||[]).map(function(sx){ return JSON.parse(JSON.stringify(sx||{})); });
-    _sAll.forEach(function(sx){
-      if(!sx) return;
-      if(sx.active){ sx.debut=sx.debut||(_yrS+'-03-01'); sx.fin=sx.fin||(_yrS+'-10-31'); }
-      else { sx.debut=sx.debut||((_yrS-1)+'-11-01'); sx.fin=sx.fin||(_yrS+'-02-28'); }
-    });
+    // ★★★ LA PERIODE ACTIVE EST CELLE QU'ON VIT. En septembre, « Printemps »
+    //   etait toujours la saison active alors qu'elle s'arrete en juillet : la
+    //   demo pilotait une campagne finie depuis deux mois, et le lot AXE-1 dit
+    //   justement qu'une campagne se borne a sa vendange. La periode de
+    //   printemps se ferme au dernier apport ; celle qui s'ouvre porte les
+    //   travaux d'apres-vendange ET LA TAILLE — le gros morceau qui arrive,
+    //   donc le seul qui rende l'ecran des echeances interessant.
+    var _sAct=null, _sPrec=null;
+    _sAll.forEach(function(sx){ if(!sx) return; if(sx.active) _sPrec=sx; else if(!_sAct) _sAct=sx; });
+    if(_sPrec){ _sPrec.active=false; _sPrec.debut=_yrS+'-03-01'; _sPrec.fin=_daysAgo(4); }
+    if(_sAct){
+      _sAct.active=true;
+      _sAct.nom=_MVT_SAISON;
+      _sAct.periode='Sept. '+_yrS+' \u2014 F\u00e9v. '+(_yrS+1);
+      _sAct.taches=['Palissage','Tirage','Taille'];
+      _sAct.debut=_daysAgo(3);
+      _sAct.fin=(_yrS+1)+'-02-28';
+    }
     _ap('saisons',_sAll);
   }catch(e){ if(window.logError)window.logError({level:'info',cat:'demo',msg:'saisons dates'}); }
 
@@ -1811,7 +1849,13 @@ function _visiteScenario(){
       window.CAVE_ELEVAGE.cuvees=[
         {id:'cuv1', nom:'Gevrey-Chambertin VV', millesime:_yr-1, tonneaux:[{annee:_yr-1,nb:6},{annee:_yr-3,nb:4}], statut:'elevage', fml_terminee:true,  sous_tire:false, last_ouillage:_daysAgo(6),  last_analyse:_daysAgo(20)},
         {id:'cuv2', nom:'Fixin 1er Cru',        millesime:_yr-1, tonneaux:[{annee:_yr-1,nb:3}],                  statut:'elevage', fml_terminee:true,  sous_tire:false, last_ouillage:_daysAgo(19), last_analyse:_daysAgo(35)},
-        {id:'cuv3', nom:'Bourgogne Pinot Noir', millesime:_yr-1, tonneaux:[{annee:_yr-2,nb:8}],                  statut:'elevage', fml_terminee:false, sous_tire:true,  last_ouillage:_daysAgo(4),  last_analyse:null}
+        {id:'cuv3', nom:'Bourgogne Pinot Noir', millesime:_yr-1, tonneaux:[{annee:_yr-2,nb:8}],                  statut:'elevage', fml_terminee:false, sous_tire:true,  last_ouillage:_daysAgo(4),  last_analyse:null},
+        /* ★ LA CUVEE NEE DU DECUVAGE D'HIER (voir 10ter, `vcuv_3`). Son
+           identifiant est celui que porte `decuvage.cuvee_id` : sans elle, la
+           cuve decuvee pointerait vers une cuvee inexistante, et le fil
+           parcelle -> cuve -> fut serait coupe la ou la visite le montre.
+           22 futs de 228 L = 50 hL, soit le volume entonne. */
+        {id:'cuv2026', nom:'Vieilles Vignes', millesime:_yr, tonneaux:[{annee:_yr,nb:6},{annee:_yr-1,nb:8},{annee:_yr-3,nb:8}], statut:'elevage', fml_terminee:false, sous_tire:false, last_ouillage:_daysAgo(1), last_analyse:null}
       ];
       window.CAVE_ELEVAGE.operations=[
         {id:'op1', type:'ouillage',  date:_daysAgo(6),  cuvee_id:'cuv1', cuvees_ids:['cuv1'], operateur:'Marie', intervenants:[], notes:'', data:{}},
@@ -1823,26 +1867,55 @@ function _visiteScenario(){
     }
   }catch(e){}
 
-  // 10ter) Le Cuvier : recoltes + cuves de vinification
-  //        (branche 'cave_vendange' presente dans applyFbData ; sans seed
-  //         le chapitre Cuvier ouvre un ecran vide, comme La Reserve avant lui)
+  // 10ter) LE CUVIER — LA VENDANGE 2026, RENTREE ET COHERENTE.
+  //   ⚠️⚠️ TROIS DEFAUTS CORRIGES ICI, ET AUCUN N'ETAIT VISIBLE D'UN HARNAIS :
+  //   ① les apports portaient « Le Clos », « Aux Combottes », « En Champs » —
+  //      TROIS PARCELLES QUI N'EXISTENT PAS au domaine de demo. Le rendement
+  //      ecrit par parcelle ne retombait sur rien, et « encore sur pied »
+  //      annoncait un domaine a peine vendange.
+  //   ② les volumes ne tenaient pas devant un vigneron : 48 caisses de 25 kg
+  //      sur 1,2 ha font 9 hL/ha, et la cuve qui les recevait etait declaree a
+  //      21 hL pour 15 reels. Tout est recalcule caisses -> kg -> hL -> hL/ha,
+  //      au ratio du reglage, entre 34 et 42 hL/ha.
+  //   ③ `statut:'macera'` N'EXISTE PAS dans `_VEND_STAT` (setup/mpf/fa/
+  //      decuvage/fml/termine) : la cuve etait donc INACTIVE, absente de la
+  //      tournee, sans habillage d'etat. Le bon statut de la maceration
+  //      pre-fermentaire est 'mpf'.
+  //   ★ Les huit parcelles sont rentrees — la vendange est FINIE, c'est le
+  //     sujet de la visite. La derniere benne date de quatre jours.
   try{
     var _vD=function(k){ var t=new Date(now); t.setDate(t.getDate()-k); return _mvISO(t); };
     var _cvSeed={
       config:{poids_caisse_kg:25,ratio_min:130,ratio_max:140,sucre_par_degre:16.83},
       recoltes:[
-        {id:'vrec_d1',parcelle:'Les Charmes',date:_vD(5),nb_caisses:48,temp_c:17,etat_pct:95,erasflage:true,er_pct:100,vendu:false,client:'',cuvee:'Charmes 2026',vcuvee_id:'vcv_a',note:'Belle maturit\u00e9',cuve_id:'vcuv_1'},
-        {id:'vrec_d2',parcelle:'Le Clos',date:_vD(4),nb_caisses:36,temp_c:16,etat_pct:92,erasflage:true,er_pct:100,vendu:false,client:'',cuvee:'Charmes 2026',vcuvee_id:'vcv_a',note:'',cuve_id:'vcuv_1'},
-        {id:'vrec_d3',parcelle:'Aux Combottes',date:_vD(3),nb_caisses:52,temp_c:18,etat_pct:88,erasflage:false,er_pct:0,vendu:false,client:'',cuvee:'Combottes 2026',vcuvee_id:'vcv_b',note:'Grappes enti\u00e8res',cuve_id:'vcuv_2'},
-        {id:'vrec_d4',parcelle:'En Champs',date:_vD(2),nb_caisses:30,temp_c:19,etat_pct:90,erasflage:true,er_pct:100,vendu:true,client:'Maison Ducret',cuvee:'',vcuvee_id:null,note:'Vendu au kilo',cuve_id:null}
+        {id:'vrec_d1',parcelle:'Les Charmes',date:_vD(12),nb_caisses:272,temp_c:15,etat_pct:95,erasflage:true,er_pct:100,vendu:false,client:'',cuvee:'Charmes-Combotte 2026',vcuvee_id:'vcv_a',note:'Belle maturit\u00e9',cuve_id:'vcuv_1'},
+        {id:'vrec_d2',parcelle:'La Combotte',date:_vD(11),nb_caisses:310,temp_c:16,etat_pct:93,erasflage:true,er_pct:100,vendu:false,client:'',cuvee:'Charmes-Combotte 2026',vcuvee_id:'vcv_a',note:'',cuve_id:'vcuv_1'},
+        {id:'vrec_d3',parcelle:'Vieilles Vignes',date:_vD(10),nb_caisses:150,temp_c:14,etat_pct:96,erasflage:true,er_pct:100,vendu:false,client:'',cuvee:'Vieilles Vignes 2026',vcuvee_id:'vcv_c',note:'',cuve_id:'vcuv_3'},
+        {id:'vrec_d4',parcelle:'Champ de la Croix',date:_vD(9),nb_caisses:124,temp_c:15,etat_pct:90,erasflage:true,er_pct:100,vendu:false,client:'',cuvee:'Vieilles Vignes 2026',vcuvee_id:'vcv_c',note:'',cuve_id:'vcuv_3'},
+        {id:'vrec_d5',parcelle:'Aux Murgers',date:_vD(8),nb_caisses:100,temp_c:16,etat_pct:88,erasflage:false,er_pct:0,vendu:false,client:'',cuvee:'Perri\u00e8res-Clos 2026',vcuvee_id:'vcv_b',note:'Grappes enti\u00e8res',cuve_id:'vcuv_2'},
+        {id:'vrec_d6',parcelle:'Les Perri\u00e8res',date:_vD(7),nb_caisses:210,temp_c:15,etat_pct:94,erasflage:false,er_pct:0,vendu:false,client:'',cuvee:'Perri\u00e8res-Clos 2026',vcuvee_id:'vcv_b',note:'Grappes enti\u00e8res',cuve_id:'vcuv_2'},
+        {id:'vrec_d7',parcelle:'Clos du Moulin',date:_vD(6),nb_caisses:92,temp_c:16,etat_pct:92,erasflage:false,er_pct:0,vendu:false,client:'',cuvee:'Perri\u00e8res-Clos 2026',vcuvee_id:'vcv_b',note:'',cuve_id:'vcuv_2'},
+        {id:'vrec_d8',parcelle:'En Bertrange',date:_vD(4),nb_caisses:180,temp_c:17,etat_pct:89,erasflage:true,er_pct:100,vendu:true,client:'Maison Ducret',cuvee:'',vcuvee_id:null,note:'Vendu au kilo \u2014 bon de livraison',cuve_id:null}
       ],
       cuves_vinif:[
-        {id:'vcuv_1',nom:'Cuve 3 \u2014 inox 40 hL',volume_hl:21,statut:'fa',parcelles:['Les Charmes','Le Clos'],date_entree:_vD(5),erasflage:true,so2_g_hl:3,levures:'Indig\u00e8nes',mpf:{active:true,temp_c:12,duree_j:5},mesures_fa:[{id:'vm_d1',date:_vD(5),densite:1094,temp_c:22,remontages:1,pigeages:0,note:''},{id:'vm_d2',date:_vD(4),densite:1076,temp_c:24,remontages:2,pigeages:0,note:''},{id:'vm_d3',date:_vD(3),densite:1055,temp_c:26,remontages:2,pigeages:1,note:'FA franche'},{id:'vm_d4',date:_vD(2),densite:1034,temp_c:27,remontages:1,pigeages:1,note:''},{id:'vm_d5',date:_vD(1),densite:1018,temp_c:25,remontages:1,pigeages:0,note:''},{id:'vm_d6',date:_vD(0),densite:1006,temp_c:23,remontages:0,pigeages:1,note:'Fin de FA proche'}],decuvage:null,cuvee_src:'Charmes 2026',vcuvee_id:'vcv_a',recolte_ids:['vrec_d1','vrec_d2'],nb_caisses:84},
-        {id:'vcuv_2',nom:'Cuve 5 \u2014 bois 30 hL',volume_hl:13,statut:'macera',parcelles:['Aux Combottes'],date_entree:_vD(3),erasflage:false,so2_g_hl:2,levures:'Indig\u00e8nes',mpf:{active:true,temp_c:11,duree_j:6},mesures_fa:[{id:'vm_e1',date:_vD(2),densite:1097,temp_c:12,remontages:0,pigeages:1,note:'Macération pré-fermentaire'},{id:'vm_e2',date:_vD(1),densite:1095,temp_c:13,remontages:0,pigeages:1,note:''}],decuvage:null,cuvee_src:'Combottes 2026',vcuvee_id:'vcv_b',recolte_ids:['vrec_d3'],nb_caisses:52}
+        {id:'vcuv_1',nom:'Cuve 3 \u2014 inox 120 hL',volume_hl:108,statut:'fa',parcelles:['Les Charmes','La Combotte'],date_entree:_vD(12),erasflage:true,so2_g_hl:3,levures:'Indig\u00e8nes',mpf:{active:true,temp_c:12,duree_j:4},
+          mesures_fa:[{id:'vm_a1',date:_vD(11),densite:1098,temp_c:14,remontages:1,pigeages:0,note:'Mac\u00e9ration \u00e0 froid'},{id:'vm_a2',date:_vD(9),densite:1092,temp_c:18,remontages:1,pigeages:1,note:'D\u00e9part'},{id:'vm_a3',date:_vD(7),densite:1071,temp_c:24,remontages:2,pigeages:1,note:'FA franche'},{id:'vm_a4',date:_vD(5),densite:1048,temp_c:27,remontages:2,pigeages:2,note:''},{id:'vm_a5',date:_vD(3),densite:1026,temp_c:28,remontages:1,pigeages:2,note:'Pic thermique'},{id:'vm_a6',date:_vD(1),densite:1012,temp_c:25,remontages:1,pigeages:1,note:''},{id:'vm_a7',date:_vD(0),densite:1006,temp_c:23,remontages:0,pigeages:1,note:'Fin de FA proche'}],
+          decuvage:null,cuvee_src:'Charmes-Combotte 2026',vcuvee_id:'vcv_a',recolte_ids:['vrec_d1','vrec_d2'],nb_caisses:582},
+        {id:'vcuv_2',nom:'Cuve 5 \u2014 bois 80 hL',volume_hl:74,statut:'mpf',parcelles:['Aux Murgers','Les Perri\u00e8res','Clos du Moulin'],date_entree:_vD(8),erasflage:false,so2_g_hl:2,levures:'Indig\u00e8nes',mpf:{active:true,temp_c:11,duree_j:7},
+          mesures_fa:[{id:'vm_b1',date:_vD(5),densite:1099,temp_c:11,remontages:0,pigeages:1,note:'Mac\u00e9ration pr\u00e9-fermentaire'},{id:'vm_b2',date:_vD(3),densite:1097,temp_c:12,remontages:0,pigeages:1,note:''},{id:'vm_b3',date:_vD(1),densite:1095,temp_c:13,remontages:0,pigeages:1,note:'Grappes enti\u00e8res'}],
+          decuvage:null,cuvee_src:'Perri\u00e8res-Clos 2026',vcuvee_id:'vcv_b',recolte_ids:['vrec_d5','vrec_d6','vrec_d7'],nb_caisses:402},
+        {id:'vcuv_3',nom:'Cuve 7 \u2014 inox 60 hL',volume_hl:51,statut:'termine',parcelles:['Vieilles Vignes','Champ de la Croix'],date_entree:_vD(10),erasflage:true,so2_g_hl:3,levures:'Indig\u00e8nes',mpf:{active:false,temp_c:null,duree_j:0},
+          mesures_fa:[{id:'vm_c1',date:_vD(9),densite:1096,temp_c:17,remontages:1,pigeages:0,note:''},{id:'vm_c2',date:_vD(7),densite:1078,temp_c:25,remontages:2,pigeages:1,note:''},{id:'vm_c3',date:_vD(5),densite:1042,temp_c:28,remontages:2,pigeages:2,note:''},{id:'vm_c4',date:_vD(3),densite:1020,temp_c:26,remontages:1,pigeages:1,note:''},{id:'vm_c5',date:_vD(2),densite:1014,temp_c:24,remontages:1,pigeages:1,note:'D\u00e9cuvage d\u00e9cid\u00e9'}],
+          /* ★★ CUV-9/CUV-10 : la cuve est DECUVEE mais sa fermentation n'est pas
+             finie (`fa_finie:false`) — elle reste donc dans la tournee, taguee
+             « d\u00e9cuv\u00e9e ». C'est le cas que le lot de septembre a ouvert, et il
+             n'etait demontre nulle part. */
+          decuvage:{date:_vD(1),cuvee_id:'cuv2026',fa_finie:false,densite_fut:1016,temp_fut:22},
+          vol_decuve_hl:50,cuvee_src:'Vieilles Vignes 2026',vcuvee_id:'vcv_c',recolte_ids:['vrec_d3','vrec_d4'],nb_caisses:274}
       ],
       clients:['Maison Ducret'],
       analyses:[],
-      cuvees:[{id:'vcv_a',nom:'Charmes 2026'},{id:'vcv_b',nom:'Combottes 2026'}]
+      cuvees:[{id:'vcv_a',nom:'Charmes-Combotte 2026'},{id:'vcv_b',nom:'Perri\u00e8res-Clos 2026'},{id:'vcv_c',nom:'Vieilles Vignes 2026'}]
     };
     _ap('cave_vendange',_cvSeed);
   }catch(e){ if(window.logError)window.logError({level:'info',cat:'demo',msg:'seed vendange'}); }
@@ -1871,8 +1944,8 @@ function _visiteScenario(){
       ],
       futs:[
         {id:'rf1',four:'Tonnellerie Rousseau',ref:'Chauffe moyenne 228 L',annee:'2025',qte:6,date:_rD(300)},
-        {id:'rf2',four:'Tonnellerie Rousseau',ref:'Chauffe moyenne 228 L',annee:'2026',qte:4,date:_rD(45)},
-        {id:'rf3',four:'Tonnellerie Damy',ref:'Chauffe longue 228 L',annee:'2026',qte:3,date:_rD(45)}
+        {id:'rf2',four:'Tonnellerie Rousseau',ref:'Chauffe moyenne 228 L',annee:'2026',qte:4,date:_rD(6)},
+        {id:'rf3',four:'Tonnellerie Damy',ref:'Chauffe longue 228 L',annee:'2026',qte:2,date:_rD(6)}
       ],
       fut_four:['Tonnellerie Rousseau','Tonnellerie Damy'],
       fut_ref:['Chauffe moyenne 228 L','Chauffe longue 228 L'],
@@ -1890,7 +1963,8 @@ function _visiteScenario(){
   //   par type de contrat et le tractoriste perd son taux propre.
   try{
     window.PAIE = {
-      taux:{ 'Marie':15.80, 'Jean':14.60, 'Paul':13.20, 'Sophie':12.70, 'Camille':12.10, 'Lucie':12.10 },
+      taux:{ 'Marie':15.80, 'Jean':14.60, 'Paul':13.20, 'Sophie':12.70,
+             'Camille':12.10, 'Lucie':12.10, 'Nina':12.10, 'Th\u00e9o':12.10, 'Basile':12.10, 'Awa':12.10 },
       taux_hist:{ 'Jean':[{de:13.90,a:14.60,d:'2026-03-01'}] },
       gnr_appoints:[
         {d:'2026-02-12',l:1200,pu:1.18},
@@ -1949,6 +2023,23 @@ function _visiteScenario(){
     // Conges sur DEUX periodes distinctes (multi-periode)
     if(_eP){ [1,2,3].forEach(function(k){ var dd=_wd(1,k); if(dd) _eP[dd]={type:'cp',heures:7}; });
              [11,12].forEach(function(k){ var dd=_wd(1,k); if(dd) _eP[dd]={type:'cp',heures:7}; }); }
+    // ★ LES HUIT JOURS DE VENDANGE, DEJA POINTES. Sans eux, « le classeur de
+    //   vendange n'existe plus » serait une phrase devant un ecran vide. Les
+    //   dimanches sautent, et une journee de vendange n'est pas une journee de
+    //   bureau : 7 h 30 - 17 h.
+    try{
+      var _vdgP=['Camille','Lucie','Nina','Th\u00e9o','Basile','Awa'];
+      _vdgP.forEach(function(nm){
+        _pe[nm]={}; _pe[nm][_YR]={};
+        for(var _kv=12;_kv>=4;_kv--){
+          var _dv=new Date(now.getFullYear(),now.getMonth(),now.getDate()-_kv);
+          if(_dv.getDay()===0 || _dv.getFullYear()!==_YR) continue;
+          var _mv=_dv.getMonth(), _jv=_dv.getDate();
+          if(!_pe[nm][_YR][_mv]) _pe[nm][_YR][_mv]={};
+          _pe[nm][_YR][_mv][_jv]={timing:{debut:'07:30',fin:'17:00',continu:false},comment:'Vendange'};
+        }
+      });
+    }catch(e4){ if(window.logError)window.logError({level:'info',cat:'demo',msg:'pointage vendange'}); }
     _ap('planning_entries',_pe);
     // Regle « heures dues » active sur toute l'annee de la demo
     try{ if(window.CONFIG) window.CONFIG.hsup_dues_debut=_YR+'-01'; }catch(e3){ if(window.logError)window.logError({level:'info',cat:'demo',msg:'hsup_dues_debut'}); }
@@ -1976,6 +2067,28 @@ function _visiteScenario(){
       var _c=p.cepages||(p.cepage?[p.cepage]:[]);
       if(!_c.length) p.cepage=(i%5===4)?'Chardonnay':'Pinot Noir';
     });
+
+    // a-bis) ★★★ L'APPELLATION PORTE LE PLAFOND (RDTAOC-1) — ET SANS ELLE, LE
+    //   MOMENT DES APPORTS MENTAIT. `_mlRendements` calcule `depasse` contre
+    //   `_vendRdtMax(parcelle, millesime)` : plafond de la parcelle, sinon de
+    //   son appellation, sinon rien. AUCUNE parcelle de demo ne portait
+    //   d'appellation — donc aucun plafond, donc « plafond non renseigne »
+    //   partout, et un rendement qu'on ne peut comparer a rien. Deux
+    //   appellations declarees, les parcelles rattachees par NOM (c'est le
+    //   rattachement du modele), un plafond par millesime.
+    //   ★ UNE SEULE parcelle depasse — Les Charmes, 42 hL/ha contre 40. Un
+    //     domaine dont tout le parcellaire serait en depassement ne serait pas
+    //     une demonstration, ce serait un contre-argument.
+    try{
+      window.CONFIG=window.CONFIG||{};
+      var _milA=now.getFullYear();
+      window.CONFIG.appellations=[
+        {nom:'Gevrey-Chambertin', rdt_max_hist:[{mil:_milA,max:40},{mil:_milA-1,max:40},{mil:_milA-2,max:40}]},
+        {nom:'Bourgogne',         rdt_max_hist:[{mil:_milA,max:55},{mil:_milA-1,max:55},{mil:_milA-2,max:55}]}
+      ];
+      var _aocBourgogne={'Aux Murgers':1,'En Bertrange':1};
+      _pA.forEach(function(p){ if(!p.appellation) p.appellation=_aocBourgogne[p.nom]?'Bourgogne':'Gevrey-Chambertin'; });
+    }catch(e){ if(window.logError)window.logError({level:'info',cat:'demo',msg:'seed appellations'}); }
 
     // b) CUIVRE METAL sur sept ans — _cuIsCu() exige type==='Cuivre' ET
     //    cuMetal>0 : le traitement de bouillie ci-dessus portait le bon type
@@ -2009,12 +2122,16 @@ function _visiteScenario(){
     //    Les parcelles deja rentrees sont ecartees : elles sortiraient du
     //    classement pour rejoindre « rentrees », et la demo n'aurait rien a
     //    comparer.
-    var _dej={}; (_cvSeed.recoltes||[]).forEach(function(r){ if(r&&r.parcelle) _dej[r.parcelle]=1; });
-    var _matP=_pN.filter(function(n){ return !_dej[n]; }).slice(0,5);
+    // ⚠️ LE FILTRE « pas encore rentree » N'A PLUS DE SENS : tout est rentre.
+    //   Il ne laissait AUCUNE parcelle, donc un ecran de maturite VIDE — le
+    //   defaut exact qu'il avait ete ecrit pour eviter, retourne par la saison.
+    //   Les releves restent ceux d'AVANT la recolte : c'est ce qu'un controle
+    //   de maturite est, une fois la vendange faite — la memoire des dates.
+    var _matP=_pN.slice(0,6);
     var _ana=[];
     _matP.forEach(function(nom,i){
       var _dep=176+i*4, _pas=13+(i%3)*4;   // depart et vitesse differents par parcelle
-      [12,6,1].forEach(function(j,k){
+      [26,20,14].forEach(function(j,k){
         _ana.push({id:'vana_d'+i+'_'+k,parcelle:nom,date:_vD(j),mode:'sucre',
                    val:_dep+_pas*k,spd:16.83});
       });
@@ -2074,7 +2191,7 @@ function _mvtWelcome(){
     +_mvtCap('imprimante','22 documents pr\u00eats \u00e0 imprimer')
     +_mvtCap('graphique','Pilotage : décider d\'un coup d\'œil')
     +'</div>'
-    +'<div class="mvtwc-foot"><div class="mvtwc-note">Suivez une journée type au domaine — quatre minutes, montre en main. Puis '+_MVT_CHAPS.length+' écrans à explorer librement.</div>'
+    +'<div class="mvtwc-foot"><div class="mvtwc-note">Suivez une journée de vinification au domaine — cinq minutes, montre en main. Puis '+_MVT_CHAPS.length+' écrans à explorer librement.</div>'
     +'<button class="mvtwc-go" id="mvtwc-go">Commencer la visite&nbsp;&nbsp;'+_mvIcon('lecture',18)+'</button>'
     +'<button class="mvtwc-skip" id="mvtwc-skip">Explorer par moi-même</button></div>'
     +'</div>';
@@ -2184,6 +2301,17 @@ var _mvtCss = `
 .mvt-chbar-tx span{display:block;font-size:11px;color:#cbb896;line-height:1.35;margin-top:2px}
 .mvt-chbar-btn{flex-shrink:0;font-family:inherit;font-weight:600;font-size:12.5px;border:1px solid rgba(201,168,76,.5);background:rgba(201,168,76,.14);color:#E8C98A;border-radius:11px;padding:9px 13px;cursor:pointer;white-space:nowrap}
 .mvt-chbar-btn:active{background:rgba(201,168,76,.26)}
+/* ★★★ LA BARRE NE MANGE PLUS L'ECRAN. Elle est la moitie du defaut de cadrage :
+   plus elle est haute, moins il reste de place pour ce qu'on montre. Bornee a
+   46% de la hauteur, elle defile chez elle au lieu de pousser la cible sous
+   elle ; sur un ecran court, le texte et la ligne grise se resserrent. */
+.mvt-bar-in{max-height:46vh;overflow-y:auto;overscroll-behavior:contain}
+@media (max-height:740px){
+  .mvt-bar-in{padding:9px 14px calc(10px + env(safe-area-inset-bottom))}
+  .mvt-btx{font-size:12.5px;line-height:1.38;margin-top:3px}
+  .mvt-bh{font-size:9.5px;line-height:1.3}
+  .mvt-brow{margin-top:7px;min-height:32px}
+}
 `;
 // ── DEMO-2 « L'addition » : table de chiffrage — SOURCE UNIQUE.
 //    Créditée par le compteur pendant la visite, affichée par l'écran final.
@@ -2288,148 +2416,177 @@ function _mvtPilTabRendre(){
 //   ⚠️ `wait` : delai avant de poser le projecteur, quand la navigation
 //     enchaine plusieurs rendus (onglet -> sous-vue -> depli d'une carte).
 var _mvtSteps = [
-  // ══ ACTE I — AVANT QUE L'EQUIPE ARRIVE ══
-  { kick:'7 h 40', tx:'Lundi. 7 hectares, 4 personnes. Vos vignes sont sur trois communes : il pleut \u00e0 Fixin, pas \u00e0 Gevrey. Trois pr\u00e9visions, pas une moyenne \u2014 c\u2019est ce qui d\u00e9cide o\u00f9 part l\u2019\u00e9quipe.',
-    hyp:'Chaque secteur suit ses propres coordonn\u00e9es. Rien \u00e0 param\u00e9trer : les parcelles portent leur commune.',
-    nav:function(){ if(window.goTo) window.goTo('home'); setTimeout(function(){ var el=document.getElementById('home-meteo-communes'); if(el){ try{ el.scrollIntoView({block:'center'}); }catch(e){ if(window.logError)window.logError({level:'info',cat:'visite',msg:'scroll secteurs'}); } } },260); },
-    sel:['#home-meteo-communes','.home-w[data-w="meteo5"]'] },
+  // ══ ACTE I — 7 H, LA JOURNEE COMMENCE AU CUVIER ══
+  // ★★★ LE PREMIER ECRAN DIT LA SAISON. La visite s'ouvrait sur la meteo d'un
+  //   lundi de printemps pendant que les donnees portaient quatre apports de
+  //   vendange et deux cuves en fermentation. En septembre, la journee d'un
+  //   vigneron commence a la cave : c'est par la qu'on entre.
+  { kick:'6 h 40', tx:'Les vendanges sont rentr\u00e9es depuis quatre jours. La journ\u00e9e ne commence plus dans les rangs : elle commence devant les cuves.',
+    hyp:'Ce qui presse aujourd\u2019hui, et les quatre semaines qui suivent.',
+    nav:function(){ _mvtGoCave('aujourdhui',null); },
+    sel:['#auj-body','#cave-view-auj','#page-cave'],
+    wait:680 },
 
-  { kick:'7 h 50', tx:'La question du matin, d\u00e9j\u00e0 tranch\u00e9e : fen\u00eatre favorable, vent, d\u00e9lai avant r\u00e9colte, parcelles encore ferm\u00e9es. Vous ne cherchez pas la r\u00e9ponse \u2014 elle est l\u00e0.',
-    hyp:'Cinq jours de pr\u00e9vision crois\u00e9s avec vos traitements : le verdict du jour, puis les jours suivants d\u2019un doigt.',
-    nav:function(){ _mvtPilTab('auj'); },
-    sel:['[data-mvt="traiter"]','.pil-cockpit-card','#pil-content'], wait:620 },
+  // ★ LE GESTE DE LA SAISON. Compter un pigeage du pouce, c'est ce qu'un
+  //   vigneron fait quinze fois par jour en septembre : la mission se pose la.
+  //   Le compteur ecrit dans le tampon local de la tournee, rien ne part.
+  { kick:'7 h 00', tx:'Six cuves, une ligne chacune : densit\u00e9, temp\u00e9rature, pigeage. La tourn\u00e9e se remplit dans le cuvier, au t\u00e9l\u00e9phone, une main libre.',
+    hyp:'Les cuves sans relev\u00e9 du jour remontent en t\u00eate : on ne cherche pas laquelle il reste.',
+    mission:'Comptez un pigeage',
+    nav:function(){ _mvtGoCave('vendange',function(){ if(window.switchVendOng) window.switchVendOng('tour'); }); },
+    sel:['#mvt-list','#mvv-body','#page-cave'],
+    clickSel:'.mvt-cnt',
+    actDelay:700,
+    wait:760,
+    credits:[{ k:'cuvees', min:15 }] },
 
-  { kick:'Le cap du jour', tx:'Avant que l\u2019\u00e9quipe arrive : la t\u00e2che du moment, un mot pour tous.',
+  // ⚠️ LA COURBE N'EXISTE QUE SI LA CUVE EST DEPLIEE : `_vendBascOuv` BASCULE,
+  //   donc on ne l'appelle QUE si aucun graphe n'est deja ouvert — sinon
+  //   revenir sur ce moment refermerait la cuve qu'on vient de montrer.
+  { kick:'7 h 20', tx:'La cuve 3 est descendue \u00e0 1006. La courbe le dit avant vous : la fermentation s\u2019ach\u00e8ve, le d\u00e9cuvage se pr\u00e9pare.',
+    hyp:'Le seuil du vin sec appartient \u00e0 la cuve, pas \u00e0 l\u2019application : chacune porte le sien.',
+    nav:function(){ _mvtGoCave('vendange',function(){ if(window.switchVendOng) window.switchVendOng('cuves'); setTimeout(function(){ try{ if(!document.querySelector('.mvv-det-g') && window._vendBascOuv) window._vendBascOuv('vcuv_1'); }catch(e){ if(window.logError)window.logError({level:'info',cat:'visite',msg:'ouvrir cuve 3'}); } },280); }); },
+    sel:['.mvv-det-g','.mvv-det','#mvv-body','#page-cave'],
+    wait:940 },
+
+  { kick:'7 h 45', tx:'Dehors, trois communes, trois m\u00e9t\u00e9os. Il pleut \u00e0 Fixin, pas \u00e0 Gevrey : c\u2019est ce qui d\u00e9cide o\u00f9 part le reste de l\u2019\u00e9quipe.',
+    hyp:'Rien \u00e0 param\u00e9trer : les parcelles portent leur commune.',
+    nav:function(){ if(window.goTo) window.goTo('home'); },
+    sel:['#home-meteo-communes','.home-w[data-w="meteo5"]'],
+    wait:460 },
+
+  { kick:'Le cap du jour', tx:'Avant que l\u2019\u00e9quipe arrive, un mot pour tous : cette semaine, on r\u00e9pare le palissage avant la taille.',
     mission:'Touchez \u00ab Diffuser la priorit\u00e9 \u00bb',
-    nav:function(){ try{ openPriorityEdit(); }catch(e){ if(window.logError)window.logError({level:'info',cat:'visite',msg:'openPriorityEdit'}); } }, sel:'#ovPriority .modal', clickSel:'#ovPriority .mbtn.verte' },
+    nav:function(){ try{ openPriorityEdit(); }catch(e){ if(window.logError)window.logError({level:'info',cat:'visite',msg:'openPriorityEdit'}); } },
+    sel:'#ovPriority .modal',
+    clickSel:'#ovPriority .mbtn.verte' },
 
-  // ══ ACTE II — LA JOURNEE S'ECRIT TOUTE SEULE ══
-  // ★★★ LE MOMENT QUI MANQUAIT. L'objection numero un d'un patron de domaine
-  //   n'est pas le prix, c'est « mes gars ne s'en serviront pas ». La visite
-  //   entiere se jouait depuis le fauteuil du chef. Le geste est
-  //   contre-intuitif — MONTRER MOINS — donc il se retient.
-  // ⚠️ L'ouvrier n'atterrit PAS sur l'accueil : son ecran, c'est la liste de ses
-  //   parcelles filtree sur la tache du jour, avec le \u2713 a portee de pouce. On
-  //   pose donc `pTacheFilter` ICI — c'est ce filtre qui fait apparaitre le
-  //   bouton (_pvActions sort vide si la tache vaut « toutes »).
-  { kick:'8 h 10', tx:'Sur le t\u00e9l\u00e9phone de Jean, il n\u2019y a pas de tableau de bord. La t\u00e2che du jour, ses parcelles, un \u2713 \u00e0 cocher. On lui a tout enlev\u00e9 \u2014 c\u2019est la seule fa\u00e7on qu\u2019il s\u2019en serve.',
-    hyp:'Bascule r\u00e9elle sur le r\u00f4le ouvrier : c\u2019est l\u2019\u00e9cran que vos salari\u00e9s ouvrent le matin, tel quel.',
-    nav:function(){
-      _mvtRoleOuvrier(true);
-      try{ pTacheFilter=window._visiteTache||'Ebourgeonnage'; }catch(e){ if(window.logError)window.logError({level:'info',cat:'visite',msg:'pTacheFilter ouvrier'}); }
-      if(window.switchVigneOng) window.switchVigneOng('parcelles');
-      setTimeout(function(){ try{ if(window.switchPTab) window.switchPTab('liste'); }catch(e){ if(window.logError)window.logError({level:'info',cat:'visite',msg:'switchPTab liste ouvrier'}); } },240);
-    },
-    sel:['#pwrapliste','#page-parcelles'], wait:620 },
+  // ══ ACTE II — LA TRACE S'ECRIT TOUTE SEULE ══
+  // ★★★ L'OBJECTION N°1 N'EST PAS LE PRIX, C'EST « MES GARS NE S'EN SERVIRONT
+  //   PAS ». Le geste est contre-intuitif — MONTRER MOINS — donc il se retient.
+  // ⚠️ `pTacheFilter` se pose ICI : sans filtre de tache, `_pvActions` sort vide
+  //   et il n'y a aucune coche a montrer.
+  { kick:'8 h 10', tx:'Sur le t\u00e9l\u00e9phone de Jean : sa t\u00e2che, ses parcelles, un \u2713. On lui a tout enlev\u00e9 \u2014 c\u2019est la seule fa\u00e7on qu\u2019il s\u2019en serve.',
+    hyp:'Bascule r\u00e9elle sur le r\u00f4le ouvrier : l\u2019\u00e9cran que vos salari\u00e9s ouvrent le matin.',
+    nav:function(){ _mvtRoleOuvrier(true); try{ pTacheFilter=window._visiteTache||'Palissage'; }catch(e){ if(window.logError)window.logError({level:'info',cat:'visite',msg:'pTacheFilter ouvrier'}); } if(window.switchVigneOng) window.switchVigneOng('parcelles'); setTimeout(function(){ try{ if(window.switchPTab) window.switchPTab('liste'); }catch(e){ if(window.logError)window.logError({level:'info',cat:'visite',msg:'switchPTab liste ouvrier'}); } },240); },
+    sel:['#pwrapliste','#page-parcelles'],
+    wait:680 },
 
-  // ★ LE MEME BOUTON, DES DEUX COTES. C'est ce qui leve la peur : « et s'il
-  //   oublie ? ». L'ouvrier coche depuis le rang, et vous cochez pour lui si
-  //   personne ne l'a fait — meme geste, meme trace (canWrite() est vrai pour
-  //   l'ouvrier comme pour l'admin).
-  { kick:'9 h 40', tx:'Vous reprenez la main. Jean a coch\u00e9 les siennes depuis le rang. Celle-ci, personne ne l\u2019a fait \u2014 cochez-la pour lui : un oubli ne fait rien perdre.',
+  // ★ LE MEME BOUTON DES DEUX COTES : `canWrite()` est vrai pour l'ouvrier
+  //   comme pour l'admin. C'est ce qui repond a « et s'il oublie ? ».
+  { kick:'9 h 40', tx:'Jean a coch\u00e9 les siennes depuis le rang. Celle-ci, personne ne l\u2019a fait : cochez-la pour lui, un oubli ne fait rien perdre.',
     mission:'Touchez le \u2713',
     nav:function(){ _mvtRoleOuvrier(false); if(window.switchVigneOng) window.switchVigneOng('parcelles'); },
-    sel:'.pcard-qv .pc-validate', clickSel:'.pcard-qv .pc-validate', actDelay:1700, wait:560 },
+    sel:'.pcard-qv .pc-validate',
+    clickSel:'.pcard-qv .pc-validate',
+    actDelay:1700,
+    wait:560 },
 
   { kick:'C\u2019est trac\u00e9', tx:'Votre validation est au journal : parcelle, \u00e9quipe, m\u00e9t\u00e9o du jour. Rien \u00e0 remplir.',
     nav:function(){ if(window.switchVigneOng) window.switchVigneOng('journal'); try{ renderJournal(); }catch(e){ if(window.logError)window.logError({level:'info',cat:'visite',msg:'renderJournal'}); } },
-    sel:'.jcard', credits:[{ k:'validation', min:5 }] },
+    sel:'.jcard',
+    credits:[{ k:'validation', min:5 }] },
 
-  { kick:'10 h 15', tx:'Les m\u00eames parcelles vues d\u2019en haut. La couleur, c\u2019est l\u2019avancement : ce qui reste se voit sans ouvrir une liste.',
-    hyp:'Parcelles g\u00e9olocalis\u00e9es \u2014 surfaces, c\u00e9pages et contours viennent de votre relev\u00e9.',
-    nav:function(){ if(window.goTo) window.goTo('parcelles'); setTimeout(function(){ try{ if(window.switchPTab) window.switchPTab('carte'); }catch(e){ if(window.logError)window.logError({level:'info',cat:'visite',msg:'switchPTab carte'}); } },240); },
-    sel:['#pwrapcarte','#page-parcelles'] },
+  { kick:'10 h 30', tx:'L\u2019apport du 5 septembre, saisi en caisses. L\u2019application en fait des kilos, des hectolitres, et un rendement par parcelle.',
+    hyp:'Les Charmes : 272 caisses, 6 800 kg, 42 hL/ha \u2014 au-dessus du plafond, et Le mill\u00e9sime le signale.',
+    nav:function(){ _mvtGoCave('vendange',function(){ if(window.switchVendOng) window.switchVendOng('rec'); }); },
+    sel:['.mvv-camp','#mvv-body','#page-cave'],
+    wait:760 },
 
-  // ★ LE TRACTEUR NE SE RESUME PAS A UNE JAUGE. Le chrono inverse (§31) est ce
-  //   qui distingue l'outil d'un carnet : le temps se pose sur les parcelles
-  //   REELLEMENT faites, pas au prorata de la surface.
-  // ⚠️ NE PAS PARLER DU CHRONO ICI : il ne s'affiche que si `CONFIG.chrono_mode`
-  //   vaut 'on' ET qu'une mesure est ouverte (_chronoEnabledForSession). Le
-  //   scenario n'en ouvre pas — le texte annoncait donc un ecran qu'on ne
-  //   voyait pas. La liste des sessions porte deja l'argument de precision :
-  //   les parcelles FAITES sont cochees une par une.
-  { kick:'11 h 30', tx:'Le broyage est en cours : la machine, le conducteur, et les parcelles d\u00e9j\u00e0 faites, coch\u00e9es une par une. Le temps du chantier se posera sur celles-l\u00e0 \u2014 jamais au prorata de la surface.',
-    hyp:'Et le mat\u00e9riel pr\u00e9vient avant de tomber : cuve GNR \u00e0 255 L sur 1 000, New Holland \u00e0 482 h \u2014 r\u00e9vision \u00e0 500.',
+  // ★ MEME ECRAN QUE LE MOMENT PRECEDENT, AUTRE CIBLE : le bandeau des kilos
+  //   vendus. Pas de `nav` — re-naviguer refermerait l'onglet sur lui-meme.
+  { kick:'10 h 45', tx:'En Bertrange est partie au n\u00e9goce. Le bon de livraison sort tout seul, et ces kilos ne font pas baisser votre rendement.',
+    hyp:'La surface vendue sort du calcul : vendre son raisin n\u2019est pas faire une petite r\u00e9colte.',
+    sel:['.mvv-camp-sold','.mvv-camp','#mvv-body'],
+    wait:460 },
+
+  { kick:'14 h', tx:'La benne a tourn\u00e9 huit jours. Machine, conducteur, parcelles faites coch\u00e9es une par une : le temps se pose sur celles-l\u00e0.',
+    hyp:'Et le mat\u00e9riel pr\u00e9vient : cuve GNR \u00e0 255 L sur 1 000, New Holland \u00e0 482 h, r\u00e9vision \u00e0 500.',
     nav:function(){ if(window.goTo) window.goTo('tracteur'); setTimeout(function(){ try{ if(window.switchTracOnglet) window.switchTracOnglet('sessions'); }catch(e){ if(window.logError)window.logError({level:'info',cat:'visite',msg:'switchTracOnglet sessions'}); } },240); },
-    sel:['#trac-panel-sessions','#page-tracteur'], credits:[{ k:'tracteur', min:10 }] },
+    sel:['#trac-panel-sessions','#page-tracteur'],
+    wait:520,
+    credits:[{ k:'tracteur', min:10 }] },
 
-  { kick:'16 h 20', tx:'Le traitement de ce matin est au registre : n\u00b0 AMM, dose, DAR, ZNT \u2014 remplis depuis le catalogue officiel E-Phy. Et la R\u00e9serve a d\u00e9duit la bouillie du stock toute seule.',
-    nav:function(){ if(window.goTo) window.goTo('phyto'); },
-    sel:'#page-phyto .content', credits:[{ k:'phyto', min:20 },{ k:'reserve', min:20 }] },
+  { kick:'16 h', tx:'Chaque sulfitage saisi au cuvier descend du stock. Les six f\u00fbts neufs livr\u00e9s la semaine pass\u00e9e sont d\u00e9j\u00e0 au parc \u00e0 f\u00fbts.',
+    hyp:'Le bilan mati\u00e8re se tient tout seul : achats, inventaires, consommations.',
+    nav:function(){ if(window.goTo) window.goTo('reserve'); setTimeout(function(){ try{ if(window._rsvTabTo) window._rsvTabTo('intrants'); }catch(e){ if(window.logError)window.logError({level:'info',cat:'visite',msg:'rsvTabTo intrants'}); } },240); },
+    sel:['#mvr-body','#page-reserve'],
+    wait:680,
+    credits:[{ k:'reserve', min:20 }] },
 
   // ★★★ LE SEUL MOMENT OU LE LOGICIEL RATTRAPE L'UTILISATEUR au lieu de
   //   l'assister. Un ecran qui protege vaut trois ecrans qui font gagner du
   //   temps : il repond a une peur, pas a une corvee.
-  { kick:'16 h 25', tx:'Le m\u00eame registre, vu du contr\u00f4le. Cuivre m\u00e9tal cumul\u00e9 sur sept ans face au plafond bio, passages par parcelle \u2014 et Les Charmes et La Combotte sont ferm\u00e9es jusqu\u2019\u00e0 demain matin. Personne n\u2019y entrera par erreur.',
+  { kick:'16 h 25', tx:'Le registre, vu du contr\u00f4le : cuivre m\u00e9tal cumul\u00e9 sur sept ans, passages par parcelle, dernier traitement bien avant la r\u00e9colte.',
     hyp:'Le cumul se met \u00e0 jour \u00e0 chaque traitement saisi \u2014 personne ne tient ce tableau \u00e0 la main.',
     nav:function(){ _mvtPilTab('cfm'); },
-    selAll:'.pil-tile', n:3, wait:620 },
+    selAll:'.pil-tile',
+    n:3,
+    wait:660,
+    credits:[{ k:'phyto', min:20 }] },
 
-  { kick:'17 h', tx:'Au Chai, chaque cuv\u00e9e suit ses f\u00fbts, sa part des anges et ses analyses \u2014 SO2 et acidit\u00e9 se comparent d\u2019un relev\u00e9 \u00e0 l\u2019autre, l\u2019ouillage en retard s\u2019est signal\u00e9 tout seul.',
-    nav:function(){ if(window.goTo) window.goTo('cave'); setTimeout(function(){ try{ if(window.selectCaveSection) window.selectCaveSection('elevage'); }catch(e){ if(window.logError)window.logError({level:'error',cat:'visite',msg:'chai: '+(e&&e.message)}); } },240); },
-    sel:['#mvc-elevage','#page-cave'], credits:[{ k:'cuvees', min:15 }] },
-
-  { kick:'17 h 15', tx:'Et la question du lendemain : qu\u2019est-ce qui m\u2019attend ? Ouillages dus, cuves \u00e0 mesurer, f\u00fbts \u00e0 pr\u00e9parer \u2014 la semaine se range toute seule, du raisin \u00e0 la bouteille.',
-    hyp:'Le mill\u00e9sime est un fil : la parcelle, la cuve, le f\u00fbt et la bouteille sont le m\u00eame vin. Le Cuvier et la vendange cuve par cuve vous attendent dans les \u00e9crans.',
-    // ★ Lot CAVE-1 : « qu'est-ce qui m'attend ? » a sa reponse dans l'onglet
-    //   Aujourd'hui de la Cave, plus dans Le millesime.
-    nav:function(){ if(window.goTo) window.goTo('cave'); setTimeout(function(){ try{ if(window.selectCaveSection) window.selectCaveSection('aujourdhui'); }catch(e){ if(window.logError)window.logError({level:'error',cat:'visite',msg:'aujourdhui: '+(e&&e.message)}); } },260); },
-    sel:['#auj-body','#cave-view-auj','#page-cave'] },
+  { kick:'17 h', tx:'Au Chai, le mill\u00e9sime d\u2019avant continue : ouillages, analyses, part des anges. Deux vins \u00e0 deux \u00e2ges, le m\u00eame \u00e9cran s\u2019en occupe.',
+    nav:function(){ _mvtGoCave('elevage',function(){ if(window.switchCaveOng) window.switchCaveOng('cuv'); }); },
+    sel:['#mvc-elevage','#page-cave'],
+    wait:680 },
 
   // ══ ACTE III — CE QUE CA REND ══
-  // ⚠️⚠️ NE PAS ANNONCER « une heure de retard » ICI. _pl2Cell rend TOUTE entree
-  //   `absent:true` par une croix rouge « Absence » : un retard d'une heure et
-  //   une journee entiere s'affichent PAREIL sur le tableau. Le detail en
-  //   heures se lit dans la fiche du salarie, moment suivant. (Le defaut de
-  //   lisibilite du tableau est au backlog — ce n'est pas un defaut de demo.)
-  { kick:'17 h 30', tx:'Le pointage du soir tient en deux gestes. Cong\u00e9s, r\u00e9cup\u00e9rations, absences : le mois entier se lit d\u2019un coup d\u2019\u0153il, et le compteur annuel suit tout seul.',
-    hyp:'La feuille d\u2019heures du soir n\u2019existe plus.',
-    nav:function(){ if(window.goTo) window.goTo('planning'); },
-    sel:['#page-planning .pl2-board','#page-planning'], credits:[{ k:'pointage', min:10 }] },
+  { kick:'17 h 30', tx:'Les six vendangeurs de septembre sont l\u00e0, avec leurs jours faits. Un saisonnier ne dispara\u00eet pas le jour o\u00f9 son contrat s\u2019arr\u00eate.',
+    hyp:'Chacun garde sa fiche, ses heures et son relev\u00e9 \u2014 l\u2019an prochain, on le reprend d\u2019un geste.',
+    nav:function(){ if(window.goTo) window.goTo('planning'); setTimeout(function(){ try{ if(window.planSwitchTab) window.planSwitchTab('gens'); }catch(e){ if(window.logError)window.logError({level:'info',cat:'visite',msg:'planSwitchTab gens'}); } },240); },
+    sel:['#plan-body','#page-planning'],
+    wait:680,
+    credits:[{ k:'saisonniers', min:20 }] },
 
-  { kick:'17 h 40', tx:'La fiche de Jean, pr\u00eate pour la paie : acompte de 300 \u20ac, heures sup au compteur, retard et r\u00e9cup d\u00e9j\u00e0 compt\u00e9s \u2014 le relev\u00e9 MSA sort en PDF.',
-    hyp:'\u2248 18 h de fins de mois par an \u2014 et chaque saisonnier de vendanges suivi sans classeur.',
+  // ⚠️⚠️ NE PAS ANNONCER « une heure de retard » ICI : `_pl2Cell` rend TOUTE
+  //   entree `absent:true` par une croix rouge « Absence ». Le detail en heures
+  //   se lit dans la fiche, moment suivant. (Defaut produit, au backlog.)
+  { kick:'17 h 45', tx:'Le pointage du soir tient en deux gestes. Cong\u00e9s, r\u00e9cup\u00e9rations, absences : le mois se lit d\u2019un coup d\u2019\u0153il, le compteur annuel suit.',
+    nav:function(){ if(window.goTo) window.goTo('planning'); setTimeout(function(){ try{ if(window.planSwitchTab) window.planSwitchTab('mois'); }catch(e){ if(window.logError)window.logError({level:'info',cat:'visite',msg:'planSwitchTab mois'}); } },240); },
+    sel:['#page-planning .pl2-board','#page-planning'],
+    wait:660,
+    credits:[{ k:'pointage', min:10 }] },
+
+  { kick:'17 h 50', tx:'La fiche de Jean, pr\u00eate pour la paie : acompte, heures sup, r\u00e9cup d\u00e9j\u00e0 compt\u00e9es. Le relev\u00e9 MSA sort en PDF.',
     nav:function(){ setTimeout(function(){ try{ if(window.openPlanFiche) openPlanFiche('Jean'); }catch(e){ if(window.logError)window.logError({level:'info',cat:'visite',msg:'planFiche'}); } },180); },
-    sel:['#ovPlanFiche .modal','#ovPlanFiche'], credits:[{ k:'finmois', min:20 },{ k:'saisonniers', min:0 }] },
+    sel:['#ovPlanFiche .modal','#ovPlanFiche'],
+    credits:[{ k:'finmois', min:20 }] },
 
-  // ⚠️ LA CIBLE SUIVAIT LE MAUVAIS BLOC. Le texte parle de marge, de charge et
-  //   de cadence : tout cela vit dans `.pil-cockpit-card` (.pil-verdict +
-  //   .pil-cks). `.pil-dec` est le bloc D'EN DESSOUS — et il contient la carte
-  //   « Traiter ? » deja eclairee au moment 2 : deux fois la meme image sous
-  //   deux titres differents (§35e).
-  { kick:'18 h', tx:'Le soir, le verdict : votre marge sur l\u2019objectif, la charge qui reste, la cadence r\u00e9ellement tenue. Un chiffre, et ce qui le cadre.',
-    hyp:'Juste en dessous, la d\u00e9cision du jour : qui est l\u00e0, traiter ou pas, la t\u00e2che prioritaire.',
-    nav:function(){ try{ if(window.closePlanFiche) closePlanFiche(); }catch(e2){ if(window.logError)window.logError({level:'info',cat:'visite',msg:'closeFiche'}); } _mvtPilTab('auj'); },
-    sel:['.pil-cockpit-card','#pil-content'], wait:620 },
+  // ★★★ UNE DATE ET DES HEURES QUI MANQUENT frappent dix fois plus fort qu'un
+  //   pourcentage d'avancement. Le seul ecran qui dit au vigneron quelque chose
+  //   qu'il ne sait pas encore.
+  { kick:'18 h 05', tx:'La question que personne ne pose \u00e0 temps : \u00e0 la cadence tenue, voil\u00e0 quand chaque t\u00e2che finit. En jours ouvr\u00e9s, pas en pourcentage.',
+    hyp:'La taille arrive : c\u2019est le gros morceau de la p\u00e9riode, et il a maintenant une date.',
+    nav:function(){ try{ if(window.closePlanFiche) closePlanFiche(); }catch(e2){ if(window.logError)window.logError({level:'info',cat:'visite',msg:'closeFiche'}); } _mvtPilTab('avc'); setTimeout(function(){ _mvtPilOuvrir('echeances'); },300); },
+    sel:['.pil-tile[data-pid="echeances"]','.pil-panels','#pil-content'],
+    wait:940 },
 
-  // ★★★ LE PREVISIONNEL. Une DATE et un NOMBRE D'HEURES QUI MANQUENT frappent
-  //   dix fois plus fort qu'un pourcentage d'avancement : c'est le seul ecran
-  //   qui dit au vigneron quelque chose qu'il ne sait pas encore.
-  { kick:'18 h 05', tx:'Et la question que personne ne pose \u00e0 temps : \u00e0 la cadence tenue depuis le d\u00e9but, voil\u00e0 quand chaque t\u00e2che finit. En jours ouvr\u00e9s et en heures restantes \u2014 pas en pourcentage.',
-    hyp:'La cadence vient de vos quatre derni\u00e8res semaines de pr\u00e9sence r\u00e9elle. Elle ne s\u2019applique qu\u2019au travail qui reste.',
-    nav:function(){ _mvtPilTab('avc'); setTimeout(function(){ _mvtPilOuvrir('echeances'); },300); },
-    sel:['.pil-tile[data-pid="echeances"]','.pil-panels','#pil-content'], wait:880 },
-
-  { kick:'18 h 10', tx:'Chaque parcelle porte son co\u00fbt r\u00e9el de main-d\u2019\u0153uvre \u2014 en euros, et \u00e0 l\u2019hectare, pond\u00e9r\u00e9 par l\u2019\u00e9quipe qui y est vraiment pass\u00e9e.',
-    hyp:'Co\u00fbt de culture : main-d\u2019\u0153uvre, tracteur, GNR, produits. Ni vinification, ni foncier, ni amortissement.',
+  { kick:'18 h 10', tx:'Chaque parcelle porte son co\u00fbt r\u00e9el de main-d\u2019\u0153uvre, en euros et \u00e0 l\u2019hectare, pond\u00e9r\u00e9 par l\u2019\u00e9quipe qui y est vraiment pass\u00e9e.',
+    hyp:'Co\u00fbt de culture : main-d\u2019\u0153uvre, tracteur, GNR, produits. Ni vinification, ni foncier.',
     nav:function(){ _mvtPilTab('eco'); setTimeout(function(){ _mvtPecSub('par'); },300); },
-    sel:['.pec-tbl','.pec-card','#pil-content'], wait:880 },
+    sel:['.pec-tbl','.pec-card','#pil-content'],
+    wait:900 },
 
-  { kick:'18 h 15', tx:'La question du renfort : combien, et quand ? Demandez au moteur \u2014 il essaie des centaines de placements et ne garde que ce qui boucle.',
-    hyp:'Chaque proposition affiche son co\u00fbt \u2014 le classement se fait parmi ce qui boucle.',
-    mission:'Touchez \u00ab Le meilleur placement trouv\u00e9 \u00bb',
-    nav:function(){ _mvtPilTab('sim'); },
-    sel:['.rf-strats','.pil-panels','#pil-content'], clickSel:'.rf-strat.best', actDelay:900, wait:700 },
-
-  { kick:'18 h 20', tx:'Reste le classeur. Registre phyto, synth\u00e8se cuivre, relev\u00e9s d\u2019heures MSA, inventaires, sauvegarde : vingt-deux documents, chacun \u00e0 un clic. Le registre phyto \u00e9lectronique devient obligatoire au 1\u1d49\u02b3 janvier 2027 \u2014 le v\u00f4tre sera pr\u00eat.',
-    hyp:'Et rien ne se perd : chaque campagne s\u2019archive, et se compare \u00e0 la suivante sur le m\u00eame axe.',
+  { kick:'18 h 20', tx:'Votre campagne s\u2019est ferm\u00e9e avec le dernier apport, la suivante est ouverte. Vingt-deux documents suivent, registre phyto compris.',
+    hyp:'Le registre phyto \u00e9lectronique devient obligatoire au 1\u1d49\u02b3 janvier 2027 \u2014 le v\u00f4tre sera pr\u00eat.',
     nav:function(){ if(window.goTo) window.goTo('reglages'); setTimeout(function(){ try{ if(window.openDocs) window.openDocs(); }catch(e){ if(window.logError)window.logError({level:'info',cat:'visite',msg:'openDocs'}); } },300); },
-    sel:['#docs-list','#ovDocs .modal','#ovDocs'], credits:[{ k:'controle', min:0 }] }
+    sel:['#docs-list','#ovDocs .modal','#ovDocs'],
+    credits:[{ k:'controle', min:0 }] }
 ];
 var _mvtCur=-1, _mvtEl=null, _mvtEls=null, _mvtOne=null, _mvtBuilt=false, _mvtEarn=0, _mvtDone={};
 function _mvtBuild(){
   if(_mvtBuilt) return;
-  var st=document.createElement('style'); st.id='mvt-css'; st.textContent=_mvtCss; document.head.appendChild(st);
+  // ⚠️⚠️ L'IDENTIFIANT `mvt-css` APPARTENAIT DEJA A UN AUTRE MODULE. `_vtCss()`
+  //   (cave.js, la tournee du cuvier) commence par
+  //   `if(document.getElementById('mvt-css')) return;` : des que la visite
+  //   posait SA feuille sous ce nom — c'est-a-dire des l'ecran d'accueil,
+  //   _mvtWelcome appelle _mvtBuild — la tournee se rendait SANS SON HABILLAGE,
+  //   pour toute la session. Aucun harnais ne pouvait le voir : les deux
+  //   feuilles sont valides, ce sont leurs NOMS qui se marchaient dessus.
+  //   La visite prend un nom qui lui appartient.
+  if(!document.getElementById('mvt-visite-css')){
+    var st=document.createElement('style'); st.id='mvt-visite-css'; st.textContent=_mvtCss; document.head.appendChild(st);
+  }
   var d=document.createElement('div'); d.id='mvt'; d.style.display='none';
   d.innerHTML='<div class="mvt-mask" id="mvt-mt"></div><div class="mvt-mask" id="mvt-mb"></div><div class="mvt-mask" id="mvt-ml"></div><div class="mvt-mask" id="mvt-mr"></div><div class="mvt-mask" id="mvt-c"></div><div class="mvt-ring" id="mvt-ring"></div><div class="mvt-bar" id="mvt-bar"></div><span class="mvt-chip" id="mvt-chip"><span class="ic">\u{23F1}\u{FE0F}</span><span class="v">0 min</span><span class="l">de moins qu\u2019au papier</span></span>';
   document.body.appendChild(d);
@@ -2481,6 +2638,15 @@ function _mvtNext(){
   _mvtCur++;
   if(_mvtCur>=_mvtSteps.length){ _mvtEnd(); return; }
   var s=_mvtSteps[_mvtCur];
+  // ★★★ L'ORDRE A CHANGE, ET C'EST LA MOITIE DU DEFAUT DE CADRAGE.
+  //   AVANT : on faisait defiler, PUIS on ecrivait la narration. La barre
+  //   mesuree pendant le defilement etait donc celle du moment PRECEDENT — et
+  //   `scrollIntoView({block:'center'})` centrait de toute facon la cible dans
+  //   l'ecran ENTIER, en-tete fige et barre comprises. Sur un telephone, une
+  //   carte un peu haute ou la derniere de la page finissait sous la barre :
+  //   le halo entourait quelque chose qu'on ne voyait pas.
+  //   MAINTENANT : la narration s'ecrit d'abord (sa hauteur EST la bande),
+  //   puis on centre dans ce qui reste visible, puis on pose le projecteur.
   var doPlace=function(){
     if(s.prep){ try{ s.prep(); }catch(e){} }
     _mvtEl=null; _mvtEls=null;
@@ -2488,12 +2654,14 @@ function _mvtNext(){
       var all=document.querySelectorAll(s.selAll), arr=[];
       for(var i=0;i<all.length && i<(s.n||2);i++) arr.push(all[i]);
       _mvtEls = arr.length ? arr : null;
-      if(_mvtEls && _mvtEls[0]){ try{ _mvtEls[0].scrollIntoView({block:'center'}); }catch(e){} }
     } else {
-      var el=_mvtQuery(s.sel); _mvtEl=el;
-      if(el){ try{ el.scrollIntoView({block:'center', inline:'nearest'}); }catch(e){} }
+      _mvtEl=_mvtQuery(s.sel);
     }
-    requestAnimationFrame(function(){ _mvtPlace(s); });
+    _mvtPlace(s);
+    requestAnimationFrame(function(){
+      _mvtScrollDans((_mvtEls && _mvtEls[0]) || _mvtEl);
+      requestAnimationFrame(_mvtReposition);
+    });
   };
   // `wait` : quand la navigation enchaine plusieurs rendus (onglet -> sous-vue
   //   -> depli d'une carte), 420 ms ne suffisent pas et le projecteur se pose
@@ -2606,6 +2774,67 @@ function _mvtCredit(key, min){
     requestAnimationFrame(fr);
   }, 700);
 }
+// ★★★ LA BANDE UTILE — DEUX BARRES MANGENT L'ECRAN, ET PERSONNE NE LES MESURAIT.
+//   En haut : l'en-tete du module, `position:sticky` (styles.css §21b), plus le
+//   bandeau d'essai quand il est la. En bas : la narration de la visite, posee
+//   par-dessus le dock, et qui change de hauteur A CHAQUE MOMENT puisqu'elle
+//   porte le texte. Ce qui reste entre les deux est la seule zone ou un cadrage
+//   se voit. On la MESURE — on ne la devine pas : un en-tete se replie, un
+//   bandeau d'essai apparait, un texte passe de deux a cinq lignes.
+//   ⚠️ Garde-fou : si les deux barres prenaient plus que l'ecran (ecran tres
+//     court, clavier ouvert), on rend une bande minimale plutot qu'une hauteur
+//     negative — c'est le cas ou l'ancien code masquait tout l'ecran.
+function _mvtBande(){
+  var vh=window.innerHeight||document.documentElement.clientHeight||640;
+  var haut=0, bas=0;
+  try{
+    var tb=document.getElementById('mv-trial-bar');
+    if(tb){ var rt=tb.getBoundingClientRect(); if(rt.height>0 && rt.top<vh/2) haut=Math.max(haut, rt.bottom); }
+    var pg=document.querySelector('.page.active');
+    var hd=pg?pg.querySelector('.mod-header'):null;
+    if(hd){ var rh=hd.getBoundingClientRect(); if(rh.height>0 && rh.top<vh/2) haut=Math.max(haut, rh.bottom); }
+  }catch(e){ if(window.logError)window.logError({level:'info',cat:'visite',msg:'bande haute'}); }
+  try{
+    var bar=document.getElementById('mvt-bar');
+    if(bar){ var rb=bar.getBoundingClientRect(); if(rb.height>0) bas=rb.height+6; }
+    var cb=document.getElementById('mvt-chbar');
+    if(cb){ var rc=cb.getBoundingClientRect(); if(rc.height>0) bas=Math.max(bas, rc.height+6); }
+  }catch(e){ if(window.logError)window.logError({level:'info',cat:'visite',msg:'bande basse'}); }
+  if(haut<0) haut=0; if(bas<0) bas=0;
+  if(haut+bas > vh-120){ var trop=haut+bas-(vh-120); haut=Math.max(0,haut-trop); }
+  if(haut+bas > vh-80){ bas=Math.max(0,vh-80-haut); }
+  return {haut:haut, bas:bas, dispo:Math.max(80, vh-haut-bas), vh:vh};
+}
+// Le conteneur qui defile REELLEMENT autour d'une cible. `scrollIntoView` le
+// trouvait tout seul, mais il ne sait pas viser autre chose que le centre de
+// l'ecran : on refait donc son travail de recherche pour pouvoir choisir la
+// cible du defilement.
+function _mvtScroller(el){
+  var n=el&&el.parentNode;
+  while(n && n.nodeType===1){
+    var st=null; try{ st=window.getComputedStyle(n); }catch(e){ st=null; }
+    if(st && /(auto|scroll|overlay)/.test(st.overflowY||'') && n.scrollHeight>n.clientHeight+4) return n;
+    n=n.parentNode;
+  }
+  return window;
+}
+// Centrer DANS LA BANDE, pas dans l'ecran. Et pour une cible plus haute que la
+// bande, on cale son HAUT : un rectangle de 600 px dans une bande de 400 ne se
+// centre pas, il se lit par le haut.
+function _mvtScrollDans(el){
+  if(!el || !document.body.contains(el)) return;
+  try{
+    var b=_mvtBande(), r=el.getBoundingClientRect();
+    if(!r.height && !r.width) return;
+    var vise = b.haut + b.dispo/2;
+    var centre = r.top + Math.min(r.height, b.dispo)/2;
+    var delta = centre - vise;
+    if(Math.abs(delta)<2) return;
+    var sc=_mvtScroller(el);
+    if(sc===window){ window.scrollBy(0, delta); }
+    else { sc.scrollTop += delta; }
+  }catch(e){ if(window.logError)window.logError({level:'info',cat:'visite',msg:'defilement cadrage'}); }
+}
 function _mvtSet(id,l,t,w,h){ var e=document.getElementById(id); if(!e)return; e.style.left=l+'px'; e.style.top=t+'px'; e.style.width=w+'px'; e.style.height=h+'px'; }
 function _mvtUnionRect(els){
   var L=Infinity,T=Infinity,R=-Infinity,B=-Infinity,ok=false;
@@ -2626,12 +2855,24 @@ function _mvtReposition(){
     return;
   }
   if(ring) ring.style.opacity='1';
-  _mvtSet('mvt-mt',0,0,vw,Math.max(0,r.top-pad));
-  _mvtSet('mvt-mb',0,r.bottom+pad,vw,Math.max(0,vh-r.bottom-pad));
-  _mvtSet('mvt-ml',0,r.top-pad,Math.max(0,r.left-pad),r.height+2*pad);
-  _mvtSet('mvt-mr',r.right+pad,r.top-pad,Math.max(0,vw-r.right-pad),r.height+2*pad);
-  _mvtSet('mvt-c',r.left-pad,r.top-pad,r.width+2*pad,r.height+2*pad);
-  if(ring){ ring.style.left=(r.left-pad)+'px'; ring.style.top=(r.top-pad)+'px'; ring.style.width=(r.width+2*pad)+'px'; ring.style.height=(r.height+2*pad)+'px'; }
+  // ★★★ LE CADRAGE NE DEPASSE PLUS SOUS LES BARRES. Il se rogne au bord de la
+  //   bande utile : montrer le HAUT d'une carte, entier, vaut mieux qu'un halo
+  //   dont la moitie basse est derriere la narration. Si le rognage ne laisse
+  //   presque rien (la cible est entierement hors bande, ce qui arrive quand un
+  //   ecran se re-rend sous le projecteur), on cadre le haut de la bande plutot
+  //   que de rendre un rectangle de deux pixels.
+  var b=_mvtBande();
+  var t=r.top-pad, bo=r.bottom+pad;
+  if(t<b.haut) t=b.haut;
+  if(bo>vh-b.bas) bo=vh-b.bas;
+  if(bo-t<48){ t=b.haut; bo=b.haut+Math.min(b.dispo, Math.max(48, r.height+2*pad)); }
+  var l=Math.max(0,r.left-pad), rr=Math.min(vw, r.right+pad);
+  _mvtSet('mvt-mt',0,0,vw,Math.max(0,t));
+  _mvtSet('mvt-mb',0,bo,vw,Math.max(0,vh-bo));
+  _mvtSet('mvt-ml',0,t,l,Math.max(0,bo-t));
+  _mvtSet('mvt-mr',rr,t,Math.max(0,vw-rr),Math.max(0,bo-t));
+  _mvtSet('mvt-c',l,t,Math.max(0,rr-l),Math.max(0,bo-t));
+  if(ring){ ring.style.left=l+'px'; ring.style.top=t+'px'; ring.style.width=Math.max(0,rr-l)+'px'; ring.style.height=Math.max(0,bo-t)+'px'; }
 }
 // ── L'addition : plein \u00e9cran sobre, calcul\u00e9 depuis DEMO2_CREDITS. ──
 // ★★★ L'ADDITION — ELLE NE COMPTE QU'EN HEURES.
@@ -10477,17 +10718,6 @@ async function refreshApp(){
   window.openConfirmDel   = openConfirmDel;
   window.couleurTracType  = couleurTracType;
   window.fmtDate          = fmtDate;
-  // Lot SAUV-1 : une restauration remplace les 26 documents du tenant. La snapshot
-  // hors ligne, elle, porte encore l'etat d'AVANT : la laisser en place, c'est garder
-  // une copie perimee que le prochain demarrage sans reseau relirait comme si de rien
-  // n'etait. On annule le flush en attente AVANT d'effacer -- sinon il se reecrit
-  // juste apres (cf. la note posee au-dessus de _mvSnapCancel).
-  window._mvPurgerSnapshot = function(){
-    try{ _mvSnapCancel(); }
-    catch(e){ if(window.logError) window.logError({level:'info', cat:'storage', msg:'purge snapshot : annulation du flush', detail:String(e)}); }
-    try{ var _k = _mvLsKey(); if(_k) localStorage.removeItem(_k); }
-    catch(e2){ if(window.logError) window.logError({level:'info', cat:'storage', msg:'purge snapshot : effacement impossible', detail:String(e2)}); }
-  };
 })();
 
 function switchVigneOng(dest){

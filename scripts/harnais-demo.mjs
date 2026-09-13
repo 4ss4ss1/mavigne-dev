@@ -130,6 +130,31 @@ export function jouer(src = SRC, tout = null, muet = false) {
   t('les journées de bureau sont dites', /journ\\u00e9es de bureau/.test(add));
   t('la ligne hors total est affichée', /horsH/.test(add));
 
+  // 8 — LA FEUILLE DE STYLE DE LA VISITE NE PORTE PLUS LE NOM D'UN AUTRE MODULE.
+  //   `_vtCss()` (la tournée du cuvier, cave.js) se garde par
+  //   `getElementById('mvt-css')`. Le jour où la visite a posé SA feuille sous
+  //   ce nom — dès l'écran d'accueil — la tournée s'est rendue SANS habillage,
+  //   pour toute la session. Rien n'a rougi : les deux feuilles sont valides,
+  //   c'est le NOM qui collisionne. Aucun contrôle du dépôt ne regardait ça.
+  const build = corps(bloc(src, 'function _mvtBuild(){', '\n}'));
+  t('la visite pose sa feuille sous « mvt-visite-css »', /id\s*=\s*'mvt-visite-css'/.test(build));
+  t('la visite ne réclame plus l\'identifiant « mvt-css »', !/'mvt-css'/.test(corpsSrc));
+  t('aucun autre module ne réclame « mvt-visite-css »', !AUTRES.includes('mvt-visite-css'));
+
+  // 9 — LE CADRAGE SE POSE DANS LA BANDE UTILE, PAS AU MILIEU DE L'ÉCRAN.
+  //   Deux barres mangent l'écran — l'en-tête figé en haut, la narration en
+  //   bas — et `scrollIntoView({block:'center'})` les ignorait toutes les deux.
+  //   Trois choses tiennent la correction : plus de centrage sur l'écran
+  //   entier, la narration écrite AVANT le défilement (sa hauteur EST la
+  //   bande), et un halo borné par la bande.
+  const next = corps(bloc(src, 'function _mvtNext(){', '\n}'));
+  const repo = corps(bloc(src, 'function _mvtReposition(){', '\n}'));
+  t('le moteur ne centre plus dans l\'écran entier', !/scrollIntoView/.test(next));
+  t('le moteur centre dans la bande utile', /_mvtScrollDans\(/.test(next));
+  t('la narration s\'écrit avant le défilement',
+    next.indexOf('_mvtPlace(s)') >= 0 && next.indexOf('_mvtScrollDans(') > next.indexOf('_mvtPlace(s)'));
+  t('le halo est borné par la bande', /_mvtBande\(\)/.test(repo));
+
   return { ok, ko, totalH, horsH: H.min * H.freq / 60, moments: M.length };
 }
 

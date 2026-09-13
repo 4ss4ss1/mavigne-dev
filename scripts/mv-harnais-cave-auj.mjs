@@ -149,8 +149,15 @@ pose(/^\s*<button class="mvu-tab active" id="cave-sec-aujourdhui"/.test(tabs), '
 pose((tabs.match(/class="mvu-tab active"/g) || []).length === 1, 'index.html : un seul onglet actif par d\u00e9faut');
 pose(/id="cave-view-auj"/.test(HTMLNU) && /id="auj-body"/.test(HTMLNU) && /id="cave-kpis-note"/.test(HTMLNU),
   'index.html : #cave-view-auj, #auj-body et #cave-kpis-note existent');
-pose(/selectCaveSection\('aujourdhui'\)/.test(APPNU) && /sel:\['#auj-body','#cave-view-auj','#page-cave'\]/.test(APPNU),
-  'app.js : la visite guid\u00e9e (17 h 15) atterrit sur Aujourd\u2019hui');
+// ⚠️ L'HEURE N'EST PAS L'INVARIANT, L'ECRAN L'EST. Le lot VIS-1 a refait le
+//   parcours en vinification : la Cave n'est plus la 15e etape d'un soir de
+//   printemps, elle est le PREMIER ecran de la journee (6 h 40). Et la
+//   navigation passe par `_mvtGoCave`, le raccourci partage avec les chapitres,
+//   au lieu de reecrire `goTo` + `selectCaveSection` a la main. Ce qui doit
+//   rester vrai : un moment de la visite atterrit sur Aujourd'hui, et vise
+//   bien son corps.
+pose(/(selectCaveSection\('aujourdhui'\)|_mvtGoCave\('aujourdhui')/.test(APPNU) && /sel:\['#auj-body','#cave-view-auj','#page-cave'\]/.test(APPNU),
+  'app.js : la visite guid\u00e9e atterrit sur Aujourd\u2019hui');
 pose(/id:'aujourdhui'/.test(APPNU) && /id==='aujourdhui'/.test(APPNU), 'app.js : le chapitre d\u00e9mo « Aujourd\u2019hui » a sa branche');
 pose(/'cave\.auj':\s*\{/.test(UTNU) && /_mvInfoBtn\('cave\.auj'\)/.test(SRCNU), 'la fiche MV_INFO cave.auj existe et est pos\u00e9e');
 const ev = extraire(SRCNU, '_mlEvHtml')[1];
