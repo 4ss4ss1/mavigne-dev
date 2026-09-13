@@ -308,8 +308,11 @@ function renderTracInfoBar(){
 
 // ════ RÉPARATEUR ════
 
-function todayStr(){return new Date().toISOString().slice(0,10);}
-function addDays(iso,n){var d=new Date(iso);d.setDate(d.getDate()+n);return d.toISOString().slice(0,10);}
+function todayStr(){return _mvToday();}
+// ⚠️ Deux horloges dans une seule fonction : `new Date(iso)` lit minuit UTC,
+// `getDate()/setDate()` ecrivent en local. C'est la faute de `_mvJourApres`
+// (harnais fuseau) : on reste en UTC de bout en bout, comme lui.
+function addDays(iso,n){var p=String(iso||'').split('-');if(p.length<3)return '';var d=new Date(Date.UTC(+p[0],(+p[1]||1)-1,(+p[2]||1)+n));return d.toISOString().slice(0,10);}
 
 function renderRepBanner(){
   renderRepHist();
@@ -742,7 +745,8 @@ function toggleAnomalieTraitee(id){
 // ════ CUVE GNR + PROCHAINE RÉVISION (saisie, écriture tractoriste/admin) ════
 var _gnrEdit=false, _revEdit=false, _gnrAct='';
 function _gnrNum(n){ return (Number(n)||0).toLocaleString('fr-FR'); }
-function _gnrTodayISO(){ var d=new Date(); return d.getFullYear()+'-'+String(d.getMonth()+1).padStart(2,'0')+'-'+String(d.getDate()).padStart(2,'0'); }
+// FUS-2 : ce patron etait le seul juste du depot — il vit desormais dans utils.js.
+function _gnrTodayISO(){ return _mvToday(); }
 function _gnrField(id,label,val){
   return '<div style="margin-bottom:8px"><div style="font-size:12px;color:var(--texte-doux);margin-bottom:3px">'+label+'</div>'
     +'<input type="number" id="'+id+'" value="'+(val!=null&&val!==''?val:'')+'" min="0" inputmode="numeric" style="width:100%;padding:9px 11px;border:1.5px solid var(--gris);border-radius:9px;font-size:16px;font-family:inherit;background:var(--bg-card);color:var(--texte);box-sizing:border-box"></div>';
@@ -2356,7 +2360,7 @@ function openNewSession(){
   var condHtml='';
   _condList().forEach(function(c,i){condHtml+='<div class="pchk'+(i===0?' sel acre':'')+'" onclick="pickCond(this)">'+_escHtml(c.nom)+'</div>';});
   document.getElementById('s-cond-pick').innerHTML=condHtml;
-  document.getElementById('s-date').value=new Date().toISOString().split('T')[0];
+  document.getElementById('s-date').value=_mvToday();
   document.getElementById('s-note').value='';
   // Tracteur par défaut pour la première activité
   if(document.getElementById('s-trac-id'))document.getElementById('s-trac-id').value='';

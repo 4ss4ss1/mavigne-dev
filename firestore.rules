@@ -260,11 +260,28 @@ service cloud.firestore {
       allow read, write: if isGtAdmin();
     }
 
-    // ── Registre des slugs — lecture publique (vérif unicité onboarding)
-    // Ne contient que {slugs:[…]} : aucune donnée sensible.
+    // ── Registre des slugs — lecture publique ─────────────────────────
+    // Deux usages, tous deux PRE-AUTHENTIFICATION, d'ou le `read: if true` :
+    //   · unicite du slug pendant l'onboarding (fbCheckTenantExists) ;
+    //   · routage d'un domaine « en attente » (_fbTenantStatus).
+    // ⚠️⚠️ CE DOCUMENT EST LU PAR N'IMPORTE QUI, SANS COMPTE. Il ne doit donc
+    // porter QUE `slugs:[…]` et `statuts:{slug:'pending'|'active'}`.
+    // ⚠️⚠️⚠️ Le registre commercial (plan, essai, dates) a VECU ICI et n'y est
+    // plus : il est dans `_guerettech/clients`, GT-only. Le seul ecrivain est
+    // `_agtWriteClients` (admin-gt.js), qui reecrit ce document en entier et
+    // sans le champ `clients`. Ne jamais y remettre un champ commercial « juste
+    // le temps de » : la regle ne sait pas filtrer par champ.
     match /_guerettech/tenants {
       allow read: if true;
       allow write: if isGtAdmin();
+    }
+
+    // ── Registre commercial — GT admin uniquement ─────────────────────
+    // {clients:{slug:{plan,trialDays,status,created_at,trialExp,trialPrevu}}}
+    // Deja couvert par le bloc /_guerettech/{document=**} ci-dessus ; ecrit ici
+    // explicitement pour que la lecture des regles ne laisse aucun doute.
+    match /_guerettech/clients {
+      allow read, write: if isGtAdmin();
     }
 
     // ── Codes d'essai 30j — GT admin uniquement ───────────────────────

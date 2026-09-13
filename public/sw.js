@@ -1,4 +1,5 @@
-// MA VIGNE — Service Worker v7.76
+// MA VIGNE — Service Worker v7.77
+// v7.77 (13/09/2026) — AUDIT : le registre commercial quitte le document public (_guerettech/clients, GT-only) · 78 dates recalees en heure LOCALE (_mvToday/_mvISO) · plus de defaut 'marchand-grillot' dans la cle locale ni dans le start_url du manifest · cuivre : moyenne 7 ans divisee par les annees COUVERTES, plafond derive du reglage · reglages vendange bornes · filet sitemap
 // v7.76 (12/09/2026) — TRI-3 : LA FEUILLE DE TRI REMPLACE LES DEUX DERNIERS
 //   `openPrompt` D'ANNEE, ET LA FAMILLE EST CLOSE.
 //   Controle de maturite et cahier de cuverie posaient deja leur annee dans un
@@ -3907,7 +3908,7 @@
 // v2.22 — Fix profils vides : guard vide dans loadData() pour MEMBRES/SAISONS/TACHES
 // v2.17 — Onboarding intégré + tenantId · v2.06 — Firebase Auth · v2.00–v2.05 — divers
 const DEBUG = self.location.hostname === 'localhost' || self.location.hostname === '127.0.0.1';
-const CACHE_NAME   = 'mavigne-v7.76';
+const CACHE_NAME   = 'mavigne-v7.77';
 const TENANT_CACHE = 'mavigne-tenant';   // Cache persistant — préservé à chaque mise à jour SW
 const SYNC_TAG     = 'mavigne-sync';
 
@@ -3923,7 +3924,7 @@ const CDN_URLS = [
 ];
 
 self.addEventListener('install', event => {
-  if(DEBUG) console.log('[SW] Ma Vigne v7.76 installé');
+  if(DEBUG) console.log('[SW] Ma Vigne v7.77 installé');
   event.waitUntil(
     caches.open(CACHE_NAME).then(async cache => {
       // ── Cœur applicatif : STRICT (mise à jour ATOMIQUE) ──
@@ -3939,7 +3940,7 @@ self.addEventListener('install', event => {
 });
 
 self.addEventListener('activate', event => {
-  if(DEBUG) console.log('[SW] Ma Vigne v7.76 activé');
+  if(DEBUG) console.log('[SW] Ma Vigne v7.77 activé');
   event.waitUntil(
     caches.keys().then(keys =>
       Promise.all(
@@ -3976,19 +3977,31 @@ self.addEventListener('fetch', event => {
   // ── Manifest dynamique par tenant ──
   // Intercepté en priorité : retourne un manifest avec start_url contenant le slug du tenant courant.
   // Le tenant est stocké dans TENANT_CACHE via message SET_TENANT (envoyé par firebase.js au chargement).
-  // Fallback : 'marchand-grillot' si le cache tenant est vide (1er install avant firebase.js).
+  //
+  // ⚠️⚠️⚠️ LE FALLBACK ETAIT 'marchand-grillot', ET C'ETAIT LE PIRE CAS POSSIBLE.
+  // Le cache tenant est vide exactement au 1er install — c'est-à-dire chez un
+  // NOUVEAU client. Il installait donc un raccourci figé sur
+  //     start_url = https://mavigneapp.fr/?tenant=marchand-grillot
+  // et `?tenant=` est en PRIORITÉ ABSOLUE (firebase.js) : chaque lancement depuis
+  // l'icône réécrivait son tenant. Les règles Firestore l'empêchaient de VOIR quoi
+  // que ce soit (son claim ne colle pas) — aucune fuite — mais son icône ouvrait
+  // une app morte, et le navigateur FIGE le start_url au moment de l'install :
+  // le défaut ne se répare pas tout seul.
+  // Sans tenant connu, on sert donc un start_url NEUTRE : l'app décide elle-même
+  // (onboarding, ou le tenant déjà posé en localStorage). Ne jamais remettre un
+  // slug en dur ici : ce chemin ne s'exécute QUE quand on ne sait pas.
   if (url.pathname.endsWith('/manifest.json')) {
     event.respondWith(
       caches.open(TENANT_CACHE).then(function(cache) {
         return cache.match('current-tenant').then(function(resp) {
-          return (resp ? resp.text() : Promise.resolve('marchand-grillot')).then(function(tenant) {
+          return (resp ? resp.text() : Promise.resolve('')).then(function(tenant) {
             var slug = (tenant && /^[a-z0-9][a-z0-9-]*$/.test(tenant) && tenant.length <= 50)
-              ? tenant : 'marchand-grillot';
+              ? tenant : '';
             var manifest = {
               name: 'Ma Vigne',
               short_name: 'Ma Vigne',
               description: 'Gestion viticole \u2014 Suivi parcelles, travaux, tracteur et phyto',
-              start_url: 'https://mavigneapp.fr/?tenant=' + slug,
+              start_url: slug ? ('https://mavigneapp.fr/?tenant=' + slug) : 'https://mavigneapp.fr/',
               display: 'standalone',
               orientation: 'portrait',
               background_color: '#0F1319',
@@ -3998,7 +4011,7 @@ self.addEventListener('fetch', event => {
                 { src: 'icon-512.png', sizes: '512x512', type: 'image/png', purpose: 'any maskable' }
               ]
             };
-            if(DEBUG) console.log('[SW] Manifest servi pour tenant :', slug);
+            if(DEBUG) console.log('[SW] Manifest servi pour tenant :', slug || '(neutre)');
             return new Response(JSON.stringify(manifest, null, 2), {
               status: 200,
               headers: {

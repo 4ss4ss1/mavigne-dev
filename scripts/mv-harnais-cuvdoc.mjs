@@ -26,6 +26,7 @@ import path from 'node:path';
 import { fileURLToPath, pathToFileURL } from 'node:url';
 import { execFileSync } from 'node:child_process';
 
+import { sourceDates, poseDates } from './mv-dates-reelles.mjs';
 const ICI    = path.dirname(fileURLToPath(import.meta.url));
 const RACINE = path.join(ICI, '..');
 const args   = process.argv.slice(2);
@@ -63,6 +64,7 @@ const win = { document:doc,
   URL:{ createObjectURL(){ return 'blob:x'; }, revokeObjectURL(){} },
   Blob:function(p){ this.parts = p; } };
 win.window = win; win.self = win;
+poseDates(globalThis);   // _mvISO/_mvToday extraits du vrai utils.js (FUS-2)
 globalThis.window = win; globalThis.document = doc; globalThis.location = win.location;
 globalThis.localStorage = win.localStorage; globalThis.sessionStorage = win.localStorage;
 globalThis.requestAnimationFrame = win.requestAnimationFrame;

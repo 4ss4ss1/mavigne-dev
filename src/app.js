@@ -559,7 +559,32 @@ window._syncLocalVars = function() {
 // ════════════════════════════════════
 // PERSISTANCE — Firebase (primaire) + localStorage (fallback)
 // ════════════════════════════════════
-const LS_KEY = 'mavigne_data_v1_' + (localStorage.getItem('mavigne_tenant') || 'marchand-grillot');
+// ⚠⚠⚠ CE FUT UNE CONSTANTE, AVEC UN DEFAUT  marchand-grillot .
+// Evaluee au CHARGEMENT du module, donc AVANT le login : le premier passage d'un
+// nouveau client (localStorage vierge, navigation privee, cache vide) figeait la
+// cle sur le domaine de reference pour toute la session. Sa sauvegarde hors ligne
+// s'ecrivait dans le seau d'un autre domaine, devenait orpheline au reload
+// suivant, et son `logout()` ne la purgeait jamais.
+// firebase.js:#10 avait retire ce defaut de `TENANT_ID` ; il avait survecu ici.
+// Desormais : une FONCTION, relue a chaque appel, et qui rend '' quand le tenant
+// n'est pas connu. Sans tenant, on n'ecrit RIEN plutot que d'ecrire ailleurs.
+var _mvLsKeyMuet = false;
+function _mvLsKey(){
+  var t = '';
+  try { t = localStorage.getItem('mavigne_tenant') || ''; }
+  catch(e){
+    // localStorage inaccessible (navigation privee stricte, quota, iframe bloquee).
+    // On rend '' : pas de repli hors ligne, plutot qu'une ecriture a l'aveugle.
+    // Une seule trace : cette fonction est appelee a chaque snapshot.
+    if(!_mvLsKeyMuet && window.logError){
+      _mvLsKeyMuet = true;
+      window.logError({level:'info', cat:'storage',
+        msg:'localStorage inaccessible \u2014 repli hors ligne d\u00e9sactiv\u00e9',
+        detail:(e && e.message) ? e.message : ''});
+    }
+  }
+  return t ? ('mavigne_data_v1_' + t) : '';
+}
 
 // ════ SNAPSHOT localStorage — une seule écriture, groupée, et qui parle quand elle échoue ════
 //
@@ -582,7 +607,7 @@ const LS_KEY = 'mavigne_data_v1_' + (localStorage.getItem('mavigne_tenant') || '
 // Sérialiser tout le domaine vingt fois pour vingt validations d'affilée ne servait qu'à
 // faire ramer le téléphone dans les rangs.
 //
-// ⚠️ Toute purge VOLONTAIRE de LS_KEY (déconnexion SEC-5, remise à zéro) doit appeler
+// ⚠️ Toute purge VOLONTAIRE de la cle locale (_mvLsKey) (déconnexion SEC-5, remise à zéro) doit appeler
 //    _mvSnapCancel() AVANT d'effacer : sinon une snapshot en attente se réécrirait après.
 
 const _MV_BK_MAX  = 3;      // nombre maximum de copies de secours conservées
@@ -691,9 +716,11 @@ function _mvSnapWrite(){
       detail:(e && e.message) ? e.message : ''});
     return;
   }
-  if(!_mvLsPut(LS_KEY, json, true)) return;
+  var _lsk = _mvLsKey();
+  if(!_lsk) return;                       // tenant inconnu : aucune ecriture a l'aveugle
+  if(!_mvLsPut(_lsk, json, true)) return;
   // La copie courante vient de passer : localStorage répond, getItem ne peut plus échouer.
-  var bk = 'mavigne_backup_' + new Date().toISOString().split('T')[0];
+  var bk = 'mavigne_backup_' + _mvToday();
   if(localStorage.getItem(bk) !== null){ _mvBkPurge(_MV_BK_MAX); return; }
   _mvBkPurge(_MV_BK_MAX - 1);   // faire la place AVANT d'écrire, pas après
   _mvLsPut(bk, json, false);    // même chaîne, déjà en main : zéro relecture, zéro re-sérialisation
@@ -851,7 +878,9 @@ function saveData(keyHint, toastMsg, toastCoul) {
 
 function loadData() {
   try {
-    const raw = localStorage.getItem(LS_KEY);
+    const _lsk = _mvLsKey();
+    if (!_lsk) return false;              // sans tenant, pas de repli hors ligne
+    const raw = localStorage.getItem(_lsk);
     if (!raw) return false;
     const d = JSON.parse(raw);
     if (d.PARCELLES)    { PARCELLES.length=0; d.PARCELLES.forEach(x=>PARCELLES.push(x)); }
@@ -886,8 +915,8 @@ function loadData() {
 
 function resetData() {
   // Conservée pour compatibilité interne — appelée via executeDangerAction
-  _mvSnapCancel();   // sans ça, le pagehide du reload réécrirait LS_KEY juste après l'effacement
-  localStorage.removeItem(LS_KEY);
+  _mvSnapCancel();   // sans ça, le pagehide du reload réécrirait la clé juste après l'effacement
+  var _lsk = _mvLsKey(); if(_lsk) localStorage.removeItem(_lsk);
   location.reload();
 }
 
@@ -1798,7 +1827,7 @@ function _visiteScenario(){
   //        (branche 'cave_vendange' presente dans applyFbData ; sans seed
   //         le chapitre Cuvier ouvre un ecran vide, comme La Reserve avant lui)
   try{
-    var _vD=function(k){ var t=new Date(now); t.setDate(t.getDate()-k); return t.toISOString().slice(0,10); };
+    var _vD=function(k){ var t=new Date(now); t.setDate(t.getDate()-k); return _mvISO(t); };
     var _cvSeed={
       config:{poids_caisse_kg:25,ratio_min:130,ratio_max:140,sucre_par_degre:16.83},
       recoltes:[
@@ -1821,7 +1850,7 @@ function _visiteScenario(){
   // 10bis) La Reserve : produits + achats + inventaires + futs
   //        (sans intrants semes, le chapitre Reserve ouvre un ecran vide)
   try{
-    var _rD=function(k){ var t=new Date(now); t.setDate(t.getDate()-k); return t.toISOString().slice(0,10); };
+    var _rD=function(k){ var t=new Date(now); t.setDate(t.getDate()-k); return _mvISO(t); };
     _ap('intrants',{
       produits:[
         {id:'ri1',nom:'Bouillie bordelaise RSR',cat:'phyto',unite:'kg',contenance:5,contLbl:'sac',prixU:8.40,conso_src:'registre',conso_manuel:0},
@@ -3090,21 +3119,21 @@ function logout(){
   firebase.auth().signOut();
   _mvSessClear();
   // SEC-5 - Poste partage : effacer les donnees du domaine mises en cache localement.
-  // LS_KEY (mavigne_data_v1_<tenant>) porte l'integralite des donnees du domaine ;
+  // La cle locale (mavigne_data_v1_<tenant>) porte l'integralite des donnees du domaine ;
   // les snapshots mavigne_backup_* en conservent une COPIE et ne sont PAS scopees au
   // tenant -> sans les effacer aussi, la donnee resterait lisible apres deconnexion.
   // On NE touche PAS mavigne_offline_queue (ecritures en attente = perte si effacee)
-  // ni les preferences d'affichage. Au prochain login, LS_KEY est re-hydrate depuis
+  // ni les preferences d'affichage. Au prochain login, la cle locale est re-hydrate depuis
   // Firestore ; la sauvegarde serveur (weeklyTenantJsonBackup, GCS) fait foi.
   _mvSnapCancel();   // une snapshot en attente se réécrirait APRÈS la purge — poste partagé
   try {
-    localStorage.removeItem(LS_KEY);
+    var _lsk = _mvLsKey(); if(_lsk) localStorage.removeItem(_lsk);
     _mvBkPurge(0);
   } catch(e) { if(window.logError) window.logError({level:'info', cat:'storage',
     msg:'Purge locale de déconnexion incomplète', detail:(e && e.name) ? e.name : ''}); }
   window.loginPendingIdx=-1;
   // UX-LOGIN + doctrine SEC-5 — une déconnexion VOLONTAIRE efface le souvenir.
-  // Arbitrage assumé, et j'ai changé d'avis en écrivant : logout() purge déjà LS_KEY
+  // Arbitrage assumé, et j'ai changé d'avis en écrivant : logout() purge déjà la cle locale
   // et les sauvegardes locales « poste partagé ». Garder la tuile du dernier connecté affichée
   // sur la tablette du hangar après avoir effacé toutes ses données serait incohérent.
   // ⚠ Aucune déconnexion AUTOMATIQUE n'existe (vérifié : logout() n'a que deux
@@ -3715,7 +3744,7 @@ async function fetchMeteo(){
     const rain=Math.round((cur.precipitation||0)*10)/10;
     const desc=wmoDesc(code);
     const emoji=wmoIcone(code);
-    meteoData={temp,desc,wind,emoji,date:new Date().toISOString().split('T')[0]};
+    meteoData={temp,desc,wind,emoji,date:_mvToday()};
     window.meteoData=meteoData;
     // Gel calculé avant la mise en cache (lu par le journal d'alertes du hub)
     let _gelIdx=-1,_gelTemp=null;
@@ -3798,7 +3827,7 @@ async function fetchMeteo(){
 // ⚠️ `dateRef` est la date de la VALIDATION, pas la date du jour : rejouer une
 // validation anterieure doit borner sur SA periode, pas sur la periode courante.
 function _findDebutTache(parcelle, tache, dateRef){
-  var ref=dateRef||new Date().toISOString().split('T')[0];
+  var ref=dateRef||_mvToday();
   var enc=JOURNAL.filter(function(j){return j.parcelle===parcelle&&j.tache===tache&&j.statut==='En cours'&&!j.meteo;});
   if(!enc.length)return null;
   var per=(typeof window._saisonForDate==='function')?window._saisonForDate(ref):'';
@@ -3819,7 +3848,7 @@ function _findDebutTache(parcelle, tache, dateRef){
 // Récupère la météo moyenne sur une plage de dates via Open-Meteo (daily)
 async function fetchMeteoMoyenne(dateDebut, dateFin){
   try{
-    var today=new Date().toISOString().split('T')[0];
+    var today=_mvToday();
     // Même jour = aujourd'hui : réutiliser le cache courant
     if(dateDebut===dateFin&&dateDebut===today&&meteoData){
       return{temp_moy:meteoData.temp,temp_min:meteoData.temp,temp_max:meteoData.temp,
@@ -5845,7 +5874,7 @@ function _mvPartTache(){
   var lst=(typeof getTachesSaison==='function')?getTachesSaison():[];
   if(!lst.length)return null;
   var vn=(typeof _visuSaison==='function')?_visuSaison():((getSaisonActive()||{}).nom||'');
-  var d15=new Date(Date.now()-15*86400000).toISOString().split('T')[0];
+  var d15=_mvISO(new Date(Date.now()-15*86400000));
   var cnt={};
   JOURNAL.forEach(function(j){
     if(!j||j.meteo||!j.tache||!j.date||j.date<d15)return;
@@ -5870,7 +5899,7 @@ function _mvPartTache(){
 function _mvPartCalc(tache,nom){
   var parcs=_parcConcern(tache);
   var vn=(typeof _visuSaison==='function')?_visuSaison():((getSaisonActive()||{}).nom||'');
-  var d15=new Date(Date.now()-15*86400000).toISOString().split('T')[0];
+  var d15=_mvISO(new Date(Date.now()-15*86400000));
   var contrib={},recent={};
   JOURNAL.forEach(function(j){
     if(!j||j.meteo||j.tache!==tache||!j.parcelle||!j.date)return;
@@ -6697,7 +6726,7 @@ function _fixPassagesP2(){
 function bulkValidateP1(nomTache){
   if(_mvValidBlocked())return;
   if(!isAdmin()){showToast('Admin requis','#B85A1A');return;}
-  var date=new Date().toISOString().split('T')[0];
+  var date=_mvToday();
   var cnt=0;
   PARCELLES.filter(function(p){return p.statut!=='Arrachee';}).forEach(function(p){
     var s=p.taches&&p.taches[nomTache];
@@ -7463,7 +7492,7 @@ function openRepPonct(){
   var sub=document.getElementById('rp-sub');if(sub)sub.textContent=_dpCurrentNom+(p?(' · '+p.surface+' ha'):'');
   document.querySelectorAll('#rp-chips .rp-chip').forEach(function(c){c.classList.remove('sel');});
   var qv=document.getElementById('rp-qval');if(qv)qv.textContent='0';
-  var dt=document.getElementById('rp-date');if(dt)dt.value=new Date().toISOString().split('T')[0];
+  var dt=document.getElementById('rp-date');if(dt)dt.value=_mvToday();
   _repPonctRefresh();
   openOv('ovRepPonct');
 }
@@ -7480,7 +7509,7 @@ function _repPonctRefresh(){
 }
 function saveRepPonct(){
   if(!_dpCurrentNom||!_repTypes.length)return;
-  var date=(document.getElementById('rp-date')||{}).value||new Date().toISOString().split('T')[0];
+  var date=(document.getElementById('rp-date')||{}).value||_mvToday();
   var jEntry={id:Date.now().toString(16),date:date,parcelle:_dpCurrentNom,tache:'Réparation ponctuelle',qui:currentUser.nom,statut:'Validé',equipe:false,membresEquipe:[],reparation_types:_repTypes.slice(),reparation_qte:_repQ||0};
   JOURNAL.unshift(jEntry);
   injectMeteoIfNeeded(date);
@@ -7554,7 +7583,7 @@ function marquerEnCours(nomParcelle,nomTache,btn){
     showToast('Démarrage annulé — non enregistré','#7A4F2E');
   } else {
     p.taches[nomTache]='En cours';
-    const today=new Date().toISOString().split('T')[0];
+    const today=_mvToday();
     JOURNAL.unshift({id:Date.now().toString(16),date:today,parcelle:nomParcelle,tache:nomTache,qui:currentUser.nom,statut:'En cours',equipe:false,ts_debut:Date.now()});
     injectMeteoIfNeeded(today);
     saveData('journal');
@@ -7710,7 +7739,7 @@ function openValidationPanel(nomParcelle,nomTache,btn){
   _validParcelle=nomParcelle;_validTache=nomTache;_validBtn=btn;
   document.getElementById('vp-titre').textContent=nomTache;
   document.getElementById('vp-parcelle').textContent=nomParcelle;
-  document.getElementById('vp-date').value=new Date().toISOString().split('T')[0];
+  document.getElementById('vp-date').value=_mvToday();
   // Reset mode Seul
   document.querySelectorAll('#vp-equipe-pick .pchk').forEach((el,i)=>{el.classList.toggle('sel',i===0);el.classList.toggle('vert',i===0);});
   document.getElementById('vp-equipe-val').value='non';
@@ -7767,7 +7796,7 @@ async function confirmValidation(){
   const p=PARCELLES.find(x=>x.nom===_validParcelle);if(!p)return;
   _mvdsSnap(_validTache);
   const equipe=document.getElementById('vp-equipe-val').value==='oui';
-  const date=document.getElementById('vp-date').value||new Date().toISOString().split('T')[0];
+  const date=document.getElementById('vp-date').value||_mvToday();
   const membresEquipe=equipe?_getSelectedMembres('vp-membres-pick'):[];
   p.taches[_validTache]='Validé';
   // Entreplantation : stocker le nombre de trous tarrière (saisie manuelle)
@@ -7817,7 +7846,7 @@ function _jePrefillTeam(){
 function _jeBuildTaches(){
   var ts=document.getElementById('je-tache'); if(!ts) return;
   var prev=ts.value;
-  var d=((document.getElementById('je-date')||{}).value)||new Date().toISOString().split('T')[0];
+  var d=((document.getElementById('je-date')||{}).value)||_mvToday();
   var perN=(typeof window._saisonForDate==='function')?window._saisonForDate(d):'';
   var noms=(perN&&typeof window._saisonTaches==='function')?window._saisonTaches(perN):null;
   var dans=noms?TACHES.filter(function(t){return t&&noms.indexOf(t.nom)>=0;}):getTachesSaison();
@@ -7843,7 +7872,7 @@ function openJournalEntry(){
   // Remplir les selects
   const ps=document.getElementById('je-parcelle');
   ps.innerHTML=PARCELLES.filter(p=>p.statut!=='Arrachee').map(p=>`<option value="${_escHtml(p.nom)}">${_escHtml(p.nom)}</option>`).join('');
-  document.getElementById('je-date').value=new Date().toISOString().split('T')[0];
+  document.getElementById('je-date').value=_mvToday();
   var _jeD=document.getElementById('je-date');
   // onblur (et non onchange seul) : un <input type=date> émet onchange sur chaque date
   // intermédiaire structurellement valide pendant la frappe (année « 2 » -> 0002).
@@ -7862,7 +7891,7 @@ function openJournalEntry(){
 async function saveJournalEntry(){
   const parcelle=document.getElementById('je-parcelle').value;
   const tache=document.getElementById('je-tache').value;
-  const date=document.getElementById('je-date').value||new Date().toISOString().split('T')[0];
+  const date=document.getElementById('je-date').value||_mvToday();
   const statut=document.getElementById('je-statut').value;
   const equipe=document.getElementById('je-equipe-val').value==='oui';
   const membresEquipe=equipe?_getSelectedMembres('je-membres-pick'):[];
@@ -8369,7 +8398,7 @@ function openNiveauxPanel(nomParcelle, nomTache) {
   var dateEl=document.getElementById('niv-date');
   if(titEl)titEl.textContent=nomTache;
   if(parEl)parEl.textContent=nomParcelle;
-  if(dateEl)dateEl.value=new Date().toISOString().split('T')[0];
+  if(dateEl)dateEl.value=_mvToday();
   var ab=document.getElementById('niv-admin-badge');
   if(ab)ab.style.display=_adminNiveaux?'inline-flex':'none';
   // Reset team picker
@@ -8498,7 +8527,7 @@ function confirmNiveaux(){
   }
   p.taches[_nivTache]=newState;
   var statut=getTacheStatut(p,_nivTache);
-  var date=document.getElementById('niv-date')&&document.getElementById('niv-date').value||new Date().toISOString().split('T')[0];
+  var date=document.getElementById('niv-date')&&document.getElementById('niv-date').value||_mvToday();
   var equipe=document.getElementById('niv-equipe-val')&&document.getElementById('niv-equipe-val').value==='oui';
   var membresEquipe=equipe?_getSelectedMembres('niv-membres-pick'):[];
   JOURNAL.unshift({id:Date.now().toString(16),date:date,parcelle:_nivParcelle,tache:_nivTache,qui:currentUser.nom,statut:statut,equipe:equipe,membresEquipe:membresEquipe,niveaux:_nivSelDone.slice().sort()});
@@ -8541,7 +8570,7 @@ function openPassagesPanel(nomParcelle, nomTache){
   var dateEl=document.getElementById('pass-date');
   if(titEl)titEl.textContent=nomTache;
   if(parEl)parEl.textContent=nomParcelle;
-  if(dateEl)dateEl.value=new Date().toISOString().split('T')[0];
+  if(dateEl)dateEl.value=_mvToday();
   // Reset team picker
   document.querySelectorAll('#pass-equipe-pick .pchk').forEach(function(el,i){el.classList.toggle('sel',i===0);el.classList.toggle('vert',i===0);});
   var _phv=document.getElementById('pass-equipe-val');if(_phv)_phv.value='non';
@@ -8631,7 +8660,7 @@ function confirmPassages(){
   var doneParcelle=_passSelDone.filter(function(i){return i<=planNb;});
   var doneCnt=doneParcelle.length;
   var commParcelle=_passSelComm.filter(function(i){return i<=planNb;});
-  var date=document.getElementById('pass-date')&&document.getElementById('pass-date').value||new Date().toISOString().split('T')[0];
+  var date=document.getElementById('pass-date')&&document.getElementById('pass-date').value||_mvToday();
   var equipe=document.getElementById('pass-equipe-val')&&document.getElementById('pass-equipe-val').value==='oui';
   var membresEquipe=equipe?_getSelectedMembres('pass-membres-pick'):[];
   var statut=doneCnt>=planNb?'Validé':(doneCnt>0||commParcelle.length>0)?'En cours':'Non démarré';
@@ -8687,7 +8716,7 @@ function annulerTache(nomParcelle,nomTache){
   } else {
     p.taches[nomTache]='Non démarré';
   }
-  const date=new Date().toISOString().split('T')[0];
+  const date=_mvToday();
   JOURNAL.unshift({id:Date.now().toString(16),date,parcelle:nomParcelle,tache:nomTache,qui:currentUser.nom,statut:'Annulé',equipe:false,membresEquipe:[]});
   recalcTravaux(nomTache);injectMeteoIfNeeded(date);
   saveData('parcelles');saveData('journal');saveData('travaux');
@@ -9803,7 +9832,7 @@ function lancerExportEntretienPDF(){
     }).join('');
     return '<section class="tracteur-section"><div class="tracteur-title"><div><div class="tracteur-nom">'+_escHtml(t.nom)+(t.traitementOnly?' <span class="badge-trait">Traitement</span>':'')+'</div><div class="tracteur-modele">'+_escHtml(t.modele||'—')+' · '+_escHtml(t.type)+'</div></div><div class="tracteur-annee">'+annee+'</div></div>'+resumeHTML+'<h3 class="section-sub">Fiches d\'entretien</h3>'+fichesHTML+'<h3 class="section-sub" style="margin-top:20px">Passages réparateur</h3>'+repsHTML+'</section>';
   }).join('<div class="page-break"></div>');
-  var aujourd_hui=fmtD(new Date().toISOString().slice(0,10));
+  var aujourd_hui=fmtD(_mvToday());
   // ★ CHARTE MV_DOC. Ce document titrait « Ma Vigne — Entretien tracteurs » et
   // signait « © GUERETTECH » : il portait le nom de l'editeur, pas celui du
   // vigneron. Le format de page, les polices, l'en-tete et le pied viennent
@@ -9988,7 +10017,7 @@ window.addEventListener('load', function(){
   // Initialiser le thème dès le chargement
   if(typeof initTheme==='function') initTheme();
 
-  var todayStr = new Date().toISOString().split('T')[0];
+  var todayStr = _mvToday();
   var sd = document.getElementById('s-date'); if(sd) sd.value = todayStr;
   var pm = document.getElementById('pdf-mois'); if(pm) pm.value = todayStr.slice(0,7);
 
@@ -10625,7 +10654,7 @@ function pQuickValidate(nom,evt){
   _mvdsSnap(task);
   if(!p.taches)p.taches={};
   var prev=(p.taches[task]===undefined)?undefined:JSON.parse(JSON.stringify(p.taches[task]));
-  var date=new Date().toISOString().split('T')[0];
+  var date=_mvToday();
   var _eqt=_eqtFor(task);var equipe=_eqt.length>0,membresEquipe=equipe?_eqt.slice():[];
   var jid=Date.now().toString(16)+'-qv';
   var label,extra={};
@@ -10702,7 +10731,7 @@ function pQuickStart(nom,evt){
   var task=pTacheFilter,type=_pvType(task);
   if(task==='toutes')return;
   if(!p.taches)p.taches={};
-  var date=new Date().toISOString().split('T')[0];
+  var date=_mvToday();
   if(type==='simple'){
     if((p.taches[task]||'Non d\u00e9marr\u00e9')!=='Non d\u00e9marr\u00e9'){renderParcelles();return;}
     p.taches[task]='En cours';
@@ -11250,6 +11279,8 @@ function exportRapportSaison(seasonNom){
     var trousTot=parcActives.reduce(function(s,p){return s+(p.plantation_trous||0);},0);
     var anyTrous=trousTot>0;
     var anyCu=(typeof window._cuParcRollSum==='function') && parcActives.some(function(p){return window._cuParcRollSum(p.nom)>0;});
+    // Plafond 7 ans derive du plafond annuel reglable (Reglages), jamais 28 en dur.
+    var _cuP7=(typeof window._cuPlafond7==='function')?window._cuPlafond7():28;
     function parcDates(nom){
       var ds=JOURNAL.filter(function(j){return j&&j.parcelle===nom&&(j.statut==='Valid\u00e9')&&inWin(j.date);}).map(function(j){return j.date;}).sort();
       return {d1:ds[0],dN:ds[ds.length-1]};
@@ -11257,7 +11288,7 @@ function exportRapportSaison(seasonNom){
     var prows=parcActives.map(function(p){
       var ok=taches.filter(function(t){return getTacheStatut(p,t.nom)==='Valid\u00e9';}).length, tot=taches.length;
       var dd=parcDates(p.nom);
-      var cu=anyCu?window._cuParcRollSum(p.nom):0, cuR=cu/28;
+      var cu=anyCu?window._cuParcRollSum(p.nom):0, cuR=_cuP7>0?cu/_cuP7:0;
       return '<tr><td class="pnom">'+esc(p.nom)+'</td>'
         +'<td class="r muted">'+(parseFloat(p.surface)||0).toFixed(2)+' ha</td>'
         +'<td class="c"><span class="tag '+(tot>0&&ok>=tot?'ok':ok>=tot*0.5?'warn':'neu')+'">'+ok+'/'+tot+' \u2713</span></td>'
@@ -11375,17 +11406,17 @@ function exportRapportSaison(seasonNom){
       var cuList=parcActives.map(function(p){return {nom:p.nom,surf:parseFloat(p.surface)||0,cu:window._cuParcRollSum(p.nom)};}).filter(function(x){return x.cu>0;}).sort(function(a,b){return b.cu-a.cu;});
       var maxCu=cuList.reduce(function(m,x){return Math.max(m,x.cu);},0);
       var wSum=cuList.reduce(function(s,x){return s+x.cu*x.surf;},0), sSum=cuList.reduce(function(s,x){return s+x.surf;},0);
-      var wAvg=sSum>0?wSum/sSum:0, nOver=cuList.filter(function(x){return x.cu>28;}).length;
-      var cuRows=cuList.map(function(x){var r=x.cu/28;return '<div class="cu-row"><div class="nm">'+esc(x.nom)+'</div>'
+      var wAvg=sSum>0?wSum/sSum:0, nOver=cuList.filter(function(x){return x.cu>_cuP7;}).length;
+      var cuRows=cuList.map(function(x){var r=_cuP7>0?x.cu/_cuP7:0;return '<div class="cu-row"><div class="nm">'+esc(x.nom)+'</div>'
         +'<div class="cu-gauge"><div class="cu-gfill" style="width:'+Math.min(100,r*100)+'%;background:'+cuCol(r)+'"></div></div>'
-        +'<div class="rt" style="color:'+cuCol(r)+'">'+x.cu.toFixed(1)+' <span class="muted" style="font-weight:400">/ 28</span></div></div>';}).join('');
+        +'<div class="rt" style="color:'+cuCol(r)+'">'+x.cu.toFixed(1)+' <span class="muted" style="font-weight:400">/ '+_cuP7+'</span></div></div>';}).join('');
       cuHtml='<div class="section">'
         +'<div class="sec-head"><div class="sec-titles"><div class="sec-eyebrow">Certification bio</div><div class="sec-title"><span class="cop">Conformit\u00e9 cuivre</span> \u2014 7 ans glissants</div></div><div class="sec-count">'+(nOver===0?'0 d\u00e9passement \u2713':nOver+' \u00e0 surveiller')+'</div></div>'
         +'<div class="cu-band"><div><div class="big">'+maxCu.toFixed(1)+'</div><div class="txt"><b>Max parcelle</b> liss\u00e9 7 ans (kg/ha)</div></div>'
         +'<div><div class="big" style="font-size:22px">'+wAvg.toFixed(1)+'</div><div class="txt">Moyenne <b>pond\u00e9r\u00e9e</b> domaine</div></div>'
-        +'<div class="plaf">Plafond UE<b>28 kg/ha</b>sur 7 ans (\u2248 4 kg/ha/an)</div></div>'
+        +'<div class="plaf">Plafond<b>'+_cuP7+' kg/ha</b>sur 7 ans (\u2248 '+((typeof window._cuPlafond==='function')?window._cuPlafond():4)+' kg/ha/an)</div></div>'
         +cuRows
-        +'<div class="sec-note">Cumul du cuivre m\u00e9tal (kg/ha) sur 7 ann\u00e9es glissantes vs plafond 28 kg/ha. Vert &lt; 75 % \u00b7 or 75\u201387 % \u00b7 orange 87\u2013100 % \u00b7 rouge &gt; plafond. Indicatif \u2014 \u00e0 recouper avec l\u2019organisme certificateur.</div></div>';
+        +'<div class="sec-note">Cumul du cuivre m\u00e9tal (kg/ha) sur 7 ann\u00e9es glissantes vs plafond '+_cuP7+' kg/ha. Vert &lt; 75 % \u00b7 or 75\u201387 % \u00b7 orange 87\u2013100 % \u00b7 rouge &gt; plafond. Indicatif \u2014 \u00e0 recouper avec l\u2019organisme certificateur.</div></div>';
     }
 
     // ── 9) Heures & ETP — présence (Planning/manuel) répartie en Travaux vigne / Tracteur / Autres ──
@@ -11530,7 +11561,7 @@ function exportRapportSaison(seasonNom){
       +'<table><thead><tr><th>Parcelle</th><th class="r">Surface</th><th class="c">T\u00e2ches</th><th class="c">1\u02b3\u1d49 \u2192 derni\u00e8re validation</th>'+(anyTrous?'<th class="r">Trous plant.</th>':'')+(anyCu?'<th class="r">Cu 7 ans</th>':'')+'</tr></thead><tbody>'
       +(prows||'<tr class="emptyrow"><td colspan="4">Aucune parcelle active.</td></tr>')
       +(anyTrous?'<tr class="tot"><td>Total</td><td class="r">'+surfTot.toFixed(2)+' ha</td><td class="c">\u2014</td><td class="c">\u2014</td><td class="r">\'+_mvIcon(\'pousse\',16)+\' '+trousTot+'</td>'+(anyCu?'<td class="r">\u2014</td>':'')+'</tr>':'')
-      +'</tbody></table><div class="sec-note">'+(anyCu?'Colonne Cu = cuivre m\u00e9tal cumul\u00e9 sur 7 ans glissants (kg/ha) vs plafond 28 kg/ha \u2014 voir Conformit\u00e9 cuivre. ':'')+(parcArr.length?parcArr.length+' parcelle(s) arrach\u00e9e(s) non incluse(s). ':'')+'Dates = 1\u02b3\u1d49 et derni\u00e8re validation toutes t\u00e2ches confondues.</div></div>');
+      +'</tbody></table><div class="sec-note">'+(anyCu?'Colonne Cu = cuivre m\u00e9tal cumul\u00e9 sur 7 ans glissants (kg/ha) vs plafond '+_cuP7+' kg/ha \u2014 voir Conformit\u00e9 cuivre. ':'')+(parcArr.length?parcArr.length+' parcelle(s) arrach\u00e9e(s) non incluse(s). ':'')+'Dates = 1\u02b3\u1d49 et derni\u00e8re validation toutes t\u00e2ches confondues.</div></div>');
     // §4 Sessions
     H.push('<div class="section"><div class="sec-head"><div class="sec-titles"><div class="sec-eyebrow">M\u00e9canisation</div><div class="sec-title"><span class="acc">Travaux tracteur</span> \u2014 sessions</div></div><div class="sec-count">'+sess.length+' sessions</div></div>'
       +'<table><thead><tr><th>Activit\u00e9</th><th>Tracteur</th><th>Conducteur</th><th class="r">Surface</th><th class="c">Statut</th><th class="r">Avanct.</th></tr></thead><tbody>'

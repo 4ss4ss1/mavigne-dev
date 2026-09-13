@@ -14,6 +14,7 @@ import fs from 'node:fs';
 import path from 'node:path';
 import { fileURLToPath } from 'node:url';
 
+import { sourceDates, poseDates } from './mv-dates-reelles.mjs';
 const ICI = path.dirname(fileURLToPath(import.meta.url));
 const CAVE = path.join(ICI, '..', 'src', 'cave.js');
 
@@ -64,6 +65,7 @@ const MORCEAUX = [
 
 /* ── stubs : le strict minimum ───────────────────────────────────────── */
 const PRELUDE = `
+${sourceDates()}
 var CAVE_VENDANGE = null, CAVE_ELEVAGE = { cuvees: [] };
 var _vendFusSel = {}, _vendFusDest = null, _vendFusNom = '', _vendFusNomTouche = false;
 var _vendOuvert = null;

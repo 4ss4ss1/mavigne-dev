@@ -532,7 +532,10 @@ exports.logVisite = onCall({ region: REGION, enforceAppCheck: true }, async (req
   const vid = String((request.data && request.data.vid) || '').replace(/[^a-zA-Z0-9_]/g, '').slice(0, 60);
   const db = admin.firestore();
   const ref = db.doc('_guerettech/demo_stats');
-  const dayKey = new Date().toISOString().slice(0, 10); // AAAA-MM-JJ
+  // FUS-2 : le jour de PARIS, pas celui d'UTC. La console GT relit ces cles avec
+  // la date locale de l'operateur : en UTC, tout ce qui arrive entre minuit et
+  // 2 h etait compte la veille, et la barre du jour restait vide.
+  const dayKey = new Intl.DateTimeFormat('en-CA', { timeZone: 'Europe/Paris' }).format(new Date()); // AAAA-MM-JJ
   let isNew = false;
   if (vid) {
     const vref = db.doc('_guerettech/demo_stats/visitors/' + vid);

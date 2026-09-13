@@ -1817,6 +1817,11 @@ window._fbTenantStatus = async function (slug) {
     var reg = await getDoc(doc(db, '_guerettech', 'tenants'));
     if (!reg.exists()) return null;
     var data = reg.data() || {};
+    // SEC-GTC : le registre public ne porte plus que `slugs` + `statuts`.
+    // Repli LEGACY sur `clients[slug].status` tant qu'aucune ecriture GT n'a
+    // migre le document — les deux formes coexistent sans rattrapage.
+    var st = (data.statuts && typeof data.statuts === 'object') ? data.statuts[slug] : null;
+    if (st === 'pending' || st === 'active') return st;
     var cli = (data.clients && typeof data.clients === 'object') ? data.clients[slug] : null;
     if (cli && (cli.status === 'pending' || cli.status === 'active')) return cli.status;
     return null;

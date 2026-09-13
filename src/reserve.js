@@ -63,7 +63,8 @@ function saveIntrants(){
 function _rid(){ return 'r'+Date.now().toString(36)+Math.random().toString(36).slice(2,6); }
 function _fmt(n){ if(n==null||isNaN(n)) return '—'; return (Math.round(n*10)/10).toString().replace('.',','); }
 function _frDate(s){ if(!s) return ''; var m=['janv.','févr.','mars','avr.','mai','juin','juil.','août','sept.','oct.','nov.','déc.']; var d=new Date(s); if(isNaN(d)) return s; return d.getDate()+' '+m[d.getMonth()]+' '+String(d.getFullYear()).slice(2); }
-function _today(){ return new Date().toISOString().slice(0,10); }
+// FUS-2 : delegue au seul  aujourd'hui  du projet (utils.js).
+function _today(){ return _mvToday(); }
 function _uniqPush(arr, val){ val=(val||'').trim(); if(val && arr.indexOf(val)<0){ arr.push(val); arr.sort(function(a,b){return a.localeCompare(b,'fr');}); } }
 function _saisonNom(){ try{ var s=window.getSaisonActive&&window.getSaisonActive(); return s?s.nom:''; }catch(e){ return ''; } }
 

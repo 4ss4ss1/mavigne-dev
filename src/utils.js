@@ -23,7 +23,7 @@ export const GT_ADMIN_EMAIL = 'ngdevpro@gmail.com';
 // WHATS_NEW   : tableau vide = modal desactive pour cette version.
 // Format item : { emoji:'📅', titre:'Titre court', desc:'Phrase utilisateur.' }
 // Regle : seulement les changements visibles par les utilisateurs.
-export const APP_VERSION = '7.16';
+export const APP_VERSION = '7.17';
 // ════ Journal des nouveautés (récap cumulatif) ════
 // Une entrée par version, la PLUS RÉCENTE EN HAUT : { v:'5.10', items:[ {emoji,titre,desc}, … ] }
 // À chaque release visible → AJOUTER un bloc en tête (ne pas remplacer). items:[] = release technique (rien à afficher).
@@ -710,6 +710,39 @@ window._mvGraphRepeindre = function(){
 };
 
 export const WHATS_NEW = [
+  { v: '7.17', items: [
+    { emoji: 'reveil', titre: 'Une saisie faite \u00e0 minuit et demie \u00e9tait dat\u00e9e de la veille',
+      desc: "L\u2019application prenait la date sur l\u2019horloge de r\u00e9f\u00e9rence mondiale, pas sur la v\u00f4tre. "
+        + "Entre minuit et 2\u00a0h l\u2019\u00e9t\u00e9 (1\u00a0h l\u2019hiver), tout ce que vous enregistriez portait "
+        + "<b>la date de la veille</b>\u00a0: une pes\u00e9e de caisses en pleine vendange, un ajout de SO\u2082 en fin de "
+        + "nuit, une ligne de journal, un traitement. Deux de ces registres sont r\u00e9glementaires. "
+        + "<b>78\u00a0endroits</b> ont \u00e9t\u00e9 remis \u00e0 l\u2019heure de votre appareil, et un contr\u00f4le "
+        + "automatique rejoue d\u00e9sormais les calculs de dates sous cinq fuseaux avant chaque livraison." },
+    { emoji: 'goutte', titre: 'Le cuivre liss\u00e9 sur 7\u00a0ans criait au loup',
+      desc: "La moyenne glissante ne divisait que par les ann\u00e9es o\u00f9 vous aviez trait\u00e9. Une parcelle \u00e0 "
+        + "4\u00a0kg en 2020, plus rien pendant cinq ans, puis 4\u00a0kg en 2026 affichait <b>4,00\u00a0kg/ha/an "
+        + "\u2014 Vigilance</b>, comme un domaine coll\u00e9 au plafond depuis sept ans. Sa vraie moyenne\u00a0: "
+        + "<b>1,14</b>. Une ann\u00e9e sans cuivre \u00e0 l\u2019int\u00e9rieur de la p\u00e9riode suivie compte "
+        + "d\u00e9sormais pour z\u00e9ro, les ann\u00e9es d\u2019avant votre premi\u00e8re trace ne comptent pas, et "
+        + "l\u2019\u00e9cran <b>dit sur combien d\u2019ann\u00e9es il divise</b>\u00a0\u2014 sans cette assiette, "
+        + "\u00ab\u202f1,7\u00a0kg/ha/an\u202f\u00bb ne se lit pas." },
+    { emoji: 'curseurs', titre: 'Votre plafond cuivre s\u2019applique enfin partout',
+      desc: "Le plafond annuel est r\u00e9glable (R\u00e9glages \u203a Domaine), mais le budget sur sept ans \u00e9tait "
+        + "\u00e9crit \u00ab\u202f28\u202f\u00bb en dur \u00e0 six endroits\u00a0: la vue annuelle suivait votre "
+        + "r\u00e9glage, la vue sept ans non. Il en d\u00e9coule maintenant\u00a0\u2014 une seule notion, un seul chiffre." },
+    { emoji: 'balance', titre: 'Les r\u00e9glages de vendange ne se saisissent plus \u00e0 c\u00f4t\u00e9',
+      desc: "Poids par caisse, ratio kg/hL et sucre par degr\u00e9 pilotent <b>tous les volumes</b> de "
+        + "l\u2019application, jusqu\u2019au rendement en hL/ha. Rien ne les v\u00e9rifiait\u00a0: une valeur "
+        + "aberrante s\u2019enregistrait en silence, et intervertir les ratios minimum et maximum retournait "
+        + "toutes les fourchettes (\u00ab\u202f15,4\u201314,3\u202f\u00bb). Les valeurs sont born\u00e9es, les deux "
+        + "ratios remis dans l\u2019ordre, et l\u2019application <b>vous le dit</b> au lieu de corriger en douce." },
+    { emoji: 'cadenas', titre: 'Deux corrections que vous ne verrez pas',
+      desc: "Le registre commercial de GUERETTECH vivait dans un document lisible sans compte\u00a0: il est "
+        + "d\u00e9plac\u00e9. Et l\u2019application gardait un nom de domaine par d\u00e9faut \u00e0 deux endroits qui "
+        + "s\u2019ex\u00e9cutent avant votre connexion\u00a0\u2014 la sauvegarde hors ligne d\u2019un nouveau domaine "
+        + "pouvait s\u2019\u00e9crire dans le mauvais tiroir, et son raccourci install\u00e9 sur t\u00e9l\u00e9phone "
+        + "pouvait pointer ailleurs. Les deux d\u00e9fauts sont ferm\u00e9s." }
+  ] },
   { v: '7.16', items: [
     { emoji: 'raisin', titre: 'Le contr\u00f4le de maturit\u00e9 et le cahier de cuverie se rangent aussi',
       desc: "Les deux documents demandaient d\u00e9j\u00e0 leur ann\u00e9e dans une petite bo\u00eete\u00a0; c\u2019est "
@@ -4269,6 +4302,31 @@ window._mvContrats = function(m){
 //   etait juste. Trouve le 23/08/2026 par un harnais lance sur la machine de Nico.
 //   Voir le harnais mv-harnais-fuseau.mjs, qui rejoue les fonctions de dates sous cinq
 //   fuseaux et exige un resultat IDENTIQUE.
+// ── LE JOUR, EN HEURE LOCALE (FUS-2) ──────────────────────────────
+// ⚠️⚠️⚠️ `_mvToday()` rend la date UTC, pas celle du
+// vigneron. A Paris, entre minuit et 2 h (ete) ou 1 h (hiver), c'est LA VEILLE :
+//     Paris 15/09/2026 00 h 30  ->  "2026-09-14"
+// Une pesee de caisses a 00 h 30 pendant les vendanges, un ajout de SO2 en fin de
+// nuit, une ligne de journal : dates de la veille, en silence. Deux de ces
+// registres sont reglementaires, et la cave se travaille la nuit.
+// Le bon patron existait deja dans le depot (`_gnrTodayISO`, tracteur.js) : il est
+// promu ici, et il n'y a plus qu'une definition du mot  aujourd'hui .
+//
+// ⚠️⚠️ NE PAS s'en servir pour les allers-retours JOUR-EPOQUE : `_mvJourApres`
+// ci-dessous, `_mvFutIso`, `_cmpISO`/`_cmpEchelle`/`_cmpSeuil` (reglages.js),
+// `_arcISO`/`_pexIsoPlus` (pilotage.js) sont UTC de bout en bout, et le RESTER est
+// precisement ce qui les rend justes sous tous les fuseaux (mv-harnais-fuseau).
+// La regle n'est pas  local partout , c'est  une seule horloge par fonction .
+export function _mvISO(d){
+  var x = (d instanceof Date) ? d : new Date(d);
+  if(!x || isNaN(x.getTime())) return '';
+  return x.getFullYear() + '-' + String(x.getMonth() + 1).padStart(2, '0')
+                         + '-' + String(x.getDate()).padStart(2, '0');
+}
+export function _mvToday(){ return _mvISO(new Date()); }
+window._mvISO   = _mvISO;
+window._mvToday = _mvToday;
+
 window._mvJourApres = function(iso){
   if(!iso) return '';
   var m = /^(\d{4})-(\d{2})-(\d{2})/.exec(String(iso));
@@ -4660,7 +4718,7 @@ function _mvFutTracer(INTRANTS, motif, lot, nb, note){
   if(!INTRANTS.fut_mouv) INTRANTS.fut_mouv = [];
   var m = MV_FUT_MOTIFS[motif];
   if(!m || !(nb > 0)) return null;
-  var e = {id:_mvFutRid(), date:new Date().toISOString().slice(0,10), sens:m.sens, motif:motif,
+  var e = {id:_mvFutRid(), date:_mvToday(), sens:m.sens, motif:motif,
            four:(lot&&lot.four)||'', ref:(lot&&lot.ref)||'', annee:_mvFutAn(lot&&lot.annee),
            nb:nb, note:String(note||'').trim()};
   INTRANTS.fut_mouv.push(e);
@@ -4833,7 +4891,7 @@ function _mvFutLoyer(INTRANTS, CAVE_ELEVAGE, d0, d1, curY){
 // Jours restants avant la fin d'un contrat, a partir d'une date de reference.
 function _mvFutJoursFin(f, isoRef){
   if(!_mvFutEstLoc(f)) return null;
-  var a1 = _mvFutMs(f.fin), r = _mvFutMs(isoRef || new Date().toISOString().slice(0,10));
+  var a1 = _mvFutMs(f.fin), r = _mvFutMs(isoRef || _mvToday());
   if(a1 == null || r == null) return null;
   return Math.round((a1 - r) / 86400000);
 }
@@ -4919,7 +4977,7 @@ function _mvFutEntrer(INTRANTS, lot, nb, motif, note){
   if(ex) ex.qte = (parseInt(ex.qte,10)||0) + nb;
   else INTRANTS.futs.push({id:_mvFutRid(), four:cible.four, ref:cible.ref,
         annee:(cible.annee==null?'':String(cible.annee)), qte:nb,
-        date:new Date().toISOString().slice(0,10)});
+        date:_mvToday()});
   _mvFutTracer(INTRANTS, motif || 'achat', cible, nb, note);
   return nb;
 }

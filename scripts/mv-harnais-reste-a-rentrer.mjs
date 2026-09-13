@@ -34,6 +34,7 @@ import fs from 'node:fs';
 import path from 'node:path';
 import { fileURLToPath } from 'node:url';
 
+import { sourceDates, poseDates } from './mv-dates-reelles.mjs';
 /* fileURLToPath, jamais new URL().pathname : celui-ci rend « /C:/Users/… »
    sous Windows et Node le repart en « C:\C:\Users\… » (§53). */
 const ICI    = path.dirname(fileURLToPath(import.meta.url));
@@ -79,6 +80,7 @@ const ETAT = [varDeModule('_vendResteOuv'), varDeModule('_VEND_RESTE_MAX')].join
 
 /* Les seules dépendances hors périmètre : pilotées par le harnais. */
 const PRELUDE = `
+${sourceDates()}
 var window = CTX.window;
 var CAVE_VENDANGE = CTX.CAVE_VENDANGE;
 function _vendCfg(){ return CTX.cfg; }

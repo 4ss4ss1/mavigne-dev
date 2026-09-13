@@ -166,7 +166,7 @@ function _pl2YearTabs(){
 (function(){
   try{
     var _t=new Date();
-    if(_t.getFullYear()===planYear){ var _iso=_t.toISOString().slice(0,10); _planCanic.du=_iso; _planCanic.au=_iso; }
+    if(_t.getFullYear()===planYear){ var _iso=_mvISO(_t); _planCanic.du=_iso; _planCanic.au=_iso; }
     else { _planCanic.du=planYear+'-01-01'; _planCanic.au=planYear+'-01-01'; }
     var _tn=localStorage.getItem('mavigne_tenant')||'';
     var _raw=localStorage.getItem('mavigne_canic_'+_tn);
@@ -5607,7 +5607,7 @@ function _planExportPDF_(nom,mbr,_ctr){
   }
   // Idem : la date d'edition imprimee sur le document doit etre celle du domaine.
   var _edite=_planFmtJour((typeof window._mvAujIso==='function')?window._mvAujIso()
-                          :new Date().toISOString().slice(0,10));
+                          :_mvToday());
   // \u2605 BASE ABSOLUE. Le document naît dans une fenetre about:blank : sous iOS Safari,
   //   « /fonts/fonts.css » ne s'y resout pas et la feuille tombait en Times \u2014 la
   //   « mauvaise police » se voyait sur iPad, jamais sur le poste de bureau.
@@ -6648,7 +6648,7 @@ function _plRvContratsHtml(mbr){
   //   _mvAujIso() (utils.js) lit l'horloge locale, ce qui est la seule bonne reponse
   //   a « quel jour sommes-nous ». Meme famille que le defaut de _mvJourApres (§55o).
   var _plRvAuj = (typeof window._mvAujIso === 'function') ? window._mvAujIso()
-               : new Date().toISOString().slice(0, 10);
+               : _mvToday();
   var P = (typeof window._mvPeriodes === 'function') ? (window._mvPeriodes(mbr) || [])
         : ((typeof window._mvContrats === 'function') ? (window._mvContrats(mbr) || []) : []);
   var annu = (typeof window._mvAnnualise === 'function') ? !!window._mvAnnualise(mbr) : true;

@@ -1067,7 +1067,7 @@ function _cmpFrise(){
       +'<b>'+_escHtml(s.nom)+'</b></div>';
     if(!prevFin||s.fin>prevFin) prevFin=s.fin;
   });
-  var today=new Date().toISOString().split('T')[0];
+  var today=_mvToday();
   if(today>=W.a&&today<=W.b) segs+='<div class="cmp-today" style="left:'+pc(today)+'%"></div>';
   // Trous : intervalles de la fenêtre que plus aucune période ne couvre.
   var trous=[],curN=a;
@@ -3194,7 +3194,7 @@ var MV_DOCS = [
     s:'Le m\u00eame registre en format lisible par machine : une ligne par produit et par parcelle, avec les coordonn\u00e9es GPS.' },
   { f:'oblig', act:'cuivre',    mod:'phyto',    ico:'\u{1FA99}', bg:'var(--terre-pale)', fm:'pdf',
     t:'Synth\u00e8se cuivre', ask:'',
-    s:'Cuivre m\u00e9tal par parcelle sur sept ans, face au plafond de 28 kg/ha.' },
+    s:'Cuivre m\u00e9tal par parcelle sur sept ans, face au plafond des sept ans.' },
   { f:'oblig', act:'mois',      mod:'planning', ico:'\u23F1\u{FE0F}', bg:'var(--bleu-pale)', fm:'pdf',
     t:'Relev\u00e9 mensuel d\u2019heures', ask:'Choix du mois',
     s:'Heures travaill\u00e9es, jours travaill\u00e9s et absences du mois \u2014 le format attendu par la MSA.' },
@@ -3445,7 +3445,7 @@ function showExportFeedback(msg){
 function exportJSON(){
   if(!isAdmin())return;
   const data={exportDate:new Date().toISOString(),version:'4.7',domaine:(window.DOMAINE_NOM||'Mon domaine'),parcelles:window.PARCELLES,journal:window.JOURNAL.filter(j=>!j.meteo),sessions:window.SESSIONS,traitements:window.TRAITEMENTS,membres:window.MEMBRES.map(m=>({nom:m.nom,roles:m.roles,statut:m.statut})),saisons:window.SAISONS,taches:window.TACHES,historique:window.HISTORIQUE};
-  const date=new Date().toISOString().split('T')[0];
+  const date=_mvToday();
   dlFile(JSON.stringify(data,null,2),`mavigne_export_${date}.json`,'application/json');
   showExportFeedback('Export JSON téléchargé !');
 }
@@ -3552,7 +3552,7 @@ function exportCSVJournal(){
   const q=v=>`"${String(v==null?'':v).replace(/"/g,'""')}"`;
   const rows=travaux.map(j=>[j.date,j.parcelle,j.tache,j.qui||'',j.statut,j.equipe?'Oui':'Non'].map(q).join(';'));
   const csv=[cols.map(q).join(';'),...rows].join('\r\n');
-  const date=new Date().toISOString().split('T')[0];
+  const date=_mvToday();
   dlFile('\uFEFF'+csv,`mavigne_journal_${date}.csv`,'text/csv;charset=utf-8');
   showExportFeedback(`${travaux.length} entrées exportées en CSV !`);
 }
@@ -3572,7 +3572,7 @@ function exportCSVParcelles(){
     return [q(p.nom),q(dec(p.surface)),q(p.statut),q(cl.pct),...tacheVals.map(q)].join(';');
   });
   const csv=[cols.map(q).join(';'),...rows].join('\r\n');
-  const date=new Date().toISOString().split('T')[0];
+  const date=_mvToday();
   dlFile('\uFEFF'+csv,`mavigne_parcelles_${date}.csv`,'text/csv;charset=utf-8');
   showExportFeedback(`${window.PARCELLES.length} parcelles exportées en CSV !`);
 }
@@ -5170,6 +5170,13 @@ window._aocRenderCard=_aocRenderCard;
 // ═══════════════ Synthèse cuivre métal (bio) ═══════════════
 var _cuState={mode:'an'};
 function _cuPlafond(){ return (window.CONFIG&&window.CONFIG.cuivre_plafond>0)?window.CONFIG.cuivre_plafond:4; }
+// ⚠⚠ LE PLAFOND 7 ANS ETAIT ECRIT  28  EN DUR, A QUATRE ENDROITS, pendant que le
+// plafond annuel etait reglable. Changer le reglage faisait suivre la vue annuelle
+// et pas la vue 7 ans : une seule notion, deux chiffres. Il en derive desormais.
+// (28 = 4 x 7, le cas general du reglement UE 2018/1981.)
+function _cuPlafond7(){ return _cuPlafond()*7; }
+window._cuPlafond  = _cuPlafond;
+window._cuPlafond7 = _cuPlafond7;
 function _cuActiveParc(){ return (window.PARCELLES||[]).filter(function(p){return p.statut!=='Arrachee';}); }
 function _cuIsCu(t){ return !!(t&&t.type==='Cuivre'&&t.cuMetal!=null&&t.cuMetal>0); }
 function _cuYear(d){ return (d||'').slice(0,4); }
@@ -5179,9 +5186,31 @@ function _cuTreatments(year){ return (window.TRAITEMENTS||[]).filter(function(t)
 function _cuParcYear(nom,year){ return _cuTreatments(year).filter(function(t){return _cuTreatParc(t).indexOf(nom)>=0;}).reduce(function(s,t){return s+(t.cuMetal||0);},0); }
 function _cuParcApps(nom,year){ return _cuTreatments(year).filter(function(t){return _cuTreatParc(t).indexOf(nom)>=0;}).sort(function(a,b){return (a.date||'').localeCompare(b.date||'');}); }
 function _cuRollingYears(){ var y=parseInt(_cuCampagneYear(),10)||new Date().getFullYear(); var a=[]; for(var k=6;k>=0;k--)a.push(String(y-k)); return a; }
-function _cuParcRolling(nom){ var ys=_cuRollingYears(),vals=[]; ys.forEach(function(yr){var v=_cuParcYear(nom,yr); if(v>0)vals.push(v);}); if(!vals.length)return _cuParcYear(nom,_cuCampagneYear()); return vals.reduce(function(a,b){return a+b;},0)/vals.length; }
+// ⚠⚠⚠ LA MOYENNE NE DIVISAIT QUE PAR LES ANNEES OU L'ON AVAIT MIS DU CUIVRE.
+// Une annee SANS cuivre a l'interieur de la periode suivie est un vrai zero : elle
+// compte. En l'ecartant, une parcelle traitee 4 kg en 2020 puis plus rien jusqu'a
+// 4 kg en 2026 affichait  4,00  — sa vraie moyenne glissante est 1,14. L'ecran
+// promet pourtant, deux lignes plus bas, de montrer qu' une annee peut depasser 4
+// tant que la moyenne glissante reste sous le plafond  : c'est exactement ce qu'il
+// etait incapable de faire. Le defaut ne va que dans un sens — fausse alerte,
+// jamais fausse tranquillite — mais un indicateur reglementaire qui crie au loup
+// s'apprend a etre ignore.
+// LE DIVISEUR JUSTE n'est ni 7 ni le nombre d'annees traitees : c'est le nombre
+// d'annees COUVERTES PAR LE REGISTRE, de la premiere trace de cuivre a la campagne
+// en cours. Les annees d'AVANT cette premiere trace ne sont pas des zeros, elles
+// sont INCONNUES — diviser par 7 un domaine qui n'a que deux ans d'historique
+// mentirait dans l'autre sens.
+// ★ Et l'ecran doit DIRE sur combien d'annees il divise :  1,71 kg/ha/an  ne se
+// lit pas sans son assiette. C'est a quoi sert _cuParcRollN.
+function _cuParcRollN(nom){
+  var ys=_cuRollingYears();
+  for(var i=0;i<ys.length;i++){ if(_cuParcYear(nom,ys[i])>0) return ys.length-i; }
+  return 0;
+}
+function _cuParcRolling(nom){ var n=_cuParcRollN(nom); return n?(_cuParcRollSum(nom)/n):0; }
 function _cuParcRollSum(nom){ var ys=_cuRollingYears(),s=0; ys.forEach(function(yr){s+=_cuParcYear(nom,yr);}); return s; }
 window._cuParcRollSum = _cuParcRollSum;
+window._cuParcRollN   = _cuParcRollN;
 function _cuColor(r){ return r>1?'--rouge':r>=0.875?'--orange':r>=0.75?'--or':'--vert'; }
 function _cuStatus(r){ return r>1?['D\u00e9passement','--rouge']:r>=0.875?['Vigilance','--orange']:['Conforme','--vert']; }
 function _cuFmt(d){ if(!d)return '\u2014'; var pp=d.split('-'); return pp.length>=3?pp[2]+'/'+pp[1]+'/'+pp[0]:d; }
@@ -5239,7 +5268,8 @@ function _renderCuivre(){
       var apps=_cuParcApps(r.p.nom,year);
       var det=apps.map(function(a){return '<div style="display:flex;justify-content:space-between;font-size:12px;padding:5px 0;border-bottom:1px solid var(--gris-clair)"><span>'+_cuFmt(a.date)+' &#x00B7; '+esc(a.produit||'\u2014')+'</span><span style="font-weight:600;color:#A56B3A">+'+(a.cuMetal||0).toFixed(2)+' kg/ha</span></div>';}).join('')
         +'<div style="display:flex;justify-content:space-between;font-size:12px;padding:6px 0 0;font-weight:700"><span>Cumul '+year+'</span><span>'+r.an.toFixed(2)+' kg Cu/ha</span></div>'
-        +(mode==='roll'?'<div style="display:flex;justify-content:space-between;font-size:12px;padding:5px 0 0"><span style="color:var(--texte-doux)">Budget 7 ans ('+_cuRollingYears()[0]+'\u2013'+year+')</span><span style="font-weight:700;color:var(--vert)">'+_cuParcRollSum(r.p.nom).toFixed(1)+' / 28 kg/ha</span></div>':'');
+        +(mode==='roll'?'<div style="display:flex;justify-content:space-between;font-size:12px;padding:5px 0 0"><span style="color:var(--texte-doux)">Budget 7 ans ('+_cuRollingYears()[0]+'\u2013'+year+')</span><span style="font-weight:700;color:var(--vert)">'+_cuParcRollSum(r.p.nom).toFixed(1)+' / '+_cuPlafond7()+' kg/ha</span></div>'
+          +'<div style="display:flex;justify-content:space-between;font-size:12px;padding:5px 0 0"><span style="color:var(--texte-doux)">Moyenne sur les ann\u00e9es suivies</span><span style="font-weight:700">'+r.roll.toFixed(2)+' kg/ha/an <span style="font-weight:500;color:var(--texte-doux)">sur '+_cuParcRollN(r.p.nom)+' an'+(_cuParcRollN(r.p.nom)>1?'n\u00e9es':'n\u00e9e')+'</span></span></div>':'');
       return '<div onclick="window._cuToggleRow(this)" style="border:1px solid var(--gris);border-radius:13px;padding:12px 14px;background:var(--bg-card);cursor:pointer;margin-bottom:9px">'
         +'<div style="display:flex;align-items:baseline;justify-content:space-between;gap:10px">'
         +'<div><div style="font-family:\'Cormorant Garamond\',serif;font-size:17px;font-weight:600">'+esc(r.p.nom)+'</div>'
@@ -5269,7 +5299,7 @@ function _renderCuivre(){
       +'</div></div>'
       +'<div style="font-size:12.5px;color:var(--texte-doux);margin:-4px 0 12px">Le plafond s\'applique <b>par hectare</b>. Touche une parcelle pour le d\u00e9tail des apports.</div>'
       +'<div>'+listHtml+'</div>'
-      +'<div style="font-size:12px;color:var(--texte-doux);background:var(--gris-clair);border-radius:10px;padding:10px 12px;margin-top:14px;line-height:1.55"><b>Lissage 7 ans.</b> La r\u00e8gle UE autorise 28&#x202F;kg&#x202F;Cu/ha sur 7 ans (4 kg/ha/an en moyenne) : une ann\u00e9e peut d\u00e9passer 4 tant que la moyenne glissante reste sous le plafond. Bascule \u00ab Liss\u00e9 7 ans \u00bb pour la moyenne r\u00e9elle par parcelle.</div>';
+      +'<div style="font-size:12px;color:var(--texte-doux);background:var(--gris-clair);border-radius:10px;padding:10px 12px;margin-top:14px;line-height:1.55"><b>Lissage 7 ans.</b> La r\u00e8gle UE autorise '+_cuPlafond7()+'&#x202F;kg&#x202F;Cu/ha sur 7 ans ('+_cuPlafond()+' kg/ha/an en moyenne) : une ann\u00e9e peut d\u00e9passer 4 tant que la moyenne glissante reste sous le plafond. Bascule \u00ab Liss\u00e9 7 ans \u00bb pour la moyenne par parcelle, calcul\u00e9e sur les ann\u00e9es <b>couvertes par votre registre</b> \u2014 une ann\u00e9e sans cuivre \u00e0 l\u2019int\u00e9rieur de cette p\u00e9riode compte pour z\u00e9ro, les ann\u00e9es d\u2019avant votre premi\u00e8re trace ne comptent pas.</div>';
   }
 
   var panel=ov.querySelector('.modal');
@@ -5306,7 +5336,7 @@ function _cuivrePdfSection(){
     return '<tr><td '+td+'>'+esc(r.nom)+'</td><td '+tdc+'>'+r.ha.toFixed(2)+'</td><td '+tdc+'>'+r.n+'</td><td '+tdc.slice(0,-1)+';font-weight:700;color:'+col+'">'+r.cu.toFixed(2)+'</td><td '+tdc+'>'+ceil.toFixed(1)+'</td><td '+tdc.slice(0,-1)+';color:'+col+'">'+lab+'</td></tr>';
   }).join('');
   return '<div class="section"><div class="section-title">&#x1FA99; Synth\u00e8se cuivre m\u00e9tal '+year+' (contr\u00f4le bio)</div>'
-    +'<div style="font-size:11px;color:#555;margin-bottom:8px">Plafond de r\u00e9f\u00e9rence : <b>'+ceil.toFixed(1)+' kg Cu m\u00e9tal/ha/an</b> (UE : 28 kg/ha sur 7 ans, moyenne 4 kg/ha/an). Cumul du cuivre m\u00e9tal apport\u00e9 par parcelle sur la campagne. Max parcelle : <b>'+maxV.toFixed(2)+' kg/ha</b>.</div>'
+    +'<div style="font-size:11px;color:#555;margin-bottom:8px">Plafond de r\u00e9f\u00e9rence : <b>'+ceil.toFixed(1)+' kg Cu m\u00e9tal/ha/an</b> (UE : '+_cuPlafond7()+' kg/ha sur 7 ans, moyenne '+_cuPlafond()+' kg/ha/an). Cumul du cuivre m\u00e9tal apport\u00e9 par parcelle sur la campagne. Max parcelle : <b>'+maxV.toFixed(2)+' kg/ha</b>.</div>'
     +'<table style="width:100%;border-collapse:collapse"><thead><tr><th '+th+'>Parcelle</th><th '+th+'>ha</th><th '+th+'>Applic.</th><th '+th+'>Cu m\u00e9tal (kg/ha)</th><th '+th+'>Plafond</th><th '+th+'>Statut</th></tr></thead><tbody>'+rows+'</tbody></table></div>';
 }
 

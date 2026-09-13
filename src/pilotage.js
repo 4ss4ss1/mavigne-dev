@@ -991,7 +991,7 @@ function _pilEchelle(cd,w){
   function moO0(mo){ if(mo.o0!=null)return mo.o0; var yr=mo.yr||2026; return _o(yr+'-'+String(mo.m+1).padStart(2,'0')+'-01'); }
   function moO1(mo){ if(mo.o1!=null)return mo.o1; var yr=mo.yr||2026; var d2=new Date(Date.UTC(yr,mo.m+1,0)).getUTCDate(); return _o(yr+'-'+String(mo.m+1).padStart(2,'0')+'-'+String(d2).padStart(2,'0')); }
   return { o:_o, s:s, e:e, L:L, W:W, padL:padL, padR:padR, plotW:plotW, moO0:moO0, moO1:moO1,
-           todayIso:((typeof window._mvAujIso==='function')?window._mvAujIso():new Date().toISOString().split('T')[0]),
+           todayIso:((typeof window._mvAujIso==='function')?window._mvAujIso():_mvToday()),
            X:function(ord){ return padL+(ord-s)/L*plotW; } };
 }
 function _pilFriseSvg(cd,real,w){
@@ -1845,7 +1845,7 @@ function _pilFriseAnneeSvg(ann,w){
   var qq=_pilPolyBreak(ptsP), pp=_pilPolyBreak(ptsH);
   if(qq) g+='<path d="'+qq+'" fill="none" stroke="'+_PIL_SEM.socle+'" stroke-width="1.8" stroke-dasharray="5 4"/>';
   if(pp) g+='<path d="'+pp+'" fill="none" stroke="var(--texte)" stroke-width="2.4" stroke-linejoin="round"/>';
-  var tIso=(typeof window._mvAujIso==='function')?window._mvAujIso():new Date().toISOString().split('T')[0];
+  var tIso=(typeof window._mvAujIso==='function')?window._mvAujIso():_mvToday();
   var tj=_pilAnnOrd(tIso);
   // Le trait du jour est un REPERE, pas une alerte : il ne prend plus la
   // couleur des barres de renfort, avec qui il partageait `col.alerte`.
@@ -4577,7 +4577,7 @@ function _pilCkEtp(d){
 function _pilCkCave(){
   var sem=null, v=null;
   try{
-    if(typeof window._mlAgendaComplet==='function') sem=window._mlAgendaComplet(new Date().toISOString().slice(0,10),4);
+    if(typeof window._mlAgendaComplet==='function') sem=window._mlAgendaComplet(_mvToday(),4);
     if(sem&&typeof window._mlVerdict==='function') v=window._mlVerdict(sem,{phase:null,haReste:0,parc:null});
   }catch(e){ if(window.logError) window.logError({level:'info',cat:'pilotage',msg:'ck cave',err:e}); }
   if(!sem||!v) return '';
@@ -8682,7 +8682,7 @@ function _arcLigne(an,list,cur){
       return '<div class="arc-seg" style="left:'+x+'%;width:'+w+'%;background:'+col(s)+'">'
         +'<b>'+_pilEsc(s.nom)+'</b></div>';
     }).join('');
-  var today=new Date().toISOString().slice(0,10);
+  var today=_mvToday();
   if(today>=_arcISO(a)&&today<=_arcISO(b)) segs+='<div class="arc-today" style="left:'+pc(today)+'%"></div>';
   var h=list.reduce(function(n,s){ return n+_arcHeures(s.nom); },0);
   var meta=list.length+' période'+(list.length>1?'s':'');
@@ -8698,7 +8698,7 @@ function _pilTabArc(d){
   var par={};
   S.forEach(function(s){ var k=_arcCampagneDe(s.debut); (par[k]=par[k]||[]).push(s); });
   var keys=Object.keys(par).map(Number).sort(function(x,y){ return y-x; });
-  var anCur=_arcCampagneDe(new Date().toISOString().slice(0,10));
+  var anCur=_arcCampagneDe(_mvToday());
   var hTot=S.reduce(function(n,s){ return n+_arcHeures(s.nom); },0);
   var h='<div class="arc-intro">Toutes les campagnes sur le même axe, <b>1ᵉʳ août → 31 juillet</b> : '
     +'de récolte à récolte, l’hiver n’est pas coupé en deux. D’une ligne à l’autre, on lit le '

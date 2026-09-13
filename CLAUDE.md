@@ -2,7 +2,28 @@
 
 > Document de référence du projet **Ma Vigne** (GUERETTECH). Il est le **porteur de vérité** :
 > la mémoire Claude est plafonnée, ce fichier ne l'est pas.
-> Dernière consolidation : **10 septembre 2026 (soir, PIL-FIN)** — ★★★ **LA DATE DE FIN D'AUJOURD'HUI EST CELLE DE LA
+> Dernière consolidation : **13 septembre 2026 (AUDIT)** — ★★★ **SIX DÉFAUTS TROUVÉS HORS DES
+> HARNAIS (§122)**. Nico : *« vérifie l'intégralité des fichiers, les codes, les calculs, les
+> cohérences, les bugs »*. La suite complète était verte, `node --check` aussi, et ESLint rejoué
+> avec **`no-undef` activé** n'a rien rendu : ce qui restait demandait de MESURER autre chose.
+> ① Le registre commercial vivait dans `_guerettech/tenants`, **lisible sans compte** — une règle
+> Firestore protège un DOCUMENT, pas un champ ; il passe dans `_guerettech/clients`, GT-only, et la
+> fuite se referme à la première écriture (setDoc sans merge, zéro migration).
+> ② **FUS-2** : `toISOString().slice(0,10)` rend la date **UTC** — à Paris, une saisie de 00 h 30
+> était datée de la veille, registres réglementaires compris. **78 réécritures** vers
+> `_mvISO`/`_mvToday`, promus depuis `_gnrTodayISO` qui était **le seul juste du dépôt**.
+> ⚠⚠ **8 exclusions assumées** : les allers-retours jour-époque restent UTC — *une seule horloge
+> par fonction*, pas « local partout ».
+> ③ Le défaut `marchand-grillot` avait survécu à sa suppression dans les **deux** endroits qui
+> tournent avant le login (clé locale, `start_url` du manifest — figé par le navigateur à l'install).
+> ④ Le cuivre lissé divisait par les années TRAITÉES : 18 kg sur 7 ans (conforme) sortait
+> « Dépassement ». ⑤ Le plafond 28 était en dur à six endroits face à un réglage. ⑥ Les réglages
+> de vendange n'avaient aucun garde-fou.
+> ★ Deux filets : `mv-sitemap.mjs` et `mv-dates-reelles.mjs`. ★★★ **Les cliquets ont attrapé
+> l'auditeur trois fois**, et **deux constats de l'audit étaient faux** — retirés en §122.
+> **APP 7.16 → 7.17 · SW 7.76 → 7.77**, base `82f22a4`. Détail en **§122**.
+>
+> ★ Précédente : **10 septembre 2026 (soir, PIL-FIN)** — ★★★ **LA DATE DE FIN D'AUJOURD'HUI EST CELLE DE LA
 > CAMPAGNE (§105)**. Nico : *« je crois que les 32 jours d'avance sont faux »*. Ils l'étaient : « +32 j d'avance, fin le
 > 15 févr. » sur Aujourd'hui, du **rouge** fin mars sur La campagne et « 4,9 personnes pour 2,8 » dans le tableau des
 > fenêtres, sur les mêmes données. Le cockpit avait **son** moteur (`_pilCapaProj`) : il cumulait l'équipe dès le
@@ -17483,3 +17504,142 @@ sur un code parfaitement correct : le **commentaire** de `_matExportChoix` cite 
 raconter sa disparition. Un grep brut compte les commentaires. On cherche désormais un **appel**
 (`/openPrompt\s*\(/`) dans un source **décommenté**, et une contre-épreuve garde la trace du
 piège. *Le test avait tort, pas le code* — huitième fois que la question fait gagner du temps.
+
+
+---
+
+## 122. ★★★ AUDIT — SIX DÉFAUTS TROUVÉS HORS DES HARNAIS, ET DEUX FILETS DE PLUS (13/09 — `admin-gt.js` + `firebase.js` + `app.js` + `cave.js` + `reglages.js` + `phyto.js` + `utils.js` + 5 modules + `sw.js` + `index.html` + `firestore.rules` + backend + 2 pages publiques — **APP 7.16 → 7.17 · SW 7.76 → 7.77**, base `82f22a4`)
+
+Nico : *« vérifie l'intégralité des fichiers, les codes, les calculs, les cohérences, les bugs »*.
+La suite complète passait au vert, `node --check` aussi, et ESLint rejoué avec **`no-undef` activé**
+(que la config du projet désactive) plus quinze règles de plus n'a rendu **aucune erreur réelle**.
+★★ **Ce qui reste après ça ne se trouve pas en relisant : il faut MESURER autre chose.** Les six
+défauts viennent de six sondes qu'aucun harnais ne portait.
+
+### ① Le registre commercial vivait dans un document lisible par la terre entière
+
+`firestore.rules` : `match /_guerettech/tenants { allow read: if true; }`, justifié par un
+commentaire disant *« Ne contient que {slugs:[…]} : aucune donnée sensible »*. **Le commentaire
+était vrai le jour où il a été écrit** — puis `admin-gt.js` a mis `clients[slug]` = {plan,
+trialDays, status, created_at, trialExp} dans **le même document**. Sans compte, n'importe qui
+lisait le fichier clients complet.
+★★★ **Une règle Firestore ne sait pas filtrer par champ : elle protège un DOCUMENT.** Poser une
+donnée sensible à côté d'une donnée publique, c'est la publier. La séparation doit être physique.
+→ `_guerettech/tenants` ne porte plus que `slugs` + `statuts` (les deux seuls usages **pré-auth** :
+unicité du slug à l'onboarding, routage `_fbTenantStatus`). Le commercial passe dans
+`_guerettech/clients`, GT-only. Deux helpers, `_agtReadClients` / `_agtWriteClients`, branchés sur
+les **sept** sites.
+★ **Aucun script de migration** : `fbAdminWriteGT` fait un `setDoc` SANS merge, donc la première
+écriture GT réécrit `tenants` sans le champ `clients` — la fuite se referme d'elle-même. Repli
+legacy en lecture le temps que ça arrive, des deux côtés (`_agtReadClients` et `_fbTenantStatus`).
+
+### ② FUS-2 — une saisie de minuit et demie était datée de la veille
+
+**117 `toISOString()` dans `src/`, dont 23 qui écrivaient une date en base.**
+`new Date().toISOString().slice(0,10)` rend la date **UTC** : à Paris, entre minuit et 2 h (été) ou
+1 h (hiver), c'est la veille. Pesée de caisses en vendange, ajout de SO₂ en fin de nuit, ligne de
+journal, traitement — **deux de ces registres sont réglementaires, et la cave se travaille la nuit.**
+★★★ **Le bon patron était DÉJÀ dans le dépôt** : `_gnrTodayISO` (tracteur.js) construisait la date
+en local, seul contre 117. *Quand un projet contient déjà la bonne réponse à un endroit, le lot
+n'invente pas — il PROMEUT.* → `_mvISO(d)` / `_mvToday()` dans `utils.js`, **78 réécritures**,
+`_gnrTodayISO` et `_today` (reserve.js) deviennent des délégués.
+⚠⚠ **HUIT EXCLUSIONS ASSUMÉES, et c'est le cœur du lot** : `_mvJourApres`, `_mvFutIso`, `_cmpSeuil`,
+`_cmpEchelle`, `_cmpISO`, `_arcISO`, `_pexIsoPlus` sont des allers-retours **jour-époque**, UTC de
+bout en bout — et le RESTER est précisément ce qui les rend justes sous tous les fuseaux
+(`mv-harnais-fuseau`). **La règle n'est pas « local partout », c'est « une seule horloge par
+fonction ».** Un balayage qui ne connaît pas cette nuance casse des fonctions correctes.
+★ **Deux prises en passant** : une date imprimée découpée à la main (`slice(8,10)` sur l'ISO UTC,
+cave.js) que le motif avait ratée — *un balayage se vérifie par ce qui RESTE, pas par ce qu'il a
+pris* ; et **`addDays` (tracteur.js) mélangeait deux horloges**, exactement la faute de
+`_mvJourApres` : `new Date(iso)` lit minuit UTC, `getDate()/setDate()` écrivent en local.
+Côté serveur, `dayKey` (claims.js) passe à l'heure de **Paris** : la console GT relit ces clés avec
+la date locale de l'opérateur.
+
+### ③ Le défaut `marchand-grillot` avait survécu à sa propre suppression, en deux endroits
+
+`firebase.js:170` acte la décision (*« #10 : plus de defaut 'marchand-grillot' code en dur »*).
+Elle avait été appliquée là, **pas dans les deux endroits qui tournent AVANT que le tenant existe** :
+- `app.js` — `LS_KEY` était un `const` de module, évalué au chargement donc avant login. Premier
+  passage d'un nouveau client : sa sauvegarde hors ligne s'écrivait dans le seau du domaine de
+  référence, devenait orpheline au reload, et son `logout()` ne la purgeait jamais. → `_mvLsKey()`,
+  relue à chaque appel, qui rend `''` quand le tenant est inconnu : **sans tenant, on n'écrit rien
+  plutôt que d'écrire ailleurs.**
+- `sw.js` — le manifest dynamique retombait sur `marchand-grillot` quand le cache tenant est vide,
+  **c'est-à-dire au 1ᵉʳ install** ; le commentaire le disait lui-même. Le raccourci PWA du nouveau
+  client était donc épinglé sur `?tenant=marchand-grillot`, et `?tenant=` est en priorité absolue.
+  Les règles Firestore l'empêchaient de VOIR quoi que ce soit — aucune fuite — mais son icône
+  ouvrait une app morte, et **le navigateur fige le `start_url` à l'install : ça ne se répare pas
+  tout seul.** → `start_url` neutre quand le tenant est inconnu.
+★ **La leçon de méthode** : une suppression de défaut se vérifie par un `grep` sur TOUS les
+fichiers, pas sur celui qu'on avait ouvert. Les défauts survivent là où on ne regardait pas.
+
+### ④ Le cuivre lissé sur 7 ans criait au loup
+
+`_cuParcRolling` ne divisait que par les années **où l'on avait traité** (`if(v>0)vals.push(v)`).
+Banc d'essai sur les vraies fonctions :
+
+| scénario | avant | après |
+|---|---|---|
+| 4 kg en 2020, rien 5 ans, 4 kg en 2026 | 4,00 → **Vigilance** | 1,14 sur 7 ans → Conforme |
+| 6 kg une année sur deux (18/28, conforme) | 6,00 → **Dépassement** | 3,60 sur 5 ans → Vigilance |
+| 4 kg, premier cuivre du registre | 4,00 → Vigilance | 4,00 **sur 1 année** → Vigilance |
+
+★★★ **Le diviseur juste n'était ni 7 ni les années traitées : c'est les années COUVERTES PAR LE
+REGISTRE.** Une année sans cuivre à l'intérieur de la période suivie est un vrai zéro, elle compte ;
+les années d'avant la première trace sont **inconnues**, pas nulles — diviser par 7 un domaine qui
+a deux ans d'historique mentirait dans l'autre sens.
+★ **Le troisième cas ne bouge pas, et c'est correct** : 4 kg sur une seule année, c'est le plafond
+annuel. Ce qui change, c'est que l'écran **dit sur combien d'années il divise** (`_cuParcRollN`) —
+*« 1,71 kg/ha/an » ne se lit pas sans son assiette.* C'est §7 vu depuis un indicateur réglementaire.
+⚠ Le défaut n'allait que dans un sens : fausse alerte, jamais fausse tranquillité. **Ce n'est pas
+une excuse** — un indicateur réglementaire qui crie au loup s'apprend à être ignoré.
+
+### ⑤ Le plafond 28 était en dur pendant que le plafond annuel était réglable
+
+`_cuPlafond()` est réglable (défaut 4), mais le budget 7 ans était écrit **28** à six endroits
+(`phyto.js`, `reglages.js` ×3, `app.js` ×3). Changer le réglage faisait suivre la vue annuelle et
+pas celle des sept ans. → `_cuPlafond7()` = `_cuPlafond()*7`, exposé sur `window`.
+⚠ **Un seul 28 reste, et c'est voulu** : le rappel de la règle UE elle-même sous le champ de
+réglage. Un texte qui énonce le règlement n'est pas un calcul.
+
+### ⑥ Les réglages de vendange n'avaient aucun garde-fou
+
+`_vendSaveParam` lisait `.value` sec. **Les `min`/`max` des champs sont des attributs HTML : sans
+soumission de formulaire, ils ne bloquent rien.** Or `ratio_min`/`ratio_max` alimentent `_mlKgHl`,
+donc `_mlRdtMoyen`, donc le rendement hL/ha — un indicateur réglementaire.
+★ **Et l'ordre compte** : le ratio est en kg/hL, donc le ratio MAXIMUM donne le volume MINIMUM.
+Intervertir les deux champs est une confusion naturelle, et elle retournait **toutes** les
+fourchettes de l'app (« 15,4–14,3 »). → valeurs bornées, ratios remis dans l'ordre, **et le toast
+le dit** : on ne corrige pas une saisie en silence.
+
+### Deux filets de plus
+
+| script | ce qu'il interdit |
+|---|---|
+| `scripts/mv-sitemap.mjs` | qu'un `<lastmod>` soit antérieur au dernier commit de sa page (**les six l'étaient**) ; qu'une page publique indexable ne soit ni dans le sitemap ni dans une liste d'exclusions **motivées** ; qu'un `<loc>` s'écarte de son `canonical`. Branché dans `check` et `prebuild`. Sans `--check`, il réécrit les dates depuis git. |
+| `scripts/mv-dates-reelles.mjs` | pas un harnais : le module qui **extrait `_mvISO`/`_mvToday` du vrai `utils.js`** pour les six harnais intégrés qui les exécutent désormais. |
+
+★★★ **SIX HARNAIS INTÉGRÉS ONT CASSÉ D'UN COUP** sur `_mvToday is not defined` (`cuv7`,
+`reste-a-rentrer`, `fusion`, `cuvdoc`, `entretien`, `tri2`) — **et c'est exactement leur travail** :
+ils exécutent du vrai code, et ce code a gagné une dépendance. ⚠⚠ **Le trou n'a PAS été comblé
+par six bouchons écrits à la main.** Un bouchon a sa propre signature : il suffirait que `_mvISO`
+reparte en UTC pour que les six restent verts sur un code faux. Le module extrait les fonctions
+réelles, comme le fait déjà le harnais fuseau.
+
+### ⚠⚠⚠ Ce que ce lot dit de la méthode d'audit elle-même
+
+- **Deux constats de l'audit étaient FAUX, et ils ont été retirés.** `_vendDegrePot` (16,83 en dur)
+  avait déjà disparu entre deux `git pull`. Et « aucune mention HT/TTC sur la page tarifs » était
+  une **erreur de grep** : la page porte la bonne mention, en meilleure forme (*« TVA non
+  applicable, article 293 B du CGI — les montants affichés sont ceux que vous payez »*). Seules les
+  CGU ne la portaient pas → article 3.1 aligné sur les mentions légales.
+  *Un audit se vérifie comme du code, et il se corrige devant témoin.*
+- ★★ **LE PATCH A ÉTÉ REJOUÉ SUR BASE NEUVE, DEUX FOIS** (`43a95ab` puis `82f22a4`) : diff → depôt
+  propre → `git pull` → `git apply`. **Un patch qui s'applique ne prouve que les lignes de
+  contexte** : le re-balayage des motifs a suivi, et il a trouvé une étiquette « Plafond UE 28 »
+  laissée à côté d'une jauge devenue dérivée.
+- ★★★ **LES CLIQUETS ONT ATTRAPÉ L'AUDITEUR TROIS FOIS** : preflight (un `catch {}` vide écrit dans
+  `_mvLsKey`, 156 contre 155), `mv-harnais-jetons` (un `font-weight:400` hors des trois pas),
+  `mv-harnais-icones` (deux noms d'icônes **inventés** dans le `WHATS_NEW` — `horloge` et `reglage`
+  n'existent pas, `reveil` et `curseurs` si). *Celui qui pose les filets s'y prend aussi, et c'est
+  la preuve qu'ils valent quelque chose.*

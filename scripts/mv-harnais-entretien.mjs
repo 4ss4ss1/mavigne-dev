@@ -24,6 +24,7 @@ import path from 'node:path';
 import { fileURLToPath } from 'node:url';
 import { execFileSync } from 'node:child_process';
 
+import { sourceDates, poseDates } from './mv-dates-reelles.mjs';
 const ICI    = path.dirname(fileURLToPath(import.meta.url));
 const RACINE = path.join(ICI, '..');
 const args   = process.argv.slice(2);
@@ -65,6 +66,7 @@ const doc = {
 let ovFerme = false;
 const ovFake = { classList:{ remove(c){ if (c === 'open') ovFerme = true; }, add(){} } };
 const toasts = [];
+poseDates(globalThis);   // _mvISO/_mvToday extraits du vrai utils.js (FUS-2)
 globalThis.document = doc;
 globalThis.window = { document: doc };
 

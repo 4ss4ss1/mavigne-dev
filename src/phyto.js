@@ -383,14 +383,17 @@ function _tratCuBudgetHtml(){
   if(!cuProds.length||!_trat.parcelles.length)return '';
   if(typeof window._cuParcRollSum!=='function')return '';
   var add=cuProds.reduce(function(s,p){return s+(p.cuMetal||0);},0);
-  var CU_MAX=28;
+  // Le plafond 7 ans DERIVE du plafond annuel de Reglages (_cuPlafond), au lieu
+  // d'etre ecrit 28 ici : sinon la vue annuelle suit le reglage et pas celle-ci.
+  var CU_MAX=(typeof window._cuPlafond7==='function')?window._cuPlafond7():28;
+  var CU_AN =(typeof window._cuPlafond==='function')?window._cuPlafond():4;
   var rows=_trat.parcelles.map(function(nom){var cur=window._cuParcRollSum(nom)||0;return {nom:nom,cur:cur,proj:cur+add};}).sort(function(a,b){return b.proj-a.proj;});
   var over=rows.filter(function(r){return r.proj>CU_MAX;});
   var col=function(v){var r=v/CU_MAX;return r>1?'#C0392B':(r>=0.875?'#B8621A':(r>=0.75?'#C9A84C':'#3D7A27'));};
   var f1=function(v){return v.toFixed(1).replace('.',',');};
   var h='<div style="background:rgba(26,74,122,0.05);border:1.5px solid rgba(26,74,122,0.25);border-radius:12px;padding:14px;margin-bottom:14px">'
     +'<div style="font-size:13px;font-weight:700;color:#1A4A7A;margin-bottom:3px">&#x1F535; Budget cuivre m&#xe9;tal &#x00B7; bio</div>'
-    +'<div style="font-size:11px;color:var(--texte-doux);margin-bottom:12px">Plafond 28&#x202F;kg Cu/ha sur 7 ans (4 kg/ha/an en moyenne). Ce traitement apporte <b style="color:#1A4A7A">+'+f1(add)+'&#x202F;kg/ha</b>.</div>';
+    +'<div style="font-size:11px;color:var(--texte-doux);margin-bottom:12px">Plafond '+CU_MAX+'&#x202F;kg Cu/ha sur 7 ans ('+CU_AN+' kg/ha/an en moyenne). Ce traitement apporte <b style="color:#1A4A7A">+'+f1(add)+'&#x202F;kg/ha</b>.</div>';
   rows.forEach(function(r){
     var c=col(r.proj),pct=Math.min(100,r.proj/CU_MAX*100),pctNow=Math.min(100,r.cur/CU_MAX*100);
     h+='<div style="margin-bottom:10px">'
@@ -403,9 +406,9 @@ function _tratCuBudgetHtml(){
     +'</div>';
   });
   if(over.length){
-    h+='<div style="font-size:11.5px;color:var(--rouge);background:rgba(192,57,43,0.08);border:1px solid rgba(192,57,43,0.25);border-radius:8px;padding:9px 11px;margin-top:4px;line-height:1.5">&#x26A0;&#xFE0F; D&#xe9;passement du plafond 28&#x202F;kg/ha sur '+over.length+' parcelle'+(over.length>1?'s':'')+' : '+_escHtml(over.map(function(r){return r.nom;}).join(', '))+'. Le traitement <b>reste enregistrable</b> &#x2014; le d&#xe9;passement est consign&#xe9; au registre ; v&#xe9;rifier la d&#xe9;rogation applicable.</div>';
+    h+='<div style="font-size:11.5px;color:var(--rouge);background:rgba(192,57,43,0.08);border:1px solid rgba(192,57,43,0.25);border-radius:8px;padding:9px 11px;margin-top:4px;line-height:1.5">&#x26A0;&#xFE0F; D&#xe9;passement du plafond '+CU_MAX+'&#x202F;kg/ha sur '+over.length+' parcelle'+(over.length>1?'s':'')+' : '+_escHtml(over.map(function(r){return r.nom;}).join(', '))+'. Le traitement <b>reste enregistrable</b> &#x2014; le d&#xe9;passement est consign&#xe9; au registre ; v&#xe9;rifier la d&#xe9;rogation applicable.</div>';
   } else {
-    h+='<div style="font-size:11.5px;color:var(--vert);background:rgba(61,122,39,0.08);border:1px solid rgba(61,122,39,0.25);border-radius:8px;padding:9px 11px;margin-top:4px">&#x2705; Conforme &#x2014; toutes les parcelles restent sous 28&#x202F;kg/ha sur 7 ans.</div>';
+    h+='<div style="font-size:11.5px;color:var(--vert);background:rgba(61,122,39,0.08);border:1px solid rgba(61,122,39,0.25);border-radius:8px;padding:9px 11px;margin-top:4px">&#x2705; Conforme &#x2014; toutes les parcelles restent sous '+CU_MAX+'&#x202F;kg/ha sur 7 ans.</div>';
   }
   return h+'</div>';
 }
@@ -620,7 +623,7 @@ function openOvTraitement(){
     ov.onclick=function(){window._tratClose();};
     document.body.appendChild(ov);
   }
-  var todayStr=new Date().toISOString().split('T')[0];
+  var todayStr=_mvToday();
   var _cd=_conducteursDispo();var defCond=(_cd.find(function(c){return c.statut==='Formé';})||_cd[0]||{nom:''}).nom;
   _trat={step:1,produits:[],date:todayStr,conducteur:defCond,parcelles:[],
          stade:'',heureDebut:'',heureFin:'',dreAnticipe:'',modeAb:false,note:'',q:'',selMeta:null};
@@ -1137,7 +1140,7 @@ window._phytoExportCsv = function(mode){
   var slug = String(window.DOMAINE_NOM||'domaine').toLowerCase()
     .normalize('NFD').replace(/[\u0300-\u036f]/g,'')
     .replace(/[^a-z0-9]+/g,'-').replace(/^-+|-+$/g,'');
-  var jour = new Date().toISOString().slice(0,10);
+  var jour = _mvToday();
   // ⚠️ La fenetre est DANS le nom : deux exports du meme registre sur deux periodes
   //    differentes ne doivent pas se ressembler une fois poses sur un bureau.
   var fenNom = (R.d0 && R.d1) ? ('du-'+R.d0+'_au-'+R.d1) : 'complet';

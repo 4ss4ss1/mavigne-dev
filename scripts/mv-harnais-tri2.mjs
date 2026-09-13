@@ -17,6 +17,9 @@
 import fs from 'node:fs';
 import path from 'node:path';
 import { fileURLToPath } from 'node:url';
+import { sourceDates, poseDates } from './mv-dates-reelles.mjs';
+poseDates(globalThis);   // _mvISO/_mvToday extraits du vrai utils.js (FUS-2)
+
 const ICI = path.dirname(fileURLToPath(import.meta.url));
 const R   = path.join(ICI, '..');
 

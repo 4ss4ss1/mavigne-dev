@@ -37,6 +37,42 @@ var _agtErrPer     = 30;         // fenetre en jours, 0 = depuis toujours
 var _agtErrOpen    = null;       // empreinte du groupe deplie
 var _agtEssais     = [];  // tokens d'essai 30j
 var _agtDemoStats  = null;  // stats démo visite guidée {connexions,uniques,last,jours}
+// ── SEC-GTC — LE REGISTRE COMMERCIAL QUITTE LE DOCUMENT PUBLIC ─────────────
+// `_guerettech/tenants` est lisible SANS AUTHENTIFICATION (regle firestore
+// `allow read: if true`) : l'unicite des slugs a l'onboarding et le routage
+// pre-auth `_fbTenantStatus` en dependent tous les deux. Il ne doit donc porter
+// que ce qui doit etre public : `slugs` et `statuts` (pending/active).
+// Plan, essai, dates et montants vivent desormais dans `_guerettech/clients`,
+// couvert par `match /_guerettech/{document=**} { if isGtAdmin() }`.
+//
+// ⚠️ REPLI LEGACY, et il compte : tant que la premiere ecriture GT n'a pas eu
+// lieu, le commercial est encore dans l'ancien emplacement. On l'y relit.
+// `fbAdminWriteGT` fait un `setDoc` SANS merge : la premiere ecriture reecrit
+// `tenants` sans le champ `clients` — la fuite se referme d'elle-meme, sans
+// script de migration a lancer a la main.
+async function _agtReadClients(){
+  var c = window.fbAdminReadGT ? await window.fbAdminReadGT('clients') : null;
+  if (c && c.clients && typeof c.clients === 'object') return c.clients;
+  var t = window.fbAdminReadGT ? await window.fbAdminReadGT('tenants') : null;
+  return (t && t.clients && typeof t.clients === 'object') ? t.clients : {};
+}
+// gtData = le document `tenants` tel qu'il vient d'etre lu : on preserve ses
+// champs inconnus, on retire `clients`, on recalcule `statuts`.
+async function _agtWriteClients(clients, slugs, gtData){
+  if (!window.fbAdminWriteGT) return;
+  await window.fbAdminWriteGT('clients', { clients: clients, maj: _agtNowISO() });
+  var pub = Object.assign({}, gtData || {});
+  delete pub.clients;
+  pub.slugs = (slugs || pub.slugs || []).slice();
+  pub.statuts = {};
+  Object.keys(clients).forEach(function(sg){
+    var st = clients[sg] && clients[sg].status;
+    if (st === 'pending' || st === 'active') pub.statuts[sg] = st;
+  });
+  await window.fbAdminWriteGT('tenants', pub);
+}
+function _agtNowISO(){ return new Date().toISOString(); }
+
 var _agtKmlPolygons = []; // polygones parsés en attente d'upload
 var _agtKmlFileName = '';
 // ─── Fusion des contours (lot KML-FUSION) ────────────────────────────────────
@@ -60,7 +96,7 @@ var _agtKmlBusy     = false;
 var _agtErrTenant  = 'all';
 var _agtAccessLog  = [];
 // --- AXE A : registre de vente + demandes entrantes ---
-var _agtClients    = {};  // _guerettech/tenants.clients[slug] : {plan,trialDays,status,created_at,trialExp}
+var _agtClients    = {};  // _guerettech/clients.clients[slug] : {plan,trialDays,status,created_at,trialExp}
 var _agtSlugs      = [];  // memorise pour ne JAMAIS reecrire tenants sans ses slugs
 var _agtBilling    = {};  // _guerettech/billing {value:{slug:{fact:[...],note}}}  <- JAMAIS dans tenants
 var _agtLeads      = null; // null = pas encore lu / refuse ; [] = lu et vide
@@ -319,11 +355,11 @@ async function renderAdminGT(){
   var slugs=(gtData&&Array.isArray(gtData.slugs)&&gtData.slugs.length>0)?gtData.slugs:['marchand-grillot'];
   // Toujours inclure marchand-grillot dans la liste
   if(slugs.indexOf('marchand-grillot')<0) slugs.unshift('marchand-grillot');
-  // AXE A — le registre de vente vit dans _guerettech/tenants.clients[slug].
+  // AXE A — le registre de vente vit dans _guerettech/clients (GT-only).
   // On le memorise tel quel : aucune ecriture ne part d'ici (ce doc est lisible
   // PUBLIQUEMENT par la regle d'unicite des slugs — voir _agtBuildBusiness).
   _agtSlugs   = slugs.slice();
-  _agtClients = (gtData && gtData.clients && typeof gtData.clients==='object') ? gtData.clients : {};
+  _agtClients = await _agtReadClients();
 
   _agtTenants=[];
   for(var i=0;i<slugs.length;i++){
@@ -1328,13 +1364,13 @@ async function saveAddTenant() {
   try {
     var gtData=window.fbAdminReadGT?await window.fbAdminReadGT('tenants'):null;
     var slugs=(gtData&&Array.isArray(gtData.slugs))?gtData.slugs.slice():['marchand-grillot'];
-    var clients=(gtData&&gtData.clients&&typeof gtData.clients==='object')?Object.assign({},gtData.clients):{};
+    var clients=Object.assign({},await _agtReadClients());
     if(slugs.indexOf(slug)>=0){showToast('Ce slug existe d\u00e9j\u00e0','#C0392B');return;}
     slugs.push(slug);
     // status 'pending' → l'assistant d'onboarding s'ouvre pour ce slug (routage _fbTenantStatus).
     // plan + trialDays : appliqu\u00e9s au compte admin par la Cloud Function onboardTenant.
     clients[slug]={plan:plan,trialDays:trialDays,status:'pending',created_at:new Date().toISOString()};
-    if(window.fbAdminWriteGT) await window.fbAdminWriteGT('tenants',Object.assign({},gtData||{},{slugs:slugs,clients:clients}));
+    await _agtWriteClients(clients,slugs,gtData);
     var link=GT_BASE_URL+'/?tenant='+slug;
     if(navigator.clipboard&&navigator.clipboard.writeText) navigator.clipboard.writeText(link).catch(function(){});
     if(window.closeOv) window.closeOv(null,'ovAddTenant');
@@ -2129,7 +2165,7 @@ function _agtVisiteCard(){
   var lastTxt='\u2014';
   if(s.last){ try{ var _ld=s.last.toDate?s.last.toDate():new Date(s.last.seconds?s.last.seconds*1000:s.last); lastTxt=_ld.toLocaleDateString('fr-FR',{day:'2-digit',month:'short'})+' '+_ld.toLocaleTimeString('fr-FR',{hour:'2-digit',minute:'2-digit'}); }catch(e){} }
   var jours=s.jours||{}, maxv=1, days=[], JJ=['D','L','M','M','J','V','S'];
-  for(var i=6;i>=0;i--){ var dt=new Date(); dt.setDate(dt.getDate()-i); var k=dt.toISOString().slice(0,10); var v=jours[k]||0; days.push({v:v,lbl:JJ[dt.getDay()]}); if(v>maxv)maxv=v; }
+  for(var i=6;i>=0;i--){ var dt=new Date(); dt.setDate(dt.getDate()-i); var k=_mvISO(dt); var v=jours[k]||0; days.push({v:v,lbl:JJ[dt.getDay()]}); if(v>maxv)maxv=v; }
   var bars='';
   days.forEach(function(d){ var hp=Math.max(3,Math.round((d.v/maxv)*100)); bars+='<div style="flex:1;display:flex;flex-direction:column;align-items:center;gap:4px"><div style="width:100%;height:40px;display:flex;align-items:flex-end"><div style="width:100%;background:linear-gradient(to top,#C9A84C,#E8C860);border-radius:3px 3px 0 0;height:'+hp+'%;opacity:'+(d.v?1:0.22)+'"></div></div><div style="font-size:9px;color:rgba(255,255,255,0.3)">'+d.lbl+'</div><div style="font-size:9px;color:rgba(255,255,255,0.5);font-weight:600">'+d.v+'</div></div>'; });
   var h='<div class="agt-card" style="border-color:rgba(201,168,76,0.25);margin-bottom:16px"><div style="padding:14px 16px">';
@@ -3293,9 +3329,9 @@ window._fcSaveAbo=async function(){
     var _texp=(_pres&&typeof _pres.trialUntil==='number')?_pres.trialUntil:(td>0?Date.now()+td*86400000:0);
     if(window.fbAdminReadGT && window.fbAdminWriteGT){
       var gt=await window.fbAdminReadGT('tenants')||{};
-      var clients=(gt.clients&&typeof gt.clients==='object')?gt.clients:{};
+      var clients=Object.assign({},await _agtReadClients());
       clients[_FC_SLUG]=Object.assign({},clients[_FC_SLUG]||{},{plan:plan,trialDays:td,trialExp:_texp});
-      await window.fbAdminWriteGT('tenants',Object.assign({},gt,{clients:clients}));
+      await _agtWriteClients(clients,gt.slugs,gt);
     }
     try{
       var _cfg=(_FC.config&&typeof _FC.config==='object')?_FC.config:{};
@@ -3332,8 +3368,8 @@ async function _fcLoad(slug){
   var tch=R?await R(slug,'taches'):null;
   var trc=R?await R(slug,'tracteurs_list'):null;
   var sai=R?await R(slug,'saisons'):null;
-  var gt=window.fbAdminReadGT?await window.fbAdminReadGT('tenants'):null;
-  var cli=(gt&&gt.clients&&gt.clients[slug])?gt.clients[slug]:{};
+  var _cliAll=await _agtReadClients();
+  var cli=(_cliAll&&_cliAll[slug])?_cliAll[slug]:{};
   _FC={
     config:(cfg&&typeof cfg==='object')?cfg:{},
     parcelles:_fcArr(prc),
@@ -3877,7 +3913,7 @@ function _agtInsPerSaisons(an) {
     return [{ nom: 'Campagne ' + an, periode: 'janv. ' + an + ' \u2013 d\u00e9c. ' + an,
               debut: an + '-01-01', fin: an + '-12-31', active: true, taches: dispo }];
   }
-  var auj = new Date().toISOString().slice(0, 10), act = -1;
+  var auj = _mvToday(), act = -1;
   _agtIns.per.forEach(function (p, i) {
     if (p.debut && p.fin && auj >= p.debut && auj <= p.fin && (act < 0 || p.debut > _agtIns.per[act].debut)) act = i;
   });
@@ -4449,14 +4485,14 @@ async function agtInsGo() {
     // 1. Registre
     var gtData = window.fbAdminReadGT ? await window.fbAdminReadGT('tenants') : null;
     var slugs = (gtData && Array.isArray(gtData.slugs)) ? gtData.slugs.slice() : ['marchand-grillot'];
-    var clients = (gtData && gtData.clients && typeof gtData.clients === 'object') ? Object.assign({}, gtData.clients) : {};
+    var clients = Object.assign({}, await _agtReadClients());
     if (clients[slug] && clients[slug].status === 'active') throw new Error('Ce domaine est d\u00e9j\u00e0 install\u00e9');
     if (slugs.indexOf(slug) < 0) slugs.push(slug);
     clients[slug] = { plan: plan, trialDays: trialNow, status: 'pending', created_at: new Date().toISOString() };
     // ⚠️ trialPrevu n'est LU PAR PERSONNE cote serveur : c'est une note pour la fiche
     //    client, qui dirait sinon « abonnement actif » d'un domaine en attente de remise.
     if (trial > 0 && !trialNow) clients[slug].trialPrevu = trial;
-    if (window.fbAdminWriteGT) await window.fbAdminWriteGT('tenants', Object.assign({}, gtData || {}, { slugs: slugs, clients: clients }));
+    await _agtWriteClients(clients, slugs, gtData);
 
     // 2. Les communes, une seule fois chacune (meteo par secteur des l'ouverture).
     var _comm = await _agtInsGeoComm();
@@ -4596,12 +4632,12 @@ async function agtInsTrialGo() {
     var exp = (r && typeof r.trialUntil === 'number') ? r.trialUntil : (Date.now() + c.trial * 86400000);
     if (window.fbAdminReadGT && window.fbAdminWriteGT) {
       var gt = (await window.fbAdminReadGT('tenants')) || {};
-      var clients = (gt.clients && typeof gt.clients === 'object') ? Object.assign({}, gt.clients) : {};
+      var clients = Object.assign({}, await _agtReadClients());
       // Object.assign sur l'existant : plan, status et created_at ne se perdent pas.
       var cur = Object.assign({}, clients[c.slug] || {}, { trialDays: c.trial, trialExp: exp });
       delete cur.trialPrevu;
       clients[c.slug] = cur;
-      await window.fbAdminWriteGT('tenants', Object.assign({}, gt, { clients: clients }));
+      await _agtWriteClients(clients, gt.slugs, gt);
     }
     c.trialArme = true;
     if (typeof agtLogAccess === 'function') agtLogAccess(c.slug, 'Essai de ' + c.trial + ' j d\u00e9marr\u00e9', '\u23F3');
@@ -4642,9 +4678,14 @@ async function agtResetPwd(slug, email, btn) {
 // le premier prospect entrant).
 //
 // OU VIT QUOI, et pourquoi :
-//   _guerettech/tenants        -> slugs + clients[slug] (plan, essai). LISIBLE
-//                                 PUBLIQUEMENT (regle d'unicite des slugs a
-//                                 l'onboarding) : on n'y ecrit RIEN ici.
+//   _guerettech/tenants        -> slugs + statuts[slug] SEULEMENT. LISIBLE
+//                                 PUBLIQUEMENT (unicite des slugs a
+//                                 l'onboarding + routage pre-auth). Aucune
+//                                 donnee commerciale n'y entre : voir
+//                                 _agtWriteClients, qui l'ecrit toujours en
+//                                 entier et sans le champ `clients`.
+//   _guerettech/clients        -> {clients:{slug:{plan,trialDays,status,
+//                                 created_at,trialExp}}}            GT-only.
 //   _guerettech/billing        -> {value:{slug:{fact:[...],note}}}  GT-only.
 //   _guerettech/leads_status   -> {value:{leadId:{st,note,ts}}}     GT-only.
 //                                 `leads` est write:if false cote client : le

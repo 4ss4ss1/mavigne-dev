@@ -1221,7 +1221,7 @@ function openOvCaveOp(opId) {
   // Reset \u00E9tat multi-cuv\u00E9es
   _copCuvSel=new Set();_copAllCuv=false;_copOuillette=10;_copSo2Mode='none';_copSo2Nb=2;_copSo2Freq=10;
   _copIntSel=(window.currentUser&&window.currentUser.nom)?[window.currentUser.nom]:[];
-  var today=new Date().toISOString().split('T')[0];
+  var today=_mvToday();
   _caveOpType='ouillage';_caveFml='none';
   ['cop-so2l','cop-so2t','cop-av','cop-mal','cop-fml-date'].forEach(function(id){
     var el=document.getElementById(id); if(el) el.value='';
@@ -1425,7 +1425,7 @@ async function saveCaveOp() {
         so2.unite=((document.getElementById('cop-so2-unite-r')||{}).value)||'cL';
         so2.nb_doses=_copSo2Nb;so2.freq_j=_copSo2Freq;
         var base=new Date(date),dArr=[];
-        for(var i=0;i<_copSo2Nb;i++){var dd=new Date(base);dd.setDate(dd.getDate()+i*_copSo2Freq);dArr.push(dd.toISOString().split('T')[0]);}
+        for(var i=0;i<_copSo2Nb;i++){var dd=new Date(base);dd.setDate(dd.getDate()+i*_copSo2Freq);dArr.push(_mvISO(dd));}
         so2.dates=dArr;
       }
       opData.so2=so2;
@@ -1527,7 +1527,7 @@ function saveCuvee() {
   if(!nbTotal){showToast('Indiquez au moins un tonneau','#E07060');return;}
   // ★ La declaration de la fiche est DATEE : c'est ce qui permet a une analyse
   //   posterieure de la corriger sans qu'on ait a revenir decocher le bouton.
-  var _fmlAuj=new Date().toISOString().split('T')[0];
+  var _fmlAuj=_mvToday();
   if(existId) {
     var idx=CAVE_ELEVAGE.cuvees.findIndex(function(c){return c.id===existId;});
     // sous_tire n'est plus ecrit : l'ancienne valeur reste en base, inerte,
@@ -1881,7 +1881,7 @@ function openOvCaveAna(file) {
   var el;
   el=document.getElementById('cana-filename'); if(el) el.textContent=_caveAnaPendingFile.name;
   el=document.getElementById('cana-filesize'); if(el) el.textContent=_caveAnaFmtSize(_caveAnaPendingFile.size);
-  el=document.getElementById('cana-date'); if(el) el.value=new Date().toISOString().split('T')[0];
+  el=document.getElementById('cana-date'); if(el) el.value=_mvToday();
   el=document.getElementById('cana-type'); if(el) el.value='so2';
   el=document.getElementById('cana-commentaire'); if(el) el.value='';
   el=document.getElementById('cana-save-btn'); if(el){el.disabled=false;el.textContent='Enregistrer';}
@@ -2694,7 +2694,7 @@ function _vendResteARentrer(mil){
     var k=_vendResteCle(a.parcelle);
     if(!der[k]||a.date>der[k].date) der[k]=a;
   });
-  var tj=Date.parse(new Date().toISOString().slice(0,10));
+  var tj=Date.parse(_mvToday());
   var lignes=[];
   actives.forEach(function(p){
     var nom=String(p.nom).trim(), k=_vendResteCle(nom);
@@ -3282,7 +3282,7 @@ function openOvVendRec(id, presetParc) {
   /* presetParc n'existe QUE pour une création : sur une modification, la
      parcelle de la récolte fait foi et rien ne doit la déplacer. */
   _vendInjectParcelleSelect(r?r.parcelle:(presetParc||''));
-  el=document.getElementById('vrec-date'); if(el) el.value=r?r.date:new Date().toISOString().slice(0,10);
+  el=document.getElementById('vrec-date'); if(el) el.value=r?r.date:_mvToday();
   el=document.getElementById('vrec-caisses'); if(el) el.value=r?_recCsDom(r):0;
   el=document.getElementById('vrec-temp'); if(el) el.value=r&&r.temp_c?r.temp_c:'';
   var etatPct=r?(r.etat_pct||0):0;
@@ -3512,7 +3512,7 @@ function openOvVendCuve(id) {
   _caveV2InjectCss();
   el=document.getElementById('vcuv-nom'); if(el) el.value=c?c.nom:'';
   el=document.getElementById('vcuv-volume'); if(el) el.value=c?c.volume_hl:'';
-  el=document.getElementById('vcuv-date'); if(el) el.value=c?c.date_entree:new Date().toISOString().slice(0,10);
+  el=document.getElementById('vcuv-date'); if(el) el.value=c?c.date_entree:_mvToday();
   el=document.getElementById('vcuv-parcelles'); if(el) el.value=c&&c.parcelles?c.parcelles.join(', '):'';
   el=document.getElementById('vcuv-statut'); if(el) el.value=c?(c.statut||'setup'):'setup';
   el=document.getElementById('vcuv-so2'); if(el) el.value=c&&c.so2_g_hl?c.so2_g_hl:'';
@@ -3687,7 +3687,7 @@ function openOvVendMesure(cuveId, mesureId) {
   // « ce qui trainait dans le DOM » (§20, defaut 3 : l'analyse rouverte).
   _vmRem=m?(m.remontages||0):2; _vmPig=m?(m.pigeages||0):1;
   var el;
-  el=document.getElementById('vm-date'); if(el) el.value=(m&&m.date)||new Date().toISOString().slice(0,10);
+  el=document.getElementById('vm-date'); if(el) el.value=(m&&m.date)||_mvToday();
   el=document.getElementById('vm-densite'); if(el) el.value=(m&&m.densite!=null)?m.densite:'';
   el=document.getElementById('vm-temp'); if(el) el.value=(m&&m.temp_c!=null)?m.temp_c:'';
   el=document.getElementById('vm-rem-val'); if(el) el.textContent=_vmRem;
@@ -3716,7 +3716,7 @@ function saveVendMesure() {
   var cuveId=_vmesureCuveId; if(!cuveId) return;
   var densite=parseFloat((document.getElementById('vm-densite')||{}).value)||null;
   if(!densite){showToast('Saisissez la densit\u00e9','#E07060');return;}
-  var date=(document.getElementById('vm-date')||{}).value||new Date().toISOString().slice(0,10);
+  var date=(document.getElementById('vm-date')||{}).value||_mvToday();
   // ⚠️ `parseFloat(...)||null` avalait un 0 : une cuve a 0 °C perdait sa
   // temperature, donc sa correction de densite. Le zero est une valeur.
   var _t=parseFloat((document.getElementById('vm-temp')||{}).value);
@@ -3743,13 +3743,33 @@ function _vendSaveParam() {
   var rMin=parseFloat((document.getElementById('vpfi-rmin')||{}).value)||130;
   var rMax=parseFloat((document.getElementById('vpfi-rmax')||{}).value)||140;
   var spd=parseFloat((document.getElementById('vpfi-spd')||{}).value)||16.83;
+  // \u26a0\u26a0\u26a0 CES QUATRE CHIFFRES PILOTENT TOUS LES VOLUMES DE L'APPLICATION, ET
+  // RIEN NE LES VERIFIAIT. Les min/max des champs sont des attributs HTML : sans
+  // soumission de formulaire, ils ne bloquent rien \u2014 on lisait `.value` sec.
+  // ratio_min/ratio_max alimentent `_mlKgHl`, donc `_mlRdtMoyen`, donc le rendement
+  // hL/ha, qui est un indicateur reglementaire. Une saisie a cote ne doit pas
+  // pouvoir s'enregistrer en silence.
+  // \u2605 Et l'ORDRE compte : le ratio est en kg/hL, donc le ratio MAXIMUM donne le
+  // volume MINIMUM. Inverser les deux champs est une confusion naturelle, et elle
+  // retournait toutes les fourchettes de l'app (\u00ab 15,4\u201314,3 \u00bb). On les remet dans
+  // l'ordre plutot que de refuser : le vigneron a saisi deux bornes, on sait
+  // lesquelles \u2014 mais on le DIT.
+  var _bor=function(v,lo,hi){ return Math.min(hi,Math.max(lo,v)); };
+  var _av=[pck,rMin,rMax,spd].join('|');
+  pck=_bor(pck,10,60); rMin=_bor(rMin,80,200); rMax=_bor(rMax,80,200); spd=_bor(spd,15,20);
+  var _inv=(rMin>rMax);
+  if(_inv){ var _t=rMin; rMin=rMax; rMax=_t; }
+  var _corr=(_av!==[pck,rMin,rMax,spd].join('|'));
   if(!CAVE_VENDANGE.config) CAVE_VENDANGE.config={};
   CAVE_VENDANGE.config.poids_caisse_kg=pck;
   CAVE_VENDANGE.config.ratio_min=rMin;
   CAVE_VENDANGE.config.ratio_max=rMax;
   CAVE_VENDANGE.config.sucre_par_degre=spd;
   window.CAVE_VENDANGE=CAVE_VENDANGE;
-  _vendFbSave('Param\u00e8tres enregistr\u00e9s','#3D6B27');
+  _vendFbSave(_inv?'Ratios remis dans l\u2019ordre \u00b7 min '+rMin+', max '+rMax
+                  :(_corr?'Param\u00e8tres enregistr\u00e9s \u00b7 valeur(s) ramen\u00e9e(s) aux bornes'
+                         :'Param\u00e8tres enregistr\u00e9s'),
+              (_inv||_corr)?'#B85A1A':'#3D6B27');
   renderVendParam();
 }
 
@@ -5419,7 +5439,7 @@ function saveVendDecuvage(){
   CAVE_ELEVAGE.cuvees.push(cuvee);
   var _dfd=parseFloat((document.getElementById('vdec-dens')||{}).value);
   var _dft=parseFloat((document.getElementById('vdec-temp')||{}).value);
-  c.decuvage={date:new Date().toISOString().slice(0,10),cuvee_id:cuvee.id,
+  c.decuvage={date:_mvToday(),cuvee_id:cuvee.id,
     fa_finie:!!_vendDecFaFinie,
     densite_fut:(isFinite(_dfd)&&_dfd>0)?_dfd:null,
     temp_fut:isFinite(_dft)?_dft:null};
@@ -5639,7 +5659,7 @@ function openVendOp(cuveId,opId){
     +'<div class="mvv-sheet-hd"><div class="mvv-sheet-t">'+(op?'Corriger l\u2019opération':'Opération')+' — '+_escHtml(c.nom)+'</div>'
     +'<button class="mv-gh mvv-sheet-x" onclick="_vendSheetClose()" title="Fermer" aria-label="Fermer">'+_mvIcon('croix',18)+'</button></div>'
     +'<div class="mvv-optabs">'+chips+'</div>'
-    +'<label class="mvv-flbl">Date</label><input id="vop-date" class="mvv-tin" type="date" value="'+((op&&op.date)||new Date().toISOString().slice(0,10))+'">'
+    +'<label class="mvv-flbl">Date</label><input id="vop-date" class="mvv-tin" type="date" value="'+((op&&op.date)||_mvToday())+'">'
     +'<div id="vop-fields"></div>'
     +'<label class="mvv-flbl">Note</label><input id="vop-note" class="mvv-tin" type="text" placeholder="Observation…" value="'+_escHtml((op&&op.note)||'')+'">'
     +'<button class="mvv-save" style="margin-top:18px" onclick="saveVendOp()">'+(op?'Enregistrer la correction':'Enregistrer l\u2019opération')+'</button>'
@@ -5751,7 +5771,7 @@ function saveVendOp(){
   if(!_vendGarde()) return;
   var c=(CAVE_VENDANGE.cuves_vinif||[]).find(function(x){return x.id===_vendOpCuveId;});
   if(!c) return;
-  var date=(document.getElementById('vop-date')||{}).value||new Date().toISOString().slice(0,10);
+  var date=(document.getElementById('vop-date')||{}).value||_mvToday();
   var note=((document.getElementById('vop-note')||{}).value||'').trim();
   var editId=_vendOpEditId;
   var prev=editId?((c.operations||[]).find(function(o){return o.id===editId;})||null):null;
@@ -5997,7 +6017,7 @@ function _vendFusHtml(){
     +'<input id="vfus-nom" class="mvv-tin" type="text" '
     +'value="'+_escAttr(_vendFusNom||_vendFusNomAuto())+'" oninput="_vendFusSetNom(this.value)">'
     +'<label class="mvv-flbl">Date</label>'
-    +'<input id="vfus-date" class="mvv-tin" type="date" value="'+new Date().toISOString().slice(0,10)+'">';
+    +'<input id="vfus-date" class="mvv-tin" type="date" value="'+_mvToday()+'">';
 
   h+='<div id="vfus-recap">'+_vendFusRecapHtml()+'</div>'
     +'<button class="mvv-save" id="vfus-go" onclick="saveVendFusion()">'+_vendFusGoLbl()+'</button>';
@@ -6055,7 +6075,7 @@ function saveVendFusion(){
   var d=_vendFusDestObj();
   if(!d){ showToast('Choisissez la cuve d\u2019arriv\u00e9e','#E07060'); return; }
   var nom=((document.getElementById('vfus-nom')||{}).value||'').trim() || _vendFusNomAuto();
-  var date=(document.getElementById('vfus-date')||{}).value || new Date().toISOString().slice(0,10);
+  var date=(document.getElementById('vfus-date')||{}).value || _mvToday();
   var hl=_vendFusTotHl();
 
   /* La porteuse : la cuve d'arrivee si c'en est une, sinon la premiere
@@ -8446,7 +8466,7 @@ async function saveRetraitFut(){
   if(_retraitFutNb<1||_retraitFutNb>max){showToast('Nombre invalide','#E07060');return;}
   var notes=((document.getElementById('rfut-notes')||{}).value||'').trim();
   var lbl={vente:'Vente',remplissage:'Cuve de remplissage',pique:'Vin piqu\u00E9',acetique:'Acide ac\u00E9tique',autre:'Autre'}[_retraitFutRaison]||_retraitFutRaison;
-  var op={id:'op_'+Date.now(),type:'retrait_fut',date:new Date().toISOString().split('T')[0],
+  var op={id:'op_'+Date.now(),type:'retrait_fut',date:_mvToday(),
     cuvees_ids:[_retraitFutCuvId],operateur:(window.currentUser&&window.currentUser.prenom)||'',
     data:{nb_futs:_retraitFutNb,raison:_retraitFutRaison,raison_lbl:lbl,vol_retire_L:parseFloat((_retraitFutNb*_caveFutL()).toFixed(0)),annee_fut:_retraitFutAnnee},notes:notes};
   if(cuv.tonneaux&&cuv.tonneaux.length&&_retraitFutAnnee!==null){
@@ -8524,7 +8544,7 @@ async function saveCaveAna() {
   }
   // Mode "Nouvelle analyse" standalone
   if(!_caveAnaSelIds.length){showToast('S\u00E9lectionnez au moins une cuv\u00E9e','#E07060');return;}
-  var date=(document.getElementById('cana-date')||{}).value||new Date().toISOString().split('T')[0];
+  var date=(document.getElementById('cana-date')||{}).value||_mvToday();
   var type=(document.getElementById('cana-type')||{}).value||'autre';
   var commentaire=((document.getElementById('cana-commentaire')||{}).value||'').trim();
   var btn2=document.getElementById('cana-save-btn');
@@ -8630,7 +8650,7 @@ var _VT_TMR = null;        // minuterie de l'écriture différée
 var _VT_OPK = 'chaptalisation';
 var _VT_SEL = [];          // cuves retenues pour l'intervention groupée
 
-function _vtJour(){ return new Date().toISOString().slice(0,10); }
+function _vtJour(){ return _mvToday(); }
 function _vtNum(v){
   if(v==null) return null;
   var s=String(v).trim().replace(',','.');
@@ -10235,7 +10255,7 @@ function _matJours(d, tj){ return Math.round((tj - Date.parse(d)) / 86400000); }
 // l'annee precedente — un seul moteur, mais deux bornes.
 function _matSynth(fen, refIso){
   var o = { frais:[], vieilles:[], jamais:[], rentrees:[], nonClass:[], tiles:{} };
-  var ref = refIso || new Date().toISOString().slice(0, 10);
+  var ref = refIso || _mvToday();
   var tj = Date.parse(ref);
 
   var byP = {};
@@ -10336,7 +10356,7 @@ function _matSynthHtml(){
 
   var h = '<div class="mvsy">'
     + '<div class="mvsy-hd"><div class="mvsy-ttl">Où en est la maturité</div>'
-    + '<div class="mvsy-dt">au ' + new Date().toISOString().slice(8, 10) + '/' + new Date().toISOString().slice(5, 7) + '</div></div>'
+    + '<div class="mvsy-dt">au ' + _mvToday().slice(8, 10) + '/' + _mvToday().slice(5, 7) + '</div></div>'
     + '<div class="mvsy-fen">'
     + [[7, '7 derniers jours'], [14, '14 jours'], [_MAT_CAMP_J, 'Cette vendange']].map(function(f){
         return '<button type="button" class="' + (_matFen === f[0] ? 'on' : '') + '" onclick="_matSetFen(' + f[0] + ')">' + f[1] + '</button>';
@@ -10499,7 +10519,7 @@ function renderVendAna(){
     html+='<div class="mva-form">'
       +'<div class="mva-frow">'
         +'<div class="mva-fld" style="min-width:150px"><label>Parcelle</label><select id="mva-parc">'+opts+'</select></div>'
-        +'<div class="mva-fld" style="max-width:150px"><label>Date</label><input id="mva-date" type="date" value="'+(new Date().toISOString().slice(0,10))+'"></div>'
+        +'<div class="mva-fld" style="max-width:150px"><label>Date</label><input id="mva-date" type="date" value="'+(_mvToday())+'"></div>'
         +'<div class="mva-fld" style="max-width:160px"><label>Mesure</label><div class="mva-useg">'
           +'<button id="mva-u-suc" class="'+(sucOn?'on':'')+'" onclick="_vendAnaUnit(\'sucre\')">Sucre g/L</button>'
           +'<button id="mva-u-alc" class="'+(sucOn?'':'on')+'" onclick="_vendAnaUnit(\'alc\')">°alc %vol</button>'
@@ -10583,7 +10603,7 @@ function _vendAnaAdd(){
   if(!p){ showToast('Choisissez une parcelle','#E07060'); return; }
   if(!(v>0)){ showToast('Saisissez une mesure','#E07060'); return; }
   if(!CAVE_VENDANGE.analyses) CAVE_VENDANGE.analyses=[];
-  CAVE_VENDANGE.analyses.push({id:'vana_'+Date.now(),parcelle:p,date:d||new Date().toISOString().slice(0,10),
+  CAVE_VENDANGE.analyses.push({id:'vana_'+Date.now(),parcelle:p,date:d||_mvToday(),
     mode:_vendAnaUnitMode,val:v,spd:(_vendCfg().sucre_par_degre)||16.83});
   window.CAVE_VENDANGE=CAVE_VENDANGE;
   _vendFbSave('Analyse enregistrée','#C0845A');
@@ -10803,7 +10823,7 @@ function _caveBtlConfirmYes(id){
   }
   c.statut='embouteille';
   c.nb_bouteilles=reel;
-  c.date_embouteillage=new Date().toISOString().slice(0,10);
+  c.date_embouteillage=_mvToday();
   c.bilan_perte={recolteKg:ch.recolteKg,cuveHl:ch.cuveHl,eleveHl:ch.eleveHl};
   _caveBtlConfirm=null;
   window.CAVE_ELEVAGE=CAVE_ELEVAGE;
@@ -12480,7 +12500,7 @@ function _pcavMatiere(ch){ if(!ch) return false;
 // Millesime courant = celui de la campagne ouverte le 1er aout precedent.
 // _mvCampagneDe est la source unique (utils.js) ; repli local si absent.
 function _pcavCampagne(){
-  var iso=new Date().toISOString().slice(0,10);
+  var iso=_mvToday();
   if(_pcavHas('_mvCampagneDe')){ try{ return window._mvCampagneDe(iso); }catch(e){ _pcavLog('campagne',e); } }
   var y=parseInt(iso.slice(0,4),10), m=parseInt(iso.slice(5,7),10);
   return m>=8?y:y-1;
@@ -12501,7 +12521,7 @@ function _pcavCtx(){
   c.alerte=_caveSeuilGlobal()||14;
   c.cuvees=(window.CAVE_ELEVAGE&&CAVE_ELEVAGE.cuvees)||[];
   c.enElevage=c.cuvees.filter(function(x){ return x&&x.statut!=='embouteille'; });
-  try{ c.agenda=_pcavHas('_mlAgenda')?window._mlAgenda(new Date().toISOString().slice(0,10),4):null; }
+  try{ c.agenda=_pcavHas('_mlAgenda')?window._mlAgenda(_mvToday(),4):null; }
   catch(e){ c.agenda=null; }
   // Le millesime affiche n'est pas forcement celui de la campagne ouverte.
   // Le 7 aout, la campagne 2026-2027 vient de commencer mais le vin en cave
@@ -12549,9 +12569,9 @@ function _pcavCtx(){
 // quatre jours ne contient presque aucun ouillage.
 function _pcavAnges(c){
   var ops=(window.CAVE_ELEVAGE&&CAVE_ELEVAGE.operations)||[];
-  var d1=new Date().toISOString().slice(0,10);
+  var d1=_mvToday();
   var _d0=new Date(); _d0.setFullYear(_d0.getFullYear()-1);
-  var d0=_d0.toISOString().slice(0,10);
+  var d0=_mvISO(_d0);
   // Millesime de chaque cuvee, pour ventiler les ouillages.
   var milDe={}, futDe={};
   c.enElevage.forEach(function(x){
@@ -14053,7 +14073,7 @@ function _rmExport(campagne, millesime){
   // Un millesime donne prime sur la campagne : le document porte alors sur
   // TOUT le vin de cette annee, quelle que soit la campagne de l'operation.
   var an = (millesime != null) ? null
-         : ((campagne != null) ? campagne : _rmCampagne(new Date().toISOString().slice(0,10)));
+         : ((campagne != null) ? campagne : _rmCampagne(_mvToday()));
   var body, nb = 0;
   try{
     var r = _rmLignes(CAVE_VENDANGE, CAVE_ELEVAGE, an, millesime);
@@ -14674,7 +14694,7 @@ function _bcExport(c, mil){
     nom: (window.DOMAINE_NOM || (window.CONFIG && window.CONFIG.domaine) || 'Mon domaine'),
     commune: (window.CONFIG && window.CONFIG.commune) || ''
   };
-  var an = (c != null) ? c : _bcCampagne(new Date().toISOString().slice(0,10));
+  var an = (c != null) ? c : _bcCampagne(_mvToday());
   var body;
   try{ body = _bcDoc(ctx, DOM, an, (mil!=null?mil:an)); }
   catch(err){
@@ -14867,7 +14887,7 @@ function _matAnnees(){
    fenetre de fraicheur de sept jours ne contiendrait plus rien et les trois
    moyennes sortiraient vides d'un document pourtant plein de mesures. */
 function _matRefIso(an){
-  var today = new Date().toISOString().slice(0, 10);
+  var today = _mvToday();
   if(String(an) === today.slice(0, 4)) return today;
   var last = '';
   (CAVE_VENDANGE.analyses || []).forEach(function(a){

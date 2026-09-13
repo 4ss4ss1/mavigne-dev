@@ -1,5 +1,6 @@
 // Harnais fonctionnel CUV-7 — sur les VRAIES fonctions extraites de cave.js.
 import fs from 'fs';
+import { sourceDates, poseDates } from './mv-dates-reelles.mjs';
 const SRC = fs.readFileSync(new URL('../src/cave.js', import.meta.url), 'utf8');
 
 function extrait(nom) {
@@ -27,6 +28,7 @@ function monter(saboter) {
   let code = NOMS.map(extrait).join('\n');
   if (saboter) code = saboter(code);
   const pre = `
+${sourceDates()}
 var CAVE_VENDANGE={cuves_vinif:[]}, _VT_BUF={}, _VT_WHO=[];
 function _vendTriMes(c){ var m=(c&&c.mesures_fa)||[]; if(m.length>1) m.sort(function(a,b){return a.date<b.date?-1:1;}); return m; }
 function _vendIsActive(c){ return c.statut==='fa'||c.statut==='mpf'; }
