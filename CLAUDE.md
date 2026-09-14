@@ -18171,3 +18171,93 @@ parent, le contrôle **le dit** et laisse passer. **Contre-épreuve : 7/7**, don
 
 ★ **Ce que ça ne couvre toujours pas** : un lot poussé sans `.mv-base` à jour. La sonde des scripts
 et l'œil restent les derniers filets — et c'est l'œil qui a lu la sortie de CI ce soir.
+
+## 127. ★★★ TYPO-1 — LE BARÈME EXISTAIT DEPUIS DS-0 ET DEUX MODULES SUR ONZE S'EN SERVAIENT (14/09 — `src/*.js` + `index.html` + `src/styles.css` + `scripts/` + `package.json` · APP **inchangé** · SW 7.80 → **7.81** · base `eea1df4`)
+
+**Point de départ** : *« on se fait P1 »* — la tranche de dette mesurée en §123 bis, dont l'entrée
+« l'échelle typographique ».
+
+### 127a. ⚠️ LA MESURE A CORRIGÉ MA PROPRE FORMULATION
+
+J'avais écrit, la veille : *« 1 475 sites sous 12 px, le trop-petit est industrialisé »*. Le compte
+était juste mais **le diagnostic était faux** — et le regex qui l'avait produit était faux aussi :
+sa classe de caractères excluait `)`, donc **il sautait purement et simplement toute déclaration
+écrite en `var(--pt-x,Npx)`**. Il n'avait vu aucun jeton. Le vrai état :
+
+| | px en dur | jetons |
+|---|---|---|
+| `pilotage.js` | **0** | 229 |
+| `cave.js` | 68 | 501 |
+| `admin-gt.js` | 473 | **0** |
+| `index.html` | 408 | **0** |
+| `reglages.js` | 327 | **0** |
+| `app.js` | 299 | **0** |
+| `planning.js` | 278 | **0** |
+| `styles.css` | 1 018 | 15 |
+
+**82 % des tailles en dur, et 764 jetons concentrés dans trois fichiers.** Le sujet n'était pas
+« le texte est trop petit » : c'était **un barème posé par DS-0, appliqué dans deux modules, puis
+abandonné**. ★ *Un chiffre juste peut porter une conclusion fausse. Ce qui a changé la conclusion,
+c'est la ventilation par fichier — pas le total.*
+
+### 127b. ★★★ CE N'EST PAS UN SUJET DE PROPRETÉ, C'EST CE QUI BLOQUE LE RÉGLAGE « TAILLE DU TEXTE »
+
+Le cran d'accessibilité (lot B du backlog) se pose **en une ligne dans `:root`**. Mais tant que
+82 % des tailles sont écrites en dur, ce réglage ne déplacerait que 18 % de l'écran —
+**c'est pire que pas de réglage du tout** : l'utilisateur croit avoir agrandi, et la moitié de
+l'interface ne bouge pas. La conversion n'est donc pas du rangement, c'est **le prérequis de la
+fonctionnalité**.
+
+### 127c. La règle de conversion : aucun arrondi, donc aucun risque
+
+**1 246 sites convertis, zéro pixel de changement.** Seules les valeurs **exactement égales** à un
+cran ont été touchées : 11 → `--pt-micro` (671), 14 → `--pt-base` (162), 12.5 → `--pt-txt` (135),
+10.5 → `--pt-lbl` (89), 9.5 → `--pt-nano` (77), plus 17/20/23/27/31/40 (112).
+Les **1 966 restants** — 12, 13, 10, 9, 11.5, 15, 16, 22, 18, 13.5 — demandent un arbitrage à l'œil
+(13 → 12.5 ou 14 ?) et attendent leur lot. ★ *Un lot mécanique et un lot de goût ne se mélangent
+pas : le premier se prouve, le second se regarde.*
+
+### 127d. ⚠️⚠️ LE REPLI EST OBLIGATOIRE — `var(--pt-micro,11px)`, jamais nu
+
+**Dix modules sur douze construisent des fenêtres d'impression**, et `:root` n'y existe pas. Un
+`var(--pt-micro)` nu n'y résout rien : la déclaration devient invalide et la taille retombe à
+l'héritage — sur un registre phytosanitaire opposable en contrôle.
+C'est exactement la famille de `_mvIcon` vs `_mvIconInline` (règle F du harnais des icônes) : *un
+document imprimé ne vit pas dans le document de l'application.*
+★ **La convention existait déjà** : les 755 jetons de `cave.js`, `pilotage.js`, `reserve.js` et
+`utils.js` portaient **tous** leur repli, et les 9 sans repli étaient tous dans `styles.css`, où
+`:root` s'applique toujours. Le lot n'a pas inventé la règle, il l'a **relevée dans le code
+existant et transformée en assertion**.
+
+### 127e. `scripts/mv-harnais-typo.mjs` — l'assertion qui garde l'acquis
+
+Un cliquet seul ne suffisait pas : il autorise d'écrire `font-size:11px` ici pendant qu'on en
+convertit un ailleurs, à somme nulle. L'assertion forte est donc :
+★★★ **AUCUNE TAILLE ÉGALE À UN CRAN NE PEUT ÊTRE ÉCRITE EN DUR.** Un `font-size:14px` écrit demain
+rougit le jour même, sans attendre un audit.
+Le reste : le barème est **vérifié** dans `:root` (onze crans, aux bonnes valeurs) au lieu d'être
+supposé ; le repli est exigé dans `src/*.js` ; le px en dur et le trop-petit sont à cliquet
+**par fichier** ; et un **plafond de poids de module** (1 024 ko, +5 % par lot sans regraver)
+remplace enfin l'entrée « à surveiller » du backlog — *une veille qui a écrit trois fois « à
+surveiller » pendant que `cave.js` doublait n'est pas une veille.*
+**Contre-épreuve : 4/4 injectés, 5 assertions rougissent.**
+
+### 127f. Le résultat, en une ligne
+
+Sous 12 px, **1 223 sites sur 1 872 obéissent maintenant à `:root`** — contre 386 avant. Le
+trop-petit n'a pas diminué d'un pixel : **il est devenu pilotable depuis un seul endroit.**
+
+### 127g. La note de livraison
+
+**Base : `eea1df4`** (`.mv-base` posé, cf. §126). `npm run check` joué en entier, ESLint installé
+dans le bac à sable. **SW 7.80 → 7.81** parce que des fichiers servis changent ; **APP inchangé**
+parce qu'aucun pixel ne bouge — donc **pas d'entrée au journal des nouveautés** : il n'y a rien à
+annoncer à un utilisateur.
+
+**Ouvert, et dit** : ① **aucun rendu navigateur** — la conversion est prouvée sans arrondi, mais
+1 246 substitutions dans onze fichiers se regardent au moins sur trois écrans, dont un document
+imprimé (c'est là que le repli se vérifie pour de vrai). ② Les **1 966 tailles restantes** sont le
+lot suivant, et il est de goût. ③ Le **harnais de contraste** (`mv-harnais-contraste.mjs`) n'existe
+toujours pas : aucun contrôle du projet ne lit une couleur. ④ Le reste de P1 — 223 `catch{}` vides
+dont 155 dans `app.js`, 159 slots JS nus et 330 interpolations nues, 58 classes mortes dans le CSS
+de la Cave, 3 937 hex en dur — est intact.

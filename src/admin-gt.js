@@ -550,7 +550,7 @@ function _agtBuildRadar(){
   h+=_agtBizKpi(neufs,'demandes du site',neufs>0?'#C4B5FD':'rgba(255,255,255,0.3)','sans r\u00e9ponse');
   h+='</div>';
 
-  h+='<div style="margin:0 0 8px;font-size:11px;color:rgba(255,255,255,0.35);letter-spacing:.08em;text-transform:uppercase;font-weight:500">'
+  h+='<div style="margin:0 0 8px;font-size:var(--pt-micro,11px);color:rgba(255,255,255,0.35);letter-spacing:.08em;text-transform:uppercase;font-weight:500">'
     +(rows.length?('\u00c0 traiter \u2014 '+rows.length):'\u00c0 traiter')+'</div>';
 
   if(!rows.length){
@@ -565,15 +565,15 @@ function _agtBuildRadar(){
       h+='<div style="display:flex;align-items:center;gap:9px;padding:8px 0;flex-wrap:wrap'
         +(i<rows.length-1?';border-bottom:1px solid rgba(255,255,255,0.05)':'')+'">';
       h+='<span style="width:7px;height:7px;border-radius:50%;flex-shrink:0;background:'+r.c+'"></span>';
-      h+='<span style="flex:1;min-width:160px;font-size:12.5px;color:rgba(255,255,255,0.8)">'+r.t+'</span>';
-      if(r.m) h+='<span style="font-size:12.5px;font-weight:600">'+r.m+'</span>';
-      h+='<button onclick="'+r.a+'" style="background:rgba(255,255,255,0.07);border:1px solid rgba(255,255,255,0.12);border-radius:7px;padding:4px 10px;color:rgba(255,255,255,0.6);font-size:11px;cursor:pointer;font-family:Outfit,sans-serif">'+r.b+'</button>';
+      h+='<span style="flex:1;min-width:160px;font-size:var(--pt-txt,12.5px);color:rgba(255,255,255,0.8)">'+r.t+'</span>';
+      if(r.m) h+='<span style="font-size:var(--pt-txt,12.5px);font-weight:600">'+r.m+'</span>';
+      h+='<button onclick="'+r.a+'" style="background:rgba(255,255,255,0.07);border:1px solid rgba(255,255,255,0.12);border-radius:7px;padding:4px 10px;color:rgba(255,255,255,0.6);font-size:var(--pt-micro,11px);cursor:pointer;font-family:Outfit,sans-serif">'+r.b+'</button>';
       h+='</div>';
     });
     h+='</div>';
   }
 
-  h+='<div style="margin:18px 0 8px;font-size:11px;color:rgba(255,255,255,0.35);letter-spacing:.08em;text-transform:uppercase;font-weight:500">Le produit vu du dehors</div>';
+  h+='<div style="margin:18px 0 8px;font-size:var(--pt-micro,11px);color:rgba(255,255,255,0.35);letter-spacing:.08em;text-transform:uppercase;font-weight:500">Le produit vu du dehors</div>';
   h+=_agtVisiteCard();
   return h;
 }
@@ -626,10 +626,10 @@ function _agtBuildOutils(){
 // Extrait de l'onglet Clients : la maintenance du catalogue n'a rien a y faire.
 function _agtEphyCard(){
   var h='<div class="agt-card" style="border-color:rgba(34,197,94,0.18)"><div style="padding:14px 16px">';
-  h+='<div style="font-size:14px;font-weight:600;color:#fff;display:flex;align-items:center;gap:8px">\uD83C\uDF3F Catalogue E-Phy (ANSES)</div>';
-  h+='<div style="font-size:11px;color:rgba(255,255,255,0.4);line-height:1.6;margin:6px 0 12px">R\u00e9f\u00e9rentiel officiel partag\u00e9 par tous les domaines \u00b7 mise \u00e0 jour auto chaque mercredi. Forcer une resynchronisation imm\u00e9diate :</div>';
+  h+='<div style="font-size:var(--pt-base,14px);font-weight:600;color:#fff;display:flex;align-items:center;gap:8px">\uD83C\uDF3F Catalogue E-Phy (ANSES)</div>';
+  h+='<div style="font-size:var(--pt-micro,11px);color:rgba(255,255,255,0.4);line-height:1.6;margin:6px 0 12px">R\u00e9f\u00e9rentiel officiel partag\u00e9 par tous les domaines \u00b7 mise \u00e0 jour auto chaque mercredi. Forcer une resynchronisation imm\u00e9diate :</div>';
   h+='<button class="agt-btn fill" style="width:100%;background:#1F7A3D;border-color:rgba(34,197,94,0.4)" onclick="agtSyncEphy(this)">\uD83D\uDD04 Resynchroniser maintenant</button>';
-  h+='<div id="agt-ephy-status" style="font-size:11px;color:rgba(255,255,255,0.35);text-align:center;margin-top:8px;line-height:1.5"></div>';
+  h+='<div id="agt-ephy-status" style="font-size:var(--pt-micro,11px);color:rgba(255,255,255,0.35);text-align:center;margin-top:8px;line-height:1.5"></div>';
   h+='</div></div>';
   return h;
 }
@@ -731,7 +731,7 @@ function _agtCnxBadge(slug){
   if(!c) return '';  // pas encore chargé / indisponible
   var f=_agtCnxFmt(c.last);
   var label = c.last ? ('Dernière connexion · '+f.txt) : 'Aucune connexion';
-  return '<div style="display:inline-flex;align-items:center;gap:6px;margin-top:9px;font-size:11px;font-weight:600;padding:3px 9px;border-radius:8px;background:'+f.bg+';color:'+f.c+'">'
+  return '<div style="display:inline-flex;align-items:center;gap:6px;margin-top:9px;font-size:var(--pt-micro,11px);font-weight:600;padding:3px 9px;border-radius:8px;background:'+f.bg+';color:'+f.c+'">'
        + '<span style="width:6px;height:6px;border-radius:50%;background:'+f.dot+'"></span>'+label+'</div>';
 }
 
@@ -780,7 +780,7 @@ function _agtCnxSection(slug){
 // la question se pose vraiment : « qui est alle chez ce client, et quand ? ».
 function _agtFicheSec(titre, corps){
   return '<div style="margin-top:12px;padding-top:10px;border-top:1px solid rgba(255,255,255,0.06)">'
-    +'<div style="font-size:10.5px;color:rgba(255,255,255,0.32);letter-spacing:.06em;text-transform:uppercase;font-weight:600;margin-bottom:7px">'+titre+'</div>'
+    +'<div style="font-size:var(--pt-lbl,10.5px);color:rgba(255,255,255,0.32);letter-spacing:.06em;text-transform:uppercase;font-weight:600;margin-bottom:7px">'+titre+'</div>'
     +corps+'</div>';
 }
 function _agtFicheBiz(slug){
@@ -800,14 +800,14 @@ function _agtFicheBiz(slug){
   c+='<span style="font-size:11.5px;color:rgba(255,255,255,0.4);background:rgba(255,255,255,0.04);border-radius:20px;padding:3px 9px">'+(_AGT_PLANL[_agtPlan(slug)]||'')+' \u00b7 '+_agtEur(_agtAboPrix(slug))+'/mois'+(_rm?(' \u00b7 '+_escHtml(_rm.motif||'remis\u00e9')):'')+'</span>';
   c+='</div>';
   if(!fs.length){
-    c+='<div style="font-size:11px;color:rgba(255,255,255,0.25)">Aucune ligne enregistr\u00e9e.</div>';
+    c+='<div style="font-size:var(--pt-micro,11px);color:rgba(255,255,255,0.25)">Aucune ligne enregistr\u00e9e.</div>';
   } else {
     var ord=fs.map(function(f,k){ return k; }).sort(function(a,b){
       return String(fs[b].date||'').localeCompare(String(fs[a].date||''));
     }).slice(0,3);
     ord.forEach(function(k){
       var f=fs[k], ty=_AGT_TY[_agtFType(f)], ret=_agtFRetard(f);
-      c+='<div style="display:flex;align-items:center;gap:8px;padding:3px 0;font-size:11px;flex-wrap:wrap">';
+      c+='<div style="display:flex;align-items:center;gap:8px;padding:3px 0;font-size:var(--pt-micro,11px);flex-wrap:wrap">';
       c+='<span style="width:13px;height:13px;border-radius:3px;background:'+ty.col+';color:#0B0F14;font-size:8px;font-weight:700;display:flex;align-items:center;justify-content:center;flex-shrink:0">'+ty.ini+'</span>';
       c+='<span style="font-family:monospace;color:rgba(255,255,255,0.5)">'+_escHtml(f.ref||'')+'</span>';
       c+='<span style="color:rgba(255,255,255,0.28)">'+_agtDateFr(f.date)+'</span>';
@@ -818,8 +818,8 @@ function _agtFicheBiz(slug){
     if(fs.length>3) c+='<div style="font-size:10px;color:rgba(255,255,255,0.2);padding-top:2px">+ '+(fs.length-3)+' autre'+(fs.length>4?'s':'')+'</div>';
   }
   c+='<div style="display:flex;gap:12px;flex-wrap:wrap;margin-top:7px">';
-  if(idx>=0) c+='<button onclick="event.stopPropagation();agtSwitchTab(\'business\')" style="background:none;border:none;color:rgba(196,181,253,0.5);font-size:11px;cursor:pointer;font-family:Outfit,sans-serif;padding:0">Ouvrir Business</button>';
-  if(idx>=0 && fs.length) c+='<button onclick="event.stopPropagation();agtBizReleve('+idx+')" style="background:none;border:none;color:rgba(196,181,253,0.5);font-size:11px;cursor:pointer;font-family:Outfit,sans-serif;padding:0">Relev\u00e9 de compte</button>';
+  if(idx>=0) c+='<button onclick="event.stopPropagation();agtSwitchTab(\'business\')" style="background:none;border:none;color:rgba(196,181,253,0.5);font-size:var(--pt-micro,11px);cursor:pointer;font-family:Outfit,sans-serif;padding:0">Ouvrir Business</button>';
+  if(idx>=0 && fs.length) c+='<button onclick="event.stopPropagation();agtBizReleve('+idx+')" style="background:none;border:none;color:rgba(196,181,253,0.5);font-size:var(--pt-micro,11px);cursor:pointer;font-family:Outfit,sans-serif;padding:0">Relev\u00e9 de compte</button>';
   c+='</div>';
   return _agtFicheSec('Facturation', c);
 }
@@ -838,14 +838,14 @@ function _agtFicheIncid(t){
   if(reps.length) c+='<div style="font-size:11.5px;color:#F97316;font-weight:600;margin-bottom:6px">'+reps.length+' signalement'+(reps.length>1?'s':'')+' en attente</div>';
   errs.slice(0,4).forEach(function(e){
     var m=_AGT_LVL[e.level]||_AGT_LVL.error;
-    c+='<div style="display:flex;align-items:center;gap:7px;padding:3px 0;font-size:11px;flex-wrap:wrap">';
+    c+='<div style="display:flex;align-items:center;gap:7px;padding:3px 0;font-size:var(--pt-micro,11px);flex-wrap:wrap">';
     c+='<span style="width:6px;height:6px;border-radius:50%;background:'+m.color+';flex-shrink:0"></span>';
     c+='<span style="flex:1;min-width:120px;color:rgba(255,255,255,0.55);overflow:hidden;text-overflow:ellipsis;white-space:nowrap">'+_escHtml(e.msg||'')+'</span>';
     c+='<span style="color:rgba(255,255,255,0.25)">'+_agtRelTime(e.ts)+'</span>';
     c+='</div>';
   });
   if(errs.length>4) c+='<div style="font-size:10px;color:rgba(255,255,255,0.2);padding-top:2px">+ '+(errs.length-4)+' autre'+(errs.length>5?'s':'')+'</div>';
-  c+='<button onclick="event.stopPropagation();agtSetErrTenant(\''+t.slug+'\');agtSwitchTab(\'incidents\')" style="background:none;border:none;color:rgba(196,181,253,0.5);font-size:11px;cursor:pointer;font-family:Outfit,sans-serif;padding:7px 0 0">Ouvrir dans Incidents</button>';
+  c+='<button onclick="event.stopPropagation();agtSetErrTenant(\''+t.slug+'\');agtSwitchTab(\'incidents\')" style="background:none;border:none;color:rgba(196,181,253,0.5);font-size:var(--pt-micro,11px);cursor:pointer;font-family:Outfit,sans-serif;padding:7px 0 0">Ouvrir dans Incidents</button>';
   return _agtFicheSec('Incidents', c);
 }
 function _agtFicheAcces(slug){
@@ -855,7 +855,7 @@ function _agtFicheAcces(slug){
     c='<div style="font-size:11.5px;color:rgba(255,255,255,0.28)">Aucun acc\u00e8s enregistr\u00e9.</div>';
   } else {
     l.slice(0,5).forEach(function(a){
-      c+='<div style="display:flex;align-items:center;gap:8px;padding:3px 0;font-size:11px;flex-wrap:wrap">';
+      c+='<div style="display:flex;align-items:center;gap:8px;padding:3px 0;font-size:var(--pt-micro,11px);flex-wrap:wrap">';
       c+='<span style="flex-shrink:0;display:inline-flex">'+_agtIco(a.icon)+'</span>';
       c+='<span style="flex:1;min-width:120px;color:rgba(255,255,255,0.5)">'+_escHtml(a.action||'')+'</span>';
       c+='<span style="color:rgba(255,255,255,0.25)">'+_agtRelTime(a.ts)+'</span>';
@@ -885,7 +885,7 @@ function _agtBuildClients(){
     h+='<div style="width:8px;height:8px;border-radius:50%;background:'+dot+';box-shadow:0 0 6px '+dotGlow+';flex-shrink:0;margin-top:6px"></div>';
     h+='<div style="flex:1">';
     h+='<div style="font-size:15px;font-weight:600;color:#fff;display:flex;align-items:center">'+_escHtml(t.nom)+errBadge+'</div>';
-    h+='<div style="font-size:11px;color:rgba(196,181,253,0.45);margin-top:2px;font-family:monospace">'+_escHtml(t.slug)+'</div>';
+    h+='<div style="font-size:var(--pt-micro,11px);color:rgba(196,181,253,0.45);margin-top:2px;font-family:monospace">'+_escHtml(t.slug)+'</div>';
     h+=_agtCnxBadge(t.slug);
     // Barre avancement saison (on utilise 0% si pas de données)
     h+='<div style="margin-top:10px">';
@@ -927,7 +927,7 @@ function _agtBuildClients(){
       h+='<button class="agt-btn sm" onclick="agtShowErreurs(\''+t.slug+'\')">Erreurs'+(t.errorsOpen>0?' ('+t.errorsOpen+')':'')+'</button>';
       h+='</div>';
       if(t.slug==='marchand-grillot'){
-        h+='<div style="font-size:11px;color:rgba(255,255,255,0.28);text-align:center;padding:9px;background:rgba(255,255,255,0.03);border:1px solid rgba(255,255,255,0.06);border-radius:8px;margin-bottom:8px">Domaine de production — suppression désactivée</div>';
+        h+='<div style="font-size:var(--pt-micro,11px);color:rgba(255,255,255,0.28);text-align:center;padding:9px;background:rgba(255,255,255,0.03);border:1px solid rgba(255,255,255,0.06);border-radius:8px;margin-bottom:8px">Domaine de production — suppression désactivée</div>';
       } else {
         h+='<button class="agt-btn" style="width:100%;background:rgba(239,68,68,0.08);border-color:rgba(239,68,68,0.28);color:#FCA5A5;margin-bottom:8px" onclick="agtDeleteTenant(\''+t.slug+'\')">Supprimer le domaine</button>';
       }
@@ -937,7 +937,7 @@ function _agtBuildClients(){
     h+='</div>';
   }
   h+='<button style="width:100%;background:none;border:1px dashed rgba(139,92,246,0.28);border-radius:16px;color:rgba(196,181,253,0.4);font-size:13px;font-weight:500;padding:14px;cursor:pointer;font-family:Outfit,sans-serif;display:flex;align-items:center;justify-content:center;gap:8px;margin-top:4px" onclick="openOv(\'ovAddTenant\')">';
-  h+='<span style="width:22px;height:22px;border-radius:50%;background:rgba(139,92,246,0.14);border:1px solid rgba(139,92,246,0.3);display:flex;align-items:center;justify-content:center;font-size:14px;color:#8B5CF6">+</span> Nouveau client</button>';
+  h+='<span style="width:22px;height:22px;border-radius:50%;background:rgba(139,92,246,0.14);border:1px solid rgba(139,92,246,0.3);display:flex;align-items:center;justify-content:center;font-size:var(--pt-base,14px);color:#8B5CF6">+</span> Nouveau client</button>';
   // Le chemin normal : le dossier du client remplit l'installation, et le domaine s'ouvre
   // AVEC ses parcelles dedans. « Nouveau client » ci-dessus reste le chemin manuel — il
   // se contente de r\u00e9server un slug et de laisser le client d\u00e9rouler l'assistant lui-m\u00eame.
@@ -1084,7 +1084,7 @@ function _agtCopyFb(txt,msg){
 // sait rien du tout — et c'est exactement le cas qu'il faut voir.
 function _agtErrSante(){
   var h='<div style="background:rgba(255,255,255,0.04);border:1px solid rgba(255,255,255,0.1);border-radius:12px;padding:12px 14px;margin-bottom:12px">';
-  h+='<div style="font-size:11px;color:rgba(255,255,255,0.35);letter-spacing:.06em;text-transform:uppercase;font-weight:600;margin-bottom:8px">Remont\u00e9e par domaine</div>';
+  h+='<div style="font-size:var(--pt-micro,11px);color:rgba(255,255,255,0.35);letter-spacing:.06em;text-transform:uppercase;font-weight:600;margin-bottom:8px">Remont\u00e9e par domaine</div>';
   _agtTenants.forEach(function(t,i){
     var arr=Array.isArray(t.errors)?t.errors:[];
     var open=arr.filter(function(e){ return !e.resolved; }).length;
@@ -1101,9 +1101,9 @@ function _agtErrSante(){
     h+='<div style="display:flex;align-items:center;gap:9px;padding:6px 0;flex-wrap:wrap'
       +(i<_agtTenants.length-1?';border-bottom:1px solid rgba(255,255,255,0.05)':'')+'">';
     h+='<span style="width:7px;height:7px;border-radius:50%;flex-shrink:0;background:'+col+'"></span>';
-    h+='<span style="flex:1;min-width:130px;font-size:12.5px;color:rgba(255,255,255,0.75)">'+_escHtml(t.nom)+'</span>';
+    h+='<span style="flex:1;min-width:130px;font-size:var(--pt-txt,12.5px);color:rgba(255,255,255,0.75)">'+_escHtml(t.nom)+'</span>';
     h+='<span style="font-size:11.5px;font-weight:600;color:'+col+'">'+txt+'</span>';
-    h+='<span style="font-size:10.5px;color:rgba(255,255,255,0.25);min-width:120px;text-align:right">'
+    h+='<span style="font-size:var(--pt-lbl,10.5px);color:rgba(255,255,255,0.25);min-width:120px;text-align:right">'
       +(last?('derni\u00e8re '+_agtRelTime(last.toISOString())):'\u2014')
       +(cnxLast?(' \u00b7 vu '+_agtRelTime(cnxLast.toISOString())):'')+'</span>';
     h+='</div>';
@@ -1193,7 +1193,7 @@ function _agtBuildErrors(){
     h+='<div style="color:#E8E8E0;font-size:12px;font-weight:600;line-height:1.45">'+_escHtml(g.msg)+'</div>';
 
     h+='<div style="display:flex;gap:5px;margin-top:6px;flex-wrap:wrap;align-items:center">';
-    if(g.n>1) h+='<span style="font-size:10.5px;font-weight:700;background:rgba(255,255,255,0.10);border-radius:5px;padding:1px 7px;color:#E8E8E0">\u00d7'+g.n+'</span>';
+    if(g.n>1) h+='<span style="font-size:var(--pt-lbl,10.5px);font-weight:700;background:rgba(255,255,255,0.10);border-radius:5px;padding:1px 7px;color:#E8E8E0">\u00d7'+g.n+'</span>';
     h+='<span style="font-size:10px;background:rgba(255,255,255,0.07);border-radius:5px;padding:1px 6px;color:rgba(255,255,255,0.45)">'+_escHtml(_AGT_CAT[g.cat]||g.cat||'\u2014')+'</span>';
     noms.slice(0,4).forEach(function(nm){
       h+='<span style="font-size:10px;background:rgba(139,92,246,0.12);border:1px solid rgba(139,92,246,0.2);border-radius:5px;padding:1px 6px;color:rgba(196,181,253,0.7);font-weight:600">'
@@ -1204,7 +1204,7 @@ function _agtBuildErrors(){
     else if(g.loc>0)      h+='<span style="font-size:9px;background:rgba(255,255,255,0.05);border-radius:4px;padding:1px 5px;color:rgba(255,255,255,0.3)">mon poste</span>';
     h+='</div>';
 
-    h+='<div style="font-size:10.5px;color:rgba(255,255,255,0.3);margin-top:5px">';
+    h+='<div style="font-size:var(--pt-lbl,10.5px);color:rgba(255,255,255,0.3);margin-top:5px">';
     h+= (g.n>1 && g.first && g.last && g.first.getTime()!==g.last.getTime())
       ? ('du '+_agtDateFr(g.first)+' \u00e0 il y a '+_agtRelTime(g.last.toISOString()))
       : (g.last?('il y a '+_agtRelTime(g.last.toISOString())):'\u2014');
@@ -1216,12 +1216,12 @@ function _agtBuildErrors(){
 
     h+='<div style="display:flex;flex-direction:column;gap:5px;flex-shrink:0">';
     if(g.nOpen>0)
-      h+='<button onclick="agtResolveGroup(\''+g.id+'\')" style="background:rgba(34,197,94,0.12);border:1px solid rgba(34,197,94,0.3);border-radius:7px;color:#86EFAC;font-size:11px;padding:5px 9px;cursor:pointer;white-space:nowrap;font-family:Outfit,sans-serif">\u2713 R\u00e9solu'+(g.nOpen>1?(' \u00d7'+g.nOpen):'')+'</button>';
-    h+='<button onclick="agtErrCopy(\''+g.id+'\')" style="background:rgba(255,255,255,0.06);border:1px solid rgba(255,255,255,0.12);border-radius:7px;color:rgba(255,255,255,0.5);font-size:10.5px;padding:4px 9px;cursor:pointer;white-space:nowrap;font-family:Outfit,sans-serif">Copier</button>';
+      h+='<button onclick="agtResolveGroup(\''+g.id+'\')" style="background:rgba(34,197,94,0.12);border:1px solid rgba(34,197,94,0.3);border-radius:7px;color:#86EFAC;font-size:var(--pt-micro,11px);padding:5px 9px;cursor:pointer;white-space:nowrap;font-family:Outfit,sans-serif">\u2713 R\u00e9solu'+(g.nOpen>1?(' \u00d7'+g.nOpen):'')+'</button>';
+    h+='<button onclick="agtErrCopy(\''+g.id+'\')" style="background:rgba(255,255,255,0.06);border:1px solid rgba(255,255,255,0.12);border-radius:7px;color:rgba(255,255,255,0.5);font-size:var(--pt-lbl,10.5px);padding:4px 9px;cursor:pointer;white-space:nowrap;font-family:Outfit,sans-serif">Copier</button>';
     h+='</div></div>';
 
     // Detail : occurrences et pile technique.
-    h+='<button onclick="agtErrToggle(\''+g.id+'\')" style="background:none;border:none;color:rgba(255,255,255,0.3);font-size:10.5px;cursor:pointer;font-family:Outfit,sans-serif;padding:7px 0 0">'
+    h+='<button onclick="agtErrToggle(\''+g.id+'\')" style="background:none;border:none;color:rgba(255,255,255,0.3);font-size:var(--pt-lbl,10.5px);cursor:pointer;font-family:Outfit,sans-serif;padding:7px 0 0">'
       +(ouvert?'\u2013 Replier':'+ D\u00e9tail technique')+'</button>';
     if(ouvert){
       var det='';
@@ -1243,7 +1243,7 @@ function _agtBuildErrors(){
     h+='</div>';
   });
 
-  if(groupes.length>40) h+='<div style="text-align:center;font-size:11px;color:rgba(255,255,255,0.25);padding:6px">'+(groupes.length-40)+' probl\u00e8me(s) de plus \u2014 affinez les filtres</div>';
+  if(groupes.length>40) h+='<div style="text-align:center;font-size:var(--pt-micro,11px);color:rgba(255,255,255,0.25);padding:6px">'+(groupes.length-40)+' probl\u00e8me(s) de plus \u2014 affinez les filtres</div>';
   if(merged.some(function(e){ return e.resolved; })){
     h+='<button onclick="agtPurgeErrors()" style="width:100%;margin-top:8px;background:rgba(239,68,68,0.06);border:1px dashed rgba(239,68,68,0.2);border-radius:10px;padding:10px;font-size:12px;color:rgba(252,165,165,0.4);cursor:pointer;font-family:Outfit,sans-serif">\uD83D\uDDD1\uFE0F Purger les erreurs r\u00e9solues</button>';
   }
@@ -1465,7 +1465,7 @@ async function agtShowMembres(slug) {
     + '<div style="display:flex;align-items:center;gap:10px">'
     + '<div style="width:32px;height:32px;border-radius:10px;background:rgba(139,92,246,0.15);border:1px solid rgba(139,92,246,0.3);display:flex;align-items:center;justify-content:center;font-size:15px">\uD83D\uDC65</div>'
     + '<div><div style="font-size:15px;font-weight:600;color:#fff">Membres</div>'
-    + '<div style="font-size:11px;color:rgba(196,181,253,0.5);margin-top:1px">'+_escHtml(slug)+'</div></div>'
+    + '<div style="font-size:var(--pt-micro,11px);color:rgba(196,181,253,0.5);margin-top:1px">'+_escHtml(slug)+'</div></div>'
     + '</div>'
     + '<button onclick="document.getElementById(\'agt-mbr-overlay\').remove()" style="min-width:44px;min-height:44px;border-radius:10px;background:rgba(255,255,255,0.06);border:1px solid rgba(255,255,255,0.1);color:rgba(255,255,255,0.6);font-size:18px;cursor:pointer;display:flex;align-items:center;justify-content:center">\u2715</button>'
     + '</div>'
@@ -1502,21 +1502,21 @@ async function agtRefreshMembres(slug) {
     return '<div style="display:flex;align-items:center;gap:12px;padding:12px 0;border-bottom:1px solid rgba(255,255,255,0.05)">'
       +'<div style="width:40px;height:40px;border-radius:12px;background:'+couleur+';display:flex;align-items:center;justify-content:center;font-size:16px;font-weight:700;color:#fff;flex-shrink:0">'+initiale+'</div>'
       +'<div style="flex:1;min-width:0">'
-      +'<div style="font-size:14px;font-weight:600;color:#fff">'+_escHtml(m.nom||'\u2014')+'</div>'
-      +'<div style="font-size:11px;color:rgba(255,255,255,0.35);margin:2px 0">'+_escHtml(m.email||'\u2014')+'</div>'
+      +'<div style="font-size:var(--pt-base,14px);font-weight:600;color:#fff">'+_escHtml(m.nom||'\u2014')+'</div>'
+      +'<div style="font-size:var(--pt-micro,11px);color:rgba(255,255,255,0.35);margin:2px 0">'+_escHtml(m.email||'\u2014')+'</div>'
       +'<div style="display:flex;gap:5px;flex-wrap:wrap;margin-top:5px">'+roleHtml+'</div>'
       +'</div>'
       // Sortie de secours : la fen\u00eatre de remise des identifiants ne s'affiche qu'une fois.
       // \u26a0\ufe0f L'adresse passe par data-mail, jamais par une interpolation dans onclick.
       +'<button data-mail="'+_escHtml(m.email||'')+'" onclick="agtResetPwd(\''+slug+'\', this.dataset.mail, this)" '
-      +'style="flex:none;font-size:11px;background:rgba(201,168,76,0.1);border:1px solid rgba(201,168,76,0.28);color:#C9A84C;border-radius:6px;padding:6px 10px;cursor:pointer;font-family:Outfit,sans-serif;white-space:nowrap;min-height:32px">'
+      +'style="flex:none;font-size:var(--pt-micro,11px);background:rgba(201,168,76,0.1);border:1px solid rgba(201,168,76,0.28);color:#C9A84C;border-radius:6px;padding:6px 10px;cursor:pointer;font-family:Outfit,sans-serif;white-space:nowrap;min-height:32px">'
       +_mvIcon('cle',16)+' Nouveau mot de passe</button>'
       +'</div>';
   }
-  var h = '<div style="font-size:11px;color:rgba(196,181,253,0.4);letter-spacing:.08em;text-transform:uppercase;font-weight:600;margin-bottom:10px">'+actifs.length+' actif'+(actifs.length>1?'s':'')+'</div>';
+  var h = '<div style="font-size:var(--pt-micro,11px);color:rgba(196,181,253,0.4);letter-spacing:.08em;text-transform:uppercase;font-weight:600;margin-bottom:10px">'+actifs.length+' actif'+(actifs.length>1?'s':'')+'</div>';
   h += actifs.map(_mbrCard).join('');
   if(inactifs.length > 0) {
-    h += '<div style="font-size:11px;color:rgba(196,181,253,0.25);letter-spacing:.08em;text-transform:uppercase;font-weight:600;margin:18px 0 10px">'+inactifs.length+' inactif'+(inactifs.length>1?'s':'')+'</div>';
+    h += '<div style="font-size:var(--pt-micro,11px);color:rgba(196,181,253,0.25);letter-spacing:.08em;text-transform:uppercase;font-weight:600;margin:18px 0 10px">'+inactifs.length+' inactif'+(inactifs.length>1?'s':'')+'</div>';
     h += '<div style="opacity:0.5">'+inactifs.map(_mbrCard).join('')+'</div>';
   }
   body.innerHTML = h;
@@ -1526,14 +1526,14 @@ function agtOpenAddMembre(slug) {
   var body = document.getElementById('agt-mbr-body');
   if(!body) return;
   var chipsHtml = ['admin','ouvrier','tractoriste','saisonnier'].map(function(r){
-    return '<span id="agt-chip-'+r+'" onclick="this.classList.toggle(\'on\');this.style.background=this.classList.contains(\'on\')?\''+(_ROLE_COLORS[r]||'#555')+'33\':\'transparent\';this.style.color=this.classList.contains(\'on\')?\''+(_ROLE_COLORS[r]||'#aaa')+'\':\'rgba(255,255,255,0.4)\'" style="cursor:pointer;font-size:11px;font-weight:600;padding:5px 12px;border-radius:20px;border:1px solid '+(_ROLE_COLORS[r]||'#555')+'55;color:rgba(255,255,255,0.4);background:transparent;transition:all .15s">'+r+'</span>';
+    return '<span id="agt-chip-'+r+'" onclick="this.classList.toggle(\'on\');this.style.background=this.classList.contains(\'on\')?\''+(_ROLE_COLORS[r]||'#555')+'33\':\'transparent\';this.style.color=this.classList.contains(\'on\')?\''+(_ROLE_COLORS[r]||'#aaa')+'\':\'rgba(255,255,255,0.4)\'" style="cursor:pointer;font-size:var(--pt-micro,11px);font-weight:600;padding:5px 12px;border-radius:20px;border:1px solid '+(_ROLE_COLORS[r]||'#555')+'55;color:rgba(255,255,255,0.4);background:transparent;transition:all .15s">'+r+'</span>';
   }).join('');
   body.innerHTML = '<div style="padding:4px 0 16px">'
     +'<div style="font-size:13px;font-weight:600;color:rgba(196,181,253,0.7);margin-bottom:14px">\u2192 Nouveau membre</div>'
     +'<input id="agt-add-nom"   type="text"     placeholder="Pr\u00e9nom" autocomplete="off" style="width:100%;background:rgba(255,255,255,0.05);border:1px solid rgba(139,92,246,0.2);border-radius:10px;padding:11px 14px;font-size:13px;color:#fff;font-family:Outfit,sans-serif;margin-bottom:10px;box-sizing:border-box">'
     +'<input id="agt-add-email" type="email"    placeholder="Email"  autocomplete="off" style="width:100%;background:rgba(255,255,255,0.05);border:1px solid rgba(139,92,246,0.2);border-radius:10px;padding:11px 14px;font-size:13px;color:#fff;font-family:Outfit,sans-serif;margin-bottom:10px;box-sizing:border-box">'
     +'<input id="agt-add-pwd"   type="password" placeholder="Mot de passe \u2014 laissez vide pour le g\u00e9n\u00e9rer" autocomplete="new-password" style="width:100%;background:rgba(255,255,255,0.05);border:1px solid rgba(139,92,246,0.2);border-radius:10px;padding:11px 14px;font-size:13px;color:#fff;font-family:Outfit,sans-serif;margin-bottom:10px;box-sizing:border-box">'
-    +'<div style="margin-bottom:14px"><div style="font-size:11px;color:rgba(255,255,255,0.35);margin-bottom:8px">R\u00f4les</div>'
+    +'<div style="margin-bottom:14px"><div style="font-size:var(--pt-micro,11px);color:rgba(255,255,255,0.35);margin-bottom:8px">R\u00f4les</div>'
     +'<div style="display:flex;gap:8px;flex-wrap:wrap">'+chipsHtml+'</div></div>'
     +'<div id="agt-add-err" style="display:none;color:#EF4444;font-size:12px;margin-bottom:10px"></div>'
     +'<div style="display:flex;gap:8px">'
@@ -1724,7 +1724,7 @@ function _agtLotRender() {
     + 'style="width:100%;box-sizing:border-box;background:rgba(255,255,255,0.05);border:1px solid rgba(139,92,246,0.2);'
     + 'border-radius:10px;padding:11px 14px;font-size:16px;color:#fff;font-family:Outfit,sans-serif;line-height:1.5;resize:vertical"></textarea>'
     + '<div style="margin-top:12px;padding:10px 12px;background:rgba(255,255,255,0.03);border:1px solid rgba(255,255,255,0.07);border-radius:10px">'
-    + '<div style="font-size:11px;color:rgba(196,181,253,0.45);letter-spacing:.06em;text-transform:uppercase;font-weight:600;margin-bottom:7px">Adresses de connexion</div>'
+    + '<div style="font-size:var(--pt-micro,11px);color:rgba(196,181,253,0.45);letter-spacing:.06em;text-transform:uppercase;font-weight:600;margin-bottom:7px">Adresses de connexion</div>'
     + '<div style="display:flex;align-items:center;gap:5px;flex-wrap:wrap;font-size:13px;color:rgba(255,255,255,0.5);font-family:ui-monospace,Menlo,monospace">'
     + '<span>pr\u00e9nom.</span>'
     + '<input id="agt-lot-part" style="flex:1 1 130px;min-width:0;background:rgba(255,255,255,0.05);border:1px solid rgba(139,92,246,0.2);border-radius:8px;padding:7px 10px;font-size:16px;color:#fff;font-family:inherit">'
@@ -1744,7 +1744,7 @@ function _agtLotRender() {
 
   if (_agtLot.lignes.length) {
     var aCreer = _agtLot.lignes.filter(function (x) { return !x.bloque; });
-    h += '<div style="font-size:11px;color:rgba(196,181,253,0.4);letter-spacing:.08em;text-transform:uppercase;font-weight:600;margin:18px 0 8px">Apercu</div>';
+    h += '<div style="font-size:var(--pt-micro,11px);color:rgba(196,181,253,0.4);letter-spacing:.08em;text-transform:uppercase;font-weight:600;margin:18px 0 8px">Apercu</div>';
     h += '<div style="border:1px solid rgba(255,255,255,0.08);border-radius:10px;overflow:hidden">';
     _agtLot.lignes.forEach(function (x) {
       var col = x.bloque ? 'rgba(255,255,255,0.25)' : '#fff';
@@ -1766,7 +1766,7 @@ function _agtLotRender() {
       h += '<button id="agt-lot-go" onclick="agtLotGo()" style="width:100%;margin-top:12px;background:#3D6B27;border:none;border-radius:12px;color:#fff;font-size:15px;font-weight:600;padding:14px;cursor:pointer;font-family:Outfit,sans-serif;min-height:52px">'
         + 'Cr\u00e9er ' + aCreer.length + ' compte' + (aCreer.length > 1 ? 's' : '') + '</button>';
     } else {
-      h += '<div style="font-size:12.5px;color:rgba(255,255,255,0.4);margin-top:12px;text-align:center">Rien \u00e0 cr\u00e9er.</div>';
+      h += '<div style="font-size:var(--pt-txt,12.5px);color:rgba(255,255,255,0.4);margin-top:12px;text-align:center">Rien \u00e0 cr\u00e9er.</div>';
     }
   }
   h += '</div>';
@@ -1802,9 +1802,9 @@ function _agtLotModsLigne(roles) {
   var md = null;
   try { md = window._mvModsDefaut ? window._mvModsDefaut(roles) : null; } catch (e) { md = null; }
   var ks = md ? Object.keys(md) : [];
-  if (!ks.length) return '<div style="font-size:11px;color:rgba(255,255,255,0.28);margin-top:3px">Tous les modules visibles</div>';
+  if (!ks.length) return '<div style="font-size:var(--pt-micro,11px);color:rgba(255,255,255,0.28);margin-top:3px">Tous les modules visibles</div>';
   var noms = ks.map(function (k) { return _AGT_MOD_LBL[k] || k; }).join(', ');
-  return '<div style="font-size:11px;color:rgba(255,255,255,0.32);margin-top:3px">'
+  return '<div style="font-size:var(--pt-micro,11px);color:rgba(255,255,255,0.32);margin-top:3px">'
     + _mvIcon('oeil',16)+' Masqu\u00e9s\u00a0: ' + noms + ' \u00b7 <span style="opacity:.7">modifiable dans R\u00e9glages</span></div>';
 }
 
@@ -1870,14 +1870,14 @@ function _agtLotCredsHtml() {
   var h = '<div style="padding:4px 0 16px">';
   if (_agtLot.creds.length) {
     h += '<div style="font-size:15px;font-weight:600;color:#86EFAC;margin-bottom:4px">' + _agtLot.creds.length + ' compte' + (_agtLot.creds.length > 1 ? 's cr\u00e9\u00e9s' : ' cr\u00e9\u00e9') + '</div>'
-      + '<div style="font-size:12.5px;color:#E0A46A;background:rgba(184,90,26,.10);border-left:3px solid #B85A1A;border-radius:0 8px 8px 0;padding:9px 12px;margin:10px 0 14px;line-height:1.55">'
+      + '<div style="font-size:var(--pt-txt,12.5px);color:#E0A46A;background:rgba(184,90,26,.10);border-left:3px solid #B85A1A;border-radius:0 8px 8px 0;padding:9px 12px;margin:10px 0 14px;line-height:1.55">'
       + 'Ces mots de passe ne sont enregistr\u00e9s <b>nulle part</b>. Cet \u00e9cran ferm\u00e9, ils n\u2019existent plus. '
       + 'Chacun devra le remplacer \u00e0 sa premi\u00e8re connexion.</div>'
       + '<div style="border:1px solid rgba(255,255,255,0.08);border-radius:10px;overflow:hidden">';
     _agtLot.creds.forEach(function (c) {
       h += '<div style="padding:10px 12px;border-bottom:1px solid rgba(255,255,255,0.05)">'
         + '<div style="font-size:13.5px;font-weight:600;color:#fff">' + E(c.nom) + '</div>'
-        + '<div style="font-family:ui-monospace,Menlo,monospace;font-size:12.5px;color:rgba(255,255,255,0.55);margin-top:2px;word-break:break-all;user-select:all">' + E(c.mail) + '</div>'
+        + '<div style="font-family:ui-monospace,Menlo,monospace;font-size:var(--pt-txt,12.5px);color:rgba(255,255,255,0.55);margin-top:2px;word-break:break-all;user-select:all">' + E(c.mail) + '</div>'
         + '<div style="font-family:ui-monospace,Menlo,monospace;font-size:15px;color:#C9A84C;margin-top:3px;user-select:all">' + E(c.pwd) + '</div>'
         + '</div>';
     });
@@ -1888,10 +1888,10 @@ function _agtLotCredsHtml() {
       + '</div>';
   }
   if (_agtLot.err.length) {
-    h += '<div style="font-size:11px;color:rgba(255,255,255,0.35);letter-spacing:.08em;text-transform:uppercase;font-weight:600;margin:18px 0 8px">'
+    h += '<div style="font-size:var(--pt-micro,11px);color:rgba(255,255,255,0.35);letter-spacing:.08em;text-transform:uppercase;font-weight:600;margin:18px 0 8px">'
       + _agtLot.err.length + ' \u00e9chec' + (_agtLot.err.length > 1 ? 's' : '') + '</div>';
     _agtLot.err.forEach(function (e) {
-      h += '<div style="font-size:12.5px;color:#E0A46A;padding:6px 0;border-bottom:1px solid rgba(255,255,255,0.05)">'
+      h += '<div style="font-size:var(--pt-txt,12.5px);color:#E0A46A;padding:6px 0;border-bottom:1px solid rgba(255,255,255,0.05)">'
         + E(e.nom) + ' \u2014 ' + E(e.msg) + '</div>';
     });
   }
@@ -1962,7 +1962,7 @@ function _agtOverlay(slug, icon, titre, bodyHtml, footerHtml) {
     +'<div style="display:flex;align-items:center;gap:10px">'
     +'<div style="width:32px;height:32px;border-radius:10px;background:rgba(139,92,246,0.15);border:1px solid rgba(139,92,246,0.3);display:flex;align-items:center;justify-content:center;font-size:15px">'+icon+'</div>'
     +'<div><div style="font-size:15px;font-weight:600;color:#fff">'+titre+'</div>'
-    +'<div style="font-size:11px;color:rgba(196,181,253,0.5);margin-top:1px">'+_escHtml(slug)+'</div></div>'
+    +'<div style="font-size:var(--pt-micro,11px);color:rgba(196,181,253,0.5);margin-top:1px">'+_escHtml(slug)+'</div></div>'
     +'</div>'
     +'<button onclick="document.getElementById(\'agt-panel-overlay\').remove()" style="min-width:44px;min-height:44px;border-radius:10px;background:rgba(255,255,255,0.06);border:1px solid rgba(255,255,255,0.1);color:rgba(255,255,255,0.6);font-size:18px;cursor:pointer;display:flex;align-items:center;justify-content:center">\u2715</button>'
     +'</div>'
@@ -1982,7 +1982,7 @@ async function agtShowParcelles(slug) {
     + '<div style="display:flex;align-items:center;gap:10px">'
     + '<div style="width:32px;height:32px;border-radius:10px;background:rgba(139,92,246,0.15);border:1px solid rgba(139,92,246,0.3);display:flex;align-items:center;justify-content:center;font-size:15px"></div>'
     + '<div><div style="font-size:15px;font-weight:600;color:#fff">Parcelles</div>'
-    + '<div style="font-size:11px;color:rgba(196,181,253,0.5);margin-top:1px">'+_escHtml(slug)+'</div></div>'
+    + '<div style="font-size:var(--pt-micro,11px);color:rgba(196,181,253,0.5);margin-top:1px">'+_escHtml(slug)+'</div></div>'
     + '</div>'
     + '<button onclick="document.getElementById(\'agt-prc-overlay\').remove()" style="min-width:44px;min-height:44px;border-radius:10px;background:rgba(255,255,255,0.06);border:1px solid rgba(255,255,255,0.1);color:rgba(255,255,255,0.6);font-size:18px;cursor:pointer;display:flex;align-items:center;justify-content:center">✕</button>'
     + '</div>'
@@ -1998,7 +1998,7 @@ async function agtShowParcelles(slug) {
   var body = document.getElementById('agt-prc-body');
   if(!body) return;
   if(!Array.isArray(prc) || prc.length === 0) {
-    body.innerHTML = '<div style="text-align:center;padding:40px;color:rgba(255,255,255,0.3);font-size:13px">Aucune parcelle en base<br><span style="font-size:11px;color:rgba(255,255,255,0.2)">(parcellaire pas encore importé)</span></div>';
+    body.innerHTML = '<div style="text-align:center;padding:40px;color:rgba(255,255,255,0.3);font-size:13px">Aucune parcelle en base<br><span style="font-size:var(--pt-micro,11px);color:rgba(255,255,255,0.2)">(parcellaire pas encore importé)</span></div>';
     return;
   }
   var actives = prc.filter(function(p){ return p && p.statut!=='Arrachee'; });
@@ -2009,10 +2009,10 @@ async function agtShowParcelles(slug) {
     var s=_ha(p.surface);
     return '<div style="display:flex;justify-content:space-between;align-items:baseline;gap:10px;padding:8px 0;border-bottom:1px solid rgba(255,255,255,0.05)'+(dim?';opacity:.45':'')+'">'
       +'<span style="font-size:13px;color:#fff;font-family:monospace'+(dim?';text-decoration:line-through':'')+'">'+_escHtml(p.nom||'—')+'</span>'
-      +(dim?'<span style="font-size:11px;color:rgba(255,255,255,0.3)">arrachée</span>':'<span style="font-size:12px;color:rgba(196,181,253,0.6)">'+s+'</span>')
+      +(dim?'<span style="font-size:var(--pt-micro,11px);color:rgba(255,255,255,0.3)">arrachée</span>':'<span style="font-size:12px;color:rgba(196,181,253,0.6)">'+s+'</span>')
       +'</div>';
   }
-  var h = '<div style="font-size:11px;color:rgba(196,181,253,0.4);letter-spacing:.08em;text-transform:uppercase;font-weight:600;margin-bottom:10px">'+actives.length+' active'+(actives.length>1?'s':'')+(arrach.length?' · '+arrach.length+' arrachée'+(arrach.length>1?'s':''):'')+'</div>';
+  var h = '<div style="font-size:var(--pt-micro,11px);color:rgba(196,181,253,0.4);letter-spacing:.08em;text-transform:uppercase;font-weight:600;margin-bottom:10px">'+actives.length+' active'+(actives.length>1?'s':'')+(arrach.length?' · '+arrach.length+' arrachée'+(arrach.length>1?'s':''):'')+'</div>';
   h += actives.map(function(p){return _prcRow(p,false);}).join('');
   if(arrach.length) h += arrach.map(function(p){return _prcRow(p,true);}).join('');
   body.innerHTML = h;
@@ -2052,14 +2052,14 @@ async function agtShowConfig(slug) {
   if(!body) return;
   function _cfgField(label, id, val, type) {
     type = type || 'text';
-    return '<div style="margin-bottom:12px"><div style="font-size:11px;color:rgba(255,255,255,0.35);margin-bottom:6px">'+label+'</div>'
+    return '<div style="margin-bottom:12px"><div style="font-size:var(--pt-micro,11px);color:rgba(255,255,255,0.35);margin-bottom:6px">'+label+'</div>'
       +'<input id="'+id+'" type="'+type+'" value="'+_escHtml(String(val===undefined||val===null?'':val))+'" style="width:100%;background:rgba(255,255,255,0.05);border:1px solid rgba(139,92,246,0.2);border-radius:10px;padding:11px 14px;font-size:13px;color:#fff;font-family:Outfit,sans-serif;box-sizing:border-box"></div>';
   }
   body.innerHTML =
     _cfgField('Nom du domaine',   'cfg-nom',  cfg.domaine_nom||'')
     +_cfgField('Latitude',        'cfg-lat',  cfg.lat||'',  'number')
     +_cfgField('Longitude',       'cfg-lon',  cfg.lon||'',  'number')
-    +'<div style="margin-bottom:12px"><div style="font-size:11px;color:rgba(255,255,255,0.35);margin-bottom:6px">Onboarding terminé</div>'
+    +'<div style="margin-bottom:12px"><div style="font-size:var(--pt-micro,11px);color:rgba(255,255,255,0.35);margin-bottom:6px">Onboarding terminé</div>'
     +'<div style="font-size:13px;color:'+(cfg.onboarding_done?'#3D6B27':'#C0392B')+';font-weight:600">'+(cfg.onboarding_done?'\u2705 Oui':'\u274C Non')+'</div></div>'
     +_agtCguHtml(cfg, slug)
     +'<div id="agt-cfg-err" style="display:none;color:#EF4444;font-size:12px;margin-top:6px"></div>';
@@ -2089,18 +2089,18 @@ async function agtShowJournal(slug) {
     return;
   }
   var sorted = journal.slice().sort(function(a,b){ return (b.date||'').localeCompare(a.date||''); });
-  var h = '<div style="font-size:11px;color:rgba(196,181,253,0.4);letter-spacing:.08em;text-transform:uppercase;font-weight:600;margin-bottom:12px">'+sorted.length+' entr\u00e9e'+(sorted.length>1?'s':'')+' \u2014 20 derni\u00e8res affich\u00e9es</div>';
+  var h = '<div style="font-size:var(--pt-micro,11px);color:rgba(196,181,253,0.4);letter-spacing:.08em;text-transform:uppercase;font-weight:600;margin-bottom:12px">'+sorted.length+' entr\u00e9e'+(sorted.length>1?'s':'')+' \u2014 20 derni\u00e8res affich\u00e9es</div>';
   sorted.slice(0,20).forEach(function(e){
     var parcelles = Array.isArray(e.parcelles) ? e.parcelles.join(', ') : (e.parcelle||'');
     var qui = Array.isArray(e.qui) ? e.qui.join(', ') : (e.qui||'');
     h += '<div style="padding:10px 0;border-bottom:1px solid rgba(255,255,255,0.05)">'
       +'<div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:4px">'
       +'<span style="font-size:12px;font-weight:600;color:#C4B5FD">'+_escHtml(e.date||'\u2014')+'</span>'
-      +'<span style="font-size:11px;color:rgba(255,255,255,0.4);background:rgba(255,255,255,0.06);padding:2px 8px;border-radius:6px">'+_escHtml(e.tache||'\u2014')+'</span>'
+      +'<span style="font-size:var(--pt-micro,11px);color:rgba(255,255,255,0.4);background:rgba(255,255,255,0.06);padding:2px 8px;border-radius:6px">'+_escHtml(e.tache||'\u2014')+'</span>'
       +'</div>'
-      +(parcelles ? '<div style="font-size:11px;color:rgba(255,255,255,0.45);margin-bottom:2px">\uD83C\uDF31 '+_escHtml(parcelles)+'</div>' : '')
-      +(qui       ? '<div style="font-size:11px;color:rgba(255,255,255,0.35)">\uD83D\uDC64 '+_escHtml(qui)+'</div>' : '')
-      +(e.note    ? '<div style="font-size:11px;color:rgba(255,255,255,0.25);margin-top:3px;font-style:italic">'+_escHtml(e.note)+'</div>' : '')
+      +(parcelles ? '<div style="font-size:var(--pt-micro,11px);color:rgba(255,255,255,0.45);margin-bottom:2px">\uD83C\uDF31 '+_escHtml(parcelles)+'</div>' : '')
+      +(qui       ? '<div style="font-size:var(--pt-micro,11px);color:rgba(255,255,255,0.35)">\uD83D\uDC64 '+_escHtml(qui)+'</div>' : '')
+      +(e.note    ? '<div style="font-size:var(--pt-micro,11px);color:rgba(255,255,255,0.25);margin-top:3px;font-style:italic">'+_escHtml(e.note)+'</div>' : '')
       +'</div>';
   });
   body.innerHTML = h;
@@ -2126,7 +2126,7 @@ async function agtShowErreurs(slug) {
      `border-left:3px solid LVL_COLOR[e.level]` sur la meme carte : le glyphe
      la disait une seconde fois. Une pastille de couleur l'aurait dite une
      TROISIEME. Meme raisonnement que le bandeau de confirmation (§45b). */
-  var h = '<div style="font-size:11px;color:rgba(196,181,253,0.4);letter-spacing:.08em;text-transform:uppercase;font-weight:600;margin-bottom:12px">'+sorted.length+' erreur'+(sorted.length>1?'s':'')+'</div>';
+  var h = '<div style="font-size:var(--pt-micro,11px);color:rgba(196,181,253,0.4);letter-spacing:.08em;text-transform:uppercase;font-weight:600;margin-bottom:12px">'+sorted.length+' erreur'+(sorted.length>1?'s':'')+'</div>';
   sorted.slice(0,30).forEach(function(e){
     var lc = LVL_COLOR[e.level]||'#F97316';
     
@@ -2169,10 +2169,10 @@ function _agtVisiteCard(){
   var bars='';
   days.forEach(function(d){ var hp=Math.max(3,Math.round((d.v/maxv)*100)); bars+='<div style="flex:1;display:flex;flex-direction:column;align-items:center;gap:4px"><div style="width:100%;height:40px;display:flex;align-items:flex-end"><div style="width:100%;background:linear-gradient(to top,#C9A84C,#E8C860);border-radius:3px 3px 0 0;height:'+hp+'%;opacity:'+(d.v?1:0.22)+'"></div></div><div style="font-size:9px;color:rgba(255,255,255,0.3)">'+d.lbl+'</div><div style="font-size:9px;color:rgba(255,255,255,0.5);font-weight:600">'+d.v+'</div></div>'; });
   var h='<div class="agt-card" style="border-color:rgba(201,168,76,0.25);margin-bottom:16px"><div style="padding:14px 16px">';
-  h+='<div style="display:flex;align-items:center;gap:8px;margin-bottom:12px"><span style="font-size:17px">\uD83C\uDF47</span><span style="font-size:13px;font-weight:700;color:#E8C860">D\u00e9mo visite guid\u00e9e</span><span style="font-size:10px;color:rgba(255,255,255,0.28);margin-left:auto">?demo=visite</span></div>';
+  h+='<div style="display:flex;align-items:center;gap:8px;margin-bottom:12px"><span style="font-size:var(--pt-sm,17px)">\uD83C\uDF47</span><span style="font-size:13px;font-weight:700;color:#E8C860">D\u00e9mo visite guid\u00e9e</span><span style="font-size:10px;color:rgba(255,255,255,0.28);margin-left:auto">?demo=visite</span></div>';
   h+='<div style="display:grid;grid-template-columns:1fr 1fr;gap:10px;margin-bottom:14px">';
-  h+='<div style="background:rgba(255,255,255,0.05);border-radius:10px;padding:12px;text-align:center"><div style="font-size:24px;font-weight:600;color:#F0E8DC">'+cnx+'</div><div style="font-size:11px;color:rgba(255,255,255,0.4);margin-top:3px">connexions</div></div>';
-  h+='<div style="background:rgba(255,255,255,0.05);border-radius:10px;padding:12px;text-align:center"><div style="font-size:24px;font-weight:600;color:#C4B5FD">'+uniq+'</div><div style="font-size:11px;color:rgba(255,255,255,0.4);margin-top:3px">visiteurs uniques</div></div>';
+  h+='<div style="background:rgba(255,255,255,0.05);border-radius:10px;padding:12px;text-align:center"><div style="font-size:24px;font-weight:600;color:#F0E8DC">'+cnx+'</div><div style="font-size:var(--pt-micro,11px);color:rgba(255,255,255,0.4);margin-top:3px">connexions</div></div>';
+  h+='<div style="background:rgba(255,255,255,0.05);border-radius:10px;padding:12px;text-align:center"><div style="font-size:24px;font-weight:600;color:#C4B5FD">'+uniq+'</div><div style="font-size:var(--pt-micro,11px);color:rgba(255,255,255,0.4);margin-top:3px">visiteurs uniques</div></div>';
   h+='</div>';
   h+='<div style="font-size:10px;color:rgba(255,255,255,0.3);margin-bottom:7px">7 derniers jours \u00b7 derni\u00e8re visite : '+lastTxt+'</div>';
   h+='<div style="display:flex;align-items:flex-end;gap:5px;height:62px">'+bars+'</div>';
@@ -2249,28 +2249,28 @@ function _agtBuildEssais(){
   var actifs =_agtEssais.filter(function(t){return t.actif&&new Date(t.expires_at).getTime()>now;});
   var expires=_agtEssais.filter(function(t){return !t.actif||new Date(t.expires_at).getTime()<=now;});
 
-  var h='<div style="margin:0 0 14px;font-size:11px;color:rgba(255,255,255,0.35);letter-spacing:.08em;text-transform:uppercase;font-weight:500">Codes d\'acc\u00e8s essai 30 jours</div>';
+  var h='<div style="margin:0 0 14px;font-size:var(--pt-micro,11px);color:rgba(255,255,255,0.35);letter-spacing:.08em;text-transform:uppercase;font-weight:500">Codes d\'acc\u00e8s essai 30 jours</div>';
 
   // Stats
   h+='<div style="display:grid;grid-template-columns:repeat(3,1fr);gap:10px;margin-bottom:16px">';
-  h+='<div style="background:rgba(255,255,255,0.05);border-radius:10px;padding:12px;text-align:center"><div style="font-size:22px;font-weight:600;color:#C4B5FD">'+actifs.length+'</div><div style="font-size:11px;color:rgba(255,255,255,0.35);margin-top:3px">actifs</div></div>';
-  h+='<div style="background:rgba(255,255,255,0.05);border-radius:10px;padding:12px;text-align:center"><div style="font-size:22px;font-weight:600;color:#E8C860">'+_agtEssais.filter(function(t){return t.actif&&(new Date(t.expires_at).getTime()-now)<5*86400*1000&&new Date(t.expires_at).getTime()>now;}).length+'</div><div style="font-size:11px;color:rgba(255,255,255,0.35);margin-top:3px">expirent dans 5j</div></div>';
-  h+='<div style="background:rgba(255,255,255,0.05);border-radius:10px;padding:12px;text-align:center"><div style="font-size:22px;font-weight:600;color:rgba(255,255,255,0.3)">'+expires.length+'</div><div style="font-size:11px;color:rgba(255,255,255,0.35);margin-top:3px">expir\u00e9s</div></div>';
+  h+='<div style="background:rgba(255,255,255,0.05);border-radius:10px;padding:12px;text-align:center"><div style="font-size:22px;font-weight:600;color:#C4B5FD">'+actifs.length+'</div><div style="font-size:var(--pt-micro,11px);color:rgba(255,255,255,0.35);margin-top:3px">actifs</div></div>';
+  h+='<div style="background:rgba(255,255,255,0.05);border-radius:10px;padding:12px;text-align:center"><div style="font-size:22px;font-weight:600;color:#E8C860">'+_agtEssais.filter(function(t){return t.actif&&(new Date(t.expires_at).getTime()-now)<5*86400*1000&&new Date(t.expires_at).getTime()>now;}).length+'</div><div style="font-size:var(--pt-micro,11px);color:rgba(255,255,255,0.35);margin-top:3px">expirent dans 5j</div></div>';
+  h+='<div style="background:rgba(255,255,255,0.05);border-radius:10px;padding:12px;text-align:center"><div style="font-size:22px;font-weight:600;color:rgba(255,255,255,0.3)">'+expires.length+'</div><div style="font-size:var(--pt-micro,11px);color:rgba(255,255,255,0.35);margin-top:3px">expir\u00e9s</div></div>';
   h+='</div>';
 
   // Formulaire cr\u00e9ation
   h+='<div style="background:rgba(255,255,255,0.04);border:1px solid rgba(255,255,255,0.1);border-radius:12px;padding:14px;margin-bottom:16px">';
-  h+='<div style="font-size:11px;color:rgba(255,255,255,0.45);font-weight:600;letter-spacing:.06em;margin-bottom:10px">+ G\u00e9n\u00e9rer un code d\'acc\u00e8s</div>';
+  h+='<div style="font-size:var(--pt-micro,11px);color:rgba(255,255,255,0.45);font-weight:600;letter-spacing:.06em;margin-bottom:10px">+ G\u00e9n\u00e9rer un code d\'acc\u00e8s</div>';
   h+='<div style="display:grid;grid-template-columns:1fr 1fr;gap:10px;margin-bottom:10px">';
-  h+='<div><div style="font-size:11px;color:rgba(255,255,255,0.4);margin-bottom:4px">Nom prospect</div><input id="agt-essai-prospect" placeholder="ex: Dupont \u2014 Dom. Chablis" style="width:100%;background:rgba(255,255,255,0.07);border:1px solid rgba(255,255,255,0.12);border-radius:8px;padding:8px 10px;color:#F0E8DC;font-size:12px;font-family:Outfit,sans-serif;box-sizing:border-box"></div>';
-  h+='<div><div style="font-size:11px;color:rgba(255,255,255,0.4);margin-bottom:4px">T\u00e9l\u00e9phone</div><input id="agt-essai-tel" placeholder="06 XX XX XX XX" style="width:100%;background:rgba(255,255,255,0.07);border:1px solid rgba(255,255,255,0.12);border-radius:8px;padding:8px 10px;color:#F0E8DC;font-size:12px;font-family:Outfit,sans-serif;box-sizing:border-box"></div>';
+  h+='<div><div style="font-size:var(--pt-micro,11px);color:rgba(255,255,255,0.4);margin-bottom:4px">Nom prospect</div><input id="agt-essai-prospect" placeholder="ex: Dupont \u2014 Dom. Chablis" style="width:100%;background:rgba(255,255,255,0.07);border:1px solid rgba(255,255,255,0.12);border-radius:8px;padding:8px 10px;color:#F0E8DC;font-size:12px;font-family:Outfit,sans-serif;box-sizing:border-box"></div>';
+  h+='<div><div style="font-size:var(--pt-micro,11px);color:rgba(255,255,255,0.4);margin-bottom:4px">T\u00e9l\u00e9phone</div><input id="agt-essai-tel" placeholder="06 XX XX XX XX" style="width:100%;background:rgba(255,255,255,0.07);border:1px solid rgba(255,255,255,0.12);border-radius:8px;padding:8px 10px;color:#F0E8DC;font-size:12px;font-family:Outfit,sans-serif;box-sizing:border-box"></div>';
   h+='</div>';
   h+='<button onclick="agtCreateEssai()" style="background:#C9A84C;border:none;border-radius:10px;padding:9px 18px;color:#0C1A0A;font-size:12px;font-weight:700;cursor:pointer;font-family:Outfit,sans-serif">G\u00e9n\u00e9rer le code</button>';
   h+='</div>';
 
   // Liste essais actifs
   if(actifs.length>0){
-    h+='<div style="font-size:11px;color:rgba(255,255,255,0.35);letter-spacing:.06em;margin-bottom:8px">Essais actifs</div>';
+    h+='<div style="font-size:var(--pt-micro,11px);color:rgba(255,255,255,0.35);letter-spacing:.06em;margin-bottom:8px">Essais actifs</div>';
     actifs.forEach(function(t){
       var exp=new Date(t.expires_at);
       var jRest=Math.max(0,Math.ceil((exp.getTime()-now)/86400000));
@@ -2281,9 +2281,9 @@ function _agtBuildEssais(){
       h+='<div style="font-size:13px;font-weight:600;color:#E8E8E0;margin-bottom:4px">'+_escHtml(t.prospect||'(sans nom)')+'</div>';
       h+='<div style="display:flex;align-items:center;gap:8px;flex-wrap:wrap;margin-bottom:5px">';
       h+='<span style="font-family:monospace;font-size:13px;background:rgba(255,255,255,0.08);padding:2px 8px;border-radius:6px;color:#E8C860">'+_escHtml(t.code)+'</span>';
-      h+='<span style="font-size:11px;font-weight:600;color:'+jColor+'">J+'+jRest+' restant'+(jRest>1?'s':'')+'</span>';
+      h+='<span style="font-size:var(--pt-micro,11px);font-weight:600;color:'+jColor+'">J+'+jRest+' restant'+(jRest>1?'s':'')+'</span>';
       h+='</div>';
-      h+='<div style="font-size:11px;color:rgba(255,255,255,0.3)">'+(t.telephone?'&#128222; '+_escHtml(t.telephone)+' &middot; ':'')+' '+t.usage_count+' acc\u00e8s'+(t.last_access?' &middot; dernier : '+_agtRelTime(t.last_access):'')+'</div>';
+      h+='<div style="font-size:var(--pt-micro,11px);color:rgba(255,255,255,0.3)">'+(t.telephone?'&#128222; '+_escHtml(t.telephone)+' &middot; ':'')+' '+t.usage_count+' acc\u00e8s'+(t.last_access?' &middot; dernier : '+_agtRelTime(t.last_access):'')+'</div>';
       h+='</div>';
       h+='<div style="display:flex;gap:6px;flex-shrink:0">';
       h+='<button onclick="agtCopyEssaiCode(\''+_escAttr(t.code)+'\')" style="background:rgba(255,255,255,0.07);border:1px solid rgba(255,255,255,0.12);border-radius:8px;padding:6px 10px;color:rgba(255,255,255,0.6);font-size:12px;cursor:pointer" title="Copier le code">&#128203;</button>';
@@ -2295,12 +2295,12 @@ function _agtBuildEssais(){
 
   // Liste essais expir\u00e9s
   if(expires.length>0){
-    h+='<div style="font-size:11px;color:rgba(255,255,255,0.2);letter-spacing:.06em;margin:12px 0 8px">Expir\u00e9s</div>';
+    h+='<div style="font-size:var(--pt-micro,11px);color:rgba(255,255,255,0.2);letter-spacing:.06em;margin:12px 0 8px">Expir\u00e9s</div>';
     expires.forEach(function(t){
       h+='<div style="background:rgba(255,255,255,0.02);border:1px solid rgba(255,255,255,0.06);border-radius:10px;padding:10px 12px;margin-bottom:6px;opacity:.55;display:flex;align-items:center;gap:10px">';
       h+='<span style="font-family:monospace;font-size:12px;color:rgba(255,255,255,0.3)">'+_escHtml(t.code)+'</span>';
       h+='<span style="flex:1;font-size:12px;color:rgba(255,255,255,0.3)">'+_escHtml(t.prospect||'')+'</span>';
-      h+='<span style="font-size:11px;color:rgba(239,68,68,0.6)">expir\u00e9</span>';
+      h+='<span style="font-size:var(--pt-micro,11px);color:rgba(239,68,68,0.6)">expir\u00e9</span>';
       h+='<button onclick="agtRevokeEssai(\''+_escAttr(t.id)+'\')" style="background:none;border:none;color:rgba(255,255,255,0.2);font-size:12px;cursor:pointer">&#128465;</button>';
       h+='</div>';
     });
@@ -2534,9 +2534,9 @@ function _agtBuildKml() {
     h += 'background:rgba(255,255,255,0.04);margin-bottom:6px">';
     h += '<div>';
     h += '<div style="font-size:13px;color:rgba(255,255,255,0.8);font-weight:500">' + _escHtml(t.nom) + '</div>';
-    h += '<div style="font-size:11px;color:rgba(255,255,255,0.3);font-family:monospace">' + t.slug + '</div>';
+    h += '<div style="font-size:var(--pt-micro,11px);color:rgba(255,255,255,0.3);font-family:monospace">' + t.slug + '</div>';
     h += '</div>';
-    h += '<button style="font-size:11px;background:rgba(74,159,200,0.12);border:1px solid rgba(74,159,200,0.25);';
+    h += '<button style="font-size:var(--pt-micro,11px);background:rgba(74,159,200,0.12);border:1px solid rgba(74,159,200,0.25);';
     h += 'color:#4A9FC8;border-radius:6px;padding:5px 12px;cursor:pointer;font-family:Outfit,sans-serif;white-space:nowrap" ';
     h += 'onclick="agtCheckKml(\'' + t.slug + '\',this)">Vérifier</button>';
     h += '</div>';
@@ -2555,7 +2555,7 @@ function _agtKmlEtatHtml() {
   if (_agtKmlLu === 'err') {
     return '<div style="background:rgba(224,112,96,0.12);border:1px solid rgba(224,112,96,0.35);border-radius:10px;padding:11px 13px;margin-bottom:14px">'
       + '<div style="font-size:12px;font-weight:700;color:#E07060;margin-bottom:4px">Base illisible</div>'
-      + '<div style="font-size:11px;color:rgba(255,255,255,0.55);line-height:1.6">Impossible de savoir ce que ce domaine contient déjà. Rien ne sera écrit tant que la lecture n\'aura pas abouti — rechoisissez le domaine pour réessayer.</div></div>';
+      + '<div style="font-size:var(--pt-micro,11px);color:rgba(255,255,255,0.55);line-height:1.6">Impossible de savoir ce que ce domaine contient déjà. Rien ne sera écrit tant que la lecture n\'aura pas abouti — rechoisissez le domaine pour réessayer.</div></div>';
   }
   if (_agtKmlLu !== 'ok') return '';
 
@@ -2568,7 +2568,7 @@ function _agtKmlEtatHtml() {
   if (!nb && _agtKmlSlug === 'marchand-grillot') {
     return '<div style="background:rgba(142,47,38,0.18);border:1px solid rgba(224,112,96,0.45);border-radius:10px;padding:12px 14px;margin-bottom:14px">'
       + '<div style="font-size:12px;font-weight:700;color:#E88B7C;margin-bottom:5px">Ce domaine tire ses contours de l\'application</div>'
-      + '<div style="font-size:11px;color:rgba(255,255,255,0.6);line-height:1.65">Ses 46 contours sont intégrés au code, pas en base. Dès qu\'un contour est écrit ici, ce jeu intégré cesse d\'être lu et <b>seul le contenu du fichier reste visible sur la carte</b>. Pour ajouter une parcelle à ce domaine, chargez un fichier contenant <b>toutes</b> ses parcelles.</div></div>';
+      + '<div style="font-size:var(--pt-micro,11px);color:rgba(255,255,255,0.6);line-height:1.65">Ses 46 contours sont intégrés au code, pas en base. Dès qu\'un contour est écrit ici, ce jeu intégré cesse d\'être lu et <b>seul le contenu du fichier reste visible sur la carte</b>. Pour ajouter une parcelle à ce domaine, chargez un fichier contenant <b>toutes</b> ses parcelles.</div></div>';
   }
 
   h += '<div style="background:rgba(74,159,200,0.10);border:1px solid rgba(74,159,200,0.26);border-radius:10px;padding:11px 13px;margin-bottom:14px">';
@@ -2576,7 +2576,7 @@ function _agtKmlEtatHtml() {
   h += nb ? ('<b style="color:#6FBEE0">' + nb + '</b> contour' + (nb > 1 ? 's' : '') + ' en base') : 'Aucun contour en base';
   h += ' · <b style="color:#6FBEE0">' + nf + '</b> fiche' + (nf > 1 ? 's' : '') + ' de parcelle';
   h += '</div>';
-  if (!nb) h += '<div style="font-size:11px;color:rgba(255,255,255,0.4);line-height:1.6;margin-top:4px">Ce fichier sera le premier parcellaire de ce domaine.</div>';
+  if (!nb) h += '<div style="font-size:var(--pt-micro,11px);color:rgba(255,255,255,0.4);line-height:1.6;margin-top:4px">Ce fichier sera le premier parcellaire de ce domaine.</div>';
   h += '</div>';
   return h;
 }
@@ -2593,7 +2593,7 @@ function _agtKmlApercuHtml() {
   h += '<div style="font-size:12px;font-weight:700;color:#6BA34A;margin-bottom:8px">';
   h += _agtKmlPolygons.length + ' contour' + (_agtKmlPolygons.length > 1 ? 's' : '');
   h += ' — ' + _escHtml(_agtKmlFileName) + '</div>';
-  h += '<div style="font-size:11px;color:rgba(255,255,255,0.45);line-height:1.8;';
+  h += '<div style="font-size:var(--pt-micro,11px);color:rgba(255,255,255,0.45);line-height:1.8;';
   h += 'max-height:150px;overflow-y:auto;font-family:monospace">';
   _agtKmlPolygons.slice(0, 14).forEach(function (x) {
     h += _escHtml(x.name) + ' · ' + x.pts.length + ' pts · ' + _agtGeoArea(x.pts).toFixed(2) + ' ha<br>';
@@ -2641,7 +2641,7 @@ function _agtKmlApercuHtml() {
     h += '<label style="display:flex;align-items:flex-start;gap:10px;padding:11px 13px;border-radius:10px;background:rgba(255,255,255,0.035);margin-bottom:10px;cursor:pointer">';
     h += '<input type="checkbox"' + (_agtKmlCreerF ? ' checked' : '') + ' onchange="agtKmlCreerF(this)" style="margin-top:2px;width:16px;height:16px;accent-color:#6BA34A;flex:none">';
     h += '<div><div style="font-size:13px;color:rgba(255,255,255,0.82)">Créer aussi la fiche de ' + p.fichesAcreer.length + ' parcelle' + (p.fichesAcreer.length > 1 ? 's' : '') + '</div>';
-    h += '<div style="font-size:11px;color:rgba(255,255,255,0.38);line-height:1.5;margin-top:2px">';
+    h += '<div style="font-size:var(--pt-micro,11px);color:rgba(255,255,255,0.38);line-height:1.5;margin-top:2px">';
     h += p.fichesAcreer.map(function (x) { return _escHtml(x.name) + ' — ' + _agtGeoArea(x.pts).toFixed(2) + ' ha'; }).join(' · ');
     h += '<br>Sans sa fiche, une parcelle sort en gris sur la carte et n\'apparaît dans aucun écran. La surface est calculée sur le contour et reste modifiable dans Réglages.</div></div></label>';
   } else if (p.nouveaux.length) {
@@ -2653,7 +2653,7 @@ function _agtKmlApercuHtml() {
     h += '<label style="display:flex;align-items:flex-start;gap:10px;padding:11px 13px;border-radius:10px;background:rgba(142,47,38,0.15);margin-bottom:10px;cursor:pointer">';
     h += '<input type="checkbox"' + (_agtKmlConfirm ? ' checked' : '') + ' onchange="agtKmlConfirmSet(this)" style="margin-top:2px;width:16px;height:16px;accent-color:#E07060;flex:none">';
     h += '<div><div style="font-size:13px;color:#E88B7C">Je comprends que ' + p.perdus.length + ' contour' + (p.perdus.length > 1 ? 's' : '') + ' vont disparaître de la carte</div>';
-    h += '<div style="font-size:11px;color:rgba(255,255,255,0.38);line-height:1.5;margin-top:2px">Les fiches de ces parcelles ne sont pas supprimées — seule leur forme sur la carte est perdue.</div></div></label>';
+    h += '<div style="font-size:var(--pt-micro,11px);color:rgba(255,255,255,0.38);line-height:1.5;margin-top:2px">Les fiches de ces parcelles ne sont pas supprimées — seule leur forme sur la carte est perdue.</div></div></label>';
   }
 
   // Le bouton
@@ -2663,7 +2663,7 @@ function _agtKmlApercuHtml() {
       ? 'Remplacer par ce fichier — ' + p.sortie.length + ' contours'
       : 'Enregistrer — ' + p.sortie.length + ' contours au total');
   h += '<button onclick="agtKmlSave()"' + (bloque ? ' disabled' : '') + ' style="width:100%;padding:13px;border-radius:10px;';
-  h += 'border:none;font-size:14px;font-weight:700;font-family:Outfit,sans-serif;cursor:' + (bloque ? 'not-allowed' : 'pointer') + ';';
+  h += 'border:none;font-size:var(--pt-base,14px);font-weight:700;font-family:Outfit,sans-serif;cursor:' + (bloque ? 'not-allowed' : 'pointer') + ';';
   h += 'background:' + (_agtKmlMode === 'replace' ? '#8E2F26' : '#3D6B27') + ';color:white;margin-bottom:8px;opacity:' + (bloque ? '0.45' : '1') + '">' + lib + '</button>';
   return h;
 }
@@ -2677,7 +2677,7 @@ function _agtKmlModeBtn(m, titre, desc) {
     // ⚠️ <span> et non <div> : un <div> dans un <button> est invalide en HTML5 (§24).
     //    Le display:block leur rend la mise en page d'un bloc sans la balise interdite.
     + '<span style="display:block;font-size:13px;font-weight:700;color:#fff;margin-bottom:3px">' + titre + '</span>'
-    + '<span style="display:block;font-size:11px;color:rgba(255,255,255,0.45);line-height:1.5">' + desc + '</span></button>';
+    + '<span style="display:block;font-size:var(--pt-micro,11px);color:rgba(255,255,255,0.45);line-height:1.5">' + desc + '</span></button>';
 }
 
 function _agtKmlPill(txt, col, bg, bd) {
@@ -2689,7 +2689,7 @@ function _agtKmlRow(nom, sub, tag, col, bg) {
   return '<div style="display:flex;align-items:center;justify-content:space-between;gap:10px;'
     + 'padding:9px 12px;border-radius:9px;background:rgba(255,255,255,0.035);margin-bottom:5px">'
     + '<div><div style="font-size:13px;color:rgba(255,255,255,0.82)">' + _escHtml(nom) + '</div>'
-    + '<div style="font-size:11px;color:rgba(255,255,255,0.3);font-family:monospace">' + _escHtml(sub) + '</div></div>'
+    + '<div style="font-size:var(--pt-micro,11px);color:rgba(255,255,255,0.3);font-family:monospace">' + _escHtml(sub) + '</div></div>'
     + '<span style="font-size:10px;font-weight:700;letter-spacing:0.05em;text-transform:uppercase;'
     + 'padding:3px 8px;border-radius:5px;white-space:nowrap;color:' + col + ';background:' + bg + '">' + tag + '</span></div>';
 }
@@ -2774,9 +2774,9 @@ async function agtCheckKml(slug, btn) {
       var btn2 = row.querySelector('button');
       if (btn2) {
         if (Array.isArray(data) && data.length > 0) {
-          btn2.outerHTML = '<span style="font-size:11px;color:#6BA34A;font-weight:600">' + data.length + ' polygones</span>';
+          btn2.outerHTML = '<span style="font-size:var(--pt-micro,11px);color:#6BA34A;font-weight:600">' + data.length + ' polygones</span>';
         } else {
-          btn2.outerHTML = '<span style="font-size:11px;color:rgba(255,255,255,0.3)">— KML statique</span>';
+          btn2.outerHTML = '<span style="font-size:var(--pt-micro,11px);color:rgba(255,255,255,0.3)">— KML statique</span>';
         }
       }
     }
@@ -2800,11 +2800,11 @@ function agtDeleteTenant(slug){
     +'<div style="width:38px;height:38px;border-radius:11px;background:rgba(239,68,68,0.14);border:1px solid rgba(239,68,68,0.35);display:flex;align-items:center;justify-content:center;font-size:18px"></div>'
     +'<div style="font-size:16px;font-weight:700;color:#fff">Supprimer le domaine</div>'
     +'</div>'
-    +'<div style="font-size:12.5px;line-height:1.55;color:rgba(255,255,255,0.6);margin-top:12px">Tu vas <b style="color:#FCA5A5">effacer définitivement</b> le domaine <b style="color:#FCA5A5">'+sg+'</b>. Cette action est <b style="color:#FCA5A5">irréversible</b>.</div>'
+    +'<div style="font-size:var(--pt-txt,12.5px);line-height:1.55;color:rgba(255,255,255,0.6);margin-top:12px">Tu vas <b style="color:#FCA5A5">effacer définitivement</b> le domaine <b style="color:#FCA5A5">'+sg+'</b>. Cette action est <b style="color:#FCA5A5">irréversible</b>.</div>'
     +'<div style="font-size:12px;color:rgba(255,255,255,0.5);background:rgba(239,68,68,0.06);border:1px solid rgba(239,68,68,0.16);border-radius:11px;padding:11px 13px;margin:12px 0;line-height:1.7">Seront supprimés : tous les <b>comptes de connexion</b> des membres, parcelles, journal, sessions, traitements, planning, cave, tâches, saisons, config, et l\'entrée du registre.</div>'
-    +'<div style="font-size:11px;color:rgba(255,255,255,0.4);margin:14px 0 6px">Pour confirmer, tape le nom exact : <code style="background:rgba(255,255,255,0.08);padding:1px 7px;border-radius:4px;color:#C4B5FD;font-weight:600">'+sg+'</code></div>'
+    +'<div style="font-size:var(--pt-micro,11px);color:rgba(255,255,255,0.4);margin:14px 0 6px">Pour confirmer, tape le nom exact : <code style="background:rgba(255,255,255,0.08);padding:1px 7px;border-radius:4px;color:#C4B5FD;font-weight:600">'+sg+'</code></div>'
     +'<input id="agt-del-slug" type="text" autocomplete="off" placeholder="nom du domaine" oninput="agtDelCheck(\''+slug+'\')" style="width:100%;background:rgba(255,255,255,0.05);border:1px solid rgba(139,92,246,0.2);border-radius:10px;padding:11px 13px;font-size:13px;color:#fff;font-family:Outfit,sans-serif;box-sizing:border-box">'
-    +'<div style="font-size:11px;color:rgba(255,255,255,0.4);margin:14px 0 6px">Mot de passe de suppression</div>'
+    +'<div style="font-size:var(--pt-micro,11px);color:rgba(255,255,255,0.4);margin:14px 0 6px">Mot de passe de suppression</div>'
     +'<input id="agt-del-pwd" type="password" autocomplete="new-password" placeholder="••••••••" oninput="agtDelCheck(\''+slug+'\')" style="width:100%;background:rgba(255,255,255,0.05);border:1px solid rgba(139,92,246,0.2);border-radius:10px;padding:11px 13px;font-size:13px;color:#fff;font-family:Outfit,sans-serif;box-sizing:border-box">'
     +'<div id="agt-del-err" style="display:none;color:#FCA5A5;font-size:12px;margin-top:10px"></div>'
     +'<div style="display:flex;gap:9px;margin-top:18px">'
@@ -2870,7 +2870,7 @@ var _FC_SLUG='', _FC_TAB='dom', _FC={}, _FC_BASE={};
 var _FC_GUARD_FLOOR=0.25;  // bloque si le contenu chute SOUS 25% de la baseline
 var _FC_ROLES=['admin','ouvrier','tractoriste','saisonnier','pilotage'];
 var _FC_TABS=[['dom','\uD83C\uDFDB\uFE0F Domaine'],['parcelles','\uD83C\uDF47 Parcelles'],['membres','\uD83D\uDC65 Membres'],['taches','\u2713 T\u00e2ches'],['tracteurs_list','\uD83D\uDE9C Tracteurs'],['saisons','\uD83D\uDCC5 Saisons'],['abo','\uD83D\uDCB3 Abonnement']];
-var _FC_INP_STYLE='width:100%;background:rgba(255,255,255,0.05);border:1px solid rgba(139,92,246,0.2);border-radius:9px;padding:9px 11px;font-size:12.5px;color:#fff;font-family:Outfit,sans-serif;box-sizing:border-box';
+var _FC_INP_STYLE='width:100%;background:rgba(255,255,255,0.05);border:1px solid rgba(139,92,246,0.2);border-radius:9px;padding:9px 11px;font-size:var(--pt-txt,12.5px);color:#fff;font-family:Outfit,sans-serif;box-sizing:border-box';
 var _FC_SEL_STYLE=_FC_INP_STYLE;
 
 function _fcClone(o){ return JSON.parse(JSON.stringify(o==null?null:o)); }
@@ -2879,7 +2879,7 @@ function _fcSecTitle(t){ return {dom:'Domaine',parcelles:'Parcelles & secteurs m
 function _fcCollLabel(c){ return {parcelles:'les parcelles',membres:'les membres',taches:'les t\u00e2ches',tracteurs_list:'les tracteurs',saisons:'les saisons'}[c]||c; }
 function _fcItemLabel(coll,i){ var a=_FC[coll]||[],o=a[i]||{}; if(coll==='membres') return o.nom||o.email||'ce membre'; return o.nom||'cet \u00e9l\u00e9ment'; }
 function _fcHint(html){ return '<div style="font-size:11.5px;color:rgba(255,255,255,0.4);line-height:1.6;margin:0 0 13px">'+html+'</div>'; }
-function _fcEmpty(txt){ return '<div style="text-align:center;padding:22px;color:rgba(255,255,255,0.25);font-size:12.5px">'+txt+'</div>'; }
+function _fcEmpty(txt){ return '<div style="text-align:center;padding:22px;color:rgba(255,255,255,0.25);font-size:var(--pt-txt,12.5px)">'+txt+'</div>'; }
 
 function _fcActiveCount(coll){ var a=_FC[coll]||[]; if(coll==='parcelles') return a.filter(function(p){return p.statut!=='Arrachee';}).length; return a.length; }
 function _fcBaseCount(coll){ var a=_FC_BASE[coll]||[]; if(coll==='parcelles') return a.filter(function(p){return p.statut!=='Arrachee';}).length; return a.length; }
@@ -2893,19 +2893,19 @@ function _fcDelBtn(coll,i){
   return '<button onclick="_fcAskDel(\''+coll+'\','+i+')" title="Supprimer" style="width:34px;height:34px;border-radius:9px;background:rgba(239,68,68,0.08);border:1px solid rgba(239,68,68,0.2);color:#FCA5A5;font-size:15px;cursor:pointer;line-height:1;padding:0">\u00d7</button>';
 }
 function _fcAddBtn(coll,label){
-  return '<button onclick="_fcAddRow(\''+coll+'\')" style="width:100%;margin-top:4px;background:rgba(139,92,246,0.07);border:1px dashed rgba(139,92,246,0.3);border-radius:11px;padding:11px;color:#C4B5FD;font-size:12.5px;font-weight:500;cursor:pointer;font-family:Outfit,sans-serif">+ '+_escHtml(label)+'</button>';
+  return '<button onclick="_fcAddRow(\''+coll+'\')" style="width:100%;margin-top:4px;background:rgba(139,92,246,0.07);border:1px dashed rgba(139,92,246,0.3);border-radius:11px;padding:11px;color:#C4B5FD;font-size:var(--pt-txt,12.5px);font-weight:500;cursor:pointer;font-family:Outfit,sans-serif">+ '+_escHtml(label)+'</button>';
 }
 
 // ── Sections ────────────────────────────────────────────────────────────────
 function _fcSecDom(){
   var c=_FC.config||{};
   function fld(lbl,id,val,type){
-    return '<div style="margin-bottom:13px"><div style="font-size:11px;color:rgba(255,255,255,0.35);margin-bottom:6px">'+lbl+'</div><input id="'+id+'" type="'+(type||'text')+'" value="'+_escHtml(String(val==null?'':val))+'" style="'+_FC_INP_STYLE+'"></div>';
+    return '<div style="margin-bottom:13px"><div style="font-size:var(--pt-micro,11px);color:rgba(255,255,255,0.35);margin-bottom:6px">'+lbl+'</div><input id="'+id+'" type="'+(type||'text')+'" value="'+_escHtml(String(val==null?'':val))+'" style="'+_FC_INP_STYLE+'"></div>';
   }
   return _fcHint('Le centre m\u00e9t\u00e9o r\u00e9el se calcule sur le centro\u00efde des parcelles ; ces coordonn\u00e9es ne servent que de repli.')
     +'<div style="display:grid;grid-template-columns:1fr 1fr;gap:12px">'
     + fld('Nom du domaine','agt-fc-nom',c.domaine_nom||'')
-    +'<div style="margin-bottom:13px"><div style="font-size:11px;color:rgba(255,255,255,0.35);margin-bottom:6px">Onboarding</div><div style="font-size:13px;font-weight:600;color:'+(c.onboarding_done?'#6BA34A':'#FCA5A5')+';padding:9px 0">'+(c.onboarding_done?'\u2705 Termin\u00e9':'\u274c Non termin\u00e9')+'</div></div>'
+    +'<div style="margin-bottom:13px"><div style="font-size:var(--pt-micro,11px);color:rgba(255,255,255,0.35);margin-bottom:6px">Onboarding</div><div style="font-size:13px;font-weight:600;color:'+(c.onboarding_done?'#6BA34A':'#FCA5A5')+';padding:9px 0">'+(c.onboarding_done?'\u2705 Termin\u00e9':'\u274c Non termin\u00e9')+'</div></div>'
     + fld('Latitude (repli)','agt-fc-lat',c.lat==null?'':c.lat,'number')
     + fld('Longitude (repli)','agt-fc-lon',c.lon==null?'':c.lon,'number')
     +'</div>';
@@ -2934,11 +2934,11 @@ function _fcSecteursHtml(){
   act.forEach(function(p){ var nom=(p.commune&&p.commune.nom)?p.commune.nom:((typeof p.commune==='string'&&p.commune)?p.commune:''); var k=(nom||'').trim()||'__none__'; m[k]=(m[k]||0)+1; });
   var keys=Object.keys(m).filter(function(k){return k!=='__none__';});
   var on=keys.length>=2;
-  var chips=Object.keys(m).map(function(k){ var lbl=(k==='__none__')?'\u2014 sans secteur':k; return '<span style="font-size:11px;background:rgba(0,0,0,0.25);border:1px solid rgba(255,255,255,0.07);border-radius:9px;padding:6px 11px;color:rgba(255,255,255,0.6)"><b style="color:#fff">'+_escHtml(lbl)+'</b> \u00b7 '+m[k]+' parc.</span>'; }).join(' ');
+  var chips=Object.keys(m).map(function(k){ var lbl=(k==='__none__')?'\u2014 sans secteur':k; return '<span style="font-size:var(--pt-micro,11px);background:rgba(0,0,0,0.25);border:1px solid rgba(255,255,255,0.07);border-radius:9px;padding:6px 11px;color:rgba(255,255,255,0.6)"><b style="color:#fff">'+_escHtml(lbl)+'</b> \u00b7 '+m[k]+' parc.</span>'; }).join(' ');
   var badge=on?'background:rgba(61,107,39,0.18);border:1px solid rgba(61,107,39,0.4);color:#6BA34A':'background:rgba(255,255,255,0.05);border:1px solid rgba(255,255,255,0.1);color:rgba(255,255,255,0.4)';
   return '<div id="agt-fc-secteurs" style="background:linear-gradient(135deg,rgba(61,107,39,0.12),rgba(139,92,246,0.06));border:1px solid rgba(61,107,39,0.25);border-radius:13px;padding:13px;margin-top:14px">'
     +'<div style="font-size:12px;font-weight:700;color:#A8D08A;display:flex;align-items:center;gap:8px">\uD83D\uDDFA\uFE0F Secteurs m\u00e9t\u00e9o <span style="font-size:10px;border-radius:999px;padding:2px 9px;font-weight:600;'+badge+'">'+(on?'cartes par secteur activ\u00e9es':'m\u00e9t\u00e9o unique du domaine')+'</span></div>'
-    +'<div style="font-size:11px;color:rgba(255,255,255,0.4);margin-top:6px">'+keys.length+' commune'+(keys.length>1?'s':'')+' active'+(keys.length>1?'s':'')+' \u00b7 cartes empil\u00e9es sur l\'accueil d\u00e8s \u22652 communes.</div>'
+    +'<div style="font-size:var(--pt-micro,11px);color:rgba(255,255,255,0.4);margin-top:6px">'+keys.length+' commune'+(keys.length>1?'s':'')+' active'+(keys.length>1?'s':'')+' \u00b7 cartes empil\u00e9es sur l\'accueil d\u00e8s \u22652 communes.</div>'
     +'<div style="display:flex;flex-wrap:wrap;gap:7px;margin-top:9px">'+chips+'</div></div>';
 }
 
@@ -2947,16 +2947,16 @@ function _fcSecMbr(){
     var roles=Array.isArray(m.roles)?m.roles:Object.keys(m.roles||{}).filter(function(r){return m.roles[r];});
     var chips=_FC_ROLES.map(function(r){
       var onr=roles.indexOf(r)>=0, col=_ROLE_COLORS[r]||'#8B5CF6';
-      return '<span onclick="_fcToggleRole('+i+',\''+r+'\')" style="cursor:pointer;font-size:10.5px;font-weight:600;padding:4px 9px;border-radius:8px;user-select:none;border:1px solid '+col+(onr?'':'44')+';background:'+(onr?col+'33':'transparent')+';color:'+(onr?col:'rgba(255,255,255,0.4)')+'">'+r+'</span>';
+      return '<span onclick="_fcToggleRole('+i+',\''+r+'\')" style="cursor:pointer;font-size:var(--pt-lbl,10.5px);font-weight:600;padding:4px 9px;border-radius:8px;user-select:none;border:1px solid '+col+(onr?'':'44')+';background:'+(onr?col+'33':'transparent')+';color:'+(onr?col:'rgba(255,255,255,0.4)')+'">'+r+'</span>';
     }).join(' ');
     return '<div style="background:rgba(255,255,255,0.04);border:1px solid rgba(255,255,255,0.06);border-radius:12px;padding:11px;margin-bottom:8px">'
       +'<div style="display:grid;grid-template-columns:1fr 34px;gap:8px;align-items:start"><div style="min-width:0">'
       + _fcInp('membres',i,'nom',m.nom,'text','Pr\u00e9nom')
-      +'<div style="font-size:11px;color:rgba(255,255,255,0.3);margin-top:5px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap">\u2709 '+_escHtml(m.email||'\u2014')+'</div></div>'
+      +'<div style="font-size:var(--pt-micro,11px);color:rgba(255,255,255,0.3);margin-top:5px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap">\u2709 '+_escHtml(m.email||'\u2014')+'</div></div>'
       + _fcDelBtn('membres',i)
       +'</div><div style="display:flex;flex-wrap:wrap;gap:5px;margin-top:9px">'+chips+'</div></div>';
   }).join(''):_fcEmpty('Aucun membre');
-  var addBtn='<button onclick="_fcAddRow(\'membres\')" style="width:100%;margin-top:4px;background:rgba(139,92,246,0.12);border:1px solid rgba(139,92,246,0.35);border-radius:11px;padding:11px;color:#C4B5FD;font-size:12.5px;font-weight:600;cursor:pointer;font-family:Outfit,sans-serif">+ Ajouter un compte (Auth)</button>';
+  var addBtn='<button onclick="_fcAddRow(\'membres\')" style="width:100%;margin-top:4px;background:rgba(139,92,246,0.12);border:1px solid rgba(139,92,246,0.35);border-radius:11px;padding:11px;color:#C4B5FD;font-size:var(--pt-txt,12.5px);font-weight:600;cursor:pointer;font-family:Outfit,sans-serif">+ Ajouter un compte (Auth)</button>';
   return _fcHint('La cr\u00e9ation de compte passe par la Cloud Function (Auth + claims). <b>Retirer</b> un membre ici l\'enl\u00e8ve de la liste mais ne supprime pas son compte de connexion. Changer un r\u00f4le lecture seule (saisonnier / pilotage) n\u00e9cessite aussi de r\u00e9g\u00e9n\u00e9rer le compte.')
     + rows + addBtn;
 }
@@ -3001,7 +3001,7 @@ function _fcSecSais(){
       + _fcInp('saisons',i,'nom',s.nom,'text','Nom')
       + _fcInp('saisons',i,'debut',s.debut,'date')
       + _fcInp('saisons',i,'fin',s.fin,'date')
-      + '<span onclick="_fcSetActive('+i+')" style="cursor:pointer;font-size:10.5px;font-weight:600;padding:7px 10px;border-radius:8px;white-space:nowrap;'+act+'">'+(s.active?'\u25cf active':'activer')+'</span>'
+      + '<span onclick="_fcSetActive('+i+')" style="cursor:pointer;font-size:var(--pt-lbl,10.5px);font-weight:600;padding:7px 10px;border-radius:8px;white-space:nowrap;'+act+'">'+(s.active?'\u25cf active':'activer')+'</span>'
       + _fcDelBtn('saisons',i)
       + '</div>';
   }).join(''):_fcEmpty('Aucune saison');
@@ -3063,10 +3063,10 @@ function _fcRenewHtml(){
     : 'D\u00e9j\u00e0 reconduit une fois. Au-del\u00e0, c\u2019est une conversion \u2014 ou le champ ci-dessus, en connaissance de cause.';
   return '<div id="agt-fc-renew" style="background:rgba(201,168,76,0.06);border:1px solid rgba(201,168,76,0.22);border-radius:11px;padding:12px 13px;margin:0 0 13px">'
     +'<div style="display:flex;align-items:center;gap:8px;margin-bottom:6px">'
-    +'<span style="font-size:12.5px;font-weight:600;color:#E8D89A">Reconduction de l\u2019essai</span>'
+    +'<span style="font-size:var(--pt-txt,12.5px);font-weight:600;color:#E8D89A">Reconduction de l\u2019essai</span>'
     +'<span style="font-size:10px;font-weight:600;color:'+(dispo?'#86EFAC':'rgba(255,255,255,0.35)')+';background:rgba(255,255,255,0.05);border-radius:20px;padding:2px 8px">'+faites+' / '+_FC_TRIAL_MAX+'</span></div>'
-    +'<div style="font-size:11px;color:rgba(255,255,255,0.4);line-height:1.5;margin-bottom:9px">'+sous+'</div>'
-    +'<button id="agt-fc-renew-btn"'+(dispo?'':' disabled')+' onclick="_fcRenewTrial()" style="width:100%;font-family:Outfit,sans-serif;font-size:12.5px;font-weight:700;border-radius:9px;padding:10px;border:0;cursor:'+(dispo?'pointer':'not-allowed')+';background:'+(dispo?'#C9A84C':'rgba(255,255,255,0.06)')+';color:'+(dispo?'#0C1A0A':'rgba(255,255,255,0.3)')+'">'
+    +'<div style="font-size:var(--pt-micro,11px);color:rgba(255,255,255,0.4);line-height:1.5;margin-bottom:9px">'+sous+'</div>'
+    +'<button id="agt-fc-renew-btn"'+(dispo?'':' disabled')+' onclick="_fcRenewTrial()" style="width:100%;font-family:Outfit,sans-serif;font-size:var(--pt-txt,12.5px);font-weight:700;border-radius:9px;padding:10px;border:0;cursor:'+(dispo?'pointer':'not-allowed')+';background:'+(dispo?'#C9A84C':'rgba(255,255,255,0.06)')+';color:'+(dispo?'#0C1A0A':'rgba(255,255,255,0.3)')+'">'
     +(dispo?('Reconduire '+_FC_TRIAL_DAYS+' jours'):'Reconduction utilis\u00e9e')+'</button></div>';
 }
 
@@ -3112,7 +3112,7 @@ function _fcTrialStatusHtml(fc){
     return '<div id="agt-fc-trial-status" style="background:'+bg+';border:1px solid '+bd+';border-radius:11px;padding:11px 13px;margin:0 0 15px;display:flex;align-items:center;gap:10px">'
       +'<div style="width:30px;height:30px;border-radius:8px;background:'+icbg+';display:flex;align-items:center;justify-content:center;flex-shrink:0;font-size:16px">'+ic+'</div>'
       +'<div style="flex:1;min-width:0"><div style="font-size:13px;font-weight:600;color:'+tcol+'">'+title+'</div>'
-      +(sub?('<div style="font-size:11px;color:'+scol+';margin-top:2px">'+sub+'</div>'):'')+'</div></div>';
+      +(sub?('<div style="font-size:var(--pt-micro,11px);color:'+scol+';margin-top:2px">'+sub+'</div>'):'')+'</div></div>';
   }
   var exp=_fcTrialExpMs(fc), now=Date.now();
   if(exp>0){
@@ -3148,11 +3148,11 @@ function _fcSecAbo(){
     +'#agt-fc-mods .agt-mod-txt{flex:1;min-width:0}'
     +'#agt-fc-mods .agt-mod-name{font-size:13px;font-weight:600;color:#fff}'
     +'#agt-fc-mods .agt-mod-sub{font-size:10px;color:rgba(255,255,255,0.4);margin-top:2px}'
-    +'#agt-fc-mods .agt-b{display:inline-block;font-size:9.5px;font-weight:600;padding:2px 8px;border-radius:999px;margin-top:5px}'
+    +'#agt-fc-mods .agt-b{display:inline-block;font-size:var(--pt-nano,9.5px);font-weight:600;padding:2px 8px;border-radius:999px;margin-top:5px}'
     +'#agt-fc-mods .agt-b-herit{background:rgba(255,255,255,0.05);border:1px solid rgba(255,255,255,0.1);color:rgba(255,255,255,0.5)}'
     +'#agt-fc-mods .agt-b-on{background:rgba(139,92,246,0.14);border:1px solid rgba(139,92,246,0.3);color:#C4B5FD}'
     +'#agt-fc-mods .agt-b-off{background:rgba(224,112,96,0.12);border:1px solid rgba(224,112,96,0.3);color:#E07060}'
-    +'#agt-fc-mods .agt-mod-reset{font-size:9.5px;color:#C4B5FD;cursor:pointer;text-decoration:underline;margin-left:8px;opacity:.75}'
+    +'#agt-fc-mods .agt-mod-reset{font-size:var(--pt-nano,9.5px);color:#C4B5FD;cursor:pointer;text-decoration:underline;margin-left:8px;opacity:.75}'
     +'#agt-fc-mods .agt-sw{position:relative;width:42px;height:25px;flex-shrink:0;cursor:pointer;display:inline-block}'
     +'#agt-fc-mods .agt-sw input{opacity:0;width:0;height:0;position:absolute}'
     +'#agt-fc-mods .agt-sw-tr{position:absolute;inset:0;border-radius:999px;background:rgba(255,255,255,0.12);border:1px solid rgba(255,255,255,0.14);transition:.18s}'
@@ -3164,11 +3164,11 @@ function _fcSecAbo(){
     +_fcHint('La <b>formule</b> (claim, posée sur tous les membres) reste le socle commercial. Les <b>cases</b> affinent module par module : seuls les <b>écarts</b> à la formule sont enregistrés — changer la formule refait suivre les modules non forcés.')
     +_fcTrialStatusHtml(_FC)
     +'<div style="display:grid;grid-template-columns:1fr 1fr;gap:12px">'
-    +'<div style="margin-bottom:13px"><div style="font-size:11px;color:rgba(255,255,255,0.35);margin-bottom:6px">Formule (= socle modules)</div><select id="agt-fc-plan" onchange="_fcModPlanChange()" style="'+_FC_SEL_STYLE+'">'+opt('essentiel','Essentiel — Vigne · Journal · Météo')+opt('vigneron','Vigneron — + Tracteur · Phyto')+opt('domaine','Domaine — + Planning · Pilotage · Cave · Réserve')+'</select></div>'
-    +'<div style="margin-bottom:13px"><div style="font-size:11px;color:rgba(255,255,255,0.35);margin-bottom:6px">Régler l&#39;essai — jours dès aujourd&#39;hui</div><input id="agt-fc-trial" type="number" min="0" max="90" value="'+tdInput+'" style="'+_FC_INP_STYLE+'"><div style="font-size:10px;color:rgba(255,255,255,0.3);margin-top:5px;line-height:1.4">Enregistrer repositionne l&#39;expiration à aujourd&#39;hui + N jours. <b style="color:rgba(255,255,255,0.45)">0</b> = convertir en payant.</div></div>'
+    +'<div style="margin-bottom:13px"><div style="font-size:var(--pt-micro,11px);color:rgba(255,255,255,0.35);margin-bottom:6px">Formule (= socle modules)</div><select id="agt-fc-plan" onchange="_fcModPlanChange()" style="'+_FC_SEL_STYLE+'">'+opt('essentiel','Essentiel — Vigne · Journal · Météo')+opt('vigneron','Vigneron — + Tracteur · Phyto')+opt('domaine','Domaine — + Planning · Pilotage · Cave · Réserve')+'</select></div>'
+    +'<div style="margin-bottom:13px"><div style="font-size:var(--pt-micro,11px);color:rgba(255,255,255,0.35);margin-bottom:6px">Régler l&#39;essai — jours dès aujourd&#39;hui</div><input id="agt-fc-trial" type="number" min="0" max="90" value="'+tdInput+'" style="'+_FC_INP_STYLE+'"><div style="font-size:10px;color:rgba(255,255,255,0.3);margin-top:5px;line-height:1.4">Enregistrer repositionne l&#39;expiration à aujourd&#39;hui + N jours. <b style="color:rgba(255,255,255,0.45)">0</b> = convertir en payant.</div></div>'
     +'</div>'
     +_fcRenewHtml()
-    +'<div style="font-size:11px;color:rgba(255,255,255,0.35);margin:8px 0 9px">Modules visibles par ce client</div>'
+    +'<div style="font-size:var(--pt-micro,11px);color:rgba(255,255,255,0.35);margin:8px 0 9px">Modules visibles par ce client</div>'
     +'<div id="agt-fc-mods">'+_fcModsHtml()+'</div>';
 }
 
@@ -3178,7 +3178,7 @@ function _fcRenderTabs(){
   el.innerHTML=_FC_TABS.map(function(tb){
     var id=tb[0], onn=(id===_FC_TAB), n='';
     if(['parcelles','membres','taches','tracteurs_list','saisons'].indexOf(id)>=0) n=' <span style="font-size:10px;background:rgba(255,255,255,0.1);border-radius:7px;padding:0 6px;min-width:18px;text-align:center;display:inline-block">'+_fcActiveCount(id)+'</span>';
-    return '<button onclick="_fcTab(\''+id+'\')" style="flex-shrink:0;padding:9px 13px;border-radius:11px;font-size:12.5px;font-weight:'+(onn?'600':'500')+';cursor:pointer;white-space:nowrap;font-family:Outfit,sans-serif;border:1px solid '+(onn?'rgba(139,92,246,0.4)':'rgba(255,255,255,0.06)')+';background:'+(onn?'rgba(139,92,246,0.15)':'rgba(255,255,255,0.04)')+';color:'+(onn?'#C4B5FD':'rgba(255,255,255,0.6)')+'">'+tb[1]+n+'</button>';
+    return '<button onclick="_fcTab(\''+id+'\')" style="flex-shrink:0;padding:9px 13px;border-radius:11px;font-size:var(--pt-txt,12.5px);font-weight:'+(onn?'600':'500')+';cursor:pointer;white-space:nowrap;font-family:Outfit,sans-serif;border:1px solid '+(onn?'rgba(139,92,246,0.4)':'rgba(255,255,255,0.06)')+';background:'+(onn?'rgba(139,92,246,0.15)':'rgba(255,255,255,0.04)')+';color:'+(onn?'#C4B5FD':'rgba(255,255,255,0.6)')+'">'+tb[1]+n+'</button>';
   }).join('');
 }
 function _fcRenderSection(){
@@ -3191,7 +3191,7 @@ function _fcRenderSection(){
   else if(t==='tracteurs_list') html=_fcSecTrac();
   else if(t==='saisons') html=_fcSecSais();
   else if(t==='abo') html=_fcSecAbo();
-  body.innerHTML='<div style="font-size:11px;letter-spacing:.08em;text-transform:uppercase;color:rgba(255,255,255,0.35);font-weight:600;margin:2px 0 14px">'+_fcSecTitle(t)+'</div>'+html;
+  body.innerHTML='<div style="font-size:var(--pt-micro,11px);letter-spacing:.08em;text-transform:uppercase;color:rgba(255,255,255,0.35);font-weight:600;margin:2px 0 14px">'+_fcSecTitle(t)+'</div>'+html;
 }
 function _fcRenderSecteurs(){ var el=document.getElementById('agt-fc-secteurs'); if(el) el.outerHTML=_fcSecteursHtml(); }
 function _fcSyncSum(){
@@ -3199,7 +3199,7 @@ function _fcSyncSum(){
   var plan=_FC.plan||'domaine';
   var _tExp=_fcTrialExpMs(_FC), _tLeft=_fcTrialLeft(_FC), _tNow=Date.now();
   var planL={essentiel:'Essentiel',vigneron:'Vigneron',domaine:'Domaine'}[plan]||plan;
-  function chip(bg,bd,col,txt){ return '<span style="font-size:11px;font-weight:600;padding:4px 10px;border-radius:999px;border:1px solid '+bd+';background:'+bg+';color:'+col+'">'+txt+'</span>'; }
+  function chip(bg,bd,col,txt){ return '<span style="font-size:var(--pt-micro,11px);font-weight:600;padding:4px 10px;border-radius:999px;border:1px solid '+bd+';background:'+bg+';color:'+col+'">'+txt+'</span>'; }
   var h=chip('rgba(139,92,246,0.14)','rgba(139,92,246,0.28)','#C4B5FD',planL);
   if(_tLeft>0) h+=chip('rgba(201,168,76,0.12)','rgba(201,168,76,0.3)','#C9A84C','Essai · J-'+_tLeft);
   else if(_tExp>0 && _tExp<=_tNow) h+=chip('rgba(224,112,96,0.12)','rgba(224,112,96,0.3)','#E88F82','Essai expiré');
@@ -3249,8 +3249,8 @@ window._fcAskDel=function(coll,i){
   ov.style.cssText='position:fixed;inset:0;background:rgba(6,4,12,0.88);z-index:10001;display:flex;align-items:center;justify-content:center;padding:20px;font-family:Outfit,sans-serif';
   ov.innerHTML='<div style="width:100%;max-width:410px;background:rgba(18,14,28,0.98);border-radius:20px;border:1px solid rgba(239,68,68,0.3);padding:22px;box-shadow:0 24px 60px rgba(0,0,0,0.6)">'
     +'<div style="display:flex;align-items:center;gap:11px;margin-bottom:12px"><div style="width:38px;height:38px;border-radius:11px;background:rgba(239,68,68,0.12);border:1px solid rgba(239,68,68,0.35);display:flex;align-items:center;justify-content:center;font-size:18px">\uD83D\uDDD1\uFE0F</div><div style="font-size:16px;font-weight:700;color:#fff">Supprimer ?</div></div>'
-    +'<p style="font-size:12.5px;line-height:1.55;color:rgba(255,255,255,0.65);margin:0 0 6px">Retirer <b style="color:#FCA5A5">'+_escHtml(label)+'</b> de la liste. La suppression est appliqu\u00e9e \u00e0 l\'enregistrement de la section.</p>'
-    +'<div style="font-size:11px;color:rgba(255,255,255,0.4);margin:12px 0 6px">Pour confirmer, tape <code style="background:rgba(255,255,255,0.08);padding:1px 7px;border-radius:4px;color:#FCA5A5;font-weight:600">SUPPRIMER</code></div>'
+    +'<p style="font-size:var(--pt-txt,12.5px);line-height:1.55;color:rgba(255,255,255,0.65);margin:0 0 6px">Retirer <b style="color:#FCA5A5">'+_escHtml(label)+'</b> de la liste. La suppression est appliqu\u00e9e \u00e0 l\'enregistrement de la section.</p>'
+    +'<div style="font-size:var(--pt-micro,11px);color:rgba(255,255,255,0.4);margin:12px 0 6px">Pour confirmer, tape <code style="background:rgba(255,255,255,0.08);padding:1px 7px;border-radius:4px;color:#FCA5A5;font-weight:600">SUPPRIMER</code></div>'
     +'<input id="agt-fcdel-inp" type="text" autocomplete="off" placeholder="SUPPRIMER" oninput="_fcDelCheck()" style="'+_FC_INP_STYLE+'">'
     +'<div style="display:flex;gap:9px;margin-top:16px">'
     +'<button onclick="document.getElementById(\'agt-fcdel-ov\').remove()" style="flex:1;padding:12px;border-radius:11px;font-size:13px;font-weight:500;cursor:pointer;font-family:Outfit,sans-serif;background:rgba(255,255,255,0.05);border:1px solid rgba(255,255,255,0.1);color:rgba(255,255,255,0.55)">Annuler</button>'
@@ -3281,8 +3281,8 @@ function _fcGuardBlock(coll,before,after){
   ov.style.cssText='position:fixed;inset:0;background:rgba(6,4,12,0.88);z-index:10001;display:flex;align-items:center;justify-content:center;padding:20px;font-family:Outfit,sans-serif';
   ov.innerHTML='<div style="width:100%;max-width:420px;background:rgba(18,14,28,0.98);border-radius:20px;border:1px solid rgba(239,68,68,0.3);padding:22px;box-shadow:0 24px 60px rgba(0,0,0,0.6)">'
     +'<div style="display:flex;align-items:center;gap:11px;margin-bottom:12px"><div style="width:38px;height:38px;border-radius:11px;background:rgba(239,68,68,0.12);border:1px solid rgba(239,68,68,0.35);display:flex;align-items:center;justify-content:center;font-size:18px">\u26a0\uFE0F</div><div style="font-size:16px;font-weight:700;color:#fff">\u00c9criture refus\u00e9e</div></div>'
-    +'<p style="font-size:12.5px;line-height:1.6;color:rgba(255,255,255,0.65);margin:0 0 12px">L\'enregistrement ferait passer <b style="color:#FCA5A5">'+_fcCollLabel(coll)+'</b> de <b style="color:#FCA5A5">'+before+'</b> \u00e0 <b style="color:#FCA5A5">'+after+'</b> \u2014 une chute sous le seuil de <b>25 %</b>. Rien n\'est \u00e9crit, le serveur reste intact.</p>'
-    +'<div style="font-size:11px;color:rgba(255,255,255,0.45);background:rgba(239,68,68,0.06);border:1px solid rgba(239,68,68,0.16);border-radius:11px;padding:11px 13px;line-height:1.6">Garde anti-\u00e9crasement (\u00a711b) port\u00e9e dans la Fiche client. Pour retirer beaucoup d\'\u00e9l\u00e9ments volontairement, fais-le en plusieurs fois.</div>'
+    +'<p style="font-size:var(--pt-txt,12.5px);line-height:1.6;color:rgba(255,255,255,0.65);margin:0 0 12px">L\'enregistrement ferait passer <b style="color:#FCA5A5">'+_fcCollLabel(coll)+'</b> de <b style="color:#FCA5A5">'+before+'</b> \u00e0 <b style="color:#FCA5A5">'+after+'</b> \u2014 une chute sous le seuil de <b>25 %</b>. Rien n\'est \u00e9crit, le serveur reste intact.</p>'
+    +'<div style="font-size:var(--pt-micro,11px);color:rgba(255,255,255,0.45);background:rgba(239,68,68,0.06);border:1px solid rgba(239,68,68,0.16);border-radius:11px;padding:11px 13px;line-height:1.6">Garde anti-\u00e9crasement (\u00a711b) port\u00e9e dans la Fiche client. Pour retirer beaucoup d\'\u00e9l\u00e9ments volontairement, fais-le en plusieurs fois.</div>'
     +'<button onclick="document.getElementById(\'agt-fcguard-ov\').remove()" style="width:100%;margin-top:18px;padding:12px;border-radius:12px;font-size:13px;font-weight:600;cursor:pointer;font-family:Outfit,sans-serif;background:rgba(255,255,255,0.06);border:1px solid rgba(255,255,255,0.1);color:rgba(255,255,255,0.6)">Revenir</button>'
     +'</div>';
   document.body.appendChild(ov);
@@ -3398,8 +3398,8 @@ window.agtShowFiche=async function(slug){
   ov.innerHTML=
      '<div style="display:flex;align-items:center;justify-content:space-between;gap:12px;padding:16px 20px 13px;border-bottom:1px solid rgba(139,92,246,0.15)">'
     +'<div style="display:flex;align-items:center;gap:11px;min-width:0"><div style="width:34px;height:34px;border-radius:10px;background:rgba(139,92,246,0.15);border:1px solid rgba(139,92,246,0.28);display:flex;align-items:center;justify-content:center;font-size:16px;flex-shrink:0">\uD83D\uDDC2\uFE0F</div>'
-    +'<div><div style="font-size:15px;font-weight:600;color:#fff">Fiche client</div><div style="font-size:11px;color:rgba(196,181,253,0.6);margin-top:2px;font-family:monospace">'+_escHtml(slug)+'</div></div></div>'
-    +'<button onclick="document.getElementById(\'agt-fiche-ov\').remove()" style="min-width:40px;height:40px;border-radius:10px;background:rgba(255,255,255,0.06);border:1px solid rgba(255,255,255,0.1);color:rgba(255,255,255,0.6);font-size:17px;cursor:pointer">\u2715</button></div>'
+    +'<div><div style="font-size:15px;font-weight:600;color:#fff">Fiche client</div><div style="font-size:var(--pt-micro,11px);color:rgba(196,181,253,0.6);margin-top:2px;font-family:monospace">'+_escHtml(slug)+'</div></div></div>'
+    +'<button onclick="document.getElementById(\'agt-fiche-ov\').remove()" style="min-width:40px;height:40px;border-radius:10px;background:rgba(255,255,255,0.06);border:1px solid rgba(255,255,255,0.1);color:rgba(255,255,255,0.6);font-size:var(--pt-sm,17px);cursor:pointer">\u2715</button></div>'
     +'<div id="agt-fc-sum" style="display:flex;flex-wrap:wrap;align-items:center;gap:8px;padding:11px 20px;border-bottom:1px solid rgba(255,255,255,0.05);background:rgba(0,0,0,0.18)"></div>'
     +'<div id="agt-fiche-tabs" style="display:flex;gap:6px;overflow-x:auto;padding:12px 16px;border-bottom:1px solid rgba(255,255,255,0.05)"></div>'
     +'<div id="agt-fiche-body" style="flex:1;overflow-y:auto;padding:18px 20px 96px"><div style="text-align:center;padding:50px;color:rgba(255,255,255,0.3);font-size:13px">Chargement\u2026</div></div>'
@@ -3421,8 +3421,8 @@ function _agtCguHtml(cfg, slug){
   // Plus aucun geste à armer côté GT. La preuve vit hors tenant (_mv_signatures/{slug}) et un
   // reçu horodaté part par e-mail (au client + à GUERETTECH) à chaque acceptation.
   return '<div style="margin:14px 0 10px;padding-top:12px;border-top:1px solid rgba(255,255,255,0.08)">'
-    +'<div style="font-size:11px;color:rgba(255,255,255,0.35);margin-bottom:6px">Acceptation CGU + DPA</div>'
-    +'<div style="font-size:12.5px;color:rgba(255,255,255,0.7);line-height:1.5">Automatique &#224; la 1<sup>re</sup> ouverture par le client (bloquant). Un re&#231;u horodat&#233; est envoy&#233; par e-mail &#224; chaque acceptation.</div>'
+    +'<div style="font-size:var(--pt-micro,11px);color:rgba(255,255,255,0.35);margin-bottom:6px">Acceptation CGU + DPA</div>'
+    +'<div style="font-size:var(--pt-txt,12.5px);color:rgba(255,255,255,0.7);line-height:1.5">Automatique &#224; la 1<sup>re</sup> ouverture par le client (bloquant). Un re&#231;u horodat&#233; est envoy&#233; par e-mail &#224; chaque acceptation.</div>'
     +'</div>';
 }
 window.agtShowParcelles  = agtShowParcelles;
@@ -3490,10 +3490,10 @@ function _agtInsCss() {
     '  width:100%;max-width:760px;padding:22px;color:#F0E2C8;font-family:Outfit,sans-serif}',
     '.agi-hd{display:flex;justify-content:space-between;align-items:flex-start;gap:12px;margin-bottom:18px}',
     '.agi-hd h3{font-family:Cormorant Garamond,Georgia,serif;font-size:26px;margin:0;font-weight:600}',
-    '.agi-hd p{margin:2px 0 0;font-size:12.5px;color:rgba(240,226,200,.45)}',
+    '.agi-hd p{margin:2px 0 0;font-size:var(--pt-txt,12.5px);color:rgba(240,226,200,.45)}',
     '.agi-x{background:none;border:1px solid rgba(240,226,200,.16);color:#F0E2C8;border-radius:8px;',
     '  width:36px;height:36px;font-size:15px;cursor:pointer;flex:none}',
-    '.agi-ch{font-size:11px;letter-spacing:1.5px;text-transform:uppercase;',
+    '.agi-ch{font-size:var(--pt-micro,11px);letter-spacing:1.5px;text-transform:uppercase;',
     '  color:rgba(240,226,200,.35);font-weight:600;margin:20px 0 10px}',
     '.agi-dos{display:flex;gap:8px;overflow-x:auto;padding-bottom:4px;margin-bottom:4px}',
     '.agi-d{flex:none;min-width:180px;text-align:left;background:rgba(255,255,255,.04);',
@@ -3508,15 +3508,15 @@ function _agtInsCss() {
     '  padding:8px 10px;background:rgba(255,255,255,.02);border-left:3px solid rgba(240,226,200,.25)}',
     '.agi-v.ok{border-left-color:#3D6B27}.agi-v.no{border-left-color:#B85A1A}',
     '.agi-v .n{font-size:12px;font-weight:600}',
-    '.agi-v .s{font-size:11px;color:rgba(240,226,200,.45);margin-top:1px}',
+    '.agi-v .s{font-size:var(--pt-micro,11px);color:rgba(240,226,200,.45);margin-top:1px}',
     '.agi-v.ok .s{color:#9BC77E}.agi-v.no .s{color:#E0A46A}',
     '.agi-f{display:grid;grid-template-columns:130px 1fr;gap:9px 12px;align-items:center;margin-bottom:10px}',
-    '.agi-f > label{font-size:12.5px;color:rgba(240,226,200,.5)}',
+    '.agi-f > label{font-size:var(--pt-txt,12.5px);color:rgba(240,226,200,.5)}',
     '.agi-f input,.agi-f select{width:100%;background:rgba(255,255,255,.05);',
     '  border:1px solid rgba(240,226,200,.12);border-radius:8px;padding:9px 11px;color:#F0E2C8;',
     '  font-family:inherit;font-size:16px}',
     '.agi-f input:focus,.agi-f select:focus{outline:2px solid rgba(201,168,76,.5);outline-offset:1px}',
-    '.agi-src{font-size:11px;color:#C9A84C;margin-top:4px}',
+    '.agi-src{font-size:var(--pt-micro,11px);color:#C9A84C;margin-top:4px}',
     '.agi-pl{max-height:210px;overflow-y:auto;border:1px solid rgba(240,226,200,.12);',
     '  border-radius:9px;margin-top:10px}',
     '.agi-pr{display:grid;grid-template-columns:1fr 96px 30px;gap:8px;align-items:center;',
@@ -3525,7 +3525,7 @@ function _agtInsCss() {
     '.agi-pr input{background:rgba(255,255,255,.05);border:1px solid rgba(240,226,200,.12);',
     '  border-radius:6px;padding:5px 7px;color:#C9A84C;font-family:inherit;font-size:16px;',
     '  width:100%;text-align:right}',
-    '.agi-pd{background:none;border:none;color:rgba(240,226,200,.3);font-size:14px;cursor:pointer;',
+    '.agi-pd{background:none;border:none;color:rgba(240,226,200,.3);font-size:var(--pt-base,14px);cursor:pointer;',
     '  min-height:30px}',
     '.agi-tot{display:flex;justify-content:space-between;font-size:12px;',
     '  color:rgba(240,226,200,.45);padding:8px 10px;background:rgba(255,255,255,.03)}',
@@ -3537,15 +3537,15 @@ function _agtInsCss() {
     '  width:100%;padding:14px;min-height:52px;margin-top:18px}',
     '.agi-b[disabled]{opacity:.4;cursor:not-allowed}',
     '.agi-w{border-left:3px solid #B85A1A;background:rgba(184,90,26,.09);border-radius:0 8px 8px 0;',
-    '  padding:9px 12px;font-size:12.5px;margin-top:12px;line-height:1.55}',
+    '  padding:9px 12px;font-size:var(--pt-txt,12.5px);margin-top:12px;line-height:1.55}',
     '.agi-lu{display:grid;grid-template-columns:1fr 1fr;gap:1px;background:rgba(240,226,200,.1);',
     '  border:1px solid rgba(240,226,200,.1);border-radius:10px;overflow:hidden}',
     '.agi-lu > div{background:#141A20;padding:9px 12px}',
-    '.agi-lu .k{font-size:11px;text-transform:uppercase;letter-spacing:.8px;color:rgba(240,226,200,.4)}',
+    '.agi-lu .k{font-size:var(--pt-micro,11px);text-transform:uppercase;letter-spacing:.8px;color:rgba(240,226,200,.4)}',
     '.agi-lu .v{font-size:13.5px;font-weight:500;margin-top:1px}',
     '.agi-cr{background:rgba(0,0,0,.35);border:1px solid rgba(240,226,200,.12);border-radius:10px;',
     '  padding:12px;margin-bottom:10px}',
-    '.agi-cr .k{font-size:10.5px;letter-spacing:1.2px;text-transform:uppercase;color:rgba(240,226,200,.35)}',
+    '.agi-cr .k{font-size:var(--pt-lbl,10.5px);letter-spacing:1.2px;text-transform:uppercase;color:rgba(240,226,200,.35)}',
     '.agi-cr .v{font-family:ui-monospace,Menlo,monospace;font-size:16px;color:#C9A84C;margin-top:3px;',
     '  word-break:break-all;user-select:all}',
     '.agi-pw{border-bottom:1px solid rgba(240,226,200,.06)}',
@@ -3565,7 +3565,7 @@ function _agtInsCss() {
     '  border-radius:8px;padding:9px 11px;color:#F0E2C8;font-family:inherit;',
     '  font-size:16px;margin-top:10px;line-height:1.5}',
     '.agi-rz{display:flex;gap:8px;flex-wrap:wrap;margin-top:8px}',
-    '.agi-bil{font-size:12.5px;color:rgba(240,226,200,.5);margin-top:10px;line-height:1.55}',
+    '.agi-bil{font-size:var(--pt-txt,12.5px);color:rgba(240,226,200,.5);margin-top:10px;line-height:1.55}',
     '.agi-bil b{color:#C9A84C;font-weight:600}',
     '@media(max-width:600px){.agi-f{grid-template-columns:1fr;gap:3px}.agi-lu{grid-template-columns:1fr}}',
     '@media(max-width:600px){.agi-pl{max-height:none}.agi-pr{grid-template-columns:1fr 78px 28px}}'
@@ -4181,7 +4181,7 @@ function _agtInsRender() {
   h += '<div class="agi-f"><label for="agtins-mail">Son e-mail</label><div>';
   h += '<input type="email" id="agtins-mail">';
   h += '<div class="agi-src">une vraie bo\u00eete : c\u2019est sa seule porte de secours</div></div></div>';
-  h += '<div class="agi-f"><label>Mot de passe</label><div style="font-size:12.5px;color:rgba(240,226,200,.5)">';
+  h += '<div class="agi-f"><label>Mot de passe</label><div style="font-size:var(--pt-txt,12.5px);color:rgba(240,226,200,.5)">';
   h += 'G\u00e9n\u00e9r\u00e9 \u00e0 l\u2019installation, pronon\u00e7able, affich\u00e9 une seule fois. Le client le remplace ';
   h += '\u00e0 sa premi\u00e8re connexion.</div></div>';
 
@@ -4308,7 +4308,7 @@ function _agtInsRender() {
   }
   var futL = (_agtIns.cfg && _agtIns.cfg.cave && _agtIns.cfg.cave.fut_l) || 0;
   h += '<div class="agi-p2" style="padding:10px 0 0">'
-    + '<span style="font-size:12.5px;color:rgba(240,226,200,.5);flex:0 0 auto">Volume d\u2019un f\u00fbt</span>'
+    + '<span style="font-size:var(--pt-txt,12.5px);color:rgba(240,226,200,.5);flex:0 0 auto">Volume d\u2019un f\u00fbt</span>'
     + '<select onchange="agtInsFut(this.value)" style="flex:1 1 150px;min-width:0;background:rgba(255,255,255,.05);'
     + 'border:1px solid rgba(240,226,200,.12);border-radius:8px;padding:7px 9px;color:#F0E2C8;font-family:inherit;font-size:16px">'
     + '<option value="">228 L \u2014 d\u00e9faut de l\u2019application</option>'
@@ -4333,7 +4333,7 @@ function _agtInsRender() {
     if (L.mer.recap) {
       h += '<pre style="max-height:230px;overflow:auto;margin:0;padding:11px 13px;white-space:pre-wrap;'
         + 'background:rgba(255,255,255,.03);border:1px solid rgba(240,226,200,.10);border-radius:10px;'
-        + 'font-family:inherit;font-size:12.5px;line-height:1.6;color:rgba(240,226,200,.72)">'
+        + 'font-family:inherit;font-size:var(--pt-txt,12.5px);line-height:1.6;color:rgba(240,226,200,.72)">'
         + E(L.mer.recap) + '</pre>';
     }
   }
@@ -4348,13 +4348,13 @@ function _agtInsRender() {
     h += _agtInsLu('Engins', L.engins || '\u2014');
     h += _agtInsLu('Cuv\u00e9es', L.cuvees || '\u2014');
     h += '</div>';
-    if (L.tel) h += '<p style="font-size:12.5px;color:rgba(240,226,200,.45);margin:10px 0 0">T\u00e9l\u00e9phone : ' + E(L.tel) + '</p>';
-    if (L.message) h += '<p style="font-size:12.5px;color:rgba(240,226,200,.45);margin:6px 0 0;white-space:pre-wrap">' + E(L.message) + '</p>';
+    if (L.tel) h += '<p style="font-size:var(--pt-txt,12.5px);color:rgba(240,226,200,.45);margin:10px 0 0">T\u00e9l\u00e9phone : ' + E(L.tel) + '</p>';
+    if (L.message) h += '<p style="font-size:var(--pt-txt,12.5px);color:rgba(240,226,200,.45);margin:6px 0 0;white-space:pre-wrap">' + E(L.message) + '</p>';
   }
 
   // ── Reste à faire à la conversion (c'est TA liste, pas la sienne) ──
   h += '<div class="agi-ch">\u00c0 finir chez ce client, \u00e0 la conversion</div>';
-  h += '<p style="font-size:12.5px;color:rgba(240,226,200,.45);margin:0;line-height:1.6">';
+  h += '<p style="font-size:var(--pt-txt,12.5px);color:rgba(240,226,200,.45);margin:0;line-height:1.6">';
   h += 'SIRET de l\u2019exploitation \u00b7 \u00e9cartements de plantation \u00b7 bar\u00e8me r\u00e9gional \u00b7 taux horaires \u00b7 ';
   h += 'contrats et mod\u00e8les d\u2019horaires \u00b7 cuves, f\u00fbts et cuv\u00e9es. Rien de tout cela n\u2019emp\u00eache ';
   h += 'd\u2019ouvrir : vous les posez vous-m\u00eame en fin d\u2019essai.</p>';
@@ -4943,7 +4943,7 @@ function _agtBizG1(an){
   for(i=0;i<12;i++)
     h+='<div style="flex:1;text-align:center;font-size:10px;padding-top:4px;color:rgba(255,255,255,'+(i<=iN?'0.42':'0.18')+')">'+_AGT_MOIS_L[i]+'</div>';
   h+='</div></div>';
-  h+='<div style="font-size:11px;color:rgba(255,255,255,0.4);margin-top:6px">Au '+_agtDateFr(new Date())+' \u2014 '
+  h+='<div style="font-size:var(--pt-micro,11px);color:rgba(255,255,255,0.4);margin-top:6px">Au '+_agtDateFr(new Date())+' \u2014 '
     +'<b style="color:#E8C860">'+_agtEur(cf[iN])+'</b> factur\u00e9s, <b style="color:#86EFAC">'+_agtEur(ce[iN])+'</b> encaiss\u00e9s'
     +(cf[iN]-ce[iN]>0?(' \u00b7 '+_agtEur(cf[iN]-ce[iN])+' en attente'):'')+'</div>';
   return h;
@@ -5003,7 +5003,7 @@ function _agtBizG3(){
     h+='<div style="margin-bottom:10px">';
     h+='<div style="display:flex;align-items:baseline;gap:8px;margin-bottom:4px">';
     h+='<span style="flex:1;min-width:0;font-size:12px;color:rgba(255,255,255,0.7);overflow:hidden;text-overflow:ellipsis;white-space:nowrap">'+_escHtml(t.nom)+'</span>';
-    h+='<span style="font-size:11px;font-weight:600;color:'+(d>0?'#F97316':'#86EFAC')+'">'+(d>0?(_agtEur(d)+' d\u00fb'):'sold\u00e9')+'</span>';
+    h+='<span style="font-size:var(--pt-micro,11px);font-weight:600;color:'+(d>0?'#F97316':'#86EFAC')+'">'+(d>0?(_agtEur(d)+' d\u00fb'):'sold\u00e9')+'</span>';
     h+='</div>';
     h+='<div style="display:flex;height:9px;border-radius:5px;overflow:hidden;background:rgba(255,255,255,0.05)">';
     if(e>0) h+='<div style="width:'+(e/max*100).toFixed(1)+'%;background:#86EFAC"></div>';
@@ -5068,18 +5068,18 @@ function _agtBizTodo(){
   var h='<div style="background:'+(urgent?'rgba(249,115,22,0.06)':'rgba(255,255,255,0.04)')
     +';border:1px solid '+(urgent?'rgba(249,115,22,0.22)':'rgba(255,255,255,0.1)')+';border-radius:12px;padding:12px 14px;margin-bottom:6px">';
   if(!rows.length){
-    return h+'<div style="font-size:12.5px;color:rgba(255,255,255,0.35)">Rien \u00e0 traiter aujourd\u2019hui.</div></div>';
+    return h+'<div style="font-size:var(--pt-txt,12.5px);color:rgba(255,255,255,0.35)">Rien \u00e0 traiter aujourd\u2019hui.</div></div>';
   }
   rows.forEach(function(r,i){
     h+='<div style="display:flex;align-items:center;gap:9px;padding:7px 0;flex-wrap:wrap'
       +(i<rows.length-1?';border-bottom:1px solid rgba(255,255,255,0.05)':'')+'">';
     h+='<span style="width:7px;height:7px;border-radius:50%;flex-shrink:0;background:'+r.c+'"></span>';
-    h+='<span style="flex:1;min-width:150px;font-size:12.5px;color:rgba(255,255,255,0.8)">'+r.t+'</span>';
-    h+='<span style="font-size:12.5px;font-weight:600">'+r.m+'</span>';
+    h+='<span style="flex:1;min-width:150px;font-size:var(--pt-txt,12.5px);color:rgba(255,255,255,0.8)">'+r.t+'</span>';
+    h+='<span style="font-size:var(--pt-txt,12.5px);font-weight:600">'+r.m+'</span>';
     h+='<button onclick="'+r.a+'" style="background:'+(r.b==='\u00c9mettre'||r.b==='Facturer'?'rgba(201,168,76,0.14)':'rgba(255,255,255,0.07)')
       +';border:1px solid '+(r.b==='\u00c9mettre'||r.b==='Facturer'?'rgba(201,168,76,0.3)':'rgba(255,255,255,0.12)')
       +';border-radius:7px;padding:4px 10px;color:'+(r.b==='\u00c9mettre'||r.b==='Facturer'?'#E8C860':'rgba(255,255,255,0.6)')
-      +';font-size:11px;cursor:pointer;font-family:Outfit,sans-serif">'+r.b+'</button>';
+      +';font-size:var(--pt-micro,11px);cursor:pointer;font-family:Outfit,sans-serif">'+r.b+'</button>';
     h+='</div>';
   });
   return h+'</div>';
@@ -5087,16 +5087,16 @@ function _agtBizTodo(){
 
 function _agtBizKpi(v,l,c,s){
   return '<div style="background:rgba(255,255,255,0.05);border-radius:10px;padding:12px;text-align:center">'
-    +'<div style="font-size:20px;font-weight:600;color:'+c+'">'+v+'</div>'
-    +'<div style="font-size:11px;color:rgba(255,255,255,0.35);margin-top:3px">'+l+'</div>'
+    +'<div style="font-size:var(--pt-md,20px);font-weight:600;color:'+c+'">'+v+'</div>'
+    +'<div style="font-size:var(--pt-micro,11px);color:rgba(255,255,255,0.35);margin-top:3px">'+l+'</div>'
     +'<div style="font-size:10px;color:rgba(255,255,255,0.25);margin-top:2px">'+(s||'')+'</div></div>';
 }
 function _agtBizCard(titre, sous, corps, leg){
   return '<div style="background:rgba(255,255,255,0.04);border:1px solid rgba(255,255,255,0.1);border-radius:12px;padding:13px 14px">'
-    +'<div style="font-size:12.5px;font-weight:600;color:rgba(255,255,255,0.75)">'+titre+'</div>'
-    +'<div style="font-size:10.5px;color:rgba(255,255,255,0.25);margin-bottom:10px">'+sous+'</div>'
+    +'<div style="font-size:var(--pt-txt,12.5px);font-weight:600;color:rgba(255,255,255,0.75)">'+titre+'</div>'
+    +'<div style="font-size:var(--pt-lbl,10.5px);color:rgba(255,255,255,0.25);margin-bottom:10px">'+sous+'</div>'
     +corps
-    +(leg?'<div style="display:flex;gap:12px;flex-wrap:wrap;font-size:10.5px;color:rgba(255,255,255,0.35);margin-top:8px">'+leg+'</div>':'')
+    +(leg?'<div style="display:flex;gap:12px;flex-wrap:wrap;font-size:var(--pt-lbl,10.5px);color:rgba(255,255,255,0.35);margin-top:8px">'+leg+'</div>':'')
     +'</div>';
 }
 function _agtBizLeg(col,txt){
@@ -5200,7 +5200,7 @@ function agtBizCible(i){
 // Select de rattachement, affiche sur la ligne d'un geste orphelin.
 function _agtBizRatSel(i,k,slug){
   var cs=_agtBizCibles(slug);
-  if(!cs.length) return '<div style="font-size:10.5px;color:rgba(255,255,255,0.3)">Aucune facture \u00e0 laquelle rattacher cette remise.</div>';
+  if(!cs.length) return '<div style="font-size:var(--pt-lbl,10.5px);color:rgba(255,255,255,0.3)">Aucune facture \u00e0 laquelle rattacher cette remise.</div>';
   var h='<select onchange="agtBizRattache('+i+','+k+',this.value)" style="width:100%;background:rgba(249,115,22,0.06);border:1px solid rgba(249,115,22,0.28);border-radius:8px;padding:7px 9px;color:#F0E8DC;font-size:16px;font-family:Outfit,sans-serif;box-sizing:border-box">';
   h+='<option value="">\u2192 Rattacher cette remise \u00e0\u2026</option>';
   cs.forEach(function(c){
@@ -5236,24 +5236,24 @@ function _agtBuildBusiness(){
     _agtFacts(t.slug).forEach(function(f){ if(_agtFRetard(f)>0) lateA+=(Number(f.montant)||0); });
   });
 
-  var h='<div style="margin:0 0 12px;font-size:11px;color:rgba(255,255,255,0.35);letter-spacing:.08em;text-transform:uppercase;font-weight:500">Revenu r\u00e9current, facturation et encaissements</div>';
+  var h='<div style="margin:0 0 12px;font-size:var(--pt-micro,11px);color:rgba(255,255,255,0.35);letter-spacing:.08em;text-transform:uppercase;font-weight:500">Revenu r\u00e9current, facturation et encaissements</div>';
   h+='<div style="display:grid;grid-template-columns:repeat(auto-fit,minmax(132px,1fr));gap:8px">';
-  h+=_agtBizKpi(_agtEur(mrr)+'<span style="font-size:11px;opacity:.5">/mois</span>','r\u00e9current','#86EFAC',nActif+' abonn\u00e9'+(nActif>1?'s':''));
-  h+=_agtBizKpi(_agtEur(pot)+'<span style="font-size:11px;opacity:.5">/mois</span>','potentiel','#C4B5FD',nEssai+' essai'+(nEssai>1?'s':'')+(nExp7>0?' \u00b7 '+nExp7+' \u2264 7j':''));
+  h+=_agtBizKpi(_agtEur(mrr)+'<span style="font-size:var(--pt-micro,11px);opacity:.5">/mois</span>','r\u00e9current','#86EFAC',nActif+' abonn\u00e9'+(nActif>1?'s':''));
+  h+=_agtBizKpi(_agtEur(pot)+'<span style="font-size:var(--pt-micro,11px);opacity:.5">/mois</span>','potentiel','#C4B5FD',nEssai+' essai'+(nEssai>1?'s':'')+(nExp7>0?' \u00b7 '+nExp7+' \u2264 7j':''));
   h+=_agtBizKpi(_agtEur(duA),'\u00e0 encaisser',duA>0?'#F97316':'rgba(255,255,255,0.3)',lateA>0?('dont '+_agtEur(lateA)+' en retard'):'aucun retard');
   h+=_agtBizKpi(_agtEur(caA),'factur\u00e9 en '+an,'#E8C860','tous types confondus');
   h+='</div>';
-  h+='<div style="font-size:10.5px;color:rgba(255,255,255,0.25);line-height:1.6;margin:8px 0 16px">'
+  h+='<div style="font-size:var(--pt-lbl,10.5px);color:rgba(255,255,255,0.25);line-height:1.6;margin:8px 0 16px">'
     +'Un abonnement annuel (2 mois offerts) se saisit en <b>une seule ligne</b> couvrant 12 mois, pas en douze. '
     +'Les domaines marqu\u00e9s <b>interne</b> sortent du r\u00e9current et des totaux.</div>';
 
-  h+='<div style="margin:0 0 8px;font-size:11px;color:rgba(255,255,255,0.35);letter-spacing:.08em;text-transform:uppercase;font-weight:500">\u00c0 traiter</div>';
+  h+='<div style="margin:0 0 8px;font-size:var(--pt-micro,11px);color:rgba(255,255,255,0.35);letter-spacing:.08em;text-transform:uppercase;font-weight:500">\u00c0 traiter</div>';
   h+=_agtBizTodo();
 
   // Courbes
   var annees=_agtBizAnnees();
   h+='<div style="display:flex;align-items:center;gap:8px;flex-wrap:wrap;margin:18px 0 8px">';
-  h+='<span style="font-size:11px;color:rgba(255,255,255,0.35);letter-spacing:.08em;text-transform:uppercase;font-weight:500">Courbes de l\u2019ann\u00e9e</span>';
+  h+='<span style="font-size:var(--pt-micro,11px);color:rgba(255,255,255,0.35);letter-spacing:.08em;text-transform:uppercase;font-weight:500">Courbes de l\u2019ann\u00e9e</span>';
   annees.forEach(function(a){
     h+='<button class="agt-chip'+(a===an?' on':'')+'" onclick="agtBizSetAn('+a+')">'+a+'</button>';
   });
@@ -5274,7 +5274,7 @@ function _agtBuildBusiness(){
       g3?(_agtBizLeg('#86EFAC','Encaiss\u00e9')+_agtBizLeg('#F97316','\u00c0 encaisser')):'');
   h+='</div>';
 
-  h+='<div style="margin:18px 0 8px;font-size:11px;color:rgba(255,255,255,0.35);letter-spacing:.08em;text-transform:uppercase;font-weight:500">Clients</div>';
+  h+='<div style="margin:18px 0 8px;font-size:var(--pt-micro,11px);color:rgba(255,255,255,0.35);letter-spacing:.08em;text-transform:uppercase;font-weight:500">Clients</div>';
   if(_agtTenants.length===0){
     return h+'<div style="text-align:center;padding:30px;color:rgba(255,255,255,0.2);font-size:13px">Aucun client</div>';
   }
@@ -5288,26 +5288,26 @@ function _agtBuildBusiness(){
     h+='<div style="background:rgba(255,255,255,0.04);border:1px '+(inte?'dashed':'solid')+' rgba(255,255,255,0.1);border-radius:12px;padding:14px;margin-bottom:10px'+(inte?';opacity:.72':'')+'">';
     h+='<div style="display:flex;align-items:flex-start;gap:10px;flex-wrap:wrap">';
     h+='<div style="flex:1;min-width:140px">';
-    h+='<div style="font-size:14px;font-weight:600;color:#E8E8E0">'+_escHtml(t.nom)+'</div>';
-    h+='<div style="font-size:11px;color:rgba(255,255,255,0.3);font-family:monospace;margin-top:2px">'+_escHtml(t.slug)+'</div>';
+    h+='<div style="font-size:var(--pt-base,14px);font-weight:600;color:#E8E8E0">'+_escHtml(t.nom)+'</div>';
+    h+='<div style="font-size:var(--pt-micro,11px);color:rgba(255,255,255,0.3);font-family:monospace;margin-top:2px">'+_escHtml(t.slug)+'</div>';
     h+='</div><div style="text-align:right">';
     h+= inte
       ? '<div style="font-size:12px;color:rgba(255,255,255,0.35)">non factur\u00e9</div>'
       : ('<div style="font-size:15px;font-weight:600;color:#E8E8E0">'
           +(rem?('<span style="font-size:12px;font-weight:400;color:rgba(255,255,255,0.3);text-decoration:line-through;margin-right:6px">'+_agtEur(plein)+'</span>'):'')
-          +_agtEur(pr)+'<span style="font-size:11px;opacity:.45">/mois</span></div>');
-    h+='<div style="font-size:11px;color:rgba(255,255,255,0.35);margin-top:2px">'+(_AGT_PLANL[plan]||plan)+'</div>';
-    if(rem) h+='<div style="font-size:10.5px;color:#C4B5FD;margin-top:2px">'+_escHtml(rem.motif||'')+'</div>';
+          +_agtEur(pr)+'<span style="font-size:var(--pt-micro,11px);opacity:.45">/mois</span></div>');
+    h+='<div style="font-size:var(--pt-micro,11px);color:rgba(255,255,255,0.35);margin-top:2px">'+(_AGT_PLANL[plan]||plan)+'</div>';
+    if(rem) h+='<div style="font-size:var(--pt-lbl,10.5px);color:#C4B5FD;margin-top:2px">'+_escHtml(rem.motif||'')+'</div>';
     h+='</div></div>';
 
     h+='<div style="display:flex;gap:6px;flex-wrap:wrap;margin-top:9px;align-items:center">';
-    h+='<span style="font-size:11px;font-weight:600;color:'+(inte?'rgba(255,255,255,0.4)':st.color)+';background:rgba(255,255,255,0.05);border-radius:20px;padding:3px 9px">'+(inte?'interne':st.label)+'</span>';
-    h+='<span style="font-size:11px;color:rgba(255,255,255,0.3);background:rgba(255,255,255,0.04);border-radius:20px;padding:3px 9px">'+t.membres+' utilisateur'+(t.membres>1?'s':'')+'</span>';
-    if(!inte && duT>0) h+='<span style="font-size:11px;font-weight:600;color:#F97316;background:rgba(249,115,22,0.1);border-radius:20px;padding:3px 9px">'+_agtEur(duT)+' \u00e0 encaisser</span>';
-    if(!inte && encT>0) h+='<span style="font-size:11px;font-weight:600;color:#86EFAC;background:rgba(134,239,172,0.08);border-radius:20px;padding:3px 9px">'+_agtEur(encT)+' encaiss\u00e9s</span>';
+    h+='<span style="font-size:var(--pt-micro,11px);font-weight:600;color:'+(inte?'rgba(255,255,255,0.4)':st.color)+';background:rgba(255,255,255,0.05);border-radius:20px;padding:3px 9px">'+(inte?'interne':st.label)+'</span>';
+    h+='<span style="font-size:var(--pt-micro,11px);color:rgba(255,255,255,0.3);background:rgba(255,255,255,0.04);border-radius:20px;padding:3px 9px">'+t.membres+' utilisateur'+(t.membres>1?'s':'')+'</span>';
+    if(!inte && duT>0) h+='<span style="font-size:var(--pt-micro,11px);font-weight:600;color:#F97316;background:rgba(249,115,22,0.1);border-radius:20px;padding:3px 9px">'+_agtEur(duT)+' \u00e0 encaisser</span>';
+    if(!inte && encT>0) h+='<span style="font-size:var(--pt-micro,11px);font-weight:600;color:#86EFAC;background:rgba(134,239,172,0.08);border-radius:20px;padding:3px 9px">'+_agtEur(encT)+' encaiss\u00e9s</span>';
     h+='<span style="flex:1"></span>';
-    if(!inte) h+='<button onclick="agtBizAbo('+i+')" style="background:none;border:none;color:rgba(196,181,253,0.5);font-size:10.5px;cursor:pointer;font-family:Outfit,sans-serif;margin-right:10px" title="Facturer cet abonnement a un tarif different du tarif de la formule">'+(rem?'modifier le tarif remis\u00e9':'appliquer un tarif remis\u00e9')+'</button>';
-    h+='<button onclick="agtBizInterne('+i+')" style="background:none;border:none;color:rgba(255,255,255,0.28);font-size:10.5px;cursor:pointer;font-family:Outfit,sans-serif" title="Un domaine interne sort du r\u00e9current et des totaux">'+(inte?'compter ce domaine':'marquer interne')+'</button>';
+    if(!inte) h+='<button onclick="agtBizAbo('+i+')" style="background:none;border:none;color:rgba(196,181,253,0.5);font-size:var(--pt-lbl,10.5px);cursor:pointer;font-family:Outfit,sans-serif;margin-right:10px" title="Facturer cet abonnement a un tarif different du tarif de la formule">'+(rem?'modifier le tarif remis\u00e9':'appliquer un tarif remis\u00e9')+'</button>';
+    h+='<button onclick="agtBizInterne('+i+')" style="background:none;border:none;color:rgba(255,255,255,0.28);font-size:var(--pt-lbl,10.5px);cursor:pointer;font-family:Outfit,sans-serif" title="Un domaine interne sort du r\u00e9current et des totaux">'+(inte?'compter ce domaine':'marquer interne')+'</button>';
     h+='</div>';
 
     if(fs.length>0){
@@ -5335,11 +5335,11 @@ function _agtBuildBusiness(){
         var paye=(f.statut==='payee'), ret=_agtFRetard(f), arm=(_agtFactArm===(i+':'+k));
         var o='<div style="display:flex;align-items:center;gap:9px;padding:7px 0;flex-wrap:wrap'
           +(retrait?';margin-left:20px;border-left:2px solid rgba(196,181,253,0.25);padding-left:10px':'')+'">';
-        o+='<span title="'+ty.lbl+'" style="width:17px;height:17px;border-radius:4px;flex-shrink:0;background:'+ty.col+';color:#0B0F14;font-size:9.5px;font-weight:700;display:flex;align-items:center;justify-content:center">'+ty.ini+'</span>';
+        o+='<span title="'+ty.lbl+'" style="width:17px;height:17px;border-radius:4px;flex-shrink:0;background:'+ty.col+';color:#0B0F14;font-size:var(--pt-nano,9.5px);font-weight:700;display:flex;align-items:center;justify-content:center">'+ty.ini+'</span>';
         o+='<div style="flex:1;min-width:150px">';
         if(!retrait) o+='<div style="font-family:monospace;font-size:11.5px;color:'+(paye?'rgba(255,255,255,0.3)':'#E8C860')+'">'+_escHtml(f.ref||'')
           +'<span style="font-family:Outfit,sans-serif;color:rgba(255,255,255,0.28);margin-left:7px">'+_agtDateFr(f.date)+'</span></div>';
-        o+='<div style="font-size:11px;color:rgba(255,255,255,0.35)'+(retrait?'':';margin-top:1px')+'">'+_escHtml(f.libelle||ty.lbl)
+        o+='<div style="font-size:var(--pt-micro,11px);color:rgba(255,255,255,0.35)'+(retrait?'':';margin-top:1px')+'">'+_escHtml(f.libelle||ty.lbl)
           +(geste?'':' \u00b7 \u00e9ch\u00e9ance '+_agtDateFr(_agtFEch(f))+(ret>0?' <b style="color:#FCA5A5">retard '+ret+' j</b>':''))+'</div>';
         o+='</div>';
         o+='<span style="font-size:13px;font-weight:600;color:'+(geste?'#C4B5FD':(paye?'#86EFAC':'#E8E8E0'))+'">'+_agtEur(f.montant)+'</span>';
@@ -5350,7 +5350,7 @@ function _agtBuildBusiness(){
             +';border-radius:6px;padding:2px 8px;color:'+(paye?'#86EFAC':(ret>0?'#FCA5A5':'rgba(255,255,255,0.5)'))
             +';font-size:10px;cursor:pointer;font-family:Outfit,sans-serif">'+(paye?'pay\u00e9e':(ret>0?'en retard':'\u00e0 encaisser'))+'</button>';
         if(!geste) o+='<button onclick="agtBizRecap('+i+','+k+')" title="R\u00e9capitulatif imprimable" style="background:rgba(255,255,255,0.06);border:1px solid rgba(255,255,255,0.12);border-radius:6px;padding:2px 8px;color:rgba(255,255,255,0.5);font-size:10px;cursor:pointer;font-family:Outfit,sans-serif">PDF</button>';
-        o+='<button onclick="agtFactDel('+i+','+k+')" style="background:'+(arm?'rgba(239,68,68,0.18)':'none')+';border:none;border-radius:6px;padding:2px 7px;color:'+(arm?'#FCA5A5':'rgba(255,255,255,0.2)')+';font-size:11px;cursor:pointer;font-family:Outfit,sans-serif">'+(arm?'confirmer ?':'\u2715')+'</button>';
+        o+='<button onclick="agtFactDel('+i+','+k+')" style="background:'+(arm?'rgba(239,68,68,0.18)':'none')+';border:none;border-radius:6px;padding:2px 7px;color:'+(arm?'#FCA5A5':'rgba(255,255,255,0.2)')+';font-size:var(--pt-micro,11px);cursor:pointer;font-family:Outfit,sans-serif">'+(arm?'confirmer ?':'\u2715')+'</button>';
         return o+'</div>';
       };
 
@@ -5369,7 +5369,7 @@ function _agtBuildBusiness(){
       });
       if(orph.length){
         h+='<div style="border-top:1px solid rgba(249,115,22,0.25);margin-top:6px;padding-top:8px">';
-        h+='<div style="font-size:10.5px;color:#F97316;font-weight:600;margin-bottom:4px">Remise'+(orph.length>1?'s':'')
+        h+='<div style="font-size:var(--pt-lbl,10.5px);color:#F97316;font-weight:600;margin-bottom:4px">Remise'+(orph.length>1?'s':'')
           +' rattach\u00e9e'+(orph.length>1?'s':'')+' \u00e0 aucune facture \u2014 non d\u00e9duite'+(orph.length>1?'s':'')+' du solde</div>';
         orph.forEach(function(k){
           h+=_ligne(k,false);
@@ -5391,15 +5391,15 @@ function _agtBuildBusiness(){
     });
     h+='</div>';
     h+='<div style="display:grid;grid-template-columns:repeat(auto-fit,minmax(140px,1fr));gap:7px;margin-bottom:8px">';
-    h+='<div id="agt-biz-rw'+i+'"><div style="font-size:10.5px;color:rgba(255,255,255,0.35);margin-bottom:3px">R\u00e9f\u00e9rence</div><input id="agt-biz-ref'+i+'" style="width:100%;background:rgba(255,255,255,0.07);border:1px solid rgba(255,255,255,0.12);border-radius:8px;padding:8px 9px;color:#F0E8DC;font-size:16px;font-family:monospace;box-sizing:border-box"></div>';
-    h+='<div><div style="font-size:10.5px;color:rgba(255,255,255,0.35);margin-bottom:3px">Date</div><input id="agt-biz-dat'+i+'" type="date" style="width:100%;background:rgba(255,255,255,0.07);border:1px solid rgba(255,255,255,0.12);border-radius:8px;padding:8px 9px;color:#F0E8DC;font-size:16px;font-family:Outfit,sans-serif;box-sizing:border-box"></div>';
-    h+='<div><div style="font-size:10.5px;color:rgba(255,255,255,0.35);margin-bottom:3px">\u00c9ch\u00e9ance</div><input id="agt-biz-ech'+i+'" type="date" style="width:100%;background:rgba(255,255,255,0.07);border:1px solid rgba(255,255,255,0.12);border-radius:8px;padding:8px 9px;color:#F0E8DC;font-size:16px;font-family:Outfit,sans-serif;box-sizing:border-box"></div>';
-    h+='<div><div style="font-size:10.5px;color:rgba(255,255,255,0.35);margin-bottom:3px">Montant HT</div><input id="agt-biz-mnt'+i+'" type="number" step="0.01" style="width:100%;background:rgba(255,255,255,0.07);border:1px solid rgba(255,255,255,0.12);border-radius:8px;padding:8px 9px;color:#F0E8DC;font-size:16px;font-family:Outfit,sans-serif;box-sizing:border-box"></div>';
+    h+='<div id="agt-biz-rw'+i+'"><div style="font-size:var(--pt-lbl,10.5px);color:rgba(255,255,255,0.35);margin-bottom:3px">R\u00e9f\u00e9rence</div><input id="agt-biz-ref'+i+'" style="width:100%;background:rgba(255,255,255,0.07);border:1px solid rgba(255,255,255,0.12);border-radius:8px;padding:8px 9px;color:#F0E8DC;font-size:16px;font-family:monospace;box-sizing:border-box"></div>';
+    h+='<div><div style="font-size:var(--pt-lbl,10.5px);color:rgba(255,255,255,0.35);margin-bottom:3px">Date</div><input id="agt-biz-dat'+i+'" type="date" style="width:100%;background:rgba(255,255,255,0.07);border:1px solid rgba(255,255,255,0.12);border-radius:8px;padding:8px 9px;color:#F0E8DC;font-size:16px;font-family:Outfit,sans-serif;box-sizing:border-box"></div>';
+    h+='<div><div style="font-size:var(--pt-lbl,10.5px);color:rgba(255,255,255,0.35);margin-bottom:3px">\u00c9ch\u00e9ance</div><input id="agt-biz-ech'+i+'" type="date" style="width:100%;background:rgba(255,255,255,0.07);border:1px solid rgba(255,255,255,0.12);border-radius:8px;padding:8px 9px;color:#F0E8DC;font-size:16px;font-family:Outfit,sans-serif;box-sizing:border-box"></div>';
+    h+='<div><div style="font-size:var(--pt-lbl,10.5px);color:rgba(255,255,255,0.35);margin-bottom:3px">Montant HT</div><input id="agt-biz-mnt'+i+'" type="number" step="0.01" style="width:100%;background:rgba(255,255,255,0.07);border:1px solid rgba(255,255,255,0.12);border-radius:8px;padding:8px 9px;color:#F0E8DC;font-size:16px;font-family:Outfit,sans-serif;box-sizing:border-box"></div>';
     h+='</div>';
-    h+='<div id="agt-biz-cw'+i+'" style="display:none;margin-bottom:8px"><div style="font-size:10.5px;color:rgba(255,255,255,0.35);margin-bottom:3px">S\u2019applique \u00e0</div>'+_agtBizCibleSel(i,t.slug,'')+'</div>';
-    h+='<div style="margin-bottom:9px"><div style="font-size:10.5px;color:rgba(255,255,255,0.35);margin-bottom:3px">Libell\u00e9</div><input id="agt-biz-lib'+i+'" style="width:100%;background:rgba(255,255,255,0.07);border:1px solid rgba(255,255,255,0.12);border-radius:8px;padding:8px 9px;color:#F0E8DC;font-size:16px;font-family:Outfit,sans-serif;box-sizing:border-box"></div>';
+    h+='<div id="agt-biz-cw'+i+'" style="display:none;margin-bottom:8px"><div style="font-size:var(--pt-lbl,10.5px);color:rgba(255,255,255,0.35);margin-bottom:3px">S\u2019applique \u00e0</div>'+_agtBizCibleSel(i,t.slug,'')+'</div>';
+    h+='<div style="margin-bottom:9px"><div style="font-size:var(--pt-lbl,10.5px);color:rgba(255,255,255,0.35);margin-bottom:3px">Libell\u00e9</div><input id="agt-biz-lib'+i+'" style="width:100%;background:rgba(255,255,255,0.07);border:1px solid rgba(255,255,255,0.12);border-radius:8px;padding:8px 9px;color:#F0E8DC;font-size:16px;font-family:Outfit,sans-serif;box-sizing:border-box"></div>';
     h+='<button onclick="agtFactAdd('+i+')" style="background:#C9A84C;border:none;border-radius:8px;padding:9px 16px;color:#0C1A0A;font-size:12px;font-weight:700;cursor:pointer;font-family:Outfit,sans-serif">Enregistrer la ligne</button>';
-    h+='<div id="agt-biz-hint'+i+'" style="font-size:10.5px;color:rgba(255,255,255,0.3);line-height:1.6;margin-top:8px"></div>';
+    h+='<div id="agt-biz-hint'+i+'" style="font-size:var(--pt-lbl,10.5px);color:rgba(255,255,255,0.3);line-height:1.6;margin-top:8px"></div>';
     h+='</div>';
 
     h+='<div style="display:flex;gap:16px;align-items:center;flex-wrap:wrap">';
@@ -5579,17 +5579,17 @@ function _agtDocOuvrir(titre, corps){
     +'@page{size:A4;margin:16mm}'
     +'body{font-family:Georgia,\'Times New Roman\',serif;color:#1A1410;background:#fff;font-size:12px;line-height:1.6;margin:0}'
     +'.wm{background:#F3E4C4;border:1px solid #D9BE7E;color:#6B4E10;border-radius:4px;padding:7px 11px;'
-      +'font-size:10.5px;font-family:Arial,sans-serif;margin-bottom:20px;letter-spacing:.02em}'
-    +'h1{font-size:20px;margin:0 0 4px;letter-spacing:.02em}'
-    +'.em{font-size:10.5px;color:#5A4A34;line-height:1.55}'
+      +'font-size:var(--pt-lbl,10.5px);font-family:Arial,sans-serif;margin-bottom:20px;letter-spacing:.02em}'
+    +'h1{font-size:var(--pt-md,20px);margin:0 0 4px;letter-spacing:.02em}'
+    +'.em{font-size:var(--pt-lbl,10.5px);color:#5A4A34;line-height:1.55}'
     +'.ti{margin:18px 0 4px;font-size:15px;font-weight:700}'
-    +'table{width:100%;border-collapse:collapse;margin:16px 0;font-size:11px}'
-    +'th{text-align:left;border-bottom:1.5px solid #1A1410;padding:6px 4px;font-size:9.5px;'
+    +'table{width:100%;border-collapse:collapse;margin:16px 0;font-size:var(--pt-micro,11px)}'
+    +'th{text-align:left;border-bottom:1.5px solid #1A1410;padding:6px 4px;font-size:var(--pt-nano,9.5px);'
       +'text-transform:uppercase;letter-spacing:.05em;font-family:Arial,sans-serif}'
     +'td{padding:6px 4px;border-bottom:1px solid #E2D8C4}'
     +'td.r,th.r{text-align:right}'
     +'.tot{display:flex;justify-content:flex-end;gap:26px;font-size:13px;font-weight:700;padding:7px 4px}'
-    +'.foot{margin-top:24px;padding-top:12px;border-top:1px solid #D8CDB8;font-size:9.5px;color:#6B5E48;line-height:1.7}'
+    +'.foot{margin-top:24px;padding-top:12px;border-top:1px solid #D8CDB8;font-size:var(--pt-nano,9.5px);color:#6B5E48;line-height:1.7}'
     +'</style></head><body>'
     +corps
     +'<div class="foot">Document de travail \u00e9tabli le '+_agtDateFr(d)+'. '
@@ -5728,10 +5728,10 @@ function _agtLeadsSorted(){
 }
 
 function _agtBuildLeads(){
-  var h='<div style="margin:0 0 14px;font-size:11px;color:rgba(255,255,255,0.35);letter-spacing:.08em;text-transform:uppercase;font-weight:500">Demandes re\u00e7ues par le site</div>';
+  var h='<div style="margin:0 0 14px;font-size:var(--pt-micro,11px);color:rgba(255,255,255,0.35);letter-spacing:.08em;text-transform:uppercase;font-weight:500">Demandes re\u00e7ues par le site</div>';
 
   if(_agtLeads===null){
-    return h+'<div style="background:rgba(249,115,22,0.08);border:1px solid rgba(249,115,22,0.22);border-radius:12px;padding:16px;font-size:12.5px;color:#FDBA74;line-height:1.6">'
+    return h+'<div style="background:rgba(249,115,22,0.08);border:1px solid rgba(249,115,22,0.22);border-radius:12px;padding:16px;font-size:var(--pt-txt,12.5px);color:#FDBA74;line-height:1.6">'
       +'Lecture de la collection <span style="font-family:monospace">leads</span> refus\u00e9e ou indisponible. '
       +'Elle est r\u00e9serv\u00e9e au compte GUERETTECH par les r\u00e8gles Firestore \u2014 v\u00e9rifier la connexion, puis recharger.</div>';
   }
@@ -5770,14 +5770,14 @@ function _agtBuildLeads(){
     h+='<div style="background:rgba(255,255,255,0.04);border:1px solid '+(st==='nouveau'?'rgba(232,200,96,0.28)':'rgba(255,255,255,0.1)')+';border-radius:12px;padding:14px;margin-bottom:10px">';
     h+='<div style="display:flex;align-items:flex-start;gap:10px;flex-wrap:wrap">';
     h+='<div style="flex:1;min-width:150px">';
-    h+='<div style="font-size:14px;font-weight:600;color:#E8E8E0">'+_escHtml(l.domaine||'(sans nom)')+'</div>';
+    h+='<div style="font-size:var(--pt-base,14px);font-weight:600;color:#E8E8E0">'+_escHtml(l.domaine||'(sans nom)')+'</div>';
     h+='<div style="font-size:11.5px;color:rgba(255,255,255,0.35);margin-top:3px">'
       +[_escHtml([l.ville,l.cp].filter(Boolean).join(' ')), _escHtml(l.region||''), l.surface?_escHtml(l.surface)+' ha':'' ]
         .filter(Boolean).join(' \u00b7 ')+'</div>';
     h+='</div>';
     h+='<div style="text-align:right">';
-    h+='<span style="font-size:11px;font-weight:600;color:'+sd.c+';background:rgba(255,255,255,0.05);border-radius:20px;padding:3px 9px">'+sd.l+'</span>';
-    h+='<div style="font-size:11px;color:rgba(255,255,255,0.25);margin-top:4px">'+_agtDateFr(l.createdAt)+'</div>';
+    h+='<span style="font-size:var(--pt-micro,11px);font-weight:600;color:'+sd.c+';background:rgba(255,255,255,0.05);border-radius:20px;padding:3px 9px">'+sd.l+'</span>';
+    h+='<div style="font-size:var(--pt-micro,11px);color:rgba(255,255,255,0.25);margin-top:4px">'+_agtDateFr(l.createdAt)+'</div>';
     h+='</div></div>';
 
     h+='<div style="font-size:11.5px;color:rgba(255,255,255,0.45);margin-top:8px;word-break:break-word">'
@@ -5789,8 +5789,8 @@ function _agtBuildLeads(){
     if(l.mer){
       var _pj=!!(_agtLeadSt[l._id]&&_agtLeadSt[l._id].pj);
       h+='<div style="margin-top:7px;display:flex;gap:6px;flex-wrap:wrap">';
-      h+='<span style="font-size:10.5px;font-weight:600;color:#C4B5FD;background:rgba(139,92,246,0.12);border:1px solid rgba(139,92,246,0.3);border-radius:20px;padding:2px 9px">R\u00e9ponses de mise en route</span>';
-      h+='<span style="font-size:10.5px;font-weight:600;color:'+(_pj?'#86EFAC':'#E8C860')+';background:rgba(255,255,255,0.05);border:1px solid '+(_pj?'rgba(134,239,172,0.35)':'rgba(232,200,96,0.35)')+';border-radius:20px;padding:2px 9px">'+(_pj?'Pi\u00e8ces re\u00e7ues':'Pi\u00e8ces attendues')+'</span>';
+      h+='<span style="font-size:var(--pt-lbl,10.5px);font-weight:600;color:#C4B5FD;background:rgba(139,92,246,0.12);border:1px solid rgba(139,92,246,0.3);border-radius:20px;padding:2px 9px">R\u00e9ponses de mise en route</span>';
+      h+='<span style="font-size:var(--pt-lbl,10.5px);font-weight:600;color:'+(_pj?'#86EFAC':'#E8C860')+';background:rgba(255,255,255,0.05);border:1px solid '+(_pj?'rgba(134,239,172,0.35)':'rgba(232,200,96,0.35)')+';border-radius:20px;padding:2px 9px">'+(_pj?'Pi\u00e8ces re\u00e7ues':'Pi\u00e8ces attendues')+'</span>';
       h+='</div>';
     }
 
@@ -5817,7 +5817,7 @@ function _agtBuildLeads(){
       h+='<div style="margin-top:10px;display:flex;gap:6px;flex-wrap:wrap">';
       Object.keys(_AGT_LEADST).forEach(function(k){
         var on=(st===k);
-        h+='<button onclick="agtLeadSet(\'' + id + '\',\'' + k + '\')" style="background:'+(on?'rgba(255,255,255,0.12)':'rgba(255,255,255,0.04)')+';border:1px solid '+(on?_AGT_LEADST[k].c:'rgba(255,255,255,0.1)')+';border-radius:20px;padding:4px 10px;color:'+(on?_AGT_LEADST[k].c:'rgba(255,255,255,0.35)')+';font-size:11px;cursor:pointer;font-family:Outfit,sans-serif">'+_AGT_LEADST[k].l+'</button>';
+        h+='<button onclick="agtLeadSet(\'' + id + '\',\'' + k + '\')" style="background:'+(on?'rgba(255,255,255,0.12)':'rgba(255,255,255,0.04)')+';border:1px solid '+(on?_AGT_LEADST[k].c:'rgba(255,255,255,0.1)')+';border-radius:20px;padding:4px 10px;color:'+(on?_AGT_LEADST[k].c:'rgba(255,255,255,0.35)')+';font-size:var(--pt-micro,11px);cursor:pointer;font-family:Outfit,sans-serif">'+_AGT_LEADST[k].l+'</button>';
       });
       h+='</div>';
       h+='<div style="margin-top:9px;display:flex;gap:6px;flex-wrap:wrap">';

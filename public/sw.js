@@ -1,4 +1,11 @@
-// MA VIGNE — Service Worker v7.80
+// MA VIGNE — Service Worker v7.81
+// v7.81 (14/09/2026) — TYPO-1 : LE BAREME --pt-* ETAIT APPLIQUE DANS DEUX MODULES SUR ONZE. 1 246 tailles converties, ZERO pixel de change.
+//   Etat trouve : 82 % des font-size ecrits en dur (3 212 sites) ; pilotage.js a 0 en dur et cave.js quasi, les neuf autres a 0 jeton (admin-gt 473/0, index.html 408/0, reglages 327/0, app 299/0, planning 278/0).
+//   Converties : UNIQUEMENT les valeurs EXACTEMENT egales a un cran (11 / 12.5 / 14 / 10.5 / 9.5 / 17 / 20 / 23 / 27 / 31 / 40) -- aucun arrondi, donc aucun deplacement possible a l'ecran.
+//   Les 1 966 restants (12, 13, 10, 9, 11.5, 15, 16...) demandent un oeil et attendent leur lot.
+//   ⚠⚠ LE REPLI EST OBLIGATOIRE : `var(--pt-micro,11px)`, jamais nu. Dix modules construisent des fenetres d'impression, ou :root n'existe pas -- un jeton nu y perdrait la taille (meme famille que _mvIcon vs _mvIconInline).
+//   ★ L'ENJEU N'EST PAS LA PROPRETE : c'est le reglage << Taille du texte >>. Il se pose en une ligne dans :root, mais tant que 82 % des tailles etaient en dur il n'aurait deplace que 18 % de l'ecran -- pire que pas de reglage.
+//   Sous 12 px : 1 223 sites sur 1 872 obeissent desormais a :root, contre 386 avant. Harnais neuf mv-harnais-typo.mjs (cliquet par fichier + plafond de poids de module), contre-epreuve 4/4.
 // v7.80 (13/09/2026) — VIS-1 (REINTEGRE — le lot avait ete colle SUR SAUV-1 et l'avait ecrase, cf. §126) : LA VISITE GUIDEE SE JOUE EN VINIFICATION, ET LE CADRAGE NE SE CACHE PLUS SOUS LES BARRES (20 moments, trois actes, la journee commence au cuvier : tournee, courbe de fermentation, apports, bon de livraison au negoce, cuve decuvee dont la FA continue — le parcours racontait le printemps pendant que les donnees portaient la vendange) · CADRAGE : la narration s'ecrit AVANT le defilement (sa hauteur EST la bande utile), la cible se centre entre l'en-tete fige et la barre au lieu du milieu de l'ecran, et le halo se rogne au bord de la bande plutot que de passer dessous (_mvtBande / _mvtScrollDans / _mvtScroller, _mvtReposition borne) · la feuille de style de la visite prenait l'identifiant `mvt-css`, DEJA UTILISE par la tournee du cuvier (cave.js) : celle-ci se rendait SANS SON HABILLAGE des l'ecran d'accueil de la demo — elle prend `mvt-visite-css` · donnees de demo recablees : trois parcelles inexistantes dans les apports, volumes a 9 hL/ha, statut de cuve `macera` inconnu du modele, DAR de 28 jours pose la veille d'une recolte vieille de cinq jours, saison active finie depuis deux mois
 // v7.79 (13/09/2026) — SAUV-1 : LA << SAUVEGARDE COMPLETE >> N'EN GARDAIT PAS LE TIERS, ET LA RESTAURATION DETRUISAIT CE QU'ELLE N'AVAIT PAS SAUVEGARDE.
 //   L'export ecrivait 8 documents sur 26 (dehors : tout le planning, toute la cave, la reserve, les machines, les entretiens, les contours KML, la config, la paie) sous une
@@ -3921,7 +3928,7 @@
 // v2.22 — Fix profils vides : guard vide dans loadData() pour MEMBRES/SAISONS/TACHES
 // v2.17 — Onboarding intégré + tenantId · v2.06 — Firebase Auth · v2.00–v2.05 — divers
 const DEBUG = self.location.hostname === 'localhost' || self.location.hostname === '127.0.0.1';
-const CACHE_NAME   = 'mavigne-v7.80';
+const CACHE_NAME   = 'mavigne-v7.81';
 const TENANT_CACHE = 'mavigne-tenant';   // Cache persistant — préservé à chaque mise à jour SW
 const SYNC_TAG     = 'mavigne-sync';
 
@@ -3937,7 +3944,7 @@ const CDN_URLS = [
 ];
 
 self.addEventListener('install', event => {
-  if(DEBUG) console.log('[SW] Ma Vigne v7.80 installé');
+  if(DEBUG) console.log('[SW] Ma Vigne v7.81 installé');
   event.waitUntil(
     caches.open(CACHE_NAME).then(async cache => {
       // ── Cœur applicatif : STRICT (mise à jour ATOMIQUE) ──
@@ -3953,7 +3960,7 @@ self.addEventListener('install', event => {
 });
 
 self.addEventListener('activate', event => {
-  if(DEBUG) console.log('[SW] Ma Vigne v7.80 activé');
+  if(DEBUG) console.log('[SW] Ma Vigne v7.81 activé');
   event.waitUntil(
     caches.keys().then(keys =>
       Promise.all(

@@ -61,7 +61,7 @@ window._mvDocCss = function(orient){
   var o = (orient === 'paysage') ? 'A4 landscape' : 'A4 portrait';
   return '@page{size:' + o + ';margin:' + MV_DOC_MARGE + '}'
     + 'html,body{margin:0;padding:0;background:#fff;color:#1A1A14;'
-      + 'font-family:\'Outfit\',system-ui,-apple-system,sans-serif;font-size:11px;line-height:1.5;'
+      + 'font-family:\'Outfit\',system-ui,-apple-system,sans-serif;font-size:var(--pt-micro,11px);line-height:1.5;'
       + '-webkit-print-color-adjust:exact;print-color-adjust:exact}'
     + '.mvdoc-serif{font-family:\'Cormorant Garamond\',Georgia,serif}'
     // en-tete : bande sombre + filet d'or. Le filet est la signature du domaine.
@@ -69,8 +69,8 @@ window._mvDocCss = function(orient){
     + '.mvdoc-hd::after{content:"";position:absolute;left:0;right:0;bottom:0;height:3px;'
       + 'background:linear-gradient(90deg,#8A5A38 0%,' + MV_DOC_OR + ' 48%,#D8BC72 100%)}'
     + '.mvdoc-dom{font-family:\'Cormorant Garamond\',Georgia,serif;font-size:19px;font-weight:600;letter-spacing:.3px;line-height:1.15}'
-    + '.mvdoc-tit{font-size:11px;font-weight:700;text-transform:uppercase;letter-spacing:1.4px;color:#D8BC72;margin-top:5px}'
-    + '.mvdoc-meta{font-size:9.5px;color:#A79E8E;margin-top:6px;display:flex;gap:14px;flex-wrap:wrap}'
+    + '.mvdoc-tit{font-size:var(--pt-micro,11px);font-weight:700;text-transform:uppercase;letter-spacing:1.4px;color:#D8BC72;margin-top:5px}'
+    + '.mvdoc-meta{font-size:var(--pt-nano,9.5px);color:#A79E8E;margin-top:6px;display:flex;gap:14px;flex-wrap:wrap}'
     // corps et pied
     + '.mvdoc-body{padding:16px 18px}'
     + '.mvdoc-ft{border-top:1px solid #E4DCCB;margin:16px 18px 0;padding:9px 0 4px;font-size:8px;color:#8A8272;'
@@ -538,7 +538,7 @@ window._mvGraphVide = function(quoi, geste){
       '.mv-graph-vide{border:1px dashed var(--gris);border-radius:12px;'
       + 'background:var(--terre-pale);padding:20px 18px;text-align:center}'
       + '.mv-graph-vide .t{font-size:13.5px;font-weight:600;color:var(--terre);line-height:1.4}'
-      + '.mv-graph-vide .s{font-size:12.5px;color:var(--texte-med);margin-top:4px;line-height:1.55}';
+      + '.mv-graph-vide .s{font-size:var(--pt-txt,12.5px);color:var(--texte-med);margin-top:4px;line-height:1.55}';
     document.head.appendChild(st);
   }
   return '<div class="mv-graph-vide"><div class="t">'
@@ -2146,7 +2146,7 @@ function _wnRow(item, sep) {
   return '<div style="display:flex;gap:12px;align-items:flex-start;padding:10px 0;' + sep + '">'
     + '<div style="width:32px;height:32px;background:var(--gris-clair);border-radius:8px;display:flex;align-items:center;justify-content:center;flex-shrink:0;font-size:15px;">' + _wnIco(item.emoji) + '</div>'
     + '<div><div style="font-size:13px;font-weight:500;color:var(--texte);line-height:1.3;">' + item.titre + '</div>'
-    + '<div style="font-size:11px;color:var(--texte-doux);margin-top:3px;line-height:1.5;">' + item.desc + '</div></div>'
+    + '<div style="font-size:var(--pt-micro,11px);color:var(--texte-doux);margin-top:3px;line-height:1.5;">' + item.desc + '</div></div>'
     + '</div>';
 }
 
@@ -2170,7 +2170,7 @@ export function checkWhatsNew() {
     if (multi) {
       blocks.forEach(function(b) {
         html += '<div style="display:flex;align-items:center;gap:8px;margin:14px 0 2px;">'
-          + '<span style="font-size:11px;font-weight:600;color:#7A1020;background:rgba(122,16,32,0.08);border:1px solid rgba(122,16,32,0.2);border-radius:6px;padding:2px 8px;">Version ' + b.v + '</span>'
+          + '<span style="font-size:var(--pt-micro,11px);font-weight:600;color:#7A1020;background:rgba(122,16,32,0.08);border:1px solid rgba(122,16,32,0.2);border-radius:6px;padding:2px 8px;">Version ' + b.v + '</span>'
           + '<span style="flex:1;height:1px;background:rgba(0,0,0,0.06);"></span></div>';
         b.items.forEach(function(it, i) { html += _wnRow(it, i < b.items.length - 1 ? 'border-bottom:1px solid rgba(0,0,0,0.06);' : ''); });
       });

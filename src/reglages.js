@@ -104,8 +104,8 @@ function _planFillPDFMois(m){
         rows+='<div style="display:flex;align-items:center;gap:6px;padding:5px 0;border-bottom:1px solid var(--gris)">'
           +'<div style="font-size:12px;color:var(--texte-doux);flex:1">'+_escHtml(mbr.nom)+'</div>'
           +'<div style="font-size:12px;font-weight:700;color:var(--texte);min-width:36px;text-align:right">'+window._planFmt(w)+'</div>'
-          +'<div style="font-size:11px;color:var(--texte-doux);min-width:36px;text-align:right">/ '+window._planFmt(r)+'</div>'
-          +'<div style="font-size:11px;font-weight:700;color:'+etpColor+';min-width:30px;text-align:right">'+etp+'%</div>'
+          +'<div style="font-size:var(--pt-micro,11px);color:var(--texte-doux);min-width:36px;text-align:right">/ '+window._planFmt(r)+'</div>'
+          +'<div style="font-size:var(--pt-micro,11px);font-weight:700;color:'+etpColor+';min-width:30px;text-align:right">'+etp+'%</div>'
           +'</div>';
       });
       detEl.innerHTML=rows||'<div style="font-size:12px;color:var(--texte-doux);padding:6px 0">Aucune donn\u00e9e planning pour ce mois</div>';
@@ -242,7 +242,7 @@ function _reglStashOuvrir(){
   p.className='set-card';
   p.style.cssText='margin-top:10px;padding:12px;border:1px solid var(--terre-pale);border-radius:14px';
   var h=document.createElement('div');
-  h.style.cssText='font-size:11px;color:var(--texte-doux);line-height:1.5;margin-bottom:10px';
+  h.style.cssText='font-size:var(--pt-micro,11px);color:var(--texte-doux);line-height:1.5;margin-bottom:10px';
   // ★★ L'AVERTISSEMENT N'EST PAS DECORATIF. Ce qui est range est le document ENTIER
   //    au moment du refus : le renvoyer ecrase tout ce qui a ete fait depuis.
   h.textContent='Ces saisies ont \u00e9t\u00e9 refus\u00e9es par le serveur et gard\u00e9es sur cet appareil. '
@@ -258,7 +258,7 @@ function _reglStashOuvrir(){
     t1.style.cssText='font-size:13px;font-weight:600';
     t1.textContent=e.libelle;
     var t2=document.createElement('div');
-    t2.style.cssText='font-size:10.5px;color:var(--texte-doux)';
+    t2.style.cssText='font-size:var(--pt-lbl,10.5px);color:var(--texte-doux)';
     t2.textContent=_reglStashDate(e.at);
     t.appendChild(t1); t.appendChild(t2);
     var bR=document.createElement('button');
@@ -562,7 +562,7 @@ function renderReglages(){
           for(var pp=1;pp<=n;pp++){
             var curHha=phha[pp-1]!=null?phha[pp-1]:tDef.hha;
             subRows+='<div style="display:inline-flex;align-items:center;gap:4px;margin-right:6px">'
-              +'<span style="font-size:11px;color:var(--texte-doux)">P'+pp+'</span>'
+              +'<span style="font-size:var(--pt-micro,11px);color:var(--texte-doux)">P'+pp+'</span>'
               +'<input type="number" min="0" max="200" value="'+curHha+'" data-tache="'+nom+'" data-pass="'+pp+'" class="pp-hha-input"'
               +' style="width:44px;padding:3px 5px;border-radius:6px;border:1px solid rgba(255,255,255,0.15);background:rgba(255,255,255,0.05);color:var(--texte);font-size:12px;text-align:center">'
               +'<span style="font-size:10px;color:var(--texte-doux)">h</span>'
@@ -573,7 +573,7 @@ function renderReglages(){
           var nivsRef=tDef.niveaux||[{num:1,hha:50},{num:2,hha:25},{num:3,hha:25}];
           for(var nn=1;nn<=n;nn++){
             var nivRef=nivsRef.find(function(x){return x.num===nn;})||{hha:50};
-            subRows+='<span style="display:inline-flex;align-items:center;gap:4px;margin-right:8px;font-size:11px;color:var(--texte-doux)">N'+nn+' · '+nivRef.hha+'h/ha</span>';
+            subRows+='<span style="display:inline-flex;align-items:center;gap:4px;margin-right:8px;font-size:var(--pt-micro,11px);color:var(--texte-doux)">N'+nn+' · '+nivRef.hha+'h/ha</span>';
           }
         }
         passHtml+='<div style="padding:10px 0;border-bottom:1px solid var(--gris-clair)">'
@@ -685,19 +685,19 @@ function renderActTracList(){
       +'<div class="mv-ft">'
         +'<div class="mv-l">Bar\u00e8me \u2014 heures machine par hectare</div>'
         +'<div onclick="event.stopPropagation()" style="display:flex;align-items:center;gap:6px;flex:none">'
-          +'<input type="number" inputmode="decimal" step="0.1" min="0" value="'+hhaV+'" placeholder="\u2014" onchange="setActHha(\''+nomA+'\',this.value)" style="width:62px;text-align:right;border:1px solid var(--gris);border-radius:9px;padding:7px 8px;font-family:inherit;font-size:14px;background:var(--bg-card);color:var(--texte)">'
+          +'<input type="number" inputmode="decimal" step="0.1" min="0" value="'+hhaV+'" placeholder="\u2014" onchange="setActHha(\''+nomA+'\',this.value)" style="width:62px;text-align:right;border:1px solid var(--gris);border-radius:9px;padding:7px 8px;font-family:inherit;font-size:var(--pt-base,14px);background:var(--bg-card);color:var(--texte)">'
           +'<span class="mv-l">h/ha</span>'
           +'<button class="mv-gh" onclick="openEditActTrac(\''+nomA+'\')" title="Modifier" aria-label="Modifier">'+_mvIcon('crayon',18)+'</button>'
         +'</div>'
       +'</div></div>';
   }).join('');
-  el.innerHTML=_chrToggleHtml()+'<div style="font-size:11px;color:var(--texte-doux);margin-bottom:8px;line-height:1.55">Le <b>barème h/ha</b> (heures machine par hectare) estime le temps tracteur par passage dans le <b>Rapport de saison</b> et le <b>Pilotage</b>. Laissez vide pour ne pas comptabiliser l\'activité (elle reste dans « Autres »).</div>'+_rows;
+  el.innerHTML=_chrToggleHtml()+'<div style="font-size:var(--pt-micro,11px);color:var(--texte-doux);margin-bottom:8px;line-height:1.55">Le <b>barème h/ha</b> (heures machine par hectare) estime le temps tracteur par passage dans le <b>Rapport de saison</b> et le <b>Pilotage</b>. Laissez vide pour ne pas comptabiliser l\'activité (elle reste dans « Autres »).</div>'+_rows;
 }
 function _chrToggleHtml(){
   var o=!!(window.CONFIG&&window.CONFIG.chrono_mode==='on');
   return '<div style="display:flex;align-items:center;gap:12px;background:var(--gris-clair);border-radius:11px;padding:11px 13px;margin-bottom:10px">'
     +'<div style="flex:1;min-width:0"><div style="font-size:13px;font-weight:600;color:var(--texte)">'+_mvIcon('chrono',16)+' Chronometrer le temps reel</div>'
-    +'<div style="font-size:11px;color:var(--texte-doux);margin-top:2px;line-height:1.4">Optionnel - dans une session, mesure le travail parcelle par parcelle. Sinon, le bareme ci-dessous prend le relais.</div></div>'
+    +'<div style="font-size:var(--pt-micro,11px);color:var(--texte-doux);margin-top:2px;line-height:1.4">Optionnel - dans une session, mesure le travail parcelle par parcelle. Sinon, le bareme ci-dessous prend le relais.</div></div>'
     +'<button onclick="_chronoSetMode('+(o?'false':'true')+')" style="flex-shrink:0;border:none;cursor:pointer;font-family:Outfit,sans-serif;font-weight:700;font-size:12px;padding:8px 15px;border-radius:20px;min-height:40px;'+(o?'background:var(--vert);color:#fff':'background:var(--gris);color:var(--texte-doux)')+'">'+(o?'ON':'OFF')+'</button>'
   +'</div>';
 }
@@ -1158,7 +1158,7 @@ function saveSaison(){
      régional et les écartements de plantation, et nulle part ailleurs.
    ══════════════════════════════════════════════════════════════════════════ */
 var _tn=null;
-var _TN_SEC='font-size:10.5px;font-weight:800;letter-spacing:.05em;text-transform:uppercase;color:var(--terre);margin:16px 2px 7px';
+var _TN_SEC='font-size:var(--pt-lbl,10.5px);font-weight:800;letter-spacing:.05em;text-transform:uppercase;color:var(--terre);margin:16px 2px 7px';
 var _TN_HINT='font-size:11.5px;color:var(--texte-doux);margin:9px 2px 6px;line-height:1.45';
 var _TN_OPT='display:flex;align-items:center;gap:9px;padding:10px 12px;border-radius:11px;margin-bottom:6px;cursor:pointer;background:var(--bg-card);border:1px solid var(--gris)';
 
@@ -1216,16 +1216,16 @@ function _tnRender(){
         return '<div style="'+_TN_OPT+'" onclick="window._tnPick(\''+_escAttr(c.nom)+'\')">'
           +'<span style="flex:none">'+_mvIconTache(c.nom,18)+'</span>'
           +'<span style="flex:1;min-width:0"><span style="display:block;font-size:13.5px;font-weight:600;color:var(--texte)">'+_escHtml(c.label||c.nom)+'</span>'
-          +'<span style="display:block;font-size:11px;color:var(--texte-doux);margin-top:1px">'+info+(dj?' \u00b7 déjà au domaine':'')+'</span></span>'
-          +'<span style="font-size:17px;color:var(--vert-med);flex:none">+</span></div>';
+          +'<span style="display:block;font-size:var(--pt-micro,11px);color:var(--texte-doux);margin-top:1px">'+info+(dj?' \u00b7 déjà au domaine':'')+'</span></span>'
+          +'<span style="font-size:var(--pt-sm,17px);color:var(--vert-med);flex:none">+</span></div>';
       }).join('');
     }
     var exact=hits.some(function(c){return String(c.label||c.nom).toLowerCase()===ql||String(c.nom).toLowerCase()===ql;});
     if(q&&!exact){
       h+='<div style="'+_TN_OPT+';background:var(--terre-pale);border:1.5px dashed rgba(138,90,56,0.45)" onclick="window._tnLibre()">'
         +'<span style="flex:1;min-width:0"><span style="display:block;font-size:13.5px;font-weight:600;color:var(--terre)">Créer «\u00a0'+_escHtml(q)+'\u00a0»</span>'
-        +'<span style="display:block;font-size:11px;color:var(--texte-doux);margin-top:1px">Travail du domaine, hors convention \u2014 au temps réel</span></span>'
-        +'<span style="font-size:17px;color:var(--terre);flex:none">+</span></div>';
+        +'<span style="display:block;font-size:var(--pt-micro,11px);color:var(--texte-doux);margin-top:1px">Travail du domaine, hors convention \u2014 au temps réel</span></span>'
+        +'<span style="font-size:var(--pt-sm,17px);color:var(--terre);flex:none">+</span></div>';
     }
     if(!q) h+='<div style="'+_TN_HINT+'">Le nom que tu tapes n\u2019y est pas\u00a0? Le panneau proposera de créer le travail du domaine.</div>';
     h+='<div class="tcv-lnk" style="color:var(--terre);margin-top:4px" onclick="window._tnVoirBareme()">Voir le barème de la convention et vos écartements</div>';
@@ -1242,7 +1242,7 @@ function _tnRender(){
   h+='<div style="display:flex;align-items:center;gap:9px;padding:11px 12px;border-radius:11px;background:var(--vert-pale);border:1px solid rgba(61,107,39,0.32)">'
     +'<span style="flex:none">'+_mvIconTache(_tn.choix||'',18)+'</span>'
     +'<span style="flex:1;min-width:0"><span style="display:block;font-size:13.5px;font-weight:600;color:var(--texte)">'+_escHtml(_tnLbl())+'</span>'
-    +'<span style="display:block;font-size:11px;color:var(--texte-doux);margin-top:1px">'+(_tn.libre?'Hors convention \u00b7 temps réel':'Travail de la convention')+'</span></span>'
+    +'<span style="display:block;font-size:var(--pt-micro,11px);color:var(--texte-doux);margin-top:1px">'+(_tn.libre?'Hors convention \u00b7 temps réel':'Travail de la convention')+'</span></span>'
     +'<button style="flex:none;padding:6px 11px;border-radius:9px;border:1.5px solid var(--gris);background:transparent;font-family:inherit;font-size:11.5px;font-weight:600;color:var(--texte-doux);cursor:pointer" onclick="window._tnBack()">Changer</button></div>';
   // ── Les heures ──
   h+='<div style="'+_TN_SEC+'">Les heures</div>';
@@ -1277,7 +1277,7 @@ function _tnRender(){
     var row='<div style="display:flex;align-items:center;gap:9px;padding:10px 12px;border-radius:11px;cursor:pointer;background:'+(on?'var(--vert-pale)':'var(--bg-card)')+';border:1px solid '+(on?'rgba(61,107,39,0.32)':'var(--gris)')+'" onclick="window._tnTogPer(\''+_escAttr(s.nom)+'\')">'
       +'<span style="width:18px;height:18px;border-radius:5px;flex:none;border:1.5px solid '+(on?'var(--vert-med)':'var(--gris)')+';background:'+(on?'var(--vert-med)':'transparent')+';color:var(--bg-card);display:flex;align-items:center;justify-content:center">'+(on?_mvIcon('check',16):'')+'</span>'
       +'<span style="flex:1;min-width:0"><span style="display:block;font-size:13px;font-weight:600;color:var(--texte)">'+_escHtml(s.nom)+(cons?' '+_mvBadge('consultée','neutre'):'')+'</span>'
-      +'<span style="display:block;font-size:11px;color:var(--texte-doux)">'+_escHtml(s.periode||((s.debut||'')+' \u2192 '+(s.fin||'')))+'</span></span></div>';
+      +'<span style="display:block;font-size:var(--pt-micro,11px);color:var(--texte-doux)">'+_escHtml(s.periode||((s.debut||'')+' \u2192 '+(s.fin||'')))+'</span></span></div>';
     if(on) row+='<div style="display:flex;align-items:center;gap:6px;padding:8px 2px 2px 38px">'
       +'<input type="date" class="fi" style="margin:0;flex:1;font-size:12px;padding:7px 9px" value="'+_escAttr(d.d1||'')+'" onchange="window._tnDate(\''+_escAttr(s.nom)+'\',\'d1\',this.value)">'
       +'<span style="color:var(--texte-doux);font-size:12px">\u2192</span>'
@@ -1720,7 +1720,7 @@ function openEditHha(nom){
       bodyHtml+='<div class="fl">Passage '+pp+'</div>'
         +'<div style="display:flex;align-items:center;gap:8px;margin-bottom:12px">'
         +'<input class="fi ac" type="number" min="0" max="500" step="1" id="ehha-pass-'+pp+'">'
-        +'<span style="font-size:14px;color:var(--texte-doux)">h/ha</span></div>';
+        +'<span style="font-size:var(--pt-base,14px);color:var(--texte-doux)">h/ha</span></div>';
     }
     if(subEl)subEl.textContent='h/ha par passage · '+planNb+' passage'+(planNb>1?'s':'')+' configuré'+(planNb>1?'s':'');
   } else if(t.type==='niveaux'){
@@ -1731,7 +1731,7 @@ function openEditHha(nom){
       bodyHtml+='<div class="fl">Niveau '+niv.num+'</div>'
         +'<div style="display:flex;align-items:center;gap:8px;margin-bottom:12px">'
         +'<input class="fi ac" type="number" min="0" max="500" step="1" id="ehha-niv-'+niv.num+'">'
-        +'<span style="font-size:14px;color:var(--texte-doux)">h/ha</span></div>';
+        +'<span style="font-size:var(--pt-base,14px);color:var(--texte-doux)">h/ha</span></div>';
     });
     if(subEl)subEl.textContent='h/ha par niveau · '+planNbN+' niveau'+(planNbN>1?'x':'')+' configuré'+(planNbN>1?'s':'');
   } else if(t.trous){
@@ -1739,15 +1739,15 @@ function openEditHha(nom){
     bodyHtml+='<div class="fl">'+_mvIcon('tariere',16)+' Temps par trou (tarière)</div>'
       +'<div style="display:flex;align-items:center;gap:8px;margin-bottom:4px">'
       +'<input class="fi ac" type="number" min="0.5" max="60" step="0.5" id="ehha-mintrou" value="'+_mtCur+'">'
-      +'<span style="font-size:14px;color:var(--texte-doux)">min/trou</span></div>'
-      +'<div style="font-size:11px;color:var(--texte-doux);margin:4px 0 14px">Pas d\'h/ha : le temps = trous saisis en session Tarière × ce délai.</div>';
+      +'<span style="font-size:var(--pt-base,14px);color:var(--texte-doux)">min/trou</span></div>'
+      +'<div style="font-size:var(--pt-micro,11px);color:var(--texte-doux);margin:4px 0 14px">Pas d\'h/ha : le temps = trous saisis en session Tarière × ce délai.</div>';
     if(subEl)subEl.textContent='Travail piloté par les trous de tarière';
   } else {
     bodyHtml+='<div class="fl">Heures par hectare</div>'
       +'<div style="display:flex;align-items:center;gap:8px;margin-bottom:4px">'
       +'<input class="fi ac" type="number" min="0" max="500" step="1" id="ehha-val">'
-      +'<span style="font-size:14px;color:var(--texte-doux)">h/ha</span></div>'
-      +'<div style="font-size:11px;color:var(--vert);background:rgba(61,107,39,0.1);border-radius:6px;padding:5px 9px;margin:6px 0 14px" id="ehha-est"></div>';
+      +'<span style="font-size:var(--pt-base,14px);color:var(--texte-doux)">h/ha</span></div>'
+      +'<div style="font-size:var(--pt-micro,11px);color:var(--vert);background:rgba(61,107,39,0.1);border-radius:6px;padding:5px 9px;margin:6px 0 14px" id="ehha-est"></div>';
     if(subEl)subEl.textContent=t.tempsReel?'Estimation d\'heures par hectare (temps réel)':'Référentiel d\'heures estimées par hectare';
   }
   bodyHtml+='<button class="mbtn verte" onclick="saveEditHha(\''+nomEsc+'\')" style="margin-top:4px">'+_mvIcon('check',16)+' Enregistrer</button>'
@@ -1967,9 +1967,9 @@ function _emModsHtml(m){
   if(!list.length) return '';
   var off=list.filter(function(x){return mods[x.k]===false;}).length;
   return '<div class="fl" style="margin-top:14px">'+_mvIcon('oeil',16)+' Modules visibles '
-      +'<span style="font-size:11px;color:var(--texte-doux,#6b7280);font-weight:400">('
+      +'<span style="font-size:var(--pt-micro,11px);color:var(--texte-doux,#6b7280);font-weight:400">('
       +(off?(off+' masqu\u00e9'+(off>1?'s':'')):'tous visibles')+')</span></div>'
-    +'<div style="font-size:11px;color:var(--texte-doux,#6b7280);margin:-2px 2px 8px;line-height:1.5">'
+    +'<div style="font-size:var(--pt-micro,11px);color:var(--texte-doux,#6b7280);margin:-2px 2px 8px;line-height:1.5">'
       +'All\u00e8ge la barre du bas de cette personne. \u00c0 d\u00e9cocher pour un poste sp\u00e9cialis\u00e9 \u2014 un caviste n\u2019a pas besoin de l\u2019avancement des vignes. '
       +'Ce n\u2019est pas une s\u00e9curit\u00e9\u202f: les droits d\u2019\u00e9criture restent ceux des r\u00f4les, et R\u00e9glages reste toujours accessible.</div>'
     +'<div class="emod-presets">'
@@ -2056,15 +2056,15 @@ function editMembre(nom){
   }
   cs.innerHTML=_emModsHtml(m)
     +'<div id="em-hist-wrap"></div>'
-    +'<div class="fl" style="margin-top:14px">Solde CP initial <span style="font-size:11px;color:var(--texte-doux,#6b7280);font-weight:400">('+(((window.CONFIG&&window.CONFIG.cp_mode)==='ouvres')?'jours ouvrés':'jours ouvrables')+', au début de la période de référence)</span></div>'
-    +'<input type="number" id="em-cp-initial-j" min="0" max="100" step="0.5" value="'+(m.cp_initial_j||0)+'" style="width:100%;padding:10px;border:1.5px solid #e5e7eb;border-radius:10px;font-size:14px;outline:none;box-sizing:border-box;margin-bottom:8px;font-family:inherit">'
+    +'<div class="fl" style="margin-top:14px">Solde CP initial <span style="font-size:var(--pt-micro,11px);color:var(--texte-doux,#6b7280);font-weight:400">('+(((window.CONFIG&&window.CONFIG.cp_mode)==='ouvres')?'jours ouvrés':'jours ouvrables')+', au début de la période de référence)</span></div>'
+    +'<input type="number" id="em-cp-initial-j" min="0" max="100" step="0.5" value="'+(m.cp_initial_j||0)+'" style="width:100%;padding:10px;border:1.5px solid #e5e7eb;border-radius:10px;font-size:var(--pt-base,14px);outline:none;box-sizing:border-box;margin-bottom:8px;font-family:inherit">'
     // Le taux horaire a quitté ce bloc : il est devenu un ÉVÉNEMENT de
     // l'historique ci-dessus (§39). Il vit toujours dans la collection `paie`,
     // PAS dans le doc `membres` (lisible par toute l'équipe) — l'historique ne
     // fusionne les deux qu'à l'affichage, et seulement pour un administrateur.
     +'<div class="fl" style="margin-top:14px">Rattachement</div>'
     +'<div style="display:flex;align-items:center;justify-content:space-between;gap:12px;background:#f8fafc;border:1.5px solid #e5e7eb;border-radius:10px;padding:11px 12px">'
-    +'<div style="font-size:13px;color:var(--texte,#374151);font-weight:600">Bureau<div style="font-size:11px;color:var(--texte-doux,#6b7280);font-weight:400;margin-top:1px;max-width:300px">Non compté dans la capacité de travail des vignes (calcul de charge).</div></div>'
+    +'<div style="font-size:13px;color:var(--texte,#374151);font-weight:600">Bureau<div style="font-size:var(--pt-micro,11px);color:var(--texte-doux,#6b7280);font-weight:400;margin-top:1px;max-width:300px">Non compté dans la capacité de travail des vignes (calcul de charge).</div></div>'
     +'<div class="role-chk '+(m.bureau?'on':'')+'" id="em-bureau" onclick="toggleEmBureau(this)">'+(m.bureau?_mvIcon('check',16):'')+'</div>'
     +'</div>'
     // ── EQUIPE COLLECTIVE ──────────────────────────────────────────────
@@ -2074,13 +2074,13 @@ function editMembre(nom){
     // dit ce que cette fiche EST, pas ce qu'elle fait.
     +'<div class="fl" style="margin-top:14px">'+_mvIcon('equipe',16)+' \u00c9quipe collective</div>'
     +'<div style="display:flex;align-items:center;justify-content:space-between;gap:12px;background:#f8fafc;border:1.5px solid #e5e7eb;border-radius:10px;padding:11px 12px">'
-    +'<div style="font-size:13px;color:var(--texte,#374151);font-weight:600">Une ligne, plusieurs personnes<div style="font-size:11px;color:var(--texte-doux,#6b7280);font-weight:400;margin-top:1px;max-width:300px">Pour la vendange ou un prestataire. Ni compteur des 1607\u00a0h, ni cong\u00e9s, ni heures sup, ni compte de connexion\u00a0: ce n\u2019est pas un salari\u00e9, c\u2019est une \u00e9quipe.</div></div>'
+    +'<div style="font-size:13px;color:var(--texte,#374151);font-weight:600">Une ligne, plusieurs personnes<div style="font-size:var(--pt-micro,11px);color:var(--texte-doux,#6b7280);font-weight:400;margin-top:1px;max-width:300px">Pour la vendange ou un prestataire. Ni compteur des 1607\u00a0h, ni cong\u00e9s, ni heures sup, ni compte de connexion\u00a0: ce n\u2019est pas un salari\u00e9, c\u2019est une \u00e9quipe.</div></div>'
     +'<div class="role-chk '+(m.collectif?'on':'')+'" id="em-collectif" onclick="toggleEmCollectif(this)">'+(m.collectif?'\u2713':'')+'</div>'
     +'</div>'
     +'<div id="em-eff-wrap" style="display:'+(m.collectif?'block':'none')+'">'
       +'<div class="fl" style="margin-top:10px">Nombre de personnes par d\u00e9faut</div>'
       +'<input type="number" id="em-effectif" min="1" max="999" step="1" inputmode="numeric" value="'+(m.effectif||1)+'" style="width:100%;padding:10px;border:1.5px solid #e5e7eb;border-radius:10px;font-size:16px;outline:none;box-sizing:border-box;font-family:inherit">'
-      +'<div style="font-size:11px;color:var(--texte-doux,#6b7280);margin:5px 2px 0;line-height:1.5">Se change jour par jour dans le Planning\u00a0: onglet <b>Le mois</b>, cocher les jours, puis \u{1F465}\u00a0Effectif. Pensez \u00e0 renseigner les dates de contrat pour que la ligne n\u2019apparaisse que pendant le chantier.</div>'
+      +'<div style="font-size:var(--pt-micro,11px);color:var(--texte-doux,#6b7280);margin:5px 2px 0;line-height:1.5">Se change jour par jour dans le Planning\u00a0: onglet <b>Le mois</b>, cocher les jours, puis \u{1F465}\u00a0Effectif. Pensez \u00e0 renseigner les dates de contrat pour que la ligne n\u2019apparaisse que pendant le chantier.</div>'
     +'</div>'
     // ── SEC-2 : l'admin du domaine dépanne son équipe lui-même ──────────
     // Remplacement du « mot de passe oublié » pour les membres sans vraie boîte mail
@@ -2089,7 +2089,7 @@ function editMembre(nom){
     +((window.isAdmin&&window.isAdmin()&&m.email)?(
        '<div class="fl" style="margin-top:14px">Accès</div>'
       +'<div style="background:#f8fafc;border:1.5px solid #e5e7eb;border-radius:10px;padding:11px 12px">'
-      +'<div style="font-size:11px;color:var(--texte-doux,#6b7280);line-height:1.5;margin-bottom:9px">Génère un nouveau mot de passe, affiché <b>une seule fois</b>. '+_escHtml(nom)+' devra le remplacer à sa prochaine connexion.</div>'
+      +'<div style="font-size:var(--pt-micro,11px);color:var(--texte-doux,#6b7280);line-height:1.5;margin-bottom:9px">Génère un nouveau mot de passe, affiché <b>une seule fois</b>. '+_escHtml(nom)+' devra le remplacer à sa prochaine connexion.</div>'
       +'<button type="button" class="mbtn" id="em-reset-pwd" onclick="_mvResetMemberPwd(\''+_escAttr(m.nom)+'\')" style="width:100%;margin:0;background:var(--terre-pale,#F3EADF);color:var(--terre,#8A5A38);border:1.5px solid var(--terre,#8A5A38)">Réinitialiser le mot de passe</button>'
       +'</div>'):'');
   window.openOv('ovEditMembre');
@@ -2741,12 +2741,12 @@ function _clotOverlayHTML(ctx){
     + '<div style="font-size:9px;letter-spacing:.4px;text-transform:uppercase;color:#6B655C;margin-top:3px">'+l+'</div></div>'; };
   var prepOpts = (ctx.prepared||[]).map(function(s){ return '<option value="'+_clotEsc(s.nom)+'">'+_clotEsc(s.nom)+'</option>'; }).join('');
   var activateInner = (ctx.prepared && ctx.prepared.length)
-    ? '<div style="margin-bottom:13px"><label style="display:block;font-size:11px;letter-spacing:.5px;text-transform:uppercase;color:#6B655C;font-weight:600;margin-bottom:6px">Campagne déjà préparée</label>'
+    ? '<div style="margin-bottom:13px"><label style="display:block;font-size:var(--pt-micro,11px);letter-spacing:.5px;text-transform:uppercase;color:#6B655C;font-weight:600;margin-bottom:6px">Campagne déjà préparée</label>'
       + '<select id="clot-prep" onchange="window._clotSyncConfirm&&window._clotSyncConfirm()" style="width:100%;font-family:inherit;font-size:15px;padding:11px 12px;border:1px solid #E7E3DA;border-radius:10px;background:#fff;color:#1C1813">'+prepOpts+'</select></div>'
-      + '<div style="display:flex;gap:9px;align-items:flex-start;background:#eef4ea;border:1px solid rgba(61,107,39,.3);border-radius:12px;padding:12px 13px;font-size:12.5px;line-height:1.45;color:#3f5233"><span>'+_mvIcon('check',16)+'</span><div>Cette campagne a déjà ses dates. Elle deviendra simplement la <b>campagne active</b> de l\'équipe.</div></div>'
-    : '<div style="display:flex;gap:9px;align-items:flex-start;background:#fbeede;border:1px solid rgba(184,90,26,.4);border-radius:12px;padding:12px 13px;font-size:12.5px;line-height:1.45;color:#8a4516"><span>ℹ️</span><div>Aucune campagne préparée à l\'avance. Utilise <b>« Créer la prochaine »</b> ci-dessus.</div></div>';
+      + '<div style="display:flex;gap:9px;align-items:flex-start;background:#eef4ea;border:1px solid rgba(61,107,39,.3);border-radius:12px;padding:12px 13px;font-size:var(--pt-txt,12.5px);line-height:1.45;color:#3f5233"><span>'+_mvIcon('check',16)+'</span><div>Cette campagne a déjà ses dates. Elle deviendra simplement la <b>campagne active</b> de l\'équipe.</div></div>'
+    : '<div style="display:flex;gap:9px;align-items:flex-start;background:#fbeede;border:1px solid rgba(184,90,26,.4);border-radius:12px;padding:12px 13px;font-size:var(--pt-txt,12.5px);line-height:1.45;color:#8a4516"><span>ℹ️</span><div>Aucune campagne préparée à l\'avance. Utilise <b>« Créer la prochaine »</b> ci-dessus.</div></div>';
   var garde = ctx.warn
-    ? '<div style="display:flex;gap:9px;align-items:flex-start;background:#fbeede;border:1px solid rgba(184,90,26,.4);border-radius:12px;padding:12px 13px;margin-top:6px;font-size:12.5px;line-height:1.45;color:#8a4516"><span>'+_mvIcon('alerte',16)+'</span><div><b>Il reste '+reste+'% de travail</b> sur '+esc+'. Tu peux clôturer quand même — l\'avancement restera consultable — mais vérifie que la campagne est bien terminée.</div></div>'
+    ? '<div style="display:flex;gap:9px;align-items:flex-start;background:#fbeede;border:1px solid rgba(184,90,26,.4);border-radius:12px;padding:12px 13px;margin-top:6px;font-size:var(--pt-txt,12.5px);line-height:1.45;color:#8a4516"><span>'+_mvIcon('alerte',16)+'</span><div><b>Il reste '+reste+'% de travail</b> sur '+esc+'. Tu peux clôturer quand même — l\'avancement restera consultable — mais vérifie que la campagne est bien terminée.</div></div>'
     : '';
 
   return ''
@@ -2754,7 +2754,7 @@ function _clotOverlayHTML(ctx){
     + '<div style="background:#14110D;color:#F0E2C8;padding:16px 16px 14px;position:relative;flex:none">'
       + '<div style="display:flex;align-items:center;gap:12px">'
         + '<button onclick="window._clotClose&&window._clotClose()" style="background:rgba(255,255,255,.08);border:none;color:#F0E2C8;width:32px;height:32px;border-radius:9px;font-size:16px;cursor:pointer">'+_mvIcon('croix',16)+'</button>'
-        + '<div id="clot-ttl" style="font-family:\'Cormorant Garamond\',serif;font-weight:600;font-size:20px">Bilan de la campagne</div>'
+        + '<div id="clot-ttl" style="font-family:\'Cormorant Garamond\',serif;font-weight:600;font-size:var(--pt-md,20px)">Bilan de la campagne</div>'
       + '</div>'
       + '<div style="display:flex;gap:6px;margin-top:13px">'
         + '<div id="clot-d1" style="height:4px;flex:1;border-radius:3px;background:#C9A84C"></div>'
@@ -2766,10 +2766,10 @@ function _clotOverlayHTML(ctx){
     + '<div id="clot-scroll" style="flex:1;overflow-y:auto;padding:18px 16px 16px">'
       + '<div id="clot-s1">'
         + '<div style="background:linear-gradient(165deg,#14110D,#1C1813);border-radius:18px;padding:26px 20px 22px;color:#F0E2C8;text-align:center">'
-          + '<div style="font-size:11px;letter-spacing:1.8px;text-transform:uppercase;color:#C9A84C">Campagne qui se termine</div>'
+          + '<div style="font-size:var(--pt-micro,11px);letter-spacing:1.8px;text-transform:uppercase;color:#C9A84C">Campagne qui se termine</div>'
           + '<div style="font-family:\'Cormorant Garamond\',serif;font-weight:700;font-size:66px;line-height:1;margin:6px 0 2px">'+(ctx.pct||0)+'%</div>'
           + '<div style="font-family:\'Cormorant Garamond\',serif;font-size:22px">'+esc+'</div>'
-          + '<div style="font-size:14px;color:#e9dcc0;margin-top:10px">'+_mvIcon('raisin',16)+' Bravo à l\'équipe — belle campagne.</div>'
+          + '<div style="font-size:var(--pt-base,14px);color:#e9dcc0;margin-top:10px">'+_mvIcon('raisin',16)+' Bravo à l\'équipe — belle campagne.</div>'
         + '</div>'
         + '<div style="display:grid;grid-template-columns:1fr 1fr;gap:9px;margin-top:15px">'
           + stat((ctx.surfTot||0).toFixed(2), 'ha travaillés')
@@ -2777,23 +2777,23 @@ function _clotOverlayHTML(ctx){
           + stat(ctx.nSess||0, 'Sessions tracteur')
           + stat(ctx.nTrait||0, 'Traitements phyto')
         + '</div>'
-        + '<div style="display:flex;gap:9px;align-items:flex-start;background:#F6EDD8;border:1px solid rgba(201,168,76,.35);border-radius:12px;padding:12px 13px;margin-top:15px;font-size:12.5px;line-height:1.45;color:#5c4a1f"><span>'+_mvIcon('carton',16)+'</span><div>Cette campagne sera <b>archivée dans l\'Historique</b> (parcelles, journal, sessions tracteur, phyto) — consultable ensuite pour le comparatif N-1.</div></div>'
+        + '<div style="display:flex;gap:9px;align-items:flex-start;background:#F6EDD8;border:1px solid rgba(201,168,76,.35);border-radius:12px;padding:12px 13px;margin-top:15px;font-size:var(--pt-txt,12.5px);line-height:1.45;color:#5c4a1f"><span>'+_mvIcon('carton',16)+'</span><div>Cette campagne sera <b>archivée dans l\'Historique</b> (parcelles, journal, sessions tracteur, phyto) — consultable ensuite pour le comparatif N-1.</div></div>'
       + '</div>'
       + '<div id="clot-s2" style="display:none">'
         + '<div style="font-family:\'Cormorant Garamond\',serif;font-weight:700;font-size:22px;margin-bottom:4px">La prochaine campagne</div>'
         + '<div style="font-size:13px;color:#6B655C;margin-bottom:16px;line-height:1.4">Crée la suivante, ou active une campagne déjà préparée à l\'avance.</div>'
         + '<div style="display:flex;gap:8px;margin-bottom:16px">'
-          + '<button id="clot-seg-create" onclick="window._clotSeg&&window._clotSeg(\'create\')" style="flex:1;background:#14110D;color:#F0E2C8;border:1px solid #14110D;border-radius:11px;padding:11px 8px;font-family:inherit;font-size:12.5px;font-weight:600;cursor:pointer">Créer la prochaine</button>'
-          + '<button id="clot-seg-activate" onclick="window._clotSeg&&window._clotSeg(\'activate\')" style="flex:1;background:#FBFAF6;color:#6B655C;border:1px solid #E7E3DA;border-radius:11px;padding:11px 8px;font-family:inherit;font-size:12.5px;font-weight:600;cursor:pointer">Activer une préparée</button>'
+          + '<button id="clot-seg-create" onclick="window._clotSeg&&window._clotSeg(\'create\')" style="flex:1;background:#14110D;color:#F0E2C8;border:1px solid #14110D;border-radius:11px;padding:11px 8px;font-family:inherit;font-size:var(--pt-txt,12.5px);font-weight:600;cursor:pointer">Créer la prochaine</button>'
+          + '<button id="clot-seg-activate" onclick="window._clotSeg&&window._clotSeg(\'activate\')" style="flex:1;background:#FBFAF6;color:#6B655C;border:1px solid #E7E3DA;border-radius:11px;padding:11px 8px;font-family:inherit;font-size:var(--pt-txt,12.5px);font-weight:600;cursor:pointer">Activer une préparée</button>'
         + '</div>'
         + '<div id="clot-create" style="display:block">'
-          + '<div style="margin-bottom:13px"><label style="display:block;font-size:11px;letter-spacing:.5px;text-transform:uppercase;color:#6B655C;font-weight:600;margin-bottom:6px">Type de saison</label>'
+          + '<div style="margin-bottom:13px"><label style="display:block;font-size:var(--pt-micro,11px);letter-spacing:.5px;text-transform:uppercase;color:#6B655C;font-weight:600;margin-bottom:6px">Type de saison</label>'
             + '<div style="font-size:12px;color:#6B655C;line-height:1.45">La p\u00e9riode ci-dessous reprend « '+_clotEsc(ctx.endNom)+' » d\u00e9cal\u00e9e d\u2019un an, avec la m\u00eame liste de travaux. Ajustez ce qui doit l\u2019\u00eatre.</div></div>'
-          + '<div style="margin-bottom:13px"><label style="display:block;font-size:11px;letter-spacing:.5px;text-transform:uppercase;color:#6B655C;font-weight:600;margin-bottom:6px">Nom de la campagne</label>'
+          + '<div style="margin-bottom:13px"><label style="display:block;font-size:var(--pt-micro,11px);letter-spacing:.5px;text-transform:uppercase;color:#6B655C;font-weight:600;margin-bottom:6px">Nom de la campagne</label>'
             + '<input id="clot-name" value="'+_clotEsc(ctx.sug.nom)+'" oninput="window._clotSyncConfirm&&window._clotSyncConfirm()" style="width:100%;font-family:inherit;font-size:15px;padding:11px 12px;border:1px solid #E7E3DA;border-radius:10px;background:#fff;color:#1C1813"></div>'
           + '<div style="display:grid;grid-template-columns:1fr 1fr;gap:10px">'
-            + '<div><label style="display:block;font-size:11px;letter-spacing:.5px;text-transform:uppercase;color:#6B655C;font-weight:600;margin-bottom:6px">Début</label><input id="clot-deb" type="date" value="'+ctx.sug.deb+'" oninput="window._clotSyncConfirm&&window._clotSyncConfirm()" style="width:100%;font-family:inherit;font-size:15px;padding:11px 12px;border:1px solid #E7E3DA;border-radius:10px;background:#fff;color:#1C1813"></div>'
-            + '<div><label style="display:block;font-size:11px;letter-spacing:.5px;text-transform:uppercase;color:#6B655C;font-weight:600;margin-bottom:6px">Fin</label><input id="clot-fin" type="date" value="'+ctx.sug.fin+'" oninput="window._clotSyncConfirm&&window._clotSyncConfirm()" style="width:100%;font-family:inherit;font-size:15px;padding:11px 12px;border:1px solid #E7E3DA;border-radius:10px;background:#fff;color:#1C1813"></div>'
+            + '<div><label style="display:block;font-size:var(--pt-micro,11px);letter-spacing:.5px;text-transform:uppercase;color:#6B655C;font-weight:600;margin-bottom:6px">Début</label><input id="clot-deb" type="date" value="'+ctx.sug.deb+'" oninput="window._clotSyncConfirm&&window._clotSyncConfirm()" style="width:100%;font-family:inherit;font-size:15px;padding:11px 12px;border:1px solid #E7E3DA;border-radius:10px;background:#fff;color:#1C1813"></div>'
+            + '<div><label style="display:block;font-size:var(--pt-micro,11px);letter-spacing:.5px;text-transform:uppercase;color:#6B655C;font-weight:600;margin-bottom:6px">Fin</label><input id="clot-fin" type="date" value="'+ctx.sug.fin+'" oninput="window._clotSyncConfirm&&window._clotSyncConfirm()" style="width:100%;font-family:inherit;font-size:15px;padding:11px 12px;border:1px solid #E7E3DA;border-radius:10px;background:#fff;color:#1C1813"></div>'
           + '</div>'
           + garde
         + '</div>'
@@ -2804,10 +2804,10 @@ function _clotOverlayHTML(ctx){
         + '<div style="font-size:13px;color:#6B655C;margin-bottom:16px;line-height:1.4">Voici ce qui va se passer quand tu valides.</div>'
         + '<div style="display:flex;align-items:stretch;margin-bottom:16px;border-radius:16px;overflow:hidden;border:1px solid #E7E3DA">'
           + '<div style="flex:1;padding:18px 12px;text-align:center;background:#eef4ea"><div style="font-family:\'Cormorant Garamond\',serif;font-weight:600;font-size:16px;line-height:1.15">'+esc+'</div><div style="font-family:\'Cormorant Garamond\',serif;font-weight:700;font-size:32px;color:#3D6B27;margin-top:6px">'+(ctx.pct||0)+'%</div><div style="font-size:10px;letter-spacing:.6px;text-transform:uppercase;margin-top:4px;color:#3f5233">'+_mvIcon('check',16)+' archivée</div></div>'
-          + '<div style="width:40px;display:grid;place-items:center;background:linear-gradient(90deg,#8A5A38,#C2871E,#3D6B27);color:#fff;font-size:20px;font-weight:700">→</div>'
+          + '<div style="width:40px;display:grid;place-items:center;background:linear-gradient(90deg,#8A5A38,#C2871E,#3D6B27);color:#fff;font-size:var(--pt-md,20px);font-weight:700">→</div>'
           + '<div style="flex:1;padding:18px 12px;text-align:center;background:#14110D;color:#F0E2C8"><div id="clot-cf-new" style="font-family:\'Cormorant Garamond\',serif;font-weight:600;font-size:16px;line-height:1.15">'+_clotEsc(ctx.sug.nom)+'</div><div style="font-family:\'Cormorant Garamond\',serif;font-weight:700;font-size:32px;color:#C9A84C;margin-top:6px">0%</div><div style="font-size:10px;letter-spacing:.6px;text-transform:uppercase;margin-top:4px;opacity:.85">démarre</div></div>'
         + '</div>'
-        + '<div style="background:linear-gradient(180deg,#f3f7ef,#eef4ea);border:1px solid rgba(61,107,39,.28);border-radius:13px;padding:14px 15px;margin-bottom:15px"><div style="font-weight:600;font-size:13.5px;color:#3D6B27;margin-bottom:5px">'+_mvIcon('pousse',16)+' Rien n\'est perdu</div><div style="font-size:12.5px;line-height:1.5;color:#3f5233">Le 0% est un nouveau départ, pas une régression. L\'avancement de '+esc+' reste consultable via le sélecteur de saison et l\'Historique.</div></div>'
+        + '<div style="background:linear-gradient(180deg,#f3f7ef,#eef4ea);border:1px solid rgba(61,107,39,.28);border-radius:13px;padding:14px 15px;margin-bottom:15px"><div style="font-weight:600;font-size:13.5px;color:#3D6B27;margin-bottom:5px">'+_mvIcon('pousse',16)+' Rien n\'est perdu</div><div style="font-size:var(--pt-txt,12.5px);line-height:1.5;color:#3f5233">Le 0% est un nouveau départ, pas une régression. L\'avancement de '+esc+' reste consultable via le sélecteur de saison et l\'Historique.</div></div>'
         + '<div>'
           + '<div style="display:flex;gap:10px;align-items:flex-start;padding:9px 2px;font-size:13px;line-height:1.4;border-bottom:1px solid #E7E3DA"><span style="color:#3D6B27;font-weight:700">'+_mvIcon('check',16)+'</span><div><b>'+esc+'</b> archivée — snapshot complet (parcelles, journal, sessions, phyto).</div></div>'
           + '<div style="display:flex;gap:10px;align-items:flex-start;padding:9px 2px;font-size:13px;line-height:1.4;border-bottom:1px solid #E7E3DA"><span style="color:#3D6B27;font-weight:700">'+_mvIcon('check',16)+'</span><div><b id="clot-cf-new2">'+_clotEsc(ctx.sug.nom)+'</b> devient la campagne active de <b>toute l\'équipe</b>.</div></div>'
@@ -3005,7 +3005,7 @@ function renderHistorique(){
       <div class="hab-lbl">Archiver ${_escHtml(cur.saisonNom)}</div>
       <div class="hab-sub">Créer un snapshot de l'état actuel</div>
     </div>
-    <div style="font-size:20px;color:var(--texte-doux)">›</div>
+    <div style="font-size:var(--pt-md,20px);color:var(--texte-doux)">›</div>
   </div>
   <div id="histo-archive-feedback" style="display:none;margin:0 16px 12px;background:var(--vert-pale);color:var(--vert);border-radius:10px;padding:8px 14px;font-size:12px;font-weight:600"></div>`;
 
@@ -3042,7 +3042,7 @@ function renderHistorique(){
   html += `<div style="padding:0 16px;margin-bottom:6px">
     <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:8px">
       <div style="font-size:10px;font-weight:700;text-transform:uppercase;letter-spacing:0.8px;color:var(--texte-doux)">Avancement global</div>
-      <div style="font-size:11px;font-weight:700;color:${diffCol}">${diffSign} ${Math.abs(diffPct)}% d'écart</div>
+      <div style="font-size:var(--pt-micro,11px);font-weight:700;color:${diffCol}">${diffSign} ${Math.abs(diffPct)}% d'écart</div>
     </div>
     <div class="histo-compare-grid" style="padding:0">
       <div class="histo-col col-a">
@@ -3297,29 +3297,29 @@ function _docsCan(mod){
 }
 function _docsEsc(s){ return (typeof window._escHtml==='function') ? window._escHtml(String(s==null?'':s)) : String(s==null?'':s); }
 function _docsFmTag(fm){
-  if(fm==='pdf')  return '<span style="font-size:9.5px;font-weight:600;padding:2.5px 7px;border-radius:20px;background:var(--rouge-pale);color:var(--rouge)">PDF</span>';
-  if(fm==='csv')  return '<span style="font-size:9.5px;font-weight:600;padding:2.5px 7px;border-radius:20px;background:var(--vert-pale);color:var(--vert)">Excel / CSV</span>';
-  if(fm==='json') return '<span style="font-size:9.5px;font-weight:600;padding:2.5px 7px;border-radius:20px;background:var(--acier-pale);color:var(--acier)">JSON</span>';
-  if(fm==='imp')  return '<span style="font-size:9.5px;font-weight:600;padding:2.5px 7px;border-radius:20px;background:var(--bleu-pale);color:var(--bleu)">Fichier \u00e0 choisir</span>';
-  return '<span style="font-size:9.5px;font-weight:600;padding:2.5px 7px;border-radius:20px;background:var(--gris-clair);color:var(--texte-doux)">R\u00e9glage</span>';
+  if(fm==='pdf')  return '<span style="font-size:var(--pt-nano,9.5px);font-weight:600;padding:2.5px 7px;border-radius:20px;background:var(--rouge-pale);color:var(--rouge)">PDF</span>';
+  if(fm==='csv')  return '<span style="font-size:var(--pt-nano,9.5px);font-weight:600;padding:2.5px 7px;border-radius:20px;background:var(--vert-pale);color:var(--vert)">Excel / CSV</span>';
+  if(fm==='json') return '<span style="font-size:var(--pt-nano,9.5px);font-weight:600;padding:2.5px 7px;border-radius:20px;background:var(--acier-pale);color:var(--acier)">JSON</span>';
+  if(fm==='imp')  return '<span style="font-size:var(--pt-nano,9.5px);font-weight:600;padding:2.5px 7px;border-radius:20px;background:var(--bleu-pale);color:var(--bleu)">Fichier \u00e0 choisir</span>';
+  return '<span style="font-size:var(--pt-nano,9.5px);font-weight:600;padding:2.5px 7px;border-radius:20px;background:var(--gris-clair);color:var(--texte-doux)">R\u00e9glage</span>';
 }
 function _docsChip(txt,bg,col){
-  return '<span style="font-size:9.5px;font-weight:600;padding:2.5px 7px;border-radius:20px;background:'+bg+';color:'+col+'">'+_docsEsc(txt)+'</span>';
+  return '<span style="font-size:var(--pt-nano,9.5px);font-weight:600;padding:2.5px 7px;border-radius:20px;background:'+bg+';color:'+col+'">'+_docsEsc(txt)+'</span>';
 }
 function _docsRow(d,i,ok){
   return '<div onclick="'+(ok?'docsGo('+i+')':'')+'" style="display:flex;gap:11px;align-items:flex-start;background:var(--fond-module);border:1px solid var(--gris);border-radius:13px;padding:12px 13px;margin-bottom:9px;min-height:44px;'
     +(ok?'cursor:pointer':'opacity:.45')+'">'
-    +'<span style="width:38px;height:38px;flex:none;border-radius:10px;display:flex;align-items:center;justify-content:center;font-size:17px;background:'+d.bg+'">'+d.ico+'</span>'
+    +'<span style="width:38px;height:38px;flex:none;border-radius:10px;display:flex;align-items:center;justify-content:center;font-size:var(--pt-sm,17px);background:'+d.bg+'">'+d.ico+'</span>'
     +'<span style="flex:1;min-width:0;display:block">'
       +'<span style="display:block;font-size:13.5px;font-weight:700;color:var(--texte);line-height:1.25">'+_docsEsc(d.t)+'</span>'
-      +'<span style="display:block;font-size:11px;color:var(--texte-doux);line-height:1.45;margin-top:3px">'+_docsEsc(d.s)+'</span>'
+      +'<span style="display:block;font-size:var(--pt-micro,11px);color:var(--texte-doux);line-height:1.45;margin-top:3px">'+_docsEsc(d.s)+'</span>'
       +'<span style="display:flex;flex-wrap:wrap;gap:5px;margin-top:7px">'
         +_docsFmTag(d.fm)
         +(d.ask?_docsChip(d.ask,'var(--gris-clair)','var(--texte-doux)'):'')
         +(ok?'':_docsChip('\u{1F512} formule sup\u00e9rieure','var(--gris-clair)','var(--texte-doux)'))
       +'</span>'
     +'</span>'
-    +(ok?'<span style="align-self:center;font-size:17px;color:var(--texte-doux);opacity:.5;flex:none">\u203a</span>':'')
+    +(ok?'<span style="align-self:center;font-size:var(--pt-sm,17px);color:var(--texte-doux);opacity:.5;flex:none">\u203a</span>':'')
     +'</div>';
 }
 function _docsRender(){
@@ -3663,43 +3663,43 @@ async function _docsRestOpen(){
   var dateTxt = meta.date ? new Date(meta.date).toLocaleString('fr-FR') : 'date inconnue';
   var h='<div style="background:var(--rouge-pale);border-radius:14px;padding:14px 16px">'
     + '<div style="font-size:13px;font-weight:700;color:var(--rouge);margin-bottom:4px">Restaurer une sauvegarde</div>'
-    + '<div style="font-size:11px;color:var(--texte-doux);line-height:1.5;margin-bottom:12px">'
+    + '<div style="font-size:var(--pt-micro,11px);color:var(--texte-doux);line-height:1.5;margin-bottom:12px">'
       + _docsEsc(_mvSauvEnCours.nom) + '<br>Sauvegarde du ' + _docsEsc(dateTxt)
       + (meta.domaine ? ' · ' + _docsEsc(meta.domaine) : '')
       + (meta.app_version ? ' · version ' + _docsEsc(meta.app_version) : '')
       + '</div>';
 
   if(meta.ancien){
-    h+='<div style="background:var(--or-pale);border-radius:10px;padding:9px 11px;font-size:11px;'
+    h+='<div style="background:var(--or-pale);border-radius:10px;padding:9px 11px;font-size:var(--pt-micro,11px);'
       + 'line-height:1.5;margin-bottom:10px"><b>Fichier d’une ancienne version.</b> Il ne contient '
       + 'que huit éléments sur ' + cles.length + ', et les fiches de l’équipe y sont incomplètes '
       + '(nom, rôles et statut seulement). Les contrats, e-mails et couleurs actuels seront '
       + '<b>conservés</b> : ce fichier ne les remplace pas.</div>';
   }
   if(meta.complet===false || (meta.cles_en_erreur && meta.cles_en_erreur.length)){
-    h+='<div style="background:var(--or-pale);border-radius:10px;padding:9px 11px;font-size:11px;'
+    h+='<div style="background:var(--or-pale);border-radius:10px;padding:9px 11px;font-size:var(--pt-micro,11px);'
       + 'line-height:1.5;margin-bottom:10px"><b>Cette sauvegarde se déclare incomplète.</b> '
       + 'Certains éléments n’avaient pas pu être lus au moment où elle a été faite.</div>';
   }
 
-  h+='<div style="font-size:11px;font-weight:700;color:var(--rouge);margin:2px 0 6px">'
+  h+='<div style="font-size:var(--pt-micro,11px);font-weight:700;color:var(--rouge);margin:2px 0 6px">'
     + 'Remplacés (' + remplace.length + ')</div>';
   h+= remplace.length
     ? remplace.map(function(x){
         var baisse=(x.ap<x.av);
-        return '<div style="display:flex;justify-content:space-between;gap:8px;font-size:11px;'
+        return '<div style="display:flex;justify-content:space-between;gap:8px;font-size:var(--pt-micro,11px);'
           + 'padding:3px 0;border-bottom:1px solid rgba(0,0,0,.05)">'
           + '<span>' + _docsEsc(_sauvNom(x.k)) + '</span>'
           + '<span style="font-variant-numeric:tabular-nums;font-weight:600;'
           + (baisse?'color:var(--rouge)':'color:var(--texte-doux)') + '">'
           + x.av + ' \u2192 ' + x.ap + '</span></div>';
       }).join('')
-    : '<div style="font-size:11px;color:var(--texte-doux)">Aucun.</div>';
+    : '<div style="font-size:var(--pt-micro,11px);color:var(--texte-doux)">Aucun.</div>';
 
   if(intouchees.length){
-    h+='<div style="font-size:11px;font-weight:700;color:var(--texte-doux);margin:12px 0 6px">'
+    h+='<div style="font-size:var(--pt-micro,11px);font-weight:700;color:var(--texte-doux);margin:12px 0 6px">'
       + 'Absents du fichier — laissés tels quels (' + intouchees.length + ')</div>'
-      + '<div style="font-size:11px;color:var(--texte-doux);line-height:1.6">'
+      + '<div style="font-size:var(--pt-micro,11px);color:var(--texte-doux);line-height:1.6">'
       + intouchees.map(function(x){
           return _docsEsc(_sauvNom(x.k)) + (x.n ? ' (' + x.n + ')' : '');
         }).join(' · ')
@@ -3708,7 +3708,7 @@ async function _docsRestOpen(){
 
   if(perte>0){
     h+='<div style="background:var(--rouge-pale);border:1px solid var(--rouge);border-radius:10px;'
-      + 'padding:9px 11px;font-size:11px;line-height:1.5;margin-top:12px">'
+      + 'padding:9px 11px;font-size:var(--pt-micro,11px);line-height:1.5;margin-top:12px">'
       + '<b>' + perte + ' ligne(s) de moins</b> après restauration. Si ce n’est pas ce que vous '
       + 'attendez, faites d’abord une sauvegarde de l’état actuel et comparez les deux fichiers.</div>';
   }
@@ -3852,18 +3852,18 @@ function exportCSVJournal(){
 // ═══════════════════════════════════════════════════════════════════════════
 var _JIV_CSS =
  '*{margin:0;padding:0;box-sizing:border-box}'
-+'body{font-family:Outfit,system-ui,sans-serif;color:#1A1A14;background:#fff;font-size:11px}'
++'body{font-family:Outfit,system-ui,sans-serif;color:#1A1A14;background:#fff;font-size:var(--pt-micro,11px)}'
 +'@page{size:A4 portrait;margin:11mm}'
 +'.jiv-cov{background:#2A1A10;color:#fff;padding:22px 26px;display:flex;align-items:flex-end;justify-content:space-between;gap:16px}'
 +'.jiv-k{font-size:9px;letter-spacing:3px;text-transform:uppercase;opacity:.45;margin-bottom:5px}'
-+'.jiv-t{font-family:"Cormorant Garamond",Georgia,serif;font-size:27px;font-weight:700;line-height:1.05}'
++'.jiv-t{font-family:"Cormorant Garamond",Georgia,serif;font-size:var(--pt-xl,27px);font-weight:700;line-height:1.05}'
 +'.jiv-s{opacity:.72;font-size:12px;margin-top:4px}'
 +'.jiv-m{text-align:right;opacity:.55;font-size:10px;line-height:1.6}'
 +'.jiv-kpi{display:flex;gap:10px;padding:14px 26px 4px;flex-wrap:wrap}'
 +'.jiv-kc{flex:1;min-width:110px;border:1px solid #E3DFD4;border-radius:11px;padding:9px 12px}'
-+'.jiv-kv{font-family:"Cormorant Garamond",Georgia,serif;font-size:23px;font-weight:700;color:#2A1A10;line-height:1.05}'
-+'.jiv-kl{font-size:9.5px;text-transform:uppercase;letter-spacing:.8px;color:#7A7A6A;font-weight:600;margin-top:2px}'
-+'.jiv-ks{font-size:9.5px;color:#8A8A7A;margin-top:2px;line-height:1.35}'
++'.jiv-kv{font-family:"Cormorant Garamond",Georgia,serif;font-size:var(--pt-lg,23px);font-weight:700;color:#2A1A10;line-height:1.05}'
++'.jiv-kl{font-size:var(--pt-nano,9.5px);text-transform:uppercase;letter-spacing:.8px;color:#7A7A6A;font-weight:600;margin-top:2px}'
++'.jiv-ks{font-size:var(--pt-nano,9.5px);color:#8A8A7A;margin-top:2px;line-height:1.35}'
 +'.jiv-sec{padding:16px 26px 0;break-inside:auto}'
 +'.jiv-st{font-family:"Cormorant Garamond",Georgia,serif;font-size:19px;font-weight:700;color:#2A1A10;'
         +'border-bottom:2px solid #2A1A10;padding-bottom:4px;margin-bottom:3px}'
@@ -3880,9 +3880,9 @@ var _JIV_CSS =
 +'.tag{display:inline-block;font-size:8.5px;font-weight:700;padding:1px 6px;border-radius:20px}'
 +'.tg-ok{background:#E3EDDD;color:#2C6E29}.tg-w{background:#F7F1D9;color:#7D6608}'
 +'.tg-n{background:#EFEFE9;color:#7A7A6A}'
-+'.jiv-vide{font-style:italic;color:#8A8A7A;padding:9px 0;font-size:10.5px}'
++'.jiv-vide{font-style:italic;color:#8A8A7A;padding:9px 0;font-size:var(--pt-lbl,10.5px)}'
 +'.jiv-note{margin:16px 26px 0;background:#F4F1E8;border-radius:11px;padding:11px 13px;'
-           +'font-size:9.5px;color:#5A4A38;line-height:1.55}'
+           +'font-size:var(--pt-nano,9.5px);color:#5A4A38;line-height:1.55}'
 +'.jiv-ft{margin-top:16px;padding:9px 26px;border-top:1px solid #D8D3C6;display:flex;'
          +'justify-content:space-between;font-size:8.5px;color:#8A8A7A}';
 
@@ -4130,9 +4130,9 @@ function _jivChoix(F){
       +'style="width:100%;display:block;text-align:left;background:var(--bg-card);border:1.5px solid '
       +(acc?'var(--vert,#3D6B27)':'var(--gris)')+';border-radius:12px;padding:14px 16px;margin-bottom:10px;'
       +'cursor:pointer;font-family:Outfit,sans-serif;min-height:44px">'
-      +'<span style="display:block;font-size:14px;font-weight:600;color:var(--texte)">'+_escHtml(f.lbl)+'</span>'
-      +'<span style="display:block;font-size:11px;color:var(--texte-doux);margin-top:3px;line-height:1.4">'+_escHtml(f.sub||'')+'</span>'
-      +'<span style="display:block;font-size:11px;color:'+(n?'var(--vert,#3D6B27)':'var(--texte-doux)')
+      +'<span style="display:block;font-size:var(--pt-base,14px);font-weight:600;color:var(--texte)">'+_escHtml(f.lbl)+'</span>'
+      +'<span style="display:block;font-size:var(--pt-micro,11px);color:var(--texte-doux);margin-top:3px;line-height:1.4">'+_escHtml(f.sub||'')+'</span>'
+      +'<span style="display:block;font-size:var(--pt-micro,11px);color:'+(n?'var(--vert,#3D6B27)':'var(--texte-doux)')
       +';font-weight:600;margin-top:5px">'+n+' intervention'+(n>1?'s':'')+'</span></button>';
   });
   var body=ov.querySelector('#jiv-body'); if(body) body.innerHTML=h;
@@ -4491,10 +4491,10 @@ function exportPDFMois(){
   .cover-left{}
   .cover-brand{font-size:9px;letter-spacing:3px;text-transform:uppercase;opacity:0.5;margin-bottom:6px;}
   .cover-title{font-size:28px;font-weight:700;margin-bottom:2px;}
-  .cover-sub{opacity:0.5;font-size:11px;}
+  .cover-sub{opacity:0.5;font-size:var(--pt-micro,11px);}
   .cover-right{text-align:right;}
   .cover-date{opacity:0.5;font-size:10px;}
-  .cover-domaine{opacity:0.7;font-size:11px;font-weight:600;margin-top:2px;}
+  .cover-domaine{opacity:0.7;font-size:var(--pt-micro,11px);font-weight:600;margin-top:2px;}
   /* ── STATS ── */
   .stats-row{display:grid;grid-template-columns:repeat(4,1fr);border-bottom:2px solid #EAF3E2;}
   .stat{padding:14px 20px;border-right:1px solid #EAF3E2;}
@@ -4518,11 +4518,11 @@ function exportPDFMois(){
   .h-sep{width:1px;background:#EFEDE8;flex-shrink:0;}
   .h-val{font-size:22px;font-weight:700;color:#1A1A14;line-height:1;}
   .h-lbl{font-size:9px;color:#7A7A6A;margin-top:3px;text-transform:uppercase;letter-spacing:0.4px;}
-  .commentaire-box{background:#F8F7F3;border-left:3px solid #3D6B27;border-radius:0 8px 8px 0;padding:12px 14px;font-size:11px;line-height:1.6;color:#1A1A14;font-style:italic;white-space:pre-wrap;}
+  .commentaire-box{background:#F8F7F3;border-left:3px solid #3D6B27;border-radius:0 8px 8px 0;padding:12px 14px;font-size:var(--pt-micro,11px);line-height:1.6;color:#1A1A14;font-style:italic;white-space:pre-wrap;}
   /* ── AVANCEMENT ── */
   .avancement-global{display:flex;align-items:center;gap:14px;background:#F5F5F0;border-radius:10px;padding:12px 16px;margin-bottom:12px;}
   .ag-left,.ag-right{text-align:center;min-width:48px;}
-  .ag-pct{font-size:20px;font-weight:700;color:#1E3A12;}
+  .ag-pct{font-size:var(--pt-md,20px);font-weight:700;color:#1E3A12;}
   .ag-lbl{font-size:9px;color:#7A7A6A;text-transform:uppercase;margin-top:2px;}
   .ag-bar-wrap{flex:1;display:flex;flex-direction:column;gap:4px;}
   .ag-bar{height:8px;background:#EFEDE8;border-radius:4px;overflow:hidden;}
@@ -4530,7 +4530,7 @@ function exportPDFMois(){
   .ag-fill-reste{height:100%;background:#D4A56A;border-radius:4px;}
   .taches-table{width:100%;border-collapse:collapse;}
   .taches-table th{font-size:9px;font-weight:700;text-transform:uppercase;color:#7A7A6A;padding:5px 8px;text-align:left;border-bottom:2px solid #EFEDE8;}
-  .taches-table td{padding:6px 8px;border-bottom:1px solid #F5F5F0;font-size:11px;vertical-align:middle;}
+  .taches-table td{padding:6px 8px;border-bottom:1px solid #F5F5F0;font-size:var(--pt-micro,11px);vertical-align:middle;}
   .tc-val{text-align:center;font-weight:600;}
   .cv{color:#1E3A12;}.co{color:#B85A1A;}.cr{color:#A0291E;}
   .mini-bar{display:inline-block;width:56px;height:5px;background:#EFEDE8;border-radius:3px;overflow:hidden;vertical-align:middle;margin-right:4px;}
@@ -4539,7 +4539,7 @@ function exportPDFMois(){
   /* ── TRACTEUR RÉSUMÉ ── */
   .trac-table{width:100%;border-collapse:collapse;}
   .trac-table th{font-size:9px;font-weight:700;text-transform:uppercase;color:#7A7A6A;padding:5px 8px;text-align:left;border-bottom:2px solid #ECF0F4;}
-  .trac-table td{padding:7px 8px;border-bottom:1px solid #F5F5F0;font-size:11px;vertical-align:middle;}
+  .trac-table td{padding:7px 8px;border-bottom:1px solid #F5F5F0;font-size:var(--pt-micro,11px);vertical-align:middle;}
   .trac-badge{display:inline-block;padding:2px 8px;border-radius:6px;font-size:9px;font-weight:700;}
   .trac-ter{background:#ECF0F4;color:#2C3E50;}.trac-enc{background:#FBF0E6;color:#B85A1A;}
   .trac-bar-wrap{display:flex;align-items:center;gap:5px;}
@@ -4570,7 +4570,7 @@ function exportPDFMois(){
   /* Détail tracteur page 2 */
   .trac-session-block{background:#F8F8F5;border-radius:8px;padding:12px 14px;margin-bottom:10px;}
   .trac-session-block:last-child{margin-bottom:0;}
-  .trac-session-head{font-size:11px;font-weight:700;color:#1A1A14;margin-bottom:10px;padding-bottom:8px;border-bottom:1px solid #EBEBEB;}
+  .trac-session-head{font-size:var(--pt-micro,11px);font-weight:700;color:#1A1A14;margin-bottom:10px;padding-bottom:8px;border-bottom:1px solid #EBEBEB;}
   .trac-detail-block{display:flex;flex-wrap:wrap;gap:12px;}
   .trac-detail-col{flex:1;min-width:150px;}
   .trac-detail-label{font-size:9px;font-weight:700;text-transform:uppercase;letter-spacing:0.5px;margin-bottom:5px;padding:2px 6px;border-radius:4px;display:inline-block;}
@@ -4823,7 +4823,7 @@ function exportPDFPhyto(mode){
 <style>
   @page{size:A4 landscape;margin:9mm;}
   *{margin:0;padding:0;box-sizing:border-box;}
-  body{font-family:'Outfit',system-ui,-apple-system,sans-serif;color:#1A1A14;background:white;font-size:11px;}
+  body{font-family:'Outfit',system-ui,-apple-system,sans-serif;color:#1A1A14;background:white;font-size:var(--pt-micro,11px);}
   .cover{background:#2D0B45;color:white;padding:24px 30px 20px;position:relative;display:flex;align-items:flex-end;justify-content:space-between;}
   .cover-l{padding-top:30px;}
   .cover-pic{font-size:28px;position:absolute;left:30px;top:20px;opacity:.9;}
@@ -4842,7 +4842,7 @@ function exportPDFPhyto(mode){
   table.reg{width:100%;border-collapse:collapse;table-layout:fixed;}
   table.reg thead tr{background:#2D0B45;color:white;}
   table.reg th{padding:6px 7px;font-size:8px;font-weight:600;text-transform:uppercase;letter-spacing:0.4px;text-align:left;vertical-align:bottom;}
-  table.reg td{padding:6px 7px;border-bottom:1px solid #F5F0FA;vertical-align:top;font-size:9.5px;word-wrap:break-word;}
+  table.reg td{padding:6px 7px;border-bottom:1px solid #F5F0FA;vertical-align:top;font-size:var(--pt-nano,9.5px);word-wrap:break-word;}
   table.reg tr:nth-child(even) td{background:#FAF7FC;}
   .c-num{color:#C0B0D0;font-size:8.5px;text-align:center;}
   .pname{font-weight:700;font-size:10px;}
@@ -5069,7 +5069,7 @@ function _esBuildEch(){
   var base=(_esSaison&&_esSaison.echeances&&typeof _esSaison.echeances==='object'&&!Array.isArray(_esSaison.echeances))?_esSaison.echeances:{};
   _esEchTasks=Array.from(_esTachesSel||[]);
   if(!_esEchTasks.length){
-    host.innerHTML='<div style="font-size:12.5px;color:var(--texte-doux);padding:4px 0">Aucune t\u00e2che pour cette p\u00e9riode \u2014 coche-les au-dessus.</div>';
+    host.innerHTML='<div style="font-size:var(--pt-txt,12.5px);color:var(--texte-doux);padding:4px 0">Aucune t\u00e2che pour cette p\u00e9riode \u2014 coche-les au-dessus.</div>';
     return;
   }
   host.innerHTML=_esEchTasks.map(function(tn,i){
@@ -5534,12 +5534,12 @@ window._ecoCfgSet=function(group,key,val){
 // la conso de référence est un réglage du Tracteur, l'IFT de référence un
 // réglage de la Conformité, donc du Pilotage. Deux cartes, deux roues.
 // Les écrivains n'ont pas changé : _ecoCfgSet('conso'|'ift', …).
-var _ECO_IN_CSS='width:78px;padding:7px 8px;border:1.5px solid var(--gris-clair);border-radius:9px;font-family:inherit;font-size:14px;text-align:right;background:var(--bg-app);color:var(--texte);box-sizing:border-box';
+var _ECO_IN_CSS='width:78px;padding:7px 8px;border:1.5px solid var(--gris-clair);border-radius:9px;font-family:inherit;font-size:var(--pt-base,14px);text-align:right;background:var(--bg-app);color:var(--texte);box-sizing:border-box';
 var _ECO_ROW_CSS='display:flex;align-items:center;justify-content:space-between;gap:12px;flex-wrap:wrap';
 function _ecoCarte(titre,sous,corps){
   return '<div style="background:var(--bg-card);border:1px solid var(--gris-clair);border-radius:16px;padding:16px 18px;margin:14px 16px">'
-    +'<div style="font-family:\'Cormorant Garamond\',serif;font-weight:700;font-size:20px;color:var(--cave,#14110D);margin-bottom:3px">'+titre+'</div>'
-    +'<div style="font-size:12.5px;color:var(--texte-doux);margin-bottom:12px">'+sous+'</div>'
+    +'<div style="font-family:\'Cormorant Garamond\',serif;font-weight:700;font-size:var(--pt-md,20px);color:var(--cave,#14110D);margin-bottom:3px">'+titre+'</div>'
+    +'<div style="font-size:var(--pt-txt,12.5px);color:var(--texte-doux);margin-bottom:12px">'+sous+'</div>'
     +corps+'</div>';
 }
 // Roue du Tracteur : la conso de référence, et l'état du prix du GNR (qui se
@@ -5553,7 +5553,7 @@ function _ecoRenderConsoCard(){
   var nApp=_paie().gnr_appoints.length;
   var gnrEtat = pmp>0
     ? ('<span style="font-size:11.5px;font-weight:600;color:var(--vert,#3D6B27)">'+(Math.round(pmp*100)/100).toLocaleString('fr-FR',{minimumFractionDigits:0,maximumFractionDigits:2})+' \u20ac/L</span>'
-       +'<div style="font-size:11px;color:var(--texte-doux)">'+(nApp>0?('moyenne pond\u00e9r\u00e9e sur '+nApp+' appoint'+(nApp>1?'s':'')):'ancienne saisie manuelle')+'</div>')
+       +'<div style="font-size:var(--pt-micro,11px);color:var(--texte-doux)">'+(nApp>0?('moyenne pond\u00e9r\u00e9e sur '+nApp+' appoint'+(nApp>1?'s':'')):'ancienne saisie manuelle')+'</div>')
     : ('<span style="font-size:11.5px;font-weight:600;color:var(--orange,#B85A1A)">\u00e0 renseigner \u00e0 l\u2019appoint</span>');
   card.innerHTML=_ecoCarte('Carburant','Alimente le co\u00fbt GNR par parcelle et par session dans <b>Pilotage</b>.',
      '<div style="'+_ECO_ROW_CSS+'"><div style="flex:1;min-width:180px"><div style="font-size:13.5px;color:var(--texte);font-weight:600">Consommation GNR moyenne</div><div style="font-size:11.5px;color:var(--texte-doux)">estime le GNR par heure de tracteur quand le compteur ne le dit pas</div></div>'
@@ -5748,19 +5748,19 @@ function _aocRenderCard(){
   var parcs=(window.PARCELLES||[]).filter(function(p){ return p&&p.nom&&String(p.statut||'').toLowerCase()!=='arrachée'&&String(p.statut||'').toLowerCase()!=='arrachee'; });
   var esc=(typeof _escHtml==='function')?_escHtml:function(x){ return String(x==null?'':x); };
   var att=(typeof _escAttr==='function')?_escAttr:function(x){ return String(x==null?'':x).replace(/'/g,'&#39;').replace(/"/g,'&quot;'); };
-  var lblCss='font-size:11px;font-weight:700;letter-spacing:.06em;text-transform:uppercase;color:var(--texte-doux);margin-bottom:6px';
+  var lblCss='font-size:var(--pt-micro,11px);font-weight:700;letter-spacing:.06em;text-transform:uppercase;color:var(--texte-doux);margin-bottom:6px';
   var btnCss='min-width:36px;min-height:36px;border:1px solid var(--gris-clair);background:transparent;border-radius:9px;cursor:pointer;color:var(--texte-med);display:inline-flex;align-items:center;justify-content:center';
 
   /* ⚠️ Habillage INLINE (comme les cartes des roues, reglages.js). Les classes
      `mvc-*` sont posees par `_caveV2InjectCss` (cave.js) : arriver dans les
      Reglages sans avoir ouvert la Cave rendrait cette carte SANS STYLE. */
   var h='<div style="background:var(--bg-card);border:1px solid var(--gris-clair);border-radius:16px;padding:16px 18px;margin:14px 0">'
-    +'<div style="font-family:\'Cormorant Garamond\',serif;font-weight:700;font-size:20px;color:var(--cave,#14110D);margin-bottom:3px">Appellations et plafonds de rendement</div>'
-    +'<div style="font-size:12.5px;color:var(--texte-doux);margin-bottom:12px">Le rendement maximum est fix\u00e9 <b>par arr\u00eat\u00e9, campagne par campagne</b>. D\u00e9clarez vos appellations, posez leur plafond pour chaque mill\u00e9sime, puis rattachez vos parcelles. Un plafond pos\u00e9 directement sur une parcelle (Cave \u203a Le mill\u00e9sime) reste <b>prioritaire</b> sur celui de son appellation.</div>'
+    +'<div style="font-family:\'Cormorant Garamond\',serif;font-weight:700;font-size:var(--pt-md,20px);color:var(--cave,#14110D);margin-bottom:3px">Appellations et plafonds de rendement</div>'
+    +'<div style="font-size:var(--pt-txt,12.5px);color:var(--texte-doux);margin-bottom:12px">Le rendement maximum est fix\u00e9 <b>par arr\u00eat\u00e9, campagne par campagne</b>. D\u00e9clarez vos appellations, posez leur plafond pour chaque mill\u00e9sime, puis rattachez vos parcelles. Un plafond pos\u00e9 directement sur une parcelle (Cave \u203a Le mill\u00e9sime) reste <b>prioritaire</b> sur celui de son appellation.</div>'
     +'<div style="height:3px;border-radius:3px;background:linear-gradient(90deg,#8A5A38,#C2871E,#3D6B27);margin-bottom:14px"></div>';
 
   if(!A.length){
-    h+='<div style="font-size:12.5px;color:var(--texte-doux);padding:10px 0">Aucune appellation d\u00e9clar\u00e9e. Tant qu\u2019il n\u2019y en a pas, chaque parcelle porte son propre plafond.</div>';
+    h+='<div style="font-size:var(--pt-txt,12.5px);color:var(--texte-doux);padding:10px 0">Aucune appellation d\u00e9clar\u00e9e. Tant qu\u2019il n\u2019y en a pas, chaque parcelle porte son propre plafond.</div>';
   }
   A.forEach(function(a){
     var n=_aocParcelles(a.nom).length;
@@ -5795,7 +5795,7 @@ function _aocRenderCard(){
       +'<div style="max-height:340px;overflow:auto;border:1px solid var(--gris-clair);border-radius:11px">';
     parcs.forEach(function(p,i){
       h+='<div style="display:flex;align-items:center;gap:9px;padding:7px 10px'+(i?';border-top:1px solid var(--gris-clair)':'')+'">'
-        +'<span style="flex:1;min-width:0;font-size:12.5px;color:var(--texte);overflow:hidden;text-overflow:ellipsis;white-space:nowrap">'+esc(p.nom)+'</span>'
+        +'<span style="flex:1;min-width:0;font-size:var(--pt-txt,12.5px);color:var(--texte);overflow:hidden;text-overflow:ellipsis;white-space:nowrap">'+esc(p.nom)+'</span>'
         +'<select onchange="window._aocSetParc(\''+att(p.nom)+'\',this.value)" '
         +'style="max-width:180px;padding:5px 7px;border:1.5px solid var(--gris-clair);border-radius:8px;font-family:inherit;font-size:12px;background:var(--bg-app);color:var(--texte)">'
         +opts(p.appellation)+'</select></div>';
@@ -5854,7 +5854,7 @@ window._cuParcRollN   = _cuParcRollN;
 function _cuColor(r){ return r>1?'--rouge':r>=0.875?'--orange':r>=0.75?'--or':'--vert'; }
 function _cuStatus(r){ return r>1?['D\u00e9passement','--rouge']:r>=0.875?['Vigilance','--orange']:['Conforme','--vert']; }
 function _cuFmt(d){ if(!d)return '\u2014'; var pp=d.split('-'); return pp.length>=3?pp[2]+'/'+pp[1]+'/'+pp[0]:d; }
-function _cuKpi(v,u,l,warn){ return '<div style="background:rgba(255,255,255,0.05);border:1px solid '+(warn?'rgba(192,57,43,0.5)':'rgba(201,168,76,0.18)')+';border-radius:12px;padding:11px 12px"><div style="font-size:22px;font-weight:700;font-family:\'Cormorant Garamond\',serif;line-height:1.1;color:'+(warn?'#E8846F':'#EFE7D3')+'">'+v+'<span style="font-size:11px;font-weight:500;color:#B7AE98;font-family:Outfit"> '+u+'</span></div><div style="font-size:10px;letter-spacing:.04em;text-transform:uppercase;color:#A79E88;margin-top:4px;font-weight:600">'+l+'</div></div>'; }
+function _cuKpi(v,u,l,warn){ return '<div style="background:rgba(255,255,255,0.05);border:1px solid '+(warn?'rgba(192,57,43,0.5)':'rgba(201,168,76,0.18)')+';border-radius:12px;padding:11px 12px"><div style="font-size:22px;font-weight:700;font-family:\'Cormorant Garamond\',serif;line-height:1.1;color:'+(warn?'#E8846F':'#EFE7D3')+'">'+v+'<span style="font-size:var(--pt-micro,11px);font-weight:500;color:#B7AE98;font-family:Outfit"> '+u+'</span></div><div style="font-size:10px;letter-spacing:.04em;text-transform:uppercase;color:#A79E88;margin-top:4px;font-weight:600">'+l+'</div></div>'; }
 
 window._cuToggleRow=function(el){ var d=el.querySelector('.cu-det'); if(d) d.style.display=(d.style.display==='none'?'block':'none'); };
 window._cuClose=function(){ var o=document.getElementById('ovSyntheseCuivre'); if(o) o.classList.remove('open'); };
@@ -5912,12 +5912,12 @@ function _renderCuivre(){
           +'<div style="display:flex;justify-content:space-between;font-size:12px;padding:5px 0 0"><span style="color:var(--texte-doux)">Moyenne sur les ann\u00e9es suivies</span><span style="font-weight:700">'+r.roll.toFixed(2)+' kg/ha/an <span style="font-weight:500;color:var(--texte-doux)">sur '+_cuParcRollN(r.p.nom)+' an'+(_cuParcRollN(r.p.nom)>1?'n\u00e9es':'n\u00e9e')+'</span></span></div>':'');
       return '<div onclick="window._cuToggleRow(this)" style="border:1px solid var(--gris);border-radius:13px;padding:12px 14px;background:var(--bg-card);cursor:pointer;margin-bottom:9px">'
         +'<div style="display:flex;align-items:baseline;justify-content:space-between;gap:10px">'
-        +'<div><div style="font-family:\'Cormorant Garamond\',serif;font-size:17px;font-weight:600">'+esc(r.p.nom)+'</div>'
-        +'<div style="font-size:11px;color:var(--texte-doux)">'+((r.p.commune&&r.p.commune.nom)?'&#x1F4CD; '+esc(r.p.commune.nom)+' &#x00B7; ':'')+(parseFloat(r.p.surface)||0).toFixed(2)+' ha</div></div>'
-        +'<div style="font-size:16px;font-weight:700;white-space:nowrap;color:var('+col+')">'+r.shown.toFixed(2)+'<span style="font-size:11px;font-weight:500;color:var(--texte-doux)"> kg Cu/ha</span></div>'
+        +'<div><div style="font-family:\'Cormorant Garamond\',serif;font-size:var(--pt-sm,17px);font-weight:600">'+esc(r.p.nom)+'</div>'
+        +'<div style="font-size:var(--pt-micro,11px);color:var(--texte-doux)">'+((r.p.commune&&r.p.commune.nom)?'&#x1F4CD; '+esc(r.p.commune.nom)+' &#x00B7; ':'')+(parseFloat(r.p.surface)||0).toFixed(2)+' ha</div></div>'
+        +'<div style="font-size:16px;font-weight:700;white-space:nowrap;color:var('+col+')">'+r.shown.toFixed(2)+'<span style="font-size:var(--pt-micro,11px);font-weight:500;color:var(--texte-doux)"> kg Cu/ha</span></div>'
         +'</div>'
         +'<div style="position:relative;height:9px;border-radius:6px;background:var(--gris-clair);margin:10px 0 4px;overflow:hidden"><div style="position:absolute;left:0;top:0;bottom:0;border-radius:6px;width:'+pct+'%;background:var('+col+')"></div></div>'
-        +'<div style="display:flex;justify-content:space-between;font-size:11px;color:var(--texte-doux)"><span><b style="color:var('+st[1]+')">'+st[0]+'</b> &#x00B7; '+apps.length+' apport'+(apps.length>1?'s':'')+'</span><span>'+(r.ratio*100).toFixed(0)+'% du plafond</span></div>'
+        +'<div style="display:flex;justify-content:space-between;font-size:var(--pt-micro,11px);color:var(--texte-doux)"><span><b style="color:var('+st[1]+')">'+st[0]+'</b> &#x00B7; '+apps.length+' apport'+(apps.length>1?'s':'')+'</span><span>'+(r.ratio*100).toFixed(0)+'% du plafond</span></div>'
         +'<div class="cu-det" style="margin-top:11px;padding-top:11px;border-top:1px dashed var(--gris);display:none">'+det+'</div>'
         +'</div>';
     }).join('');
@@ -5933,11 +5933,11 @@ function _renderCuivre(){
       +kpis
       +'<div style="display:flex;align-items:center;gap:10px;flex-wrap:wrap;margin-top:13px;padding-top:13px;border-top:1px solid rgba(201,168,76,0.16)">'
       +'<span style="font-size:12px;color:#C9C0AC">Plafond&#xA0;:</span>'
-      +'<input type="number" step="0.5" value="'+ceil+'" onchange="window._cuSetPlafond(this.value)" style="width:60px;padding:6px 8px;border-radius:8px;border:1.5px solid rgba(201,168,76,0.35);background:rgba(0,0,0,0.25);color:#F3ECD8;font-family:Outfit;font-size:14px;text-align:center">'
+      +'<input type="number" step="0.5" value="'+ceil+'" onchange="window._cuSetPlafond(this.value)" style="width:60px;padding:6px 8px;border-radius:8px;border:1.5px solid rgba(201,168,76,0.35);background:rgba(0,0,0,0.25);color:#F3ECD8;font-family:Outfit;font-size:var(--pt-base,14px);text-align:center">'
       +'<span style="font-size:12px;color:#C9C0AC">kg&#xA0;Cu/ha/an</span>'
-      +'<span style="font-size:11px;color:#8C8470;flex:1;min-width:180px">'+domHint+'</span>'
+      +'<span style="font-size:var(--pt-micro,11px);color:#8C8470;flex:1;min-width:180px">'+domHint+'</span>'
       +'</div></div>'
-      +'<div style="font-size:12.5px;color:var(--texte-doux);margin:-4px 0 12px">Le plafond s\'applique <b>par hectare</b>. Touche une parcelle pour le d\u00e9tail des apports.</div>'
+      +'<div style="font-size:var(--pt-txt,12.5px);color:var(--texte-doux);margin:-4px 0 12px">Le plafond s\'applique <b>par hectare</b>. Touche une parcelle pour le d\u00e9tail des apports.</div>'
       +'<div>'+listHtml+'</div>'
       +'<div style="font-size:12px;color:var(--texte-doux);background:var(--gris-clair);border-radius:10px;padding:10px 12px;margin-top:14px;line-height:1.55"><b>Lissage 7 ans.</b> La r\u00e8gle UE autorise '+_cuPlafond7()+'&#x202F;kg&#x202F;Cu/ha sur 7 ans ('+_cuPlafond()+' kg/ha/an en moyenne) : une ann\u00e9e peut d\u00e9passer 4 tant que la moyenne glissante reste sous le plafond. Bascule \u00ab Liss\u00e9 7 ans \u00bb pour la moyenne par parcelle, calcul\u00e9e sur les ann\u00e9es <b>couvertes par votre registre</b> \u2014 une ann\u00e9e sans cuivre \u00e0 l\u2019int\u00e9rieur de cette p\u00e9riode compte pour z\u00e9ro, les ann\u00e9es d\u2019avant votre premi\u00e8re trace ne comptent pas.</div>';
   }
@@ -5951,8 +5951,8 @@ function _renderCuivre(){
     +'<div style="font-size:12px;color:var(--texte-doux);margin-top:3px">'+esc(dom)+' &#x00B7; Campagne '+year+' &#x00B7; '+parc.length+' parcelles</div></div>'
     +'<div style="flex:1;overflow-y:auto;padding:16px 20px 0">'+body+'</div>'
     +'<div style="padding:12px 20px 20px;border-top:1px solid var(--gris);flex-shrink:0;display:flex;gap:10px">'
-    +(treats.length?'<button onclick="if(window.exportPDFPhyto)window.exportPDFPhyto()" style="flex:1;padding:13px;border-radius:12px;border:none;background:var(--vert);color:#fff;font-family:Outfit;font-size:14px;font-weight:700;cursor:pointer"><span>&#x1F4C4; Registre PDF</span></button>':'')
-    +'<button onclick="window._cuClose()" style="flex:1;padding:13px;border-radius:12px;border:1.5px solid var(--gris);background:transparent;color:var(--texte);font-family:Outfit;font-size:14px;font-weight:600;cursor:pointer"><span>Fermer</span></button>'
+    +(treats.length?'<button onclick="if(window.exportPDFPhyto)window.exportPDFPhyto()" style="flex:1;padding:13px;border-radius:12px;border:none;background:var(--vert);color:#fff;font-family:Outfit;font-size:var(--pt-base,14px);font-weight:700;cursor:pointer"><span>&#x1F4C4; Registre PDF</span></button>':'')
+    +'<button onclick="window._cuClose()" style="flex:1;padding:13px;border-radius:12px;border:1.5px solid var(--gris);background:transparent;color:var(--texte);font-family:Outfit;font-size:var(--pt-base,14px);font-weight:600;cursor:pointer"><span>Fermer</span></button>'
     +'</div>';
 }
 window._renderCuivre=_renderCuivre;
@@ -5967,8 +5967,8 @@ function _cuivrePdfSection(){
   if(!parc.length) return '';
   var maxV=Math.max.apply(null,parc.map(function(r){return r.cu;}));
   var th='style="border:1px solid #CFC9BC;padding:5px 7px;background:#efe7d8;font-size:10px;text-align:center;font-weight:700"';
-  var td='style="border:1px solid #E0DACD;padding:5px 7px;font-size:11px"';
-  var tdc='style="border:1px solid #E0DACD;padding:5px 7px;font-size:11px;text-align:center"';
+  var td='style="border:1px solid #E0DACD;padding:5px 7px;font-size:var(--pt-micro,11px)"';
+  var tdc='style="border:1px solid #E0DACD;padding:5px 7px;font-size:var(--pt-micro,11px);text-align:center"';
   var rows=parc.map(function(r){
     var ratio=ceil>0?r.cu/ceil:0;
     var col=ratio>1?'#C0392B':ratio>=0.875?'#B5621A':'#2C6E49';
@@ -5976,7 +5976,7 @@ function _cuivrePdfSection(){
     return '<tr><td '+td+'>'+esc(r.nom)+'</td><td '+tdc+'>'+r.ha.toFixed(2)+'</td><td '+tdc+'>'+r.n+'</td><td '+tdc.slice(0,-1)+';font-weight:700;color:'+col+'">'+r.cu.toFixed(2)+'</td><td '+tdc+'>'+ceil.toFixed(1)+'</td><td '+tdc.slice(0,-1)+';color:'+col+'">'+lab+'</td></tr>';
   }).join('');
   return '<div class="section"><div class="section-title">&#x1FA99; Synth\u00e8se cuivre m\u00e9tal '+year+' (contr\u00f4le bio)</div>'
-    +'<div style="font-size:11px;color:#555;margin-bottom:8px">Plafond de r\u00e9f\u00e9rence : <b>'+ceil.toFixed(1)+' kg Cu m\u00e9tal/ha/an</b> (UE : '+_cuPlafond7()+' kg/ha sur 7 ans, moyenne '+_cuPlafond()+' kg/ha/an). Cumul du cuivre m\u00e9tal apport\u00e9 par parcelle sur la campagne. Max parcelle : <b>'+maxV.toFixed(2)+' kg/ha</b>.</div>'
+    +'<div style="font-size:var(--pt-micro,11px);color:#555;margin-bottom:8px">Plafond de r\u00e9f\u00e9rence : <b>'+ceil.toFixed(1)+' kg Cu m\u00e9tal/ha/an</b> (UE : '+_cuPlafond7()+' kg/ha sur 7 ans, moyenne '+_cuPlafond()+' kg/ha/an). Cumul du cuivre m\u00e9tal apport\u00e9 par parcelle sur la campagne. Max parcelle : <b>'+maxV.toFixed(2)+' kg/ha</b>.</div>'
     +'<table style="width:100%;border-collapse:collapse"><thead><tr><th '+th+'>Parcelle</th><th '+th+'>ha</th><th '+th+'>Applic.</th><th '+th+'>Cu m\u00e9tal (kg/ha)</th><th '+th+'>Plafond</th><th '+th+'>Statut</th></tr></thead><tbody>'+rows+'</tbody></table></div>';
 }
 
@@ -6038,12 +6038,12 @@ function _tcvInjectCss(){
    +'.tcv-row.pick{cursor:pointer}'
    +'.tcv-row.on{border-color:var(--vert-med);background:rgba(61,107,39,0.08)}'
    +'.tcv-nom{font-weight:700;font-size:13.5px;color:var(--texte)}'
-   +'.tcv-sub{font-size:11px;color:var(--texte-doux);margin-top:2px}'
+   +'.tcv-sub{font-size:var(--pt-micro,11px);color:var(--texte-doux);margin-top:2px}'
    +'.tcv-h{font-size:13px;font-weight:800;color:var(--terre,#8A5A38);white-space:nowrap}'
    +'.tcv-tag{display:inline-block;font-size:9px;font-weight:700;border-radius:10px;padding:1px 7px;'
    +'margin-right:4px;background:rgba(61,107,39,0.14);color:var(--vert-med)}'
    +'.tcv-act{flex-shrink:0;width:30px;height:30px;border-radius:9px;display:flex;align-items:center;'
-   +'justify-content:center;font-size:17px;font-weight:700;color:var(--vert-med);'
+   +'justify-content:center;font-size:var(--pt-sm,17px);font-weight:700;color:var(--vert-med);'
    +'background:rgba(61,107,39,0.10);border:1px solid rgba(61,107,39,0.22)}'
    +'.tcv-act.ok{background:transparent;border-color:transparent}'
    +'.tcv-sec{font-size:10px;font-weight:700;text-transform:uppercase;letter-spacing:1px;'
@@ -6204,8 +6204,8 @@ function _tcvRender(){
   },0);
 
   var head=mode
-    ? '<div style="font-size:12.5px;color:var(--texte-doux);margin-bottom:12px;line-height:1.5">Choisis le travail de la convention qui correspond à <b>'+esc(_tcvTache)+'</b>. La tâche garde son nom, ses saisons et ses h/ha — le rattachement sert de <b>référence</b>.</div>'
-    : '<div style="font-size:12.5px;color:var(--texte-doux);margin-bottom:12px;line-height:1.5">Les travaux du cycle de la vigne et leurs h/ha de référence.'+(admin?' Touche un travail pour l\'ajouter à la saison (ou revoir ses heures s\'il y est déjà).':'')+' Une tâche créée hors convention peut être rattachée depuis sa ligne dans Réglages.</div>';
+    ? '<div style="font-size:var(--pt-txt,12.5px);color:var(--texte-doux);margin-bottom:12px;line-height:1.5">Choisis le travail de la convention qui correspond à <b>'+esc(_tcvTache)+'</b>. La tâche garde son nom, ses saisons et ses h/ha — le rattachement sert de <b>référence</b>.</div>'
+    : '<div style="font-size:var(--pt-txt,12.5px);color:var(--texte-doux);margin-bottom:12px;line-height:1.5">Les travaux du cycle de la vigne et leurs h/ha de référence.'+(admin?' Touche un travail pour l\'ajouter à la saison (ou revoir ses heures s\'il y est déjà).':'')+' Une tâche créée hors convention peut être rattachée depuis sa ligne dans Réglages.</div>';
   if(mode&&!admin) head+='<div style="font-size:12px;color:var(--bordeaux,#7A1020);margin-bottom:10px">Le rattachement est réservé à l\'administrateur.</div>';
 
   // Bandeau densite : le bareme vaut pour 10 000 pieds/ha. On dit d'ou vient le chiffre,
@@ -6221,7 +6221,7 @@ function _tcvRender(){
   var _chip=function(k,o){
     var on=(k===_bk);
     return '<span'+(admin?(' onclick="window._tcvSetBareme(\''+k+'\')"'):'')
-      +' style="display:inline-block;font-size:11px;font-weight:700;border-radius:12px;padding:3px 10px;'
+      +' style="display:inline-block;font-size:var(--pt-micro,11px);font-weight:700;border-radius:12px;padding:3px 10px;'
       +'margin:0 5px 5px 0;cursor:'+(admin?'pointer':'default')+';border:1px solid '
       +(on?'var(--vert-med)':'var(--gris-clair)')+';background:'+(on?'rgba(61,107,39,0.12)':'transparent')
       +';color:'+(on?'var(--vert-med)':'var(--texte-doux)')+'">'+esc(o.court||k)+'</span>';
@@ -6260,8 +6260,8 @@ function _tcvRender(){
     +'<div style="font-size:12px;color:var(--texte-doux);margin-top:3px">'+(mode?esc(_tcvTache):'Travaux de la vigne · h/ha de référence')+'</div></div>'
     +'<div style="flex:1;overflow-y:auto;padding:16px 20px 0">'+body+'</div>'
     +'<div style="padding:12px 20px 20px;border-top:1px solid var(--gris);flex-shrink:0;display:flex;gap:10px">'
-    +((mode&&cur&&admin)?'<button onclick="window._tcvPick(\'\')" style="flex:1;padding:13px;border-radius:12px;border:1.5px solid var(--gris);background:transparent;color:var(--bordeaux,#7A1020);font-family:Outfit;font-size:14px;font-weight:700;cursor:pointer"><span>'+_mvIcon('retour',16)+' Détacher</span></button>':'')
-    +'<button onclick="window._tcvClose()" style="flex:1;padding:13px;border-radius:12px;border:1.5px solid var(--gris);background:transparent;color:var(--texte);font-family:Outfit;font-size:14px;font-weight:600;cursor:pointer"><span>Fermer</span></button>'
+    +((mode&&cur&&admin)?'<button onclick="window._tcvPick(\'\')" style="flex:1;padding:13px;border-radius:12px;border:1.5px solid var(--gris);background:transparent;color:var(--bordeaux,#7A1020);font-family:Outfit;font-size:var(--pt-base,14px);font-weight:700;cursor:pointer"><span>'+_mvIcon('retour',16)+' Détacher</span></button>':'')
+    +'<button onclick="window._tcvClose()" style="flex:1;padding:13px;border-radius:12px;border:1.5px solid var(--gris);background:transparent;color:var(--texte);font-family:Outfit;font-size:var(--pt-base,14px);font-weight:600;cursor:pointer"><span>Fermer</span></button>'
     +'</div>';
 }
 
@@ -6306,11 +6306,11 @@ var MV_VGNDOC_CSS = ''
     + 'border-radius:7px;padding:9px 13px;margin-bottom:13px}'
   + '.cd-k{min-width:96px}'
   + '.cd-k b{display:block;font-size:8px;text-transform:uppercase;letter-spacing:.6px;color:#8B6020;margin-bottom:2px}'
-  + '.cd-k span{font-family:\'Cormorant Garamond\',Georgia,serif;font-size:20px;font-weight:700;color:#2D1B09;line-height:1.05}'
+  + '.cd-k span{font-family:\'Cormorant Garamond\',Georgia,serif;font-size:var(--pt-md,20px);font-weight:700;color:#2D1B09;line-height:1.05}'
   + '.cd-k span small{font-family:\'Outfit\',sans-serif;font-size:9px;font-weight:600;color:#7A6A4A}'
   + '.cd-k i{display:block;font-style:normal;font-size:8px;color:#7A7263;margin-top:2px;line-height:1.4}'
-  + 'h2{font-size:11px;color:#2D1B09;margin:15px 0 6px;text-transform:uppercase;letter-spacing:.9px}'
-  + 'table{width:100%;border-collapse:collapse;font-size:9.5px;margin-bottom:4px}'
+  + 'h2{font-size:var(--pt-micro,11px);color:#2D1B09;margin:15px 0 6px;text-transform:uppercase;letter-spacing:.9px}'
+  + 'table{width:100%;border-collapse:collapse;font-size:var(--pt-nano,9.5px);margin-bottom:4px}'
   + 'th{text-align:left;padding:5px 6px;background:#2D1B09;color:#F3E7CE;font-size:8px;'
     + 'text-transform:uppercase;letter-spacing:.4px;font-weight:700}'
   + 'td{border-bottom:1px solid #EDE7DA;padding:4px 6px;vertical-align:top}'
@@ -6318,7 +6318,7 @@ var MV_VGNDOC_CSS = ''
   + 'tr:nth-child(even) td{background:#FBFAF6}'
   + 'tr.tot td{background:#F4EEE2;font-weight:700;border-top:1.5px solid #C8A060;border-bottom:none}'
   + '.cd-note{font-size:8.5px;color:#7A7263;margin:2px 0 11px;line-height:1.5}'
-  + '.cd-vide{font-size:9.5px;color:#7A7263;margin:0 0 11px}'
+  + '.cd-vide{font-size:var(--pt-nano,9.5px);color:#7A7263;margin:0 0 11px}'
   // propre a ce document : les reperes manquants, et la barre d'avancement
   + '.vg-m{display:inline-block;font-size:7.5px;font-weight:700;letter-spacing:.3px;text-transform:uppercase;'
     + 'padding:1px 5px;border-radius:8px;background:#F6E4D2;color:#A2521A;margin-right:3px}'

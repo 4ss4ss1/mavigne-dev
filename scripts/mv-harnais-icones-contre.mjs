@@ -167,8 +167,13 @@ epreuve('un badge d\u2019un ton inexistant',
       la charte remanie : elle se met a viser le mauvais bloc, en silence. */
 epreuve('une regle CSS qui vise un enfant par son rang',
   () => ecrire('src/styles.css', lire('src/styles.css')
-        .replace('.home-w-compact #home-stat-content .mv-hn{font-size:27px;}',
-                 '.home-w-compact #home-stat-content>div:first-child{font-size:27px;}')),
+        /* ⚠️ L'ANCRE PORTE LE JETON, PAS LE LITTERAL. TYPO-1 a converti `27px` en
+           `var(--pt-xl,27px)` : l'ancienne ancre ne matchait plus, l'injection est
+           devenue MORTE et cette epreuve a annonce << RESTE VERT >> alors que le
+           harnais etait intact. C'est la seule des 22 qu'un lot de typographie
+           pouvait casser, et c'est la contre-epreuve elle-meme qui l'a dit. */
+        .replace('.home-w-compact #home-stat-content .mv-hn{font-size:var(--pt-xl,27px);}',
+                 '.home-w-compact #home-stat-content>div:first-child{font-size:var(--pt-xl,27px);}')),
   /par son rang/);
 
 /* 5sexies. Un ternaire dont les deux branches redeviennent identiques : le

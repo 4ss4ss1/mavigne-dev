@@ -115,7 +115,7 @@ function openEphyDetail(amm){
   var p = _ephyList().find(function(x){return x.amm===amm;}); if(!p) return;
   var statBox = p.statut==='ok'
     ? '<div class="oed-box" style="background:var(--vert-pale);grid-column:1/-1"><div class="oed-l">Statut</div><div class="oed-v" style="color:var(--vert)">'+_mvIcon('check',16)+' Autorisé à la vente et à l\'usage</div></div>'
-    : '<div class="oed-box" style="background:var(--tag-red-bg,#FEE8E8);grid-column:1/-1"><div class="oed-l">Statut</div><div class="oed-v" style="color:var(--rouge)">'+_mvIcon('interdit',16)+' Retiré — usage interdit</div>'+((p.retraitDate||p.ecoulement)?'<div style="font-size:11px;color:var(--texte-doux);margin-top:5px">'+(p.retraitDate?'Retrait : <b>'+_escHtml(p.retraitDate)+'</b>':'')+(p.ecoulement?' · Fin d\'écoulement : <b>'+_escHtml(p.ecoulement)+'</b>':'')+'</div>':'')+'</div>';
+    : '<div class="oed-box" style="background:var(--tag-red-bg,#FEE8E8);grid-column:1/-1"><div class="oed-l">Statut</div><div class="oed-v" style="color:var(--rouge)">'+_mvIcon('interdit',16)+' Retiré — usage interdit</div>'+((p.retraitDate||p.ecoulement)?'<div style="font-size:var(--pt-micro,11px);color:var(--texte-doux);margin-top:5px">'+(p.retraitDate?'Retrait : <b>'+_escHtml(p.retraitDate)+'</b>':'')+(p.ecoulement?' · Fin d\'écoulement : <b>'+_escHtml(p.ecoulement)+'</b>':'')+'</div>':'')+'</div>';
   var usages = (p.usages||[]).map(function(u){
     return '<div class="oed-usage"><div class="oed-uh"><span class="oed-uc">'+_escHtml(u.cible)+'</span><span class="oed-ud">'+_escHtml(u.dose)+'</span></div>'
       + '<div class="oed-ur"><span>DAR : <b>'+(u.dar==='—'?'—':u.dar+' j')+'</b></span><span>ZNT : <b>'+(u.znt==='—'?'—':u.znt+' m')+'</b></span><span>Réentrée : <b>'+dreEffectif(p.drae,p.type,p.dreH,p.dreHc).txt+'</b></span></div></div>';
@@ -137,7 +137,7 @@ function openEphyDetail(amm){
     var _dCol=_dreP.h>=48?'#7A1020':(_dreP.h>=24?'#B5621A':'var(--texte)');
     var _dBg=_dreP.h>=48?'#FEE8E8':(_dreP.h>=24?'#FFF3CD':'var(--gris-clair)');
     var _dNote=_dreP.defaut?'Minimum légal — aucune mention de danger ne majore ce délai (arrêté du 4 mai 2017).':'Délai majoré selon la classification de danger du produit (arrêté du 4 mai 2017).';
-    dreBox='<div class="oed-box" style="background:'+_dBg+';grid-column:1/-1"><div class="oed-l">Délai de rentrée</div><div class="oed-v" style="color:'+_dCol+';font-weight:700">'+_escHtml(_dreP.txtLong)+'</div><div style="font-size:11px;color:var(--texte-doux);margin-top:4px">'+_dNote+'</div></div>';
+    dreBox='<div class="oed-box" style="background:'+_dBg+';grid-column:1/-1"><div class="oed-l">Délai de rentrée</div><div class="oed-v" style="color:'+_dCol+';font-weight:700">'+_escHtml(_dreP.txtLong)+'</div><div style="font-size:var(--pt-micro,11px);color:var(--texte-doux);margin-top:4px">'+_dNote+'</div></div>';
   }
   document.getElementById('oed-body').innerHTML =
       '<div class="oed-grid">'+statBox+dreBox+'<div class="oed-box" style="grid-column:1/-1"><div class="oed-l">Substance active</div><div class="oed-v">'+_escHtml(p.sub||'—')+'</div></div>'+noms2Html+'</div>'
@@ -189,16 +189,16 @@ function renderPhytoTrac(){
     const meta3=(parc||cond);
     return `<div class="phyto-row" onclick="openTraitDetail(${idx})" style="background:var(--bg-card);border-radius:12px;padding:12px 14px;margin-bottom:8px;border:1px solid var(--gris-clair);cursor:pointer">
       <div style="display:flex;justify-content:space-between;align-items:center;gap:8px;margin-bottom:6px">
-        <span style="font-size:14px;font-weight:600;color:var(--texte)">${_escHtml(t.produit)}</span>
-        <span style="font-size:11px;color:var(--texte-doux);white-space:nowrap">${_escHtml(t.date)}</span>
+        <span style="font-size:var(--pt-base,14px);font-weight:600;color:var(--texte)">${_escHtml(t.produit)}</span>
+        <span style="font-size:var(--pt-micro,11px);color:var(--texte-doux);white-space:nowrap">${_escHtml(t.date)}</span>
       </div>
       <div style="display:flex;flex-wrap:wrap;gap:6px;align-items:center;${meta3?'margin-bottom:6px':''}">
         <span style="font-size:10px;font-weight:700;padding:2px 8px;border-radius:7px;background:${tb};color:${tc}">${emj}${_escHtml(m.type||'—')}</span>
-        ${m.dose?'<span style="font-size:11px;color:var(--texte-doux);background:var(--gris-clair);padding:2px 8px;border-radius:7px">'+_escHtml(m.dose)+'</span>':''}
+        ${m.dose?'<span style="font-size:var(--pt-micro,11px);color:var(--texte-doux);background:var(--gris-clair);padding:2px 8px;border-radius:7px">'+_escHtml(m.dose)+'</span>':''}
         ${darBadge}
         ${draeBadge}
       </div>
-      ${meta3?`<div style="display:flex;flex-wrap:wrap;gap:4px 12px;font-size:11px;color:var(--texte-doux);align-items:center">${parc?'<span>'+_escHtml(parc)+'</span>':''}${cond?'<span>'+_escHtml(cond)+'</span>':''}<span style="margin-left:auto;color:var(--gris)">›</span></div>`:''}
+      ${meta3?`<div style="display:flex;flex-wrap:wrap;gap:4px 12px;font-size:var(--pt-micro,11px);color:var(--texte-doux);align-items:center">${parc?'<span>'+_escHtml(parc)+'</span>':''}${cond?'<span>'+_escHtml(cond)+'</span>':''}<span style="margin-left:auto;color:var(--gris)">›</span></div>`:''}
     </div>`;
   }).join('');
 }
@@ -336,10 +336,10 @@ function renderRepBanner(){
   wrap.innerHTML='<div class="rep-banner" style="background:'+bgCouleur+';border:1px solid '+couleur+'">'
     +'<div style="font-weight:700;color:'+couleur+';font-size:13px;margin-bottom:6px;display:flex;justify-content:space-between;align-items:center">'
       +'<span>'+titre+' — '+nbJ+'j</span>'
-      +'<span style="font-size:11px;font-weight:400;color:var(--texte-doux)">'+_fmtDate(rep.depuis)+'</span>'
+      +'<span style="font-size:var(--pt-micro,11px);font-weight:400;color:var(--texte-doux)">'+_fmtDate(rep.depuis)+'</span>'
     +'</div>'
     +'<div style="font-size:12px;margin-bottom:4px">'+_escHtml(rep.motif)+'</div>'
-    +(retour?'<div style="font-size:11px;color:var(--texte-doux);margin-bottom:12px">Retour prévu : <strong style="color:'+couleur+'">'+_fmtDate(retour)+'</strong>'+depasseInfo+'</div>':'<div style="margin-bottom:12px"></div>')
+    +(retour?'<div style="font-size:var(--pt-micro,11px);color:var(--texte-doux);margin-bottom:12px">Retour prévu : <strong style="color:'+couleur+'">'+_fmtDate(retour)+'</strong>'+depasseInfo+'</div>':'<div style="margin-bottom:12px"></div>')
     +((isAdmin()||isTractoriste())?('<div class="rep-banner-btns">'
       +'<button class="rep-banner-btn" style="border:1.5px solid var(--vert);background:transparent;color:var(--vert)" onclick="retourReparateur()">Rentré</button>'
       +'<button class="rep-banner-btn" style="border:1.5px solid var(--orange);background:transparent;color:var(--orange)" onclick="_openOv(\'ovReporter\')">Reporter</button>'
@@ -536,7 +536,7 @@ function _pleinBlocEnsure(pfx){
       '<div id="'+_pleinWrapId(pfx)+'" style="display:none;margin:-2px 0 14px">'
       +'<div class="fl">Litres mis dans le r\u00e9servoir</div>'
       +'<input type="number" class="fi ac" id="'+_pleinInpId(pfx)+'" inputmode="decimal" min="0.1" step="0.1" placeholder="ex. 40">'
-      +'<div id="'+pfx+'-plein-l-note" style="font-size:11px;color:var(--texte-doux);margin:6px 2px 0;line-height:1.45"></div>'
+      +'<div id="'+pfx+'-plein-l-note" style="font-size:var(--pt-micro,11px);color:var(--texte-doux);margin:6px 2px 0;line-height:1.45"></div>'
       +'</div>');
     w=document.getElementById(_pleinWrapId(pfx));
   }
@@ -761,8 +761,8 @@ function _gnrCardHtml(){
       +_gnrField('gnr-lvl','Litrage restant (L)',gg.niveau)
       +_gnrField('gnr-seuil','Seuil d\u2019alerte (L)',gg.seuil)
       +'<div style="display:flex;gap:8px;margin-top:6px">'
-      +'<button onclick="window.saveGnr()" style="flex:1;padding:11px;border:none;border-radius:10px;background:var(--vert-med);color:#fff;font-family:\'Outfit\',sans-serif;font-size:14px;font-weight:600;cursor:pointer;min-height:44px">Enregistrer</button>'
-      +'<button onclick="window.cancelGnrEdit()" style="padding:11px 16px;border:1px solid var(--gris);border-radius:10px;background:transparent;color:var(--texte-doux);font-family:\'Outfit\',sans-serif;font-size:14px;cursor:pointer;min-height:44px">Annuler</button>'
+      +'<button onclick="window.saveGnr()" style="flex:1;padding:11px;border:none;border-radius:10px;background:var(--vert-med);color:#fff;font-family:\'Outfit\',sans-serif;font-size:var(--pt-base,14px);font-weight:600;cursor:pointer;min-height:44px">Enregistrer</button>'
+      +'<button onclick="window.cancelGnrEdit()" style="padding:11px 16px;border:1px solid var(--gris);border-radius:10px;background:transparent;color:var(--texte-doux);font-family:\'Outfit\',sans-serif;font-size:var(--pt-base,14px);cursor:pointer;min-height:44px">Annuler</button>'
       +'</div></div>';
   }
   if(_gnrAct==='appoint' && isAdmin()){
@@ -771,31 +771,31 @@ function _gnrCardHtml(){
     var lCss='font-size:12px;color:var(--texte-doux);margin-bottom:3px';
     return '<div class="ent-resume-card" style="margin-bottom:12px">'
       +'<div style="font-size:13px;font-weight:600;color:var(--texte);margin-bottom:4px">Appoint de cuve</div>'
-      +'<div style="font-size:11px;color:var(--texte-doux);margin-bottom:10px">Livraison ou remplissage de la cuve du domaine. Le prix saisi ici alimente le coût du GNR dans Pilotage › Économie.</div>'
+      +'<div style="font-size:var(--pt-micro,11px);color:var(--texte-doux);margin-bottom:10px">Livraison ou remplissage de la cuve du domaine. Le prix saisi ici alimente le coût du GNR dans Pilotage › Économie.</div>'
       +'<div style="margin-bottom:8px"><div style="'+lCss+'">Litres livrés</div><input type="number" id="gnr-ap-l" min="1" step="1" inputmode="decimal" placeholder="ex. 500" style="'+fCss+'"></div>'
       +'<div style="margin-bottom:8px"><div style="'+lCss+'">Prix du litre (€/L)</div><input type="number" id="gnr-ap-pu" min="0" step="0.001" inputmode="decimal" placeholder="ex. 1,24" style="'+fCss+'"></div>'
       +'<div style="margin-bottom:8px"><div style="'+lCss+'">Date</div><input type="date" id="gnr-ap-d" value="'+_gnrTodayISO()+'" style="'+fCss+'"></div>'
       +'<div style="margin-bottom:8px"><div style="'+lCss+'">Fournisseur <span style="opacity:.7">(facultatif)</span></div><input type="text" id="gnr-ap-f" placeholder="ex. coopérative" style="'+fCss+'"></div>'
-      +'<div style="font-size:11px;color:var(--texte-doux);margin:2px 0 10px">Cuve : '+_gnrNum(rest)+' / '+_gnrNum(cap)+' L avant appoint.</div>'
+      +'<div style="font-size:var(--pt-micro,11px);color:var(--texte-doux);margin:2px 0 10px">Cuve : '+_gnrNum(rest)+' / '+_gnrNum(cap)+' L avant appoint.</div>'
       +'<div style="display:flex;gap:8px">'
-      +'<button onclick="window.saveGnrAppoint()" style="flex:1;padding:11px;border:none;border-radius:10px;background:var(--vert-med);color:#fff;font-family:\'Outfit\',sans-serif;font-size:14px;font-weight:600;cursor:pointer;min-height:44px">Enregistrer l’appoint</button>'
-      +'<button onclick="window.cancelGnrAct()" style="padding:11px 16px;border:1px solid var(--gris);border-radius:10px;background:transparent;color:var(--texte-doux);font-family:\'Outfit\',sans-serif;font-size:14px;cursor:pointer;min-height:44px">Annuler</button>'
+      +'<button onclick="window.saveGnrAppoint()" style="flex:1;padding:11px;border:none;border-radius:10px;background:var(--vert-med);color:#fff;font-family:\'Outfit\',sans-serif;font-size:var(--pt-base,14px);font-weight:600;cursor:pointer;min-height:44px">Enregistrer l’appoint</button>'
+      +'<button onclick="window.cancelGnrAct()" style="padding:11px 16px;border:1px solid var(--gris);border-radius:10px;background:transparent;color:var(--texte-doux);font-family:\'Outfit\',sans-serif;font-size:var(--pt-base,14px);cursor:pointer;min-height:44px">Annuler</button>'
       +'</div></div>';
   }
   if(_gnrAct==='corr' && canEdit){
     var gc=g||{};
     return '<div class="ent-resume-card" style="margin-bottom:12px">'
       +'<div style="font-size:13px;font-weight:600;color:var(--texte);margin-bottom:4px">Corriger le niveau</div>'
-      +'<div style="font-size:11px;color:var(--texte-doux);margin-bottom:10px">À utiliser si un plein n\'a pas été noté.</div>'
+      +'<div style="font-size:var(--pt-micro,11px);color:var(--texte-doux);margin-bottom:10px">À utiliser si un plein n\'a pas été noté.</div>'
       +_gnrField('gnr-corr','Litrage restant réel (L)',gc.niveau)
       +'<div style="display:flex;gap:8px;margin-top:6px">'
-      +'<button onclick="window.saveGnrCorr()" style="flex:1;padding:11px;border:none;border-radius:10px;background:var(--vert-med);color:#fff;font-family:\'Outfit\',sans-serif;font-size:14px;font-weight:600;cursor:pointer;min-height:44px">Enregistrer</button>'
-      +'<button onclick="window.cancelGnrAct()" style="padding:11px 16px;border:1px solid var(--gris);border-radius:10px;background:transparent;color:var(--texte-doux);font-family:\'Outfit\',sans-serif;font-size:14px;cursor:pointer;min-height:44px">Annuler</button>'
+      +'<button onclick="window.saveGnrCorr()" style="flex:1;padding:11px;border:none;border-radius:10px;background:var(--vert-med);color:#fff;font-family:\'Outfit\',sans-serif;font-size:var(--pt-base,14px);font-weight:600;cursor:pointer;min-height:44px">Enregistrer</button>'
+      +'<button onclick="window.cancelGnrAct()" style="padding:11px 16px;border:1px solid var(--gris);border-radius:10px;background:transparent;color:var(--texte-doux);font-family:\'Outfit\',sans-serif;font-size:var(--pt-base,14px);cursor:pointer;min-height:44px">Annuler</button>'
       +'</div></div>';
   }
   if(!g||!g.capacite){
     return '<div class="ent-resume-card" style="margin-bottom:12px;display:flex;align-items:center;justify-content:space-between;gap:10px">'
-      +'<div><div style="font-size:13px;font-weight:600;color:var(--texte)">'+_mvIcon('carburant',16)+' Cuve GNR</div><div style="font-size:11px;color:var(--texte-doux);margin-top:2px">Non renseign\u00e9e</div></div>'
+      +'<div><div style="font-size:13px;font-weight:600;color:var(--texte)">'+_mvIcon('carburant',16)+' Cuve GNR</div><div style="font-size:var(--pt-micro,11px);color:var(--texte-doux);margin-top:2px">Non renseign\u00e9e</div></div>'
       +(canEdit?'<button onclick="window.openGnrEdit()" style="padding:8px 14px;border:1px solid var(--acier);border-radius:8px;background:transparent;color:var(--acier);font-family:\'Outfit\',sans-serif;font-size:12px;font-weight:600;cursor:pointer;min-height:44px">Renseigner</button>':'')
       +'</div>';
   }
@@ -804,14 +804,14 @@ function _gnrCardHtml(){
   return '<div class="ent-resume-card" style="margin-bottom:12px">'
     +'<div style="display:flex;align-items:center;justify-content:space-between;gap:10px">'
       +'<div><div style="font-size:13px;font-weight:600;color:var(--texte)">'+_mvIcon('carburant',16)+' Cuve GNR'+(low?' <span style="color:var(--rouge);font-weight:700">'+_mvIcon('alerte',16)+' bas</span>':'')+'</div>'
-      +'<div style="font-size:11px;color:var(--texte-doux);margin-top:2px">'+_gnrNum(g.niveau)+' / '+_gnrNum(g.capacite)+' L \u00b7 '+pc+' %'+(g.maj?(' \u00b7 maj '+_fmtDate(g.maj)):'')+'</div></div>'
+      +'<div style="font-size:var(--pt-micro,11px);color:var(--texte-doux);margin-top:2px">'+_gnrNum(g.niveau)+' / '+_gnrNum(g.capacite)+' L \u00b7 '+pc+' %'+(g.maj?(' \u00b7 maj '+_fmtDate(g.maj)):'')+'</div></div>'
       +(canEdit?'<button onclick="window.openGnrEdit()" style="padding:8px 12px;border:1px solid var(--gris);border-radius:8px;background:transparent;color:var(--texte-doux);font-family:\'Outfit\',sans-serif;font-size:13px;cursor:pointer;min-width:44px;min-height:44px">'+_mvIcon('crayon',18)+'</button>':'')
     +'</div>'
     +'<div style="height:8px;border-radius:5px;background:var(--gris-clair);overflow:hidden;margin-top:9px"><i style="display:block;height:100%;width:'+Math.min(pc,100)+'%;background:'+col+'"></i></div>'
     +(isAdmin()?_gnrPrixLigne():'')
     +(canEdit?'<div style="display:flex;gap:8px;margin-top:11px">'
-      +(isAdmin()?'<button onclick="window.openGnrAppoint()" style="flex:1;padding:9px;border:1px solid var(--vert-med);border-radius:9px;background:transparent;color:var(--vert-med);font-family:\'Outfit\',sans-serif;font-size:12.5px;font-weight:600;cursor:pointer;min-height:44px">Appoint de cuve</button>':'')
-      +'<button onclick="window.openGnrCorr()" style="flex:1;padding:9px;border:1px solid var(--gris);border-radius:9px;background:transparent;color:var(--texte-doux);font-family:\'Outfit\',sans-serif;font-size:12.5px;font-weight:600;cursor:pointer;min-height:44px">Corriger le niveau</button>'
+      +(isAdmin()?'<button onclick="window.openGnrAppoint()" style="flex:1;padding:9px;border:1px solid var(--vert-med);border-radius:9px;background:transparent;color:var(--vert-med);font-family:\'Outfit\',sans-serif;font-size:var(--pt-txt,12.5px);font-weight:600;cursor:pointer;min-height:44px">Appoint de cuve</button>':'')
+      +'<button onclick="window.openGnrCorr()" style="flex:1;padding:9px;border:1px solid var(--gris);border-radius:9px;background:transparent;color:var(--texte-doux);font-family:\'Outfit\',sans-serif;font-size:var(--pt-txt,12.5px);font-weight:600;cursor:pointer;min-height:44px">Corriger le niveau</button>'
     +'</div>':'')
   +'</div>';
 }
@@ -824,8 +824,8 @@ function _revCardHtml(t){
       +_gnrField('rev-comp','Compteur actuel (h)',comp)
       +_gnrField('rev-target','Prochaine r\u00e9vision \u00e0 (h)',rev)
       +'<div style="display:flex;gap:8px;margin-top:6px">'
-      +'<button onclick="window.saveRev()" style="flex:1;padding:11px;border:none;border-radius:10px;background:var(--vert-med);color:#fff;font-family:\'Outfit\',sans-serif;font-size:14px;font-weight:600;cursor:pointer;min-height:44px">Enregistrer</button>'
-      +'<button onclick="window.cancelRevEdit()" style="padding:11px 16px;border:1px solid var(--gris);border-radius:10px;background:transparent;color:var(--texte-doux);font-family:\'Outfit\',sans-serif;font-size:14px;cursor:pointer;min-height:44px">Annuler</button>'
+      +'<button onclick="window.saveRev()" style="flex:1;padding:11px;border:none;border-radius:10px;background:var(--vert-med);color:#fff;font-family:\'Outfit\',sans-serif;font-size:var(--pt-base,14px);font-weight:600;cursor:pointer;min-height:44px">Enregistrer</button>'
+      +'<button onclick="window.cancelRevEdit()" style="padding:11px 16px;border:1px solid var(--gris);border-radius:10px;background:transparent;color:var(--texte-doux);font-family:\'Outfit\',sans-serif;font-size:var(--pt-base,14px);cursor:pointer;min-height:44px">Annuler</button>'
       +'</div></div>';
   }
   var hasComp=(comp!=null&&comp!==''&&rev!=null&&rev!=='');
@@ -834,7 +834,7 @@ function _revCardHtml(t){
   else { sub='\u00c0 renseigner'; }
   return '<div class="ent-resume-card" style="margin-bottom:12px;display:flex;align-items:center;justify-content:space-between;gap:10px">'
     +'<div><div style="font-size:13px;font-weight:600;color:var(--texte)">'+_mvIcon('engrenage',16)+' Prochaine r\u00e9vision</div>'
-    +'<div style="font-size:11px;color:'+col+';font-weight:'+fw+';margin-top:2px">'+sub+'</div></div>'
+    +'<div style="font-size:var(--pt-micro,11px);color:'+col+';font-weight:'+fw+';margin-top:2px">'+sub+'</div></div>'
     +(canEdit?'<button onclick="window.openRevEdit()" style="padding:8px 12px;border:1px solid var(--gris);border-radius:8px;background:transparent;color:var(--texte-doux);font-family:\'Outfit\',sans-serif;font-size:13px;cursor:pointer;min-width:44px;min-height:44px">'+_mvIcon('crayon',18)+'</button>':'')
   +'</div>';
 }
@@ -850,12 +850,12 @@ function _gnrPrixLigne(){
   var P=_gnrPaie(); if(!P) return '';
   var ap=(P.gnr_appoints||[]).filter(function(a){return a&&Number(a.l)>0;});
   var pmp=(window._mvPaieGnrPMP?window._mvPaieGnrPMP():0);
-  if(!ap.length && !(pmp>0)) return '<div style="font-size:11px;color:var(--texte-doux);margin-top:9px">Prix du GNR non renseign\u00e9 \u2014 il se saisit au prochain appoint.</div>';
+  if(!ap.length && !(pmp>0)) return '<div style="font-size:var(--pt-micro,11px);color:var(--texte-doux);margin-top:9px">Prix du GNR non renseign\u00e9 \u2014 il se saisit au prochain appoint.</div>';
   var last=ap.slice().sort(function(a,b){return String(a.d||'').localeCompare(String(b.d||''));}).pop();
   var t='';
   if(last) t+='Dernier appoint : '+_gnrNum(last.l)+' L'+(Number(last.pu)>0?(' \u00e0 '+_gnrEur(last.pu)+' \u20AC/L'):'')+(last.d?(' \u00b7 '+_fmtDate(last.d)):'');
   if(pmp>0) t+=(t?' \u00b7 ':'')+'moyenne '+_gnrEur(pmp)+' \u20AC/L';
-  return '<div style="font-size:11px;color:var(--texte-doux);margin-top:9px">'+_escHtml(t)+'</div>';
+  return '<div style="font-size:var(--pt-micro,11px);color:var(--texte-doux);margin-top:9px">'+_escHtml(t)+'</div>';
 }
 function openGnrAppoint(){
   if(!isAdmin()){showToast('R\u00e9serv\u00e9 \u00e0 l\u2019admin','#C0392B');return;}
@@ -1003,7 +1003,7 @@ function renderEntretiens(){
     var ok=!!d;
     return '<div class="ent-resume-cell">'
       +'<div>'
-        +'<div style="font-size:11px;color:var(--texte-doux);line-height:1.2">'+fi.label+'</div>'
+        +'<div style="font-size:var(--pt-micro,11px);color:var(--texte-doux);line-height:1.2">'+fi.label+'</div>'
         +'<div style="font-size:12px;font-weight:600;color:'+(ok?'var(--vert)':'var(--rouge)')+';margin-top:1px">'+(ok?_fmtDate(d):'Jamais')+'</div>'
       +'</div></div>';
   }).join('');
@@ -1014,11 +1014,11 @@ function renderEntretiens(){
     var rows=anomActives.map(function(f){
       return '<div class="ent-ano-row">'
         +'<div style="font-size:12px;color:var(--texte);flex:1">'+f.anomalie+'</div>'
-        +'<div style="font-size:11px;color:var(--texte-doux);white-space:nowrap">'+_fmtDate(f.date)+' · '+f.conducteur+'</div>'
+        +'<div style="font-size:var(--pt-micro,11px);color:var(--texte-doux);white-space:nowrap">'+_fmtDate(f.date)+' · '+f.conducteur+'</div>'
       +'</div>';
     }).join('');
     anoBanner='<div class="ent-ano-banner">'
-      +'<div style="font-size:11px;font-weight:700;color:var(--rouge);margin-bottom:6px">Anomalie'+(anomActives.length>1?'s':'')+' en attente de traitement</div>'
+      +'<div style="font-size:var(--pt-micro,11px);font-weight:700;color:var(--rouge);margin-bottom:6px">Anomalie'+(anomActives.length>1?'s':'')+' en attente de traitement</div>'
       +rows
       +'<div style="font-size:10px;color:var(--texte-doux);margin-top:6px">Ouvrez les fiches pour marquer comme traitée →</div>'
     +'</div>';
@@ -1031,7 +1031,7 @@ function renderEntretiens(){
     +'<div class="ent-resume-hd">'
       +'<div>'
         +'<div style="font-size:13px;font-weight:600;color:var(--texte)">Derniers contrôles</div>'
-        +'<div style="font-size:11px;color:var(--texte-doux);margin-top:2px">'+nbF+' fiche'+(nbF>1?'s':'')+nbAnoText+'</div>'
+        +'<div style="font-size:var(--pt-micro,11px);color:var(--texte-doux);margin-top:2px">'+nbF+' fiche'+(nbF>1?'s':'')+nbAnoText+'</div>'
       +'</div>'
       +'<button onclick="openListeFiches()" style="padding:6px 12px;border-radius:8px;border:1.5px solid var(--acier);background:transparent;color:var(--acier);font-size:12px;font-weight:600;font-family:\'Outfit\',sans-serif;cursor:pointer;min-height:44px">Voir tout →</button>'
     +'</div>'
@@ -1248,9 +1248,9 @@ function renderTracteurSet(){
     if(t.traitementOnly)badges+='<span style="font-size:9px;background:var(--orange-pale);color:var(--orange);border-radius:5px;padding:1px 6px;margin-left:4px">Traitement</span>';
     if(enR)badges+='<span style="font-size:9px;background:var(--rouge-pale);color:var(--rouge);border-radius:5px;padding:1px 6px;margin-left:4px">En réparation</span>';
     return '<div class="trac-set-card"><div style="display:flex;align-items:center;gap:12px">'+dot
-      +'<div><div style="display:flex;align-items:center;gap:4px"><span style="font-weight:700;font-size:14px">'+_escHtml(t.nom)+'</span>'+badges+'</div>'
+      +'<div><div style="display:flex;align-items:center;gap:4px"><span style="font-weight:700;font-size:var(--pt-base,14px)">'+_escHtml(t.nom)+'</span>'+badges+'</div>'
       +'<div style="font-size:12px;color:var(--texte-doux);margin-top:2px">'+_escHtml(t.modele||'—')+'</div>'
-      +'<div style="font-size:11px;color:'+couleurTracType(t.type)+';margin-top:2px">'+_escHtml(t.type)+'</div>'
+      +'<div style="font-size:var(--pt-micro,11px);color:'+couleurTracType(t.type)+';margin-top:2px">'+_escHtml(t.type)+'</div>'
     +'</div></div>'
     +'<button class="mv-gh" onclick="openEditTracteur(\''+t.id+'\')" title="Modifier" aria-label="Modifier">'+_mvIcon('crayon',18)+'</button>'
     +'</div>';
@@ -1560,7 +1560,7 @@ function renderTracteur(){
     return `<div class="scard${encCls}" ${clk}>`
       +`<div class="sc-hd"><div class="sc-info"><div class="mv-t" style="color:inherit">${_escHtml(s.activite)}</div><div class="sc-meta"><span class="sc-date">${_sessDates(s)}</span><span class="sc-cond">${_escHtml(s.conducteur)}</span>${tracBadge}${tracRepBadge}</div></div><div class="sc-right">${editBtn}${_mvBadge(s.statut, isEnc?'ambre':'vert')}<div class="mv-n" style="color:inherit;margin-top:4px">${pct}<span style="font-size:13px">%</span></div></div></div>`
       +`<div class="sc-bwrap"><div class="sc-blbl"><span>Avancement domaine</span><span>${doneSurf.toFixed(2)}/${totalSurf.toFixed(2)} ha</span></div><div class="sc-btrack"><div class="sc-bfill ${isEnc?'sc-bfill-enc':''}" style="width:${pct}%"></div></div></div>`
-      +(s.note?`<div style="padding:0 16px 12px;font-size:11px;color:${isEnc?'rgba(255,255,255,0.45)':'var(--texte-doux)'}">« ${_escHtml(s.note)} »</div>`:'')
+      +(s.note?`<div style="padding:0 16px 12px;font-size:var(--pt-micro,11px);color:${isEnc?'rgba(255,255,255,0.45)':'var(--texte-doux)'}">« ${_escHtml(s.note)} »</div>`:'')
       +overrideAlert+hint
     +`</div>`;
   };
@@ -1577,7 +1577,7 @@ function renderTracteur(){
       var ty=_prodType[nom]||'';
       var col=_TC[ty]||'var(--texte-doux)',bg=_TB[ty]||'var(--gris-clair)';
       var emj='';
-      return '<span style="font-size:11px;font-weight:600;padding:3px 9px;border-radius:8px;white-space:nowrap;background:'+bg+';color:'+col+'">'+emj+_escHtml(nom)+'</span>';
+      return '<span style="font-size:var(--pt-micro,11px);font-weight:600;padding:3px 9px;border-radius:8px;white-space:nowrap;background:'+bg+';color:'+col+'">'+emj+_escHtml(nom)+'</span>';
     }).join('');
     return '<div class="scard scard-traitement">'
       +'<div class="sc-hd">'
@@ -1586,7 +1586,7 @@ function renderTracteur(){
       +'<div class="sc-act">Traitement '+npTag+abBadge+'</div>'
       +'<div class="sc-meta"><span class="sc-date">'+_fmtDate(g.date)+'</span>'
       +'<span class="sc-cond">'+_escHtml(condTxt)+'</span>'+passTag+'</div>'
-      +'<div style="font-size:11px;color:var(--texte-doux);margin-top:2px">'+nbProd+' produit'+(nbProd>1?'s':'')+' · '+g.nbParc+' parc.</div>'
+      +'<div style="font-size:var(--pt-micro,11px);color:var(--texte-doux);margin-top:2px">'+nbProd+' produit'+(nbProd>1?'s':'')+' · '+g.nbParc+' parc.</div>'
       +'</div>'
       +'<div class="sc-right"><div class="sc-st sster">Terminé</div><div class="sc-pct">100%</div></div>'
       +'</div>'
@@ -2394,7 +2394,7 @@ function _openRepBlock(actNom,defTracId){
   // Info répar
   var infoEl=document.getElementById('rb-info');
   infoEl.innerHTML='<div style="font-size:12px;color:var(--rouge,#E07070);font-weight:600;margin-bottom:4px">'+_escHtml(rep.motif||'Réparation en cours')+'</div>'
-    +'<div style="font-size:11px;color:rgba(255,255,255,0.45)">Depuis le '+_fmtDate(rep.depuis||'')+(rep.prevu_retour?' · Retour prévu le '+_fmtDate(rep.prevu_retour):'')+'</div>';
+    +'<div style="font-size:var(--pt-micro,11px);color:rgba(255,255,255,0.45)">Depuis le '+_fmtDate(rep.depuis||'')+(rep.prevu_retour?' · Retour prévu le '+_fmtDate(rep.prevu_retour):'')+'</div>';
   // Liste alternatifs
   var eligible=actNom==='Traitement'
     ?TRACTEURS_LIST.filter(function(t){return t.traitementOnly&&t.id!==defTracId;})
@@ -2408,8 +2408,8 @@ function _openRepBlock(actNom,defTracId){
     return '<div class="sd-trac-sheet-btn" data-tracid="'+t.id+'" onclick="_rbPick(this,\''+t.id+'\',\''+actNom+'\',\''+defTracId+'\')">'
       +'<div class="sd-trac-sheet-radio"></div>'
       +'<div style="flex:1;min-width:0">'
-        +'<div style="font-size:14px;font-weight:500;color:'+(rep2?'#E07070':'rgba(255,255,255,0.85)')+'">'+_escHtml(t.nom)+(t.modele?'<span style="font-weight:400;font-size:12px;margin-left:6px;color:rgba(255,255,255,0.4)">'+_escHtml(t.modele)+'</span>':'')+' </div>'
-        +'<div style="font-size:11px;margin-top:2px;color:'+col+'">'+_escHtml(t.type)+(rep2?' · <span style="color:var(--rouge,#E07070)">En répar.</span>':'')+'</div>'
+        +'<div style="font-size:var(--pt-base,14px);font-weight:500;color:'+(rep2?'#E07070':'rgba(255,255,255,0.85)')+'">'+_escHtml(t.nom)+(t.modele?'<span style="font-weight:400;font-size:12px;margin-left:6px;color:rgba(255,255,255,0.4)">'+_escHtml(t.modele)+'</span>':'')+' </div>'
+        +'<div style="font-size:var(--pt-micro,11px);margin-top:2px;color:'+col+'">'+_escHtml(t.type)+(rep2?' · <span style="color:var(--rouge,#E07070)">En répar.</span>':'')+'</div>'
       +'</div>'
     +'</div>';
   }).join('');
@@ -2541,8 +2541,8 @@ function openSdTracPicker(){
     return '<div class="sd-trac-sheet-btn'+(sel?' sel':'')+'" data-tracid="'+t.id+'" onclick="_sdPickTrac(this,\''+t.id+'\')">'
       +'<div class="sd-trac-sheet-radio"'+(sel?' style="border-color:var(--acier);background:var(--acier)"':'')+'>'+(sel?_mvIcon('check',16):'')+'</div>'
       +'<div style="flex:1;min-width:0">'
-        +'<div style="font-size:14px;font-weight:'+(sel?'700':'500')+';color:'+(rep?'#E07070':sel?'var(--acier)':'rgba(255,255,255,0.8)')+'">'+_escHtml(t.nom)+(t.modele?'<span style="font-weight:400;font-size:12px;margin-left:6px;color:rgba(255,255,255,0.4)">'+_escHtml(t.modele)+'</span>':'')+'</div>'
-        +'<div style="font-size:11px;margin-top:2px;display:flex;gap:6px"><span style="color:'+col+'">'+t.type+'</span>'+(isDefaut?'<span style="color:rgba(255,255,255,0.3)">· Défaut '+actNom+'</span>':'')+(rep?'<span style="color:var(--rouge,#E07070)">· En répar.</span>':'')+'</div>'
+        +'<div style="font-size:var(--pt-base,14px);font-weight:'+(sel?'700':'500')+';color:'+(rep?'#E07070':sel?'var(--acier)':'rgba(255,255,255,0.8)')+'">'+_escHtml(t.nom)+(t.modele?'<span style="font-weight:400;font-size:12px;margin-left:6px;color:rgba(255,255,255,0.4)">'+_escHtml(t.modele)+'</span>':'')+'</div>'
+        +'<div style="font-size:var(--pt-micro,11px);margin-top:2px;display:flex;gap:6px"><span style="color:'+col+'">'+t.type+'</span>'+(isDefaut?'<span style="color:rgba(255,255,255,0.3)">· Défaut '+actNom+'</span>':'')+(rep?'<span style="color:var(--rouge,#E07070)">· En répar.</span>':'')+'</div>'
       +'</div>'
       +(sel?'<span style="font-size:10px;font-weight:600;padding:2px 8px;border-radius:6px;background:rgba(255,255,255,0.08);color:rgba(255,255,255,0.4)">Actuel</span>':'')
     +'</div>';

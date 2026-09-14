@@ -241,7 +241,7 @@ function _tratResultRow(m, section, i){
     +'<div style="font-size:13px;font-weight:'+(isE?'600':'700')+';color:var(--texte);white-space:nowrap;overflow:hidden;text-overflow:ellipsis">'+(T[m.type]||'')+' '+_escHtml(m.nom)+'</div>'
     +'<div style="font-size:10px;color:var(--texte-doux);margin-top:1px">'+_escHtml(m.type||'')+(m.sub?' &#x00B7; '+_escHtml(m.sub):'')+'</div>'
     +'<div style="margin-top:4px;line-height:1.8">'+minis+stat+'</div>'
-    +'</div><span style="color:var(--acier-med);font-size:17px;font-weight:700">+</span></div>';
+    +'</div><span style="color:var(--acier-med);font-size:var(--pt-sm,17px);font-weight:700">+</span></div>';
 }
 function _tratSelectedHtml(){
   var m=_trat.selMeta; if(!m) return '';
@@ -252,15 +252,15 @@ function _tratSelectedHtml(){
   var duPre=dp.unit||_doseUnitDefault(m.type);
   var uOpts=['l/ha','kg/ha','g/ha'].map(function(u){return '<option value="'+u+'"'+(u===duPre?' selected':'')+'>'+u+'</option>';}).join('');
   return '<div style="background:rgba(74,158,224,0.08);border:1.5px solid rgba(74,158,224,0.3);border-radius:12px;padding:12px 13px;margin-top:10px">'
-    +'<div style="font-size:14px;font-weight:700;color:var(--texte);margin-bottom:'+(m.sub?'2':'10')+'px">'+(T[m.type]||'')+' '+_escHtml(m.nom)+'</div>'
-    +(m.sub?'<div style="font-size:11px;color:var(--texte-doux);margin-bottom:10px">'+_escHtml(m.sub)+'</div>':'')
+    +'<div style="font-size:var(--pt-base,14px);font-weight:700;color:var(--texte);margin-bottom:'+(m.sub?'2':'10')+'px">'+(T[m.type]||'')+' '+_escHtml(m.nom)+'</div>'
+    +(m.sub?'<div style="font-size:var(--pt-micro,11px);color:var(--texte-doux);margin-bottom:10px">'+_escHtml(m.sub)+'</div>':'')
     +'<div style="display:grid;grid-template-columns:1fr 1fr 1fr;gap:7px;margin-bottom:10px">'
     +'<div style="background:var(--gris-clair);border-radius:8px;padding:7px;text-align:center"><div style="font-size:9px;color:var(--texte-doux);text-transform:uppercase;font-weight:600">DAR</div><div style="font-size:18px;font-weight:700;font-family:&#39;Cormorant Garamond&#39;,serif;color:'+(m.dar>0?'var(--or)':'var(--vert-med)')+'">'+(m.dar>0?m.dar+'j':'Libre')+'</div></div>'
     +'<div style="background:var(--gris-clair);border-radius:8px;padding:7px;text-align:center"><div style="font-size:9px;color:var(--texte-doux);text-transform:uppercase;font-weight:600">DRE</div><div style="font-size:18px;font-weight:700;font-family:&#39;Cormorant Garamond&#39;,serif;color:'+((m.drae||0)>0?'var(--orange)':'var(--vert-med)')+'">'+(m.drae||0)+'h</div></div>'
     +'<div style="background:var(--gris-clair);border-radius:8px;padding:7px;text-align:center"><div style="font-size:9px;color:var(--texte-doux);text-transform:uppercase;font-weight:600">ZNT</div><div style="font-size:18px;font-weight:700;font-family:&#39;Cormorant Garamond&#39;,serif;color:'+(m.znt>5?'var(--rouge)':'var(--texte)')+'">'+(m.znt!=null?m.znt+'m':'&#8212;')+'</div></div>'
     +'</div>'
     +'<input id="trat-dose-input" type="text" placeholder="'+ph+'" value="'+_escHtml(m.dose||'')+'" style="width:100%;padding:11px 12px;border-radius:10px;background:var(--bg-card);border:1.5px solid var(--gris);color:var(--texte);font-family:Outfit,sans-serif;font-size:13px;margin-bottom:9px">'
-    +'<div style="display:flex;align-items:center;gap:7px;margin-bottom:5px"><span style="font-size:11px;color:var(--texte-doux);white-space:nowrap">Dose/ha</span>'
+    +'<div style="display:flex;align-items:center;gap:7px;margin-bottom:5px"><span style="font-size:var(--pt-micro,11px);color:var(--texte-doux);white-space:nowrap">Dose/ha</span>'
     +'<input id="trat-doseval-input" type="number" step="0.01" inputmode="decimal" placeholder="ex. 1.5" value="'+dvPre+'" style="flex:1;min-width:0;padding:9px 10px;border-radius:9px;background:var(--bg-card);border:1.5px solid var(--gris);color:var(--texte);font-family:Outfit,sans-serif;font-size:13px">'
     +'<select id="trat-doseunit-input" style="padding:9px 8px;border-radius:9px;background:var(--bg-card);border:1.5px solid var(--gris);color:var(--texte);font-family:Outfit,sans-serif;font-size:13px">'+uOpts+'</select></div>'
     +'<div style="font-size:10px;color:var(--texte-doux);margin-bottom:9px;line-height:1.4">&#x1F4E6; Quantit&#xe9; r&#xe9;elle appliqu&#xe9;e &#8212; alimente le bilan mati&#xe8;re de La R&#xe9;serve.</div>'
@@ -280,11 +280,11 @@ function _tratAddZoneHtml(){
     groups.forEach(function(g){
       var items=res.map(function(r,i){return {r:r,i:i};}).filter(function(o){return o.r.section===g[0];});
       if(!items.length) return;
-      html+='<div style="font-size:11px;color:var(--texte-doux);text-transform:uppercase;font-weight:600;letter-spacing:.03em;margin:6px 0 7px">'+g[1]+' ('+items.length+')</div>';
+      html+='<div style="font-size:var(--pt-micro,11px);color:var(--texte-doux);text-transform:uppercase;font-weight:600;letter-spacing:.03em;margin:6px 0 7px">'+g[1]+' ('+items.length+')</div>';
       html+=items.map(function(o){return _tratResultRow(o.r.meta,o.r.section,o.i);}).join('');
     });
-    if(_trat._ephyMore>0) html+='<div style="font-size:11px;color:var(--texte-doux);text-align:center;padding:3px">+ '+_trat._ephyMore+' autres &#8212; pr&#xe9;cisez la recherche</div>';
-    if(!q) html+='<div style="font-size:11px;color:var(--texte-doux);display:flex;gap:6px;align-items:flex-start;margin-top:6px;padding:8px 10px;background:rgba(74,158,224,0.06);border-radius:8px"><span>&#x1F50D;</span><span>Tapez un nom ou une substance pour chercher dans le <strong style="color:#7FC3E6">catalogue officiel E-Phy (ANSES)</strong>.</span></div>';
+    if(_trat._ephyMore>0) html+='<div style="font-size:var(--pt-micro,11px);color:var(--texte-doux);text-align:center;padding:3px">+ '+_trat._ephyMore+' autres &#8212; pr&#xe9;cisez la recherche</div>';
+    if(!q) html+='<div style="font-size:var(--pt-micro,11px);color:var(--texte-doux);display:flex;gap:6px;align-items:flex-start;margin-top:6px;padding:8px 10px;background:rgba(74,158,224,0.06);border-radius:8px"><span>&#x1F50D;</span><span>Tapez un nom ou une substance pour chercher dans le <strong style="color:#7FC3E6">catalogue officiel E-Phy (ANSES)</strong>.</span></div>';
     else if(!_trat._ephyOffline && res.some(function(r){return r.section==='ephy';})) html+='<div style="font-size:10px;color:var(--texte-doux);font-style:italic;margin-top:6px">&#x2139;&#xfe0f; Donn&#xe9;es E-Phy indicatives, non opposables &#8212; seul le registre officiel fait foi.</div>';
   }
   return html+_tratSelectedHtml();
@@ -313,9 +313,9 @@ function _tratCuFieldHtml(p,i){
   var pct=_cuPct(p.nom,p.sub);
   var hint=(pct!=null?'base ~'+pct+'% Cu, ajustable':'kg de cuivre m&#xe9;tal apport&#xe9;');
   return '<div style="margin-top:7px;display:flex;align-items:center;gap:8px;background:rgba(165,107,58,0.1);border:1px solid rgba(165,107,58,0.28);border-radius:8px;padding:6px 9px">'
-    +'<span style="font-size:11px;font-weight:700;color:#A56B3A;white-space:nowrap">&#x1FA99; Cuivre m&#xe9;tal</span>'
+    +'<span style="font-size:var(--pt-micro,11px);font-weight:700;color:#A56B3A;white-space:nowrap">&#x1FA99; Cuivre m&#xe9;tal</span>'
     +'<input id="trat-cu-'+i+'" type="number" step="0.05" inputmode="decimal" value="'+v+'" oninput="window._tratSetCu('+i+',this.value)" style="width:74px;padding:5px 7px;border-radius:7px;border:1.5px solid rgba(165,107,58,0.4);background:var(--bg-card);color:var(--texte);font-family:Outfit,sans-serif;font-size:13px;text-align:center">'
-    +'<span style="font-size:11px;color:var(--texte-doux);white-space:nowrap">kg/ha</span>'
+    +'<span style="font-size:var(--pt-micro,11px);color:var(--texte-doux);white-space:nowrap">kg/ha</span>'
     +'<span style="font-size:10px;color:var(--texte-doux);flex:1;text-align:right">'+hint+'</span>'
     +'</div>';
 }
@@ -363,7 +363,7 @@ function _tratParcRowsHtml(){var allParc=_tratParcAll();return allParc.map(funct
         return '<div onclick="window._tratToggleParc(\''+pnEsc+'\')" style="display:flex;align-items:center;gap:12px;padding:12px 14px;border-radius:12px;margin-bottom:8px;cursor:pointer;background:'+(sel?'rgba(61,122,39,0.1)':'var(--bg-card)')+';border:1.5px solid '+(sel?'var(--vert)':'var(--gris)')+';min-height:52px">'
           +'<div style="width:22px;height:22px;border-radius:6px;background:'+(sel?'var(--vert)':'transparent')+';border:2px solid '+(sel?'var(--vert)':'var(--gris)')+';display:flex;align-items:center;justify-content:center;flex-shrink:0">'+(sel?'<span style="color:#fff;font-size:13px;font-weight:700">&#x2713;</span>':'')+'</div>'
           +'<div style="flex:1"><div style="font-size:15px;font-family:\'Cormorant Garamond\',serif;font-weight:600;color:'+(sel?'var(--texte)':'var(--texte-doux)')+'">'+_escHtml(p.nom)+abBadge+'</div>'
-          +'<div style="font-size:11px;color:var(--texte-doux)">'+p.surface+' ha</div></div>'
+          +'<div style="font-size:var(--pt-micro,11px);color:var(--texte-doux)">'+p.surface+' ha</div></div>'
           +'<div style="font-size:13px;font-weight:700;color:'+(getPCls(p).pct===100?'var(--vert)':getPCls(p).pct>=75?'var(--or)':'var(--orange)')+'">'+getPCls(p).pct+'%</div>'
           +'</div>';
       }).join('');}
@@ -393,7 +393,7 @@ function _tratCuBudgetHtml(){
   var f1=function(v){return v.toFixed(1).replace('.',',');};
   var h='<div style="background:rgba(26,74,122,0.05);border:1.5px solid rgba(26,74,122,0.25);border-radius:12px;padding:14px;margin-bottom:14px">'
     +'<div style="font-size:13px;font-weight:700;color:#1A4A7A;margin-bottom:3px">&#x1F535; Budget cuivre m&#xe9;tal &#x00B7; bio</div>'
-    +'<div style="font-size:11px;color:var(--texte-doux);margin-bottom:12px">Plafond '+CU_MAX+'&#x202F;kg Cu/ha sur 7 ans ('+CU_AN+' kg/ha/an en moyenne). Ce traitement apporte <b style="color:#1A4A7A">+'+f1(add)+'&#x202F;kg/ha</b>.</div>';
+    +'<div style="font-size:var(--pt-micro,11px);color:var(--texte-doux);margin-bottom:12px">Plafond '+CU_MAX+'&#x202F;kg Cu/ha sur 7 ans ('+CU_AN+' kg/ha/an en moyenne). Ce traitement apporte <b style="color:#1A4A7A">+'+f1(add)+'&#x202F;kg/ha</b>.</div>';
   rows.forEach(function(r){
     var c=col(r.proj),pct=Math.min(100,r.proj/CU_MAX*100),pctNow=Math.min(100,r.cur/CU_MAX*100);
     h+='<div style="margin-bottom:10px">'
@@ -437,7 +437,7 @@ function _tratRender(){
   if(step===1){
     var prodsHtml=_trat.produits.length===0
       ?'<div style="font-size:12px;color:var(--texte-doux);font-style:italic;margin-bottom:8px">Aucun produit — ajoutez-en un ci-dessous</div>'
-      :'<div style="font-size:11px;color:var(--texte-doux);text-transform:uppercase;font-weight:600;margin-bottom:8px">'
+      :'<div style="font-size:var(--pt-micro,11px);color:var(--texte-doux);text-transform:uppercase;font-weight:600;margin-bottom:8px">'
         +_trat.produits.length+' produit'+(_trat.produits.length>1?'s':'')+' dans ce traitement</div>'
         +_trat.produits.map(function(p,i){
           var c=_pMeta(p);
@@ -447,10 +447,10 @@ function _tratRender(){
           if(c.drae>0)warns+='<span style="font-size:10px;color:var(--orange)">DRE '+c.drae+'h</span>';
           return '<div style="display:flex;align-items:center;gap:10px;background:var(--gris-clair);border-radius:10px;padding:10px 12px;margin-bottom:6px">'
             +'<div style="flex:1"><div style="font-size:13px;font-weight:700">'+_escHtml(p.nom)+'</div>'
-            +(p.dose?'<div style="font-size:11px;color:var(--texte-doux)">'+_escHtml(p.dose)+'</div>':'')
-            +(p.dose_val!=null?'<div style="font-size:11px;color:#A56B3A;font-weight:600">&#x1F4E6; '+p.dose_val+' '+_escHtml(p.dose_unit||'')+'</div>':'')
+            +(p.dose?'<div style="font-size:var(--pt-micro,11px);color:var(--texte-doux)">'+_escHtml(p.dose)+'</div>':'')
+            +(p.dose_val!=null?'<div style="font-size:var(--pt-micro,11px);color:#A56B3A;font-weight:600">&#x1F4E6; '+p.dose_val+' '+_escHtml(p.dose_unit||'')+'</div>':'')
             +(warns?'<div style="margin-top:3px">'+warns+'</div>':'')+(c.type==='Cuivre'?_tratCuFieldHtml(p,i):'')+'</div>'
-            +'<button onclick="window._tratRemoveProd(\''+p.nom.replace(/\\/g,'\\\\').replace(/'/g,"\\'")+'\')" style="min-width:44px;min-height:44px;border-radius:8px;border:none;background:rgba(192,57,43,0.2);color:var(--rouge);font-size:14px;cursor:pointer"><span>&#x2715;</span></button>'
+            +'<button onclick="window._tratRemoveProd(\''+p.nom.replace(/\\/g,'\\\\').replace(/'/g,"\\'")+'\')" style="min-width:44px;min-height:44px;border-radius:8px;border:none;background:rgba(192,57,43,0.2);color:var(--rouge);font-size:var(--pt-base,14px);cursor:pointer"><span>&#x2715;</span></button>'
             +'</div>';
         }).join('');
     if(maxDrae>0){
@@ -462,21 +462,21 @@ function _tratRender(){
       prodsHtml+='<div style="font-size:12px;color:#E0934A;background:rgba(184,90,26,0.08);border:1px solid rgba(184,90,26,0.25);border-radius:8px;padding:7px 10px;margin-bottom:10px">&#x1F41D; Insecticide : renseignez les horaires d&#39;application et respectez les pr&#xe9;cautions abeilles (hors floraison, en soir&#xe9;e).</div>';
     }
     var addHtml='<div style="background:var(--gris-clair);border:1.5px dashed var(--gris);border-radius:12px;padding:14px;margin-bottom:14px">'
-      +'<div style="font-size:11px;color:var(--texte-doux);text-transform:uppercase;font-weight:600;margin-bottom:8px">+ Ajouter un produit</div>'
+      +'<div style="font-size:var(--pt-micro,11px);color:var(--texte-doux);text-transform:uppercase;font-weight:600;margin-bottom:8px">+ Ajouter un produit</div>'
       +'<div style="position:relative;margin-bottom:10px">'
-      +'<span style="position:absolute;left:11px;top:11px;font-size:14px;pointer-events:none">&#x1F50D;</span>'
+      +'<span style="position:absolute;left:11px;top:11px;font-size:var(--pt-base,14px);pointer-events:none">&#x1F50D;</span>'
       +'<input id="trat-q" type="text" oninput="window._tratSearch(this.value)" autocomplete="off" placeholder="Vos produits + catalogue E-Phy ANSES&#x2026;" value="'+_escHtml(_trat.q||'')+'" style="width:100%;padding:11px 12px 11px 34px;border-radius:10px;background:var(--bg-card);border:1.5px solid var(--gris);color:var(--texte);font-family:Outfit,sans-serif;font-size:13px">'
       +'<button id="trat-q-clr" onclick="window._tratQClear()" style="position:absolute;right:6px;top:6px;width:30px;height:30px;border:none;background:transparent;color:var(--texte-doux);cursor:pointer;display:'+(_trat.q?'block':'none')+'"><span>&#x2715;</span></button>'
       +'</div>'
       +'<div id="trat-add-zone">'+_tratAddZoneHtml()+'</div>'
       +'</div>';
     var dateHtml='<div style="margin-bottom:14px">'
-      +'<div style="font-size:11px;color:var(--texte-doux);text-transform:uppercase;font-weight:600;margin-bottom:6px">Date du traitement</div>'
+      +'<div style="font-size:var(--pt-micro,11px);color:var(--texte-doux);text-transform:uppercase;font-weight:600;margin-bottom:6px">Date du traitement</div>'
       +'<input id="trat-date" type="date" style="width:100%;padding:11px 12px;border-radius:10px;background:var(--bg-card);border:1.5px solid var(--gris);color:var(--texte);font-family:Outfit,sans-serif;font-size:13px">'
       +'</div>';
     var conds=_conducteursDispo().filter(function(c){return c.statut!=='Archivé';});
     var condHtml='<div style="margin-bottom:14px">'
-      +'<div style="font-size:11px;color:var(--texte-doux);text-transform:uppercase;font-weight:600;margin-bottom:6px">Conducteur du tracteur</div>'
+      +'<div style="font-size:var(--pt-micro,11px);color:var(--texte-doux);text-transform:uppercase;font-weight:600;margin-bottom:6px">Conducteur du tracteur</div>'
       +'<div style="display:flex;gap:8px;flex-wrap:wrap">'
       +conds.map(function(c){
         var sel=_trat.conducteur===c.nom;
@@ -492,25 +492,25 @@ function _tratRender(){
     var reqHeureLabel='Horaires d&#39;application'+(needsHeure?' <span style="color:var(--rouge)">*requis</span>':'');
     var rglHtml='<div style="background:rgba(74,158,224,0.05);border:1.5px solid rgba(74,158,224,0.2);border-radius:12px;padding:14px;margin-bottom:14px">'
       +'<div style="font-size:12px;font-weight:700;color:var(--ink-info,#4A9EE0);margin-bottom:12px">&#x1F4CB; Champs r&#xe9;glementaires obligatoires</div>'
-      +'<div style="margin-bottom:12px"><div style="font-size:11px;color:var(--texte-doux);text-transform:uppercase;font-weight:600;margin-bottom:6px">'+reqStadeLabel+'</div>'
+      +'<div style="margin-bottom:12px"><div style="font-size:var(--pt-micro,11px);color:var(--texte-doux);text-transform:uppercase;font-weight:600;margin-bottom:6px">'+reqStadeLabel+'</div>'
       +'<select id="trat-stade" style="width:100%;padding:11px 12px;border-radius:10px;background:var(--bg-card);border:1.5px solid var(--gris);color:var(--texte);font-family:Outfit,sans-serif;font-size:13px;appearance:none">'
       +'<option value="">S&#xe9;lectionner le stade&#x2026;</option>'+stadeOpts+'</select></div>'
-      +'<div style="margin-bottom:12px"><div style="font-size:11px;color:var(--texte-doux);text-transform:uppercase;font-weight:600;margin-bottom:6px">'+reqHeureLabel+'</div>'
+      +'<div style="margin-bottom:12px"><div style="font-size:var(--pt-micro,11px);color:var(--texte-doux);text-transform:uppercase;font-weight:600;margin-bottom:6px">'+reqHeureLabel+'</div>'
       +'<div style="display:grid;grid-template-columns:1fr 1fr;gap:10px">'
-      +'<div><div style="font-size:11px;color:var(--texte-doux);margin-bottom:4px">D&#xe9;but</div>'
+      +'<div><div style="font-size:var(--pt-micro,11px);color:var(--texte-doux);margin-bottom:4px">D&#xe9;but</div>'
       +'<input id="trat-hd" type="time" style="width:100%;padding:11px 12px;border-radius:10px;background:var(--bg-card);border:1.5px solid var(--gris);color:var(--texte);font-family:Outfit,sans-serif;font-size:13px"></div>'
-      +'<div><div style="font-size:11px;color:var(--texte-doux);margin-bottom:4px">Fin</div>'
+      +'<div><div style="font-size:var(--pt-micro,11px);color:var(--texte-doux);margin-bottom:4px">Fin</div>'
       +'<input id="trat-hf" type="time" style="width:100%;padding:11px 12px;border-radius:10px;background:var(--bg-card);border:1.5px solid var(--gris);color:var(--texte);font-family:Outfit,sans-serif;font-size:13px"></div>'
       +'</div></div>'
-      +'<div style="margin-bottom:12px"><div style="font-size:11px;color:var(--texte-doux);text-transform:uppercase;font-weight:600;margin-bottom:6px">DRE anticip&#xe9; (si rentr&#xe9;e avant d&#xe9;lai standard)</div>'
+      +'<div style="margin-bottom:12px"><div style="font-size:var(--pt-micro,11px);color:var(--texte-doux);text-transform:uppercase;font-weight:600;margin-bottom:6px">DRE anticip&#xe9; (si rentr&#xe9;e avant d&#xe9;lai standard)</div>'
       +'<input id="trat-dre" type="text" placeholder="Ex : 6h &#x2014; justification agronomique" style="width:100%;padding:11px 12px;border-radius:10px;background:var(--bg-card);border:1.5px solid var(--gris);color:var(--texte);font-family:Outfit,sans-serif;font-size:13px"></div>'
-      +'<div><div style="font-size:11px;color:var(--texte-doux);text-transform:uppercase;font-weight:600;margin-bottom:6px">Mode de production</div>'
+      +'<div><div style="font-size:var(--pt-micro,11px);color:var(--texte-doux);text-transform:uppercase;font-weight:600;margin-bottom:6px">Mode de production</div>'
       +'<div style="display:flex;gap:10px">'
       +'<div onclick="window._tratSetModeAb(false)" style="flex:1;padding:10px 12px;border-radius:10px;cursor:pointer;text-align:center;background:'+(!_trat.modeAb?'var(--acier)':'var(--bg-card)')+';border:1.5px solid '+(!_trat.modeAb?'var(--acier-med)':'var(--gris)')+';color:'+(!_trat.modeAb?'#fff':'var(--texte-doux)')+';font-size:12px;font-weight:600;min-height:44px;display:flex;align-items:center;justify-content:center">&#x1F33E; Conventionnel</div>'
       +'<div onclick="window._tratSetModeAb(true)" style="flex:1;padding:10px 12px;border-radius:10px;cursor:pointer;text-align:center;background:'+(_trat.modeAb?'#1A3A1A':'var(--bg-card)')+';border:1.5px solid '+(_trat.modeAb?'#2A6A2A':'var(--gris)')+';color:'+(_trat.modeAb?'#40C080':'var(--texte-doux)')+';font-size:12px;font-weight:600;min-height:44px;display:flex;align-items:center;justify-content:center">&#x1F33F; Bio (AB)</div>'
       +'</div></div></div>';
     var noteHtml='<div style="margin-bottom:14px">'
-      +'<div style="font-size:11px;color:var(--texte-doux);text-transform:uppercase;font-weight:600;margin-bottom:6px">Observations (optionnel)</div>'
+      +'<div style="font-size:var(--pt-micro,11px);color:var(--texte-doux);text-transform:uppercase;font-weight:600;margin-bottom:6px">Observations (optionnel)</div>'
       +'<input id="trat-note" type="text" placeholder="Conditions m&#xe9;t&#xe9;o, stade v&#xe9;g&#xe9;tatif compl&#xe9;mentaire&#x2026;" style="width:100%;padding:11px 12px;border-radius:10px;background:var(--bg-card);border:1.5px solid var(--gris);color:var(--texte);font-family:Outfit,sans-serif;font-size:13px">'
       +'</div>';
     bodyHtml=prodsHtml+addHtml+dateHtml+condHtml+rglHtml+noteHtml;
@@ -538,7 +538,7 @@ function _tratRender(){
     if(_trat.heureDebut)rcells.push({l:'Horaires',v:_trat.heureDebut+'–'+(_trat.heureFin||'?')});
     if(_trat.dreAnticipe)rcells.push({l:'DRE anticipé',v:_trat.dreAnticipe});
     var parcListHtml=_trat.parcelles.map(function(nom){
-      return '<span style="font-size:11px;background:var(--gris-clair);border-radius:6px;padding:3px 8px">'+_escHtml(nom)+'</span>';
+      return '<span style="font-size:var(--pt-micro,11px);background:var(--gris-clair);border-radius:6px;padding:3px 8px">'+_escHtml(nom)+'</span>';
     }).join(' ');
     var recapHtml='<div style="background:rgba(61,122,39,0.08);border:1.5px solid rgba(61,122,39,0.3);border-radius:12px;padding:14px;margin-bottom:14px">'
       +'<div style="font-size:13px;font-weight:700;color:var(--vert);margin-bottom:10px">&#x1F33F; Traitement &#x00B7; '+fmtDate(_trat.date)+' &#x00B7; '+_escHtml(_trat.conducteur||'—')+'</div>'
@@ -548,28 +548,28 @@ function _tratRender(){
           +'<div style="font-size:9px;color:var(--texte-doux);text-transform:uppercase;font-weight:600;margin-bottom:2px">'+f.l+'</div>'
           +'<div style="font-size:12px;font-weight:600">'+_escHtml(String(f.v))+'</div></div>';
       }).join('')+'</div>'
-      +'<div style="font-size:11px;color:var(--texte-doux);margin-bottom:6px">'+_trat.parcelles.length+' parcelle'+(_trat.parcelles.length>1?'s':'')+' :</div>'
+      +'<div style="font-size:var(--pt-micro,11px);color:var(--texte-doux);margin-bottom:6px">'+_trat.parcelles.length+' parcelle'+(_trat.parcelles.length>1?'s':'')+' :</div>'
       +'<div style="display:flex;flex-wrap:wrap;gap:5px;margin-bottom:'+(maxDrae>0?'10':'0')+'px">'+parcListHtml+'</div>'
       +(maxDrae>0?'<div style="font-size:12px;color:var(--orange);margin-top:4px">&#x26A0;&#xFE0F; DRAE max : <strong>'+maxDrae+'h</strong> &#x2014; parcelles signal&#xe9;es en rouge</div>':'')
       +'</div>';
     var confHtml='<div style="background:rgba(74,158,224,0.05);border:1.5px solid rgba(74,158,224,0.2);border-radius:10px;padding:10px 12px;margin-bottom:14px">'
-      +'<div style="font-size:11px;font-weight:700;color:var(--ink-info,#4A9EE0);margin-bottom:3px">&#x2705; Conforme r&#xe9;glementation 2027</div>'
-      +'<div style="font-size:11px;color:var(--texte-doux)">Format num&#xe9;rique structur&#xe9; &#x00B7; Tous champs obligatoires renseign&#xe9;s</div>'
+      +'<div style="font-size:var(--pt-micro,11px);font-weight:700;color:var(--ink-info,#4A9EE0);margin-bottom:3px">&#x2705; Conforme r&#xe9;glementation 2027</div>'
+      +'<div style="font-size:var(--pt-micro,11px);color:var(--texte-doux)">Format num&#xe9;rique structur&#xe9; &#x00B7; Tous champs obligatoires renseign&#xe9;s</div>'
       +'</div>';
-    var lignesHtml='<div style="font-size:11px;color:var(--texte-doux);text-transform:uppercase;font-weight:600;margin-bottom:10px">'
+    var lignesHtml='<div style="font-size:var(--pt-micro,11px);color:var(--texte-doux);text-transform:uppercase;font-weight:600;margin-bottom:10px">'
       +'&#x1F4CB; '+_trat.produits.length+' entr&#xe9;e'+(_trat.produits.length>1?'s':'')+' ajout&#xe9;e'+(_trat.produits.length>1?'s':'')+' au registre'
       +'</div>'
       +_trat.produits.map(function(p){
         var c=_pMeta(p);
         var abBadge=_trat.modeAb?'<span style="font-size:10px;background:rgba(64,192,128,0.15);color:#40C080;border-radius:5px;padding:1px 6px;font-weight:700;margin-left:4px">AB</span>':'';
         var draeBadge=c.drae>0?'<span style="font-size:10px;background:rgba(192,57,43,0.15);color:var(--rouge);border-radius:5px;padding:1px 6px;font-weight:700;margin-left:4px">DRE '+c.drae+'h</span>':'';
-        var stRow=_trat.stade?'<div style="font-size:11px;color:var(--phyto-med,#A060E0);margin-top:2px">&#x1F4CB; '+_escHtml(_trat.stade.split('(')[0].trim())+'</div>':'';
-        var hRow=_trat.heureDebut?'<div style="font-size:11px;color:var(--or);margin-top:2px">&#x1F550; '+_escHtml(_trat.heureDebut)+'–'+_escHtml(_trat.heureFin||'?')+'</div>':'';
+        var stRow=_trat.stade?'<div style="font-size:var(--pt-micro,11px);color:var(--phyto-med,#A060E0);margin-top:2px">&#x1F4CB; '+_escHtml(_trat.stade.split('(')[0].trim())+'</div>':'';
+        var hRow=_trat.heureDebut?'<div style="font-size:var(--pt-micro,11px);color:var(--or);margin-top:2px">&#x1F550; '+_escHtml(_trat.heureDebut)+'–'+_escHtml(_trat.heureFin||'?')+'</div>':'';
         return '<div style="background:var(--bg-card);border:1.5px solid var(--gris);border-radius:10px;padding:12px 14px;margin-bottom:8px">'
           +'<div style="display:flex;justify-content:space-between;align-items:flex-start">'
           +'<div style="flex:1"><div style="font-size:13px;font-weight:700">'+_escHtml(p.nom)+abBadge+draeBadge+'</div>'
-          +'<div style="font-size:11px;color:var(--texte-doux);margin-top:2px">AMM '+(c.amm?_escHtml(c.amm):'—')+' &#x00B7; Dose : '+_escHtml(p.dose||c.dose||'—')+(p.dose_val!=null?' &#x00B7; <span style="color:#A56B3A;font-weight:600">'+p.dose_val+' '+_escHtml(p.dose_unit||'')+'</span>':'')+'</div>'
-          +'<div style="font-size:11px;color:var(--texte-doux)">'+_trat.parcelles.length+' parc. &#x00B7; '+surfSel.toFixed(2)+' ha &#x00B7; '+_escHtml(_trat.conducteur||'—')+'</div>'
+          +'<div style="font-size:var(--pt-micro,11px);color:var(--texte-doux);margin-top:2px">AMM '+(c.amm?_escHtml(c.amm):'—')+' &#x00B7; Dose : '+_escHtml(p.dose||c.dose||'—')+(p.dose_val!=null?' &#x00B7; <span style="color:#A56B3A;font-weight:600">'+p.dose_val+' '+_escHtml(p.dose_unit||'')+'</span>':'')+'</div>'
+          +'<div style="font-size:var(--pt-micro,11px);color:var(--texte-doux)">'+_trat.parcelles.length+' parc. &#x00B7; '+surfSel.toFixed(2)+' ha &#x00B7; '+_escHtml(_trat.conducteur||'—')+'</div>'
           +stRow+hRow+'</div>'
           +'<div style="font-size:12px;font-weight:700;color:'+(c.dar>0?'var(--or)':'var(--vert)')+'">DAR '+(c.dar>0?c.dar+'j':'libre')+'</div>'
           +'</div></div>';
@@ -580,16 +580,16 @@ function _tratRender(){
   // ── Footer ──
   var canNext1=_trat.produits.length>0&&!!_trat.date&&!!_trat.conducteur;
   var canNext2=_trat.parcelles.length>0;
-  var backBtn=step>1?'<button onclick="window._tratPrev()" style="flex:1;padding:14px;border-radius:12px;border:1.5px solid var(--gris);background:transparent;color:var(--texte-doux);font-size:14px;font-weight:600;cursor:pointer;font-family:Outfit,sans-serif;min-height:44px"><span>&#x2190; Retour</span></button>':'';
+  var backBtn=step>1?'<button onclick="window._tratPrev()" style="flex:1;padding:14px;border-radius:12px;border:1.5px solid var(--gris);background:transparent;color:var(--texte-doux);font-size:var(--pt-base,14px);font-weight:600;cursor:pointer;font-family:Outfit,sans-serif;min-height:44px"><span>&#x2190; Retour</span></button>':'';
   var mainBtn='';
   if(step===1){
-    mainBtn='<button onclick="window._tratNext()" '+(canNext1?'':'disabled')+' style="flex:2;padding:14px;border-radius:12px;border:none;background:'+(canNext1?'var(--acier)':'var(--gris)')+';color:'+(canNext1?'#fff':'var(--texte-doux)')+';font-size:14px;font-weight:700;cursor:pointer;font-family:Outfit,sans-serif;min-height:44px"><span>'
+    mainBtn='<button onclick="window._tratNext()" '+(canNext1?'':'disabled')+' style="flex:2;padding:14px;border-radius:12px;border:none;background:'+(canNext1?'var(--acier)':'var(--gris)')+';color:'+(canNext1?'#fff':'var(--texte-doux)')+';font-size:var(--pt-base,14px);font-weight:700;cursor:pointer;font-family:Outfit,sans-serif;min-height:44px"><span>'
       +(_trat.produits.length>0?'Continuer ('+_trat.produits.length+' produit'+(_trat.produits.length>1?'s':'')+')\u00a0\u2192':'Ajouter au moins 1 produit')+'</span></button>';
   } else if(step===2){
-    mainBtn='<button id="trat-next-btn" onclick="window._tratNext()" '+(canNext2?'':'disabled')+' style="flex:2;padding:14px;border-radius:12px;border:none;background:'+(canNext2?'var(--acier)':'var(--gris)')+';color:'+(canNext2?'#fff':'var(--texte-doux)')+';font-size:14px;font-weight:700;cursor:pointer;font-family:Outfit,sans-serif;min-height:44px"><span>'
+    mainBtn='<button id="trat-next-btn" onclick="window._tratNext()" '+(canNext2?'':'disabled')+' style="flex:2;padding:14px;border-radius:12px;border:none;background:'+(canNext2?'var(--acier)':'var(--gris)')+';color:'+(canNext2?'#fff':'var(--texte-doux)')+';font-size:var(--pt-base,14px);font-weight:700;cursor:pointer;font-family:Outfit,sans-serif;min-height:44px"><span>'
       +(canNext2?'Continuer ('+_trat.parcelles.length+' parc. &#x00B7; '+surfSel.toFixed(2)+' ha)\u00a0\u2192':'S&#xe9;lectionner au moins 1 parcelle')+'</span></button>';
   } else {
-    mainBtn='<button onclick="window._tratSave()" style="flex:2;padding:14px;border-radius:12px;border:none;background:#2C6E29;color:#fff;font-size:14px;font-weight:700;cursor:pointer;font-family:Outfit,sans-serif;min-height:44px"><span>&#x2713; Enregistrer</span></button>';
+    mainBtn='<button onclick="window._tratSave()" style="flex:2;padding:14px;border-radius:12px;border:none;background:#2C6E29;color:#fff;font-size:var(--pt-base,14px);font-weight:700;cursor:pointer;font-family:Outfit,sans-serif;min-height:44px"><span>&#x2713; Enregistrer</span></button>';
   }
   var footerHtml='<div style="display:flex;gap:10px">'+backBtn+mainBtn+'</div>';
 
@@ -760,12 +760,12 @@ function openTraitDetail(idx){
       </div>
     </div>
     ${t.note?`<div style="background:var(--gris-clair);border-radius:12px;padding:12px;font-size:12px;color:var(--texte-doux);font-style:italic">${_escHtml(t.note)}</div>`:''}
-    ${(t.parcelles&&t.parcelles.length>0)?`<div style="margin-top:10px"><div style="font-size:10px;color:var(--texte-doux);text-transform:uppercase;font-weight:600;margin-bottom:5px">Parcelles traitées</div><div style="display:flex;flex-wrap:wrap;gap:5px">${t.parcelles.map(n=>'<span style="font-size:11px;background:var(--gris-clair);border-radius:6px;padding:3px 8px">'+_escHtml(n)+'</span>').join('')}</div></div>`:''}
+    ${(t.parcelles&&t.parcelles.length>0)?`<div style="margin-top:10px"><div style="font-size:10px;color:var(--texte-doux);text-transform:uppercase;font-weight:600;margin-bottom:5px">Parcelles traitées</div><div style="display:flex;flex-wrap:wrap;gap:5px">${t.parcelles.map(n=>'<span style="font-size:var(--pt-micro,11px);background:var(--gris-clair);border-radius:6px;padding:3px 8px">'+_escHtml(n)+'</span>').join('')}</div></div>`:''}
     ${t.stade?`<div style="background:rgba(160,96,224,0.08);border-radius:10px;padding:9px 12px;margin-top:8px;font-size:12px;color:#A060E0">Stade : ${_escHtml(t.stade)}</div>`:''}
     ${t.heureDebut?`<div style="background:var(--gris-clair);border-radius:10px;padding:9px 12px;margin-top:8px;font-size:12px">Horaires : ${t.heureDebut}–${t.heureFin||'?'}</div>`:''}
     ${t.dreAnticipe?`<div style="background:rgba(184,90,26,0.08);border-radius:10px;padding:9px 12px;margin-top:8px;font-size:12px;color:var(--orange)">DRE anticipé : ${_escHtml(t.dreAnticipe)}</div>`:''}
     ${typeof t.modeAb!=='undefined'?`<div style="margin-top:8px;font-size:12px;color:var(--texte-doux)">Mode : <strong style="color:${t.modeAb?'#40C080':'var(--texte)'}">${t.modeAb?'🌿 Agriculture Biologique (AB)':'🌾 Conventionnel'}</strong></div>`:''}
-    ${_canEd?`<button onclick="openTraitEdit(${idx})" style="width:100%;margin-top:16px;padding:13px;border-radius:11px;border:1.5px solid var(--phyto);background:rgba(90,45,142,0.12);color:#9B70D4;font-size:14px;font-weight:700;cursor:pointer;font-family:'Outfit',sans-serif;min-height:44px"><span>✏️ Modifier ce traitement</span></button>`:''}
+    ${_canEd?`<button onclick="openTraitEdit(${idx})" style="width:100%;margin-top:16px;padding:13px;border-radius:11px;border:1.5px solid var(--phyto);background:rgba(90,45,142,0.12);color:#9B70D4;font-size:var(--pt-base,14px);font-weight:700;cursor:pointer;font-family:'Outfit',sans-serif;min-height:44px"><span>✏️ Modifier ce traitement</span></button>`:''}
   `;
   openOv('ovTraitDetail');
 }
@@ -808,7 +808,7 @@ function openTraitEdit(idx){
   var condOpts='<option value="">— Aucun —</option>'+conds.map(function(c){return '<option value="'+_escHtml(c.nom)+'"'+(c.nom===curCond?' selected':'')+'>'+_escHtml(c.nom)+'</option>';}).join('');
   var stadeOpts='<option value="">— Aucun —</option>'+(window.STADES_PHENO||[]).map(function(sd){return '<option value="'+_escHtml(sd)+'"'+(sd===(t.stade||'')?' selected':'')+'>'+_escHtml(sd)+'</option>';}).join('');
   var abVal=(t.modeAb===true)?'1':((t.modeAb===false)?'0':'');
-  var L='font-size:11px;color:var(--texte-doux);text-transform:uppercase;font-weight:600;margin-bottom:6px;display:block';
+  var L='font-size:var(--pt-micro,11px);color:var(--texte-doux);text-transform:uppercase;font-weight:600;margin-bottom:6px;display:block';
   var BM='padding:6px 12px;border-radius:8px;border:1.5px solid var(--gris);background:var(--bg-card);color:var(--texte-doux);font-size:12px;font-weight:600;cursor:pointer;font-family:Outfit,sans-serif;min-height:36px';
   var _ttCu=(t.type||(window._phResolve?(window._phResolve(t)||{}).type:'')||'');
   var _isCu=(_ttCu==='Cuivre');
@@ -817,8 +817,8 @@ function openTraitEdit(idx){
   var _cuHint=(_cuPctV!=null?'base ~'+_cuPctV+'% Cu, ajustable':'kg de cuivre m&#xe9;tal apport&#xe9;');
   var cuHtml=_isCu?('<div style="margin-bottom:14px;display:flex;align-items:center;gap:8px;background:rgba(165,107,58,0.1);border:1px solid rgba(165,107,58,0.28);border-radius:8px;padding:8px 10px">'
     +'<span style="font-size:12px;font-weight:700;color:#A56B3A;white-space:nowrap">&#x1FA99; Cuivre m&#xe9;tal</span>'
-    +'<input id="te-cu" type="number" step="0.05" inputmode="decimal" value="'+_cuVal+'" style="width:84px;padding:6px 8px;border-radius:7px;border:1.5px solid rgba(165,107,58,0.4);background:var(--bg-card);color:var(--texte);font-family:Outfit,sans-serif;font-size:14px;text-align:center">'
-    +'<span style="font-size:11px;color:var(--texte-doux);white-space:nowrap">kg/ha</span>'
+    +'<input id="te-cu" type="number" step="0.05" inputmode="decimal" value="'+_cuVal+'" style="width:84px;padding:6px 8px;border-radius:7px;border:1.5px solid rgba(165,107,58,0.4);background:var(--bg-card);color:var(--texte);font-family:Outfit,sans-serif;font-size:var(--pt-base,14px);text-align:center">'
+    +'<span style="font-size:var(--pt-micro,11px);color:var(--texte-doux);white-space:nowrap">kg/ha</span>'
     +'<span style="font-size:10px;color:var(--texte-doux);flex:1;text-align:right">'+_cuHint+'</span>'
     +'</div>'):'';
   document.getElementById('te-title').textContent='✏️ '+t.produit;
@@ -832,7 +832,7 @@ function openTraitEdit(idx){
     +'<div style="margin-bottom:14px"><span style="'+L+'">DRE anticipé</span><input type="text" id="te-dre" class="fi" placeholder="ex. Soirée hors butinage"></div>'
     +'<div style="margin-bottom:14px"><span style="'+L+'">Mode</span><select id="te-ab" class="fsel"><option value="">— Non renseigné —</option><option value="0"'+(abVal==='0'?' selected':'')+'>🌾 Conventionnel</option><option value="1"'+(abVal==='1'?' selected':'')+'>🌿 Agriculture Biologique (AB)</option></select></div>'
     +'<div style="margin-bottom:14px"><span style="'+L+'">Note / observations</span><input type="text" id="te-note" class="fi" placeholder="Conditions, cible…"></div>'
-    +'<div style="margin-bottom:4px"><div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:8px"><span style="'+L+';margin-bottom:0">📍 Parcelles traitées</span><div style="display:flex;gap:6px"><button type="button" onclick="window._teAllParc()" style="'+BM+'">Tout</button><button type="button" onclick="window._teNoneParc()" style="'+BM+'">Aucun</button></div></div><div id="te-parc-count" style="font-size:11px;color:var(--texte-doux);margin-bottom:8px"></div><div id="te-parc-grid" style="display:flex;flex-wrap:wrap;gap:6px"></div></div>';
+    +'<div style="margin-bottom:4px"><div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:8px"><span style="'+L+';margin-bottom:0">📍 Parcelles traitées</span><div style="display:flex;gap:6px"><button type="button" onclick="window._teAllParc()" style="'+BM+'">Tout</button><button type="button" onclick="window._teNoneParc()" style="'+BM+'">Aucun</button></div></div><div id="te-parc-count" style="font-size:var(--pt-micro,11px);color:var(--texte-doux);margin-bottom:8px"></div><div id="te-parc-grid" style="display:flex;flex-wrap:wrap;gap:6px"></div></div>';
   var de=document.getElementById('te-date'); if(de) de.value=t.date||'';
   var dse=document.getElementById('te-dose'); if(dse) dse.value=t.dose||'';
   var hd=document.getElementById('te-hd'); if(hd) hd.value=t.heureDebut||'';
@@ -1129,14 +1129,14 @@ function _phytoExportChoix(cible){
     var _k = (typeof _escAttr==='function') ? _escAttr(f.k) : String(f.k);
     var appel = pdf ? ("exportPDFPhyto('"+_k+"')") : ("_phytoExportCsv('"+_k+"')");
     h += `<button onclick="${appel}" style="width:100%;display:block;text-align:left;background:var(--bg-card);border:1.5px solid ${acc?'#5A2D8E':'var(--gris)'};border-radius:12px;padding:14px 16px;margin-bottom:10px;cursor:pointer;font-family:Outfit,sans-serif;min-height:44px">
-      <span style="display:block;font-size:14px;font-weight:600;color:var(--texte)">${_escHtml(f.lbl)}</span>
-      <span style="display:block;font-size:11px;color:var(--texte-doux);margin-top:3px;line-height:1.4">${_escHtml(f.sub)}</span>
-      <span style="display:block;font-size:11px;color:${n?'#5A2D8E':'var(--texte-doux)'};font-weight:600;margin-top:5px">${n} traitement${n>1?'s':''}</span>
+      <span style="display:block;font-size:var(--pt-base,14px);font-weight:600;color:var(--texte)">${_escHtml(f.lbl)}</span>
+      <span style="display:block;font-size:var(--pt-micro,11px);color:var(--texte-doux);margin-top:3px;line-height:1.4">${_escHtml(f.sub)}</span>
+      <span style="display:block;font-size:var(--pt-micro,11px);color:${n?'#5A2D8E':'var(--texte-doux)'};font-weight:600;margin-top:5px">${n} traitement${n>1?'s':''}</span>
     </button>`;
   });
   h += `<div style="background:var(--gris-clair);border-radius:12px;padding:12px;margin-top:4px">
       <div style="font-size:9px;text-transform:uppercase;color:var(--texte-doux);font-weight:600;margin-bottom:6px">\u00c0 savoir</div>
-      <div style="font-size:11px;color:var(--texte-doux);line-height:1.5">La colonne \u00ab\u00a0Surface de la parcelle (ha)\u00a0\u00bb donne la surface TOTALE de la parcelle. Ma Vigne n\u2019enregistre pas de surface partielle : si un traitement n\u2019a couvert qu\u2019une partie du rang, corrigez la valeur dans le tableur avant de remettre le fichier.</div>
+      <div style="font-size:var(--pt-micro,11px);color:var(--texte-doux);line-height:1.5">La colonne \u00ab\u00a0Surface de la parcelle (ha)\u00a0\u00bb donne la surface TOTALE de la parcelle. Ma Vigne n\u2019enregistre pas de surface partielle : si un traitement n\u2019a couvert qu\u2019une partie du rang, corrigez la valeur dans le tableur avant de remettre le fichier.</div>
     </div>`;
   var body = ov.querySelector('#phx-body');
   if(body) body.innerHTML = h;

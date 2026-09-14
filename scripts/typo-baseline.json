@@ -1,0 +1,72 @@
+{
+  "src/admin-gt.js": {
+    "dur": 281,
+    "petit": 97,
+    "ko": 373
+  },
+  "src/app.js": {
+    "dur": 206,
+    "petit": 79,
+    "ko": 706
+  },
+  "src/cave.js": {
+    "dur": 32,
+    "petit": 24,
+    "ko": 953
+  },
+  "src/firebase.js": {
+    "dur": 0,
+    "petit": 0,
+    "ko": 112
+  },
+  "src/onboarding.js": {
+    "dur": 6,
+    "petit": 1,
+    "ko": 40
+  },
+  "src/phyto.js": {
+    "dur": 110,
+    "petit": 44,
+    "ko": 90
+  },
+  "src/pilotage.js": {
+    "dur": 0,
+    "petit": 0,
+    "ko": 705
+  },
+  "src/planning.js": {
+    "dur": 200,
+    "petit": 102,
+    "ko": 420
+  },
+  "src/reglages.js": {
+    "dur": 209,
+    "petit": 100,
+    "ko": 421
+  },
+  "src/reserve.js": {
+    "dur": 33,
+    "petit": 9,
+    "ko": 100
+  },
+  "src/tracteur.js": {
+    "dur": 49,
+    "petit": 16,
+    "ko": 159
+  },
+  "src/utils.js": {
+    "dur": 6,
+    "petit": 2,
+    "ko": 559
+  },
+  "index.html": {
+    "dur": 261,
+    "petit": 47,
+    "ko": 337
+  },
+  "src/styles.css": {
+    "dur": 573,
+    "petit": 128,
+    "ko": 389
+  }
+}
