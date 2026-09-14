@@ -31,7 +31,7 @@ const NOMS = [
   '_vendCorrTerm', '_vendD20', '_vendMesD20', '_vendSucre',
   '_vendSucPente', '_vendMesD', '_vendD0', '_vendChaptDeg', '_vendDPot',
   '_vendDZero', '_vendDSec', '_vendDSecTxt', '_vendSucreRest', '_vendFaPct',
-  '_vendDecuvee', '_vendFaEnCours', '_vendJourSec', '_vendSuivie', '_vendDecD20',
+  '_vendDecuvee', '_vendFaEnCours', '_vendJourSec', '_vendSuivie', '_vendMesurable', '_vendDecD20',
   '_vendFrDate', '_pcrbFin',
   '_mlD', '_mlIso', '_mlEcartJ', '_mlAddJ', '_mlAuj', '_mlProjFA'
 ];
@@ -70,7 +70,7 @@ function _vendCfg(){ return { sucre_par_degre: ${SPD} }; }
 const RETOUR = `
 return { _vendSucre, _vendSucPente, _vendDPot, _vendDZero, _vendDSec, _vendDSecTxt,
          _vendSucreRest, _vendFaPct, _vendDecuvee, _vendFaEnCours, _vendJourSec,
-         _vendSuivie, _vendD0, _vendDecD20, _vendMesD, _pcrbFin, _mlProjFA, _ML_D20_SEC };
+         _vendSuivie, _vendMesurable, _vendD0, _vendDecD20, _vendMesD, _pcrbFin, _mlProjFA, _ML_D20_SEC };
 `;
 function monter(mutation) {
   const corps = mutation ? mutation(BLOC) : BLOC;
@@ -226,6 +226,44 @@ if (!CONTRE) {
     pose(/rep\u00e8re/.test(fin(rep)), 'le passage sous le repère est marqué comme un repère');
   }
 
+  console.log('\n── 7d · CUV-11 · une cuve décuvée se relève encore ──');
+  {
+    /* Le lot en une phrase : POUVOIR relever n'est pas DEVOIR relever.
+       Les trois décuvées ont la même densité — seule la réponse au décuvage
+       change — et toutes les trois doivent accepter un relevé. */
+    const finie    = decuvee(cuve(13, [1040, 1005, 997]), true);
+    const afinir   = decuvee(cuve(13, [1040, 1005, 997]), false);
+    const ancienne = decuvee(cuve(13, [1040, 1005, 997]));
+    const active   = cuve(13, [1040, 1005]);
+    const setup    = cuve(13, []); setup.statut = 'setup';
+    pose(A._vendMesurable(active), 'une cuve en fermentation est mesurable');
+    pose(A._vendMesurable(finie),
+      '★★ décuvée et déclarée FINIE : mesurable — c’est le cas courant, et c’était le plus fermé');
+    pose(A._vendMesurable(afinir), 'décuvée à finir au chai : mesurable');
+    pose(A._vendMesurable(ancienne), '★ décuvée avant CUV-10, sans réponse notée : mesurable aussi');
+    pose(!A._vendMesurable(setup), 'une cuve à l’encuvage n’est pas encore mesurable');
+    const fus = decuvee(cuve(13, [1040, 1005, 997]), true);
+    fus.fusion = { vers: 'autre', date: J(8) };
+    pose(!A._vendMesurable(fus), '★ une cuve fusionnée n’est jamais mesurable : son vin est ailleurs');
+    /* LA distinction du lot. Si ces deux-là tombent ensemble, le predicat n'a
+       servi a rien : il aurait rouvert une relance quotidienne sur une cuve
+       que le vigneron a declaree finie. */
+    pose(A._vendMesurable(finie) && !A._vendSuivie(finie),
+      '★★★ mesurable SANS être suivie : la porte s’ouvre, aucune relance ne se pose');
+    pose(A._vendMesurable(afinir) && A._vendSuivie(afinir),
+      'celle qui finit au chai reste, elle, réclamée dans la tournée');
+    /* §118 tient : le fait prime sur le chiffre, y compris sur un chiffre
+       releve APRES le decuvage. */
+    const apres = decuvee(cuve(13, [1040, 1005, 997]), true);
+    const nAv = A._vendMesD(apres).length;      /* la cuve porte DÉJÀ son moût */
+    apres.mesures_fa.push({ id: 'ap', date: J(10), densite: 1020, temp_c: 20 });
+    const serie = A._vendMesD(apres);
+    pose(!A._vendFaEnCours(apres),
+      '★★ un relevé à 1020 pris APRÈS le décuvage ne rouvre pas la fermentation');
+    pose(serie.length === nAv + 1 && serie[serie.length - 1].id === 'ap',
+      '★ il rejoint la MÊME série, en dernier — jamais une seconde (§116)');
+  }
+
   console.log('\n── 8 · la date de vin sec est RELEVÉE, jamais interpolée ──');
   {
     const c = cuve(13, [1040, 1005, 994, 991, 990]);
@@ -308,6 +346,20 @@ if (CONTRE) {
     b => b.replace(/for\(var i=0;i<m\.length;i\+\+\) if\(_vendMesD20\(m\[i\]\)<=ds\) return m\[i\]\.date;/,
                    'for(var i=m.length-1;i>=0;i--) if(_vendMesD20(m[i])<=ds) return m[i].date;'),
     F => F._vendJourSec(cuve(13, [1040, 1005, 994, 991, 990])) === J(4));
+
+  mord('★★ CUV-11 · « mesurable » retombe sur « suivie » — le cas courant se referme',
+    b => b.replace(/  return _vendIsActive\(c\)\|\|_vendDecuvee\(c\);/,
+                   '  return _vendSuivie(c);'),
+    F => F._vendMesurable(decuvee(cuve(13, [1040, 1005, 997]), true)));
+
+  mord('★ une cuve fusionnée redevient mesurable',
+    b => b.replace(/  if\(!c\|\|_vendEstFusionnee\(c\)\) return false;/, '  if(!c) return false;'),
+    F => { const f = decuvee(cuve(13, [1040, 997]), true);
+           f.fusion = { vers: 'autre', date: J(8) }; return !F._vendMesurable(f); });
+
+  mord('une cuve à l’encuvage devient mesurable',
+    b => b.replace(/  return _vendIsActive\(c\)\|\|_vendDecuvee\(c\);/, '  return true;'),
+    F => { const s = cuve(13, []); s.statut = 'setup'; return !F._vendMesurable(s); });
 
   mord('l’avancement repart des anciennes bornes fixes',
     b => b.replace(/if\(d0==null\|\|!\(d0>ds\+10\)\) d0=1085;/, 'd0=1085; ds=990;'),

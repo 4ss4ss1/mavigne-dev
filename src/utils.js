@@ -23,7 +23,7 @@ export const GT_ADMIN_EMAIL = 'ngdevpro@gmail.com';
 // WHATS_NEW   : tableau vide = modal desactive pour cette version.
 // Format item : { emoji:'📅', titre:'Titre court', desc:'Phrase utilisateur.' }
 // Regle : seulement les changements visibles par les utilisateurs.
-export const APP_VERSION = '7.20';
+export const APP_VERSION = '7.21';
 // ════ Journal des nouveautés (récap cumulatif) ════
 // Une entrée par version, la PLUS RÉCENTE EN HAUT : { v:'5.10', items:[ {emoji,titre,desc}, … ] }
 // À chaque release visible → AJOUTER un bloc en tête (ne pas remplacer). items:[] = release technique (rien à afficher).
@@ -715,6 +715,27 @@ window._mvGraphRepeindre = function(){
 };
 
 export const WHATS_NEW = [
+  { v: '7.21', items: [
+    { emoji: 'eprouvette', titre: 'La densité se relève encore une fois la cuve décuvée',
+      desc: "Une fois le marc sorti, l’application fermait le dossier\u00a0: plus de bouton "
+        + "«\u00a0Saisir une mesure\u00a0», plus de champ dans la tournée — et la tournée elle-même "
+        + "annonçait «\u00a0aucune cuve en fermentation\u00a0» dès que la dernière cuve était décuvée, "
+        + "c’est-à-dire <b>tous les ans, à partir de la fin des vendanges</b>. Le vin, lui, continue "
+        + "de se goûter et de se mesurer. Les trois portes sont rouvertes\u00a0: le bouton dans le "
+        + "détail de la cuve, les champs dans la tournée sous «\u00a0Toutes\u00a0», et la tournée qui "
+        + "s’ouvre désormais <b>sur les cuves décuvées</b> quand plus rien ne fermente. Le relevé "
+        + "rejoint la <b>même courbe</b>, jamais une seconde." },
+    { emoji: 'cuve', titre: 'Relever ne rouvre rien, et n’est jamais réclamé',
+      desc: "Sortir le marc, c’est avoir constaté que la fermentation était finie\u00a0: un chiffre "
+        + "saisi après coup ne contredit pas ce que vous avez vu et goûté. Votre cuve <b>reste "
+        + "décuvée</b>, son parcours reste clos, et une cuve déclarée finie au décuvage ne revient "
+        + "pas dans les cuves à mesurer ni dans les rappels — <b>pouvoir relever n’est pas devoir "
+        + "relever</b>. Au Chai, la cuvée née du décuvage affiche le <b>dernier relevé de sa cuve</b>, "
+        + "puisque c’est là qu’on décide de sulfiter. Et si la courbe remonte après le décuvage, "
+        + "l’écran en donne la raison\u00a0: les relevés portent alors sur la masse assemblée, goutte "
+        + "et presse, et <b>le pressurage relargue du sucre</b> — jusqu’ici la seule explication "
+        + "proposée était une chaptalisation, qu’il n’y avait pas lieu de chercher." }
+  ] },
   { v: '7.20', items: [
     { emoji: 'imprimante', titre: 'Le titre de la feuille de tri ne se lisait pas',
       desc: "Quand vous ouvriez « Trier » avant d’éditer un document — le vignoble, la cave, "

@@ -775,13 +775,24 @@ function _caveCuveSource(cuvee){
    un fait note au decuvage — plus sur une densite comparee a un repere. */
 function _caveFaLineHtml(c){
   var src=_caveCuveSource(c); if(!src) return '';
+  /* ★★ CUV-11 — LA CUVEE LIT LA SUITE DE LA SERIE DE SA CUVE. §116 avait pose
+     la regle (« rien n'est recopie, rien ne peut diverger ») mais la serie
+     s'arretait au decuvage. Elle continue : le dernier releve s'affiche ICI,
+     parce que c'est ici qu'on decide de sulfiter, et qu'on ne sulfite pas sur
+     du sucre. Toujours aucune densite propre a la cuvee. */
+  var _lm=_vendLastD(src), _dk=(src.decuvage||{}).date||'';
+  var _sv=(_lm&&_lm.date>_dk)
+    ? (' \u00b7 dernier relev\u00e9 <b>'+Math.round(_vendMesD20(_lm))+'</b> le '+_vendFrDate(_lm.date))
+    : '';
   if(_vendFaEnCours(src))
     return '<div class="mvc-fa-line">'+_mvIcon('alerte',16)+' <b>Fermentation \u00e0 finir</b> \u2014 '
       +_escHtml(src.nom||'la cuve')+' a \u00e9t\u00e9 d\u00e9cuv\u00e9e avant la fin de FA. '
-      +'Attendez qu\u2019elle soit finie avant de sulfiter.</div>';
-  var d=_vendDecD20(src); if(d==null) return '';
-  return '<div class="mvc-fut-line">'+_mvIcon('eprouvette',16)+' Mise en f\u00fbt \u00e0 <b>'
-    +Math.round(d)+'</b> \u00e0 20\u00a0\u00b0C \u00b7 goutte et presse assembl\u00e9es</div>';
+      +'Attendez qu\u2019elle soit finie avant de sulfiter.'+_sv+'</div>';
+  var d=_vendDecD20(src); if(d==null&&!_sv) return '';
+  return '<div class="mvc-fut-line">'+_mvIcon('eprouvette',16)
+    +(d!=null?(' Mise en f\u00fbt \u00e0 <b>'+Math.round(d)+'</b> \u00e0 20\u00a0\u00b0C \u00b7 goutte et presse assembl\u00e9es')
+            :' Suivi de densit\u00e9')
+    +_sv+'</div>';
 }
 function _caveCuvCardHtml(c,w){
   var st=_caveState(c);
@@ -3022,6 +3033,10 @@ function _vendDetailHtml(c,canEdit){
         +'</b>. L\u2019\u00e9tat de la fermentation n\u2019a pas \u00e9t\u00e9 not\u00e9 \u00e0 ce moment-l\u00e0\u00a0: '
         +'l\u2019\u00e9cran ne le devine pas.'+_fut+'</div>';
     }
+    /* ★★ CUV-11 — la porte reste ouverte, et l'ecran dit ce qu'elle ne fait pas. */
+    h+='<div class="mvv-detnote">La densit\u00e9 se rel\u00e8ve encore\u00a0: \u00ab\u00a0Saisir une mesure\u00a0\u00bb '
+      +'\u00e9crit dans la <b>m\u00eame courbe</b>. Un relev\u00e9 ne rouvre rien \u2014 ni l\u2019\u00e9tape de la cuve, '
+      +'ni ce qui a \u00e9t\u00e9 constat\u00e9 au d\u00e9cuvage.</div>';
   }
   if(_vendEstFusionnee(c)){
     h+='<div class="mvv-detnote">Fusionn\u00e9e le '+_vendFrDate(c.fusion.date)+' dans <b>'
@@ -3029,7 +3044,7 @@ function _vendDetailHtml(c,canEdit){
   }
   if(canEdit && !_vendEstFusionnee(c)){
     h+='<div class="mvv-actrow" style="flex-wrap:wrap">';
-    if(act||_vendFaEnCours(c)) h+='<button class="mvv-act2 dec" onclick="openOvVendMesure(\''+_escAttr(c.id)+'\')">Saisir une mesure</button>';
+    if(_vendMesurable(c)) h+='<button class="mvv-act2 dec" onclick="openOvVendMesure(\''+_escAttr(c.id)+'\')">Saisir une mesure</button>';
     if(c.statut==='setup') h+='<button class="mvv-act2 dec" onclick="openOvVendCuve(\''+_escAttr(c.id)+'\')">D\u00e9marrer la fermentation</button>';
     if(c.statut!=='termine')
       h+='<button class="mvv-act2" onclick="openVendStat(\''+_escAttr(c.id)+'\')">Changer l\u2019\u00e9tape</button>';
@@ -4002,6 +4017,25 @@ function _vendJourSec(c){
 }
 /* La cuve est-elle encore suivie ? En FA, ou decuvee avec du sucre. */
 function _vendSuivie(c){ return _vendIsActive(c)||_vendFaEnCours(c); }
+/* ★★★ CUV-11 — POUVOIR RELEVER N'EST PAS DEVOIR RELEVER.
+   `_vendSuivie` dit qui l'application RECLAME : la tournee, l'agenda, le badge
+   « a mesurer ». Il n'a jamais eu a dire qui elle ACCEPTE. Les deux etaient
+   confondus, et c'est le defaut que Nico decrit : une cuve decuvee n'avait
+   plus aucune porte pour un releve — ni bouton dans son detail, ni champ dans
+   la tournee — alors que le vin, lui, continue d'exister, de se gouter et de
+   se mesurer.
+   ⚠ LE CAS COURANT ETAIT LE PLUS FERME : depuis §118 la feuille de decuvage
+     coche « terminee en cuve » d'avance, donc `_vendFaEnCours` est faux, donc
+     plus rien. Et une cuve decuvee AVANT §118 n'a pas de `fa_finie` du tout.
+   ⚠⚠ CE PREDICAT N'ARME RIEN. Il ouvre une porte, il ne pose aucune relance :
+     une cuve declaree finie au decuvage ne revient PAS dans la tournee, et un
+     releve ne rouvre aucune fermentation — le decuvage est un FAIT (§118), un
+     chiffre ne le contredit pas.
+   ⚠ Une cuve FUSIONNEE reste dehors : son vin est ailleurs, sous un autre nom. */
+function _vendMesurable(c){
+  if(!c||_vendEstFusionnee(c)) return false;
+  return _vendIsActive(c)||_vendDecuvee(c);
+}
 /* ★★ CUV-10 — LA DENSITE DE MISE EN FUT. Au decuvage on PRESSE pour extraire
    les jus restes dans les raisins, et le pressurage RELARGUE du sucre : la
    densite de la masse remonte par rapport au vin de goutte. La valeur qui
@@ -6180,7 +6214,12 @@ function _vendDecuveesSection(list){
     var _dd=_vendDecD20(c);
     var fa=_vendFaEnCours(c) ? '<span class="mvv-decfa">FA au chai</span>'
       : (_dd!=null ? (' · mise en fût à '+Math.round(_dd)) : '');
-    return '<div class="mvv-decrow"><span>'+_escHtml(c.nom)+'</span><span class="u">'+(d.date?_vendFrDate(d.date):'')+' · '+(c.volume_hl||0)+' hL → Le Chai'+fa+'</span></div>';
+    /* ★ CUV-11 : la série continue après le décuvage — on montre son dernier point,
+       sinon il faut déplier chaque cuve pour savoir laquelle a été relevée. */
+    var _ap=_vendMesD(c).filter(function(m){ return m.date>(d.date||''); });
+    var _sv=_ap.length ? (' · relevée à '+Math.round(_vendMesD20(_ap[_ap.length-1]))
+      +' le '+_vendFrDate(_ap[_ap.length-1].date)) : '';
+    return '<div class="mvv-decrow"><span>'+_escHtml(c.nom)+'</span><span class="u">'+(d.date?_vendFrDate(d.date):'')+' · '+(c.volume_hl||0)+' hL → Le Chai'+fa+_sv+'</span></div>';
   }).join('');
   var nFa=list.filter(_vendFaEnCours).length;
   return '<details class="mvv-decwrap"'+(nFa?' open':'')+'><summary class="mvv-decsum">Décuvées ('+list.length+')'
@@ -8666,6 +8705,17 @@ function _vtActives(){
     return _vendSuivie(c) && !_vendEstFusionnee(c);
   });
 }
+/* ★ CUV-11 — CE QU'ON PEUT ECRIRE EST PLUS LARGE QUE CE QU'ON RECLAME.
+   La tournee (`_vtActives`) ne bouge pas : c'est le tour de cuverie, et une
+   cuve declaree finie au decuvage n'a rien a y faire tous les matins. Mais
+   le filtre « Tout » montre TOUTES les cuves, et depuis ce lot une cuve
+   decuvee y porte ses champs.
+   ⚠⚠ Le tampon et l'ecriture couvrent donc le meme ensemble que l'affichage.
+     Un champ ou l'on peut taper et que personne n'enregistre est PIRE que
+     pas de champ du tout : il rend une saisie faite, et elle est perdue. */
+function _vtMesurables(){
+  return (CAVE_VENDANGE.cuves_vinif||[]).filter(_vendMesurable);
+}
 // Le relevé du jour, s'il existe — quel que soit l'écran qui l'a écrit.
 function _vtMesJour(c){
   var m=_vendTriMes(c), j=_vtJour();
@@ -8676,7 +8726,7 @@ function _vtMesJour(c){
 // tournée en milieu de matinée doit montrer les cuves déjà faites comme faites.
 function _vtLoad(){
   _VT_BUF={};
-  _vtActives().forEach(function(c){
+  _vtMesurables().forEach(function(c){
     var m=_vtMesJour(c);
     _VT_BUF[c.id]={
       t:(m&&m.temp_c!=null)?String(m.temp_c).replace('.',','):'',
@@ -8687,6 +8737,7 @@ function _vtLoad(){
     if(m&&m.qui&&m.qui.length&&!_VT_WHO.length) _VT_WHO=m.qui.slice();
   });
   if(!_VT_WHO.length && window.currentUser && window.currentUser.nom) _VT_WHO=[window.currentUser.nom];
+  _VT_FILT=_vtFiltDef();
 }
 function _vtB(id){ if(!_VT_BUF[id]) _VT_BUF[id]={t:'',d:'',p:0,r:0}; return _VT_BUF[id]; }
 function _vtFait(id){ var b=_vtB(id); return b.t!=='' && b.d!==''; }
@@ -8697,24 +8748,54 @@ function _vtVisibles(){
   if(_VT_FILT==='reste') return a.filter(function(c){ return !_vtFait(c.id); });
   return a;
 }
+/* ★★ CUV-11 — LA TOURNEE COMPTE CE QU'ELLE MONTRE. Une seule regle, pour la
+   barre de progression comme pour le bilan de fin : l'ensemble AFFICHE et
+   relevable. Sous « En cours » et « Reste a faire » c'est exactement
+   `_vtActives()` — rien ne change. Sous « Toutes », les decuvees comptent
+   aussi, puisque depuis ce lot elles y portent leurs champs : une barre qui
+   ignore la moitie des lignes ouvertes ne mesure plus rien, et un bilan qui
+   annonce « 0 releve » apres trois densites saisies est un mensonge.
+   ⚠ Ce n'est PAS une relance : ce qui RECLAME (badge « a mesurer », agenda,
+     alerte de la liste) passe toujours par `_vendSuivie`. */
+function _vtBase(){ return _vtVisibles().filter(_vendMesurable); }
+/* ★★★ CUV-11 — LA TOURNEE NE S'OUVRE PLUS SUR UNE LISTE VIDE. Quand plus rien
+   ne fermente mais qu'il reste des cuves relevables, elle s'ouvre sur
+   « Toutes » : c'est la SEULE vue ou elles sont. Decide au chargement, pas a
+   chaque rendu — sinon un clic sur « En cours » serait annule aussitot. */
+function _vtFiltDef(){
+  return (!_vtActives().length && _vtMesurables().length) ? 'tout' : _VT_FILT;
+}
 
 // ── L'écran ──────────────────────────────────────────────────────────────
 function renderVendTour(){
   var host=document.getElementById('mvv-body'); if(!host) return;
   _vtCss(); _vendEnsureSheetCss();
   if(!Object.keys(_VT_BUF).length) _vtLoad();
-  var a=_vtActives();
-  if(!a.length){
-    host.innerHTML='<div class="vt-vide"><div class="vt-vide-t">Aucune cuve en fermentation</div>'
+  /* ★★★ CUV-11 — L'ECRAN VIDE SE DECIDE SUR CE QU'ON PEUT RELEVER, PAS SUR CE
+     QUI FERMENTE. Cette garde rendait « Aucune cuve en fermentation » AVANT de
+     regarder le filtre : une fois la derniere cuve decuvee, la tournee etait
+     une IMPASSE — pas de liste, donc pas de chip « Toutes », donc aucune porte.
+     Le reste du lot avait ouvert la ligne, le champ et l'ecriture ; ils etaient
+     inatteignables. Et c'est l'etat NORMAL du cuvier apres la vendange, pas un
+     cas limite : toutes les cuves finissent decuvees. */
+  if(!_vtMesurables().length){
+    host.innerHTML='<div class="vt-vide"><div class="vt-vide-t">Aucune cuve à relever</div>'
       +'<div class="vt-vide-d">La tournée s\'ouvre dès qu\'une cuve passe en macération ou en fermentation, '
-      +'et une cuve décuvée y reste tant que sa fermentation n\'est pas finie. '
+      +'et une cuve décuvée y reste relevable : le vin continue de se goûter et de se mesurer. '
       +'Les cuves se créent depuis l\'onglet Cuves.</div>'
       +'<button class="mvv-act2 dec" onclick="switchVendOng(\'cuves\')">Aller aux cuves</button></div>';
     return;
   }
   var canEdit=canWrite();
+  var vis=_vtVisibles();
   var h='<div class="vt">'+_vtBandeauHtml()+'<div class="vt-list" id="vt-list">';
-  _vtVisibles().forEach(function(c){ h+=_vtRowHtml(c,canEdit); });
+  /* Le filtre choisi ne ramene rien, mais il reste des cuves a relever
+     ailleurs : on le DIT et on donne le chemin, au lieu d'un blanc. */
+  if(!vis.length)
+    h+='<div class="vt-vide"><div class="vt-vide-d">Plus rien en fermentation active. '
+      +'Les cuves décuvées se relèvent sous «&nbsp;Toutes&nbsp;».</div>'
+      +'<button class="mvv-act2 dec" onclick="_vtFilt(\'tout\')">Voir toutes les cuves</button></div>';
+  vis.forEach(function(c){ h+=_vtRowHtml(c,canEdit); });
   h+='</div>';
   if(canEdit) h+='<div class="vt-bot">'
     +'<button class="vt-fin" onclick="_vtFin()">Terminer la tournée <small id="vt-fin-n"></small></button>'
@@ -8742,7 +8823,16 @@ function _vtBandeauHtml(){
     +'<div class="vt-leg"><span><b>P</b> pigeage</span><span><b>R</b> remontage</span><span>appui long = −1</span></div>';
 }
 function _vtRowHtml(c,canEdit){
-  var b=_vtB(c.id), inact=!_vendIsActive(c);
+  /* ★★★ CUV-11 — CETTE LIGNE FERMAIT LA TOURNEE QUE §116 VENAIT D'OUVRIR.
+     CUV-9 avait fait entrer les cuves decuvees dont la FA continue dans
+     `_vtActives` — « c'est la que le releve compte le plus » — mais leur
+     ligne se rendait SANS AUCUN CHAMP, parce que la condition d'edition
+     etait restee `_vendIsActive`. Le tag « decuvee » s'affichait au-dessus
+     de rien. Verifie au bac sur la fonction reelle avant correction.
+     ⚠ C'est bien `_vendMesurable` et non `_vendSuivie` : sous le filtre
+       « Tout », une cuve decuvee et declaree finie doit pouvoir etre
+       relevee elle aussi, sans pour autant etre reclamee. */
+  var b=_vtB(c.id), inact=!_vendMesurable(c);
   var cls=_vtFait(c.id)?'done':(_vtPart(c.id)?'part':'');
   var mj=_vtMesJour(c);
   var h='<div class="vt-cv '+cls+'" id="vt-cv-'+_escAttr(c.id)+'">'
@@ -8794,7 +8884,7 @@ function _vtTags(c){
   var t=_vtNum(b.t); if(t==null) t=(lt&&lt.temp_c!=null)?lt.temp_c:null;
   var d=_vtNum(b.d);
   if(c.statut==='mpf') o+='<span class="vt-tag">macération</span>';
-  if(_vendFaEnCours(c)) o+='<span class="vt-tag">décuvée</span>';
+  if(_vendDecuvee(c)) o+='<span class="vt-tag">décuvée</span>';
   if(t!=null&&t>=30) o+='<span class="vt-tag hot">'+_vendCuvF1(t)+' °C</span>';
   if(d!=null){
     /* ★ CUV-10 : un repere, pas un verdict. C'est la degustation qui tranche. */
@@ -8879,7 +8969,7 @@ function _vtFilt(k){
   renderVendTour();
 }
 function _vtMaj(){
-  var a=_vtActives(), n=a.filter(function(c){return _vtFait(c.id);}).length;
+  var a=_vtBase(), n=a.filter(function(c){return _vtFait(c.id);}).length;
   var pn=document.getElementById('vt-pn'); if(pn) pn.textContent=n;
   var pt=document.getElementById('vt-pt'); if(pt) pt.textContent='/'+a.length;
   var pf=document.getElementById('vt-pf'); if(pf) pf.style.width=(a.length?Math.round(n/a.length*100):0)+'%';
@@ -8910,7 +9000,7 @@ function _vtEtat(s){
 function _vtEcrire(){
   if(!canWrite()) return;
   var jour=_vtJour(), n=0;
-  _vtActives().forEach(function(c){
+  _vtMesurables().forEach(function(c){
     var b=_VT_BUF[c.id]; if(!b) return;
     var d=_vtNum(b.d), t=_vtNum(b.t);
     if(d==null&&t==null&&!b.p&&!b.r) return;
@@ -8940,7 +9030,10 @@ function _vtEcrire(){
 }
 function _vtFin(){
   clearTimeout(_VT_TMR); _vtEcrire();
-  var a=_vtActives();
+  /* ★ CUV-11 : le bilan porte sur l'ensemble affiche (`_vtBase`). Sur
+     `_vtActives`, une tournee faite entierement sur des cuves decuvees
+     annoncait « 0 releve » alors que trois venaient d'etre ecrits. */
+  var a=_vtBase();
   var n=a.filter(function(c){return _vtFait(c.id);}).length;
   var pg=0,rm=0;
   a.forEach(function(c){ var b=_vtB(c.id); pg+=b.p; rm+=b.r; });
@@ -9863,8 +9956,18 @@ function _fermLegende(cu, ops, t0, mes, deuxAxes, ets){
     h += '</div>';
   }
   var chap = ops.filter(function(o){ return o.type === 'chaptalisation'; });
-  if(chap.length) h += '<div class="mvfm-note">La seule remont\u00e9e possible de la courbe, c\u2019est une chaptalisation. '
+  if(chap.length) h += '<div class="mvfm-note">Une chaptalisation dat\u00e9e explique une remont\u00e9e de la courbe. '
     + 'Elle est ici dat\u00e9e au m\u00eame endroit que la mesure, on ne la cherche plus.</div>';
+  /* ★★ CUV-11 — LA SECONDE EXPLICATION D'UNE REMONTEE. Tant qu'une courbe
+     s'arretait au decuvage, une chaptalisation etait la seule cause possible,
+     et l'ecran l'ecrivait. Un releve pris APRES le decuvage porte sur la masse
+     assemblee, goutte et presse : le pressurage relargue du sucre, et la
+     densite remonte sans qu'on ait ajoute un gramme. Le taire ferait chercher
+     une chaptalisation qui n'existe pas. */
+  if(cu && _vendDecuvee(cu) && mes.some(function(m){ return m.date > cu.decuvage.date; }))
+    h += '<div class="mvfm-note">Les relev\u00e9s pris <b>apr\u00e8s le d\u00e9cuvage</b> portent sur la masse '
+      + 'assembl\u00e9e, goutte et presse\u00a0: le pressurage relargue du sucre, et la courbe peut '
+      + 'remonter sans chaptalisation.</div>';
   var der = _vendMesD20(mes[mes.length-1]);
   var _dsc = _vendDSec(cu);
   if(der <= _dsc) h += '<div class="mvfm-fin"><b>' + Math.round(der) + ' au jour '

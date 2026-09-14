@@ -2,7 +2,20 @@
 
 > Document de référence du projet **Ma Vigne** (GUERETTECH). Il est le **porteur de vérité** :
 > la mémoire Claude est plafonnée, ce fichier ne l'est pas.
-> Dernière consolidation : **14 septembre 2026 (NS-1 + BAS-1 + PLUS-1)** — ★★★ **TROIS FAMILLES SE
+> Dernière consolidation : **14 septembre 2026 (CUV-11)** — ★★★ **LA DENSITÉ SE RELÈVE ENCORE UNE
+> FOIS LA CUVE DÉCUVÉE (§129)**. Nico : *« il faut pouvoir mesurer encore la densité une fois les
+> cuves décuvées. »* Trois portes fermées, et la dernière tenait les deux autres : `renderVendTour`
+> décidait l'écran vide sur `_vtActives()` **avant de regarder le filtre**, donc la dernière cuve
+> décuvée fermait la tournée entière — **l'état normal du cuvier après vendange, tous les ans**.
+> Nouveau prédicat `_vendMesurable` : **pouvoir relever n'est pas devoir relever** ; bouton, ligne,
+> écriture et progression couvrent le même ensemble, `_vendSuivie` ne bouge pas, rien ne rouvre.
+> ⚠️⚠️ **Une contre-épreuve s'est éteinte en silence** en élargissant le harnais : son ancre
+> (`var m=_vtMesJour(c);`) est devenue non unique dans le bloc extrait, `String.replace` a saboté la
+> mauvaise fonction. ⚠️⚠️⚠️ **Lot rebasé DEUX FOIS dans la journée** (§127 puis §128 sur les mêmes
+> fichiers) — *une livraison qui attend une heure doit être rebasée, pas collée* (§129e).
+> **APP 7.20 → 7.21 · SW 7.82 → 7.83**, base `f6ed8e7`. Détail en **§129**.
+>
+> ★ Précédente : **14 septembre 2026 (NS-1 + BAS-1 + PLUS-1)** — ★★★ **TROIS FAMILLES SE
 > PARTAGEAIENT LE PRÉFIXE `.mvt-*` SANS LE SAVOIR (§128)**. Nico : *« revois toutes les polices, tous
 > les affichages en z-index pour être sûr que tout s'affiche — j'ai retrouvé des problèmes mais je ne
 > sais plus où. »* La suite était verte, `mv-harnais-couches` aussi : il lisait `.mvt-ov` et répondait
@@ -18445,3 +18458,121 @@ une erreur. Recâblés sur `#vt-list` / `.vt-cnt`.
 > deux familles qui s'ignoraient ; le sélecteur traversant fait dépendre une famille d'une autre sans
 > que rien ne le déclare. Le contrôle qui l'a vu (« ce sélecteur ne vise rien dans les sources »)
 > existait déjà — il a suffi qu'il tourne.
+
+## 129. ★★★ CUV-11 — LA DENSITÉ SE RELÈVE ENCORE UNE FOIS LA CUVE DÉCUVÉE, ET LA TOURNÉE NE SE FERME PLUS QUAND LE CUVIER SE VIDE (14/09 — `cave.js` + `utils.js` + `index.html` + `sw.js` + `scripts/` · APP 7.20 → 7.21 · SW 7.82 → 7.83 · base `f6ed8e7`)
+
+**Le point de départ, dit par Nico** : *« il faut pouvoir mesurer encore la densité une fois les
+cuves décuvées. »* Une phrase, **trois portes fermées** — et la dernière tenait les deux autres.
+
+### 129a. ★★★ POUVOIR RELEVER N'EST PAS DEVOIR RELEVER
+
+`_vendSuivie` dit qui l'application **RÉCLAME** : la tournée, l'agenda, le badge « à mesurer ». Il
+n'a jamais eu à dire qui elle **ACCEPTE**. Les deux étaient confondus, et le cas courant était le
+plus fermé : depuis §118 la feuille de décuvage coche « terminée en cuve » d'avance, donc
+`_vendFaEnCours` est faux, donc plus **aucune** porte — ni bouton dans le détail, ni champ dans la
+tournée. Une cuve décuvée **avant** §118 n'a pas de `fa_finie` du tout : même résultat.
+
+```
+_vendMesurable(c)  = !fusionnée && (_vendIsActive(c) || _vendDecuvee(c))
+_vtMesurables()    = ce que l'écriture couvre
+_vtBase()          = ce que la progression compte  (= _vtVisibles ∩ mesurable)
+```
+
+⚠️⚠️ **CE PRÉDICAT N'ARME RIEN.** Il ouvre une porte, il ne pose aucune relance. Une cuve déclarée
+finie au décuvage ne revient **pas** dans la tournée réclamée (`_vtActives` est inchangé), et un
+relevé ne rouvre aucune fermentation : **le décuvage est un FAIT (§118), un chiffre ne le
+contredit pas.** ⚠️ Une cuve **fusionnée** reste dehors : son vin est ailleurs, sous un autre nom.
+
+### 129b. ★★★ LA PORTE QUI TENAIT LES DEUX AUTRES — ET ELLE ÉTAIT EN AMONT
+
+Le premier temps du lot avait ouvert la ligne (`_vtRowHtml` sur `_vendMesurable` et non
+`_vendIsActive` — CUV-9 avait fait entrer les cuves décuvées dans la tournée pendant que leur ligne
+se rendait **sans aucun champ**, le tag « décuvée » s'affichant au-dessus de rien), l'écriture
+(`_vtEcrire` sur `_vtMesurables`) et le bouton du détail. **Trois fonctions vertes derrière une
+porte fermée** : `renderVendTour` décidait l'écran vide sur `_vtActives()` **avant de regarder le
+filtre**. Dès la dernière cuve décuvée : pas de liste → pas de chip « Toutes » → aucune porte.
+
+★★★ **Et ce n'est pas un cas limite : c'est l'état NORMAL du cuvier après la vendange.** Toutes les
+cuves finissent décuvées. Le défaut s'installait chaque année, exactement au moment où le relevé
+compte le plus — plus de marc, plus de chapeau, **rien dans le cuvier ne rappelle qu'il faut aller
+voir**.
+
+| | Avant | Après |
+|---|---|---|
+| écran vide | `!_vtActives().length` | `!_vtMesurables().length` |
+| vue d'ouverture | toujours « En cours » | « Toutes » si rien ne fermente et qu'il reste à relever (`_vtFiltDef`, décidé **au chargement** — à chaque rendu, un clic sur « En cours » serait annulé aussitôt) |
+| filtre vide | un blanc | la phrase qui dit où sont les cuves, et le bouton qui y va |
+| progression et bilan | `_vtActives()` | `_vtBase()` |
+
+⚠️ **Arbitrage assumé** : sous « Toutes », la barre et le bilan comptent aussi les décuvées. Sous
+« En cours » et « Reste à faire » c'est **exactement** `_vtActives()`, donc aucune régression. La
+règle tient en une ligne : **la tournée compte ce qu'elle montre.** Sur `_vtActives`, une tournée
+faite entièrement sur des décuvées annonçait *« 0 relevé »* après trois densités écrites.
+
+### 129c. Ce que ça change ailleurs
+
+- **Au Chai** : `_caveFaLineHtml` affiche le **dernier relevé de la cuve source** (`_caveCuveSource`
+  par `decuvage.cuvee_id`). Aucune densité propre à la cuvée, rien de recopié, rien qui puisse
+  diverger (§116). C'est là qu'on décide de sulfiter, et **on ne sulfite pas sur du sucre**.
+- **La légende de la courbe** : tant qu'elle s'arrêtait au décuvage, une chaptalisation était la
+  **seule** remontée possible, et l'écran l'écrivait. Un relevé postérieur porte sur la **masse
+  assemblée, goutte et presse** : le pressurage relargue du sucre, la courbe remonte sans qu'on ait
+  ajouté un gramme. Le taire ferait chercher une chaptalisation qui n'existe pas.
+- **Le tag « décuvée »** de la tournée passe de `_vendFaEnCours` à `_vendDecuvee` : il décrit un
+  fait, pas une réponse cochée.
+- **La section Décuvées** montre le dernier point relevé après le décuvage — sinon il faut déplier
+  chaque cuve pour savoir laquelle a été suivie.
+
+### 129d. ⚠️⚠️ LE HARNAIS NE VOYAIT PAS L'IMPASSE, ET UNE CONTRE-ÉPREUVE S'EST ÉTEINTE EN SILENCE
+
+`mv-harnais-cuv7` n'éprouvait que des **prédicats**. Trois d'entre eux étaient justes chacun de son
+côté pendant que l'écran était mort au milieu. ★ **Un harnais qui s'arrête aux prédicats ne voit
+pas une porte fermée : il faut RENDRE l'écran.** `renderVendTour`, `_vtLoad`, `_vtBandeauHtml`,
+`_vtMaj`, `_vtVisibles`, `_vtBase` et `_vtFiltDef` sont désormais extraits, sur un décor DOM
+minimal (un nœud pour tout `getElementById`) — il ne prétend pas être un navigateur.
+
+⚠️⚠️ **ET C'EST EN FAISANT ÇA QU'UNE CONTRE-ÉPREUVE EST MORTE.** Le sabotage « empilement au lieu de
+mise à jour » visait `var m=_vtMesJour(c);`, **présent dans deux fonctions** dès que `_vtLoad` entre
+dans le bloc extrait. `String.replace` ne remplace que la **première occurrence** : la
+contre-épreuve saccageait `_vtLoad` et laissait `_vtEcrire` intact — **verte sans rien prouver**.
+★★★ **Règle : une ancre de contre-épreuve doit être unique DANS LE BLOC EXTRAIT, pas dans la
+fonction qu'on croit viser.** Élargir un harnais peut en éteindre une partie, sans une ligne rouge.
+
+**Compte** : `mv-harnais-cuv7` **44 assertions vertes**, 5 contre-épreuves qui mordent (dont deux
+neuves : la ligne qui reprend `_vendIsActive`, l'écriture qui reste sur `_vtActives` pendant que
+l'affichage s'élargit). `mv-harnais-cuv8` **50 vertes · 13 contre-épreuves**, avec le bloc 7d
+(les trois décuvées — finie, à finir, muette — sont toutes mesurables ; un relevé à 1020 pris après
+le décuvage ne rouvre pas la fermentation).
+
+### 129e. ⚠️⚠️⚠️ CE LOT A ÉTÉ REBASÉ DEUX FOIS EN UNE JOURNÉE, ET C'EST LA LEÇON DE §126 QUI A SERVI
+
+Construit sur `eea1df4`, il a vu passer **TYPO-1 (§127)** puis **NS-1 + BAS-1 + PLUS-1 (§128)** sur
+**les mêmes fichiers** avant d'être livré. Les deux fois : `git diff` mis de côté, base récupérée,
+patch réappliqué en **fusion trois voies**, chaîne rejouée.
+
+★ **La seconde fois a fait quatre conflits, et ils étaient tous du même genre** : §128 renomme le
+préfixe `.mvt-*` en `.vt-*`. Résolus en gardant **ma logique et son préfixe** — puis vérifié classe
+par classe que chacune existe encore dans le CSS (`vt-vide`, `vt-tag`, `mvv-act2`, `mvc-fa-line`…).
+⚠️ **Un piège s'est glissé là** : la classe racine `mvt` n'a **pas** de tiret, donc un
+remplacement `mvt-` → `vt-` la laisse intacte. Elle est sortie au grep, pas au harnais — aucun
+contrôle du projet ne lit une classe CSS émise depuis JS.
+⚠️⚠️ **Et le harnais cherchait `/mvt-d-/`** : sur la nouvelle base il aurait été **vert en ne
+trouvant jamais le champ**, puisqu'il teste une absence par la négative dans un cas et une présence
+dans l'autre. Réancré sur `vt-d-`.
+
+★★★ **La règle de §82a tient toujours, et elle vaut dans les deux sens** : des fichiers complets
+préparés sur une base et collés sur une autre écrasent ce qui est passé entre les deux. **Une
+livraison qui attend une heure doit être rebasée, pas collée.**
+
+### 129f. La note de livraison
+
+**Base `f6ed8e7`.** **APP 7.20 → 7.21** (deux entrées au journal : c'est visible) · **SW 7.82 →
+7.83**. `npm run check` joué en entier sur la base finale.
+
+**Ouvert, et dit** : ① **aucun rendu navigateur** — le décor DOM du harnais prouve la logique de
+l'écran, pas son apparence ; la vue « Toutes » sur douze cuves se regarde sur téléphone, d'autant
+que §128 vient de reprendre l'en-tête et le bas de cet écran-là. ② `npm run build`, `test:smoke`,
+`test:e2e` restent côté Nico. ③ **`_mlProjFA` n'est toujours pas repris** (§117-4) : une projection
+linéaire sur une cinétique qui ralentit annonce une fin trop proche, systématiquement — et elle
+porte maintenant aussi sur des cuves décuvées. ④ La **zone de 996** attend toujours les résultats du
+labo pour être calée sur ce domaine (§117).

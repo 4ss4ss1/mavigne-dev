@@ -1,4 +1,14 @@
-// MA VIGNE — Service Worker v7.82
+// MA VIGNE — Service Worker v7.83
+// v7.83 (14/09/2026) — CUV-11 : LA DENSITE SE RELEVE ENCORE UNE FOIS LA CUVE DECUVEE.
+//   Nico : « il faut pouvoir mesurer encore la densite une fois les cuves decuvees ». Trois portes fermees, la
+//   derniere en amont des deux autres : `renderVendTour` decidait l'ecran vide sur `_vtActives()` AVANT de regarder
+//   le filtre — la derniere cuve decuvee fermait la tournee entiere, donc la chip « Toutes » devenait inatteignable,
+//   donc les champs ouverts plus bas n'existaient pour personne. C'est l'etat NORMAL du cuvier apres vendange.
+//   Nouveau predicat `_vendMesurable` (POUVOIR relever n'est pas DEVOIR relever) : bouton du detail, ligne de
+//   tournee editable, ecriture (`_vtMesurables`) et progression (`_vtBase`) couvrent le meme ensemble. Le decuvage
+//   reste un FAIT (§118) : rien ne rouvre, rien ne reclame, `_vendSuivie` ne bouge pas. La cuvee du Chai affiche la
+//   suite de la serie de sa cuve, et la legende de la courbe cite le relargage de presse comme seconde explication
+//   d'une remontee. Le tag « decuvee » passe sur `_vendDecuvee` : un fait, pas une case cochee.
 // v7.82 (14/09/2026) — NS-1 + BAS-1 + PLUS-1 : TROIS FAMILLES SE PARTAGEAIENT LE PREFIXE .mvt-* SANS LE SAVOIR.
 //   La porte CGU (styles.css), la feuille de tri (utils.js) et la tournee du Cuvier (cave.js) declaraient les MEMES classes dans TROIS feuilles :
 //   la derniere injectee gagnait. Mesure : .mvt-ov 9500 ici / 9200 la, .mvt-hd avec un fond noir et un display:flex qui ne lui etaient pas destines.
@@ -3938,7 +3948,7 @@
 // v2.22 — Fix profils vides : guard vide dans loadData() pour MEMBRES/SAISONS/TACHES
 // v2.17 — Onboarding intégré + tenantId · v2.06 — Firebase Auth · v2.00–v2.05 — divers
 const DEBUG = self.location.hostname === 'localhost' || self.location.hostname === '127.0.0.1';
-const CACHE_NAME   = 'mavigne-v7.82';
+const CACHE_NAME   = 'mavigne-v7.83';
 const TENANT_CACHE = 'mavigne-tenant';   // Cache persistant — préservé à chaque mise à jour SW
 const SYNC_TAG     = 'mavigne-sync';
 
@@ -3954,7 +3964,7 @@ const CDN_URLS = [
 ];
 
 self.addEventListener('install', event => {
-  if(DEBUG) console.log('[SW] Ma Vigne v7.82 installé');
+  if(DEBUG) console.log('[SW] Ma Vigne v7.83 installé');
   event.waitUntil(
     caches.open(CACHE_NAME).then(async cache => {
       // ── Cœur applicatif : STRICT (mise à jour ATOMIQUE) ──
@@ -3970,7 +3980,7 @@ self.addEventListener('install', event => {
 });
 
 self.addEventListener('activate', event => {
-  if(DEBUG) console.log('[SW] Ma Vigne v7.82 activé');
+  if(DEBUG) console.log('[SW] Ma Vigne v7.83 activé');
   event.waitUntil(
     caches.keys().then(keys =>
       Promise.all(
