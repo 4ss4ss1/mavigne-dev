@@ -173,6 +173,115 @@ A('★ et son voile',
   zDe('.pil-scrim') != null && PLANCHER != null && zDe('.pil-scrim') < PLANCHER,
   '.pil-scrim = ' + zDe('.pil-scrim'));
 
+/* ══ ★★★ UN SÉLECTEUR, UNE FEUILLE — l'angle mort du 14/09 ════════════════
+   Le contrôle ci-dessus lisait `.mvt-ov` et répondait 9500. Il avait raison, et
+   il se trompait : la classe était déclarée DEUX FOIS — 9500 dans `styles.css`
+   pour la porte CGU, 9200 dans la CSS injectée par `utils.js` pour la feuille
+   de tri. Trois familles se partageaient le préfixe `.mvt-*` (la porte, la
+   feuille de tri, la tournée du Cuvier) sans le savoir, et la dernière feuille
+   injectée gagnait. Résultat mesuré : le titre de la feuille de tri écrit en
+   noir sur le fond noir de la porte, et l'en-tête de la tournée mis en ligne
+   par un `display:flex` qui ne lui était pas destiné.
+
+   ★★★ CE N'EST PAS UN PROBLÈME DE Z-INDEX, C'EST CE QUI REND UN Z-INDEX
+   ILLISIBLE. Prendre le maximum, comme le faisait la ligne `porte`, c'est
+   choisir une valeur au hasard parmi deux vérités contradictoires. La règle
+   qui tient : une classe appartient à UNE feuille. Deux feuilles qui la
+   déclarent, c'est deux fonctionnalités qui se marchent dessus.
+
+   ⚠️ Les blocs `@media` sont RETIRÉS avant lecture : `pilotage.js` y surcharge
+   volontairement `.pil-dom` et `.pil-mast-in` de `styles.css` — c'est un
+   réglage responsive, pas une collision. Les compter sortirait quatre faux
+   rouges, et un contrôle qui rougit à tort finit désactivé (cf. le premier jet
+   de ce harnais, 31 faux positifs).
+   ⚠️ On ne regarde que les sélecteurs de classe SIMPLES (`.foo`, seuls devant
+   leur accolade). `.a .b` ou `.a > .b` sont des règles de contexte, pas des
+   déclarations de famille. */
+/* ⚠️⚠️ PREMIER JET, ET IL A SORTI SIX FAUX ROUGES (.sbox, .section, .foot,
+   .muted, .cover, .mc-val). Cause : lire un module ENTIER ramasse aussi le CSS
+   des DOCUMENTS IMPRIMÉS, qui vit dans une chaîne HTML ouverte dans une autre
+   fenêtre. Deux documents peuvent parfaitement appeler `.foot` chacun de son
+   côté — ils ne partagent aucune cascade. On ne garde donc, pour un module,
+   que le CSS qui part VRAIMENT dans la page : celui d'un `<style>` créé puis
+   posé dans le `document`. La fenêtre de lecture va de `createElement('style')`
+   au `appendChild` qui suit. */
+function cssDeLaPage(txt, fichier){
+  if (/\.css$/.test(fichier)) return txt;
+  if (/\.html$/.test(fichier))
+    return (txt.match(/<style[^>]*>([\s\S]*?)<\/style>/g) || []).join('\n');
+  /* ⚠️⚠️ ET IL A CASSÉ AU PREMIER COMMENTAIRE ÉCRIT EN FRANÇAIS. Le découpage
+     en littéraux prend l'apostrophe de « qu'elle » pour une ouverture de
+     chaîne, se désynchronise, et la fenêtre entière disparaît — l'auto-contrôle
+     ci-dessous a rougi tout seul. On blanchit donc les commentaires AVANT de
+     découper, les deux formes, avec la précaution d'usage sur `https://`. */
+  const lignes = txt
+    .replace(/\/\*[\s\S]*?\*\//g, (m) => m.replace(/[^\n]/g, ' '))
+    .replace(/(^|[^:'"\\`])\/\/[^\n]*/g, (m, p) => p + ' '.repeat(m.length - p.length))
+    .split('\n');
+  const morceaux = [];
+  for (let i = 0; i < lignes.length; i++){
+    if (!/createElement\(['"]style['"]\)/.test(lignes[i])) continue;
+    let fin = i;
+    for (let j = i; j < Math.min(i + 400, lignes.length); j++){
+      fin = j;
+      if (/appendChild\(\s*(s|st|sty|style|el)\s*\)/.test(lignes[j])) break;
+    }
+    /* Dans cette fenêtre, le CSS est en morceaux de chaîne concaténés ou en
+       tableau. On les recolle : ce sont eux, et rien d'autre, qui entrent dans
+       la cascade de l'application. */
+    const bloc = lignes.slice(i, fin + 1).join('\n');
+    for (const m of bloc.matchAll(/'([^'\\]*(?:\\.[^'\\]*)*)'|"([^"\\]*(?:\\.[^"\\]*)*)"|`([^`\\]*(?:\\.[^`\\]*)*)`/g)){
+      const t = (m[1] || m[2] || m[3] || '');
+      if (t.length > 3) morceaux.push(t.replace(/\\'/g, "'"));
+    }
+  }
+  return morceaux.join('\n');
+}
+function reglesDeClasse(txt, fichier){
+  let t = sansCommentaires(cssDeLaPage(txt, fichier));
+  t = t.replace(/@media[^{]*\{(?:[^{}]*\{[^{}]*\})*[^{}]*\}/g, ' ');
+  const out = new Set();
+  const re = /([^{}@;]+)\{([^{}]*)\}/g;
+  let m;
+  while ((m = re.exec(t)) !== null){
+    const sel = m[1].split('\n').pop().trim();
+    if (!sel || sel.length > 200) continue;
+    for (const part of sel.split(',')){
+      const c = /^\.([\w-]+)$/.exec(part.trim());
+      if (c) out.add(c[1]);
+    }
+  }
+  return out;
+}
+const parClasse = new Map();
+for (const f of SOURCES)
+  for (const c of reglesDeClasse(lire(f), f)){
+    if (!parClasse.has(c)) parClasse.set(c, []);
+    parClasse.get(c).push(f);
+  }
+/* ⚠️ L'EXTRACTEUR DOIT NOMMER CE QU'IL PRÉTEND SURVEILLER. Quatre extracteurs
+   ont menti sur ce harnais avant le bon (cf. en-tête) : chacun rendait une
+   liste d'apparence saine. On exige donc de retrouver, nommément, une classe
+   de la feuille de style ET une classe de chacune des deux CSS injectées qui
+   se marchaient dessus. Si l'extracteur casse, ces trois-là disparaissent. */
+const vu = (c, f) => (parClasse.get(c) || []).indexOf(f) !== -1;
+A('★ l\'extracteur de classes retrouve les trois familles',
+  vu('mvt-ov', 'src/styles.css') && vu('mvz-ov', 'src/utils.js') && vu('vt-hd', 'src/cave.js'),
+  parClasse.size + ' classes lues');
+
+const doublons = [...parClasse.entries()].filter(([, fs2]) => new Set(fs2).size > 1);
+A('★★★ aucune classe n\'est déclarée dans deux feuilles', doublons.length === 0,
+  doublons.length ? doublons.length + ' collision(s)' : parClasse.size + ' classes examinées');
+doublons.slice(0, 8).forEach(([c, fs2]) => {
+  console.log('       ' + R + '· .' + c + T + '   ' + G + [...new Set(fs2)].join(' || ') + T);
+});
+
+/* La porte CGU, nommément : une seule déclaration, sinon le chiffre lu plus
+   haut n'est qu'un des deux. */
+A('★ la porte CGU n\'est déclarée qu\'une fois',
+  TOUTES.filter(c => c.sel === '.mvt-ov').length === 1,
+  TOUTES.filter(c => c.sel === '.mvt-ov').length + ' déclaration(s)');
+
 /* openOv doit VRAIMENT utiliser la constante, pas un 600 réécrit à la main. */
 A('★ openOv part du plancher, pas d\'un nombre en dur',
   /var base\s*=\s*MV_Z_MODAL_PLANCHER/.test(APP));

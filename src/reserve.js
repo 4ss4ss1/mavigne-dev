@@ -393,7 +393,7 @@ function _rsvFutsHtml(){
     +'</div>';
   if(adm || INTRANTS.futs.length){
     h+='<div class="mvr-btnrow">';
-    if(adm) h+='<button class="mvr-btn mvr-btn-p" onclick="_rsvOpenFut()">\uFF0B Ajouter des fûts</button>';
+    if(adm) h+='<button class="mvr-btn mvr-btn-p" onclick="_rsvOpenFut()">+ Ajouter des fûts</button>';
     if(INTRANTS.futs.length) h+='<button class="mvr-btn mvr-btn-o" onclick="_rsvExportFutsPdf()">'+_mvIcon('document',16)+' Inventaire PDF</button>';
     if(adm && INTRANTS.futs.length) h+='<button class="mvr-btn mvr-btn-o" onclick="_rsvOpenSep()">\uD83D\uDCE4 Se séparer de fûts</button>';
     h+='</div>';
@@ -572,7 +572,7 @@ function _rsvFutQteHtml(f, adm){
   return '<div class="mvr-fstep">'
     +'<button type="button" class="mvr-fstepb" '+(q<=1?'disabled ':'')+'onclick="_rsvFutStep(\''+_escAttr(f.id)+'\',-1)" aria-label="Retirer un fût">−</button>'
     +'<div class="mvr-fstepc"><span class="mvr-fstepv">'+q+'</span><span class="mvr-fstepl">'+lbl+'</span></div>'
-    +'<button type="button" class="mvr-fstepb" onclick="_rsvFutStep(\''+_escAttr(f.id)+'\',1)" aria-label="Ajouter un fût">＋</button>'
+    +'<button type="button" class="mvr-fstepb" onclick="_rsvFutStep(\''+_escAttr(f.id)+'\',1)" aria-label="Ajouter un fût">+</button>'
     +'</div>';
 }
 var _rsvSaveT=null;
@@ -747,7 +747,7 @@ function _rsvIntrantsHtml(){
   var h='';
   if(adm){
     h+='<div class="mvr-btnrow">'
-      +'<button class="mvr-btn mvr-btn-p" onclick="_rsvOpenAchat()">\uFF0B Achat</button>'
+      +'<button class="mvr-btn mvr-btn-p" onclick="_rsvOpenAchat()">+ Achat</button>'
       +'<button class="mvr-btn mvr-btn-o" onclick="_rsvOpenInv()">'+_mvIcon('envoyer',16)+' Inventaire d\'ouverture</button>'
       +'</div>';
   }
@@ -829,7 +829,7 @@ function _rsvOpenAchat(){
   if(!isAdmin()){ showToast('Réservé à l\'administrateur','#C0392B'); return; }
   var sel=document.getElementById('mvr-a-prod');
   sel.innerHTML=INTRANTS.produits.map(function(p){return '<option value="'+_escAttr(p.id)+'">'+_escHtml(p.nom)+' ('+(_CATLBL[p.cat]||p.cat)+')</option>';}).join('')
-    +'<option value="__new__">\uFF0B Nouvel intrant…</option>';
+    +'<option value="__new__">+ Nouvel intrant…</option>';
   if(!INTRANTS.produits.length) sel.value='__new__';
   _rsvFillDatalist('mvr-a-four-list', INTRANTS.achat_four);
   document.getElementById('mvr-a-date').value=_today();
@@ -1529,7 +1529,7 @@ function _rsvRenderSep(){
     +  (_rsvSep.nb <= 1 ? ' disabled' : '') + '>\u2212</button>'
     +  '<span>' + _rsvSep.nb + '</span>'
     +  '<button type="button" onclick="window._rsvSepAdj(1)"'
-    +  (_rsvSep.nb >= max ? ' disabled' : '') + '>\uff0b</button>'
+    +  (_rsvSep.nb >= max ? ' disabled' : '') + '>+</button>'
     +  '<span class="mvr-sepstep-u">sur ' + max + '</span></div>'
     +  '<div class="mvr-lab">Motif</div><div class="mvr-sepmots">';
   SEP.forEach(function(k){

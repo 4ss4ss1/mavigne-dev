@@ -23,7 +23,7 @@ export const GT_ADMIN_EMAIL = 'ngdevpro@gmail.com';
 // WHATS_NEW   : tableau vide = modal desactive pour cette version.
 // Format item : { emoji:'📅', titre:'Titre court', desc:'Phrase utilisateur.' }
 // Regle : seulement les changements visibles par les utilisateurs.
-export const APP_VERSION = '7.19';
+export const APP_VERSION = '7.20';
 // ════ Journal des nouveautés (récap cumulatif) ════
 // Une entrée par version, la PLUS RÉCENTE EN HAUT : { v:'5.10', items:[ {emoji,titre,desc}, … ] }
 // À chaque release visible → AJOUTER un bloc en tête (ne pas remplacer). items:[] = release technique (rien à afficher).
@@ -188,40 +188,45 @@ function _mvTriCss(){
   if(document.getElementById('mv-tri-css')) return;
   var s=document.createElement('style'); s.id='mv-tri-css';
   s.textContent=''
-   +'.mvt-ov{position:fixed;inset:0;z-index:9200;background:rgba(0,0,0,.58);display:flex;'
+   /* ⚠️ 9200 EST LE PLANCHER MODAL (MV_Z_MODAL_PLANCHER) : une feuille posee
+      dessus se met au niveau des dialogues qu'elle ouvre elle-meme. Le defaut
+      etait invisible tant que la classe s'appelait `.mvt-ov` — le harnais des
+      couches croyait lire la porte CGU, qui est legitimement au-dessus. On se
+      range avec la feuille du Cuvier (`.mvv-ov`, 9000) : une surface d'accueil. */
+   +'.mvz-ov{position:fixed;inset:0;z-index:9000;background:rgba(0,0,0,.58);display:flex;'
      +'align-items:flex-end;justify-content:center;opacity:0;pointer-events:none;transition:opacity .22s}'
-   +'.mvt-ov.open{opacity:1;pointer-events:auto}'
-   +'.mvt-sh{width:100%;max-width:560px;max-height:88vh;overflow-y:auto;background:var(--bg-card,#FBFAF6);'
+   +'.mvz-ov.open{opacity:1;pointer-events:auto}'
+   +'.mvz-sh{width:100%;max-width:560px;max-height:88vh;overflow-y:auto;background:var(--bg-card,#FBFAF6);'
      +'border:1px solid rgba(138,90,56,.12);border-bottom:none;border-radius:24px 24px 0 0;'
      +'padding:18px 17px calc(20px + env(safe-area-inset-bottom,0px));color:var(--texte,#1A1A14);'
      +'transform:translateY(100%);transition:transform .26s cubic-bezier(.4,0,.2,1);'
      +'font-family:inherit;box-shadow:0 -12px 40px rgba(20,17,13,.22)}'
-   +'.mvt-ov.open .mvt-sh{transform:translateY(0)}'
-   +'.mvt-sh *{box-sizing:border-box}'
-   +'.mvt-hd{display:flex;align-items:flex-start;justify-content:space-between;gap:10px}'
-   +'.mvt-t{font-family:\'Cormorant Garamond\',Georgia,serif;font-weight:600;font-size:var(--pt-lg,23px);'
+   +'.mvz-ov.open .mvz-sh{transform:translateY(0)}'
+   +'.mvz-sh *{box-sizing:border-box}'
+   +'.mvz-hd{display:flex;align-items:flex-start;justify-content:space-between;gap:10px}'
+   +'.mvz-t{font-family:\'Cormorant Garamond\',Georgia,serif;font-weight:600;font-size:var(--pt-lg,23px);'
      +'line-height:1.15;display:flex;align-items:center;gap:8px}'
-   +'.mvt-x{background:var(--bg-app,#F2EFE7);border:1px solid rgba(138,90,56,.18);'
+   +'.mvz-x{background:var(--bg-app,#F2EFE7);border:1px solid rgba(138,90,56,.18);'
      +'color:var(--texte-doux,#5F5F5F);width:38px;height:38px;border-radius:10px;cursor:pointer;'
      +'flex-shrink:0;display:flex;align-items:center;justify-content:center}'
-   +'.mvt-sub{font-size:var(--pt-txt,12.5px);color:var(--texte-doux,#5F5F5F);line-height:1.5;margin-top:5px}'
-   +'.mvt-l{display:block;font-size:var(--pt-micro,11px);letter-spacing:.8px;text-transform:uppercase;'
+   +'.mvz-sub{font-size:var(--pt-txt,12.5px);color:var(--texte-doux,#5F5F5F);line-height:1.5;margin-top:5px}'
+   +'.mvz-l{display:block;font-size:var(--pt-micro,11px);letter-spacing:.8px;text-transform:uppercase;'
      +'color:var(--texte-doux,#5F5F5F);font-weight:700;margin:15px 0 7px}'
-   +'.mvt-l i{font-style:normal;font-weight:400;text-transform:none;letter-spacing:0}'
-   +'.mvt-row{display:flex;flex-wrap:wrap;gap:6px}'
-   +'.mvt-seg{display:flex;gap:6px}.mvt-seg .mvt-b{flex:1;text-align:center}'
-   +'.mvt-b{border:1px solid rgba(138,90,56,.2);background:transparent;color:var(--texte-med,#4A4A3A);'
+   +'.mvz-l i{font-style:normal;font-weight:400;text-transform:none;letter-spacing:0}'
+   +'.mvz-row{display:flex;flex-wrap:wrap;gap:6px}'
+   +'.mvz-seg{display:flex;gap:6px}.mvz-seg .mvz-b{flex:1;text-align:center}'
+   +'.mvz-b{border:1px solid rgba(138,90,56,.2);background:transparent;color:var(--texte-med,#4A4A3A);'
      +'border-radius:10px;padding:9px 12px;font-size:var(--pt-txt,12.5px);font-weight:600;'
      +'cursor:pointer;font-family:inherit;min-height:40px}'
-   +'.mvt-b.on{background:var(--cave,#14110D);border-color:var(--cave,#14110D);color:#F0E2C8}'
-   +'.mvt-b[disabled]{opacity:.4;cursor:not-allowed;text-decoration:line-through}'
-   +'.mvt-note{background:var(--or-pale,#FAF3E0);border-left:3px solid var(--or,#C2A14D);'
+   +'.mvz-b.on{background:var(--cave,#14110D);border-color:var(--cave,#14110D);color:#F0E2C8}'
+   +'.mvz-b[disabled]{opacity:.4;cursor:not-allowed;text-decoration:line-through}'
+   +'.mvz-note{background:var(--or-pale,#FAF3E0);border-left:3px solid var(--or,#C2A14D);'
      +'border-radius:0 6px 6px 0;padding:9px 11px;font-size:var(--pt-micro,11px);'
      +'color:var(--texte-med,#4A4A3A);line-height:1.55;margin-top:13px}'
-   +'.mvt-go{width:100%;margin-top:16px;padding:14px;border:0;border-radius:13px;cursor:pointer;'
+   +'.mvz-go{width:100%;margin-top:16px;padding:14px;border:0;border-radius:13px;cursor:pointer;'
      +'background:var(--cave,#14110D);color:#F3EEE2;font-family:inherit;font-size:var(--pt-base,14px);'
      +'font-weight:600}'
-   +'.mvt-mem{text-align:center;font-size:var(--pt-lbl,10.5px);color:var(--texte-doux,#5F5F5F);margin-top:9px}';
+   +'.mvz-mem{text-align:center;font-size:var(--pt-lbl,10.5px);color:var(--texte-doux,#5F5F5F);margin-top:9px}';
   document.head.appendChild(s);
 }
 
@@ -290,27 +295,27 @@ function _mvTriRendre(){
   var esc=(typeof window._escHtml==='function')?window._escHtml:function(x){return String(x==null?'':x);};
   var ico=(typeof window._mvIcon==='function')?window._mvIcon(o.icone||'imprimante',20):'';
   var b=function(on,act,txt,off){
-    return '<button type="button" class="mvt-b'+(on?' on':'')+'"'+(off?' disabled':'')
+    return '<button type="button" class="mvz-b'+(on?' on':'')+'"'+(off?' disabled':'')
       +' aria-pressed="'+(on?'true':'false')+'" onclick="'+act+'">'+txt+'</button>';
   };
-  var h='<div class="mvt-hd"><div class="mvt-t">'+ico+esc(o.titre||'Trier le document')+'</div>'
-    +'<button type="button" class="mvt-x" onclick="window._mvTriFermer()" aria-label="Fermer">'
+  var h='<div class="mvz-hd"><div class="mvz-t">'+ico+esc(o.titre||'Trier le document')+'</div>'
+    +'<button type="button" class="mvz-x" onclick="window._mvTriFermer()" aria-label="Fermer">'
     +((typeof window._mvIcon==='function')?window._mvIcon('croix',18):'\u00d7')+'</button></div>';
-  if(o.sub) h+='<div class="mvt-sub">'+esc(o.sub)+'</div>';
+  if(o.sub) h+='<div class="mvz-sub">'+esc(o.sub)+'</div>';
 
   if(o.annees&&o.annees.length>1){
-    h+='<span class="mvt-l">'+esc(o.anLbl||'Ann\u00e9e')+'</span><div class="mvt-row">'
+    h+='<span class="mvz-l">'+esc(o.anLbl||'Ann\u00e9e')+'</span><div class="mvz-row">'
       +o.annees.map(function(a){ return b(String(a)===String(e.an),
           'window._mvTriSet(\'an\',\''+esc(a)+'\')', esc(a)); }).join('')+'</div>';
   }
   if(o.groupes&&o.groupes.length>1){
-    h+='<span class="mvt-l">'+esc(o.grpLbl||'Une ligne par')
-      +(o.grpHint?' <i>'+esc(o.grpHint)+'</i>':'')+'</span><div class="mvt-seg">'
+    h+='<span class="mvz-l">'+esc(o.grpLbl||'Une ligne par')
+      +(o.grpHint?' <i>'+esc(o.grpHint)+'</i>':'')+'</span><div class="mvz-seg">'
       +o.groupes.map(function(g){ return b(g.v===e.groupe,
           'window._mvTriSet(\'groupe\',\''+esc(g.v)+'\')', esc(g.lbl)); }).join('')+'</div>';
   }
   var dispo=_mvTriDispo(o, e.groupe);
-  h+='<span class="mvt-l">Trier par</span><div class="mvt-row">'
+  h+='<span class="mvz-l">Trier par</span><div class="mvz-row">'
     +(o.cles||[]).map(function(k){
         var off=!dispo.some(function(d){return d.v===k.v;});
         return b(k.v===e.cle, 'window._mvTriSet(\'cle\',\''+esc(k.v)+'\')', esc(k.lbl), off);
@@ -321,18 +326,18 @@ function _mvTriRendre(){
   // « la plus grande d'abord ») ; une fleche collee devant serait un PICTOGRAMME
   // brut dans une surface qui n'en veut plus (harnais des icones), et elle ne
   // dirait rien que le mot ne dise mieux.
-  h+='<span class="mvt-l">Sens</span><div class="mvt-seg">'
+  h+='<span class="mvz-l">Sens</span><div class="mvz-seg">'
     +b(e.sens==='asc','window._mvTriSet(\'sens\',\'asc\')',esc(kc.a))
     +b(e.sens==='desc','window._mvTriSet(\'sens\',\'desc\')',esc(kc.z))+'</div>';
 
   var c={an:e.an,cle:e.cle,sens:e.sens,groupe:e.groupe};
-  if(typeof o.note==='function'){ var n=o.note(c); if(n) h+='<div class="mvt-note">'+n+'</div>'; }
+  if(typeof o.note==='function'){ var n=o.note(c); if(n) h+='<div class="mvz-note">'+n+'</div>'; }
   var cpt=(typeof o.compte==='function')?o.compte(c):'';
-  h+='<button type="button" class="mvt-go" onclick="window._mvTriValider()">'
+  h+='<button type="button" class="mvz-go" onclick="window._mvTriValider()">'
     +esc(o.btn||'\u00c9diter le document')+(cpt?' \u00b7 '+esc(cpt):'')+'</button>';
   if(o.memo && !MV_TRI_MEMO_KO)
-    h+='<div class="mvt-mem">Ce choix est retenu pour la prochaine fois.</div>';
-  ov.innerHTML='<div class="mvt-sh" onclick="event.stopPropagation()">'+h+'</div>';
+    h+='<div class="mvz-mem">Ce choix est retenu pour la prochaine fois.</div>';
+  ov.innerHTML='<div class="mvz-sh" onclick="event.stopPropagation()">'+h+'</div>';
 }
 
 window._mvTriSet = function(champ, val){
@@ -380,7 +385,7 @@ window._mvTriOuvrir = function(o){
   _mvTriCss();
   var ov=document.getElementById('mv-tri-ov');
   if(!ov){
-    ov=document.createElement('div'); ov.id='mv-tri-ov'; ov.className='mvt-ov';
+    ov=document.createElement('div'); ov.id='mv-tri-ov'; ov.className='mvz-ov';
     ov.addEventListener('click',function(ev){ if(ev.target===ov) window._mvTriFermer(); });
     document.addEventListener('keydown',function(ev){
       if(ev.key==='Escape' && MV_TRI_ETAT) window._mvTriFermer();
@@ -710,6 +715,27 @@ window._mvGraphRepeindre = function(){
 };
 
 export const WHATS_NEW = [
+  { v: '7.20', items: [
+    { emoji: 'imprimante', titre: 'Le titre de la feuille de tri ne se lisait pas',
+      desc: "Quand vous ouvriez « Trier » avant d’éditer un document — le vignoble, la cave, "
+        + "la réserve — le bandeau du haut sortait noir sur noir : le titre était bien là, "
+        + "illisible. La ligne d’explication juste en dessous partait en majuscules et se "
+        + "coupait au bout d’une ligne. La feuille retrouve son bandeau clair, son titre et "
+        + "sa phrase entière, et elle se recolle au bas de l’écran au lieu de flotter." },
+    { emoji: 'cuve', titre: 'La tournée du Cuvier : en-tête en vrac et boutons sous la barre',
+      desc: "En haut, la date, la jauge d’avancement et les trois filtres se mettaient "
+        + "côte à côte sur une seule ligne au lieu de s’empiler. En bas, « Terminer la "
+        + "tournée » et le bouton d’intervention groupée passaient <b>derrière la barre de "
+        + "navigation</b> : on les voyait à peine, et le bas du bouton ne répondait pas. "
+        + "L’en-tête se range de nouveau en trois étages, et la barre se pose au-dessus "
+        + "de la navigation." },
+    { emoji: 'plus', titre: 'Le + des boutons d’ajout n’était pas dessiné par la police de l’app',
+      desc: "Le signe + de « + Ajouter », « + Nouvelle tâche », « + Nouvelle cuve » et de "
+        + "soixante autres boutons était un caractère que <b>ni Cormorant ni Outfit ne "
+        + "contiennent</b> : votre appareil le remplaçait par le sien, plus large et mal "
+        + "aligné sur le texte — et sur certains écrans il ne s’affichait pas du tout. "
+        + "Il est remplacé par le + de la police, celui qui va avec le − des mêmes boutons." }
+  ] },
   { v: '7.19', items: [
     { emoji: 'bouclier', titre: 'Votre sauvegarde ne gardait qu’un tiers du domaine',
       desc: "Le fichier proposé sous « Sauvegarde complète » n’en portait pas le tiers : "
@@ -978,7 +1004,7 @@ export const WHATS_NEW = [
     { emoji: 'check', titre: 'Pigeages et remontages au pouce',
       desc: "Deux compteurs par cuve, <b>P</b> et <b>R</b>\u00a0: un appui ajoute un, un appui long en retire un. Pas d\u2019\u00e9cran \u00e0 ouvrir, pas de champ \u00e0 viser." },
     { emoji: 'etincelles', titre: 'Sulfiter huit cuves en une fois',
-      desc: "Le bouton <b>\uFF0B</b> en bas \u00e0 droite de la tourn\u00e9e ouvre une intervention group\u00e9e\u00a0: l\u2019op\u00e9ration, les cuves (ou <b>Toutes</b>), la dose. Chaque cuve re\u00e7oit son op\u00e9ration avec <b>son propre volume</b>, et chacune reste corrigible depuis sa fiche." },
+      desc: "Le bouton <b>+</b> en bas \u00e0 droite de la tourn\u00e9e ouvre une intervention group\u00e9e\u00a0: l\u2019op\u00e9ration, les cuves (ou <b>Toutes</b>), la dose. Chaque cuve re\u00e7oit son op\u00e9ration avec <b>son propre volume</b>, et chacune reste corrigible depuis sa fiche." },
     { emoji: 'chrono', titre: 'Un relev\u00e9 par cuve et par jour',
       desc: "La tourn\u00e9e met \u00e0 jour le relev\u00e9 du jour au lieu d\u2019en empiler un deuxi\u00e8me\u00a0: corriger une faute de frappe ne pose plus deux points sur la m\u00eame date dans la courbe. Un champ laiss\u00e9 vide veut dire \u00ab je n\u2019ai pas saisi \u00bb, jamais \u00ab efface \u00bb\u00a0\u2014 pour effacer une valeur, passez par \u00ab Saisir une mesure \u00bb." },
     { emoji: 'graphique', titre: 'Le pourcentage de FA ne tombe plus \u00e0 z\u00e9ro',
@@ -988,7 +1014,7 @@ export const WHATS_NEW = [
     { emoji: 'liste', titre: 'La parcelle o\u00f9 vous travaillez passe en t\u00eate',
       desc: "Vous appuyez sur <b>D\u00e9but</b> sur une parcelle&nbsp;: elle monte imm\u00e9diatement en haut de la liste, et elle y reste jusqu\u2019\u00e0 ce que vous validiez. Elle passe devant la tourn\u00e9e du domaine et devant la proximit\u00e9&nbsp;GPS, parce qu\u2019appuyer sur D\u00e9but est un geste que vous avez fait expr\u00e8s. Avant, elle descendait \u2014 et sur les t\u00e2ches \u00e0 passages ou \u00e0 niveaux, comme le Relevage ou l\u2019\u00c9bourgeonnage, l\u2019\u00e9tat ne comptait pas du tout dans l\u2019ordre." },
     { emoji: 'feuille', titre: 'Cr\u00e9er une t\u00e2che&nbsp;: un seul \u00e9cran',
-      desc: "\u00ab Nouvelle t\u00e2che selon le bar\u00e8me \u00bb et \u00ab Nouvelle t\u00e2che libre \u00bb ne font plus qu\u2019un bouton, <b>\uFF0B Nouvelle t\u00e2che</b>, dans la roue crant\u00e9e de la Vigne. Vous tapez le nom&nbsp;: s\u2019il existe dans la convention on vous le propose avec ses heures de r\u00e9f\u00e9rence, sinon on cr\u00e9e votre travail \u00e0 vous. Les p\u00e9riodes o\u00f9 la t\u00e2che se fait \u2014 et leurs dates estim\u00e9es \u2014 sont dans le m\u00eame \u00e9cran, celle que vous consultez d\u00e9j\u00e0 coch\u00e9e. Le bar\u00e8me de la convention et vos \u00e9cartements se consultent depuis ce m\u00eame panneau." },
+      desc: "\u00ab Nouvelle t\u00e2che selon le bar\u00e8me \u00bb et \u00ab Nouvelle t\u00e2che libre \u00bb ne font plus qu\u2019un bouton, <b>+ Nouvelle t\u00e2che</b>, dans la roue crant\u00e9e de la Vigne. Vous tapez le nom&nbsp;: s\u2019il existe dans la convention on vous le propose avec ses heures de r\u00e9f\u00e9rence, sinon on cr\u00e9e votre travail \u00e0 vous. Les p\u00e9riodes o\u00f9 la t\u00e2che se fait \u2014 et leurs dates estim\u00e9es \u2014 sont dans le m\u00eame \u00e9cran, celle que vous consultez d\u00e9j\u00e0 coch\u00e9e. Le bar\u00e8me de la convention et vos \u00e9cartements se consultent depuis ce m\u00eame panneau." },
     { emoji: 'alerte', titre: 'Une t\u00e2che cr\u00e9\u00e9e ne dispara\u00eet plus',
       desc: "Une t\u00e2che cr\u00e9\u00e9e hors convention n\u2019\u00e9tait rattach\u00e9e \u00e0 aucune p\u00e9riode&nbsp;: elle sortait de la liste au moment m\u00eame o\u00f9 vous l\u2019enregistriez, et il fallait aller la cocher dans la p\u00e9riode pour la revoir. Elle est maintenant pos\u00e9e dans les p\u00e9riodes que vous cochez, en une fois." },
     { emoji: 'calendrier', titre: 'Cocher une t\u00e2che ouvre ses dates tout de suite',
@@ -1988,7 +2014,7 @@ export const WHATS_NEW = [
     { emoji: 'dossier', titre: 'Archives des campagnes', desc: "Le Pilotage gagne un onglet \u00ab Archives \u00bb. Toutes vos campagnes y sont empil\u00e9es sur un m\u00eame axe, du 1er ao\u00fbt au 31 juillet \u2014 de r\u00e9colte \u00e0 r\u00e9colte, pour que l\u2019hiver ne soit pas coup\u00e9 en deux par le 31 d\u00e9cembre. D\u2019une ligne \u00e0 l\u2019autre se lit le d\u00e9calage des travaux : est-ce qu\u2019on s\u2019y est pris plus t\u00f4t cette ann\u00e9e ? Les heures affich\u00e9es viennent des instantan\u00e9s pris \u00e0 la cl\u00f4ture de chaque campagne. La comparaison de deux saisons, jusqu\u2019ici cach\u00e9e derri\u00e8re un bouton des R\u00e9glages, a d\u00e9m\u00e9nag\u00e9 ici \u2014 et elle refonctionne quel que soit le nom de vos p\u00e9riodes : elle les rapproche par leur place dans l\u2019ann\u00e9e, plus par leur intitul\u00e9." }
   ] },
   { v: '5.48', items: [
-    { emoji: 'epingle', titre: "L\u2019en-t\u00eate de chaque module reste en place", desc: "D\u00e8s qu\u2019on faisait d\u00e9filer un \u00e9cran, le bandeau du module partait vers le haut : le nom de la p\u00e9riode consult\u00e9e, les onglets et l\u2019aide disparaissaient, et il fallait remonter tout en haut rien que pour changer d\u2019onglet. L\u2019en-t\u00eate reste d\u00e9sormais fixe \u2014 seul le contenu d\u00e9file dessous. Deux g\u00eanes du m\u00eame ordre disparaissent avec lui : le bouton \uFF0B ne d\u00e9rive plus avec la liste, et l\u2019\u00e9cran ne peut plus glisser de travers apr\u00e8s un changement de module." }
+    { emoji: 'epingle', titre: "L\u2019en-t\u00eate de chaque module reste en place", desc: "D\u00e8s qu\u2019on faisait d\u00e9filer un \u00e9cran, le bandeau du module partait vers le haut : le nom de la p\u00e9riode consult\u00e9e, les onglets et l\u2019aide disparaissaient, et il fallait remonter tout en haut rien que pour changer d\u2019onglet. L\u2019en-t\u00eate reste d\u00e9sormais fixe \u2014 seul le contenu d\u00e9file dessous. Deux g\u00eanes du m\u00eame ordre disparaissent avec lui : le bouton + ne d\u00e9rive plus avec la liste, et l\u2019\u00e9cran ne peut plus glisser de travers apr\u00e8s un changement de module." }
   ] },
   { v: '5.47', items: [
     { emoji: 'nuage', titre: 'La m\u00e9t\u00e9o revient en haut de l\u2019Accueil', desc: "Le temps qu\u2019il fait \u00e9tait calcul\u00e9 et tenu \u00e0 jour, mais plus rien ne l\u2019affichait en haut de l\u2019\u00e9cran : il fallait descendre jusqu\u2019\u00e0 la carte m\u00e9t\u00e9o pour le voir. La pastille est de retour sur la ligne de la p\u00e9riode \u2014 temp\u00e9rature et vent, d\u2019un coup d\u2019\u0153il, d\u00e8s l\u2019ouverture. Hors ligne, elle affiche la derni\u00e8re valeur connue en plus p\u00e2le." },
@@ -2096,7 +2122,7 @@ export const WHATS_NEW = [
     { emoji: 'info', titre: 'Budget cuivre en direct dans le traitement', desc: "Lors d'une saisie de traitement au cuivre, l'assistant affiche pour chaque parcelle traitée le cumul de cuivre métal sur 7 ans face au plafond bio de 28 kg/ha — cumul actuel + apport de ce traitement. Un dépassement est signalé, mais n'empêche jamais l'enregistrement (le registre doit refléter la réalité). Le calcul est exactement celui de votre synthèse cuivre dans Réglages." }
   ] },
   { v: '5.17', items: [
-    { emoji: 'plus', titre: 'Ajouter : session ou traitement', desc: "Le bouton ＋ de l'onglet Tracteur propose maintenant un choix — démarrer une session mécanique, ou saisir un traitement phytosanitaire (qui ouvre l'assistant réglementaire avec les produits E-Phy). Un seul point d'entrée pour les deux." }
+    { emoji: 'plus', titre: 'Ajouter : session ou traitement', desc: "Le bouton + de l'onglet Tracteur propose maintenant un choix — démarrer une session mécanique, ou saisir un traitement phytosanitaire (qui ouvre l'assistant réglementaire avec les produits E-Phy). Un seul point d'entrée pour les deux." }
   ] },
   { v: '5.16', items: [
     { emoji: 'tracteur', titre: 'Module Tracteur repensé', desc: "L'onglet Tracteur fait peau neuve : le chantier en cours s'affiche désormais en grande carte « live » — avancement en hectares et bouton pour enregistrer directement. Le parc devient une bande de cartes où chaque machine indique d'un coup d'œil sa prochaine révision ou son passage au garage (touchez-la pour ouvrir son entretien). L'ensemble adopte le filet doré du domaine et un accent vert sur les sessions terminées." }
@@ -2954,7 +2980,7 @@ var MV_AIDE = {
       ['La tournée', "est l’écran de la main gauche, au milieu du cuvier : toutes les cuves en fermentation l’une sous l’autre, deux champs par cuve. La touche « Suivant » du clavier enchaîne température, densité, cuve suivante sans jamais refermer le clavier, et le champ visé remonte au centre de l’écran. La ligne passe au vert dès que les deux chiffres y sont ; la barre du haut dit combien de cuves restent. Filtrez sur « Reste à faire » pour ne plus voir que celles-là."],
       ['Ce que la tournée écrit', "un relevé par cuve et par jour, le même objet que « Saisir une mesure » — corrigible au crayon depuis la cuve, courbe comprise. Elle met à jour le relevé du jour au lieu d’en créer un second. Un champ laissé vide veut dire « je n’ai pas saisi », jamais « efface » : pour retirer une valeur, passez par « Saisir une mesure », qui reconstruit le relevé en entier."],
       ['Les compteurs P et R', "pigeage et remontage. Un appui ajoute un, un appui long en retire un. Ils se posent sur le relevé du jour, comme dans la fiche de mesure. Le nom de qui fait la tournée se choisit en haut à droite et part sur chaque relevé : c’est ce qui répond à « qui a pigé ? » trois semaines plus tard."],
-      ['L’intervention groupée', "le bouton ＋ en bas à droite de la tournée : une opération, les cuves retenues (ou « Toutes »), une dose. Chaque cuve reçoit sa propre opération, calculée sur SON volume — jamais sur un volume commun. Chacune se corrige ensuite depuis sa cuve, comme si elle avait été saisie à la main."],
+      ['L’intervention groupée', "le bouton + en bas à droite de la tournée : une opération, les cuves retenues (ou « Toutes »), une dose. Chaque cuve reçoit sa propre opération, calculée sur SON volume — jamais sur un volume commun. Chacune se corrige ensuite depuis sa cuve, comme si elle avait été saisie à la main."],
       ['La tournée s’enregistre toute seule', "une seule fois, une seconde après votre dernière frappe, pas à chaque chiffre tapé. Un « Enregistré » discret passe sous la barre. Si le réseau manque au fond du cuvier, l’écran le dit et garde votre saisie : elle repart dès que le téléphone accroche."],
       ['Un millésime à la fois', "une opération porte sur une seule année. Changer de millésime en haut du formulaire vide la sélection : on ne mélange pas deux vins dans un même geste."],
       ['Le délai d’ouillage', "se règle pour tout le domaine, et se resserre millésime par millésime — un vin jeune se surveille de plus près."],
@@ -3075,7 +3101,7 @@ var MV_AIDE = {
       },
       ['Les réglages de la Vigne et du Tracteur', "ne sont plus ici : chaque module les règle chez lui, par la roue crantée de son en-tête — tâches, barème et plantations pour la Vigne, parc, activités et chrono pour le Tracteur. La Cave fait pareil depuis peu."],
       ['Vos écartements', "ramènent les heures conseillées à votre densité réelle. Sans eux, le barème suppose 10 000 pieds à l’hectare — vos heures à vous, elles, ne bougent jamais."],
-      ['Le barème de référence', "se choisit par région dans l’écran du barème, ouvert depuis « ＋ Nouvelle tâche » par le lien « Voir le barème de la convention et vos écartements » : la Bourgogne ou la Gironde pour l’instant, chacune avec son texte source et sa date. C’est une référence, pas une règle : en changer ne modifie aucune de vos valeurs."],
+      ['Le barème de référence', "se choisit par région dans l’écran du barème, ouvert depuis « + Nouvelle tâche » par le lien « Voir le barème de la convention et vos écartements » : la Bourgogne ou la Gironde pour l’instant, chacune avec son texte source et sa date. C’est une référence, pas une règle : en changer ne modifie aucune de vos valeurs."],
       ['Le taux horaire d’un salarié', "porte une date. Une augmentation s’enregistre « à partir du » jour choisi : les heures déjà travaillées gardent l’ancien taux, et le coût d’un exercice clos ne bouge plus. La fiche liste tout ce que ce taux a valu ; pour corriger une simple faute de frappe sans créer d’augmentation, videz la date. Ces montants sont visibles des seuls administrateurs."],
       ['Le mot de passe initial', "d’un nouveau membre s’affiche une seule fois — notez-le avant de fermer."],
       ['Passer un membre en inactif', "plutôt que le supprimer conserve son historique."],

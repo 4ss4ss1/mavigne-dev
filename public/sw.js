@@ -1,4 +1,14 @@
-// MA VIGNE — Service Worker v7.81
+// MA VIGNE — Service Worker v7.82
+// v7.82 (14/09/2026) — NS-1 + BAS-1 + PLUS-1 : TROIS FAMILLES SE PARTAGEAIENT LE PREFIXE .mvt-* SANS LE SAVOIR.
+//   La porte CGU (styles.css), la feuille de tri (utils.js) et la tournee du Cuvier (cave.js) declaraient les MEMES classes dans TROIS feuilles :
+//   la derniere injectee gagnait. Mesure : .mvt-ov 9500 ici / 9200 la, .mvt-hd avec un fond noir et un display:flex qui ne lui etaient pas destines.
+//   Effets vus a l'ecran : titre de la feuille de tri en noir sur noir, sous-titre en capitales tronque, en-tete de la tournee mis en ligne au lieu d'etre empile.
+//   Effet latent : la porte CGU (fail-closed) descendait a 9200 avec opacity:0 et pointer-events:none des qu'une feuille de tri avait ete ouverte.
+//   Chaque famille a son prefixe : porte = .mvt-* · feuille de tri = .mvz-* · tournee = .vt-*. Le harnais des couches refuse desormais qu'une classe soit declaree dans deux feuilles.
+//   ★ Le renommage a DECOUVERT un second defaut : la feuille de tri etait a 9200, soit exactement le plancher modal -- invisible tant qu'elle portait le nom de la porte. Descendue a 9000.
+//   BAS-1 : .vt-bot (barre << Terminer la tournee >>) etait a bottom:0 z-index:50 sous le socle (bottom:0 z-index:90). Passee a bottom:64px+safe / z-index:93, garde de hauteur 140 -> 150.
+//   PLUS-1 : 66 occurrences du + PLEINE CHASSE (U+FF0B), absent des deux subsets latins donc dessine par une police systeme, remplacees par U+002B. Nouveau harnais mv-harnais-subset.mjs
+//   (plages et graisses lues dans fonts.css, interdiction nommee de U+FF0B, cliquet par fichier sur 274 caracteres hors subset et 72 fausses graisses au-dessus de 700).
 // v7.81 (14/09/2026) — TYPO-1 : LE BAREME --pt-* ETAIT APPLIQUE DANS DEUX MODULES SUR ONZE. 1 246 tailles converties, ZERO pixel de change.
 //   Etat trouve : 82 % des font-size ecrits en dur (3 212 sites) ; pilotage.js a 0 en dur et cave.js quasi, les neuf autres a 0 jeton (admin-gt 473/0, index.html 408/0, reglages 327/0, app 299/0, planning 278/0).
 //   Converties : UNIQUEMENT les valeurs EXACTEMENT egales a un cran (11 / 12.5 / 14 / 10.5 / 9.5 / 17 / 20 / 23 / 27 / 31 / 40) -- aucun arrondi, donc aucun deplacement possible a l'ecran.
@@ -3928,7 +3938,7 @@
 // v2.22 — Fix profils vides : guard vide dans loadData() pour MEMBRES/SAISONS/TACHES
 // v2.17 — Onboarding intégré + tenantId · v2.06 — Firebase Auth · v2.00–v2.05 — divers
 const DEBUG = self.location.hostname === 'localhost' || self.location.hostname === '127.0.0.1';
-const CACHE_NAME   = 'mavigne-v7.81';
+const CACHE_NAME   = 'mavigne-v7.82';
 const TENANT_CACHE = 'mavigne-tenant';   // Cache persistant — préservé à chaque mise à jour SW
 const SYNC_TAG     = 'mavigne-sync';
 
@@ -3944,7 +3954,7 @@ const CDN_URLS = [
 ];
 
 self.addEventListener('install', event => {
-  if(DEBUG) console.log('[SW] Ma Vigne v7.81 installé');
+  if(DEBUG) console.log('[SW] Ma Vigne v7.82 installé');
   event.waitUntil(
     caches.open(CACHE_NAME).then(async cache => {
       // ── Cœur applicatif : STRICT (mise à jour ATOMIQUE) ──
@@ -3960,7 +3970,7 @@ self.addEventListener('install', event => {
 });
 
 self.addEventListener('activate', event => {
-  if(DEBUG) console.log('[SW] Ma Vigne v7.81 activé');
+  if(DEBUG) console.log('[SW] Ma Vigne v7.82 activé');
   event.waitUntil(
     caches.keys().then(keys =>
       Promise.all(

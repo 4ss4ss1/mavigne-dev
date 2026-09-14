@@ -993,7 +993,7 @@ function renderEntretiens(){
   var hasAnoActive=anomActives.length>0;
 
   if(!fiches.length){
-    el.innerHTML=(_gnrCardHtml()+_revCardHtml(t))+'<div class="empty-state" style="padding:32px 20px"><div class="ei">'+_mvIcon('outil',40)+'</div><div class="et">Aucune fiche d\'entretien</div><div class="ed">Ajoutez une fiche avec le bouton ＋ pour commencer le suivi.</div></div>';
+    el.innerHTML=(_gnrCardHtml()+_revCardHtml(t))+'<div class="empty-state" style="padding:32px 20px"><div class="ei">'+_mvIcon('outil',40)+'</div><div class="et">Aucune fiche d\'entretien</div><div class="ed">Ajoutez une fiche avec le bouton + pour commencer le suivi.</div></div>';
     return;
   }
 
@@ -1506,7 +1506,7 @@ function renderTracteur(){
   if(!sl)return;
   if(!window._dataReady){ sl.innerHTML=window._mvSk('tracteur'); return; }
   if(!data.length){
-    sl.innerHTML=`<div class="empty-state"><div class="ei">${_mvIcon('tracteur',40)}</div><div class="et">Aucune session</div><div class="ed">Aucun passage tracteur enregistré pour cette saison.</div>${isTractoriste()?'<button class="empty-cta-ac" onclick="openNewSession()">＋ Démarrer une session</button>':''}</div>`;
+    sl.innerHTML=`<div class="empty-state"><div class="ei">${_mvIcon('tracteur',40)}</div><div class="et">Aucune session</div><div class="ed">Aucun passage tracteur enregistré pour cette saison.</div>${isTractoriste()?'<button class="empty-cta-ac" onclick="openNewSession()">+ Démarrer une session</button>':''}</div>`;
     // Peupler quand même les selects du form nouvelle session
     _fillNewSessionForm();
     return;

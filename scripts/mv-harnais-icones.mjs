@@ -84,7 +84,17 @@ const PICTO = /[\u2190-\u21FF\u2300-\u23FF\u25A0-\u25FF\u2600-\u27BF\u2B00-\u2BF
         Meme famille que le \u25B2 colle a un pourcentage — un SIGNE, pas un objet.
      ⚠ Sept occurrences, toutes le meme geste. Si l'une devient autre chose
        qu'une marque d'ecart, elle sort de cette liste. */
-const TYPO = new Set(['\u2192', '\u25B2', '\u25BC', '\uFF0B', '\u00A9', '\u25FC', '\u25AD', '\u2731']);
+/* ★★★ UN DE MOINS DEPUIS LE 14/09, ET LA RAISON COMPTE.
+     \uFF0B  le plus PLEINE CHASSE etait ici depuis DS-1, au titre de « ce n'est
+        pas une icone, c'est un signe ». C'etait vrai. Ce qui etait faux, c'est
+        qu'un signe se compose avec la police du projet : U+FF0B n'est dans
+        AUCUN des deux subsets latins, il etait donc dessine par une police
+        systeme sur 66 boutons. Il est remplace par U+002B, la paire
+        typographique du U+2212 que les memes boutons utilisent deja.
+     ★ La question « est-ce un pictogramme ? » et la question « la police
+       sait-elle le dessiner ? » sont deux questions. La seconde a desormais
+       son harnais : `scripts/mv-harnais-subset.mjs`. */
+const TYPO = new Set(['\u2192', '\u25B2', '\u25BC', '\u00A9', '\u25FC', '\u25AD', '\u2731']);
 
 /* ⚠️ LE SEUL RESIDU TOLERE DANS reglages.js, ET POURQUOI.
    `_ACT_EMOJIS` est la VALEUR enregistree dans `a.emoji`. tracteur.js la rend

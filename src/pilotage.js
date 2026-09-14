@@ -8070,7 +8070,7 @@ function _pexConso(E){
       +'les r\u00e9visions et r\u00e9parations dans <b>La R\u00e9serve \u203a D\u00e9penses</b>. '
       +'Le carburant vient tout seul des appoints de cuve.</div>'
       +'<div class="pec-acts"><button class="pec-btn" data-pec="rsv" data-v="intrants">'
-      +'<span>\uFF0B</span> Saisir un achat</button>'
+      +'<span>+</span> Saisir un achat</button>'
       +'<button class="pec-btn" data-pec="pachgo">Chiffrer dans Achats</button></div>'
       +'</div></div>';
   }
@@ -8216,7 +8216,7 @@ function _pexAxeAtelier(E,T){
     +ctrl
     +(nsp?('<div class="pec-note">'+nsp+'</div>'):'')
     +'<div class="pec-acts">'
-    +'<button class="pec-btn" data-pec="rsv" data-v="intrants"><span>\uFF0B</span> Saisir un achat</button>'
+    +'<button class="pec-btn" data-pec="rsv" data-v="intrants"><span>+</span> Saisir un achat</button>'
     +'<button class="pec-btn" data-pec="pachgo">Chiffrer dans Achats</button>'
     +'</div>'
     +'<div class="pec-note">Ces boutons <b>ouvrent La R\u00e9serve</b> \u2014 rien ne se saisit ici. '
@@ -8412,7 +8412,7 @@ function _pachView(){
 
   h+='<div class="pec-card"><div class="pec-cb" style="padding-top:16px">'
    +'<div class="pec-acts" style="margin-top:0;margin-bottom:14px">'
-     +(adm?'<button class="pec-btn pec-btn-p" data-pec="pachadd"><span>\uFF0B</span> Achat</button>':'')
+     +(adm?'<button class="pec-btn pec-btn-p" data-pec="pachadd"><span>+</span> Achat</button>':'')
      +'<button class="pec-btn'+(_PACH_FILT==='tout'?' on':'')+'" data-pec="pachf" data-v="tout">Tout</button>'
      +'<button class="pec-btn'+(_PACH_FILT==='sans'?' on':'')+'" data-pec="pachf" data-v="sans">\u00c0 chiffrer</button>'
      +'<button class="pec-btn'+(_PACH_PER==='exe'?' on':'')+'" data-pec="pachper" data-v="exe">Exercice</button>'

@@ -2,7 +2,32 @@
 
 > Document de référence du projet **Ma Vigne** (GUERETTECH). Il est le **porteur de vérité** :
 > la mémoire Claude est plafonnée, ce fichier ne l'est pas.
-> Dernière consolidation : **13 septembre 2026 (AUDIT)** — ★★★ **SIX DÉFAUTS TROUVÉS HORS DES
+> Dernière consolidation : **14 septembre 2026 (NS-1 + BAS-1 + PLUS-1)** — ★★★ **TROIS FAMILLES SE
+> PARTAGEAIENT LE PRÉFIXE `.mvt-*` SANS LE SAVOIR (§128)**. Nico : *« revois toutes les polices, tous
+> les affichages en z-index pour être sûr que tout s'affiche — j'ai retrouvé des problèmes mais je ne
+> sais plus où. »* La suite était verte, `mv-harnais-couches` aussi : il lisait `.mvt-ov` et répondait
+> **9500**. Il avait raison, et il se trompait — la classe était déclarée **deux fois**, 9500 dans
+> `styles.css` (porte CGU) et **9200** dans la CSS injectée par `utils.js` (feuille de tri). Six
+> classes en collision, toutes dans `.mvt-*` : la **porte CGU**, la **feuille de tri** et la
+> **tournée du Cuvier**. Mesuré à l'écran : titre de la feuille de tri **noir sur noir**, sous-titre
+> en capitales tronqué à une ligne, en-tête de la tournée **mis en ligne** par un `display:flex` qui
+> ne lui était pas destiné. ⚠️ Latent : la porte CGU (*fail-closed*) tombait à 9200 **avec
+> `opacity:0` et `pointer-events:none`** dès qu'une feuille de tri avait été ouverte.
+> ★★★ **ET LE RENOMMAGE A DÉCOUVERT UN SECOND DÉFAUT QUE PERSONNE NE CHERCHAIT** : la feuille de tri
+> était à **9200 = le plancher modal**, invisible tant qu'elle portait le nom de la porte, que le
+> harnais excluait légitimement. Descendue à 9000. **BAS-1** : la barre « Terminer la tournée »
+> (`bottom:0`, z **50**) passait **sous le socle** (`bottom:0`, z **90**) — la garde de 140 px du
+> conteneur prouvait qu'elle avait été pensée au-dessus. **PLUS-1** : **66** « ＋ » pleine chasse
+> (U+FF0B), absent des **deux** subsets latins donc dessiné par une police système, remplacés par
+> U+002B. ★ Deux filets : `mv-harnais-couches` refuse qu'une classe soit déclarée dans deux feuilles ;
+> `mv-harnais-subset.mjs` (neuf) lit plages et graisses **dans `fonts.css`** et tient le cliquet.
+> **APP 7.19 → 7.20 · SW 7.81 → 7.82**, base `56cd2c8`. Détail en **§128**.
+>
+> ★ Précédente : **14 septembre 2026 (TYPO-1)** — ★★★ **LE BARÈME `--pt-*` EXISTAIT DEPUIS DS-0 ET
+> DEUX MODULES SUR ONZE S'EN SERVAIENT (§127)** : 1 246 tailles converties, **zéro pixel de change**,
+> et le prérequis du réglage « taille du texte » enfin posé. **APP inchangé · SW 7.80 → 7.81.**
+>
+> ★ Précédente : **13 septembre 2026 (AUDIT)** — ★★★ **SIX DÉFAUTS TROUVÉS HORS DES
 > HARNAIS (§122)**. Nico : *« vérifie l'intégralité des fichiers, les codes, les calculs, les
 > cohérences, les bugs »*. La suite complète était verte, `node --check` aussi, et ESLint rejoué
 > avec **`no-undef` activé** n'a rien rendu : ce qui restait demandait de MESURER autre chose.
@@ -18261,3 +18286,162 @@ lot suivant, et il est de goût. ③ Le **harnais de contraste** (`mv-harnais-co
 toujours pas : aucun contrôle du projet ne lit une couleur. ④ Le reste de P1 — 223 `catch{}` vides
 dont 155 dans `app.js`, 159 slots JS nus et 330 interpolations nues, 58 classes mortes dans le CSS
 de la Cave, 3 937 hex en dur — est intact.
+
+## 128. ★★★ NS-1 + BAS-1 + PLUS-1 — UN PRÉFIXE, UNE FAMILLE (14/09 — `utils.js` + `cave.js` + `index.html` + `styles.css` + 4 modules + `sw.js` + `guide/` + `scripts/` + `package.json` · APP 7.19 → 7.20 · SW 7.81 → 7.82 · base `56cd2c8`)
+
+**Point de départ** : *« revois toutes les polices, tous les affichages en z-index pour être sûr que
+tout s'affiche — j'ai retrouvé des problèmes mais je ne sais plus où. »*
+
+### 128a. ★★★ LE HARNAIS RÉPONDAIT 9500, ET IL Y AVAIT DEUX RÉPONSES
+
+`mv-harnais-couches` était vert. Sa ligne clé :
+
+```js
+const porte = TOUTES.filter(c => c.sel === '.mvt-ov').map(c => c.z).sort((a,b)=>b-a)[0];
+```
+
+**Prendre le maximum, c'est choisir au hasard entre deux vérités contradictoires.** `.mvt-ov` valait
+**9500** dans `styles.css` (la porte CGU) et **9200** dans la CSS injectée par `utils.js` (la feuille
+de tri, §119–121). Le harnais lisait la plus haute et concluait que l'ordre tenait.
+
+Un détecteur écrit pour l'occasion — 29 feuilles lues (`styles.css`, les `<style>` d'`index.html`, les
+28 CSS injectées), blocs `@media` retirés — a rendu **6 collisions, toutes dans `.mvt-*`, zéro
+ailleurs** :
+
+| classe | porte CGU (`styles.css`) | feuille de tri (`utils.js`) | tournée (`cave.js`) |
+|---|---|---|---|
+| `.mvt-ov` | z 9500 · `display:none` · centré | z **9200** · `display:flex` · bas · `opacity:0` | — |
+| `.mvt-hd` | fond **cave sombre** + `::after` filet or + padding | flex / align / gap | sticky z 40 |
+| `.mvt-t` | — | Cormorant 600, **sans couleur** | Cormorant 700, `#F5EBD6` |
+| `.mvt-sub` | uppercase · nowrap · ellipsis | taille + couleur | — |
+| `.mvt-row`, `.mvt-fld` | ✓ | ✓ | ✓ |
+
+**Ce que ça donnait à l'écran**, la CSS injectée gagnant sur la feuille liée :
+① le `.mvt-hd` de la porte posait son dégradé noir sous le titre de la feuille de tri, dont le
+`.mvt-t` n'a pas de couleur — **noir sur noir**, à chaque ouverture ;
+② le `.mvt-sub` de la porte imposait `uppercase` + `nowrap` + `ellipsis` à la ligne d'explication ;
+③ le `padding:22px` de la porte décollait la feuille du bas de l'écran, qu'elle est dessinée pour
+toucher ;
+④ **et dans l'autre sens** : le `display:flex; align-items:center; gap:13px` de la porte s'appliquait
+à l'en-tête de la **tournée du Cuvier**, dont les trois enfants (date, jauge, filtres) doivent
+s'empiler. Ils passaient **côte à côte**. Celui-là est inconditionnel : `styles.css` est toujours
+chargée.
+
+⚠️ **Et un effet latent, plus grave** : `_mvTermsCheck` ouvre la porte par `ov.style.display='flex'`,
+ce qui ne recouvre **ni** `opacity:0` **ni** `pointer-events:none`. Dès qu'une feuille de tri avait
+été ouverte dans la session, un consentement *fail-closed* se serait rendu **transparent et
+traversable**, à 9200 au lieu de 9500 — sous le plafond modal de §85. Le gating tourne au boot,
+avant toute feuille : ça n'a pas mordu. Ça n'a pas mordu **encore**.
+
+### 128b. ★★★ LE RENOMMAGE A DÉCOUVERT UN DÉFAUT QUE PERSONNE NE CHERCHAIT
+
+Trois familles, trois préfixes : porte CGU **`.mvt-*`** (elle garde le sien : `styles.css` +
+`index.html`), feuille de tri **`.mvz-*`** (40 occurrences, `utils.js` seul), tournée du Cuvier
+**`.vt-*`** (193 occurrences + `class="mvt"`, `.mvt{}` et l'animation `mvtBump`, `cave.js` seul —
+le préfixe suit le nom des fonctions, `_vtCss`, `_VT_BUF`). La visite guidée (`app.js`) garde
+`.mvt-*` : elle ne partage aucune classe avec les autres, et le filet le vérifie désormais.
+
+★★★ **La minute d'après, le harnais est passé au rouge** : `.mvz-ov` = **9200**, soit exactement
+`MV_Z_MODAL_PLANCHER`. La feuille de tri était **au niveau des dialogues qu'elle ouvre elle-même**
+depuis TRI-1, et le contrôle ne la voyait pas parce qu'elle s'appelait `.mvt-ov` — un nom que le
+harnais excluait explicitement, la porte CGU étant légitimement au-dessus du plafond.
+Descendue à **9000**, avec `.mvv-ov`.
+
+> ★★★ **UN DÉFAUT PEUT SE CACHER DERRIÈRE LE NOM D'UN AUTRE.** Ce n'est pas le z-index qui était
+> illisible, c'est l'homonymie qui rendait le z-index illisible. Renommer n'était pas du rangement :
+> c'est le geste qui a rendu la mesure possible.
+
+### 128c. ★★ BAS-1 — la barre de la tournée passait sous le socle
+
+`.vt-bot` : `position:fixed; bottom:0; z-index:50`. `#mv-dock` : `position:fixed; bottom:0;
+z-index:90`. Chaînes d'ancêtres reconstruites depuis `index.html` : les deux sont enfants directs de
+`#app-root`, **aucun ancêtre ne crée de contexte d'empilement**. Le socle est en `display:flex` pour
+tout utilisateur connecté non-GT. **« Terminer la tournée » et l'intervention groupée étaient
+recouverts.**
+
+★ **La preuve de l'intention était dans le code** : `.vt{padding:0 0 140px}` — or la barre fait 83 px
+et le socle 64. On ne réserve 140 px que si l'on croit les empiler. La convention du projet le dit
+aussi : `.pl2-mbar` est à `bottom:calc(64px + safe-area)`, `.pl2-abar` à 76 px. `.vt-bot` passe à
+`bottom:calc(64px + env(safe-area-inset-bottom,0px))`, `z-index:93` (au-dessus du socle, **sous** la
+feuille du socle à 95), le `safe-area` quitte son `padding` — il est déjà dans le décalage — et la
+garde monte à **150 px** (64 + 22 + 50 + 11 = 147).
+
+### 128d. ★★ PLUS-1 — un signe qu'aucune des deux polices ne sait dessiner
+
+**66 occurrences de `＋` U+FF0B**, le plus **pleine chasse**, sur les boutons d'ajout. Le subset latin
+de `fonts.css` s'arrête à U+00FF plus quelques plages nommées : ni Cormorant ni Outfit ne le
+contiennent. Il était donc dessiné par une **police système** — chasse pleine, ligne de base
+étrangère, et **carré vide** sur un poste sans police CJK. Remplacé par **U+002B**, qui est dans le
+subset et qui est la paire typographique du **U+2212** que les mêmes boutons utilisent déjà.
+
+⚠️ **Le harnais des icônes ne pouvait pas le voir, et ce n'est pas un trou.** Il répond à « est-ce un
+pictogramme ? ». U+FF0B n'en est pas un — il était même **nommé dans sa liste `TYPO`**, « ce qui
+n'est pas une icône et reste ». C'était vrai. Ce qui était faux, c'est qu'un signe typographique se
+compose avec la police du projet. ★ *Deux questions différentes demandent deux filets différents ;
+élargir le premier l'aurait rendu faux sur son propre sujet.*
+
+### 128e. Les deux filets
+
+**`mv-harnais-couches.mjs`** — ★★★ *aucune classe n'est déclarée dans deux feuilles* (+ la porte CGU
+n'est déclarée qu'une fois). ⚠️⚠️ **Deux faux départs, et les deux ont menti comme les quatre
+extracteurs de §85b.** ① Lire un module ENTIER ramasse le CSS des **documents imprimés**, qui vit
+dans une autre fenêtre : six faux rouges (`.sbox`, `.section`, `.foot`, `.muted`, `.cover`,
+`.mc-val`) — deux documents peuvent appeler `.foot` chacun de son côté, ils ne partagent aucune
+cascade. On ne lit donc, pour un module, que le CSS d'un `<style>` **posé dans le `document`** :
+fenêtre `createElement('style')` → `appendChild`. ② Le découpage en littéraux a pris l'apostrophe de
+« qu'elle » — dans un commentaire que je venais d'écrire — pour une ouverture de chaîne : la fenêtre
+entière disparaissait. Les commentaires sont blanchis **avant** découpage. ★ **L'auto-contrôle a
+attrapé les deux** : le harnais doit retrouver **nommément** `.mvt-ov` dans `styles.css`, `.mvz-ov`
+dans `utils.js` et `.vt-hd` dans `cave.js`. Contre-épreuve : plancher à 600 → 4 rouges sur 14.
+
+**`scripts/mv-harnais-subset.mjs`** (neuf) — plages `unicode-range` et graisses `@font-face` **lues
+dans `fonts.css`**, jamais écrites en dur, avec trois auto-contrôles (11 fontes, graisse max 700,
+209 plages ; le subset couvre é à ç ù œ « » € ’ — … ; **il ne couvre PAS U+FF0B**, sinon le harnais
+ne prouverait rien). Une **interdiction nommée** (zéro U+FF0B) et deux **cliquets par fichier** :
+**274** caractères hors subset (₂ ≈ ᵉ ʳ ⊘ ⋯ ≥ ≤ Σ ⠿ ① ② ③, plus des plages de regex et des
+sentinelles qui ne sont pas rendues) et **72 fausses graisses** au-dessus de 700.
+★ *Les déclarer « tolérés » un par un aurait menti sur ce qu'on a mesuré ; un compte qui ne peut que
+descendre dit la vérité et rend la dette visible.* Contre-épreuve : 4 rouges sur 8.
+
+### 128f. La note de livraison
+
+**Base : `56cd2c8`.** `npm run check` joué en entier.
+
+| fichier | ce qui change | bump |
+|---|---|---|
+| `src/utils.js` | feuille de tri `.mvt-*` → `.mvz-*` (40), z 9200 → 9000, `＋`, APP 7.20, `WHATS_NEW` 3 items | ★ APP |
+| `src/cave.js` | tournée `.mvt-*` → `.vt-*` (193 + `mvt`/`mvtBump`), `.vt-bot` au-dessus du socle, garde 150 px, `＋` | — |
+| `index.html` · `src/styles.css` | `＋`, 4 porteurs de version | ★ APP |
+| `pilotage` · `reglages` · `reserve` · `tracteur` | `＋` | — |
+| `guide/` (4) · `public/demarrage.html` · `public/guide.html` | `＋` | — |
+| `public/sw.js` | 7.82, changelog | ★ SW |
+| `scripts/mv-harnais-couches.mjs` · `mv-harnais-icones.mjs` · `mv-harnais-subset.mjs` (neuf) · `subset-baseline.json` · `package.json` | 2 filets, U+FF0B retiré de `TYPO`, câblage `check` + `prebuild` | — |
+
+**Ouvert, et dit** : ① **aucun rendu navigateur** — la feuille de tri, l'en-tête de la tournée et sa
+barre basse se regardent sur un téléphone, c'est là que se voit le décalage de 64 px. ② Le `＋` de
+deux commandes **icône seule** (`#trac-fab`, la pastille `.tcv-act` de Réglages) gagnerait le sprite
+`ic-plus` plutôt qu'un `+` : c'est un lot de **goût**, il ne se mélange pas à une substitution
+mécanique (§127c). ③ Le **catalogue propre au domaine** n'a plus d'écran : `renderCatalogueTrac()`
+vise `#catalogue-list-trac`, absent d'`index.html` depuis la bascule E-Phy, et sort en `if(!el)return`
+à chaque `renderPhyto()` — la donnée est chargée, synchronisée, sauvegardée, restaurée, et jamais
+affichée. **À trancher** : suppression assumée, ou régression. ④ Les 274 hors subset et les 72
+fausses graisses sont désormais mesurés ; le lot qui les traite est un lot de goût, comme les 1 966
+tailles de §127c. ⑤ **`harnais-demo.mjs` garde une assertion devenue partiellement caduque** : elle
+vérifie que la visite ne réclame plus l'identifiant `mvt-css` — or `cave.js` ne le porte plus non
+plus (il est devenu `vt-css`). L'assertion reste verte et garde encore quelque chose (une visite qui
+reprend un identifiant générique est un signe), mais **son commentaire décrit un monde qui n'existe
+plus**. Non touchée dans ce lot : on ne réécrit pas un couple assertion / contre-épreuve vert pour
+une raison cosmétique. À reformuler au prochain passage sur la démo.
+
+### 128g. ★★ CE QUE LE PREFLIGHT A ATTRAPÉ, ET QUE LE RENOMMAGE AVAIT CASSÉ
+
+Suite verte, sauf **deux erreurs de preflight** : la **visite guidée** (`app.js`, §125) pointe
+`#mvt-list` et `.mvt-cnt` — deux sélecteurs qui vivent **dans la tournée du Cuvier**, pas dans la
+visite. Le renommage les avait laissés en arrière, et le projecteur se serait posé au hasard, sans
+une erreur. Recâblés sur `#vt-list` / `.vt-cnt`.
+
+> ★★★ **UN SÉLECTEUR QUI TRAVERSE UN MODULE SE CASSE AU RENOMMAGE DE L'AUTRE, EN SILENCE.** C'est le
+> pendant exact de la collision qu'on venait de fermer : le préfixe partagé faisait se marcher dessus
+> deux familles qui s'ignoraient ; le sélecteur traversant fait dépendre une famille d'une autre sans
+> que rien ne le déclare. Le contrôle qui l'a vu (« ce sélecteur ne vise rien dans les sources »)
+> existait déjà — il a suffi qu'il tourne.

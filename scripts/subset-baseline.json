@@ -1,0 +1,34 @@
+{
+  "_note": "Cliquet du harnais SUBSET. Regraver : node scripts/mv-harnais-subset.mjs --baseline. Il ne doit que DESCENDRE.",
+  "genere": "2026-09-14",
+  "hors_subset": {
+    "src/app.js": 19,
+    "src/utils.js": 34,
+    "src/pilotage.js": 30,
+    "src/planning.js": 4,
+    "src/reglages.js": 69,
+    "src/cave.js": 53,
+    "src/tracteur.js": 3,
+    "src/phyto.js": 2,
+    "src/reserve.js": 8,
+    "src/admin-gt.js": 12,
+    "src/onboarding.js": 4,
+    "index.html": 17,
+    "guide/01-demarrer.html": 2,
+    "guide/08-cave.html": 5,
+    "guide/09-reserve.html": 1,
+    "guide/14-depannage.html": 1,
+    "guide/_layout.html": 2,
+    "public/demarrage.html": 6,
+    "public/logiciel-vigne.html": 2
+  },
+  "hors_subset_total": 274,
+  "fausses_graisses": {
+    "src/app.js": 17,
+    "src/pilotage.js": 11,
+    "src/planning.js": 29,
+    "src/reglages.js": 2,
+    "src/styles.css": 13
+  },
+  "fausses_graisses_total": 72
+}

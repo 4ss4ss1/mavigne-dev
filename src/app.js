@@ -2434,8 +2434,13 @@ var _mvtSteps = [
     hyp:'Les cuves sans relev\u00e9 du jour remontent en t\u00eate : on ne cherche pas laquelle il reste.',
     mission:'Comptez un pigeage',
     nav:function(){ _mvtGoCave('vendange',function(){ if(window.switchVendOng) window.switchVendOng('tour'); }); },
-    sel:['#mvt-list','#mvv-body','#page-cave'],
-    clickSel:'.mvt-cnt',
+    // ⚠️ Ces deux selecteurs pointent DANS la tournee du Cuvier (cave.js), pas
+    //   dans la visite. Le lot NS-1 a renomme son prefixe `.mvt-*` -> `.vt-*`
+    //   (trois familles se partageaient `.mvt-*`) : c'est le preflight qui a
+    //   attrape les deux references restees en arriere. ★ Un selecteur qui
+    //   traverse un module se casse au renommage de l'autre, en silence.
+    sel:['#vt-list','#mvv-body','#page-cave'],
+    clickSel:'.vt-cnt',
     actDelay:700,
     wait:760,
     credits:[{ k:'cuvees', min:15 }] },

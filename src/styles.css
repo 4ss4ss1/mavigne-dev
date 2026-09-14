@@ -2973,7 +2973,7 @@ body.mv-trial-on #app-root{padding-top:calc(env(safe-area-inset-top,0px) + 44px)
 .sc-bfill{background:linear-gradient(90deg,var(--vert-med),#8FBF6F);}
 .sc-st.sster{background:var(--gris-clair);color:var(--texte-doux);}
 
-/* ══ Lot ＋Ajouter — Hub de choix session / traitement ══ */
+/* ══ Lot +Ajouter — Hub de choix session / traitement ══ */
 .tadd-opt{display:flex;align-items:center;gap:14px;background:var(--bg-app);border:1.5px solid var(--gris-clair);border-radius:16px;padding:15px 16px;margin-bottom:12px;cursor:pointer;transition:transform 0.15s ease;min-height:72px;}
 .tadd-opt:active{transform:scale(0.98);}
 .tadd-ic{width:50px;height:50px;border-radius:14px;display:flex;align-items:center;justify-content:center;font-size:25px;flex-shrink:0;}

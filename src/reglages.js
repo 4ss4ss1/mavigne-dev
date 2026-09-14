@@ -450,8 +450,8 @@ function renderReglages(){
     const tachesFiltrees=window.getTachesSaison();
     _tcvInjectCss();
     // Le barème n'est plus un bandeau en tête de liste : il est devenu le PREMIER des
-    // deux boutons d'ajout, sous la liste (index.html) — « ＋ Nouvelle tâche selon le
-    // barème de la convention » à côté de « ＋ Nouvelle tâche libre ». Même cible :
+    // deux boutons d'ajout, sous la liste (index.html) — « + Nouvelle tâche selon le
+    // barème de la convention » à côté de « + Nouvelle tâche libre ». Même cible :
     // window.openTacheConv(''). Le compteur de travaux vit désormais dans le modal.
     tachesList.innerHTML=tachesFiltrees.map(t=>{
       var catRef=window._tacheConvRef?window._tacheConvRef(t):window.TACHES_CATALOGUE.find(function(c){return c.nom===t.nom;});
@@ -946,7 +946,7 @@ function _emhRender(nom){
   var auj=_paieAuj();
   box.innerHTML=_emhRapHtml(m,last,auj)+'<div class="fl">Contrat en cours</div>'+_emhNowHtml(m,last,adm,auj)
     +_emhHistHtml(m,P,adm)
-    +'<button type="button" class="emh-add" onclick="_emhPick(\''+_escAttr(nom)+'\')">\uFF0B Ajouter un \u00e9v\u00e9nement</button>';
+    +'<button type="button" class="emh-add" onclick="_emhPick(\''+_escAttr(nom)+'\')">+ Ajouter un \u00e9v\u00e9nement</button>';
 }
 // ── LE RAPPEL. Sa seule source est la FIN DU CONTRAT, toujours renseignee sur
 // un CDD — contrairement a l'ancien champ facultatif, qui pouvait l'eteindre.
@@ -1536,7 +1536,7 @@ function _tcfgRender(){
     h+='<div class="tcfg-lbl">Heures par hectare</div><div class="tcfg-hrow"><input class="tcfg-in" type="number" min="0" max="500" value="'+cur0+'" oninput="_tcfgHour(-1,this.value)" id="tcfg-h-s"><span class="tcfg-u">h/ha</span><span class="tcfg-co">Conseillé '+ref0+_tcfgDensNote(c.hha,ref0)+'</span><button class="tcfg-rst" onclick="_tcfgReset(-1,'+ref0+')">'+_mvIcon('rotation',16)+'</button><span class="tcfg-mf'+(mod0?' on':'')+'" id="tcfg-mf-s">'+_mvIcon('crayon',16)+'</span></div>';
   }
   var body=document.getElementById('tcfg-body');if(body)body.innerHTML=h;
-  var btn=document.getElementById('tcfg-save');if(btn)btn.textContent=_tcfg.isEdit?'Enregistrer':'＋ Ajouter à la saison';
+  var btn=document.getElementById('tcfg-save');if(btn)btn.textContent=_tcfg.isEdit?'Enregistrer':'+ Ajouter à la saison';
 }
 function _tcfgSetCount(n){_tcfg.count=n;var c=(window.TACHES_CATALOGUE||[]).find(function(x){return x.nom===_tcfg.nom;});while(_tcfg.hours.length<n)_tcfg.hours.push(_tcfgCatRef(c,_tcfg.hours.length));_tcfg.hours=_tcfg.hours.slice(0,n);_tcfgRender();}
 function _tcfgHour(i,v){var num=parseFloat(v);var c=(window.TACHES_CATALOGUE||[]).find(function(x){return x.nom===_tcfg.nom;});if(i<0){_tcfg.simple=isNaN(num)?0:num;var mf=document.getElementById('tcfg-mf-s');if(mf)mf.className='tcfg-mf'+(Number(_tcfg.simple)!==Number(c.hha)?' on':'');}else{_tcfg.hours[i]=isNaN(num)?0:num;var mf2=document.getElementById('tcfg-mf-'+i);if(mf2)mf2.className='tcfg-mf'+(Number(_tcfg.hours[i])!==Number(_tcfgCatRef(c,i))?' on':'');}}
@@ -6176,7 +6176,7 @@ function _tcvRender(){
     var u=usedBy(c);
     var inDom=(window.TACHES||[]).some(function(x){return x.nom===c.nom;});
     // Consultation : le travail s'ajoute (ou se reconfigure) via le flux existant
-    // openTacheCfg -> « ＋ Ajouter à la saison ». Rattachement : on pose t.conv.
+    // openTacheCfg -> « + Ajouter à la saison ». Rattachement : on pose t.conv.
     var act='';
     if(admin) act=mode?("window._tcvPick('"+_escAttr(c.nom)+"')"):("window._tcvAdd('"+_escAttr(c.nom)+"')");
     var cls='tcv-row'+(on?' on':'')+(act?' pick':'');
@@ -6189,7 +6189,7 @@ function _tcvRender(){
         +'<div class="tcv-sub">'+sub+'</div>'
       +'</div>'
       +'<div class="tcv-h">'+_tcvHha(c)+'</div>'
-      +(mode?'':'<div class="tcv-act'+(inDom?' ok':'')+'">'+(inDom?_mvIcon('check',16):(admin?'＋':''))+'</div>')
+      +(mode?'':'<div class="tcv-act'+(inDom?' ok':'')+'">'+(inDom?_mvIcon('check',16):(admin?'+':''))+'</div>')
     +'</div>';
   }
   var oblig=cat.filter(function(c){return c.obligatoire;});

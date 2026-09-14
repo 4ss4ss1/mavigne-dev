@@ -886,7 +886,7 @@ function renderCaveReglages(){
       +'<div class="mvc-set-d">Nombre de jours sans ouillage avant qu\u2019une cuv\u00e9e passe au rouge. La jauge \u00ab part des anges \u00bb se cale sur ce seuil.</div>'
       +'<div class="mvc-stepper"><button class="mvc-step-btn" onclick="_caveSeuilStep(-1)" aria-label="Diminuer">\u2212</button>'
       +'<div class="mvc-step-val"><div class="mvc-step-num" id="mvc-seuil-num">'+seuil+'</div><div class="mvc-step-unit">JOURS</div></div>'
-      +'<button class="mvc-step-btn" onclick="_caveSeuilStep(1)" aria-label="Augmenter">\uff0b</button></div>';
+      +'<button class="mvc-step-btn" onclick="_caveSeuilStep(1)" aria-label="Augmenter">+</button></div>';
     if(_mils.length){
       html+='<div class="mvc-set-sep"></div><div class="mvc-set-d" style="margin-bottom:8px">Par mill\u00e9sime \u2014 un vin jeune se rattrape plus souvent qu\u2019un vin d\u2019un an. Sans r\u00e9glage propre, le mill\u00e9sime suit le seuil ci-dessus.</div>';
       _mils.forEach(function(m){
@@ -895,7 +895,7 @@ function renderCaveReglages(){
         html+='<div class="mvc-milrow"><span class="mvc-milrow-a">'+(m==='?'?'Sans mill\u00e9sime':_escHtml(m))+'</span>'
           +'<button class="mvc-step-btn sm" onclick="_caveSeuilMilStep(\''+_escAttr(m)+'\',-1)" aria-label="Diminuer">\u2212</button>'
           +'<span class="mvc-milrow-v'+(propre?' own':'')+'">'+_caveSeuilOu(m)+' j</span>'
-          +'<button class="mvc-step-btn sm" onclick="_caveSeuilMilStep(\''+_escAttr(m)+'\',1)" aria-label="Augmenter">\uff0b</button>'
+          +'<button class="mvc-step-btn sm" onclick="_caveSeuilMilStep(\''+_escAttr(m)+'\',1)" aria-label="Augmenter">+</button>'
           +(propre?'<button class="mvc-milrow-x" onclick="_caveSeuilMilReset(\''+_escAttr(m)+'\')" title="Revenir au seuil g\u00e9n\u00e9ral">\u21a9</button>':'<span class="mvc-milrow-x" style="visibility:hidden">\u21a9</span>')
           +'</div>';
       });
@@ -949,7 +949,7 @@ function _caveParcCardHtml(){
     h+='<div class="mvc-pk-tot">'+libres+' libre'+(libres>1?'s':'')+' sur '+parc.length
       +' \u00b7 '+_mvF1(capL/100)+' hL de capacit\u00e9 totale</div>';
   }
-  return h+'<button class="mvc-set-btn" onclick="_cavePkOpen(\'\')">\uff0b Ajouter une cuve</button></div>';
+  return h+'<button class="mvc-set-btn" onclick="_cavePkOpen(\'\')">+ Ajouter une cuve</button></div>';
 }
 function _cavePkNoteHtml(m){
   return _caveMat(m).ouille
@@ -1177,7 +1177,7 @@ function renderCaveCuvees() {
   if(!cuvs.length) {
     el.innerHTML='<div class="cave-empty"><div class="cave-empty-ico">'+_mvIcon('seau',40)+'</div>'
       +'<div class="cave-empty-txt">Aucune cuv\u00e9e.</div>'
-      +((typeof isAdmin==='function'&&isAdmin())?'<button class="cave-empty-btn" onclick="openOvCavee()">\uff0b Nouvelle cuv\u00e9e</button>':'')
+      +((typeof isAdmin==='function'&&isAdmin())?'<button class="cave-empty-btn" onclick="openOvCavee()">+ Nouvelle cuv\u00e9e</button>':'')
       +'</div>';
     return;
   }
@@ -1204,7 +1204,7 @@ function renderCaveCuvees() {
   }
   sorted.filter(_caveDansFiltre).forEach(function(c){ html+=_caveCuvCardHtml(c,w); });
   if(typeof isAdmin==='function'&&isAdmin()){
-    html+='<button class="mvc-add" onclick="openOvCavee()">\uff0b Nouvelle cuv\u00e9e</button>';
+    html+='<button class="mvc-add" onclick="openOvCavee()">+ Nouvelle cuv\u00e9e</button>';
   }
   el.innerHTML=html;
 }
@@ -2850,7 +2850,7 @@ function renderVendRec() {
     html+=_vendResteHtml();
   }
   html+=_vendRendHistHtml();
-  if(canEdit) html+='<div class="mvv-fab"><button class="mvv-fab-btn" onclick="openOvVendRec(null)">＋ Nouvelle récolte</button></div>';
+  if(canEdit) html+='<div class="mvv-fab"><button class="mvv-fab-btn" onclick="openOvVendRec(null)">+ Nouvelle récolte</button></div>';
   el.innerHTML=html;
   _vendRefreshCockpit();
 }
@@ -3161,7 +3161,7 @@ function renderVendCuves() {
     if(actives.length>=2)
       h+='<button class="mvv-fab-btn" style="background:var(--bg-card,#FBFAF6);color:var(--terre,#8A5A38);'
         +'border:1px solid rgba(138,90,56,.3);margin-bottom:8px" onclick="openVendFusion()">Fusionner des cuves</button>';
-    h+='<button class="mvv-fab-btn" onclick="openOvVendCuve(null)">\uff0b Nouvelle cuve</button></div>';
+    h+='<button class="mvv-fab-btn" onclick="openOvVendCuve(null)">+ Nouvelle cuve</button></div>';
   }
   el.innerHTML=h;
   _vendPeindreGraphes();
@@ -4197,7 +4197,7 @@ function _vendRepRender(){
   h+='</div>';
   var reste=_vendRepLibres(null).length;
   h+='<button type="button" class="vrp-add" onclick="_vendRepAdd()"'+(reste?'':' disabled')+'>'
-    +(reste?'\uFF0B Ajouter un destinataire':'Tous les clients sont d\u00e9j\u00e0 sur cette r\u00e9colte')+'</button>';
+    +(reste?'+ Ajouter un destinataire':'Tous les clients sont d\u00e9j\u00e0 sur cette r\u00e9colte')+'</button>';
   h+='<div id="vrec-rep-tot">'+_vendRepTotHtml()+'</div>';
   box.innerHTML=h;
   _vendRepPush();
@@ -4219,7 +4219,7 @@ function _vendRepLigne(p,i){
   h+='<div class="vrp-r"><div class="vrp-st">'
    +'<button type="button" onclick="_vendRepAdj('+i+',-1)">\u2212</button>'
    +'<input type="number" min="0" inputmode="numeric" value="'+_vpCs(p)+'" oninput="_vendRepCs('+i+',this.value)">'
-   +'<button type="button" onclick="_vendRepAdj('+i+',1)">\uFF0B</button>'
+   +'<button type="button" onclick="_vendRepAdj('+i+',1)">+</button>'
    +'<span class="vrp-u">caisses</span></div>'
    +'<div class="vrp-p"><input type="text" inputmode="decimal" value="'+_vendNbTxt(_vpPck(p),0)+'" oninput="_vendRepPck('+i+',this.value)">'
    +'<span class="vrp-u">kg/caisse</span></div></div>';
@@ -5293,7 +5293,7 @@ function _vendDecZone(){
         +(_vendDecMode==='mixte'?'pour le reste':'\u2248 '+_vendCuvF1(_vendDecVolHl())+' hL')+' \u00f7 '+_futTxt+' hL)</span></label>'
         +'<div class="mvv-step2"><button class="mvv-step2-b" onclick="_vendDecAdj(-1)">\u2212</button>'
         +'<span id="vdec-nb" class="mvv-step2-v">'+_vendDecNb+'</span>'
-        +'<button class="mvv-step2-b" onclick="_vendDecAdj(1)">\uff0b</button>'
+        +'<button class="mvv-step2-b" onclick="_vendDecAdj(1)">+</button>'
         +'<span class="mvv-step2-u">barriques ('+_futTxt+' hL)</span></div>')
       : '')
       +_vendDecLotsHtml(_futTxt);
@@ -5365,7 +5365,7 @@ function _vendDecRender(){
       +(n<=0?' disabled':'')+'>\u2212</button>'
       +'<span>'+n+'</span>'
       +'<button type="button" onclick="_vendDecAdjLot(\''+_escAttr(l.id)+'\',1)"'
-      +(n>=l.qte?' disabled':'')+'>\uff0b</button></span></div>';
+      +(n>=l.qte?' disabled':'')+'>+</button></span></div>';
   });
   var neuf=0;
   st.lots.forEach(function(l){ if(l.vins===0) neuf+=parseInt(_vendDecChoix[l.id],10)||0; });
@@ -6208,7 +6208,7 @@ function openVendClients(){
     +'<button class="mv-gh mvv-sheet-x" onclick="_vendSheetClose()" title="Fermer" aria-label="Fermer">'+_mvIcon('croix',18)+'</button></div>'
     +'<div class="mvv-sheet-sub">Référentiel propre à la vendange. Le poids par caisse de chaque client sert à convertir les caisses vendues en kilos.</div>'
     +'<div class="mvv-cllist">'+rows+'</div>'
-    +'<button class="mvv-save ghost2" style="margin-top:14px" onclick="openVendClient(-1)">＋ Ajouter un client</button>';
+    +'<button class="mvv-save ghost2" style="margin-top:14px" onclick="openVendClient(-1)">+ Ajouter un client</button>';
   _vendSheet(html);
 }
 function openVendClient(i){
@@ -6957,7 +6957,7 @@ function _vendCuvRender(){
   }
   h+='<div class="mvcs-list" style="margin-top:10px">'
     +'<button type="button" class="mvcs-row new" onclick="_vendCuvNew()">'
-    +'<span class="mvcs-ico">\uFF0B</span>'
+    +'<span class="mvcs-ico">+</span>'
     +'<span class="mvcs-mid"><span class="mvcs-nom">Nouvelle cuv\u00e9e\u2026</span>'
     +'<span class="mvcs-sub">Un nom qui n\u2019existe pas encore</span></span></button></div>';
   box.innerHTML=h;
@@ -8284,7 +8284,7 @@ function _caveContenantsSectionHtml(cuv){
   });
   if(!n && !((cuv&&cuv.cuves)||[]).length)
     h+='<div class="mvc-pk-vide">Aucun contenant. Ajoutez des f\u00fbts ou une cuve.</div>';
-  if(w) h+='<button type="button" class="mvc-aff-add" onclick="_caveAffOpen(\'' + _escAttr(cuv.id) + '\')">\uff0b Ajouter une cuve</button>';
+  if(w) h+='<button type="button" class="mvc-aff-add" onclick="_caveAffOpen(\'' + _escAttr(cuv.id) + '\')">+ Ajouter une cuve</button>';
   return h;
 }
 
@@ -8705,20 +8705,20 @@ function renderVendTour(){
   if(!Object.keys(_VT_BUF).length) _vtLoad();
   var a=_vtActives();
   if(!a.length){
-    host.innerHTML='<div class="mvt-vide"><div class="mvt-vide-t">Aucune cuve en fermentation</div>'
-      +'<div class="mvt-vide-d">La tournée s\'ouvre dès qu\'une cuve passe en macération ou en fermentation, '
+    host.innerHTML='<div class="vt-vide"><div class="vt-vide-t">Aucune cuve en fermentation</div>'
+      +'<div class="vt-vide-d">La tournée s\'ouvre dès qu\'une cuve passe en macération ou en fermentation, '
       +'et une cuve décuvée y reste tant que sa fermentation n\'est pas finie. '
       +'Les cuves se créent depuis l\'onglet Cuves.</div>'
       +'<button class="mvv-act2 dec" onclick="switchVendOng(\'cuves\')">Aller aux cuves</button></div>';
     return;
   }
   var canEdit=canWrite();
-  var h='<div class="mvt">'+_vtBandeauHtml()+'<div class="mvt-list" id="mvt-list">';
+  var h='<div class="vt">'+_vtBandeauHtml()+'<div class="vt-list" id="vt-list">';
   _vtVisibles().forEach(function(c){ h+=_vtRowHtml(c,canEdit); });
   h+='</div>';
-  if(canEdit) h+='<div class="mvt-bot">'
-    +'<button class="mvt-fin" onclick="_vtFin()">Terminer la tournée <small id="mvt-fin-n"></small></button>'
-    +'<button class="mvt-fab" onclick="_vtSheet()" aria-label="Intervention groupée">'+_mvIcon('plus',24)+'</button>'
+  if(canEdit) h+='<div class="vt-bot">'
+    +'<button class="vt-fin" onclick="_vtFin()">Terminer la tournée <small id="vt-fin-n"></small></button>'
+    +'<button class="vt-fab" onclick="_vtSheet()" aria-label="Intervention groupée">'+_mvIcon('plus',24)+'</button>'
     +'</div>';
   h+='</div>';
   host.innerHTML=h;
@@ -8729,49 +8729,49 @@ function _vtBandeauHtml(){
   var J=['dimanche','lundi','mardi','mercredi','jeudi','vendredi','samedi'];
   var M=['janvier','février','mars','avril','mai','juin','juillet','août','septembre','octobre','novembre','décembre'];
   var f=[['cours','En cours'],['reste','Reste à faire'],['tout','Toutes']];
-  return '<div class="mvt-hd">'
-    +'<div class="mvt-hd-top">'
-    +'<div><div class="mvt-t">La tournée</div><div class="mvt-d">'+J[j.getDay()]+' '+j.getDate()+' '+M[j.getMonth()]+'</div></div>'
-    +'<button class="mvt-who" onclick="_vtWho()">'+_escHtml(_VT_WHO.length?_caveIntLabel(_VT_WHO):'Qui ?')+'</button>'
+  return '<div class="vt-hd">'
+    +'<div class="vt-hd-top">'
+    +'<div><div class="vt-t">La tournée</div><div class="vt-d">'+J[j.getDay()]+' '+j.getDate()+' '+M[j.getMonth()]+'</div></div>'
+    +'<button class="vt-who" onclick="_vtWho()">'+_escHtml(_VT_WHO.length?_caveIntLabel(_VT_WHO):'Qui ?')+'</button>'
     +'</div>'
-    +'<div class="mvt-prog"><div class="mvt-prog-bar"><div class="mvt-prog-f" id="mvt-pf"></div></div>'
-    +'<div class="mvt-prog-n"><span id="mvt-pn">0</span><small id="mvt-pt">/0</small></div></div>'
-    +'<div class="mvt-filt">'
-    +f.map(function(x){ return '<button class="mvt-fb'+(x[0]===_VT_FILT?' on':'')+'" onclick="_vtFilt(\''+_escAttr(x[0])+'\')">'+_escHtml(x[1])+'</button>'; }).join('')
+    +'<div class="vt-prog"><div class="vt-prog-bar"><div class="vt-prog-f" id="vt-pf"></div></div>'
+    +'<div class="vt-prog-n"><span id="vt-pn">0</span><small id="vt-pt">/0</small></div></div>'
+    +'<div class="vt-filt">'
+    +f.map(function(x){ return '<button class="vt-fb'+(x[0]===_VT_FILT?' on':'')+'" onclick="_vtFilt(\''+_escAttr(x[0])+'\')">'+_escHtml(x[1])+'</button>'; }).join('')
     +'</div></div>'
-    +'<div class="mvt-leg"><span><b>P</b> pigeage</span><span><b>R</b> remontage</span><span>appui long = −1</span></div>';
+    +'<div class="vt-leg"><span><b>P</b> pigeage</span><span><b>R</b> remontage</span><span>appui long = −1</span></div>';
 }
 function _vtRowHtml(c,canEdit){
   var b=_vtB(c.id), inact=!_vendIsActive(c);
   var cls=_vtFait(c.id)?'done':(_vtPart(c.id)?'part':'');
   var mj=_vtMesJour(c);
-  var h='<div class="mvt-cv '+cls+'" id="mvt-cv-'+_escAttr(c.id)+'">'
-    +'<div class="mvt-l1">'
-    +(function(){var rp=_vendRepere(c);return rp?'<span class="mvt-rep">'+_escHtml(rp)+'</span>':'';})()
-    +'<span class="mvt-nom">'+_escHtml(c.nom||'Cuve')+'</span>'
-    +'<span class="mvt-tags" id="mvt-tg-'+_escAttr(c.id)+'">'+_vtTags(c)+'</span>'
-    +'<span class="mvt-chk">'+_mvIcon('check',16)+'</span>'
+  var h='<div class="vt-cv '+cls+'" id="vt-cv-'+_escAttr(c.id)+'">'
+    +'<div class="vt-l1">'
+    +(function(){var rp=_vendRepere(c);return rp?'<span class="vt-rep">'+_escHtml(rp)+'</span>':'';})()
+    +'<span class="vt-nom">'+_escHtml(c.nom||'Cuve')+'</span>'
+    +'<span class="vt-tags" id="vt-tg-'+_escAttr(c.id)+'">'+_vtTags(c)+'</span>'
+    +'<span class="vt-chk">'+_mvIcon('check',16)+'</span>'
     +'</div>';
   if(!inact){
     if(canEdit){
       var lt=_vendLastD(c), pt=(mj&&mj.temp_c!=null)?String(mj.temp_c).replace('.',','):((lt&&lt.temp_c!=null)?_vendCuvF1(lt.temp_c):'—');
       var pd=(mj&&mj.densite!=null)?String(mj.densite):((lt&&lt.densite!=null)?String(Math.round(lt.densite)):'—');
-      h+='<div class="mvt-l2">'
-        +'<div class="mvt-fld"><span class="u">T °C</span>'
-        +'<input id="mvt-t-'+_escAttr(c.id)+'" data-vtnav="1" type="text" inputmode="decimal" enterkeyhint="next" '
+      h+='<div class="vt-l2">'
+        +'<div class="vt-fld"><span class="u">T °C</span>'
+        +'<input id="vt-t-'+_escAttr(c.id)+'" data-vtnav="1" type="text" inputmode="decimal" enterkeyhint="next" '
         +'placeholder="'+_escAttr(pt)+'" value="'+_escAttr(b.t)+'" '
         +'oninput="_vtIn(\''+_escAttr(c.id)+'\')" onkeydown="_vtNav(event,this)" onfocus="this.select()" '
         +'aria-label="Température de '+_escAttr(c.nom||'la cuve')+'"></div>'
-        +'<div class="mvt-fld"><span class="u">DENSITÉ</span>'
-        +'<input id="mvt-d-'+_escAttr(c.id)+'" data-vtnav="1" type="text" inputmode="numeric" enterkeyhint="next" '
+        +'<div class="vt-fld"><span class="u">DENSITÉ</span>'
+        +'<input id="vt-d-'+_escAttr(c.id)+'" data-vtnav="1" type="text" inputmode="numeric" enterkeyhint="next" '
         +'placeholder="'+_escAttr(pd)+'" value="'+_escAttr(b.d)+'" '
         +'oninput="_vtIn(\''+_escAttr(c.id)+'\')" onkeydown="_vtNav(event,this)" onfocus="this.select()" '
         +'aria-label="Densité de '+_escAttr(c.nom||'la cuve')+'">'
-        +'<span class="ec" id="mvt-ec-'+_escAttr(c.id)+'"></span></div>'
+        +'<span class="ec" id="vt-ec-'+_escAttr(c.id)+'"></span></div>'
         +_vtCntHtml(c.id,'p','P')+_vtCntHtml(c.id,'r','R')
         +'</div>';
     } else if(mj){
-      h+='<div class="mvt-ro">'+(mj.densite!=null?Math.round(mj.densite):'—')+' · '
+      h+='<div class="vt-ro">'+(mj.densite!=null?Math.round(mj.densite):'—')+' · '
         +(mj.temp_c!=null?_vendCuvF1(mj.temp_c)+' °C':'—')+'</div>';
     }
   }
@@ -8780,7 +8780,7 @@ function _vtRowHtml(c,canEdit){
 function _vtCntHtml(id,k,lbl){
   var v=_vtB(id)[k];
   var a=_escAttr(id);
-  return '<button type="button" class="mvt-cnt'+(v>0?' has':'')+'" id="mvt-'+k+'-'+a+'" '
+  return '<button type="button" class="vt-cnt'+(v>0?' has':'')+'" id="vt-'+k+'-'+a+'" '
     +'onpointerdown="_vtDown(event,\''+_escAttr(id)+'\',\''+_escAttr(k)+'\')" onpointerup="_vtUp(event,\''+_escAttr(id)+'\',\''+_escAttr(k)+'\')" '
     +'onpointercancel="_vtCancel()" onpointerleave="_vtCancel()" oncontextmenu="return false" '
     +'aria-label="'+(k==='p'?'Pigeages':'Remontages')+'">'
@@ -8793,14 +8793,14 @@ function _vtTags(c){
   var lt=_vendLastD(c);
   var t=_vtNum(b.t); if(t==null) t=(lt&&lt.temp_c!=null)?lt.temp_c:null;
   var d=_vtNum(b.d);
-  if(c.statut==='mpf') o+='<span class="mvt-tag">macération</span>';
-  if(_vendFaEnCours(c)) o+='<span class="mvt-tag">décuvée</span>';
-  if(t!=null&&t>=30) o+='<span class="mvt-tag hot">'+_vendCuvF1(t)+' °C</span>';
+  if(c.statut==='mpf') o+='<span class="vt-tag">macération</span>';
+  if(_vendFaEnCours(c)) o+='<span class="vt-tag">décuvée</span>';
+  if(t!=null&&t>=30) o+='<span class="vt-tag hot">'+_vendCuvF1(t)+' °C</span>';
   if(d!=null){
     /* ★ CUV-10 : un repere, pas un verdict. C'est la degustation qui tranche. */
-    if(d<=_vendDSec(c)) o+='<span class="mvt-tag fin">sous le repère</span>';
+    if(d<=_vendDSec(c)) o+='<span class="vt-tag fin">sous le repère</span>';
     else if(lt&&lt.densite!=null&&(lt.densite-d)<=1&&_vendSince(lt.date)>=1)
-      o+='<span class="mvt-tag pal">palier</span>';
+      o+='<span class="vt-tag pal">palier</span>';
   }
   return o;
 }
@@ -8809,19 +8809,19 @@ function _vtTags(c){
 // ⚠ On ne re-rend RIEN ici. Le focus et le clavier virtuel doivent survivre.
 function _vtIn(id){
   var b=_vtB(id);
-  var et=document.getElementById('mvt-t-'+id), ed=document.getElementById('mvt-d-'+id);
+  var et=document.getElementById('vt-t-'+id), ed=document.getElementById('vt-d-'+id);
   b.t=et?et.value:''; b.d=ed?ed.value:'';
-  var row=document.getElementById('mvt-cv-'+id);
+  var row=document.getElementById('vt-cv-'+id);
   if(row){ row.classList.toggle('done',_vtFait(id)); row.classList.toggle('part',_vtPart(id)); }
   var c=(CAVE_VENDANGE.cuves_vinif||[]).find(function(x){return x.id===id;});
-  var tg=document.getElementById('mvt-tg-'+id);
+  var tg=document.getElementById('vt-tg-'+id);
   if(tg&&c) tg.innerHTML=_vtTags(c);
   _vtEcart(id); _vtMaj(); _vtPlan();
 }
 // L'écart depuis le dernier relevé : le seul chiffre qu'on lit vraiment au
 // milieu des cuves. Il dit si la fermentation avance, ralentit ou s'arrête.
 function _vtEcart(id){
-  var el=document.getElementById('mvt-ec-'+id); if(!el) return;
+  var el=document.getElementById('vt-ec-'+id); if(!el) return;
   var c=(CAVE_VENDANGE.cuves_vinif||[]).find(function(x){return x.id===id;});
   var last=c?_vendLastD(c):null;
   var v=_vtNum(_vtB(id).d);
@@ -8865,12 +8865,12 @@ function _vtUp(ev,id,k){
 function _vtCancel(){ clearTimeout(_VT_PTMR); _VT_LONG=false; }
 function _vtCntMaj(id,k,bas){
   var v=_vtB(id)[k];
-  var el=document.getElementById('mvt-'+k+'-'+id); if(!el) return;
+  var el=document.getElementById('vt-'+k+'-'+id); if(!el) return;
   var n=el.querySelector('.v'); if(n) n.textContent=v;
   el.classList.toggle('has',v>0);
   el.classList.add(bas?'down':'bump');
   setTimeout(function(){ el.classList.remove('down','bump'); },260);
-  var row=document.getElementById('mvt-cv-'+id);
+  var row=document.getElementById('vt-cv-'+id);
   if(row){ row.classList.toggle('part',_vtPart(id)); }
 }
 function _vtBuzz(ms){ if(navigator.vibrate) navigator.vibrate(ms); }
@@ -8880,10 +8880,10 @@ function _vtFilt(k){
 }
 function _vtMaj(){
   var a=_vtActives(), n=a.filter(function(c){return _vtFait(c.id);}).length;
-  var pn=document.getElementById('mvt-pn'); if(pn) pn.textContent=n;
-  var pt=document.getElementById('mvt-pt'); if(pt) pt.textContent='/'+a.length;
-  var pf=document.getElementById('mvt-pf'); if(pf) pf.style.width=(a.length?Math.round(n/a.length*100):0)+'%';
-  var fn=document.getElementById('mvt-fin-n');
+  var pn=document.getElementById('vt-pn'); if(pn) pn.textContent=n;
+  var pt=document.getElementById('vt-pt'); if(pt) pt.textContent='/'+a.length;
+  var pf=document.getElementById('vt-pf'); if(pf) pf.style.width=(a.length?Math.round(n/a.length*100):0)+'%';
+  var fn=document.getElementById('vt-fin-n');
   if(fn) fn.textContent=(n<a.length)?('· '+(a.length-n)+' restante'+((a.length-n)>1?'s':'')):'· complète';
 }
 // ── L'écriture ───────────────────────────────────────────────────────────
@@ -8896,16 +8896,16 @@ function _vtPlan(){
   _VT_TMR=setTimeout(_vtEcrire,1200);
 }
 function _vtEtat(s){
-  var el=document.getElementById('mvt-sv');
+  var el=document.getElementById('vt-sv');
   if(!el){
-    var l=document.getElementById('mvt-list'); if(!l) return;
-    el=document.createElement('div'); el.id='mvt-sv'; el.className='mvt-sv';
+    var l=document.getElementById('vt-list'); if(!l) return;
+    el=document.createElement('div'); el.id='vt-sv'; el.className='vt-sv';
     l.parentNode.insertBefore(el,l);
   }
-  if(s==='en cours'){ el.className='mvt-sv show'; el.textContent='Enregistrement…'; }
-  else if(s==='ok'){ el.className='mvt-sv show ok'; el.textContent='Enregistré';
-    clearTimeout(el._h); el._h=setTimeout(function(){ el.className='mvt-sv'; },1500); }
-  else { el.className='mvt-sv show ko'; el.textContent='Non enregistré — la saisie est conservée'; }
+  if(s==='en cours'){ el.className='vt-sv show'; el.textContent='Enregistrement…'; }
+  else if(s==='ok'){ el.className='vt-sv show ok'; el.textContent='Enregistré';
+    clearTimeout(el._h); el._h=setTimeout(function(){ el.className='vt-sv'; },1500); }
+  else { el.className='vt-sv show ko'; el.textContent='Non enregistré — la saisie est conservée'; }
 }
 function _vtEcrire(){
   if(!canWrite()) return;
@@ -8958,12 +8958,12 @@ function _vtWho(){
   var h='<div class="mvv-sheet-hd"><div class="mvv-sheet-t">Qui fait la tournée ?</div>'
     +'<button class="mv-gh mvv-sheet-x" onclick="_vendSheetClose()" aria-label="Fermer">'+_mvIcon('croix',18)+'</button></div>'
     +'<div class="mvv-sheet-sub">Le nom est écrit sur chaque relevé de la tournée. Il répond à « qui a pigé ? » trois semaines plus tard.</div>'
-    +'<div class="mvt-who-list">'
+    +'<div class="vt-who-list">'
     +mbrs.map(function(nm){
       var sel=_VT_WHO.indexOf(nm)!==-1;
       var col=(window.COULEURS_MBR||{})[nm]||'#7A4F2E';
       var nj=String(nm).replace(/\\/g,'\\\\').replace(/'/g,"\\'");
-      return '<button class="mvt-whob'+(sel?' on':'')+'" onclick="_vtWhoTog(\''+_escAttr(nj)+'\')">'
+      return '<button class="vt-whob'+(sel?' on':'')+'" onclick="_vtWhoTog(\''+_escAttr(nj)+'\')">'
         +'<span class="av" style="background:'+col+'">'+_escHtml(String(nm).charAt(0).toUpperCase())+'</span>'
         +'<span class="nm">'+_escHtml(nm)+'</span>'+(sel?_mvIcon('check',16):'')+'</button>';
     }).join('')
@@ -8974,7 +8974,7 @@ function _vtWhoTog(nm){
   var i=_VT_WHO.indexOf(nm);
   if(i>=0) _VT_WHO.splice(i,1); else _VT_WHO.push(nm);
   _vtWho();
-  var b=document.querySelector('.mvt-who');
+  var b=document.querySelector('.vt-who');
   if(b) b.textContent=_VT_WHO.length?_caveIntLabel(_VT_WHO):'Qui ?';
 }
 
@@ -9001,64 +9001,64 @@ function _vtSheet(){
   var h='<div class="mvv-sheet-hd"><div class="mvv-sheet-t">Intervention groupée</div>'
     +'<button class="mv-gh mvv-sheet-x" onclick="_vendSheetClose()" aria-label="Fermer">'+_mvIcon('croix',18)+'</button></div>'
     +'<label class="mvv-flbl">Opération</label>'
-    +'<div class="mvt-ops">'+_VT_OPS.map(function(o){
-      return '<button class="mvt-op'+(o.k===_VT_OPK?' on':'')+'" onclick="_vtOpSet(\''+_escAttr(o.k)+'\')">'+_escHtml(o.l)+'</button>';
+    +'<div class="vt-ops">'+_VT_OPS.map(function(o){
+      return '<button class="vt-op'+(o.k===_VT_OPK?' on':'')+'" onclick="_vtOpSet(\''+_escAttr(o.k)+'\')">'+_escHtml(o.l)+'</button>';
     }).join('')+'</div>'
-    +'<label class="mvv-flbl">Cuves <span class="mvv-fhint" id="mvt-seln"></span></label>'
-    +'<div class="mvt-cuves">'
-    +'<button class="mvt-cb all" id="mvt-cb-all" onclick="_vtAll()">Toutes</button>'
+    +'<label class="mvv-flbl">Cuves <span class="mvv-fhint" id="vt-seln"></span></label>'
+    +'<div class="vt-cuves">'
+    +'<button class="vt-cb all" id="vt-cb-all" onclick="_vtAll()">Toutes</button>'
     +a.map(function(c){
       var v=_vendIntrVol(c);
-      return '<button class="mvt-cb'+(_VT_SEL.indexOf(c.id)!==-1?' on':'')+'" id="mvt-cb-'+_escAttr(c.id)+'" '
+      return '<button class="vt-cb'+(_VT_SEL.indexOf(c.id)!==-1?' on':'')+'" id="vt-cb-'+_escAttr(c.id)+'" '
         +'onclick="_vtTog(\''+_escAttr(c.id)+'\')">'+_escHtml(_vendRepere(c)||c.nom||'Cuve')
         +' <span class="hl">'+_vendCuvF1(v.hl)+' hL</span></button>';
     }).join('')+'</div>'
     +'<label class="mvv-flbl">Date</label>'
-    +'<input id="mvt-date" class="mvv-tin" type="date" value="'+_vtJour()+'">'
-    +'<div id="mvt-fields"></div>'
-    +'<div class="mvv-bigcalc"><div class="mvv-bigcalc-n" id="mvt-calc-n">—</div>'
-    +'<div class="mvv-bigcalc-l" id="mvt-calc-l">quantité totale</div></div>'
-    +'<button class="mvv-save" id="mvt-go" style="margin-top:16px" onclick="_vtValider()">Enregistrer</button>'
+    +'<input id="vt-date" class="mvv-tin" type="date" value="'+_vtJour()+'">'
+    +'<div id="vt-fields"></div>'
+    +'<div class="mvv-bigcalc"><div class="mvv-bigcalc-n" id="vt-calc-n">—</div>'
+    +'<div class="mvv-bigcalc-l" id="vt-calc-l">quantité totale</div></div>'
+    +'<button class="mvv-save" id="vt-go" style="margin-top:16px" onclick="_vtValider()">Enregistrer</button>'
     +'<div class="mvv-fnote" style="color:var(--texte-doux,#5F5F5F)">Une opération est écrite dans chaque cuve retenue, avec son propre volume. Chacune reste corrigible depuis sa cuve.</div>';
   _vendSheet(h);
   _vtOpSet(_VT_OPK);
 }
 function _vtOpSet(k){
   _VT_OPK=k;
-  var bs=document.querySelectorAll('#mvv-ov .mvt-op');
+  var bs=document.querySelectorAll('#mvv-ov .vt-op');
   [].slice.call(bs).forEach(function(b,i){ if(_VT_OPS[i]) b.classList.toggle('on',_VT_OPS[i].k===k); });
-  var el=document.getElementById('mvt-fields'); if(!el) return;
+  var el=document.getElementById('vt-fields'); if(!el) return;
   var h='';
   if(k==='chaptalisation'){
     var spd=_vendCfg().sucre_par_degre||16.83;
     h='<label class="mvv-flbl">Enrichissement visé <span class="mvv-fhint">· ° d\'alcool · base '+spd+' g/L</span></label>'
-      +'<input id="mvt-v1" class="mvv-tin" type="text" inputmode="decimal" value="1" oninput="_vtCalc()">';
+      +'<input id="vt-v1" class="mvv-tin" type="text" inputmode="decimal" value="1" oninput="_vtCalc()">';
   } else if(k==='so2'){
     h='<label class="mvv-flbl">Dose <span class="mvv-fhint">· g/hL</span></label>'
-      +'<input id="mvt-v1" class="mvv-tin" type="text" inputmode="decimal" placeholder="0" oninput="_vtCalc()">';
+      +'<input id="vt-v1" class="mvv-tin" type="text" inputmode="decimal" placeholder="0" oninput="_vtCalc()">';
   } else if(k==='levurage'||k==='nutriment'){
     h='<label class="mvv-flbl">'+(k==='levurage'?'Souche':'Produit')+'</label>'
-      +'<input id="mvt-v2" class="mvv-tin" type="text" placeholder="'+(k==='levurage'?'RC 212…':'DAP, Fermaid…')+'">'
+      +'<input id="vt-v2" class="mvv-tin" type="text" placeholder="'+(k==='levurage'?'RC 212…':'DAP, Fermaid…')+'">'
       +'<label class="mvv-flbl">Dose <span class="mvv-fhint">· g/hL</span></label>'
-      +'<input id="mvt-v1" class="mvv-tin" type="text" inputmode="decimal" placeholder="0" oninput="_vtCalc()">';
+      +'<input id="vt-v1" class="mvv-tin" type="text" inputmode="decimal" placeholder="0" oninput="_vtCalc()">';
   } else if(_vendEstIntrant(k)){
     var prods=_vendIntrProds();
     h='<label class="mvv-flbl">Produit <span class="mvv-fhint">· La Réserve</span></label>'
-      +'<select id="mvt-prod" class="mvv-tin" onchange="_vtCalc()"><option value="">— sans produit —</option>'
+      +'<select id="vt-prod" class="mvv-tin" onchange="_vtCalc()"><option value="">— sans produit —</option>'
       +prods.map(function(p){ return '<option value="'+_escAttr(p.id)+'">'+_escHtml(p.nom)+'</option>'; }).join('')
       +'</select>'
-      +'<label class="mvv-flbl">Dose <span class="mvv-fhint" id="mvt-du">· g/hL</span></label>'
-      +'<input id="mvt-v1" class="mvv-tin" type="text" inputmode="decimal" placeholder="0" oninput="_vtCalc()">'
+      +'<label class="mvv-flbl">Dose <span class="mvv-fhint" id="vt-du">· g/hL</span></label>'
+      +'<input id="vt-v1" class="mvv-tin" type="text" inputmode="decimal" placeholder="0" oninput="_vtCalc()">'
       +(prods.length?'':'<div class="mvv-fnote">Aucun produit œnologique dans La Réserve : l\'opération s\'enregistre, mais ne bougera aucun stock.</div>');
   } else if(k==='refroidissement'){
     h='<label class="mvv-flbl">Température visée <span class="mvv-fhint">· °C</span></label>'
-      +'<input id="mvt-v1" class="mvv-tin" type="text" inputmode="decimal" placeholder="0" oninput="_vtCalc()">'
-      +'<label class="mvv-flbl">Moyen</label><select id="mvt-moy" class="mvv-tin">'
+      +'<input id="vt-v1" class="mvv-tin" type="text" inputmode="decimal" placeholder="0" oninput="_vtCalc()">'
+      +'<label class="mvv-flbl">Moyen</label><select id="vt-moy" class="mvv-tin">'
       +_VEND_FROID.map(function(m){ return '<option value="'+m.k+'">'+_escHtml(m.lbl)+'</option>'; }).join('')
       +'</select>';
   } else if(k==='delestage'){
     h='<label class="mvv-flbl">Nombre par cuve</label>'
-      +'<input id="mvt-v1" class="mvv-tin" type="text" inputmode="numeric" value="1" oninput="_vtCalc()">';
+      +'<input id="vt-v1" class="mvv-tin" type="text" inputmode="numeric" value="1" oninput="_vtCalc()">';
   }
   el.innerHTML=h;
   _vtSelN(); _vtCalc();
@@ -9066,9 +9066,9 @@ function _vtOpSet(k){
 function _vtTog(id){
   var i=_VT_SEL.indexOf(id);
   if(i>=0) _VT_SEL.splice(i,1); else _VT_SEL.push(id);
-  var b=document.getElementById('mvt-cb-'+id);
+  var b=document.getElementById('vt-cb-'+id);
   if(b) b.classList.toggle('on',_VT_SEL.indexOf(id)!==-1);
-  var all=document.getElementById('mvt-cb-all');
+  var all=document.getElementById('vt-cb-all');
   if(all) all.classList.toggle('on',_VT_SEL.length===_vtActives().length);
   _vtBuzz(6); _vtSelN(); _vtCalc();
 }
@@ -9076,10 +9076,10 @@ function _vtAll(){
   var a=_vtActives();
   _VT_SEL=(_VT_SEL.length===a.length)?[]:a.map(function(c){return c.id;});
   a.forEach(function(c){
-    var b=document.getElementById('mvt-cb-'+c.id);
+    var b=document.getElementById('vt-cb-'+c.id);
     if(b) b.classList.toggle('on',_VT_SEL.indexOf(c.id)!==-1);
   });
-  var all=document.getElementById('mvt-cb-all');
+  var all=document.getElementById('vt-cb-all');
   if(all) all.classList.toggle('on',_VT_SEL.length===a.length);
   _vtBuzz(10); _vtSelN(); _vtCalc();
 }
@@ -9092,21 +9092,21 @@ function _vtVolTot(){
   return _vtSelCuves().reduce(function(s,c){ return s+_vendIntrVol(c).hl; },0);
 }
 function _vtSelN(){
-  var el=document.getElementById('mvt-seln'); if(!el) return;
+  var el=document.getElementById('vt-seln'); if(!el) return;
   el.textContent=_VT_SEL.length?('· '+_VT_SEL.length+' retenue'+(_VT_SEL.length>1?'s':'')+', '+_vendCuvF1(_vtVolTot())+' hL'):'';
 }
 function _vtCalc(){
-  var n=document.getElementById('mvt-calc-n'), l=document.getElementById('mvt-calc-l');
-  var go=document.getElementById('mvt-go');
-  var v=_vtNum((document.getElementById('mvt-v1')||{}).value);
+  var n=document.getElementById('vt-calc-n'), l=document.getElementById('vt-calc-l');
+  var go=document.getElementById('vt-go');
+  var v=_vtNum((document.getElementById('vt-v1')||{}).value);
   var vol=_vtVolTot(), k=_VT_OPK;
   if(go){
     go.disabled=!(_VT_SEL.length&&v!=null&&v>0);
     go.textContent=_VT_SEL.length?('Enregistrer sur '+_VT_SEL.length+' cuve'+(_VT_SEL.length>1?'s':'')):'Choisir au moins une cuve';
   }
   if(_vendEstIntrant(k)){
-    var p=_vendIntrProd((document.getElementById('mvt-prod')||{}).value);
-    var du=document.getElementById('mvt-du');
+    var p=_vendIntrProd((document.getElementById('vt-prod')||{}).value);
+    var du=document.getElementById('vt-du');
     if(du) du.textContent='· '+_vendIntrUnite(p);
   }
   if(!n||!l) return;
@@ -9120,7 +9120,7 @@ function _vtCalc(){
     var kg=spd*v*vol/10;
     n.textContent=_vendCuvF1(kg); l.textContent='kg de sucre · '+_vendCuvF1(vol)+' hL';
   } else {
-    var pr=_vendEstIntrant(k)?_vendIntrProd((document.getElementById('mvt-prod')||{}).value):null;
+    var pr=_vendEstIntrant(k)?_vendIntrProd((document.getElementById('vt-prod')||{}).value):null;
     var q=_vendIntrQte(v,vol);
     var tq=_vendIntrQteTxt(q,_vendIntrUniteQ(pr));
     n.textContent=tq.n; l.textContent=tq.u+' · '+_vendCuvF1(vol)+' hL';
@@ -9129,14 +9129,14 @@ function _vtCalc(){
 function _vtValider(){
   if(!_vendGarde()) return;
   var cs=_vtSelCuves(); if(!cs.length) return;
-  var v=_vtNum((document.getElementById('mvt-v1')||{}).value);
+  var v=_vtNum((document.getElementById('vt-v1')||{}).value);
   if(v==null||v<=0){ showToast('Saisissez une valeur','#E07060'); return; }
-  var date=(document.getElementById('mvt-date')||{}).value||_vtJour();
+  var date=(document.getElementById('vt-date')||{}).value||_vtJour();
   var k=_VT_OPK, spd=_vendCfg().sucre_par_degre||16.83;
-  var txt=((document.getElementById('mvt-v2')||{}).value||'').trim();
-  var pid=((document.getElementById('mvt-prod')||{}).value)||null;
+  var txt=((document.getElementById('vt-v2')||{}).value||'').trim();
+  var pid=((document.getElementById('vt-prod')||{}).value)||null;
   var prod=_vendIntrProd(pid);
-  var moy=((document.getElementById('mvt-moy')||{}).value)||null;
+  var moy=((document.getElementById('vt-moy')||{}).value)||null;
   var note='Tournée'+(_VT_WHO.length?' · '+_caveIntLabel(_VT_WHO):'');
   var base=Date.now(), i=0;
   cs.forEach(function(c){
@@ -9176,88 +9176,89 @@ function _vtValider(){
 // Injection idempotente, comme `_vendEnsureSheetCss` : la tournée ne touche
 // pas `styles.css`, donc elle ne coûte pas de bump à elle seule.
 function _vtCss(){
-  if(document.getElementById('mvt-css')) return;
-  var s=document.createElement('style'); s.id='mvt-css';
+  if(document.getElementById('vt-css')) return;
+  var s=document.createElement('style'); s.id='vt-css';
   s.textContent=[
-".mvt{padding:0 0 140px}",
-".mvt-hd{position:sticky;top:0;z-index:40;background:var(--cave,#14110D);color:#F0E2C8;padding:13px 14px 0;border-radius:0 0 16px 16px;box-shadow:0 6px 20px rgba(20,17,13,.16)}",
-".mvt-hd-top{display:flex;align-items:flex-start;justify-content:space-between;gap:10px}",
-".mvt-t{font-family:'Cormorant Garamond',Georgia,serif;font-weight:700;font-size:var(--pt-lg,23px);line-height:1.05;color:#F5EBD6}",
-".mvt-d{font-size:var(--pt-micro,11px);color:rgba(240,226,200,.62);margin-top:2px}",
-".mvt-who{background:rgba(240,226,200,.10);border:1px solid rgba(240,226,200,.22);color:#F0E2C8;border-radius:999px;padding:8px 12px;font-size:var(--pt-txt,12.5px);font-weight:600;cursor:pointer;min-height:38px;white-space:nowrap;font-family:inherit;max-width:46%;overflow:hidden;text-overflow:ellipsis}",
-".mvt-prog{display:flex;align-items:center;gap:9px;margin-top:11px}",
-".mvt-prog-bar{flex:1;height:5px;border-radius:999px;background:rgba(240,226,200,.14);overflow:hidden}",
-".mvt-prog-f{height:100%;width:0;background:linear-gradient(90deg,var(--or,#C2A14D),#8DC868);border-radius:999px;transition:width .3s cubic-bezier(.4,0,.2,1)}",
-".mvt-prog-n{font-family:'Cormorant Garamond',serif;font-weight:700;font-size:var(--pt-sm,17px);color:#F5EBD6;min-width:52px;text-align:right}",
-".mvt-prog-n small{font-size:var(--pt-micro,11px);font-weight:400;color:rgba(240,226,200,.55)}",
-".mvt-filt{display:flex;gap:6px;padding:11px 0 12px;overflow-x:auto;scrollbar-width:none}",
-".mvt-filt::-webkit-scrollbar{display:none}",
-".mvt-fb{background:transparent;border:1px solid rgba(240,226,200,.22);color:rgba(240,226,200,.72);border-radius:10px;padding:7px 11px;font-size:var(--pt-txt,12.5px);font-weight:600;cursor:pointer;white-space:nowrap;min-height:36px;font-family:inherit}",
-".mvt-fb.on{background:rgba(240,226,200,.94);border-color:rgba(240,226,200,.94);color:var(--cave,#14110D)}",
-".mvt-leg{display:flex;justify-content:flex-end;gap:13px;padding:9px 14px 2px;font-size:var(--pt-nano,9.5px);color:var(--texte-doux,#5F5F5F);letter-spacing:.3px}",
-".mvt-leg b{color:var(--texte-med,#4A4A3A);font-weight:700}",
-".mvt-sv{text-align:center;font-size:var(--pt-micro,11px);font-weight:600;color:var(--texte-doux,#5F5F5F);height:0;overflow:hidden;transition:height .18s}",
-".mvt-sv.show{height:20px}",
-".mvt-sv.ok{color:var(--vert-med,#3D6B27)}",
-".mvt-sv.ko{color:var(--orange,#B85A1A)}",
-".mvt-list{padding:5px 12px 0;display:flex;flex-direction:column;gap:7px}",
-".mvt-cv{background:var(--bg-card,#FBFAF6);border:1px solid rgba(138,90,56,.16);border-left:3px solid var(--gris,#DED7C9);border-radius:13px;padding:8px 9px 9px 10px;transition:border-left-color .2s,background .2s}",
-".mvt-cv.part{border-left-color:var(--or,#C2A14D)}",
-".mvt-cv.done{border-left-color:var(--vert-med,#3D6B27);background:#F7FAF3}",
-".mvt-l1{display:flex;align-items:center;gap:8px;min-height:24px}",
-".mvt-rep{font-family:'Cormorant Garamond',serif;font-weight:700;font-size:var(--pt-base,14px);color:var(--terre,#8A5A38);background:var(--terre-pale,#F3EADF);border-radius:7px;min-width:26px;height:24px;display:flex;align-items:center;justify-content:center;flex-shrink:0;padding:0 5px}",
-".mvt-nom{font-size:var(--pt-base,14px);font-weight:600;color:var(--texte,#1A1A14);white-space:nowrap;overflow:hidden;text-overflow:ellipsis;flex:1;min-width:0}",
-".mvt-tags{display:flex;gap:4px;flex-shrink:0;align-items:center}",
-".mvt-tag{font-size:var(--pt-nano,9.5px);font-weight:700;letter-spacing:.3px;border-radius:5px;padding:3px 6px;background:var(--bleu-pale,#E8F0FA);color:var(--bleu,#1A4A7A);white-space:nowrap}",
-".mvt-tag.hot{background:var(--rouge-pale,#FAEAE8);color:var(--rouge,#A0291E)}",
-".mvt-tag.pal{background:var(--orange-pale,#FBF0E6);color:var(--orange,#B85A1A)}",
-".mvt-tag.fin{background:var(--vert-pale,#EAF3E2);color:var(--vert-med,#3D6B27)}",
-".mvt-chk{width:20px;height:20px;border-radius:50%;background:var(--vert-med,#3D6B27);color:#fff;display:none;align-items:center;justify-content:center;flex-shrink:0}",
-".mvt-cv.done .mvt-chk{display:flex}",
-".mvt-l2{display:flex;align-items:center;gap:6px;margin-top:7px}",
-".mvt-fld{position:relative;flex:1;min-width:0}",
-".mvt-fld input{width:100%;height:46px;background:#fff;border:1px solid rgba(138,90,56,.28);border-radius:11px;padding:15px 8px 4px 9px;font-size:var(--pt-sm,17px);font-weight:600;color:var(--texte,#1A1A14);font-family:inherit}",
-".mvt-fld input:focus{border-color:var(--terre,#8A5A38);outline:none;box-shadow:0 0 0 3px rgba(138,90,56,.13)}",
-".mvt-fld input::placeholder{color:#B9B0A0;font-weight:500}",
-".mvt-fld .u{position:absolute;left:9px;top:5px;font-size:var(--pt-nano,9.5px);font-weight:700;letter-spacing:.5px;color:var(--texte-doux,#5F5F5F);pointer-events:none}",
-".mvt-fld .ec{position:absolute;right:8px;bottom:5px;font-family:'Cormorant Garamond',serif;font-weight:700;font-size:var(--pt-base,14px);color:var(--texte-doux,#5F5F5F);pointer-events:none;opacity:0;transition:opacity .2s}",
-".mvt-fld .ec.show{opacity:1}",
-".mvt-fld .ec.ok{color:var(--vert-med,#3D6B27)}",
-".mvt-fld .ec.lent{color:var(--orange,#B85A1A)}",
-".mvt-cnt{width:46px;height:46px;border-radius:11px;background:var(--bg-app,#F2EFE7);border:1px solid rgba(138,90,56,.24);cursor:pointer;flex-shrink:0;display:flex;flex-direction:column;align-items:center;justify-content:center;line-height:1;padding:0;font-family:inherit;transition:transform .09s,background .15s,border-color .15s;touch-action:manipulation;user-select:none;-webkit-user-select:none}",
-".mvt-cnt .k{font-size:var(--pt-nano,9.5px);font-weight:700;letter-spacing:.5px;color:var(--texte-doux,#5F5F5F)}",
-".mvt-cnt .v{font-family:'Cormorant Garamond',serif;font-weight:700;font-size:var(--pt-md,20px);color:var(--texte-med,#4A4A3A);margin-top:1px}",
-".mvt-cnt.has{background:var(--terre-pale,#F3EADF);border-color:rgba(138,90,56,.42)}",
-".mvt-cnt.has .v,.mvt-cnt.has .k{color:var(--terre,#8A5A38)}",
-".mvt-cnt.bump{animation:mvtBump .22s ease}",
-".mvt-cnt.down{background:var(--rouge-pale,#FAEAE8);border-color:rgba(160,41,30,.3)}",
-"@keyframes mvtBump{0%{transform:scale(1)}45%{transform:scale(1.13)}100%{transform:scale(1)}}",
-".mvt-ro{margin-top:6px;font-size:var(--pt-txt,12.5px);color:var(--texte-doux,#5F5F5F)}",
-".mvt-bot{position:fixed;left:50%;transform:translateX(-50%);bottom:0;z-index:50;width:100%;max-width:430px;padding:22px 12px calc(11px + env(safe-area-inset-bottom,0px));display:flex;align-items:center;gap:9px;background:linear-gradient(180deg,rgba(242,239,231,0) 0%,var(--bg-app,#F2EFE7) 34%);pointer-events:none}",
-".mvt-bot>*{pointer-events:auto}",
-".mvt-fin{flex:1;min-height:50px;border-radius:13px;background:var(--cave,#14110D);border:none;color:#F0E2C8;font-size:var(--pt-base,14px);font-weight:700;cursor:pointer;display:flex;align-items:center;justify-content:center;gap:8px;font-family:inherit;box-shadow:0 6px 20px rgba(20,17,13,.2)}",
-".mvt-fin small{font-weight:500;font-size:var(--pt-micro,11px);color:rgba(240,226,200,.6)}",
-".mvt-fab{width:50px;height:50px;border-radius:14px;background:var(--terre,#8A5A38);border:none;color:#fff;cursor:pointer;flex-shrink:0;display:flex;align-items:center;justify-content:center;box-shadow:0 6px 20px rgba(138,90,56,.3)}",
-".mvt-vide{padding:34px 20px;text-align:center}",
-".mvt-vide-t{font-family:'Cormorant Garamond',serif;font-weight:700;font-size:var(--pt-md,20px);color:var(--texte,#1A1A14)}",
-".mvt-vide-d{font-size:var(--pt-txt,12.5px);color:var(--texte-doux,#5F5F5F);line-height:1.55;margin:8px 0 16px}",
-".mvt-ops{display:flex;gap:7px;overflow-x:auto;scrollbar-width:none;padding:2px 0 4px}",
-".mvt-ops::-webkit-scrollbar{display:none}",
-".mvt-op{background:transparent;border:1px solid rgba(138,90,56,.22);color:var(--texte-med,#4A4A3A);border-radius:12px;padding:12px 15px;font-size:var(--pt-txt,12.5px);font-weight:600;cursor:pointer;white-space:nowrap;min-height:46px;flex-shrink:0;font-family:inherit}",
-".mvt-op.on{background:var(--cave,#14110D);border-color:var(--cave,#14110D);color:#F0E2C8}",
-".mvt-cuves{display:flex;flex-wrap:wrap;gap:7px}",
-".mvt-cb{border:1px solid rgba(138,90,56,.22);background:#fff;color:var(--texte-med,#4A4A3A);border-radius:11px;padding:10px 12px;font-size:var(--pt-txt,12.5px);font-weight:600;cursor:pointer;min-height:44px;display:flex;align-items:center;gap:6px;font-family:inherit}",
-".mvt-cb.on{background:var(--terre-pale,#F3EADF);border-color:var(--terre,#8A5A38);color:var(--terre,#8A5A38)}",
-".mvt-cb .hl{font-size:var(--pt-nano,9.5px);color:var(--texte-doux,#5F5F5F);font-weight:500}",
-".mvt-cb.on .hl{color:rgba(138,90,56,.75)}",
-".mvt-cb.all{background:var(--bg-app,#F2EFE7);border-style:dashed}",
-".mvt-cb.all.on{background:var(--cave,#14110D);border-color:var(--cave,#14110D);border-style:solid;color:#F0E2C8}",
-".mvt-who-list{display:flex;flex-direction:column;gap:7px;margin-top:4px}",
-".mvt-whob{display:flex;align-items:center;gap:10px;width:100%;min-height:52px;padding:8px 12px;border-radius:12px;border:1.5px solid var(--gris-clair,#ECE6DA);background:var(--bg-card,#FBFAF6);cursor:pointer;font-family:inherit;text-align:left;color:var(--texte,#1A1A14)}",
-".mvt-whob.on{border-color:var(--terre,#8A5A38);background:var(--terre-pale,#F3EADF)}",
-".mvt-whob .av{width:30px;height:30px;border-radius:50%;display:flex;align-items:center;justify-content:center;color:#fff;font-weight:700;font-size:var(--pt-txt,12.5px);flex-shrink:0}",
-".mvt-whob .nm{flex:1;font-size:var(--pt-base,14px);font-weight:600}",
-"@media (prefers-reduced-motion:reduce){.mvt-cnt,.mvt-prog-f,.mvt-cv{transition:none;animation:none}}"
+".vt{padding:0 0 150px}",
+".vt-hd{position:sticky;top:0;z-index:40;background:var(--cave,#14110D);color:#F0E2C8;padding:13px 14px 0;border-radius:0 0 16px 16px;box-shadow:0 6px 20px rgba(20,17,13,.16)}",
+".vt-hd-top{display:flex;align-items:flex-start;justify-content:space-between;gap:10px}",
+".vt-t{font-family:'Cormorant Garamond',Georgia,serif;font-weight:700;font-size:var(--pt-lg,23px);line-height:1.05;color:#F5EBD6}",
+".vt-d{font-size:var(--pt-micro,11px);color:rgba(240,226,200,.62);margin-top:2px}",
+".vt-who{background:rgba(240,226,200,.10);border:1px solid rgba(240,226,200,.22);color:#F0E2C8;border-radius:999px;padding:8px 12px;font-size:var(--pt-txt,12.5px);font-weight:600;cursor:pointer;min-height:38px;white-space:nowrap;font-family:inherit;max-width:46%;overflow:hidden;text-overflow:ellipsis}",
+".vt-prog{display:flex;align-items:center;gap:9px;margin-top:11px}",
+".vt-prog-bar{flex:1;height:5px;border-radius:999px;background:rgba(240,226,200,.14);overflow:hidden}",
+".vt-prog-f{height:100%;width:0;background:linear-gradient(90deg,var(--or,#C2A14D),#8DC868);border-radius:999px;transition:width .3s cubic-bezier(.4,0,.2,1)}",
+".vt-prog-n{font-family:'Cormorant Garamond',serif;font-weight:700;font-size:var(--pt-sm,17px);color:#F5EBD6;min-width:52px;text-align:right}",
+".vt-prog-n small{font-size:var(--pt-micro,11px);font-weight:400;color:rgba(240,226,200,.55)}",
+".vt-filt{display:flex;gap:6px;padding:11px 0 12px;overflow-x:auto;scrollbar-width:none}",
+".vt-filt::-webkit-scrollbar{display:none}",
+".vt-fb{background:transparent;border:1px solid rgba(240,226,200,.22);color:rgba(240,226,200,.72);border-radius:10px;padding:7px 11px;font-size:var(--pt-txt,12.5px);font-weight:600;cursor:pointer;white-space:nowrap;min-height:36px;font-family:inherit}",
+".vt-fb.on{background:rgba(240,226,200,.94);border-color:rgba(240,226,200,.94);color:var(--cave,#14110D)}",
+".vt-leg{display:flex;justify-content:flex-end;gap:13px;padding:9px 14px 2px;font-size:var(--pt-nano,9.5px);color:var(--texte-doux,#5F5F5F);letter-spacing:.3px}",
+".vt-leg b{color:var(--texte-med,#4A4A3A);font-weight:700}",
+".vt-sv{text-align:center;font-size:var(--pt-micro,11px);font-weight:600;color:var(--texte-doux,#5F5F5F);height:0;overflow:hidden;transition:height .18s}",
+".vt-sv.show{height:20px}",
+".vt-sv.ok{color:var(--vert-med,#3D6B27)}",
+".vt-sv.ko{color:var(--orange,#B85A1A)}",
+".vt-list{padding:5px 12px 0;display:flex;flex-direction:column;gap:7px}",
+".vt-cv{background:var(--bg-card,#FBFAF6);border:1px solid rgba(138,90,56,.16);border-left:3px solid var(--gris,#DED7C9);border-radius:13px;padding:8px 9px 9px 10px;transition:border-left-color .2s,background .2s}",
+".vt-cv.part{border-left-color:var(--or,#C2A14D)}",
+".vt-cv.done{border-left-color:var(--vert-med,#3D6B27);background:#F7FAF3}",
+".vt-l1{display:flex;align-items:center;gap:8px;min-height:24px}",
+".vt-rep{font-family:'Cormorant Garamond',serif;font-weight:700;font-size:var(--pt-base,14px);color:var(--terre,#8A5A38);background:var(--terre-pale,#F3EADF);border-radius:7px;min-width:26px;height:24px;display:flex;align-items:center;justify-content:center;flex-shrink:0;padding:0 5px}",
+".vt-nom{font-size:var(--pt-base,14px);font-weight:600;color:var(--texte,#1A1A14);white-space:nowrap;overflow:hidden;text-overflow:ellipsis;flex:1;min-width:0}",
+".vt-tags{display:flex;gap:4px;flex-shrink:0;align-items:center}",
+".vt-tag{font-size:var(--pt-nano,9.5px);font-weight:700;letter-spacing:.3px;border-radius:5px;padding:3px 6px;background:var(--bleu-pale,#E8F0FA);color:var(--bleu,#1A4A7A);white-space:nowrap}",
+".vt-tag.hot{background:var(--rouge-pale,#FAEAE8);color:var(--rouge,#A0291E)}",
+".vt-tag.pal{background:var(--orange-pale,#FBF0E6);color:var(--orange,#B85A1A)}",
+".vt-tag.fin{background:var(--vert-pale,#EAF3E2);color:var(--vert-med,#3D6B27)}",
+".vt-chk{width:20px;height:20px;border-radius:50%;background:var(--vert-med,#3D6B27);color:#fff;display:none;align-items:center;justify-content:center;flex-shrink:0}",
+".vt-cv.done .vt-chk{display:flex}",
+".vt-l2{display:flex;align-items:center;gap:6px;margin-top:7px}",
+".vt-fld{position:relative;flex:1;min-width:0}",
+".vt-fld input{width:100%;height:46px;background:#fff;border:1px solid rgba(138,90,56,.28);border-radius:11px;padding:15px 8px 4px 9px;font-size:var(--pt-sm,17px);font-weight:600;color:var(--texte,#1A1A14);font-family:inherit}",
+".vt-fld input:focus{border-color:var(--terre,#8A5A38);outline:none;box-shadow:0 0 0 3px rgba(138,90,56,.13)}",
+".vt-fld input::placeholder{color:#B9B0A0;font-weight:500}",
+".vt-fld .u{position:absolute;left:9px;top:5px;font-size:var(--pt-nano,9.5px);font-weight:700;letter-spacing:.5px;color:var(--texte-doux,#5F5F5F);pointer-events:none}",
+".vt-fld .ec{position:absolute;right:8px;bottom:5px;font-family:'Cormorant Garamond',serif;font-weight:700;font-size:var(--pt-base,14px);color:var(--texte-doux,#5F5F5F);pointer-events:none;opacity:0;transition:opacity .2s}",
+".vt-fld .ec.show{opacity:1}",
+".vt-fld .ec.ok{color:var(--vert-med,#3D6B27)}",
+".vt-fld .ec.lent{color:var(--orange,#B85A1A)}",
+".vt-cnt{width:46px;height:46px;border-radius:11px;background:var(--bg-app,#F2EFE7);border:1px solid rgba(138,90,56,.24);cursor:pointer;flex-shrink:0;display:flex;flex-direction:column;align-items:center;justify-content:center;line-height:1;padding:0;font-family:inherit;transition:transform .09s,background .15s,border-color .15s;touch-action:manipulation;user-select:none;-webkit-user-select:none}",
+".vt-cnt .k{font-size:var(--pt-nano,9.5px);font-weight:700;letter-spacing:.5px;color:var(--texte-doux,#5F5F5F)}",
+".vt-cnt .v{font-family:'Cormorant Garamond',serif;font-weight:700;font-size:var(--pt-md,20px);color:var(--texte-med,#4A4A3A);margin-top:1px}",
+".vt-cnt.has{background:var(--terre-pale,#F3EADF);border-color:rgba(138,90,56,.42)}",
+".vt-cnt.has .v,.vt-cnt.has .k{color:var(--terre,#8A5A38)}",
+".vt-cnt.bump{animation:vtBump .22s ease}",
+".vt-cnt.down{background:var(--rouge-pale,#FAEAE8);border-color:rgba(160,41,30,.3)}",
+"@keyframes vtBump{0%{transform:scale(1)}45%{transform:scale(1.13)}100%{transform:scale(1)}}",
+".vt-ro{margin-top:6px;font-size:var(--pt-txt,12.5px);color:var(--texte-doux,#5F5F5F)}",
+"/* Le socle (#mv-dock) est en position:fixed bottom:0 z-index:90 : une barre posee a bottom:0 passe DESSOUS, boutons compris. Convention du projet (.pl2-mbar) : on se cale sur la hauteur du socle et on passe au-dessus. 93 = au-dessus du socle, sous la feuille du socle (#mv-dock-sheet-bg 95). */",
+".vt-bot{position:fixed;left:50%;transform:translateX(-50%);bottom:calc(64px + env(safe-area-inset-bottom,0px));z-index:93;width:100%;max-width:430px;padding:22px 12px 11px;display:flex;align-items:center;gap:9px;background:linear-gradient(180deg,rgba(242,239,231,0) 0%,var(--bg-app,#F2EFE7) 34%);pointer-events:none}",
+".vt-bot>*{pointer-events:auto}",
+".vt-fin{flex:1;min-height:50px;border-radius:13px;background:var(--cave,#14110D);border:none;color:#F0E2C8;font-size:var(--pt-base,14px);font-weight:700;cursor:pointer;display:flex;align-items:center;justify-content:center;gap:8px;font-family:inherit;box-shadow:0 6px 20px rgba(20,17,13,.2)}",
+".vt-fin small{font-weight:500;font-size:var(--pt-micro,11px);color:rgba(240,226,200,.6)}",
+".vt-fab{width:50px;height:50px;border-radius:14px;background:var(--terre,#8A5A38);border:none;color:#fff;cursor:pointer;flex-shrink:0;display:flex;align-items:center;justify-content:center;box-shadow:0 6px 20px rgba(138,90,56,.3)}",
+".vt-vide{padding:34px 20px;text-align:center}",
+".vt-vide-t{font-family:'Cormorant Garamond',serif;font-weight:700;font-size:var(--pt-md,20px);color:var(--texte,#1A1A14)}",
+".vt-vide-d{font-size:var(--pt-txt,12.5px);color:var(--texte-doux,#5F5F5F);line-height:1.55;margin:8px 0 16px}",
+".vt-ops{display:flex;gap:7px;overflow-x:auto;scrollbar-width:none;padding:2px 0 4px}",
+".vt-ops::-webkit-scrollbar{display:none}",
+".vt-op{background:transparent;border:1px solid rgba(138,90,56,.22);color:var(--texte-med,#4A4A3A);border-radius:12px;padding:12px 15px;font-size:var(--pt-txt,12.5px);font-weight:600;cursor:pointer;white-space:nowrap;min-height:46px;flex-shrink:0;font-family:inherit}",
+".vt-op.on{background:var(--cave,#14110D);border-color:var(--cave,#14110D);color:#F0E2C8}",
+".vt-cuves{display:flex;flex-wrap:wrap;gap:7px}",
+".vt-cb{border:1px solid rgba(138,90,56,.22);background:#fff;color:var(--texte-med,#4A4A3A);border-radius:11px;padding:10px 12px;font-size:var(--pt-txt,12.5px);font-weight:600;cursor:pointer;min-height:44px;display:flex;align-items:center;gap:6px;font-family:inherit}",
+".vt-cb.on{background:var(--terre-pale,#F3EADF);border-color:var(--terre,#8A5A38);color:var(--terre,#8A5A38)}",
+".vt-cb .hl{font-size:var(--pt-nano,9.5px);color:var(--texte-doux,#5F5F5F);font-weight:500}",
+".vt-cb.on .hl{color:rgba(138,90,56,.75)}",
+".vt-cb.all{background:var(--bg-app,#F2EFE7);border-style:dashed}",
+".vt-cb.all.on{background:var(--cave,#14110D);border-color:var(--cave,#14110D);border-style:solid;color:#F0E2C8}",
+".vt-who-list{display:flex;flex-direction:column;gap:7px;margin-top:4px}",
+".vt-whob{display:flex;align-items:center;gap:10px;width:100%;min-height:52px;padding:8px 12px;border-radius:12px;border:1.5px solid var(--gris-clair,#ECE6DA);background:var(--bg-card,#FBFAF6);cursor:pointer;font-family:inherit;text-align:left;color:var(--texte,#1A1A14)}",
+".vt-whob.on{border-color:var(--terre,#8A5A38);background:var(--terre-pale,#F3EADF)}",
+".vt-whob .av{width:30px;height:30px;border-radius:50%;display:flex;align-items:center;justify-content:center;color:#fff;font-weight:700;font-size:var(--pt-txt,12.5px);flex-shrink:0}",
+".vt-whob .nm{flex:1;font-size:var(--pt-base,14px);font-weight:600}",
+"@media (prefers-reduced-motion:reduce){.vt-cnt,.vt-prog-f,.vt-cv{transition:none;animation:none}}"
   ].join('\n');
   document.head.appendChild(s);
 }
@@ -10525,7 +10526,7 @@ function renderVendAna(){
           +'<button id="mva-u-alc" class="'+(sucOn?'':'on')+'" onclick="_vendAnaUnit(\'alc\')">°alc %vol</button>'
         +'</div></div>'
         +'<div class="mva-fld" style="max-width:120px"><label id="mva-vlab">'+(sucOn?'Sucre (g/L)':'°alc (%vol)')+'</label><input id="mva-val" type="number" step="'+(sucOn?'1':'0.1')+'" value="'+(sucOn?'200':'12')+'" oninput="_vendAnaLive()"></div>'
-        +'<div class="mva-fld" style="flex:0 0 auto"><button class="mva-add" onclick="_vendAnaAdd()">＋ Ajouter</button></div>'
+        +'<div class="mva-fld" style="flex:0 0 auto"><button class="mva-add" onclick="_vendAnaAdd()">+ Ajouter</button></div>'
       +'</div>'
       +'<div class="mva-derived"><div>Sucre<b id="mva-d-suc">—</b></div><div>Degré potentiel<b id="mva-d-alc">—</b></div><div>Estimation alcoolique<b id="mva-d-est" style="color:var(--bordeaux,#7A1020)">—</b></div></div>'
     +'</div>';

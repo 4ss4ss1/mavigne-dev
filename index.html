@@ -624,7 +624,7 @@
         <p style="margin:0 0 14px">Firebase / Google LLC — 1600 Amphitheatre Pkwy, Mountain View, CA 94043, USA. Transfert encadré par les clauses contractuelles types de la Commission européenne.</p>
         <div style="font-weight:700;font-size:13px;margin-bottom:6px;color:#4A2060">Cookies &amp; traceurs</div>
         <p style="margin:0 0 14px">Aucun cookie publicitaire. L'application utilise uniquement le stockage local (localStorage) pour sauvegarder vos données de travail sur votre appareil.</p>
-        <div style="text-align:center;color:#9A9A8A;font-size:10px;margin-top:8px">© 2026 Nicolas GUERET / GUERETTECH · Ma Vigne · v7.19</div>
+        <div style="text-align:center;color:#9A9A8A;font-size:10px;margin-top:8px">© 2026 Nicolas GUERET / GUERETTECH · Ma Vigne · v7.20</div>
         <button onclick="document.getElementById('login-mentions-ov').style.display='none'" style="display:block;width:100%;margin-top:20px;padding:14px;background:#3D6B27;color:white;border:none;border-radius:12px;font-family:'Outfit',sans-serif;font-size:var(--pt-base,14px);font-weight:600;cursor:pointer;-webkit-tap-highlight-color:transparent">Fermer</button>
       </div>
     </div>
@@ -1073,7 +1073,7 @@
         <div class="mod-header-title">Vigne</div>
         <div class="mod-header-sub" id="j-sub">0 entrées</div>
       </div>
-      <button id="journal-add-btn" class="mod-header-action" onclick="openJournalEntry()">＋ Ajouter</button>
+      <button id="journal-add-btn" class="mod-header-action" onclick="openJournalEntry()">+ Ajouter</button>
       <button class="mod-home-btn mv-regl-gear" onclick="_mvReglOpen('vigne')" style="margin-left:6px" aria-label="Réglages et documents de la Vigne" title="Réglages"><svg class="mv-ic" width="18" height="18" viewBox="0 0 24 24" aria-hidden="true"><use href="#ic-engrenage"></use></svg></button>
     </div>
     <div class="mod-meta-row mvu-meta">
@@ -1169,12 +1169,12 @@
     <!-- Encart résumé entretien -->
     <div id="entretiens-list" style="margin-bottom:6px"></div>
     <!-- Une action primaire + un tiroir Outils (même convention que les autres modules) -->
-    <button id="ent-add-btn" onclick="openOvEntretien()" style="width:100%;padding:14px;background:var(--acier);color:white;border:none;border-radius:12px;font-family:'Outfit',sans-serif;font-size:var(--pt-base,14px);font-weight:700;cursor:pointer;min-height:48px;margin-top:4px">＋ Nouvelle fiche d'entretien</button>
+    <button id="ent-add-btn" onclick="openOvEntretien()" style="width:100%;padding:14px;background:var(--acier);color:white;border:none;border-radius:12px;font-family:'Outfit',sans-serif;font-size:var(--pt-base,14px);font-weight:700;cursor:pointer;min-height:48px;margin-top:4px">+ Nouvelle fiche d'entretien</button>
     <button id="ent-outils-btn" onclick="openOv(&#39;ovTracOutils&#39;)" style="width:100%;padding:12px;margin-top:8px;background:transparent;color:var(--texte-doux);border:1.5px solid var(--gris);border-radius:12px;font-family:'Outfit',sans-serif;font-size:13.5px;font-weight:600;cursor:pointer;min-height:44px"><svg class="mv-ic" width="16" height="16" viewBox="0 0 24 24" aria-hidden="true" focusable="false"><use href="#ic-engrenage"></use></svg> Outils d'entretien</button>
   </div>
 
   <!-- FAB + session (visible seulement sur onglet sessions, tractoriste uniquement) -->
-  <button id="trac-fab" onclick="openTracAdd()" style="position:fixed;bottom:84px;right:20px;width:52px;height:52px;border-radius:26px;background:var(--acier);color:white;border:none;font-size:24px;cursor:pointer;box-shadow:0 4px 16px rgba(44,62,80,0.35);z-index:100;display:none;align-items:center;justify-content:center;line-height:1">＋</button>
+  <button id="trac-fab" onclick="openTracAdd()" style="position:fixed;bottom:84px;right:20px;width:52px;height:52px;border-radius:26px;background:var(--acier);color:white;border:none;font-size:24px;cursor:pointer;box-shadow:0 4px 16px rgba(44,62,80,0.35);z-index:100;display:none;align-items:center;justify-content:center;line-height:1">+</button>
 </div>
 
 <!-- ══════ PAGE PHYTO — module autonome (dock) ══════
@@ -1246,7 +1246,7 @@
       <span class="mod-header-icon"><svg class="mv-ic" width="20" height="20" viewBox="0 0 24 24" aria-hidden="true"><use href="#ic-curseurs"></use></svg></span>
       <div class="mod-header-titles">
         <div class="mod-header-title">Réglages</div>
-        <div class="mod-header-sub">Ma Vigne v7.19</div>
+        <div class="mod-header-sub">Ma Vigne v7.20</div>
       </div>
       <span class="mod-header-badge" style="background:rgba(61,107,39,0.2);color:#7CB95A;border:1px solid rgba(61,107,39,0.3)" id="regl-role-badge">Admin</span>
       
@@ -1287,7 +1287,7 @@
       <div class="set-title">Campagne</div>
       <div id="saisons-list" style="padding:0 16px"></div>
       <div style="padding:0 16px;margin-top:8px">
-        <button class="mbtn verte" style="margin-top:0;font-size:13px;padding:10px" onclick="openSaison()">＋ Nouvelle période</button>
+        <button class="mbtn verte" style="margin-top:0;font-size:13px;padding:10px" onclick="openSaison()">+ Nouvelle période</button>
       </div>
       <div style="padding:12px 16px 4px">
         <button onclick="window.openClotureFlow&&window.openClotureFlow()" style="width:100%;display:flex;align-items:center;gap:13px;background:linear-gradient(180deg,#fffdf7,#f9f4e7);border:1px solid rgba(201,168,76,.45);border-radius:14px;padding:14px 15px;cursor:pointer;text-align:left;font-family:&#39;Outfit&#39;,sans-serif">
@@ -1316,7 +1316,7 @@
     <div class="set-sec" id="set-sec-equipe">
       <div class="set-title">Équipe &amp; accès</div>
       <div id="membres-list" style="padding:0 16px"></div>
-      <div style="padding:0 16px;margin-top:8px"><button class="mbtn verte" style="margin-top:0;font-size:13px;padding:10px" onclick="openOv(&#39;ovMembre&#39;)">＋ Ajouter un membre</button></div>
+      <div style="padding:0 16px;margin-top:8px"><button class="mbtn verte" style="margin-top:0;font-size:13px;padding:10px" onclick="openOv(&#39;ovMembre&#39;)">+ Ajouter un membre</button></div>
     </div>
   </div>
 
@@ -1353,7 +1353,7 @@
         <div class="set-row set-danger-row" style="border-radius:16px;border:1.5px solid var(--rouge)" onclick="openOvDanger(&#39;reset&#39;)"><div class="sr-l"><div class="sr-ico" style="background:var(--rouge-pale)"><svg class="mv-ic" width="18" height="18" viewBox="0 0 24 24" aria-hidden="true" focusable="false"><use href="#ic-corbeille"></use></svg></div><div><div class="sr-lbl" style="color:var(--rouge);font-weight:700">Réinitialiser l'application</div><div class="sr-sub">Efface toutes les sauvegardes locales</div></div></div><div class="sr-arr" style="color:var(--rouge)">›</div></div>
       </div>
     </div>
-    <div class="ver-tag">Ma Vigne v7.19 · Catalogue phyto officiel E-Phy (ANSES) <svg class="mv-ic" width="16" height="16" viewBox="0 0 24 24" aria-hidden="true" focusable="false"><use href="#ic-feuille"></use></svg></div>
+    <div class="ver-tag">Ma Vigne v7.20 · Catalogue phyto officiel E-Phy (ANSES) <svg class="mv-ic" width="16" height="16" viewBox="0 0 24 24" aria-hidden="true" focusable="false"><use href="#ic-feuille"></use></svg></div>
     <div class="mv-legal-foot" style="text-align:center;font-size:10px;color:var(--texte-doux);padding:0 0 16px;line-height:1.9"><a href="/mentions-legales.html" target="_blank" rel="noopener" style="color:var(--texte-doux);text-decoration:underline">Mentions légales</a> · <a href="/confidentialite.html" target="_blank" rel="noopener" style="color:var(--texte-doux);text-decoration:underline">Confidentialité</a> · <a href="/cgu.html" target="_blank" rel="noopener" style="color:var(--texte-doux);text-decoration:underline">CGU</a></div>
   </div>
 </div>
@@ -1463,7 +1463,7 @@
            existe dans la convention. C'est le champ de recherche du panneau qui
            répond à la question, et le barème reste consultable depuis ce panneau. -->
       <div style="padding:0 16px;margin-top:8px">
-        <button class="mbtn verte" style="margin-top:0;font-size:13px;padding:11px;line-height:1.35" onclick="window.openTacheNew&amp;&amp;window.openTacheNew()"><svg class="mv-ic" width="16" height="16" viewBox="0 0 24 24" aria-hidden="true" focusable="false"><use href="#ic-feuille"></use></svg> ＋ Nouvelle tâche</button>
+        <button class="mbtn verte" style="margin-top:0;font-size:13px;padding:11px;line-height:1.35" onclick="window.openTacheNew&amp;&amp;window.openTacheNew()"><svg class="mv-ic" width="16" height="16" viewBox="0 0 24 24" aria-hidden="true" focusable="false"><use href="#ic-feuille"></use></svg> + Nouvelle tâche</button>
       </div>
       <div id="passages-config-section" style="display:none">
         <div class="section-header" style="padding:18px 16px 6px;display:flex;align-items:center;gap:8px">
@@ -1515,12 +1515,12 @@
     <div class="set-sec" id="set-sec-tracteurs">
       <div class="set-title"><svg class="mv-ic" width="16" height="16" viewBox="0 0 24 24" aria-hidden="true" focusable="false"><use href="#ic-tracteur"></use></svg> Parc tracteurs</div>
       <div id="tracteurs-set-list" style="padding:0 16px"></div>
-      <div style="padding:0 16px;margin-top:8px"><button class="mbtn verte" style="margin-top:0;font-size:13px;padding:10px" onclick="openOv(&#39;ovAddTracteur&#39;)">＋ Ajouter un tracteur</button></div>
+      <div style="padding:0 16px;margin-top:8px"><button class="mbtn verte" style="margin-top:0;font-size:13px;padding:10px" onclick="openOv(&#39;ovAddTracteur&#39;)">+ Ajouter un tracteur</button></div>
     </div>
     <div class="set-sec" id="set-sec-act-trac">
       <div style="display:flex;align-items:center;justify-content:space-between;padding:0 16px 0">
         <div class="set-title" style="padding:0;margin:0"><svg class="mv-ic" width="16" height="16" viewBox="0 0 24 24" aria-hidden="true" focusable="false"><use href="#ic-lien"></use></svg> Activités tracteur</div>
-        <button onclick="openOvNouvelleActivite()" style="background:var(--vert);color:#fff;border:none;border-radius:8px;padding:6px 13px;font-family:&#39;Outfit&#39;,sans-serif;font-size:13px;font-weight:700;cursor:pointer;min-height:44px">＋ Ajouter</button>
+        <button onclick="openOvNouvelleActivite()" style="background:var(--vert);color:#fff;border:none;border-radius:8px;padding:6px 13px;font-family:&#39;Outfit&#39;,sans-serif;font-size:13px;font-weight:700;cursor:pointer;min-height:44px">+ Ajouter</button>
       </div>
       <div style="font-size:12px;color:var(--texte-doux);padding:4px 16px 10px">Tracteur par défaut + champ de saisie optionnel lors de la validation.</div>
       <div id="act-trac-list" style="background:var(--bg-card);border-radius:16px;padding:0 16px;margin:0 16px;box-shadow:var(--shadow-sm)"></div>
@@ -2206,7 +2206,7 @@
     <div class="fl">Répartition des tonneaux</div>
     <div style="font-size:var(--pt-micro,11px);color:var(--texte-doux);margin-top:-8px;margin-bottom:10px;">Année d'achat · Quantité — 1/3 neuf, 2/3 anciens en tendance</div>
     <div id="cuv-tonneaux-body"></div>
-    <button onclick="addCuvTonneau()" style="background:none;border:1.5px dashed var(--gris);border-radius:10px;width:100%;padding:10px;font-size:13px;color:var(--texte-doux);cursor:pointer;margin-bottom:13px;min-height:44px;">＋ Ajouter une année</button>
+    <button onclick="addCuvTonneau()" style="background:none;border:1.5px dashed var(--gris);border-radius:10px;width:100%;padding:10px;font-size:13px;color:var(--texte-doux);cursor:pointer;margin-bottom:13px;min-height:44px;">+ Ajouter une année</button>
     <div class="fl">Statut</div>
     <select class="fsel ac" id="cuv-statut">
       <option value="elevage">En élevage</option>
@@ -2823,7 +2823,7 @@
     <div class="fl">Membres présents</div>
     <div id="je-membres-pick" style="display:flex;flex-wrap:wrap;gap:8px;margin-top:4px"></div>
   </div>
-  <button class="mbtn verte" onclick="saveJournalEntry()">＋ Ajouter au journal</button>
+  <button class="mbtn verte" onclick="saveJournalEntry()">+ Ajouter au journal</button>
 </div></div></div>
 
 <div class="overlay" id="ovChangePwd" onclick="closeOv(event,'ovChangePwd')"><div class="modal" onclick="event.stopPropagation()"><div class="modal-handle"></div><div class="modal-hd"><div class="modal-title"><svg class="mv-ic" width="18" height="18" viewBox="0 0 24 24" aria-hidden="true" focusable="false"><use href="#ic-cle"></use></svg> Changer mon mot de passe</div><div class="modal-sub" id="cpwd-sub">Votre nouveau mot de passe sera chiffré</div></div><div class="modal-body">
@@ -2873,7 +2873,7 @@
 <div class="overlay" id="ovEditSaison" onclick="closeOv(event,'ovEditSaison')"><div class="modal" onclick="event.stopPropagation()"><div class="modal-handle"></div><div class="modal-hd"><div class="modal-title"><svg class="mv-ic" width="18" height="18" viewBox="0 0 24 24" aria-hidden="true" focusable="false"><use href="#ic-crayon"></use></svg> Modifier la période</div><div class="modal-sub">Affichée dans les réglages et rapports</div></div><div class="modal-body"><input type="hidden" id="es-saison-nom"><div class="fl">Nom</div><input type="text" class="fi" id="es-saison-nomlibre" placeholder="Ex : Hiver, Saison verte"><div class="fl">Libellé de période (facultatif)</div><input type="text" class="fi" id="es-saison-periode" placeholder="Ex : Nov. 2025 – Mars 2026"><div class="fl">Début</div><input type="date" class="fi" id="es-saison-debut"><div class="fl">Fin</div><input type="date" class="fi" id="es-saison-fin"><div class="fl" style="margin-top:14px;display:flex;justify-content:space-between;align-items:center">Tâches de cette période <span id="es-taches-count" style="font-size:var(--pt-micro,11px);font-weight:600;color:var(--texte-doux)"></span></div><div id="es-taches-pick" class="ns-taches-pick"></div><div class="es-ech-hd">Dates de travaux estimées <span>(pour préparer le pilotage)</span></div><div id="es-echeances" class="es-ech-list"></div><button class="mbtn verte" onclick="saveEditSaison()" style="margin-top:16px">Enregistrer</button></div></div></div>
 
 <div class="overlay" id="ovTache" onclick="closeOv(event,'ovTache')"><div class="modal" onclick="event.stopPropagation()"><div class="modal-handle"></div><div class="modal-hd"><div class="modal-title"><svg class="mv-ic" width="18" height="18" viewBox="0 0 24 24" aria-hidden="true" focusable="false"><use href="#ic-feuille"></use></svg> Nouvelle tâche</div><div class="modal-sub">Le travail, ses heures, et les périodes où il se fait</div></div><div class="modal-body"><div id="tn-body"></div></div></div></div>
-<div class="overlay" id="ovTacheCfg" onclick="closeOv(event,'ovTacheCfg')"><div class="modal" onclick="event.stopPropagation()"><div class="modal-handle"></div><div class="modal-hd"><div class="modal-title" id="tcfg-title">Tâche</div></div><div class="modal-body"><div id="tcfg-body"></div><button class="mbtn verte" id="tcfg-save" onclick="tcfgSave()" style="margin-top:14px">＋ Ajouter à la saison</button><button class="mbtn" onclick="window.closeOv(null,'ovTacheCfg')" style="background:transparent;border:1.5px solid var(--gris);color:var(--texte-doux);margin-top:6px">Annuler</button></div></div></div>
+<div class="overlay" id="ovTacheCfg" onclick="closeOv(event,'ovTacheCfg')"><div class="modal" onclick="event.stopPropagation()"><div class="modal-handle"></div><div class="modal-hd"><div class="modal-title" id="tcfg-title">Tâche</div></div><div class="modal-body"><div id="tcfg-body"></div><button class="mbtn verte" id="tcfg-save" onclick="tcfgSave()" style="margin-top:14px">+ Ajouter à la saison</button><button class="mbtn" onclick="window.closeOv(null,'ovTacheCfg')" style="background:transparent;border:1.5px solid var(--gris);color:var(--texte-doux);margin-top:6px">Annuler</button></div></div></div>
 
 <div class="overlay" id="ovMembre" onclick="closeOv(event,'ovMembre')"><div class="modal" onclick="event.stopPropagation()"><div class="modal-handle"></div><div class="modal-hd"><div class="modal-title"><svg class="mv-ic" width="18" height="18" viewBox="0 0 24 24" aria-hidden="true" focusable="false"><use href="#ic-personne"></use></svg> Nouveau membre</div></div><div class="modal-body"><div class="fl">Prénom</div><input type="text" class="fi" id="nm-nom" placeholder="Prénom"><div class="fl">Email</div><input type="email" class="fi" id="nm-email" placeholder="email@domaine.fr"><div class="fl">Mot de passe <span style="font-size:var(--pt-micro,11px);color:var(--texte-doux,#6b7280);font-weight:400">(laisser vide — recommandé)</span></div><input type="password" class="fi" id="nm-mdp" placeholder="Vide = généré automatiquement"><div style="font-size:var(--pt-micro,11px);color:var(--texte-doux,#6b7280);margin:-6px 0 12px;line-height:1.5">Un mot de passe unique et facile à dire sera généré et affiché une seule fois. La personne le remplacera à sa première connexion.</div><div class="fl">Rôles</div><div class="roles-check" id="nm-roles"><div class="role-check-row"><span class="role-check-name"><svg class="mv-ic" width="16" height="16" viewBox="0 0 24 24" aria-hidden="true" focusable="false"><use href="#ic-feuille"></use></svg> Ouvrier</span><div class="role-chk on" id="rc-ouvrier" onclick="toggleRole('ouvrier')"><svg class="mv-ic" width="16" height="16" viewBox="0 0 24 24" aria-hidden="true" focusable="false"><use href="#ic-check"></use></svg></div></div><div class="role-check-row"><span class="role-check-name"><svg class="mv-ic" width="16" height="16" viewBox="0 0 24 24" aria-hidden="true" focusable="false"><use href="#ic-tracteur"></use></svg> Tractoriste</span><div class="role-chk" id="rc-tractoriste" onclick="toggleRole('tractoriste')"></div></div><div class="role-check-row"><span class="role-check-name"><svg class="mv-ic" width="16" height="16" viewBox="0 0 24 24" aria-hidden="true" focusable="false"><use href="#ic-ticket"></use></svg> Saisonnier</span><div class="role-chk" id="rc-saisonnier" onclick="toggleRole('saisonnier')"></div></div><div class="role-check-row"><span class="role-check-name"><svg class="mv-ic" width="16" height="16" viewBox="0 0 24 24" aria-hidden="true" focusable="false"><use href="#ic-graphique"></use></svg> Pilotage</span><div class="role-chk" id="rc-pilotage" onclick="toggleRole('pilotage')"></div></div></div><div class="fl">Période (si saisonnier)</div><input type="text" class="fi" id="nm-periode" placeholder="Ex : Juin–Août 2026"><button class="mbtn verte" onclick="saveMembre()">Ajouter</button></div></div></div>
 
@@ -2937,7 +2937,7 @@
         <div class="modal-title" style="font-size:var(--pt-sm,17px)">Fiches d'entretien</div>
         <div style="font-size:12px;color:var(--texte-doux);font-family:'Outfit',sans-serif" id="ov-liste-fiches-count"></div>
       </div>
-      <span class="sa sac" onclick="closeOv(null,'ovListeFiches');openOvEntretien()">＋ Fiche</span>
+      <span class="sa sac" onclick="closeOv(null,'ovListeFiches');openOvEntretien()">+ Fiche</span>
     </div>
     <div id="ov-liste-fiches-body" style="overflow-y:auto;flex:1;padding:12px 16px"></div>
   </div>
@@ -3471,7 +3471,7 @@
         <div style="font-size:10px;color:rgba(240,226,200,0.55);letter-spacing:1.2px;margin-top:2px;">MISE &#xC0; JOUR</div>
       </div>
       <div style="background:rgba(200,176,32,0.12);border:1px solid rgba(200,176,32,0.35);border-radius:7px;padding:4px 10px;flex-shrink:0;">
-        <span id="wn-version-badge" style="color:#C8B020;font-size:12px;font-weight:600;">v7.19</span>
+        <span id="wn-version-badge" style="color:#C8B020;font-size:12px;font-weight:600;">v7.20</span>
       </div>
     </div>
     <div class="modal-body">
