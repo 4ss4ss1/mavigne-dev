@@ -762,7 +762,11 @@ function _caveSoutLineHtml(c){
 }
 /* ★★ CUV-9 — LA CUVEE QUI FERMENTE ENCORE LE DIT AU CHAI.
    Le vin decuve avant la fin de la FA est PHYSIQUEMENT au Chai, et c'est la
-   qu'on decide de sulfiter. Sulfiter sur sucre, c'est une malo sur sucre.
+   qu'on decide de la suite. En rouge de garde on entonne SANS SO2 pour
+   enchainer sur la malo en fut : la question n'est donc pas « sulfiter ou
+   pas », c'est « la FA est-elle finie ». Lancer une malo sur du sucre, c'est
+   le risque de piqure lactique ; sulfiter sur du sucre combine le SO2 et
+   expose a un reveil tardif. Les deux gestes attendent la meme reponse.
    La cuvee n'a pas de densite a elle : elle lit celle de la cuve d'ou elle
    vient (`decuvage.cuvee_id`). Rien n'est recopie, rien ne peut diverger. */
 function _caveCuveSource(cuvee){
@@ -778,8 +782,9 @@ function _caveFaLineHtml(c){
   /* ★★ CUV-11 — LA CUVEE LIT LA SUITE DE LA SERIE DE SA CUVE. §116 avait pose
      la regle (« rien n'est recopie, rien ne peut diverger ») mais la serie
      s'arretait au decuvage. Elle continue : le dernier releve s'affiche ICI,
-     parce que c'est ici qu'on decide de sulfiter, et qu'on ne sulfite pas sur
-     du sucre. Toujours aucune densite propre a la cuvee. */
+     parce que c'est ici qu'on decide de lancer la malo ou de sulfiter, et
+     qu'aucun des deux ne se fait sur du sucre. Toujours aucune densite propre
+     a la cuvee. */
   var _lm=_vendLastD(src), _dk=(src.decuvage||{}).date||'';
   var _sv=(_lm&&_lm.date>_dk)
     ? (' \u00b7 dernier relev\u00e9 <b>'+Math.round(_vendMesD20(_lm))+'</b> le '+_vendFrDate(_lm.date))
@@ -787,7 +792,7 @@ function _caveFaLineHtml(c){
   if(_vendFaEnCours(src))
     return '<div class="mvc-fa-line">'+_mvIcon('alerte',16)+' <b>Fermentation \u00e0 finir</b> \u2014 '
       +_escHtml(src.nom||'la cuve')+' a \u00e9t\u00e9 d\u00e9cuv\u00e9e avant la fin de FA. '
-      +'Attendez qu\u2019elle soit finie avant de sulfiter.'+_sv+'</div>';
+      +'Attendez qu\u2019elle soit finie avant de lancer la malo ou de sulfiter.'+_sv+'</div>';
   var d=_vendDecD20(src); if(d==null&&!_sv) return '';
   return '<div class="mvc-fut-line">'+_mvIcon('eprouvette',16)
     +(d!=null?(' Mise en f\u00fbt \u00e0 <b>'+Math.round(d)+'</b> \u00e0 20\u00a0\u00b0C \u00b7 goutte et presse assembl\u00e9es')

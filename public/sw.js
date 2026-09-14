@@ -1,4 +1,11 @@
-// MA VIGNE — Service Worker v7.83
+// MA VIGNE — Service Worker v7.84
+// v7.84 (14/09/2026) — CUV-12 : L'AVERTISSEMENT DU CHAI NOMMAIT LE SULFITAGE, PAS LA MALO.
+//   En rouge de garde on entonne SANS SO2 pour enchainer sur la malo en fut ; le soufre vient apres, une fois la
+//   malo finie et verifiee par analyse. « Attendez qu'elle soit finie avant de sulfiter » nommait donc un geste
+//   que personne ne fait a ce moment-la, et laissait de cote le vrai risque : lancer la malo sur du sucre, soit
+//   la piqure lactique. Trois textes vus par le client (ligne d'alerte du Chai, aide MV_AIDE, note de version
+//   7.12) et deux commentaires d'en-tete (CUV-9, CUV-11) nomment desormais les deux gestes. Signale par un
+//   oenologue en relecture. APP 7.21 -> 7.22. AUCUN calcul, aucun predicat, aucun ecran touche.
 // v7.83 (14/09/2026) — CUV-11 : LA DENSITE SE RELEVE ENCORE UNE FOIS LA CUVE DECUVEE.
 //   Nico : « il faut pouvoir mesurer encore la densite une fois les cuves decuvees ». Trois portes fermees, la
 //   derniere en amont des deux autres : `renderVendTour` decidait l'ecran vide sur `_vtActives()` AVANT de regarder
@@ -3948,7 +3955,7 @@
 // v2.22 — Fix profils vides : guard vide dans loadData() pour MEMBRES/SAISONS/TACHES
 // v2.17 — Onboarding intégré + tenantId · v2.06 — Firebase Auth · v2.00–v2.05 — divers
 const DEBUG = self.location.hostname === 'localhost' || self.location.hostname === '127.0.0.1';
-const CACHE_NAME   = 'mavigne-v7.83';
+const CACHE_NAME   = 'mavigne-v7.84';
 const TENANT_CACHE = 'mavigne-tenant';   // Cache persistant — préservé à chaque mise à jour SW
 const SYNC_TAG     = 'mavigne-sync';
 
@@ -3964,7 +3971,7 @@ const CDN_URLS = [
 ];
 
 self.addEventListener('install', event => {
-  if(DEBUG) console.log('[SW] Ma Vigne v7.83 installé');
+  if(DEBUG) console.log('[SW] Ma Vigne v7.84 installé');
   event.waitUntil(
     caches.open(CACHE_NAME).then(async cache => {
       // ── Cœur applicatif : STRICT (mise à jour ATOMIQUE) ──
@@ -3980,7 +3987,7 @@ self.addEventListener('install', event => {
 });
 
 self.addEventListener('activate', event => {
-  if(DEBUG) console.log('[SW] Ma Vigne v7.83 activé');
+  if(DEBUG) console.log('[SW] Ma Vigne v7.84 activé');
   event.waitUntil(
     caches.keys().then(keys =>
       Promise.all(

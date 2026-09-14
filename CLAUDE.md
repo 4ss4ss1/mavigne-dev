@@ -17062,8 +17062,16 @@ contre-épreuve du harnais.
   concernées, et date les autres (« sèche le … »).
 - ★★ **AU CHAI** : la cuvée née du décuvage affiche **« Fermentation non finie »**. Elle n'a pas de
   densité à elle — `_caveCuveSource` remonte à la cuve par `decuvage.cuvee_id`. **Rien n'est
-  recopié, rien ne peut diverger.** C'est là qu'on décide de sulfiter, et **on ne sulfite pas sur du
-  sucre** : malo sur sucre, piqûre lactique.
+  recopié, rien ne peut diverger.** C'est là qu'on décide de la suite.
+  ⚠️ **CORRIGÉ LE 14/09/2026 — la formulation précédente était fausse** (« c'est là qu'on décide de
+  sulfiter, et on ne sulfite pas sur du sucre »). En **rouge de garde**, on entonne **sans SO₂**
+  précisément pour enchaîner sur la **malo en fût** ; le soufre ne vient qu'**après**, une fois la
+  malo finie et vérifiée par analyse. La question à l'entonnage n'est donc pas « sulfiter ou pas »,
+  c'est **« la FA est-elle finie »**. Les deux gestes attendent la même réponse, pour deux raisons
+  distinctes : **lancer une malo sur du sucre** = risque de **piqûre lactique** (bactéries lactiques
+  sur sucre résiduel) ; **sulfiter sur du sucre** = le SO₂ se combine, le libre s'effondre, réveil
+  tardif. Signalé par un œnologue en relecture d'un post LinkedIn tiré de cette section — l'erreur
+  était partie d'ici et avait déjà atteint trois textes clients (lot **CUV-12**).
 
 ### Ce qui reste ouvert
 
@@ -17124,8 +17132,11 @@ l'écart entre cuves, et laisser le fait constaté écrire « sèche ».
 **Au décuvage on presse** pour extraire les jus restés dans les raisins, et le pressurage
 **relargue du sucre** : la densité de la masse remonte par rapport au vin de goutte.
 ★ **La valeur qui compte pour la suite est celle de la MISE EN FÛT**, goutte et presse assemblées.
-**Elle n'existe nulle part dans l'application aujourd'hui** — c'est le champ à ajouter dans la
-feuille « Décuver → Le Chai », et à afficher au Chai, puisque c'est là qu'on décide de sulfiter.
+✅ **FAIT** (commit `42af518`, APP 7.21) : champ **facultatif « Densité à la mise en fût »** avec sa
+température sur la feuille « Décuver », lu par `_vendDecD20`, affiché sur la cuvée au Chai
+(« goutte et presse assemblées »). Il ne rejoint **jamais** la courbe du Cuvier : ce n'est pas un
+relevé de cuve. ⚠️ Cette section a affirmé « elle n'existe nulle part » **après** que le champ eut
+été livré — vérifier le code avant de citer un manque.
 
 ### Le lot à venir, quand la zone sera calée
 
@@ -18513,7 +18524,9 @@ faite entièrement sur des décuvées annonçait *« 0 relevé »* après trois 
 
 - **Au Chai** : `_caveFaLineHtml` affiche le **dernier relevé de la cuve source** (`_caveCuveSource`
   par `decuvage.cuvee_id`). Aucune densité propre à la cuvée, rien de recopié, rien qui puisse
-  diverger (§116). C'est là qu'on décide de sulfiter, et **on ne sulfite pas sur du sucre**.
+  diverger (§116). C'est là qu'on décide de la suite : **ni malo ni sulfitage sur du sucre** — voir
+  la correction du 14/09/2026 en §116, la formulation « on ne sulfite pas sur du sucre » seule était
+  fausse.
 - **La légende de la courbe** : tant qu'elle s'arrêtait au décuvage, une chaptalisation était la
   **seule** remontée possible, et l'écran l'écrivait. Un relevé postérieur porte sur la **masse
   assemblée, goutte et presse** : le pressurage relargue du sucre, la courbe remonte sans qu'on ait

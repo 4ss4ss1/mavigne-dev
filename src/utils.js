@@ -23,7 +23,7 @@ export const GT_ADMIN_EMAIL = 'ngdevpro@gmail.com';
 // WHATS_NEW   : tableau vide = modal desactive pour cette version.
 // Format item : { emoji:'📅', titre:'Titre court', desc:'Phrase utilisateur.' }
 // Regle : seulement les changements visibles par les utilisateurs.
-export const APP_VERSION = '7.21';
+export const APP_VERSION = '7.22';
 // ════ Journal des nouveautés (récap cumulatif) ════
 // Une entrée par version, la PLUS RÉCENTE EN HAUT : { v:'5.10', items:[ {emoji,titre,desc}, … ] }
 // À chaque release visible → AJOUTER un bloc en tête (ne pas remplacer). items:[] = release technique (rien à afficher).
@@ -715,6 +715,16 @@ window._mvGraphRepeindre = function(){
 };
 
 export const WHATS_NEW = [
+  { v: '7.22', items: [
+    { emoji: 'eprouvette', titre: 'Sur une cuve pas finie, l’avertissement du Chai visait le mauvais geste',
+      desc: "Il demandait d’attendre la fin de fermentation «\u00a0avant de sulfiter\u00a0». En rouge de "
+        + "garde on entonne justement <b>sans SO2</b> pour enchaîner sur la malo en fût, et le soufre "
+        + "ne vient qu’après, une fois la malo finie et vérifiée\u00a0: la phrase nommait un geste que "
+        + "personne ne fait à ce moment-là. Le vrai risque, c’est de <b>lancer la malo sur du "
+        + "sucre</b>\u00a0— piqûre lactique. L’avertissement du Chai, l’aide de la Cave et la note de "
+        + "la version 7.12 nomment maintenant les deux gestes. <b>Aucun calcul, aucun écran n’a "
+        + "changé.</b>" }
+  ] },
   { v: '7.21', items: [
     { emoji: 'eprouvette', titre: 'La densité se relève encore une fois la cuve décuvée',
       desc: "Une fois le marc sorti, l’application fermait le dossier\u00a0: plus de bouton "
@@ -950,8 +960,8 @@ export const WHATS_NEW = [
         + "la laissait \u00ab\u00a0pas encore\u00a0\u00bb s\u00e8che pour toujours. Elle porte maintenant "
         + "<b>D\u00e9cuv\u00e9e \u00b7 FA</b>, garde \u00ab\u00a0Saisir une mesure\u00a0\u00bb, <b>reste dans la tourn\u00e9e</b> et dans "
         + "la liste \u00e0 mesurer, jusqu\u2019au relev\u00e9 qui passe sous son seuil \u2014 c\u2019est la m\u00eame courbe, "
-        + "pas une seconde. La cuv\u00e9e n\u00e9e du d\u00e9cuvage l\u2019annonce aussi au Chai, pour ne pas sulfiter "
-        + "sur du sucre." }
+        + "pas une seconde. La cuv\u00e9e n\u00e9e du d\u00e9cuvage l\u2019annonce aussi au Chai\u00a0: ni malo "
+        + "ni sulfitage tant qu\u2019il reste du sucre." }
   ] },
   { v: '7.11', items: [
     { emoji: 'euro', titre: 'Ce qui est sorti cette ann\u00e9e, d\u00e8s l\u2019ouverture de l\u2019\u00c9conomie',
@@ -3021,7 +3031,7 @@ var MV_AIDE = {
       ['L’ouillage suit le bois, pas le contenant', "inox et béton ne s’évaporent pas : une cuvée logée seulement là n’a pas de jauge de part des anges et ne déclenche aucune alerte. Un foudre bois, si. Une cuvée mixte garde sa jauge, cadrée sur sa seule part en fût."],
       ['La fin de fermentation et la fin de malo', "sont estimées à partir de vos propres relevés : la densité pour l’une, l’acide malique pour l’autre. Sans trois mesures, l’écran dit « démarrage » plutôt qu’une date inventée."],
       ['Le repère de densité, et ce qu’il ne fait pas', "chaque cuve porte un repère de vin sec calculé sur le degré potentiel de son moût — lu sur votre premier relevé s’il a été pris avant le départ, sinon sur vos contrôles de maturité ; une chaptalisation datée l’abaisse. Le détail de la cuve écrit où il est et d’où il vient. <b>Il ne déclenche rien</b> : ni « finie », ni une entrée dans la tournée. C’est un repère de lecture sur la courbe, et sa valeur reste à caler sur vos analyses."],
-      ['Décuver, c’est constater que c’est fini', "la feuille de décuvage pose la question une fois : <b>terminée en cuve</b> (coché d’avance, c’est le cas courant) ou <b>elle finira au chai</b>. C’est vous qui répondez, à la dégustation et à l’état de la cuve ; aucun chiffre ne le décide. Dans le second cas seulement, la cuve porte <b>Décuvée · FA</b>, garde « Saisir une mesure », reste dans la tournée, et la cuvée le signale au Chai pour ne pas sulfiter sur du sucre. Les cuves décuvées avant cette mise à jour n’ont pas de réponse enregistrée : l’écran ne la devine pas."],
+      ['Décuver, c’est constater que c’est fini', "la feuille de décuvage pose la question une fois : <b>terminée en cuve</b> (coché d’avance, c’est le cas courant) ou <b>elle finira au chai</b>. C’est vous qui répondez, à la dégustation et à l’état de la cuve ; aucun chiffre ne le décide. Dans le second cas seulement, la cuve porte <b>Décuvée · FA</b>, garde « Saisir une mesure », reste dans la tournée, et la cuvée le signale au Chai : ni malo ni sulfitage tant qu’il reste du sucre. Les cuves décuvées avant cette mise à jour n’ont pas de réponse enregistrée : l’écran ne la devine pas."],
       ['La densité à la mise en fût', "même feuille, champ facultatif : la densité de la masse assemblée, <b>goutte et presse</b>, avec sa température. Le pressurage relargue du sucre et fait remonter la densité — c’est cette valeur-là qui compte pour la suite, pas le dernier relevé de cuve. Elle s’affiche sur la cuvée au Chai et ne rejoint jamais la courbe du Cuvier."],
       ['Trouver une cuve', "la liste du Cuvier est rangée dans l’ordre de votre cuverie — celui écrit sur les cuves, celui dans lequel vous marchez. Une cuve garde donc sa place d’un jour à l’autre, même après un relevé. Vous pouvez trier par urgence ou par avancement, filtrer, et chercher par nom ou par parcelle dès six cuves."],
       ['Une cuve s’ouvre au doigt', "la liste ne montre que l’essentiel : repère, nom, densité, température, avancement. Touchez une ligne pour déplier sa courbe, ses trois derniers chiffres et ses boutons. Une seule cuve reste ouverte à la fois."],
