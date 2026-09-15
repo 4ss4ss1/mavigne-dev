@@ -32,6 +32,7 @@ const NOMS = [
   '_vendSucPente', '_vendMesD', '_vendD0', '_vendChaptDeg', '_vendDPot',
   '_vendDZero', '_vendDSec', '_vendDSecTxt', '_vendSucreRest', '_vendFaPct',
   '_vendDecuvee', '_vendFaEnCours', '_vendJourSec', '_vendSuivie', '_vendMesurable', '_vendDecD20',
+  '_vendPressee',   /* CUV-13 : lu par _vendSuivie et _vendMesurable */
   '_vendFrDate', '_pcrbFin',
   '_mlD', '_mlIso', '_mlEcartJ', '_mlAddJ', '_mlAuj', '_mlProjFA'
 ];
@@ -70,7 +71,7 @@ function _vendCfg(){ return { sucre_par_degre: ${SPD} }; }
 const RETOUR = `
 return { _vendSucre, _vendSucPente, _vendDPot, _vendDZero, _vendDSec, _vendDSecTxt,
          _vendSucreRest, _vendFaPct, _vendDecuvee, _vendFaEnCours, _vendJourSec,
-         _vendSuivie, _vendMesurable, _vendD0, _vendDecD20, _vendMesD, _pcrbFin, _mlProjFA, _ML_D20_SEC };
+         _vendSuivie, _vendMesurable, _vendPressee, _vendD0, _vendDecD20, _vendMesD, _pcrbFin, _mlProjFA, _ML_D20_SEC };
 `;
 function monter(mutation) {
   const corps = mutation ? mutation(BLOC) : BLOC;
@@ -348,7 +349,7 @@ if (CONTRE) {
     F => F._vendJourSec(cuve(13, [1040, 1005, 994, 991, 990])) === J(4));
 
   mord('★★ CUV-11 · « mesurable » retombe sur « suivie » — le cas courant se referme',
-    b => b.replace(/  return _vendIsActive\(c\)\|\|_vendDecuvee\(c\);/,
+    b => b.replace(/  return _vendIsActive\(c\)\|\|_vendDecuvee\(c\)\|\|_vendPressee\(c\);/,
                    '  return _vendSuivie(c);'),
     F => F._vendMesurable(decuvee(cuve(13, [1040, 1005, 997]), true)));
 
@@ -358,7 +359,7 @@ if (CONTRE) {
            f.fusion = { vers: 'autre', date: J(8) }; return !F._vendMesurable(f); });
 
   mord('une cuve à l’encuvage devient mesurable',
-    b => b.replace(/  return _vendIsActive\(c\)\|\|_vendDecuvee\(c\);/, '  return true;'),
+    b => b.replace(/  return _vendIsActive\(c\)\|\|_vendDecuvee\(c\)\|\|_vendPressee\(c\);/, '  return true;'),
     F => { const s = cuve(13, []); s.statut = 'setup'; return !F._vendMesurable(s); });
 
   mord('l’avancement repart des anciennes bornes fixes',

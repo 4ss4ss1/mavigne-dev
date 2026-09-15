@@ -2317,8 +2317,20 @@ function _vendEtatBadge(p){ p=parseInt(p)||0;
   if(p>=55) return _mvBadge('Sanitaire '+p+' %','ambre');
   return '<span class="mvv-b san-lo">▲ Tri renforcé '+p+'%</span>';
 }
-var _VEND_STAT={setup:{i:0,lbl:'Setup'},mpf:{i:1,lbl:'MPF'},fa:{i:2,lbl:'FA'},decuvage:{i:3,lbl:'Décuvage'},fml:{i:4,lbl:'FML'},termine:{i:5,lbl:'Terminé'}};
-var _VEND_STEPS=[['setup','Setup'],['mpf','MPF'],['fa','FA'],['decuvage','Décuv.'],['fml','FML'],['termine','Fini']];
+/* ★★★ CUV-13 — L'ETAPE S'APPELLE PRESSURAGE, ET SA CLE RESTE `decuvage`.
+   Nico, 15/09 : « le decuvage ici est en fait un pressurage ». A cette etape
+   on PRESSE, et le jus peut finir sa fermentation dans une AUTRE cuve avant
+   d'etre entonne. Le mot « Decuvage » disait l'inverse — que le vin etait
+   parti — et il portait le meme nom que le bouton « Decuver → Le Chai », qui
+   cree la cuvee. Deux gestes, un seul mot : on lisait le second comme fait.
+   ⚠⚠ LA CLE NE CHANGE PAS : `statut_hist` porte deja des 'decuvage' dates, et
+     les renommer serait une migration pour un libelle. Tout ce qui s'affiche
+     lit ces deux tables — frise, parcours, badge, graphe, legende, toast,
+     cahier de cuverie imprime — sauf l'option du formulaire « Modifier »,
+     ecrite dans index.html et corrigee dans le meme lot.
+   ⚠ Ce que l'etape change au SUIVI est dans `_vendPressee`. */
+var _VEND_STAT={setup:{i:0,lbl:'Setup'},mpf:{i:1,lbl:'MPF'},fa:{i:2,lbl:'FA'},decuvage:{i:3,lbl:'Pressurage'},fml:{i:4,lbl:'FML'},termine:{i:5,lbl:'Terminé'}};
+var _VEND_STEPS=[['setup','Setup'],['mpf','MPF'],['fa','FA'],['decuvage','Press.'],['fml','FML'],['termine','Fini']];
 function _vendStatLbl(st){ return (_VEND_STAT[st]||{lbl:st||'—'}).lbl; }
 function _vendTempCls(t){ return t>=30?'hot':t>=26?'warm':'cool'; }
 function _vendIsActive(c){ return c.statut==='fa'||c.statut==='mpf'; }
@@ -2591,8 +2603,17 @@ function _vendKpiData(){
   var kgCuve=recs.reduce(function(s,r){return s+_recKgDom(r);},0);
   var hl=(kgCuve/cfg.ratio_max).toFixed(0)+'–'+(kgCuve/cfg.ratio_min).toFixed(0);
   var active=cuves.filter(_vendIsActive);
-  var due=active.filter(function(c){return _vendStale(c)>=1;}).length;
-  return {caisses:caisses,tonnes:(kg/1000).toFixed(1),hl:hl,enFA:active.length,due:due,activeN:active.length};
+  /* ★★ CUV-13 — LE BADGE « A MESURER » COMPTE CE QUE L'ALERTE COMPTE. Il lisait
+     `_vendIsActive` pendant que l'alerte de la liste lit `_vendADue`, donc
+     `_vendSuivie` : une cuve decuvee qui finit au chai etait « a mesurer »
+     dans l'alerte, absente du badge de l'onglet, et la barre de sante disait
+     « Fermentations suivies » juste au-dessus. Une cuve pressuree aurait vecu
+     la meme contradiction des le premier jour. Une seule regle : ce qui
+     RECLAME passe par `_vendSuivie` (§129a) — et une cuve fusionnee ne
+     reclame rien, son vin est ailleurs. */
+  var suivies=cuves.filter(function(c){ return c&&!_vendEstFusionnee(c)&&_vendSuivie(c); });
+  var due=suivies.filter(function(c){return _vendStale(c)>=1;}).length;
+  return {caisses:caisses,tonnes:(kg/1000).toFixed(1),hl:hl,enFA:active.length,due:due,activeN:suivies.length};
 }
 function _vendCockpitHtml(){
   // Meme anatomie que Le Chai et Le millesime : les chiffres vivent dans la
@@ -3018,6 +3039,17 @@ function _vendDetailHtml(c,canEdit){
       +_escHtml(c.fusion_src.map(function(x){return x.nom;}).join(', '))
       +' rejoint'+(c.fusion_src.length>1?'s':'')+' cette cuve. Les relev\u00e9s ant\u00e9rieurs portent sur un autre volume.</div>';
   }
+  /* ★★★ CUV-13 — LA CUVE PRESSUREE DIT CE QUI CONTINUE. La frise porte
+     « Pressurage » et les boutons « Decuver » : sans cette ligne, on les lirait
+     comme le meme geste, deja fait. La phrase du rattachement ne sort que si
+     la cuve a un repere de cuverie — c'est lui que la tournee affiche, et il
+     devient faux quand le jus change de cuve. */
+  if(_vendPressee(c)){
+    h+='<div class="mvv-detnote"><b>Pressur\u00e9e</b>\u00a0: le jus reste suivi. Il garde sa place dans la tourn\u00e9e, '
+      +'et ses relev\u00e9s continuent la m\u00eame courbe.'
+      +(_vendRepere(c)?' S\u2019il a chang\u00e9 de cuve, \u00ab\u00a0Modifier\u00a0\u00bb le rattache \u00e0 la nouvelle.':'')
+      +' \u00ab\u00a0D\u00e9cuver\u00a0\u00bb l\u2019envoie ensuite au Chai.</div>';
+  }
   /* ★★ CUV-9 — LE MOT QUI MANQUAIT. Une cuve décuvée avec du sucre n'est ni
      finie ni en panne : elle finit sa fermentation ailleurs. L'écran le dit,
      avec le seuil ET d'où il vient. */
@@ -3075,11 +3107,13 @@ function _vendCellHtml(c){
   var dedans=_vendVolLoge(c)>0?_vendVolLoge(c):_vendHlKg(_vendCuvKgDom(c.id));
   var niv = (c.statut==='setup'||!(cap>0)) ? 0 : Math.max(8,Math.min(100,Math.round(dedans/cap*100)));
   var col = c.statut==='termine' ? '#C0BAAE' : _vendADue(c) ? '#C86A4E'
-          : _vendIsActive(c) ? '#8A5A38' : '#9A93A8';
+          : (_vendIsActive(c)||_vendPressee(c)) ? '#8A5A38' : '#9A93A8';
   var H=52, y=6+(H)*(1-niv/100);
   var sous = _vendFaEnCours(c) ? 'd\u00e9cuv\u00e9e \u00b7 FA en cours'
     : c.statut==='termine' ? 'd\u00e9cuv\u00e9e' : c.statut==='setup' ? 'en attente'
-    : _vendADue(c) ? _vendStale(c)+' j sans relev\u00e9' : (pct?pct+'\u00a0% FA':'suivie');
+    : _vendADue(c) ? _vendStale(c)+' j sans relev\u00e9'
+    : _vendPressee(c) ? 'pressur\u00e9e'                  /* CUV-13 : suivie, pas finie */
+    : (pct?pct+'\u00a0% FA':'suivie');
   var rep=_vendRepere(c);
   var uid=_mvgId(c.id);
   return '<button type="button" class="mvv-cell'+(_vendADue(c)?' due':'')+(ouv?' open':'')+'" '
@@ -4020,8 +4054,29 @@ function _vendJourSec(c){
   for(var i=0;i<m.length;i++) if(_vendMesD20(m[i])<=ds) return m[i].date;
   return null;
 }
-/* La cuve est-elle encore suivie ? En FA, ou decuvee avec du sucre. */
-function _vendSuivie(c){ return _vendIsActive(c)||_vendFaEnCours(c); }
+/* ★★★ CUV-13 — PRESSURER N'EST PAS DECUVER.
+   Nico, 15/09 : « quand on est au decuvage, on remet le jus dans une autre
+   cuve, surtout quand il reste du sucre, pour qu'il finisse la fermentation ;
+   une fois finie, on la met en tonneau. » L'etape du parcours (cle
+   'decuvage', libelle « Pressurage ») n'etait ni active ni decuvee : la cuve
+   perdait « Saisir une mesure », sa ligne de tournee et toute relance,
+   exactement au moment ou le jus finit de fermenter hors du marc.
+   Reponse de Nico a la question « acceptee ou reclamee ? » : RECLAMEE. La
+   cuve pressuree rentre donc dans `_vendSuivie` — tournee, cuves a mesurer,
+   badge — et, par la meme, dans `_vendMesurable`.
+   ⚠⚠ LE DECUVAGE RESTE UN FAIT (§118) : une cuve qui porte `decuvage.date` est
+     gouvernee par sa reponse `fa_finie`, pas par l'etape. Le formulaire
+     « Modifier » permet de reposer 'decuvage' sur une cuve deja decuvee :
+     elle ne doit PAS revenir dans la tournee pour autant.
+   ⚠ Une cuve FUSIONNEE ne suit rien : son vin est ailleurs, sous un autre nom.
+   ⚠ `_vendIsActive` NE BOUGE PAS : « en fermentation » (filtre, KPI, fin de FA
+     estimee) garde son sens. Meme patron que CUV-9 pour `_vendFaEnCours`. */
+function _vendPressee(c){
+  return !!c && c.statut==='decuvage' && !_vendDecuvee(c) && !_vendEstFusionnee(c);
+}
+/* La cuve est-elle encore suivie ? En FA, decuvee avec du sucre, ou pressuree
+   (CUV-13 : le jus finit peut-etre sa fermentation dans une autre cuve). */
+function _vendSuivie(c){ return _vendIsActive(c)||_vendFaEnCours(c)||_vendPressee(c); }
 /* ★★★ CUV-11 — POUVOIR RELEVER N'EST PAS DEVOIR RELEVER.
    `_vendSuivie` dit qui l'application RECLAME : la tournee, l'agenda, le badge
    « a mesurer ». Il n'a jamais eu a dire qui elle ACCEPTE. Les deux etaient
@@ -4039,7 +4094,9 @@ function _vendSuivie(c){ return _vendIsActive(c)||_vendFaEnCours(c); }
    ⚠ Une cuve FUSIONNEE reste dehors : son vin est ailleurs, sous un autre nom. */
 function _vendMesurable(c){
   if(!c||_vendEstFusionnee(c)) return false;
-  return _vendIsActive(c)||_vendDecuvee(c);
+  /* ★ CUV-13 : ce qui est RECLAME doit etre ACCEPTE — suivie ⇒ mesurable.
+     La cuve pressuree est reclamee (`_vendSuivie`), elle est donc ici aussi. */
+  return _vendIsActive(c)||_vendDecuvee(c)||_vendPressee(c);
 }
 /* ★★ CUV-10 — LA DENSITE DE MISE EN FUT. Au decuvage on PRESSE pour extraire
    les jus restes dans les raisins, et le pressurage RELARGUE du sucre : la
@@ -8890,6 +8947,8 @@ function _vtTags(c){
   var d=_vtNum(b.d);
   if(c.statut==='mpf') o+='<span class="vt-tag">macération</span>';
   if(_vendDecuvee(c)) o+='<span class="vt-tag">décuvée</span>';
+  /* ★ CUV-13 : le jus a peut-etre change de cuve — la ligne le dit. */
+  if(_vendPressee(c)) o+='<span class="vt-tag">pressurée</span>';
   if(t!=null&&t>=30) o+='<span class="vt-tag hot">'+_vendCuvF1(t)+' °C</span>';
   if(d!=null){
     /* ★ CUV-10 : un repere, pas un verdict. C'est la degustation qui tranche. */
@@ -9969,6 +10028,15 @@ function _fermLegende(cu, ops, t0, mes, deuxAxes, ets){
      assemblee, goutte et presse : le pressurage relargue du sucre, et la
      densite remonte sans qu'on ait ajoute un gramme. Le taire ferait chercher
      une chaptalisation qui n'existe pas. */
+  /* ★ CUV-13 — LA MEME RAISON AU PRESSURAGE, et c'est la qu'elle se voit le
+     plus : le jus de presse rejoint la goutte, et la cuve reste suivie. On lit
+     la date du PASSAGE (PARC-1), jamais une date devinee. Le decuvage, s'il a
+     eu lieu, garde la priorite : c'est un fait, pas une etape. */
+  var _dPr = cu ? _vendStatDeb(cu,'decuvage') : null;
+  if(!(cu && _vendDecuvee(cu)) && _dPr && mes.some(function(m){ return m.date > _dPr; }))
+    h += '<div class="mvfm-note">Les relev\u00e9s pris <b>apr\u00e8s le pressurage</b> portent sur la masse '
+      + 'assembl\u00e9e, goutte et presse\u00a0: la presse relargue du sucre, et la courbe peut '
+      + 'remonter sans chaptalisation.</div>';
   if(cu && _vendDecuvee(cu) && mes.some(function(m){ return m.date > cu.decuvage.date; }))
     h += '<div class="mvfm-note">Les relev\u00e9s pris <b>apr\u00e8s le d\u00e9cuvage</b> portent sur la masse '
       + 'assembl\u00e9e, goutte et presse\u00a0: le pressurage relargue du sucre, et la courbe peut '

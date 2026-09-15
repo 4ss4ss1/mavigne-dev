@@ -2,7 +2,19 @@
 
 > Document de référence du projet **Ma Vigne** (GUERETTECH). Il est le **porteur de vérité** :
 > la mémoire Claude est plafonnée, ce fichier ne l'est pas.
-> Dernière consolidation : **14 septembre 2026 (CUV-11)** — ★★★ **LA DENSITÉ SE RELÈVE ENCORE UNE
+> Dernière consolidation : **15 septembre 2026 (CUV-13)** — ★★★ **L'ÉTAPE « DÉCUVAGE » S'APPELLE
+> « PRESSURAGE », ET LA CUVE PRESSURÉE RESTE RÉCLAMÉE (§133)**. Nico : *« le décuvage ici est en fait
+> un pressurage »* — à cette étape on presse, et quand il reste du sucre le jus finit sa FA **dans une
+> autre cuve** avant la mise en fût. L'étape (clé `decuvage`, posée par « Changer l'étape ») n'était ni
+> active ni décuvée : plus de « Saisir une mesure », plus de champ dans la tournée. Libellé changé, **clé
+> inchangée** ; `_vendPressee` entre dans `_vendSuivie` — **réponse de Nico : « réclamée »** — donc dans
+> `_vendMesurable`. ★ Trouvé en route : le badge de l'onglet comptait `_vendIsActive` quand l'alerte
+> « à mesurer » lit `_vendSuivie`. ⚠️⚠️ **Un filet se serait éteint en silence** : `mv-harnais-cuvdoc`
+> testait l'**absence** de « >Décuvage< », vert à jamais après le renommage (§133d). **APP 7.23 → 7.24 ·
+> SW 7.86 → 7.87**, base `b3fa09f`. ⚠️ §130–§132 (CONTRASTE-1, CONTRASTE-2, AVALE-1) n'avaient pas
+> relevé cet en-tête : lire leurs sections. Détail en **§133**.
+>
+> ★ Précédente : **14 septembre 2026 (CUV-11)** — ★★★ **LA DENSITÉ SE RELÈVE ENCORE UNE
 > FOIS LA CUVE DÉCUVÉE (§129)**. Nico : *« il faut pouvoir mesurer encore la densité une fois les
 > cuves décuvées. »* Trois portes fermées, et la dernière tenait les deux autres : `renderVendTour`
 > décidait l'écran vide sur `_vtActives()` **avant de regarder le filtre**, donc la dernière cuve
@@ -17102,6 +17114,12 @@ entrée dans la tournée.
 | Ce qui décide du décuvage | **la dégustation et l'état de la cuve** — aucun chiffre |
 | Où finit la FA | **en cuve**, le décuvage vient après |
 
+⚠️ **PRÉCISÉ LE 15/09/2026 (CUV-13)** — *« parfois, chez nous, quand on est au décuvage, on va remettre
+le jus dans une autre cuve, surtout quand il reste encore du sucre dedans, afin qu'il finisse la
+fermentation. Et une fois que cette fermentation est finie, on la mettra en tonneau. »* La FA finit en
+cuve **le plus souvent, pas toujours** : pressé avec du sucre, le jus la termine dans une autre cuve,
+puis part en fût. L'étape du parcours s'appelle désormais « Pressurage » et la cuve reste réclamée (§133).
+
 ### ⚠️ LA CONTRADICTION, ET ELLE N'EST PAS TRANCHÉE
 
 Le bilan de matière dit qu'à **997 sur un moût à 13,5–14°**, il reste du sucre. Nico goûte sec.
@@ -18883,3 +18901,101 @@ tourne pour que `_mvAvalees` se remplisse, et c'est ce relevé, pas ce lot, qui 
 c'est le lot de tri, et il attend les données. ③ Aucun rendu navigateur ; le risque est faible
 (206 substitutions mécaniques, syntaxe vérifiée sur les douze modules) mais il n'est pas nul.
 ④ Les 20 `catch{}` des fenêtres d'impression restent muets, volontairement.
+
+## 133. ★★★ CUV-13 — « PRESSURAGE » : L'ÉTAPE S'APPELLE PAR SON NOM, ET LA CUVE PRESSURÉE RESTE RÉCLAMÉE (15/09 — `cave.js` + `utils.js` + `index.html` + `sw.js` + `guide/` + `scripts/` + `package.json` · APP 7.23 → 7.24 · SW 7.86 → 7.87 · base `b3fa09f`)
+
+**Le point de départ, dit par Nico**, sur la capture d'une cuve à 1005 posée à l'étape « Décuvage »
+depuis trois jours : *« parfois, chez nous, quand on est au décuvage, on va remettre le jus dans une
+autre cuve, surtout quand il reste encore du sucre dedans, afin qu'il finisse la fermentation. Et une
+fois que cette fermentation est finie, on la mettra en tonneau. […] Ici il n'est pas possible de
+rajouter de relevé de densité puisque décuvée, mais le décuvage ici est en fait un pressurage. Il faut
+changer le mot ici. »*
+
+### 133a. La cause : deux gestes, un seul mot
+
+| | Porte | Ce qu'elle fait |
+|---|---|---|
+| L'**étape** `decuvage` | « Changer l'étape », ou le statut de « Modifier » | pose un passage daté (PARC-1). **Rien d'autre.** |
+| Le **fait** `decuvage` | bouton « Décuver → Le Chai » | crée la cuvée, `statut='termine'`, `fa_finie`, densité de mise en fût |
+
+`_vendMesurable = _vendIsActive (MPF, FA) || _vendDecuvee (le fait)`. L'étape n'était **ni l'un ni
+l'autre** : la cuve pressée à 1005 perdait « Saisir une mesure », ses champs dans la tournée et toute
+relance — au moment exact où le jus finit de fermenter hors du marc. ★ **CUV-11 avait ouvert la porte
+au FAIT, pas à l'ÉTAPE** : même mot, deux objets, et la correction n'avait vu que l'un.
+
+### 133b. Le modèle
+
+- **Libellé** « Pressurage », « Press. » dans la frise. ⚠️⚠️ **Clé inchangée** : `statut_hist` porte déjà
+  des `decuvage` datés, et les renommer serait une migration pour un libellé. Tout ce qui s'affiche lit
+  `_VEND_STAT` / `_VEND_STEPS` — frise, parcours, badge, graphe, légende, toast, cahier imprimé — **sauf
+  l'option du formulaire « Modifier »**, écrite dans `index.html`.
+- `_vendPressee(c) = statut==='decuvage' && !_vendDecuvee(c) && !_vendEstFusionnee(c)`.
+- ★★★ **Question posée à Nico : « acceptée ou réclamée ? » — réponse : « réclamée ».** Donc
+  `_vendSuivie += _vendPressee` (tournée, cuves à mesurer, badge) et `_vendMesurable += _vendPressee`.
+  Invariant écrit et testé sur 13 formes de cuve : **réclamée ⇒ acceptée**.
+- ⚠️⚠️ **Le décuvage reste un FAIT (§118)** : « Modifier » permet de reposer l'étape sur une cuve déjà
+  décuvée ; elle n'est pas réclamée pour autant, et reste mesurable comme toute décuvée (§129).
+  Une cuve fusionnée ne suit rien.
+- ⚠️ `_vendIsActive` **ne bouge pas** : « en fermentation » (filtre, KPI, fin de FA estimée, agenda)
+  garde son sens. Même patron que CUV-9 pour `_vendFaEnCours`.
+- **Le bouton « Décuver » garde son nom** : c'est lui qui envoie au Chai. Nico a demandé « le mot
+  ici » — celui de l'étape. À rouvrir s'il veut « Mettre en fût ».
+
+### 133c. Ce que l'écran dit
+
+- **Détail** : « **Pressurée** : le jus reste suivi. Il garde sa place dans la tournée, et ses relevés
+  continuent la même courbe. » La phrase de rattachement (« Modifier » le rattache à la nouvelle cuve)
+  ne sort **que si la cuve a un repère de cuverie** : c'est lui que la tournée affiche, et il devient
+  faux dès que le jus change de cuve.
+- **Tournée** : pastille « pressurée ». **Plan de cuverie** : « pressurée », couleur de cuve suivie.
+  **Ligne fermée** : « Pressurage », ou « N j » en rouge sans relevé depuis la veille.
+- **Légende de la courbe** : un relevé pris **après** le passage au pressurage explique une remontée par
+  le jus de presse. Même règle stricte (`>`) que le décuvage — un relevé du jour même ne dit pas s'il a
+  été pris avant ou après le pressoir. Le décuvage, s'il existe, garde la priorité : jamais les deux notes.
+
+### 133d. ★★ Trouvé en route
+
+1. **Le badge de l'onglet et la barre de santé** comptaient `_vendIsActive` pendant que l'alerte « à
+   mesurer » lit `_vendSuivie` : une cuve décuvée qui finit au chai était « à mesurer » dans l'alerte,
+   absente du badge, sous « Fermentations suivies ». Latent **depuis CUV-9**, et une cuve pressurée
+   l'aurait rendu quotidien. `_vendKpiData` lit `_vendSuivie`, fusionnées exclues.
+2. ⚠️⚠️⚠️ **UN FILET SE SERAIT ÉTEINT EN SILENCE.** `mv-harnais-cuvdoc` vérifiait qu'un passage hors
+   fenêtre n'était **pas** tracé en cherchant `>Décuvage<`. Après le renommage, il ne pouvait plus rien
+   trouver, donc plus rien rater. Il lit maintenant le libellé **dans le module testé**, et un libellé
+   introuvable est rouge. **Prouvé sur un mutant** (bornes de fenêtre du graphe retirées) : l'assertion
+   réancrée rougit, l'ancienne serait restée verte. ★★★ **Règle, déjà vécue en §129e et qui revient :
+   un renommage oblige à relire toute assertion d'ABSENCE qui cite l'ancien mot.**
+3. `mv-harnais-parcours` **recopiait** `_VEND_STAT` et `_VEND_STEPS` — sa copie disait encore
+   « Décuvage ». Les tables sont désormais **extraites** : un harnais qui teste sa propre copie ne teste
+   pas le code livré.
+4. `mv-harnais-cuv8` : deux contre-épreuves ancrées sur l'ancienne ligne de `_vendMesurable`, réancrées.
+   Elles auraient rougi bruyamment — le bon sens de panne. `cuv7` et `agenda` extraient `_vendPressee`.
+5. **Textes périmés depuis CUV-11 et CUV-12**, corrigés dans le même lot : l'aide et le guide
+   réservaient « Saisir une mesure » au seul cas « elle finira au chai » ; le **guide** disait encore
+   « on ne sulfite pas sur du sucre » — un quatrième texte client que CUV-12 n'avait pas vu.
+6. **Hors lot, constaté sur la base `b3fa09f`** : `mv-harnais-cuvdoc --contre` porte une contre-épreuve
+   sans effet (n° 26, « rabattement sur le bord bas au lieu de la remontée en bloc »). Ce mode n'est pas
+   dans `npm run check`, donc rien ne le signale. **Non corrigé ici.**
+
+### 133e. Le harnais
+
+`scripts/mv-harnais-cuv13.mjs` — **43 assertions vertes, 12 contre-épreuves qui mordent**, dans `check`
+et `prebuild` (et `npm run test:cuv13`). Il **rend** l'écran — détail, ligne, vignette, pastille, frise,
+légende — au lieu de s'arrêter aux prédicats (§129d), et lit `index.html`, l'aide et les deux guides.
+★★ **Méthode neuve, à reprendre ailleurs** : chaque contre-épreuve vérifie d'abord que son **ancre est
+unique** dans le bloc extrait, puis que son **essai passe sur le code sain**. Sinon elle est rouge, jamais
+« détectée ». ★ Trois essais faux attrapés ainsi à l'écriture, **zéro défaut de code** : l'espace
+insécable de « Modifier », une vignette sans contenance donc sans couleur, un relevé du jour même de la
+presse. Même leçon qu'au bac du 10/09 : *quand une assertion rougit, se demander d'abord qui a tort.*
+
+### 133f. La note de livraison
+
+**Base `b3fa09f`.** **APP 7.23 → 7.24** (deux entrées au journal) · **SW 7.86 → 7.87**. `npm run check`
+joué en entier sur la base finale.
+
+**Ouvert, et dit** : ① ⚠️ **toute cuve déjà laissée à l'étape « Décuvage »**, sur tous les domaines,
+revient dans la tournée et en « à mesurer » ; « Décuver » ou « Changer l'étape » l'en sort. ② La démo
+guidée n'a aucune cuve à cette étape : en ajouter une demande une vendange cohérente (10ter) — non fait.
+③ Une cuve pressurée garde sa cuve du parc **occupée** jusqu'au décuvage (`_caveCuveOcc` lit
+`statut!=='termine'`) ; « Modifier » la rattache à celle où le jus est parti, ce qui libère l'autre.
+④ Aucun rendu navigateur ; `npm run build`, `test:smoke`, `test:e2e` restent côté Nico.

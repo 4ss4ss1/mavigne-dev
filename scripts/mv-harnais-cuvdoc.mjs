@@ -300,8 +300,16 @@ for (const X of [D, K]) {
 console.log('\n6b-bis. Les changements d\'etat sur la courbe');
 const ets = (svg.match(/stroke-dasharray="4 3"/g) || []).length;
 T('les deux passages de la fenetre sont traces', ets === 2, ets + ' trait(s)');
-T('le decuvage, hors fenetre, ne l\'est PAS',
-  k.indexOf('>Décuvage</span>') === -1 && k.indexOf('>Décuvage<') === -1);
+/* ⚠⚠ CUV-13 — CETTE ASSERTION TESTE UNE ABSENCE : ELLE DOIT LIRE LE VRAI MOT.
+   Ecrite sur « Décuvage » en dur, elle serait restee verte pour toujours le
+   jour ou l'etape a pris le nom de « Pressurage » : elle ne pouvait plus rien
+   trouver, donc plus rien rater (le piege de §129e). Le libelle est lu dans le
+   module TESTE, et un libelle introuvable est rouge, pas vert. */
+const LBL_ETAPE = (fs.readFileSync(path.resolve(CIBLE), 'utf8')
+  .match(/decuvage:\{i:3,lbl:'([^']+)'\}/) || [])[1] || '';
+T('l\'etape de pressurage (cle decuvage), hors fenetre, ne l\'est PAS',
+  !!LBL_ETAPE && k.indexOf('>' + LBL_ETAPE + '</span>') === -1 && k.indexOf('>' + LBL_ETAPE + '<') === -1,
+  LBL_ETAPE ? '' : 'libelle introuvable dans _VEND_STAT');
 T('chaque trait porte son nom dans la marge haute',
   svg.indexOf('>MPF</text>') !== -1 && svg.indexOf('>FA</text>') !== -1);
 T('la legende date les passages en jours',

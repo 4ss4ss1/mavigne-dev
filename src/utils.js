@@ -23,7 +23,7 @@ export const GT_ADMIN_EMAIL = 'ngdevpro@gmail.com';
 // WHATS_NEW   : tableau vide = modal desactive pour cette version.
 // Format item : { emoji:'📅', titre:'Titre court', desc:'Phrase utilisateur.' }
 // Regle : seulement les changements visibles par les utilisateurs.
-export const APP_VERSION = '7.23';
+export const APP_VERSION = '7.24';
 // ════ Journal des nouveautés (récap cumulatif) ════
 // Une entrée par version, la PLUS RÉCENTE EN HAUT : { v:'5.10', items:[ {emoji,titre,desc}, … ] }
 // À chaque release visible → AJOUTER un bloc en tête (ne pas remplacer). items:[] = release technique (rien à afficher).
@@ -715,6 +715,22 @@ window._mvGraphRepeindre = function(){
 };
 
 export const WHATS_NEW = [
+  { v: '7.24', items: [
+    { emoji: 'cuve', titre: 'L’étape « Décuvage » s’appelle « Pressurage », et la cuve reste suivie',
+      desc: "Poser une cuve à l’étape «\u00a0Décuvage\u00a0» la sortait du suivi\u00a0: plus de bouton "
+        + "«\u00a0Saisir une mesure\u00a0», plus de champ dans la tournée. Or à ce moment-là on presse, "
+        + "et le jus peut très bien finir sa fermentation <b>dans une autre cuve</b> avant d’être mis "
+        + "en fût. L’étape porte maintenant son vrai nom, <b>Pressurage</b>, et la cuve <b>reste "
+        + "réclamée</b>\u00a0: dans la tournée, dans les cuves à mesurer, avec ses relevés sur la même "
+        + "courbe. Le bouton «\u00a0Décuver\u00a0» ne change pas\u00a0: c’est toujours lui qui envoie le vin "
+        + "au Chai. Une cuve déjà posée à cette étape suit la nouvelle règle d’elle-même, sans rien "
+        + "ressaisir." },
+    { emoji: 'eprouvette', titre: 'Le badge de l’onglet Cuves compte les mêmes cuves que l’alerte',
+      desc: "L’alerte «\u00a0à mesurer\u00a0» de la liste comptait une cuve décuvée qui finit sa "
+        + "fermentation au chai\u00a0; le badge de l’onglet et la barre du haut l’oubliaient, et "
+        + "annonçaient «\u00a0Fermentations suivies\u00a0» juste au-dessus. Ils lisent désormais la même "
+        + "règle, cuves pressurées comprises." }
+  ] },
   { v: '7.23', items: [
     { emoji: 'contraste', titre: 'Des pastilles illisibles en mode sombre',
       desc: "Les petites pastilles de couleur — celles qui portent un stade, un statut, un rappel — écrivaient leur texte dans la même teinte que leur fond dès que l'application passait en <b>mode sombre</b>. Sur fond crème le contraste était bon, et personne ne voyait le problème ; sur fond noir il tombait à trois fois moins que ce qu'il faut pour lire confortablement. Quatre familles sont corrigées — terre, bleu, violet et rouge — avec une <b>encre distincte du fond</b>, comme les étiquettes du planning en avaient déjà une. <b>Rien ne change en mode clair</b> : les teintes y sont exactement celles d'avant, au chiffre près." }
@@ -3072,7 +3088,8 @@ var MV_AIDE = {
       ['L’ouillage suit le bois, pas le contenant', "inox et béton ne s’évaporent pas : une cuvée logée seulement là n’a pas de jauge de part des anges et ne déclenche aucune alerte. Un foudre bois, si. Une cuvée mixte garde sa jauge, cadrée sur sa seule part en fût."],
       ['La fin de fermentation et la fin de malo', "sont estimées à partir de vos propres relevés : la densité pour l’une, l’acide malique pour l’autre. Sans trois mesures, l’écran dit « démarrage » plutôt qu’une date inventée."],
       ['Le repère de densité, et ce qu’il ne fait pas', "chaque cuve porte un repère de vin sec calculé sur le degré potentiel de son moût — lu sur votre premier relevé s’il a été pris avant le départ, sinon sur vos contrôles de maturité ; une chaptalisation datée l’abaisse. Le détail de la cuve écrit où il est et d’où il vient. <b>Il ne déclenche rien</b> : ni « finie », ni une entrée dans la tournée. C’est un repère de lecture sur la courbe, et sa valeur reste à caler sur vos analyses."],
-      ['Décuver, c’est constater que c’est fini', "la feuille de décuvage pose la question une fois : <b>terminée en cuve</b> (coché d’avance, c’est le cas courant) ou <b>elle finira au chai</b>. C’est vous qui répondez, à la dégustation et à l’état de la cuve ; aucun chiffre ne le décide. Dans le second cas seulement, la cuve porte <b>Décuvée · FA</b>, garde « Saisir une mesure », reste dans la tournée, et la cuvée le signale au Chai : ni malo ni sulfitage tant qu’il reste du sucre. Les cuves décuvées avant cette mise à jour n’ont pas de réponse enregistrée : l’écran ne la devine pas."],
+      ['Pressurer n’est pas décuver', "l’étape <b>Pressurage</b> du parcours — l’ancienne « Décuvage » — dit que le marc est pressé, pas que le vin est parti au Chai. Le jus peut finir sa fermentation dans une autre cuve : la cuve reste donc <b>suivie</b>, dans la tournée et dans les cuves à mesurer, et ses relevés continuent la même courbe. Si le jus a changé de cuve, « Modifier » la rattache à la nouvelle : c’est le repère que la tournée affiche. C’est « Décuver » qui l’envoie au Chai et la sort de la tournée."],
+      ['Décuver, c’est constater que c’est fini', "la feuille de décuvage pose la question une fois : <b>terminée en cuve</b> (coché d’avance, c’est le cas courant) ou <b>elle finira au chai</b>. C’est vous qui répondez, à la dégustation et à l’état de la cuve ; aucun chiffre ne le décide. Dans le second cas seulement, la cuve porte <b>Décuvée · FA</b>, reste dans la tournée, et la cuvée le signale au Chai : ni malo ni sulfitage tant qu’il reste du sucre. Les cuves décuvées avant cette mise à jour n’ont pas de réponse enregistrée : l’écran ne la devine pas. Dans tous les cas, « Saisir une mesure » reste ouvert : un relevé ne rouvre rien."],
       ['La densité à la mise en fût', "même feuille, champ facultatif : la densité de la masse assemblée, <b>goutte et presse</b>, avec sa température. Le pressurage relargue du sucre et fait remonter la densité — c’est cette valeur-là qui compte pour la suite, pas le dernier relevé de cuve. Elle s’affiche sur la cuvée au Chai et ne rejoint jamais la courbe du Cuvier."],
       ['Trouver une cuve', "la liste du Cuvier est rangée dans l’ordre de votre cuverie — celui écrit sur les cuves, celui dans lequel vous marchez. Une cuve garde donc sa place d’un jour à l’autre, même après un relevé. Vous pouvez trier par urgence ou par avancement, filtrer, et chercher par nom ou par parcelle dès six cuves."],
       ['Une cuve s’ouvre au doigt', "la liste ne montre que l’essentiel : repère, nom, densité, température, avancement. Touchez une ligne pour déplier sa courbe, ses trois derniers chiffres et ses boutons. Une seule cuve reste ouverte à la fois."],
@@ -3083,7 +3100,7 @@ var MV_AIDE = {
       ['Le parcours se corrige, étape par étape', "dépliez la cuve : sous la frise, « Parcours » liste tous ses passages avec leur durée, un crayon par ligne. Le bouton « Changer l’étape » fait la même chose depuis le détail. Une date antérieure à l’encuvage ou postérieure à aujourd’hui est refusée. Supprimer une étape efface une date, pas un fait : le statut de la cuve ne change pas."],
       ['Les cuves d’avant cette mise à jour n’ont pas de date de passage', "on ne connaît pas le jour où elles sont entrées dans leur étape actuelle, et la date d’encuvage ne le dit pas. La frise écrit un tiret plutôt qu’une date fausse : un tiret se corrige, une date fausse se croit. Posez-la à la main si vous la connaissez."],
       ['La fin de fermentation ne compte que les jours de FA', "cinq jours de macération à froid ne sont pas cinq jours de fermentation. Tant que la fermentation n’a pas trois jours, l’écran dit « démarrage » au lieu d’une date de fin. Le cahier de cuverie imprime la durée de macération réellement faite ; à défaut, la durée prévue, et il le dit."],
-      ['Un relevé se corrige', "dépliez la cuve : la liste de ses relevés s’ouvre sous la courbe ; le crayon rouvre celui que vous désignez, date comprise. Les relevés se rangent par date, pas par ordre de saisie : un carnet rattrapé le lendemain se remet tout seul à sa place, et la fin de fermentation estimée suit. La liste reste ouverte sur une cuve déjà décuvée, et la saisie aussi tant que sa fermentation n’est pas finie."],
+      ['Un relevé se corrige', "dépliez la cuve : la liste de ses relevés s’ouvre sous la courbe ; le crayon rouvre celui que vous désignez, date comprise. Les relevés se rangent par date, pas par ordre de saisie : un carnet rattrapé le lendemain se remet tout seul à sa place, et la fin de fermentation estimée suit. La liste reste ouverte sur une cuve pressurée ou déjà décuvée, et la saisie aussi."],
       ['Une opération se corrige aussi', "toutes sont listées, plus seulement la dernière. Corriger ou supprimer une saignée rend d’abord les hectolitres à la cuve avant d’appliquer la nouvelle valeur : le volume ne se retranche jamais deux fois."],
       ['Un refroidissement dit par quel moyen', "groupe de froid, échangeur, glace carbonique, azote liquide, CO₂ liquide, eau froide. Les trois qui se pèsent demandent une quantité en kilos, et la carboglace annonce l’abaissement approximatif — un ordre de grandeur, la cuve n’étant pas isolée. Le moyen et la quantité partent au registre des manipulations : c’est là qu’on les cherche."],
       ['Tanins, enzymes et bentonite', "se posent sur une cuve comme les autres opérations, mais le produit se choisit dans La Réserve : c’est ce qui permet de sortir la quantité du stock toute seule. L’unité de dose suit le produit — g/hL pour ce qui se pèse, mL/hL pour ce qui se verse. Sans produit choisi, l’opération s’enregistre quand même, hors bilan matière, et l’écran le dit."],

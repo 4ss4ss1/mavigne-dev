@@ -47,7 +47,9 @@ const NOMS = ['_caveCuvesBois', '_caveOuille', '_caveNbTonneaux',
   '_mlVolParFut', '_mlOuillages', '_mlAMesurer', '_mlAgenda', '_mlResumeSem',
   '_vendIsActive', '_vendTriDate', '_vendTriMes', '_vendLastMes', '_vendLastD',
   /* CUV-9 : _mlAMesurer passe par _vendSuivie — extrait, c'est le sujet. */
-  '_vendEstFusionnee', '_vendDecuvee', '_vendFaEnCours', '_vendSuivie'];
+  '_vendEstFusionnee', '_vendDecuvee', '_vendFaEnCours', '_vendSuivie',
+  /* CUV-13 : _vendSuivie lit _vendPressee (la cuve pressuree est reclamee). */
+  '_vendPressee'];
 
 function extraire(nom) {
   const m = new RegExp('^function ' + nom + '\\s*\\(', 'm').exec(SRC);

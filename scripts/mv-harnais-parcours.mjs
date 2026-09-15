@@ -55,6 +55,8 @@ const AUJ = iso(new Date());
 function monte(SRC) {
   const MORCEAUX = [
     bloc(SRC, 'function _vendFrDate(s){', '\n'),
+    bloc(SRC, 'var _VEND_STAT=', '\n'),
+    bloc(SRC, 'var _VEND_STEPS=', '\n'),
     bloc(SRC, 'function _vendStatLbl(st){', '\n'),
     bloc(SRC, 'function _vendIsActive(c)', '\n'),
     bloc(SRC, 'function _vendHist(c){', '\n}'),
@@ -88,11 +90,10 @@ function monte(SRC) {
 var CAVE_VENDANGE = { cuves_vinif: [], recoltes: [] };
 var CAVE_ELEVAGE  = { cuvees: [] };
 var TOASTS = [], CHAMPS = {}, RENDUS = 0;
-var _VEND_STAT = ${JSON.stringify({
-    setup: { i: 0, lbl: 'Setup' }, mpf: { i: 1, lbl: 'MPF' }, fa: { i: 2, lbl: 'FA' },
-    decuvage: { i: 3, lbl: 'D\u00e9cuvage' }, fml: { i: 4, lbl: 'FML' }, termine: { i: 5, lbl: 'Termin\u00e9' }
-  })};
-var _VEND_STEPS = [['setup','Setup'],['mpf','MPF'],['fa','FA'],['decuvage','D\u00e9cuv.'],['fml','FML'],['termine','Fini']];
+/* CUV-13 : _VEND_STAT et _VEND_STEPS ne sont PLUS recopiees ici, elles sont
+   EXTRAITES de cave.js avec le reste. La copie disait encore « Decuvage » le
+   jour ou l'etape a pris le nom de « Pressurage » : un harnais qui teste sa
+   propre copie ne teste pas le code livre. */
 var _ML_D20_SEC = 996;
 /* CUV-8 : bouchon. Ce harnais mesure le PARCOURS DATE d'une cuve, pas le
    seuil du vin sec — celui-ci a son harnais (mv-harnais-cuv8). Rendre 996,

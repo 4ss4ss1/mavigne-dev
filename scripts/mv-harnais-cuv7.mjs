@@ -18,6 +18,9 @@ const NOMS = ['_vtJour','_vtNum','_vtB','_vtMesJour','_vtEcrire','_vtActives','_
      EXTRAITS (c'est le sujet), le seuil est bouchonne (ce n'est pas le
      sujet : il a son propre harnais, mv-harnais-cuv8). */
   '_vendDecuvee','_vendFaEnCours','_vendSuivie',
+  /* CUV-13 : `_vendSuivie` et `_vendMesurable` lisent `_vendPressee` — extrait,
+     jamais bouchonne : c'est lui qui fait entrer la cuve pressuree. */
+  '_vendPressee',
   /* CUV-11 : la LIGNE de tournee entre dans le harnais. Elle n'y etait pas,
      et c'est exactement la qu'un defaut a vecu deux jours : CUV-9 faisait
      entrer les cuves decuvees dans `_vtActives` pendant que `_vtRowHtml` leur

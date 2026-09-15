@@ -1,4 +1,15 @@
-// MA VIGNE — Service Worker v7.86
+// MA VIGNE — Service Worker v7.87
+// v7.87 (15/09/2026) — CUV-13 : L'ETAPE « DECUVAGE » S'APPELLE « PRESSURAGE », ET LA CUVE PRESSUREE RESTE RECLAMEE.
+//   Nico : « le decuvage ici est en fait un pressurage ». A cette etape on presse, et quand il reste du sucre le jus finit sa
+//   fermentation dans une AUTRE cuve avant la mise en fut. L'etape (cle 'decuvage', posee par « Changer l'etape ») n'etait ni
+//   active (MPF/FA) ni decuvee (le fait pose par « Decuver -> Le Chai ») : plus de « Saisir une mesure », plus de champ dans la
+//   tournee, sur une cuve pressee a 1005. Libelle « Pressurage » / « Press. », CLE INCHANGEE (aucune migration de statut_hist).
+//   Nouveau predicat _vendPressee, dans _vendSuivie (reponse de Nico : RECLAMEE) donc dans _vendMesurable. ⚠ Le decuvage reste un
+//   FAIT (§118) : une cuve decuvee ou fusionnee n'est pas reclamee par l'etape. _vendIsActive ne bouge pas.
+//   ★ Trouve en route : le badge de l'onglet et la barre de sante comptaient _vendIsActive pendant que l'alerte « a mesurer »
+//   comptait _vendSuivie — une cuve decuvee a finir au chai y manquait deja. Une seule regle maintenant.
+//   ⚠⚠ Un filet se serait eteint en silence : mv-harnais-cuvdoc testait l'ABSENCE de « >Decuvage< », vert a jamais apres le
+//   renommage. Il lit desormais le libelle dans _VEND_STAT. Harnais neuf mv-harnais-cuv13.mjs + contre-epreuve. APP 7.23 -> 7.24.
 // v7.86 (14/09/2026) — AVALE-1 : 206 ERREURS AVALEES SANS TRACE ONT MAINTENANT UN NOM. C14 : 223 -> 15.
 //   Le preflight comptait ces catch{} depuis des mois en disant lui-meme ce qu'ils coutent (<< le motif qui a permis au bug .window.currentUser de survivre des mois >>). Le compteur ne descendait pas.
 //   Un helper, _mvAvale(e,'fichier.js/fonction'), et une conversion mecanique. Le contexte est le nom de la fonction ENGLOBANTE, extrait du code -- pas une phrase inventee.
@@ -3971,7 +3982,7 @@
 // v2.22 — Fix profils vides : guard vide dans loadData() pour MEMBRES/SAISONS/TACHES
 // v2.17 — Onboarding intégré + tenantId · v2.06 — Firebase Auth · v2.00–v2.05 — divers
 const DEBUG = self.location.hostname === 'localhost' || self.location.hostname === '127.0.0.1';
-const CACHE_NAME   = 'mavigne-v7.86';
+const CACHE_NAME   = 'mavigne-v7.87';
 const TENANT_CACHE = 'mavigne-tenant';   // Cache persistant — préservé à chaque mise à jour SW
 const SYNC_TAG     = 'mavigne-sync';
 
@@ -3987,7 +3998,7 @@ const CDN_URLS = [
 ];
 
 self.addEventListener('install', event => {
-  if(DEBUG) console.log('[SW] Ma Vigne v7.86 installé');
+  if(DEBUG) console.log('[SW] Ma Vigne v7.87 installé');
   event.waitUntil(
     caches.open(CACHE_NAME).then(async cache => {
       // ── Cœur applicatif : STRICT (mise à jour ATOMIQUE) ──
@@ -4003,7 +4014,7 @@ self.addEventListener('install', event => {
 });
 
 self.addEventListener('activate', event => {
-  if(DEBUG) console.log('[SW] Ma Vigne v7.86 activé');
+  if(DEBUG) console.log('[SW] Ma Vigne v7.87 activé');
   event.waitUntil(
     caches.keys().then(keys =>
       Promise.all(
