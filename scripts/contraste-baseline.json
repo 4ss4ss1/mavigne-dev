@@ -1,0 +1,55 @@
+{
+  "familles": {
+    "clair": {
+      "plan-acc / plan-acc-pale": 3.7,
+      "tag-orange": 4.14,
+      "tag-sky": 4.27
+    },
+    "sombre": {}
+  },
+  "code": {
+    "clair": {
+      "mesurees": 793,
+      "nonResoluble": 246,
+      "fondInconnu": 436,
+      "sous": {
+        "src/app.js": 5,
+        "src/cave.js": 11,
+        "src/pilotage.js": 4,
+        "src/planning.js": 10,
+        "src/reglages.js": 5,
+        "src/reserve.js": 1,
+        "src/tracteur.js": 1,
+        "index.html": 7,
+        "src/styles.css": 47
+      }
+    },
+    "sombre": {
+      "mesurees": 793,
+      "nonResoluble": 246,
+      "fondInconnu": 438,
+      "sous": {
+        "src/app.js": 7,
+        "src/cave.js": 47,
+        "src/phyto.js": 1,
+        "src/pilotage.js": 8,
+        "src/planning.js": 10,
+        "src/reglages.js": 15,
+        "src/reserve.js": 7,
+        "src/tracteur.js": 5,
+        "index.html": 25,
+        "src/styles.css": 90
+      }
+    }
+  },
+  "surfaces": {
+    "src/app.js": 5,
+    "src/cave.js": 4,
+    "src/pilotage.js": 12,
+    "src/planning.js": 6,
+    "src/reglages.js": 3,
+    "src/tracteur.js": 1,
+    "index.html": 1,
+    "src/styles.css": 11
+  }
+}

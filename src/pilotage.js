@@ -4279,7 +4279,7 @@ function _pilObjectifSet(iso){
   var nom=_pilSaisonNom(); if(!nom) return false;
   if(!window.CONFIG.objectifs_fin) window.CONFIG.objectifs_fin={};
   window.CONFIG.objectifs_fin[nom]=iso;
-  try{ if(typeof window.saveData==='function') window.saveData('config'); }catch(e){}
+  try{ if(typeof window.saveData==='function') window.saveData('config'); }catch(e){ if(window._mvAvale) window._mvAvale(e,'pilotage.js/_pilObjectifSet'); }
   return true;
 }
 
@@ -4588,9 +4588,9 @@ function _pilCkCave(){
     +'<button type="button" class="pil-ck-btn" onclick="_pilOuvrirCave()">Ouvrir la Cave</button></div>';
 }
 window._pilOuvrirCave=function(){
-  if(typeof window.selectCaveSection==='function'){ try{ window.selectCaveSection('aujourdhui'); }catch(e){} }
+  if(typeof window.selectCaveSection==='function'){ try{ window.selectCaveSection('aujourdhui'); }catch(e){ if(window._mvAvale) window._mvAvale(e,'pilotage.js/_pilOuvrirCave'); } }
   if(typeof goTo==='function') goTo('cave');
-  if(typeof window.selectCaveSection==='function'){ try{ window.selectCaveSection('aujourdhui'); }catch(e){} }
+  if(typeof window.selectCaveSection==='function'){ try{ window.selectCaveSection('aujourdhui'); }catch(e){ if(window._mvAvale) window._mvAvale(e,'pilotage.js/_pilOuvrirCave#2'); } }
 };
 function _pilCkJours(){
   var days=_pilTreatDays();
@@ -9010,7 +9010,7 @@ function _pilCssV2(){
   +'.pil-crumb{display:flex;align-items:center;gap:5px;flex-wrap:wrap;flex:1;min-width:0}'
   +'.pil-cr{display:inline-flex;align-items:center;gap:6px;border:1px solid var(--gris);background:var(--bg-app);border-radius:9px;padding:5px 10px;font-size:var(--pt-txt,12.5px);font-weight:600;color:var(--texte);white-space:nowrap;min-height:34px;font-family:inherit;cursor:pointer}'
   +'.pil-cr.root{background:var(--cave);border-color:var(--cave);color:var(--or-clair)}'
-  +'.pil-cr.sel{background:var(--terre-pale);border-color:var(--terre);color:var(--terre)}'
+  +'.pil-cr.sel{background:var(--terre-pale);border-color:var(--terre);color:var(--terre-tx,#8A5A38)}'
   +'.pil-cr .x{border:0;background:none;color:inherit;opacity:.55;font-size:var(--pt-sm,17px);line-height:1;padding:0 0 0 3px;font-family:inherit;cursor:pointer;min-width:20px}'
   +'.pil-cr .x:hover{opacity:1}'
   +'.pil-cr-sep{color:var(--gris);font-size:var(--pt-txt,12.5px)}'
@@ -9030,7 +9030,7 @@ function _pilCssV2(){
   // cinquieme niveau, et la barre redevient une liste de sujets.
   +'.pil-tabsep{display:inline-block;width:1px;align-self:stretch;min-height:22px;margin:0 9px;background:var(--gris);flex-shrink:0}'
   +'.pil-diagbtn{border:1px solid var(--orange);background:var(--orange-pale);color:var(--orange);border-radius:9px;padding:6px 11px;font-size:var(--pt-txt,12.5px);font-weight:700;white-space:nowrap;min-height:34px;font-family:inherit;cursor:pointer}'
-  +'.pil-diagbtn.grave{border-color:var(--rouge);background:var(--rouge-pale);color:var(--rouge)}'
+  +'.pil-diagbtn.grave{border-color:var(--rouge);background:var(--rouge-pale);color:var(--rouge-tx,#A0291E)}'
   +'.pil-diagbtn.clean{border-color:var(--vert-med);background:var(--vert-pale);color:var(--vert-med)}'
   +'.pil-diagwrap{position:fixed;inset:0;background:rgba(20,17,13,.45);z-index:90;display:none;align-items:flex-end;justify-content:center}'
   +'.pil-diagwrap.show{display:flex}'
@@ -9980,7 +9980,7 @@ function _pilBindParam(d){
   function clampO(o,cd){ var a=ord(cd.debut),b=ord(cd.fin); return Math.max(a,Math.min(b,o)); }
   function cfg(){ if(!window.CONFIG) return null; if(!window.CONFIG.task_windows) window.CONFIG.task_windows={}; return window.CONFIG.task_windows; }
   function ech(){ var s=(typeof window._pilSaison==='function')?window._pilSaison():null; if(!s) return null; if(!s.echeances||typeof s.echeances!=='object'||Array.isArray(s.echeances)) s.echeances={}; return s.echeances; }
-  function commit(msg){ try{ if(typeof window.saveData==='function'){ window.saveData('saisons'); window.saveData('config'); } }catch(e){} if(msg&&window.showToast) window.showToast(msg,'#3D6B27'); _pilFillContent(_pilData()); }
+  function commit(msg){ try{ if(typeof window.saveData==='function'){ window.saveData('saisons'); window.saveData('config'); } }catch(e){ if(window._mvAvale) window._mvAvale(e,'pilotage.js/commit'); } if(msg&&window.showToast) window.showToast(msg,'#3D6B27'); _pilFillContent(_pilData()); }
   function winOf(k,cd){ var f=null; (cd.taskWindows||[]).forEach(function(t){ if(_friseNorm(t.nom)===k)f=t; }); return f; }
   // Saisie de date : on ne valide JAMAIS a chaque 'change' (un input[type=date] en emet un
   // par segment pendant la frappe -> commit + re-render intempestifs + valeur intermediaire).
@@ -10313,7 +10313,7 @@ function renderPilotage(){
   _pilBind();
   // Idempotent : ne fait rien si la pastille est deja posee.
   if(typeof window._mvInjectHelpBtn==='function') window._mvInjectHelpBtn();
-  if(!window._dataReady){ setTimeout(function(){ var p=document.querySelector('.page.active'); if(p&&p.id==='page-pilotage'){ try{ _pilFillContent(_pilData()); }catch(e){} } }, 800); }
+  if(!window._dataReady){ setTimeout(function(){ var p=document.querySelector('.page.active'); if(p&&p.id==='page-pilotage'){ try{ _pilFillContent(_pilData()); }catch(e){ if(window._mvAvale) window._mvAvale(e,'pilotage.js/renderPilotage'); } } }, 800); }
 }
 
 // (_pilUpdateCard + carte hub « Pilotage » supprimées — hub purgé, plus aucun appelant · MAINT-2)

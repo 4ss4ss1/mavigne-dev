@@ -128,8 +128,16 @@ for (const sel of ['pil-tile', 'data-pid', 'pil-cockpit-card', 'pil-dec', 'pil-t
 t('les sept cles d\'onglet sont intactes',
   ['auj','an','avc','equ','sim','eco','cfm'].every(k => new RegExp(`\\['${k}',`).test(SRC)));
 t('la cle cav est migree, pas perdue', /cav:'auj'/.test(SRC) && !/\['cav',/.test(SRC));
-t('le nombre de catch vides n\'a pas bouge (cliquet C14)',
-  (BRUT.match(/catch\s*\([^)]*\)\s*\{\s*\}/g) || []).length === 15);
+/* ⚠️ CE NOMBRE ETAIT ECRIT EN DUR (15), ET IL A PERIME AU LOT SUIVANT. AVALE-1 a
+   instrumente les 5 catch vides de ce module qui vivaient dans du CODE ; les 10
+   restants sont dans des CHAINES (les scripts des fenetres d'impression) et
+   resteront muets. Un second cliquet sur la meme grandeur, tenu a la main a cote
+   du premier, se desynchronise du premier lot qui touche la grandeur : on lit
+   desormais LA reference, celle du preflight. */
+const C14REF = JSON.parse(readFileSync(new URL('./preflight-baseline.json', import.meta.url), 'utf8'))
+  .C14_empty_catch['src/pilotage.js'];
+t(`le nombre de catch vides n'a pas bouge (cliquet C14 : ${C14REF})`,
+  (BRUT.match(/catch\s*\([^)]*\)\s*\{\s*\}/g) || []).length === C14REF);
 
 console.log(`\n  ${ok} vertes, ${ko} rouges\n`);
 process.exit(ko ? 1 : 0);

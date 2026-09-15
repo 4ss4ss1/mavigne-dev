@@ -268,7 +268,7 @@ function renderReserve(){
   page.innerHTML=head+'<div id="mvr-body" class="mvr-body"></div>';
   // Module rendu en JS → il rappelle lui-même les deux injecteurs globaux, exactement
   // comme le prévoit le commentaire d'utils.js. Appels gardés, PAS de try/catch vide
-  // (C14 est un cliquet : un catch{} de plus = erreur nommée au prebuild).
+  // (C14 est un cliquet : un catch(_e){} de plus = erreur nommée au prebuild).
   if(window._mvMetaSync) window._mvMetaSync();
   if(window._mvInjectHelpBtn) window._mvInjectHelpBtn();
   _rsvCssAte();
@@ -610,8 +610,8 @@ function _rsvInjectCss(){
     +'.mvr-mseg button.on{background:var(--terre,#8A5A38);color:#FBF7F1}'
     +'.mvr-fhint{font-size:var(--pt-lbl,10.5px);color:var(--texte-doux,#5F5F5F);line-height:1.45;margin:-4px 0 12px}'
     +'.mvr-ftag{display:inline-block;font-size:var(--pt-nano,9.5px);font-weight:700;border-radius:3px;padding:1px 6px;letter-spacing:.03em;margin-left:6px;vertical-align:1px}'
-    +'.mvr-ftag-ach{background:var(--terre-pale,#F3EADF);color:var(--terre,#8A5A38)}'
-    +'.mvr-ftag-loc{background:var(--bleu-pale,#E8F0FA);color:var(--bleu,#1A4A7A)}'
+    +'.mvr-ftag-ach{background:var(--terre-pale,#F3EADF);color:var(--terre-tx,#8A5A38)}'
+    +'.mvr-ftag-loc{background:var(--bleu-pale,#E8F0FA);color:var(--bleu-tx,#1A4A7A)}'
     +'.mvr-floc{font-size:var(--pt-micro,11px);color:var(--bleu,#1A4A7A);line-height:1.45;margin-top:5px}'
     +'.mvr-parc-sig{display:flex;gap:8px;margin-top:9px}'
     +'.mvr-parc-sig>div{flex:1;border-radius:10px;padding:7px 9px;text-align:left}'
@@ -619,7 +619,7 @@ function _rsvInjectCss(){
     +'.mvr-parc-sig .l{font-size:var(--pt-nano,9.5px);text-transform:uppercase;letter-spacing:.06em;opacity:.8;font-weight:600}'
     +'.mvr-parc-sig .s{font-size:10px;opacity:.75;margin-top:2px;line-height:1.35}'
     +'.mvr-sig-ref{background:var(--orange-pale,#FBF0E6);color:var(--orange,#B85A1A)}'
-    +'.mvr-sig-ren{background:var(--bleu-pale,#E8F0FA);color:var(--bleu,#1A4A7A)}'
+    +'.mvr-sig-ren{background:var(--bleu-pale,#E8F0FA);color:var(--bleu-tx,#1A4A7A)}'
     +'@media(hover:hover){.mvr-fchip:hover{border-color:var(--terre,#8A5A38)}.mvr-sghd:hover{background:rgba(138,90,56,.04)}}'
     +'.mvr-flabel{font-size:var(--pt-micro,11px);font-weight:600;color:var(--muted,#7A7060);text-transform:uppercase;letter-spacing:.6px;margin:2px 2px 8px}'
     +'.mvr-fbar{display:flex;gap:8px;overflow-x:auto;padding:1px 2px 10px;-webkit-overflow-scrolling:touch;scrollbar-width:none}'
@@ -648,7 +648,7 @@ function _rsvInjectCss(){
     +'.mvr-sgpad{padding:0 13px 13px}'
     +'.mvr-sugg{display:flex;flex-wrap:wrap;gap:7px;margin-top:9px}'
     +'.mvr-slab{font-size:var(--pt-micro,11px);color:var(--muted,#7A7060);width:100%;margin-bottom:-2px}'
-    +'.mvr-schip{border:1px solid var(--terre,#8A5A38);background:var(--terre-pale,#F3EADF);color:var(--terre,#8A5A38);border-radius:999px;padding:6px 11px;font-size:var(--pt-txt,12.5px);cursor:pointer;font-weight:500;font-family:inherit}'
+    +'.mvr-schip{border:1px solid var(--terre,#8A5A38);background:var(--terre-pale,#F3EADF);color:var(--terre-tx,#8A5A38);border-radius:999px;padding:6px 11px;font-size:var(--pt-txt,12.5px);cursor:pointer;font-weight:500;font-family:inherit}'
     +'.mvr-schip:active{background:#E9DAC6}'
     +'.mvr-sempty{font-size:11.5px;color:var(--muted,#7A7060);font-style:italic;padding:2px 0}'
     +'@media(prefers-reduced-motion:reduce){.mvr-sgbody{transition:none}.mvr-sgchev{transition:none}}'
@@ -851,7 +851,7 @@ function _rsvOnProdChange(){
 window._rsvOnProdChange=_rsvOnProdChange;
 
 // ── Recherche E-Phy pour un nouvel intrant phyto ──
-function _rsvNorm(s){ s=(s==null?'':String(s)).toLowerCase(); try{ s=s.normalize('NFD').replace(/[\u0300-\u036f]/g,''); }catch(e){} return s.trim(); }
+function _rsvNorm(s){ s=(s==null?'':String(s)).toLowerCase(); try{ s=s.normalize('NFD').replace(/[\u0300-\u036f]/g,''); }catch(e){ if(window._mvAvale) window._mvAvale(e,'reserve.js/_rsvNorm'); } return s.trim(); }
 function _rsvEphyOn(){ return !!(window.EPHY && window.EPHY.length); }
 function _rsvNpShow(mode){
   var e=document.getElementById('mvr-np-ephy'), m=document.getElementById('mvr-np-man');

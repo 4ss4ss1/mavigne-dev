@@ -1,4 +1,20 @@
-// MA VIGNE — Service Worker v7.84
+// MA VIGNE — Service Worker v7.86
+// v7.86 (14/09/2026) — AVALE-1 : 206 ERREURS AVALEES SANS TRACE ONT MAINTENANT UN NOM. C14 : 223 -> 15.
+//   Le preflight comptait ces catch{} depuis des mois en disant lui-meme ce qu'ils coutent (<< le motif qui a permis au bug .window.currentUser de survivre des mois >>). Le compteur ne descendait pas.
+//   Un helper, _mvAvale(e,'fichier.js/fonction'), et une conversion mecanique. Le contexte est le nom de la fonction ENGLOBANTE, extrait du code -- pas une phrase inventee.
+//   ★ NIVEAU 'info', DELIBERE : _ERR_SEND_LVL n'envoie que critical/error/warning, donc RIEN ne part vers Firestore. Ce lot ouvre une fenetre, il ne declenche pas d'alarme chez 12 clients.
+//   ⚠⚠ UNE TRACE PAR EMPLACEMENT ET PAR SESSION : logError relit et reecrit tout le journal localStorage a chaque appel ; depuis une boucle de rendu il couterait plus cher que le defaut qu'il signale.
+//   ⚠⚠⚠ 20 catch{} LAISSES EXPRES : ils vivent DANS UNE CHAINE (les scripts ecrits dans les fenetres d'impression). La premiere passe les avait convertis et avait casse app.js -- une apostrophe de contexte
+//   posee au milieu d'une chaine a apostrophes. Le convertisseur masque desormais chaines, gabarits et commentaires avant de substituer. 15 restants au compteur, tous la ou dans logError lui-meme.
+//   Harnais neuf mv-harnais-avale.mjs (12 assertions, dont 4 EXECUTEES sur le vrai helper), contre-epreuve 4/4.
+// v7.85 (14/09/2026) — CONTRASTE-1 + CONTRASTE-2 : LE PREMIER CONTROLE DU PROJET QUI LIT UNE COULEUR, ET LES QUATRE FAMILLES DE PASTILLES ILLISIBLES EN SOMBRE QU'IL A TROUVEES.
+//   70 scripts de controle, aucun ne lisait une couleur : un texte illisible en theme sombre passait tous les filets. mv-harnais-contraste.mjs derive ses paires de la palette (--tag-X-bg/-tx, --X/--X-pale) et du code
+//   (toute declaration qui pose color: ET background:), dans les DEUX themes. Il ne suppose rien : un fond translucide anonyme est compte << fond inconnu >> et le compte est AFFICHE.
+//   ⚠️ Trois erreurs de mesure corrigees AVANT de croire le chiffre : (1) composer un rgba anonyme sur la carte faisait remonter la console GT, qui a son propre fond ; (2) une regle portee par un theme ne se mesure que
+//   dans ce theme ; (3) la feuille EXPLIQUE la cascade en prose et ces commentaires citent :root -- un :root en commentaire faisait ouvrir le bloc SUIVANT et la palette claire absorbait les valeurs sombres.
+//   CONTRASTE-2 : un badge est color:var(--X) sur background:var(--X-pale). En sombre l'accent sert d'encre sur sa propre pastille au-dessus d'une carte noire : phyto 2,92 · terre 3,13 · bleu 3,28 · rouge 3,52.
+//   ⚠️⚠️ ON NE PEUT PAS ECLAIRCIR --X : il sert AUSSI de fond plein sous du blanc (#fff sur --vert = 3,29). Un jeton, deux metiers -> il en faut deux. --terre-tx / --bleu-tx / --phyto-tx / --rouge-tx, poses dans les TROIS
+//   portes (clair, bascule manuelle, mode OS), valeur CLAIRE identique a l'accent actuel au hexa pres : zero pixel deplace en clair. 62 declarations converties, familles sombres sous 4,5 : 7 -> 0, ecarts 277 -> 215.
 // v7.84 (14/09/2026) — CUV-12 : L'AVERTISSEMENT DU CHAI NOMMAIT LE SULFITAGE, PAS LA MALO.
 //   En rouge de garde on entonne SANS SO2 pour enchainer sur la malo en fut ; le soufre vient apres, une fois la
 //   malo finie et verifiee par analyse. « Attendez qu'elle soit finie avant de sulfiter » nommait donc un geste
@@ -3955,7 +3971,7 @@
 // v2.22 — Fix profils vides : guard vide dans loadData() pour MEMBRES/SAISONS/TACHES
 // v2.17 — Onboarding intégré + tenantId · v2.06 — Firebase Auth · v2.00–v2.05 — divers
 const DEBUG = self.location.hostname === 'localhost' || self.location.hostname === '127.0.0.1';
-const CACHE_NAME   = 'mavigne-v7.84';
+const CACHE_NAME   = 'mavigne-v7.86';
 const TENANT_CACHE = 'mavigne-tenant';   // Cache persistant — préservé à chaque mise à jour SW
 const SYNC_TAG     = 'mavigne-sync';
 
@@ -3971,7 +3987,7 @@ const CDN_URLS = [
 ];
 
 self.addEventListener('install', event => {
-  if(DEBUG) console.log('[SW] Ma Vigne v7.84 installé');
+  if(DEBUG) console.log('[SW] Ma Vigne v7.86 installé');
   event.waitUntil(
     caches.open(CACHE_NAME).then(async cache => {
       // ── Cœur applicatif : STRICT (mise à jour ATOMIQUE) ──
@@ -3987,7 +4003,7 @@ self.addEventListener('install', event => {
 });
 
 self.addEventListener('activate', event => {
-  if(DEBUG) console.log('[SW] Ma Vigne v7.84 activé');
+  if(DEBUG) console.log('[SW] Ma Vigne v7.86 activé');
   event.waitUntil(
     caches.keys().then(keys =>
       Promise.all(

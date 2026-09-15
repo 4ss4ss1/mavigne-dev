@@ -18589,3 +18589,297 @@ que §128 vient de reprendre l'en-tête et le bas de cet écran-là. ② `npm ru
 linéaire sur une cinétique qui ralentit annonce une fin trop proche, systématiquement — et elle
 porte maintenant aussi sur des cuves décuvées. ④ La **zone de 996** attend toujours les résultats du
 labo pour être calée sur ce domaine (§117).
+
+## 130. ★★★ CONTRASTE-1 — SOIXANTE-DIX SCRIPTS DE CONTRÔLE, ET AUCUN NE LISAIT UNE COULEUR (14/09 — `scripts/` + `package.json` · APP **inchangé** · SW **inchangé** · base `1ca0bb8`)
+
+**Point de départ** : *« contraste »* — l'entrée P1 qui disait qu'un texte illisible en thème
+sombre passerait tous les filets du projet. Elle disait vrai.
+
+### 130a. Ce que le projet savait déjà, et n'appliquait qu'à la vitrine
+
+La mécanique WCAG existait : `harnais-vitrine.mjs` §10c calcule des ratios depuis 2025. **Sur sept
+paires écrites à la main.** ★ *Une liste à la main ne couvre que ce qu'on a pensé à y mettre le
+jour où on l'a écrite* — c'est le défaut de §124 (l'export qui gardait 8 clés sur 26), transposé
+aux couleurs. Ici les paires sont **dérivées** : de la palette pour les familles, du code pour le
+reste.
+
+### 130b. Trois sources de paires, aucune liste
+
+1. **Les paires que la palette DÉCLARE par ses noms** : `--tag-X-bg`/`--tag-X-tx` (le projet dit
+   lui-même quel texte va sur quel fond) et `--X`/`--X-pale` (la famille des badges). Elles sortent
+   des **noms de jetons** : un `--tag-teal-*` ajouté demain est mesuré le jour même.
+2. **Les paires que le CODE écrit** : toute déclaration qui pose `color:` *et* `background:` au
+   même endroit — règle CSS ou attribut `style=`. 792 mesurables.
+3. **Les deux thèmes.** Le sombre redéfinit 40 jetons, et c'est là que sont les trois quarts des
+   écarts.
+
+### 130c. ⚠️⚠️⚠️ DEUX ERREURS DE MESURE CORRIGÉES AVANT DE CROIRE LE CHIFFRE
+
+Le premier jet sortait **427 écarts en clair**. Faux, deux fois :
+
+- **Un fond translucide anonyme n'est pas mesurable.** `rgba(255,255,255,.05)` ne dit pas sur quoi
+  il repose. En supposant la carte, la console GT — qui a son propre fond sombre — remontait
+  massivement dans les pires écarts. On ne compose désormais que les jetons **nommés**
+  `--*-pale` / `--*-bg`, dont la palette dit où ils vivent ; le reste est compté « fond inconnu »,
+  et **ce compte est affiché**. ★ *Un harnais qui tait sa couverture ment sur ce qu'il prouve* —
+  436 paires au fond inconnu et 247 non résolubles sont annoncées à chaque passage.
+- **Une règle portée par un thème ne se mesure que dans ce thème.** Sans ça,
+  `[data-theme="dark"] .x{color:#F0EFE9;background:#1C1A16}` ressortait à 1,07 « en clair », sur
+  une règle que le thème clair n'applique jamais.
+
+Après correction : **91 écarts en clair, 281 en sombre.** Le sombre est trois fois pire, et ce
+n'est pas une dispersion de fautes — c'est **une famille**.
+
+### 130d. La famille : les badges du thème sombre
+
+En sombre, **7 des 12 paires `--X` / `--X-pale` sont sous 4,5** : `phyto` 2,92 · `terre` 3,13 ·
+`acier` 3,28 · `bleu` 3,28 · `rouge` 3,52 · `vert` 3,84 · `orange` 3,91. Toutes entre 2,9 et 3,9 —
+la signature d'une cause unique, pas de sept étourderies : la couleur d'accent est posée en texte
+sur son propre fond à 22 % d'opacité au-dessus d'une carte quasi noire.
+★ **Le remède est déjà dans la palette** : les variantes `-med` et `-clair` passent
+(`vert-med` 5,14 · `acier-med` 4,81 · `vert-clair` 6,37). Le lot suivant est donc un arbitrage de
+jetons, pas une reprise de 281 sites.
+En clair, 5 familles seulement : `or/pale` 2,23 · `plan-acc/pale` 3,70 · `orange/pale` 4,14 ·
+`tag-orange` 4,14 · `tag-sky` 4,27.
+
+### 130e. ★★★ LA CLASSE DE DÉFAUT QUE LE HARNAIS A TROUVÉE LE JOUR OÙ IL A ÉTÉ ÉCRIT
+
+**Un jeton de SURFACE employé comme couleur de TEXTE. 43 fois, dans six modules.**
+`--cave` est le fond du chai. En clair il vaut `#14110D` — une encre presque noire — donc
+`color:var(--cave)` sur une carte crème donne **18:1**, et personne n'a jamais rien vu. En sombre
+le **même jeton** vaut `#100D0A` et la carte `#1C1A16` : **1,12**. Des titres sérif de 20 px, gras,
+**invisibles** — dans la Cave, le Pilotage, les Réglages, la Réserve.
+
+⚠️⚠️ **ET LE REMÈDE N'EST PAS UN REMPLACEMENT EN MASSE.** J'ai failli livrer les 43 substitutions
+`--cave` → `--texte` : ratio inchangé en clair (18,02 → 17,3), corrigé en sombre (1,12 → 15,08),
+et sans danger à l'impression puisque `_mvDocCss` n'écrit **aucun `:root`** — les jetons y tombent
+sur leur repli. Le contexte a dit non : **une bonne moitié de ces 43 sont posés sur un fond FIXE**
+(`#fff`, `#FDF7EE`, `rgba(240,226,200,.94)`, un badge `--or` qui reste clair en sombre). Là, l'encre
+sombre est **juste**, et `--texte` la rendrait blanche sur crème.
+★ *Le même symptôme a deux causes opposées selon que le fond suit le thème ou non.* D'où un
+cliquet et une liste de travail exacte, pas une correction automatique — c'est la règle de TYPO-1
+(§127c) tenue une seconde fois : **un lot mécanique et un lot de goût ne se mélangent pas.**
+
+### 130f. `scripts/mv-harnais-contraste.mjs` — 8 assertions, 4 injections
+
+Cliquets : les familles de jetons (par thème, avec leur ratio mesuré au cran près — une famille qui
+repasse au-dessus est annoncée comme un **gain** à regraver), les écarts du code **par fichier et
+par thème**, les surfaces employées comme encre, et **la couverture** — car un harnais qui mesure
+moins tout en restant vert est la panne la plus silencieuse qu'un contrôle puisse avoir.
+
+⚠️ **Les injections ne s'ancrent plus toutes sur un littéral.** Deux des quatre **ajoutent** du
+code. §127e avait montré qu'une injection ancrée meurt au premier lot qui touche son ancre — et
+qu'elle meurt en annonçant « RESTE VERT », c'est-à-dire **en accusant le harnais**. Une injection
+qui ajoute ne peut pas se périmer. La garde d'injection a d'ailleurs mordu à l'écriture : **1/3
+appliqués** au premier essai, deux ancres écrites de mémoire et fausses. *Le contrôle du contrôle
+a fonctionné avant le contrôle.*
+**Contre-épreuve : 4/4 injectés, 4 assertions rouges — une par classe de défaut.**
+
+### 130g. La note de livraison
+
+**Base : `1ca0bb8`.** Deux fichiers neufs (`mv-harnais-contraste.mjs`, `contraste-baseline.json`),
+`package.json`, `CLAUDE.md`, `harnais-claude-md.mjs`, `.mv-base`. **Aucun code applicatif touché :
+APP et SW inchangés**, rien à annoncer au journal des nouveautés — ce lot ne change pas un pixel,
+il rend les pixels mesurables.
+
+**Ouvert, et dit** : ① les **372 écarts** (91 clair + 281 sombre) contiennent du bruit qu'aucune
+lecture statique ne peut lever — `.sdp-check{background:white … color:white}` décrit **deux états**
+du même élément, pas une faute. Le cliquet est le produit ; la liste est une **liste de travail à
+trier**, pas un verdict. ② Les 436 paires au fond inconnu resteront hors mesure tant qu'on n'aura
+pas de rendu réel. ③ Le lot de correction se découpe en deux : **les jetons du thème sombre**
+(mécanique, une poignée de valeurs) et **les 43 surfaces-en-encre** (site par site, avec l'œil).
+④ Rien de tout cela n'a été regardé dans un navigateur — un harnais qui mesure des couleurs ne
+remplace pas un écran allumé en thème sombre.
+
+## 131. ★★★ CONTRASTE-2 — UN JETON, DEUX MÉTIERS : QUATRE FAMILLES DE PASTILLES ILLISIBLES EN SOMBRE (14/09 — `styles.css` + 7 modules + `index.html` + `utils.js` + `sw.js` + `scripts/` · APP 7.22 → 7.23 · SW 7.84 → 7.85 · base `1ca0bb8`, à la suite de §130)
+
+### 131a. ⚠️⚠️⚠️ TROIS ERREURS DE MESURE DANS MON PROPRE HARNAIS, TROUVÉES EN M'EN SERVANT
+
+§130 était livré vert. En m'en servant pour préparer la correction, il s'est révélé faux **trois
+fois** — et deux de ces erreurs le rendaient aveugle sans jamais le faire rougir :
+
+1. **Il ne lisait que le PREMIER bloc `:root`.** La palette n'est pas déclarée d'un seul tenant :
+   des lots successifs ont ajouté des `:root{}` plus bas dans la feuille, et c'est là que vivent
+   `--or-tx`, `--vert-tx`, `--orange-tx`, `--acier-tx`. Ces jetons étaient donc **inconnus**, et
+   toute règle qui les emploie tombait dans « non résoluble » — hors mesure, en silence.
+2. **Les commentaires.** La feuille EXPLIQUE la cascade des thèmes en prose, et ces explications
+   citent `:root`. Un `:root` en commentaire faisait ouvrir le bloc `{` **suivant** — celui du
+   thème sombre — et la palette CLAIRE absorbait les valeurs SOMBRES. C'est l'assertion
+   « la palette se lit » (elle exige `--texte` différent entre les deux thèmes) qui a rougi. ★ *Elle
+   avait été écrite comme une formalité de démarrage ; c'est elle qui a attrapé la panne.*
+3. **La fenêtre d'exclusion.** En regardant 90 caractères après le sélecteur, un bloc clair d'une
+   seule ligne suivi du bloc sombre à la ligne d'en dessous était pris pour du sombre et exclu.
+
+★★★ **UN HARNAIS QUI NE VOIT PAS UN JETON NE SIGNALE PAS SON ABSENCE : il signale une couverture
+plus faible.** Et on ne regarde une couverture que si elle est affichée. C'est pour ça qu'elle
+l'est — la ligne « 246 non résolubles » n'est pas décorative, c'est la seule trace qu'un défaut de
+lecture laisse derrière lui.
+
+⚠️ **Et une fausse alerte, dite ici pour qu'elle ne resserve pas.** Mon premier contrôle « à la
+main » annonçait *7 jetons présents dans la bascule manuelle et absents du mode OS* — dont
+`--or-tx`. Faux : ce contrôle-là aussi oubliait les commentaires et ne lisait que le premier bloc
+`@media`. Les deux portes sont **synchronisées, 68 = 68**. L'invariant est désormais une assertion
+permanente, écrite pour le jour où il cessera d'être vrai.
+
+### 131b. Le défaut, et pourquoi il n'a pas de correction simple
+
+Un badge, c'est `color:var(--X)` sur `background:var(--X-pale)`. En clair, l'accent est sombre et
+la pastille pâle : 4,9 à 8,1, rien à redire. En sombre, **le même jeton** sert d'encre sur une
+pastille à 22 % d'opacité au-dessus d'une carte quasi noire : `phyto` 2,92 · `terre` 3,13 ·
+`bleu` 3,28 · `rouge` 3,52 · `vert` 3,84 · `orange` 3,91 · `acier` 3,28.
+
+**J'ai chiffré les deux remèdes évidents avant d'en écrire un :**
+
+- **Baisser l'alpha de la pastille** : mort. Pour `terre`, `acier`, `bleu`, `phyto`, le seuil de
+  4,5 n'est **jamais** atteint, même à alpha 0 — le fond n'est pas le problème.
+- **Éclaircir l'accent** : marche pour le badge, **et casse le bouton**. Le même jeton sert de
+  **fond plein sous du texte blanc**, et `#fff` sur `--vert` vaut déjà 3,29 ; l'éclaircir
+  l'enfonce.
+
+★★★ **UN JETON, DEUX MÉTIERS : IL EN FAUT DEUX.** C'est exactement la forme que
+`--tag-X-bg`/`--tag-X-tx` avait déjà, et que `--or-tx`, `--vert-tx`, `--orange-tx`, `--acier-tx`
+avaient commencée lot après lot. Ce lot ne l'invente pas : **il la finit.**
+
+### 131c. Ce qui est fait, et ce qui est laissé exprès
+
+Quatre jetons neufs — `--terre-tx`, `--bleu-tx`, `--phyto-tx`, `--rouge-tx` — posés dans les
+**trois** portes (clair, bascule manuelle, mode OS). ★ **Leur valeur claire est l'accent actuel, au
+héxa près** : `#8A5A38`, `#1A4A7A`, `#5B2D8E`, `#A0291E`. Ce lot **ne déplace pas un pixel en thème
+clair**, il ne répare que le sombre. Puis 62 déclarations converties — uniquement celles qui
+posaient déjà `color:var(--X)` **et** `background:var(--X-pale)` dans la même déclaration, donc un
+périmètre qui se prouve au lieu de se juger.
+
+⚠️ **`vert`, `acier`, `orange`, `or` et `plan-acc` sont laissés en l'état.** Leur `-tx` existe, mais
+sa valeur CLAIRE diffère de l'accent (`--vert` `#1E3A12` contre `--vert-tx` `#31601C`, `--or`
+`#C2A14D` contre `--or-tx` `#7A5E12`) : les convertir change l'apparence en clair, sur une centaine
+de sites, et cela **se regarde**. Même règle qu'en §127c : *un lot mécanique et un lot de goût ne se
+mélangent pas.*
+
+**Résultat mesuré** : familles sous 4,5 en sombre **7 → 0**, écarts du code en sombre
+**277 → 215**, thème clair **inchangé à 91**.
+
+### 131d. L'injection qui se réparait toute seule
+
+La contre-épreuve est passée à 3 rouges pour 4 défauts. L'injection « thème sombre privé de sa
+couleur de texte » remplaçait la **première** occurrence de `--texte:#F0EFE9` — mais le sombre est
+déclaré **deux fois**, et la palette fusionne les deux : le second bloc **réparait** la valeur, le
+défaut n'entrait pas, et l'épreuve accusait une assertion muette.
+★ *Troisième lot d'affilée où le défaut n'est pas dans le harnais mais dans l'injection* (§123g,
+§124h, §127e). La leçon se précise : **une injection doit être écrite contre le modèle réel du
+code, pas contre l'idée qu'on s'en fait** — ici, « le thème sombre » n'est pas un bloc, c'en est
+deux. Corrigée en remplacement global : **4/4, 4 rouges.**
+
+### 131e. La note de livraison
+
+**Base : `1ca0bb8`** — ce lot contient AUSSI §130 (CONTRASTE-1), qui n'avait pas encore été poussé.
+`npm run check` joué en entier. APP 7.22 → **7.23**, SW 7.84 → **7.85**, une entrée au journal des
+nouveautés (icône `contraste` — la première proposée, `palette`, n'existe pas dans le sprite, et le
+harnais des icônes l'a dit avant moi).
+
+**Ouvert, et dit** : ① **aucun rendu navigateur** — quatre familles de pastilles changent de teinte
+en sombre, ça se regarde sur un écran, pas dans un tableau de ratios. ② Les **cinq familles
+laissées** (`vert`, `acier`, `orange`, `or`, `plan-acc`) sont le lot suivant, et il est de goût.
+③ **`#fff` sur un accent plein reste sous 4,5 partout** (`vert` 3,29 · `orange` 3,38 · `rouge` 3,78
+· `acier` 4,06) : c'est une famille entière de boutons, jamais mesurée avant aujourd'hui, et
+personne ne l'a encore arbitrée. ④ Les 43 surfaces employées comme encre sont intactes. ⑤ Les 215
+écarts sombres restants contiennent toujours le bruit des états (`.sdp-check`), non levable sans
+rendu.
+
+## 132. ★★★ AVALE-1 — 206 ERREURS QUI DISPARAISSAIENT SANS TRACE ONT MAINTENANT UN NOM (14/09 — 12 modules + `sw.js` + `scripts/` + `package.json` · APP **inchangé** · SW 7.85 → 7.86 · base `1ca0bb8`, à la suite de §130-131)
+
+### 132a. Un compteur qui ne descendait pas
+
+`C14_empty_catch` : **223**, dont **152 dans `app.js`**. Le preflight écrit lui-même ce que ça
+coûte, depuis des mois : *« c'est le motif qui a permis au bug `.window.currentUser` de survivre
+des mois et aux refus de lecture d'être invisibles »*. Le cliquet descendait d'un cran de temps en
+temps, quand un lot passait par là. ★ *Un cliquet empêche de remonter ; il ne fait pas descendre.
+Pour descendre, il faut un lot.*
+
+### 132b. ⚠️ CES `catch{}` NE SE VALENT PAS — ET C'EST POURQUOI ON NE LES TRIE PAS
+
+`try{ localStorage.removeItem(…) }catch{}` est du meilleur effort légitime : navigation privée,
+quota. Mais dans le même fichier : `try{ renderParcelles() }catch{}` avale un **échec de rendu**,
+et `try{ _recalcSurfTotale() }catch{}` avale un **calcul de surface faux**.
+Relire 223 emplacements pour décider lequel mérite quel niveau, c'est se tromper quelque part —
+et se tromper en silence, puisque rien ne vérifierait le jugement. ★ **On les rend tous
+TRAÇABLES, et le tri se fera sur des données** : `window._mvAvalees` dit, en console, où ça avale
+et combien de fois. Le premier lot de tri aura des chiffres au lieu d'un avis.
+
+### 132c. Le contexte est extrait, pas inventé
+
+`_mvAvale(e, 'app.js/_recalcSurfTotale')`. La clé est le **nom de la fonction englobante**, lu dans
+le code, plus un ordinal quand une fonction en contient plusieurs (`#2`, `#3`). Aucune phrase
+rédigée à la main : 206 messages écrits à la main seraient 206 occasions de décrire de travers ce
+qu'on n'a pas lu.
+
+### 132d. ★★★ NIVEAU `info`, ET C'EST LE CŒUR DU LOT
+
+`_ERR_SEND_LVL` n'envoie vers Firestore que `critical`, `error`, `warning`. En `info`, la trace
+s'écrit **en local seulement**, là où l'écran Admin la lit déjà. Sans ça, ce lot aurait expédié
+**206 points d'appel dans le journal du domaine de chaque client** — un bruit que personne n'aurait
+trié et qui aurait discrédité le journal entier.
+⚠️ **L'assertion tient les deux bouts** : le niveau dans `_mvAvale`, ET l'absence d'`info` dans
+`_ERR_SEND_LVL`. Changer l'un des deux suffirait à ouvrir les vannes, et il n'y a aucune raison
+qu'un futur lot devine le lien entre ces deux endroits.
+
+⚠️⚠️ **Une trace par emplacement et par session.** `logError` relit et réécrit tout le journal
+localStorage à chaque appel : appelé depuis une boucle de rendu, il coûterait plus cher que le
+défaut qu'il signale. Le compteur, lui, continue de compter.
+
+### 132e. ⚠️⚠️⚠️ LA PREMIÈRE PASSE A CASSÉ `app.js` — ET C'EST LA BONNE NOUVELLE
+
+La conversion mécanique a produit ceci, dans le script qu'une fenêtre d'impression reçoit :
+
+```
+H.push('…<script>setTimeout(function(){try{window.print();}catch(e){ … window._mvAvale(e,'app.js/cuvNames'); }}…')
+```
+
+Une apostrophe de contexte posée **au milieu d'une chaîne à apostrophes**. `node --check` l'a dit
+immédiatement — *avant* la livraison, ce qui est exactement ce à quoi sert le contrôle de syntaxe
+sur les douze modules.
+★★★ **UNE SUBSTITUTION DE MASSE DOIT SAVOIR CE QUI EST DU CODE ET CE QUI EST UNE CHAÎNE.** Le
+convertisseur masque désormais chaînes, gabarits, interpolations `${}` et commentaires avant de
+toucher quoi que ce soit. Résultat : **20 `catch{}` laissés exprès**, tous à l'intérieur de scripts
+écrits dans des fenêtres d'impression — un autre document, un autre monde, et du meilleur effort
+légitime (`window.print()` qui échoue).
+
+**C14 : 223 → 15.** Les quinze restants sont ces vingt-là moins ceux qu'aucun règle ne comptait,
+plus celui de `logError` lui-même — qu'on n'instrumente pas, sous peine de boucle.
+
+### 132f. `scripts/mv-harnais-avale.mjs` — 12 assertions, dont 4 exécutées
+
+Le helper est **extrait du vrai `utils.js` et lancé** : trois avalements donnent deux traces (le
+doublon est tu) pendant que le compteur en voit trois ; la trace nomme l'emplacement et garde le
+détail ; un avalement sans objet d'erreur ne casse rien.
+
+★ **L'assertion qu'on ne voit pas venir** : *aucun contexte n'est partagé par deux emplacements*
+(206 clés pour 206 appels). La clé sert **aussi** de clé de déduplication — deux sites homonymes et
+le second ne serait **jamais** journalisé, sans que rien ne le dise. C'est précisément pour ça que
+l'ordinal `#2` existe, et l'assertion est ce qui empêche qu'on l'oublie au prochain copier-coller.
+
+**Contre-épreuve : 4/4 injectés, 6 assertions rouges.** Deux des quatre injections **ajoutent** du
+code (§127e, §131d) : une injection ancrée sur un littéral meurt au premier lot qui touche ce
+littéral, et elle meurt en accusant le harnais.
+
+### 132g. La note de livraison
+
+**Base : `1ca0bb8`** — ce lot contient AUSSI §130 et §131, toujours pas poussés. `npm run check`
+joué en entier. **SW 7.85 → 7.86** (des fichiers servis changent), **APP inchangé** et **pas
+d'entrée au journal** : en `info`, l'utilisateur ne voit strictement rien — ce lot ne s'adresse
+qu'à celui qui dépanne.
+
+### 132h. Un second cliquet sur la même grandeur, tenu à la main
+
+`mv-harnais-echelle.mjs` affirmait que `pilotage.js` contient **exactement 15** `catch{}` vides —
+un nombre écrit en dur, à côté du cliquet C14 du preflight qui mesure déjà la même chose. Il a
+périmé le jour où la grandeur a bougé (15 → 10). ★ *Un second cliquet sur la même grandeur ne
+double pas la protection : il double la maintenance, et c'est le double qu'on oublie.* Il lit
+désormais `preflight-baseline.json` au lieu de recopier son chiffre.
+
+**Ouvert, et dit** : ① la valeur du lot n'arrive qu'**après usage** — il faut que l'application
+tourne pour que `_mvAvalees` se remplisse, et c'est ce relevé, pas ce lot, qui dira lesquels de ces
+206 emplacements avalent vraiment quelque chose. ② Aucun n'a été **requalifié** : tous sont en
+`info`, y compris `renderParcelles()` et `_recalcSurfTotale()` qui mériteront sans doute mieux —
+c'est le lot de tri, et il attend les données. ③ Aucun rendu navigateur ; le risque est faible
+(206 substitutions mécaniques, syntaxe vérifiée sur les douze modules) mais il n'est pas nul.
+④ Les 20 `catch{}` des fenêtres d'impression restent muets, volontairement.

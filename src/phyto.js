@@ -131,7 +131,7 @@ var _trat={step:1,produits:[],date:'',conducteur:'',parcelles:[],stade:'',heureD
 // ════ Phyto : référentiel E-Phy + récents (catalogue local = repli invisible) ════
 function _phyNorm(s){
   s=(s==null?'':String(s)).toLowerCase();
-  try{ s=s.normalize('NFD'); var o=''; for(var i=0;i<s.length;i++){ var cc=s.charCodeAt(i); if(cc>=768&&cc<=879) continue; o+=s[i]; } s=o; }catch(e){}
+  try{ s=s.normalize('NFD'); var o=''; for(var i=0;i<s.length;i++){ var cc=s.charCodeAt(i); if(cc>=768&&cc<=879) continue; o+=s[i]; } s=o; }catch(e){ if(window._mvAvale) window._mvAvale(e,'phyto.js/_phyNorm'); }
   return s.trim();
 }
 function _phyEphy(){ return (window.EPHY && window.EPHY.length) ? window.EPHY : []; }
@@ -178,7 +178,7 @@ function _phResolve(t){
 window._phResolve=_phResolve;
 function _phyRecentsKey(){ return 'mavigne_phy_recents_' + (localStorage.getItem('mavigne_tenant')||'default'); }
 function _phyReadRecents(){ try{ var r=JSON.parse(localStorage.getItem(_phyRecentsKey())||'[]'); return Array.isArray(r)?r:[]; }catch(e){ return []; } }
-function _phyWriteRecents(arr){ try{ localStorage.setItem(_phyRecentsKey(), JSON.stringify(arr.slice(0,10))); }catch(e){} }
+function _phyWriteRecents(arr){ try{ localStorage.setItem(_phyRecentsKey(), JSON.stringify(arr.slice(0,10))); }catch(e){ if(window._mvAvale) window._mvAvale(e,'phyto.js/_phyWriteRecents'); } }
 function _phySeedRecents(){
   var hist=(window.TRAITEMENTS||[]).slice().sort(function(a,b){return (b.date||'').localeCompare(a.date||'');});
   var seen={}, out=[];

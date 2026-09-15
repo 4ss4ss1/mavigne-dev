@@ -77,7 +77,7 @@ function applyFbData(key, value) {
       if(window._syncLocalVars) window._syncLocalVars();
     }
     // Priorite du moment (multi-taches, v5.05) : re-rendre la liste si elle est ouverte
-    try{ var _ppEl=document.getElementById('page-parcelles'); if(_ppEl&&_ppEl.classList.contains('active')&&typeof renderParcelles==='function') renderParcelles(); }catch(e){}
+    try{ var _ppEl=document.getElementById('page-parcelles'); if(_ppEl&&_ppEl.classList.contains('active')&&typeof renderParcelles==='function') renderParcelles(); }catch(e){ if(window._mvAvale) window._mvAvale(e,'app.js/applyFbData'); }
     if(value.domaine_nom) {
       window.DOMAINE_NOM = value.domaine_nom;
       if(typeof DOMAINE_NOM !== 'undefined') DOMAINE_NOM = value.domaine_nom;
@@ -90,7 +90,7 @@ function applyFbData(key, value) {
     if(value.pause_dejeuner !== undefined) {
       window.PLAN_PAUSE_MIN = value.pause_dejeuner;
     }
-    try{ if(window._mvTermsCheck) _mvTermsCheck(); }catch(e){}
+    try{ if(window._mvTermsCheck) _mvTermsCheck(); }catch(e){ if(window._mvAvale) window._mvAvale(e,'app.js/applyFbData#2'); }
   } else if(key === 'membres') {
     window.MEMBRES = value;
     if(typeof MEMBRES !== 'undefined') MEMBRES = value;
@@ -177,16 +177,16 @@ function applyFbData(key, value) {
         window.ACTIVITES.push({nom:'Tarière',emoji:'🌱',tracteurDefautId:((window.TRACTEURS_LIST||[])[0]||{}).id||'trac1',champCustom:{label:'Trous',type:'nombre',feedsPlantation:true}});
         if(typeof ACTIVITES!=='undefined') ACTIVITES=window.ACTIVITES;
       }
-    }catch(e){}
+    }catch(e){ if(window._mvAvale) window._mvAvale(e,'app.js/applyFbData#3'); }
   }
   if((key==='sessions'||key==='parcelles') && typeof _recalcPlantationTrous==='function'
      && _mvKeyLoaded.parcelles && _mvKeyLoaded.sessions
      && Array.isArray(window.PARCELLES) && window.PARCELLES.length){
-    try{ _recalcPlantationTrous(); }catch(e){}
+    try{ _recalcPlantationTrous(); }catch(e){ if(window._mvAvale) window._mvAvale(e,'app.js/applyFbData#4'); }
   }
   if((key==='parcelles'||key==='taches'||key==='config') && typeof _mvMigrateEntreplantation==='function'
      && _mvKeyLoaded.parcelles && _mvKeyLoaded.taches && _mvKeyLoaded.config){
-    try{ _mvMigrateEntreplantation(); }catch(e){}
+    try{ _mvMigrateEntreplantation(); }catch(e){ if(window._mvAvale) window._mvAvale(e,'app.js/applyFbData#5'); }
   }
 }
 window.applyFbData = applyFbData;
@@ -280,7 +280,7 @@ window.loadData       = function() { if(typeof loadData === 'function') loadData
 // Garde de démarrage (boot.js) : l'app a démarré — annuler le filet de sécurité
 window.__MV_BOOTED=true;
 if(window.__MV_BOOT_T)clearTimeout(window.__MV_BOOT_T);
-try{sessionStorage.removeItem('mv_boot_retry');}catch(e){}
+try{sessionStorage.removeItem('mv_boot_retry');}catch(e){ if(window._mvAvale) window._mvAvale(e,'app.js/loadData'); }
 
 // ════ SPLASH SCREEN ════
 (function(){
@@ -397,7 +397,7 @@ function _recalcSurfTotale(){
                      .reduce(function(a,p){return a+(parseFloat(p.surface)||0);},0);
     SURF_TOTALE=Math.round(_s*10000)/10000;
     window.SURF_TOTALE=SURF_TOTALE;
-  }catch(e){}
+  }catch(e){ if(window._mvAvale) window._mvAvale(e,'app.js/_recalcSurfTotale'); }
   return SURF_TOTALE;
 }
 window._recalcSurfTotale=_recalcSurfTotale;
@@ -781,7 +781,7 @@ function saveData(keyHint, toastMsg, toastCoul) {
       detail:'verrou de chargement (Couche 2 anti-perte)'});
     return;
   }
-  if((keyHint==='parcelles'||!keyHint) && typeof _recalcSurfTotale==='function'){ try{ _recalcSurfTotale(); }catch(e){} }
+  if((keyHint==='parcelles'||!keyHint) && typeof _recalcSurfTotale==='function'){ try{ _recalcSurfTotale(); }catch(e){ if(window._mvAvale) window._mvAvale(e,'app.js/saveData'); } }
   // Toujours lire depuis window.* (source de vérité après synchro Firebase)
   const W = {
     parcelles:   window.PARCELLES   || PARCELLES,
@@ -959,7 +959,7 @@ function openOvDanger(action) {
   document.getElementById('ovDangerForm').style.display = 'block';
   document.getElementById('ovDangerSuccess').classList.remove('show');
   openOv('ovDanger');
-  setTimeout(()=>{ try{ document.getElementById('ovDangerInput').focus(); }catch(e){} }, 350);
+  setTimeout(()=>{ try{ document.getElementById('ovDangerInput').focus(); }catch(e){ if(window._mvAvale) window._mvAvale(e,'app.js/openOvDanger'); } }, 350);
 }
 
 function closeOvDanger(e) {
@@ -1508,8 +1508,8 @@ function _showDemoProfiles(){
       // Cacher le login-screen (position:fixed z-index:9999) — même chose que confirmLogin()
       var ls = document.getElementById('login-screen');
       if(ls) ls.style.display = 'none';
-      if(_demoCodeVerified && window.fbCallFn) window.fbCallFn('logTrialAccess',{code:_demoCodeVerified,action:p.nom}).catch(function(){});
-      if(_demoCodeVerified && window.agtUpdateEssaiAccess) window.agtUpdateEssaiAccess(_demoCodeVerified).catch(function(){});
+      if(_demoCodeVerified && window.fbCallFn) window.fbCallFn('logTrialAccess',{code:_demoCodeVerified,action:p.nom}).catch(function(_e){ if(window._mvAvale) window._mvAvale(_e,'app.js/_demoGo'); });
+      if(_demoCodeVerified && window.agtUpdateEssaiAccess) window.agtUpdateEssaiAccess(_demoCodeVerified).catch(function(_e){ if(window._mvAvale) window._mvAvale(_e,'app.js/_demoGo#2'); });
       applyRoles();
       goHub();
       // Charger toutes les données + marquer _dataReady (comme confirmLogin)
@@ -1577,13 +1577,13 @@ function _showDemoProfiles(){
 // Auto-login bac à sable (domaine-dupont, aucune écriture).
 // ════════════════════════════════════════════════════════════════════
 async function _startDemoVisite(){
-  try { sessionStorage.removeItem('mavigne_demo_visite'); } catch(e){}
+  try { sessionStorage.removeItem('mavigne_demo_visite'); } catch(e){ if(window._mvAvale) window._mvAvale(e,'app.js/_startDemoVisite'); }
   window._visiteFakeWx = 1; // neutralise le fetch météo réel dès maintenant (météo scénarisée)
   // v5.58 : les caches météo ne sont PAS rattachés à un domaine. La visite y écrivait sa
   // météo inventée et ne les nettoyait jamais — de retour sur son vrai domaine, le client
   // héritait d'une journée qui n'a jamais eu lieu. Elle n'écrit plus rien, et efface ce
   // qu'elle trouve en entrant.
-  try{ localStorage.removeItem('mavigne_meteocom_cache'); localStorage.removeItem('mavigne_meteo5_cache'); localStorage.removeItem('mavigne_meteohr_cache'); }catch(e){}
+  try{ localStorage.removeItem('mavigne_meteocom_cache'); localStorage.removeItem('mavigne_meteo5_cache'); localStorage.removeItem('mavigne_meteohr_cache'); }catch(e){ if(window._mvAvale) window._mvAvale(e,'app.js/_startDemoVisite#2'); }
   // Démo en thème clair (pas sombre / pas auto) — c'est la 1re impression
   // ⚠ Les DEUX, comme applyTheme : <html> non marqué laisserait la media query
   // de l'OS repasser les overlays en sombre pendant une démo censée être claire.
@@ -1593,18 +1593,18 @@ async function _startDemoVisite(){
   try {
     var _vid = localStorage.getItem('mavigne_visite_id');
     if(!_vid){ _vid = 'v'+Date.now().toString(36)+Math.random().toString(36).slice(2,9); localStorage.setItem('mavigne_visite_id', _vid); }
-    if(window.fbCallFn) window.fbCallFn('logVisite', { mode:'visite', vid:_vid }).catch(function(){});
-  } catch(e){}
+    if(window.fbCallFn) window.fbCallFn('logVisite', { mode:'visite', vid:_vid }).catch(function(_e){ if(window._mvAvale) window._mvAvale(_e,'app.js/_startDemoVisite#3'); });
+  } catch(e){ if(window._mvAvale) window._mvAvale(e,'app.js/_startDemoVisite#4'); }
   var ok = window.fbLoginDemo ? await window.fbLoginDemo(DEMO_FIREBASE_EMAIL, DEMO_FIREBASE_PWD) : false;
   if(!ok){ if(DEBUG) console.warn('[Visite] login démo échoué → écran code'); _initLoginDemo(); return; }
   currentUser = { nom:'Visiteur', roles:['admin','ouvrier','tractoriste'], email:DEMO_FIREBASE_EMAIL, _isDemo:true, _isVisite:true };
   window.currentUser = currentUser;
   var ls = document.getElementById('login-screen'); if(ls) ls.style.display='none';
-  try{ applyRoles(); }catch(e){}
+  try{ applyRoles(); }catch(e){ if(window._mvAvale) window._mvAvale(e,'app.js/_startDemoVisite#5'); }
   var _go = function(){
     window._dataReady = true;
     window.DOMAINE_NOM = 'Domaine des Grandes Vignes';
-    if(typeof applyDomNom==='function'){ try{ applyDomNom(); }catch(e){} }
+    if(typeof applyDomNom==='function'){ try{ applyDomNom(); }catch(e){ if(window._mvAvale) window._mvAvale(e,'app.js/_go'); } }
     var _ar2=document.getElementById('app-root'); if(_ar2) _ar2.setAttribute('data-theme','light');
     document.documentElement.setAttribute('data-theme','light');  // ⚠ les deux (§59c)
     try{ _visiteScenario(); }catch(e){ if(DEBUG)console.error('[Visite scénario]',e); }
@@ -1628,7 +1628,7 @@ function _visiteScenario(){
   function _isoH(dt){ return dt.getFullYear()+'-'+_p2(dt.getMonth()+1)+'-'+_p2(dt.getDate())+'T'+_p2(dt.getHours())+':00'; }
   function _isoD(dt){ return dt.getFullYear()+'-'+_p2(dt.getMonth()+1)+'-'+_p2(dt.getDate()); }
   function _daysAgo(n){ var d=new Date(now.getFullYear(),now.getMonth(),now.getDate()-n); return _isoD(d); }
-  var _ap=function(k,v){ try{ if(window.applyFbData) window.applyFbData(k,v); }catch(e){} };
+  var _ap=function(k,v){ try{ if(window.applyFbData) window.applyFbData(k,v); }catch(e){ if(window._mvAvale) window._mvAvale(e,'app.js/_ap'); } };
 
   // 1) Météo scénarisée 5 jours : 0 auj favorable · 1 demain favorable · 2 pluie · 3 vent · 4 favorable
   var time=[],temp=[],precip=[],wind=[],dT=[],dC=[],dmin=[],dmax=[],dpp=[];
@@ -1652,7 +1652,7 @@ function _visiteScenario(){
   window.METEO_DAILY={time:dT,code:dC,tmin:dmin,tmax:dmax,pp:dpp};
   // v5.58 : PAS d'écriture localStorage — window.METEO_* suffit au rendu de la visite,
   // et ces clés survivraient à la visite pour être relues sur le vrai domaine.
-  try{ meteoData={temp:17,desc:'Ensoleill\u00e9',wind:9,emoji:'\u2600\uFE0F',date:_isoD(now)}; window.meteoData=meteoData; }catch(e){}
+  try{ meteoData={temp:17,desc:'Ensoleill\u00e9',wind:9,emoji:'\u2600\uFE0F',date:_isoD(now)}; window.meteoData=meteoData; }catch(e){ if(window._mvAvale) window._mvAvale(e,'app.js/_ap#2'); }
 
   // 2) Domaine sur 3 communes -> météo par secteur (hook personnalisé)
   var _COMM=[
@@ -1668,7 +1668,7 @@ function _visiteScenario(){
       p.lat=c.lat + ((i%3)-1)*0.0035;
       p.lng=c.lng + (((i+1)%3)-1)*0.0045;
     });
-  }catch(e){}
+  }catch(e){ if(window._mvAvale) window._mvAvale(e,'app.js/_ap#3'); }
   // Météo par secteur PRÉ-CALCULÉE (sinon le rendu déclencherait un appel réseau réel)
   try{
     window._domaineCommuneNom='Gevrey-Chambertin';
@@ -1683,7 +1683,7 @@ function _visiteScenario(){
     _grp.forEach(function(g){ var w=_byNom[g.nom]||_wx(1,17,9,11,20,5); _store[g.key]={nom:g.nom,nbParc:g.nbParc,lat:g.lat,lng:g.lng,wx:w}; });
     window.METEO_PAR_COMMUNE=_store;
     window._MV_WXCOM_TS=Date.now();   // v5.58 : en mémoire seulement, jamais dans localStorage
-  }catch(e){}
+  }catch(e){ if(window._mvAvale) window._mvAvale(e,'app.js/_wx'); }
 
   // 3) Priorité diffusée + équipe + avancement réaliste (~45%)
   var _ts=(typeof getTachesSaison==='function')?getTachesSaison():[];
@@ -1691,20 +1691,20 @@ function _visiteScenario(){
   //   de la periode : reparation du palissage, avant que la taille commence.
   var _tache=_ts.some(function(t){return t.nom==='Palissage';})?'Palissage':(_ts.length?_ts[0].nom:'Palissage');
   window._visiteTache=_tache;
-  try{ priorityTask=_tache; window.priorityTask=_tache; }catch(e){}
-  try{ priorityMessage='Priorit\u00e9 du jour \u2014 '+_tache.toLowerCase()+', on finit le secteur Gevrey-bas avant la taille'; window.priorityMessage=priorityMessage; }catch(e){}
-  try{ pTacheFilter=_tache; }catch(e){}
+  try{ priorityTask=_tache; window.priorityTask=_tache; }catch(e){ if(window._mvAvale) window._mvAvale(e,'app.js/_wx#2'); }
+  try{ priorityMessage='Priorit\u00e9 du jour \u2014 '+_tache.toLowerCase()+', on finit le secteur Gevrey-bas avant la taille'; window.priorityMessage=priorityMessage; }catch(e){ if(window._mvAvale) window._mvAvale(e,'app.js/_wx#3'); }
+  try{ pTacheFilter=_tache; }catch(e){ if(window._mvAvale) window._mvAvale(e,'app.js/_wx#4'); }
   try{
     var _me=(currentUser&&currentUser.nom)||'';
     var _mem=(MEMBRES||[]).filter(function(m){ return m && m.nom && m.nom!==_me && m.statut!=='Inactif'; }).map(function(m){ return m.nom; });
     if(_mem.length) _eqtSet(_tache, _mem.slice(0,3));
-  }catch(e){}
+  }catch(e){ if(window._mvAvale) window._mvAvale(e,'app.js/_wx#5'); }
   try{
     var _actP=(PARCELLES||[]).filter(function(p){ return p && p.statut!=='Arrachee'; });
     var _totS=_actP.reduce(function(s,p){ return s+(+p.surface||0); },0), _cumS=0;
     _actP.forEach(function(p){ if(!p.taches)p.taches={}; if(_cumS < _totS*0.45){ p.taches[_tache]={ov:null,p1:'Valid\u00e9',p2:'Valid\u00e9'}; _cumS+=(+p.surface||0); } });
     if(typeof recalcTravaux==='function') recalcTravaux(_tache);
-  }catch(e){}
+  }catch(e){ if(window._mvAvale) window._mvAvale(e,'app.js/_wx#6'); }
   // ★★ LE DELAI DE RENTREE A DISPARU AVEC LE PRINTEMPS, ET C'EST VOULU.
   //   Il etait seme sur deux parcelles parce qu'un Profiler datait de la
   //   veille — DAR 28 jours, sur des parcelles VENDANGEES cinq jours plus tot.
@@ -1713,7 +1713,7 @@ function _visiteScenario(){
   //   recolte : plus aucun delai de rentree n'est actif, `_cfmDre` n'en trouve
   //   aucun, et la liste dit la meme chose que le Pilotage.
   window._visiteDrae={};
-  try{ var _tnp=(localStorage.getItem('mavigne_tenant')||'domaine-dupont'); localStorage.setItem('mavigne_pil_tab_'+_tnp,'auj'); }catch(e){}
+  try{ var _tnp=(localStorage.getItem('mavigne_tenant')||'domaine-dupont'); localStorage.setItem('mavigne_pil_tab_'+_tnp,'auj'); }catch(e){ if(window._mvAvale) window._mvAvale(e,'app.js/_wx#7'); }
 
   // 4) Conducteurs + activités (objets : sinon .nom indéfini)
   _ap('conducteurs',[{nom:'Marie',statut:'actif'},{nom:'Jean',statut:'actif'},{nom:'Paul',statut:'actif'}]);
@@ -1735,7 +1735,7 @@ function _visiteScenario(){
     {id:'trac2',nom:'Enjambeur Bobard',   modele:'1054',   type:'hydrostatique',traitementOnly:false, compteur_h:1180, revision_h:1400}
   ]);
   // Cuve GNR basse (alerte) — lue depuis CONFIG.gnr
-  try{ window.CONFIG=window.CONFIG||{}; window.CONFIG.gnr={capacite:1000, niveau:255, seuil:300, maj:_daysAgo(2)}; window.CONFIG.features=Object.assign({}, window.CONFIG.features||{}, {cave:true}); }catch(e){}
+  try{ window.CONFIG=window.CONFIG||{}; window.CONFIG.gnr={capacite:1000, niveau:255, seuil:300, maj:_daysAgo(2)}; window.CONFIG.features=Object.assign({}, window.CONFIG.features||{}, {cave:true}); }catch(e){ if(window._mvAvale) window._mvAvale(e,'app.js/_wx#8'); }
 
   // 6) Sessions tracteur (terminées + en cours)
   var _sn=_MVT_SAISON;
@@ -1865,7 +1865,7 @@ function _visiteScenario(){
       ];
       window.CAVE_ELEVAGE.config=window.CAVE_ELEVAGE.config||{ouillage_alerte_j:14};
     }
-  }catch(e){}
+  }catch(e){ if(window._mvAvale) window._mvAvale(e,'app.js/_wx#9'); }
 
   // 10ter) LE CUVIER — LA VENDANGE 2026, RENTREE ET COHERENTE.
   //   ⚠️⚠️ TROIS DEFAUTS CORRIGES ICI, ET AUCUN N'ETAIT VISIBLE D'UN HARNAIS :
@@ -2045,7 +2045,7 @@ function _visiteScenario(){
     try{ if(window.CONFIG) window.CONFIG.hsup_dues_debut=_YR+'-01'; }catch(e3){ if(window.logError)window.logError({level:'info',cat:'demo',msg:'hsup_dues_debut'}); }
     var _hs={}; _hs['Jean']={}; _hs['Jean'][_mk]={paye:0}; _ap('planning_hsup',_hs);
     var _ac={}; _ac['Jean']={}; _ac['Jean'][_mk]=[{date:'2026-'+_p2(_m+1)+'-15',montant:300,note:'Acompte'}]; _ap('planning_acomptes',_ac);
-  }catch(e){}
+  }catch(e){ if(window._mvAvale) window._mvAvale(e,'app.js/_wd'); }
 
   // 10quinquies) CEPAGES, CUIVRE, MATURITE, BOUTEILLES
   //   Les ecrans ouverts par la refonte de la visite (conformite, controle de
@@ -2166,8 +2166,8 @@ function _visiteScenario(){
 
   // 12) Gel du scenario : aucune donnee Firestore tardive ne le remplace
   window._visiteScenarioReady=true;
-  try{ if(window._syncLocalVars) window._syncLocalVars(); }catch(e){}
-  try{ if(window._dockBuild) window._dockBuild(); }catch(e){}
+  try{ if(window._syncLocalVars) window._syncLocalVars(); }catch(e){ if(window._mvAvale) window._mvAvale(e,'app.js/_wd#2'); }
+  try{ if(window._dockBuild) window._dockBuild(); }catch(e){ if(window._mvAvale) window._mvAvale(e,'app.js/_wd#3'); }
 }
 
 // ── Écran de bienvenue ──
@@ -2599,7 +2599,7 @@ function _mvtBuild(){
   window.addEventListener('scroll', _mvtReposition, true);
   _mvtBuilt=true;
 }
-function _mvtClearOne(){ if(_mvtOne){ try{_mvtOne.el.removeEventListener('click', _mvtOne.fn);}catch(e){} _mvtOne=null; } }
+function _mvtClearOne(){ if(_mvtOne){ try{_mvtOne.el.removeEventListener('click', _mvtOne.fn);}catch(e){ if(window._mvAvale) window._mvAvale(e,'app.js/_mvtClearOne'); } _mvtOne=null; } }
 function _mvtStart(){
   _mvtBuild();
   var t=document.getElementById('mvt'); if(t){ t.style.display='block'; }
@@ -2653,7 +2653,7 @@ function _mvtNext(){
   //   MAINTENANT : la narration s'ecrit d'abord (sa hauteur EST la bande),
   //   puis on centre dans ce qui reste visible, puis on pose le projecteur.
   var doPlace=function(){
-    if(s.prep){ try{ s.prep(); }catch(e){} }
+    if(s.prep){ try{ s.prep(); }catch(e){ if(window._mvAvale) window._mvAvale(e,'app.js/doPlace'); } }
     _mvtEl=null; _mvtEls=null;
     if(s.selAll){
       var all=document.querySelectorAll(s.selAll), arr=[];
@@ -2671,7 +2671,7 @@ function _mvtNext(){
   // `wait` : quand la navigation enchaine plusieurs rendus (onglet -> sous-vue
   //   -> depli d'une carte), 420 ms ne suffisent pas et le projecteur se pose
   //   sur le DOM d'avant, qui va disparaitre sous lui.
-  if(s.nav){ try{ s.nav(); }catch(e){} setTimeout(doPlace, s.wait||420); }
+  if(s.nav){ try{ s.nav(); }catch(e){ if(window._mvAvale) window._mvAvale(e,'app.js/doPlace#2'); } setTimeout(doPlace, s.wait||420); }
   else { requestAnimationFrame(doPlace); }
 }
 function _mvtPlace(s){
@@ -2767,7 +2767,7 @@ function _mvtCredit(key, min){
     fly.style.opacity='0';
   }); });
   setTimeout(function(){
-    try{ fly.remove(); }catch(e){}
+    try{ fly.remove(); }catch(e){ if(window._mvAvale) window._mvAvale(e,'app.js/_mvtCredit'); }
     chip.classList.add('zap'); setTimeout(function(){ chip.classList.remove('zap'); }, 200);
     var from=_mvtEarn, target=_mvtEarn+min, t0=null;
     function fr(ts){
@@ -3284,7 +3284,7 @@ async function confirmLogin(){
     // mot de passe, qui sort par un `return` plus haut : ce login-la n'est pas fini.
     _loginMemEcrire(m.nom);
     _loginVoirTous = false;
-    try{ _mvSessArm(cred.user && cred.user.uid); }catch(e){}
+    try{ _mvSessArm(cred.user && cred.user.uid); }catch(e){ if(window._mvAvale) window._mvAvale(e,'app.js/confirmLogin'); }
     if(DEBUG) console.log('Login Firebase OK:', m.nom, 'roles:', m.roles);
     window.loginPendingIdx = -1;
     document.getElementById('login-screen').style.display = 'none';
@@ -3421,15 +3421,15 @@ function _mvRefreshCurrentUserRoles(){
     if(before!==_sig(cu)){
       if(typeof applyRoles==='function') applyRoles();   // reconstruit le dock
       var _ap=(document.querySelector('.page.active')||{}).id||'';
-      if(_ap==='page-reglages'&&typeof renderReglages==='function'){try{renderReglages();}catch(e){}}
+      if(_ap==='page-reglages'&&typeof renderReglages==='function'){try{renderReglages();}catch(e){ if(window._mvAvale) window._mvAvale(e,'app.js/_sig'); }}
       // La page ouverte vient peut-etre d'etre masquee : on ne laisse personne sur
       // un module qui a disparu du dock (il n'aurait plus aucun moyen d'en sortir
       // sinon que le bouton retour).
       try{ var _cp=_ap.replace('page-',''); if(_cp&&_mvPageGated(_cp)) _goLanding(); }
       catch(e){ if(window.logError)window.logError({level:'info',cat:'nav',msg:'sortie de page masquee impossible',detail:(e&&e.message)||String(e)}); }
     }
-    try{ if(window._mvApplyTrialGating)window._mvApplyTrialGating(); }catch(e){}
-  }catch(e){}
+    try{ if(window._mvApplyTrialGating)window._mvApplyTrialGating(); }catch(e){ if(window._mvAvale) window._mvAvale(e,'app.js/_sig#2'); }
+  }catch(e){ if(window._mvAvale) window._mvAvale(e,'app.js/_sig#3'); }
 }
 // Expose : reglages.js l'appelle apres avoir enregistre un membre, pour que
 // l'admin qui se restreint lui-meme voie l'effet sans attendre le retour Firestore.
@@ -3452,10 +3452,10 @@ function _mvSessArm(uid){
     if(!u) return;
     sessionStorage.setItem('mv_sess_uid', u);
     sessionStorage.setItem('mv_sess_tenant', localStorage.getItem('mavigne_tenant') || '');
-  }catch(e){}
+  }catch(e){ if(window._mvAvale) window._mvAvale(e,'app.js/_mvSessArm'); }
   _mvSessCheck(); // ré-évalue (retire l'alerte si une session cohérente vient d'être posée)
 }
-function _mvSessClear(){ try{ sessionStorage.removeItem('mv_sess_uid'); sessionStorage.removeItem('mv_sess_tenant'); }catch(e){} }
+function _mvSessClear(){ try{ sessionStorage.removeItem('mv_sess_uid'); sessionStorage.removeItem('mv_sess_tenant'); }catch(e){ if(window._mvAvale) window._mvAvale(e,'app.js/_mvSessClear'); } }
 function _mvSessCheck(){
   try{
     var base = sessionStorage.getItem('mv_sess_uid');
@@ -3468,7 +3468,7 @@ function _mvSessCheck(){
     if(!cur) return;                         // transition / rechargement → currentUser restauré ensuite
     if(cur === base){ _mvSessHide(); return; }
     _mvSessShow();                           // uid différent = une AUTRE connexion a pris la session de cet onglet
-  }catch(e){}
+  }catch(e){ if(window._mvAvale) window._mvAvale(e,'app.js/_mvSessCheck'); }
 }
 function _mvSessHide(){ var o=document.getElementById('mv-sess-lost'); if(o) o.remove(); }
 function _mvSessShow(){
@@ -3491,11 +3491,11 @@ function _mvSessShow(){
 function _mvSessRecover(){
   // 1) Restaurer le tenant du domaine : localStorage.mavigne_tenant a pu être écrasé
   //    par la démo (domaine-dupont) → on le remet à la valeur capturée au login.
-  try{ var t=sessionStorage.getItem('mv_sess_tenant'); if(t) localStorage.setItem('mavigne_tenant', t); }catch(e){}
+  try{ var t=sessionStorage.getItem('mv_sess_tenant'); if(t) localStorage.setItem('mavigne_tenant', t); }catch(e){ if(window._mvAvale) window._mvAvale(e,'app.js/_mvSessRecover'); }
   _mvSessClear();
   // 2) Couper la session partagée puis recharger → écran de login du bon domaine.
   if (window._fbUnsubAll) window._fbUnsubAll(); // idem logout() : pas de rafale parasite
-  try{ if(window.firebase && window.firebase.auth) window.firebase.auth().signOut(); }catch(e){}
+  try{ if(window.firebase && window.firebase.auth) window.firebase.auth().signOut(); }catch(e){ if(window._mvAvale) window._mvAvale(e,'app.js/_mvSessRecover#2'); }
   setTimeout(function(){ location.reload(); }, 60);
 }
 window._mvSessArm=_mvSessArm; window._mvSessCheck=_mvSessCheck; window._mvSessClear=_mvSessClear;
@@ -3664,8 +3664,8 @@ async function _ensureDomaineCommune(){
   try{
     var g=getDomaineGeo();
     var rv=await _reverseCommuneBAN(g.lat,g.lng);
-    if(rv&&rv.nom){ window._domaineCommuneNom=rv.nom; try{renderHomeMeteoCommunes();}catch(e){} }
-  }catch(e){}
+    if(rv&&rv.nom){ window._domaineCommuneNom=rv.nom; try{renderHomeMeteoCommunes();}catch(e){ if(window._mvAvale) window._mvAvale(e,'app.js/_ensureDomaineCommune'); } }
+  }catch(e){ if(window._mvAvale) window._mvAvale(e,'app.js/_ensureDomaineCommune#2'); }
 }
 
 // ── Météo courante pour un point (current + min/max/pluie du jour) ──
@@ -3755,13 +3755,13 @@ async function fetchMeteoCommunes(){
   var groups=_communesActives();
   if(groups.length<2){
     window.METEO_PAR_COMMUNE=null;
-    try{localStorage.removeItem(_WXCOM_KEY);}catch(e){}
-    try{renderHomeMeteoCommunes();}catch(e2){}
+    try{localStorage.removeItem(_WXCOM_KEY);}catch(e){ if(window._mvAvale) window._mvAvale(e,'app.js/fetchMeteoCommunes'); }
+    try{renderHomeMeteoCommunes();}catch(e2){ if(window._mvAvale) window._mvAvale(e2,'app.js/fetchMeteoCommunes#2'); }
     return;
   }
   window._mvComFetching=true;
   try{
-    if(!window._domaineCommuneNom){ try{await _ensureDomaineCommune();}catch(e){} }
+    if(!window._domaineCommuneNom){ try{await _ensureDomaineCommune();}catch(e){ if(window._mvAvale) window._mvAvale(e,'app.js/fetchMeteoCommunes#3'); } }
     var res={}, ok=0;
     for(var i=0;i<groups.length;i++){
       var g=groups[i];
@@ -3774,7 +3774,7 @@ async function fetchMeteoCommunes(){
     if(ok) _wxCacheWrite(res);   // un relevé entièrement vide ne mérite pas d'être gardé
     else if(window.logError) window.logError({level:'warning',cat:'meteo',
       msg:'Aucun secteur meteo obtenu', detail:groups.length+' secteurs'});
-    try{renderHomeMeteoCommunes();}catch(e){}
+    try{renderHomeMeteoCommunes();}catch(e){ if(window._mvAvale) window._mvAvale(e,'app.js/fetchMeteoCommunes#4'); }
   } finally {
     window._mvComFetching=false;
   }
@@ -3815,7 +3815,7 @@ function renderHomeMeteoCommunes(){
   if(store){ for(var i=0;i<groups.length;i++){ if(!store[groups[i].key]){ store=null; ts=0; break; } } }
   if(!store){ var cached=_wxCacheRead(groups); if(cached){ store=cached.data; ts=cached.ts; } }
   if(!store || !ts || (Date.now()-ts)>_WXCOM_MAXAGE){
-    setTimeout(function(){ try{fetchMeteoCommunes();}catch(e){} },50);   // le verrou est tenu par fetchMeteoCommunes
+    setTimeout(function(){ try{fetchMeteoCommunes();}catch(e){ if(window._mvAvale) window._mvAvale(e,'app.js/renderHomeMeteoCommunes'); } },50);   // le verrou est tenu par fetchMeteoCommunes
   }
   var age=_wxAgeTxt(ts);
   var html='<div class="cm-wx-head">M\u00e9t\u00e9o par secteur'
@@ -3908,10 +3908,10 @@ async function _commSuggestFromCoords(silent){
 function _commAfterSave(){
   closeOv(null,'ovCommune');
   var ovP=document.getElementById('ovParcelle');
-  if(ovP&&ovP.classList.contains('open')){ try{openDP(_commEditNom);}catch(e){} }
+  if(ovP&&ovP.classList.contains('open')){ try{openDP(_commEditNom);}catch(e){ if(window._mvAvale) window._mvAvale(e,'app.js/_commAfterSave'); } }
   var ovB=document.getElementById('ovCommunes');
-  if(ovB&&ovB.classList.contains('open')){ try{renderCommunesBulk();}catch(e){} }
-  try{ fetchMeteoCommunes(); }catch(e){}
+  if(ovB&&ovB.classList.contains('open')){ try{renderCommunesBulk();}catch(e){ if(window._mvAvale) window._mvAvale(e,'app.js/_commAfterSave#2'); } }
+  try{ fetchMeteoCommunes(); }catch(e){ if(window._mvAvale) window._mvAvale(e,'app.js/_commAfterSave#3'); }
 }
 function saveCommune(){
   var p=(window.PARCELLES||[]).find(function(x){return x.nom===_commEditNom;}); if(!p) return;
@@ -3934,7 +3934,7 @@ function clearCommune(){
 function openCommunesBulk(){ renderCommunesBulk(); openOv('ovCommunes'); }
 function renderCommunesBulk(){
   var c=document.getElementById('communes-bulk'); if(!c) return;
-  if(!window._domaineCommuneNom){ try{_ensureDomaineCommune();}catch(e){} }
+  if(!window._domaineCommuneNom){ try{_ensureDomaineCommune();}catch(e){ if(window._mvAvale) window._mvAvale(e,'app.js/renderCommunesBulk'); } }
   var domNom=window._domaineCommuneNom||'Domaine';
   var parcs=(window.PARCELLES||[]).filter(function(p){return p.statut!=='Arrachee';}).slice()
     .sort(function(a,b){return String(a.nom).localeCompare(String(b.nom),'fr');});
@@ -3983,7 +3983,7 @@ async function fetchMeteo(){
       const rHr=await fetch('https://api.open-meteo.com/v1/forecast?'+_ll+'&current=temperature_2m,weathercode,windspeed_10m,precipitation&models=meteofrance_seamless&timezone=Europe/Paris');
       const dHr=await rHr.json();
       if(dHr&&dHr.current&&typeof dHr.current.temperature_2m==='number')cur=dHr.current;
-    }catch(eHr){}
+    }catch(eHr){ if(window._mvAvale) window._mvAvale(eHr,'app.js/fetchMeteo'); }
     const temp=Math.round(cur.temperature_2m);
     const code=cur.weathercode;
     const wind=Math.round(cur.windspeed_10m);
@@ -3997,16 +3997,16 @@ async function fetchMeteo(){
     if(d.daily&&d.daily.time){
       // Widget météo 5 jours (v4.34)
       window.METEO_DAILY={time:d.daily.time,code:d.daily.weathercode||[],tmin:d.daily.temperature_2m_min||[],tmax:d.daily.temperature_2m_max||[],pp:d.daily.precipitation_probability_max||[]};
-      try{localStorage.setItem('mavigne_meteo5_cache',JSON.stringify(window.METEO_DAILY));}catch(e2){}
+      try{localStorage.setItem('mavigne_meteo5_cache',JSON.stringify(window.METEO_DAILY));}catch(e2){ if(window._mvAvale) window._mvAvale(e2,'app.js/fetchMeteo#2'); }
       if(typeof renderHomeMeteo5==='function')renderHomeMeteo5();
-      if(d.hourly&&d.hourly.time){ window.METEO_HOURLY={time:d.hourly.time,temp:d.hourly.temperature_2m||[],precip:d.hourly.precipitation||[],pp:d.hourly.precipitation_probability||[],wind:d.hourly.windspeed_10m||[]}; try{localStorage.setItem('mavigne_meteohr_cache',JSON.stringify(window.METEO_HOURLY));}catch(e3){} }
+      if(d.hourly&&d.hourly.time){ window.METEO_HOURLY={time:d.hourly.time,temp:d.hourly.temperature_2m||[],precip:d.hourly.precipitation||[],pp:d.hourly.precipitation_probability||[],wind:d.hourly.windspeed_10m||[]}; try{localStorage.setItem('mavigne_meteohr_cache',JSON.stringify(window.METEO_HOURLY));}catch(e3){ if(window._mvAvale) window._mvAvale(e3,'app.js/fetchMeteo#3'); } }
     }
     if(d.daily&&d.daily.temperature_2m_min){
       _gelIdx=d.daily.temperature_2m_min.findIndex(t=>t<3);
       if(_gelIdx>=0)_gelTemp=Math.round(d.daily.temperature_2m_min[_gelIdx]);
     }
     // Sauvegarder en cache avec timestamp (+ info gel)
-    try{localStorage.setItem('mavigne_meteo_cache',JSON.stringify({...meteoData,wind,rain,gelIdx:_gelIdx,gelTemp:_gelTemp,ts:Date.now()}));}catch(e){}
+    try{localStorage.setItem('mavigne_meteo_cache',JSON.stringify({...meteoData,wind,rain,gelIdx:_gelIdx,gelTemp:_gelTemp,ts:Date.now()}));}catch(e){ if(window._mvAvale) window._mvAvale(e,'app.js/fetchMeteo#4'); }
     // Badge météo mini dans le header
     _renderMeteoMini(emoji,temp,wind);
     // Alerte gel
@@ -4019,7 +4019,7 @@ async function fetchMeteo(){
       }
     }
     // Météo par secteur (≥2 communes) — sinon météo unique du domaine
-    try{ if(_communesActives().length>=2){ _ensureDomaineCommune(); fetchMeteoCommunes(); } else { window.METEO_PAR_COMMUNE=null; renderHomeMeteoCommunes(); } }catch(eCom){}
+    try{ if(_communesActives().length>=2){ _ensureDomaineCommune(); fetchMeteoCommunes(); } else { window.METEO_PAR_COMMUNE=null; renderHomeMeteoCommunes(); } }catch(eCom){ if(window._mvAvale) window._mvAvale(eCom,'app.js/fetchMeteo#5'); }
     // Enregistrer dans journal seulement si un vrai travail existe ce jour
     const existant=METEO_JOURNAL.find(m=>m.date===meteoData.date);
     if(!existant){
@@ -4047,7 +4047,7 @@ async function fetchMeteo(){
         const mini=document.getElementById('hv2-meteo-mini');
         if(mini){mini.style.display='flex';document.getElementById('hv2-mini-ico').textContent='';document.getElementById('hv2-mini-temp').textContent='—';document.getElementById('hv2-mini-desc').textContent='Hors ligne';}
       }
-    }catch(e2){}
+    }catch(e2){ if(window._mvAvale) window._mvAvale(e2,'app.js/fetchMeteo#6'); }
   }
 }
 
@@ -4170,7 +4170,7 @@ window._visuSaison = _visuSaison;
 // ── Pointeur de vue LOCAL (par utilisateur) : JAMAIS persiste en Firestore. ──
 function _visuKey(){ return 'mavigne_visu_saison_'+((typeof localStorage!=='undefined'&&localStorage.getItem&&localStorage.getItem('mavigne_tenant'))||''); }
 function _visuLoad(){ try{ return localStorage.getItem(_visuKey())||''; }catch(e){ return ''; } }
-function _visuSave(nom){ try{ if(nom)localStorage.setItem(_visuKey(),nom); }catch(e){} }
+function _visuSave(nom){ try{ if(nom)localStorage.setItem(_visuKey(),nom); }catch(e){ if(window._mvAvale) window._mvAvale(e,'app.js/_visuSave'); } }
 // Accesseur de LECTURE : bloc taches de la saison VUE. Vue===active (equipe + cas courant) => p.taches (transparent).
 function _tachesFor(p){
   if(!p) return {};
@@ -4247,7 +4247,7 @@ function _migrateTachesSaison(){
   _VISU_SAISON=(stored&&exists)?stored:act;
   // Purge du pointeur partage historique : n'est plus lu -> on le retire de CONFIG en memoire pour
   // qu'il cesse de se propager au prochain save config (la consultation n'ecrit plus jamais config).
-  if(CONFIG && CONFIG.visuSaison!==undefined){ try{ delete CONFIG.visuSaison; }catch(e){} }
+  if(CONFIG && CONFIG.visuSaison!==undefined){ try{ delete CONFIG.visuSaison; }catch(e){ if(window._mvAvale) window._mvAvale(e,'app.js/_migrateTachesSaison'); } }
   if(!act) return;
   // Re-epinglage ONE-TIME : p.taches DOIT etre la saison ACTIVE. Le tag _tachesSaison (ecrit
   // atomiquement avec p.taches) dit ce que p.taches contient reellement ; toute donnee non-active est
@@ -4263,7 +4263,7 @@ function _migrateTachesSaison(){
     p._tachesSaison=act;
     changed=true;
   });
-  if(changed){ try{ if(typeof saveData==='function') saveData('parcelles'); }catch(e){} }
+  if(changed){ try{ if(typeof saveData==='function') saveData('parcelles'); }catch(e){ if(window._mvAvale) window._mvAvale(e,'app.js/_migrateTachesSaison#2'); } }
   // Le pointeur de vue (_VISU_SAISON) vient d'etre pose depuis localStorage : purger + reconstruire
   // TRAVAUX pour qu'il reflete la saison CONSULTEE des le 1er rendu. Sinon le cache TRAVAUX, peuple
   // pendant le chargement avec la saison ACTIVE, reste servi pour les taches simples -> avancement
@@ -4271,7 +4271,7 @@ function _migrateTachesSaison(){
   try{
     Object.keys(TRAVAUX).forEach(function(n){delete TRAVAUX[n];});
     TACHES.forEach(function(t){recalcTravaux(t.nom);}); window.TRAVAUX=TRAVAUX;
-  }catch(e){}
+  }catch(e){ if(window._mvAvale) window._mvAvale(e,'app.js/_migrateTachesSaison#3'); }
 }
 window._migrateTachesSaison=_migrateTachesSaison;
 
@@ -4377,9 +4377,9 @@ function _mvReconApply(res){
     }
     if(_mvOnActiveSaison()&&actNom) p._tachesSaison=actNom;
   });
-  try{ if(typeof saveData==='function') saveData('parcelles'); }catch(e){}
-  try{ Object.keys(TRAVAUX).forEach(function(k){delete TRAVAUX[k];}); TACHES.forEach(function(t){recalcTravaux(t.nom);}); window.TRAVAUX=TRAVAUX; }catch(e){}
-  try{ if(typeof _renderAfterSaison==='function') _renderAfterSaison(); }catch(e){}
+  try{ if(typeof saveData==='function') saveData('parcelles'); }catch(e){ if(window._mvAvale) window._mvAvale(e,'app.js/_mvReconApply'); }
+  try{ Object.keys(TRAVAUX).forEach(function(k){delete TRAVAUX[k];}); TACHES.forEach(function(t){recalcTravaux(t.nom);}); window.TRAVAUX=TRAVAUX; }catch(e){ if(window._mvAvale) window._mvAvale(e,'app.js/_mvReconApply#2'); }
+  try{ if(typeof _renderAfterSaison==='function') _renderAfterSaison(); }catch(e){ if(window._mvAvale) window._mvAvale(e,'app.js/_mvReconApply#3'); }
   if(typeof showToast==='function') showToast('Avancement reconstruit — '+n+' validation'+(n>1?'s':'')+' ajoutée'+(n>1?'s':'')+' à « '+res.vn+' »','#3D6B27');
 }
 function _mvRepairSaisonProg(){
@@ -4396,10 +4396,10 @@ function _mvRepairSaisonProg(){
 window._mvRepairSaisonProg=_mvRepairSaisonProg;
 
 function _renderAfterSaison(){
-  try{ if(typeof applyVigneSaison==='function')applyVigneSaison(); }catch(e){}
-  try{ if(typeof renderHome==='function')renderHome(); }catch(e){}
-  try{ if(typeof renderParcelles==='function')renderParcelles(); }catch(e){}
-  try{ if(typeof renderPilotage==='function'&&document.getElementById('page-pilotage')&&document.getElementById('page-pilotage').classList.contains('active'))renderPilotage(); }catch(e){}
+  try{ if(typeof applyVigneSaison==='function')applyVigneSaison(); }catch(e){ if(window._mvAvale) window._mvAvale(e,'app.js/_renderAfterSaison'); }
+  try{ if(typeof renderHome==='function')renderHome(); }catch(e){ if(window._mvAvale) window._mvAvale(e,'app.js/_renderAfterSaison#2'); }
+  try{ if(typeof renderParcelles==='function')renderParcelles(); }catch(e){ if(window._mvAvale) window._mvAvale(e,'app.js/_renderAfterSaison#3'); }
+  try{ if(typeof renderPilotage==='function'&&document.getElementById('page-pilotage')&&document.getElementById('page-pilotage').classList.contains('active'))renderPilotage(); }catch(e){ if(window._mvAvale) window._mvAvale(e,'app.js/_renderAfterSaison#4'); }
   _updateSaisonSelector();
   _seasonMenuClose();
 }
@@ -4736,7 +4736,7 @@ function _landingPage(){
   if(_canPilotage()&&_mvCan('pilotage')) return 'page-pilotage';
   if(_mvCan('vigne')){
     // Priorite du moment (v5.05) : membre affecte a une priorite -> atterrissage direct sur les parcelles
-    try{ if(typeof _prioForMember==='function'&&currentUser&&_prioForMember(currentUser.nom)) return 'page-parcelles'; }catch(e){}
+    try{ if(typeof _prioForMember==='function'&&currentUser&&_prioForMember(currentUser.nom)) return 'page-parcelles'; }catch(e){ if(window._mvAvale) window._mvAvale(e,'app.js/_landingPage'); }
     return 'page-home';
   }
   // Vigne masquee pour ce membre (le cas du caviste) : on atterrit sur le premier
@@ -4760,7 +4760,7 @@ function _goLanding(){
           goTo('parcelles'); return;
         }
       }
-    }catch(e){}
+    }catch(e){ if(window._mvAvale) window._mvAvale(e,'app.js/_goLanding'); }
     goTo('home'); return;
   }
   // Vigne masquee : premier module du dock (cf. _landingPage).
@@ -4959,7 +4959,7 @@ function _mvContactMailto(){
     +'Merci de me recontacter.\n';
   return 'mailto:ngdevpro@gmail.com?subject='+encodeURIComponent(subj)+'&body='+encodeURIComponent(body);
 }
-function _mvContactGo(){ try{ window.location.href=_mvContactMailto(); }catch(e){} }
+function _mvContactGo(){ try{ window.location.href=_mvContactMailto(); }catch(e){ if(window._mvAvale) window._mvAvale(e,'app.js/_mvContactGo'); } }
 window._mvContactGo=_mvContactGo;
 
 // Bandeau d'essai en haut (barre fixe). Couleur évolutive : or (>=4 j) → orange (2-3 j) → rouge (<=1 j).
@@ -4999,7 +4999,7 @@ function _mvCheckExpired(){
   var t=_mvTrial();
   if(t.active && t.expired && currentUser && !currentUser._isGTAdmin && !currentUser._isDemo){
     window._MV_LOCKED=true;
-    var em=document.getElementById('mv-exp-mail'); if(em){ try{ em.href=_mvContactMailto(); }catch(e){} }
+    var em=document.getElementById('mv-exp-mail'); if(em){ try{ em.href=_mvContactMailto(); }catch(e){ if(window._mvAvale) window._mvAvale(e,'app.js/_mvCheckExpired'); } }
     if(!window._MV_EXPIRED_DISMISSED){ ov.style.display='flex'; }
   } else {
     window._MV_LOCKED=false; ov.style.display='none';
@@ -5048,7 +5048,7 @@ function _mvTermsCheck(){
       if(f)f.style.display='block'; if(d)d.style.display='none';
       ov.style.display='flex';
     });
-  }catch(e){}
+  }catch(e){ if(window._mvAvale) window._mvAvale(e,'app.js/_mvTermsCheck'); }
 }
 window._mvTermsCheck=_mvTermsCheck;
 
@@ -5059,7 +5059,7 @@ function _mvTermsPrefill(){
     var rs=document.getElementById('mvt-rs'); if(rs && !rs.value){ rs.value=((window.DOMAINE_NOM||'')+'').trim(); }
     var nm=document.getElementById('mvt-nom'); if(nm && !nm.value){ nm.value=((currentUser&&currentUser.nom)||''); }
     if(window._mvTermsSync) window._mvTermsSync();
-  }catch(e){}
+  }catch(e){ if(window._mvAvale) window._mvAvale(e,'app.js/_mvTermsPrefill'); }
 }
 // SIRET : 14 chiffres, groupés à la saisie (3 3 3 5).
 window._mvtSiret=function(el){
@@ -5103,13 +5103,13 @@ window._mvTermsSubmit=async function(){
     var res=(r&&r.data)?r.data:r;
     if(!res||!res.ok){ return fail('Enregistrement refus\u00e9, r\u00e9essayez.'); }
     // Rafraîchit le jeton pour voir le claim `terms` fraîchement posé, sans F5.
-    try{ if(currentUser&&currentUser._firebaseUser) await currentUser._firebaseUser.getIdToken(true); }catch(e){}
-    try{ if(window._mvLoadClaims) await window._mvLoadClaims(true); }catch(e){}
+    try{ if(currentUser&&currentUser._firebaseUser) await currentUser._firebaseUser.getIdToken(true); }catch(e){ if(window._mvAvale) window._mvAvale(e,'app.js/fail'); }
+    try{ if(window._mvLoadClaims) await window._mvLoadClaims(true); }catch(e){ if(window._mvAvale) window._mvAvale(e,'app.js/fail#2'); }
     _mvTermsFillReceipt(res, payload);
-    try{ _mvTermsStoreFill(res, payload); }catch(e){}
+    try{ _mvTermsStoreFill(res, payload); }catch(e){ if(window._mvAvale) window._mvAvale(e,'app.js/fail#3'); }
     var f=document.getElementById('mvt-form'), d=document.getElementById('mvt-done');
     if(f)f.style.display='none'; if(d)d.style.display='block';
-    try{ _mvReceiptRender(); }catch(e){}
+    try{ _mvReceiptRender(); }catch(e){ if(window._mvAvale) window._mvAvale(e,'app.js/fail#4'); }
   }catch(e){
     var reason=(e&&e.details&&e.details.reason)||'';
     if(reason==='stale_version') return fail('Documents mis \u00e0 jour \u2014 rechargez la page.');
@@ -5127,7 +5127,7 @@ function _mvTermsFillReceipt(res, payload){
     set('mvt-r-ref', res.ref||'\u2014');
     set('mvt-r-cgv', 'CGU v'+(res.cgvVersion||_MVT_CGV));
     set('mvt-r-dpa', 'DPA v'+(res.dpaVersion||_MVT_DPA));
-  }catch(e){}
+  }catch(e){ if(window._mvAvale) window._mvAvale(e,'app.js/set'); }
 }
 window._mvTermsClose=function(){ var ov=document.getElementById('ovTerms'); if(ov)ov.style.display='none'; };
 
@@ -5145,17 +5145,17 @@ function _mvTermsStoreFill(res, payload){
       signed:true
     };
     window._MV_TERMS_FILL=f;
-    try{ localStorage.setItem('mv_terms_fill', JSON.stringify(f)); }catch(e){}
-    try{ localStorage.removeItem('mv_terms_draft'); }catch(e){}
-  }catch(e){}
+    try{ localStorage.setItem('mv_terms_fill', JSON.stringify(f)); }catch(e){ if(window._mvAvale) window._mvAvale(e,'app.js/_mvTermsStoreFill'); }
+    try{ localStorage.removeItem('mv_terms_draft'); }catch(e){ if(window._mvAvale) window._mvAvale(e,'app.js/_mvTermsStoreFill#2'); }
+  }catch(e){ if(window._mvAvale) window._mvAvale(e,'app.js/_mvTermsStoreFill#3'); }
 }
 // Ouvre l'exemplaire SIGNÉ (écran de fin, Réglages). kind: 'dpa' | 'cgv'/'cgu'.
 window._mvTermsOpenDoc=function(kind){
   try{
-    if(window._MV_TERMS_FILL){ try{ localStorage.setItem('mv_terms_fill', JSON.stringify(window._MV_TERMS_FILL)); }catch(e){} }
+    if(window._MV_TERMS_FILL){ try{ localStorage.setItem('mv_terms_fill', JSON.stringify(window._MV_TERMS_FILL)); }catch(e){ if(window._mvAvale) window._mvAvale(e,'app.js/_mvTermsOpenDoc'); } }
     var url=(kind==='dpa'?'/dpa.html':'/cgu.html')+'#mv';
     window.open(url,'_blank','noopener');
-  }catch(e){}
+  }catch(e){ if(window._mvAvale) window._mvAvale(e,'app.js/_mvTermsOpenDoc#2'); }
 };
 // Aperçu AVANT signature : écrit un brouillon depuis les champs saisis puis ouvre en #mvp.
 window._mvTermsPreviewDoc=function(kind){
@@ -5167,7 +5167,7 @@ window._mvTermsPreviewDoc=function(kind){
       sig_nom:_mvtVal('mvt-nom'), sig_fct:_mvtVal('mvt-fct'),
       ref:'', date_iso:'', hashCgv:'', hashDpa:'', signed:false
     };
-    try{ localStorage.setItem('mv_terms_draft', JSON.stringify(draft)); }catch(e){}
+    try{ localStorage.setItem('mv_terms_draft', JSON.stringify(draft)); }catch(e){ if(window._mvAvale) window._mvAvale(e,'app.js/_mvTermsPreviewDoc'); }
     window.open(url+'#mvp','_blank','noopener');
   }catch(e){ window.open(url,'_blank','noopener'); }
 };
@@ -5183,31 +5183,31 @@ function _mvReceiptRender(){
     box.style.display='block';
     box.innerHTML='<div style="font-weight:600;color:var(--vert,#3D6B27);font-size:var(--pt-txt,12.5px);margin-bottom:4px">\u2713 Conditions accept\u00e9es</div>'
       +'<div style="font-size:12px;color:var(--texte-doux,#726A5E);line-height:1.6">CGU v'+(t.c||'?')+' + DPA v'+(t.d||'?')+' \u00b7 le '+when+(t.r?(' \u00b7 r\u00e9f '+t.r):'')+'</div>';
-    var _hasFill=false; try{ _hasFill=!!localStorage.getItem('mv_terms_fill'); }catch(e){}
+    var _hasFill=false; try{ _hasFill=!!localStorage.getItem('mv_terms_fill'); }catch(e){ if(window._mvAvale) window._mvAvale(e,'app.js/_mvReceiptRender'); }
     if(_hasFill){
       box.innerHTML+='<div style="margin-top:10px;display:flex;gap:8px;flex-wrap:wrap">'
         +'<button onclick="window._mvTermsOpenDoc&&_mvTermsOpenDoc(\'dpa\')" style="flex:1;min-width:148px;font-family:\'Outfit\',sans-serif;font-weight:600;font-size:12px;color:var(--vert,#3D6B27);background:var(--bg-card,#FBFAF6);border:1px solid rgba(61,107,39,0.4);border-radius:9px;padding:9px 10px;cursor:pointer">&#128196; DPA sign\u00e9</button>'
         +'<button onclick="window._mvTermsOpenDoc&&_mvTermsOpenDoc(\'cgv\')" style="flex:1;min-width:148px;font-family:\'Outfit\',sans-serif;font-weight:600;font-size:12px;color:var(--vert,#3D6B27);background:var(--bg-card,#FBFAF6);border:1px solid rgba(61,107,39,0.4);border-radius:9px;padding:9px 10px;cursor:pointer">&#128196; CGU sign\u00e9es</button>'
         +'</div>';
     }
-  }catch(e){}
+  }catch(e){ if(window._mvAvale) window._mvAvale(e,'app.js/_mvReceiptRender#2'); }
 }
 window._mvReceiptRender=_mvReceiptRender;
 
 // Si la page active n'est plus accessible (changement de plan), revenir à l'accueil.
 function _mvGuardActivePage(){
-  try{ var a=document.querySelector('.page.active'); if(!a) return; var p=a.id.replace('page-',''); if(_mvPageGated(p)&&window.goTo){ _goLanding(); } }catch(e){}
+  try{ var a=document.querySelector('.page.active'); if(!a) return; var p=a.id.replace('page-',''); if(_mvPageGated(p)&&window.goTo){ _goLanding(); } }catch(e){ if(window._mvAvale) window._mvAvale(e,'app.js/_mvGuardActivePage'); }
 }
 
 // Point d'entrée appelé après login : recharge les claims puis applique gating + bandeau + expiration.
 window._mvApplyTrialGating=function(){
   (window._mvLoadClaims?window._mvLoadClaims():Promise.resolve()).then(function(){
-    try{ if(window._dockBuild)_dockBuild(); }catch(e){}
-    try{ _mvTrialBanner(); }catch(e){}
-    try{ _mvCheckExpired(); }catch(e){}
-    try{ _mvGuardActivePage(); }catch(e){}
-    try{ _mvTermsCheck(); }catch(e){}
-    try{ _mvReceiptRender(); }catch(e){}
+    try{ if(window._dockBuild)_dockBuild(); }catch(e){ if(window._mvAvale) window._mvAvale(e,'app.js/_mvApplyTrialGating'); }
+    try{ _mvTrialBanner(); }catch(e){ if(window._mvAvale) window._mvAvale(e,'app.js/_mvApplyTrialGating#2'); }
+    try{ _mvCheckExpired(); }catch(e){ if(window._mvAvale) window._mvAvale(e,'app.js/_mvApplyTrialGating#3'); }
+    try{ _mvGuardActivePage(); }catch(e){ if(window._mvAvale) window._mvAvale(e,'app.js/_mvApplyTrialGating#4'); }
+    try{ _mvTermsCheck(); }catch(e){ if(window._mvAvale) window._mvAvale(e,'app.js/_mvApplyTrialGating#5'); }
+    try{ _mvReceiptRender(); }catch(e){ if(window._mvAvale) window._mvAvale(e,'app.js/_mvApplyTrialGating#6'); }
   });
 };
 
@@ -5229,7 +5229,7 @@ window._openEmailModal=function(oldEmail,nom){
   var inp=document.getElementById('mv-email-input'); if(inp){ inp.value=''; }
   var msg=document.getElementById('mv-email-msg'); if(msg){ msg.textContent=''; msg.style.display='none'; }
   if(window.openOv)openOv('mv-email-ov'); else ov.classList.add('open');
-  setTimeout(function(){ if(inp)try{inp.focus();}catch(e){} },120);
+  setTimeout(function(){ if(inp)try{inp.focus();}catch(e){ if(window._mvAvale) window._mvAvale(e,'app.js/_openEmailModal'); } },120);
 };
 window._closeEmailModal=function(){ if(window.closeOv)closeOv(null,'mv-email-ov'); else { var ov=document.getElementById('mv-email-ov'); if(ov)ov.classList.remove('open'); } };
 window._saveEmailModal=async function(){
@@ -5243,10 +5243,10 @@ window._saveEmailModal=async function(){
   var bt=sb?sb.textContent:''; if(sb){ sb.disabled=true; sb.textContent='…'; }
   try{
     await window._fbUpdateMemberEmail(oldEmail, ne);
-    try{ var arr=window.MEMBRES||[]; for(var i=0;i<arr.length;i++){ if(arr[i]&&arr[i].email===oldEmail) arr[i].email=ne; } }catch(e){}
+    try{ var arr=window.MEMBRES||[]; for(var i=0;i<arr.length;i++){ if(arr[i]&&arr[i].email===oldEmail) arr[i].email=ne; } }catch(e){ if(window._mvAvale) window._mvAvale(e,'app.js/err'); }
     if(window._closeEmailModal)window._closeEmailModal();
     if(window.showToast)showToast('Adresse mise à jour','#3D6B27');
-    try{ if(typeof window.renderReglages==='function')window.renderReglages(); }catch(e){}
+    try{ if(typeof window.renderReglages==='function')window.renderReglages(); }catch(e){ if(window._mvAvale) window._mvAvale(e,'app.js/err#2'); }
   }catch(e){
     var code=(e&&(e.code||(e.details&&e.details.authCode)))||'';
     var m2='Échec de la mise à jour.';
@@ -5259,7 +5259,7 @@ window._saveEmailModal=async function(){
 };
 // ════ fin FORMULES & ESSAI ════
 
-function goHub(){ try{applyVigneSaison();}catch(e){} _goLanding(); }
+function goHub(){ try{applyVigneSaison();}catch(e){ if(window._mvAvale) window._mvAvale(e,'app.js/goHub'); } _goLanding(); }
 
 
 // ════ MODE PLEIN SOLEIL (#6) — v4.36 ════
@@ -5274,7 +5274,7 @@ function toggleHiContrast(){
   var r=document.getElementById('app-root');
   var on=!(r&&r.getAttribute('data-hicontrast')==='1');
   _hcApply(on);
-  try{localStorage.setItem(_hcKey(),on?'1':'0');}catch(e){}
+  try{localStorage.setItem(_hcKey(),on?'1':'0');}catch(e){ if(window._mvAvale) window._mvAvale(e,'app.js/toggleHiContrast'); }
   if(window.showToast)showToast(on?'Mode plein soleil activ\u00e9':'Mode normal','#3D6B27');
 }
 window.toggleHiContrast=toggleHiContrast;
@@ -5297,9 +5297,9 @@ function getHomeLayout(){
   try{
     var cfg=window.CONFIG||{};
     if(cfg.home_layout&&currentUser&&cfg.home_layout[currentUser.nom])lay=cfg.home_layout[currentUser.nom];
-  }catch(e){}
-  if(!lay){try{lay=JSON.parse(localStorage.getItem(_homeLayoutKey())||'null');}catch(e){}}
-  if(!lay){try{var cfgD=window.CONFIG||{};if(cfgD.home_layout_default&&Array.isArray(cfgD.home_layout_default.order))lay=cfgD.home_layout_default;}catch(e){}}
+  }catch(e){ if(window._mvAvale) window._mvAvale(e,'app.js/getHomeLayout'); }
+  if(!lay){try{lay=JSON.parse(localStorage.getItem(_homeLayoutKey())||'null');}catch(e){ if(window._mvAvale) window._mvAvale(e,'app.js/getHomeLayout#2'); }}
+  if(!lay){try{var cfgD=window.CONFIG||{};if(cfgD.home_layout_default&&Array.isArray(cfgD.home_layout_default.order))lay=cfgD.home_layout_default;}catch(e){ if(window._mvAvale) window._mvAvale(e,'app.js/getHomeLayout#3'); }}
   if(!lay||!Array.isArray(lay.order))lay={order:HOME_WIDGETS.slice(),hidden:[],compact:[]};
   lay={order:(lay.order||[]).slice(),hidden:(lay.hidden||[]).slice(),compact:(lay.compact||[]).slice()};
   HOME_WIDGETS.forEach(function(w){
@@ -5312,7 +5312,7 @@ function getHomeLayout(){
   return lay;
 }
 function saveHomeLayout(lay){
-  try{localStorage.setItem(_homeLayoutKey(),JSON.stringify(lay));}catch(e){}
+  try{localStorage.setItem(_homeLayoutKey(),JSON.stringify(lay));}catch(e){ if(window._mvAvale) window._mvAvale(e,'app.js/saveHomeLayout'); }
   try{
     if(typeof canWrite==='function'&&canWrite()&&currentUser&&currentUser.nom){
       var cfg=window.CONFIG||{};
@@ -5321,7 +5321,7 @@ function saveHomeLayout(lay){
       window.CONFIG=cfg;
       saveData('config');
     }
-  }catch(e){}
+  }catch(e){ if(window._mvAvale) window._mvAvale(e,'app.js/saveHomeLayout#2'); }
 }
 function _homeIsCompact(id){return getHomeLayout().compact.indexOf(id)!==-1;}
 function applyHomeLayout(){
@@ -5499,7 +5499,7 @@ function _mvCloseable(){
   var _a=document.querySelector('.page.active');
   return !!(_a && _a.id!=='page-hub');
 }
-function _mvHistPush(){ try{ history.pushState({mv:1},''); }catch(e){} }
+function _mvHistPush(){ try{ history.pushState({mv:1},''); }catch(e){ if(window._mvAvale) window._mvAvale(e,'app.js/_mvHistPush'); } }
 // Overlay reellement au-dessus : z-index le plus eleve, puis dernier dans le DOM
 // (a z-index egal, l'element peint en dernier est visuellement au-dessus).
 function _mvTopOverlay(){
@@ -5617,7 +5617,7 @@ function goTo(page){
       window.fbPullStatic().then(function(){
         var _acp=document.querySelector('.page.active');
         if(_acp&&_acp.id==='page-cave'&&window.renderCave)window.renderCave();
-      }).catch(function(){});
+      }).catch(function(_e){ if(window._mvAvale) window._mvAvale(_e,'app.js/goTo'); });
     }
   }
   if(page==='chat')chatRender();
@@ -5731,7 +5731,7 @@ function renderHomeCard(){
 
 function toggleHomeCard(){
   homeCardMode = (homeCardMode+1) % 2;
-  try{localStorage.setItem(_homeCardModeKey(),String(homeCardMode));}catch(e){}
+  try{localStorage.setItem(_homeCardModeKey(),String(homeCardMode));}catch(e){ if(window._mvAvale) window._mvAvale(e,'app.js/toggleHomeCard'); }
   renderHomeCard();
 }
 
@@ -5921,18 +5921,18 @@ function renderHome(){
 function _renderHomeWidgets(){
   try{renderHomeDemarrage();}catch(e){window.logError&&window.logError({level:'info',cat:'home',msg:'renderHomeDemarrage'});}
   try{renderHomeMaPart();}catch(e){window.logError&&window.logError({level:'info',cat:'home',msg:'renderHomeMaPart'});}
-  try{renderHomeMeteo5();}catch(e){}
-  try{renderHomeMaSemaine();}catch(e){}
-  try{renderHomeDRE();}catch(e){}
-  try{renderHomeRaccourcis();}catch(e){}
+  try{renderHomeMeteo5();}catch(e){ if(window._mvAvale) window._mvAvale(e,'app.js/_renderHomeWidgets'); }
+  try{renderHomeMaSemaine();}catch(e){ if(window._mvAvale) window._mvAvale(e,'app.js/_renderHomeWidgets#2'); }
+  try{renderHomeDRE();}catch(e){ if(window._mvAvale) window._mvAvale(e,'app.js/_renderHomeWidgets#3'); }
+  try{renderHomeRaccourcis();}catch(e){ if(window._mvAvale) window._mvAvale(e,'app.js/_renderHomeWidgets#4'); }
 }
 
 // ── Météo 5 jours ──
 function renderHomeMeteo5(){
-  try{renderHomeMeteoCommunes();}catch(_e){}
+  try{renderHomeMeteoCommunes();}catch(_e){ if(window._mvAvale) window._mvAvale(_e,'app.js/renderHomeMeteo5'); }
   var c=document.getElementById('home-meteo5');if(!c)return;
   var md=window.METEO_DAILY;
-  if(!md){try{md=JSON.parse(localStorage.getItem('mavigne_meteo5_cache')||'null');}catch(e){}}
+  if(!md){try{md=JSON.parse(localStorage.getItem('mavigne_meteo5_cache')||'null');}catch(e){ if(window._mvAvale) window._mvAvale(e,'app.js/renderHomeMeteo5#2'); }}
   if(!md||!md.time||!md.time.length){
     c.innerHTML='<div class="hm5-mini">'+_mvIcon('antenne',16)+' M\u00e9t\u00e9o indisponible hors ligne</div>';
     return;
@@ -7586,9 +7586,9 @@ function openDP(nom){
     }
     if(dpCepBtn){dpCepBtn.style.display=isAdmin()?'':'none';dpCepBtn.onclick=function(){openDPCepage(nom);};}
   }
-  try{ var _pmEl=document.getElementById('dp-parc-meteo'); if(_pmEl)_pmEl.dataset.nom=nom; }catch(e){}
-  try{ _dpFillCommune(p); }catch(e){}
-  try{ _dpFillParcMeteo(p); }catch(e){}
+  try{ var _pmEl=document.getElementById('dp-parc-meteo'); if(_pmEl)_pmEl.dataset.nom=nom; }catch(e){ if(window._mvAvale) window._mvAvale(e,'app.js/onclick'); }
+  try{ _dpFillCommune(p); }catch(e){ if(window._mvAvale) window._mvAvale(e,'app.js/onclick#2'); }
+  try{ _dpFillParcMeteo(p); }catch(e){ if(window._mvAvale) window._mvAvale(e,'app.js/onclick#3'); }
   const pe=document.getElementById('dp-pct');
   pe.textContent=cl.pct+'%';
   pe.style.cssText='float:right;font-family:"Cormorant Garamond",serif;font-size:38px;font-weight:600;color:'+(cl.pct===100?'var(--vert)':cl.pct>=75?'var(--or)':'var(--orange)');
@@ -7763,8 +7763,8 @@ function saveRepPonct(){
   saveData('journal');
   closeOv(null,'ovRepPonct');
   showToast('Réparation notée · '+_repTypes.join(', ')+(_repQ>0?(' ×'+_repQ):''),'#3D6B27');
-  try{renderJournalList();}catch(e){}
-  try{renderHome();}catch(e){}
+  try{renderJournalList();}catch(e){ if(window._mvAvale) window._mvAvale(e,'app.js/saveRepPonct'); }
+  try{renderHome();}catch(e){ if(window._mvAvale) window._mvAvale(e,'app.js/saveRepPonct#2'); }
 }
 
 function openGPS(){
@@ -7812,7 +7812,7 @@ function toggleExcluTache(nomParcelle,nomTache){
   recalcTravaux(nomTache); window.TRAVAUX=TRAVAUX; // MAJ heures + avancement du domaine
   saveData('parcelles');                            // persister l'exclusion
   renderParcelles();computePStats();
-  if(typeof renderHomeCard==='function'){try{renderHomeCard();}catch(e){}}
+  if(typeof renderHomeCard==='function'){try{renderHomeCard();}catch(e){ if(window._mvAvale) window._mvAvale(e,'app.js/toggleExcluTache'); }}
   // Rafraîchir la fiche ouverte
   openDP(nomParcelle);
 }
@@ -7946,8 +7946,8 @@ function clearPriority(){
 }
 function savePriorityData(){
   // localStorage
-  try { localStorage.setItem('mavigne_priority', priorityMessage); } catch(e){}
-  try { localStorage.setItem('mavigne_priority_task', priorityTask); } catch(e){}
+  try { localStorage.setItem('mavigne_priority', priorityMessage); } catch(e){ if(window._mvAvale) window._mvAvale(e,'app.js/savePriorityData'); }
+  try { localStorage.setItem('mavigne_priority_task', priorityTask); } catch(e){ if(window._mvAvale) window._mvAvale(e,'app.js/savePriorityData#2'); }
   // Firebase — écrire le doc config COMPLET (ne jamais le remplacer par {priorityMessage}
   // seul, sinon gnr / pilote_default / domaine_nom / timings… sont écrasés)
   if(window.fbSave){
@@ -8540,7 +8540,7 @@ function _mvMigrateEntreplantation(){
       if(didParc){ saveData('parcelles'); saveData('taches'); }
       saveData('config'); // config déjà chargée → marqueur ajouté à la config pleine (garde anti-écrasement OK)
     }
-  }catch(e){}
+  }catch(e){ if(window._mvAvale) window._mvAvale(e,'app.js/_migBloc'); }
 }
 window._mvMigrateEntreplantation=_mvMigrateEntreplantation;
 
@@ -9199,7 +9199,7 @@ function _mvMapLocate(){
 }
 function _mvMapMeMarker(lat,lng){
   if(!leafMap)return;
-  if(_mvMeMarker){try{_mvMeMarker.setLatLng([lat,lng]);}catch(e){}return;}
+  if(_mvMeMarker){try{_mvMeMarker.setLatLng([lat,lng]);}catch(e){ if(window._mvAvale) window._mvAvale(e,'app.js/_mvMapMeMarker'); }return;}
   var ic=L.divIcon({className:'mv-mehere-wrap',html:'<div class="mv-mehere-pulse"></div><div class="mv-mehere-dot"></div>',iconSize:[22,22],iconAnchor:[11,11]});
   _mvMeMarker=L.marker([lat,lng],{icon:ic,interactive:false,keyboard:false,zIndexOffset:1000}).addTo(leafMap);
 }
@@ -9215,7 +9215,7 @@ function _mvMapHighlight(){
   _leafLayers.forEach(function(item){
     if(item.parcelle&&item.parcelle.nom===_pProxHere){
       item.poly.setStyle({color:'#C9A84C',weight:5,dashArray:'7 5',fillOpacity:0.42});
-      try{item.poly.bringToFront();}catch(e){}
+      try{item.poly.bringToFront();}catch(e){ if(window._mvAvale) window._mvAvale(e,'app.js/_mvMapHighlight'); }
     }
   });
 }
@@ -9463,7 +9463,7 @@ function _mvScrollLock(on){
     if(!b.classList.contains('mv-ov-lock')) return;
     de.classList.remove('mv-ov-lock'); b.classList.remove('mv-ov-lock');
     var pg=(document.querySelector('.page.active')||{}).id || '';
-    if(_mvOvScrollY>0 && !window.scrollY && pg===_mvOvLockPage){ try{ window.scrollTo(0,_mvOvScrollY); }catch(e){} }
+    if(_mvOvScrollY>0 && !window.scrollY && pg===_mvOvLockPage){ try{ window.scrollTo(0,_mvOvScrollY); }catch(e){ if(window._mvAvale) window._mvAvale(e,'app.js/_mvScrollLock'); } }
     _mvOvScrollY=0;
   }
 }
@@ -9499,7 +9499,7 @@ function _mvOvRefocus(el){
 function _mvOvFocusIn(ov){
   var box=ov.querySelector('.modal')||ov;
   if(!box.getAttribute('tabindex')) box.setAttribute('tabindex','-1');
-  try{ box.focus({preventScroll:true}); }catch(e){ try{ box.focus(); }catch(e2){} }
+  try{ box.focus({preventScroll:true}); }catch(e){ try{ box.focus(); }catch(e2){ if(window._mvAvale) window._mvAvale(e2,'app.js/_mvOvFocusIn'); } }
 }
 
 function _mvOvSync(){
@@ -9633,7 +9633,7 @@ try{
       if(t&&t.classList&&t.classList.contains('overlay')){ _mvOvSync(); return; }
     }
   }).observe(document.documentElement,{attributes:true,attributeFilter:['class'],subtree:true});
-}catch(e){}
+}catch(e){ if(window._mvAvale) window._mvAvale(e,'app.js/_mvOvKey'); }
 window._mvOvSync=_mvOvSync; window._mvOvDismissTop=_mvOvDismissTop;
 function pickVal(el,hid,cls){el.parentElement.querySelectorAll('.pchk').forEach(x=>{x.classList.remove('sel','vert','acre','phyt');});el.classList.add('sel',cls);document.getElementById(hid).value=el.dataset.val;}
 
@@ -10289,7 +10289,7 @@ window.addEventListener('load', function(){
     }
   } catch(e) {
     console.error('[Init erreur critique]',e);
-    try { loadData(); initLogin(); } catch(e2){}
+    try { loadData(); initLogin(); } catch(e2){ if(window._mvAvale) window._mvAvale(e2,'app.js/_reset'); }
   }
 
   // ── Intercepteurs erreurs globaux (v2.68) ──
@@ -10303,7 +10303,7 @@ window.addEventListener('load', function(){
   });
   // Etouffer un rejet deja pris en charge. Helper unique : deux blocs en ont besoin,
   // et un try/catch de plus par site ferait grimper le compteur C14 sans rien apporter.
-  var _mvHushRejet = function(ev){ try { ev.preventDefault(); } catch(_e){} };
+  var _mvHushRejet = function(ev){ try { ev.preventDefault(); } catch(_e){ if(window._mvAvale) window._mvAvale(_e,'app.js/_mvHushRejet'); } };
   window.addEventListener('unhandledrejection', function(e) {
     var reason = e.reason;
     var _rmsg = (reason && reason.message ? reason.message : String(reason)) || '';
@@ -10315,10 +10315,10 @@ window.addEventListener('load', function(){
     if (/INTERNAL ASSERTION FAILED/i.test(_rmsg)) {
       _mvHushRejet(e);
       window._mvFsAssertCount = (window._mvFsAssertCount || 0) + 1;
-      try { console.warn('[Firestore] assertion interne SDK ignorée (bug connu, non bloquant) x' + window._mvFsAssertCount + ' : ' + _rmsg); } catch(_e){}
+      try { console.warn('[Firestore] assertion interne SDK ignorée (bug connu, non bloquant) x' + window._mvFsAssertCount + ' : ' + _rmsg); } catch(_e){ if(window._mvAvale) window._mvAvale(_e,'app.js/_mvHushRejet#2'); }
       if (!window._mvFsAssertLogged) {
         window._mvFsAssertLogged = true;
-        try { if (window.fbAppendError) window.fbAppendError({ id:'fa'+Date.now(), ts:new Date().toISOString(), level:'info', cat:'firebase', msg:'Assertion interne SDK Firestore (bug connu, masquée a l’ecran)', detail:_rmsg }); } catch(_e){}
+        try { if (window.fbAppendError) window.fbAppendError({ id:'fa'+Date.now(), ts:new Date().toISOString(), level:'info', cat:'firebase', msg:'Assertion interne SDK Firestore (bug connu, masquée a l’ecran)', detail:_rmsg }); } catch(_e){ if(window._mvAvale) window._mvAvale(_e,'app.js/_mvHushRejet#3'); }
       }
       return;
     }
@@ -10395,7 +10395,7 @@ if ('serviceWorker' in navigator) {
     navigator.serviceWorker.register('./sw.js').then(function(reg) {
       if(DEBUG) console.log('[SW] Enregistré :', reg.scope);
       // Forcer vérification mise à jour SW à chaque chargement
-      reg.update().catch(function(){});
+      reg.update().catch(function(_e){ if(window._mvAvale) window._mvAvale(_e,'app.js/_mvHushRejet#4'); });
       // Si un SW est en attente, lui demander de prendre le contrôle immédiatement
       if(reg.waiting) reg.waiting.postMessage({type:'SKIP_WAITING'});
       // Détecter installation d'un nouveau SW et forcer skip
@@ -10431,8 +10431,8 @@ if ('serviceWorker' in navigator) {
     document.addEventListener('visibilitychange', function() {
       if (document.visibilityState === 'visible') {
         navigator.serviceWorker.getRegistration().then(function(reg) {
-          if (reg) reg.update().catch(function(){});
-        }).catch(function(){});
+          if (reg) reg.update().catch(function(_e){ if(window._mvAvale) window._mvAvale(_e,'app.js/_mvHushRejet#5'); });
+        }).catch(function(_e){ if(window._mvAvale) window._mvAvale(_e,'app.js/_mvHushRejet#6'); });
       }
     });
   });
@@ -10773,10 +10773,10 @@ function _eqtLoad(){
     var old=localStorage.getItem(oldKey);
     if(old){var oj=JSON.parse(old);if(Array.isArray(oj)&&oj.length){ if(EQUIPE_TACHE.__default===undefined)EQUIPE_TACHE.__default=oj.slice(); _eqtPushRecent(oj); }
       localStorage.removeItem(oldKey); _eqtSave(); }
-  }catch(e){}
+  }catch(e){ if(window._mvAvale) window._mvAvale(e,'app.js/_eqtLoad'); }
   _eqtLoaded=true;
 }
-function _eqtSave(){try{localStorage.setItem(_eqtKey(),JSON.stringify(EQUIPE_TACHE));localStorage.setItem(_eqtRecentKey(),JSON.stringify(EQUIPE_RECENT));}catch(e){}}
+function _eqtSave(){try{localStorage.setItem(_eqtKey(),JSON.stringify(EQUIPE_TACHE));localStorage.setItem(_eqtRecentKey(),JSON.stringify(EQUIPE_RECENT));}catch(e){ if(window._mvAvale) window._mvAvale(e,'app.js/_eqtSave'); }}
 function _eqtFor(task){ if(!_eqtLoaded)_eqtLoad(); var t=(EQUIPE_TACHE[task]!==undefined)?EQUIPE_TACHE[task]:(EQUIPE_TACHE.__default||[]); return _eqtClean(t); }
 function _eqtSet(task,team){ if(!_eqtLoaded)_eqtLoad(); team=_eqtClean(team); EQUIPE_TACHE[task]=team; _eqtPushRecent(team); _eqtSave(); }
 
@@ -10950,7 +10950,7 @@ function pQuickValidate(nom,evt){
   } else {
     _pvToast(label+' · '+nom+' · '+who, function(){pQuickUndoEntry(nom,task,prev,jid);});
   }
-  (async function(){try{var _d=_findDebutTache(nom,task,date)||date;var _m=await fetchMeteoMoyenne(_d,date);if(_m){jEntry.meteo_snapshot=_m;saveData('journal');}}catch(e){}})();
+  (async function(){try{var _d=_findDebutTache(nom,task,date)||date;var _m=await fetchMeteoMoyenne(_d,date);if(_m){jEntry.meteo_snapshot=_m;saveData('journal');}}catch(e){ if(window._mvAvale) window._mvAvale(e,'app.js/undo'); }})();
   var card=evt&&evt.target?evt.target.closest('.pcard'):null;
   if(!window.pShowDone&&card&&_pvCurDone(p,task)){
     card.classList.add('pv-removing');
@@ -11035,7 +11035,7 @@ function _prioItems(){
         .map(function(it){return {t:it.t,equipe:(typeof _eqtClean==='function')?_eqtClean(it.equipe||[]):(it.equipe||[])};});
     }
     if(typeof priorityTask!=='undefined'&&priorityTask&&_valid(priorityTask)) return [{t:priorityTask,equipe:[]}];
-  }catch(e){}
+  }catch(e){ if(window._mvAvale) window._mvAvale(e,'app.js/_valid'); }
   return [];
 }
 window._prioItems=_prioItems;
@@ -11070,7 +11070,7 @@ function _prioSeedEquipe(task){
     _prioEqSeeded[task]=true;
     var cur=_eqtFor(task).slice().sort().join('|'), tgt=it.equipe.slice().sort().join('|');
     if(cur!==tgt) _eqtSet(task, it.equipe.slice());
-  }catch(e){}
+  }catch(e){ if(window._mvAvale) window._mvAvale(e,'app.js/_prioSeedEquipe'); }
 }
 function _pvActions(p){
   if(!canWrite()||p.statut==='Arrachee')return '';
@@ -11212,8 +11212,8 @@ function _syncOpenDetail(){
 (function(){
   var _orig=window.showSyncBadge;
   window.showSyncBadge=function(msg,color){
-    try{if(typeof _orig==='function')_orig(msg,color);}catch(e){}
-    try{_syncFromMessage(msg);}catch(e){}
+    try{if(typeof _orig==='function')_orig(msg,color);}catch(e){ if(window._mvAvale) window._mvAvale(e,'app.js/showSyncBadge'); }
+    try{_syncFromMessage(msg);}catch(e){ if(window._mvAvale) window._mvAvale(e,'app.js/showSyncBadge#2'); }
   };
 })();
 window.addEventListener('online',function(){setTimeout(_syncRefresh,50);});
@@ -11221,14 +11221,14 @@ window.addEventListener('offline',function(){setTimeout(_syncRefresh,50);});
 // ré-injection défensive lors des navigations (pages statiques, mais sûr)
 ['goHub','goTo'].forEach(function(fn){
   var _o=window[fn];
-  if(typeof _o==='function'){window[fn]=function(){var r=_o.apply(this,arguments);try{_syncEnsureDots();_syncRefresh();}catch(e){}return r;};}
+  if(typeof _o==='function'){window[fn]=function(){var r=_o.apply(this,arguments);try{_syncEnsureDots();_syncRefresh();}catch(e){ if(window._mvAvale) window._mvAvale(e,'app.js/showSyncBadge#3'); }return r;};}
 });
 window._syncOpenDetail=_syncOpenDetail;
 window._syncEnsureDots=_syncEnsureDots;
 window._syncRefresh=_syncRefresh;
 // init (module déféré : DOM prêt)
-try{_syncEnsureDots();_syncRefresh();}catch(e){}
-setTimeout(function(){try{_syncEnsureDots();_syncRefresh();}catch(e){}},1200);
+try{_syncEnsureDots();_syncRefresh();}catch(e){ if(window._mvAvale) window._mvAvale(e,'app.js/showSyncBadge#4'); }
+setTimeout(function(){try{_syncEnsureDots();_syncRefresh();}catch(e){ if(window._mvAvale) window._mvAvale(e,'app.js/showSyncBadge#5'); }},1200);
 
 /* ════════════════════════════════════════════════════════════════════
    LOT 5 — Export PDF du rapport de saison [v4.49]
@@ -11487,7 +11487,7 @@ function exportRapportSaison(seasonNom){
 
   // ── Bascule LOCALE du pointeur de saison (zéro écriture Firestore) ──
   var _prevVisu=_VISU_SAISON;
-  function _rebuild(){ try{ Object.keys(TRAVAUX).forEach(function(n){delete TRAVAUX[n];}); TACHES.forEach(function(t){recalcTravaux(t.nom);}); window.TRAVAUX=TRAVAUX; }catch(e){} }
+  function _rebuild(){ try{ Object.keys(TRAVAUX).forEach(function(n){delete TRAVAUX[n];}); TACHES.forEach(function(t){recalcTravaux(t.nom);}); window.TRAVAUX=TRAVAUX; }catch(e){ if(window._mvAvale) window._mvAvale(e,'app.js/_rebuild'); } }
   _VISU_SAISON=S.nom; _rebuild();
 
   try{
@@ -11516,7 +11516,7 @@ function exportRapportSaison(seasonNom){
     }
     var sHd=0,sHt=0,sHr=0;
     var trows=taches.map(function(t){
-      try{recalcTravaux(t.nom);}catch(e){}
+      try{recalcTravaux(t.nom);}catch(e){ if(window._mvAvale) window._mvAvale(e,'app.js/dureeTache'); }
       var tw=TRAVAUX[t.nom]; if(!tw)return '';
       sHd+=tw.h_done||0; sHt+=tw.h_total||0; sHr+=tw.h_reste||0;
       var pc=tw.pct||0,c=pctCol(pc),du=dureeTache(t.nom);

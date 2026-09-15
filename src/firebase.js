@@ -145,10 +145,10 @@ if (_MV_EMU) {
     // 3. Démo visite guidée : force le bac à sable + drapeau de lancement (gagne sur tout le reste).
     if (_demoVisite) {
       localStorage.setItem('mavigne_tenant', 'domaine-dupont');
-      try { sessionStorage.setItem('mavigne_demo_visite', '1'); } catch (e) {}
+      try { sessionStorage.setItem('mavigne_demo_visite', '1'); } catch(e){ if(window._mvAvale) window._mvAvale(e,'firebase.js/fbCallFn'); }
       if(DEBUG) console.log('[Tenant] Démo visite guidée → domaine-dupont');
     }
-  } catch (e) {}
+  } catch(e){ if(window._mvAvale) window._mvAvale(e,'firebase.js/fbCallFn#2'); }
 })();
 
 // Guard format — rejeter tout slug au format invalide (multi-tenant : plus de whitelist fixe).
@@ -183,7 +183,7 @@ var TENANT_ID = (function () {
         reg.active.postMessage({ type: 'SET_TENANT', tenant: TENANT_ID });
         if(DEBUG) console.log('[Tenant→SW] Notifié :', TENANT_ID);
       }
-    }).catch(function () {});
+    }).catch(function(_e){ if(window._mvAvale) window._mvAvale(_e,'firebase.js/fbCallFn#3'); });
   }
 })();
 
@@ -281,7 +281,7 @@ var _offlineQueue = {};
 
 function _queueSave(key, value) {
   _offlineQueue[key] = value;
-  try { localStorage.setItem('mavigne_offline_queue', JSON.stringify(_offlineQueue)); } catch (e) {}
+  try { localStorage.setItem('mavigne_offline_queue', JSON.stringify(_offlineQueue)); } catch(e){ if(window._mvAvale) window._mvAvale(e,'firebase.js/_queueSave'); }
   _showOfflineQueueBadge();
 }
 
@@ -347,7 +347,7 @@ async function _flushQueue() {
       success = false;
     }
   }
-  try { localStorage.setItem('mavigne_offline_queue', JSON.stringify(_offlineQueue)); } catch (e) {}
+  try { localStorage.setItem('mavigne_offline_queue', JSON.stringify(_offlineQueue)); } catch(e){ if(window._mvAvale) window._mvAvale(e,'firebase.js/_flushQueue'); }
   if (success && keys.length > 0) {
     showSyncBadge(+ keys.length + ' modif. synchronisée' + (keys.length > 1 ? 's' : ''), '#3D6B27');
   } else if (!success) {
@@ -364,7 +364,7 @@ window._flushOfflineQueue = _flushQueue;
 var _onlineRetryTO = null;
 setInterval(function(){
   if (navigator.onLine && Object.keys(_offlineQueue).length > 0) {
-    _flushQueue().catch(function(){});
+    _flushQueue().catch(function(_e){ if(window._mvAvale) window._mvAvale(_e,'firebase.js/_flushQueue#2'); });
   }
 }, 30000);
 
@@ -401,7 +401,7 @@ window.addEventListener('online', function () {
         if (window.renderParcelles) window.renderParcelles();
         if (window.computePStats)  window.computePStats();
       }
-    }).catch(function () {});
+    }).catch(function(_e){ if(window._mvAvale) window._mvAvale(_e,'firebase.js/showSyncBadge'); });
   }, 2000);
 });
 
@@ -574,10 +574,10 @@ function _fbWipe(o) { Object.keys(o).forEach(function (k) { delete o[k]; }); }
 function _fbDeadCount() { return Object.keys(_fbDeadKeys).length; }
 window._fbDeadCount = _fbDeadCount;
 
-// ⚠️ UN SEUL catch{} vide dans tout ce bloc (cliquet C14 du preflight) : _fbSubscribe
+// ⚠️ UN SEUL catch(_e){} vide dans tout ce bloc (cliquet C14 du preflight) : _fbSubscribe
 // reutilise _fbUnsubOne au lieu de re-ecrire son propre try/catch.
 function _fbUnsubOne(key) {
-  try { if (_fbUnsubs[key]) _fbUnsubs[key](); } catch (e) {}
+  try { if (_fbUnsubs[key]) _fbUnsubs[key](); } catch(e){ if(window._mvAvale) window._mvAvale(e,'firebase.js/_fbUnsubOne'); }
   delete _fbUnsubs[key];
 }
 
@@ -1057,7 +1057,7 @@ async function _mvBlockDestructive(key, value) {
       if (window.logError) window.logError({ level:'critical', cat:'guard', msg:'fbSave ' + key + ' BLOQUE (anti-ecrasement)', detail:'cur=' + curN + ' new=' + newN });
       return true;
     }
-  } catch (e) {}
+  } catch(e){ if(window._mvAvale) window._mvAvale(e,'firebase.js/_mvBlockDestructive'); }
   return false;
 }
 
@@ -1122,7 +1122,7 @@ window.fbSave = async function (key, value) {
       var _pRes = await _retryAsync(function(){ return _saveParcellesMerged(value); }, 3, 1000);
       if (_pRes && _pRes.__mvBlocked) {
         if (window.logError) window.logError({ level:'critical', cat:'guard', msg:'fbSave parcelles BLOQUE (anti-ecrasement)', detail:'remoteProg='+_pRes.remoteProg+' mergedProg='+_pRes.mergedProg });
-        try { var _sH = await getDoc(fbDocRef('parcelles')); if (_sH.exists()) applyFbData('parcelles', _sH.data().value); } catch (e) {}
+        try { var _sH = await getDoc(fbDocRef('parcelles')); if (_sH.exists()) applyFbData('parcelles', _sH.data().value); } catch(e){ if(window._mvAvale) window._mvAvale(e,'firebase.js/fbSave'); }
         if (typeof showSyncBadge === 'function') showSyncBadge('\ud83d\udee1\ufe0f Sauvegarde ignoree (protection)', '#B5621A');
         if (window.showToast) window.showToast('Ecriture ignoree : protection anti-perte de donnees', '#7A1020');
         return { ok: false, blocked: true };
@@ -1130,7 +1130,7 @@ window.fbSave = async function (key, value) {
     } else {
       // #wipe : garde generique anti-ecrasement (lecture-avant-ecriture)
       if (await _mvBlockDestructive(key, value)) {
-        try { var _sH2 = await getDoc(fbDocRef(key)); if (_sH2.exists()) applyFbData(key, _sH2.data().value); } catch (e) {}
+        try { var _sH2 = await getDoc(fbDocRef(key)); if (_sH2.exists()) applyFbData(key, _sH2.data().value); } catch(e){ if(window._mvAvale) window._mvAvale(e,'firebase.js/fbSave#2'); }
         if (typeof showSyncBadge === 'function') showSyncBadge('\ud83d\udee1\ufe0f Sauvegarde ignoree (protection)', '#B5621A');
         if (window.showToast) window.showToast('Ecriture ignoree : protection anti-perte de donnees', '#7A1020');
         return { ok: false, blocked: true };
@@ -1142,7 +1142,7 @@ window.fbSave = async function (key, value) {
     // en ligne (aucun event 'online' pour la retenter). On profite de ce succès pour
     // vider la file — la modif coincée repart sans attendre un rechargement.
     if (key !== 'parcelles' && Object.keys(_offlineQueue).length > 0) {
-      setTimeout(function(){ _flushQueue().catch(function(){}); }, 300);
+      setTimeout(function(){ _flushQueue().catch(function(_e){ if(window._mvAvale) window._mvAvale(_e,'firebase.js/fbSave#3'); }); }, 300);
     }
     return { ok: true };
   } catch (e) {
@@ -1191,7 +1191,7 @@ window.fbSave = async function (key, value) {
     if(window.logError) window.logError({level:'info',cat:'firebase',msg:'fbSave échoué (3 tentatives): '+key,detail:String(e)});
     _queueSave(key, value);
     // Retenter bientôt même si on reste EN LIGNE (sinon la file ne se vide qu'au reload)
-    if (navigator.onLine) { clearTimeout(_onlineRetryTO); _onlineRetryTO = setTimeout(function(){ _flushQueue().catch(function(){}); }, 5000); }
+    if (navigator.onLine) { clearTimeout(_onlineRetryTO); _onlineRetryTO = setTimeout(function(){ _flushQueue().catch(function(_e){ if(window._mvAvale) window._mvAvale(_e,'firebase.js/fbSave#4'); }); }, 5000); }
     return { ok: false, queued: true, code: (e && e.code) || '' };
   }
 };
@@ -1245,7 +1245,7 @@ window._fbLoadEphy = async function () {
         if (window.applyEphy) window.applyEphy();
       }
     }
-  } catch (e) {}
+  } catch(e){ if(window._mvAvale) window._mvAvale(e,'firebase.js/_fbLoadEphy'); }
   // 2) Rafraîchir depuis Firestore (réseau requis)
   if (!navigator.onLine) {
     if (window._ephyStatus !== 'ready') { window._ephyStatus = 'offline'; if (window.applyEphy) window.applyEphy(); }
@@ -1272,7 +1272,7 @@ window._fbLoadEphy = async function () {
           updated: (d.updated && d.updated.seconds) ? { seconds: d.updated.seconds } : null
         };
         localStorage.setItem('mavigne_ephy_v1', JSON.stringify({ produits: arr, meta: metaSer }));
-      } catch (e) {}
+      } catch(e){ if(window._mvAvale) window._mvAvale(e,'firebase.js/_fbLoadEphy#2'); }
     } else {
       window._ephyStatus = 'empty';
     }
@@ -1350,7 +1350,7 @@ window._fbLoadAfterAuth = async function () {
 function _mvAuthReadyOnce(timeoutMs) {
   return new Promise(function (resolve) {
     var done = false, unsub = null;
-    var finish = function () { if (done) return; done = true; try { if (unsub) unsub(); } catch (e) {} clearTimeout(to); resolve(); };
+    var finish = function () { if (done) return; done = true; try { if (unsub) unsub(); } catch(e){ if(window._mvAvale) window._mvAvale(e,'firebase.js/finish'); } clearTimeout(to); resolve(); };
     var to = setTimeout(finish, timeoutMs || 3000);
     try { unsub = onAuthStateChanged(auth, function () { finish(); }); } catch (e) { finish(); }
   });
@@ -1421,7 +1421,7 @@ window._fbLoad = async function () {
       window.showOnboarding();
       return;
     }
-  } catch (e) {}
+  } catch(e){ if(window._mvAvale) window._mvAvale(e,'firebase.js/_fbLoad'); }
   if (!navigator.onLine) {
     if(DEBUG) console.log('[Offline] Démarrage hors ligne — chargement localStorage');
     _showOfflineQueueBadge();
@@ -2048,7 +2048,7 @@ window.fbSetTenant = function(slug) {
   if ('serviceWorker' in navigator) {
     navigator.serviceWorker.ready.then(function (reg) {
       if (reg.active) reg.active.postMessage({ type: 'SET_TENANT', tenant: slug });
-    }).catch(function () {});
+    }).catch(function(_e){ if(window._mvAvale) window._mvAvale(_e,'firebase.js/fbSetTenant'); });
   }
 };
 

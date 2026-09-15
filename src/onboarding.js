@@ -74,7 +74,7 @@ function obUpdateSlug() {
   var derived = obSlugify(val);
   // Domaine ouvert via lien d'invitation GT → le slug technique est IMPOSÉ (déjà au
   // registre, status « en attente »). Le prospect ne saisit que le nom d'affichage.
-  var linkSlug = ''; try { linkSlug = localStorage.getItem('mavigne_tenant')||''; } catch(e){}
+  var linkSlug = ''; try { linkSlug = localStorage.getItem('mavigne_tenant')||''; } catch(e){ if(window._mvAvale) window._mvAvale(e,'onboarding.js/obUpdateSlug'); }
   var slug = linkSlug || derived;
   _obDomaine.nom = val; _obDomaine.slug = slug;
   var preview = document.getElementById('ob-slug-preview');
@@ -324,7 +324,7 @@ async function obFinalize() {
 
   try {
     // 0. Vérifier que le tenant n'existe pas déjà
-    var _linkSlugNow = ''; try { _linkSlugNow = localStorage.getItem('mavigne_tenant')||''; } catch(e){}
+    var _linkSlugNow = ''; try { _linkSlugNow = localStorage.getItem('mavigne_tenant')||''; } catch(e){ if(window._mvAvale) window._mvAvale(e,'onboarding.js/obFinalize'); }
     // La garde de collision ne vaut que pour un slug choisi librement (sans lien). Pour un
     // domaine ouvert via lien GT, le slug EST déjà au registre (« en attente ») — c'est
     // onboardTenant qui tranche côté serveur (statut + absence de membres). On saute donc.
@@ -389,7 +389,7 @@ async function obFinalize() {
     if(window.fbSetTenant) window.fbSetTenant(_obDomaine.slug);
     if(finSub) finSub.textContent='Connexion…';
     var cred = await firebase.auth().signInWithEmailAndPassword(adminEmail, adminPwd);
-    try { await cred.user.getIdToken(true); } catch(e){}   // claims tenant/plan/essai frais
+    try { await cred.user.getIdToken(true); } catch(e){ if(window._mvAvale) window._mvAvale(e,'onboarding.js/onclick'); }   // claims tenant/plan/essai frais
 
     // 4. Appliquer dans les variables globales
     window.PARCELLES.length=0; _obParcelles.forEach(function(p){window.PARCELLES.push(p);});
@@ -457,7 +457,7 @@ function showOnboarding() {
   window._obAuthCred = null; // repartir propre a chaque ouverture d'onboarding
   // Pré-poser le slug du lien d'invitation (s'il existe) au cas où le prospect
   // validerait sans avoir déclenché obUpdateSlug.
-  try { var _ls = localStorage.getItem('mavigne_tenant'); if(_ls) _obDomaine.slug = _ls; } catch(e){}
+  try { var _ls = localStorage.getItem('mavigne_tenant'); if(_ls) _obDomaine.slug = _ls; } catch(e){ if(window._mvAvale) window._mvAvale(e,'onboarding.js/showOnboarding'); }
   // Le modele par TYPE de saison est mort : le nom d'une periode est libre. Le defaut
   // « Printemps 2026 » d'index.html est a la fois un nom de type et une annee figee en dur.
   // Corrige ici en JS (onboarding.js seul = aucun bump).

@@ -70,7 +70,7 @@ function ephyRender(){
   var attr = document.getElementById('ephy-attr');
   if(attr){
     var meta = window.EPHY_META || {}; var dt='';
-    try{ if(meta.updated && meta.updated.seconds) dt = new Date(meta.updated.seconds*1000).toLocaleDateString('fr-FR'); }catch(e){}
+    try{ if(meta.updated && meta.updated.seconds) dt = new Date(meta.updated.seconds*1000).toLocaleDateString('fr-FR'); }catch(e){ if(window._mvAvale) window._mvAvale(e,'tracteur.js/ephyRender'); }
     attr.innerHTML = 'Source : <b>Données E-Phy — Anses</b>'+(dt?' · MAJ '+dt:'')+' · Licence Ouverte<br>Données indicatives, non opposables.';
   }
   var all = _ephyList();
@@ -174,7 +174,7 @@ function renderPhytoTrac(){
     if(darBase>0&&t.date){
       const ap=new Date(t.date);const fin=new Date(ap.getTime()+darBase*86400000);
       const reste=Math.ceil((fin-now)/86400000);
-      if(reste>0) darBadge='<span style="background:var(--rouge-pale);color:var(--rouge);font-size:10px;font-weight:700;padding:2px 8px;border-radius:8px">DAR '+reste+'j</span>';
+      if(reste>0) darBadge='<span style="background:var(--rouge-pale);color:var(--rouge-tx,#A0291E);font-size:10px;font-weight:700;padding:2px 8px;border-radius:8px">DAR '+reste+'j</span>';
     }
     const dreInfo=dreEffectif(m.drae,m.type,m.dreH,m.dreHc);
     let draeBadge='';
@@ -1246,7 +1246,7 @@ function renderTracteurSet(){
     var dot='<div class="trac-set-dot" style="background:'+couleurTracType(t.type)+'"></div>';
     var badges='';
     if(t.traitementOnly)badges+='<span style="font-size:9px;background:var(--orange-pale);color:var(--orange);border-radius:5px;padding:1px 6px;margin-left:4px">Traitement</span>';
-    if(enR)badges+='<span style="font-size:9px;background:var(--rouge-pale);color:var(--rouge);border-radius:5px;padding:1px 6px;margin-left:4px">En réparation</span>';
+    if(enR)badges+='<span style="font-size:9px;background:var(--rouge-pale);color:var(--rouge-tx,#A0291E);border-radius:5px;padding:1px 6px;margin-left:4px">En réparation</span>';
     return '<div class="trac-set-card"><div style="display:flex;align-items:center;gap:12px">'+dot
       +'<div><div style="display:flex;align-items:center;gap:4px"><span style="font-weight:700;font-size:var(--pt-base,14px)">'+_escHtml(t.nom)+'</span>'+badges+'</div>'
       +'<div style="font-size:12px;color:var(--texte-doux);margin-top:2px">'+_escHtml(t.modele||'—')+'</div>'
@@ -2154,7 +2154,7 @@ function toggleSessionParcelle(nom,row){
   }
   if(estDecoche){
     s.parcellesFaites.splice(idx,1);
-  if(window._recalcPlantationTrous && _recalcPlantationTrous()){ try{ _saveData('parcelles'); }catch(e){} }
+  if(window._recalcPlantationTrous && _recalcPlantationTrous()){ try{ _saveData('parcelles'); }catch(e){ if(window._mvAvale) window._mvAvale(e,'tracteur.js/blink'); } }
     _saveData('sessions');renderSessionProgress();renderSDParcelles();
     return;
   }
@@ -2195,7 +2195,7 @@ function confirmerValidationChamp(){
   var data={};
   if(act&&act.champCustom&&act.champCustom.label){data[act.champCustom.label]=val;}
   s.parcellesFaites.push({nom:_ocvNomParcelle,data:data});
-  if(window._recalcPlantationTrous && _recalcPlantationTrous()){ try{ _saveData('parcelles'); }catch(e){} }
+  if(window._recalcPlantationTrous && _recalcPlantationTrous()){ try{ _saveData('parcelles'); }catch(e){ if(window._mvAvale) window._mvAvale(e,'tracteur.js/confirmerValidationChamp'); } }
   var nomAff=_ocvNomParcelle;
   _ocvNomParcelle=null;
   _closeOv(null,'ovChampValidation');
@@ -2255,7 +2255,7 @@ function deleteSessionFromDetail(btn){
   if(!id)return;
   var idx=SESSIONS.findIndex(function(x){return x.id===id;});
   if(idx>=0)SESSIONS.splice(idx,1);
-  if(window._recalcPlantationTrous && _recalcPlantationTrous()){ try{ _saveData('parcelles'); }catch(e){} }
+  if(window._recalcPlantationTrous && _recalcPlantationTrous()){ try{ _saveData('parcelles'); }catch(e){ if(window._mvAvale) window._mvAvale(e,'tracteur.js/deleteSessionFromDetail'); } }
   window.tracSessionId=null;
   if(navigator.vibrate)navigator.vibrate([80,60,80]);
   _saveData('sessions');
@@ -2641,7 +2641,7 @@ function _fillTracPickWithId(pfx, actNom, selId, defId){
           '<div style="font-size:10px;color:'+col+'">'+t.type+(isDefaut?' · Défaut pour '+actNom:'')+'</div>'+
         '</div>'+
       '</div>'+
-      (rep?'<span style="font-size:10px;font-weight:600;background:var(--rouge-pale);color:var(--rouge);border-radius:6px;padding:2px 8px">En répar.</span>':'')+
+      (rep?'<span style="font-size:10px;font-weight:600;background:var(--rouge-pale);color:var(--rouge-tx,#A0291E);border-radius:6px;padding:2px 8px">En répar.</span>':'')+
       ((!rep&&isDefaut)?'<span style="font-size:10px;background:var(--acier-pale);color:var(--acier-med);border-radius:6px;padding:2px 8px">Défaut</span>':'')+
     '</div>';
   }).join('');

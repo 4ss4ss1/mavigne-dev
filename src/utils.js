@@ -23,7 +23,7 @@ export const GT_ADMIN_EMAIL = 'ngdevpro@gmail.com';
 // WHATS_NEW   : tableau vide = modal desactive pour cette version.
 // Format item : { emoji:'📅', titre:'Titre court', desc:'Phrase utilisateur.' }
 // Regle : seulement les changements visibles par les utilisateurs.
-export const APP_VERSION = '7.22';
+export const APP_VERSION = '7.23';
 // ════ Journal des nouveautés (récap cumulatif) ════
 // Une entrée par version, la PLUS RÉCENTE EN HAUT : { v:'5.10', items:[ {emoji,titre,desc}, … ] }
 // À chaque release visible → AJOUTER un bloc en tête (ne pas remplacer). items:[] = release technique (rien à afficher).
@@ -715,6 +715,10 @@ window._mvGraphRepeindre = function(){
 };
 
 export const WHATS_NEW = [
+  { v: '7.23', items: [
+    { emoji: 'contraste', titre: 'Des pastilles illisibles en mode sombre',
+      desc: "Les petites pastilles de couleur — celles qui portent un stade, un statut, un rappel — écrivaient leur texte dans la même teinte que leur fond dès que l'application passait en <b>mode sombre</b>. Sur fond crème le contraste était bon, et personne ne voyait le problème ; sur fond noir il tombait à trois fois moins que ce qu'il faut pour lire confortablement. Quatre familles sont corrigées — terre, bleu, violet et rouge — avec une <b>encre distincte du fond</b>, comme les étiquettes du planning en avaient déjà une. <b>Rien ne change en mode clair</b> : les teintes y sont exactement celles d'avant, au chiffre près." }
+  ] },
   { v: '7.22', items: [
     { emoji: 'eprouvette', titre: 'Sur une cuve pas finie, l’avertissement du Chai visait le mauvais geste',
       desc: "Il demandait d’attendre la fin de fermentation «\u00a0avant de sulfiter\u00a0». En rouge de "
@@ -2211,7 +2215,7 @@ let _whatsNewShown = false;
 export function checkWhatsNew() {
   if (_whatsNewShown) return;
   var seen = localStorage.getItem('mavigne_last_seen_version');
-  if (!seen) { try{ localStorage.setItem('mavigne_last_seen_version', APP_VERSION); }catch(e){} return; } // 1er install : pas de recap
+  if (!seen) { try{ localStorage.setItem('mavigne_last_seen_version', APP_VERSION); }catch(e){ if(window._mvAvale) window._mvAvale(e,'utils.js/checkWhatsNew'); } return; } // 1er install : pas de recap
   if (_cmpVer(seen, APP_VERSION) >= 0) return; // déjà à jour (ou downgrade)
   var blocks = _whatsNewSince(seen);
   if (!blocks.length) return; // que des versions techniques → rien à montrer, curseur inchangé
@@ -2383,7 +2387,7 @@ export function showToast(msg, color) {
   color = color || '#3D6B27';
   // Capture silencieuse des toasts d'erreur/alerte (accompagne un signalement)
   if (_mvSuppressToastCapture) { _mvSuppressToastCapture = false; }
-  else { try { _mvCaptureToastErr(msg, color); } catch(e){} }
+  else { try { _mvCaptureToastErr(msg, color); } catch(e){ if(window._mvAvale) window._mvAvale(e,'utils.js/showToast'); } }
   var t = document.getElementById('mv-toast');
   var d = document.getElementById('mv-toast-dot');
   var m = document.getElementById('mv-toast-msg');
@@ -2437,12 +2441,12 @@ export function applyTheme(mode) {
   });
 }
 export function setThemeMode(mode) {
-  try { localStorage.setItem('mavigne_theme', mode); } catch(e) {}
+  try { localStorage.setItem('mavigne_theme', mode); } catch(e){ if(window._mvAvale) window._mvAvale(e,'utils.js/setThemeMode'); }
   applyTheme(mode);
 }
 export function initTheme() {
   var saved = 'auto';
-  try { saved = localStorage.getItem('mavigne_theme') || 'auto'; } catch(e) {}
+  try { saved = localStorage.getItem('mavigne_theme') || 'auto'; } catch(e){ if(window._mvAvale) window._mvAvale(e,'utils.js/initTheme'); }
   applyTheme(saved);
   // Écouter les changements système en mode Auto
   if(window.matchMedia) {
@@ -2450,7 +2454,7 @@ export function initTheme() {
       try {
         var m = localStorage.getItem('mavigne_theme') || 'auto';
         if(m === 'auto') applyTheme('auto');
-      } catch(e) {}
+      } catch(e){ if(window._mvAvale) window._mvAvale(e,'utils.js/initTheme#2'); }
     });
   }
 }
@@ -2562,7 +2566,7 @@ function _mvCaptureToastErr(msg, color) {
     log.unshift(entry);
     if (log.length > _ERR_MAX) log.length = _ERR_MAX;
     localStorage.setItem(_ERR_KEY, JSON.stringify(log));
-  } catch(e) {}
+  } catch(e){ if(window._mvAvale) window._mvAvale(e,'utils.js/_mvCaptureToastErr'); }
 }
 
 function _escHtml(s) {
@@ -2586,7 +2590,7 @@ function _swNotify(title, opts) {
   if (navigator.serviceWorker && navigator.serviceWorker.controller) {
     navigator.serviceWorker.ready.then(function(reg){ reg.showNotification(title, opts); });
   } else if ('Notification' in window && Notification.permission === 'granted') {
-    try { new Notification(title, opts); } catch(e) {}
+    try { new Notification(title, opts); } catch(e){}
   }
 }
 window._swNotify = _swNotify;
@@ -2594,6 +2598,43 @@ window._swNotify = _swNotify;
 function _errCurrentPage() {
   var a = document.querySelector('.page.active');
   return a ? (a.id || '').replace('page-', '') : '—';
+}
+
+/* ═══════════════════════════════════════════════════════════════════════════
+   L'ERREUR AVALEE A MAINTENANT UN NOM — lot AVALE-1
+   ═══════════════════════════════════════════════════════════════════════════
+   223 `catch{}` vides dans src/, dont 152 dans app.js. Le preflight les compte
+   depuis des mois (C14) : « c'est le motif qui a permis au bug
+   `.window.currentUser` de survivre des mois et aux refus de lecture d'etre
+   invisibles ». Le compteur descendait d'un cran de temps en temps. Il ne
+   descendait pas.
+
+   ⚠️ CES CATCH NE SE VALENT PAS. `try{localStorage.removeItem(...)}catch{}` est
+   du meilleur effort legitime — navigation privee, quota. Mais
+   `try{ renderParcelles() }catch{}` et `try{ _recalcSurfTotale() }catch{}`
+   avalent un ECHEC DE RENDU et un CALCUL DE SURFACE FAUX. On ne peut pas les
+   distinguer par relecture de 223 emplacements sans se tromper quelque part :
+   on les rend tous TRACABLES, et le tri se fera sur des donnees.
+
+   ★★★ NIVEAU 'info', ET C'EST DELIBERE. `_ERR_SEND_LVL` n'envoie a Firestore que
+   critical / error / warning : une erreur avalee ne remontera donc PAS dans le
+   journal du domaine et n'inondera personne. Elle s'ecrit en local, ou l'ecran
+   Admin la lit deja. Ce lot ouvre une fenetre, il ne declenche pas d'alarme.
+
+   ⚠️⚠️ UNE FOIS PAR EMPLACEMENT ET PAR SESSION. `logError` relit et reecrit tout
+   le journal localStorage a chaque appel : appele depuis une boucle de rendu,
+   il couterait plus cher que le defaut qu'il signale. Le compteur reste, lui,
+   et `window._mvAvalees` le rend lisible en console. */
+var _MV_AVALEES = {};
+export function _mvAvale(e, ou) {
+  var k = ou ? String(ou) : '?';
+  _MV_AVALEES[k] = (_MV_AVALEES[k] || 0) + 1;
+  if (_MV_AVALEES[k] > 1) return;   /* deja signale cette session */
+  if (typeof logError !== 'function') return;
+  var d = '';
+  if (e && (e.stack || e.message)) d = String(e.stack || e.message).slice(0, 300);
+  else if (e !== undefined) d = String(e).slice(0, 300);
+  logError({ level: 'info', cat: 'avale', msg: 'erreur avalée dans ' + k, detail: d });
 }
 
 export function logError(opts) {
@@ -2688,7 +2729,7 @@ var _ERR_FRESH_MS = 86400000; // 24 h
 //    callable ne l'est pas.
 function _mvPickReportErrors() {
   var all = [];
-  try { all = JSON.parse(localStorage.getItem(_ERR_KEY) || '[]'); } catch(e) {}
+  try { all = JSON.parse(localStorage.getItem(_ERR_KEY) || '[]'); } catch(e){ if(window._mvAvale) window._mvAvale(e,'utils.js/_mvPickReportErrors'); }
   if (!Array.isArray(all)) return [];
   var now = Date.now();
 
@@ -2795,7 +2836,7 @@ function openReport() {
   if (window.openOv) window.openOv('ovReport');
 }
 function closeReport() {
-  try { if (window.closeOv) { window.closeOv(null, 'ovReport'); return; } } catch(e) {}
+  try { if (window.closeOv) { window.closeOv(null, 'ovReport'); return; } } catch(e){ if(window._mvAvale) window._mvAvale(e,'utils.js/closeReport'); }
   var ov = document.getElementById('ovReport');
   if (ov) { ov.classList.remove('open'); ov.style.zIndex = ''; }
 }
@@ -3864,6 +3905,8 @@ window.getRoleLabel       = getRoleLabel;
 window.isPilotage         = isPilotage;
 window.canSeePilotage     = canSeePilotage;
 window.logError           = logError;
+window._mvAvale           = _mvAvale;
+window._mvAvalees         = _MV_AVALEES;   /* lisible en console : ou ca avale, et combien */
 window._closeCriticalOverlay = _closeCriticalOverlay;
 window.openReport         = openReport;
 window.closeReport        = closeReport;

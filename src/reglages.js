@@ -1223,9 +1223,9 @@ function _tnRender(){
     var exact=hits.some(function(c){return String(c.label||c.nom).toLowerCase()===ql||String(c.nom).toLowerCase()===ql;});
     if(q&&!exact){
       h+='<div style="'+_TN_OPT+';background:var(--terre-pale);border:1.5px dashed rgba(138,90,56,0.45)" onclick="window._tnLibre()">'
-        +'<span style="flex:1;min-width:0"><span style="display:block;font-size:13.5px;font-weight:600;color:var(--terre)">Créer «\u00a0'+_escHtml(q)+'\u00a0»</span>'
+        +'<span style="flex:1;min-width:0"><span style="display:block;font-size:13.5px;font-weight:600;color:var(--terre-tx,#8A5A38)">Créer «\u00a0'+_escHtml(q)+'\u00a0»</span>'
         +'<span style="display:block;font-size:var(--pt-micro,11px);color:var(--texte-doux);margin-top:1px">Travail du domaine, hors convention \u2014 au temps réel</span></span>'
-        +'<span style="font-size:var(--pt-sm,17px);color:var(--terre);flex:none">+</span></div>';
+        +'<span style="font-size:var(--pt-sm,17px);color:var(--terre-tx,#8A5A38);flex:none">+</span></div>';
     }
     if(!q) h+='<div style="'+_TN_HINT+'">Le nom que tu tapes n\u2019y est pas\u00a0? Le panneau proposera de créer le travail du domaine.</div>';
     h+='<div class="tcv-lnk" style="color:var(--terre);margin-top:4px" onclick="window._tnVoirBareme()">Voir le barème de la convention et vos écartements</div>';
@@ -2090,7 +2090,7 @@ function editMembre(nom){
        '<div class="fl" style="margin-top:14px">Accès</div>'
       +'<div style="background:#f8fafc;border:1.5px solid #e5e7eb;border-radius:10px;padding:11px 12px">'
       +'<div style="font-size:var(--pt-micro,11px);color:var(--texte-doux,#6b7280);line-height:1.5;margin-bottom:9px">Génère un nouveau mot de passe, affiché <b>une seule fois</b>. '+_escHtml(nom)+' devra le remplacer à sa prochaine connexion.</div>'
-      +'<button type="button" class="mbtn" id="em-reset-pwd" onclick="_mvResetMemberPwd(\''+_escAttr(m.nom)+'\')" style="width:100%;margin:0;background:var(--terre-pale,#F3EADF);color:var(--terre,#8A5A38);border:1.5px solid var(--terre,#8A5A38)">Réinitialiser le mot de passe</button>'
+      +'<button type="button" class="mbtn" id="em-reset-pwd" onclick="_mvResetMemberPwd(\''+_escAttr(m.nom)+'\')" style="width:100%;margin:0;background:var(--terre-pale,#F3EADF);color:var(--terre-tx,#8A5A38);border:1.5px solid var(--terre,#8A5A38)">Réinitialiser le mot de passe</button>'
       +'</div>'):'');
   window.openOv('ovEditMembre');
   _emhRender(nom);
@@ -2828,7 +2828,7 @@ function openClotureFlow(){
   var sa = (window.getSaisonActive && window.getSaisonActive()) || null;
   if(!sa){ if(window.showToast)showToast('Aucune saison active','#B85A1A'); return; }
   var actNom = sa.nom || '';
-  if(window._visuSaison && window._visuSaison()!==actNom && window._switchSaison){ try{ window._switchSaison(actNom); }catch(e){} }
+  if(window._visuSaison && window._visuSaison()!==actNom && window._switchSaison){ try{ window._switchSaison(actNom); }catch(e){ if(window._mvAvale) window._mvAvale(e,'reglages.js/openClotureFlow'); } }
   var hcd = (window.getHomeCardData) ? window.getHomeCardData() : {pctGlobal:0};
   var pct = (hcd && typeof hcd.pctGlobal==='number') ? hcd.pctGlobal : 0;
   var parcActives = (window.PARCELLES||[]).filter(function(p){ return p && p.statut!=='Arrachee'; });
@@ -3297,10 +3297,10 @@ function _docsCan(mod){
 }
 function _docsEsc(s){ return (typeof window._escHtml==='function') ? window._escHtml(String(s==null?'':s)) : String(s==null?'':s); }
 function _docsFmTag(fm){
-  if(fm==='pdf')  return '<span style="font-size:var(--pt-nano,9.5px);font-weight:600;padding:2.5px 7px;border-radius:20px;background:var(--rouge-pale);color:var(--rouge)">PDF</span>';
+  if(fm==='pdf')  return '<span style="font-size:var(--pt-nano,9.5px);font-weight:600;padding:2.5px 7px;border-radius:20px;background:var(--rouge-pale);color:var(--rouge-tx,#A0291E)">PDF</span>';
   if(fm==='csv')  return '<span style="font-size:var(--pt-nano,9.5px);font-weight:600;padding:2.5px 7px;border-radius:20px;background:var(--vert-pale);color:var(--vert)">Excel / CSV</span>';
   if(fm==='json') return '<span style="font-size:var(--pt-nano,9.5px);font-weight:600;padding:2.5px 7px;border-radius:20px;background:var(--acier-pale);color:var(--acier)">JSON</span>';
-  if(fm==='imp')  return '<span style="font-size:var(--pt-nano,9.5px);font-weight:600;padding:2.5px 7px;border-radius:20px;background:var(--bleu-pale);color:var(--bleu)">Fichier \u00e0 choisir</span>';
+  if(fm==='imp')  return '<span style="font-size:var(--pt-nano,9.5px);font-weight:600;padding:2.5px 7px;border-radius:20px;background:var(--bleu-pale);color:var(--bleu-tx,#1A4A7A)">Fichier \u00e0 choisir</span>';
   return '<span style="font-size:var(--pt-nano,9.5px);font-weight:600;padding:2.5px 7px;border-radius:20px;background:var(--gris-clair);color:var(--texte-doux)">R\u00e9glage</span>';
 }
 function _docsChip(txt,bg,col){

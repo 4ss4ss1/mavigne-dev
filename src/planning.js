@@ -171,7 +171,7 @@ function _pl2YearTabs(){
     var _tn=localStorage.getItem('mavigne_tenant')||'';
     var _raw=localStorage.getItem('mavigne_canic_'+_tn);
     if(_raw){ var _o=JSON.parse(_raw); if(_o&&_o.deb)_planCanic.deb=_o.deb; if(_o&&_o.fin)_planCanic.fin=_o.fin; if(_o&&typeof _o.continu==='boolean')_planCanic.continu=_o.continu; }
-  }catch(_e){}
+  }catch(_e){ if(window._mvAvale) window._mvAvale(_e,'planning.js/_pl2YearTabs'); }
 })();
 
 // Domaine de référence : templates personnels NON distribués aux autres tenants (flag local, indépendant d'app.js).
@@ -3493,7 +3493,7 @@ function _planLegalCard(mbr){
   var breaches=_planLegalBreaches(mbr,planMonth);
   var worked=_planWorkMonth(mbr,planMonth);
   var headPill=breaches>0
-    ?'<span style="margin-left:auto;font-size:10px;font-weight:700;color:var(--rouge);background:var(--rouge-pale);border:1px solid rgba(220,38,38,0.4);padding:2px 8px;border-radius:20px">\u26a0 '+breaches+' sem. &gt; max</span>'
+    ?'<span style="margin-left:auto;font-size:10px;font-weight:700;color:var(--rouge-tx,#A0291E);background:var(--rouge-pale);border:1px solid rgba(220,38,38,0.4);padding:2px 8px;border-radius:20px">\u26a0 '+breaches+' sem. &gt; max</span>'
     :'<span style="margin-left:auto;font-size:10px;font-weight:700;color:var(--vert-med);background:var(--vert-pale);border:1px solid rgba(61,107,39,0.35);padding:2px 8px;border-radius:20px">\u2713 conforme</span>';
   var border=breaches>0?'1.5px solid var(--rouge)':'1px solid var(--gris-clair)';
   var h='<div class="plan-card" style="border:'+border+';flex-direction:column;align-items:stretch;margin-bottom:14px">';
@@ -4284,7 +4284,7 @@ function _planRenderCadre(){
         +'<button class="plan-btn-saisir" onclick="planOpenGridEditor(\''+id+'\')">Modifier</button>'
         +'<button class="plan-btn-pdf" onclick="planExportCSV(\''+id+'\')">CSV \u2193</button>'
         +'<button class="plan-btn-pdf" style="background:var(--plan-acc-pale);color:var(--plan-acc);border-color:rgba(123,109,184,0.4)" onclick="planDirectImportCSV(\''+id+'\')">CSV \u2191</button>'
-        +(!isDefault?'<button class="plan-btn-pdf" style="background:var(--rouge-pale);color:var(--rouge);border-color:rgba(220,38,38,0.3)" onclick="planAskDeleteTemplate(\''+id+'\')">Suppr.</button>':'')
+        +(!isDefault?'<button class="plan-btn-pdf" style="background:var(--rouge-pale);color:var(--rouge-tx,#A0291E);border-color:rgba(220,38,38,0.3)" onclick="planAskDeleteTemplate(\''+id+'\')">Suppr.</button>':'')
       +'</div>'
     +'</div>';
     if(delConfirm){
@@ -5182,7 +5182,7 @@ function _planCaniculeFix(){
   Object.keys(_m).forEach(function(k){ var el=document.getElementById(_m[k]); if(el&&_planCanic[k]!=null)el.value=_planCanic[k]; });
 }
 function _planCanicSave(){
-  try{ var tn=localStorage.getItem('mavigne_tenant')||''; localStorage.setItem('mavigne_canic_'+tn, JSON.stringify({deb:_planCanic.deb,fin:_planCanic.fin,continu:_planCanic.continu})); }catch(e){}
+  try{ var tn=localStorage.getItem('mavigne_tenant')||''; localStorage.setItem('mavigne_canic_'+tn, JSON.stringify({deb:_planCanic.deb,fin:_planCanic.fin,continu:_planCanic.continu})); }catch(e){ if(window._mvAvale) window._mvAvale(e,'planning.js/_planCanicSave'); }
 }
 function _planHasCanicule(nom){
   var mE=PLANNING_ENTRIES[nom]; if(!mE)return false;
