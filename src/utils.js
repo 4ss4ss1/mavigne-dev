@@ -23,7 +23,7 @@ export const GT_ADMIN_EMAIL = 'ngdevpro@gmail.com';
 // WHATS_NEW   : tableau vide = modal desactive pour cette version.
 // Format item : { emoji:'📅', titre:'Titre court', desc:'Phrase utilisateur.' }
 // Regle : seulement les changements visibles par les utilisateurs.
-export const APP_VERSION = '7.24';
+export const APP_VERSION = '7.25';
 // ════ Journal des nouveautés (récap cumulatif) ════
 // Une entrée par version, la PLUS RÉCENTE EN HAUT : { v:'5.10', items:[ {emoji,titre,desc}, … ] }
 // À chaque release visible → AJOUTER un bloc en tête (ne pas remplacer). items:[] = release technique (rien à afficher).
@@ -715,6 +715,25 @@ window._mvGraphRepeindre = function(){
 };
 
 export const WHATS_NEW = [
+  { v: '7.25', items: [
+    { emoji: 'calendrier', titre: 'Une absence peut ne couvrir qu’une partie de la journée',
+      desc: "Resté chez lui l’après-midi, parti une heure plus tôt, arrivé en retard\u00a0: dans la feuille du jour, "
+        + "<b>Absence › Une partie seulement</b> se note de telle heure à telle heure, avec un raccourci pour le matin, "
+        + "l’après-midi, un retard ou un départ, puis un <b>motif</b>. Deux motifs arrivent\u00a0: <b>Personnel (autorisé)</b> "
+        + "et <b>Décidé par le domaine</b>. L’écran compte les heures manquées, coupure déduite, et dit avant d’enregistrer "
+        + "ce qu’elles retirent du compteur." },
+    { emoji: 'crayon', titre: 'Un horaire raccourci dit pourquoi',
+      desc: "Raccourcir une journée dans «\u00a0Travaillé\u00a0» ne demandait qu’une heure de fin. L’écran demande "
+        + "maintenant le <b>motif</b>\u00a0: personnel, injustifié, décidé par le domaine, arrêt de travail. Les horaires "
+        + "chaleur et les jours d’échange n’ont pas à le dire\u00a0: c’est le domaine qui les pose." },
+    { emoji: 'balance', titre: 'Les heures sup deviennent du temps de récup majoré',
+      desc: "À partir de septembre 2026, les heures faites au-delà du planning gardent leur taux\u00a0: <b>25\u00a0%</b> "
+        + "jusqu’à la 43e heure de la semaine, <b>50\u00a0%</b> au-delà — soit 1\u00a0h\u00a015 ou 1\u00a0h\u00a030 de récup "
+        + "par heure. Une journée écourtée se retire d’abord de ce temps, <b>au taux normal</b>\u00a0: 1\u00a0h manquée, "
+        + "1\u00a0h de récup en moins. Ce qui n’est pas couvert est retenu sur la paie, sauf si le domaine a arrêté la "
+        + "journée. Arrêt de travail, formation, événement familial et congé sans solde ne retirent rien. L’onglet "
+        + "Compteur de la fiche et le relevé montrent tout le calcul. Les mois d’avant septembre ne changent pas." }
+  ] },
   { v: '7.24', items: [
     { emoji: 'cuve', titre: 'L’étape « Décuvage » s’appelle « Pressurage », et la cuve reste suivie',
       desc: "Poser une cuve à l’étape «\u00a0Décuvage\u00a0» la sortait du suivi\u00a0: plus de bouton "
@@ -3051,14 +3070,15 @@ var MV_AIDE = {
       ['Toucher une case', "la coche. Toucher le numéro du jour, en haut, coche toute l’équipe ce jour-là ; toucher un nom coche sa ligne ; toucher « Salarié », dans le coin, coche tout ce qui est affiché. Un deuxième appui décoche."],
       ['La barre du bas', "dit qui est coché et à quelles dates, puis propose ce qui s’applique vraiment à cette sélection — heures, congé, absence, récup, chaleur, effacer. Une case ou trente, c’est le même geste et la même fiche."],
       ['Sur une période plus longue', "que la vue affichée, deux boutons au-dessus de la grille posent des congés ou des horaires chaleur du jour au jour, pour plusieurs salariés."],
-      ['Les heures dues', "se décomptent sur une absence injustifiée ou un retard. Un arrêt de travail est neutre, une formation compte comme du travail."],
-      ['Un retard se note par l’heure d’arrivée', ": indiquez l’heure à laquelle la personne est arrivée, l’écran calcule ce qui manque. La journée est payée à hauteur de ce qui a été fait, et les heures manquées tirent sur le compteur d’heures sup, comme une récupération — sans qu’aucun réglage soit nécessaire. Arriver après la fin prévue n’est plus un retard : la saisie bascule seule en absence injustifiée."],
+      ['Une journée écourtée', "se retire d’abord du compteur d’heures sup, au taux normal : 1 h manquée = 1 h de récup en moins, quel que soit le motif. Ce que le compteur ne couvre pas est retenu sur la paie, sauf si le domaine a arrêté la journée : il attend alors les prochaines heures sup. Un arrêt de travail, une formation, un événement familial ou un congé sans solde ne retirent rien. Ces règles valent à partir de septembre 2026 ; les mois d’avant gardent la leur."],
+      ['Une absence sur une partie de la journée', "se note dans Absence, « Une partie seulement » : de telle heure à telle heure, ou un raccourci — le matin, l’après-midi, arrivé en retard, parti plus tôt — puis le motif. L’écran calcule les heures manquées, coupure déduite, dessine la journée et dit avant d’enregistrer ce qu’elles retirent du compteur. Un horaire raccourci dans « Travaillé » demande aussi son motif, sauf les horaires chaleur et les jours d’échange."],
+      ['Les heures sup et la récup', "l’onglet Compteur de la fiche d’un salarié montre les heures sup faites avec leur taux — 25 % jusqu’à la 43e heure de la semaine, 50 % au-delà —, le temps de récup qu’elles donnent (1 h 15 ou 1 h 30 par heure) et ce qui en a été retiré, puis le mois en grille et le détail semaine par semaine. Un jour se touche pour l’ouvrir. Si vos heures sup se paient, les taux sont à porter en paie au lieu d’entrer au compteur."],
       ['Présence, coupure, heures dues', "trois nombres qui se ressemblent et ne disent pas la même chose. La ‹‹ présence ›› va de l’arrivée au départ. La ‹‹ coupure ›› est le temps non travaillé au milieu : sa durée et son heure sont fixées par le domaine, dans la roue crantée du Planning, ce n’est pas un moment que chacun choisit. Les ‹‹ heures dues ›› sont ce qui part en paie et alimente le compteur des 1 607 h. Une journée de 09:00 à 16:00 avec une heure de coupure fait 7 h de présence et 6 h dues."],
       ['Le planning de l’année', "s’imprime depuis le même endroit : le rythme sur douze mois, avec les heures de prise et de fin de service et la coupure déjeuner. Une page par modèle de semaine — c’est le document qu’on remet à l’équipe pour l’année à venir. Une variante nominative sort la même grille pour une seule personne, bornée à ses contrats, avec ses jours de formation et ses congés déjà posés."],
       ['Le relevé mensuel', "s’imprime depuis la roue crantée du Planning, bloc Documents. C’est un relevé d’heures, pas un bulletin de paie."],
       ['Le relevé d’un seul salarié', "s’imprime au même endroit, en choisissant la personne et le mois : son mois jour par jour, ses contrats avec leurs coupures, ses congés payés, son compteur d’heures et son annualisation, avec deux lignes de signature. Le bouton PDF de sa fiche sort exactement le même document. Les anciens salariés y figurent aussi, marqués comme tels : un relevé est un document d’histoire."],
       ['Un ancien salarié', "reste compté dans les mois où il était sous contrat. Reculez d’un mois dans Les gens : il reprend sa ligne dans la liste, avec ses heures, et il disparaît de la section Anciens salariés ce mois-là. Passer une fiche en Inactif ferme son accès à l’application, cela n’efface aucune heure déjà faite."],
-      ['Dimanches et jours fériés travaillés', "se majorent tout seuls — 50 % le dimanche, 100 % un jour férié, taux modifiables dans la roue crantée du Planning. Seules les heures réellement faites comptent : un férié chômé reste payé sans majoration, un congé ou une récup ne majorent rien, et un férié qui tombe un dimanche prend le taux le plus fort, jamais les deux. La majoration part en paie si vos heures sup se paient, au compteur si elles se récupèrent. Elle ne compte pas dans les 1 607 h."],
+      ['Dimanches et jours fériés travaillés', "se majorent tout seuls — 50 % le dimanche, 100 % un jour férié, taux modifiables dans la roue crantée du Planning. Seules les heures réellement faites comptent : un férié chômé reste payé sans majoration, un congé ou une récup ne majorent rien, et un férié qui tombe un dimanche prend le taux le plus fort, jamais les deux — de même qu’une heure sup faite un dimanche. La majoration part en paie si vos heures sup se paient, au compteur si elles se récupèrent. Elle ne compte pas dans les 1 607 h."],
     ['Taux horaires et acomptes', ": administrateurs seulement, et jamais enregistrés sur l’appareil."]
     ]
   },

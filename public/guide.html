@@ -1997,47 +1997,50 @@ mark{background:rgba(200,176,32,.32);color:var(--cream);border-radius:3px;paddin
   </ul>
 
   <h3><svg class="g-ic" width="18" height="18" viewBox="0 0 24 24" aria-hidden="true" focusable="false"><use href="#ic-interdit"></use></svg> Motifs d'absence</h3>
-  <p>Le motif n'est pas décoratif : il détermine l'effet sur le compteur annuel et sur la paie.</p>
+  <p>Le motif n'est pas décoratif : il dit ce que l'absence fait au compteur d'heures sup et à la paie.
+  L'écran l'écrit sous chaque motif, avant que vous le choisissiez.</p>
   <div class="tw"><table>
     <tr><th>Motif</th><th>Effet</th></tr>
-    <tr><td><svg class="g-ic" width="18" height="18" viewBox="0 0 24 24" aria-hidden="true" focusable="false"><use href="#ic-pansement"></use></svg> <b>Arrêt de travail</b></td><td>Suspend le contrat : <b>abaisse le plafond annuel</b>. Journée rémunérée.</td></tr>
-    <tr><td><svg class="g-ic" width="18" height="18" viewBox="0 0 24 24" aria-hidden="true" focusable="false"><use href="#ic-avion"></use></svg> <b>Congé sans solde</b></td><td>Suspend le contrat. Non rémunéré.</td></tr>
-    <tr><td><svg class="g-ic" width="18" height="18" viewBox="0 0 24 24" aria-hidden="true" focusable="false"><use href="#ic-equipe"></use></svg> <b>Événement familial</b></td><td>Assimilé à du travail effectif. Rémunéré.</td></tr>
-    <tr><td><svg class="g-ic" width="18" height="18" viewBox="0 0 24 24" aria-hidden="true" focusable="false"><use href="#ic-diplome"></use></svg> <b>Formation</b></td><td>Assimilée à du travail effectif. Rémunérée. C'est le motif
-    des <b>jours de CFA d'un apprenti</b> : le code du travail (art. L6222-24) les compte comme du
-    temps de travail.</td></tr>
-    <tr><td><svg class="g-ic" width="18" height="18" viewBox="0 0 24 24" aria-hidden="true" focusable="false"><use href="#ic-croix"></use></svg> <b>Absence injustifiée</b></td><td>Heures dues, journée non payée.</td></tr>
-    <tr><td><svg class="g-ic" width="18" height="18" viewBox="0 0 24 24" aria-hidden="true" focusable="false"><use href="#ic-reveil"></use></svg> <b>Retard</b></td><td>Se saisit par l'<b>heure d'arrivée</b>. Heures manquées dues.</td></tr>
-    <tr><td>— <b>Absence non précisée</b></td><td>Sans effet sur le plafond annuel.</td></tr>
+    <tr><td><svg class="g-ic" width="18" height="18" viewBox="0 0 24 24" aria-hidden="true" focusable="false"><use href="#ic-maison"></use></svg> <b>Personnel (autorisé)</b></td><td>Rendez-vous, affaire de famille, départ demandé. Retiré des heures sup&nbsp;; le reste est retenu sur la paie.</td></tr>
+    <tr><td><svg class="g-ic" width="18" height="18" viewBox="0 0 24 24" aria-hidden="true" focusable="false"><use href="#ic-croix"></use></svg> <b>Absence injustifiée</b></td><td>Parti ou absent sans prévenir. Retiré des heures sup&nbsp;; le reste est retenu sur la paie.</td></tr>
+    <tr><td><svg class="g-ic" width="18" height="18" viewBox="0 0 24 24" aria-hidden="true" focusable="false"><use href="#ic-pluie"></use></svg> <b>Décidé par le domaine</b></td><td>Pluie, chantier terminé, attente de matériel. Retiré des heures sup&nbsp;; <b>jamais retenu sur la paie</b>.</td></tr>
+    <tr><td><svg class="g-ic" width="18" height="18" viewBox="0 0 24 24" aria-hidden="true" focusable="false"><use href="#ic-pansement"></use></svg> <b>Arrêt de travail</b></td><td>Sans effet sur les heures sup. Suspend le contrat : abaisse le plafond annuel.</td></tr>
+    <tr><td><svg class="g-ic" width="18" height="18" viewBox="0 0 24 24" aria-hidden="true" focusable="false"><use href="#ic-diplome"></use></svg> <b>Formation</b></td><td>Compté comme travaillé. C'est le motif des <b>jours de CFA d'un apprenti</b> : le code du
+    travail (art. L6222-24) les compte comme du temps de travail.</td></tr>
+    <tr><td><svg class="g-ic" width="18" height="18" viewBox="0 0 24 24" aria-hidden="true" focusable="false"><use href="#ic-equipe"></use></svg> <b>Événement familial</b></td><td>Compté comme travaillé.</td></tr>
+    <tr><td><svg class="g-ic" width="18" height="18" viewBox="0 0 24 24" aria-hidden="true" focusable="false"><use href="#ic-avion"></use></svg> <b>Congé sans solde</b></td><td>Journée non payée, sans effet sur les heures sup. Toujours une journée entière.</td></tr>
   </table></div>
-  <div class="note"><span class="ni" aria-hidden="true"><svg class="g-ic" width="18" height="18" viewBox="0 0 24 24" aria-hidden="true" focusable="false"><use href="#ic-etincelles"></use></svg></span><div>La couleur du jour suit le
-  motif : <b>bleu</b> pour une absence assimilée à du travail (formation, événement familial),
-  <b>orange</b> pour une absence payée mais non travaillée (arrêt de travail), <b>rouge</b> pour une
-  absence qui ne compte pas. Un jour bleu affiche <b>ses heures</b>, pas un zéro : elles entrent dans
-  le compteur du mois et dans l'annualisation. En revanche il ne compte pas comme <b>jour
-  travaillé</b> au domaine — la personne n'y était pas, et la déclaration MSA ne doit pas
-  l'y compter.</div></div>
+  <div class="note"><span class="ni" aria-hidden="true"><svg class="g-ic" width="18" height="18" viewBox="0 0 24 24" aria-hidden="true" focusable="false"><use href="#ic-etincelles"></use></svg></span><div>Les anciennes saisies
+  <b>Retard</b> et <b>Absence non précisée</b> se relisent telles quelles, mais ces deux motifs ne se
+  choisissent plus : un retard est devenu un créneau, suivi de son vrai motif. La couleur du jour suit le
+  motif : <b>bleu</b> pour une absence comptée comme travaillée, <b>orange</b> pour une absence payée
+  ou une partie de journée, <b>rouge</b> pour une journée entière qui ne compte pas.</div></div>
 
-  <h3><svg class="g-ic" width="18" height="18" viewBox="0 0 24 24" aria-hidden="true" focusable="false"><use href="#ic-reveil"></use></svg> Noter un retard</h3>
-  <p>Ouvrez le jour, choisissez <b>Absence</b> puis <b>Retard</b>, et indiquez l'<b>heure à laquelle
-  la personne est arrivée</b>. Rien d'autre : l'écran calcule ce qui manque et vous l'affiche avant
-  que vous enregistriez.</p>
+  <h3><svg class="g-ic" width="18" height="18" viewBox="0 0 24 24" aria-hidden="true" focusable="false"><use href="#ic-reveil"></use></svg> Une absence sur une partie de la journée</h3>
+  <p>Resté chez lui l'après-midi, parti une heure plus tôt, arrivé en retard : ouvrez le jour, choisissez
+  <b>Absence</b>, puis <b>Une partie seulement</b>.</p>
   <ul class="dot">
-    <li>La journée est <b>payée à hauteur de ce qui a été fait</b>. Arriver à 9 h 30 sur une journée
-    de 8 h à 16 h, c'est 5 h 30 travaillées.</li>
-    <li>Les <b>heures manquées sont dues</b> : elles tirent sur le compteur d'heures supplémentaires,
-    exactement comme une récupération. Aucun réglage n'est nécessaire.</li>
-    <li>La <b>coupure déjeuner est prise en compte</b> : arriver à 14 h ne fait pas devoir l'heure du
-    repas.</li>
-    <li>Dans la grille, la case porte les <b>heures faites</b> en orange, avec une pastille — et non
-    une croix rouge, qui la confondrait avec une journée entière d'absence.</li>
-    <li>Arriver <b>après l'heure de fin</b> n'est plus un retard : rien n'a été travaillé. La saisie
-    bascule seule en <b>absence injustifiée</b>, et le message vous le dit.</li>
-    <li>Arriver <b>à l'heure ou en avance</b> n'enregistre rien : aucune absence n'est posée.</li>
+    <li>Indiquez le créneau, <b>de telle heure à telle heure</b>, ou touchez un raccourci : <b>le matin</b>,
+    <b>l'après-midi</b>, <b>arrivé en retard</b>, <b>parti plus tôt</b>. Choisissez ensuite le motif.</li>
+    <li>L'écran calcule les <b>heures manquées</b> et dessine la journée : travaillé, manqué, coupure. La
+    <b>coupure déjeuner n'est pas comptée</b> : si le domaine a fixé son heure dans la roue crantée, elle se
+    retire là où elle tombe.</li>
+    <li>Avant d'enregistrer, un encadré dit ce que ce jour fait au compteur : le temps de récup sans ce
+    jour, ce qui en est retiré, ce qui reste, et ce qui serait retenu sur la paie.</li>
+    <li>Dans la grille, la case porte les <b>heures faites</b> en orange, avec une pastille.</li>
+    <li>Les heures manquées sont <b>figées à l'enregistrement</b> : modifier le modèle de planning plus
+    tard ne fait pas bouger une paie déjà faite.</li>
   </ul>
-  <div class="note"><span class="ni" aria-hidden="true"><svg class="g-ic" width="18" height="18" viewBox="0 0 24 24" aria-hidden="true" focusable="false"><use href="#ic-epingle"></use></svg></span><div>Un retard se saisit
-  <b>jour par jour</b>. Sur une sélection de plusieurs jours, le motif Retard ne propose pas d'heure
-  d'arrivée : les heures prévues ne sont pas les mêmes d'un jour à l'autre.</div></div>
+  <div class="note"><span class="ni" aria-hidden="true"><svg class="g-ic" width="18" height="18" viewBox="0 0 24 24" aria-hidden="true" focusable="false"><use href="#ic-epingle"></use></svg></span><div>Une absence sur une partie de
+  la journée se saisit <b>jour par jour</b>. Sur une sélection de plusieurs jours, l'absence couvre toujours
+  la journée entière.</div></div>
+
+  <h3><svg class="g-ic" width="18" height="18" viewBox="0 0 24 24" aria-hidden="true" focusable="false"><use href="#ic-crayon"></use></svg> Un horaire raccourci</h3>
+  <p>Si vous raccourcissez simplement les horaires d'une journée dans <b>Travaillé</b>, l'écran le voit :
+  «&nbsp;1h de moins que prévu. Pourquoi&nbsp;?&nbsp;». Choisissez <b>personnel</b>, <b>injustifiée</b>,
+  <b>décidé par le domaine</b> ou <b>arrêt de travail</b> — ou passez à un créneau précis. L'enregistrement
+  le demande. Les <b>horaires chaleur</b> et les <b>jours d'échange</b> n'ont pas à le dire : c'est le domaine
+  qui les pose.</p>
 
   <h3><svg class="g-ic" width="18" height="18" viewBox="0 0 24 24" aria-hidden="true" focusable="false"><use href="#ic-euro"></use></svg> Compteur d'heures &amp; acomptes</h3>
   <ul class="dot">
@@ -2048,10 +2051,31 @@ mark{background:rgba(200,176,32,.32);color:var(--cream);border-radius:3px;paddin
     <b>surchargeables</b> à la main : une valeur corrigée s'affiche d'une autre couleur.</li>
     <li>Trois politiques possibles selon le domaine : heures <b>payées</b> le mois même, <b>récupérées</b>
     en repos, ou <b>reportées</b> au solde de fin d'année. Le calcul est identique, seul l'affichage change.</li>
+    <li>Le tableau porte aussi la <b>majoration</b> et les <b>heures retirées</b> de chaque mois, quand l'année
+    en contient.</li>
     <li><b>Acomptes</b> par salarié et par mois, avec montant, date et note ; ils apparaissent dans le
     relevé PDF.</li>
     <li><b>Relevé d'heures PDF</b> — voir ci-dessous : il s'édite aussi bien depuis la fiche que
     depuis les Documents.</li>
+  </ul>
+
+  <h3><svg class="g-ic" width="18" height="18" viewBox="0 0 24 24" aria-hidden="true" focusable="false"><use href="#ic-balance"></use></svg> Heures sup et temps de récup</h3>
+  <p>À partir de <b>septembre 2026</b>, l'onglet <b>Compteur</b> de la fiche d'un salarié commence par trois
+  cartes.</p>
+  <ul class="dot">
+    <li><b>Heures sup</b> : les heures faites au-delà du planning, avec leur taux. Le taux se décide
+    <b>à la semaine</b> : <b>25&nbsp;%</b> jusqu'à la 43e heure, <b>50&nbsp;%</b> au-delà. Une heure à 25&nbsp;%
+    donne <b>1&nbsp;h&nbsp;15</b> de récup, une heure à 50&nbsp;% <b>1&nbsp;h&nbsp;30</b>. L'équation se lit
+    «&nbsp;acquises − retirées = de récup&nbsp;», avec le calcul écrit en clair.</li>
+    <li>Une journée écourtée se retire <b>d'abord du temps de récup, au taux normal</b> : 1&nbsp;h manquée,
+    1&nbsp;h de récup en moins. Ce que le compteur ne couvre pas est <b>retenu sur la paie</b>, sauf si le
+    domaine a arrêté la journée : il attend alors les prochaines heures sup.</li>
+    <li><b>Le mois</b> en grille : touchez un jour pour l'ouvrir. <b>Le détail</b> reprend chaque semaine,
+    ses heures faites et prévues, ses taux, et chaque journée en plus ou en moins.</li>
+    <li>Si vos heures sup <b>se paient</b>, les taux sont à porter en paie au lieu d'entrer au compteur.</li>
+    <li>Le <b>relevé PDF</b> reprend le même calcul : heures sup par taux, temps de récup, chaque journée
+    écourtée avec son créneau et son motif, et ce qui reste à retenir sur la paie.</li>
+    <li>Les mois <b>d'avant septembre 2026</b> gardent la règle d'alors : leurs paies ne changent pas.</li>
   </ul>
 
   <h3><svg class="g-ic" width="18" height="18" viewBox="0 0 24 24" aria-hidden="true" focusable="false"><use href="#ic-calendrier"></use></svg> Dimanches et jours f&eacute;ri&eacute;s travaill&eacute;s</h3>
@@ -2061,10 +2085,10 @@ mark{background:rgba(200,176,32,.32);color:var(--cream);border-radius:3px;paddin
   <ul class="dot">
     <li>Seules les <b>heures r&eacute;ellement faites</b> comptent. Un f&eacute;ri&eacute;
     ch&ocirc;m&eacute; reste pay&eacute; sans majoration&nbsp;; un cong&eacute;, une r&eacute;cup, un
-    arr&ecirc;t ou une journ&eacute;e de formation ne majorent rien. Un retard majore ce qui reste de
-    la journ&eacute;e.</li>
+    arr&ecirc;t ou une journ&eacute;e de formation ne majorent rien. Une absence d'une partie de la
+    journ&eacute;e majore ce qui a &eacute;t&eacute; fait.</li>
     <li>Un <b>f&eacute;ri&eacute; qui tombe un dimanche</b> prend le taux le plus fort, jamais les
-    deux additionn&eacute;s. Le <b>samedi</b> n'est pas concern&eacute;.</li>
+    deux additionn&eacute;s. Une <b>heure sup faite un dimanche</b> aussi. Le <b>samedi</b> n'est pas concern&eacute;.</li>
     <li>La majoration suit vos heures sup&nbsp;: <b>pay&eacute;es</b>, elle s'imprime sur la feuille
     d'heures, pr&ecirc;te pour la paie&nbsp;; <b>r&eacute;cup&eacute;r&eacute;es</b>, elle s'ajoute au
     compteur d'heures.</li>

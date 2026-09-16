@@ -2,7 +2,17 @@
 
 > Document de référence du projet **Ma Vigne** (GUERETTECH). Il est le **porteur de vérité** :
 > la mémoire Claude est plafonnée, ce fichier ne l'est pas.
-> Dernière consolidation : **16 septembre 2026 (PREP-1)** — ★★★ **LE MODE PRÉPARATION GUERETTECH
+> Dernière consolidation : **16 septembre 2026 (RECUP-1)** — ★★★ **UNE JOURNÉE ÉCOURTÉE SE RETIRE DU
+> COMPTEUR AU TAUX NORMAL, ET LES HEURES SUP DEVIENNENT DU TEMPS DE RÉCUP MAJORÉ (§135)**. Nico : *« retirées
+> de prime abord des heures sup »*, *« afficher les temps de récup en majoration (25 % ou 50 %) »*, *« retirer
+> au taux normal »*. Une absence peut couvrir **une partie de la journée** (créneau + motif, deux motifs
+> neufs) ; à partir de **septembre 2026**, `_planCompteur` calcule le compteur une fois et `_planBank` /
+> `_planYearBalance` en sont deux lectures. ★ Trouvé en route : **la feuille du jour n'avait ni hauteur
+> maximale ni fond depuis le socle du dépôt** (mesuré dans Chromium sur la base intacte) ; ⚠️⚠️
+> `mv-harnais-releve` **aurait rougi le 1er janvier 2027** (année courante lue) — horloge figée.
+> **APP 7.24 → 7.25 · SW 7.88 → 7.89**, base `8136bd0`. Détail en **§135**.
+>
+> ★ Précédente : **16 septembre 2026 (PREP-1)** — ★★★ **LE MODE PRÉPARATION GUERETTECH
 > (§134)**. Nico : *« je préfère mettre en place un mode préparation »* — depuis la carte client du panneau,
 > GUERETTECH ouvre un domaine **dans ses écrans normaux** pour le préparer avant la remise, **au nom de
 > GUERETTECH, sans valider aucune tâche** (décision du 16/09). ⚠️⚠️⚠️ **Le serveur ne protège plus d'une
@@ -19155,3 +19165,133 @@ hors dépôt, reçoit l'étape « Préparer » de la main de Nico ; ⑧ fermer l
 préparation reste la seule garantie que rien du domaine ne demeure dans le navigateur ; ⑨ le journal
 d'accès affiche les noms d'icône **en toutes lettres** (« cle » pour « Accéder », « crayon » ici) :
 `_agtBuildLog` rend `e.icon` tel quel. Un emoji aurait fait remonter le cliquet d'icônes — non corrigé.
+
+---
+
+## 135. ★★★ RECUP-1 — UNE JOURNÉE ÉCOURTÉE SE RETIRE DU COMPTEUR AU TAUX NORMAL, ET LES HEURES SUP DEVIENNENT DU TEMPS DE RÉCUP MAJORÉ (16/09 — `planning.js` · `styles.css` · `utils.js` · `index.html` · `sw.js` · `guide/10-planning.html` · `scripts/` · APP 7.24 → **7.25** · SW 7.88 → **7.89**)
+
+> Point de départ, un utilisateur : *« les heures de ces horaires réduits ne sont pas décomptées des heures
+> sup »*. Puis Nico, sur la maquette : *« les heures des journées écourtées, quelle qu'en soit la raison,
+> retirées de prime abord des heures sup ; les heures sup doivent cependant apparaître »* ; *« il faut
+> afficher les temps de récup en majoration (25 % ou 50 %) »* ; *« sur les heures retirées il faut retirer
+> au taux normal, pas au taux heures sup »* ; puis « go ».
+
+### 135a. Le constat, mesuré avant la maquette
+
+- `_planSupMonth` valait `Math.max(0, écart)` : **un mois en déficit était écrasé à zéro**. Un horaire réduit
+  ne se retirait donc que dans SON mois. Sonde sur les vraies fonctions : +6 h en août puis −3 h en
+  septembre → compteur **6 h** ; les deux journées dans le même mois → **3 h**. Le résultat dépendait du
+  calendrier.
+- Mode payé : 6 h payées et une absence injustifiée le même mois → journée « non payée » **et** solde −7 h.
+  L'écran annonçait les deux à la fois.
+- Aucun motif possible sur un horaire raccourci, aucune absence « de telle heure à telle heure » : un
+  après-midi à la maison ne se disait qu'en raccourcissant la journée.
+
+### 135b. Le cadre légal, recherché, et ce que Nico a tranché
+
+- Accord national agricole du 23/12/1981 (avenant 19 étendu par arrêté du 15/04/2020), art. 10.4 : les heures
+  au-delà de 35 h se compensent par du repos (une journée raccourcie en est un), bilan en fin de période,
+  salaire acquis si la compensation dépasse ; à titre supplétif, une absence non payée se **retient** et
+  ne se récupère pas. Art. 7.3 : **25 %** de la 36e à la 43e heure, **50 %** au-delà.
+- Une retenue qui dépasse le temps d'absence est une sanction pécuniaire. Un arrêt maladie ne peut pas
+  réduire les heures sup (discrimination liée à la santé).
+- ★★ **Nico a tranché, informé** : toute journée écourtée se retire D'ABORD des heures sup, quel qu'en soit
+  le motif. ⚠️ **Pour une absence injustifiée, c'est un écart assumé avec la règle supplétive** (retenue
+  sur salaire) — à faire confirmer par le comptable de chaque domaine. **Gardés neutres parce que la loi
+  l'impose** : arrêt de travail, formation, événement familial, congé sans solde.
+- Trois maquettes : v1 (créneau + motif), v2 (récup majorée — elle retirait des heures sup à 25 % d'abord),
+  **v3 validée** : le retrait se fait **au taux normal**, 1 h manquée = 1 h de récup en moins. ★ C'est
+  aussi la lecture la plus sûre : on retire exactement le temps manqué.
+
+### 135c. Le moteur — une seule boucle, deux lectures
+
+- `PLAN_RECUP_DEBUT='2026-09'` (**constante**, idiome de `PLAN_MAJ_DEBUT`) et `_planRecupActive(m)`. Avant :
+  la règle historique **à l'identique**, harnais du retard et du relevé à l'appui.
+- `_planJourEcart(plId,m,d,e)` : `plus` (heures au-delà de `_planRefPart`), `moins` (heures manquées), `cpt`
+  (`retire` → retenue · `domaine` → à compenser · `indet` → horaire raccourci sans motif, **traité comme le
+  domaine** : à défaut de savoir, on ne retient rien sur une paie). Horaires chaleur sans motif = domaine.
+- `_planHsupMois(mbr,m)` : le taux se décide **à la semaine (lundi → dimanche)**, même à cheval sur deux mois
+  ou deux années ; les heures au-delà de la 43e sont rangées sur les **derniers** jours porteurs d'heures sup,
+  puis chaque jour va dans SON mois. ★ **La plus forte seule** (§73b) : un dimanche ou un férié déjà majoré
+  ne prend la majoration des heures sup que pour ce qui dépasse son propre taux.
+- `_planHsupTiers` (une valeur saisie à la main garde sa part à 50 %, bornée), `_planHsupMajBank` (**même
+  aiguillage** que `_planMajBank` : au compteur si les heures se récupèrent, à la paie sinon).
+- ★★★ `_planCompteur(mbr,upto)` calcule le compteur **une fois** ; `_planBank` et `_planYearBalance` en
+  sont deux lectures. Avant, chacune avait sa boucle : ça tenait tant que la règle était une somme. Elle ne
+  l'est plus — ce que le compteur couvre dépend de l'ORDRE des tranches. Chaque mois : ① les heures sup et
+  majorations comblent d'abord ce qui reste à compenser ; ② le salarié se retire, non-couvert **retenu** ;
+  ③ le domaine se retire, non-couvert **à compenser** ; ④ la récup ; ⑤ les paiements pris sur le compteur.
+  Invariant tenu par construction : **solde − à compenser = net**, tant qu'aucune récup ne dépasse.
+- Absence partielle : `abs_de`, `abs_a`, `motif_h` **figé à la saisie** (même principe que le retard, §55).
+  `_planAbsPartH` retire la coupure là où tombe son heure fixée (`_planCoupureH`), sinon au milieu de la
+  journée — ce qui rend exactement la réponse de `_planRetardH` pour un retard (A6 : 5 h, pas 6).
+- Motifs : `perso` et `domaine` ajoutés, champ `cpt` sur chacun ; `retard` et `autre` **cachés** (relus,
+  plus choisis). ⚠️ `autre` doit rester le DERNIER du tableau : c'est le repli de `_planAbsDef`.
+
+### 135d. Les écrans, et les écarts avec la maquette validée
+
+- Feuille du jour : « Quand » (Toute la journée / Une partie seulement), quatre raccourcis, ruban, sept motifs
+  dans l'ordre de la maquette, verdict avant d'enregistrer, motif **obligatoire**. `_planAbsConstruit` est la
+  seule construction d'une absence : le verdict la montre, l'enregistrement l'écrit. Le verdict passe par
+  `_planSimJour` : le jour est posé dans les entrées, le compteur calculé, puis l'entrée remise.
+- Travaillé : un horaire plus court demande « Pourquoi ? » ; `reduit_motif` n'est écrit que si la journée est
+  vraiment raccourcie. `planRetardSync` est supprimée avec l'ancienne saisie du retard.
+- Fiche › Compteur, à partir de septembre 2026 : trois cartes (`_planRecupCartes`) avant l'existant ; la
+  carte violette « Compteur » reste pour les mois d'avant. Tableau mois par mois : colonnes Majoration et
+  Heures retirées. Relevé : bloc « Heures supplémentaires », ligne « Ce mois », tableau d'année.
+- **Écarts dits à Nico** : « Temps de récup **sans** ce jour » (le compteur est mensuel, pas chronologique) ;
+  « acquises » inclut le report du mois précédent, l'explication le dit ; la grille montre le mois entier ;
+  la valeur d'une semaine est brute (la retenue se lit au mois) ; la légende « Retard » devient « Absent une
+  partie ».
+
+### 135e. Ce que les filets ont trouvé, et qui avait tort
+
+- ★★★ **LA FEUILLE DU JOUR N'AVAIT NI HAUTEUR MAXIMALE NI FOND, depuis le socle du dépôt.** La règle
+  `#ovPlanDay .ov-plan-sheet` vise une classe qu'aucun élément ne porte. **Mesuré dans Chromium sur la base
+  intacte** : la feuille d'une absence faisait 1 078 px sur un écran de 844 et dépassait par le haut — les
+  modes étaient hors d'atteinte. Aucun harnais ne lit une mise en page : seul le rendu réel l'a montré.
+  Corrigé par une règle sur `#ovPlanDaySheet` ; mesuré ensuite : 776 px, le corps défile.
+- ★★ **Vrai bug du lot, attrapé en relisant** : l'en-tête du tableau d'année du relevé lisait une variable
+  posée PLUS BAS dans la fonction (`var`, hoisting) — il écrivait « Heures dues » en septembre. Verrouillé
+  (L24) avec sa contre-épreuve.
+- Le harnais neuf : **36 rouges au premier passage, tous du harnais** — il remplaçait les objets globaux au
+  lieu de les modifier en place (`_planMigrateYears` recopie `window.PLANNING_ENTRIES`). Puis **49 h
+  fantômes** : les fériés du modèle de test portaient 7 h « faites », majorées à 100 %. Une contre-épreuve
+  était **inopérante** (elle sautait le retour d'un motif neutre sans lui donner de destination).
+- ⚠️⚠️ **Une bombe à retardement désamorcée** : `mv-harnais-releve` lisait l'année courante. La feuille
+  d'août de Victor, qui prouve la règle d'avant, serait passée sous la nouvelle **le 1er janvier 2027**.
+  Horloge figée au 16/09/2026. Sa contre-épreuve n°16 visait l'ancienne ligne « Ce mois ».
+- `mv-harnais-retard` extrait ses fonctions : `_planAbsPartiel` ajoutée à sa liste. ESLint : `_rc`
+  redéclaré dans le relevé. C24b : deux valeurs de gestionnaire sans `_escAttr`.
+- Charte : **le cliquet des rayons compte aussi le repli d'un jeton** (`var(--r-md,12px)` lit « 12px ») —
+  rayons hors pas (10/13/15/99 px). `var(--shadow-sm)` sans repli → ombre écrite en dur.
+- ⚠️ **Poids** : `planning.js` 420 → 454 ko (+8 %), au-delà des +5 %. Découpage envisagé et écarté : un
+  module de plus pour une fonction du Planning, c'est des globaux à exposer et un ordre d'import à tenir.
+  Cliquet regravé (`mv-harnais-typo --baseline`), les autres fichiers n'ont bougé que dans leur tolérance.
+
+### 135f. La note de livraison
+
+**Base `8136bd0`** (`.mv-base` posé). **APP 7.24 → 7.25 · SW 7.88 → 7.89.** Hébergement seul :
+`firebase deploy --only hosting`. `public/guide.html` **ne se livre pas** : `node scripts/build-guide.mjs`.
+
+| Fichier | Ce qui change | Bump ? |
+|---|---|---|
+| `src/planning.js` | créneau d'absence, motif d'un horaire raccourci, compteur en temps de récup, 3 cartes, relevé | — |
+| `src/styles.css` | styles de la feuille et du compteur ; la feuille du jour a enfin sa hauteur maximale | ★ SW |
+| `src/utils.js` | APP 7.25, 3 nouveautés, aide du Planning | ★ APP |
+| `index.html` | version aux 4 emplacements | ★ APP |
+| `public/sw.js` | 7.89 | ★ SW |
+| `guide/10-planning.html` | motifs, créneau, horaire raccourci, heures sup et récup | — |
+| `scripts/mv-harnais-recup.mjs` | neuf : 117 assertions, 10 contre-épreuves | — |
+| `scripts/mv-harnais-releve.mjs` · `mv-harnais-retard.mjs` | horloge figée · une dépendance de plus | — |
+| `scripts/typo-baseline.json` · `package.json` · `.github/workflows/ci.yml` · `scripts/harnais-claude-md.mjs` | cliquet regravé · harnais branché · §135 comptée | — |
+
+### 135g. Ouvert, et dit
+
+① **Les non-annualisés** (TESA, saisonniers, extras) : leurs heures sup se décomptent légalement **à la
+semaine** ; le compteur reste mensuel pour eux — lot à part. ② **Confirmation comptable** de la règle des
+absences injustifiées (§135b). ③ En mode **payé**, l'appli donne les heures par taux, pas de montant.
+④ Sur une **sélection** de plusieurs jours, une absence couvre toujours la journée entière. ⑤ Un solde
+« à compenser » au 31 décembre ne passe pas sur l'année suivante : chaque année repart de son report de
+départ. ⑥ Rendu vérifié dans Chromium (serveur de dev, données injectées, 390 px, clair et sombre, zéro
+erreur console) — **pas sur un téléphone réel**, et pas le document imprimé à l'œil.

@@ -215,6 +215,15 @@ jobs:
           node scripts/mv-harnais-recalage.mjs
           node scripts/mv-harnais-recalage.mjs --contre
 
+      # ★★★ RECUP-1 : une journee ecourtee se retire du compteur AU TAUX NORMAL, les heures
+      # sup gardent leur taux (25 % jusqu'a la 43e heure de la semaine, 50 % au-dela), et ce
+      # que le compteur ne couvre pas est retenu sur la paie — sauf si le domaine a arrete la
+      # journee. Une regle qui chiffre des euros : ses neuf defauts doivent tous rougir.
+      - name: Harnais — heures manquees et recup majoree
+        run: |
+          node scripts/mv-harnais-recup.mjs
+          node scripts/mv-harnais-recup.mjs --contre
+
       # Vite + inject-precache (postbuild, idempotent).
       - name: Build
         run: npm run build

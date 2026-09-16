@@ -30,6 +30,17 @@ const args   = process.argv.slice(2);
 const CONTRE = args.includes('--contre');
 const CIBLE  = path.resolve(args.find(a => !a.startsWith('--')) || path.join(RACINE, 'src', 'planning.js'));
 
+// ── ★ RECUP-1 : L'HORLOGE DU HARNAIS EST FIGEE AU 16/09/2026 ───────────────────
+// La regle des heures manquees s'applique a partir de septembre 2026 (PLAN_RECUP_DEBUT).
+// Ce harnais lisait l'ANNEE COURANTE : la feuille d'aout de Victor, qui prouve la regle
+// d'avant, serait passee sous la nouvelle le 1er janvier 2027 — et le harnais aurait
+// rougi sans qu'une ligne de code ait bouge. Une regle datee se teste a date fixe.
+const _DateReelle = Date;
+globalThis.Date = class extends _DateReelle {
+  constructor(...a) { if (a.length) super(...a); else super(2026, 8, 16, 12, 0, 0); }
+  static now() { return new _DateReelle(2026, 8, 16, 12, 0, 0).getTime(); }
+};
+
 // ── DOM minimal ─────────────────────────────────────────────────────────────
 function El(){ return { id:'', innerHTML:'', textContent:'', value:'', style:{}, dataset:{}, children:[],
   classList:{ add(){}, remove(){}, toggle(){}, contains(){ return false; } },
@@ -569,8 +580,10 @@ if (CONTRE && !ko) {
       '    h+=_perdu;'],
     ['★★ l’absence injustifiée redevient gratuite hors fenêtre',
       '    var _du=(mo.heures||mo.id===\'injustifie\');', '    var _du=mo.heures;'],
+    // RECUP-1 : la ligne porte deux branches (heures dues avant septembre 2026, heures retirees
+    // ensuite). Le defaut vise celle d'aout, que ce harnais mesure.
     ['les heures dues disparaissent de la ligne « Ce mois »',
-      "      +(_duesM>0.0001?(' \\u00b7 heures dues <b>\\u2212'+_planFmt(_duesM)+'</b>'):'')", "      +''"],
+      "        :(_duesM>0.0001?(' \\u00b7 heures dues <b>\\u2212'+_planFmt(_duesM)+'</b>'):''))", "        :'')"],
     ['★★ l’écart affiché repasse sur la référence NETTE (il redit « = »)',
       "          +(s.ecartBrut>0?'#b45309':(s.ecartBrut<0?'#dc2626':'#15803d'))+'\">'+_planFmtE(s.ecartBrut)+'</div>'",
       "          +(s.ecart>0?'#b45309':(s.ecart<0?'#dc2626':'#15803d'))+'\">'+_planFmtE(s.ecart)+'</div>'"],

@@ -63,7 +63,9 @@ const VOULUES = [
   '_planMinOf', '_planAbsT', '_planAbsH', '_planAbsDef', '_planAbsMotif',
   '_planTimingH', '_planRetardFaites', '_planRetardH', '_planRetardVide',
   '_planDayH', '_planWorkH', '_planRefPart', '_planAbsLostH', '_planApplyAbs', '_pl2Cell', '_planRefH',
-  '_planDefTiming', '_planRetardBornes', '_planPlanned', '_planFmt', '_planDays'
+  '_planDefTiming', '_planRetardBornes', '_planPlanned', '_planFmt', '_planDays',
+  // RECUP-1 : _planDayH, _planWorkH et _pl2Cell lisent aussi l'absence sur une partie de journee
+  '_planAbsPartiel'
 ];
 
 const morceaux = [];
