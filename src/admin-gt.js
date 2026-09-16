@@ -915,6 +915,7 @@ function _agtBuildClients(){
       h+=_agtFicheAcces(t.slug);
       h+='<div class="agt-section-lbl" style="margin:12px 0 8px">Actions</div>';
       h+='<button class="agt-btn" style="width:100%;background:linear-gradient(135deg,rgba(124,77,214,0.25),rgba(139,92,246,0.18));border-color:rgba(139,92,246,0.4);color:#C4B5FD;font-weight:600;margin-bottom:8px" onclick="agtShowFiche(\''+t.slug+'\')">Fiche client — tout paramétrer</button>';
+      h+='<button class="agt-btn" style="width:100%;border-color:rgba(139,92,246,0.4);color:#C4B5FD;font-weight:600;margin-bottom:8px" onclick="agtPrepOuvrir(\''+_escAttr(t.slug)+'\')">Préparer ce domaine — ses écrans, en direct</button>';
       h+='<div style="display:flex;gap:8px;margin-bottom:8px">';
       h+='<button class="agt-btn fill" onclick="agtAccedeTenant(\''+t.slug+'\')">Accéder</button>';
       h+='<button class="agt-btn" onclick="copyTenantLink(\''+t.slug+'\',this)">Invitation</button>';
@@ -954,6 +955,100 @@ async function agtAccedeTenant(slug){
   var url = GT_BASE_URL + '/?tenant=' + encodeURIComponent(slug);
   showToast('Ouverture de '+slug+'…','#3D6B27');
   try { window.open(url, '_blank', 'noopener'); } catch(e){ location.href = url; }
+}
+
+// ════ PREP-1 — OUVRIR LA PRÉPARATION D'UN DOMAINE (§134) ════
+// ⚠️ « Accéder » ci-dessus ouvre le lien du domaine dans un NOUVEL onglet. Depuis SEC-GT, la
+//   session GUERETTECH ne vit que dans son onglet (_fbSessionOnly) : ce nouvel onglet arrive
+//   sur l'écran de connexion du domaine, sans session. « Préparer » entre dans ses écrans,
+//   dans CET onglet. Chevauchement signalé, non tranché (§134).
+//
+// Journal d'accès RELU avant d'écrire. agtLogAccess écrit la liste EN MÉMOIRE, chargée par
+// le panneau : appelée hors du panneau (depuis une préparation), elle remplacerait tout le
+// journal par une seule ligne.
+window._agtLogAccessLu = async function(slug, action, icon){
+  if(!window.fbAdminReadGT || !window.fbAdminWriteGT) return false;
+  var d=await window.fbAdminReadGT('access_log');
+  var liste=null;
+  if(!d) liste=[];
+  else if(Array.isArray(d.value)) liste=d.value.slice();
+  else if(Array.isArray(d)) liste=d.slice();
+  if(liste===null) return false;   // forme inconnue : on n'écrase rien
+  liste.unshift({ id:'al'+Date.now(), ts:new Date().toISOString(), tenant:String(slug||''), action:String(action||''), icon:String(icon||'') });
+  if(liste.length>100) liste.length=100;
+  _agtAccessLog=liste;
+  await window.fbAdminWriteGT('access_log',{ value:liste });
+  return true;
+};
+
+// La feuille VÉRIFIE avant d'ouvrir : session GT, file d'attente et coffre de CETTE fenêtre.
+// ⚠️ Construite par le DOM : nom du domaine et identifiants sont des saisies.
+async function agtPrepOuvrir(slug){
+  slug=String(slug||'');
+  if(!/^[a-z0-9][a-z0-9-]*$/.test(slug)||slug.length>50) return;
+  var cl=window._fbClaims?await window._fbClaims(true):null;
+  var sessOk=!!(window._fbGtSessOk&&window._fbGtSessOk(cl));
+  var resteMn=sessOk?Math.floor((cl.gts-Date.now())/60000):0;
+  var nFile=window._fbQueueCompteDisque?window._fbQueueCompteDisque():0;
+  var qt=window._fbQueueTenant?window._fbQueueTenant():'';
+  var nCoffre=(typeof window.mvStashCount==='function')?window.mvStashCount():0;
+  var cfg=null, clients={};
+  try{ cfg=window.fbAdminRead?await window.fbAdminRead(slug,'config'):null; }catch(e){ if(window._mvAvale) window._mvAvale(e,'admin-gt.js/agtPrepOuvrir'); }
+  try{ clients=(await _agtReadClients())||{}; }catch(e){ if(window._mvAvale) window._mvAvale(e,'admin-gt.js/agtPrepOuvrir#2'); }
+  var nom=String((cfg&&cfg.domaine_nom)||slug);
+  var plan=String((clients[slug]||{}).plan||'');
+  var refus='';
+  if(!sessOk) refus='Ta session GT est ferm\u00e9e : rouvre-la, puis reviens ici.';
+  else if(nFile>0 && qt!==slug) refus=nFile+' modification'+(nFile>1?'s':'')+' '+(qt?('du domaine \u00ab '+qt+' \u00bb'):'d\u2019origine inconnue')+' attend'+(nFile>1?'ent':'')+' dans cette fen\u00eatre. Ouvre la pr\u00e9paration de ce domaine-l\u00e0 pour les envoyer, ou ferme la fen\u00eatre priv\u00e9e pour repartir de z\u00e9ro.';
+  else if(nCoffre>0) refus=nCoffre+' saisie'+(nCoffre>1?'s':'')+' refus\u00e9e'+(nCoffre>1?'s':'')+' par le serveur '+(nCoffre>1?'sont gard\u00e9es':'est gard\u00e9e')+' dans cette fen\u00eatre. Ferme la fen\u00eatre priv\u00e9e pour repartir de z\u00e9ro.';
+  var cnx='non charg\u00e9e';
+  try{
+    var c=_agtConnexions[slug], der=null;
+    ((c&&c.members)||[]).forEach(function(m){ if(m&&m.lastActive&&(!der||new Date(m.lastActive)>new Date(der))) der=m.lastActive; });
+    if(der) cnx=_agtCnxFmt(der).txt; else if(c) cnx='aucune';
+  }catch(e){ if(window._mvAvale) window._mvAvale(e,'admin-gt.js/agtPrepOuvrir#3'); }
+
+  var ex=document.getElementById('agt-prep-ov'); if(ex) ex.remove();
+  var el=function(tag,css,txt){ var x=document.createElement(tag); if(css) x.style.cssText=css; if(txt!=null) x.textContent=txt; return x; };
+  var ov=el('div','position:fixed;inset:0;background:rgba(6,4,12,0.88);z-index:10001;display:flex;align-items:center;justify-content:center;padding:20px;font-family:Outfit,sans-serif');
+  ov.id='agt-prep-ov';
+  var bx=el('div','width:100%;max-width:440px;background:rgba(18,14,28,0.98);border-radius:20px;border:1px solid rgba(139,92,246,0.35);padding:22px;box-shadow:0 24px 60px rgba(0,0,0,0.6)');
+  bx.appendChild(el('div','font-size:var(--pt-sm,17px);font-weight:700;color:#fff','Pr\u00e9parer '+nom));
+  bx.appendChild(el('div','font-size:var(--pt-micro,11px);color:rgba(196,181,253,0.7);margin-top:3px;font-family:monospace',slug));
+  var ligne=function(k,v,alerte){
+    var r=el('div','display:flex;justify-content:space-between;gap:12px;padding:9px 0;border-bottom:1px solid rgba(255,255,255,0.06);font-size:var(--pt-txt,12.5px)');
+    r.appendChild(el('span','color:rgba(255,255,255,0.55)',k));
+    r.appendChild(el('span','color:'+(alerte?'#FCA5A5':'rgba(255,255,255,0.88)')+';font-weight:600;text-align:right',v));
+    return r;
+  };
+  var lst=el('div','margin:14px 0 12px');
+  lst.appendChild(ligne('Session GT', sessOk?('encore '+Math.floor(resteMn/60)+' h '+('0'+(resteMn%60)).slice(-2)):'ferm\u00e9e', !sessOk||resteMn<30));
+  lst.appendChild(ligne('En attente dans cette fen\u00eatre', nFile>0?(nFile+' modif. \u00b7 '+(qt||'origine inconnue')):'rien', nFile>0&&qt!==slug));
+  lst.appendChild(ligne('Derni\u00e8re connexion de son \u00e9quipe', cnx, false));
+  bx.appendChild(lst);
+  bx.appendChild(el('p','font-size:var(--pt-txt,12.5px);line-height:1.6;color:rgba(255,255,255,0.7);margin:0 0 10px','Tu entres dans ses \u00e9crans, en administrateur. Ce que tu enregistres part directement dans son domaine, au nom de GUERETTECH. Les validations et le journal restent \u00e0 son \u00e9quipe.'));
+  if(sessOk && resteMn<30) bx.appendChild(el('p','font-size:var(--pt-micro,11px);line-height:1.5;color:#E8A45A;margin:0 0 10px','Moins de 30 min de session : l\u2019\u00e9criture s\u2019arr\u00eatera 2 min avant la fin.'));
+  if(refus) bx.appendChild(el('div','font-size:var(--pt-txt,12.5px);line-height:1.6;color:#FCA5A5;background:rgba(239,68,68,0.08);border:1px solid rgba(239,68,68,0.25);border-radius:11px;padding:11px 13px;margin-bottom:6px',refus));
+  var pied=el('div','display:flex;gap:10px;margin-top:16px');
+  var non=el('button','flex:1;padding:12px;border-radius:12px;font-size:var(--pt-txt,12.5px);font-weight:600;cursor:pointer;font-family:Outfit,sans-serif;background:rgba(255,255,255,0.06);border:1px solid rgba(255,255,255,0.1);color:rgba(255,255,255,0.65)','Annuler');
+  non.type='button';
+  non.addEventListener('click', function(){ ov.remove(); });
+  var oui=el('button','flex:1.4;padding:12px;border-radius:12px;font-size:var(--pt-txt,12.5px);font-weight:600;cursor:pointer;font-family:Outfit,sans-serif;border:none;background:linear-gradient(135deg,#7C4DD6,#8B5CF6);color:#fff','Ouvrir la pr\u00e9paration');
+  oui.type='button';
+  if(refus){ oui.disabled=true; oui.style.opacity='0.4'; oui.style.cursor='not-allowed'; }
+  oui.addEventListener('click', async function(){
+    if(refus) return;
+    oui.disabled=true; oui.textContent='Ouverture\u2026';
+    try{ await window._agtLogAccessLu(slug,'Pr\u00e9paration ouverte','crayon'); }
+    catch(e){ if(window._mvAvale) window._mvAvale(e,'admin-gt.js/agtPrepOuvrir#4'); }
+    if(!(window._mvPrepPoser && window._mvPrepPoser({ slug:slug, nom:nom, plan:plan }))){
+      showToast('Stockage du navigateur indisponible \u2014 pr\u00e9paration impossible','#C0392B');
+      oui.disabled=false; oui.textContent='Ouvrir la pr\u00e9paration';
+    }
+  });
+  pied.appendChild(non); pied.appendChild(oui); bx.appendChild(pied);
+  ov.appendChild(bx);
+  document.body.appendChild(ov);
 }
 
 // ─── Onglet Accès log ─────────────────────────────────────────────────────────
@@ -5968,6 +6063,7 @@ window.agtErrToggle      = agtErrToggle;
 window.agtErrCopy        = agtErrCopy;
 window.agtResolveGroup   = agtResolveGroup;
 window.agtAccedeTenant   = agtAccedeTenant;
+window.agtPrepOuvrir     = agtPrepOuvrir;
 window.agtResolveError   = agtResolveError;
 window.agtPurgeErrors    = agtPurgeErrors;
 window.copyTenantLink    = copyTenantLink;

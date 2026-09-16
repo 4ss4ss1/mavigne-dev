@@ -2402,6 +2402,9 @@ function deleteMembre(){
 
 // Ouvrir overlay changement de MDP
 function openChangePwd() {
+  // ★ PREP-1 (§134) — ce bouton agit sur le compte CONNECTÉ (firebase.auth().currentUser) :
+  //   en préparation, ce serait le compte GUERETTECH, pas celui d'un membre du domaine.
+  if (window._mvPrepOn && window._mvPrepOn()) { if (window.showToast) window.showToast('Pr\u00e9paration : ce bouton changerait le mot de passe de ton compte GUERETTECH', '#B85A1A'); return; }
   if(!window.currentUser) return;
   document.getElementById('cpwd-sub').textContent = `Compte : ${window.currentUser.nom}`;
   document.getElementById('cpwd-old').value = '';

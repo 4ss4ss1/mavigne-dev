@@ -282,6 +282,8 @@ var _offlineQueue = {};
 function _queueSave(key, value) {
   _offlineQueue[key] = value;
   try { localStorage.setItem('mavigne_offline_queue', JSON.stringify(_offlineQueue)); } catch(e){ if(window._mvAvale) window._mvAvale(e,'firebase.js/_queueSave'); }
+  // PREP-1 (§134) — la file porte le domaine qui l'a remplie (lue par _flushQueue en préparation).
+  try { localStorage.setItem('mavigne_offline_queue_t', TENANT_ID || ''); } catch(e){ if(window._mvAvale) window._mvAvale(e,'firebase.js/_queueSave#t'); }
   _showOfflineQueueBadge();
 }
 
@@ -298,6 +300,28 @@ function _showOfflineQueueBadge() {
   showSyncBadge(tete + ' — ' + n + ' modification' + (n > 1 ? 's' : '') + ' en attente, envoi automatique', '#7A4F2E');
 }
 window._offlineQueueCount = function () { return Object.keys(_offlineQueue).length; };
+// ★ PREP-1 (§134) — le domaine qui a rempli la file. '' : file vide, ou remplie avant PREP-1.
+window._fbQueueTenant = function () {
+  try { return localStorage.getItem('mavigne_offline_queue_t') || ''; }
+  catch (e) { if (window._mvAvale) window._mvAvale(e, 'firebase.js/_fbQueueTenant'); return ''; }
+};
+// ★ PREP-1 — ce que la file contient SUR LE DISQUE : un autre onglet a pu l'écrire.
+window._fbQueueCompteDisque = function () {
+  try { var o = JSON.parse(localStorage.getItem('mavigne_offline_queue') || '{}'); return Object.keys(o || {}).length; }
+  catch (e) { if (window._mvAvale) window._mvAvale(e, 'firebase.js/_fbQueueCompteDisque'); return 0; }
+};
+// ★ PREP-1 — le domaine sur lequel ce module lit et écrit (fbDocRef). Lecture seule.
+window._fbTenant = function () { return TENANT_ID; };
+// PREP-1 — la session GT (limitée à l'onglet) est relue après un rechargement : _mvPrepBoot l'attend.
+window._fbAuthPret = function (ms) { return _mvAuthReadyOnce(ms); };
+// ⚠️ Déclarée ICI et pas à côté des fonctions qui l'appellent : plus bas, « auth/ » suivi d'une
+//   étoile dans un commentaire aveugle C23 du preflight sur ~220 lignes (§134e ⑤).
+// PREP-1 (§134) — le jeton GT ne porte aucun domaine : en préparation, il part avec la demande.
+//   Hors préparation, RIEN (dans le panneau, TENANT_ID serait celui de la fenêtre).
+function _mvPrepTenant(data) {
+  if (window._mvPrepOn && window._mvPrepOn() && TENANT_ID && data && !data.tenant) data.tenant = TENANT_ID;
+  return data;
+}
 
 function _loadQueue() {
   try {
@@ -310,6 +334,13 @@ async function _flushQueue() {
   _loadQueue();
   var keys = Object.keys(_offlineQueue);
   if (keys.length === 0) return;
+  // ★★★ PREP-1 (§134) — le jeton GT écrit PARTOUT : en préparation, une file d'un autre domaine,
+  //   ou sans marque, ne part pas. Hors préparation, rien ne change.
+  if (window._mvPrepOn && window._mvPrepOn() && window._fbQueueTenant() !== TENANT_ID) {
+    if (window.logError) window.logError({ level:'error', cat:'prep', msg:'File d\u2019un autre domaine \u2014 envoi refus\u00e9 en pr\u00e9paration', detail:(window._fbQueueTenant() || '(sans marque)') + ' au lieu de ' + TENANT_ID });
+    showSyncBadge('Envoi bloqu\u00e9 \u2014 ces modifications viennent d\u2019un autre domaine', '#C0392B');
+    return;
+  }
   if(DEBUG) console.log('[Sync] Vidage queue hors ligne :', keys);
   showSyncBadge('Synchronisation…', '#1A4A7A');
   var success = true;
@@ -348,6 +379,9 @@ async function _flushQueue() {
     }
   }
   try { localStorage.setItem('mavigne_offline_queue', JSON.stringify(_offlineQueue)); } catch(e){ if(window._mvAvale) window._mvAvale(e,'firebase.js/_flushQueue'); }
+  if (Object.keys(_offlineQueue).length === 0) {
+    try { localStorage.removeItem('mavigne_offline_queue_t'); } catch(e){ if(window._mvAvale) window._mvAvale(e,'firebase.js/_flushQueue#t'); }
+  }
   if (success && keys.length > 0) {
     showSyncBadge(+ keys.length + ' modif. synchronisée' + (keys.length > 1 ? 's' : ''), '#3D6B27');
   } else if (!success) {
@@ -756,6 +790,14 @@ window.mvStashList = function () {
   return out;
 };
 window.mvStashCount = function () { return window.mvStashList().length; };
+// PREP-1 (§134) — vider le coffre en quittant une préparation : il n'est pas rangé par domaine.
+//   Rend le nombre de saisies écartées, pour le dire.
+window._fbStashVider = function () {
+  var n = 0;
+  try { n = window.mvStashCount(); localStorage.removeItem(_MV_STASH_KEY); }
+  catch (e) { if (window._mvAvale) window._mvAvale(e, 'firebase.js/_fbStashVider'); }
+  return n;
+};
 
 // Renoncer : on retire l'entree sans rien envoyer.
 window.mvStashDrop = function (cle) {
@@ -1389,6 +1431,8 @@ window.fbGetLoginEmail = async function (nom) {
 // ── _fbLoad (point d'entrée pré-auth) ──
 window._fbLoad = async function () {
   _loadQueue();
+  // ★ PREP-1 (§134) — une préparation GUERETTECH (ou son retour au panneau) se reprend ICI, file chargée.
+  if (window._mvPrepBoot && await window._mvPrepBoot()) return;
   if (!localStorage.getItem('mavigne_tenant')) {
     // #tenant-recovery : localStorage purgé (éviction iOS/ITP, données effacées) alors qu'une
     // session Firebase est restaurée → on récupère le slug depuis le claim plutôt que d'ouvrir
@@ -1647,7 +1691,7 @@ window.createAuthAccount = async function (email, password, opts) {
 // quelqu'un administrateur ne lui donnerait aucun droit d'écriture tant que
 // gtBackfillClaims n'a pas été relancé à la main.
 window._fbUpdateMemberRoles = function (email, roles) {
-  return window.fbCallFn('updateMemberRoles', { email: email, roles: roles || [] });
+  return window.fbCallFn('updateMemberRoles', _mvPrepTenant({ email: email, roles: roles || [] }));
 };
 
 // ── SEC-2 — mots de passe ────────────────────────────────────────────
@@ -1667,7 +1711,7 @@ window._fbCompleteFirstLogin = async function (newPassword) {
 // L'admin du domaine dépanne un membre. Renvoie { ok, email, password } — le mot de
 // passe n'est lisible qu'ici, une seule fois.
 window._fbResetMemberPassword = function (email) {
-  return window.fbCallFn('resetMemberPassword', { email: email });
+  return window.fbCallFn('resetMemberPassword', _mvPrepTenant({ email: email }));
 };
 
 // Ce compte doit-il changer son mot de passe avant d'entrer ? Lu dans les claims déjà en
@@ -1853,7 +1897,9 @@ window._mvLoadClaims = _mvLoadClaims;
 // Plan d'abonnement : 'essentiel' | 'vigneron' | 'domaine'. Défaut 'domaine'
 // (gating opt-in : l'existant garde l'accès complet ; on RESTREINT en posant un plan plus bas).
 window._plan = function () {
-  var p = window._MV_CLAIMS && window._MV_CLAIMS.plan;
+  // PREP-1 (§134) — en préparation, la formule vient du registre (le jeton GT n'en porte pas).
+  var p = (window._mvPrepOn && window._mvPrepOn() && window.currentUser._prepPlan)
+          || (window._MV_CLAIMS && window._MV_CLAIMS.plan);
   return (p === 'essentiel' || p === 'vigneron' || p === 'domaine') ? p : 'domaine';
 };
 
@@ -1962,7 +2008,7 @@ window._fbRenewTrial = function (tenant) {
   return window.fbCallFn('gtRenewTrial', { tenant: tenant }, { timeout: 120000 });
 };
 window._fbUpdateMemberEmail = function (oldEmail, newEmail, tenant) {
-  return window.fbCallFn('updateMemberEmail', { oldEmail: oldEmail, newEmail: newEmail, tenant: tenant || undefined });
+  return window.fbCallFn('updateMemberEmail', _mvPrepTenant({ oldEmail: oldEmail, newEmail: newEmail, tenant: tenant || undefined }));
 };
 // Suppression DÉFINITIVE d'un domaine entier (GT admin) — guard = mot de passe de suppression.
 window._fbDeleteTenant = function (slug, guard) {

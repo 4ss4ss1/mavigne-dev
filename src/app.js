@@ -570,6 +570,9 @@ window._syncLocalVars = function() {
 // n'est pas connu. Sans tenant, on n'ecrit RIEN plutot que d'ecrire ailleurs.
 var _mvLsKeyMuet = false;
 function _mvLsKey(){
+  // ★ PREP-1 (§134) — aucune copie locale d'un domaine en préparation : GUERETTECH n'en
+  //   garde rien sur son poste, et une copie sans marque de domaine ne doit exister nulle part.
+  if(window._mvPrepOn && window._mvPrepOn()) return '';
   var t = '';
   try { t = localStorage.getItem('mavigne_tenant') || ''; }
   catch(e){
@@ -754,7 +757,7 @@ function _fbSaveMuet(key, value) {
 window._fbSaveMuet = _fbSaveMuet;
 
 function saveData(keyHint, toastMsg, toastCoul) {
-  if(window._MV_LOCKED){ if(window.showToast)showToast('Essai terminé · lecture seule','#7A1020'); return; }
+  if(window._MV_LOCKED){ if(window.showToast)showToast(window._mvPrepOn()?'Session GT terminée · plus rien n’est enregistré':'Essai terminé · lecture seule','#7A1020'); return; }
   // #wipe : VERROU DE CHARGEMENT (Couche 2 anti-perte) -- ne jamais persister l'etat memoire
   // d'une cle sensible avant que Firestore ait repondu au moins une fois dans la session.
   //
@@ -3294,6 +3297,37 @@ async function confirmLogin(){
     document.body.style.background = 'var(--blanc)';
     btn.disabled = false;
     btn.textContent = 'Se connecter';
+    _mvApresEntree();
+  } catch(e) {
+    btn.disabled = false;
+    btn.textContent = 'Se connecter';
+    var _loginErr = 'Mot de passe incorrect.';
+    if (e.code === 'auth/invalid-email') {
+      _loginErr = 'Email invalide pour ce compte. Contactez l\'administrateur.';
+    } else if (e.code === 'auth/user-not-found') {
+      _loginErr = 'Compte introuvable. Contactez l\'administrateur.';
+    } else if (e.code === 'auth/user-disabled') {
+      _loginErr = 'Ce compte a été désactivé.';
+    } else if (e.code === 'auth/network-request-failed') {
+      _loginErr = 'Pas de connexion réseau.';
+    } else if (!e.code) {
+      _loginErr = 'Connexion bloquée (extension navigateur ou VPN). Désactivez uBlock / MetaMask et réessayez.';
+    }
+    console.warn('[Login] Erreur Firebase:', e.code, _mail);
+    document.getElementById('login-pwd-error').textContent = _loginErr;
+    document.getElementById('login-pwd-error').style.display = 'block';
+    document.getElementById('login-pwd-input').value = '';
+    document.getElementById('login-pwd-input').focus();
+    console.warn('Login Firebase error:', e.code);
+  }
+}
+
+// ── Entrée dans l'application, une fois l'utilisateur authentifié ──
+// ★ PREP-1 (§134) — EXTRAITE de confirmLogin, MÊMES CARACTÈRES : la préparation GUERETTECH
+//   (_mvPrepBoot) entre par ce chemin-là, pour que les deux entrées ne divergent jamais.
+//   ⚠️ confirmLogin l'appelle DANS son try : une exception de la partie synchrone y est
+//   rattrapée exactement comme avant l'extraction.
+function _mvApresEntree(){
     applyRoles();
     if(window._mvApplyTrialGating)window._mvApplyTrialGating();
     if(window.applyDomNom) window.applyDomNom();
@@ -3325,29 +3359,217 @@ async function confirmLogin(){
     } else {
       window._dataReady = true;
     }
-  } catch(e) {
-    btn.disabled = false;
-    btn.textContent = 'Se connecter';
-    var _loginErr = 'Mot de passe incorrect.';
-    if (e.code === 'auth/invalid-email') {
-      _loginErr = 'Email invalide pour ce compte. Contactez l\'administrateur.';
-    } else if (e.code === 'auth/user-not-found') {
-      _loginErr = 'Compte introuvable. Contactez l\'administrateur.';
-    } else if (e.code === 'auth/user-disabled') {
-      _loginErr = 'Ce compte a été désactivé.';
-    } else if (e.code === 'auth/network-request-failed') {
-      _loginErr = 'Pas de connexion réseau.';
-    } else if (!e.code) {
-      _loginErr = 'Connexion bloquée (extension navigateur ou VPN). Désactivez uBlock / MetaMask et réessayez.';
-    }
-    console.warn('[Login] Erreur Firebase:', e.code, _mail);
-    document.getElementById('login-pwd-error').textContent = _loginErr;
-    document.getElementById('login-pwd-error').style.display = 'block';
-    document.getElementById('login-pwd-input').value = '';
-    document.getElementById('login-pwd-input').focus();
-    console.warn('Login Firebase error:', e.code);
-  }
 }
+
+// ════════════════════════════════════════════════════════════════════════════
+// ★★★ PREP-1 — LE MODE PRÉPARATION GUERETTECH (§134)
+// ════════════════════════════════════════════════════════════════════════════
+// GUERETTECH ouvre un domaine client dans les écrans NORMAUX, depuis sa session GT (fenêtre
+// privée, code à usage unique), pour le préparer avant la remise : cave, planning, taux,
+// réserve, réglages. On y entre par « Préparer ce domaine » sur la carte du client
+// (admin-gt.js, agtPrepOuvrir) ; on en sort par le bandeau.
+//
+// ⚠️⚠️⚠️ LE SERVEUR NE PROTÈGE PLUS D'UNE ERREUR DE DOMAINE. Pour un membre, les règles
+//   refusent toute écriture hors de son domaine ; le jeton GT écrit PARTOUT. Le filet est
+//   donc ici, en quatre règles :
+//   1. en ligne seulement ;
+//   2. la file d'attente porte son domaine (firebase.js) : une file d'ailleurs ne part pas ;
+//   3. aucune copie locale du domaine (_mvLsKey rend '') ; à la sortie, le coffre des
+//      saisies refusées est vidé ;
+//   4. un seul domaine par passage : l'entrée et la sortie RECHARGENT l'application.
+//
+// ⚠️ `mavigne_tenant` (localStorage) est posé AVANT le rechargement, et rendu à la sortie :
+//   une vingtaine de lectures directes de cette clé, dont deux au CHARGEMENT des modules
+//   (_MV_IS_MG, _PLAN_IS_MG), doivent voir le même domaine que Firestore.
+//
+// ⚠️ L'utilisateur est SYNTHÉTIQUE : « GUERETTECH », rôle admin SEUL, ABSENT de MEMBRES.
+//   Pas ouvrier ni tractoriste : la question « Tu prends le tracteur ? » ne se pose pas, et
+//   openNewSession refuse déjà une session à qui n'est pas tractoriste. Les autres gestes de
+//   travail sont refusés par _mvPrepGesteRefuse — décision de Nico, 16/09 : « je ne valide
+//   aucune tâche ». Jamais d'écran de conditions (_mvTermsCheck) ni de verrou d'essai : la
+//   session GT a son propre compte à rebours, dans le bandeau.
+var _MV_PREP_CLE    = 'mv_prep';          // sessionStorage : {slug, nom, plan, avant, at}
+var _MV_PREP_RETOUR = 'mv_prep_retour';   // sessionStorage : rentrer dans le panneau au rechargement
+var _MV_PREP_MSG    = 'mv_prep_msg';      // sessionStorage : ce qu'on dit en revenant au panneau
+var _MV_PREP_MARGE  = 2 * 60 * 1000;      // on cesse d'écrire 2 min avant la fin de la session GT
+var _mvPrepT = null;
+
+function _mvPrepLire(){
+  try{
+    var raw=sessionStorage.getItem(_MV_PREP_CLE); if(!raw) return null;
+    var o=JSON.parse(raw);
+    var slug=String((o&&o.slug)||'');
+    if(!/^[a-z0-9][a-z0-9-]*$/.test(slug)||slug.length>50) return null;
+    return o;
+  }catch(e){ if(window._mvAvale) window._mvAvale(e,'app.js/_mvPrepLire'); return null; }
+}
+
+// Rend la fenêtre dans l'état d'avant : drapeau retiré, domaine local d'avant remis.
+function _mvPrepDefaire(prep){
+  try{ sessionStorage.removeItem(_MV_PREP_CLE); }catch(e){ if(window._mvAvale) window._mvAvale(e,'app.js/_mvPrepDefaire'); }
+  try{
+    var avant=String((prep&&prep.avant)||'');
+    if(avant) localStorage.setItem('mavigne_tenant', avant); else localStorage.removeItem('mavigne_tenant');
+  }catch(e){ if(window._mvAvale) window._mvAvale(e,'app.js/_mvPrepDefaire#2'); }
+}
+
+// Appelée par le panneau GT. Pose le drapeau et le domaine, puis recharge : c'est au
+// démarrage suivant que _mvPrepBoot entre dans le domaine.
+function _mvPrepPoser(o){
+  var slug=String((o&&o.slug)||'');
+  if(!/^[a-z0-9][a-z0-9-]*$/.test(slug)||slug.length>50) return false;
+  try{
+    var avant=localStorage.getItem('mavigne_tenant')||'';
+    sessionStorage.setItem(_MV_PREP_CLE, JSON.stringify({ slug:slug, nom:String((o&&o.nom)||slug), plan:String((o&&o.plan)||''), avant:avant, at:Date.now() }));
+    localStorage.setItem('mavigne_tenant', slug);
+  }catch(e){ if(window._mvAvale) window._mvAvale(e,'app.js/_mvPrepPoser'); return false; }
+  location.reload();
+  return true;
+}
+window._mvPrepPoser=_mvPrepPoser;
+
+// Le refus d'un geste de travail, dit une seule fois pour tous les gestes.
+function _mvPrepGesteRefuse(){
+  if(!window._mvPrepOn()) return false;
+  if(typeof showToast==='function') showToast('Pr\u00e9paration : les travaux se valident par l\u2019\u00e9quipe','#B85A1A');
+  return true;
+}
+
+function _mvPrepReste(){ var cu=window.currentUser; var fin=(cu&&cu._prepFin)||0; return fin-_MV_PREP_MARGE-Date.now(); }
+function _mvPrepFini(){ return _mvPrepReste()<=0; }
+
+function _mvPrepDire(txt,col,delai){
+  setTimeout(function(){ if(typeof showToast==='function') showToast(txt,col); }, delai||700);
+}
+function _mvPrepDireMessage(){
+  var m=null;
+  try{ m=JSON.parse(sessionStorage.getItem(_MV_PREP_MSG)||'null'); sessionStorage.removeItem(_MV_PREP_MSG); }
+  catch(e){ if(window._mvAvale) window._mvAvale(e,'app.js/_mvPrepDireMessage'); }
+  if(m && m.txt) _mvPrepDire(String(m.txt), String(m.col||'#3D6B27'), 800);
+}
+
+// Appelée par _fbLoad AVANT tout le reste. Rend true si elle a pris le démarrage en main.
+async function _mvPrepBoot(){
+  var prep=_mvPrepLire(), retour=false;
+  try{ retour=(sessionStorage.getItem(_MV_PREP_RETOUR)==='1'); sessionStorage.removeItem(_MV_PREP_RETOUR); }
+  catch(e){ if(window._mvAvale) window._mvAvale(e,'app.js/_mvPrepBoot'); }
+  if(!prep && !retour) return false;
+  if(window._fbAuthPret) await window._fbAuthPret(4000);
+  var au=(window.firebase&&window.firebase.auth)?window.firebase.auth():null;
+  var fu=(au&&au.currentUser)||null;
+  var cl=(fu&&window._fbClaims)?await window._fbClaims(true):null;
+  if(!(fu && window._fbGtSessOk && window._fbGtSessOk(cl))){
+    // Session GT fermée ou expirée : ni domaine, ni panneau. Démarrage normal.
+    if(prep) _mvPrepDefaire(prep);
+    _mvPrepDire('Session GUERETTECH ferm\u00e9e \u2014 pr\u00e9paration interrompue','#B85A1A',900);
+    return false;
+  }
+  if(!prep){
+    // Retour après « Quitter » : la session est encore ouverte, on rentre dans le panneau.
+    if(!window._gtEnterPanel) return false;
+    window._gtEnterPanel(fu);
+    _mvPrepDireMessage();
+    return true;
+  }
+  var raison='';
+  if(!navigator.onLine) raison='connexion requise';
+  else if(!window._fbTenant || window._fbTenant()!==prep.slug) raison='le domaine charg\u00e9 n\u2019est pas celui demand\u00e9';
+  else if(window._offlineQueueCount && window._offlineQueueCount()>0 && window._fbQueueTenant && window._fbQueueTenant()!==prep.slug) raison='des modifications d\u2019un autre domaine attendent dans cette fen\u00eatre';
+  if(raison){
+    _mvPrepDefaire(prep);
+    if(window.logError) window.logError({level:'warning',cat:'prep',msg:'Pr\u00e9paration refus\u00e9e : '+raison,detail:prep.slug});
+    try{
+      sessionStorage.setItem(_MV_PREP_RETOUR,'1');
+      sessionStorage.setItem(_MV_PREP_MSG, JSON.stringify({ txt:'Pr\u00e9paration refus\u00e9e : '+raison, col:'#C0392B' }));
+    }catch(e){ if(window._mvAvale) window._mvAvale(e,'app.js/_mvPrepBoot#2'); }
+    location.reload();
+    return true;
+  }
+  var u={ nom:'GUERETTECH', email:String(fu.email||''), roles:['admin'], statut:'Actif',
+          _isPrep:true, _prepSlug:prep.slug, _prepNom:String(prep.nom||prep.slug),
+          _prepPlan:String(prep.plan||''), _prepFin:(cl&&typeof cl.gts==='number')?cl.gts:0,
+          _firebaseUser:fu };
+  window._MV_CLAIMS=cl||{};
+  currentUser=u; window.currentUser=u;
+  try{
+    var ls=document.getElementById('login-screen'); if(ls) ls.style.display='none';
+    document.body.style.background='var(--blanc)';
+    _mvApresEntree();
+  }catch(e){ if(window._mvAvale) window._mvAvale(e,'app.js/_mvPrepBoot#3'); }
+  _mvPrepMinuteur();
+  return true;
+}
+window._mvPrepBoot=_mvPrepBoot;
+
+// Toutes les 20 s : le bandeau se relit, et l'écriture s'arrête avant la fin de session.
+function _mvPrepMinuteur(){
+  if(_mvPrepT) clearInterval(_mvPrepT);
+  var tic=function(){
+    try{
+      if(!window._mvPrepOn()){ clearInterval(_mvPrepT); _mvPrepT=null; return; }
+      if(_mvPrepFini()) window._MV_LOCKED=true;
+      _mvTrialBanner();
+    }catch(e){ if(window._mvAvale) window._mvAvale(e,'app.js/_mvPrepMinuteur'); }
+  };
+  tic();
+  _mvPrepT=setInterval(tic, 20000);
+}
+
+// Le bandeau occupe l'emplacement du bandeau d'essai (qui ne s'affiche jamais pour
+// GUERETTECH) : même décalage d'en-tête (body.mv-trial-on), rien de nouveau à caler.
+// ⚠️ Construit par le DOM, jamais par innerHTML : le nom du domaine est une saisie.
+function _mvPrepBandeau(bar){
+  var cu=window.currentUser||{};
+  var reste=_mvPrepReste(), fini=reste<=0;
+  var mn=Math.max(0,Math.floor(reste/60000)), h=Math.floor(mn/60), m=mn%60;
+  var duree=(h>0)?(h+' h '+(m<10?'0':'')+m):(m+' min');
+  var fond=fini?'#7A1020':((mn<10)?'#9C4E14':'#4C2F96');
+  bar.textContent='';
+  bar.style.background=fond;
+  var dedans=document.createElement('div'); dedans.className='mvtb-in'; dedans.style.color='#FFFFFF';
+  var txt=document.createElement('span'); txt.className='mvtb-txt';
+  var titre=document.createElement('b'); titre.textContent='Pr\u00e9paration \u00b7 '+(cu._prepNom||cu._prepSlug||'');
+  var sous=document.createElement('span');
+  sous.style.cssText='display:block;font-size:var(--pt-micro,11px);font-weight:500;opacity:.92;line-height:1.3;margin-top:1px';
+  sous.textContent=fini
+    ? 'Session GT termin\u00e9e \u2014 plus rien n\u2019est enregistr\u00e9. Quitte, puis rouvre une session.'
+    : ((mn<10)
+      ? ('Session GT : plus que '+duree+' \u2014 termine, puis Quitter')
+      : ('Session GT : encore '+duree+' \u00b7 les travaux se valident par l\u2019\u00e9quipe'));
+  txt.appendChild(titre); txt.appendChild(sous);
+  var bouton=document.createElement('button'); bouton.type='button'; bouton.className='mvtb-btn';
+  bouton.style.color=fond; bouton.textContent='Quitter';
+  bouton.addEventListener('click', function(){ _mvPrepQuitter(); });
+  dedans.appendChild(txt); dedans.appendChild(bouton); bar.appendChild(dedans);
+  bar.classList.add('show'); document.body.classList.add('mv-trial-on');
+}
+
+// Sortie : rien en attente, trace, coffre vidé, domaine d'avant remis, retour au panneau.
+async function _mvPrepQuitter(){
+  if(!window._mvPrepOn()) return;
+  var cu=window.currentUser, prep=_mvPrepLire()||{ slug:cu._prepSlug, avant:'' };
+  var n=window._offlineQueueCount?window._offlineQueueCount():0;
+  if(n>0 && navigator.onLine && window._flushOfflineQueue){
+    try{ await window._flushOfflineQueue(); }catch(e){ if(window._mvAvale) window._mvAvale(e,'app.js/_mvPrepQuitter'); }
+    n=window._offlineQueueCount();
+  }
+  if(n>0){
+    if(typeof showToast==='function') showToast(n+' modification'+(n>1?'s':'')+' pas encore envoy\u00e9e'+(n>1?'s':'')+' \u2014 v\u00e9rifie le r\u00e9seau, puis Quitter \u00e0 nouveau','#C0392B');
+    return;
+  }
+  try{ if(window._agtLogAccessLu) await window._agtLogAccessLu(cu._prepSlug,'Pr\u00e9paration ferm\u00e9e','crayon'); }
+  catch(e){ if(window._mvAvale) window._mvAvale(e,'app.js/_mvPrepQuitter#2'); }
+  var ec=window._fbStashVider?window._fbStashVider():0;
+  _mvPrepDefaire(prep);
+  try{
+    sessionStorage.setItem(_MV_PREP_RETOUR,'1');
+    sessionStorage.setItem(_MV_PREP_MSG, JSON.stringify(ec>0
+      ? { txt:'Pr\u00e9paration ferm\u00e9e \u00b7 '+ec+' saisie'+(ec>1?'s':'')+' refus\u00e9e'+(ec>1?'s':'')+' par le serveur, effac\u00e9e'+(ec>1?'s':'')+' de ce poste', col:'#B85A1A' }
+      : { txt:'Pr\u00e9paration ferm\u00e9e', col:'#3D6B27' }));
+  }catch(e){ if(window._mvAvale) window._mvAvale(e,'app.js/_mvPrepQuitter#3'); }
+  location.reload();
+}
+window._mvPrepQuitter=_mvPrepQuitter;
 
 
 function logout(){
@@ -3402,7 +3624,7 @@ function logout(){
 function _mvRefreshCurrentUserRoles(){
   try{
     var cu=window.currentUser;
-    if(!cu||cu._isDemo||cu._isGTAdmin) return;
+    if(!cu||cu._isDemo||cu._isGTAdmin||window._mvPrepOn()) return;
     var email=(cu.email||(cu._firebaseUser&&cu._firebaseUser.email)||'').toLowerCase();
     if(!email) return;
     var m=(window.MEMBRES||[]).find(function(x){return x&&(x.email||'').toLowerCase()===email;});
@@ -3462,7 +3684,7 @@ function _mvSessCheck(){
     if(!base) return;                        // aucun login établi dans cet onglet
     var cu = window.currentUser;
     // Bascules VOLONTAIRES dans le même onglet (GT / démo / visite) : pas une collision.
-    if(cu && (cu._isGTAdmin || cu._isDemo || cu._isVisite)){ _mvSessHide(); return; }
+    if(cu && (cu._isGTAdmin || cu._isDemo || cu._isVisite || window._mvPrepOn())){ _mvSessHide(); return; }
     var au  = (window.firebase && window.firebase.auth) ? window.firebase.auth() : null;
     var cur = au && au.currentUser ? au.currentUser.uid : null;
     if(!cur) return;                         // transition / rechargement → currentUser restauré ensuite
@@ -4185,6 +4407,10 @@ function _mvOnActiveSaison(){ var v=_VISU_SAISON, act=((getSaisonActive()||{}).n
 window._mvOnActiveSaison=_mvOnActiveSaison;
 // Garde de validation : bloque toute ecriture d'avancement quand on CONSULTE une saison non-active.
 function _mvValidBlocked(){
+  // ★ PREP-1 (§134) — en préparation, aucun geste de travail : c'est l'équipe qui valide.
+  //   Chacun de ces gestes écrit « qui » = la personne connectée ; un appui de trop
+  //   inscrirait GUERETTECH dans le journal du client.
+  if(_mvPrepGesteRefuse()) return true;
   if(_mvOnActiveSaison()) return false;
   var v=_VISU_SAISON, act=((getSaisonActive()||{}).nom)||'';
   if(typeof showToast==='function') showToast('Consultation de \u00ab '+v+' \u00bb \u2014 la validation se fait sur la saison active ('+act+')','#B85A1A');
@@ -4965,6 +5191,7 @@ window._mvContactGo=_mvContactGo;
 // Bandeau d'essai en haut (barre fixe). Couleur évolutive : or (>=4 j) → orange (2-3 j) → rouge (<=1 j).
 function _mvTrialBanner(){
   var bar=document.getElementById('mv-trial-bar'); if(!bar) return;
+  if(window._mvPrepOn()){ _mvPrepBandeau(bar); return; }   // PREP-1 (§134) : le bandeau de la préparation
   var t=_mvTrial();
   if(!t.active || t.expired || !currentUser || currentUser._isGTAdmin || currentUser._isDemo){
     bar.classList.remove('show'); document.body.classList.remove('mv-trial-on'); return;
@@ -4996,6 +5223,8 @@ window._mvTrialBanner=_mvTrialBanner;
 // Écran lecture seule à l'expiration (données conservées). Verrouille les écritures via window._MV_LOCKED.
 function _mvCheckExpired(){
   var ov=document.getElementById('mv-expired-ov'); if(!ov) return;
+  // PREP-1 (§134) : pas d'essai pour GUERETTECH, mais une session qui finit — le verrou suit la session.
+  if(window._mvPrepOn()){ window._MV_LOCKED=_mvPrepFini(); ov.style.display='none'; return; }
   var t=_mvTrial();
   if(t.active && t.expired && currentUser && !currentUser._isGTAdmin && !currentUser._isDemo){
     window._MV_LOCKED=true;
@@ -5039,7 +5268,8 @@ function _mvTermsCheck(){
   try{
     var ov=document.getElementById('ovTerms'); if(!ov) return;
     var cu=currentUser;
-    if(!cu||cu._isGTAdmin||cu._isDemo){ ov.style.display='none'; return; }
+    // PREP-1 (§134) : GUERETTECH ne signe JAMAIS au nom du client.
+    if(!cu||cu._isGTAdmin||cu._isDemo||window._mvPrepOn()){ ov.style.display='none'; return; }
     if(!(typeof isAdmin==='function'&&isAdmin())){ ov.style.display='none'; return; } // seul l'admin accepte au nom du domaine
     _mvTermsFromToken().then(function(t){
       if(_mvTermsOk(t)){ ov.style.display='none'; return; }
@@ -6388,7 +6618,8 @@ function renderHomeMaPart(){
   if(!c)return;
   var wrap=document.querySelector('.home-w[data-w="mapart"]');
   var tache=_mvPartTache();
-  if(!tache){ if(wrap)wrap.style.display='none'; c.innerHTML=''; return; }
+  // PREP-1 (§134) : GUERETTECH n'est pas dans l'équipe, sa part serait toujours vide.
+  if(!tache||window._mvPrepOn()){ if(wrap)wrap.style.display='none'; c.innerHTML=''; return; }
   if(wrap)wrap.style.display='';
   var nom=(currentUser&&currentUser.nom)||'';
   var r=_mvPartCalc(tache,nom);
@@ -6531,6 +6762,8 @@ function renderMaTrace(){
 }
 
 function openMaTrace(){
+  // PREP-1 (§134) : « Ma trace » est celle d'un membre de l'équipe — GUERETTECH n'en a pas.
+  if(window._mvPrepOn()){ if(typeof showToast==='function') showToast('Pr\u00e9paration : \u00ab Ma trace \u00bb est celle d\u2019un membre de l\u2019\u00e9quipe','#B85A1A'); return; }
   renderMaTrace();
   if(typeof openOv==='function')openOv('ovMaTrace');
 }
@@ -7732,6 +7965,7 @@ function openDP(nom){
 // Journal d'une réparation ad hoc (piquet/amarre/fil, multi) — n'affecte PAS l'avancement de la tâche planifiée « Reparation ».
 var _repTypes=[],_repQ=0;
 function openRepPonct(){
+  if(_mvPrepGesteRefuse())return;   // PREP-1 : une réparation est un geste de terrain
   if(!_dpCurrentNom)return;
   var p=PARCELLES.find(function(x){return x.nom===_dpCurrentNom;});
   _repTypes=[];_repQ=0;
@@ -7754,6 +7988,7 @@ function _repPonctRefresh(){
   var qw=document.getElementById('rp-qty-wrap');if(qw)qw.style.opacity=_repTypes.length?'1':'0.45';
 }
 function saveRepPonct(){
+  if(_mvPrepGesteRefuse())return;
   if(!_dpCurrentNom||!_repTypes.length)return;
   var date=(document.getElementById('rp-date')||{}).value||_mvToday();
   var jEntry={id:Date.now().toString(16),date:date,parcelle:_dpCurrentNom,tache:'Réparation ponctuelle',qui:currentUser.nom,statut:'Validé',equipe:false,membresEquipe:[],reparation_types:_repTypes.slice(),reparation_qte:_repQ||0};
@@ -8115,6 +8350,7 @@ function _jeBuildTaches(){
 }
 
 function openJournalEntry(){
+  if(_mvPrepGesteRefuse())return;   // PREP-1 : une entrée de journal porte le nom de celui qui l'écrit
   // Remplir les selects
   const ps=document.getElementById('je-parcelle');
   ps.innerHTML=PARCELLES.filter(p=>p.statut!=='Arrachee').map(p=>`<option value="${_escHtml(p.nom)}">${_escHtml(p.nom)}</option>`).join('');
@@ -8135,6 +8371,7 @@ function openJournalEntry(){
   openOv('ovJournalEntry');
 }
 async function saveJournalEntry(){
+  if(_mvPrepGesteRefuse())return;
   const parcelle=document.getElementById('je-parcelle').value;
   const tache=document.getElementById('je-tache').value;
   const date=document.getElementById('je-date').value||_mvToday();

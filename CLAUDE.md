@@ -2,7 +2,19 @@
 
 > Document de référence du projet **Ma Vigne** (GUERETTECH). Il est le **porteur de vérité** :
 > la mémoire Claude est plafonnée, ce fichier ne l'est pas.
-> Dernière consolidation : **15 septembre 2026 (CUV-13)** — ★★★ **L'ÉTAPE « DÉCUVAGE » S'APPELLE
+> Dernière consolidation : **16 septembre 2026 (PREP-1)** — ★★★ **LE MODE PRÉPARATION GUERETTECH
+> (§134)**. Nico : *« je préfère mettre en place un mode préparation »* — depuis la carte client du panneau,
+> GUERETTECH ouvre un domaine **dans ses écrans normaux** pour le préparer avant la remise, **au nom de
+> GUERETTECH, sans valider aucune tâche** (décision du 16/09). ⚠️⚠️⚠️ **Le serveur ne protège plus d'une
+> erreur de domaine** : le jeton GT écrit partout, et la file d'attente, le coffre et les copies de secours
+> ne sont pas rangés par domaine. Quatre règles tiennent le filet dans l'application (en ligne, file
+> marquée, aucune copie locale, un rechargement par domaine). ★ Trouvé en route : `agtLogAccess` aurait
+> **remplacé tout le journal d'accès** par une ligne s'il était appelé hors du panneau ; « Accéder » ouvre
+> un onglet **sans** la session GT ; ⚠️⚠️ **le preflight est aveugle sur ~220 lignes de `firebase.js`**
+> (un « auth/ » + étoile dans un commentaire ouvre un faux bloc pour C23). **APP 7.24 inchangé · SW 7.87 →
+> 7.88**, base `11188c7`. Détail en **§134**.
+>
+> ★ Précédente : **15 septembre 2026 (CUV-13)** — ★★★ **L'ÉTAPE « DÉCUVAGE » S'APPELLE
 > « PRESSURAGE », ET LA CUVE PRESSURÉE RESTE RÉCLAMÉE (§133)**. Nico : *« le décuvage ici est en fait
 > un pressurage »* — à cette étape on presse, et quand il reste du sucre le jus finit sa FA **dans une
 > autre cuve** avant la mise en fût. L'étape (clé `decuvage`, posée par « Changer l'étape ») n'était ni
@@ -2463,6 +2475,8 @@ Contenu obligatoire depuis le **01/01/2026** ; **format électronique lisible pa
 ---
 
 ## 18. Admin GT — le panneau
+
+> ★ **PREP-1 (16/09)** : « Préparer ce domaine », sur la carte client, ouvre ses écrans en direct — **§134**.
 
 - Fiche client (plan + toggles modules + essai temps réel), **dernières connexions clients**,
   vérification KML, bascule de plan, journal des erreurs (`_agtBuildErrors()` lit
@@ -4928,6 +4942,16 @@ radios/cases, section « pièces à joindre » explicite.
 ---
 
 ## 28. État courant & backlog
+
+### ⚠️ PREP-1 — À JOUER SUR UN DOMAINE JETABLE AVANT UN VRAI CLIENT (§134)
+
+1. ⚠️⚠️⚠️ **Le protocole de §134h, en entier, dans la fenêtre privée ngdevpro.** Aucun navigateur côté
+   Claude : le harnais prouve la logique, pas l'écran. Point dur : **la feuille, le bandeau, le refus de
+   « Début »/« Valider », la sortie, et le journal d'accès relu intact**.
+2. **« Accéder » ou « Préparer » : trancher.** Deux portes vers le même domaine, dont une qui n'y fait
+   plus entrer (§134e).
+3. **Le trou de C23 dans `firebase.js`** : réparer le nettoyeur de commentaires de `preflight.mjs`, puis
+   regarder ce que la zone cachait (§134e ⑤).
 
 ### ⚠️ À FAIRE AVANT DE DÉPLOYER LE CHANTIER §43 (la visite guidée)
 
@@ -18999,3 +19023,135 @@ guidée n'a aucune cuve à cette étape : en ajouter une demande une vendange co
 ③ Une cuve pressurée garde sa cuve du parc **occupée** jusqu'au décuvage (`_caveCuveOcc` lit
 `statut!=='termine'`) ; « Modifier » la rattache à celle où le jus est parti, ce qui libère l'autre.
 ④ Aucun rendu navigateur ; `npm run build`, `test:smoke`, `test:e2e` restent côté Nico.
+
+## 134. ★★★ PREP-1 — LE MODE PRÉPARATION GUERETTECH (16/09 — `app.js` · `firebase.js` · `utils.js` · `admin-gt.js` · `reglages.js` · `sw.js`, SW 7.88)
+
+### 134a. La demande, et ce que Nico a décidé
+
+Le client ne devait avoir « qu'à cliquer ». Réponse du 16/09 : **le fichier est inutile** — ce que le
+panneau GT écrit part déjà dans son domaine — mais le panneau n'écrit ni la cave, ni le planning, ni les
+taux, ni la réserve. Nico : *« non je préfère mettre en place un mode préparation »*.
+
+**Décisions de Nico, à ne pas rouvrir sans lui** : ① les saisies se font **au nom de GUERETTECH** ;
+② *« je ne valide aucune tâche »* — les gestes de travail sont donc refusés, pas seulement déconseillés ;
+③ le mode sert aussi à **vérifier avant livraison** — en vue administrateur seulement.
+
+★ Pourquoi « faux salarié » avait été dit, puis corrigé : chaque validation écrit `qui` = la personne
+connectée (une quinzaine d'endroits), et le Pilotage relit ce nom. Nico avait raison — sans validation,
+rien ne s'écrit à son nom. **Le vrai risque était l'appui de trop** : « Début » et « Valider » enregistrent
+en un appui, sans confirmation, dès qu'un filtre de tâche est posé.
+
+### 134b. ★★★ Le danger : le serveur ne protège plus d'une erreur de domaine
+
+Pour un membre, `firestore.rules` refuse toute écriture hors de son domaine. **Le jeton GT (claims
+`gtAdmin` + `gts`) écrit dans TOUS les `mavigne_*`**, sans contrôle de forme. Or trois choses ne sont pas
+rangées par domaine sur l'appareil : **`mavigne_offline_queue`** (vidée par `_flushQueue` dans le domaine
+**courant**), **`mavigne_denied_stash`** (renvoyé par `mvStashResend` dans le domaine courant) et
+**`mavigne_backup_*`**. Une modification en attente du domaine A partirait dans le domaine B.
+
+**Les quatre règles, tenues dans le code :**
+1. **en ligne seulement** (`_mvPrepBoot` refuse hors ligne) ;
+2. **la file porte son domaine** : `_queueSave` pose `mavigne_offline_queue_t` ; en préparation,
+   `_flushQueue` refuse une file d'un autre domaine **ou sans marque** ; hors préparation, rien ne change ;
+3. **aucune copie locale** : `_mvLsKey()` rend `''` en préparation ; à la sortie, `_fbStashVider()` vide le
+   coffre **et le nombre écarté est dit** ;
+4. **un seul domaine par passage** : l'entrée et la sortie **rechargent** l'application.
+
+### 134c. Entrer, sortir
+
+**Entrer.** Carte client → « Préparer ce domaine — ses écrans, en direct » → `agtPrepOuvrir(slug)`. La
+feuille **vérifie** : session GT (refus si fermée), file de CETTE fenêtre (refus si d'un autre domaine),
+coffre (refus s'il n'est pas vide), dernière connexion de l'équipe (`_agtConnexions`). Puis
+`_agtLogAccessLu` → `_mvPrepPoser` : drapeau `sessionStorage.mv_prep` = `{slug, nom, plan, avant, at}`,
+**`mavigne_tenant` = le domaine du client AVANT le rechargement**, rechargement.
+
+Au démarrage : `_fbLoad` → `_loadQueue()` → **`_mvPrepBoot()`**, avant l'écran de connexion. Il attend la
+session (`_fbAuthPret`, elle ne vit que dans l'onglet), exige `gtAdmin` + `gts` valides, le réseau,
+`_fbTenant() === slug`, et une file vide ou de ce domaine. Sinon : drapeau retiré, domaine d'avant rendu,
+retour au panneau avec la raison. Si tout tient : utilisateur **synthétique** `GUERETTECH`, **rôle admin
+SEUL**, absent de `MEMBRES`, formule du registre (`_prepPlan`, lue par `window._plan`), puis
+**`_mvApresEntree()`** — la fin de `confirmLogin`, **extraite au caractère près** : les deux entrées ne
+peuvent plus diverger.
+
+**Dedans.** Bandeau dans l'emplacement du bandeau d'essai (`#mv-trial-bar`, même `body.mv-trial-on`),
+construit **par le DOM** : violet, puis orange sous 10 min, puis rouge. **L'écriture s'arrête 2 min avant
+la fin de session** (`_MV_LOCKED`, relu par `_mvCheckExpired`), au lieu de laisser le serveur refuser.
+
+**Sortir.** « Quitter » → `_mvPrepQuitter` : s'il reste des modifications, on tente l'envoi, et **on ne
+sort pas** tant qu'elles n'ont pas pu partir ; trace « Préparation fermée » ; coffre vidé et compté ;
+domaine d'avant rendu ; `mv_prep_retour` + `mv_prep_msg` ; rechargement → `_gtEnterPanel` → message.
+
+### 134d. Refusé ou masqué en préparation
+
+- **Les 10 gestes de validation** : une condition en tête de `_mvValidBlocked()`, le verrou qui existait
+  déjà pour la consultation d'une ancienne période. **Hors de ce verrou**, gardés un par un :
+  `openRepPonct`/`saveRepPonct`, `openJournalEntry`/`saveJournalEntry`. **Sessions tracteur** : rien à
+  ajouter — `openNewSession` refuse qui n'est pas tractoriste, d'où le rôle admin SEUL (et la question
+  « Tu prends le tracteur ? » ne se pose pas).
+- **Jamais l'écran de conditions** (`_mvTermsCheck`) : GUERETTECH ne signe pas pour le client.
+- **« Changer mon mot de passe »** : `confirmChangePwd` agit sur `firebase.auth().currentUser` — ce serait
+  le compte GT.
+- **« Ma part du chantier »**, **« Ma trace »** (vides pour qui n'est pas de l'équipe), **les nouveautés**,
+  la garde multi-onglet, la relecture des rôles dans `MEMBRES`.
+- **Réglages › Équipe** : `updateMemberRoles`, `resetMemberPassword`, `updateMemberEmail` partaient
+  **sans domaine** — refus `tenant invalide` pour un jeton GT. `_mvPrepTenant` l'ajoute **en préparation
+  seulement** : dans le panneau, `TENANT_ID` serait celui de la fenêtre.
+
+**GUERETTECH apparaîtra, et c'est juste**, sur ce qu'il règle : tournée fixée (`par`), appoint GNR (`par`).
+⚠️ En cave, une opération **sans intervenant coché** prend le nom connecté : cocher le vrai caviste.
+
+### 134e. ★ Trouvé en route
+
+① **Une vingtaine de lectures directes de `localStorage.mavigne_tenant`**, dont **deux au chargement des
+modules** (`_MV_IS_MG`, `_PLAN_IS_MG`) : le domaine doit être posé AVANT le rechargement, sinon un poste
+qui a déjà ouvert MG préparerait un autre domaine avec les règles de MG.
+② ★★★ **`agtLogAccess` écrit la liste EN MÉMOIRE** (`_agtAccessLog`, chargée par le panneau). Appelée
+depuis une préparation, elle aurait **remplacé tout le journal d'accès par une seule ligne**.
+`_agtLogAccessLu` relit, complète, plafonne à 100, et **n'écrit rien sur une forme inconnue**.
+③ **« Accéder » (`agtAccedeTenant`)** ouvre `?tenant=` dans un **nouvel onglet**. Depuis SEC-GT la session
+est limitée à l'onglet (`browserSessionPersistence`) : il arrive sur l'écran de connexion du domaine. Son
+commentaire promet l'inverse. Il écrit aussi `mavigne_tenant` pour toute la fenêtre. **Gardé, à trancher.**
+④ Le premier essai **bumpait APP** : `mv-whatsnew-check` refuse un bloc APP sans rien à annoncer, et §7 le
+disait — *un lot GT n'a rien à annoncer*. **APP inchangé, SW seul.**
+⑤ ⚠️⚠️ **`preflight.mjs` est aveugle sur ~220 lignes de `firebase.js`.** Son nettoyeur retire les blocs
+`/…/` **avant** les commentaires de ligne ; un « auth/ » suivi d'une étoile écrit dans un commentaire
+(vers la ligne 1684) ouvre un **faux bloc** jusqu'au prochain `*/` (vers 1901). **C23 ne voit aucune
+déclaration là-dedans.** `_mvPrepTenant` y était : C23 a crié. ★ **La note ajoutée pour expliquer le piège
+contenait elle-même la séquence** et a déplacé l'aveuglement sur trois autres fonctions — attrapé au
+relancement. `_mvPrepTenant` est déclarée hors zone ; le harnais vérifie qu'elle reste visible, et sa
+contre-épreuve réintroduit la séquence. **Nettoyeur non corrigé ici.**
+
+### 134f. Le harnais
+
+`scripts/mv-harnais-prep.mjs` — **75 assertions vertes, 26 contre-épreuves qui mordent**, dans `check` et
+`prebuild` (et `npm run test:prep`). Il exécute les **vraies** fonctions extraites (entrée, refus, bandeau,
+sortie, file, fonctions d'équipe, journal d'accès), puis lit le câblage dans les sources. Méthode de §133e :
+ancre **unique**, essai **vrai sur le code sain**, sinon rouge. ★ Une contre-épreuve est passée inaperçue
+au premier tour — elle écrivait un bloc **fermé**, qui ne reproduit pas le piège ⑤. Corrigée pour écrire la
+séquence **sans fermeture**, comme dans le fichier.
+
+### 134g. La note de livraison
+
+**Base `11188c7`.** **APP 7.24 inchangé** · **SW 7.87 → 7.88**. Aucune règle, aucune Cloud Function
+touchée : `firebase deploy --only hosting` suffit. `npm run check` joué en entier sur l'arbre final.
+
+### 134h. Ouvert, et dit — et le protocole
+
+**Protocole, sur un domaine jetable, fenêtre privée ngdevpro :** ① carte → « Préparer » → la feuille dit la
+session et « rien » en attente ; ② ouvrir → bandeau violet (nom, durée), **pas** d'écran de conditions,
+modules de sa formule ; ③ saisir une cuve, un contrat, un taux → les retrouver dans la fiche client ;
+④ Parcelles, filtre de tâche posé → « Début » puis « Valider » → **refus**, rien au journal ;
+⑤ Réglages › Changer mon mot de passe → **refus** ; ⑥ couper le réseau, saisir, « Quitter » → **refus**
+tant que rien n'est parti ; ⑦ réseau revenu → « Quitter » → panneau, « Préparation fermée », journal
+d'accès : ouverte puis fermée, **anciennes lignes intactes** ; ⑧ se connecter comme le client → ses
+données sont là, aucun « GUERETTECH » au journal.
+
+**Ouvert** : ① aucun rendu navigateur côté Claude ; ② « Accéder » / « Préparer » (§134e ③) ; ③ le trou
+de C23 (§134e ⑤) ; ④ la vue d'un ouvrier n'est pas couverte ; ⑤ **après la remise**, le client peut
+écrire en même temps : écriture du document entier, la dernière gagne (sauf `parcelles`, fusionnées) —
+le même risque que deux administrateurs ; la feuille montre la dernière connexion de l'équipe ;
+⑥ la session GT (8 h) ne se prolonge pas de l'intérieur : sortir, rouvrir ; ⑦ `INSTALLER-UN-DOMAINE.md`,
+hors dépôt, reçoit l'étape « Préparer » de la main de Nico ; ⑧ fermer la fenêtre privée après une
+préparation reste la seule garantie que rien du domaine ne demeure dans le navigateur ; ⑨ le journal
+d'accès affiche les noms d'icône **en toutes lettres** (« cle » pour « Accéder », « crayon » ici) :
+`_agtBuildLog` rend `e.icon` tel quel. Un emoji aurait fait remonter le cliquet d'icônes — non corrigé.

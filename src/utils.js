@@ -2230,6 +2230,7 @@ function _wnRow(item, sep) {
 let _whatsNewShown = false;
 export function checkWhatsNew() {
   if (_whatsNewShown) return;
+  if (_mvPrepOn()) return;   // PREP-1 (§134) : les nouveautés d'un domaine ne regardent pas GUERETTECH
   var seen = localStorage.getItem('mavigne_last_seen_version');
   if (!seen) { try{ localStorage.setItem('mavigne_last_seen_version', APP_VERSION); }catch(e){ if(window._mvAvale) window._mvAvale(e,'utils.js/checkWhatsNew'); } return; } // 1er install : pas de recap
   if (_cmpVer(seen, APP_VERSION) >= 0) return; // déjà à jour (ou downgrade)
@@ -2479,6 +2480,14 @@ export function initTheme() {
 // Utilisent window.currentUser (défini par app.js au login/logout)
 export function isAdmin() {
   return !!(window.currentUser && window.currentUser.roles && window.currentUser.roles.includes('admin'));
+}
+// ★ PREP-1 (§134) — LE MODE PRÉPARATION GUERETTECH. GUERETTECH ouvre un domaine client
+//   dans les écrans normaux, depuis sa session GT, pour le préparer avant la remise.
+//   `_isPrep` n'est posé qu'à UN endroit (_mvPrepBoot, app.js), sur un utilisateur
+//   synthétique ABSENT de MEMBRES. Cette fonction est la seule question que le reste du
+//   code pose : ne pas relire `_isPrep` à la main ailleurs.
+export function _mvPrepOn() {
+  return !!(window.currentUser && window.currentUser._isPrep === true);
 }
 export function isTractoriste() {
   return !!(window.currentUser && window.currentUser.roles && window.currentUser.roles.includes('tractoriste'));
@@ -3914,6 +3923,7 @@ window.wmoIcone           = wmoIcone;
 window.MV_METEO_IC        = MV_METEO_IC;
 window.wmoEmoji           = wmoEmoji;
 window.isAdmin            = isAdmin;
+window._mvPrepOn          = _mvPrepOn;
 window.isTractoriste      = isTractoriste;
 window.canSeePhyto        = canSeePhyto;
 window.isSaisonnier       = isSaisonnier;
