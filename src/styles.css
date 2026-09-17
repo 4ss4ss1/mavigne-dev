@@ -2747,6 +2747,17 @@ body.mv-trial-on #app-root{padding-top:calc(env(safe-area-inset-top,0px) + 44px)
 .pl2r-dy{display:flex;justify-content:space-between;gap:var(--e-3,12px);width:100%;box-sizing:border-box;margin:var(--e-1,4px) 0 0 2px;padding:var(--e-1,4px) 0 var(--e-1,4px) var(--e-3,12px);background:none;border:none;border-left:2px solid var(--gris-clair);font-family:inherit;font-size:var(--pt-txt,12.5px);color:var(--texte-med);text-align:left;cursor:pointer;}
 .pl2r-dy em{display:block;font-style:normal;font-size:var(--pt-micro,11px);color:var(--texte-doux);margin-top:2px;}
 .pl2r-dy b{white-space:nowrap;font-variant-numeric:tabular-nums;}
+/* RECUP-2 — « Pour la compta » : le temps en récup, les heures à déclarer, le taux */
+.pl2r-cp{width:100%;border-collapse:collapse;font-size:var(--pt-txt,12.5px);font-variant-numeric:tabular-nums;}
+.pl2r-cp th{font-size:var(--pt-nano,9.5px);font-weight:var(--fw-bold,700);text-transform:uppercase;letter-spacing:.4px;color:var(--texte-doux);text-align:left;padding:var(--e-1,4px) 2px;border-bottom:1px solid var(--gris-clair);}
+.pl2r-cp th.r2{text-align:right;}
+.pl2r-cp td{padding:var(--e-2,8px) 2px;border-bottom:1px solid var(--gris-clair);vertical-align:top;color:var(--texte);line-height:1.3;}
+.pl2r-cp td.rec,.pl2r-cp td.dec,.pl2r-cp td.tx{text-align:right;}
+.pl2r-cp td.rec,.pl2r-cp td.dec{white-space:nowrap;font-weight:var(--fw-bold,700);}
+.pl2r-cp td.rec{color:var(--plan-acc);}
+.pl2r-cp td.dec{color:var(--terre-tx,#8A5A38);}
+.pl2r-cp td.tx{font-size:var(--pt-micro,11px);color:var(--texte-doux);}
+.pl2r-cp tfoot td{font-weight:var(--fw-bold,700);border-bottom:none;}
 
 /* Fiche salarié */
 .pl2-fhead{display:flex;align-items:center;gap:12px;}

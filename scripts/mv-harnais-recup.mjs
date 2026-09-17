@@ -19,6 +19,11 @@
 //  ★ L'HORLOGE EST FIGEE AU 16/09/2026 : la fenetre de la regle est une date, un
 //    harnais qui lirait l'annee courante changerait de verdict le 1er janvier.
 //
+//  ★ RECUP-2 (16/09/2026) — POUR LA COMPTA. « 1h sup en recup = 1h15, en paie = 1h15, mais pour
+//    la paie il faut laisser 1h sup, car la compta integre en 1h + 25 % » (Nico). Le compteur
+//    compte en temps de recup DANS TOUS LES MODES ; chaque tranche garde son taux ; ce qui se
+//    paie se declare en heure BRUTE. Une heure sup un dimanche va au taux le plus fort, une fois.
+//
 //  Usage :  node scripts/mv-harnais-recup.mjs [--contre]
 //  Exit 0 si tout passe, 1 sinon. Un CRASH est ROUGE.
 // ═══════════════════════════════════════════════════════════════════════════
@@ -89,7 +94,7 @@ function modele(an) {
   for (const [m, d] of [[0, 1], [3, 6], [4, 1], [4, 8], [4, 14], [4, 25], [6, 14], [10, 11], [11, 25]]) t[m][d] = 0;
   return t;
 }
-const EXPORTS = ['_planJourEcart', '_planHsupMois', '_planHsupTiers', '_planHsupMajBank', '_planCompteur', '_planBank',
+const EXPORTS = ['_planValeurPourBrut', '_planComptaLignes', '_planComptaTable', '_planSeauxTxt', '_planSeauNom', '_planJourEcart', '_planHsupMois', '_planHsupTiers', '_planCompteur', '_planBank',
   '_planYearBalance', '_planSupMonth', '_planSupCalc', '_planSummary', '_planDuesMonth', '_planMajBank', '_planHsupPaye',
   '_planHsupPayeBank', '_planRecupH', '_planDepartSolde', '_planAbsPartH', '_planAbsPartiel', '_planDayH', '_planWorkH',
   '_planDayStatus', '_pl2Cell', '_planRecupActive', '_planApplyAbsPart', '_planApplyHeures', '_planSuspH',
@@ -130,6 +135,7 @@ function lance(R) {
   const vider = o => { for (const k of Object.keys(o)) delete o[k]; return o; };
   function domaine(o) {
     const tpl = modele(2026); tpl._timings = {};
+    if (o.tpl) o.tpl(tpl);
     for (let m = 0; m < 12; m++) tpl._timings[m] = { d: '08:00' };        // 7 h = 08:00 -> 16:00, coupure 1 h
     Object.assign(vider(window.PLANNING_TEMPLATES), { 2026: { standard: tpl } });
     Object.assign(vider(window.PLANNING_ENTRIES), { Jean: { 2026: o.ent || {} } });
@@ -225,13 +231,18 @@ function lance(R) {
   z = R._planHsupTiers(J, 8);
   eq('G4 · valeur saisie 6h : la part à 50 % reste 2h', z.h50, 2); eq('G5 · … et 4h à 25 %', z.h25, 4); eq('G6 · majoration 2h', z.maj, 2);
   domaine({ ent: { 8: { 7: T('08:00', '18:00'), 8: T('08:00', '18:00') } }, config: { hsup_mode: 'paye' } });
-  eq('G7 · mode payé : la majoration ne va pas au compteur', R._planHsupMajBank(J, 8), 0);
+  // RECUP-2 : le compteur compte en temps de récup PARTOUT — ce qui se paie se déclare en heure brute.
+  eq('G7 · mode payé : la majoration des heures sup va aussi au compteur', R._planCompteur(J, 8).rows[8].majSup, 1);
+  eq('G7b · mode payé : 4h à 25 % = 5h au compteur', R._planBank(J, 8).solde, 5);
   eq('G8 · … mais les taux existent', R._planHsupMois(J, 8).h25, 4);
 
   // H. Dimanche : la plus forte seule
   domaine({ ent: { 8: { 13: T('08:00', '17:00') } } });
   z = R._planHsupMois(J, 8);
-  eq('H1 · 8h un dimanche = 8h sup', z.plus, 8); eq('H2 · aucune majoration d’heures sup en plus des 50 % du dimanche', z.maj, 0);
+  eq('H1 · 8h un dimanche = 8h sup', z.plus, 8);
+  eq('H2 · une seule majoration : 8h au taux du dimanche (4h)', z.maj, 4);
+  eq('H2b · … et rien en « majoration seule » : ces heures sont des heures sup', z.majHsVal, 0);
+  eq('H2c · une seule ligne, au taux le plus fort', JSON.stringify(z.buckets.map(b => [b.taux, b.nat, b.h])), JSON.stringify([[50, 'dim', 8]]));
   eq('H3 · le compteur prend 8h + 4h de dimanche', R._planBank(J, 8).solde, 12);
   domaine({ ent: { 8: { 13: T('08:00', '17:00') } }, config: { majorations: { dim: 0, ferie: 100 } } });
   eq('H4 · dimanche non majoré : les 25 % des heures sup reprennent', R._planHsupMois(J, 8).maj, 2);
@@ -249,7 +260,7 @@ function lance(R) {
   eq('J3 · août : heures sup = l’écart historique', R._planSupMonth(J, 7), Math.max(0, s7.ecart));
   const y7 = R._planYearBalance(J, 7);
   eq('J4 · août : dues = heures dues historiques', y7.dues, R._planDuesMonth(J, 7));
-  eq('J5 · août : aucune majoration d’heures sup', R._planHsupMajBank(J, 7), 0);
+  eq('J5 · août : aucune majoration d’heures sup', R._planCompteur(J, 7).rows[7].majSup, 0);
 
   // K. Ce que la grille et le relevé lisent
   domaine({ ent: { 8: { 16: abs2h } } });
@@ -302,34 +313,93 @@ function lance(R) {
   const pdf = pages[0] ? pages[0].html : '';
   eq('L18 · le relevé est produit', pdf.length > 2000, true);
   eq('L19 · bloc « Heures supplémentaires · septembre »', pdf.indexOf('Heures suppl\u00e9mentaires \u00b7 septembre') !== -1, true);
-  eq('L20 · la journée écourtée, son créneau et son motif',
-    pdf.indexOf('Retir\u00e9 au taux normal \u00b7 me 16, Absent 13:00 \u2192 15:00 \u00b7 personnel') !== -1, true);
-  eq('L21 · temps de récup restant 3h', /Temps de r\u00e9cup restant<\/b><\/span><span class="cv"><b>3h<\/b>/.test(pdf), true);
-  eq('L22 · à retenir sur la paie 0h', /\u00c0 retenir sur la paie<\/b><\/span><span class="cv"><b>0h<\/b>/.test(pdf), true);
+  eq('L20 · la journée écourtée, son créneau et son motif, dans la table compta',
+    pdf.indexOf('Heures manqu\u00e9es \u00b7 me 16, Absent 13:00 \u2192 15:00 \u00b7 personnel</td><td class="r2">\u22122h</td><td class="r2">\u22122h</td>') !== -1, true);
+  eq('L21 · temps de récup 3h', /Temps de r\u00e9cup<\/td><td class="r2"[^>]*>3h<\/td>/.test(pdf), true);
+  eq('L22 · à retenir sur la paie 0h', pdf.indexOf('<b>\u00c0 retenir sur la paie</b></td><td class="r2">\u2014</td><td class="r2"><b>0h</b></td>') !== -1, true);
+  eq('L22b · 4h à déclarer à +25 % pour 5h de récup, jamais 5h',
+    pdf.indexOf('<td>Heures sup \u00e0 25\u202f%</td><td class="r2">5h</td><td class="r2">4h</td><td class="r2">+25\u202f%</td>') !== -1, true);
+  eq('L22c · plus de bloc « Dimanches et jours fériés » séparé en septembre', pdf.indexOf('Dimanches et jours f\u00e9ri\u00e9s travaill\u00e9s'), -1);
   // ⚠️ Vécu à l'intégration : l'en-tête du tableau d'année lisait une variable posée PLUS BAS
   //    dans la fonction (hoisting) — il disait « Heures dues » en septembre. Rien d'autre ne le voyait.
   eq('L24 · le tableau d’année dit « Heures retirées » à partir de septembre', pdf.indexOf('>Heures retir\u00e9es</th>') !== -1, true);
   eq('L23 · relevé : ni undefined ni NaN', /undefined|NaN/.test(pdf.replace(/<script[\s\S]*?<\/script>/g, '')), false);
+
+  // M. RECUP-2 — pour la compta : l'heure brute et son taux, jamais 1h15
+  const cols = (html) => [...html.matchAll(/<tr><td>([\s\S]*?)<\/td><td class="(?:rec|r2)">([\s\S]*?)<\/td><td class="(?:dec|r2)">([\s\S]*?)<\/td><td class="(?:tx|r2)">([\s\S]*?)<\/td><\/tr>/g)]
+    .map(m => m.slice(1).map(x => x.replace(/<[^>]+>/g, '')));
+  const heures = (t) => { const m = /^(\u2212)?(\d+)h(\d*)$/.exec(t); return m ? (m[1] ? -1 : 1) * (+m[2] + (m[3] ? +m[3] / 60 : 0)) : 0; };
+  const somme = (html) => cols(html).reduce((a, r) => a + heures(r[1]), 0);
+  // M1–M2 : un dimanche PRÉVU (7h au modèle) travaillé 9h
+  const dim7 = t => { t[8][13] = 7; };
+  domaine({ tpl: dim7, ent: { 8: { 13: T('08:00', '18:00') } } });
+  z = R._planHsupMois(J, 8);
+  eq('M1 · 2h sup ce dimanche, au taux du dimanche', JSON.stringify(z.buckets.map(b => [b.taux, b.nat, b.h])), JSON.stringify([[50, 'dim', 2]]));
+  eq('M2 · les 7h prévues ne portent que leur majoration (3h30)', z.majHsVal, 3.5);
+  eq('M2b · récup : 2h × 1,5 + 3h30 = 6h30', R._planBank(J, 8).solde, 6.5); inv('M2c', 8);
+  domaine({ tpl: dim7, ent: { 8: { 13: T('08:00', '18:00') } }, config: { hsup_mode: 'paye' } });
+  eq('M3 · payé : la majoration des heures prévues part en paie, pas au compteur', R._planBank(J, 8).solde, 3);
+  let X = R._planComptaLignes(J, 8, R._planCompteur(J, 8));
+  eq('M3b · payé : « majoration seule » à déclarer, rien en récup',
+    JSON.stringify(X.lignes.find(l => /Majoration/.test(l[0]))), JSON.stringify(['Majoration \u00b7 dimanche 13 (heures pr\u00e9vues)', '\u2014', '7h', '+50\u202f% (majoration seule)']));
+  // M4 : payé, 2h payées ce mois sur 4h à 25 %
+  domaine({ ent: { 8: { 7: T('08:00', '18:00'), 8: T('08:00', '18:00'), 16: abs2h } }, config: { hsup_mode: 'paye' }, hsup: { '2026-09': { paye: 2 } } });
+  let c4 = R._planCompteur(J, 8);
+  eq('M4 · 2h payées = 2h brutes à +25 %', JSON.stringify(c4.rows[8].payes), JSON.stringify([{ taux: 25, nat: 'hs', brut: 2 }]));
+  eq('M4b · 2h restent au compteur = 2h30, − 2h manquées = 0h30', c4.solde, 0.5); inv('M4c', 8);
+  let tb = R._planComptaTable(J, 8, c4, false);
+  eq('M4d · ligne « Payées ce mois » : 2h à déclarer', cols(tb).some(r => /^Pay\u00e9es ce mois/.test(r[0]) && r[1] === '\u2014' && r[2] === '2h' && r[3] === '+25\u202f%'), true);
+  eq('M4e · ligne « Au compteur » : 2h30 en récup', cols(tb).some(r => /^Au compteur/.test(r[0]) && r[1] === '2h30' && r[2] === '\u2014'), true);
+  eq('M4f · la colonne « En récup » tombe sur le solde', somme(tb), c4.solde);
+  // M5 : en octobre, 2h30 payées depuis le compteur
+  domaine({ ent: { 8: { 7: T('08:00', '18:00'), 8: T('08:00', '18:00'), 16: abs2h } }, hsup: { '2026-10': { paye_bank: 2.5 } } });
+  let c5 = R._planCompteur(J, 9);
+  eq('M5 · 2h30 de récup payées = 2h brutes à +25 %', JSON.stringify(c5.rows[9].payesBank.map(p => [p.taux, p.v, p.brut])), JSON.stringify([[25, 2.5, 2]]));
+  eq('M5b · il reste 0h30', c5.solde, 0.5);
+  tb = R._planComptaTable(J, 9, c5, false);
+  eq('M5c · ligne « Payées depuis le compteur » : −2h30 en récup, 2h à déclarer', cols(tb).some(r => /^Pay\u00e9es depuis le compteur/.test(r[0]) && r[1] === '\u22122h30' && r[2] === '2h' && r[3] === '+25\u202f%'), true);
+  eq('M5d · octobre : report 3h − 2h30 = le solde', somme(tb), c5.solde);
+  // M6 : sans paiement, les deux colonnes disent la même valeur, et jamais 1h15 à déclarer
+  domaine({ ent: { 8: { 7: T('08:00', '19:00'), 8: T('08:00', '19:00'), 9: T('08:00', '18:00'), 10: T('08:00', '18:00'), 13: T('08:00', '17:00'), 16: abs2h } } });
+  let c6 = R._planCompteur(J, 8); tb = R._planComptaTable(J, 8, c6, false);
+  const hsR = cols(tb).filter(r => /^(Heures sup|Dimanche)/.test(r[0]));
+  eq('M6 · même valeur : Σ récup = Σ heures × (1 + taux)', hsR.reduce((a, r) => a + heures(r[1]), 0),
+    hsR.reduce((a, r) => a + heures(r[2]) * (1 + (+/\+(\d+)/.exec(r[3])[1]) / 100), 0));
+  eq('M6b · toutes les heures sup déclarées une fois', hsR.reduce((a, r) => a + heures(r[2]), 0), R._planHsupMois(J, 8).plus);
+  eq('M6c · la colonne « En récup » tombe sur le solde', somme(tb), c6.solde); inv('M6d', 8);
+  sain('M7 table compta', tb);
+  // M8 : payer 2h BRUTES au-delà du mois coûte 2h30 au compteur (tranche à 25 %)
+  domaine({ ent: { 8: { 7: T('08:00', '18:00'), 8: T('08:00', '18:00'), 16: abs2h } } });
+  let vb = R._planValeurPourBrut(J, 9, 2);
+  eq('M8 · 2h brutes = 2h30 de récup retirées', vb.v, 2.5); eq('M8b · rien de non retenu', vb.reste, 0);
+  vb = R._planValeurPourBrut(J, 9, 3);
+  eq('M8c · 3h demandées : le compteur (3h) n’en rend que 2h24', vb.v, 3); eq('M8d · 0h36 non retenues', vb.reste, 0.6);
 
   return { ok, ko, echecs };
 }
 
 // ── Contre-epreuves ─────────────────────────────────────────────────────────
 const DEFAUTS = [
-  ['les heures manquées retirées au taux heures sup', "r.retire=hm.retire;r.retenue=tire(hm.retire);", "r.retire=hm.retire;r.retenue=tire(hm.retire*1.25);"],
+  ['les heures manquées retirées au taux heures sup', "r.retire=hm2.retire;r.retenue=tire(hm2.retire);", "r.retire=hm2.retire;r.retenue=tire(hm2.retire*1.25);"],
   ['le seuil des 50 % oublié', "var r50=Math.min(plus,Math.max(0,compte-PLAN_HS_SEUIL50));", "var r50=0;"],
-  ['la majoration des heures sup oubliée', "z.maj+=y.h25*Math.max(0,25-tx)/100+y.h50*Math.max(0,50-tx)/100;", "z.maj+=0;"],
-  ['dimanche et heures sup cumulés', "z.maj+=y.h25*Math.max(0,25-tx)/100+y.h50*Math.max(0,50-tx)/100;", "z.maj+=y.h25*0.25+y.h50*0.5;"],
+  ['la majoration des heures sup oubliée', "ent.push({taux:b.taux,nat:b.nat,h:(b.h-p)*(1+b.taux/100)});", "ent.push({taux:b.taux,nat:b.nat,h:(b.h-p)});"],
+  ['dimanche et heures sup cumulés', "if(jm)seau(MH,tx,nj,Math.max(0,jm.h-ec.plus),y.d);", "if(jm)seau(MH,tx,nj,jm.h,y.d);"],
   // ⚠️ Premiere version : on sautait le « return » des motifs neutres. Defaut INOPERANT — le
   //    motif n'avait toujours pas de destination et le calcul l'ignorait : le harnais restait
   //    vert sur un defaut qui n'en etait pas un. Le vrai defaut, c'est de lui en DONNER une.
   ['un arrêt retire des heures', "id:'arret',     ico:'pansement', nom:'Arr\\u00eat de travail',          sub:'Maladie, accident du travail',                     suspend:true,  assim:false, paye:true,  heures:false, cpt:''}",
     "id:'arret',     ico:'pansement', nom:'Arr\\u00eat de travail',          sub:'Maladie, accident du travail',                     suspend:true,  assim:false, paye:true,  heures:false, cpt:'retire'}"],
-  ['la journée du domaine retenue sur la paie', "r.domaine=hm.domaine+hm.indet;r.compense=tire(r.domaine);dette+=r.compense;", "r.domaine=hm.domaine+hm.indet;r.retenue+=tire(r.domaine);"],
+  ['la journée du domaine retenue sur la paie', "r.domaine=hm2.domaine+hm2.indet;r.compense=tire(r.domaine);dette+=r.compense;", "r.domaine=hm2.domaine+hm2.indet;r.retenue+=tire(r.domaine);"],
   ['la fenêtre de septembre 2026 supprimée', "var PLAN_RECUP_DEBUT='2026-09';", "var PLAN_RECUP_DEBUT='2026-01';"],
   ['la coupure comptée dans l’absence', "return Math.max(0,Math.min(jour,((y-x)-dans)/60));", "return Math.max(0,Math.min(jour,(y-x)/60));"],
-  ['ce qui reste à compenser n’est jamais comblé', "r.comble=Math.min(dette,Math.max(0,entre));", "r.comble=0;"],
-  ['le tableau d’année du relevé redit « Heures dues » après septembre', "(_planRecupActive(planMonth)?'Heures retir", "(false?'Heures retir"]
+  ['ce qui reste à compenser n’est jamais comblé', "r.comble=Math.min(dette,entre);dette-=r.comble;", "r.comble=0;"],
+  ['le tableau d’année du relevé redit « Heures dues » après septembre', "(_planRecupActive(planMonth)?'Heures retir", "(false?'Heures retir"],
+  // RECUP-2
+  ['on déclare 1h15 à la compta au lieu de l’heure brute', "hm.buckets.forEach(function(b){L.push([_planSeauNom(b),_planFmt(b.h*(1+b.taux/100)),_planFmt(b.h),tx(b.taux)]);});",
+    "hm.buckets.forEach(function(b){L.push([_planSeauNom(b),_planFmt(b.h*(1+b.taux/100)),_planFmt(b.h*(1+b.taux/100)),tx(b.taux)]);});"],
+  ['un paiement pris au compteur se déclare en temps de récup', "brut:t/(1+tr[k].taux/100)", "brut:t"],
+  ['payé : la majoration d’un dimanche prévu part aussi au compteur', "if(!_planHsupPayable()&&hm.majHsVal>0.0001)", "if(hm.majHsVal>0.0001)"],
+  ['payer des heures brutes retire autant de récup, sans leur taux', "var f=1+t.taux/100,b=Math.min(t.h/f,reste);", "var f=1,b=Math.min(t.h/f,reste);"]
 ];
 
 const SRC = fs.readFileSync(path.join(RACINE, 'src', 'planning.js'), 'utf8');

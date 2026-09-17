@@ -23,7 +23,7 @@ export const GT_ADMIN_EMAIL = 'ngdevpro@gmail.com';
 // WHATS_NEW   : tableau vide = modal desactive pour cette version.
 // Format item : { emoji:'📅', titre:'Titre court', desc:'Phrase utilisateur.' }
 // Regle : seulement les changements visibles par les utilisateurs.
-export const APP_VERSION = '7.25';
+export const APP_VERSION = '7.26';
 // ════ Journal des nouveautés (récap cumulatif) ════
 // Une entrée par version, la PLUS RÉCENTE EN HAUT : { v:'5.10', items:[ {emoji,titre,desc}, … ] }
 // À chaque release visible → AJOUTER un bloc en tête (ne pas remplacer). items:[] = release technique (rien à afficher).
@@ -715,6 +715,19 @@ window._mvGraphRepeindre = function(){
 };
 
 export const WHATS_NEW = [
+  { v: '7.26', items: [
+    { emoji: 'balance', titre: 'Pour la compta : l’heure et son taux, jamais 1h15',
+      desc: "Dans la fiche d’un salarié, onglet Compteur, et sur son relevé, la carte <b>Pour la compta</b> donne "
+        + "pour chaque taux trois chiffres\u00a0: le <b>temps en récup</b>, les <b>heures à déclarer</b> et le <b>taux à "
+        + "appliquer</b>. Une heure sup à 25\u00a0% vaut 1\u00a0h\u00a015 de repos, mais la compta, qui majore elle-même, "
+        + "reçoit <b>1\u00a0h à +25\u00a0%</b>\u00a0: lui déclarer 1\u00a0h\u00a015, ce serait majorer deux fois. Une heure sup "
+        + "un dimanche ou un jour férié garde le taux le plus fort, sur une seule ligne." },
+    { emoji: 'chrono', titre: 'Le compteur compte en temps de récup, même quand les heures se paient',
+      desc: "Chaque heure garde son taux au compteur. Payer des heures en puisant dans le compteur retire ce "
+        + "qu’elles valent (2\u00a0h à 25\u00a0% = 2\u00a0h\u00a030 de récup) et les déclare en heures brutes, avec leur "
+        + "taux. Les heures payées dans le mois se déclarent de la même façon, et seules celles qui restent "
+        + "entrent au compteur." }
+  ] },
   { v: '7.25', items: [
     { emoji: 'calendrier', titre: 'Une absence peut ne couvrir qu’une partie de la journée',
       desc: "Resté chez lui l’après-midi, parti une heure plus tôt, arrivé en retard\u00a0: dans la feuille du jour, "
@@ -3072,7 +3085,8 @@ var MV_AIDE = {
       ['Sur une période plus longue', "que la vue affichée, deux boutons au-dessus de la grille posent des congés ou des horaires chaleur du jour au jour, pour plusieurs salariés."],
       ['Une journée écourtée', "se retire d’abord du compteur d’heures sup, au taux normal : 1 h manquée = 1 h de récup en moins, quel que soit le motif. Ce que le compteur ne couvre pas est retenu sur la paie, sauf si le domaine a arrêté la journée : il attend alors les prochaines heures sup. Un arrêt de travail, une formation, un événement familial ou un congé sans solde ne retirent rien. Ces règles valent à partir de septembre 2026 ; les mois d’avant gardent la leur."],
       ['Une absence sur une partie de la journée', "se note dans Absence, « Une partie seulement » : de telle heure à telle heure, ou un raccourci — le matin, l’après-midi, arrivé en retard, parti plus tôt — puis le motif. L’écran calcule les heures manquées, coupure déduite, dessine la journée et dit avant d’enregistrer ce qu’elles retirent du compteur. Un horaire raccourci dans « Travaillé » demande aussi son motif, sauf les horaires chaleur et les jours d’échange."],
-      ['Les heures sup et la récup', "l’onglet Compteur de la fiche d’un salarié montre les heures sup faites avec leur taux — 25 % jusqu’à la 43e heure de la semaine, 50 % au-delà —, le temps de récup qu’elles donnent (1 h 15 ou 1 h 30 par heure) et ce qui en a été retiré, puis le mois en grille et le détail semaine par semaine. Un jour se touche pour l’ouvrir. Si vos heures sup se paient, les taux sont à porter en paie au lieu d’entrer au compteur."],
+      ['Les heures sup et la récup', "l’onglet Compteur de la fiche d’un salarié montre les heures sup faites avec leur taux — 25 % jusqu’à la 43e heure de la semaine, 50 % au-delà —, le temps de récup qu’elles donnent (1 h 15 ou 1 h 30 par heure) et ce qui en a été retiré, puis la carte Pour la compta, le mois en grille et le détail semaine par semaine. Un jour se touche pour l’ouvrir."],
+      ['Pour la compta', "une ligne par taux : le temps en récup, les heures à déclarer et le taux à appliquer. La compta majore elle-même : pour 1 h sup à 25 %, on lui déclare 1 h à +25 %, jamais 1 h 15. Le compteur compte toujours en temps de récup, même quand les heures se paient : des heures payées sortent du compteur et se déclarent en heures brutes, avec leur taux. Une heure sup un dimanche ou un jour férié prend le taux le plus fort, une seule fois."],
       ['Présence, coupure, heures dues', "trois nombres qui se ressemblent et ne disent pas la même chose. La ‹‹ présence ›› va de l’arrivée au départ. La ‹‹ coupure ›› est le temps non travaillé au milieu : sa durée et son heure sont fixées par le domaine, dans la roue crantée du Planning, ce n’est pas un moment que chacun choisit. Les ‹‹ heures dues ›› sont ce qui part en paie et alimente le compteur des 1 607 h. Une journée de 09:00 à 16:00 avec une heure de coupure fait 7 h de présence et 6 h dues."],
       ['Le planning de l’année', "s’imprime depuis le même endroit : le rythme sur douze mois, avec les heures de prise et de fin de service et la coupure déjeuner. Une page par modèle de semaine — c’est le document qu’on remet à l’équipe pour l’année à venir. Une variante nominative sort la même grille pour une seule personne, bornée à ses contrats, avec ses jours de formation et ses congés déjà posés."],
       ['Le relevé mensuel', "s’imprime depuis la roue crantée du Planning, bloc Documents. C’est un relevé d’heures, pas un bulletin de paie."],

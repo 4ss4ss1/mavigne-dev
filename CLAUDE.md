@@ -2,7 +2,15 @@
 
 > Document de référence du projet **Ma Vigne** (GUERETTECH). Il est le **porteur de vérité** :
 > la mémoire Claude est plafonnée, ce fichier ne l'est pas.
-> Dernière consolidation : **16 septembre 2026 (RECUP-1)** — ★★★ **UNE JOURNÉE ÉCOURTÉE SE RETIRE DU
+> Dernière consolidation : **16 septembre 2026 (RECUP-2)** — ★★★ **POUR LA COMPTA : L'HEURE ET SON TAUX,
+> JAMAIS 1H15 (§136)**. Nico : *« 1h sup en récup égale 1h15, en paie égale 1h15, MAIS pour la paie il faut
+> laisser 1h sup car la compta intègre en 1h + 25 % »*. Le compteur compte en temps de récup **dans tous les
+> modes**, chaque tranche garde son taux, ce qui se paie se déclare en heure brute ; une heure sup un dimanche
+> va au taux le plus fort, une fois. Carte et relevé « Pour la compta ». ★ Trouvé en route : **la v4 opposait
+> récup et paie — c'était une équivalence** ; deux assertions du harnais encodaient l'ancienne règle.
+> **APP 7.25 → 7.26 · SW 7.89 → 7.90**, base `2bc2a6d`. Détail en **§136**.
+>
+> ★ Précédente : **16 septembre 2026 (RECUP-1)** — ★★★ **UNE JOURNÉE ÉCOURTÉE SE RETIRE DU
 > COMPTEUR AU TAUX NORMAL, ET LES HEURES SUP DEVIENNENT DU TEMPS DE RÉCUP MAJORÉ (§135)**. Nico : *« retirées
 > de prime abord des heures sup »*, *« afficher les temps de récup en majoration (25 % ou 50 %) »*, *« retirer
 > au taux normal »*. Une absence peut couvrir **une partie de la journée** (créneau + motif, deux motifs
@@ -19295,3 +19303,72 @@ absences injustifiées (§135b). ③ En mode **payé**, l'appli donne les heures
 « à compenser » au 31 décembre ne passe pas sur l'année suivante : chaque année repart de son report de
 départ. ⑥ Rendu vérifié dans Chromium (serveur de dev, données injectées, 390 px, clair et sombre, zéro
 erreur console) — **pas sur un téléphone réel**, et pas le document imprimé à l'œil.
+
+---
+
+## 136. ★★★ RECUP-2 — POUR LA COMPTA : L'HEURE ET SON TAUX, JAMAIS 1H15 (16/09 — `planning.js` · `styles.css` · `utils.js` · `index.html` · `sw.js` · `guide/10-planning.html` · `scripts/` · APP 7.25 → **7.26** · SW 7.89 → **7.90**)
+
+> Nico, après RECUP-1 : *« il ne faut pas que les heures soient majorées dans l'appli et sur la paie ; je
+> souhaite voir le temps d'heures en récup, le temps à déclarer en compta et le taux à appliquer »*. Puis,
+> sur la maquette v4 : *« Non attention : 1h sup en récup égale 1h15, en paie égale 1h15, MAIS pour la paie
+> il faut laisser 1h sup car la compta intègre en 1h + 25 % »*. Puis « oui go » sur la v5.
+
+### 136a. Ce que la v4 avait mal compris — et la leçon
+
+La v4 opposait « le domaine récupère » et « le domaine paie » : une heure était **soit** en récup, **soit** à
+déclarer. **Faux.** Les deux écritures ont la **même valeur** (1 h 15) ; ce qui change, c'est la façon de
+l'écrire : en récup la majoration est dans le temps, pour la compta on donne **l'heure brute et le taux**,
+parce que la paie majore elle-même. La v5 affiche donc, pour chaque taux, les trois chiffres demandés.
+★ *Une règle formulée « jamais les deux » peut cacher une équivalence : c'est la v4 livrée à Nico qui l'a
+montré, pas une relecture.*
+
+### 136b. Le moteur
+
+- `_planHsupMois` range chaque heure sup dans un **seau à son taux effectif** (`buckets`) : le palier 25/50 %,
+  ou le taux du dimanche/férié s'il est au moins aussi fort — **une seule fois**. Les heures **prévues** d'un
+  dimanche ou d'un férié ne sont pas des heures sup : seule leur majoration compte (`majHs`, §73).
+- La majoration des heures sup entre au compteur **dans tous les modes** : le compteur compte en temps de
+  récup partout (calculé dans `_planCompteur` ; `_planHsupMajBank`, devenue sans appelant, est supprimée).
+  ⚠️ **Les domaines en mode « payé » voient leur compteur changer d'unité à partir de septembre 2026.**
+- `_planMajBank` et `_planMajMonth` **ne bougent pas** — le harnais de la majoration reste intact ; le partage
+  heures prévues / heures sup vit dans `_planCompteur`.
+- `_planCompteur` : des tranches `{mois, taux, nat, h}`. L'acompte du mois (`paye`, heures brutes) se prend
+  sur le taux le plus bas d'abord et n'entre jamais au compteur (`payes`). Un paiement **pris au compteur**
+  (`paye_bank`) se saisit en **temps de récup** et rend l'heure brute : `brut = v / (1 + taux)` (`payesBank`).
+  FIFO : le mois le plus ancien d'abord, le taux le plus bas d'abord dans un mois.
+- `_planValeurPourBrut` : le surplus d'un acompte au-delà du mois (heures brutes) retire ce qu'il vaut au
+  compteur — 2 h à 25 % = 2 h 30.
+
+### 136c. Les écrans
+
+- `_planComptaLignes` / `_planComptaTable`, sur l'onglet Compteur (carte « Pour la compta ») et sur le relevé.
+  **Sans paiement** : chaque ligne dit les deux équivalences (maquette v5). **Avec un paiement** : les lignes se
+  séparent en « Payées ce mois », « Au compteur » et « Payées depuis le compteur » — sinon la compta lirait
+  les mêmes heures deux fois. ★ La colonne « En récup » **s'additionne au solde** : c'est le test (M4f, M5d, M6c).
+- Relevé : à partir de septembre 2026, le bloc « Dimanches et jours fériés travaillés » ne s'imprime plus —
+  ils sont dans la table, à leur taux le plus fort. Garder les deux ferait lire leur majoration deux fois.
+- **Écarts avec la maquette, dits** : lignes « Report des mois précédents » et « Comble ce qui restait à
+  compenser » (un vrai compteur a un passé) ; lignes de paiement (absentes de la maquette) ; « Heures
+  manquées (part couverte) » en une ligne quand une retenue existe, pour que la colonne tombe sur le solde.
+
+### 136d. Ce que les filets ont trouvé
+
+- **G7 et H2 du harnais encodaient l'ancienne règle** (mode payé = majoration hors compteur ; `z.maj` =
+  majoration au-delà du dimanche). Réécrits pour dire la nouvelle — pas contournés.
+- Cinq contre-épreuves visaient du code déplacé : elles suivent. Quatre défauts neufs : déclarer 1 h 15,
+  un paiement au compteur rendu en temps de récup, la majoration d'un dimanche prévu comptée au compteur
+  en mode payé, une conversion brute sans taux. **14 défauts, 14 détectés.**
+- `_planRecupTxt` devenue morte (C15) : retirée, avec son commentaire.
+- Rendu Chromium de la carte : clair et sombre, sans et avec paiement, zéro erreur console. ⚠️ Bruit du
+  **test** seulement : réinjecter la config rouvre l'écran des conditions, qui masquait la capture.
+
+### 136e. La note de livraison, et ce qui reste ouvert
+
+**Base `2bc2a6d`** (RECUP-1 poussé, vérifié identique au livré, 16 fichiers sur 16). **APP 7.25 → 7.26 ·
+SW 7.89 → 7.90** — la 7.25 a pu être servie, on ne la réutilise pas. `firebase deploy --only hosting`.
+`public/guide.html` ne se livre pas : `node scripts/build-guide.mjs`.
+
+**Ouvert** : ① le solde du compteur n'est pas traduit en « si tout était payé : X h à +25 % » hors d'un
+paiement réel ; ② les tranches d'avant septembre 2026 se déclarent au taux 0 (règle d'alors) ;
+③ les non-annualisés (TESA, saisonniers) restent au décompte mensuel ; ④ la règle des absences injustifiées
+est toujours à faire confirmer par le comptable ; ⑤ pas de téléphone réel, relevé imprimé non regardé à l'œil.
