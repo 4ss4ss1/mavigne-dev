@@ -3888,6 +3888,355 @@ function _planComptaTable(mbr,dm,c,papier){
     +'<tbody>'+h+'</tbody><tfoot><tr><td'+fs+'>'+(X.recupNC>0.0001?'Temps de r\u00e9cup (non couvert\u00a0: '+_planFmt(X.recupNC)+')':'Temps de r\u00e9cup')+'</td>'
     +'<td class="'+(papier?'r2':'rec')+'"'+fs+'>'+_planFmt(X.solde)+'</td><td'+fs+'></td><td'+fs+'></td></tr></tfoot></table>';
 }
+// ★★★ FICHE-1 (17/09/2026) — LE MOIS D'UN SALARIÉ, TEL QUE LA PAIE LE LIT (maquette v3 validée).
+//   Nico : « tout doit être clair pour le salarié, pour la compta, pour la secrétaire ».
+//   Chaque jour du mois se range en quatre parts : PRÉVU (le modèle), FAIT (le travail
+//   effectif), ABSENCE PAYÉE (congé payé, récup couverte, formation, événement familial,
+//   absence couverte par la récup ou décidée par le domaine), NEUTRE (arrêt, sans solde).
+//   ★ Comme en paie : une absence payée ne fait pas varier le salaire. L'écart d'un jour
+//   = fait + payé + neutre − prévu : il ne garde que les heures sup et ce qui n'est pas payé.
+//   ⚠️ La récup et les absences sont couvertes dans l'ORDRE DES DATES, à hauteur de ce que
+//   _planCompteur a couvert pour le mois : les totaux sont ceux du compteur, au centième.
+function _pfPrevT(plId,m,d,pl){
+  var t=_planDefTiming(pl,plId,m,d);if(!t)return '';
+  var a=t.d||t.debut,b=t.f||t.fin;
+  return (typeof a==='string'&&typeof b==='string')?a+'\u2013'+b:'';
+}
+function _planPaieMois(mbr,m){
+  var plId=_planPlId(mbr),nom=mbr.nom,nd=_planDays(m),act=_planRecupActive(m);
+  var c=_planCompteur(mbr,m),r=c.rows[m]||{},hm=_planHsupTiers(mbr,m);
+  var P={m:m,act:act,c:c,r:r,hm:hm,jours:[],prevues:0,faites:0,payees:0,cp:0,rec:0,dom:0,assim:0,
+         neutres:{},nonPayees:0,recupNC:0,joursPrevus:0};
+  for(var d=1;d<=nd;d++){
+    var x={d:d,w:_planDow(m,d),fait:0,paye:0,payeType:'',neutre:0,neutreType:'',nonPaye:0,moins:0,cpt:'',recupH:0,recNC:0};
+    if(!_planInContract(mbr,m,d)){x.hors=true;P.jours.push(x);continue;}
+    var e=_pEntDay(nom,m,d),pl=_planPlanned(plId,m,d);
+    x.e=e;x.st=_planDayStatus(plId,m,d,e);
+    x.prevu=(e&&e.type==='recup')?pl:_planRefPart(plId,m,d,e);
+    if(x.prevu>0.0001){x.prevT=_pfPrevT(plId,m,d,pl>0?pl:x.prevu);P.joursPrevus++;}
+    var wh=_planWorkH(plId,m,d,e);
+    if(!e){x.fait=wh;}
+    else if(e.type==='cp'){x.paye=_planDayH(plId,m,d,e);x.payeType='cp';}
+    else if(e.type==='recup'){x.recupH=x.prevu;}
+    else if(e.absent){
+      var mo=_planAbsMotif(e);
+      if(mo.assim){var part=_planAbsPartiel(e)?Math.min(x.prevu,_planAbsH(e)):x.prevu;x.fait=Math.max(0,x.prevu-part);x.paye=part;x.payeType=mo.id;}
+      else if(mo.suspend){x.fait=wh;x.neutre=Math.max(0,x.prevu-wh);x.neutreType=mo.id;}
+      else if(mo.cpt){var ec=_planJourEcart(plId,m,d,e);x.fait=wh;x.moins=ec.moins;x.cpt=ec.cpt;}
+      else {x.fait=wh;x.neutre=Math.max(0,x.prevu-wh);x.neutreType='autre';}
+    } else {
+      x.fait=wh;
+      var ec2=_planJourEcart(plId,m,d,e);
+      if(ec2.moins>0.0001){x.moins=ec2.moins;x.cpt=ec2.cpt;}
+    }
+    if(e&&e.timing&&!e.absent)x.faitT=e.timing.debut+'\u2013'+e.timing.fin;
+    else if(e&&_planAbsPartiel(e)){
+      var b=_planRetardBornes(mbr,m,d),D0=_planMinOf(b.t0),D1=_planMinOf(b.t1),A=_planMinOf(e.abs_de),B=_planMinOf(e.abs_a),seg=[];
+      if(A>D0)seg.push(b.t0+'\u2013'+e.abs_de);
+      if(B<D1)seg.push(e.abs_a+'\u2013'+b.t1);
+      x.faitT=seg.join(' et ');
+    }
+    else if(x.fait>0.0001&&x.prevT)x.faitT=x.prevT;
+    P.jours.push(x);
+  }
+  var rc=Math.max(0,(r.retire||0)-(r.retenue||0)),kc=Math.max(0,(r.recup||0)-(r.recupNC||0));
+  P.jours.forEach(function(x){
+    if(x.hors)return;
+    if(x.moins>0.0001){
+      if(act&&x.cpt==='retire'){var p=Math.min(x.moins,rc);rc-=p;x.paye+=p;x.nonPaye=x.moins-p;if(p>0.0001)x.payeType=x.payeType||'rec';}
+      else {x.paye+=x.moins;x.payeType=x.payeType||(x.cpt==='retire'?'rec':'dom');}
+    }
+    if(x.recupH>0.0001){var q=act?Math.min(x.recupH,kc):x.recupH;kc-=q;x.paye+=q;x.payeType='rec';x.recNC=x.recupH-q;}
+    x.ecart=x.fait+x.paye+x.neutre-(x.prevu||0);
+    P.prevues+=x.prevu||0;P.faites+=x.fait;P.payees+=x.paye;
+    if(x.payeType==='cp')P.cp+=x.paye;else if(x.payeType==='rec')P.rec+=x.paye;else if(x.payeType==='dom')P.dom+=x.paye;else if(x.payeType)P.assim+=x.paye;
+    if(x.neutre>0.0001)P.neutres[x.neutreType]=(P.neutres[x.neutreType]||0)+x.neutre;
+    P.nonPayees+=x.nonPaye;P.recupNC+=x.recNC;
+  });
+  // Les heures sup : faites, payées ce mois, gardées en récup
+  P.sup=_planSupMonth(mbr,m);
+  P.lignes=(hm.buckets||[]).map(function(bk){
+    var p=0;(r.payes||[]).forEach(function(q){if(q.taux===bk.taux&&q.nat===bk.nat)p+=q.brut;});
+    return {taux:bk.taux,nat:bk.nat,h:bk.h,jours:bk.jours||[],paye:p,garde:Math.max(0,bk.h-p),valeur:Math.max(0,bk.h-p)*(1+bk.taux/100)};
+  });
+  P.payeMois=r.paye||0;
+  P.payeBank=(r.payesBank||[]).reduce(function(a,q){return a+q.brut;},0);
+  P.payeTotal=P.payeMois+P.payeBank;
+  P.payable=_planHsupPayable();
+  P.majSeule=hm.majHs||[];
+  P.valeurRecup=P.lignes.reduce(function(a,l){return a+l.valeur;},0)+(P.payable?0:P.majSeule.reduce(function(a,x){return a+x.h*x.taux/100;},0));
+  var rec=(PLANNING_HSUP[nom]||{})[_planHsupKey(m)]||{};
+  P.demande=(typeof rec.demande==='boolean')?rec.demande:(P.payeTotal>0.0001);
+  var mk=_pY()+'-'+String(m+1).padStart(2,'0');
+  P.acomptes=((PLANNING_ACOMPTES[nom]||{})[mk]||[]).slice().sort(function(a,b){return a.date<b.date?-1:1;});
+  P.acomptesTotal=P.acomptes.reduce(function(a,x){return a+(x.montant||0);},0);
+  return P;
+}
+// Le plus d'heures sup qu'on peut payer ce mois-ci SANS découvrir la récup déjà prise ni
+// faire retenir une absence : essais sur le vrai compteur, la saisie remise en place ensuite.
+function _planPayeMaxCouvert(mbr,m){
+  var nom=mbr.nom,key=_planHsupKey(m),hadNom=!!PLANNING_HSUP[nom];
+  if(!hadNom)PLANNING_HSUP[nom]={};
+  var had=Object.prototype.hasOwnProperty.call(PLANNING_HSUP[nom],key),rec=PLANNING_HSUP[nom][key]||{},sv={p:rec.paye,b:rec.paye_bank};
+  PLANNING_HSUP[nom][key]=rec;
+  try{
+    var essai=function(h){rec.paye=h;rec.paye_bank=0;return _planCompteur(mbr,m).rows[m];};
+    var z=essai(0),n=Math.floor(_planSupMonth(mbr,m)*2+1e-9);
+    var ok=function(k){var rr=essai(k/2);return rr.retenue<=z.retenue+1e-6&&rr.recupNC<=z.recupNC+1e-6;};
+    if(n<=0)return 0;
+    if(ok(n))return n/2;
+    var lo=0,hi=n;
+    while(hi-lo>1){var mid=(lo+hi)>>1;if(ok(mid))lo=mid;else hi=mid;}
+    return lo/2;
+  } finally {
+    if(sv.p===undefined)delete rec.paye;else rec.paye=sv.p;
+    if(sv.b===undefined)delete rec.paye_bank;else rec.paye_bank=sv.b;
+    if(!had)delete PLANNING_HSUP[nom][key];
+    if(!hadNom)delete PLANNING_HSUP[nom];         // un essai ne laisse aucune trace, pas même une fiche vide
+  }
+}
+// Le travail effectif d'une semaine entière (lundi -> dimanche), même à cheval sur deux mois
+function _planSemEffectif(mbr,mon){
+  var plId=_planPlId(mbr),sv=_planCtxYear,t=0;
+  for(var k=0;k<7;k++){
+    var dt=new Date(mon.getFullYear(),mon.getMonth(),mon.getDate()+k),y=dt.getFullYear(),mm=dt.getMonth(),dd=dt.getDate();
+    _planCtxYear=y;
+    try{if(_planInContractRead(mbr,mm,dd))t+=_planWorkH(plId,mm,dd,_pEntDay(mbr.nom,mm,dd),y);}finally{_planCtxYear=sv;}
+  }
+  return t;
+}
+
+// ═══ 2. Les écrans de la fiche ═══
+function _pfMark(cls,txt){return '<mark class="pf-hl pf-hl-'+cls+'">'+txt+'</mark>';}
+var PF_PAYE_LIB={cp:'Cong\u00e9 pay\u00e9',rec:'R\u00e9cup',dom:'D\u00e9cid\u00e9 par le domaine',formation:'Formation',famille:'\u00c9v\u00e9nement familial'};
+var PF_NEUTRE_LIB={arret:'Arr\u00eat de travail',sansolde:'Cong\u00e9 sans solde',autre:'Absence non pr\u00e9cis\u00e9e'};
+function _pfNatLib(l){
+  if(l.nat==='dim')return 'Dimanche'+(l.jours.length===1?' '+l.jours[0]:'s');
+  if(l.nat==='fer')return 'Jour'+(l.jours.length>1?'s':'')+' f\u00e9ri\u00e9'+(l.jours.length>1?'s':'');
+  return 'Heures sup';
+}
+function _pfCadre(mbr,P){
+  var mois=PLAN_MOIS[P.m]+' '+planYear,D=_pfPaieDonnees(mbr,P),sansSolde=D.sansSolde;
+  return '<section class="pf-paie" aria-labelledby="pf-paie-t">'
+    +'<header class="pf-paie-h"><h3 id="pf-paie-t">Pour la paie</h3><span>'+mois+'</span></header>'
+    +'<div class="pf-grid">'
+      +'<div class="pf-b"><h4>Le salaire de base</h4><div class="pf-trio">'
+        +'<div><span class="pf-l">Pr\u00e9vues</span>'+_pfMark('prev pf-v',_planFmt(P.prevues))+'<span class="pf-s">'+P.joursPrevus+' jours au planning</span></div>'
+        +'<div><span class="pf-l">Faites</span>'+_pfMark('fait pf-v',_planFmt(P.faites))+'<span class="pf-s">travaill\u00e9es</span></div>'
+        +'<div><span class="pf-l">Absences pay\u00e9es</span>'+_pfMark('paye pf-v',_planFmt(P.payees))+'<span class="pf-s">cong\u00e9s, r\u00e9cup\u2026</span></div>'
+      +'</div>'
+      +((P.nonPayees+sansSolde)<0.0001?'<p class="pf-ok">'+_mvIcon('check',16)+'<span>Maintenu\u00a0: les absences pay\u00e9es ne se retirent pas.</span></p>'
+        :'<p class="pf-ko">'+_mvIcon('alerte',16)+'<span>'+_planFmt(P.nonPayees+sansSolde)+' d\u2019absence ne sont pas pay\u00e9es\u00a0: \u00e0 retirer.</span></p>')
+      +'</div>'
+      +'<div class="pf-b"><h4>\u00c0 payer en plus</h4><dl class="pf-lst pf-plus">'+_pfLignes(D.plus)+'</dl>'
+        +(P.act?'':'<p class="pf-s">Mois ant\u00e9rieur \u00e0 septembre 2026\u00a0: le d\u00e9tail est dans l\u2019onglet Compteur.</p>')+'</div>'
+      +'<div class="pf-b"><h4>\u00c0 retirer</h4><dl class="pf-lst">'+_pfLignes(D.moins)+'</dl></div>'
+      +'<div class="pf-b"><h4>Pour information</h4><dl class="pf-lst">'+_pfLignes(D.info)+'</dl>'
+        +(P.recupNC>0.0001?'<p class="pf-ko">'+_mvIcon('alerte',16)+'<span>R\u00e9cup prise non couverte\u00a0: '+_planFmt(P.recupNC)+'.</span></p>':'')+'</div>'
+    +'</div>'
+    +'<p class="pf-pied">'+D.pied+'</p>'
+  +'</section>';
+}
+function _pfDemande(mbr,P){
+  if(!P.act||!isAdmin())return '';
+  var max=_planPayeMaxCouvert(mbr,P.m),v=P.demande?P.payeTotal:0;
+  var payes=P.lignes.filter(function(l){return l.paye>0.0001;});
+  var garde=P.lignes.reduce(function(a,l){return a+l.garde;},0);
+  var res=(P.demande&&P.payeTotal>0.0001)
+    ?(payes.map(function(l){return _planFmt(l.paye)+' \u00e0 +'+l.taux+'\u202f%'+(l.nat==='hs'?'':' ('+_pfNatLib(l).toLowerCase()+')');}).join(', ')
+      +(P.payeBank>0.0001?(payes.length?', ':'')+_planFmt(P.payeBank)+' sur le compteur':'')+' pay\u00e9es. '+_planFmt(garde)+' restent en r\u00e9cup, soit '+_planFmt(P.valeurRecup)+' de repos.')
+    :(P.sup>0.0001?'Aucune heure pay\u00e9e\u00a0: les '+_planFmt(P.sup)+' sup restent en r\u00e9cup, soit '+_planFmt(P.valeurRecup)+' de repos.':'Pas d\u2019heures sup ce mois-ci.');
+  return '<section class="pf-card pf-dem" aria-labelledby="pf-dem-t">'
+    +'<div class="pf-card-t"><h3 id="pf-dem-t">Paiement des heures sup</h3><span>'+PLAN_MOIS[P.m].toLowerCase()+'</span></div>'
+    +'<label class="pf-case"><input type="checkbox" id="pf-dem-case"'+(P.demande?' checked':'')+' onchange="planFicheDemande(\''+_escAttr(mbr.nom)+'\')"><span>'+_escHtml(mbr.nom)+' demande \u00e0 \u00eatre pay\u00e9 de ses heures sup</span></label>'
+    +'<div class="pf-dem-h'+(P.demande?'':' off')+'"><label for="pf-dem-h">Heures \u00e0 payer</label>'
+      +'<div class="pf-stp"><button type="button" onclick="planFicheHeures(\''+_escAttr(mbr.nom)+'\',-1)" aria-label="Une heure de moins"'+(P.demande?'':' disabled')+'>\u2212</button>'
+      +'<input id="pf-dem-h" type="text" inputmode="decimal" value="'+String(Math.round(v*100)/100).replace('.',',')+'"'+(P.demande?'':' disabled')+' onchange="planFicheHeures(\''+_escAttr(mbr.nom)+'\')" aria-describedby="pf-dem-res">'
+      +'<span>h sur '+_planFmt(P.sup)+'</span>'
+      +'<button type="button" onclick="planFicheHeures(\''+_escAttr(mbr.nom)+'\',1)" aria-label="Une heure de plus"'+(P.demande?'':' disabled')+'>+</button></div></div>'
+    +(P.demande&&P.sup>0.0001?'<div class="pf-rac"><button type="button" onclick="planFicheHeures(\''+_escAttr(mbr.nom)+'\',0,0)">Aucune</button>'
+      +'<button type="button" onclick="planFicheHeures(\''+_escAttr(mbr.nom)+'\',0,'+_escAttr(String(max))+')">Sans toucher la r\u00e9cup prise ('+_planFmt(max)+')</button>'
+      +'<button type="button" onclick="planFicheHeures(\''+_escAttr(mbr.nom)+'\',0,'+_escAttr(String(P.sup))+')">Tout le mois ('+_planFmt(P.sup)+')</button></div>':'')
+    +'<p class="pf-res" id="pf-dem-res">'+res+'</p>'
+    +(P.payeMois>max+1e-9?'<p class="pf-al">'+_mvIcon('alerte',16)+'<span>Au-del\u00e0 de '+_planFmt(max)+', la r\u00e9cup d\u00e9j\u00e0 prise ce mois-ci n\u2019est plus couverte.</span></p>':'')
+    +'<p class="pl2-note">Les heures pay\u00e9es se prennent d\u2019abord sur celles \u00e0 25\u202f%. Elles sortent de la r\u00e9cup\u00a0: 1h pay\u00e9e \u00e0 +25\u202f% = 1h15 de repos en moins.</p>'
+  +'</section>';
+}
+function _pfOuVont(P){
+  if(!P.act||!P.lignes.length)return '';
+  return '<section class="pf-card"><div class="pf-card-t"><h3>O\u00f9 vont les heures sup</h3></div>'
+    +'<table class="pf-t"><thead><tr><th>Nature</th><th class="n">Faites</th><th class="n">Pay\u00e9es</th><th class="n">En r\u00e9cup</th></tr></thead><tbody>'
+    +P.lignes.map(function(l){return '<tr><td>'+(l.nat==='hs'?'\u00c0 +'+l.taux+'\u202f%':_pfNatLib(l)+', +'+l.taux+'\u202f%')+'</td><td class="n">'+_planFmt(l.h)+'</td><td class="n">'+(l.paye>0.0001?_pfMark('sup',_planFmt(l.paye)):'\u2014')+'</td><td class="n pf-rec">'+(l.garde>0.0001?_planFmt(l.valeur):'\u2014')+'</td></tr>';}).join('')
+    +'</tbody><tfoot><tr><td>Total</td><td class="n">'+_planFmt(P.sup)+'</td><td class="n">'+_planFmt(P.payeMois)+'</td><td class="n pf-rec">'+_planFmt(P.lignes.reduce(function(a,l){return a+l.valeur;},0))+'</td></tr></tfoot></table>'
+    +'<p class="pl2-note">Pay\u00e9es\u00a0: l\u2019heure brute, la paie applique le taux. En r\u00e9cup\u00a0: le temps de repos, majoration comprise (1h \u00e0 25\u202f% = 1h15).</p></section>';
+}
+function _pfResume(mbr,P){
+  return _pfCadre(mbr,P)+_pfDemande(mbr,P)+_pfOuVont(P)
+    +'<button type="button" class="pf-btn" onclick="planFichePdf()">'+_mvIcon('document',18)+'<span>Voir le relev\u00e9 du mois</span></button>';
+}
+// ★★ FICHE-2 — CE QUE L'ÉCRAN ET LE RELEVÉ LISENT DU MÊME MOIS. Les onglets de la fiche et le relevé
+//   PDF impriment les mêmes chiffres : ils les prennent ICI, jamais dans un second calcul. Sortis tels
+//   quels de _pfJours, _pfCompteur et _pfCadre — l'écran rend le même HTML au caractère près (instantané
+//   pris avant, comparé après).
+function _pfSemaines(mbr,P){
+  var L=_planLegal(),maj={},hs=_planRecupActive(P.m)?_planHsupMois(mbr,P.m):null,out=[];
+  _planMajMonth(mbr,P.m).jours.forEach(function(j){maj[j.d]=j;});
+  _planMonthWeeks(P.m).forEach(function(w){
+    var js=P.jours.filter(function(x){var dt=new Date(_pY(),P.m,x.d);return !x.hors&&dt>=w.mon&&dt<=w.sun;});
+    if(!js.length)return;
+    var fait=0,paye=0,prev=0,cp=0,rec=0;
+    js.forEach(function(x){fait+=x.fait;paye+=x.paye;prev+=x.prevu||0;if(x.payeType==='cp')cp+=x.paye;else if(x.paye)rec+=x.paye;});
+    var B={};
+    if(hs){
+      var sm=hs.semaines.filter(function(s){return s.mon.getTime()===w.mon.getTime();})[0];
+      (sm?sm.jours:[]).forEach(function(j){var t=maj[j.d],tx=t?t.tx:0,nat=t?(t.fer?'f\u00e9ri\u00e9':'dimanche'):'';
+        if(j.h25>0.0001){var k=(tx>=25&&nat)?'le '+nat:'\u00e0 25\u202f%';B[k]=(B[k]||0)+j.h25;}
+        if(j.h50>0.0001){var k2=(tx>=50&&nat)?'le '+nat:'\u00e0 50\u202f%';B[k2]=(B[k2]||0)+j.h50;}});
+    }
+    var hsT=Object.keys(B).map(function(k){return _planFmt(B[k])+' '+k;}),hsSum=Object.keys(B).reduce(function(a,k){return a+B[k];},0);
+    var eff=_planSemEffectif(mbr,w.mon);
+    out.push({w:w,js:js,fait:fait,paye:paye,prev:prev,cp:cp,rec:rec,hsT:hsT,hsSum:hsSum,eff:eff,trop:eff>L.maxHebdo+0.0001,maxHebdo:L.maxHebdo});
+  });
+  out.maj=maj;
+  return out;
+}
+function _pfMouvements(mbr,P){
+  var r=P.r,c=P.c,m=P.m;
+  var avant=m>0?c.rows[m-1].solde:Math.max(0,_planDepartSolde(mbr));
+  var acq=(r.sup||0)-(r.paye||0)+(r.majDim||0)+(r.majSup||0)-(r.comble||0);
+  var retire=Math.max(0,(r.retire||0)-(r.retenue||0))+Math.max(0,(r.domaine||0)-(r.compense||0)),prise=Math.max(0,(r.recup||0)-(r.recupNC||0));
+  var uti=Math.max(0,avant+acq-c.solde),payeC=Math.max(0,uti-retire-prise);
+  var mv=[];
+  if(acq>0.0001)mv.push(['Ce mois','Heures sup gard\u00e9es en r\u00e9cup',(P.payeMois>0.0001?_planFmt(P.payeMois)+' pay\u00e9es, hors r\u00e9cup':''),acq]);
+  P.jours.forEach(function(x){
+    if(x.hors)return;
+    if(x.payeType==='rec'&&x.e&&x.e.type==='recup')mv.push([x.d+' '+PLAN_MOIS_C[m].toLowerCase()+'.','R\u00e9cup prise','',-x.paye]);
+    else if(x.moins>0.0001&&x.paye>0.0001&&x.cpt==='retire')mv.push([x.d+' '+PLAN_MOIS_C[m].toLowerCase()+'.',_escHtml(x.st.l),'retir\u00e9e au taux normal',-(x.paye)]);
+  });
+  if(payeC>0.0001)mv.push(['Ce mois','Pay\u00e9es sur le compteur',_planFmt(P.payeBank)+' \u00e0 d\u00e9clarer',-payeC]);
+  if((r.comble||0)>0.0001)mv.push(['Ce mois','Comble ce qui restait \u00e0 compenser','',-(r.comble)]);
+  return {avant:avant,acq:acq,retire:retire,prise:prise,uti:uti,payeC:payeC,mv:mv};
+}
+function _pfAnnee(mbr,m){
+  var all=_planCompteur(mbr,11);
+  return all.rows.map(function(rw,i){
+    var av=i>0?all.rows[i-1].solde:Math.max(0,_planDepartSolde(mbr));
+    var a=(rw.sup||0)-(rw.paye||0)+(rw.majDim||0)+(rw.majSup||0)-(rw.comble||0),u=Math.max(0,av+a-rw.solde);
+    return {i:i,sup:rw.sup||0,a:a,u:u,solde:rw.solde,cur:(i===m),vide:(rw.sup||0)<0.0001&&a<0.0001&&u<0.0001};
+  });
+}
+function _pfPaieDonnees(mbr,P){
+  // Chaque ligne : [classe, libellé, valeur] — la valeur porte déjà son <b>.
+  var D={plus:[],moins:[],info:[]},payes=P.lignes.filter(function(l){return l.paye>0.0001;});
+  payes.forEach(function(l){D.plus.push(['',_pfNatLib(l)+' \u00e0 +'+l.taux+'\u202f%','<b>'+_planFmt(l.paye)+'</b>']);});
+  if(P.payeBank>0.0001)D.plus.push(['','Heures sup pay\u00e9es sur le compteur','<b>'+_planFmt(P.payeBank)+'</b>']);
+  if(P.payable)P.majSeule.forEach(function(x){D.plus.push(['','Majoration '+(x.nat==='fer'?'f\u00e9ri\u00e9':'dimanche')+' \u00e0 +'+x.taux+'\u202f% (heures pr\u00e9vues)','<b>'+_planFmt(x.h)+'</b>']);});
+  if(!D.plus.length)D.plus.push(['pf-rien','Aucune heure sup pay\u00e9e',(P.sup>0.0001?'elles vont en r\u00e9cup':'\u2014')]);
+  if(!P.lignes.some(function(l){return l.nat==='fer';}))D.plus.push(['pf-rien','Jours f\u00e9ri\u00e9s','0h']);
+  D.sansSolde=P.neutres.sansolde||0;
+  D.moins.push([P.nonPayees>0.0001?'pf-fort':'','Absences non pay\u00e9es','<b>'+_planFmt(P.nonPayees)+'</b>']);
+  if(D.sansSolde>0.0001)D.moins.push(['pf-fort','Cong\u00e9 sans solde','<b>'+_planFmt(D.sansSolde)+'</b>']);
+  if(P.acomptes.length)P.acomptes.forEach(function(a){var dp=(a.date||'').split('-');D.moins.push(['','Acompte vers\u00e9 le '+(dp.length===3?parseInt(dp[2],10)+'/'+parseInt(dp[1],10):''),'<b>'+(a.montant||0).toLocaleString('fr-FR')+'\u202f\u20ac</b>']);});
+  else D.moins.push(['pf-rien','Acompte','aucun']);
+  var cpJ=P.jours.filter(function(x){return x.payeType==='cp';}).map(function(x){return x.d;});
+  // Les dates et les heures : le décompte en jours (ouvrables ou ouvrés) est dans l'onglet Congés et acomptes
+  if(cpJ.length)D.info.push(['','Cong\u00e9s pay\u00e9s','le'+(cpJ.length>1?'s ':' ')+cpJ.join(', ')+', <b>'+_planFmt(P.cp)+'</b>']);
+  if(P.rec>0.0001)D.info.push(['','R\u00e9cup prise','<b>'+_planFmt(P.rec)+'</b>']);
+  if(P.neutres.arret)D.info.push(['','Arr\u00eat de travail','<b>'+_planFmt(P.neutres.arret)+'</b>']);
+  if(P.neutres.autre)D.info.push(['','Absence non pr\u00e9cis\u00e9e','<b>'+_planFmt(P.neutres.autre)+'</b>']);
+  if(P.act)D.info.push(['','Heures sup gard\u00e9es en r\u00e9cup','<b>'+_planFmt(P.lignes.reduce(function(a,l){return a+l.garde;},0))+'</b>, soit '+_planFmt(P.valeurRecup)+' de repos']);
+  D.info.push(['','Temps de r\u00e9cup restant','<b>'+_planFmt(Math.max(0,P.c.solde))+'</b>']);
+  if(P.c.dette>0.0001)D.info.push(['','\u00c0 compenser sur les prochaines heures sup','<b>'+_planFmt(P.c.dette)+'</b>']);
+  D.neutres=Object.keys(P.neutres).reduce(function(a,k){return a+P.neutres[k];},0);
+  D.ecart=P.faites+P.payees+D.neutres-P.prevues;
+  D.nonPayeTotal=P.nonPayees+D.sansSolde;
+  D.pied=_planFmt(P.faites)+' faites + '+_planFmt(P.payees)+' d\u2019absences pay\u00e9es'+(D.neutres>0.0001?' + '+_planFmt(D.neutres)+' d\u2019arr\u00eat ou de cong\u00e9 sans solde':'')
+    +' \u2212 '+_planFmt(P.prevues)+' pr\u00e9vues = <b>'+_planFmtE(D.ecart)+(Math.abs(D.ecart-P.sup)<0.01&&P.sup>0.0001?', les heures sup':'')+'</b>';
+  return D;
+}
+function _pfLignes(L){
+  return L.map(function(r){return '<div'+(r[0]?' class="'+r[0]+'"':'')+'><dt>'+r[1]+'</dt><dd>'+r[2]+'</dd></div>';}).join('');
+}
+function _pfJours(mbr,P){
+  var SEM=_pfSemaines(mbr,P),maj=SEM.maj;
+  var h='<div class="pf-leg">'+_pfMark('prev','pr\u00e9vu')+_pfMark('fait','fait')+_pfMark('paye','absence pay\u00e9e')+_pfMark('sup','heures sup')+_pfMark('dim','dimanche, f\u00e9ri\u00e9')+'</div>';
+  SEM.forEach(function(s){
+    var w=s.w,js=s.js,fait=s.fait,paye=s.paye,prev=s.prev,cp=s.cp,rec=s.rec,hsT=s.hsT,hsSum=s.hsSum,eff=s.eff,L={maxHebdo:s.maxHebdo},tags=[];
+    if(hsSum>0.0001)tags.push('<span class="pf-tag pf-tag-sup">'+_mvIcon('balance',16)+' '+_planFmt(hsSum)+' sup\u00a0: '+hsT.join(', ')+'</span>');
+    if(paye>0.0001)tags.push('<span class="pf-tag">'+_mvIcon('check',16)+' '+[cp?_planFmt(cp)+' de cong\u00e9s pay\u00e9s':'',rec?_planFmt(rec)+' de r\u00e9cup ou d\u2019absence couverte':''].filter(Boolean).join(', ')+', pay\u00e9es</span>');
+    if(eff>L.maxHebdo+0.0001)tags.push('<span class="pf-tag pf-tag-al">'+_mvIcon('alerte',16)+' '+_planFmt(eff)+' sur la semaine, au-del\u00e0 des '+L.maxHebdo+'h autoris\u00e9es</span>');
+    h+='<section class="pf-sem"><header class="pf-sem-h"><h3>Du '+(w.mon.getMonth()===P.m?w.mon.getDate():1)+' au '+(w.sun.getMonth()===P.m?w.sun.getDate():_planDays(P.m))+' '+PLAN_MOIS[P.m].toLowerCase()+'</h3>'
+      +'<span>'+_pfMark('fait',_planFmt(fait))+(paye>0.0001?' + '+_pfMark('paye',_planFmt(paye)):'')+' sur '+_pfMark('prev',_planFmt(prev))+'</span></header>'
+      +(tags.length?'<div class="pf-tags">'+tags.join('')+'</div>':'')
+      +'<div class="pf-jt" aria-hidden="true"><span></span><span>Pr\u00e9vu</span><span>Fait</span><span>\u00c9cart</span></div>';
+    var repos=[];
+    var vider=function(){if(repos.length){h+='<div class="pf-repos">'+repos.join(' et ')+'\u00a0: repos</div>';repos=[];}};
+    js.forEach(function(x){
+      var e=x.e;
+      if((x.prevu||0)<0.0001&&x.fait<0.0001&&x.paye<0.0001&&!e){repos.push(PLAN_JOURS[x.w]+' '+x.d);return;}
+      vider();
+      var prevC=(x.prevu>0.0001)?_pfMark('prev',x.prevT||'pr\u00e9vu')+'<b>'+_planFmt(x.prevu)+'</b>':'<span class="pf-z">repos</span>';
+      var faitC='';
+      if(x.fait>0.0001)faitC=_pfMark(maj[x.d]&&maj[x.d].tx>0?'dim':'fait',x.faitT||'fait')+'<b>'+_planFmt(x.fait)+'</b>';
+      if(x.paye>0.0001)faitC+=(faitC?'':'')+_pfMark('paye',PF_PAYE_LIB[x.payeType]||'Pay\u00e9e')+'<b>'+_planFmt(x.paye)+' pay\u00e9e'+(x.paye>1?'s':'')+'</b>';
+      if(x.neutre>0.0001)faitC+=_pfMark('paye',PF_NEUTRE_LIB[x.neutreType]||'Absence')+'<b>'+_planFmt(x.neutre)+'</b>';
+      if(!faitC)faitC='<span class="pf-z">\u2014</span>';
+      var ec=x.ecart>0.0001?'<span class="pf-ec up">+'+_planFmt(x.ecart)+'</span>':(x.ecart<-0.0001?'<span class="pf-ec dn">'+_planFmtE(x.ecart)+'</span>':'<span class="pf-ec"></span>');
+      var obs=[];
+      if(e&&e.absent)obs.push(_escHtml(x.st.l));
+      if(x.nonPaye>0.0001)obs.push(_planFmt(x.nonPaye)+' non pay\u00e9es');
+      if(x.recNC>0.0001)obs.push(_planFmt(x.recNC)+' de r\u00e9cup non couvertes');
+      if(e&&e.comment)obs.push(_escHtml(e.comment));
+      h+='<button type="button" class="pf-jr" onclick="planFicheOpenDay('+_escAttr(String(x.d))+')" aria-label="'+PLAN_JOURS_L[x.w]+' '+x.d+' '+PLAN_MOIS[P.m]+'">'
+        +'<span class="pf-jd"><b>'+x.d+'</b><span>'+PLAN_JOURS[x.w]+'</span></span>'
+        +'<span class="pf-jc">'+prevC+'</span><span class="pf-jc">'+faitC+'</span>'+ec
+        +(obs.length?'<span class="pf-jo">'+obs.join(' \u00b7 ')+'</span>':'')
+      +'</button>';
+    });
+    vider();
+    h+='</section>';
+  });
+  return h+'<p class="pl2-note">Toucher un jour ouvre sa feuille. Le taux des heures sup se d\u00e9cide \u00e0 la semaine\u00a0: 25\u202f% jusqu\u2019\u00e0 la 43<sup>e</sup> heure, 50\u202f% au-del\u00e0.</p>';
+}
+function _pfCompteur(mbr,P){
+  if(!P.act)return _planHsupCard(mbr);
+  var r=P.r,c=P.c,m=P.m;
+  var M=_pfMouvements(mbr,P),avant=M.avant,acq=M.acq,retire=M.retire,prise=M.prise,uti=M.uti,payeC=M.payeC;
+  var calc=_planFmt(avant)+' report\u00e9es + '+_planFmt(acq)+' acquises \u2212 '+_planFmt(retire)+' retir\u00e9es \u2212 '+_planFmt(prise)+' prises'+(payeC>0.0001?' \u2212 '+_planFmt(payeC)+' pay\u00e9es':'')+' = <b>'+_planFmt(c.solde)+'</b>';
+  var mv=M.mv;
+  var rows=_pfAnnee(mbr,m).map(function(x){
+    return '<tr'+(x.cur?' class="cur"':'')+'><td>'+PLAN_MOIS_C[x.i]+'</td><td class="n">'+(x.vide?'':_planFmt(x.sup))+'</td><td class="n">'+(x.a>0.0001?'+'+_planFmt(x.a):'')+'</td><td class="n">'+(x.u>0.0001?'\u2212'+_planFmt(x.u):'')+'</td><td class="n b">'+_planFmt(x.solde)+'</td></tr>';
+  }).join('');
+  var dep=_planDepartSolde(mbr),depD=_planDepartDate(mbr);
+  return '<section class="pf-card"><div class="pf-card-t"><h3>Temps de r\u00e9cup</h3><span>fin '+PLAN_MOIS[m].toLowerCase()+'</span></div>'
+      +'<div class="pf-solde">'+_pfMark('rec',_planFmt(c.solde))+'<span>\u00e0 prendre</span></div><p class="pf-calc">'+calc+'</p>'
+      +(c.dette>0.0001?'<p class="pf-ko">'+_mvIcon('alerte',16)+'<span>'+_planFmt(c.dette)+' \u00e0 compenser sur les prochaines heures sup.</span></p>':'')
+      +(P.recupNC>0.0001?'<p class="pf-ko">'+_mvIcon('alerte',16)+'<span>R\u00e9cup prise non couverte\u00a0: '+_planFmt(P.recupNC)+'.</span></p>':'')
+    +'</section>'
+    +'<section class="pf-card"><div class="pf-card-t"><h3>Ce qui a boug\u00e9 en '+PLAN_MOIS[m].toLowerCase()+'</h3></div>'
+      +(mv.length?'<ul class="pf-mv">'+mv.map(function(x){return '<li><span class="pf-mv-d">'+x[0]+'</span><span class="pf-mv-t">'+x[1]+(x[2]?'<em>'+x[2]+'</em>':'')+'</span><b class="'+(x[3]>0?'up':'dn')+'">'+_planFmtE(x[3])+'</b></li>';}).join('')+'</ul>'
+        :'<p class="pl2-note">Rien n\u2019est entr\u00e9 ni sorti du compteur ce mois-ci.</p>')
+    +'</section>'
+    +'<section class="pf-card"><div class="pf-card-t"><h3>L\u2019ann\u00e9e '+planYear+'</h3><span>mois par mois</span></div>'
+      +'<div class="pf-scroll"><table class="pf-t pf-an"><thead><tr><th>Mois</th><th class="n">Heures sup</th><th class="n">Acquise</th><th class="n">Utilis\u00e9e</th><th class="n">Solde</th></tr></thead><tbody>'+rows+'</tbody></table></div>'
+    +'</section>'
+    +_planAnnuCard(mbr,m)
+    +'<details class="pf-card pf-calme"><summary><span>Report d\u2019avant Ma Vigne</span><b>'+(dep?_planFmt(dep):'aucun')+'</b></summary>'
+      +'<div class="pf-dep"><label>Report d\u2019heures<input type="number" step="0.5" id="plan-depsolde" value="'+(Math.round(dep*100)/100)+'" onchange="planSaveDepart()"></label>'
+      +'<label>\u00c0 partir du<input type="date" id="plan-depdate" value="'+_escAttr(depD)+'" min="'+planYear+'-01-01" max="'+planYear+'-12-31" onblur="planSaveDepart()"></label></div>'
+      +'<p class="pl2-note">\u00c0 r\u00e9gler une fois, \u00e0 l\u2019arriv\u00e9e du salari\u00e9.</p></details>';
+}
+function _pfConges(mbr,P){
+  var cpPris=_planCpPris(mbr.nom),cpSolde=_planCpSolde(mbr),cpIni=mbr.cp_initial_j||0;
+  var cpJ=P.jours.filter(function(x){return x.payeType==='cp';});
+  return '<section class="pf-card"><div class="pf-card-t"><h3>Cong\u00e9s pay\u00e9s</h3><span>'+_escHtml(_planCpPeriodeLbl())+'</span></div>'
+      +'<div class="pf-cp3"><div><span>Acquis au d\u00e9part</span><b>'+cpIni+' j</b></div><div><span>Pris</span><b>'+_pfMark('cp',cpPris+' j')+'</b></div><div'+(cpSolde<0?' class="neg"':'')+'><span>Restants</span><b>'+cpSolde+' j</b></div></div>'
+      +(cpJ.length?'<ul class="pf-mv">'+cpJ.map(function(x){return '<li><span class="pf-mv-d">'+PLAN_JOURS[x.w]+' '+x.d+'</span><span class="pf-mv-t">Cong\u00e9 pay\u00e9</span><b>'+_planFmt(x.paye)+'</b></li>';}).join('')+'</ul>'
+        :'<p class="pl2-note">Aucun cong\u00e9 pay\u00e9 en '+PLAN_MOIS[P.m].toLowerCase()+'.</p>')
+      +'<p class="pl2-note">Le solde de d\u00e9part se r\u00e8gle dans R\u00e9glages, \u00c9quipe. La r\u00e8gle de d\u00e9compte du domaine est dans la roue crant\u00e9e du Planning.</p>'
+    +'</section>'
+    +_planAcomptesCard(mbr,isAdmin());
+}
 function _planRecupCartes(mbr,dm){
   var c=_planCompteur(mbr,dm),r=c.rows[dm],hm=_planHsupTiers(mbr,dm),pay=_planHsupPayable();
   var avant=dm>0?c.rows[dm-1].solde:Math.max(0,_planDepartSolde(mbr));
@@ -4213,13 +4562,13 @@ function planSaveDepart(){
 
 // ── (ex-onglet Saisie — remplacé par la fiche salarié · refonte v5.08) ──
 // ── FICHE SALARIÉ (overlay 4 volets : Mois · Congés · H. sup · Acomptes) ──
-var _planFicheNom=null,_planFicheTabId='mois';
+var _planFicheNom=null,_planFicheTabId='resume';
 
 function openPlanFiche(nom){
   if(!isAdmin())return;
   var mbr=(window.MEMBRES||[]).find(function(m){return m.nom===nom;});
   if(!mbr)return;
-  _planFicheNom=nom;_planFicheTabId='mois';_planHsupDetM=planMonth;
+  _planFicheNom=nom;_planFicheTabId='resume';_planHsupDetM=planMonth;
   _planFicheRender();
   var ov=document.getElementById('ovPlanFiche');
   if(ov)ov.classList.add('open');
@@ -4239,66 +4588,70 @@ function _planFicheRender(){
   if(ava){ava.textContent=mbr.nom.charAt(0);ava.style.background=mbr.couleur||'#3D6B27';}
   var nomEl=document.getElementById('pf-nom');
   if(nomEl)nomEl.textContent=mbr.nom;
+  var _coll=!!(window._mvEstCollectif&&window._mvEstCollectif(mbr));
   var sub=document.getElementById('pf-sub');
-  if(sub)sub.textContent=((window._mvEstCollectif&&window._mvEstCollectif(mbr))
-    ?('\u00c9quipe collective \u00b7 '+_planEffMax(mbr,planMonth)+' pers.')
-    :('Planning '+_planPlId(mbr)+' \u00b7 '+(mbr.type_contrat||'CDI')))
-    +(mbr.statut==='Inactif'?' \u00b7 inactif':'')+' \u00b7 '+PLAN_MOIS[planMonth]+' '+planYear;
-  document.querySelectorAll('#ovPlanFiche .pl2-ftab').forEach(function(b){b.classList.toggle('on',b.getAttribute('data-f')===_planFicheTabId);});
+  if(sub)sub.textContent=(_coll?('\u00c9quipe collective, '+_planEffMax(mbr,planMonth)+' pers.'):((mbr.type_contrat||'CDI')+', planning '+_planPlId(mbr)))+(mbr.statut==='Inactif'?', inactif':'');
+  var moisEl=document.getElementById('pf-mois');
+  if(moisEl)moisEl.textContent=PLAN_MOIS[planMonth]+' '+planYear;
+  // ★ FICHE-1 : Résumé, Jours, Compteur, Congés et acomptes. Les anciens identifiants
+  //   d'onglet (« mois », « cp », « ac ») se lisent encore : un lien ancien ne tombe pas à vide.
+  var t={mois:'jours',ac:'cp'}[_planFicheTabId]||_planFicheTabId;
+  if(['resume','jours','hsup','cp'].indexOf(t)<0)t='resume';
+  _planFicheTabId=t;
+  document.querySelectorAll('#ovPlanFiche .pl2-ftab').forEach(function(b){var on=b.getAttribute('data-f')===t;b.classList.toggle('on',on);b.setAttribute('aria-selected',on?'true':'false');});
   var body=document.getElementById('pf-body');
   if(!body)return;
-  var t=_planFicheTabId,s=_planSummary(mbr,planMonth),h='';
   // Une equipe collective n'a ni solde de conges ni compteur d'heures sup : ces
   // onglets afficheraient des chiffres faux avec l'aplomb de chiffres vrais.
-  var _coll=!!(window._mvEstCollectif&&window._mvEstCollectif(mbr));
-  if(_coll&&(t==='cp'||t==='hsup')){body.innerHTML=_planCollNote(mbr);return;}
-  if(t==='mois'){
-    h=(_coll?('<div class="pl2-note" style="margin-bottom:8px">Chiffres ci-dessous\u00a0: ceux d\u2019<b>une</b> personne. Le total de l\u2019\u00e9quipe est en bas de page.</div>'):'')
-      +'<div class="pl2-fstat">'
-      +'<div class="pl2-fs"><span class="pl2-fs-v">'+_planFmt(s.ref)+'</span><span class="pl2-fs-l">Pr\u00e9vu (h)</span></div>'
-      +'<div class="pl2-fs"><span class="pl2-fs-v">'+_planFmt(s.worked)+'</span><span class="pl2-fs-l">Travaill\u00e9 (h)</span></div>'
-      +'<div class="pl2-fs"><span class="pl2-fs-v" style="color:'+(s.ecartBrut>=0?'var(--vert-med)':'var(--orange)')+'">'+_planFmtE(s.ecart)+'</span><span class="pl2-fs-l">\u00c9cart \u00b7 ETP '+_planFmtEtp(s.etp)+'</span></div>'
-    +'</div>';
-    var ent=_pEntMonth(mbr.nom,planMonth);
-    var ks=Object.keys(ent).map(function(x){return parseInt(x,10);}).filter(function(x){return !isNaN(x);}).sort(function(a,b){return a-b;});
-    h+='<div class="plan-sec-lbl" style="margin-top:2px">Jours particuliers du mois \u2014 '+ks.length+'</div>';
-    if(!ks.length)h+='<div class="pl2-note">Aucune modification \u2014 le planning pr\u00e9vu s\u2019applique tel quel.</div>';
-    var plId=_planPlId(mbr);
-    ks.forEach(function(d){
-      var e=ent[d],st=_planDayStatus(plId,planMonth,d,e);
-      var eff=_planEffective(plId,planMonth,d,e);
-      var tim=e&&e.timing?e.timing.debut+' \u2192 '+e.timing.fin+(e.timing.continu?' \u00b7 continu':''):'';
-      h+='<button class="pl2-drow" onclick="planFicheOpenDay('+d+')">'
-        +'<span class="pl2-drow-d"><span class="pl2-drow-n">'+d+'</span><span class="pl2-drow-w">'+PLAN_JOURS[_planDow(planMonth,d)]+'</span></span>'
-        +'<span class="pl2-drow-mid"><span class="pl2-drow-l" style="color:'+st.c+'">'+st.l+'</span>'
-          +(tim?'<span class="pl2-drow-t">'+_mvIcon('chrono',16)+' '+tim+'</span>':'')
-          +(e&&e.comment&&!e.absent?'<span class="pl2-drow-t">'+_mvIcon('bulle',16)+' '+_escHtml(e.comment)+'</span>':'')
-          +(e&&e.absent&&e.comment?'<span class="pl2-drow-t">'+_escHtml(e.comment)+'</span>':'')
-        +'</span>'
-        // ⚠️ Ne JAMAIS reecrire un chiffre que _planEffective sait deja rendre :
-        //   « 0h » etait pose en dur ici et contredisait le compteur du mois des
-        //   qu'une absence etait assimilee a du travail effectif.
-        +'<span class="pl2-drow-h" style="color:'+st.c+'">'+(e&&e.type==='recup'?'\u21ba':_planFmt(eff))+'</span>'
-      +'</button>';
-    });
-    h+='<div class="pl2-note" style="margin-top:8px">'+_mvIcon('crayon',16)+' Toucher un jour l\u2019ouvre dans la feuille \u2014 la grille compl\u00e8te est dans l\u2019onglet <b>Le mois</b>.</div>';
-    h+=_coll?_planCollNote(mbr):_planLegalCard(mbr);
-  }
-  if(t==='cp'){
-    var cpPris=_planCpPris(mbr.nom),cpSolde=_planCpSolde(mbr),cpIni=mbr.cp_initial_j||0;
-    // ⚠️ Le mode de decompte et la periode de reference sont des reglages DU DOMAINE :
-    //    ils se reglaient ici, dans la fiche d'UNE personne, ou les changer touchait
-    //    tout le monde sans le dire. Ils vivent desormais dans la roue crantee (ex-onglet « Le cadre »).
-    h='<div class="pl2-fstat">'
-      +'<div class="pl2-fs"><span class="pl2-fs-v">'+cpIni+'</span><span class="pl2-fs-l">Solde initial (j)</span></div>'
-      +'<div class="pl2-fs"><span class="pl2-fs-v" style="color:'+(cpPris>0?'var(--orange)':'var(--texte)')+'">'+cpPris+'</span><span class="pl2-fs-l">Pris (j)</span></div>'
-      +'<div class="pl2-fs"><span class="pl2-fs-v" style="color:'+(cpSolde>5?'var(--vert-med)':cpSolde>=0?'var(--orange)':'var(--rouge)')+'">'+cpSolde+'</span><span class="pl2-fs-l">Restants (j)</span></div>'
-    +'</div>'
-    +'<div class="pl2-note">D\u00e9compte sur la p\u00e9riode <b>'+_planCpPeriodeLbl()+'</b>. Le solde initial se r\u00e8gle dans R\u00e9glages \u203a \u00c9quipe, la r\u00e8gle de d\u00e9compte du domaine dans la <b>roue crant\u00e9e</b> du Planning.</div>';
-  }
-  if(t==='hsup')h=_planHsupCard(mbr);
-  if(t==='ac')h=_planAcomptesCard(mbr,true);
+  if(_coll&&(t==='cp'||t==='hsup'||t==='resume')){body.innerHTML=_planCollNote(mbr);return;}
+  var P=_planPaieMois(mbr,planMonth),h='';
+  if(t==='resume')h=_pfResume(mbr,P);
+  else if(t==='jours')h=_pfJours(mbr,P)+_planLegalCard(mbr);
+  else if(t==='hsup')h=_pfCompteur(mbr,P);
+  else h=_pfConges(mbr,P);
   body.innerHTML=h;
+}
+// Changer de mois sans quitter la fiche
+function planFicheMois(dlt){
+  if(dlt<0)planPrevMonth();else planNextMonth();
+  _planHsupDetM=planMonth;
+  var ov=document.getElementById('ovPlanFiche');
+  if(_planFicheNom&&ov&&ov.classList.contains('open'))_planFicheRender();
+}
+// La case « demande à être payé » et le nombre d'heures : la saisie de la secrétaire
+function _planFichePayer(nom,v,dem){
+  if(!isAdmin())return;
+  var mbr=(window.MEMBRES||[]).find(function(x){return x.nom===nom;});
+  if(!mbr)return;
+  var key=_planHsupKey(planMonth);
+  if(!PLANNING_HSUP[nom])PLANNING_HSUP[nom]={};
+  if(!PLANNING_HSUP[nom][key])PLANNING_HSUP[nom][key]={};
+  var rec=PLANNING_HSUP[nom][key];
+  rec.demande=!!dem;rec.paye=0;rec.paye_bank=0;
+  if(dem&&v>0.0001){
+    var sup=_planSupMonth(mbr,planMonth),pm=Math.min(v,sup),sur=v-pm;
+    rec.paye=Math.round(pm*100)/100;
+    // Au-delà des heures du mois, on puise dans le compteur, au prix de leur taux (RECUP-2)
+    if(sur>0.0001){var cv=_planValeurPourBrut(mbr,planMonth,sur);rec.paye_bank=Math.round(cv.v*100)/100;}
+  }
+  window.PLANNING_HSUP=PLANNING_HSUP;
+  if(window.fbSave)window.fbSave('planning_hsup',PLANNING_HSUP);
+  _pl2Refresh();
+}
+function planFicheDemande(nom){
+  var c=document.getElementById('pf-dem-case'),dem=!!(c&&c.checked);
+  var mbr=(window.MEMBRES||[]).find(function(x){return x.nom===nom;});
+  var P=mbr?_planPaieMois(mbr,planMonth):null;
+  _planFichePayer(nom,dem?(P&&P.payeTotal>0.0001?P.payeTotal:0):0,dem);
+  var c2=document.getElementById('pf-dem-case');if(c2)c2.focus();
+}
+function planFicheHeures(nom,dlt,fixe){
+  var el=document.getElementById('pf-dem-h');
+  var v=parseFloat(String(el?el.value:'0').replace(',','.'));if(isNaN(v)||v<0)v=0;
+  if(typeof fixe==='number')v=fixe;else if(dlt)v=Math.max(0,v+dlt);
+  v=Math.round(v*2)/2;
+  _planFichePayer(nom,v,true);
+  var el2=document.getElementById('pf-dem-h');if(el2&&!dlt&&typeof fixe!=='number')el2.focus();
 }
 
 
@@ -5896,37 +6249,29 @@ function _planAcomptesCard(mbr,canEdit){
   var list=((PLANNING_ACOMPTES[mbr.nom]||{})[moisKey]||[]).slice().sort(function(a,b){return a.date<b.date?-1:1;});
   var total=list.reduce(function(s,e){return s+e.montant;},0);
   var key=mbr.nom.replace(/[^a-zA-Z]/g,'');
-  var html='<div class="plan-card" style="background:var(--orange-pale);border:1.5px solid rgba(217,119,6,0.5);margin-top:14px">';
-  html+='<div style="font-size:10px;font-weight:700;text-transform:uppercase;letter-spacing:1px;color:var(--orange);margin-bottom:8px">\uD83D\uDCB6 Acomptes vers\u00e9s</div>';
+  // ★ FICHE-1 : un acompte est une avance EN EUROS. Il se retire du salaire, jamais du temps de récup.
+  var html='<section class="pf-card"><div class="pf-card-t"><h3>Acomptes sur salaire</h3><span>'+PLAN_MOIS[planMonth].toLowerCase()+'</span></div>';
   if(list.length>0){
+    html+='<ul class="pf-mv">';
     list.forEach(function(e,idx){
       var dp=e.date?e.date.split('-'):['','',''];
       var dateFmt=dp.length>=3?parseInt(dp[2],10)+'/'+parseInt(dp[1],10):'';
-      html+='<div style="display:flex;align-items:center;gap:8px;padding:7px 0;border-bottom:0.5px solid rgba(217,119,6,0.35)">';
-      html+='<span style="font-size:12px;color:var(--orange);min-width:44px">'+dateFmt+'</span>';
-      html+='<span style="flex:1;font-size:13px;color:var(--orange)">'+_escHtml(e.note||'Acompte')+'</span>';
-      html+='<span style="font-size:var(--pt-base,14px);font-weight:700;color:var(--orange)">'+e.montant.toLocaleString('fr-FR')+'&#8239;\u20ac</span>';
-      if(canEdit)html+='<button onclick="planDeleteAcompte(\''+_escAttr(mbr.nom)+'\',\''+moisKey+'\','+idx+')" style="background:none;border:none;cursor:pointer;color:var(--orange);font-size:18px;padding:2px 6px;border-radius:4px;line-height:1;min-width:44px;min-height:44px">\u00d7</button>';
-      html+='</div>';
+      html+='<li><span class="pf-mv-d">'+dateFmt+'</span><span class="pf-mv-t">'+_escHtml(e.note||'Acompte')+'</span><b>'+e.montant.toLocaleString('fr-FR')+'\u202f\u20ac</b>'
+        +(canEdit?'<button type="button" class="pf-x" onclick="planDeleteAcompte(\''+_escAttr(mbr.nom)+'\',\''+_escAttr(moisKey)+'\','+_escAttr(String(idx))+')" aria-label="Supprimer l\u2019acompte du '+dateFmt+'">'+_mvIcon('croix',16)+'</button>':'')+'</li>';
     });
-    html+='<div style="text-align:right;font-size:13px;font-weight:700;color:var(--orange);padding-top:8px">Total\u202f: '+total.toLocaleString('fr-FR')+'&#8239;\u20ac</div>';
+    html+='</ul><div class="pf-tot"><span>Total du mois</span><b>'+total.toLocaleString('fr-FR')+'\u202f\u20ac</b></div>';
   } else {
-    html+='<div style="font-size:12px;color:var(--orange);font-style:italic;padding:4px 0">Aucun acompte ce mois</div>';
+    html+='<p class="pl2-note">Aucun acompte ce mois-ci.</p>';
   }
   if(canEdit){
-    html+='<div id="plan-ac-form-'+key+'" style="display:none;margin-top:10px;padding:10px;background:var(--orange-pale);border-radius:8px;border:0.5px solid rgba(217,119,6,0.35)">';
-    html+='<div style="display:grid;grid-template-columns:1fr 1fr;gap:8px;margin-bottom:8px">';
-    html+='<div><div style="font-size:10px;font-weight:600;color:var(--orange);margin-bottom:4px;text-transform:uppercase;letter-spacing:.4px">Date</div><input type="date" id="plan-ac-date-'+key+'" style="width:100%;font-size:var(--pt-base,14px);padding:9px 10px;border-radius:8px;border:0.5px solid rgba(217,119,6,0.35);background:var(--bg-card);color:var(--texte);font-family:inherit"></div>';
-    html+='<div><div style="font-size:10px;font-weight:600;color:var(--orange);margin-bottom:4px;text-transform:uppercase;letter-spacing:.4px">Montant (\u20ac)</div><input type="number" id="plan-ac-mt-'+key+'" style="width:100%;font-size:var(--pt-base,14px);padding:9px 10px;border-radius:8px;border:0.5px solid rgba(217,119,6,0.35);background:var(--bg-card);color:var(--texte);font-family:inherit" placeholder="ex\u202f: 200" min="1" step="1"></div>';
-    html+='</div>';
-    html+='<div style="margin-bottom:10px"><div style="font-size:10px;font-weight:600;color:var(--orange);margin-bottom:4px;text-transform:uppercase;letter-spacing:.4px">Note (optionnel)</div><input type="text" id="plan-ac-note-'+key+'" style="width:100%;font-size:var(--pt-base,14px);padding:9px 10px;border-radius:8px;border:0.5px solid rgba(217,119,6,0.35);background:var(--bg-card);color:var(--texte);font-family:inherit" placeholder="Avance sur salaire"></div>';
-    html+='<div style="display:grid;grid-template-columns:1fr 1fr;gap:8px">';
-    html+='<button onclick="planToggleAcForm(\''+_escAttr(mbr.nom)+'\')" style="padding:10px;border-radius:8px;border:0.5px solid rgba(217,119,6,0.35);background:var(--orange-pale);color:var(--orange);font-size:13px;font-weight:500;cursor:pointer;font-family:inherit;min-height:44px">Annuler</button>';
-    html+='<button onclick="planSaveAcompte(\''+_escAttr(mbr.nom)+'\',\''+moisKey+'\')" style="padding:10px;border-radius:8px;border:none;background:var(--orange);color:white;font-size:13px;font-weight:500;cursor:pointer;font-family:inherit;min-height:44px">Enregistrer</button>';
-    html+='</div></div>';
-    html+='<button id="plan-ac-add-'+key+'" onclick="planToggleAcForm(\''+_escAttr(mbr.nom)+'\')" style="width:100%;margin-top:10px;padding:10px 12px;background:rgba(217,119,6,0.1);border:1px dashed rgba(217,119,6,0.5);border-radius:8px;cursor:pointer;color:var(--orange);font-size:13px;font-weight:500;font-family:inherit;display:flex;align-items:center;gap:6px;justify-content:center;min-height:44px">+ Ajouter un acompte</button>';
+    html+='<div id="plan-ac-form-'+key+'" class="pf-acf" style="display:none">'
+      +'<div class="pf-acf-g"><label>Date<input type="date" id="plan-ac-date-'+key+'"></label><label>Montant (\u20ac)<input type="number" id="plan-ac-mt-'+key+'" inputmode="numeric" min="1" step="1"></label></div>'
+      +'<label>Note (facultatif)<input type="text" id="plan-ac-note-'+key+'" placeholder="Ex\u00a0: avance demand\u00e9e"></label>'
+      +'<div class="pf-acf-g"><button type="button" class="pf-btn pf-btn-2" onclick="planToggleAcForm(\''+_escAttr(mbr.nom)+'\')">Annuler</button><button type="button" class="pf-btn pf-btn-ok" onclick="planSaveAcompte(\''+_escAttr(mbr.nom)+'\',\''+_escAttr(moisKey)+'\')">Enregistrer</button></div>'
+    +'</div>'
+    +'<button type="button" id="plan-ac-add-'+key+'" class="pf-btn" onclick="planToggleAcForm(\''+_escAttr(mbr.nom)+'\')">'+_mvIcon('euro',16)+'<span>Ajouter un acompte</span></button>';
   }
-  html+='</div>';
+  html+='<p class="pl2-note">Un acompte est une avance en euros\u00a0: il se retire du salaire, jamais du temps de r\u00e9cup.</p></section>';
   return html;
 }
 
@@ -6005,7 +6350,189 @@ function planExportPDF(nom){
   var _ctr=_planCtrDuMois(mbr,planMonth);
   return _planSurContrat(_ctr,function(){ return _planExportPDF_(nom,mbr,_ctr); });
 }
+// ★★★ FICHE-2 (17/09/2026) — LE RELEVÉ SUIT LA FICHE (maquette v3 validée). Deux pages A4 :
+//   ① l'en-tête, le cadre « Pour la paie », puis chaque jour avec trois colonnes surlignées —
+//     Prévu, Fait, Absence payée — le total de chaque semaine et celui du mois ;
+//   ② où vont les heures sup (et la demande du salarié), le temps de récup, l'année, les congés,
+//     les acomptes, ce qu'il faut savoir, et les signatures, avec la date d'envoi à la compta.
+//   Tous les chiffres viennent de _planPaieMois et des aides _pf* : l'écran et le papier ne peuvent
+//   pas se contredire. ⚠️ Tailles en jetons de l'échelle (le barème compte aussi les documents),
+//   aucun texte plus pâle que #78716C (contraste), aucune icône du sprite (absent de la fenêtre).
+// ★ FICHE-2 — Le compteur d'heures de l'année, imprimé à l'identique par les deux relevés.
+function _plRvAnnuHtml(mbr,tc,_moisLbl){
+  var _an=_planAnnu(mbr,planMonth);
+  var _anOver=(_an.cumul>_an.plafond+0.0001);
+  var _anMod=(_an.modul>_an.modulMax+0.0001);
+  return _an.annualise
+  ? ('<div class="soldean"><div class="t">Compteur d\u2019heures \u2014 ann\u00e9e '+planYear+', arr\u00eat\u00e9 \u00e0 fin '+_moisLbl+'</div>'
+    +'<span class="it">Plafond annuel <b>'+_planFmt(_an.plafond)+'</b></span>'
+    +'<span class="it">Travail effectif <b>'+_planFmt(_an.cumul)+'</b></span>'
+    +'<span class="it">'+(_an.reste<0?'Au-dessus':'Reste \u00e0 faire')+' <b style="color:'+(_anOver?'#b45309':'#15803d')+'">'+_planFmt(Math.abs(_an.reste))+'</b></span>'
+    +'<span class="it">Modulation <b style="color:'+(_anMod?'#dc2626':'#6a5ba8')+'">'+_planFmt(_an.modul)+' / '+_planFmt(_an.modulMax)+'</b></span>'
+    +(_an.susp>0.0001?'<span class="it">Dont suspension <b style="color:#dc2626">\u2212'+_planFmt(_an.susp)+'</b></span>':'')
+    +'<div class="nt">Travail effectif\u00a0: hors cong\u00e9s pay\u00e9s, arr\u00eats et r\u00e9cup\u00e9rations. Le solde se r\u00e8gle \u00e0 la cl\u00f4ture du 31 d\u00e9cembre.</div>'
+  +'</div>')
+  : ('<div class="soldean"><div class="t">Heures faites \u2014 ann\u00e9e '+planYear+', arr\u00eat\u00e9 \u00e0 fin '+_moisLbl+'</div>'
+    +'<span class="it">Travail effectif <b>'+_planFmt(_an.cumul)+'</b></span>'
+    +'<span class="it">Type de contrat <b>'+_escHtml(tc)+'</b></span>'
+    +'<div class="nt">Pay\u00e9 \u00e0 l\u2019heure\u00a0: pas d\u2019annualisation, donc ni plafond annuel, ni modulation, ni solde \u00e0 la cl\u00f4ture. Travail effectif\u00a0: hors cong\u00e9s pay\u00e9s, arr\u00eats et r\u00e9cup\u00e9rations.</div>'
+  +'</div>');
+}
+function _planReleveFiche_(nom,mbr,_ctr){
+  var m=planMonth,P=_planPaieMois(mbr,m),D=_pfPaieDonnees(mbr,P),SEM=_pfSemaines(mbr,P),M=_pfMouvements(mbr,P),A=_pfAnnee(mbr,m);
+  var plId=_planPlId(mbr),tc=mbr.type_contrat||'CDI',dom=(window.DOMAINE_NOM||''),mois=PLAN_MOIS[m]+' '+planYear,moisL=PLAN_MOIS[m].toLowerCase();
+  var _edite=_planFmtJour((typeof window._mvAujIso==='function')?window._mvAujIso():_mvToday());
+  var _base=(window.location&&window.location.origin&&window.location.origin!=='null')?(window.location.origin+'/'):'';
+  var _ctrTxt=_ctr?('Contrat du '+_planFmtJour(_ctr.debut||'')+(_ctr.fin?(' au '+_planFmtJour(_ctr.fin)):', en cours')):'';
+  var F=_planFmt,maj=SEM.maj,LIB={cp:'Cong\u00e9 pay\u00e9',rec:'R\u00e9cup',dom:'D\u00e9cid\u00e9 par le domaine',formation:'Formation',famille:'\u00c9v\u00e9nement familial'};
+  var lignes=function(L){return L.map(function(r){return '<div class="r'+(r[0]==='pf-rien'?' rien':(r[0]==='pf-fort'?' fort':''))+'"><span>'+r[1]+'</span><span>'+r[2]+'</span></div>';}).join('');};
+  var tete=function(n){
+    return '<div class="hd"><div><h1>Relev\u00e9 d\u2019heures</h1><div class="s"><b>'+_escHtml(nom)+'</b>, '+_escHtml(tc)+', planning '+_escHtml(plId)+'</div>'
+      +(_ctrTxt?'<div class="s">'+_escHtml(_ctrTxt)+'</div>':'')+'</div>'
+      +'<div class="d"><b>'+mois+'</b>'+(dom?_escHtml(dom)+'<br>':'')+'Page '+n+' sur 2</div></div>';
+  };
+  var pied=function(){return '<div class="cr"><span>'+_escHtml(nom)+', '+moisL+' '+planYear+'</span><span>'+(dom?_escHtml(dom)+', ':'')+'Ma Vigne, \u00e9dit\u00e9 le '+_edite+'</span></div>';};
+  // ── Page 1 : le cadre ──
+  var cadre='<div class="cad"><div class="cad-h"><h2>Pour la paie</h2><b>'+mois+'</b></div><div class="cad-g">'
+    +'<div class="cb"><h3>Le salaire de base</h3><div class="trio">'
+      +'<div><span class="l">Pr\u00e9vues</span><mark class="prev">'+F(P.prevues)+'</mark><span class="t">'+P.joursPrevus+' jours au planning</span></div>'
+      +'<div><span class="l">Faites</span><mark class="fait">'+F(P.faites)+'</mark><span class="t">travaill\u00e9es</span></div>'
+      +'<div><span class="l">Absences pay\u00e9es</span><mark class="paye">'+F(P.payees)+'</mark><span class="t">cong\u00e9s, r\u00e9cup\u2026</span></div></div>'
+      +(D.nonPayeTotal<0.0001?'<p class="ok">Maintenu\u00a0: les absences pay\u00e9es ne se retirent pas.</p>':'<p class="ko">'+F(D.nonPayeTotal)+' d\u2019absence ne sont pas pay\u00e9es\u00a0: \u00e0 retirer.</p>')+'</div>'
+    +'<div class="cb plus"><h3>\u00c0 payer en plus</h3>'+lignes(D.plus)+(P.demande&&P.payeTotal>0.0001?'<p class="nt">Pay\u00e9es \u00e0 la demande du salari\u00e9.</p>':'')+'</div>'
+    +'<div class="cb"><h3>\u00c0 retirer</h3>'+lignes(D.moins)+'</div>'
+    +'<div class="cb"><h3>Pour information</h3>'+lignes(D.info)+(P.recupNC>0.0001?'<p class="ko">R\u00e9cup prise non couverte\u00a0: '+F(P.recupNC)+'.</p>':'')+'</div>'
+    +'</div><div class="pd">'+D.pied+'</div></div>';
+  // ── Page 1 : chaque jour ──
+  var corps='';
+  SEM.forEach(function(s){
+    var w=s.w;
+    s.js.forEach(function(x){
+      var e=x.e,t=maj[x.d],repos=(x.prevu||0)<0.0001&&x.fait<0.0001&&x.paye<0.0001&&x.neutre<0.0001&&!e;
+      var payT=x.paye>0.0001?(LIB[x.payeType]||'Pay\u00e9e'):(x.neutre>0.0001?(PF_NEUTRE_LIB[x.neutreType]||'Absence'):'');
+      var payH=x.paye>0.0001?F(x.paye):(x.neutre>0.0001?F(x.neutre):'');
+      var obs=[];
+      if(t&&x.fait>0.0001)obs.push((t.fer?'Jour f\u00e9ri\u00e9':'Dimanche')+' travaill\u00e9, +'+t.tx+'\u202f%');
+      if(e&&e.absent)obs.push(_escHtml(x.st.l));
+      if(x.nonPaye>0.0001)obs.push(F(x.nonPaye)+' non pay\u00e9es');
+      if(x.recNC>0.0001)obs.push(F(x.recNC)+' de r\u00e9cup non couvertes');
+      if(e&&e.comment)obs.push(_escHtml(e.comment));
+      corps+='<tr'+(repos?' class="off"':(t&&x.fait>0.0001?' class="dim"':''))+'><td class="jr">'+PLAN_JOURS[x.w]+' '+x.d+'</td>'
+        +'<td class="cpv">'+(x.prevu>0.0001?(x.prevT||''):'\u2014')+'</td><td class="cpv n">'+(x.prevu>0.0001?F(x.prevu):'')+'</td>'
+        +'<td class="cfa">'+(x.fait>0.0001?(x.faitT||''):(repos?'\u2014':''))+'</td><td class="cfa n">'+(x.fait>0.0001?F(x.fait):'')+'</td>'
+        +'<td class="cpa">'+payT+'</td><td class="cpa n">'+payH+'</td>'
+        +'<td class="n'+(x.ecart>0.0001?' up':(x.ecart<-0.0001?' dn':''))+'">'+(x.ecart>0.0001?'+'+F(x.ecart):(x.ecart<-0.0001?_planFmtE(x.ecart):''))+'</td>'
+        +'<td class="o">'+obs.join(', ')+'</td></tr>';
+    });
+    var d0=(w.mon.getMonth()===m?w.mon.getDate():1);
+    corps+='<tr class="sem"><td colspan="9"><b>Du '+(d0===1?'1er':d0)+' au '+(w.sun.getMonth()===m?w.sun.getDate():_planDays(m))+' '+moisL+'</b>\u00a0: '
+      +F(s.prev)+' pr\u00e9vues, '+F(s.fait)+' faites'+(s.paye>0.0001?', '+F(s.paye)+' d\u2019absences pay\u00e9es':'')
+      +(s.hsSum>0.0001?'\u00a0; heures sup '+s.hsT.join(', '):'')
+      +(s.trop?'\u00a0; <span class="al">'+F(s.eff)+' sur la semaine, au-del\u00e0 des '+s.maxHebdo+'h autoris\u00e9es</span>':'')+'</td></tr>';
+  });
+  var jours='<h4 class="st">Jour par jour</h4><table class="j"><thead><tr><th>Jour</th><th class="cpv" colspan="2">Pr\u00e9vu</th><th class="cfa" colspan="2">Fait</th><th class="cpa" colspan="2">Absence pay\u00e9e</th><th class="n">\u00c9cart</th><th>Observations</th></tr></thead>'
+    +'<tbody>'+corps+'</tbody><tfoot><tr><td>Total</td><td class="cpv"></td><td class="cpv n">'+F(P.prevues)+'</td><td class="cfa"></td><td class="cfa n">'+F(P.faites)+'</td><td class="cpa"></td><td class="cpa n">'+F(P.payees)+'</td>'
+    +'<td class="n">'+_planFmtE(D.ecart)+'</td><td class="o">'+(Math.abs(D.ecart-P.sup)<0.01&&P.sup>0.0001?'Les heures sup, et rien d\u2019autre':'')+'</td></tr></tfoot></table>';
+  // ── Page 2 ──
+  var gard=P.lignes.reduce(function(a,l){return a+l.garde;},0),val=P.lignes.reduce(function(a,l){return a+l.valeur;},0);
+  var ouVont=P.lignes.length
+    ?'<table class="t"><thead><tr><th>Nature</th><th class="n">Faites</th><th class="n">Pay\u00e9es</th><th class="n">En r\u00e9cup</th></tr></thead><tbody>'
+      +P.lignes.map(function(l){return '<tr><td>'+(l.nat==='hs'?'Heures sup \u00e0 +'+l.taux+'\u202f%':_pfNatLib(l)+', +'+l.taux+'\u202f%')+'</td><td class="n">'+F(l.h)+'</td><td class="n">'+(l.paye>0.0001?F(l.paye):'\u2014')+'</td><td class="n">'+(l.garde>0.0001?F(l.valeur):'\u2014')+'</td></tr>';}).join('')
+      +'<tr class="tot"><td>Total</td><td class="n">'+F(P.sup)+'</td><td class="n">'+F(P.payeMois)+'</td><td class="n">'+F(val)+'</td></tr></tbody></table>'
+    :'<p class="nt">Pas d\u2019heures sup ce mois-ci.</p>';
+  var demande=(P.demande&&P.payeTotal>0.0001)?'Le salari\u00e9 a demand\u00e9 \u00e0 \u00eatre pay\u00e9 de '+F(P.payeTotal)+' d\u2019heures sup.'
+    :(P.sup>0.0001?'Aucune demande de paiement\u00a0: les heures sup restent en r\u00e9cup.':'');
+  var mvt='<table class="t"><tbody>'+M.mv.map(function(x){return '<tr><td>'+x[0]+'</td><td>'+x[1]+(x[2]?', '+x[2]:'')+'</td><td class="n '+(x[3]>0?'up':'dn')+'">'+_planFmtE(x[3])+'</td></tr>';}).join('')
+    +'<tr class="tot"><td></td><td>Solde fin '+moisL+'</td><td class="n">'+F(Math.max(0,P.c.solde))+'</td></tr></tbody></table>';
+  var an='<table class="t"><thead><tr><th>Mois</th><th class="n">Heures sup</th><th class="n">Acquise</th><th class="n">Utilis\u00e9e</th><th class="n">Solde</th></tr></thead><tbody>'
+    +A.map(function(x){return '<tr'+(x.cur?' class="cur"':'')+'><td>'+PLAN_MOIS_C[x.i]+'</td><td class="n">'+(x.vide?'':F(x.sup))+'</td><td class="n">'+(x.a>0.0001?'+'+F(x.a):'')+'</td><td class="n">'+(x.u>0.0001?'\u2212'+F(x.u):'')+'</td><td class="n">'+F(x.solde)+'</td></tr>';}).join('')+'</tbody></table>';
+  var cpJ=P.jours.filter(function(x){return x.payeType==='cp';});
+  var ac=P.acomptes.length
+    ?'<table class="t"><tbody>'+P.acomptes.map(function(a){var dp=(a.date||'').split('-');return '<tr><td>'+(dp.length===3?parseInt(dp[2],10)+'/'+parseInt(dp[1],10):'')+'</td><td>'+_escHtml(a.note||'Acompte')+'</td><td class="n">'+(a.montant||0).toLocaleString('fr-FR')+'\u202f\u20ac</td></tr>';}).join('')
+      +'<tr class="tot"><td></td><td>Total du mois</td><td class="n">'+P.acomptesTotal.toLocaleString('fr-FR')+'\u202f\u20ac</td></tr></tbody></table>'
+    :'<p class="nt">Aucun acompte ce mois-ci.</p>';
+  var page2='<div class="p2"><div>'
+      +'<h4 class="st">O\u00f9 vont les heures sup</h4>'+ouVont+(demande?'<p class="nt">'+demande+'</p>':'')
+      +'<h4 class="st">Temps de r\u00e9cup</h4>'+mvt
+      +'<h4 class="st">D\u00e9tail mois par mois \u2014 ann\u00e9e '+planYear+'</h4>'+an
+    +'</div><div>'
+      // Les blocs des deux relevés : les contrats de l'année, les congés, le compteur d'heures
+      +_plRvContratsHtml(mbr)+_plRvCpHtml(mbr)+_plRvAnnuHtml(mbr,tc,moisL)
+      +'<h4 class="st">Acomptes sur salaire</h4>'+ac
+      +'<h4 class="st">\u00c0 savoir</h4><ul class="sav">'
+        +'<li>\u00ab\u00a0Pay\u00e9es\u00a0\u00bb\u00a0: l\u2019heure brute, la paie applique le taux. \u00ab\u00a0En r\u00e9cup\u00a0\u00bb\u00a0: le temps de repos, majoration comprise.</li>'
+        +'<li>Un dimanche ou un f\u00e9ri\u00e9 en heures sup prend le taux le plus fort, une seule fois.</li>'
+        +'<li>Les cong\u00e9s pay\u00e9s et la r\u00e9cup sont des absences pay\u00e9es\u00a0: ils ne se retirent ni du salaire, ni des heures \u00e0 d\u00e9clarer.</li>'
+        +'<li>Les heures manqu\u00e9es se retirent de la r\u00e9cup au taux normal. Ce qu\u2019elle ne couvre pas est retenu sur la paie.</li></ul>'
+    +'</div></div>'
+    +'<p class="lieu">Fait le <b>'+_edite+'</b>, \u00e0 \u2026\u2026\u2026\u2026\u2026\u2026\u2026\u2026</p>'
+    +'<div class="sig"><div><span>Signature salari\u00e9'+(P.demande&&P.payeTotal>0.0001?', qui demande le paiement de '+F(P.payeTotal)+' sup':'')+'</span><i></i></div>'
+      +'<div><span>Signature employeur</span><i></i></div><div><span>Transmis \u00e0 la compta le</span><i></i></div></div>';
+  var css='*{box-sizing:border-box;margin:0;padding:0}html,body{background:#fff}'
+    +'body{font-family:Outfit,system-ui,sans-serif;color:#1C1917;font-size:var(--pt-lbl,10.5px);line-height:1.35;-webkit-print-color-adjust:exact;print-color-adjust:exact}'
+    +'@page{size:A4;margin:0}'
+    +'.pg{width:210mm;height:297mm;padding:10mm 12mm 12mm;position:relative;overflow:hidden;page-break-after:always}.pg:last-child{page-break-after:auto}'
+    +'.hd{display:flex;justify-content:space-between;align-items:flex-end;gap:12px;border-bottom:2px solid #1C1917;padding-bottom:6px;margin-bottom:8px}'
+    +'.hd h1{font-family:\'Cormorant Garamond\',Georgia,serif;font-size:var(--pt-xl,27px);font-weight:700;line-height:1}'
+    +'.hd .s{font-size:var(--pt-micro,11px);margin-top:3px}.hd .d{text-align:right;font-size:var(--pt-nano,9.5px);color:#57534E}.hd .d b{display:block;font-size:var(--pt-sm,17px);color:#1C1917}'
+    +'.cad{border:1.5px solid #1C1917;border-radius:8px;overflow:hidden;margin-bottom:8px}'
+    +'.cad-h{display:flex;justify-content:space-between;align-items:baseline;padding:4px 10px;border-bottom:1.5px solid #1C1917}'
+    +'.cad-h h2{font-family:\'Cormorant Garamond\',Georgia,serif;font-size:var(--pt-md,20px);font-weight:700}.cad-h b{font-size:var(--pt-micro,11px)}'
+    +'.cad-g{display:grid;grid-template-columns:1fr 1fr}.cb{padding:6px 10px;border-top:1px solid #E7E5E4}.cb:nth-child(-n+2){border-top:none}.cb:nth-child(even){border-left:1px solid #E7E5E4}'
+    +'.cb h3{font-size:var(--pt-micro,11px);font-weight:700;margin-bottom:3px}'
+    +'.trio{display:grid;grid-template-columns:repeat(3,1fr);gap:6px}.trio .l{display:block;font-size:var(--pt-nano,9.5px);font-weight:600;color:#57534E}.trio .t{display:block;font-size:var(--pt-nano,9.5px);color:#57534E}'
+    +'mark{display:inline-block;font-size:var(--pt-sm,17px);font-weight:700;padding:0 6px;border-radius:5px}'
+    +'mark.prev{background:#E4ECF5;color:#1A4A7A}mark.fait{background:#E6F0DC;color:#31601C}mark.paye{background:#F4F2EE;color:#1C1917;box-shadow:inset 0 0 0 1px #D6D3D1}'
+    +'.ok{color:#31601C;font-weight:600;font-size:var(--pt-nano,9.5px);margin-top:3px}.ko{color:#A0291E;font-weight:600;font-size:var(--pt-nano,9.5px);margin-top:3px}'
+    +'.r{display:flex;justify-content:space-between;gap:8px;padding:2px 0;border-bottom:1px solid #F0EEEB}.r:last-of-type{border-bottom:none}.r span:last-child{text-align:right}'
+    +'.r.rien{color:#57534E}.r.fort span:last-child b{color:#A0291E}.plus .r span:last-child b{color:#8A5A38}'
+    +'.pd{padding:4px 10px;border-top:1.5px solid #1C1917;font-size:var(--pt-nano,9.5px)}'
+    +'.nt{font-size:var(--pt-nano,9.5px);color:#57534E;margin-top:3px}h4.st{font-size:var(--pt-micro,11px);font-weight:700;margin:6px 0 3px}'
+    +'table{width:100%;border-collapse:collapse;font-variant-numeric:tabular-nums}'
+    +'.j{font-size:var(--pt-nano,9.5px)}.j th{text-align:left;font-weight:600;color:#57534E;padding:2px 3px;border-bottom:1.5px solid #1C1917}'
+    +'.j td{padding:1px 3px;border-bottom:1px solid #EFEDEA;white-space:nowrap;line-height:1.2}.j .n{text-align:right}.j td.jr{font-weight:600}'
+    +'.j .cpv{background:#E4ECF5;color:#1A4A7A}.j .cfa{background:#E6F0DC;color:#31601C;font-weight:600}.j .cpa{background:#F4F2EE;color:#44403C}'
+    +'.j tr.dim td.cfa{background:#F6ECC9;color:#6E5200}.j tr.off td{color:#78716C}.j tr.off td.cpv,.j tr.off td.cfa,.j tr.off td.cpa{background:#FAFAF9;color:#78716C;font-weight:inherit}'
+    +'.j td.up{color:#8A5A38;font-weight:700}.j td.dn{color:#9C4E14;font-weight:700}.j td.o{white-space:normal;color:#44403C}'
+    +'.j tr.sem td{background:#F5F5F4;color:#44403C;padding:2px 5px;border-bottom:1.5px solid #D6D3D1;white-space:normal}.j .al{color:#A0291E;font-weight:600}'
+    +'.j tfoot td{font-weight:700;border-top:1.5px solid #1C1917;border-bottom:none;padding:2px 3px}'
+    +'.p2{display:grid;grid-template-columns:1fr 1fr;gap:16px}'
+    +'.t td,.t th{padding:2px 3px;border-bottom:1px solid #EFEDEA;font-size:var(--pt-nano,9.5px);text-align:left;vertical-align:top}.t th{color:#57534E;font-weight:600;border-bottom:1.5px solid #1C1917}'
+    +'.t td:first-child{white-space:nowrap}.t .n{text-align:right;white-space:nowrap}.t tr.cur td{background:#ECE9F6;font-weight:600}.t tr.tot td{font-weight:700;border-top:1.5px solid #1C1917;border-bottom:none}'
+    +'.t .up{color:#31601C;font-weight:700}.t .dn{color:#9C4E14;font-weight:700}'
+    +'ul.sav{padding-left:14px;font-size:var(--pt-nano,9.5px);color:#44403C}ul.sav li{margin-bottom:2px}'
+    +'.lieu{margin-top:14px;font-size:var(--pt-lbl,10.5px)}'
+    +'.sig{display:grid;grid-template-columns:repeat(3,1fr);gap:10px;margin-top:6px}.sig span{font-size:var(--pt-nano,9.5px);font-weight:600;color:#44403C}.sig i{display:block;height:56px;border:1px solid #D6D3D1;border-radius:5px;margin-top:3px}'
+    +'.cr{position:absolute;left:12mm;right:12mm;bottom:5mm;display:flex;justify-content:space-between;font-size:var(--pt-nano,9.5px);color:#57534E}'
+    // ★ La page 2 porte les contrats de l'année : elle peut dépasser un A4 et doit alors passer à la
+    //   page suivante, pas être coupée. Le pied suit le contenu au lieu d'être posé en bas.
+    +'.pg.pg2{height:auto;min-height:297mm;overflow:visible}.pg.pg2 .cr{position:static;margin-top:10px}'
+    +'.ctr{border:1.5px solid #D8C3A3;background:#FAF6EF;border-radius:8px;padding:6px 10px;margin-bottom:8px;page-break-inside:avoid}'
+    +'.soldean{border:1.5px solid #D8C3A3;background:#FAF6EF;border-radius:8px;padding:6px 10px;margin-bottom:8px;page-break-inside:avoid}'
+    +'.ctr .t,.soldean .t{font-size:var(--pt-nano,9.5px);font-weight:700;color:#8A5A38;margin-bottom:4px}'
+    +'.crow{display:flex;justify-content:space-between;gap:10px;font-size:var(--pt-nano,9.5px);color:#44403C;padding:2px 0;border-bottom:1px solid #EFE7DA}'
+    +'.crow:last-of-type{border-bottom:none}.crow .cv{white-space:nowrap;color:#57534E}'
+    +'.cgap .cl,.cgap .cv{color:#57534E;font-style:italic}.cbreak .cl,.cbreak .cv{color:#9C4E14}'
+    +'.cnow{font-size:var(--pt-nano,9.5px);color:#15803D;background:#F0FDF4;border-radius:8px;padding:1px 5px;margin-left:4px}'
+    +'.ctr .note,.soldean .nt{font-size:var(--pt-nano,9.5px);color:#57534E;margin-top:4px;line-height:1.4}.ctr .note b{color:#44403C}'
+    +'.soldean{display:flex;flex-wrap:wrap;gap:3px 14px;align-items:baseline}.soldean .t{width:100%}.soldean .it{font-size:var(--pt-nano,9.5px);color:#57534E}.soldean .it b{color:#1C1917}.soldean .nt{width:100%}';
+  var html='<!DOCTYPE html><html lang="fr"><head><meta charset="UTF-8">'
+    +(_base?('<base href="'+_escAttr(_base)+'">'):'')
+    +'<title>Relev\u00e9 d\u2019heures \u2014 '+_escHtml(nom)+' \u2014 '+mois+'</title>'
+    +'<link rel="stylesheet" href="/fonts/fonts.css"><style>'+css+'</style></head><body>'
+    +'<section class="pg">'+tete(1)+cadre+jours+pied()+'</section>'
+    +'<section class="pg pg2">'+tete(2)+page2+pied()+'</section>'
+    // Même impression que le relevé d'avant : une fois la police arrivée.
+    +'<script>(function(){function p(){setTimeout(function(){window.print();},120);}'
+    +'if(document.fonts&&document.fonts.ready){document.fonts.ready.then(p);setTimeout(p,2500);}else{setTimeout(p,500);}})();<\/script></body></html>';
+  var w=window.open('','_blank');
+  if(w){w.document.write(html);w.document.close();}
+  else showToast('Autorisez les popups pour le PDF','#E07060');
+}
 function _planExportPDF_(nom,mbr,_ctr){
+  // ★★★ FICHE-2 : à partir de septembre 2026, le relevé suit la fiche. Les mois d'avant gardent le
+  //   leur — leur règle n'avait ni taux par heure ni absences couvertes — et une équipe collective aussi.
+  if(_planRecupActive(planMonth)&&!(window._mvEstCollectif&&window._mvEstCollectif(mbr)))return _planReleveFiche_(nom,mbr,_ctr);
   var _ctrTxt=_ctr?('Contrat du '+_planFmtJour(_ctr.debut||'')+(_ctr.fin?(' au '+_planFmtJour(_ctr.fin)):' \u2014 en cours')):'';
   var plId=_planPlId(mbr);
   var ent=_pEntMonth(nom,planMonth);
@@ -6153,22 +6680,7 @@ function _planExportPDF_(nom,mbr,_ctr){
   }).join(' \u00b7 ');
   // Compteur d'annualisation — le chiffre qui a valeur legale, a cote du releve mensuel
   var _an=_planAnnu(mbr,planMonth);
-  var _anOver=(_an.cumul>_an.plafond+0.0001);
-  var _anMod=(_an.modul>_an.modulMax+0.0001);
-  var annuCptHtml=_an.annualise
-  ? ('<div class="soldean"><div class="t">Compteur d\u2019heures \u2014 ann\u00e9e '+planYear+', arr\u00eat\u00e9 \u00e0 fin '+_moisLbl+'</div>'
-    +'<span class="it">Plafond annuel <b>'+_planFmt(_an.plafond)+'</b></span>'
-    +'<span class="it">Travail effectif <b>'+_planFmt(_an.cumul)+'</b></span>'
-    +'<span class="it">'+(_an.reste<0?'Au-dessus':'Reste \u00e0 faire')+' <b style="color:'+(_anOver?'#b45309':'#15803d')+'">'+_planFmt(Math.abs(_an.reste))+'</b></span>'
-    +'<span class="it">Modulation <b style="color:'+(_anMod?'#dc2626':'#6a5ba8')+'">'+_planFmt(_an.modul)+' / '+_planFmt(_an.modulMax)+'</b></span>'
-    +(_an.susp>0.0001?'<span class="it">Dont suspension <b style="color:#dc2626">\u2212'+_planFmt(_an.susp)+'</b></span>':'')
-    +'<div class="nt">Travail effectif\u00a0: hors cong\u00e9s pay\u00e9s, arr\u00eats et r\u00e9cup\u00e9rations. Le solde se r\u00e8gle \u00e0 la cl\u00f4ture du 31 d\u00e9cembre.</div>'
-  +'</div>')
-  : ('<div class="soldean"><div class="t">Heures faites \u2014 ann\u00e9e '+planYear+', arr\u00eat\u00e9 \u00e0 fin '+_moisLbl+'</div>'
-    +'<span class="it">Travail effectif <b>'+_planFmt(_an.cumul)+'</b></span>'
-    +'<span class="it">Type de contrat <b>'+_escHtml(tc)+'</b></span>'
-    +'<div class="nt">Pay\u00e9 \u00e0 l\u2019heure\u00a0: pas d\u2019annualisation, donc ni plafond annuel, ni modulation, ni solde \u00e0 la cl\u00f4ture. Travail effectif\u00a0: hors cong\u00e9s pay\u00e9s, arr\u00eats et r\u00e9cup\u00e9rations.</div>'
-  +'</div>');
+  var annuCptHtml=_plRvAnnuHtml(mbr,tc,_moisLbl);
   var _anPortee=(_anM0>0&&_ctr&&_ctr.debut)
     ? ('<br>Le compteur de ce contrat s\u2019ouvre le '+_escHtml(_planFmtJour(_ctr.debut))
        +'\u00a0: les mois ant\u00e9rieurs rel\u00e8vent du contrat pr\u00e9c\u00e9dent et sont sold\u00e9s \u00e0 part.')
@@ -7138,6 +7650,9 @@ window.planKpiAlert         = planKpiAlert;
 window.openPlanFiche        = openPlanFiche;
 window.closePlanFiche       = closePlanFiche;
 window.planFicheTab         = planFicheTab;
+window.planFicheMois        = planFicheMois;
+window.planFicheDemande     = planFicheDemande;
+window.planFicheHeures      = planFicheHeures;
 window.planFichePdf         = planFichePdf;
 window.planFicheOpenDay     = planFicheOpenDay;
 window.planSetCpMode        = planSetCpMode;

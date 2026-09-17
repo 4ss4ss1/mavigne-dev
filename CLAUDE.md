@@ -2,7 +2,21 @@
 
 > Document de référence du projet **Ma Vigne** (GUERETTECH). Il est le **porteur de vérité** :
 > la mémoire Claude est plafonnée, ce fichier ne l'est pas.
-> Dernière consolidation : **16 septembre 2026 (RECUP-2)** — ★★★ **POUR LA COMPTA : L'HEURE ET SON TAUX,
+> Dernière consolidation : **17 septembre 2026 (FICHE-2)** — ★★★ **LE RELEVÉ SUIT LA FICHE (§138)**. À partir de
+> septembre 2026, deux pages A4 : cadre « Pour la paie », chaque jour en colonnes Prévu / Fait / Absence payée,
+> puis heures sup, récup, détail mois par mois, contrats, congés, compteur d'heures, acomptes et trois cases de
+> signature et d'envoi. ★ L'écran et le papier lisent les mêmes aides `_pf*` (instantané avant/après : neuf
+> égalités). ★★ `mv-harnais-releve` a refusé une première version qui perdait les contrats de l'année.
+> **APP 7.27 → 7.28 · SW 7.91 → 7.92**, par-dessus FICHE-1. Détail en **§138**.
+>
+> ★ Précédente : **17 septembre 2026 (FICHE-1)** — ★★★ **LA FICHE D'UN SALARIÉ SE LIT COMME UNE
+> PAIE (§137)**. Quatre onglets (Résumé, Jours, Compteur, Congés et acomptes), le mois se change sans fermer
+> la fiche, cadre « Pour la paie » (salaire de base, à payer en plus, à retirer, pour information), case
+> « demande à être payé » quel que soit le mode du domaine. ★ Comme en paie, **un congé payé n'est jamais une
+> heure manquée** : `_planPaieMois` range chaque jour en prévu / fait / absence payée / neutre. Le relevé PDF
+> suit en **FICHE-2**. **APP 7.26 → 7.27 · SW 7.90 → 7.91**, base `612735b`. Détail en **§137**.
+>
+> ★ Précédente : **16 septembre 2026 (RECUP-2)** — ★★★ **POUR LA COMPTA : L'HEURE ET SON TAUX,
 > JAMAIS 1H15 (§136)**. Nico : *« 1h sup en récup égale 1h15, en paie égale 1h15, MAIS pour la paie il faut
 > laisser 1h sup car la compta intègre en 1h + 25 % »*. Le compteur compte en temps de récup **dans tous les
 > modes**, chaque tranche garde son taux, ce qui se paie se déclare en heure brute ; une heure sup un dimanche
@@ -19372,3 +19386,136 @@ SW 7.89 → 7.90** — la 7.25 a pu être servie, on ne la réutilise pas. `fire
 paiement réel ; ② les tranches d'avant septembre 2026 se déclarent au taux 0 (règle d'alors) ;
 ③ les non-annualisés (TESA, saisonniers) restent au décompte mensuel ; ④ la règle des absences injustifiées
 est toujours à faire confirmer par le comptable ; ⑤ pas de téléphone réel, relevé imprimé non regardé à l'œil.
+
+---
+
+## 137. ★★★ FICHE-1 — LA FICHE D'UN SALARIÉ SE LIT COMME UNE PAIE (17/09 — `planning.js` · `styles.css` · `utils.js` · `index.html` · `sw.js` · `guide/10-planning.html` · `scripts/` · APP 7.26 → **7.27** · SW 7.90 → **7.91**)
+
+> Nico : *« on revoit toute la mise en page des fiches salariés du planning… tout doit être clair pour le
+> salarié, pour la compta, pour la secrétaire »*. Puis, sur la maquette : *« le mec qui prend des congés
+> payés… on a l'impression qu'il a raté des heures »* ; *« il faudra ajouter pour la secrétaire la petite
+> case demande à être payé, le nombre d'heures souhaitées »* ; puis « go » sur la v3.
+
+### 137a. Le constat, mesuré dans Chromium avant la maquette
+
+L'onglet Compteur empilait **8 cartes sur plus de 3 000 px** ; l'onglet Mois ne listait que les jours
+modifiés ; le mot « acompte » désignait tantôt des heures (colonne « Acompte payé »), tantôt des euros ;
+payer des heures sup n'était possible **qu'en mode « payé »**, au fond du tableau mois par mois.
+
+### 137b. Ce que la paie fait d'un congé payé — recherché, et tranché par Nico
+
+Congés payés, RTT, congés pour événement familial sont des **absences rémunérées** : elles ne font pas
+varier le salaire, elles se mentionnent. Les logiciels de paie comparent heures du contrat et heures
+réalisées, et saisissent les absences à part, typées et datées. ★ D'où le modèle retenu : chaque jour se
+range en **prévu / fait / absence payée / neutre**, et l'écart d'un jour = fait + payé + neutre − prévu —
+il ne garde que les heures sup et ce qui n'est pas payé. **Un congé payé n'est jamais une heure manquée.**
+
+### 137c. Le moteur et les écrans
+
+- `_planPaieMois(mbr,m)` : le mois tel que la paie le lit. La récup et les absences sont couvertes **dans
+  l'ordre des dates**, à hauteur de ce que `_planCompteur` a couvert : les totaux sont ceux du compteur.
+- `_planPayeMaxCouvert` : le plus d'heures payables **sans découvrir la récup déjà prise ni faire retenir
+  une absence** — essais sur le vrai compteur, la saisie remise en place ensuite.
+- Fiche : **Résumé** (cadre « Pour la paie » : salaire de base, à payer en plus, à retirer, pour information ;
+  carte « Paiement des heures sup » ; où vont les heures sup), **Jours** (tous les jours, semaine par semaine,
+  heures sup par taux, alerte au-delà de 48 h), **Compteur** (temps de récup, ce qui a bougé, l'année, report
+  replié), **Congés et acomptes**. Le mois se change **sans fermer la fiche** (`planFicheMois`).
+- La case **« demande à être payé »** écrit `demande` dans `PLANNING_HSUP[nom][mois]`, avec `paye` (heures
+  brutes) et, au-delà du mois, `paye_bank` (RECUP-2). ★ **Quel que soit le mode du domaine** (Nico, « ok »).
+- Les anciens identifiants d'onglet (`mois`, `ac`) se relisent : un lien ancien ne tombe pas à vide.
+
+### 137d. Ce que les filets ont trouvé
+
+- **Contraste** (`mv-harnais-contraste`) : quatre paires neuves sous 4,5 — `--bleu` sur `--bleu-pale` (3,28 en
+  sombre, remplacé par `--bleu-tx`), le violet de la récup sur son pâle (3,7), l'or du dimanche sur un pâle
+  sans variante sombre, et un **jeton de surface employé en couleur de texte** pour un bouton. Le bouton
+  reprend le bouton sombre de la feuille du jour.
+- Harnais : section **N** de `mv-harnais-recup` (31 assertions) et trois défauts neufs — un congé lu en
+  heures manquées, une récup payée même non couverte, un « sans toucher la récup prise » qui l'ignore.
+  **196 assertions, 17 défauts, 17 détectés.**
+- ⚠️ **Poids** : `planning.js` 454 → 486 ko (+7 %). Découpage envisagé et écarté (même raison qu'en §135e) ;
+  cliquet regravé.
+
+### 137e. La note de livraison
+
+**Base `612735b`**. **APP 7.26 → 7.27 · SW 7.90 → 7.91.** `firebase deploy --only hosting`.
+`public/guide.html` ne se livre pas : `node scripts/build-guide.mjs`.
+
+| Fichier | Ce qui change | Bump ? |
+|---|---|---|
+| `src/planning.js` | `_planPaieMois`, quatre onglets, case de paiement, mois dans la fiche | — |
+| `src/styles.css` | styles `.pf-*` | ★ SW |
+| `src/utils.js` | APP 7.27, 3 nouveautés, aide du Planning | ★ APP |
+| `index.html` | onglets et flèches de mois de la fiche, version | ★ APP |
+| `public/sw.js` | 7.91 | ★ SW |
+| `guide/10-planning.html` | la fiche d'un salarié | — |
+| `scripts/mv-harnais-recup.mjs` · `scripts/typo-baseline.json` · `scripts/harnais-claude-md.mjs` · `.mv-base` | section N · cliquet · §137 · base | — |
+
+### 137f. Ouvert, et dit
+
+① **Le relevé PDF garde sa mise en page actuelle** : sa refonte (cadre en tête, colonnes Prévu, Fait,
+Absence payée, deux pages A4) est le lot suivant, **FICHE-2**. ② La carte annuelle du compteur (plafond,
+modulation) reste l'ancienne, sous le tableau de l'année. ③ Pour un mois d'avant septembre 2026, le cadre
+renvoie au Compteur : la règle d'alors n'avait ni taux par heure ni absences payées couvertes.
+④ Pas vu sur un vrai téléphone.
+
+---
+
+## 138. ★★★ FICHE-2 — LE RELEVÉ SUIT LA FICHE (17/09 — `planning.js` · `utils.js` · `index.html` · `sw.js` · `guide/10-planning.html` · `scripts/` · APP 7.27 → **7.28** · SW 7.91 → **7.92**)
+
+> Nico : *« c'est pas ordonné du tout sur le pdf »*, puis « go » sur la maquette v3 et « suite » après FICHE-1.
+
+### 138a. Ce qui change
+
+À partir de **septembre 2026**, `_planExportPDF_` passe la main à `_planReleveFiche_` (mois actif, équipe
+non collective) : **deux pages A4**. Page 1 : l'en-tête, le cadre « Pour la paie », puis chaque jour en
+colonnes surlignées **Prévu / Fait / Absence payée**, l'écart, les observations, le total de chaque semaine
+(heures sup par taux, alerte au-delà de 48 h) et celui du mois. Page 2 : où vont les heures sup et la demande
+du salarié, le temps de récup, le détail mois par mois, les contrats de l'année, les congés, le compteur
+d'heures, les acomptes, ce qu'il faut savoir, et trois cases : **signature salarié**, **signature employeur**,
+**transmis à la compta le**. Les mois d'avant septembre gardent leur relevé.
+
+### 138b. Un seul calcul pour l'écran et le papier — et la preuve
+
+- `_pfSemaines`, `_pfMouvements`, `_pfAnnee`, `_pfPaieDonnees` sortent de `_pfJours`, `_pfCompteur` et `_pfCadre`.
+  ★ **L'écran rend le même HTML au caractère près** : instantané des trois onglets pris AVANT la factorisation,
+  dans trois scénarios (sans paiement, 8 h, 18 h), comparé APRÈS — neuf égalités.
+- `_plRvAnnuHtml` sort du relevé d'avant : les deux relevés impriment le même compteur d'heures, comme ils
+  impriment déjà les mêmes `_plRvContratsHtml` et `_plRvCpHtml`.
+
+### 138c. Ce que les filets ont trouvé
+
+- ★★ **`mv-harnais-releve` a refusé la première version** : elle imprimait un tableau de congés simplifié et
+  une ligne de plafond, et **perdait les contrats de l'année, leurs coupures, le prorata du plafond, le mode de
+  décompte des congés et le compteur d'heures**. Le harnais avait raison : ces blocs sont repris tels quels.
+  « Ce qui existait déjà n'a pas bougé » n'est pas une formule.
+- `mv-harnais-recup` : six assertions (L19–L24) posaient leurs questions à l'ancien relevé de septembre ; elles
+  les posent au nouveau. Section **O** (13 assertions) et deux défauts neufs (le relevé de septembre retombe
+  sur l'ancien ; les absences payées disparaissent des colonnes). Un défaut devenu sans objet est retiré, dit.
+  **212 assertions, 18 défauts, 18 détectés.**
+- Charte : les tailles du document passent par les jetons de l'échelle (le barème compte aussi les chaînes
+  CSS du relevé), aucun gris plus pâle que `#78716C`, et une graisse `400` a coûté un rouge au cliquet des
+  graisses hors pas — `inherit` à la place.
+- La page 2 peut dépasser un A4 quand l'année porte plusieurs contrats : elle **s'allonge** au lieu d'être
+  coupée, et son pied suit le contenu.
+
+### 138d. La note de livraison
+
+**À appliquer par-dessus FICHE-1** (base `612735b`, FICHE-1 non encore poussé au moment du lot). Le zip
+porte les fichiers cumulés FICHE-1 + FICHE-2 ; `.mv-base` n'y est pas, pour que le garde-fou reste juste
+que FICHE-1 soit déjà validé ou non. **APP 7.27 → 7.28 · SW 7.91 → 7.92** — la 7.27 a pu être servie.
+`firebase deploy --only hosting`. `public/guide.html` : `node scripts/build-guide.mjs`.
+
+| Fichier | Ce qui change | Bump ? |
+|---|---|---|
+| `src/planning.js` | aides `_pf*` partagées, `_planReleveFiche_`, `_plRvAnnuHtml` | — |
+| `src/utils.js` | APP 7.28, nouveauté, aide du relevé | ★ APP |
+| `index.html` | version | ★ APP |
+| `public/sw.js` | 7.92 | ★ SW |
+| `guide/10-planning.html` | le relevé en deux pages | — |
+| `scripts/mv-harnais-recup.mjs` · `scripts/harnais-claude-md.mjs` · `CLAUDE.md` | sections L et O · §138 | — |
+
+### 138e. Ouvert, et dit
+
+① Relevé vérifié dans Chromium (deux pages de 1 123 px, police de secours) — **pas imprimé sur papier**, et
+pas avec les polices du domaine. ② Le relevé mensuel de toute l'équipe (roue crantée) n'a pas changé.

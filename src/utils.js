@@ -23,7 +23,7 @@ export const GT_ADMIN_EMAIL = 'ngdevpro@gmail.com';
 // WHATS_NEW   : tableau vide = modal desactive pour cette version.
 // Format item : { emoji:'📅', titre:'Titre court', desc:'Phrase utilisateur.' }
 // Regle : seulement les changements visibles par les utilisateurs.
-export const APP_VERSION = '7.26';
+export const APP_VERSION = '7.28';
 // ════ Journal des nouveautés (récap cumulatif) ════
 // Une entrée par version, la PLUS RÉCENTE EN HAUT : { v:'5.10', items:[ {emoji,titre,desc}, … ] }
 // À chaque release visible → AJOUTER un bloc en tête (ne pas remplacer). items:[] = release technique (rien à afficher).
@@ -715,6 +715,29 @@ window._mvGraphRepeindre = function(){
 };
 
 export const WHATS_NEW = [
+  { v: '7.28', items: [
+    { emoji: 'document', titre: 'Le relevé du mois suit la fiche',
+      desc: "À partir de septembre 2026, le relevé d’un salarié tient sur deux pages A4. Page 1 : le cadre "
+        + "<b>Pour la paie</b> en tête, puis chaque jour avec trois colonnes surlignées, <b>Prévu</b>, <b>Fait</b> et "
+        + "<b>Absence payée</b>, le total de chaque semaine et celui du mois. Page 2 : où vont les heures sup et la "
+        + "demande du salarié, le temps de récup, le détail mois par mois, les contrats, les congés, le compteur "
+        + "d’heures, les acomptes, et trois signatures, dont la date d’envoi à la compta. Les mois d’avant "
+        + "septembre gardent leur relevé." }
+  ] },
+  { v: '7.27', items: [
+    { emoji: 'liste', titre: 'La fiche d’un salarié se lit comme une paie',
+      desc: "Quatre onglets : <b>Résumé</b>, <b>Jours</b>, <b>Compteur</b>, <b>Congés et acomptes</b>, et le mois se change "
+        + "sans fermer la fiche. Le Résumé commence par le cadre <b>Pour la paie</b> : le salaire de base (heures prévues, "
+        + "faites et absences payées), ce qui est à payer en plus, ce qui est à retirer, et ce qui est pour information. "
+        + "Comme en paie, un congé payé ou une récup ne se lit jamais comme des heures manquées." },
+    { emoji: 'euro', titre: 'Un salarié peut demander à être payé de ses heures sup',
+      desc: "Dans le Résumé, la case <b>« demande à être payé »</b> et le nombre d’heures, avec trois raccourcis : aucune, "
+        + "sans toucher la récup déjà prise, tout le mois. Les heures payées se prennent d’abord sur celles à 25 %, "
+        + "sortent de la récup et s’inscrivent aussitôt dans le cadre. La case existe quel que soit le mode du domaine." },
+    { emoji: 'calendrier', titre: 'Chaque jour du mois, prévu et fait côte à côte',
+      desc: "L’onglet <b>Jours</b> montre tous les jours, pas seulement les jours modifiés : l’horaire prévu, l’horaire fait, "
+        + "les absences payées et l’écart. Chaque semaine dit ses heures sup par taux et prévient au-delà des 48 h." }
+  ] },
   { v: '7.26', items: [
     { emoji: 'balance', titre: 'Pour la compta : l’heure et son taux, jamais 1h15',
       desc: "Dans la fiche d’un salarié, onglet Compteur, et sur son relevé, la carte <b>Pour la compta</b> donne "
@@ -3085,12 +3108,14 @@ var MV_AIDE = {
       ['Sur une période plus longue', "que la vue affichée, deux boutons au-dessus de la grille posent des congés ou des horaires chaleur du jour au jour, pour plusieurs salariés."],
       ['Une journée écourtée', "se retire d’abord du compteur d’heures sup, au taux normal : 1 h manquée = 1 h de récup en moins, quel que soit le motif. Ce que le compteur ne couvre pas est retenu sur la paie, sauf si le domaine a arrêté la journée : il attend alors les prochaines heures sup. Un arrêt de travail, une formation, un événement familial ou un congé sans solde ne retirent rien. Ces règles valent à partir de septembre 2026 ; les mois d’avant gardent la leur."],
       ['Une absence sur une partie de la journée', "se note dans Absence, « Une partie seulement » : de telle heure à telle heure, ou un raccourci — le matin, l’après-midi, arrivé en retard, parti plus tôt — puis le motif. L’écran calcule les heures manquées, coupure déduite, dessine la journée et dit avant d’enregistrer ce qu’elles retirent du compteur. Un horaire raccourci dans « Travaillé » demande aussi son motif, sauf les horaires chaleur et les jours d’échange."],
-      ['Les heures sup et la récup', "l’onglet Compteur de la fiche d’un salarié montre les heures sup faites avec leur taux — 25 % jusqu’à la 43e heure de la semaine, 50 % au-delà —, le temps de récup qu’elles donnent (1 h 15 ou 1 h 30 par heure) et ce qui en a été retiré, puis la carte Pour la compta, le mois en grille et le détail semaine par semaine. Un jour se touche pour l’ouvrir."],
+      ['La fiche d’un salarié', "quatre onglets. Résumé : le cadre Pour la paie (salaire de base, à payer en plus, à retirer, pour information), la case « demande à être payé » et où vont les heures sup. Jours : chaque jour du mois, prévu et fait côte à côte, et les heures sup de chaque semaine par taux. Compteur : le temps de récup, ce qui a bougé dans le mois et l’année. Congés et acomptes : le solde de congés et les avances en euros. Le mois se change sans fermer la fiche, et le bouton Relevé édite le PDF."],
+      ['Les heures sup et la récup', "les heures sup gardent leur taux — 25 % jusqu’à la 43e heure de la semaine, 50 % au-delà — et donnent 1 h 15 ou 1 h 30 de récup par heure. Un congé payé, une récup, une formation sont des absences payées : ils ne se lisent jamais comme des heures manquées."],
+      ['Payer des heures sup', "dans le Résumé de la fiche, cochez « demande à être payé » et indiquez le nombre d’heures. Elles se prennent d’abord sur celles à 25 % et sortent de la récup. « Sans toucher la récup prise » donne le plus d’heures payables sans découvrir la récup déjà prise ce mois-ci. La case existe quel que soit le mode du domaine."],
       ['Pour la compta', "une ligne par taux : le temps en récup, les heures à déclarer et le taux à appliquer. La compta majore elle-même : pour 1 h sup à 25 %, on lui déclare 1 h à +25 %, jamais 1 h 15. Le compteur compte toujours en temps de récup, même quand les heures se paient : des heures payées sortent du compteur et se déclarent en heures brutes, avec leur taux. Une heure sup un dimanche ou un jour férié prend le taux le plus fort, une seule fois."],
       ['Présence, coupure, heures dues', "trois nombres qui se ressemblent et ne disent pas la même chose. La ‹‹ présence ›› va de l’arrivée au départ. La ‹‹ coupure ›› est le temps non travaillé au milieu : sa durée et son heure sont fixées par le domaine, dans la roue crantée du Planning, ce n’est pas un moment que chacun choisit. Les ‹‹ heures dues ›› sont ce qui part en paie et alimente le compteur des 1 607 h. Une journée de 09:00 à 16:00 avec une heure de coupure fait 7 h de présence et 6 h dues."],
       ['Le planning de l’année', "s’imprime depuis le même endroit : le rythme sur douze mois, avec les heures de prise et de fin de service et la coupure déjeuner. Une page par modèle de semaine — c’est le document qu’on remet à l’équipe pour l’année à venir. Une variante nominative sort la même grille pour une seule personne, bornée à ses contrats, avec ses jours de formation et ses congés déjà posés."],
       ['Le relevé mensuel', "s’imprime depuis la roue crantée du Planning, bloc Documents. C’est un relevé d’heures, pas un bulletin de paie."],
-      ['Le relevé d’un seul salarié', "s’imprime au même endroit, en choisissant la personne et le mois : son mois jour par jour, ses contrats avec leurs coupures, ses congés payés, son compteur d’heures et son annualisation, avec deux lignes de signature. Le bouton PDF de sa fiche sort exactement le même document. Les anciens salariés y figurent aussi, marqués comme tels : un relevé est un document d’histoire."],
+      ['Le relevé d’un seul salarié', "s’imprime au même endroit, en choisissant la personne et le mois : son mois jour par jour, ses contrats avec leurs coupures, ses congés payés, son compteur d’heures et son annualisation, avec les signatures. Le bouton PDF de sa fiche sort exactement le même document. À partir de septembre 2026, il commence par le cadre Pour la paie, puis chaque jour en colonnes Prévu, Fait et Absence payée ; une case note la date d’envoi à la compta. Les anciens salariés y figurent aussi, marqués comme tels : un relevé est un document d’histoire."],
       ['Un ancien salarié', "reste compté dans les mois où il était sous contrat. Reculez d’un mois dans Les gens : il reprend sa ligne dans la liste, avec ses heures, et il disparaît de la section Anciens salariés ce mois-là. Passer une fiche en Inactif ferme son accès à l’application, cela n’efface aucune heure déjà faite."],
       ['Dimanches et jours fériés travaillés', "se majorent tout seuls — 50 % le dimanche, 100 % un jour férié, taux modifiables dans la roue crantée du Planning. Seules les heures réellement faites comptent : un férié chômé reste payé sans majoration, un congé ou une récup ne majorent rien, et un férié qui tombe un dimanche prend le taux le plus fort, jamais les deux — de même qu’une heure sup faite un dimanche. La majoration part en paie si vos heures sup se paient, au compteur si elles se récupèrent. Elle ne compte pas dans les 1 607 h."],
     ['Taux horaires et acomptes', ": administrateurs seulement, et jamais enregistrés sur l’appareil."]
