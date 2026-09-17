@@ -2,7 +2,12 @@
 
 > Document de référence du projet **Ma Vigne** (GUERETTECH). Il est le **porteur de vérité** :
 > la mémoire Claude est plafonnée, ce fichier ne l'est pas.
-> Dernière consolidation : **17 septembre 2026 (FICHE-3)** — ★★ **UN NOMBRE D'HEURES PAR TAUX, ET CE QU'IL RESTE À
+> Dernière consolidation : **17 septembre 2026 (FICHE-4)** — ★★ **PAYER AU-DELÀ DU MOIS (§140)**. Le moteur savait
+> payer sur le compteur ; l'écran bornait tout aux heures du mois. `_planPayeEcrire` écrit un paiement à un seul
+> endroit, `_planPayeMaxTotal` dit tout ce qui est payable, « Tout le compteur » le propose ; un report d'avant
+> septembre 2026 s'écrit « taux à vérifier ». **APP 7.29 → 7.30 · SW 7.93 → 7.94**, base `2a37d69`. Détail en **§140**.
+>
+> ★ Précédente : **17 septembre 2026 (FICHE-3)** — ★★ **UN NOMBRE D'HEURES PAR TAUX, ET CE QU'IL RESTE À
 > PAYER (§139)**. Demande de paiement : quatre lignes (25 %, 50 %, dimanche, férié), et au Compteur les heures
 > sup restantes à payer — le compteur de fin de mois relu tranche par tranche en heures brutes, donc les mêmes
 > heures que la récup restante. **APP 7.28 → 7.29 · SW 7.92 → 7.93**, base `0df4750`. Détail en **§139**.
@@ -19573,3 +19578,47 @@ férié, et « taux normal » pour le report, les mois d'avant septembre 2026 et
 | `index.html` · `public/sw.js` | versions | ★ APP · ★ SW |
 | `guide/10-planning.html` | paiement : un nombre par taux, les restantes | — |
 | `scripts/mv-harnais-recup.mjs` · `scripts/typo-baseline.json` · `scripts/harnais-claude-md.mjs` · `CLAUDE.md` · `.mv-base` | section Q · cliquet · §139 · base | — |
+
+---
+
+## 140. ★★ FICHE-4 — PAYER AU-DELÀ DU MOIS (17/09 — `planning.js` · `utils.js` · `index.html` · `sw.js` · `guide/10-planning.html` · `scripts/` · APP 7.29 → **7.30** · SW 7.93 → **7.94**)
+
+> Nico : *« si j'ai 50 heures sup encore à rattraper, il faut que je puisse inscrire ces 50 heures sup sur le
+> mois en cours. Là, je suis bloqué au nombre d'heures sup qu'il y a sur le mois en cours »*.
+
+### 140a. Ce qui bloquait vraiment — mesuré avant de corriger
+
+**Le moteur savait déjà payer au-delà du mois** (`paye_bank`, RECUP-2) : mesuré avec 50 h de report, 30 h
+demandées donnaient bien 18 h du mois + 12 h du compteur. **C'est l'écran qui bornait** : « h sur 18h »,
+« Tout le mois » comme plus grand raccourci, et `_planPayeMaxCouvert` qui cherchait jusqu'aux heures du mois
+seulement. Au-delà du disponible, la saisie était réduite **sans rien dire**.
+
+### 140b. Ce qui change
+
+- `_planPayeEcrire` : **une seule écriture** d'un paiement (les heures du mois d'abord, le surplus pris au
+  compteur à sa valeur), servie à la case ET aux essais. `_planPayeEssais` pose, mesure et remet en place.
+- `_planPayeMaxTotal` : les heures du mois + les heures brutes que le compteur garde **une fois la récup et les
+  absences du mois servies** (elles passent avant un paiement dans `_planCompteur`). La carte dit « h sur » ce
+  total, et propose **Tout le compteur** quand il dépasse le mois. Au-delà, un message dit ce qui est payable.
+- ⚠️ **Un report d'avant septembre 2026 n'a pas de taux connu** (report de départ, mois de l'ancienne règle,
+  majoration seule). FICHE-3 l'écrivait « au taux normal » : c'était inventer. Il s'écrit désormais
+  **« Heures reportées, taux à vérifier »** — la compta le fixe.
+
+### 140c. Les filets
+
+Section **R** de `mv-harnais-recup` (9 assertions : sans report 18 h / 12 h inchangés ; 50 h de report → 59 h
+payables, toutes sans découvrir la récup ; 30 h demandées = 18 + 12, cadre et restantes justes ; 80 h demandées
+→ 59 h possibles, 21 h introuvables), deux défauts neufs. **232 assertions, 23 défauts, 23 détectés.**
+
+### 140d. La note de livraison
+
+**Base `2a37d69`** (FICHE-3 poussé). **APP 7.29 → 7.30 · SW 7.93 → 7.94.** `firebase deploy --only hosting`.
+`public/guide.html` : `node scripts/build-guide.mjs`.
+
+| Fichier | Ce qui change | Bump ? |
+|---|---|---|
+| `src/planning.js` | `_planPayeEcrire`, `_planPayeEssais`, `_planPayeMaxTotal`, carte de paiement, libellé du report | — |
+| `src/utils.js` | APP 7.30, nouveauté, aide | ★ APP |
+| `index.html` · `public/sw.js` | versions | ★ APP · ★ SW |
+| `guide/10-planning.html` | payer au-delà du mois | — |
+| `scripts/mv-harnais-recup.mjs` · `scripts/harnais-claude-md.mjs` · `CLAUDE.md` · `.mv-base` | section R · §140 · base | — |

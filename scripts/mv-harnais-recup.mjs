@@ -94,7 +94,7 @@ function modele(an) {
   for (const [m, d] of [[0, 1], [3, 6], [4, 1], [4, 8], [4, 14], [4, 25], [6, 14], [10, 11], [11, 25]]) t[m][d] = 0;
   return t;
 }
-const EXPORTS = ['_pfRestants', '_planPaieMois', '_planPayeMaxCouvert', '_planSemEffectif', '_pfCadre', '_pfDemande', '_pfOuVont', '_pfJours', '_pfCompteur', '_pfConges', '_pfResume', '_planValeurPourBrut', '_planComptaLignes', '_planComptaTable', '_planSeauxTxt', '_planSeauNom', '_planJourEcart', '_planHsupMois', '_planHsupTiers', '_planCompteur', '_planBank',
+const EXPORTS = ['_planPayeMaxTotal', '_planPayeMaxCouvert', '_planPayeEcrire', '_planDepartKey', '_pfRestants', '_planPaieMois', '_planPayeMaxCouvert', '_planSemEffectif', '_pfCadre', '_pfDemande', '_pfOuVont', '_pfJours', '_pfCompteur', '_pfConges', '_pfResume', '_planValeurPourBrut', '_planComptaLignes', '_planComptaTable', '_planSeauxTxt', '_planSeauNom', '_planJourEcart', '_planHsupMois', '_planHsupTiers', '_planCompteur', '_planBank',
   '_planYearBalance', '_planSupMonth', '_planSupCalc', '_planSummary', '_planDuesMonth', '_planMajBank', '_planHsupPaye',
   '_planHsupPayeBank', '_planRecupH', '_planDepartSolde', '_planAbsPartH', '_planAbsPartiel', '_planDayH', '_planWorkH',
   '_planDayStatus', '_pl2Cell', '_planRecupActive', '_planApplyAbsPart', '_planApplyHeures', '_planSuspH',
@@ -472,6 +472,30 @@ function lance(R) {
   eq('Q11 · octobre : 4h reportées + 3h faites − 5h payées = 2h restantes', [RSo.report, RSo.faites, RSo.payees, RSo.consommees, RSo.total].map(x => Math.round(x * 100) / 100).join('/'), '4/3/5/0/2');
   window.PLANNING_ACOMPTES.Jean = {};
 
+  // R. FICHE-4 — payer au-delà du mois : tout ce que le compteur contient encore
+  domaine({ ent: { 8: moisFiche } });
+  eq('R1 · sans report : au plus les 18h du mois', R._planPayeMaxTotal(J, 8), 18);
+  eq('R2 · sans report : sans toucher la récup prise, 12h (inchangé)', R._planPayeMaxCouvert(J, 8), 12);
+  const dep = {}; dep[R._an() + '-dep'] = { solde: 50, date: '2026-01-01' };
+  domaine({ ent: { 8: moisFiche }, hsup: Object.assign({}, dep) });
+  eq('R3 · 50h reportées : 18h du mois + 41h du compteur (9h servent la récup du mois)', R._planPayeMaxTotal(J, 8), 59);
+  eq('R4 · … et toutes payables sans découvrir la récup prise', R._planPayeMaxCouvert(J, 8), 59);
+  const rec30 = { demande: true };
+  window.PLANNING_HSUP.Jean['2026-09'] = rec30;
+  R._planPayeEcrire(J, 8, rec30, 30);
+  eq('R5 · 30h demandées : 18h du mois, 12h puisées au compteur', [rec30.paye, rec30.paye_bank].join('/'), '18/12');
+  F = R._planPaieMois(J, 8);
+  eq('R6 · la fiche paie bien 30h', F.payeTotal, 30);
+  cad = R._pfCadre(J, F);
+  eq('R7 · le cadre : 8h à 25 %, 2h à 50 %, 8h le dimanche, 12h reportées au taux à vérifier',
+    [ligne(cad, 'Heures sup \u00e0 +25\u202f%', '8h'), ligne(cad, 'Heures sup \u00e0 +50\u202f%', '2h'), ligne(cad, 'Heures du dimanche \u00e0 +50\u202f%', '8h'), ligne(cad, 'Heures report\u00e9es, taux \u00e0 v\u00e9rifier', '12h')].join(), 'true,true,true,true');
+  RS = R._pfRestants(J, F);
+  eq('R8 · restantes : 50 + 18 − 30 − 9 = 29h, toutes du report', [RS.report, RS.faites, RS.payees, RS.consommees, RS.total, RS.normal.h].join('/'), '50/18/30/9/29/29');
+  const rec80 = { demande: true }; window.PLANNING_HSUP.Jean['2026-09'] = rec80;
+  const e80 = R._planPayeEcrire(J, 8, rec80, 80);
+  eq('R9 · 80h demandées : 59h possibles, 21h introuvables', [Math.round(e80.h * 100) / 100, Math.round(e80.reste * 100) / 100].join('/'), '59/21');
+  domaine({ ent: { 8: moisFiche } });
+
   return { ok, ko, echecs };
 }
 
@@ -501,6 +525,9 @@ const DEFAUTS = [
   // FICHE-1
   ['un congé payé se lit en heures manquées', "else if(e.type==='cp'){x.paye=_planDayH(plId,m,d,e);x.payeType='cp';}", "else if(e.type==='cp'){x.paye=0;x.payeType='cp';}"],
   ['la récup est payée même quand le compteur ne la couvre pas', "var q=act?Math.min(x.recupH,kc):x.recupH;", "var q=x.recupH;"],
+  // FICHE-4
+  ['« sans toucher la récup prise » s’arrête aux heures du mois', "var z=essai(0),n=Math.floor(_planPayeMaxTotal(mbr,m)*2+1e-9);", "var z=essai(0),n=Math.floor(_planSupMonth(mbr,m)*2+1e-9);"],
+  ['le paiement ignore le compteur au-delà du mois', "  if(sur>0.0001){var cv=_planValeurPourBrut(mbr,m,sur);rec.paye_bank=Math.round(cv.v*100)/100;return {h:pm+(sur-cv.reste),reste:cv.reste};}", ""],
   // FICHE-3
   ['les heures restantes oublient leur taux', "b=t.h/(1+(t.taux||0)/100)", "b=t.h"],
   ['les heures payées sur le compteur ne rejoignent pas leur taux', "(P.r.payesBank||[]).forEach(function(q){cat[_pfCat(q.nat,q.taux)]+=q.brut;});", ""],

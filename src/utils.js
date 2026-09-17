@@ -23,7 +23,7 @@ export const GT_ADMIN_EMAIL = 'ngdevpro@gmail.com';
 // WHATS_NEW   : tableau vide = modal desactive pour cette version.
 // Format item : { emoji:'📅', titre:'Titre court', desc:'Phrase utilisateur.' }
 // Regle : seulement les changements visibles par les utilisateurs.
-export const APP_VERSION = '7.29';
+export const APP_VERSION = '7.30';
 // ════ Journal des nouveautés (récap cumulatif) ════
 // Une entrée par version, la PLUS RÉCENTE EN HAUT : { v:'5.10', items:[ {emoji,titre,desc}, … ] }
 // À chaque release visible → AJOUTER un bloc en tête (ne pas remplacer). items:[] = release technique (rien à afficher).
@@ -715,6 +715,14 @@ window._mvGraphRepeindre = function(){
 };
 
 export const WHATS_NEW = [
+  { v: '7.30', items: [
+    { emoji: 'euro', titre: 'Payer aussi les heures sup gardées au compteur',
+      desc: "La case « demande à être payé » ne s’arrête plus aux heures sup du mois : on peut inscrire sur la paie du "
+        + "mois en cours <b>tout ce que le compteur contient encore</b>. Les heures du mois se paient d’abord, puis on "
+        + "puise dans le compteur, les plus anciennes en premier. Un nouveau raccourci, <b>Tout le compteur</b>, "
+        + "propose le maximum. Les heures reportées d’avant septembre 2026 apparaissent à part, <b>taux à vérifier</b> : "
+        + "le compteur ne sait pas à quel taux elles ont été faites." }
+  ] },
   { v: '7.29', items: [
     { emoji: 'euro', titre: 'Un nombre d’heures par taux, et ce qu’il reste à payer',
       desc: "Quand un salarié demande à être payé, le cadre <b>Pour la paie</b> donne toujours quatre lignes : heures sup "
@@ -3118,7 +3126,7 @@ var MV_AIDE = {
       ['Une absence sur une partie de la journée', "se note dans Absence, « Une partie seulement » : de telle heure à telle heure, ou un raccourci — le matin, l’après-midi, arrivé en retard, parti plus tôt — puis le motif. L’écran calcule les heures manquées, coupure déduite, dessine la journée et dit avant d’enregistrer ce qu’elles retirent du compteur. Un horaire raccourci dans « Travaillé » demande aussi son motif, sauf les horaires chaleur et les jours d’échange."],
       ['La fiche d’un salarié', "quatre onglets. Résumé : le cadre Pour la paie (salaire de base, à payer en plus, à retirer, pour information), la case « demande à être payé » et où vont les heures sup. Jours : chaque jour du mois, prévu et fait côte à côte, et les heures sup de chaque semaine par taux. Compteur : le temps de récup, ce qui a bougé dans le mois et l’année. Congés et acomptes : le solde de congés et les avances en euros. Le mois se change sans fermer la fiche, et le bouton Relevé édite le PDF."],
       ['Les heures sup et la récup', "les heures sup gardent leur taux — 25 % jusqu’à la 43e heure de la semaine, 50 % au-delà — et donnent 1 h 15 ou 1 h 30 de récup par heure. Un congé payé, une récup, une formation sont des absences payées : ils ne se lisent jamais comme des heures manquées."],
-      ['Payer des heures sup', "dans le Résumé de la fiche, cochez « demande à être payé » et indiquez le nombre d’heures. Elles se prennent d’abord sur celles à 25 % et sortent de la récup. « Sans toucher la récup prise » donne le plus d’heures payables sans découvrir la récup déjà prise ce mois-ci. La case existe quel que soit le mode du domaine. « Pour la paie » donne alors un nombre d’heures par taux — 25 %, 50 %, dimanche, férié — et l’onglet Compteur montre les heures sup restantes à payer, taux par taux, avec leur décompte et leur équivalent en récup."],
+      ['Payer des heures sup', "dans le Résumé de la fiche, cochez « demande à être payé » et indiquez le nombre d’heures. Elles se prennent d’abord sur celles à 25 % et sortent de la récup. On peut payer au-delà des heures du mois, jusqu’à tout ce que le compteur contient encore : les heures du mois d’abord, puis les plus anciennes du compteur. « Sans toucher la récup prise » donne le plus d’heures payables sans découvrir la récup déjà prise ce mois-ci, « Tout le compteur » le maximum. La case existe quel que soit le mode du domaine. « Pour la paie » donne alors un nombre d’heures par taux — 25 %, 50 %, dimanche, férié — et l’onglet Compteur montre les heures sup restantes à payer, taux par taux, avec leur décompte et leur équivalent en récup."],
       ['Pour la compta', "une ligne par taux : le temps en récup, les heures à déclarer et le taux à appliquer. La compta majore elle-même : pour 1 h sup à 25 %, on lui déclare 1 h à +25 %, jamais 1 h 15. Le compteur compte toujours en temps de récup, même quand les heures se paient : des heures payées sortent du compteur et se déclarent en heures brutes, avec leur taux. Une heure sup un dimanche ou un jour férié prend le taux le plus fort, une seule fois."],
       ['Présence, coupure, heures dues', "trois nombres qui se ressemblent et ne disent pas la même chose. La ‹‹ présence ›› va de l’arrivée au départ. La ‹‹ coupure ›› est le temps non travaillé au milieu : sa durée et son heure sont fixées par le domaine, dans la roue crantée du Planning, ce n’est pas un moment que chacun choisit. Les ‹‹ heures dues ›› sont ce qui part en paie et alimente le compteur des 1 607 h. Une journée de 09:00 à 16:00 avec une heure de coupure fait 7 h de présence et 6 h dues."],
       ['Le planning de l’année', "s’imprime depuis le même endroit : le rythme sur douze mois, avec les heures de prise et de fin de service et la coupure déjeuner. Une page par modèle de semaine — c’est le document qu’on remet à l’équipe pour l’année à venir. Une variante nominative sort la même grille pour une seule personne, bornée à ses contrats, avec ses jours de formation et ses congés déjà posés."],
