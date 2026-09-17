@@ -23,7 +23,7 @@ export const GT_ADMIN_EMAIL = 'ngdevpro@gmail.com';
 // WHATS_NEW   : tableau vide = modal desactive pour cette version.
 // Format item : { emoji:'📅', titre:'Titre court', desc:'Phrase utilisateur.' }
 // Regle : seulement les changements visibles par les utilisateurs.
-export const APP_VERSION = '7.30';
+export const APP_VERSION = '7.31';
 // ════ Journal des nouveautés (récap cumulatif) ════
 // Une entrée par version, la PLUS RÉCENTE EN HAUT : { v:'5.10', items:[ {emoji,titre,desc}, … ] }
 // À chaque release visible → AJOUTER un bloc en tête (ne pas remplacer). items:[] = release technique (rien à afficher).
@@ -715,6 +715,14 @@ window._mvGraphRepeindre = function(){
 };
 
 export const WHATS_NEW = [
+  { v: '7.31', items: [
+    { emoji: 'liste', titre: 'Le détail mois par mois se lit en heures sup',
+      desc: "Dans l’onglet Compteur de la fiche et sur le relevé, le tableau de l’année donne désormais, pour chaque mois : "
+        + "les <b>heures sup du mois</b>, les <b>payées</b>, les <b>récupérées</b> et le <b>solde restant</b>. Tout est "
+        + "compté en heures sup, comme la paie : chaque ligne fait « solde d’avant + heures sup − payées − récupérées », "
+        + "et le solde du mois en cours est celui des heures sup restantes à payer. Une récup retire les heures sup "
+        + "qu’elle consomme, à leur taux." }
+  ] },
   { v: '7.30', items: [
     { emoji: 'euro', titre: 'Payer aussi les heures sup gardées au compteur',
       desc: "La case « demande à être payé » ne s’arrête plus aux heures sup du mois : on peut inscrire sur la paie du "

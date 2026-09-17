@@ -2109,6 +2109,8 @@ function _planCompteur(mbr,upto){
     r.payBank=Math.max(0,_planHsupPayeBank(mbr.nom,i));tire(r.payBank,r.payesBank);
     T.plus+=sup-paye;T.maj+=entre-(sup-paye);T.recup+=r.recup;T.pay+=r.payBank;
     r.solde=tr.reduce(function(a,t){return a+t.h;},0);r.dette=dette;
+    // ★ FICHE-5 : le même solde, en heures sup BRUTES — chaque tranche rendue à son taux (valeur ÷ (1 + taux)).
+    r.soldeBrut=tr.reduce(function(a,t){return a+t.h/(1+(t.taux||0)/100);},0);
     rows.push(r);
   }
   return {tr:tr,solde:tr.reduce(function(a,t){return a+t.h;},0),dette:dette,overdraw:od,rows:rows,tot:T};
@@ -4145,11 +4147,19 @@ function _pfMouvements(mbr,P){
   return {avant:avant,acq:acq,retire:retire,prise:prise,uti:uti,payeC:payeC,mv:mv};
 }
 function _pfAnnee(mbr,m){
+  // ★★ FICHE-5 (17/09/2026) — Nico : « il faut qu'apparaisse heures sup du mois ; payées ; récupérées ; solde
+  //   restant ». TOUT EN HEURES SUP BRUTES, comme la paie et comme « Heures sup restantes à payer » : la ligne
+  //   se lit « solde d'avant + heures sup du mois − payées − récupérées = solde restant ». « Récupérées » est le
+  //   terme qui ferme l'égalité — les heures sup que la récup prise et les absences couvertes ont consommées,
+  //   à leur taux (2h de récup sur des heures à 25 % = 1h36 d'heures sup) : il n'a pas de second calcul.
+  //   La majoration seule (dimanche/férié prévus) entre au compteur au taux normal : elle s'ajoute au mois.
   var all=_planCompteur(mbr,11);
   return all.rows.map(function(rw,i){
-    var av=i>0?all.rows[i-1].solde:Math.max(0,_planDepartSolde(mbr));
-    var a=(rw.sup||0)-(rw.paye||0)+(rw.majDim||0)+(rw.majSup||0)-(rw.comble||0),u=Math.max(0,av+a-rw.solde);
-    return {i:i,sup:rw.sup||0,a:a,u:u,solde:rw.solde,cur:(i===m),vide:(rw.sup||0)<0.0001&&a<0.0001&&u<0.0001};
+    var av=i>0?all.rows[i-1].soldeBrut:Math.max(0,_planDepartSolde(mbr));
+    var pay=(rw.paye||0)+((rw.payesBank&&rw.payesBank.length)?rw.payesBank.reduce(function(a,q){return a+q.brut;},0):0);
+    var mois=(rw.sup||0)+(rw.majDim||0),rec=Math.max(0,av+mois-pay-rw.soldeBrut);
+    return {i:i,sup:rw.sup||0,maj:rw.majDim||0,payees:pay,recup:rec,solde:rw.soldeBrut,soldeRecup:rw.solde,cur:(i===m),
+            vide:(rw.sup||0)<0.0001&&pay<0.0001&&rec<0.0001};
   });
 }
 // ★★★ FICHE-3 (17/09/2026) — LES HEURES SUP RESTANTES À PAYER (maquette v4 validée). Le compteur de fin
@@ -4283,8 +4293,9 @@ function _pfCompteur(mbr,P){
   var M=_pfMouvements(mbr,P),avant=M.avant,acq=M.acq,retire=M.retire,prise=M.prise,uti=M.uti,payeC=M.payeC;
   var calc=_planFmt(avant)+' report\u00e9es + '+_planFmt(acq)+' acquises \u2212 '+_planFmt(retire)+' retir\u00e9es \u2212 '+_planFmt(prise)+' prises'+(payeC>0.0001?' \u2212 '+_planFmt(payeC)+' pay\u00e9es':'')+' = <b>'+_planFmt(c.solde)+'</b>';
   var mv=M.mv;
-  var rows=_pfAnnee(mbr,m).map(function(x){
-    return '<tr'+(x.cur?' class="cur"':'')+'><td>'+PLAN_MOIS_C[x.i]+'</td><td class="n">'+(x.vide?'':_planFmt(x.sup))+'</td><td class="n">'+(x.a>0.0001?'+'+_planFmt(x.a):'')+'</td><td class="n">'+(x.u>0.0001?'\u2212'+_planFmt(x.u):'')+'</td><td class="n b">'+_planFmt(x.solde)+'</td></tr>';
+  var AN=_pfAnnee(mbr,m),cur=AN[m];
+  var rows=AN.map(function(x){
+    return '<tr'+(x.cur?' class="cur"':'')+'><td>'+PLAN_MOIS_C[x.i]+'</td><td class="n">'+(x.sup>0.0001?_planFmt(x.sup):'')+'</td><td class="n">'+(x.payees>0.0001?_planFmt(x.payees):'')+'</td><td class="n">'+(x.recup>0.0001?_planFmt(x.recup):'')+'</td><td class="n b">'+_planFmt(x.solde)+'</td></tr>';
   }).join('');
   var dep=_planDepartSolde(mbr),depD=_planDepartDate(mbr);
   return '<section class="pf-card"><div class="pf-card-t"><h3>Temps de r\u00e9cup</h3><span>fin '+PLAN_MOIS[m].toLowerCase()+'</span></div>'
@@ -4298,7 +4309,8 @@ function _pfCompteur(mbr,P){
         :'<p class="pl2-note">Rien n\u2019est entr\u00e9 ni sorti du compteur ce mois-ci.</p>')
     +'</section>'
     +'<section class="pf-card"><div class="pf-card-t"><h3>L\u2019ann\u00e9e '+planYear+'</h3><span>mois par mois</span></div>'
-      +'<div class="pf-scroll"><table class="pf-t pf-an"><thead><tr><th>Mois</th><th class="n">Heures sup</th><th class="n">Acquise</th><th class="n">Utilis\u00e9e</th><th class="n">Solde</th></tr></thead><tbody>'+rows+'</tbody></table></div>'
+      +'<div class="pf-scroll"><table class="pf-t pf-an"><thead><tr><th>Mois</th><th class="n">Heures sup du mois</th><th class="n">Pay\u00e9es</th><th class="n">R\u00e9cup\u00e9r\u00e9es</th><th class="n">Solde restant</th></tr></thead><tbody>'+rows+'</tbody></table></div>'
+      +'<p class="pl2-note">En heures sup, comme sur la paie\u00a0: une r\u00e9cup retire les heures sup qu\u2019elle consomme, \u00e0 leur taux (2h de r\u00e9cup sur des heures \u00e0 25\u202f% = 1h36). Fin '+PLAN_MOIS[m].toLowerCase()+'\u00a0: '+_planFmt(cur.solde)+' d\u2019heures sup, soit '+_planFmt(Math.max(0,cur.soldeRecup))+' de r\u00e9cup.</p>'
     +'</section>'
     +_planAnnuCard(mbr,m)
     +'<details class="pf-card pf-calme"><summary><span>Report d\u2019avant Ma Vigne</span><b>'+(dep?_planFmt(dep):'aucun')+'</b></summary>'
@@ -6523,8 +6535,9 @@ function _planReleveFiche_(nom,mbr,_ctr){
     :(P.sup>0.0001?'Aucune demande de paiement\u00a0: les heures sup restent en r\u00e9cup.':'');
   var mvt='<table class="t"><tbody>'+M.mv.map(function(x){return '<tr><td>'+x[0]+'</td><td>'+x[1]+(x[2]?', '+x[2]:'')+'</td><td class="n '+(x[3]>0?'up':'dn')+'">'+_planFmtE(x[3])+'</td></tr>';}).join('')
     +'<tr class="tot"><td></td><td>Solde fin '+moisL+'</td><td class="n">'+F(Math.max(0,P.c.solde))+'</td></tr></tbody></table>';
-  var an='<table class="t"><thead><tr><th>Mois</th><th class="n">Heures sup</th><th class="n">Acquise</th><th class="n">Utilis\u00e9e</th><th class="n">Solde</th></tr></thead><tbody>'
-    +A.map(function(x){return '<tr'+(x.cur?' class="cur"':'')+'><td>'+PLAN_MOIS_C[x.i]+'</td><td class="n">'+(x.vide?'':F(x.sup))+'</td><td class="n">'+(x.a>0.0001?'+'+F(x.a):'')+'</td><td class="n">'+(x.u>0.0001?'\u2212'+F(x.u):'')+'</td><td class="n">'+F(x.solde)+'</td></tr>';}).join('')+'</tbody></table>';
+  var an='<table class="t"><thead><tr><th>Mois</th><th class="n">Heures sup du mois</th><th class="n">Pay\u00e9es</th><th class="n">R\u00e9cup\u00e9r\u00e9es</th><th class="n">Solde restant</th></tr></thead><tbody>'
+    +A.map(function(x){return '<tr'+(x.cur?' class="cur"':'')+'><td>'+PLAN_MOIS_C[x.i]+'</td><td class="n">'+(x.sup>0.0001?F(x.sup):'')+'</td><td class="n">'+(x.payees>0.0001?F(x.payees):'')+'</td><td class="n">'+(x.recup>0.0001?F(x.recup):'')+'</td><td class="n">'+F(x.solde)+'</td></tr>';}).join('')+'</tbody></table>'
+    +'<p class="nt">En heures sup\u00a0: une r\u00e9cup retire les heures sup qu\u2019elle consomme, \u00e0 leur taux. Fin '+moisL+'\u00a0: '+F(A[m].solde)+' d\u2019heures sup, soit '+F(Math.max(0,A[m].soldeRecup))+' de r\u00e9cup.</p>';
   var cpJ=P.jours.filter(function(x){return x.payeType==='cp';});
   var ac=P.acomptes.length
     ?'<table class="t"><tbody>'+P.acomptes.map(function(a){var dp=(a.date||'').split('-');return '<tr><td>'+(dp.length===3?parseInt(dp[2],10)+'/'+parseInt(dp[1],10):'')+'</td><td>'+_escHtml(a.note||'Acompte')+'</td><td class="n">'+(a.montant||0).toLocaleString('fr-FR')+'\u202f\u20ac</td></tr>';}).join('')

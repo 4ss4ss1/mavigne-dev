@@ -2,7 +2,11 @@
 
 > Document de référence du projet **Ma Vigne** (GUERETTECH). Il est le **porteur de vérité** :
 > la mémoire Claude est plafonnée, ce fichier ne l'est pas.
-> Dernière consolidation : **17 septembre 2026 (FICHE-4)** — ★★ **PAYER AU-DELÀ DU MOIS (§140)**. Le moteur savait
+> Dernière consolidation : **17 septembre 2026 (FICHE-5)** — ★ **LE DÉTAIL MOIS PAR MOIS SE LIT EN HEURES SUP (§141)** :
+> heures sup du mois, payées, récupérées, solde restant — une seule unité, et chaque ligne se vérifie à la main.
+> **APP 7.30 → 7.31 · SW 7.94 → 7.95**, base `4f7ccc8`. Détail en **§141**.
+>
+> ★ Précédente : **17 septembre 2026 (FICHE-4)** — ★★ **PAYER AU-DELÀ DU MOIS (§140)**. Le moteur savait
 > payer sur le compteur ; l'écran bornait tout aux heures du mois. `_planPayeEcrire` écrit un paiement à un seul
 > endroit, `_planPayeMaxTotal` dit tout ce qui est payable, « Tout le compteur » le propose ; un report d'avant
 > septembre 2026 s'écrit « taux à vérifier ». **APP 7.29 → 7.30 · SW 7.93 → 7.94**, base `2a37d69`. Détail en **§140**.
@@ -19622,3 +19626,25 @@ payables, toutes sans découvrir la récup ; 30 h demandées = 18 + 12, cadre et
 | `index.html` · `public/sw.js` | versions | ★ APP · ★ SW |
 | `guide/10-planning.html` | payer au-delà du mois | — |
 | `scripts/mv-harnais-recup.mjs` · `scripts/harnais-claude-md.mjs` · `CLAUDE.md` · `.mv-base` | section R · §140 · base | — |
+
+---
+
+## 141. ★ FICHE-5 — LE DÉTAIL MOIS PAR MOIS SE LIT EN HEURES SUP (17/09 — `planning.js` · `utils.js` · `index.html` · `sw.js` · `guide/10-planning.html` · `scripts/` · APP 7.30 → **7.31** · SW 7.94 → **7.95**)
+
+> Nico : *« dans le détail mois par mois il faut revoir heure sup ; acquise ; utilisée ; solde. il faut
+> qu'apparaisse heure sup du mois ; payées ; récupérées ; solde restant »*.
+
+- **Les colonnes** (onglet Compteur et relevé) : heures sup du mois, payées, récupérées, solde restant.
+- ★ **Une seule unité, l'heure sup brute** — celle de la paie et de « Heures sup restantes à payer ». L'ancien
+  tableau mêlait des heures (heures sup) et du temps de récup (acquise, utilisée, solde) : aucune ligne ne se
+  vérifiait à la main. Désormais chaque ligne fait **solde d'avant + heures sup (+ majoration seule) − payées −
+  récupérées = solde restant**, et le solde du mois en cours EST le total des restantes à payer (S3).
+- `_planCompteur` retient `soldeBrut` (chaque tranche rendue à son taux). « Récupérées » ferme l'égalité, sans
+  second calcul : 2 h de récup sur des heures à 25 % = **1 h 36 récupérées**. Une note le dit sous le tableau,
+  avec l'équivalent en temps de récup du solde du mois.
+- Filets : section **S** (5 assertions, dont l'égalité sur douze mois avec report de 50 h, paiement sur le
+  compteur et un mois suivant), L24 réécrite, un défaut neuf (le solde restant garde la majoration de la récup).
+  **237 assertions, 24 défauts, 24 détectés.**
+- **Base `4f7ccc8`** (FICHE-4 poussé). **APP 7.30 → 7.31 · SW 7.94 → 7.95.** Fichiers : `src/planning.js`,
+  `src/utils.js`, `index.html`, `public/sw.js`, `guide/10-planning.html`, `scripts/mv-harnais-recup.mjs`,
+  `scripts/harnais-claude-md.mjs`, `CLAUDE.md`, `.mv-base`. `public/guide.html` : `node scripts/build-guide.mjs`.
