@@ -94,7 +94,7 @@ function modele(an) {
   for (const [m, d] of [[0, 1], [3, 6], [4, 1], [4, 8], [4, 14], [4, 25], [6, 14], [10, 11], [11, 25]]) t[m][d] = 0;
   return t;
 }
-const EXPORTS = ['_planPaieMois', '_planPayeMaxCouvert', '_planSemEffectif', '_pfCadre', '_pfDemande', '_pfOuVont', '_pfJours', '_pfCompteur', '_pfConges', '_pfResume', '_planValeurPourBrut', '_planComptaLignes', '_planComptaTable', '_planSeauxTxt', '_planSeauNom', '_planJourEcart', '_planHsupMois', '_planHsupTiers', '_planCompteur', '_planBank',
+const EXPORTS = ['_pfRestants', '_planPaieMois', '_planPayeMaxCouvert', '_planSemEffectif', '_pfCadre', '_pfDemande', '_pfOuVont', '_pfJours', '_pfCompteur', '_pfConges', '_pfResume', '_planValeurPourBrut', '_planComptaLignes', '_planComptaTable', '_planSeauxTxt', '_planSeauNom', '_planJourEcart', '_planHsupMois', '_planHsupTiers', '_planCompteur', '_planBank',
   '_planYearBalance', '_planSupMonth', '_planSupCalc', '_planSummary', '_planDuesMonth', '_planMajBank', '_planHsupPaye',
   '_planHsupPayeBank', '_planRecupH', '_planDepartSolde', '_planAbsPartH', '_planAbsPartiel', '_planDayH', '_planWorkH',
   '_planDayStatus', '_pl2Cell', '_planRecupActive', '_planApplyAbsPart', '_planApplyHeures', '_planSuspH',
@@ -441,6 +441,35 @@ function lance(R) {
   domaine({ ent: { 7: { 3: T('08:00', '18:00') } } });
   pages.length = 0; window._planReleveIndiv('Jean', 7); rel = pages[0] ? pages[0].html : '';
   eq('O13 · août garde le relevé d’avant', rel.indexOf('Feuille d\u2019heures') !== -1 && rel.indexOf('<h2>Pour la paie</h2>') === -1, true);
+
+  // Q. FICHE-3 — quatre taux à payer, et les heures sup restantes à payer
+  const ligne = (html, lib, v) => new RegExp('<dt>' + lib.replace(/[+]/g, '\\+') + '</dt><dd><b>' + v + '</b>').test(html);
+  domaine({ ent: { 8: moisFiche }, hsup: { '2026-09': { paye: 8, demande: true } } });
+  F = R._planPaieMois(J, 8);
+  let cad = R._pfCadre(J, F);
+  eq('Q1 · 8h payées : les quatre taux, même à zéro', [ligne(cad, 'Heures sup \u00e0 +25\u202f%', '8h'), ligne(cad, 'Heures sup \u00e0 +50\u202f%', '0h'),
+    ligne(cad, 'Heures du dimanche \u00e0 +50\u202f%', '0h'), ligne(cad, 'Heures de jour f\u00e9ri\u00e9 \u00e0 +100\u202f%', '0h')].join(), 'true,true,true,true');
+  let RS = R._pfRestants(J, F);
+  eq('Q2 · 4h restantes, toutes du dimanche, soit 6h de récup', [RS.total, RS.dim.h, RS.dim.v, RS.c25.h, RS.c50.h, RS.valeur].join('/'), '4/4/6/0/0/6');
+  eq('Q3 · décompte : 0 + 18 − 8 − 6 = 4', [RS.report, RS.faites, RS.payees, RS.consommees].join('/'), '0/18/8/6');
+  eq('Q4 · les restantes en récup = le temps de récup du compteur', RS.valeur, F.c.solde);
+  eq('Q5 · le compteur montre les restantes quand le salarié demande', R._pfCompteur(J, F).indexOf('Heures sup restantes \u00e0 payer') !== -1, true);
+  eq('Q6 · … et le cadre les note pour information', ligne(cad, 'Heures sup restantes \u00e0 payer', '4h'), true);
+  pages.length = 0; window._planReleveIndiv('Jean', 8); rel = pages[0] ? pages[0].html : '';
+  eq('Q7 · le relevé reprend les restantes', /Restantes fin septembre<\/td><td class="n">4h<\/td>/.test(rel), true);
+  domaine({ ent: { 8: moisFiche }, hsup: { '2026-09': { paye: 0, demande: true } } });
+  F = R._planPaieMois(J, 8); RS = R._pfRestants(J, F);
+  eq('Q8 · rien de payé : 10h48 restantes (0h48 à 25 %, 2h à 50 %, 8h le dimanche)', [RS.total, RS.c25.h, RS.c50.h, RS.dim.h].map(x => Math.round(x * 100) / 100).join('/'), '10.8/0.8/2/8');
+  domaine({ ent: { 8: moisFiche } });
+  F = R._planPaieMois(J, 8);
+  eq('Q9 · sans demande : ni restantes au compteur, ni quatre lignes', R._pfCompteur(J, F).indexOf('Heures sup restantes') === -1 && R._pfCadre(J, F).indexOf('Heures du dimanche \u00e0') === -1, true);
+  domaine({ ent: { 8: moisFiche, 9: { 5: T('08:00', '19:00') } }, hsup: { '2026-09': { paye: 8, demande: true }, '2026-10': { paye: 3, paye_bank: 3, demande: true } } });
+  // ⚠️ Comme la case l'écrit (_planFichePayer) : 3h du mois en `paye`, et 2h brutes du dimanche puisées au compteur
+  //    en `paye_bank`, À LEUR VALEUR (2h × 1,5 = 3h). Première version : `paye: 5` — le moteur borne au mois, le
+  //    harnais mesurait une saisie que l'écran n'écrit jamais.
+  const Fo = R._planPaieMois(J, 9), RSo = R._pfRestants(J, Fo);
+  eq('Q10 · octobre : 3h du mois + 2h puisées au compteur, chacune à son taux', [ligne(R._pfCadre(J, Fo), 'Heures sup \u00e0 +25\u202f%', '3h'), ligne(R._pfCadre(J, Fo), 'Heures du dimanche \u00e0 +50\u202f%', '2h')].join(), 'true,true');
+  eq('Q11 · octobre : 4h reportées + 3h faites − 5h payées = 2h restantes', [RSo.report, RSo.faites, RSo.payees, RSo.consommees, RSo.total].map(x => Math.round(x * 100) / 100).join('/'), '4/3/5/0/2');
   window.PLANNING_ACOMPTES.Jean = {};
 
   return { ok, ko, echecs };
@@ -472,6 +501,10 @@ const DEFAUTS = [
   // FICHE-1
   ['un congé payé se lit en heures manquées', "else if(e.type==='cp'){x.paye=_planDayH(plId,m,d,e);x.payeType='cp';}", "else if(e.type==='cp'){x.paye=0;x.payeType='cp';}"],
   ['la récup est payée même quand le compteur ne la couvre pas', "var q=act?Math.min(x.recupH,kc):x.recupH;", "var q=x.recupH;"],
+  // FICHE-3
+  ['les heures restantes oublient leur taux', "b=t.h/(1+(t.taux||0)/100)", "b=t.h"],
+  ['les heures payées sur le compteur ne rejoignent pas leur taux', "(P.r.payesBank||[]).forEach(function(q){cat[_pfCat(q.nat,q.taux)]+=q.brut;});", ""],
+  ['le cadre tait les taux à zéro', ".forEach(function(x){D.plus.push([cat[x[0]]>0.0001?'':'pf-rien',x[1],'<b>'+_planFmt(cat[x[0]])+'</b>']);});", ".forEach(function(x){if(cat[x[0]]>0.0001)D.plus.push(['',x[1],'<b>'+_planFmt(cat[x[0]])+'</b>']);});"],
   // FICHE-2
   ['le relevé de septembre retombe sur l’ancien', "if(_planRecupActive(planMonth)&&!(window._mvEstCollectif&&window._mvEstCollectif(mbr)))return _planReleveFiche_(nom,mbr,_ctr);", "if(false)return _planReleveFiche_(nom,mbr,_ctr);"],
   ['le relevé oublie les absences payées', "var payH=x.paye>0.0001?F(x.paye):(x.neutre>0.0001?F(x.neutre):'');", "var payH='';"],

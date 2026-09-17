@@ -2,7 +2,12 @@
 
 > Document de référence du projet **Ma Vigne** (GUERETTECH). Il est le **porteur de vérité** :
 > la mémoire Claude est plafonnée, ce fichier ne l'est pas.
-> Dernière consolidation : **17 septembre 2026 (FICHE-2)** — ★★★ **LE RELEVÉ SUIT LA FICHE (§138)**. À partir de
+> Dernière consolidation : **17 septembre 2026 (FICHE-3)** — ★★ **UN NOMBRE D'HEURES PAR TAUX, ET CE QU'IL RESTE À
+> PAYER (§139)**. Demande de paiement : quatre lignes (25 %, 50 %, dimanche, férié), et au Compteur les heures
+> sup restantes à payer — le compteur de fin de mois relu tranche par tranche en heures brutes, donc les mêmes
+> heures que la récup restante. **APP 7.28 → 7.29 · SW 7.92 → 7.93**, base `0df4750`. Détail en **§139**.
+>
+> ★ Précédente : **17 septembre 2026 (FICHE-2)** — ★★★ **LE RELEVÉ SUIT LA FICHE (§138)**. À partir de
 > septembre 2026, deux pages A4 : cadre « Pour la paie », chaque jour en colonnes Prévu / Fait / Absence payée,
 > puis heures sup, récup, détail mois par mois, contrats, congés, compteur d'heures, acomptes et trois cases de
 > signature et d'envoi. ★ L'écran et le papier lisent les mêmes aides `_pf*` (instantané avant/après : neuf
@@ -19519,3 +19524,52 @@ que FICHE-1 soit déjà validé ou non. **APP 7.27 → 7.28 · SW 7.91 → 7.92*
 
 ① Relevé vérifié dans Chromium (deux pages de 1 123 px, police de secours) — **pas imprimé sur papier**, et
 pas avec les polices du domaine. ② Le relevé mensuel de toute l'équipe (roue crantée) n'a pas changé.
+
+---
+
+## 139. ★★ FICHE-3 — UN NOMBRE D'HEURES PAR TAUX, ET CE QU'IL RESTE À PAYER (17/09 — `planning.js` · `styles.css` · `utils.js` · `index.html` · `sw.js` · `guide/10-planning.html` · `scripts/` · APP 7.28 → **7.29** · SW 7.92 → **7.93**)
+
+> Nico : *« dans le cadre pour la paie il faut préciser le nombre d'heures à 25 %, à 50 %, de dimanche et de
+> jour férié si le salarié demande à être payé […] le décompte des heures sup restantes à payer visible dans le
+> compteur, trouve un moyen pour que ça soit lisible, cohérent »*, puis « oui » sur la maquette v4.
+
+### 139a. Ce qui change
+
+- **Demande de paiement cochée** : « À payer en plus » donne toujours **quatre lignes** — heures sup à +25 %,
+  à +50 %, heures du dimanche, heures de jour férié (taux du domaine) —, même à zéro, en gris. Les heures
+  payées **sur le compteur** (`payesBank`) rejoignent la ligne de leur taux : la compta lit un nombre par taux.
+- **Onglet Compteur** : la carte **Heures sup restantes à payer** — le total, son équivalent en récup, le
+  décompte (reportées + faites + majorations en récup − payées − prises en récup = restantes) et le détail
+  par taux. La carte de paiement l'annonce, le cadre la note pour information, le relevé la reprend page 2.
+
+### 139b. Le choix qui rend ça cohérent
+
+★ **Les restantes ne sont pas un second compteur** : `_pfRestants` relit `_planCompteur(mbr,m).tr`, tranche par
+tranche, et rend chaque valeur en heures brutes (valeur ÷ (1 + taux)). Donc **les heures de récup restantes et
+les heures restantes à payer sont les mêmes heures**, comptées deux fois — c'est ce que la carte dit, et ce que
+Q4 vérifie (valeur des restantes = solde du compteur). « Prises en récup » est le terme qui ferme l'égalité :
+il n'a pas de calcul propre, il ne peut pas diverger. `_pfCat` range les natures (hs 25, hs 50, dimanche,
+férié, et « taux normal » pour le report, les mois d'avant septembre 2026 et la majoration seule).
+
+### 139c. Ce que les filets ont trouvé
+
+- Section **Q** de `mv-harnais-recup` (11 assertions), dont un report de septembre sur octobre avec 2 h puisées
+  au compteur. ⚠️ Première écriture de Q10 : `paye: 5` en octobre — le moteur borne l'acompte aux heures du
+  mois, et le harnais mesurait une saisie que l'écran n'écrit jamais. La case écrit `paye: 3, paye_bank: 3`.
+  Trois défauts neufs (taux oublié dans les restantes, paiements sur compteur hors de leur ligne, taux à zéro
+  tus). **223 assertions, 21 défauts, 21 détectés.**
+- ⚠️ **Poids** : `planning.js` 487 → 512 ko sur FICHE-2 + FICHE-3. Cliquet regravé, même raison qu'en §135e.
+
+### 139d. La note de livraison
+
+**Base `0df4750`** (FICHE-1 + FICHE-2 poussés). **APP 7.28 → 7.29 · SW 7.92 → 7.93.**
+`firebase deploy --only hosting`. `public/guide.html` : `node scripts/build-guide.mjs`.
+
+| Fichier | Ce qui change | Bump ? |
+|---|---|---|
+| `src/planning.js` | `_pfCat`, `_pfRestants`, `_pfRestantsCarte`, quatre lignes à payer, relevé | — |
+| `src/styles.css` | zéros en gris, carte des restantes | ★ SW |
+| `src/utils.js` | APP 7.29, nouveauté, aide | ★ APP |
+| `index.html` · `public/sw.js` | versions | ★ APP · ★ SW |
+| `guide/10-planning.html` | paiement : un nombre par taux, les restantes | — |
+| `scripts/mv-harnais-recup.mjs` · `scripts/typo-baseline.json` · `scripts/harnais-claude-md.mjs` · `CLAUDE.md` · `.mv-base` | section Q · cliquet · §139 · base | — |

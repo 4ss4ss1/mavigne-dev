@@ -1,4 +1,7 @@
-// MA VIGNE — Service Worker v7.92
+// MA VIGNE — Service Worker v7.93
+// v7.93 (17/09/2026) — FICHE-3 : UN NOMBRE D'HEURES PAR TAUX, ET CE QU'IL RESTE A PAYER. Demande de paiement :
+//   le cadre donne 25 %, 50 %, dimanche, ferie (meme a zero) ; l'onglet Compteur montre les heures sup restantes a
+//   payer, tranche par tranche du compteur redevenue heures brutes, avec le decompte et l'equivalent en recup.
 // v7.92 (17/09/2026) — FICHE-2 : LE RELEVE SUIT LA FICHE. A partir de septembre 2026, deux pages A4 : le cadre
 //   « Pour la paie », chaque jour en colonnes Prevu / Fait / Absence payee avec le total des semaines et du mois ;
 //   puis ou vont les heures sup, la recup, le detail mois par mois, contrats, conges, compteur d'heures, acomptes,
@@ -4003,7 +4006,7 @@
 // v2.22 — Fix profils vides : guard vide dans loadData() pour MEMBRES/SAISONS/TACHES
 // v2.17 — Onboarding intégré + tenantId · v2.06 — Firebase Auth · v2.00–v2.05 — divers
 const DEBUG = self.location.hostname === 'localhost' || self.location.hostname === '127.0.0.1';
-const CACHE_NAME   = 'mavigne-v7.92';
+const CACHE_NAME   = 'mavigne-v7.93';
 const TENANT_CACHE = 'mavigne-tenant';   // Cache persistant — préservé à chaque mise à jour SW
 const SYNC_TAG     = 'mavigne-sync';
 
@@ -4019,7 +4022,7 @@ const CDN_URLS = [
 ];
 
 self.addEventListener('install', event => {
-  if(DEBUG) console.log('[SW] Ma Vigne v7.92 installé');
+  if(DEBUG) console.log('[SW] Ma Vigne v7.93 installé');
   event.waitUntil(
     caches.open(CACHE_NAME).then(async cache => {
       // ── Cœur applicatif : STRICT (mise à jour ATOMIQUE) ──
@@ -4035,7 +4038,7 @@ self.addEventListener('install', event => {
 });
 
 self.addEventListener('activate', event => {
-  if(DEBUG) console.log('[SW] Ma Vigne v7.92 activé');
+  if(DEBUG) console.log('[SW] Ma Vigne v7.93 activé');
   event.waitUntil(
     caches.keys().then(keys =>
       Promise.all(

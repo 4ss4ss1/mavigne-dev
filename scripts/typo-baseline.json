@@ -37,7 +37,7 @@
   "src/planning.js": {
     "dur": 185,
     "petit": 98,
-    "ko": 487
+    "ko": 512
   },
   "src/reglages.js": {
     "dur": 209,
@@ -57,7 +57,7 @@
   "src/utils.js": {
     "dur": 6,
     "petit": 2,
-    "ko": 577
+    "ko": 578
   },
   "index.html": {
     "dur": 261,
@@ -67,6 +67,6 @@
   "src/styles.css": {
     "dur": 573,
     "petit": 128,
-    "ko": 415
+    "ko": 416
   }
 }

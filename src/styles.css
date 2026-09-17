@@ -3956,6 +3956,12 @@ body.mv-trial-on #app-root{padding-top:calc(env(safe-area-inset-top,0px) + 44px)
 .pf-lst dd b{color:var(--texte)}
 .pf-plus dd b{color:var(--terre-tx,#8A5A38);font-size:var(--pt-base,14px)}
 .pf-lst .pf-rien dt,.pf-lst .pf-rien dd{color:var(--texte-doux)}
+/* FICHE-3 : un taux à zéro reste lisible, en gris — pas en marron comme une somme à payer */
+.pf-plus .pf-rien dd b{color:var(--texte-doux)}
+.pf-reste{margin:0 0 var(--e-1,4px);font-size:var(--pt-txt,12.5px);color:var(--texte-med)}
+.pf-reste b{color:var(--terre-tx,#8A5A38)}
+.pf-restants{border-color:var(--terre)}
+.pf-restants .pf-t tr.pf-vide td{color:var(--texte-doux)}
 .pf-lst .pf-fort dt{font-weight:var(--fw-bold,700);color:var(--texte)}
 .pf-lst .pf-fort dd b{color:var(--rouge-tx,#A0291E);font-size:var(--pt-base,14px)}
 .pf-pied{margin:0;padding:var(--e-2,8px) var(--e-4,16px);border-top:1.5px solid var(--texte);font-size:var(--pt-txt,12.5px);color:var(--texte-med);font-variant-numeric:tabular-nums}
