@@ -2064,9 +2064,12 @@ mark{background:rgba(200,176,32,.32);color:var(--cream);border-radius:3px;paddin
   changent de mois sans la fermer, et le bouton <b>Relevé</b> édite le PDF.</p>
   <ul class="dot">
     <li><b>Résumé</b> — le cadre <b>Pour la paie</b>, dans l'ordre de la saisie de paie : le <b>salaire de
-    base</b> (heures prévues, faites et absences payées), <b>à payer en plus</b> (heures sup payées, par taux),
-    <b>à retirer</b> (absences non payées, acomptes) et <b>pour information</b> (congés, récup prise, temps
-    de récup restant). Comme en paie, un congé payé ou une récup ne se lit jamais comme des heures manquées.</li>
+    base</b> (heures prévues, faites, et les <b>absences par cause</b> : payées, par le domaine, du salarié, à
+    préciser), <b>à payer en plus</b> (heures sup payées, par taux), <b>à retirer</b> (absences non payées,
+    absences à préciser, acomptes) et <b>pour information</b> (heures écourtées et ce qu'il en reste à rattraper,
+    récup prise, temps de récup restant). Le bas du cadre additionne les heures sup <b>semaine par semaine</b>.
+    Tant que le mois n'est pas fini, le cadre dit <b>« à ce jour »</b> : les jours à venir ne comptent pas comme
+    faits. Une absence <b>sans motif</b> s'affiche en orange : donnez-lui son motif avant l'envoi à la compta.</li>
     <li><b>Paiement des heures sup</b> — cochez <b>« demande à être payé »</b> et indiquez le nombre d'heures.
     On peut payer <b>au-delà des heures du mois</b>, jusqu'à tout ce que le compteur contient encore : les heures
     du mois d'abord, puis les plus anciennes du compteur. Raccourcis : aucune, <b>sans toucher la récup prise</b>
@@ -2077,11 +2080,16 @@ mark{background:rgba(200,176,32,.32);color:var(--cream);border-radius:3px;paddin
     Compteur ajoute la carte <b>Heures sup restantes à payer</b> : les heures encore payables, taux par taux,
     le décompte (reportées + faites − payées − prises en récup) et leur équivalent en récup. Ce sont les mêmes
     heures, comptées une fois en repos, une fois en heures brutes.</li>
-    <li><b>Jours</b> — chaque jour du mois : l'horaire <b>prévu</b>, l'horaire <b>fait</b>, les absences payées
-    et l'écart. Chaque semaine dit ses heures sup par taux et prévient au-delà des 48&nbsp;h. Touchez un jour
-    pour l'ouvrir.</li>
-    <li><b>Compteur</b> — le temps de récup et son calcul, ce qui a bougé dans le mois, l'année mois par mois,
-    et le report d'avant Ma Vigne, replié.
+    <li><b>Jours</b> — semaine par semaine, du lundi au dimanche (le lundi du mois d'avant apparaît grisé quand
+    la semaine commence avant le 1er) : l'horaire <b>prévu</b>, l'horaire <b>fait</b>, l'absence avec <b>ce
+    qu'elle devient</b> (rattrapée dans la semaine, reprise sur la récup, à rattraper, non payée, à préciser) et
+    les <b>heures sup</b> du jour. Les étiquettes de la semaine disent ses heures sup par taux, ce que les heures
+    en plus ont rattrapé, et préviennent : plus de 10&nbsp;h dans la journée, plus de 48&nbsp;h, sept jours
+    travaillés. Les jours à venir sont grisés. Touchez un jour pour l'ouvrir.</li>
+    <li><b>Compteur</b> — le <b>temps de récup</b>, du solde du mois d'avant au solde de fin de mois, ligne par
+    ligne ; la carte <b>Heures à rattraper</b> (journées écourtées par le domaine : ce que la semaine puis le
+    compteur ont rattrapé, ce qui reste — toujours affichée, même à zéro) ; l'année mois par mois avec son total
+    depuis janvier, et le report d'avant Ma Vigne, replié.
     L'année se lit en <b>heures sup</b>, comme la paie : <b>heures sup du mois</b>, <b>payées</b>,
     <b>récupérées</b>, <b>solde restant</b> — chaque ligne fait « solde d'avant + heures sup − payées −
     récupérées ». Une récup retire les heures sup qu'elle consomme, à leur taux : 2h de récup sur des heures à
@@ -2093,11 +2101,14 @@ mark{background:rgba(200,176,32,.32);color:var(--cream);border-radius:3px;paddin
   <h3><svg class="g-ic" width="18" height="18" viewBox="0 0 24 24" aria-hidden="true" focusable="false"><use href="#ic-balance"></use></svg> Heures sup et temps de récup</h3>
   <p>Depuis <b>septembre 2026</b> :</p>
   <ul class="dot">
-    <li><b>Heures sup</b> : les heures faites au-delà du planning, avec leur taux. Le taux se décide
-    <b>à la semaine</b> : <b>25&nbsp;%</b> jusqu'à la 43e heure, <b>50&nbsp;%</b> au-delà. Une heure à 25&nbsp;%
+    <li><b>Heures sup</b> : elles se comptent <b>à la semaine</b>, du lundi au dimanche — ce qui est fait au-delà du
+    planning de la semaine. Les heures en plus <b>rattrapent d'abord</b> les heures manquées de la même semaine
+    (journée écourtée par le domaine, absence) : seul le reste est une heure sup. Une semaine appartient au
+    <b>mois où elle finit</b> : celle du 28 septembre se compte en octobre. Les <b>huit premières</b> heures sup de la
+    semaine sont à <b>25&nbsp;%</b>, les suivantes à <b>50&nbsp;%</b>. Une heure à 25&nbsp;%
     donne <b>1&nbsp;h&nbsp;15</b> de récup, une heure à 50&nbsp;% <b>1&nbsp;h&nbsp;30</b>. L'équation se lit
     «&nbsp;acquises − retirées = de récup&nbsp;», avec le calcul écrit en clair.</li>
-    <li>Une journée écourtée se retire <b>d'abord du temps de récup, au taux normal</b> : 1&nbsp;h manquée,
+    <li>Ce que la semaine n'a pas rattrapé d'une journée écourtée se retire <b>du temps de récup, au taux normal</b> : 1&nbsp;h manquée,
     1&nbsp;h de récup en moins. Ce que le compteur ne couvre pas est <b>retenu sur la paie</b>, sauf si le
     domaine a arrêté la journée : il attend alors les prochaines heures sup.</li>
     <li><b>Pour la compta</b> : pour chaque taux, le <b>temps en récup</b>, les <b>heures à déclarer</b> et le
@@ -2107,8 +2118,15 @@ mark{background:rgba(200,176,32,.32);color:var(--cream);border-radius:3px;paddin
     dans le mois n'y entrent pas ; des heures payées en puisant dans le compteur en retirent ce qu'elles valent
     (2&nbsp;h à 25&nbsp;% = 2&nbsp;h&nbsp;30) et se déclarent en heures brutes. La carte les sépare alors en
     « payées » et « au compteur », pour que rien ne soit déclaré deux fois.</li>
-    <li>Le <b>relevé PDF</b> reprend le même cadre « Pour la paie », et chaque journée écourtée avec son
-    créneau et son motif. Dimanches et jours fériés y figurent à leur taux le plus fort.</li>
+    <li>Le <b>relevé PDF</b> tient en deux pages. Page&nbsp;1 : le cadre « Pour la paie », puis le mois jour par jour —
+    chaque absence dit <b>sa cause et ce qu'elle devient</b> (payée, rattrapée dans la semaine, reprise sur la récup, à
+    rattraper, non payée, à préciser), une colonne donne les <b>heures sup</b> du jour, et chaque semaine se lit en
+    entier, avec en gris les jours du mois d'avant qu'elle emporte. Page&nbsp;2 : les heures sup par taux, le
+    <b>compteur de récup</b> depuis le solde du mois d'avant, le compte des <b>heures à rattraper</b>, le cumul depuis
+    janvier, les durées et repos à surveiller (plus de 10&nbsp;h dans la journée, semaine sans repos), les signatures.</li>
+    <li>Édité <b>avant la fin du mois</b>, le relevé est <b>provisoire</b> : les jours à venir ne comptent pas comme faits
+    et il ne se signe pas. Une absence <b>sans motif</b> est signalée « à préciser » : donnez-lui son motif avant
+    d'envoyer le relevé à la compta.</li>
     <li>Les mois <b>d'avant septembre 2026</b> gardent la règle d'alors : leurs paies ne changent pas.</li>
   </ul>
 

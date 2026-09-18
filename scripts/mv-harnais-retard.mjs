@@ -65,7 +65,9 @@ const VOULUES = [
   '_planDayH', '_planWorkH', '_planRefPart', '_planAbsLostH', '_planApplyAbs', '_pl2Cell', '_planRefH',
   '_planDefTiming', '_planRetardBornes', '_planPlanned', '_planFmt', '_planDays',
   // RECUP-1 : _planDayH, _planWorkH et _pl2Cell lisent aussi l'absence sur une partie de journee
-  '_planAbsPartiel'
+  '_planAbsPartiel',
+  // SEM-1 : _planDayH rend les heures du MODELE un jour sans saisie, a partir de la regle de septembre 2026
+  '_planRecupActiveAt'
 ];
 
 const morceaux = [];
@@ -85,8 +87,11 @@ function table(decl, fin) {
 }
 const tableMotifs = table('var PLAN_ABS_MOTIFS=[', '];');
 const tableDefT   = table('var PLAN_DEF_T = {', '};');
+// SEM-1 : la date de la regle, lue dans le module — jamais recopiee ici.
+const declRecup   = table("var PLAN_RECUP_DEBUT='", "';");
 if (!tableMotifs) { rouge++; ECHECS.push('EXTRACTION : PLAN_ABS_MOTIFS introuvable'); }
 if (!tableDefT)   { rouge++; ECHECS.push('EXTRACTION : PLAN_DEF_T introuvable'); }
+if (!declRecup)   { rouge++; ECHECS.push('EXTRACTION : PLAN_RECUP_DEBUT introuvable'); }
 
 if (rouge > 0) {
   console.log('\n  HARNAIS DU RETARD — extraction impossible\n');
@@ -130,7 +135,7 @@ function _planEffN(){ return 1; }
 var window = { MEMBRES: [{nom:'Jean'}] };
 `;
 
-const CODE = PRELUDE + '\n' + tableDefT + '\n' + tableMotifs + '\n' + morceaux.join('\n') + `
+const CODE = PRELUDE + '\n' + declRecup + '\n' + tableDefT + '\n' + tableMotifs + '\n' + morceaux.join('\n') + `
 ;return {
   _planMinOf:_planMinOf, _planAbsT:_planAbsT, _planAbsH:_planAbsH,
   _planRetardFaites:_planRetardFaites, _planRetardH:_planRetardH,

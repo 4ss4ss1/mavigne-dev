@@ -1,4 +1,12 @@
-// MA VIGNE — Service Worker v7.95
+// MA VIGNE — Service Worker v7.98
+// v7.98 (18/09/2026) — SEM-3 : L'ECRAN DE LA FICHE DIT LA MEME CHOSE QUE LE RELEVE v3 (une seule source). Absences par
+//   cause, « a ce jour », onglet Jours a la semaine, compteur du solde d'avant au solde d'apres, carte Heures a rattraper.
+//   APP 7.33 -> 7.34.
+// v7.97 (18/09/2026) — SEM-2 : LE RELEVE D'HEURES v3. Absences par cause, semaine entiere, releve provisoire en cours de
+//   mois, compteur depuis le solde d'avant, compte des heures a rattraper, mentions et alertes. APP 7.32 -> 7.33.
+// v7.96 (17/09/2026) — SEM-1 : LES HEURES SUP SE COMPTENT A LA SEMAINE. Les heures en plus rattrapent d'abord les heures
+//   manquees de la meme semaine ; huit heures sup a 25 %, les suivantes a 50 % (le rang, plus la 44e heure travaillee) ;
+//   une semaine appartient au mois ou elle finit ; un jour sans saisie vaut les heures du modele. APP 7.31 -> 7.32.
 // v7.95 (17/09/2026) — FICHE-5 : LE DETAIL MOIS PAR MOIS EN HEURES SUP. Colonnes « heures sup du mois, payees,
 //   recuperees, solde restant », tout en heures brutes (le compteur retient soldeBrut, tranche par tranche) ; le
 //   solde du mois en cours est celui des heures sup restantes a payer.
@@ -4012,7 +4020,7 @@
 // v2.22 — Fix profils vides : guard vide dans loadData() pour MEMBRES/SAISONS/TACHES
 // v2.17 — Onboarding intégré + tenantId · v2.06 — Firebase Auth · v2.00–v2.05 — divers
 const DEBUG = self.location.hostname === 'localhost' || self.location.hostname === '127.0.0.1';
-const CACHE_NAME   = 'mavigne-v7.95';
+const CACHE_NAME   = 'mavigne-v7.98';
 const TENANT_CACHE = 'mavigne-tenant';   // Cache persistant — préservé à chaque mise à jour SW
 const SYNC_TAG     = 'mavigne-sync';
 
@@ -4028,7 +4036,7 @@ const CDN_URLS = [
 ];
 
 self.addEventListener('install', event => {
-  if(DEBUG) console.log('[SW] Ma Vigne v7.95 installé');
+  if(DEBUG) console.log('[SW] Ma Vigne v7.98 installé');
   event.waitUntil(
     caches.open(CACHE_NAME).then(async cache => {
       // ── Cœur applicatif : STRICT (mise à jour ATOMIQUE) ──
@@ -4044,7 +4052,7 @@ self.addEventListener('install', event => {
 });
 
 self.addEventListener('activate', event => {
-  if(DEBUG) console.log('[SW] Ma Vigne v7.95 activé');
+  if(DEBUG) console.log('[SW] Ma Vigne v7.98 activé');
   event.waitUntil(
     caches.keys().then(keys =>
       Promise.all(

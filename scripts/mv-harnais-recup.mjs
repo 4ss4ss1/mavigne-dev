@@ -24,6 +24,14 @@
 //    compte en temps de recup DANS TOUS LES MODES ; chaque tranche garde son taux ; ce qui se
 //    paie se declare en heure BRUTE. Une heure sup un dimanche va au taux le plus fort, une fois.
 //
+//  ★★★ SEM-1 (17/09/2026) — LES HEURES SUP SE COMPTENT A LA SEMAINE (Nico). Les heures en plus rattrapent
+//    d'abord les heures manquees de la MEME semaine ; huit heures sup a 25 %, les suivantes a 50 % (le rang,
+//    plus la 44e heure travaillee) ; une semaine appartient au mois ou elle finit ; le 31 aout 2026, deja
+//    compte par aout, ne l'est pas deux fois. Section T. ⚠️ Les sections B a S n'ont PAS bouge : leurs
+//    scenarios posent les heures en plus et les heures manquees dans des semaines differentes, sur un planning
+//    de 35 h — la ou l'ancienne et la nouvelle regle disent la meme chose. Seule la section I (semaine a
+//    cheval) disait l'ancienne regle : elle dit la nouvelle.
+//
 //  Usage :  node scripts/mv-harnais-recup.mjs [--contre]
 //  Exit 0 si tout passe, 1 sinon. Un CRASH est ROUGE.
 // ═══════════════════════════════════════════════════════════════════════════
@@ -38,9 +46,13 @@ const CONTRE = process.argv.includes('--contre');
 
 // ── Horloge figee ───────────────────────────────────────────────────────────
 const _D = Date;
+// ★ SEM-2 : l'horloge reste figee au 16/09/2026, mais une section peut la deplacer (`horloge(2026, 9, 1)`) puis la
+//   remettre : le releve v3 est PROVISOIRE tant que le mois n'est pas fini, et definitif apres.
+let FIGE = [2026, 8, 16];
+const horloge = (...a) => { FIGE = a.length ? a : [2026, 8, 16]; };
 class DateFigee extends _D {
-  constructor(...a) { if (a.length) super(...a); else super(2026, 8, 16, 12, 0, 0); }
-  static now() { return new _D(2026, 8, 16, 12, 0, 0).getTime(); }
+  constructor(...a) { if (a.length) super(...a); else super(FIGE[0], FIGE[1], FIGE[2], 12, 0, 0); }
+  static now() { return new _D(FIGE[0], FIGE[1], FIGE[2], 12, 0, 0).getTime(); }
 }
 globalThis.Date = DateFigee;
 
@@ -94,7 +106,7 @@ function modele(an) {
   for (const [m, d] of [[0, 1], [3, 6], [4, 1], [4, 8], [4, 14], [4, 25], [6, 14], [10, 11], [11, 25]]) t[m][d] = 0;
   return t;
 }
-const EXPORTS = ['_pfAnnee', '_planPayeMaxTotal', '_planPayeMaxCouvert', '_planPayeEcrire', '_planDepartKey', '_pfRestants', '_planPaieMois', '_planPayeMaxCouvert', '_planSemEffectif', '_pfCadre', '_pfDemande', '_pfOuVont', '_pfJours', '_pfCompteur', '_pfConges', '_pfResume', '_planValeurPourBrut', '_planComptaLignes', '_planComptaTable', '_planSeauxTxt', '_planSeauNom', '_planJourEcart', '_planHsupMois', '_planHsupTiers', '_planCompteur', '_planBank',
+const EXPORTS = ['_planFmt', '_pfPlanNom', '_pfPrevT', '_planSemainesDuMois', '_pfAnnee', '_planPayeMaxTotal', '_planPayeMaxCouvert', '_planPayeEcrire', '_planDepartKey', '_pfRestants', '_planPaieMois', '_planPayeMaxCouvert', '_planSemEffectif', '_pfCadre', '_pfDemande', '_pfOuVont', '_pfJours', '_pfCompteur', '_pfConges', '_pfResume', '_planValeurPourBrut', '_planComptaLignes', '_planComptaTable', '_planSeauxTxt', '_planSeauNom', '_planJourEcart', '_planHsupMois', '_planHsupTiers', '_planCompteur', '_planBank',
   '_planYearBalance', '_planSupMonth', '_planSupCalc', '_planSummary', '_planDuesMonth', '_planMajBank', '_planHsupPaye',
   '_planHsupPayeBank', '_planRecupH', '_planDepartSolde', '_planAbsPartH', '_planAbsPartiel', '_planDayH', '_planWorkH',
   '_planDayStatus', '_pl2Cell', '_planRecupActive', '_planApplyAbsPart', '_planApplyHeures', '_planSuspH',
@@ -247,11 +259,14 @@ function lance(R) {
   domaine({ ent: { 8: { 13: T('08:00', '17:00') } }, config: { majorations: { dim: 0, ferie: 100 } } });
   eq('H4 · dimanche non majoré : les 25 % des heures sup reprennent', R._planHsupMois(J, 8).maj, 2);
 
-  // I. Une semaine à cheval sur deux mois (lundi 28 septembre → dimanche 4 octobre)
+  // I. Une semaine à cheval sur deux mois (lundi 28 septembre → dimanche 4 octobre) — SEM-1 : elle appartient à OCTOBRE
   domaine({ ent: { 8: { 28: T('08:00', '19:00'), 29: T('08:00', '19:00'), 30: T('08:00', '19:00') }, 9: { 1: T('08:00', '19:00') } } });
   const zs = R._planHsupMois(J, 8), zo = R._planHsupMois(J, 9);
-  eq('I1 · septembre : 9h sup', zs.plus, 9); eq('I2 · septembre : 1h à 50 %', zs.h50, 1); eq('I3 · octobre : 3h à 50 %', zo.h50, 3);
-  eq('I4 · la semaine entière décide : 4h à 50 % (47h)', zs.h50 + zo.h50, 4);
+  eq('I1 · septembre : la semaine du 28 finit en octobre, rien ici', zs.plus, 0);
+  eq('I2 · octobre : les 12h de la semaine, d’un bloc', zo.plus, 12);
+  eq('I3 · octobre : 8h à 25 %, 4h à 50 %', [zo.h25, zo.h50].join('/'), '8/4');
+  eq('I4 · octobre emporte les trois jours de septembre avec leur semaine', zo.semaines[0].avantMois.length, 3);
+  eq('I5 · le compteur de fin septembre ne les a pas encore, celui d’octobre oui', [R._planBank(J, 8).solde, R._planBank(J, 9).solde].join('/'), '0/16');
 
   // J. La fenêtre : août 2026 garde la règle historique
   domaine({ ent: { 7: { 3: T('08:00', '18:00'), 20: { absent: true, motif: 'injustifie' } } } });
@@ -319,7 +334,7 @@ function lance(R) {
   eq('L21 · temps de récup 3h', /Solde fin septembre<\/td><td class="n">3h<\/td>/.test(pdf), true);
   eq('L22 · absences non payées 0h', /Absences non pay\u00e9es<\/span><span><b>0h<\/b>/.test(pdf), true);
   eq('L22b · 4h faites à +25 %, 5h en récup, jamais 5h à déclarer',
-    pdf.indexOf('<td>Heures sup \u00e0 +25\u202f%</td><td class="n">4h</td><td class="n">\u2014</td><td class="n">5h</td>') !== -1, true);
+    pdf.indexOf('<td>Heures sup \u00e0 +25\u202f%</td><td class="n">4h</td><td class="n">\u2014</td><td class="n">4h</td><td class="n cv">5h</td>') !== -1, true);
   eq('L22c · plus de bloc « Dimanches et jours fériés » séparé en septembre', pdf.indexOf('Dimanches et jours f\u00e9ri\u00e9s travaill\u00e9s'), -1);
   // FICHE-5 : le détail mois par mois se lit en heures sup — 4h faites, 2h de récup sur des heures à 25 % = 1h36 récupérées, 2h24 restantes
   eq('L24 · l’année : septembre, 4h sup, 1h36 récupérées, 2h24 restantes', /<tr class="cur"><td>Sept<\/td><td class="n">4h<\/td><td class="n"><\/td><td class="n">1h36<\/td><td class="n">2h24<\/td>/.test(pdf), true);
@@ -408,7 +423,10 @@ function lance(R) {
   domaine({ ent: { 8: moisFiche } });
   F = R._planPaieMois(J, 8);
   html = R._pfCadre(J, F);
-  eq('N22 · le cadre porte 154h, 149h, 23h', ['>154h<', '>149h<', '>23h<'].every(t => html.indexOf(t) !== -1), true);
+  // ★ SEM-3 : le cadre de l'écran lit la même source que le relevé v3 — « Absences » par cause, et « à ce jour » tant que le mois court.
+  horloge(2026, 9, 1); html = R._pfCadre(J, R._planPaieMois(J, 8));
+  eq('N22 · le cadre porte 154h et 149h, le mois fini', ['>154h<', '>149h<'].every(t => html.indexOf(t) !== -1) && html.indexOf('pf-prov') === -1, true);
+  horloge(); html = R._pfCadre(J, F);
   eq('N23 · « À payer en plus » sans paiement : elles vont en récup', html.indexOf('Aucune heure sup pay\u00e9e') !== -1, true);
   eq('N24 · l’acompte de 300 € est à retirer', html.indexOf('300\u202f\u20ac') !== -1, true);
   sain('N25 onglet Jours', R._pfJours(J, F)); sain('N26 onglet Compteur', R._pfCompteur(J, F)); sain('N27 onglet Congés et acomptes', R._pfConges(J, F));
@@ -425,20 +443,26 @@ function lance(R) {
   sain('O1 relevé', rel.replace(/<script[\s\S]*?<\/script>/g, ''));
   eq('O2 · deux pages A4', (rel.match(/<section class="pg[ "]/g) || []).length, 2);
   eq('O3 · le cadre « Pour la paie » avant le jour par jour', rel.indexOf('<h2>Pour la paie</h2>') > 0 && rel.indexOf('<h2>Pour la paie</h2>') < rel.indexOf('Jour par jour'), true);
-  const rj = [...rel.matchAll(/<tr(?: class="(?:off|dim)")?><td class="jr">([^<]*)<\/td><td class="cpv">[^<]*<\/td><td class="cpv n">([^<]*)<\/td><td class="cfa">[^<]*<\/td><td class="cfa n">([^<]*)<\/td><td class="cpa">([^<]*)<\/td><td class="cpa n">([^<]*)<\/td><td class="n[^"]*">([^<]*)<\/td>/g)];
-  eq('O4 · trente jours', rj.length, 30);
+  // ★ SEM-2 : le relevé v3. La colonne « Absence » porte la cause et ce qu'elle devient, la colonne « Heures sup »
+  //   remplace l'écart du jour, un week-end de repos tient sur une ligne. Lu le 1er octobre : le mois est fini.
+  const lireJours = html => [...html.matchAll(/<tr class="(?:off|dim|fut|)"><td class="jr">([^<]*)<\/td><td class="cpv">[^<]*<\/td><td class="cpv n">([^<]*)<\/td><td class="cfa">[^<]*<\/td><td class="cfa n">([^<]*)<\/td><td class="cab[^"]*">([\s\S]*?)<\/td><td class="cab n[^"]*">([^<]*)<\/td><td class="n up">([^<]*)<\/td>/g)];
+  horloge(2026, 9, 1);
+  pages.length = 0; window._planReleveIndiv('Jean', 8); rel = pages[0] ? pages[0].html : '';
+  const rj = lireJours(rel);
+  eq('O4 · les trente jours, chacun une fois (un week-end de repos tient sur une ligne)', rj.flatMap(r => r[1].split(', ').map(t => +t.split(' ')[1])).sort((a, b) => a - b).join(','), Array.from({ length: 30 }, (_, i) => i + 1).join(','));
   const hh = t => { const m = /^(\u2212|-)?(\d+)h(\d*)$/.exec(t || ''); return m ? (m[1] ? -1 : 1) * (+m[2] + (m[3] ? +m[3] / 60 : 0)) : 0; };
-  eq('O5 · colonnes : 154h prévues, 149h faites, 23h payées', [rj.reduce((a, r) => a + hh(r[2]), 0), rj.reduce((a, r) => a + hh(r[3]), 0), rj.reduce((a, r) => a + hh(r[5]), 0)].join('/'), '154/149/23');
-  eq('O6 · l’écart des jours = les 18h sup', rj.reduce((a, r) => a + hh(r[6].replace('+', '')), 0), 18);
-  eq('O7 · le 24 : « Congé payé » 7h, sans écart', JSON.stringify(rj.find(r => r[1] === 'Je 24').slice(4, 7)), JSON.stringify(['Cong\u00e9 pay\u00e9', '7h', '']));
+  eq('O5 · colonnes : 154h prévues, 149h faites', [rj.reduce((a, r) => a + hh(r[2]), 0), rj.reduce((a, r) => a + hh(r[3]), 0)].join('/'), '154/149');
+  eq('O6 · la colonne « Heures sup » = les 18h sup', rj.reduce((a, r) => a + hh(r[6].replace('+', '')), 0), 18);
+  eq('O7 · le 24 : « Congé payé », payée, 7h, sans heure sup', JSON.stringify(rj.find(r => r[1] === 'Je 24').slice(4, 7)), JSON.stringify(['Cong\u00e9 pay\u00e9 <i>pay\u00e9e</i>', '7h', '']));
   eq('O8 · la semaine du 7 dit ses 53h au-delà des 48h', rel.indexOf('53h sur la semaine, au-del\u00e0 des 48h autoris\u00e9es') !== -1, true);
-  eq('O9 · page 2 : heures sup, récup, année, congés, acomptes, signatures',
-    ['O\u00f9 vont les heures sup', 'Temps de r\u00e9cup', 'D\u00e9tail mois par mois \u2014 ann\u00e9e 2026', 'Cong\u00e9s pay\u00e9s', 'Compteur d\u2019heures', 'Acomptes sur salaire', 'Signature salari\u00e9', 'Signature employeur', 'Transmis \u00e0 la compta le'].every(t => rel.indexOf(t) !== -1), true);
-  eq('O10 · le relevé lit le même cadre que l’écran', ['>154h<', '>149h<', '>23h<'].every(t => rel.indexOf(t) !== -1) && rel.indexOf('Aucune heure sup pay\u00e9e') !== -1, true);
+  eq('O9 · page 2 : heures sup, compteur, année, congés, acomptes, signatures',
+    ['Les heures sup de septembre', 'Le compteur de r\u00e9cup, en temps de repos', 'D\u00e9tail mois par mois \u2014 ann\u00e9e 2026', 'Cong\u00e9s pay\u00e9s', 'Compteur d\u2019heures', 'Acomptes sur salaire', 'Signature salari\u00e9', 'Signature employeur', 'Transmis \u00e0 la compta le'].every(t => rel.indexOf(t) !== -1), true);
+  eq('O10 · le cadre : 154h prévues, 149h faites, et « aucune heure sup payée »', ['>154h<', '>149h<'].every(t => rel.indexOf(t) !== -1) && rel.indexOf('Aucune heure sup pay\u00e9e') !== -1, true);
   domaine({ ent: { 8: moisFiche }, hsup: { '2026-09': { paye: 8, demande: true } } });
   pages.length = 0; window._planReleveIndiv('Jean', 8); rel = pages[0] ? pages[0].html : '';
   eq('O11 · 8h payées : « Heures sup à +25 % 8h » à payer en plus', /Heures sup \u00e0 \+25\u202f%<\/span><span><b>8h<\/b>/.test(rel), true);
-  eq('O12 · la signature porte la demande du salarié', rel.indexOf('qui demande le paiement de 8h sup') !== -1, true);
+  eq('O12 · la demande du salarié se coche à la signature', rel.indexOf('<span class="bx on"></span>Je demande le paiement de 8h d\u2019heures sup.') !== -1, true);
+  horloge();
   domaine({ ent: { 7: { 3: T('08:00', '18:00') } } });
   pages.length = 0; window._planReleveIndiv('Jean', 7); rel = pages[0] ? pages[0].html : '';
   eq('O13 · août garde le relevé d’avant', rel.indexOf('Feuille d\u2019heures') !== -1 && rel.indexOf('<h2>Pour la paie</h2>') === -1, true);
@@ -507,7 +531,122 @@ function lance(R) {
   eq('S2 · septembre : 18h sup, 30h payées, 9h récupérées, 29h restantes', [AN[8].sup, AN[8].payees, AN[8].recup, AN[8].solde].map(x => Math.round(x * 100) / 100).join('/'), '18/30/9/29');
   eq('S3 · le solde restant de septembre est celui des « heures sup restantes à payer »', Math.abs(AN[8].solde - R._pfRestants(J, R._planPaieMois(J, 8)).total) < 1e-6, true);
   eq('S4 · octobre : 3h sup, rien de payé ni récupéré, 32h restantes', [AN[9].sup, AN[9].payees, AN[9].recup, AN[9].solde].map(x => Math.round(x * 100) / 100).join('/'), '3/0/0/32');
-  eq('S5 · l’onglet Compteur porte les quatre colonnes', R._pfCompteur(J, R._planPaieMois(J, 8)).indexOf('<th class="n">Heures sup du mois</th><th class="n">Pay\u00e9es</th><th class="n">R\u00e9cup\u00e9r\u00e9es</th><th class="n">Solde restant</th>') !== -1, true);
+  eq('S5 · l’onglet Compteur porte les quatre colonnes', R._pfCompteur(J, R._planPaieMois(J, 8)).indexOf('<th class="n">Faites</th><th class="n">Pay\u00e9es</th><th class="n">R\u00e9cup\u00e9r\u00e9es</th><th class="n">Solde</th><th class="n pf-cv">en repos</th>') !== -1, true);
+  domaine({ ent: { 8: moisFiche } });
+
+  // T. SEM-1 — les heures sup à la semaine, les taux au rang, la semaine dans le mois où elle finit
+  const court = (f, mo) => Object.assign(T('08:00', f), { reduit_motif: mo });
+  domaine({ ent: { 8: { 7: T('08:00', '18:00'), 9: court('15:00', 'domaine') } } });
+  z = R._planHsupMois(J, 8);
+  eq('T1 · +2h lundi, 1h écourtée mercredi par le domaine : 1h sup, pas 2', z.plus, 1);
+  eq('T1b · l’heure écourtée est rattrapée dans la semaine, rien ne part au compteur', [z.domaine, z.rattrape.domaine].join('/'), '0/1');
+  eq('T1c · 1h à 25 % = 1h15 de récup', R._planBank(J, 8).solde, 1.25); inv('T1d', 8);
+  let PM = R._planPaieMois(J, 8);
+  eq('T1e · la fiche : 1h rattrapée dans la semaine, ni retenue ni reprise sur la récup', [PM.sem, PM.nonPayees, PM.jours[8].payeType].join('/'), '1/0/sem');
+  domaine({ ent: { 8: { 7: T('08:00', '17:00'), 9: court('12:00', 'domaine') } } });   // 08:00→12:00 = 4h : 3h écourtées (13:00 n’en ferait que 2, sans coupure)
+  z = R._planHsupMois(J, 8); b = R._planBank(J, 8);
+  eq('T2 · +1h lundi, 3h écourtées par le domaine : aucune heure sup, 2h restent à rattraper', [z.plus, z.domaine, b.dette, b.retenue].join('/'), '0/2/2/0'); inv('T2b', 8);
+  domaine({ ent: { 8: { 8: { absent: true, motif: 'injustifie' }, 12: { timing: { debut: '08:00', fin: '12:00', continu: true } } } } });
+  z = R._planHsupMois(J, 8); b = R._planBank(J, 8);
+  eq('T3 · absence injustifiée mardi, 4h le samedi : pas d’heure sup, 3h d’absence restent', [z.plus, z.retire, z.rattrape.retire].join('/'), '0/3/4');
+  eq('T3b · sans compteur, 3h retenues — pas 7', b.retenue, 3); inv('T3c', 8);
+  domaine({ ent: { 8: { 8: { absent: true, motif: 'injustifie' }, 13: { timing: { debut: '08:00', fin: '12:00', continu: true } } } } });
+  z = R._planHsupMois(J, 8);
+  eq('T4 · un dimanche qui rattrape n’est pas une heure sup : il garde sa majoration seule', [z.plus, JSON.stringify(z.majHs.map(x => [x.taux, x.nat, x.h])), z.majHsVal].join(' '), '0 [[50,"dim",4]] 2');
+  eq('T4b · 2h de majoration au compteur, 3h d’absence : 1h retenue', R._planBank(J, 8).retenue, 1);
+  domaine({ tpl: t => { for (const d of [7, 8, 9, 10, 11]) t[8][d] = 8; },
+            ent: { 8: { 7: T('08:00', '19:00'), 8: T('08:00', '19:00'), 9: T('08:00', '19:00'), 10: T('08:00', '19:00'), 11: T('08:00', '18:00') } } });
+  z = R._planHsupMois(J, 8);
+  eq('T5 · planning 40h, 49h faites : 9h sup', z.plus, 9);
+  eq('T5b · le rang : 8h à 25 %, 1h à 50 % — jamais moins de 25 % que de 50 %', [z.h25, z.h50].join('/'), '8/1');
+  domaine({ ent: { 7: { 31: T('08:00', '18:00') }, 8: { 1: T('08:00', '19:00'), 3: court('15:00', 'domaine') } } });
+  z = R._planHsupMois(J, 8);
+  eq('T6 · semaine du 31 août : 4h sup sur la semaine, dont 2h déjà comptées par août', [z.semaines[0].deja, z.plus].join('/'), '2/2');
+  eq('T6b · août + septembre = la semaine, rien compté deux fois', R._planSupMonth(J, 7) + z.plus, 4);
+  eq('T6c · l’heure écourtée du 3 est rattrapée', [z.domaine, z.rattrape.domaine].join('/'), '0/1');
+  domaine({ tpl: t => { t._timings_jour = { 7: { 18: 'D' }, 8: { 18: 'D' } }; } });
+  eq('T7 · un jour sans saisie vaut les heures du modèle (7h), pas celles de l’horaire par défaut (7h30)', R._planDayH('standard', 8, 18, null), 7);
+  eq('T7b · … à partir de septembre 2026 seulement : août ne bouge pas', R._planDayH('standard', 7, 18, null), 7.5);
+  eq('T7c · l’horaire prévu colle à ses heures', R._pfPrevT('standard', 8, 18, 7), '08:00\u201316:00');
+  domaine({ ent: { 8: { 29: court('15:00', 'domaine') } } });
+  PM = R._planPaieMois(J, 8);
+  eq('T8 · le 29 septembre appartient à une semaine d’octobre : il attend, payé, rien au compteur', [PM.att, PM.jours[28].payeType, R._planBank(J, 8).dette].join('/'), '1/att/0');
+  eq('T8b · … et octobre le règle', R._planBank(J, 9).dette, 1);
+  domaine({ ent: { 8: { 7: T('08:00', '18:00'), 8: T('08:00', '18:00'), 9: abs2h } } });
+  const apT = { b: R._planBank(J, 8), hm: R._planHsupTiers(J, 8) };
+  const j9 = window.PLANNING_ENTRIES.Jean[2026][8][9]; delete window.PLANNING_ENTRIES.Jean[2026][8][9];
+  const avT = { b: R._planBank(J, 8), hm: R._planHsupTiers(J, 8) };
+  window.PLANNING_ENTRIES.Jean[2026][8][9] = j9;
+  const vdT = R._planVerdict('t', R._planAbsDef('perso'), 2, avT, apT);
+  eq('T9 · verdict : 2h d’absence la même semaine que 4h en plus — rattrapées, plus « retirées au taux normal »',
+    [vdT.indexOf('Rattrap\u00e9 par les heures en plus de la semaine') !== -1, vdT.indexOf('Retir\u00e9 au taux normal') === -1, vdT.indexOf('<b>\u22122h30</b>') !== -1, vdT.indexOf('Il reste en r\u00e9cup</span><b>2h30</b>') !== -1].join('/'), 'true/true/true/true');
+  // U. SEM-2 — le relevé v3 : provisoire, absences par cause, compteurs qui tombent juste, mentions
+  const releve = () => { pages.length = 0; window._planReleveIndiv('Jean', 8); return (pages[0] ? pages[0].html : '').replace(/<script[\s\S]*?<\/script>/g, ''); };
+  domaine({ ent: { 8: moisFiche } });
+  let rv = releve(); PM = R._planPaieMois(J, 8);
+  sain('U1 relevé provisoire', rv);
+  eq('U1b · édité le 16/09 : provisoire, il ne se signe pas', [rv.indexOf('<b>Relev\u00e9 provisoire</b>') !== -1, rv.indexOf('class="sig non"') !== -1, rv.indexOf('il se signe sur l\u2019\u00e9dition du mois fini') !== -1].join('/'), 'true/true/true');
+  eq('U1c · les jours à venir ne sont pas comptés faits sur le papier — P.faites ne bouge pas', [PM.provisoire, PM.futurFait > 0, rv.indexOf('>' + R._planFmt(PM.faites - PM.futurFait) + '<') !== -1].join('/'), 'true/true/true');
+  // (moisFiche porte des saisies jusqu'au 24 : aucune de ses semaines n'est ENTIÈREMENT à venir — le scénario d'avant mesurait le test, pas le code)
+  domaine({ ent: { 8: { 7: T('08:00', '18:00') } } });
+  rv = releve();
+  eq('U1d · une semaine entièrement à venir tient sur sa ligne, sans ses jours', [rv.indexOf('<b>Semaine du 21 au 27 septembre</b>\u00a0: 35h pr\u00e9vues au planning, \u00e0 venir.') !== -1, lireJours(rv).some(r => r[1] === 'Lu 21')].join('/'), 'true/false');
+  eq('U1e · la semaine du 28 : à venir, et elle finit en octobre', rv.indexOf('\u00e0 venir. Elle finit en octobre, elle se compte sur le relev\u00e9 d\u2019octobre.') !== -1, true);
+  domaine({ ent: { 8: moisFiche } });
+  horloge(2026, 9, 1);
+  rv = releve();
+  sain('U2 relevé définitif', rv);
+  eq('U2b · le mois fini : plus de provisoire, et la signature dit ce qu’elle vaut', [rv.indexOf('Relev\u00e9 provisoire'), rv.indexOf('ne vaut pas renonciation \u00e0 ses droits (Code rural, art. R.\u00a0713-36)') !== -1].join('/'), '-1/true');
+  eq('U2c · le compteur part du solde d’avant', rv.indexOf('<td>Solde fin ao\u00fbt</td>') !== -1, true);
+  eq('U2d · octobre à décembre restent vides, et le cumul depuis janvier est écrit', [rv.indexOf('<tr class="vide"><td>Oct</td><td></td>') !== -1, rv.indexOf('<td>Depuis le 1er janvier</td>') !== -1].join('/'), 'true/true');
+  eq('U2e · l’en-tête dit le modèle par son nom', [rv.indexOf(', planning Standard</div>') !== -1, R._pfPlanNom('planning-35h-(administration)')].join('/'), 'true/35h (administration)');
+  eq('U2f · congés : pas de reste négatif sans solde de départ', [rv.indexOf('\u00e0 saisir dans la fiche') !== -1, rv.indexOf('connu une fois le solde saisi') !== -1].join('/'), 'true/true');
+  domaine({ ent: { 8: { 7: T('08:00', '18:00'), 8: T('08:00', '18:00'), 16: { absent: true, motif: 'injustifie' } } } });
+  rv = releve();
+  const l16 = lireJours(rv).find(r => r[1] === 'Me 16') || [];
+  eq('U3 · absence injustifiée : elle garde son nom, et dit ce qu’elle devient', [/^R\u00e9cup/.test(l16[4] || ''), (l16[4] || '').indexOf('<i>5h sur la r\u00e9cup, 2h non pay\u00e9es</i>') !== -1, l16[5]].join('/'), 'false/true/7h');
+  eq('U3b · la reprise sur la récup demande l’accord du salarié', rv.indexOf('<span class="bx"></span>J\u2019accepte que mon absence du 16 septembre (5h non rattrap\u00e9es) soit reprise sur ma r\u00e9cup.') !== -1, true);
+  domaine({ ent: { 8: { 16: { absent: true, motif: 'autre' } } } });
+  rv = releve();
+  eq('U4 · une absence sans motif bloque l’envoi', [rv.indexOf('Sans motif <i>\u00e0 pr\u00e9ciser</i>') !== -1, rv.indexOf('7h d\u2019absence sans motif\u00a0: \u00e0 pr\u00e9ciser avant l\u2019envoi \u00e0 la compta.') !== -1, rv.indexOf('Absences \u00e0 pr\u00e9ciser') !== -1].join('/'), 'true/true/true');
+  domaine({ ent: { 8: { 7: T('08:00', '17:00'), 9: court('12:00', 'domaine') } } });
+  rv = releve();
+  eq('U5 · le compte des heures à rattraper : 3h écourtées, 1h dans la semaine, 2h restent', [rv.indexOf('Les heures \u00e0 rattraper') !== -1, /Rattrap\u00e9es dans la semaine, par les heures en plus<\/td><td class="n up">\u22121h<\/td>/.test(rv), /Reste \u00e0 rattraper fin septembre<\/td><td class="n">2h<\/td>/.test(rv)].join('/'), 'true/true/true');
+  eq('U5b · le jour le dit aussi', (lireJours(rv).find(r => r[1] === 'Me 9') || [])[4], '\u00c9court\u00e9e par le domaine <i>1h dans la semaine, 2h \u00e0 rattraper</i>');
+  domaine({ ent: { 7: { 31: T('08:00', '18:00') }, 8: { 1: T('08:00', '19:00'), 3: court('15:00', 'domaine') } } });
+  rv = releve();
+  eq('U6 · le lundi 31 août est sur le papier, en gris, avec ce qu’août a compté', [rv.indexOf('<tr class="hors"><td class="jr">Lu 31 ao\u00fbt</td>') !== -1, rv.indexOf('2h sup d\u00e9j\u00e0 compt\u00e9es en ao\u00fbt') !== -1].join('/'), 'true/true');
+  domaine({ ent: { 8: { 7: T('08:00', '19:30') } } });
+  rv = releve();
+  eq('U7 · 10h30 dans la journée : l’observation et le bloc « Durées et repos »', [rv.indexOf('Plus de 10h') !== -1, rv.indexOf('Lundi 7\u00a0: 10h30 de travail, au-del\u00e0 de 10h dans la journ\u00e9e.') !== -1].join('/'), 'true/true');
+  // V. SEM-3 — l'ÉCRAN de la fiche dit la même chose que le relevé v3 (une seule source : _pfV3, _pfComptesV3)
+  domaine({ ent: { 8: { 7: T('08:00', '18:00'), 8: T('08:00', '18:00'), 16: { absent: true, motif: 'injustifie' } } } });
+  PM = R._planPaieMois(J, 8);
+  let ecr = R._pfCadre(J, PM), ejr = R._pfJours(J, PM), ecp = R._pfCompteur(J, PM);
+  sain('V1 cadre', ecr); sain('V1 jours', ejr); sain('V1 compteur', ecp);
+  eq('V2 · le cadre : « Absences » par cause, plus « Absences payées » ni « Maintenu »', [ecr.indexOf('<span class="pf-l">Absences</span>') !== -1, ecr.indexOf('<span class="pf-ab pf-ab-rec">du salari\u00e9 7h</span>') !== -1, ecr.indexOf('Absences pay\u00e9es'), ecr.indexOf('Maintenu')].join('/'), 'true/true/-1/-1');
+  eq('V3 · l’écran et le papier disent le même bas de cadre', ecr.indexOf('Heures sup\u00a0: <b>4h</b>, sur la semaine du 7.') !== -1 && rv.length > 0 && releve().indexOf('Heures sup\u00a0: <b>4h</b>, sur la semaine du 7.') !== -1, true);
+  eq('V4 · Jours : la colonne « Heures sup », et l’absence dit ce qu’elle devient', [ejr.indexOf('<span>Heures sup</span>') !== -1, ejr.indexOf('>\u00c9cart<'), ejr.indexOf('5h reprises sur la r\u00e9cup, 2h non pay\u00e9es') !== -1].join('/'), 'true/-1/true');
+  eq('V5 · Jours : la note ne parle plus de la 43e heure', [ejr.indexOf('43'), ejr.indexOf('les huit premi\u00e8res \u00e0 25\u202f%') !== -1].join('/'), '-1/true');
+  eq('V6 · Compteur : du solde d’avant au solde d’après', [ecp.indexOf('<span class="pf-mv-t">Solde fin ao\u00fbt</span>') !== -1, ecp.indexOf('<li class="pf-tot"><span class="pf-mv-t">Solde fin septembre</span>') !== -1, ecp.indexOf('report\u00e9es + ')].join('/'), 'true/true/-1');
+  eq('V7 · Compteur : la carte « Heures à rattraper » est TOUJOURS là, même à zéro', [ecp.indexOf('<h3>Heures \u00e0 rattraper</h3>') !== -1, ecp.indexOf('<span class="pf-mv-t">Reste \u00e0 rattraper fin septembre</span><b>0h</b>') !== -1].join('/'), 'true/true');
+  eq('V7b · … et sur le papier aussi', releve().indexOf('Reste \u00e0 rattraper fin septembre</td><td class="n">0h</td>') !== -1, true);
+  eq('V8 · Compteur : total depuis janvier, mois à venir vides', [ecp.indexOf('<tr class="pf-totr"><td>Depuis janvier</td>') !== -1, ecp.indexOf('<tr class="pf-vide"><td>Oct</td>') !== -1].join('/'), 'true/true');
+  domaine({ ent: { 7: { 31: T('08:00', '18:00') }, 8: { 1: T('08:00', '19:00'), 3: court('15:00', 'domaine') } } });
+  PM = R._planPaieMois(J, 8); ejr = R._pfJours(J, PM);
+  eq('V9 · Jours : la semaine entière, le lundi 31 août grisé, ce que la semaine a rattrapé', [ejr.indexOf('<h3>Semaine du 31 ao\u00fbt au 6 septembre</h3>') !== -1, ejr.indexOf('<div class="pf-jr pf-hors">') !== -1, ejr.indexOf('1h \u00e9court\u00e9es par le domaine, rattrap\u00e9es') !== -1, ejr.indexOf('2h sup d\u00e9j\u00e0 compt\u00e9es en ao\u00fbt') !== -1].join('/'), 'true/true/true/true');
+  domaine({ ent: { 8: { 7: T('08:00', '17:00'), 9: court('12:00', 'domaine') } } });
+  PM = R._planPaieMois(J, 8); ecp = R._pfCompteur(J, PM);
+  eq('V10 · Compteur : 3h écourtées, 1h dans la semaine, 2h restent — comme le relevé (U5)', [ecp.indexOf('<span class="pf-mv-t">Rattrap\u00e9es dans la semaine, par les heures en plus</span><b class="up">\u22121h</b>') !== -1, ecp.indexOf('Reste \u00e0 rattraper fin septembre</span><b>2h</b>') !== -1].join('/'), 'true/true');
+  horloge();
+  domaine({ ent: { 8: { 7: T('08:00', '18:00') } } });
+  PM = R._planPaieMois(J, 8); ecr = R._pfCadre(J, PM); ejr = R._pfJours(J, PM);
+  eq('V11 · le 16/09, l’écran dit « mois en cours » et grise les jours à venir', [ecr.indexOf('class="pf-prov"') !== -1, ecr.indexOf('Pr\u00e9vues \u00e0 ce jour') !== -1, ejr.indexOf('pf-jr pf-fut') !== -1, ejr.indexOf('\u00c0 venir\u00a0: 35h au planning') !== -1].join('/'), 'true/true/true/true');
+  domaine({ ent: { 7: { 3: T('08:00', '18:00') } } });
+  PM = R._planPaieMois(J, 7); ecr = R._pfCadre(J, PM); ejr = R._pfJours(J, PM);
+  eq('V12 · août garde l’écran d’avant : « Absences payées », « Écart »', [ecr.indexOf('Absences pay\u00e9es') !== -1, ejr.indexOf('>\u00c9cart<') !== -1, ejr.indexOf('Semaine du')].join('/'), 'true/true/-1');
+  horloge();
+  eq('T10 · les semaines de septembre 2026 : du 31 août au 27 septembre, quatre', R._planSemainesDuMois(8).map(w => w.mon.getDate() + '-' + w.sun.getDate()).join(' '), '31-6 7-13 14-20 21-27');
   domaine({ ent: { 8: moisFiche } });
 
   return { ok, ko, echecs };
@@ -516,9 +655,9 @@ function lance(R) {
 // ── Contre-epreuves ─────────────────────────────────────────────────────────
 const DEFAUTS = [
   ['les heures manquées retirées au taux heures sup', "r.retire=hm2.retire;r.retenue=tire(hm2.retire);", "r.retire=hm2.retire;r.retenue=tire(hm2.retire*1.25);"],
-  ['le seuil des 50 % oublié', "var r50=Math.min(plus,Math.max(0,compte-PLAN_HS_SEUIL50));", "var r50=0;"],
+  ['le seuil des 50 % oublié', "var r50=Math.max(0,totHs-PLAN_HS_RANG50);", "var r50=0;"],
   ['la majoration des heures sup oubliée', "ent.push({taux:b.taux,nat:b.nat,h:(b.h-p)*(1+b.taux/100)});", "ent.push({taux:b.taux,nat:b.nat,h:(b.h-p)});"],
-  ['dimanche et heures sup cumulés', "if(jm)seau(MH,tx,nj,Math.max(0,jm.h-ec.plus),y.d);", "if(jm)seau(MH,tx,nj,jm.h,y.d);"],
+  ['dimanche et heures sup cumulés', "if(jm)seau(MH,tx,nj,Math.max(0,jm.h-y.hs),y.d);", "if(jm)seau(MH,tx,nj,jm.h,y.d);"],
   // ⚠️ Premiere version : on sautait le « return » des motifs neutres. Defaut INOPERANT — le
   //    motif n'avait toujours pas de destination et le calcul l'ignorait : le harnais restait
   //    vert sur un defaut qui n'en etait pas un. Le vrai defaut, c'est de lui en DONNER une.
@@ -550,8 +689,26 @@ const DEFAUTS = [
   ['le cadre tait les taux à zéro', ".forEach(function(x){D.plus.push([cat[x[0]]>0.0001?'':'pf-rien',x[1],'<b>'+_planFmt(cat[x[0]])+'</b>']);});", ".forEach(function(x){if(cat[x[0]]>0.0001)D.plus.push(['',x[1],'<b>'+_planFmt(cat[x[0]])+'</b>']);});"],
   // FICHE-2
   ['le relevé de septembre retombe sur l’ancien', "if(_planRecupActive(planMonth)&&!(window._mvEstCollectif&&window._mvEstCollectif(mbr)))return _planReleveFiche_(nom,mbr,_ctr);", "if(false)return _planReleveFiche_(nom,mbr,_ctr);"],
-  ['le relevé oublie les absences payées', "var payH=x.paye>0.0001?F(x.paye):(x.neutre>0.0001?F(x.neutre):'');", "var payH='';"],
-  ['« sans toucher la récup prise » ignore la récup prise', "return rr.retenue<=z.retenue+1e-6&&rr.recupNC<=z.recupNC+1e-6;", "return true;"]
+  ['le relevé oublie les absences payées', "else if(!x.futur&&x.paye>0.0001){abT=LIB[x.payeType]||'Pay\\u00e9e';abH=F(x.paye);st.push('pay\\u00e9e');}", ""],
+  ['« sans toucher la récup prise » ignore la récup prise', "return rr.retenue<=z.retenue+1e-6&&rr.recupNC<=z.recupNC+1e-6;", "return true;"],
+  // SEM-1
+  ['les heures sup se recomptent au jour', "var off=Math.min(totP,totM),r=off;", "var off=0,r=off;"],
+  ['le 50 % repart de la 44e heure travaillée', "var r50=Math.max(0,totHs-PLAN_HS_RANG50);", "var r50=Math.min(totHs,Math.max(0,compte-43));"],
+  ['une semaine à cheval se recoupe en deux', "      if(y.avant||!y.ec)return;", "      if(y.avant||!y.ec||y.m!==m)return;"],
+  ['le 31 août compté deux fois', "var E=Math.max(0,deja-avNew);", "var E=0;"],
+  ['un jour sans saisie reprend son horaire par défaut', "  if(_planRecupActiveAt(yr!=null?yr:_pY(),m))return pl;\n", ""],
+  ['ce que la semaine a rattrapé repart au compteur de la fiche', "if(sj){x.ratt=sj.rattrape||0;x.moins=sj.moins;}", "if(sj){x.ratt=0;}"],
+  ['le verdict redit « retiré au taux normal » pour des heures rattrapées', "if(dSup<=0.0001||auTaux>0.0001)h+=", "h+="],
+  // SEM-2
+  ['un jour à venir redevient un jour fait', "    if(!e&&_pfIsoJour(m,d)>=_pfAujIso()){x.futur=true;}\n", ""],
+  ['le compteur repart sans son solde d’avant (papier et écran)', "MV=[['Solde fin '+avantL,M.avant,1]];", "MV=[];"],
+  ['une absence sans motif ne bloque plus l’envoi', "var verdict=AB.preciser>0.0001?", "var verdict=false?"],
+  ['octobre porte déjà un solde', "return x.i>m?'<tr class=\"vide\">", "return false?'<tr class=\"vide\">"],
+  ['les heures à rattraper disparaissent du papier', "  var ratt='';\n  if(P.act){", "  var ratt='';\n  if(false){"],
+  // SEM-3
+  ['l’écran reprend son cadre d’avant', "  var V=P.act?_pfV3(mbr,P,D,null):null;", "  var V=null;"],
+  ['l’onglet Jours revient à l’écart du jour', "  var SEM=_pfSemaines(mbr,P),maj=SEM.maj,F=_planFmt,L0=_planLegal(),hm=P.hm||{},act=P.act,", "  var SEM=_pfSemaines(mbr,P),maj=SEM.maj,F=_planFmt,L0=_planLegal(),hm=P.hm||{},act=false,"],
+  ['la carte « Heures à rattraper » ne perd pas ce que la semaine a rattrapé', "  if(rtD>0.0001)RA.push(['Rattrap\\u00e9es dans la semaine, par les heures en plus',-rtD]);", ""]
 ];
 
 const SRC = fs.readFileSync(path.join(RACINE, 'src', 'planning.js'), 'utf8');

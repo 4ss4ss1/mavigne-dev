@@ -2,7 +2,33 @@
 
 > Document de référence du projet **Ma Vigne** (GUERETTECH). Il est le **porteur de vérité** :
 > la mémoire Claude est plafonnée, ce fichier ne l'est pas.
-> Dernière consolidation : **17 septembre 2026 (FICHE-5)** — ★ **LE DÉTAIL MOIS PAR MOIS SE LIT EN HEURES SUP (§141)** :
+> Dernière consolidation : **18 septembre 2026 (SEM-3)** — ★★★ **L'ÉCRAN DE LA FICHE DIT LA MÊME CHOSE QUE LE RELEVÉ v3
+> (§144)** — UNE seule source (`_pfV3`, `_pfComptesV3`), deux rendus. Cadre : absences par cause, « à ce jour » ; Jours :
+> à la semaine ; Compteur : du solde d'avant au solde d'après, et la carte « Heures à rattraper » **toujours** là (Nico).
+> ★ La note de l'onglet Jours disait encore « 43e heure » depuis SEM-1 : mon grep cherchait `43e`, le code écrit
+> `43<sup>e</sup>`. **APP 7.33 → 7.34 · SW 7.97 → 7.98.** ⚠️ `origin/main` toujours `270320f` : **ce lot contient SEM-1
+> et SEM-2 et les remplace.** Détail en **§144**.
+>
+> ★ Précédente : **18 septembre 2026 (SEM-2)** — ★★★ **LE RELEVÉ D'HEURES v3 (§143)**, second volet de la maquette
+> validée le 17/09. Édité en cours de mois il est PROVISOIRE (un jour à venir n'est pas un jour fait, il ne se signe
+> pas) ; chaque absence dit sa cause et ce qu'elle devient ; la semaine se lit en entier, le lundi du mois d'avant en
+> gris ; page 2, une unité par colonne, le compteur part du solde d'avant et tombe juste, le compte des heures à
+> rattraper, le cumul depuis janvier, les mentions que les textes demandent. ★ Les jours des trois relevés de départ,
+> reposés dans le vrai code et rendus dans Chromium avec les polices du dépôt : **deux pages A4 dans les six cas**.
+> **APP 7.32 → 7.33 · SW 7.96 → 7.97.** ⚠️ **SEM-1 n'était pas poussé (`origin/main` = `270320f`) : ce lot le CONTIENT
+> et le remplace**, base `270320f`. Détail en **§143**.
+>
+> ★ Précédente : **17 septembre 2026 (SEM-1)** — ★★★ **LES HEURES SUP SE COMPTENT À LA SEMAINE (§142)**.
+> Nico, sur trois relevés de septembre : *« beaucoup d'erreurs »*, puis *« il faut que les heures sup se comptent à la
+> semaine »*, *« les heures écourtées par le domaine restent à rattraper »*, *« il est bizarre de voir un nombre d'heures
+> sup à +25 % inférieur à +50 % »*, puis « go » sur la maquette v3. `_planHsupMois` : les heures en plus rattrapent
+> d'abord les heures manquées de la MÊME semaine ; huit heures sup à 25 %, puis 50 % (le rang, plus la 44e heure
+> travaillée) ; une semaine appartient au mois où elle finit ; un jour sans saisie vaut les heures du modèle.
+> ★ Contrat de sortie du moteur inchangé : **3 rouges sur 237** au premier passage, les trois attendus.
+> **APP 7.31 → 7.32 · SW 7.95 → 7.96**, base `270320f`. ⚠️ Le relevé v3 lui-même (absences par cause, compte des
+> heures à rattraper, relevé provisoire, mentions légales) est le lot suivant, **SEM-2**. Détail en **§142**.
+>
+> ★ Précédente : **17 septembre 2026 (FICHE-5)** — ★ **LE DÉTAIL MOIS PAR MOIS SE LIT EN HEURES SUP (§141)** :
 > heures sup du mois, payées, récupérées, solde restant — une seule unité, et chaque ligne se vérifie à la main.
 > **APP 7.30 → 7.31 · SW 7.94 → 7.95**, base `4f7ccc8`. Détail en **§141**.
 >
@@ -19648,3 +19674,285 @@ payables, toutes sans découvrir la récup ; 30 h demandées = 18 + 12, cadre et
 - **Base `4f7ccc8`** (FICHE-4 poussé). **APP 7.30 → 7.31 · SW 7.94 → 7.95.** Fichiers : `src/planning.js`,
   `src/utils.js`, `index.html`, `public/sw.js`, `guide/10-planning.html`, `scripts/mv-harnais-recup.mjs`,
   `scripts/harnais-claude-md.mjs`, `CLAUDE.md`, `.mv-base`. `public/guide.html` : `node scripts/build-guide.mjs`.
+
+---
+
+## 142. ★★★ SEM-1 — LES HEURES SUP SE COMPTENT À LA SEMAINE, ET LE 50 % NE PASSE PLUS DEVANT LE 25 % (17/09 — `planning.js` · `utils.js` · `index.html` · `sw.js` · `guide/10-planning.html` · `scripts/` · `package.json` · `ci.yml` · APP 7.31 → **7.32** · SW 7.95 → **7.96**)
+
+> Nico, trois relevés de septembre 2026 en main (Chloé, Nico, Victor, édités le 17/09) : *« Beaucoup d'erreur. vérifie
+> tout, vérifie la loi, propose une maquette »*. Puis sur la v1 : *« les heures écourtées par le domaine restent à
+> rattraper (soit dans un compte heures à rattraper soit rattrapées dans les heures sup) ; il faut que les heures sup se
+> comptent à la semaine »*. Sur la v2 : *« il est bizarre de voir un nombre d'heures sup à +25 % inférieur à un nombre
+> d'heures sup à +50 % »*. Puis « go » sur la v3.
+
+### 142a. L'audit, mesuré avant la maquette
+
+- Les trois relevés ont été **recalculés à partir des jours** par un moteur écrit pour la maquette : 67 égalités, **aucun
+  écart** — les additions étaient justes. Les erreurs étaient ailleurs, neuf de calcul ou de données :
+  ① les jours à venir comptés « faits » (`_planPaieMois` : `if(!e) x.fait = wh`, sans regarder la date) ; ② le même
+  horaire valant deux durées (`_planDayH` sans saisie rendait les heures de l'horaire PAR DÉFAUT — codes D/M/A, 09:00 et
+  16:30 en dur — au lieu du modèle : +0h30 le 18, −0h30 le 25, sans aucune saisie, et ces demi-heures entraient dans le
+  travail effectif de l'année) ; ③ « Temps de récup » sans solde d'avant ni journées du domaine ; ④ deux unités par ligne
+  (3h30 = 2h + 2h15) ; ⑤ « arrêt ou congé sans solde » pour une absence non précisée ; ⑥ 10h30 payées et 5h15 à
+  compenser le même mois (`_planPayeMaxCouvert` ignore `dette`) ; ⑦ « 4h à 50 % » avec 36h30 visibles (le lundi 31 août
+  hors du papier) ; ⑧ les taux d'une semaine à cheval pouvaient bouger APRÈS la signature (le 50 % se rangeait sur des
+  jours du mois suivant) ; ⑨ octobre à décembre portaient déjà un solde.
+- **La loi, lue** (accord national du 23/12/1981, version consolidée avenants 12–16 — l'avenant 19 reste à relire) :
+  art. 7.1/7.3 heures sup au-delà de la durée normale, **huit premières à 25 %, suivantes à 50 %** ; art. 10.2 repos de
+  remplacement 1h15/1h30, droit ouvert à 7h, à prendre dans les deux mois, **mention obligatoire** ; art. 10.4 §3 absence
+  non maintenue = retenue à 1/151,67e par rapport à l'horaire programmé ; art. 8.2 10h/jour (50h de dépassement/an),
+  art. 5.3 repos hebdomadaire suspendu six fois/an au plus. Code rural R. 713-36 : copie remise avec la paie, **la
+  signature ne vaut pas renonciation**, et les absences « en précisant si elles ont été ou non rémunérées ». Code du
+  travail D. 3171-12 : cumul annuel des heures sup. Cass. soc. 10/09/2025 n° 23-14.455 : un congé payé compte dans le
+  seuil hebdomadaire — **déjà conforme** (`_planDayH`).
+
+### 142b. Ce qui change dans le moteur
+
+- **`_planHsupMois` compte à la semaine** (lundi → dimanche). ① Les heures en plus rattrapent d'abord les heures
+  manquées de la MÊME semaine, dans l'ordre des jours ; ce qui reste en plus = ce qui est compté au-delà du **planning
+  de la semaine** (pas 35h fixes : sinon chaque semaine haute de l'annualisation deviendrait des heures sup) ; congé
+  payé, récup, arrêt, formation, absence non précisée restent neutres. ② Ce qui reste manqué garde sa destination
+  (`retire` / `domaine` / `indet`) et part au compteur comme avant — **« à compenser » EST le compte des heures à
+  rattraper** : dans la semaine, puis sur les heures sup du compteur au taux normal, sinon en attente, et les prochaines
+  heures sup le comblent d'abord (`comble`, inchangé).
+- **`PLAN_HS_RANG50=8` remplace `PLAN_HS_SEUIL50=43`** : les huit premières heures sup de la semaine à 25 %, les suivantes
+  à 50 % — donc les DERNIÈRES. RECUP-1 disait « la 44e heure travaillée » : juste sur 35h, faux dès que le planning
+  dépasse 35h (planning 40h, 47h faites, 7h sup dont quatre déjà à 50 %). ⚠️ Moins généreux qu'avant sur une semaine
+  haute : cohérent si l'annualisation est en place — **à faire confirmer par le comptable**, avec le reste du régime.
+- **`_planSemainesDuMois(m)` : une semaine appartient au mois où elle finit.** Celle du 28 septembre se compte en octobre,
+  d'un bloc, avec ses jours de septembre (`sem.avantMois`). Le majoration d'un férié suit sa semaine (`majDe`).
+- **Transition, une seule fois** : le lundi 31 août 2026 a déjà été réglé par août (règle historique). Ses heures
+  manquées ne se rattrapent pas en septembre ; ses heures en plus tiennent les premiers rangs de la semaine, puis ce
+  qu'août a compté sort de septembre (`deja`, `dejaRetire`).
+- **Un dimanche qui rattrape** n'est pas une heure sup : il ne garde que sa majoration (`majHs`, par `jm.h − y.hs`).
+- **`_planDayH`** : un jour SANS saisie vaut les heures du MODÈLE à partir de septembre 2026 (`_planRecupActiveAt`) ;
+  `_pfPrevT` recale la fin de l'horaire prévu (`_planFinDe`). Les mois d'avant ne bougent pas.
+- ★ **Contrat de sortie inchangé** (`plus`, `h25`, `h50`, `retire`, `domaine`, `indet`, `semaines`, `buckets`,
+  `majHs`) : `plus`/`moins` d'un jour sont ce qui RESTE après la semaine, le brut est dans `plusBrut`/`moinsBrut`, ce
+  que la semaine a rattrapé dans `rattrape`. C'est ce qui a tenu `_planCompteur`, `_planBank` et l'année sans y toucher.
+
+### 142c. Ceux qui lisent le moteur
+
+`_planPaieMois` : `x.ratt` (rattrapé dans la semaine : ni retenu, ni repris sur la récup — `payeType 'sem'`) et `x.att`
+(le jour appartient à une semaine qui finit le mois suivant : il attend, `'att'`) ; `P.sem`, `P.att`. `_pfMouvements` ne
+liste que la part vraiment reprise sur la récup. Le bas du cadre dit « Heures sup, comptées à la semaine » quand l'écart
+du mois n'est plus les heures sup. « Le détail » de l'onglet Compteur dit ce que la semaine a rattrapé et liste les jours
+du mois d'avant qu'elle emporte. `_planVerdict` : « Rattrapé par les heures en plus de la semaine » au lieu de « Retiré au
+taux normal » quand c'est le cas.
+
+### 142d. Ce que les filets ont trouvé
+
+- `mv-harnais-recup` : **3 rouges sur 237 au premier passage, les trois attendus** (section I, la semaine à cheval) — les
+  sections B à S posent heures en plus et heures manquées dans des semaines différentes, sur 35h : l'ancienne et la
+  nouvelle règle y disent la même chose. Section I réécrite, section **T** (25 assertions), 2 contre-épreuves recalées, 7
+  neuves. **262 assertions, 31 défauts, 31 détectés.** ★ T2 rouge à l'écriture : c'était le TEST (08:00→13:00 fait 5h
+  sans coupure, donc 2h écourtées, pas 3).
+- **`mv-harnais-semaine` (neuf)** : les jours des trois relevés reposés dans le VRAI moteur rendent la maquette v3 —
+  Chloé 21h (11h30/4h/5h30), Nico 10h30 (**5h à 25 %, rien à 50 %**), Victor 3h, 7h d'absence rattrapées, majoration
+  seule du dimanche. ★ Premier passage : 49h de trop au compteur — les fériés du jeu de test portaient 7h « faites »
+  majorées à 100 % (le piège de §135e, retombé dedans) ; c'était le jeu de données.
+- `mv-harnais-retard` ET `mv-harnais-effectif-periode` extraient `_planDayH` : `_planRecupActiveAt` et `PLAN_RECUP_DEBUT`
+  (lue dans le module, jamais recopiée) ajoutées. ★ Le second n'est sorti qu'à `npm run check` — « _planRecupActiveAt is
+  not defined », un PLANTAGE compté rouge : chercher tous les harnais qui extraient la fonction qu'on touche, pas
+  seulement celui du lot (`grep -l _planDayH scripts/`).
+- `mv-harnais-icones` : `horloge` n'existe pas dans le sprite — la nouveauté prend `reveil`. `npm run check` vert au
+  bout, `npm run build` vert ; **`test:smoke` non lancé** (le Chromium de Playwright-node n'est pas installé dans le bac
+  à sable).
+- ⚠️ **Faute de procédure, dite** : ma ligne d'écriture de `.mv-base` a vidé le fichier avant de le lire ; les autres
+  fichiers du même script étaient écrits. Vérifié fichier par fichier, `.mv-base` réécrit. La leçon de l'état partiel
+  (mémoire du projet) vaut aussi pour un script de textes.
+
+### 142e. La note de livraison
+
+**Base `270320f`.** **APP 7.31 → 7.32 · SW 7.95 → 7.96.** `firebase deploy --only hosting`. `public/guide.html` ne se
+livre pas : `node scripts/build-guide.mjs`.
+
+| Fichier | Ce qui change | Bump ? |
+|---|---|---|
+| `src/planning.js` | `_planHsupMois` à la semaine, `PLAN_HS_RANG50`, `_planSemainesDuMois`, `_planRecupActiveAt`, `_planDayH`, `_planFinDe`/`_pfPrevT`, `_planPaieMois`, `_pfMouvements`, cadre, détail, verdict, « À savoir » | — |
+| `src/utils.js` | APP 7.32, 3 nouveautés, aide du Planning | ★ APP |
+| `index.html` · `public/sw.js` | versions | ★ APP · ★ SW |
+| `guide/10-planning.html` | heures sup à la semaine, taux au rang | — |
+| `scripts/mv-harnais-recup.mjs` · `mv-harnais-retard.mjs` · `mv-harnais-effectif-periode.mjs` · `mv-harnais-semaine.mjs` (neuf) | sections I et T · une dépendance chacun · les trois relevés | — |
+| `package.json` · `.github/workflows/ci.yml` · `scripts/harnais-claude-md.mjs` · `CLAUDE.md` · `.mv-base` | harnais branché · §142 · base | — |
+
+### 142f. Ouvert, et dit
+
+① **SEM-2, le relevé v3** : absences par cause, compte des heures à rattraper imprimé, relevé PROVISOIRE (jours à venir
+non faits, pas de signature), lundi du mois d'avant en gris, mentions légales (droit à repos, R. 713-36, cumul annuel),
+alertes 10h/jour et repos hebdomadaire, en-tête, congés sans négatif, plafond arrondi. **Rien de cela n'est dans SEM-1** :
+le relevé actuel imprime les nouveaux chiffres dans l'ancienne mise en page, et sa colonne « Écart » reste au jour.
+② Une semaine EN COURS est comptée telle qu'elle est saisie (les jours à venir valent leur planning, donc neutres) — la
+maquette ne la soldait pas ; écart assumé pour que le verdict de la feuille du jour et le compteur vivent. ③ À trancher
+par Nico (onglet Audit de la maquette v3) : absence injustifiée sur la récup d'office ou case signée ; heures à rattraper
+prises d'office sur la récup acquise ou non ; paiement quand il reste des heures à rattraper ; report du compte au
+31 décembre (l'accord laisse la rémunération acquise en fin de période — comptable). ④ `_planTimingH` lit la coupure avec
+`||` : une coupure à 0 redevient 60 min (`_planFinDe` et `_computeEnd` la lisent bien) — non touché, l'effet serait
+rétroactif. ⑤ Contingent annuel (220h ; Nico : 210h payées fin septembre) : pas de compteur. ⑥ Rendu non vu sur
+téléphone réel ni sur papier.
+
+---
+
+## 143. ★★★ SEM-2 — LE RELEVÉ D'HEURES v3 : PROVISOIRE, ABSENCES PAR CAUSE, COMPTEURS QUI TOMBENT JUSTE (18/09 — `planning.js` · `utils.js` · `index.html` · `sw.js` · `guide/10-planning.html` · `scripts/mv-harnais-recup.mjs` · APP 7.32 → **7.33** · SW 7.96 → **7.97**)
+
+> Nico : « Suite ». Second volet de la maquette v3 (« go » du 17/09) : SEM-1 avait changé le MOTEUR, le papier
+> imprimait encore les nouveaux chiffres dans l'ancienne mise en page. ⚠️ `origin/main` était toujours `270320f` :
+> SEM-1 n'avait pas été poussé. **Ce lot contient SEM-1 et le remplace** ; sa base reste `270320f`.
+
+### 143a. Ce qui change sur le papier
+
+- **Provisoire en cours de mois.** `_planPaieMois` pose `x.futur` sur un jour SANS saisie et pas encore passé
+  (`_pfIsoJour` ≥ `_pfAujIso`), et totalise À PART (`P.futurFait`, `P.futurPrevu`, `P.provisoire`) : **`P.faites` ne
+  bouge pas**, l'écran et les harnais lisent comme avant. Le relevé, lui, imprime « Prévues à ce jour / Faites » sans les
+  jours à venir, un bandeau « Relevé provisoire, arrêté au … », une semaine entièrement à venir sur UNE ligne, et des
+  cases de signature hachurées : il ne se signe pas.
+- **Une absence dit sa cause et ce qu'elle devient.** Colonne « Absence » (classe `cab`) : payée · rattrapée dans la
+  semaine · reprise sur la récup · rattrapée sur heures sup · à rattraper · non payée · comptée le mois prochain · à
+  préciser. Par jour : `x.brutMoins`, `x.surRecup`, `x.surHs`, `x.aRatt` (la part que le compteur a couverte se répartit
+  dans l'ordre des dates, comme `rc` depuis FICHE-1). ★ Une absence injustifiée **ne s'appelle plus « Récup »** sous
+  « Maintenu » ; la reprise sur la récup se COCHE à la signature (« J'accepte que mon absence du 16… ») — l'écart avec
+  l'accord (art. 10.4 §3 : retenue) est ainsi porté par l'accord du salarié. Une absence **sans motif** passe « à
+  préciser », en orange, avec « à préciser avant l'envoi à la compta » : le document mensuel doit dire si chaque absence
+  est rémunérée ou non (Code rural, R. 713-36 et s.).
+- **La semaine se lit en entier.** `_pfJoursAvant` rend les jours du mois d'avant que la première semaine emporte (le
+  lundi 31 août), en gris, avec « 2h sup déjà comptées en août » ou « déjà réglé par son mois ». La ligne de semaine dit
+  prévu, fait, heures sup et taux, ce que la semaine a rattrapé, ce qui reste ; la dernière, à cheval : « elle finit en
+  octobre, elle se compte sur le relevé d'octobre ». Colonne **« Heures sup »** (`x.hs`) au lieu de l'écart du jour ;
+  un week-end de repos tient sur une ligne ; `sem.trav` (neuf, moteur) dit les sept jours travaillés.
+- **Page 2, une unité par colonne.** Heures sup : Faites · Payées · Gardées · **Repos gagné** (avant : 3h30 = 2h + 2h15).
+  **Le compteur part du solde d'avant** et liste tout — heures gardées, majoration seule, absences reprises, heures
+  écourtées rattrapées, récup prise, payées sur le compteur — jusqu'au solde. **« Les heures à rattraper »** : reste
+  d'avant + écourtées − dans la semaine − sur le compteur − par les heures sup du mois = reste (`c.dette`). Année : total
+  « Depuis le 1er janvier » (D. 3171-12), colonne « en repos », **mois à venir vides** (ils répétaient le solde).
+- **Mentions et alertes** : droit à repos ouvert dès 7h et délai de deux mois (accord, art. 10.2) ; « sa signature ne vaut
+  pas renonciation à ses droits » (R. 713-36) ; bloc « Durées et repos » — plus de `maxJour` dans la journée, semaine
+  au-delà de `maxHebdo`, sept jours travaillés, journées de plus de 6h sans coupure ; alerte contingent
+  (`PLAN_CONTINGENT_DEF=220`, « à confirmer avec le comptable ») à partir de 200h payées.
+- **Petites choses** : `_pfPlanNom` (« planning-35h-(administration) » → « 35h (administration) ») ; contrat sur une
+  ligne ; congés sans reste négatif quand le solde de départ n'est pas saisi (`_plRvCpHtml`) ; plafond annuel arrondi à
+  l'heure, reste à la demi-heure (`_plRvAnnuHtml`) ; la note du jour entre guillemets ; « d'octobre », pas « de octobre ».
+
+### 143b. Vérifié, pas supposé
+
+- **Le vrai relevé, rendu dans Chromium** (`/home/claude/lot/rendre*.mjs`, jours des trois PDF de départ, polices du
+  dépôt) : Chloé, Nico, Victor × édité le 16/09 et le 1er/10 — **page 1 et page 2 tiennent sur un A4 dans les six cas**.
+  ★ Premier rendu sans les polices (`/fonts/` ne résout pas en `file://`) : DejaVu, plus large, faisait déborder la page 1
+  de Victor de 96 px — c'était le banc, pas le code ; remesuré avec Outfit. Victor débordait ENCORE de 57 px en page 2 :
+  « Heures sup restantes à payer » est passé dans la colonne de droite.
+- `mv-harnais-recup` : section **O recalée** sur la nouvelle structure (horloge RÉGLABLE — `horloge(2026, 9, 1)` — car le
+  relevé n'imprime plus la même chose le 16/09 et le 1er/10), section **U** (24 assertions), 1 contre-épreuve recalée, 5
+  neuves. **286 assertions, 36 défauts, 36 détectés.** ★ U1d rouge à l'écriture : `moisFiche` porte des saisies jusqu'au
+  24, aucune de ses semaines n'est entièrement à venir — le TEST. `mv-harnais-releve` : 1 rouge, le titre « Détail mois
+  par mois » que j'avais renommé — titre gardé. `mv-harnais-icones` : `attention` n'existe pas → `alerte` (deuxième fois
+  en deux lots : ★ vérifier l'icône d'une nouveauté dans le sprite AVANT d'écrire l'entrée).
+- `mv-harnais-jetons` : `font-weight:400` écrit en chiffres compte « hors des trois pas » (500/600/700) → `normal`.
+- **`mv-harnais-typo` : `planning.js` 512 → 546 ko, +6,6 % depuis la base** (SEM-1 + SEM-2 cumulés) — au-dessus du cliquet
+  de 5 % par lot. **Regravé** (`scripts/typo-baseline.json` : `planning.js` 546, `utils.js` 583, rien d'autre ne bouge),
+  après s'être posé la question : le relevé (`_planReleveFiche_`, son CSS, `_pf*`) ferait un module à lui, `planning`
+  reste à 53 % du plafond de 1 024 ko. **Découpage non fait dans ce lot** — il touche l'ordre d'import et les noms
+  exposés ; à décider avant que le fichier ne regagne 5 %.
+
+### 143c. La note de livraison
+
+**Base `270320f`. Ce zip CONTIENT SEM-1 et le remplace.** **APP 7.31 → 7.33 · SW 7.95 → 7.97** (règle du doute : le zip
+SEM-1 a pu être déployé sans être poussé). `node scripts/build-guide.mjs`, puis `npm run build && firebase deploy --only hosting`.
+
+| Fichier | SEM-1 | SEM-2 |
+|---|---|---|
+| `src/planning.js` | moteur à la semaine, taux au rang, jour sans saisie | relevé v3, `_planPaieMois` (futur, parts couvertes), `_pfJoursAvant`, `_pfPlanNom`, congés, plafond |
+| `src/utils.js` · `index.html` · `public/sw.js` | 7.32 / 7.96 | **7.33 / 7.97**, 3 nouveautés |
+| `guide/10-planning.html` | heures sup à la semaine | le relevé en deux pages, provisoire, à préciser |
+| `scripts/mv-harnais-recup.mjs` | sections I, T | section O recalée, section U, horloge réglable |
+| `scripts/mv-harnais-retard.mjs` · `mv-harnais-effectif-periode.mjs` · `mv-harnais-semaine.mjs` | une dépendance · neuf | — |
+| `package.json` · `ci.yml` · `harnais-claude-md.mjs` · `CLAUDE.md` · `.mv-base` · `scripts/typo-baseline.json` | §142 | §143 · cliquet de poids regravé |
+
+### 143d. Ouvert, et dit
+
+① **L'ÉCRAN de la fiche n'a pas bougé** : son cadre « Pour la paie » dit encore « Absences payées » et compte les jours à
+venir comme faits ; ses onglets Jours et Compteur lisent le nouveau moteur mais pas la nouvelle présentation. Le papier
+et l'écran ne disent donc plus tout à fait la même chose — lot suivant (SEM-3), maquette d'abord. ② Les décisions de
+l'onglet Audit restent à prendre : reprise d'office sur la récup ou case signée (le papier propose la case, le MOTEUR
+reprend toujours d'office) ; heures à rattraper prises d'office sur la récup acquise ; paiement quand il reste des heures
+à rattraper (`_planPayeMaxCouvert` ignore toujours `dette`) ; report du compte au 31 décembre. ③ Le compteur annuel
+« Modulation » compte encore des heures déjà payées en heures sup. ④ Pas de décompte des suspensions du repos
+hebdomadaire sur l'année (six au plus). ⑤ `_planTimingH` et la coupure à 0 (§142f ④). ⑥ Rendu vu dans Chromium, pas sur
+papier ni sur téléphone réel ; `test:smoke` non lancé (Playwright-node absent du bac à sable).
+
+---
+
+## 144. ★★★ SEM-3 — L'ÉCRAN DE LA FICHE LIT LA MÊME SOURCE QUE LE RELEVÉ v3 (18/09 — `planning.js` · `styles.css` · `utils.js` · `index.html` · `sw.js` · `guide/10-planning.html` · `scripts/mv-harnais-recup.mjs` · APP 7.33 → **7.34** · SW 7.97 → **7.98**)
+
+> Nico : « Suite » → maquette `maquette-fiche-ecran-v1.html` (l'écran d'un téléphone, trois onglets, trois salariés, bâti
+> avec le VRAI bloc `.pf-*` extrait de `styles.css`) ; deux questions ; réponse : **« 2 - toujours »** — la carte
+> « Heures à rattraper » s'affiche toujours, même à zéro. La question 1 (jours à venir à part dans le cadre) était
+> proposée, elle est prise telle quelle. ⚠️ `origin/main` = `270320f` : SEM-1 et SEM-2 ne sont pas poussés, ce lot
+> les CONTIENT.
+
+### 144a. Une seule source, deux rendus
+
+SEM-2 avait écrit le cadre v3 DANS `_planReleveFiche_` : le papier disait « Absences, par cause », l'écran disait encore
+« Absences payées — Maintenu ». Le principe du projet (relevé et écran, une seule source) était rompu par mon propre lot.
+- **`_pfV3(mbr,P,D,A)`** : les absences par cause (`AB`), les étiquettes, le verdict (`{ko,t}`), les lignes « à payer en
+  plus / à retirer / pour information », le bas de cadre semaine par semaine, prévues et faites « à ce jour ». Le bloc
+  est SORTI du relevé tel quel (coupé-collé par index, pas réécrit) ; le relevé et `_pfCadre` le lisent, chacun avec son
+  balisage (`.ab` / `.pf-ab`, `<p class="ko">` / `pf-ko` + icône).
+- **`_pfComptesV3(mbr,P,M,V)`** : les deux colonnes qui tombent juste — compteur de récup (`MV`) et heures à rattraper
+  (`RA`). Le relevé et `_pfCompteur` les lisent.
+- ★ Le filet : les sections O et U du harnais (papier) sont restées vertes pendant tout le déplacement — 1 rouge attendu
+  (N22, le cadre de l'écran), puis 2 (S5, l'en-tête du tableau de l'année).
+
+### 144b. Ce qui change à l'écran (à partir de septembre 2026 ; avant : l'écran d'avant, à l'identique — V12)
+
+- **Résumé** : bandeau `pf-prov` « Mois en cours, arrêté au … » et « Prévues à ce jour » tant que le mois court ;
+  troisième chiffre « Absences », étiquettes `pf-ab` par cause ; une absence sans motif en orange, « à préciser avant
+  l'envoi à la compta » ; « Où vont les heures sup » : Faites · Payées · Gardées · Repos gagné (`pf-cv`).
+- **Jours** : titre « Semaine du 31 août au 6 septembre », jours du mois d'avant en `pf-jr pf-hors` (un `div`, pas un
+  bouton : on n'ouvre pas la feuille d'un autre mois d'ici) ; étiquettes : heures sup de la semaine et ce qu'août a déjà
+  compté, ce que les heures en plus ont rattrapé, ce qui reste (rouge), sept jours travaillés, plus de `maxJour` dans la
+  journée, semaine en cours, semaine qui finit le mois suivant ; colonne « Heures sup » (`x.hs`) ; chaque absence dit ce
+  qu'elle devient, avec les mots du relevé ; jours à venir `pf-fut`, semaine entièrement à venir repliée sur son en-tête.
+  ★ **La note du bas disait « 25 % jusqu'à la 43e heure, 50 % au-delà » depuis SEM-1** — le moteur compte au rang
+  depuis deux lots. `grep 43e` ne voit pas `43<sup>e</sup>` : ★ chercher un nombre par le NOMBRE (`grep -n "43"` filtré),
+  pas par sa forme typographique. V5 l'épingle (`indexOf('43') === -1`).
+- **Compteur** : la phrase « 20h reportées + 2h15 acquises − 22h retirées… » et la carte « Ce qui a bougé » deviennent UNE
+  liste, du solde d'avant au solde d'après (`pf-mv` + `li.pf-tot`) ; **carte « Heures à rattraper » toujours affichée** ;
+  rappel du droit à repos dès 7h ; année : Faites · Payées · Récupérées · Solde · en repos, ligne « Depuis janvier »,
+  mois à venir vides (`pf-vide`) ; alerte contingent. ⚠️ « toujours » vaut aussi pour le PAPIER : le bloc s'imprime
+  même à zéro (`if(P.act)`), V7b.
+
+### 144c. Vérifié
+
+- **Le vrai code, rendu** (`/home/claude/lot/rendre-ecran.mjs`) : les trois onglets de Victor avec `src/styles.css`, à
+  390 px dans Chromium — aucun débordement horizontal, même allure que la maquette. Icônes absentes du banc (le sprite
+  vit dans `index.html`), donc non vues.
+- Les six relevés papier remesurés avec le bloc « Heures à rattraper » désormais permanent : **deux pages A4 dans les
+  six cas**, mêmes marges qu'en §143b.
+- ★ `mv-harnais-jetons`, deux cliquets qui se répondent : `border-radius:var(--r-md,12px)` est compté « rayon en dur qui
+  double un pas » (le repli `12px` est lu), et `var(--r-md)` sans repli est « un appel du socle sans repli ». Le bloc
+  `.pf-` écrit ses rayons à la main hors des pas (5, 11, 13 px) : `.pf-prov` 11px, `.pf-ab` 6px, comme ses voisins.
+- `npm run check` vert, `npx vite build` vert (30 s). ⚠️ `npm run build` relance tout le `check` en prebuild : il dépasse
+  la limite de temps du bac à sable, pas celle de la machine de Nico.
+- `mv-harnais-recup` : N22 et S5 recalés, section **V** (24 assertions : l'écran ET le papier disent le même bas de
+  cadre, la carte toujours là, août inchangé), 2 contre-épreuves recalées, 3 neuves. **310 assertions, 39 défauts, 39
+  détectés.** Icônes des nouveautés vérifiées dans le sprite PAR LE SCRIPT avant écriture (leçon de §143b appliquée).
+
+### 144d. La note de livraison
+
+**Base `270320f`. Ce zip CONTIENT SEM-1 et SEM-2 et les remplace.** **APP 7.31 → 7.34 · SW 7.95 → 7.98.**
+`node scripts/build-guide.mjs`, puis `npm run build && firebase deploy --only hosting`.
+
+Fichiers de SEM-3 : `src/planning.js` (`_pfV3`, `_pfComptesV3`, `_pfCadre`, `_pfOuVont`, `_pfJours`, `_pfCompteur`, relevé
+branché dessus) · `src/styles.css` (12 règles `.pf-`) · `src/utils.js` · `index.html` · `public/sw.js` ·
+`guide/10-planning.html` · `scripts/mv-harnais-recup.mjs` · `scripts/harnais-claude-md.mjs` · `CLAUDE.md` · `.mv-base` —
+plus ceux de §142e et §143c.
+
+### 144e. Ouvert, et dit
+
+① Les décisions de l'Audit (maquette v3) restent à prendre — le moteur reprend TOUJOURS d'office une absence du salarié
+sur la récup, alors que le papier propose une case à signer ; `_planPayeMaxCouvert` ignore toujours `dette`. ② La carte
+« La demande du salarié » ne prévient pas quand un paiement laisse des heures à rattraper. ③ L'en-tête de semaine de
+l'onglet Jours additionne « faites + absences » brutes : une semaine où le week-end rattrape une absence affiche
+« 15h30 + 30h30 sur 39h » — vrai, mais la somme dépasse le prévu ; à reprendre si ça gêne. ④ Découpage de `planning.js`
+(§143b) : le fichier a encore grossi. ⑤ Vu dans Chromium, pas sur téléphone réel ; `test:smoke` et `test:e2e` non lancés
+(Playwright-node absent du bac à sable) — ★ l'e2e ouvre la fiche : à lancer chez Nico avant de déployer.
+

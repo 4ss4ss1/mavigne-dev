@@ -223,6 +223,7 @@ jobs:
         run: |
           node scripts/mv-harnais-recup.mjs
           node scripts/mv-harnais-recup.mjs --contre
+          node scripts/mv-harnais-semaine.mjs
 
       # Vite + inject-precache (postbuild, idempotent).
       - name: Build

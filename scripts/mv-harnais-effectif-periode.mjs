@@ -71,6 +71,8 @@ const NOMS = [
   '_planInContract', '_planJourCouvert', '_planDansCtr',
   '_planInContractRead', '_planInContractCtr', '_planWide',
   '_planMbrs', '_planEntAn', '_planCouvre', '_planMbrsPer', '_planMbrsMois', '_planMbrsAn',
+  // SEM-1 (17/09/2026) : _planDayH rend les heures du MODELE un jour sans saisie, a partir de la regle de septembre 2026
+  '_planRecupActiveAt',
   '_planPlId', '_planPlanned', '_planTimingH', '_planDefTiming', '_planDayH', '_planEffective',
   '_planCalcMonth', '_planAbsLostH', '_planAbsNeutH', '_planRempH', '_planSummary',
   '_pl2Actifs', '_pl2HorsContrat', '_pl2Annual', '_pl2Annual_', '_planGensArchives', '_paGroupes'
@@ -98,6 +100,7 @@ function makeEnv(opts) {
     ligne(s, /^var PLAN_MOIS_C=.*$/m, 'PLAN_MOIS_C'),
     ligne(s, /^var PLAN_BG=.*$/m, 'PLAN_BG'),
     'var PLAN_PAUSE_MIN=60;',
+    ligne(s, /^var PLAN_RECUP_DEBUT=.*$/m, 'PLAN_RECUP_DEBUT'),   // SEM-1 : la date de la regle, lue dans le module
     ligne(s, /^var PLAN_DEF_AN=.*$/m, 'PLAN_DEF_AN'),
     'var _PLAN_RECALE_CACHE={};',
     'var PLANNING_TEMPLATES=' + JSON.stringify(opts.templates || {}) + ';',

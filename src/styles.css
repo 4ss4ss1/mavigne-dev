@@ -4026,6 +4026,20 @@ body.mv-trial-on #app-root{padding-top:calc(env(safe-area-inset-top,0px) + 44px)
 .pf-mv{list-style:none;margin:0;padding:0}
 .pf-mv li{display:flex;align-items:baseline;gap:var(--e-2,8px);padding:var(--e-2,8px) 0;border-top:1px solid var(--gris-clair);font-size:var(--pt-txt,12.5px)}
 .pf-mv li:first-child{border-top:none}
+/* SEM-3 (18/09/2026) — l'écran de la fiche dit les mêmes choses que le relevé v3 : mois en cours, absences par cause,
+   colonne « repos » à part, jour du mois d'avant et jours à venir grisés, comptes qui se lisent du solde d'avant au solde d'après. */
+.pf-prov{margin:0 0 var(--e-3,12px);border:1.5px dashed var(--orange-tx,#9C4E14);background:var(--orange-pale);color:var(--texte);border-radius:11px;padding:var(--e-2,8px) var(--e-3,12px);font-size:var(--pt-txt,12.5px);line-height:1.4}
+.pf-abd{display:flex;flex-wrap:wrap;gap:var(--e-1,4px);margin-top:var(--e-2,8px)}
+.pf-ab{font-size:var(--pt-micro,11px);font-weight:var(--fw-semi,600);border-radius:6px;padding:1px var(--e-2,8px);background:var(--bg-app);color:var(--texte);box-shadow:inset 0 0 0 1.5px var(--gris)}
+.pf-ab-rec{background:var(--plan-acc-pale);box-shadow:inset 0 0 0 1.5px var(--plan-acc)}
+.pf-ab-pre{background:var(--bg-card);color:var(--orange-tx,#9C4E14);box-shadow:inset 0 0 0 1.5px var(--orange-tx,#9C4E14)}
+.pf-lst .pf-att dd{color:var(--orange-tx,#9C4E14)}
+.pf-t .pf-cv{border-left:1px dashed var(--plan-acc);padding-left:var(--e-2,8px)}
+.pf-jr.pf-hors{opacity:.62;font-style:italic;cursor:default}
+.pf-jr.pf-fut{opacity:.6}
+.pf-an tr.pf-vide td{color:var(--texte-doux)}
+.pf-t tr.pf-totr td{font-weight:var(--fw-bold,700);border-top:1.5px solid var(--texte);border-bottom:none}
+.pf-mv li.pf-tot{border-top:1.5px solid var(--texte);font-weight:var(--fw-bold,700)}
 .pf-mv-d{flex:0 0 64px;color:var(--texte-doux)}
 .pf-mv-t{flex:1;min-width:0;color:var(--texte)}
 .pf-mv-t em{display:block;font-style:normal;font-size:var(--pt-micro,11px);color:var(--texte-doux)}

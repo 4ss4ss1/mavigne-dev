@@ -23,7 +23,7 @@ export const GT_ADMIN_EMAIL = 'ngdevpro@gmail.com';
 // WHATS_NEW   : tableau vide = modal desactive pour cette version.
 // Format item : { emoji:'📅', titre:'Titre court', desc:'Phrase utilisateur.' }
 // Regle : seulement les changements visibles par les utilisateurs.
-export const APP_VERSION = '7.31';
+export const APP_VERSION = '7.34';
 // ════ Journal des nouveautés (récap cumulatif) ════
 // Une entrée par version, la PLUS RÉCENTE EN HAUT : { v:'5.10', items:[ {emoji,titre,desc}, … ] }
 // À chaque release visible → AJOUTER un bloc en tête (ne pas remplacer). items:[] = release technique (rien à afficher).
@@ -715,6 +715,50 @@ window._mvGraphRepeindre = function(){
 };
 
 export const WHATS_NEW = [
+  { v: '7.34', items: [
+    { emoji: 'personne', titre: 'La fiche du salarié dit la même chose que le relevé',
+      desc: "Le cadre «\u00a0Pour la paie\u00a0» affiche les <b>absences par cause</b> — payées, par le domaine, du salarié, à "
+        + "préciser — et additionne les heures sup semaine par semaine. Tant que le mois n’est pas fini, il dit "
+        + "«\u00a0à ce jour\u00a0»\u00a0: les jours à venir ne comptent plus comme faits." },
+    { emoji: 'calendrier', titre: 'L’onglet Jours se lit à la semaine',
+      desc: "Du lundi au dimanche, avec en gris le lundi du mois d’avant quand la semaine commence avant le 1er. La "
+        + "colonne «\u00a0Heures sup\u00a0» remplace l’écart du jour, chaque absence dit <b>ce qu’elle devient</b>, et des "
+        + "étiquettes préviennent\u00a0: plus de 10\u00a0h dans la journée, sept jours travaillés. La note du bas parlait "
+        + "encore de la 43e heure\u00a0: corrigée." },
+    { emoji: 'balance', titre: 'Compteur\u00a0: du solde d’avant au solde d’après',
+      desc: "Le temps de récup se lit ligne par ligne, du solde du mois d’avant au solde de fin de mois. Une nouvelle "
+        + "carte, <b>Heures à rattraper</b>, suit les journées écourtées par le domaine\u00a0: ce que la semaine et le "
+        + "compteur ont rattrapé, ce qui reste. L’année a son total depuis janvier, et les mois à venir restent vides." }
+  ] },
+  { v: '7.33', items: [
+    { emoji: 'document', titre: 'Le relevé d’heures est refait',
+      desc: "Chaque absence dit maintenant <b>sa cause et ce qu’elle devient</b>\u00a0: payée, rattrapée dans la semaine, reprise "
+        + "sur la récup, à rattraper, non payée. Une absence injustifiée ne s’appelle plus «\u00a0Récup\u00a0». La semaine se lit en "
+        + "entier, avec en gris le lundi du mois d’avant quand elle commence avant le 1er. Page\u00a02, le compteur de récup "
+        + "part du solde du mois d’avant et <b>tombe juste</b>, et un nouveau bloc suit les <b>heures à rattraper</b>." },
+    { emoji: 'calendrier', titre: 'Un relevé édité en cours de mois est provisoire',
+      desc: "Le relevé imprimait «\u00a0faits\u00a0» les jours à venir et les additionnait. Édité avant la fin du mois, il est "
+        + "maintenant marqué <b>provisoire</b>\u00a0: les jours à venir ne comptent pas, et il ne se signe pas." },
+    { emoji: 'alerte', titre: 'Ce que le relevé signale',
+      desc: "Une absence <b>sans motif</b> est marquée «\u00a0à préciser\u00a0» avant l’envoi à la compta. Le relevé signale aussi "
+        + "une journée de plus de 10\u00a0h, une semaine sans jour de repos, et le droit à repos ouvert dès 7\u00a0h de récup. "
+        + "Les congés n’affichent plus de reste négatif quand le solde de départ n’est pas saisi." }
+  ] },
+  { v: '7.32', items: [
+    { emoji: 'balance', titre: 'Les heures sup se comptent à la semaine',
+      desc: "À partir de septembre 2026, les heures sup ne se comptent plus jour par jour mais <b>à la semaine</b>, du lundi "
+        + "au dimanche\u00a0: ce qui est fait au-delà du planning de la semaine. Les heures en plus <b>rattrapent d’abord</b> "
+        + "les heures manquées de la même semaine — journée écourtée par le domaine, absence — et seul le reste part au "
+        + "compteur. Une semaine appartient au <b>mois où elle finit</b>\u00a0: celle du 28 septembre se compte en octobre." },
+    { emoji: 'liste', titre: '25\u00a0% d’abord, 50\u00a0% ensuite',
+      desc: "Les <b>huit premières</b> heures sup de la semaine sont à 25\u00a0%, les suivantes à 50\u00a0%. Avant, le 50\u00a0% "
+        + "partait de la 44e heure travaillée\u00a0: sur une semaine au planning de 40\u00a0h, on pouvait lire moins d’heures à "
+        + "25\u00a0% qu’à 50\u00a0%. Sur un planning de 35\u00a0h, rien ne change." },
+    { emoji: 'reveil', titre: 'Un jour sans saisie vaut les heures du planning',
+      desc: "Un jour que personne n’a touché s’imprimait parfois «\u00a0prévu 8\u00a0h, fait 8\u00a0h\u00a030\u00a0»\u00a0: l’horaire "
+        + "affiché ne faisait pas les heures du modèle. Le jour vaut maintenant les heures du modèle, et l’horaire prévu "
+        + "se cale dessus. Les mois d’avant septembre ne changent pas." }
+  ] },
   { v: '7.31', items: [
     { emoji: 'liste', titre: 'Le détail mois par mois se lit en heures sup',
       desc: "Dans l’onglet Compteur de la fiche et sur le relevé, le tableau de l’année donne désormais, pour chaque mois : "
@@ -3132,8 +3176,8 @@ var MV_AIDE = {
       ['Sur une période plus longue', "que la vue affichée, deux boutons au-dessus de la grille posent des congés ou des horaires chaleur du jour au jour, pour plusieurs salariés."],
       ['Une journée écourtée', "se retire d’abord du compteur d’heures sup, au taux normal : 1 h manquée = 1 h de récup en moins, quel que soit le motif. Ce que le compteur ne couvre pas est retenu sur la paie, sauf si le domaine a arrêté la journée : il attend alors les prochaines heures sup. Un arrêt de travail, une formation, un événement familial ou un congé sans solde ne retirent rien. Ces règles valent à partir de septembre 2026 ; les mois d’avant gardent la leur."],
       ['Une absence sur une partie de la journée', "se note dans Absence, « Une partie seulement » : de telle heure à telle heure, ou un raccourci — le matin, l’après-midi, arrivé en retard, parti plus tôt — puis le motif. L’écran calcule les heures manquées, coupure déduite, dessine la journée et dit avant d’enregistrer ce qu’elles retirent du compteur. Un horaire raccourci dans « Travaillé » demande aussi son motif, sauf les horaires chaleur et les jours d’échange."],
-      ['La fiche d’un salarié', "quatre onglets. Résumé : le cadre Pour la paie (salaire de base, à payer en plus, à retirer, pour information), la case « demande à être payé » et où vont les heures sup. Jours : chaque jour du mois, prévu et fait côte à côte, et les heures sup de chaque semaine par taux. Compteur : le temps de récup, ce qui a bougé dans le mois et l’année. Congés et acomptes : le solde de congés et les avances en euros. Le mois se change sans fermer la fiche, et le bouton Relevé édite le PDF."],
-      ['Les heures sup et la récup', "les heures sup gardent leur taux — 25 % jusqu’à la 43e heure de la semaine, 50 % au-delà — et donnent 1 h 15 ou 1 h 30 de récup par heure. Un congé payé, une récup, une formation sont des absences payées : ils ne se lisent jamais comme des heures manquées."],
+      ['La fiche d’un salarié', "quatre onglets. Résumé : le cadre Pour la paie (salaire de base avec les absences par cause, à payer en plus, à retirer, pour information — « à ce jour » tant que le mois court), la case « demande à être payé » et où vont les heures sup. Jours : semaine par semaine, prévu et fait côte à côte, ce que chaque absence devient, les heures sup du jour et les alertes de la semaine. Compteur : le temps de récup du solde d’avant au solde d’après, les heures à rattraper, et l’année. Congés et acomptes : le solde de congés et les avances en euros. Le mois se change sans fermer la fiche, et le bouton Relevé édite le PDF."],
+      ['Les heures sup et la récup', "les heures sup se comptent à la semaine, du lundi au dimanche : ce qui est fait au-delà du planning de la semaine, une fois les heures manquées de la semaine rattrapées. Les huit premières sont à 25 %, les suivantes à 50 %, et donnent 1 h 15 ou 1 h 30 de récup par heure. Une semaine appartient au mois où elle finit. Un congé payé, une récup, une formation sont des absences payées : ils ne se lisent jamais comme des heures manquées."],
       ['Payer des heures sup', "dans le Résumé de la fiche, cochez « demande à être payé » et indiquez le nombre d’heures. Elles se prennent d’abord sur celles à 25 % et sortent de la récup. On peut payer au-delà des heures du mois, jusqu’à tout ce que le compteur contient encore : les heures du mois d’abord, puis les plus anciennes du compteur. « Sans toucher la récup prise » donne le plus d’heures payables sans découvrir la récup déjà prise ce mois-ci, « Tout le compteur » le maximum. La case existe quel que soit le mode du domaine. « Pour la paie » donne alors un nombre d’heures par taux — 25 %, 50 %, dimanche, férié — et l’onglet Compteur montre les heures sup restantes à payer, taux par taux, avec leur décompte et leur équivalent en récup."],
       ['Pour la compta', "une ligne par taux : le temps en récup, les heures à déclarer et le taux à appliquer. La compta majore elle-même : pour 1 h sup à 25 %, on lui déclare 1 h à +25 %, jamais 1 h 15. Le compteur compte toujours en temps de récup, même quand les heures se paient : des heures payées sortent du compteur et se déclarent en heures brutes, avec leur taux. Une heure sup un dimanche ou un jour férié prend le taux le plus fort, une seule fois."],
       ['Présence, coupure, heures dues', "trois nombres qui se ressemblent et ne disent pas la même chose. La ‹‹ présence ›› va de l’arrivée au départ. La ‹‹ coupure ›› est le temps non travaillé au milieu : sa durée et son heure sont fixées par le domaine, dans la roue crantée du Planning, ce n’est pas un moment que chacun choisit. Les ‹‹ heures dues ›› sont ce qui part en paie et alimente le compteur des 1 607 h. Une journée de 09:00 à 16:00 avec une heure de coupure fait 7 h de présence et 6 h dues."],
