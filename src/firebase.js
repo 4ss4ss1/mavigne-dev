@@ -19,6 +19,10 @@ import {
   onSnapshot,
   runTransaction,
   getDocs,
+  getDocFromServer,
+  getDocFromCache,
+  enableNetwork,
+  disableNetwork,
 } from 'firebase/firestore';
 import { getStorage, ref as _storageRef, uploadBytesResumable, getDownloadURL, deleteObject } from 'firebase/storage';
 import { getFunctions, httpsCallable, connectFunctionsEmulator } from 'firebase/functions';
@@ -67,14 +71,30 @@ if (APPCHECK_SITE_KEY) {
       isTokenAutoRefreshEnabled: true,
     });
     if (DEBUG) console.log('[AppCheck] initialise');
+    _mvAcEcouter();   // ★ BOOT-1 (§145) : le SDK charge le script reCAPTCHA sans gérer son échec
   } catch (e) { console.warn('App Check init echouee (non bloquant) :', e); }
 }
 
 // ── Cloud Functions (europe-west1) — lot 5 sécurité ──
 const fns = getFunctions(app, 'europe-west1');
 // Appel générique : window.fbCallFn('nomFonction', {…}, {timeout:ms}) → data
+// ★ BOOT-1 (§145) — §52 GÉNÉRALISÉ À TOUS LES APPELS. Le délai passé au SDK (`opts.timeout`, 70 s par
+//   défaut) ne démarre qu'une fois le jeton App Check obtenu : un jeton qui ne vient jamais laissait la
+//   promesse pendante POUR TOUJOURS (la liste des profils au démarrage, l'adresse d'un profil, le
+//   signalement…). Cette course-ci démarre tout de suite. Marge de 10 s : un appel lent mais vivant
+//   garde le délai du SDK. Le minuteur est toujours nettoyé (§52 : sinon, un rejet tardif dans le vide).
+var _MV_FN_MARGE_MS = 10000;
 window.fbCallFn = function (name, data, opts) {
-  return httpsCallable(fns, name, opts || undefined)(data || {}).then(function (r) { return r.data; });
+  var appel = httpsCallable(fns, name, opts || undefined)(data || {}).then(function (r) { return r.data; });
+  var t = null;
+  var borne = new Promise(function (_ok, ko) {
+    t = setTimeout(function () {
+      var err = new Error('Le serveur ne répond pas (' + name + ')');
+      err.code = 'mv/timeout';
+      ko(err);
+    }, ((opts && opts.timeout) || 70000) + _MV_FN_MARGE_MS);
+  });
+  return Promise.race([appel, borne]).finally(function () { clearTimeout(t); });
 };
 // Mode émulateur (DEV/E2E) détecté tôt : Firestore en long-polling pour fiabiliser
 // la connexion navigateur → émulateur (le streaming WebChannel échoue souvent contre l'émulateur).
@@ -278,10 +298,29 @@ var FB_STATIC   = ['travaux','catalogue','conducteurs','activites',
 
 // ── Queue offline ──
 var _offlineQueue = {};
-
-function _queueSave(key, value) {
+// ★★★ FUSION-1 (§146) — la base de chaque valeur en file : l'état serveur dont elle dérivait QUAND
+//   elle est partie en file. Sans elle, l'envoi prenait pour base la relecture faite à la reconnexion
+//   (qui porte déjà ce que les autres ont saisi) et la fusion l'aurait effacé. La PREMIÈRE base est
+//   gardée : une deuxième saisie hors ligne s'accumule par-dessus la première. `null` = sans base
+//   (démarrage hors ligne) → l'envoi fera l'UNION.
+var _offlineBases = {};
+var _MV_FILE_BASE_CLE = 'mavigne_offline_queue_base';
+function _mvBaseFile(key) { var b = _offlineBases[key]; return (b === null || b === undefined) ? undefined : b; }
+function _mvBasesFileEcrire() {
+  try {
+    if (Object.keys(_offlineBases).length) localStorage.setItem(_MV_FILE_BASE_CLE, JSON.stringify(_offlineBases));
+    else localStorage.removeItem(_MV_FILE_BASE_CLE);
+  } catch (e) {
+    // Quota : la file passe avant ses bases. Sans base, l'envoi fera l'union — rien ne sera retiré.
+    if (window._mvAvale) window._mvAvale(e, 'firebase.js/_mvBasesFileEcrire');
+    try { localStorage.removeItem(_MV_FILE_BASE_CLE); } catch (e2) { if (window._mvAvale) window._mvAvale(e2, 'firebase.js/_mvBasesFileEcrire#2'); }
+  }
+}
+function _queueSave(key, value, base) {
   _offlineQueue[key] = value;
+  if (!Object.prototype.hasOwnProperty.call(_offlineBases, key)) _offlineBases[key] = (base === undefined) ? null : base;
   try { localStorage.setItem('mavigne_offline_queue', JSON.stringify(_offlineQueue)); } catch(e){ if(window._mvAvale) window._mvAvale(e,'firebase.js/_queueSave'); }
+  _mvBasesFileEcrire();
   // PREP-1 (§134) — la file porte le domaine qui l'a remplie (lue par _flushQueue en préparation).
   try { localStorage.setItem('mavigne_offline_queue_t', TENANT_ID || ''); } catch(e){ if(window._mvAvale) window._mvAvale(e,'firebase.js/_queueSave#t'); }
   _showOfflineQueueBadge();
@@ -328,6 +367,8 @@ function _loadQueue() {
     var raw = localStorage.getItem('mavigne_offline_queue');
     if (raw) _offlineQueue = JSON.parse(raw) || {};
   } catch (e) { _offlineQueue = {}; }
+  try { var rb = localStorage.getItem(_MV_FILE_BASE_CLE); _offlineBases = rb ? (JSON.parse(rb) || {}) : {}; }
+  catch (e) { _offlineBases = {}; if (window._mvAvale) window._mvAvale(e, 'firebase.js/_loadQueue#base'); }
 }
 
 async function _flushQueue() {
@@ -348,14 +389,32 @@ async function _flushQueue() {
     var key = keys[i];
     try {
       if (key === 'parcelles') {
-        await _saveParcellesMerged(_offlineQueue[key]); // #1 : fusion a la reconnexion (ne pas ecraser le travail des autres)
-      } else if (await _mvBlockDestructive(key, _offlineQueue[key])) {
-        // #wipe : ecriture destructrice en file -> on l'abandonne (pas de re-tentative en boucle)
-        if (window.logError) window.logError({ level:'critical', cat:'guard', msg:'flush ' + key + ' BLOQUE (anti-ecrasement) -- retire de la file' });
+        // #1 : fusion a la reconnexion (ne pas ecraser le travail des autres) — ★ FUSION-1 : avec la base
+        //   de la mise en file, et la mémoire mise à jour (elle dérive de la relecture, pas de la file).
+        var _bmP = Array.isArray(_baseParcelles) ? deepClone(_baseParcelles) : deepClone(_offlineQueue[key]);
+        var _pq = await _saveParcellesMerged(_offlineQueue[key], _mvBaseFile(key));
+        if (_pq && !_pq.__mvBlocked) _mvParcellesApres(_pq, _bmP);
+      } else if (_MV_FUSION_EXCLUES[key]) {
+        if (await _mvBlockDestructive(key, _offlineQueue[key])) {
+          // #wipe : ecriture destructrice en file -> on l'abandonne (pas de re-tentative en boucle)
+          if (window.logError) window.logError({ level:'critical', cat:'guard', msg:'flush ' + key + ' BLOQUE (anti-ecrasement) -- retire de la file' });
+        } else {
+          await setDoc(fbDocRef(key), { value: _fbClone(key, _offlineQueue[key]) });
+        }
       } else {
-        await setDoc(fbDocRef(key), { value: _fbClone(key, _offlineQueue[key]) });
+        // ★★★ FUSION-1 (§146) — la valeur en file est FUSIONNÉE avec le serveur : ce que les autres ont
+        //   saisi pendant l'absence reste. La mémoire, elle, dérive de la relecture de la reconnexion.
+        var _bmF = (_mvBaseDe(key) !== undefined) ? deepClone(_fbBases[key]) : deepClone(_offlineQueue[key]);
+        var _fq = await _mvSauverFusion(key, _offlineQueue[key], _mvBaseFile(key));
+        if (_fq && _fq.bloque) {
+          // #wipe : ecriture destructrice en file -> on l'abandonne (pas de re-tentative en boucle)
+          if (window.logError) window.logError({ level:'critical', cat:'guard', msg:'flush ' + key + ' BLOQUE (anti-ecrasement) -- retire de la file', detail:'cur=' + _fq.curN + ' new=' + _fq.newN });
+        } else {
+          _mvApresFusion(key, _fq.fusion, _bmF);
+        }
       }
       delete _offlineQueue[key];
+      delete _offlineBases[key];
     } catch (e) {
       // SEC-1 : idem fbSave — un refus de droits reste refusé. On l'abandonne (comme le
       // fait déjà la garde anti-écrasement) pour ne pas coincer la file à vie.
@@ -372,6 +431,7 @@ async function _flushQueue() {
         _mvStashDenied(key, _offlineQueue[key]);
         if (window.logError) window.logError({ level:'error', cat:'sync', msg:'Écriture refusée (droits) : ' + key + ' — retirée de la file, saisie conservée', detail:String(e) });
         delete _offlineQueue[key];
+        delete _offlineBases[key];
         continue;
       }
       if(window.logError) window.logError({level:'warning',cat:'sync',msg:'Synchro échouée: '+key,detail:String(e)});
@@ -379,6 +439,7 @@ async function _flushQueue() {
     }
   }
   try { localStorage.setItem('mavigne_offline_queue', JSON.stringify(_offlineQueue)); } catch(e){ if(window._mvAvale) window._mvAvale(e,'firebase.js/_flushQueue'); }
+  _mvBasesFileEcrire();
   if (Object.keys(_offlineQueue).length === 0) {
     try { localStorage.removeItem('mavigne_offline_queue_t'); } catch(e){ if(window._mvAvale) window._mvAvale(e,'firebase.js/_flushQueue#t'); }
   }
@@ -413,6 +474,9 @@ function showSyncBadge(msg, color) {
   // le sinistre que la couverture FB_REALTIME/FB_STATIC sert à empêcher.
   // Comparaison sur l'égalité EXACTE (3 sites d'appel) plutôt que sur une sous-chaîne :
   // « ✅ N modif. synchronisée » parle de la file d'écriture et reste vrai, lui.
+  // ★ REPRISE-1 (§145) — ni « Synchronisé » ni sa variante cochée quand ce qu'on vient de lire est la
+  //   copie du téléphone : le serveur n'a pas répondu.
+  if (String(msg).slice(-11) === 'Synchronisé' && window._mvSrvKO) { msg = 'Serveur injoignable — données du téléphone'; color = '#B85A1A'; }
   if (msg === 'Synchronisé' && _fbDeadCount()) { msg = 'Synchro partielle'; color = '#B85A1A'; }
   if (typeof window.showSyncBadge === 'function') {
     window.showSyncBadge(msg, color);
@@ -520,11 +584,16 @@ async function _pullKeys(keys, tag, respectIgnore) {
   });
   var res = await Promise.all(reads);   // ordre d'entree preserve -> ordre d'application stable
   var state = {};
+  var nCache = 0, nServeur = 0;         // ★ REPRISE-1 (§145) : d'où vient ce qu'on vient de lire
   for (var i = 0; i < res.length; i++) {
     var r = res[i];
     if (r.skip)           { state[r.key] = 'skip';    continue; }
     if (r.err)            { state[r.key] = 'error';   continue; }
-    if (!r.snap.exists()) { state[r.key] = 'missing'; continue; }
+    var _deCache = !!(r.snap.metadata && r.snap.metadata.fromCache);
+    if (_deCache) nCache++; else nServeur++;
+    // ⚠️ REPRISE-1 : une absence lue dans la COPIE DU TÉLÉPHONE n'est pas un constat — le serveur
+    //   n'a pas été joint. 'missing' autorise fbPushIfAbsent à écrire sans relire : jamais sur un doute.
+    if (!r.snap.exists()) { state[r.key] = _deCache ? 'error' : 'missing'; continue; }
     // Re-controle a l'APPLICATION : une sauvegarde a pu demarrer PENDANT la fenetre de lecture
     // parallele. Sans ce 2e controle, on ecraserait en memoire une valeur en cours d'ecriture.
     if (respectIgnore && _ignoreBefore[r.key] && Date.now() < _ignoreBefore[r.key]) {
@@ -532,9 +601,13 @@ async function _pullKeys(keys, tag, respectIgnore) {
       state[r.key] = 'skip'; continue;
     }
     state[r.key] = 'ok';
-    try { applyFbData(r.key, r.snap.data().value); }
+    try { var _pv = r.snap.data().value; applyFbData(r.key, _pv); _mvBaseNoter(r.key, _pv, r.snap.metadata); }
     catch (e) { if(window.logError) window.logError({level:'info',cat:'firebase',msg:tag+': '+r.key,detail:String(e)}); }
   }
+  // ★ REPRISE-1 : Firestore rend la copie du téléphone quand il ne joint pas le serveur, sans prévenir.
+  //   Le voyant le dit (« Pas de synchro ») au lieu d'annoncer « Synchronisé ».
+  if (nCache > 0) _mvSrvPerdu('relecture ' + tag + ' : ' + nCache + ' document(s) du téléphone');
+  else if (nServeur > 0) _mvSrvRetrouve();
   if(DEBUG) console.log('[PERF] ' + tag + ' — ' + keys.length + ' docs en ' + (Date.now() - t0) + ' ms');
   return state;
 }
@@ -558,7 +631,8 @@ async function fbPushIfAbsent(key, value, known) {
       return;
     }
     var snap = await getDoc(fbDocRef(key));
-    if (!snap.exists() && value !== undefined) {
+    // ★ REPRISE-1 (§145) — absent DE LA COPIE DU TÉLÉPHONE ne veut pas dire absent du serveur.
+    if (!snap.exists() && !(snap.metadata && snap.metadata.fromCache) && value !== undefined) {
       await setDoc(fbDocRef(key), { value: _fbClone(key, value) });
       if(DEBUG) console.log('[Firebase] Init collection absente :', key);
     }
@@ -664,14 +738,22 @@ function _fbListenFailed(key, e) {
 
 function _fbSubscribe(key) {
   _fbUnsubOne(key);
+  try {
   _fbUnsubs[key] = onSnapshot(fbDocRef(key), function (snap) {
       // Un snapshot reçu = le flux est vivant : la clé récupère son budget de reprise.
       _fbListenTries[key] = 0;
       if (_fbDeadKeys[key]) delete _fbDeadKeys[key];
+      // ★ REPRISE-1 (§145) — seul un instantané CONFIRMÉ par le serveur prouve la connexion : ni la
+      //   copie du téléphone (fromCache), ni l'écho d'une écriture locale (hasPendingWrites).
+      var _md = snap.metadata || {};
+      var _duServeur = !_md.fromCache && !_md.hasPendingWrites;
+      if (_duServeur) _mvSrvRetrouve();
       if (!snap.exists()) return;
       if (_ignoreNext[key])  { _ignoreNext[key] = false; return; }
       if (_ignoreBefore[key] && Date.now() < _ignoreBefore[key]) return;
-      applyFbData(key, snap.data().value);
+      var _sv = snap.data().value;
+      applyFbData(key, _sv);
+      _mvBaseNoter(key, _sv, _md);   // ★ FUSION-1 : la base suit ce qui descend du serveur
       if (window.currentUser) {
         var p = document.querySelector('.page.active');
         if (p) {
@@ -689,10 +771,18 @@ function _fbSubscribe(key) {
           if ((key==='reparateur'||key==='entretiens'||key==='reparateur_hist')  && pid==='page-tracteur'  && window.renderTracteur) window.renderTracteur();
           if ((key==='planning_templates'||key==='planning_entries'||key==='planning_hsup') && pid==='page-planning' && window.renderPlanning) window.renderPlanning();
         }
-        showSyncBadge('Mis à jour', '#1A4A7A');
-        setTimeout(function () { showSyncBadge('Synchronisé', '#3D6B27'); }, 1500);
+        if (_duServeur) {
+          showSyncBadge('Mis à jour', '#1A4A7A');
+          setTimeout(function () { showSyncBadge('Synchronisé', '#3D6B27'); }, 1500);
+        }
       }
     }, function (e) { _fbListenFailed(key, e); });
+  } catch (e) {
+    // ★ REPRISE-1 (§145) — onSnapshot LÈVE tout de suite quand la file du SDK est hors service :
+    //   relancer l'écoute en boucle n'y changerait rien, seule une relance de la page guérit.
+    if (_mvFsEtat() === 'mort') _mvFsMort('ecoute');
+    else _fbListenFailed(key, e);
+  }
 }
 
 function fbListen() {
@@ -975,6 +1065,211 @@ function _mvMergeParcelles(base, local, remote) {
   local.forEach(function(p){ if (p && p.nom != null) emit(p.nom); });
   return out;
 }
+// ════════════════════════════════════════════════════════════════════════════
+// ★★★ FUSION-1 (§146) — UNE ÉCRITURE N'EFFACE PLUS CE QU'UN AUTRE APPAREIL A SAISI
+// ════════════════════════════════════════════════════════════════════════════
+// Chaque document est réécrit EN ENTIER. Seules les parcelles étaient fusionnées : partout ailleurs,
+// le dernier qui écrivait gagnait — un téléphone à la copie en retard (Cave sans écoute, flux mort,
+// file hors ligne) effaçait ce que l'ordinateur avait ajouté entre-temps, sans un mot. La garde
+// anti-perte ne mord qu'au-delà de la moitié : une ligne perdue passait.
+// Désormais chaque écriture est une TRANSACTION : relire le serveur, fusionner à trois voies
+//   base   = l'état serveur dont la mémoire de CET appareil dérive (_fbBases),
+//   local  = ce qu'on veut écrire,
+//   distant = le serveur, maintenant,
+// puis écrire le résultat, et le reporter dans la mémoire (sinon la base mentirait à la prochaine
+// écriture : c'est le défaut dormant que les parcelles portaient, §146b).
+// Règles, dans l'ordre : ce qui n'a bougé que d'un côté prend ce côté ; deux objets se fusionnent
+// clé par clé ; deux listes d'enregistrements se fusionnent élément par élément (par `id`, sinon
+// `nom`, sinon par contenu) ; une ligne supprimée d'un côté et MODIFIÉE de l'autre est GARDÉE ; une
+// même valeur changée des deux côtés : celle de cet appareil. Sans base connue (démarrage hors
+// ligne), c'est l'UNION : rien de ce que le serveur porte n'est retiré.
+// Hors fusion générique — parcelles : leur propre fusion (par nom) ; KML : un import REMPLACE, c'est voulu ;
+// travaux : recalculés depuis le journal.
+var _MV_FUSION_EXCLUES = { parcelles: 1, kml_polygons: 1, travaux: 1 };
+var _fbBases = {};
+
+// Égalité de fond : `undefined` ne compte pas (Firestore ne le stocke pas), l'ordre des clés non plus.
+function _mvEgal(a, b) {
+  if (a === b) return true;
+  if (a == null || b == null) return a == null && b == null;
+  if (typeof a !== 'object' || typeof b !== 'object') return a === b;
+  var aL = Array.isArray(a), bL = Array.isArray(b);
+  if (aL !== bL) return false;
+  if (aL) {
+    if (a.length !== b.length) return false;
+    for (var i = 0; i < a.length; i++) if (!_mvEgal(a[i], b[i])) return false;
+    return true;
+  }
+  var k, n = 0;
+  for (k in a) if (Object.prototype.hasOwnProperty.call(a, k) && a[k] !== undefined) { n++; if (!_mvEgal(a[k], b[k])) return false; }
+  for (k in b) if (Object.prototype.hasOwnProperty.call(b, k) && b[k] !== undefined) n--;
+  return n === 0;
+}
+// Forme canonique (clés triées, `undefined` retiré) : l'identité d'un enregistrement sans `id`.
+function _mvCanon(v) {
+  if (v === undefined || v === null) return 'null';
+  if (typeof v !== 'object') return JSON.stringify(v);
+  if (Array.isArray(v)) return '[' + v.map(_mvCanon).join(',') + ']';
+  return '{' + Object.keys(v).filter(function (k) { return v[k] !== undefined; }).sort()
+    .map(function (k) { return JSON.stringify(k) + ':' + _mvCanon(v[k]); }).join(',') + '}';
+}
+function _mvFusion(B, L, R) {
+  if (_mvEgal(L, R)) return L;
+  if (B !== undefined) {
+    if (_mvEgal(L, B)) return R;          // seul le serveur a bougé
+    if (_mvEgal(R, B)) return L;          // seul cet appareil a bougé
+  }
+  if (_mvIsObj(L) && _mvIsObj(R)) return _mvFusionObjet(_mvIsObj(B) ? B : undefined, L, R);
+  if (Array.isArray(L) && Array.isArray(R)) return _mvFusionListe(Array.isArray(B) ? B : undefined, L, R);
+  return L;                               // une même valeur changée des deux côtés : celle de cet appareil
+}
+function _mvFusionObjet(B, L, R) {
+  var out = {}, vus = {}, cles = [];
+  [L, R, B || {}].forEach(function (o) { Object.keys(o).forEach(function (k) { if (!vus[k]) { vus[k] = 1; cles.push(k); } }); });
+  cles.forEach(function (k) {
+    var lv = L[k], rv = R[k], bv = B ? B[k] : undefined;
+    var lH = lv !== undefined, rH = rv !== undefined, bH = bv !== undefined;
+    if (lH && rH) { out[k] = _mvFusion(bH ? bv : undefined, lv, rv); return; }
+    if (lH) { if (!(bH && _mvEgal(lv, bv))) out[k] = lv; return; }   // retiré ailleurs et intact ici → retiré
+    if (rH) { if (!(bH && _mvEgal(rv, bv))) out[k] = rv; }            // retiré ici et intact ailleurs → retiré
+  });
+  return out;
+}
+// Comment reconnaître un élément d'une version à l'autre : par `id` si TOUS les enregistrements en
+// portent un, sinon par `nom`, sinon par leur contenu. Une liste qui contient des valeurs simples n'a
+// pas d'identité : c'est une feuille — elle ne se fusionne pas ; si elle a bougé des deux côtés, cet
+// appareil l'emporte.
+function _mvIdentite(listes) {
+  var i, j, c;
+  for (i = 0; i < listes.length; i++) for (j = 0; j < listes[i].length; j++) if (!_mvIsObj(listes[i][j])) return null;
+  var champs = ['id', 'nom'];
+  for (c = 0; c < champs.length; c++) {
+    var ok = true;
+    for (i = 0; i < listes.length && ok; i++) for (j = 0; j < listes[i].length; j++) {
+      var v = listes[i][j][champs[c]];
+      if (v === undefined || v === null || v === '') { ok = false; break; }
+    }
+    if (ok) return champs[c];
+  }
+  return 'contenu';
+}
+// Les clés des versions d'une liste. Un identifiant présent PLUS D'UNE FOIS dans l'une des versions
+// (deux lignes créées la même milliseconde) n'identifie plus rien : ces lignes-là prennent leur
+// CONTENU pour clé, comme une liste sans identifiant — elles ne se fusionnent jamais entre elles. La
+// n-ième occurrence d'un même contenu a sa propre clé. Le contenu ne se calcule que pour elles : une
+// liste bien identifiée reste rapide.
+function _mvClesListes(listes, champ) {
+  var ambigus = {};
+  if (champ !== 'contenu') listes.forEach(function (l) {
+    var vu = {};
+    l.forEach(function (x) { var v = typeof x[champ] + ':' + x[champ]; if (vu[v]) ambigus[v] = 1; vu[v] = 1; });
+  });
+  return listes.map(function (l) {
+    var n = {};
+    return l.map(function (x) {
+      var v = (champ === 'contenu') ? null : typeof x[champ] + ':' + x[champ];
+      if (v !== null && !ambigus[v]) return 'i' + v;
+      var c = 'c' + _mvCanon(x);
+      n[c] = (n[c] || 0) + 1;
+      return c + '#' + n[c];
+    });
+  });
+}
+function _mvFusionListe(B, L, R) {
+  var champ = _mvIdentite(B ? [L, R, B] : [L, R]);
+  if (!champ) return L;
+  var cles = _mvClesListes(B ? [L, R, B] : [L, R], champ);
+  var kL = cles[0], kR = cles[1], kB = B ? cles[2] : [];
+  var mL = {}, mR = {}, mB = {}, i, j;
+  for (i = 0; i < L.length; i++) mL[kL[i]] = L[i];
+  for (i = 0; i < R.length; i++) mR[kR[i]] = R[i];
+  for (i = 0; i < kB.length; i++) mB[kB[i]] = B[i];
+  var a = function (m, k) { return Object.prototype.hasOwnProperty.call(m, k); };
+  // Une ligne présente des deux côtés reste ; présente d'un seul côté, elle reste SAUF si l'autre
+  // l'a supprimée sans que ce côté-ci l'ait touchée. Modifiée d'un côté, supprimée de l'autre : gardée.
+  var garde = function (k) {
+    if (a(mL, k) && a(mR, k)) return true;
+    if (a(mL, k)) return !(a(mB, k) && _mvEgal(mL[k], mB[k]));
+    if (a(mR, k)) return !(a(mB, k) && _mvEgal(mR[k], mB[k]));
+    return false;
+  };
+  var valeur = function (k) {
+    if (a(mL, k) && a(mR, k)) return k.charAt(0) === 'c' ? mL[k] : _mvFusion(a(mB, k) ? mB[k] : undefined, mL[k], mR[k]);
+    return a(mL, k) ? mL[k] : mR[k];
+  };
+  // L'ordre de cet appareil ; une ligne venue d'ailleurs se place à côté de sa voisine d'origine —
+  // en tête pour une liste qui ajoute en tête (journal), en queue pour une liste qui ajoute en queue.
+  var ordre = [], dans = {};
+  for (i = 0; i < kL.length; i++) if (garde(kL[i])) { ordre.push(kL[i]); dans[kL[i]] = 1; }
+  for (i = 0; i < kR.length; i++) {
+    var k = kR[i];
+    if (dans[k] || !garde(k)) continue;
+    var pos = -1;
+    for (j = i - 1; j >= 0 && pos < 0; j--) if (dans[kR[j]]) pos = ordre.indexOf(kR[j]) + 1;
+    for (j = i + 1; j < kR.length && pos < 0; j++) if (dans[kR[j]]) pos = ordre.indexOf(kR[j]);
+    if (pos < 0) pos = ordre.length;
+    ordre.splice(pos, 0, k);
+    dans[k] = 1;
+  }
+  return ordre.map(valeur);
+}
+// La base d'une clé : l'état SERVEUR dont la mémoire dérive. Jamais un instantané qui porte des
+// écritures locales en attente (hasPendingWrites) : il contiendrait nos propres modifications non
+// envoyées, et la fusion les prendrait pour « déjà sur le serveur ».
+function _mvBaseNoter(key, value, md) {
+  if (_MV_FUSION_EXCLUES[key] || value === undefined || (md && md.hasPendingWrites)) return false;
+  try { _fbBases[key] = deepClone(value); return true; }
+  catch (e) { if (window._mvAvale) window._mvAvale(e, 'firebase.js/_mvBaseNoter'); return false; }
+}
+function _mvBaseDe(key) { return Object.prototype.hasOwnProperty.call(_fbBases, key) ? _fbBases[key] : undefined; }
+function _mvBaseMem(key) {
+  var b = (key === 'parcelles') ? (Array.isArray(_baseParcelles) ? _baseParcelles : undefined) : _mvBaseDe(key);
+  return (b === undefined) ? undefined : deepClone(b);
+}
+
+// L'écriture fusionnée : relire, fusionner, garder (même règle que _mvBlockDestructive, sur le
+// résultat), écrire. Une transaction se rejoue d'elle-même si le document bouge entre la lecture et
+// l'écriture ; hors ligne, elle échoue — et fbSave met en file, avec sa base.
+async function _mvSauverFusion(key, local, base) {
+  var ref = fbDocRef(key);
+  return runTransaction(db, async function (tx) {
+    var snap = await tx.get(ref);
+    var distant = snap.exists() ? snap.data().value : undefined;
+    var fusion = (distant === undefined) ? local : _mvFusion(base, local, distant);
+    if (distant !== undefined && Object.prototype.hasOwnProperty.call(_MV_GUARD_FLOORS, key)) {
+      var curN = _mvDocSize(key, distant), newN = _mvDocSize(key, fusion);
+      if (curN >= _MV_GUARD_FLOORS[key] && newN < curN * 0.5) return { bloque: true, curN: curN, newN: newN };
+    }
+    tx.set(ref, { value: _fbClone(key, fusion) });
+    return { fusion: fusion, distant: distant !== undefined && !_mvEgal(fusion, local) };
+  });
+}
+// Après l'écriture : la mémoire dérivait de `baseMem` ; le serveur porte `fusion`. Si le serveur
+// apporte quelque chose, on le reporte dans la mémoire EN GARDANT ce qui y a été saisi pendant
+// l'écriture (fusion à trois voies, base = baseMem). Si l'on tape dans un champ, on ne touche à rien
+// ET la base ne bouge pas : la prochaine écriture refusionnera juste.
+function _mvApresFusion(key, fusion, baseMem) {
+  if (_mvEgal(fusion, baseMem)) { _mvBaseNoter(key, fusion); return 'rien'; }
+  if (_mvSaisieEnCours()) return 'differe';
+  var courant = window[key.toUpperCase()];
+  var rebase = (courant === undefined) ? fusion : _mvFusion(baseMem, courant, fusion);
+  applyFbData(key, deepClone(rebase));
+  _mvBaseNoter(key, fusion);
+  if (typeof window._mvRendrePageActive === 'function') window._mvRendrePageActive();   // l'écran ouvert le montre
+  return 'reporte';
+}
+// Même règle pour les parcelles, avec leur propre fusion (par nom). ⚠️ Avant FUSION-1, la base
+// devenait le résultat fusionné SANS que la mémoire le reçoive (l'écho de l'écriture est ignoré
+// quatre secondes) : l'écriture suivante reprenait l'ancienne valeur d'une tâche validée ailleurs.
+function _mvParcellesApres(fusion, baseMem) {
+  if (_mvEgal(fusion, baseMem)) { _baseParcelles = deepClone(fusion); return 'rien'; }
+  if (_mvSaisieEnCours()) return 'differe';     // la base ne bouge pas : la prochaine écriture refusionnera
+  var courant = Array.isArray(window.PARCELLES) ? window.PARCELLES : baseMem;
+  applyFbData('parcelles', deepClone(_mvMergeParcelles(baseMem, courant, fusion)));
+  _baseParcelles = deepClone(fusion);
+  if (typeof window._mvRendrePageActive === 'function') window._mvRendrePageActive();
+  return 'reporte';
+}
 // ============ GARDE ANTI-ECRASEMENT GLOBAL (#wipe) ============================
 // Empeche tout etat par defaut / vide / tronque de remplacer des donnees serveur
 // peuplees. Vaut pour TOUTES les collections critiques, TOUS les domaines.
@@ -1104,12 +1399,15 @@ async function _mvBlockDestructive(key, value) {
 }
 
 // Sauvegarde parcelles transactionnelle : lit le serveur frais, fusionne, ecrit, met la base a jour.
-async function _saveParcellesMerged(localValue) {
+// ★ FUSION-1 (§146) — `baseFile` : la base de la mise en file (sinon la base courante). La base n'est
+//   plus posée DANS la transaction : c'est _mvParcellesApres, après, qui la pose avec la mémoire.
+async function _saveParcellesMerged(localValue, baseFile) {
   var ref = fbDocRef('parcelles');
+  var base0 = (baseFile !== undefined) ? baseFile : _baseParcelles;
   return runTransaction(db, async function (tx) {
     var snap = await tx.get(ref);
     var remote = (snap.exists() && Array.isArray(snap.data().value)) ? snap.data().value : [];
-    var base = Array.isArray(_baseParcelles) ? _baseParcelles : remote;
+    var base = Array.isArray(base0) ? base0 : remote;
     var merged = _mvMergeParcelles(base, localValue, remote);
 
     // -- GARDE : refuse une chute de progression > 50% (ecrasement massif) --------
@@ -1120,7 +1418,6 @@ async function _saveParcellesMerged(localValue) {
     }
 
     tx.set(ref, { value: deepClone(merged) });
-    _baseParcelles = deepClone(merged);
     return merged;
   });
 }
@@ -1154,14 +1451,16 @@ window.fbSave = async function (key, value) {
   _ignoreNext[key]   = true;
   _ignoreBefore[key] = Date.now() + 4000;
   if (!navigator.onLine) {
-    _queueSave(key, value);
+    _queueSave(key, value, _mvBaseMem(key));
     return { ok: false, queued: true, offline: true };
   }
+  var _msgOk = 'Sauvegardé';
   try {
     if (key === 'parcelles') {
       // #1 : fusion 3-way transactionnelle (fin du last-write-wins sur le point chaud terrain)
       // #wipe : peut renvoyer {__mvBlocked} si l'ecriture ferait disparaitre la progression
-      var _pRes = await _retryAsync(function(){ return _saveParcellesMerged(value); }, 3, 1000);
+      var _pL0 = deepClone(value);
+      var _pRes = await _retryAsync(function(){ return _saveParcellesMerged(_pL0); }, 3, 1000);
       if (_pRes && _pRes.__mvBlocked) {
         if (window.logError) window.logError({ level:'critical', cat:'guard', msg:'fbSave parcelles BLOQUE (anti-ecrasement)', detail:'remoteProg='+_pRes.remoteProg+' mergedProg='+_pRes.mergedProg });
         try { var _sH = await getDoc(fbDocRef('parcelles')); if (_sH.exists()) applyFbData('parcelles', _sH.data().value); } catch(e){ if(window._mvAvale) window._mvAvale(e,'firebase.js/fbSave'); }
@@ -1169,7 +1468,8 @@ window.fbSave = async function (key, value) {
         if (window.showToast) window.showToast('Ecriture ignoree : protection anti-perte de donnees', '#7A1020');
         return { ok: false, blocked: true };
       }
-    } else {
+      if (_mvParcellesApres(_pRes, _pL0) !== 'rien') _msgOk = 'Sauvegardé — fusionné avec un autre appareil';
+    } else if (_MV_FUSION_EXCLUES[key]) {
       // #wipe : garde generique anti-ecrasement (lecture-avant-ecriture)
       if (await _mvBlockDestructive(key, value)) {
         try { var _sH2 = await getDoc(fbDocRef(key)); if (_sH2.exists()) applyFbData(key, _sH2.data().value); } catch(e){ if(window._mvAvale) window._mvAvale(e,'firebase.js/fbSave#2'); }
@@ -1178,8 +1478,21 @@ window.fbSave = async function (key, value) {
         return { ok: false, blocked: true };
       }
       await _retryAsync(function(){ return setDoc(fbDocRef(key), { value: _fbClone(key, value) }); }, 3, 1000);
+    } else {
+      // ★★★ FUSION-1 (§146) — relire, fusionner, écrire : ce qu'un autre appareil a ajouté reste.
+      var _fL0 = deepClone(value), _fB0 = _mvBaseDe(key);
+      var _fRes = await _retryAsync(function(){ return _mvSauverFusion(key, _fL0, _fB0); }, 3, 1000);
+      if (_fRes && _fRes.bloque) {
+        if (window.logError) window.logError({ level:'critical', cat:'guard', msg:'fbSave ' + key + ' BLOQUE (anti-ecrasement)', detail:'cur=' + _fRes.curN + ' new=' + _fRes.newN });
+        try { var _sH3 = await getDoc(fbDocRef(key)); if (_sH3.exists()) { applyFbData(key, _sH3.data().value); _mvBaseNoter(key, _sH3.data().value, _sH3.metadata); } } catch(e){ if(window._mvAvale) window._mvAvale(e,'firebase.js/fbSave#fusion'); }
+        if (typeof showSyncBadge === 'function') showSyncBadge('Sauvegarde ignorée (protection)', '#B5621A');
+        if (window.showToast) window.showToast('Ecriture ignoree : protection anti-perte de donnees', '#7A1020');
+        return { ok: false, blocked: true };
+      }
+      _mvApresFusion(key, _fRes.fusion, _fL0);
+      if (_fRes.distant) _msgOk = 'Sauvegardé — fusionné avec un autre appareil';
     }
-    showSyncBadge('Sauvegardé', '#3D6B27');
+    showSyncBadge(_msgOk, '#3D6B27');
     // Une modif a pu être mise en file lors d'un échec précédent ALORS QU'ON RESTAIT
     // en ligne (aucun event 'online' pour la retenter). On profite de ce succès pour
     // vider la file — la modif coincée repart sans attendre un rechargement.
@@ -1201,7 +1514,7 @@ window.fbSave = async function (key, value) {
       var _alive = await _mvTokenAlive();
       if (!_alive) {
         if (window.logError) window.logError({ level:'info', cat:'firebase', msg:'Jeton non rafraîchi — écriture mise en file : ' + key, detail:String(e) });
-        _queueSave(key, value);
+        _queueSave(key, value, _mvBaseMem(key));
         if (navigator.onLine) _mvSoonFlush(5000);
         return { ok: false, queued: true, tokenStale: true, code: (e && e.code) || '' };
       }
@@ -1231,7 +1544,7 @@ window.fbSave = async function (key, value) {
     //    part avec « Signaler un probleme » ; c'est le badge de synchro qui parle a
     //    l'utilisateur, en francais et en disant la verite.
     if(window.logError) window.logError({level:'info',cat:'firebase',msg:'fbSave échoué (3 tentatives): '+key,detail:String(e)});
-    _queueSave(key, value);
+    _queueSave(key, value, _mvBaseMem(key));
     // Retenter bientôt même si on reste EN LIGNE (sinon la file ne se vide qu'au reload)
     if (navigator.onLine) { clearTimeout(_onlineRetryTO); _onlineRetryTO = setTimeout(function(){ _flushQueue().catch(function(_e){ if(window._mvAvale) window._mvAvale(_e,'firebase.js/fbSave#4'); }); }, 5000); }
     return { ok: false, queued: true, code: (e && e.code) || '' };
@@ -1375,6 +1688,10 @@ window._fbLoadAfterAuth = async function () {
     showSyncBadge('✅ Synchronisé', '#3D6B27');
     window._authReady = true;
     fbListen();
+    // ★ REPRISE-1 (§145) — relecture passée par la copie du téléphone : on revérifie dans 15 s.
+    //   Sinon, le carnet d'incidents de l'appareil part au journal du domaine.
+    if (window._mvSrvKO) setTimeout(function () { window._mvReprise(Infinity).catch(function (e) { if (window._mvAvale) window._mvAvale(e, 'firebase.js/_fbLoadAfterAuth#reprise'); }); }, 15000);
+    else setTimeout(_mvIncidentsEnvoyer, 4000);
     if (window._fbLoadEphy) window._fbLoadEphy(); // catalogue E-Phy partagé (non bloquant)
     if (Object.keys(_offlineQueue).length > 0) {
       setTimeout(_flushQueue, 1500);
@@ -1428,11 +1745,326 @@ window.fbGetLoginEmail = async function (nom) {
   return (r && r.email) ? String(r.email) : '';
 };
 
+// ════════════════════════════════════════════════════════════════════════════
+// ★★★ BOOT-1 + REPRISE-1 (§145) — LE DÉMARRAGE NE RESTE JAMAIS MUET, ET LE RETOUR DE VEILLE
+//     VÉRIFIE QUE LE SERVEUR RÉPOND ENCORE
+// ════════════════════════════════════════════════════════════════════════════
+// Signalé sur iPhone : « l'app freeze sur la page d'accueil sans faire apparaître la sélection du
+// profil », et « une opération enregistrée sur l'ordi n'est pas prise en compte sur mon téléphone ».
+// Deux faces d'un même moment : le retour de veille.
+//  · Les profils n'apparaissent que quand _fbLoad arrive au bout. UNE attente qui ne se règle jamais
+//    — jeton App Check jamais obtenu (§52), lecture sans serveur — et l'écran de connexion restait
+//    vide POUR TOUJOURS : ni tuile, ni sablier. boot.js ne couvre pas ce cas : __MV_BOOTED est posé
+//    dès l'évaluation d'app.js, bien avant _fbLoad.
+//  · App Check 0.8.8 charge le script reCAPTCHA avec `onload` SEUL (lu dans le SDK) : si le script
+//    ne se charge pas, App Check ne démarre jamais, et tout ce qui demande un jeton attend dans CETTE
+//    page — les appels au serveur, la connexion, Firestore. Seule une relance de la page guérit.
+//  · Au retour de veille, rien ne vérifiait que le flux temps réel avait survécu. Un flux mort ne se
+//    signale pas ; une relecture sans serveur rend la copie du téléphone ; l'app disait « Synchronisé ».
+//  · « INTERNAL ASSERTION FAILED » était masqué comme bénin. Dans le SDK (Firestore 4.7.3), une erreur
+//    interne met sa file de travail hors service jusqu'au rechargement : toute lecture, écriture ou
+//    écoute suivante renvoie ce même message.
+// Les durées ci-dessous sont des CHOIX, pas des mesures : le carnet d'incidents dira s'il faut les
+// resserrer ou les élargir.
+var _MV_DEPASSE = { __mvDepasse: true };
+var _MV_BOOT_BORNES = { statut: 5000, profils: 8000, membres: 6000, garde: 15000 };
+
+// Une attente bornée : rend `siDepasse` au-delà de `ms`, sans rejeter pour ça. Le minuteur est
+// TOUJOURS nettoyé (§52 : un minuteur oublié rejette plus tard, dans le vide).
+function _mvBorne(p, ms, siDepasse) {
+  var t = null;
+  var borne = new Promise(function (res) { t = setTimeout(function () { res(siDepasse); }, ms); });
+  return Promise.race([Promise.resolve(p), borne]).finally(function () { clearTimeout(t); });
+}
+
+function _mvBootDebut() {
+  var B = window.__MV_BOOT = { etape: 'file', t0: Date.now(), fin: false, notes: [] };
+  setTimeout(function () { _mvBootGarde(B); }, _MV_BOOT_BORNES.garde);
+  return B;
+}
+function _mvBootNote(B, n) {
+  B.notes.push(n);
+  _mvIncident({ type: n, etape: B.etape, ms: Date.now() - B.t0 });
+}
+// Le filet final : _fbLoad n'est pas allé au bout, et l'écran de connexion est encore VIDE → les
+// profils enregistrés sur l'appareil. Rien d'autre n'est touché (onboarding, préparation, accueil
+// public : ils ont masqué l'écran de connexion, ou posé `fin`).
+function _mvBootGarde(B) {
+  if (B.fin) return 'fini';
+  if (window.currentUser) return 'occupe';      // déjà connecté : l'écran de connexion n'est plus là
+  var ls = document.getElementById('login-screen'), pr = document.getElementById('login-profiles');
+  if (!ls || !pr || ls.style.display === 'none' || pr.children.length) return 'occupe';
+  _mvBootNote(B, 'demarrage-bloque');
+  if (window.logError) window.logError({ level: 'info', cat: 'boot', msg: 'Démarrage bloqué à l\u2019étape « ' + B.etape + ' » — profils de l\u2019appareil', detail: (Date.now() - B.t0) + ' ms' });
+  if (typeof window.loadData === 'function') window.loadData();
+  if (typeof window.initLogin === 'function') window.initLogin();
+  return 'repli';
+}
+
+// Quelqu'un a déjà touché une tuile : confirmLogin lira MEMBRES[loginPendingIdx]. Une liste remplacée
+// sous ses doigts changerait la personne — on n'y touche plus.
+function _mvTuileTouchee() {
+  return typeof window.loginPendingIdx === 'number' && window.loginPendingIdx >= 0;
+}
+function _mvMembresServeur(liste) {
+  if (window.currentUser || _mvTuileTouchee()) return false;
+  applyFbData('membres', liste);
+  return true;
+}
+function _mvProfilsAfficher() {
+  if (window.currentUser || _mvTuileTouchee()) return false;
+  if (typeof window.initLogin === 'function') window.initLogin();
+  return true;
+}
+// Les données enregistrées sur l'appareil — jamais une fois quelqu'un connecté ou une tuile touchée :
+// loadData remplacerait la mémoire (relue du serveur APRÈS la connexion) par la copie du disque. Le
+// filet final montre des tuiles pendant que _fbLoad attend encore : on peut donc être connecté avant
+// que _fbLoad n'arrive au bout (vu par l'e2e, §145i).
+function _mvDonneesAppareil() {
+  if (window.currentUser || _mvTuileTouchee()) return false;
+  if (typeof window.loadData === 'function') window.loadData();
+  return true;
+}
+// La liste des profils arrivée APRÈS la borne : elle remplace celle de l'appareil (applyFbData
+// rafraîchit les tuiles tant que l'écran de connexion est affiché).
+function _mvRosterTardif(p) {
+  return Promise.resolve(p).then(function (rr) {
+    var r = (rr && Array.isArray(rr.roster)) ? rr.roster : null;
+    return (r && r.length) ? _mvMembresServeur(r) : false;
+  }, function (e) { if (window._mvAvale) window._mvAvale(e, 'firebase.js/_mvRosterTardif'); return false; });
+}
+
+// ── App Check : le script reCAPTCHA sans gestion d'échec ──
+// initializeAppCheck l'insère DE FAÇON SYNCHRONE (lu dans le SDK) : il est donc déjà dans la page
+// quand on arrive ici, et son échec s'écoute.
+function _mvAcEcouter() {
+  try {
+    var s = document.querySelector('script[src^="https://www.google.com/recaptcha/api.js"]');
+    if (!s) return false;
+    s.addEventListener('error', function () {
+      window._mvAcKO = Date.now();
+      window._mvAcSrc = s.src;
+      _mvIncident({ type: 'appcheck-script' });
+      if (window.logError) window.logError({ level: 'info', cat: 'boot', msg: 'Script reCAPTCHA non chargé — App Check bloqué dans cette page' });
+      setTimeout(function () { _mvAcRelance().catch(function (e) { if (window._mvAvale) window._mvAvale(e, 'firebase.js/_mvAcRelance'); }); }, 3000);
+    });
+    return true;
+  } catch (e) { if (window._mvAvale) window._mvAvale(e, 'firebase.js/_mvAcEcouter'); return false; }
+}
+// Sur l'écran de connexion, rien n'est encore saisi : relancer ne coûte rien et guérit. Une fois
+// entré, jamais sous les doigts — le voyant et sa fenêtre proposent la relance.
+// ⚠️ Relancer ne guérit que si le script PEUT se charger maintenant : un réseau qui se réveillait,
+//   oui ; un bloqueur de contenu, un réseau qui filtre Google — ou l'e2e, qui coupe reCAPTCHA exprès —,
+//   non : la page neuve rejouerait l'écran d'accueil pour rien, sous les doigts de qui choisit son
+//   profil. (L'e2e l'a montré : la relance arrivait pendant le clic sur la tuile, §145i.) On sonde
+//   donc l'adresse du script d'abord ; en échec, une seconde sonde 12 s plus tard, puis on s'arrête —
+//   le bouton « Relancer l'application » reste là quand la connexion échoue.
+function _mvAcSonde(src) {
+  if (!src || typeof fetch !== 'function') return Promise.resolve(false);
+  try {
+    return _mvBorne(fetch(src, { mode: 'no-cors', cache: 'no-store' }).then(function () { return true; }, function () { return false; }), 5000, false);
+  } catch (e) { if (window._mvAvale) window._mvAvale(e, 'firebase.js/_mvAcSonde'); return Promise.resolve(false); }
+}
+function _mvAcRelance(essai) {
+  if (!window._mvAcKO || window.currentUser || _mvTuileTouchee()) return Promise.resolve('non');
+  if (!navigator.onLine) { window.addEventListener('online', function () { _mvAcRelance(essai); }, { once: true }); return Promise.resolve('attente'); }
+  return _mvAcSonde(window._mvAcSrc).then(function (joignable) {
+    if (window.currentUser || _mvTuileTouchee()) return 'non';
+    if (!joignable) {
+      if (!essai) { setTimeout(function () { _mvAcRelance(1); }, 12000); return 'sonde-ko'; }
+      _mvIncident({ type: 'appcheck-bloque' });
+      return 'bloque';
+    }
+    return _mvRechargerBorne('appcheck-script', 0) ? 'recharge' : 'borne';
+  });
+}
+
+// ── Relancer la page ──
+var _MV_RECHARGE_CLE = 'mv_recharge_auto', _MV_RECHARGE_ECART_MS = 120000;
+function _mvRechargePermise() {
+  var der = 0;
+  try { der = parseInt(sessionStorage.getItem(_MV_RECHARGE_CLE) || '0', 10) || 0; }
+  catch (e) { if (window._mvAvale) window._mvAvale(e, 'firebase.js/_mvRechargePermise'); }
+  return !(der && (Date.now() - der) < _MV_RECHARGE_ECART_MS);
+}
+// Une relance AUTOMATIQUE au plus toutes les deux minutes : jamais de boucle, même si la page neuve
+// retombe dans le même trou.
+function _mvRechargerBorne(motif, delaiMs) {
+  if (!_mvRechargePermise()) return false;
+  try { sessionStorage.setItem(_MV_RECHARGE_CLE, String(Date.now())); }
+  catch (e) { if (window._mvAvale) window._mvAvale(e, 'firebase.js/_mvRechargerBorne'); }
+  _mvIncident({ type: 'relance-auto', motif: motif });
+  if (delaiMs) setTimeout(function () { location.reload(); }, delaiMs); else location.reload();
+  return true;
+}
+// Le bouton « Relancer l'application » (écran de connexion, fenêtre du voyant) : toujours permis.
+window._mvRecharger = function () {
+  _mvIncident({ type: 'relance-manuelle' });
+  try { sessionStorage.removeItem('mv_boot_retry'); }
+  catch (e) { if (window._mvAvale) window._mvAvale(e, 'firebase.js/_mvRecharger'); }
+  location.reload();
+};
+function _mvSaisieEnCours() {
+  var a = document.activeElement;
+  if (!a || a === document.body || a === document.documentElement) return false;
+  var t = String(a.tagName || '').toUpperCase();
+  return t === 'INPUT' || t === 'TEXTAREA' || t === 'SELECT' || a.isContentEditable === true;
+}
+window._mvSaisieEnCours = _mvSaisieEnCours;
+// Relancer ne perd rien de ce qui est ENREGISTRÉ (la file vit dans localStorage, Firestore garde ses
+// écritures en attente sur l'appareil) — mais perdrait une fenêtre de saisie ouverte.
+function _mvRechargeSure() {
+  if (_mvSaisieEnCours()) return false;
+  return !document.querySelector('.overlay.open, .mvv-ov.open');
+}
+
+// ── Carnet d'incidents de l'appareil ──
+// Ce que le téléphone a vécu (démarrage bloqué, script en échec, serveur injoignable, Firestore hors
+// service, relances) : noté sur place, parce qu'à ce moment-là rien ne part vers le serveur.
+var _MV_INC_CLE = 'mavigne_incidents_v1', _MV_INC_MAX = 12;
+function _mvIncident(o) {
+  try {
+    var l = JSON.parse(localStorage.getItem(_MV_INC_CLE) || '[]');
+    if (!Array.isArray(l)) l = [];
+    l.push(Object.assign({ ts: new Date().toISOString(), v: String(window.APP_VERSION || ''), enLigne: !!navigator.onLine }, o || {}));
+    if (l.length > _MV_INC_MAX) l = l.slice(l.length - _MV_INC_MAX);
+    localStorage.setItem(_MV_INC_CLE, JSON.stringify(l));
+    return l.length;
+  } catch (e) { if (window._mvAvale) window._mvAvale(e, 'firebase.js/_mvIncident'); return 0; }
+}
+window._mvIncident = _mvIncident;
+// Il part dans le journal du domaine (Admin GT › erreurs) à la première connexion SAINE, en UNE
+// entrée : fbAppendError relit puis réécrit tout le journal, deux envois simultanés s'écraseraient.
+function _mvIncidentsEnvoyer() {
+  var l = [];
+  try { l = JSON.parse(localStorage.getItem(_MV_INC_CLE) || '[]'); }
+  catch (e) { if (window._mvAvale) window._mvAvale(e, 'firebase.js/_mvIncidentsEnvoyer'); }
+  var cu = window.currentUser || {};
+  if (!Array.isArray(l) || !l.length || !window.fbAppendError || window._mvSrvKO) return 0;
+  if (cu._isDemo || cu._isVisite || cu._isGTAdmin || cu._isPrep) return 0;
+  try { localStorage.removeItem(_MV_INC_CLE); }
+  catch (e) { if (window._mvAvale) window._mvAvale(e, 'firebase.js/_mvIncidentsEnvoyer#2'); }
+  var parType = {};
+  l.forEach(function (x) { parType[x.type] = (parType[x.type] || 0) + 1; });
+  window.fbAppendError({
+    id: Date.now() + '_' + Math.random().toString(36).slice(2, 6),
+    ts: new Date().toISOString(), level: 'warning', cat: 'sync',
+    msg: 'Connexion : ' + l.length + ' incident' + (l.length > 1 ? 's' : '') + ' sur cet appareil ('
+      + Object.keys(parType).map(function (k) { return k + ' \u00d7' + parType[k]; }).join(', ') + ')',
+    detail: String(navigator.userAgent || '').slice(0, 160) + '\n'
+      + l.map(function (x) { return JSON.stringify(x); }).join('\n').slice(0, 3000),
+    user: cu.nom || '\u2014', tenant: TENANT_ID || '?', page: 'connexion', resolved: false
+  });
+  return l.length;
+}
+
+// ── Firestore hors service ? ──
+// Une lecture de la COPIE DU TÉLÉPHONE ne coûte rien et ne sort pas sur le réseau. Si la file interne
+// du SDK a échoué, elle LÈVE tout de suite « INTERNAL ASSERTION FAILED » (lu dans le SDK : enqueue →
+// verifyNotFailed). Un document absent de la copie, lui, rejette plus tard : sans objet ici.
+function _mvFsEtat() {
+  try {
+    getDocFromCache(fbDocRef('membres')).then(null, _mvFsCacheAbsent);
+    return 'vivant';
+  } catch (e) {
+    return /INTERNAL ASSERTION FAILED/i.test(String((e && e.message) || e)) ? 'mort' : 'vivant';
+  }
+}
+function _mvFsCacheAbsent(e) {
+  if (e && e.code !== 'unavailable' && window._mvAvale) window._mvAvale(e, 'firebase.js/_mvFsCacheAbsent');
+  return 'absent';
+}
+function _mvFsMort(origine) {
+  if (!window._mvFsDead) {
+    window._mvFsDead = Date.now();
+    _mvIncident({ type: 'firestore-hors-service', origine: origine });
+    if (window.logError) window.logError({ level: 'info', cat: 'sync', msg: 'Firestore hors service dans cette page (' + origine + ')', detail: 'Toute lecture, écriture ou écoute échoue jusqu\u2019au rechargement (§145).' });
+  }
+  _mvSrvPerdu('firestore-hors-service');
+  // Au retour de veille, personne n'a encore rien touché : on relance tout de suite — sauf fenêtre
+  // de saisie ouverte. Pendant le travail, jamais : le voyant le dit, et sa fenêtre propose la relance.
+  if (origine === 'reprise' && _mvRechargeSure() && _mvRechargePermise()) {
+    showSyncBadge('Connexion perdue — l\u2019application se relance…', '#B85A1A');
+    if (_mvRechargerBorne('firestore-hors-service', 1200)) return 'recharge';
+  }
+  return 'voyant';
+}
+window._mvFsVerifier = function (origine) {
+  return _mvFsEtat() === 'mort' ? _mvFsMort(origine || '?') : 'vivant';
+};
+
+// ── L'état du serveur, pour le voyant ──
+function _mvSrvPerdu(motif) {
+  var neuf = !window._mvSrvKO;
+  window._mvSrvKO = { motif: String(motif || ''), depuis: neuf ? Date.now() : window._mvSrvKO.depuis };
+  if (typeof window._syncRefresh === 'function') window._syncRefresh();
+  return neuf;
+}
+function _mvSrvRetrouve() {
+  if (!window._mvSrvKO || window._mvFsDead) return false;   // hors service : seule une relance rétablit
+  window._mvSrvKO = null;
+  if (typeof window._syncRefresh === 'function') window._syncRefresh();
+  return true;
+}
+
+// ── Le retour de veille ──
+var _MV_REPRISE = { seuil: 30000, sonde: 8000, relance: 5000, relecture: 12000, enCours: false };
+// Un document minuscule, lisible par tout membre du domaine, `ro` compris.
+async function _mvSondeServeur() {
+  try {
+    var r = await _mvBorne(getDocFromServer(fbDocRef('membres')), _MV_REPRISE.sonde, _MV_DEPASSE);
+    return r !== _MV_DEPASSE;
+  } catch (e) {
+    if (window._mvAvale) window._mvAvale(e, 'firebase.js/_mvSondeServeur');
+    return false;
+  }
+}
+window._mvReprise = async function (absenceMs) {
+  if (!(absenceMs >= _MV_REPRISE.seuil)) return 'court';
+  var cu = window.currentUser;
+  if (!cu || !window._authReady || cu._isDemo || cu._isVisite || cu._isGTAdmin) return 'hors-session';
+  if (!navigator.onLine) return 'hors-ligne';   // le badge hors ligne dit déjà la vérité ; 'online' relira
+  if (_MV_REPRISE.enCours) return 'deja';
+  _MV_REPRISE.enCours = true;
+  try {
+    if (_mvFsEtat() === 'mort') return _mvFsMort('reprise');
+    var ok = await _mvSondeServeur();
+    if (!ok) {
+      // Un flux « fantôme » après la veille ne se signale pas : on coupe le réseau de Firestore et on le
+      // rouvre, ce qui relance ses flux. Les écritures en attente restent en attente.
+      try { await _mvBorne(disableNetwork(db).then(function () { return enableNetwork(db); }), _MV_REPRISE.relance, null); }
+      catch (e) { if (window._mvAvale) window._mvAvale(e, 'firebase.js/_mvReprise#relance'); }
+      if (_mvFsEtat() === 'mort') return _mvFsMort('reprise');
+      ok = await _mvSondeServeur();
+    }
+    if (!ok) {
+      if (_mvSrvPerdu('reprise')) {
+        _mvIncident({ type: 'serveur-injoignable', absence_s: Math.round(Math.min(absenceMs, 864e5) / 1000) });
+        showSyncBadge('Serveur injoignable — données du téléphone', '#B85A1A');
+      }
+      return 'injoignable';
+    }
+    _mvSrvRetrouve();
+    // Les écoutes détachées pendant l'absence repartent ; les vivantes suivent le flux relancé.
+    Object.keys(_fbDeadKeys).forEach(function (k) { _fbSubscribe(k); });
+    // Les clés sans écoute (Cave, réglages, tâches…) ne bougent qu'en relisant.
+    await _mvBorne(fbPullStatic(), _MV_REPRISE.relecture, null);
+    if (typeof window._mvRendrePageActive === 'function') window._mvRendrePageActive();
+    showSyncBadge('Synchronisé', '#3D6B27');
+    setTimeout(_mvIncidentsEnvoyer, 2000);
+    return 'ok';
+  } finally {
+    _MV_REPRISE.enCours = false;
+  }
+};
+
 // ── _fbLoad (point d'entrée pré-auth) ──
 window._fbLoad = async function () {
+  var B = _mvBootDebut();   // ★ BOOT-1 (§145) : chaque attente bornée, et un filet final à 15 s
   _loadQueue();
   // ★ PREP-1 (§134) — une préparation GUERETTECH (ou son retour au panneau) se reprend ICI, file chargée.
-  if (window._mvPrepBoot && await window._mvPrepBoot()) return;
+  if (window._mvPrepBoot && await window._mvPrepBoot()) { B.fin = true; return; }
+  B.etape = 'domaine';
   if (!localStorage.getItem('mavigne_tenant')) {
     // #tenant-recovery : localStorage purgé (éviction iOS/ITP, données effacées) alors qu'une
     // session Firebase est restaurée → on récupère le slug depuis le claim plutôt que d'ouvrir
@@ -1450,6 +2082,7 @@ window._fbLoad = async function () {
       // On affiche les portes réelles (site, démo, lien d'installation). L'onboarding reste
       // atteignable par le chemin normal : lien ?tenant=slug → statut 'pending' ci-dessous.
       if(DEBUG) console.log('[Accueil] Aucun tenant — écran public');
+      B.fin = true;
       if (typeof window.showPublicLanding === 'function') { window.showPublicLanding(); return; }
       if (typeof window.showOnboarding === 'function') window.showOnboarding();
       return;
@@ -1458,10 +2091,14 @@ window._fbLoad = async function () {
   // Routage registre PUBLIC : un domaine « en attente » (créé par GT, jamais configuré)
   // ouvre l'assistant d'onboarding sans dépendre d'une lecture authentifiée (la lecture de
   // mavigne_<slug>/membres ci-dessous échouerait sans session → page de login parasite).
+  B.etape = 'statut';
   try {
-    var _tstatus = await window._fbTenantStatus(localStorage.getItem('mavigne_tenant'));
+    // ★ BOOT-1 : borné. Au-delà, on continue comme pour un domaine actif — un domaine vraiment
+    //   « en attente » retombe sur l'onboarding plus bas, par sa liste de profils vide.
+    var _tstatus = await _mvBorne(window._fbTenantStatus(localStorage.getItem('mavigne_tenant')), _MV_BOOT_BORNES.statut, null);
     if (_tstatus === 'pending' && typeof window.showOnboarding === 'function') {
       if(DEBUG) console.log('[Onboarding] Domaine en attente →', localStorage.getItem('mavigne_tenant'));
+      B.fin = true;
       window.showOnboarding();
       return;
     }
@@ -1469,6 +2106,7 @@ window._fbLoad = async function () {
   if (!navigator.onLine) {
     if(DEBUG) console.log('[Offline] Démarrage hors ligne — chargement localStorage');
     _showOfflineQueueBadge();
+    B.fin = true;
     if (typeof window.loadData === 'function') window.loadData();
     if (typeof window.initLogin === 'function') window.initLogin();
     return;
@@ -1481,47 +2119,65 @@ window._fbLoad = async function () {
   // nouveaux saisonniers) n'avaient pas de tuile. On lit ici la liste à jour côté serveur ;
   // si la function échoue (offline / KO), on retombe sur la lecture Firestore directe ci-dessous
   // (qui fonctionne quand une session est déjà active sur l'appareil).
+  B.etape = 'profils';
   try {
     if(DEBUG) console.log('[Login] Roster via getLoginRoster (pre-auth)');
     // SEC-3 : `v:2` dit au serveur que ce client sait demander une adresse tout seul
     // (fbGetLoginEmail). Il n'en renvoie donc AUCUNE. Un client d'avant SEC-3 n'envoie
     // pas ce champ et continue de les recevoir : sans quoi il ne pourrait plus se
     // connecter du tout tant qu'il n'a pas rechargé son bundle. Voir claims.js §12.
-    var _rr = await window.fbCallFn('getLoginRoster', { tenant: localStorage.getItem('mavigne_tenant'), v: 2 }, { timeout: 15000 });
+    // ★ BOOT-1 (§145) : le délai de 15 s passé au SDK ne démarre qu'APRÈS le jeton App Check (§52).
+    //   On borne donc ici ; une liste qui arrive après la borne remplace celle de l'appareil.
+    var _rosterP = window.fbCallFn('getLoginRoster', { tenant: localStorage.getItem('mavigne_tenant'), v: 2 }, { timeout: 15000 });
+    var _rr = await _mvBorne(_rosterP, _MV_BOOT_BORNES.profils, _MV_DEPASSE);
+    if (_rr === _MV_DEPASSE) { _mvBootNote(B, 'profils-lents'); _mvRosterTardif(_rosterP); _rr = null; }
     var _roster = (_rr && Array.isArray(_rr.roster)) ? _rr.roster : null;
     if (_roster) {
       if (_roster.length > 0) {
-        applyFbData('membres', _roster);
+        _mvMembresServeur(_roster);
         showSyncBadge('', '#3D6B27');
       } else {
         if(DEBUG) console.log('[Onboarding] Roster vide pour tenant', TENANT_ID, '-> onboarding');
+        B.fin = true;
         if (typeof window.showOnboarding === 'function') window.showOnboarding();
         return;
       }
-      if (typeof window.initLogin === 'function') window.initLogin();
+      B.fin = true;
+      _mvProfilsAfficher();
       return;
     }
   } catch (e) {
     if(DEBUG) console.warn('[Login] getLoginRoster KO -> repli lecture directe:', (e && (e.code || e.message)) || e);
   }
+  B.etape = 'membres';
   try {
     if(DEBUG) console.log('🔥 Chargement membres (pré-auth)');
-    var membresSnap = await getDoc(fbDocRef('membres'));
-    if (membresSnap.exists()) {
-      applyFbData('membres', membresSnap.data().value);
+    var membresSnap = await _mvBorne(getDoc(fbDocRef('membres')), _MV_BOOT_BORNES.membres, _MV_DEPASSE);
+    if (membresSnap === _MV_DEPASSE) {
+      // ★ BOOT-1 : le serveur ne répond pas — les profils enregistrés sur l'appareil.
+      _mvBootNote(B, 'membres-lents');
+      if (_mvDonneesAppareil()) showSyncBadge('Serveur lent — profils de l\u2019appareil', '#7A4F2E');
+    } else if (membresSnap.exists()) {
+      _mvMembresServeur(membresSnap.data().value);
       showSyncBadge('', '#3D6B27');
+    } else if (membresSnap.metadata && membresSnap.metadata.fromCache) {
+      // ★ BOOT-1 : « absent » lu dans la copie du téléphone n'est pas un constat — jamais
+      //   l'assistant d'installation sur un doute.
+      _mvDonneesAppareil();
     } else {
       // Nouveau tenant sans membres — afficher l'onboarding
       if(DEBUG) console.log('[Onboarding] Aucun membre Firestore pour tenant', TENANT_ID, '→ onboarding');
+      B.fin = true;
       if (typeof window.showOnboarding === 'function') window.showOnboarding();
       return;
     }
   } catch (e) {
     console.warn('🔥 Firebase membres load error:', e);
     showSyncBadge('📵 Mode hors ligne', '#7A4F2E');
-    if (typeof window.loadData === 'function') window.loadData();
+    _mvDonneesAppareil();
   }
-  if (typeof window.initLogin === 'function') window.initLogin();
+  B.fin = true;
+  _mvProfilsAfficher();
 };
 
 // ════════════════════════════════════

@@ -2,7 +2,26 @@
 
 > Document de référence du projet **Ma Vigne** (GUERETTECH). Il est le **porteur de vérité** :
 > la mémoire Claude est plafonnée, ce fichier ne l'est pas.
-> Dernière consolidation : **18 septembre 2026 (SEM-3)** — ★★★ **L'ÉCRAN DE LA FICHE DIT LA MÊME CHOSE QUE LE RELEVÉ v3
+> Dernière consolidation : **18 septembre 2026 (FUSION-1)** — ★★★ **UNE ÉCRITURE N'EFFACE PLUS CE QU'UN AUTRE APPAREIL A
+> SAISI (§146)**. Chaque document était réécrit en entier : la Cave sans écoute, la file hors ligne et une vieille valeur
+> en file effaçaient en silence le travail des autres appareils. Désormais : transaction, fusion à trois voies (par `id`,
+> `nom` ou contenu ; modifié contre supprimé → gardé ; sans base → union), mémoire mise à jour, file avec la base de sa
+> première mise en file. ★★★ **Défaut dormant des parcelles corrigé** : la base avançait sans la mémoire, et la
+> deuxième écriture reprenait une tâche validée ailleurs. Harnais neuf : 29 assertions (400 tirages au hasard), 15
+> contre-épreuves. **APP 7.35 → 7.36 · SW 7.99 → 8.00**, puis **SW 8.01** : l'e2e a attrapé deux défauts de §145,
+> corrigés (§145i). Base `c0e671a` — ⚠️ §145 non poussé : **ce zip le contient**. Détail en **§146**.
+>
+> ★ Précédente : **18 septembre 2026 (BOOT-1 + REPRISE-1)** — ★★★ **LE DÉMARRAGE NE RESTE JAMAIS MUET, ET LE
+> RETOUR DE VEILLE VÉRIFIE QUE LE SERVEUR RÉPOND (§145)**. Sur iPhone, au second domaine : écran de connexion figé sur le
+> logo, sans profil ; saisies de l'ordinateur absentes du téléphone — « toutes opérations », a précisé Nico. ★ Lu dans le
+> SDK : App Check charge reCAPTCHA sans gérer l'échec (la page attend POUR TOUJOURS), et une erreur interne met Firestore
+> hors service jusqu'au rechargement — **ce que l'app masquait comme bénin**, trace comprise. Attentes du démarrage
+> bornées + filet final, démarrage sans attendre `load`, appels bornés en entier, reprise au retour de veille (sonde,
+> relance du flux, relecture), voyant « Pas de synchro », carnet d'incidents envoyé au journal du domaine. Harnais neuf,
+> horloge simulée : 47 assertions, 29 contre-épreuves. **APP 7.34 → 7.35 · SW 7.98 → 7.99**, base `c0e671a`. Détail en
+> **§145**.
+>
+> ★ Précédente : **18 septembre 2026 (SEM-3)** — ★★★ **L'ÉCRAN DE LA FICHE DIT LA MÊME CHOSE QUE LE RELEVÉ v3
 > (§144)** — UNE seule source (`_pfV3`, `_pfComptesV3`), deux rendus. Cadre : absences par cause, « à ce jour » ; Jours :
 > à la semaine ; Compteur : du solde d'avant au solde d'après, et la carte « Heures à rattraper » **toujours** là (Nico).
 > ★ La note de l'onglet Jours disait encore « 43e heure » depuis SEM-1 : mon grep cherchait `43e`, le code écrit
@@ -1013,6 +1032,7 @@ chose est faite ou en attente — dans les deux sens.
 | ★★ **« il n'existe aucune infobulle dans l'app »** | **exact**, et c'était le problème : zéro `<details>`, zéro popover, dans tout le projet |
 | ★★★ **`PIL_TREAT_DAYS` existe** | **je l'ai inventée.** `node --check` ne voit pas un identifiant inconnu : seule l'exécution l'aurait levé |
 | ★★ **`A8` du harnais d'audit est un cliquet** | c'était un cliquet **à l'envers** : il rougissait quand on AJOUTAIT un bouton de redirection |
+| ★★★ **« INTERNAL ASSERTION FAILED » est bénin, « le pull getDoc réussit »** (commentaire d'`app.js`) | **le SDK met sa file hors service** : toute lecture, écriture, écoute suivante échoue — et la trace partait par ce même Firestore (§145) |
 
 À l'inverse, l'audit trouve régulièrement du **travail déjà fait** encore listé au backlog.
 
@@ -1934,6 +1954,8 @@ et un caractère absent sort en **carré noir** que l'extraction de texte ne voi
   l'`index.html` qui embarque les CGU/DPA **en app**, lui, exige le bump.
 - Cache tenant séparé (`TENANT_CACHE`), purge des anciens caches à l'`activate`.
 - `boot.js` précaché : si `__MV_BOOTED` absent après 10 s → rechargement auto, puis « Réessayer ».
+  ⚠️ `__MV_BOOTED` est posé **dès l'évaluation d'`app.js`** : il ne couvre PAS un `_fbLoad` bloqué. C'est
+  `_mvBootGarde` (filet à 15 s) et les attentes bornées de `_fbLoad` qui le font (§145).
 - **Mise à jour actuellement FORCÉE** par trois mécanismes cumulés : `skipWaiting()`,
   `clients.claim()`, et `location.reload()` sur `controllerchange`.
   ⚠️ Le chemin « reload poli » via `_swUpdatePending` est **du code mort**.
@@ -19955,4 +19977,338 @@ l'onglet Jours additionne « faites + absences » brutes : une semaine où le we
 « 15h30 + 30h30 sur 39h » — vrai, mais la somme dépasse le prévu ; à reprendre si ça gêne. ④ Découpage de `planning.js`
 (§143b) : le fichier a encore grossi. ⑤ Vu dans Chromium, pas sur téléphone réel ; `test:smoke` et `test:e2e` non lancés
 (Playwright-node absent du bac à sable) — ★ l'e2e ouvre la fiche : à lancer chez Nico avant de déployer.
+
+## 145. ★★★ BOOT-1 + REPRISE-1 — LE DÉMARRAGE NE RESTE JAMAIS MUET, ET LE RETOUR DE VEILLE VÉRIFIE QUE LE SERVEUR RÉPOND (18/09 — `firebase.js` · `app.js` · `utils.js` · `index.html` · `sw.js` · `guide/01-demarrer.html` · `guide/14-depannage.html` · `scripts/` · `package.json` · `ci.yml` · APP 7.34 → **7.35** · SW 7.98 → **7.99**)
+
+> Le contact technique du second domaine, sur iPhone : *« je rentre une donnée, je sors de l'application et verrouille
+> mon téléphone ; si je redémarre l'application, elle freeze sur la page d'accueil sans faire apparaître la sélection du
+> profil »*, puis *« lorsque j'enregistre une opération sur un ordi, elle n'est pas prise en compte sur mon téléphone »*.
+> Nico : *« je pense qu'il parle de toutes opérations (pas seulement de cave) »* — cette phrase a déplacé le diagnostic
+> (145b). Puis « Go » sur le lot 1 + 2 + 3 ; le 4 (fusion au lieu d'écraser) est un lot séparé (145h ①).
+
+### 145a. Ce qui a été LU, pas supposé — dans le SDK, à la version du dépôt
+
+Les paquets ont été téléchargés à la version exacte de `package-lock.json` et lus :
+- **App Check 0.8.8** — `loadReCAPTCHAV3Script` pose `script.onload` **et rien d'autre**. Si le script de Google ne se
+  charge pas (réseau qui se réveille au déverrouillage), la promesse d'initialisation ne se règle **jamais**, et
+  `exchangeTokenPromise` est **partagée** : tout ce qui demande un jeton attend la même promesse morte — appels au
+  serveur, connexion, flux Firestore. Seule une relance de la page guérit. `initializeAppCheck` insère le script **de
+  façon synchrone** : son échec s'écoute juste après.
+- **Functions 0.11.8** — le délai (`opts.timeout`) ne démarre **qu'après** l'obtention des jetons : c'est §52, qui
+  n'avait été corrigé que pour `createMemberAccount`. `getLoginRoster` au démarrage restait nu.
+- **Auth 1.7.9** — ses requêtes, elles, sont bornées à **30 s** (`NetworkTimeout` créé AVANT l'attente des en-têtes App
+  Check) : la connexion ne gèle pas, elle échoue en `auth/network-request-failed`… et l'app répondait « Pas de
+  connexion réseau » à quelqu'un qui en avait (ouvert depuis §68h).
+- **Firestore 4.7.3** — ★★★ une erreur dans sa file de travail (`AsyncQueue`) la met hors service **pour le reste de la
+  page** : tout appel suivant passe par `verifyNotFailed` → `fail()` → **« INTERNAL ASSERTION FAILED: Unexpected
+  state »**. Lecture, écriture, écoute : tout échoue, jusqu'au rechargement. `getDocFromCache` passe par la même file :
+  **il lève tout de suite** quand elle est morte — un test gratuit, sans réseau. `getDoc` hors ligne rend la **copie du
+  téléphone** sans prévenir (`metadata.fromCache`). `disableNetwork`/`enableNetwork` relancent les flux.
+
+### 145b. Ce qui a été lu dans l'app — deux symptômes, un seul moment
+
+- **L'écran de connexion d'origine**, c'est le logo, « Ma Vigne », « Choisissez votre profil » et une zone de tuiles
+  **vide** : exactement la « page d'accueil sans sélection du profil ». Les tuiles n'arrivent que quand `_fbLoad` va au
+  bout ; **une** attente qui ne se règle pas, et l'écran reste ainsi pour toujours — ni tuile, ni sablier (le sablier
+  n'apparaît que si `initLogin` est appelé). ⚠️ `boot.js` ne couvrait pas ce cas : `__MV_BOOTED` est posé **dès
+  l'évaluation d'`app.js`**, bien avant `_fbLoad`.
+- **Tout le démarrage attendait l'événement `load`** — profils, bouton « Se connecter », gestionnaires d'erreurs. Or
+  `load` attend AUSSI le script reCAPTCHA inséré par App Check pendant l'évaluation du module.
+- **Au retour de veille, rien ne vérifiait la connexion.** Seuls deux rechargements existaient : iOS après 30 min en
+  arrière-plan, et le nouveau service worker après chaque mise en ligne (`controllerchange`) — tous deux **au moment
+  précis du retour**, quand le réseau est le moins prêt.
+- ★★★ **« Toutes opérations », pas seulement la Cave** (la correction de Nico) : le journal, le tracteur, le phyto, le
+  planning sont en temps réel (`FB_REALTIME`). Si eux non plus n'arrivent pas, ce n'est pas `FB_STATIC` — c'est la
+  **connexion du téléphone** qui n'a pas survécu, et que l'app ne voyait pas : `_pullKeys` ne lisait jamais
+  `fromCache`, le badge disait « Synchronisé », le voyant restait vert (réseau présent + rien en attente), sa fenêtre
+  disait « Tout est enregistré ».
+- ★★★ **Le signal de la panne était masqué exprès.** Le gestionnaire global cachait « INTERNAL ASSERTION FAILED » avec ce
+  commentaire : *« sans perte de données (le pull getDoc réussit) »*. **Le SDK dit le contraire** (145a). Et la trace
+  qu'il tentait d'écrire (`fbAppendError`) partait… **par ce même Firestore mort** : elle ne pouvait pas arriver. Le
+  journal du domaine ne pouvait donc RIEN montrer de ce défaut — l'absence de trace ne prouvait rien.
+
+### 145c. Le lot
+
+1. **`fbCallFn` borné en entier** (§52 généralisé) : course maison démarrée tout de suite, `opts.timeout` (défaut 70 s)
+   **+ 10 s** de marge, rejet `mv/timeout`, minuteur toujours nettoyé.
+2. **`_fbLoad` borné pas à pas** (`_mvBorne`, qui rend une valeur sentinelle `_MV_DEPASSE` au lieu de rejeter) : statut
+   du domaine 5 s, liste des profils 8 s, lecture des membres 6 s, puis les profils **de l'appareil** (`loadData`). La
+   liste qui arrive **après** la borne remplace celle de l'appareil (`_mvRosterTardif`) — **sauf si une tuile est
+   touchée** (`_mvTuileTouchee` : `confirmLogin` lit `MEMBRES[loginPendingIdx]`, une liste remplacée sous les doigts
+   changerait la personne). Un « absent » lu dans la copie du téléphone n'ouvre **plus** l'installation.
+   **Filet final** (`_mvBootGarde`, 15 s) : `_fbLoad` pas au bout ET écran de connexion encore vide → profils de
+   l'appareil. Il ne touche pas un écran déjà pris (installation, préparation, accueil public posent `B.fin`).
+3. **Démarrage sans attendre `load`** : le corps du gestionnaire est devenu `_mvDemarrer`, lancé par `load` **ou** à 2,5 s,
+   une seule fois.
+4. **reCAPTCHA en échec** (`_mvAcEcouter`) : sur l'écran de connexion, personne n'a rien saisi → relance automatique
+   (`_mvRechargerBorne`, **au plus une toutes les 2 min**, clé `mv_recharge_auto` en `sessionStorage` : jamais de
+   boucle). Hors ligne, la relance attend `online`. Une fois entré, jamais sous les doigts.
+5. **Connexion honnête** : `auth/network-request-failed` **avec du réseau** → « Le serveur ne répond pas. Relancez
+   l'application » + bouton (`_loginErreur`). Même bouton sur « Compte inaccessible » et dans le sablier (4 essais).
+   ★ §68h est fermé.
+6. **Reprise au retour de veille** (`_mvReprise`, appelée par le bloc « iOS FROZEN STATE » d'`app.js`, APRÈS la relance
+   des 30 min et pour toutes les plateformes) : absence ≥ 30 s, session réelle, en ligne → Firestore hors service ?
+   (`_mvFsEtat`) → **sonde** du serveur (`getDocFromServer` sur `membres`, 8 s) → sinon **coupe et rouvre** le réseau de
+   Firestore → resonde → OK : écoutes mortes réabonnées, relecture de `FB_STATIC` (la Cave, les réglages, les tâches :
+   ce qui n'a pas d'écoute), écran repeint (`_mvRendrePageActive`, jamais si l'on tape), « Synchronisé ». Toujours KO :
+   voyant « Pas de synchro », incident noté, rien relu.
+7. **Firestore hors service** (`_mvFsMort`) : au retour de veille, **relance tout de suite** si aucune fenêtre de saisie
+   n'est ouverte et aucun champ actif (`_mvRechargeSure`), bornée comme en 4 ; pendant le travail, jamais — le voyant le
+   dit. Le gestionnaire de l'assertion **vérifie** désormais (`_mvFsVerifier`) au lieu de supposer ; une écoute qui lève
+   sur une file morte ne boucle plus.
+8. **Ce qu'on lit dit d'où ça vient** : `_pullKeys` compte `fromCache` → `_mvSrvPerdu` / `_mvSrvRetrouve` ; un
+   « absent » servi par la copie devient `'error'`, jamais `'missing'` — ★ **faille dormante fermée** : `'missing'`
+   autorisait `fbPushIfAbsent` à écrire les valeurs par défaut **sans relire**, donc par-dessus un document que le
+   téléphone n'avait simplement pas en copie (domaine de référence seulement, seul à semer) ; `fbPushIfAbsent` refuse
+   aussi sur sa propre relecture. Seul un instantané **confirmé par le serveur** (`!fromCache && !hasPendingWrites` —
+   l'écho d'une écriture locale ne prouve rien) rétablit le voyant ; un instantané de la copie met à jour **sans**
+   annoncer « Mis à jour ».
+9. **Le voyant** : « Pas de synchro » en orange quand il y a du réseau mais pas de serveur ; sa fenêtre dit « Pas de
+   connexion au serveur » et propose « Relancer l'application » (`.mbtn.verte`, `_mvRecharger`). Le badge ne dit plus
+   « Synchronisé » ni « ✅ Synchronisé » dans ce cas (comparaison sur la fin du texte : **aucun emoji ajouté**, le
+   cliquet des icônes l'a refusé à la première version).
+10. ★★ **Le carnet d'incidents de l'appareil** (`_mvIncident`, `localStorage['mavigne_incidents_v1']`, 12 au plus) :
+    `demarrage-bloque`, `profils-lents`, `membres-lents`, `load-tardif`, `appcheck-script`, `serveur-injoignable`,
+    `firestore-hors-service`, `relance-auto`, `relance-manuelle`. Il part dans le journal du domaine (Admin GT, niveau
+    `warning`, catégorie `sync`) à la **première connexion saine**, en **une seule** entrée — `fbAppendError` relit puis
+    réécrit tout le journal : deux envois simultanés s'écraseraient. ★ **C'est la mesure qui manquait au diagnostic** :
+    le lot ne se contente pas de parer, il dira combien de fois, et où, ça arrive.
+
+### 145d. Arbitrages
+
+- **Relancer seul, ou proposer ?** Seule une relance guérit une page dont App Check ou Firestore est mort. Relance
+  **automatique** là où personne n'a rien saisi (écran de connexion ; retour de veille avec Firestore hors service et
+  aucune saisie ouverte) ; **proposée** partout ailleurs. Une relance ramène à l'écran de connexion, comme aujourd'hui
+  après 30 min — c'est le prix, et il est déjà payé tous les jours.
+- **La Cave en temps réel** (proposée au premier diagnostic) **passe après** : la relecture au retour de veille couvre le
+  cas signalé (on saisit sur l'ordinateur, on revient au téléphone). Deux écrans ouverts côte à côte restent l'angle mort
+  (145h ②). ⚠️ Mettre `cave_elevage`/`cave_vendange` en écoute redessinerait la Cave à chaque écriture d'un autre
+  appareil : à regarder contre la tournée du cuvier avant de le faire.
+- **Écarté** : passer Firestore en cache mémoire ou en `persistentSingleTabManager` sur iOS. Le gestionnaire
+  multi-onglets est un suspect sérieux (bail de primauté rafraîchi toutes les 4 s, minuteurs gelés en arrière-plan) —
+  **mais rien ne le mesure encore**. Le carnet dira si `firestore-hors-service` et `serveur-injoignable` sont fréquents.
+- **Les durées sont des choix, pas des mesures** : 5 / 8 / 6 / 15 s au démarrage, 2,5 s pour `load`, 30 s d'absence, 8 s
+  de sonde, 5 s de relance du flux, 2 min entre deux relances automatiques. À resserrer ou élargir sur pièces.
+- ★ **`firebase.js` passe de 117 à 137 ko (+17 %)** : le cliquet de taille de `mv-harnais-typo` a rougi, et il demande
+  de se poser la question du découpage. **Posée, et écartée** : le bloc a besoin des internes du module — `db`, l'état
+  des écoutes (`_fbDeadKeys`, `_fbSubscribe`), la relecture (`fbPullStatic`), `fbDocRef` — et un module à part devrait
+  les exposer sur `window`, ce qui est pire que 20 ko de plus. Référence regravée (`scripts/typo-baseline.json`) ; le
+  regravage enregistre aussi `planning.js` 546 → 558 ko, venu de SEM-3 et sous la tolérance.
+
+### 145e. Vérifié
+
+- `scripts/mv-harnais-reprise.mjs` (neuf) — les **vraies** fonctions extraites de `firebase.js` et `app.js`, sous une
+  **horloge simulée** : une attente infinie se rejoue en une milliseconde, « l'écran n'est jamais vide après 20 s » se
+  vérifie. Un essai qui ne se règle pas en 3 s réelles, ou qui laisse un rejet non attrapé, compte **rouge**.
+  **47 assertions, 29 contre-épreuves détectées** (6 sur le câblage d'`app.js`, dont la reprise débranchée et le retour
+  à `load` seul). Branché dans `check`, `prebuild` et la CI (`mv-harnais-portes` vert).
+- ★ **Le harnais s'est trompé avant le code** : sept rouges au premier passage, tous dans le démarrage — le bac n'avait
+  pas de domaine en `localStorage`, `_fbLoad` partait sur l'accueil public. **Le code était juste.** Puis la
+  contre-épreuve a PLANTÉ au lieu de rougir : la mutation « appel non borné » laisse le minuteur rejeter dans le vide,
+  et Node s'arrête sur un rejet non géré — c'est exactement le défaut de §52. Le harnais compte désormais un rejet non
+  attrapé comme un rouge.
+- `npm run check` : EXIT 0 · preflight 0 erreur (C14 à sa référence, aucun `catch` vide ; chaque erreur avalée a un nom
+  unique pour `mv-harnais-avale`) · `npx vite build` vert · `mv-harnais-prep` vert : `_fbLoad` garde l'ordre file →
+  préparation → domaine dans ses 900 premiers caractères.
+- ⚠️ **Rien de ceci n'a tourné sur un iPhone.** La panne exacte chez le contact technique reste **à confirmer** : le
+  carnet d'incidents est là pour ça. `test:smoke` et `test:e2e` non lancés (Playwright absent du bac à sable) — **l'e2e
+  passe par l'écran de connexion : à lancer chez Nico avant de déployer.**
+
+### 145f. La note de livraison
+
+| Fichier | Ce qui change pour l'utilisateur | Bump |
+|---|---|---|
+| `src/firebase.js` | le démarrage va toujours au bout ; retour de veille vérifié ; voyant et badge honnêtes ; carnet d'incidents | — |
+| `src/app.js` | démarrage sans attendre `load` ; relance proposée à la connexion et dans le voyant ; reprise branchée | ★ SW |
+| `src/utils.js` | `APP_VERSION`, bloc `WHATS_NEW`, un point de `MV_AIDE` (accueil : le voyant) | ★ APP |
+| `index.html` | les 4 affichages de version | ★ APP |
+| `public/sw.js` | en-tête, `CACHE_NAME`, 2 `console.log`, ligne de changelog | ★ SW |
+| `guide/01-demarrer.html` · `guide/14-depannage.html` | « Pas de synchro », retour de veille, écran de connexion vide | — |
+| `scripts/mv-harnais-reprise.mjs` (neuf) · `package.json` · `.github/workflows/ci.yml` | le harnais, dans les trois portes | — |
+| `scripts/harnais-claude-md.mjs` · `CLAUDE.md` · `.mv-base` | `SECTIONS` 177, cette section, base `c0e671a` | — |
+| `scripts/typo-baseline.json` | référence de taille regravée (145d) | — |
+
+`node scripts/build-guide.mjs` (le guide généré n'est **pas** livré), puis `npm run check`, puis
+`npm run build && firebase deploy --only hosting`.
+
+### 145g. Accompagnement
+
+`MV_AIDE` : un point ajouté à l'Accueil (le voyant, « Pas de synchro », la relance) ; les fiches des modules ne
+décrivent ni la synchro ni la connexion — relues, rien à changer. `MV_INFO` : aucune méthode de calcul touchée.
+Visite guidée : aucun sélecteur ne bouge. Guide : deux sections. `WHATS_NEW` : trois entrées, sans nom de client.
+
+### 145h. Ouvert, et dit
+
+① ★★★ **Fusionner au lieu d'écraser** (le lot 4 annoncé) — ✅ **fait en §146**. La file hors ligne et les écritures en attente de Firestore
+renvoient **le document entier** tel que le téléphone le connaissait ; seules les parcelles sont fusionnées
+(`_saveParcellesMerged`). Ce que l'ordinateur a ajouté entre-temps est effacé — la garde anti-perte ne mord qu'au-delà
+de la moitié. C'est la vraie protection contre la perte ; ce lot en réduit la fenêtre (retour de veille relu, relance),
+il ne la ferme pas. Question à poser au contact technique : l'opération saisie sur l'ordinateur y est-elle **encore**,
+page rafraîchie ?
+② `cave_elevage` / `cave_vendange` restent en `FB_STATIC` : deux écrans ouverts côte à côte ne se voient pas (145d).
+③ Un flux fantôme **pendant** le travail (sans passer par la veille) laisse `setDoc` en attente : l'écran peut rester
+sur « Enregistrement… ». Non traité.
+④ La navigation du service worker est en réseau d'abord **sans délai** : sur un réseau fantôme, l'`index.html` attend.
+Un délai (3–4 s, puis la copie) est simple et sûr — non livré, hors du périmètre validé.
+⑤ Chaque mise en ligne force un rechargement au retour dans l'app (`controllerchange`) : au pire moment, et en
+redemandant le mot de passe. La piste du bandeau poli (§8) reste la bonne.
+⑥ `load-tardif` peut être fréquent sur 4G : si le carnet en déborde, le retirer une fois la mesure faite.
+⑦ **Mesurer** : après déploiement, lire dans Admin GT › erreurs du second domaine les entrées « Connexion : N
+incidents sur cet appareil ».
+
+### 145i. ★★ L'e2e l'a attrapé — deux défauts du lot, corrigés (SW 8.00 → **8.01**)
+
+Nico a lancé `npm run test:e2e` avant de déployer : **3 échecs** (Login, Action session, Action dock). Reproduit ici, puis
+comparé à la base `c0e671a`, qui passe : **le lot était en cause**, pas le test.
+① ★★★ **La relance automatique rejouait l'écran sous les doigts.** L'e2e coupe reCAPTCHA exprès (`route.abort`) : le
+script échoue, `_mvAcRelance` relançait la page 3 s plus tard — pendant le clic sur la tuile (« element was detached »,
+puis le splash de la page neuve interceptait les clics), et les données injectées disparaissaient avec la page. Session
+et dock échouaient ensuite, faute de connexion. **Un bloqueur de contenu, ou un réseau qui filtre Google, fait la même
+chose à un vrai utilisateur** — et là, relancer ne guérit rien. Correctif : `_mvAcSonde` interroge d'abord l'adresse du
+script (`fetch` en `no-cors`, bornée à 5 s ; `connect-src` autorise `www.google.com`) et ne relance que si elle répond ;
+sinon une seconde sonde 12 s plus tard, puis un incident `appcheck-bloque`, et plus rien. Le bouton « Relancer
+l'application » reste là quand la connexion échoue.
+② ★★ **Les données de l'appareil pouvaient écraser une session ouverte.** Le filet final montre des tuiles pendant que
+`_fbLoad` attend encore : on peut donc se connecter AVANT qu'il n'arrive au bout. Sa branche « membres trop lents »
+appelait alors `loadData()` — la mémoire relue du serveur après la connexion, remplacée par la copie du disque. Trouvé en
+déroulant la chronologie de l'e2e, pas par un échec visible. Correctif : `_mvDonneesAppareil` (jamais une fois connecté
+ni sous une tuile touchée) partout où `_fbLoad` lisait le disque ; le filet final se tait lui aussi une fois connecté.
+- `mv-harnais-reprise` : **49 assertions, 31 contre-épreuves** (+ « adresse bloquée : aucune relance, deux sondes »,
+  « connecté avant la fin du démarrage : rien n'est remplacé », « relance sans sonde », « tuile touchée : pas même une
+  sonde »). `npm run check` : EXIT 0.
+- E2E rejoué ici après correctif : **identique à la base** — tout vert sauf « Action parcelle », qui échoue AUSSI sur la
+  base dans ce bac à sable (la météo Open-Meteo y est bloquée par le proxy) et passe chez Nico.
+- SW **8.01** : le correctif change les fichiers en cache, et 8.00 a pu être déployé. APP 7.36 inchangé, rien de neuf à
+  annoncer.
+- ★★ **Leçon : l'e2e se lance dans le bac à sable.** `playwright` 1.61 est dans `node_modules` ; son Chromium attendu
+  (build 1228) manque, mais `/opt/pw-browsers` porte un build 1194 : une copie JETABLE de `scripts/e2e-local.mjs` avec
+  `executablePath: '/opt/pw-browsers/chromium_headless_shell-1194/chrome-linux/headless_shell'` le fait tourner. §144 et
+  §145e disaient l'inverse. À faire AVANT de livrer tout lot qui touche le démarrage, la connexion ou la synchro — et
+  TOUJOURS contre la base, pour séparer ce qui vient du lot de ce qui vient du bac à sable.
+
+## 146. ★★★ FUSION-1 — UNE ÉCRITURE N'EFFACE PLUS CE QU'UN AUTRE APPAREIL A SAISI (18/09 — `firebase.js` · `utils.js` · `index.html` · `sw.js` · `guide/01-demarrer.html` · `guide/14-depannage.html` · `scripts/` · `package.json` · `ci.yml` · APP 7.35 → **7.36** · SW 7.99 → **8.00**)
+
+> Nico : « suite », après BOOT-1 + REPRISE-1. C'est le lot 4 annoncé en §145h ①. ⚠️ `origin/main` = `c0e671a` : §145
+> n'est pas poussé — **ce zip le CONTIENT et le remplace**.
+
+### 146a. Le défaut — trois chemins d'effacement, et un dormant
+
+Chaque document est réécrit EN ENTIER (`setDoc`). Seules les parcelles étaient fusionnées ; partout ailleurs, le
+dernier qui écrit gagne, et la garde anti-perte ne mord qu'au-delà de la moitié : une ligne perdue passait. Lus dans le
+code, trois chemins :
+1. **Une clé sans écoute** (`FB_STATIC` : la Cave, les réglages, les tâches) à la copie en retard. En vendange, la
+   tournée du cuvier sur le téléphone effaçait les réceptions saisies au bureau depuis sa dernière relecture.
+2. **L'envoi de la file hors ligne** : la valeur entière, en `setDoc` aveugle, APRÈS la relecture de la reconnexion.
+3. ★ **Une vieille valeur en file défaisait une écriture plus récente** de la même clé : `fbSave` relance
+   `_flushQueue` après chaque succès, et la file renvoyait l'état d'avant.
+
+★★★ **Le dormant, dans les parcelles** — lu, puis prouvé par le harnais : `_saveParcellesMerged` posait
+`_baseParcelles = fusion` DANS la transaction, mais la mémoire ne recevait jamais la fusion (l'écho de l'écriture est
+ignoré quatre secondes, `_ignoreNext` / `_ignoreBefore`). À l'écriture suivante, une tâche validée sur un autre appareil
+se lisait à l'envers : la base disait « Validé », la mémoire « En cours » → « seul cet appareil a bougé » → **« En
+cours » réécrit**. L'envoi de la file prenait, lui, la relecture de la reconnexion pour base : même effet. Le « prouvé
+par 8 scénarios » du commentaire d'origine ne couvrait pas une DEUXIÈME écriture.
+
+### 146b. La fusion — `_mvFusion(base, local, distant)`
+
+- Ce qui n'a bougé que d'un côté prend ce côté. Deux objets : clé par clé (le planning, la config). Deux listes
+  d'enregistrements : élément par élément, reconnus par **`id`** si tous en ont un, sinon **`nom`**, sinon par leur
+  **contenu** (forme canonique `_mvCanon` : clés triées, `undefined` retiré — le serveur rend les clés dans SON ordre).
+- ★ **Un `id` présent deux fois dans une version** (le journal fabrique ses `id` avec `Date.now()` : deux lignes créées la
+  même milliseconde) n'identifie plus rien : ces lignes-là passent par leur contenu, les autres gardent leur `id`. Le
+  contenu ne se calcule que pour elles — mesuré : 5 000 lignes en ~100 ms dans Node (×3 à ×5 sur un téléphone).
+- **Supprimé d'un côté, intact de l'autre → supprimé. Supprimé d'un côté, MODIFIÉ de l'autre → gardé.** Une même valeur
+  changée des deux côtés → celle de cet appareil. Une liste de valeurs simples est une feuille (pas de fusion).
+- **Ordre** : celui de cet appareil ; une ligne venue d'ailleurs se place à côté de sa voisine d'origine — en tête pour
+  le journal (qui ajoute en tête), en queue pour une liste qui ajoute en queue.
+- **Sans base connue** (démarrage hors ligne) : l'**union** — rien de ce que le serveur porte n'est retiré.
+- Hors fusion générique (`_MV_FUSION_EXCLUES`) : `parcelles` (leur fusion par nom, gardée), `kml_polygons` (un import
+  REMPLACE, c'est voulu), `travaux` (recalculé depuis le journal).
+
+### 146c. Le chemin d'écriture
+
+- `fbSave` → **`_mvSauverFusion`** : une transaction relit le serveur, fusionne avec la base, applique la garde
+  anti-perte **au résultat** (mêmes planchers que `_mvBlockDestructive`), écrit. Même coût qu'avant pour les clés gardées
+  (une lecture + une écriture) ; une lecture de plus pour les autres. La transaction se rejoue seule si le document
+  bouge entre la lecture et l'écriture ; hors ligne elle échoue, et la saisie part en file — comme les parcelles depuis
+  le lot #1.
+- **La base** (`_fbBases`) : l'état serveur dont la mémoire dérive, noté à chaque relecture (`_pullKeys`) et à chaque
+  instantané d'écoute (`_fbSubscribe`) — **jamais** un instantané qui porte des écritures locales en attente
+  (`hasPendingWrites` : il contiendrait nos propres modifications non envoyées).
+- ★★ **Après l'écriture, la mémoire reçoit le résultat** (`_mvApresFusion`), en gardant ce qui y a été saisi PENDANT
+  l'écriture (fusion à trois voies, base = ce qui a été envoyé). Un champ actif (`_mvSaisieEnCours`) : on ne touche à
+  rien ET la base ne bouge pas — la prochaine écriture refusionne juste. Le badge dit « Sauvegardé — fusionné avec un
+  autre appareil » quand le serveur a apporté quelque chose.
+- **La file** : `_offlineBases` (`localStorage['mavigne_offline_queue_base']`) garde la base de la **première** mise en
+  file — une deuxième saisie hors ligne s'accumule par-dessus la première. `null` = sans base → union. Quota dépassé →
+  les bases sautent, la file reste (union). `_flushQueue` fusionne avec la base de la file ; la mémoire, qui dérive de la
+  relecture de la reconnexion, reçoit le résultat.
+- **Les parcelles** : `_saveParcellesMerged(local, baseFile)` ne pose plus la base dans la transaction ;
+  `_mvParcellesApres` reporte la fusion dans la mémoire, puis pose la base. Leur garde (progression) est inchangée.
+
+### 146d. Arbitrages
+
+- **Modifié contre supprimé → gardé** : une ligne qui revient se voit et se supprime ; une modification perdue ne se voit
+  jamais.
+- **Une même valeur des deux côtés → cet appareil** (la dernière écriture), au niveau du CHAMP et non plus du document.
+- **L'union sans base** peut faire revenir une ligne supprimée pendant un démarrage hors ligne. Même raison.
+- **Pas d'écran de conflit** : un badge, pas une fenêtre. À reconsidérer si le carnet ou le terrain montre des
+  conflits réels.
+- `firebase.js` grossit encore, **137 → 153 ko** (fusion + file) : le cliquet de taille a rougi, référence regravée —
+  même réponse qu'en §145d, ce code a besoin de `db`, de la transaction et de l'état des écoutes. Si `firebase.js` doit
+  un jour se couper, la fusion (fonctions pures, de `_mvEgal` à `_mvFusionListe`) est le premier morceau détachable.
+
+### 146e. Vérifié
+
+- `scripts/mv-harnais-fusion-docs.mjs` (neuf) : les **vraies** fonctions de `firebase.js` — fusion, transaction,
+  `fbSave`, file, envoi, parcelles — sur un faux serveur. **29 assertions, dont 400 tirages au hasard** (lignes ajoutées,
+  modifiées, supprimées de part et d'autre : rien ne se perd, rien ne se double) ; **15 contre-épreuves détectées**, dont
+  le retour du défaut dormant des parcelles et « l'envoi fusionne avec la relecture de la reconnexion ».
+- ★ Deux contre-épreuves ne mordaient pas au premier passage : l'essai « ordre des clés » n'avait AUCUNE ligne commune
+  aux clés réordonnées (il passait sans le tri), et une ancre avait bougé avec la réécriture de l'identité. Recalées :
+  l'essai porte maintenant la ligne « Liage », supprimée ici, que le serveur rend avec ses clés dans un autre ordre.
+- `mv-harnais-reprise` recalé (l'écoute note la base : `_mvBaseNoter` extrait) — toujours 47 / 29. ★ Deux harnais
+  d'avant ont suivi le code, sans rien perdre de ce qu'ils prouvent : `mv-harnais-prep` (l'envoi de la file appelle
+  la fusion : bouchonnée, une écriture fusionnée compte comme une écriture ; `_mvBaseFile` et `_mvBasesFileEcrire`
+  extraits pour de vrai — 75 / 26) et `mv-harnais-auth1` (une clé fusionnée s'écrit par transaction : le bouchon passe
+  par le même faux serveur que `setDoc`, avec les mêmes refus — 27 vertes). Sans ça, `npm run check` plantait sur
+  `_offlineBases is not defined` : le premier symptôme a été lu comme tel, pas contourné.
+- `npm run check` : EXIT 0 · `npx vite build` vert.
+- ⚠️ Pas vérifié : un vrai téléphone ; la transaction sur un flux fantôme (§145h ③) — elle passe par les requêtes
+  unitaires, pas par le flux d'écoute : **à observer** dans le carnet d'incidents.
+
+### 146f. La note de livraison
+
+**Base `c0e671a`. Ce zip CONTIENT BOOT-1 + REPRISE-1 (§145, avec son correctif §145i) et le remplace. APP 7.34 → 7.36 ·
+SW 7.98 → 8.01.**
+
+| Fichier | Ce qui change pour l'utilisateur | Bump |
+|---|---|---|
+| `src/firebase.js` | §145 + la fusion : plus aucune saisie d'un autre appareil effacée | — |
+| `src/app.js` | §145 | ★ SW |
+| `src/utils.js` · `index.html` | versions, `WHATS_NEW` 7.35 et 7.36, `MV_AIDE` (Accueil : le voyant ; Journal : la fusion) | ★ APP |
+| `public/sw.js` | v7.99 et v8.00 au changelog | ★ SW |
+| `guide/01-demarrer.html` · `guide/14-depannage.html` | §145 + « Deux personnes ont saisi en même temps » réécrit | — |
+| `scripts/mv-harnais-fusion-docs.mjs` (neuf) · `scripts/mv-harnais-reprise.mjs` (neuf) · `package.json` · `ci.yml` | les deux harnais, dans les trois portes | — |
+| `scripts/mv-harnais-prep.mjs` · `scripts/mv-harnais-auth1.mjs` | recalés sur l'écriture fusionnée (146e) | — |
+| `scripts/typo-baseline.json` · `scripts/harnais-claude-md.mjs` · `CLAUDE.md` · `.mv-base` | référence de taille, `SECTIONS` 178, §145 et §146, base | — |
+
+`node scripts/build-guide.mjs`, puis `npm run check`, `npm run test:e2e`, puis
+`npm run build && firebase deploy --only hosting`.
+
+### 146g. Accompagnement
+
+`MV_AIDE` : Journal, « une saisie faite hors réseau… se fusionne avec ce que les autres ont saisi entre-temps ». Guide :
+« Deux personnes ont saisi en même temps » disait « pour les autres écrans, la dernière écriture l'emporte » — c'était
+vrai, ça ne l'est plus ; et la file « se fusionne au retour du réseau ». `WHATS_NEW` 7.36 : deux entrées. Visite guidée
+et `MV_INFO` : rien ne bouge.
+
+### 146h. Ouvert, et dit
+
+① La Cave reste sans écoute : deux écrans ouverts côte à côte ne se VOIENT pas avant une relecture — mais ne
+s'effacent plus. ② Pas d'écran de conflit (146d). ③ Le journal fabrique ses `id` avec `Date.now()` : des doublons
+existent sûrement ; ces lignes passent par leur contenu (une modification concurrente de l'une d'elles garde les deux
+versions). Un `id` vraiment unique à la création réglerait ça. ④ La transaction sur un réseau fantôme (146e).
+⑤ Mesurer : les badges « fusionné avec un autre appareil » ne laissent pas de trace ; si le terrain en parle, ajouter
+une entrée au carnet d'incidents.
 

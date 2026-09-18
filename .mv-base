@@ -1,1 +1,1 @@
-270320f076c8e34bbc0efef491040ebb652c3760  # base : 270320f — SEM-1 + SEM-2 + SEM-3 (heures sup à la semaine, relevé v3, écran de la fiche) — APP 7.31 → 7.34 / SW 7.95 → 7.98
+c0e671abed291e3635b34c4e18474e31af8b7162  # base : c0e671a — BOOT-1 + REPRISE-1 (+ correctif e2e) + FUSION-1 (démarrage borné, retour de veille, fusion des documents) — APP 7.34 → 7.36 / SW 7.98 → 8.01

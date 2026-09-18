@@ -225,6 +225,23 @@ jobs:
           node scripts/mv-harnais-recup.mjs --contre
           node scripts/mv-harnais-semaine.mjs
 
+      # ★★★ BOOT-1 + REPRISE-1 (§145) : le demarrage ne reste jamais muet (attentes bornees,
+      # filet final, demarrage sans attendre `load`), et le retour de veille verifie que le
+      # serveur repond encore (sonde, relance du flux, relecture, voyant « Pas de synchro »).
+      # Rejoue sous une HORLOGE SIMULEE : une attente qui ne se regle jamais se teste en 1 ms.
+      - name: Harnais — demarrage borne et retour de veille
+        run: |
+          node scripts/mv-harnais-reprise.mjs
+          node scripts/mv-harnais-reprise.mjs --contre
+
+      # ★★★ FUSION-1 (§146) : une ecriture n'efface plus ce qu'un autre appareil a saisi. Fusion a
+      # trois voies, transaction, file hors ligne avec sa base, parcelles : 400 tirages au hasard ou
+      # rien ne se perd, et chaque defaut corrige, reintroduit, doit rougir.
+      - name: Harnais — fusion des documents entre appareils
+        run: |
+          node scripts/mv-harnais-fusion-docs.mjs
+          node scripts/mv-harnais-fusion-docs.mjs --contre
+
       # Vite + inject-precache (postbuild, idempotent).
       - name: Build
         run: npm run build

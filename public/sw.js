@@ -1,4 +1,14 @@
-// MA VIGNE — Service Worker v7.98
+// MA VIGNE — Service Worker v8.01
+// v8.01 (18/09/2026) — BOOT-1, CORRECTIF VU PAR L'E2E : la relance automatique sur echec du script reCAPTCHA sonde
+//   d'abord son adresse (bloqueur, reseau filtre, e2e : plus de relance sous les doigts) ; les donnees de l'appareil
+//   ne remplacent plus la memoire d'une session deja ouverte quand le demarrage finit apres la connexion.
+// v8.00 (18/09/2026) — FUSION-1 : UNE ECRITURE N'EFFACE PLUS CE QU'UN AUTRE APPAREIL A SAISI. Chaque document est
+//   relu, fusionne a trois voies (base = etat serveur dont la memoire derive) et reecrit en transaction ; la file hors
+//   ligne garde la base de sa premiere mise en file ; la memoire recoit le resultat ; defaut dormant des parcelles corrige.
+// v7.99 (18/09/2026) — BOOT-1 + REPRISE-1 : LE DEMARRAGE NE RESTE JAMAIS MUET, LE RETOUR DE VEILLE VERIFIE LE
+//   SERVEUR. Attentes du demarrage bornees (profils de l'appareil au-dela), demarrage sans attendre `load`, appels
+//   au serveur bornes en entier ; au retour de veille, sonde du serveur, relance du flux, relecture ; voyant
+//   « Pas de synchro » et relance proposee ; carnet d'incidents de l'appareil envoye au journal du domaine.
 // v7.98 (18/09/2026) — SEM-3 : L'ECRAN DE LA FICHE DIT LA MEME CHOSE QUE LE RELEVE v3 (une seule source). Absences par
 //   cause, « a ce jour », onglet Jours a la semaine, compteur du solde d'avant au solde d'apres, carte Heures a rattraper.
 //   APP 7.33 -> 7.34.
@@ -4020,7 +4030,7 @@
 // v2.22 — Fix profils vides : guard vide dans loadData() pour MEMBRES/SAISONS/TACHES
 // v2.17 — Onboarding intégré + tenantId · v2.06 — Firebase Auth · v2.00–v2.05 — divers
 const DEBUG = self.location.hostname === 'localhost' || self.location.hostname === '127.0.0.1';
-const CACHE_NAME   = 'mavigne-v7.98';
+const CACHE_NAME   = 'mavigne-v8.01';
 const TENANT_CACHE = 'mavigne-tenant';   // Cache persistant — préservé à chaque mise à jour SW
 const SYNC_TAG     = 'mavigne-sync';
 
@@ -4036,7 +4046,7 @@ const CDN_URLS = [
 ];
 
 self.addEventListener('install', event => {
-  if(DEBUG) console.log('[SW] Ma Vigne v7.98 installé');
+  if(DEBUG) console.log('[SW] Ma Vigne v8.01 installé');
   event.waitUntil(
     caches.open(CACHE_NAME).then(async cache => {
       // ── Cœur applicatif : STRICT (mise à jour ATOMIQUE) ──
@@ -4052,7 +4062,7 @@ self.addEventListener('install', event => {
 });
 
 self.addEventListener('activate', event => {
-  if(DEBUG) console.log('[SW] Ma Vigne v7.98 activé');
+  if(DEBUG) console.log('[SW] Ma Vigne v8.01 activé');
   event.waitUntil(
     caches.keys().then(keys =>
       Promise.all(

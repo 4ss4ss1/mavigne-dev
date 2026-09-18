@@ -332,6 +332,13 @@ try{sessionStorage.removeItem('mv_boot_retry');}catch(e){ if(window._mvAvale) wi
       var elapsed=Date.now()-_lastHidden;
       if(isStandaloneIOS && _lastHidden>0 && elapsed>30*60*1000){
         window.location.reload();
+        return;
+      }
+      // ★★★ REPRISE-1 (§145) — au retour de veille, rien ne vérifiait que la connexion au serveur avait
+      //   survécu : un flux mort ne se signale pas, et le téléphone montrait sa copie en disant
+      //   « Synchronisé ». _mvReprise sonde le serveur, relance le flux, relit — ou le dit.
+      if(_lastHidden>0 && typeof window._mvReprise==='function'){
+        window._mvReprise(elapsed).catch(function(_e){ if(window._mvAvale) window._mvAvale(_e,'app.js/_mvRepriseVisible'); });
       }
     }
   });
@@ -1418,7 +1425,8 @@ function initLogin(){
       + '<div style="margin-bottom:12px;animation:spin 1.2s linear infinite;display:inline-flex;color:var(--texte-doux)">'+_mvIcon('sablier',40)+'</div>'
       + '<div>Chargement… (' + window._loginRetryCount + ')</div>'
       + '<div style="margin-top:8px;font-size:10px;opacity:.5">tenant: ' + _tenant + '</div>'
-      + (window._loginRetryCount >= 4 ? '<div style="margin-top:16px;font-size:var(--pt-micro,11px);color:var(--rouge,#E74C3C)">Firebase lent — vérifie ta connexion.</div>' : '')
+      + (window._loginRetryCount >= 4 ? '<div style="margin-top:16px;font-size:var(--pt-micro,11px);color:var(--rouge,#E74C3C)">Le serveur tarde à répondre — vérifiez la connexion.</div>'
+        + '<button type="button" class="login-btn" onclick="_mvRecharger()" style="margin-top:14px">Relancer l\u2019application</button>' : '')
       + '</div>';
     console.warn('[initLogin] MEMBRES vide — retry', window._loginRetryCount, '— tenant:', _tenant);
     var _delays = [1500, 2000, 3000, 5000];
@@ -3155,6 +3163,22 @@ async function _loginAwaitEmail(){
 }
 window._mvLoginAwaitEmail = _loginAwaitEmail;
 
+// ★ BOOT-1 (§145) — le message d'échec et, quand c'est le serveur qui ne répond pas, le seul geste qui
+//   guérit une page dont le jeton App Check ne viendra jamais : relancer l'application.
+function _loginErreur(msg, relancer){
+  var el=document.getElementById('login-pwd-error'); if(!el) return false;
+  el.textContent=msg;
+  if(relancer){
+    var b=document.createElement('button');
+    b.type='button'; b.className='login-btn'; b.style.marginTop='12px';
+    b.textContent='Relancer l\u2019application';
+    b.onclick=function(){ if(window._mvRecharger) window._mvRecharger(); else location.reload(); };
+    el.appendChild(b);
+  }
+  el.style.display='block';
+  return true;
+}
+
 function selectProfile(idx){
   window.loginPendingIdx = idx;
   var m = MEMBRES[idx];
@@ -3255,8 +3279,7 @@ async function confirmLogin(){
   if(!_mail) {
     btn.disabled = false;
     btn.textContent = 'Se connecter';
-    document.getElementById('login-pwd-error').textContent = 'Compte inaccessible — vérifiez votre connexion, puis réessayez. Si cela persiste, contactez votre responsable.';
-    document.getElementById('login-pwd-error').style.display = 'block';
+    _loginErreur('Compte inaccessible — vérifiez votre connexion, puis réessayez. Si cela persiste, contactez votre responsable.', navigator.onLine);
     return;
   }
   try {
@@ -3302,6 +3325,7 @@ async function confirmLogin(){
     btn.disabled = false;
     btn.textContent = 'Se connecter';
     var _loginErr = 'Mot de passe incorrect.';
+    var _loginRelancer = false;
     if (e.code === 'auth/invalid-email') {
       _loginErr = 'Email invalide pour ce compte. Contactez l\'administrateur.';
     } else if (e.code === 'auth/user-not-found') {
@@ -3309,13 +3333,15 @@ async function confirmLogin(){
     } else if (e.code === 'auth/user-disabled') {
       _loginErr = 'Ce compte a été désactivé.';
     } else if (e.code === 'auth/network-request-failed') {
-      _loginErr = 'Pas de connexion réseau.';
+      // ★ BOOT-1 (§145) — avec du réseau, c'est le serveur (ou le jeton App Check de cette page) qui ne
+      //   répond pas : « Pas de connexion réseau » mentait (§68h), et réessayer sans relancer échouait.
+      _loginErr = navigator.onLine ? 'Le serveur ne répond pas. Relancez l\u2019application, puis réessayez.' : 'Pas de connexion réseau.';
+      _loginRelancer = navigator.onLine;
     } else if (!e.code) {
       _loginErr = 'Connexion bloquée (extension navigateur ou VPN). Désactivez uBlock / MetaMask et réessayez.';
     }
     console.warn('[Login] Erreur Firebase:', e.code, _mail);
-    document.getElementById('login-pwd-error').textContent = _loginErr;
-    document.getElementById('login-pwd-error').style.display = 'block';
+    _loginErreur(_loginErr, _loginRelancer);
     document.getElementById('login-pwd-input').value = '';
     document.getElementById('login-pwd-input').focus();
     console.warn('Login Firebase error:', e.code);
@@ -10496,7 +10522,15 @@ function lancerExportEntretienPDF(){
   }, { passive: true });
 })();
 
-window.addEventListener('load', function(){
+// ★★ BOOT-1 (§145) — LE DÉMARRAGE N'ATTEND PLUS `load` AU-DELÀ DE 2,5 s. `load` attend AUSSI le script
+//   reCAPTCHA de Google, inséré par App Check pendant l'évaluation du module : sur un réseau qui se
+//   réveille (déverrouillage, fond de cave), il peut tarder des dizaines de secondes — et avec lui TOUT
+//   le démarrage : les profils, le bouton « Se connecter », les gestionnaires d'erreurs.
+//   Une seule exécution, quel que soit celui qui arrive le premier.
+var _mvDemarre=false;
+function _mvDemarrer(){
+  if(_mvDemarre) return;
+  _mvDemarre=true;
   // Initialiser le thème dès le chargement
   if(typeof initTheme==='function') initTheme();
 
@@ -10546,12 +10580,18 @@ window.addEventListener('load', function(){
     var _rmsg = (reason && reason.message ? reason.message : String(reason)) || '';
     // Bug SDK Firestore connu (firebase-js-sdk : « INTERNAL ASSERTION FAILED: Unexpected
     // state ») — assertion interne du flux de watch temps réel, intermittente, plus fréquente
-    // sur réseau mobile instable, NON corrigée par les versions récentes du SDK. Sans perte de
-    // données (le pull getDoc réussit). On NE l'affiche PAS au client : trace silencieuse (une
-    // seule entrée error_log par session + compteur console) au lieu du bandeau d'erreur rouge.
+    // sur réseau mobile instable, NON corrigée par les versions récentes du SDK. On NE l'affiche
+    // PAS au client : trace silencieuse (compteur console, une entrée error_log par session — qui
+    // n'arrive que si Firestore vit encore) au lieu du bandeau d'erreur rouge.
+    // ⚠️⚠️ REPRISE-1 (§145) — ce commentaire disait « sans perte de données (le pull getDoc
+    //   réussit) » : c'était FAUX. Dans le SDK (Firestore 4.7.3, AsyncQueue), une erreur interne met
+    //   la file hors service pour le reste de la page, et TOUT appel suivant renvoie ce même message
+    //   — lecture, écriture, écoute. Et l'entrée error_log partait… par ce même Firestore. On le
+    //   VÉRIFIE (_mvFsVerifier), au lieu de le supposer : hors service, le voyant le dit.
     if (/INTERNAL ASSERTION FAILED/i.test(_rmsg)) {
       _mvHushRejet(e);
       window._mvFsAssertCount = (window._mvFsAssertCount || 0) + 1;
+      try { if (window._mvFsVerifier) window._mvFsVerifier('assertion'); } catch(_e){ if(window._mvAvale) window._mvAvale(_e,'app.js/_mvHushRejet#fs'); }
       try { console.warn('[Firestore] assertion interne SDK ignorée (bug connu, non bloquant) x' + window._mvFsAssertCount + ' : ' + _rmsg); } catch(_e){ if(window._mvAvale) window._mvAvale(_e,'app.js/_mvHushRejet#2'); }
       if (!window._mvFsAssertLogged) {
         window._mvFsAssertLogged = true;
@@ -10623,7 +10663,14 @@ window.addEventListener('load', function(){
   } else if('Notification' in window&&Notification.permission==='denied'){
     if(window.updateNotifUI) window.updateNotifUI('denied');
   }
-});
+}
+window.addEventListener('load', _mvDemarrer);
+setTimeout(function(){
+  if(_mvDemarre) return;
+  window.__MV_LOAD_TARDIF=Date.now();
+  if(window._mvIncident) window._mvIncident({ type:'load-tardif' });
+  _mvDemarrer();
+}, 2500);
 
 // ════ SERVICE WORKER ════
 // ── Enregistrement Service Worker (PWA offline) ──
@@ -10682,6 +10729,27 @@ function _swReload() {
   window.location.reload();
 }
 
+
+// ★ REPRISE-1 (§145) — après une relecture au retour de veille : repeindre l'écran ouvert, sauf si l'on
+//   y tape (la donnée est en mémoire, la prochaine navigation la montrera).
+function _mvRendrePageActive(){
+  if(window._mvSaisieEnCours&&window._mvSaisieEnCours()) return 'saisie';
+  var p=document.querySelector('.page.active'),pid=p?p.id:'';
+  try{
+    if(pid==='page-home') renderHome();
+    else if(pid==='page-parcelles'){ renderParcelles(); computePStats(); }
+    else if(pid==='page-journal') renderJournalList();
+    else if(pid==='page-tracteur') renderTracteur();
+    else if(pid==='page-phyto'&&window.renderPhyto) window.renderPhyto();
+    else if(pid==='page-reglages'&&window.renderReglages) window.renderReglages();
+    else if(pid==='page-cave'&&window.renderCave) window.renderCave();
+    else if(pid==='page-reserve'&&window.renderReserve) window.renderReserve();
+    else if(pid==='page-planning'&&window.renderPlanning) window.renderPlanning();
+    else if(pid==='page-pilotage'&&window.renderPilotage) _ensureLeaflet().then(function(){window.renderPilotage();}).catch(function(){window.renderPilotage();});
+  }catch(e){ if(window._mvAvale) window._mvAvale(e,'app.js/_mvRendrePageActive'); }
+  return pid;
+}
+window._mvRendrePageActive=_mvRendrePageActive;
 
 // ════ REFRESH SANS DÉCONNEXION ════
 async function refreshApp(){
@@ -11381,7 +11449,7 @@ function _syncEnsureDots(){
     top.appendChild(_syncMakeDot());
   });
 }
-function _syncSetState(state,count){
+function _syncSetState(state,count,mot){
   document.querySelectorAll('.mv-syncdot').forEach(function(el){
     el.classList.remove('synced','syncing','offline');
     el.classList.add(state);
@@ -11389,10 +11457,11 @@ function _syncSetState(state,count){
     if(!lbl||!cnt)return;
     if(state==='synced'){lbl.textContent='';cnt.style.display='none';el.setAttribute('aria-label','Synchronisé');}
     else if(state==='syncing'){lbl.textContent='Synchro…';cnt.style.display='none';el.setAttribute('aria-label','Synchronisation en cours');}
-    else{ // offline / en attente
+    else{ // offline / en attente / serveur injoignable (REPRISE-1, §145)
+      var _mot=mot||'Hors ligne';
       if(count>0){lbl.textContent='';cnt.style.display='';cnt.textContent=count;}
-      else{lbl.textContent='Hors ligne';cnt.style.display='none';}
-      el.setAttribute('aria-label','Hors ligne'+(count>0?' — '+count+' en attente':''));
+      else{lbl.textContent=_mot;cnt.style.display='none';}
+      el.setAttribute('aria-label',_mot+(count>0?' — '+count+' en attente':''));
     }
   });
 }
@@ -11400,7 +11469,9 @@ function _syncPending(){try{return (typeof window._offlineQueueCount==='function
 function _syncRefresh(){
   if(_syncTransient)return;
   var pending=_syncPending();
-  if(!navigator.onLine||pending>0){_syncSetState('offline',pending);}
+  // ★ REPRISE-1 (§145) — du réseau mais pas de serveur : le point le dit, au lieu d'un vert qui ment.
+  var _srvKO=!!(navigator.onLine&&window._mvSrvKO);
+  if(!navigator.onLine||pending>0||_srvKO){_syncSetState('offline',pending,_srvKO?'Pas de synchro':'');}
   else{_syncSetState('synced',0);if(!_syncLastSync)_syncLastSync=Date.now();}
 }
 function _syncFromMessage(msg){
@@ -11427,6 +11498,18 @@ var _PV_KEYLBL={parcelles:'Parcelles',journal:'Journal',sessions:'Tracteur',trav
 function _syncOpenDetail(){
   var b=document.getElementById('sync-pop-body');if(!b){_syncRefresh();return;}
   var pending=_syncPending(),online=navigator.onLine,h='';
+  // ★ REPRISE-1 (§145) — du réseau, mais plus de serveur : « Tout est enregistré » aurait menti.
+  if(online&&window._mvSrvKO){
+    h='<div class="sync-pop-hd"><div class="sync-pop-ico offline">'+_mvIcon('horsligne',18)+'</div><div><div class="sync-pop-t">Pas de connexion au serveur</div></div></div>'
+     +'<div class="sync-pop-d">Le téléphone a du réseau, mais ne joint plus le serveur&nbsp;: il ne reçoit plus ce que les autres enregistrent'
+     +(pending>0?(', et '+pending+' modification'+(pending>1?'s attendent':' attend')+' sur l\'appareil'):'')
+     +'. Vos saisies restent enregistrées sur l\'appareil. Relancez l\'application pour rétablir la connexion.</div>'
+     +'<button type="button" class="mbtn verte" onclick="_mvRecharger()">Relancer l\'application</button>'
+     +'<div class="sync-pop-foot">Dernière synchro réussie : '+_syncAgo()+'</div>';
+    b.innerHTML=h;
+    openOv('ovSync');
+    return;
+  }
   if(online&&pending===0){
     h='<div class="sync-pop-hd"><div class="sync-pop-ico synced">'+_mvIcon('check',18)+'</div><div><div class="sync-pop-t">Tout est enregistré</div></div></div>'
      +'<div class="sync-pop-d">Toutes les modifications sont synchronisées dans le cloud.</div>'

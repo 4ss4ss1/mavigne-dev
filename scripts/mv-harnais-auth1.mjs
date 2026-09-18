@@ -84,6 +84,16 @@ function bac(scenario) {
       return Promise.resolve();
     },
     _retryAsync: async (fn) => fn(),   // le retry interne n'est pas l'objet du test
+    // FUSION-1 (§146) — une clé fusionnée s'écrit par transaction (_mvSauverFusion) et non plus par
+    // setDoc. La fusion est éprouvée par mv-harnais-fusion-docs ; ici, seul compte le REFUS : la
+    // transaction passe par le même faux serveur que setDoc, avec les mêmes refus.
+    _MV_FUSION_EXCLUES: { parcelles: 1, kml_polygons: 1, travaux: 1 },
+    _mvBaseDe: () => undefined,
+    _mvBaseMem: () => undefined,
+    _mvBaseNoter: () => false,
+    _mvApresFusion: () => 'rien',
+    _mvParcellesApres: () => 'rien',
+    _mvSauverFusion: (k, L) => sandbox.setDoc().then(() => ({ fusion: L, distant: false })),
   };
   sandbox.window = sandbox;
   sandbox.self = sandbox;

@@ -85,11 +85,17 @@
     <tr><td><b>{ic:info} Envoi en cours</b></td><td>Une saisie part en ce moment.</td><td>Attendre 2&nbsp;secondes.</td></tr>
     <tr><td><b>{ic:alerte} En attente</b></td><td>Le réseau manque ou faiblit : les saisies sont en file.</td><td>Continuer à travailler,
     l'envoi repart tout seul dès que le réseau revient.</td></tr>
+    <tr><td><b>{ic:horsligne} Pas de synchro</b></td><td>Le téléphone a du réseau, mais ne joint plus le serveur : il ne
+    reçoit plus ce que les autres saisissent.</td><td>Toucher l'indicateur, puis <em>Relancer l'application</em>. Vos
+    saisies restent sur l'appareil.</td></tr>
   </table></div>
   <ul class="dot">
     <li><b>Tirer la page vers le bas</b> force une actualisation immédiate des données et de la météo.</li>
+    <li><b>Au retour dans l'application</b> après une mise en veille, elle vérifie d'elle-même qu'elle joint encore le
+    serveur, relance la connexion si besoin et relit ce que les autres ont saisi entre-temps.</li>
     <li>Rien n'est jamais perdu hors réseau : la file d'attente est conservée, y compris si vous fermez
-    l'application ou éteignez le téléphone.</li>
+    l'application ou éteignez le téléphone. Au retour du réseau, elle se <b>fusionne</b> avec ce que les
+    autres ont saisi entre-temps, au lieu de l'écraser.</li>
     <li>L'indicateur distingue deux situations. <b>« Hors ligne »</b> : le téléphone n'a plus de réseau
     du tout. <b>« Réseau instable »</b> : il affiche des barres, mais l'envoi n'aboutit pas — au fond
     d'une cave, dans un hangar, sous un couvert. Dans les deux cas la saisie est conservée dans

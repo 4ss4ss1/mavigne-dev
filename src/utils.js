@@ -23,7 +23,7 @@ export const GT_ADMIN_EMAIL = 'ngdevpro@gmail.com';
 // WHATS_NEW   : tableau vide = modal desactive pour cette version.
 // Format item : { emoji:'📅', titre:'Titre court', desc:'Phrase utilisateur.' }
 // Regle : seulement les changements visibles par les utilisateurs.
-export const APP_VERSION = '7.34';
+export const APP_VERSION = '7.36';
 // ════ Journal des nouveautés (récap cumulatif) ════
 // Une entrée par version, la PLUS RÉCENTE EN HAUT : { v:'5.10', items:[ {emoji,titre,desc}, … ] }
 // À chaque release visible → AJOUTER un bloc en tête (ne pas remplacer). items:[] = release technique (rien à afficher).
@@ -715,6 +715,30 @@ window._mvGraphRepeindre = function(){
 };
 
 export const WHATS_NEW = [
+  { v: '7.36', items: [
+    { emoji: 'equipe', titre: 'Deux appareils, les deux saisies gardées',
+      desc: "Ce que vous enregistrez n’efface plus ce qu’un autre appareil a saisi entre-temps. Le journal, le tracteur, le "
+        + "phyto, la cave, le planning, les réglages\u00a0: tout est désormais <b>fusionné</b>, comme les parcelles l’étaient déjà. "
+        + "Une ligne supprimée d’un côté et modifiée de l’autre est gardée\u00a0: rien ne disparaît en silence." },
+    { emoji: 'horsligne', titre: 'Au retour du réseau, rien n’est écrasé',
+      desc: "Les saisies faites hors réseau se fusionnent avec ce que les autres ont enregistré pendant ce temps, au lieu de "
+        + "le remplacer. Quand une sauvegarde reprend des saisies d’un autre appareil, le badge le dit\u00a0: «\u00a0fusionné avec "
+        + "un autre appareil\u00a0»." }
+  ] },
+  { v: '7.35', items: [
+    { emoji: 'rotation', titre: 'Au retour dans l’application, les saisies des autres arrivent',
+      desc: "Quand vous revenez dans l’application après une mise en veille, elle vérifie qu’elle joint encore le serveur, "
+        + "relance la connexion si besoin et récupère ce que les autres ont enregistré entre-temps — la Cave comprise. "
+        + "Si le serveur ne répond plus, elle ne prétend plus que tout est à jour." },
+    { emoji: 'horsligne', titre: 'Le voyant dit «\u00a0Pas de synchro\u00a0» quand le serveur ne répond pas',
+      desc: "Avec du réseau mais sans serveur, le voyant en haut de l’écran passe à l’orange avec «\u00a0Pas de synchro\u00a0»\u00a0: "
+        + "le téléphone ne reçoit plus ce que les autres saisissent. Touchez-le, puis «\u00a0Relancer l’application\u00a0» pour "
+        + "rétablir la connexion. Vos saisies restent enregistrées sur l’appareil." },
+    { emoji: 'cle', titre: 'L’écran de connexion ne reste plus vide',
+      desc: "Si le serveur tarde à répondre, les profils enregistrés sur le téléphone s’affichent au bout de quelques secondes, "
+        + "et «\u00a0Relancer l’application\u00a0» est proposé quand la connexion échoue alors qu’il y a du réseau. Avant, "
+        + "l’écran pouvait rester sur le logo, sans aucun profil." }
+  ] },
   { v: '7.34', items: [
     { emoji: 'personne', titre: 'La fiche du salarié dit la même chose que le relevé',
       desc: "Le cadre «\u00a0Pour la paie\u00a0» affiche les <b>absences par cause</b> — payées, par le domaine, du salarié, à "
@@ -3108,6 +3132,7 @@ var MV_AIDE = {
       ['Appui long puis glisser', "déplace un bloc ; l’œil le masque. Chacun règle son Accueil."],
       ['La pastille de saison', "change la vue. Revenir sur une période passée ne touche pas à la période active."],
       ['Actualiser', "force une resynchronisation quand un chiffre semble figé."],
+      ['Le voyant en haut de l’écran', "dit où en est la synchro. Orange avec «\u00a0Pas de synchro\u00a0»\u00a0: le téléphone a du réseau mais ne joint plus le serveur, et ne reçoit plus ce que les autres saisissent — touchez-le, puis «\u00a0Relancer l’application\u00a0». Au retour de veille, l’application vérifie d’elle-même et relit ce qui a changé."],
       ['La roue crantée', "en haut à droite ouvre ce qui se règle une fois l’an pour la vigne — tâches et barème, écartements de plantation, secteurs météo — et les documents de la vigne. Administrateur seulement ; l’en-tête dit « Vigne » sur les trois onglets."],
       ['« Tu prends le tracteur aujourd’hui ? »', "se pose à la première ouverture du jour, à ceux qui sont à la fois ouvriers et tractoristes et seulement si une session tracteur est ouverte. La réponse tient la journée et se repose le lendemain. Elle range le menu du bas et choisit l’écran d’ouverture : elle ne change aucun de vos droits, et rien ne disparaît — le reste passe sous « Plus », où se trouve aussi le retour au terrain."],
       ['La météo a besoin du réseau.', "Hors ligne, elle affiche la dernière prévision reçue."]
@@ -3131,7 +3156,7 @@ var MV_AIDE = {
       ['Chaque tâche validée', "écrit une ligne ici, avec la parcelle, la personne et la durée."],
       ['Une équipe au travail', "tient en une seule entrée : tous les noms y figurent, et le travail se partage entre eux."],
       ['Les filtres', "par parcelle et par tâche se cumulent ; la pastille rappelle ce qui est actif."],
-      ['Une saisie faite hors réseau', "repart toute seule au retour du signal."],
+      ['Une saisie faite hors réseau', "repart toute seule au retour du signal, et se fusionne avec ce que les autres ont saisi entre-temps : rien n’est écrasé."],
       ['Le journal en fichier', "se prend dans la roue crantée de la Vigne, bloc Documents."]
     ]
   },
