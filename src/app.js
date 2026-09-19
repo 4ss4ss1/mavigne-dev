@@ -11,7 +11,7 @@ import { isAdmin, isTractoriste, isSaisonnier, canWrite,
          getRoleLabel, showToast, showSyncBadge, wmoDesc, wmoIcone, TABREV, tNom,
          applyTheme, setThemeMode, initTheme, logError, _closeCriticalOverlay, _escHtml, _escAttr,
          GT_ADMIN_EMAIL, DEMO_TENANT, DEMO_FIREBASE_EMAIL, DEMO_FIREBASE_PWD, dreEffectif,
-         _mvBadge, _mvIcon, _mvIconTache, _mvIconInline, _actIcone,
+         _mvBadge, _mvIcon, _mvIconTache, _mvIconInline, _actIcone, _swNotify,
 } from './utils.js';
 // Exposer constantes démo sur window pour accès cross-module
 import './firebase.js';
@@ -10793,12 +10793,18 @@ if ('serviceWorker' in navigator) {
       // en attente et prend le relais tout seul au prochain lancement, sans
       // interrompre la session en cours.
       reg.update().catch(function(_e){ if(window._mvAvale) window._mvAvale(_e,'app.js/_mvHushRejet#4'); });
-      // Suivi (debug) : détecte l'installation d'une nouvelle version, sans rien forcer.
+      // Suivi + notification (NOTIF-1, §158) : détecte l'installation d'une nouvelle
+      // version, sans rien forcer. Ne notifie que si une AUTRE version tournait déjà
+      // (navigator.serviceWorker.controller non nul) — jamais au tout premier install.
       reg.addEventListener('updatefound', function(){
         var inst = reg.installing;
         if(!inst) return;
         inst.addEventListener('statechange', function(){
-          if(inst.state === 'installed' && DEBUG) console.log('[SW] Nouvelle version installée, en attente (prendra effet au prochain lancement)');
+          if(inst.state !== 'installed') return;
+          if(DEBUG) console.log('[SW] Nouvelle version installée, en attente (prendra effet au prochain lancement)');
+          if(navigator.serviceWorker.controller) {
+            _swNotify('Mise à jour Ma Vigne', {body:'Fermez et rouvrez l\'application pour l\'installer.', icon:'icon-192.png', tag:'maj_dispo'});
+          }
         });
       });
       if ('sync' in reg) {

@@ -1,1 +1,1 @@
-4b93fcc6ba8c69b2e010a9b39f280c55ef804a9c  # base : 4b93fcc — MAJ-1 (§157 : le nouveau SW n'interrompt plus la session en cours, il attend le prochain lancement) — APP 7.44 inchangé / SW 8.11 → 8.12
+60d7a85797f99015b990b7684efa20f299fd6b4d  # base : 60d7a85 — NOTIF-1 (§158 : une notification previent quand la mise a jour est prete) — APP 7.44 → 7.45 / SW 8.12 → 8.13

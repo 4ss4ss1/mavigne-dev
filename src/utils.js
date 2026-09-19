@@ -23,7 +23,7 @@ export const GT_ADMIN_EMAIL = 'ngdevpro@gmail.com';
 // WHATS_NEW   : tableau vide = modal desactive pour cette version.
 // Format item : { emoji:'📅', titre:'Titre court', desc:'Phrase utilisateur.' }
 // Regle : seulement les changements visibles par les utilisateurs.
-export const APP_VERSION = '7.44';
+export const APP_VERSION = '7.45';
 // ════ Journal des nouveautés (récap cumulatif) ════
 // Une entrée par version, la PLUS RÉCENTE EN HAUT : { v:'5.10', items:[ {emoji,titre,desc}, … ] }
 // À chaque release visible → AJOUTER un bloc en tête (ne pas remplacer). items:[] = release technique (rien à afficher).
@@ -715,6 +715,13 @@ window._mvGraphRepeindre = function(){
 };
 
 export const WHATS_NEW = [
+  { v: '7.45', items: [
+    { emoji: 'cloche', titre: 'Une notification quand une mise à jour est prête',
+      desc: "Un déploiement ne recharge plus l'application pendant que vous l'utilisez. Si les notifications "
+        + "sont activées (Réglages), un message prévient dès qu'une mise à jour est installée et prête\u00a0: "
+        + "fermez et rouvrez l'application pour en profiter. Sans notifications activées, elle s'applique en "
+        + "silence, à la prochaine fermeture." }
+  ] },
   { v: '7.44', items: [
     { emoji: 'document', titre: 'La fiche et le relevé commencent par « Pour la compta »',
       desc: "Une ligne par chose que la compta saisit, toujours dans le même ordre\u00a0: salaire de base (retenue de tant d’heures, "

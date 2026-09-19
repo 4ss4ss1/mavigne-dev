@@ -21447,3 +21447,66 @@ par-dessus). Pas d'entrée `WHATS_NEW`, `APP_VERSION` inchangée : correctif inv
 |---|---|---|
 | `src/app.js` | retrait des 2 `postMessage(SKIP_WAITING)` (enregistrement + `updatefound`), log au lieu du skip forcé, commentaires mis à jour | — |
 | `public/sw.js` | retrait de `self.skipWaiting()` dans `install`, retrait de la branche `SKIP_WAITING` du handler `message`, version | ★ SW |
+
+## 158. ★★ NOTIF-1 — UNE NOTIFICATION PRÉVIENT QUAND LA MISE À JOUR EST PRÊTE (19/09 — `app.js` · `utils.js` · `index.html` · `sw.js` · APP 7.44 → **7.45** · SW 8.12 → **8.13** · base `60d7a85`)
+
+### 158a. Le besoin, en suite directe de MAJ-1 (§157)
+
+MAJ-1 a retiré le rechargement forcé, mais un appareil qui ne ferme jamais l'appli peut désormais rester
+longtemps sur une ancienne version sans que personne ne le sache — question posée par Nico après coup
+(risque « sauvegarde » : pas de perte de données, mais un correctif de calcul mettrait plus de temps à
+atteindre un poste resté ouvert). Sa proposition : un message qui annonce la MAJ sans redémarrer l'appli,
+en disant à l'utilisateur qu'il devra fermer et rouvrir pour l'installer.
+
+### 158b. Le choix technique — réutiliser `_swNotify`, pas construire une infra push
+
+Pas de Web Push / FCM : ça demanderait un abonnement serveur par appareil et une Cloud Function
+déclenchée au déploiement, pour un besoin que l'infra existante couvre déjà. `_swNotify` (`utils.js`,
+déjà utilisée pour gel/DAR/priorités et les rappels tracteur) passe par `reg.showNotification()` — visible
+même appli en arrière-plan, sans réabonnement ni permission nouvelle à demander. Suffit d'appeler ce qui
+existe déjà au bon endroit : le `statechange` → `installed` posé par MAJ-1.
+
+### 158c. Le garde contre le faux positif
+
+`updatefound` se déclenche aussi au **tout premier** install (pas de mise à jour, juste une première pose
+de cache) — notifier « fermez et rouvrez pour installer » à ce moment-là n'aurait aucun sens. Garde :
+`navigator.serviceWorker.controller` n'est non nul que s'il y avait déjà un SW actif avant, donc jamais au
+premier install. La notification ne part que dans ce cas.
+
+### 158d. ⚠️ TROUVÉ À LA RELECTURE DU BUNDLE — `_swNotify` N'ÉTAIT PAS IMPORTÉ DANS `app.js`
+
+Première écriture : appel `_swNotify(…)` nu dans `app.js`, qui ne l'importe pas (`reglages.js` et
+`tracteur.js`, eux, l'importent explicitement). **Rien ne rougissait** : ni `node --check`, ni le
+preflight, ni `mv-harnais-globaux` — ce dernier tolère à juste titre le nom, puisque `utils.js` pose
+`window._swNotify = _swNotify`, donc la référence libre retombe sur l'objet global et *fonctionne*.
+★ **C'est le BUNDLE CONSTRUIT qui l'a dit, pas un harnais** : `npx vite build` puis lecture de
+`dist/assets/main-*.js` — l'appel sortait **non minifié** (`_swNotify(…)`, signature d'une globale
+externe) tandis que la fonction, elle, était renommée `K` et n'existait plus que via `window._swNotify=K`.
+Le jour où un lot retire cette ligne d'exposition — qui a l'air redondante puisque tous les autres
+consommateurs importent — l'appel lève un `ReferenceError` **dans un gestionnaire d'événement**, donc
+sans rien à l'écran. Corrigé en ajoutant `_swNotify` à la liste d'import de `app.js` ; après rebuild,
+l'appel est lié statiquement (`K(…)`, minifié comme le reste) et **zéro référence libre** ne subsiste.
+⚠️ La règle générale : *un harnais qui vérifie « ce nom est-il joignable ? » répond oui pour une globale
+— il ne dit pas si la liaison est STATIQUE. Seul le bundle le dit.*
+
+### 158e. Ouvert, et dit
+
+① Comme `_swNotify` (branche `reg.showNotification`) ne vérifie pas explicitement la permission avant
+d'appeler — déjà le cas pour gel/DAR/tracteur, pas quelque chose que ce lot corrige. ② N'atteint que les
+appareils où les notifications sont déjà activées ; les autres restent sur le comportement silencieux de
+MAJ-1 (rien ne change pour eux). ③ Le message reste générique (« une mise à jour est prête »), jamais le
+contenu réel du `WHATS_NEW` de la version poussée : la page qui tourne encore ne peut pas lire l'intérieur
+du nouveau bundle mis en cache, seulement détecter qu'il existe.
+
+### 158f. La note de livraison
+
+**Base `60d7a85`** (MAJ-1/§157 déjà intégré et poussé par Nico entre les deux lots — reclone avant
+d'écrire, comme la fois précédente). Feature visible cette fois : entrée `WHATS_NEW` réelle, `APP_VERSION`
+bumpée.
+
+| Fichier | Ce qui change | Bump ? |
+|---|---|---|
+| `src/app.js` | import de `_swNotify` ajouté (cf. 158d), notification sur `statechange` → `installed`, gardée par `navigator.serviceWorker.controller` | — |
+| `src/utils.js` | `APP_VERSION`, entrée `WHATS_NEW` | ★ APP |
+| `index.html` | 4 emplacements de version | ★ APP |
+| `public/sw.js` | version | ★ SW |
