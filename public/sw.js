@@ -1,4 +1,7 @@
-// MA VIGNE — Service Worker v8.08
+// MA VIGNE — Service Worker v8.09
+// v8.09 (19/09/2026) — PAIE-1 : la fiche et le releve commencent par « Pour la compta » (une ligne par chose a saisir, le
+//   chiffre en gros) ; une demande de paiement est un total, elle ne fond plus ; dans la semaine, le salarie passe avant le
+//   domaine ; le detail de l'annee separe recup prise et absences ; le releve tient sur deux pages. APP 7.43 -> 7.44.
 // v8.08 (19/09/2026) — ASM-1 : un fut entame (volume mesure sous les futs) se complete depuis Le Chai, avec le vin d'une
 //   cuve du Cuvier (meme pas encore decuvee) ou d'une cuvee du Chai ; Le Chai compte le vin reel. VOL-2 : le kg/hL de
 //   chaque etape sur la chaine, un id de degrade par graphe. APP 7.42 -> 7.43.
@@ -4050,7 +4053,7 @@
 // v2.22 — Fix profils vides : guard vide dans loadData() pour MEMBRES/SAISONS/TACHES
 // v2.17 — Onboarding intégré + tenantId · v2.06 — Firebase Auth · v2.00–v2.05 — divers
 const DEBUG = self.location.hostname === 'localhost' || self.location.hostname === '127.0.0.1';
-const CACHE_NAME   = 'mavigne-v8.08';
+const CACHE_NAME   = 'mavigne-v8.09';
 const TENANT_CACHE = 'mavigne-tenant';   // Cache persistant — préservé à chaque mise à jour SW
 const SYNC_TAG     = 'mavigne-sync';
 
@@ -4066,7 +4069,7 @@ const CDN_URLS = [
 ];
 
 self.addEventListener('install', event => {
-  if(DEBUG) console.log('[SW] Ma Vigne v8.08 installé');
+  if(DEBUG) console.log('[SW] Ma Vigne v8.09 installé');
   event.waitUntil(
     caches.open(CACHE_NAME).then(async cache => {
       // ── Cœur applicatif : STRICT (mise à jour ATOMIQUE) ──
@@ -4082,7 +4085,7 @@ self.addEventListener('install', event => {
 });
 
 self.addEventListener('activate', event => {
-  if(DEBUG) console.log('[SW] Ma Vigne v8.08 activé');
+  if(DEBUG) console.log('[SW] Ma Vigne v8.09 activé');
   event.waitUntil(
     caches.keys().then(keys =>
       Promise.all(

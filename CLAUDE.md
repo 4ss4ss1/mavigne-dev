@@ -2,7 +2,18 @@
 
 > Document de référence du projet **Ma Vigne** (GUERETTECH). Il est le **porteur de vérité** :
 > la mémoire Claude est plafonnée, ce fichier ne l'est pas.
-> Dernière consolidation : **19 septembre 2026 (ASM-1 + VOL-2)** — ★★★ **LE FÛT ENTAMÉ SE COMPLÈTE DEPUIS LE CHAI,
+> Dernière consolidation : **19 septembre 2026 (PAIE-1)** — ★★★ **« POUR LA COMPTA » : CE QUE LA COMPTA SAISIT, EN GROS ;
+> LA DEMANDE EST UN TOTAL ; LE SALARIÉ D'ABORD, AUSSI DANS LA SEMAINE (§154)**. Nico : « les infos importantes sont marquées
+> en petit […] que ça ne demande aucune ressource cognitive ». Mesuré : « Retenue sur salaire » en 9,5 px sous trois chiffres
+> de 17 px qui ne s'additionnaient pas. Cadre « Pour la compta » (`_pfCompta`, papier et écran) : une ligne par chose à
+> saisir, le chiffre en gros, « aucun » en gris, le pourquoi dessous ; les taux à 0h ne s'impriment plus. Défauts trouvés :
+> ① une demande de paiement FONDAIT quand les heures sup du mois baissaient (30h → 21h, 20h au compteur) — `paye` est
+> désormais un total, le reste se prend au compteur au calcul (`spill`, `tireBrut`, `FG.spill`) ; ② dans la semaine, le
+> domaine passait avant le salarié (ordre des jours) ; ③ le relevé de Nico sur 3 pages ; ④ « Récupérées » mêlait récup et
+> absences (`brutRec` / `brutAbs`). Septembre : Victor 5h45 → 3h45 retenues, Nico 24h30 → 30h payées. Harnais recup :
+> 378 assertions, 60 contre-épreuves. **APP 7.43 → 7.44 · SW 8.08 → 8.09**, base `3cbb7c8`. Détail en **§154**.
+>
+> ★ Précédente : **19 septembre 2026 (ASM-1 + VOL-2)** — ★★★ **LE FÛT ENTAMÉ SE COMPLÈTE DEPUIS LE CHAI,
 > ET LA CHAÎNE DIT LE kg/hL DE CHAQUE ÉTAPE (§153)**. Une cuvée garde ce qui manque dans ses fûts (`manque_l` :
 > écrit au décuvage mesuré, suivi à la correction, déduit pour les cuvées d'avant) et `_caveVolL` le retire — Le Chai
 > compte le vin réel. On touche le fût entamé (carte, fiche) : « Compléter le fût » avec le vin d'une cuve du Cuvier —
@@ -21042,3 +21053,125 @@ le type « assemblage » (le registre, oui). ④ Le défilement de 34 px des gra
 harnais morts de §152e restent. ⑥ ★★ **`cave.js` : 1 023 ko sur 1 024** — le prochain lot Cave commence par le
 découper. Piste : Le Cuvier (`_vend*`, `_vt*`, `_cuv*`) dans son propre module, sa surface `window` décidée d'avance, et
 les harnais qui extraient de `src/cave.js` repointés dans le même lot.
+
+## 154. ★★★ PAIE-1 — « POUR LA COMPTA » : CE QUE LA COMPTA SAISIT, EN GROS ; LA DEMANDE EST UN TOTAL ; LE SALARIÉ D'ABORD, AUSSI DANS LA SEMAINE (19/09 — `planning.js` · `styles.css` · `utils.js` · `index.html` · `sw.js` · `guide/10-planning.html` · `scripts/mv-harnais-recup.mjs` · `scripts/mv-harnais-semaine.mjs` · `scripts/harnais-claude-md.mjs` · APP 7.43 → **7.44** · SW 8.08 → **8.09**)
+
+> Nico : *« j'ai l'impression qu'il y a encore des bugs dans planning par rapport aux heures à 25, aux heures à 50, aux
+> récupérations, aux absences. Et la façon dont c'est affiché pour la paye, je trouve que c'est pas clair : les infos
+> importantes sont marquées en petit, les infos pas importantes un peu trop grosses […] que ça ne demande aucune ressource
+> cognitive pour la lecture de ce document »*. Audit, puis maquette `maquette-paie1-pour-la-compta.html` (avant / après
+> rendus par le vrai code, quatre cas — Victor, Nico, Chloé et un cas inventé complet —, papier pages 1 et 2, écran, onglet
+> Audit), puis « go » : les recommandations sur les quatre points (nom « Pour la compta », taux à 0h retirés, congés en
+> jours au planning ; la majoration du dimanche à côté d'une retenue reste ouverte).
+
+### 154a. L'audit, mesuré avant d'écrire
+
+- Les trois relevés de référence (les jours du harnais `semaine`, édités au 19/09) rendus en A4 dans Chromium avec les
+  polices du dépôt, puis un **banc de tirages au hasard** hors dépôt : 1 400 mois sur l'ancien code, 1 800 sur le nouveau.
+  Invariants : une retenue OU un paiement ; 50 % jamais avant 8h à 25 % ; seaux = heures sup ; payées + gardées = faites ;
+  compteur et heures à rattraper qui tombent juste ; absences par cause ; retenue = jours retenus ; restantes = récup
+  restante ; récupérées = récup prise + absences (neuf) ; la ligne du mois jamais négative. **Aucune addition fausse** : les
+  défauts étaient d'ORDRE et de MODÈLE, pas d'arithmétique.
+- ★ Mesuré sur le papier : « Retenue sur salaire » en 9,5 px — le plus petit texte de la feuille — sous trois chiffres de
+  17 px (prévues, faites, absences) qui ne s'additionnaient pas : Victor, 145 + 43 ≠ 176, les 12h faites en plus du
+  planning n'étaient écrites nulle part.
+
+### 154b. Les défauts trouvés
+
+① **La demande de paiement fondait.** Elle était gardée en deux morceaux : `paye` (le mois, borné aux heures sup) et
+`paye_bank` (le reste, converti en temps de récup à la saisie). Quand les heures sup du mois baissaient ensuite — une
+absence rattrapée dans sa semaine, ou NET-1 pour Nico —, la part du mois baissait et rien ne passait au compteur. Nico :
+30h demandées, 24h30 payées, 27h15 encore au compteur ; test : 30h → 21h, 20h au compteur.
+② **Dans la semaine, le domaine passait avant le salarié** : `_planHsupMois` rattrapait dans l'ordre des jours ; la règle
+de NET-1 (« une heure du domaine ne fait jamais retenir une absence ») ne jouait qu'au mois. Test : lundi écourté par le
+domaine 1h, mardi par le salarié 1h, samedi +1h → 1h retenue.
+③ Le relevé de Nico sortait sur **trois pages** (page 2 : 1 179 px pour 1 123).
+④ « Récupérées », au détail mois par mois, mêlait la récup prise et les absences reprises : Victor, « 21h45 récupérées »
+sans un jour de récup.
+⑤ Écran : « Les jours à partir du… » collé au bord du cadre, première lettre coupée (`p.pf-s` sans marge après le pied).
+⑥ Carte de paiement : « 0h restent en récup, soit 2h45 de repos » quand tout est payé (la majoration seule comptée dans
+`valeurRecup`).
+
+### 154c. Le moteur
+
+- **`_planHsupMois`** : dans la semaine, le rattrapage sert les jours `cpt:'retire'` d'abord, puis les autres, chacun dans
+  l'ordre des jours. La consommation des heures en plus reste dans l'ordre des jours : les heures sup et leurs rangs ne
+  bougent pas (`_planEstLecture`, qui ne lit que `h25/h50`, est inchangé).
+- **`_planCompteur` — la demande est un total.** `paye` = ce qui est demandé, en heures brutes. Le mois paie
+  `min(paye, sup)` dans `bud` comme avant ; le reste, `spill = paye − sup`, se prend au compteur APRÈS les absences et la
+  récup prise (`tireBrut` : même file que `tire`, converti au taux de la tranche au moment du calcul). `paye_bank` reste
+  LU : une saisie d'avant ce lot se relit comme un total (Nico : 10h30 + 19h30 → 30h). Mois figé : `FG.spill`, neuf dans
+  l'instantané, est ce que le compteur a payé à l'envoi ; un instantané d'avant ce lot n'en a pas → 0, rien ne bouge ; ce
+  que le compteur ne couvre plus après l'envoi (`spillNC`) entre dans `retenueVive`, comme `bankNC`. `r.dem` = tout ce qui
+  est demandé ; `P.payeDem` le lit.
+- `_planPayeEcrire` écrit le total (`paye = h`, `paye_bank = 0`) et mesure ce qui se paie (`_planPayeEffectif`) ;
+  `_planPayeMaxTotal` demande tout et lit. `_planValeurPourBrut` ne sert plus qu'à l'ancien tableau de l'année.
+- **Récup prise / absences** : `tire(h, sA | sR)` range ce que chaque consommation prend, en heures brutes (`r.brutAbs`,
+  `r.brutRec` ; avant septembre, tout est au taux 0 : récup d'abord, le reste aux heures dues, plus le comble d'entrée).
+  `_pfAnnee` rend `recPrise` et `abs` ; leur somme est l'ancienne « récupérées » (harnais Z10, tirages I13).
+- `_planHsupTable` (l'écran des mois d'avant septembre, qui liste les douze mois) : pour un mois ≥ septembre 2026, le
+  paiement se lit au compteur, sans case — il se règle dans le Résumé.
+
+### 154d. L'affichage — une seule source, `_pfCompta`
+
+- **« Pour la compta »** : une ligne par chose que la compta saisit, toujours dans le même ordre — salaire de base
+  (« Retenue de 3h45 » / « Maintenu »), heures sup à payer (une ligne par taux qui a des heures, `span.x`), congés payés
+  (jours au planning, dates, heures), arrêt de travail, acompte ; congé sans solde, majorations à payer (mode payé),
+  retenue du mois figé à rendre : seulement s'il y en a. « aucun » en gris ; le pourquoi dessous. ★ **Les taux à 0h ne
+  s'impriment plus** : FICHE-3 les voulait, Nico a tranché sur la maquette (Q1 réécrit, contre-épreuve inversée).
+- **Pour le salarié** : récup restante, heures à rattraper (le chiffre seul, leur origine en petit), heures sup restantes à
+  payer (si demande), récup prise, formation, événement familial.
+- **La ligne du mois** : prévues = faites + absences − en plus (`enPlus = faites + AB.total + recupNC − prévues`, jamais
+  négatif sur 1 800 tirages), puis les heures sup semaine par semaine et les jours comptés au planning.
+- Papier : 20 px le salaire de base, 17 px les chiffres, 11 px « aucun », 9,5 px le pourquoi ; deux colonnes (compta
+  1,62 fr, salarié 1 fr). Écran : 23 / 20 / 12,5 / 11 px ; le libellé ne se coupe pas, les taux s'empilent à droite.
+- Page 2 : « À savoir » en 4 points au lieu de 7 ; la note des heures à rattraper ne garde que ses phrases du mois ; la
+  demande n'est plus répétée sous les heures sup (elle est en page 1 et cochée à la signature, avec le DEMANDÉ) ;
+  l'acompte seulement s'il y en a ; « Heures sup restantes à payer » : les taux qui ont des heures ; détail de l'année en
+  sept colonnes (Récup prise, Absences).
+- Carte de paiement : la case montre la demande (`payeDem`) ; « Sur Xh demandées : … » quand moins se paie ; « 0h restent
+  en récup » ne s'écrit plus ; la note passe de cinq lignes à trois.
+- ★ **Deux choses ne portent plus le même nom** (le piège de §113, trouvé à la relecture) : « Pour la compta » était déjà le
+  titre du tableau de RECUP-2 (temps en récup, heures à déclarer, taux — `_planRecupCartes`, visible seulement depuis
+  l'écran des mois d'avant septembre, et le bloc du relevé d'avant). Il s'appelle désormais **« À déclarer »** ; la fiche
+  d'aide « Pour la compta » et le guide décrivent le cadre du Résumé, et gardent la règle de déclaration (l'heure brute et
+  son taux, jamais 1 h 15).
+
+### 154e. Mesuré
+
+- Relevés rendus dans Chromium, polices du dépôt : **deux pages dans les quatre cas** ; page 2 de Nico : 1 179 → 1 000 px
+  de contenu ; le cadre de la page 1 prend environ 100 px de moins (Nico : fin du contenu 1 073 → 971 px).
+- Septembre, ce qui change (dit à Nico, écrit dans la maquette) : Victor, retenue 5h45 → 3h45, heures à rattraper 3h30 →
+  5h30 ; Nico, payées 24h30 → 30h, récup restante 27h15 → 21h45. Chloé et le cas inventé : rien.
+- `mv-harnais-recup` : **378 assertions**. 24 réécrites sur le nouveau cadre sans changer un chiffre ; R5 et W1 : la demande
+  est un total ; W3b (neuve) : une saisie d'avant ; section **Z** (19) : Z1–Z2 le salarié d'abord, Z3–Z6 la demande en total
+  et la saisie d'avant, Z7–Z9 le mois figé, Z10 récup et absences, Z11–Z14 le cadre, écran et papier. **60 contre-épreuves** :
+  7 ancres recalées (`tire(…, sA)`), FICHE-3 inversée (« le cadre réimprime les taux à zéro »), FICHE-4 repointée sur
+  `spill`, AVANT-1 dédoublée (`tire` et `tireBrut`, W3b pour la première), SEM-3 « l'écran reprend son cadre d'avant » ⚰️
+  remplacée par « PAIE-1 · l'écran reprend l'ancien cadre » (la ligne qu'elle mutait ne sert plus qu'aux mois d'avant), 4
+  neuves. `mv-harnais-semaine` : 5 chiffres recalés (ceux ci-dessus).
+- ★ La section Z était verte au premier passage : ce sont les contre-épreuves qui disent qu'elle mord (1 à 18 rouges
+  chacune).
+
+### 154f. La note de livraison
+
+**Base `3cbb7c8`. APP 7.43 → 7.44 · SW 8.08 → 8.09.** `node scripts/build-guide.mjs` (le guide public se régénère, il ne
+se livre pas), puis `npm run build && firebase deploy --only hosting`.
+
+| Fichier | Ce qui change | Bump ? |
+|---|---|---|
+| `src/planning.js` | la demande en total, le salarié d'abord dans la semaine, récup / absences à part, « Pour la compta » (papier et écran), page 2 resserrée, carte de paiement | — |
+| `src/styles.css` | le bloc `.pf-cl` / `.pf-sal` du cadre à l'écran | ★ APP · ★ SW |
+| `src/utils.js` | APP 7.44, quatre nouveautés, aide du Planning | ★ APP |
+| `index.html` · `public/sw.js` | versions | ★ APP · ★ SW |
+| `guide/10-planning.html` | la fiche, le paiement, la semaine, le relevé | — |
+| `scripts/mv-harnais-recup.mjs` · `scripts/mv-harnais-semaine.mjs` · `scripts/harnais-claude-md.mjs` · `CLAUDE.md` · `.mv-base` | voir 154e · SECTIONS 186 · base | — |
+
+### 154g. Ouvert, et dit
+
+① La majoration du dimanche payée peut toujours voisiner une retenue (§150f ②), sans réponse. ② Congés payés en jours
+au planning : la compta applique sa règle (ouvrables ou ouvrés) — le samedi ouvrable n'est pas compté ici. ③ Vu dans
+Chromium (390 px et A4), pas sur téléphone ni sur papier réel ; `test:e2e` à lancer chez Nico (il ouvre la fiche). ④
+`_pfCadre` garde, pour les mois d'avant, sa branche `V=P.act?…` devenue inutile (V vaut toujours null après le retour
+anticipé) : sans effet, à nettoyer. ⑤ `planning.js` : 576 → 593 ko (+2,9 %), sous le cliquet de 5 % ; le découpage du
+relevé en module (§143b) reste à décider avant le prochain gros lot Planning.

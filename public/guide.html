@@ -2123,24 +2123,28 @@ mark{background:rgba(200,176,32,.32);color:var(--cream);border-radius:3px;paddin
   <p>Touchez un nom dans <b>Les gens</b>. La fiche s'ouvre sur le mois affiché ; les flèches sous le nom
   changent de mois sans la fermer, et le bouton <b>Relevé</b> édite le PDF.</p>
   <ul class="dot">
-    <li><b>Résumé</b> — le cadre <b>Pour la paie</b>, dans l'ordre de la saisie de paie : le <b>salaire de
-    base</b> (heures prévues, faites, et les <b>absences par cause</b> : payées, par le domaine, du salarié), <b>à payer
-    en plus</b> (heures sup payées, par taux — ou une seule ligne quand rien n'est à payer), <b>à retirer</b>
-    (<b>retenue sur salaire</b>, acomptes) et <b>pour information</b> (absences du domaine et du salarié et ce
-    qu'elles sont devenues, récup prise, temps de récup restant, <b>heures à rattraper</b>). Le bas du cadre
-    additionne les heures sup <b>semaine par semaine</b>. Le cadre compte <b>tout le mois</b> : les jours à venir,
+    <li><b>Résumé</b> — le cadre <b>Pour la compta</b> : une ligne par chose que la compta saisit, toujours dans le
+    même ordre — le <b>salaire de base</b> (<b>retenue</b> de tant d'heures, ou <b>maintenu</b>), les <b>heures sup à
+    payer</b> (une ligne par taux qui a des heures), les <b>congés payés</b>, l'<b>arrêt de travail</b>, l'<b>acompte</b>.
+    Le chiffre est en gros ; « aucun », en gris, veut dire qu'il n'y a rien — pas un oubli ; le pourquoi est écrit en
+    petit dessous (les absences du salarié et ce qu'elles sont devenues). Dessous, <b>Pour le salarié</b> : la récup
+    restante, les <b>heures à rattraper</b>, les heures sup restantes à payer, la récup prise. En bas, le mois en
+    heures, qui s'additionne (prévues = faites + absences − heures faites en plus du planning), et les heures sup
+    <b>semaine par semaine</b>. Le cadre compte <b>tout le mois</b> : les jours à venir,
     aux heures du planning. Une retenue et des heures sup à payer ne s'y trouvent <b>jamais ensemble</b> : les
     absences passent d'abord. La carte <b>Envoi à la compta</b> porte le bouton <b>Figer</b> (voir le relevé plus bas).</li>
     <li><b>Paiement des heures sup</b> — cochez <b>« demande à être payé »</b> et indiquez le nombre d'heures.
     On peut payer <b>au-delà des heures du mois</b>, jusqu'à tout ce que le compteur contient encore : les heures
-    du mois d'abord, puis les plus anciennes du compteur. On ne paie que ce qui reste une fois <b>les absences,
+    du mois d'abord, puis les plus anciennes du compteur. Le nombre d'heures est <b>un total</b> : si les heures sup
+    du mois baissent ensuite (une absence rattrapée dans sa semaine), le reste se prend au compteur — la demande ne
+    fond pas. On ne paie que ce qui reste une fois <b>les absences,
     la récup prise et les heures à rattraper couvertes</b>. Raccourcis : aucune, tout le mois, <b>tout le
     compteur</b>. Les heures sup d'avant septembre 2026 apparaissent à part, avec un <b>taux estimé</b> d'après les jours saisis :
     chaque semaine est relue avec la règle d'aujourd'hui, et ce qui a déjà été payé ou pris en récup part des heures
     à 25&nbsp;%. C'est une estimation : le compteur et les paies d'avant ne changent pas, la compta confirme. Le report
     d'avant Ma Vigne reste <b>taux à vérifier</b>. Les heures payées se prennent d'abord sur celles à 25&nbsp;% et
-    sortent de la récup. La case existe quel que soit le mode du domaine. Le cadre donne alors <b>un nombre
-    d'heures par taux</b> — à +25&nbsp;%, à +50&nbsp;%, du dimanche, de jour férié —, même à zéro, et l'onglet
+    sortent de la récup. La case existe quel que soit le mode du domaine. Le cadre donne alors <b>une ligne par
+    taux qui a des heures</b> — à +25&nbsp;%, à +50&nbsp;%, du dimanche, de jour férié —, et l'onglet
     Compteur ajoute la carte <b>Heures sup restantes à payer</b> : les heures encore payables, taux par taux,
     le décompte (reportées + faites − payées − prises en récup) et leur équivalent en récup. Ce sont les mêmes
     heures, comptées une fois en repos, une fois en heures brutes. Pour les heures d'avant septembre, le détail
@@ -2168,7 +2172,7 @@ mark{background:rgba(200,176,32,.32);color:var(--cream);border-radius:3px;paddin
   <ul class="dot">
     <li><b>Heures sup</b> : elles se comptent <b>à la semaine</b>, du lundi au dimanche — ce qui est fait au-delà du
     planning de la semaine. Les heures en plus <b>rattrapent d'abord</b> les heures manquées de la même semaine
-    (journée écourtée par le domaine, absence) : seul le reste est une heure sup. Une semaine appartient au
+    — celles du <b>salarié d'abord</b>, puis celles du domaine : seul le reste est une heure sup. Une semaine appartient au
     <b>mois où elle finit</b> : celle du 28 septembre se compte en octobre. Les <b>huit premières</b> heures sup de la
     semaine sont à <b>25&nbsp;%</b>, les suivantes à <b>50&nbsp;%</b>. Une heure à 25&nbsp;%
     donne <b>1&nbsp;h&nbsp;15</b> de récup, une heure à 50&nbsp;% <b>1&nbsp;h&nbsp;30</b>. L'équation se lit
@@ -2178,19 +2182,19 @@ mark{background:rgba(200,176,32,.32);color:var(--cream);border-radius:3px;paddin
     <b>retenu sur la paie</b> ; pour le domaine, il va aux <b>heures à rattraper</b>, que les prochaines heures sup
     comblent — jamais retenu. Le salarié passe d'abord. Des heures sup ne se paient qu'une fois les absences
     couvertes : un relevé porte une retenue ou des heures sup à payer, <b>jamais les deux</b>.</li>
-    <li><b>Pour la compta</b> : pour chaque taux, le <b>temps en récup</b>, les <b>heures à déclarer</b> et le
-    <b>taux à appliquer</b>. La compta majore elle-même : pour 1&nbsp;h sup à 25&nbsp;%, on lui déclare
+    <li><b>À déclarer</b> : dans le cadre <b>Pour la compta</b>, les heures sup payées s'écrivent en <b>heures
+    brutes</b>, avec leur taux. La compta majore elle-même : pour 1&nbsp;h sup à 25&nbsp;%, on lui déclare
     <b>1&nbsp;h à +25&nbsp;%</b>, jamais 1&nbsp;h&nbsp;15.</li>
     <li>Le compteur compte <b>toujours en temps de récup</b>, même quand les heures se paient. Des heures payées
     dans le mois n'y entrent pas ; des heures payées en puisant dans le compteur en retirent ce qu'elles valent
-    (2&nbsp;h à 25&nbsp;% = 2&nbsp;h&nbsp;30) et se déclarent en heures brutes. La carte les sépare alors en
-    « payées » et « au compteur », pour que rien ne soit déclaré deux fois.</li>
-    <li>Le <b>relevé PDF</b> tient en deux pages. Page&nbsp;1 : le cadre « Pour la paie », puis le mois jour par jour —
+    (2&nbsp;h à 25&nbsp;% = 2&nbsp;h&nbsp;30) et se déclarent en heures brutes. Le cadre Pour la compta les distingue
+    alors, « du mois » et « prises sur le compteur », pour que rien ne soit déclaré deux fois.</li>
+    <li>Le <b>relevé PDF</b> tient en deux pages. Page&nbsp;1 : le cadre « Pour la compta », puis le mois jour par jour —
     chaque absence dit <b>sa cause et ce qu'elle devient</b> (payée, rattrapée dans la semaine, reprise sur la récup, à
     rattraper, retenue), une colonne donne les <b>heures sup</b> du jour, et chaque semaine se lit en
     entier, avec en gris les jours du mois d'avant qu'elle emporte. Page&nbsp;2 : les heures sup par taux, le
-    <b>compteur de récup</b> depuis le solde du mois d'avant, le compte des <b>heures à rattraper</b>, le cumul depuis
-    janvier, les durées et repos à surveiller (plus de 10&nbsp;h dans la journée, semaine sans repos), les signatures.</li>
+    <b>compteur de récup</b> depuis le solde du mois d'avant, le compte des <b>heures à rattraper</b>, le détail mois
+    par mois (la <b>récup prise</b> et les <b>absences reprises</b> en colonnes séparées) et le cumul depuis janvier, les durées et repos à surveiller (plus de 10&nbsp;h dans la journée, semaine sans repos), les signatures.</li>
     <li>Le relevé part à la compta <b>la dernière semaine du mois</b> : il compte <b>tout le mois</b>, les jours à
     venir aux heures du planning — une ligne dit à partir de quel jour —, et il se signe. Au moment de l'envoi,
     <b>figez le mois</b> (bouton <b>Figer</b>, carte <b>Envoi à la compta</b> du Résumé de la fiche) : ce qui est payé
@@ -2262,11 +2266,12 @@ mark{background:rgba(200,176,32,.32);color:var(--cream);border-radius:3px;paddin
   document dans les deux cas.</p>
   <p>À partir de <b>septembre 2026</b>, il tient sur <b>deux pages A4</b>, dans l'ordre où la paie le lit.</p>
   <ul class="dot">
-    <li><b>Page 1</b> : le cadre <b>Pour la paie</b> (salaire de base, à payer en plus, à retirer, pour
-    information), puis <b>chaque jour</b> avec trois colonnes surlignées — <b>Prévu</b>, <b>Fait</b>,
-    <b>Absence payée</b> —, l'écart, les observations, le total de chaque semaine et celui du mois. Un congé
+    <li><b>Page 1</b> : le cadre <b>Pour la compta</b> (salaire de base, heures sup à payer, congés payés, arrêt de
+    travail, acompte — puis ce qui reste au salarié), puis <b>chaque jour</b> avec trois colonnes surlignées —
+    <b>Prévu</b>, <b>Fait</b>, <b>Absence</b> —, les heures sup du jour, les observations, le total de chaque semaine et
+    celui du mois. Un congé
     payé s'inscrit en absence payée : il n'est jamais compté comme des heures manquées.</li>
-    <li><b>Page 2</b> : où vont les heures sup et la <b>demande du salarié</b>, le temps de récup, le détail
+    <li><b>Page 2</b> : où vont les heures sup, le temps de récup, les heures à rattraper, le détail
     mois par mois, puis les blocs ci-dessous, et trois cases : la signature du salarié, celle de l'employeur,
     et <b>la date d'envoi à la compta</b>.</li>
     <li><b>Le mois jour par jour</b> : statut de chaque journée et heures effectives, sur les seuls

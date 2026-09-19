@@ -3966,6 +3966,29 @@ body.mv-trial-on #app-root{padding-top:calc(env(safe-area-inset-top,0px) + 44px)
 .pf-lst .pf-fort dd b{color:var(--rouge-tx,#A0291E);font-size:var(--pt-base,14px)}
 .pf-pied{margin:0;padding:var(--e-2,8px) var(--e-4,16px);border-top:1.5px solid var(--texte);font-size:var(--pt-txt,12.5px);color:var(--texte-med);font-variant-numeric:tabular-nums}
 .pf-pied b{color:var(--texte)}
+/* ★★★ PAIE-1 (19/09/2026) — « Pour la compta » : une ligne par chose que la compta saisit, le chiffre en gros, le pourquoi
+   en petit dessous ; « aucun » en gris. Puis « Pour le salarié », plus discret. Avant : le verdict en 12,5 px sous trois
+   chiffres de 23 px qui ne s'additionnaient pas. */
+.pf-cpt{padding:var(--e-1,4px) var(--e-4,16px) var(--e-2,8px)}
+.pf-cl{display:grid;grid-template-columns:auto minmax(0,1fr);align-items:baseline;column-gap:var(--e-3,12px);padding:var(--e-2,8px) 0;border-top:1px solid var(--gris-clair)}
+.pf-cl:first-child{border-top:none}
+.pf-cl-l{font-size:var(--pt-base,14px);font-weight:var(--fw-semi,600);color:var(--texte);white-space:nowrap}
+.pf-cl-v{display:flex;align-items:center;justify-content:flex-end;gap:var(--e-1,4px);text-align:right;font-size:var(--pt-md,20px);font-weight:var(--fw-bold,700);line-height:1.2;color:var(--texte);font-variant-numeric:tabular-nums}
+.pf-cl-v>span{display:flex;flex-direction:column;align-items:flex-end;min-width:0}
+.pf-cl-v small{font-size:var(--pt-txt,12.5px);font-weight:var(--fw-semi,600);color:var(--texte-med)}
+.pf-cl-v .x{white-space:normal}
+.pf-cl-p{grid-column:1 / -1;margin:var(--e-1,4px) 0 0;font-size:var(--pt-micro,11px);line-height:1.4;color:var(--texte-med)}
+.pf-cl-base .pf-cl-v{font-size:var(--pt-lg,23px)}
+.pf-cl-ko .pf-cl-v{color:var(--rouge-tx,#A0291E)}
+.pf-cl-ok .pf-cl-v{color:var(--vert-tx,#31601C)}
+.pf-cl-sup .pf-cl-v,.pf-cl-sup .pf-cl-v small{color:var(--terre-tx,#8A5A38)}
+.pf-cl-rien .pf-cl-l{font-weight:normal;color:var(--texte-med)}
+.pf-cl-rien .pf-cl-v{font-size:var(--pt-txt,12.5px);font-weight:normal;color:var(--texte-doux)}
+.pf-sal{padding:var(--e-2,8px) var(--e-4,16px);border-top:1.5px solid var(--texte);background:var(--bg-app)}
+.pf-sal h4{margin:0;font-size:var(--pt-micro,11px);font-weight:var(--fw-bold,700);color:var(--texte-med)}
+.pf-sal .pf-lst>div{padding:var(--e-1,4px) 0}
+.pf-sal .pf-lst dt small{display:block;font-size:var(--pt-micro,11px);font-weight:normal;color:var(--texte-doux)}
+.pf-plan{display:block;margin-top:var(--e-1,4px);font-size:var(--pt-micro,11px);color:var(--texte-doux)}
 .pf-card{background:var(--bg-card);border:1.5px solid var(--gris-clair);border-radius:15px;padding:var(--e-3,12px) var(--e-4,16px);margin:0 0 var(--e-3,12px)}
 .pf-card-t{display:flex;justify-content:space-between;align-items:baseline;gap:var(--e-2,8px);margin-bottom:var(--e-2,8px)}
 .pf-card-t h3{margin:0;font-family:'Cormorant Garamond',Georgia,serif;font-size:var(--pt-md,20px);font-weight:var(--fw-bold,700);line-height:1.1;color:var(--texte)}
