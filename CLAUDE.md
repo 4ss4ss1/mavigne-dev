@@ -2,7 +2,26 @@
 
 > Document de référence du projet **Ma Vigne** (GUERETTECH). Il est le **porteur de vérité** :
 > la mémoire Claude est plafonnée, ce fichier ne l'est pas.
-> Dernière consolidation : **18 septembre 2026 (AVANT-1)** — ★★ **LES HEURES SUP D'AVANT SEPTEMBRE 2026 ONT UN TAUX
+> Dernière consolidation : **19 septembre 2026 (FUT-CAP-2)** — ★★ **CE QUI RESTAIT OUVERT EN §148 EST RÉGLÉ (§149)**.
+> Nico : « règle ce qui est ouvert ». Une cuvée remise d'« Embouteillée » à « En élevage » reprend ses fûts au parc
+> (`_mvFutDispo` / `_mvFutReprendre`, triplet ET contenance) ou refuse s'ils n'y sont plus ; l'ouillage à prévoir compte
+> chaque fût à sa contenance (`vol_par_eq_L`) ; La Réserve rendue avec le VRAI `reserve.js` ; `MV_INFO` relue (`cave.auj`
+> affirmait « jamais d'une moyenne par fût » : c'en est une) ; **`test:smoke` joué pour la première fois dans le bac à
+> sable** — démarrage OK, 23/23 globaux. Harnais futcap : 64 assertions, 17 contre-épreuves. **APP 7.38 → 7.39 · SW 8.03
+> → 8.04**, base `c227c18` — ⚠️ §148 n'est pas poussé : **ce zip le contient**. Détail en **§149**.
+>
+> ★ Précédente : **19 septembre 2026 (FUT-CAP + CUV-14)** — ★★★ **LA CONTENANCE D'UN FÛT VIT DANS SON LOT, ET
+> LE VOLUME DÉCUVÉ SE SAISIT (§148)**. Nico : « modifier manuellement la contenance d'un fût si nécessaire » et « indiquer
+> la quantité exacte décuvée » → contenance dans le LOT (« ta reco »), maquette v1, « go ». `l` (litres) sur
+> `INTRANTS.futs[]` et `cuvee.tonneaux[]`, absent = réglage du domaine ; `_caveFutsL` devient la seule porte des volumes
+> de fûts (fiche, part des anges, bilan de campagne — 2,28 y était EN DUR —, retrait). Volume décuvé saisi →
+> `vol_decuve_hl` + `vol_decuve_src:'mesure'`, corrigeable après coup. ★★ Trouvé en route : « Modifier la cuvée »
+> effaçait tonnelier, référence et lot des fûts (quatrième fois le piège de l'objet rebâti), inventait six fûts sur une
+> cuvée en cuve, et « Embouteillée » y perdait les fûts ; « Les deux » au décuvage ajoutait un fût fantôme ; « cuve prise »
+> refusait APRÈS avoir sorti les fûts du parc. Harnais neuf : 54 assertions, 13 contre-épreuves. **APP 7.37 → 7.38 ·
+> SW 8.02 → 8.03**, base `c227c18`. Détail en **§148**.
+>
+> ★ Précédente : **18 septembre 2026 (AVANT-1)** — ★★ **LES HEURES SUP D'AVANT SEPTEMBRE 2026 ONT UN TAUX
 > ESTIMÉ (§147)**. Nico : récupérer les taux et les récup d'avant septembre ? → la voie indicative (« 1 »), maquette,
 > « go ». Rien ne bouge au compteur ni aux paies : là où l'appli écrivait « taux à vérifier », elle relit les jours de
 > janvier à août avec la règle d'aujourd'hui et donne une estimation à 25 % et 50 % (bascule avancée le temps de la
@@ -3519,7 +3538,8 @@ revient**.
 ⚠️ **La légende de la pyramide mélangeait deux axes.** Un fût peut être **neuf ET libre**.
 **Quand une légende énumère, vérifier qu'elle énumère UN seul axe.**
 ★ **Le VOLUME d'un fût, lui, est désormais réglable dès l'installation** (`CONFIG.cave.fut_l`,
-§18b) — 225 L en Gironde, 228 L en Bourgogne.
+§18b) — 225 L en Gironde, 228 L en Bourgogne. ★★ **Et chaque LOT peut porter le sien** (`l`, en litres :
+demi-muid, feuillette) ; le fût l'emporte en vin et le rapporte au parc — §148.
 
 ---
 
@@ -20421,3 +20441,160 @@ relevé **5,6 → 8,2 ms**. Chaque mois lu est gardé le temps d'un appel
 ① **C'est une estimation** : la compta tranche, et le régime lui-même (8 h à 25 %, puis 50 %, §142) reste à lui faire
 confirmer. ② Voie ② non faite (147a). ③ Rendu vérifié dans Chromium, sur la maquette ; pas vu sur un vrai téléphone
 ni sur un relevé imprimé.
+
+## 148. ★★★ FUT-CAP + CUV-14 — LA CONTENANCE D'UN FÛT VIT DANS SON LOT, ET LE VOLUME DÉCUVÉ SE SAISIT (19/09 — `cave.js` · `reserve.js` · `utils.js` · `index.html` · `sw.js` · `guide/08-cave.html` · `guide/09-reserve.html` · `scripts/` · `package.json` · APP 7.37 → **7.38** · SW 8.02 → **8.03**)
+
+> Nico, 18/09 : *« Je dois pouvoir modifier manuellement la contenance d'un fût si nécessaire. Lors du décuvage il faut
+> que je puisse indiquer la quantité exacte décuvée. »* Le réglage du domaine existait déjà (roue crantée de la Cave,
+> « Contenance d'un fût ») : ce qui manquait, c'est un fût DIFFÉRENT des autres. Question posée : la contenance vit dans
+> le lot de La Réserve, ou se choisit au décuvage ? Réponse : **« ta reco »** (le lot). Maquette v1 — cinq onglets, bâtie
+> avec le CSS réel extrait en exécutant les fonctions d'injection de `cave.js` et `reserve.js` —, puis **« go (relis les
+> fichiers) »**. Deux commits de Nico étaient passés entre-temps (FUSION-1, AVANT-1) : base relue, `c227c18`.
+
+### 148a. Le modèle
+
+- **`l`, en litres, facultatif**, sur `INTRANTS.futs[]` (le lot) et sur `cuvee.tonneaux[]` (le fût en vin). **Absent =
+  `CONFIG.cave.fut_l`**. La valeur du domaine ne s'écrit JAMAIS (champ vidé, `delete f.l`) : un lot au format suit le
+  domaine si le réglage change. `_mvFutL` (utils) ne lit pas CONFIG — la famille `_mvFut*` reçoit ses données (§20e).
+- **Le voyage** : `_mvFutStock` porte `l` ; `_mvFutEntonner` l'emporte dans la cuvée ; `_mvFutEntrer` (mise en bouteille,
+  retrait) ne rend un fût qu'à un lot de **même triplet ET même contenance** — sinon un lot neuf. ⚠️ `_mvFutMemeLot` n'a
+  PAS bougé : l'assiette des fûts loués (FUT-LOC) s'apparie comme avant.
+- **La seule porte** : `_caveTonL(t)` (un fût), `_caveFutsL(cuv)` (le bois, sans les cuves — part des anges),
+  `_caveVolL = _caveFutsL + cuves`. Tout `nb × fut_l` est passé par elle : fiche (une ligne par contenance,
+  `_caveGroupesL`), sous-titre d'une cuvée mixte, part des anges (litres par millésime), **bilan de campagne** (`_bcData`
+  portait **2,28 écrit en dur** et oubliait les cuves), retrait d'un fût, répartition (`« (500 L) »`).
+- **Hors format** (`_caveHorsFormat`) : plus de 10 % d'écart avec le domaine. 500 et 114 oui ; 225 et 250 non — une
+  barrique de 225 dans un domaine à 228 reste une barrique, proposée comme les autres.
+
+### 148b. Le volume décuvé
+
+- Champ facultatif dans la feuille « Décuver ». **Vide** : proposition sur l'estimation des caisses, volume écrit = les
+  contenants remplis, **comme avant**. **Saisi** : `vol_decuve_hl` = la mesure, `vol_decuve_src:'mesure'` (sinon
+  `'contenants'`), `vol_decuve_le`. Le seul refus : **plus que la contenance de la cuve** (des litres tapés en hL), et il
+  passe AVANT toute écriture. Un champ qui bloque une vanne se contourne par un faux chiffre : rien d'autre ne bloque.
+- **La proposition au volume** (`_vendDecPropVol`, pure) : fûts pleins du plus vieux au plus neuf, puis un dernier si le
+  reste en remplit la moitié. Lots au format : **l'arrondi d'avant, prouvé litre par litre de 5 à 4000 L**. Un fût hors
+  format n'est jamais proposé ; choisi, il reste, et les barriques se recalculent sur le reste.
+- **Le bilan** (`_vendDecBilan`, pur) : estimé = mots et tolérance d'avant (0,6 hL) ; mesuré = au litre — « le dernier fût
+  attend 10 L » n'est pas une faute, un fût de trop ou plus de 0,6 hL sans contenant restent orange.
+- **Après coup** : le détail d'une cuve décuvée porte un bloc « Volume décuvé » qui dit d'où vient le chiffre, et
+  « Corriger le volume » (`_vendDvolCorriger`, même refus). `saveVendCuve` rebâtit l'objet : il garde `vol_decuve_src` et
+  `vol_decuve_le` (piège n° 9, encore).
+- **La contenance d'un lot se corrige depuis la feuille** (`_vendDecCap`, administrateur) : elle s'écrit dans le LOT.
+
+### 148c. ★★ Trouvé en route
+
+1. **« Modifier la cuvée » recopiait `{annee, nb}`** : réenregistrer une cuvée (un nom, la malo) effaçait tonnelier,
+   référence et lot des fûts entonnés depuis le parc — retour « lot sans nom » à la mise en bouteille, fût loué sorti de
+   l'assiette du loyer. `_cuvTonneauxDe` copie la ligne entière. **Quatrième fois le piège de l'objet rebâti de zéro.**
+2. **La même fiche, sur une cuvée en cuve seule**, pré-remplissait six fûts qui n'existaient pas, et refusait
+   d'enregistrer sans au moins un fût. Elle s'ouvre vide, et s'enregistre sans fût si la cuvée a une cuve.
+3. **« Embouteillée » posé depuis la fiche** ne rendait pas les fûts : ni en vin (cuvée embouteillée ignorée), ni libres.
+   `_mvFutLiberer` avant le statut, comme la mise en bouteille. ⚠️ **Le retour arrière (Embouteillée → En élevage) n'est
+   pas traité** : les fûts compteraient deux fois. Ouvert.
+4. **Un fût fantôme au décuvage « Les deux »** : `nb=(total>0 ? total : (_vendDecNb||1))` posait une barrique quand la cuve
+   prenait tout — dans la cuvée et dans le volume décuvé. Le compte simple ne sert plus que parc vide.
+5. **« La cuve vient d'être prise » refusait APRÈS l'entonnage** : les fûts étaient sortis du parc (et enregistrés) sans
+   cuvée pour les porter. Le contrôle passe avant tout geste.
+6. **Retirer un fût choisissait l'ANNÉE** : deux lignes de la même année, la première gagnait. Choix par ligne
+   (`_retraitFutIdx`) ; et les boutons de motif ne décochent plus la ligne (`[data-reason]`).
+7. ★★★ **Le « + » avalé** — vu sur la maquette v1, dans Chromium : le champ « Volume décuvé » recalcule sur `change`,
+   c'est-à-dire au moment précis où le doigt touche un « + » ; reconstruire les boutons à cet instant avale le toucher.
+   **Le code existant avait le même défaut** sur « Volume logé » en mixte (`_vendDecCuveVolFin` → `_vendDecZone`). La
+   liste se rend une fois, `_vendDecRender` met à jour sur place. **Règle : jamais de reconstruction de boutons au
+   `change` d'un champ.**
+8. `.mvr-mseg button{font:600 12px/1 inherit}` est **invalide** (`inherit` n'entre pas dans le raccourci) : le navigateur
+   ignorait la règle, « Acheté / Loué » sortait en police système depuis FUT-LOC.
+9. **Le guide 09 promettait la fusion retirée par FUT-LOC** (« saisir un lot déjà présent ajoute à l'existant »). Réécrit.
+10. `_mvFutProposer` et `_retraitFutSetAnnee` devenus sans appelant : retirés (preflight, joignabilité).
+
+### 148d. Écarts avec la maquette, dits
+
+- **« ≈ » remplacé par « environ » / « estimés »** : U+2248 n'est pas dans les polices de l'app (`mv-harnais-subset` :
+  `cave.js` 53 → 56 hors subset).
+- **Couleurs de texte `--or-tx` / `--terre-tx`**, qui s'inversent en sombre. Premier essai avec `--terre` : écarts de
+  contraste en sombre `cave.js` 47 → 49, `reserve.js` 7 → 8 ; revenus à la référence (213).
+- **Crayon en 16 px** (échelle des icônes 16/18/20/24/40), pas 12.
+
+### 148e. Le harnais
+
+`scripts/mv-harnais-futcap.mjs` — **54 assertions, 13 contre-épreuves qui mordent**, dans `check` et `prebuild`
+(`npm run test:futcap`). Sur les VRAIES fonctions de `cave.js` et `utils.js`, extraites hors chaînes et hors
+commentaires : volumes (A), proposition (B), bilan (C), voyage de la contenance (D), fiche cuvée (E), écritures et ordre
+des refus (F), La Réserve (G), aide, guides et « Quoi de neuf » (H). ★ Une assertion a rougi à l'écriture sur un
+**commentaire** qui citait l'ancien code (`_vendDecNb||1`) : F8 lit le code sans ses commentaires.
+Harnais existants ajustés : `intrants`, `rendement`, `vendange-parts` extraient `_caveTonL` et `_caveFutsL` (leur
+`_caveVolL` passe par eux) ; `cuv13` bouche `_vendDvolHtml` (le bloc a son propre harnais).
+
+### 148f. La note de livraison, et ce qui reste ouvert
+
+**Base `c227c18`. APP 7.37 → 7.38 · SW 8.02 → 8.03.** `node scripts/build-guide.mjs`, puis `npm run build && firebase
+deploy --only hosting`. `npm run check` joué en entier sur la base finale.
+
+★ **Le vrai code, rendu** (`/home/claude/lot/rendre-vrai.mjs`, hors dépôt) : les fonctions EXTRAITES de `cave.js` et
+`utils.js`, le CSS réel, dans Chromium à 390 px. Joué : ouverture (5 fûts de 2022 pour 11,6 hL estimés), 11,30 tapé puis
+« + » sur le demi-muid **touché aussitôt** — le demi-muid passe à 1, les barriques à 3, « le dernier fût attend 54 L » —,
+retour à 5, « Les deux » + Cuve 3, 1130 tapé (l'avertissement sort), bloc Volume, contenants, fiche cuvée : aucune
+erreur, aucun débordement. Une retouche en est sortie : le libellé du bloc Volume passait sous le chiffre.
+⚠️ Le banc a d'abord échoué sur SA propre extraction (`_escHtml` porte une expression régulière avec des guillemets, que
+le compteur d'accolades prenait pour une chaîne) : il la bouche, et c'est dit.
+
+Ouvert, et dit : ① **La Réserve n'a pas été rendue** (champ Contenance, étiquette) — à regarder. ② Embouteillée → En élevage depuis la fiche (148c-3).
+③ `_mlOuillages` compte l'ouillage PAR FÛT (moyenne des ouillages saisis, 7 L à défaut) sans la contenance : un
+demi-muid s'ouille plus qu'une pièce. ④ Parc vide : le compte simple garde la contenance du domaine (volontaire).
+⑤ Le fût n'est toujours pas nominatif : on reste à la maille du lot. ⑥ `npm run build`, `test:smoke`, `test:e2e` non
+joués dans le bac à sable.
+
+## 149. ★★ FUT-CAP-2 — CE QUI RESTAIT OUVERT EST RÉGLÉ (19/09 — `cave.js` · `utils.js` · `index.html` · `sw.js` · `guide/08-cave.html` · `scripts/mv-harnais-futcap.mjs` · `scripts/mv-harnais-agenda.mjs` · APP 7.38 → **7.39** · SW 8.03 → **8.04**)
+
+> Nico : *« règle ce qui est ouvert »*. §148 n'était pas poussé (`origin/main` = `c227c18`) : ce lot s'empile dessus, et
+> le zip livré CONTIENT les deux.
+
+### 149a. Les ouverts de §148f, un par un
+
+- **② Embouteillée → En élevage depuis la fiche.** `_mvFutDispo` (utils) dit combien de fûts de la cuvée sont encore libres,
+  lot par lot, triplet ET contenance — en SIMULANT la prise : deux lignes sur un même lot ne comptent pas deux fois ses
+  fûts. S'il en manque (repartis dans une autre cuvée, vendus, retirés), la fiche **refuse, avant toute écriture**, et dit
+  combien. Sinon `_mvFutReprendre` les sort du parc (tracés « entonnage », note « remise en élevage ») et la mise en
+  bouteille annulée perd ses traces (`nb_bouteilles`, `date_embouteillage`, `bilan_perte`). C'était le seul chemin de
+  retour : la mise en bouteille n'a pas d'« annuler ».
+- **③ L'ouillage à la contenance.** Un ouillage écrit désormais `vol_par_eq_L` = total ÷ « pièces » (chaque fût à sa
+  contenance divisée par celle du domaine, `_copGetEqFuts`) ; `_mlVolParFut` le relit en priorité, `vol_par_fut_L` sinon
+  (ouillages d'avant ce lot, justes pour une cuvée en pièces) ; `_mlOuillages` prévoit « pièces × moyenne ». Une cuvée
+  toute en pièces : **au litre près comme avant**. ★ Arbitrage : au VOLUME (un demi-muid de 500 L = 2,2 pièces) plutôt
+  qu'à la SURFACE de bois (≈ 1,7, plus juste physiquement) — la règle se dit en une phrase, et la moyenne vient des
+  ouillages de la cuvée elle-même : elle se recale seule.
+- **① La Réserve, rendue** (`/home/claude/lot/rendre-rsv.mjs`, hors dépôt) : `reserve.js` chargé ENTIER dans Chromium, sa
+  ligne d'import retirée et six noms bouchés. Étiquette « 500 L » sur le demi-muid, rien sur une pièce ; champ vide et
+  « 228 — réglage du domaine » en indication ; 225 écrit, 228 retire la clé, 30 refusé sans rien écrire ; « Acheté /
+  Loué » enfin en Outfit. Aucune erreur, aucun débordement.
+- **⑥ `test:smoke` joué** — `npx vite build` (29 s) puis `node scripts/smoke.mjs` : démarrage OK, 23/23 globaux, aucune
+  exception. ★ Mécanique, à garder : Playwright-node 1.61 cherche `chromium_headless_shell-1228`, le bac à sable n'a que
+  le 1194 (`/opt/pw-browsers`) → `PLAYWRIGHT_BROWSERS_PATH=/tmp/pw`, où `chromium_headless_shell-1228/chrome-headless-shell-linux64/`
+  pointe par liens vers `chrome-linux/` du 1194 (et `chrome-headless-shell` vers `headless_shell`). **`test:e2e` non
+  joué** : il lui faut les émulateurs Firebase.
+- **④ ⑤ et le « ≈ » ne sont pas des ouverts, ce sont des choix, et ils restent** : parc vide = compte simple au format du
+  domaine ; le fût reste à la maille du lot (arbitrage de Nico, §20e) ; « environ » plutôt que « ≈ », absent des polices.
+
+### 149b. ★ Trouvé en route
+
+1. **`MV_INFO['cave.auj']` affirmait le contraire du code** : « le volume à compléter est déduit des ouillages passés de
+   la cuvée, jamais d'une moyenne par fût ». `_mlVolParFut` EST une moyenne par fût — de la cuvée, sinon du domaine,
+   sinon 7 L. Réécrit, avec la contenance. `MV_INFO['cave.rdt']` dit maintenant d'où vient le volume décuvé.
+2. **Le SO₂ « par fût » compte un demi-muid comme une pièce** : `nb_total = pastilles × nombre de fûts`, puis
+   `so2_total_g`. Une quantité qui part au registre : **non modifiée sans la réponse de Nico** — dans un demi-muid,
+   mettez-vous plus de pastilles ? Si oui, le mode « par fût » doit compter en pièces, comme l'ouillage.
+3. `mv-harnais-agenda` exécute `_mlOuillages` hors navigateur : `_caveFutL` y lit `window.CONFIG` → `window` bouché, et
+   `_caveFutL` / `_caveTonL` / `_caveFutsL` extraits.
+
+### 149c. Le harnais
+
+`mv-harnais-futcap` : **64 assertions, 17 contre-épreuves** — I (reprise : disponibles, même lot compté une fois, aller-retour
+à l'identique, demi-muid jamais repris chez les pièces, refus avant écriture), J (ouillage : `vol_par_eq_L` prioritaire,
+ancien relu, pièces inchangées, écriture), H5 (les deux fiches « i »), H3 recalé (7.38 : trois entrées, 7.39 : deux).
+`mv-harnais-agenda` : 31/31.
+
+### 149d. Ouvert, et dit
+
+① La question du SO₂ « par fût » (149b-2). ② `test:e2e` et un vrai téléphone, chez Nico. ③ Le zip contient §148 ET §149 :
+un seul commit suffit, `.mv-base` reste `c227c18`.

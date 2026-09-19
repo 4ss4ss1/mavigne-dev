@@ -29,7 +29,7 @@ const SRC = readFileSync('src/cave.js', 'utf8');
 
 /* ══ EXTRACTION — dans l'ordre du fichier (str.index avant de trancher) ═════ */
 const NOMS = ['_vendCfg', '_vendClient', '_caveFutL', '_caveVolCuvesL', '_caveNbTonneaux',
-  '_caveVolL', '_vendPckLegacy', '_vendParts', '_vpPck', '_vpCs', '_vpKg', '_vpNom', '_vpSurf',
+  '_caveTonL', '_caveFutsL', '_caveVolL', '_vendPckLegacy', '_vendParts', '_vpPck', '_vpCs', '_vpKg', '_vpNom', '_vpSurf',
   '_recKg', '_recCaisses', '_recKgDom', '_recCsDom', '_recKgCli', '_recHasDom', '_recSold',
   '_vendRdtBase', '_vendLitresRetour', '_vendVolLoge', '_vendCuvCsDom', '_vendVolCuve',
   '_vendVolPart', '_vendSurfParc', '_vendVolParc', '_vendRdtParc', '_vendParcSurf',

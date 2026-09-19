@@ -92,6 +92,7 @@ function _vendDSec(){ return 996; }
 function _vendDSecTxt(){ return '996 (rep\\u00e8re)'; }
 function _vendCuvCsDom(){ return 0; }
 function _vendVolLoge(){ return 0; }
+function _vendDvolHtml(){ return ''; }   // CUV-14 : le bloc « Volume decuve » a son harnais (futcap)
 function _vendHlKg(){ return 0; }
 function _vendCuvKgDom(){ return 0; }
 function _vendDecD20(){ return null; }

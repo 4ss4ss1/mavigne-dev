@@ -69,7 +69,7 @@ function extraireVar(SRC, nom, ou) {
 
 const FN_CAVE = ['_vendEstIntrant', '_vendIntrUnite', '_vendIntrUniteQ', '_vendIntrVol',
   '_vendIntrVolLbl', '_vendIntrQte', '_vendIntrQteTxt', '_vendOpDet', '_vendCuvF1',
-  '_vendMoyLbl', '_vendMoyTbl', '_vendVolLoge', '_caveVolL', '_rmDetail', '_rmF'];
+  '_vendMoyLbl', '_vendMoyTbl', '_vendVolLoge', '_caveTonL', '_caveFutsL', '_caveVolL', '_rmDetail', '_rmF'];
 const VA_CAVE = ['_VEND_INTR', '_VEND_OPS', '_VEND_FROID', '_VEND_CHAUD', 'RM_TYPES', 'RM_FAMILLES'];
 
 const morceaux = []

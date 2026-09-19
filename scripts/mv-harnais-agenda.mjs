@@ -42,7 +42,7 @@ function pose(ok, nom) {
 }
 
 /* ══ EXTRACTION — dans l'ordre du fichier ══════════════════════════════════ */
-const NOMS = ['_caveCuvesBois', '_caveOuille', '_caveNbTonneaux',
+const NOMS = ['_caveFutL', '_caveTonL', '_caveFutsL', '_caveCuvesBois', '_caveOuille', '_caveNbTonneaux',
   '_mlD', '_mlIso', '_mlAddJ', '_mlEcartJ', '_mlLundi',
   '_mlVolParFut', '_mlOuillages', '_mlAMesurer', '_mlAgenda', '_mlResumeSem',
   '_vendIsActive', '_vendTriDate', '_vendTriMes', '_vendLastMes', '_vendLastD',
@@ -70,7 +70,8 @@ const BLOC = NOMS.map(extraire).sort((a, b) => a[0] - b[0]).map(x => x[1]).join(
    remplace une dépendance hors sujet ne fausse rien ; un bouchon qui remplace
    la fonction testée, si — et il n'y en a aucun. */
 function monter(ce, cv, mutation, seuilFn) {
-  const corps = mutation ? mutation(BLOC) : BLOC;
+  // FUT-CAP-2 : _mlOuillages passe par _caveFutsL, qui lit le reglage du domaine sur window.CONFIG.
+  const corps = 'var window = { CONFIG: {} };\n' + (mutation ? mutation(BLOC) : BLOC);
   return new Function('CAVE_ELEVAGE', 'CAVE_VENDANGE', '_mlSeuil', '_mlProjFA',
     '_mlNomCuvee', '_caveCuve', '_caveMat', '_vendMesD20', '_vendDSec',
     corps + '\nreturn {_mlOuillages,_mlAgenda,_mlVolParFut,_caveOuille,_mlAMesurer,_mlResumeSem};'

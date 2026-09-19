@@ -23,7 +23,7 @@ export const GT_ADMIN_EMAIL = 'ngdevpro@gmail.com';
 // WHATS_NEW   : tableau vide = modal desactive pour cette version.
 // Format item : { emoji:'📅', titre:'Titre court', desc:'Phrase utilisateur.' }
 // Regle : seulement les changements visibles par les utilisateurs.
-export const APP_VERSION = '7.37';
+export const APP_VERSION = '7.39';
 // ════ Journal des nouveautés (récap cumulatif) ════
 // Une entrée par version, la PLUS RÉCENTE EN HAUT : { v:'5.10', items:[ {emoji,titre,desc}, … ] }
 // À chaque release visible → AJOUTER un bloc en tête (ne pas remplacer). items:[] = release technique (rien à afficher).
@@ -715,6 +715,27 @@ window._mvGraphRepeindre = function(){
 };
 
 export const WHATS_NEW = [
+  { v: '7.39', items: [
+    { emoji: 'verre', titre: 'Une cuvée remise en élevage reprend ses fûts',
+      desc: "Passée par erreur à «\u00a0Embouteillée\u00a0» puis remise «\u00a0En élevage\u00a0» depuis sa fiche, une cuvée reprend "
+        + "ses fûts au parc — sinon ils comptaient deux fois. S’ils n’y sont plus tous, la fiche refuse et dit combien manquent." },
+    { emoji: 'barrique', titre: 'L’ouillage à prévoir compte chaque fût à sa contenance',
+      desc: "Un demi-muid de 500\u00a0L boit plus qu’une pièce\u00a0: dans l’agenda de la Cave, les litres à prévoir comptent "
+        + "chaque fût à sa contenance, d’après vos propres ouillages. Une cuvée toute en pièces ne change pas d’un litre." }
+  ] },
+  { v: '7.38', items: [
+    { emoji: 'cuve', titre: 'Le volume décuvé se saisit',
+      desc: "La feuille «\u00a0Décuver\u00a0» a un champ <b>Volume décuvé</b>, goutte et presse. Saisi, c’est lui qui fait le "
+        + "rendement des parcelles de la cuve, et les fûts se proposent dessus\u00a0; le bilan se lit au litre («\u00a0le "
+        + "dernier fût attend 10\u00a0L\u00a0»). Pour une cuve déjà décuvée\u00a0: «\u00a0Corriger le volume\u00a0», dans son détail." },
+    { emoji: 'barrique', titre: 'Chaque lot de fûts a sa contenance',
+      desc: "Demi-muid, feuillette, fût de 225\u00a0L\u00a0: la contenance se règle dans le lot de La Réserve, ou en la "
+        + "touchant au décuvage. Elle suit le fût au Chai et revient avec lui, et tous les volumes du Chai la lisent. Un fût "
+        + "hors format n’est jamais proposé d’office\u00a0: il se choisit." },
+    { emoji: 'verre', titre: '«\u00a0Modifier la cuvée\u00a0» garde vos fûts',
+      desc: "Réenregistrer une cuvée effaçait le tonnelier et la référence de ses fûts\u00a0: c’est fini. Une cuvée logée "
+        + "en cuve ne reçoit plus six fûts d’office, et «\u00a0Embouteillée\u00a0» posé depuis la fiche rend les fûts au parc." }
+  ] },
   { v: '7.37', items: [
     { emoji: 'balance', titre: 'Les heures sup d’avant septembre ont un taux estimé',
       desc: "Quand des heures sup d’avant septembre 2026 sont payées ou restent au compteur, la fiche et le relevé ne disent plus "
@@ -3244,7 +3265,10 @@ var MV_AIDE = {
       ['Le délai d’ouillage', "se règle pour tout le domaine, et se resserre millésime par millésime — un vin jeune se surveille de plus près."],
       ['Le parc à cuves', "se déclare une fois dans la roue crantée de la Cave, bloc Le Chai : un nom, une contenance en litres, une matière. La même cuve sert à vinifier au Cuvier puis à élever au Chai, et l’application sait laquelle est prise — dans les deux cas."],
       ['Au Cuvier', "une cuve de vinification peut être rattachée à une cuve du parc. C’est ce rattachement qui rend l’occupation juste : sans lui, le parc ne voit que Le Chai et annonce libre une cuve qui fermente. Facultatif — la saisie libre reste possible."],
-      ['Au décuvage', "vous choisissez où part le vin : barriques, cuve, ou les deux. Le répartiteur met la cuve d’abord et convertit le reste en barriques. La cuve que vous videz reste choisissable — élever sur lies dans la cuve de fermentation est un usage courant, pas une erreur de saisie."],
+      ['Au décuvage', "vous choisissez où part le vin : barriques, cuve, ou les deux. Le répartiteur met la cuve d’abord et convertit le reste en barriques. La cuve que vous videz reste choisissable — élever sur lies dans la cuve de fermentation est un usage courant, pas une erreur de saisie. Saisissez aussi le <b>volume décuvé</b>, mesuré, goutte et presse : les fûts se proposent dessus, et c’est lui qui fait le rendement des parcelles de la cuve. Laissé vide, on retient le volume des contenants remplis, comme avant."],
+      ['Un fût qui n’a pas la contenance du domaine', "se règle dans son lot de La Réserve, champ « Contenance d’un fût » — ou, pour l’administrateur, en touchant sa contenance dans la feuille de décuvage. Elle part avec le fût au Chai et revient avec lui. Un demi-muid ou une feuillette (plus de 10 % d’écart avec le réglage du domaine) est « hors format » : jamais proposé d’office, il se choisit avec +, et les barriques se recalculent sur le reste."],
+      ['Corriger un volume décuvé', "dépliez une cuve décuvée : le bloc « Volume décuvé » dit d’où vient le chiffre — mesuré, ou d’après les contenants remplis au décuvage. « Corriger le volume » le remplace par la mesure ; le rendement suit, Le Chai garde ses fûts. Un volume plus grand que la cuve est refusé : c’est le piège des litres tapés en hL."],
+      ['Modifier une cuvée garde ses fûts', "la fiche garde le tonnelier, la référence, le lot et la contenance de chaque ligne de fûts. La colonne Contenance corrige un fût déjà en vin (vide = réglage du domaine). Une cuvée logée seulement en cuve s’enregistre sans fût, et « Embouteillée » posé depuis la fiche rend les fûts au parc, comme la mise en bouteille. Remise ensuite « En élevage », elle les reprend ; s’ils n’y sont plus tous (repartis dans une autre cuvée, vendus), elle refuse plutôt que de les compter deux fois."],
       ['Une récolte peut avoir plusieurs destinataires', "sur la même parcelle et le même jour : le domaine, et un ou plusieurs acheteurs de raisin. Une ligne chacun, avec ses caisses, son poids par caisse et, si l’acheteur a pris une partie de la parcelle, sa surface. Laissée vide, la surface prend tout le reste."],
       ['Le poids d’une caisse est un poids du jour', "il est figé sur l’apport au moment où vous le saisissez. La fiche du client ne fait que le proposer : la corriger plus tard ne déplace aucun kilo déjà livré, ni sur un bon déjà signé."],
       ['Corriger un poids après coup', "quand la caisse elle-même pesait autre chose que ce qui était annoncé, la roue crantée de la Cave › Le Cuvier › « Corriger un poids déjà saisi » reprend tout un millésime d’un coup. L’écran liste les poids réellement en place, ce qu’ils pèsent, et montre le résultat destinataire par destinataire avant d’appliquer. Les rendements des parcelles suivent. Les litres rendus par un acheteur ne bougent pas : ce sont les siens."],
@@ -3252,10 +3276,10 @@ var MV_AIDE = {
       ['Les hectolitres estimés viennent des kilos', "la jauge d’une cuve, les apports par parcelle et la proposition de fûts se calculent sur le poids réel de chaque apport, pas sur le nombre de caisses multiplié par le réglage. Avec plusieurs tailles de caisse, c’est la seule façon d’être juste. Le volume mesuré au décuvage, lui, prime toujours sur l’estimation."],
       ['Le bon de livraison', "s’ouvre depuis la ligne « kg vendus en raisin » de l’écran Récoltes. Une livraison, c’est un chargement : un client, une date, même s’il emporte deux parcelles. Le bon ne dit que des kilos — aucun prix."],
       ['Le retour du client', "les litres de jus et de lie qu’il a obtenus, saisis des semaines plus tard sur la livraison. Corriger les caisses ne touche pas aux litres, et l’inverse non plus : deux mesures, deux personnes, deux moments."],
-      ['Le rendement va chercher le mesuré d’abord', "les litres rendus par l’acheteur, puis le volume logé au décuvage, et seulement à défaut une estimation d’après les kilos. Tant que la cuve n’est pas décuvée, il n’y a rien à mesurer : la parcelle affiche une fourchette et le pourcentage mesuré, et le chiffre net arrive avec le décuvage. Il manque des litres, pas des raisins."],
+      ['Le rendement va chercher le mesuré d’abord', "les litres rendus par l’acheteur, puis le volume décuvé — mesuré s’il a été saisi, sinon celui des contenants remplis —, et seulement à défaut une estimation d’après les kilos. Tant que la cuve n’est pas décuvée, il n’y a rien à mesurer : la parcelle affiche une fourchette et le pourcentage mesuré, et le chiffre net arrive avec le décuvage. Il manque des litres, pas des raisins."],
       ['La contenance d’une cuve n’est pas son contenu', "le volume inscrit sur une cuve de vinification est sa contenance — celle du parc à cuves, qui se pré-remplit toute seule. Elle sert à la jauge de remplissage, jamais au rendement : une cuve à moitié pleine ne donne pas son volume en vin. Le rendement, lui, attend le décuvage."],
       ['Une cuve n’est pas un fût', "elle ne sort pas de La Réserve, elle n’a pas d’âge, et elle a sa contenance propre. Ajouter une cuve à une cuvée ne change aucun compte de fûts. Le volume que vous inscrivez est celui qui est réellement dedans, pas la contenance de la cuve."],
-      ['L’ouillage suit le bois, pas le contenant', "inox et béton ne s’évaporent pas : une cuvée logée seulement là n’a pas de jauge de part des anges et ne déclenche aucune alerte. Un foudre bois, si. Une cuvée mixte garde sa jauge, cadrée sur sa seule part en fût."],
+      ['L’ouillage suit le bois, pas le contenant', "inox et béton ne s’évaporent pas : une cuvée logée seulement là n’a pas de jauge de part des anges et ne déclenche aucune alerte. Un foudre bois, si. Une cuvée mixte garde sa jauge, cadrée sur sa seule part en fût. Les litres à prévoir comptent chaque fût à sa contenance : un demi-muid de 500 L pour 2,2 pièces."],
       ['La fin de fermentation et la fin de malo', "sont estimées à partir de vos propres relevés : la densité pour l’une, l’acide malique pour l’autre. Sans trois mesures, l’écran dit « démarrage » plutôt qu’une date inventée."],
       ['Le repère de densité, et ce qu’il ne fait pas', "chaque cuve porte un repère de vin sec calculé sur le degré potentiel de son moût — lu sur votre premier relevé s’il a été pris avant le départ, sinon sur vos contrôles de maturité ; une chaptalisation datée l’abaisse. Le détail de la cuve écrit où il est et d’où il vient. <b>Il ne déclenche rien</b> : ni « finie », ni une entrée dans la tournée. C’est un repère de lecture sur la courbe, et sa valeur reste à caler sur vos analyses."],
       ['Pressurer n’est pas décuver', "l’étape <b>Pressurage</b> du parcours — l’ancienne « Décuvage » — dit que le marc est pressé, pas que le vin est parti au Chai. Le jus peut finir sa fermentation dans une autre cuve : la cuve reste donc <b>suivie</b>, dans la tournée et dans les cuves à mesurer, et ses relevés continuent la même courbe. Si le jus a changé de cuve, « Modifier » la rattache à la nouvelle : c’est le repère que la tournée affiche. C’est « Décuver » qui l’envoie au Chai et la sort de la tournée."],
@@ -3302,6 +3326,7 @@ var MV_AIDE = {
       ['L’onglet Fûts porte le parc entier', "les fûts vides du magasin et ceux qui sont en vin au chai, additionnés. Ce ne sont pas deux comptabilités : ce sont deux états du même fût."],
       ['En tête de Fûts', "deux lectures venues de la Cave : la part des anges — ce que l’ouillage a réellement remis dans chaque cuvée sur douze mois, une ligne par millésime — et la pyramide des âges du parc, avec les barriques au-delà de la durée de vie fixée. Elles étaient dans le Pilotage ; le parc n’a plus qu’un chez-soi."],
       ['Entonner, embouteiller ou retirer', "ne change pas le nombre de fûts du domaine. Seuls acheter et se séparer le font."],
+      ['La contenance d’un lot', "vide, le lot suit le réglage du domaine (roue crantée de la Cave, bloc Le Chai). Pour un demi-muid, une feuillette ou un fût de 300 L, écrivez sa contenance dans le lot : elle part avec les fûts au décuvage et revient avec eux à la mise en bouteille. Une étiquette la rappelle sur la carte du lot, et l’inventaire PDF l’imprime."],
       ['Le registre des mouvements', "en bas de l’onglet garde chaque entrée et chaque sortie, avec son motif."],
       ['La roue crantée', "en haut à droite imprime les deux inventaires, fûts et intrants. Administrateur seulement."],
       ['Le prix moyen d’un intrant', "n’est pas saisi ici : il se calcule sur vos factures, euros divisés par quantité, et s’affiche sur la fiche. Les lignes sans prix sont écartées du calcul plutôt que comptées à zéro — sinon la moyenne serait tirée vers le bas sans en avoir l’air."],
@@ -3507,7 +3532,7 @@ export const MV_INFO = {
     'Une dose de SO\u2082 est <b>rappelée</b>, pas vérifiée : l\u2019application connaît la date que vous avez posée au soutirage, pas le geste. Enregistrer l\u2019opération « soufre » est ce qui l\u2019acquitte.',
     'Les <b>fûts en fin de vie</b> n\u2019ont pas de date : ils sont listés à part plutôt que rangés dans une semaine choisie au hasard. Une échéance inventée se croirait.',
     'Une cuve de moins de trois jours ou de moins de trois relevés n\u2019est pas projetable : l\u2019écran dit « démarrage », pas une date.',
-    'Un <b>ouillage</b> est dû quand le délai d\u2019alerte du millésime est dépassé — chaque millésime a le sien, réglable dans la roue crantée, bloc Le Chai. Le volume à compléter est déduit des ouillages passés de la cuvée, jamais d\u2019une moyenne par fût.',
+    'Un <b>ouillage</b> est dû quand le délai d\u2019alerte du millésime est dépassé — chaque millésime a le sien, réglable dans la roue crantée, bloc Le Chai. Le volume à compléter est déduit de vos ouillages passés — ceux de la cuvée, sinon ceux du domaine, sinon 7\u00a0L par pièce —, et chaque fût y compte à <b>sa</b> contenance : un demi-muid de 500\u00a0L pour 2,2 pièces.',
     'Un <b>soutirage</b> se déclenche à la fin de la malo, pas à une date : la projection vient des valeurs d\u2019acide malique mesurées. Deux pentes sont calculées, la moyenne sur trois analyses projette la fin, les deux dernières détectent un blocage.'
   ] },
 
@@ -3627,6 +3652,7 @@ export const MV_INFO = {
 
   'cave.rdt': { t: 'Rendement face au plafond', p: [
     'Un rendement s\u2019affiche en <b>fourchette</b> tant que le volume n\u2019a pas été mesuré, et il ne l\u2019est qu\u2019<b>au décuvage</b> : avant, la cuve contient du raisin, pas du vin. Le chiffre net ne vient qu\u2019ensuite.',
+      'Le volume <b>décuvé</b> est celui que vous saisissez dans la feuille «\u00a0Décuver\u00a0» — ou corrigez ensuite dans le détail de la cuve. Laissé vide, c\u2019est celui des contenants remplis, chaque fût compté à <b>sa</b> contenance.',
     'Chaque parcelle vendangée a sa ligne, du rendement le plus fort au plus faible. Ce n\u2019est pas la moyenne du domaine : elle est en tête de l\u2019écran, dans les quatre chiffres.',
     'Le <b>trait vertical</b> est le plafond que vous avez renseigné, <b>par parcelle et par millésime</b>. Ce n\u2019est pas une valeur du logiciel : le rendement annuel autorisé est fixé par arrêté, campagne par campagne.',
     'Un administrateur le pose <b>ici même</b>, en touchant une parcelle : c\u2019est cet écran qui montre lesquelles en manquent.',
@@ -5181,6 +5207,14 @@ function _mvFutRef(o){
   if(o && o.ref)  p.push(o.ref);
   return p.length ? p.join(' \u00b7 ') : '';
 }
+/* ★★ FUT-CAP — LA CONTENANCE D'UN LOT, en litres. Absente = le reglage du
+   domaine (CONFIG.cave.fut_l), que ce fichier ne lit PAS : la famille _mvFut*
+   recoit ses donnees en argument (§20e). null plutot que 228 : un lot qui suit
+   le domaine suit aussi un changement de ce reglage. */
+function _mvFutL(o){
+  var v = parseFloat(o && o.l);
+  return (isFinite(v) && v > 0) ? Math.round(v * 10) / 10 : null;
+}
 function _mvFutRid(){
   return 'fm_' + Date.now().toString(36) + Math.random().toString(36).slice(2,7);
 }
@@ -5215,7 +5249,7 @@ function _mvFutStock(INTRANTS, curY){
     var a = _mvFutAn(f.annee);
     return {id:f.id, four:f.four||'', ref:f.ref||'', annee:a,
             qte:Math.max(0, parseInt(f.qte,10)||0), vins:_mvFutVins(a, curY),
-            nom:_mvFutRef(f) || 'Lot sans nom'};
+            l:_mvFutL(f), nom:_mvFutRef(f) || 'Lot sans nom'};
   }).filter(function(l){ return l.qte > 0; })
     .sort(function(a,b){
       if(a.annee == null) return 1;
@@ -5445,12 +5479,20 @@ function _mvFutEntrer(INTRANTS, lot, nb, motif, note){
   if(!INTRANTS) return 0;
   if(!INTRANTS.futs) INTRANTS.futs = [];
   nb = parseInt(nb, 10) || 0; if(nb <= 0) return 0;
-  var cible = {four:(lot&&lot.four)||'', ref:(lot&&lot.ref)||'', annee:_mvFutAn(lot&&lot.annee)};
-  var ex = INTRANTS.futs.find(function(f){ return _mvFutMemeLot(f, cible); });
+  var cible = {four:(lot&&lot.four)||'', ref:(lot&&lot.ref)||'', annee:_mvFutAn(lot&&lot.annee),
+               l:_mvFutL(lot)};
+  /* ★ FUT-CAP — un fut qui revient retrouve un lot de SA contenance : un
+     demi-muid ne se fond jamais dans un lot de pieces du meme tonnelier, sinon
+     sa contenance disparaitrait sans bruit a la premiere mise en bouteille. */
+  var ex = INTRANTS.futs.find(function(f){ return _mvFutMemeLot(f, cible) && _mvFutL(f) === cible.l; });
   if(ex) ex.qte = (parseInt(ex.qte,10)||0) + nb;
-  else INTRANTS.futs.push({id:_mvFutRid(), four:cible.four, ref:cible.ref,
+  else {
+    var nv = {id:_mvFutRid(), four:cible.four, ref:cible.ref,
         annee:(cible.annee==null?'':String(cible.annee)), qte:nb,
-        date:_mvToday()});
+        date:_mvToday()};
+    if(cible.l) nv.l = cible.l;
+    INTRANTS.futs.push(nv);
+  }
   _mvFutTracer(INTRANTS, motif || 'achat', cible, nb, note);
   return nb;
 }
@@ -5464,6 +5506,45 @@ function _mvFutLiberer(cuvee, INTRANTS, note){
       note || ((cuvee.nom||'') + (cuvee.millesime ? ' ' + cuvee.millesime : '')));
   });
   return rendus;
+}
+// ── REMETTRE EN ELEVAGE : l'inverse de la mise en bouteille ────────────────
+// ★ FUT-CAP-2 — une cuvee « Embouteillee » par erreur, remise en elevage depuis
+//   sa fiche, reprend ses futs au parc : sinon ils compteraient DEUX fois — libres
+//   au parc ET en vin dans la cuvee. Meme egalite que le retour : triplet ET
+//   contenance. _mvFutDispo dit combien sont encore libres, en simulant la prise
+//   (deux lignes sur un meme lot ne comptent pas deux fois ses futs) ; l'appelant
+//   refuse s'il en manque — on ne reprend jamais un fut reparti ailleurs.
+function _mvFutLotsDe(INTRANTS, t){
+  return ((INTRANTS && INTRANTS.futs) || []).filter(function(f){
+    return _mvFutMemeLot(f, t) && _mvFutL(f) === _mvFutL(t); });
+}
+function _mvFutDispo(cuvee, INTRANTS){
+  var libre = {}, besoin = 0, dispo = 0;
+  ((INTRANTS && INTRANTS.futs) || []).forEach(function(f){ libre[f.id] = Math.max(0, parseInt(f.qte,10)||0); });
+  ((cuvee && cuvee.tonneaux) || []).forEach(function(t){
+    var reste = parseInt(t && t.nb, 10) || 0; if(reste <= 0) return;
+    besoin += reste;
+    _mvFutLotsDe(INTRANTS, t).forEach(function(f){
+      var n = Math.min(reste, libre[f.id] || 0);
+      libre[f.id] -= n; reste -= n; dispo += n;
+    });
+  });
+  return {besoin:besoin, dispo:dispo, manque:besoin - dispo};
+}
+function _mvFutReprendre(cuvee, INTRANTS, note){
+  var pris = 0;
+  ((cuvee && cuvee.tonneaux) || []).forEach(function(t){
+    var reste = parseInt(t && t.nb, 10) || 0;
+    _mvFutLotsDe(INTRANTS, t).forEach(function(f){
+      if(reste <= 0) return;
+      var n = Math.min(reste, Math.max(0, parseInt(f.qte,10)||0)); if(n <= 0) return;
+      f.qte = (parseInt(f.qte,10)||0) - n; reste -= n; pris += n;
+      _mvFutTracer(INTRANTS, 'entonnage', f, n, note);
+    });
+  });
+  if(INTRANTS && INTRANTS.futs)
+    INTRANTS.futs = INTRANTS.futs.filter(function(f){ return (parseInt(f.qte,10)||0) > 0; });
+  return pris;
 }
 
 // ── RETIRER un fut d'une cuvee : le vin sort, le fut revient ──────────────
@@ -5513,7 +5594,10 @@ function _mvFutEntonner(choix, INTRANTS, note){
     if(pris <= 0) return;
     lot.qte = (parseInt(lot.qte,10)||0) - pris;
     _mvFutTracer(INTRANTS, 'entonnage', lot, pris, note);
-    out.push({annee:_mvFutAn(lot.annee), nb:pris, four:lot.four||'', ref:lot.ref||'', lot_id:lot.id});
+    var o = {annee:_mvFutAn(lot.annee), nb:pris, four:lot.four||'', ref:lot.ref||'', lot_id:lot.id};
+    var _l = _mvFutL(lot);
+    if(_l) o.l = _l;   // ★ FUT-CAP : la contenance part avec le fut
+    out.push(o);
   });
   if(INTRANTS && INTRANTS.futs){
     INTRANTS.futs = INTRANTS.futs.filter(function(f){ return (parseInt(f.qte,10)||0) > 0; });
@@ -5523,22 +5607,6 @@ function _mvFutEntonner(choix, INTRANTS, note){
 function _mvFutTotal(choix){
   return Object.keys(choix || {}).reduce(function(s,k){ return s + (parseInt(choix[k],10)||0); }, 0);
 }
-// Proposition : du plus VIEUX au plus neuf. Un fut age doit tourner ou partir a
-// la reforme ; le neuf se garde pour les cuvees qui le meritent. Proposition,
-// jamais contrainte : le vigneron ajuste lot par lot.
-function _mvFutProposer(stock, nb){
-  var choix = {}, reste = parseInt(nb,10) || 0;
-  ((stock && stock.lots) || []).slice().sort(function(a,b){
-    if(a.annee == null) return 1;
-    if(b.annee == null) return -1;
-    return a.annee - b.annee;
-  }).forEach(function(l){
-    if(reste <= 0) return;
-    var n = Math.min(reste, l.qte);
-    if(n > 0){ choix[l.id] = n; reste -= n; }
-  });
-  return choix;
-}
 
 window.MV_FUT_MOTIFS   = MV_FUT_MOTIFS;
 window.MV_FUT_SEP      = MV_FUT_SEP;
@@ -5546,6 +5614,9 @@ window._mvFutAn        = _mvFutAn;
 window._mvFutVins      = _mvFutVins;
 window._mvFutAge       = _mvFutAge;
 window._mvFutRef       = _mvFutRef;
+window._mvFutL         = _mvFutL;
+window._mvFutDispo     = _mvFutDispo;
+window._mvFutReprendre = _mvFutReprendre;
 window._mvFutMemeLot   = _mvFutMemeLot;
 window._mvFutTracer    = _mvFutTracer;
 window._mvFutMouv      = _mvFutMouv;
@@ -5566,7 +5637,6 @@ window._mvFutRetirer   = _mvFutRetirer;
 window._mvFutSeparer   = _mvFutSeparer;
 window._mvFutEntonner  = _mvFutEntonner;
 window._mvFutTotal     = _mvFutTotal;
-window._mvFutProposer  = _mvFutProposer;
 
 window._saisonObj         = _saisonObj;
 window._saisonForDate     = _saisonForDate;

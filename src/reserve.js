@@ -436,7 +436,7 @@ function _rsvFutsHtml(){
         +'<div class="mvr-fband"></div>'
         +'<div class="mvr-fin">'
           +'<div class="mvr-ftop"><div class="mvr-fref">'+_escHtml(f.ref||'Réf. non précisée')
-            +'<span class="mvr-ftag '+(f.mode==='loc'?'mvr-ftag-loc">loué':'mvr-ftag-ach">acheté')+'</span></div>'
+            +'<span class="mvr-ftag '+(f.mode==='loc'?'mvr-ftag-loc">loué':'mvr-ftag-ach">acheté')+'</span>'+_rsvCapTag(f)+'</div>'
           +_rsvFutQteHtml(f, adm)+'</div>'
           +'<div class="mvr-fmeta"><span>'+_mvIcon('calendrier',16)+' '+_escHtml(f.annee||'—')+'</span></div>'
           +_rsvFutEcoHtml(f)
@@ -451,6 +451,16 @@ function _rsvFutsHtml(){
 
 // Ce que la carte d'un lot dit de son argent : un loyer et son échéance, ou un
 // prix et sa facture. Rien d'inventé — un champ vide se dit « à chiffrer ».
+// ★ FUT-CAP — le reglage du domaine, lu dans la Cave ; 228 si elle n'est pas chargee.
+function _rsvDomL(){
+  var v=(typeof window._caveFutL==='function')?parseFloat(window._caveFutL()):NaN;
+  return (isFinite(v)&&v>0)?v:228;
+}
+// Un lot qui a sa propre contenance la porte en etiquette : « 500 L ».
+function _rsvCapTag(f){
+  var l=parseFloat(f&&f.l);
+  return (isFinite(l)&&l>0)?'<span class="mvr-ftag mvr-ftag-cap">'+String(Math.round(l*10)/10).replace('.',',')+'\u00a0L</span>':'';
+}
 function _rsvFutEcoHtml(f){
   if(f && f.mode==='loc'){
     var j=(window._mvFutJoursFin)?window._mvFutJoursFin(f):null;
@@ -477,6 +487,12 @@ function _rsvOpenFut(id){
   document.getElementById('mvr-fut-ref').value=f?(f.ref||''):'';
   document.getElementById('mvr-fut-annee').value=f?(f.annee||''):(new Date().getFullYear());
   document.getElementById('mvr-fut-qte').value=f?(f.qte||''):'';
+  // ★ FUT-CAP — la contenance du lot ; vide = le reglage du domaine, qu'on affiche.
+  var _lf=document.getElementById('mvr-fut-l');
+  if(_lf){
+    _lf.value=(f&&parseFloat(f.l)>0)?String(f.l).replace('.',','):'';
+    _lf.placeholder=_rsvDomL()+' \u2014 r\u00e9glage du domaine';
+  }
   var _v=function(id,val){ var e=document.getElementById(id); if(e) e.value=(val==null?'':val); };
   _v('mvr-fut-dfact', f?(f.dfact||f.date||''):_today());
   _v('mvr-fut-prix',  (f&&f.prix!=null)?f.prix:'');
@@ -516,6 +532,13 @@ function _rsvSaveFut(){
   var qte=parseInt(document.getElementById('mvr-fut-qte').value)||0;
   if(!four && !ref){ showToast('Renseigne au moins le fournisseur ou la référence','#B85A1A'); return; }
   if(qte<=0){ showToast('Indique une quantité de fûts','#B85A1A'); return; }
+  /* ★ FUT-CAP — la contenance, controlee AVANT toute ecriture. Egale au reglage
+     du domaine = pas de contenance propre : le lot suivra le domaine s'il change. */
+  var _lRaw=((document.getElementById('mvr-fut-l')||{}).value||'').trim();
+  var _lN=_lRaw?parseFloat(_lRaw.replace(/[\s\u00a0\u202f]/g,'').replace(',','.')):null;
+  if(_lRaw && (!isFinite(_lN)||_lN<50||_lN>5000)){ showToast('Contenance attendue entre 50 et 5000 L','#B85A1A'); return; }
+  var _lV=(_lN!=null)?Math.round(_lN*10)/10:null;
+  if(_lV===_rsvDomL()) _lV=null;
   var loc=(_rsvFutMode==='loc');
   var _d=function(id){ var e=document.getElementById(id); return e?String(e.value||'').slice(0,10):''; };
   var dfact=_d('mvr-fut-dfact'), debut=_d('mvr-fut-debut'), fin=_d('mvr-fut-fin');
@@ -532,6 +555,7 @@ function _rsvSaveFut(){
     var f=INTRANTS.futs.find(function(x){return x.id===_rsvEditFut;});
     if(f){
       f.four=four; f.ref=ref; f.annee=annee; f.qte=qte;
+      if(_lV) f.l=_lV; else delete f.l;
       Object.keys(champs).forEach(function(k){ f[k]=champs[k]; });
     }
   } else {
@@ -541,6 +565,7 @@ function _rsvSaveFut(){
     //   du premier. Deux factures = deux lots. Le +/- de la carte reste là pour
     //   corriger une quantité ; il ne sert plus à empiler des achats.
     var np={id:_rid(), four:four, ref:ref, annee:annee, qte:qte, date:_today()};
+    if(_lV) np.l=_lV;
     Object.keys(champs).forEach(function(k){ np[k]=champs[k]; });
     INTRANTS.futs.push(np);
   }
@@ -606,12 +631,17 @@ function _rsvInjectCss(){
     +'.mvr-fstepl{font-size:var(--pt-lbl,10.5px);color:var(--muted,#7A7060);margin-top:-1px}'
     +'@media(hover:hover){.mvr-fstepb:hover{background:var(--terre-pale,#F3EADF)}}'
     +'.mvr-mseg{display:flex;border:1.5px solid var(--gris,#DED7C9);border-radius:999px;overflow:hidden;background:var(--bg-card,#FBFAF6);margin-bottom:12px}'
-    +'.mvr-mseg button{flex:1;border:0;background:transparent;color:var(--texte-med,#4A4A3A);padding:10px 6px;font:600 12px/1 inherit;cursor:pointer}'
+    +'.mvr-mseg button{flex:1;border:0;background:transparent;color:var(--texte-med,#4A4A3A);padding:10px 6px;font-family:inherit;font-size:var(--pt-txt,12.5px);font-weight:600;line-height:1;cursor:pointer}'
     +'.mvr-mseg button.on{background:var(--terre,#8A5A38);color:#FBF7F1}'
     +'.mvr-fhint{font-size:var(--pt-lbl,10.5px);color:var(--texte-doux,#5F5F5F);line-height:1.45;margin:-4px 0 12px}'
     +'.mvr-ftag{display:inline-block;font-size:var(--pt-nano,9.5px);font-weight:700;border-radius:3px;padding:1px 6px;letter-spacing:.03em;margin-left:6px;vertical-align:1px}'
     +'.mvr-ftag-ach{background:var(--terre-pale,#F3EADF);color:var(--terre-tx,#8A5A38)}'
     +'.mvr-ftag-loc{background:var(--bleu-pale,#E8F0FA);color:var(--bleu-tx,#1A4A7A)}'
+    +'.mvr-ftag-cap{background:var(--or-pale,#FAF3E0);color:var(--or-tx,#7A5E12)}'
+    +'.mvr-fsuf{display:flex;align-items:center;gap:8px}'
+    +'.mvr-fsuf .mvr-fi{flex:1}'
+    +'.mvr-fsuf span{font-size:var(--pt-txt,12.5px);color:var(--texte-doux,#5F5F5F)}'
+    +'.mvr-fsuf+.mvr-fhint{margin-top:8px}'
     +'.mvr-floc{font-size:var(--pt-micro,11px);color:var(--bleu,#1A4A7A);line-height:1.45;margin-top:5px}'
     +'.mvr-parc-sig{display:flex;gap:8px;margin-top:9px}'
     +'.mvr-parc-sig>div{flex:1;border-radius:10px;padding:7px 9px;text-align:left}'
@@ -1201,7 +1231,8 @@ function _rsvExportFutsPdf(){
     var rows='';
     g.lots.forEach(function(f){
       var q=parseInt(f.qte)||0;
-      rows+='<tr><td class="l">'+_escHtml(f.ref||'R\u00e9f\u00e9rence non pr\u00e9cis\u00e9e')+'</td>'
+      rows+='<tr><td class="l">'+_escHtml(f.ref||'R\u00e9f\u00e9rence non pr\u00e9cis\u00e9e')
+        +(parseFloat(f.l)>0?(' \u00b7 '+String(Math.round(parseFloat(f.l)*10)/10).replace('.',',')+'\u00a0L'):'')+'</td>'
         +'<td class="c">'+_escHtml(f.annee||'\u2014')+'</td>'
         +'<td class="n">'+q+'</td></tr>';
     });
@@ -1328,6 +1359,9 @@ function _rsvEnsureOverlays(){
       +'<div class="mvr-sugg" id="mvr-fut-sugg"></div>'
       +'<div class="mvr-f2"><div><div class="mvr-fl">Millésime du fût</div><input type="number" class="mvr-fi" id="mvr-fut-annee" placeholder="2026"></div>'
       +'<div><div class="mvr-fl">Quantité</div><input type="number" class="mvr-fi" id="mvr-fut-qte" placeholder="nb de fûts"></div></div>'
+      +'<div class="mvr-fl">Contenance d\u2019un f\u00fbt</div>'
+      +'<div class="mvr-fsuf"><input class="mvr-fi" id="mvr-fut-l" type="text" inputmode="decimal" autocomplete="off" placeholder="r\u00e9glage du domaine"><span>L</span></div>'
+      +'<div class="mvr-fhint">Vide\u00a0: le lot suit le r\u00e9glage du domaine (roue crant\u00e9e de la Cave). Pour un demi-muid, une feuillette\u00a0: \u00e9crivez sa contenance. Elle suit ses f\u00fbts au Chai, et revient avec eux.</div>'
       +'<div class="mvr-fl">Ce lot est</div>'
       +'<div class="mvr-mseg" id="mvr-fut-mode">'
         +'<button type="button" data-m="achat" onclick="_rsvSetFutMode(\'achat\')">Acheté</button>'
