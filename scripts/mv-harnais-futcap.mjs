@@ -64,7 +64,7 @@ function table(src, nom) {
 }
 
 const NC = ['_mvF1', '_caveFutL', '_caveFutHl', '_caveTonL', '_caveFutsL', '_caveHorsFormat', '_caveLTxt',
-  '_caveGroupesL', '_caveNbTonneaux', '_caveVolCuvesL', '_caveVolL', '_caveTonneauxStr', '_cuvTonneauxDe',
+  '_caveGroupesL', '_caveNbTonneaux', '_caveVolCuvesL', '_caveVolL', '_caveManqueL', '_caveCuveSource', '_caveTonneauxStr', '_cuvTonneauxDe',
   '_vendDecVieux', '_vendDecLotL', '_vendDecPropVol', '_vendDecF2', '_vendDecBilan', '_mlVolParFut'];
 const NU = ['_mvFutAn', '_mvFutVins', '_mvFutNorm', '_mvFutMemeLot', '_mvFutRef', '_mvFutL', '_mvFutRid',
   '_mvFutTracer', '_mvFutStock', '_mvFutEntrer', '_mvFutEntonner', '_mvFutLiberer', '_mvFutRetirer',

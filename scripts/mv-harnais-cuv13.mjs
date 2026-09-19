@@ -45,7 +45,10 @@ const NOMS = [
   '_vendLigneHtml', '_vendDetailHtml', '_vendCellHtml',
   '_vendDecuvee', '_vendFaEnCours', '_vendPressee', '_vendSuivie', '_vendMesurable',
   '_vtNum', '_vtActives', '_vtB', '_vtTags', '_fermLegende', '_vendCuvF1',
-  '_mlD', '_mlIso', '_mlAuj', '_mlEcartJ', '_mlAMesurer'
+  '_mlD', '_mlIso', '_mlAuj', '_mlEcartJ', '_mlAMesurer',
+  /* ★ VOL-1 — la jauge lit `_vendVolContenu` : les VRAIES fonctions, qui
+     s'appuient sur les bouchons du prélude (_vendVolLoge, _vendCuvKgDom…). */
+  '_vendSortiesHl', '_vendVolContenu'
 ];
 function extraire(nom) {
   const m = new RegExp('^function ' + nom + '\\s*\\(', 'm').exec(SRC);

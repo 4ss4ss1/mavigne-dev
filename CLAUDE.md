@@ -2,7 +2,30 @@
 
 > Document de référence du projet **Ma Vigne** (GUERETTECH). Il est le **porteur de vérité** :
 > la mémoire Claude est plafonnée, ce fichier ne l'est pas.
-> Dernière consolidation : **19 septembre 2026 (FIGE-1)** — ★★ **FIGER À L'ENVOI : CE QUI CHANGE ENSUITE PASSE AU
+> Dernière consolidation : **19 septembre 2026 (ASM-1 + VOL-2)** — ★★★ **LE FÛT ENTAMÉ SE COMPLÈTE DEPUIS LE CHAI,
+> ET LA CHAÎNE DIT LE kg/hL DE CHAQUE ÉTAPE (§153)**. Une cuvée garde ce qui manque dans ses fûts (`manque_l` :
+> écrit au décuvage mesuré, suivi à la correction, déduit pour les cuvées d'avant) et `_caveVolL` le retire — Le Chai
+> compte le vin réel. On touche le fût entamé (carte, fiche) : « Compléter le fût » avec le vin d'une cuve du Cuvier —
+> même pas encore décuvée (le prélèvement sort de son contenu, reste à son rendement) — ou d'une cuvée du Chai ; la
+> composition est gardée, une ligne « Assemblage » va au journal et au registre, la supprimer défait tout. La chaîne :
+> kg/hL sous chaque étape, l'apport en pointillé, et ★ un id de dégradé par graphe (les barres disparaissaient après
+> un passage par Bouteilles — trouvé sur la maquette). ★ L'essai de bout en bout sur l'appli compilée a trouvé ce que
+> la maquette ne pouvait pas voir (un style du Cuvier absent). Harnais neuf : 48 assertions, 17 contre-épreuves.
+> ⚠️⚠️ **`cave.js` est à 1 023 ko sur 1 024 : le prochain lot Cave commence par le découper (§153h ⑥).**
+> **APP 7.42 → 7.43 · SW 8.07 → 8.08**, base `85f0959` — **VOL-1 pas poussé, le zip contient les deux**. Détail en **§153**.
+>
+> ★ Précédente : **19 septembre 2026 (VOL-1)** — ★★★ **UNE CUVE CONTIENT CE QU'ON Y A MIS, PAS SA
+> CONTENANCE (§152)**. Nico, sur « De la récolte à la bouteille » : « ce n'est pas la contenance de la cuve qui est à
+> mettre mais le nombre d'hectolitres estimé […], puis ce qui est réellement entonné (et non la taille du fût) », et
+> « vérifie que cette règle s'applique bien partout ». Une seule porte, `_vendVolContenu` (décuvée : le volume logé ;
+> avant : les caisses à la règle du Cuvier, saignées déduites ; sans caisse : rien). Seize lecteurs corrigés, dont ★ la
+> tournée qui chaptalisait sur la contenance sans case (Ruchottes, +1° : 8,4 kg de sucre au lieu de 6,0) et le registre
+> qui calculait le SO₂ dessus. Chaîne : kilos → estimé → entonné MESURÉ (pointillé + « Saisir le volume entonné » sinon)
+> → bouteilles ; « Après élevage » (les fûts comptés pleins) disparaît. Les volumes du Chai attendent ASM-1 (assemblage,
+> fût en creux — maquette ; « le jus peut venir d'une cuve pas encore décuvée »). Harnais neuf : 48 assertions, 19
+> contre-épreuves. **APP 7.41 → 7.42 · SW 8.06 → 8.07**, base `85f0959`. Détail en **§152**.
+>
+> ★ Précédente : **19 septembre 2026 (FIGE-1)** — ★★ **FIGER À L'ENVOI : CE QUI CHANGE ENSUITE PASSE AU
 > MOIS SUIVANT (§151)**. Nico : « on fige à l'envoi ce qui a été payé et retenu pour le reporter sur le mois suivant.
 > Ajoute juste un bouton pour figer ». Bouton **Figer** (fiche › Résumé › Envoi à la compta) → instantané
 > `PLANNING_HSUP[nom][mois].fige` ; un mois figé garde son paiement et sa retenue ; l'écart (retenue vive − figée, et la
@@ -20770,3 +20793,252 @@ sans passer par les heures sup, retenue de trop pas rendue, retenue figée recal
 ① Un congé sans solde ajouté après l'envoi n'entre pas dans l'écart (jour neutre, hors compteur). ② Le paiement pris au
 compteur (`paye_bank`) d'un mois figé n'est pas dans l'instantané : il ne peut plus changer (paiement bloqué), et ce que
 le compteur ne couvre plus passe dans l'écart. ③ Les ouverts ② à ⑤ de §150f restent.
+
+## 152. ★★★ VOL-1 — UNE CUVE CONTIENT CE QU'ON Y A MIS, PAS SA CONTENANCE (19/09 — `cave.js` · `utils.js` · `app.js` · `index.html` · `sw.js` · `guide/08-cave.html` · `scripts/mv-harnais-vol1.mjs` (neuf) · `scripts/mv-harnais-intrants.mjs` · `scripts/mv-harnais-cuv13.mjs` · `package.json` · APP 7.41 → **7.42** · SW 8.06 → **8.07**)
+
+> Nico, capture de la carte « De la récolte à la bouteille » (Le millésime › Les courbes), cuvée Ruchottes :
+> Récolte 480 kg · En cuve **5 hL** · Après élevage **2,8 hL** (−44 %). *« Il faut indiquer les kilos récoltés en fonction
+> du nombre de caisses (estimation, ici c'est ok), ensuite ce n'est pas la contenance de la cuve qui est à mettre mais le
+> nombre d'hectolitres estimé en fonction de la règle de calcul de rendement indiquée, puis ce qui est réellement entonné
+> (et non la taille du fût). Vérifie aussi que cette règle s'applique bien partout. »* Il demande aussi l'**assemblage**
+> (compléter un fût non rempli avec le jus d'une autre cuve, depuis Le Chai, en touchant le fût) : c'est **ASM-1**, à
+> maquetter — sa réponse à la question posée : *« le jus peut venir d'une cuve pas encore décuvée »*. Audit rendu d'abord,
+> puis « relis les fichiers et go », « Continuer ». Base `85f0959` (NET-1 + FIGE-1 poussés entre-temps, planning seul).
+
+### 152a. La seule porte — `_vendVolContenu(c, exclId)`
+
+- **Décuvée** : `_vendVolLoge` (mesuré, ou d'après les contenants remplis). **Avant** : les kilos du domaine à la règle du
+  Cuvier (`_vendHlKg`, kg/hL — la moyenne de la fourchette de la roue crantée), **moins `_vendSortiesHl`** (les saignées).
+  **Sans caisse rattachée** : `{hl:0, src:'aucun'}` — une cuve où l'on n'a rien mis ne contient rien.
+- Arrondi au centième : les feuilles recopient ce chiffre dans une case, et la source « saisi » se déduit en comparant la
+  case au repère (§71d). `exclId` = la récolte en cours de correction (même règle que `_vendCuvKgDom`).
+- `_vendSortiesHl` est l'endroit où ASM-1 retirera le jus prélevé dans une cuve non décuvée.
+- ⚠️ `volume_hl` **reste la contenance**, et n'est plus lu que comme telle : jauge (`_cuveCouches`), parc, refus « plus que
+  la cuve », fusion, formulaire de la cuve, et le point de départ de la **proposition** de fûts d'une cuve SANS caisse — la
+  feuille l'écrit « (contenance de la cuve) », aucun volume n'est enregistré dessus.
+
+### 152b. Partout — les lecteurs qui prenaient la contenance (ou la taille des fûts) pour du vin
+
+| où | lisait | lit |
+|---|---|---|
+| carte « De la récolte à la bouteille » (Le millésime ; Le Chai › Bouteilles) | En cuve = `cv.volume_hl` ; Après élevage = `_caveVolHl` (fûts pleins) | Récolte kg → En cuve estimé → **Entonné mesuré** (sinon pointillé) → Bouteilles |
+| feuille Chaptalisation | contenance pré-remplie | contenu + source déduite (`vop-volsrc`), `vol_src` écrit |
+| intervention groupée (tournée) : chaptalisation, SO2, intrants | `_vendIntrVol` = contenance avant décuvage, **sans case pour corriger** | contenu ; sans caisse : `volume_hl` et `kg_sucre` à `null` |
+| SO2 du Cuvier | la dose seule — le registre multipliait par la contenance | case « Volume sulfité » + grammes de SO2 (`_vendSo2Calc`) ; `volume_hl` et `vol_src` écrits |
+| registre des manipulations (repli des opérations sans volume, colonne volume, total de SO2) | `c.volume_hl` | `_rmVolRepli` : les caisses d'abord (une opération du Cuvier se fait pendant la vinification), le décuvé à défaut, sinon rien |
+| tanins, enzymes, bentonite | contenance « dite comme telle » | contenu ; case vide sans caisse ; `volume_hl` à `null` plutôt que 0 |
+| saignée | retranchait `volume_hl` (la jauge MONTAIT après une saignée) | `cap_intacte:true` : se retire du contenu ; une saignée d'avant ce lot rend la contenance quand on la corrige ou la supprime |
+| carboglace (abaissement estimé) | contenance | contenu |
+| liste des cuves décuvées | « `volume_hl` hL → Le Chai » | `_vendVolLoge` (+ « mesurés ») |
+| rattacher une récolte (« X hL en place ») | contenance | `_vendDedansTxt` (hors récolte en correction) |
+| plan de cuverie (jauge) | logé, ou kilos sans les saignées | `_vendVolContenu` |
+| feuille Décuver (estimation) | kilos sans les saignées | `_vendVolContenu` |
+| cahier de cuverie | « Volume » = contenance ; total = somme des contenances ; tri « Volume » | « Contenance » + « Volume estimé (N kg) » ou « Décuvé » ; total = contenus ; tri « Contenance » (clé `volume` gardée) |
+| Le millésime, millésime d'avant le Cuvier (bilan figé) | `bilan_perte.cuveHl` (contenance) comme décuvé — et le rendement moyen avec | l'entonné figé, sinon les contenants à la mise |
+| mise en bouteille (`bilan_perte`) | `{recolteKg, cuveHl, eleveHl}` | `{recolteKg, estHl, entonneHl, entonneSrc, eleveHl}` |
+| pied du parcours du millésime | « rien n'est estimé sauf la projection » | les deux premiers étages sont des kilos convertis |
+
+★ **Le plus grave, trouvé en vérifiant « partout »** : la tournée chaptalisait sur la contenance, sans case. Rendu dans
+Chromium sur les vraies fonctions, Ruchottes (480 kg, cuve de 5 hL), +1° : **6,0 kg de sucre**, contre **8,4 kg** avant —
+40 % de trop, en pleine vendange. Les chaptalisations déjà enregistrées **gardent leurs kilos** (des faits écrits) :
+« Quoi de neuf » demande de relire celles de la vendange.
+
+### 152c. La chaîne, dans le détail
+
+- `_caveBilanChaine` : le vivant d'abord (`_caveCuveSource`), le figé en repli — une mesure saisie après la mise se voit,
+  une cuve supprimée n'efface pas ce qui était figé. `estHl` **n'est pas arrondi** : arrondi à 3,56, il donnait 475 cols
+  face aux 474 des kilos — une perte à l'envers (vu au premier rendu).
+- `_caveBtlGraphSvg` : barres = kilos, estimation, entonné **mesuré**, bouteilles. Entonné non mesuré (`vol_decuve_src`
+  absent ou `'contenants'`) = trait tireté au sol et « à mesurer », jamais la taille des fûts. L'écart se lit sur la
+  dernière barre **dessinée** ; 0 ne s'écrit pas (des kilos à leur estimation, c'est une conversion) ; un gain s'écrit
+  « +N % » ; l'échelle suit la plus haute barre.
+- `_pcrbChaine` : compte les barres qui se dessinent (≥ 2 pour montrer la carte) ; la note dit d'où vient chaque étape (et
+  la règle en kg/hL) ; **« Saisir le volume entonné »** (`.pcrb-act` + `.pcav-act`) ouvre `_vendDvolCorriger` sur la cuve
+  décuvée, qui repeint `renderCave()` quand on vient d'ailleurs que du Cuvier.
+- « Après élevage » disparaît : c'était `_caveVolHl`, les fûts comptés pleins. Une cuvée embouteillée **sans cuve source**
+  (la `cuv0` de la démo) n'a plus qu'une étape : pas de graphe, la phrase « liez la cuvée à sa cuve » reste.
+
+### 152d. Ce qui ne bouge pas, et pourquoi
+
+- **Les volumes du Chai** (en-tête, carte, fiche, Bouteilles « hL élevés » et bouteilles théoriques, « En élevage » du
+  millésime, bilan de campagne « au chai ») lisent toujours `_caveVolL` : fûts comptés pleins + cuves. Les corriger demande
+  de savoir qu'un fût n'est PAS plein — c'est le « fût en creux » d'ASM-1, qui va avec l'assemblage.
+- Les `vol_src:'estime'` écrits avant ce lot désignaient la contenance : le registre les imprime « (estimé) » comme avant.
+- `_vendOpDet` (résumé des opérations d'une cuve) ne dit que la dose d'un SO2 ; le registre, lui, dit les grammes.
+
+### 152e. Les harnais
+
+`scripts/mv-harnais-vol1.mjs` — **48 assertions, 19 contre-épreuves**, dans `check` et `prebuild` (`npm run test:vol1`),
+sur les VRAIES fonctions de `cave.js` et le socle de graphe d'`utils.js` : A la porte, B la chaîne (le cas Ruchottes),
+C le registre, D les écrans et écritures (code lu sans ses commentaires), E l'aide, le guide, « Quoi de neuf », la démo.
+★ **Deux contre-épreuves n'ont pas mordu au premier passage — c'étaient les MUTATIONS qui ne recréaient pas le défaut**
+(l'une retirait toutes les étiquettes au lieu d'écrire « +0 % » ; l'autre gardait la condition même qu'elle devait
+défaire). Corrigées, pas les assertions. Une contre-épreuve se relit comme un test : elle peut être fausse.
+
+Existants : `intrants` — sa §5 gravait « c'est la CONTENANCE qui sert de repère » : **l'ancienne règle, réécrite, pas
+contournée** (61/61) ; extraction élargie, deux bouchons de données (réglage du Cuvier, kilos d'une récolte) ; C1 réancré,
+C1b/C1c neufs ; ★ C6 mutait la PREMIÈRE occurrence de « (estimé) » — la chaptalisation et le SO2 la portent désormais
+avant les intrants : la mutation tombait à côté ; elle les prend toutes (12/12). `cuv13` extrait les deux fonctions neuves
+(43/43, contre 12/12).
+★ Trouvés morts, **hors chaîne**, laissés : `mv-harnais-rendement` plante sur la base intacte (`_vendRdtMax is not
+defined`) ; `mv-harnais-cuvier-correction` (mort depuis §81) grave encore la saignée qui mange la contenance.
+
+### 152f. Rendu
+
+`/home/claude/lot/rendre-vol1.mjs` et `feuille-vol1.mjs` (hors dépôt) : les fonctions EXTRAITES, `styles.css`, le CSS
+injecté par `_pcavInjectCss`, les polices du dépôt, dans Chromium. ★ Le même banc sur le code de la base reproduit la
+capture de Nico au chiffre près (474 · 5 hL · 373 −44 %) : c'est ce qui prouve que le banc lit le vrai code. Après : 474 ·
+474 · Entonné « à mesurer » + bouton ; mesuré 2,5 hL : 333 −30 % ; 320 bouteilles : −4 %. Feuille d'opération : SO2
+3,56 hL et 10,7 g pour 3 g/hL, source « estimé » puis « saisi » ; chaptalisation 3,56 hL et 6,0 kg ; saignée : contenance
+5 intacte, contenu 3,56 → 3,06 → 3,56 à la suppression ; une saignée d'avant ce lot rend 1 hL de contenance ; cuve sans
+caisse : case vide et « saisissez le volume ». Aucune erreur.
+⚠️ Vu en passant, **pas touché** : le graphe de la chaîne défile de 34 px sur la largeur de la carte, en 390 comme en
+760 px — **à l'identique sur la base**. `_mvGraphW` mesure le `clientWidth` de `.pcrb-g`, padding compris (`margin:0 -14px;
+padding:0 14px`) : toutes les cartes des courbes sont concernées.
+
+### 152g. Note de livraison
+
+**Base `85f0959`. APP 7.41 → 7.42 · SW 8.06 → 8.07.** Fichier par fichier :
+`src/cave.js` (la porte, les lecteurs du tableau, la chaîne) · `src/utils.js` (version, « Quoi de neuf » 7.42 — trois
+entrées —, quatre entrées d'aide, une info des courbes) · `src/app.js` (la cuve décuvée de la démo porte un volume
+mesuré) · `index.html` (les quatre affichages de version) · `public/sw.js` (en-tête, changelog, `CACHE_NAME`, les deux
+`console.log`) · `guide/08-cave.html` + `public/guide.html` (régénéré par `node scripts/build-guide.mjs`) ·
+`scripts/mv-harnais-vol1.mjs` (neuf) · `scripts/mv-harnais-intrants.mjs` · `scripts/mv-harnais-cuv13.mjs` ·
+`scripts/harnais-claude-md.mjs` (SECTIONS) · `package.json` (`check`, `prebuild`, `test:vol1`) · `CLAUDE.md` · `.mv-base`.
+★ `npm run check` joué **en entier** sur l'état livré (vert) ; `npx vite build` (30 s) puis `test:smoke` — démarrage OK,
+23/23 globaux, aucune exception (Playwright 1.61 : `PLAYWRIGHT_BROWSERS_PATH=/tmp/pw`, liens vers le 1194, §149a) ; `test:e2e`
+non joué (émulateurs Firebase).
+Puis `npm run build && firebase deploy --only hosting`.
+
+### 152h. Ouvert, et dit
+
+① **ASM-1** : maquette à faire — le fût en creux (le volume entonné mesuré sous la contenance des fûts), « Compléter ce
+fût » depuis Le Chai en touchant le fût ; source : une cuvée du Chai **ou une cuve pas encore décuvée** (Nico) — le jus
+prélevé sort de son contenu (`_vendSortiesHl`) et doit être **rajouté** au rendement de ses parcelles ; la composition
+reste visible. ② Les volumes du Chai (152d) suivront ASM-1. ③ Le défilement de 34 px des graphes des courbes (152f).
+④ Les deux harnais morts (152e). ⑤ `test:e2e` et un vrai téléphone, chez Nico.
+
+## 153. ★★★ ASM-1 — LE FÛT ENTAMÉ SE COMPLÈTE DEPUIS LE CHAI · VOL-2 — LE kg/hL DE CHAQUE ÉTAPE (19/09 — `cave.js` · `utils.js` · `index.html` · `sw.js` · `guide/08-cave.html` · `scripts/mv-harnais-asm1.mjs` (neuf) · 4 harnais adaptés · `package.json` · APP 7.42 → **7.43** · SW 8.07 → **8.08**)
+
+> Nico, 19/09 : *« il faut aussi pouvoir faire un assemblage (c'est-à-dire prendre du jus d'une autre cuve pour compléter
+> un fût non rempli ; l'idéal est de pouvoir le remplir par le Chai en cliquant sur le fût concerné) »* — à la question
+> posée : *« le jus peut venir d'une cuve pas encore décuvée »* — puis, sur la chaîne : *« il serait intéressant
+> d'indiquer le kg/hL du rendement sur chaque étape sur le graph »*. Maquette (5 onglets, CSS réel exécuté, graphes de
+> la fonction proposée) → « go » → « Continuer ». **VOL-1 (§152) n'est pas poussé : `origin/main` = `85f0959`, ce zip
+> contient les deux.**
+
+### 153a. Le fût entamé — `manque_l`, `_caveManqueL`, et le Chai qui compte le vin réel
+
+- Une cuvée garde ce qui MANQUE dans ses fûts : `manque_l` (litres). **Écrit au décuvage** quand le volume est MESURÉ
+  (`F − max(0, M − C)` : fûts, mesure, cuves de la cuvée) — 0, écrit, sinon ; **suivi** quand on corrige le volume
+  décuvé (`_vendDvolCorriger` reporte l'écart, et enregistre alors le Chai aussi) ; **rendu** par « Compléter le fût ».
+- Absent (cuvée décuvée avant ce lot) : `_caveManqueL` le **déduit** de la mesure du décuvage — seulement si la cuvée
+  n'a pas de cuve (le volume de sa cuve a pu bouger depuis : on ne devine pas). Sans mesure : 0, les fûts comptent
+  pleins comme avant. Plafonné aux fûts.
+- ★★ `_caveVolL` = fûts + cuves **− ce qui manque**. C'est la porte « combien de vin » de §20 : carte, fiche, en-tête,
+  bouteilles théoriques, « En élevage » du millésime, bilan de campagne suivent sans autre retouche. `_caveFutsL` (le
+  BOIS : part des anges, ouillage, pyramide) ne bouge pas. C'était le « ② » de §152h.
+- Démo : la cuvée « Vieilles Vignes » (22 fûts de 228 L, 50 hL mesurés depuis VOL-1) montre d'elle-même « 1 fût
+  entamé · il attend 16 L ».
+
+### 153b. Compléter le fût — la feuille et ce qu'elle écrit
+
+- **Où** : la carte du Chai (`_asmCarteHtml`, sous la ligne des contenants — le bouton arrête la propagation : toucher
+  le fût n'ouvre pas la fiche) et la fiche, section Contenants (le DERNIER lot porte le fût entamé : le manque est
+  connu à la maille de la cuvée, §20e). En lecture seule : visible, pas touchable.
+- **Sources** (`_asmSources`) : les cuves du Cuvier qui contiennent du vin — **même pas encore décuvées** (Nico) ; ni
+  décuvées (même si leur statut dit autre chose), ni terminées, fusionnées, préparées ou vides — puis les cuvées du
+  Chai en élevage, ni elle-même ni les embouteillées. Chacune dit ce qu'elle contient et ses appellations (parcelles
+  de ses caisses).
+- **Litres** : ce qui manque est proposé ; ±5 L et un champ ; refus en mots (`_asmRefus`) : pas de source, pas de
+  litres, plus que le fût n'attend, plus que la source n'a. `_asmValider` ne relit PAS le DOM (trois variables).
+- **Aperçu** : ce que devient le fût, la composition, la part d'une **autre appellation** ou d'un **autre millésime**
+  (en pourcentage — l'appli ne tranche pas ce que la réglementation permet), ce que devient la source.
+- **Écrit** : cuvée → `manque_l −= L`, `apports[]` (`{id,date,l,de,de_type,de_id,mil,aoc}`) ; cuve du Cuvier → une
+  opération `prelevement` (`volume_hl`, `vers`, `asm_id`) ; cuvée du Chai → sa cuve baisse (la plus pleine), ou, sans
+  cuve, l'un de ses fûts devient entamé ; au Chai, une opération `assemblage` (`cuvees_ids:[cuvée complétée]` — le
+  registre et le filtre millésime la rattachent au bon vin ; `data.sources`, `volume_hl` : le type `assemblage` des
+  Pratiques de cave de `RM_TYPES` l'imprime « depuis Cuve 7 (Gevrey VV 2026) · 0,3 hL réunis »). `_vendFbSave` sur le
+  ou les deux magasins.
+- **Défaire** : supprimer la ligne du journal (`deleteCaveOp` → `_asmDefaire`, bouton « Défaire ») remet tout — le fût
+  redevient entamé, l'apport sort de la composition, le prélèvement quitte sa cuve, la cuve du Chai remonte. Un
+  assemblage ne se « modifie » pas (pas de crayon, aux deux journaux). La cuvée où l'on a puisé le voit dans sa fiche.
+
+### 153c. La source du Cuvier : sortie du contenu, gardée au rendement
+
+`_vendSortiesHl` compte saignées **et prélèvements** (le contenu estimé baisse) ; `_vendPrelevHl` les RAJOUTE au
+rendement — `_vendVolCuve` (parcelles) et l'étage « décuvé » du parcours du millésime : ses raisins ont produit ce
+vin. Le prélèvement a un nom et un détail au Cuvier (`_vendOpLbl`, `_vendOpDet` : « 0,3 hL → Ruchottes 2026 »), n'est
+**pas** dans `_VEND_OPS` (il ne se choisit pas dans la feuille), et `openVendOp` refuse de le corriger : il se défait
+au Chai.
+
+### 153d. VOL-2 — la chaîne
+
+- **kg/hL sous chaque étape** : les kilos récoltés ÷ les hectolitres de l'étape. En cuve, c'est la règle (135) ;
+  entonné, ce que le pressoir a donné (Ruchottes : 192) ; en bouteilles, le bout (200 pour 320 cols). Rien sous
+  « Récolte ». Hauteur 168 → 180 px pour la troisième ligne.
+- **L'apport** (ASM-1) s'empile en pointillé sur l'entonné (« 333 +40 ») : ni dans le kg/hL, ni dans l'écart
+  de l'entonné ; les bouteilles se comparent à TOUT l'entonné, et leur kg/hL se calcule sur la part de la cuvée.
+- ★★ **Un id de dégradé par graphe** (`_CAVE_BTL_GID`) — et un id de découpe par fût dessiné (`_ASM_GID`). `mvbgd`
+  était fixe : **trouvé sur la maquette** — la vue masquée qui porte le premier `mvbgd` du document emporte les barres
+  des autres. Dans l'appli : #mvc-elevage (Chai › Bouteilles) précède #cave-view-mil dans le DOM ; après un passage
+  par Bouteilles avec une cuvée embouteillée, les barres de la chaîne de Le millésime › Les courbes disparaissaient.
+- `_caveBilanChaine` rend `apportHl` ; la note de la carte dit le kg/hL, et l'apport s'il y en a un.
+
+### 153e. Le vrai code, rendu — et ce qu'il a trouvé
+
+- **Maquette** (hors dépôt, validée) : le défaut du dégradé ci-dessus.
+- **Essai de bout en bout** (hors dépôt, `/home/claude/lot/e2e-asm1.mjs`) : l'appli COMPILÉE (`dist/`), Chromium,
+  réseau extérieur coupé, un jeu posé en mémoire comme la visite guidée, puis on TOUCHE l'écran : la carte (« 1 fût
+  entamé · 250 L sur 280 · il attend 30 L »), la feuille (pas la fiche), la source, −5 L puis +5 L, « Compléter »,
+  la carte (2,8 hL, « dont 30 L de Cuve 7 (Gevrey VV 2026) · 11 % », plus de fût entamé), le journal (sans crayon),
+  la fenêtre « Défaire », tout revient. Aucune erreur.
+  ★ **Il a trouvé ce que la maquette ne pouvait pas voir** : la feuille empruntait les styles du Cuvier (le bouton
+  d'enregistrement) — ouverte depuis Le Chai sans passage par Le Cuvier, le bouton sortait brut. `_asmOuvrir` injecte
+  maintenant `_vendInjectCss` aussi. Et le champ des litres gardait `width:100%` (`.mvv-tin`, posé après) : style à
+  deux classes. **Une maquette qui injecte tout le CSS ne voit pas un style manquant ; l'appli compilée, si.**
+
+### 153f. Les harnais
+
+`scripts/mv-harnais-asm1.mjs` — **48 assertions, 17 contre-épreuves** (check, prebuild, `npm run test:asm1`) : A le
+fût entamé, B les sources, C compléter depuis le Cuvier (registre compris, et le rendement à 40,3 hL après un
+décuvage à 40), D les refus, E depuis le Chai (cuve, fûts) et le défaire, F défaire, G la chaîne (kg/hL, apport,
+dégradé unique), H la carte, I le Cuvier, J décuvage et correction, K les journaux, L l'accompagnement.
+★ La contre-épreuve B2 (« une cuve décuvée proposée ») n'a pas mordu : le jeu excluait la cuve par son statut
+« terminée » AVANT la garde du décuvage — elle ne testait rien. Le jeu a maintenant une cuve décuvée au statut resté
+« MPF » (un parcours corrigé), et une terminée à part. La garde est gardée : défensive, et désormais prouvée.
+Adaptés : `vol1` (extraction `_caveManqueL`, la variable du dégradé, une ancre), `futcap` et `vendange-parts`
+(extraction — `_caveVolL` appelle `_caveManqueL`, `_vendVolCuve` appelle `_vendPrelevHl`), `intrants` inchangé.
+
+★★ **Le poids : `cave.js` est au plafond.** `mv-harnais-typo` a rougi deux fois : 1 034 ko (> 1 024, le plafond
+absolu) et +7 % en un lot (965 → 1 034 ; VOL-1 et ASM-1 livrés ensemble). **Le découpage a été examiné et écarté pour
+ce lot** : le bloc ASM-1 vit des internes du Cuvier et du Chai (`_vendSheet`, `_vendVolContenu`, `_caveManqueL`,
+`_caveGroupesL`, `_rmMilCuve`… une vingtaine) — un module à part devrait les exposer sur `window` (la même raison qu'en
+§145d) ; et déplacer du code existant casse chaque harnais qui l'extrait de `src/cave.js` par son nom. Ce qui a été
+fait : les **commentaires AJOUTÉS par VOL-1 et ASM-1 ont été condensés** (38 blocs ramenés à une ligne qui renvoie à
+§152/§153, qui gardent le pourquoi ; 11 ko), aucun commentaire d'avant n'a été touché — **1 023 ko**. Référence du
+cliquet regravée (`scripts/typo-baseline.json`) ; le regravage enregistre aussi `utils.js` 588 → 605, `planning.js`
+558 → 576, `firebase.js` 153 → 155, `reserve.js` 100 → 103, `styles.css` 417 → 418, venus d'autres lots et sous la
+tolérance. ⚠️⚠️ **Il reste 1 ko : le prochain lot qui touche `cave.js` commence par le découper** (§153h ⑥).
+
+### 153g. Note de livraison
+
+**Base `85f0959` ; le zip contient VOL-1 (§152) et ce lot. APP 7.41 → 7.42 → 7.43 · SW 8.06 → 8.07 → 8.08.**
+Fichier par fichier : `src/cave.js` · `src/utils.js` (version, « Quoi de neuf » 7.43 — trois entrées —, l'aide : une
+entrée neuve et la chaîne, l'info des courbes) · `src/app.js` (VOL-1 : la démo) · `index.html` (les quatre versions) ·
+`public/sw.js` · `guide/08-cave.html` + `public/guide.html` (régénéré) · `scripts/mv-harnais-asm1.mjs` (neuf) ·
+`scripts/mv-harnais-vol1.mjs` · `scripts/mv-harnais-futcap.mjs` · `scripts/mv-harnais-vendange-parts.mjs` ·
+`scripts/mv-harnais-intrants.mjs` · `scripts/mv-harnais-cuv13.mjs` · `scripts/harnais-claude-md.mjs` (SECTIONS) ·
+`scripts/typo-baseline.json` (poids regravé) · `package.json` · `CLAUDE.md` · `.mv-base`.
+`npm run check` joué en entier sur l'état livré ; `npx vite build` puis `test:smoke` ; l'essai de bout en bout ci-dessus ;
+`test:e2e` non joué (émulateurs). Puis `npm run build && firebase deploy --only hosting`.
+
+### 153h. Ouvert, et dit
+
+① **Un soutirage qui laisse un fût entamé** (les lies parties) : la case « volume après soutirage » serait le lot
+suivant ; aujourd'hui un soutirage ne touche pas `manque_l`. ② Retirer ou ajouter un fût (« Modifier la cuvée »,
+retrait) ne recalcule pas le manque — il reste plafonné aux fûts. ③ L'export CSV des opérations du Chai ne propose pas
+le type « assemblage » (le registre, oui). ④ Le défilement de 34 px des graphes des courbes (§152f) reste. ⑤ Les deux
+harnais morts de §152e restent. ⑥ ★★ **`cave.js` : 1 023 ko sur 1 024** — le prochain lot Cave commence par le
+découper. Piste : Le Cuvier (`_vend*`, `_vt*`, `_cuv*`) dans son propre module, sa surface `window` décidée d'avance, et
+les harnais qui extraient de `src/cave.js` repointés dans le même lot.

@@ -23,7 +23,7 @@ export const GT_ADMIN_EMAIL = 'ngdevpro@gmail.com';
 // WHATS_NEW   : tableau vide = modal desactive pour cette version.
 // Format item : { emoji:'📅', titre:'Titre court', desc:'Phrase utilisateur.' }
 // Regle : seulement les changements visibles par les utilisateurs.
-export const APP_VERSION = '7.41';
+export const APP_VERSION = '7.43';
 // ════ Journal des nouveautés (récap cumulatif) ════
 // Une entrée par version, la PLUS RÉCENTE EN HAUT : { v:'5.10', items:[ {emoji,titre,desc}, … ] }
 // À chaque release visible → AJOUTER un bloc en tête (ne pas remplacer). items:[] = release technique (rien à afficher).
@@ -715,6 +715,37 @@ window._mvGraphRepeindre = function(){
 };
 
 export const WHATS_NEW = [
+  { v: '7.43', items: [
+    { emoji: 'barrique', titre: 'Un fût pas plein se complète depuis Le Chai',
+      desc: "Quand le volume entonné mesuré est plus petit que les fûts, la carte de la cuvée le dit\u00a0: «\u00a01 fût entamé, il "
+        + "attend 30\u00a0L\u00a0». Touchez-le pour le compléter avec le vin d’une autre cuve — même pas encore décuvée — ou d’une "
+        + "cuvée du Chai. La composition est gardée (d’où, combien, quelle appellation, quel millésime), le journal et le "
+        + "registre aussi\u00a0; supprimer la ligne défait tout." },
+    { emoji: 'balance', titre: 'Le Chai compte le vin réel',
+      desc: "Un fût entamé ne compte plus plein\u00a0: volume de la cuvée, bouteilles théoriques, millésime et bilan de campagne "
+        + "suivent. Le vin prélevé dans une cuve du Cuvier sort de ce qu’elle contient, mais reste dans le rendement de ses "
+        + "parcelles\u00a0: ses raisins l’ont produit." },
+    { emoji: 'bouteille', titre: 'Le kg/hL de chaque étape',
+      desc: "Sur la chaîne De la récolte à la bouteille, sous chaque étape\u00a0: en cuve, votre règle\u00a0; entonné, ce que le "
+        + "pressoir a vraiment donné\u00a0; en bouteilles, ce qui est arrivé au bout. De quoi caler la règle du Cuvier. Et les "
+        + "barres ne disparaissent plus quand on vient de l’onglet Bouteilles." }
+  ] },
+  { v: '7.42', items: [
+    { emoji: 'bouteille', titre: 'La chaîne « De la récolte à la bouteille » suit le vin',
+      desc: "En cuve, ce sont les hectolitres estimés d’après vos caisses, à la règle du Cuvier — plus la contenance de la "
+        + "cuve. Entonné, c’est le volume décuvé que vous avez mesuré — plus la taille du fût. Tant qu’il n’est pas saisi, "
+        + "l’étape reste en pointillé et la carte propose <b>Saisir le volume entonné</b>." },
+    { emoji: 'balance', titre: 'Chaptalisation, soufre et intrants : calculés sur ce que la cuve contient',
+      desc: "Avant le décuvage, le volume proposé était la contenance de la cuve\u00a0: kilos de sucre, grammes de SO<sub>2</sub> "
+        + "et doses d’intrants sortaient trop hauts dès qu’une cuve n’était pas pleine — y compris dans l’intervention "
+        + "groupée, sans case pour corriger. C’est maintenant le volume estimé d’après les caisses, saignées déduites. Le "
+        + "SO<sub>2</sub> du Cuvier a sa case de volume, et le registre des manipulations recalcule les grammes déjà saisis. "
+        + "Les chaptalisations déjà enregistrées gardent leurs kilos\u00a0: relisez celles de cette vendange." },
+    { emoji: 'cuve', titre: 'Contenance et contenu ne se confondent plus',
+      desc: "La liste des cuves décuvées dit le volume parti au Chai, le rattachement d’une récolte dit ce qui est déjà dans "
+        + "la cuve, et le cahier de cuverie imprime la contenance et le volume, chacun sous son nom. Une saignée retire son "
+        + "volume de ce que contient la cuve, plus de sa contenance." }
+  ] },
   { v: '7.41', items: [
     { emoji: 'check', titre: 'Figer le mois à l’envoi à la compta',
       desc: "Dans la fiche d’un salarié, la carte <b>Envoi à la compta</b> a un bouton <b>Figer</b>\u00a0: ce qui est payé et "
@@ -3304,7 +3335,7 @@ var MV_AIDE = {
       ['Le bon de livraison', "s’ouvre depuis la ligne « kg vendus en raisin » de l’écran Récoltes. Une livraison, c’est un chargement : un client, une date, même s’il emporte deux parcelles. Le bon ne dit que des kilos — aucun prix."],
       ['Le retour du client', "les litres de jus et de lie qu’il a obtenus, saisis des semaines plus tard sur la livraison. Corriger les caisses ne touche pas aux litres, et l’inverse non plus : deux mesures, deux personnes, deux moments."],
       ['Le rendement va chercher le mesuré d’abord', "les litres rendus par l’acheteur, puis le volume décuvé — mesuré s’il a été saisi, sinon celui des contenants remplis —, et seulement à défaut une estimation d’après les kilos. Tant que la cuve n’est pas décuvée, il n’y a rien à mesurer : la parcelle affiche une fourchette et le pourcentage mesuré, et le chiffre net arrive avec le décuvage. Il manque des litres, pas des raisins."],
-      ['La contenance d’une cuve n’est pas son contenu', "le volume inscrit sur une cuve de vinification est sa contenance — celle du parc à cuves, qui se pré-remplit toute seule. Elle sert à la jauge de remplissage, jamais au rendement : une cuve à moitié pleine ne donne pas son volume en vin. Le rendement, lui, attend le décuvage."],
+      ['La contenance d’une cuve n’est pas son contenu', "le volume inscrit sur une cuve de vinification est sa contenance — celle du parc à cuves, qui se pré-remplit toute seule. Elle sert à la jauge de remplissage, jamais au rendement : une cuve à moitié pleine ne donne pas son volume en vin. Le rendement, lui, attend le décuvage. Elle ne sert pas non plus aux doses, ni à la chaîne De la récolte à la bouteille : ce que la cuve <b>contient</b>, c’est ce que ses caisses donnent à la règle du Cuvier (kilos par hectolitre), saignées déduites, puis le volume décuvé."],
       ['Une cuve n’est pas un fût', "elle ne sort pas de La Réserve, elle n’a pas d’âge, et elle a sa contenance propre. Ajouter une cuve à une cuvée ne change aucun compte de fûts. Le volume que vous inscrivez est celui qui est réellement dedans, pas la contenance de la cuve."],
       ['L’ouillage suit le bois, pas le contenant', "inox et béton ne s’évaporent pas : une cuvée logée seulement là n’a pas de jauge de part des anges et ne déclenche aucune alerte. Un foudre bois, si. Une cuvée mixte garde sa jauge, cadrée sur sa seule part en fût. Les litres à prévoir comptent chaque fût à sa contenance : un demi-muid de 500 L pour 2,2 pièces."],
       ['La fin de fermentation et la fin de malo', "sont estimées à partir de vos propres relevés : la densité pour l’une, l’acide malique pour l’autre. Sans trois mesures, l’écran dit « démarrage » plutôt qu’une date inventée."],
@@ -3322,13 +3353,15 @@ var MV_AIDE = {
       ['Les cuves d’avant cette mise à jour n’ont pas de date de passage', "on ne connaît pas le jour où elles sont entrées dans leur étape actuelle, et la date d’encuvage ne le dit pas. La frise écrit un tiret plutôt qu’une date fausse : un tiret se corrige, une date fausse se croit. Posez-la à la main si vous la connaissez."],
       ['La fin de fermentation ne compte que les jours de FA', "cinq jours de macération à froid ne sont pas cinq jours de fermentation. Tant que la fermentation n’a pas trois jours, l’écran dit « démarrage » au lieu d’une date de fin. Le cahier de cuverie imprime la durée de macération réellement faite ; à défaut, la durée prévue, et il le dit."],
       ['Un relevé se corrige', "dépliez la cuve : la liste de ses relevés s’ouvre sous la courbe ; le crayon rouvre celui que vous désignez, date comprise. Les relevés se rangent par date, pas par ordre de saisie : un carnet rattrapé le lendemain se remet tout seul à sa place, et la fin de fermentation estimée suit. La liste reste ouverte sur une cuve pressurée ou déjà décuvée, et la saisie aussi."],
-      ['Une opération se corrige aussi', "toutes sont listées, plus seulement la dernière. Corriger ou supprimer une saignée rend d’abord les hectolitres à la cuve avant d’appliquer la nouvelle valeur : le volume ne se retranche jamais deux fois."],
+      ['Une opération se corrige aussi', "toutes sont listées, plus seulement la dernière. Une saignée retire son volume de ce que contient la cuve — l’estimation d’après les caisses —, plus de sa contenance. Une saignée d’avant la version 7.42 avait pris sur la contenance : la corriger ou la supprimer la lui rend d’abord, et le volume ne se retranche jamais deux fois."],
       ['Un refroidissement dit par quel moyen', "groupe de froid, échangeur, glace carbonique, azote liquide, CO₂ liquide, eau froide. Les trois qui se pèsent demandent une quantité en kilos, et la carboglace annonce l’abaissement approximatif — un ordre de grandeur, la cuve n’étant pas isolée. Le moyen et la quantité partent au registre des manipulations : c’est là qu’on les cherche."],
       ['Tanins, enzymes et bentonite', "se posent sur une cuve comme les autres opérations, mais le produit se choisit dans La Réserve : c’est ce qui permet de sortir la quantité du stock toute seule. L’unité de dose suit le produit — g/hL pour ce qui se pèse, mL/hL pour ce qui se verse. Sans produit choisi, l’opération s’enregistre quand même, hors bilan matière, et l’écran le dit."],
-      ['La quantité se calcule sur un volume, et ce volume dit d’où il vient', "tant que la cuve n’est pas décuvée, c’est sa <b>contenance</b> qui sert de repère, pas son contenu : la saisie affiche « volume estimé », et le registre imprime « (estimé) ». Corriger le volume à la main reste possible, et se voit."],
+      ['La quantité se calcule sur un volume, et ce volume dit d’où il vient', "tant que la cuve n’est pas décuvée, c’est le volume <b>estimé d’après ses caisses</b>, à la règle du Cuvier, saignées déduites — jamais sa contenance : la saisie affiche « volume estimé », et le registre imprime « (estimé) ». Cela vaut pour la chaptalisation, le SO<sub>2</sub>, les tanins, enzymes et bentonite, dans la feuille comme dans l’intervention groupée. Sans caisse rattachée, rien n’est inventé : la case reste vide. Corriger le volume à la main reste possible, et se voit."],
       ['Un stock négatif n’empêche jamais d’enregistrer', "le tanin est déjà dans la cuve : refuser la saisie parce qu’une facture manque ferait mentir le suivi pour protéger la comptabilité. L’écart part dans La Réserve, qui le nomme et le garde jusqu’à régularisation."],
       ['Encore sur pied', "en haut de l\u2019écran Récoltes, les parcelles actives qui n\u2019ont aucune récolte saisie sur la campagne, la plus mûre en premier d\u2019après vos analyses. Une parcelle arrachée n\u2019y figure pas ; une parcelle sans surface renseignée, si. Toucher une ligne ouvre la nouvelle récolte avec la parcelle déjà choisie. Un nom de parcelle absent du parcellaire est signalé sous la carte : c\u2019est ce qui explique un compte qui semble faux."],
       ['Le millésime', "a deux onglets. La ligne de vie : quatre chiffres en tête, le parcours du vin de la benne à la bouteille, le rendement de chaque parcelle face à son plafond, d’où vient chaque cuvée, et face à l’an dernier. Les courbes : un couloir qui va de la cuve la plus lente à la plus rapide, sa médiane en pointillé, et par-dessus la ou les deux cuves que vous choisissez dans la bande de pastilles. Quinze traits nommés tenaient sur le cahier de cuverie imprimé, pas sur un téléphone. C’est le seul écran de ce nom — celui du Pilotage est rentré ici."],
+      ['La chaîne De la récolte à la bouteille', "dans Le millésime, onglet Les courbes, et au Chai, onglet Bouteilles : les kilos d’après les caisses, puis ces kilos à la règle du Cuvier (en cuve, estimés, saignées déduites), puis le volume <b>réellement entonné</b> — le volume décuvé que vous avez mesuré —, puis les bouteilles. Jamais la contenance de la cuve, jamais la taille des fûts. Sous chaque étape, son <b>kg/hL</b> : les kilos récoltés divisés par ses hectolitres — l’écart entre votre règle et l’entonné dit s’il faut la revoir. Le vin d’une autre cuve versé pour compléter un fût s’empile en pointillé et n’entre pas dans le calcul. Tant que le volume entonné n’est pas saisi, l’étape reste en pointillé : « Saisir le volume entonné », sur la carte, ouvre la saisie de la cuve décuvée."],
+      ['Un fût entamé se complète', "quand le volume décuvé <b>mesuré</b> est plus petit que les fûts remplis, la carte de la cuvée le dit — « 1 fût entamé, il attend 30 L » — et Le Chai compte le vin réel. Touchez-le (sur la carte, ou dans la fiche, ligne des fûts) : choisissez d’où vient le vin — une cuve du Cuvier, même pas encore décuvée, ou une cuvée du Chai — et combien, jamais plus que ce qui manque. Le vin prélevé dans une cuve du Cuvier sort de ce qu’elle contient mais reste dans le rendement de ses parcelles. La fiche garde la composition ; une ligne « Assemblage » va au journal et au registre des manipulations. La supprimer défait tout. L’application ne tranche pas ce que la réglementation permet : elle écrit la part d’une autre appellation ou d’un autre millésime."],
       ['Suivre une cuve dans le couloir', "touchez sa pastille au-dessus du graphe, ou sa ligne dans le tableau : elle passe en trait épais par-dessus le couloir. Deux cuves au maximum — au-delà on retombe sur le graphe illisible qu’on vient de remplacer ; en toucher une troisième relâche la première. La même sélection vaut pour les densités et pour les températures : le palier et la chaleur qui l’explique se lisent sur la même cuve, sans rien retoucher."],
       ['Lire un jour dans le couloir', "un appui sur le graphe ouvre une étiquette : la valeur de votre cuve, la médiane du cuvage, l’écart entre les deux en toutes lettres, et le nombre de cuves prises en compte. Un jour où une cuve n’a pas été relevée, sa valeur est estimée entre ses deux relevés voisins et porte le signe ~ — jamais avant le premier relevé ni après le dernier."],
       ['Le rendement maximum de l\u2019appellation', "se pose par parcelle ET par millésime, en touchant une parcelle dans « La ligne de vie » — ou depuis la même carte du Pilotage. Le rendement annuel autorisé est fixé par arrêté, campagne par campagne : une valeur posée pour 2026 ne dit rien de 2025. Valider à vide retire celui d\u2019une année. Réservé à l\u2019administrateur."],
@@ -3700,7 +3733,8 @@ export const MV_INFO = {
     'Sur les temp\u00e9ratures, un <b>palier de densit\u00e9</b> trouve souvent son explication : douze degr\u00e9s cinq jours durant, c\u2019est une mac\u00e9ration pr\u00e9fermentaire, pas une fermentation qui tra\u00eene.',
     '<b>Aucune temp\u00e9rature n\u2019est enregistr\u00e9e en \u00e9levage.</b> Ni l\u2019ouillage, ni le soutirage, ni le sulfitage, ni l\u2019analyse n\u2019en portent. La courbe s\u2019arr\u00eate au d\u00e9cuvage.',
     'Sur la malo, le trait est <b>tiret\u00e9</b> : entre deux analyses, personne n\u2019a mesur\u00e9. Une ligne pleine laisserait croire \u00e0 un suivi continu.',
-    'La colonne \u00ab Vigne \u00bb est la derni\u00e8re analyse d\u2019avant encuvage de chaque parcelle de la cuve, <b>pond\u00e9r\u00e9e par la surface</b>. La part r\u00e9elle de chaque parcelle entr\u00e9e dans la cuve n\u2019\u00e9tant pas connue, c\u2019est un <b>ordre de grandeur</b>.'
+    'La colonne \u00ab Vigne \u00bb est la derni\u00e8re analyse d\u2019avant encuvage de chaque parcelle de la cuve, <b>pond\u00e9r\u00e9e par la surface</b>. La part r\u00e9elle de chaque parcelle entr\u00e9e dans la cuve n\u2019\u00e9tant pas connue, c\u2019est un <b>ordre de grandeur</b>.',
+    'La cha\u00eene <b>De la r\u00e9colte \u00e0 la bouteille</b>\u00a0: les kilos d\u2019apr\u00e8s les caisses, puis ces kilos \u00e0 la r\u00e8gle du Cuvier (en cuve, estim\u00e9s, saign\u00e9es d\u00e9duites), puis le volume <b>r\u00e9ellement entonn\u00e9</b> \u2014 le volume d\u00e9cuv\u00e9 mesur\u00e9 \u2014, puis les bouteilles. <b>Jamais la contenance de la cuve, jamais la taille des f\u00fbts.</b> Sans mesure, l\u2019\u00e9tape Entonn\u00e9 reste en pointill\u00e9 et la carte propose de la saisir. Sous chaque \u00e9tape, son <b>kg/hL</b>\u00a0: les kilos r\u00e9colt\u00e9s divis\u00e9s par ses hectolitres \u2014 en cuve, votre r\u00e8gle\u00a0; entonn\u00e9, ce que le pressoir a vraiment donn\u00e9. Le vin d\u2019une autre cuve vers\u00e9 pour compl\u00e9ter un f\u00fbt s\u2019empile en pointill\u00e9 et n\u2019entre pas dans ce calcul.'
   ] },
 
   // ══ LA CAMPAGNE ══

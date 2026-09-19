@@ -1922,7 +1922,7 @@ function _visiteScenario(){
              « d\u00e9cuv\u00e9e ». C'est le cas que le lot de septembre a ouvert, et il
              n'etait demontre nulle part. */
           decuvage:{date:_vD(1),cuvee_id:'cuv2026',fa_finie:false,densite_fut:1016,temp_fut:22},
-          vol_decuve_hl:50,cuvee_src:'Vieilles Vignes 2026',vcuvee_id:'vcv_c',recolte_ids:['vrec_d3','vrec_d4'],nb_caisses:274}
+          vol_decuve_hl:50,vol_decuve_src:'mesure',vol_decuve_le:_vD(1),cuvee_src:'Vieilles Vignes 2026',vcuvee_id:'vcv_c',recolte_ids:['vrec_d3','vrec_d4'],nb_caisses:274}
       ],
       clients:['Maison Ducret'],
       analyses:[],

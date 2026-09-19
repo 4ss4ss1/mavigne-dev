@@ -252,7 +252,22 @@ function _caveVolCuvesL(cuv){
 //   pyramide des ages et le parc a futs se mesurent sur les FUTS SEULS. Ajouter
 //   l'inox au denominateur de la part des anges la SOUS-ESTIMERAIT — ce calcul
 //   est juste, on n'y touche pas.
-function _caveVolL(cuv){ return _caveFutsL(cuv)+_caveVolCuvesL(cuv); }
+// ★ ASM-1 — moins ce qui manque dans les futs (§153a).
+function _caveVolL(cuv){ return _caveFutsL(cuv)+_caveVolCuvesL(cuv)-_caveManqueL(cuv); }
+/* ★★★ ASM-1 — le fut entame : ecrit, suivi, rendu ; sinon deduit de la mesure (§153a). */
+function _caveManqueL(cuv){
+  if(!cuv) return 0;
+  var F=_caveFutsL(cuv);
+  if(!(F>0)) return 0;
+  var m=parseFloat(cuv.manque_l);
+  if(!isFinite(m)){
+    if(_caveVolCuvesL(cuv)>0) return 0;
+    var cv=_caveCuveSource(cuv);
+    if(!cv||cv.vol_decuve_src!=='mesure') return 0;
+    m=F-(parseFloat(cv.vol_decuve_hl)||0)*100;
+  }
+  return Math.max(0,Math.min(F,Math.round(m)));
+}
 function _caveVolHl(cuv){ return _caveVolL(cuv)/100; }
 
 // ★★★ LA GARDE D'OUILLAGE. Une cuvee sans aucun contenant en bois n'a pas de
@@ -503,7 +518,7 @@ function _caveFmlLabel(v) {
 }
 
 function _caveTypeLabel(type) {
-  return {ouillage:'Ouillage',soutirage:'Soutirage',soufre:'Soufre',analyse:'Analyse',autre:'Autre'}[type]||type;
+  return {ouillage:'Ouillage',soutirage:'Soutirage',soufre:'Soufre',analyse:'Analyse',assemblage:'Assemblage',autre:'Autre'}[type]||type;
 }
 
 // \u2500\u2500 helpers multi-cuv\u00E9es formulaire op\u00E9ration \u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500
@@ -884,6 +899,7 @@ function _caveCuvCardHtml(c,w){
     +'<div class="mvc-cuv-head"><div class="mvc-cuv-lead"><div class="mvc-cuv-name">'+_escHtml(c.nom)+'</div>'
     +(tonStr?'<div class="mvc-cuv-ton">'+tonStr+'</div>':'')+'</div>'+right+'</div>'
     +'<div class="mvc-cuv-vol">'+_mvIcon(nbT?'barrique':'cuve',16)+' '+(_caveContenantsHtml(c)||'aucun contenant')+' <span class="mvc-dot"></span> '+hl+' hL</div>'
+    +_asmCarteHtml(c,w)   // ASM-1
     +(isEmb?'':_caveFaLineHtml(c))
     +(isEmb?'':(_caveOuille(c)?_caveGaugeHtml(c):_caveNoOuHtml(c)))
     +_caveAnaLineHtml(c)
@@ -915,6 +931,10 @@ function _caveOuillerTous(){
 }
 function _caveJDet(op){
   var h='';
+  if(op.type==='assemblage'&&op.data){   // ★ ASM-1
+    h+='<div class="mvc-jdet">'+_escHtml(String(op.data.litres||0))+'\u00a0L de '+_escHtml(op.data.de_nom||'une autre cuve')
+      +' \u2192 '+_escHtml(op.data.vers_nom||'')+'</div>';
+  }
   if(op.type==='ouillage'&&op.data&&op.data.nb_ouillettes){
     h+='<div class="mvc-jdet">'+op.data.nb_ouillettes+' ouillettes \u00d7 '+op.data.vol_ouillette_L+' L = '+op.data.vol_total_L+' L'+(op.data.vol_par_fut_L?' \u00b7 '+op.data.vol_par_fut_L+' L/f\u00fbt':'')+'</div>';
   }
@@ -1936,7 +1956,7 @@ function renderCaveJournal() {
     el.innerHTML=_milNote+'<div class="cave-empty"><div class="cave-empty-ico">'+(_jFilter==='analyse'?'\ud83d\udd2c':'\ud83d\udccb')+'</div><div class="cave-empty-txt">Aucune op\u00e9ration'+(_caveMillFilter!=='tous'?' sur ce mill\u00e9sime':'')+'.</div></div>';
     return;
   }
-  var opMeta={ouillage:{ico:'seau',col:'#C0845A'},soutirage:{ico:'hautbas',col:'#5CB87A'},soufre:{ico:'eprouvette',col:'#4A9C50'},analyse:{ico:'microscope',col:'#4A9FC8'},autre:{ico:'crayon',col:'#A0A8B8'}};
+  var opMeta={ouillage:{ico:'seau',col:'#C0845A'},soutirage:{ico:'hautbas',col:'#5CB87A'},soufre:{ico:'eprouvette',col:'#4A9C50'},analyse:{ico:'microscope',col:'#4A9FC8'},assemblage:{ico:'fiole',col:'#8A5A38'},autre:{ico:'crayon',col:'#A0A8B8'}};
   var monthNames=['Janvier','F\u00e9vrier','Mars','Avril','Mai','Juin','Juillet','Ao\u00fbt','Septembre','Octobre','Novembre','D\u00e9cembre'];
   var byMonth={}, order=[];
   filtered.forEach(function(o){
@@ -1960,7 +1980,8 @@ function renderCaveJournal() {
       if(op.notes&&op.type!=='analyse') html+='<div class="mvc-jnote">'+_escHtml(op.notes)+'</div>';
       html+='<div class="mvc-jdate">'+_caveDateFr((op.type==='analyse')?(op.date_analyse||op.date):op.date)+'</div>';
       if(op._src==='op'&&typeof isAdmin==='function'&&isAdmin()){
-        html+='<div class="mvc-jact"><button onclick="window.openOvCaveOp(\''+op.id+'\')" class="mvc-jact-e">\u270f\ufe0f Modifier</button><button onclick="window.deleteCaveOp(\''+op.id+'\')" class="mvc-jact-d">\ud83d\uddd1</button></div>';
+        // ★ ASM-1 — un assemblage ne se modifie pas : il se defait (la corbeille), puis se refait.
+        html+='<div class="mvc-jact">'+(op.type!=='assemblage'?'<button onclick="window.openOvCaveOp(\''+op.id+'\')" class="mvc-jact-e">\u270f\ufe0f Modifier</button>':'')+'<button onclick="window.deleteCaveOp(\''+op.id+'\')" class="mvc-jact-d">\ud83d\uddd1</button></div>';
       }
       html+='</div></div>';
     });
@@ -3219,7 +3240,8 @@ function _vendDvolHtml(c, canEdit){
   var h='<div class="mvv-dvol"><span class="mvv-dvol-t">Volume d\u00e9cuv\u00e9</span>'
     +'<div class="mvv-dvol-h"><span class="mvv-dtot-n">'+(v>0?_vendDecF2(v):'\u2014')+'</span>'
     +'<span class="mvv-dtot-l">'+(v>0?src:'aucun contenant n\u2019a \u00e9t\u00e9 rempli')+'</span></div>'
-    +'<div class="mvv-detnote">C\u2019est ce volume que Le mill\u00e9sime retient pour le rendement des parcelles de la cuve. '
+    +'<div class="mvv-detnote">C\u2019est ce volume que Le mill\u00e9sime retient pour le rendement des parcelles de la cuve'
+    +'\u00a0; mesur\u00e9, c\u2019est aussi l\u2019\u00e9tape \u00ab\u00a0Entonn\u00e9\u00a0\u00bb de la cha\u00eene De la r\u00e9colte \u00e0 la bouteille. '
     +'S\u2019il a \u00e9t\u00e9 mesur\u00e9 autrement, corrigez-le\u00a0: Le Chai, lui, garde ses f\u00fbts.</div>';
   if(canEdit) h+='<button class="mvv-act2" onclick="_vendDvolCorriger(\''+_escAttr(c.id)+'\')">Corriger le volume</button>';
   return h+'</div>';
@@ -3232,16 +3254,24 @@ function _vendDvolCorriger(id){
   var cap=parseFloat(c.volume_hl)||0, v=_vendVolLoge(c);
   window.openPrompt({icone:'cuve', titre:'Volume d\u00e9cuv\u00e9',
     sub:(c.nom||'Cette cuve')+' \u2014 goutte et presse assembl\u00e9es. Le rendement des parcelles de la cuve suivra '
-      +'ce chiffre\u00a0; Le Chai garde ses f\u00fbts.',
+      +'ce chiffre, et au Chai le f\u00fbt entam\u00e9 aussi.',
     valeur:v>0?String(Math.round(v*100)/100).replace('.',','):'', unite:'hL', type:'nombre', btnLabel:'Enregistrer',
     cb:function(x){
       var n=parseFloat(String(x).replace(/[\s\u00a0\u202f]/g,'').replace(',','.'));
       if(!isFinite(n)||n<=0){ showToast('Volume attendu, en hL','#B85A1A'); return; }
       if(cap>0 && n>cap){ showToast('Plus que la contenance de la cuve ('+_mvF1(cap)+' hL) \u2014 le volume se saisit en hL','#B85A1A'); return; }
       c.vol_decuve_hl=Math.round(n*100)/100; c.vol_decuve_src='mesure'; c.vol_decuve_le=_mvToday();
+      /* ★ ASM-1 — le fut entame suit la mesure corrigee (§153a). */
+      var _cles=['cave_vendange'];
+      var _cu=(CAVE_ELEVAGE.cuvees||[]).find(function(x){ return x&&c.decuvage&&x.id===c.decuvage.cuvee_id; });
+      if(_cu && isFinite(parseFloat(_cu.manque_l))){
+        _cu.manque_l=Math.max(0,Math.min(_caveFutsL(_cu),Math.round(parseFloat(_cu.manque_l)-(c.vol_decuve_hl-(v>0?v:0))*100)));
+        window.CAVE_ELEVAGE=CAVE_ELEVAGE; _cles.push('cave_elevage');
+      }
       window.CAVE_VENDANGE=CAVE_VENDANGE;
-      _vendFbSave('Volume d\u00e9cuv\u00e9\u00a0: '+_vendDecF2(c.vol_decuve_hl)+' hL \u2014 le rendement suit','#3D6B27');
-      renderVendCuves();
+      _vendFbSave('Volume d\u00e9cuv\u00e9\u00a0: '+_vendDecF2(c.vol_decuve_hl)+' hL \u2014 le rendement suit','#3D6B27',_cles);
+      // ★ VOL-1 — repeindre l'ecran d'ou l'on vient (§152c).
+      if(caveSection==='vendange'||typeof renderCave!=='function') renderVendCuves(); else renderCave();
     }});
 }
 window._vendDvolCorriger=_vendDvolCorriger;
@@ -3253,7 +3283,7 @@ function _vendCellHtml(c){
   var lastD=_vendLastD(c);
   var pct=lastD?_vendFaPct(c,_vendMesD20(lastD)):0;
   var cap=parseFloat(c.volume_hl)||0;
-  var dedans=_vendVolLoge(c)>0?_vendVolLoge(c):_vendHlKg(_vendCuvKgDom(c.id));
+  var dedans=_vendVolContenu(c).hl;   // VOL-1
   var niv = (c.statut==='setup'||!(cap>0)) ? 0 : Math.max(8,Math.min(100,Math.round(dedans/cap*100)));
   var col = c.statut==='termine' ? '#C0BAAE' : _vendADue(c) ? '#C86A4E'
           : (_vendIsActive(c)||_vendPressee(c)) ? '#8A5A38' : '#9A93A8';
@@ -4702,6 +4732,30 @@ function _vendVolLoge(cv){
   var l=cu?_caveVolL(cu):0;
   return l>0?Math.round(l/100*100)/100:0;
 }
+/* ★★★ VOL-1 — CE QU'IL Y A DANS UNE CUVE, LA SEULE PORTE : jamais `volume_hl` (§152a). */
+function _vendSortiesHl(c){
+  // Saignees et prelevements (ASM-1) : plus dans la cuve (§153c).
+  return ((c&&c.operations)||[]).reduce(function(s,o){
+    var v=(o&&(o.type==='saignee'||o.type==='prelevement'))?parseFloat(o.volume_hl):0;
+    return s+((isFinite(v)&&v>0)?v:0);
+  },0);
+}
+/* ★ ASM-1 — le preleve : hors du contenu, garde au rendement (§153c). */
+function _vendPrelevHl(c){
+  return ((c&&c.operations)||[]).reduce(function(s,o){
+    var v=(o&&o.type==='prelevement')?parseFloat(o.volume_hl):0;
+    return s+((isFinite(v)&&v>0)?v:0);
+  },0);
+}
+function _vendVolContenu(c, exclId){
+  if(!c) return {hl:0, src:'aucun', kg:0};
+  var m=_vendVolLoge(c);
+  if(m>0) return {hl:Math.round(m*100)/100, src:'mesure', kg:0};
+  var kg=_vendCuvKgDom(c.id, exclId);
+  if(!(kg>0)) return {hl:0, src:'aucun', kg:0};
+  var e=Math.max(0, _vendHlKg(kg)-_vendSortiesHl(c));
+  return {hl:Math.round(e*100)/100, src:'estime', kg:kg};
+}
 // Les caisses DOMAINE rattachees a une cuve. Recalculees depuis les recoltes a
 // chaque appel : rien ne s'accumule dans un champ, donc rien ne peut doubler.
 function _vendCuvCsDom(cuveId, exclId){
@@ -4714,6 +4768,7 @@ function _vendVolCuve(r){
   var cv=(CAVE_VENDANGE.cuves_vinif||[]).find(function(c){ return c&&c.id===r.cuve_id; });
   var vol=_vendVolLoge(cv);
   if(!(vol>0)) return null;
+  vol+=_vendPrelevHl(cv);   // ASM-1
   var mine=(CAVE_VENDANGE.recoltes||[]).filter(function(x){ return x&&x.cuve_id===cv.id; });
   var tot=mine.reduce(function(s,x){ return s+_recKgDom(x); },0);
   var kd=_recKgDom(r);
@@ -5492,11 +5547,13 @@ function _vendDecCuveObj(){
 // contenance : une cuve a moitie pleine proposait deux fois trop de futs.
 function _vendDecVolEst(){
   var c=_vendDecCuveObj(); if(!c) return 0;
-  var est=_vendHlKg(_vendCuvKgDom(c.id));
-  return est>0?est:(parseFloat(c.volume_hl)||0);
+  // ★ VOL-1 — la seule porte ; sans caisse, la contenance ne fait que PROPOSER (§152a).
+  var v=_vendVolContenu(c);
+  return v.hl>0?v.hl:(parseFloat(c.volume_hl)||0);
 }
 function _vendDecEstCaisses(){
-  var c=_vendDecCuveObj(); return !!c && _vendHlKg(_vendCuvKgDom(c.id))>0;
+  var c=_vendDecCuveObj(); if(!c) return false;
+  var v=_vendVolContenu(c); return v.src==='estime' && v.hl>0;
 }
 // ★ CUV-14 — le volume de reference : le MESURE s'il est saisi, sinon l'estime.
 function _vendDecVolHl(){ return (_vendDecVolSaisi!=null)?_vendDecVolSaisi:_vendDecVolEst(); }
@@ -5920,9 +5977,15 @@ function saveVendDecuvage(){
   /* ★★★ CUV-14 — SAISI, LE VOLUME MESURE PRIME : c'est lui le fait. Non saisi,
      on garde le volume des contenants remplis, comme avant. `vol_decuve_src` dit
      lequel des deux : l'ecran ne presente pas un calcul comme une mesure. */
+  cuvee.manque_l=0;   // ASM-1
   var _vdec=_caveVolL(cuvee)/100;
   if(_vendDecVolSaisi!=null){ c.vol_decuve_hl=_vendDecVolSaisi; c.vol_decuve_src='mesure'; }
   else { c.vol_decuve_hl=(_vdec>0)?Math.round(_vdec*100)/100:null; c.vol_decuve_src='contenants'; }
+  /* ★★★ ASM-1 — mesure sous les futs : le manque va a la cuvee (§153a). */
+  if(_vendDecVolSaisi!=null){
+    var _Fl=_caveFutsL(cuvee), _Cl=_caveVolCuvesL(cuvee);
+    cuvee.manque_l=(_Fl>0)?Math.max(0,Math.min(_Fl,Math.round(_Fl-Math.max(0,_vendDecVolSaisi*100-_Cl)))):0;
+  }
   c.vol_decuve_le=c.decuvage.date;
   c.statut='termine';
   _vendHistPose(c,'termine',c.decuvage.date);   /* PARC-1 : le decuvage EST un passage */
@@ -5952,7 +6015,9 @@ var _VEND_OPS=[
   {k:'delestage',lbl:'Délestage'}
 ];
 var _vendOpType='chaptalisation', _vendOpCuveId=null, _vendOpEditId=null, _vendOpEditOp=null;
-function _vendOpLbl(k){ var o=_VEND_OPS.find(function(x){return x.k===k;}); return o?o.lbl:k; }
+// ★ ASM-1 — hors de _VEND_OPS : il ne se cree qu'au Chai (§153c).
+function _vendOpLbl(k){ if(k==='prelevement') return 'Pr\u00e9l\u00e8vement';
+  var o=_VEND_OPS.find(function(x){return x.k===k;}); return o?o.lbl:k; }
 
 // —— Par quel moyen le froid (ou le chaud) a-t-il ete fait ? ——
 // « Refroidir » ne disait que la cible. Or la carboglace et l'azote sont des
@@ -6011,19 +6076,17 @@ function _vendIntrProd(id){
 function _vendIntrUnite(p){ return (p&&p.unite==='L')?'mL/hL':'g/hL'; }
 function _vendIntrUniteQ(p){ return (p&&p.unite==='L')?'L':'kg'; }
 // ⚠️⚠️ `c.volume_hl` est la CONTENANCE de la cuve, pas ce qu'il y a dedans.
-//   C'est la faute de RDT-1 et elle se rejouerait ici a l'identique : une dose
-//   juste sur un volume faux donne une quantite fausse, affichee avec l'aplomb
-//   d'un calcul. Tant que la cuve n'est pas decuvee il n'y a rien de mesure —
-//   le volume est ESTIME, et l'ecran le dit.
+// ⚠️ `volume_hl` est la CONTENANCE : le repere des doses est le CONTENU (§152b).
 function _vendIntrVol(c){
-  var m=_vendVolLoge(c);
-  if(m>0) return {hl:m, src:'mesure'};
-  return {hl:(c&&c.volume_hl)||0, src:'estime'};
+  var v=_vendVolContenu(c);
+  return {hl:v.hl, src:v.src};
 }
 function _vendIntrVolLbl(s){
   return s==='mesure' ? 'Volume mesur\u00e9 au d\u00e9cuvage.'
        : s==='saisi'  ? 'Volume saisi \u00e0 la main.'
-       : 'Volume estim\u00e9 \u2014 c\u2019est la contenance de la cuve, pas son contenu.';
+       : s==='aucun'  ? 'Aucune caisse rattach\u00e9e \u00e0 cette cuve\u00a0: saisissez le volume.'
+       : 'Volume estim\u00e9 d\u2019apr\u00e8s les caisses, \u00e0 la r\u00e8gle du Cuvier ('
+         +_vendCuvF1(_mlKgHl())+'\u00a0kg/hL), saign\u00e9es d\u00e9duites.';
 }
 // dose (g ou mL par hL) x volume (hL) -> quantite dans l'unite du produit.
 // 1 g/hL sur 1 hL = 1 g = 0,001 kg. Meme rapport pour mL -> L.
@@ -6060,7 +6123,7 @@ function _vendIntrFields(c,op){
   h+='<label class="mvv-flbl">Dose <span class="mvv-fhint" id="vop-dose-u">\u2014 g/hL</span></label>'
     +'<input id="vop-dose" class="mvv-tin" type="number" value="'+((op&&op.dose!=null)?op.dose:'')+'" min="0" step="0.1" placeholder="ex. 24" oninput="_vendIntrCalc()">'
     +'<label class="mvv-flbl">Volume trait\u00e9 (hL)</label>'
-    +'<input id="vop-vol" class="mvv-tin" type="number" value="'+vol+'" min="0" step="0.1" oninput="_vendIntrCalc()">'
+    +'<input id="vop-vol" class="mvv-tin" type="number" value="'+(vol>0?vol:'')+'" min="0" step="0.1" placeholder="volume dans la cuve" oninput="_vendIntrCalc()">'
     +'<input type="hidden" id="vop-volsrc" value="'+_escAttr(vsrc)+'">'
     +'<div class="mvv-fnote" id="vop-volsrc-note"></div>'
     +'<div class="mvv-bigcalc"><div class="mvv-bigcalc-n" id="vop-qte">\u2014</div>'
@@ -6118,11 +6181,17 @@ window._vendIntrQteTxt=_vendIntrQteTxt;
 window._vendIntrVol=_vendIntrVol;
 window._vendIntrProdChg=_vendIntrProdChg;
 window._vendIntrCalc=_vendIntrCalc;
+window._vendSo2Calc=_vendSo2Calc;
 function openVendOp(cuveId,opId){
   if(!canWrite()) return;
   var c=(CAVE_VENDANGE.cuves_vinif||[]).find(function(x){return x.id===cuveId;});
   if(!c) return;
   var op=opId?_vendTriOps(c).find(function(x){return x.id===opId;}):null;
+  // ★ ASM-1 — se defait au Chai, depuis l'assemblage (§153c).
+  if(op&&op.type==='prelevement'){
+    showToast('Ce pr\u00e9l\u00e8vement se d\u00e9fait depuis l\u2019assemblage, dans la fiche de '+((op.vers&&op.vers.nom)||'la cuv\u00e9e'),'#B85A1A');
+    return;
+  }
   _vendOpCuveId=cuveId;
   _vendOpEditId=op?opId:null;
   _vendOpEditOp=op||null;
@@ -6154,20 +6223,25 @@ function _vendOpFields(c){
   // On ne prerempli que si l'onglet est reste sur le type de l'operation :
   // changer de type, c'est demander une autre operation, pas la meme autrement.
   var op=(_vendOpEditOp&&_vendOpEditOp.type===_vendOpType)?_vendOpEditOp:null;
-  var vol=c.volume_hl||0; var h='';
+  /* ★ VOL-1 — repere : le contenu, jamais la contenance (§152b). */
+  var ref=_vendIntrVol(c), vol=ref.hl; var h='';
   var _v=function(x){ return (x!=null&&x!=='')?x:''; };
   if(_vendOpType==='chaptalisation'){
     var spd=_vendCfg().sucre_par_degre||16.83;
-    h='<label class="mvv-flbl">Volume à chaptaliser (hL)</label><input id="vop-vol" class="mvv-tin" type="number" value="'+(op&&op.volume_hl!=null?op.volume_hl:vol)+'" min="0" step="0.1" oninput="_vendOpCalc()">'
+    var vch=(op&&op.volume_hl!=null)?op.volume_hl:vol;
+    h='<label class="mvv-flbl">Volume à chaptaliser (hL)</label><input id="vop-vol" class="mvv-tin" type="number" value="'+(vch>0?vch:'')+'" min="0" step="0.1" placeholder="volume dans la cuve" oninput="_vendOpCalc()">'
+      +'<input type="hidden" id="vop-volsrc" value="'+_escAttr((op&&op.vol_src)||ref.src)+'">'
+      +'<div class="mvv-fnote" id="vop-volsrc-note"></div>'
       +'<label class="mvv-flbl">Enrichissement visé (° d\'alcool)</label><input id="vop-deg" class="mvv-tin" type="number" value="'+(op&&op.degre!=null?op.degre:1)+'" min="0" max="3" step="0.1" oninput="_vendOpCalc()">'
       +'<div class="mvv-bigcalc"><div class="mvv-bigcalc-n" id="vop-kg">—</div><div class="mvv-bigcalc-l">kg de sucre <span style="opacity:.6">· base '+spd+' g/L</span></div><div class="mvv-bigcalc-cum" id="vop-cum"></div></div>';
   } else if(_vendOpType==='saignee'){
-    // ⚠️ En correction, le volume affiche est celui de la cuve APRES la saignee
-    // qu'on corrige : c'est saveVendOp qui rend l'ancien volume avant d'appliquer
-    // le nouveau. Le plafond suit donc la cuve rendue a son etat d'avant.
+    // ⚠️ Repere APRES cette saignee ; le plafond la rend. Plus de contenance touchee (§152b).
     var volMax=vol+((op&&op.type==='saignee'&&op.volume_hl)||0);
-    h='<label class="mvv-flbl">Volume saigné (hL)</label><input id="vop-vol" class="mvv-tin" type="number" value="'+(op&&op.volume_hl!=null?op.volume_hl:0)+'" min="0" max="'+volMax+'" step="0.1">'
-      +'<div class="mvv-fnote">Réduit le volume de la cuve (actuel : '+vol+' hL'+(op?', soit '+_vendCuvF1(volMax)+' hL avant cette saignée':'')+').</div>';
+    h='<label class="mvv-flbl">Volume saigné (hL)</label><input id="vop-vol" class="mvv-tin" type="number" value="'+(op&&op.volume_hl!=null?op.volume_hl:0)+'" min="0"'+(volMax>0?' max="'+volMax+'"':'')+' step="0.1">'
+      +'<div class="mvv-fnote">'+(volMax>0
+        ? ('Retiré de ce que contient la cuve\u00a0: environ '+_vendCuvF1(vol)+' hL'+(ref.src==='mesure'?' mesurés':' d\u2019après les caisses')
+          +(op?', soit '+_vendCuvF1(volMax)+' hL avant cette saignée':'')+'. La contenance de la cuve ne change pas.')
+        : 'Aucune caisse rattachée à cette cuve\u00a0: son volume n\u2019est pas estimé.')+'</div>';
   } else if(_vendOpType==='refroidissement'||_vendOpType==='rechauffement'){
     var tbl=_vendMoyTbl(_vendOpType), moy=(op&&op.moyen)||'';
     h='<label class="mvv-flbl">Température cible (°C)</label><input id="vop-temp" class="mvv-tin" type="number" value="'+_v(op&&op.temp_c)+'" min="0" max="45" step="0.5" placeholder="ex. 18">'
@@ -6185,12 +6259,19 @@ function _vendOpFields(c){
   } else if(_vendEstIntrant(_vendOpType)){
     h=_vendIntrFields(c,op);
   } else if(_vendOpType==='so2'){
-    h='<label class="mvv-flbl">Dose SO₂ (g/hL)</label><input id="vop-dose" class="mvv-tin" type="number" value="'+_v(op&&op.dose)+'" min="0" step="0.5" placeholder="ex. 3">';
+    /* ★ VOL-1 — le SO2 du Cuvier porte son volume (§152b). */
+    var vs=(op&&op.volume_hl!=null)?op.volume_hl:vol;
+    h='<label class="mvv-flbl">Dose SO₂ (g/hL)</label><input id="vop-dose" class="mvv-tin" type="number" value="'+_v(op&&op.dose)+'" min="0" step="0.5" placeholder="ex. 3" oninput="_vendSo2Calc()">'
+      +'<label class="mvv-flbl">Volume sulfité (hL)</label><input id="vop-vol" class="mvv-tin" type="number" value="'+(vs>0?vs:'')+'" min="0" step="0.1" placeholder="volume dans la cuve" oninput="_vendSo2Calc()">'
+      +'<input type="hidden" id="vop-volsrc" value="'+_escAttr((op&&op.vol_src)||ref.src)+'">'
+      +'<div class="mvv-fnote" id="vop-volsrc-note"></div>'
+      +'<div class="mvv-bigcalc"><div class="mvv-bigcalc-n" id="vop-so2g">\u2014</div><div class="mvv-bigcalc-l">grammes de SO<sub>2</sub></div></div>';
   } else if(_vendOpType==='delestage'){
     h='<label class="mvv-flbl">Nombre de délestages</label><input id="vop-nb" class="mvv-tin" type="number" value="'+(op&&op.nb!=null?op.nb:1)+'" min="1" step="1">';
   }
   el.innerHTML=h;
   if(_vendOpType==='chaptalisation') _vendOpCalc();
+  if(_vendOpType==='so2') _vendSo2Calc();
   if(_vendOpType==='refroidissement'||_vendOpType==='rechauffement') _vendOpMoyChg(op&&op.qte_kg);
   if(_vendEstIntrant(_vendOpType)) _vendIntrProdChg();
 }
@@ -6213,7 +6294,7 @@ function _vendOpQteCalc(){
   var k=((document.getElementById('vop-moyen')||{}).value)||'';
   var kg=parseFloat((document.getElementById('vop-qte')||{}).value);
   var c=(CAVE_VENDANGE.cuves_vinif||[]).find(function(x){return x.id===_vendOpCuveId;});
-  var vol=(c&&c.volume_hl)||0;
+  var _vr=_vendIntrVol(c), vol=_vr.hl;   // VOL-1
   if(k!=='carbo'){
     note.innerHTML='La quantité part au registre des manipulations. L\u2019abaissement obtenu dépend trop du matériel pour être estimé ici.';
     return;
@@ -6222,7 +6303,7 @@ function _vendOpQteCalc(){
   // Sublimation du CO2 : ~571 kJ/kg. Un hL de mout ~107 kg a ~3,8 kJ/(kg·K),
   // soit ~407 kJ par degre et par hL -> ~1,4 °C par kg et par hL.
   var dT=1.4*kg/vol;
-  note.innerHTML='Environ \u2212'+_vendCuvF1(dT)+' °C sur les '+_vendCuvF1(vol)+' hL de la cuve. '
+  note.innerHTML='Environ \u2212'+_vendCuvF1(dT)+' °C sur les '+_vendCuvF1(vol)+' hL '+(_vr.src==='mesure'?'mesurés':'estimés')+' dans la cuve. '
     +'Ordre de grandeur : la cuve n\u2019est pas isolée, et le résultat dépend de la répartition de la glace.';
 }
 function _vendOpCalc(){
@@ -6232,6 +6313,10 @@ function _vendOpCalc(){
   var kg=spd*deg*vol/10;
   var el=document.getElementById('vop-kg'); if(el) el.textContent=kg>0?kg.toFixed(1):'—';
   var c=(CAVE_VENDANGE.cuves_vinif||[]).find(function(x){return x.id===_vendOpCuveId;});
+  // ★ VOL-1 — la source du volume se DEDUIT, comme pour les intrants (§71d).
+  var _r=_vendIntrVol(c), _s=(vol>0&&Math.abs(vol-_r.hl)>0.001)?'saisi':_r.src;
+  var _hs=document.getElementById('vop-volsrc'); if(_hs) _hs.value=_s;
+  var _ns=document.getElementById('vop-volsrc-note'); if(_ns) _ns.textContent=_vendIntrVolLbl(_s);
   var prev=((c&&c.operations)||[]).filter(function(o){return o.type==='chaptalisation';}).reduce(function(s,o){return s+(o.kg_sucre||0);},0);
   var cu=document.getElementById('vop-cum');
   if(cu){
@@ -6242,6 +6327,18 @@ function _vendOpCalc(){
     } else cu.innerHTML='';
   }
 }
+/* ★ VOL-1 — SO2 du Cuvier : volume, grammes, source deduite (§71d, §152b). */
+function _vendSo2Calc(){
+  var c=(CAVE_VENDANGE.cuves_vinif||[]).find(function(x){return x.id===_vendOpCuveId;});
+  var ref=_vendIntrVol(c);
+  var dose=parseFloat((document.getElementById('vop-dose')||{}).value);
+  var vol=parseFloat((document.getElementById('vop-vol')||{}).value);
+  var src=(isFinite(vol)&&vol>0&&Math.abs(vol-ref.hl)>0.001)?'saisi':ref.src;
+  var hid=document.getElementById('vop-volsrc'); if(hid) hid.value=src;
+  var note=document.getElementById('vop-volsrc-note'); if(note) note.textContent=_vendIntrVolLbl(src);
+  var g=(isFinite(dose)&&dose>0&&isFinite(vol)&&vol>0)?dose*vol:0;
+  var el=document.getElementById('vop-so2g'); if(el) el.textContent=g>0?_vendCuvF1(g):'\u2014';
+}
 function saveVendOp(){
   if(!_vendGarde()) return;
   var c=(CAVE_VENDANGE.cuves_vinif||[]).find(function(x){return x.id===_vendOpCuveId;});
@@ -6250,20 +6347,19 @@ function saveVendOp(){
   var note=((document.getElementById('vop-note')||{}).value||'').trim();
   var editId=_vendOpEditId;
   var prev=editId?((c.operations||[]).find(function(o){return o.id===editId;})||null):null;
-  // ⚠️⚠️ La saignee est la SEULE operation qui mute la cuve : elle retranche son
-  // volume a c.volume_hl. Corriger ou supprimer une saignee doit donc d'abord
-  // RENDRE l'ancien volume, sinon les hL disparaissent deux fois — et le
-  // rendement du millesime part avec eux.
-  if(prev&&prev.type==='saignee'&&prev.volume_hl) c.volume_hl=(c.volume_hl||0)+prev.volume_hl;
+  // ⚠️ Une saignee d'avant VOL-1 (sans `cap_intacte`) rend la contenance qu'elle avait prise (§152b).
+  if(prev&&prev.type==='saignee'&&prev.volume_hl&&!prev.cap_intacte) c.volume_hl=(c.volume_hl||0)+prev.volume_hl;
   var op={id:editId||('vop_'+Date.now()),type:_vendOpType,date:date,note:note};
   if(_vendOpType==='chaptalisation'){
     op.volume_hl=parseFloat((document.getElementById('vop-vol')||{}).value)||0;
     op.degre=parseFloat((document.getElementById('vop-deg')||{}).value)||0;
     var spd=_vendCfg().sucre_par_degre||16.83;
     op.kg_sucre=spd*op.degre*op.volume_hl/10;
+    // ★ VOL-1 — le registre dit « (estime) » quand le volume vient des caisses.
+    op.vol_src=((document.getElementById('vop-volsrc')||{}).value)||null;
   } else if(_vendOpType==='saignee'){
     op.volume_hl=parseFloat((document.getElementById('vop-vol')||{}).value)||0;
-    if(op.volume_hl>0) c.volume_hl=Math.max(0,(c.volume_hl||0)-op.volume_hl);
+    op.cap_intacte=true;   // VOL-1
   } else if(_vendOpType==='refroidissement'||_vendOpType==='rechauffement'){
     var _t=parseFloat((document.getElementById('vop-temp')||{}).value);
     op.temp_c=isFinite(_t)?_t:null;                      // 0 °C est une cible, pas une absence
@@ -6286,12 +6382,16 @@ function saveVendOp(){
     op.dose=isFinite(_idz)?_idz:null;
     op.dose_unit=_vendIntrUnite(_ip);
     var _ivl=parseFloat((document.getElementById('vop-vol')||{}).value);
-    op.volume_hl=isFinite(_ivl)?_ivl:0;
+    op.volume_hl=(isFinite(_ivl)&&_ivl>0)?_ivl:null;   // VOL-1
     op.vol_src=((document.getElementById('vop-volsrc')||{}).value)||'estime';
     op.qte=_vendIntrQte(op.dose,op.volume_hl);
     op.qte_unite=_vendIntrUniteQ(_ip);
   } else if(_vendOpType==='so2'){
     op.dose=parseFloat((document.getElementById('vop-dose')||{}).value)||null;
+    // ★ VOL-1 — le volume sulfite, et d'ou il vient : le registre en tire les grammes.
+    var _sv=parseFloat((document.getElementById('vop-vol')||{}).value);
+    op.volume_hl=(isFinite(_sv)&&_sv>0)?_sv:null;
+    op.vol_src=(op.volume_hl!=null)?(((document.getElementById('vop-volsrc')||{}).value)||'saisi'):null;
   } else if(_vendOpType==='delestage'){
     op.nb=parseInt((document.getElementById('vop-nb')||{}).value)||1;
   }
@@ -6316,7 +6416,7 @@ function _vendOpDel(){
     ? ('Les '+_vendCuvF1(op.volume_hl)+' hL saignés seront rendus à la cuve.')
     : 'Elle disparaîtra du suivi et du registre des manipulations.';
   window.openConfirmDel('Supprimer cette '+_vendOpLbl(op.type).toLowerCase()+' ?',avert,function(){
-    if(op.type==='saignee'&&op.volume_hl) c.volume_hl=(c.volume_hl||0)+op.volume_hl;
+    if(op.type==='saignee'&&op.volume_hl&&!op.cap_intacte) c.volume_hl=(c.volume_hl||0)+op.volume_hl;   // VOL-1
     c.operations=(c.operations||[]).filter(function(o){return o.id!==id;});
     _vendOpEditId=null; _vendOpEditOp=null;
     window.CAVE_VENDANGE=CAVE_VENDANGE;
@@ -6328,7 +6428,10 @@ function _vendOpDel(){
 // Le detail court d'une operation, partage par le resume et l'historique.
 function _vendOpDet(o){
   if(!o) return '';
-  if(o.type==='chaptalisation') return (o.kg_sucre||0).toFixed(1).replace('.',',')+' kg de sucre';
+  if(o.type==='prelevement') return _vendCuvF1(o.volume_hl||0)+' hL \u2192 '+((o.vers&&o.vers.nom)||'une cuv\u00e9e du Chai');
+  if(o.type==='chaptalisation') return (o.kg_sucre!=null)
+    ? (o.kg_sucre||0).toFixed(1).replace('.',',')+' kg de sucre'
+    : ('+'+_vendCuvF1(o.degre||0)+'\u00b0 vis\u00e9, volume inconnu');   // VOL-1
   if(o.type==='saignee') return _vendCuvF1(o.volume_hl||0)+' hL';
   if(o.type==='delestage') return (o.nb||1)+'\u00d7';
   if(_vendEstIntrant(o.type)){
@@ -6660,7 +6763,10 @@ function _vendDecuveesSection(list){
     var _ap=_vendMesD(c).filter(function(m){ return m.date>(d.date||''); });
     var _sv=_ap.length ? (' · relevée à '+Math.round(_vendMesD20(_ap[_ap.length-1]))
       +' le '+_vendFrDate(_ap[_ap.length-1].date)) : '';
-    return '<div class="mvv-decrow"><span>'+_escHtml(c.nom)+'</span><span class="u">'+(d.date?_vendFrDate(d.date):'')+' · '+(c.volume_hl||0)+' hL → Le Chai'+fa+_sv+'</span></div>';
+    // ★ VOL-1 — le volume parti au Chai, plus la contenance de la cuve.
+    var _vl=_vendVolLoge(c);
+    return '<div class="mvv-decrow"><span>'+_escHtml(c.nom)+'</span><span class="u">'+(d.date?_vendFrDate(d.date):'')+' · '
+      +(_vl>0?(_vendCuvF1(_vl)+' hL'+(c.vol_decuve_src==='mesure'?' mesurés':'')):'volume non saisi')+' → Le Chai'+fa+_sv+'</span></div>';
   }).join('');
   var nFa=list.filter(_vendFaEnCours).length;
   return '<details class="mvv-decwrap"'+(nFa?' open':'')+'><summary class="mvv-decsum">Décuvées ('+list.length+')'
@@ -7446,6 +7552,12 @@ function _vendCuvRender(){
   if(hid) hid.value=sc?sc.nom:'';
   _vendCuvAtt(caisses);
 }
+/* ★ VOL-1 — ce qui est deja dans la cuve (§152b). */
+function _vendDedansTxt(cv, exclId){
+  var v=_vendVolContenu(cv, exclId);
+  if(!(v.hl>0)) return 'rien dedans pour l\u2019instant';
+  return (v.src==='mesure'?'':'environ ')+_vendCuvF1(v.hl)+' hL dedans';
+}
 // Panneau de rattachement : compléter une cuve existante ou en créer une de plus
 function _vendCuvAtt(caisses){
   var z=document.getElementById('vrec-cuv-att'); if(!z) return;
@@ -7464,11 +7576,12 @@ function _vendCuvAtt(caisses){
   var idx=_vcuvSel.cuveIdx; if(idx>=st.cuves.length) idx=st.cuves.length-1;
   var h='<div class="mvcs-att"><div class="mvcs-att-h"><span>'+_mvIcon('fiole',16)+'</span><span>Cette cuv\u00e9e a d\u00e9j\u00e0 '
     +(st.cuves.length>1?'des cuves':'une cuve')+'</span></div><div class="mvcs-att-b">';
+  var _ridA=((document.getElementById('vrec-id')||{}).value||'');   // la recolte qu'on corrige ne compte pas deux fois
   st.cuves.forEach(function(cv,i){
     var on=idx===i;
     h+='<label class="mvcs-opt'+(on?' on':'')+'"><input type="radio" name="vrec-att" '+(on?'checked':'')+' onchange="_vendCuvSetCuve('+i+')">'
       +'<span><span class="mvcs-opt-t">Compl\u00e9ter \u00ab\u00a0'+_escHtml(cv.nom||'cuve')+'\u00a0\u00bb</span>'
-      +'<span class="mvcs-opt-s">'+_vendCuvF1(cv.volume_hl||0)+' hL en place'
+      +'<span class="mvcs-opt-s">'+_vendDedansTxt(cv,_ridA)
       +(cv.statut?' \u00b7 '+_escHtml(String(cv.statut).toUpperCase()):'')+'</span></span></label>';
   });
   var onNew=idx<0;
@@ -8354,7 +8467,8 @@ function openCuveeDetail(cuvId){
   else if(lFml==='non')fmlH='<div style="font-size:var(--pt-lbl,10.5px);font-weight:600;color:#E07060;background:rgba(224,112,96,0.1);border-radius:6px;padding:2px 8px;display:inline-block;margin-top:4px;">FML non faite</div>';
   var cOps=(CAVE_ELEVAGE.operations||[]).filter(function(op){
     var ids=op.cuvees_ids||(op.cuvee_id?[op.cuvee_id]:[]);
-    return ids.indexOf(cuvId)!==-1;
+    // ★ ASM-1 — la cuvee ou l'on a puise le voit aussi (§153b).
+    return ids.indexOf(cuvId)!==-1||(op.type==='assemblage'&&op.data&&op.data.de_type==='cuvee'&&op.data.de_id===cuvId);
   });
   var cAnas=(CAVE_ELEVAGE.analyses||[]).filter(function(a){
     return Array.isArray(a.cuvee_ids)&&a.cuvee_ids.indexOf(cuvId)!==-1;
@@ -8406,8 +8520,8 @@ function openCuveeDetail(cuvId){
   // Journal
   if(allIt.length){
     html+='<div style="font-size:var(--pt-lbl,10.5px);color:var(--texte-doux);text-transform:uppercase;letter-spacing:.5px;margin-bottom:8px;">Journal</div>';
-    var tI={ouillage:'seau',soutirage:'rotation',soufre:'eprouvette',analyse:'microscope',retrait_fut:'\uD83D\uDEAA',autre:'crayon'};
-    var tL={ouillage:'Ouillage',soutirage:'Soutirage',soufre:'Soufre',analyse:'Analyse',retrait_fut:'Retrait f\u00FBt',autre:'Autre'};
+    var tI={ouillage:'seau',soutirage:'rotation',soufre:'eprouvette',analyse:'microscope',retrait_fut:'\uD83D\uDEAA',assemblage:'fiole',autre:'crayon'};
+    var tL={ouillage:'Ouillage',soutirage:'Soutirage',soufre:'Soufre',analyse:'Analyse',retrait_fut:'Retrait f\u00FBt',assemblage:'Assemblage',autre:'Autre'};
     allIt.forEach(function(op){
       var ico=_mvIcon(tI[op.type]||'crayon',16),lbl=tL[op.type]||op.type;
       html+='<div style="background:var(--bg-card);border:1px solid rgba(255,255,255,0.06);border-radius:12px;padding:11px;margin-bottom:7px;">';
@@ -8416,12 +8530,15 @@ function openCuveeDetail(cuvId){
       html+='<div style="flex:1;min-width:0;"><div style="font-size:var(--pt-txt,12.5px);font-weight:600;color:var(--texte);">'+lbl+'</div>';
       html+='<div style="font-size:var(--pt-micro,11px);color:var(--texte-doux);">'+_caveDateFr(op.date)+(_caveWho(op)?' \u00B7 '+_escHtml(_caveWho(op)):'')+'</div></div>';
       if(op._src==='op'&&typeof isAdmin==='function'&&isAdmin()){
-        html+='<button onclick="window.openOvCaveOp&&window.openOvCaveOp(\''+op.id+'\')" style="background:none;border:none;font-size:var(--pt-txt,12.5px);cursor:pointer;color:var(--texte-doux);padding:2px;min-width:28px;">\u270F\uFE0F</button>';
+        if(op.type!=='assemblage') html+='<button onclick="window.openOvCaveOp&&window.openOvCaveOp(\''+op.id+'\')" style="background:none;border:none;font-size:var(--pt-txt,12.5px);cursor:pointer;color:var(--texte-doux);padding:2px;min-width:28px;">\u270F\uFE0F</button>';
         html+='<button onclick="window.deleteCaveOp&&window.deleteCaveOp(\''+op.id+'\')" style="background:none;border:none;font-size:var(--pt-txt,12.5px);cursor:pointer;color:#E07060;padding:2px;min-width:28px;">\uD83D\uDDD1</button>';
       }
       html+='</div>';
       var det=[];
       if(op.type==='ouillage'&&op.data&&op.data.nb_ouillettes)det.push(op.data.nb_ouillettes+' ouillettes \u00D7 '+op.data.vol_ouillette_L+'L = '+op.data.vol_total_L+' L');
+      if(op.type==='assemblage'&&op.data)det.push((op.data.de_id===cuvId&&op.data.de_type==='cuvee')   // ★ ASM-1
+        ? (op.data.litres+'\u00a0L vers\u00e9s dans '+_escHtml(op.data.vers_nom||'une autre cuv\u00e9e'))
+        : (op.data.litres+'\u00a0L de '+_escHtml(op.data.de_nom||'une autre cuve')));
       if(op.type==='soufre'&&op.data&&op.data.grammes_pastille)det.push(op.data.grammes_pastille+'g \u00D7 '+op.data.nb_total+' = '+op.data.so2_total_g+' g SO\u2082');
       if(op.type==='soutirage'&&op.data&&op.data.so2&&op.data.so2.mode!=='none'){var ss=op.data.so2;det.push('SO\u2082 '+ss.dose+' '+(ss.unite||'cL')+(ss.mode==='unique'?' dose unique':' \u00D7 '+ss.nb_doses));}
       if(op.type==='analyse'&&op._src==='op'&&op.data){
@@ -8538,12 +8655,19 @@ window.deleteCuvee          = deleteCuvee;
 
 function deleteCaveOp(opId) {
   if(!isAdmin())return;
-  window.openConfirmDel('Supprimer cette opération ?','',function(){
+  // ★ ASM-1 — supprimer un assemblage le defait (§153b).
+  var _op=(CAVE_ELEVAGE.operations||[]).find(function(o){ return o&&o.id===opId; });
+  var _asm=!!(_op&&_op.type==='assemblage');
+  window.openConfirmDel(_asm?'D\u00e9faire cet assemblage ?':'Supprimer cette opération ?',
+    _asm?'Le f\u00fbt redevient entam\u00e9, et le vin retourne \u00e0 sa source.':'',function(){
+    if(_asm) _asmDefaire(_op);
     CAVE_ELEVAGE.operations=CAVE_ELEVAGE.operations.filter(function(o){return o.id!==opId;});
     window.CAVE_ELEVAGE=CAVE_ELEVAGE;
-    window.fbSaveToast({cave_elevage:CAVE_ELEVAGE},'Op\u00E9ration supprim\u00E9e','#3D6B27');
+    if(_asm){ window.CAVE_VENDANGE=CAVE_VENDANGE;
+      window.fbSaveToast({cave_elevage:CAVE_ELEVAGE, cave_vendange:CAVE_VENDANGE},'Assemblage d\u00e9fait','#3D6B27'); }
+    else window.fbSaveToast({cave_elevage:CAVE_ELEVAGE},'Op\u00E9ration supprim\u00E9e','#3D6B27');
     renderCave();
-  });
+  },null,_asm?'D\u00e9faire':undefined);
 }
 
 window.openOvCaveExport = function() {
@@ -8747,12 +8871,22 @@ function _caveContenantsSectionHtml(cuv){
   var n=_caveNbTonneaux(cuv);
   var h='<div class="mvc-aff-sec">Contenants</div>';
   // ★ FUT-CAP — une ligne par contenance : « 4 futs de 228 L », « 1 fut de 500 L ».
-  if(n) _caveGroupesL(cuv).forEach(function(g){
-    h+='<div class="mvc-pk"><span class="mvc-pk-ic bois">'+_mvIcon('barrique',18)+'</span>'
+  // ★ ASM-1 — le dernier lot porte le fut entame (§20e, §153b).
+  var _G=n?_caveGroupesL(cuv):[], _m=_caveManqueL(cuv);
+  _G.forEach(function(g,gi){
+    var cr=(_m>0&&gi===_G.length-1), un=cr&&_m<g.l, bt=cr&&w;
+    h+=(bt?'<button type="button" class="mvc-pk mvc-pk-creux" onclick="_asmOuvrir(\''+_escAttr(cuv.id)+'\')">'
+          :'<div class="mvc-pk'+(cr?' mvc-pk-creux':'')+'">')
+      +'<span class="mvc-pk-ic bois">'+_mvIcon('barrique',18)+'</span>'
       +'<span class="mvc-pk-b"><span class="mvc-pk-n">'+g.nb+' f\u00fbt'+(g.nb>1?'s':'')+' de '+_caveLTxt(g.l)+'\u00a0L'
       +(_caveHorsFormat(g.l)?'<span class="mvc-dhf">hors format</span>':'')+'</span>'
-      +'<span class="mvc-pk-m">'+(g.rep||'r\u00e9partition non pr\u00e9cis\u00e9e')+'</span></span>'
-      +'<span class="mvc-pk-r"><span class="mvc-pk-cap">'+_mvF1(g.nb*g.l/100)+'<span class="u">hL</span></span></span></div>';
+      +'<span class="mvc-pk-m">'+(g.rep||'r\u00e9partition non pr\u00e9cis\u00e9e')
+      +(cr?(' \u00b7 <b>'+(un?'entam\u00e9':'pas pleins')+'</b>'+(un?'\u00a0: '+_caveLTxt(g.l-_m)+'\u00a0L sur '+_caveLTxt(g.l):'')):'')+'</span>'
+      +(un?'<span class="mvc-pk-fill"><i class="bois" style="width:'+Math.round((g.l-_m)*100/g.l)+'%"></i></span>':'')
+      +'</span>'
+      +'<span class="mvc-pk-r"><span class="mvc-pk-cap">'+_mvF1((g.nb*g.l-(cr?_m:0))/100)+'<span class="u">hL</span></span>'
+      +(cr?'<span class="mvc-pk-att">attend '+_m+'\u00a0L</span>':'')+'</span>'
+      +(bt?'</button>':'</div>');
   });
   ((cuv&&cuv.cuves)||[]).forEach(function(x){
     var p=_caveCuve(x&&x.ref), L=parseFloat(x&&x.litres)||0;
@@ -8774,6 +8908,239 @@ function _caveContenantsSectionHtml(cuv){
   if(w) h+='<button type="button" class="mvc-aff-add" onclick="_caveAffOpen(\'' + _escAttr(cuv.id) + '\')">+ Ajouter une cuve</button>';
   return h;
 }
+
+/* ★★★ ASM-1 — COMPLETER UN FUT ENTAME. ⚠️ _asmValider ne relit pas le DOM (§153b). */
+var _asmCuv=null, _asmSrc=null, _asmL=0, _ASM_GID=0;
+function _asmCuvee(id){
+  return ((CAVE_ELEVAGE&&CAVE_ELEVAGE.cuvees)||[]).find(function(x){ return x&&x.id===id; })||null;
+}
+// Les appellations d'une cuve du Cuvier : celles des parcelles de ses caisses.
+function _asmAocsCuve(cv){
+  var vus={}, out=[];
+  ((CAVE_VENDANGE&&CAVE_VENDANGE.recoltes)||[]).forEach(function(r){
+    if(!r||!cv||r.cuve_id!==cv.id) return;
+    var p=_vendParcByName(r.parcelle), a=(p&&p.appellation)?String(p.appellation).trim():'';
+    if(a&&!vus[a.toLowerCase()]){ vus[a.toLowerCase()]=1; out.push(a); }
+  });
+  return out;
+}
+function _asmAocsCuvee(cu){ var cv=_caveCuveSource(cu); return cv?_asmAocsCuve(cv):[]; }
+// La cuve d'une cuvee du Chai ou l'on puise : celle qui a le plus de vin (-1 : aucune).
+function _asmIdxCuve(cu){
+  var k=-1, best=0;
+  ((cu&&cu.cuves)||[]).forEach(function(x,i){ var l=parseFloat(x&&x.litres)||0; if(l>best){ best=l; k=i; } });
+  return k;
+}
+// Sources : Cuvier (meme non decuvees), puis Chai en elevage.
+function _asmSources(cu){
+  var out=[];
+  ((CAVE_VENDANGE&&CAVE_VENDANGE.cuves_vinif)||[]).forEach(function(c){
+    if(!c||_vendDecuvee(c)||_vendEstFusionnee(c)||c.statut==='setup'||c.statut==='termine') return;
+    var v=_vendVolContenu(c); if(!(v.hl>0)) return;
+    var vin=c.cuvee_src?String(c.cuvee_src):'';
+    out.push({k:'cuve:'+c.id, type:'cuve', grp:'cuvier', id:c.id,
+      nom:(c.nom||'Cuve')+(vin?' \u00b7 '+vin:''), lbl:(c.nom||'Cuve')+(vin?' ('+vin+')':''),
+      meta:_vendStatLbl(c.statut)+' \u00b7 environ '+_vendCuvF1(v.hl)+'\u00a0hL dedans',
+      hl:v.hl, mil:_rmMilCuve(CAVE_VENDANGE,c.id), aocs:_asmAocsCuve(c), futs:false, cuveL:0});
+  });
+  ((CAVE_ELEVAGE&&CAVE_ELEVAGE.cuvees)||[]).forEach(function(x){
+    if(!x||!cu||x.id===cu.id||x.statut==='embouteille') return;
+    var hl=_caveVolHl(x); if(!(hl>0)) return;
+    var k=_asmIdxCuve(x), nm=(x.nom||'Cuv\u00e9e')+(x.millesime?' '+x.millesime:'');
+    out.push({k:'cuvee:'+x.id, type:'cuvee', grp:'chai', id:x.id, nom:nm, lbl:nm,
+      meta:(_caveContenantsHtml(x)||'')+' \u00b7 '+_mvF1(hl)+'\u00a0hL',
+      hl:(k>=0?(parseFloat(x.cuves[k].litres)||0)/100:hl), mil:(x.millesime!=null?x.millesime:null),
+      aocs:_asmAocsCuvee(x), futs:(k<0), cuveL:(k>=0?(parseFloat(x.cuves[k].litres)||0):0)});
+  });
+  return out;
+}
+// Un fut dessine, rempli a pct % — un identifiant de decoupe par dessin (§153, le degrade).
+function _asmFutSvg(pct){
+  var p=Math.max(0,Math.min(100,pct||0)), id='mvfc'+(++_ASM_GID);
+  return '<svg class="mvc-creux-f" width="26" height="30" viewBox="0 0 26 30" aria-hidden="true">'
+    +'<defs><clipPath id="'+id+'"><path d="M4 3h18c2 4 2 20 0 24H4C2 23 2 7 4 3z"/></clipPath></defs>'
+    +'<path d="M4 3h18c2 4 2 20 0 24H4C2 23 2 7 4 3z" fill="var(--bg-card)" stroke="var(--terre)" stroke-width="1.4"/>'
+    +'<rect x="0" y="'+(3+24*(1-p/100)).toFixed(1)+'" width="26" height="30" fill="var(--terre)" opacity=".55" clip-path="url(#'+id+')"/>'
+    +'<path d="M3 9h20M3 21h20" stroke="var(--terre)" stroke-width="1" opacity=".5"/></svg>';
+}
+// Sur la carte du Chai : le fut entame (touchable) et la composition.
+function _asmCarteHtml(c,w){
+  if(!c||c.statut==='embouteille') return '';
+  var h='', m=_caveManqueL(c);
+  if(m>0){
+    var G=_caveGroupesL(c), g=G.length?G[G.length-1]:null, un=!!(g&&m<g.l);
+    var t='<span class="mvc-creux-t"><b>'+(un?'1 f\u00fbt entam\u00e9':'F\u00fbts pas pleins')+'</b><span>'
+      +(un?(_caveLTxt(g.l-m)+'\u00a0L sur '+_caveLTxt(g.l)+' \u00b7 il attend '):'ils attendent ')+m+'\u00a0L</span></span>';
+    var f=_asmFutSvg(un?Math.round((g.l-m)*100/g.l):0);
+    h+=w
+      ? '<button type="button" class="mvc-creux" onclick="event.stopPropagation();_asmOuvrir(\''+_escAttr(c.id)+'\')">'+f+t
+        +'<span class="mvc-creux-go">Compl\u00e9ter <span class="mvc-creux-ch">'+_mvIcon('chevron',16)+'</span></span></button>'
+      : '<div class="mvc-creux">'+f+t+'</div>';
+  }
+  var ap=c.apports||[];
+  if(ap.length){
+    var L=ap.reduce(function(s,a){ return s+(parseFloat(a&&a.l)||0); },0), tot=_caveVolL(c);
+    h+='<div class="mvc-compo">'+_mvIcon('fiole',16)+' dont <b>'+L+'\u00a0L '
+      +(ap.length===1?('de '+_escHtml(ap[0].de||'une autre cuve')):'d\u2019apports')+'</b>'
+      +(tot>0?' \u00b7 '+Math.round(L*100/tot)+'\u00a0%':'')+'</div>';
+  }
+  return h;
+}
+function _asmFutTxt(cu,m){
+  var G=_caveGroupesL(cu), g=G.length?G[G.length-1]:null;
+  if(g&&m<g.l) return 'le f\u00fbt de '+_caveLTxt(g.l)+'\u00a0L contient '+_caveLTxt(g.l-m)+'\u00a0L\u00a0: il attend <b>'+m+'\u00a0L</b>.';
+  return 'ses f\u00fbts attendent <b>'+m+'\u00a0L</b>.';
+}
+function _asmOuvrir(cuvId){
+  if(typeof canWrite==='function'&&!canWrite()){ showToast('Acc\u00e8s lecture seule','#B85A1A'); return; }
+  var cu=_asmCuvee(cuvId); if(!cu) return;
+  var m=_caveManqueL(cu);
+  if(!(m>0)){ showToast('Les f\u00fbts de cette cuv\u00e9e sont pleins','#3D6B27'); return; }
+  var S=_asmSources(cu);
+  _asmCuv=cuvId; _asmL=m; _asmSrc=S.length?S[0].k:null;
+  // ⚠️ Les styles du Cuvier : sans eux, le bouton sortait brut (§153e).
+  _caveV2InjectCss(); _vendInjectCss();
+  var ligne=function(s){
+    var bois=(s.type==='cuvee'&&s.futs);
+    return '<button type="button" class="mvc-pk mvc-aff-c'+(s.k===_asmSrc?' sel':'')+'" data-asm="'+_escHtml(s.k)+'" onclick="_asmChoisir(\''+_escAttr(s.k)+'\')">'
+      +'<span class="mvc-aff-rad"></span><span class="mvc-pk-ic '+(bois?'bois':'inox')+'">'+_mvIcon(bois?'barrique':'cuve',18)+'</span>'
+      +'<span class="mvc-pk-b"><span class="mvc-pk-n">'+_escHtml(s.nom)+'</span><span class="mvc-pk-m">'+s.meta+'</span>'
+      +(s.aocs.length?'<span class="mvc-pk-m mvv-asm-aoc">'+_escHtml(s.aocs.join(', '))+'</span>':'')+'</span></button>';
+  };
+  var cv=S.filter(function(s){ return s.grp==='cuvier'; }), ch=S.filter(function(s){ return s.grp==='chai'; });
+  _vendSheet('<div class="mvv-sheet-hd"><div class="mvv-sheet-t">Compl\u00e9ter le f\u00fbt</div>'
+    +'<button class="mv-gh mvv-sheet-x" onclick="_vendSheetClose()" title="Fermer" aria-label="Fermer">'+_mvIcon('croix',18)+'</button></div>'
+    +'<div class="mvv-sheet-sub">'+_escHtml((cu.nom||'')+(cu.millesime?' '+cu.millesime:''))+' \u2014 '+_asmFutTxt(cu,m)+'</div>'
+    +'<label class="mvv-flbl">D\u2019o\u00f9 vient le vin</label>'
+    +(cv.length?'<div class="mvv-asm-grp">Au Cuvier \u2014 m\u00eame pas encore d\u00e9cuv\u00e9e</div>'+cv.map(ligne).join(''):'')
+    +(ch.length?'<div class="mvv-asm-grp">Au Chai</div>'+ch.map(ligne).join(''):'')
+    +(S.length?'':'<div class="mvcs-empty">Aucune cuve du Cuvier ni cuv\u00e9e du Chai n\u2019a de vin \u00e0 verser.</div>')
+    +'<label class="mvv-flbl">Litres vers\u00e9s <span class="mvv-fhint">(le f\u00fbt en attend '+m+')</span></label>'
+    +'<div class="mvv-step2"><button type="button" class="mvv-step2-b" onclick="_asmPas(-5)" aria-label="5 litres de moins">\u2212</button>'
+    +'<input id="asm-l" class="mvv-tin mvv-asm-l" type="number" inputmode="numeric" min="1" max="'+m+'" step="1" value="'+m+'" oninput="_asmSaisie()">'
+    +'<button type="button" class="mvv-step2-b" onclick="_asmPas(5)" aria-label="5 litres de plus">+</button><span class="mvv-step2-u">litres</span></div>'
+    +'<div id="asm-prev"></div>'
+    +'<button class="mvv-save" id="asm-go" style="margin-top:16px" onclick="_asmValider()">Compl\u00e9ter le f\u00fbt</button>'
+    +'<div class="mvv-fnote">L\u2019application ne tranche pas ce que la r\u00e9glementation permet (appellation, mill\u00e9sime)\u00a0: '
+    +'elle \u00e9crit la composition, et le registre des manipulations la garde.</div>');
+  _asmApercu();
+}
+function _asmChoisir(k){
+  _asmSrc=k;
+  document.querySelectorAll('#mvv-ov [data-asm]').forEach(function(b){ b.classList.toggle('sel', b.getAttribute('data-asm')===k); });
+  _asmApercu();
+}
+function _asmPas(d){
+  var cu=_asmCuvee(_asmCuv); if(!cu) return;
+  _asmL=Math.max(1,Math.min(_caveManqueL(cu),Math.round((_asmL||0)+d)));
+  var el=document.getElementById('asm-l'); if(el) el.value=_asmL;
+  _asmApercu();
+}
+function _asmSaisie(){
+  var v=Math.round(parseFloat((document.getElementById('asm-l')||{}).value));
+  _asmL=isFinite(v)?v:0; _asmApercu();
+}
+// Ce qui empeche d'ecrire, en mots ('' : rien).
+function _asmRefus(cu,s,L){
+  var m=_caveManqueL(cu);
+  if(!s) return 'Choisissez d\u2019o\u00f9 vient le vin.';
+  if(!(L>0)) return 'Indiquez les litres.';
+  if(L>m) return 'Le f\u00fbt n\u2019en attend que '+m+'\u00a0L.';
+  if(L/100>s.hl+1e-9) return 'La source n\u2019a qu\u2019environ '+_mvF1(s.hl)+'\u00a0hL.';
+  return '';
+}
+function _asmApercu(){
+  var el=document.getElementById('asm-prev'), go=document.getElementById('asm-go');
+  var cu=_asmCuvee(_asmCuv); if(!el||!cu) return;
+  var L=_asmL, m=_caveManqueL(cu);
+  var s=_asmSources(cu).find(function(x){ return x.k===_asmSrc; })||null;
+  var err=_asmRefus(cu,s,L);
+  if(go){ go.disabled=!!err; go.textContent=err?'Compl\u00e9ter le f\u00fbt':('Compl\u00e9ter le f\u00fbt \u2014 '+L+'\u00a0L'); }
+  if(err){ el.innerHTML='<div class="mvv-asm-prev mvv-asm-err">'+err+'</div>'; return; }
+  var avant=_caveVolL(cu), tot=avant+L, nomCu=(cu.nom||'')+(cu.millesime?' '+cu.millesime:'');
+  var dA=_asmAocsCuvee(cu), deja=(cu.apports||[]).reduce(function(t,a){ return t+(parseFloat(a&&a.l)||0); },0);
+  var part=Math.round(L*100/tot), dejaP=Math.round(deja*100/tot);
+  var autreAoc=!!(s.aocs.length&&dA.length&&s.aocs.join('|').toLowerCase()!==dA.join('|').toLowerCase());
+  var autreMil=(s.mil!=null&&cu.millesime!=null&&String(s.mil)!==String(cu.millesime));
+  var h='<b>'+_escHtml(nomCu)+'\u00a0:</b> '+_caveLTxt(avant)+'\u00a0L + '+L+'\u00a0L = '+_caveLTxt(tot)+'\u00a0L'
+    +(L>=m?' \u2014 le f\u00fbt est plein.':' \u2014 il attendra encore '+(m-L)+'\u00a0L.')
+    +'<br><b>Composition\u00a0:</b> '+part+'\u00a0% de '+_escHtml(s.lbl)+(s.aocs.length?', '+_escHtml(s.aocs.join(', ')):'')
+    +(dejaP?' \u00b7 '+dejaP+'\u00a0% d\u2019apports d\u00e9j\u00e0 re\u00e7us':'')+'.';
+  if(autreAoc||autreMil) h+='<span class="mvv-asm-w">'+part+'\u00a0% d\u2019'+(autreAoc?'une autre appellation':'')
+    +(autreAoc&&autreMil?' et d\u2019':'')+(autreMil?'un autre mill\u00e9sime':'')+'.</span>';
+  var e=(s.type==='cuve')
+    ? ('<b>'+_escHtml(s.lbl)+'\u00a0:</b> environ '+_mvF1(s.hl)+' \u2192 '+_mvF1(Math.max(0,s.hl-L/100))+'\u00a0hL dedans. Ces '+L+'\u00a0L restent dans le rendement de ses parcelles.')
+    : (s.futs ? ('<b>'+_escHtml(s.lbl)+'\u00a0:</b> un de ses f\u00fbts attendra '+L+'\u00a0L.')
+              : ('<b>'+_escHtml(s.lbl)+'\u00a0:</b> sa cuve passe de '+_mvF1(s.cuveL/100)+' \u00e0 '+_mvF1(Math.max(0,s.cuveL-L)/100)+'\u00a0hL.'));
+  el.innerHTML='<div class="mvv-asm-prev">'+h+'<div class="mvv-asm-e">'+e+'</div></div>';
+}
+function _asmValider(){
+  if(typeof canWrite==='function'&&!canWrite()){ showToast('Acc\u00e8s lecture seule','#B85A1A'); return; }
+  var cu=_asmCuvee(_asmCuv); if(!cu) return;
+  var L=Math.round(_asmL), m=_caveManqueL(cu);
+  var s=_asmSources(cu).find(function(x){ return x.k===_asmSrc; })||null;
+  var err=_asmRefus(cu,s,L);
+  if(err){ showToast(err,'#B85A1A'); _asmApercu(); return; }
+  var id='asm_'+Date.now().toString(36)+Math.random().toString(36).slice(2,6), date=_mvToday();
+  var vers=(cu.nom||'Cuv\u00e9e')+(cu.millesime?' '+cu.millesime:'');
+  var op={id:id, type:'assemblage', date:date, cuvee_id:cu.id, cuvees_ids:[cu.id],
+    operateur:(window.currentUser&&window.currentUser.nom)||'', intervenants:[], notes:'',
+    data:{litres:L, volume_hl:L/100, sources:[s.lbl], de_type:s.type, de_id:s.id, de_nom:s.lbl,
+          de_mil:(s.mil!=null?s.mil:null), vers_id:cu.id, vers_nom:vers}};
+  cu.manque_l=m-L;
+  cu.apports=(cu.apports||[]).concat([{id:id, date:date, l:L, de:s.lbl, de_type:s.type, de_id:s.id,
+    mil:(s.mil!=null?s.mil:null), aoc:s.aocs.join(', ')}]);
+  var cles=['cave_elevage'];
+  if(s.type==='cuve'){
+    var cv=(CAVE_VENDANGE.cuves_vinif||[]).find(function(x){ return x&&x.id===s.id; });
+    if(cv){
+      if(!cv.operations) cv.operations=[];
+      cv.operations.push({id:'vop_'+id, type:'prelevement', date:date, volume_hl:L/100,
+        vers:{cuvee_id:cu.id, nom:vers}, asm_id:id});
+      cles.push('cave_vendange');
+    }
+  } else {
+    var sc=_asmCuvee(s.id);
+    if(sc){
+      var k=_asmIdxCuve(sc);
+      if(k>=0){ sc.cuves[k].litres=Math.max(0,(parseFloat(sc.cuves[k].litres)||0)-L);
+                op.data.de_cuve=sc.cuves[k].ref||null; op.data.de_cuve_i=k; }
+      else { sc.manque_l=_caveManqueL(sc)+L; op.data.de_futs=true; }
+    }
+  }
+  if(!CAVE_ELEVAGE.operations) CAVE_ELEVAGE.operations=[];
+  CAVE_ELEVAGE.operations.push(op);
+  window.CAVE_ELEVAGE=CAVE_ELEVAGE; window.CAVE_VENDANGE=CAVE_VENDANGE;
+  _vendSheetClose();
+  _vendFbSave('F\u00fbt compl\u00e9t\u00e9\u00a0: '+L+'\u00a0L de '+s.lbl,'#3D6B27',cles);
+  if(typeof renderCave==='function') renderCave();
+}
+/* Defaire : tout revient ; appele AVANT le retrait de l'operation (§153b). */
+function _asmDefaire(op){
+  var d=(op&&op.data)||{}, L=parseFloat(d.litres)||0;
+  if(!(L>0)) return;
+  var cu=_asmCuvee(d.vers_id);
+  if(cu){
+    cu.manque_l=_caveManqueL(cu)+L;
+    cu.apports=(cu.apports||[]).filter(function(a){ return a&&a.id!==op.id; });
+    if(!cu.apports.length) delete cu.apports;
+  }
+  if(d.de_type==='cuve'){
+    var cv=((CAVE_VENDANGE&&CAVE_VENDANGE.cuves_vinif)||[]).find(function(x){ return x&&x.id===d.de_id; });
+    if(cv&&cv.operations) cv.operations=cv.operations.filter(function(o){ return !o||o.asm_id!==op.id; });
+  } else if(d.de_type==='cuvee'){
+    var sc=_asmCuvee(d.de_id);
+    if(sc){
+      if(d.de_futs) sc.manque_l=Math.max(0,_caveManqueL(sc)-L);
+      else {
+        var x=((sc.cuves||[]).find(function(y){ return y&&d.de_cuve&&y.ref===d.de_cuve; }))||((sc.cuves||[])[d.de_cuve_i]);
+        if(x) x.litres=(parseFloat(x.litres)||0)+L;
+      }
+    }
+  }
+}
+window._asmOuvrir=_asmOuvrir; window._asmChoisir=_asmChoisir; window._asmPas=_asmPas;
+window._asmSaisie=_asmSaisie; window._asmValider=_asmValider;
 
 function _caveAffOpen(cuvId){
   if(typeof canWrite==='function' && !canWrite()){ showToast('Acc\u00e8s lecture seule','#B85A1A'); return; }
@@ -9567,7 +9934,7 @@ function _vtSheet(){
       var v=_vendIntrVol(c);
       return '<button class="vt-cb'+(_VT_SEL.indexOf(c.id)!==-1?' on':'')+'" id="vt-cb-'+_escAttr(c.id)+'" '
         +'onclick="_vtTog(\''+_escAttr(c.id)+'\')">'+_escHtml(_vendRepere(c)||c.nom||'Cuve')
-        +' <span class="hl">'+_vendCuvF1(v.hl)+' hL</span></button>';
+        +' <span class="hl">'+(v.hl>0?_vendCuvF1(v.hl)+' hL':'\u2014 hL')+'</span></button>';
     }).join('')+'</div>'
     +'<label class="mvv-flbl">Date</label>'
     +'<input id="vt-date" class="mvv-tin" type="date" value="'+_vtJour()+'">'
@@ -9575,7 +9942,7 @@ function _vtSheet(){
     +'<div class="mvv-bigcalc"><div class="mvv-bigcalc-n" id="vt-calc-n">—</div>'
     +'<div class="mvv-bigcalc-l" id="vt-calc-l">quantité totale</div></div>'
     +'<button class="mvv-save" id="vt-go" style="margin-top:16px" onclick="_vtValider()">Enregistrer</button>'
-    +'<div class="mvv-fnote" style="color:var(--texte-doux,#5F5F5F)">Une opération est écrite dans chaque cuve retenue, avec son propre volume. Chacune reste corrigible depuis sa cuve.</div>';
+    +'<div class="mvv-fnote" style="color:var(--texte-doux,#5F5F5F)">Une opération est écrite dans chaque cuve retenue, avec son propre volume\u00a0: estimé d\u2019après ses caisses, à la règle du Cuvier, mesuré si elle est décuvée — jamais sa contenance. Chacune reste corrigible depuis sa cuve.</div>';
   _vendSheet(h);
   _vtOpSet(_VT_OPK);
 }
@@ -9699,9 +10066,11 @@ function _vtValider(){
     var ref=_vendIntrVol(c);
     var op={id:'vop_'+(base+(i++))+'_'+String(c.id).slice(-4),type:k,date:date,note:note,groupe:true};
     if(k==='chaptalisation'){
-      op.volume_hl=ref.hl; op.degre=v; op.kg_sucre=spd*v*ref.hl/10;
+      /* ★ VOL-1 — plus de chaptalisation sur la contenance ; sans caisse, pas de kilos (§152b). */
+      op.volume_hl=ref.hl>0?ref.hl:null; op.vol_src=ref.hl>0?ref.src:null; op.degre=v;
+      op.kg_sucre=ref.hl>0?spd*v*ref.hl/10:null;
     } else if(k==='so2'){
-      op.dose=v;
+      op.dose=v; op.volume_hl=ref.hl>0?ref.hl:null; op.vol_src=ref.hl>0?ref.src:null;
     } else if(k==='levurage'){
       op.souche=txt; op.dose=v;
     } else if(k==='nutriment'){
@@ -10153,7 +10522,28 @@ function _caveV2InjectCss(){
   +'.mvb-tot{font-size:var(--pt-xxl,31px);font-weight:700;color:var(--bordeaux,#7A1020);line-height:1}'
   +'.mvb-tot small{font-size:var(--pt-micro,11px);color:var(--texte-doux,#5F5F5F);display:block;letter-spacing:.08em;text-transform:uppercase;font-weight:400}'
   +'.mvb-hint{font-size:var(--pt-micro,11px);color:var(--texte-doux,#5F5F5F);font-style:italic;margin:2px 0 10px}'
-  +'.mvb-empty{text-align:center;color:var(--texte-doux,#5F5F5F);padding:34px 20px;font-size:var(--pt-txt,12.5px)}';
+  +'.mvb-empty{text-align:center;color:var(--texte-doux,#5F5F5F);padding:34px 20px;font-size:var(--pt-txt,12.5px)}'
+  // ★ ASM-1 — le fut entame (carte, fiche), la composition, la feuille « Completer le fut »
+  +'.mvc-creux{display:flex;align-items:center;gap:10px;width:100%;margin:8px 0 4px;padding:9px 11px;border-radius:12px;border:1.5px dashed var(--terre);background:var(--terre-pale);font-family:inherit;text-align:left;cursor:pointer;color:var(--texte)}'
+  +'div.mvc-creux{cursor:default}'
+  +'.mvc-creux-f{flex-shrink:0}'
+  +'.mvc-creux-t{display:flex;flex-direction:column;flex:1;min-width:0;font-size:var(--pt-txt,12.5px)}'
+  +'.mvc-creux-t span{font-size:var(--pt-micro,11px);color:var(--texte-med,#4A4A3A)}'
+  +'.mvc-creux-go{display:flex;align-items:center;gap:2px;font-size:var(--pt-micro,11px);font-weight:700;color:var(--terre-tx,var(--terre))}'
+  +'.mvc-creux-ch{display:inline-flex;transform:rotate(-90deg)}'
+  +'.mvc-compo{display:flex;align-items:center;gap:6px;font-size:var(--pt-micro,11px);color:var(--texte-med,#4A4A3A);background:var(--terre-pale);border-radius:9px;padding:5px 9px;margin:6px 0 2px}'
+  +'.mvc-pk-creux{border:1.5px dashed var(--terre)!important;width:100%;text-align:left;font-family:inherit}'
+  +'button.mvc-pk-creux{cursor:pointer}'
+  +'.mvc-pk-att{display:block;font-size:var(--pt-micro,11px);font-weight:700;color:var(--terre-tx,var(--terre));margin-top:3px;text-align:right}'
+  +'.mvv-asm-grp{font-size:var(--pt-nano,9.5px);letter-spacing:1.3px;text-transform:uppercase;color:var(--texte-doux,#5F5F5F);font-weight:700;margin:12px 2px 6px}'
+  +'.mvv-asm-aoc{font-style:italic}'
+  // deux classes : la feuille pose `.mvv-tin{width:100%}` APRES ce style, a la meme force
+  +'.mvv-step2 .mvv-asm-l{width:96px;flex:0 0 96px;text-align:center;padding:6px 8px;font-family:\'Cormorant Garamond\',Georgia,serif;font-weight:700;font-size:var(--pt-xl,27px)}'
+  +'.mvv-asm-prev{margin-top:12px;background:var(--or-pale);border:1px solid rgba(194,161,77,.4);border-radius:12px;padding:10px 12px;font-size:var(--pt-txt,12.5px);line-height:1.5;color:var(--texte-med,#4A4A3A)}'
+  +'.mvv-asm-prev b{color:var(--texte)}'
+  +'.mvv-asm-e{margin-top:7px}'
+  +'.mvv-asm-w{display:block;margin-top:6px;color:var(--terre-tx,var(--terre));font-weight:600}'
+  +'.mvv-asm-err{background:var(--bg-card);border-style:dashed}';
   document.head.appendChild(s);
 }
 
@@ -11272,43 +11662,84 @@ function _caveEnsureBtlTab(){
     if(vref.nextSibling) vref.parentNode.insertBefore(v,vref.nextSibling); else vref.parentNode.appendChild(v);
   }
 }
+/* ★★★ VOL-1 — LA CHAINE DIT CE QUI EST PASSE, pas la taille des contenants (§152c). */
 function _caveBilanChaine(c){
-  var eleveHl=_caveVolHl(c);
-  var cuveHl=null, recolteKg=null;
-  var cv=(CAVE_VENDANGE.cuves_vinif||[]).find(function(x){return x&&x.decuvage&&x.decuvage.cuvee_id===c.id;});
+  var cv=_caveCuveSource(c), bp=(c&&c.bilan_perte)||null;
+  var recolteKg=null, entHl=null, entSrc=null, sorties=0;
   if(cv){
-    cuveHl=parseFloat(cv.volume_hl)||null;
-    var rk=0, any=false;
-    (CAVE_VENDANGE.recoltes||[]).forEach(function(r){ if(r.cuve_id===cv.id){ rk+=_recKgDom(r); any=true; } });
-    if(any) recolteKg=rk;
+    var rk=0;
+    (CAVE_VENDANGE.recoltes||[]).forEach(function(r){ if(r&&r.cuve_id===cv.id) rk+=_recKgDom(r); });
+    if(rk>0) recolteKg=rk;
+    sorties=_vendSortiesHl(cv);
+    var v=parseFloat(cv.vol_decuve_hl);
+    if(cv.decuvage&&isFinite(v)&&v>0){ entHl=v; entSrc=(cv.vol_decuve_src==='mesure')?'mesure':'contenants'; }
   }
-  return { recolteKg:recolteKg, cuveHl:cuveHl, eleveHl:eleveHl, nbBtl:(c.nb_bouteilles!=null?c.nb_bouteilles:null) };
+  if(recolteKg==null&&bp&&parseFloat(bp.recolteKg)>0) recolteKg=parseFloat(bp.recolteKg);
+  var bpe=bp?parseFloat(bp.entonneHl):NaN;
+  if(entSrc!=='mesure'&&bp&&bp.entonneSrc==='mesure'&&isFinite(bpe)&&bpe>0){ entHl=bpe; entSrc='mesure'; }
+  return { recolteKg:recolteKg,
+           // Pas d'arrondi : 474 cols face a 474, pas a 475 (§152c).
+           estHl:(recolteKg!=null)?Math.max(0,_vendHlKg(recolteKg)-sorties):null,
+           entonneHl:entHl, entonneSrc:entSrc, cuveId:(cv?cv.id:null),
+           // ★ ASM-1 — l'apport, a part des kilos (§153d).
+           apportHl:((c&&c.apports)||[]).reduce(function(s,a){ return s+(parseFloat(a&&a.l)||0); },0)/100,
+           nbBtl:(c&&c.nb_bouteilles!=null)?c.nb_bouteilles:null };
 }
+/* ★ VOL-2 — un id de degrade par graphe (§153d). */
+var _CAVE_BTL_GID=0;
 function _caveBtlGraphSvg(ch,nbBtl,w){
-  var steps=[];
-  if(ch.recolteKg!=null) steps.push({lab:'R\u00e9colte',sub:Math.round(ch.recolteKg)+' kg',v:_mvBtl(ch.recolteKg/_mlKgHl())});
-  if(ch.cuveHl!=null)    steps.push({lab:'En cuve',sub:_mvF1(ch.cuveHl)+' hL',v:_mvBtl(ch.cuveHl)});
-  steps.push({lab:'Apr\u00e8s \u00e9levage',sub:_mvF1(ch.eleveHl)+' hL',v:_mvBtl(ch.eleveHl)});
-  if(nbBtl!=null)        steps.push({lab:'Bouteilles',sub:nbBtl+' btl',v:nbBtl});
-  if(steps.length<2) return '';
-  var c=window._mvGraphCadre(w,168,{padL:12,padR:12,padT:34,padB:34});
-  var W=c.w,H=c.h,pad=c.padL;
+  /* ★ VOL-2 — le kg/hL de chaque etape ; l'apport a part (§153d). */
+  var steps=[], ent=(ch.entonneHl!=null&&ch.entonneSrc==='mesure'), kg=ch.recolteKg;
+  var ap=(ent&&parseFloat(ch.apportHl)>0)?parseFloat(ch.apportHl):0;
+  var kgHl=function(hl){ return (kg!=null&&hl>0)?Math.round(kg/hl):null; };
+  if(kg!=null) steps.push({lab:'R\u00e9colte',sub:Math.round(kg)+' kg',v:_mvBtl(kg/_mlKgHl()),va:0,r:null});
+  if(ch.estHl!=null) steps.push({lab:'En cuve',sub:_mvF1(ch.estHl)+' hL estim\u00e9s',v:_mvBtl(ch.estHl),va:0,r:kgHl(ch.estHl)});
+  if(ent) steps.push({lab:'Entonn\u00e9',sub:_mvF1(ch.entonneHl)+(ap?(' + '+_mvF1(ap)):'')+' hL',
+                      v:_mvBtl(ch.entonneHl),va:(ap?_mvBtl(ap):0),r:kgHl(ch.entonneHl)});
+  else if(steps.length) steps.push({lab:'Entonn\u00e9',sub:'\u00e0 mesurer',v:null,va:0,r:null});
+  if(nbBtl!=null){
+    var part=(ent&&ap)?ch.entonneHl/(ch.entonneHl+ap):1;   // la part du vin de la cuvee dans les cols
+    steps.push({lab:'Bouteilles',sub:nbBtl+' btl',v:nbBtl,va:0,r:kgHl(nbBtl*0.75/100*part)});
+  }
+  var pleins=steps.filter(function(s){ return s.v!=null; });
+  if(pleins.length<2) return '';
+  var c=window._mvGraphCadre(w,180,{padL:12,padR:12,padT:34,padB:46});
+  var H=c.h,pad=c.padL;
   var bw=Math.min(96,Math.max(24,c.iw/steps.length-10));
   var gap=(c.iw-bw*steps.length)/(steps.length-1||1);
-  var max=steps[0].v||1, base=H-c.padB;
+  var max=Math.max.apply(null,pleins.map(function(s){ return s.v+s.va; }))||1, base=H-c.padB, prec=null;
+  var gid='mvbgd'+(++_CAVE_BTL_GID);
   var bars=steps.map(function(s,i){
-    var h=Math.max(3,(s.v/max)*(base-c.padT)), x=pad+i*(bw+gap), y=base-h;
-    var perte=i>0?Math.round((1-s.v/(steps[i-1].v||1))*100):0;
-    return '<rect x="'+x.toFixed(1)+'" y="'+y.toFixed(1)+'" width="'+bw.toFixed(1)+'" height="'+h.toFixed(1)+'" rx="5" fill="url(#mvbgd)"/>'
-      +'<text x="'+(x+bw/2).toFixed(1)+'" y="'+(y-14).toFixed(1)+'" font-size="'+c.txt.val+'" font-weight="700" fill="'+c.col.mesure+'" text-anchor="middle">'+s.v+'</text>'
-      +(i>0?'<text x="'+(x+bw/2).toFixed(1)+'" y="'+(y-2).toFixed(1)+'" font-size="'+c.txt.mini+'" fill="'+c.col.alerte+'" text-anchor="middle">\u2212'+perte+'%</text>':'')
-      +'<text x="'+(x+bw/2).toFixed(1)+'" y="'+(base+14)+'" font-size="'+c.txt.mini+'" fill="var(--texte)" text-anchor="middle" font-weight="600">'+s.lab+'</text>'
-      +'<text x="'+(x+bw/2).toFixed(1)+'" y="'+(base+26)+'" font-size="'+c.txt.mini+'" fill="'+c.col.texte+'" text-anchor="middle">'+s.sub+'</text>';
+    var x=pad+i*(bw+gap), cx=(x+bw/2).toFixed(1);
+    var pied='<text x="'+cx+'" y="'+(base+14)+'" font-size="'+c.txt.mini+'" fill="var(--texte)" text-anchor="middle" font-weight="600">'+s.lab+'</text>'
+      +'<text x="'+cx+'" y="'+(base+26)+'" font-size="'+c.txt.mini+'" fill="'+c.col.texte+'" text-anchor="middle">'+s.sub+'</text>'
+      +(s.r!=null?('<text x="'+cx+'" y="'+(base+39)+'" font-size="'+c.txt.mini+'" fill="'+c.col.mesure
+        +'" text-anchor="middle" font-weight="700">'+s.r+' kg/hL</text>'):'');
+    if(s.v==null)
+      return '<line x1="'+x.toFixed(1)+'" y1="'+(base-1)+'" x2="'+(x+bw).toFixed(1)+'" y2="'+(base-1)+'" stroke="'+c.col.texte
+        +'" stroke-width="1.5" stroke-dasharray="4 3"/>'+pied;
+    var h=Math.max(3,(s.v/max)*(base-c.padT)), y=base-h;
+    var ha=s.va?Math.max(2,(s.va/max)*(base-c.padT)):0, ya=y-ha;
+    // Ecart sur la derniere barre dessinee ; bouteilles face a tout l'entonne.
+    var ref=prec?(prec.v+(s.lab==='Bouteilles'?prec.va:0)):0;
+    var ec=prec?Math.round((1-s.v/(ref||1))*100):0;
+    prec=s;
+    return '<rect x="'+x.toFixed(1)+'" y="'+y.toFixed(1)+'" width="'+bw.toFixed(1)+'" height="'+h.toFixed(1)+'" rx="5" fill="url(#'+gid+')"/>'
+      +(ha?('<rect x="'+x.toFixed(1)+'" y="'+ya.toFixed(1)+'" width="'+bw.toFixed(1)+'" height="'+(ha+4).toFixed(1)+'" rx="5" fill="'
+        +c.col.prevu+'" opacity=".38" stroke="'+c.col.prevu+'" stroke-dasharray="3 2"/>'):'')
+      +'<text x="'+cx+'" y="'+((ha?ya:y)-14).toFixed(1)+'" font-size="'+c.txt.val+'" font-weight="700" fill="'+c.col.mesure+'" text-anchor="middle">'
+        +s.v+(s.va?('<tspan font-size="'+c.txt.mini+'" font-weight="600"> +'+s.va+'</tspan>'):'')+'</text>'
+      +(ec?('<text x="'+cx+'" y="'+((ha?ya:y)-2).toFixed(1)+'" font-size="'+c.txt.mini+'" fill="'+c.col.alerte+'" text-anchor="middle">'
+        +(ec>0?('\u2212'+ec):('+'+(-ec)))+'%</text>'):'')
+      +pied;
   }).join('');
-  var g='<defs><linearGradient id="mvbgd" x1="0" y1="0" x2="0" y2="1">'
+  var g='<defs><linearGradient id="'+gid+'" x1="0" y1="0" x2="0" y2="1">'
     +'<stop offset="0" stop-color="'+c.col.prevu+'"/><stop offset="1" stop-color="'+c.col.mesure+'"/></linearGradient></defs>'+bars;
-  var aria='\u00c9volution du volume en \u00e9quivalent bouteilles, de '+steps[0].lab.toLowerCase()
-    +' \u00e0 '+steps[steps.length-1].lab.toLowerCase()+' : '+steps[0].v+' puis '+steps[steps.length-1].v+' cols.';
+  var eR=steps.filter(function(s){ return s.lab==='Entonn\u00e9'&&s.r!=null; })[0];
+  var aria='\u00c9volution du volume en \u00e9quivalent bouteilles, de '+pleins[0].lab.toLowerCase()
+    +' \u00e0 '+pleins[pleins.length-1].lab.toLowerCase()+' : '+pleins[0].v+' puis '+pleins[pleins.length-1].v+' cols'
+    +(ent?(eR?(', '+eR.r+' kg/hL \u00e0 l\u2019entonnage'):''):' \u2014 volume entonn\u00e9 pas encore mesur\u00e9')
+    +(ap?(', dont '+_mvF1(ap)+' hL apport\u00e9s d\u2019une autre cuve'):'')+'.';
   return window._mvGraphSvg(c,aria,g);
 }
 function renderCaveBouteille(){
@@ -11356,8 +11787,8 @@ function renderCaveBouteille(){
       var totBtl=list.reduce(function(s,c){return s+(c.nb_bouteilles||0);},0);
       html+='<div class="mvb-grp"><div class="mvb-grphead">Millésime '+m+' · '+totBtl+' bouteilles</div>';
       list.forEach(function(c){
-        var ch=c.bilan_perte||_caveBilanChaine(c);
-        ch.nbBtl=(c.nb_bouteilles!=null?c.nb_bouteilles:null);
+        // ★ VOL-1 — le vivant d'abord (une mesure saisie apres la mise se voit), le fige en repli.
+        var ch=_caveBilanChaine(c);
         var perteTot=(ch.recolteKg!=null&&c.nb_bouteilles)?Math.round((1-c.nb_bouteilles/_mvBtl(ch.recolteKg/_mlKgHl()))*100):null;
         html+='<div class="mvb-card"><div class="mvb-name">'+_escHtml(c.nom)+'</div>'
           +'<div class="mvb-meta">Mis en bouteille'+(c.date_embouteillage?' · '+_caveDateFr(c.date_embouteillage):'')+'</div>'
@@ -11400,7 +11831,8 @@ function _caveBtlConfirmYes(id){
   c.statut='embouteille';
   c.nb_bouteilles=reel;
   c.date_embouteillage=_mvToday();
-  c.bilan_perte={recolteKg:ch.recolteKg,cuveHl:ch.cuveHl,eleveHl:ch.eleveHl};
+  // ★ VOL-1 — plus de `cuveHl` (la contenance) (§152b).
+  c.bilan_perte={recolteKg:ch.recolteKg,estHl:ch.estHl,entonneHl:ch.entonneHl,entonneSrc:ch.entonneSrc,eleveHl:hl};
   _caveBtlConfirm=null;
   window.CAVE_ELEVAGE=CAVE_ELEVAGE;
   if(window.fbSave) window.fbSave('cave_elevage',CAVE_ELEVAGE);
@@ -11887,7 +12319,7 @@ function _mlChaine(mil){
   var hlCuve=cuves.filter(function(c){ return c.statut!=='termine'; })
                   .reduce(function(s,c){ return s+_vendHlKg(_vendCuvKgDom(c.id)); },0);
   var hlDecuve=cuves.filter(function(c){ return c.statut==='termine'; })
-                    .reduce(function(s,c){ return s+_vendVolLoge(c); },0);
+                    .reduce(function(s,c){ return s+_vendVolLoge(c)+_vendPrelevHl(c); },0);   // ASM-1
   var cuvees=(CAVE_ELEVAGE.cuvees||[]).filter(function(c){ return String(c.millesime)===String(mil); });
   var enFut=cuvees.filter(function(c){ return c.statut!=='embouteille'; });
   var hlFut=enFut.reduce(function(s,c){ return s+_mlHlCuvee(c); },0);
@@ -11900,7 +12332,9 @@ function _mlChaine(mil){
     var bp={kg:0,cuve:0,eleve:0,vu:false};
     cuvees.forEach(function(c){
       var b=c.bilan_perte; if(!b) return; bp.vu=true;
-      bp.kg+=(b.recolteKg||0); bp.cuve+=(b.cuveHl||0); bp.eleve+=(b.eleveHl||0);
+      /* ★ VOL-1 — `cuveHl` ne compte plus (§152b). */
+      var _en=parseFloat(b.entonneHl);
+      bp.kg+=(b.recolteKg||0); bp.cuve+=((isFinite(_en)&&_en>0)?_en:(b.eleveHl||0)); bp.eleve+=(b.eleveHl||0);
     });
     if(bp.vu){ kgTot=bp.kg; hlDecuve=Math.round(bp.cuve); hlFut=bp.eleve; retro=true; }
   }
@@ -12432,7 +12866,9 @@ function _mlRenderVie(){
     foot+='De la benne \u00e0 l\u2019\u00e9levage, <b>'+Math.round((1-ch.hlFut/cuve0)*100)
       +' %</b> du volume s\u2019est perdu. Le reste se jouera \u00e0 l\u2019\u00e9levage et \u00e0 la mise. ';
   }
-  foot+='Chaque \u00e9tage est un chiffre d\u00e9j\u00e0 saisi ailleurs \u2014 rien n\u2019est estim\u00e9 sauf la projection en pointill\u00e9.';
+  // ★ VOL-1 — le pied disait « rien n'est estime » : les deux premiers etages le sont.
+  foot+='Les deux premiers \u00e9tages sont des kilos convertis \u00e0 la r\u00e8gle du Cuvier ('+_mvF1(ch.kgHl)
+    +'\u00a0kg/hL)\u00a0; les suivants sont des volumes saisis ailleurs, sauf la projection en pointill\u00e9.';
   h+='<div class="mlx-foot">'+foot+'</div></div>';
 
   var reste=_mlResteARentrer(mil);
@@ -13569,6 +14005,7 @@ function _pcavInjectCss(){
   +'.pcrb-g svg{display:block}'
   +'.pcrb-note{background:var(--or-pale);border:1px solid rgba(194,161,77,.4);border-radius:12px;padding:11px 14px;font-size:var(--pt-txt,12.5px);color:var(--texte-med);line-height:1.55;margin-top:13px}'
   +'.pcrb-note b{color:var(--texte)}'
+  +'.pcrb-act{margin-top:12px}'
   +'.pcrb-tb{width:100%;border-collapse:collapse;font-size:var(--pt-micro,11px);margin-top:13px}'
   +'.pcrb-tb th{text-align:left;font-size:var(--pt-lbl,10.5px);letter-spacing:.9px;text-transform:uppercase;color:var(--texte-doux);font-weight:600;padding:0 0 7px;border-bottom:1px solid var(--gris-clair);white-space:nowrap}'
   +'.pcrb-tb td{padding:8px 0;border-bottom:1px solid var(--gris-clair);color:var(--texte-med);white-space:nowrap}'
@@ -14063,15 +14500,29 @@ function _pcrbChaine(c){
     var ch=null;
     try{ ch=window._caveBilanChaine(x); }catch(e){ _pcavLog('bilanChaine',e); return; }
     if(!ch) return;
-    var n=(ch.recolteKg!=null?1:0)+(ch.cuveHl!=null?1:0)+1+(ch.nbBtl!=null?1:0);
+    /* ★ VOL-1 — les barres qui se dessinent ; plus d'« Apres elevage » (§152c). */
+    var n=(ch.recolteKg!=null?2:0)+((ch.entonneHl!=null&&ch.entonneSrc==='mesure')?1:0)+(ch.nbBtl!=null?1:0);
     if(n>bestN){ bestN=n; best={cuv:x,ch:ch}; }
   });
   if(!best||bestN<2) return '';
   _PCRB_CH=best;
+  var ch0=best.ch, ent=(ch0.entonneHl!=null&&ch0.entonneSrc==='mesure');
+  // Le volume entonne se saisit la ou il vit — sur la cuve decuvee — mais d'ici.
+  var act=(!ent&&ch0.cuveId&&typeof canWrite==='function'&&canWrite()&&_pcavHasW('_vendDvolCorriger'))
+    ? ('<div class="pcrb-act"><button type="button" class="pcav-act" onclick="_vendDvolCorriger(\''
+      +_escAttr(ch0.cuveId)+'\')">Saisir le volume entonn\u00e9</button></div>') : '';
   return _pcrbCard('bouteille','De la r\u00e9colte \u00e0 la bouteille',
     _escHtml(best.cuv.nom||'Cuv\u00e9e')+'\u00a0\u00b7 ce que chaque \u00e9tape a laiss\u00e9 passer.','cha\u00eene',
-    _pcrbSlot('pcrb-g-chain'),
-    'La cuv\u00e9e montr\u00e9e est celle dont la cha\u00eene est la <b>plus compl\u00e8te</b>. Une \u00e9tape absente '
+    _pcrbSlot('pcrb-g-chain')+act,
+    '<b>R\u00e9colte</b>\u00a0: les kilos d\u2019apr\u00e8s les caisses. <b>En cuve</b>\u00a0: ces kilos \u00e0 la r\u00e8gle du '
+    +'Cuvier ('+_mvF1(_mlKgHl())+'\u00a0kg/hL), saign\u00e9es d\u00e9duites \u2014 jamais la contenance de la cuve. '
+    +'<b>Entonn\u00e9</b>\u00a0: le volume d\u00e9cuv\u00e9 <b>mesur\u00e9</b> \u2014 jamais la taille des f\u00fbts'
+    +(ent?'.':'\u00a0; tant qu\u2019il n\u2019est pas saisi, l\u2019\u00e9tape reste en pointill\u00e9.')
+    // ★ VOL-2 — le kg/hL, et a quoi il sert ; ★ ASM-1 — l'apport, s'il y en a un.
+    +' <b>kg/hL</b>, sous chaque \u00e9tape\u00a0: les kilos r\u00e9colt\u00e9s divis\u00e9s par ses hectolitres \u2014 l\u2019\u00e9cart entre '
+    +'la r\u00e8gle et l\u2019entonn\u00e9 dit s\u2019il faut revoir la r\u00e8gle.'
+    +(ch0.apportHl>0?' L\u2019apport d\u2019une autre cuve s\u2019empile en pointill\u00e9\u00a0: il n\u2019entre ni dans le kg/hL, ni dans l\u2019\u00e9cart.':'')
+    +'<br>La cuv\u00e9e montr\u00e9e est celle dont la cha\u00eene est la <b>plus compl\u00e8te</b>. Une \u00e9tape absente '
     +'n\u2019est pas un z\u00e9ro\u00a0: elle n\u2019est simplement pas dessin\u00e9e. Le d\u00e9tail de chaque cuv\u00e9e vit '
     +'dans <b>Le Chai\u00a0\u203a Bouteilles</b>.','cave.courbes');
 }
@@ -14317,13 +14768,14 @@ function _rmDetail(o){
   var d = [];
   switch(o.type){
     case 'chaptalisation':
-      if(o.volume_hl != null) d.push(_rmF(o.volume_hl) + ' hL trait\u00e9s');
+      if(o.volume_hl != null) d.push(_rmF(o.volume_hl) + ' hL trait\u00e9s' + (o.vol_src === 'estime' ? ' (estim\u00e9)' : ''));
       if(o.degre != null)     d.push('+' + _rmF(o.degre) + '\u00b0 vis\u00e9');
       if(o.kg_sucre != null)  d.push(_rmF(o.kg_sucre) + ' kg de sucre');
       break;
     case 'so2':
       if(o.dose != null) d.push(_rmF(o.dose) + ' g/hL');
-      if(o.dose != null && o.volume_hl) d.push('soit ' + _rmF(o.dose * o.volume_hl) + ' g');
+      if(o.dose != null && o.volume_hl) d.push('soit ' + _rmF(o.dose * o.volume_hl) + ' g sur ' + _rmF(o.volume_hl) + ' hL'
+                                               + (o.vol_src === 'estime' ? ' (estim\u00e9)' : ''));
       break;
     case 'soufre':
       if(o.grammes_pastille) d.push(o.grammes_pastille + ' g/pastille');
@@ -14375,6 +14827,19 @@ function _rmDetail(o){
   return d.join(' \u00b7 ');
 }
 
+/* ★ VOL-1 — repli : caisses, sinon decuve, sinon rien — jamais la contenance (§152b). */
+function _rmVolRepli(V, c){
+  if(!c) return null;
+  var kg = 0;
+  ((V && V.recoltes) || []).forEach(function(r){ if(r && r.cuve_id === c.id) kg += _recKgDom(r); });
+  if(kg > 0){
+    var hl = Math.max(0, _vendHlKg(kg) - _vendSortiesHl(c));
+    if(hl > 0) return {hl:Math.round(hl * 100) / 100, src:'estime'};
+  }
+  var m = _rmNum(c.vol_decuve_hl);
+  return (c.decuvage && m > 0) ? {hl:m, src:'mesure'} : null;
+}
+
 /* ── Collecte : Cuvier puis Chai, une ligne par manipulation ──────── */
 function _rmLignes(CAVE_VENDANGE, CAVE_ELEVAGE, campagne, millesime){
   var out = [], hors = {};
@@ -14390,11 +14855,15 @@ function _rmLignes(CAVE_VENDANGE, CAVE_ELEVAGE, campagne, millesime){
       // le volume de la cuve sert a convertir les doses en g/hL
       var e = {};
       for(var k in o) if(Object.prototype.hasOwnProperty.call(o,k)) e[k] = o[k];
-      if(e.volume_hl == null) e.volume_hl = _rmNum(c.volume_hl);
+      /* ★ VOL-1 — repli : le contenu, dit estime (§152b). */
+      if(e.volume_hl == null){
+        var _rv = _rmVolRepli(CAVE_VENDANGE, c);
+        if(_rv){ e.volume_hl = _rv.hl; if(!e.vol_src) e.vol_src = _rv.src; }
+      }
       var mc = _rmMilCuve(CAVE_VENDANGE, c.id);
       if(!milOk(mc)) return;
       out.push({date:o.date, fam:T.fam, type:o.type, lbl:T.lbl, source:'Cuvier', mil:mc,
-                contenant:c.nom || 'Cuve', volume:_rmNum(c.volume_hl),
+                contenant:c.nom || 'Cuve', volume:(e.volume_hl != null ? e.volume_hl : null),
                 detail:_rmDetail(e), note:o.note || '', operateur:'', brut:e});
     });
   });
@@ -16499,7 +16968,7 @@ function _cuvDocGraph(c){
 var MV_TRI_CUVERIE = [
   { v:'encuvage', lbl:'Encuvage', a:'la premi\u00e8re entr\u00e9e d\u2019abord', z:'la derni\u00e8re entr\u00e9e d\u2019abord' },
   { v:'nom',      lbl:'Cuve',     a:'A \u2192 Z', z:'Z \u2192 A' },
-  { v:'volume',   lbl:'Volume',   a:'la plus petite d\u2019abord', z:'la plus grande d\u2019abord' },
+  { v:'volume',   lbl:'Contenance', a:'la plus petite d\u2019abord', z:'la plus grande d\u2019abord' },   // VOL-1
   { v:'duree',    lbl:'Cuvaison', a:'la plus courte d\u2019abord', z:'la plus longue d\u2019abord' }
 ];
 function _cuvTrier(cuves, c){
@@ -16540,7 +17009,7 @@ function _cuvDoc(an, ctri){
   var sections = cuves.map(function(c){
     var mes = (c.mesures_fa || []).slice().sort(function(a, b){ return String(a.date) < String(b.date) ? -1 : 1; });
     var ops = (c.operations || []).slice().sort(function(a, b){ return String(a.date) < String(b.date) ? -1 : 1; });
-    totVol += (c.volume_hl || 0);
+    totVol += _vendVolContenu(c).hl;   // VOL-1
     totMes += mes.length;
     ops.forEach(function(o){ if(o.type === 'chaptalisation' && o.kg_sucre) totSuc += o.kg_sucre; });
 
@@ -16596,7 +17065,11 @@ function _cuvDoc(an, ctri){
     var haP  = parc.reduce(function(s, n){ return s + _vendParcSurf(n); }, 0);
     var id = [];
     if(c.date_entree) id.push('<em>Entrée le <b>' + _vendFrDate(c.date_entree) + '</b></em>');
-    if(c.volume_hl)   id.push('<em>Volume <b>' + _mvF1(c.volume_hl) + ' hL</b></em>');
+    /* ★ VOL-1 — « Contenance » et contenu, chacun sous son nom (§152b). */
+    if(c.volume_hl)   id.push('<em>Contenance <b>' + _mvF1(c.volume_hl) + ' hL</b></em>');
+    var _vc = _vendVolContenu(c);
+    if(_vc.hl > 0)    id.push('<em>' + (_vc.src === 'mesure' ? 'D\u00e9cuv\u00e9' : 'Volume estim\u00e9') + ' <b>'
+                        + _mvF1(_vc.hl) + ' hL</b>' + (_vc.src === 'estime' ? ' (' + Math.round(_vc.kg) + ' kg)' : '') + '</em>');
     if(parc.length)   id.push('<em>' + parc.length + ' parcelle' + (parc.length > 1 ? 's' : '')
                         + ' <b>' + _escHtml(parc.join(', ')) + '</b>'
                         + (haP > 0 ? ' (' + _mvF1(haP) + ' ha)' : '') + '</em>');

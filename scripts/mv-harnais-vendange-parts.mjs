@@ -394,7 +394,7 @@ T('prorata : la lie aussi', r[0].lie + r[1].lie, 50);
     signal partiel ment avec l'autorité d'une mesure.
     ⚠️ Et la surface ne s'additionne pas d'un passage à l'autre. */
 const NOMS_RDT = ['_vendRdtBase','_vendLitresRetour','_caveFutL','_caveVolCuvesL','_caveNbTonneaux',
-                  '_caveTonL','_caveFutsL','_caveVolL','_vendVolLoge','_vendCuvCsDom','_vendVolCuve','_vendVolPart','_vendSrcLbl',
+                  '_caveTonL','_caveFutsL','_caveVolL','_caveManqueL','_caveCuveSource','_vendVolLoge','_vendPrelevHl','_vendCuvCsDom','_vendVolCuve','_vendVolPart','_vendSrcLbl',
                   '_vendSurfParc','_vendSurfLbl','_vendHaTxt','_vendVolParc','_vendRdtParc'];
 const absentsRdt = NOMS_RDT.filter(x => !corps(x));
 if (absentsRdt.length){ console.error('ROUGE — VD-3 introuvable : ' + absentsRdt.join(', ')); process.exit(1); }

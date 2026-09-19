@@ -13,6 +13,11 @@
       pas le contenu (faute RDT-1). Une dose juste sur un volume faux donne une
       quantité fausse, affichée avec l'aplomb d'un calcul. Tant que la cuve
       n'est pas décuvée, `vol_src` vaut 'estime' et l'écran le dit.
+      ★ VOL-1 (19/09) — l'estimation est celle des CAISSES à la règle du
+      Cuvier, saignées déduites ; la contenance ne sert plus de repère du tout
+      (Nico : « ce n'est pas la contenance de la cuve qui est à mettre »). Les
+      assertions de §5 qui gravaient « c'est la CONTENANCE qui sert de repère »
+      encodaient l'ancienne règle : elles sont réécrites, pas contournées.
    3. LE CONSOMMÉ NON FILTRÉ. `cave_so2` additionne TOUT le soufre de la cave
       sans regarder le produit. Avec quatre produits œno au catalogue, ce
       raccourci attribuerait à chacun la totalité. `cuvier` filtre par
@@ -69,7 +74,8 @@ function extraireVar(SRC, nom, ou) {
 
 const FN_CAVE = ['_vendEstIntrant', '_vendIntrUnite', '_vendIntrUniteQ', '_vendIntrVol',
   '_vendIntrVolLbl', '_vendIntrQte', '_vendIntrQteTxt', '_vendOpDet', '_vendCuvF1',
-  '_vendMoyLbl', '_vendMoyTbl', '_vendVolLoge', '_caveTonL', '_caveFutsL', '_caveVolL', '_rmDetail', '_rmF'];
+  '_vendMoyLbl', '_vendMoyTbl', '_vendVolLoge', '_caveTonL', '_caveFutsL', '_caveVolL', '_rmDetail', '_rmF',
+  '_vendSortiesHl', '_vendVolContenu', '_vendHlKg', '_vendCuvKgDom', '_mlKgHl'];
 const VA_CAVE = ['_VEND_INTR', '_VEND_OPS', '_VEND_FROID', '_VEND_CHAUD', 'RM_TYPES', 'RM_FAMILLES'];
 
 const morceaux = []
@@ -85,10 +91,14 @@ const BLOC_RSV = ['_consoCuvier', '_consoCuvierEstime']
 /* ══ BOUCHONS — minimaux ═══════════════════════════════════════════════════ */
 function monterCave(mutation) {
   const corps = mutation ? mutation(BLOC_CAVE) : BLOC_CAVE;
-  return new Function('CAVE_ELEVAGE', 'window',
-    corps + '\nreturn {_vendEstIntrant,_vendIntrQte,_vendIntrQteTxt,_vendIntrVol,'
+  /* ★ VOL-1 — le repère lit les caisses : deux bouchons de DONNÉES (le réglage
+     du Cuvier, et les kilos domaine d'une récolte), aucune règle réécrite. */
+  const BOUCHONS = "function _vendCfg(){ return { ratio_min:130, ratio_max:140 }; }\n"
+                 + "function _recKgDom(r){ return (r && r.kg_dom) || 0; }\n";
+  return new Function('CAVE_ELEVAGE', 'window', 'CAVE_VENDANGE',
+    BOUCHONS + corps + '\nreturn {_vendEstIntrant,_vendIntrQte,_vendIntrQteTxt,_vendIntrVol,'
           + '_vendIntrUnite,_vendIntrUniteQ,_vendOpDet,_rmDetail,_VEND_OPS,RM_TYPES,RM_FAMILLES};'
-  )({ cuvees: [] }, {});
+  )({ cuvees: [] }, {}, { recoltes: [{ id: 'r1', cuve_id: 'cv1', kg_dom: 6345 }], cuves_vinif: cuves().cuves_vinif });
 }
 function monterRsv(cv, mutation) {
   const corps = mutation ? mutation(BLOC_RSV) : BLOC_RSV;
@@ -154,7 +164,9 @@ if (!CONTRE) {
   const cv = cuves();
   const vEst = C._vendIntrVol(cv.cuves_vinif[0]);
   pose(vEst.src === 'estime', 'cuve non d\u00e9cuv\u00e9e \u2192 volume estim\u00e9');
-  pose(vEst.hl === 50, 'et c\u2019est la CONTENANCE qui sert de rep\u00e8re, dite comme telle');
+  pose(vEst.hl === 42, '\u2605 VOL-1 : 6345 kg \u00e0 135 kg/hL = 47 hL, moins la saign\u00e9e de 5 \u2014 jamais les 50 hL de contenance');
+  const vVide = C._vendIntrVol({ id: 'vide', volume_hl: 50 });
+  pose(vVide.src === 'aucun' && vVide.hl === 0, '\u2605 VOL-1 : sans caisse, rien n\u2019est invent\u00e9 \u2014 la contenance n\u2019est pas un repli');
   const vMes = C._vendIntrVol(cv.cuves_vinif[1]);
   pose(vMes.src === 'mesure', 'cuve d\u00e9cuv\u00e9e \u2192 volume mesur\u00e9');
   pose(vMes.hl === 26, 'et c\u2019est le volume log\u00e9, pas la contenance');
@@ -232,10 +244,19 @@ if (!CONTRE) {
 
   const casCave = [
     ['C1 \u00b7 la contenance relue comme un contenu mesur\u00e9',
-     b => b.replace('  var m=_vendVolLoge(c);\n  if(m>0) return {hl:m, src:\'mesure\'};',
-                    '  var m=(c&&c.volume_hl)||0;\n  if(m>0) return {hl:m, src:\'mesure\'};'),
-     C => C._vendIntrVol({ volume_hl: 50 }).src === 'estime',
+     b => b.replace('  var m=_vendVolLoge(c);\n  if(m>0) return {hl:Math.round(m*100)/100, src:\'mesure\', kg:0};',
+                    '  var m=(c&&c.volume_hl)||0;\n  if(m>0) return {hl:Math.round(m*100)/100, src:\'mesure\', kg:0};'),
+     C => C._vendIntrVol({ id: 'vide', volume_hl: 50 }).src === 'aucun',
      'le volume redevient « mesur\u00e9 » sans d\u00e9cuvage'],
+    ['C1b \u00b7 VOL-1 : la contenance redevient le rep\u00e8re d\u2019une cuve sans caisse',
+     b => b.replace("  if(!(kg>0)) return {hl:0, src:'aucun', kg:0};",
+                    "  if(!(kg>0)) return {hl:(c&&c.volume_hl)||0, src:'estime', kg:0};"),
+     C => C._vendIntrVol({ id: 'vide', volume_hl: 50 }).hl === 0,
+     'une cuve vide re\u00e7oit 50 hL de dose'],
+    ['C1c \u00b7 VOL-1 : la saign\u00e9e n\u2019est plus d\u00e9duite',
+     b => b.replace('_vendHlKg(kg)-_vendSortiesHl(c)', '_vendHlKg(kg)'),
+     C => C._vendIntrVol(cuves().cuves_vinif[0]).hl === 42,
+     'le jus saign\u00e9 est encore dos\u00e9'],
     ['C2 \u00b7 division par mille oubli\u00e9e (g pris pour des kg)',
      b => b.replace('return dose*vol/1000;', 'return dose*vol;'),
      C => C._vendIntrQte(24, 42) === 1.008,
@@ -255,7 +276,9 @@ if (!CONTRE) {
      C => !!C.RM_TYPES.tanins,
      'le tanin dispara\u00eet du registre des manipulations'],
     ['C6 \u00b7 le registre tait l\u2019estimation',
-     b => b.replace("+ (o.vol_src === 'estime' ? ' (estim\\u00e9)' : '')", "+ ''"),
+     /* ★ VOL-1 : la chaptalisation et le SO2 portent aussi la mention — toutes
+        les occurrences, sinon la mutation tombe sur la mauvaise et ne mord pas. */
+     b => b.split("+ (o.vol_src === 'estime' ? ' (estim\\u00e9)' : '')").join("+ ''"),
      C => /\(estim/.test(C._rmDetail({ type: 'tanins', produit: 'X', dose: 24,
             volume_hl: 42, vol_src: 'estime', qte: 1.008, qte_unite: 'kg' })),
      'le contr\u00f4le croit le volume mesur\u00e9']
