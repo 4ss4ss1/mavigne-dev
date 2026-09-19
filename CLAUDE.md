@@ -2,7 +2,32 @@
 
 > Document de référence du projet **Ma Vigne** (GUERETTECH). Il est le **porteur de vérité** :
 > la mémoire Claude est plafonnée, ce fichier ne l'est pas.
-> Dernière consolidation : **19 septembre 2026 (PAIE-1)** — ★★★ **« POUR LA COMPTA » : CE QUE LA COMPTA SAISIT, EN GROS ;
+> Dernière consolidation : **19 septembre 2026 (SIGN-1)** — ★★★ **LE CONTRAT EST PAR DOMAINE : UN ADMIN ARRIVÉ APRÈS NE SIGNE
+> PLUS, ET LA PREUVE NE S'ÉCRASE PLUS (§156)**. Trouvé en relisant le code après TIERS-1 : un salarié passé admin a dû signer
+> CGU + DPA « au nom du domaine » (claim `terms` par personne, contrat par domaine), et `acceptTerms` a REMPLACÉ la preuve
+> d'origine (`set`, un document par domaine, sans historique). Serveur : transaction, historique `hist/{ref}-{ts_ms}`, preuve
+> du domaine remplacée seulement si absente ou dépassée (`termsPlan`), courriel GT qui le dit. Porte : sans claim, la preuve
+> du DOMAINE à jour suffit (`fbLirePreuveDomaine`, lisible par ses membres) ; sinon, et sur toute erreur, le formulaire
+> (fail-closed). Reçu : « acceptées pour le domaine par … ». `scripts/mv-signature-restaurer.cjs` reverse la preuve écrasée
+> depuis l'export du 19/09 (règle GCS de 7 jours → copier sous `archives/` d'abord). Harnais neuf : 30 assertions, 11
+> contre-épreuves ; ★ son premier rouge était le test (extraction arrêtée aux options de `onCall`). **SW 8.10 → 8.11, APP
+> 7.44 inchangé**, base `ebba4de` — ⚠️ TIERS-1 (§155) pas poussé : **ce zip le contient**. Détail en **§156**.
+>
+> ★ Précédente : **19 septembre 2026 (TIERS-1)** — ★★ **« SCRIPT ERROR. » N'EST PAS UNE ERREUR DE MA VIGNE :
+> PLUS DE TOAST, UNE TRACE QUI DIT D'OÙ ELLE VIENT (§155)**. Rapport d'un domaine client : « Script error. », niveau
+> error, ni écran ni compte, aucun détail technique. ★ Rejoué dans Chrome 141 avec la formule exacte du gestionnaire :
+> un script d'une autre adresse chargé sans laissez-passer donne « Script error. », fichier vide, ligne 0, erreur nulle —
+> le `detail` sort vide ; notre code (même adresse) et Leaflet (unpkg, crossOrigin + SRI) arrivent entiers. Restent le
+> script reCAPTCHA d'App Check (inséré par le SDK sans crossorigin, lu dans `node_modules`) et ce que le téléphone
+> injecte (extension, traducteur, navigateur d'une autre appli) — lequel, le navigateur l'a effacé. Le gestionnaire
+> global reconnaît l'erreur effacée (`_mvErreurMasquee`) : plus de toast anglais ; `info` local (3 par session, le reste
+> compté dans `window._mvErrTiersN`) ; UNE entrée par session au journal du domaine avec les scripts d'autres adresses
+> présents (sans leur requête), le navigateur, le mode d'ouverture (`_mvErreurTiersContexte`). ★ La contre-épreuve a
+> démasqué un test faux (ligne 5 : la condition sur la ligne cachait l'absence de celle sur le fichier). Harnais neuf :
+> 26 assertions, 11 contre-épreuves ; rejoué dans un vrai Chrome. **SW 8.09 → 8.10, APP 7.44 inchangé** (`app.js` seul :
+> correctif invisible, §7), base `ebba4de`. Détail en **§155**.
+>
+> ★ Précédente : **19 septembre 2026 (PAIE-1)** — ★★★ **« POUR LA COMPTA » : CE QUE LA COMPTA SAISIT, EN GROS ;
 > LA DEMANDE EST UN TOTAL ; LE SALARIÉ D'ABORD, AUSSI DANS LA SEMAINE (§154)**. Nico : « les infos importantes sont marquées
 > en petit […] que ça ne demande aucune ressource cognitive ». Mesuré : « Retenue sur salaire » en 9,5 px sous trois chiffres
 > de 17 px qui ne s'additionnaient pas. Cadre « Pour la compta » (`_pfCompta`, papier et écran) : une ligne par chose à
@@ -2148,6 +2173,9 @@ c'est la leçon la plus chère du chantier accompagnement.**
 ★ **Même principe côté GT** : un géocodage de commune indisponible, une lecture de saisons refusée,
 une écriture de machines en échec — chacun trace en `info` et **le dit à l'écran**, sans faire
 échouer l'installation (§18b).
+★★ **Et depuis TIERS-1 (§155), « Script error. »** : l'erreur d'un script d'une autre adresse arrive effacée par le
+navigateur (ni fichier, ni ligne, ni pile). Pas de toast ; `info` local (3 par session) et UNE entrée par session au
+journal du domaine, avec les scripts d'autres adresses présents dans la page — c'est elle qui dira d'où ça vient.
 
 ---
 
@@ -4481,7 +4509,7 @@ aperçu de modèle.
 
 - **Double qualité** : GUERETTECH est **responsable de traitement** pour le site, **sous-traitant
   art. 28** pour les données saisies dans l'app.
-- **Signature en app** : `acceptTerms` → `_mv_signatures` (lecture `gtAdmin` uniquement), avec le
+- **Signature en app** : `acceptTerms` → `_mv_signatures` (lecture : GT **et les membres du domaine** — rules relues le 19/09, §156 ; écriture : la seule Cloud Function), avec le
   **hash SHA-256** de la page signée.
 - **Catégories traitées** : identification, vie professionnelle, connexion/sécurité. **Aucune donnée
   art. 9.**
@@ -21175,3 +21203,198 @@ Chromium (390 px et A4), pas sur téléphone ni sur papier réel ; `test:e2e` à
 `_pfCadre` garde, pour les mois d'avant, sa branche `V=P.act?…` devenue inutile (V vaut toujours null après le retour
 anticipé) : sans effet, à nettoyer. ⑤ `planning.js` : 576 → 593 ko (+2,9 %), sous le cliquet de 5 % ; le découpage du
 relevé en module (§143b) reste à décider avant le prochain gros lot Planning.
+
+## 155. ★★ TIERS-1 — « SCRIPT ERROR. » N'EST PAS UNE ERREUR DE MA VIGNE : PLUS DE TOAST, UNE TRACE QUI DIT D'OÙ ELLE VIENT (19/09 — `app.js` · `sw.js` · `scripts/mv-harnais-tiers.mjs` (neuf) · `package.json` · `scripts/harnais-claude-md.mjs` · APP 7.44 **inchangé** · SW 8.09 → **8.10**)
+
+### 155a. Le signalement, et ce qu'il dit déjà
+
+Admin GT › erreurs, un domaine client, 19/09 à 18 h 04 : `Script error.`, `error` / `runtime`, une occurrence,
+**Écrans : —**, **Comptes : —**, **aucun « Détail technique »**. Lu dans le code, chaque tiret parle : `user`
+vaut `'—'` sans `currentUser`, `page` vaut `'—'` sans `.page.active` → personne n'était encore entré dans
+l'appli (démarrage ou écran de connexion) ; l'écriture a pourtant été acceptée par les rules (`canWrite()`) →
+la session Firebase d'un membre était vivante sur l'appareil ; `detail` vide → `e.filename` vide **et**
+`e.error` nul.
+
+### 155b. « Script error. » — rejoué, pas supposé
+
+Règle « muted errors » du HTML : une erreur née dans un script d'une **autre adresse**, chargé **sans
+laissez-passer** (attribut `crossorigin` + en-tête CORS), arrive au gestionnaire global réduite à
+`message = "Script error."`, `filename = ""`, `lineno = colno = 0`, `error = null`. Rejoué dans Chrome 141
+(headless, deux serveurs sur deux ports), avec la formule **exacte** du `detail` du gestionnaire :
+
+| Le script qui lève | message | fichier | ligne | `error` | `detail` |
+|---|---|---|---|---|---|
+| même adresse | `Uncaught TypeError: …` | l'adresse | 1 | objet | rempli |
+| autre adresse, sans laissez-passer | `Script error.` | vide | 0 | `null` | **vide** |
+| autre adresse, `crossorigin` + CORS | `Uncaught TypeError: …` | l'adresse | 1 | objet | rempli |
+
+Pour Ma Vigne : ① notre code est servi par `mavigneapp.fr` (`/assets/main-….js`, `/boot.js`) → **jamais
+effacé** — le rapport du 21/08 (`loginPendingIdx`) arrivait avec fichier et ligne ; ② Leaflet (unpkg) est
+chargé avec `crossOrigin='anonymous'` + SRI (`_ensureLeaflet`) → **jamais effacé** ; ③ restent le **script
+reCAPTCHA d'App Check** — `loadReCAPTCHAV3Script` (`@firebase/app-check`) insère
+`https://www.google.com/recaptcha/api.js` **sans** `crossorigin`, lu dans `node_modules` — et **ce que le
+téléphone glisse dans la page** : extension, traducteur, navigateur intégré d'une autre appli. Le CSP n'autorise
+aucun autre script tiers (`script-src 'self' 'unsafe-inline'` + unpkg, google, gstatic, recaptcha.net).
+⚠️ **Lequel des deux : on ne le sait pas, et aucune relecture du code ne le dira** — le navigateur l'a effacé.
+
+### 155c. Le défaut : un toast anglais que personne ne peut traiter
+
+Le gestionnaire passait tout à `logError` en `error` → toast orange **« ⚠️ Script error. »**, en anglais, ici sur
+l'écran de connexion. Même famille que §55 (« un incident réseau n'est pas une panne ») : un message qui alarme
+sans rien permettre — ni au vigneron, ni au support.
+
+### 155d. Le correctif (`app.js`, juste avant BOOT-1)
+
+- `_mvErreurMasquee(e)` : `Script error.` (point facultatif, casse libre) **et** ni fichier, ni ligne, ni objet
+  `error`. Le même texte AVEC l'un des trois reste une erreur ordinaire.
+- `_mvErreurTiers()` : rien à l'écran ; `logError` en `info`, catégorie `tiers` (journal de l'appareil, joint à
+  « Signaler un problème ») — **3 par session au plus**, le reste compté dans `window._mvErrTiersN` (le journal
+  local garde 50 lignes : un script qui boucle en chasserait les vraies erreurs) ; **la première** part au
+  journal du domaine par `fbAppendError` — même patron que l'assertion interne du SDK Firestore.
+- `_mvErreurTiersContexte()` : les scripts d'autres adresses présents dans la page (**sans leur requête** : celle
+  de reCAPTCHA porte la clé du site ; sans doublon ; 6 au plus, `(+N)` au-delà), le navigateur (160 caractères,
+  comme le carnet d'incidents de BOOT-1), appli installée ou navigateur, secondes depuis l'ouverture, onglet
+  visible ou non, `APP_VERSION`, rang dans la session. Aucun `try` : l'adresse se lit par expression régulière,
+  pas par `new URL` — rien à avaler, rien pour le compteur C14.
+
+★ **Lire la prochaine entrée** : un `chrome-extension://`, `safari-web-extension://` ou `moz-extension://` dans la
+liste → une extension. ⚠️ **L'inverse ne vaut pas** : beaucoup d'extensions retirent leur balise `<script>` juste
+après l'avoir exécutée — une liste réduite à `google.com` / `gstatic.com` n'innocente pas une extension. La lire
+avec la ligne du navigateur : un ordinateur (Windows, Mac) rend l'extension probable — les gestionnaires de mots de
+passe injectent justement au moment de la connexion ; `FBAN`, `Instagram`, `GSA`… → le navigateur intégré d'une autre
+appli. Une entrée `tiers` isolée, sans autre trace autour : rien à faire, la marquer traitée.
+
+### 155e. Harnais — `scripts/mv-harnais-tiers.mjs` (neuf, dans `check` et `prebuild`)
+
+Le vrai code extrait d'`app.js` (trois fonctions, trois constantes, le gestionnaire entier) et **joué** dans un
+contexte `vm` (méthode C20) : **26 assertions** — l'erreur effacée, le rang, la borne locale, l'envoi unique, le
+contexte (requête retirée, même adresse exclue, doublon, borne de 6, « aucun », longueur), et l'erreur de notre
+code qui arrive comme avant. **`--contre` : 11 défauts réinjectés**, chacun rougit.
+★ **La contre-épreuve a démasqué un test faux** : « même texte AVEC un fichier » passait `lineno: 5` — la
+condition sur la ligne suffisait à le rattraper, et retirer celle sur le fichier restait vert. Ligne 0, et un
+test « AVEC une ligne » à part. Le code était juste ; c'est le test qui ne prouvait rien.
+★ **Rejoué dans un vrai Chrome** avec le code extrait : un vrai événement effacé (script d'un autre port, adresse
+avec requête) → `info`, `tiers`, l'adresse citée **sans** sa requête ; une erreur de même adresse → `error`,
+fichier, ligne, pile.
+
+### 155f. Versions et livraison
+
+`app.js` seul côté appli → **correctif invisible** (§7, cas « identité légale ») : **SW 8.09 → 8.10**,
+`APP_VERSION` et `WHATS_NEW` intacts, `index.html` non touché. Base `ebba4de` (`.mv-base`). Déploiement :
+`npm run build && firebase deploy`.
+
+| Fichier | Ce qui change | Bump ? |
+|---|---|---|
+| `src/app.js` | `_mvErreurMasquee`, `_mvErreurTiersContexte`, `_mvErreurTiers` ; une ligne dans le gestionnaire global | ★ SW |
+| `public/sw.js` | 8.10 | ★ SW |
+| `scripts/mv-harnais-tiers.mjs` | neuf | — |
+| `package.json` | le harnais et sa contre-épreuve dans `check` et `prebuild` | — |
+| `scripts/harnais-claude-md.mjs` · `CLAUDE.md` · `.mv-base` | SECTIONS 187 · §155 et §9 · base | — |
+
+### 155g. Ouvert, et dit
+
+① La cause de l'occurrence du 19/09 reste inconnue, et le restera : il faut la suivante, avec son contexte.
+② WebKit (iPhone) efface selon la même règle — pas rejoué ici, faute de Safari. ③ `test:e2e` à lancer chez Nico.
+④ L'Admin GT dit encore « le niveau info reste local » : vrai pour `logError`, pas pour les deux envois directs
+(assertion Firestore, `tiers`) — à reformuler au prochain lot Admin.
+⑤ ★★ **Trouvé en marge, le même jour — la preuve de signature s'écrase.** L'occurrence a coïncidé avec la
+première ouverture d'un salarié passé admin, qui a dû signer CGU + DPA. Lu dans `acceptTerms` (`claims.js`) : la
+preuve s'écrit `_mv_signatures/{slug}` par `set`, UN document par domaine, sans historique → **chaque nouvel admin
+remplace la preuve du domaine** (signataire, fonction, empreintes, `user_agent`). Et la porte (`_mvTermsCheck`) le
+demande à TOUT admin sans claim `terms` — claim par personne, contrat par domaine —, case « pouvoir d'engager le
+domaine » comprise, quel que soit son rôle réel. La preuve d'avant se relit dans les exports natifs quotidiens
+(toutes collections, rétention 7 j) et dans le courriel « DPA accepté » de l'époque. **À trancher** : garder
+l'historique (jamais `set` sur une preuve) ; qui signe pour le domaine, et ce que voit un admin arrivé après.
+→ **Réglé en §156 (SIGN-1)**, sauf « qui signe » (§156g ①).
+
+## 156. ★★★ SIGN-1 — LE CONTRAT EST PAR DOMAINE : UN ADMIN ARRIVÉ APRÈS NE SIGNE PLUS, ET LA PREUVE NE S'ÉCRASE PLUS (19/09 — `functions/claims.js` · `app.js` · `firebase.js` · `sw.js` · `scripts/mv-harnais-signature.mjs` (neuf) · `scripts/mv-signature-restaurer.cjs` (neuf) · `package.json` · `scripts/harnais-claude-md.mjs` · APP 7.44 **inchangé** · SW 8.10 → **8.11**)
+
+### 156a. D'où ça vient
+
+19/09 vers 18 h : courriel « DPA accepté » d'un domaine client, signé par un salarié qu'un admin du domaine venait de
+passer admin (il était tractoriste). Nico demandait si l'erreur de §155 venait de là : non (§155). Mais la relecture du
+code a trouvé deux défauts, et Nico a dit « oui » au correctif.
+
+### 156b. Les deux défauts
+
+① **La porte fait signer, au nom du domaine, tout admin sans claim.** Le claim `terms` est PAR PERSONNE
+(`mergeClaimsUid`), le contrat PAR DOMAINE. Un admin arrivé après la signature n'a pas le claim → `_mvTermsCheck` lui
+ouvre le formulaire : raison sociale, SIRET, adresse, nom, fonction, case « pouvoir d'engager le domaine » — quel que
+soit son rôle réel.
+② **Sa signature écrase celle du domaine.** `acceptTerms` écrivait `_mv_signatures/{slug}` par `set` : UN document par
+domaine, sans historique. La preuve d'origine a disparu de la base.
+
+### 156c. Le correctif
+
+- **Serveur** (`acceptTerms`, en transaction) : toute acceptation va dans `_mv_signatures/{slug}/hist/{ref}-{ts_ms}` (la
+  réf seule ne suffit pas : 9 000 valeurs par an) ; la preuve en place y est versée si elle n'y est pas (preuves d'avant
+  SIGN-1) ; la preuve du domaine n'est remplacée que si elle manque ou porte des versions dépassées — `termsPlan` : **la
+  première acceptation des versions en vigueur fait foi**. Courriel GT : « acceptation supplémentaire, preuve du domaine
+  inchangée » ou « remplace comme preuve du domaine : réf … du … (qui) ». App Check toujours exigé. **Aucune règle
+  touchée** : `hist` est une sous-collection que seul l'Admin SDK écrit et que les rules ne donnent à personne (console
+  Firebase pour la lire).
+- **Porte** (`_mvTermsCheck`) : sans claim à jour, lecture de la preuve du DOMAINE (`fbLirePreuveDomaine`, bornée 8 s ; les
+  rules la laissent lire aux membres du domaine). Si elle couvre les versions en vigueur (`_mvTermsPreuveOk`) → porte
+  fermée, rien à signer ; gardée pour la session, pour CE domaine seulement (`slug` comparé). Sinon — pas de preuve,
+  versions dépassées, non acceptée, lecture impossible, erreur — le formulaire comme avant : **fail-closed**, `.catch`
+  compris (avant, un rejet dans la chaîne laissait la porte fermée en silence).
+- **Reçu** (Réglages › CGU & Mentions légales) : sans acceptation personnelle, celui du domaine — versions, date, réf, et
+  « Acceptées pour le domaine par <nom> — <fonction> », échappés. « Voir le DPA / les CGU signés » ouvre l'exemplaire du
+  domaine (`_mvTermsFillDomaine`, en mémoire ; `_mvTermsOpenDoc` le passe à la page au clic, comme avant).
+
+### 156d. Reverser la preuve écrasée — `scripts/mv-signature-restaurer.cjs`
+
+⚠️ **Délai** : la règle GCS (README_BLAZE) efface `backups/firestore/` à 7 jours → l'export du 19/09 (2 h, AVANT la
+signature) disparaît vers le 26/09. **Étape 0 d'abord** : le copier sous `archives/`, hors règle.
+Import dans une base **à part** (`restauration`), jamais dans `(default)` : l'export est de toutes les collections, et un
+import filtré par collection exige un export filtré.
+
+```
+gcloud storage cp --recursive gs://mavigne-a0fd5.firebasestorage.app/backups/firestore/<DATE> gs://mavigne-a0fd5.firebasestorage.app/archives/firestore-<DATE>
+gcloud firestore databases create --database=restauration --location=eur3 --project=mavigne-a0fd5
+gcloud firestore import gs://mavigne-a0fd5.firebasestorage.app/archives/firestore-<DATE> --database=restauration --project=mavigne-a0fd5
+node scripts/mv-signature-restaurer.cjs <slug>            (lecture seule : les deux preuves, et ce qui serait écrit)
+node scripts/mv-signature-restaurer.cjs <slug> --ecrire   (transaction, rien d'effacé)
+gcloud firestore databases delete --database=restauration --project=mavigne-a0fd5
+```
+
+`--ecrire` : les deux preuves dans `hist` (si absentes) ; la preuve du domaine ← la première acceptation des mêmes
+versions (`choisirParent`) ; l'autre passe « supplementaire ». Accès : `scripts/serviceAccountKey.json` s'il existe
+(comme `restore-from-json.js`), sinon les identifiants par défaut ; firebase-admin du projet, sinon de `functions/`
+(12.3 : bases nommées gérées). **Déployer `acceptTerms` d'abord** — l'ancienne réécraserait à la signature suivante.
+
+### 156e. Harnais — `scripts/mv-harnais-signature.mjs` (neuf, dans `check` et `prebuild`)
+
+**30 assertions** sur le vrai code extrait et joué : serveur (plan, historique, courriel, gardes statiques sur le vrai
+`acceptTerms`, App Check) ; porte dans un contexte `vm` (claim, preuve à jour, dépassée, non acceptée, lecture rejetée,
+lecteur absent, cache d'un autre domaine, cache de ce domaine, GT, non-admin, échappement, reçu personnel inchangé) ;
+restauration (choix de la preuve, même identifiant d'historique que le serveur). **`--contre` : 11 défauts**, chacun rougit.
+★ **Premier passage : un rouge sur un code juste.** L'extraction d'`acceptTerms` s'arrêtait à l'accolade des OPTIONS de
+`onCall({ region… })` : le test ne lisait que l'en-tête. Corrigé (en-tête + corps). Deuxième fois du jour (§155e).
+★ **La chaîne a attrapé le code, elle aussi** : le reçu du domaine ajoutait un `<div style="font-size:12px">` → cliquet
+typo rouge (px en dur 1952 contre 1951). Remis dans la même ligne, avec un `<br>`.
+
+### 156f. Versions et livraison
+
+`app.js` + `firebase.js` + `claims.js` → **SW 8.10 → 8.11** ; APP 7.44 et `WHATS_NEW` intacts : l'admin qui n'a plus rien
+à signer ne voit rien à annoncer (§7). ⚠️ **TIERS-1 (§155, SW 8.10) n'est pas poussé : ce zip le contient et le
+remplace.** Base `ebba4de`. Déploiement : `npm run build && firebase deploy` (fonctions comprises), PUIS 156d.
+
+| Fichier | Ce qui change | Bump ? |
+|---|---|---|
+| `functions/claims.js` | `termsPlan`, `termsHistId`, `termsLigneAvant` ; `acceptTerms` en transaction, historique, courriel GT | déploiement des fonctions |
+| `src/app.js` | porte par domaine, reçu du domaine ; + TIERS-1 | ★ SW |
+| `src/firebase.js` | `fbLirePreuveDomaine` | ★ SW (déjà) |
+| `public/sw.js` | 8.11 | ★ SW |
+| `scripts/mv-harnais-signature.mjs` · `scripts/mv-signature-restaurer.cjs` · `scripts/mv-harnais-tiers.mjs` | neufs | — |
+| `package.json` | les harnais et leurs contre-épreuves dans `check` et `prebuild` | — |
+| `scripts/harnais-claude-md.mjs` · `CLAUDE.md` · `.mv-base` | SECTIONS 188 · §155-156, §26b corrigé · base | — |
+
+### 156g. Ouvert, et dit
+
+① **Qui signe** : quand la preuve manque ou que les versions changent, la porte s'ouvre pour le premier admin venu ; la case
+« pouvoir d'engager le domaine » reste la seule garde, et un admin non habilité reste bloqué sans issue. À trancher avant
+la prochaine version des textes. ② La preuve du domaine reste lisible par TOUS ses membres (rules existantes) : SIRET,
+adresse, signataire, `email_at_signing`, `user_agent` ; le reçu n'en montre que réf, date, nom et fonction. À resserrer aux
+admins si l'on veut (règle + déploiement dans l'ordre §8c). ③ Pas d'écran Admin GT pour l'historique : console Firebase.
+④ Pas joué sur l'appli déployée : `test:e2e` chez Nico (le parcours passe par `_mvTermsCheck`).

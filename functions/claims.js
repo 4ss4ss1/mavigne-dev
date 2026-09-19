@@ -2032,6 +2032,30 @@ async function sha256Url(url) {
   return crypto.createHash('sha256').update(buf).digest('hex');
 }
 
+// ★★ SIGN-1 (§156) — CE QUE DEVIENT LA PREUVE DU DOMAINE QUAND QUELQU'UN ACCEPTE.
+//   Le contrat est PAR DOMAINE : la preuve qui fait foi est la PREMIÈRE acceptation des versions en vigueur.
+//   Pures (harnais scripts/mv-harnais-signature.mjs).
+function termsPlan(cur, cgv, dpa) {
+  const aJour = !!(cur && cur.accepted && cur.docs && cur.docs.cgv && cur.docs.dpa
+    && cur.docs.cgv.version === cgv && cur.docs.dpa.version === dpa);
+  return { remplacer: !aJour, archiverAncienne: !!(cur && cur.ref) };
+}
+// Identifiant d'une acceptation dans l'historique. La réf seule ne suffit pas : 9 000 valeurs par an
+// (MV-AAAA-1000…9999), deux acceptations peuvent la partager — l'horodatage les sépare.
+// ⚠️ MÊME règle que histId dans scripts/mv-signature-restaurer.cjs (le harnais le vérifie).
+function termsHistId(p) {
+  return String((p && p.ref) || 'sans-ref') + '-' + String((p && p.ts_ms) || 0);
+}
+// La ligne du courriel de suivi GT : ce que cette acceptation a fait de la preuve du domaine.
+function termsLigneAvant(cur, plan) {
+  if (!cur || !plan) return '';
+  const quand = new Date(cur.ts_ms || 0).toLocaleString('fr-FR', { timeZone: 'Europe/Paris' });
+  const qui = ((cur.signataire && cur.signataire.nom) || cur.email_at_signing || '?')
+    + ((cur.signataire && cur.signataire.fonction) ? (' — ' + cur.signataire.fonction) : '');
+  return plan.remplacer
+    ? 'Remplace comme preuve du domaine : réf ' + cur.ref + ' du ' + quand + ' (' + qui + ') — gardée dans l\'historique.\n'
+    : 'Preuve du domaine inchangée : réf ' + cur.ref + ' du ' + quand + ' (' + qui + '). Cette acceptation est gardée dans l\'historique.\n';
+}
 exports.acceptTerms = onCall({ region: REGION, enforceAppCheck: true, timeoutSeconds: 30 }, async (request) => {
   const ctx = assertTenantAdmin(request);            // admin du domaine OU GT
   const uid = request.auth.uid;
@@ -2094,9 +2118,27 @@ exports.acceptTerms = onCall({ region: REGION, enforceAppCheck: true, timeoutSec
     user_agent: String((request.rawRequest && request.rawRequest.headers && request.rawRequest.headers['user-agent']) || '').slice(0, 300),
   };
 
+  let cur = null, plan = null;
   try {
-    // Preuve HORS tenant, écriture Admin SDK (bypass rules). set = un doc par slug.
-    await db.doc('_mv_signatures/' + slug).set(proof);
+    // Preuve HORS tenant, écriture Admin SDK (bypass rules).
+    // ★★ SIGN-1 (§156) — LA PREUVE DU DOMAINE NE S'ÉCRASE PLUS. Avant : `set` sur _mv_signatures/{slug},
+    //   un document par domaine → chaque admin passé par la porte REMPLAÇAIT la preuve du domaine (vécu le
+    //   19/09 : un salarié passé admin a remplacé la signature d'origine). Maintenant, en transaction : toute
+    //   acceptation va dans l'historique (hist/{ref}-{ts_ms}) ; la preuve en place y est versée si elle n'y
+    //   est pas encore (preuves d'avant SIGN-1) ; la preuve du domaine n'est remplacée que si elle manque ou
+    //   porte des versions dépassées (termsPlan). Rien ne s'efface.
+    const parent = db.doc('_mv_signatures/' + slug);
+    await db.runTransaction(async (tx) => {
+      const snap = await tx.get(parent);
+      cur = snap.exists ? snap.data() : null;
+      plan = termsPlan(cur, TERMS_CGV_CUR, TERMS_DPA_CUR);
+      const ancienne = plan.archiverAncienne ? parent.collection('hist').doc(termsHistId(cur)) : null;
+      const dejaVersee = ancienne ? (await tx.get(ancienne)).exists : true;
+      if (!dejaVersee) tx.set(ancienne, Object.assign({}, cur, { type: 'preuve', versee_le: at }));
+      tx.set(parent.collection('hist').doc(termsHistId(proof)),
+        Object.assign({}, proof, { type: plan.remplacer ? 'preuve' : 'supplementaire' }));
+      if (plan.remplacer) tx.set(parent, proof);
+    });
   } catch (e) {
     throw new HttpsError('internal', 'Enregistrement de la preuve impossible : ' + (e.message || e));
   }
@@ -2143,11 +2185,12 @@ exports.acceptTerms = onCall({ region: REGION, enforceAppCheck: true, timeoutSec
       to: [GT_EMAIL],
       createdAt: admin.firestore.FieldValue.serverTimestamp(), // relu par mailQueueWatchdog
       message: {
-        subject: 'Ma Vigne — DPA accepté · ' + slug,
+        subject: (plan && !plan.remplacer ? 'Ma Vigne — acceptation supplémentaire, preuve du domaine inchangée · ' : 'Ma Vigne — DPA accepté · ') + slug,
         text: 'Domaine ' + slug + ' — ' + rs + ' (SIRET ' + siret + ')\n'
           + 'Signataire : ' + (nom || email) + (fct ? (' — ' + fct) : '') + '\n'
           + 'Réf : ' + ref + ' · le ' + new Date(at).toLocaleString('fr-FR', { timeZone: 'Europe/Paris' }) + '\n'
-          + 'CGU v' + TERMS_CGV_CUR + ' / DPA v' + TERMS_DPA_CUR + '\n',
+          + 'CGU v' + TERMS_CGV_CUR + ' / DPA v' + TERMS_DPA_CUR + '\n'
+          + termsLigneAvant(cur, plan),
       },
     });
   } catch (e) { console.error('[acceptTerms] copie GT non mise en file', slug, e); }

@@ -5289,6 +5289,48 @@ function _mvTermsFromToken(){
 // (nouvelle publication) fait réapparaître l'écran → re-signature.
 function _mvTermsOk(t){ return !!(t && t.c===_MVT_CGV && t.d===_MVT_DPA); }
 
+// ★★ SIGN-1 (§156) — LE CONTRAT EST PAR DOMAINE, le claim `terms` est PAR PERSONNE. Un salarié passé admin
+//   après la signature n'avait pas de claim : la porte lui faisait signer CGU + DPA « au nom du domaine »,
+//   case « pouvoir d'engager le domaine » comprise — et sa signature remplaçait celle d'origine (vécu le
+//   19/09). Faute de claim, la porte lit donc la preuve du DOMAINE (fbLirePreuveDomaine) : si elle couvre les
+//   versions en vigueur, rien à signer. Sinon — pas de preuve, versions dépassées, lecture impossible, erreur
+//   —, la porte s'ouvre comme avant (fail-closed).
+function _mvTermsPreuveOk(p){
+  return !!(p && p.accepted && p.docs && p.docs.cgv && p.docs.dpa
+    && p.docs.cgv.version===_MVT_CGV && p.docs.dpa.version===_MVT_DPA);
+}
+// La preuve du domaine, gardée pour la session quand elle est bonne — et pour CE domaine seulement.
+function _mvTermsDomaine(){
+  var c=window._MV_TERMS_DOMAINE;
+  if(_mvTermsPreuveOk(c) && c.slug===window.TENANT_ID) return Promise.resolve(c);
+  if(typeof window.fbLirePreuveDomaine!=='function') return Promise.resolve(null);
+  return window.fbLirePreuveDomaine().then(function(p){
+    if(_mvTermsPreuveOk(p)) window._MV_TERMS_DOMAINE=p;
+    return p;
+  });
+}
+function _mvTermsOuvrir(ov){
+  _mvTermsPrefill();
+  var f=document.getElementById('mvt-form'), d=document.getElementById('mvt-done');
+  if(f)f.style.display='block'; if(d)d.style.display='none';
+  ov.style.display='flex';
+}
+// L'exemplaire du DOMAINE, pour « Voir le DPA / les CGU signés » quand ce n'est pas cet appareil qui a signé.
+// Même forme que _mvTermsStoreFill ; en mémoire seulement (_mvTermsOpenDoc le passe à la page au clic).
+function _mvTermsFillDomaine(p){
+  try{
+    var c=p.client||{}, g=p.signataire||{}, d=p.docs||{};
+    window._MV_TERMS_FILL={
+      rs:(c.raison_sociale||''), siret:(c.siret||''), adr:(c.adresse||''), cpv:(c.cp_ville||''),
+      sig_nom:(g.nom||''), sig_fct:(g.fonction||''), ref:(p.ref||''),
+      date_iso:(p.ts_ms? new Date(p.ts_ms).toISOString() : ''),
+      hashCgv:((d.cgv&&d.cgv.hash)||''), hashDpa:((d.dpa&&d.dpa.hash)||''),
+      signed:true
+    };
+    _mvReceiptRender();
+  }catch(e){ if(window._mvAvale) window._mvAvale(e,'app.js/_mvTermsFillDomaine'); }
+}
+
 // Point d'entrée du gating (remplace _mvTermsCheck). Appelé par _mvApplyTrialGating.
 function _mvTermsCheck(){
   try{
@@ -5299,11 +5341,12 @@ function _mvTermsCheck(){
     if(!(typeof isAdmin==='function'&&isAdmin())){ ov.style.display='none'; return; } // seul l'admin accepte au nom du domaine
     _mvTermsFromToken().then(function(t){
       if(_mvTermsOk(t)){ ov.style.display='none'; return; }
-      _mvTermsPrefill();
-      var f=document.getElementById('mvt-form'), d=document.getElementById('mvt-done');
-      if(f)f.style.display='block'; if(d)d.style.display='none';
-      ov.style.display='flex';
-    });
+      // ★★ SIGN-1 (§156) — pas de claim à jour : la preuve du DOMAINE suffit-elle ?
+      return _mvTermsDomaine().then(function(p){
+        if(_mvTermsPreuveOk(p)){ ov.style.display='none'; _mvTermsFillDomaine(p); return; }
+        _mvTermsOuvrir(ov);
+      });
+    }).catch(function(e){ if(window._mvAvale) window._mvAvale(e,'app.js/_mvTermsCheck#2'); _mvTermsOuvrir(ov); });
   }catch(e){ if(window._mvAvale) window._mvAvale(e,'app.js/_mvTermsCheck'); }
 }
 window._mvTermsCheck=_mvTermsCheck;
@@ -5433,14 +5476,20 @@ function _mvReceiptRender(){
   try{
     var box=document.getElementById('mvt-receipt'); if(!box) return;
     var t=_mvTermsClaim();
+    // ★★ SIGN-1 (§156) — sans acceptation personnelle, le reçu est celui du DOMAINE, et dit qui l'a signé.
+    var dom=(!t && _mvTermsPreuveOk(window._MV_TERMS_DOMAINE)) ? window._MV_TERMS_DOMAINE : null;
+    if(dom) t={ c:dom.docs.cgv.version, d:dom.docs.dpa.version, r:dom.ref, t:dom.ts_ms };
     if(!t){ box.style.display='none'; box.innerHTML=''; return; }
     var at=t.t?new Date(t.t):null;
     var when=at?(at.toLocaleDateString('fr-FR',{day:'2-digit',month:'long',year:'numeric'})+' \u00e0 '+at.toLocaleTimeString('fr-FR',{hour:'2-digit',minute:'2-digit'})):'\u2014';
     box.style.display='block';
     box.innerHTML='<div style="font-weight:600;color:var(--vert,#3D6B27);font-size:var(--pt-txt,12.5px);margin-bottom:4px">\u2713 Conditions accept\u00e9es</div>'
-      +'<div style="font-size:12px;color:var(--texte-doux,#726A5E);line-height:1.6">CGU v'+(t.c||'?')+' + DPA v'+(t.d||'?')+' \u00b7 le '+when+(t.r?(' \u00b7 r\u00e9f '+t.r):'')+'</div>';
+      +'<div style="font-size:12px;color:var(--texte-doux,#726A5E);line-height:1.6">CGU v'+(t.c||'?')+' + DPA v'+(t.d||'?')+' \u00b7 le '+when+(t.r?(' \u00b7 r\u00e9f '+t.r):'')
+      // ⚠️ Dans la MÊME ligne (<br>) : un second <div style="font-size:…px"> ajoutait un px en dur (cliquet typo).
+      +(dom?('<br>Accept\u00e9es pour le domaine par '+_escHtml((dom.signataire&&dom.signataire.nom)||'?')
+        +((dom.signataire&&dom.signataire.fonction)?(' \u2014 '+_escHtml(dom.signataire.fonction)):'')):'')+'</div>';
     var _hasFill=false; try{ _hasFill=!!localStorage.getItem('mv_terms_fill'); }catch(e){ if(window._mvAvale) window._mvAvale(e,'app.js/_mvReceiptRender'); }
-    if(_hasFill){
+    if(_hasFill||window._MV_TERMS_FILL){
       box.innerHTML+='<div style="margin-top:10px;display:flex;gap:8px;flex-wrap:wrap">'
         +'<button onclick="window._mvTermsOpenDoc&&_mvTermsOpenDoc(\'dpa\')" style="flex:1;min-width:148px;font-family:\'Outfit\',sans-serif;font-weight:600;font-size:12px;color:var(--vert,#3D6B27);background:var(--bg-card,#FBFAF6);border:1px solid rgba(61,107,39,0.4);border-radius:9px;padding:9px 10px;cursor:pointer">&#128196; DPA sign\u00e9</button>'
         +'<button onclick="window._mvTermsOpenDoc&&_mvTermsOpenDoc(\'cgv\')" style="flex:1;min-width:148px;font-family:\'Outfit\',sans-serif;font-weight:600;font-size:12px;color:var(--vert,#3D6B27);background:var(--bg-card,#FBFAF6);border:1px solid rgba(61,107,39,0.4);border-radius:9px;padding:9px 10px;cursor:pointer">&#128196; CGU sign\u00e9es</button>'
@@ -10522,6 +10571,65 @@ function lancerExportEntretienPDF(){
   }, { passive: true });
 })();
 
+// ★★ TIERS-1 (§155) — « SCRIPT ERROR. » : L'ERREUR QUE LE NAVIGATEUR EFFACE.
+//   Sans fichier, sans ligne, sans pile : le navigateur efface tout, EXPRÈS, quand l'erreur naît dans un script
+//   venu d'une AUTRE adresse et chargé sans laissez-passer (attribut crossorigin + en-tête CORS) — règle
+//   « muted errors » du HTML : une page ne doit rien apprendre du code d'un autre site.
+//   ① Le code de Ma Vigne est servi par mavigneapp.fr : ses erreurs arrivent TOUJOURS avec fichier, ligne et
+//      pile (rapport du 21/08 : `main-….js:2`, `onclick@…/:460`).
+//   ② Leaflet vient d'unpkg, mais AVEC laissez-passer (crossOrigin + SRI, `_ensureLeaflet`) : entier aussi.
+//   ③ Restent le script reCAPTCHA d'App Check (www.google.com — le SDK l'insère sans crossorigin, lu dans
+//      `@firebase/app-check`) et ce que le téléphone glisse dans la page : extension, traducteur, navigateur
+//      intégré d'une autre appli.
+//   Vérifié dans Chrome 141 avec la formule du gestionnaire ci-dessous : même adresse → message, fichier,
+//   ligne, pile ; autre adresse sans laissez-passer → « Script error. », fichier vide, ligne 0, erreur nulle,
+//   et le `detail` du journal sort VIDE ; autre adresse avec laissez-passer → tout.
+//   AVANT : toast orange « ⚠️ Script error. », en anglais, souvent sur l'écran de connexion — et personne n'y
+//   peut rien. MAINTENANT : rien à l'écran ; trace au journal de l'appareil (jointe à « Signaler un
+//   problème ») et UNE entrée par session au journal du domaine, avec de quoi trancher la prochaine fois.
+//   Jamais muet (§9) : un repli muet cache une régression.
+var _MV_TIERS_MAX = 6;   // adresses citées au plus
+var _MV_TIERS_LOC = 3;   // traces locales par session au plus : le journal de l'appareil garde 50 lignes
+var _mvTiersN = 0;
+function _mvErreurMasquee(e){
+  return !!e && !e.error && !e.filename && !e.lineno
+    && /^\s*script error\.?\s*$/i.test(String(e.message || ''));
+}
+// Les scripts d'autres adresses présents dans la page, et d'où on l'ouvre. Les adresses SANS leur requête :
+// celle de reCAPTCHA porte la clé du site. Une chaîne bornée : elle part dans le journal.
+function _mvErreurTiersContexte(){
+  var tiers = [], reste = 0, s = document.scripts || [], i, m, k;
+  var ici = (location.protocol + '//' + location.host).toLowerCase();
+  for (i = 0; i < s.length; i++) {
+    m = /^([a-z][a-z0-9+.-]*:)\/\/([^\/?#]*)([^?#]*)/i.exec(String(s[i].src || ''));
+    if (!m) continue;                                           // script écrit dans la page
+    if ((m[1] + '//' + m[2]).toLowerCase() === ici) continue;   // même adresse : le code de Ma Vigne
+    k = (m[1] + '//' + m[2] + m[3]).slice(0, 120);
+    if (tiers.indexOf(k) >= 0) continue;
+    if (tiers.length < _MV_TIERS_MAX) tiers.push(k); else reste++;
+  }
+  var mm = typeof window.matchMedia === 'function' ? window.matchMedia('(display-mode: standalone)') : null;
+  var appli = !!(mm && mm.matches) || navigator.standalone === true;
+  var t = window.performance && typeof window.performance.now === 'function' ? window.performance.now() : 0;
+  return 'scripts d\u2019autres adresses : '
+      + (tiers.length ? tiers.join(' \u00b7 ') + (reste ? ' (+' + reste + ')' : '') : 'aucun')
+    + '\nnavigateur : ' + String(navigator.userAgent || '?').slice(0, 160)
+    + '\nouverture : ' + (appli ? 'appli install\u00e9e' : 'dans le navigateur')
+      + ' \u00b7 depuis ' + Math.round(t / 1000) + ' s \u00b7 onglet ' + (document.visibilityState || '?')
+    + '\nMa Vigne ' + (window.APP_VERSION || '?');
+}
+function _mvErreurTiers(){
+  _mvTiersN++;
+  window._mvErrTiersN = _mvTiersN;             // lisible en console : combien dans cette session
+  if (_mvTiersN > _MV_TIERS_LOC) return;       // au-delà, compté seulement : un script qui boucle chasserait les vraies erreurs
+  var ent = logError({ level: 'info', cat: 'tiers',
+    msg: 'Script error. \u2014 script d\u2019une autre adresse, d\u00e9tail effac\u00e9 par le navigateur',
+    detail: _mvErreurTiersContexte() + '\n' + _mvTiersN + (_mvTiersN > 1 ? 'e' : 're') + ' fois dans cette session' });
+  // 'info' ne part pas seul au journal du domaine (logError) : on l'y envoie, UNE fois par session — même
+  // patron que l'assertion interne du SDK Firestore, dans le gestionnaire des promesses plus bas.
+  if (_mvTiersN === 1 && ent && window.fbAppendError) window.fbAppendError(ent);
+}
+
 // ★★ BOOT-1 (§145) — LE DÉMARRAGE N'ATTEND PLUS `load` AU-DELÀ DE 2,5 s. `load` attend AUSSI le script
 //   reCAPTCHA de Google, inséré par App Check pendant l'évaluation du module : sur un réseau qui se
 //   réveille (déverrouillage, fond de cave), il peut tarder des dizaines de secondes — et avec lui TOUT
@@ -10566,6 +10674,8 @@ function _mvDemarrer(){
   // ── Intercepteurs erreurs globaux (v2.68) ──
   window.addEventListener('error', function(e) {
     if(typeof logError !== 'function') return;
+    // ★★ TIERS-1 (§155) — l'erreur d'un script venu d'ailleurs, effacée par le navigateur : pas de toast.
+    if(_mvErreurMasquee(e)) { _mvErreurTiers(); return; }
     logError({
       level: 'error', cat: 'runtime',
       msg: e.message || 'Erreur JS non gérée',

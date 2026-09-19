@@ -1,4 +1,12 @@
-// MA VIGNE — Service Worker v8.09
+// MA VIGNE — Service Worker v8.11
+// v8.11 (19/09/2026) — SIGN-1 : un admin arrive apres la signature du domaine -> plus rien a signer, la preuve du
+//   domaine suffit (lue dans _mv_signatures) et le recu de Reglages dit qui a signe ; acceptTerms n'ecrase plus la
+//   preuve du domaine (historique hist/, remplacement seulement si versions depassees). Contient TIERS-1 (8.10,
+//   pas encore pousse). APP inchange (7.44).
+// v8.10 (19/09/2026) — TIERS-1 : « Script error. » (erreur d'un script d'une autre adresse, detail efface par le
+//   navigateur) ne s'affiche plus en toast orange ; trace locale en info et une entree par session au journal du
+//   domaine, avec les scripts d'autres adresses presents dans la page, le navigateur et le mode d'ouverture.
+//   app.js seul : APP inchange (7.44).
 // v8.09 (19/09/2026) — PAIE-1 : la fiche et le releve commencent par « Pour la compta » (une ligne par chose a saisir, le
 //   chiffre en gros) ; une demande de paiement est un total, elle ne fond plus ; dans la semaine, le salarie passe avant le
 //   domaine ; le detail de l'annee separe recup prise et absences ; le releve tient sur deux pages. APP 7.43 -> 7.44.
@@ -4053,7 +4061,7 @@
 // v2.22 — Fix profils vides : guard vide dans loadData() pour MEMBRES/SAISONS/TACHES
 // v2.17 — Onboarding intégré + tenantId · v2.06 — Firebase Auth · v2.00–v2.05 — divers
 const DEBUG = self.location.hostname === 'localhost' || self.location.hostname === '127.0.0.1';
-const CACHE_NAME   = 'mavigne-v8.09';
+const CACHE_NAME   = 'mavigne-v8.11';
 const TENANT_CACHE = 'mavigne-tenant';   // Cache persistant — préservé à chaque mise à jour SW
 const SYNC_TAG     = 'mavigne-sync';
 
@@ -4069,7 +4077,7 @@ const CDN_URLS = [
 ];
 
 self.addEventListener('install', event => {
-  if(DEBUG) console.log('[SW] Ma Vigne v8.09 installé');
+  if(DEBUG) console.log('[SW] Ma Vigne v8.11 installé');
   event.waitUntil(
     caches.open(CACHE_NAME).then(async cache => {
       // ── Cœur applicatif : STRICT (mise à jour ATOMIQUE) ──
@@ -4085,7 +4093,7 @@ self.addEventListener('install', event => {
 });
 
 self.addEventListener('activate', event => {
-  if(DEBUG) console.log('[SW] Ma Vigne v8.09 activé');
+  if(DEBUG) console.log('[SW] Ma Vigne v8.11 activé');
   event.waitUntil(
     caches.keys().then(keys =>
       Promise.all(

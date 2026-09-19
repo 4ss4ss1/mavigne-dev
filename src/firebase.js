@@ -2732,6 +2732,18 @@ window.fbAppendError = async function(entry) {
   } catch(e) { console.warn('[fbAppendError]', e.code || e.message); }
 };
 
+// ★★ SIGN-1 (§156) — LA PREUVE D'ACCEPTATION DU DOMAINE (_mv_signatures/{slug}). Les rules la laissent lire
+//   aux membres du domaine ; seule la Cloud Function acceptTerms l'écrit. La porte CGU s'en sert pour ne plus
+//   faire signer, au nom du domaine, un admin arrivé après la signature. Bornée (BOOT-1) : un échec ou un
+//   silence rend null, et la porte reste fermée (fail-closed).
+window.fbLirePreuveDomaine = function () {
+  try {
+    if (!TENANT_ID) return Promise.resolve(null);
+    var lire = getDoc(doc(db, '_mv_signatures', TENANT_ID)).then(function (s) { return s.exists() ? s.data() : null; });
+    return _mvBorne(lire, 8000, null).catch(function (e) { if (window._mvAvale) window._mvAvale(e, 'firebase.js/fbLirePreuveDomaine'); return null; });
+  } catch (e) { if (window._mvAvale) window._mvAvale(e, 'firebase.js/fbLirePreuveDomaine#2'); return Promise.resolve(null); }
+};
+
 // ── Signalement de problème (support) — connecté OU avant connexion ──
 // Relaye vers la Cloud Function submitReport (écrit support_reports + notifie par
 // e-mail). Fonctionne aussi sans session Auth (onCall + App Check).
