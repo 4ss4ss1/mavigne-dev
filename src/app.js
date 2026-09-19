@@ -10788,16 +10788,17 @@ if ('serviceWorker' in navigator) {
   window.addEventListener('load', function() {
     navigator.serviceWorker.register('./sw.js').then(function(reg) {
       if(DEBUG) console.log('[SW] Enregistré :', reg.scope);
-      // Forcer vérification mise à jour SW à chaque chargement
+      // Vérifier une mise à jour à chaque chargement : téléchargement + mise en
+      // cache seulement — plus de skip forcé (MAJ-1, §157) : le nouveau SW reste
+      // en attente et prend le relais tout seul au prochain lancement, sans
+      // interrompre la session en cours.
       reg.update().catch(function(_e){ if(window._mvAvale) window._mvAvale(_e,'app.js/_mvHushRejet#4'); });
-      // Si un SW est en attente, lui demander de prendre le contrôle immédiatement
-      if(reg.waiting) reg.waiting.postMessage({type:'SKIP_WAITING'});
-      // Détecter installation d'un nouveau SW et forcer skip
+      // Suivi (debug) : détecte l'installation d'une nouvelle version, sans rien forcer.
       reg.addEventListener('updatefound', function(){
         var inst = reg.installing;
         if(!inst) return;
         inst.addEventListener('statechange', function(){
-          if(inst.state === 'installed') inst.postMessage({type:'SKIP_WAITING'});
+          if(inst.state === 'installed' && DEBUG) console.log('[SW] Nouvelle version installée, en attente (prendra effet au prochain lancement)');
         });
       });
       if ('sync' in reg) {
@@ -10810,14 +10811,18 @@ if ('serviceWorker' in navigator) {
       if(typeof logError === 'function') logError({level:'warning',cat:'runtime',msg:'Service Worker non enregistré',detail:String(err)});
     });
 
-    // controllerchange : rechargement quand un nouveau SW prend le contrôle
+    // controllerchange : filet de sécurité si un nouveau SW prend malgré tout le
+    // contrôle en cours de session (ex. plusieurs onglets ouverts). Depuis le
+    // retrait du skip forcé (MAJ-1, §157), ne se déclenche plus au déploiement
+    // normal : en usage courant (une seule instance), la mise à jour n'apparaît
+    // qu'au prochain lancement de l'appli, jamais pendant l'utilisation.
     // Pas de guard : fonctionne aussi en navigation privée (SW vierge au premier lancement)
     // Safe : après rechargement le SW est déjà actif, pas de nouveau controllerchange
     var _swReloadDone = false;
     navigator.serviceWorker.addEventListener('controllerchange', function() {
       if (_swReloadDone) return;
       _swReloadDone = true;
-      if(DEBUG) console.log('[SW] Nouveau contrôleur — rechargement auto');
+      if(DEBUG) console.log('[SW] Nouveau contrôleur — rechargement (filet de sécurité)');
       _swReload();
     });
 
@@ -10831,11 +10836,13 @@ if ('serviceWorker' in navigator) {
     });
   });
 }
-// Rechargement SW différé : attend la fermeture des overlays ouverts
+// _swReload() ne sert plus qu'au filet de sécurité controllerchange ci-dessus
+// (MAJ-1, §157) : le cas normal (déploiement pendant que l'appli tourne) ne
+// déclenche plus aucun rechargement — la nouvelle version prend le relais
+// toute seule au prochain lancement.
 window._swUpdatePending = false;
 function _swReload() {
-  // Toujours recharger immédiatement : le SW apportera les nouveaux assets
-  if(DEBUG) console.log('[SW] Rechargement pour nouveaux assets');
+  if(DEBUG) console.log('[SW] Rechargement (nouveau SW déjà en contrôle)');
   window.location.reload();
 }
 

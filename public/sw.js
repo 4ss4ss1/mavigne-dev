@@ -1,4 +1,10 @@
-// MA VIGNE — Service Worker v8.11
+// MA VIGNE — Service Worker v8.12
+// v8.12 (19/09/2026) — MAJ-1 : le nouveau SW n'active plus rien de force pendant que l'appli tourne : skipWaiting()
+//   retire de install(), plus de postMessage SKIP_WAITING a l'enregistrement ni sur updatefound (handler du
+//   message SKIP_WAITING retire). Le nouveau SW reste « en attente » et prend seul le relais, sans rechargement
+//   visible, au prochain lancement, une fois l'ancienne instance fermee. reg.update() continue de verifier en
+//   tache de fond (chargement + retour au premier plan) pour que la version soit deja prete a ce moment-la.
+//   app.js seul : APP inchange (7.44).
 // v8.11 (19/09/2026) — SIGN-1 : un admin arrive apres la signature du domaine -> plus rien a signer, la preuve du
 //   domaine suffit (lue dans _mv_signatures) et le recu de Reglages dit qui a signe ; acceptTerms n'ecrase plus la
 //   preuve du domaine (historique hist/, remplacement seulement si versions depassees). Contient TIERS-1 (8.10,
@@ -4061,7 +4067,7 @@
 // v2.22 — Fix profils vides : guard vide dans loadData() pour MEMBRES/SAISONS/TACHES
 // v2.17 — Onboarding intégré + tenantId · v2.06 — Firebase Auth · v2.00–v2.05 — divers
 const DEBUG = self.location.hostname === 'localhost' || self.location.hostname === '127.0.0.1';
-const CACHE_NAME   = 'mavigne-v8.11';
+const CACHE_NAME   = 'mavigne-v8.12';
 const TENANT_CACHE = 'mavigne-tenant';   // Cache persistant — préservé à chaque mise à jour SW
 const SYNC_TAG     = 'mavigne-sync';
 
@@ -4077,7 +4083,7 @@ const CDN_URLS = [
 ];
 
 self.addEventListener('install', event => {
-  if(DEBUG) console.log('[SW] Ma Vigne v8.11 installé');
+  if(DEBUG) console.log('[SW] Ma Vigne v8.12 installé — en attente');
   event.waitUntil(
     caches.open(CACHE_NAME).then(async cache => {
       // ── Cœur applicatif : STRICT (mise à jour ATOMIQUE) ──
@@ -4088,12 +4094,16 @@ self.addEventListener('install', event => {
       await cache.addAll(['./index.html', ...SHELL_STATIC, ...PRECACHE_ASSETS]);
       // ── CDN (Leaflet, fonts) : tolérant — non bloquant pour le boot ──
       await Promise.allSettled(CDN_URLS.map(url => cache.add(url).catch(() => {})));
-    }).then(() => self.skipWaiting())
+    })
+    // MAJ-1 (§157) : plus de self.skipWaiting() ici. Ce SW installé reste
+    // « waiting » — le navigateur ne le fait passer actif que lorsque plus
+    // aucun client n'est contrôlé par l'ancien SW, donc au prochain lancement
+    // de l'appli, jamais pendant qu'un client tourne encore dessus.
   );
 });
 
 self.addEventListener('activate', event => {
-  if(DEBUG) console.log('[SW] Ma Vigne v8.11 activé');
+  if(DEBUG) console.log('[SW] Ma Vigne v8.12 activé');
   event.waitUntil(
     caches.keys().then(keys =>
       Promise.all(
@@ -4263,7 +4273,7 @@ self.addEventListener('sync', event => {
 });
 
 self.addEventListener('message', event => {
-  if (event.data?.type === 'SKIP_WAITING') self.skipWaiting();
+  // MAJ-1 (§157) : branche SKIP_WAITING retirée — plus rien ne l'envoie (app.js).
   if (event.data?.type === 'FLUSH_QUEUE') flushOfflineQueue();
   // Mise à jour du tenant courant dans le cache persistant
   if (event.data?.type === 'SET_TENANT') {

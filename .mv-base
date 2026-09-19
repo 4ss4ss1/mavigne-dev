@@ -1,1 +1,1 @@
-ebba4de2aaab99c199f66dc5b2774fc6c1f0417b  # base : ebba4de — SIGN-1 (§156 : le contrat est par domaine, la preuve ne s'écrase plus) + TIERS-1 (§155, pas poussé) — APP 7.44 inchangé / SW 8.09 → 8.11
+4b93fcc6ba8c69b2e010a9b39f280c55ef804a9c  # base : 4b93fcc — MAJ-1 (§157 : le nouveau SW n'interrompt plus la session en cours, il attend le prochain lancement) — APP 7.44 inchangé / SW 8.11 → 8.12

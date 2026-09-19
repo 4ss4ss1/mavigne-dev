@@ -21398,3 +21398,52 @@ la prochaine version des textes. ② La preuve du domaine reste lisible par TOUS
 adresse, signataire, `email_at_signing`, `user_agent` ; le reçu n'en montre que réf, date, nom et fonction. À resserrer aux
 admins si l'on veut (règle + déploiement dans l'ordre §8c). ③ Pas d'écran Admin GT pour l'historique : console Firebase.
 ④ Pas joué sur l'appli déployée : `test:e2e` chez Nico (le parcours passe par `_mvTermsCheck`).
+
+## 157. ★★ MAJ-1 — LA MISE À JOUR N'INTERROMPT PLUS LA SESSION EN COURS : ELLE ATTEND LE PROCHAIN LANCEMENT (19/09 — `app.js` · `sw.js` · APP 7.44 **inchangé** · SW 8.11 → **8.12** · base `4b93fcc`)
+
+### 157a. Le symptôme, et sa cause exacte
+
+Un déploiement rechargeait l'appli **en cours d'utilisation** chez les clients, sans prévenir — signalé
+par Nico (dicté, 19/09). `app.js` forçait tout nouveau SW installé à passer actif immédiatement —
+`postMessage({type:'SKIP_WAITING'})` à l'enregistrement (`if(reg.waiting)`) ET sur `updatefound` dès
+`state === 'installed'` — ce qui déclenchait `self.skipWaiting()` côté `sw.js`, puis `clients.claim()` à
+l'activation, puis `controllerchange` côté `app.js` → `window.location.reload()` sans délai. Le
+déclencheur réel en usage réel : le `reg.update()` posé sur `visibilitychange`. Dès qu'un client revenait
+au premier plan après avoir mis l'appli en arrière-plan quelques instants, une MAJ fraîchement poussée
+s'activait et rechargeait sous ses doigts.
+
+### 157b. Le correctif — rien de nouveau, un forçage en moins
+
+Retiré : `self.skipWaiting()` dans `install()` (`sw.js`), les deux `postMessage({type:'SKIP_WAITING'})`
+(`app.js`, enregistrement + `updatefound`), et la branche `SKIP_WAITING` du handler `message` (`sw.js`,
+devenue sans émetteur). Rien d'autre ne change : `reg.update()` continue de tourner au chargement et à
+chaque retour au premier plan — il télécharge et installe la nouvelle version en tâche de fond, sans
+l'activer. Un SW nouvellement installé reste **« waiting »**, comportement natif du navigateur : il ne
+prend le relais que lorsque plus aucun client n'est contrôlé par l'ancien SW — donc, en usage réel (une
+instance par appareil), au prochain lancement de l'appli, jamais pendant qu'elle tourne. Le
+`controllerchange` → `_swReload()` reste en place comme filet de sécurité, mais ne se déclenche plus au
+déploiement normal. Correctif invisible : `WHATS_NEW` non touché, `APP_VERSION` inchangée.
+
+### 157c. Ouvert, et dit
+
+① Un onglet resté ouvert pendant qu'un AUTRE onglet du même appareil se ferme peut encore recevoir un
+`controllerchange` et donc se recharger — cas multi-onglets, marginal sur l'usage mobile/tablette visé
+ici ; non traité par ce lot. ② Trouvé en chemin, non touché : `window._swUpdatePending` et son test
+`if(window._swUpdatePending && !document.querySelector('.overlay.open'))` (dans `_mvDemarrer`, autour de
+l'ancienne l.9853) forment un mécanisme de rechargement différé jamais achevé — rien ne met jamais ce
+flag à `true`, la branche est morte depuis son introduction. Hors périmètre de ce lot ; à trancher
+(compléter, ou retirer) au prochain passage sur ce fichier. ③ Aucun harnais dédié : le calendrier
+d'activation d'un Service Worker (attente multi-clients) n'est pas testable en fonction pure — à
+vérifier chez un client au prochain vrai déploiement.
+
+### 157d. La note de livraison
+
+**Base `4b93fcc`** (relit après-coup : le lot précédent avait déjà poussé SIGN-1/§156 + TIERS-1/§155
+pendant la préparation de celui-ci — reclone complet avant d'écrire, rien de l'ancien brouillon collé
+par-dessus). Pas d'entrée `WHATS_NEW`, `APP_VERSION` inchangée : correctif invisible, aucun changement
+à l'écran (c'est le but).
+
+| Fichier | Ce qui change | Bump ? |
+|---|---|---|
+| `src/app.js` | retrait des 2 `postMessage(SKIP_WAITING)` (enregistrement + `updatefound`), log au lieu du skip forcé, commentaires mis à jour | — |
+| `public/sw.js` | retrait de `self.skipWaiting()` dans `install`, retrait de la branche `SKIP_WAITING` du handler `message`, version | ★ SW |
