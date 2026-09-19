@@ -513,7 +513,7 @@ function lance(R) {
   eq('R6 · la fiche paie bien 30h', F.payeTotal, 30);
   cad = R._pfCadre(J, F);
   eq('R7 · le cadre : 8h à 25 %, 2h à 50 %, 8h le dimanche, 12h reportées au taux à vérifier',
-    [ligne(cad, 'Heures sup \u00e0 +25\u202f%', '8h'), ligne(cad, 'Heures sup \u00e0 +50\u202f%', '2h'), ligne(cad, 'Heures du dimanche \u00e0 +50\u202f%', '8h'), ligne(cad, 'Heures report\u00e9es, taux \u00e0 v\u00e9rifier', '12h')].join(), 'true,true,true,true');
+    [ligne(cad, 'Heures sup \u00e0 +25\u202f%', '8h'), ligne(cad, 'Heures sup \u00e0 +50\u202f%', '2h'), ligne(cad, 'Heures du dimanche \u00e0 +50\u202f%', '8h'), ligne(cad, 'Report d\u2019avant Ma Vigne, taux \u00e0 v\u00e9rifier', '12h')].join(), 'true,true,true,true');
   RS = R._pfRestants(J, F);
   eq('R8 · restantes : 50 + 18 − 30 − 9 = 29h, toutes du report', [RS.report, RS.faites, RS.payees, RS.consommees, RS.total, RS.normal.h].join('/'), '50/18/30/9/29/29');
   const rec80 = { demande: true }; window.PLANNING_HSUP.Jean['2026-09'] = rec80;
@@ -649,6 +649,56 @@ function lance(R) {
   eq('T10 · les semaines de septembre 2026 : du 31 août au 27 septembre, quatre', R._planSemainesDuMois(8).map(w => w.mon.getDate() + '-' + w.sun.getDate()).join(' '), '31-6 7-13 14-20 21-27');
   domaine({ ent: { 8: moisFiche } });
 
+  // W. AVANT-1 — les heures sup d'avant septembre 2026 : un taux ESTIMÉ d'après les jours, rien ne bouge au compteur (§147)
+  horloge(2026, 9, 1);
+  const hj = (d, f, js) => Object.fromEntries(js.map(j => [j, T(d, f)]));
+  const anW = () => ({
+    4: hj('08:00', '18:00', [18, 19, 20]),
+    5: Object.assign(hj('08:00', '19:00', [8, 9, 10, 11, 12]), hj('08:00', '18:00', [22, 23])),
+    6: Object.assign(hj('08:00', '18:00', [6, 7, 8, 9, 10]), hj('08:00', '18:00', [20, 21, 22])),
+    7: Object.assign({ 10: { type: 'recup' }, 11: { type: 'recup' } }, hj('08:00', '18:00', [17, 18])),
+    8: Object.assign(hj('07:30', '18:30', [7, 8, 9, 10]), { 11: T('08:00', '17:00') }, hj('08:00', '18:00', [14, 15]))
+  });
+  const estL = (html, h, txt) => html.indexOf('<dt>Heures sup d\u2019avant septembre<small class="pf-estl">Estimation d\u2019apr\u00e8s les jours saisis\u00a0: ' + txt + '</small></dt><dd><b>' + h + '</b></dd>') !== -1;
+  domaine({ ent: anW(), hsup: { '2026-09': { demande: true } } });
+  let recW = window.PLANNING_HSUP.Jean['2026-09'];
+  R._planPayeEcrire(J, 8, recW, 30);
+  eq('W1 · 30h demandées : 17h du mois, 13h puisées au compteur (juin, puis juillet)', [recW.paye, recW.paye_bank].join('/'), '17/13');
+  let PW = R._planPaieMois(J, 8), cadW = R._pfCadre(J, PW);
+  sain('W1 cadre', cadW);
+  eq('W2 · le cadre : 13h d’avant septembre, estimées 6h à +25 %, 7h à +50 %', estL(cadW, '13h', '6h \u00e0 +25\u202f%, 7h \u00e0 +50\u202f%'), true);
+  eq('W3 · plus aucune ligne « taux à vérifier » : tout vient de mois lisibles', cadW.indexOf('taux \u00e0 v\u00e9rifier'), -1);
+  let RW = R._pfRestants(J, PW);
+  eq('W4 · restantes : 18h d’avant septembre, 16h à 25 %, 2h à 50 %', [RW.total, RW.src.avant, RW.src.est.c25, RW.src.est.c50, RW.src.est.deja].join('/'), '18/18/16/2/0');
+  eq('W5 · mois par mois : juillet 14h sur 16h (12h + 2h), août 4h', JSON.stringify(RW.src.mois.map(x => [x.mois, x.h, x.sup, x.c25, x.c50])), '[[6,14,16,12,2],[7,4,4,4,0]]');
+  const temoin = () => JSON.stringify(R._planCompteur(J, 8)) + JSON.stringify(window.PLANNING_HSUP) + JSON.stringify(window.PLANNING_ENTRIES);
+  const t0 = temoin(); R._pfRestants(J, PW); R._pfCadre(J, PW); R._pfCompteur(J, PW); releve();
+  eq('W6 · lire l’estimation ne change ni le compteur, ni les saisies', temoin() === t0, true);
+  eq('W7 · la bascule de septembre est remise en place après chaque lecture', [R._planRecupActive(7), R._planRecupActive(8)].join('/'), 'false/true');
+  const cpW = R._pfCompteur(J, PW);
+  sain('W8 compteur', cpW);
+  eq('W8 · Compteur : la ligne, son estimation, le calcul mois par mois', [cpW.indexOf('<tr class="pf-src"><td>Heures sup d\u2019avant septembre</td><td class="n"><b>18h</b></td><td class="n pf-rec">18h</td></tr>') !== -1,
+    cpW.indexOf('Estimation d\u2019apr\u00e8s les jours saisis\u00a0: 16h \u00e0 +25\u202f%, 2h \u00e0 +50\u202f%. En r\u00e9cup, 1h pour 1h') !== -1,
+    cpW.indexOf('<li><b>Juillet</b>\u00a0: 14h restantes sur 16h compt\u00e9es au mois\u00a0\u2192 12h \u00e0 +25\u202f%, 2h \u00e0 +50\u202f%</li>') !== -1].join('/'), 'true/true/true');
+  const rvW = releve();
+  eq('W9 · relevé : le cadre, la page 2 et « À savoir » disent la même chose', [rvW.indexOf('Heures sup d\u2019avant septembre<small class="pf-estl">Estimation d\u2019apr\u00e8s les jours saisis\u00a0: 6h') !== -1,
+    rvW.indexOf('Heures sup d\u2019avant septembre<small class="est">Estimation d\u2019apr\u00e8s les jours saisis\u00a0: 16h') !== -1,
+    rvW.indexOf('<li>Heures sup d\u2019avant septembre 2026\u00a0:') !== -1].join('/'), 'true/true/true');
+  // Un report d'avant Ma Vigne, un jour de récup en mars, un dimanche travaillé le 12 juillet
+  const anM = anW(); anM[2] = { 20: { type: 'recup' } }; anM[6][12] = T('08:00', '17:00');
+  domaine({ ent: anM, hsup: { '2026-dep': { solde: 30, date: '2026-01-01' }, '2026-09': { demande: true } } });
+  recW = window.PLANNING_HSUP.Jean['2026-09']; R._planPayeEcrire(J, 8, recW, 30);
+  PW = R._planPaieMois(J, 8); cadW = R._pfCadre(J, PW); RW = R._pfRestants(J, PW);
+  eq('W10 · le report reste à part, à vérifier (9h) ; 4h d’avant septembre, à 25 %', [ligne(cadW, 'Report d\u2019avant Ma Vigne, taux \u00e0 v\u00e9rifier', '9h'), estL(cadW, '4h', '4h \u00e0 +25\u202f%')].join('/'), 'true/true');
+  eq('W11 · un dimanche a sa majoration à part : 8h déjà majorées, et 4h de majoration sur leur ligne', [RW.src.avant, RW.src.est.c25, RW.src.est.c50, RW.src.est.deja, RW.src.maj, RW.src.dep].join('/'), '49/32/9/8/4/0');
+  eq('W11b · … et la carte le dit', R._pfCompteur(J, PW).indexOf('<td>Majoration des dimanches et f\u00e9ri\u00e9s, d\u00e9j\u00e0 calcul\u00e9e</td><td class="n"><b>4h</b></td>') !== -1, true);
+  // Une valeur saisie à la main au-delà de ce que les jours montrent
+  domaine({ ent: { 5: hj('08:00', '19:00', [8, 9, 10, 11, 12]) }, hsup: { '2026-06': { sup_override: 20 }, '2026-09': { demande: true } } });
+  RW = R._pfRestants(J, R._planPaieMois(J, 8));
+  eq('W12 · une valeur saisie à la main : ce que les jours ne montrent pas compte à 25 %', [RW.src.avant, RW.src.est.c25, RW.src.est.c50].join('/'), '20/13/7');
+  horloge();
+  domaine({ ent: { 8: moisFiche } });
+
   return { ok, ko, echecs };
 }
 
@@ -708,7 +758,16 @@ const DEFAUTS = [
   // SEM-3
   ['l’écran reprend son cadre d’avant', "  var V=P.act?_pfV3(mbr,P,D,null):null;", "  var V=null;"],
   ['l’onglet Jours revient à l’écart du jour', "  var SEM=_pfSemaines(mbr,P),maj=SEM.maj,F=_planFmt,L0=_planLegal(),hm=P.hm||{},act=P.act,", "  var SEM=_pfSemaines(mbr,P),maj=SEM.maj,F=_planFmt,L0=_planLegal(),hm=P.hm||{},act=false,"],
-  ['la carte « Heures à rattraper » ne perd pas ce que la semaine a rattrapé', "  if(rtD>0.0001)RA.push(['Rattrap\\u00e9es dans la semaine, par les heures en plus',-rtD]);", ""]
+  ['la carte « Heures à rattraper » ne perd pas ce que la semaine a rattrapé', "  if(rtD>0.0001)RA.push(['Rattrap\\u00e9es dans la semaine, par les heures en plus',-rtD]);", ""],
+  // AVANT-1 (§147)
+  ['la lecture laisse la bascule de septembre au 1er janvier', "  } finally {PLAN_RECUP_DEBUT=sv;}\n  return o;", "  } finally {}\n  return o;"],
+  ['les heures qui restent prennent les taux les plus bas', "[['c50',L.c50],['c25',L.c25+ex],['deja',L.deja]]", "[['deja',L.deja],['c25',L.c25+ex],['c50',L.c50]]"],
+  ['ce que les jours ne montrent pas passe à 50 %', "[['c50',L.c50],['c25',L.c25+ex]", "[['c50',L.c50+ex],['c25',L.c25]"],
+  ['un dimanche se majore deux fois', "o[ex<=0.0001?'deja':(ex>=50?'c50':'c25')]+=p[0]", "o[p[1]>=50?'c50':'c25']+=p[0]"],
+  ['un paiement pris au compteur perd son mois', "mois:tr[k].mois,bas:tr[k].h,haut:tr[k].h+t", "bas:tr[k].h,haut:tr[k].h+t"],
+  ['le report d’avant Ma Vigne se mêle aux heures estimées', "if(t.nat==='dep'){z.dep+=h;return;}", ""],
+  ['le relevé perd l’estimation', "<small class=\"est\">Estimation", "<small class=\"est\">"],
+  ['« À savoir » ne dit plus que le taux est estimé', "?'<li>Heures sup d\\u2019avant septembre 2026", "?'<li>Heures sup d\\u2019avant 2026"],
 ];
 
 const SRC = fs.readFileSync(path.join(RACINE, 'src', 'planning.js'), 'utf8');

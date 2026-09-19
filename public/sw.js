@@ -1,4 +1,7 @@
-// MA VIGNE — Service Worker v8.01
+// MA VIGNE — Service Worker v8.02
+// v8.02 (18/09/2026) — AVANT-1 : les heures sup d'avant septembre 2026 ont un taux ESTIME d'apres les jours saisis
+//   (a titre indicatif : rien ne bouge au compteur ni aux paies) ; « taux a verifier » se separe en trois (estimees,
+//   majoration seule, report d'avant Ma Vigne).
 // v8.01 (18/09/2026) — BOOT-1, CORRECTIF VU PAR L'E2E : la relance automatique sur echec du script reCAPTCHA sonde
 //   d'abord son adresse (bloqueur, reseau filtre, e2e : plus de relance sous les doigts) ; les donnees de l'appareil
 //   ne remplacent plus la memoire d'une session deja ouverte quand le demarrage finit apres la connexion.
@@ -4030,7 +4033,7 @@
 // v2.22 — Fix profils vides : guard vide dans loadData() pour MEMBRES/SAISONS/TACHES
 // v2.17 — Onboarding intégré + tenantId · v2.06 — Firebase Auth · v2.00–v2.05 — divers
 const DEBUG = self.location.hostname === 'localhost' || self.location.hostname === '127.0.0.1';
-const CACHE_NAME   = 'mavigne-v8.01';
+const CACHE_NAME   = 'mavigne-v8.02';
 const TENANT_CACHE = 'mavigne-tenant';   // Cache persistant — préservé à chaque mise à jour SW
 const SYNC_TAG     = 'mavigne-sync';
 
@@ -4046,7 +4049,7 @@ const CDN_URLS = [
 ];
 
 self.addEventListener('install', event => {
-  if(DEBUG) console.log('[SW] Ma Vigne v8.01 installé');
+  if(DEBUG) console.log('[SW] Ma Vigne v8.02 installé');
   event.waitUntil(
     caches.open(CACHE_NAME).then(async cache => {
       // ── Cœur applicatif : STRICT (mise à jour ATOMIQUE) ──
@@ -4062,7 +4065,7 @@ self.addEventListener('install', event => {
 });
 
 self.addEventListener('activate', event => {
-  if(DEBUG) console.log('[SW] Ma Vigne v8.01 activé');
+  if(DEBUG) console.log('[SW] Ma Vigne v8.02 activé');
   event.waitUntil(
     caches.keys().then(keys =>
       Promise.all(

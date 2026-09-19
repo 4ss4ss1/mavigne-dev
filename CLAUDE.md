@@ -2,7 +2,15 @@
 
 > Document de référence du projet **Ma Vigne** (GUERETTECH). Il est le **porteur de vérité** :
 > la mémoire Claude est plafonnée, ce fichier ne l'est pas.
-> Dernière consolidation : **18 septembre 2026 (FUSION-1)** — ★★★ **UNE ÉCRITURE N'EFFACE PLUS CE QU'UN AUTRE APPAREIL A
+> Dernière consolidation : **18 septembre 2026 (AVANT-1)** — ★★ **LES HEURES SUP D'AVANT SEPTEMBRE 2026 ONT UN TAUX
+> ESTIMÉ (§147)**. Nico : récupérer les taux et les récup d'avant septembre ? → la voie indicative (« 1 »), maquette,
+> « go ». Rien ne bouge au compteur ni aux paies : là où l'appli écrivait « taux à vérifier », elle relit les jours de
+> janvier à août avec la règle d'aujourd'hui et donne une estimation à 25 % et 50 % (bascule avancée le temps de la
+> lecture, remise en place dans un `finally`). La ligne se sépare en trois : estimées, majoration seule, report d'avant
+> Ma Vigne. Harnais recup : 331 assertions, 47 contre-épreuves dont 8 neuves. **APP 7.36 → 7.37 · SW 8.01 → 8.02**,
+> base `a578994`. Détail en **§147**.
+>
+> ★ Précédente : **18 septembre 2026 (FUSION-1)** — ★★★ **UNE ÉCRITURE N'EFFACE PLUS CE QU'UN AUTRE APPAREIL A
 > SAISI (§146)**. Chaque document était réécrit en entier : la Cave sans écoute, la file hors ligne et une vieille valeur
 > en file effaçaient en silence le travail des autres appareils. Désormais : transaction, fusion à trois voies (par `id`,
 > `nom` ou contenu ; modifié contre supprimé → gardé ; sans base → union), mémoire mise à jour, file avec la base de sa
@@ -20312,3 +20320,104 @@ versions). Un `id` vraiment unique à la création réglerait ça. ④ La transa
 ⑤ Mesurer : les badges « fusionné avec un autre appareil » ne laissent pas de trace ; si le terrain en parle, ajouter
 une entrée au carnet d'incidents.
 
+## 147. ★★ AVANT-1 — LES HEURES SUP D'AVANT SEPTEMBRE 2026 ONT UN TAUX ESTIMÉ, À TITRE INDICATIF (18/09 — `planning.js` · `styles.css` · `utils.js` · `index.html` · `sw.js` · `guide/10-planning.html` · harnais — APP 7.36 → **7.37** · SW 8.01 → **8.02**)
+
+> Nico : *« Juste pour savoir, est-ce possible de récupérer les taux des heures sup et les récup d'avant septembre
+> dans le planning ? »* Deux voies proposées : ① indicatif, rien ne bouge ; ② bascule au 1er janvier, janvier-août
+> recalculés. Réponse : **« 1 »**. Maquette `maquette-avant-septembre-v1.html` (la fiche dans un téléphone et le
+> relevé, rendus par le vrai code et un prototype du lot, deux salariés fictifs, avant/après, clair/sombre), puis
+> **« go »**.
+
+### 147a. Pourquoi pas la bascule au 1er janvier (voie ②)
+
+`PLAN_RECUP_DEBUT` ne commande pas que les taux. Le reculer changerait des chiffres déjà payés : heures sup comptées à
+la semaine au lieu du mois ; compteur en temps majoré (les récup déjà prises « coûteraient » moins d'heures sup) ; un
+mois en déficit n'est plus remis à zéro — ses heures manquées reviennent « à rattraper », et les journées raccourcies
+d'avant, sans motif, comptent comme décidées par le domaine ; un jour sans saisie vaut le modèle et non son horaire
+par défaut, jusque dans le compteur annuel (`_planWorkH`). Le solde de chacun bougerait, dans un sens ou dans l'autre :
+c'est la raison même de la bascule au 1er septembre (une paie éditée ne change pas). Le report d'avant Ma Vigne, lui,
+n'a aucun jour derrière lui. Voie ② non faite : ce serait une régularisation à caler avec le comptable.
+
+### 147b. La règle de l'estimation
+
+- **`_planEstLecture(mbr,i)`** relit le mois i avec la règle d'aujourd'hui : `PLAN_RECUP_DEBUT` avancé au 1er janvier
+  le temps de la lecture, **remis en place dans un `finally`** ; `_planHsupMois` sur les semaines qui finissent en i et
+  en i+1 ; chaque jour rangé dans **son** mois — le compteur d'avant comptait au calendrier : les 29 et 30 juin d'une
+  semaine qui finit en juillet restent en juin.
+- **Un dimanche ou un férié a déjà eu sa majoration à part** (tranche `maj` du compteur, ou la paie en mode payé) :
+  l'heure sup ne prend que ce qui lui manque (taux du rang moins taux du jour) ; à zéro, elle est « déjà majorée ».
+  Sans ça la compta paierait deux fois la majoration (§73b, la plus forte seule).
+- **`_pfEstPile(mbr,i)`** : la pile du mois, du haut — 50 %, 25 %, déjà majorées. Ce que la lecture ne retrouve pas
+  (une valeur saisie à la main au-delà des jours, les demi-heures d'un horaire par défaut) compte à 25 %, comme dans
+  `_planHsupTiers`.
+- **Ce qui est sorti du compteur part du bas, ce qui reste garde le haut** (heures manquées du mois, acompte, récup,
+  paiements) : l'ordre de `_planCompteur` depuis septembre. `tire` rend désormais, pour chaque heure payée sur une
+  tranche, `mois`, `bas` et `haut` — ses rangs dans la tranche : un paiement pris au compteur se range lui aussi.
+- **`_pfSources`** range les heures sans taux par origine : `avant` (estimées), `maj` (« Majoration des dimanches et
+  fériés, déjà calculée »), `dep` (« Report d'avant Ma Vigne, taux à vérifier »), `autre` (l'ancien libellé, en filet :
+  ne doit pas arriver). `_pfCat` ne bouge pas : la catégorie `normal` sert toujours aux totaux.
+
+### 147c. À l'écran et sur le papier
+
+- Cadre « Pour la paie », écran et relevé : « Heures sup d'avant septembre », avec sous le libellé « Estimation
+  d'après les jours saisis : 6h à +25 %, 7h à +50 % ».
+- Carte « Heures sup restantes à payer » : la ligne, une ligne d'estimation qui rappelle « En récup, 1h pour 1h, comme
+  avant septembre », et un détail replié **« Le calcul, mois par mois »** (« Juillet : 14h restantes sur 16h comptées
+  au mois → 12h à +25 %, 2h à +50 % »).
+- Relevé, page 2 : la même ligne ; « À savoir » gagne une phrase quand ces heures apparaissent.
+- ★ **Écart validé sur maquette** : la ligne unique « Heures reportées, taux à vérifier » (FICHE-4) se sépare en trois.
+  La majoration seule a un taux connu — c'est la majoration elle-même — et le report d'avant Ma Vigne garde son « taux
+  à vérifier ».
+
+### 147d. Invariants
+
+Rien ne s'écrit : ni compteur, ni saisie, ni paie. La bascule est remise en place même si la lecture plante. En récup,
+les heures d'avant septembre gardent leur valeur d'alors (1h pour 1h). L'estimation d'une ligne fait exactement ses
+heures, à la minute près.
+
+### 147e. Les filets
+
+`mv-harnais-recup`, section **W** : 13 assertions et 2 contrôles de HTML sain. L'année de la maquette (Jean : 30h
+demandées → 17h du mois et 13h du compteur, estimées 6h à 25 % et 7h à 50 % ; restent 18h, 16h et 2h) ; la même avec un
+report de 30h, une récup en mars et un dimanche travaillé (9h de report à vérifier ; 49h restantes dont 8h déjà
+majorées ; 4h de majoration) ; une valeur saisie à la main au-delà des jours (le surplus à 25 %). Témoin : compteur,
+saisies et enregistrements identiques avant et après lecture ; bascule remise. R7 recalée : le report dit son nom.
+Contre-épreuves, **8 neuves** : bascule laissée au 1er janvier, pile à l'envers, surplus à 50 %, dimanche majoré deux
+fois, paiement sans son mois, report mêlé aux estimées, relevé sans estimation, « À savoir » muet. **331 assertions,
+47 défauts, 47 détectés.**
+
+### 147f. La note de livraison
+
+**Base `a578994`. APP 7.36 → 7.37 · SW 8.01 → 8.02.**
+
+| Fichier | Ce qui change pour l'utilisateur | Bump |
+|---|---|---|
+| `src/planning.js` | l'estimation, les trois lignes, le calcul mois par mois, le relevé | — |
+| `src/styles.css` | `.pf-estl`, `.pf-src`, `.pf-est`, `.pf-estd` | ★ SW |
+| `src/utils.js` · `index.html` | versions, `WHATS_NEW` 7.37 | ★ APP |
+| `public/sw.js` | v8.02 au changelog | ★ SW |
+| `guide/10-planning.html` | « La fiche d'un salarié » : le taux estimé, le report, le calcul mois par mois | — |
+| `scripts/mv-harnais-recup.mjs` | section W, R7, 8 contre-épreuves | — |
+| `scripts/harnais-claude-md.mjs` · `CLAUDE.md` · `.mv-base` | `SECTIONS` 179, §147, base | — |
+
+`node scripts/build-guide.mjs`, puis `npm run check`, `npm run test:e2e`, puis
+`npm run build && firebase deploy --only hosting`.
+
+### 147g. Accompagnement
+
+Guide : 10-planning, « La fiche d'un salarié ». `WHATS_NEW` 7.37 : deux entrées ; l'entrée d'avant qui parlait du
+« taux à vérifier » reste telle quelle (prépendé, jamais remplacé). `MV_AIDE`, visite guidée, `MV_INFO` : rien ne
+bouge, aucun ne parlait du « taux à vérifier ».
+
+### 147h. Mesuré
+
+Coût de la lecture, dans Node, sur le cas le plus chargé du harnais (report, récup en mars, dimanche, quatre mois
+d'avant septembre au compteur) : fiche (Résumé + Compteur) **13,1 → 13,9 ms**,
+relevé **5,6 → 8,2 ms**. Chaque mois lu est gardé le temps d'un appel
+(`_pfSources`).
+
+### 147i. Ouvert, et dit
+
+① **C'est une estimation** : la compta tranche, et le régime lui-même (8 h à 25 %, puis 50 %, §142) reste à lui faire
+confirmer. ② Voie ② non faite (147a). ③ Rendu vérifié dans Chromium, sur la maquette ; pas vu sur un vrai téléphone
+ni sur un relevé imprimé.

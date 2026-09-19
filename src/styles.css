@@ -4061,6 +4061,15 @@ body.mv-trial-on #app-root{padding-top:calc(env(safe-area-inset-top,0px) + 44px)
 .pf-dep{display:grid;grid-template-columns:1fr 1fr;gap:var(--e-2,8px);margin-top:var(--e-2,8px)}
 .pf-dep label{display:flex;flex-direction:column;gap:var(--e-1,4px);font-size:var(--pt-micro,11px);color:var(--texte-med)}
 .pf-dep input{min-height:44px;box-sizing:border-box;border-radius:10px;border:1.5px solid var(--gris);background:var(--bg-card);color:var(--texte);font-family:inherit;font-size:var(--pt-base,14px);padding:0 var(--e-2,8px)}
+/* ★★ AVANT-1 (§147) — les heures sup d'avant septembre 2026 : l'estimation de leur taux, et le calcul mois par mois */
+.pf-lst dt small.pf-estl{display:block;margin-top:var(--e-0,2px);font-size:var(--pt-micro,11px);line-height:1.4;color:var(--texte-doux)}
+.pf-t tr.pf-src td{border-bottom:none}
+.pf-t tr.pf-est td{padding:0 var(--e-0,2px) var(--e-2,8px);font-size:var(--pt-micro,11px);line-height:1.45;color:var(--texte-doux);white-space:normal}
+.pf-estd{margin-top:var(--e-2,8px);border-top:1px solid var(--gris-clair);padding-top:var(--e-1,4px)}
+.pf-estd summary{min-height:36px;padding:var(--e-2,8px) 0;cursor:pointer;font-size:var(--pt-txt,12.5px);font-weight:var(--fw-semi,600);color:var(--texte)}
+.pf-estd ul{margin:0;padding:0 0 0 var(--e-4,16px);font-size:var(--pt-txt,12.5px);line-height:1.5;color:var(--texte-med)}
+.pf-estd li{padding:var(--e-0,2px) 0}
+.pf-estd p{margin:var(--e-2,8px) 0 var(--e-1,4px);font-size:var(--pt-micro,11px);line-height:1.5;color:var(--texte-doux)}
 
 
 /* ═══ NAV UNIFIÉE — étape 5 : Pilotage ═══

@@ -23,7 +23,7 @@ export const GT_ADMIN_EMAIL = 'ngdevpro@gmail.com';
 // WHATS_NEW   : tableau vide = modal desactive pour cette version.
 // Format item : { emoji:'📅', titre:'Titre court', desc:'Phrase utilisateur.' }
 // Regle : seulement les changements visibles par les utilisateurs.
-export const APP_VERSION = '7.36';
+export const APP_VERSION = '7.37';
 // ════ Journal des nouveautés (récap cumulatif) ════
 // Une entrée par version, la PLUS RÉCENTE EN HAUT : { v:'5.10', items:[ {emoji,titre,desc}, … ] }
 // À chaque release visible → AJOUTER un bloc en tête (ne pas remplacer). items:[] = release technique (rien à afficher).
@@ -715,6 +715,15 @@ window._mvGraphRepeindre = function(){
 };
 
 export const WHATS_NEW = [
+  { v: '7.37', items: [
+    { emoji: 'balance', titre: 'Les heures sup d’avant septembre ont un taux estimé',
+      desc: "Quand des heures sup d’avant septembre 2026 sont payées ou restent au compteur, la fiche et le relevé ne disent plus "
+        + "seulement «\u00a0taux à vérifier\u00a0»\u00a0: ils donnent une <b>estimation</b>, à +25\u00a0% et à +50\u00a0%, en relisant "
+        + "chaque semaine avec la règle d’aujourd’hui. Rien ne change au compteur ni aux paies déjà faites\u00a0; la compta confirme." },
+    { emoji: 'liste', titre: 'Le report d’avant Ma Vigne reste à part',
+      desc: "La ligne «\u00a0Heures reportées, taux à vérifier\u00a0» se sépare en trois\u00a0: les heures sup d’avant septembre, "
+        + "estimées\u00a0; la majoration des dimanches et fériés, déjà calculée\u00a0; le report d’avant Ma Vigne, toujours à vérifier." }
+  ] },
   { v: '7.36', items: [
     { emoji: 'equipe', titre: 'Deux appareils, les deux saisies gardées',
       desc: "Ce que vous enregistrez n’efface plus ce qu’un autre appareil a saisi entre-temps. Le journal, le tracteur, le "
