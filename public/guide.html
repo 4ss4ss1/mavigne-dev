@@ -2024,9 +2024,9 @@ mark{background:rgba(200,176,32,.32);color:var(--cream);border-radius:3px;paddin
   L'écran l'écrit sous chaque motif, avant que vous le choisissiez.</p>
   <div class="tw"><table>
     <tr><th>Motif</th><th>Effet</th></tr>
-    <tr><td><svg class="g-ic" width="18" height="18" viewBox="0 0 24 24" aria-hidden="true" focusable="false"><use href="#ic-maison"></use></svg> <b>Personnel (autorisé)</b></td><td>Rendez-vous, affaire de famille, départ demandé. Retiré des heures sup&nbsp;; le reste est retenu sur la paie.</td></tr>
-    <tr><td><svg class="g-ic" width="18" height="18" viewBox="0 0 24 24" aria-hidden="true" focusable="false"><use href="#ic-croix"></use></svg> <b>Absence injustifiée</b></td><td>Parti ou absent sans prévenir. Retiré des heures sup&nbsp;; le reste est retenu sur la paie.</td></tr>
-    <tr><td><svg class="g-ic" width="18" height="18" viewBox="0 0 24 24" aria-hidden="true" focusable="false"><use href="#ic-pluie"></use></svg> <b>Décidé par le domaine</b></td><td>Pluie, chantier terminé, attente de matériel. Retiré des heures sup&nbsp;; <b>jamais retenu sur la paie</b>.</td></tr>
+    <tr><td><svg class="g-ic" width="18" height="18" viewBox="0 0 24 24" aria-hidden="true" focusable="false"><use href="#ic-maison"></use></svg> <b>Personnel (autorisé)</b></td><td>Rendez-vous, affaire de famille, départ demandé. Rattrapé dans la semaine, puis repris sur la récup et les heures sup du mois&nbsp;; le reste est retenu sur la paie.</td></tr>
+    <tr><td><svg class="g-ic" width="18" height="18" viewBox="0 0 24 24" aria-hidden="true" focusable="false"><use href="#ic-croix"></use></svg> <b>Absence injustifiée</b></td><td>Parti ou absent sans prévenir — c'est aussi ce que vaut une absence sans motif. Rattrapé dans la semaine, puis repris sur la récup et les heures sup du mois&nbsp;; le reste est retenu sur la paie.</td></tr>
+    <tr><td><svg class="g-ic" width="18" height="18" viewBox="0 0 24 24" aria-hidden="true" focusable="false"><use href="#ic-pluie"></use></svg> <b>Décidé par le domaine</b></td><td>Pluie, chantier terminé, attente de matériel. Rattrapé dans la semaine, puis repris sur la récup et les heures sup du mois&nbsp;; le reste va aux <b>heures à rattraper</b>, <b>jamais retenu sur la paie</b>.</td></tr>
     <tr><td><svg class="g-ic" width="18" height="18" viewBox="0 0 24 24" aria-hidden="true" focusable="false"><use href="#ic-pansement"></use></svg> <b>Arrêt de travail</b></td><td>Sans effet sur les heures sup. Suspend le contrat : abaisse le plafond annuel.</td></tr>
     <tr><td><svg class="g-ic" width="18" height="18" viewBox="0 0 24 24" aria-hidden="true" focusable="false"><use href="#ic-diplome"></use></svg> <b>Formation</b></td><td>Compté comme travaillé. C'est le motif des <b>jours de CFA d'un apprenti</b> : le code du
     travail (art. L6222-24) les compte comme du temps de travail.</td></tr>
@@ -2087,16 +2087,17 @@ mark{background:rgba(200,176,32,.32);color:var(--cream);border-radius:3px;paddin
   changent de mois sans la fermer, et le bouton <b>Relevé</b> édite le PDF.</p>
   <ul class="dot">
     <li><b>Résumé</b> — le cadre <b>Pour la paie</b>, dans l'ordre de la saisie de paie : le <b>salaire de
-    base</b> (heures prévues, faites, et les <b>absences par cause</b> : payées, par le domaine, du salarié, à
-    préciser), <b>à payer en plus</b> (heures sup payées, par taux), <b>à retirer</b> (absences non payées,
-    absences à préciser, acomptes) et <b>pour information</b> (heures écourtées et ce qu'il en reste à rattraper,
-    récup prise, temps de récup restant). Le bas du cadre additionne les heures sup <b>semaine par semaine</b>.
-    Tant que le mois n'est pas fini, le cadre dit <b>« à ce jour »</b> : les jours à venir ne comptent pas comme
-    faits. Une absence <b>sans motif</b> s'affiche en orange : donnez-lui son motif avant l'envoi à la compta.</li>
+    base</b> (heures prévues, faites, et les <b>absences par cause</b> : payées, par le domaine, du salarié), <b>à payer
+    en plus</b> (heures sup payées, par taux — ou une seule ligne quand rien n'est à payer), <b>à retirer</b>
+    (<b>retenue sur salaire</b>, acomptes) et <b>pour information</b> (absences du domaine et du salarié et ce
+    qu'elles sont devenues, récup prise, temps de récup restant, <b>heures à rattraper</b>). Le bas du cadre
+    additionne les heures sup <b>semaine par semaine</b>. Le cadre compte <b>tout le mois</b> : les jours à venir,
+    aux heures du planning. Une retenue et des heures sup à payer ne s'y trouvent <b>jamais ensemble</b> : les
+    absences passent d'abord. La carte <b>Envoi à la compta</b> porte le bouton <b>Figer</b> (voir le relevé plus bas).</li>
     <li><b>Paiement des heures sup</b> — cochez <b>« demande à être payé »</b> et indiquez le nombre d'heures.
     On peut payer <b>au-delà des heures du mois</b>, jusqu'à tout ce que le compteur contient encore : les heures
-    du mois d'abord, puis les plus anciennes du compteur. Raccourcis : aucune, <b>sans toucher la récup prise</b>
-    (le plus d'heures payables sans découvrir la récup déjà prise ce mois-ci), tout le mois, <b>tout le
+    du mois d'abord, puis les plus anciennes du compteur. On ne paie que ce qui reste une fois <b>les absences,
+    la récup prise et les heures à rattraper couvertes</b>. Raccourcis : aucune, tout le mois, <b>tout le
     compteur</b>. Les heures sup d'avant septembre 2026 apparaissent à part, avec un <b>taux estimé</b> d'après les jours saisis :
     chaque semaine est relue avec la règle d'aujourd'hui, et ce qui a déjà été payé ou pris en récup part des heures
     à 25&nbsp;%. C'est une estimation : le compteur et les paies d'avant ne changent pas, la compta confirme. Le report
@@ -2109,13 +2110,13 @@ mark{background:rgba(200,176,32,.32);color:var(--cream);border-radius:3px;paddin
     <b>Le calcul, mois par mois</b> montre d'où vient l'estimation.</li>
     <li><b>Jours</b> — semaine par semaine, du lundi au dimanche (le lundi du mois d'avant apparaît grisé quand
     la semaine commence avant le 1er) : l'horaire <b>prévu</b>, l'horaire <b>fait</b>, l'absence avec <b>ce
-    qu'elle devient</b> (rattrapée dans la semaine, reprise sur la récup, à rattraper, non payée, à préciser) et
+    qu'elle devient</b> (rattrapée dans la semaine, reprise sur la récup, à rattraper, retenue) et
     les <b>heures sup</b> du jour. Les étiquettes de la semaine disent ses heures sup par taux, ce que les heures
     en plus ont rattrapé, et préviennent : plus de 10&nbsp;h dans la journée, plus de 48&nbsp;h, sept jours
-    travaillés. Les jours à venir sont grisés. Touchez un jour pour l'ouvrir.</li>
+    travaillés. Les jours à venir comptent aux heures du planning. Touchez un jour pour l'ouvrir.</li>
     <li><b>Compteur</b> — le <b>temps de récup</b>, du solde du mois d'avant au solde de fin de mois, ligne par
-    ligne ; la carte <b>Heures à rattraper</b> (journées écourtées par le domaine : ce que la semaine puis le
-    compteur ont rattrapé, ce qui reste — toujours affichée, même à zéro) ; l'année mois par mois avec son total
+    ligne ; la carte <b>Heures à rattraper</b> (absences et journées écourtées par le domaine : ce que la semaine, la
+    récup puis les heures sup du mois ont rattrapé, ce qui reste — toujours affichée, même à zéro) ; l'année mois par mois avec son total
     depuis janvier, et le report d'avant Ma Vigne, replié.
     L'année se lit en <b>heures sup</b>, comme la paie : <b>heures sup du mois</b>, <b>payées</b>,
     <b>récupérées</b>, <b>solde restant</b> — chaque ligne fait « solde d'avant + heures sup − payées −
@@ -2135,9 +2136,11 @@ mark{background:rgba(200,176,32,.32);color:var(--cream);border-radius:3px;paddin
     semaine sont à <b>25&nbsp;%</b>, les suivantes à <b>50&nbsp;%</b>. Une heure à 25&nbsp;%
     donne <b>1&nbsp;h&nbsp;15</b> de récup, une heure à 50&nbsp;% <b>1&nbsp;h&nbsp;30</b>. L'équation se lit
     «&nbsp;acquises − retirées = de récup&nbsp;», avec le calcul écrit en clair.</li>
-    <li>Ce que la semaine n'a pas rattrapé d'une journée écourtée se retire <b>du temps de récup, au taux normal</b> : 1&nbsp;h manquée,
-    1&nbsp;h de récup en moins. Ce que le compteur ne couvre pas est <b>retenu sur la paie</b>, sauf si le
-    domaine a arrêté la journée : il attend alors les prochaines heures sup.</li>
+    <li>Ce que la semaine n'a pas rattrapé d'une absence se reprend <b>sur la récup et les heures sup du mois, au
+    taux normal</b> : 1&nbsp;h manquée, 1&nbsp;h de récup en moins. Pour le salarié, ce qui n'est pas couvert est
+    <b>retenu sur la paie</b> ; pour le domaine, il va aux <b>heures à rattraper</b>, que les prochaines heures sup
+    comblent — jamais retenu. Le salarié passe d'abord. Des heures sup ne se paient qu'une fois les absences
+    couvertes : un relevé porte une retenue ou des heures sup à payer, <b>jamais les deux</b>.</li>
     <li><b>Pour la compta</b> : pour chaque taux, le <b>temps en récup</b>, les <b>heures à déclarer</b> et le
     <b>taux à appliquer</b>. La compta majore elle-même : pour 1&nbsp;h sup à 25&nbsp;%, on lui déclare
     <b>1&nbsp;h à +25&nbsp;%</b>, jamais 1&nbsp;h&nbsp;15.</li>
@@ -2147,13 +2150,16 @@ mark{background:rgba(200,176,32,.32);color:var(--cream);border-radius:3px;paddin
     « payées » et « au compteur », pour que rien ne soit déclaré deux fois.</li>
     <li>Le <b>relevé PDF</b> tient en deux pages. Page&nbsp;1 : le cadre « Pour la paie », puis le mois jour par jour —
     chaque absence dit <b>sa cause et ce qu'elle devient</b> (payée, rattrapée dans la semaine, reprise sur la récup, à
-    rattraper, non payée, à préciser), une colonne donne les <b>heures sup</b> du jour, et chaque semaine se lit en
+    rattraper, retenue), une colonne donne les <b>heures sup</b> du jour, et chaque semaine se lit en
     entier, avec en gris les jours du mois d'avant qu'elle emporte. Page&nbsp;2 : les heures sup par taux, le
     <b>compteur de récup</b> depuis le solde du mois d'avant, le compte des <b>heures à rattraper</b>, le cumul depuis
     janvier, les durées et repos à surveiller (plus de 10&nbsp;h dans la journée, semaine sans repos), les signatures.</li>
-    <li>Édité <b>avant la fin du mois</b>, le relevé est <b>provisoire</b> : les jours à venir ne comptent pas comme faits
-    et il ne se signe pas. Une absence <b>sans motif</b> est signalée « à préciser » : donnez-lui son motif avant
-    d'envoyer le relevé à la compta.</li>
+    <li>Le relevé part à la compta <b>la dernière semaine du mois</b> : il compte <b>tout le mois</b>, les jours à
+    venir aux heures du planning — une ligne dit à partir de quel jour —, et il se signe. Au moment de l'envoi,
+    <b>figez le mois</b> (bouton <b>Figer</b>, carte <b>Envoi à la compta</b> du Résumé de la fiche) : ce qui est payé
+    et retenu ne bouge plus, le relevé porte la date d'envoi, et ce qui change ensuite passe sur le mois suivant — à
+    retenir (repris d'abord sur la récup et les heures sup), à rendre, ou une majoration à payer. <b>Défiger</b>
+    rouvre le mois. Une absence sans motif compte comme injustifiée.</li>
     <li>Les mois <b>d'avant septembre 2026</b> gardent la règle d'alors : leurs paies ne changent pas.</li>
   </ul>
 

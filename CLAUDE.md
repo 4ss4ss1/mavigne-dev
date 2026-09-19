@@ -2,7 +2,25 @@
 
 > Document de référence du projet **Ma Vigne** (GUERETTECH). Il est le **porteur de vérité** :
 > la mémoire Claude est plafonnée, ce fichier ne l'est pas.
-> Dernière consolidation : **19 septembre 2026 (FUT-CAP-2)** — ★★ **CE QUI RESTAIT OUVERT EN §148 EST RÉGLÉ (§149)**.
+> Dernière consolidation : **19 septembre 2026 (FIGE-1)** — ★★ **FIGER À L'ENVOI : CE QUI CHANGE ENSUITE PASSE AU
+> MOIS SUIVANT (§151)**. Nico : « on fige à l'envoi ce qui a été payé et retenu pour le reporter sur le mois suivant.
+> Ajoute juste un bouton pour figer ». Bouton **Figer** (fiche › Résumé › Envoi à la compta) → instantané
+> `PLANNING_HSUP[nom][mois].fige` ; un mois figé garde son paiement et sa retenue ; l'écart (retenue vive − figée, et la
+> majoration seule en mode payé) entre au mois suivant par `_planCompteur` : à retenir (repris d'abord sur la récup et
+> les heures sup), à rendre, majoration à payer. Harnais recup : 358 assertions, 56 contre-épreuves. **APP 7.40 → 7.41
+> · SW 8.05 → 8.06**, base `d099fe5` — ⚠️ §150 n'est pas poussé : **ce zip contient les deux**. Détail en **§151**.
+>
+> ★ Précédente : **19 septembre 2026 (NET-1)** — ★★★ **UNE RETENUE OU DES HEURES SUP À PAYER, JAMAIS LES
+> DEUX ; LE RELEVÉ COMPTE TOUT LE MOIS (§150)**. Parti de l'audit du relevé de Victor (3h sup payées ET 3h30 retenues).
+> Nico : « TOUTES les heures d'absences sont récupérées sur les heures sup » ; « il est impossible qu'apparaissent les deux
+> sur la feuille » ; la feuille part à la compta la dernière semaine, « tous les jours doivent apparaître […] faits aux heures
+> indiquées ». Puis, sur maquette : le domaine se reprend sur la récup d'abord, puis va aux heures à rattraper, jamais
+> retenu ; « retirer absence sans motif » (= injustifiée depuis septembre). Paiement plafonné APRÈS les absences
+> (`_planCompteur`), salarié avant domaine, `_planPayeMaxCouvert` retirée, mode provisoire retiré, lundi 31 août qui
+> servait deux fois corrigé. Harnais recup : 345 assertions, 51 contre-épreuves ; semaine revu. **APP 7.39 → 7.40 · SW
+> 8.04 → 8.05**, base `d099fe5`. Détail en **§150**.
+>
+> ★ Précédente : **19 septembre 2026 (FUT-CAP-2)** — ★★ **CE QUI RESTAIT OUVERT EN §148 EST RÉGLÉ (§149)**.
 > Nico : « règle ce qui est ouvert ». Une cuvée remise d'« Embouteillée » à « En élevage » reprend ses fûts au parc
 > (`_mvFutDispo` / `_mvFutReprendre`, triplet ET contenance) ou refuse s'ils n'y sont plus ; l'ouillage à prévoir compte
 > chaque fût à sa contenance (`vol_par_eq_L`) ; La Réserve rendue avec le VRAI `reserve.js` ; `MV_INFO` relue (`cave.auj`
@@ -20598,3 +20616,157 @@ ancien relu, pièces inchangées, écriture), H5 (les deux fiches « i »), H3 r
 
 ① La question du SO₂ « par fût » (149b-2). ② `test:e2e` et un vrai téléphone, chez Nico. ③ Le zip contient §148 ET §149 :
 un seul commit suffit, `.mv-base` reste `c227c18`.
+
+## 150. ★★★ NET-1 — UNE RETENUE OU DES HEURES SUP À PAYER, JAMAIS LES DEUX ; LE RELEVÉ COMPTE TOUT LE MOIS (19/09 — `planning.js` · `styles.css` · `utils.js` · `index.html` · `sw.js` · `guide/10-planning.html` · `scripts/mv-harnais-recup.mjs` · `scripts/mv-harnais-semaine.mjs` · `scripts/harnais-claude-md.mjs` · APP 7.39 → **7.40** · SW 8.04 → **8.05**)
+
+> Point de départ : le relevé de Victor de septembre (édité le 19/09). Nico : *« je ne comprends pas comment une personne
+> absente et devant des heures réussissent à se faire payer des heures sup »*. Les additions du PDF étaient justes ; deux
+> défauts de RÈGLE l'expliquaient : ① le samedi 12, absent sans motif, était neutre — il ne consommait pas les heures en
+> plus de sa semaine, d'où 3h « sup » sur une semaine de 38h faites pour 42h prévues ; ② le lundi 31 août servait deux
+> fois (ses 0h30, comptées en août, rattrapaient encore le 1er septembre — la reprise « E » de SEM-1 ne jouait que s'il
+> restait des heures sup). Décisions de Nico, dans l'ordre :
+> *« les heures sup se comptent à la semaine. Par contre TOUTES les heures d'absences sont récupérées sur les heures sup.
+> À l'impression du relevé, il doit apparaître sur la feuille si le salarié a une retenue sur salaire et de combien d'heures
+> ou s'il a des heures sup à se faire payer (mais il est impossible qu'apparaissent les deux sur la feuille) »* ; *« j'envoie
+> la feuille en compta la dernière semaine du mois pour être payé au dernier jour du mois, tous les jours doivent apparaître
+> sur la feuille en considérant qu'ils sont faits aux heures indiquées »* ; sur maquette, *« toutes absences injustifiées et
+> retard est pris sur heures sup d'abord et ensuite retenue sur salaire. Les absences provoquées par le domaine et journées
+> écourtées par le domaine doivent se rattraper mais sans retenue »*, *« mettre un compteur heures à rattraper »* ;
+> puis *« mais si ! s'il y a des récup à prendre, les heures en moins à cause du domaine se récupèrent dessus dans un
+> premier temps »* et *« dans l'appli, il faut retirer absence sans motif »* ; « go ».
+> ⚠️ Une lecture fausse en route (maquette v2 : le domaine ne touchait plus la récup acquise), corrigée par Nico : le lot a
+> été RECONSTRUIT depuis la base, pas empilé sur le prototype.
+
+### 150a. Les règles, depuis septembre 2026
+
+- **Salarié** (injustifiée, personnel, retard — et l'absence sans motif) : rattrapé dans la semaine, heure pour heure ; puis
+  repris sur la récup et les heures sup du mois, au taux normal (1h d'absence = 1h de récup, comme le compteur l'a
+  toujours fait : 1h sup à 25 % couvre 1h15) ; le reste est **retenu sur salaire**.
+- **Domaine** (absence ou journée écourtée, et journée écourtée SANS motif, comptée domaine comme avant) : pareil, puis
+  **heures à rattraper** — jamais de retenue ; les prochaines heures sup les comblent.
+- **Le salarié passe d'abord** : quand la récup ne suffit pas aux deux, une heure du domaine ne fait jamais retenir une absence.
+- **Le paiement vient après** : le mois ne paie que la VALEUR qui reste une fois les absences, ce qui restait à rattraper,
+  les heures du domaine et la récup prise servis. Dans cette limite, rien ne change : l'acompte prend les heures à 25 %
+  d'abord (§135). Conséquence voulue : une feuille porte une retenue OU des heures sup à payer — jamais les deux.
+- **Sans motif** : `autre` depuis septembre = absence injustifiée (libellé ET calcul). Avant septembre : neutre, inchangé.
+- **Tout le mois** : un jour à venir sans saisie compte fait aux heures du planning (le moteur le faisait déjà) ; le
+  relevé n'est plus provisoire et se signe ; une ligne dit « les jours à partir du X sont comptés aux heures du planning ».
+- Ne se rattrapent pas : congé payé, récup, arrêt, formation, événement familial, congé sans solde.
+
+### 150b. Le moteur
+
+- **`_planCompteur`** (mois actifs) : `bes = dette + retire + domaine + indet + récup` ; `bud = (récup acquise + heures
+  sup du mois en valeur) − bes` ; le paiement du mois se prend dans `bud`, taux le plus bas d'abord ; ce qui n'est pas payé
+  entre au compteur. Puis `retire` (→ `retenue`), puis `comble` (ce qui restait à rattraper, déplacé APRÈS le salarié — il
+  était pris à l'entrée), puis le domaine (`tire`, récup d'abord → `compense` → `dette`), puis la récup prise. Avant
+  septembre : le `comble` d'entrée, à l'identique. L'invariant `solde − dette = net` tient (le comble s'annule).
+- **`PLAN_NET_DEBUT` + `_planNetAt` + `_planAbsMotifAt(e,m,y)`** : borne FIXE — AVANT-1 déplace `PLAN_RECUP_DEBUT` le
+  temps d'une lecture (§147) et les absences sans motif de janvier à août doivent rester neutres. Seuls les lecteurs qui
+  datent le jour passent par `_planAbsMotifAt` (`_planJourEcart`, `_planDayStatus`, `_planPaieMois`) : les autres ne lisent
+  que les drapeaux, identiques pour `autre` et `injustifie`.
+- **`_planHsupMois`, la transition** : un jour d'avant la règle ne rattrape plus rien (`totP` et la consommation l'excluent) ;
+  la reprise « E » et `dejaRetire` n'avaient plus rien à reprendre — retirés avec leurs lecteurs (⚰️ relevé, écran, carte récup).
+- **`_planPaieMois`** : `x.plan` / `P.planDe` (au lieu de `x.futur` / `P.provisoire`, retirés), `P.payeDem` (la demande ;
+  `P.payeMois` est ce qui se paie vraiment). **`_planPayeEcrire`** rend le reste quand les absences plafonnent le mois ;
+  **`_planPayeMaxTotal`** lit le paiement effectif. ⚰️ **`_planPayeMaxCouvert`** (« sans toucher la récup prise ») : un
+  paiement ne peut plus rien découvrir, son maximum était devenu celui du total — deux boutons pour un même nombre.
+
+### 150c. La feuille et l'écran (une seule source, `_pfV3`)
+
+- Verdict : « Retenue sur salaire : Xh. » ou « Salaire de base maintenu. » — plus d'« à préciser ». « À retirer » : ligne
+  **Retenue sur salaire** (« aucune » à zéro), congé sans solde, acompte. « À payer en plus » : les quatre taux quand on paie
+  (FICHE-3, inchangé) ; sinon UNE ligne — « Aucune heure sup à payer : elles couvrent les absences » / « Aucune heure sup
+  payée : elles vont en récup » / « Pas d'heures sup ce mois-ci » — plus les majorations seules.
+- « Pour information » : **Absences du domaine** (rattrapées / sur la récup / à rattraper / le mois prochain), absences du
+  salarié (… « retenues »), récup restante, et le compteur **Heures à rattraper**, toujours, même à 0h. Payée, la majoration
+  seule n'y est plus répétée ; « gardées en récup : 0h » non plus.
+- Relevé : « non payée(s) » → « retenue(s) » ; journée écourtée sans motif → « Écourtée par le domaine » ; la case « J'accepte
+  que … sinon retenue » devient une mention sans case (la reprise est d'office) ; la demande dit « il en demandait Xh : les
+  absences passent d'abord » ; « À savoir » réécrit ; « (heures prévues) » → « hors heures sup » (et à la compta).
+- Mode provisoire RETIRÉ partout : bandeaux, « à ce jour », jours grisés, semaines « à venir », signature hachurée ;
+  CSS `.prov`, `.sig.non`, `.j tr.fut`, `.pf-prov`, `.pf-jr.pf-fut`.
+- Carte de paiement : raccourcis « Aucune », « Tout le mois » (plafonné), « Tout le compteur » ; note « les absences
+  passent d'abord » ; toast « Seulement Xh payables ce mois-ci ».
+- **Deux pages A4** : mesurées dans Chromium, polices du dépôt, sur les six relevés de référence (Chloé, Nico, Victor ×
+  16/09 et 1er/10) et la maquette de Victor. Gagné pour tenir : l'observation « Xh de rattrapage » sur une ligne (au lieu de
+  « Xh rattrapent la semaine »), la majoration seule et « gardées en récup : 0h » non répétées. Plus serrée : Nico, 22 px.
+
+### 150d. Les chiffres de contrôle
+
+Victor (données du relevé, août reconstitué à 28h30 sup / 8h30 récup / 20h) : samedi 12 sans motif = injustifié → retenue
+**7h30**, **3h30** à rattraper (le 15), aucune heure sup, sa demande de 3h → 0 payable. En arrêt le 12 : 3h sup absorbées,
+ni retenue ni paiement, 3h15 à rattraper. Mois « domaine » (11 et 15 écourtés, rien d'autre) : 5h30 reprises sur 20h de
+récup → 14h30, rien à rattraper. Contre-épreuve (présent, 10h sup) : 3h payées à 25 %, aucune retenue.
+
+### 150e. Les harnais
+
+`mv-harnais-recup` : **345 assertions** (X1–X14 : retenue XOR paiement, `_planPayeEcrire` qui rend le reste, maximum payable
+réel, domaine sur la récup, salarié d'abord, compteur à rattraper toujours affiché, sans motif septembre/août, 31 août, récup
+non couverte sans paiement) ; N, R, U, V relus (18h demandées → 12h payées ; plus de provisoire ; « retenues »).
+**51 contre-épreuves** : 9 neuves ou refaites (paiement avant les absences, récup qui ne reprend plus le domaine, domaine
+avant le salarié, transition SEM-1 réintroduite, bascule sans motif suivant AVANT-1, « non payées », case à cocher, jours
+à venir tus, sans motif neutre) ; ⚰️ deux retirées avec `_planPayeMaxCouvert`, une avec la reprise « E ».
+`mv-harnais-semaine` : Nico 5h (son 9, sans motif, est injustifié), Victor 0h, compteurs recalculés à la main (Nico 27h15 :
++ 2h45 de majoration du dimanche 13 qui rattrape sa semaine ; Victor 5h45 retenues, 3h30 à rattraper, rien payé).
+`mv-harnais-releve` 96/96 ; jetons : la graisse du petit texte en `normal` (400 comptait hors des trois pas).
+`npm run check` vert (préflight C1–C22, tous les harnais, contre-épreuves) ; `vite build` puis **`test:smoke` OK** (démarrage,
+23/23 globaux — le Chromium de Playwright-node pointé sur celui du bac à sable). `SECTIONS` 179 → **182** : +§150, et le
+rattrapage de §148 et §149, non relevés dans leur lot.
+
+### 150f. Ouvert, et dit
+
+① **Régularisation** : la feuille partie le 24, un jour qui change ensuite n'était pas reporté sur le mois suivant (aucune
+trace de ce qui avait été envoyé) — ✅ réglé par **§151 (FIGE-1)**. ② La **majoration du
+dimanche** payée reste à côté d'une retenue (ce ne sont pas des heures sup) — question posée à Nico, sans réponse.
+③ La compensation d'une semaine sur l'autre, en valeur, est celle d'un temps annualisé : à faire valider par le comptable
+avec le régime 25/50 et le report au 31 décembre (§142). ④ Baisses de cliquets non regravées (icônes −18, échelle −3,
+C24b 24 → 21, rayons 194 → 193) : à regraver après vérification. ⑤ `test:e2e` et un vrai téléphone, chez Nico : la feuille à imprimer depuis le téléphone, en fin de mois.
+
+## 151. ★★ FIGE-1 — FIGER À L'ENVOI : CE QUI CHANGE ENSUITE PASSE AU MOIS SUIVANT (19/09 — `planning.js` · `utils.js` · `index.html` · `sw.js` · `guide/10-planning.html` · `scripts/mv-harnais-recup.mjs` · `scripts/harnais-claude-md.mjs` · APP 7.40 → **7.41** · SW 8.05 → **8.06**)
+
+> Ouvert ① de §150f. Nico : *« un jour qui change après l'envoi […] bien sûr que si, si je fais des heures sup, ça va
+> gonfler mon taux d'heures sup ; s'il y a des absences, ça va diminuer sur le mois d'après »* — juste pour le solde (les
+> heures en plus vont au compteur, le domaine aux heures à rattraper). Faux pour deux cas : une retenue née après l'envoi
+> tombait sur un mois déjà payé, et une absence qui mangeait des heures sup déjà payées faisait BAISSER après coup le
+> paiement du mois (le compteur remettait en stock des heures versées). Puis : *« on fige à l'envoi ce qui a été payé et
+> retenu pour le reporter sur le mois suivant. Ajoute juste un bouton pour figer »*. ⚠️ §150 n'est pas poussé
+> (`origin/main` = `d099fe5`) : ce lot s'empile dessus, le zip livré contient les deux.
+
+### 151a. Le bouton et l'instantané
+
+Fiche › Résumé › carte **Envoi à la compta** (admin, mois ≥ septembre 2026) : **Figer {mois}** → `planFicheFiger` pose
+`PLANNING_HSUP[nom][AAAA-MM].fige = {le, payes:[{taux,nat,brut}], retenue, maj:[{taux,nat,h}]}` (`_planFigeInstantane` :
+le paiement du mois par taux, la retenue de la feuille, la majoration seule en mode payé), sauvé comme le reste de
+`planning_hsup`. Figé : la carte dit la date, ce qui a été payé et retenu, ce qui a changé depuis, et **Défiger**
+(`planFicheDefiger`) ; la carte de paiement devient une ligne sans commandes et `_planFichePayer` refuse ; le relevé écrit
+« Transmis à la compta le 24/09/2026 » ; l'en-tête du cadre (écran et papier) dit « Septembre 2026 · figé le 24/09/2026 »
+— dans l'en-tête et pas en ligne : la page 1 de Nico n'a que 22 px de marge.
+
+### 151b. Le moteur (`_planCompteur`)
+
+- **Mois figé** : son paiement est un FAIT — repris tel qu'il est parti, taux par taux ; des heures sup défaites après
+  l'envoi (une absence qui les rattrape dans la semaine) ont été payées quand même : leur valeur (`trop`) sort du
+  compteur d'abord, avant les absences. Sa retenue affichée est celle de l'instantané (`P.nonPayees`), la vive est gardée
+  à part (`P.nonPayeesVive`).
+- **L'écart** `rep = retenue vive (absences, report reçu, trop et paiement pris au compteur non couverts) − retenue figée`,
+  plus, en mode payé, l'écart de la majoration seule (en plus → `repMaj`, payée le mois suivant ; en trop → ajoutée à
+  `rep` en valeur). Il passe au mois SUIVANT : `reportRet` (> 0) rejoint les besoins du mois — il attend son paiement
+  (`bes`) et se reprend sur la récup et les heures sup APRÈS les absences du mois (`reportRetNC` = retenu) ; `reportRendre`
+  (< 0) se rend d'abord sur la retenue du mois (`rendu`), le reste est « à rendre » (`aRendre`, dans « À payer en plus »).
+  Chaîne : un mois suivant figé à son tour prend l'écart dans son instantané, et ainsi de suite.
+- Sans instantané : rien ne change (`garde` remplace `sup − paye`, même valeur). L'invariant `solde − dette = net` tient
+  (les parts couvertes du report et de `trop` entrent dans `T.dues`).
+
+### 151c. Le harnais
+
+`mv-harnais-recup` : **358 assertions** (Y1–Y13 : instantané daté, absence couverte par la récup → rien ne passe, tout payé
+puis absent → 7h sur octobre, retenues sans heures sup, reprises par les 9h sup d'octobre avant paiement, arrêt après
+l'envoi → 7h rendues, cadre d'octobre et de septembre, défiger, figé sans changement = mêmes chiffres, invariant, date sur
+le relevé) ; **56 contre-épreuves** (5 neuves : repaiement selon le compteur, écart gardé sur le mois, report retenu
+sans passer par les heures sup, retenue de trop pas rendue, retenue figée recalculée ; 2 ancres recalées).
+
+### 151d. Ouvert, et dit
+
+① Un congé sans solde ajouté après l'envoi n'entre pas dans l'écart (jour neutre, hors compteur). ② Le paiement pris au
+compteur (`paye_bank`) d'un mois figé n'est pas dans l'instantané : il ne peut plus changer (paiement bloqué), et ce que
+le compteur ne couvre plus passe dans l'écart. ③ Les ouverts ② à ⑤ de §150f restent.

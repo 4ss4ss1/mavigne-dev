@@ -9,6 +9,8 @@
 //    · Chloé  21h   — 11h30 à 25 %, 4h à 50 %, 5h30 le dimanche ; 1h30 écourtées, rattrapées dans la semaine ;
 //    · Nico   10h30 — 5h à 25 %, RIEN à 50 % (planning 40h : avant, « 1h à 25 %, 4h à 50 % ») ; le 18 vaut 8h ;
 //    · Victor 3h    — les 7h du week-end rattrapent 7h d'absence injustifiée, le dimanche garde sa majoration seule.
+//  ★ NET-1 (19/09/2026) : une absence sans motif est injustifiée depuis septembre. Le 9 de Nico et les 2 et 12 de Victor
+//    le deviennent : Nico 5h sup (sa semaine du 7 rattrape le 9), Victor 0h ; le paiement ne prend que ce qui reste.
 //  ★ Même chargement que mv-harnais-recup (le vrai module, horloge figée au 16/09/2026). Un CRASH est ROUGE.
 //  Usage :  node scripts/mv-harnais-semaine.mjs
 // ═══════════════════════════════════════════════════════════════════════════
@@ -139,15 +141,16 @@ let z = R._planHsupMois(M[0], 8);
 eq('Chloé 21h', z.plus, 21); eq('Chloé taux', bk(z), '25hs:11.5 50hs:4 50dim:5.5'); eq('Chloé domaine rattrapé', [z.domaine, z.rattrape.domaine].join('/'), '0/1.5');
 eq('Chloé S1 déjà en août', z.semaines[0].deja, 3.5);
 z = R._planHsupMois(M[1], 8);
-eq('Nico 10h30', z.plus, 10.5); eq('Nico taux : 5h à 25 %, rien à 50 %', bk(z), '25hs:5 50dim:5.5'); eq('Nico domaine rattrapé', [z.domaine, z.rattrape.domaine].join('/'), '0/3');
+eq('Nico 5h — le 9, sans motif, est injustifié : les heures en plus de sa semaine le rattrapent', z.plus, 5); eq('Nico taux : 5h à 25 %', bk(z), '25hs:5'); eq('Nico domaine : 2h rattrapées, 1h reste', [z.domaine, z.rattrape.domaine].join('/'), '1/2');
 eq('Nico faites 165h, le 18 vaut 8h', [R._planPaieMois(M[1], 8).faites, R._planDayH('nico', 8, 18, null)].join('/'), '165/8');
 z = R._planHsupMois(M[2], 8);
-eq('Victor 3h', z.plus, 3); eq('Victor taux', bk(z), '25hs:3'); eq('Victor absence : 7h rattrapées, 15h restent', [z.rattrape.retire, z.retire].join('/'), '7/15');
+eq('Victor 0h — les 2 et 12, sans motif, sont injustifiés', z.plus, 0); eq('Victor taux', bk(z), ''); eq('Victor absence : 10h rattrapées, 27h30 restent', [z.rattrape.retire, z.retire].join('/'), '10/27.5');
 eq('Victor domaine : 2h dans la semaine, 3h30 restent', [z.rattrape.domaine, z.domaine].join('/'), '2/3.5'); eq('Victor dimanche : majoration seule 3h30', JSON.stringify(z.majHs.map(x => [x.taux, x.nat, x.h])), '[[50,"dim",3.5]]');
 const rows = n => R._planCompteur(M[n], 8).rows[8];
 // Le solde de départ + l'écart historique d'août (3h30 / 2h / 0h) donnent le solde d'entrée de septembre
 eq('Chloé compteur : 31 + 3h30 d’août + 28h37 = 63h07', R._planBank(M[0], 8).solde, 31 + 3.5 + 28.625);
-eq('Nico compteur : 43h30 + 2h d’août − 19h30 payées = 26h', R._planBank(M[1], 8).solde, 43.5 + 2 - 19.5);
-eq('Victor compteur : 20 + 1h45 − 15 − 3h30 = 3h15', [R._planBank(M[2], 8).solde, rows(2).retenue, R._planBank(M[2], 8).dette].join('/'), '3.25/0/0');
+eq('Nico compteur : 43h30 + 2h d’août + 2h45 de majoration du dimanche 13 − 1h30 reprises − 19h30 payées = 27h15', R._planBank(M[1], 8).solde, 43.5 + 2 + 2.75 - 1.5 - 19.5);
+eq('Nico : 10h30 demandées sur le mois, 5h payées — ses heures sup du mois', rows(1).paye, 5);
+eq('Victor compteur : 20 + 1h45 − 27h30 = 5h45 retenues ; les 3h30 du domaine à rattraper ; rien de payé', [R._planBank(M[2], 8).solde, rows(2).retenue, R._planBank(M[2], 8).dette, rows(2).paye].join('/'), '0/5.75/3.5/0');
 console.log(rouge ? '  ' + rouge + ' rouge(s)' : '  ✓ les trois relevés de septembre : le vrai moteur dit comme la maquette v3');
 process.exit(rouge ? 1 : 0);
