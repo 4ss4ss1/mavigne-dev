@@ -142,10 +142,16 @@ export { _pilEchCadence };`;
   t('⑦ compte presentFiches / nVchamp (hors bureau)', /d\.presentFiches/.test(pr) && /d\.nVchamp/.test(pr) && /if\(p\.bureau\) return false;/.test(pr));
 }
 
-// ── ⑧ le simulateur divise par la journee mesuree par personne ───────────────
+// ── ⑧ DZ-1 (§162) : la tournee et « qui fait quoi » lisent le planning JOUR PAR JOUR ──
+//   ⚰️ L'assertion visait _pilSimInitData (cadence moyenne sur 28 jours, perH = c.hPers).
+//   Le simulateur « et si » est retire : « Qui fait quoi » part de l'affectation de la
+//   priorite et passe par le moteur de la tournee (_dzSimuler). Une seule journee.
 {
-  const si=fn(SRC.pil,'_pilSimInitData').replace(/^\s*\/\/.*$/gm,'');
-  t('⑧ perH = c.hPers, plus cadH/nMes', /var perH=\(cadH>0\)\?c\.hPers:0;/.test(si) && !/cadH\/nMes/.test(si));
+  const jm=fn(SRC.pil,'_dzJourMbr').replace(/^\s*\/\/.*$/gm,'');
+  t('⑧ la journee d\'une personne vient de _planWorkPersRange, jour par jour', /_planWorkPersRange\(m,dt,dt\)/.test(jm));
+  t('⑧ une equipe collective compte son effectif du jour (_planEffN)', /_planEffN\(m,mi,dd\)/.test(jm));
+  t('⑧ « qui fait quoi » passe par le moteur de la tournee', /_dzSimuler\(/.test(fn(SRC.pil,'_dzRepTache')));
+  t('⑧ plus de cadence moyenne dans Decider', !/function _pilSimInitData\(/.test(SRC.pil));
 }
 
 // ── ⑨ _ecoRate : heures sur la periode x effectif, avec cache oublie au rendu ─

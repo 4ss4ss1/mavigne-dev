@@ -23,7 +23,7 @@ export const GT_ADMIN_EMAIL = 'ngdevpro@gmail.com';
 // WHATS_NEW   : tableau vide = modal desactive pour cette version.
 // Format item : { emoji:'📅', titre:'Titre court', desc:'Phrase utilisateur.' }
 // Regle : seulement les changements visibles par les utilisateurs.
-export const APP_VERSION = '7.48';
+export const APP_VERSION = '7.49';
 // ════ Journal des nouveautés (récap cumulatif) ════
 // Une entrée par version, la PLUS RÉCENTE EN HAUT : { v:'5.10', items:[ {emoji,titre,desc}, … ] }
 // À chaque release visible → AJOUTER un bloc en tête (ne pas remplacer). items:[] = release technique (rien à afficher).
@@ -715,6 +715,26 @@ window._mvGraphRepeindre = function(){
 };
 
 export const WHATS_NEW = [
+  { v: '7.49', items: [
+    { emoji: 'cible', titre: 'Décider part du planning\u00a0: rien à régler pour commencer',
+      desc: "Dans Pilotage › Décider, la tournée du jour se remplit toute seule\u00a0: le travail en priorité, le prochain jour \
+travaillé, l’équipe affectée à la priorité et <b>présente ce jour-là</b> (congés et récup retirés), ses heures et sa \
+coupure au planning. Chaque case dit d’où vient sa valeur. En toucher une passe l’écran en simulation\u00a0; \
+«\u00a0Valeurs réelles\u00a0» revient au planning." },
+    { emoji: 'route', titre: 'Les trajets entre les vignes sont calculés',
+      desc: "Plus de minutes «\u00a0par saut\u00a0» à deviner\u00a0: le temps de trajet se calcule entre chaque parcelle et la \
+suivante — à pied jusqu’à 300\u00a0m, au-delà en camion. La règle se règle dans la case Trajets." },
+    { emoji: 'calendrier', titre: 'La fin tombe au bon jour',
+      desc: "La date de fin se calcule jour par jour, avec l’équipe réelle de chaque jour\u00a0: un congé lundi, un retour \
+mardi, une fin de contrat comptent. La liste est rangée par jour. Quand ça déborde de la fenêtre, l’écran dit combien \
+de personnes il faudrait en plus, et un bouton l’essaie." },
+    { emoji: 'carte', titre: 'Sur téléphone, la carte laisse défiler la page',
+      desc: "Faire glisser le doigt sur la carte de la tournée fait défiler la page\u00a0; deux doigts la déplacent. \
+«\u00a0Agrandir\u00a0» l’ouvre en plein écran. Les quatre réglages tiennent maintenant dans l’écran." },
+    { emoji: 'equipe', titre: '«\u00a0Qui fait quoi\u00a0» remplace «\u00a0Et si\u00a0»',
+      desc: "La répartition part de l’affectation de la priorité, avec le même calcul que la tournée\u00a0: les deux cartes \
+donnent la même date. + et − déplacent une personne, la date de fin de chaque travail suit." }
+  ] },
   { v: '7.48', items: [
     { emoji: 'balance', titre: 'Les heures sup d’avant septembre prennent leur majoration en récup',
       desc: "Des heures sup faites avant septembre 2026 et <b>encore au compteur</b> valaient 1\u00a0h pour 1\u00a0h en récup, "
@@ -3496,9 +3516,9 @@ var MV_AIDE = {
       ['Deux périodes qui se chevauchent', "ne comptent rien deux fois : les heures suivent les tâches, et une tâche n’appartient qu’à une seule période. Sur les jours communs, la frise hachure le fond en violet — il y a deux barres au même endroit, on lit la plus haute."],
       ['Une fenêtre de tâche s’arrête le jour écrit', " : fin au 25 avril, le 25 travaille. Et les heures se répartissent au prorata des jours <b>travaillables</b> : une semaine de ponts en reçoit moins, les semaines pleines récupèrent le reste."],
       ['Le marqueur « hors période »', "dans la roue crantée, fenêtres des tâches, veut dire qu’une fenêtre enregistrée ne tombe pas dans cette période. La fenêtre par défaut s’applique à la place, et l’écran le dit au lieu d’écraser tout le travail sur un seul jour."],
-      ['Décider', "— l’onglet s’appelait <b>Simuler</b>, mais l’ordre de passage qu’on y enregistre part sur l’écran de toute l’équipe : c’est le seul endroit du Pilotage qui change ce que les autres voient. On simule, puis on décide de diffuser. Il répond à deux questions : dans quel ordre passer sur les parcelles, et combien de renfort prendre — à quelle date, et pour quel coût. La simulation part de l’effectif <b>déjà sous contrat</b>, vendangeurs compris : le renfort que vous posez s’ajoute à cette ligne. Le sélecteur « On part de » permet de repasser aux permanents seuls pour préparer la campagne suivante."],
-      ['Décider compte sur la fenêtre du TRAVAIL', ", pas sur le calendrier d’aujourd’hui. Quarante vendangeurs engagés du 26 août au 4 septembre comptent dès maintenant pour l’ordre de passage et la répartition de la vendange — même si vous êtes seul dans les rangs ce matin. Le jour du travail, personne n’est en congé et tous les contrats courent."],
-      ['Un contrat de groupe compte pour son effectif', " : une fiche « équipe de vendange » à 40 vaut 40 personnes, pas une ligne. Inutile de créer quarante fiches. L’écran dit toujours sur quelles dates il a compté, et affiche l’écart avec la présence du jour."],
+      ['Décider', "— l’onglet s’appelait <b>Simuler</b>, mais la tournée qu’on y enregistre part sur l’écran de toute l’équipe : c’est le seul endroit du Pilotage qui change ce que les autres voient. Trois cartes : <b>la tournée du jour</b> (jusqu’où l’équipe ira, dans quel ordre), <b>qui fait quoi</b> (l’équipe répartie entre les priorités) et <b>le renfort</b> (combien, et quand)."],
+      ['La tournée part du planning', " : le travail en priorité, le prochain jour travaillé, l’équipe affectée à la priorité et présente ce jour-là (congés et récup retirés), ses heures et sa coupure. Les trajets se calculent entre chaque parcelle et la suivante. Chaque case dit d’où vient sa valeur ; en toucher une passe l’écran en simulation, « Valeurs réelles » revient au planning."],
+      ['Un contrat de groupe compte pour son effectif', " : une fiche « équipe de vendange » à 40 vaut 40 personnes, pas une ligne. Et quand la fenêtre du travail n’est pas encore ouverte, la tournée se calcule sur son premier jour : on compte ceux qui seront là ce jour-là, pas ceux d’aujourd’hui."],
       ['Le manque d’effectif se lit sur la semaine du pic', ", contre ce qui est prévu au planning <b>cette semaine-là</b> — pas contre la présence d’aujourd’hui. Un pic qui tombe dans onze mois ne se compare pas à qui est là ce matin."],
       ['Le total de l’Exercice n’est pas un compte de résultat', ": Ma Vigne connaît ce qui passe par elle — heures payées, carburant, achats d’intrants. Ni le fermage, ni les amortissements, ni les assurances, ni vos cotisations d’exploitant. Ce total sert à <b>piloter vos charges d’un bilan à l’autre</b>, pas à remplacer votre comptable."],
       ['La carte de fiabilité d’Économie', ": elle relit la liste du bandeau <b>« à compléter »</b> — mêmes lignes, mêmes mots, mêmes boutons — et n’en garde que ce qui met un <b>poste de ce budget à zéro</b> : un taux horaire, le prix du GNR, une dose. Ce n’est pas « un peu bas » : c’est zéro, et le budget affiché n’est qu’un plancher. La puce « N remarques » en dessous ouvre tout ce qui n’empêche pas un calcul mais change sa lecture."],
@@ -3721,6 +3741,22 @@ export const MV_INFO = {
 
   // ⚠️ FICHE VIVANTE : remplie par _pexEntete (pilotage.js) a chaque rendu.
   // ══ SIMULER ══
+  'pil.tournee': { t: 'La tournée du jour', p: [
+    '<b>Le travail</b> : la priorité du moment, diffusée dans Vigne. Sans priorité, le travail qui a le plus d\u2019heures restantes.',
+    '<b>Le jour</b> : aujourd\u2019hui s\u2019il est travaillé au planning, sinon le prochain jour travaillé. Si la fenêtre du travail n\u2019est pas encore ouverte, son premier jour : on compte ceux qui seront là ce jour-là.',
+    '<b>L\u2019équipe</b> : les personnes affectées à la priorité qui travaillent ce jour-là au planning. Congés, récup et absences sont retirés ; une équipe collective compte son effectif du jour. Sans équipe affectée : tout le monde au champ.',
+    '<b>Le travail par jour</b> : les heures prévues au planning, jour par jour et personne par personne. La coupure ne se retire pas du travail : elle allonge la présence.',
+    '<b>Les trajets</b> : calculés entre chaque parcelle et la suivante, à vol d\u2019oiseau — à pied jusqu\u2019à 300 m (4 km/h), au-delà en camion (5 min + 25 km/h), 5 min pour une parcelle sans position. La case Trajets règle ces cinq valeurs.',
+    '<b>La fin</b> : la tournée se déroule jour après jour avec l\u2019équipe du planning, puis se compare à la fenêtre de chaque travail coché. « Il faudrait N personnes » sort de la même simulation, relancée avec N personnes de plus.'
+  ] },
+
+  'pil.quifait': { t: 'Qui fait quoi', p: [
+    'Chaque travail en priorité part de <b>son équipe affectée</b>, au planning du jour, avec sa tournée (enregistrée, sinon au plus proche) et le même calcul que la tournée du jour.',
+    '<b>+</b> ajoute une personne à ce travail : d\u2019abord quelqu\u2019un sans priorité ce jour-là, puis un renfort. <b>\u2212</b> en retire une. La date de fin suit.',
+    'Sans priorité diffusée, l\u2019équipe du jour est répartie également entre les travaux ouverts.',
+    'Rien n\u2019est enregistré ici : l\u2019affectation se diffuse dans Vigne \u203a Priorité du moment.'
+  ] },
+
   'pil.sim.frise': { t: 'Quand chaque travail peut se faire', p: [
     'Une <b>ligne par travail</b>, une <b>barre par fenêtre</b> : du premier jour où il peut se faire au dernier jour où il devrait être fini.',
     'C\u2019est ce qui explique qu\u2019on ne puisse pas <b>prendre de l\u2019avance</b> : l\u2019effeuillage ne se fait pas en avril, même avec dix personnes disponibles. Le renfort ne sert que s\u2019il tombe <b>dans la fenêtre</b>.',
@@ -4996,35 +5032,9 @@ function _mvFenetre(saison, noms, depuisIso){
 //   journee  heures EFFECTIVES/pers/jour pauseMin   pause (amplitude seulement)
 //   sauts / trajetMin  deplacements entre parcelles (temps CALENDAIRE d'equipe)
 //   fen      objet _mvFenetre() ou null
-function _mvProj(o){
-  o=o||{};
-  var N=Math.max(1,parseFloat(o.eff)||1);
-  var hJ=Math.max(0.5,parseFloat(o.journee)||7);
-  var resteH=Math.max(0,parseFloat(o.resteH)||0);
-  var trajetH=Math.max(0,(parseFloat(o.sauts)||0)*(parseFloat(o.trajetMin)||0)/60);
-  var capJour=N*hJ;                        // heures-HOMME par jour
-  var calTot=resteH/N+trajetH;             // duree CALENDAIRE totale
-  var jours=Math.ceil(calTot/hJ-1e-9);
-  // On compare aux jours QUI RESTENT, pas a la fenetre entiere. Repli sur
-  // .jours pour un objet fenetre construit par une version anterieure.
-  var fen=o.fen||null, fenTot=fen?(fen.jours||0):0;
-  var fenJ=fen?((fen.joursRestants!=null)?fen.joursRestants:fenTot):0;
-  if(!(fenJ>0)) fenJ=0;
-  // L'effectif requis doit payer le TRAJET lui aussi : il est le meme quel que
-  // soit le nombre de bras, donc il ne se divise pas. Sans cette soustraction,
-  // l'ecran prescrivait l'effectif deja en place (« deborde de 1 j, il faudrait
-  // 5 personnes » a 5 personnes).
-  var utile=fenJ*hJ-trajetH;
-  return {
-    capJour:capJour, jours:jours, calTot:calTot, trajetH:trajetH,
-    fenJours:fenJ||null, fenJoursTotal:fenTot||null,
-    depassement:fenJ?Math.max(0,jours-fenJ):null,
-    tient:fenJ?(jours<=fenJ):null,
-    effPourFenetre:(fenJ&&utile>1e-9)?(resteH/utile):null,
-    impossible:!!(fenJ&&utile<=1e-9),
-    amplitude:hJ+(Math.max(0,parseFloat(o.pauseMin)||0)/60)
-  };
-}
+// ⚰️ _mvProj (effectif constant x journee reglee) a ete RETIRE au lot DZ-1 (§162) : son seul appelant etait
+//   l'ancien verdict de l'ordre de passage. La tournee se deroule maintenant JOUR PAR JOUR avec l'equipe du
+//   planning (_dzSimuler, pilotage.js) ; _mvFenetre reste la seule definition de la fenetre.
 
 // ════════════════════════════════════════════════════════════════════════════
 // EXERCICE COMPTABLE — la fenêtre « de date de bilan à date de bilan »
@@ -5099,7 +5109,6 @@ window._mvJoursOuvrables  = _mvJoursOuvrables;
 window._mvAujIso          = _mvAujIso;
 window._mvJoursRestants   = _mvJoursRestants;
 window._mvFenetre         = _mvFenetre;
-window._mvProj            = _mvProj;
 
 // ── Axe campagne : du 1er aout au 31 juillet, de recolte a recolte. ──
 // Une date appartient a la campagne ouverte le 1er aout qui la precede : au 6 aout on

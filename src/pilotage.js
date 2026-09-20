@@ -64,7 +64,8 @@ function _pilDomKey(){ return 'mavigne_pilote_dom_'+_pilTenant(); }
 //   et vu le meme ecran. C'est le piege deja vecu avec `avc_etp` / `an_frise`.
 //   A chaque fois qu'un defaut de disposition change, ce numero monte d'un cran
 //   et _pilMigrEtat repose la disposition neuve — UNE seule fois.
-var _PIL_ST_V = 3;
+// 4 (DZ-1, §162) : le Renfort arrive REPLIÉ — seule la tournée est ouverte à l'arrivée.
+var _PIL_ST_V = 4;
 var _PIL_DEFAULT = {
   show: {
     // Aujourd'hui (cockpit)
@@ -98,7 +99,7 @@ var _PIL_DEFAULT = {
   //   indicateurs, sept pleines largeurs empilees, ~4 500 px de defilement.
   //   ⚠️ Replier NE CACHE AUCUN CHIFFRE : depuis ce lot le chiffre et sa ligne
   //     de cadre vivent dans l'EN-TETE. On replie le detail, jamais le nombre.
-  collapsed:{echeances:1,carte:1,etp:1,anbudget:1,temps:1,equipe:1,tracteur:1,cave:1,presences:1,gnr:1,capacite:1,simulateur:1,phyto:1,cout:1,couteff:1,cuivre:1,ift:1,dre:1},
+  collapsed:{echeances:1,carte:1,etp:1,anbudget:1,temps:1,equipe:1,tracteur:1,cave:1,presences:1,gnr:1,capacite:1,simulateur:1,renfort:1,phyto:1,cout:1,couteff:1,cuivre:1,ift:1,dre:1},
   v: _PIL_ST_V,
   sub:   {trac_revision:1,trac_controle:1,trac_repar:1,trac_intercep:1,cave_fml:1,cave_sout:1,cave_ouillage:1,pres_cp:1,pres_recup:1,pres_mal:1,etp_frise:1,etp_courbe:1,etp_ecart:1}
 };
@@ -219,7 +220,7 @@ var _PIL_ZOOM_FIN = 'sim';
 // le lot 5 declarait mort. Et `an` n'avait AUCUNE entree : le titre du niveau ①
 // sortait VIDE, la roue crantee flottant seule dans l'en-tete.
 // ⚠️ Les cles ne bougent pas ; seuls les mots changent.
-var _PIL_LABELS = {auj:'Aujourd\'hui',an:'L\'année — les douze mois, d\'un cadre à l\'autre',avc:'La campagne — avancement, temps et échéances',equ:'L\'équipe & le matériel',cav:'Cave',eco:'Économie — budget, rythme de dépense et prix de revient',cfm:'Conformité — cuivre, passages phyto et délai de rentrée',arc:'Archives des campagnes',sim:'Décider — ordre de passage, effectif et renfort'};
+var _PIL_LABELS = {auj:'Aujourd\'hui',an:'L\'année — les douze mois, d\'un cadre à l\'autre',avc:'La campagne — avancement, temps et échéances',equ:'L\'équipe & le matériel',cav:'Cave',eco:'Économie — budget, rythme de dépense et prix de revient',cfm:'Conformité — cuivre, passages phyto et délai de rentrée',arc:'Archives des campagnes',sim:'Décider — la tournée du jour, qui fait quoi, et le renfort'};
 var _PIL_VALID_TAB = {auj:1,an:1,avc:1,equ:1,cav:1,eco:1,cfm:1,arc:1,sim:1};
 // Migration des onglets memorises avant le regroupement.
 // Migration des cles memorisees : `ecf` (l'onglet composite) part sur l'economie.
@@ -265,7 +266,7 @@ function _taskColor(nom){ return _PIL_TASK_COL[_friseNorm(nom)]||'#8A5A38'; }
 //   dont elles le sont. Une seule table desormais, toutes valeurs = sprite.
 var _PIL_TILE_ICO={couteff:'balance',carte:'carte',temps:'balance',equipe:'equipe',
   tracteur:'tracteur',cave:'verre',presences:'equipe',phyto:'feuille',echeances:'calendrier',
-  etp:'balance',capacite:'balance',simulateur:'curseurs',ordrepassage:'cible',gnr:'carburant',
+  etp:'balance',capacite:'balance',simulateur:'equipe',ordrepassage:'cible',gnr:'carburant',
   traitement:'pulverisateur',meteo:'nuage',vinif:'fiole',cout:'balance',cuivre:'fiole',
   ift:'pulverisateur',dre:'goutte'};
 function _pilIco(n){ return _mvIcon(n,16); }
@@ -933,14 +934,6 @@ function _pilEchCadence(d){
   var hPers=(cad && cad.hPers>0)?cad.hPers:hJ;
   return { cadH:cadH, estim:estim, hPers:hPers, nPers:nV };
 }
-function _pilWorkdayDate(n){
-  if(n==null) return '—';
-  var dt=new Date(), added=0, guard=0;
-  while(added<n && guard<3000){ guard++; dt.setDate(dt.getDate()+1); var wd=dt.getDay(); if(wd!==0 && wd!==6) added++; }
-  var M=['janv.','févr.','mars','avr.','mai','juin','juil.','août','sept.','oct.','nov.','déc.'];
-  var J=['dim.','lun.','mar.','mer.','jeu.','ven.','sam.'];
-  return J[dt.getDay()]+' '+dt.getDate()+' '+M[dt.getMonth()];
-}
 function _friseNorm(s){ return String(s==null?'':s).normalize('NFD').replace(/[\u0300-\u036f]/g,'').toLowerCase().trim(); }
 // ⚠️ `memeSaison` : d.data (calcHeures) ne connait que la periode CONSULTEE. Sur
 //    une campagne zoomee qui n'est pas elle, un pourcentage emprunte declarerait
@@ -1487,46 +1480,12 @@ function _pilPicPortee(){
 //   \u26a0 On retient le MAXIMUM des semaines couvertes, pas la moyenne : une
 //   vendange de 40 personnes sur deux semaines noyee dans un mois de calme
 //   rendrait 12, un chiffre qui n'existe aucun jour de l'annee (\u00a733).
-function _pilEffFenetre(iso0,iso1){
-  var ann=null; try{ ann=_pilAnnuelData(); }catch(e){ ann=null; }
-  if(!ann||!ann.weeks||!ann.weeks.length) return null;
-  var a=_pilAnnOrd(iso0), b=_pilAnnOrd(iso1||iso0);
-  if(isNaN(a)||isNaN(b)) return null;
-  if(b<a){ var t=a; a=b; b=t; }
-  var best=null;
-  ann.weeks.forEach(function(w){
-    if(w.o1<a||w.o0>b) return;
-    // ⚠ headMax, pas head. head est lisse sur la semaine : un contrat de groupe
-    //   qui demarre un mercredi y vaut 5/7 de son effectif. Personne ne travaille
-    //   a 28,6 — ce jour-la il y a 40 personnes dans les rangs, ou aucune.
-    var h=(w.headMax!=null?w.headMax:(w.head||0));
-    if(best===null||h>best) best=h;
-  });
-  return best;
-}
 // Fenetre COMMUNE d'une liste de taches, lue dans cd.taskWindows (les memes
 // dates que le tableau Outils \u203a Param\u00e9trage). null si aucune tache reconnue :
 // une fenetre inventee vaudrait moins que pas de fenetre.
-function _pilFenTaches(noms){
-  var cd=_pilCdVue(); if(!cd||!cd.taskWindows||!cd.taskWindows.length) return null;
-  var set={}; (noms||[]).forEach(function(n){ set[_friseNorm(n)]=1; });
-  var d0=null,d1=null;
-  cd.taskWindows.forEach(function(t){
-    if(!set[_friseNorm(t.nom)]) return;
-    if(!d0||t.start<d0) d0=t.start;
-    if(!d1||t.end>d1)   d1=t.end;
-  });
-  return (d0&&d1)?{d0:d0,d1:d1}:null;
-}
 // Effectif sous contrat PENDANT ces taches. Rend aussi la fenetre, pour que
 // l'ecran puisse dire SUR QUOI il a compte — un nombre sans ses dates est une
 // opinion.
-function _pilEffTaches(noms){
-  var f=_pilFenTaches(noms); if(!f) return null;
-  var e=_pilEffFenetre(f.d0,f.d1);
-  return (e==null)?null:{eff:e,d0:f.d0,d1:f.d1};
-}
-function _pilFenLbl(f){ return f?(_pilFmtD(f.d0)+' \u2192 '+_pilFmtD(f.d1)):''; }
 // Le libelle du cadre, ecrit SOUS le chiffre. Un pic sans cadre est une opinion.
 function _pilCadreLbl(PP){
   if(!PP.annee) return PP.nom||'la campagne';
@@ -2232,158 +2191,123 @@ function _pilTreatRows(days){
   }).join('');
 }
 
-// ── Simulateur « et si ? » (réallocation de l'équipe, recalcul des dates en direct) ──
-var _PIL_SIM=null, _PIL_SIM_DATA=null;
-function _pilIndispoNoms(d){
-  return (d.presences||[]).filter(function(p){ return !p.bureau && p.etat!=='present'; }).map(function(p){
-    var t=p.etat==='cp'?'CP':p.etat==='recup'?'récup':p.etat==='maladie'?'maladie':'absent';
-    return p.nom+' ('+t+')';
-  });
+// ════════════════════════════════════════════════════════════════════
+// « QUI FAIT QUOI » — remplace « Simulateur — et si ? » (DZ-1, §162).
+// ⚰️ L'ancien panneau divisait par une cadence MOYENNE sur 28 jours (c.hPers)
+//   et répartissait « l'effectif sous contrat pendant ces travaux » à parts
+//   égales. Ici chaque priorité part de SON équipe affectée, au planning jour
+//   par jour, avec la tournée de ce travail (enregistrée, sinon au plus proche)
+//   et le moteur de la tournée : les deux cartes donnent la même date.
+// ════════════════════════════════════════════════════════════════════
+var _PIL_SIM=null;
+function _dzDernierFait(t){
+  var best=null, bd='';
+  (window.JOURNAL||[]).forEach(function(j){ if(j&&j.tache===t&&j.statut==='Valid\u00e9'&&j.parcelle){ var p=_opParcByNom(j.parcelle); if(p&&_opGeoOK(p)){ var dd=String(j.date||''); if(dd>=bd){ bd=dd; best=p; } } } });
+  return best;
 }
-function _pilSimClamp(){
-  if(!_PIL_SIM) return;
-  var a=_PIL_SIM.alloc, pool=_PIL_SIM.pool, assigned=a.reduce(function(x,y){return x+y;},0), g=0;
-  while(assigned>pool && g<200){ g++; var mi=0; for(var i=1;i<a.length;i++){ if(a[i]>=a[mi]) mi=i; } if(a[mi]<=0) break; a[mi]--; assigned--; }
-}
-function _pilSimEven(nT, ppl){ var a=[]; for(var i=0;i<nT;i++)a.push(0); if(nT>0){ for(var k=0;k<ppl;k++)a[k%nT]++; } return a; }
-function _pilSimInitData(d){
-  // \u26a0 nV divise la cadence pour donner les heures PAR PERSONNE. Compte en
-  //   fiches, il fait d'une equipe de 26 une seule paire de bras : perH sortait
-  //   26 fois trop haut et TOUTES les durees du panneau avec lui.
-  var c=_pilEchCadence(d), cadH=c.cadH;
-  var nV=(d.membres||[]).reduce(function(a,m){
-    return a + ((m&&!m.bureau)?((typeof window._mvEffDef==='function')?window._mvEffDef(m):1):0);
-  },0);
-  // \u26a0 nMes est le DIVISEUR de la cadence mesuree : c'est l'equipe qui a PRODUIT
-  //   ces heures, pas celle qui viendra. Le remplacer par l'effectif futur
-  //   diviserait la cadence par 41 et rendrait chaque personne 41 fois plus lente.
-  var nMes=Math.max(1,nV);
-  // ★ perH etait cadH/nMes : 28 jours de presence divises par l'effectif du JOUR.
-  //   En vendange, l'equipe de 30 arrivee depuis dix jours donnait 0,8 h par
-  //   personne et par jour, donc « 13 j a cet effectif » pour 324 h a 33 — pendant
-  //   que la tournee, juste au-dessus, disait 2 j. La journee mesuree par personne
-  //   vient desormais de la meme mesure (c.hPers), repli journee reglee.
-  var perH=(cadH>0)?c.hPers:0;
-  var presentJour=(typeof d.presentChamp==='number')?d.presentChamp:nV;
-  var tasks=(d.active||[]).filter(function(t){ return (t.h_reste||0)>0; }).sort(function(a,b){ return (b.h_reste||0)-(a.h_reste||0); }).map(function(t){ return {nom:t.nom,hreste:Math.round(t.h_reste||0),pct:t.pct||0}; });
-  // \u2605 LE POINT DE DEPART EST L'EFFECTIF SOUS CONTRAT PENDANT CES TRAVAUX.
-  //   Les taches restantes se feront dans les semaines qui viennent ; c'est la
-  //   qu'il faut compter, pas ce matin.
-  // \u26a0\u26a0 CE BLOC DOIT RESTER APRES `var tasks`. Place avant, `tasks` vaut
-  //   undefined par hissage et `tasks.map` leve — l'onglet Decider rendait un
-  //   ecran BLANC avec \u00ab Cannot read properties of undefined (reading 'map') \u00bb.
-  //   Ni node --check ni le preflight ne voient ça : c'est une faute d'ORDRE, pas
-  //   de syntaxe. Seul un appel reel la revele (harnais fonctionnel, scenario 5).
-  var et=_pilEffTaches(tasks.map(function(t){ return t.nom; }));
-  var base=(et&&et.eff>0.5)?Math.round(et.eff):presentJour;
-  if(!(base>0)) base=Math.max(1,presentJour);
-  // nV nomme desormais l'equipe DE REFERENCE du panneau (celle qui fera le
-  // travail), pas le nombre de fiches presentes ce matin : c'est elle qui borne
-  // le curseur et qui sert de repere « equipe au complet ».
-  _PIL_SIM_DATA={ tasks:tasks, cadH:cadH, nV:base, nMes:nMes, present:base,
-                  presentJour:presentJour, perH:perH, indispo:(d.nIndispoChamp||0),
-                  indispoNoms:_pilIndispoNoms(d), fen:(et?{d0:et.d0,d1:et.d1}:null) };
-  if(!_PIL_SIM || _PIL_SIM.alloc.length!==tasks.length || _PIL_SIM._present!==base){
-    _PIL_SIM={ alloc:_pilSimEven(tasks.length,base).slice(), pool:base, _present:base };
+function _dzRowsTache(t){
+  var def=_opTaskDef(t); if(!def) return [];
+  var act=_opParcActive().filter(function(p){ return _opApplic(p,def)&&_opParcReste(p,def)>0.05; }), ord=[], saved=_opSavedTask(t);
+  if(saved){ var by={}; act.forEach(function(p){ by[p.nom]=p; }); saved.forEach(function(n){ if(by[n]){ ord.push(by[n]); delete by[n]; } }); act.forEach(function(p){ if(by[p.nom]) ord.push(p); }); }
+  else {
+    var geo=act.filter(_opGeoOK), no=act.filter(function(p){ return !_opGeoOK(p); }), st=_dzDernierFait(t);
+    if(geo.length&&!st){ var c=_opCentroid(geo), bdist=Infinity; geo.forEach(function(p){ var dd=_opHav(c,p); if(dd<bdist){ bdist=dd; st=p; } }); }
+    ord=(geo.length?_opNN(geo,st||geo[0]):[]).concat(no);
   }
+  return ord.map(function(p){ return {p:p,nom:p.nom,s:parseFloat(p.surface)||0,reste:Math.round(_opParcReste(p,def)*10)/10,geo:_opGeoOK(p)}; });
 }
-function _pilSimReset(){ if(_PIL_SIM_DATA){ _PIL_SIM={ alloc:_pilSimEven(_PIL_SIM_DATA.tasks.length,_PIL_SIM_DATA.present).slice(), pool:_PIL_SIM_DATA.present, _present:_PIL_SIM_DATA.present }; } }
-function _pilSimStep(act, ti, sym, on){
-  var t=(ti!=null)?(' data-ti="'+ti+'"'):'';
-  return '<button data-sim="'+act+'"'+t+' style="width:30px;height:30px;border:1px solid var(--gris-clair);border-radius:7px;background:'+(on?'rgba(127,127,127,.08)':'transparent')+';color:'+(on?'var(--texte)':'var(--texte-doux)')+';font-size:var(--pt-sm,17px);font-weight:700;cursor:'+(on?'pointer':'default')+';line-height:1'+(on?'':';opacity:.4')+'">'+sym+'</button>';
+function _dzRepTache(t,noms,o,refIso,H,equipe,delta,nbAnon){
+  var f=_dzFen(t,refIso), start=(f&&f.debut>refIso)?f.debut:refIso;
+  var ctx=_dzCtx(noms,{R:o.R||0,anon:(o.anon!=null?o.anon:null)});
+  var rows=_dzRowsTache(t), e0=_dzEquipeJour(start,ctx);
+  var sim=rows.length?_dzSimuler(rows,start,ctx,H):{days:[],bloque:false};
+  var arret=rows.length>0&&(sim.bloque||!sim.days.length||!(sim.days[0].n>0));
+  var fin=(!arret&&sim.days.length)?sim.days[sim.days.length-1].iso:null;
+  return {t:t,e0:e0,n:(nbAnon!=null?nbAnon:e0.n),delta:delta,equipe:equipe,fin:fin,arret:arret,rien:!rows.length,ok:!!fin&&(!f||fin<=f.fin),f:f};
 }
-function _pilSimStepper(kind, ti, val, canDec, canInc){
-  var dec=(kind==='pool')?'pool-dec':'dec', inc=(kind==='pool')?'pool-inc':'inc';
-  return '<span style="display:inline-flex;align-items:center;gap:7px">'+_pilSimStep(dec,ti,'−',canDec)+'<b style="min-width:22px;text-align:center;font-size:var(--pt-sm,17px);color:var(--texte);font-variant-numeric:tabular-nums">'+val+'</b>'+_pilSimStep(inc,ti,'+',canInc)+'</span>';
-}
-function _pilSimBody(){
-  var D=_PIL_SIM_DATA, S=_PIL_SIM;
-  if(!D || D.cadH<=0 || D.nV<=0 || !D.tasks.length){ return '<div class="pil-empty">Simulateur indisponible : il faut une cadence planning, au moins un membre au champ et une tâche en cours.</div>'; }
-  var perH=D.perH, pool=S.pool, assigned=S.alloc.reduce(function(a,b){return a+b;},0), free=pool-assigned;
-  function jr(h,pp){ return pp>0?Math.ceil(h/(pp*perH)):null; }
-  // réf. par tâche = ton effectif réparti également → isole l'effet de TA répartition
-  var evenNow=_pilSimEven(D.tasks.length,assigned);
-  var calc=D.tasks.map(function(t,i){ var j=jr(t.hreste,S.alloc[i]), bj=jr(t.hreste,evenNow[i]); return {j:j,delta:(j!=null&&bj!=null)?(j-bj):null}; });
-  var totH=D.tasks.reduce(function(a,t){return a+t.hreste;},0);
-  // ⚠⚠ LA FIN DE SAISON EST CELLE DE LA DERNIERE TACHE FINIE, pas le total
-  //   divise par l'effectif. L'ancien calcul divisait par le POOL : on pouvait
-  //   laisser deux taches « a l'arret » et lire quand meme la meme date de fin,
-  //   et le curseur de repartition — le seul geste du panneau — ne bougeait
-  //   jamais son propre indicateur. Une tache sans personne n'avance pas : la
-  //   saison ne finit pas, et l'ecran doit le dire.
-  function _finDe(al){ var mx=0; for(var q=0;q<D.tasks.length;q++){ var jq=jr(D.tasks[q].hreste,al[q]); if(jq==null) return null; if(jq>mx) mx=jq; } return D.tasks.length?mx:null; }
-  var nArret=0; D.tasks.forEach(function(t,i){ if(!(S.alloc[i]>0)) nArret++; });
-  var seasonJ=_finDe(S.alloc);                                 // fin a la repartition affichee
-  var fullSeasonJ=_finDe(_pilSimEven(D.tasks.length,D.nV));    // ref. = equipe au complet, repartie egalement
-  var sDelta=(seasonJ!=null&&fullSeasonJ!=null)?(seasonJ-fullSeasonJ):null;
-  var chargeJH=Math.round(totH/perH);
-  var sDate=seasonJ!=null?_pilWorkdayDate(seasonJ):null;
-  function stat(lab,val,col){ return '<div style="flex:1;min-width:118px"><div style="font-size:var(--pt-lbl,10.5px);font-weight:700;letter-spacing:1px;color:var(--texte-doux)">'+lab+'</div><div style="font-size:var(--pt-sm,17px);font-weight:800;color:'+(col||'var(--texte)')+'">'+val+'</div></div>'; }
-  var h='<div style="display:flex;flex-wrap:wrap;gap:10px;margin-bottom:12px">';
-  h+=stat('CHARGE', chargeJH+' <span style="font-size:var(--pt-txt,12.5px);color:var(--texte-doux)">j-homme</span>');
-  h+=stat('EFFECTIF', assigned+'<span style="font-size:var(--pt-txt,12.5px);color:var(--texte-doux)"> / '+pool+'</span>');
-  var fin=(sDate?'~ '+sDate:'à l\'arrêt')+(sDelta!=null&&sDelta!==0?' <span style="font-size:var(--pt-micro,11px);font-weight:700;color:'+(sDelta<0?'var(--vert-med)':'var(--rouge)')+'">('+(sDelta<0?(-sDelta+' j plus tôt'):('+'+sDelta+' j'))+')</span>':'');
-  h+=stat('FIN DE SAISON', fin, 'var(--or)');
-  h+='</div>';
-  h+='<div style="font-size:var(--pt-lbl,10.5px);color:var(--texte-doux);margin:-6px 0 12px">fin de saison \u00b7 r\u00e9f. '+(D.fen?'\u00e9quipe sous contrat':'\u00e9quipe au complet')+' ('+_pilEtpFmt(D.nV)+')'
-    + (nArret>0?(' \u00b7 <b style="color:var(--rouge)">'+nArret+' t\u00e2che'+(nArret>1?'s':'')+' sans personne : la saison ne se termine pas</b>'):'')
-    + (free>0?(' \u00b7 <b style="color:var(--orange)">'+free+' personne'+(free>1?'s':'')+' non affect\u00e9e'+(free>1?'s':'')+'</b>'):'')+'</div>';
-  // \u2605 LE NOMBRE, PUIS SUR QUOI IL A ETE COMPTE. Un effectif sans ses dates ne
-  //   se verifie pas — et c'est exactement ce qui a fait passer « 1 » pour une
-  //   mesure alors que quarante personnes etaient sous contrat pour la vendange.
-  var presLine;
-  if(D.fen){
-    presLine=_pilEtpFmt(D.present)+' sous contrat \u00b7 '+_pilEsc(_pilFenLbl(D.fen))
-      +' <span style="color:var(--texte-doux)">la fen\u00eatre de ces travaux</span>';
-    if(Math.abs((D.presentJour||0)-D.present)>0.5)
-      presLine+='<br><span style="color:var(--texte-doux)">aujourd\u2019hui : '+_pilEtpFmt(D.presentJour||0)
-        +' au champ \u2014 les cong\u00e9s et les contrats \u00e0 venir expliquent l\u2019\u00e9cart</span>';
+function _dzRep(){
+  var C=_DZ_LAST||_dzCalc(), refIso=C.ref.iso, H=C.H, S=_PIL_SIM||(_PIL_SIM={rep:{}});
+  var mbs=_dzMbs(), tous=Object.keys(mbs);
+  var trav=tous.filter(function(n){ return _dzJourMbr(mbs[n],refIso).pH>0.01; });
+  var nJour=trav.reduce(function(a,n){ return a+_dzJourMbr(mbs[n],refIso).n; },0);
+  var its=_dzPrios(), out={mode:null,taches:[],libres:[],nLib:0,nJour:nJour,ref:refIso,vide:false};
+  if(its.length){
+    out.mode='prio';
+    var pris={};
+    its.forEach(function(it){ var eq=(it.equipe||[]).filter(function(n){ return mbs[n]; }); if(!eq.length) out.vide=true; eq.forEach(function(n){ pris[n]=1; }); });
+    if(!out.vide){ out.libres=trav.filter(function(n){ return !pris[n]; }); out.nLib=out.libres.reduce(function(a,n){ return a+_dzJourMbr(mbs[n],refIso).n; },0); }
+    its.forEach(function(it){ var eq=(it.equipe||[]).filter(function(n){ return mbs[n]; }), dl=S.rep[it.t]||0;
+      out.taches.push(_dzRepTache(it.t,eq.length?eq:tous,{R:dl},refIso,H,eq.length?eq:null,dl)); });
   } else {
-    presLine=_pilEtpFmt(D.present)+' pr\u00e9sent'+(D.present>1.05?'s':'')+' aujourd\'hui';
+    // Sans priorité : l'équipe du jour, répartie également entre les travaux
+    // ouverts (ou qui s'ouvrent dans le mois), les plus chargés d'abord.
+    out.mode='egal';
+    var ts=_PIL_OP_DATA.tasks.filter(function(x){ return x.tot>0.05&&_dzOuvrable(x.nom,refIso); }).sort(function(a,b){ return b.tot-a.tot; }).slice(0,4).map(function(x){ return x.nom; });
+    var base=ts.map(function(){ return 0; }); for(var k=0;k<Math.round(nJour)&&ts.length;k++) base[k%ts.length]++;
+    ts.forEach(function(t,i){ var nb=Math.max(0,base[i]+(S.rep[t]||0)); out.taches.push(_dzRepTache(t,tous,{anon:nb},refIso,H,null,S.rep[t]||0,nb)); });
   }
-  if(D.indispo>0){ presLine+=' <span style="color:var(--rouge)">\u00b7 \u2212'+D.indispo+' indispo'+((D.indispoNoms&&D.indispoNoms.length)?' ('+_pilEsc(D.indispoNoms.join(', '))+')':'')+'</span>'; }
-  var renfortDelta=pool-D.present;
-  var rdLab=renfortDelta>0?('+'+renfortDelta+' renfort'):(renfortDelta<0?(renfortDelta+' en moins'):(D.fen?'\u00e9quipe sous contrat':'\u00e9quipe du jour'));
-  var rdCol=renfortDelta>0?'var(--vert-med)':(renfortDelta<0?'var(--rouge)':'var(--texte-doux)');
-  h+='<div style="border:1px solid var(--gris-clair);border-radius:11px;padding:11px 13px;margin-bottom:10px;background:rgba(201,168,76,.05)">'
-    + '<div style="display:flex;align-items:center;justify-content:space-between;gap:10px">'
-    + '<div><div style="font-size:var(--pt-base,14px);font-weight:700;color:var(--texte)">Effectif au champ'+(free>0?' <span style="font-size:var(--pt-micro,11px);color:var(--orange);font-weight:700">· '+free+' libre'+(free>1?'s':'')+'</span>':'')+'</div>'
-    + '<div style="font-size:var(--pt-micro,11px);color:var(--texte-doux);margin-top:2px">'+presLine+'</div></div>'
-    + '<div style="text-align:center">'+_pilSimStepper('pool',null,pool,pool>0,pool<D.nV+6)
-    + '<div style="font-size:var(--pt-lbl,10.5px);font-weight:700;margin-top:3px;color:'+rdCol+'">'+rdLab+'</div></div>'
-    + '</div></div>';
-  var maxJ=0; calc.forEach(function(c){ if(c.j!=null&&c.j>maxJ)maxJ=c.j; });
-  h+='<div class="pil-ip-list">';
-  D.tasks.forEach(function(t,i){
-    var c=calc[i], pole=(D.tasks.length>1&&c.j!=null&&c.j===maxJ);
-    var dS=(c.delta==null||c.delta===0)?'':' <b style="color:'+(c.delta<0?'var(--vert-med)':'var(--rouge)')+'">'+(c.delta<0?c.delta:'+'+c.delta)+'j</b>';
-    h+='<div class="pil-li"><span class="pil-av" style="background:#16313F;color:#4A9FC8"></span>'
-      + '<div class="pil-li-main"><div class="pil-li-t">'+_pilEsc(_pilTnom(t.nom))+(pole?' <span style="font-size:var(--pt-nano,9.5px);color:var(--or)">· pôle long</span>':'')+'</div>'
-      + '<div class="pil-li-s">'+(c.j!=null?(c.j+' j à cet effectif'):'à l\'arrêt')+dS+'</div></div>'
-      + '<div class="pil-li-r">'+_pilSimStepper('task',i,S.alloc[i],S.alloc[i]>0,free>0)+'</div></div>';
+  _DZ_REP_LAST=out; return out;
+}
+function _dzRepFin(R){ var f=R.taches.filter(function(x){ return !x.arret&&x.fin; }).map(function(x){ return x.fin; }).sort(); return f.length?f[f.length-1]:null; }
+function _dzRepSim(){ var S=_PIL_SIM||{rep:{}}; return Object.keys(S.rep).some(function(k){ return S.rep[k]; }); }
+function _dzStatRep(R){
+  if(!R.taches.length) return _pilStat('\u2014',' rien \u00e0 r\u00e9partir');
+  if(R.taches.some(function(x){ return x.arret; })) return _pilStat('\u2014',' un travail ne finit pas');
+  var fin=_dzRepFin(R);
+  return _pilStat(fin?_dzJc(fin):'\u2014',' fin '+(R.taches.length>1?'des '+R.taches.length+' travaux':'du travail'));
+}
+function _dzSubRep(R){ return (R.mode==='prio'?_dzPl(R.taches.length,'priorit\u00e9'):'aucune priorit\u00e9')+' \u00b7 '+_dzPers(R.nJour)+' pers. au champ le '+_dzJ(R.ref)+(_dzRepSim()?' \u00b7 simulation':''); }
+function _dzRepHtml(R){
+  if(!R.taches.length) return '<div class="pil-empty">Aucun travail ouvert \u00e0 r\u00e9partir.</div>';
+  var voir=_pilShow('sim_ordre'), prio=(R.mode==='prio');
+  var h='<div class="pil-dz-note">\u00c0 partir du <b>'+_dzJ(R.ref)+'</b> \u2014 m\u00eame jour, m\u00eame planning, m\u00eames trajets que la tourn\u00e9e.</div><div class="pil-dz-rep">';
+  R.taches.forEach(function(x,i){
+    var sub, d=x.delta||0;
+    if(x.equipe){ var ab=x.e0.abs.filter(function(a){ return a.motif!=='hors contrat'&&a.motif!=='pas au planning'; }).map(function(a){ return [a.nom,' (',a.motif,')'].join(''); });
+      sub=x.e0.pers.map(function(p){ return p.nom; }).join(', ')+(ab.length?' \u00b7 '+ab.join(', '):''); }
+    else sub=prio?'toute l\u2019\u00e9quipe au champ ce jour-l\u00e0':'part \u00e9gale de l\u2019\u00e9quipe du jour';
+    var tag=x.rien?'<span class="pil-dz-tag ok">rien \u00e0 faire</span>':(x.arret?'<span class="pil-dz-tag gr">\u00e0 l\u2019arr\u00eat</span>'
+      :(x.ok?'<span class="pil-dz-tag ok">tient'+(x.f?' \u00b7 '+_dzJc(x.f.fin):'')+'</span>':'<span class="pil-dz-tag ko">d\u00e9borde'+(x.f?' \u00b7 fen\u00eatre '+_dzJc(x.f.fin):'')+'</span>'));
+    h+='<div class="pil-dz-rt"><div class="l1"><div class="nm">'+(prio?'<span class="st">'+_mvIcon('etoile',16)+'</span> ':'')+_pilEsc(_opTNom(x.t))
+      +'<small>'+_pilEsc(sub+(d?' \u00b7 '+(d>0?'+':'')+d+' simul\u00e9'+(Math.abs(d)>1?'s':''):''))+'</small></div>'
+      +'<span class="pil-dz-stp"><button data-sim="dec" data-ti="'+i+'" aria-label="Une personne de moins"'+(x.n>0?'':' disabled')+'>\u2212</button><span class="val">'+_dzPers(x.n)+'</span><button data-sim="inc" data-ti="'+i+'" aria-label="Une personne de plus">+</button></span></div>'
+      +'<div class="l2"><span class="fin">'+(x.arret?'ne se termine pas':(x.fin?'fin '+_dzJ(x.fin):''))+'</span>'+tag
+      +((voir&&!x.rien)?'<button class="pil-dz-lk" data-sim="voir" data-ti="'+i+'">Voir la tourn\u00e9e \u203a</button>':'')+'</div></div>';
   });
   h+='</div>';
-  h+='<div style="font-size:var(--pt-micro,11px);color:var(--texte-doux);line-height:1.5;margin-top:8px">L\'effectif part de ce qui est <b>sous contrat pendant ces travaux</b>, pas de qui est l\u00e0 ce matin : un contrat de groupe qui d\u00e9marre dans quinze jours compte, et un cong\u00e9 d\'aujourd\'hui ne retire personne du chantier. Une \u00e9quipe collective y p\u00e8se son <b>effectif inscrit au contrat</b>, pas une fiche. Monte pour un <b>renfort</b>, descends pour un <b>d\u00e9part</b> \u00b7 <b>r\u00e9partir</b> change quelle t\u00e2che finit en premier.</div>';
-  var even0=_pilSimEven(D.tasks.length,D.present);
-  var touched=(pool!==D.present)||D.tasks.some(function(t,i){return S.alloc[i]!==even0[i];});
-  h+='<div style="margin-top:10px;display:flex;align-items:center;gap:10px"><button data-sim="reset" style="border:1px solid var(--gris-clair);background:transparent;color:var(--texte);cursor:pointer;border-radius:8px;padding:7px 14px;font-size:var(--pt-txt,12.5px);font-weight:700'+(touched?'':';opacity:.55')+'">↺ Revenir à l\'équipe '+(D.fen?'sous contrat':'du jour')+'</button><span style="font-size:var(--pt-micro,11px);color:var(--texte-doux)">simulation — rien n\'est enregistré</span></div>';
-  return h;
+  if(prio){
+    var place=R.taches.reduce(function(a,x){ return a+Math.max(0,x.delta||0); },0);
+    h+='<div class="pil-dz-lib">'+(R.vide?'Une priorit\u00e9 sans \u00e9quipe affect\u00e9e prend toute l\u2019\u00e9quipe du jour.'
+      :(R.libres.length?'Sans priorit\u00e9 ce jour-l\u00e0\u00a0: <b>'+_pilEsc(R.libres.join(', '))+'</b>':'Toute l\u2019\u00e9quipe du jour est affect\u00e9e.'))
+      +((!R.vide&&place>R.nLib)?' \u00b7 <b>+'+_dzPl(Math.round(place-R.nLib),'renfort')+'</b> au-del\u00e0':'')+'</div>';
+  } else h+='<div class="pil-dz-lib">Aucune priorit\u00e9 diffus\u00e9e\u00a0: les <b>'+_dzPers(R.nJour)+' personnes</b> au champ ce jour-l\u00e0 sont r\u00e9parties \u00e9galement. <b>Vigne \u203a Priorit\u00e9 du moment</b> fixe qui fait quoi.</div>';
+  var bloq=R.taches.some(function(x){ return x.arret; }), fin=_dzRepFin(R);
+  h+='<div class="pil-dz-bil"><b>'+((bloq||!fin)?'\u2014':_dzJ(fin))+'</b><span>'+(bloq?'un travail sans personne ne finit pas':(R.taches.length>1?'les '+R.taches.length+' travaux finis':'travail fini'))+'</span></div>';
+  if(_dzRepSim()) h+='<div class="pil-dz-reset"><span>Simulation \u2014 rien n\u2019est enregistr\u00e9.</span><button data-sim="reset">\u21ba '+(prio?'Affectation diffus\u00e9e':'R\u00e9partition \u00e9gale')+'</button></div>';
+  return h+'<div class="pil-dz-note">+ ajoute une personne \u00e0 ce travail\u00a0: d\u2019abord quelqu\u2019un sans priorit\u00e9 ce jour-l\u00e0, puis un renfort. \u2212 en retire une.</div>';
 }
-function _pilSimRefresh(){ var el=document.getElementById('pil-sim-body'); if(el) el.innerHTML=_pilSimBody(); }
-function _pilSimAction(act, ti){
-  if(!_PIL_SIM||!_PIL_SIM_DATA) return;
-  var pool=_PIL_SIM.pool, assigned=_PIL_SIM.alloc.reduce(function(a,b){return a+b;},0), free=pool-assigned;
-  if(act==='inc'){ ti=+ti; if(free>0 && _PIL_SIM.alloc[ti]!=null) _PIL_SIM.alloc[ti]++; }
-  else if(act==='dec'){ ti=+ti; if(_PIL_SIM.alloc[ti]>0) _PIL_SIM.alloc[ti]--; }
-  else if(act==='pool-inc'){ if(_PIL_SIM.pool<_PIL_SIM_DATA.nV+6) _PIL_SIM.pool++; }
-  else if(act==='pool-dec'){ if(_PIL_SIM.pool>0){ _PIL_SIM.pool--; _pilSimClamp(); } }
-  else if(act==='reset'){ _pilSimReset(); }
+function _pilSimRefresh(){
+  var el=document.getElementById('pil-sim-body'); if(!el||!_PIL_OP_DATA) return;
+  var R=_dzRep(); el.innerHTML=_dzRepHtml(R);
+  _dzMajEntete('simulateur',_dzStatRep(R),_dzSubRep(R));
+}
+function _pilSimAction(act,ti){
+  if(!_PIL_SIM) _PIL_SIM={rep:{}};
+  var R=_DZ_REP_LAST, x=(R&&R.taches[parseInt(ti,10)])||null;
+  if(act==='inc'&&x) _PIL_SIM.rep[x.t]=(_PIL_SIM.rep[x.t]||0)+1;
+  else if(act==='dec'&&x){ if(x.n>0) _PIL_SIM.rep[x.t]=(_PIL_SIM.rep[x.t]||0)-1; }
+  else if(act==='reset') _PIL_SIM.rep={};
+  else if(act==='voir'&&x&&_PIL_OP){
+    _PIL_OP.tasks=[x.t]; _PIL_OP.tSrc='main'; _PIL_OP.order=null; _PIL_OP._pick=null; _PIL_OP.ref=null; _PIL_OP.refManuel=false; _PIL_OP.excl={}; _PIL_OP.add={}; _PIL_OP.R=0;
+    _pilOpRefresh(); _dzOuvrirCarte('ordrepassage'); return;
+  }
   _pilSimRefresh();
 }
 function _pilPanelSimulateur(d){
-  _pilSimInitData(d);
-  var statHtml=_pilStat(_PIL_SIM_DATA?_PIL_SIM_DATA.present:0,' présents');
-  return _pilTile('simulateur','#C9A84C','Simulateur — et si ?', statHtml, 'déplace l\'équipe entre les tâches · recalcul en direct', null, '<div id="pil-sim-body">'+_pilSimBody()+'</div>');
+  // La tournée a posé le jour et l'équipe ; masquée, on les calcule ici.
+  if(!_pilShow('sim_ordre')||!_DZ_LAST){ _opInit(d); _dzCalc(); }
+  var R=_dzRep();
+  return _pilTile('simulateur','#C9A84C','Qui fait quoi \u2014 r\u00e9partir l\u2019\u00e9quipe',_dzStatRep(R),_dzSubRep(R),null,'<div id="pil-sim-body">'+_dzRepHtml(R)+'</div>','pil.quifait');
 }
 
 // ════════════════════════════════════════════════════════════════════
@@ -2396,16 +2320,6 @@ function _pilPanelSimulateur(d){
 // ════════════════════════════════════════════════════════════════════
 var _PIL_OP=null, _PIL_OP_DATA=null;
 
-// \u2605 D'OU VIENT LE NOMBRE, ECRIT SOUS LE NOMBRE. \u00ab pr\u00e9sents (auto) \u00bb ne disait
-//   pas si les contrats etaient lus ; quand la semaine engage plus de monde que
-//   ce matin, on l'annonce plutot que de laisser l'utilisateur monter le compteur
-//   a l'aveugle.
-function _opEffNote(OP){
-  if(!OP.effAuto) return 'r\u00e9gl\u00e9';
-  var D=_PIL_OP_DATA;
-  if(D&&D.fen&&D.effFen!=null&&D.effFen>0.5) return 'sous contrat \u00b7 '+_pilFenLbl(D.fen);
-  return 'pr\u00e9sents (auto)';
-}
 function _opCanEdit(){ return !!(typeof window.isAdmin==='function' && window.isAdmin()); }
 function _opTaskDef(nom){ var arr=(typeof window.getTachesSaison==='function')?window.getTachesSaison():(window.TACHES||[]); return arr.find(function(t){ return t && t.nom===nom; }) || null; }
 function _opDefs(){ return (_PIL_OP&&_PIL_OP.tasks||[]).map(_opTaskDef).filter(Boolean); }
@@ -2590,14 +2504,6 @@ function _opClearOrder(){
   if(window.showToast) window.showToast('Tourn\u00e9e retir\u00e9e \u00b7 '+ts.map(_opTNom).join(', ')+' \u2014 l\u2019\u00e9quipe revient au tri habituel','#B85A1A');
   _pilOpRefresh();
 }
-// Bouton « Retirer » : visible seulement si l'une des taches cochees porte
-// bien une tournee, pour ne pas proposer d'effacer ce qui n'existe pas.
-function _opClearBtn(){
-  var ts=(_PIL_OP&&_PIL_OP.tasks)||[], n=0;
-  ts.forEach(function(t){ if(_opSavedTask(t)) n++; });
-  if(!n) return '';
-  return '<button data-op="clear" style="border:1px solid var(--gris-clair);background:transparent;color:var(--texte-doux);border-radius:9px;padding:8px 12px;font-size:var(--pt-txt,12.5px);font-weight:600;cursor:pointer;font-family:inherit;margin-left:auto">Retirer</button>';
-}
 // Ce qui est REELLEMENT diffuse, tout en bas de l'ecran de rangement.
 function _opDiffusHtml(){
   var m=_opOrdMap();
@@ -2609,96 +2515,446 @@ function _opDiffusHtml(){
     +'</b><div style="margin-top:3px">Chacun voit la tourn\u00e9e du travail qu\u2019il a \u00e0 l\u2019\u00e9cran, \u00e0 sa prochaine ouverture de l\u2019application.</div></div>';
 }
 
-// ── Sim (frise journalière, ordre-indépendant sur le nb de jours) ──
-function _opSimulate(list,N,journeeH,pauseMin,trajetMin){
-  // La JOURNEE reglee est du travail EFFECTIF : la pause s'ajoute a l'amplitude
-  // de presence, elle ne se soustrait plus a l'ouvrage. Avant, 7 h moins 120 min
-  // de pause donnait 5 h x 5 personnes = 25 h-homme/jour au lieu de 35, soit 39
-  // jours annonces la ou il en faut 28. pauseMin ne sert plus qu'a l'amplitude.
-  var budget=Math.max(0.1,journeeH), trajetH=Math.max(0,trajetMin/60); N=Math.max(1,N||1);
-  var days=[{day:1,items:[],surf:0}], day=1, used=0, per=list.map(function(row){ return {row:row,work:row.reste/N,startDay:0,endDay:0}; }), lastIdxByDay={};
-  // ⚠⚠ SURFACE DECOUPEE COMME LES HEURES.
-  //   La surface entiere d'une parcelle etait portee au jour ou elle SE TERMINE :
-  //   une grande parcelle etalee sur quatre jours faisait afficher « 0,00 ha J1 »
-  //   apres une journee pleine de travail. Chaque tranche d'heures apporte
-  //   desormais sa part de surface au jour ou elle est faite.
-  function advance(len,idx){ var rem=len, sHa=(idx!=null && len>1e-9)?(per[idx].row.s/len):0;
-    if(rem<=1e-9 && idx!=null){ if(!per[idx].startDay)per[idx].startDay=day; per[idx].endDay=day; lastIdxByDay[day]=idx; days[day-1].surf+=per[idx].row.s; return; }
-    while(rem>1e-9){ var free=budget-used; if(free<=1e-9){ day++; used=0; free=budget; days.push({day:day,items:[],surf:0}); } var chunk=Math.min(rem,free); used+=chunk; rem-=chunk; if(idx!=null){ if(!per[idx].startDay)per[idx].startDay=day; per[idx].endDay=day; lastIdxByDay[day]=idx; days[day-1].surf+=chunk*sHa; } } }
-  list.forEach(function(row,li){ if(li>0) advance(trajetH,null); advance(per[li].work,li); });
-  days.forEach(function(d){ d.lastIdx=lastIdxByDay[d.day]; });
-  return {budget:budget,days:days,per:per};
+// ════════════════════════════════════════════════════════════════════
+// ★★★ DZ-1 (§162) — DÉCIDER : LA TOURNÉE DU JOUR ET « QUI FAIT QUOI »,
+//     LUES AU PLANNING, JOUR PAR JOUR.
+// Nico, 20/09/2026 : « par défaut l'effectif réel, le nombre d'heures de la
+// journée, le temps de pause et le temps de trajet entre les vignes, et la
+// tâche en priorité du moment [...] je veux un outil puissant. » Maquette
+// validée (« c'est parfait »), constantes de trajet comprises.
+// AVANT : journée 7 h, pause 45 min et trajet 5 min par saut ÉCRITS EN DUR ;
+//   effectif lu sur la fenêtre du travail, même passée (« 12 mai → 11 août »
+//   affiché un 20 septembre) ; la même équipe supposée chaque jour ; « Et si »
+//   divisait par une cadence moyenne sur 28 jours — deux définitions de la
+//   journée dans le même onglet. Sur téléphone, la carte prenait le doigt
+//   (touch-action:none, mesuré : 405 → 405 px) et la case Trajet sortait de
+//   l'écran (x = 430 px sur 390).
+// MAINTENANT, UNE lecture pour les deux cartes :
+//   travail = la priorité du moment (sinon le plus chargé, et l'écran le dit)
+//   jour    = aujourd'hui s'il est travaillé, sinon le prochain ; le premier
+//             jour de la fenêtre si elle n'est pas ouverte (on compte les 40
+//             du 31 août, pas les 6 du 24)
+//   équipe  = les affectés à la priorité, AU PLANNING DE CHAQUE JOUR
+//             (_planWorkPersRange : congés, récup, contrats, collectifs)
+//   coupure = PLAN_PAUSE_MIN : elle allonge la présence, jamais le travail
+//   trajets = calculés parcelle à parcelle (_dzHop), règle du domaine
+//             CONFIG.eco.trajet (défaut : à pied ≤ 300 m à 4 km/h, au-delà
+//             camion 5 min + 25 km/h, 5 min pour une parcelle sans position)
+// Toucher une valeur = simulation ; « ↺ Valeurs réelles » revient au planning.
+// ════════════════════════════════════════════════════════════════════
+var _DZ_LAST=null, _DZ_REP_LAST=null, _DZ_CACHE={}, _DZ_MBS=null, _dzFmMap=null;
+var _DZ_JS=['dim.','lun.','mar.','mer.','jeu.','ven.','sam.'];
+var _DZ_JL=['dimanche','lundi','mardi','mercredi','jeudi','vendredi','samedi'];
+var _DZ_MS=['janv.','f\u00e9vr.','mars','avr.','mai','juin','juil.','ao\u00fbt','sept.','oct.','nov.','d\u00e9c.'];
+function _dzIso(dt){ return dt.getFullYear()+'-'+String(dt.getMonth()+1).padStart(2,'0')+'-'+String(dt.getDate()).padStart(2,'0'); }
+function _dzAuj(){ return _dzIso(new Date()); }
+// Midi, pas minuit : un passage a l'heure d'ete ne fait pas sauter un jour.
+function _dzDt(iso){ var p=String(iso||'').split('-'); return new Date(+p[0],(+p[1]||1)-1,(+p[2]||1),12,0,0); }
+function _dzAdd(iso,n){ var d=_dzDt(iso); d.setDate(d.getDate()+n); return _dzIso(d); }
+function _dzEcart(a,b){ return Math.round((_dzDt(b)-_dzDt(a))/86400000); }
+function _dzJ(iso){ var d=_dzDt(iso), n=d.getDate(); return _DZ_JS[d.getDay()]+' '+(n===1?'1er':n)+' '+_DZ_MS[d.getMonth()]; }
+function _dzJc(iso){ var d=_dzDt(iso), n=d.getDate(); return (n===1?'1er':n)+' '+_DZ_MS[d.getMonth()]; }
+function _dzHj(h){ var r=Math.round((h||0)*2)/2; return (r%1===0?String(r):r.toLocaleString('fr-FR'))+'\u00a0h'; }
+function _dzMin(m){ m=Math.round(m||0); if(m<60) return m+'\u00a0min'; var h=Math.floor(m/60), r=m%60; return h+'\u00a0h'+(r?('\u00a0'+String(r).padStart(2,'0')):''); }
+function _dzPers(n){ return (Math.round((n||0)*10)/10).toLocaleString('fr-FR'); }
+function _dzPl(n,s,p){ return n+'\u00a0'+(Math.abs(n)>1?(p||s+'s'):s); }
+function _dzPt(s){ s=String(s); return /\.$/.test(s)?s:s+'.'; }
+function _dzHm(deb,plus){ var p=String(deb||'').split(':'); if(p.length<2) return ''; var m=(+p[0])*60+(+p[1])+Math.round(plus||0); return String(Math.floor(m/60)).padStart(2,'0')+':'+String(m%60).padStart(2,'0'); }
+function _dzDoigt(){ try{ return !!(window.matchMedia&&window.matchMedia('(pointer: coarse)').matches); }catch(e){ if(DEBUG) console.warn('[pilotage] pointeur', e); return false; } }
+
+// ── L'équipe au planning, personne par personne, jour par jour ──
+// Même source que la masse salariale et la capacité : _planWorkPersRange
+// (travail EFFECTIF : un congé, une récup, un jour hors contrat valent 0 ;
+// une équipe collective est multipliée par son effectif du jour).
+function _dzMbs(){
+  if(_DZ_MBS) return _DZ_MBS;
+  var o={}; (window.MEMBRES||[]).forEach(function(m){ if(m&&m.nom&&!m.bureau&&m.statut!=='Inactif') o[m.nom]=m; });
+  _DZ_MBS=o; return o;
 }
-// Confrontation a la FENETRE agronomique : c'est le seul chiffre qui dit s'il
-// faut renforcer. L'ecran annoncait « 39 j pour finir » sans jamais preciser que
-// la fenetre saisie n'en offre que 12.
-function _opFenetreHtml(rows,OP){
-  var sa=(typeof window._pilSaison==='function')?window._pilSaison():null;
-  if(!sa || typeof window._mvFenetre!=='function' || typeof window._mvProj!=='function') return '';
-  var fen=window._mvFenetre(sa,(OP.tasks||[]));
-  if(!fen) return '';
-  // ⚠⚠ UNE FENETRE PAR TACHE, JAMAIS L'ENVELOPPE.
-  //   Taille (janvier -> mars) et effeuillage (juillet) coches ensemble
-  //   donnaient une enveloppe de 141 jours quand les deux fenetres reelles n'en
-  //   totalisent que 64 : le test « ca tient » devenait vrai par construction.
-  //   Chaque tache est desormais confrontee A SA fenetre, avec SA charge et SES
-  //   parcelles — et aux jours qui RESTENT, pas a la fenetre entiere.
-  var defs=_opDefs(), parF={};
-  (fen.parTache||[]).forEach(function(t){ parF[t.nom]=t; });
-  var L=[], nKo=0;
-  defs.forEach(function(def){
-    var f=parF[def.nom]; if(!f) return;
-    var h=0, nP=0;
-    rows.forEach(function(r){
-      if(!_opApplic(r.p,def)) return;
-      var v=_opParcReste(r.p,def);
-      if(v>0.01){ h+=v; nP++; }
-    });
-    if(!(h>0.01)) return;
-    var pr=window._mvProj({resteH:h,eff:OP.eff,journee:OP.jour,pauseMin:OP.pause,sauts:Math.max(0,nP-1),trajetMin:OP.trajet,fen:f});
-    var ko=(f.joursRestants<=0)||(pr.tient===false);
-    if(ko) nKo++;
-    L.push({def:def,f:f,pr:pr,h:h,nP:nP,ko:ko});
-  });
-  if(!L.length) return '';
-  var col=nKo?'var(--rouge)':'var(--vert-med)', bg=nKo?'rgba(155,45,31,.09)':'rgba(111,191,90,.10)';
-  var multi=(L.length>1);
-  var h1='';
-  if(multi){
-    h1='<b>'+(nKo?(''+_mvIcon('alerte',16)+' '+nKo+' t\u00e2che'+(nKo>1?'s':'')+' sur '+L.length+(nKo>1?' ne tiennent pas dans leur fen\u00eatre.':' ne tient pas dans sa fen\u00eatre.'))
-                : (''+_mvIcon('check',16)+' Chaque t\u00e2che tient dans sa fen\u00eatre.'))+'</b>';
-  }
-  var corps=L.map(function(x){
-    var f=x.f, pr=x.pr, verdict, besoin='';
-    if(f.joursRestants<=0){
-      verdict='<b>fen\u00eatre termin\u00e9e</b> \u2014 il reste '+pr.jours+' j de travail \u00e0 caser ailleurs';
-    } else if(x.ko){
-      verdict='d\u00e9borde de <b>'+pr.depassement+' j</b> \u2014 '+pr.jours+' j n\u00e9cessaires pour <b>'+f.joursRestants+' j</b> restants';
-      besoin=pr.impossible
-        ? '<br><span style="color:var(--texte-doux)">aucun effectif ne tient : les d\u00e9placements consomment d\u00e9j\u00e0 la fen\u00eatre</span>'
-        : '<br><span style="color:var(--texte-doux)">il faudrait <b>'+(Math.ceil(pr.effPourFenetre*10)/10).toLocaleString('fr-FR')+' personnes</b> (trajets compris) au lieu de '+OP.eff+'</span>';
-    } else {
-      verdict='tient \u2014 '+pr.jours+' j n\u00e9cessaires pour <b>'+f.joursRestants+' j</b> restants';
+function _dzOublier(){ _DZ_CACHE={}; _DZ_MBS=null; }
+function _dzColl(m){ return !!(typeof window._mvEstCollectif==='function'&&window._mvEstCollectif(m)); }
+function _dzJourMbr(m,iso){
+  var k=m.nom+'|'+iso; if(_DZ_CACHE[k]) return _DZ_CACHE[k];
+  var out={h:0,n:0,pH:0};
+  try{
+    var dt=_dzDt(iso), pH=(typeof window._planWorkPersRange==='function')?(window._planWorkPersRange(m,dt,dt)||0):0;
+    if(pH>0.01){
+      var n=1;
+      if(_dzColl(m)){
+        var y=dt.getFullYear(), mi=dt.getMonth(), dd=dt.getDate();
+        n=(typeof window._planSurAnnee==='function'&&typeof window._planEffN==='function')
+          ? window._planSurAnnee(y,function(){ return window._planEffN(m,mi,dd); })
+          : ((typeof window._mvEffDef==='function')?window._mvEffDef(m):1);
+        if(!(n>=1)) n=1;
+      }
+      out={h:pH/n,n:n,pH:pH};
     }
-    return '<div style="margin-top:'+(multi?'6':'0')+'px">'
-      + (multi?('<b>'+(x.ko?_mvIcon('alerte',16):_mvIcon('check',16))+' '+_pilEsc(_opTNom(x.def.nom))+'</b> \u00b7 '):(x.ko?'\u26A0 ':'\u2713 '))
-      + verdict + besoin
-      + '<br><span style="color:var(--texte-doux)">'+_pilFmtD(f.debut)+' \u2192 '+_pilFmtD(f.fin)
-      + (f.joursRestants<=0 ? ' \u00b7 fen\u00eatre pass\u00e9e'
-          : (f.joursRestants<f.jours ? (' \u00b7 '+f.joursRestants+' j sur '+f.jours+' '+(f.chantier?'(7j/7)':'ouvr\u00e9s')+', fen\u00eatre entam\u00e9e')
-                                     : (' \u00b7 '+f.jours+' j '+(f.chantier?'(chantier, 7j/7)':'ouvr\u00e9s'))))
-      + ' \u00b7 '+_opFmtH(x.h)+' sur '+x.nP+' parc.</span></div>';
-  }).join('');
-  var pied='<div style="color:var(--texte-doux);margin-top:6px">Journ\u00e9e '+_ecoH1(OP.jour)+' h de travail \u00e0 '+OP.eff+''
-    + (OP.pause>0?(' \u00b7 amplitude '+_ecoH1(OP.jour+OP.pause/60)+' h'):'')+'</div>';
-  return '<div style="margin-top:8px;font-size:var(--pt-micro,11px);color:'+col+';background:'+bg+';border-radius:8px;padding:7px 10px;line-height:1.45">'
-    + h1 + corps + pied + '</div>';
+  }catch(e){ if(window._mvAvale) window._mvAvale(e,'pilotage.js/_dzJourMbr'); }
+  _DZ_CACHE[k]=out; return out;
+}
+function _dzEnt(m,iso){ var dt=_dzDt(iso); return (((((window.PLANNING_ENTRIES||{})[m.nom]||{})[dt.getFullYear()]||{})[dt.getMonth()]||{})[dt.getDate()])||null; }
+function _dzMotif(m,iso){
+  var e=_dzEnt(m,iso);
+  if(e){ if(e.type==='cp') return 'en cong\u00e9'; if(e.type==='recup') return 'en r\u00e9cup'; if(e.absent) return 'absent'; }
+  if(typeof window._mvEnContratLe==='function'&&!window._mvEnContratLe(m,iso)) return 'hors contrat';
+  return 'pas au planning';
+}
+// L'heure de prise, pour dire « sur place 08:00 → 16:00 ». Lue, jamais inventée :
+// sans horaire au planning, l'écran donne la durée de présence seule.
+function _dzHoraire(m,iso){
+  var r={deb:null,continu:false};
+  try{
+    var e=_dzEnt(m,iso);
+    if(e&&e.timing&&e.timing.debut){ r.deb=e.timing.debut; r.continu=!!e.timing.continu; return r; }
+    var dt=_dzDt(iso), T=((window.PLANNING_TEMPLATES||{})[dt.getFullYear()]||{})[m.planning_id||'standard'];
+    var mt=T&&T._timings&&T._timings[dt.getMonth()];
+    if(mt){ r.deb=mt.d||mt.debut||null; r.continu=!!mt.continu; }
+  }catch(e2){ if(window._mvAvale) window._mvAvale(e2,'pilotage.js/_dzHoraire'); }
+  return r;
+}
+function _dzCtx(noms,o){ o=o||{}; return {noms:noms||[],R:o.R||0,J:(o.J!=null?o.J:null),coup:(o.coup!=null?o.coup:null),anon:(o.anon!=null?o.anon:null)}; }
+// Une journée d'équipe : n personnes, C heures-personnes, J la journée la plus
+// longue (le temps de calendrier de l'équipe), la coupure, les absents.
+function _dzEquipeJour(iso,ctx){
+  var mbs=_dzMbs(), out={iso:iso,n:0,C:0,J:0,pers:[],abs:[],coup:0,deb:null,continu:false}, jm=0;
+  ctx.noms.forEach(function(nm){
+    var m=mbs[nm]; if(!m) return;
+    var j=_dzJourMbr(m,iso);
+    if(j.pH>0.01){
+      var h=(ctx.J!=null)?ctx.J:j.h;
+      out.n+=j.n; out.C+=h*j.n; if(h>jm) jm=h;
+      out.pers.push({nom:nm,h:h,n:j.n});
+      if(out.deb==null){ var t=_dzHoraire(m,iso); out.deb=t.deb; out.continu=t.continu; }
+    } else out.abs.push({nom:nm,motif:_dzMotif(m,iso)});
+  });
+  if(!(jm>0)){ out.n=0; out.C=0; return out; }
+  out.J=jm;
+  if(ctx.anon!=null){ out.n=ctx.anon; out.C=ctx.anon*jm; }
+  if(ctx.R){ out.n=Math.max(0,out.n+ctx.R); out.C=Math.max(0,out.C+ctx.R*jm); }
+  var P=(window.PLAN_PAUSE_MIN!=null)?window.PLAN_PAUSE_MIN:60;
+  out.coup=(ctx.coup!=null)?ctx.coup:((!out.continu&&jm>=6)?P:0);
+  return out;
+}
+function _dzSuivant(iso,ctx,sens){ var g=0; do{ iso=_dzAdd(iso,sens||1); g++; }while(g<400&&!(_dzEquipeJour(iso,ctx).n>0)); return (g<400)?iso:null; }
+
+// ── Le travail, sa fenêtre, la priorité ──
+function _dzFen(t,depuis){
+  var sa=(typeof window._pilSaison==='function')?window._pilSaison():null;
+  if(!sa||typeof window._mvFenetre!=='function') return null;
+  var f=window._mvFenetre(sa,[t],depuis||_dzAuj());
+  return (f&&f.parTache&&f.parTache[0])||null;
+}
+function _dzOuvrable(t,iso){ var f=_dzFen(t,iso); return !f||(f.fin>=iso&&f.debut<=_dzAdd(iso,30)); }
+function _dzPrioItems(){ return (typeof window._prioItems==='function')?(window._prioItems()||[]):[]; }
+function _dzPrios(){ var D=_PIL_OP_DATA; return _dzPrioItems().filter(function(it){ return D&&D.byNom[it.t]&&D.byNom[it.t].tot>0.05; }); }
+function _dzTachesDefaut(){
+  var D=_PIL_OP_DATA, its=_dzPrios();
+  if(its.length) return {t:[its[0].t],src:'prio'};
+  var auj=_dzAuj(), best=null;
+  D.tasks.forEach(function(x){ if(x.tot>0.05&&_dzOuvrable(x.nom,auj)&&(!best||x.tot>best.tot)) best=x; });
+  if(!best) D.tasks.forEach(function(x){ if(x.tot>0.05&&(!best||x.tot>best.tot)) best=x; });
+  if(!best) best=D.tasks[0]||null;
+  return {t:best?[best.nom]:[],src:'charge'};
+}
+// L'équipe de départ : les affectés à la priorité des travaux cochés ; sans
+// équipe affectée, toute l'équipe au champ (bureau et fiches inactives exclus).
+function _dzBase(tasks){
+  var mbs=_dzMbs(), noms=[], vu={}, nP=0;
+  _dzPrioItems().forEach(function(it){ if(tasks.indexOf(it.t)<0) return; nP++; (it.equipe||[]).forEach(function(n){ if(mbs[n]&&!vu[n]){ vu[n]=1; noms.push(n); } }); });
+  if(noms.length) return {noms:noms,src:'prio'};
+  return {noms:Object.keys(mbs),src:(nP?'prio-vide':'tous')};
+}
+function _dzTourCtx(){
+  var OP=_PIL_OP, b=_dzBase(OP.tasks||[]);
+  var noms=b.noms.filter(function(n){ return !OP.excl[n]; });
+  Object.keys(OP.add).forEach(function(n){ if(OP.add[n]&&noms.indexOf(n)<0) noms.push(n); });
+  var c=_dzCtx(noms,{R:OP.R,J:OP.J,coup:OP.coup}); c.base=b; return c;
+}
+function _dzRefAuto(tasks,ctx){
+  var auj=_dzAuj(), f0=null;
+  tasks.forEach(function(t){ var f=_dzFen(t,auj); if(f&&f.debut&&(!f0||f.debut<f0)) f0=f.debut; });
+  var fut=!!(f0&&f0>auj), from=fut?f0:auj;
+  for(var i=0;i<120;i++){ var iso=_dzAdd(from,i); if(_dzEquipeJour(iso,ctx).n>0) return {iso:iso,why:(iso===auj?'auj':(fut?'fen':'suiv'))}; }
+  return {iso:from,why:'aucun'};
+}
+function _dzRef(ctx){ var a=_dzRefAuto(_PIL_OP.tasks||[],ctx); if(_PIL_OP.refManuel&&_PIL_OP.ref) return {iso:_PIL_OP.ref,why:'main',auto:a}; return a; }
+function _dzPourquoi(ref){
+  var auj=_dzAuj(), w=_dzDt(auj).getDay();
+  if(ref.why==='auj') return 'aujourd\u2019hui';
+  if(ref.why==='main') return 'choisi \u00e0 la main';
+  if(ref.why==='fen') return 'd\u00e9but de la fen\u00eatre \u00b7 dans '+_dzPl(_dzEcart(auj,ref.iso),'jour');
+  if(ref.why==='suiv') return 'prochain jour travaill\u00e9 \u00b7 '+((w===0||w===6)?'aujourd\u2019hui '+_DZ_JL[w]:'personne de l\u2019\u00e9quipe au planning aujourd\u2019hui');
+  return 'aucun jour travaill\u00e9 trouv\u00e9 au planning';
 }
 
-function _opFmtH(h){ return (Math.round(h*10)/10).toLocaleString('fr-FR')+' h'; }
-function _opFmtHa(s){ return s.toLocaleString('fr-FR',{minimumFractionDigits:2,maximumFractionDigits:2}).replace(/\u202f/g,' ')+' ha'; }
+// ── Les trajets : une règle, réglable, appliquée à chaque déplacement ──
+var _DZ_H0={pied_m:300,pied_kmh:4,fixe_min:5,camion_kmh:25,sans_min:5};
+var _DZ_HB={pied_m:[0,1500,50],pied_kmh:[1,8,0.5],fixe_min:[0,30,1],camion_kmh:[5,60,5],sans_min:[0,60,1]};
+function _dzHDom(){ var c=(window.CONFIG&&window.CONFIG.eco&&window.CONFIG.eco.trajet)||null, o={}; Object.keys(_DZ_H0).forEach(function(k){ var v=c?parseFloat(c[k]):NaN; o[k]=isFinite(v)?v:_DZ_H0[k]; }); return o; }
+function _dzH(){ return (_PIL_OP&&_PIL_OP.H)?_PIL_OP.H:_dzHDom(); }
+function _dzHMod(){ if(!_PIL_OP||!_PIL_OP.H) return false; var d=_dzHDom(); return Object.keys(_DZ_H0).some(function(k){ return _PIL_OP.H[k]!==d[k]; }); }
+function _dzHop(a,b,H){
+  if(!_opGeoOK(a)||!_opGeoOK(b)) return {m:null,min:H.sans_min,mode:'gps'};
+  var d=_opHav(a,b);
+  if(d<=H.pied_m) return {m:d,min:d/1000/Math.max(0.5,H.pied_kmh)*60,mode:'pied'};
+  return {m:d,min:H.fixe_min+d/1000/Math.max(1,H.camion_kmh)*60,mode:'camion'};
+}
+function _dzHSave(){
+  if(!_opCanEdit()||!_PIL_OP||!_PIL_OP.H) return;
+  window.CONFIG=window.CONFIG||{}; window.CONFIG.eco=window.CONFIG.eco||{};
+  var o={}; Object.keys(_DZ_H0).forEach(function(k){ o[k]=_PIL_OP.H[k]; });
+  window.CONFIG.eco.trajet=o;
+  if(typeof window.saveData==='function') window.saveData('config');
+  _PIL_OP.H=null;
+  if(window.showToast) window.showToast('R\u00e8gle des trajets gard\u00e9e pour le domaine','#3D6B27');
+  _pilOpRefresh();
+}
 
-// ── Mini-carte SVG du trajet ──
+// ── LA SIMULATION : jour après jour, avec l'équipe du planning de chaque jour ──
+// Le trajet est du temps de CALENDRIER d'équipe (tout le monde se déplace) ;
+// le travail se partage entre les présents : C/J personnes équivalentes.
+function _dzSimuler(rows,refIso,ctx,H){
+  var days=[], iso=refIso, bloque=false;
+  if(!(_dzEquipeJour(iso,ctx).n>0)){ iso=_dzSuivant(iso,ctx,1); if(!iso) return {days:[],per:[],bloque:true}; }
+  function mk(i){ var e=_dzEquipeJour(i,ctx); return {iso:i,n:e.n,C:e.C,J:e.J,coup:e.coup,deb:e.deb,pers:e.pers,abs:e.abs,used:0,work:0,traj:0,surf:0,parcs:[],done:{},reprise:null}; }
+  var d=mk(iso), guard=0;
+  function next(){ days.push(d); if(days.length>=400){ bloque=true; return false; } var n=_dzSuivant(d.iso,ctx,1); if(!n){ bloque=true; return false; } d=mk(n); return true; }
+  var per=rows.map(function(r){ return {h0:r.reste,rem:r.reste,d0:null,d1:null}; });
+  for(var i=0;i<rows.length&&!bloque;i++){
+    var r=rows[i];
+    if(i>0){ var t=_dzHop(rows[i-1].p,r.p,H).min/60;
+      while(t>1e-9&&!bloque){ var fr=d.J-d.used; if(fr<=1e-9){ if(!next()) break; continue; } var c=Math.min(t,fr); d.used+=c; d.traj+=c*60; t-=c; } }
+    while(per[i].rem>1e-9&&!bloque&&guard<50000){
+      guard++;
+      var free=d.J-d.used;
+      if(free<=1e-9||!(d.C>0)){ if(!next()) break; if(per[i].d0!=null&&d.reprise==null) d.reprise=i; continue; }
+      var neff=d.C/d.J, done=Math.min(per[i].rem,free*neff);
+      d.used+=done/neff; d.work+=done; per[i].rem-=done; d.surf+=(per[i].h0>0?done/per[i].h0:0)*r.s;
+      d.done[i]=(d.done[i]||0)+done;
+      if(per[i].d0==null) per[i].d0=days.length;
+      per[i].d1=days.length;
+      if(d.parcs[d.parcs.length-1]!==i) d.parcs.push(i);
+    }
+  }
+  days.push(d);
+  return {days:days,per:per,bloque:bloque};
+}
+// La fenêtre de CHAQUE travail coché, jamais l'enveloppe. « Il faudrait N
+// personnes » sort de la MÊME simulation, relancée avec N de plus.
+function _dzVerdict(rows,sim,refIso,ctx,H){
+  var fin=sim.days.length?sim.days[sim.days.length-1].iso:null, out=[];
+  (_PIL_OP.tasks||[]).forEach(function(t){
+    var f=_dzFen(t,refIso); if(!f) return;
+    var passee=f.fin<refIso, ok=!sim.bloque&&!!fin&&fin<=f.fin;
+    var jr=0, x=refIso; for(var g=0;g<400&&x<=f.fin;g++){ if(_dzEquipeJour(x,ctx).n>0) jr++; x=_dzAdd(x,1); }
+    var over=ok?0:sim.days.filter(function(dd){ return dd.iso>f.fin; }).length, besoin=null;
+    if(!ok&&!passee&&!sim.bloque){
+      for(var k=1;k<=40;k++){
+        var s2=_dzSimuler(rows,refIso,Object.assign({},ctx,{R:(ctx.R||0)+k}),H), f2=s2.days.length?s2.days[s2.days.length-1].iso:null;
+        if(!s2.bloque&&f2&&f2<=f.fin){ besoin=k; break; }
+      }
+    }
+    out.push({t:t,ok:ok,fin:fin,f:f,jr:jr,over:over,besoin:besoin,passee:passee});
+  });
+  return out;
+}
+function _dzEqMod(){ var OP=_PIL_OP; return Object.keys(OP.excl).some(function(k){ return OP.excl[k]; })||Object.keys(OP.add).some(function(k){ return OP.add[k]; })||!!OP.R; }
+function _dzMod(){ var OP=_PIL_OP; return _dzEqMod()||OP.J!=null||OP.coup!=null||!!OP.refManuel||_dzHMod(); }
+// Un seul calcul par rendu : l'en-tête, le résultat, la carte et la liste
+// lisent le même objet — deux calculs finissent toujours par se contredire.
+function _dzCalc(){
+  var ctx=_dzTourCtx(), ref=_dzRef(ctx), H=_dzH(), rows=_opParcelles();
+  var hops=rows.map(function(r,i){ return i?_dzHop(rows[i-1].p,r.p,H):null; });
+  var sim=rows.length?_dzSimuler(rows,ref.iso,ctx,H):{days:[],per:[],bloque:false};
+  var e0=_dzEquipeJour(ref.iso,ctx), eP=_dzEquipeJour(ref.iso,_dzCtx(ctx.noms,{R:ctx.R}));
+  var ver=(rows.length&&sim.days.length)?_dzVerdict(rows,sim,ref.iso,ctx,H):[];
+  var sp=_opStartResolve(rows.filter(function(r){ return r.geo; }).map(function(r){ return r.p; }));
+  var traj=0, km=0; hops.forEach(function(h){ if(h){ traj+=h.min; km+=(h.m||0); } });
+  _DZ_LAST={ctx:ctx,ref:ref,H:H,rows:rows,hops:hops,sim:sim,e0:e0,jPlan:eP.J,coupPlan:eP.coup,ver:ver,sp:sp,startPt:sp?sp.p:null,traj:traj,km:km};
+  return _DZ_LAST;
+}
+function _dzStatTour(C){
+  if(!C.rows.length) return _pilStat('\u2713',' rien \u00e0 faire');
+  if(!C.sim.days.length) return _pilStat('\u2014',' personne au planning');
+  var n=C.sim.days.length, fin=C.sim.days[n-1].iso, ko=C.sim.bloque||C.ver.some(function(v){ return !v.ok; });
+  return _pilStat(n,(n>1?' jours':' jour')+' pour finir \u00b7 '+_dzJ(fin),ko?'d\u00e9borde':null);
+}
+function _dzSubTour(C){
+  return (_PIL_OP.tasks||[]).map(_opTNom).join(' + ')+' \u00b7 d\u00e8s le '+_dzJ(C.ref.iso)+' \u00b7 '+_dzPers(C.e0.n)+' pers. \u00d7 '+_dzHj(C.e0.J)+' \u00b7 '+(_dzMod()?'simulation':'planning');
+}
+function _dzMajEntete(id,stat,sub){
+  var t=document.querySelector('.pil-tile[data-pid="'+id+'"]'); if(!t) return;
+  var l2=t.querySelector('.pil-th-l2'); if(l2) l2.innerHTML=stat;
+  var s=t.querySelector('.pil-tsub'); if(s) s.textContent=sub;
+}
+
+// ── LE RENDU DE LA TOURNÉE ──
+function _opBodyC(C){
+  var D=_PIL_OP_DATA, OP=_PIL_OP, edit=_opCanEdit();
+  if(!D||!D.tasks.length) return '<div class="pil-empty">Aucune t\u00e2che de saison \u00e0 planifier.</div>';
+  var h='<div class="pil-dz-wrap"><div class="pil-dz-a">'+_dzJourHtml(C)+_dzTravauxHtml(edit);
+  if(!C.rows.length) return h+'<div class="pil-dz-hero"><div class="k">R\u00e9sultat</div><div class="stop">'+_mvIcon('check',20)+'Rien \u00e0 faire pour '+((OP.tasks||[]).length>1?'ces travaux':'ce travail')+'</div></div></div></div>'+_dzOverlays(C);
+  h+=_dzReglagesHtml(C)+_dzResultatHtml(C)+'</div><div class="pil-dz-b">'+_opMapHtml(C)+_dzTriHtml(C,edit)+_dzListeHtml(C,edit)+'</div></div>';
+  return h+_dzOverlays(C);
+}
+function _dzJourHtml(C){
+  var prev=_dzSuivant(C.ref.iso,C.ctx,-1), canPrev=!!(prev&&prev>=_dzAuj());
+  return '<div class="pil-dz-lbl">Pour quel jour</div><div class="pil-dz-day">'
+    +'<button class="nav" data-op="day" data-d="-1" aria-label="Jour travaill\u00e9 pr\u00e9c\u00e9dent"'+(canPrev?'':' disabled')+'>\u2039</button>'
+    +'<div class="mid"><b>'+_dzJ(C.ref.iso)+'</b><span>'+_pilEsc(_dzPourquoi(C.ref))+'</span></div>'
+    +'<button class="nav" data-op="day" data-d="1" aria-label="Jour travaill\u00e9 suivant">\u203a</button></div>';
+}
+function _dzTravauxHtml(edit){
+  var D=_PIL_OP_DATA, OP=_PIL_OP, its=_dzPrios(), pn={}, mbs=_dzMbs(), auj=_dzAuj();
+  its.forEach(function(it){ pn[it.t]=1; });
+  var autres=D.tasks.filter(function(x){ return !pn[x.nom]&&x.tot>0.05; });
+  var autresOn=autres.filter(function(x){ return OP.tasks.indexOf(x.nom)>=0; });
+  function chip(nom,prio,small){
+    var on=OP.tasks.indexOf(nom)>=0, tag=edit?'button':'span';
+    return '<'+tag+' class="pil-dz-chip'+(on?' on':'')+'"'+(edit?' data-op="task" data-nom="'+_pilEsc(nom)+'"':'')+'>'
+      +(prio?'<span class="st">'+_mvIcon('etoile',16)+'</span>':(on?_mvIcon('check',16):''))
+      +_pilEsc(_opTNom(nom))+(small?' <small>\u00b7 '+small+'</small>':'')+'</'+tag+'>';
+  }
+  var h='<div class="pil-dz-lbl">Le travail'+(its.length?'<span class="r">priorit\u00e9 du moment</span>':'')+'</div><div class="pil-dz-chips">';
+  its.forEach(function(it){ var n=(it.equipe||[]).filter(function(x){ return mbs[x]; }).length; h+=chip(it.t,true,n?String(n):''); });
+  (OP._autres?autres:autresOn).forEach(function(x){ var f=_dzFen(x.nom,auj); h+=chip(x.nom,false,(f&&f.debut>auj)?'d\u00e8s le '+_dzJc(f.debut):''); });
+  var nA=autres.length-(OP._autres?0:autresOn.length);
+  if(autres.length&&(OP._autres||nA>0)) h+='<button class="pil-dz-more" data-op="autres">'+(OP._autres?'moins':'autres travaux ('+nA+')')+'</button>';
+  h+='</div>';
+  if(!its.length&&OP.tSrc==='charge') h+='<div class="pil-dz-note">Aucune priorit\u00e9 diffus\u00e9e\u00a0: c\u2019est le travail qui a le plus d\u2019heures restantes. <b>Vigne \u203a Priorit\u00e9 du moment</b> la fixe pour toute l\u2019\u00e9quipe.</div>';
+  if((OP.tasks||[]).length>1) h+='<div class="pil-dz-note">'+OP.tasks.length+' travaux coch\u00e9s\u00a0: faits sur chaque parcelle avant de passer \u00e0 la suivante.</div>';
+  return h;
+}
+function _dzEqSrc(C){
+  var b=C.ctx.base, e=C.e0;
+  var src=(b.src==='prio')?'affect\u00e9e \u00e0 la priorit\u00e9':'toute l\u2019\u00e9quipe au champ';
+  var coll=e.pers.filter(function(p){ return p.n>1; }).map(function(p){ return ['dont',p.nom,'\u00d7'+p.n].join(' '); });
+  var abs=e.abs.filter(function(a){ return a.motif!=='hors contrat'&&a.motif!=='pas au planning'; }).map(function(a){ return [a.nom,a.motif].join(' '); });
+  if(abs.length>2) abs=abs.slice(0,2).concat(['+'+(abs.length-2)]);
+  return src+(coll.length?' \u00b7 '+coll.join(', '):'')+(abs.length?' \u00b7 '+abs.join(', '):'');
+}
+function _dzReglagesHtml(C){
+  var OP=_PIL_OP, e=C.e0, mod=_dzMod(), eqMod=_dzEqMod(), jMod=OP.J!=null, cMod=OP.coup!=null, hMod=_dzHMod();
+  var nH=C.hops.filter(Boolean).length, moy=nH?C.traj/nH:0, sansG=C.hops.filter(function(x){ return x&&x.mode==='gps'; }).length;
+  var h='<div class="pil-dz-lbl">La journ\u00e9e de l\u2019\u00e9quipe<span class="r">'+(mod?'valeurs modifi\u00e9es':'lues au planning')+'</span></div><div class="pil-dz-grid">';
+  h+='<button class="pil-dz-set'+(eqMod?' mod':'')+'" data-op="sheet" data-k="equipe"><span class="k">'+_mvIcon('equipe',16)+'\u00c9quipe</span>'
+    +'<span class="v"><b>'+_dzPers(e.n)+'<small>pers.</small></b><span class="pil-dz-go">\u203a</span></span>'
+    +'<span class="src'+(eqMod?' mod':'')+'">'+_pilEsc(eqMod?'modifi\u00e9e \u2014 simulation':_dzEqSrc(C))+'</span></button>';
+  h+='<div class="pil-dz-set'+(jMod?' mod':'')+'"><span class="k">'+_mvIcon('chrono',16)+'Travail</span>'
+    +'<span class="v"><b>'+_dzHj(e.J)+'</b><span class="pil-dz-stp"><button data-op="stp" data-k="jour" data-d="-0.5" aria-label="Journ\u00e9e plus courte"'+(e.J<=1?' disabled':'')+'>\u2212</button><button data-op="stp" data-k="jour" data-d="0.5" aria-label="Journ\u00e9e plus longue"'+(e.J>=12?' disabled':'')+'>+</button></span></span>'
+    +'<span class="src'+(jMod?' mod':'')+'">'+(jMod?'modifi\u00e9 \u2014 planning\u00a0: '+_dzHj(C.jPlan):'planning de '+_DZ_JL[_dzDt(C.ref.iso).getDay()]+' \u00b7 par personne')+'</span></div>';
+  h+='<div class="pil-dz-set'+(cMod?' mod':'')+'"><span class="k">'+_mvIcon('repas',16)+'Coupure</span>'
+    +'<span class="v"><b>'+_dzMin(e.coup)+'</b><span class="pil-dz-stp"><button data-op="stp" data-k="coup" data-d="-15" aria-label="Coupure plus courte"'+(e.coup<=0?' disabled':'')+'>\u2212</button><button data-op="stp" data-k="coup" data-d="15" aria-label="Coupure plus longue"'+(e.coup>=180?' disabled':'')+'>+</button></span></span>'
+    +'<span class="src'+(cMod?' mod':'')+'">'+(cMod?'modifi\u00e9e \u2014 planning\u00a0: '+_dzMin(C.coupPlan):(e.coup?'planning \u00b7 allonge la pr\u00e9sence':'journ\u00e9e continue au planning'))+'</span></div>';
+  h+='<button class="pil-dz-set'+(hMod?' mod':'')+'" data-op="sheet" data-k="trajet"><span class="k">'+_mvIcon('route',16)+'Trajets</span>'
+    +'<span class="v"><b>'+(nH?'\u2248\u00a0'+_dzMin(moy):'\u2014')+'</b><span class="pil-dz-go">\u203a</span></span>'
+    +'<span class="src'+(hMod?' mod':'')+'">'+(hMod?'r\u00e8gle modifi\u00e9e \u2014 simulation':(nH?'par d\u00e9placement \u00b7 calcul\u00e9s sur les distances'+(sansG?' ('+sansG+' sans position)':''):'une seule parcelle'))+'</span></button>';
+  h+='</div>';
+  if(mod) h+='<div class="pil-dz-reset"><span>Simulation \u2014 rien n\u2019est enregistr\u00e9.</span><button data-op="reset">\u21ba Valeurs r\u00e9elles</button></div>';
+  return h;
+}
+function _dzSuiteTxt(sim){
+  var d=sim.days; if(d.length<2) return '';
+  var n0=d[0].n, au=d.slice(1).map(function(x){ return x.n; });
+  if(!au.some(function(v){ return Math.abs(v-n0)>0.05; })) return '';
+  var mx=Math.max.apply(0,au), mn=Math.min.apply(0,au);
+  return _dzPers(n0)+' pers. le 1er jour, '+((Math.abs(mx-mn)<0.05)?_dzPers(mx)+' ensuite':'de '+_dzPers(mn)+' \u00e0 '+_dzPers(mx)+' ensuite');
+}
+function _dzHoraireTxt(d){
+  if(d.deb) return 'Sur place '+d.deb+' \u2192 '+_dzHm(d.deb,d.J*60+(d.coup||0))+(d.coup?' \u00b7 coupure '+_dzMin(d.coup):' \u00b7 sans coupure');
+  return 'Pr\u00e9sence '+_dzHj(d.J+(d.coup||0)/60)+' \u00b7 '+_dzHj(d.J)+' de travail'+(d.coup?' + '+_dzMin(d.coup)+' de coupure':'');
+}
+function _dzResultatHtml(C){
+  var sim=C.sim, rows=C.rows;
+  if(!sim.days.length) return '<div class="pil-dz-verd ko">'+_mvIcon('alerte',16)+'<div>Personne de cette \u00e9quipe n\u2019est au planning dans les mois qui viennent. Ajoutez quelqu\u2019un dans la case \u00c9quipe.</div></div>';
+  var d1=sim.days[0], si=d1.parcs.length?d1.parcs[d1.parcs.length-1]:0, st=rows[si], n=sim.days.length, last=sim.days[n-1];
+  var reste=Math.max(0,sim.per[si].h0-(d1.done[si]||0));
+  var sub=(n<2)?'<b>termin\u00e9e</b> \u2014 tout est fini ce soir':((reste<0.05)?'<b>termin\u00e9e</b> \u2014 la suivante le '+_dzJ(sim.days[1].iso):'en cours \u2014 il restera <b>'+_opFmtH(reste)+'</b>, reprise le '+_dzJ(sim.days[1].iso));
+  var h='<div class="pil-dz-hero"><div class="k">'+_dzJ(d1.iso)+' \u2014 le soir, l\u2019\u00e9quipe est \u00e0</div>'
+    +'<div class="stop">'+_mvIcon('epingle',20)+_pilEsc(st.nom)+'</div><div class="sub">'+sub+'</div>'
+    +'<div class="pil-dz-kpis"><div class="pil-dz-kpi"><b>'+_opFmtHa(d1.surf)+'</b><span>faits le 1er jour</span></div>'
+    +'<div class="pil-dz-kpi"><b>'+_opFmtH(d1.work)+'</b><span>de travail</span></div>'
+    +'<div class="pil-dz-kpi"><b>'+_dzMin(d1.traj)+'</b><span>de trajets</span></div></div>'
+    +'<div class="pil-dz-fin"><div class="l1"><b>'+_dzPl(n,'jour')+'</b><span>pour finir \u2192 <b>'+_dzJ(last.iso)+'</b></span></div>';
+  var tot=rows.reduce(function(a,r){ return a+r.reste; },0), suite=_dzSuiteTxt(sim);
+  h+='<div class="pil-dz-note">'+_opFmtH(tot)+' \u00e0 faire sur '+_dzPl(rows.length,'parcelle')+(suite?' \u00b7 '+suite:'')+'</div>';
+  if(sim.bloque) h+='<div class="pil-dz-verd ko">'+_mvIcon('alerte',16)+'<div><b>La tourn\u00e9e ne se termine pas</b> \u2014 '+_dzPt('l\u2019\u00e9quipe n\u2019est plus au planning apr\u00e8s le '+_dzJc(last.iso))+'</div></div>';
+  else {
+    var multi=C.ver.length>1, renf=_pilShow('sim_cout');
+    C.ver.forEach(function(v){
+      var nom=multi?'<b>'+_pilEsc(_opTNom(v.t))+'</b> \u00b7 ':'';
+      if(v.passee) h+='<div class="pil-dz-verd ko">'+_mvIcon('alerte',16)+'<div>'+nom+_dzPt('la fen\u00eatre s\u2019est ferm\u00e9e le '+_dzJc(v.f.fin))+'</div></div>';
+      else if(v.ok) h+='<div class="pil-dz-verd ok">'+_mvIcon('check',16)+'<div>'+nom+'<b>tient dans la fen\u00eatre</b> \u2014 fini le '+_dzJc(v.fin)+', fen\u00eatre jusqu\u2019au '+_dzJc(v.f.fin)+' ('+_dzPl(v.jr,'jour travaill\u00e9','jours travaill\u00e9s')+' d\u2019ici l\u00e0).</div></div>';
+      else h+='<div class="pil-dz-verd ko">'+_mvIcon('alerte',16)+'<div>'+nom+'<b>d\u00e9borde de '+_dzPl(v.over,'jour')+'</b> \u2014 '+_dzPt('la fen\u00eatre ferme le '+_dzJc(v.f.fin))
+        +(v.besoin?'<br>Il faudrait <b>'+_dzPl(v.besoin,'personne')+' de plus</b> chaque jour, trajets compris.':'<br>M\u00eame avec quarante personnes de plus, \u00e7a ne tient pas.')
+        +'<div class="act">'+(v.besoin?'<button data-op="essai" data-r="'+v.besoin+'">Essayer +'+v.besoin+'</button>':'')+(renf?'<button data-op="renfort">Voir le renfort \u203a</button>':'')+'</div></div></div>';
+    });
+  }
+  h+='<div class="pil-dz-hor">'+_dzHoraireTxt(d1)+'</div></div></div>';
+  return h;
+}
+function _dzTriHtml(C,edit){
+  if(!edit) return '<div class="pil-dz-note pil-dz-ro">'+_mvIcon('cadenas',16)+' Tourn\u00e9e d\u00e9finie par l\u2019administrateur \u2014 lecture seule. Vos parcelles s\u2019affichent dans cet ordre, avec leur num\u00e9ro, dans Vigne.</div>';
+  var act=_opActTodo(), st=C.startPt, cur=C.rows.map(function(r){ return r.nom; }).join('|');
+  function chip(mode,lab,on){ return '<button class="pil-dz-sort'+(on?' on':'')+'" data-op="sort" data-mode="'+mode+'">'+lab+'</button>'; }
+  var nnO=_opNNNames(act), kmN=st?_opFmtM(_opRouteLen(nnO.map(_opParcByNom).filter(Boolean),st)):'';
+  var h='<div class="pil-dz-lbl">L\u2019ordre de passage<span class="r">puis ajuste au \u21c5</span></div><div class="pil-dz-sorts">';
+  h+=chip('nn',_mvIcon('boussole',16)+'Au plus proche'+(kmN?' <small>\u00b7 '+kmN+'</small>':''),nnO.join('|')===cur);
+  if(_opHasCom()){ var co=_opComNames(act), kmC=st?_opFmtM(_opRouteLen(co.map(_opParcByNom).filter(Boolean),st)):''; h+=chip('com',_mvIcon('bureau',16)+'Par commune'+(kmC?' <small>\u00b7 '+kmC+'</small>':''),co.join('|')===cur); }
+  h+=chip('dom','Ordre du domaine')+chip('surfD','Grandes d\u2019abord')+chip('avc','Moins avanc\u00e9es')+chip('rev','\u21c5 Inverser')+'</div>';
+  var sp=C.sp, opts='<option value="">D\u00e9part\u00a0: '+((sp&&sp.auto)?('auto \u2014 '+(sp.src==='journal'?'derni\u00e8re faite\u00a0: '+_pilEsc(sp.p.nom):'centre du vignoble')):'auto')+'</option>';
+  _opParcActive().filter(_opGeoOK).forEach(function(p){ opts+='<option value="'+_pilEsc(p.nom)+'"'+((_PIL_OP._startNom===p.nom)?' selected':'')+'>D\u00e9part\u00a0: '+_pilEsc(p.nom)+'</option>'; });
+  h+='<select id="pil-op-start" class="pil-dz-sel" aria-label="D\u00e9part de la tourn\u00e9e">'+opts+'</select>';
+  var dirty=_opDirty(), can=(dirty==='modified'||dirty==='unsaved'), nS=0;
+  (_PIL_OP.tasks||[]).forEach(function(t){ if(_opSavedTask(t)) nS++; });
+  var pill=(dirty==='saved')?'<span class="pil-dz-pill ok">\u2713 enregistr\u00e9e</span>':(dirty==='empty'?'<span class="pil-dz-pill no">rien \u00e0 ordonner</span>':'<span class="pil-dz-pill mod">\u25cf '+(dirty==='unsaved'?'non enregistr\u00e9e':'modifi\u00e9e')+'</span>');
+  h+='<div class="pil-dz-save"><button class="go" data-op="save"'+(can?'':' disabled')+'>'+_mvIcon('envoyer',16)+'Enregistrer la tourn\u00e9e</button>'+pill+(nS?'<button class="rm" data-op="clear">Retirer</button>':'')+'</div>';
+  return h+'<div class="pil-dz-dif">'+_opDiffusHtml()+'</div>';
+}
+function _dzSlot(i){ return '<button class="pil-dz-slot" data-op="drop" data-i="'+i+'"><i></i><span>\u21b3 INS\u00c9RER ICI</span><i></i></button>'; }
+function _dzRowHtml(x,i,pr,pk,edit,hasCom){
+  var multi=(_PIL_OP.tasks||[]).length>1, span=(pr&&pr.d0!=null&&pr.d1>pr.d0)?'<span class="bd">J'+(pr.d0+1)+'\u2192J'+(pr.d1+1)+'</span>':'';
+  return '<div class="pil-dz-row'+(pk?' pk':'')+'"><span class="n">'+(i+1)+'</span><div class="c"><div class="nm">'+_pilEsc(x.nom)+span+((multi&&x.emos>1)?' <small>\u00b7 '+x.emos+' travaux</small>':'')+'</div>'
+    +'<div class="ds">'+(x.geo?'':'\u25cb sans position \u00b7 ')+((hasCom&&_opCom(x.p))?_pilEsc(_opCom(x.p))+' \u00b7 ':'')+'<b>'+_opFmtHa(x.s)+'</b> \u00b7 '+x.pct+'\u00a0% fait</div></div>'
+    +'<div class="r"><b>'+_opFmtH(x.reste)+'</b><span>\u00e0 faire</span></div>'
+    +((edit&&!pk)?'<button class="mv" data-op="pick" data-nom="'+_pilEsc(x.nom)+'" aria-label="D\u00e9placer '+_pilEsc(x.nom)+'">'+_mvIcon('hautbas',16)+'</button>':'')+'</div>';
+}
+// La liste RANGÉE PAR JOUR : un en-tête par jour travaillé. Avant, une parcelle
+// de quatre jours empilait « Fin de la journée 4 · 5 · 6 » sous elle.
+function _dzListeHtml(C,edit){
+  var rows=C.rows, sim=C.sim, OP=_PIL_OP, hasCom=_opHasCom();
+  var pk=(edit&&OP._pick&&OP._pick.names&&OP._pick.names.length)?OP._pick:null;
+  var h='<div class="pil-dz-days" id="pil-op-rows">';
+  if(pk){
+    // En placement : liste nue, les index des fentes sont ceux de la liste privée
+    // de la prise en main — mélanger deux numérotations rendrait la pose imprévisible.
+    var rest=rows.filter(function(x){ return pk.names.indexOf(x.nom)<0; });
+    rest.forEach(function(x,ri){ h+=_dzSlot(ri)+_dzRowHtml(x,rows.indexOf(x),null,true,edit,hasCom); });
+    return h+_dzSlot(rest.length)+'</div>';
+  }
+  var runs={}; if(edit&&hasCom) _opRuns(rows).forEach(function(r){ if(r.com&&r.names.length>1) runs[r.i0]=r; });
+  sim.days.forEach(function(d,k){
+    h+='<div class="pil-dz-dh'+(k?' nx':'')+'"><span class="j">J'+(k+1)+'</span><span class="t">'+_dzJ(d.iso)+' <small>\u00b7 '+_dzPers(d.n)+' pers. \u00b7 '+_dzHj(d.J)+'</small></span><span class="m">'+_opFmtHa(d.surf)+'</span></div>';
+    if(d.reprise!=null){ var rp=rows[d.reprise]; h+='<div class="pil-dz-cont">reprise\u00a0: '+_pilEsc(rp.nom)+' \u2014 '+_opFmtH(d.done[d.reprise]||0)+' ce jour-l\u00e0'+(sim.per[d.reprise].d1===k?', termin\u00e9e':'')+'</div>'; }
+    rows.forEach(function(r,i){
+      if(!sim.per[i]||sim.per[i].d0!==k) return;
+      if(runs[i]) h+='<div class="pil-dz-run"><span>'+_pilEsc(runs[i].com)+' \u00b7 '+runs[i].names.length+'</span><i></i><button data-op="pickr" data-i="'+i+'">\u21c5 bloc</button></div>';
+      var hp=C.hops[i];
+      if(hp) h+='<div class="pil-dz-hop">'+(hp.mode==='gps'?'sans position \u00b7 '+_dzMin(hp.min):('<b>'+_opFmtM(hp.m)+'</b> \u00b7 '+_dzMin(hp.min)+' <span'+(hp.mode==='camion'?' class="cam"':'')+'>'+(hp.mode==='pied'?'\u00e0 pied':'en camion')+'</span>'))+'</div>';
+      h+=_dzRowHtml(r,i,sim.per[i],false,edit,hasCom);
+    });
+  });
+  var jamais=[]; rows.forEach(function(r,i){ if(!sim.per[i]||sim.per[i].d0==null) jamais.push(i); });
+  if(jamais.length){
+    h+='<div class="pil-dz-dh nx"><span class="j">\u2014</span><span class="t">Pas atteintes <small>\u00b7 l\u2019\u00e9quipe n\u2019est plus au planning</small></span></div>';
+    jamais.forEach(function(i){ h+=_dzRowHtml(rows[i],i,null,false,edit,hasCom); });
+  }
+  h+='</div>';
+  if(edit) h+='<div class="pil-dz-note">Pour ranger\u00a0: <b>\u21c5</b> prend la parcelle en main, une <b>fente dor\u00e9e</b> la repose'+(hasCom?' \u2014 <b>\u21c5 bloc</b> d\u00e9place toute une commune':'')+'. <b>Enregistrer</b> la diffuse \u00e0 l\u2019\u00e9quipe, dans Vigne.</div>';
+  return h;
+}
+
+// ── Repli SVG de la carte (hors ligne) ──
 function _opMapSvg(seqRows,w){
   var todoGeo=seqRows.filter(function(r){return r.geo;}).map(function(r){return r.p;});
   var doneGeo=_opDoneGeo(), sp=_opStartResolve(todoGeo), startPt=sp?sp.p:null;
@@ -2727,310 +2983,270 @@ function _opMapSvg(seqRows,w){
     +'<div style="position:absolute;left:9px;bottom:7px;font-size:var(--pt-lbl,10.5px);color:#A79E8C;background:rgba(20,17,13,.55);padding:2px 7px;border-radius:8px">\uD83D\uDFE2 d\u00e9part \u00b7 \uD83D\uDFE1 \u00e0 faire \u00b7 \u26AB fait</div></div>';
 }
 
-// ── UI helpers ──
-var _OP_FLD='background:rgba(127,127,127,.08);color:var(--texte);border:1px solid var(--gris-clair);border-radius:10px;padding:10px 11px;font-size:var(--pt-txt,12.5px);font-weight:700;font-family:inherit';
-function _opStp(k,d,sym,on){ return '<button data-op="stp" data-k="'+k+'" data-d="'+d+'" style="width:26px;height:26px;border:1px solid var(--gris-clair);border-radius:7px;background:'+(on?'rgba(127,127,127,.10)':'transparent')+';color:'+(on?'var(--texte)':'var(--texte-doux)')+';font-size:var(--pt-sm,17px);font-weight:700;cursor:'+(on?'pointer':'default')+';line-height:1'+(on?'':';opacity:.4')+'">'+sym+'</button>'; }
-// ── CARTE ORDRE (Leaflet) — la tournée sur une vraie carte ──────────
-// Remplace le schéma SVG quand Leaflet est chargé (le SVG reste le repli hors
-// ligne). Les numéros sont ceux de la LISTE (index global, parcelles sans GPS
-// comprises) : une parcelle sans GPS fait sauter un numéro plutôt que de créer
-// deux numérotations concurrentes. Trait plein = journée 1, pointillé = la
-// suite. Anneau doré = la parcelle où la J1 s'arrête. Le zoom est conservé
-// entre deux rafraîchissements tant que le jeu de parcelles ne change pas.
+function _opFmtH(h){ return (Math.round(h*10)/10).toLocaleString('fr-FR')+' h'; }
+function _opFmtHa(s){ return s.toLocaleString('fr-FR',{minimumFractionDigits:2,maximumFractionDigits:2}).replace(/\u202f/g,' ')+' ha'; }
+
+// ── Ce qui se pose PAR-DESSUS la liste : la barre « en main », les deux
+//    feuilles (l'équipe, les trajets) et la carte agrandie. Tout vit dans le
+//    corps de la carte : la délégation de clics du Pilotage les couvre déjà.
+// ⚠️ Le Pilotage vit sous le dock (#mv-dock, fixe, z 90, hors du contexte
+//   d'empilement de la page) : une feuille posée jusqu'au bas de l'écran passait
+//   SOUS lui — mesuré, le dock interceptait le bouton « Voir le résultat ». Les
+//   couches s'arrêtent donc au-dessus du dock quand il est affiché, comme la
+//   barre « en main ».
+function _dzDockH(){ var d=document.getElementById('mv-dock'); try{ if(d&&getComputedStyle(d).display!=='none') return Math.round(d.getBoundingClientRect().height); }catch(e){ if(DEBUG) console.warn('[pilotage] dock', e); } return 0; }
+function _dzOverlays(C){
+  var OP=_PIL_OP, h='', bas=(OP._sheet||OP._fm)?_dzDockH():0, st=bas?' style="bottom:'+bas+'px"':'';
+  var pk=(_opCanEdit()&&OP._pick&&OP._pick.names&&OP._pick.names.length)?OP._pick:null;
+  if(pk) h+='<div class="pil-dz-pk"><span>'+_mvIcon('doigt',18)+'</span><div class="t"><b>'+_pilEsc(pk.label)+'</b><div>Touchez une fente dor\u00e9e pour poser</div></div>'
+    +'<button class="go" data-op="last">En dernier</button><button data-op="cancel">Annuler</button></div>';
+  if(OP._sheet) h+='<div class="pil-dz-shw"'+st+'><div class="pil-dz-shbg" data-op="shut"></div><div class="pil-dz-sh" role="dialog" aria-modal="true">'
+    +(OP._sheet==='trajet'?_dzSheetTrajet(C):_dzSheetEquipe(C))+'</div></div>';
+  if(OP._fm) h+='<div class="pil-dz-fm"'+st+'><div class="top"><b>'+_pilEsc((OP.tasks||[]).map(_opTNom).join(' + ')+' \u00b7 '+_dzPl(C.rows.length,'parcelle')+(C.km>0?' \u00b7 '+_opFmtM(C.km)+' \u00b7 '+_dzMin(C.traj):''))+'</b>'
+    +'<button data-op="fmx">Fermer</button></div><div id="pil-op-fm" class="lf"></div></div>';
+  return h;
+}
+function _dzSuiteNoms(C){
+  var d=C.sim.days, out=[];
+  for(var k=1;k<d.length&&out.length<3;k++){
+    var a=d[k-1].pers.map(function(p){ return p.nom; }), b=d[k].pers.map(function(p){ return p.nom; });
+    b.forEach(function(n){ if(a.indexOf(n)<0&&out.length<3) out.push(n+' revient le '+_dzJ(d[k].iso)); });
+    a.forEach(function(n){ if(b.indexOf(n)<0&&out.length<3) out.push(n+' pas l\u00e0 le '+_dzJ(d[k].iso)); });
+  }
+  return 'Les jours suivants suivent le planning de chacun\u00a0: '+(out.length?_dzPt(out.join(' \u00b7 ')):'la m\u00eame \u00e9quipe chaque jour.');
+}
+function _dzSheetEquipe(C){
+  var OP=_PIL_OP, ref=C.ref.iso, b=C.ctx.base, mbs=_dzMbs(), prios=_dzPrioItems();
+  var h='<div class="hdl"></div><h3>L\u2019\u00e9quipe \u2014 '+_pilEsc((OP.tasks||[]).map(_opTNom).join(' + '))+'</h3><div class="sub">'
+    +(b.src==='prio'?'Les personnes affect\u00e9es \u00e0 la priorit\u00e9, et leur journ\u00e9e du <b>'+_dzJ(ref)+'</b> au planning.'
+      :'Pas d\u2019\u00e9quipe affect\u00e9e \u00e0 ce travail\u00a0: toute l\u2019\u00e9quipe au champ, et sa journ\u00e9e du <b>'+_dzJ(ref)+'</b> au planning.')
+    +' Toucher un nom l\u2019enl\u00e8ve ou le remet, pour essayer.</div>';
+  function ligne(nm,dansBase){
+    var m=mbs[nm]; if(!m) return '';
+    var j=_dzJourMbr(m,ref), dispo=j.pH>0.01, inc=dansBase?!OP.excl[nm]:!!OP.add[nm], autre=null;
+    prios.forEach(function(it){ if((OP.tasks||[]).indexOf(it.t)<0&&(it.equipe||[]).indexOf(nm)>=0) autre=it.t; });
+    var sub=_dzColl(m)?'\u00e9quipe collective':(autre?'d\u00e9j\u00e0 sur '+_opTNom(autre):'');
+    var info=dispo?(_dzHj(OP.J!=null?OP.J:j.h)+(j.n>1?' \u00d7 '+j.n:'')):_dzMotif(m,ref);
+    return '<button class="pil-dz-pp'+((inc&&dispo)?' on':'')+'"'+(dispo?' data-op="pp" data-nom="'+_pilEsc(nm)+'" data-b="'+(dansBase?1:0)+'"':' disabled')+'>'
+      +'<span class="ck">'+_mvIcon('check',16)+'</span><span class="nm">'+_pilEsc(nm)+(sub?'<small>'+_pilEsc(sub)+'</small>':'')+'</span><span class="h">'+_pilEsc(info)+'</span></button>';
+  }
+  var liste=b.noms.filter(function(nm){ var m=mbs[nm]; if(!m) return false; if(b.src==='prio'||_dzJourMbr(m,ref).pH>0.01) return true; var mo=_dzMotif(m,ref); return mo!=='hors contrat'&&mo!=='pas au planning'; });
+  h+='<div class="sec">'+(b.src==='prio'?'Affect\u00e9s \u00e0 la priorit\u00e9':'Au champ')+'</div>'+liste.map(function(nm){ return ligne(nm,true); }).join('');
+  var autres=Object.keys(mbs).filter(function(nm){ return b.noms.indexOf(nm)<0&&_dzJourMbr(mbs[nm],ref).pH>0.01; });
+  if(autres.length) h+='<div class="sec">Ajouter quelqu\u2019un du jour</div>'+autres.map(function(nm){ return ligne(nm,false); }).join('');
+  h+='<div class="sec">Renfort simul\u00e9</div><div class="pil-dz-hy"><div class="t">Personnes en plus, chaque jour<small>au temps de travail de la journ\u00e9e</small></div>'
+    +'<span class="pil-dz-stp"><button data-op="R" data-d="-1" aria-label="Une personne de moins"'+((OP.R||0)>0?'':' disabled')+'>\u2212</button><span class="val">'+(OP.R||0)+'</span><button data-op="R" data-d="1" aria-label="Une personne de plus">+</button></span></div>';
+  h+='<div class="pil-dz-ex">'+_pilEsc(_dzSuiteNoms(C))+'</div>';
+  h+='<div class="pil-dz-ex">Rien n\u2019est enregistr\u00e9 ici\u00a0: l\u2019affectation se diffuse dans <b>Vigne \u203a Priorit\u00e9 du moment</b>.</div>';
+  return h+'<button class="pil-dz-close" data-op="shut">Voir le r\u00e9sultat</button>';
+}
+function _dzSheetTrajet(C){
+  var H=_dzH(), hMod=_dzHMod(), edit=_opCanEdit();
+  function hy(k,lab,sub,val){ var bb=_DZ_HB[k];
+    return '<div class="pil-dz-hy"><div class="t">'+lab+(sub?'<small>'+sub+'</small>':'')+'</div><span class="pil-dz-stp">'
+      +'<button data-op="hy" data-k="'+k+'" data-d="-1" aria-label="Moins"'+(H[k]<=bb[0]?' disabled':'')+'>\u2212</button><span class="val">'+val+'</span>'
+      +'<button data-op="hy" data-k="'+k+'" data-d="1" aria-label="Plus"'+(H[k]>=bb[1]?' disabled':'')+'>+</button></span></div>'; }
+  var h='<div class="hdl"></div><h3>Les trajets entre parcelles</h3><div class="sub">Calcul\u00e9s entre chaque parcelle et la suivante, sur la distance \u00e0 vol d\u2019oiseau. L\u2019\u00e9quipe se d\u00e9place ensemble\u00a0: ce temps se retire de sa journ\u00e9e.</div>';
+  h+=hy('pied_m','\u00c0 pied jusqu\u2019\u00e0','au-del\u00e0, on prend le camion',H.pied_m+'\u00a0m')
+    +hy('pied_kmh','Vitesse \u00e0 pied','',String(H.pied_kmh).replace('.',',')+'\u00a0km/h')
+    +hy('fixe_min','Camion\u00a0: temps fixe','se garer, charger, d\u00e9charger',H.fixe_min+'\u00a0min')
+    +hy('camion_kmh','Vitesse en camion','dans les vignes et les villages',H.camion_kmh+'\u00a0km/h')
+    +hy('sans_min','Parcelle sans position','ni GPS ni contour connus',H.sans_min+'\u00a0min');
+  h+='<div class="sec">Sur cette tourn\u00e9e \u2014 '+_dzMin(C.traj)+' en tout</div>';
+  C.rows.forEach(function(x,i){ var hp=C.hops[i]; if(!hp) return;
+    h+='<div class="pil-dz-hl"><span class="nm">'+_pilEsc(C.rows[i-1].nom)+' \u2192 '+_pilEsc(x.nom)+'<small>'+(hp.mode==='gps'?'sans position':(_opFmtM(hp.m)+' \u00b7 '+(hp.mode==='pied'?'\u00e0 pied':'en camion')))+'</small></span><span class="h">'+_dzMin(hp.min)+'</span></div>'; });
+  h+='<div class="pil-dz-ex">Ces cinq valeurs sont un <b>r\u00e9glage du domaine</b>. Les changer ici sert \u00e0 essayer'+(edit?'\u00a0; \u00ab\u00a0Garder pour le domaine\u00a0\u00bb les enregistre pour tout le monde.':'.')+'</div>';
+  if(hMod) h+='<div class="pil-dz-reset"><span>R\u00e8gle modifi\u00e9e</span><button data-op="hyreset">\u21ba R\u00e9glage du domaine</button></div>'+(edit?'<button class="pil-dz-close alt" data-op="hysave">Garder pour le domaine</button>':'');
+  return h+'<button class="pil-dz-close" data-op="shut">Voir le r\u00e9sultat</button>';
+}
+
+// ── La carte : la tournée sur une vraie carte, repli SVG hors ligne ──
+// ⚠️ DANS LA CARTE, UN DOIGT FAIT DÉFILER LA PAGE. Sur un écran tactile
+//   (pointeur « coarse »), dragging:false : Leaflet ne pose plus que
+//   `leaflet-touch-zoom`, soit touch-action:pan-x pan-y — le navigateur garde le
+//   glissement à un doigt, et deux doigts déplacent et zooment (TouchZoom suit
+//   le milieu des doigts). « Agrandir » ouvre la carte plein écran, où le doigt
+//   la déplace. Avant : touch-action:none sur 220 px d'écran, mesuré 405 → 405.
 var _opMap=null, _OP_MAPDATA=null;
-function _opMapHtml(rows,sim,startPt){
+function _opMapHtml(C){
+  var rows=C.rows, startPt=C.startPt;
   if(typeof window.L==='undefined'){
     _OP_MAPDATA=null;
     window._mvGraphSuivre('#pil-g-opmap', function(lg){ return _opMapSvg(rows,lg); });
-    return '<div id="pil-g-opmap"></div>';
+    return '<div class="pil-dz-svg"><div id="pil-g-opmap"></div><button class="pil-dz-big" data-op="fm">'+_mvIcon('carte',16)+'Agrandir</button></div>';
   }
-  var todoGeo=rows.filter(function(r){return r.geo;}), doneGeo=_opDoneGeo();
+  var todoGeo=rows.filter(function(r){ return r.geo; }), doneGeo=_opDoneGeo();
   if(((startPt?1:0)+todoGeo.length+doneGeo.length)<2){ _OP_MAPDATA=null; return ''; }
-  _OP_MAPDATA={rows:rows,sim:sim,startPt:startPt,doneGeo:doneGeo};
-  var dist=_opRouteLen(todoGeo.map(function(r){return r.p;}),startPt);
-  return '<div style="position:relative;border:1px solid var(--gris-clair);border-radius:12px;overflow:hidden;margin-bottom:11px">'
-    +'<div id="pil-op-map" style="height:230px;background:#E8E4D8"></div>'
-    +(todoGeo.length?'<div style="position:absolute;right:9px;top:8px;z-index:1000;pointer-events:none;font-size:var(--pt-micro,11px);font-weight:700;color:#C9A84C;background:rgba(20,17,13,.72);padding:3px 8px;border-radius:8px">trajet ~ '+_opFmtM(dist)+'</div>':'')
-    +'<div style="position:absolute;left:9px;bottom:7px;z-index:1000;pointer-events:none;font-size:var(--pt-lbl,10.5px);color:#EFE9DA;background:rgba(20,17,13,.68);padding:2px 7px;border-radius:8px">\u{1F7E2} d\u00e9part \u00b7 \u2460\u2461\u2462 \u00e0 faire \u00b7 \u26AB fait \u00b7 plein = J1 \u00b7 pointill\u00e9 = ensuite</div>'
-    +'</div>';
+  _OP_MAPDATA={rows:rows,sim:C.sim,startPt:startPt,doneGeo:doneGeo};
+  return '<div class="pil-dz-map"><div id="pil-op-map" class="pil-dz-lf"></div>'
+    +(C.km>0?'<span class="tag">'+_mvIcon('route',16)+_opFmtM(C.km)+' \u00b7 '+_dzMin(C.traj)+'</span>':'')
+    +(_dzDoigt()?'<span class="hint">un doigt fait d\u00e9filer \u00b7 deux doigts d\u00e9placent</span>':'')
+    +'<button class="pil-dz-big" data-op="fm">'+_mvIcon('carte',16)+'Agrandir</button></div>';
+}
+function _dzLayers(map,D,noms){
+  var L=window.L, rows=D.rows, sim=D.sim, startPt=D.startPt, SG=startPt?_opGeo(startPt):null, bounds=[], seq=[];
+  rows.forEach(function(r,i){ if(!r.geo) return; var g=_opGeo(r.p); if(g) seq.push({i:i,r:r,g:g}); });
+  // Contours KML des parcelles concernées : à faire = or, déjà fait = sombre.
+  var src=(window.KML_POLYGONS_DYNAMIC&&window.KML_POLYGONS_DYNAMIC.length)?window.KML_POLYGONS_DYNAMIC:(window.KML_DATA||[]), st={};
+  seq.forEach(function(o){ st[String(o.r.nom).toLowerCase()]='todo'; });
+  D.doneGeo.forEach(function(p){ var k=String(p.nom||'').toLowerCase(); if(!st[k]) st[k]='done'; });
+  src.forEach(function(k){
+    if(!k||!k.pts||!k.pts.length||!k.name) return;
+    var s=st[String(k.name).toLowerCase()]; if(!s) return;
+    if(s==='todo') L.polygon(k.pts,{color:'#C9A84C',weight:2,fillColor:'#C9A84C',fillOpacity:.13}).addTo(map);
+    else L.polygon(k.pts,{color:'#5a5248',weight:1.2,fillColor:'#3a352c',fillOpacity:.28}).addTo(map);
+  });
+  if(SG) bounds.push([SG.lat,SG.lng]);
+  D.doneGeo.forEach(function(p){ if(startPt&&p.nom===startPt.nom) return; var g=_opGeo(p); if(!g) return;
+    L.circleMarker([g.lat,g.lng],{radius:4.5,fillColor:'#3a352c',color:'#5a5248',weight:1.2,fillOpacity:1}).addTo(map).bindPopup('<b>'+_pilEsc(p.nom)+'</b><br>fait'); bounds.push([g.lat,g.lng]); });
+  // Trait plein tant que la parcelle appartient au 1er jour, pointillé ensuite.
+  var d1=sim&&sim.days&&sim.days[0], li=(d1&&d1.parcs.length)?d1.parcs[d1.parcs.length-1]:-1;
+  var solid=SG?[[SG.lat,SG.lng]]:[], dash=[], sw=false;
+  seq.forEach(function(o){ var pt=[o.g.lat,o.g.lng]; bounds.push(pt);
+    if(!sw&&o.i<=li){ solid.push(pt); return; }
+    if(!sw){ sw=true; if(solid.length) dash.push(solid[solid.length-1]); }
+    dash.push(pt); });
+  if(solid.length>1) L.polyline(solid,{color:'#C9A84C',weight:3.5,opacity:.85,lineJoin:'round'}).addTo(map);
+  if(dash.length>1) L.polyline(dash,{color:'#C9A84C',weight:2.5,opacity:.55,dashArray:'6 7',lineJoin:'round'}).addTo(map);
+  if(SG) L.marker([SG.lat,SG.lng],{icon:L.divIcon({className:'',iconSize:[20,20],iconAnchor:[10,10],html:'<div style="width:20px;height:20px;border-radius:50%;background:#6FBF5A;border:2.5px solid #fff;box-shadow:0 1px 4px rgba(0,0,0,.45)"></div>'})}).addTo(map).bindPopup('<b>D\u00e9part</b><br>'+_pilEsc(startPt.nom));
+  seq.forEach(function(o){
+    var ring=(o.i===li), pr=(sim&&sim.per)?sim.per[o.i]:null;
+    var jour=(pr&&pr.d0!=null)?('jour '+(pr.d0+1)+(pr.d1>pr.d0?'\u2192'+(pr.d1+1):'')):'';
+    var mk=L.marker([o.g.lat,o.g.lng],{icon:L.divIcon({className:'',iconSize:[26,26],iconAnchor:[13,13],html:'<div style="width:26px;height:26px;border-radius:50%;background:#14110D;border:2px solid #C9A84C;color:#C9A84C;display:flex;align-items:center;justify-content:center;font:800 12px/1 Outfit,system-ui,sans-serif;box-shadow:'+(ring?'0 0 0 4px rgba(201,168,76,.45),':'')+'0 1px 4px rgba(0,0,0,.4)">'+(o.i+1)+'</div>'})}).addTo(map)
+      .bindPopup('<b>'+(o.i+1)+' \u00b7 '+_pilEsc(o.r.nom)+'</b><br>'+_opFmtH(o.r.reste)+' \u00e0 faire'+(jour?' \u00b7 '+jour:'')+(ring?'<br>le soir du 1er jour':''));
+    if(noms) mk.bindTooltip(_pilEsc(o.r.nom),{permanent:true,direction:'right',offset:[12,0],className:'pil-plabel'});
+  });
+  return bounds;
 }
 function _opBuildMap(){
   var el=document.getElementById('pil-op-map');
-  if(!el || typeof window.L==='undefined' || !_OP_MAPDATA) return;
+  if(!el||typeof window.L==='undefined'||!_OP_MAPDATA) return;
   _opMap=_pilMapKill(_opMap);
-  var D=_OP_MAPDATA, rows=D.rows, sim=D.sim, startPt=D.startPt;
-  var SG=startPt?_opGeo(startPt):null;
+  var D=_OP_MAPDATA;
   try{
-    _opMap=window.L.map(el,{zoomControl:true,attributionControl:false,zoomSnap:0,zoomDelta:0.5});
+    _opMap=window.L.map(el,{zoomControl:true,attributionControl:false,zoomSnap:0,zoomDelta:0.5,dragging:!_dzDoigt(),touchZoom:true,scrollWheelZoom:false});
     window.L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png').addTo(_opMap);
-    var seq=[]; rows.forEach(function(r,i){ if(!r.geo) return; var g=_opGeo(r.p); if(g) seq.push({i:i,r:r,g:g}); });
-    // Contours KML des parcelles concernées : à faire = or, déjà fait = sombre.
-    var src=(window.KML_POLYGONS_DYNAMIC&&window.KML_POLYGONS_DYNAMIC.length)?window.KML_POLYGONS_DYNAMIC:(window.KML_DATA||[]);
-    var st={}; seq.forEach(function(o){ st[String(o.r.nom).toLowerCase()]='todo'; });
-    D.doneGeo.forEach(function(p){ var k=String(p.nom||'').toLowerCase(); if(!st[k]) st[k]='done'; });
-    src.forEach(function(k){
-      if(!k||!k.pts||!k.pts.length||!k.name) return;
-      var s=st[String(k.name).toLowerCase()]; if(!s) return;
-      if(s==='todo') window.L.polygon(k.pts,{color:'#C9A84C',weight:2,fillColor:'#C9A84C',fillOpacity:.13}).addTo(_opMap);
-      else window.L.polygon(k.pts,{color:'#5a5248',weight:1.2,fillColor:'#3a352c',fillOpacity:.28}).addTo(_opMap);
-    });
-    var bounds=[];
-    if(SG) bounds.push([SG.lat,SG.lng]);
-    D.doneGeo.forEach(function(p){ if(startPt&&p.nom===startPt.nom) return; var g=_opGeo(p); if(!g) return; window.L.circleMarker([g.lat,g.lng],{radius:4.5,fillColor:'#3a352c',color:'#5a5248',weight:1.2,fillOpacity:1}).addTo(_opMap).bindPopup('<b>'+_pilEsc(p.nom)+'</b><br>fait'); bounds.push([g.lat,g.lng]); });
-    // Trajet : plein tant que la parcelle appartient encore à la journée 1
-    // (index de LISTE, donc la coupure suit exactement le bandeau au-dessus).
-    var li=(sim&&sim.days&&sim.days[0]&&typeof sim.days[0].lastIdx==='number')?sim.days[0].lastIdx:-1;
-    var solid=SG?[[SG.lat,SG.lng]]:[], dash=[], sw=false;
-    seq.forEach(function(o){
-      var pt=[o.g.lat,o.g.lng]; bounds.push(pt);
-      if(!sw && o.i<=li){ solid.push(pt); return; }
-      if(!sw){ sw=true; if(solid.length) dash.push(solid[solid.length-1]); }
-      dash.push(pt);
-    });
-    if(solid.length>1) window.L.polyline(solid,{color:'#C9A84C',weight:3.5,opacity:.85,lineJoin:'round'}).addTo(_opMap);
-    if(dash.length>1) window.L.polyline(dash,{color:'#C9A84C',weight:2.5,opacity:.55,dashArray:'6 7',lineJoin:'round'}).addTo(_opMap);
-    if(SG) window.L.marker([SG.lat,SG.lng],{icon:window.L.divIcon({className:'',iconSize:[20,20],iconAnchor:[10,10],html:'<div style="width:20px;height:20px;border-radius:50%;background:#6FBF5A;border:2.5px solid #fff;box-shadow:0 1px 4px rgba(0,0,0,.45)"></div>'})}).addTo(_opMap).bindPopup('<b>\u{1F6A9} D\u00e9part</b><br>'+_pilEsc(startPt.nom));
-    seq.forEach(function(o){
-      var ring=(o.i===li), pr=(sim&&sim.per)?sim.per[o.i]:null;
-      var jour=pr?('Jour '+pr.startDay+(pr.endDay>pr.startDay?'\u2192'+pr.endDay:'')):'';
-      window.L.marker([o.g.lat,o.g.lng],{icon:window.L.divIcon({className:'',iconSize:[26,26],iconAnchor:[13,13],html:'<div style="width:26px;height:26px;border-radius:50%;background:#14110D;border:2px solid #C9A84C;color:#C9A84C;display:flex;align-items:center;justify-content:center;font:800 12px/1 Outfit,system-ui,sans-serif;box-shadow:'+(ring?'0 0 0 4px rgba(201,168,76,.45),':'')+'0 1px 4px rgba(0,0,0,.4)">'+(o.i+1)+'</div>'})})
-        .addTo(_opMap).bindPopup('<b>'+(o.i+1)+' \u00b7 '+_pilEsc(o.r.nom)+'</b><br>'+_opFmtH(o.r.reste)+' restantes'+(jour?' \u00b7 '+jour:'')+(ring?'<br>\u{1F536} fin de la journ\u00e9e 1':''));
-    });
-    var sig=seq.map(function(o){return o.r.nom;}).sort().join('|')+'\u00a7'+(startPt?startPt.nom:'');
-    var mv=(_PIL_OP&&_PIL_OP._mapView)||null;
-    var _mine=_opMap;
-    function _fit(){ if(!_opMap || _opMap!==_mine) return;
-      try{ _opMap.invalidateSize(); }catch(e){ if(DEBUG) console.warn('[pilotage] carte ordre inv', e); }
-      try{ if(mv&&mv.sig===sig) _opMap.setView(mv.c,mv.z,{animate:false}); else if(bounds.length) _opMap.fitBounds(bounds,{padding:[20,20],animate:false}); }catch(e){ if(DEBUG) console.warn('[pilotage] carte ordre fit', e); }
-    }
+    var bounds=_dzLayers(_opMap,D,false);
+    var sig=D.rows.filter(function(r){ return r.geo; }).map(function(r){ return r.nom; }).sort().join('|')+'\u00a7'+(D.startPt?D.startPt.nom:'');
+    var mv=(_PIL_OP&&_PIL_OP._mapView)||null, _mine=_opMap;
+    var _fit=function(){ if(!_opMap||_opMap!==_mine) return;
+      try{ _opMap.invalidateSize(); }catch(e){ if(DEBUG) console.warn('[pilotage] carte tourn\u00e9e inv', e); }
+      try{ if(mv&&mv.sig===sig) _opMap.setView(mv.c,mv.z,{animate:false}); else if(bounds.length) _opMap.fitBounds(bounds,{padding:[20,20],animate:false}); }catch(e){ if(DEBUG) console.warn('[pilotage] carte tourn\u00e9e fit', e); } };
     requestAnimationFrame(function(){ requestAnimationFrame(_fit); });
     _opMap.on('moveend zoomend',function(){ if(_PIL_OP&&_opMap) _PIL_OP._mapView={sig:sig,c:_opMap.getCenter(),z:_opMap.getZoom()}; });
-  }catch(e){ if(DEBUG) console.warn('[pilotage] carte ordre', e); }
+  }catch(e){ if(DEBUG) console.warn('[pilotage] carte tourn\u00e9e', e); }
 }
-// ── FIN CARTE ORDRE ──────────────────────────────────────────────────
-
-function _opStepper(id,lab,dm,dp,val,unit,canDec,canInc){ return '<div style="background:rgba(127,127,127,.05);border:1px solid var(--gris-clair);border-radius:11px;padding:7px 4px;text-align:center"><div style="font-size:var(--pt-nano,9.5px);font-weight:700;letter-spacing:.3px;color:var(--texte-doux);text-transform:uppercase;min-height:18px;display:flex;align-items:center;justify-content:center">'+lab+'</div><div style="display:flex;align-items:center;justify-content:center;gap:3px;margin-top:1px">'+_opStp(id,dm,'\u2212',canDec)+'<b style="min-width:24px;font-size:var(--pt-base,14px);font-weight:800;color:var(--texte);font-variant-numeric:tabular-nums">'+val+'</b>'+_opStp(id,dp,'+',canInc)+'</div><div style="font-size:var(--pt-nano,9.5px);color:var(--texte-doux);margin-top:1px">'+unit+'</div></div>'; }
-
-function _opBody(){
-  var D=_PIL_OP_DATA, OP=_PIL_OP, edit=_opCanEdit();
-  if(!D || !D.tasks.length){ return '<div class="pil-empty">Aucune t\u00e2che de saison \u00e0 planifier.</div>'; }
-  if(!OP.tasks.length){ OP.tasks=[D.defaultTask].filter(Boolean); }
-  var rows=_opParcelles();
-  var sim=_opSimulate(rows, OP.eff, OP.jour, OP.pause, OP.trajet);
-  var geoTodo=rows.filter(function(r){return r.geo;}).map(function(r){return r.p;});
-  var sp=_opStartResolve(geoTodo), startPt=sp?sp.p:null;
-  var multi=OP.tasks.length>1;
-
-  var h='';
-  // ── Tâches : multi-sélection (chips) ──
-  h+='<div style="font-size:var(--pt-nano,9.5px);font-weight:700;letter-spacing:.4px;color:var(--texte-doux);text-transform:uppercase;margin:0 0 5px 2px">T\u00e2ches \u2014 plusieurs possibles</div>';
-  h+='<div style="display:flex;flex-wrap:wrap;gap:6px;margin-bottom:12px">'+D.tasks.map(function(x){
-    var on=OP.tasks.indexOf(x.nom)>=0;
-    return '<button'+(edit?' data-op="task" data-nom="'+_pilEsc(x.nom)+'"':'')+' style="border:1px solid '+(on?'var(--or)':'var(--gris-clair)')+';background:'+(on?'rgba(201,168,76,.14)':'transparent')+';color:'+(on?'var(--or)':'var(--texte-doux)')+';border-radius:20px;padding:6px 12px;font-size:var(--pt-txt,12.5px);font-weight:'+(on?'700':'600')+';cursor:'+(edit?'pointer':'default')+'">'+(on?_mvIcon('check',16)+' ':'')+_pilEsc(_opTNom(x.nom))+'</button>';
-  }).join('')+'</div>';
-
-  // ── Départ (admin) — cale le tri au plus proche ──
-  if(edit){
-    var startOpts='<option value="">'+(sp&&sp.auto?('Auto \u2014 '+(sp.src==='journal'?'derni\u00e8re faite : '+_pilEsc(startPt.nom):'centre du vignoble')):'Auto')+'</option>';
-    _opParcActive().filter(_opGeoOK).forEach(function(p){ startOpts+='<option value="'+_pilEsc(p.nom)+'"'+((OP._startNom===p.nom)?' selected':'')+'>d\u00e9part : '+_pilEsc(p.nom)+'</option>'; });
-    h+='<div style="margin-bottom:11px"><div style="font-size:var(--pt-nano,9.5px);font-weight:700;letter-spacing:.4px;color:var(--texte-doux);text-transform:uppercase;margin:0 0 4px 2px">D\u00e9part de la tourn\u00e9e</div><select id="pil-op-start" style="width:100%;'+_OP_FLD+'">'+startOpts+'</select></div>';
-  }
-
-  // ── Réglages sim ──
-  h+='<div style="display:grid;grid-template-columns:repeat(4,1fr);gap:7px;margin-bottom:11px">'
-    +_opStepper('eff','Effectif',-1,1,OP.eff,_opEffNote(OP),OP.eff>1,true)
-    +_opStepper('jour','Journ\u00e9e',-0.5,0.5,OP.jour,'h/jour',OP.jour>1,OP.jour<12)
-    +_opStepper('pause','Pause',-15,15,OP.pause,'min',OP.pause>0,OP.pause<180)
-    +_opStepper('trajet','Trajet',-5,5,OP.trajet,'min/saut',OP.trajet>0,OP.trajet<60)+'</div>';
-
-  h+=_opMapHtml(rows,sim,startPt);
-
-  // ── Bandeau ──
-  h+='<div style="background:rgba(201,168,76,.06);border:1px solid var(--gris-clair);border-left:3px solid var(--or);border-radius:11px;padding:13px 14px;margin:0 0 12px">';
-  if(!rows.length){ h+='<div style="font-size:var(--pt-micro,11px);font-weight:700;letter-spacing:.5px;color:var(--texte-doux);text-transform:uppercase">R\u00e9sultat</div><div style="font-size:var(--pt-sm,17px);font-weight:800;color:var(--vert-med);margin-top:3px">\u2705 Rien \u00e0 faire pour '+(multi?'ces t\u00e2ches':'cette t\u00e2che')+'.</div>'; }
-  else{ var d1=sim.days[0], stop=rows[d1.lastIdx], stopPer=sim.per[d1.lastIdx], partiel=stopPer.endDay>1, totR=rows.reduce(function(a,b){return a+b.reste;},0);
-    h+='<div style="font-size:var(--pt-micro,11px);font-weight:700;letter-spacing:.5px;color:var(--texte-doux);text-transform:uppercase">En fin de journ\u00e9e 1, l\'\u00e9quipe s\'arr\u00eate \u00e0</div>'
-      +'<div style="font-size:var(--pt-md,20px);font-weight:800;color:var(--texte);margin:2px 0 6px">\uD83D\uDCCD '+_pilEsc(stop.nom)+'</div>'
-      +'<div style="display:flex;flex-wrap:wrap;gap:5px 15px;font-size:var(--pt-txt,12.5px);color:var(--texte-doux)">'
-      +'<span><b style="color:var(--texte);font-size:var(--pt-base,14px)">'+(Math.round(d1.surf*100)/100).toLocaleString('fr-FR')+'</b> ha J1</span>'
-      +'<span><b style=\"color:var(--texte);font-size:var(--pt-base,14px)\">'+sim.days.length+'</b> j pour finir</span>'
-      +'<span><b style="color:var(--texte);font-size:var(--pt-base,14px)">'+_opFmtH(totR)+'</b> restantes ('+rows.length+' parc.'+(multi?' \u00d7 '+OP.tasks.length+' t\u00e2ches':'')+')</span></div>'
-      +(partiel?'<div style=\"margin-top:8px;font-size:var(--pt-micro,11px);color:var(--orange);background:rgba(224,165,86,.1);border-radius:8px;padding:6px 10px\">\u23F8 La J1 se termine <b>en cours</b> de \u00ab '+_pilEsc(stop.nom)+' \u00bb \u2014 cette parcelle demande <b>'+_opFmtH(stop.reste)+'</b> d\'\u00e9quipe, soit '+_opFmtH(stopPer.work)+' \u00e0 '+OP.eff+'.</div>':'')
-      +_opFenetreHtml(rows,OP);
-  }
-  h+='</div>';
-
-  // ── Tris + enregistrement (admin) ──
-  if(edit){
-    var kmnn=startPt?_opFmtM(_opRouteLen(_opNNNames(_opActTodo()).map(_opParcByNom).filter(Boolean),startPt)):'';
-    var _opChip=function(mode,lab,gold){ return '<button data-op="sort" data-mode="'+mode+'" style="border:1px solid '+(gold?'var(--or)':'var(--gris-clair)')+';background:'+(gold?'rgba(201,168,76,.14)':'transparent')+';color:'+(gold?'var(--or)':'var(--texte-doux)')+';border-radius:20px;padding:0 12px;height:34px;font-size:var(--pt-micro,11px);font-weight:'+(gold?'700':'600')+';cursor:pointer;font-family:inherit">'+lab+'</button>'; };
-    h+='<div style="display:flex;flex-wrap:wrap;gap:6px;margin-bottom:10px"><div style="width:100%;font-size:var(--pt-micro,11px);color:var(--texte-doux);margin-bottom:1px">Pr\u00e9-tri (puis ajuste au \u21C5) :</div>'
-      +_opChip('nn',_mvIcon('boussole',16)+' Au plus proche'+(kmnn?'<span style="opacity:.7"> \u00b7 '+kmnn+'</span>':''),true);
-    if(_opHasCom()){ var kmc=startPt?_opFmtM(_opRouteLen(_opComNames(_opActTodo()).map(_opParcByNom).filter(Boolean),startPt)):'';
-      h+=_opChip('com',_mvIcon('bureau',16)+' Par commune'+(kmc?'<span style="opacity:.7"> \u00b7 '+kmc+'</span>':''),true); }
-    h+=_opChip('dom','Ordre du domaine')+_opChip('surfD','Grandes d\'abord')+_opChip('avc','Moins avanc\u00e9es')+_opChip('rev','\u21C5 Inverser')+'</div>';
-    var dirty=_opDirty();
-    var pill=(dirty==='saved')?'<span style="color:var(--vert-med);font-size:var(--pt-micro,11px);font-weight:700">\u2713 Ordre enregistr\u00e9</span>':(dirty==='empty')?'<span style="color:var(--texte-doux);font-size:var(--pt-micro,11px)">rien \u00e0 ordonner</span>':'<span style="color:var(--orange);font-size:var(--pt-micro,11px);font-weight:700">\u25CF '+(dirty==='unsaved'?'non enregistr\u00e9':'modifi\u00e9')+'</span>';
-    var canSave=(dirty==='modified'||dirty==='unsaved');
-    h+='<div style="display:flex;align-items:center;gap:10px;margin-bottom:6px"><button data-op="save" style="border:1px solid '+(canSave?'var(--vert-med)':'var(--gris-clair)')+';background:'+(canSave?'rgba(111,191,90,.12)':'transparent')+';color:'+(canSave?'var(--vert-med)':'var(--texte-doux)')+';border-radius:9px;padding:8px 15px;font-size:var(--pt-txt,12.5px);font-weight:700;cursor:'+(canSave?'pointer':'default')+(canSave?'':';opacity:.6')+'">\uD83D\uDCBE Enregistrer la tourn\u00e9e</button>'+pill+_opClearBtn()+'</div>'+_opDiffusHtml();
-  } else { h+='<div style="font-size:var(--pt-micro,11px);color:var(--texte-doux);background:rgba(127,127,127,.05);border:1px solid var(--gris-clair);border-radius:9px;padding:7px 11px;margin-bottom:8px">\uD83D\uDD12 Tourn\u00e9e d\u00e9finie par l\'administrateur \u2014 lecture seule. Vos parcelles s\'affichent dans cet ordre, avec leur num\u00e9ro, dans Vigne.</div>'; }
-
-  // ── Liste ──
-  // Rangement SANS glisser : ⇅ prend en main (une parcelle ou un bloc de commune),
-  // puis une fente « insérer ici » la repose. Deux taps, aucun maintien du doigt,
-  // aucune lutte avec le défilement. Le glisser-déposer était inutilisable au-delà
-  // d'une dizaine de parcelles et les ▲▼ demandaient N appuis pour un seul écart.
-  var pk=(edit && OP._pick && OP._pick.names && OP._pick.names.length) ? OP._pick : null;
-  var hasCom=_opHasCom();
-  var _OP_BOX='display:flex;align-items:center;gap:8px;background:rgba(127,127,127,.05);border:1px solid var(--gris-clair);border-radius:11px;padding:9px 10px;';
-  var _OP_DASH='background:repeating-linear-gradient(90deg,var(--or) 0 7px,transparent 7px 13px)';
-  function _opRowHtml(x,ri,prevP,badge){
-    var hop=(prevP&&x.geo)?('<span style="color:#4A9FC8;font-weight:700">\u21B3 '+_opFmtM(_opHav(prevP,x.p))+'</span> \u00b7 '):(x.geo?'':'<span style="color:var(--texte-doux)">\u25CB sans GPS</span> \u00b7 ');
-    var com=(hasCom&&_opCom(x.p))?(_mvIcon('epingle',16)+' '+_pilEsc(_opCom(x.p))+' \u00b7 '):'';
-    return '<div style="'+_OP_BOX+(pk?'opacity:.45;border-style:dashed;':'')+'">'
-      +'<span style="flex:0 0 auto;width:24px;height:24px;border-radius:7px;background:var(--gris-clair);color:var(--texte-doux);font-size:var(--pt-txt,12.5px);font-weight:800;display:flex;align-items:center;justify-content:center">'+(ri+1)+'</span>'
-      +'<div style="flex:1;min-width:0"><div style="font-weight:600;font-size:var(--pt-base,14px);color:var(--texte);white-space:nowrap;overflow:hidden;text-overflow:ellipsis">'+_pilEsc(x.nom)+(multi&&x.emos>1?' <span style="font-size:var(--pt-txt,12.5px);color:var(--texte-doux);font-weight:500">'+x.emos+' travaux</span>':'')+(badge||'')+'</div>'
-      +'<div style="font-size:var(--pt-micro,11px);color:var(--texte-doux);margin-top:1px">'+hop+com+'<b>'+_opFmtHa(x.s)+'</b> \u00b7 '+x.pct+'% fait</div></div>'
-      +'<div style="text-align:right;flex:0 0 auto"><div style="font-weight:700;font-size:var(--pt-base,14px);color:var(--texte);font-variant-numeric:tabular-nums">'+_opFmtH(x.reste)+'</div><div style="font-size:var(--pt-nano,9.5px);color:var(--texte-doux)">restantes</div></div>'
-      +((edit&&!pk)?'<button data-op="pick" data-nom="'+_pilEsc(x.nom)+'" title="D\u00e9placer" style="flex:0 0 auto;width:38px;height:44px;border:1px solid var(--gris-clair);background:transparent;color:var(--texte-doux);border-radius:9px;cursor:pointer;font-size:var(--pt-base,14px);line-height:1;font-family:inherit">\u21C5</button>':'')
-      +'</div>';
-  }
-  function _opSlot(i){ return '<button data-op="drop" data-i="'+i+'" style="display:flex;align-items:center;gap:8px;width:100%;height:44px;border:0;background:transparent;padding:0;cursor:pointer;color:var(--or);font-family:inherit">'
-    +'<span style="flex:1;height:2px;border-radius:2px;'+_OP_DASH+'"></span>'
-    +'<span style="font-size:var(--pt-micro,11px);font-weight:800;letter-spacing:.3px;white-space:nowrap">\u21B3 INS\u00c9RER ICI</span>'
-    +'<span style="flex:1;height:2px;border-radius:2px;'+_OP_DASH+'"></span></button>'; }
-
-  h+='<div id="pil-op-rows" style="display:flex;flex-direction:column;gap:7px">';
-  if(!rows.length){ h+='<div class="pil-empty">Tout est \u00e0 jour.</div>'; }
-  if(pk){
-    // En placement : liste nue (ni badge de jour ni s\u00e9parateur). Les index des
-    // fentes sont ceux de la liste PRIV\u00c9E de la prise en main \u2014 m\u00e9langer les deux
-    // num\u00e9rotations rendrait la fente choisie impr\u00e9visible.
-    var rest=rows.filter(function(x){ return pk.names.indexOf(x.nom)<0; }), pv=startPt;
-    rest.forEach(function(x,ri){ h+=_opSlot(ri)+_opRowHtml(x,ri,pv,''); if(x.geo) pv=x.p; });
-    h+=_opSlot(rest.length);
-  } else {
-    var lastOfDay={}; sim.days.forEach(function(dd){ var li=dd.lastIdx, reprise=(sim.per[li]&&sim.per[li].endDay>dd.day); (lastOfDay[li]=lastOfDay[li]||[]).push({day:dd.day,reprise:reprise}); });
-    var prev=startPt, ri=0;
-    _opRuns(rows).forEach(function(run){
-      if(edit && hasCom && run.com && run.names.length>1){
-        h+='<div style="display:flex;align-items:center;gap:8px;margin:5px 2px 0"><span style="font-size:var(--pt-lbl,10.5px);font-weight:800;letter-spacing:.3px;text-transform:uppercase;color:var(--texte-doux);white-space:nowrap">\uD83D\uDCCD '+_pilEsc(run.com)+' \u00b7 '+run.names.length+'</span><span style="flex:1;height:1px;background:var(--gris-clair)"></span>'
-          +'<button data-op="pickr" data-i="'+run.i0+'" style="flex:0 0 auto;border:1px solid var(--gris-clair);background:var(--bg-card);color:var(--texte-doux);border-radius:9px;padding:0 11px;height:34px;font-size:var(--pt-micro,11px);font-weight:700;cursor:pointer;font-family:inherit">\u21C5 bloc</button></div>';
-      }
-      run.names.forEach(function(){
-        var x=rows[ri], pr=sim.per[ri];
-        var badge=(pr.startDay===pr.endDay)?'<span style="font-size:var(--pt-lbl,10.5px);font-weight:700;border-radius:6px;padding:1px 6px;margin-left:6px;background:rgba(201,168,76,.16);color:var(--or)">Jour '+pr.startDay+'</span>':'<span style="font-size:var(--pt-lbl,10.5px);font-weight:700;border-radius:6px;padding:1px 6px;margin-left:6px;background:rgba(74,159,200,.16);color:#4A9FC8">Jours '+pr.startDay+'\u2192'+pr.endDay+'</span>';
-        h+=_opRowHtml(x,ri,prev,badge);
-        if(x.geo) prev=x.p;
-        if(lastOfDay[ri]){ lastOfDay[ri].forEach(function(de){ var j1=(de.day===1); h+='<div style="display:flex;align-items:center;gap:9px;margin:3px 2px"><span style="flex:1;height:1px;background:'+(j1?'linear-gradient(90deg,transparent,var(--or))':'var(--gris-clair)')+'"></span><span style="font-size:var(--pt-lbl,10.5px);font-weight:700;white-space:nowrap;border-radius:20px;padding:3px 10px;'+(j1?'color:#14110D;background:var(--or)':'color:var(--texte-doux);background:rgba(127,127,127,.08);border:1px solid var(--gris-clair)')+'">'+(j1?'\u25D7 Fin de la journ\u00e9e 1':'Fin de la journ\u00e9e '+de.day)+(de.reprise?' \u00b7 reprise le lendemain':'')+'</span><span style="flex:1;height:1px;background:'+(j1?'linear-gradient(90deg,var(--or),transparent)':'var(--gris-clair)')+'"></span></div>'; }); }
-        ri++;
-      });
-    });
-  }
-  h+='</div>';
-  // Barre « en main » : flottante au-dessus du dock, à portée de pouce, pour que la
-  // pose reste possible sans jamais remonter en haut de la liste.
-  if(pk){
-    h+='<div style="position:fixed;left:50%;transform:translateX(-50%);width:calc(100% - 24px);max-width:600px;bottom:calc(74px + env(safe-area-inset-bottom,0px));z-index:95;display:flex;align-items:center;gap:9px;background:var(--cave);color:#F2EFE7;border-radius:12px;padding:10px 11px;box-shadow:0 10px 24px rgba(0,0,0,.28)">'
-      +'<span style="flex:0 0 auto">'+_mvIcon('doigt',18)+'</span>'
-      +'<div style="flex:1;min-width:0;font-size:var(--pt-txt,12.5px);line-height:1.3"><b style="color:var(--or-clair)">'+_pilEsc(pk.label)+'</b><div style="font-size:var(--pt-lbl,10.5px);color:#B9B2A4;margin-top:2px">Touchez une fente dor\u00e9e pour poser</div></div>'
-      +'<button data-op="last" style="flex:0 0 auto;border:1px solid var(--or);background:rgba(201,168,76,.22);color:var(--or-clair);border-radius:9px;padding:0 11px;height:44px;font-size:var(--pt-micro,11px);font-weight:700;cursor:pointer;font-family:inherit;white-space:nowrap">En dernier</button>'
-      +'<button data-op="cancel" style="flex:0 0 auto;border:1px solid rgba(255,255,255,.25);background:transparent;color:#F2EFE7;border-radius:9px;padding:0 11px;height:44px;font-size:var(--pt-micro,11px);font-weight:700;cursor:pointer;font-family:inherit">Annuler</button></div>';
-  }
-  if(edit){ h+='<div style="font-size:var(--pt-micro,11px);color:var(--texte-doux);line-height:1.5;margin-top:10px">Coche une ou plusieurs <b>t\u00e2ches</b> (faites sur chaque parcelle avant de passer \u00e0 la suivante). Pour ranger : <b>\u21C5</b> prend la parcelle en main, une <b>fente dor\u00e9e</b> la repose \u2014 <b>\u21C5 bloc</b> d\u00e9place toute une commune d\'un coup. <b>Enregistre</b> pour partager l\'ordre \u00e0 l\'\u00e9quipe.</div>'; }
-  return h;
+function _dzBuildFm(){
+  var el=document.getElementById('pil-op-fm'); if(!el) return;
+  _dzFmMap=_pilMapKill(_dzFmMap);
+  var D=_OP_MAPDATA;
+  if(typeof window.L==='undefined'||!D){ el.innerHTML=_opMapSvg((_DZ_LAST&&_DZ_LAST.rows)||[],el.clientWidth||360); return; }
+  try{
+    var m=window.L.map(el,{zoomControl:true,attributionControl:false,zoomSnap:0,zoomDelta:0.5});
+    _dzFmMap=m;
+    window.L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png').addTo(m);
+    var b=_dzLayers(m,D,true);
+    requestAnimationFrame(function(){ requestAnimationFrame(function(){ if(_dzFmMap!==m) return;
+      try{ m.invalidateSize(); if(b.length) m.fitBounds(b,{padding:[36,36],animate:false}); }catch(e){ if(DEBUG) console.warn('[pilotage] carte agrandie fit', e); } }); });
+  }catch(e){ if(DEBUG) console.warn('[pilotage] carte agrandie', e); }
 }
 
-function _pilOpRefresh(){ var el=document.getElementById('pil-op-body'); if(el){ el.innerHTML=_opBody(); _opBuildMap(); } }
+// ── LES GESTES ──
+function _pilOpRefresh(){
+  var el=document.getElementById('pil-op-body');
+  if(el){
+    var sh=el.querySelector('.pil-dz-sh'), shTop=sh?sh.scrollTop:0;
+    var C=_dzCalc();
+    el.innerHTML=_opBodyC(C);
+    _dzMajEntete('ordrepassage',_dzStatTour(C),_dzSubTour(C));
+    var sh2=el.querySelector('.pil-dz-sh'); if(sh2&&shTop) sh2.scrollTop=shTop;
+    _opBuildMap();
+    if(_PIL_OP&&_PIL_OP._fm) _dzBuildFm(); else _dzFmMap=_pilMapKill(_dzFmMap);
+  }
+  _pilSimRefresh();
+}
+function _dzOuvrirCarte(id){
+  var t=document.querySelector('.pil-tile[data-pid="'+id+'"]'); if(!t) return;
+  if(!t.classList.contains('open')){ var th=t.querySelector('.pil-th'); if(th) th.click(); }
+  setTimeout(function(){ try{ t.scrollIntoView({behavior:'smooth',block:'start'}); }catch(e){ if(DEBUG) console.warn('[pilotage] ouvrir carte', e); } },60);
+}
 function _pilOpAction(el){
   if(!_PIL_OP||!el) return;
-  var op=el.getAttribute('data-op');
-  if(op==='stp'){ var k=el.getAttribute('data-k'), d=parseFloat(el.getAttribute('data-d'));
-    if(k==='eff'){ _PIL_OP.eff=Math.max(1,_PIL_OP.eff+d); _PIL_OP.effAuto=false; }
-    else if(k==='jour') _PIL_OP.jour=Math.max(1,Math.min(12,Math.round((_PIL_OP.jour+d)*2)/2));
-    else if(k==='pause') _PIL_OP.pause=Math.max(0,Math.min(180,_PIL_OP.pause+d));
-    else if(k==='trajet') _PIL_OP.trajet=Math.max(0,Math.min(60,_PIL_OP.trajet+d));
-  }
+  var OP=_PIL_OP, op=el.getAttribute('data-op'), C=_DZ_LAST||_dzCalc();
+  // Tout le monde peut SIMULER (le jour, l'équipe, la journée, la coupure, les
+  // trajets, la carte). Seul l'administrateur choisit les travaux, range et diffuse.
+  if(op==='day'){ var sens=parseInt(el.getAttribute('data-d'),10)||1, n=_dzSuivant(C.ref.iso,C.ctx,sens);
+    if(n&&n>=_dzAuj()){ var a=_dzRefAuto(OP.tasks||[],C.ctx); if(n===a.iso){ OP.ref=null; OP.refManuel=false; } else { OP.ref=n; OP.refManuel=true; } } }
+  else if(op==='stp'){ var k=el.getAttribute('data-k'), dv=parseFloat(el.getAttribute('data-d'))||0;
+    if(k==='jour'){ OP.J=Math.max(1,Math.min(12,Math.round(((C.e0.J||7)+dv)*2)/2)); if(OP.J===C.jPlan) OP.J=null; }
+    else if(k==='coup'){ OP.coup=Math.max(0,Math.min(180,(C.e0.coup||0)+dv)); if(OP.coup===C.coupPlan) OP.coup=null; } }
+  else if(op==='sheet'){ OP._sheet=el.getAttribute('data-k'); }
+  else if(op==='shut'){ OP._sheet=null; }
+  else if(op==='pp'){ var nm=el.getAttribute('data-nom'); if(el.getAttribute('data-b')==='1') OP.excl[nm]=!OP.excl[nm]; else OP.add[nm]=!OP.add[nm]; }
+  else if(op==='R'){ OP.R=Math.max(0,(OP.R||0)+(parseInt(el.getAttribute('data-d'),10)||0)); }
+  else if(op==='hy'){ var hk=el.getAttribute('data-k'), bb=_DZ_HB[hk]; if(bb){ var H=Object.assign({},_dzH());
+      H[hk]=Math.max(bb[0],Math.min(bb[1],Math.round((H[hk]+(parseInt(el.getAttribute('data-d'),10)||0)*bb[2])*10)/10)); OP.H=H; if(!_dzHMod()) OP.H=null; } }
+  else if(op==='hyreset'){ OP.H=null; }
+  else if(op==='reset'){ OP.excl={}; OP.add={}; OP.R=0; OP.J=null; OP.coup=null; OP.ref=null; OP.refManuel=false; OP.H=null; }
+  else if(op==='essai'){ OP.R=(OP.R||0)+(parseInt(el.getAttribute('data-r'),10)||0); }
+  else if(op==='renfort'){ _dzOuvrirCarte('renfort'); return; }
+  else if(op==='fm'){ OP._fm=true; }
+  else if(op==='fmx'){ OP._fm=false; }
+  else if(op==='autres'){ OP._autres=!OP._autres; }
   else if(!_opCanEdit()){ return; }
-  else if(op==='task'){ var nm=el.getAttribute('data-nom'), i=_PIL_OP.tasks.indexOf(nm);
-    if(i>=0){ if(_PIL_OP.tasks.length>1) _PIL_OP.tasks.splice(i,1); } else _PIL_OP.tasks.push(nm);
-    _PIL_OP.order=null; _PIL_OP._pick=null;
-    // Changer de travail change la fenetre, donc l'effectif engage dessus.
-    _opEffAppliquer(); }
+  else if(op==='hysave'){ _dzHSave(); return; }
+  else if(op==='task'){ var tn=el.getAttribute('data-nom'), i=OP.tasks.indexOf(tn);
+    if(i>=0){ if(OP.tasks.length>1) OP.tasks.splice(i,1); } else OP.tasks.push(tn);
+    // Changer de travail change l'équipe, le jour et la fenêtre : on repart du réel.
+    OP.tSrc='main'; OP.order=null; OP._pick=null; OP.ref=null; OP.refManuel=false; OP.excl={}; OP.add={}; }
   else if(op==='sort'){ var mode=el.getAttribute('data-mode'), act=_opActTodo();
-    _PIL_OP._pick=null;
-    if(mode==='nn') _PIL_OP.order=_opNNNames(act);
-    else if(mode==='com') _PIL_OP.order=_opComNames(act);
-    else if(mode==='rev') _PIL_OP.order=_opParcelles().map(function(x){return x.nom;}).reverse();
-    else if(mode==='dom') _PIL_OP.order=act.map(function(p){return p.nom;});
-    else if(mode==='surfD') _PIL_OP.order=act.slice().sort(function(a,b){return (parseFloat(b.surface)||0)-(parseFloat(a.surface)||0);}).map(function(p){return p.nom;});
-    else if(mode==='avc') _PIL_OP.order=act.slice().sort(function(a,b){return _opParcPctM(a)-_opParcPctM(b);}).map(function(p){return p.nom;}); }
-  // Prise en main / pose : remplace le glisser-d\u00e9poser (inutilisable au doigt sur
-  // une longue liste, et cass\u00e9 : la ligne saisie passait en display:none) ET les
-  // fl\u00e8ches \u25B2\u25BC (N appuis par \u00e9cart, cibles de 19 px).
-  else if(op==='pick'){ var pn=el.getAttribute('data-nom'); if(pn) _PIL_OP._pick={names:[pn],label:pn}; }
+    OP._pick=null;
+    if(mode==='nn') OP.order=_opNNNames(act);
+    else if(mode==='com') OP.order=_opComNames(act);
+    else if(mode==='rev') OP.order=_opParcelles().map(function(x){ return x.nom; }).reverse();
+    else if(mode==='dom') OP.order=act.map(function(p){ return p.nom; });
+    else if(mode==='surfD') OP.order=act.slice().sort(function(a,b){ return (parseFloat(b.surface)||0)-(parseFloat(a.surface)||0); }).map(function(p){ return p.nom; });
+    else if(mode==='avc') OP.order=act.slice().sort(function(a,b){ return _opParcPctM(a)-_opParcPctM(b); }).map(function(p){ return p.nom; }); }
+  // Prise en main / pose : deux taps, aucun maintien du doigt (inchangé).
+  else if(op==='pick'){ var pn=el.getAttribute('data-nom'); if(pn) OP._pick={names:[pn],label:pn}; }
   else if(op==='pickr'){ var i0=parseInt(el.getAttribute('data-i'),10); if(!isFinite(i0)) i0=-1;
     var run=null; _opRuns(_opParcelles()).forEach(function(r){ if(r.i0===i0) run=r; });
-    if(run) _PIL_OP._pick={names:run.names.slice(),label:(run.com||'Sans commune')+' \u00b7 '+run.names.length+' parcelles'}; }
-  else if(op==='drop'||op==='last'){ var pk2=_PIL_OP._pick;
-    if(pk2){ var nms=_opParcelles().map(function(x){return x.nom;});
-      var rest2=nms.filter(function(n){ return pk2.names.indexOf(n)<0; });
+    if(run) OP._pick={names:run.names.slice(),label:(run.com||'Sans commune')+' \u00b7 '+run.names.length+' parcelles'}; }
+  else if(op==='drop'||op==='last'){ var pk2=OP._pick;
+    if(pk2){ var nms=_opParcelles().map(function(x){ return x.nom; });
+      var rest2=nms.filter(function(x){ return pk2.names.indexOf(x)<0; });
       var ii=(op==='last')?rest2.length:parseInt(el.getAttribute('data-i'),10);
       if(!isFinite(ii)||ii<0) ii=0; if(ii>rest2.length) ii=rest2.length;
-      _PIL_OP.order=rest2.slice(0,ii).concat(pk2.names,rest2.slice(ii)); }
-    _PIL_OP._pick=null; }
-  else if(op==='cancel'){ _PIL_OP._pick=null; }
-  else if(op==='save'){ _PIL_OP._pick=null; _opSaveOrder(); return; }
-  else if(op==='clear'){ _PIL_OP._pick=null; _opClearOrder(); return; }
+      OP.order=rest2.slice(0,ii).concat(pk2.names,rest2.slice(ii)); }
+    OP._pick=null; }
+  else if(op==='cancel'){ OP._pick=null; }
+  else if(op==='save'){ OP._pick=null; _opSaveOrder(); return; }
+  else if(op==='clear'){ OP._pick=null; _opClearOrder(); return; }
   _pilOpRefresh();
 }
-
 function _opInit(d){
-  // Meme regle que partout : une equipe collective pese son effectif. Le repli
-  // (aucun presentChamp) applique le meme poids, sinon il contredit le chemin
-  // normal des qu'il sert.
-  var present=(typeof d.presentChamp==='number')?d.presentChamp:Math.max(1,
-    (d.membres||[]).reduce(function(a,m){
-      return a + ((m&&!m.bureau)?((typeof window._mvEffDef==='function')?window._mvEffDef(m):1):0);
-    },0));
-  present=Math.round(present);
+  _dzOublier(); _DZ_LAST=null;
   var arr=(typeof window.getTachesSaison==='function')?window.getTachesSaison():(window.TACHES||[]);
-  var tasks=arr.map(function(def){ var tot=_opParcActive().filter(function(p){return _opApplic(p,def);}).reduce(function(a,p){return a+_opParcReste(p,def);},0); return { def:def, nom:def.nom, tot:tot }; });
-  var deflt=null; tasks.forEach(function(x){ if(!deflt||x.tot>deflt.tot) deflt=x; });
-  _PIL_OP_DATA={ present:present, tasks:tasks, defaultTask:deflt?deflt.nom:((tasks[0]&&tasks[0].nom)||'') };
-  if(!_PIL_OP){ _PIL_OP={ tasks:[_PIL_OP_DATA.defaultTask].filter(Boolean), eff:Math.max(1,present), effAuto:true, jour:7, pause:45, trajet:5, _startNom:null, order:null, _pick:null }; }
-  else { if(_PIL_OP.effAuto) _PIL_OP.eff=Math.max(1,present);
-    // Un rendu COMPLET de l'onglet (changement d'onglet, rafra\u00eechissement de
-    // donn\u00e9es) l\u00e2che ce qu'on tenait : sinon la barre flottante survit \u00e0 une
-    // navigation et propose de poser dans une liste qu'on ne voit plus.
-    _PIL_OP._pick=null;
-    var valid={}; tasks.forEach(function(x){valid[x.nom]=1;});
-    _PIL_OP.tasks=(_PIL_OP.tasks||[]).filter(function(n){return valid[n];});
-    if(!_PIL_OP.tasks.length) _PIL_OP.tasks=[_PIL_OP_DATA.defaultTask].filter(Boolean); }
-  _opEffAppliquer();
-}
-// \u2605\u2605\u2605 L'EFFECTIF DE LA TOURNEE EST CELUI DE LA FENETRE DU TRAVAIL.
-//   \u26a0 Cet ecran-la n'est pas qu'un indicateur : l'ordre de passage est
-//   ENREGISTRE et ENVOYE aux ouvriers. Une tournee decoupee pour UNE personne
-//   quand quarante seront dans les rangs ne se voit pas a l'ecran — elle se voit
-//   en bout de rang, le jour de la vendange.
-//   La fenetre suit LES TACHES COCHEES : cocher \u00ab Vendange \u00bb doit recompter sur
-//   le 26 aout, pas sur aujourd'hui. Appele a l'init ET a chaque changement de
-//   coche, tant que l'utilisateur n'a pas regle le compteur a la main (effAuto).
-function _opEffAppliquer(){
-  if(!_PIL_OP||!_PIL_OP_DATA) return;
-  var et=_pilEffTaches(_PIL_OP.tasks||[]);
-  _PIL_OP_DATA.fen=et?{d0:et.d0,d1:et.d1}:null;
-  _PIL_OP_DATA.effFen=et?et.eff:null;
-  if(!_PIL_OP.effAuto) return;
-  var v=(et&&et.eff>0.5)?Math.round(et.eff):_PIL_OP_DATA.present;
-  _PIL_OP.eff=Math.max(1,Math.round(v||1));
+  var tasks=arr.map(function(def){ var tot=_opParcActive().filter(function(p){ return _opApplic(p,def); }).reduce(function(a,p){ return a+_opParcReste(p,def); },0); return {def:def,nom:def.nom,tot:tot}; });
+  var byNom={}; tasks.forEach(function(x){ byNom[x.nom]=x; });
+  _PIL_OP_DATA={tasks:tasks,byNom:byNom};
+  if(!_PIL_OP) _PIL_OP={tasks:[],tSrc:null,ref:null,refManuel:false,excl:{},add:{},R:0,J:null,coup:null,H:null,_startNom:null,order:null,_pick:null,_sheet:null,_fm:false,_autres:false};
+  else {
+    // Un rendu COMPLET de l'onglet lâche ce qu'on tenait (barre « en main »,
+    // feuille, carte agrandie) : sinon ils survivent à une navigation.
+    _PIL_OP._pick=null; _PIL_OP._sheet=null; _PIL_OP._fm=false;
+    _PIL_OP.tasks=(_PIL_OP.tasks||[]).filter(function(n){ return byNom[n]; });
+  }
+  // Tant que l'utilisateur n'a pas choisi, le travail SUIT la priorité : une
+  // priorité diffusée pendant la session est reprise au rendu suivant.
+  if(!_PIL_OP.tasks.length||_PIL_OP.tSrc!=='main'){ var df=_dzTachesDefaut(); if(df.t.join('|')!==_PIL_OP.tasks.join('|')) _PIL_OP.order=null; _PIL_OP.tasks=df.t; _PIL_OP.tSrc=df.src; }
 }
 function _pilPanelOrdrePassage(d){
   _opInit(d);
-  var statHtml=_pilStat(_PIL_OP_DATA?_PIL_OP_DATA.present:0,' pr\u00e9sents');
-  return _pilTile('ordrepassage', '#C9A84C', 'Ordre de passage \u2014 jusqu\'o\u00f9 aujourd\'hui ?', statHtml, 'tourn\u00e9e au plus court \u00b7 diffus\u00e9e \u00e0 l\'\u00e9quipe, par travail', null, '<div id="pil-op-body">'+_opBody()+'</div>');
+  var C=_dzCalc();
+  return _pilTile('ordrepassage','#C9A84C','La tourn\u00e9e du jour \u2014 jusqu\u2019o\u00f9\u00a0?',_dzStatTour(C),_dzSubTour(C),null,'<div id="pil-op-body">'+_opBodyC(C)+'</div>','pil.tournee');
 }
+
 
 // ── Onglet SIMULATION ──
 // ════════════════════════════════════════════════════════════════════
@@ -8759,7 +8975,7 @@ var _PIL_PERSO_DEFS={
   an: [['an_cadres','Deux fa\u00e7ons de compter l\'ann\u00e9e'],['an_budget','Le budget de l\'ann\u00e9e, mois par mois'],['an_frise','Les 52 semaines de l\'exercice']],
   avc:[['avc_gauge','Jauge de saison'],['avc_bar','Avancement par tâche'],['avc_pie','Charge (donut)'],['avc_temps','Où va le temps de l\'équipe'],['avc_echeances','Échéances par tâche'],['avc_carte','Carte du domaine']],
   equ:[['prs_equipe','Équipe'],['prs_presences','Présences du jour'],['prs_capacite','Capacité vs charge'],['mat_tracteur','Parc tracteur'],['mat_gnr','Cuve GNR']],
-  sim:[['sim_ordre','Ordre de passage'],['sim_etsi','Répartition « et si ? »'],['sim_cout','Renfort : combien et quand']],
+  sim:[['sim_ordre','La tournée du jour'],['sim_etsi','Qui fait quoi'],['sim_cout','Renfort : combien et quand']],
   cfm:[['cfm_cuivre','Cuivre (bio · 7 ans)'],['cfm_ift','Passages phyto / IFT'],['mat_phyto','Registre phyto'],['cfm_dre','Délai de rentrée (DRE)']]
 };
 function _pilPersoHtml(tab){
@@ -10233,7 +10449,7 @@ function _pilBindContent(content){
             var _t=_autres[_i]; if(_t===tile) continue;
             var _id=_t.getAttribute('data-pid'); if(!_id) continue;
             _PIL_STATE.collapsed[_id]=1; _t.classList.remove('open');
-            if(_id==='ordrepassage'&&_PIL_OP) _PIL_OP._pick=null;
+            if(_id==='ordrepassage'&&_PIL_OP){ _PIL_OP._pick=null; _PIL_OP._sheet=null; _PIL_OP._fm=false; }
           }
         }
         _pilSaveState(_PIL_STATE); tile.classList.toggle('open',_ouvre);
@@ -10245,7 +10461,7 @@ function _pilBindContent(content){
         if(_ouvre && window._mvGraphRepeindre) window._mvGraphRepeindre();
         // La barre \u00ab en main \u00bb est en position:fixed : replier le volet doit la
         // l\u00e2cher, sinon elle flotterait au-dessus d'un contenu invisible.
-        if(id==='ordrepassage'){ if(_PIL_STATE.collapsed[id]){ if(_PIL_OP) _PIL_OP._pick=null; } else _opBuildMap(); } if(id==='carte'&&!_PIL_STATE.collapsed[id]) _pilBuildMap(_pilData()); return; }
+        if(id==='ordrepassage'){ if(_PIL_STATE.collapsed[id]){ if(_PIL_OP){ _PIL_OP._pick=null; _PIL_OP._sheet=null; _PIL_OP._fm=false; } } else _opBuildMap(); } if(id==='carte'&&!_PIL_STATE.collapsed[id]) _pilBuildMap(_pilData()); return; }
   });
   var _odTimer=null, _odEl=null;
   function _odApply(){

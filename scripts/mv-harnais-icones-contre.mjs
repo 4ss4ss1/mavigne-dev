@@ -204,9 +204,12 @@ epreuve('une table qui demande un symbole absent',
 /* 5nonies. UN AIDE PRIVE APPELE MAIS DISPARU — la panne du 17/08 en production.
       Ni `node --check` ni ESLint ne la voyaient. C23 la voit.
       ⚠️ Cette epreuve lance le PREFLIGHT, pas le harnais d'icones. */
+/* DZ-1 (§162) : l'ancre visait la puce de tache de l'ancien ordre de passage
+   (_pilEsc(_opTNom(x.nom))), retiree ; la mutation ne mordait plus et
+   l'epreuve restait verte. Elle vise la puce de la tournee du jour. */
 epreuve('un aide prive appele mais disparu',
   () => ecrire('src/pilotage.js', lire('src/pilotage.js')
-        .replace("_pilEsc(_opTNom(x.nom))", "_opEmo(x.nom)+_pilEsc(_opTNom(x.nom))")),
+        .replace("_pilEsc(_opTNom(nom))", "_opEmo(nom)+_pilEsc(_opTNom(nom))")),
   /C23[\s\S]*_opEmo/, 'preflight.mjs');
 
 /* 6. Un document imprime qui appelle `_mvIcon` : le sprite n'existe pas dans

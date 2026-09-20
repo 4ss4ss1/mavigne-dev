@@ -245,18 +245,22 @@
   </ul>
 
   <h3>{ic:curseurs} Décider</h3>
-  <p>C'est l'onglet qui répond à <b>« qu'est-ce que je fais&nbsp;? »</b>, et il pose deux questions
-  bien distinctes.</p>
+  <p>C'est l'onglet qui répond à <b>« qu'est-ce que je fais&nbsp;? »</b>. Il tient en trois cartes :
+  la tournée du jour, qui fait quoi, et le renfort.</p>
   <div class="note tip"><span class="ni" aria-hidden="true">{ic:crayon}</span><div>Cet onglet s'appelait
   <b>Simuler</b>. Deux de ses trois cartes sont bien des simulations — rien n'y est enregistré. Mais
-  la troisième, <b>l'ordre de passage</b>, s'enregistre et <b>part sur l'écran de toute l'équipe</b> :
-  c'est le seul endroit du Pilotage où vous changez ce que les autres voient. Un onglet nommé
-  « Simuler » promettait qu'il ne s'y passe rien. On simule, puis on décide de diffuser — le nom le
-  dit maintenant.</div></div>
+  la première, <b>la tournée du jour</b>, s'enregistre et <b>part sur l'écran de toute l'équipe</b> :
+  c'est le seul endroit du Pilotage où vous changez ce que les autres voient. On simule, puis on
+  décide de diffuser — le nom le dit.</div></div>
   <ul class="dot">
-    <li><b>Dans quel ordre passer sur les parcelles</b> : la tournée du jour, au plus court, sur la
-    carte du domaine. L'ordre défini par l'administrateur est <b>partagé à toute l'équipe</b> ; les
-    autres le consultent en lecture seule. Une tournée par travail, pas une seule pour tout le domaine.</li>
+    <li><b>La tournée du jour — jusqu'où ?</b> Où l'équipe sera le soir, combien de jours il faut pour
+    finir, et si ça tient dans la fenêtre du travail — sinon, combien de personnes il faudrait en plus,
+    avec un bouton qui l'essaie. Dessous, la carte et l'ordre de passage, rangé <b>jour par jour</b>.
+    L'ordre défini par l'administrateur est <b>partagé à toute l'équipe</b> ; les autres le consultent
+    en lecture seule. Une tournée par travail, pas une seule pour tout le domaine.</li>
+    <li><b>Qui fait quoi</b> : chaque travail en priorité, avec son équipe affectée et sa date de fin.
+    Les boutons + et − déplacent une personne, la date suit. Même jour, même planning et même calcul
+    que la tournée : les deux cartes donnent la même date.</li>
     <li><b>Combien de renfort prendre, et surtout quand</b> : vous posez un nombre de personnes par
     semaine, l'application rejoue la campagne et affiche ce qui boucle et ce que ça coûte. Le travail
     non absorbé ne disparaît pas, il <b>glisse</b> sur les semaines suivantes, en coûtant un peu plus
@@ -275,27 +279,33 @@
     Ces propositions-là ne vous sont plus présentées : ce qui reste est comparable.</li>
   </ul>
 
-  <h3>{ic:equipe} Sur quel effectif Décider compte</h3>
-  <div class="note tip"><span class="ni" aria-hidden="true">{ic:eclair}</span><div><b>L'effectif se lit sur la
-  fenêtre du travail, pas sur le calendrier d'aujourd'hui.</b> Si vos quarante vendangeurs sont
-  engagés du 26 août au 4 septembre, ils comptent dès aujourd'hui pour l'ordre de passage et la
-  répartition de la vendange — même si vous êtes seul dans les rangs ce matin, et même si tout le
-  monde est en congé cette semaine. Le jour du travail, personne n'est en congé et tous les contrats
-  courent : c'est ce jour-là qu'il faut compter.</div></div>
+  <h3>{ic:equipe} D'où viennent les valeurs de la tournée</h3>
+  <div class="note tip"><span class="ni" aria-hidden="true">{ic:eclair}</span><div><b>Rien n'est à régler
+  pour commencer.</b> Chaque case dit d'où vient sa valeur. En toucher une passe l'écran en
+  <b>simulation</b>, où rien n'est enregistré ; « Valeurs réelles » revient au planning.</div></div>
   <ul class="dot">
+    <li><b>Le travail</b> : la priorité du moment, diffusée dans Vigne. Sans priorité, le travail qui a
+    le plus d'heures restantes — et l'écran le dit.</li>
+    <li><b>Le jour</b> : aujourd'hui s'il est travaillé au planning, sinon le prochain jour travaillé.
+    Les flèches passent d'un jour travaillé à l'autre.</li>
+    <li><b>L'équipe</b> : les personnes affectées à la priorité qui travaillent ce jour-là au planning.
+    Congés, récup et absences sont retirés. Sans équipe affectée, toute l'équipe au champ. Toucher la
+    case ouvre la liste : un nom se retire ou s'ajoute, pour essayer.</li>
     <li><b>Un contrat de groupe compte pour son effectif.</b> Une fiche « équipe de vendange » à
-    quarante personnes vaut quarante, pas une ligne de tableau. Vous n'avez pas besoin de créer
-    quarante fiches individuelles.</li>
-    <li><b>L'écran dit toujours sur quelles dates il a compté</b> — « 41 sous contrat · 26 août →
-    4 sept. ». Un effectif sans ses dates ne se vérifie pas.</li>
-    <li><b>Changer de travail change l'effectif.</b> Cocher « Vendange » recompte sur la fenêtre de
-    la vendange ; cocher « Ébourgeonnage » recompte sur la sienne. Dès que vous touchez au compteur
-    à la main, il ne bouge plus : votre réglage prime.</li>
-    <li>Quand l'effectif du jour diffère de celui du chantier, l'écart est affiché et expliqué —
-    congés en cours, contrats qui n'ont pas encore commencé.</li>
-    <li><b>C'est ce nombre qui découpe la tournée</b> que vous enregistrez et envoyez aux ouvriers.
-    Une tournée calculée pour une personne quand quarante seront dans les rangs ne se voit pas à
-    l'écran : elle se voit en bout de rang.</li>
+    quarante personnes vaut quarante, pas une ligne de tableau.</li>
+    <li><b>Une fenêtre pas encore ouverte</b> : la tournée se calcule sur son premier jour. Si vos
+    quarante vendangeurs arrivent le 31 août, elle se découpe sur eux, même si vous êtes six dans les
+    rangs ce matin. Une tournée calculée pour six quand quarante seront là ne se voit pas à l'écran :
+    elle se voit en bout de rang.</li>
+    <li><b>Le travail et la coupure</b> : les heures prévues au planning, jour par jour et personne par
+    personne. La coupure ne se retire pas du travail : elle allonge la présence.</li>
+    <li><b>Les trajets</b> : calculés entre chaque parcelle et la suivante, à vol d'oiseau — à pied
+    jusqu'à 300 m (4 km/h), au-delà en camion (5 min + 25 km/h), 5 min pour une parcelle sans position.
+    La case Trajets règle ces cinq valeurs ; l'administrateur peut les garder pour tout le domaine.</li>
+    <li><b>La fin se calcule jour par jour</b>, avec l'équipe réelle de chaque jour : un congé lundi,
+    un retour mardi, une fin de contrat comptent.</li>
+    <li><b>Sur téléphone</b>, faire glisser le doigt sur la carte fait défiler la page ; deux doigts la
+    déplacent. « Agrandir » l'ouvre en plein écran.</li>
   </ul>
   <div class="note tip"><span class="ni" aria-hidden="true">{ic:eclair}</span><div><b>La date compte autant que
   le nombre.</b> Certains travaux ont une fenêtre qu'on ne rattrape pas : la vendange se fait quand

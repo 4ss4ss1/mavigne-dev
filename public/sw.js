@@ -1,4 +1,7 @@
-// MA VIGNE — Service Worker v8.16
+// MA VIGNE — Service Worker v8.17
+// v8.17 (20/09/2026) — DZ-1 : Pilotage › Décider lu au planning. Tournée du jour : travail en priorité, prochain jour travaillé,
+//   équipe affectée et présente ce jour-là, heures et coupure du planning, trajets calculés parcelle à parcelle, fin jour par
+//   jour. « Qui fait quoi » remplace « Et si » (même moteur). Carte : un doigt fait défiler, « Agrandir ». APP 7.48 -> 7.49.
 // v8.16 (20/09/2026) — AVANT-2 : les heures sup d'avant septembre 2026 ENCORE AU COMPTEUR prennent leur majoration au
 //   1er septembre (1h a 25 % = 1h15, 1h a 50 % = 1h30, taux relu semaine par semaine) — elles valaient 1h pour 1h en recup
 //   alors qu'elles etaient majorees a la paie. Rien ne bouge de janvier a aout ; le gain entre une fois, en septembre.
@@ -4088,7 +4091,7 @@
 // v2.22 — Fix profils vides : guard vide dans loadData() pour MEMBRES/SAISONS/TACHES
 // v2.17 — Onboarding intégré + tenantId · v2.06 — Firebase Auth · v2.00–v2.05 — divers
 const DEBUG = self.location.hostname === 'localhost' || self.location.hostname === '127.0.0.1';
-const CACHE_NAME   = 'mavigne-v8.16';
+const CACHE_NAME   = 'mavigne-v8.17';
 const TENANT_CACHE = 'mavigne-tenant';   // Cache persistant — préservé à chaque mise à jour SW
 const SYNC_TAG     = 'mavigne-sync';
 
@@ -4104,7 +4107,7 @@ const CDN_URLS = [
 ];
 
 self.addEventListener('install', event => {
-  if(DEBUG) console.log('[SW] Ma Vigne v8.16 installé — en attente');
+  if(DEBUG) console.log('[SW] Ma Vigne v8.17 installé — en attente');
   event.waitUntil(
     caches.open(CACHE_NAME).then(async cache => {
       // ── Cœur applicatif : STRICT (mise à jour ATOMIQUE) ──
@@ -4124,7 +4127,7 @@ self.addEventListener('install', event => {
 });
 
 self.addEventListener('activate', event => {
-  if(DEBUG) console.log('[SW] Ma Vigne v8.16 activé');
+  if(DEBUG) console.log('[SW] Ma Vigne v8.17 activé');
   event.waitUntil(
     caches.keys().then(keys =>
       Promise.all(

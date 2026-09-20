@@ -2,7 +2,17 @@
 
 > Document de référence du projet **Ma Vigne** (GUERETTECH). Il est le **porteur de vérité** :
 > la mémoire Claude est plafonnée, ce fichier ne l'est pas.
-> Dernière consolidation : **20 septembre 2026 (AVANT-2)** — ★★★ **À LA BASCULE, LES HEURES SUP D'AVANT SEPTEMBRE ENCORE AU COMPTEUR
+> Dernière consolidation : **20 septembre 2026 (DZ-1)** — ★★★ **PILOTAGE › DÉCIDER LU AU PLANNING, JOUR PAR JOUR : LA TOURNÉE
+> DU JOUR, « QUI FAIT QUOI », ET LA CARTE QUI LAISSE DÉFILER (§162)**. Nico : « par défaut l'effectif réel, le nombre d'heures de
+> travail de la journée, le temps de pause, le temps de trajet entre les vignes (revoir aussi le défilement sur téléphone qui ne marche
+> pas) […] la tâche qui est indiquée en priorité du moment […] je veux un outil puissant ». Maquette validée (« c'est parfait »). La
+> tournée part de la priorité, du prochain jour travaillé, de l'équipe affectée et présente ce jour-là au planning
+> (`_planWorkPersRange`, un collectif compte son effectif), de ses heures et de sa coupure ; trajets calculés parcelle à parcelle
+> (`_dzHop`, règle du domaine `CONFIG.eco.trajet`) ; fin déroulée jour par jour (`_dzSimuler`). « Qui fait quoi » remplace « Et si »
+> sur le même moteur : les deux cartes donnent la même date. Un doigt sur la carte fait défiler la page (mesuré : 405 → 405 px avant,
+> 1 179 → 1 404 après). **APP 7.48 → 7.49 · SW 8.16 → 8.17**, base `404b52b`. Détail en **§162**.
+>
+> ★ Précédente : **20 septembre 2026 (AVANT-2)** — ★★★ **À LA BASCULE, LES HEURES SUP D'AVANT SEPTEMBRE ENCORE AU COMPTEUR
 > PRENNENT LEUR MAJORATION (§161)**. Nico, devant le détail de l'année (août : 27h faites, 27h gagnées, 27h restantes) : « les récup
 > gagnées et restantes n'ont pas leur majoration je crois », puis, la règle d'AVANT-1 rappelée (voie ① choisie le 17/09 : « rien ne
 > bouge ») : **« si les heures sup apparaissent encore c'est qu'elles n'ont pas été prises donc elles sont aussi majorées (que ça soit
@@ -21854,3 +21864,134 @@ d'abord des heures à 25 % » — le grep de TAUX-1 cherchait « 25 % d'abord »
 si la revalorisation aurait évité une retenue, octobre la RENDRA (FIGE-1, « retenue de septembre à rendre ») — juste, mais à savoir
 avant d'envoyer. ③ **La récup de chacun monte en septembre** : à dire à l'équipe avant qu'elle le découvre sur sa feuille. ④ Le taux
 vient d'une relecture (AVANT-1) : « la compta le confirme » reste écrit. ⑤ Vu dans Chromium, pas sur papier ni sur téléphone.
+
+---
+
+## 162. ★★★ DZ-1 — PILOTAGE › DÉCIDER LU AU PLANNING, JOUR PAR JOUR : LA TOURNÉE DU JOUR, « QUI FAIT QUOI », ET LA CARTE QUI LAISSE DÉFILER (20/09 — `pilotage.js` · `styles.css` · `utils.js` · `index.html` · `sw.js` · `guide/11-pilotage.html` · `scripts/mv-harnais-pil-coherence.mjs` · `scripts/harnais-claude-md.mjs` · APP 7.48 → **7.49** · SW 8.16 → **8.17** · base `404b52b`)
+
+> Nico : *« dans décider dans pilotage, il faut que par défaut soient configurés l'effectif réel, le nombre d'heures de travail de
+> la journée, le temps de pause, et le temps de trajet entre les vignes (revoir aussi le défilement sur téléphone qui ne marche
+> pas). Il faut par défaut aussi la tâche qui est indiquée en priorité du moment. Revois toute cette partie afin que ça soit
+> ergonomique et intuitif. Je veux un outil puissant. »* Maquette HTML (quatre scénarios, clair/sombre, téléphone/large) validée :
+> *« c'est parfait »* — constantes de trajet comprises (§56e : une maquette validée est une décision prise).
+
+### 162a. Mesuré AVANT d'écrire (Chromium, 390 × 844, vrais événements tactiles)
+
+- **Le défilement** : un glissement parti de la carte Leaflet de l'ordre de passage ne bougeait pas la page (405 → 405 px) ; hors
+  carte, elle défilait (405 → 640). La carte posait `touch-action:none` (`leaflet-touch-drag` + `leaflet-touch-zoom`) sur 230 px.
+  ⚠️ **L'outil de mesure lui-même mentait** : `Input.synthesizeScrollGesture` en `touch` ne défile JAMAIS en headless, même sur une
+  page témoin vide ; seul `Input.dispatchTouchEvent` (start / move / end) rejoue un doigt. Et le portail CGU (`#ovTerms`) recouvre
+  l'écran en mode test : il interceptait les gestes « hors carte ».
+- **La case Trajet sortait de l'écran** : quatre réglages en `repeat(4,1fr)` allaient de x = 41 à **x = 430 sur 390** ; son « + »
+  était hors d'atteinte (la garde `overflow-x:clip` de §67 masquait le débordement, elle ne le supprimait pas).
+- **L'effectif venait d'une fenêtre passée** (« sous contrat · 12 mai → 11 août » affiché un 20 septembre) ; journée 7 h, pause
+  45 min et trajet 5 min par saut étaient **écrits en dur** dans `_opInit` ; deux cartes arrivaient ouvertes (ordre + renfort) ; les
+  lignes « Fin de la journée N · reprise le lendemain » s'empilaient sous une parcelle de plusieurs jours.
+- **Deux définitions de la journée dans le même onglet** : l'ordre de passage (effectif constant × journée réglée) et « Et si »
+  (cadence moyenne sur 28 jours, `c.hPers`).
+
+### 162b. Le modèle — une seule lecture pour les deux cartes (`_dz*`, `pilotage.js`)
+
+- **Le travail** = `_prioItems()` (la priorité du moment) ; sans priorité, le travail qui a le plus d'heures restantes parmi ceux
+  dont la fenêtre est ouverte ou s'ouvre dans le mois — et l'écran le dit. Tant que l'utilisateur n'a pas choisi (`tSrc!=='main'`),
+  le travail SUIT la priorité à chaque rendu complet.
+- **Le jour** (`_dzRefAuto`) = aujourd'hui s'il est travaillé, sinon le prochain jour travaillé DE L'ÉQUIPE ; si la fenêtre du
+  travail n'est pas ouverte, son premier jour travaillé (la leçon des quarante vendangeurs, §20b, conservée). ‹ › passent d'un jour
+  travaillé à l'autre, jamais avant aujourd'hui.
+- **L'équipe** (`_dzBase`, `_dzEquipeJour`) = les affectés à la priorité des travaux cochés, sinon toute l'équipe au champ (bureau
+  et fiches « Inactif » exclus). Chaque personne, chaque jour : `_planWorkPersRange(m,dt,dt)` (travail EFFECTIF : congé, récup,
+  hors contrat = 0) ; une équipe collective compte `_planEffN` sous `_planSurAnnee` (sinon l'année AFFICHÉE du Planning serait lue).
+  Journée d'équipe : n personnes, C heures-personnes, J = la plus longue journée (temps de calendrier). Cache par (nom, jour),
+  vidé à chaque rendu complet (`_dzOublier`).
+- **La coupure** = `PLAN_PAUSE_MIN` quand la journée fait 6 h ou plus et n'est pas continue (horaire du mois `_timings`, ou saisie
+  du jour) : elle allonge la présence, jamais le travail (§ moteur unique, 26/07). L'heure de prise est LUE ; sans horaire au
+  planning, l'écran donne la durée de présence seule.
+- **Les trajets** (`_dzHop`) = calculés entre chaque parcelle et la suivante, à vol d'oiseau : à pied jusqu'à 300 m à 4 km/h,
+  au-delà camion 5 min + 25 km/h, 5 min sans position. Règle du domaine dans `CONFIG.eco.trajet` (défauts `_DZ_H0`), essayée dans
+  la feuille Trajets, gardée par l'administrateur (« Garder pour le domaine »).
+- **La simulation** (`_dzSimuler`) déroule la tournée jour après jour avec l'équipe du planning de CHAQUE jour (un congé lundi, un
+  retour mardi, une fin de CDD comptent). Trajet = temps de calendrier d'équipe ; travail partagé entre C/J personnes équivalentes ;
+  surface découpée comme les heures ; garde 400 jours (`bloque`) — « la tournée ne se termine pas » est DIT, pas masqué.
+- **La fenêtre** (`_dzVerdict`) : une par travail coché, jamais l'enveloppe (§ fenêtre par tâche, conservé). « Il faudrait N
+  personnes de plus » sort de la MÊME simulation relancée avec N de plus (1 à 40) ; « Essayer +N » l'applique.
+- **Simulation** : toucher l'équipe, le travail, la coupure, les trajets ou le jour passe l'en-tête en « simulation » ;
+  « ↺ Valeurs réelles » revient au planning. Rien de tout cela n'est enregistré ; seule la tournée l'est (inchangé : par travail,
+  `CONFIG.ordre_passage_t`, lue par Vigne).
+
+### 162c. L'écran
+
+- **La tournée du jour — jusqu'où ?** (clé `ordrepassage` inchangée) : le jour, les travaux (priorités étoilées, « autres travaux »),
+  les quatre réglages **en grille 2 × 2** avec leur source, le résultat (le soir, l'équipe est à… ; 1er jour ; jours pour finir ;
+  verdict), la carte, l'ordre de passage (tris, départ, enregistrement, « ⇅ bloc » conservé), la liste **rangée par jour** (un
+  en-tête par jour, « reprise : » au lieu de la pile de « Fin de la journée »). Feuilles Équipe et Trajets, carte agrandie.
+- **Qui fait quoi** (clé `simulateur` inchangée) remplace « Simulateur — et si ? » : chaque priorité avec son équipe affectée, +/−,
+  date de fin et verdict, « Voir la tournée › » ; sans priorité, part égale entre les travaux ouverts. Même jour et même moteur :
+  **vérifié, les deux cartes donnent la même date** (priorité Ébourgeonnage : ven. 9 oct. des deux côtés).
+- ⚰️ `_pilSimInitData` et son panneau, `_opSimulate`, `_opFenetreHtml`, `_opStepper`, `_opEffNote`, `_opEffAppliquer`,
+  `_pilEffTaches`, `_pilFenTaches`, `_pilEffFenetre`, `_pilFenLbl`, `_pilWorkdayDate`, `_opBody`, `_opClearBtn`, et **`_mvProj`**
+  dans `utils.js` (avec `window._mvProj` : son seul appelant était `_opFenetreHtml`) — plus d'appelant (grep src/ et scripts/,
+  puis la joignabilité du preflight, §25.11, qui en a vu quatre que le grep avait laissés).
+- **La carte** : sur pointeur « coarse », `dragging:false` → Leaflet ne pose plus que `leaflet-touch-zoom` = `pan-x pan-y` : un
+  doigt fait défiler, deux doigts déplacent et zooment (TouchZoom suit le milieu des doigts). `scrollWheelZoom:false` (la molette
+  d'un ordinateur défile la page). « Agrandir » ouvre une carte plein écran, déplaçable au doigt, avec les noms.
+- ⚠️ **TROUVÉ AU REJEU : LE DOCK PASSAIT PAR-DESSUS LES FEUILLES.** Les couches vivent dans le corps de la carte (la délégation de
+  clics du Pilotage les couvre), donc dans le contexte d'empilement de la page ; `#mv-dock` (fixe, z 90) est hors de ce contexte et
+  interceptait « Voir le résultat » malgré un z-index 400. Les couches s'arrêtent désormais au-dessus du dock quand il est affiché
+  (`_dzDockH`), comme la barre « en main ».
+- **Disposition** : le Renfort arrive REPLIÉ (`collapsed.renfort:1`), `_PIL_ST_V` 3 → 4 pour que les clients installés le voient
+  (§ état mémorisé). Libellés du ⚙ et du fil : « La tournée du jour », « Qui fait quoi ». Icône de « Qui fait quoi » : `equipe`.
+- Toutes les tailles passent par `--pt-*`, tous les espacements neufs par `--e-*` (cliquet d'échelle), aucune couleur en dur dans
+  la feuille ; les deux cartes portent leur pastille `i` (`pil.tournee`, `pil.quifait`). Icônes à 16 (échelle 16/18/20/24/40).
+- ⚠️ **Les rayons : le cliquet compte aussi les repli en px.** `border-radius:var(--r-sm,8px)` fait monter « rayons en dur qui
+  doublent un pas » (le `8px` du repli) : quarante déclarations l'auraient poussé de 194 à 232. Les jetons du socle sont posés UNE
+  fois, avec leur repli, en alias locaux (`--dz-rs/rm/rl/rf` sur `#pil-op-body,#pil-sim-body`) ; les déclarations lisent l'alias.
+- Aucun fond de surface employé comme encre (`color:var(--cave)`, `color:var(--bg-card)` retirés : justes dans un thème,
+  invisibles dans l'autre) ; `--ink-info` en texte sur `--gris-clair` passait sous 4,5 en clair → `--texte-med`, `--texte`.
+
+### 162d. Mesuré APRÈS (Chromium, 390 × 844, tactile, données injectées : 10 parcelles, 6 fiches dont un contrat de groupe à 6)
+
+- Glissement parti de la carte : **1 179 → 1 404 px** (la page défile) ; `touch-action` de la carte : `pan-x pan-y`. Carte agrandie :
+  `touch-action:none` (elle se déplace au doigt), 720 px de haut au-dessus du dock.
+- Aucun débordement à 390 px (`scrollWidth` 390, aucun élément au-delà du bord hors bandeaux défilants). Clair et sombre relus.
+- Dimanche 20 sept. → **lun. 21 sept., « prochain jour travaillé · aujourd'hui dimanche »** ; équipe de la priorité 2 (Karim en congé
+  le 21), 3 ensuite ; le contrat de groupe compte ×6 ; « déborde de 5 jours — il faudrait 2 personnes de plus », « Essayer +2 ».
+- Harnais : `mv-harnais-pil-coherence` ⑧ **repointé** (il visait `_pilSimInitData`, retiré) : quatre assertions sur la lecture jour
+  par jour et le moteur partagé. `mv-harnais-carte` et `mv-harnais-info` verts sans retouche.
+- ★ **Une contre-épreuve devenue MUETTE** : dans `mv-harnais-icones-contre`, « un aide privé appelé mais disparu » mutait
+  `_pilEsc(_opTNom(x.nom))` — la puce de tâche de l'ancien ordre de passage, retirée. La mutation ne mordait plus : l'épreuve
+  restait VERTE sans rien prouver. Repointée sur la puce de la tournée (`_pilEsc(_opTNom(nom))`), elle rougit de nouveau.
+- Rejoué APRÈS le rebasage sur `404b52b` : mêmes chiffres (glissement 1 183 → 1 408 px ; tournée et « Qui fait quoi » : ven. 9 oct.).
+  Fenêtre pas encore ouverte (Pioche, du 5 au 30 oct., seule cochée) : « lun. 5 oct. · début de la fenêtre · dans 15 jours », avec
+  l'équipe du 5 octobre (11 pers. × 7 h, planning d'octobre).
+- Contrôle complet vert : 110 commandes (`mv-harnais-recup --contre` lancé à part, 86 s). `test:smoke` : OK (boot, 23/23 globaux).
+  `test:e2e` : tout vert, « Page pilotage » comprise, sauf « Action parcelle » (météo injoignable depuis le bac à sable) — **même rouge
+  sur la base `404b52b` seule, sans le lot** : c'est l'environnement. ⚠️ Playwright (node) n'a pas son Chromium ici : lancé avec celui
+  de Playwright (python) par un `--import` qui ne fait que passer `executablePath` — rien de livré.
+
+### 162e. La note de livraison
+
+**Base `404b52b`. APP 7.48 → 7.49 · SW 8.16 → 8.17.** `node scripts/build-guide.mjs`, puis `npm run build && firebase deploy --only hosting`.
+
+| Fichier | Ce qui change | Bump ? |
+|---|---|---|
+| `src/pilotage.js` | moteur `_dz*`, tournée du jour, « Qui fait quoi », carte, feuilles, `_PIL_ST_V` 4, `collapsed.renfort` | — |
+| `src/styles.css` | `.pil-dz-*` | ★ APP · ★ SW |
+| `src/utils.js` | APP 7.49, cinq nouveautés, fiches `pil.tournee` / `pil.quifait`, aide du Pilotage | ★ APP |
+| `index.html` · `public/sw.js` | versions | ★ APP · ★ SW |
+| `guide/11-pilotage.html` · `public/guide.html` | Décider, « D'où viennent les valeurs de la tournée » | — |
+| `scripts/mv-harnais-pil-coherence.mjs` · `scripts/mv-harnais-icones-contre.mjs` · `scripts/harnais-claude-md.mjs` · `CLAUDE.md` · `.mv-base` | ⑧ repointé · ancre repointée · SECTIONS 194 · base | — |
+
+⚠️ **Rebasé en cours de lot.** Écrit sur `9e5044d` ; AVANT-2 (§161) a été poussé entre-temps (`404b52b`, APP 7.48, SW 8.16,
+SECTIONS 193) avec les mêmes numéros. Repris : 7.49, 8.17, §162, SECTIONS 194, base `404b52b` ; fusion à trois voies, conflits
+résolus un par un (nouveautés : les miennes au-dessus ; en-tête du SW : ma ligne au-dessus ; CLAUDE.md : §161 d'AVANT-2 intacte).
+Aucun fichier de code en commun. AVANT-2 ne touche aucune des fonctions que lit la tournée (`_planWorkPersRange`, `_planEffN`,
+`_planSurAnnee`, `PLAN_PAUSE_MIN`, `_timings`, `_mvEnContratLe`) : vérifié sur son diff de `planning.js`.
+
+### 162f. Ouvert, et dit
+
+① La priorité ne garde pas sa date de diffusion (`CONFIG.tachesPrio` n'en a pas) : l'écran dit « priorité du moment », sans date.
+② Le Renfort n'est pas touché (sa journée n'est qu'un ratio `hMax/hJour`, sa capacité vient déjà du planning).
+③ Les trajets sont à vol d'oiseau : la route est plus longue. La règle est réglable, pas mesurée sur le terrain.
+④ L'heure « sur place 08:00 → 16:00 » n'apparaît que si le planning porte l'horaire du mois (`_timings`) ou une saisie du jour.
+⑤ Rejoué dans Chromium (téléphone émulé), pas sur un vrai téléphone. ⑥ « Il faudrait N » cherche de 1 à 40 personnes, par
+simulations successives (cache par personne et par jour) : à surveiller sur un très gros domaine.
