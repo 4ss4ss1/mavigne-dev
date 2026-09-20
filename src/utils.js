@@ -23,7 +23,7 @@ export const GT_ADMIN_EMAIL = 'ngdevpro@gmail.com';
 // WHATS_NEW   : tableau vide = modal desactive pour cette version.
 // Format item : { emoji:'📅', titre:'Titre court', desc:'Phrase utilisateur.' }
 // Regle : seulement les changements visibles par les utilisateurs.
-export const APP_VERSION = '7.49';
+export const APP_VERSION = '7.51';
 // ════ Journal des nouveautés (récap cumulatif) ════
 // Une entrée par version, la PLUS RÉCENTE EN HAUT : { v:'5.10', items:[ {emoji,titre,desc}, … ] }
 // À chaque release visible → AJOUTER un bloc en tête (ne pas remplacer). items:[] = release technique (rien à afficher).
@@ -715,6 +715,19 @@ window._mvGraphRepeindre = function(){
 };
 
 export const WHATS_NEW = [
+  { v: '7.51', items: [
+    { emoji: 'carte', titre: 'Sur les cartes, un anneau montre où vous en êtes',
+      desc: "Un <b>anneau doré respire doucement</b> autour de la parcelle <b>commencée et pas finie</b> — celle où «\u00a0Début\u00a0» "
+        + "a été touché sans validation. S’il n’y en a aucune, il se pose sur la <b>prochaine à faire</b>\u00a0: le n°\u00a01 de la "
+        + "tournée enregistrée dans Pilotage\u00a0› Décider. Sur Parcelles il suit le travail affiché (sur «\u00a0toutes\u00a0», la "
+        + "priorité du moment), sur la carte du domaine la priorité du moment, sur la carte de la tournée les travaux cochés. "
+        + "Plusieurs parcelles commencées\u00a0? Chacune a son anneau. Rien quand vous consultez une période archivée." },
+    { emoji: 'route', titre: 'La tournée part bien de la dernière parcelle faite',
+      desc: "Quand plusieurs parcelles avaient été validées le même jour, le départ «\u00a0dernière faite\u00a0» de la tournée était "
+        + "en réalité la <b>première</b> de la journée\u00a0: l’ordre proposé repartait du matin. Le même défaut se cachait dans "
+        + "«\u00a0Qui fait quoi\u00a0» quand aucune tournée n’est enregistrée. C’est corrigé, et une validation annulée n’est plus "
+        + "prise pour un départ." }
+  ] },
   { v: '7.49', items: [
     { emoji: 'cible', titre: 'Décider part du planning\u00a0: rien à régler pour commencer',
       desc: "Dans Pilotage › Décider, la tournée du jour se remplit toute seule\u00a0: le travail en priorité, le prochain jour \
@@ -3330,6 +3343,7 @@ var MV_AIDE = {
       ['La colonne de droite', "porte les deux gestes du terrain, sans ouvrir la parcelle : « Début » signale qu’on attaque, « Valider » que c’est fini. Une tâche à passages affiche en plus le passage en cours (P1, P2, N1…)."],
       ['Le numéro devant le nom', "est le rang de la tournée du domaine. Il n’apparaît que si une tournée est fixée, et les parcelles se rangent dans cet ordre."],
       ['Onglet Carte', ": les contours viennent de votre export PAC ou d’un fichier KML."],
+      ['L’anneau doré qui respire', "sur la carte marque la parcelle <b>commencée et pas finie</b> pour le travail affiché\u00a0: celle où «\u00a0Début\u00a0» a été touché sans validation. S’il n’y en a aucune, il se pose sur la <b>prochaine à faire</b>, le n°\u00a01 de la tournée enregistrée. Sur «\u00a0toutes\u00a0», c’est la priorité du moment. Plusieurs parcelles commencées ont chacune leur anneau, et rien ne s’affiche sur une période archivée."],
       ['La recherche', "accepte le nom du climat comme le lieu-dit."],
       ['Une parcelle arrachée', "sort des totaux mais reste dans l’historique."],
       ['L’état du vignoble', "s’imprime depuis la roue crantée de la Vigne, bloc Documents : toutes vos parcelles sur une page, avec la surface, le cépage, la commune, l’avancement, le dernier travail, le dernier rendement — et la liste de ce qui reste à renseigner."]
@@ -3518,6 +3532,7 @@ var MV_AIDE = {
       ['Le marqueur « hors période »', "dans la roue crantée, fenêtres des tâches, veut dire qu’une fenêtre enregistrée ne tombe pas dans cette période. La fenêtre par défaut s’applique à la place, et l’écran le dit au lieu d’écraser tout le travail sur un seul jour."],
       ['Décider', "— l’onglet s’appelait <b>Simuler</b>, mais la tournée qu’on y enregistre part sur l’écran de toute l’équipe : c’est le seul endroit du Pilotage qui change ce que les autres voient. Trois cartes : <b>la tournée du jour</b> (jusqu’où l’équipe ira, dans quel ordre), <b>qui fait quoi</b> (l’équipe répartie entre les priorités) et <b>le renfort</b> (combien, et quand)."],
       ['La tournée part du planning', " : le travail en priorité, le prochain jour travaillé, l’équipe affectée à la priorité et présente ce jour-là (congés et récup retirés), ses heures et sa coupure. Les trajets se calculent entre chaque parcelle et la suivante. Chaque case dit d’où vient sa valeur ; en toucher une passe l’écran en simulation, « Valeurs réelles » revient au planning."],
+      ['L’anneau doré qui respire', "marque la parcelle commencée et pas finie, sinon la prochaine à faire\u00a0: sur la carte du domaine pour la priorité du moment, sur celle de la tournée pour les travaux cochés — c’est son n°\u00a01. Le départ de la tournée, lui, reste la dernière parcelle validée, sauf si vous en choisissez un autre."],
       ['Un contrat de groupe compte pour son effectif', " : une fiche « équipe de vendange » à 40 vaut 40 personnes, pas une ligne. Et quand la fenêtre du travail n’est pas encore ouverte, la tournée se calcule sur son premier jour : on compte ceux qui seront là ce jour-là, pas ceux d’aujourd’hui."],
       ['Le manque d’effectif se lit sur la semaine du pic', ", contre ce qui est prévu au planning <b>cette semaine-là</b> — pas contre la présence d’aujourd’hui. Un pic qui tombe dans onze mois ne se compare pas à qui est là ce matin."],
       ['Le total de l’Exercice n’est pas un compte de résultat', ": Ma Vigne connaît ce qui passe par elle — heures payées, carburant, achats d’intrants. Ni le fermage, ni les amortissements, ni les assurances, ni vos cotisations d’exploitant. Ce total sert à <b>piloter vos charges d’un bilan à l’autre</b>, pas à remplacer votre comptable."],
@@ -4621,6 +4636,125 @@ window._mvOrdreRangs = function(tache, noms){
   out.n = k;
   out.hors = Math.max(0, (noms||[]).length - k);
   return out;
+};
+
+// ══ LA DERNIÈRE PARCELLE VALIDÉE — définition UNIQUE (CIBLE-1, §163) ═══════════
+// D'où part la tournée du jour, et d'où part « Qui fait quoi » quand aucune
+// tournée n'est enregistrée : une seule réponse à « où a-t-on validé en dernier ».
+// (Ce n'est PAS ce que montrent les anneaux des cartes : voir `_mvCibleCarte`.)
+// ⚠️ « Dernière » se lit sur la DATE DU TRAVAIL, puis sur l'HEURE DE SAISIE : on
+//   valide plusieurs parcelles le même jour, et l'ordre du tableau ne dit rien de
+//   l'heure (le journal est rangé du plus récent au plus ancien, une fusion entre
+//   appareils peut le mêler). L'heure de saisie est l'`id` — Date.now() en
+//   hexadécimal, suivi de « -qv » pour une validation depuis la carte. Avant
+//   CIBLE-1, le départ « dernière faite » de la tournée était la PREMIÈRE du jour.
+// ⚠️ Une validation ANNULÉE ensuite (même parcelle, même tâche, saisie plus tard)
+//   ne compte plus : `annulerTache` ajoute une ligne « Annulé » au journal, il ne
+//   retire pas la ligne « Validé ». Sans heure lisible d'un côté, le jour tranche.
+// `taches` : noms de tâches, vide ou absent = toutes. `garde(p)` : filtre
+// facultatif — la tournée ne part que d'une parcelle placée sur la carte.
+// Renvoie { p, nom, date, tache } ou null. Parcelles arrachées écartées.
+window._mvDerniereValidee = function(taches, garde){
+  function heure(j){
+    var m = /^([0-9a-f]{9,12})(?![0-9a-f])/i.exec(String((j && j.id) || ''));
+    var t = m ? parseInt(m[1], 16) : 0;
+    return (t > 1.5e12 && t < 4.1e12) ? t : 0;
+  }
+  var tset = null;
+  if(Array.isArray(taches) && taches.length){ tset = {}; taches.forEach(function(t){ if(t) tset[t] = 1; }); }
+  var parc = {};
+  (window.PARCELLES || []).forEach(function(p){ if(p && p.nom && p.statut !== 'Arrachee') parc[p.nom] = p; });
+  var ann = {}, val = [];
+  (window.JOURNAL || []).forEach(function(j, i){
+    if(!j || j.meteo || !j.parcelle || !j.date) return;
+    if(tset && !tset[j.tache]) return;
+    var e = { j: j, d: String(j.date), t: heure(j), i: i, k: String(j.parcelle) + '\u0001' + String(j.tache || '') };
+    if(j.statut === 'Annulé') (ann[e.k] = ann[e.k] || []).push(e);
+    else if(j.statut === 'Validé' && parc[j.parcelle]) val.push(e);
+  });
+  function annulee(v){
+    return (ann[v.k] || []).some(function(c){ return (c.t && v.t) ? c.t > v.t : c.d >= v.d; });
+  }
+  val.sort(function(a, b){ return (a.d < b.d ? 1 : (a.d > b.d ? -1 : 0)) || (b.t - a.t) || (a.i - b.i); });
+  for(var n = 0; n < val.length; n++){
+    var v = val[n], p = parc[v.j.parcelle];
+    if(annulee(v)) continue;
+    if(typeof garde === 'function' && !garde(p)) continue;
+    return { p: p, nom: p.nom, date: v.d, tache: String(v.j.tache || '') };
+  }
+  return null;
+};
+// ══ LA PARCELLE QUE LES CARTES MONTRENT — définition UNIQUE (CIBLE-1, §163) ═══
+// Nico : « montrer soit celle commencée et non finie, soit la prochaine à faire,
+// commandée par le module Décider ». Pour une tâche, dans cet ordre :
+//   ① les parcelles COMMENCÉES et pas finies — « Début » touché, pas encore
+//      validé. Il peut y en avoir plusieurs (deux équipes, un oubli de la
+//      veille) : chacune a son anneau, aucune n'est cachée ;
+//   ② sinon la PROCHAINE : la première de la tournée ENREGISTRÉE dans Décider
+//      qui reste à faire — le même « 1 » que la liste des parcelles affiche.
+//      Sans tournée enregistrée, rien : personne n'a dit par où commencer.
+// ⚠️ « Commencée » et « finie » se lisent à l'ÉTAPE EN COURS pour une tâche à
+//   passages ou à niveaux : une parcelle dont P1 est validé n'est pas finie pour
+//   la saison, mais elle l'est pour le passage du moment. C'est la lecture de
+//   l'écran Vigne (`_pvCurDone`, `_pvCurStarted`), qui passe par ici.
+window._mvTacheEtat = function(p, T){
+  if(!p || !T) return '';
+  var f = function(n){ return (typeof window[n] === 'function') ? window[n] : null; };
+  var type = f('_pvType') ? window._pvType(T) : 'simple';
+  if(type === 'simple'){
+    var s = f('getTacheStatut') ? window.getTacheStatut(p, T) : ((window._tachesFor ? window._tachesFor(p) : (p.taches || {}))[T] || '');
+    return (s === 'Validé') ? 'finie' : ((s === 'En cours') ? 'commencee' : 'a-faire');
+  }
+  var i   = f('_pvEtapeCourante') ? window._pvEtapeCourante(T) : 1;
+  var eff = f('_pvEffPlan') ? window._pvEffPlan(p, T) : i;
+  if(i > eff) return 'finie';                       // étape non applicable sur cette parcelle
+  var st = f('_pvStepState') ? window._pvStepState(p, T, i) : '';
+  if(st === 'Validé' || st === 'Auto') return 'finie';
+  return (st === 'Commencé') ? 'commencee' : 'a-faire';
+};
+// La priorité du moment : celle de l'équipe où l'on est, sinon la première.
+// C'est la tâche sur laquelle ouvre l'écran Vigne, donc celle que montrent les
+// cartes qui n'affichent pas de tâche (Carte du domaine, Parcelles sur « toutes »).
+window._mvTachePrio = function(){
+  try{ return (typeof window._prioDefaultTask === 'function') ? (window._prioDefaultTask() || '') : ''; }
+  catch(e){ if(window._mvAvale) window._mvAvale(e, 'utils.js/_mvTachePrio'); return ''; }
+};
+// Renvoie { etat:'commencee'|'prochaine', ps:[parcelles], tache } ou null.
+window._mvCibleCarte = function(T){
+  if(!T || !window._mvVueActive()) return null;
+  var act = (window.PARCELLES || []).filter(function(p){
+    return p && p.nom && p.statut !== 'Arrachee' && ((p.tachesExclues || []).indexOf(T) < 0);
+  });
+  var comm = act.filter(function(p){ return window._mvTacheEtat(p, T) === 'commencee'; });
+  if(comm.length) return { etat: 'commencee', ps: comm, tache: T };
+  var o = (typeof window._mvOrdreFor === 'function') ? window._mvOrdreFor(T) : null;
+  if(!o) return null;
+  var par = {}; act.forEach(function(p){ par[p.nom] = p; });
+  for(var i = 0; i < o.ordre.length; i++){
+    var p = par[o.ordre[i]];
+    if(p && window._mvTacheEtat(p, T) !== 'finie') return { etat: 'prochaine', ps: [p], tache: T };
+  }
+  return null;
+};
+// La vue montre-t-elle la période ACTIVE ? Consulter une archive remet dans
+// `p.taches` l'avancement de l'archive (Lot 4, app.js) : un repère « d'aujourd'hui »
+// y mentirait. Même question pour la tournée (`_pOrdPeriodeOK`) : une réponse.
+window._mvVueActive = function(){
+  try{
+    var a = (typeof window.getSaisonActive === 'function') ? ((window.getSaisonActive() || {}).nom || '') : '';
+    if(!a) return true;
+    return (typeof window._visuSaison !== 'function') || window._visuSaison() === a;
+  }catch(e){ if(window._mvAvale) window._mvAvale(e, 'utils.js/_mvVueActive'); return true; }
+};
+// L'anneau lui-même, sur une carte Leaflet : non cliquable (le toucher passe à la
+// parcelle dessous), sous les autres repères, animé par la feuille (`.mv-cible-o`)
+// — c'est elle qui le fige quand le téléphone demande moins de mouvement.
+window._mvCibleAnneau = function(map, g){
+  if(!map || !g || !window.L) return null;
+  try{
+    var ic = window.L.divIcon({ className: 'mv-cible', html: '<i class="mv-cible-o"></i>', iconSize: [40, 40], iconAnchor: [20, 20] });
+    return window.L.marker([g.lat, g.lng], { icon: ic, interactive: false, keyboard: false, zIndexOffset: -1000 }).addTo(map);
+  }catch(e){ if(window._mvAvale) window._mvAvale(e, 'utils.js/_mvCibleAnneau'); return null; }
 };
 
 // ════ LES PERIODES DE CONTRAT D'UNE FICHE — definition UNIQUE ════════════════

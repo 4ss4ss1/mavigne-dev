@@ -7442,13 +7442,8 @@ function _pOrdOff(){ try{ return localStorage.getItem(_pOrdKey())==='1'; }catch(
 function pOrdreToggle(){ try{ localStorage.setItem(_pOrdKey(), _pOrdOff()?'0':'1'); }catch(e){ if(window.logError)window.logError({level:'info',cat:'tournee',msg:'preference tri non memorisee'}); } renderParcelles(); }
 // Une tournée décrit le travail d'AUJOURD'HUI : consulter une archive ne doit
 // pas réorganiser l'écran avec elle.
-function _pOrdPeriodeOK(){
-  try{
-    var act=(getSaisonActive()||{}).nom||'';
-    if(!act) return true;
-    return (typeof _visuSaison!=='function') || _visuSaison()===act;
-  }catch(e){ return true; }
-}
+// ★ CIBLE-1 (§163) : la même question sert l'anneau des cartes — une seule réponse, `_mvVueActive` (utils.js).
+function _pOrdPeriodeOK(){ return window._mvVueActive(); }
 // Tâche dont la tournée s'applique — la tâche affichée, rien d'autre.
 function _pOrdTache(){
   if(_pOrdOff()||!_pOrdPeriodeOK()) return '';
@@ -7729,6 +7724,7 @@ function renderParcelles(){
   _pvRenderProxBar();
   _pvRenderOrdreBar();
   _pOrdMapSync();
+  _pCibleMapSync();
 }
 
 // ── Cépage ──
@@ -9414,6 +9410,7 @@ function initMap(){
   } else {
     var _dg2=getDomaineGeo(); leafMap.setView([_dg2.lat,_dg2.lng],13);
   }
+  _pCibleMapSync();
 }
 function refreshMapColors(){
   _leafLayers.forEach(function(item){
@@ -9423,6 +9420,25 @@ function refreshMapColors(){
     item.poly.setPopupContent('<b>'+_escHtml(item.parcelle.nom)+'</b><br>'+item.parcelle.surface+' ha · '+cl.pct+'%');
   });
   _pOrdMapSync();
+  _pCibleMapSync();
+}
+// ★ CIBLE-1 (§163) — la parcelle commencée, sinon la prochaine de la tournée, respire
+// sur la carte. La définition est unique (`_mvCibleCarte`, utils.js) ; ici, seulement
+// quelle tâche et où poser l'anneau. La tâche affichée décide ; sur « toutes », c'est
+// la priorité du moment. Rien sur une période archivée. Relancé par initMap,
+// refreshMapColors et renderParcelles — donc à chaque « Début », chaque validation et
+// chaque changement de tâche, y compris depuis un autre téléphone : le journal et les
+// parcelles sont écoutés en temps réel et relancent renderParcelles sur cette page.
+var _pCibleMk=[];
+function _pCibleMapSync(){
+  if(typeof leafMap==='undefined'||!leafMap) return;
+  try{
+    _pCibleMk.forEach(function(m){ leafMap.removeLayer(m); }); _pCibleMk=[];
+    var t=(pTacheFilter&&pTacheFilter!=='toutes')?pTacheFilter:window._mvTachePrio();
+    var c=window._mvCibleCarte(t);
+    if(!c) return;
+    c.ps.forEach(function(p){ var g=window._mvParcGeo(p); if(!g) return; var m=window._mvCibleAnneau(leafMap,g); if(m) _pCibleMk.push(m); });
+  }catch(e){ if(window._mvAvale) window._mvAvale(e,'app.js/_pCibleMapSync'); }
 }
 function _mvMapTap(nom){
   var p=PARCELLES.find(function(x){return x.nom===nom;});
@@ -11229,13 +11245,11 @@ function _pvStepState(p,nom,i){
   if(typeof s==='string')return s==='Validé'?'Validé':'Non démarré';
   return s[_pvPrefix(nom)+i]||'Non démarré';
 }
-function _pvCurDone(p,nom){
-  nom=nom||pTacheFilter;
-  if(_pvType(nom)==='simple')return getTacheStatut(p,nom)==='Validé';
-  if(pCurStep>_pvEffPlan(p,nom))return true; // étape non applicable (override) -> hors "à faire"
-  var st=_pvStepState(p,nom,pCurStep);
-  return st==='Validé'||st==='Auto';
-}
+// ★ CIBLE-1 (§163) : « finie » et « commencée » servent aussi aux anneaux des cartes,
+//   y compris pour une tâche qui n'est pas celle affichée. La lecture part donc dans
+//   utils.js (`_mvTacheEtat`), et l'étape en cours répond ici — une seule définition.
+function _pvEtapeCourante(nom){ return (nom===pTacheFilter) ? pCurStep : _pvSmartStep(nom); }
+function _pvCurDone(p,nom){ return window._mvTacheEtat(p,nom||pTacheFilter)==='finie'; }
 function _pvStepChips(p,nom){
   var plan=_pvSeasonPlan(nom),lab=_pvStepLabel(nom),eff=_pvEffPlan(p,nom),h='';
   for(var i=1;i<=plan;i++){
@@ -11441,11 +11455,7 @@ function pQuickStart(nom,evt){
   renderParcelles();computePStats();
   if(typeof refreshMapColors==='function')refreshMapColors();
 }
-function _pvCurStarted(p,nom){
-  nom=nom||pTacheFilter;
-  if(_pvType(nom)==='simple')return ((_tachesFor(p)[nom])||'Non d\u00e9marr\u00e9')==='En cours';
-  return _pvStepState(p,nom,pCurStep)==='Commenc\u00e9';
-}
+function _pvCurStarted(p,nom){ return window._mvTacheEtat(p,nom||pTacheFilter)==='commencee'; }
 function _prioShowAll(){_prioOverride=true;renderParcelles();}
 function _prioBackToPriority(){_prioOverride=false;var _bits=_prioItems();if(_bits.length){var _bt=_prioDefaultTask(_bits);pTacheFilter=_bt;pCurStep=_pvSmartStep(_bt);}renderParcelles();}
 // ── Priorite du moment : multi-taches + equipes affectees (v5.05) ──
@@ -11531,6 +11541,8 @@ window._pvApplyTeam=_pvApplyTeam;
 window._pvActions=_pvActions;
 window.pQuickStart=pQuickStart;
 window._pvCurStarted=_pvCurStarted;
+window._pvStepState=_pvStepState; window._pvEffPlan=_pvEffPlan; window._pvEtapeCourante=_pvEtapeCourante;
+window._prioDefaultTask=function(){ return _prioDefaultTask(); };
 window._prioShowAll=_prioShowAll;
 window._prioBackToPriority=_prioBackToPriority;
 window._mvMapTap=_mvMapTap;

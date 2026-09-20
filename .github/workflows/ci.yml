@@ -242,6 +242,15 @@ jobs:
           node scripts/mv-harnais-fusion-docs.mjs
           node scripts/mv-harnais-fusion-docs.mjs --contre
 
+      # ★★ CIBLE-1 (§163) : ce que les cartes entourent — la parcelle COMMENCEE et pas finie, sinon la PROCHAINE
+      # (n°1 de la tournee enregistree dans Decider). Definitions EXECUTEES sur des parcelles et des journaux
+      # fabriques, plus les quatre cartes qui les appellent. Le depart retenait la PREMIERE validee du jour :
+      # ce defaut, reinjecte (deux fois : _opJournalLast et _dzDernierFait), doit rougir.
+      - name: Harnais — ce que les cartes montrent
+        run: |
+          node scripts/mv-harnais-cible.mjs
+          node scripts/mv-harnais-cible.mjs --contre
+
       # Vite + inject-precache (postbuild, idempotent).
       - name: Build
         run: npm run build

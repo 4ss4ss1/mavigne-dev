@@ -805,6 +805,9 @@ function _pilBuildMap(d){
         bounds.push([g.lat,g.lng]);
       });
     })();
+    // ★ CIBLE-1 (§163) — l'anneau sur la priorité du moment : commencée, sinon la prochaine.
+    var _cib=window._mvCibleCarte(window._mvTachePrio());
+    if(_cib) _cib.ps.forEach(function(_cp){ var _cg=window._mvParcGeo(_cp); if(_cg) window._mvCibleAnneau(_pilMap,_cg); });
     // _mine : un rAF en retard d'un build cadrerait la carte SUIVANTE avec les bornes
     // de la precedente, en relancant une animation — donc une 2e chance de course.
     var _mine=_pilMap;
@@ -2200,11 +2203,11 @@ function _pilTreatRows(days){
 //   et le moteur de la tournée : les deux cartes donnent la même date.
 // ════════════════════════════════════════════════════════════════════
 var _PIL_SIM=null;
-function _dzDernierFait(t){
-  var best=null, bd='';
-  (window.JOURNAL||[]).forEach(function(j){ if(j&&j.tache===t&&j.statut==='Valid\u00e9'&&j.parcelle){ var p=_opParcByNom(j.parcelle); if(p&&_opGeoOK(p)){ var dd=String(j.date||''); if(dd>=bd){ bd=dd; best=p; } } } });
-  return best;
-}
+// ★ CIBLE-1 (§163) — DZ-1 avait écrit ici une SECONDE copie de « dernière faite », avec le
+//   même défaut que `_opJournalLast` : `>=` sur la date seule, journal rangé du plus récent
+//   au plus ancien, donc la PREMIÈRE validée du jour. Elle sert de départ quand aucune
+//   tournée n'est enregistrée : l'ordre proposé partait du matin. Une définition, un appel.
+function _dzDernierFait(t){ var d=window._mvDerniereValidee([t], _opGeoOK); return d?d.p:null; }
 function _dzRowsTache(t){
   var def=_opTaskDef(t); if(!def) return [];
   var act=_opParcActive().filter(function(p){ return _opApplic(p,def)&&_opParcReste(p,def)>0.05; }), ord=[], saved=_opSavedTask(t);
@@ -2391,7 +2394,23 @@ function _opActTodo(){ return _opParcActive().filter(function(p){ return _opParc
 function _opDoneGeo(){ return _opParcActive().filter(function(p){ return _opParcResteM(p)<=0.05 && _opGeoOK(p); }); }
 
 // ── Départ : dernière parcelle FAITE (l'une des tâches sélectionnées) > centre du vignoble ──
-function _opJournalLast(){ var J=window.JOURNAL||[], tset={}; (_PIL_OP&&_PIL_OP.tasks||[]).forEach(function(t){tset[t]=1;}); var best=null,bestD=''; J.forEach(function(j){ if(j&&tset[j.tache]&&j.statut==='Validé'&&j.parcelle){ var p=_opParcByNom(j.parcelle); if(p&&_opGeoOK(p)){ var d=String(j.date||''); if(d>=bestD){bestD=d;best=p;} } }}); return best?{p:best,date:bestD}:null; }
+// ★ CIBLE-1 (§163) — « dernière faite » lit la définition unique (`_mvDerniereValidee`, utils.js).
+//   La copie privée qui vivait ici départageait un même jour par l'ordre du tableau (le
+//   plus récent en tête) avec `>=` : elle retenait la PREMIÈRE parcelle validée du jour.
+//   Elle ignorait aussi les annulations. Sans travail coché : pas de départ (inchangé).
+function _opDern(garde){ var T=(_PIL_OP&&_PIL_OP.tasks)||[]; return T.length?window._mvDerniereValidee(T,garde):null; }
+// ★ CIBLE-1 (§163) — ce que la carte de la tournée entoure : les parcelles COMMENCÉES et pas
+//   finies sur un travail coché, sinon la PROCHAINE — le n°1 de la tournée affichée, celle-là
+//   même que la carte numérote. Rien sur une période archivée.
+function _opCibles(rows){
+  var T=(_PIL_OP&&_PIL_OP.tasks)||[];
+  if(!rows||!rows.length||!T.length||!window._mvVueActive()) return [];
+  var comm=rows.filter(function(r){ return r.geo && T.some(function(t){ return window._mvTacheEtat(r.p,t)==='commencee'; }); });
+  if(comm.length) return comm.map(function(r){ return r.p; });
+  for(var i=0;i<rows.length;i++){ if(rows[i].geo) return [rows[i].p]; }
+  return [];
+}
+function _opJournalLast(){ var d=_opDern(_opGeoOK); return d?{p:d.p,date:d.date}:null; }
 function _opStartResolve(geoTodo){
   if(_PIL_OP && _PIL_OP._startNom){ var sp=_opParcByNom(_PIL_OP._startNom); if(sp && _opGeoOK(sp)) return {p:sp,auto:false}; }
   var jl=_opJournalLast(); if(jl) return {p:jl.p,auto:true,src:'journal',date:jl.date};
@@ -2961,6 +2980,8 @@ function _opMapSvg(seqRows,w){
   var pool=[]; if(startPt) pool.push(startPt); todoGeo.forEach(function(p){pool.push(p);}); doneGeo.forEach(function(p){pool.push(p);});
   if(pool.length<2) return window._mvGraphVide('Pas assez de parcelles rep\u00e9r\u00e9es pour tracer une tourn\u00e9e',
     'Il en faut au moins deux dont le contour est connu.');
+  // ★ CIBLE-1 (§163) — les anneaux (commencée, sinon prochaine), gardés dans le cadre du dessin.
+  var cib=_opCibles(seqRows); cib.forEach(function(cp){ if(pool.indexOf(cp)<0) pool.push(cp); });
   var lats=pool.map(function(p){return (_opGeo(p)||p).lat;}), lngs=pool.map(function(p){return (_opGeo(p)||p).lng;});
   var minLa=Math.min.apply(0,lats),maxLa=Math.max.apply(0,lats),minLo=Math.min.apply(0,lngs),maxLo=Math.max.apply(0,lngs);
   // Fond sombre assume : ce repli imite la carte. Sa palette ne suit pas la
@@ -2973,6 +2994,7 @@ function _opMapSvg(seqRows,w){
   var seqNom={}; todoGeo.forEach(function(p,i){ seqNom[p.nom]=i+1; });
   var svg='';
   if(startPt){ var path='M '+X(startPt).toFixed(1)+' '+Y(startPt).toFixed(1); todoGeo.forEach(function(p){ path+=' L '+X(p).toFixed(1)+' '+Y(p).toFixed(1); }); svg+='<path d="'+path+'" fill="none" stroke="#C9A84C" stroke-width="2" stroke-opacity=".5" stroke-linejoin="round"/>'; }
+  cib.forEach(function(cp){ svg+='<circle class="mv-cible-svg" cx="'+X(cp).toFixed(1)+'" cy="'+Y(cp).toFixed(1)+'" r="13" fill="none" stroke="#C9A84C" stroke-width="2"/>'; });
   doneGeo.forEach(function(p){ if(startPt&&p.nom===startPt.nom) return; svg+='<circle cx="'+X(p).toFixed(1)+'" cy="'+Y(p).toFixed(1)+'" r="4.5" fill="#3a352c" stroke="#5a5248" stroke-width="1"/>'; });
   todoGeo.forEach(function(p){ var x=X(p).toFixed(1),y=Y(p).toFixed(1); svg+='<circle cx="'+x+'" cy="'+y+'" r="9" fill="#14110D" stroke="#C9A84C" stroke-width="1.6"/><text x="'+x+'" y="'+(parseFloat(y)+3.5)+'" text-anchor="middle" font-size="'+gc.txt.mini+'" font-weight="800" fill="#C9A84C" font-family="Outfit,sans-serif">'+seqNom[p.nom]+'</text>'; });
   if(startPt){ var sx=X(startPt).toFixed(1),sy=Y(startPt).toFixed(1); svg+='<circle cx="'+sx+'" cy="'+sy+'" r="6.5" fill="#6FBF5A"/><path d="M'+(parseFloat(sx)+0.5)+' '+(parseFloat(sy)-6.5)+' v-8 h6 l-2 2.5 2 2.5 h-6" fill="#6FBF5A" stroke="#0d1f0b" stroke-width=".5"/>'; }
@@ -3109,6 +3131,8 @@ function _dzLayers(map,D,noms){
   if(solid.length>1) L.polyline(solid,{color:'#C9A84C',weight:3.5,opacity:.85,lineJoin:'round'}).addTo(map);
   if(dash.length>1) L.polyline(dash,{color:'#C9A84C',weight:2.5,opacity:.55,dashArray:'6 7',lineJoin:'round'}).addTo(map);
   if(SG) L.marker([SG.lat,SG.lng],{icon:L.divIcon({className:'',iconSize:[20,20],iconAnchor:[10,10],html:'<div style="width:20px;height:20px;border-radius:50%;background:#6FBF5A;border:2.5px solid #fff;box-shadow:0 1px 4px rgba(0,0,0,.45)"></div>'})}).addTo(map).bindPopup('<b>D\u00e9part</b><br>'+_pilEsc(startPt.nom));
+  // ★ CIBLE-1 (§163) — l'anneau : commencée et pas finie, sinon la prochaine de la tournée.
+  _opCibles(rows).forEach(function(cp){ var cg=_opGeo(cp); if(cg){ window._mvCibleAnneau(map,cg); bounds.push([cg.lat,cg.lng]); } });
   seq.forEach(function(o){
     var ring=(o.i===li), pr=(sim&&sim.per)?sim.per[o.i]:null;
     var jour=(pr&&pr.d0!=null)?('jour '+(pr.d0+1)+(pr.d1>pr.d0?'\u2192'+(pr.d1+1):'')):'';

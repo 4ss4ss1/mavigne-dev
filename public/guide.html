@@ -737,6 +737,11 @@ mark{background:rgba(200,176,32,.32);color:var(--cream);border-radius:3px;paddin
     rouge au vert.</li>
     <li>Toucher un polygone sélectionne la parcelle ; les noms peuvent être masqués (<kbd><svg class="g-ic" width="18" height="18" viewBox="0 0 24 24" aria-hidden="true" focusable="false"><use href="#ic-etiquette"></use></svg> Noms</kbd>).</li>
     <li>La carte se recentre automatiquement sur le domaine à l'ouverture.</li>
+    <li>Un <b>anneau doré qui respire</b> marque la parcelle <b>commencée et pas finie</b> pour le travail
+    affiché : celle où « Début » a été touché sans validation. S'il n'y en a aucune, il se pose sur la
+    <b>prochaine à faire</b>, le n° 1 de la tournée enregistrée dans Décider. Sur « toutes », c'est la
+    priorité du moment. Plusieurs parcelles commencées ont chacune leur anneau, et rien ne s'affiche quand
+    vous consultez une période archivée.</li>
   </ul>
   <h4>La fiche d'une parcelle</h4>
   <ul class="dot">
@@ -2642,7 +2647,8 @@ mark{background:rgba(200,176,32,.32);color:var(--cream);border-radius:3px;paddin
     calendrier. Une semaine avec le 1<sup>er</sup> mai et l'Ascension n'a que trois jours pour absorber
     du travail : elle en reçoit trois cinquièmes, et les semaines pleines récupèrent le reste. C'est
     pour cela qu'une semaine de ponts apparaît plus calme que sa voisine sur les courbes.</li>
-    <li><b>Carte du domaine</b> colorée par avancement, libellés masquables.</li>
+    <li><b>Carte du domaine</b> colorée par avancement, libellés masquables. Un anneau doré qui respire
+    marque, sur la priorité du moment, la parcelle commencée et pas finie — sinon la prochaine à faire.</li>
   </ul>
 
   <h3><svg class="g-ic" width="18" height="18" viewBox="0 0 24 24" aria-hidden="true" focusable="false"><use href="#ic-curseurs"></use></svg> Décider</h3>
@@ -2707,6 +2713,11 @@ mark{background:rgba(200,176,32,.32);color:var(--cream);border-radius:3px;paddin
     un retour mardi, une fin de contrat comptent.</li>
     <li><b>Sur téléphone</b>, faire glisser le doigt sur la carte fait défiler la page ; deux doigts la
     déplacent. « Agrandir » l'ouvre en plein écran.</li>
+    <li><b>L'anneau doré</b> entoure la parcelle commencée et pas finie sur un travail coché ; s'il n'y en a
+    aucune, le n° 1 de la tournée affichée.</li>
+    <li><b>Le départ</b> : par défaut, la dernière parcelle validée sur les travaux cochés (sans validation,
+    le centre du vignoble). Une validation annulée ne compte plus. Vous pouvez choisir un autre départ ;
+    l'anneau, lui, ne bouge pas avec ce choix.</li>
   </ul>
   <div class="note tip"><span class="ni" aria-hidden="true"><svg class="g-ic" width="18" height="18" viewBox="0 0 24 24" aria-hidden="true" focusable="false"><use href="#ic-eclair"></use></svg></span><div><b>La date compte autant que
   le nombre.</b> Certains travaux ont une fenêtre qu'on ne rattrape pas : la vendange se fait quand

@@ -937,6 +937,16 @@ html.mv-ov-lock,body.mv-ov-lock{overflow:hidden!important;}
 .mv-mehere-dot{position:absolute;left:50%;top:50%;width:14px;height:14px;margin:-7px 0 0 -7px;background:#2563EB;border:2.5px solid #fff;border-radius:50%;box-shadow:0 0 3px rgba(0,0,0,.45);z-index:2;}
 .mv-mehere-pulse{position:absolute;left:50%;top:50%;width:14px;height:14px;margin:-7px 0 0 -7px;border-radius:50%;background:rgba(37,99,235,.40);z-index:1;animation:mvMePulse 1.8s ease-out infinite;}
 @keyframes mvMePulse{0%{transform:scale(1);opacity:.7;}100%{transform:scale(4.2);opacity:0;}}
+/* ★ CIBLE-1 (§163) — la dernière parcelle validée : un anneau qui RESPIRE autour de son point (cartes
+   Parcelles, Pilotage, tournée du jour et son repli). Lent et discret, pour ne pas le confondre avec la
+   position (le point bleu ci-dessus pulse en onde). Centre vide : le point de la parcelle se voit dedans.
+   L'or est celui de la CARTE, pas du thème : la carte a sa palette, comme le repli SVG de la tournée.
+   Mouvement réduit demandé par le téléphone : l'anneau reste, fixe. */
+.mv-cible{pointer-events:none;}
+.mv-cible-o{position:absolute;left:0;top:0;width:100%;height:100%;box-sizing:border-box;border-radius:50%;border:2.5px solid #C9A84C;box-shadow:0 0 0 1px rgba(20,17,13,.35),inset 0 0 0 1px rgba(20,17,13,.35);animation:mvCible 2.4s ease-in-out infinite;}
+.mv-cible-svg{transform-box:fill-box;transform-origin:center;animation:mvCible 2.4s ease-in-out infinite;}
+@keyframes mvCible{0%,100%{transform:scale(.7);opacity:.95;}50%{transform:scale(1);opacity:.3;}}
+@media(prefers-reduced-motion:reduce){.mv-cible-o,.mv-cible-svg{animation:none;transform:scale(.8);opacity:.9;}}
 /* feuille de validation rapide (carte) */
 .mq-barwrap{height:8px;background:var(--gris-clair);border-radius:6px;overflow:hidden;margin-bottom:14px;}
 .mq-bar-fill{height:100%;border-radius:6px;transition:width .3s,background .3s;width:0;}

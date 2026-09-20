@@ -32,6 +32,13 @@ import { readFileSync } from 'node:fs';
 const CONTRE = process.argv.includes('--contre');
 const APP = readFileSync('src/app.js', 'utf8');
 const REG = readFileSync('src/reglages.js', 'utf8');
+/* ★ CIBLE-1 (§163) : « commencée » et « finie » se lisent maintenant dans utils.js
+   (`_mvTacheEtat`), pour que l'écran Vigne et les anneaux des cartes disent la même
+   chose. Le bac monte donc la VRAIE définition, pas un bouchon. */
+const UTILS = readFileSync('src/utils.js', 'utf8');
+const ETAT = (function(){ const i = UTILS.indexOf('window._mvTacheEtat = function');
+  return i < 0 ? '' : UTILS.slice(i, UTILS.indexOf('\n};\n', i) + 3); })();
+if (!ETAT) { console.log('   \u2717 _mvTacheEtat introuvable dans utils.js'); process.exit(1); }
 
 let vert = 0, total = 0;
 const rouges = [];
@@ -62,7 +69,8 @@ function fonction(src, nom) {
 
 const CMP = bloc(APP, '  const data=_dataF.sort((a,b)=>{', '\n  });\n', 'comparateur');
 const PVSTATE = [ '_pvDef', '_pvType', '_pvPrefix', '_pvSeasonPlan', '_pvEffPlan',
-                  '_pvStepState', '_pvCurDone', '_pvCurStarted' ].map(n => fonction(APP, n)).join('\n');
+                  '_pvStepState', '_pvSmartStep', '_pvEtapeCourante', '_pvCurDone',
+                  '_pvCurStarted' ].map(n => fonction(APP, n)).join('\n');
 const POSE = fonction(REG, '_perPoseTache');
 
 /* ══ MONTAGE — le comparateur, avec ses bouchons ═══════════════════════════ */
@@ -75,6 +83,9 @@ function monterTri(mutation) {
     function _tachesFor(p){ return p.taches||{}; }
     function getPCls(p){ return {pct:p.pct||0}; }
     ${PVSTATE}
+    var window={ _tachesFor:_tachesFor, _pvType:_pvType, _pvEffPlan:_pvEffPlan,
+                 _pvStepState:_pvStepState, _pvEtapeCourante:_pvEtapeCourante };
+    ${ETAT}
     var _pProxPos=null, _pOrdRangs={ok:false,rang:{}}, pTacheFilter='Taille', pCurStep=1;
     function _pProxDistOf(p){ return p.dist!=null?p.dist:9999; }
     function _pOrdRang(n){ var r=_pOrdRangs.rang[n]; return (r>0)?r:null; }

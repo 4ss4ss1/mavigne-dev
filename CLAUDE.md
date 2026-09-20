@@ -2,7 +2,20 @@
 
 > Document de référence du projet **Ma Vigne** (GUERETTECH). Il est le **porteur de vérité** :
 > la mémoire Claude est plafonnée, ce fichier ne l'est pas.
-> Dernière consolidation : **20 septembre 2026 (DZ-1)** — ★★★ **PILOTAGE › DÉCIDER LU AU PLANNING, JOUR PAR JOUR : LA TOURNÉE
+> Dernière consolidation : **20 septembre 2026 (CIBLE-1)** — ★★ **LES CARTES ENTOURENT LA PARCELLE COMMENCÉE, SINON LA PROCHAINE
+> À FAIRE — ET LA TOURNÉE PART ENFIN DE LA DERNIÈRE VALIDÉE, PAS DE LA PREMIÈRE DU JOUR (§163)**. Nico : « le point de la dernière
+> parcelle validée clignote sur toutes les cartes », puis, la faisabilité rendue : « non en fait il faut montrer soit celle commencée
+> et non finie, soit la prochaine à faire (commandé par le module Décider) ». Une définition unique, `_mvCibleCarte` (utils.js) :
+> ① les parcelles COMMENCÉES et pas finies — chacune son anneau ; ② sinon la PROCHAINE, le n°1 de la tournée ENREGISTRÉE dans
+> Décider. L'état d'une tâche (`_mvTacheEtat`, lu à l'étape en cours) devient la lecture COMMUNE de l'écran Vigne et des cartes.
+> ★ Trouvé en route : le départ « dernière faite » de la tournée prenait la PREMIÈRE parcelle validée du jour (`>=` sur la date
+> seule, journal rangé du plus récent au plus ancien) — et le défaut existait DEUX fois, la seconde ajoutée par DZ-1 dans « Qui fait
+> quoi » (`_dzDernierFait`). Anneau doré qui respire (`.mv-cible-o`, figé en mouvement réduit) sur Parcelles › Carte, Pilotage ›
+> Carte du domaine, la tournée du jour (page et « Agrandir ») et son repli hors ligne ; rien sur une archive. Harnais neuf : 33
+> assertions, 16 contre-épreuves. **APP 7.49 → 7.51 · SW 8.17 → 8.19** (DERN-1, jamais poussé, est REMPLACÉ par ce lot), base
+> `107a646`. Détail en **§163**.
+>
+> ★ Précédente : **20 septembre 2026 (DZ-1)** — ★★★ **PILOTAGE › DÉCIDER LU AU PLANNING, JOUR PAR JOUR : LA TOURNÉE
 > DU JOUR, « QUI FAIT QUOI », ET LA CARTE QUI LAISSE DÉFILER (§162)**. Nico : « par défaut l'effectif réel, le nombre d'heures de
 > travail de la journée, le temps de pause, le temps de trajet entre les vignes (revoir aussi le défilement sur téléphone qui ne marche
 > pas) […] la tâche qui est indiquée en priorité du moment […] je veux un outil puissant ». Maquette validée (« c'est parfait »). La
@@ -21995,3 +22008,111 @@ Aucun fichier de code en commun. AVANT-2 ne touche aucune des fonctions que lit 
 ④ L'heure « sur place 08:00 → 16:00 » n'apparaît que si le planning porte l'horaire du mois (`_timings`) ou une saisie du jour.
 ⑤ Rejoué dans Chromium (téléphone émulé), pas sur un vrai téléphone. ⑥ « Il faudrait N » cherche de 1 à 40 personnes, par
 simulations successives (cache par personne et par jour) : à surveiller sur un très gros domaine.
+
+---
+
+## 163. ★★ CIBLE-1 — LES CARTES ENTOURENT LA PARCELLE COMMENCÉE, SINON LA PROCHAINE À FAIRE ; ET LE DÉPART DE LA TOURNÉE N'EST PLUS LA PREMIÈRE DU JOUR (20/09 — `utils.js` · `app.js` · `pilotage.js` · `styles.css` · `index.html` · `sw.js` · `guide/04-vigne.html` · `guide/11-pilotage.html` · `scripts/mv-harnais-cible.mjs` · `package.json` · `.github/workflows/ci.yml` · `scripts/typo-baseline.json` · `scripts/harnais-claude-md.mjs` · APP 7.49 → **7.51** · SW 8.17 → **8.19** · base `107a646`)
+
+> ⚠️ **Ce lot REMPLACE DERN-1**, livré quelques heures plus tôt et jamais poussé (le dépôt était resté sur `107a646`). DERN-1
+> faisait respirer la DERNIÈRE PARCELLE VALIDÉE ; Nico, à la livraison : *« non en fait il faut montrer soit celle commencée et non
+> finie, soit celle la prochaine à faire (commandé par le module décider) »*. Le mécanisme (anneau, mouvement réduit, période,
+> correction du départ) est repris tel quel ; la CIBLE change, et les noms avec elle (`mv-dern-*` → `mv-cible-*`). Les numéros
+> sautent 7.50 / 8.18 par la règle du doute : on ne réutilise jamais un numéro qui a pu partir en ligne.
+>
+> Étude de faisabilité faite sur `9e5044d`, lot écrit sur `107a646` (AVANT-2 et DZ-1 poussés entre-temps), tout relu dessus.
+> Pas de maquette : le rendu Chromium (390 px) a servi de maquette, montré à la livraison.
+
+### 163a. Ce que les cartes montrent, et pourquoi ce n'est pas « la dernière validée »
+
+« La dernière validée » dit d'où l'on vient. Sur une carte, ce qu'on cherche est **où aller** : la parcelle en cours, sinon la
+suivante. Pour une tâche, dans cet ordre :
+
+1. **COMMENCÉES et pas finies** — « Début » touché, pas encore validé. Il peut y en avoir plusieurs (deux équipes, un oubli de la
+   veille) : **chacune a son anneau**, aucune n'est cachée derrière un choix arbitraire.
+2. Sinon la **PROCHAINE** : la première de la **tournée enregistrée dans Décider** qui reste à faire — le même « 1 » que la liste
+   des parcelles affiche. **Sans tournée enregistrée : rien.** Personne n'a dit par où commencer, la carte n'invente pas un ordre.
+
+Quelle tâche, selon la carte : Parcelles › Carte, la **tâche affichée** (sur « toutes », la **priorité du moment**) ; Carte du
+domaine, la priorité du moment ; carte de la tournée, les **travaux cochés**, et sa « prochaine » est le n°1 de la tournée
+affichée — celle que la carte numérote, enregistrée ou non.
+
+⚠️ **« Commencée » et « finie » se lisent à l'ÉTAPE EN COURS** pour une tâche à passages ou à niveaux : une parcelle dont P1 est
+validé n'est pas finie pour la saison, mais elle l'est pour le passage du moment. C'est exactement la lecture de l'écran Vigne.
+Plutôt que de la recopier, `_pvCurDone` et `_pvCurStarted` **passent maintenant par `_mvTacheEtat`** (utils.js), et app.js ne garde
+que la réponse qu'il est seul à connaître : quelle étape est en cours (`_pvEtapeCourante` — l'étape affichée pour la tâche
+affichée, sinon l'étape où en est le domaine).
+
+### 163b. Trouvé en route : la tournée partait de la PREMIÈRE parcelle du jour, à DEUX endroits
+
+- `_opJournalLast` (pilotage.js) gardait la parcelle de plus grande date avec `if(d>=bestD)`, en parcourant le journal dans l'ordre
+  du tableau. Le journal s'écrit par `unshift` (le plus récent en tête) : à date égale, `>=` garde le dernier RENCONTRÉ, donc le
+  plus ANCIEN du jour. Rejoué : A 8 h, B 10 h, C 15 h → **A**. Le libellé « Départ : auto — dernière faite : A » mentait, et
+  l'ordre au plus proche partait de la parcelle du matin.
+- ★ **Le même défaut, une seconde fois** : DZ-1 avait écrit `_dzDernierFait` pour « Qui fait quoi », avec la même boucle. Une copie
+  privée d'une règle non centralisée se reproduit ; c'est le premier lot qui aurait dû la centraliser. Les deux appellent désormais
+  `_mvDerniereValidee`, et le harnais refuse le retour du motif (`bestD`, `dd>=bd`) dans tout pilotage.js.
+- `_mvDerniereValidee` : date du TRAVAIL d'abord, puis **heure de saisie** (l'`id` d'une ligne de journal est `Date.now()` en
+  hexadécimal, `-qv` derrière pour la validation depuis la carte — rien à ajouter, rien à migrer), puis rang dans le tableau. Une
+  validation **annulée** ensuite ne compte plus : `annulerTache` ajoute une ligne « Annulé », il ne retire pas la « Validé ».
+
+### 163c. L'anneau
+
+- `_mvCibleAnneau(map, g)` : `divIcon` `.mv-cible` (40 px) + `<i class="mv-cible-o">`. On anime l'**enfant**, jamais la racine :
+  Leaflet place un marqueur par `transform`. `interactive:false` (le toucher passe à la parcelle), `zIndexOffset:-1000`.
+- Feuille : `@keyframes mvCible` 2,4 s, échelle .7 ↔ 1, opacité .95 ↔ .3 — une respiration, pas l'onde bleue de la position
+  (`mvMePulse`, 1,8 s). L'or de la carte (`#C9A84C`) en dur : la carte a sa palette, elle ne suit pas le thème.
+  `prefers-reduced-motion` : l'anneau reste, fixe.
+- Les quatre cartes : `_pCibleMapSync` (Parcelles — relancé par `initMap`, `refreshMapColors` et `renderParcelles`, que l'écoute
+  temps réel relance : l'anneau suit un « Début » ou une validation venus d'un autre téléphone) ; `_pilBuildMap` (Carte du
+  domaine) ; `_dzLayers` (tournée, page ET « Agrandir ») ; `_opMapSvg` (repli hors ligne, cercle `.mv-cible-svg`).
+- ⚠️ Parcelles : le centre est occupé par l'étiquette du nom, dessinée au-dessus des marqueurs. L'anneau déborde derrière elle en
+  haut et en bas ; noms masqués, il se voit entier.
+
+### 163d. Mesuré
+
+- `mv-harnais-cible` : **33 assertions** — 22 scénarios EXÉCUTÉS sur les vraies définitions (commencée devant la prochaine, deux
+  commencées, n°1 fini, hors tournée, arrachée, tâche désactivée, sans tournée, archive, passages P1/P2, plan raccourci, priorité,
+  puis le départ : même jour, antidaté, annulé, `-qv`, garde), 11 contrôles d'appelants et de feuille. **16 contre-épreuves**,
+  toutes détectées. Branché dans `check`, `prebuild` et la CI (`mv-harnais-portes` vert), `npm run test:cible`.
+- Chromium, bundle construit, Leaflet 1.9.4 servi depuis le paquet npm (même empreinte que la SRI de l'appli), 390 × 844, six
+  parcelles à contour et une tournée enregistrée : rien de commencé → l'anneau est sur le **n°1 de la tournée** (0,5 px de son
+  étiquette) ; une parcelle passée « En cours » → il la rejoint ; deux → **deux anneaux** ; le n°1 validé et rien en cours → il
+  descend sur la suivante de l'ordre ; tournée effacée → plus d'anneau ; mouvement réduit → `animation:none`, l'anneau reste.
+  Pilotage › Carte du domaine : un anneau autour du point de la parcelle commencée, sur la priorité du moment. Aucune erreur de page.
+- ⚠️ Trouvé en passant la chaîne : `mv-harnais-vigne-tri` extrait `_pvCurDone` / `_pvCurStarted` d'app.js et les exécute dans un bac
+  SANS `window` — la délégation les y faisait planter. Le bac monte désormais la vraie `_mvTacheEtat` (pas un bouchon) et le harnais
+  du tri reste vert (18 assertions + 22 en contre-épreuve). ★ Un harnais qui lit du code doit suivre le code qu'il lit : déplacer
+  une définition, c'est déplacer ses bancs d'essai.
+- ★ Le cliquet de poids avait rougi (`styles.css` 421 → 443 ko) : DZ-1 l'avait porté à 442, tout juste sous +5 %, et l'anneau ajoute
+  1,1 ko. Découper la feuille : non, elle est à 43 % du plafond. Regravé : seuls des `ko` changent.
+- Contrôle complet : les **112 commandes** de `npm run check`, toutes vertes (code retour 0), dont `mv-harnais-recup --contre`
+  (83 défauts détectés) et le harnais neuf. ⚠️ Jouées en tranches, dans l'ordre de la chaîne et arrêt au premier rouge : le bac
+  coupe une commande à 300 s, la chaîne entière en prend un peu plus. `vite build` : OK. `test:smoke` : OK (démarrage, 23/23
+  globaux ; Chromium de Playwright python passé par `executablePath`, rien de livré). `test:e2e` : non joué.
+
+### 163e. La note de livraison
+
+**Base `107a646`. APP 7.49 → 7.51 · SW 8.17 → 8.19.** ⚠️ Ne pas intégrer le zip DERN-1 : celui-ci le contient et le remplace.
+`node scripts/build-guide.mjs` (le crochet de commit le fait), puis `npm run build && firebase deploy --only hosting`.
+
+| Fichier | Ce qui change | Bump ? |
+|---|---|---|
+| `src/utils.js` | `_mvTacheEtat`, `_mvCibleCarte`, `_mvTachePrio`, `_mvDerniereValidee`, `_mvVueActive`, `_mvCibleAnneau` ; APP 7.51, deux nouveautés, aide Parcelles et Pilotage | ★ APP |
+| `src/app.js` | `_pCibleMapSync` ; `_pvCurDone`/`_pvCurStarted` passent par `_mvTacheEtat` ; `_pvEtapeCourante` ; `_pOrdPeriodeOK` délègue | ★ SW |
+| `src/pilotage.js` | `_opCibles` ; `_opJournalLast` et `_dzDernierFait` lisent la définition unique ; anneaux sur `_dzLayers`, `_opMapSvg`, `_pilBuildMap` | — |
+| `src/styles.css` | `.mv-cible`, `.mv-cible-o`, `.mv-cible-svg`, `mvCible`, mouvement réduit | ★ SW |
+| `index.html` · `public/sw.js` | versions | ★ APP · ★ SW |
+| `guide/04-vigne.html` · `guide/11-pilotage.html` | la carte ; la carte du domaine ; l'anneau et le départ | — |
+| `scripts/mv-harnais-cible.mjs` · `package.json` · `.github/workflows/ci.yml` | harnais neuf, branché aux trois portes, `test:cible` | — |
+| `scripts/mv-harnais-vigne-tri.mjs` | son bac monte la vraie `_mvTacheEtat` (la délégation l'avait cassé) | — |
+| `scripts/typo-baseline.json` · `scripts/harnais-claude-md.mjs` · `CLAUDE.md` · `.mv-base` | poids regravé · SECTIONS 195 · §163 · base | — |
+
+### 163f. Ouvert, et dit
+
+① **Sans tournée enregistrée, aucun anneau** tant que rien n'est commencé — c'est le choix, pas un oubli : la carte ne propose pas
+un ordre que personne n'a décidé. ② La carte de la tournée et son repli n'ont pas été VUS : dans le bac, sans planning ni équipe,
+l'écran dit « Rien à faire pour ce travail ». Leur code est tenu par le harnais. ③ Vu dans Chromium, pas sur un vrai téléphone ni
+en plein soleil : si l'anneau est trop discret, deux nombres le règlent (opacité basse .3, durée 2,4 s). ④ Une parcelle sans
+contour ni coordonnées n'a pas d'anneau : elle n'est nulle part sur la carte. ⑤ Les deux cartes du Pilotage se redessinent à
+l'ouverture, pas en direct. ⑥ Plusieurs parcelles commencées font plusieurs anneaux : à regarder sur un domaine où deux équipes
+tournent en parallèle, l'écran peut devenir bavard.

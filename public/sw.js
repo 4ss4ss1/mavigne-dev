@@ -1,4 +1,9 @@
-// MA VIGNE — Service Worker v8.17
+// MA VIGNE — Service Worker v8.19
+// v8.19 (20/09/2026) — CIBLE-1 : un anneau doré respire sur les cartes (Parcelles, Carte du domaine, tournée du jour et son repli)
+//   autour de la parcelle COMMENCÉE et pas finie, sinon de la PROCHAINE à faire — le n°1 de la tournée enregistrée dans Décider.
+//   Une définition unique (_mvCibleCarte / _mvTacheEtat), lue aussi par l'écran Vigne. Corrigé au passage : le départ « dernière
+//   faite » de la tournée ET son jumeau caché dans « Qui fait quoi » retenaient la PREMIÈRE parcelle validée du jour ; les
+//   validations annulées ne comptent plus. Rien sur une période archivée. APP 7.49 -> 7.51. (v8.18 non déployée, remplacée.)
 // v8.17 (20/09/2026) — DZ-1 : Pilotage › Décider lu au planning. Tournée du jour : travail en priorité, prochain jour travaillé,
 //   équipe affectée et présente ce jour-là, heures et coupure du planning, trajets calculés parcelle à parcelle, fin jour par
 //   jour. « Qui fait quoi » remplace « Et si » (même moteur). Carte : un doigt fait défiler, « Agrandir ». APP 7.48 -> 7.49.
@@ -4091,7 +4096,7 @@
 // v2.22 — Fix profils vides : guard vide dans loadData() pour MEMBRES/SAISONS/TACHES
 // v2.17 — Onboarding intégré + tenantId · v2.06 — Firebase Auth · v2.00–v2.05 — divers
 const DEBUG = self.location.hostname === 'localhost' || self.location.hostname === '127.0.0.1';
-const CACHE_NAME   = 'mavigne-v8.17';
+const CACHE_NAME   = 'mavigne-v8.19';
 const TENANT_CACHE = 'mavigne-tenant';   // Cache persistant — préservé à chaque mise à jour SW
 const SYNC_TAG     = 'mavigne-sync';
 
@@ -4107,7 +4112,7 @@ const CDN_URLS = [
 ];
 
 self.addEventListener('install', event => {
-  if(DEBUG) console.log('[SW] Ma Vigne v8.17 installé — en attente');
+  if(DEBUG) console.log('[SW] Ma Vigne v8.19 installé — en attente');
   event.waitUntil(
     caches.open(CACHE_NAME).then(async cache => {
       // ── Cœur applicatif : STRICT (mise à jour ATOMIQUE) ──
@@ -4127,7 +4132,7 @@ self.addEventListener('install', event => {
 });
 
 self.addEventListener('activate', event => {
-  if(DEBUG) console.log('[SW] Ma Vigne v8.17 activé');
+  if(DEBUG) console.log('[SW] Ma Vigne v8.19 activé');
   event.waitUntil(
     caches.keys().then(keys =>
       Promise.all(
