@@ -1,4 +1,11 @@
-// MA VIGNE — Service Worker v8.13
+// MA VIGNE — Service Worker v8.14
+// v8.14 (20/09/2026) — TAUX-1 + DIM-1 : releve d'heures et compteur relus. Le taux le plus fort sort TOUJOURS en premier
+//   (absence, heures a rattraper, recup prise, paiement ; il pouvait rester plus de 50 % que de 25 %) ; la valeur reprise ne
+//   change pas ; l'estimation d'avant septembre suit. En mode paye, la majoration seule d'un dimanche couvre d'abord les
+//   absences : jamais une retenue a cote d'une majoration a payer. Detail de l'annee refait, papier et ecran : heures sup
+//   faites / payees, recup gagnee / prise, absences reprises, recup restante, heures a rattraper (7h d'absence s'ecrivaient
+//   « 5h36 », colonne « en repos »). Tournures : « Conge paye payee », « Recup payee », « de octobre », « a regler »,
+//   « sur heures sup » ; la ligne de semaine dit qu'une heure qui rattrape n'est pas une heure sup. APP 7.45 -> 7.46.
 // v8.13 (19/09/2026) — NOTIF-1 : quand une MAJ est installee et prete (en attente), une notification previent
 //   l'utilisateur s'il a deja autorise les notifications ("Fermez et rouvrez l'application pour l'installer") ;
 //   rien ne se force encore, elle attend toujours le prochain lancement (MAJ-1, §157). Pas de notification au
@@ -4071,7 +4078,7 @@
 // v2.22 — Fix profils vides : guard vide dans loadData() pour MEMBRES/SAISONS/TACHES
 // v2.17 — Onboarding intégré + tenantId · v2.06 — Firebase Auth · v2.00–v2.05 — divers
 const DEBUG = self.location.hostname === 'localhost' || self.location.hostname === '127.0.0.1';
-const CACHE_NAME   = 'mavigne-v8.13';
+const CACHE_NAME   = 'mavigne-v8.14';
 const TENANT_CACHE = 'mavigne-tenant';   // Cache persistant — préservé à chaque mise à jour SW
 const SYNC_TAG     = 'mavigne-sync';
 
@@ -4087,7 +4094,7 @@ const CDN_URLS = [
 ];
 
 self.addEventListener('install', event => {
-  if(DEBUG) console.log('[SW] Ma Vigne v8.13 installé — en attente');
+  if(DEBUG) console.log('[SW] Ma Vigne v8.14 installé — en attente');
   event.waitUntil(
     caches.open(CACHE_NAME).then(async cache => {
       // ── Cœur applicatif : STRICT (mise à jour ATOMIQUE) ──
@@ -4107,7 +4114,7 @@ self.addEventListener('install', event => {
 });
 
 self.addEventListener('activate', event => {
-  if(DEBUG) console.log('[SW] Ma Vigne v8.13 activé');
+  if(DEBUG) console.log('[SW] Ma Vigne v8.14 activé');
   event.waitUntil(
     caches.keys().then(keys =>
       Promise.all(

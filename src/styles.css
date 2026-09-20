@@ -4015,6 +4015,12 @@ body.mv-trial-on #app-root{padding-top:calc(env(safe-area-inset-top,0px) + 44px)
 .pf-t .pf-rec{color:var(--plan-acc);font-weight:var(--fw-bold,700)}
 .pf-an tr.cur td{background:var(--plan-acc-pale);font-weight:var(--fw-semi,600)}
 .pf-an td.b{font-weight:var(--fw-bold,700)}
+/* TAUX-1 (20/09/2026) — le détail de l'année : huit colonnes, en-têtes sur deux lignes, la récup (gagnée, prise, reprise, restante) dans la couleur du compteur. */
+.pf-an th{line-height:1.2;vertical-align:bottom}
+.pf-an td,.pf-an th{font-size:var(--pt-txt,12.5px);padding-left:1px;padding-right:1px}
+.pf-an th{font-size:var(--pt-micro,11px)}
+.pf-an .pf-cv{padding-left:var(--e-1,4px)}
+.pf-an td.dn{color:var(--orange-tx,#9C4E14);font-weight:var(--fw-semi,600)}
 .pf-scroll{overflow-x:auto}
 .pf-btn{display:flex;align-items:center;justify-content:center;gap:var(--e-2,8px);width:100%;min-height:48px;border-radius:13px;border:1.5px solid var(--gris);background:var(--bg-card);color:var(--texte);font-family:inherit;font-size:var(--pt-base,14px);font-weight:var(--fw-semi,600);cursor:pointer;margin:0 0 var(--e-3,12px)}
 .pf-btn-ok{background:var(--cave-2);border-color:var(--cave-2);color:#F0E2C8}   /* le bouton sombre de la feuille du jour */

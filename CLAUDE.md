@@ -2,7 +2,21 @@
 
 > Document de référence du projet **Ma Vigne** (GUERETTECH). Il est le **porteur de vérité** :
 > la mémoire Claude est plafonnée, ce fichier ne l'est pas.
-> Dernière consolidation : **19 septembre 2026 (SIGN-1)** — ★★★ **LE CONTRAT EST PAR DOMAINE : UN ADMIN ARRIVÉ APRÈS NE SIGNE
+> Dernière consolidation : **20 septembre 2026 (TAUX-1 + DIM-1)** — ★★★ **LE TAUX LE PLUS FORT SORT TOUJOURS EN PREMIER ; UNE
+> RETENUE NE VOISINE PLUS UNE MAJORATION DU DIMANCHE ; LE DÉTAIL DE L'ANNÉE SE LIT DANS L'UNITÉ DU COMPTEUR (§159)**. Nico,
+> relevés en main : « il faut que ça soit les heures à 50 % qui servent d'abord à rattraper les heures d'absence », « parfois
+> les heures sup à 50 % sont supérieures aux heures sup à 25 %, pourquoi », « la colonne en repos ne veut rien dire » ; puis,
+> sur les deux points ouverts : « trouve la solution, mais ça ne doit pas l'être » et « toujours le taux le plus haut sort en
+> 1er ». Audit sur le vrai code : **aucune addition fausse** ; un défaut d'ORDRE, un tableau illisible (7h d'absence imprimées
+> « 5h36 »), des tournures. **Un seul ordre pour tout ce qui sort du compteur** — absence, heures à rattraper, récup prise,
+> PAIEMENT : le mois le plus ancien, puis le taux le plus fort (`ordre()`) ; l'estimation AVANT-1 retournée dans le même sens.
+> **DIM-1** : en mode payé, la majoration seule entre au compteur le temps du calcul, après les heures sup ; absences, heures à
+> rattraper et récup prise passent d'abord, le reste se paie ; mois figé : `fige.maj` = ce qui a été PAYÉ, `fige.majRep`.
+> `_pfAnneeTable`, une source pour le papier et l'écran. **404 assertions, 73 contre-épreuves** (dont 140 mois tirés au
+> hasard : jamais une retenue à côté d'un paiement) ; deux pages A4. **APP 7.45 → 7.46 · SW 8.13 → 8.14**, base `0bb80a5`.
+> Détail en **§159**.
+>
+> ★ Précédente : **19 septembre 2026 (SIGN-1)** — ★★★ **LE CONTRAT EST PAR DOMAINE : UN ADMIN ARRIVÉ APRÈS NE SIGNE
 > PLUS, ET LA PREUVE NE S'ÉCRASE PLUS (§156)**. Trouvé en relisant le code après TIERS-1 : un salarié passé admin a dû signer
 > CGU + DPA « au nom du domaine » (claim `terms` par personne, contrat par domaine), et `acceptTerms` a REMPLACÉ la preuve
 > d'origine (`set`, un document par domaine, sans historique). Serveur : transaction, historique `hist/{ref}-{ts_ms}`, preuve
@@ -21510,3 +21524,152 @@ bumpée.
 | `src/utils.js` | `APP_VERSION`, entrée `WHATS_NEW` | ★ APP |
 | `index.html` | 4 emplacements de version | ★ APP |
 | `public/sw.js` | version | ★ SW |
+
+---
+
+## 159. ★★★ TAUX-1 + DIM-1 — LE TAUX LE PLUS FORT SORT TOUJOURS EN PREMIER ; UNE RETENUE NE VOISINE PLUS UNE MAJORATION DU DIMANCHE ; LE DÉTAIL DE L'ANNÉE SE LIT DANS L'UNITÉ DU COMPTEUR (20/09 — `planning.js` · `styles.css` · `utils.js` · `index.html` · `sw.js` · `guide/10-planning.html` · `scripts/mv-harnais-recup.mjs` · `scripts/harnais-claude-md.mjs` · APP 7.45 → **7.46** · SW 8.13 → **8.14** · base `0bb80a5`)
+
+> Nico : *« relis le planning avec les retenues sur salaire, les récup, les heures de dimanche travaillés et la façon dont
+> sont tournées les phrases afin que tout soit bien clair. Moi-même j'ai l'impression que ça ne colle pas. Il faut que ça
+> soit les heures à 50 % qui servent d'abord à rattraper les heures d'absence, j'ai l'impression que les taux ne sont pas
+> appliqués si ce sont des heures de rattrapage. Parfois les heures sup à 50 % sont supérieures aux heures sup à 25 %,
+> pourquoi. Sur le PDF la colonne en repos ne veut rien dire, on a dit qu'il faut une colonne heure à récup, la colonne
+> absence est vide… enfin vérifie tout »*. Pas de maquette cette fois : les défauts étaient nommés, et les relevés rendus
+> avant / après ont servi de maquette. ⚠️ `origin/main` a avancé pendant le lot (`60d7a85` → `0bb80a5`, NOTIF-1, §158) :
+> recalé par `git fetch` avant les bumps — la section prévue « §158 » est devenue §159, 7.45/8.13 étaient pris.
+
+### 159a. L'audit, mesuré avant d'écrire
+
+- Banc hors dépôt (`/home/claude/lot/`) bâti sur le chargement de `mv-harnais-semaine` : les trois relevés de référence
+  (Chloé, Nico, Victor) rendus par le vrai `_planReleveFiche_`, lus en texte puis en A4 dans Chromium, et dix scénarios
+  sur un salarié à 35h (octobre 2026, semaines entières). **Aucune addition fausse.**
+- **« Le 50 % dépasse le 25 % »** — deux causes, une seule est un défaut. ① Légitime : une semaine à plus de 16h sup
+  (8h à 25 %, le reste à 50 %) ; la semaine du 31 août, dont le lundi d'août tient les premiers rangs (transition, une
+  fois). ② Défaut : `tire` prenait la file dans l'ordre d'entrée — dans un mois, le taux le plus BAS d'abord (§135). +12h
+  une semaine (8h à 25 %, 4h à 50 %), 7h d'absence injustifiée une AUTRE semaine : il restait 2h24 à 25 % et 4h à 50 %.
+- **« Les taux ne sont pas appliqués aux heures de rattrapage »** — ce n'est pas un bug, et la feuille ne le disait pas.
+  Dans la MÊME semaine, une heure en plus qui rattrape une heure manquée n'est pas une heure sup (la semaine ne dépasse
+  pas son planning, SEM-1) : heure pour heure, et c'est déjà le 50 % qui tombe en premier (12h en plus, 2h manquées → 8h
+  à 25 %, 2h à 50 %). D'un mois sur l'autre, le taux JOUE : 3h à rattraper sont comblées par 2h à 50 % (mesuré, AA5).
+  ★ Conséquence assumée de « compter à la semaine » : la même absence coûte plus dans la semaine des heures en plus
+  (1 pour 1) que dans une autre (en valeur).
+- **Dimanche travaillé** : juste. En heures sup, le taux le plus fort une seule fois (seau `50dim`) ; s'il rattrape, il ne
+  garde que sa majoration, qui entre au compteur (5h un dimanche + 7h injustifiées la même semaine : 5h rattrapées, 2h30
+  de majoration, 2h reprises dessus, reste 0h30).
+- **Le détail de l'année** : tout y était converti en heures sup BRUTES (FICHE-5) — 7h d'absence s'imprimaient « 5h36 »,
+  une récup de 7h « 4h40 », à côté de deux soldes dans deux unités (« Solde », « en repos »). Illisible, et la colonne
+  « Absences » était vide chez quiconque rattrape dans la semaine ou se voit retenir.
+
+### 159b. Le moteur (`_planCompteur`) — un seul ordre
+
+- Première passe : seules les prises EN TEMPS partaient du taux le plus fort, un paiement gardait le 25 % d'abord (§135), et
+  l'estimation AVANT-1 restait dans l'ancien sens — dit à Nico comme « ouvert ». Sa réponse : **« non, toujours le taux le plus
+  haut sort en 1er »**. Lu sans exception, paiement compris — deux ordres sur une même file auraient demandé une estimation à
+  deux bouts, et laissaient de toute façon « 50 % > 25 % » quelque part (dans ce qui reste, ou dans ce qui se paie).
+- **`ordre()`** : le mois le plus ancien d'abord (inchangé — NET-1 : la récup acquise passe avant les heures sup du mois), puis
+  le taux le plus FORT, puis l'ordre d'entrée. `tire` (absences, report, comble, domaine, récup prise, paiement défait d'un mois
+  figé, `paye_bank`) et `tireBrut` (le reste d'une demande) le suivent ; le **paiement du mois** trie ses seaux du plus fort au
+  plus bas (`pm`), l'entrée au compteur garde son ordre (25 %, 50 %, dimanche, férié). ⚰️ `tirePaie`, née et morte dans ce lot.
+- ★ **Ce que ça change, mesuré** : la VALEUR ne bouge pas (1h d'absence = 1h de récup ; retenue, heures à rattraper, solde en
+  temps de récup identiques), mais **pour une même valeur on paie moins d'HEURES, à un taux plus fort** : 12h sup (8h à 25 %, 4h à
+  50 %), 7h d'absence, 12h demandées → 6h24 payées (4h à 50 %, 2h24 à 25 %) ; avant 7h12, toutes à 25 %. Même argent. Le mois de
+  référence du harnais : au plus 10h30 payables (avant 12h). Un mois figé garde son paiement (c'est un fait, taux par taux).
+- Avant septembre 2026 toutes les tranches sont à taux 0 : à égalité l'ordre d'entrée est gardé, rien ne bouge (`releve`,
+  `retard`, `semaine` verts sans retouche).
+- **AVANT-1 retournée** (`_pfEstPile`) : la pile se range depuis le rang 0 — déjà majorées, 25 %, 50 % ; une tranche se vide
+  par ses rangs les plus hauts, donc ce qui est sorti a pris le 50 % d'abord et ce qui RESTE garde les taux les plus bas. Jeu W :
+  13h payées estimées 11h à 25 % et 2h à 50 % (avant 6h / 7h) ; 18h restantes, toutes à 25 % (avant 16h / 2h).
+- Neufs sur chaque ligne : `valAbs`, `valRec`, `entre`, `bankVal`, `payeCVal` (159c) ; `majPayee`, `majAbsV`, `reportMajFait` (159h).
+
+### 159c. Le détail de l'année — `_pfAnneeTable`, une source pour le papier et l'écran
+
+Colonnes : **Heures sup faites · Heures sup payées** (l'heure faite, ce que la paie saisit) **· Récup gagnée · Récup prise ·
+Absences reprises · Récup restante** (temps de récup, majoration comprise) **· Heures à rattraper**. La ligne tombe juste :
+restante = celle d'avant + gagnée − prise − absences − payé sur le compteur (la note le dit, avec le chiffre du mois quand
+il y en a un). « Solde » en heures brutes et « en repos » disparaissent ; les heures brutes restantes sont dans « Heures sup
+restantes à payer », quand il y a une demande. `_pfAnnee` garde ses anciens champs (`recup`, `recPrise`, `abs`, `solde` : Z10
+et `_pfRestants` les lisent). « Colonne heure à récup » lu comme la récup restante ; les heures à rattraper ajoutées en plus.
+- CSS papier : `.t .rc`, `.t.an` ; ★ `.p2{grid-template-columns:minmax(0,1fr) minmax(0,1fr)}` — avec `1fr 1fr`, un tableau
+  aux en-têtes `nowrap` élargissait SA colonne et rétrécissait l'autre : la page 2 de Nico passait à trois pages sans
+  qu'une ligne de la colonne de droite ait changé. Écran : `.pf-an th`, `.pf-an td.dn` (`styles.css`).
+
+### 159d. Les tournures
+
+« Congé payé *payée* », « Récup *payée* » → *payé*, *prise sur la récup* (écran : « 7h prises sur la récup ») ; « rattrapée sur
+heures sup » → « reprise sur la récup » (un seul nom, jour par jour, page 1, compteur, signature : « reprise sur ma
+récup ») ; `_pfDeMois` : « Les heures sup d'octobre », « Heures sup d'août gardées » ; « au 1er novembre » ; « 7h d'absence du
+salarié à régler » → « non rattrapées dans la semaine » ; « restent 3h45 » → « les 3h45 qui restent sont retenues » ; « au taux
+normal » → « heure pour heure » ; « Repos gagné » → « Récup gagnée ». La ligne de semaine : « Les heures en plus rattrapent 7h
+d'absence, heure pour heure : ce ne sont pas des heures sup » (★ essayé d'abord sur chaque jour — « de rattrapage, sans
+majoration » passait à deux lignes et coûtait 70 px à la page 1 de Victor : retiré). « À savoir » réécrit, plus court
+qu'avant malgré deux règles de plus (le 50 % d'abord, le rattrapage n'est pas une heure sup ; « sans motif » retiré).
+
+### 159e. Mesuré, et ce que les filets ont trouvé
+
+- Relevés rendus dans Chromium, polices du dépôt : **deux pages A4 dans les trois cas** ; page 2 de Nico 997 px de contenu,
+  comme avant le lot. ★ **Retombé dans le piège de §143b** : `/fonts/fonts.css` ne résout pas en `file://` ; sans Outfit, la
+  base elle-même sortait Nico sur trois pages. Banc corrigé (copie locale de `fonts.css`, `document.fonts.ready`, nombre de
+  polices chargées imprimé à chaque mesure).
+- `mv-harnais-recup` : **404 assertions, 73 contre-épreuves** au bout du lot. Première passe (392) — Q8 recalée (12h restantes : 8h à 25 %, rien à 50 %, 4h le dimanche ; avant
+  10h48), L24, O7, S5, U3b recalées ; section **AA** (14) : le 50 % d'abord pour une absence, une récup, un comble ; le 25 %
+  d'abord pour un paiement ; le plus ancien mois d'abord ; la ligne de l'année qui tombe juste ; 7h et 7h, plus « 4h40 » et
+  « 5h36 » ; en-têtes, « d'octobre », « prise sur la récup », « 1er novembre », la ligne de semaine, le dimanche. ★ AA5 rouge à
+  l'écriture : c'était le TEST (08:00 → 12:00 fait 4h, donc 3h écourtées — le piège de T2, §142d, une troisième fois).
+  66 contre-épreuves : 6 neuves ; 4 ancres repointées.
+- Seconde passe (« toujours », DIM-1) : **28 rouges au premier passage, tous attendus** — chacun recalculé À LA MAIN avant
+  d'être recalé (N10–N16, O11, Q1–Q11, R1, W2–W9, X1–X4, Y1, Y5, Y11, AA4), puis 392 verts du premier coup : le calcul à la main
+  et le moteur disaient la même chose. Section **AB** (11) : la majoration couvre 2h d'absence et il reste 1h à +50 % à payer ;
+  9h d'absence : 6h30 retenues, RIEN à payer ; un dimanche prévu sans absence se paie comme avant ; mode récup inchangé ;
+  l'instantané fige la majoration PAYÉE ; figé sans changement = mêmes chiffres ; la majoration née après l'envoi passe au mois
+  suivant, où une absence passe d'abord ; **140 mois tirés au hasard** en mode payé (graine fixe) : jamais une retenue à côté
+  d'un paiement — heures sup, majoration du mois, majoration reportée —, et le compteur tombe juste.
+  ★ AB9 rouge à l'écriture : c'était le TEST (un dimanche en heures sup ajouté après l'envoi couvrait l'absence à la place de la
+  majoration — juste, mais pas ce que le test voulait montrer). ★ AB11 : 49 « fautes » d'invariant au premier tirage — toutes
+  sur des récup prises compteur vide, hors du domaine de `solde − dette = net` (§135c) : le test borné, zéro faute.
+  **72 contre-épreuves** : 7 neuves (dont « la majoration se paie de nouveau sans regarder les absences » : 8 rouges) ; 5
+  repointées ; ⚰️ « les heures qui restent prennent les taux les plus bas » — c'était un défaut, c'est la règle ; son inverse le
+  remplace. ★ « le cadre réimprime les taux à zéro » était devenue MUETTE (Q1 paie désormais du 50 % : forcer la ligne du 50 %
+  ne montrait plus rien) : repointée sur la ligne du 25 %. Une contre-épreuve se relit quand ses données changent.
+- `npm run check`, `vite build`, `test:smoke` : voir la note de livraison.
+
+### 159f. La note de livraison
+
+**Base `0bb80a5`. APP 7.45 → 7.46 · SW 8.13 → 8.14.** `node scripts/build-guide.mjs`, puis `npm run build && firebase deploy --only hosting`.
+
+| Fichier | Ce qui change | Bump ? |
+|---|---|---|
+| `src/planning.js` | `ordre()` (un seul ordre, paiement compris), DIM-1 (majoration seule en mode payé, `fige.maj`/`fige.majRep`), `_pfEstPile` retournée, `valAbs`/`valRec`/`entre`/`payeCVal`, `_pfAnneeTable`, `_pfDeMois`, tournures, « À savoir », grille de la page 2 | — |
+| `src/styles.css` | `.pf-an th`, `.pf-an td.dn` | ★ APP · ★ SW |
+| `src/utils.js` | APP 7.46, quatre nouveautés, aide du Planning | ★ APP |
+| `index.html` · `public/sw.js` | versions | ★ APP · ★ SW |
+| `guide/10-planning.html` | l'année, le 50 % d'abord, le rattrapage dans la semaine | — |
+| `scripts/mv-harnais-recup.mjs` · `scripts/harnais-claude-md.mjs` · `CLAUDE.md` · `.mv-base` | voir 159e · SECTIONS 191 · base | — |
+
+### 159g. Ouvert, et dit
+
+① « Toujours » a été lu PAIEMENT COMPRIS (159b) : dit à Nico en tête de livraison, avec l'exemple chiffré — à inverser dans
+`pm` et `ordre()` s'il ne voulait que les prises en temps. ② DIM-1 : la majoration couvre aussi les heures du DOMAINE et la
+récup prise, pas seulement ce qui serait retenu — même file que les heures sup (NET-1) et même effet qu'en mode récup ; dit.
+③ Un mois figé AVANT ce lot garde `fige.maj` = la majoration travaillée (elle a été payée : c'est un fait) et n'a pas de
+`majRep` (son report affiché est tenu pour payé). ④ Vu dans Chromium (A4 et 390 px), pas sur papier ni sur téléphone.
+⑤ `planning.js` : 593 → ~601 ko.
+
+### 159h. DIM-1 — la majoration seule d'un mois payé
+
+- **Le défaut** (ouvert depuis §150f ②) : en mode payé, la majoration d'un dimanche ou d'un férié hors heures sup partait à la
+  paie sans regarder les absences — 7h injustifiées, un dimanche de 5h qui en rattrape 5 : 2h retenues ET 5h de majoration à
+  payer sur la même feuille.
+- **La règle** : c'est un paiement comme un autre. Sa valeur (heures × taux) entre au compteur le temps du calcul, en tranches
+  `nat:'maj'`, `aPayer`, `mj:{taux,nat}` — le férié avant le dimanche, APRÈS les heures sup du mois (taux 0 : elles sortent en
+  dernier) ; `bud` la compte (`majIn`). Absences du salarié, comble, domaine, récup prise passent ; ce qu'il en reste sort
+  aussitôt : `r.majPayee` (heures à leur taux), jamais gardé au compteur. `r.majDim` = la part ABSORBÉE seulement (`majAbsV`) :
+  les lecteurs du compteur (`_pfMouvements`, `_pfAnnee`, `_pfComptesV3`) tombent juste sans rien savoir du reste ; `entre` en
+  est diminué. Même exemple : aucune retenue, 1h à +50 % à payer.
+- **Mois figé** : `fige.maj` = la majoration PAYÉE (avant : travaillée), `fige.majRep` = le report payé. La majoration vive
+  au-delà du fait entre au compteur, couvre ce qui a changé, et le reste passe au mois suivant (`suiteMaj` → `repMaj`), où il
+  entre à son tour dans la file (`rep:true`) : une absence de novembre passe avant une majoration d'octobre. Payé de trop
+  (heures retirées après l'envoi) : sa valeur rejoint `trop`. ⚰️ L'ancien écart `mf` (en trop → retenu au mois suivant sans
+  passer par le compteur).
+- **L'affichage** : « Majorations à payer » lit `P.majPayee` ; « Xh de majoration ont d'abord couvert les absences », ou
+  « aucune — les Xh de majoration […] couvrent d'abord les absences » ; page 2, la phrase du dimanche le dit ; le compteur :
+  « Majoration […] gardée pour couvrir les absences ». Mode récup : rien ne change (AB6).

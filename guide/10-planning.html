@@ -234,8 +234,8 @@
     la récup prise et les heures à rattraper couvertes</b>. Raccourcis : aucune, tout le mois, <b>tout le
     compteur</b>. Les heures sup d'avant septembre 2026 apparaissent à part, avec un <b>taux estimé</b> d'après les jours saisis :
     chaque semaine est relue avec la règle d'aujourd'hui, et ce qui a déjà été payé ou pris en récup part des heures
-    à 25&nbsp;%. C'est une estimation : le compteur et les paies d'avant ne changent pas, la compta confirme. Le report
-    d'avant Ma Vigne reste <b>taux à vérifier</b>. Les heures payées se prennent d'abord sur celles à 25&nbsp;% et
+    à 50&nbsp;% d'abord : ce qui reste garde les taux les plus bas. C'est une estimation : le compteur et les paies d'avant ne changent pas, la compta confirme. Le report
+    d'avant Ma Vigne reste <b>taux à vérifier</b>. Les heures payées se prennent d'abord sur celles au taux le plus fort (50&nbsp;%, dimanche, férié) et
     sortent de la récup. La case existe quel que soit le mode du domaine. Le cadre donne alors <b>une ligne par
     taux qui a des heures</b> — à +25&nbsp;%, à +50&nbsp;%, du dimanche, de jour férié —, et l'onglet
     Compteur ajoute la carte <b>Heures sup restantes à payer</b> : les heures encore payables, taux par taux,
@@ -252,10 +252,11 @@
     ligne ; la carte <b>Heures à rattraper</b> (absences et journées écourtées par le domaine : ce que la semaine, la
     récup puis les heures sup du mois ont rattrapé, ce qui reste — toujours affichée, même à zéro) ; l'année mois par mois avec son total
     depuis janvier, et le report d'avant Ma Vigne, replié.
-    L'année se lit en <b>heures sup</b>, comme la paie : <b>heures sup du mois</b>, <b>payées</b>,
-    <b>récupérées</b>, <b>solde restant</b> — chaque ligne fait « solde d'avant + heures sup − payées −
-    récupérées ». Une récup retire les heures sup qu'elle consomme, à leur taux : 2h de récup sur des heures à
-    25&nbsp;% font 1h36 récupérées.</li>
+    L'année se lit mois par mois : <b>heures sup faites</b> et <b>heures sup payées</b> (l'heure faite, ce que la
+    paie saisit), puis, en temps de récup, la <b>récup gagnée</b> (majoration comprise), la <b>récup prise</b>,
+    les <b>absences reprises</b> (1&nbsp;h d'absence = 1&nbsp;h), la <b>récup restante</b>, et les <b>heures à
+    rattraper</b>. Chaque ligne tombe juste : récup restante = celle du mois d'avant + gagnée − prise − absences
+    reprises − ce qu'un paiement a pris au compteur.</li>
     <li><b>Congés et acomptes</b> — le solde de congés payés et les jours pris ; les <b>acomptes sur salaire</b>,
     en euros : ils se retirent du salaire, jamais du temps de récup.</li>
   </ul>
@@ -270,11 +271,19 @@
     semaine sont à <b>25&nbsp;%</b>, les suivantes à <b>50&nbsp;%</b>. Une heure à 25&nbsp;%
     donne <b>1&nbsp;h&nbsp;15</b> de récup, une heure à 50&nbsp;% <b>1&nbsp;h&nbsp;30</b>. L'équation se lit
     «&nbsp;acquises − retirées = de récup&nbsp;», avec le calcul écrit en clair.</li>
-    <li>Ce que la semaine n'a pas rattrapé d'une absence se reprend <b>sur la récup et les heures sup du mois, au
-    taux normal</b> : 1&nbsp;h manquée, 1&nbsp;h de récup en moins. Pour le salarié, ce qui n'est pas couvert est
+    <li>Une heure en plus qui rattrape une heure manquée <b>de la même semaine</b> n'est pas une heure sup : elle
+    compte heure pour heure, sans majoration — la ligne de semaine du relevé le dit.</li>
+    <li>Ce que la semaine n'a pas rattrapé d'une absence se reprend <b>sur la récup et les heures sup du mois, heure
+    pour heure</b> : 1&nbsp;h manquée, 1&nbsp;h de récup en moins. La récup la plus ancienne passe d'abord ; dans un
+    même mois, ce qui se prend en temps (absence, heures à rattraper, récup prise) part des <b>heures à 50&nbsp;%
+    d'abord</b> — un paiement aussi : le taux le plus fort sort toujours en premier. Pour le salarié, ce qui n'est pas couvert est
     <b>retenu sur la paie</b> ; pour le domaine, il va aux <b>heures à rattraper</b>, que les prochaines heures sup
     comblent — jamais retenu. Le salarié passe d'abord. Des heures sup ne se paient qu'une fois les absences
     couvertes : un relevé porte une retenue ou des heures sup à payer, <b>jamais les deux</b>.</li>
+    <li><b>Dimanche ou férié hors heures sup, domaine qui paie</b> : la majoration couvre d'abord les absences du mois, les
+    heures à rattraper et la récup prise, après les heures sup ; seul ce qu'il en reste part en paie. Une feuille ne porte
+    jamais une retenue à côté d'une majoration à payer. Dans un mois figé, une majoration née après l'envoi passe au mois
+    suivant, où elle suit la même règle.</li>
     <li><b>À déclarer</b> : dans le cadre <b>Pour la compta</b>, les heures sup payées s'écrivent en <b>heures
     brutes</b>, avec leur taux. La compta majore elle-même : pour 1&nbsp;h sup à 25&nbsp;%, on lui déclare
     <b>1&nbsp;h à +25&nbsp;%</b>, jamais 1&nbsp;h&nbsp;15.</li>
@@ -287,7 +296,8 @@
     rattraper, retenue), une colonne donne les <b>heures sup</b> du jour, et chaque semaine se lit en
     entier, avec en gris les jours du mois d'avant qu'elle emporte. Page&nbsp;2 : les heures sup par taux, le
     <b>compteur de récup</b> depuis le solde du mois d'avant, le compte des <b>heures à rattraper</b>, le détail mois
-    par mois (la <b>récup prise</b> et les <b>absences reprises</b> en colonnes séparées) et le cumul depuis janvier, les durées et repos à surveiller (plus de 10&nbsp;h dans la journée, semaine sans repos), les signatures.</li>
+    par mois (heures sup faites et payées, récup gagnée, prise, <b>absences reprises</b>, <b>récup restante</b>,
+    <b>heures à rattraper</b>) et le cumul depuis janvier, les durées et repos à surveiller (plus de 10&nbsp;h dans la journée, semaine sans repos), les signatures.</li>
     <li>Le relevé part à la compta <b>la dernière semaine du mois</b> : il compte <b>tout le mois</b>, les jours à
     venir aux heures du planning — une ligne dit à partir de quel jour —, et il se signe. Au moment de l'envoi,
     <b>figez le mois</b> (bouton <b>Figer</b>, carte <b>Envoi à la compta</b> du Résumé de la fiche) : ce qui est payé
