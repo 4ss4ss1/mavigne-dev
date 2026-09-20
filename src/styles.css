@@ -3977,6 +3977,17 @@ body.mv-trial-on #app-root{padding-top:calc(env(safe-area-inset-top,0px) + 44px)
 .pf-cl-v>span{display:flex;flex-direction:column;align-items:flex-end;min-width:0}
 .pf-cl-v small{font-size:var(--pt-txt,12.5px);font-weight:var(--fw-semi,600);color:var(--texte-med)}
 .pf-cl-v .x{white-space:normal}
+/* CLAIR-1 (20/09/2026) — « Heures sup à payer » : trois totaux, toujours les mêmes (25 %, 50 %, dimanches et fériés), chacun avec d'où viennent ses heures. */
+.pf-cl-sup{grid-template-columns:minmax(0,1fr)}
+.pf-cl-sup .pf-cl-v{justify-content:stretch;text-align:left;margin-top:var(--e-1,4px)}
+.pf-cl-sup .pf-cl-v>span{display:block;width:100%}
+.pf-cl-v .tx3{display:grid;grid-template-columns:1fr 1fr 1.35fr;gap:var(--e-1,4px)}
+.pf-cl-v .tb{display:block;border:1px solid var(--gris-clair);border-radius:var(--r-sm,8px);padding:var(--e-1,4px) var(--e-2,8px);background:var(--terre-pale)}
+.pf-cl-v .tb small{display:block;font-size:var(--pt-micro,11px);color:var(--texte-med)}
+.pf-cl-v .tb b{display:block;font-size:var(--pt-md,20px);line-height:1.15}
+.pf-cl-v .tb i{display:block;font-style:normal;font-size:var(--pt-micro,11px);font-weight:normal;line-height:1.3;color:var(--texte-med)}
+.pf-cl-v .tb.z{background:none;border-color:var(--gris-clair)}
+.pf-cl-v .tb.z b{font-weight:normal;color:var(--texte-doux)}
 .pf-cl-p{grid-column:1 / -1;margin:var(--e-1,4px) 0 0;font-size:var(--pt-micro,11px);line-height:1.4;color:var(--texte-med)}
 .pf-cl-base .pf-cl-v{font-size:var(--pt-lg,23px)}
 .pf-cl-ko .pf-cl-v{color:var(--rouge-tx,#A0291E)}

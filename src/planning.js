@@ -4480,26 +4480,48 @@ function _pfCompta(mbr,P,D,V,A){
   }
   if((RP.retNC||0)>0.0001)pq+=(pq?' ':'')+'Plus '+F(RP.retNC)+' '+de+mR+', apr\u00e8s l\u2019envoi\u00a0: '+(RP.ret-RP.retNC>0.0001?F(RP.ret-RP.retNC)+' ont \u00e9t\u00e9 prises sur la r\u00e9cup.':'rien sur la r\u00e9cup.');
   if((RP.rendu||0)>0.0001)pq+=(pq?' ':'')+'Moins '+F(RP.rendu)+' retenues de trop en '+mR+'.';
-  L.push({k:'base',l:'Salaire de base',v:ret>0.0001?'Retenue de '+F(ret):'Maintenu',ton:ret>0.0001?'ko':'ok',p:pq});
+  // ★ CLAIR-1 (20/09/2026) — Nico : « il faut que ça soit clair quand on marque aucune retenue ». « Maintenu » demandait de
+  //   savoir ce qui l'était : la ligne dit « Aucune retenue », et ce que la compta en fait.
+  L.push({k:'base',l:'Salaire de base',v:ret>0.0001?'Retenue de '+F(ret):'Aucune retenue',ton:ret>0.0001?'ko':'ok',
+    p:(ret>0.0001?F(ret)+' \u00e0 retirer du salaire de base. ':'Le salaire de base se paie en entier. ')+pq});
   var ss=JS(function(x){return x.neutreType==='sansolde'&&x.neutre>0.0001;});
   if(ss.length)L.push({k:'sansolde',l:'Cong\u00e9 sans solde',v:F(som(ss,'neutre'))+' <small>\u00e0 retirer</small>',ton:'ko',
     p:ss.length+' jour'+(ss.length>1?'s':'')+', '+_pfJoursTxt(ss.map(function(x){return x.d;}))+'.'});
   // ── 2. Les heures sup à payer, une ligne par taux (FICHE-3), ou « aucune » et pourquoi.
-  var TX=_planMajTaux(),tD=TX.dim,tF=TX.ferie,cat={c25:0,c50:0,dim:0,fer:0};
-  P.lignes.forEach(function(l){if(l.nat==='dim')tD=l.taux;if(l.nat==='fer')tF=l.taux;var k=_pfCat(l.nat,l.taux);if(k in cat)cat[k]+=l.paye;});
-  (r.payesBank||[]).forEach(function(q){var k=_pfCat(q.nat,q.taux||0);if(k in cat)cat[k]+=q.brut;});
-  var SP=_pfSources(mbr,(r.payesBank||[]).map(function(q){return {mois:q.mois,nat:q.nat,taux:q.taux||0,bas:q.bas,haut:q.haut};})),X=[];
-  if(cat.c25>0.0001)X.push('<b>'+F(cat.c25)+'</b> <small>\u00e0 +25\u202f%</small>');
-  if(cat.c50>0.0001)X.push('<b>'+F(cat.c50)+'</b> <small>\u00e0 +50\u202f%</small>');
-  if(cat.dim>0.0001)X.push('<b>'+F(cat.dim)+'</b> <small>le dimanche, \u00e0 +'+tD+'\u202f%</small>');
-  if(cat.fer>0.0001)X.push('<b>'+F(cat.fer)+'</b> <small>jour f\u00e9ri\u00e9, \u00e0 +'+tF+'\u202f%</small>');
-  _pfSourcesLignes(SP).forEach(function(x){X.push('<b>'+F(x[2])+'</b> <small>'+x[1].charAt(0).toLowerCase()+x[1].slice(1)+(x[3]?' (estim\u00e9es\u00a0: '+x[3]+')':'')+'</small>');});
+  // ★★★ CLAIR-1 (20/09/2026) — TROIS TOTAUX, ET PLUS DE PHRASE. Nico : « il faut qu'il y ait le total d'heures sup à payer à
+  //   25 %, le total à 50 %, le total de dimanche et de jours fériés à payer. Il ne faut pas de phrase type nombre d'heures sup
+  //   d'avant le mois estimé. Tu mets la ligne heure sup à 25 % (nbre heure du mois + nombre heure d'avant) ; idem pour la ligne
+  //   50 % et idem pour la ligne dimanche et jour férié. » La ligne « heures sup d'avant septembre (estimées : …) » disparaît :
+  //   ce qu'elle estimait rejoint SON taux, et chaque case dit d'où viennent ses heures. Les cases sont toujours les trois
+  //   mêmes, dans le même ordre, un zéro en gris. Ce qui n'a PAS de taux (report d'avant Ma Vigne, majoration déjà
+  //   calculée) ne peut rejoindre aucune case : une ligne à part, seulement s'il y en a.
+  var TX=_planMajTaux(),tD=TX.dim,tF=TX.ferie,mo={c25:0,c50:0,dim:0,fer:0},av={c25:0,c50:0,dim:0,fer:0};
+  P.lignes.forEach(function(l){if(l.nat==='dim')tD=l.taux;if(l.nat==='fer')tF=l.taux;var k=_pfCat(l.nat,l.taux);if(k in mo)mo[k]+=l.paye;});
+  (r.payesBank||[]).forEach(function(q){var k=_pfCat(q.nat,q.taux||0);if(k in av)av[k]+=q.brut;});
+  var SP=_pfSources(mbr,(r.payesBank||[]).map(function(q){return {mois:q.mois,nat:q.nat,taux:q.taux||0,bas:q.bas,haut:q.haut};}));
+  av.c25+=SP.est.c25;av.c50+=SP.est.c50;
+  var deja=SP.est.deja||0,t25=mo.c25+av.c25,t50=mo.c50+av.c50,tDim=mo.dim+av.dim,tFer=mo.fer+av.fer,tDF=tDim+tFer+deja;
+  var aAvant=(av.c25+av.c50+av.dim+av.fer+deja)>0.0001;
+  var origine=function(a,b){return (a>0.0001&&b>0.0001)?F(a)+' du mois + '+F(b)+' d\u2019avant':(b>0.0001?'d\u2019avant '+moisL:((a>0.0001&&aAvant)?'du mois':''));};
+  var boite=function(lib,t,det){return '<span class="tb'+(t>0.0001?'':' z')+'"><small>'+lib+'</small><b>'+F(t)+'</b>'+(det?'<i>'+det+'</i>':'')+'</span>';};
+  var dDF=[];
+  if(tDim>0.0001)dDF.push(F(tDim)+' le dimanche, \u00e0 +'+tD+'\u202f%'+(av.dim>0.0001?' ('+origine(mo.dim,av.dim)+')':''));
+  if(tFer>0.0001)dDF.push(F(tFer)+' jour f\u00e9ri\u00e9, \u00e0 +'+tF+'\u202f%'+(av.fer>0.0001?' ('+origine(mo.fer,av.fer)+')':''));
+  if(deja>0.0001)dDF.push(F(deja)+' d\u2019avant septembre, sans majoration');
+  var X3='<span class="tx3">'+boite('\u00e0 +25\u202f%',t25,origine(mo.c25,av.c25))+boite('\u00e0 +50\u202f%',t50,origine(mo.c50,av.c50))+boite('dimanches et f\u00e9ri\u00e9s',tDF,dDF.join('<br>'))+'</span>';
+  var AU=[];
+  if(SP.dep>0.0001)AU.push('<span class="x"><b>'+F(SP.dep)+'</b> <small>report d\u2019avant Ma Vigne, taux \u00e0 v\u00e9rifier</small></span>');
+  if(SP.maj>0.0001)AU.push('<span class="x"><b>'+F(SP.maj)+'</b> <small>de majoration d\u00e9j\u00e0 calcul\u00e9e, \u00e0 payer sans majoration</small></span>');
+  if(SP.autre>0.0001)AU.push('<span class="x"><b>'+F(SP.autre)+'</b> <small>report\u00e9es, taux \u00e0 v\u00e9rifier</small></span>');
   var tot=P.payeTotal||0,dem=P.demande?(P.payeDem||0):0,absM=(V.AB.sal+V.AB.dom>0.0001||(c.dette||0)>0.0001||(RP.ret||0)>0.0001);
   var raison=absM?'les absences passent d\u2019abord.':'le compteur n\u2019en a pas davantage.';
   if(tot>0.0001){
-    var ps=(X.length>1?F(tot)+' en tout, \u00e0':'\u00c0')+' la demande du salari\u00e9'+(P.payeBank>0.0001&&P.payeMois>0.0001?'\u00a0: '+F(P.payeMois)+' du mois, '+F(P.payeBank)+' prises sur le compteur':(P.payeBank>0.0001?', prises sur le compteur':''))+'.';
+    var nb=(t25>0.0001?1:0)+(t50>0.0001?1:0)+(tDF>0.0001?1:0)+AU.length;
+    var ps=(nb>1?F(tot)+' en tout, \u00e0':'\u00c0')+' la demande du salari\u00e9'+(P.payeBank>0.0001&&P.payeMois>0.0001?'\u00a0: '+F(P.payeMois)+' du mois, '+F(P.payeBank)+' prises sur le compteur':(P.payeBank>0.0001?', prises sur le compteur':''))+'.';
+    if(deja>0.0001)ps+=' Dimanches et f\u00e9ri\u00e9s d\u2019avant septembre\u00a0: leur majoration a d\u00e9j\u00e0 \u00e9t\u00e9 compt\u00e9e en r\u00e9cup \u00e0 l\u2019\u00e9poque, ces '+F(deja)+' se paient sans majoration.';
     if(dem>tot+0.01)ps+=' Il en demandait '+F(dem)+'\u00a0: '+raison;
-    L.push({k:'sup',l:'Heures sup \u00e0 payer',v:X.map(function(x){return '<span class="x">'+x+'</span>';}).join(''),ton:'sup',p:ps});
+    L.push({k:'sup',l:'Heures sup \u00e0 payer',v:X3,ton:'sup',p:ps});
+    if(AU.length)L.push({k:'autres',l:'Autres heures \u00e0 payer',v:AU.join(''),ton:'sup',p:'Prises sur le compteur\u00a0: elles n\u2019ont pas de taux connu.'});
   } else {
     var pn=dem>0.0001?'Il en demandait '+F(dem)+'\u00a0: '+raison
       :(P.sup<0.0001?'Pas d\u2019heures sup ce mois-ci.'
@@ -4817,7 +4839,9 @@ function _pfEstTxt(e){
   var F=_planFmt,p=[];
   if(e.c25>0.004)p.push(F(e.c25)+' \u00e0 +25\u202f%');
   if(e.c50>0.004)p.push(F(e.c50)+' \u00e0 +50\u202f%');
-  if(e.deja>0.004)p.push(F(e.deja)+' un dimanche ou un f\u00e9ri\u00e9, d\u00e9j\u00e0 major\u00e9es');
+  // ★ CLAIR-1 — Nico : « dont heures dimanche déjà majorées : ce n'est pas clair ». Ce sont des heures sup faites un dimanche
+  //   ou un férié avant septembre : leur majoration est entrée au compteur à l'époque, à part ; l'heure se paie sans elle.
+  if(e.deja>0.004)p.push(F(e.deja)+' d\u2019un dimanche ou d\u2019un f\u00e9ri\u00e9, \u00e0 payer sans majoration (elle est d\u00e9j\u00e0 dans la r\u00e9cup)');
   return p.join(', ');
 }
 // Les lignes « à payer » ou « restantes » de ces heures : [clé, libellé, heures, estimation].
@@ -4849,22 +4873,36 @@ function _pfRestants(mbr,P){
   P.lignes.forEach(function(l){if(l.nat==='dim')R.tauxDim=l.taux;if(l.nat==='fer')R.tauxFer=l.taux;});
   return R;
 }
+// ★ CLAIR-1 (20/09/2026) — les heures restantes se rangent comme « Pour la compta » : ce que l'estimation d'avant septembre
+//   donne à un taux rejoint la ligne de CE taux (« dont Xh d'avant septembre »), plus de ligne « estimées ». En récup, une
+//   heure d'avant septembre vaut 1h pour 1h, comme à l'époque. Chaque ligne : {k, l, h, v, avant}.
+function _pfRestLignes(R){
+  var e=(R.src&&R.src.est)||{},S=R.src||{};
+  return [
+    {k:'c25',l:'Heures sup \u00e0 +25\u202f%',h:R.c25.h+(e.c25||0),v:R.c25.v+(e.c25||0),avant:e.c25||0,fixe:1},
+    {k:'c50',l:'Heures sup \u00e0 +50\u202f%',h:R.c50.h+(e.c50||0),v:R.c50.v+(e.c50||0),avant:e.c50||0,fixe:1},
+    {k:'dim',l:'Heures du dimanche \u00e0 +'+R.tauxDim+'\u202f%',h:R.dim.h,v:R.dim.v,avant:0,fixe:1},
+    {k:'fer',l:'Heures de jour f\u00e9ri\u00e9 \u00e0 +'+R.tauxFer+'\u202f%',h:R.fer.h,v:R.fer.v,avant:0,fixe:1},
+    {k:'deja',l:'Dimanches et f\u00e9ri\u00e9s d\u2019avant septembre, sans majoration',h:e.deja||0,v:e.deja||0,avant:0,note:'leur majoration est d\u00e9j\u00e0 dans la r\u00e9cup'},
+    {k:'maj',l:'Majoration des dimanches et f\u00e9ri\u00e9s, d\u00e9j\u00e0 calcul\u00e9e',h:S.maj||0,v:S.maj||0,avant:0},
+    {k:'dep',l:'Report d\u2019avant Ma Vigne, taux \u00e0 v\u00e9rifier',h:S.dep||0,v:S.dep||0,avant:0},
+    {k:'autre',l:'Heures report\u00e9es, taux \u00e0 v\u00e9rifier',h:S.autre||0,v:S.autre||0,avant:0}
+  ];
+}
 function _pfRestantsCarte(mbr,P){
   var R=_pfRestants(mbr,P),mois=PLAN_MOIS[P.m].toLowerCase();
-  var noms=[['c25','Heures sup \u00e0 +25\u202f%'],['c50','Heures sup \u00e0 +50\u202f%'],['dim','Heures du dimanche \u00e0 +'+R.tauxDim+'\u202f%'],['fer','Heures de jour f\u00e9ri\u00e9 \u00e0 +'+R.tauxFer+'\u202f%']];
-  var lignes=noms.map(function(x){var o=R[x[0]];return '<tr'+(o.h>0.0001?'':' class="pf-vide"')+'><td>'+x[1]+'</td><td class="n"><b>'+_planFmt(o.h)+'</b></td><td class="n pf-rec">'+(o.v>0.0001?_planFmt(o.v):'\u2014')+'</td></tr>';}).join('')
-    // ★★ AVANT-1 : les heures sans taux, par origine ; celles d'avant septembre avec leur estimation (§147).
-    +_pfSourcesLignes(R.src).map(function(x){return '<tr'+(x[3]?' class="pf-src"':'')+'><td>'+x[1]+'</td><td class="n"><b>'+_planFmt(x[2])+'</b></td><td class="n pf-rec">'+_planFmt(x[2])+'</td></tr>'
-      +(x[3]?'<tr class="pf-est"><td colspan="3">Estimation d\u2019apr\u00e8s les jours saisis\u00a0: '+x[3]+'. En r\u00e9cup, 1h pour 1h, comme avant septembre.</td></tr>':'');}).join('');
+  var lignes=_pfRestLignes(R).filter(function(x){return x.fixe||x.h>0.0001;}).map(function(x){
+    var sm=x.avant>0.0001?'dont '+_planFmt(x.avant)+' d\u2019avant septembre':(x.note||'');
+    return '<tr'+(x.h>0.0001?'':' class="pf-vide"')+'><td>'+x.l+(sm?'<small class="pf-estl">'+sm+'</small>':'')+'</td><td class="n"><b>'+_planFmt(x.h)+'</b></td><td class="n pf-rec">'+(x.v>0.0001?_planFmt(x.v):'\u2014')+'</td></tr>';}).join('');
   var det=R.src.mois.length?'<details class="pf-estd"><summary>Le calcul, mois par mois</summary><ul>'+R.src.mois.map(function(x){return '<li><b>'+PLAN_MOIS[x.mois]+'</b>\u00a0: '+_planFmt(x.h)+' restantes sur '+_planFmt(x.sup)+' compt\u00e9es au mois\u00a0\u2192 '+_pfEstTxt(x)+'</li>';}).join('')
-    +'</ul><p>Chaque semaine est relue avec la r\u00e8gle de septembre\u00a0: huit heures sup \u00e0 25\u202f%, les suivantes \u00e0 50\u202f%. Ce qui est sorti du compteur (r\u00e9cup, paiements) part des heures \u00e0 25\u202f%, comme depuis septembre. Le compteur et les paies d\u2019avant ne changent pas.</p></details>':'';
+    +'</ul><p>Chaque semaine est relue avec la r\u00e8gle de septembre\u00a0: huit heures sup \u00e0 25\u202f%, les suivantes \u00e0 50\u202f%. Ce qui est sorti du compteur (r\u00e9cup, paiements) a pris les heures au taux le plus fort d\u2019abord, comme depuis septembre\u00a0; en r\u00e9cup, une heure d\u2019avant septembre vaut 1h pour 1h. Le compteur et les paies d\u2019avant ne changent pas.</p></details>':'';
   return '<section class="pf-card pf-restants" aria-labelledby="pf-restants-t"><div class="pf-card-t"><h3 id="pf-restants-t">Heures sup restantes \u00e0 payer</h3><span>fin '+mois+'</span></div>'
     +'<div class="pf-solde">'+_pfMark('sup',_planFmt(R.total))+'<span>restantes, soit '+_planFmt(R.valeur)+' de r\u00e9cup</span></div>'
     +'<p class="pf-calc">'+_planFmt(R.report)+' report\u00e9es + '+_planFmt(R.faites)+' faites'+(R.maj>0.0001?' + '+_planFmt(R.maj)+' de majoration':'')
       +' \u2212 '+_planFmt(R.payees)+' pay\u00e9es \u2212 '+_planFmt(R.consommees)+' prises en r\u00e9cup = <b>'+_planFmt(R.total)+'</b></p>'
     +'<table class="pf-t"><thead><tr><th>Taux</th><th class="n">Restantes</th><th class="n">En r\u00e9cup</th></tr></thead><tbody>'+lignes+'</tbody>'
     +'<tfoot><tr><td>Total</td><td class="n">'+_planFmt(R.total)+'</td><td class="n pf-rec">'+_planFmt(R.valeur)+'</td></tr></tfoot></table>'+det
-    +'<p class="pl2-note">Les heures pay\u00e9es et la r\u00e9cup prise partent d\u2019abord des heures \u00e0 25\u202f%. Payer une heure restante \u00e0 +50\u202f% retire 1h30 du temps de r\u00e9cup.</p>'
+    +'<p class="pl2-note">Les heures pay\u00e9es et la r\u00e9cup prise partent d\u2019abord des heures au taux le plus fort. Payer une heure restante \u00e0 +50\u202f% retire 1h30 du temps de r\u00e9cup.</p>'
   +'</section>';
 }
 function _pfPaieDonnees(mbr,P){
@@ -7395,10 +7433,9 @@ function _planReleveFiche_(nom,mbr,_ctr){
       +_plRvContratsHtml(mbr)+_plRvCpHtml(mbr)+_plRvAnnuHtml(mbr,tc,moisL)
       +(P.demande?(function(){var R=_pfRestants(mbr,P);
         return '<h4 class="st">Heures sup restantes \u00e0 payer</h4><table class="t"><tbody>'
-          +[['c25','Heures sup \u00e0 +25\u202f%'],['c50','Heures sup \u00e0 +50\u202f%'],['dim','Heures du dimanche \u00e0 +'+R.tauxDim+'\u202f%'],['fer','Heures de jour f\u00e9ri\u00e9 \u00e0 +'+R.tauxFer+'\u202f%']]
-            // ★ PAIE-1 : seulement les taux qui ont des heures — quatre lignes à 0h ne disaient rien et poussaient la page 2 sur une troisième.
-            .filter(function(x){return R[x[0]].h>0.0001;}).map(function(x){var o=R[x[0]];return '<tr><td>'+x[1]+'</td><td class="n">'+F(o.h)+'</td><td class="n cv">'+F(o.v)+' de repos</td></tr>';}).join('')
-          +_pfSourcesLignes(R.src).map(function(x){return '<tr><td>'+x[1]+(x[3]?'<small class="est">Estimation d\u2019apr\u00e8s les jours saisis\u00a0: '+x[3]+'</small>':'')+'</td><td class="n">'+F(x[2])+'</td><td class="n cv">'+F(x[2])+' de repos</td></tr>';}).join('')
+          // ★ PAIE-1 : seulement les lignes qui ont des heures. ★ CLAIR-1 : l'estimation d'avant septembre rejoint la ligne de son taux.
+          +_pfRestLignes(R).filter(function(x){return x.h>0.0001;}).map(function(x){var sm=x.avant>0.0001?'dont '+F(x.avant)+' d\u2019avant septembre':(x.note||'');
+            return '<tr><td>'+x.l+(sm?'<small class="est">'+sm+'</small>':'')+'</td><td class="n">'+F(x.h)+'</td><td class="n cv">'+F(x.v)+' de repos</td></tr>';}).join('')
           +'<tr class="tot"><td>Restantes fin '+moisL+'</td><td class="n">'+F(R.total)+'</td><td class="n cv">'+F(R.valeur)+' de repos</td></tr></tbody></table>';})():'')
       +(P.acomptes.length?'<h4 class="st">Acomptes sur salaire</h4>'+ac:'')
       +'<h4 class="st">\u00c0 savoir</h4><ul class="sav">'
@@ -7427,6 +7464,9 @@ function _planReleveFiche_(nom,mbr,_ctr){
     +'.cpt{padding:2px 10px 5px}.cl{display:grid;grid-template-columns:30mm 1fr;column-gap:8px;align-items:baseline;padding:4px 0 3px;border-top:1px solid #EFEDEA}.cl:first-child{border-top:none}'
     +'.cl-l{font-size:var(--pt-micro,11px);font-weight:600;color:#1C1917}.cl-v{font-size:var(--pt-sm,17px);font-weight:700;line-height:1.15;color:#1C1917;font-variant-numeric:tabular-nums}'
     +'.cl-v small{font-size:var(--pt-lbl,10.5px);font-weight:600}.cl-v .x{display:block;white-space:nowrap}'
+    +'.tx3{display:grid;grid-template-columns:1fr 1fr 1.35fr;gap:5px}.tb{display:block;border:1px solid #D9C7B8;border-radius:5px;padding:2px 6px 3px;background:#FBF6F1}'
+    +'.tb small{display:block;font-size:var(--pt-nano,9.5px);font-weight:600;color:#57534E}.tb b{display:block;font-size:var(--pt-sm,17px);line-height:1.1}'
+    +'.tb i{display:block;font-style:normal;font-size:var(--pt-nano,9.5px);font-weight:normal;line-height:1.25;color:#57534E}.tb.z{background:none;border-color:#E7E5E4}.tb.z b{font-weight:normal;color:#A8A29E}'
     +'.cl-p{grid-column:2;font-size:var(--pt-nano,9.5px);font-weight:normal;color:#57534E;line-height:1.3;margin-top:1px}'
     +'.cl.base .cl-v{font-size:var(--pt-md,20px)}.cl.ko .cl-v{color:#A0291E}.cl.ok .cl-v{color:#31601C}.cl.sup .cl-v{color:#8A5A38}'
     +'.cl.rien .cl-l{font-weight:normal;color:#44403C}.cl.rien .cl-v{font-size:var(--pt-micro,11px);font-weight:normal;color:#57534E}'

@@ -7,7 +7,7 @@
   "src/app.js": {
     "dur": 206,
     "petit": 79,
-    "ko": 735
+    "ko": 744
   },
   "src/cave.js": {
     "dur": 32,
@@ -17,7 +17,7 @@
   "src/firebase.js": {
     "dur": 0,
     "petit": 0,
-    "ko": 155
+    "ko": 156
   },
   "src/onboarding.js": {
     "dur": 6,
@@ -37,7 +37,7 @@
   "src/planning.js": {
     "dur": 185,
     "petit": 98,
-    "ko": 576
+    "ko": 606
   },
   "src/reglages.js": {
     "dur": 209,
@@ -57,7 +57,7 @@
   "src/utils.js": {
     "dur": 6,
     "petit": 2,
-    "ko": 605
+    "ko": 613
   },
   "index.html": {
     "dur": 261,
@@ -67,6 +67,6 @@
   "src/styles.css": {
     "dur": 573,
     "petit": 128,
-    "ko": 418
+    "ko": 421
   }
 }

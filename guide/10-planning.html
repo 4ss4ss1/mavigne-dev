@@ -217,8 +217,9 @@
   changent de mois sans la fermer, et le bouton <b>Relevé</b> édite le PDF.</p>
   <ul class="dot">
     <li><b>Résumé</b> — le cadre <b>Pour la compta</b> : une ligne par chose que la compta saisit, toujours dans le
-    même ordre — le <b>salaire de base</b> (<b>retenue</b> de tant d'heures, ou <b>maintenu</b>), les <b>heures sup à
-    payer</b> (une ligne par taux qui a des heures), les <b>congés payés</b>, l'<b>arrêt de travail</b>, l'<b>acompte</b>.
+    même ordre — le <b>salaire de base</b> (<b>retenue</b> de tant d'heures, ou <b>Aucune retenue</b>), les <b>heures sup à
+    payer</b> (trois totaux, toujours les mêmes : à +25&nbsp;%, à +50&nbsp;%, dimanches et jours fériés — chacun dit ce
+    qui vient du mois et ce qui vient d'avant), les <b>congés payés</b>, l'<b>arrêt de travail</b>, l'<b>acompte</b>.
     Le chiffre est en gros ; « aucun », en gris, veut dire qu'il n'y a rien — pas un oubli ; le pourquoi est écrit en
     petit dessous (les absences du salarié et ce qu'elles sont devenues). Dessous, <b>Pour le salarié</b> : la récup
     restante, les <b>heures à rattraper</b>, les heures sup restantes à payer, la récup prise. En bas, le mois en
@@ -232,12 +233,14 @@
     du mois baissent ensuite (une absence rattrapée dans sa semaine), le reste se prend au compteur — la demande ne
     fond pas. On ne paie que ce qui reste une fois <b>les absences,
     la récup prise et les heures à rattraper couvertes</b>. Raccourcis : aucune, tout le mois, <b>tout le
-    compteur</b>. Les heures sup d'avant septembre 2026 apparaissent à part, avec un <b>taux estimé</b> d'après les jours saisis :
+    compteur</b>. Les heures sup d'avant septembre 2026 n'avaient pas de taux : il est <b>estimé</b> d'après les jours saisis, et elles
+    rejoignent la case de ce taux (« 12h du mois + 11h d'avant ») ; celles faites un dimanche ou un férié se paient
+    <b>sans majoration</b>, elle est déjà dans la récup depuis l'époque. Pour l'estimer,
     chaque semaine est relue avec la règle d'aujourd'hui, et ce qui a déjà été payé ou pris en récup part des heures
     à 50&nbsp;% d'abord : ce qui reste garde les taux les plus bas. C'est une estimation : le compteur et les paies d'avant ne changent pas, la compta confirme. Le report
     d'avant Ma Vigne reste <b>taux à vérifier</b>. Les heures payées se prennent d'abord sur celles au taux le plus fort (50&nbsp;%, dimanche, férié) et
-    sortent de la récup. La case existe quel que soit le mode du domaine. Le cadre donne alors <b>une ligne par
-    taux qui a des heures</b> — à +25&nbsp;%, à +50&nbsp;%, du dimanche, de jour férié —, et l'onglet
+    sortent de la récup. La case existe quel que soit le mode du domaine. Le cadre donne alors <b>trois totaux</b> — à +25&nbsp;%, à +50&nbsp;%, dimanches et jours fériés ; un report d'avant
+    Ma Vigne, sans taux connu, reste sur sa ligne « taux à vérifier » —, et l'onglet
     Compteur ajoute la carte <b>Heures sup restantes à payer</b> : les heures encore payables, taux par taux,
     le décompte (reportées + faites − payées − prises en récup) et leur équivalent en récup. Ce sont les mêmes
     heures, comptées une fois en repos, une fois en heures brutes. Pour les heures d'avant septembre, le détail

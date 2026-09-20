@@ -2,7 +2,17 @@
 
 > Document de référence du projet **Ma Vigne** (GUERETTECH). Il est le **porteur de vérité** :
 > la mémoire Claude est plafonnée, ce fichier ne l'est pas.
-> Dernière consolidation : **20 septembre 2026 (TAUX-1 + DIM-1)** — ★★★ **LE TAUX LE PLUS FORT SORT TOUJOURS EN PREMIER ; UNE
+> Dernière consolidation : **20 septembre 2026 (CLAIR-1)** — ★★ **« POUR LA COMPTA » : TROIS TOTAUX D'HEURES SUP, TOUJOURS LES
+> MÊMES, ET PLUS DE PHRASE À DÉCHIFFRER (§160)**. Nico, le relevé en main : « il faut qu'il y ait le total d'heures sup à payer à
+> 25 %, le total à 50 %, le total de dimanche et de jours fériés […] il ne faut pas de phrase type nombre d'heures sup d'avant le
+> mois estimé […] il faut que ça soit clair quand on marque aucune retenue. Idem quand est marqué dont heures dimanche déjà
+> majorées : ce n'est pas clair ». Trois cases (à +25 %, à +50 %, dimanches et fériés), chacune avec son total et « Xh du mois +
+> Yh d'avant » ; l'estimation d'avant septembre rejoint la case de SON taux ; ce qui n'a pas de taux (report d'avant Ma Vigne)
+> garde sa ligne. « Maintenu » → « Aucune retenue ». « déjà majorées » → « à payer sans majoration (elle est déjà dans la
+> récup) ». Les heures restantes (page 2, onglet Compteur) rangées de même — `_pfRestLignes`, qui SONT le total. **409
+> assertions, 78 contre-épreuves.** **APP 7.46 → 7.47 · SW 8.14 → 8.15**, base `91ec503`. Détail en **§160**.
+>
+> ★ Précédente : **20 septembre 2026 (TAUX-1 + DIM-1)** — ★★★ **LE TAUX LE PLUS FORT SORT TOUJOURS EN PREMIER ; UNE
 > RETENUE NE VOISINE PLUS UNE MAJORATION DU DIMANCHE ; LE DÉTAIL DE L'ANNÉE SE LIT DANS L'UNITÉ DU COMPTEUR (§159)**. Nico,
 > relevés en main : « il faut que ça soit les heures à 50 % qui servent d'abord à rattraper les heures d'absence », « parfois
 > les heures sup à 50 % sont supérieures aux heures sup à 25 %, pourquoi », « la colonne en repos ne veut rien dire » ; puis,
@@ -21673,3 +21683,83 @@ récup prise, pas seulement ce qui serait retenu — même file que les heures s
 - **L'affichage** : « Majorations à payer » lit `P.majPayee` ; « Xh de majoration ont d'abord couvert les absences », ou
   « aucune — les Xh de majoration […] couvrent d'abord les absences » ; page 2, la phrase du dimanche le dit ; le compteur :
   « Majoration […] gardée pour couvrir les absences ». Mode récup : rien ne change (AB6).
+
+---
+
+## 160. ★★ CLAIR-1 — « POUR LA COMPTA » : TROIS TOTAUX D'HEURES SUP, « AUCUNE RETENUE », ET PLUS DE PHRASE À DÉCHIFFRER (20/09 — `planning.js` · `styles.css` · `utils.js` · `index.html` · `sw.js` · `guide/10-planning.html` · `scripts/mv-harnais-recup.mjs` · `scripts/harnais-claude-md.mjs` · APP 7.46 → **7.47** · SW 8.14 → **8.15** · base `91ec503`)
+
+> Nico, après avoir poussé TAUX-1 + DIM-1 (`91ec503`, identique octet pour octet au lot livré — vérifié avant de repartir) : *« tout
+> pour le planning, pour le PDF, il faut que ça soit clair. Le pour la compta, il faut qu'il y ait le total d'heures sup à payer à
+> 25 %, le total d'heures sup à payer à 50 %, le total de dimanche et de jours fériés à payer. Il ne faut pas de phrase type nombre
+> d'heures sup d'avant le mois estimé. Tu mets la ligne heure sup à 25 % (nbre heure du mois + nombre heure d'avant) ; idem pour la
+> ligne heure sup 50 % et idem pour la ligne dimanche et jour férié. Il faut que ça soit clair quand on marque aucune retenue. Idem
+> quand est marqué dont heure dimanche déjà majoré : ce n'est pas clair. »* Pas de maquette : la structure était dictée ; le rendu
+> Chromium (A4 et 390 px) a servi de maquette, montré à la livraison.
+
+### 160a. Le cadre (`_pfCompta`, une source pour l'écran et le papier)
+
+- **« Heures sup à payer »** : une ligne, trois cases (`.tx3` / `.tb`), **toujours les trois mêmes, dans le même ordre** — *à +25 %*,
+  *à +50 %*, *dimanches et fériés* —, le total en gros, un zéro en gris (`.tb.z`). ⚠️ Revient sur PAIE-1 (§154 : « les taux à 0h ne
+  s'impriment plus ») : c'était MA recommandation, validée par un « go » ; Nico demande maintenant les trois totaux, explicitement.
+  Rien à payer : « aucune », sans cases (X6).
+- **D'où viennent les heures**, sous le total : « 12h du mois + 11h d'avant » (les mots de Nico), « d'avant septembre » si tout vient
+  du compteur, « du mois » seulement quand une autre case a de l'« avant » (sinon rien : c'est le cas courant). `mo` = le paiement du
+  mois (`P.lignes`), `av` = ce qui est pris au compteur à son taux (`payesBank`) **+ l'estimation AVANT-1** (`SP.est.c25/c50`).
+- ⚰️ La ligne « Xh heures sup d'avant septembre (estimées : …) ». Le mot « estimé » ne figure plus dans le cadre ; « À savoir »
+  (page 2) garde la puce qui dit que ces taux sont relus et que la compta confirme.
+- **Dimanches et fériés** : heures sup du dimanche / du férié à leur taux (« 6h le dimanche, à +50 % »), et les **heures de dimanche
+  d'avant septembre** (`est.deja`) : « 3h d'avant septembre, sans majoration » — la phrase dessous dit pourquoi (« leur majoration a
+  déjà été comptée en récup à l'époque, ces 3h se paient sans majoration »). ★ Elles ne sont PAS mises « à +50 % » : avant septembre
+  la majoration d'un dimanche entrait au compteur à part (tranche `maj`) ; la repayer ici la compterait deux fois.
+- **Ce qui n'a pas de taux** ne rejoint aucune case : ligne « Autres heures à payer », seulement s'il y en a — report d'avant Ma
+  Vigne (« taux à vérifier »), majoration déjà calculée (« à payer sans majoration »), heures reportées.
+- La **majoration seule** d'un mois payé (DIM-1) garde sa ligne « Majorations à payer » : ce n'est pas une heure à payer mais une
+  prime sur une heure déjà dans le salaire — la fondre dans le total des dimanches ferait payer l'heure deux fois.
+- **Salaire de base** : « Maintenu » → **« Aucune retenue »** + « Le salaire de base se paie en entier. » ; avec une retenue :
+  « Retenue de 3h45 » + « 3h45 à retirer du salaire de base. » puis le pourquoi.
+
+### 160b. Les heures restantes — `_pfRestLignes`
+
+Page 2 (« Heures sup restantes à payer ») et onglet Compteur : même rangement — l'estimation rejoint la ligne de son taux (« dont 18h
+d'avant septembre »), les dimanches d'avant septembre ont leur ligne (« sans majoration — leur majoration est déjà dans la récup »),
+majoration déjà calculée et report gardent la leur. En récup, une heure d'avant septembre vaut 1h pour 1h. ★ Les lignes SONT le total
+(W10b : Σh = `R.total`, Σv = `R.valeur`). `_pfEstTxt` : « déjà majorées » → « à payer sans majoration (elle est déjà dans la récup) »
+(« Le calcul, mois par mois »). ★ **Trouvé en passant, échappé à TAUX-1** : deux notes de la carte des restantes disaient encore « partent
+d'abord des heures à 25 % » — le grep de TAUX-1 cherchait « 25 % d'abord », pas « d'abord des heures à 25 % ». Corrigées.
+
+### 160c. Mesuré
+
+- Chromium, polices du dépôt : deux pages A4 (Nico page 1 : 967 → 1 018 px — le cadre prend 51 px ; cas « avant septembre » : 967 /
+  1 055). ⚠️ La page 1 est à hauteur fixe (`overflow:hidden`) : le cadre a grossi, la marge d'un mois très chargé a fondu d'autant.
+  390 px : les trois cases tiennent (332 px), rien ne déborde.
+- `mv-harnais-recup` : **409 assertions** — 13 recalées (aide `bx` : une case, son total, son origine), 5 neuves (W10b–f) ; mes deux
+  premières attentes de W10b/c étaient fausses (elles visaient l'état après 70h payées) : c'était le TEST. **78 contre-épreuves** : 6
+  neuves, 2 repointées (l'ancien cadre n'existe plus), ⚰️ « le cadre réimprime les taux à zéro (PAIE-1) » — c'était un défaut, c'est
+  la demande ; son inverse (« une case à zéro disparaît ») le remplace. ★ Vu seulement par `npm run check` : la série des
+  contre-épreuves n'avait pas été relancée après le recalage — trois ancres mortes attendaient. `semaine`, `releve`, `retard` verts sans retouche.
+
+- ★ **Le cliquet de poids a rougi** (`mv-harnais-typo`, règle E : « aucun module n'enfle de plus de 5 % sans regraver ») :
+  `planning.js` 576 → 606 ko depuis la dernière gravure (+5,2 %, cumul de NET-1 à CLAIR-1 — personne n'avait regravé). La question
+  du découpage a été posée, comme la règle le demande : la fiche et le relevé (`_pf*`, `_planReleveFiche_`, leur CSS papier) pèsent
+  ~150 ko et forment un bloc séparable (`planning-fiche.js`) — **un lot à part entière** (ordre d'import, globaux, harnais qui
+  évaluent `planning.js` seul), pas un effet de bord de celui-ci. Plafond : 1 024 ko. Regravé (`--baseline`) : seuls des `ko`
+  changent (5 fichiers), aucun compte de px — la gravure ne masque aucune régression typographique.
+
+### 160d. La note de livraison
+
+**Base `91ec503`. APP 7.46 → 7.47 · SW 8.14 → 8.15.** `node scripts/build-guide.mjs`, puis `npm run build && firebase deploy --only hosting`.
+
+| Fichier | Ce qui change | Bump ? |
+|---|---|---|
+| `src/planning.js` | `_pfCompta` (trois cases, origine, « Autres heures à payer », « Aucune retenue »), `_pfRestLignes`, `_pfEstTxt`, CSS papier `.tx3`/`.tb`, deux notes « 25 % d'abord » | — |
+| `src/styles.css` | `.pf-cl-sup`, `.pf-cl-v .tx3`, `.tb` | ★ APP · ★ SW |
+| `src/utils.js` | APP 7.47, trois nouveautés, aide du Planning | ★ APP |
+| `index.html` · `public/sw.js` | versions | ★ APP · ★ SW |
+| `guide/10-planning.html` | le cadre, les heures d'avant septembre | — |
+| `scripts/mv-harnais-recup.mjs` · `scripts/harnais-claude-md.mjs` · `CLAUDE.md` · `.mv-base` | voir 160c · SECTIONS 192 · base | — |
+| `scripts/typo-baseline.json` | cliquet de poids regravé (`planning.js` 576 → 606 ko), voir 160c | — |
+
+### 160e. Ouvert, et dit
+
+① L'ancien cadre des mois d'AVANT septembre (`_pfCadre`, « À payer en plus ») n'est pas touché : une paie déjà éditée ne change pas.
+② Le relevé collectif (`_planReleve`) n'a pas été relu dans ce lot. ③ Vu dans Chromium, pas sur papier ni sur téléphone. ④ **Découper `planning.js`** (sortir la fiche et le relevé) : à décider par Nico, lot à part (160c).

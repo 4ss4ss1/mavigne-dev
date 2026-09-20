@@ -1,4 +1,9 @@
-// MA VIGNE — Service Worker v8.14
+// MA VIGNE — Service Worker v8.15
+// v8.15 (20/09/2026) — CLAIR-1 : « Pour la compta » (fiche et releve) — heures sup a payer en TROIS totaux, toujours les
+//   memes : a +25 %, a +50 %, dimanches et feries, chacun avec « Xh du mois + Yh d'avant » ; la ligne « heures sup d'avant
+//   septembre (estimees...) » disparait, ses heures rejoignent la case de leur taux ; report sans taux sur sa ligne.
+//   « Maintenu » devient « Aucune retenue ». « deja majorees » devient « a payer sans majoration (elle est deja dans la
+//   recup) ». Heures restantes rangees de la meme facon (papier, ecran). APP 7.46 -> 7.47.
 // v8.14 (20/09/2026) — TAUX-1 + DIM-1 : releve d'heures et compteur relus. Le taux le plus fort sort TOUJOURS en premier
 //   (absence, heures a rattraper, recup prise, paiement ; il pouvait rester plus de 50 % que de 25 %) ; la valeur reprise ne
 //   change pas ; l'estimation d'avant septembre suit. En mode paye, la majoration seule d'un dimanche couvre d'abord les
@@ -4078,7 +4083,7 @@
 // v2.22 — Fix profils vides : guard vide dans loadData() pour MEMBRES/SAISONS/TACHES
 // v2.17 — Onboarding intégré + tenantId · v2.06 — Firebase Auth · v2.00–v2.05 — divers
 const DEBUG = self.location.hostname === 'localhost' || self.location.hostname === '127.0.0.1';
-const CACHE_NAME   = 'mavigne-v8.14';
+const CACHE_NAME   = 'mavigne-v8.15';
 const TENANT_CACHE = 'mavigne-tenant';   // Cache persistant — préservé à chaque mise à jour SW
 const SYNC_TAG     = 'mavigne-sync';
 
@@ -4094,7 +4099,7 @@ const CDN_URLS = [
 ];
 
 self.addEventListener('install', event => {
-  if(DEBUG) console.log('[SW] Ma Vigne v8.14 installé — en attente');
+  if(DEBUG) console.log('[SW] Ma Vigne v8.15 installé — en attente');
   event.waitUntil(
     caches.open(CACHE_NAME).then(async cache => {
       // ── Cœur applicatif : STRICT (mise à jour ATOMIQUE) ──
@@ -4114,7 +4119,7 @@ self.addEventListener('install', event => {
 });
 
 self.addEventListener('activate', event => {
-  if(DEBUG) console.log('[SW] Ma Vigne v8.14 activé');
+  if(DEBUG) console.log('[SW] Ma Vigne v8.15 activé');
   event.waitUntil(
     caches.keys().then(keys =>
       Promise.all(
