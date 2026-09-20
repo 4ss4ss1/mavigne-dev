@@ -2185,6 +2185,32 @@ function _planCompteur(mbr,upto){
   //   plus ancien d'abord (la récup acquise passe avant les heures sup du mois, NET-1), puis le taux le plus FORT, puis
   //   l'ordre d'entrée. Avant septembre 2026 toutes les tranches sont sans taux : rien n'y bouge.
   function ordre(){return tr.map(function(t,k){return k;}).sort(function(a,b){return (tr[a].mois-tr[b].mois)||((tr[b].taux||0)-(tr[a].taux||0))||(a-b);});}
+  // ★★★ AVANT-2 (20/09/2026) — À LA BASCULE, LES HEURES SUP D'AVANT SEPTEMBRE ENCORE AU COMPTEUR PRENNENT LEUR MAJORATION.
+  //   Nico, devant le détail de l'année (août : 27h faites, 27h de récup gagnées, 27h restantes) : « les récup gagnées et
+  //   restantes n'ont pas leur majoration », puis : « si les heures sup apparaissent encore c'est qu'elles n'ont pas été prises
+  //   donc elles sont aussi majorées (que ça soit de l'heure sup ou de l'heure de dimanche ou férié) ».
+  //   Avant : AVANT-1 (§147, voie ① choisie le 17/09) estimait leur taux POUR LA PAIE seulement ; prises en récup ou reprises
+  //   par une absence, elles valaient 1h pour 1h — le salarié gagnait à se les faire payer plutôt qu'à les récupérer.
+  //   Désormais, au premier mois de la règle (septembre 2026), chaque tranche 'hs' d'avant, pour ce qu'il en RESTE (ses rangs
+  //   [0, h) — le taux le plus fort est déjà sorti, TAUX-1), est relue par _pfEstPile : ses heures à 25 % et à 50 % deviennent
+  //   de vraies tranches à leur taux (1h = 1h15, 1h = 1h30), au même mois d'origine. Ce qui reste à 1 pour 1 : les heures d'un
+  //   dimanche ou d'un férié DÉJÀ majorées à part (leur majoration est la tranche 'maj' du même mois : elles l'ont), la tranche
+  //   'maj' elle-même, et le report d'avant Ma Vigne (aucun jour saisi : rien à relire, « taux à vérifier »).
+  //   ⚠️ Rien ne bouge de janvier à août : ni les mois, ni les paies, ni les relevés édités. Le gain entre en SEPTEMBRE
+  //      (`r.revalo`, compté dans `majSup` et `entre` : tous les lecteurs du compteur tombent juste sans le savoir).
+  function revalorise(){
+    var gain=0,neuves=[];
+    tr.forEach(function(t){
+      if(t.mois<0||t.nat!=='hs'||(t.taux||0)>0.0001||_planRecupActive(t.mois)||t.h<=0.0001)return;
+      var e=_pfEstSeg(_pfEstPile(mbr,t.mois),0,t.h);
+      if(e.c25>0.0001)neuves.push({mois:t.mois,taux:25,nat:'hs',h:e.c25*1.25});
+      if(e.c50>0.0001)neuves.push({mois:t.mois,taux:50,nat:'hs',h:e.c50*1.5});
+      gain+=e.c25*0.25+e.c50*0.5;t.h=Math.max(0,t.h-e.c25-e.c50);
+    });
+    tr=tr.filter(function(t){return t.h>0.0001;}).concat(neuves);
+    return gain;
+  }
+  var revaloFaite=false;
   var nTire=0;                                    // ★ DIM-1 : le rang de chaque appel, pour retrouver ce qu'UN besoin a pris
   function tire(h,rendu){
     var ord=ordre();nTire++;
@@ -2211,6 +2237,7 @@ function _planCompteur(mbr,upto){
     var ent=[],hm2=act?_planHsupMois(mbr,i):null,FG=act?_planHsupFige(mbr.nom,i):null,trop=0,garde=0;
     if(act){
       var hm=_planHsupTiers(mbr,i),reste=paye;
+      if(!revaloFaite){revaloFaite=true;r.revalo=revalorise();}      // ★ AVANT-2 : avant le budget du paiement, qui compte la file
       var payMaj=_planHsupPayable(),majIn=0,majTr=[],suiteMaj=[];
       if(!payMaj&&hm.majHsVal>0.0001){ent.push({taux:0,nat:'maj',h:hm.majHsVal});r.majDim=hm.majHsVal;majIn=hm.majHsVal;}
       // ★★★ DIM-1 (20/09/2026) — UNE RETENUE ET UNE MAJORATION DU DIMANCHE À PAYER NE VOISINENT PLUS. Nico : « trouve la
@@ -2265,13 +2292,13 @@ function _planCompteur(mbr,upto){
         paye=Math.max(0,paye-reste);if(paye<0.0001)paye=0;r.paye=paye;
       }
       majTr.forEach(function(t){ent.push(t);});                     // ★ DIM-1 : après les heures sup du mois
-      r.majSup=ent.reduce(function(s,e){return s+e.h;},0)-majIn-garde;
+      r.majSup=ent.reduce(function(s,e){return s+e.h;},0)-majIn-garde+(r.revalo||0);
     } else {
       if(sup-paye>0.0001)ent.push({taux:0,nat:'hs',h:sup-paye});
       r.majDim=_planMajBank(mbr,i);
       if(r.majDim>0.0001)ent.push({taux:0,nat:'maj',h:r.majDim});
     }
-    var entre=ent.reduce(function(s,e){return s+e.h;},0);
+    var entre=ent.reduce(function(s,e){return s+e.h;},0)+(r.revalo||0);     // ★ AVANT-2 : la majoration du stock d'avant entre ici
     if(!act){r.comble=Math.min(dette,entre);dette-=r.comble;}     // depuis septembre 2026 : APRES les absences du salarie
     var cb=act?0:r.comble;
     ent.forEach(function(e){var t=Math.min(e.h,cb);e.h-=t;cb-=t;if(e.h>0.0001){var nt={mois:i,taux:e.taux,nat:e.nat,h:e.h};if(e.aPayer){nt.aPayer=true;nt.mj=e.mj;nt.rep=!!e.rep;}tr.push(nt);}});
@@ -4499,7 +4526,8 @@ function _pfCompta(mbr,P,D,V,A){
   P.lignes.forEach(function(l){if(l.nat==='dim')tD=l.taux;if(l.nat==='fer')tF=l.taux;var k=_pfCat(l.nat,l.taux);if(k in mo)mo[k]+=l.paye;});
   (r.payesBank||[]).forEach(function(q){var k=_pfCat(q.nat,q.taux||0);if(k in av)av[k]+=q.brut;});
   var SP=_pfSources(mbr,(r.payesBank||[]).map(function(q){return {mois:q.mois,nat:q.nat,taux:q.taux||0,bas:q.bas,haut:q.haut};}));
-  av.c25+=SP.est.c25;av.c50+=SP.est.c50;
+  // ★ AVANT-2 : `SP.est.c25/c50` valent 0 ici — le cadre n'existe que dans un mois `act`, où le stock d'avant est déjà majoré
+  //   (de vraies tranches, lues par `payesBank` ci-dessus). Seul `deja` reste à estimer.
   var deja=SP.est.deja||0,t25=mo.c25+av.c25,t50=mo.c50+av.c50,tDim=mo.dim+av.dim,tFer=mo.fer+av.fer,tDF=tDim+tFer+deja;
   var aAvant=(av.c25+av.c50+av.dim+av.fer+deja)>0.0001;
   var origine=function(a,b){return (a>0.0001&&b>0.0001)?F(a)+' du mois + '+F(b)+' d\u2019avant':(b>0.0001?'d\u2019avant '+moisL:((a>0.0001&&aAvant)?'du mois':''));};
@@ -4570,7 +4598,9 @@ function _pfComptesV3(mbr,P,M,V){
   var F=_planFmt,m=P.m,r=P.r||{},c=P.c||{},hm=P.hm||{},moisL=PLAN_MOIS[m].toLowerCase(),avantL=PLAN_MOIS[(m+11)%12].toLowerCase();
   var Q=function(d){return d===1?'1er':String(d);},listeJ=function(a){a=a.map(Q);return a.length<2?a.join(''):a.slice(0,-1).join(', ')+' et '+a[a.length-1];};
   var gard=V.gard,salCouvert=V.salCouvert,domCouvert=V.domCouvert,jRec=V.jRec,jDom=V.jDom,rtD=V.rtD,detteFin=V.detteFin;
-  var entre=Math.max(0,M.acq+(r.comble||0)-(r.majDim||0)),MV=[['Solde fin '+avantL,M.avant,1]];
+  var entre=Math.max(0,M.acq+(r.comble||0)-(r.majDim||0)-(r.revalo||0)),MV=[['Solde fin '+avantL,M.avant,1]];
+  // ★ AVANT-2 : la première ligne du mois de la bascule — ce que le stock d'avant septembre gagne en prenant sa majoration.
+  if((r.revalo||0)>0.0001)MV.push(['Majoration des heures sup d\u2019avant '+moisL+', rest\u00e9es au compteur',r.revalo]);
   if(entre>0.0001)MV.push(['Heures sup '+_pfDeMois(m)+' gard\u00e9es'+(gard>0.0001?' ('+F(gard)+')':''),entre]);
   if((r.majDim||0)>0.0001)MV.push([P.payable?'Majoration des dimanches et f\u00e9ri\u00e9s, gard\u00e9e pour couvrir les absences':'Majoration des dimanches et f\u00e9ri\u00e9s, heures hors heures sup',r.majDim]);
   if((r.comble||0)>0.0001)MV.push(['Rattrapent ce qui restait \u00e0 rattraper',-(r.comble)]);
@@ -4705,7 +4735,9 @@ function _pfMouvements(mbr,P){
   var retire=Math.max(0,(r.retire||0)-(r.retenue||0))+Math.max(0,(r.domaine||0)-(r.compense||0)),prise=Math.max(0,(r.recup||0)-(r.recupNC||0));
   var uti=Math.max(0,avant+acq-c.solde),payeC=Math.max(0,uti-retire-prise);
   var mv=[];
-  if(acq>0.0001)mv.push(['Ce mois','Heures sup gard\u00e9es en r\u00e9cup',(P.payeMois>0.0001?_planFmt(P.payeMois)+' pay\u00e9es, hors r\u00e9cup':''),acq]);
+  var rv=r.revalo||0;
+  if(rv>0.0001)mv.push(['Ce mois','Majoration des heures sup d\u2019avant '+PLAN_MOIS[m].toLowerCase(),'rest\u00e9es au compteur\u00a0: 1h \u00e0 25\u202f% = 1h15, 1h \u00e0 50\u202f% = 1h30',rv]);
+  if(acq-rv>0.0001)mv.push(['Ce mois','Heures sup gard\u00e9es en r\u00e9cup',(P.payeMois>0.0001?_planFmt(P.payeMois)+' pay\u00e9es, hors r\u00e9cup':''),acq-rv]);
   P.jours.forEach(function(x){
     if(x.hors)return;
     if(x.payeType==='rec'&&x.e&&x.e.type==='recup')mv.push([x.d+' '+PLAN_MOIS_C[m].toLowerCase()+'.','R\u00e9cup prise','',-x.paye]);
@@ -4735,7 +4767,7 @@ function _pfAnnee(mbr,m){
     //   en TEMPS DE RÉCUP — gagnée, prise, reprise par les absences (1h d'absence = 1h), restante — et les heures à
     //   rattraper. La ligne tombe juste : restante = celle d'avant + gagnée − prise − absences − payé sur le compteur.
     return {i:i,sup:rw.sup||0,maj:rw.majDim||0,payees:pay,recup:rec,recPrise:rw.brutRec||0,abs:rw.brutAbs||0,solde:rw.soldeBrut,soldeRecup:rw.solde,cur:(i===m),
-            gagnee:rw.entre||0,priseV:rw.valRec||0,absV:rw.valAbs||0,payeCV:rw.payeCVal||0,dette:rw.dette||0,
+            gagnee:rw.entre||0,priseV:rw.valRec||0,absV:rw.valAbs||0,payeCV:rw.payeCVal||0,dette:rw.dette||0,act:!!rw.act,revalo:rw.revalo||0,
             vide:(rw.sup||0)<0.0001&&pay<0.0001&&rec<0.0001};
   });
 }
@@ -4750,11 +4782,17 @@ function _pfAnneeTable(A,m,c){
     +A.map(function(x){
       if(x.i>m)return '<tr class="'+c.vide+'"><td>'+PLAN_MOIS_C[x.i]+'</td><td></td><td></td><td class="'+c.cv+'"></td><td></td><td></td><td></td><td></td></tr>';
       return '<tr'+(x.cur?' class="cur"':'')+'><td>'+PLAN_MOIS_C[x.i]+'</td><td class="n">'+z(x.sup)+'</td><td class="n">'+z(x.payees)+'</td>'
-        +'<td class="n '+c.cv+'">'+z(x.gagnee)+'</td><td class="n '+c.rc+'">'+z(x.priseV)+'</td><td class="n '+c.rc+'">'+z(x.absV)+'</td>'
+        +'<td class="n '+c.cv+'">'+z(x.gagnee)+((!x.act&&x.gagnee>0.0001)?'*':'')+'</td><td class="n '+c.rc+'">'+z(x.priseV)+'</td><td class="n '+c.rc+'">'+z(x.absV)+'</td>'
         +'<td class="n '+c.rc+' b">'+F(Math.max(0,x.soldeRecup))+'</td><td class="n'+(x.dette>0.0001?' dn':'')+'">'+F(x.dette)+'</td></tr>';
     }).join('')
     +'<tr class="'+c.tot+'"><td>Depuis janvier</td><td class="n">'+F(cum.s)+'</td><td class="n">'+F(cum.p)+'</td><td class="n '+c.cv+'">'+F(cum.g)+'</td><td class="n '+c.rc+'">'+F(cum.r)+'</td><td class="n '+c.rc+'">'+F(cum.a)+'</td><td></td><td></td></tr></tbody></table>';
+  // ★ AVANT-2 — la légende disait « majoration comprise » sous une ligne d'août à 27h pour 27h : fausse pour les mois d'avant
+  //   la bascule. Ces mois portent un astérisque, et la légende dit la règle d'avant et où leur majoration est entrée.
+  var avantB=A.filter(function(x){return x.i<=m&&!x.act&&x.gagnee>0.0001;}).length>0,rvA=A.reduce(function(a,x){return a+(x.i<=m?(x.revalo||0):0);},0),iB=-1;
+  A.forEach(function(x){if(iB<0&&x.act)iB=x.i;});
   var cur=A[m]||{},note='Heures sup\u00a0: l\u2019heure faite, sans majoration. R\u00e9cup\u00a0: le temps \u00e0 prendre, majoration comprise (1h \u00e0 25\u202f% = 1h15, 1h \u00e0 50\u202f% = 1h30). '
+    +(avantB?'* Avant '+(iB>=0?PLAN_MOIS[iB].toLowerCase():'septembre')+' '+planYear+', le compteur comptait 1h sup = 1h de r\u00e9cup'
+      +(rvA>0.0001?'\u00a0; les heures encore au compteur ont pris leur majoration en '+PLAN_MOIS[iB].toLowerCase()+' (+'+F(rvA)+', dans sa r\u00e9cup gagn\u00e9e). ':'. '):'')
     +'R\u00e9cup restante = celle du mois d\u2019avant + gagn\u00e9e \u2212 prise \u2212 absences reprises'+((cur.payeCV||0)>0.0001?' \u2212 '+F(cur.payeCV)+' pay\u00e9es sur le compteur en '+PLAN_MOIS[m].toLowerCase():'')+'.';
   return {html:h,legende:note,cum:cum};
 }
@@ -4861,8 +4899,9 @@ function _pfCat(nat,taux){
   return 'normal';                          // report de départ, mois d'avant septembre 2026, majoration seule
 }
 function _pfRestants(mbr,P){
-  var brut=function(L){var o={c25:{h:0,v:0},c50:{h:0,v:0},dim:{h:0,v:0},fer:{h:0,v:0},normal:{h:0,v:0},total:0,valeur:0};
-    L.forEach(function(t){var k=_pfCat(t.nat,t.taux||0),b=t.h/(1+(t.taux||0)/100);o[k].h+=b;o[k].v+=t.h;o.total+=b;o.valeur+=t.h;});
+  var brut=function(L){var o={c25:{h:0,v:0,av:0},c50:{h:0,v:0,av:0},dim:{h:0,v:0,av:0},fer:{h:0,v:0,av:0},normal:{h:0,v:0,av:0},total:0,valeur:0};
+    L.forEach(function(t){var k=_pfCat(t.nat,t.taux||0),b=t.h/(1+(t.taux||0)/100);o[k].h+=b;o[k].v+=t.h;o.total+=b;o.valeur+=t.h;
+      if((t.taux||0)>0.0001&&t.mois>=0&&!_planRecupActive(t.mois))o[k].av+=b;});      // ★ AVANT-2 : majorées à la bascule
     return o;};
   var R=brut(P.c.tr),avant=brut(_planCompteur(mbr,P.m-1).tr);
   R.src=_pfSources(mbr,P.c.tr.map(function(t){return {mois:t.mois,nat:t.nat,taux:t.taux||0,bas:0,haut:t.h};}));
@@ -4874,13 +4913,14 @@ function _pfRestants(mbr,P){
   return R;
 }
 // ★ CLAIR-1 (20/09/2026) — les heures restantes se rangent comme « Pour la compta » : ce que l'estimation d'avant septembre
-//   donne à un taux rejoint la ligne de CE taux (« dont Xh d'avant septembre »), plus de ligne « estimées ». En récup, une
-//   heure d'avant septembre vaut 1h pour 1h, comme à l'époque. Chaque ligne : {k, l, h, v, avant}.
+//   donne à un taux rejoint la ligne de CE taux (« dont Xh d'avant septembre »), plus de ligne « estimées ».
+//   ★ AVANT-2 : vu d'un mois d'AVANT la bascule, ces heures valent encore 1h pour 1h (`est`) ; à partir de septembre elles
+//   sont de vraies tranches à leur taux, majorées (`R.c25.av`, `R.c50.av`). Chaque ligne : {k, l, h, v, avant}.
 function _pfRestLignes(R){
   var e=(R.src&&R.src.est)||{},S=R.src||{};
   return [
-    {k:'c25',l:'Heures sup \u00e0 +25\u202f%',h:R.c25.h+(e.c25||0),v:R.c25.v+(e.c25||0),avant:e.c25||0,fixe:1},
-    {k:'c50',l:'Heures sup \u00e0 +50\u202f%',h:R.c50.h+(e.c50||0),v:R.c50.v+(e.c50||0),avant:e.c50||0,fixe:1},
+    {k:'c25',l:'Heures sup \u00e0 +25\u202f%',h:R.c25.h+(e.c25||0),v:R.c25.v+(e.c25||0),avant:(e.c25||0)+(R.c25.av||0),fixe:1},
+    {k:'c50',l:'Heures sup \u00e0 +50\u202f%',h:R.c50.h+(e.c50||0),v:R.c50.v+(e.c50||0),avant:(e.c50||0)+(R.c50.av||0),fixe:1},
     {k:'dim',l:'Heures du dimanche \u00e0 +'+R.tauxDim+'\u202f%',h:R.dim.h,v:R.dim.v,avant:0,fixe:1},
     {k:'fer',l:'Heures de jour f\u00e9ri\u00e9 \u00e0 +'+R.tauxFer+'\u202f%',h:R.fer.h,v:R.fer.v,avant:0,fixe:1},
     {k:'deja',l:'Dimanches et f\u00e9ri\u00e9s d\u2019avant septembre, sans majoration',h:e.deja||0,v:e.deja||0,avant:0,note:'leur majoration est d\u00e9j\u00e0 dans la r\u00e9cup'},
@@ -4895,7 +4935,7 @@ function _pfRestantsCarte(mbr,P){
     var sm=x.avant>0.0001?'dont '+_planFmt(x.avant)+' d\u2019avant septembre':(x.note||'');
     return '<tr'+(x.h>0.0001?'':' class="pf-vide"')+'><td>'+x.l+(sm?'<small class="pf-estl">'+sm+'</small>':'')+'</td><td class="n"><b>'+_planFmt(x.h)+'</b></td><td class="n pf-rec">'+(x.v>0.0001?_planFmt(x.v):'\u2014')+'</td></tr>';}).join('');
   var det=R.src.mois.length?'<details class="pf-estd"><summary>Le calcul, mois par mois</summary><ul>'+R.src.mois.map(function(x){return '<li><b>'+PLAN_MOIS[x.mois]+'</b>\u00a0: '+_planFmt(x.h)+' restantes sur '+_planFmt(x.sup)+' compt\u00e9es au mois\u00a0\u2192 '+_pfEstTxt(x)+'</li>';}).join('')
-    +'</ul><p>Chaque semaine est relue avec la r\u00e8gle de septembre\u00a0: huit heures sup \u00e0 25\u202f%, les suivantes \u00e0 50\u202f%. Ce qui est sorti du compteur (r\u00e9cup, paiements) a pris les heures au taux le plus fort d\u2019abord, comme depuis septembre\u00a0; en r\u00e9cup, une heure d\u2019avant septembre vaut 1h pour 1h. Le compteur et les paies d\u2019avant ne changent pas.</p></details>':'';
+    +'</ul><p>Chaque semaine est relue avec la r\u00e8gle de septembre\u00a0: huit heures sup \u00e0 25\u202f%, les suivantes \u00e0 50\u202f%. Ce qui est sorti du compteur (r\u00e9cup, paiements) a pris les heures au taux le plus fort d\u2019abord, comme depuis septembre\u00a0; jusqu\u2019\u00e0 fin ao\u00fbt, une heure vaut 1h pour 1h en r\u00e9cup\u00a0; le 1er septembre, celles qui restent au compteur prennent leur majoration. Les mois et les paies d\u2019avant ne changent pas.</p></details>':'';
   return '<section class="pf-card pf-restants" aria-labelledby="pf-restants-t"><div class="pf-card-t"><h3 id="pf-restants-t">Heures sup restantes \u00e0 payer</h3><span>fin '+mois+'</span></div>'
     +'<div class="pf-solde">'+_pfMark('sup',_planFmt(R.total))+'<span>restantes, soit '+_planFmt(R.valeur)+' de r\u00e9cup</span></div>'
     +'<p class="pf-calc">'+_planFmt(R.report)+' report\u00e9es + '+_planFmt(R.faites)+' faites'+(R.maj>0.0001?' + '+_planFmt(R.maj)+' de majoration':'')
@@ -4914,6 +4954,8 @@ function _pfPaieDonnees(mbr,P){
     P.lignes.forEach(function(l){cat[_pfCat(l.nat,l.taux)]+=l.paye;});
     (P.r.payesBank||[]).forEach(function(q){cat[_pfCat(q.nat,q.taux)]+=q.brut;});
     var SP=_pfSources(mbr,(P.r.payesBank||[]).map(function(q){return {mois:q.mois,nat:q.nat,taux:q.taux||0,bas:q.bas,haut:q.haut};}));D.avantEst=SP.avant;
+    // ★ AVANT-2 : payées à leur vrai taux depuis la bascule, elles viennent toujours d'une relecture — la feuille le dit.
+    D.avantEst+=(P.r.payesBank||[]).reduce(function(a,q){return a+(((q.taux||0)>0.0001&&q.mois>=0&&!_planRecupActive(q.mois))?q.brut:0);},0);
     [['c25','Heures sup \u00e0 +25\u202f%'],['c50','Heures sup \u00e0 +50\u202f%'],['dim','Heures du dimanche \u00e0 +'+RS.tauxDim+'\u202f%'],['fer','Heures de jour f\u00e9ri\u00e9 \u00e0 +'+RS.tauxFer+'\u202f%']]
       .forEach(function(x){D.plus.push([cat[x[0]]>0.0001?'':'pf-rien',x[1],'<b>'+_planFmt(cat[x[0]])+'</b>']);});
     // ★★ AVANT-1 : ces heures sans taux, par origine — estimées (d'avant septembre), majoration seule, report
@@ -5101,6 +5143,7 @@ function _planRecupCartes(mbr,dm){
   // ★ RECUP-2 : un seul texte, quel que soit le mode — le compteur compte en temps de recup partout.
   var ex='Acquises\u00a0: '+(_planSeauxTxt(hm.buckets,true)||'aucune heure sup')+(r.majDim>0.0001?' + '+_planFmt(r.majDim)+' de majoration du dimanche ou d\u2019un f\u00e9ri\u00e9':'');
   if(r.paye>0.0001)ex+=', moins '+_planFmt(r.paye)+' pay\u00e9es ce mois';
+  if((r.revalo||0)>0.0001)ex+=' + '+_planFmt(r.revalo)+' de majoration des heures sup d\u2019avant '+PLAN_MOIS[dm].toLowerCase();
   if(avant>0.0001)ex+=' + '+_planFmt(avant)+' report\u00e9es';
   if(r.comble>0.0001)ex+=' \u2212 '+_planFmt(r.comble)+' qui comblent le reste \u00e0 compenser';
   ex+='.';
@@ -7443,7 +7486,8 @@ function _planReleveFiche_(nom,mbr,_ctr){
         +'<li><b>Absences du salari\u00e9</b> (injustifi\u00e9e, personnelle, retard)\u00a0: rattrap\u00e9es par les heures en plus de leur semaine, puis prises sur la r\u00e9cup (1h d\u2019absence = 1h de r\u00e9cup, les heures \u00e0 50\u202f% d\u2019abord)\u00a0; le reste est retenu sur le salaire.</li>'
         +'<li><b>Absences du domaine</b> (journ\u00e9e \u00e9court\u00e9e, pluie\u2026)\u00a0: jamais retenues. Rattrap\u00e9es dans la semaine apr\u00e8s celles du salari\u00e9, puis prises sur la r\u00e9cup\u00a0; le reste va aux heures \u00e0 rattraper, que les prochaines heures sup comblent.</li>'
         +'<li><b>Paiement</b>\u00a0: une fois les absences couvertes \u2014 une retenue ou des heures sup \u00e0 payer, jamais les deux'+(P.payable?', majoration du dimanche comprise':'')+'. Le taux le plus fort sort toujours d\u2019abord. \u00ab\u00a0Pay\u00e9es\u00a0\u00bb\u00a0: l\u2019heure faite, la paie applique le taux\u00a0; \u00ab\u00a0r\u00e9cup\u00a0\u00bb\u00a0: le temps \u00e0 prendre, majoration comprise.</li>'
-        +((D.avantEst>0.0001||(P.demande&&_pfRestants(mbr,P).src.avant>0.0001))?'<li>Heures sup d\u2019avant septembre 2026\u00a0: le compteur les comptait au mois, sans taux. Leur taux est estim\u00e9 en relisant chaque semaine avec la r\u00e8gle d\u2019aujourd\u2019hui\u00a0; la compta le confirme.</li>':'')+'</ul>'
+        +((D.avantEst>0.0001||(P.r&&P.r.revalo>0.0001)||(function(R){return R.src.avant>0.0001||R.c25.av+R.c50.av>0.0001;})(_pfRestants(mbr,P)))
+          ?'<li><b>Heures sup d\u2019avant septembre 2026</b>\u00a0: le compteur les comptait au mois, sans taux, 1h pour 1h. Leur taux est relu semaine par semaine avec la r\u00e8gle d\u2019aujourd\u2019hui\u00a0; celles qui restaient au compteur ont pris leur majoration le 1er septembre. La compta le confirme.</li>':'')+'</ul>'
     +'</div></div>'
     +'<p class="lieu">Fait le <b>'+_edite+'</b>, \u00e0 \u2026\u2026\u2026\u2026\u2026\u2026\u2026\u2026</p>'
     +'<div class="sig"><div><span>Signature salari\u00e9</span>'+(cases?'<div class="cases">'+cases+'</div>':'')+'<i></i></div>'

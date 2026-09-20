@@ -2,7 +2,17 @@
 
 > Document de référence du projet **Ma Vigne** (GUERETTECH). Il est le **porteur de vérité** :
 > la mémoire Claude est plafonnée, ce fichier ne l'est pas.
-> Dernière consolidation : **20 septembre 2026 (CLAIR-1)** — ★★ **« POUR LA COMPTA » : TROIS TOTAUX D'HEURES SUP, TOUJOURS LES
+> Dernière consolidation : **20 septembre 2026 (AVANT-2)** — ★★★ **À LA BASCULE, LES HEURES SUP D'AVANT SEPTEMBRE ENCORE AU COMPTEUR
+> PRENNENT LEUR MAJORATION (§161)**. Nico, devant le détail de l'année (août : 27h faites, 27h gagnées, 27h restantes) : « les récup
+> gagnées et restantes n'ont pas leur majoration je crois », puis, la règle d'AVANT-1 rappelée (voie ① choisie le 17/09 : « rien ne
+> bouge ») : **« si les heures sup apparaissent encore c'est qu'elles n'ont pas été prises donc elles sont aussi majorées (que ça soit
+> de l'heure sup ou de l'heure de dimanche ou férié) »**. `revalorise()` dans `_planCompteur` : au premier mois de la règle, ce qui
+> RESTE de chaque tranche d'avant est relu (`_pfEstPile`) et devient de vraies tranches à 25 % et 50 % ; le gain entre en septembre
+> (`r.revalo`, dans `majSup` et `entre`). Rien ne bouge de janvier à août. Restent à 1 pour 1 : un dimanche déjà majoré à part, la
+> tranche `maj`, le report d'avant Ma Vigne. **419 assertions, 83 contre-épreuves.** **APP 7.47 → 7.48 · SW 8.15 → 8.16**, base
+> `9e5044d`. Détail en **§161**.
+>
+> ★ Précédente : **20 septembre 2026 (CLAIR-1)** — ★★ **« POUR LA COMPTA » : TROIS TOTAUX D'HEURES SUP, TOUJOURS LES
 > MÊMES, ET PLUS DE PHRASE À DÉCHIFFRER (§160)**. Nico, le relevé en main : « il faut qu'il y ait le total d'heures sup à payer à
 > 25 %, le total à 50 %, le total de dimanche et de jours fériés […] il ne faut pas de phrase type nombre d'heures sup d'avant le
 > mois estimé […] il faut que ça soit clair quand on marque aucune retenue. Idem quand est marqué dont heures dimanche déjà
@@ -21763,3 +21773,84 @@ d'abord des heures à 25 % » — le grep de TAUX-1 cherchait « 25 % d'abord »
 
 ① L'ancien cadre des mois d'AVANT septembre (`_pfCadre`, « À payer en plus ») n'est pas touché : une paie déjà éditée ne change pas.
 ② Le relevé collectif (`_planReleve`) n'a pas été relu dans ce lot. ③ Vu dans Chromium, pas sur papier ni sur téléphone. ④ **Découper `planning.js`** (sortir la fiche et le relevé) : à décider par Nico, lot à part (160c).
+
+---
+
+## 161. ★★★ AVANT-2 — À LA BASCULE, LES HEURES SUP D'AVANT SEPTEMBRE ENCORE AU COMPTEUR PRENNENT LEUR MAJORATION (20/09 — `planning.js` · `utils.js` · `index.html` · `sw.js` · `guide/10-planning.html` · `scripts/mv-harnais-recup.mjs` · `scripts/mv-harnais-semaine.mjs` · `scripts/harnais-claude-md.mjs` · APP 7.47 → **7.48** · SW 8.15 → **8.16** · base `9e5044d`)
+
+> Nico, une capture du détail de l'année à l'appui (août : 27h faites, 27h de récup gagnées, 27h restantes ; septembre : 13h30
+> d'absences reprises, 13h30 restantes) : *« encore un problème, les récup gagnées et restantes n'ont pas leurs majorations je
+> crois »*. Vérifié : pas un bug — la bascule de septembre (§135c), et AVANT-1 (§147) où, entre ① « indicatif, rien ne bouge » et
+> ② « bascule au 1er janvier, tout recalculé », il avait répondu « 1 ». Dit tel quel, avec deux constats : ma légende (TAUX-1) écrivait
+> « majoration comprise » sous une ligne à 27h pour 27h — FAUSSE pour ces mois ; et une **asymétrie** que je n'avais pas vue : les
+> mêmes heures, PAYÉES, recevaient un taux estimé ; PRISES en récup ou reprises par une absence, elles valaient 1h pour 1h.
+> Troisième voie proposée (rien recalculé de janvier à août ; au 1er septembre le stock restant prend sa majoration). Réponse :
+> ***« si les heures sup apparaissent encore c'est qu'elles n'ont pas été prise donc elles sont aussi majorées (que ça soit de l'heure
+> sup ou de l'heure de dimanche ou férié) »***. `origin/main` = `9e5044d` (« planningtop » : CLAIR-1 poussé à l'identique, vérifié).
+
+### 161a. Le moteur — `revalorise()`, dans `_planCompteur`
+
+- Au **premier mois `act`** de la boucle (septembre 2026), AVANT le budget du paiement (`bud` compte la file) : chaque tranche
+  `nat:'hs'`, taux 0, d'un mois d'avant la bascule, pour ce qu'il en RESTE — ses rangs [0, h) : le taux le plus fort est déjà sorti
+  (TAUX-1) — est relue par `_pfEstSeg(_pfEstPile(mbr, mois), 0, h)`. Ses heures à 25 % et à 50 % deviennent de **vraies tranches**
+  (`taux:25` → h × 1,25 ; `taux:50` → h × 1,5), **au même mois d'origine** (l'ordre « le plus ancien d'abord » est gardé). Le gain
+  (`0,25 × c25 + 0,5 × c50`) = `r.revalo`, ajouté à `r.majSup` et à `entre` : `_pfMouvements`, `_planRecupCartes`, le tableau annuel
+  du Planning, `_planYearBalance` (l'invariant `solde − dette = net`, AC4) tombent juste sans rien savoir.
+- **Ce qui reste à 1 pour 1**, et pourquoi : ① les heures d'un dimanche ou d'un férié DÉJÀ majorées à part (`deja`) — leur majoration
+  EST la tranche `maj` du même mois (`PLAN_MAJ_DEBUT='2026-01'`) : « aussi majorées », elles le sont ; les majorer ici les compterait
+  deux fois (contre-épreuve) ; ② la tranche `maj` elle-même (c'est déjà du temps de récup) ; ③ le **report d'avant Ma Vigne** (`dep`) :
+  aucun jour saisi, rien à relire — « taux à vérifier ». ⚠️ ③ est dit à Nico : sa phrase pourrait le viser aussi.
+- **Rien ne bouge de janvier à août** : `_planCompteur(mbr, 7)` rend 27h/27h/aucune revalorisation (AC1) ; relu depuis septembre, août
+  garde `sup`, `entre`, `solde` (AC3). Une récup prise en août a entamé le stock à 1 pour 1, à l'époque : seul ce qui RESTE est majoré
+  (AC8). Mode payé : même règle (AC9).
+- ★ **La capture, rejouée** (AC2) : 27h d'août = 16h à 25 % + 11h à 50 % → +9h30 ; les 13h30 d'absences de septembre partent du 50 % ;
+  restent 23h (16h à 25 %, 2h à 50 %) — avant : 13h30.
+- AVANT-1 n'estime plus que ce qui reste SANS taux : vu d'un mois d'avant la bascule (tout), ou le `deja` ensuite. Les lecteurs :
+  `_pfRestants` compte `av` par catégorie (heures à un vrai taux venues d'un mois d'avant) → « dont 18h d'avant septembre » reste écrit ;
+  le cadre CLAIR-1 lit `payesBank` à son taux : « 12h du mois + 11h d'avant », inchangé. ★ Une saisie d'avant PAIE-1 (`paye_bank`, en
+  VALEUR) rend moins d'heures : 13h de récup = 10h24 à 25 % (W3b).
+- Coût mesuré : 1,3 ms par compteur de septembre (0,4 ms en août) — la relecture des mois d'avant. ★ L'horloge du banc est figée :
+  `Date.now()` disait « 0 ms » ; chronométré avec `process.hrtime`.
+
+### 161b. L'affichage
+
+- **Le compteur** (page 2, onglet Compteur, cartes) : « Majoration des heures sup d'avant septembre, restées au compteur +9h30 »,
+  première ligne du mois de la bascule ; « Heures sup de septembre gardées » n'en porte plus rien.
+- **Le détail de l'année** : les mois d'avant portent un astérisque sur leur récup gagnée (« 27h* ») ; la légende : « * Avant septembre
+  2026, le compteur comptait 1h sup = 1h de récup ; les heures encore au compteur ont pris leur majoration en septembre (+9h30, dans
+  sa récup gagnée). » La ligne de septembre tombe juste (AC5).
+- **« À savoir »** : la puce des heures d'avant septembre s'imprime aussi quand le mois les paie à leur vrai taux, les garde, ou vient
+  de les majorer ; elle dit la règle d'avant, la relecture, le 1er septembre, « la compta le confirme ».
+- Aide : une fiche « Les heures sup d'avant septembre 2026 ». Guide : deux passages. Deux nouveautés.
+
+### 161c. Mesuré
+
+- `mv-harnais-recup` : **419 assertions** — section W recalée (9 : ce qu'AVANT-1 estimait est devenu réel — chaque chiffre recalculé à la
+  main AVANT de sonder : 8h15 de gain, 22h30, 26h45, 65h30 — la sonde a dit pareil), AA6 (3h d'août = 3h45), section **AC** (9), W10g.
+  **83 contre-épreuves** : 6 neuves (dont : le dimanche majoré deux fois ; le report majoré à l'aveugle), 1 repointée. ★ Deux étaient
+  devenues MUETTES, vues par la série : « un paiement pris au compteur perd son mois » (l'estimation qui lisait ce mois ne sert plus
+  qu'au `deja` : W10g fait descendre une saisie d'avant PAIE-1 jusqu'au dimanche de juillet) ; « les heures d'avant ne rejoignent plus
+  la case de leur taux » visait `av.c25+=SP.est.c25`, du code MORT depuis ce lot (dans un mois `act` le stock est déjà majoré) —
+  ⚰️ la ligne et sa contre-épreuve. `mv-harnais-semaine` : Chloé
+  63h07 → **64h** (3h30 d'août, +0h52), Nico 21h45 → **22h15** (2h d'août, +0h30) — ce sont les vrais effets du lot sur les gens du
+  domaine. `releve`, `retard` verts sans retouche.
+
+### 161d. La note de livraison
+
+**Base `9e5044d`. APP 7.47 → 7.48 · SW 8.15 → 8.16.** `node scripts/build-guide.mjs`, puis `npm run build && firebase deploy --only hosting`.
+
+| Fichier | Ce qui change | Bump ? |
+|---|---|---|
+| `src/planning.js` | `revalorise()`, `r.revalo`, `_pfRestants` (`av`), `_pfAnneeTable` (astérisque, légende), `_pfComptesV3`/`_pfMouvements`/`_planRecupCartes` (la ligne), la puce « À savoir » | — |
+| `src/utils.js` | APP 7.48, deux nouveautés, une fiche d'aide | ★ APP · ★ SW |
+| `index.html` · `public/sw.js` | versions | ★ APP · ★ SW |
+| `guide/10-planning.html` | les heures d'avant septembre | — |
+| `scripts/mv-harnais-recup.mjs` · `scripts/mv-harnais-semaine.mjs` · `scripts/harnais-claude-md.mjs` · `CLAUDE.md` · `.mv-base` | voir 161c · SECTIONS 193 · base | — |
+
+### 161e. Ouvert, et dit
+
+① **Le report d'avant Ma Vigne reste à 1 pour 1** : pas de semaines à relire. S'il doit être majoré, il faut que Nico dise à quel taux
+(ou le ressaisir en temps de récup dans Réglages › Équipe). ② **Un septembre déjà figé** : ses paiements et sa retenue sont des faits ;
+si la revalorisation aurait évité une retenue, octobre la RENDRA (FIGE-1, « retenue de septembre à rendre ») — juste, mais à savoir
+avant d'envoyer. ③ **La récup de chacun monte en septembre** : à dire à l'équipe avant qu'elle le découvre sur sa feuille. ④ Le taux
+vient d'une relecture (AVANT-1) : « la compta le confirme » reste écrit. ⑤ Vu dans Chromium, pas sur papier ni sur téléphone.

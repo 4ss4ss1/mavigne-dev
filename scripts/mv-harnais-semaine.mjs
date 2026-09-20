@@ -150,8 +150,9 @@ eq('Victor 0h — les 2 et 12, sans motif, sont injustifiés', z.plus, 0); eq('V
 eq('Victor domaine : rien dans la semaine, 5h30 restent — le 11 passe après son absence du 12 (PAIE-1)', [z.rattrape.domaine, z.domaine].join('/'), '0/5.5'); eq('Victor dimanche : majoration seule 3h30', JSON.stringify(z.majHs.map(x => [x.taux, x.nat, x.h])), '[[50,"dim",3.5]]');
 const rows = n => R._planCompteur(M[n], 8).rows[8];
 // Le solde de départ + l'écart historique d'août (3h30 / 2h / 0h) donnent le solde d'entrée de septembre
-eq('Chloé compteur : 31 + 3h30 d’août + 28h37 = 63h07', R._planBank(M[0], 8).solde, 31 + 3.5 + 28.625);
-eq('Nico compteur : 43h30 + 2h d’août + 2h45 de majoration du dimanche 13 − 1h30 reprises − 25h payées au compteur = 21h45 (PAIE-1 : sa demande de 30h est un total)', R._planBank(M[1], 8).solde, 43.5 + 2 + 2.75 - 1.5 - 25);
+// ★ AVANT-2 (20/09/2026) : au 1er septembre, les heures sup d'août encore au compteur prennent leur majoration (3h30 à 25 % : +0h52).
+eq('Chloé compteur : 31 + 3h30 d’août, majorées (+0h52) + 28h37 = 64h', R._planBank(M[0], 8).solde, 31 + 3.5 * 1.25 + 28.625);
+eq('Nico compteur : 43h30 + 2h d’août, majorées (+0h30, AVANT-2) + 2h45 de majoration du dimanche 13 − 1h30 reprises − 25h payées au compteur = 22h15 (PAIE-1 : sa demande de 30h est un total)', R._planBank(M[1], 8).solde, 43.5 + 2 * 1.25 + 2.75 - 1.5 - 25);
 eq('Nico : 10h30 demandées sur le mois, 5h payées — ses heures sup du mois', rows(1).paye, 5);
 eq('Victor compteur : 20 + 1h45 − 25h30 = 3h45 retenues ; les 5h30 du domaine à rattraper ; rien de payé (PAIE-1)', [R._planBank(M[2], 8).solde, rows(2).retenue, R._planBank(M[2], 8).dette, rows(2).paye].join('/'), '0/3.75/5.5/0');
 console.log(rouge ? '  ' + rouge + ' rouge(s)' : '  ✓ les trois relevés de septembre : le vrai moteur dit comme la maquette v3');
