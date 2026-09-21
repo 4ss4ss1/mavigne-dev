@@ -2,7 +2,19 @@
 
 > Document de référence du projet **Ma Vigne** (GUERETTECH). Il est le **porteur de vérité** :
 > la mémoire Claude est plafonnée, ce fichier ne l'est pas.
-> Dernière consolidation : **20 septembre 2026 (CIBLE-1)** — ★★ **LES CARTES ENTOURENT LA PARCELLE COMMENCÉE, SINON LA PROCHAINE
+> Dernière consolidation : **21 septembre 2026 (CUV-DEC)** — ★★★ **LE CUVIER SORT DE `cave.js` : `src/cuvier.js`, ET UNE
+> FRONTIÈRE GARDÉE (§164)**. `cave.js` était à 1 023 ko sur 1 024 ; la règle de §153h ⑥ disait que le prochain lot Cave commençait
+> par le découper. Il a fallu le faire tout de suite : Nico venait de signaler un fût « pas plein » qui attend tout le vin de sa
+> cuvée (fûts pré-cochés au décuvage en plus des siens, puis retirés par la croix de « Modifier la cuvée » sans toucher au manque
+> ni les rendre à La Réserve) — le correctif touche `cave.js`. À la question « correctif serré dans le 1,7 ko restant, ou
+> découpage d'abord ? » : *« découpage d'abord »*. 674 instructions de premier niveau passent dans `cuvier.js` (494 ko), 658
+> restent (535 ko), chacune avec les commentaires qui la précèdent — recomposition vérifiée à l'octet. Deux états seulement
+> traversaient : `_caveSectionAct()` (la section lue par Le Cuvier) et `_vendOngletCuves()` (l'onglet remis par le Chai). 78
+> expositions en fin de fichiers. Harnais neuf `mv-harnais-cuvier` (15 assertions, 10 contre-épreuves) ; une seule porte pour
+> les harnais, `scripts/mv-cave-src.mjs`. ★ Sur l'appli compilée, 41 écrans joués en visite : **DOM identique à la base, écran
+> par écran**. **APP 7.51 inchangé · SW 8.19 → 8.20**, base `0ceadc4`. Détail en **§164**.
+>
+> ★ Précédente : **20 septembre 2026 (CIBLE-1)** — ★★ **LES CARTES ENTOURENT LA PARCELLE COMMENCÉE, SINON LA PROCHAINE
 > À FAIRE — ET LA TOURNÉE PART ENFIN DE LA DERNIÈRE VALIDÉE, PAS DE LA PREMIÈRE DU JOUR (§163)**. Nico : « le point de la dernière
 > parcelle validée clignote sur toutes les cartes », puis, la faisabilité rendue : « non en fait il faut montrer soit celle commencée
 > et non finie, soit la prochaine à faire (commandé par le module Décider) ». Une définition unique, `_mvCibleCarte` (utils.js) :
@@ -1675,8 +1687,11 @@ mavigne/
 │   │                        + création de comptes en lot `_agtLot` — cf. §18)
 │   ├── planning.js
 │   ├── reglages.js         (+ MV_DOCS / MV_DOCS_FAM : le hub Documents)
-│   ├── cave.js             (Chai + Cuvier + Le millésime + registre + bilan de campagne
+│   ├── cave.js             (Chai + Le millésime + Aujourd'hui + registre + bilan de campagne
 │   │                        + le moteur MILLÉSIME : _copMil*, _caveSeuilOu, _mlProjMalo)
+│   ├── cuvier.js           (★ CUV-DEC, §164 — Le Cuvier : réceptions, cuves, relevés, décuvage,
+│   │                        tournée, maturité, ventes en vrac ; la frontière avec cave.js est
+│   │                        en fin des DEUX fichiers, gardée par mv-harnais-cuvier)
 │   └── tracteur.js · phyto.js · pilotage.js · reserve.js
 ├── public/                 ← servi tel quel, JAMAIS compilé
 │   ├── sw.js · boot.js · manifest.json · icônes · fonts/
@@ -1710,8 +1725,9 @@ Un fichier au mauvais endroit se déploie sans effet et **sans erreur**.
 `mvprint.py`, `comparateur-kml-parcelles.html`, ★ `INSTALLER-UN-DOMAINE.md` et `mkpdf.py` (§18c).
 
 **★ Ordre d'import RÉEL dans `app.js`** (revérifié par grep) :
-`styles.css → utils → firebase → onboarding → admin-gt → cave → planning → reglages → **tracteur**
+`styles.css → utils → firebase → onboarding → admin-gt → cave → **cuvier** → planning → reglages → **tracteur**
 → phyto → pilotage → **reserve**`.
+★ **`cuvier.js` JUSTE APRÈS `cave.js`** (§164) : il lit le Chai par `window` au premier geste, jamais au chargement.
 ⚠️ **`reserve.js` est importé EN DERNIER**, `phyto.js` **après** `tracteur.js`, et
 ★ **`cave.js` AVANT `reglages.js`, `pilotage.js` et `reserve.js`** — c'est ce qui permet à ces
 trois modules d'appeler les fonctions de la Cave sans repli.
@@ -3297,6 +3313,9 @@ sans bump — c'est une page de `public/`, hors `SHELL_STATIC` (§27d).
 
 ## 20. Cave — Le Chai & Le Cuvier
 
+- ★★★ **Deux fichiers depuis CUV-DEC (§164)** : Le Cuvier dans `src/cuvier.js`, le reste dans `src/cave.js`. Un nom lu de
+  l'autre côté passe par le bloc « LA FRONTIÈRE » en fin du fichier qui le déclare ; les harnais lisent la Cave par
+  `scripts/mv-cave-src.mjs`, jamais par un chemin en dur.
 - **Le Chai** (namespace `mvc-`) : élevage, fûts, **jauges de part des anges**.
 - **Le Cuvier** : vendange. **Cuvées normalisées** (`_cuvKey` + distance de Levenshtein).
   ★ **Repeint aux couleurs de la Cave le 09/08** (c'était le dernier écran sombre ; 7 textes hérités
@@ -22116,3 +22135,160 @@ en plein soleil : si l'anneau est trop discret, deux nombres le règlent (opacit
 contour ni coordonnées n'a pas d'anneau : elle n'est nulle part sur la carte. ⑤ Les deux cartes du Pilotage se redessinent à
 l'ouverture, pas en direct. ⑥ Plusieurs parcelles commencées font plusieurs anneaux : à regarder sur un domaine où deux équipes
 tournent en parallèle, l'écran peut devenir bavard.
+
+## 164. ★★★ CUV-DEC — LE CUVIER SORT DE `cave.js` : `src/cuvier.js`, ET UNE FRONTIÈRE GARDÉE (21/09 — `src/cave.js` · `src/cuvier.js` (neuf) · `src/app.js` · `public/sw.js` · `scripts/mv-cave-src.mjs` (neuf) · `scripts/mv-harnais-cuvier.mjs` (neuf) · 30 scripts de contrôle suivis · 4 références regravées · `package.json` · `.github/workflows/ci.yml` · `scripts/harnais-claude-md.mjs` · APP **7.51 inchangé** · SW 8.19 → **8.20** · base `0ceadc4`)
+
+> Nico, sur une cuvée de village : le Chai dit « Fûts pas pleins — ils attendent » presque tout le vin de la cuvée ; la cuve est
+> décuvée, donc « Compléter » ne la propose plus. Diagnostic lu dans le code (§164e) : des fûts **pré-cochés** au décuvage sont
+> venus EN PLUS des siens, puis ont été retirés par la croix de « Modifier la cuvée » — qui ne touche pas au manque et ne rend
+> pas les fûts à La Réserve. Le correctif touche `cave.js`, à **1 023 ko sur 1 024** ; §153h ⑥ : *« le prochain lot Cave
+> commence par le découper »*. Question posée (correctif serré dans le 1,7 ko restant, ou découpage d'abord) : *« découpage
+> d'abord »*. Base `0ceadc4`, remesurée avant le paquet. Aucun changement visible : c'est un lot de structure.
+
+### 164a. La coupe
+
+- **Ce qui part** : les familles du Cuvier, par leur nom — `_vend*`, `_VEND_*`, `_vt*`, `_VT_*`, `_vcuv*`, `_vnd*`, `_vm*`,
+  `_vmesure*`, `_vst*`, `_vpc*`, `_vp*`, `_vl*`, `_liv*`, `_rec*`, `_mat*`, `openVend*` / `openOvVend*` / `saveVend*` /
+  `renderVend*` / `deleteVend*` / `exportVend*`, `switchVendOng`, l'état de la répartition et des ventes en vrac (`_vrep`,
+  `_vliv`, `_vlivNom`, `_vrecDateHooked`) et les constantes qu'eux seuls lisent (`VD_BL_CSS`, `MV_TRI_RECOLTES`,
+  `MV_TRI_MATURITE`, `MV_APP_MAX`, `MV_CUV_*`, `MV_MAT_*`, `_MAT_CAMP_J`). **674 instructions de premier niveau** partent,
+  **658** restent : `cave.js` **535 ko**, `cuvier.js` **494 ko**.
+- **Ce qui reste** : le Chai, Le millésime, Aujourd'hui, les documents (registre, bilan, cahier de cuverie), les courbes, le
+  comparatif, l'assemblage (`_asm*`), le parc à cuves (`_caveCuve`, `_caveParc`…).
+- **Comment** : script de découpe hors dépôt, sur l'arbre syntaxique (`espree` + `eslint-scope`, les dépendances d'ESLint).
+  Chaque instruction emporte **les commentaires qui la précèdent et ce qui la suit sur sa ligne** ; un commentaire n'est jamais
+  coupé en deux. Les morceaux recomposent la source **à l'octet** (contrôlé avant écriture) ; l'ordre d'origine est gardé des
+  deux côtés.
+- **Ce qui n'est pas un déplacement pur** — quatre retouches, toutes nommées :
+  1. `caveSection` était **lue deux fois** par Le Cuvier (`_vendDvolCorriger`, `_vpcAppliquer`) : elle se lit par
+     `_caveSectionAct()` (cave.js). La variable ne quitte jamais son module.
+  2. `_vendTab` était **écrit quatre fois** par le Chai (`selectCaveSection`, trois fois dans `_mlGo`) : le Chai appelle
+     `_vendOngletCuves()` (cuvier.js).
+  3. L'import de `cave.js` perd `_mvBadge`, qu'il n'utilise plus ; `cuvier.js` importe ses sept noms d'`utils.js`.
+  4. Un commentaire de `_bcDoc` disait « `_recKg` est déclaré dans CE fichier » : il dit maintenant qu'il passe la frontière.
+
+### 164b. La frontière
+
+- **Deux blocs « LA FRONTIÈRE »**, en fin de chaque fichier : **22 expositions dans `cave.js`** (ce que Le Cuvier lit du Chai :
+  `_mvF1`, `_caveV2InjectCss`, `_mlAuj`, `_caveSectionAct`, `MV_CUVDOC_CSS`…), **56 dans `cuvier.js`** (ce que le Chai lit du
+  Cuvier : `_vendVolContenu`, `_vendHlKg`, `_recKg`, `_vendDecuvee`, `_vendOngletCuves`…). Les autres noms qui traversent
+  étaient déjà posés sur `window` par leur propre fichier (vérifié : aucun n'était posé par un autre module).
+- Mesuré sur les fichiers écrits : `cave.js` lit **64 noms** de `cuvier.js`, `cuvier.js` en lit **39** (+ les deux objets) ;
+  **aucun au chargement, aucun écrit de l'autre côté**. Seul `DEBUG` est déclaré des deux côtés (une constante par module, §24 n°8).
+- **`CAVE_VENDANGE` / `CAVE_ELEVAGE`** : déclarés dans `cave.js`, posés sur `window` à son chargement, **mutés en place par tout
+  le monde, jamais réaffectés** (vérifié : aucune réaffectation dans les deux fichiers). `cuvier.js` les lit par `window` — le
+  même objet. Une réaffectation future ferait lire à Le Cuvier l'objet d'avant : le harnais l'interdit (C).
+- **Chronologie** : `app.js` importe `cuvier.js` **juste après `cave.js`**. Aucun des deux n'exécute de code au chargement hors
+  déclarations et `window.X = …` (vérifié instruction par instruction) : rien ne lit l'autre avant le premier geste.
+- Le bundle : les noms de la frontière restent des **globales** après Terser (`_vendHlKg(` 5 appels nus, `_caveCuve(` 12,
+  `_mvF1(` 59 — exactement les références qui traversent), chacun posé une fois par `window.X=`.
+
+### 164c. Les harnais — une seule porte, et ceux qui ont suivi
+
+- **`scripts/mv-cave-src.mjs`** (neuf) : `CAVE_FICHIERS`, `lireCave()` (les deux textes, dans l'ordre d'app.js — pour extraire
+  par nom ou par motif) et `importerCave()` (importe les deux vrais modules ; ★ recopie sur `globalThis` ce que chacun pose sur un
+  faux `window` : dans le navigateur `window` EST l'objet global, un harnais qui fabrique un `window` distinct casse le pont —
+  c'est le décor qui ment, pas le code). Le jour où la Cave se recoupe, on ajoute UN fichier à la liste.
+- **Repointés sur `lireCave()`** (22) : `agenda`, `alignement`, `asm1`, `cave-reglages`, `cuv7`, `cuv8`, `cuv13`, `fusion`,
+  `futcap`, `intrants`, `parcours`, `poids-caisse`, `rdtmil`, `reste-a-rentrer`, `tri1`, `tri2`, `tri3`, `vendange-garde`,
+  `vendange-parts`, `vol1` — plus `cuvdoc` et `cuvgr3` sur `importerCave()`. `poids-caisse` et `vendange-parts` gardent leur
+  argument (une copie donnée à la main) ; sans argument, la Cave entière.
+- **Listes écrites en dur, complétées** : `couches`, `jetons`, `toast-honnete`, `icones`, `icones-contre`, `subset`,
+  `harnais-demo`. ★ Un harnais à liste fermée ne rougit pas quand un module naît : il l'ignore. `cuvier.js` y serait resté
+  invisible — et le cliquet de poids (`typo`) saute un fichier sans référence : il échappait au plafond de 1 024 ko.
+- **Assertions recalées** (l'intention gardée, la forme suivie) : vol1 `D15` (la section se lit par `_caveSectionAct()`) ;
+  `poids-caisse` « le repli mort sur `window._recKg` a disparu » — l'exposition de la frontière est légitime, le REPLI reste
+  interdit, borné au nom exact (`_recKgDom` n'est pas `_recKg`) ; **re-mord vérifié** en réinjectant le repli ; `couches` cherche
+  `.vt-hd` dans `cuvier.js` ; `mv-chartes-doc` : `_vendRecoltesDoc` et `_matDoc` vivent dans `cuvier.js`.
+- **Contre-épreuves** rejouées : futcap 17/17, asm1 17/17, vol1 19/19, poids-caisse 8/8 (★ sa contre-épreuve relançait l'enfant
+  avec la cible en dur : l'enfant n'aurait lu que `cave.js`, planté sur les fonctions du Cuvier, et chaque plantage serait passé
+  pour un sabotage « vu » — il ne passe la cible que si on en a donné une), cuv8, cuv13, cuvgr3 6/6 (★ le vrai fichier est rendu
+  dans un `finally`).
+- **Références regravées, total par total** — la base réelle d'abord, dans un clone intact (`git worktree` sur `0ceadc4`) :
+  `preflight-baseline` (C24b : `cave.js` 26 → 20, `cuvier.js` 6 ; `planning.js` 24 → 23, une baisse d'avant ce lot), `mv-icones`
+  (26 = 22 + 4), `subset` (53 = 43 + 10), `contraste` (clair 11 = 6 + 5, sombre 47 = 20 + 27, surfaces 4 = 1 + 3), `typo` (`dur`
+  et `petit` inchangés au total, `cave.js` 1 023 → 535 ko, `cuvier.js` 494). ★ Les références d'icones (669) et de subset (274)
+  étaient **déjà périmées** sur la base (639 et 272 : pilotage et planning avaient baissé sans regravure) — mesuré avant de
+  conclure, sinon on aurait attribué au découpage une baisse de 30 emojis qu'il n'a pas faite.
+- **`scripts/mv-harnais-cuvier.mjs`** (neuf) : A l'import juste après `cave.js` · B tout nom lu chez l'autre est exposé PAR SON
+  fichier, jamais lu au chargement, jamais écrit · C les deux objets partagés jamais réaffectés · D chaque famille chez elle (pas de
+  `_vend*` dans `cave.js`, pas de `_cave*` / `_ml*` / `_asm*`… dans `cuvier.js`) · E `const DEBUG` des deux côtés, `cuvier.js`
+  n'importe qu'`utils.js` · F rien ne tourne au chargement. **15 assertions, 10 contre-épreuves**, chacune attrapée par SA règle.
+  Branché dans `check`, `prebuild` et la CI (`mv-harnais-portes` vert) ; `npm run test:cuvier`. ★ Il dit ce que
+  `mv-harnais-globaux` ne peut pas dire : QUI pose le nom, QUAND on le lit, et si on l'ÉCRIT.
+
+### 164d. ★ Trouvé en route : la contre-épreuve de `cuvdoc` ne prouvait rien
+
+Elle écrivait ses copies sabotées **à la racine du dépôt** ; `import './utils.js'` y cassait (`ERR_MODULE_NOT_FOUND`) ; **chaque
+enfant plantait**, et un plantage comptait comme un défaut attrapé — « 25 rouges » sans qu'aucune assertion n'ait tourné.
+Réparée : les copies vont dans un dossier temporaire, **à côté d'une copie d'`utils.js`**, et un enfant qui plante sans assertion
+rouge compte comme **sans effet**. Le défaut 5 (ordre de maturité) visait une ligne réécrite par TRI-1 : réancré sur
+`_matTrier(_matClasse(byP, spd), mtri)`. Résultat honnête : **24 défauts attrapés sur 26**. Les deux autres (19 : la légende qui
+date les passages ; 26 : le rabattement au bord bas) **restent verts aussi sur la base** — des trous du harnais, masqués par les
+plantages, hors de ce lot. `test:cuvdoc` n'est pas dans la chaîne de `check` : il sort rouge, comme avant ce lot, mais pour une
+raison vraie. ★ Une contre-épreuve qui compte un plantage comme une prise est la même faute qu'un harnais qui compte un
+plantage comme un vert (§6b) : il faut regarder POURQUOI l'enfant a rougi.
+
+### 164e. Le fût « pas plein » — le diagnostic, pour le lot suivant
+
+Lu dans le code, pas dans les données (le bac n'y a pas accès) ; c'est le seul chemin qui donne exactement le message décrit :
+1. **« Décuver »** : dès que le volume mesuré est tapé, la proposition coche des fûts, **les plus vieux** — donc **en bas** de la
+   liste, que `_mvFutStock` range du plus récent au plus ancien. Les fûts ajoutés à la main avec « + » s'**ajoutent** à la
+   proposition. `saveVendDecuvage` écrit `manque_l = F − (M − C)` : le vide des fûts en trop. ⚠️ Et le `change` du champ volume
+   REFAIT la proposition (`_vendDecPropose`) : taper ou corriger le volume après avoir choisi ses fûts efface le choix (seuls les
+   hors-format sont gardés).
+2. **« Modifier la cuvée »** : la croix (`removeCuvTonneau`) retire la ligne ; `saveCuvee` réécrit `tonneaux` **sans toucher
+   `manque_l`** (§153h ② l'avait noté ouvert) et **sans rendre les fûts** au parc (`INTRANTS.futs[].qte` ne compte que les fûts
+   libres — ils disparaissent de La Réserve). `_caveManqueL` plafonne au bois restant : ce sont les vrais fûts qui « attendent »
+   presque tout le vin (`_asmCarteHtml` : « Fûts pas pleins — ils attendent N L »).
+3. La cuve est décuvée : `_asmSources` l'exclut. Aucun geste ne permet de dire « mes fûts sont pleins ».
+**Réparer les données sans code** : console Firestore, `mavigne_<slug>` › `cave_elevage` › `value.cuvees[n].manque_l` (0, ou les
+litres qui manquent vraiment), puis relancer l'appli ; remettre dans La Réserve les fûts disparus. Si c'est « Retirer un fût »
+qui a servi : les fûts sont revenus au parc, mais une ligne « Retrait fût » (motif « Vente » par défaut) reste au journal.
+**Le correctif proposé** (lot suivant, `cave.js` et `cuvier.js` ont maintenant de la place) : ① « Compléter le fût » gagne une
+sortie « Mes fûts sont pleins — corriger ce qui manque » (une correction, pas une opération du registre) ; ② « Modifier la
+cuvée » : enlever un fût enlève d'abord son vide et le rend à La Réserve s'il en venait (`lot_id`) ; ③ « Décuver » : un fût
+choisi à la main remplace un pré-coché en trop, et corriger le volume ne refait plus la proposition sur un choix déjà fait.
+
+### 164f. Mesuré
+
+- `npm run check` : **la vraie chaîne, jouée en entier sur l'état livré — code retour 0** (292 s, lancée détachée : le bac coupe
+  une commande à 300 s). Avant elle, les 114 commandes une par une, sans arrêt au premier rouge : une seule tombait — C26 lisait
+  « import(s) » dans un TEXTE du harnais neuf (la règle ne blanchit pas les chaînes) ; libellé réécrit, la règle n'a pas bougé.
+- `npx vite build` : OK (l'avertissement « chunk > 800 kB » est connu, non bloquant). `test:smoke` : démarrage OK, 23/23 globaux
+  (Playwright 1.61 : `PLAYWRIGHT_BROWSERS_PATH=/tmp/pw`, liens vers le Chromium 1194 du bac, §149a).
+- ★★ **Parcours réel sur l'appli COMPILÉE** (hors dépôt, `/home/claude/lot/parcours-cuvier.mjs`) : Chromium 390 × 844, réseau
+  extérieur coupé, mode visite (le login démo court-circuité, le scénario de la visite pose ses données en mémoire), puis
+  **41 étapes** : Aujourd'hui, les quatre onglets du Cuvier, une cuve dépliée, relevé, saignée, décuvage, fiche cuve, récolte,
+  ventes en vrac, fusion, volume décuvé, les trois documents du Cuvier, les trois `_mlGo`, le Chai et ses onglets, fiche et
+  modification de cuvée, retrait de fût, « Compléter » sur chaque cuvée, registre, bilan, Le millésime, réglages, Pilotage,
+  Réglages, La Réserve. **Aucune erreur pendant les étapes** ; au chargement, deux messages, les mêmes sur la base (service
+  worker bloqué par le test, vibration refusée). ★ **Le même parcours sur le build de la base : DOM identique, écran par écran,
+  41 sur 41, deux passes** — une fois retirés l'écran d'accueil animé et le toast, qui changent d'une passe à l'autre même sur la
+  base seule. C'est la preuve qu'un lot de structure doit donner : rien n'a bougé à l'écran.
+- `test:e2e` : non joué (émulateurs Firebase).
+
+### 164g. La note de livraison
+
+**Base `0ceadc4`. APP 7.51 inchangé · SW 8.19 → 8.20** (`app.js` touché : bump SW seul, `WHATS_NEW` intact — aucun changement
+visible, §7). Puis `npm run build && firebase deploy --only hosting`.
+
+| Fichier | Ce qui change | Bump ? |
+|---|---|---|
+| `src/cave.js` | le Cuvier en moins ; `_caveSectionAct` ; `_vendOngletCuves()` ×4 ; import sans `_mvBadge` ; bloc « LA FRONTIÈRE » (22) ; en-tête | — |
+| `src/cuvier.js` (neuf) | Le Cuvier, dans l'ordre d'origine, avec ses commentaires ; `_vendOngletCuves` ; bloc « LA FRONTIÈRE » (56) ; en-tête | — |
+| `src/app.js` | `import './cuvier.js'` juste après `cave.js` | ★ SW |
+| `public/sw.js` | 8.20 : en-tête, changelog, `CACHE_NAME`, deux `console.log` | ★ SW |
+| `scripts/mv-cave-src.mjs` · `scripts/mv-harnais-cuvier.mjs` | neufs | — |
+| 30 scripts de contrôle (`scripts/`) | repointés, listes complétées, deux assertions recalées, contre-épreuve de `cuvdoc` réparée | — |
+| `scripts/preflight-baseline.json` · `mv-icones-baseline.json` · `subset-baseline.json` · `contraste-baseline.json` · `typo-baseline.json` | regravés, total par total | — |
+| `package.json` · `.github/workflows/ci.yml` | `mv-harnais-cuvier` (et `--contre`) aux trois portes ; `test:cuvier` | — |
+| `scripts/harnais-claude-md.mjs` · `CLAUDE.md` · `.mv-base` | SECTIONS 196 · §164, §5, §20, en-tête · base | — |
+
+### 164h. Ouvert, et dit
+
+① **Le correctif du fût « pas plein »** (§164e) : le lot suivant, sur cette base. ② Les trous 19 et 26 de la contre-épreuve de
+`cuvdoc` (§164d). ③ La frontière est **large** (78 expositions) : c'est la mesure honnête d'un fichier qui n'avait jamais été
+pensé en deux ; la resserrer (un module « parc à cuves » partagé, par exemple) serait un lot de structure à part, pas une
+urgence. ④ `cave.js` garde les documents du Cuvier qui lisent les deux mondes (cahier de cuverie, comparatif) ; `cuvier.js`
+garde le contrôle de maturité. ⑤ `test:e2e` et un vrai téléphone, chez Nico.

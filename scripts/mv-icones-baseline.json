@@ -1,12 +1,13 @@
 {
-  "total": 669,
+  "total": 639,
   "modules": {
     "app": 79,
     "utils": 77,
-    "pilotage": 106,
-    "planning": 78,
+    "pilotage": 78,
+    "planning": 76,
     "reglages": 90,
-    "cave": 26,
+    "cave": 22,
+    "cuvier": 4,
     "tracteur": 3,
     "phyto": 10,
     "reserve": 14,

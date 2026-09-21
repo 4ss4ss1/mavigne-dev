@@ -35,13 +35,14 @@ import path from 'node:path';
 import { fileURLToPath } from 'node:url';
 
 import { sourceDates, poseDates } from './mv-dates-reelles.mjs';
+import { lireCave } from './mv-cave-src.mjs';   // ★ CUV-DEC (§164) : la Cave = cave.js + cuvier.js
 /* fileURLToPath, jamais new URL().pathname : celui-ci rend « /C:/Users/… »
    sous Windows et Node le repart en « C:\C:\Users\… » (§53). */
 const ICI    = path.dirname(fileURLToPath(import.meta.url));
 const RACINE = path.join(ICI, '..');
 const CONTRE = process.argv.slice(2).includes('--contre');
 
-const CAVE  = fs.readFileSync(path.join(RACINE, 'src', 'cave.js'), 'utf8');
+const CAVE  = lireCave(RACINE);
 const UTILS = fs.readFileSync(path.join(RACINE, 'src', 'utils.js'), 'utf8');
 
 /* Extraction par comptage d'accolades : la fonction telle qu'elle est écrite

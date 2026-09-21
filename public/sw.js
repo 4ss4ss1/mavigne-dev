@@ -1,4 +1,7 @@
-// MA VIGNE — Service Worker v8.19
+// MA VIGNE — Service Worker v8.20
+// v8.20 (21/09/2026) — CUV-DEC : Le Cuvier sort de cave.js (1 023 ko sur 1 024) et devient src/cuvier.js, importé
+//   juste après lui dans app.js. Aucun changement visible : les mêmes écrans, les mêmes gestes. La frontière
+//   (un bloc d'expositions en fin de chaque fichier) est gardée par mv-harnais-cuvier. APP 7.51 inchangé.
 // v8.19 (20/09/2026) — CIBLE-1 : un anneau doré respire sur les cartes (Parcelles, Carte du domaine, tournée du jour et son repli)
 //   autour de la parcelle COMMENCÉE et pas finie, sinon de la PROCHAINE à faire — le n°1 de la tournée enregistrée dans Décider.
 //   Une définition unique (_mvCibleCarte / _mvTacheEtat), lue aussi par l'écran Vigne. Corrigé au passage : le départ « dernière
@@ -4096,7 +4099,7 @@
 // v2.22 — Fix profils vides : guard vide dans loadData() pour MEMBRES/SAISONS/TACHES
 // v2.17 — Onboarding intégré + tenantId · v2.06 — Firebase Auth · v2.00–v2.05 — divers
 const DEBUG = self.location.hostname === 'localhost' || self.location.hostname === '127.0.0.1';
-const CACHE_NAME   = 'mavigne-v8.19';
+const CACHE_NAME   = 'mavigne-v8.20';
 const TENANT_CACHE = 'mavigne-tenant';   // Cache persistant — préservé à chaque mise à jour SW
 const SYNC_TAG     = 'mavigne-sync';
 
@@ -4112,7 +4115,7 @@ const CDN_URLS = [
 ];
 
 self.addEventListener('install', event => {
-  if(DEBUG) console.log('[SW] Ma Vigne v8.19 installé — en attente');
+  if(DEBUG) console.log('[SW] Ma Vigne v8.20 installé — en attente');
   event.waitUntil(
     caches.open(CACHE_NAME).then(async cache => {
       // ── Cœur applicatif : STRICT (mise à jour ATOMIQUE) ──
@@ -4132,7 +4135,7 @@ self.addEventListener('install', event => {
 });
 
 self.addEventListener('activate', event => {
-  if(DEBUG) console.log('[SW] Ma Vigne v8.19 activé');
+  if(DEBUG) console.log('[SW] Ma Vigne v8.20 activé');
   event.waitUntil(
     caches.keys().then(keys =>
       Promise.all(

@@ -20,12 +20,16 @@ import fs from 'node:fs';
 import path from 'node:path';
 import { fileURLToPath, pathToFileURL } from 'node:url';
 import { execFileSync } from 'node:child_process';
+import { CAVE_FICHIERS, importerCave } from './mv-cave-src.mjs';   // ★ CUV-DEC (§164)
 
 const ICI    = path.dirname(fileURLToPath(import.meta.url));
 const RACINE = path.join(ICI, '..');
 const args   = process.argv.slice(2);
 const CONTRE = args.includes('--contre');
-const CIBLE  = args.find(a => !a.startsWith('--')) || path.join(RACINE, 'src', 'cave.js');
+/* ★ CUV-DEC (§164) — la Cave vit dans deux fichiers : sans argument, les deux, dans l'ordre d'app.js. */
+const CIBLES = args.filter(a => !a.startsWith('--')).map(a => path.resolve(a));
+if (!CIBLES.length) CAVE_FICHIERS.forEach(f => CIBLES.push(path.join(RACINE, f)));
+const TEXTE_CAVE = () => CIBLES.map(f => fs.readFileSync(f, 'utf8')).join('\n');
 
 // ── DOM minimal : on ne remplace que le navigateur, jamais le code teste ────
 function El() {
@@ -69,7 +73,7 @@ catch { /* Node expose deja un navigator en lecture seule */ }
 
 // ⚠ `startsWith('/')` etait DEJA une hypothese Unix : sous Windows un chemin absolu
 //   commence par « C:\\ ». pathToFileURL(path.resolve(...)) est juste des deux cotes.
-await import(pathToFileURL(path.resolve(CIBLE)).href);
+await importerCave(CIBLES);   // ★ CUV-DEC : cave.js puis cuvier.js, le pont window → globalThis posé
 
 
 let ok = 0, ko = 0;
@@ -142,9 +146,9 @@ const pap = window._vendFermSvg(CUVE, 520, { sansTouche: true });
 T('sansTouche : aucune zone', !pap.includes('mvg-hit'));
 T('mais le trac\u00e9 est le m\u00eame', pap.includes('<polyline') && /role="img"/.test(pap));
 T('le cahier de cuverie passe bien sansTouche',
-  /_vendFermSvg\(c, MV_CUVDOC_GRW, \{ sansTouche:true \}\)/.test(fs.readFileSync(path.resolve(CIBLE), 'utf8')));
+  /_vendFermSvg\(c, MV_CUVDOC_GRW, \{ sansTouche:true \}\)/.test(TEXTE_CAVE()));
 T('\u00ab touchez la courbe \u00bb est masqu\u00e9 \u00e0 l\u2019impression',
-  /\.mvfm-tap\{display:none\}/.test(fs.readFileSync(path.resolve(CIBLE), 'utf8')));
+  /\.mvfm-tap\{display:none\}/.test(TEXTE_CAVE()));
 
 console.log('\n\u2500\u2500 6. \u2605 AUCUN AUTRE GRAPHE N\u2019EST TOUCH\u00c9 \u2500\u2500');
 /* Tous les graphes ne sont pas exposes : on vise la SOURCE.
@@ -154,7 +158,7 @@ console.log('\n\u2500\u2500 6. \u2605 AUCUN AUTRE GRAPHE N\u2019EST TOUCH\u00c9 
    encourager. Meme defaut que `A8` de mv-harnais-audit-pil (\u00a76c).
    Convertie : LE COMPTE NE DESCEND JAMAIS. Il protege ce que le lot CUVGR-3 a
    pose (la courbe de fermentation) sans interdire la suite. */
-const SRC_CAVE = fs.readFileSync(path.resolve(CIBLE), 'utf8');
+const SRC_CAVE = TEXTE_CAVE();
 const CRB_HIT_MIN = 2;   /* _vendFermSvg (CUVGR-3) + _crbEnvSvg (CRB-2) */
 const nHit = (SRC_CAVE.match(/_mvGraphHit\(/g) || []).length;
 T('\u2605 le nombre de graphes a infobulle ne descend jamais (>= ' + CRB_HIT_MIN + ')',
@@ -194,15 +198,17 @@ if (CONTRE) {
      [`    .replace(/"/g, '&quot;').replace(/'/g, '&#39;');`,
       `    .replace(/'/g, '&#39;');`], 'utils']
   ];
-  const F_CAVE = path.join(RACINE, 'src', 'cave.js');
+  /* ★ CUV-DEC — un défaut de la Cave va dans LE fichier qui porte son ancre (cave.js ou cuvier.js). */
+  const F_CAVES = CAVE_FICHIERS.map(f => path.join(RACINE, f));
   const F_UTIL = path.join(RACINE, 'src', 'utils.js');
-  const cave0 = fs.readFileSync(F_CAVE, 'utf8');
+  const caves0 = F_CAVES.map(f => fs.readFileSync(f, 'utf8'));
   const util0 = fs.readFileSync(F_UTIL, 'utf8');
   let rougi = 0;
   console.log('\n\u2550\u2550 CONTRE-\u00c9PREUVES \u2550\u2550');
   for (const [nom, [av, ap], ou] of DEF) {
-    const cible = (ou === 'utils') ? F_UTIL : F_CAVE;
-    const src0  = (ou === 'utils') ? util0 : cave0;
+    const k = caves0.findIndex(s => s.includes(av));
+    const cible = (ou === 'utils') ? F_UTIL : F_CAVES[k < 0 ? 0 : k];
+    const src0  = (ou === 'utils') ? util0 : caves0[k < 0 ? 0 : k];
     if (src0.split(av).length - 1 !== 1) {
       console.log('   ' + rouge('ANCRE') + ' introuvable ou multiple : ' + nom); continue;
     }
@@ -210,7 +216,7 @@ if (CONTRE) {
     let mort = false;
     try { execFileSync(process.execPath, [fileURLToPath(import.meta.url)], { stdio:'pipe', cwd:RACINE }); }
     catch { mort = true; }
-    fs.writeFileSync(cible, src0);
+    finally { fs.writeFileSync(cible, src0); }   // le vrai fichier est rendu, quoi qu'il arrive
     console.log('   ' + (mort ? vert('rouge') : rouge('VERT ')) + '  ' + nom
       + (mort ? '' : '  \u2190 LE FILET NE SERT \u00c0 RIEN'));
     if (mort) rougi++;

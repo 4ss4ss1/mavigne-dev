@@ -18,6 +18,8 @@ import './firebase.js';
 import './onboarding.js';
 import './admin-gt.js';
 import './cave.js';
+// ★ CUV-DEC (§164) — Le Cuvier, sorti de cave.js : JUSTE APRÈS lui (il lit le Chai par window).
+import './cuvier.js';
 import './planning.js';
 import './reglages.js';
 import './tracteur.js';

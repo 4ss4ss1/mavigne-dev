@@ -35,10 +35,11 @@
 // ═══════════════════════════════════════════════════════════════════════════
 import { readFileSync } from 'node:fs';
 import vm from 'node:vm';
+import { lireCave } from './mv-cave-src.mjs';   // ★ CUV-DEC (§164) : la Cave = cave.js + cuvier.js
 const CONTRE = process.argv.includes('--contre');
 const lire = p => readFileSync(new URL('../' + p, import.meta.url), 'utf8');
 const SAIN = {
-  cave: lire('src/cave.js'), utils: lire('src/utils.js'), app: lire('src/app.js'),
+  cave: lireCave(), utils: lire('src/utils.js'), app: lire('src/app.js'),
   g08: lire('guide/08-cave.html')
 };
 
@@ -245,7 +246,7 @@ const T = {
     const f = code(S.cave, '_pcrbChaine');
     return f.includes("ch.entonneSrc==='mesure'") && f.includes('_vendDvolCorriger') && !f.includes('cuveHl'); }],
   D15: ['la saisie ouverte depuis Le millésime repeint l’écran d’où l’on vient', (A, S) =>
-    code(S.cave, '_vendDvolCorriger').includes("if(caveSection==='vendange'||typeof renderCave!=='function') renderVendCuves(); else renderCave();")],
+    code(S.cave, '_vendDvolCorriger').includes("if(_caveSectionAct()==='vendange'||typeof renderCave!=='function') renderVendCuves(); else renderCave();")],   // ★ CUV-DEC (§164) : la section se lit par le Chai
   D16: ['l’onglet Bouteilles lit le vivant d’abord', (A, S) => code(S.cave, 'renderCaveBouteille').includes('var ch=_caveBilanChaine(c);')
     && !code(S.cave, 'renderCaveBouteille').includes('c.bilan_perte||_caveBilanChaine(c)')],
   D17: ['une chaptalisation sans volume ne dit pas « 0,0 kg de sucre »', A =>

@@ -29,9 +29,10 @@
    bouchons minimaux. Aucune formule réécrite ici.
    ─────────────────────────────────────────────────────────────────────────── */
 import { readFileSync } from 'node:fs';
+import { lireCave } from './mv-cave-src.mjs';   // ★ CUV-DEC (§164) : la Cave = cave.js + cuvier.js
 
 const CONTRE = process.argv.includes('--contre');
-const SRC = readFileSync('src/cave.js', 'utf8');
+const SRC = lireCave();
 
 let vert = 0, total = 0;
 const rouges = [];

@@ -13,10 +13,11 @@
 import fs from 'node:fs';
 import vm from 'node:vm';
 import { fileURLToPath } from 'node:url';
+import { lireCave } from './mv-cave-src.mjs';   // ★ CUV-DEC (§164) : la Cave = cave.js + cuvier.js
 
 const F_CAVE   = fileURLToPath(new URL('../src/cave.js', import.meta.url));
 const F_CLAIMS = fileURLToPath(new URL('../functions/claims.js', import.meta.url));
-const cave   = fs.readFileSync(F_CAVE, 'utf8');
+const cave   = lireCave();
 const claims = fs.readFileSync(F_CLAIMS, 'utf8');
 
 let rouges = 0, verts = 0;

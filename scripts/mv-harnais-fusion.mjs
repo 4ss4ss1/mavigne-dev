@@ -15,6 +15,7 @@ import path from 'node:path';
 import { fileURLToPath } from 'node:url';
 
 import { sourceDates, poseDates } from './mv-dates-reelles.mjs';
+import { lireCave } from './mv-cave-src.mjs';   // ★ CUV-DEC (§164) : la Cave = cave.js + cuvier.js
 const ICI = path.dirname(fileURLToPath(import.meta.url));
 const CAVE = path.join(ICI, '..', 'src', 'cave.js');
 
@@ -35,7 +36,7 @@ function bloc(src, debut, fin) {
   return src.slice(i, j + fin.length);
 }
 
-const SRC = fs.readFileSync(CAVE, 'utf8');
+const SRC = lireCave();
 
 const MORCEAUX = [
   bloc(SRC, 'function _caveCuve(id){', '\n}'),

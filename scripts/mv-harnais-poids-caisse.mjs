@@ -33,6 +33,7 @@
 import fs from 'node:fs';
 import path from 'node:path';
 import { fileURLToPath } from 'node:url';
+import { lireCave } from './mv-cave-src.mjs';   // ★ CUV-DEC (§164) : la Cave = cave.js + cuvier.js
 
 const ICI    = path.dirname(fileURLToPath(import.meta.url));
 const RACINE = path.join(ICI, '..');
@@ -43,9 +44,11 @@ const CONTRE = args.includes('--contre');
    réellement vu. `--contre` relance donc ce fichier une fois par défaut, dans
    son propre processus, et EXIGE le rouge à chaque fois. */
 const SABOT = (() => { const a = args.find(x => x.startsWith('--sabotage=')); return a ? parseInt(a.slice(11), 10) : -1; })();
-const CIBLE  = path.resolve(args.find(a => !a.startsWith('--')) || path.join(RACINE, 'src', 'cave.js'));
+const ARG    = args.find(a => !a.startsWith('--'));
+const CIBLE  = path.resolve(ARG || path.join(RACINE, 'src', 'cave.js'));
 
-const SRC = fs.readFileSync(CIBLE, 'utf8');
+/* ★ CUV-DEC (§164) — sans cible donnée, la Cave entière : cave.js + cuvier.js. */
+const SRC = ARG ? fs.readFileSync(CIBLE, 'utf8') : lireCave(RACINE);
 
 /* Extraction par comptage d'accolades : la fonction telle qu'elle est écrite
    dans le module, pas une copie qui dériverait au premier lot suivant. */
@@ -68,7 +71,8 @@ const NOMS = [
   '_vendSurfParc','_vendVolCuve','_vendVolPart','_vendLitresRetour','_vendRdtBase',
   '_vendCuvCsDom','_vendCuvKgDom','_vendHlKg','_mlKgHl','_vendVolLoge','_vendRecordRendement',
   '_vpcMillesimes','_vpcRecs','_vpcPoids','_vpcLigne','_vpcClientsVises','_vpcAppliquer',
-  '_vpcEnorme','_vpcSetAnc','_vpcSetMil'
+  '_vpcEnorme','_vpcSetAnc','_vpcSetMil',
+  '_caveSectionAct'   // ★ CUV-DEC : _vpcAppliquer lit la section par le Chai
 ];
 /* Les deux compteurs du lot d'écritures sont des `var` de module, pas des
    fonctions : on les extrait tels quels, pour que le harnais tombe si la
@@ -178,7 +182,7 @@ if (CONTRE){
   let vus = 0;
   const TOTAL = SABOTAGES.length + SAB_TXT.length;
   for (let i = 0; i < TOTAL; i++){
-    const r = spawnSync(process.execPath, [fileURLToPath(import.meta.url), CIBLE, '--sabotage=' + i],
+    const r = spawnSync(process.execPath, [fileURLToPath(import.meta.url)].concat(ARG ? [CIBLE] : [], ['--sabotage=' + i]),
                         { encoding:'utf8' });
     void r;
     const rouge = r.status !== 0;
@@ -410,7 +414,11 @@ const BC = sansCom(corpsT('_bcDoc'));
 T('★★ le bilan de campagne ne repèse plus les caisses en dur',
   /nb_caisses\s*\|\|\s*0\)\s*\*\s*25/.test(BC), false);
 T('★ ...il lit le poids de chaque apport', /var kg = _recKg\(r\);/.test(BC), true);
-T('★ le repli mort sur window._recKg a disparu', sansCom(TEXTE).includes('window._recKg'), false);
+/* ★ CUV-DEC (§164) — _recKg vit dans cuvier.js et cave.js l'appelle par la frontière :
+   la ligne d'exposition `window._recKg = _recKg;` est légitime. Ce qui reste interdit, c'est
+   le REPLI (typeof window._recKg === 'function' ? … : 25 kg en dur). */
+T('★ le repli mort sur window._recKg a disparu',
+  /window\._recKg\b/.test(sansCom(TEXTE).replace(/^window\._recKg = _recKg;$/m, '')), false);   // \b : _recKgDom n'est pas _recKg
 
 console.log('\n' + (ko ? ko + ' ASSERTION(S) ROUGE(S) sur ' + n : 'TOUT VERT — ' + n + ' assertions'));
 process.exit(ko ? 1 : 0);

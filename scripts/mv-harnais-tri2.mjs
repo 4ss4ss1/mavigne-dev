@@ -18,6 +18,7 @@ import fs from 'node:fs';
 import path from 'node:path';
 import { fileURLToPath } from 'node:url';
 import { sourceDates, poseDates } from './mv-dates-reelles.mjs';
+import { lireCave } from './mv-cave-src.mjs';   // ★ CUV-DEC (§164) : la Cave = cave.js + cuvier.js
 poseDates(globalThis);   // _mvISO/_mvToday extraits du vrai utils.js (FUS-2)
 
 const ICI = path.dirname(fileURLToPath(import.meta.url));
@@ -43,7 +44,7 @@ function jusqua(src, debut, fin) {
 }
 const REGL  = fs.readFileSync(path.join(R, 'src/reglages.js'), 'utf8');
 const RSV_TXT = fs.readFileSync(path.join(R, 'src/reserve.js'), 'utf8');
-const CAVE  = fs.readFileSync(path.join(R, 'src/cave.js'),     'utf8');
+const CAVE  = lireCave(R);
 const APP   = fs.readFileSync(path.join(R, 'src/app.js'),      'utf8');
 
 // ═══════════════════════════════════════════════════════════════════════════

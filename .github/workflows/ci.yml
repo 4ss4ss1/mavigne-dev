@@ -73,6 +73,8 @@ jobs:
         run: |
           node scripts/mv-harnais-globaux.mjs
           node scripts/mv-harnais-globaux.mjs --contre
+          node scripts/mv-harnais-cuvier.mjs
+          node scripts/mv-harnais-cuvier.mjs --contre
 
       # Cliquet : bloque toute erreur NOUVELLE, tolere le plafond documente
       # dans scripts/lint-cliquet.mjs.

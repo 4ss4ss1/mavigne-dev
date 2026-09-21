@@ -20,9 +20,10 @@
 //           node scripts/mv-harnais-cuv8.mjs --contre
 // ═══════════════════════════════════════════════════════════════════════════
 import { readFileSync } from 'node:fs';
+import { lireCave } from './mv-cave-src.mjs';   // ★ CUV-DEC (§164) : la Cave = cave.js + cuvier.js
 
 const CONTRE = process.argv.includes('--contre');
-const SRC = readFileSync(new URL('../src/cave.js', import.meta.url), 'utf8');
+const SRC = lireCave();
 
 /* ══ EXTRACTION — indices relus avant de trancher, ordre réel du fichier ══ */
 const NOMS = [

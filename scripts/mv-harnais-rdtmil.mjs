@@ -31,9 +31,10 @@
    qu'il teste ne prouve rien.
    ─────────────────────────────────────────────────────────────────────────── */
 import { readFileSync } from 'node:fs';
+import { lireCave } from './mv-cave-src.mjs';   // ★ CUV-DEC (§164) : la Cave = cave.js + cuvier.js
 
 const CONTRE = process.argv.includes('--contre');
-const CAVE = readFileSync('src/cave.js', 'utf8');
+const CAVE = lireCave();
 const PILO = readFileSync('src/pilotage.js', 'utf8');
 const UTIL = readFileSync('src/utils.js', 'utf8');
 

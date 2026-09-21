@@ -31,10 +31,11 @@
 // ═══════════════════════════════════════════════════════════════════════════
 import { readFileSync } from 'node:fs';
 import vm from 'node:vm';
+import { lireCave } from './mv-cave-src.mjs';   // ★ CUV-DEC (§164) : la Cave = cave.js + cuvier.js
 const CONTRE = process.argv.includes('--contre');
 const lire = p => readFileSync(new URL('../' + p, import.meta.url), 'utf8');
 const SAIN = {
-  cave: lire('src/cave.js'), utils: lire('src/utils.js'), rsv: lire('src/reserve.js'),
+  cave: lireCave(), utils: lire('src/utils.js'), rsv: lire('src/reserve.js'),
   idx: lire('index.html'), g08: lire('guide/08-cave.html'), g09: lire('guide/09-reserve.html')
 };
 

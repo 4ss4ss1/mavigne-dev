@@ -42,7 +42,7 @@ const lire = (f) => fs.readFileSync(path.join(RACINE, f), 'utf8');
    module qui injecte du CSS. Les seconds sont les dangereux — un z-index dans
    une chaîne JavaScript ne se voit dans aucun outil CSS. */
 const SOURCES = ['src/styles.css', 'index.html',
-  'src/cave.js', 'src/pilotage.js', 'src/planning.js', 'src/reglages.js',
+  'src/cave.js', 'src/cuvier.js', 'src/pilotage.js', 'src/planning.js', 'src/reglages.js',   // ★ CUV-DEC
   'src/tracteur.js', 'src/phyto.js', 'src/reserve.js', 'src/admin-gt.js',
   'src/onboarding.js', 'src/app.js', 'src/utils.js']
   .filter(f => fs.existsSync(path.join(RACINE, f)));
@@ -266,7 +266,7 @@ for (const f of SOURCES)
    se marchaient dessus. Si l'extracteur casse, ces trois-là disparaissent. */
 const vu = (c, f) => (parClasse.get(c) || []).indexOf(f) !== -1;
 A('★ l\'extracteur de classes retrouve les trois familles',
-  vu('mvt-ov', 'src/styles.css') && vu('mvz-ov', 'src/utils.js') && vu('vt-hd', 'src/cave.js'),
+  vu('mvt-ov', 'src/styles.css') && vu('mvz-ov', 'src/utils.js') && vu('vt-hd', 'src/cuvier.js'),   // ★ CUV-DEC : la tournée du Cuvier vit dans cuvier.js
   parClasse.size + ' classes lues');
 
 const doublons = [...parClasse.entries()].filter(([, fs2]) => new Set(fs2).size > 1);

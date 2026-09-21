@@ -28,14 +28,17 @@
 import fs from 'node:fs';
 import path from 'node:path';
 import { fileURLToPath } from 'node:url';
+import { lireCave } from './mv-cave-src.mjs';   // ★ CUV-DEC (§164) : la Cave = cave.js + cuvier.js
 
 const ICI    = path.dirname(fileURLToPath(import.meta.url));
 const RACINE = path.join(ICI, '..');
 const args   = process.argv.slice(2);
 const CONTRE = args.includes('--contre');
-const CIBLE  = path.resolve(args.find(a => !a.startsWith('--')) || path.join(RACINE, 'src', 'cave.js'));
+const ARG    = args.find(a => !a.startsWith('--'));
+const CIBLE  = path.resolve(ARG || path.join(RACINE, 'src', 'cave.js'));
 
-const SRC = fs.readFileSync(CIBLE, 'utf8');
+/* ★ CUV-DEC (§164) — sans cible donnée, la Cave entière : cave.js + cuvier.js. */
+const SRC = ARG ? fs.readFileSync(CIBLE, 'utf8') : lireCave(RACINE);
 
 /* Extraction par comptage d'accolades : la fonction telle qu'elle est écrite
    dans le module, pas une copie qui dériverait. */

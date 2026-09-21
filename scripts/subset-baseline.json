@@ -1,13 +1,14 @@
 {
   "_note": "Cliquet du harnais SUBSET. Regraver : node scripts/mv-harnais-subset.mjs --baseline. Il ne doit que DESCENDRE.",
-  "genere": "2026-09-14",
+  "genere": "2026-09-21",
   "hors_subset": {
     "src/app.js": 19,
     "src/utils.js": 34,
-    "src/pilotage.js": 30,
+    "src/pilotage.js": 28,
     "src/planning.js": 4,
     "src/reglages.js": 69,
-    "src/cave.js": 53,
+    "src/cave.js": 43,
+    "src/cuvier.js": 10,
     "src/tracteur.js": 3,
     "src/phyto.js": 2,
     "src/reserve.js": 8,
@@ -22,13 +23,13 @@
     "public/demarrage.html": 6,
     "public/logiciel-vigne.html": 2
   },
-  "hors_subset_total": 274,
+  "hors_subset_total": 272,
   "fausses_graisses": {
     "src/app.js": 17,
-    "src/pilotage.js": 11,
+    "src/pilotage.js": 4,
     "src/planning.js": 29,
     "src/reglages.js": 2,
     "src/styles.css": 13
   },
-  "fausses_graisses_total": 72
+  "fausses_graisses_total": 65
 }

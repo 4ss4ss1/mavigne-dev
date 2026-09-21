@@ -17,6 +17,7 @@
 import fs from 'node:fs';
 import path from 'node:path';
 import { fileURLToPath } from 'node:url';
+import { lireCave } from './mv-cave-src.mjs';   // ★ CUV-DEC (§164) : la Cave = cave.js + cuvier.js
 const ICI = path.dirname(fileURLToPath(import.meta.url));
 const R   = path.join(ICI, '..');
 
@@ -41,7 +42,7 @@ function ligne(src, debut) {
   return src.slice(i, k + 2);
 }
 
-const CAVE  = fs.readFileSync(path.join(R, 'src/cave.js'),  'utf8');
+const CAVE  = lireCave(R);
 const UTILS = fs.readFileSync(path.join(R, 'src/utils.js'), 'utf8');
 
 // ── Le jeu d'essai. Surfaces et kilos choisis pour que chaque defaut se voie. ──

@@ -9,7 +9,7 @@ const SRC = fs.readFileSync(new URL('../src/app.js', import.meta.url), 'utf8');
 const PIL = fs.readFileSync(new URL('../src/pilotage.js', import.meta.url), 'utf8');
 const IDX = fs.readFileSync(new URL('../index.html', import.meta.url), 'utf8');
 const CSS = fs.readFileSync(new URL('../src/styles.css', import.meta.url), 'utf8');
-const AUTRES = ['planning','cave','tracteur','phyto','reserve','reglages','utils','onboarding','firebase','admin-gt']
+const AUTRES = ['planning','cave','cuvier','tracteur','phyto','reserve','reglages','utils','onboarding','firebase','admin-gt']   // ★ CUV-DEC
   .map(m => { try { return fs.readFileSync(new URL(`../src/${m}.js`, import.meta.url), 'utf8'); } catch { return ''; } }).join('\n');
 // ⚠️⚠️ LE PIEGE : chercher un selecteur dans app.js le trouve TOUJOURS —
 //    puisque c'est _mvtSteps lui-meme qui l'ecrit. L'assertion se prouvait

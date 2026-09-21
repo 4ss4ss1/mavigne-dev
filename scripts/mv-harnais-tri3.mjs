@@ -15,6 +15,7 @@
 import fs from 'node:fs';
 import path from 'node:path';
 import { fileURLToPath } from 'node:url';
+import { lireCave } from './mv-cave-src.mjs';   // ★ CUV-DEC (§164) : la Cave = cave.js + cuvier.js
 const ICI = path.dirname(fileURLToPath(import.meta.url));
 const R   = path.join(ICI, '..');
 
@@ -35,7 +36,7 @@ function jusqua(src, debut, fin) {
   if (i < 0) throw new Error('introuvable : ' + debut);
   return src.slice(i, src.indexOf(fin, i) + fin.length);
 }
-const CAVE = fs.readFileSync(path.join(R, 'src/cave.js'), 'utf8');
+const CAVE = lireCave(R);
 const REGL = fs.readFileSync(path.join(R, 'src/reglages.js'), 'utf8');
 
 const M = new Function('PARC', `

@@ -1,7 +1,8 @@
 // Harnais fonctionnel CUV-7 — sur les VRAIES fonctions extraites de cave.js.
 import fs from 'fs';
 import { sourceDates, poseDates } from './mv-dates-reelles.mjs';
-const SRC = fs.readFileSync(new URL('../src/cave.js', import.meta.url), 'utf8');
+import { lireCave } from './mv-cave-src.mjs';   // ★ CUV-DEC (§164) : la Cave = cave.js + cuvier.js
+const SRC = lireCave();
 
 function extrait(nom) {
   const i = SRC.indexOf('function ' + nom + '(');

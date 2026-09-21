@@ -53,11 +53,11 @@ const DOCS = [
   ['src/reglages.js', 'exportPDFPhyto',           'Registre phytosanitaire'],
   ['src/planning.js', 'planExportPDF',            'Relev\u00e9 individuel'],
   ['src/planning.js', '_paDoc',                   'Planning de l\u2019ann\u00e9e'],
-  ['src/cave.js',     '_vendRecoltesDoc',         'R\u00e9coltes de la vendange'],
+  ['src/cuvier.js',   '_vendRecoltesDoc',         'R\u00e9coltes de la vendange'],   // ★ CUV-DEC (§164)
   ['src/cave.js',     'generateCaveExport',       'Suivi d\u2019\u00e9levage'],
   ['src/cave.js',     '_rmExport',                'Registre des manipulations'],
   ['src/cave.js',     '_bcExport',                'Bilan de campagne'],
-  ['src/cave.js',     '_matDoc',                  'Contr\u00f4le de maturit\u00e9'],
+  ['src/cuvier.js',   '_matDoc',                  'Contr\u00f4le de maturit\u00e9'],   // ★ CUV-DEC (§164)
   ['src/cave.js',     '_cuvDoc',                  'Cahier de cuverie'],
   ['src/reserve.js',  '_rsvDoc',                  'Inventaire des intrants'],
   ['src/reserve.js',  '_rsvExportFutsPdf',        'Inventaire des f\u00fbts'],

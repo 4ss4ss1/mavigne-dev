@@ -30,7 +30,7 @@ const REF        = 'scripts/mv-jetons-baseline.json';
 const CSS_BRUT = readFileSync(CHEMIN_CSS, 'utf8');
 /* Les fichiers où un jeton pourrait être re-déclaré en douce. */
 const AUTRES = ['index.html', 'src/app.js', 'src/utils.js', 'src/pilotage.js',
-                'src/planning.js', 'src/cave.js', 'src/reglages.js', 'src/tracteur.js',
+                'src/planning.js', 'src/cave.js', 'src/cuvier.js', 'src/reglages.js', 'src/tracteur.js',   // ★ CUV-DEC
                 'src/phyto.js', 'src/reserve.js', 'src/admin-gt.js', 'src/onboarding.js',
                 'src/firebase.js']
   .map(f => { try { return [f, readFileSync(f, 'utf8')]; } catch { return null; } })

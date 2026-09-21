@@ -12,7 +12,12 @@
   "src/cave.js": {
     "dur": 32,
     "petit": 24,
-    "ko": 1023
+    "ko": 535
+  },
+  "src/cuvier.js": {
+    "dur": 0,
+    "petit": 0,
+    "ko": 494
   },
   "src/firebase.js": {
     "dur": 0,
@@ -32,7 +37,7 @@
   "src/pilotage.js": {
     "dur": 0,
     "petit": 0,
-    "ko": 720
+    "ko": 721
   },
   "src/planning.js": {
     "dur": 185,
@@ -57,7 +62,7 @@
   "src/utils.js": {
     "dur": 6,
     "petit": 2,
-    "ko": 623
+    "ko": 627
   },
   "index.html": {
     "dur": 261,

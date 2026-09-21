@@ -23,7 +23,7 @@ const bac = fs.mkdtempSync(path.join(os.tmpdir(), 'mv-ic-'));
    embarquerait node_modules et .git pour rien. */
 fs.mkdirSync(path.join(bac, 'src'), { recursive: true });
 fs.mkdirSync(path.join(bac, 'scripts'), { recursive: true });
-const MODULES = ['app', 'utils', 'pilotage', 'planning', 'reglages', 'cave',
+const MODULES = ['app', 'utils', 'pilotage', 'planning', 'reglages', 'cave', 'cuvier',   // ★ CUV-DEC (§164)
                  'tracteur', 'phyto', 'reserve', 'admin-gt', 'firebase', 'onboarding'];
 for (const m of MODULES)
   fs.copyFileSync(path.join(root, 'src', m + '.js'), path.join(bac, 'src', m + '.js'));

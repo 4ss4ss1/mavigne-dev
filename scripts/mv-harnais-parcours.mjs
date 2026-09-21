@@ -24,6 +24,7 @@
    ══════════════════════════════════════════════════════════════════════ */
 import fs from 'node:fs';
 import { fileURLToPath } from 'node:url';
+import { lireCave } from './mv-cave-src.mjs';   // ★ CUV-DEC (§164) : la Cave = cave.js + cuvier.js
 
 const F_CAVE = fileURLToPath(new URL('../src/cave.js', import.meta.url));
 
@@ -132,7 +133,7 @@ var window = { CAVE_VENDANGE: null, closeOv: null };
   return new Function(CODE)();
 }
 
-const SRC = fs.readFileSync(F_CAVE, 'utf8');
+const SRC = lireCave();
 let API;
 try { API = monte(SRC); }
 catch (e) { console.error('\u2717 le harnais n\'a pas pu charger les fonctions : ' + e.message); process.exit(1); }

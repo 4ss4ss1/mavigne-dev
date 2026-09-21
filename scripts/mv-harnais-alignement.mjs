@@ -26,9 +26,10 @@
 import fs from 'node:fs';
 import path from 'node:path';
 import { fileURLToPath } from 'node:url';
+import { lireCave } from './mv-cave-src.mjs';   // ★ CUV-DEC (§164) : la Cave = cave.js + cuvier.js
 
 const ICI = path.dirname(fileURLToPath(import.meta.url));
-const SRC = fs.readFileSync(path.join(ICI, '..', 'src', 'cave.js'), 'utf8');
+const SRC = lireCave();
 
 let ok = 0, ko = 0;
 const dit = [];

@@ -37,9 +37,10 @@
    fictif) ; le reste est structurel, lu APRÈS retrait des commentaires (§34g).
    ─────────────────────────────────────────────────────── */
 import { readFileSync } from 'node:fs';
+import { lireCave } from './mv-cave-src.mjs';   // ★ CUV-DEC (§164) : la Cave = cave.js + cuvier.js
 
 const CONTRE = process.argv.includes('--contre');
-const SRC  = readFileSync('src/cave.js', 'utf8');
+const SRC  = lireCave();
 const HTML = readFileSync('index.html', 'utf8');
 const REG  = readFileSync('src/reglages.js', 'utf8');
 const UT   = readFileSync('src/utils.js', 'utf8');

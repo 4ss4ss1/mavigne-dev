@@ -110,7 +110,7 @@ console.log('\n  2. plus aucun fbSave direct suivi d\'un message de succes');
   // firebase.js definit fbSave ; app.js porte saveData/_fbSaveMuet, le chemin qui
   // LIT deja l'etat (§68). Partout ailleurs, un fbSave suivi d'un showToast est le
   // defaut que ce harnais interdit.
-  const MODULES = ['src/planning.js', 'src/cave.js', 'src/tracteur.js', 'src/phyto.js',
+  const MODULES = ['src/planning.js', 'src/cave.js', 'src/cuvier.js', 'src/tracteur.js', 'src/phyto.js',   // ★ CUV-DEC
                    'src/pilotage.js', 'src/reglages.js', 'src/reserve.js', 'src/onboarding.js',
                    'src/admin-gt.js', 'src/utils.js'];
   const coupables = [];

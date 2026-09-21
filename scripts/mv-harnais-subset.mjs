@@ -72,7 +72,7 @@ const PICTO = /[\u2190-\u21FF\u2300-\u23FF\u25A0-\u25FF\u2600-\u27BF\u2B00-\u2BF
    celui d'a cote. Les compter annoncerait 371 la ou l'oeil en voit 274. */
 const INVISIBLES = new Set([0xFE0E, 0xFE0F, 0x200D]);
 
-const MODULES = ['app', 'utils', 'pilotage', 'planning', 'reglages', 'cave',
+const MODULES = ['app', 'utils', 'pilotage', 'planning', 'reglages', 'cave', 'cuvier',   // ★ CUV-DEC (§164)
                  'tracteur', 'phyto', 'reserve', 'admin-gt', 'firebase', 'onboarding'];
 
 // ── La reference : lue dans fonts.css, jamais supposee ─────────────────────

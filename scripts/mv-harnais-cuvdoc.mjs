@@ -27,11 +27,17 @@ import { fileURLToPath, pathToFileURL } from 'node:url';
 import { execFileSync } from 'node:child_process';
 
 import { sourceDates, poseDates } from './mv-dates-reelles.mjs';
+import { CAVE_FICHIERS, importerCave } from './mv-cave-src.mjs';   // ★ CUV-DEC (§164)
+import os from 'node:os';
 const ICI    = path.dirname(fileURLToPath(import.meta.url));
 const RACINE = path.join(ICI, '..');
 const args   = process.argv.slice(2);
 const CONTRE = args.includes('--contre');
-const CIBLE  = args.find(a => !a.startsWith('--')) || path.join(RACINE, 'src', 'cave.js');
+/* ★ CUV-DEC (§164) — la Cave vit dans deux fichiers. Sans argument : les deux, dans l'ordre
+   d'app.js. Avec : les chemins donnés, dans le même ordre (la contre-épreuve passe ses copies). */
+const CIBLES = args.filter(a => !a.startsWith('--')).map(a => path.resolve(a));
+if (!CIBLES.length) CAVE_FICHIERS.forEach(f => CIBLES.push(path.join(RACINE, f)));
+const TEXTE_CAVE = () => CIBLES.map(f => fs.readFileSync(f, 'utf8')).join('\n');
 
 // ── DOM minimal : on ne remplace que le navigateur, jamais le code teste ────
 function El() {
@@ -90,7 +96,7 @@ const A = (p, dt, val, mode) => ({ id:'a_' + p + dt, parcelle:p, date:dt, val, m
 
 // ⚠ `startsWith('/')` etait DEJA une hypothese Unix : sous Windows un chemin absolu
 //   commence par « C:\\ ». pathToFileURL(path.resolve(...)) est juste des deux cotes.
-await import(pathToFileURL(path.resolve(CIBLE)).href);
+await importerCave(CIBLES);   // ★ CUV-DEC : cave.js puis cuvier.js, le pont window → globalThis posé
 
 window.PARCELLES = [
   { nom:'Ergot',         surface:0.37, statut:'Active',   cepages:['Pinot noir'] },
@@ -305,7 +311,7 @@ T('les deux passages de la fenetre sont traces', ets === 2, ets + ' trait(s)');
    jour ou l'etape a pris le nom de « Pressurage » : elle ne pouvait plus rien
    trouver, donc plus rien rater (le piege de §129e). Le libelle est lu dans le
    module TESTE, et un libelle introuvable est rouge, pas vert. */
-const LBL_ETAPE = (fs.readFileSync(path.resolve(CIBLE), 'utf8')
+const LBL_ETAPE = (TEXTE_CAVE()
   .match(/decuvage:\{i:3,lbl:'([^']+)'\}/) || [])[1] || '';
 T('l\'etape de pressurage (cle decuvage), hors fenetre, ne l\'est PAS',
   !!LBL_ETAPE && k.indexOf('>' + LBL_ETAPE + '</span>') === -1 && k.indexOf('>' + LBL_ETAPE + '<') === -1,
@@ -498,7 +504,8 @@ console.log('  ' + ok + ' vert · ' + ko + ' ' + (ko ? rouge('ROUGE') : 'rouge')
 
 // ── Contre-epreuves ────────────────────────────────────────────────────────
 if (CONTRE && !ko) {
-  const base = fs.readFileSync(CIBLE, 'utf8');
+  const bases = CIBLES.map(f => fs.readFileSync(f, 'utf8'));
+  const UTILS = fs.readFileSync(path.join(RACINE, 'src', 'utils.js'), 'utf8');
   const DEFAUTS = [
     ['borne haute des analyses retiree',
       '    if(refIso && a.date > ref) return;                // vendange suivante\n', ''],
@@ -509,7 +516,7 @@ if (CONTRE && !ko) {
     ['troncature a huit colonnes desactivee',
       '  var cols   = toutes.length > 8 ? toutes.slice(-8) : toutes;', '  var cols   = toutes;'],
     ['ordre de maturite inverse',
-      '  var rangs  = _matClasse(byP, spd);', '  var rangs  = _matClasse(byP, spd).slice().reverse();'],
+      '  var rangs  = _matTrier(_matClasse(byP, spd), mtri);', '  var rangs  = _matTrier(_matClasse(byP, spd), mtri).slice().reverse();'],
     ['densite brute au lieu de la corrigee a 20 °C',
       '(d20 != null ? Math.round(d20) : \'—\')', '(m.densite != null ? Math.round(m.densite) : \'—\')'],
     ['detail d\'operation perdu (_rmDetail court-circuite)',
@@ -567,16 +574,27 @@ if (CONTRE && !ko) {
   console.log('\n  CONTRE-EPREUVES — ' + DEFAUTS.length + ' defauts reinjectes un par un\n');
   let sansEffet = 0;
   DEFAUTS.forEach(([nom, vieux, neuf], i) => {
-    const n = base.split(vieux).length - 1;
+    const n = bases.reduce((s, b) => s + b.split(vieux).length - 1, 0);
     if (n !== 1) { console.log('  ' + String(i + 1).padStart(2) + '. ' + nom.padEnd(46) + ' '
       + rouge('MOTIF INTROUVABLE (' + n + ')')); sansEffet++; return; }
-    const tmp = path.join(RACINE, '.mv-ko-' + (i + 1) + '.js');
-    fs.writeFileSync(tmp, base.replace(vieux, neuf));
-    let rouge2 = false;
-    try { execFileSync(process.execPath, [fileURLToPath(import.meta.url), tmp],
+    const dos = fs.mkdtempSync(path.join(os.tmpdir(), 'mv-cuvdoc-ko-'));
+    fs.writeFileSync(path.join(dos, 'utils.js'), UTILS);
+    const copies = CIBLES.map((f, k) => {
+      const c = path.join(dos, path.basename(f));
+      fs.writeFileSync(c, bases[k].includes(vieux) ? bases[k].replace(vieux, neuf) : bases[k]);
+      return c;
+    });
+    let rouge2 = false, plante = '';
+    try { execFileSync(process.execPath, [fileURLToPath(import.meta.url)].concat(copies),
       { stdio:'pipe', env:{ ...process.env, NO_COLOR:'1' } }); }
-    catch { rouge2 = true; }
-    fs.unlinkSync(tmp);
+    catch (e) {
+      rouge2 = true;
+      /* Un enfant qui PLANTE n'a rien attrapé : il n'a rien testé. Seul un rouge d'assertion compte. */
+      const sortie = String((e && e.stdout) || '');
+      if (!/ROUGE/.test(sortie)) { rouge2 = false; plante = String((e && e.stderr) || '').split('\n').find(l => /Error/.test(l)) || 'plantage'; }
+    }
+    finally { fs.rmSync(dos, { recursive:true, force:true }); }
+    if (plante) console.log('     ' + rouge('plantage, pas une assertion : ') + plante.slice(0, 120));
     console.log('  ' + String(i + 1).padStart(2) + '. ' + nom.padEnd(46) + ' '
       + (rouge2 ? vert('rouge') : rouge('LE HARNAIS RESTE VERT')));
     if (!rouge2) sansEffet++;

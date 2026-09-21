@@ -104,7 +104,7 @@ const TYPO = new Set(['\u2192', '\u25B2', '\u25BC', '\u00A9', '\u25FC', '\u25AD'
    maison (DS-M), cette exemption saute. */
 const EXEMPT_REGLAGES = [/^var _ACT_EMOJIS\s*=/];
 
-const MODULES = ['app', 'utils', 'pilotage', 'planning', 'reglages', 'cave',
+const MODULES = ['app', 'utils', 'pilotage', 'planning', 'reglages', 'cave', 'cuvier',   // ★ CUV-DEC (§164)
                  'tracteur', 'phyto', 'reserve', 'admin-gt', 'firebase', 'onboarding'];
 
 let ok = 0, ko = 0;
