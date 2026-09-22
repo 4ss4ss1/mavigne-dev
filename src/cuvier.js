@@ -3341,6 +3341,9 @@ var _vendDecFaFinie=true;
 // Choix des futs a l'entonnage : {lot_id: nb}. Vide = on retombe sur le simple
 // compte de barriques, comme avant ce lot.
 var _vendDecChoix={};
+/* ★ CREUX-1 (§165) — les lots touchés à la main : {lot_id: true}. Leur compte ne se recalcule plus,
+   ni au changement de volume ni à celui du mode ; la proposition ne remplit que le reste. */
+var _vendDecMain={};
 /* ★★★ CUV-14 — LE VOLUME DECUVE SE SAISIT. null = pas saisi : les futs se
    proposent sur l'estimation des caisses, et le volume ecrit reste celui des
    contenants remplis, exactement comme avant. Saisi, c'est un FAIT MESURE : il
@@ -3364,7 +3367,7 @@ function openVendDecuvage(cuveId){
   _caveV2InjectCss();
   // Proposition : du plus VIEUX au plus neuf. Un fut age doit tourner ; le neuf
   // se garde pour les cuvees qui le meritent. Proposition, jamais contrainte.
-  _vendDecChoix={};
+  _vendDecChoix={}; _vendDecMain={};
   _vendDecPropose();
   var html=''
     +'<div class="mvv-sheet-hd"><div class="mvv-sheet-t">Décuver → Le Chai</div>'
@@ -3502,7 +3505,7 @@ function _vendDecVolHl(){ return (_vendDecVolSaisi!=null)?_vendDecVolSaisi:_vend
 function _vendDecMode2(m){
   _vendDecMode=m; _vendDecNote='';
   if(m==='fut'){ _vendDecCuveRef=null; _vendDecCuveL=0; }
-  if(m==='cuve'){ _vendDecChoix={}; }
+  if(m==='cuve'){ _vendDecChoix={}; _vendDecMain={}; }
   _vendDecPropose();
   var seg=document.getElementById('vdec-seg');
   if(seg) Array.prototype.forEach.call(seg.querySelectorAll('button'),function(b){
@@ -3528,11 +3531,13 @@ function _vendDecPropose(){
     return;
   }
   var lots=window._mvFutStock(window.INTRANTS).lots, garde={};
+  /* ★ CREUX-1 — un lot touché à la main garde son compte, MÊME à zéro (zéro = « pas ceux-là ») :
+     taper le volume après avoir choisi ses fûts effaçait le choix et recochait les plus vieux. */
   lots.forEach(function(l){
-    var n=Math.min(parseInt(_vendDecChoix[l.id],10)||0, l.qte);
-    if(n>0 && _caveHorsFormat(_vendDecLotL(l))){ garde[l.id]=n; resteL-=n*_vendDecLotL(l); }
+    var n=Math.min(parseInt(_vendDecChoix[l.id],10)||0, l.qte), main=!!_vendDecMain[l.id];
+    if(main || (n>0 && _caveHorsFormat(_vendDecLotL(l)))){ garde[l.id]=n; resteL-=n*_vendDecLotL(l); }
   });
-  var std=lots.filter(function(l){ return !_caveHorsFormat(_vendDecLotL(l)); });
+  var std=lots.filter(function(l){ return !_caveHorsFormat(_vendDecLotL(l)) && !_vendDecMain[l.id]; });
   _vendDecChoix=_vendDecPropVol(std, resteL, garde);
   if(_vendDecMode==='fut' && !_vendDecTotal()){
     var v=std.filter(function(l){ return l.qte>0; }).sort(_vendDecVieux)[0];
@@ -3764,6 +3769,8 @@ function _vendDecLotsTotHtml(st){
   if(neuf>0) o+='<div class="mvv-dneuf">'+_mvIcon('etincelles',16)+' dont <b>'+neuf+' barrique'+(neuf>1?'s':'')+' neuve'
     +(neuf>1?'s':'')+'</b> \u2014 v\u00e9rifiez que cette cuv\u00e9e les m\u00e9rite.</div>';
   if(_vendDecNote) o+='<div class="mvv-dlnote">'+_vendDecNote+'</div>';
+  else if(Object.keys(_vendDecMain).length && _vendDecMode!=='cuve')
+    o+='<div class="mvv-dlnote">Vos f\u00fbts choisis \u00e0 la main restent\u00a0: les f\u00fbts propos\u00e9s s\u2019ajustent sur le reste.</div>';
   else if(st.lots.some(function(l){ return _caveHorsFormat(_vendDecLotL(l)); }))
     o+='<div class="mvv-dlnote">Un f\u00fbt hors format n\u2019est jamais propos\u00e9 d\u2019office\u00a0: ajoutez-le avec +, '
       +'les barriques se recalculent sur le reste.</div>';
@@ -3810,14 +3817,39 @@ function _vendDecAdjLot(id,d){
   if(v<0) v=0;
   if(v>lot.qte) v=lot.qte;      // on ne pose jamais plus que le disponible
   _vendDecChoix[id]=v;
+  _vendDecMain[id]=true;   // ★ CREUX-1 : ce lot est un choix, il ne se recompte plus
   // Un fut hors format ajoute ou retire : les barriques se recalculent sur le reste.
   if(_caveHorsFormat(_vendDecLotL(lot))){
     _vendDecPropose();
     var hl=_vendDecHorsHl();
     _vendDecNote=hl>0?('Les f\u00fbts hors format prennent <b>'+_vendDecF2(hl)+'\u00a0hL</b>\u00a0: '
       +'les barriques se recalculent sur le reste.'):'';
-  } else _vendDecNote='';
+  } else {
+    _vendDecNote='';
+    /* ★ CREUX-1 — vu chez un domaine : ses fûts ajoutés avec « + » venaient EN PLUS des fûts proposés,
+       rangés en bas de la liste ; la cuvée est partie avec deux fois trop de bois, et son vide sur les
+       vrais fûts. Un « + » retire donc les fûts PROPOSÉS devenus de trop. Un « − » ne recoche rien :
+       le bilan dit ce qui manque, la main choisit où. */
+    if(d>0){
+      _vendDecChoix=_vendDecSansTrop(window._mvFutStock(window.INTRANTS).lots, _vendDecChoix, _vendDecMain,
+        Math.round(_vendDecLogeHl()*100)-Math.round(_vendDecVolHl()*100));
+      _vendDecNb=_vendDecTotal();
+    }
+  }
   _vendDecRender();
+}
+/* ★ CREUX-1 (§165) — pure (le harnais la rejoue) : retire les fûts PROPOSÉS en trop, du plus neuf
+   au plus vieux (l'inverse de la proposition), tant que l'excès en litres en contient un entier.
+   Jamais un lot choisi à la main, jamais un fût hors format. */
+function _vendDecSansTrop(lots, choix, main, excesL){
+  var out=Object.assign({}, choix||{});
+  (lots||[]).filter(function(l){ return !(main&&main[l.id]) && !_caveHorsFormat(_vendDecLotL(l)) && (out[l.id]||0)>0; })
+    .sort(function(a,b){ return _vendDecVieux(b,a); })
+    .forEach(function(l){
+      var cap=_vendDecLotL(l);
+      while((out[l.id]||0)>0 && excesL>=cap){ out[l.id]--; excesL-=cap; }
+    });
+  return out;
 }
 /* ★★ FUT-CAP — LA CONTENANCE D'UN LOT SE CORRIGE D'ICI, la main sur la vanne.
    Elle s'ecrit dans La Reserve (tout le lot), pas dans cette feuille : c'est une

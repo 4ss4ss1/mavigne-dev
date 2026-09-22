@@ -2,7 +2,17 @@
 
 > Document de référence du projet **Ma Vigne** (GUERETTECH). Il est le **porteur de vérité** :
 > la mémoire Claude est plafonnée, ce fichier ne l'est pas.
-> Dernière consolidation : **21 septembre 2026 (CUV-DEC)** — ★★★ **LE CUVIER SORT DE `cave.js` : `src/cuvier.js`, ET UNE
+> Dernière consolidation : **21 septembre 2026 (CREUX-1)** — ★★★ **CE QUI MANQUE DANS LES FÛTS DIT LA VÉRITÉ (§165)**. Le
+> correctif annoncé en §164e, sur la base découpée (`81e93f9`). ① « Compléter le fût » a sa sortie : **« Mes fûts sont pleins —
+> corriger ce qui manque »** (`_asmCorriger`, une correction, rien au registre) — c'est elle qui répare la cuvée signalée, dont la
+> cuve décuvée ne pouvait plus servir de source. ② « Modifier la cuvée » : un fût enlevé **emporte son vide** et **retourne dans
+> La Réserve** s'il en venait (`lot_id`). ③ « Décuver » : un « + » **remplace** un fût proposé en trop (`_vendDecSansTrop`, pure),
+> un « − » ne recoche rien, et le volume retapé ne recompte que les fûts proposés (`_vendDecMain`). ★ Rejoué sur l'appli compilée,
+> la visite, en touchant l'écran : sur la base, quatre « + » donnaient **8 barriques** et le volume retapé effaçait le choix ; sur
+> le lot, **4**, et le choix reste. Harnais neuf `mv-harnais-creux` : 30 assertions, 12 contre-épreuves. **APP 7.51 → 7.52 · SW
+> 8.20 → 8.21**, base `81e93f9`. Détail en **§165**.
+>
+> ★ Précédente : **21 septembre 2026 (CUV-DEC)** — ★★★ **LE CUVIER SORT DE `cave.js` : `src/cuvier.js`, ET UNE
 > FRONTIÈRE GARDÉE (§164)**. `cave.js` était à 1 023 ko sur 1 024 ; la règle de §153h ⑥ disait que le prochain lot Cave commençait
 > par le découper. Il a fallu le faire tout de suite : Nico venait de signaler un fût « pas plein » qui attend tout le vin de sa
 > cuvée (fûts pré-cochés au décuvage en plus des siens, puis retirés par la croix de « Modifier la cuvée » sans toucher au manque
@@ -22292,3 +22302,103 @@ visible, §7). Puis `npm run build && firebase deploy --only hosting`.
 pensé en deux ; la resserrer (un module « parc à cuves » partagé, par exemple) serait un lot de structure à part, pas une
 urgence. ④ `cave.js` garde les documents du Cuvier qui lisent les deux mondes (cahier de cuverie, comparatif) ; `cuvier.js`
 garde le contrôle de maturité. ⑤ `test:e2e` et un vrai téléphone, chez Nico.
+
+## 165. ★★★ CREUX-1 — CE QUI MANQUE DANS LES FÛTS DIT LA VÉRITÉ : « MES FÛTS SONT PLEINS », LE FÛT ENLEVÉ EMPORTE SON VIDE, LE « + » NE DOUBLE PLUS LE BOIS (21/09 — `src/cave.js` · `src/cuvier.js` · `src/utils.js` · `index.html` · `public/sw.js` · `guide/08-cave.html` · `scripts/mv-harnais-creux.mjs` (neuf) · `scripts/mv-harnais-futcap.mjs` · `package.json` · `.github/workflows/ci.yml` · `scripts/harnais-claude-md.mjs` · APP 7.51 → **7.52** · SW 8.20 → **8.21** · base `81e93f9`)
+
+> Le correctif proposé en §164e, dans l'ordre choisi par Nico (« découpage d'abord », puis « go »). CUV-DEC poussé (`81e93f9`,
+> contenu vérifié identique au zip livré) : ce lot est écrit dessus. Pas de maquette : trois gestes sur des écrans existants, et
+> le rendu Chromium de l'appli compilée a servi à les regarder (§165e).
+
+### 165a. « Mes fûts sont pleins — corriger ce qui manque » (`cave.js`)
+
+- Une sortie dans la feuille **« Compléter le fût »**, sous le bouton principal (`mvv-act2`, le style de « Corriger le volume »).
+  Elle est là même quand **aucune source** n'a de vin — c'était le cas signalé : la cuve décuvée n'est plus proposée.
+- `_asmCorriger(cuvId)` : ferme la feuille, ouvre `openPrompt` pré-rempli du manque actuel, dit la contenance du bois et le
+  sens de la correction. **0 = les fûts sont pleins** ; refus de plus que le bois, d'un négatif, d'un texte ; virgule acceptée.
+  Écrit `manque_l`, enregistre, repeint. **Rien au journal ni au registre** — une correction, comme « Corriger le volume ».
+  Lecture seule : ne s'ouvre pas.
+
+### 165b. « Modifier la cuvée » : le fût enlevé emporte son vide, et rentre au parc (`cave.js`)
+
+- `saveCuvee` compare le bois d'avant et d'après : ce qui a été enlevé **retire d'abord le vide** (`manque_l` baisse d'autant,
+  jamais sous 0). Le vin ne bouge pas : c'est une correction de contenants, pas une sortie de vin (celle-là, c'est « Retirer un
+  fût »). Un manque **déduit** (champ absent, cuvée d'avant ASM-1) n'est pas écrit : il se redéduit seul sur le bois restant.
+- `_cuvRendreFuts(avant, apres, note)` : par `lot_id` (posé à l'entonnage), les fûts enlevés **retournent à La Réserve** par
+  `_mvFutEntrer` (même triplet et même contenance, sinon un lot neuf), tracés « retiré d'une cuvée ». **Une ligne sans lot n'y
+  va pas** (saisie à la main, d'avant le parc : la fiche fabriquerait des fûts). Le toast le dit : « · 5 fûts rendus à La Réserve ».
+- **Une cuvée embouteillée** n'a plus ses fûts (ils sont au parc depuis la mise) : ni manque ni retour.
+
+### 165c. « Décuver » : le « + » remplace un fût proposé en trop (`cuvier.js`)
+
+- `_vendDecMain` : les lots **touchés à la main** (`{lot_id: true}`), remis à zéro à l'ouverture et au passage « en cuve ».
+- `_vendDecPropose` : un lot choisi **garde son compte, même à zéro** (zéro = « pas ceux-là »), comme les hors-format avant lui ;
+  la proposition ne remplit que les lots **non choisis**. `_vendDecPropVol` (pure, prouvée litre par litre) n'a pas bougé :
+  seules ses entrées changent.
+- `_vendDecAdjLot` : marque le lot ; un **« + »** sur un lot au format retire les fûts **proposés** devenus de trop
+  (`_vendDecSansTrop`, pure : du plus neuf au plus vieux — l'inverse de la proposition —, jamais un choix, jamais un hors-format,
+  tant que l'excès contient un fût entier). Un **« − »** ne recoche rien ailleurs : le bilan dit ce qui manque, la main choisit où.
+- La liste le dit : « Vos fûts choisis à la main restent : les fûts proposés s'ajustent sur le reste. »
+- ★ Ce que la base faisait, mesuré sur l'appli compilée (§165e) : **quatre « + » sur le lot du haut donnaient 8 barriques**
+  (la proposition, en bas, restait cochée), et **retaper le volume effaçait le choix** — `change` refaisait la proposition sans
+  garder que les hors-format. C'est exactement l'enchaînement de la cuvée signalée.
+
+### 165d. Les harnais
+
+- `scripts/mv-harnais-creux.mjs` (neuf) — **30 assertions, 12 contre-épreuves**, sur les VRAIES fonctions de la Cave (par
+  `lireCave()`) et d'`utils.js` : A la fonction pure (le cas vécu, l'ordre, le seuil, hors-format, choix intouchables, pureté) ;
+  B la feuille geste par geste (★ le cas vécu : C = 5, A = 0, 5 fûts ; le volume retapé ; le « − » ; le hors-format comme avant ;
+  un choix sur le lot le plus vieux qui ne grossit pas) ; C la fiche (★ le cas vécu : plus rien ne manque, 5 fûts rentrent tracés
+  « retrait » ; 5 → 3 ; ligne sans lot ; embouteillée ; manque déduit ; ligne ajoutée) ; D la sortie (pré-remplie, 0, 30,4 → 30,
+  refus, lecture seule, bouton joignable) ; E l'accompagnement. Les déclarations d'état (`var _vendDecMain={};`…) sont extraites
+  telles quelles : si l'une disparaît, le bac ne se charge pas. Branché dans `check`, `prebuild` et la CI ; `npm run test:creux`.
+- `mv-harnais-futcap` B6 lisait la forme exacte du filtre de la proposition : recalé pour accepter l'exclusion des lots choisis,
+  l'exclusion du hors-format reste exigée (64/64, 17 contre-épreuves).
+
+### 165e. Le vrai code, rendu — et touché
+
+Hors dépôt (`/home/claude/lot/parcours-creux.mjs`) : l'appli compilée, Chromium 390 × 844, réseau coupé, la visite (son parc :
+Rousseau 2025 ×6 en bas de la liste, Rousseau 2026 ×4 et Damy 2026 ×2 en haut), puis de vrais clics :
+- **Décuver** (9,12 hL, 4 fûts) : proposé Rousseau 2025 ×4 ; quatre « + » sur Rousseau 2026 → **2025 : 0, 2026 : 4, « Décuver dans
+  4 barriques »**, la phrase des choix affichée ; volume retapé à 11,40 → 2026 : 4 gardés, 2025 : 1. ★ **Le même geste sur le build
+  de la base : 8 barriques, puis 2025 : 5 et 2026 : 0 au volume retapé.**
+- **Compléter** : la carte « Vieilles Vignes » (1 fût entamé), la sortie, le dialogue pré-rempli à 16 L, 0 → la carte n'a plus de
+  fût entamé.
+- **Modifier la cuvée** : une cuvée d'essai (2 fûts du lot 2025 + 3 du lot 2026, 456 L de manque) ; la croix sur la ligne 2025,
+  Enregistrer → manque 0, une ligne, **le lot 2025 de La Réserve passe de 6 à 8**.
+- Aucune erreur du code de l'appli ; au journal, seulement le réseau coupé (Firestore hors ligne, App Check).
+- Regardé : la sortie sous « Compléter le fût », la liste de la feuille Décuver avec sa phrase. Rien ne déborde.
+- `npm run check` : la vraie chaîne, jouée en entier sur l'état livré — **code retour 0** (325 s, lancée détachée). `vite build`
+  OK, `test:smoke` OK (démarrage, 23/23 globaux). `test:e2e` : non joué (émulateurs Firebase).
+
+### 165f. Accompagnement
+
+`guide/08-cave.html` : « Vos fûts restent les vôtres » (nouvelle ligne du Cuvier), la fiche qui rend les fûts, « Mes fûts sont
+pleins » sous « Compléter un fût entamé » (et : un fût compté en trop se retire dans « Modifier la cuvée », « Retirer un fût »
+sert quand du vin sort). `MV_AIDE` : « Au décuvage », « Modifier une cuvée garde ses fûts », « Un fût entamé se complète ».
+« Quoi de neuf » 7.52 : trois entrées, écrites depuis le chai (exécutées en Node par `mv-whatsnew-check`). La démo guidée ne
+passe ni par la feuille Décuver ni par « Compléter » : rien à y changer (sa cuvée « Vieilles Vignes » montre le fût entamé et,
+désormais, la sortie). `public/guide.html` : régénéré par le crochet de commit, **non livré** (§5, on livre l'entrée).
+
+### 165g. La note de livraison
+
+**Base `81e93f9`. APP 7.51 → 7.52 · SW 8.20 → 8.21.** `node scripts/build-guide.mjs` (le crochet de commit le fait), puis
+`npm run build && firebase deploy --only hosting`.
+
+| Fichier | Ce qui change | Bump ? |
+|---|---|---|
+| `src/cave.js` | `_asmCorriger` et sa sortie dans `_asmOuvrir` ; `saveCuvee` (le vide, le retour au parc, le toast) ; `_cuvRendreFuts` | — |
+| `src/cuvier.js` | `_vendDecMain` ; `_vendDecPropose` garde les choix ; `_vendDecAdjLot` + `_vendDecSansTrop` ; la phrase de la liste | — |
+| `src/utils.js` | APP 7.52 ; « Quoi de neuf » (trois entrées) ; trois fiches d'aide | ★ APP |
+| `index.html` · `public/sw.js` | les quatre versions · 8.21 | ★ APP · ★ SW |
+| `guide/08-cave.html` | trois passages | — |
+| `scripts/mv-harnais-creux.mjs` · `package.json` · `.github/workflows/ci.yml` | harnais neuf aux trois portes, `test:creux` | — |
+| `scripts/mv-harnais-futcap.mjs` · `scripts/harnais-claude-md.mjs` · `CLAUDE.md` · `.mv-base` | B6 recalé · SECTIONS 197 · §165 · base | — |
+
+### 165h. Ouvert, et dit
+
+① **La cuvée signalée se répare dans l'appli** : Le Chai › sa carte « Fûts pas pleins » › « Mes fûts sont pleins — corriger ce
+qui manque » › 0. Les fûts **déjà perdus** de La Réserve (retirés par la croix avant ce lot) ne reviennent pas seuls : on ne sait
+plus lesquels — ils se remettent à la main dans leur lot. ② « Retirer un fût » (un événement : du vin sort) ne touche toujours pas
+le manque — voulu ; un fût vide compté en trop se retire par la fiche. ③ La sortie n'existe que quand il manque quelque chose : dire
+qu'un fût s'est vidé (lies parties au soutirage) reste §153h ①. ④ Les deux trous de la contre-épreuve de `cuvdoc` (§164d).
+⑤ `test:e2e` et un vrai téléphone, chez Nico.

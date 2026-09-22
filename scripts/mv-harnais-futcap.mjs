@@ -124,7 +124,8 @@ const T = {
     return o.dm === 1 && o.o === 3; }],
   B6: ['la feuille ne propose que des lots au format, et garde les choix hors format', (A, S) => {
     const f = fn(S.cave, '_vendDecPropose');
-    return /std=lots\.filter\(function\(l\)\{ return !_caveHorsFormat\(_vendDecLotL\(l\)\); \}\)/.test(f) && /garde\[l\.id\]=n/.test(f); }],
+    /* ★ CREUX-1 (§165) : la proposition exclut AUSSI les lots choisis à la main — l'exclusion du hors-format reste exigée. */
+    return /std=lots\.filter\(function\(l\)\{ return !_caveHorsFormat\(_vendDecLotL\(l\)\)( && !_vendDecMain\[l\.id\])?; \}\)/.test(f) && /garde\[l\.id\]=n/.test(f); }],
   // C — bilan
   C1: ['mesuré 11,30 pour 11,40 : « le dernier fût attend 10 L », pas orange', A => {
     const b = A._vendDecBilan(11.30, true, 11.40, 228, 'fut', ''); return !b.ko && b.l.includes('le dernier f\u00fbt attend 10\u00a0L'); }],

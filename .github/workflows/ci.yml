@@ -253,6 +253,14 @@ jobs:
           node scripts/mv-harnais-cible.mjs
           node scripts/mv-harnais-cible.mjs --contre
 
+      # CREUX-1 (§165) : ce qui manque dans les futs dit la verite — la feuille Decuver
+      # ne double plus le bois, un fut enleve de la fiche emporte son vide, « Mes futs
+      # sont pleins » corrige le manque. Sur les vraies fonctions de la Cave.
+      - name: Harnais — ce qui manque dans les futs
+        run: |
+          node scripts/mv-harnais-creux.mjs
+          node scripts/mv-harnais-creux.mjs --contre
+
       # Vite + inject-precache (postbuild, idempotent).
       - name: Build
         run: npm run build

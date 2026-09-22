@@ -1593,6 +1593,22 @@ function _cuvTonneauxDe(cuv){
   if(cuv) return [];
   return [{annee:y,nb:2},{annee:y-2,nb:4}];
 }
+/* ★ CREUX-1 (§165) — les fûts d'un lot de La Réserve (`lot_id`) enlevés de la fiche y retournent, tracés
+   « retiré d'une cuvée ». Une ligne sans lot (saisie à la main, d'avant le parc) n'en venait pas : elle
+   n'y va pas — sinon la fiche fabriquerait des fûts. Rend le nombre de fûts rendus. */
+function _cuvRendreFuts(avant, apres, note){
+  if(typeof window._mvFutEntrer!=='function' || !window.INTRANTS) return 0;
+  var parLot=function(l){ var s={}; (l||[]).forEach(function(t){
+    if(t&&t.lot_id) s[t.lot_id]=(s[t.lot_id]||0)+(parseInt(t.nb,10)||0); }); return s; };
+  var a=parLot(avant), b=parLot(apres), rendus=0;
+  Object.keys(a).forEach(function(id){
+    var d=a[id]-(b[id]||0); if(d<=0) return;
+    var t=(avant||[]).find(function(x){ return x&&x.lot_id===id; });
+    rendus+=window._mvFutEntrer(window.INTRANTS, t, d, 'retrait', 'retir\u00e9 de la fiche \u2014 '+note)||0;
+  });
+  if(rendus && typeof window.saveIntrants==='function') window.saveIntrants();
+  return rendus;
+}
 function openOvCavee(cuvId) {
   var cuv=cuvId?CAVE_ELEVAGE.cuvees.find(function(c){return c.id===cuvId;}):null;
   var titleEl=document.getElementById('ov-cuv-title');
@@ -1630,7 +1646,7 @@ function saveCuvee() {
   if(!nbTotal && !(_exC && (_exC.cuves||[]).length)){showToast('Indiquez au moins un tonneau','#E07060');return;}
   // ★ La declaration de la fiche est DATEE : c'est ce qui permet a une analyse
   //   posterieure de la corriger sans qu'on ait a revenir decocher le bouton.
-  var _fmlAuj=_mvToday();
+  var _fmlAuj=_mvToday(), _rendus=0;
   if(existId) {
     var idx=CAVE_ELEVAGE.cuvees.findIndex(function(c){return c.id===existId;});
     // sous_tire n'est plus ecrit : l'ancienne valeur reste en base, inerte,
@@ -1663,6 +1679,16 @@ function saveCuvee() {
         if(window._mvFutLiberer({nom:nom, millesime:millesime, tonneaux:tonneaux}, window.INTRANTS)
            && typeof window.saveIntrants==='function') window.saveIntrants();
       }
+      /* ★ CREUX-1 (§165) — un fût ENLEVÉ de la fiche emporte d'abord son vide, et retourne à La Réserve
+         s'il en venait (`lot_id`, posé à l'entonnage). Vécu : des fûts comptés en trop au décuvage, retirés
+         ici — le manque restait sur les vrais fûts (« ils attendent » tout le vin) et les fûts disparaissaient
+         du parc. Une cuvée embouteillée n'a plus ses fûts (ils sont au parc) : on n'y touche pas. */
+      if(_prevC.statut!=='embouteille'){
+        var _dF=_caveFutsL(_prevC)-_caveFutsL({tonneaux:tonneaux});
+        if(_dF>0 && isFinite(parseFloat(_prevC.manque_l)))
+          _prevC.manque_l=Math.max(0,Math.round(parseFloat(_prevC.manque_l)-_dF));
+        _rendus=_cuvRendreFuts(_prevC.tonneaux, tonneaux, nom+' '+millesime);
+      }
       // ⚠️ On ne REDATE pas un drapeau deja pose et deja date : reenregistrer
       //    la fiche pour corriger un nom ferait passer la declaration devant
       //    une analyse plus recente.
@@ -1677,7 +1703,8 @@ function saveCuvee() {
       last_ouillage:null,last_analyse:null});
   }
   window.CAVE_ELEVAGE=CAVE_ELEVAGE;
-  window.fbSaveToast({cave_elevage:CAVE_ELEVAGE},existId?'Cuv\u00e9e mise \u00e0 jour':'Cuv\u00e9e cr\u00e9\u00e9e','#C0845A');
+  window.fbSaveToast({cave_elevage:CAVE_ELEVAGE},(existId?'Cuv\u00e9e mise \u00e0 jour':'Cuv\u00e9e cr\u00e9\u00e9e')
+    +(_rendus?(' \u00b7 '+_rendus+' f\u00fbt'+(_rendus>1?'s':'')+' rendu'+(_rendus>1?'s':'')+' \u00e0 La R\u00e9serve'):''),'#C0845A');
   window.closeOv(null,'ovCuveeMgmt');
   renderCave();
 }
@@ -2745,6 +2772,8 @@ function _asmOuvrir(cuvId){
     +'<button type="button" class="mvv-step2-b" onclick="_asmPas(5)" aria-label="5 litres de plus">+</button><span class="mvv-step2-u">litres</span></div>'
     +'<div id="asm-prev"></div>'
     +'<button class="mvv-save" id="asm-go" style="margin-top:16px" onclick="_asmValider()">Compl\u00e9ter le f\u00fbt</button>'
+    +'<button type="button" class="mvv-act2" style="margin-top:10px" onclick="_asmCorriger(\''+_escAttr(cu.id)+'\')">'   // CREUX-1
+    +'Mes f\u00fbts sont pleins \u2014 corriger ce qui manque</button>'
     +'<div class="mvv-fnote">L\u2019application ne tranche pas ce que la r\u00e9glementation permet (appellation, mill\u00e9sime)\u00a0: '
     +'elle \u00e9crit la composition, et le registre des manipulations la garde.</div>');
   _asmApercu();
@@ -2839,6 +2868,32 @@ function _asmValider(){
   _vendFbSave('F\u00fbt compl\u00e9t\u00e9\u00a0: '+L+'\u00a0L de '+s.lbl,'#3D6B27',cles);
   if(typeof renderCave==='function') renderCave();
 }
+/* ★ CREUX-1 (§165) — « Mes fûts sont pleins » : dire ce qui manque VRAIMENT. Une correction, comme
+   « Corriger le volume » : rien au journal ni au registre. Le cas qui l'a demandée : des fûts comptés en
+   trop au décuvage puis retirés — leur vide restait sur les vrais fûts, et la cuve décuvée ne pouvait
+   plus servir de source : aucun geste ne sortait de là. 0 = les fûts sont pleins ; jamais plus que le bois. */
+function _asmCorriger(cuvId){
+  if(typeof canWrite==='function'&&!canWrite()){ showToast('Acc\u00e8s lecture seule','#B85A1A'); return; }
+  if(typeof window.openPrompt!=='function'){ showToast('Saisie indisponible','#C0392B'); return; }
+  var cu=_asmCuvee(cuvId); if(!cu) return;
+  var F=_caveFutsL(cu), m=_caveManqueL(cu);
+  _vendSheetClose();
+  window.openPrompt({icone:'barrique', titre:'Ce qui manque dans les f\u00fbts',
+    sub:(cu.nom||'Cette cuv\u00e9e')+(cu.millesime?' '+cu.millesime:'')+' \u2014 '+_caveLTxt(F)+'\u00a0L de f\u00fbts. '
+      +'Mettez 0 si le vin y est d\u00e9j\u00e0 (des f\u00fbts compt\u00e9s en trop, une mesure faite autrement). '
+      +'C\u2019est une correction\u00a0: rien ne part au registre.',
+    valeur:String(m), unite:'L', type:'nombre', btnLabel:'Enregistrer',
+    cb:function(v){
+      var n=parseFloat(String(v).replace(/[\s\u00a0\u202f]/g,'').replace(',','.'));
+      if(!isFinite(n)||n<0){ showToast('Des litres \u2014 0 si les f\u00fbts sont pleins','#B85A1A'); return; }
+      if(n>F){ showToast('Plus que les f\u00fbts ('+_caveLTxt(F)+'\u00a0L)','#B85A1A'); return; }
+      cu.manque_l=Math.round(n);
+      window.CAVE_ELEVAGE=CAVE_ELEVAGE;
+      _vendFbSave(cu.manque_l>0?('Il manque '+cu.manque_l+'\u00a0L dans les f\u00fbts'):'Les f\u00fbts sont pleins','#3D6B27',['cave_elevage']);
+      if(typeof renderCave==='function') renderCave();
+    }});
+}
+window._asmCorriger = _asmCorriger;
 /* Defaire : tout revient ; appele AVANT le retrait de l'operation (§153b). */
 function _asmDefaire(op){
   var d=(op&&op.data)||{}, L=parseFloat(d.litres)||0;
