@@ -22760,8 +22760,11 @@ l'horloge avancée :
 ### 168f. Ouvert, et dit
 
 ① **La journée du 22/09 ne revient pas avec ce lot** : il empêche, il ne répare pas. Seule piste : la reprise après sinistre
-Firestore (PITR), si elle est activée — à vérifier par Nico. ② Le script console `recaler-session.js` (hors dépôt) écrit
-`dmin` sans `mes` : sans conséquence (repli sur `dmin`), mais une reprise ajoutera au `dmin` posé à la main. ③ Un téléphone
+Firestore (PITR), si elle est activée — à vérifier par Nico. ② Le script console `recaler-session.js` (hors dépôt) est passé
+en v4 : ce qu'il pose porte `mes` et `n`, et `recal.trace()` lit la boîte noire. Essayé sur l'appli compilée : poser
+49 min à la main puis reprendre 20 min dans l'appli donne bien `mes` 69 en 2 fois — mais le TOTAL est rejugé, et 69 min
+pour 0,6 ha passent « écartées » (sous 40 % du barème). Une pose à la main n'est donc pas à l'abri du verdict ; c'est
+dit en tête du script. ③ Un téléphone
 resté sur l'ancienne version réécrit des chaînes : liste de nouveau mixte le temps qu'il se mette à jour. ④ Les compteurs du
 bandeau restent « ce téléphone, aujourd'hui » : une fois écartée puis rendue crédible par une reprise reste comptée écartée
 au compteur (la session, elle, est juste). ⑤ `test:e2e` et un vrai téléphone, chez Nico : la reprise de la veille, la veille
