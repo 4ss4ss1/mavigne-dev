@@ -57,7 +57,7 @@ function pickVar(name){
 
 const REEL = [
   pickVar('PLAN_ABS_MOTIFS'), pickVar('_MV_FERIES_CACHE'),
-  pickVar('PLAN_MAJ_DEF'),    pickVar('PLAN_MAJ_DEBUT'),
+  pickVar('PLAN_MAJ_DEF'),    pickVar('PLAN_MAJ_DEBUT'),  pickVar('PLAN_RECUP_DEBUT'),
   pickVar('_PLAN_ST_OFFDAY'),
   pickFn('_mvEasterMD'), pickFn('_feriesY'),  pickFn('_planFerie'),
   pickFn('_planAbsDef'), pickFn('_planAbsMotif'), pickFn('_planAbsT'),
@@ -65,6 +65,7 @@ const REEL = [
   pickFn('_planHsupMode'), pickFn('_planHsupPayable'),
   pickFn('_planDayStatus'),
   pickFn('_planMajTaux'), pickFn('_planMajActive'),
+  pickFn('_planRecupActive'), pickFn('_planMajAuCompteur'),
   pickFn('_planMajMonth'), pickFn('_planMajBank')
 ].join('\n');
 
@@ -78,9 +79,13 @@ const DEFAUTS = {
      'var enFerie=!!f;var tx=(enFerie?T.ferie:0)+(dow===0?T.dim:0);'],
   'fenetre de janvier 2026 supprimee':
     [/if\(!_planMajActive\(m\)\)return z;/, ''],
-  'la majoration alimente le compteur meme en mode paye':
-    [/function _planMajBank\(mbr,m\)\{return _planHsupPayable\(\)\?0:_planMajMonth\(mbr,m\)\.maj;\}/,
-     'function _planMajBank(mbr,m){return _planMajMonth(mbr,m).maj;}']
+  'la majoration alimente le compteur meme en mode paye, depuis septembre':
+    [/function _planMajAuCompteur\(m\)\{return !_planHsupPayable\(\)\|\|!_planRecupActive\(m\);\}/,
+     'function _planMajAuCompteur(m){return true;}'],
+  // ★ DIMAV-1 : le defaut d'avant ce lot — avant septembre, en mode paye, la majoration n'allait nulle part.
+  'avant septembre, en mode paye, la majoration ne va nulle part':
+    [/function _planMajAuCompteur\(m\)\{return !_planHsupPayable\(\)\|\|!_planRecupActive\(m\);\}/,
+     'function _planMajAuCompteur(m){return !_planHsupPayable();}']
 };
 
 // ── Contexte : ce qui n'est PAS teste est stubbe ─────────────────────────────
@@ -208,6 +213,17 @@ function lance(code){
   c = faireCtx(code, { annee: 2026, CONFIG: { hsup_mode: 'cloture' }, entrees: ent14 });
   eq('14d · mode cloture : au compteur', 4, c._planMajBank(MBR, 8));
 
+  // 16. ★ DIMAV-1 — avant septembre 2026, la majoration va au compteur quel que soit le mode (Ma Vigne n'editait pas ces paies)
+  const ent16 = { 2: { h: 8, timing: { debut:'07:00', fin:'15:00' } } };        // dimanche 2 aout 2026
+  c = faireCtx(code, { annee: 2026, CONFIG: { hsup_mode: 'paye' }, entrees: ent16 });
+  eq('16 · 2 aout 2026 est bien un dimanche', 0, c._planDow(7, 2));
+  eq('16b · aout, mode paye : au compteur', 4, c._planMajBank(MBR, 7));
+  eq('16c · aout, mode paye : le dimanche compte ses 8h', 8, c._planMajMonth(MBR, 7).hDim);
+  c = faireCtx(code, { annee: 2026, CONFIG: { hsup_mode: 'recup' }, entrees: ent16 });
+  eq('16d · aout, mode recup : au compteur, pareil', 4, c._planMajBank(MBR, 7));
+  c = faireCtx(code, { annee: 2025, CONFIG: { hsup_mode: 'paye' }, entrees: ent16 });
+  eq('16e · avant janvier 2026 : rien', 0, c._planMajBank(MBR, 7));
+
   // 15. Le calendrier reel — Paques mobile, 2026 et 2027
   c = faireCtx(code, { annee: 2026, entrees: {} });
   eq('15 · 1er nov 2026 est bien un dimanche', 0, c._planDow(10, 1));
@@ -236,7 +252,7 @@ if (CONTRE) {
     else { console.log('  MANQUE   ' + nom + ' — le harnais reste vert, il ne prouve rien'); manques++; }
   }
   if (manques) sortie = 1;
-  console.log(manques ? '\n' + manques + ' defaut(s) non detecte(s).' : '\nLes quatre defauts sont detectes.');
+  console.log(manques ? '\n' + manques + ' defaut(s) non detecte(s).' : '\nLes ' + Object.keys(DEFAUTS).length + ' defauts sont detectes.');
 }
 
 process.exit(sortie);

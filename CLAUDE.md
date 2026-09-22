@@ -2,7 +2,18 @@
 
 > Document de référence du projet **Ma Vigne** (GUERETTECH). Il est le **porteur de vérité** :
 > la mémoire Claude est plafonnée, ce fichier ne l'est pas.
-> Dernière consolidation : **22 septembre 2026 (TAP-1)** — ★★★ **FAIRE DÉFILER NE COCHE PLUS UNE PARCELLE (§166)**. Nico :
+> Dernière consolidation : **22 septembre 2026 (DIMAV-1)** — ★★★ **AVANT SEPTEMBRE, LE DIMANCHE ET LE FÉRIÉ TRAVAILLÉS
+> DONNENT ENFIN LEUR REPOS (§167)**. Nico : « pourquoi dans le planning les heures sup d'avant septembre et les dimanches et
+> jours fériés ne sont pas comptés ? », puis : « lis ce qu'il y a d'écrit sur le planning de chacun […] une ligne visible du
+> nombre d'heures qui ont été effectuées ces jours-là, mois par mois, et ce que ça ajoute en temps de repos réel. Avec la loi des
+> 50 % ». Mesuré : en mode payé (défaut), un mois d'avant la bascule envoyait la majoration « à la paie » — que Ma Vigne n'éditait
+> pas : elle n'allait NULLE PART, et AVANT-2 laissait l'heure du dimanche à 1 pour 1 en la croyant « déjà majorée à part ».
+> `_planMajAuCompteur(m)` : avant `PLAN_RECUP_DEBUT`, la majoration entre au compteur le mois où le jour a été travaillé, quel que
+> soit le mode. Colonne « Dim. et fériés » dans « Écart au planning · mois par mois » ; tableau « Dimanches et jours fériés
+> travaillés avant septembre 2026 » (onglet Compteur, relevé p. 2). **APP 7.53 → 7.54 · SW 8.22 → 8.23**, base `f13c3ba`.
+> Détail en **§167**.
+>
+> ★ Précédente : **22 septembre 2026 (TAP-1)** — ★★★ **FAIRE DÉFILER NE COCHE PLUS UNE PARCELLE (§166)**. Nico :
 > « rien que défiler ça valide les parcelles ». Dans une session tracteur, la coche partait au LEVER DU DOIGT, quel qu'ait
 > été son chemin (`touchmove` n'annulait que l'appui long). L'appui devient le `click` du navigateur — jamais né d'un
 > défilement —, filtré par `_sdTapVerdict` (pure) : liste encore lancée, défilement pendant le geste, glissé de plus de
@@ -22554,3 +22565,77 @@ travers se reprend par « Voir toutes » et la confirmation. Un toast avec « An
 `utils.js`. ③ L'appui long (480 ms) reste celui d'avant : un pouce posé immobile sur une ligne, chrono ouvert, ajoute encore
 la parcelle au bloc (le toast le dit). ④ Les compteurs du Cuvier (`_vtDown`/`_vtUp`, §109) sont déjà en `pointer*` avec
 `pointercancel` : même famille, non touchés, non rejoués ici. ⑤ `test:e2e`, chez Nico.
+
+---
+
+## 167. ★★★ DIMAV-1 — AVANT SEPTEMBRE 2026, LA MAJORATION DU DIMANCHE ET DU FÉRIÉ VA AU COMPTEUR, QUEL QUE SOIT LE MODE (22/09 — `src/planning.js` · `src/utils.js` · `index.html` · `public/sw.js` · `guide/10-planning.html` · `scripts/mv-harnais-majoration.mjs` · `scripts/mv-harnais-recup.mjs` · `scripts/harnais-claude-md.mjs` · APP 7.53 → **7.54** · SW 8.22 → **8.23** · base `f13c3ba`)
+
+> Nico : *« pourquoi dans le planning les heures sup d'avant septembre et les dimanches et jours fériés ne sont pas
+> comptés ? »* — expliqué (règle d'avant : écart du mois, 1 pour 1 ; majoration d'avant revalorisée en septembre seulement,
+> AVANT-2). Puis : *« c'est parce qu'on rentrait les heures sup et les dimanches manuellement avant septembre ? »* — deux voies
+> proposées (ressaisir la grille ; champ manuel par mois). Réponse : ***« Non, le but, c'est juste que tu lises ce qu'il y a
+> d'écrit sur le planning de chacun et tu vois très bien si ça tombe un dimanche ou un jour férié. Il faut l'ajouter, il faut
+> qu'il y ait une ligne visible du nombre d'heures qui ont été effectuées ces jours-là, mois par mois, et ce que ça ajoute en
+> temps de repos réel. Avec la loi des 50 %. »***
+
+### 167a. Le défaut, mesuré
+
+- `_planMajMonth` lisait DÉJÀ la grille jour par jour depuis janvier 2026 (§73). Le trou était en aval : `_planMajBank` =
+  `_planHsupPayable() ? 0 : maj`. En mode **payé** (défaut de `CONFIG.hsup_mode`), un mois d'avant `PLAN_RECUP_DEBUT` mettait
+  0 au compteur — « la majoration se paie » —, or ces paies (janvier → août) n'ont pas été éditées par Ma Vigne. Elle n'allait
+  nulle part, et la colonne « Majoration » du tableau annuel ne s'affichait même pas (`anyMaj` faux).
+- Aggravé par AVANT-2 (§161) : `_planEstLecture` range l'heure du dimanche en `deja` (« sa majoration est ailleurs ») et
+  `revalorise()` la laisse à 1 pour 1. Un dimanche de juillet de 8h, rien de prévu : **8h** au compteur au lieu de **12h**.
+
+### 167b. Le moteur — `_planMajAuCompteur(m)`
+
+- `!_planHsupPayable() || !_planRecupActive(m)` ; `_planMajBank` le lit. Avant la bascule : au compteur, tranche `maj`, **au
+  mois qui l'a produite** (même règle que le mode récup, §73d) — l'invariant `solde − dette = net` tient sans rien toucher.
+  Depuis septembre : inchangé (payé → paie, DIM-1 ; récup → compteur).
+- Effet de bord voulu : le `deja` d'AVANT-2 dit enfin vrai (la majoration EST dans la tranche `maj` du même mois).
+- Taux : ceux du Cadre (`_planMajTaux`, dim 50 / férié 100 par défaut, décision §73). « La loi des 50 % » = le dimanche ;
+  le férié garde ses 100 % — ⚠️ dit à Nico, réglable dans Planning › Le cadre s'il le veut à 50.
+- ⚠️ **Revient sur AVANT-1 voie ① (« rien ne bouge de janvier à août »)** pour cette seule majoration : le compteur des mois
+  d'avant monte. Les paies éditées, elles, ne bougent pas (elles n'ont jamais porté cette majoration).
+
+### 167c. L'affichage
+
+- **Écart au planning · mois par mois** (`_planHsupTable`) : colonne **Dim. et fériés** (heures lues au planning, `hDim +
+  hFer`), avant **Majoration** ; titre de cellule « 8h le dimanche — majoration 4h en repos » (« à la paie » depuis septembre
+  en mode payé) ; total ; une phrase de note (les deux taux, où va la majoration).
+- **Tableau « Dimanches et jours fériés travaillés avant septembre 2026 »** (`_pfAnneeTable` → `AT.df`, ses champs `html`, `entete`, `legende` — `titre` ferait rougir C19, qui le prend pour un champ saisi) : mois (seulement
+  ceux qui en ont), heures le dimanche, heures fériées, repos ajouté, total ; légende. Onglet Compteur (sous « L'année ») et
+  relevé page 2 (sous le détail de l'année). `_pfAnnee` porte `hDim`, `hFer`, `majDF`, `majCpt`.
+- `_planHsupCard` (mois d'avant) et l'ancien relevé : « Majoration → compteur » au lieu de « à porter en paie ».
+- Fiche d'aide « Les heures sup d'avant septembre 2026 », puce « À savoir », guide (deux passages), deux nouveautés 7.54.
+
+### 167d. Mesuré
+
+- `mv-harnais-majoration` : **34 assertions** (+5, section 16 : dimanche 2 août, payé → 4h au compteur, 8h lues ; récup
+  pareil ; 2025 : rien), **5 contre-épreuves** (la 4ᵉ repointée sur `_planMajAuCompteur`, une neuve : « avant septembre, en mode
+  payé, la majoration ne va nulle part »).
+- `mv-harnais-recup` : **426 assertions** (+7, section **AD** : juillet payé 4/12/0/12, `0hs:8 0maj:4` ; septembre payé → paie ;
+  invariant ; détail de l'année ; le tableau du relevé à la cellule près ; la colonne et son titre ; mode récup inchangé),
+  **86 contre-épreuves** (+3 DIMAV-1).
+- `releve`, `retard`, `semaine` verts sans retouche. ⚠️ `mv-harnais-retard-contre` était **rouge à la base** (`f13c3ba`) :
+  deux motifs périmés — hors `check`, non touché ici, à recaler.
+
+### 167e. La note de livraison
+
+**Base `f13c3ba`. APP 7.53 → 7.54 · SW 8.22 → 8.23.** `node scripts/build-guide.mjs`, puis `npm run build && firebase deploy --only hosting`.
+
+| Fichier | Ce qui change | Bump ? |
+|---|---|---|
+| `src/planning.js` | `_planMajAuCompteur`, `_planMajBank` ; colonne Dim. et fériés ; `AT.df` (écran, relevé) ; `_pfAnnee` ; carte et ancien relevé ; puce « À savoir » | — |
+| `src/utils.js` | APP 7.54, deux nouveautés, fiche d'aide | ★ APP · ★ SW |
+| `index.html` · `public/sw.js` | versions | ★ APP · ★ SW |
+| `guide/10-planning.html` · `public/guide.html` | la règle d'avant septembre, la colonne | — |
+| `scripts/mv-harnais-majoration.mjs` · `scripts/mv-harnais-recup.mjs` · `scripts/harnais-claude-md.mjs` · `CLAUDE.md` · `.mv-base` | voir 167d · SECTIONS 199 · base | — |
+
+### 167f. Ouvert, et dit
+
+① **La récup de chacun monte** de la majoration des dimanches et fériés de janvier à août : à dire à l'équipe. ② **Un septembre
+déjà figé** : sa retenue est un fait ; si ce repos l'aurait évitée, octobre la rendra (FIGE-1). ③ Le férié reste à +100 % (§73) ;
+« loi des 50 % » lue comme le dimanche. ④ Un mois d'avant dont les heures sup ont été **saisies à la main** (`sup_override`) :
+la colonne lit la grille, la majoration aussi ; si la grille est vide ces jours-là, rien ne s'ajoute — c'est la grille qui fait
+foi. ⑤ Vu en Node (harnais DOM), pas dans le navigateur ni sur papier.

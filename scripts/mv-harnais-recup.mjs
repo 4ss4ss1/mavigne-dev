@@ -120,7 +120,7 @@ const EXPORTS = ['_pfRestLignes', '_planFmt', '_pfPlanNom', '_pfPrevT', '_planSe
   '_planHsupPayeBank', '_planRecupH', '_planDepartSolde', '_planAbsPartH', '_planAbsPartiel', '_planDayH', '_planWorkH',
   '_planDayStatus', '_pl2Cell', '_planRecupActive', '_planApplyAbsPart', '_planApplyHeures', '_planSuspH',
   '_planAbsEffet', '_planAbsDef', '_planAbsMotifAt', '_planFigeInstantane', '_planHsupFige', '_planDefTiming', '_planRetardBornes', '_planTimingH',
-  '_planRecupCartes', '_planHsupCard', '_planRuban', '_planVerdict', '_planAbsMotifsHtml', '_planSheetAbsSection', '_planAbsConstruit'];
+  '_planRecupCartes', '_planHsupCard', '_planHsupTable', '_planMajAuCompteur', '_planRuban', '_planVerdict', '_planAbsMotifsHtml', '_planSheetAbsSection', '_planAbsConstruit'];
 
 window.PLANNING_TEMPLATES = {}; window.PLANNING_ENTRIES = {}; window.PLANNING_HSUP = {};
 window.PLANNING_ACOMPTES = {}; window.CONFIG = {}; window.MEMBRES = [];
@@ -1004,6 +1004,28 @@ function lance(R) {
   domaine({ ent: { 7: aout27, 8: sept135 }, config: { hsup_mode: 'paye' } });
   CS = R._planCompteur(J, 8);
   eq('AC9 · mode payé : le stock gardé d’avant septembre prend la même majoration', [CS.rows[8].revalo, CS.solde].join('/'), '9.5/23');
+  // ═══ AD. DIMAV-1 (22/09/2026) — avant septembre, la majoration du dimanche et du férié va au compteur, quel que soit le mode ═══
+  // Nico : « lis ce qu'il y a d'écrit sur le planning de chacun […] une ligne visible du nombre d'heures effectuées ces jours-là,
+  //   mois par mois, et ce que ça ajoute en temps de repos réel ». En mode payé, un dimanche de juillet (8h, rien de prévu) donnait
+  //   8h au compteur et sa majoration n'allait nulle part : Ma Vigne n'éditait pas ces paies.
+  domaine({ ent: { 6: { 12: T('08:00', '17:00') } }, config: { hsup_mode: 'paye' } });
+  CS = R._planCompteur(J, 8);
+  eq('AD1 · mode payé, un dimanche de juillet (8h) : 8h + 4h de majoration au compteur, en juillet (avant : 8h)', [CS.rows[6].majDim, CS.rows[6].solde, CS.rows[8].revalo || 0, CS.solde, tranches(CS)].join('/'), '4/12/0/12/0hs:8 0maj:4');
+  eq('AD2 · … et depuis septembre, en mode payé, la majoration part toujours à la paie', [R._planMajAuCompteur(6), R._planMajAuCompteur(8)].join('/'), 'true/false');
+  inv('AD3 · invariant', 8);
+  const AN3 = R._pfAnnee(J, 8);
+  eq('AD4 · le détail de l’année lit le dimanche au planning : 8h, +4h de repos', [AN3[6].hDim, AN3[6].hFer, AN3[6].majDF, AN3[6].majCpt, AN3[6].gagnee].join('/'), '8/0/4/true/12');
+  pages.length = 0; window._planReleveIndiv('Jean', 8);
+  const rAD = pages[0] ? pages[0].html : '';
+  eq('AD5 · le relevé a son tableau : « Dimanches et jours fériés travaillés avant septembre 2026 », juillet 8h, +4h',
+    [rAD.indexOf('<h4 class="st">Dimanches et jours f\u00e9ri\u00e9s travaill\u00e9s avant septembre 2026</h4>') !== -1,
+     rAD.indexOf('<tr><td>Juil</td><td class="n">8h</td><td class="n"></td><td class="n cv b">+4h</td></tr>') !== -1,
+     rAD.indexOf('<tr class="tot"><td>Total</td><td class="n">8h</td><td class="n">0h</td><td class="n cv">+4h</td></tr>') !== -1].join('/'), 'true/true/true');
+  const tH = R._planHsupTable(J) || '';
+  eq('AD6 · l’écart au planning mois par mois a sa colonne « Dim. et fériés » et la majoration de juillet', [tH.indexOf('<th>Dim. et<br>f\u00e9ri\u00e9s</th>') !== -1, tH.indexOf('title="8h le dimanche \u2014 majoration 4h en repos"') !== -1, tH.indexOf('>+4h</span>') !== -1].join('/'), 'true/true/true');
+  // Mode récup : rien ne change
+  domaine({ ent: { 6: { 12: T('08:00', '17:00') } } });
+  eq('AD7 · mode récup : pareil qu’avant (8h + 4h)', R._planCompteur(J, 8).solde, 12);
   domaine({ ent: { 8: moisFiche } });
 
   return { ok, ko, echecs };
@@ -1011,6 +1033,10 @@ function lance(R) {
 
 // ── Contre-epreuves ─────────────────────────────────────────────────────────
 const DEFAUTS = [
+  // DIMAV-1 (§167)
+  ["DIMAV-1 · avant septembre, en mode payé, la majoration du dimanche ne va nulle part", "function _planMajAuCompteur(m){return !_planHsupPayable()||!_planRecupActive(m);}", "function _planMajAuCompteur(m){return !_planHsupPayable();}"],
+  ["DIMAV-1 · le relevé perd le tableau des dimanches et fériés", "+(AT.df?'<h4 class=\"st\">'", "+(false?'<h4 class=\"st\">'"],
+  ["DIMAV-1 · le planning perd la colonne des dimanches et fériés", "dfA[_dm]=_mjm.hDim+_mjm.hFer;", "dfA[_dm]=0;"],
   // AVANT-2 (§161)
   ["AVANT-2 · le stock d’avant septembre reste à 1 pour 1", "      if(!revaloFaite){revaloFaite=true;r.revalo=revalorise();}", "      if(!revaloFaite){revaloFaite=true;r.revalo=0;}"],
   ["AVANT-2 · la majoration du stock n’entre pas dans ce que le mois apporte", "var entre=ent.reduce(function(s,e){return s+e.h;},0)+(r.revalo||0);", "var entre=ent.reduce(function(s,e){return s+e.h;},0);"],

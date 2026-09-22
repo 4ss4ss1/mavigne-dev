@@ -1,4 +1,8 @@
-// MA VIGNE — Service Worker v8.22
+// MA VIGNE — Service Worker v8.23
+// v8.23 (22/09/2026) — DIMAV-1 : avant septembre 2026, la majoration du dimanche et du férié travaillés entre au compteur en
+//   repos quel que soit le mode (en mode payé, elle n'allait nulle part : ces paies n'étaient pas éditées par Ma Vigne) ;
+//   colonne « Dim. et fériés » dans l'écart au planning mois par mois ; tableau « Dimanches et jours fériés travaillés avant
+//   septembre » dans l'onglet Compteur et le relevé. APP 7.53 → 7.54.
 // v8.22 (22/09/2026) — TAP-1 : sessions tracteur — faire défiler la liste ne coche plus la parcelle qui est sous le doigt
 //   (la coche partait au lever du doigt, quel qu'ait été son chemin ; chrono allumé, un défilement fermait la mesure en
 //   cours). L'appui devient le « click » du navigateur, filtré : liste encore lancée, défilement pendant le geste, doigt qui
@@ -4107,7 +4111,7 @@
 // v2.22 — Fix profils vides : guard vide dans loadData() pour MEMBRES/SAISONS/TACHES
 // v2.17 — Onboarding intégré + tenantId · v2.06 — Firebase Auth · v2.00–v2.05 — divers
 const DEBUG = self.location.hostname === 'localhost' || self.location.hostname === '127.0.0.1';
-const CACHE_NAME   = 'mavigne-v8.22';
+const CACHE_NAME   = 'mavigne-v8.23';
 const TENANT_CACHE = 'mavigne-tenant';   // Cache persistant — préservé à chaque mise à jour SW
 const SYNC_TAG     = 'mavigne-sync';
 
@@ -4123,7 +4127,7 @@ const CDN_URLS = [
 ];
 
 self.addEventListener('install', event => {
-  if(DEBUG) console.log('[SW] Ma Vigne v8.22 installé — en attente');
+  if(DEBUG) console.log('[SW] Ma Vigne v8.23 installé — en attente');
   event.waitUntil(
     caches.open(CACHE_NAME).then(async cache => {
       // ── Cœur applicatif : STRICT (mise à jour ATOMIQUE) ──
@@ -4143,7 +4147,7 @@ self.addEventListener('install', event => {
 });
 
 self.addEventListener('activate', event => {
-  if(DEBUG) console.log('[SW] Ma Vigne v8.22 activé');
+  if(DEBUG) console.log('[SW] Ma Vigne v8.23 activé');
   event.waitUntil(
     caches.keys().then(keys =>
       Promise.all(
