@@ -2045,6 +2045,87 @@ function updateSDSkipBtn(){
   else{btn.textContent='⊘ Désactiver';btn.style.background='#F0D0C8';btn.style.color='#8B3A28';}
 }
 function toggleSDSkipMode(){sdSkipMode=!sdSkipMode;updateSDSkipBtn();renderSDParcelles();}
+// ── TAP-1 : début du bloc (scripts/mv-harnais-tap.mjs l'exécute tel quel, entre ces deux bornes) ──
+/* ============ UN APPUI N'EST PAS UN DÉFILEMENT (TAP-1, §166) ============
+   Avant, la coche partait au LEVER DU DOIGT (touchend), quel qu'ait été son
+   chemin : touchmove annulait l'appui long, jamais la coche. Un défilement qui
+   finissait sur une ligne la cochait — chrono allumé, il fermait la mesure en
+   cours et en ouvrait une autre. Trois pièges de la même famille :
+     • toucher pour ARRÊTER une liste lancée comptait comme un appui ;
+     • la liste se redessine et se réordonne après un appui : un second appui
+       coup sur coup tombait sur la ligne qui venait de glisser sous le doigt ;
+     • dans « Voir toutes », un appui de travers décochait une parcelle faite
+       et effaçait son temps mesuré (la confirmation : toggleSessionParcelle).
+   Maintenant l'appui est le « click » du navigateur, qui ne naît jamais d'un
+   défilement (le navigateur envoie pointercancel, et pas de click), et
+   _sdTapVerdict (pure) le filtre encore :
+     ① l'appui long a déjà agi ;
+     ② la liste filait encore quand le doigt s'est posé : il l'arrêtait ;
+     ③ la liste a défilé pendant le geste, ou le navigateur a pris le doigt ;
+     ④ le doigt a glissé de plus de _SD_GLISSE_PX (la souris aussi) ;
+     ⑤ moins de _SD_REBOND_MS depuis le dernier geste de la liste.
+   L'appui long (doigt immobile _SD_LONG_MS) garde son rôle : ajouter au bloc.
+   ⚠️ Aucune de ces gardes n'est une confirmation : la coche reste d'un seul
+   geste — le chemin rapide reste rapide (§22b). */
+var _SD_GLISSE_PX=16, _SD_REBOND_MS=600, _SD_LANCEE_MS=120, _SD_LONG_MS=480;
+var _sdG=null;            // le geste en cours, de pointerdown au click
+var _sdDernierGeste=0;    // la dernière action de la liste (appui ou appui long)
+var _sdDernierDefil=0;    // le dernier « scroll » de la feuille de session
+function _sdTapVerdict(g,now,dernier){
+  g=g||{};                                  // pas de geste suivi : clavier, lecteur d'écran
+  if(g.long)                           return 'appui-long';
+  if(g.lancee)                         return 'liste-lancee';
+  if(g.annule||Math.abs(g.defil||0)>2) return 'defilement';
+  if((g.glisse||0)>_SD_GLISSE_PX)      return 'glisse';
+  if(now-(dernier||0)<_SD_REBOND_MS)   return 'rebond';
+  return 'appui';
+}
+function _sdFeuille(){ var ov=document.getElementById('ovSessionDetail'); return ov?ov.querySelector('.modal'):null; }
+function _sdPosDefil(){ var sc=_sdFeuille(); return (sc?sc.scrollTop:0)+(window.scrollY||0); }
+function _sdStopLong(g){ if(g&&g.tmr){ clearTimeout(g.tmr); g.tmr=null; } }
+function _sdArmerDefil(){
+  var sc=_sdFeuille(); if(!sc||sc._sdDefilArme) return;
+  sc._sdDefilArme=true;
+  sc.addEventListener('scroll',function(){ _sdDernierDefil=Date.now(); _sdStopLong(_sdG); },{passive:true});
+}
+function _sdArmerLigne(el){
+  el.addEventListener('pointerdown',function(e){
+    if(e.isPrimary===false||(e.pointerType==='mouse'&&e.button!==0)) return;
+    _sdStopLong(_sdG);
+    var g={el:el, x:e.clientX, y:e.clientY, st:_sdPosDefil(), glisse:0, defil:0,
+           lancee:(Date.now()-_sdDernierDefil)<_SD_LANCEE_MS, annule:false, long:false, tmr:null};
+    _sdG=g;
+    if(g.lancee) return;                    // il arrêtait la liste : ni appui, ni appui long
+    // Appui long = ajouter au bloc en cours. Geste rare pour un cas rare : deux
+    // parcelles cadastrales travaillées d'une traite, temps partagé à la surface.
+    g.tmr=setTimeout(function(){
+      g.tmr=null;
+      if(_sdG!==g||g.annule||g.glisse>_SD_GLISSE_PX) return;
+      g.long=true; _sdDernierGeste=Date.now();
+      _chrAjouterAuBloc(el.dataset.nom);
+    },_SD_LONG_MS);
+  });
+  el.addEventListener('pointermove',function(e){
+    var g=_sdG; if(!g||g.el!==el) return;
+    var d=Math.max(Math.abs(e.clientX-g.x),Math.abs(e.clientY-g.y));
+    if(d>g.glisse) g.glisse=d;
+    if(g.glisse>_SD_GLISSE_PX) _sdStopLong(g);
+  });
+  // Le navigateur prend le doigt pour faire défiler (ou tirer la feuille) : pointercancel.
+  el.addEventListener('pointercancel',function(){ var g=_sdG; if(g&&g.el===el){ g.annule=true; _sdStopLong(g); } });
+  el.addEventListener('pointerup',function(){ var g=_sdG; if(g&&g.el===el) _sdStopLong(g); });
+  el.addEventListener('contextmenu',function(e){ e.preventDefault(); });
+  el.addEventListener('click',function(){
+    var g=(_sdG&&_sdG.el===el)?_sdG:null;
+    if(g) g.defil=_sdPosDefil()-g.st;
+    var v=_sdTapVerdict(g,Date.now(),_sdDernierGeste);
+    _sdG=null;
+    if(v!=='appui') return;
+    _sdDernierGeste=Date.now();
+    toggleSessionParcelle(el.dataset.nom,el);
+  });
+}
+// ── TAP-1 : fin du bloc ──
 function renderSDParcelles(){
   const s=SESSIONS.find(x=>x.id===window.tracSessionId);if(!s)return;
   const actives=PARCELLES.filter(p=>p.statut!=='Arrachee');
@@ -2100,20 +2181,9 @@ function renderSDParcelles(){
   }).join('');
   // Event listeners directs (Vite-safe — pas de onclick dans innerHTML)
   var _sdEl=document.getElementById('sd-parcelles');
-  _sdEl.querySelectorAll('[data-action="coche"]').forEach(function(el){
-    // Appui long = ajouter au bloc en cours. Geste rare pour un cas rare : deux
-    // parcelles cadastrales travaillees d'une traite, temps partage a la surface.
-    var _lp=null,_tire=false;
-    function _dn(){_tire=false;_lp=setTimeout(function(){_tire=true;_chrAjouterAuBloc(el.dataset.nom);},480);}
-    function _up(){clearTimeout(_lp);if(!_tire)toggleSessionParcelle(el.dataset.nom,el);}
-    function _cx(){clearTimeout(_lp);}
-    el.addEventListener('touchstart',_dn,{passive:true});
-    el.addEventListener('touchend',function(e){e.preventDefault();_up();});
-    el.addEventListener('touchmove',_cx,{passive:true});
-    el.addEventListener('mousedown',_dn);
-    el.addEventListener('mouseup',_up);
-    el.addEventListener('mouseleave',_cx);
-  });
+  // TAP-1 (§166) : un appui n'est pas un défilement — la coche part du click, filtré (_sdArmerLigne).
+  _sdEl.querySelectorAll('[data-action="coche"]').forEach(_sdArmerLigne);
+  _sdArmerDefil();
   _sdEl.querySelectorAll('[data-action="skip"]').forEach(function(el){
     el.addEventListener('click',function(e){e.stopPropagation();toggleSessionSkip(el.dataset.nom);});
   });
@@ -2153,9 +2223,16 @@ function toggleSessionParcelle(nom,row){
     return;
   }
   if(estDecoche){
-    s.parcellesFaites.splice(idx,1);
-  if(window._recalcPlantationTrous && _recalcPlantationTrous()){ try{ _saveData('parcelles'); }catch(e){ if(window._mvAvale) window._mvAvale(e,'tracteur.js/blink'); } }
-    _saveData('sessions');renderSessionProgress();renderSDParcelles();
+    // TAP-1 (§166) : décocher efface ce qui avait été posé sur la parcelle — le
+    // temps mesuré, la valeur saisie. Un appui de travers dans « Voir toutes » le
+    // faisait sans rien demander : on confirme. La coche, elle, reste d'un geste.
+    var _dx=s.parcellesFaites[idx];
+    var _dSub=(_chrDur(_dx)!=null)?'Le temps mesur\u00e9 sur cette parcelle sera effac\u00e9.'
+      :((_dx&&typeof _dx==='object'&&_dx.data&&Object.keys(_dx.data).length)?'La valeur saisie sur cette parcelle sera effac\u00e9e.'
+      :'Elle repassera dans les parcelles restantes.');
+    if(typeof window.openConfirmDel==='function'){
+      window.openConfirmDel('D\u00e9cocher \u00ab\u00a0'+nom+'\u00a0\u00bb\u00a0?',_dSub,function(){_sdDecocher(nom);},null,'D\u00e9cocher');
+    } else _sdDecocher(nom);
     return;
   }
   // Vérifier si l'activité a un champ custom
@@ -2182,6 +2259,18 @@ function toggleSessionParcelle(nom,row){
   _saveData('sessions');renderSessionProgress();renderSDParcelles();
 }
 
+// Décoche confirmée. La parcelle se RETROUVE PAR SON NOM au moment de la
+// confirmation, jamais par la position lue à l'appui : entre les deux, un autre
+// appareil a pu réécrire la liste (FUSION-1, §146).
+function _sdDecocher(nom){
+  var s=SESSIONS.find(function(x){return x.id===window.tracSessionId;});
+  if(!s||!s.parcellesFaites)return;
+  var i=s.parcellesFaites.findIndex(function(x){return _chrNom(x)===nom;});
+  if(i<0)return;
+  s.parcellesFaites.splice(i,1);
+  if(window._recalcPlantationTrous && _recalcPlantationTrous()){ try{ _saveData('parcelles'); }catch(e){ if(window._mvAvale) window._mvAvale(e,'tracteur.js/_sdDecocher'); } }
+  _saveData('sessions');renderSessionProgress();renderSDParcelles();
+}
 // Variable temporaire pour stocker la parcelle en attente de validation champ
 var _ocvNomParcelle=null;
 

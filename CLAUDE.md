@@ -2,7 +2,17 @@
 
 > Document de référence du projet **Ma Vigne** (GUERETTECH). Il est le **porteur de vérité** :
 > la mémoire Claude est plafonnée, ce fichier ne l'est pas.
-> Dernière consolidation : **21 septembre 2026 (CREUX-1)** — ★★★ **CE QUI MANQUE DANS LES FÛTS DIT LA VÉRITÉ (§165)**. Le
+> Dernière consolidation : **22 septembre 2026 (TAP-1)** — ★★★ **FAIRE DÉFILER NE COCHE PLUS UNE PARCELLE (§166)**. Nico :
+> « rien que défiler ça valide les parcelles ». Dans une session tracteur, la coche partait au LEVER DU DOIGT, quel qu'ait
+> été son chemin (`touchmove` n'annulait que l'appui long). L'appui devient le `click` du navigateur — jamais né d'un
+> défilement —, filtré par `_sdTapVerdict` (pure) : liste encore lancée, défilement pendant le geste, glissé de plus de
+> 16 px, second appui à moins de 0,6 s. Décocher demande confirmation. ★ Trouvé en route : le point d'aide « Changer
+> d'année » (PLAN-RECAL, §112) vivait dans la fiche TRACTEUR. ★★ Et l'outil de mesure a menti : `synthesizeTapGesture` ne
+> fait aucun click en headless — rejoué en vrais contacts (`dispatchTouchEvent`) : sur la base, un défilement coche P04 ;
+> sur le lot, rien, et l'appui franc coche. Harnais neuf `mv-harnais-tap` (45 assertions, 11 contre-épreuves). **APP 7.52 →
+> 7.53 · SW 8.21 → 8.22**, base `ae8df34`. Détail en **§166**.
+>
+> ★ Précédente : **21 septembre 2026 (CREUX-1)** — ★★★ **CE QUI MANQUE DANS LES FÛTS DIT LA VÉRITÉ (§165)**. Le
 > correctif annoncé en §164e, sur la base découpée (`81e93f9`). ① « Compléter le fût » a sa sortie : **« Mes fûts sont pleins —
 > corriger ce qui manque »** (`_asmCorriger`, une correction, rien au registre) — c'est elle qui répare la cuvée signalée, dont la
 > cuve décuvée ne pouvait plus servir de source. ② « Modifier la cuvée » : un fût enlevé **emporte son vide** et **retourne dans
@@ -22402,3 +22412,145 @@ plus lesquels — ils se remettent à la main dans leur lot. ② « Retirer un f
 le manque — voulu ; un fût vide compté en trop se retire par la fiche. ③ La sortie n'existe que quand il manque quelque chose : dire
 qu'un fût s'est vidé (lies parties au soutirage) reste §153h ①. ④ Les deux trous de la contre-épreuve de `cuvdoc` (§164d).
 ⑤ `test:e2e` et un vrai téléphone, chez Nico.
+
+## 166. ★★★ TAP-1 — FAIRE DÉFILER NE COCHE PLUS : LA COCHE PARTAIT AU LEVER DU DOIGT, QUEL QU'AIT ÉTÉ SON CHEMIN (22/09 — `src/tracteur.js` · `src/styles.css` · `src/utils.js` · `index.html` · `public/sw.js` · `guide/06-tracteur.html` · `scripts/mv-harnais-tap.mjs` (neuf) · `package.json` · `.github/workflows/ci.yml` · APP 7.52 → **7.53** · SW 8.21 → **8.22** · base `ae8df34`)
+
+> Nico : « Il faut absolument revoir la façon dont on doit cliquer dans les sessions tracteur. C'est actuellement beaucoup trop
+> sensible et rien que défiler ça valide les parcelles… ». Diagnostic rendu avec une seule question — la confirmation avant de
+> décocher, recommandée — et la réponse a été « Continuer » : la recommandation est retenue. Pas de maquette : les gestes et
+> l'écran ne changent pas, seule leur reconnaissance change, plus une boîte de confirmation qui existait déjà (`openConfirmDel`).
+
+### 166a. Le défaut, lu dans le code — puis rejoué dans Chromium
+
+`renderSDParcelles` posait sur chaque ligne : `touchstart` → minuteur d'appui long ; `touchmove` → **annule l'appui long, et
+rien d'autre** ; `touchend` → `preventDefault()` puis `toggleSessionParcelle`. **La coche partait au lever du doigt, quel qu'ait
+été son chemin.** Un défilement qui finissait sur une ligne la cochait ; chrono allumé, il fermait la mesure en cours et en
+ouvrait une autre. Trois pièges de la même famille :
+① toucher pour ARRÊTER une liste lancée comptait comme un appui ;
+② après un appui, la liste se redessine et se RÉORDONNE (chrono : tri par distance à la parcelle en cours) : un second appui
+   coup sur coup tombait sur la ligne qui venait de glisser sous le doigt ;
+③ dans « Voir toutes », un appui de travers sur une parcelle faite la décochait sans rien demander, et effaçait son `dmin` ou
+   sa valeur saisie.
+
+Mesuré sur l'appli compilée de la BASE (Chromium 390 × 844, vrais contacts, §166e) : défilement parti d'une ligne → **P04
+cochée** ; un coup de doigt vif puis un appui pour arrêter la liste → **deux** parcelles cochées (celle où le glissé est parti,
+celle de l'arrêt) ; deux appuis à 180 ms → **P04 et P05** ; chrono allumé, un défilement **démarre la mesure** sur la ligne de
+départ, et la liste arrêtée clôt une parcelle et en ouvre une autre.
+
+### 166b. Le modèle : l'appui est le `click` du navigateur, filtré
+
+- Le navigateur ne fabrique jamais de `click` à partir d'un défilement : dès qu'il prend le doigt pour faire défiler, il envoie
+  `pointercancel`, et rien derrière. C'est **la même tolérance que tous les autres boutons de l'appli** (des `onclick`) : le
+  geste maison sur `touchend` était l'exception, pas la règle.
+- `_sdTapVerdict(g, now, dernier)` — pure — filtre encore, dans l'ordre : l'appui long a déjà agi · la liste filait encore
+  quand le doigt s'est posé (moins de 120 ms depuis le dernier `scroll` de la feuille) · la feuille a défilé pendant le geste
+  (plus de 2 px) ou le navigateur a pris le doigt · glissé de plus de 16 px (la souris, qui clique même après un glissé) ·
+  moins de 600 ms depuis le dernier geste de la liste.
+- L'appui long (480 ms, doigt immobile) garde son rôle, passé aux événements `pointer*` : doigt et souris ont le même chemin ;
+  le bouton droit n'arme rien ; `contextmenu` est retenu.
+- `.sdp-row` : `touch-action:manipulation` (le click part sans attendre un éventuel double appui), `user-select:none` et
+  `-webkit-touch-callout:none` (ni sélection du nom, ni menu, à l'appui long).
+- ⚠️ Le bloc vit entre deux bornes commentées (`// ── TAP-1 : début du bloc` … `// ── TAP-1 : fin du bloc ──`) : le harnais
+  l'exécute TEL QUEL. Déplacer une borne casse le harnais — exprès.
+
+★ **Les arbitrages.**
+- **Pourquoi pas un geste maison mieux écrit** (`pointerup` + un seuil à nous) : tant que `touch-action` laisse défiler — il le
+  faut, les lignes remplissent la liste —, c'est de toute façon le seuil du navigateur qui décide quand un contact devient un
+  défilement. Le `click` natif le reprend, gère la liste lancée sur les deux plateformes, et marche au clavier et au lecteur
+  d'écran, que l'ancien geste ignorait.
+- **Aucune confirmation sur la coche, ni sur l'enchaînement du chrono** : le chemin rapide reste rapide (§22b). La confirmation
+  ne porte que sur la décoche, parce qu'elle efface une mesure.
+- **600 ms** : un double appui accidentel (cahot, habitude) tombe sous 300 ms ; chercher des yeux la parcelle suivante prend
+  plus. **16 px** : au-delà c'est un glissé ; en deçà, un doigt qui tremble dans la cabine. ⚠️ Le prix, et il est voulu : un
+  doigt qui glisse de plus de quelques millimètres pendant l'appui ne coche plus rien — il faut retoucher. Mieux vaut un appui à
+  refaire qu'une parcelle validée à tort.
+
+### 166c. Décocher demande confirmation (`toggleSessionParcelle`, `_sdDecocher`)
+
+- Parcelle faite touchée → `openConfirmDel('Décocher « X » ?', …, 'Décocher')`, qui dit ce qui sera perdu : le temps mesuré
+  (`dmin`), la valeur saisie (`data`), sinon « Elle repassera dans les parcelles restantes. » Le nom passe BRUT : la boîte
+  écrit par `textContent` (§22c, pas de double échappement).
+- `_sdDecocher(nom)` retrouve la parcelle **par son nom au moment de la confirmation**, jamais par l'index lu à l'appui :
+  entre les deux, un autre appareil a pu réécrire la liste (FUSION-1, §146). Déjà décochée ailleurs → rien.
+- Sans `openConfirmDel` chargé, la décoche se fait quand même (repli) plutôt qu'un geste mort.
+- Le `catch` qui suit la décoche portait l'étiquette `tracteur.js/blink` — le nom de la fonction d'à côté. Il porte
+  `tracteur.js/_sdDecocher`, toujours unique (AVALE-1).
+
+### 166d. ★ Trouvé en route : le point d'aide « Changer d'année » vivait dans la fiche TRACTEUR
+
+§112 (PLAN-RECAL) écrit : « `MV_AIDE.planning` reçoit un point « Changer d'année » ». Le code l'avait posé dans
+`MV_AIDE.tracteur` : « ? Aide » sur le Tracteur expliquait les onglets d'année et les modèles du Planning, et la fiche Planning
+ne l'avait pas. **Règle d'or n°3, encore : une section qui décrit un changement n'est pas une preuve que le changement est
+là où elle le dit.** Le texte est repris tel quel, après « La roue crantée » de la fiche Planning ; `_pl2YearTabs` et
+`_planRecaleBar` existent toujours.
+
+### 166e. Les contrôles — et l'outil de mesure qui mentait
+
+- `scripts/mv-harnais-tap.mjs` (neuf) — **45 assertions, 11 contre-épreuves**, toutes détectées : A le verdict (11 cas) ; B le
+  VRAI bloc exécuté sous des enchaînements d'événements d'un navigateur tactile, au PIRE cas (le modèle envoie un click même
+  après une liste arrêtée ou un appui long) ; C la décoche (confirmation, nom retrouvé, repli, coche d'un seul geste, chrono) ;
+  D câblage, CSS, aide, guide, « Quoi de neuf ». Contre-épreuve n°1 : l'ANCIEN geste remis mot pour mot → **11 rouges**, dont
+  le cas signalé. Branché dans `check`, `prebuild` et la CI ; `npm run test:tap`.
+- ★ **La contre-épreuve a trouvé un trou du harnais, pas du code** : retirer la marque de l'appui long ne rougissait rien, parce
+  que le click arrivait 120 ms après l'appui long et que le rebond de 600 ms le couvrait. Ajouté : l'appui long tenu 1,5 s, où
+  le rebond ne couvre plus. **Deux gardes qui se recouvrent se masquent l'une l'autre : il faut un cas où chacune est seule.**
+- ★★★ **Chromium, vrais contacts** (hors dépôt, `/home/claude/lot/parcours-tap.py` : l'appli compilée, 390 × 844, tactile,
+  réseau coupé, service worker bloqué, un domaine d'essai de 24 parcelles posé par `applyFbData`). Premier passage : **sur le
+  lot, l'appui franc ne cochait plus rien.** Le journal des événements a dit pourquoi : `Input.synthesizeTapGesture` (CDP) ne
+  produit **aucun click** dans ce Chromium headless — le bouton « Voir toutes », un `onclick` ordinaire qui marche sur tous les
+  téléphones, n'en recevait pas non plus. `Input.dispatchTouchEvent` (ce que fait `page.touchscreen.tap`) produit la vraie
+  chaîne : `pointerdown`, `touchstart`, `pointerup`, `touchend`, `mousedown`, `mouseup`, `click`. ⚠️ **Un témoin qui marche
+  partout aurait dû être le premier geste** : c'est lui qui a dit que l'outil mentait, pas le code. Et il ne fallait pas livrer
+  sur la foi du harnais : il était vert pendant que l'outil de mesure disait « cassé ».
+
+  | Geste (vrais contacts) | Base, sans chrono | Lot, sans chrono | Base, chrono | Lot, chrono |
+  |---|---|---|---|---|
+  | défilement parti d'une ligne | **P04 cochée** | rien | **mesure démarrée sur P04** | rien |
+  | coup de doigt vif, puis appui pour arrêter (élan mesuré : 48 px en 30 ms) | **2 cochées** | rien | **1 close + 1 ouverte** | rien |
+  | appui franc | P04 | P04 | P04 en cours | P04 en cours |
+  | deux appuis à 180 ms | **P04 + P05** | P04 | P04 en cours | P04 en cours |
+  | appui long 0,9 s (aucun bloc) | rien | rien | rien | rien |
+  | appui, puis appui long sur une autre (bloc ouvert) | — | — | P04 + P06 | P04 + P06 |
+  | doigt qui tremble de 4 / 8 / 12 / 20 px | cochée ×4 | cochée ×3, **pas à 20** | — | — |
+
+  Décoche sur le lot : « Voir toutes », appui sur P01 → la boîte « Décocher « P01 » ? » s'ouvre, P01 reste cochée ; « Décocher »
+  → P01 repasse dans les restantes. Regardés : la boîte (lisible, bouton rouge), la ligne en cours et le toast du bloc. Aucune
+  erreur de page.
+- `npm run check` : **les 118 étapes de la vraie chaîne, jouées une à une et en entier sur l'état livré — 0 rouge,
+  338 s cumulées** (par tranches de moins de 300 s : l'outil coupe au-delà ; `scripts/` inchangé pour ça). `test:smoke` :
+  **OK** (démarrage, 23/23 globaux ; le Playwright de `node_modules` réclamait le Chromium 1228, pointé vers le 1194 du bac à
+  sable, rien de livré). `test:e2e` : non joué (émulateurs Firebase).
+
+### 166f. Accompagnement
+
+`MV_AIDE.tracteur` : « Faire défiler la liste ne coche rien » (défilement, liste arrêtée, double appui, confirmation) ;
+« Changer d'année » rendu au Planning (166d). `guide/06-tracteur.html` : deux lignes sous « Conduire une session », et la
+question « Je me suis trompé sur le nombre de trous » passe par « Voir toutes » et la confirmation. « Quoi de neuf » 7.53 : trois
+entrées écrites depuis la cabine, exécutées en Node par `mv-whatsnew-check`. `MV_INFO` : aucun chiffre ne change de méthode. La
+visite guidée ne passe pas par la feuille de session : rien à y changer. `public/guide.html` : régénéré par le crochet de commit,
+**non livré** (on livre l'entrée).
+
+### 166g. La note de livraison
+
+**Base `ae8df34`. APP 7.52 → 7.53 · SW 8.21 → 8.22.** `node scripts/build-guide.mjs` (le crochet de commit le fait), puis
+`npm run build && firebase deploy --only hosting`.
+
+| Fichier | Ce qui change | Bump ? |
+|---|---|---|
+| `src/tracteur.js` | le bloc TAP-1 (`_sdTapVerdict`, `_sdArmerLigne`, `_sdArmerDefil`) ; la décoche confirmée ; `_sdDecocher` | — |
+| `src/styles.css` | `.sdp-row` : pas de zoom au double appui, ni sélection ni menu à l'appui long | ★ APP · ★ SW |
+| `src/utils.js` | APP 7.53 ; « Quoi de neuf » (trois entrées) ; fiche Tracteur ; « Changer d'année » rendu au Planning | ★ APP |
+| `index.html` · `public/sw.js` | les quatre versions · 8.22 | ★ APP · ★ SW |
+| `guide/06-tracteur.html` | deux lignes et la question des trous | — |
+| `scripts/mv-harnais-tap.mjs` · `package.json` · `.github/workflows/ci.yml` | harnais neuf aux trois portes, `test:tap` | — |
+| `scripts/harnais-claude-md.mjs` · `CLAUDE.md` · `.mv-base` | SECTIONS 198 · §166 · base | — |
+
+### 166h. Ouvert, et dit
+
+① **Un vrai téléphone dans la cabine** : Chromium headless n'est ni Chrome Android ni Safari iOS ; la tolérance du doigt qui
+tremble (12 px acceptés, 20 refusés ici) dépend du téléphone. Si des appuis francs « ne prennent pas » avec des gants, c'est
+elle — le premier réglage à revoir est `_SD_GLISSE_PX`, pas le principe. ② Pas d'« Annuler » après une coche : une coche de
+travers se reprend par « Voir toutes » et la confirmation. Un toast avec « Annuler » demanderait une primitive neuve dans
+`utils.js`. ③ L'appui long (480 ms) reste celui d'avant : un pouce posé immobile sur une ligne, chrono ouvert, ajoute encore
+la parcelle au bloc (le toast le dit). ④ Les compteurs du Cuvier (`_vtDown`/`_vtUp`, §109) sont déjà en `pointer*` avec
+`pointercancel` : même famille, non touchés, non rejoués ici. ⑤ `test:e2e`, chez Nico.

@@ -23,7 +23,7 @@ export const GT_ADMIN_EMAIL = 'ngdevpro@gmail.com';
 // WHATS_NEW   : tableau vide = modal desactive pour cette version.
 // Format item : { emoji:'📅', titre:'Titre court', desc:'Phrase utilisateur.' }
 // Regle : seulement les changements visibles par les utilisateurs.
-export const APP_VERSION = '7.52';
+export const APP_VERSION = '7.53';
 // ════ Journal des nouveautés (récap cumulatif) ════
 // Une entrée par version, la PLUS RÉCENTE EN HAUT : { v:'5.10', items:[ {emoji,titre,desc}, … ] }
 // À chaque release visible → AJOUTER un bloc en tête (ne pas remplacer). items:[] = release technique (rien à afficher).
@@ -715,6 +715,20 @@ window._mvGraphRepeindre = function(){
 };
 
 export const WHATS_NEW = [
+  { v: '7.53', items: [
+    { emoji: 'tracteur', titre: 'Faire défiler ne coche plus une parcelle',
+      desc: "Dans une session tracteur, faire défiler la liste pouvait cocher la parcelle qui se trouvait sous le doigt au "
+        + "moment de le lever — chrono allumé, cela fermait même la mesure en cours. Désormais <b>seule compte une parcelle "
+        + "touchée doigt immobile</b>. Toucher l’écran pour arrêter une liste qui défile encore ne coche rien non plus." },
+    { emoji: 'chrono', titre: 'Deux appuis coup sur coup n’en font qu’un',
+      desc: "Après un appui, la liste se réordonne\u00a0: un deuxième appui trop rapproché tombait sur la parcelle qui venait "
+        + "de glisser sous le doigt. Il est ignoré pendant une demi-seconde. Un doigt qui tremble un peu, cahoté dans la "
+        + "cabine, compte toujours comme un appui." },
+    { emoji: 'check', titre: 'Décocher demande une confirmation',
+      desc: "Dans «\u00a0Voir toutes\u00a0», un appui de travers sur une parcelle déjà faite la décochait sans rien dire, et "
+        + "effaçait le temps mesuré ou la valeur saisie dessus. L’application demande maintenant de confirmer. Cocher, "
+        + "lui, reste d’un seul geste." }
+  ] },
   { v: '7.52', items: [
     { emoji: 'barrique', titre: 'Des fûts «\u00a0pas pleins\u00a0» alors qu’ils le sont\u00a0: dites-le',
       desc: "Dans Le Chai, la feuille «\u00a0Compléter le fût\u00a0» a une nouvelle sortie\u00a0: <b>«\u00a0Mes fûts sont pleins — "
@@ -3380,6 +3394,7 @@ var MV_AIDE = {
       ['Onglet Sessions', ": le travail fait avec la machine. Onglet Entretien : révisions, réparations, appoints de cuve."],
       ['Le parc', "s’affiche en pastilles sous les chiffres — toucher une machine filtre l’écran."],
       ['Une session en cours', "reste signalée en haut tant qu’elle n’est pas fermée."],
+      ['Faire défiler la liste ne coche rien', ": seule compte une parcelle touchée doigt immobile. Toucher l’écran pour arrêter une liste qui défile ne coche rien non plus, et deux appuis coup sur coup n’en font qu’un — la liste vient de se réordonner, la parcelle sous le doigt n’est plus la même. Décocher une parcelle demande une confirmation, parce que cela efface le temps mesuré ou la valeur saisie dessus."],
       ['Toucher la parcelle où vous commencez', "démarre la mesure : il n’y a rien à appuyer avant. « J’ai fini » la ferme. Toucher directement la parcelle suivante enchaîne sans compter de déplacement, et un appui long ajoute une parcelle à celle en cours — leur temps se partage à la surface. Verrouiller son téléphone ne perd plus rien : la mesure est retrouvée à la réouverture, même des heures après."],
       ['Trois compteurs, pas un', ": le temps passé dans les parcelles, le temps hors parcelle — trajets, ravitaillement, réglage, qui sont du travail eux aussi — et la pause déjeuner, qui n’en est pas. Le bouton pause interrompt sans refermer la parcelle en cours."],
       ['Ce chrono ne fait pas votre journée de travail', ": il mesure le temps passé dans les parcelles, pour budgéter les travaux. Le lavage, les niveaux et le plein n’y sont pas."],
@@ -3389,7 +3404,6 @@ var MV_AIDE = {
       ['L’appoint de cuve GNR', "remonte le niveau et recalcule le prix du litre en moyenne pondérée."],
       ['Le carnet d’entretien', "s’imprime machine par machine depuis la roue crantée du Tracteur, bloc Documents."],
       ['La roue crantée', "en haut à droite réunit le parc, les activités et leur barème h/ha, le chrono, et le carnet d’entretien. Administrateur seulement."],
-      ['Changer d’année', "se fait par les onglets au-dessus de la grille. Tant qu’aucun modèle n’est enregistré pour une année, sa grille est un report du modèle intégré, replacé sur les bons jours de la semaine. Un bandeau le dit et compte les jours qui restent à poser : une année n’a pas les mêmes semaines qu’une autre, et rien n’est ajouté à votre place."],
       ['Rôle Tractoriste requis', "pour écrire : sans lui, l’écran passe en consultation seule."]
     ]
   },
@@ -3410,6 +3424,7 @@ var MV_AIDE = {
     points: [
       ['Deux onglets', ": Le mois, la grille de toute l’équipe. Les gens, une ligne par salarié et sa fiche. Un salarié qui n’est pas administrateur n’a pas d’onglets : il arrive sur son mois."],
       ['La roue crantée', "en haut à droite ouvre le cadre de l’année — modèles de semaine, coupure, convention, règle des congés, sort des heures sup — et les relevés à imprimer. Administrateur seulement."],
+      ['Changer d’année', "se fait par les onglets au-dessus de la grille. Tant qu’aucun modèle n’est enregistré pour une année, sa grille est un report du modèle intégré, replacé sur les bons jours de la semaine. Un bandeau le dit et compte les jours qui restent à poser : une année n’a pas les mêmes semaines qu’une autre, et rien n’est ajouté à votre place."],
       ['Toucher une case', "la coche. Toucher le numéro du jour, en haut, coche toute l’équipe ce jour-là ; toucher un nom coche sa ligne ; toucher « Salarié », dans le coin, coche tout ce qui est affiché. Un deuxième appui décoche."],
       ['La barre du bas', "dit qui est coché et à quelles dates, puis propose ce qui s’applique vraiment à cette sélection — heures, congé, absence, récup, chaleur, effacer. Une case ou trente, c’est le même geste et la même fiche."],
       ['Sur une période plus longue', "que la vue affichée, deux boutons au-dessus de la grille posent des congés ou des horaires chaleur du jour au jour, pour plusieurs salariés."],

@@ -261,6 +261,14 @@ jobs:
           node scripts/mv-harnais-creux.mjs
           node scripts/mv-harnais-creux.mjs --contre
 
+      # TAP-1 (§166) : dans une session tracteur, faire defiler cochait la parcelle sous le doigt (la coche
+      # partait au lever du doigt, quel que soit son chemin). Le vrai bloc de tracteur.js, sous de vrais
+      # enchainements d'evenements tactiles ; la contre-epreuve remet l'ancien geste et doit rougir.
+      - name: Harnais — un appui n'est pas un defilement (sessions tracteur)
+        run: |
+          node scripts/mv-harnais-tap.mjs
+          node scripts/mv-harnais-tap.mjs --contre
+
       # Vite + inject-precache (postbuild, idempotent).
       - name: Build
         run: npm run build

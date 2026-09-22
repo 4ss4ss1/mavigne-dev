@@ -861,7 +861,8 @@ html.mv-ov-lock,body.mv-ov-lock{overflow:hidden!important;}
 .empty-cta-or{display:inline-flex;align-items:center;gap:6px;padding:10px 20px;border-radius:12px;font-size:13px;font-weight:600;font-family:'Outfit',sans-serif;cursor:pointer;background:var(--or-pale);color:var(--or);border:1.5px solid rgba(184,145,58,0.3);}
 .empty-cta-ac{display:inline-flex;align-items:center;gap:6px;padding:10px 20px;border-radius:12px;font-size:13px;font-weight:600;font-family:'Outfit',sans-serif;border:none;cursor:pointer;background:var(--acier);color:white;}
 .empty-cta-ph{display:inline-flex;align-items:center;gap:6px;padding:10px 20px;border-radius:12px;font-size:13px;font-weight:600;font-family:'Outfit',sans-serif;border:none;cursor:pointer;background:var(--phyto);color:white;}
-.sdp-row{display:flex;align-items:center;gap:12px;padding:11px 0;border-bottom:1px solid var(--gris-clair);cursor:pointer;transition:background 0.1s;border-radius:6px;}
+/* TAP-1 (§166) : ni zoom au double appui (le click part sans attendre), ni sélection, ni menu à l'appui long */
+.sdp-row{display:flex;align-items:center;gap:12px;padding:11px 0;border-bottom:1px solid var(--gris-clair);cursor:pointer;transition:background 0.1s;border-radius:6px;touch-action:manipulation;-webkit-user-select:none;user-select:none;-webkit-touch-callout:none;}
 .sdp-row:active{background:var(--gris-clair);}
 .sdp-row.sdp-done{background:var(--vert-pale);border-radius:8px;padding:11px 8px;border-color:transparent;margin:1px 0;}
 .sdp-row.sdp-skip{background:var(--rouge-pale);border-radius:8px;padding:11px 8px;border-color:transparent;margin:1px 0;opacity:0.75;}
