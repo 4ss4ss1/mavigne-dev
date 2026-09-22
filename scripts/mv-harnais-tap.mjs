@@ -252,10 +252,13 @@ function bacDecoche(S, o = {}) {
     _chrTapParcelle: nom => env.chrTap.push(nom),
     _saveData: k => env.ecrits.push(k),
     renderSessionProgress: () => {}, renderSDParcelles: () => { env.rendus++; },
-    _recalcPlantationTrous: () => false
+    _recalcPlantationTrous: () => false,
+    // SESS-1 (§168) : la décoche lit la mesure en cours et s'inscrit dans la boîte noire.
+    _chrono: { bloc: [], pauseOuvert: null }, _chrTrace: () => {}, _chrFmtDur: m => m + ' min',
+    _chrReprendreParcelle: nom => env.chrTap.push('reprise:' + nom)
   };
   vm.createContext(ctx);
-  vm.runInContext([S.chrNom, S.chrDur, S.decocher, S.toggle, 'var _ocvNomParcelle=null;'].join('\n'), ctx);
+  vm.runInContext([S.chrNom, S.chrDur, S.chrMes, S.sdnorm, S.decocher, S.toggle, 'var _ocvNomParcelle=null;'].join('\n'), ctx);
   env.ctx = ctx; env.s = s;
   env.noms = () => s.parcellesFaites.map(x => (typeof x === 'string' ? x : x.nom)).join();
   return env;
@@ -341,8 +344,10 @@ function mesurer(src) {
     toggle: fonction(src.trac, 'toggleSessionParcelle'),
     decocher: fonction(src.trac, '_sdDecocher'),
     chrNom: fonction(src.trac, '_chrNom'),
-    chrDur: fonction(src.trac, '_chrDur') };
-  const manque = ['bloc', 'toggle', 'decocher', 'chrNom', 'chrDur'].filter(k => !S[k]);
+    chrDur: fonction(src.trac, '_chrDur'),
+    chrMes: fonction(src.trac, '_chrMes'),
+    sdnorm: fonction(src.trac, '_sdNorm') };
+  const manque = ['bloc', 'toggle', 'decocher', 'chrNom', 'chrDur', 'chrMes', 'sdnorm'].filter(k => !S[k]);
   const R = [['le bloc TAP-1 et les quatre fonctions se lisent dans tracteur.js'
     + (manque.length ? ' (manque : ' + manque.join(', ') + ')' : ''), !manque.length]];
   if (manque.length) return R;

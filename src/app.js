@@ -10246,10 +10246,11 @@ function clearJSearch(){
 
 // ════ DOMAINE_NOM ════
 var _confirmDelCb=null;
+var _confirmAltCb=null;   // SESS-1 (§168) : le second choix facultatif (« Reprendre la mesure »)
 // `icon` accepte DEUX ecritures, et ce n'est pas une hesitation : un nom
 // d'icone du sprite (« corbeille ») pour les modules migres, un emoji pour
 // ceux qui ne le sont pas encore (DS-M). `_mvSetIcon` tranche sur la forme.
-function openConfirmDel(title,sub,cb,icon,btnLabel,btnColor){
+function openConfirmDel(title,sub,cb,icon,btnLabel,btnColor,alt){
   _confirmDelCb=cb||null;
   if(window._mvSetIcon) window._mvSetIcon(document.getElementById('ocd-icon'),(icon==null?'alerte':icon),30);
   else window._mvSetIcon(document.getElementById('ocd-icon'), icon||'alerte', 24);
@@ -10258,14 +10259,25 @@ function openConfirmDel(title,sub,cb,icon,btnLabel,btnColor){
   var _ocdBtn=document.getElementById('ocd-btn');
   _ocdBtn.textContent=btnLabel||'Supprimer';
   _ocdBtn.style.background=btnColor||'#C0392B';
+  // SESS-1 : alt = {label, cb} — un choix de plus, au-dessus ; absent, le bouton se cache.
+  _confirmAltCb=(alt&&typeof alt.cb==='function')?alt.cb:null;
+  var _ocdAlt=document.getElementById('ocd-alt');
+  if(_ocdAlt){_ocdAlt.textContent=_confirmAltCb?(alt.label||''):'';_ocdAlt.style.display=_confirmAltCb?'block':'none';}
   openOv('ovConfirmDel');
 }
 function _execConfirmDel(){
   closeOv(null,'ovConfirmDel');
+  _confirmAltCb=null;
   if(typeof _confirmDelCb==='function'){
     if(navigator.vibrate)navigator.vibrate([60,40,60]);
     setTimeout(function(){_confirmDelCb();_confirmDelCb=null;},120);
   }
+}
+
+function _execConfirmAlt(){
+  closeOv(null,'ovConfirmDel');
+  var f=_confirmAltCb;_confirmAltCb=null;_confirmDelCb=null;
+  if(typeof f==='function'){if(navigator.vibrate)navigator.vibrate(30);setTimeout(f,120);}
 }
 
 // ── Saisie d'une valeur — remplace prompt(), qui est BLOQUANT en PWA iOS ──
@@ -10940,6 +10952,7 @@ async function refreshApp(){
 // ════════════════════════════════════
 (function() {
   if (typeof _execConfirmDel !== "undefined") window._execConfirmDel = _execConfirmDel;
+  if (typeof _execConfirmAlt !== "undefined") window._execConfirmAlt = _execConfirmAlt;
   if (typeof _setActChampType !== "undefined") window._setActChampType = _setActChampType;
   if (typeof _toggleActChamp !== "undefined") window._toggleActChamp = _toggleActChamp;
   if (typeof _toggleActEmojiPick !== "undefined") window._toggleActEmojiPick = _toggleActEmojiPick;

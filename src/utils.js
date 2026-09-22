@@ -23,7 +23,7 @@ export const GT_ADMIN_EMAIL = 'ngdevpro@gmail.com';
 // WHATS_NEW   : tableau vide = modal desactive pour cette version.
 // Format item : { emoji:'📅', titre:'Titre court', desc:'Phrase utilisateur.' }
 // Regle : seulement les changements visibles par les utilisateurs.
-export const APP_VERSION = '7.54';
+export const APP_VERSION = '7.55';
 // ════ Journal des nouveautés (récap cumulatif) ════
 // Une entrée par version, la PLUS RÉCENTE EN HAUT : { v:'5.10', items:[ {emoji,titre,desc}, … ] }
 // À chaque release visible → AJOUTER un bloc en tête (ne pas remplacer). items:[] = release technique (rien à afficher).
@@ -715,6 +715,28 @@ window._mvGraphRepeindre = function(){
 };
 
 export const WHATS_NEW = [
+  { v: '7.55', items: [
+    { emoji: 'chrono', titre: 'Rouvrir la session ne tue plus la mesure en cours',
+      desc: "Fermer puis rouvrir la session pendant une mesure — ou revenir dans l’appli après une mise en veille — "
+        + "arrêtait la parcelle en cours et l’«\u00a0écartait\u00a0» (<b>chrono lancé en retard</b>). C’est fini\u00a0: seule "
+        + "une mesure oubliée — ouverte plus de 12 heures, ou bien au-delà du barème — se ferme toute seule." },
+    { emoji: 'tracteur', titre: 'Une parcelle se reprend\u00a0: le temps s’ajoute',
+      desc: "Chrono allumé, toucher une parcelle déjà faite propose <b>Reprendre la mesure</b>\u00a0: le temps de la "
+        + "nouvelle fois s’ajoute à celui d’avant, et le tout est jugé ensemble contre le barème. Une grande parcelle "
+        + "faite en plusieurs fois n’est plus écartée morceau par morceau." },
+    { emoji: 'pause', titre: 'La pause garde le temps déjà passé',
+      desc: "Interrompre une parcelle pour déjeuner faisait repartir sa mesure de zéro à la reprise\u00a0: le temps du "
+        + "matin était perdu. Il est maintenant compté. Une fin de journée pendant la pause écrit la parcelle, arrêtée "
+        + "à l’heure de l’interruption." },
+    { emoji: 'check', titre: 'Un historique pour tout retrouver',
+      desc: "En bas de chaque session, l’administrateur voit l’<b>historique des gestes</b> des trois derniers jours — "
+        + "début, fin, reprise, pause, décoche — et <b>Rétablir</b> remet une parcelle décochée par erreur telle "
+        + "qu’elle était." },
+    { emoji: 'alerte', titre: 'Et d’autres défauts des sessions',
+      desc: "Une session ne se dit plus terminée à 99,6\u00a0% ; la regarder ne la rouvre plus ; ouvrir une autre session "
+        + "n’efface plus le chrono en cours, et en commencer une ferme celui resté ouvert ailleurs ; «\u00a0Modifier\u00a0» "
+        + "ne change plus 0\u00a0% en 100\u00a0%." }
+  ] },
   { v: '7.54', items: [
     { emoji: 'calendrier', titre: 'Les dimanches et fériés d’avant septembre comptent enfin en repos',
       desc: "Avant septembre 2026, en mode «\u00a0payé\u00a0», la majoration d’un dimanche ou d’un férié travaillé partait "
@@ -3408,10 +3430,12 @@ var MV_AIDE = {
       ['Le parc', "s’affiche en pastilles sous les chiffres — toucher une machine filtre l’écran."],
       ['Une session en cours', "reste signalée en haut tant qu’elle n’est pas fermée."],
       ['Faire défiler la liste ne coche rien', ": seule compte une parcelle touchée doigt immobile. Toucher l’écran pour arrêter une liste qui défile ne coche rien non plus, et deux appuis coup sur coup n’en font qu’un — la liste vient de se réordonner, la parcelle sous le doigt n’est plus la même. Décocher une parcelle demande une confirmation, parce que cela efface le temps mesuré ou la valeur saisie dessus."],
+      ['Reprendre la mesure', ": chrono allumé, toucher une parcelle déjà faite propose de la reprendre — le temps de cette fois s’ajoute à celui d’avant. Interrompre une parcelle garde le temps déjà passé, et rouvrir la session ou l’appli pendant une mesure ne l’arrête plus. Commencer une mesure dans une autre session ferme celle restée ouverte."],
+      ['Historique des gestes', "en bas de la session, pour l’administrateur : chaque début, fin, reprise, pause et décoche, avec l’heure, gardés trois jours. « Rétablir » remet une parcelle décochée telle qu’elle était."],
       ['Toucher la parcelle où vous commencez', "démarre la mesure : il n’y a rien à appuyer avant. « J’ai fini » la ferme. Toucher directement la parcelle suivante enchaîne sans compter de déplacement, et un appui long ajoute une parcelle à celle en cours — leur temps se partage à la surface. Verrouiller son téléphone ne perd plus rien : la mesure est retrouvée à la réouverture, même des heures après."],
       ['Trois compteurs, pas un', ": le temps passé dans les parcelles, le temps hors parcelle — trajets, ravitaillement, réglage, qui sont du travail eux aussi — et la pause déjeuner, qui n’en est pas. Le bouton pause interrompt sans refermer la parcelle en cours."],
       ['Ce chrono ne fait pas votre journée de travail', ": il mesure le temps passé dans les parcelles, pour budgéter les travaux. Le lavage, les niveaux et le plein n’y sont pas."],
-      ['Une mesure aberrante est écartée', ": très au-dessus ou très en dessous du barème, la parcelle est cochée au barème sans temps constaté, et l’écran dit lequel. Si cela arrive tous les jours, c’est le barème h/ha de l’activité qui est à revoir, pas celui qui conduit."],
+      ['Une mesure aberrante est écartée', ": très au-dessus ou très en dessous du barème, la parcelle est cochée au barème sans temps constaté, et l’écran dit pourquoi. C’est le TOTAL de la parcelle qui est jugé, toutes les fois additionnées ; une fois aberrante à elle seule — chrono oublié plus de 12 heures — ne compte pas et n’efface pas ce qui était déjà mesuré juste."],
       ['Les parcelles se rangent par distance', "à celle où vous êtes ; une tournée fixée par le chef passe devant. Les distances viennent des contours de vos parcelles, jamais d’un suivi de votre position."],
       ['Le chrono s’active par le domaine', ": la roue crantée du Tracteur, en tête des activités. Sans lui, le barème h/ha prend le relais et rien ne se mesure."],
       ['L’appoint de cuve GNR', "remonte le niveau et recalcule le prix du litre en moyenne pondérée."],

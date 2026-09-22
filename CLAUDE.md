@@ -2,7 +2,18 @@
 
 > Document de référence du projet **Ma Vigne** (GUERETTECH). Il est le **porteur de vérité** :
 > la mémoire Claude est plafonnée, ce fichier ne l'est pas.
-> Dernière consolidation : **22 septembre 2026 (DIMAV-1)** — ★★★ **AVANT SEPTEMBRE, LE DIMANCHE ET LE FÉRIÉ TRAVAILLÉS
+> Dernière consolidation : **22 septembre 2026 (SESS-1)** — ★★★ **LES SESSIONS TRACTEUR NE PERDENT PLUS RIEN (§168)**.
+> Nico : « Enlève absolument tous les bugs qu'il peut y avoir dans les sessions tracteurs. » Relu, le moteur perdait des
+> mesures de quatre façons : ① **rouvrir la session TUAIT la mesure en cours** — la reprise la jugeait « lancée en retard »
+> dès qu'elle était jeune (probablement l'essentiel des 17 écartées du 22/09) ; ② la pause oubliait le temps d'avant ; ③ refaire
+> une parcelle remplaçait son temps, chaque morceau jugé seul ; ④ un seul chrono pour tout l'appareil. Maintenant une fois se
+> POSE (`mes`, `n`, verdict sur le total), la pause garde son temps (`acc`), la reprise ne juge que l'oubli, un état par session
+> et un seul chrono à la fois, une **boîte noire** (`s.trace`, 3 jours) lisible en bas de la feuille avec **« Rétablir »**, et
+> **« Reprendre la mesure »** dans la boîte de TAP-1. Aussi : 99,6 % ne termine plus une session, la regarder ne la modifie
+> plus, « Modifier » garde 0 %. Harnais neuf `mv-harnais-sessions` (31 assertions, 19 contre-épreuves) ; rejoué sur l'appli
+> compilée contre la production. **APP 7.54 → 7.55 · SW 8.23 → 8.24**, base `147c7da`. Détail en **§168**.
+>
+> ★ Précédente : **22 septembre 2026 (DIMAV-1)** — ★★★ **AVANT SEPTEMBRE, LE DIMANCHE ET LE FÉRIÉ TRAVAILLÉS
 > DONNENT ENFIN LEUR REPOS (§167)**. Nico : « pourquoi dans le planning les heures sup d'avant septembre et les dimanches et
 > jours fériés ne sont pas comptés ? », puis : « lis ce qu'il y a d'écrit sur le planning de chacun […] une ligne visible du
 > nombre d'heures qui ont été effectuées ces jours-là, mois par mois, et ce que ça ajoute en temps de repos réel. Avec la loi des
@@ -22639,3 +22650,125 @@ déjà figé** : sa retenue est un fait ; si ce repos l'aurait évitée, octobre
 « loi des 50 % » lue comme le dimanche. ④ Un mois d'avant dont les heures sup ont été **saisies à la main** (`sup_override`) :
 la colonne lit la grille, la majoration aussi ; si la grille est vide ces jours-là, rien ne s'ajoute — c'est la grille qui fait
 foi. ⑤ Vu en Node (harnais DOM), pas dans le navigateur ni sur papier.
+
+## 168. ★★★ SESS-1 — LES SESSIONS TRACTEUR NE PERDENT PLUS RIEN : ROUVRIR NE TUE PLUS LA MESURE, LA PAUSE GARDE SON TEMPS, UNE PARCELLE SE REPREND, UN CHRONO PAR SESSION, UNE BOÎTE NOIRE (22/09 — `src/tracteur.js` · `src/app.js` · `index.html` · `src/styles.css` · `src/utils.js` · `public/sw.js` · `guide/06-tracteur.html` · `scripts/mv-harnais-sessions.mjs` · `scripts/mv-harnais-tap.mjs`)
+
+> Nico, après TAP-1 et une journée de griffage devenue irrécupérable (22/09 : 2h54 mesurées, **17 mesures écartées — 4h07
+> non exploitables**, presque rien dans la session) : « Go. Il n'y a rien de compliqué là-dedans. Enlève absolument tous les
+> bugs qu'il peut y avoir dans les sessions tracteurs. » Pas de maquette : la seule nouveauté visible est un bouton de plus dans
+> la boîte de confirmation existante et un bloc repliable en bas de la feuille — le « refaire une parcelle » promis y est.
+
+### 168a. Ce que la relecture du moteur a trouvé
+
+| # | Défaut | Effet sur le terrain |
+|---|---|---|
+| ① ★★★ | `_chrRestaurer` passait la fois en cours au jugement COMPLET (`_chrSuspect`), qui répond « bas » pour toute mesure encore jeune (< 40 % du barème) | **fermer puis rouvrir la feuille, ou revenir dans l'appli après une veille, écartait la parcelle « chrono lancé en retard »** — très probablement l'essentiel des 17 écartées du 22/09 (Combe du Bas portait exactement ce motif). Non prouvable a posteriori : aucune trace n'existait |
+| ② | `_chrInterrompre` versait le temps au compteur et remettait `t0` à la reprise | le matin d'une parcelle interrompue pour déjeuner n'arrivait jamais dans la parcelle ; « Fin de journée » pendant la pause ne l'écrivait pas du tout |
+| ③ | `_chrPose` REMPLAÇAIT l'entrée ; chaque morceau jugé contre le barème de la parcelle entière | refaire une parcelle effaçait son premier temps ; une grande parcelle faite en trois fois voyait chaque morceau écarté |
+| ④ | UNE clé `mavigne_chrono_session` pour tout l'appareil | ouvrir une autre session puis la refermer réécrivait la clé : la mesure en cours de la première partait, compteurs compris |
+| ⑤ | aucune trace des gestes | rien pour comprendre ni réparer (le 22/09 en est la preuve) |
+| ⑥ | `Math.round` sur l'avancement | 99,6 % → 100 % → session « Terminé » avec une petite parcelle à faire |
+| ⑦ | `openSessionDetail` appelait `renderSessionProgress()` qui ÉCRIT | regarder une vieille session la faisait repasser « En cours » (date de fin effacée) dès qu'une parcelle avait été plantée depuis ; un « Terminé » posé à la main sautait |
+| + | « Modifier » : `avancement\|\|100` | 0 % devenait 100 % (invariant « jamais `\|\|` sur un nombre qui peut valoir 0 ») |
+| + | « Modifier » : la date change, pas `saison` | session classée dans la mauvaise saison |
+| + | supprimer depuis « Modifier » | ne recalculait pas les trous de plantation (la feuille, si) |
+| + | bloc de parcelles sans surface | temps réparti à la surface → 0 minute |
+| + | « Voir toutes » | remontrait les parcelles désactivées, cochables |
+| + | la parcelle en cours de mesure | désactivable ; la reprise la rend aussi « faite » : sans garde, un appui la décochait |
+| + | compteurs du jour | ne repartaient jamais à zéro sans « Fin de journée » (« hors parcelle » comptait la nuit) |
+| + | coche sans chrono = chaîne | liste mixte → « feuille » pour FUSION-1 : deux téléphones sur la même session, l'un gagnait tout |
+
+### 168b. Ce qui a changé
+
+- **Une fois se POSE, elle ne remplace pas** (`_chrPoserBloc`). Chaque parcelle du bloc reçoit sa part (à la surface ; parts
+  égales si le bloc n'a pas de surface) ; déjà faite, elle l'**ajoute** à `mes` (minutes posées, mesurées ou écartées, toutes
+  les fois), `n` compte les fois, `t0` reste le premier début. Le verdict se prend sur le **TOTAL** (`_chrSuspectTotal`). Une
+  fois aberrante à elle seule (≥ 12 h, ou > 3× le barème) **ne compte pas** et n'efface pas une mesure juste. `dmin` = `mes`
+  quand il est crédible : bilan et Pilotage ne lisent que lui — rien à changer chez eux. Anciennes entrées sans `mes` : `dmin`.
+- **La pause garde le temps** : `acc` (temps de la fois avant l'interruption), `t0d` (premier début), `tp` (heure de
+  l'interruption). `_chrBlocMs()` = `acc + _chrCourant()` ; minuteur, alerte et compteur « mesuré » l'affichent. Une fois en
+  pause se ferme **à l'heure de l'interruption** (`_chrFermerPause`) : fin de journée, nouveau jour, autre session.
+- **La reprise ne juge que l'oubli** : à la réouverture, seuls `dur` et `haut` ferment ; « bas » (jeunesse) jamais.
+- **Un état par session** : `mavigne_chrono_v2` = `{sid: état}`, l'ancienne clé migrée à la première lecture, ménage
+  (`_chrPrune` : session disparue, ou rien d'ouvert depuis 2 jours — et jamais sur une liste de sessions encore vide). Une
+  session seulement regardée ne laisse pas d'état (`_chrVierge`). **Un seul chrono à la fois** sur l'appareil :
+  commencer ailleurs ferme la mesure restée ouverte (`_chrFermerAilleurs`), toast à l'appui. Supprimer une session oublie son
+  chrono (`_chrOublier`). Nouveau jour : compteurs à zéro.
+- **Boîte noire** : `s.trace`, dans la session (`_chrTrace`) — `{t, e, p, m, mo, c, x, v, u}` (heure, geste, parcelle(s),
+  minutes, motif, cumul, entrée retirée sérialisée, valeur saisie, qui). Bornée **200 gestes / 3 jours** : la session vit dans
+  UN document Firestore. Pas de champ `nom` ni `id` dans un geste : FUSION-1 les fusionne par contenu (union), sans collision.
+  Lisible par l'administrateur en bas de la feuille (`#sd-hist`, `<details>` replié) ; **« Rétablir »** (`_sdRetablir`)
+  remet une parcelle décochée telle qu'elle était, si elle n'a pas été recochée depuis.
+- **« Reprendre la mesure »** : chrono allumé, toucher une parcelle faite ouvre la même boîte que TAP-1 avec un second choix
+  au-dessus. `openConfirmDel(…, alt)` — `alt = {label, cb}` facultatif, bouton `#ocd-alt` caché sinon, `_execConfirmAlt`
+  exposé ; tous les autres appels de l'appli sont inchangés. Pas proposé si le tracteur est en réparation.
+- **Regarder ne modifie pas** : `renderSessionProgress({vue:true})` affiche sans écrire. **100 % = plus rien à faire**
+  (`reste === 0`), sinon `min(99, floor)`.
+- Coches **objets `{nom}`** (`_sdNorm` convertit les anciennes chaînes quand la session est touchée) ; valeur saisie sans
+  doublon ; parcelle en cours ni décochable ni désactivable ; « Voir toutes » sans les désactivées ; « Modifier » garde 0 %,
+  la saison suit la date ; les deux suppressions recalculent les trous.
+
+### 168c. Mesuré
+
+`mv-harnais-sessions` (neuf) : **31 assertions, 19 contre-épreuves** — les vraies fonctions de `tracteur.js` extraites par nom,
+exécutées sous horloge et `localStorage` factices ; chaque défaut ① à ⑦ remis tel qu'il était doit rougir. Branché dans
+`check`, `prebuild`, la CI et `npm run test:sessions`. `mv-harnais-tap` : environnement complété (`_chrono`, `_chrTrace`,
+`_chrMes`, `_sdNorm`…) — aucune assertion affaiblie, 45/45 et 11 contre-épreuves.
+
+Appli COMPILÉE, base `147c7da` (la production, DIMAV-1 compris) contre lot, Chromium 390 × 844, vrais contacts (`dispatchTouchEvent`), seule
+l'horloge avancée :
+
+| Scénario | Base | Lot |
+|---|---|---|
+| mesure lancée, feuille fermée puis rouverte 10 min après | **écartée « bas »**, mesure arrêtée | toujours en cours ; finie à 71 min → `dmin` 71 |
+| 50 min, pause, 40 min | écartée « bas » (40 min seulement) | `dmin` 90 |
+| 50 min (écartée seule) puis reprise 40 min | boîte « Décocher ? », pas de reprise | « Reprendre la mesure » → `dmin` 90, `n` 2 |
+| une autre session regardée pendant la mesure | mesure perdue | toujours en cours |
+| décocher puis « Rétablir » | — | entrée rendue identique (`dmin` 90, `n` 2) |
+| erreurs de page | 0 | 0 |
+
+### 168d. Leçons
+
+- ★★★ **Une reprise ne juge que l'OUBLI, jamais la JEUNESSE.** Un contrôle « trop court » n'a de sens qu'à la clôture ; appliqué
+  à une mesure encore ouverte, il la tue. Toute fonction appelée à l'ouverture d'un écran doit être relue comme si l'écran
+  s'ouvrait cent fois par jour — parce que c'est le cas.
+- ★★ **Une mesure se pose, elle ne remplace pas** ; et un verdict se prend sur le tout, jamais sur un morceau.
+- ★★ **Un état local se range par l'objet qu'il suit** (la session), jamais « un pour l'appareil ».
+- ★ **Regarder n'écrit pas.** Une fonction d'affichage qui persiste finit par réécrire l'histoire.
+- ★★ **Trois cliquets de style à connaître avant d'écrire du CSS** (tous trois ont rougi ici) : l'espacement se prend dans
+  l'échelle `2 4 8 12 16 20 24 32 40` (`mv-harnais-echelle`) ; un rayon égal à un pas (`8 12 16 999`) compte « en dur » MÊME écrit
+  `var(--r-sm,8px)` — le repli est lu — et sans repli, c'est « appel du socle sans repli » qui rougit : hors jeton, seul un rayon
+  hors pas passe (10 px, celui des boutons de la boîte de confirmation) ; `var(--acier)` vaut `#4A80C4` en thème sombre — du
+  blanc dessus échoue au contraste : fond marine fixe `#2C3E50`.
+- ★ **Le résumé de compaction peut retarder sur l'arbre de travail** : branchements CI et `package.json` étaient déjà faits,
+  rejoués d'après le résumé → doublons, rattrapés. Avant de rejouer une étape « à faire », regarder l'arbre (`git status`,
+  `grep`), pas la liste.
+
+### 168e. Fichiers
+
+| Fichier | Quoi | Rendu |
+|---|---|---|
+| `src/tracteur.js` | moteur (`_chrPoserBloc`, `acc`/`t0d`/`tp`, `_chrFermerPause`, reprise, un état par session, `_chrFermerAilleurs`, jour), boîte noire + historique + `_sdRetablir`, avancement, coche objet, « Modifier », suppressions | ✓ |
+| `src/app.js` · `index.html` | second choix de `openConfirmDel` (`#ocd-alt`), `#sd-hist` ; 4 affichages 7.54 | ✓ |
+| `src/styles.css` | `.sd-hist*` | ✓ |
+| `src/utils.js` | APP 7.54, « Quoi de neuf » (5), fiche Tracteur (reprendre, historique, mesure aberrante) | ✓ |
+| `public/sw.js` · `guide/06-tracteur.html` · `public/guide.html` | 8.23 ; guide recompilé | ✓ |
+| `scripts/mv-harnais-sessions.mjs` · `scripts/mv-harnais-tap.mjs` · `package.json` · CI | neuf ; environnement ; branchements | ✓ |
+| `scripts/typo-baseline.json` | regravé : `tracteur.js` 159 → 181 ko (question du découpage posée, 168f ⑥) | — |
+| `scripts/harnais-claude-md.mjs` · `CLAUDE.md` · `.mv-base` | SECTIONS 200 · §168 · base `147c7da` | — |
+
+### 168f. Ouvert, et dit
+
+① **La journée du 22/09 ne revient pas avec ce lot** : il empêche, il ne répare pas. Seule piste : la reprise après sinistre
+Firestore (PITR), si elle est activée — à vérifier par Nico. ② Le script console `recaler-session.js` (hors dépôt) écrit
+`dmin` sans `mes` : sans conséquence (repli sur `dmin`), mais une reprise ajoutera au `dmin` posé à la main. ③ Un téléphone
+resté sur l'ancienne version réécrit des chaînes : liste de nouveau mixte le temps qu'il se mette à jour. ④ Les compteurs du
+bandeau restent « ce téléphone, aujourd'hui » : une fois écartée puis rendue crédible par une reprise reste comptée écartée
+au compteur (la session, elle, est juste). ⑤ `test:e2e` et un vrai téléphone, chez Nico : la reprise de la veille, la veille
+de l'appli, deux téléphones sur la même session. ⑦ **Lot rebasé** : DIMAV-1 (§167) a été poussé pendant sa
+fabrication — renuméroté §167 → §168, APP 7.55, SW 8.24, base `147c7da`. Aucun fichier de code commun (DIMAV-1 :
+`src/planning.js`, le guide Planning) ; seuls les compteurs de version, `CLAUDE.md` et les deux blocs « Quoi de neuf »
+se croisaient. ⑥ **`tracteur.js` a pris 22 ko** (159 → 181) : `mv-harnais-typo` demande
+qu'on se pose la question du découpage. Réponse : le moteur du chrono (≈ 600 lignes, de `_chrNeuf` à `_chrRestaurer`, plus
+l'historique) est le candidat naturel à un `src/chrono.js`, frontière gardée sur le modèle de CUV-DEC (§164) — dans un lot
+dédié, pas dans celui qui répare des pertes de données. Référence regravée.

@@ -1,1 +1,1 @@
-f13c3ba7e36a7ddaba326d5909a832ada010f759  # base : f13c3ba — detectiontracteur (TAP-1) — lot DIMAV-1 (§167 : avant septembre, la majoration du dimanche et du férié va au compteur, colonne Dim. et fériés, tableau mois par mois) — APP 7.53 → 7.54 / SW 8.22 → 8.23
+147c7da415d800f47701d4b8964a71454d60ae4d  # base : 147c7da — planningsupp (DIMAV-1) — lot SESS-1 (§168 : les sessions tracteur ne perdent plus rien — rouvrir ne tue plus la mesure, la pause garde son temps, une parcelle se reprend, un chrono par session, boîte noire) — APP 7.54 → 7.55 / SW 8.23 → 8.24

@@ -269,6 +269,14 @@ jobs:
           node scripts/mv-harnais-tap.mjs
           node scripts/mv-harnais-tap.mjs --contre
 
+      # SESS-1 (§167) : le moteur des sessions tracteur perdait des mesures — rouvrir la session tuait la
+      # mesure en cours, la pause oubliait le temps d'avant, refaire une parcelle remplacait son temps, un
+      # seul chrono pour tout l'appareil. Le vrai moteur de tracteur.js, rejoue sous une horloge factice.
+      - name: Harnais — les sessions tracteur ne perdent plus rien
+        run: |
+          node scripts/mv-harnais-sessions.mjs
+          node scripts/mv-harnais-sessions.mjs --contre
+
       # Vite + inject-precache (postbuild, idempotent).
       - name: Build
         run: npm run build

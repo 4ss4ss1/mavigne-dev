@@ -960,6 +960,13 @@ mark{background:rgba(200,176,32,.32);color:var(--cream);border-radius:3px;paddin
     coup n'en font qu'un — la liste vient de se réordonner, la parcelle sous le doigt n'est plus la même.</li>
     <li><b>Décocher demande une confirmation</b> (<b>« Voir toutes »</b>, puis toucher la parcelle faite) :
     ce qui était posé dessus — le temps mesuré, la valeur saisie — est effacé.</li>
+    <li><b>Reprendre la mesure</b> : chrono allumé, toucher une parcelle déjà faite propose de la reprendre.
+    Le temps de cette fois s'ajoute à celui d'avant, et le tout est jugé ensemble contre le barème — une grande
+    parcelle faite en plusieurs fois n'est plus « écartée » morceau par morceau.</li>
+    <li>Interrompre une parcelle garde le temps déjà passé ; rouvrir la session ou l'appli pendant une mesure ne
+    l'arrête plus. Commencer une mesure dans une autre session ferme celle restée ouverte.</li>
+    <li><b>Historique des gestes</b> (administrateur, en bas de la session) : chaque début, fin, reprise, pause et
+    décoche, avec l'heure, gardés trois jours. <b>« Rétablir »</b> remet une parcelle décochée telle qu'elle était.</li>
     <li>L'avancement est toujours calculé <b>en surface</b>, jamais en nombre de parcelles : deux petites
     ne valent pas une grande.</li>
     <li>La session en cours s'affiche en tête d'écran, en évidence, avec son pourcentage.</li>
@@ -985,7 +992,9 @@ mark{background:rgba(200,176,32,.32);color:var(--cream);border-radius:3px;paddin
     <li>Verrouiller son téléphone ne perd plus rien : la mesure en cours est <b>retrouvée à la
     réouverture</b>, même plusieurs heures après.</li>
     <li>Une mesure très au-dessus ou très en dessous du barème est <b>écartée</b> : la parcelle est
-    cochée au barème, sans temps constaté, et l'écran dit lequel. Si cela se produit tous les jours,
+    cochée au barème, sans temps constaté, et l'écran dit pourquoi. C'est le <b>total</b> de la parcelle qui est
+    jugé, toutes les fois additionnées ; une fois aberrante à elle seule (chrono oublié plus de 12 heures) ne
+    compte pas et n'efface pas ce qui était déjà mesuré juste. Si des mesures sont écartées tous les jours,
     c'est le barème h/ha de l'activité qui est à revoir.</li>
   </ul>
   <div class="note warn"><span class="ni" aria-hidden="true"><svg class="g-ic" width="18" height="18" viewBox="0 0 24 24" aria-hidden="true" focusable="false"><use href="#ic-alerte"></use></svg></span><div><b>Ce chrono ne justifie pas

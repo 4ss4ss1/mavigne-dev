@@ -7,17 +7,17 @@
   "src/app.js": {
     "dur": 206,
     "petit": 79,
-    "ko": 745
+    "ko": 746
   },
   "src/cave.js": {
     "dur": 32,
     "petit": 24,
-    "ko": 535
+    "ko": 539
   },
   "src/cuvier.js": {
     "dur": 0,
     "petit": 0,
-    "ko": 494
+    "ko": 496
   },
   "src/firebase.js": {
     "dur": 0,
@@ -57,21 +57,21 @@
   "src/tracteur.js": {
     "dur": 49,
     "petit": 16,
-    "ko": 159
+    "ko": 181
   },
   "src/utils.js": {
     "dur": 6,
     "petit": 2,
-    "ko": 627
+    "ko": 633
   },
   "index.html": {
     "dur": 261,
     "petit": 47,
-    "ko": 337
+    "ko": 338
   },
   "src/styles.css": {
     "dur": 573,
     "petit": 128,
-    "ko": 443
+    "ko": 444
   }
 }
